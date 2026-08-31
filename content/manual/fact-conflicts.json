@@ -75,7 +75,9 @@
       "claimB": "Uhlsport 2009–2012 (מפרט המדים)",
       "sourceAUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-kits/",
       "sourceBUrl": null,
-      "noteHe": "Uhlsport אינה מופיעה בארכיון המדים לאף עונה. לא נטען עד לאימות מול תמונה."
+      "noteHe": "Uhlsport אינה מופיעה בארכיון המדים לאף עונה. לא נטען עד לאימות מול תמונה.",
+      "resolution": "הוכרע לטובת הארכיון: אמברו. מאור אישר אמברו ל-2009/10.",
+      "resolvedBy": "מאור הראל — בעל הפרויקט, אימות ישיר"
     },
     {
       "entityTable": "sponsor_deal",
@@ -85,7 +87,9 @@
       "claimB": "סמסונג (מפרט המדים)",
       "sourceAUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-2010-11-home-kit-20115/",
       "sourceBUrl": null,
-      "noteHe": "ייתכן ששתיהן נכונות בעונות/תחרויות שונות; לא הוכרע."
+      "noteHe": "ייתכן ששתיהן נכונות בעונות/תחרויות שונות; לא הוכרע.",
+      "resolution": "הוכרע ע\"י מאור הראל: כתר בליגת האלופות בלבד, בוני התיכון בליגה. שתי הרשומות נשמרו, מופרדות לפי תחרות.",
+      "resolvedBy": "מאור הראל — בעל הפרויקט, אימות ישיר"
     },
     {
       "entityTable": "sponsor_deal",
@@ -95,7 +99,9 @@
       "claimB": "Sunday / Eliot (מפרט המדים)",
       "sourceAUrl": null,
       "sourceBUrl": null,
-      "noteHe": "לא נמצא מקור נגיש. לא נטען."
+      "noteHe": "לא נמצא מקור נגיש. לא נטען.",
+      "resolution": "הוכרע ע\"י מאור הראל: סובארו, עונת הדאבל. נטען בוודאות 3.",
+      "resolvedBy": "מאור הראל — בעל הפרויקט, אימות ישיר"
     },
     {
       "entityTable": "kit_supply_spell",
@@ -105,7 +111,9 @@
       "claimB": "נייקי 2014–2019 (מפרט המדים)",
       "sourceAUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-kits/",
       "sourceBUrl": null,
-      "noteHe": "הארכיון מפרט ארבעה יצרנים בטווח הזה, לא אחד."
+      "noteHe": "הארכיון מפרט ארבעה יצרנים בטווח הזה, לא אחד.",
+      "resolution": "הוכרע לטובת הארכיון: ארבעה יצרנים בטווח.",
+      "resolvedBy": "מאור הראל — בעל הפרויקט, אימות ישיר"
     },
     {
       "entityTable": "kit_supply_spell",
@@ -115,7 +123,9 @@
       "claimB": "אדידס 2021–היום (מפרט המדים)",
       "sourceAUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-kits/",
       "sourceBUrl": null,
-      "noteHe": "נייקי היא היצרנית הנוכחית לפי הארכיון."
+      "noteHe": "נייקי היא היצרנית הנוכחית לפי הארכיון.",
+      "resolution": "הוכרע לטובת הארכיון: נייקי היא היצרנית הנוכחית.",
+      "resolvedBy": "מאור הראל — בעל הפרויקט, אימות ישיר"
     }
   ]
 }

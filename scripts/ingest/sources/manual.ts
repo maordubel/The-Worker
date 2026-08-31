@@ -241,17 +241,20 @@ const SPECS: FileSpec[] = [
     file: 'sponsor-deals.json',
     entity: 'sponsorDeals',
     map: (row, ctx) => ({
+      // The competition is part of the key: one season can hold two deals.
       naturalKey: [
         req(row, 'clubSlug'),
         sport(row),
         req(row, 'sponsorSlug'),
         str(row, 'placement') ?? 'front',
         str(row, 'fromLabel') ?? '',
+        str(row, 'competitionSlug') ?? 'all',
       ].join('|'),
       clubSlug: req(row, 'clubSlug'),
       sponsorSlug: req(row, 'sponsorSlug'),
       sport: sport(row),
       placement: (str(row, 'placement') ?? 'front') as 'front',
+      competitionSlug: str(row, 'competitionSlug'),
       fromLabel: str(row, 'fromLabel'),
       toLabel: str(row, 'toLabel'),
       endedEarly: bool(row, 'endedEarly'),
@@ -429,6 +432,7 @@ const SPECS: FileSpec[] = [
       sourceBUrl: str(row, 'sourceBUrl'),
       noteHe: str(row, 'noteHe'),
       resolution: str(row, 'resolution'),
+      resolvedBy: str(row, 'resolvedBy'),
       ...fact(row, ctx),
     }),
   },

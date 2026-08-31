@@ -104,6 +104,18 @@ describe('brand acceptance — RTL', () => {
       expect(/margin(Left|Right)|padding(Left|Right)/.test(text), `${path}`).toBe(false)
     }
   })
+
+  it('never puts a logical margin on a bidi-isolated number', () => {
+    // <Num> renders <bdi dir="ltr">. A logical margin resolves against the ELEMENT's
+    // own direction, so `me-2` there means "right" while the page means "left", and
+    // the gap silently lands on the wrong side of the number. The gap belongs to the
+    // parent — a flex row with gap-x — never to the isolate.
+    const offender = /<Num[^>]*className=(?:"|\{`)[^"`]*\b(?:me|ms|mx)-/
+    for (const { path, text } of SOURCES) {
+      const match = offender.exec(text)
+      expect(match, `${path} gives <Num> a logical margin: ${match?.[0]}`).toBeNull()
+    }
+  })
 })
 
 describe('brand acceptance — typography', () => {

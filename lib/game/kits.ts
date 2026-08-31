@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { archive, nameOf } from './archive'
+import { currentSeasonStartYear, seasonsInSpell, spellCoversSeason } from './seasons'
 
 /**
  * Kit data. A kit is a vector SPEC, never a photograph: it renders as flat SVG, so it
@@ -70,26 +71,46 @@ export const DEFAULT_KIT: KitSpec = {
   numberColour: 'לבן',
 }
 
-/** Seasons with a verified maker, newest first — the strip the kit screen scrolls. */
-export function verifiedKitSeasons(): Array<{
+export type SeasonKit = {
   season: string
   maker: string
-  sponsor: string | null
+  /** one entry per competition-scoped deal; `competition` null = all competitions */
+  sponsors: Array<{ name: string; competition: string | null; noteHe: string | null }>
   sourceTitle: string
   sourceUrl: string | null
-}> {
-  return archive.kitSupply
-    .filter((row) => row.fromLabel !== null)
-    .map((row) => {
-      const season = row.fromLabel as string
-      const deal = archive.sponsorDeals.find((sponsor) => sponsor.fromLabel === season)
-      return {
+}
+
+/** Seasons with a verified maker, newest first — the strip the kit screen scrolls. */
+export function verifiedKitSeasons(): SeasonKit[] {
+  const openThrough = currentSeasonStartYear()
+
+  // One row per season, not per supply spell. A spell is the sourced fact ("Umbro,
+  // 2006/07 to 2010/11"), but a season is what a sponsor attaches to — 2010/11 sits
+  // in the middle of the Umbro spell and carries two different sponsors.
+  const rows = new Map<string, SeasonKit>()
+
+  for (const supply of archive.kitSupply) {
+    for (const season of seasonsInSpell(supply, openThrough)) {
+      // First spell wins a contested season; the archive holds no overlaps, and
+      // inventing a resolution here would be the pipeline picking a winner.
+      if (rows.has(season)) continue
+      rows.set(season, {
         season,
-        maker: nameOf.manufacturer(row.manufacturerSlug),
-        sponsor: deal ? nameOf.sponsor(deal.sponsorSlug) : null,
-        sourceTitle: row.sourceTitle,
-        sourceUrl: row.sourceUrl,
-      }
-    })
-    .sort((a, b) => b.season.localeCompare(a.season))
+        maker: nameOf.manufacturer(supply.manufacturerSlug),
+        sponsors: archive.sponsorDeals
+          .filter((deal) => spellCoversSeason(deal, season))
+          .map((deal) => ({
+            name: nameOf.sponsor(deal.sponsorSlug),
+            competition: deal.competitionSlug
+              ? nameOf.competition(deal.competitionSlug)
+              : null,
+            noteHe: deal.noteHe ?? null,
+          })),
+        sourceTitle: supply.sourceTitle,
+        sourceUrl: supply.sourceUrl,
+      })
+    }
+  }
+
+  return [...rows.values()].sort((a, b) => b.season.localeCompare(a.season))
 }

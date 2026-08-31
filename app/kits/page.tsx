@@ -27,13 +27,19 @@ export default function KitsPage() {
               {seasons.map((row) => (
                 <span
                   key={row.season}
-                  className="flex min-h-tap min-w-[132px] flex-col justify-center border-rule border-ink bg-sheet px-3"
+                  className="flex min-h-tap min-w-[150px] flex-col justify-center border-rule border-ink bg-sheet px-3 py-2"
                 >
                   <span className="font-mono text-[11px] tabular-nums text-red">{row.season}</span>
                   <span className="font-sign text-[14px] leading-tight text-ink">{row.maker}</span>
-                  {row.sponsor && (
-                    <span className="font-body text-[10.5px] text-sign">{row.sponsor}</span>
-                  )}
+                  {row.sponsors.map((sponsor) => (
+                    <span
+                      key={`${sponsor.name}-${sponsor.competition ?? 'all'}`}
+                      className="font-body text-[11px] leading-tight text-sign"
+                    >
+                      {sponsor.name}
+                      {sponsor.competition ? ` · ${sponsor.competition}` : ''}
+                    </span>
+                  ))}
                 </span>
               ))}
             </li>

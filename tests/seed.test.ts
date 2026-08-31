@@ -134,10 +134,22 @@ describe('what the research pass could not verify stays out', () => {
     expect(founding?.dateConfirmed).toBe(false)
   })
 
-  it('keeps disagreements as open conflicts instead of choosing a winner', () => {
+  it('keeps disagreements as open conflicts unless a named person settled them', () => {
     const { bundle } = seed()
     expect(bundle.factConflicts.length).toBeGreaterThanOrEqual(5)
-    expect(bundle.factConflicts.every((conflict) => conflict.resolution === null)).toBe(true)
+
+    // Nothing resolves itself. A conflict leaves the open state only when a person
+    // is named as having settled it — an anonymous verdict is indistinguishable
+    // from the pipeline quietly picking a winner, which rule 11 forbids.
+    const open = bundle.factConflicts.filter((conflict) => conflict.resolution === null)
+    expect(open.length).toBeGreaterThanOrEqual(5)
+    for (const conflict of bundle.factConflicts) {
+      if (conflict.resolution === null) {
+        expect(conflict.resolvedBy, `${conflict.field} has a resolver but no verdict`).toBeNull()
+      } else {
+        expect(conflict.resolvedBy, `${conflict.field} was resolved anonymously`).toBeTruthy()
+      }
+    }
 
     const titles = bundle.factConflicts.find((c) => c.field === 'championship_count')
     expect(titles?.claimA).toContain('13')

@@ -147,5 +147,15 @@
   "empty.goal": "אין עדיין שער משוחזר",
   "empty.goal.body": "צריך תיאור מהלך מלא ממקור כדי לבנות רצף.",
   "mode.goal": "שחזור שער",
-  "mode.goal.sub": "استرجاع الهدف · THE GOAL"
+  "mode.goal.sub": "استرجاع الهدف · THE GOAL",
+  "screen.kitChallenge.title": "אתגר החולצה",
+  "screen.kitChallenge.sub": "تحدي القميص · KIT CHALLENGE",
+  "kitChallenge.note": "מי ייצר את המדים ומי היה על החזה — באותה עונה, באותה תחרות.",
+  "kitChallenge.maker": "יצרן",
+  "kitChallenge.sponsor": "חסות",
+  "kitChallenge.submit": "שלח לאימות",
+  "kitChallenge.next": "עונה נוספת",
+  "kitChallenge.allCompetitions": "כל התחרויות",
+  "mode.kitChallenge": "אתגר החולצה",
+  "mode.kitChallenge.sub": "تحدي القميص · KIT"
 }

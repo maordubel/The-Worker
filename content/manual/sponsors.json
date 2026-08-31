@@ -36,6 +36,18 @@
       "nameHe": "IBI בית השקעות",
       "nameEn": "IBI Investment House",
       "industry": "פיננסים"
+    },
+    {
+      "slug": "בוני-התיכון",
+      "nameHe": "בוני התיכון",
+      "nameEn": "Bonei HaTichon",
+      "industry": "בנייה"
+    },
+    {
+      "slug": "סובארו",
+      "nameHe": "סובארו",
+      "nameEn": "Subaru",
+      "industry": "רכב"
     }
   ]
 }

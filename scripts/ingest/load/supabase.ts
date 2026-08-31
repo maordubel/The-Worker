@@ -293,6 +293,9 @@ async function loadGraph(
           sponsor_id: sponsorId,
           sport: row.sport,
           placement: row.placement,
+          competition_id: row.competitionSlug
+            ? (competitionIds.get(row.competitionSlug) ?? null)
+            : null,
           from_season: row.fromLabel ? (seasonIds.get(row.fromLabel) ?? null) : null,
           to_season: row.toLabel ? (seasonIds.get(row.toLabel) ?? null) : null,
           from_label: row.fromLabel,
@@ -476,6 +479,7 @@ async function loadGraph(
       claim_a: row.claimA,
       claim_b: row.claimB,
       resolution: row.resolution,
+      resolved_by: row.resolvedBy ?? null,
       note_he: row.noteHe,
     })))
 

@@ -36,8 +36,9 @@ the database:
 - **The Arsenal cannon on a Hapoel shirt, c. 1980.** Six targeted searches in Hebrew and
   English, nothing. (Arsenal wore Umbro 1978–86 and Hapoel wore Umbro in 1980/81 — a
   shared supplier is a plausible origin for the story, and is not evidence for it.)
-- **Every shirt sponsor before 2010** — Ata, Visa, Club Hotel Tiberias, Suzuki, Shikun
-  Ovdim, both Subaru spells, and Fujitsu's dates.
+- **Every shirt sponsor before 2009** — Ata, Visa, Club Hotel Tiberias, Suzuki, Shikun
+  Ovdim, the earlier Subaru spell, and Fujitsu's dates. (The 2009/10 Subaru season is now
+  confirmed by Maor and is in the archive; the earlier spell is not.)
 - **Hapoel Ussishkin's registration on 25 June 2007.** The founding and Maor Harel's role
   in it are documented; the day is not.
 - **"The fifth game", 14 November 2007, 68–51, ~500 spectators, the framed jersey.**
@@ -52,9 +53,25 @@ the database:
   Attaque 77). `songs.json` ships empty. An unverified melody credit is precisely the
   kind of fact that would embarrass the game in front of the people who sing them.
 
+## Conflicts settled by the owner of the project
+
+Five kit conflicts were closed by Maor Harel directly, on 31 August 2026. Each carries a
+`resolution` **and** a `resolvedBy` — an anonymous verdict is indistinguishable from the
+pipeline quietly picking a winner, so the schema refuses one (`tests/seed.test.ts`).
+
+| Season | Settled | Stored as |
+| --- | --- | --- |
+| 2010/11 | Keter appeared **in the Champions League only**; the league shirt carried **בוני התיכון** | two `sponsor_deal` rows, each scoped by `competition_id` |
+| 2009/10 | The double season: **Umbro** kit, **Subaru** sponsor | one row at confidence 3 |
+| — | Nike is the current supplier; four suppliers appear across the modern range | resolved to the kit archive |
+
+The competition scope is a **schema** change, not a note: `sponsor_deal.competition_id`
+(null = every competition that season). The kit game asks `(season, competition)` pairs,
+which is why 2010/11 yields two questions with two different right answers.
+
 ## Open conflicts, recorded rather than resolved
 
-Six rows in `content/manual/fact-conflicts.json`, all with `resolution: null`:
+Six rows in `content/manual/fact-conflicts.json` still carry `resolution: null`:
 
 1. Championship count — 13 (IFA/club) vs 12 (FIFA/UEFA) vs 14 (worldfootball).
 2. Bloomfield's first match score — 1–1 (Wikipedia, StadiumDB) vs 0–0 (golden-lotus).

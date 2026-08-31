@@ -17,6 +17,7 @@ const MODES: Array<{ serial: string; href: string; title: MessageKey; sub: Messa
   { serial: '04', href: '/kits', title: 'mode.kits', sub: 'mode.kits.sub' },
   { serial: '05', href: '/timeline?seed=4', title: 'mode.timeline', sub: 'mode.timeline.sub' },
   { serial: '06', href: '/goal?seed=1', title: 'mode.goal', sub: 'mode.goal.sub' },
+  { serial: '07', href: '/kits/build?seed=1', title: 'mode.kitChallenge', sub: 'mode.kitChallenge.sub' },
 ]
 
 const STREAK_ON = 13

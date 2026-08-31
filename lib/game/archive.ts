@@ -116,8 +116,11 @@ export const archive = {
   sponsors: plain<{ slug: string; nameHe: string }>(sponsorsFile),
   sponsorDeals: load<{
     sponsorSlug: string
+    /** null = every competition that season */
+    competitionSlug?: string | null
     fromLabel: string | null
     toLabel: string | null
+    noteHe?: string | null
   }>(sponsorDealsFile),
   crests: load<{
     fromYear: number

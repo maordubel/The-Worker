@@ -259,6 +259,7 @@ export function findUnresolvedReferences(bundle: StagedBundle): UnresolvedRef[] 
   for (const deal of bundle.sponsorDeals) {
     check('sponsorDeals', deal.naturalKey, 'clubSlug', deal.clubSlug, clubs)
     check('sponsorDeals', deal.naturalKey, 'sponsorSlug', deal.sponsorSlug, sponsors)
+    check('sponsorDeals', deal.naturalKey, 'competitionSlug', deal.competitionSlug, competitions)
   }
   for (const spell of bundle.kitSupplySpells) {
     check('kitSupplySpells', spell.naturalKey, 'clubSlug', spell.clubSlug, clubs)

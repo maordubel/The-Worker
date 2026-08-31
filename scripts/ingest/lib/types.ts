@@ -180,6 +180,8 @@ export type StagedSponsorDeal = Fact & {
   sponsorSlug: string
   sport: Sport
   placement: 'front' | 'back' | 'shorts' | 'sleeve' | 'other'
+  /** null = every competition that season */
+  competitionSlug: string | null
   fromLabel: string | null
   toLabel: string | null
   endedEarly: boolean
@@ -309,6 +311,7 @@ export type StagedMembershipMilestone = Fact & {
 
 export type StagedFactConflict = {
   naturalKey: string
+  resolvedBy?: string | null
   entityTable: string
   entityKey: string | null
   field: string

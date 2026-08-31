@@ -4,6 +4,13 @@ import { CONFIDENCE_FLOOR, archive } from '@/lib/game/archive'
 import { buildBoard } from '@/lib/game/memory'
 import { ROUND_LENGTH, availableQuestionCount, deal, grade } from '@/lib/game/trivia'
 import { verifiedKitSeasons } from '@/lib/game/kits'
+import { dealKitChallenge, gradeKitChallenge, kitChallengeCount } from '@/lib/game/kitChallenge'
+import {
+  seasonLabelOf,
+  seasonStartYear,
+  seasonsInSpell,
+  spellCoversSeason,
+} from '@/lib/game/seasons'
 import { TIMELINE_LENGTH, dealTimeline, gradeTimeline } from '@/lib/game/timeline'
 import { dealGoal, gradeGoal } from '@/lib/game/goal'
 import {
@@ -168,6 +175,102 @@ describe('kits', () => {
     const seasons = verifiedKitSeasons().map((row) => row.season)
     expect(seasons).not.toContain('1981/82')
     expect(seasons).not.toContain('2003/04')
+  })
+
+  it('covers the seasons inside a supply spell, not only the season it starts in', () => {
+    // Umbro ran 2006/07 to 2010/11. Matching sponsor to maker on the start label alone
+    // hid every season in between — including the one Maor verified.
+    const seasons = verifiedKitSeasons().map((row) => row.season)
+    expect(seasons).toContain('2006/07')
+    expect(seasons).toContain('2008/09')
+    expect(seasons).toContain('2010/11')
+  })
+
+  it('carries both 2010/11 sponsors, each scoped to its competition', () => {
+    const season = verifiedKitSeasons().find((row) => row.season === '2010/11')
+    expect(season?.maker).toBe('אמברו')
+
+    const scoped = (season?.sponsors ?? []).map((s) => `${s.name}|${s.competition ?? 'all'}`)
+    expect(scoped).toContain('כתר|ליגת האלופות')
+    expect(scoped).toContain('בוני התיכון|ליגת העל')
+  })
+
+  it('puts Subaru on the double-winning season', () => {
+    const season = verifiedKitSeasons().find((row) => row.season === '2009/10')
+    expect(season?.sponsors.map((s) => s.name)).toContain('סובארו')
+  })
+})
+
+describe('season ranges', () => {
+  it('reads and writes a season label, century wrap included', () => {
+    expect(seasonStartYear('2010/11')).toBe(2010)
+    expect(seasonStartYear('1999/00')).toBe(1999)
+    expect(seasonStartYear(null)).toBeNull()
+    expect(seasonStartYear('בערך 2010')).toBeNull()
+    expect(seasonLabelOf(1999)).toBe('1999/00')
+    expect(seasonLabelOf(2010)).toBe('2010/11')
+  })
+
+  it('treats an open spell as still running and a closed one as bounded', () => {
+    const open = { fromLabel: '2024/25', toLabel: null }
+    const closed = { fromLabel: '2006/07', toLabel: '2010/11' }
+
+    expect(spellCoversSeason(open, '2026/27')).toBe(true)
+    expect(spellCoversSeason(open, '2023/24')).toBe(false)
+    expect(spellCoversSeason(closed, '2008/09')).toBe(true)
+    expect(spellCoversSeason(closed, '2011/12')).toBe(false)
+
+    expect(seasonsInSpell(closed, 2026)).toEqual([
+      '2006/07',
+      '2007/08',
+      '2008/09',
+      '2009/10',
+      '2010/11',
+    ])
+    // An open spell is capped at the cap, never run to infinity.
+    expect(seasonsInSpell(open, 2026).at(-1)).toBe('2026/27')
+  })
+})
+
+describe('kit challenge', () => {
+  it('deals a season and a bank, and never the answer', () => {
+    const challenge = dealKitChallenge(11)
+    expect(challenge).not.toBeNull()
+    expect(challenge?.makers.length).toBeGreaterThan(2)
+    expect(challenge?.sponsors.length).toBeGreaterThan(2)
+    expect(JSON.stringify(challenge)).not.toContain('correct')
+  })
+
+  it('grades on the server and is stable for a seed', () => {
+    const verdict = gradeKitChallenge(11, { maker: null, sponsor: null })
+    expect(verdict).not.toBeNull()
+    expect(verdict?.makerCorrect).toBe(false)
+
+    const right = gradeKitChallenge(11, {
+      maker: verdict?.maker ?? null,
+      sponsor: verdict?.sponsor ?? null,
+    })
+    expect(right?.makerCorrect).toBe(true)
+    expect(right?.sponsorCorrect).toBe(true)
+    // Same seed, same target.
+    expect(dealKitChallenge(11)?.challengeId).toBe(dealKitChallenge(11)?.challengeId)
+  })
+
+  it('asks about the competition-scoped 2010/11 pairs', () => {
+    const ids = new Set<string>()
+    for (let seed = 1; seed < 400; seed += 1) ids.add(dealKitChallenge(seed)?.challengeId ?? '')
+    expect(ids).toContain('2010/11:ליגת-האלופות')
+    expect(ids).toContain('2010/11:ליגת-העל')
+  })
+
+  it('never asks about a season where two sponsors are both true', () => {
+    // Arkia ended early and Hachshara came in during 2019/20 — the archive holds both,
+    // so the pair has no single answer and must not be a question.
+    for (let seed = 1; seed < 400; seed += 1) {
+      const challenge = dealKitChallenge(seed)
+      expect(challenge?.challengeId).not.toBe('2019/20:all')
+    }
+    expect(kitChallengeCount()).toBeGreaterThan(5)
   })
 })
 

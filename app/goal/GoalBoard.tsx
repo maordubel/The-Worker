@@ -55,10 +55,12 @@ export function GoalBoard({ challenge, seed }: { challenge: GoalChallenge; seed:
       </p>
 
       {!verdict && step && (
-        <p className="mt-2 border-rule border-ink bg-sheet p-3 font-sign text-step-1 leading-tight text-ink">
-          <Num className="me-2 font-mono text-red">{step.step}</Num>
-          {step.actorHe} — {t(ACTION_LABEL[step.action] as MessageKey)}
-          {step.targetHe ? ` ← ${step.targetHe}` : ''}
+        <p className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1 border-rule border-ink bg-sheet p-3 font-sign text-step-1 leading-tight text-ink">
+          <Num className="font-mono text-red">{step.step}</Num>
+          <span>
+            {step.actorHe} — {t(ACTION_LABEL[step.action] as MessageKey)}
+            {step.targetHe ? ` ← ${step.targetHe}` : ''}
+          </span>
         </p>
       )}
 
@@ -178,9 +180,9 @@ export function GoalBoard({ challenge, seed }: { challenge: GoalChallenge; seed:
           <ol className="mt-stack border-t-rule border-ink">
             {verdict.steps.map((s) => (
               <li key={s.step} className="border-b-hair border-ink/30 py-3">
-                <p className="font-sign text-step-1 leading-tight text-ink">
-                  <Num className="me-2 font-mono text-red">{s.step}</Num>
-                  {s.noteHe}
+                <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 font-sign text-step-1 leading-tight text-ink">
+                  <Num className="font-mono text-red">{s.step}</Num>
+                  <span>{s.noteHe}</span>
                 </p>
                 <p className="mt-1 font-mono text-[11px] text-muted">
                   {s.hit ? t('goal.hit') : t('goal.miss')} · <Num>{s.distance}</Num>

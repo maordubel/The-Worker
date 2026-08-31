@@ -1,13 +1,13 @@
-# Ingestion report — manual (dry-run)
+# Ingestion report — all (dry-run)
 
-Started 2026-08-31T15:30:21.297Z · status **OK**
+Started 2026-08-31T15:51:23.957Z · status **OK**
 
 ## Totals
 
 | Metric | Count |
 |---|---:|
-| discovered | 291 |
-| imported | 291 |
+| discovered | 295 |
+| imported | 295 |
 | skipped | 0 |
 | rejected | 0 |
 | unresolved | 0 |
@@ -30,8 +30,8 @@ Started 2026-08-31T15:30:21.297Z · status **OK**
 | manual:matchEvents | 7 |
 | manual:trophies | 32 |
 | manual:moments | 5 |
-| manual:sponsors | 5 |
-| manual:sponsorDeals | 5 |
+| manual:sponsors | 7 |
+| manual:sponsorDeals | 7 |
 | manual:manufacturers | 7 |
 | manual:kitSupplySpells | 16 |
 | manual:crestVersions | 9 |
@@ -60,8 +60,8 @@ Started 2026-08-31T15:30:21.297Z · status **OK**
 | matchEvents | 7 |
 | trophies | 32 |
 | moments | 5 |
-| sponsors | 5 |
-| sponsorDeals | 5 |
+| sponsors | 7 |
+| sponsorDeals | 7 |
 | manufacturers | 7 |
 | kitSupplySpells | 16 |
 | crestVersions | 9 |
@@ -87,7 +87,7 @@ Started 2026-08-31T15:30:21.297Z · status **OK**
 | seasons | eraSlug | 0 | 104 | 0% |
 | songs | originalTitle | 0 | 0 | — |
 | associationEvents | dateConfirmed | 3 | 6 | 50% |
-| sponsorDeals | fromLabel | 4 | 5 | 80% |
+| sponsorDeals | fromLabel | 6 | 7 | 86% |
 
 ## Skipped
 
@@ -234,7 +234,7 @@ _none_
 | matches | 1967/68\|גביע-אלופות-אסיה\|הפועל-תל-אביב\|סלנגור\|גמר | 1 |
 | matchEvents | 2001/02\|גביע-אופא\|הפועל-תל-אביב\|לוקומוטיב-מוסקבה\|סיבוב 3 משחק 1#1 | 1 |
 | trophies | גביע-אלופות-אסיה\|1967/68\|הפועל-תל-אביב | 1 |
-| sponsorDeals | הפועל-תל-אביב\|football\|ניו-דרייב\|front\| | 1 |
+| sponsorDeals | הפועל-תל-אביב\|football\|ניו-דרייב\|front\|\|all | 1 |
 | quotes | מאור הראל\|אין לי יותר כוח להמשיך ולתרום | 1 |
 | associationEvents | הפועל-אוסישקין\|election\|ארז זייצ'יק נבחר למקום שהתפנה | 1 |
 | associationRoles | הפועל-אוסישקין\|נועה סקלי\|יו"ר ראשונה\| | 1 |
@@ -286,7 +286,7 @@ _none_
 - trophies.json: 13 championships is the IFA/club count; FIFA and UEFA recognise 12, because the abandoned 1934/35 and 1937/38 seasons are not universally counted — recorded as an open conflict rather than resolved here. Pre-state cups are named by bare year in the sources; the canonicaliser renders them YYYY/YY. The research document's claim of a 2025 Toto Cup WIN is wrong and is entered here as the runner-up place it actually was.
 - moments.json: Story units. Each one is anchored to a verified match, date or event.
 - sponsors.json: Shirt sponsors that a source actually shows on the shirt.
-- sponsor-deals.json: Only deals with a source. Everything the research document listed before 2010 — Ata, Visa, Club Hotel Tiberias, Suzuki, Shikun Ovdim, both Subaru spells — could not be sourced from any accessible archive and is deliberately absent. Fujitsu likewise.
+- sponsor-deals.json: Only deals with a source. A deal may be scoped to one competition — confirmed for 2010/11, where Keter appeared in the Champions League and Bonei HaTichon in the league. Everything the research document listed before 2009 remains unsourced and absent.
 - manufacturers.json: Kit suppliers named in Football Kit Archive.
 - kit-supply.json: Supply spells, from Football Kit Archive season entries. Seasons FKA does not cover (1981/82, 2003/04) are gaps, not claims. Nike appears in three separate spells — that is the fact the kit game is built on. Pre-1980 kits carry no branded maker in FKA; 'self-produced' is an inference and is deliberately absent.
 - crest-versions.json: Stages as the club's own history page tells them. Football Kit Archive omits the 2008-2015 stage and the centenary stage — recorded as a conflict, not silently merged. The May 2023 design that removed the hammer and sickle was made for a US tournament to gauge reaction and was never an official crest; it is not listed here.
@@ -300,3 +300,4 @@ _none_
 - fact-conflicts.json: Sources disagree. Recorded and displayed, never resolved by quietly picking one. The last five come from the kit-engine spec, which contradicts the verified kit archive — the spec drives the ENGINE, not the facts.
 - seasons.json: Calendar scaffold. A season label is arithmetic, not a claim that the club competed that season. A source that names a bare year (pre-state cups) is rendered YYYY/YY by the canonicaliser — a labelling convention, documented, not a claim about the calendar.
 - seasons: generated 104 calendar labels 1923/24–2026/27. A label is a calendar scaffold, not a claim that the club competed that season.
+- no raw wiki pages on disk — run with --fetch first

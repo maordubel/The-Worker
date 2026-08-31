@@ -1,5 +1,5 @@
 {
-  "note": "Only deals with a source. Everything the research document listed before 2010 — Ata, Visa, Club Hotel Tiberias, Suzuki, Shikun Ovdim, both Subaru spells — could not be sourced from any accessible archive and is deliberately absent. Fujitsu likewise.",
+  "note": "Only deals with a source. A deal may be scoped to one competition — confirmed for 2010/11, where Keter appeared in the Champions League and Bonei HaTichon in the league. Everything the research document listed before 2009 remains unsourced and absent.",
   "confidence": 2,
   "source": {
     "kind": "other",
@@ -13,9 +13,12 @@
       "fromLabel": "2010/11",
       "toLabel": "2010/11",
       "sport": "football",
-      "confidence": 2,
-      "sourceUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-2010-11-home-kit-20115/",
-      "sourceTitle": "Football Kit Archive — 2010-11 home kit"
+      "confidence": 3,
+      "sourceUrl": null,
+      "sourceTitle": "מאור הראל — בעל הפרויקט, אימות ישיר",
+      "competitionSlug": "ליגת-האלופות",
+      "noteHe": "בליגת האלופות בלבד; בליגה שיחקו עם בוני התיכון",
+      "sourceKind": "manual"
     },
     {
       "clubSlug": "הפועל-תל-אביב",
@@ -59,6 +62,31 @@
       "noteHe": "נחתם בספטמבר 2024; הוארך במרץ 2026 לשלוש עונות נוספות מ-2026/27",
       "sourceUrl": "https://www.htafc.co.il/ibi-בית-השקעות-חתמה-על-הסכם-חסות-ראשית-עם/",
       "sourceTitle": "אתר המועדון הרשמי, 24.9.2024"
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "sponsorSlug": "בוני-התיכון",
+      "fromLabel": "2010/11",
+      "toLabel": "2010/11",
+      "competitionSlug": "ליגת-העל",
+      "sport": "football",
+      "confidence": 3,
+      "noteHe": "חסות הליגה בעונת 2010/11, במקביל לכתר בליגת האלופות",
+      "sourceTitle": "מאור הראל — בעל הפרויקט, אימות ישיר",
+      "sourceUrl": null,
+      "sourceKind": "manual"
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "sponsorSlug": "סובארו",
+      "fromLabel": "2009/10",
+      "toLabel": "2009/10",
+      "sport": "football",
+      "confidence": 3,
+      "noteHe": "עונת הדאבל; יצרן המדים אמברו",
+      "sourceTitle": "מאור הראל — בעל הפרויקט, אימות ישיר",
+      "sourceUrl": null,
+      "sourceKind": "manual"
     }
   ]
 }
