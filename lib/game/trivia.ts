@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { scoreText } from '@/components/ui/Num'
+
 import {
   archive,
   footballPeople,
@@ -180,10 +182,11 @@ const TEMPLATES: Template[] = [
       archive.matches
         .filter((row) => row.homeScore !== null && row.awayScore !== null)
         .map((row) => {
-          const correct = `${row.homeScore}:${row.awayScore}`
+          // Scores are isolated LTR: a bare "2:1" in RTL renders reversed.
+          const correct = scoreText(row.homeScore, row.awayScore)
           const pool = archive.matches
             .filter((other) => other.homeScore !== null)
-            .map((other) => `${other.homeScore}:${other.awayScore}`)
+            .map((other) => scoreText(other.homeScore, other.awayScore))
           return {
             id: `score:${row.seasonLabel}:${row.homeClubSlug}:${row.awayClubSlug}`,
             template: 'score',
@@ -280,7 +283,7 @@ const TEMPLATES: Template[] = [
             ),
             correct,
             source: sourceOf(row),
-            explanation: `${row.playedOn ?? row.seasonLabel} · ${row.homeScore}:${row.awayScore}`,
+            explanation: `${row.playedOn ?? row.seasonLabel} · ${scoreText(row.homeScore, row.awayScore)}`,
           }
         }),
   },

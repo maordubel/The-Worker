@@ -123,9 +123,11 @@ describe('brand acceptance — typography', () => {
     const mono = SOURCES.filter(({ text }) => withoutComments(text).includes('font-mono'))
     expect(mono.length).toBeGreaterThan(0)
     for (const { path, text } of mono) {
-      expect(text.includes('tabular-nums'), `${path} uses font-mono without tabular-nums`).toBe(
-        true,
-      )
+      // Either the file sets it directly, or it renders numbers through <Num>/<Score>,
+      // which isolate the run LTR and set tabular-nums for it.
+      const safe =
+        text.includes('tabular-nums') || /<Num\b/.test(text) || /<Score\b/.test(text)
+      expect(safe, `${path} uses font-mono without tabular-nums`).toBe(true)
     }
   })
 })

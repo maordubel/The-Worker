@@ -5,6 +5,13 @@ import { buildBoard } from '@/lib/game/memory'
 import { ROUND_LENGTH, availableQuestionCount, deal, grade } from '@/lib/game/trivia'
 import { verifiedKitSeasons } from '@/lib/game/kits'
 import { TIMELINE_LENGTH, dealTimeline, gradeTimeline } from '@/lib/game/timeline'
+import {
+  FORMATIONS,
+  dealChallenge,
+  freeBuildBank,
+  gradeLineup,
+  hasVerifiedLineup,
+} from '@/lib/game/lineup'
 
 describe('archive', () => {
   it('exposes only facts at or above the confidence floor', () => {
@@ -199,5 +206,37 @@ describe('timeline', () => {
   it('never shows two cards from the same date', () => {
     const dates = gradeTimeline(6, []).solution.map((item) => item.on)
     expect(new Set(dates).size).toBe(dates.length)
+  })
+})
+
+describe('lineup', () => {
+  it('keeps every slot inside the pitch on the narrowest screen', () => {
+    for (const formation of Object.values(FORMATIONS)) {
+      for (const slot of formation.slots) {
+        // chip is 22% wide, centred — so its centre must stay 11% off each touchline
+        expect(slot.x, `${formation.name} ${slot.slotId}`).toBeGreaterThanOrEqual(11)
+        expect(slot.x, `${formation.name} ${slot.slotId}`).toBeLessThanOrEqual(89)
+      }
+    }
+  })
+
+  it('gives every formation eleven slots with unique ids', () => {
+    for (const formation of Object.values(FORMATIONS)) {
+      expect(formation.slots, formation.name).toHaveLength(11)
+      expect(new Set(formation.slots.map((slot) => slot.slotId)).size).toBe(11)
+    }
+  })
+
+  it('never offers a basketball name on a football pitch', () => {
+    expect(freeBuildBank()).not.toContain('מאור הראל')
+    expect(freeBuildBank()).not.toContain('אורי שלף')
+    // Small on purpose: only players a source actually names reach the bank.
+    expect(freeBuildBank().length).toBeGreaterThanOrEqual(4)
+  })
+
+  it('reports no verified XI rather than inventing one', () => {
+    expect(hasVerifiedLineup()).toBe(false)
+    expect(dealChallenge(2)).toBeNull()
+    expect(gradeLineup(2, {})).toBeNull()
   })
 })

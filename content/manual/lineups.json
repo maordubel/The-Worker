@@ -1,0 +1,29 @@
+{
+  "note": "EMPTY BY DESIGN. A starting XI is a historical claim and is never invented — not even as a demo. Fill one record and the pitch game switches from free build to graded immediately. Schema below; confidence 3 for anything Maor verifies himself.",
+  "confidence": 3,
+  "source": { "kind": "manual", "title": "Curated by Maor Harel — pending", "url": null },
+  "schema": {
+    "matchId": "2001-02-uefa-qf-milan",
+    "titleHe": "רבע גמר גביע אופ\"א · מול מילאן",
+    "subtitleHe": "14.03.2002 · GSP ניקוסיה",
+    "formation": "4-4-2 | 4-3-3 | 4-2-3-1 | 3-5-2",
+    "xi": {
+      "GK": "שם השוער",
+      "D1": "מגן ימני",
+      "D2": "בלם",
+      "D3": "בלם",
+      "D4": "מגן שמאלי",
+      "M1": "כנף ימני",
+      "M2": "קשר",
+      "M3": "קשר",
+      "M4": "כנף שמאלי",
+      "F1": "חלוץ",
+      "F2": "חלוץ"
+    },
+    "distractors": ["שחקנים שלא היו בהרכב באותו ערב"],
+    "sourceTitle": "מי אישר את ההרכב",
+    "sourceUrl": "https://...",
+    "confidence": 3
+  },
+  "records": []
+}

@@ -9,18 +9,42 @@ import { archive, nameOf } from './archive'
  * they live here and not in a component.
  */
 
-export type KitPattern = 'solid' | 'stripes' | 'hoops' | 'sash'
+/** Follows the KitComponent / KitDesign schema Maor supplied. */
+export type KitPattern =
+  | 'solid'
+  | 'stripes_vertical'
+  | 'stripes_horizontal'
+  | 'chevron'
+  | 'checkered'
+  | 'sash'
+
 export type KitCollar = 'crew' | 'v' | 'polo'
 
-export type KitSpec = {
-  primary: string
+export type KitComponent = {
+  base: string
   secondary: string
-  detail: string
+  accent: string
   pattern: KitPattern
+}
+
+export type KitSpec = {
+  jersey: KitComponent
+  shorts: KitComponent
+  socks: KitComponent
   collar: KitCollar
   longSleeve: boolean
   number: string
+  numberColour: string
 }
+
+export const KIT_PATTERNS: KitPattern[] = [
+  'solid',
+  'stripes_vertical',
+  'stripes_horizontal',
+  'chevron',
+  'checkered',
+  'sash',
+]
 
 /** The only palette a Hapoel kit may use. Named, so the UI never types a hex. */
 export const KIT_COLOURS: Record<string, string> = {
@@ -37,13 +61,13 @@ export const KIT_COLOUR_NAMES = Object.keys(KIT_COLOURS)
 export const DEFAULT_KIT_COLOUR = KIT_COLOUR_NAMES[0] as string
 
 export const DEFAULT_KIT: KitSpec = {
-  primary: 'אדום',
-  secondary: 'לבן',
-  detail: 'לבן',
-  pattern: 'solid',
+  jersey: { base: 'אדום', secondary: 'לבן', accent: 'לבן', pattern: 'solid' },
+  shorts: { base: 'לבן', secondary: 'אדום', accent: 'אדום', pattern: 'solid' },
+  socks: { base: 'אדום', secondary: 'לבן', accent: 'לבן', pattern: 'stripes_horizontal' },
   collar: 'crew',
   longSleeve: false,
   number: '10',
+  numberColour: 'לבן',
 }
 
 /** Seasons with a verified maker, newest first — the strip the kit screen scrolls. */

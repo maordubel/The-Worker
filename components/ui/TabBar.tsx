@@ -1,47 +1,79 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
 import { t, type MessageKey } from '@/lib/i18n'
 
 /**
- * הסרגל התחתון — present on every screen: bg-ink, a 3px red rule on top,
- * four tabs. Icons are drawn from the system itself, never from an icon library.
+ * הסרגל התחתון — fixed to the bottom of the viewport on every screen, above the
+ * home indicator, with a real link and an active state per tab.
+ *
+ * It is `fixed`, not sticky-at-the-end-of-a-flex-column: on iOS the URL bar collapses
+ * as you scroll and anything laid out in flow appears to drift. `Screen` reserves the
+ * matching space, so nothing hides behind it.
  */
 
-type Tab = { key: MessageKey; icon: 'wall' | 'game' | 'tower' | 'file' }
+type Tab = { key: MessageKey; href: string; match: string; icon: 'wall' | 'game' | 'tower' | 'file' }
 
 const TABS: Tab[] = [
-  { key: 'tab.wall', icon: 'wall' },
-  { key: 'tab.game', icon: 'game' },
-  { key: 'tab.tower', icon: 'tower' },
-  { key: 'tab.file', icon: 'file' },
+  { key: 'tab.wall', href: '/', match: '/', icon: 'wall' },
+  { key: 'tab.game', href: '/trivia?seed=3&i=0&score=0', match: '/trivia', icon: 'game' },
+  { key: 'tab.tower', href: '/timeline?seed=4', match: '/timeline', icon: 'tower' },
+  { key: 'tab.file', href: '/kits', match: '/kits', icon: 'file' },
 ]
 
-function TabIcon({ icon }: { icon: Tab['icon'] }) {
-  if (icon === 'wall') return <span className="mx-auto block h-[11px] w-[15px] border-rule border-sheet" />
+function TabIcon({ icon, active }: { icon: Tab['icon']; active: boolean }) {
+  const tone = active ? 'border-red bg-red' : 'border-sheet'
+  if (icon === 'wall')
+    return <span className={`mx-auto block h-[13px] w-[18px] border-rule ${tone}`} />
   // The one permitted radius: this icon IS a lamp.
   if (icon === 'game')
-    return <span className="mx-auto block h-[13px] w-[13px] rounded-full border-rule border-sheet" />
+    return <span className={`mx-auto block h-[15px] w-[15px] rounded-full border-rule ${tone}`} />
   if (icon === 'file')
-    return <span className="mx-auto block h-[13px] w-[13px] rotate-45 border-rule border-sheet" />
+    return (
+      <span className={`mx-auto block h-[15px] w-[15px] rotate-45 border-rule ${tone}`} />
+    )
   return (
-    <span className="flex h-[13px] items-end justify-center gap-[2px]">
-      <i className="block h-[7px] w-[3px] bg-sheet" />
-      <i className="block h-[11px] w-[3px] bg-sheet" />
-      <i className="block h-[9px] w-[3px] bg-sheet" />
+    <span className="flex h-[15px] items-end justify-center gap-[3px]">
+      <i className={`block h-[8px] w-[3px] ${active ? 'bg-red' : 'bg-sheet'}`} />
+      <i className={`block h-[13px] w-[3px] ${active ? 'bg-red' : 'bg-sheet'}`} />
+      <i className={`block h-[10px] w-[3px] ${active ? 'bg-red' : 'bg-sheet'}`} />
     </span>
   )
 }
 
 export function TabBar() {
+  const pathname = usePathname()
+
   return (
     <nav
       aria-label={t('tab.aria')}
-      className="grid grid-cols-4 border-t-plate border-red bg-ink"
+      className="fixed inset-x-0 bottom-0 z-50 border-t-plate border-red bg-ink pb-[env(safe-area-inset-bottom)]"
     >
-      {TABS.map((tab) => (
-        <span key={tab.key} className="flex min-h-tap flex-col justify-center px-0 py-2.5 text-center text-sheet">
-          <TabIcon icon={tab.icon} />
-          <span className="mt-1.5 font-body text-[9px] font-extrabold leading-none">{t(tab.key)}</span>
-        </span>
-      ))}
+      <ul className="mx-auto grid max-w-5xl grid-cols-4">
+        {TABS.map((tab) => {
+          const active = tab.match === '/' ? pathname === '/' : pathname.startsWith(tab.match)
+          return (
+            <li key={tab.key}>
+              <Link
+                href={tab.href}
+                aria-current={active ? 'page' : undefined}
+                className="flex min-h-tap flex-col items-center justify-center gap-1.5 py-2 text-sheet transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none"
+              >
+                <TabIcon icon={tab.icon} active={active} />
+                <span
+                  className={`font-body text-[10px] font-extrabold leading-none ${
+                    active ? 'text-red' : 'text-sheet'
+                  }`}
+                >
+                  {t(tab.key)}
+                </span>
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
     </nav>
   )
 }

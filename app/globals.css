@@ -23,8 +23,8 @@
   --rule: 2px;
   --rule-plate: 3px;
 
-  --gutter: 15px;
-  --stack: 16px;
+  --gutter: 16px;
+  --stack: 20px;
   --tap: 48px;               /* גובה מינימלי לכל אלמנט לחיץ */
 
   --ease-stamp: cubic-bezier(0.2, 0, 0, 1);
@@ -33,11 +33,31 @@
 
 @media (min-width: 768px) { :root { --gutter: 40px; --stack: 24px; } }
 
+html {
+  /* iOS: stop Safari inflating text in landscape, and kill the grey tap flash. */
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  /* No rubber-band bounce past the wall — that is what made the screen feel loose. */
+  overscroll-behavior-y: none;
+}
+
 body {
   background-color: rgb(var(--paper));
   color: rgb(var(--ink));
   /* מרקם הקיר: סריקות אנכיות עדינות, 5% דיו. לא גרעין הדפסה. */
   background-image: repeating-linear-gradient(94deg, rgb(var(--ink) / 0.05) 0 1px, transparent 1px 15px);
+  overscroll-behavior-y: none;
+}
+
+/* Every control responds to the first tap, with no 300ms wait and no double-tap zoom. */
+:where(a, button, [role="button"], select, input, label) {
+  touch-action: manipulation;
+}
+
+/* A native select must not shrink below the tap height or lose its arrow in RTL. */
+select {
+  appearance: none;
+  background-color: transparent;
 }
 
 /* קצה קרוע — יחידת התוכן */

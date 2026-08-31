@@ -1,5 +1,6 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Courier_Prime, Frank_Ruhl_Libre, Heebo, Miriam_Libre } from 'next/font/google'
+import { BRAND } from '@/lib/brand'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
 import './globals.css'
 
@@ -28,6 +29,14 @@ const courier = Courier_Prime({
   variable: '--font-courier',
   display: 'swap',
 })
+
+export const viewport: Viewport = {
+  // Required for env(safe-area-inset-*) to report anything on a notched iPhone.
+  viewportFit: 'cover',
+  themeColor: BRAND.ink,
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export const metadata: Metadata = {
   title: `${t('brand.name')} · ${t('brand.system')}`,

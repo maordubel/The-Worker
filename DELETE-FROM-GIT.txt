@@ -1,10 +1,4 @@
-Delete these from the repo (git rm), then commit:
+  git rm components/ui/Shirt.tsx
 
-  git rm components/ui/Ticket.tsx
-
-That is the ONLY file that has to go. It was superseded by components/ui/PastedSheet.tsx
-in the brand-kit phase.
-
-Verify nothing still references it:
-
-  grep -rn "Ticket" app components lib   # must print nothing
+Replaced by components/ui/KitPreview.tsx (jersey + shorts + socks).
+Nothing else to delete.

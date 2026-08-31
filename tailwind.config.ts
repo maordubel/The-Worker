@@ -25,14 +25,19 @@ const config: Config = {
         body: ['var(--font-heebo)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-courier)', 'ui-monospace', 'monospace'],
       },
+      // Fluid scale. Hebrew needs more body size than Latin to read comfortably, so
+      // step-0 starts at 17px on a phone; the display steps grow faster than the body
+      // steps so headlines stay headlines on a wide screen without shouting on a small
+      // one. Line-heights are tuned per step — Hebrew has no descender rhythm to lean
+      // on, and a serif at 1.05 looks cramped.
       fontSize: {
-        'step--1': ['0.833rem', { lineHeight: '1.5' }],
-        'step-0': ['1rem', { lineHeight: '1.6' }],
-        'step-1': ['1.2rem', { lineHeight: '1.45' }],
-        'step-2': ['1.44rem', { lineHeight: '1.35' }],
-        'step-3': ['1.728rem', { lineHeight: '1.25' }],
-        'step-4': ['2.074rem', { lineHeight: '1.15' }],
-        'step-5': ['2.986rem', { lineHeight: '1.02' }],
+        'step--1': ['clamp(0.813rem, 0.79rem + 0.11vw, 0.875rem)', { lineHeight: '1.55' }],
+        'step-0': ['clamp(1.063rem, 1.03rem + 0.16vw, 1.125rem)', { lineHeight: '1.65' }],
+        'step-1': ['clamp(1.188rem, 1.13rem + 0.28vw, 1.313rem)', { lineHeight: '1.4' }],
+        'step-2': ['clamp(1.375rem, 1.26rem + 0.56vw, 1.625rem)', { lineHeight: '1.25' }],
+        'step-3': ['clamp(1.625rem, 1.42rem + 1vw, 2.125rem)', { lineHeight: '1.2' }],
+        'step-4': ['clamp(2rem, 1.65rem + 1.7vw, 2.75rem)', { lineHeight: '1.12' }],
+        'step-5': ['clamp(2.75rem, 2.1rem + 3.2vw, 4.25rem)', { lineHeight: '1.04' }],
       },
       borderRadius: { none: '0', DEFAULT: '0', full: '9999px' },
       borderWidth: { hair: '1px', rule: '2px', plate: '3px', stamp: '5px' },
