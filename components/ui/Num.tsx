@@ -19,26 +19,51 @@ export function Num({ children, className }: { children: ReactNode; className?: 
   )
 }
 
-export function Score({
-  home,
-  away,
-  className,
-}: {
-  home: number | null
-  away: number | null
-  className?: string
-}) {
-  if (home === null || away === null) return null
-  return (
-    <bdi dir="ltr" className={`tabular-nums ${className ?? ''}`}>
-      {home}:{away}
-    </bdi>
-  )
+/**
+ * A match line in Hebrew.
+ *
+ * `<bdi dir="ltr">2:1</bdi>` fixes the digits' internal order but NOT the thing that
+ * actually confuses a reader: in an RTL line the home team is written first, on the
+ * right, while an LTR score puts the home number on the LEFT — right next to the away
+ * team. "לוקומוטיב 0:1 הפועל" is read as Lokomotiv winning. The score was never
+ * reversed; its adjacency was.
+ *
+ * So no separator score is ever printed between two names. Each number sits immediately
+ * beside the team it belongs to, where adjacency cannot lie:
+ *
+ *     הפועל תל אביב 2 — לוקומוטיב מוסקבה 1
+ */
+export function matchLine(
+  homeName: string,
+  homeScore: number | null,
+  awayName: string,
+  awayScore: number | null,
+): string {
+  if (homeScore === null || awayScore === null) return `${homeName} — ${awayName}`
+  return `${homeName} ${homeScore} — ${awayName} ${awayScore}`
 }
 
-/** Formats a score for a plain string context (page titles, aria-labels). */
-export function scoreText(home: number | null, away: number | null): string {
-  if (home === null || away === null) return ''
-  // U+2066 LRI … U+2069 PDI — isolates the run wherever the string lands.
-  return `⁦${home}:${away}⁩`
+/** The same line as elements, for a screen. */
+export function MatchLine({
+  homeName,
+  homeScore,
+  awayName,
+  awayScore,
+  className,
+}: {
+  homeName: string
+  homeScore: number | null
+  awayName: string
+  awayScore: number | null
+  className?: string
+}) {
+  return (
+    <span className={`inline-flex flex-wrap items-baseline gap-x-1.5 ${className ?? ''}`}>
+      <span>{homeName}</span>
+      {homeScore !== null && <Num className="font-bold text-red">{homeScore}</Num>}
+      <span aria-hidden="true">—</span>
+      <span>{awayName}</span>
+      {awayScore !== null && <Num className="font-bold text-red">{awayScore}</Num>}
+    </span>
+  )
 }

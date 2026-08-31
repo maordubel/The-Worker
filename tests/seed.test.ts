@@ -1,4 +1,8 @@
+import { readFileSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+
+const MANUAL = join(process.cwd(), 'content/manual')
 
 import { isDerbyFixture } from '@/scripts/ingest/lib/guards'
 import { IngestReport } from '@/scripts/ingest/lib/report'
@@ -189,5 +193,44 @@ describe('kit supply spells', () => {
     const covered = new Set(bundle.kitSupplySpells.map((spell) => spell.fromLabel))
     expect(covered.has('1981/82')).toBe(false)
     expect(covered.has('2003/04')).toBe(false)
+  })
+})
+
+describe('no bare scoreline survives in Hebrew content', () => {
+  it('never writes a score as "0:3" between or beside team names', () => {
+    // A separator score cannot say whose number is whose once it sits in an RTL line
+    // (see components/ui/Num.tsx). Every score in prose is written team-adjacent:
+    // "הפועל תל אביב 3 — בנפיקה 0". A clock time (06:39) is not a score.
+    // The message catalogue is user-facing text too — that is where the wall's Milan
+    // headline was still printing a bare "0:1".
+    const messages = JSON.parse(
+      readFileSync(join(process.cwd(), 'messages/he.json'), 'utf8'),
+    ) as Record<string, string>
+    for (const [key, value] of Object.entries(messages)) {
+      const found = /(?<!\d)(\d):(\d)(?!\d)/.exec(value)
+      if (found && found[1] === found[2]) continue
+      // A clock time is written HH:MM and is not a score.
+      if (/\d\d:\d\d/.test(value)) continue
+      expect(found, `messages/he.json · ${key}: "${value}"`).toBeNull()
+    }
+
+    const files = readdirSync(MANUAL).filter((name) => name.endsWith('.json'))
+    for (const name of files) {
+      const raw = readFileSync(join(MANUAL, name), 'utf8')
+      const parsed = JSON.parse(raw) as { records?: unknown[] }
+      for (const record of parsed.records ?? []) {
+        for (const [field, value] of Object.entries(record as Record<string, unknown>)) {
+          if (typeof value !== 'string') continue
+          // Only prose the player reads. Claims quoted from a conflicting source keep
+          // the wording that source used.
+          if (!/^(titleHe|bodyHe|subtitleHe|noteHe)$/.test(field)) continue
+          // A draw cannot be reversed — 1:1 reads the same from either side — so only
+          // a decisive score is a problem.
+          const bare = /(?<!\d)(\d):(\d)(?!\d)/.exec(value)
+          if (bare && bare[1] === bare[2]) continue
+          expect(bare, `${name} · ${field}: "${bare?.[0]}" in "${value.slice(0, 60)}"`).toBeNull()
+        }
+      }
+    }
   })
 })

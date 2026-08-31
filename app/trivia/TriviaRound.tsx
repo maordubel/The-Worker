@@ -72,19 +72,9 @@ export function TriviaRound({
           kicker={t('screen.trivia.title')}
           serial={`TIK-${String(index + 1).padStart(4, '0')}`}
         >
-          <h2 className="mt-2 font-display text-step-3 leading-tight text-ink">{question.prompt}</h2>
-          {/* A long Latin source title must not push the sheet around in RTL. */}
-          <p
-            className="mt-3 truncate font-mono text-[10px] tabular-nums text-sign"
-            title={question.source.title}
-          >
-            <bdi>
-              {t('trivia.sourceLine', {
-                source: question.source.title,
-                confidence: String(question.source.confidence),
-              })}
-            </bdi>
-          </p>
+          {/* No source line. Provenance gates which facts become questions; it is not
+              furniture on the card. */}
+          <h2 className="mt-2 font-display text-step-2 leading-snug text-ink">{question.prompt}</h2>
         </PastedSheet>
 
         {verdict && (

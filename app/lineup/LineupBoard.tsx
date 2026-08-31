@@ -179,9 +179,6 @@ export function LineupBoard({
               </li>
             ))}
           </ul>
-          <p className="mt-stack font-mono text-[11px] text-sign">
-            <bdi>{verdict.sourceTitle}</bdi>
-          </p>
         </>
       )}
     </>

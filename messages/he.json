@@ -54,9 +54,8 @@
   "state.empty": "הקיר עוד ריק",
   "build.status": "בבנייה. מנוע הנתונים ההיסטורי נבנה עכשיו.",
   "app.tagline": "הקיר הוא המקום. התיק הוא הראיה. המגדל הוא המידה.",
-  "wall.sheet.milan.title": "14.03.2002 · ⁦0:1⁩ על מילאן",
+  "wall.sheet.milan.title": "14.03.2002 · הפועל תל אביב 1 — מילאן 0",
   "wall.sheet.milan.body": "סרגיי קלשצ׳נקו בדקה ה־32, מבישול של יוסי אבוקסיס, באצטדיון GSP בניקוסיה.",
-  "wall.sheet.milan.source": "מקור: UEFA · ודאות 2 · TIK-0418",
   "screen.trivia.title": "טריוויה",
   "screen.trivia.sub": "تريفيا · TRIVIA",
   "screen.summary.title": "סיכום סבב",
@@ -70,10 +69,9 @@
   "trivia.of": "מתוך",
   "trivia.next": "שאלה חדשה",
   "trivia.finish": "סיכום הסבב",
-  "trivia.sourceLine": "מקור: {source} · ודאות {confidence}",
   "summary.good": "הסורג נדלק כמעט כולו",
   "summary.thin": "חלק מהפנסים נשארו כבויים",
-  "summary.note": "כל שאלה בסבב נוצרה מהארכיון, ונושאת את המקור שלה.",
+  "summary.note": "כל שאלה בסבב נוצרה מהארכיון של המועדון.",
   "summary.again": "סבב נוסף",
   "summary.lineup": "לבניית הרכב",
   "memory.pairs": "צמדים",
@@ -157,5 +155,5 @@
   "kitChallenge.next": "עונה נוספת",
   "kitChallenge.allCompetitions": "כל התחרויות",
   "mode.kitChallenge": "אתגר החולצה",
-  "mode.kitChallenge.sub": "تحدي القميص · KIT"
+  "mode.kitChallenge.sub": "تحدي القميص · KIT CHALLENGE"
 }

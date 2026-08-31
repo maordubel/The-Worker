@@ -1,10 +1,12 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { IngestReport } from '@/scripts/ingest/lib/report'
 import { concatBundles, runPipeline } from '@/scripts/ingest/pipeline'
 import { loadManualBundle } from '@/scripts/ingest/sources/manual'
 import { parseRawPages } from '@/scripts/ingest/sources/wiki'
-import { TRIVIA_CONFIDENCE_FLOOR } from '@/scripts/ingest/lib/types'
+import { BUNDLE_KEYS, TRIVIA_CONFIDENCE_FLOOR } from '@/scripts/ingest/lib/types'
 import { BASKETBALL_PLAYER_PAGE, PLAYER_PAGE, SEASON_PAGE, SQUAD_PAGE } from './fixtures/wiki'
 
 const ROOT = process.cwd()
@@ -99,6 +101,20 @@ describe('pipeline', () => {
       '## Sources',
     ]) {
       expect(markdown).toContain(heading)
+    }
+  })
+})
+
+describe('the pipeline collects every entity in the bundle', () => {
+  it('leaves no bundle key uncollected', () => {
+    // A new entity that is staged but never collected vanishes between "discovered"
+    // and "imported" with nothing rejected — the ingest report's two numbers simply
+    // stop matching. This test is why that is now a failure rather than a puzzle.
+    const source = readFileSync(join(ROOT, 'scripts/ingest/pipeline.ts'), 'utf8')
+    for (const key of BUNDLE_KEYS) {
+      // collect( may be broken across lines by the formatter.
+      const called = new RegExp(`collect\\(\\s*'${key}'`).test(source)
+      expect(called, `pipeline never collects ${key}`).toBe(true)
     }
   })
 })

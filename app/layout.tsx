@@ -39,8 +39,15 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: `${t('brand.name')} · ${t('brand.system')}`,
+  // The product is called The Worker. The tab said "הפועל · אוסישקין", which is the
+  // brand system, not the name.
+  title: {
+    default: `The Worker · ${t('brand.name')}`,
+    template: `%s · The Worker`,
+  },
   description: t('app.description'),
+  applicationName: 'The Worker',
+  icons: { icon: '/icon.svg' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

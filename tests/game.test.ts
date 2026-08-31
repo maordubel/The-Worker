@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest'
 
 import { CONFIDENCE_FLOOR, archive } from '@/lib/game/archive'
 import { buildBoard } from '@/lib/game/memory'
-import { ROUND_LENGTH, availableQuestionCount, deal, grade } from '@/lib/game/trivia'
+import {
+  OPTION_COUNT,
+  ROUND_LENGTH,
+  auditRound,
+  availableQuestionCount,
+  deal,
+  grade,
+} from '@/lib/game/trivia'
 import { verifiedKitSeasons } from '@/lib/game/kits'
 import { dealKitChallenge, gradeKitChallenge, kitChallengeCount } from '@/lib/game/kitChallenge'
 import {
@@ -92,16 +99,38 @@ describe('trivia — question quality', () => {
       const question = deal(11, index)
       if (!question) continue
       expect(new Set(question.options).size, question.prompt).toBe(question.options.length)
-      expect(question.options.length).toBeGreaterThanOrEqual(2)
+      expect(question.options.length).toBe(OPTION_COUNT)
     }
   })
 
-  it('attaches a source at or above the floor to every question', () => {
+  it('always offers exactly four distinct choices', () => {
+    // A template that cannot field three real distractors is dropped, never padded:
+    // an invented option is a fact no source supports.
+    for (const seed of [1, 2, 3, 13, 29, 101]) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (!question) continue
+        expect(question.options.length, `${question.id}`).toBe(4)
+        expect(new Set(question.options).size, `${question.id} repeats an option`).toBe(4)
+      }
+    }
+  })
+
+  it('keeps the source off the client payload but on the record', () => {
+    // Maor asked for source and confidence lines to come off the screen. The gate they
+    // enforce is untouched — it just lives server-side now.
     for (let index = 0; index < ROUND_LENGTH; index += 1) {
       const question = deal(13, index)
       if (!question) continue
-      expect(question.source.title.length).toBeGreaterThan(0)
-      expect(question.source.confidence).toBeGreaterThanOrEqual(CONFIDENCE_FLOOR)
+      expect(Object.keys(question)).not.toContain('source')
+      expect(JSON.stringify(question)).not.toContain('ודאות')
+    }
+
+    const audit = auditRound(13)
+    expect(audit.length).toBeGreaterThan(0)
+    for (const row of audit) {
+      expect(row.source.title.length, `${row.id}`).toBeGreaterThan(0)
+      expect(row.source.confidence, `${row.id}`).toBeGreaterThanOrEqual(CONFIDENCE_FLOOR)
     }
   })
 
@@ -143,6 +172,29 @@ describe('trivia — question quality', () => {
 })
 
 describe('memory', () => {
+  it('gives every card a category, so a pair is findable', () => {
+    // Both faces of a pair are different values. Without the category on the card the
+    // player cannot tell which four cards could possibly belong together, and turning
+    // all twelve teaches them nothing — which is why no pair was ever formed.
+    const board = buildBoard(7)
+    for (const card of board) {
+      expect(card.kind.length, card.face).toBeGreaterThan(0)
+    }
+    const byPair = new Map<string, string[]>()
+    for (const card of board) byPair.set(card.pair, [...(byPair.get(card.pair) ?? []), card.kind])
+    for (const [pair, kinds] of byPair) {
+      expect(kinds.length, pair).toBe(2)
+      expect(new Set(kinds).size, `${pair} shows two different categories`).toBe(1)
+    }
+  })
+
+  it('never puts the same face on two cards', () => {
+    for (const seed of [1, 7, 19, 42]) {
+      const faces = buildBoard(seed).map((card) => card.face)
+      expect(new Set(faces).size, `seed ${seed}`).toBe(faces.length)
+    }
+  })
+
   it('deals two cards for every pair', () => {
     const cards = buildBoard(7)
     const counts = new Map<string, number>()

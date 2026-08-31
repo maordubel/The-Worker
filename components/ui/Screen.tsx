@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { BuiltByDubel } from '@/components/ui/BuiltByDubel'
+import { Floodlights } from '@/components/ui/Floodlights'
 import { Num } from '@/components/ui/Num'
 import { SignPlate } from '@/components/ui/SignPlate'
 import { TabBar } from '@/components/ui/TabBar'
@@ -34,7 +35,10 @@ export function Screen({
           night ? 'bg-ink' : ''
         }`}
       >
-        <main id="main" className="flex-1 px-gutter pb-stack pt-5 md:pt-10">
+        <main id="main" className="relative flex-1 px-gutter pb-stack pt-5 md:pt-10">
+          {/* The lights come on over a night screen. On a paper screen the sun is
+              already up and there is nothing to switch on. */}
+          {night && <Floodlights />}
           <SignPlate title={title} sub={sub} />
           {children}
         </main>

@@ -31,7 +31,10 @@ export function AnswerRow({
         {picked ? '✗' : ''}
       </span>
       <span className="w-4 font-body text-[11px] text-muted">{letter}</span>
-      <span className="font-mono text-step-1 font-bold tabular-nums text-ink">{text}</span>
+      {/* Answers are Hebrew prose, not figures. They were set in the mono face at
+          step-1 — a typewriter face at heading size, which is why they read badly and
+          overflowed on a phone. Body face, one step down, normal weight. */}
+      <span className="font-body text-step-0 leading-snug text-ink">{text}</span>
     </button>
   )
 }

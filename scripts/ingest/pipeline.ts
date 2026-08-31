@@ -79,6 +79,8 @@ export function runPipeline(input: StagedBundle, report: IngestReport): Pipeline
   collect('associations', (record) => record.slug)
   collect('associationEvents', (record) => record.naturalKey)
   collect('associationRoles', (record) => record.naturalKey)
+  collect('elections', (record) => record.slug)
+  collect('electionCandidates', (record) => record.naturalKey)
   collect('membershipMilestones', (record) => record.naturalKey)
   collect('factConflicts', (record) => record.naturalKey)
 

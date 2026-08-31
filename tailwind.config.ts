@@ -56,6 +56,10 @@ const config: Config = {
         'lamp-on': 'lamp-on 90ms linear both',
         'paste-in': 'paste-in 320ms var(--ease-stamp) both',
         crawl: 'crawl 22s linear infinite',
+        /* the floodlights coming on: strike, stutter, hold */
+        strike: 'strike 900ms steps(1, end) both',
+        wash: 'wash 1200ms var(--ease-stamp) both',
+        'glow-up': 'glow-up 1200ms ease-out both',
       },
     },
   },

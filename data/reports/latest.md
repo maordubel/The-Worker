@@ -1,20 +1,20 @@
 # Ingestion report — all (dry-run)
 
-Started 2026-08-31T15:51:23.957Z · status **OK**
+Started 2026-08-31T16:32:54.152Z · status **OK**
 
 ## Totals
 
 | Metric | Count |
 |---|---:|
-| discovered | 295 |
-| imported | 295 |
+| discovered | 322 |
+| imported | 322 |
 | skipped | 0 |
 | rejected | 0 |
 | unresolved | 0 |
 | conflicts | 0 |
 | lowConfidence | 134 |
 | duplicatesMerged | 0 |
-| sources | 24 |
+| sources | 26 |
 
 ## Discovered
 
@@ -41,8 +41,10 @@ Started 2026-08-31T15:51:23.957Z · status **OK**
 | manual:associations | 1 |
 | manual:associationEvents | 6 |
 | manual:associationRoles | 8 |
+| manual:elections | 2 |
+| manual:electionCandidates | 21 |
 | manual:membershipMilestones | 1 |
-| manual:factConflicts | 11 |
+| manual:factConflicts | 15 |
 | manual:seasons | 104 |
 
 ## Imported by entity
@@ -71,8 +73,10 @@ Started 2026-08-31T15:51:23.957Z · status **OK**
 | associations | 1 |
 | associationEvents | 6 |
 | associationRoles | 8 |
+| elections | 2 |
+| electionCandidates | 21 |
 | membershipMilestones | 1 |
-| factConflicts | 11 |
+| factConflicts | 15 |
 
 ## Coverage
 
@@ -269,6 +273,8 @@ _none_
 | manual:associations.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:association-events.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:association-roles.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
+| manual:elections.json | official | אתר עמותת הפועל אוסישקין — מצעי המועמדים ותוצאות הבחירות | http://www.hapoeluta.com/ | — | — |
+| manual:election-candidates.json | official | אתר עמותת הפועל אוסישקין — מצעי המועמדים ותוצאות הבחירות | http://www.hapoeluta.com/ | — | — |
 | manual:membership-milestones.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:fact-conflicts.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:seasons.json | manual | Season calendar scaffold | — | — | — |
@@ -296,8 +302,10 @@ _none_
 - associations.json: The supporter-owned association behind the basketball club.
 - association-events.json: The fan-ownership story as documented. Dates are marked confirmed only where a source gives the day. The research document's 25 June 2007 registration date, the fifth game of 14 November 2007, the 2008 election vote counts, the separate 413/10/18 association vote and the 2015 founders' ceremony could NOT be sourced and are absent.
 - association-roles.json: Roles as contemporary reporting records them. The ordering of the 2008 election results and the audit-committee names could not be sourced and are absent.
+- elections.json: The first Hapoel Ussishkin association elections, from the association's own website as Maor supplied it: the double-envelope method, the full candidate list with the occupation each candidate declared, and the vote count for every candidate in both bodies. Two things in the source disagree with themselves and are recorded as conflicts rather than tidied: the envelope dates (July 2007 vs August 2008 in one sentence) and two names spelled differently in the candidate list and in the results. Turnout figures are given in the source as approximations and are stored as stated.
+- election-candidates.json: Every candidate in both bodies, with the vote count the association published and the occupation each candidate declared in their own manifesto. Names are stored exactly as the candidate list gives them; where the results table spells a name differently, the difference is a recorded conflict, not a silent correction.
 - membership-milestones.json: Arik Einstein as member #1,000 is attested by a founder in a Sport5 interview. The research document's January 2010 date is NOT sourced — and Walla reported Einstein joining in August 2007 — so the date is left unconfirmed rather than picked.
-- fact-conflicts.json: Sources disagree. Recorded and displayed, never resolved by quietly picking one. The last five come from the kit-engine spec, which contradicts the verified kit archive — the spec drives the ENGINE, not the facts.
+- fact-conflicts.json: Sources disagree. Recorded and displayed, never resolved by quietly picking one. The last five come from the kit-engine spec, which contradicts the verified kit archive — the spec drives the ENGINE, not the facts. Four further conflicts come from the association's own election page — two of them are the source disagreeing with itself.
 - seasons.json: Calendar scaffold. A season label is arithmetic, not a claim that the club competed that season. A source that names a bare year (pre-state cups) is rendered YYYY/YY by the canonicaliser — a labelling convention, documented, not a claim about the calendar.
 - seasons: generated 104 calendar labels 1923/24–2026/27. A label is a calendar scaffold, not a claim that the club competed that season.
 - no raw wiki pages on disk — run with --fetch first

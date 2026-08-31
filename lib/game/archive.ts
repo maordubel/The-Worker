@@ -1,8 +1,11 @@
 import 'server-only'
 
 import clubsFile from '@/content/manual/clubs.json'
+import conflictsFile from '@/content/manual/fact-conflicts.json'
 import competitionsFile from '@/content/manual/competitions.json'
 import crestsFile from '@/content/manual/crest-versions.json'
+import candidatesFile from '@/content/manual/election-candidates.json'
+import electionsFile from '@/content/manual/elections.json'
 import eventsFile from '@/content/manual/match-events.json'
 import kitSupplyFile from '@/content/manual/kit-supply.json'
 import manufacturersFile from '@/content/manual/manufacturers.json'
@@ -134,6 +137,36 @@ export const archive = {
     toDate?: string | null
     replacedByNameHe?: string | null
   }>(rolesFile),
+  elections: load<{
+    slug: string
+    titleHe: string
+    bodyHe: string
+    eligibleVoters: number | null
+    votesCast: number | null
+    invalidVotes: number | null
+    seats: number | null
+    figuresApproximate?: boolean
+    noteHe?: string | null
+  }>(electionsFile),
+  /** Recorded disagreements. A contested fact never becomes a question. */
+  factConflicts: load<{
+    entityTable: string
+    entityKey: string | null
+    field: string
+    claimA: string
+    claimB: string
+    resolution?: string | null
+  }>(conflictsFile),
+  electionCandidates: load<{
+    electionSlug: string
+    personNameHe: string
+    personSlug: string
+    votes: number | null
+    elected: boolean
+    rank: number | null
+    occupationHe?: string | null
+    priorRoleHe?: string | null
+  }>(candidatesFile),
 }
 
 /* ------------------------------------------------------------------ lookups */
@@ -159,7 +192,12 @@ export const nameOf = {
  * football and basketball never mix, and the Ussishkin founders never appear as
  * distractors in football questions (CLAUDE.md rules 14 and 16).
  */
-const ussishkinNames = new Set(archive.associationRoles.map((role) => role.personNameHe))
+const ussishkinNames = new Set([
+  ...archive.associationRoles.map((role) => role.personNameHe),
+  // Everyone who stood in the association elections is an Ussishkin name too. Rule 14
+  // is about the sport, not about how the person got into the archive.
+  ...archive.electionCandidates.map((candidate) => candidate.personNameHe),
+])
 
 export const footballPeople = archive.people.filter(
   (person) => !ussishkinNames.has(person.fullNameHe),

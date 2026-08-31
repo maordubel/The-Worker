@@ -94,6 +94,29 @@ select {
   from { transform: translateY(24px) rotate(0deg); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
 }
+/* התאורה נדלקת — the floodlights coming on.
+   A real tower does not fade up smoothly: the lamps strike, stutter, and then hold.
+   Three beats of flicker before the steady burn, and a wash of light that spreads from
+   the tower across the ground below it. */
+@keyframes strike {
+  0%   { opacity: 0.08; }
+  18%  { opacity: 0.85; }
+  26%  { opacity: 0.12; }
+  40%  { opacity: 0.95; }
+  48%  { opacity: 0.25; }
+  70%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+@keyframes wash {
+  0%   { opacity: 0; transform: scaleY(0.35); }
+  55%  { opacity: 0.5; }
+  100% { opacity: 0.32; transform: scaleY(1); }
+}
+@keyframes glow-up {
+  0%   { box-shadow: 0 0 0 rgba(247, 245, 240, 0); }
+  60%  { box-shadow: 0 0 16px rgba(247, 245, 240, 0.18); }
+  100% { box-shadow: 0 0 42px rgba(247, 245, 240, 0.35); }
+}
 @keyframes crawl {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }

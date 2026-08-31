@@ -30,7 +30,7 @@ export function MemoryBoard({ cards }: { cards: MemoryCard[] }) {
       setOpen([])
       return
     }
-    window.setTimeout(() => setOpen([]), 700)
+    window.setTimeout(() => setOpen([]), 1100)
   }
 
   return (
@@ -59,9 +59,19 @@ export function MemoryBoard({ cards }: { cards: MemoryCard[] }) {
                         : 'border-sheet/45 bg-sheet/[.12] text-sheet/0'
                   }`}
                 >
-                  <span className="font-sign text-[12px] leading-tight">
-                    {isOpen ? card.face : '·'}
-                  </span>
+                  {isOpen ? (
+                    <span className="flex flex-col items-center gap-0.5 leading-tight">
+                      <span className="font-sign text-[12px]">{card.face}</span>
+                      {/* The category is what makes this a memory game rather than a
+                          guessing game: it tells the player which four cards can
+                          possibly go together. */}
+                      <span className="font-body text-[8px] tracking-wide opacity-70">
+                        {card.kind}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="font-sign text-[12px] leading-tight">·</span>
+                  )}
                 </button>
               )
             })}

@@ -4,6 +4,8 @@ import { BannerCloth } from '@/components/ui/BannerCloth'
 import { LampGrid, Mast } from '@/components/ui/LampGrid'
 import { Num } from '@/components/ui/Num'
 import { PastedSheet } from '@/components/ui/PastedSheet'
+import { Floodlights } from '@/components/ui/Floodlights'
+import { Logo } from '@/components/ui/Logo'
 import { Screen } from '@/components/ui/Screen'
 import { Stamp } from '@/components/ui/Stamp'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -29,6 +31,21 @@ export default function WallPage() {
       <div className="pointer-events-none -mt-14 flex justify-end pe-1">
         <Stamp size={56} />
       </div>
+
+      {/* The masthead: a strip of night with the tower striking on above the name.
+          This is where the product says what it is called. */}
+      <section
+        aria-label="The Worker"
+        className="relative mt-stack overflow-hidden border-rule border-ink bg-ink"
+      >
+        <Floodlights height={116} />
+        <div className="relative flex items-end justify-between gap-3 px-4 pb-4 pt-[86px]">
+          <Logo night animate size={44} />
+          <p className="max-w-[46%] text-end font-body text-[11px] leading-relaxed text-concrete">
+            {t('brand.tagline')}
+          </p>
+        </div>
+      </section>
 
       <p className="mt-stack max-w-prose font-body text-step-0 text-muted">{t('build.status')}</p>
 
@@ -114,9 +131,6 @@ export default function WallPage() {
             {t('wall.sheet.milan.title')}
           </h2>
           <p className="mt-2 font-body text-step-0 text-muted">{t('wall.sheet.milan.body')}</p>
-          <p className="mt-3 font-mono text-[11px] text-sign">
-            <bdi>{t('wall.sheet.milan.source')}</bdi>
-          </p>
         </PastedSheet>
       </section>
 

@@ -283,6 +283,39 @@ export type StagedAssociationEvent = Fact & {
   turnout: number | null
 }
 
+export type StagedElection = Fact & {
+  slug: string
+  associationSlug: string
+  titleHe: string
+  /** which body was being elected — הנהלה · ועדת ביקורת */
+  bodyHe: string
+  heldOn: string | null
+  dateConfirmed: boolean
+  methodHe: string | null
+  eligibleVoters: number | null
+  votesCast: number | null
+  invalidVotes: number | null
+  /** null when the source does not state how many seats were filled */
+  seats: number | null
+  /** true when the source itself qualifies its figures with "approximately" */
+  figuresApproximate: boolean
+  noteHe: string | null
+}
+
+export type StagedElectionCandidate = Fact & {
+  naturalKey: string
+  electionSlug: string
+  personSlug: string
+  personNameHe: string
+  votes: number | null
+  elected: boolean
+  /** position in the published results table, 1 = most votes */
+  rank: number | null
+  /** the occupation the candidate declared in their own manifesto */
+  occupationHe: string | null
+  priorRoleHe: string | null
+}
+
 export type StagedAssociationRole = Fact & {
   naturalKey: string
   associationSlug: string
@@ -351,6 +384,8 @@ export type StagedBundle = {
   associations: StagedAssociation[]
   associationEvents: StagedAssociationEvent[]
   associationRoles: StagedAssociationRole[]
+  elections: StagedElection[]
+  electionCandidates: StagedElectionCandidate[]
   membershipMilestones: StagedMembershipMilestone[]
   factConflicts: StagedFactConflict[]
 }
@@ -378,6 +413,8 @@ export const BUNDLE_KEYS = [
   'associations',
   'associationEvents',
   'associationRoles',
+  'elections',
+  'electionCandidates',
   'membershipMilestones',
   'factConflicts',
 ] as const satisfies ReadonlyArray<keyof StagedBundle>
@@ -408,6 +445,8 @@ export function emptyBundle(): StagedBundle {
     associations: [],
     associationEvents: [],
     associationRoles: [],
+    elections: [],
+    electionCandidates: [],
     membershipMilestones: [],
     factConflicts: [],
   }

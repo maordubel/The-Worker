@@ -450,6 +450,54 @@ async function loadGraph(
       })
       .filter(nonNull))
 
+  counts.election = await upsert(db, 'election', 'slug',
+    bundle.elections
+      .map((row) => {
+        const associationId = resolveAssociation(row.associationSlug)
+        if (!associationId) return null
+        return {
+          slug: row.slug,
+          association_id: associationId,
+          title_he: row.titleHe,
+          body_he: row.bodyHe,
+          held_on: row.heldOn,
+          date_confirmed: row.dateConfirmed,
+          method_he: row.methodHe,
+          eligible_voters: row.eligibleVoters,
+          votes_cast: row.votesCast,
+          invalid_votes: row.invalidVotes,
+          seats: row.seats,
+          figures_approximate: row.figuresApproximate,
+          note_he: row.noteHe,
+          source_id: sourceIdFor(row.source.naturalKey),
+          confidence: row.confidence,
+        }
+      })
+      .filter(nonNull))
+
+  const electionIds = await idMap(db, 'election', 'slug')
+
+  counts.election_candidate = await upsert(db, 'election_candidate', 'natural_key',
+    bundle.electionCandidates
+      .map((row) => {
+        const electionId = electionIds.get(row.electionSlug)
+        if (!electionId) return null
+        return {
+          natural_key: row.naturalKey,
+          election_id: electionId,
+          person_slug: row.personSlug,
+          person_name_he: row.personNameHe,
+          votes: row.votes,
+          elected: row.elected,
+          rank: row.rank,
+          occupation_he: row.occupationHe,
+          prior_role_he: row.priorRoleHe,
+          source_id: sourceIdFor(row.source.naturalKey),
+          confidence: row.confidence,
+        }
+      })
+      .filter(nonNull))
+
   counts.membership_milestone = await upsert(db, 'membership_milestone', 'natural_key',
     bundle.membershipMilestones
       .map((row) => {

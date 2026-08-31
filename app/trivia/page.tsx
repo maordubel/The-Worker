@@ -20,7 +20,13 @@ export default function TriviaPage({
     <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')}>
       {question ? (
         <>
+          {/* The key is the fix for "from question 2 you cannot answer".
+              router.push to ?i=2 keeps the same element in the same slot, so React
+              REUSES the component and its state: the previous question's verdict is
+              still set, choose() early-returns, and every row is inert while looking
+              fresh. Keying on the question index forces a remount. */}
           <TriviaRound
+            key={`${seed}:${index}`}
             question={question}
             seed={seed}
             index={index}

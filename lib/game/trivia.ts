@@ -1,8 +1,11 @@
 import 'server-only'
 
-import { scoreText } from '@/components/ui/Num'
+import { matchLine } from '@/components/ui/Num'
+
+import { currentSeasonStartYear, seasonsInSpell, spellCoversSeason } from './seasons'
 
 import {
+  US,
   archive,
   footballPeople,
   nameOf,
@@ -25,24 +28,33 @@ import {
  * answer from the same seed on the server.
  */
 
+/**
+ * What the client receives. Deliberately WITHOUT the source: provenance governs which
+ * facts may become questions, and it lives in the archive, the ingest report and the
+ * data-quality views — it is not furniture on a game screen. Maor asked for the source
+ * and confidence lines to come off the UI; the gate they enforce is untouched.
+ */
 export type TriviaQuestion = {
   id: string
   template: string
   prompt: string
+  /** exactly four, always — see OPTION_COUNT */
   options: string[]
-  source: { title: string; url: string | null; confidence: number }
   /** the archive row this came from, for the explanation after grading */
   explanation: string
 }
 
-type Built = TriviaQuestion & { correct: string }
+type SourceRef = { title: string; url: string | null; confidence: number }
+
+type Built = TriviaQuestion & { correct: string; source: SourceRef }
 
 type Template = {
   slug: string
   /**
    * Templates in a capped group contribute at most ONE question per round between
-   * them. The Ussishkin family is capped: the founder is an answer only where a source
-   * names him, once, and the story does not need more room than that.
+   * them. The capped group is `founder`: rule 16 allows the founder to be the ANSWER
+   * only where a source names him, once per round, and never a distractor. Questions
+   * about the association that he is not the answer to are ordinary questions.
    */
   cappedGroup?: string
   build: (random: () => number) => Built[]
@@ -62,6 +74,11 @@ function withDistractors(correct: string, pool: readonly string[], random: () =>
   return shuffle([correct, ...others], random)
 }
 
+/** "ב" + "הבחירות" is one ה too many. Drop the article when a preposition supplies it. */
+function stripThe(title: string): string {
+  return title.startsWith('ה') ? title.slice(1) : title
+}
+
 function sourceOf(row: Sourced) {
   return { title: row.sourceTitle, url: row.sourceUrl, confidence: row.confidence }
 }
@@ -76,10 +93,18 @@ const SEASON_POOL = () => archive.trophies.map((row) => row.seasonLabel)
 const FOUNDER =
   archive.associationRoles.find((role) => role.roleHe === 'מייסד')?.personNameHe ?? null
 
+/**
+ * Everyone the association's own records name — role holders and every election
+ * candidate, winners and losers alike. The founder is filtered out of every pool:
+ * he is an answer where a source names him, never a decoy (rule 16).
+ */
 const ASSOCIATION_NAMES = () =>
-  [...new Set(archive.associationRoles.map((role) => role.personNameHe))].filter(
-    (name) => name !== FOUNDER,
-  )
+  [
+    ...new Set([
+      ...archive.associationRoles.map((role) => role.personNameHe),
+      ...archive.electionCandidates.map((candidate) => candidate.personNameHe),
+    ]),
+  ].filter((name) => name !== FOUNDER)
 
 const TEMPLATES: Template[] = [
   {
@@ -118,63 +143,166 @@ const TEMPLATES: Template[] = [
         .filter((question): question is Built => question !== null),
   },
   {
+    // Only a competition the club won ONCE can be asked this way. Sixteen State Cups
+    // means sixteen right answers, and the ambiguity guard drops the lot — this filter
+    // says so out loud instead of relying on it.
     slug: 'trophy-season',
-    build: (random) =>
-      archive.trophies
-        .filter((row) => row.result === 'won')
+    build: (random) => {
+      const won = archive.trophies.filter((row) => row.result === 'won')
+      const timesWon = new Map<string, number>()
+      for (const row of won) {
+        timesWon.set(row.competitionSlug, (timesWon.get(row.competitionSlug) ?? 0) + 1)
+      }
+      return won
+        .filter((row) => timesWon.get(row.competitionSlug) === 1)
         .map((row) => ({
           id: `trophy:${row.competitionSlug}:${row.seasonLabel}`,
           template: 'trophy-season',
-          prompt: `באיזו עונה זכתה הפועל תל אביב ב${nameOf.competition(row.competitionSlug)}?`,
+          prompt: `הפועל תל אביב זכתה ב${nameOf.competition(row.competitionSlug)} פעם אחת בלבד. באיזו עונה?`,
           options: withDistractors(row.seasonLabel, SEASON_POOL(), random),
           correct: row.seasonLabel,
           source: sourceOf(row),
           explanation: `${nameOf.competition(row.competitionSlug)} · ${row.seasonLabel}`,
-        })),
+        }))
+    },
   },
   {
+    // The double seasons, from the other direction: the season is given, the second
+    // trophy is the question. One answer, and it teaches the pairing.
+    slug: 'double',
+    build: (random) => {
+      const won = archive.trophies.filter((row) => row.result === 'won')
+      const bySeason = new Map<string, typeof won>()
+      for (const row of won) {
+        bySeason.set(row.seasonLabel, [...(bySeason.get(row.seasonLabel) ?? []), row])
+      }
+      const out: Built[] = []
+      for (const [season, rows] of bySeason) {
+        if (rows.length !== 2) continue
+        const league = rows.find((row) => row.competitionSlug === 'ליגת-העל')
+        const other = rows.find((row) => row.competitionSlug !== 'ליגת-העל')
+        if (!league || !other) continue
+        const correct = nameOf.competition(other.competitionSlug)
+        out.push({
+          id: `double:${season}`,
+          template: 'double',
+          prompt: `בעונת ${season} עשתה הפועל תל אביב דאבל. באיזה תואר זכתה מלבד האליפות?`,
+          options: withDistractors(
+            correct,
+            archive.competitions.filter((row) => row.sport !== 'basketball').map((row) => row.nameHe),
+            random,
+          ),
+          correct,
+          source: sourceOf(other),
+          explanation: `${season} · אליפות ו${correct}`,
+        })
+      }
+      return out
+    },
+  },
+  {
+    // How many, for competitions whose count is not itself disputed. The championship
+    // count is (13 · 12 · 14 depending on the counter) and is therefore never asked.
+    slug: 'trophy-count',
+    build: (random) => {
+      const won = archive.trophies.filter((row) => row.result === 'won')
+      const timesWon = new Map<string, number>()
+      for (const row of won) {
+        timesWon.set(row.competitionSlug, (timesWon.get(row.competitionSlug) ?? 0) + 1)
+      }
+      // The league title count is the one the sources fight over (13 · 12 · 14). The
+      // conflict is recorded, so the question is not asked — for that competition only.
+      const CONTESTED_COUNT: Record<string, string> = { 'ליגת-העל': 'championship_count' }
+
+      const out: Built[] = []
+      for (const [slug, count] of timesWon) {
+        if (count < 5) continue
+        const conflictField = CONTESTED_COUNT[slug]
+        if (conflictField !== undefined && isContested('club', conflictField)) continue
+        const row = won.find((trophy) => trophy.competitionSlug === slug)
+        if (!row) continue
+        const correct = String(count)
+        out.push({
+          id: `trophy-count:${slug}`,
+          template: 'trophy-count',
+          prompt: `בכמה פעמים זכתה הפועל תל אביב ב${nameOf.competition(slug)}?`,
+          options: withDistractors(
+            correct,
+            [count - 2, count - 1, count + 1, count + 2, count + 4].map(String),
+            random,
+          ),
+          correct,
+          source: sourceOf(row),
+          explanation: `${nameOf.competition(slug)} · ${count}`,
+        })
+      }
+      return out
+    },
+  },
+  {
+    // Every season a spell covers, not only the one it starts in — a supply spell is a
+    // range, and the seasons inside it are exactly as verified as its first.
     slug: 'kit-maker',
-    build: (random) =>
-      archive.kitSupply
-        .filter((row) => row.fromLabel !== null)
-        .map((row) => {
-          const correct = nameOf.manufacturer(row.manufacturerSlug)
-          return {
-            id: `kit:${row.manufacturerSlug}:${row.fromLabel}`,
+    build: (random) => {
+      const openThrough = currentSeasonStartYear()
+      const out: Built[] = []
+      for (const spell of archive.kitSupply) {
+        const correct = nameOf.manufacturer(spell.manufacturerSlug)
+        for (const season of seasonsInSpell(spell, openThrough)) {
+          out.push({
+            id: `kit:${spell.manufacturerSlug}:${season}`,
             template: 'kit-maker',
-            prompt: `מי סיפק את המדים של הפועל תל אביב בעונת ${row.fromLabel}?`,
+            prompt: `איזה יצרן חתום על מדי הפועל תל אביב בעונת ${season}?`,
             options: withDistractors(
               correct,
               archive.manufacturers.map((maker) => maker.nameHe),
               random,
             ),
             correct,
-            source: sourceOf(row),
-            explanation: `${correct} · ${row.fromLabel}${row.toLabel ? `–${row.toLabel}` : ''}`,
-          }
-        }),
+            source: sourceOf(spell),
+            explanation: `${correct} · ${spell.fromLabel}${spell.toLabel ? `–${spell.toLabel}` : ' ואילך'}`,
+          })
+        }
+      }
+      return out
+    },
   },
   {
+    // Competition-scoped, because 2010/11 carried Keter in the Champions League and
+    // Bonei HaTichon in the league. A season with two unscoped sponsors — 2019/20, where
+    // Arkia ended early and Hachshara came in mid-season — produces two questions with
+    // the same prompt and different answers, and the ambiguity guard removes both.
     slug: 'sponsor',
-    build: (random) =>
-      archive.sponsorDeals
-        .filter((row) => row.fromLabel !== null)
-        .map((row) => {
-          const correct = nameOf.sponsor(row.sponsorSlug)
-          return {
-            id: `sponsor:${row.sponsorSlug}:${row.fromLabel}`,
+    build: (random) => {
+      const openThrough = currentSeasonStartYear()
+      const seasons = new Set(
+        archive.kitSupply.flatMap((spell) => seasonsInSpell(spell, openThrough)),
+      )
+      const out: Built[] = []
+      for (const deal of archive.sponsorDeals) {
+        const correct = nameOf.sponsor(deal.sponsorSlug)
+        const where = deal.competitionSlug
+          ? `ב${nameOf.competition(deal.competitionSlug)} `
+          : ''
+        for (const season of seasons) {
+          if (!spellCoversSeason(deal, season)) continue
+          out.push({
+            id: `sponsor:${deal.sponsorSlug}:${season}:${deal.competitionSlug ?? 'all'}`,
             template: 'sponsor',
-            prompt: `מי היה נותן החסות על החולצה בעונת ${row.fromLabel}?`,
+            prompt: `איזו חברה התנוססה על חזה החולצה ${where}בעונת ${season}?`,
             options: withDistractors(
               correct,
               archive.sponsors.map((sponsor) => sponsor.nameHe),
               random,
             ),
             correct,
-            source: sourceOf(row),
-            explanation: `${correct} · ${row.fromLabel}${row.toLabel ? `–${row.toLabel}` : ''}`,
-          }
-        }),
+            source: sourceOf(deal),
+            explanation: deal.noteHe ?? `${correct} · ${season}`,
+          })
+        }
+      }
+      return out
+    },
   },
   {
     slug: 'score',
@@ -182,19 +310,21 @@ const TEMPLATES: Template[] = [
       archive.matches
         .filter((row) => row.homeScore !== null && row.awayScore !== null)
         .map((row) => {
-          // Scores are isolated LTR: a bare "2:1" in RTL renders reversed.
-          const correct = scoreText(row.homeScore, row.awayScore)
-          const pool = archive.matches
-            .filter((other) => other.homeScore !== null)
-            .map((other) => scoreText(other.homeScore, other.awayScore))
+          // NOT "what was the score" — a bare "2:1" between two Hebrew names cannot say
+          // whose two it is (see matchLine). Asking for one side's goals is unambiguous
+          // in any direction, and it is the same fact.
+          const us = row.homeClubSlug === US ? 'home' : 'away'
+          const ours = us === 'home' ? row.homeScore : row.awayScore
+          const correct = String(ours)
+          const homeAway = us === 'home' ? 'בבית' : 'בחוץ'
           return {
             id: `score:${row.seasonLabel}:${row.homeClubSlug}:${row.awayClubSlug}`,
             template: 'score',
-            prompt: `מה הייתה התוצאה ב${nameOf.club(row.homeClubSlug)} מול ${nameOf.club(row.awayClubSlug)}, ${row.stage ?? row.seasonLabel}?`,
-            options: withDistractors(correct, pool, random),
+            prompt: `כמה שערים הבקיעה הפועל תל אביב ${homeAway} מול ${nameOf.club(opponentOf(row))}, ${row.stage ?? row.seasonLabel}?`,
+            options: withDistractors(correct, ['0', '1', '2', '3', '4', '5'], random),
             correct,
             source: sourceOf(row),
-            explanation: `${row.playedOn ?? row.seasonLabel} · ${nameOf.competition(row.competitionSlug)}`,
+            explanation: `${matchLine(nameOf.club(row.homeClubSlug), row.homeScore, nameOf.club(row.awayClubSlug), row.awayScore)} · ${nameOf.competition(row.competitionSlug)} · ${row.playedOn ?? row.seasonLabel}`,
           }
         }),
   },
@@ -249,7 +379,7 @@ const TEMPLATES: Template[] = [
           return {
             id: `moment:${row.slug}`,
             template: 'moment-year',
-            prompt: `באיזו שנה — ${row.titleHe}?`,
+            prompt: `באיזו שנה קרה זה — ${row.titleHe}?`,
             options: withDistractors(
               correct,
               archive.moments
@@ -283,7 +413,7 @@ const TEMPLATES: Template[] = [
             ),
             correct,
             source: sourceOf(row),
-            explanation: `${row.playedOn ?? row.seasonLabel} · ${scoreText(row.homeScore, row.awayScore)}`,
+            explanation: `${matchLine(nameOf.club(row.homeClubSlug), row.homeScore, nameOf.club(row.awayClubSlug), row.awayScore)} · ${row.playedOn ?? row.seasonLabel}`,
           }
         }),
   },
@@ -309,9 +439,118 @@ const TEMPLATES: Template[] = [
           }
         }),
   },
+  /* ------------------------------------------------- the association elections
+   *
+   * The first Hapoel Ussishkin elections, from the association's own site: every
+   * candidate, the occupation each one declared in their own manifesto, and the vote
+   * count for all twenty-one of them. Losers included — "who came second" only exists
+   * as a question because the archive keeps the people who did not win.
+   *
+   * These are NOT in the founder's capped group. Rule 16 caps questions whose ANSWER is
+   * Maor Harel; a question about who chaired the audit committee is an ordinary
+   * Ussishkin question, and the story has earned the room.
+   */
   {
+    slug: 'election-top',
+    build: (random) =>
+      archive.elections.flatMap((election) => {
+        const candidates = archive.electionCandidates.filter(
+          (row) => row.electionSlug === election.slug,
+        )
+        const top = candidates.find((row) => row.rank === 1)
+        if (!top || top.personNameHe === FOUNDER) return []
+        return [
+          {
+            id: `election-top:${election.slug}`,
+            template: 'election-top',
+            prompt: `מי קיבל את מספר הקולות הגדול ביותר ב${stripThe(election.titleHe)} של הפועל אוסישקין?`,
+            options: withDistractors(
+              top.personNameHe,
+              candidates.map((row) => row.personNameHe).filter((name) => name !== FOUNDER),
+              random,
+            ),
+            correct: top.personNameHe,
+            source: sourceOf(top),
+            explanation: `${top.personNameHe} · ${top.votes} קולות`,
+          },
+        ]
+      }),
+  },
+  {
+    slug: 'election-votes',
+    build: (random) =>
+      archive.electionCandidates
+        .filter((row) => row.votes !== null && row.personNameHe !== FOUNDER)
+        .map((row) => {
+          const election = archive.elections.find((item) => item.slug === row.electionSlug)
+          const correct = String(row.votes)
+          return {
+            id: `election-votes:${row.electionSlug}:${row.personNameHe}`,
+            template: 'election-votes',
+            prompt: `כמה קולות קיבל ${row.personNameHe} ב${stripThe(election?.titleHe ?? 'בחירות העמותה')}?`,
+            options: withDistractors(
+              correct,
+              archive.electionCandidates
+                .filter((other) => other.electionSlug === row.electionSlug)
+                .map((other) => String(other.votes)),
+              random,
+            ),
+            correct,
+            source: sourceOf(row),
+            explanation: `${row.personNameHe} · מקום ${row.rank} · ${row.votes} קולות`,
+          }
+        }),
+  },
+  {
+    // The best question in the set: the manifesto in the candidate's own words, and the
+    // player has to know who wrote it.
+    slug: 'election-manifesto',
+    build: (random) =>
+      archive.electionCandidates
+        .filter((row) => row.occupationHe !== null && row.personNameHe !== FOUNDER)
+        .map((row) => ({
+          id: `election-manifesto:${row.electionSlug}:${row.personNameHe}`,
+          template: 'election-manifesto',
+          prompt: `מי הציג את עצמו במצע לבחירות הראשונות של הפועל אוסישקין כך: "${row.occupationHe}"?`,
+          options: withDistractors(
+            row.personNameHe,
+            archive.electionCandidates
+              .map((other) => other.personNameHe)
+              .filter((name) => name !== FOUNDER),
+            random,
+          ),
+          correct: row.personNameHe,
+          source: sourceOf(row),
+          explanation: `${row.personNameHe} · ${row.elected ? 'נבחר' : 'לא נבחר'} · ${row.votes} קולות`,
+        })),
+  },
+  {
+    slug: 'election-turnout',
+    build: (random) =>
+      archive.elections
+        .filter((row) => row.eligibleVoters !== null && row.votesCast !== null)
+        .flatMap((row) => {
+          const numbers = archive.elections
+            .flatMap((other) => [other.eligibleVoters, other.votesCast, other.invalidVotes])
+            .filter((value): value is number => value !== null)
+            .map(String)
+          return [
+            {
+              id: `election-eligible:${row.slug}`,
+              template: 'election-turnout',
+              prompt: `כמה חברי עמותה היו בעלי זכות הצבעה בבחירות הראשונות של הפועל אוסישקין?`,
+              options: withDistractors(String(row.eligibleVoters), numbers, random),
+              correct: String(row.eligibleVoters),
+              source: sourceOf(row),
+              explanation: `${row.votesCast} מתוך ${row.eligibleVoters} הצביעו, ${row.invalidVotes} קולות נפסלו`,
+            },
+          ]
+        }),
+  },
+  {
+    // Not capped: the answer is Erez Zeitshik, not the founder. Rule 16 caps questions
+    // whose ANSWER is Maor Harel — this one is about the seat, not the man.
     slug: 'ussishkin-replacement',
-    cappedGroup: 'ussishkin',
     build: (random) =>
       archive.associationRoles
         .filter((row) => row.replacedByNameHe)
@@ -329,10 +568,28 @@ const TEMPLATES: Template[] = [
         }),
   },
   {
+    // Capped with the founder's other question: he came second, and the archive can
+    // now prove it — 229 votes to Noa Skali's 232.
+    slug: 'founder-rank',
+    cappedGroup: 'founder',
+    build: (random) =>
+      archive.electionCandidates
+        .filter((row) => row.personNameHe === FOUNDER && row.rank === 2)
+        .map((row) => ({
+          id: `founder-rank:${row.electionSlug}`,
+          template: 'founder-rank',
+          prompt: 'מי סיים במקום השני בבחירות הראשונות להנהלת עמותת הפועל אוסישקין?',
+          options: withDistractors(row.personNameHe, ASSOCIATION_NAMES(), random),
+          correct: row.personNameHe,
+          source: sourceOf(row),
+          explanation: `${row.personNameHe} · ${row.votes} קולות, אחרי נועה סקלי`,
+        })),
+  },
+  {
     slug: 'ussishkin',
     // CLAUDE.md rule 16: at most one per round, only where a source names him,
     // never as a distractor. The Ussishkin story does not need help.
-    cappedGroup: 'ussishkin',
+    cappedGroup: 'founder',
     build: (random) =>
       archive.associationRoles
         .filter((row) => row.roleHe === 'מייסד')
@@ -353,13 +610,60 @@ const TEMPLATES: Template[] = [
 
 export const ROUND_LENGTH = 10
 
+/**
+ * Every question offers four choices. A template that cannot field three REAL
+ * distractors from the archive produces a question with two or three, and the honest
+ * response is to drop it — padding it with an invented value would put a fact in front
+ * of the player that no source supports (rule 11).
+ */
+export const OPTION_COUNT = 4
+
+function hasFourOptions(question: Built): boolean {
+  return new Set(question.options).size === OPTION_COUNT
+}
+
+/**
+ * A question with more than one right answer is not a question.
+ *
+ * "באיזו עונה זכתה הפועל תל אביב בגביע המדינה?" had sixteen correct answers, and
+ * because the distractors came from the same pool of winning seasons, several of the
+ * WRONG options were also right. Rather than special-case that template, group the
+ * built questions by their prompt: if one prompt maps to more than one correct answer,
+ * every question in that group is ill-formed and all of them go.
+ */
+function dropAmbiguousPrompts(questions: Built[]): Built[] {
+  const answers = new Map<string, Set<string>>()
+  for (const question of questions) {
+    const seen = answers.get(question.prompt) ?? new Set<string>()
+    seen.add(question.correct)
+    answers.set(question.prompt, seen)
+  }
+  return questions.filter((question) => (answers.get(question.prompt)?.size ?? 0) === 1)
+}
+
+/**
+ * A fact the archive records as disputed cannot be the answer to anything. The
+ * championship count is 13, or 12, or 14 depending on who is counting — the conflict is
+ * recorded honestly in `fact-conflicts.json`, and honesty means not then asking a
+ * player to pick one.
+ */
+const CONTESTED = new Set(
+  archive.factConflicts
+    .filter((row) => row.resolution === null)
+    .map((row) => `${row.entityTable}.${row.field}`),
+)
+
+export function isContested(entityTable: string, field: string): boolean {
+  return CONTESTED.has(`${entityTable}.${field}`)
+}
+
 function buildRound(seed: number): Built[] {
   const random = rng(seed)
   const pool: Built[] = []
   const byGroup = new Map<string, Built[]>()
 
   for (const template of TEMPLATES) {
-    const built = template.build(random)
+    const built = dropAmbiguousPrompts(template.build(random).filter(hasFourOptions))
     if (template.cappedGroup !== undefined) {
       const group = byGroup.get(template.cappedGroup) ?? []
       group.push(...built)
@@ -404,23 +708,33 @@ function buildRound(seed: number): Built[] {
 /** How many questions the archive can currently produce. Shown honestly in the UI. */
 export function availableQuestionCount(): number {
   const random = rng(1)
-  const all = TEMPLATES.flatMap((template) => template.build(random))
+  const all = dropAmbiguousPrompts(
+    TEMPLATES.flatMap((template) => template.build(random)).filter(hasFourOptions),
+  )
   return new Set(all.map((question) => question.id)).size
 }
 
-/** Public shape — no correct answer, ever. */
+/** Public shape — no correct answer, and no source line, ever. */
 export function deal(seed: number, index: number): TriviaQuestion | null {
   const question = buildRound(seed)[index]
   if (!question) return null
-  const { correct: _correct, ...rest } = question
+  const { correct: _correct, source: _source, ...rest } = question
   return rest
+}
+
+/**
+ * Server-side provenance audit for a round. The source is off the screen, not out of
+ * the system: this is how the confidence gate stays testable and how the data-quality
+ * report can name what backed a question. Never call it from a client component.
+ */
+export function auditRound(seed: number): Array<{ id: string; source: SourceRef }> {
+  return buildRound(seed).map((question) => ({ id: question.id, source: question.source }))
 }
 
 export type Verdict = {
   correct: boolean
   correctAnswer: string
   explanation: string
-  source: { title: string; url: string | null; confidence: number }
 }
 
 /** Grading happens here, on the server, from the seed. The client is never trusted. */
@@ -431,6 +745,5 @@ export function grade(seed: number, index: number, answer: string): Verdict | nu
     correct: question.correct === answer,
     correctAnswer: question.correct,
     explanation: question.explanation,
-    source: question.source,
   }
 }

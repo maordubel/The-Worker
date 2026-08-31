@@ -33,7 +33,9 @@ function withoutComments(text: string): string {
 }
 
 /** The one radius exception is semantic: a lamp is a perfect circle. */
-const LAMP_FILES = ['LampGrid.tsx', 'TabBar.tsx']
+// Radius 0 everywhere; a LAMP is the one permitted circle. The allowance is by
+// purpose, so it covers every file that draws lamps — not one filename.
+const LAMP_FILES = ['LampGrid.tsx', 'TabBar.tsx', 'Floodlights.tsx']
 
 describe('brand acceptance — colour', () => {
   it('has exactly the eight declared tokens, and no ninth', () => {

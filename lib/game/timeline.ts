@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { scoreText } from '@/components/ui/Num'
+import { matchLine } from '@/components/ui/Num'
 
 import { archive, nameOf, rng, shuffle } from './archive'
 
@@ -47,7 +47,12 @@ function pool(): Dated[] {
     if (!match.playedOn) continue
     out.push({
       id: `match:${match.seasonLabel}:${match.awayClubSlug}`,
-      title: `${nameOf.club(match.homeClubSlug)} ${scoreText(match.homeScore, match.awayScore)} ${nameOf.club(match.awayClubSlug)}`,
+      title: matchLine(
+        nameOf.club(match.homeClubSlug),
+        match.homeScore,
+        nameOf.club(match.awayClubSlug),
+        match.awayScore,
+      ),
       hint: safeHint(nameOf.competition(match.competitionSlug)),
       on: match.playedOn,
     })

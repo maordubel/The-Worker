@@ -1,5 +1,5 @@
 {
-  "note": "Sources disagree. Recorded and displayed, never resolved by quietly picking one. The last five come from the kit-engine spec, which contradicts the verified kit archive — the spec drives the ENGINE, not the facts.",
+  "note": "Sources disagree. Recorded and displayed, never resolved by quietly picking one. The last five come from the kit-engine spec, which contradicts the verified kit archive — the spec drives the ENGINE, not the facts. Four further conflicts come from the association's own election page — two of them are the source disagreeing with itself.",
   "confidence": 2,
   "source": {
     "kind": "other",
@@ -126,6 +126,58 @@
       "noteHe": "נייקי היא היצרנית הנוכחית לפי הארכיון.",
       "resolution": "הוכרע לטובת הארכיון: נייקי היא היצרנית הנוכחית.",
       "resolvedBy": "מאור הראל — בעל הפרויקט, אימות ישיר"
+    },
+    {
+      "entityTable": "election",
+      "entityKey": "בחירות-ראשונות-הנהלה",
+      "field": "envelope_dates",
+      "claimA": "המעטפות נשלחו ב-27 ביולי 2007",
+      "claimB": "המעטפות היו לחזור עד 17 באוגוסט 2008",
+      "sourceAUrl": "http://www.hapoeluta.com/",
+      "sourceBUrl": "http://www.hapoeluta.com/",
+      "noteHe": "שני התאריכים מופיעים באותו משפט במקור ומפרידה ביניהם שנה שלמה. אחד מהם שגוי, ואין דרך לדעת איזה. מועד הבחירות נשמר null.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
+    },
+    {
+      "entityTable": "election_candidate",
+      "entityKey": "אייל-ציתיאת",
+      "field": "name_spelling",
+      "claimA": "אייל ציתיאת — ברשימת המועמדים",
+      "claimB": "אייל צטיאט — בטבלת התוצאות",
+      "sourceAUrl": "http://www.hapoeluta.com/",
+      "sourceBUrl": "http://www.hapoeluta.com/",
+      "noteHe": "אותו מקור מאיית את השם בשתי צורות. נשמר כפי שברשימת המועמדים, עם השם השני כאליאס.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
+    },
+    {
+      "entityTable": "election_candidate",
+      "entityKey": "אסף-רובנר",
+      "field": "name_spelling",
+      "claimA": "אסף רובנר — ברשימת המועמדים",
+      "claimB": "אסף רוברנר — בטבלת התוצאות",
+      "sourceAUrl": "http://www.hapoeluta.com/",
+      "sourceBUrl": "http://www.hapoeluta.com/",
+      "noteHe": "כנ\"ל. נשמר כפי שברשימת המועמדים.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
+    },
+    {
+      "entityTable": "election_candidate",
+      "entityKey": "אבי-כץ",
+      "field": "given_name",
+      "claimA": "אבי כץ — אתר העמותה, רשימת המועמדים ותוצאות",
+      "claimB": "גבי כץ — מקור מסר הפוך במעבר המחקר הקודם",
+      "sourceAUrl": "http://www.hapoeluta.com/",
+      "sourceBUrl": null,
+      "noteHe": "מעבר המחקר הקודם תיקן 'אבי' ל'גבי'. אתר העמותה עצמו כותב 'אבי' פעמיים. הסתירה נרשמת; השם נשמר כפי שבמקור הראשוני של העמותה.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
     }
   ]
 }

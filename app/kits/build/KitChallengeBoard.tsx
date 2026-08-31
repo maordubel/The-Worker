@@ -120,9 +120,6 @@ export function KitChallengeBoard({
           {verdict.noteHe && (
             <p className="mt-2 font-body text-step-0 text-muted">{verdict.noteHe}</p>
           )}
-          <p className="mt-2 font-mono text-[11px] text-sign">
-            <bdi>{verdict.sourceTitle}</bdi>
-          </p>
           <Link
             href={`/kits/build?seed=${seed + 1}`}
             className="mt-stack flex min-h-tap w-full items-center bg-ink px-4 font-body text-step-1 font-extrabold text-sheet"

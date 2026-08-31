@@ -247,6 +247,21 @@ export function findUnresolvedReferences(bundle: StagedBundle): UnresolvedRef[] 
   const fanGroups = new Set(bundle.fanGroups.map((row) => row.slug))
   const associations = new Set(bundle.associations.map((row) => row.slug))
 
+  const elections = new Set(bundle.elections.map((row) => row.slug))
+
+  for (const election of bundle.elections) {
+    check('elections', election.slug, 'associationSlug', election.associationSlug, associations)
+  }
+  for (const candidate of bundle.electionCandidates) {
+    check(
+      'electionCandidates',
+      candidate.naturalKey,
+      'electionSlug',
+      candidate.electionSlug,
+      elections,
+    )
+  }
+
   for (const trophy of bundle.trophies) {
     check('trophies', trophy.naturalKey, 'competitionSlug', trophy.competitionSlug, competitions)
     check('trophies', trophy.naturalKey, 'seasonLabel', trophy.seasonLabel, seasons)
