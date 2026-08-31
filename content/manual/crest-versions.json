@@ -1,0 +1,83 @@
+{
+  "note": "Stages as the club's own history page tells them. Football Kit Archive omits the 2008-2015 stage and the centenary stage — recorded as a conflict, not silently merged. The May 2023 design that removed the hammer and sickle was made for a US tournament to gauge reaction and was never an official crest; it is not listed here.",
+  "confidence": 2,
+  "source": {
+    "kind": "official",
+    "title": "הפועל תל אביב — היסטוריה והישגים",
+    "url": "https://www.htafc.co.il/היסטוריה-והישגים/"
+  },
+  "records": [
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 1923,
+      "toYear": 1991,
+      "nameHe": "הסמל המקורי",
+      "changeHe": null,
+      "confidence": 2
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 1992,
+      "toYear": 1997,
+      "nameHe": "כדור במרכז",
+      "changeHe": "כדור נוסף במרכז הסמל המקורי",
+      "confidence": 2
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 1997,
+      "toYear": 2000,
+      "nameHe": "עיצוב מחדש",
+      "changeHe": "עיצוב מחדש ועדכון צבעים",
+      "confidence": 2
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 2001,
+      "toYear": 2007,
+      "nameHe": "תקופת כתר",
+      "changeHe": "השם \"כתר\" שולב בשם המועדון ובסמל, בתקופת הבעלות של כתר פלסטיק",
+      "confidence": 2
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 2007,
+      "toYear": 2008,
+      "nameHe": "עדכון צורה",
+      "changeHe": "שינוי צורני בלבד",
+      "confidence": 2
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 2008,
+      "toYear": 2015,
+      "nameHe": "צבעי המועדון",
+      "changeHe": "צבעי הסמל הותאמו לצבעי המועדון",
+      "confidence": 2
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 2015,
+      "toYear": 2022,
+      "nameHe": "בלי כתר",
+      "changeHe": "\"כתר\" הוסר מהסמל; שנת ההיווסדות תוקנה ל-1923",
+      "confidence": 2
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 2022,
+      "toYear": 2023,
+      "nameHe": "מאה שנה",
+      "changeHe": "כיתוב מיוחד לציון 100 שנה למועדון",
+      "confidence": 2
+    },
+    {
+      "clubSlug": "הפועל-תל-אביב",
+      "fromYear": 2023,
+      "toYear": null,
+      "nameHe": "חזרה לקלאסי",
+      "changeHe": "הסמל חזר לצורתו הקלאסית",
+      "confidence": 2
+    }
+  ]
+}

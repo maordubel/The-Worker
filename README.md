@@ -6,6 +6,8 @@ trivia, historical lineup building, memory, and kit reconstruction.
 - Architecture and data model — `docs/00-architecture.md`
 - Visual identity and tokens — `docs/01-brand-concept.md`
 - Open data questions — `docs/02-data-questions.md`
+- Ingestion layer — `docs/03-ingestion.md`
+- Verified research and open conflicts — `docs/04-verified-research.md`
 - Schema — `supabase/migrations/`
 
 ## Setup

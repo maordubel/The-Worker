@@ -42,7 +42,7 @@ I need 20 matches every Hapoel fan knows. For each: season, competition, opponen
 
 ## 4. Derby
 
-4.1 — Which fixtures count as a derby: Maccabi Tel Aviv only, or also Bnei Yehuda / Hapoel Petah Tikva?
+4.1 — ~~Which fixtures count as a derby?~~ **ANSWERED: Maccabi Tel Aviv only.** Encoded as `club.is_derby_rival` + a DB trigger; Bnei Yehuda and Hapoel Petah Tikva are ordinary fixtures.
 4.2 — The 5 derby results a fan would want to relive.
 4.3 — Is there a derby result fans do *not* want to see in a game? Good to know before it appears in a quiz.
 

@@ -1,0 +1,71 @@
+{
+  "note": "Sources disagree. Recorded and displayed, never resolved by quietly picking one.",
+  "confidence": 2,
+  "source": {
+    "kind": "other",
+    "title": "Verified research pass, 31 Aug 2026",
+    "url": null
+  },
+  "records": [
+    {
+      "entityTable": "trophy",
+      "entityKey": "ליגת-העל",
+      "field": "championship_count",
+      "claimA": "13 — ההתאחדות והמועדון",
+      "claimB": "12 — פיפ\"א ואופ\"א, שאינן מכירות בעונות 1934/35 ו-1937/38 שננטשו",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_F.C.",
+      "sourceBUrl": "https://en.wikipedia.org/wiki/List_of_Israeli_football_champions",
+      "noteHe": "worldfootball.net מונה 14 ומוסיף 1936 ו-1943 — עוד גרסה שלישית"
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1962/63 בלומפילד — שמשון",
+      "field": "score",
+      "claimA": "1:1",
+      "claimB": "0:0",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
+      "sourceBUrl": "https://golden-lotus.co.il/bloomfield/",
+      "noteHe": "ויקיפדיה ו-StadiumDB אומרים 1:1; golden-lotus אומר 0:0"
+    },
+    {
+      "entityTable": "venue",
+      "entityKey": "בלומפילד",
+      "field": "opening_match_date",
+      "claimA": "13.12.1962",
+      "claimB": "12.12.1962",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
+      "sourceBUrl": "https://www.stadiumguide.com/bloomfield-stadium/",
+      "noteHe": "משחק החנוכה הרשמי מול SC Enschede, 1:1 — התאריך במחלוקת"
+    },
+    {
+      "entityTable": "crest_version",
+      "entityKey": "הפועל-תל-אביב",
+      "field": "stages",
+      "claimA": "אתר המועדון: תשעה שלבים, כולל 2008-2015 וכיתוב המאה",
+      "claimB": "Football Kit Archive: מדלג על 2008-2015 ועל שלב המאה",
+      "sourceAUrl": "https://www.htafc.co.il/היסטוריה-והישגים/",
+      "sourceBUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-logo-history/",
+      "noteHe": "אתר המועדון עדיף כמקור ראשוני; הפער נשמר"
+    },
+    {
+      "entityTable": "membership_milestone",
+      "entityKey": "1000",
+      "field": "date",
+      "claimA": "ינואר 2010 (מסמך המחקר, ללא מקור)",
+      "claimB": "ואלה דיווחה על הצטרפות איינשטיין לעמותה ב-13.8.2007",
+      "sourceAUrl": null,
+      "sourceBUrl": "https://sports.walla.co.il/item/1153094",
+      "noteHe": "לא הוכרע; ייתכן שמדובר בשתי פעולות שונות"
+    },
+    {
+      "entityTable": "association_event",
+      "entityKey": "name_change",
+      "field": "date",
+      "claimA": "24.7.2010 (מסמך המחקר)",
+      "claimB": "23.7.2010 (ואלה, מהערב עצמו)",
+      "sourceAUrl": null,
+      "sourceBUrl": "https://sports.walla.co.il/item/1713821",
+      "noteHe": "נבחר 23.7.2010 — דיווח בן־זמן מאותו ערב"
+    }
+  ]
+}

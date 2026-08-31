@@ -1,0 +1,181 @@
+{
+  "note": "Only people named in a verified source. Roles and relationships live in matches, events and association roles — not in prose here.",
+  "confidence": 2,
+  "source": {
+    "kind": "other",
+    "title": "Verified research pass, 31 Aug 2026",
+    "url": null
+  },
+  "records": [
+    {
+      "slug": "סרגיי-קלשצנקו",
+      "fullNameHe": "סרגיי קלשצ'נקו",
+      "fullNameEn": "Serghey Clescenko",
+      "aliases": [
+        "סרגיי קלשצ'נקו",
+        "Serghey Clescenko",
+        "Sergei Kleschenko"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/0183-0eaa43ba228a-d6fe8d77e124-1000--clescenko-stuns-milan/",
+      "sourceTitle": "UEFA report, 14.3.2002"
+    },
+    {
+      "slug": "יוסי-אבוקסיס",
+      "fullNameHe": "יוסי אבוקסיס",
+      "fullNameEn": "Yossi Abuksis",
+      "aliases": [
+        "יוסי אבוקסיס",
+        "Yossi Abuksis"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/0183-0eaa43ba228a-d6fe8d77e124-1000--clescenko-stuns-milan/",
+      "sourceTitle": "UEFA report, 14.3.2002"
+    },
+    {
+      "slug": "אסי-דומב",
+      "fullNameHe": "אסי דומב",
+      "fullNameEn": "Assi Domb",
+      "aliases": [
+        "אסי דומב",
+        "Assi Domb"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/017f-0e6a31a02e21-58d549aa2129-1000--domb-gives-tel-aviv-the-advantage",
+      "sourceTitle": "UEFA report, 20.11.2001"
+    },
+    {
+      "slug": "מילאן-אוסטרץ",
+      "fullNameHe": "מילאן אוסטרץ",
+      "fullNameEn": "Milan Osterc",
+      "aliases": [
+        "מילאן אוסטרץ",
+        "Milan Osterc"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/025a-0eab13c1f1d5-dab99f819385-1000--tel-aviv-triumph-in-russia",
+      "sourceTitle": "UEFA report, 4.12.2001"
+    },
+    {
+      "slug": "ערן-זהבי",
+      "fullNameHe": "ערן זהבי",
+      "fullNameEn": "Eran Zahavi",
+      "aliases": [
+        "ערן זהבי",
+        "Eran Zahavi"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.skysports.com/football/hap-tel-aviv-vs-benfica/report/227534",
+      "sourceTitle": "Sky Sports, 24.11.2010"
+    },
+    {
+      "slug": "דאגלס-דה-סילבה",
+      "fullNameHe": "דאגלס דה סילבה",
+      "fullNameEn": "Douglas da Silva",
+      "aliases": [
+        "דאגלס דה סילבה",
+        "Douglas da Silva"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.skysports.com/football/hap-tel-aviv-vs-benfica/report/227534",
+      "sourceTitle": "Sky Sports, 24.11.2010"
+    },
+    {
+      "slug": "מאור-הראל",
+      "fullNameHe": "מאור הראל",
+      "fullNameEn": "Maor Harel",
+      "aliases": [
+        "מאור הראל",
+        "Maor Harel"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-4291776,00.html",
+      "sourceTitle": "Ynet, Yael Shahror, 14.10.2012"
+    },
+    {
+      "slug": "אורי-שלף",
+      "fullNameHe": "אורי שלף",
+      "fullNameEn": "Uri Shalef",
+      "aliases": [
+        "אורי שלף",
+        "Uri Shalef",
+        "Uri Shlef"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://sports.walla.co.il/item/2843036",
+      "sourceTitle": "Walla, Oren Yosifowitz, 2.4.2015"
+    },
+    {
+      "slug": "נועה-סקלי",
+      "fullNameHe": "נועה סקלי",
+      "fullNameEn": "Noa Skali",
+      "aliases": [
+        "נועה סקלי",
+        "Noa Skali"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-4291776,00.html",
+      "sourceTitle": "Ynet, 14.10.2012"
+    },
+    {
+      "slug": "יונתן-לרנר",
+      "fullNameHe": "יונתן לרנר",
+      "fullNameEn": "Yonatan Lerner",
+      "aliases": [
+        "יונתן לרנר",
+        "Yonatan Lerner"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-4291776,00.html",
+      "sourceTitle": "Ynet, 14.10.2012"
+    },
+    {
+      "slug": "רמי-כהן",
+      "fullNameHe": "רמי כהן",
+      "fullNameEn": "Rami Cohen",
+      "aliases": [
+        "רמי כהן",
+        "Rami Cohen"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-4291776,00.html",
+      "sourceTitle": "Ynet, 14.10.2012"
+    },
+    {
+      "slug": "גבי-כץ",
+      "fullNameHe": "גבי כץ",
+      "fullNameEn": "Gabi Katz",
+      "aliases": [
+        "גבי כץ",
+        "Gabi Katz"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-4291776,00.html",
+      "sourceTitle": "Ynet, 14.10.2012"
+    },
+    {
+      "slug": "ארז-זייציק",
+      "fullNameHe": "ארז זייצ'יק",
+      "fullNameEn": "Erez Zeitchik",
+      "aliases": [
+        "ארז זייצ'יק",
+        "Erez Zeitchik"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://www.ynet.co.il/article/4340044",
+      "sourceTitle": "Ynet, 2.2.2013"
+    },
+    {
+      "slug": "אריק-איינשטיין",
+      "fullNameHe": "אריק איינשטיין",
+      "fullNameEn": "Arik Einstein",
+      "aliases": [
+        "אריק איינשטיין",
+        "Arik Einstein"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://www.sport5.co.il/articles.aspx?FolderID=4483&docID=158800",
+      "sourceTitle": "Sport5, 27.11.2013"
+    }
+  ]
+}

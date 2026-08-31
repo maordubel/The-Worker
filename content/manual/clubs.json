@@ -1,0 +1,158 @@
+{
+  "note": "Hapoel Tel Aviv is the club this product is about. Maccabi Tel Aviv is flagged as the derby rival — for this project a derby means Maccabi Tel Aviv and nothing else. Opponent clubs exist only to give verified matches something to point at.",
+  "confidence": 2,
+  "source": {
+    "kind": "other",
+    "title": "Verified research pass, 31 Aug 2026",
+    "url": null
+  },
+  "records": [
+    {
+      "slug": "הפועל-תל-אביב",
+      "nameHe": "הפועל תל אביב",
+      "nameEn": "Hapoel Tel Aviv",
+      "city": "תל אביב",
+      "sport": "football",
+      "isUs": true,
+      "aliases": [
+        "הפועל תל אביב",
+        "הפועל ת\"א",
+        "הפועל תל אביב (כדורגל)",
+        "Hapoel Tel Aviv"
+      ],
+      "confidence": 3,
+      "sourceTitle": "Maor Harel — project owner",
+      "sourceKind": "manual"
+    },
+    {
+      "slug": "מכבי-תל-אביב",
+      "nameHe": "מכבי תל אביב",
+      "nameEn": "Maccabi Tel Aviv",
+      "city": "תל אביב",
+      "sport": "football",
+      "isDerbyRival": true,
+      "aliases": [
+        "מכבי תל אביב",
+        "מכבי ת\"א",
+        "Maccabi Tel Aviv"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tel_Aviv_derby",
+      "sourceTitle": "Tel Aviv derby — Wikipedia"
+    },
+    {
+      "slug": "הפועל-תל-אביב-כדורסל",
+      "nameHe": "הפועל תל אביב (כדורסל)",
+      "nameEn": "Hapoel Tel Aviv B.C.",
+      "city": "תל אביב",
+      "sport": "basketball",
+      "aliases": [
+        "הפועל תל אביב כדורסל",
+        "הפועל IBI תל אביב",
+        "Hapoel Tel Aviv B.C."
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_B.C.",
+      "sourceTitle": "Hapoel Tel Aviv B.C. — Wikipedia"
+    },
+    {
+      "slug": "צלסי",
+      "nameHe": "צ'לסי",
+      "nameEn": "Chelsea",
+      "city": "לונדון",
+      "sport": "football",
+      "aliases": [
+        "צ'לסי",
+        "Chelsea"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/match/68550--h-tel-aviv-vs-chelsea/",
+      "sourceTitle": "UEFA match centre"
+    },
+    {
+      "slug": "לוקומוטיב-מוסקבה",
+      "nameHe": "לוקומוטיב מוסקבה",
+      "nameEn": "Lokomotiv Moscow",
+      "city": "מוסקבה",
+      "sport": "football",
+      "aliases": [
+        "לוקומוטיב מוסקבה",
+        "Lokomotiv Moscow"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/025a-0eab13c1f1d5-dab99f819385-1000--tel-aviv-triumph-in-russia",
+      "sourceTitle": "UEFA report"
+    },
+    {
+      "slug": "פארמה",
+      "nameHe": "פארמה",
+      "nameEn": "Parma",
+      "city": "פארמה",
+      "sport": "football",
+      "aliases": [
+        "פארמה",
+        "Parma"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/025a-0eab0ace3480-d3cf7a771c8b-1000--tel-aviv-fairy-tale-continues/",
+      "sourceTitle": "UEFA report"
+    },
+    {
+      "slug": "מילאן",
+      "nameHe": "מילאן",
+      "nameEn": "AC Milan",
+      "city": "מילאנו",
+      "sport": "football",
+      "aliases": [
+        "מילאן",
+        "איי סי מילאן",
+        "AC Milan"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/0183-0eaa43ba228a-d6fe8d77e124-1000--clescenko-stuns-milan/",
+      "sourceTitle": "UEFA report"
+    },
+    {
+      "slug": "בנפיקה",
+      "nameHe": "בנפיקה",
+      "nameEn": "Benfica",
+      "city": "ליסבון",
+      "sport": "football",
+      "aliases": [
+        "בנפיקה",
+        "Benfica"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.skysports.com/football/hap-tel-aviv-vs-benfica/report/227534",
+      "sourceTitle": "Sky Sports match report"
+    },
+    {
+      "slug": "שמשון-תל-אביב",
+      "nameHe": "שמשון תל אביב",
+      "nameEn": "Shimshon Tel Aviv",
+      "city": "תל אביב",
+      "sport": "football",
+      "aliases": [
+        "שמשון תל אביב",
+        "Shimshon Tel Aviv"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
+      "sourceTitle": "Bloomfield Stadium — Wikipedia"
+    },
+    {
+      "slug": "סלנגור",
+      "nameHe": "סלנגור",
+      "nameEn": "Selangor",
+      "city": "סלנגור",
+      "sport": "football",
+      "aliases": [
+        "סלנגור",
+        "Selangor"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://en.wikipedia.org/wiki/1967_Asian_Champion_Club_Tournament",
+      "sourceTitle": "1967 Asian Champion Club Tournament — Wikipedia"
+    }
+  ]
+}

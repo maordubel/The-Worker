@@ -22,10 +22,32 @@ Read `docs/00-architecture.md` before changing anything structural.
 9. **RTL-first.** Logical properties. Wrap mixed-direction runs in `<bdi>`.
 10. **No user-facing string in code.** Everything through `messages/he.json` + `t()`.
 
+11. **The ingestion layer never invents.** Unreadable field → null. Unusable row →
+    reported as skipped/rejected with a reason. Blocked source → documented, not
+    substituted. See `docs/03-ingestion.md`.
+12. **One file knows MediaWiki:** `scripts/ingest/adapters/mediawiki.ts`. A provider
+    field name anywhere else is a defect.
+13. **A derby means Maccabi Tel Aviv. Nothing else.** It is a `club.is_derby_rival` flag
+    and a DB trigger that derives `match.is_derby`. Never hand-set it, never widen it.
+14. **Football and basketball never mix.** Every sport-bearing table carries `sport`,
+    a trigger rejects a cross-sport match, and aliases are scoped by sport. The Hapoel
+    Ussishkin chapter is basketball.
+15. **Always expand the research.** Project rule from Maor: never stop at the first
+    answer — bring sources and additional information. Verdicts and sources for the
+    current data live in `docs/04-verified-research.md`.
+16. **Maor Harel, founder of Hapoel Ussishkin, appears only where a source names him.**
+    At most one such question per session, never as a distractor, never in football
+    records. His role is stored as `association_role` rows with sources, like anyone
+    else's. Do not distort history to personalise it — the Ussishkin story does not
+    need help.
+
 ## Commands
 
 ```
-npm run dev · npm run lint · npm run typecheck · npm run build · npm run db:types
+npm run dev · npm run lint · npm run typecheck · npm run test · npm run build
+npm run ingest -- --source all --dry-run     # stage + report, no database
+npm run ingest -- --source wiki --fetch      # network; needs wiki access
+npm run db:types
 ```
 
 ## House skills that apply
