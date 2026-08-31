@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  THE WORKER — design tokens
+  Territory: archival letterpress. Red ink on newsprint stock.
+  Light is the complete definition; dark redefines the same names only.
+*/
+:root {
+  --paper: 244 237 225;      /* #F4EDE1 newsprint cream */
+  --paper-2: 232 223 207;    /* #E8DFCF aged surface   */
+  --paper-3: 214 203 184;    /* #D6CBB8 deep stock     */
+  --ink: 23 19 16;           /* #171310 warm press black */
+  --muted: 107 96 85;        /* #6B6055 */
+  --rule: 23 19 16;          /* rules share the ink plate */
+  --red: 209 18 31;          /* #D1121F Hapoel ink red  — 4.7:1 on paper */
+  --red-deep: 142 17 22;     /* #8E1116 second pass     */
+  --ochre: 180 128 42;       /* #B4802A oxidised brass  */
+  --verified: 47 107 79;     /* #2F6B4F press green     */
+  --on-red: 244 237 225;
+
+  --gutter: 1.25rem;
+  --stack: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  :root { --gutter: 2.5rem; --stack: 2rem; }
+}
+
+.dark {
+  --paper: 20 17 15;
+  --paper-2: 32 27 24;
+  --paper-3: 46 39 34;
+  --ink: 239 230 216;
+  --muted: 154 142 128;
+  --rule: 90 79 69;
+  --red: 242 86 76;          /* 5.6:1 on dark paper */
+  --red-deep: 190 52 44;
+  --ochre: 214 165 82;
+  --verified: 106 179 138;
+  --on-red: 20 17 15;
+}
+
+html { color-scheme: light dark; }
+
+body {
+  background-color: rgb(var(--paper));
+  color: rgb(var(--ink));
+  /* Signature motif, layer 1: halftone grain on the stock. */
+  background-image: radial-gradient(rgb(var(--ink) / 0.06) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+/* Signature motif, layer 2: the red plate is printed 1.5px out of register.
+   Applied to display headings and pressed states. */
+.plate-offset {
+  text-shadow: -1.5px 1.5px 0 rgb(var(--red) / 0.85);
+}
+
+/* Signature motif, layer 3: ticket perforation as the section divider. */
+.perforated-b {
+  border-block-end: 1.5px dashed rgb(var(--rule) / 0.55);
+}
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 3px solid rgb(var(--red));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
