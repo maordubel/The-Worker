@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import { BannerCloth } from '@/components/ui/BannerCloth'
 import { BuiltByDubel } from '@/components/ui/BuiltByDubel'
 import { LampGrid, Mast } from '@/components/ui/LampGrid'
@@ -12,11 +14,12 @@ import { t, type MessageKey } from '@/lib/i18n'
  * The sheets carry verified archive facts, not placeholder copy: docs/04-verified-research.md
  */
 
-const MODES: Array<{ serial: string; title: MessageKey; sub: MessageKey }> = [
-  { serial: '01', title: 'mode.trivia', sub: 'mode.trivia.sub' },
-  { serial: '02', title: 'mode.lineup', sub: 'mode.lineup.sub' },
-  { serial: '03', title: 'mode.memory', sub: 'mode.memory.sub' },
-  { serial: '04', title: 'mode.kits', sub: 'mode.kits.sub' },
+const MODES: Array<{ serial: string; href: string; title: MessageKey; sub: MessageKey }> = [
+  { serial: '01', href: '/trivia?seed=3&i=0&score=0', title: 'mode.trivia', sub: 'mode.trivia.sub' },
+  { serial: '02', href: '/lineup', title: 'mode.lineup', sub: 'mode.lineup.sub' },
+  { serial: '03', href: '/memory?seed=7', title: 'mode.memory', sub: 'mode.memory.sub' },
+  { serial: '04', href: '/kits', title: 'mode.kits', sub: 'mode.kits.sub' },
+  { serial: '05', href: '/timeline?seed=4', title: 'mode.timeline', sub: 'mode.timeline.sub' },
 ]
 
 const STREAK_ON = 13
@@ -40,10 +43,13 @@ export default function WallPage() {
 
         {/* ארבע לוחיות מצב — 2×2 בנייד, ארבע בשורה בדסקטופ */}
         <section aria-label={t('tab.game')} className="mt-stack">
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-5">
             {MODES.map((mode) => (
               <li key={mode.serial}>
-                <div className="flex min-h-tap flex-col justify-between border-rule border-ink bg-sheet p-3">
+                <Link
+                  href={mode.href}
+                  className="flex min-h-tap flex-col justify-between border-rule border-ink bg-sheet p-3 transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none"
+                >
                   <span className="font-mono text-[10px] tabular-nums text-red">{mode.serial}</span>
                   <span className="mt-3 font-sign text-step-1 leading-none text-ink">
                     {t(mode.title)}
@@ -51,7 +57,7 @@ export default function WallPage() {
                   <span className="mt-1 font-body text-[10.5px] leading-relaxed text-sign">
                     {t(mode.sub)}
                   </span>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>

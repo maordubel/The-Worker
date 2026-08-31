@@ -37,8 +37,12 @@ type Built = TriviaQuestion & { correct: string }
 
 type Template = {
   slug: string
-  /** at most one question per round may come from a capped template */
-  cap?: number
+  /**
+   * Templates in a capped group contribute at most ONE question per round between
+   * them. The Ussishkin family is capped: the founder is an answer only where a source
+   * names him, once, and the story does not need more room than that.
+   */
+  cappedGroup?: string
   build: (random: () => number) => Built[]
 }
 
@@ -61,6 +65,19 @@ function sourceOf(row: Sourced) {
 }
 
 const SEASON_POOL = () => archive.trophies.map((row) => row.seasonLabel)
+
+/**
+ * The founder's name is never a distractor (CLAUDE.md rule 16). It may only appear as
+ * the answer to a question a source supports, so every pool filters it out and the
+ * template that needs it puts it in deliberately.
+ */
+const FOUNDER =
+  archive.associationRoles.find((role) => role.roleHe === 'מייסד')?.personNameHe ?? null
+
+const ASSOCIATION_NAMES = () =>
+  [...new Set(archive.associationRoles.map((role) => role.personNameHe))].filter(
+    (name) => name !== FOUNDER,
+  )
 
 const TEMPLATES: Template[] = [
   {
@@ -220,10 +237,99 @@ const TEMPLATES: Template[] = [
         }),
   },
   {
+    slug: 'moment-year',
+    build: (random) =>
+      archive.moments
+        .filter((row) => row.happenedOn !== null && row.category !== 'club')
+        .map((row) => {
+          const correct = (row.happenedOn as string).slice(0, 4)
+          return {
+            id: `moment:${row.slug}`,
+            template: 'moment-year',
+            prompt: `באיזו שנה — ${row.titleHe}?`,
+            options: withDistractors(
+              correct,
+              archive.moments
+                .filter((other) => other.happenedOn !== null)
+                .map((other) => (other.happenedOn as string).slice(0, 4)),
+              random,
+            ),
+            correct,
+            source: sourceOf(row),
+            explanation: row.bodyHe.slice(0, 160),
+          }
+        }),
+  },
+  {
+    slug: 'opponent',
+    build: (random) =>
+      archive.matches
+        .filter((row) => row.stage !== null)
+        .map((row) => {
+          const correct = nameOf.club(opponentOf(row))
+          return {
+            id: `opponent:${row.seasonLabel}:${row.stage}`,
+            template: 'opponent',
+            prompt: `מי הייתה היריבה ב${row.stage}, ${nameOf.competition(row.competitionSlug)} ${row.seasonLabel}?`,
+            options: withDistractors(
+              correct,
+              archive.clubs
+                .filter((club) => !club.isUs && club.sport !== 'basketball')
+                .map((club) => club.nameHe),
+              random,
+            ),
+            correct,
+            source: sourceOf(row),
+            explanation: `${row.playedOn ?? row.seasonLabel} · ${row.homeScore}:${row.awayScore}`,
+          }
+        }),
+  },
+  {
+    slug: 'crest-era',
+    build: (random) =>
+      archive.crests
+        .filter((row) => row.toYear !== null)
+        .map((row) => {
+          const correct = row.nameHe
+          return {
+            id: `crest-era:${row.fromYear}`,
+            template: 'crest-era',
+            prompt: `איזה שלב בסמל המועדון נמשך מ־${row.fromYear} עד ${row.toYear}?`,
+            options: withDistractors(
+              correct,
+              archive.crests.map((crest) => crest.nameHe),
+              random,
+            ),
+            correct,
+            source: sourceOf(row),
+            explanation: row.changeHe ?? `${row.fromYear}–${row.toYear}`,
+          }
+        }),
+  },
+  {
+    slug: 'ussishkin-replacement',
+    cappedGroup: 'ussishkin',
+    build: (random) =>
+      archive.associationRoles
+        .filter((row) => row.replacedByNameHe)
+        .map((row) => {
+          const correct = row.replacedByNameHe as string
+          return {
+            id: `ussishkin-replacement:${correct}`,
+            template: 'ussishkin-replacement',
+            prompt: `מי נבחר להנהלת הפועל אוסישקין למקום שהתפנה ב־2012?`,
+            options: withDistractors(correct, ASSOCIATION_NAMES(), random),
+            correct,
+            source: sourceOf(row),
+            explanation: `${correct} · נבחר בפברואר 2013`,
+          }
+        }),
+  },
+  {
     slug: 'ussishkin',
     // CLAUDE.md rule 16: at most one per round, only where a source names him,
     // never as a distractor. The Ussishkin story does not need help.
-    cap: 1,
+    cappedGroup: 'ussishkin',
     build: (random) =>
       archive.associationRoles
         .filter((row) => row.roleHe === 'מייסד')
@@ -231,16 +337,8 @@ const TEMPLATES: Template[] = [
           id: `ussishkin:${row.personNameHe}`,
           template: 'ussishkin',
           prompt: 'מי רשם את הפועל אוסישקין בליגה עם הקמת העמותה ב־2007?',
-          options: shuffle(
-            [
-              row.personNameHe,
-              ...archive.associationRoles
-                .filter((other) => other.personNameHe !== row.personNameHe)
-                .map((other) => other.personNameHe)
-                .slice(0, 3),
-            ],
-            random,
-          ),
+          // The founder is the ANSWER here, so the pool is everyone else.
+          options: withDistractors(row.personNameHe, ASSOCIATION_NAMES(), random),
           correct: row.personNameHe,
           source: sourceOf(row),
           explanation: `${row.personNameHe} · חבר הנהלה 2007–2012`,
@@ -255,16 +353,24 @@ export const ROUND_LENGTH = 10
 function buildRound(seed: number): Built[] {
   const random = rng(seed)
   const pool: Built[] = []
-  const capped: Built[] = []
+  const byGroup = new Map<string, Built[]>()
 
   for (const template of TEMPLATES) {
     const built = template.build(random)
-    if (template.cap !== undefined) {
-      const one = pick(built, random)
-      if (one) capped.push(one)
+    if (template.cappedGroup !== undefined) {
+      const group = byGroup.get(template.cappedGroup) ?? []
+      group.push(...built)
+      byGroup.set(template.cappedGroup, group)
       continue
     }
     pool.push(...built)
+  }
+
+  // One question per capped group, at most.
+  const capped: Built[] = []
+  for (const group of byGroup.values()) {
+    const one = pick(group, random)
+    if (one) capped.push(one)
   }
 
   // Deduplicate by id, then spread across templates so a round is not all one kind.
@@ -289,7 +395,7 @@ function buildRound(seed: number): Built[] {
     }
   }
 
-  return shuffle([...round, ...capped.slice(0, 1)], random).slice(0, ROUND_LENGTH)
+  return shuffle([...round, ...capped], random).slice(0, ROUND_LENGTH)
 }
 
 /** How many questions the archive can currently produce. Shown honestly in the UI. */

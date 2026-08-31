@@ -106,5 +106,15 @@
   "empty.lineup.body": "ההרכבים ההיסטוריים עוד לא יובאו. ההרכב שבניתם נשמר כטיוטה בלבד.",
   "empty.kits": "הסורג עוד לא נדלק כאן",
   "empty.kits.body": "אין עדיין עונה עם יצרן מאומת.",
-  "trivia.letters": "א,ב,ג,ד"
+  "trivia.letters": "א,ב,ג,ד",
+  "screen.timeline.title": "ציר הזמן",
+  "screen.timeline.sub": "الخط الزمني · TIMELINE",
+  "timeline.note": "סדרו את חמשת האירועים מהמוקדם למאוחר. התאריכים נחשפים רק אחרי השליחה.",
+  "timeline.submit": "שלח לאימות",
+  "timeline.up": "העבר למעלה",
+  "timeline.down": "העבר למטה",
+  "empty.timeline": "אין מספיק אירועים מתוארכים",
+  "empty.timeline.body": "צריך חמישה אירועים בוודאות 2 ומעלה עם תאריך מלא.",
+  "mode.timeline": "ציר הזמן",
+  "mode.timeline.sub": "الخط الزمني · TIMELINE"
 }
