@@ -27,5 +27,11 @@
     "types/**/*.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "tests", "scripts", "data"]
+  "exclude": [
+    "node_modules",
+    "tests",
+    "scripts",
+    "data",
+    "lib/ingest"
+  ]
 }
