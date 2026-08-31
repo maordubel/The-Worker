@@ -1,89 +1,154 @@
+import { BannerCloth } from '@/components/ui/BannerCloth'
 import { BuiltByDubel } from '@/components/ui/BuiltByDubel'
-import { Ticket } from '@/components/ui/Ticket'
-import { t } from '@/lib/i18n'
+import { LampGrid, Mast } from '@/components/ui/LampGrid'
+import { PastedSheet } from '@/components/ui/PastedSheet'
+import { SignPlate } from '@/components/ui/SignPlate'
+import { Stamp } from '@/components/ui/Stamp'
+import { TabBar } from '@/components/ui/TabBar'
+import { t, type MessageKey } from '@/lib/i18n'
 
-const MODES = [
-  { serial: '01', title: 'home.modes.trivia', desc: 'home.modes.trivia.desc' },
-  { serial: '02', title: 'home.modes.lineup', desc: 'home.modes.lineup.desc' },
-  { serial: '03', title: 'home.modes.memory', desc: 'home.modes.memory.desc' },
-  { serial: '04', title: 'home.modes.kit', desc: 'home.modes.kit.desc' },
-] as const
+/**
+ * Screen 1 — הקיר. SignPlate → mode plates → streak → sheet stack → cloth → tab bar.
+ * The sheets carry verified archive facts, not placeholder copy: docs/04-verified-research.md
+ */
 
-const COUNTERS = [
-  { label: 'home.data.seasons', value: '—' },
-  { label: 'home.data.players', value: '—' },
-  { label: 'home.data.matches', value: '—' },
-  { label: 'home.data.questions', value: '—' },
-] as const
+const MODES: Array<{ serial: string; title: MessageKey; sub: MessageKey }> = [
+  { serial: '01', title: 'mode.trivia', sub: 'mode.trivia.sub' },
+  { serial: '02', title: 'mode.lineup', sub: 'mode.lineup.sub' },
+  { serial: '03', title: 'mode.memory', sub: 'mode.memory.sub' },
+  { serial: '04', title: 'mode.kits', sub: 'mode.kits.sub' },
+]
 
-export default function HomePage() {
+const STREAK_ON = 13
+const STREAK_TOTAL = 20
+
+export default function WallPage() {
   return (
-    <div className="min-h-dvh">
-      <main id="main" className="mx-auto max-w-5xl px-gutter py-10 md:py-20">
-        {/* Masthead — mobile stacks, desktop sets the title against a rule */}
-        <header className="perforated-b pb-6 md:pb-10">
-          <p className="font-display text-step--1 tracking-[0.2em] text-red">
-            <bdi>{t('home.masthead.eyebrow')}</bdi>
-          </p>
-          <h1 className="plate-offset mt-2 font-display text-step-5 font-black leading-none md:text-[4.5rem]">
-            {t('app.name')}
-          </h1>
-          <p className="mt-3 max-w-prose text-step-1 text-muted md:mt-4">
-            {t('app.tagline')}
-          </p>
+    <div className="mx-auto flex min-h-dvh max-w-5xl flex-col border-x-rule border-ink">
+      <main id="main" className="flex-1 px-gutter pb-10 pt-6 md:pt-10">
+        {/* כותרת המסך + החותמת */}
+        <header className="flex items-start justify-between gap-4">
+          <SignPlate title={t('screen.home.title')} sub={t('screen.home.sub')} />
+          <div className="shrink-0">
+            <Stamp size={56} />
+          </div>
         </header>
 
-        <section aria-labelledby="status" className="mt-stack">
-          <h2 id="status" className="font-display text-step-2 font-bold">
-            {t('home.status.title')}
-          </h2>
-          <p className="mt-2 max-w-prose text-step-0 text-muted">{t('home.status.body')}</p>
-        </section>
+        <p className="mt-stack max-w-prose font-body text-step-0 text-muted">
+          {t('build.status')}
+        </p>
 
-        <section aria-labelledby="modes" className="mt-10">
-          <h2 id="modes" className="font-display text-step-3 font-bold">
-            {t('home.modes.title')}
-          </h2>
-          <ul className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* ארבע לוחיות מצב — 2×2 בנייד, ארבע בשורה בדסקטופ */}
+        <section aria-label={t('tab.game')} className="mt-stack">
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {MODES.map((mode) => (
               <li key={mode.serial}>
-                <Ticket serial={mode.serial} title={t(mode.title)}>
-                  {t(mode.desc)}
-                </Ticket>
+                <div className="flex min-h-tap flex-col justify-between border-rule border-ink bg-sheet p-3">
+                  <span className="font-mono text-[10px] tabular-nums text-red">{mode.serial}</span>
+                  <span className="mt-3 font-sign text-step-1 leading-none text-ink">
+                    {t(mode.title)}
+                  </span>
+                  <span className="mt-1 font-body text-[10.5px] leading-relaxed text-sign">
+                    {t(mode.sub)}
+                  </span>
+                </div>
               </li>
             ))}
           </ul>
         </section>
 
-        <section aria-labelledby="data" className="mt-10">
-          <h2 id="data" className="font-display text-step-3 font-bold">
-            {t('home.data.title')}
-          </h2>
-          <dl className="mt-4 grid grid-cols-2 border-hairline border-ink md:grid-cols-4">
-            {COUNTERS.map((counter) => (
-              <div
-                key={counter.label}
-                className="border-hairline border-ink/30 px-4 py-5 text-center"
-              >
-                <dt className="text-step--1 text-muted">{t(counter.label)}</dt>
-                <dd className="mt-1 font-display text-step-4 font-black tabular-nums text-red">
-                  {counter.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <p className="mt-3 text-step--1 text-muted">{t('home.data.note')}</p>
+        {/* פס הרצף — המגדל */}
+        <section aria-label={t('streak.label')} className="mt-stack flex items-end gap-4">
+          <div className="w-16 shrink-0">
+            <LampGrid total={20} on={STREAK_ON} cols={5} tilt />
+            <Mast height={44} />
+          </div>
+          <div className="flex-1">
+            <div className="font-body text-[11px] font-extrabold tracking-widest text-muted">
+              {t('streak.label')}
+            </div>
+            <div className="mt-2 max-w-[340px]">
+              <LampGrid
+                total={STREAK_TOTAL}
+                on={STREAK_ON}
+                cols={STREAK_TOTAL}
+                label={`${STREAK_ON} מתוך ${STREAK_TOTAL} ${t('wall.streak.of')}`}
+              />
+            </div>
+            <div className="mt-2 font-mono text-step--1 tabular-nums text-ink">
+              <bdi>
+                {STREAK_ON} / {STREAK_TOTAL}
+              </bdi>{' '}
+              {t('wall.streak.of')}
+            </div>
+          </div>
         </section>
+
+        {/* ערימת הגיליונות — שלושה מקסימום */}
+        {/* Two sheets behind, absolutely placed; the top one is in flow and sets the height. */}
+        <section aria-label={t('wall.sheet.today')} className="relative mt-stack pb-6">
+          <PastedSheet
+            id="committee-2026-08-31"
+            stacked
+            depth={2}
+            tone="red"
+            kicker={t('wall.sheet.committee')}
+            serial="TIK-0003"
+          >
+            <p className="mt-2 font-sign text-step-1 leading-tight">{t('slogan.collective')}</p>
+          </PastedSheet>
+
+          <PastedSheet
+            id="sheet-yesterday-0417"
+            stacked
+            depth={1}
+            kicker={t('wall.sheet.yesterday')}
+            serial="TIK-0417"
+          >
+            <p className="mt-2 font-display text-step-2 leading-tight">{t('slogan.source')}</p>
+          </PastedSheet>
+
+          <PastedSheet
+            id="sheet-today-0418"
+            depth={0}
+            animate
+            kicker={`${t('wall.sheet.today')} · 31.08`}
+            serial="TIK-0418"
+          >
+            {/* Placeholder copy until the wall reads from the archive. The fact is
+                real and sourced: docs/04-verified-research.md */}
+            <h2 className="mt-2 font-display text-step-3 leading-tight tabular-nums text-ink">
+              {t('wall.sheet.milan.title')}
+            </h2>
+            <p className="mt-2 font-body text-step-0 text-muted">{t('wall.sheet.milan.body')}</p>
+            <p className="mt-3 font-mono text-[10px] tabular-nums text-sign">
+              {t('wall.sheet.milan.source')}
+            </p>
+          </PastedSheet>
+        </section>
+
+        <button
+          type="button"
+          className="mt-stack flex min-h-tap w-full items-center border-none bg-red px-4 font-body text-step-1 font-extrabold text-sheet transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none"
+        >
+          {t('wall.paste')}
+        </button>
+
+        <div className="mt-stack">
+          <BannerCloth>{t('slogan.remember')}</BannerCloth>
+        </div>
       </main>
 
-      <footer className="border-t-plate border-red">
-        <div className="mx-auto flex max-w-5xl flex-col gap-2 px-gutter py-6 text-step--1 md:flex-row md:items-center md:justify-between">
-          <p className="text-muted">
-            <bdi>{t('footer.rights')}</bdi> © <bdi>{new Date().getFullYear()}</bdi>
+      <footer className="bg-ink px-gutter py-5">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <p className="font-mono text-[11px] tabular-nums text-concrete">
+            <bdi>{t('brand.sub')}</bdi> · <bdi>1923</bdi>
           </p>
-          <BuiltByDubel variant="credit.built" />
+          <BuiltByDubel />
         </div>
       </footer>
+
+      <TabBar />
     </div>
   )
 }

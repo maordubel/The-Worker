@@ -3,74 +3,82 @@
 @tailwind utilities;
 
 /*
-  THE WORKER — design tokens
-  Territory: archival letterpress. Red ink on newsprint stock.
-  Light is the complete definition; dark redefines the same names only.
+  THE WORKER — אוסישקין
+  הקיר הוא המקום · התיק הוא הראיה · המגדל הוא המידה
+  אין צהוב · רדיוס 0 · אין צללים (למעט הילת פנס בלילה)
+
+  Supersedes the "archival letterpress" territory. Spec: brand/THE-WORKER-BRAND-SPEC.md
 */
 :root {
-  --paper: 244 237 225;      /* #F4EDE1 newsprint cream */
-  --paper-2: 232 223 207;    /* #E8DFCF aged surface   */
-  --paper-3: 214 203 184;    /* #D6CBB8 deep stock     */
-  --ink: 23 19 16;           /* #171310 warm press black */
-  --muted: 107 96 85;        /* #6B6055 */
-  --rule: 23 19 16;          /* rules share the ink plate */
-  --red: 209 18 31;          /* #D1121F Hapoel ink red  — 4.7:1 on paper */
-  --red-deep: 142 17 22;     /* #8E1116 second pass     */
-  --ochre: 180 128 42;       /* #B4802A oxidised brass  */
-  --verified: 47 107 79;     /* #2F6B4F press green     */
-  --on-red: 244 237 225;
+  --sheet: 247 245 240;      /* #F7F5F0 נייר, לוחית אמייל, פנס דולק */
+  --paper: 231 228 220;      /* #E7E4DC הקיר — רקע המסך */
+  --ink: 18 17 16;           /* #121110 טקסט, קווים, קיר לילה */
+  --red: 206 20 16;          /* #CE1410 חותמת, בד, פעולה ראשית */
+  --concrete: 169 164 155;   /* #A9A49B זרוע שילוט, בטון, מטא */
+  --sign: 20 53 126;         /* #14357E ערבית/אנגלית, מקורות, ודאות */
+  --muted: 90 86 79;         /* #5A564F טקסט משני על נייר */
+  --lamp-off: 31 29 27;      /* #1F1D1B פנס כבוי בלילה */
 
-  --gutter: 1.25rem;
-  --stack: 1.5rem;
+  --rule-hair: 1px;
+  --rule: 2px;
+  --rule-plate: 3px;
+
+  --gutter: 15px;
+  --stack: 16px;
+  --tap: 48px;               /* גובה מינימלי לכל אלמנט לחיץ */
+
+  --ease-stamp: cubic-bezier(0.2, 0, 0, 1);
+  --ease-peel: cubic-bezier(0.4, 0, 1, 1);
 }
 
-@media (min-width: 768px) {
-  :root { --gutter: 2.5rem; --stack: 2rem; }
-}
-
-.dark {
-  --paper: 20 17 15;
-  --paper-2: 32 27 24;
-  --paper-3: 46 39 34;
-  --ink: 239 230 216;
-  --muted: 154 142 128;
-  --rule: 90 79 69;
-  --red: 242 86 76;          /* 5.6:1 on dark paper */
-  --red-deep: 190 52 44;
-  --ochre: 214 165 82;
-  --verified: 106 179 138;
-  --on-red: 20 17 15;
-}
-
-html { color-scheme: light dark; }
+@media (min-width: 768px) { :root { --gutter: 40px; --stack: 24px; } }
 
 body {
   background-color: rgb(var(--paper));
   color: rgb(var(--ink));
-  /* Signature motif, layer 1: halftone grain on the stock. */
-  background-image: radial-gradient(rgb(var(--ink) / 0.06) 1px, transparent 1px);
-  background-size: 4px 4px;
+  /* מרקם הקיר: סריקות אנכיות עדינות, 5% דיו. לא גרעין הדפסה. */
+  background-image: repeating-linear-gradient(94deg, rgb(var(--ink) / 0.05) 0 1px, transparent 1px 15px);
 }
 
-/* Signature motif, layer 2: the red plate is printed 1.5px out of register.
-   Applied to display headings and pressed states. */
-.plate-offset {
-  text-shadow: -1.5px 1.5px 0 rgb(var(--red) / 0.85);
+/* קצה קרוע — יחידת התוכן */
+.torn {
+  clip-path: polygon(0 2%, 100% 0, 100% 97%, 82% 100%, 56% 96%, 30% 100%, 10% 97%, 0 99%);
+}
+/* קצה גלי — בד אוהדים */
+.cloth {
+  clip-path: polygon(0 0, 100% 4%, 100% 100%, 0 93%);
+}
+/* סבכת התורן */
+.lattice {
+  background-image: repeating-linear-gradient(28deg, rgb(var(--ink)) 0 2px, transparent 2px 12px);
+}
+.lattice-night {
+  background-image: repeating-linear-gradient(28deg, rgb(var(--sheet)) 0 2px, transparent 2px 12px);
 }
 
-/* Signature motif, layer 3: ticket perforation as the section divider. */
-.perforated-b {
-  border-block-end: 1.5px dashed rgb(var(--rule) / 0.55);
-}
-
-:where(a, button, [tabindex]):focus-visible {
+:where(a, button, [role="button"], [tabindex]):focus-visible {
   outline: 3px solid rgb(var(--red));
   outline-offset: 2px;
 }
 
+::selection { background: rgb(var(--red) / 0.18); }
+
+@keyframes stamp-in {
+  0%   { transform: rotate(-16deg) scale(2.8); opacity: 0; }
+  55%  { opacity: 1; }
+  75%  { transform: rotate(-7deg) scale(0.94); }
+  100% { transform: rotate(-8deg) scale(1); opacity: 1; }
+}
+@keyframes lamp-on { from { opacity: 0.15; } to { opacity: 1; } }
+@keyframes paste-in {
+  from { transform: translateY(24px) rotate(0deg); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes crawl {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

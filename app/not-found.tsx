@@ -1,13 +1,18 @@
 import Link from 'next/link'
+import { SignPlate } from '@/components/ui/SignPlate'
 import { t } from '@/lib/i18n'
 
 export default function NotFound() {
   return (
-    <main id="main" className="mx-auto max-w-5xl px-gutter py-24">
-      <p className="font-display text-step-5 font-black text-red">404</p>
-      <p className="mt-2 text-step-1 text-muted">{t('app.tagline')}</p>
-      <Link href="/" className="mt-6 inline-block underline underline-offset-4">
-        {t('app.name')}
+    <main id="main" className="mx-auto max-w-5xl px-gutter py-16">
+      <SignPlate title={t('screen.home.title')} sub={t('screen.home.sub')} />
+      <p className="mt-stack font-mono text-step-5 tabular-nums text-red">404</p>
+      <p className="mt-2 font-body text-step-0 text-muted">{t('wall.empty')}</p>
+      <Link
+        href="/"
+        className="mt-stack inline-flex min-h-tap items-center bg-ink px-4 font-body text-step-1 font-extrabold text-sheet"
+      >
+        {t('tab.wall')}
       </Link>
     </main>
   )

@@ -17,8 +17,11 @@ Read `docs/00-architecture.md` before changing anything structural.
 6. **Only `(כדורגל)` content.** The source wiki also covers basketball — filter and
    assert it in every ingest report.
 7. **Hebrew names are matched through `entity_alias`, never fuzzily.**
-8. **Design tokens only.** Territory and tokens: `docs/01-brand-concept.md`.
-   No raw hex, no ad-hoc px, no shadows, radius 0.
+8. **Design tokens only.** The brand system is **אוסישקין — התיק, הקיר והמגדל**;
+   the authority is `brand/THE-WORKER-BRAND-SPEC.md`. Eight tokens, four faces, six
+   components. **No yellow anywhere. Radius 0** (a lamp is the only circle). **No
+   shadow** except `shadow-lamp` at night. No raw hex. The twenty-point acceptance
+   checklist runs as `tests/brand.test.ts` — it fails the build, not the review.
 9. **RTL-first.** Logical properties. Wrap mixed-direction runs in `<bdi>`.
 10. **No user-facing string in code.** Everything through `messages/he.json` + `t()`.
 

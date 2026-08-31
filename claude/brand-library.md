@@ -5,14 +5,15 @@ family, font pairing or leading concept.
 
 ---
 
-## The Worker (הפועל)
-- **Concept** — an archive printed in two plates: warm press black and Hapoel red, on newsprint stock.
-- **Territory** — archival letterpress / Hebrew labour-movement print.
-- **Palette family** — warm cream newsprint + press black + ink red + oxidised brass. No blue anywhere.
-- **Type pairing** — Frank Ruhl Libre (display serif) + Heebo (body grotesque).
-- **Signature motif** — the red plate printed 1.5px out of register, ticket-stub perforation rules, 4px halftone grain; every card is a numbered matchday programme ticket.
-- **Geometry** — radius 0, no shadows, ink rules only.
-- **Registered** — 2026-08-31.
+## The Worker (הפועל) — אוסישקין
+- **Concept** — three instruments, not a style: the wall (a sheet pasted each morning), the dossier (a stamp that verifies a fact), the floodlight tower (a 20-lamp grid that measures every number).
+- **Territory** — Israeli labour-movement signage and municipal archive: enamel plate, cloth banner, rubber stamp, lattice pylon.
+- **Palette family** — warm off-white paper + near-black ink + a single stamp red + concrete grey + one signage blue. **No yellow, at all.**
+- **Type pairing** — Frank Ruhl Libre 900 (headlines) + Miriam Libre 700 (signage/stamps) + Heebo (interface) + Courier Prime (serials).
+- **Signature motif** — the hammer-and-sickle stamp at ‎-8°‎ with `mix-blend-mode: multiply`; the 20-lamp tower grid as the only data unit; the torn-edge pasted sheet with a deterministic tilt.
+- **Geometry** — radius 0 (a lamp is the only circle), no shadows (one night lamp glow), 2px ink rules.
+- **Registered** — 2026-08-31. Supersedes this project's earlier "archival letterpress" entry.
+- **Spec** — `brand/THE-WORKER-BRAND-SPEC.md`; source design `The Worker - Brand Kit.dc.html`.
 
 ---
 
@@ -20,4 +21,4 @@ family, font pairing or leading concept.
 
 | Family | Project |
 |---|---|
-| warm newsprint + press black + ink red | The Worker |
+| paper + ink + stamp red + concrete + signage blue (no yellow) | The Worker |

@@ -1,34 +1,50 @@
 import type { Metadata } from 'next'
-import { Frank_Ruhl_Libre, Heebo } from 'next/font/google'
+import { Courier_Prime, Frank_Ruhl_Libre, Heebo, Miriam_Libre } from 'next/font/google'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
 import './globals.css'
 
-const display = Frank_Ruhl_Libre({
+/** Four faces, fixed roles. See brand/THE-WORKER-BRAND-SPEC.md §3. */
+const frank = Frank_Ruhl_Libre({
   subsets: ['hebrew', 'latin'],
   weight: ['700', '900'],
-  variable: '--font-display',
+  variable: '--font-frank',
   display: 'swap',
 })
-
-const body = Heebo({
+const miriam = Miriam_Libre({
   subsets: ['hebrew', 'latin'],
-  weight: ['400', '500', '700'],
-  variable: '--font-body',
+  weight: ['400', '700'],
+  variable: '--font-miriam',
+  display: 'swap',
+})
+const heebo = Heebo({
+  subsets: ['hebrew', 'latin'],
+  weight: ['400', '500', '800'],
+  variable: '--font-heebo',
+  display: 'swap',
+})
+const courier = Courier_Prime({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-courier',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: `${t('app.name')} — ${t('app.tagline')}`,
+  title: `${t('brand.name')} · ${t('brand.system')}`,
   description: t('app.description'),
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={LOCALE} dir={DIRECTION} className={`${display.variable} ${body.variable}`}>
+    <html
+      lang={LOCALE}
+      dir={DIRECTION}
+      className={`${frank.variable} ${miriam.variable} ${heebo.variable} ${courier.variable}`}
+    >
       <body className="font-body antialiased">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:start-2 focus:z-50 focus:bg-red focus:px-4 focus:py-2 focus:text-on-red"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:start-2 focus:z-50 focus:bg-red focus:px-4 focus:py-2 focus:text-sheet"
         >
           {t('nav.skipToContent')}
         </a>
