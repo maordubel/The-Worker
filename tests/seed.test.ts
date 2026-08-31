@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { isDerbyFixture } from '@/lib/ingest/guards'
-import { IngestReport } from '@/lib/ingest/report'
+import { isDerbyFixture } from '@/scripts/ingest/lib/guards'
+import { IngestReport } from '@/scripts/ingest/lib/report'
 import { concatBundles, runPipeline } from '@/scripts/ingest/pipeline'
 import { loadManualBundle } from '@/scripts/ingest/sources/manual'
-import { TRIVIA_CONFIDENCE_FLOOR, type StagedBundle } from '@/lib/ingest/types'
+import { TRIVIA_CONFIDENCE_FLOOR, type StagedBundle } from '@/scripts/ingest/lib/types'
 
 const ROOT = process.cwd()
 

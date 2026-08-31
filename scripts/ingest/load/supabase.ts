@@ -9,9 +9,9 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-import type { AliasRow } from '@/lib/ingest/dedupe'
-import type { IngestReport } from '@/lib/ingest/report'
-import type { StagedBundle } from '@/lib/ingest/types'
+import type { AliasRow } from '@/scripts/ingest/lib/dedupe'
+import type { IngestReport } from '@/scripts/ingest/lib/report'
+import type { StagedBundle } from '@/scripts/ingest/lib/types'
 
 export type LoadCounts = Record<string, number>
 

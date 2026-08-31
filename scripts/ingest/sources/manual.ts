@@ -12,15 +12,15 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { canonicalSeasonLabel, parsePosition, parseShirtNumber, slugify } from '@/lib/ingest/normalize'
-import type { IngestReport } from '@/lib/ingest/report'
+import { canonicalSeasonLabel, parsePosition, parseShirtNumber, slugify } from '@/scripts/ingest/lib/normalize'
+import type { IngestReport } from '@/scripts/ingest/lib/report'
 import {
   emptyBundle,
   type BundleKey,
   type Confidence,
   type SourceRef,
   type StagedBundle,
-} from '@/lib/ingest/types'
+} from '@/scripts/ingest/lib/types'
 
 export const MANUAL_DIR = 'content/manual'
 

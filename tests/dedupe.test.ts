@@ -5,8 +5,8 @@ import {
   findUnresolvedReferences,
   mergeByKey,
   resolveAlias,
-} from '@/lib/ingest/dedupe'
-import { emptyBundle, type Confidence, type SourceRef } from '@/lib/ingest/types'
+} from '@/scripts/ingest/lib/dedupe'
+import { emptyBundle, type Confidence, type SourceRef } from '@/scripts/ingest/lib/types'
 
 const source: SourceRef = {
   naturalKey: 'manual:test',

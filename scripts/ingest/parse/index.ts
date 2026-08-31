@@ -12,7 +12,7 @@ import {
   extractTableRows,
   extractTemplate,
 } from '../adapters/mediawiki'
-import { classifySport } from '@/lib/ingest/guards'
+import { classifySport } from '@/scripts/ingest/lib/guards'
 import {
   IngestValueError,
   canonicalSeasonLabel,
@@ -21,8 +21,8 @@ import {
   parseScore,
   parseShirtNumber,
   slugify,
-} from '@/lib/ingest/normalize'
-import type { IngestReport } from '@/lib/ingest/report'
+} from '@/scripts/ingest/lib/normalize'
+import type { IngestReport } from '@/scripts/ingest/lib/report'
 import type {
   Confidence,
   RawPage,
@@ -31,7 +31,7 @@ import type {
   StagedPerson,
   StagedSeason,
   StagedSquadMembership,
-} from '@/lib/ingest/types'
+} from '@/scripts/ingest/lib/types'
 
 /** Anything read off a single wiki page is one source, unverified until reviewed. */
 const WIKI_CONFIDENCE: Confidence = 1

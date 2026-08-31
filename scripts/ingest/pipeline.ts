@@ -9,14 +9,14 @@ import {
   findUnresolvedReferences,
   mergeByKey,
   type AliasRow,
-} from '@/lib/ingest/dedupe'
-import type { IngestReport } from '@/lib/ingest/report'
+} from '@/scripts/ingest/lib/dedupe'
+import type { IngestReport } from '@/scripts/ingest/lib/report'
 import {
   BUNDLE_KEYS,
   TRIVIA_CONFIDENCE_FLOOR,
   emptyBundle,
   type StagedBundle,
-} from '@/lib/ingest/types'
+} from '@/scripts/ingest/lib/types'
 
 export type PipelineResult = {
   bundle: StagedBundle
