@@ -8,9 +8,17 @@
 
 type StampTone = 'red' | 'ink' | 'sheet'
 
+/** The two stamps that exist. The word is part of the mark, so it lives here. */
+export type StampVerdict = 'verified' | 'rejected'
+
+const VERDICT_WORD: Record<StampVerdict, string> = {
+  verified: 'אומת',
+  rejected: 'נדחה',
+}
+
 type StampProps = {
   /** null = mark only, with no text frame */
-  label?: 'אומת' | 'נדחה' | null
+  label?: StampVerdict | null
   /** ring + circumferential text — from 64px up */
   ring?: boolean
   tone?: StampTone
@@ -33,6 +41,7 @@ export function Stamp({
 }: StampProps) {
   const colour = TONE[tone]
   const ringId = `stamp-ring-${tone}-${size}`
+  const word = label === null ? null : VERDICT_WORD[label]
 
   return (
     <div
@@ -44,8 +53,8 @@ export function Stamp({
         viewBox="0 0 200 200"
         width={size}
         height={size}
-        role={label ? 'img' : undefined}
-        aria-label={label ?? undefined}
+        role={word ? 'img' : undefined}
+        aria-label={word ?? undefined}
       >
         {ring && (
           <>
@@ -80,12 +89,12 @@ export function Stamp({
           <path d="M112 74 L 140 102 L 126 116 L 98 88 Z" strokeWidth="0" />
         </g>
       </svg>
-      {label && (
+      {word && (
         <span
           className="border-stamp px-4 py-1 font-sign text-step-4 leading-none"
           style={{ borderColor: colour, color: colour }}
         >
-          {label}
+          {word}
         </span>
       )}
     </div>

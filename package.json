@@ -7,9 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.all.json",
     "test": "vitest run",
-    "db:types": "supabase gen types typescript --linked > types/database.ts"
+    "db:types": "supabase gen types typescript --linked > types/database.ts",
+    "ingest": "tsx scripts/ingest/cli.ts",
+    "ingest:dry": "tsx scripts/ingest/cli.ts --source all --dry-run",
+    "doctor": "rm -rf node_modules .next && npm ci && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
@@ -28,7 +31,11 @@
     "eslint-config-next": "14.2.15",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
+    "tsx": "^4.23.13",
     "typescript": "^5.6.3",
     "vitest": "^2.1.2"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   }
 }
