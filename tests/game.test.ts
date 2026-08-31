@@ -5,6 +5,7 @@ import { buildBoard } from '@/lib/game/memory'
 import { ROUND_LENGTH, availableQuestionCount, deal, grade } from '@/lib/game/trivia'
 import { verifiedKitSeasons } from '@/lib/game/kits'
 import { TIMELINE_LENGTH, dealTimeline, gradeTimeline } from '@/lib/game/timeline'
+import { dealGoal, gradeGoal } from '@/lib/game/goal'
 import {
   FORMATIONS,
   dealChallenge,
@@ -234,9 +235,69 @@ describe('lineup', () => {
     expect(freeBuildBank().length).toBeGreaterThanOrEqual(4)
   })
 
-  it('reports no verified XI rather than inventing one', () => {
-    expect(hasVerifiedLineup()).toBe(false)
-    expect(dealChallenge(2)).toBeNull()
-    expect(gradeLineup(2, {})).toBeNull()
+  it('never invents an XI — every record traces to a source', () => {
+    const challenge = dealChallenge(2)
+    expect(challenge?.sourceUrl).toContain('red-fans')
+  })
+})
+
+describe('goal re-enactment', () => {
+  it('deals the steps without their destinations', () => {
+    const challenge = dealGoal(1)
+    expect(challenge).not.toBeNull()
+    expect(challenge?.steps.length).toBeGreaterThanOrEqual(3)
+    // `to` is the answer and must never be in the payload
+    expect(JSON.stringify(challenge)).not.toContain('"to"')
+  })
+
+  it('accepts a placement inside the tolerance and rejects one outside', () => {
+    const truth = gradeGoal(1, [])?.steps.map((step) => step.actual) ?? []
+    expect(truth.length).toBeGreaterThan(0)
+
+    const exact = gradeGoal(1, truth)
+    expect(exact?.hits).toBe(exact?.total)
+
+    const wayOff = gradeGoal(
+      1,
+      truth.map((point) => ({ x: (point.x + 50) % 100, y: (point.y + 60) % 100 })),
+    )
+    expect(wayOff?.hits).toBe(0)
+  })
+
+  it('reveals the real path and the narrative only after grading', () => {
+    const verdict = gradeGoal(1, [])
+    expect(verdict?.narrativeHe).toContain('קלשצ')
+    expect(verdict?.steps.every((step) => step.actual.x >= 0 && step.actual.y >= 0)).toBe(true)
+  })
+
+  it('scores an empty submission as zero rather than throwing', () => {
+    const verdict = gradeGoal(1, [])
+    expect(verdict?.hits).toBe(0)
+  })
+})
+
+describe('the verified Chelsea XI', () => {
+  it('turns the lineup game on', () => {
+    expect(hasVerifiedLineup()).toBe(true)
+    const challenge = dealChallenge(2)
+    expect(challenge?.formation.slots).toHaveLength(11)
+    expect(challenge?.bank.length).toBeGreaterThanOrEqual(11)
+  })
+
+  it('grades a correct XI as eleven exact', () => {
+    const solution = gradeLineup(2, {})?.solution ?? []
+    expect(solution).toHaveLength(11)
+    const picks = Object.fromEntries(solution.map((row) => [row.slotId, row.name]))
+    expect(gradeLineup(2, picks)?.exact).toBe(11)
+  })
+
+  it('marks a bench player as not in the XI', () => {
+    const verdict = gradeLineup(2, { GK: 'ניר רחמין' })
+    expect(verdict?.slots.find((slot) => slot.slotId === 'GK')?.status).toBe('not_in_xi')
+  })
+
+  it('marks a keeper played outfield as the wrong line', () => {
+    const verdict = gradeLineup(2, { F1: 'שביט אלימלך' })
+    expect(verdict?.slots.find((slot) => slot.slotId === 'F1')?.status).toBe('wrong_slot')
   })
 })

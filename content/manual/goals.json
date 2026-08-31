@@ -1,0 +1,48 @@
+{
+  "note": "Goal sequences for the re-enactment game. Coordinates are APPROXIMATIONS derived from the narrative in the source, not measured positions — the report gives '40 metres, near Gate 7', not a coordinate. That is why every sequence carries approximateCoords: true and a generous tolerance, and why the UI says so. Bloomfield orientation supplied by Maor Harel: Gate 5 north, Gate 11 south, Gate 7 east, Gate 2 west. On the pitch diagram the attacking goal is at the top (y=0), x=0 is west (Gate 2) and x=100 is east (Gate 7).",
+  "confidence": 3,
+  "source": {
+    "kind": "wiki",
+    "title": "ויקיפועל · דיווח המשחק מול צ'לסי (אומת ע\"י מאור הראל)",
+    "url": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
+  },
+  "records": [
+    {
+      "goalId": "chelsea-2001-clescenko-90-4",
+      "titleHe": "הנגיחה של קלשצ'נקו",
+      "subtitleHe": "18.10.2001 · בלומפילד · דקה 90+4",
+      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|צלסי|סיבוב 2 משחק 1",
+      "approximateCoords": true,
+      "narrativeHe": "עמרי אפק מוסר לאבוקסיס, שמ-40 מטרים ליד שער 7 מגביה לראשו של קלשצ'נקו ליד נקודת הפנדל. המולדאבי נוגח לקורה השמאלית ולרשת.",
+      "sequence": [
+        {
+          "step": 1,
+          "actorHe": "עמרי אפק",
+          "action": "pass",
+          "from": { "x": 62, "y": 62 },
+          "to": { "x": 74, "y": 44 },
+          "targetHe": "יוסי אבוקסיס",
+          "noteHe": "מסירה קדימה לאבוקסיס"
+        },
+        {
+          "step": 2,
+          "actorHe": "יוסי אבוקסיס",
+          "action": "cross",
+          "from": { "x": 74, "y": 44 },
+          "to": { "x": 50, "y": 13 },
+          "targetHe": "סרגיי קלשצ'נקו",
+          "noteHe": "הגבהה מ-40 מטרים, ליד שער 7 (מזרח), לראשו של קלשצ'נקו ליד נקודת הפנדל"
+        },
+        {
+          "step": 3,
+          "actorHe": "סרגיי קלשצ'נקו",
+          "action": "shot",
+          "from": { "x": 50, "y": 13 },
+          "to": { "x": 38, "y": 1 },
+          "goalQuadrant": 1,
+          "noteHe": "נגיחה לקורה השמאלית ולרשת"
+        }
+      ]
+    }
+  ]
+}

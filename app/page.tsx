@@ -16,6 +16,7 @@ const MODES: Array<{ serial: string; href: string; title: MessageKey; sub: Messa
   { serial: '03', href: '/memory?seed=7', title: 'mode.memory', sub: 'mode.memory.sub' },
   { serial: '04', href: '/kits', title: 'mode.kits', sub: 'mode.kits.sub' },
   { serial: '05', href: '/timeline?seed=4', title: 'mode.timeline', sub: 'mode.timeline.sub' },
+  { serial: '06', href: '/goal?seed=1', title: 'mode.goal', sub: 'mode.goal.sub' },
 ]
 
 const STREAK_ON = 13
@@ -31,7 +32,7 @@ export default function WallPage() {
       <p className="mt-stack max-w-prose font-body text-step-0 text-muted">{t('build.status')}</p>
 
       <section aria-label={t('tab.game')} className="mt-stack">
-        <ul className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {MODES.map((mode) => (
             <li key={mode.serial}>
               <Link

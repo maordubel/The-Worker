@@ -1,5 +1,5 @@
 {
-  "note": "Sources disagree. Recorded and displayed, never resolved by quietly picking one.",
+  "note": "Sources disagree. Recorded and displayed, never resolved by quietly picking one. The last five come from the kit-engine spec, which contradicts the verified kit archive — the spec drives the ENGINE, not the facts.",
   "confidence": 2,
   "source": {
     "kind": "other",
@@ -66,6 +66,56 @@
       "sourceAUrl": null,
       "sourceBUrl": "https://sports.walla.co.il/item/1713821",
       "noteHe": "נבחר 23.7.2010 — דיווח בן־זמן מאותו ערב"
+    },
+    {
+      "entityTable": "kit_supply_spell",
+      "entityKey": "2009-2012",
+      "field": "manufacturer",
+      "claimA": "אמברו 2006/07–2010/11 ואז קאפה 2011–14",
+      "claimB": "Uhlsport 2009–2012 (מפרט המדים)",
+      "sourceAUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-kits/",
+      "sourceBUrl": null,
+      "noteHe": "Uhlsport אינה מופיעה בארכיון המדים לאף עונה. לא נטען עד לאימות מול תמונה."
+    },
+    {
+      "entityTable": "sponsor_deal",
+      "entityKey": "2010/11",
+      "field": "shirt_sponsor",
+      "claimA": "כתר — נראית על חולצת הבית 2010/11",
+      "claimB": "סמסונג (מפרט המדים)",
+      "sourceAUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-2010-11-home-kit-20115/",
+      "sourceBUrl": null,
+      "noteHe": "ייתכן ששתיהן נכונות בעונות/תחרויות שונות; לא הוכרע."
+    },
+    {
+      "entityTable": "sponsor_deal",
+      "entityKey": "2009/10",
+      "field": "shirt_sponsor",
+      "claimA": "לא אומת",
+      "claimB": "Sunday / Eliot (מפרט המדים)",
+      "sourceAUrl": null,
+      "sourceBUrl": null,
+      "noteHe": "לא נמצא מקור נגיש. לא נטען."
+    },
+    {
+      "entityTable": "kit_supply_spell",
+      "entityKey": "2014-2019",
+      "field": "manufacturer",
+      "claimA": "אמברו 2014/15, פומה 2015/16, נייקי 2016/17, מקרון 2017/18–2021/22",
+      "claimB": "נייקי 2014–2019 (מפרט המדים)",
+      "sourceAUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-kits/",
+      "sourceBUrl": null,
+      "noteHe": "הארכיון מפרט ארבעה יצרנים בטווח הזה, לא אחד."
+    },
+    {
+      "entityTable": "kit_supply_spell",
+      "entityKey": "2021-",
+      "field": "manufacturer",
+      "claimA": "אדידס 2022/23–2023/24, נייקי מ-2024/25",
+      "claimB": "אדידס 2021–היום (מפרט המדים)",
+      "sourceAUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-kits/",
+      "sourceBUrl": null,
+      "noteHe": "נייקי היא היצרנית הנוכחית לפי הארכיון."
     }
   ]
 }

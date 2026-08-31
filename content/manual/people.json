@@ -1,5 +1,5 @@
 {
-  "note": "Only people named in a verified source. Roles and relationships live in matches, events and association roles — not in prose here.",
+  "note": "Only people named in a verified source. The 2001/02 Chelsea XI and bench were supplied by Maor Harel from the Red Fans wiki match report and carry confidence 3.",
   "confidence": 2,
   "source": {
     "kind": "other",
@@ -176,6 +176,146 @@
       "confidence": 1,
       "sourceUrl": "https://www.sport5.co.il/articles.aspx?FolderID=4483&docID=158800",
       "sourceTitle": "Sport5, 27.11.2013"
+    },
+    {
+      "slug": "שביט-אלימלך",
+      "fullNameHe": "שביט אלימלך",
+      "aliases": [
+        "שביט אלימלך"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "אילן-בכר",
+      "fullNameHe": "אילן בכר",
+      "aliases": [
+        "אילן בכר"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "שמעון-גרשון",
+      "fullNameHe": "שמעון גרשון",
+      "aliases": [
+        "שמעון גרשון"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "יגאל-אנטבי",
+      "fullNameHe": "יגאל אנטבי",
+      "aliases": [
+        "יגאל אנטבי"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "דניס-אונישנקו",
+      "fullNameHe": "דניס אונישנקו",
+      "aliases": [
+        "דניס אונישנקו"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "גאבור-הלמאי",
+      "fullNameHe": "גאבור הלמאי",
+      "aliases": [
+        "גאבור הלמאי"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "אישטוון-פישונט",
+      "fullNameHe": "אישטוון פישונט",
+      "aliases": [
+        "אישטוון פישונט"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "ניר-רחמין",
+      "fullNameHe": "ניר רחמין",
+      "aliases": [
+        "ניר רחמין"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "אבי-כנפו",
+      "fullNameHe": "אבי כנפו",
+      "aliases": [
+        "אבי כנפו"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "בני-חדד",
+      "fullNameHe": "בני חדד",
+      "aliases": [
+        "בני חדד"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "קלמי-סבן",
+      "fullNameHe": "קלמי סבן",
+      "aliases": [
+        "קלמי סבן"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "יעקב-הלל",
+      "fullNameHe": "יעקב הלל",
+      "aliases": [
+        "יעקב הלל"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "עמרי-אפק",
+      "fullNameHe": "עמרי אפק",
+      "aliases": [
+        "עמרי אפק"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
+    },
+    {
+      "slug": "בן-לוז",
+      "fullNameHe": "בן לוז",
+      "aliases": [
+        "בן לוז"
+      ],
+      "confidence": 3,
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "sourceTitle": "ויקיפועל · הרכב הפועל–צ'לסי 18.10.2001 (אומת ע\"י מאור הראל)"
     }
   ]
 }

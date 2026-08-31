@@ -35,6 +35,10 @@ export default function LineupPage({ searchParams }: { searchParams: { seed?: st
         </p>
       )}
 
+      {challenge?.positionsInferred && (
+        <p className="mt-2 font-body text-step--1 text-muted">{t('lineup.inferred')}</p>
+      )}
+
       <LineupBoard
         slots={formation.slots}
         bank={challenge?.bank ?? freeBuildBank()}

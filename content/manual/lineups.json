@@ -1,7 +1,11 @@
 {
-  "note": "EMPTY BY DESIGN. A starting XI is a historical claim and is never invented — not even as a demo. Fill one record and the pitch game switches from free build to graded immediately. Schema below; confidence 3 for anything Maor verifies himself.",
+  "note": "A starting XI is a historical claim and is never invented. The 2001/02 Chelsea XI was supplied by Maor Harel from the Red Fans match report. The report lists the XI in the conventional order (keeper, defence, midfield, attack) but does NOT state each player's exact position, so this record is graded BY LINE, not by slot — see positionsInferred.",
   "confidence": 3,
-  "source": { "kind": "manual", "title": "Curated by Maor Harel — pending", "url": null },
+  "source": {
+    "kind": "manual",
+    "title": "Curated by Maor Harel — pending",
+    "url": null
+  },
   "schema": {
     "matchId": "2001-02-uefa-qf-milan",
     "titleHe": "רבע גמר גביע אופ\"א · מול מילאן",
@@ -20,10 +24,45 @@
       "F1": "חלוץ",
       "F2": "חלוץ"
     },
-    "distractors": ["שחקנים שלא היו בהרכב באותו ערב"],
+    "distractors": [
+      "שחקנים שלא היו בהרכב באותו ערב"
+    ],
     "sourceTitle": "מי אישר את ההרכב",
     "sourceUrl": "https://...",
     "confidence": 3
   },
-  "records": []
+  "records": [
+    {
+      "matchId": "2001-02-uefa-r2-chelsea",
+      "titleHe": "גביע אופ\"א · סיבוב 2 · מול צ'לסי",
+      "subtitleHe": "18.10.2001 · בלומפילד · 0:2",
+      "formation": "4-4-2",
+      "positionsInferred": true,
+      "xi": {
+        "GK": "שביט אלימלך",
+        "D1": "אילן בכר",
+        "D2": "שמעון גרשון",
+        "D3": "אסי דומב",
+        "D4": "יגאל אנטבי",
+        "M1": "יוסי אבוקסיס",
+        "M2": "דניס אונישנקו",
+        "M3": "גאבור הלמאי",
+        "M4": "אישטוון פישונט",
+        "F1": "מילאן אוסטרץ",
+        "F2": "סרגיי קלשצ'נקו"
+      },
+      "distractors": [
+        "ניר רחמין",
+        "אבי כנפו",
+        "בני חדד",
+        "קלמי סבן",
+        "יעקב הלל",
+        "עמרי אפק",
+        "בן לוז"
+      ],
+      "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+      "confidence": 3
+    }
+  ]
 }

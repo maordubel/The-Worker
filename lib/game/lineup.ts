@@ -104,6 +104,13 @@ type LineupRecord = {
   xi: Record<string, string>
   /** extra names offered alongside the eleven */
   distractors?: string[]
+  /**
+   * True when the source lists the XI in the conventional order but does not state
+   * each player's position. Grading then falls back to the LINE (keeper / defence /
+   * midfield / attack) rather than the exact slot — inferring a right-back from list
+   * order would be a claim the source does not make.
+   */
+  positionsInferred?: boolean
   sourceTitle?: string
   sourceUrl?: string
   confidence?: number
@@ -130,8 +137,14 @@ export type Challenge = {
   subtitleHe: string | null
   formation: Formation
   bank: string[]
+  positionsInferred: boolean
   sourceTitle: string
   sourceUrl: string | null
+}
+
+/** GK · D · M · F — the band a slot belongs to. */
+export function lineOf(slotId: SlotId): string {
+  return slotId.replace(/\d+$/, '')
 }
 
 /** Null when no verified XI exists — the screen then says exactly that. */
@@ -151,6 +164,7 @@ export function dealChallenge(seed: number): Challenge | null {
     subtitleHe: record.subtitleHe ?? null,
     formation: formation as Formation,
     bank: shuffle([...new Set([...eleven, ...extras])], rng(seed * 3 + 7)),
+    positionsInferred: record.positionsInferred ?? false,
     sourceTitle: record.sourceTitle ?? file.source.title,
     sourceUrl: record.sourceUrl ?? file.source.url ?? null,
   }
@@ -197,13 +211,17 @@ export function gradeLineup(
       return { slotId: slot.slotId, name: null, status: 'empty', belongsToSlotId: null }
     }
     const belongsTo = slotOfName.get(name) ?? null
-    if (belongsTo === slot.slotId) {
-      return { slotId: slot.slotId, name, status: 'exact', belongsToSlotId: belongsTo }
+    if (belongsTo === null) {
+      return { slotId: slot.slotId, name, status: 'not_in_xi', belongsToSlotId: null }
     }
+    // Exact means the exact slot, unless the source only supports the line.
+    const matched = record.positionsInferred
+      ? lineOf(belongsTo) === lineOf(slot.slotId)
+      : belongsTo === slot.slotId
     return {
       slotId: slot.slotId,
       name,
-      status: belongsTo === null ? 'not_in_xi' : 'wrong_slot',
+      status: matched ? 'exact' : 'wrong_slot',
       belongsToSlotId: belongsTo,
     }
   })

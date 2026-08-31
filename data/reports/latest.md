@@ -1,13 +1,13 @@
-# Ingestion report — all (dry-run)
+# Ingestion report — manual (dry-run)
 
-Started 2026-08-31T13:35:46.332Z · status **OK**
+Started 2026-08-31T15:30:21.297Z · status **OK**
 
 ## Totals
 
 | Metric | Count |
 |---|---:|
-| discovered | 270 |
-| imported | 270 |
+| discovered | 291 |
+| imported | 291 |
 | skipped | 0 |
 | rejected | 0 |
 | unresolved | 0 |
@@ -24,10 +24,10 @@ Started 2026-08-31T13:35:46.332Z · status **OK**
 | manual:venues | 5 |
 | manual:competitions | 11 |
 | manual:eras | 6 |
-| manual:people | 14 |
+| manual:people | 28 |
 | manual:squadMemberships | 0 |
 | manual:matches | 12 |
-| manual:matchEvents | 5 |
+| manual:matchEvents | 7 |
 | manual:trophies | 32 |
 | manual:moments | 5 |
 | manual:sponsors | 5 |
@@ -42,7 +42,7 @@ Started 2026-08-31T13:35:46.332Z · status **OK**
 | manual:associationEvents | 6 |
 | manual:associationRoles | 8 |
 | manual:membershipMilestones | 1 |
-| manual:factConflicts | 6 |
+| manual:factConflicts | 11 |
 | manual:seasons | 104 |
 
 ## Imported by entity
@@ -54,10 +54,10 @@ Started 2026-08-31T13:35:46.332Z · status **OK**
 | venues | 5 |
 | competitions | 11 |
 | seasons | 104 |
-| people | 14 |
+| people | 28 |
 | squadMemberships | 0 |
 | matches | 12 |
-| matchEvents | 5 |
+| matchEvents | 7 |
 | trophies | 32 |
 | moments | 5 |
 | sponsors | 5 |
@@ -72,14 +72,14 @@ Started 2026-08-31T13:35:46.332Z · status **OK**
 | associationEvents | 6 |
 | associationRoles | 8 |
 | membershipMilestones | 1 |
-| factConflicts | 6 |
+| factConflicts | 11 |
 
 ## Coverage
 
 | Entity | Field | Present | Total | % |
 |---|---|---|---|---|
-| people | birthDate | 0 | 14 | 0% |
-| people | nationalities | 0 | 14 | 0% |
+| people | birthDate | 0 | 28 | 0% |
+| people | nationalities | 0 | 28 | 0% |
 | squadMemberships | shirtNumber | 0 | 0 | — |
 | squadMemberships | position | 0 | 0 | — |
 | matches | playedOn | 12 | 12 | 100% |
@@ -279,7 +279,7 @@ _none_
 - venues.json: Only venues a verified match points at. Ussishkin Hall is basketball and is marked as such.
 - competitions.json: Competition names and types. Participation is a season-level fact and is asserted only through trophies and matches, never here.
 - eras.json: PROPOSED product taxonomy for navigation and progression — not a historical claim. Names and boundaries await Maor's answers to docs/02-data-questions.md section 1. Loaded at confidence 0 so nothing here can reach question generation.
-- people.json: Only people named in a verified source. Roles and relationships live in matches, events and association roles — not in prose here.
+- people.json: Only people named in a verified source. The 2001/02 Chelsea XI and bench were supplied by Maor Harel from the Red Fans wiki match report and carry confidence 3.
 - squads.json: EMPTY BY DESIGN. Per-season squads and shirt numbers need the Red Fans squad categories, which are still behind bot protection. Fill from Maor with confidence 3, or from the wiki once access is granted.
 - matches.json: Every match here was verified against a named source this session. The 2001/02 UEFA Cup run is complete from the second round onwards; the first-round opponent could not be resolved and is therefore absent rather than guessed. Kickoff times are never asserted — only dates.
 - match-events.json: Only goals a named source attributes to a named scorer with a minute.
@@ -297,7 +297,6 @@ _none_
 - association-events.json: The fan-ownership story as documented. Dates are marked confirmed only where a source gives the day. The research document's 25 June 2007 registration date, the fifth game of 14 November 2007, the 2008 election vote counts, the separate 413/10/18 association vote and the 2015 founders' ceremony could NOT be sourced and are absent.
 - association-roles.json: Roles as contemporary reporting records them. The ordering of the 2008 election results and the audit-committee names could not be sourced and are absent.
 - membership-milestones.json: Arik Einstein as member #1,000 is attested by a founder in a Sport5 interview. The research document's January 2010 date is NOT sourced — and Walla reported Einstein joining in August 2007 — so the date is left unconfirmed rather than picked.
-- fact-conflicts.json: Sources disagree. Recorded and displayed, never resolved by quietly picking one.
+- fact-conflicts.json: Sources disagree. Recorded and displayed, never resolved by quietly picking one. The last five come from the kit-engine spec, which contradicts the verified kit archive — the spec drives the ENGINE, not the facts.
 - seasons.json: Calendar scaffold. A season label is arithmetic, not a claim that the club competed that season. A source that names a bare year (pre-state cups) is rendered YYYY/YY by the canonicaliser — a labelling convention, documented, not a claim about the calendar.
 - seasons: generated 104 calendar labels 1923/24–2026/27. A label is a calendar scaffold, not a claim that the club competed that season.
-- no raw wiki pages on disk — run with --fetch first
