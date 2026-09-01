@@ -5,7 +5,9 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { EnemyPlate } from '@/components/hate/EnemyPlate'
 import { Punch } from '@/components/play/Punch'
 import { Num } from '@/components/ui/Num'
+import { AdSlot } from '@/components/ads/AdSlot'
 import { ShareRow } from '@/components/share/ShareRow'
+import { artFor } from '@/lib/share/story'
 import { DUEL_COUNT, duelAt, type Enemy, judgeRun, standingKey } from '@/lib/game/hate-run'
 import { t, type MessageKey } from '@/lib/i18n'
 
@@ -364,12 +366,16 @@ function Verdict({
         ))}
       </ol>
 
+      {/* the whistle has gone — a stopping point, not a run */}
+      <AdSlot placement="result" />
+
       <ShareRow
         kind="hate"
         params={{ a: String(verdict.agreement), s: String(seed) }}
         headline={verdict.champion.nameHe}
         card={{
           template: 'ink' as const,
+              art: artFor('hate', verdict.agreement / 100),
           kicker: 'GATE 11 · THE HATRED GAME',
           label: t('screen.derby.title'),
           eyebrow: t('hate.champion'),

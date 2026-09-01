@@ -59,9 +59,9 @@ export const GATES: readonly Gate[] = [
   },
   {
     number: 2,
-    href: '/trivia?seed=1',
+    href: '/trivia',
     title: 'gate.2',
-    latin: 'TRIVIA · NORTH-EAST',
+    latin: 'TRIVIA WING · NORTH-EAST',
     plate: 'rays',
     stain: 'b',
   },

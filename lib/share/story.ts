@@ -23,7 +23,23 @@ export const STORY_H = 1920
 /** Instagram's own furniture lives here. Nothing important may enter it. */
 export const SAFE = 260
 
-export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year'
+export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art'
+
+/**
+ * הציורים — Maor's own artwork, and the only images this card system carries.
+ *
+ * Each one is a palette PNG whose colour table is provably free of yellow
+ * (`scripts/brand/art.py`). They are not decoration: a card with a painting of the
+ * terrace on it is a card somebody screenshots, and a card that is only type is a card
+ * that announces a score. The rule for choosing is in `artFor()` — a result gets the
+ * painting that matches what it is ABOUT, and gets the print card when nothing matches.
+ */
+export const ART = {
+  celebration: '/art/celebration.png',
+  numberSeven: '/art/number-seven.png',
+  dribble: '/art/dribble.png',
+} as const
+export type ArtKey = keyof typeof ART
 
 export type StoryCard = {
   template?: StoryTemplate
@@ -47,9 +63,113 @@ export type StoryCard = {
   marks?: boolean[]
   /** the kit template draws this instead of a hero line */
   kit?: KitSpec
+  /**
+   * Which painting backs the card. Present means the `art` template is used and the
+   * whole top of the plate is the picture; absent means the print card, which has to
+   * stand on type alone and is drawn harder for exactly that reason.
+   */
+  art?: ArtKey
+}
+
+/**
+ * Which painting a result earns.
+ *
+ * Not random and not decorative. A strong result gets the celebration — the terrace
+ * photograph is the reward, and handing it out for four correct answers would spend it.
+ * A shirt-number round gets the number seven. Everything else that mentions the pitch
+ * gets the dribble, and anything left over gets no painting at all and prints instead.
+ */
+export function artFor(kind: string, fraction: number): ArtKey | undefined {
+  if (fraction >= 0.75) return 'celebration'
+  if (kind === 'numbers' || kind === 'kit') return 'numberSeven'
+  if (kind === 'goal' || kind === 'lineup' || kind === 'xi' || kind === 'europe') return 'dribble'
+  return undefined
 }
 
 /* ------------------------------------------------------------------ press helpers */
+
+/**
+ * החיתוך — the diagonal that separates the picture from the type.
+ *
+ * A straight horizontal edge between an image and a block of colour reads as a
+ * PowerPoint slide. A hard diagonal reads as something that was cut with a blade and
+ * pasted down, which is the whole language this brand is written in. The angle is
+ * constant across every card for the same reason the misregistration is constant: a
+ * varying one reads as a bug, a fixed one reads as a press.
+ */
+const CUT_DROP = 118
+
+function cutPath(ctx: CanvasRenderingContext2D, bottom: number): void {
+  ctx.beginPath()
+  ctx.moveTo(0, 0)
+  ctx.lineTo(STORY_W, 0)
+  ctx.lineTo(STORY_W, bottom - CUT_DROP)
+  ctx.lineTo(0, bottom)
+  ctx.closePath()
+}
+
+/**
+ * Draw an image to COVER a box, never stretched.
+ *
+ * The three paintings have three different aspect ratios and one of them is nearly
+ * square; fitting them to the box would letterbox two of the three, and stretching them
+ * would be worse than either.
+ */
+function cover(
+  ctx: CanvasRenderingContext2D,
+  image: CanvasImageSource,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  focusY = 0.42,
+): void {
+  const iw = (image as HTMLImageElement).naturalWidth || (image as HTMLCanvasElement).width
+  const ih = (image as HTMLImageElement).naturalHeight || (image as HTMLCanvasElement).height
+  if (!iw || !ih) return
+  const scale = Math.max(w / iw, h / ih)
+  const dw = iw * scale
+  const dh = ih * scale
+  ctx.drawImage(image, x + (w - dw) / 2, y + (h - dh) * focusY, dw, dh)
+}
+
+/**
+ * The picture, printed rather than photographed.
+ *
+ * A flat photograph on a screenprinted card is the wrong material. Two passes fix it:
+ * a vermilion wash at low alpha in `multiply`, which pulls every hue toward the plate,
+ * and the halftone screen over the top. The painting keeps its drawing and loses its
+ * photographic surface — which is exactly what a press does to a photograph.
+ */
+function pressImage(
+  ctx: CanvasRenderingContext2D,
+  image: CanvasImageSource,
+  bottom: number,
+): void {
+  ctx.save()
+  cutPath(ctx, bottom)
+  ctx.clip()
+  ctx.fillStyle = BRAND.ink
+  ctx.fillRect(0, 0, STORY_W, bottom)
+  cover(ctx, image, 0, 0, STORY_W, bottom)
+
+  ctx.globalCompositeOperation = 'multiply'
+  ctx.globalAlpha = 0.22
+  ctx.fillStyle = BRAND.red
+  ctx.fillRect(0, 0, STORY_W, bottom)
+
+  ctx.globalCompositeOperation = 'source-over'
+  ctx.globalAlpha = 1
+  dots(ctx, BRAND.ink, 0.16, 16)
+
+  // the ink line that closes every printed surface in this system
+  ctx.globalAlpha = 1
+  ctx.strokeStyle = BRAND.ink
+  ctx.lineWidth = 14
+  cutPath(ctx, bottom)
+  ctx.stroke()
+  ctx.restore()
+}
 
 function dots(ctx: CanvasRenderingContext2D, colour: string, alpha: number, step = 22) {
   ctx.save()
@@ -87,6 +207,11 @@ function fit(
  * Set a line the way the press sets it: skewed, and printed twice — the under-plate at
  * a hard offset, the colour over it. `skew` is in degrees, negative leans forward.
  */
+/** True for a run that is only digits, punctuation and Latin — 4-4-2, 90%, 2:1. */
+function isLatinRun(text: string): boolean {
+  return /^[\u0000-\u024F\s]+$/.test(text)
+}
+
 function plateText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -276,16 +401,24 @@ export function drawStory(
   ctx: CanvasRenderingContext2D,
   card: StoryCard,
   badge: CanvasImageSource | null,
+  art: CanvasImageSource | null = null,
 ): void {
   ctx.save()
   ctx.direction = 'rtl'
   ctx.textAlign = 'right'
-  const template = card.template ?? 'score'
+  // A card with a painting behind it is a different card, not a variant — so the art
+  // template takes over the whole plate rather than being a background option on
+  // another one. Without the image loaded it falls back to print, which is why a
+  // failed fetch degrades to a good card instead of an empty one.
+  const template: StoryTemplate = art && card.art ? 'art' : card.template ?? 'score'
   const pad = 76
   const right = STORY_W - pad
   const width = STORY_W - pad * 2
 
-  if (template === 'grass') grass(ctx)
+  if (template === 'art') {
+    ctx.fillStyle = BRAND.ink
+    ctx.fillRect(0, 0, STORY_W, STORY_H)
+  } else if (template === 'grass') grass(ctx)
   else if (template === 'ink') {
     ctx.fillStyle = BRAND.ink
     ctx.fillRect(0, 0, STORY_W, STORY_H)
@@ -310,10 +443,124 @@ export function drawStory(
     ctx.fillRect(0, STORY_H - 96, STORY_W, 96)
   }
 
-  const dark = template === 'ink' || template === 'grass'
+  const dark = template === 'ink' || template === 'grass' || template === 'art'
   const headline = dark ? BRAND.sheet : BRAND.ink
   const kickerColour =
-    template === 'kit' ? BRAND.sign : template === 'ink' ? BRAND.red : template === 'year' ? BRAND.ink : BRAND.sign
+    template === 'kit'
+      ? BRAND.sign
+      : template === 'ink' || template === 'art'
+        ? BRAND.red
+        : template === 'year'
+          ? BRAND.ink
+          : BRAND.sign
+
+  // ART · the picture takes the top two thirds, the type is slammed over the cut, and
+  //       the facts and the credit sit on the ink below it. This branch returns early
+  //       because it is a whole card, not a variation on the print one.
+  if (template === 'art' && art) {
+    // The card is laid out from the FOOT upward, not from the top down. Everything
+    // below the picture is anchored — challenge line, facts panel, credit strip — so
+    // flowing the type downward from the cut is what produced the first version's
+    // collisions and its second version's hole. Anchoring means the picture takes
+    // whatever room is left over, which is also the right answer aesthetically: the
+    // painting should be as big as the type allows.
+    const artChallengeY = STORY_H - SAFE - 236
+    const bandH = card.stats.length > 0 ? 134 : 0
+    const bandTop = artChallengeY - 40 - bandH
+    const cut = Math.round(STORY_H * 0.56)
+
+    pressImage(ctx, art, cut)
+
+    // the kicker, printed ON the picture at the top safe line
+    ctx.direction = 'ltr'
+    ctx.textAlign = 'right'
+    ctx.font = '800 30px Archivo, sans-serif'
+    ctx.letterSpacing = '6px'
+    ctx.fillStyle = BRAND.sheet
+    ctx.fillText(card.kicker, right, SAFE - 8)
+    ctx.letterSpacing = '0px'
+    ctx.direction = 'rtl'
+
+    // The NAME sits on the picture, just above the cut. It is the half of the card a
+    // reader recognises, and on the ink below it was competing with the number for the
+    // same 70 pixels; over the painting it has the whole width and reads as a caption
+    // stamped on a photograph.
+    //
+    // The clearance is not a guess. The number below is set in Karantina at `heroSize`
+    // with its baseline at `cut + heroSize * 0.30`, and that face's caps reach about
+    // 0.72em above the baseline — so its glyph tops land near `cut - heroSize * 0.42`.
+    // The name's baseline has to clear THAT, not the cut, which is what the first
+    // version got wrong: the two printed straight through each other.
+    const heroSizePlanned = Math.min(fit(ctx, card.bigStat?.v ?? card.hero, 210, width), 210)
+    const nameText = card.bigStat ? card.hero : ''
+    if (nameText) {
+      const nameSize = fit(ctx, nameText, 86, width, '"Suez One", serif', '400')
+      ctx.font = `400 ${nameSize}px "Suez One", serif`
+      plateText(ctx, nameText, right, cut - heroSizePlanned * 0.42 - 26, {
+        under: BRAND.ink,
+        over: BRAND.sheet,
+        offset: 8,
+        skew: -6,
+      })
+    }
+
+    // The number straddles the cut: most of the glyph on the picture, its feet on the
+    // ink. One element crossing the join is what makes a card look built rather than
+    // stacked, and it is the only thing on the plate allowed to break the line.
+    const heroText = card.bigStat?.v ?? card.hero
+    const heroSize = heroSizePlanned
+    ctx.font = `700 ${heroSize}px Karantina, sans-serif`
+    // "4-4-2" and "90%" are Latin runs and must print left to right, or the canvas's
+    // RTL direction reverses them into 2-4-4 and %90.
+    ctx.direction = isLatinRun(heroText) ? 'ltr' : 'rtl'
+    plateText(ctx, heroText, right, cut + heroSize * 0.30, {
+      under: BRAND.ink,
+      over: BRAND.red,
+      offset: 12,
+      skew: -6,
+    })
+    ctx.direction = 'rtl'
+
+    const labelY = cut + heroSize * 0.30 + 48
+    ctx.fillStyle = BRAND.concrete
+    ctx.font = '400 32px Heebo, sans-serif'
+    ctx.fillText(card.bigStat?.k ?? card.eyebrow, right, labelY)
+
+    ctx.fillStyle = BRAND.red
+    ctx.fillRect(pad, Math.min(labelY + 30, bandTop - 24), width, 10)
+
+    if (card.stats.length > 0) {
+      // a real ink panel with a vermilion keyline, not two floating labels: on a
+      // picture card the facts need a ground of their own or the painting reads
+      // straight through them
+      ctx.fillStyle = BRAND.ink
+      ctx.fillRect(pad, bandTop, width, bandH)
+      ctx.strokeStyle = BRAND.red
+      ctx.lineWidth = 6
+      ctx.strokeRect(pad + 3, bandTop + 3, width - 6, bandH - 6)
+
+      const rows = card.stats.slice(0, 2)
+      const cell = (width - 56) / rows.length
+      rows.forEach((stat, index) => {
+        const cellRight = right - 28 - index * cell
+        ctx.fillStyle = BRAND.red
+        ctx.font = '400 23px Heebo, sans-serif'
+        ctx.fillText(stat.k, cellRight, bandTop + 44)
+        const size = fit(ctx, stat.v, 44, cell - 24, '"Suez One", serif', '400')
+        ctx.font = `400 ${size}px "Suez One", serif`
+        ctx.fillStyle = BRAND.sheet
+        ctx.fillText(stat.v, cellRight, bandTop + 52 + size)
+      })
+    }
+
+    ctx.fillStyle = BRAND.concrete
+    ctx.font = '400 28px Heebo, sans-serif'
+    ctx.fillText(card.challenge, right, artChallengeY)
+
+    foot(ctx, card, { name: BRAND.red, text: BRAND.sheet, rule: BRAND.red }, badge)
+    ctx.restore()
+    return
+  }
 
   // 1 · the kicker
   ctx.direction = 'ltr'
@@ -505,7 +752,10 @@ export async function renderStory(
   }
 
   const badge = await loadImage(badgeSrc).catch(() => null)
-  drawStory(ctx, card, badge)
+  // A failed painting fetch must not fail the share: `drawStory` falls back to the
+  // print card when the image is null, which is a good card rather than an empty one.
+  const art = card.art ? await loadImage(ART[card.art]).catch(() => null) : null
+  drawStory(ctx, card, badge, art)
   return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/png'))
 }
 

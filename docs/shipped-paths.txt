@@ -38,7 +38,9 @@ app/tik/page.tsx
 app/timeline/TimelineBoard.tsx
 app/timeline/actions.ts
 app/timeline/page.tsx
+app/trivia/TopicWall.tsx
 app/trivia/TriviaRun.tsx
+app/trivia/[topic]/page.tsx
 app/trivia/actions.ts
 app/trivia/page.tsx
 app/trivia/summary/ShareCard.tsx
@@ -47,6 +49,8 @@ app/ussishkin/CardWall.tsx
 app/ussishkin/page.tsx
 app/xi/XIBuilder.tsx
 app/xi/page.tsx
+components/ads/AdSlot.tsx
+components/ads/Analytics.tsx
 components/gates/GatePlate.tsx
 components/hate/EnemyPlate.tsx
 components/kit/KitShirt.tsx
@@ -78,6 +82,7 @@ components/ui/Screen.tsx
 components/ui/SignPlate.tsx
 components/ui/Stamp.tsx
 components/ui/TabBar.tsx
+lib/ads.ts
 lib/brand.ts
 lib/game/allTimeXI.ts
 lib/game/archive.ts
@@ -99,6 +104,7 @@ lib/game/score.ts
 lib/game/seasons.ts
 lib/game/session.ts
 lib/game/timeline.ts
+lib/game/topics.ts
 lib/game/trivia.ts
 lib/gates.ts
 lib/i18n.ts

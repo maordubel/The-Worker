@@ -1,35 +1,28 @@
-import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { ROUND_LENGTH, deal } from '@/lib/game/trivia'
+import { ROUND_LENGTH, topicCounts } from '@/lib/game/trivia'
 import { t } from '@/lib/i18n'
-import { TriviaRun } from './TriviaRun'
+import { TopicWall } from './TopicWall'
 
 /**
- * שער 2 — טריוויה, as one run.
+ * שער 2 — אגף הטריוויות.
  *
- * The whole round is dealt here, server-side, WITHOUT its answers: `deal()` strips
- * `correct` and `correctSet` before the payload leaves the server, and every answer is
- * still graded by the server action from the seed. Dealing all twelve at once is what
- * lets the run play on one screen with no navigation — the thing that separates a game
- * from a form.
+ * The gate used to open straight into a round. Maor asked for a WING: five ways in, one
+ * of them general and mixing both sports, four of them narrow. So the gate is now a
+ * choice, and each topic is its own route.
+ *
+ * The counts are read from the real bank at request time, not written down — a topic
+ * that grows because new data landed shows a bigger number without anyone editing this
+ * file, and a topic that is too thin to fill a round says so instead of dealing short.
  */
-export default function TriviaPage({ searchParams }: { searchParams: { seed?: string } }) {
-  const seed = Number(searchParams.seed) || 1
-  const questions = Array.from({ length: ROUND_LENGTH }, (_, index) => deal(seed, index)).filter(
-    (question): question is NonNullable<typeof question> => question !== null,
-  )
-
+export default function TriviaWingPage() {
   return (
-    <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')} chrome={false}>
-      {questions.length >= ROUND_LENGTH ? (
-        <>
-          <TriviaRun questions={questions} seed={seed} />
-          <ReportLink />
-        </>
-      ) : (
-        <EmptyState title={t('empty.trivia')} body={t('empty.trivia.body')} />
-      )}
+    <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')}>
+      <p className="mt-stack max-w-prose font-body text-step-0 leading-relaxed text-ink">
+        {t('topic.lede')}
+      </p>
+      <TopicWall counts={topicCounts()} roundLength={ROUND_LENGTH} />
+      <ReportLink />
     </Screen>
   )
 }

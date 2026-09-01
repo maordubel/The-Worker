@@ -23,6 +23,7 @@ import { t, type MessageKey } from '@/lib/i18n'
 import type { PitchSlot, SlotStatus, LineupVerdict } from '@/lib/game/lineup'
 import { submitLineup } from './actions'
 import { ShareRow } from '@/components/share/ShareRow'
+import { artFor } from '@/lib/share/story'
 
 /**
  * Tap a slot, pick from the bank, submit. Feedback is per slot in three states.
@@ -211,6 +212,7 @@ export function LineupBoard({
             headline={`${verdict.exact}/${verdict.total}`}
             card={{
               template: 'grass' as const,
+              art: artFor('lineup', 0),
               kicker: 'GATE 1 · ALL-TIME XI',
               label: t('screen.lineup.title'),
               eyebrow: t('lineup.exact'),

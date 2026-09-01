@@ -153,15 +153,19 @@ describe('trivia — question quality', () => {
     }
   })
 
-  it('always offers exactly four distinct choices', () => {
-    // A template that cannot field three real distractors is dropped, never padded:
-    // an invented option is a fact no source supports.
+  it('always offers exactly as many distinct choices as its shape allows', () => {
+    // A template that cannot field its distractors is dropped, never padded: an invented
+    // option is a fact no source supports. `single` wants four, `multi` wants six — the
+    // count is a property of the SHAPE, and an earlier version of this test hard-coded
+    // four and only passed because no multi question happened to be dealt in these seeds.
     for (const seed of [1, 2, 3, 13, 29, 101]) {
       for (let index = 0; index < ROUND_LENGTH; index += 1) {
         const question = deal(seed, index)
         if (!question) continue
-        expect(question.options.length, `${question.id}`).toBe(4)
-        expect(new Set(question.options).size, `${question.id} repeats an option`).toBe(4)
+        const want = question.kind === 'multi' ? 6 : 4
+        expect(question.options.length, `${question.id}`).toBe(want)
+        expect(new Set(question.options).size, `${question.id} repeats an option`).toBe(want)
+        expect(question.pickCount, `${question.id}`).toBe(question.kind === 'multi' ? 3 : 1)
       }
     }
   })

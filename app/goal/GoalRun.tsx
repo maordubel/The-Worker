@@ -7,7 +7,9 @@ import { Confetti } from '@/components/play/Confetti'
 import { GoalPitch } from '@/components/press/GoalPitch'
 import { Num } from '@/components/ui/Num'
 import { Punch } from '@/components/play/Punch'
+import { AdSlot } from '@/components/ads/AdSlot'
 import { ShareRow } from '@/components/share/ShareRow'
+import { artFor } from '@/lib/share/story'
 import { GOAL_SECONDS, GOALS_PER_RUN, type Grade, type ZoneId } from '@/lib/game/goal-zones'
 import { LIVES, MAX_MULTIPLIER, rankFor } from '@/lib/game/session'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -366,12 +368,16 @@ function Result({ run, seed }: { run: Run; seed: number }) {
         </div>
       </div>
 
+      {/* the whistle has gone — a stopping point, not a run */}
+      <AdSlot placement="result" />
+
       <ShareRow
         kind="goal"
         params={{ h: String(run.hits), s: String(seed) }}
         headline={t('goal.shareHead', { hits: String(run.hits), total: String(run.touches) })}
         card={{
           template: 'grass' as const,
+              art: artFor('goal', run.touches > 0 ? run.hits / run.touches : 0),
           kicker: 'GATE 8 · REBUILD THE GOAL',
           label: t('screen.goal.title'),
           eyebrow: t('goal.hits'),

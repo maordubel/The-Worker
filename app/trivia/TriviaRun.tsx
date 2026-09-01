@@ -8,6 +8,7 @@ import { HUD } from '@/components/play/HUD'
 import { StageCard } from '@/components/play/StageCard'
 import { Num } from '@/components/ui/Num'
 import { ShareRow } from '@/components/share/ShareRow'
+import { artFor } from '@/lib/share/story'
 import { Punch } from '@/components/play/Punch'
 import {
   NEW_SESSION,
@@ -22,6 +23,7 @@ import {
   stageOf,
   type Session,
 } from '@/lib/game/session'
+import { DEFAULT_TOPIC, type Topic } from '@/lib/game/topics'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { TriviaQuestion, Verdict } from '@/lib/game/trivia'
 import { submitAnswer } from './actions'
@@ -43,9 +45,11 @@ import { submitAnswer } from './actions'
 export function TriviaRun({
   questions,
   seed,
+  topic = DEFAULT_TOPIC,
 }: {
   questions: TriviaQuestion[]
   seed: number
+  topic?: Topic
 }) {
   const [session, setSession] = useState<Session>(NEW_SESSION)
   const [picked, setPicked] = useState<string[]>([])
@@ -104,7 +108,7 @@ export function TriviaRun({
         if (locked.current) return
         locked.current = true
         // running out is a miss, and it shows the answer like any other miss
-        void submitAnswer(seed, index, '__timeout__').then((result) => {
+        void submitAnswer(seed, index, '__timeout__', topic).then((result) => {
           setVerdict(result)
           settle(result, 0)
         })
@@ -136,7 +140,7 @@ export function TriviaRun({
     locked.current = true
     const left = secondsLeft
     setPicked([option])
-    void submitAnswer(seed, index, option).then((result) => {
+    void submitAnswer(seed, index, option, topic).then((result) => {
       setVerdict(result)
       settle(result, left)
     })
@@ -146,7 +150,7 @@ export function TriviaRun({
     if (locked.current || !question || picked.length !== question.pickCount) return
     locked.current = true
     const left = secondsLeft
-    void submitAnswer(seed, index, picked).then((result) => {
+    void submitAnswer(seed, index, picked, topic).then((result) => {
       setVerdict(result)
       settle(result, left)
     })
@@ -303,6 +307,7 @@ function Result({ session, seed }: { session: Session; seed: number }) {
         headline={String(session.score)}
         card={{
           template: 'score' as const,
+              art: artFor('trivia', session.correct / RUN_LENGTH),
           kicker: 'GATE 2 · TRIVIA',
           label: t('screen.trivia.title'),
           eyebrow: t('run.score'),

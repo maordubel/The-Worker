@@ -178,6 +178,71 @@
       "resolution": null,
       "resolvedBy": null,
       "confidence": 3
+    },
+    {
+      "entityTable": "shirt_number",
+      "entityKey": "2016/17 · 2",
+      "field": "holder",
+      "claimA": "יום טוב עופר — הרכב 27.8.2016",
+      "claimB": "עופר ורטה — הרכב 25.9.2016",
+      "sourceAUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "sourceBUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "noteHe": "שני הרכבים רשמיים מאותה עונה חולקים על מי לבש את המספר. שתי הרשומות נשמרו; מחולל השאלות מפיל כל צמד (מספר, עונה) עם יותר ממחזיק אחד ולא בוחר ביניהם.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
+    },
+    {
+      "entityTable": "shirt_number",
+      "entityKey": "2016/17 · 16",
+      "field": "holder",
+      "claimA": "שגיב יחזקאל — הרכב 27.8.2016",
+      "claimB": "ויאם עמאשה — הרכב 25.9.2016",
+      "sourceAUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "sourceBUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "noteHe": "שני הרכבים רשמיים מאותה עונה חולקים על מי לבש את המספר. שתי הרשומות נשמרו; מחולל השאלות מפיל כל צמד (מספר, עונה) עם יותר ממחזיק אחד ולא בוחר ביניהם.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
+    },
+    {
+      "entityTable": "shirt_number",
+      "entityKey": "2018/19 · 21",
+      "field": "holder",
+      "claimA": "מוטי ברשצקי — הרכב 1.9.2018",
+      "claimB": "קאיו — הרכב 1.10.2018",
+      "sourceAUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "sourceBUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "noteHe": "שני הרכבים רשמיים מאותה עונה חולקים על מי לבש את המספר. שתי הרשומות נשמרו; מחולל השאלות מפיל כל צמד (מספר, עונה) עם יותר ממחזיק אחד ולא בוחר ביניהם.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
+    },
+    {
+      "entityTable": "shirt_number",
+      "entityKey": "2021/22 · 7 ו-18",
+      "field": "holder",
+      "claimA": "אושר דוידה כ-7 — הרכב 25.9.2021",
+      "claimB": "אושר דוידה כ-18 — הרכב 28.8.2021",
+      "sourceAUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "sourceBUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "noteHe": "שני הרכבים רשמיים מאותה עונה חולקים על מי לבש את המספר. שתי הרשומות נשמרו; מחולל השאלות מפיל כל צמד (מספר, עונה) עם יותר ממחזיק אחד ולא בוחר ביניהם.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
+    },
+    {
+      "entityTable": "shirt_number",
+      "entityKey": "2021/22 · 28",
+      "field": "holder",
+      "claimA": "יואב תומר",
+      "claimB": "שי אייזן — שניהם מופיעים כ-28 באותו דיווח",
+      "sourceAUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "sourceBUrl": "https://www.worldfootball.net/teams/hapoel-tel-aviv/",
+      "noteHe": "שני הרכבים רשמיים מאותה עונה חולקים על מי לבש את המספר. שתי הרשומות נשמרו; מחולל השאלות מפיל כל צמד (מספר, עונה) עם יותר ממחזיק אחד ולא בוחר ביניהם.",
+      "resolution": null,
+      "resolvedBy": null,
+      "confidence": 3
     }
   ]
 }

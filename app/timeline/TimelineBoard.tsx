@@ -7,6 +7,7 @@ import { t } from '@/lib/i18n'
 import type { TimelineCard, TimelineVerdict } from '@/lib/game/timeline'
 import { submitOrder } from './actions'
 import { ShareRow } from '@/components/share/ShareRow'
+import { artFor } from '@/lib/share/story'
 
 /**
  * Ordering by move-up / move-down rather than drag: dragging is not keyboard
@@ -122,6 +123,7 @@ export function TimelineBoard({ cards, seed }: { cards: TimelineCard[]; seed: nu
             headline={verdict.correct ? String(verdict.solution.length) : '0'}
             card={{
               template: 'year' as const,
+              art: artFor('timeline', 0),
               kicker: 'GATE 13 · TIMELINE',
               label: t('screen.timeline.title'),
               eyebrow: t('rank.label'),

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 
 import { Num } from '@/components/ui/Num'
 import { ShareRow } from '@/components/share/ShareRow'
+import { artFor } from '@/lib/share/story'
 import type { Formation, PitchSlot } from '@/lib/game/lineup'
 import { searchRoster } from '@/lib/game/roster-search'
 import type { RosterEntry, RosterIndex } from '@/lib/game/allTimeXI'
@@ -171,6 +172,7 @@ export function XIBuilder({
         headline={`${chosen}/11`}
         card={{
           template: 'grass',
+              art: artFor('xi', 0),
           kicker: 'GATE 1 · ALL-TIME XI',
           label: t('screen.xi.title'),
           eyebrow: formation.name,

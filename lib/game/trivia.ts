@@ -3,6 +3,7 @@ import 'server-only'
 import { matchLine } from '@/components/ui/Num'
 
 import { currentSeasonStartYear, seasonsInSpell, spellCoversSeason } from './seasons'
+import { DEFAULT_TOPIC, TOPICS, topicSpec, type Topic } from './topics'
 import type { Difficulty } from './score'
 
 import {
@@ -120,6 +121,17 @@ const DIFFICULTY: Record<string, Difficulty> = {
   'crossing-club': 3,
   'crossing-year': 4,
   'enemy-fact': 4,
+  'euro-opponent': 2,
+  'euro-round': 4,
+  'euro-season': 3,
+  'euro-aggregate': 5,
+  'euro-venue': 5,
+  'euro-milestone': 4,
+  'number-season': 4,
+  'number-era': 3,
+  'song-tune': 3,
+  'song-about': 2,
+  'song-era': 4,
 }
 
 type Template = {
@@ -191,6 +203,272 @@ const ASSOCIATION_NAMES = () =>
   ].filter((name) => name !== FOUNDER)
 
 const TEMPLATES: Template[] = [
+  {
+    /**
+     * מול מי שיחקנו בשלב הזה. The European record read as TIES rather than fixtures — a
+     * two-legged tie is the unit a supporter remembers, and the aggregate is the fact.
+     */
+    slug: 'euro-opponent',
+    build: (random) => {
+      const opponents = archive.euroTies.map((tie) => tie.opponentHe)
+      return archive.euroTies
+        .filter((tie) => !tie.opponentHe.includes(' · '))
+        .map((tie) => ({
+          id: `euro-opponent:${tie.slug}`,
+          template: 'euro-opponent',
+          prompt: `מול מי שיחקה הפועל תל אביב ב${stripThe(tie.stageHe)} של ${tie.competitionHe}, עונת ${tie.seasonLabel}?`,
+          options: withDistractors(tie.opponentHe, opponents, random),
+          correct: tie.opponentHe,
+          source: sourceOf(tie),
+          explanation: `${tie.aggregateHe} · ${tie.opponentCountryHe}`,
+        }))
+    },
+  },
+  {
+    /** עד לאיזה שלב הגענו מול היריבה הזאת. */
+    slug: 'euro-round',
+    build: (random) => {
+      const stages = archive.euroTies.map((tie) => tie.stageHe)
+      return archive.euroTies
+        .filter((tie) => !tie.opponentHe.includes(' · '))
+        .map((tie) => ({
+          id: `euro-round:${tie.slug}`,
+          template: 'euro-round',
+          prompt: `באיזה שלב פגשה הפועל תל אביב את ${tie.opponentHe} בעונת ${tie.seasonLabel}?`,
+          options: withDistractors(tie.stageHe, stages, random),
+          correct: tie.stageHe,
+          source: sourceOf(tie),
+          explanation: `${tie.competitionHe} · ${tie.aggregateHe}`,
+        }))
+    },
+  },
+  {
+    /** באיזו עונה — the year a tie happened, which is the thing that gets argued about. */
+    slug: 'euro-season',
+    build: (random) => {
+      const seasons = archive.euroTies.map((tie) => tie.seasonLabel)
+      return archive.euroTies
+        .filter((tie) => !tie.opponentHe.includes(' · '))
+        .map((tie) => ({
+          id: `euro-season:${tie.slug}`,
+          template: 'euro-season',
+          prompt: `באיזו עונה שיחקה הפועל תל אביב מול ${tie.opponentHe} ב${stripThe(tie.competitionHe)}?`,
+          options: withDistractors(tie.seasonLabel, seasons, random),
+          correct: tie.seasonLabel,
+          source: sourceOf(tie),
+          explanation: `${tie.stageHe} · ${tie.aggregateHe}`,
+        }))
+    },
+  },
+  {
+    /**
+     * מה היה המצטבר. The hardest European question and the most satisfying: everyone
+     * remembers the night, almost nobody remembers the two legs added up.
+     */
+    slug: 'euro-aggregate',
+    build: (random) => {
+      const aggregates = archive.euroTies
+        .map((tie) => tie.aggregateHe)
+        .filter((value) => /^\d+:\d+$/.test(value))
+      return archive.euroTies
+        .filter((tie) => /^\d+:\d+$/.test(tie.aggregateHe) && !tie.opponentHe.includes(' · '))
+        .map((tie) => ({
+          id: `euro-aggregate:${tie.slug}`,
+          template: 'euro-aggregate',
+          prompt: `מה היה המצטבר מול ${tie.opponentHe} בעונת ${tie.seasonLabel}?`,
+          options: withDistractors(tie.aggregateHe, aggregates, random),
+          correct: tie.aggregateHe,
+          source: sourceOf(tie),
+          explanation: `${tie.stageHe} · ${tie.advanced ? 'עלינו' : 'נעצרנו'}`,
+        }))
+    },
+  },
+  {
+    /**
+     * איפה שיחקנו "בבית". Ten European home legs were played abroad, and that is the
+     * European memory this terrace actually carries — Nicosia, Sofia, Florence,
+     * Rotterdam, Tilburg, Larnaca, Miskolc. Only ties with a recorded displacement
+     * qualify; the question cannot be asked of a tie that was played at Bloomfield.
+     */
+    slug: 'euro-venue',
+    build: (random) => {
+      const places = archive.euroTies
+        .map((tie) => tie.homeAbroadHe)
+        .filter((value): value is string => value !== undefined)
+      return archive.euroTies
+        .filter((tie) => typeof tie.homeAbroadHe === 'string')
+        .map((tie) => ({
+          id: `euro-venue:${tie.slug}`,
+          template: 'euro-venue',
+          prompt: `איפה שיחקה הפועל תל אביב את משחק ה"בית" מול ${tie.opponentHe} בעונת ${tie.seasonLabel}?`,
+          options: withDistractors(tie.homeAbroadHe as string, places, random),
+          correct: tie.homeAbroadHe as string,
+          source: sourceOf(tie),
+          explanation: tie.notableHe ?? `${tie.competitionHe} · ${tie.stageHe}`,
+        }))
+    },
+  },
+  {
+    /** הלילה הזה — a recorded European landmark, and which tie it belongs to. */
+    slug: 'euro-milestone',
+    build: (random) => {
+      const rows = archive.euroTies.filter(
+        (tie) => typeof tie.notableHe === 'string' && tie.notableHe.length > 30,
+      )
+      const labels = rows.map((tie) => `${tie.opponentHe} · ${tie.seasonLabel}`)
+      return rows.map((tie) => ({
+        id: `euro-milestone:${tie.slug}`,
+        template: 'euro-milestone',
+        prompt: 'על איזה מפגש אירופי נכתב זה?',
+        quoteHe: tie.notableHe as string,
+        options: withDistractors(`${tie.opponentHe} · ${tie.seasonLabel}`, labels, random),
+        correct: `${tie.opponentHe} · ${tie.seasonLabel}`,
+        source: sourceOf(tie),
+        explanation: `${tie.competitionHe} · ${tie.stageHe} · ${tie.aggregateHe}`,
+      }))
+    },
+  },
+  {
+    /**
+     * באיזו עונה לבש אותו. The third face of the shirt-number table: the player and the
+     * number are given, the SEASON is the answer. Only where that player wore that
+     * number in exactly one season — otherwise the question has several right answers.
+     */
+    slug: 'number-season',
+    build: (random) => {
+      const byPersonNumber = new Map<string, Set<string>>()
+      for (const row of archive.shirtNumbers) {
+        const key = `${row.personNameHe}|${row.shirtNumber}`
+        const seen = byPersonNumber.get(key) ?? new Set<string>()
+        seen.add(row.seasonLabel)
+        byPersonNumber.set(key, seen)
+      }
+      const seasons = [...new Set(archive.shirtNumbers.map((row) => row.seasonLabel))]
+      return archive.shirtNumbers
+        .filter(
+          (row) =>
+            byPersonNumber.get(`${row.personNameHe}|${row.shirtNumber}`)?.size === 1 &&
+            row.disputed !== true,
+        )
+        .map((row) => ({
+          id: `number-season:${row.personNameHe}:${row.shirtNumber}`,
+          template: 'number-season',
+          prompt: `באיזו עונה לבש ${row.personNameHe} את מספר ${row.shirtNumber}?`,
+          options: withDistractors(row.seasonLabel, seasons, random),
+          correct: row.seasonLabel,
+          source: sourceOf(row),
+          explanation: `${row.personNameHe} · מספר ${row.shirtNumber} · ${row.seasonLabel}`,
+        }))
+    },
+  },
+  {
+    /**
+     * מי לבש את המספר בעונה הזאת — six names, three of them wore it that season.
+     *
+     * Different from `shirt-multi`, which asks across all time: this one fixes the
+     * SEASON, so the wrong three are men who were at the club in other years. That is a
+     * harder and fairer distractor than a name from a different decade.
+     */
+    slug: 'number-era',
+    build: (random) => {
+      const bySeason = new Map<string, { number: number; name: string }[]>()
+      for (const row of archive.shirtNumbers) {
+        if (row.disputed === true) continue
+        const list = bySeason.get(row.seasonLabel) ?? []
+        list.push({ number: row.shirtNumber, name: row.personNameHe })
+        bySeason.set(row.seasonLabel, list)
+      }
+      const everyone = [...new Set(archive.shirtNumbers.map((row) => row.personNameHe))]
+      return [...bySeason.entries()]
+        .filter(([, squad]) => squad.length >= MULTI_PICK_COUNT + 4)
+        .map(([season, squad]) => {
+          const wore = shuffle(squad, random).slice(0, MULTI_PICK_COUNT)
+          const inSquad = new Set(squad.map((entry) => entry.name))
+          const notInSquad = shuffle(
+            everyone.filter((name) => !inSquad.has(name)),
+            random,
+          ).slice(0, MULTI_OPTION_COUNT - MULTI_PICK_COUNT)
+          const names = wore.map((entry) => entry.name)
+          return {
+            id: `number-era:${season}:${[...names].sort().join('|')}`,
+            template: 'number-era',
+            kind: 'multi' as const,
+            prompt: `בחרו שלושה — מי היו בסגל הפועל תל אביב בעונת ${season}?`,
+            options: shuffle([...names, ...notInSquad], random),
+            correct: [...names].sort().join(' | '),
+            correctSet: names,
+            source: sourceOf(
+              archive.shirtNumbers.find((row) => row.seasonLabel === season) ?? {
+                sourceTitle: 'ארכיון',
+                sourceUrl: null,
+                confidence: 2,
+              },
+            ),
+            explanation: wore.map((entry) => `${entry.name} (${entry.number})`).join(' · '),
+          }
+        })
+    },
+  },
+  {
+    /** הלחן המקורי → השיר של היציע. */
+    slug: 'song-tune',
+    build: (random) => {
+      const rows = archive.songs.filter(
+        (row) => row.songType !== 'player_song' && row.originalTitle,
+      )
+      const titles = rows.map((row) => row.titleHe)
+      return rows.map((row) => ({
+        id: `song-tune:${row.slug}`,
+        template: 'song-tune',
+        prompt: `על איזה שיר של היציע הולבש הלחן "${row.originalTitle}"?`,
+        options: withDistractors(row.titleHe, titles, random),
+        correct: row.titleHe,
+        source: sourceOf(row),
+        explanation: row.backgroundHe ?? (row.originalArtist ?? row.originalTitle ?? ''),
+      }))
+    },
+  },
+  {
+    /** על מי השיר — a player chant, and the man it is about. */
+    slug: 'song-about',
+    build: (random) => {
+      const rows = archive.songs.filter(
+        (row) => row.songType === 'player_song' && row.personNameHe,
+      )
+      const names = rows.map((row) => row.personNameHe as string)
+      return rows.map((row) => ({
+        id: `song-about:${row.slug}`,
+        template: 'song-about',
+        prompt: `על מי שר היציע את "${row.originalTitle ?? row.titleHe}"?`,
+        options: withDistractors(row.personNameHe as string, names, random),
+        correct: row.personNameHe as string,
+        source: sourceOf(row),
+        explanation: row.backgroundHe ?? row.titleHe,
+      }))
+    },
+  },
+  {
+    /** סוג השיר — terrace song, player chant, or the club's own. */
+    slug: 'song-era',
+    build: (random) => {
+      const LABEL: Record<string, string> = {
+        terrace_song: 'שיר יציע',
+        player_song: 'שיר לשחקן',
+        club_song: 'שיר המועדון',
+      }
+      const rows = archive.songs.filter((row) => LABEL[row.songType] !== undefined)
+      const labels = Object.values(LABEL)
+      return rows.map((row) => ({
+        id: `song-era:${row.slug}`,
+        template: 'song-era',
+        prompt: `"${row.titleHe}" — מה זה?`,
+        options: shuffle([...labels, 'שיר של יריבה'], random),
+        correct: LABEL[row.songType] as string,
+        source: sourceOf(row),
+        explanation: row.backgroundHe ?? row.titleHe,
+      }))
+    },
+  },
   {
     /**
      * מי כבש? A described move, and the man who finished it.
@@ -1356,12 +1634,21 @@ function normalise(question: Unrated): Omit<Built, 'difficulty'> {
   }
 }
 
-function buildRound(seed: number): Built[] {
+/**
+ * A round, for one topic.
+ *
+ * The topic is a FILTER over the same templates, never a separate dataset — rule 1. A
+ * narrow topic draws on the handful of templates that ask about it; `general` draws on
+ * all of them, which is why general is the widest bank rather than a leftovers bin.
+ */
+function buildRound(seed: number, topic: Topic = DEFAULT_TOPIC): Built[] {
   const random = rng(seed)
   const pool: Built[] = []
   const byGroup = new Map<string, Built[]>()
+  const allowed = topicSpec(topic).templates
 
   for (const template of TEMPLATES) {
+    if (allowed !== null && !allowed.includes(template.slug)) continue
     // The template owns the difficulty, so a new template cannot forget to set one.
     const built = dropAmbiguousPrompts(
       template
@@ -1418,27 +1705,44 @@ function buildRound(seed: number): Built[] {
 }
 
 /** How many questions the archive can currently produce. Shown honestly in the UI. */
-export function availableQuestionCount(): number {
+export function availableQuestionCount(topic: Topic = DEFAULT_TOPIC): number {
   const random = rng(1)
+  const allowed = topicSpec(topic).templates
   const all = dropAmbiguousPrompts(
-    TEMPLATES.flatMap((template) =>
-      template
-        .build(random)
-        .map(normalise)
-        .map((question) => ({ ...question, difficulty: DIFFICULTY[template.slug] ?? 3 })),
-    ).filter(hasEnoughOptions),
+    TEMPLATES.filter((template) => allowed === null || allowed.includes(template.slug))
+      .flatMap((template) =>
+        template
+          .build(random)
+          .map(normalise)
+          .map((question) => ({ ...question, difficulty: DIFFICULTY[template.slug] ?? 3 })),
+      )
+      .filter(hasEnoughOptions),
   )
   return new Set(all.map((question) => question.id)).size
 }
 
+/**
+ * The depth of every topic's bank, for the picker.
+ *
+ * Printed on the screen rather than hidden, because a topic with forty questions and a
+ * topic with four hundred are not the same offer and a player deserves to know which
+ * one they are choosing. A topic that cannot fill a round is shown as unavailable
+ * instead of dealing a short round and pretending.
+ */
+export function topicCounts(): Record<Topic, number> {
+  const out = {} as Record<Topic, number>
+  for (const topic of TOPICS) out[topic] = availableQuestionCount(topic)
+  return out
+}
+
 /** The difficulties of a round, in order — what a perfect run would be worth. */
-export function roundDifficulties(seed: number): Difficulty[] {
-  return buildRound(seed).map((question) => question.difficulty)
+export function roundDifficulties(seed: number, topic: Topic = DEFAULT_TOPIC): Difficulty[] {
+  return buildRound(seed, topic).map((question) => question.difficulty)
 }
 
 /** Public shape — no correct answer, and no source line, ever. */
-export function deal(seed: number, index: number): TriviaQuestion | null {
-  const question = buildRound(seed)[index]
+export function deal(seed: number, index: number, topic: Topic = DEFAULT_TOPIC): TriviaQuestion | null {
+  const question = buildRound(seed, topic)[index]
   if (!question) return null
   const { correct: _correct, correctSet: _set, source: _source, ...rest } = question
   return rest
@@ -1449,8 +1753,11 @@ export function deal(seed: number, index: number): TriviaQuestion | null {
  * the system: this is how the confidence gate stays testable and how the data-quality
  * report can name what backed a question. Never call it from a client component.
  */
-export function auditRound(seed: number): Array<{ id: string; source: SourceRef }> {
-  return buildRound(seed).map((question) => ({ id: question.id, source: question.source }))
+export function auditRound(
+  seed: number,
+  topic: Topic = DEFAULT_TOPIC,
+): Array<{ id: string; source: SourceRef }> {
+  return buildRound(seed, topic).map((question) => ({ id: question.id, source: question.source }))
 }
 
 export type Verdict = {
@@ -1471,8 +1778,13 @@ export type Verdict = {
  * would reward ticking everything plausible, which is the opposite of knowing. The
  * verdict still reports `hits`, because "you had two of the three" is worth being told.
  */
-export function grade(seed: number, index: number, answer: string | string[]): Verdict | null {
-  const question = buildRound(seed)[index]
+export function grade(
+  seed: number,
+  index: number,
+  answer: string | string[],
+  topic: Topic = DEFAULT_TOPIC,
+): Verdict | null {
+  const question = buildRound(seed, topic)[index]
   if (!question) return null
   const picked = Array.isArray(answer) ? [...new Set(answer)] : [answer]
   const truth = new Set(question.correctSet)

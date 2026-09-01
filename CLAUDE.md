@@ -59,9 +59,15 @@ Read `docs/00-architecture.md` before changing anything structural.
     field name anywhere else is a defect.
 13. **A derby means Maccabi Tel Aviv. Nothing else.** It is a `club.is_derby_rival` flag
     and a DB trigger that derives `match.is_derby`. Never hand-set it, never widen it.
-14. **Football and basketball never mix.** Every sport-bearing table carries `sport`,
-    a trigger rejects a cross-sport match, and aliases are scoped by sport. The Hapoel
-    Ussishkin chapter is basketball.
+14. **A question is never cross-sport. A ROUND may be.** Every sport-bearing table
+    carries `sport`, a trigger rejects a cross-sport match, and aliases are scoped by
+    sport — so a football question can never draw a basketball distractor, and "how many
+    championships" can never answer with the other sport's count. That was always what
+    this rule protected. Maor then asked for a general trivia round that includes the
+    basketball, and that is not a breach: `lib/game/topics.ts` gives each TOPIC a list of
+    sports, `general` admits both, and every other topic is football. The wall is the
+    `sport` field on the question, not the absence of basketball from the app. The
+    Hapoel Ussishkin chapter is basketball and lives in its own wing.
 15. **A question must have exactly one right answer, four real options, and no open
     conflict behind it.** Questions are grouped by prompt and a prompt with two correct
     answers is dropped whole; a template that cannot field three real distractors is
@@ -131,8 +137,14 @@ Read `docs/00-architecture.md` before changing anything structural.
     address is **theworker.dubelteam.com** (`SITE_URL`), printed on every share card.
     הפועל תל אביב is the CLUB and belongs on the second line, never in the name slot.
 
-24. **Four game types, and they are different games.** Naming them stopped them
-    collapsing into each other:
+24. **The gate plan is Maor's, and gate 2 is a WING.** The map as he set it on
+    1.9.2026: 1 `/xi` הרכב כל הזמנים · 2 `/trivia` אגף הטריוויות (five topics, each its
+    own route) · 3 `/lineup` הרכב משחק היסטורי · 4 `/kits/build` חידון המדים ·
+    5 `/kits` עיצוב חולצה אישית · 6 `/memory` משחק הזיכרון · 7 אגף הסקרים (replacing the
+    crest game, which he cut) · 8 `/goal` שחזור שער · 9 חדר הלבשה · 10 `/tik` כרטיס פועל ·
+    11 `/derby` משחק השנאה → התיק השחור · 12 ON TOUR · 13 `/timeline` ציר הזמן.
+    `/ussishkin` is a memorial wing, not a gate. Naming the game types is what stopped
+    them collapsing into each other:
     - **gate 4 `/kits/build`** — חידון מדים לפי עונה: you are given a season and you
       BUILD its kit. Stage 1 asks the cut, stage 2 adds the sponsor, stage 3 adds the
       maker. The difficulty rises in the ASK, not only in the clock.
@@ -155,6 +167,23 @@ Read `docs/00-architecture.md` before changing anything structural.
     is clean. Every retired path keeps a valid, inert file that imports NOTHING (the one
     exception is `next/navigation` for a redirect). Enforced in `tests/guards.test.ts`:
     a tombstone that grows, gains an import, or disappears fails the suite.
+
+27. **Lossy compression reinvents yellow. Ship artwork as a palette PNG.**
+    Rule 8 has no exemption for artwork, and getting there took four attempts: JPEG at
+    4:2:0 put it back (chroma averaged over 2×2 blocks), JPEG at 4:4:4 put it back (DCT
+    ringing at hard edges), and h.264 put back a one-pixel seam wherever green met brown
+    — generated at DECODE, so no amount of cleaning the source frames helped. A palette
+    PNG is lossless with a finite, explicit colour set, which turns the check from a
+    sample into a proof: no yellow entry in the table means no yellow pixel in the file.
+    `scripts/brand/art.py` does it and asserts it. Same class as the badge coming back
+    yellow after Next's WebP re-encode.
+
+28. **An ad may never appear during a run.** `lib/ads.ts` owns that decision and no
+    component may take it for itself. A banner that reflows the board mid-question costs
+    the player the question; an interstitial between stages breaks the thing rule 21
+    exists to protect. Ads go on the reading screens and on the result screen — a place a
+    person is already stopping — one per screen, with the height reserved before the
+    script answers.
 
 ## Commands
 

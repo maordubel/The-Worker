@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from 'next'
 const _f = (o: { variable: string; [k: string]: unknown }) => ({ variable: o.variable, className: '' })
 const Suez_One = _f, Miriam_Libre = _f, Heebo = _f, Courier_Prime = _f, Karantina = _f, Archivo = _f
+import Script from 'next/script'
+
+import { Analytics } from '@/components/ads/Analytics'
+import { ADSENSE_CLIENT } from '@/lib/ads'
 import { BRAND } from '@/lib/brand'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
 import './globals.css'
@@ -86,6 +90,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {t('nav.skipToContent')}
         </a>
         {children}
+
+        {/*
+          AdSense's loader, and Google's measurement tag.
+
+          `afterInteractive` for both. Neither has any business blocking the first paint
+          of a game screen, and both are designed to arrive late — AdSense fills any
+          `<ins>` already on the page when it lands, and gtag queues into `dataLayer`.
+          Loading them `beforeInteractive` would trade the thing the app is for against
+          the things that pay for it.
+
+          The loader is global; WHERE a unit may appear is decided in `lib/ads.ts`, and
+          never inside a run.
+        */}
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+        <Analytics />
       </body>
     </html>
   )

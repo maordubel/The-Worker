@@ -6,6 +6,7 @@ import { Mast } from '@/components/ui/LampGrid'
 import { t } from '@/lib/i18n'
 import type { MemoryCard } from '@/lib/game/memory'
 import { ShareRow } from '@/components/share/ShareRow'
+import { artFor } from '@/lib/share/story'
 
 /**
  * Screen 6 — always night. Twelve lamps in a 4×3 grid, tilted -1.5°.
@@ -98,6 +99,7 @@ export function MemoryBoard({ cards, seed }: { cards: MemoryCard[]; seed: number
           headline={String(pairs)}
           card={{
             template: 'ink' as const,
+              art: artFor('memory', 0),
             kicker: 'GATE 6 · MEMORY',
             label: t('screen.memory.title'),
             eyebrow: t('memory.pairs'),

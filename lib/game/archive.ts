@@ -14,6 +14,7 @@ import competitionsFile from '@/content/manual/competitions.json'
 import crestsFile from '@/content/manual/crest-versions.json'
 import candidatesFile from '@/content/manual/election-candidates.json'
 import electionsFile from '@/content/manual/elections.json'
+import euroTiesFile from '@/content/manual/euro-ties.json'
 import goalsFile from '@/content/manual/goals.json'
 import ussishkinFile from '@/content/manual/ussishkin.json'
 import eventsFile from '@/content/manual/match-events.json'
@@ -229,6 +230,10 @@ export const archive = {
     shirtNumber: number
     seasonLabel: string
     personNameHe: string
+    /** the source spells the name in Latin and the Hebrew is ours */
+    hebrewIsTransliteration?: boolean
+    /** two official line-ups from the same season disagree — never a question (rule 15) */
+    disputed?: boolean
   }>(shirtNumbersFile),
   sponsorYears: load<{
     yearLabelRaw: string
@@ -277,6 +282,39 @@ export const archive = {
     claimB: string
     resolution?: string | null
   }>(conflictsFile),
+  /**
+   * הפועל תל אביב באירופה — every UEFA tie the club has played, plus the Intertoto groups.
+   *
+   * The European record is the part of this club's history a supporter can recite, and
+   * until now the archive held nineteen loose fixtures with no tie structure. A tie is
+   * the unit that matters: two legs, an aggregate, and whether it took you through.
+   *
+   * `homeAbroadHe` is not decoration. Ten of these "home" legs were played in Nicosia,
+   * Sofia, Florence, Rotterdam, Tilburg, Larnaca or Miskolc, and that is most of what
+   * the terrace remembers about European nights.
+   */
+  euroTies: load<{
+    slug: string
+    seasonLabel: string
+    competitionHe: string
+    stageHe: string
+    opponentHe: string
+    opponentLatin: string
+    opponentCountryHe: string
+    opponentIsTransliteration: boolean
+    legs: Array<{
+      playedOn: string
+      home: boolean
+      forHapoel: number
+      against: number
+      venueHe: string | null
+    }>
+    aggregateHe: string
+    advanced: boolean
+    scorersHe?: string
+    homeAbroadHe?: string
+    notableHe?: string
+  }>(euroTiesFile),
   /**
    * שערים משוחזרים — the goal archive gate 8 plays and the trivia bank asks about.
    *
