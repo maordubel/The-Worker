@@ -33,6 +33,10 @@ app/memory/MemoryBoard.tsx
 app/memory/page.tsx
 app/not-found.tsx
 app/page.tsx
+app/polls/BallotSheet.tsx
+app/polls/page.tsx
+app/qa/story/StoryProof.tsx
+app/qa/story/page.tsx
 app/tik/MemberBook.tsx
 app/tik/page.tsx
 app/timeline/TimelineBoard.tsx
@@ -64,6 +68,7 @@ components/press/GoalPitch.tsx
 components/press/PlayerFigure.tsx
 components/press/PressPitch.tsx
 components/press/StoryCard.tsx
+components/roster/RosterSheet.tsx
 components/share/ShareRow.tsx
 components/ui/AnswerRow.tsx
 components/ui/Badge.tsx
@@ -103,6 +108,7 @@ lib/game/roster-search.ts
 lib/game/score.ts
 lib/game/seasons.ts
 lib/game/session.ts
+lib/game/timeline-run.ts
 lib/game/timeline.ts
 lib/game/topics.ts
 lib/game/trivia.ts
@@ -111,6 +117,8 @@ lib/i18n.ts
 lib/isYellow.ts
 lib/kit/seasons.ts
 lib/kit/spec.ts
+lib/polls/ballot.ts
+lib/polls/store.ts
 lib/share/copy.ts
 lib/share/story.ts
 lib/supabase/admin.ts

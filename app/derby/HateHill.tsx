@@ -367,7 +367,6 @@ function Verdict({
       </ol>
 
       {/* the whistle has gone — a stopping point, not a run */}
-      <AdSlot placement="result" />
 
       <ShareRow
         kind="hate"
@@ -408,6 +407,8 @@ function Verdict({
       <p className="mt-3 font-body text-[11px] text-muted">
         {t('hate.rosterNote', { count: String(rosterSize) })}
       </p>
+
+      <AdSlot placement="result" />
     </div>
   )
 }

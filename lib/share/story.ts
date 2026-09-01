@@ -23,7 +23,7 @@ export const STORY_H = 1920
 /** Instagram's own furniture lives here. Nothing important may enter it. */
 export const SAFE = 260
 
-export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art' | 'xi'
+export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art' | 'xi' | 'ballot'
 
 /**
  * הציורים — Maor's own artwork, and the only images this card system carries.
@@ -72,6 +72,16 @@ export type StoryCard = {
    * draws the pitch and every name on it.
    */
   xi?: Array<{ roleHe: string; nameHe: string; x: number; y: number }>
+  /**
+   * פתק ההצבעה — the polls wing's answers, printed as a slip.
+   *
+   * A ballot is a list of eight questions and eight names, and there is no honest way
+   * to compress that into a hero line: the whole content of the card is WHO you picked,
+   * and picking one of the eight to enlarge would throw the other seven away — which is
+   * the exact mistake the XI card made before it was rebuilt. So the slip prints every
+   * row it was given, at whatever size the number of rows allows.
+   */
+  ballot?: Array<{ ask: string; latin: string; pick: string }>
   /**
    * Which painting backs the card. Present means the `art` template is used and the
    * whole top of the plate is the picture; absent means the print card, which has to
@@ -591,6 +601,13 @@ export function drawStory(
     return
   }
 
+  // BALLOT · the polls wing's slip. Also a whole card, for the same reason.
+  if (template === 'ballot' && card.ballot && card.ballot.length > 0) {
+    drawBallotCard(ctx, card, badge)
+    ctx.restore()
+    return
+  }
+
   if (template === 'art' && art) {
     // The card is laid out from the FOOT upward, not from the top down. Everything
     // below the picture is anchored — challenge line, facts panel, credit strip — so
@@ -720,6 +737,7 @@ export function drawStory(
   ctx.fillStyle = kickerColour
   ctx.letterSpacing = '6px'
   ctx.fillText(card.kicker, right, SAFE + 18)
+  recordInk(ctx, 'kicker', card.kicker, right, SAFE + 18)
   ctx.letterSpacing = '0px'
   ctx.direction = 'rtl'
 
@@ -736,6 +754,7 @@ export function drawStory(
       offset: 12,
       skew: 0,
     })
+    recordInk(ctx, 'hero', card.hero, right, y + size * 0.78, 12)
     y += size * 0.78 + 70
   } else if (template === 'kit') {
     const size = fit(ctx, card.hero, 132, width)
@@ -746,11 +765,13 @@ export function drawStory(
       offset: 7,
       skew: 0,
     })
+    recordInk(ctx, 'hero', card.hero, right, y + size * 0.8, 7)
     y += size * 0.8 + 40
   } else {
     ctx.fillStyle = dark ? BRAND.concrete : BRAND.muted
     ctx.font = '400 30px Heebo, sans-serif'
     ctx.fillText(card.eyebrow, right, y)
+    recordInk(ctx, 'eyebrow', card.eyebrow, right, y)
     const size = fit(ctx, card.hero, 118, width, '"Suez One", serif', '400')
     ctx.font = `400 ${size}px "Suez One", serif`
     plateText(ctx, card.hero, right, y + 54 + size * 0.82, {
@@ -759,6 +780,7 @@ export function drawStory(
       offset: 9,
       skew: -6,
     })
+    recordInk(ctx, 'hero', card.hero, right, y + 54 + size * 0.82, 9)
     y += 54 + size * 0.82 + 56
     ctx.fillStyle = headline
     ctx.fillRect(pad, y, width, 10)
@@ -766,6 +788,20 @@ export function drawStory(
   }
 
   // 3 · the graphic
+  //
+  // The facts box is anchored to the foot, so where it starts is known before anything
+  // is drawn between it and the headline. Computing it first is what lets the graphic be
+  // CENTRED in the room that is actually left instead of flowed from the top — the
+  // hatred card printed its figure just under the headline and then left four hundred
+  // pixels of empty plate under it, which reads as a card that failed to load.
+  const challengeY = STORY_H - SAFE - 236
+  const factRows = card.stats.slice(0, 3)
+  const across = factRows.length > 1 && factRows.every((row) => row.v.length <= 16)
+  const factsH = factRows.length === 0 ? 0 : across ? 150 : 42 + factRows.length * 96
+  const factsTop = factRows.length === 0 ? challengeY - 40 : challengeY - 56 - factsH
+  const roomTop = y
+  const roomBottom = factsTop - 40
+
   if (template === 'kit' && card.kit) {
     // sized to the room actually left between the headline and the facts box, so the
     // shirt is as big as the card can make it instead of a fixed thumbnail
@@ -794,33 +830,58 @@ export function drawStory(
   } else if (card.bigStat) {
     const size = fit(ctx, card.bigStat.v, 220, width)
     ctx.font = `700 ${size}px Karantina, sans-serif`
+    // The whole figure-plus-caption block is measured, then centred in the room. A
+    // fixed 32px multiplier is what the label used to be positioned by, and it printed
+    // through the figure at 220px (see `npm run story:overlap`).
+    const figureBox = textBox(ctx, card.bigStat.v)
+    ctx.font = '400 32px Heebo, sans-serif'
+    const captionBox = textBox(ctx, card.bigStat.k)
+    const blockH = figureBox.height + 8 + 22 + captionBox.height
+    const blockTop = Math.max(roomTop, roomTop + (roomBottom - roomTop - blockH) / 2)
+    y = blockTop - (size * 0.76 - figureBox.ascent)
+    ctx.font = `700 ${size}px Karantina, sans-serif`
     plateText(ctx, card.bigStat.v, right, y + size * 0.76, {
       under: BRAND.sign,
       over: BRAND.red,
       offset: 8,
       skew: 0,
     })
-    y += size * 0.76 + 26
+    // The label's baseline is set from the figure's MEASURED descent plus the offset
+    // the second plate is printed at — not from `size * 0.76 + 52`, which is the kind
+    // of guessed multiple that put the caption through the number at 220px while
+    // looking correct at 90px. Caught by `npm run story:overlap`, not by looking.
+    const bigBox = textBox(ctx, card.bigStat.v)
+    const bigBase = y + size * 0.76
+    recordInk(ctx, 'bigStat.v', card.bigStat.v, right, bigBase, 8)
     ctx.fillStyle = dark ? BRAND.concrete : BRAND.muted
     ctx.font = '400 32px Heebo, sans-serif'
-    ctx.fillText(card.bigStat.k, right, y + 26)
-    y += 92
+    const keyBox = textBox(ctx, card.bigStat.k)
+    const keyBase = bigBase + bigBox.descent + 8 + 22 + keyBox.ascent
+    ctx.fillText(card.bigStat.k, right, keyBase)
+    recordInk(ctx, 'bigStat.k', card.bigStat.k, right, keyBase)
+    y = keyBase + keyBox.descent + 46
   }
 
   // 4 · the facts, in an ink box ANCHORED to the foot rather than flowed after the
   //     graphic. Flowing it let a tall graphic push the box down over the challenge
   //     line; anchoring it means the two can never collide whatever the hero does.
-  const challengeY = STORY_H - SAFE - 236
-  if (card.stats.length > 0) {
-    const rows = card.stats.slice(0, 3)
+  if (factRows.length > 0) {
     // Two or three SHORT facts sit side by side, the way PATTERN / COLLAR / ERA does in
     // the handoff. Stacking them left most of the plate empty, and an ink box that is
     // mostly empty reads as a mistake rather than as a panel.
-    const across = rows.length > 1 && rows.every((row) => row.v.length <= 16)
-    const boxH = across ? 150 : 42 + rows.length * 96
-    const boxTop = Math.max(y, challengeY - 56 - boxH)
+    const rows = factRows
+    const boxH = factsH
+    const boxTop = Math.max(y, factsTop)
     ctx.fillStyle = BRAND.ink
     ctx.fillRect(pad, boxTop, width, boxH)
+    // An ink panel on an ink ground is an invisible panel: the facts floated loose on
+    // the hatred card with nothing around them. On a dark template the plate is given
+    // the cream rule that the ground would otherwise have provided.
+    if (dark) {
+      ctx.strokeStyle = BRAND.sheet
+      ctx.lineWidth = 4
+      ctx.strokeRect(pad, boxTop, width, boxH)
+    }
 
     if (across) {
       const cell = (width - 52) / rows.length
@@ -829,23 +890,27 @@ export function drawStory(
         ctx.fillStyle = BRAND.red
         ctx.font = '400 24px Heebo, sans-serif'
         ctx.fillText(stat.k, cellRight, boxTop + 56)
+        recordInk(ctx, `stat.k.${index}`, stat.k, cellRight, boxTop + 56)
         const size = fit(ctx, stat.v, 44, cell - 20, '"Suez One", serif', '400')
         ctx.font = `400 ${size}px "Suez One", serif`
         ctx.fillStyle = BRAND.sheet
         ctx.fillText(stat.v, cellRight, boxTop + 62 + size)
+        recordInk(ctx, `stat.v.${index}`, stat.v, cellRight, boxTop + 62 + size)
       })
     } else {
       let ly = boxTop + 66
-      for (const stat of rows) {
+      rows.forEach((stat, index) => {
         ctx.fillStyle = BRAND.red
         ctx.font = '400 24px Heebo, sans-serif'
         ctx.fillText(stat.k, right - 26, ly)
+        recordInk(ctx, `stat.k.${index}`, stat.k, right - 26, ly)
         const size = fit(ctx, stat.v, 46, width - 60, '"Suez One", serif', '400')
         ctx.font = `400 ${size}px "Suez One", serif`
         ctx.fillStyle = BRAND.sheet
         ctx.fillText(stat.v, right - 26, ly + size + 6)
+        recordInk(ctx, `stat.v.${index}`, stat.v, right - 26, ly + size + 6)
         ly += 96
-      }
+      })
     }
   }
 
@@ -853,6 +918,7 @@ export function drawStory(
   ctx.fillStyle = dark ? BRAND.concrete : template === 'year' ? BRAND.ink : BRAND.sign
   ctx.font = '400 28px Heebo, sans-serif'
   ctx.fillText(card.challenge, right, challengeY)
+  recordInk(ctx, 'challenge', card.challenge, right, challengeY)
 
   foot(
     ctx,
@@ -988,6 +1054,7 @@ function drawXiCard(
   const bandTop = top + chipH / 2 + 22
   const bandBottom = top + height - chipH / 2 - 22
 
+  let chipIndex = 0
   for (const row of rows.values()) {
     const sorted = [...row].sort((a, b) => a.x - b.x)
     const span = sorted.length * chipW + (sorted.length - 1) * gap
@@ -995,13 +1062,155 @@ function drawXiCard(
     const depth = (sorted[0]?.y ?? 50) / 100
     const cy = bandTop + depth * (bandBottom - bandTop)
     sorted.forEach((slot, index) => {
-      drawXiChip(ctx, slot.nameHe, slot.roleHe, startX + index * (chipW + gap), cy, chipW, chipH)
+      chipIndex += 1
+      drawXiChip(
+        ctx,
+        slot.nameHe,
+        slot.roleHe,
+        startX + index * (chipW + gap),
+        cy,
+        chipW,
+        chipH,
+        chipIndex,
+      )
     })
   }
 
   ctx.fillStyle = BRAND.sign
   ctx.font = '400 28px Heebo, sans-serif'
   ctx.fillText(card.challenge, right, challengeY)
+
+  foot(ctx, card, { name: BRAND.red, text: BRAND.ink, rule: BRAND.red }, badge)
+}
+
+/**
+ * כרטיס הפתק — the ballot, drawn as a ballot.
+ *
+ * The reference is a real voting slip and the layout follows one literally: a headed
+ * sheet, a ruled row per question, the question small on one side and the answer large
+ * on the other, and a stamp at the foot. That is not decoration — it is what makes the
+ * card readable at story size, because a viewer scanning past on a phone reads the
+ * ANSWERS as a column and the questions only if something catches them.
+ *
+ * The rows size themselves. Eight answers and three answers cannot use the same type
+ * size without one of them looking wrong, so the row height is the space available
+ * divided by the rows present, and the answer's face is derived from that height and
+ * then measured — `measureText`, never a guessed multiple of the point size, which is
+ * the mistake that put text through text three times on this project.
+ */
+function drawBallotCard(
+  ctx: CanvasRenderingContext2D,
+  card: StoryCard,
+  badge: CanvasImageSource | null,
+): void {
+  const pad = 76
+  const right = STORY_W - pad
+  const width = STORY_W - pad * 2
+  const rows = card.ballot ?? []
+
+  ctx.fillStyle = BRAND.sheet
+  ctx.fillRect(0, 0, STORY_W, STORY_H)
+  dots(ctx, BRAND.ink, 0.09)
+
+  // ── the head band ─────────────────────────────────────────────────────────
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'right'
+  ctx.font = '800 28px Archivo, sans-serif'
+  ctx.letterSpacing = '6px'
+  ctx.fillStyle = BRAND.sign
+  ctx.fillText(card.kicker, right, SAFE - 10)
+  ctx.letterSpacing = '0px'
+  ctx.direction = 'rtl'
+
+  ctx.font = '400 84px "Suez One", serif'
+  const titleBox = textBox(ctx, card.hero)
+  const titleBase = SAFE + 34 + titleBox.ascent
+  plateText(ctx, card.hero, right, titleBase, {
+    under: BRAND.red,
+    over: BRAND.ink,
+    offset: 8,
+    skew: -6,
+  })
+  recordInk(ctx, 'ballot.title', card.hero, right, titleBase, 8)
+
+  // ── the slip ──────────────────────────────────────────────────────────────
+  const challengeY = STORY_H - SAFE - 236
+  const top = titleBase + titleBox.descent + 40
+  const bottom = challengeY - 60
+  const height = bottom - top
+
+  ctx.fillStyle = BRAND.paper
+  ctx.fillRect(pad, top, width, height)
+  ctx.strokeStyle = BRAND.ink
+  ctx.lineWidth = 8
+  ctx.strokeRect(pad, top, width, height)
+
+  const rowH = height / rows.length
+  // The answer's size follows the row, capped so three answers do not print at the size
+  // of a headline, and floored so eight are still legible on a phone in a feed.
+  const pickSize = Math.max(34, Math.min(60, rowH * 0.42))
+  const askSize = Math.max(20, Math.min(28, rowH * 0.2))
+
+  rows.forEach((row, index) => {
+    const rowTop = top + index * rowH
+    if (index > 0) {
+      ctx.strokeStyle = 'rgba(26,26,26,0.22)'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(pad + 20, rowTop)
+      ctx.lineTo(right - 20, rowTop)
+      ctx.stroke()
+    }
+
+    // the tick box, on the reading edge — a slip without a mark on it is a form
+    const boxSize = Math.min(34, rowH * 0.26)
+    const boxY = rowTop + rowH / 2 - boxSize / 2
+    ctx.fillStyle = BRAND.red
+    ctx.fillRect(pad + 22, boxY, boxSize, boxSize)
+
+    ctx.direction = 'rtl'
+    ctx.textAlign = 'right'
+
+    // Both lines are measured BEFORE either is drawn, so the pair can be centred in the
+    // row as one block. Drawing the question at a fixed fraction of the row and letting
+    // the answer fall where it lands is what left the last row of the slip hanging with
+    // dead paper under it — every row was top-heavy and the error only showed at the
+    // bottom edge, where there was nothing after it to hide the gap.
+    ctx.font = `400 ${askSize}px Heebo, sans-serif`
+    const askBox = textBox(ctx, row.ask)
+
+    // The answer is fitted to the width that is left once the tick box has taken its
+    // side — a long name shrinks rather than running under the box or off the slip.
+    const room = width - 44 - boxSize - 30
+    let size = pickSize
+    ctx.font = `400 ${size}px "Suez One", serif`
+    while (ctx.measureText(row.pick).width > room && size > 22) {
+      size -= 2
+      ctx.font = `400 ${size}px "Suez One", serif`
+    }
+    const pickBox = textBox(ctx, row.pick)
+
+    const gap = 14
+    const blockH = askBox.height + gap + pickBox.height
+    const blockTop = rowTop + (rowH - blockH) / 2
+    const askBase = blockTop + askBox.ascent
+    const pickBase = askBase + askBox.descent + gap + pickBox.ascent
+
+    ctx.font = `400 ${askSize}px Heebo, sans-serif`
+    ctx.fillStyle = BRAND.sign
+    ctx.fillText(row.ask, right - 22, askBase)
+    recordInk(ctx, `ballot.ask.${index}`, row.ask, right - 22, askBase)
+
+    ctx.font = `400 ${size}px "Suez One", serif`
+    ctx.fillStyle = BRAND.ink
+    ctx.fillText(row.pick, right - 22, pickBase)
+    recordInk(ctx, `ballot.pick.${index}`, row.pick, right - 22, pickBase)
+  })
+
+  ctx.font = '400 28px Heebo, sans-serif'
+  ctx.fillStyle = BRAND.sign
+  ctx.fillText(card.challenge, right, challengeY)
+  recordInk(ctx, 'challenge', card.challenge, right, challengeY)
 
   foot(ctx, card, { name: BRAND.red, text: BRAND.ink, rule: BRAND.red }, badge)
 }
@@ -1017,6 +1226,7 @@ function drawXiChip(
   cy: number,
   chipW: number,
   chipH: number,
+  index = 0,
 ): void {
   const x = cx - chipW / 2
   const y = cy - chipH / 2
@@ -1034,12 +1244,17 @@ function drawXiChip(
   ctx.fillStyle = BRAND.red
   ctx.font = '400 20px Heebo, sans-serif'
   ctx.fillText(role, cx, y + 26)
+  // Centred text: the recorded box is anchored on its right edge, so half the measured
+  // width is added back to put the box where the glyphs actually are.
+  recordInk(ctx, `xi.role.${index}`, role, cx + ctx.measureText(role).width / 2, y + 26)
 
   const size = fit(ctx, name, 34, chipW - 18, '"Suez One", serif', '400')
   ctx.font = `400 ${size}px "Suez One", serif`
   ctx.fillStyle = BRAND.ink
   const box = textBox(ctx, name)
-  ctx.fillText(name, cx, y + chipH - 16 - box.descent)
+  const nameBase = y + chipH - 16 - box.descent
+  ctx.fillText(name, cx, nameBase)
+  recordInk(ctx, `xi.name.${index}`, name, cx + ctx.measureText(name).width / 2, nameBase)
   ctx.textAlign = 'right'
 }
 

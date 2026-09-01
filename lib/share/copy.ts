@@ -20,6 +20,7 @@ export type ShareKind =
   | 'memory'
   | 'goal'
   | 'timeline'
+  | 'polls'
 
 const ROUTE: Record<ShareKind, string> = {
   hate: '/derby',
@@ -30,10 +31,22 @@ const ROUTE: Record<ShareKind, string> = {
   memory: '/memory',
   goal: '/goal',
   timeline: '/timeline',
+  polls: '/polls',
 }
 
 /** The link a share sends people to — the same round, not the front door. */
+/**
+ * A gate with no round has no seed to hand over.
+ *
+ * Every other share here is a dare — the link reproduces the identical round. The polls
+ * wing has no round: there is nothing to reproduce and nothing to beat, and a `?seed=1`
+ * stapled to it would be a parameter the page ignores, which is the kind of small lie
+ * that makes a URL untrustworthy to read.
+ */
+const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls'])
+
 export function challengeUrl(kind: ShareKind, seed: string | number): string {
+  if (SEEDLESS.has(kind)) return `${SITE_URL}${ROUTE[kind]}?from=share`
   return `${SITE_URL}${ROUTE[kind]}?seed=${seed}&from=share`
 }
 

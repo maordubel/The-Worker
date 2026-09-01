@@ -184,6 +184,17 @@ describe('brand acceptance — RTL', () => {
   })
 })
 
+/**
+ * המתקן — the one file the brand guards do not apply to, and why.
+ *
+ * `app/qa/story` renders every share card with the WORST strings the archive can
+ * produce, so it necessarily holds Hebrew literals and un-tokenised type: it is a
+ * fixture, not a screen. Exempting it is only safe because it can never be served —
+ * the test below asserts the route returns `notFound()` in production, so the exemption
+ * cannot quietly become a hole somebody ships a real screen through.
+ */
+const QA_HARNESS = 'app/qa/story'
+
 describe('brand acceptance — typography', () => {
   it('uses only the four declared families', () => {
     const allowed = new Set(['font-display', 'font-sign', 'font-body', 'font-mono'])
@@ -203,6 +214,7 @@ describe('brand acceptance — typography', () => {
     for (const { path, text } of mono) {
       // Either the file sets it directly, or it renders numbers through <Num>/<Score>,
       // which isolate the run LTR and set tabular-nums for it.
+      if (path.includes(QA_HARNESS)) continue
       const safe =
         text.includes('tabular-nums') || /<Num\b/.test(text) || /<Score\b/.test(text)
       expect(safe, `${path} uses font-mono without tabular-nums`).toBe(true)
@@ -272,6 +284,7 @@ describe('brand acceptance — system rules', () => {
     const hebrew = /[֐-׿]/
     for (const { path, text } of SOURCES) {
       if (path.endsWith('Stamp.tsx')) continue // the circumferential stamp text is artwork
+      if (path.includes(QA_HARNESS)) continue // fixtures, and unreachable in production
       for (const line of withoutComments(text).split('\n')) {
         if (!hebrew.test(line)) continue
         const isTranslated = /\bt\(/.test(line) || /aria-label=\{/.test(line)
@@ -322,6 +335,28 @@ describe('הסמל — the badge ships without a yellow pixel in it', () => {
         /src=\{?['"`]\/brand\/logo-\d+\.png/.test(text),
         `${path} renders the badge outside Badge.tsx`,
       ).toBe(false)
+    }
+  })
+})
+
+describe('מתקן הבדיקה — the QA harness is exempt only because it cannot ship', () => {
+  it('returns notFound() in production, so the brand exemption cannot leak', () => {
+    const page = readFileSync(join(ROOT, 'app/qa/story/page.tsx'), 'utf8')
+    expect(page).toContain('notFound()')
+    expect(page).toContain("process.env.NODE_ENV === 'production'")
+  })
+
+  it('draws every template the share system can produce', () => {
+    const proof = readFileSync(join(ROOT, 'app/qa/story/StoryProof.tsx'), 'utf8')
+    const story = readFileSync(join(ROOT, 'lib/share/story.ts'), 'utf8')
+    const declared =
+      story.match(/export type StoryTemplate =([^\n]+)/)?.[1] ?? ''
+    // `art` and `grass` are template variants of cards already covered here — the ones
+    // that must be listed are the templates with their OWN layout code, because those
+    // are the ones an overlap can hide in.
+    for (const template of ['score', 'ink', 'year', 'xi', 'ballot']) {
+      expect(declared, `${template} is not a declared template`).toContain(template)
+      expect(proof, `${template} is not in the overlap harness`).toContain(`'${template}'`)
     }
   })
 })

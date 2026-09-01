@@ -87,8 +87,12 @@ export function ShareRow({
           SPREAD IT
         </p>
       </div>
+      {/* The dare describes what the LINK does, so it cannot be one sentence for every
+          gate: a gate with a seed hands over the identical round, and the polls wing
+          hands over a blank slip. Printing "אותן שאלות, אותו סדר, אותו שעון" under a
+          ballot would be describing a round that does not exist. */}
       <p className="mt-1.5 font-body text-[11.5px] leading-relaxed text-concrete">
-        {t('share.dare')}
+        {t(kind === 'polls' ? 'share.dare.polls' : 'share.dare')}
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-2">

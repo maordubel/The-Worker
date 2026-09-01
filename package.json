@@ -13,7 +13,9 @@
     "ingest": "tsx scripts/ingest/cli.ts",
     "ingest:dry": "tsx scripts/ingest/cli.ts --source all --dry-run",
     "doctor": "rm -rf node_modules .next && npm ci && npm run lint && npm run typecheck && npm run test && npm run build",
-    "wiki:corpus": "tsx scripts/ingest/corpus-cli.ts"
+    "wiki:corpus": "tsx scripts/ingest/corpus-cli.ts",
+    "story:overlap": "node scripts/brand/story-overlap.mjs",
+    "story:cards": "node scripts/brand/story-cards.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

@@ -369,7 +369,6 @@ function Result({ run, seed }: { run: Run; seed: number }) {
       </div>
 
       {/* the whistle has gone — a stopping point, not a run */}
-      <AdSlot placement="result" />
 
       <ShareRow
         kind="goal"
@@ -406,6 +405,8 @@ function Result({ run, seed }: { run: Run; seed: number }) {
           {t('nav.gates')}
         </a>
       </div>
+
+      <AdSlot placement="result" />
     </div>
   )
 }

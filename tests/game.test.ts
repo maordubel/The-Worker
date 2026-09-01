@@ -58,7 +58,13 @@ import {
   seasonsInSpell,
   spellCoversSeason,
 } from '@/lib/game/seasons'
-import { TIMELINE_LENGTH, dealTimeline, gradeTimeline } from '@/lib/game/timeline'
+import {
+  TIMELINE_LENGTH,
+  boardAfter,
+  dealTimelineRun,
+  gradeInsert,
+  timelinePoolSize,
+} from '@/lib/game/timeline'
 import { rosterIndex } from '@/lib/game/allTimeXI'
 import { dealRun, goalCount, gradeGoal } from '@/lib/game/goal'
 import { fold, searchRoster } from '@/lib/game/roster-search'
@@ -381,41 +387,90 @@ describe('kit challenge', () => {
 })
 
 describe('timeline', () => {
-  it('deals five undated cards — the dates stay on the server', () => {
-    const cards = dealTimeline(4)
-    expect(cards).toHaveLength(TIMELINE_LENGTH)
-    expect(JSON.stringify(cards)).not.toMatch(/\d{4}-\d{2}-\d{2}/)
+  it('deals a blind QUEUE — no date on any card the player still has to place', () => {
+    const { queue } = dealTimelineRun(4)
+    expect(queue).toHaveLength(TIMELINE_LENGTH)
+    // Not just the `on` field: the ID must not carry it either. The natural keys are
+    // built from dates, and shipping one inside an identifier hands the answer over.
+    expect(JSON.stringify(queue)).not.toMatch(/\d{4}-\d{2}-\d{2}/)
+    expect(JSON.stringify(queue)).not.toMatch(/\b(1[89]|20)\d{2}\b/)
   })
 
   it('leaks no year in a card title or hint', () => {
     for (const seed of [1, 4, 6, 9]) {
-      for (const card of dealTimeline(seed)) {
+      const { anchor, queue } = dealTimelineRun(seed)
+      for (const card of [anchor, ...queue]) {
         expect(`${card.title} ${card.hint}`, card.title).not.toMatch(/\b(1[89]|20)\d{2}\b/)
       }
     }
   })
 
-  it('grades the true chronological order as correct', () => {
-    const solution = gradeTimeline(4, []).solution.map((item) => item.id)
-    expect(gradeTimeline(4, solution).correct).toBe(true)
+  it('deals a blind hand — the date of a card in hand never reaches the client', () => {
+    const { anchor, queue } = dealTimelineRun(3)
+    expect(queue).toHaveLength(TIMELINE_LENGTH)
+    // the anchor is the ONE card that carries its date: there is nothing to place it
+    // against, so it opens the board face up
+    expect(anchor.on).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(JSON.stringify(queue)).not.toContain('"on"')
   })
 
-  it('rejects a wrong order and still reveals the real one', () => {
-    const solution = gradeTimeline(4, []).solution.map((item) => item.id)
-    const swapped = [solution[1], solution[0], ...solution.slice(2)] as string[]
-    const verdict = gradeTimeline(4, swapped)
-    expect(verdict.correct).toBe(false)
-    expect(verdict.solution).toHaveLength(TIMELINE_LENGTH)
+  it('draws on a pool far deeper than one run', () => {
+    // A timeline mode whose pool is the length of a run deals the same ten cards to
+    // everybody, which is a puzzle rather than a game.
+    expect(timelinePoolSize()).toBeGreaterThan(60)
   })
 
-  it('returns the solution sorted oldest first', () => {
-    const dates = gradeTimeline(4, []).solution.map((item) => item.on)
-    expect([...dates].sort()).toEqual(dates)
+  it('opens on a card from the MIDDLE of the run, not an end', () => {
+    // Anchoring on the oldest or newest fact makes the first placements one-sided.
+    for (const seed of [1, 2, 5, 8]) {
+      const { anchor, queue } = dealTimelineRun(seed)
+      const dates: string[] = [anchor.on]
+      for (let index = 0; index < TIMELINE_LENGTH; index += 1) {
+        const verdict = gradeInsert(seed, index, 0)
+        if (verdict) dates.push(verdict.card.on)
+      }
+      const sorted = [...dates].sort()
+      const rank = sorted.indexOf(anchor.on)
+      expect(rank, `seed ${seed}`).toBeGreaterThan(0)
+      expect(rank, `seed ${seed}`).toBeLessThan(dates.length - 1)
+      expect(queue).toHaveLength(TIMELINE_LENGTH)
+    }
   })
 
-  it('never shows two cards from the same date', () => {
-    const dates = gradeTimeline(6, []).solution.map((item) => item.on)
-    expect(new Set(dates).size).toBe(dates.length)
+  it('grades the true slot as correct and any other slot as wrong', () => {
+    for (let placed = 0; placed < TIMELINE_LENGTH; placed += 1) {
+      const truth = gradeInsert(2, placed, -1)
+      expect(truth).not.toBeNull()
+      const position = truth?.position ?? 0
+      expect(gradeInsert(2, placed, position)?.correct).toBe(true)
+      const wrong = position === 0 ? 1 : position - 1
+      expect(gradeInsert(2, placed, wrong)?.correct).toBe(false)
+    }
+  })
+
+  it('keeps the board a true chronology however the player played', () => {
+    // The card lands in its real place whether or not the guess was right, which is
+    // what makes the board honest AND what makes it derivable from the seed alone.
+    for (let placed = 1; placed <= TIMELINE_LENGTH; placed += 1) {
+      const board = boardAfter(2, placed)
+      expect(board).toHaveLength(placed + 1)
+      const dates = board.map((card) => card.on)
+      expect([...dates].sort()).toEqual(dates)
+      expect(new Set(dates).size).toBe(dates.length)
+    }
+  })
+
+  it('reveals the played card with its date, and reports when the run is over', () => {
+    const mid = gradeInsert(2, 0, 0)
+    expect(mid?.card.on).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(mid?.done).toBe(false)
+    expect(gradeInsert(2, TIMELINE_LENGTH - 1, 0)?.done).toBe(true)
+    expect(gradeInsert(2, TIMELINE_LENGTH, 0)).toBeNull()
+  })
+
+  it('never puts two cards from the same date in one run', () => {
+    const board = boardAfter(6, TIMELINE_LENGTH)
+    expect(new Set(board.map((card) => card.on)).size).toBe(board.length)
   })
 })
 

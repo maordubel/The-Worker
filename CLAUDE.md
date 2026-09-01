@@ -118,7 +118,22 @@ Read `docs/00-architecture.md` before changing anything structural.
     `navigator.share({ files })`; there is exactly ONE share system and it is this one.
     Every card carries the badge, the address and a `?seed=` link, because a share that
     only announces a result recruits nobody — the link has to hand over the identical
-    round. `components/share/ShareRow.tsx` is the only place a game reaches for it.
+    round. `components/share/ShareRow.tsx` is the only place a game reaches for it. A
+    gate with no round (the polls wing) is in `SEEDLESS` and gets a link with no seed on
+    it — a parameter the page ignores is a small lie in a URL people read.
+    **A card whose content is a LIST gets its own template.** The XI card printed three
+    of eleven names and the ballot would have printed one of eight: compressing a list
+    into a hero line throws the card's whole content away. `xi` and `ballot` each draw
+    every row they are given, sized to the number of rows.
+    **Nothing on a card is positioned by a guessed multiple of the point size.** Every
+    baseline comes from `measureText`/`actualBoundingBox*`, every block reports its ink
+    (`recordInk`), and `npm run story:overlap` intersects the boxes across every
+    template with the longest strings in the archive. It has already caught a caption
+    printing through a 220px figure that four screenshots did not. `npm run story:cards`
+    renders the same harness as pictures, which is what caught an ink panel drawn on an
+    ink ground. Both drive `/qa/story`, which is `notFound()` in production and is the
+    ONLY file exempt from the brand string guards — `tests/brand.test.ts` asserts the
+    exemption stays sealed.
 
 20. **A shirt is eight layers, never an image.** `lib/kit/spec.ts` + `KitShirt.tsx` +
     `KitStrip.tsx`, off the Kit Builder handoff: base, cut, sleeves, collar, crest,
@@ -155,8 +170,9 @@ Read `docs/00-architecture.md` before changing anything structural.
 24. **The gate plan is Maor's, and gate 2 is a WING.** The map as he set it on
     1.9.2026: 1 `/xi` הרכב כל הזמנים · 2 `/trivia` אגף הטריוויות (five topics, each its
     own route) · 3 `/lineup` הרכב משחק היסטורי · 4 `/kits/build` חידון המדים ·
-    5 `/kits` עיצוב חולצה אישית · 6 `/memory` משחק הזיכרון · 7 אגף הסקרים (replacing the
-    crest game, which he cut) · 8 `/goal` שחזור שער · 9 חדר הלבשה · 10 `/tik` כרטיס פועל ·
+    5 `/kits` עיצוב חולצה אישית · 6 `/memory` משחק הזיכרון · 7 `/polls` אגף הסקרים
+    (replacing the crest game, which he cut) · 8 `/goal` שחזור שער · 9 חדר הלבשה ·
+    10 `/tik` כרטיס פועל ·
     11 `/derby` משחק השנאה → התיק השחור · 12 ON TOUR · 13 `/timeline` ציר הזמן.
     `/ussishkin` is a memorial wing, not a gate. Naming the game types is what stopped
     them collapsing into each other:
@@ -166,7 +182,24 @@ Read `docs/00-architecture.md` before changing anything structural.
     - **gate 5 `/kits`** — free design, no right answer, share it.
     - **gate 1 `/xi`** — הרכב כל הזמנים: eleven from all 640, free play, no grading.
     - **gate 3 `/lineup`** — חידון ההרכב: assemble the exact XI that started a match.
+    - **gate 7 `/polls`** — אגף הסקרים, built as a BALLOT rather than a bar chart. A
+      poll is a count and a count needs voters; with one voter, bars are either
+      meaningless or fabricated, and fabricating a baseline is the worst possible place
+      to break rule 11. So the wing gives back the artefact — eight picks on a printed
+      slip, shareable — and says on the screen, in the same voice a blocked source is
+      documented in, that there is no count yet. `lib/polls/store.ts` is the seam: an
+      async `BallotStore` with `countable`, local today, `poll_vote` keyed on
+      `(device_id, question_id)` when the table lands. The screen never names a storage
+      API — `tests/polls.test.ts` asserts that, and asserts no seeded vote exists
+      anywhere in the wing.
+      Six of the eight questions are answered from the WHOLE roster: the archive holds
+      637 names and no positions, so a "goalkeepers" shortlist would have to be guessed,
+      and one striker in it would make the wing untrustworthy. The supporter knows; the
+      archive does not pretend to.
     A quiz and a toy are not the same screen and must never share a route.
+    One roster sheet serves both gate 1 and gate 7 (`components/roster/RosterSheet.tsx`).
+    The search ranking was tuned once against Maor's "it has to find a man by his family
+    name"; a second copy would have drifted from it.
 
 25. **A shirt wears the crest of its era.** `crestForSeason()` resolves it from the crest
     timeline, so 1978 carries the worker mark, 2002 the one with KETER inside it, 2008
@@ -207,6 +240,8 @@ npm run dev · npm run lint · npm run typecheck · npm run test · npm run buil
 npm run ingest -- --source all --dry-run     # stage + report, no database
 npm run ingest -- --source wiki --fetch      # network; needs wiki access
 npm run db:types
+npm run story:overlap                        # needs a dev server; fails on any collision
+npm run story:cards                          # the same harness, as pictures
 ```
 
 ## House skills that apply

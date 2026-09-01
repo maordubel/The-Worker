@@ -3,10 +3,10 @@
 import { useMemo, useState } from 'react'
 
 import { Num } from '@/components/ui/Num'
+import { RosterSheet } from '@/components/roster/RosterSheet'
 import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
 import type { Formation, PitchSlot } from '@/lib/game/lineup'
-import { searchRoster } from '@/lib/game/roster-search'
 import type { RosterEntry, RosterIndex } from '@/lib/game/allTimeXI'
 import { t } from '@/lib/i18n'
 
@@ -37,7 +37,6 @@ export function XIBuilder({
   const [formation, setFormation] = useState<Formation>(formations[0] as Formation)
   const [picked, setPicked] = useState<Record<string, RosterEntry>>({})
   const [openSlot, setOpenSlot] = useState<PitchSlot | null>(null)
-  const [query, setQuery] = useState('')
 
   const chosen = Object.keys(picked).length
   const takenSlugs = useMemo(
@@ -45,26 +44,10 @@ export function XIBuilder({
     [picked],
   )
 
-  /**
-   * The result list, ranked and grouped.
-   *
-   * Empty query shows the WHOLE roster grouped under its family-name initials rather
-   * than the first sixty names — a truncated alphabetical list is the worst of both,
-   * since it neither answers a search nor lets you browse. With a term, the ranking
-   * puts family-name matches on top and grouping is dropped: a ranked list that is then
-   * re-sorted into buckets throws the ranking away.
-   */
-  const results = useMemo(() => searchRoster(roster.all, query), [query, roster.all])
-  const grouped = useMemo(
-    () => (query.trim() === '' ? roster.letters : null),
-    [query, roster.letters],
-  )
-
   function choose(entry: RosterEntry) {
     if (!openSlot) return
     setPicked((current) => ({ ...current, [openSlot.slotId]: entry }))
     setOpenSlot(null)
-    setQuery('')
   }
 
   function clear(slotId: string) {
@@ -192,152 +175,16 @@ export function XIBuilder({
         }}
       />
 
-      {/* the roster sheet */}
+      {/* the roster sheet — shared with the polls wing, see components/roster */}
       {openSlot && (
-        <div className="fixed inset-0 z-40 flex flex-col bg-ink/70" role="dialog" aria-modal="true">
-          <button
-            type="button"
-            aria-label={t('xi.close')}
-            className="flex-1"
-            onClick={() => setOpenSlot(null)}
-          />
-          <div className="max-h-[76vh] animate-slam overflow-y-auto border-t-rule border-ink bg-sheet">
-            <div className="sticky top-0 z-10 border-b-hair border-ink bg-sheet px-4 pb-2 pt-3">
-              <div className="flex items-baseline justify-between gap-3">
-                <p className="font-display text-step-1 text-ink">{openSlot.roleHe}</p>
-                <button
-                  type="button"
-                  onClick={() => setOpenSlot(null)}
-                  className="min-h-tap px-2 font-body text-[12px] font-extrabold text-red"
-                >
-                  {t('xi.close')}
-                </button>
-              </div>
-              <div className="mt-2 flex items-stretch gap-2">
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={t('xi.search')}
-                  aria-label={t('xi.search')}
-                  inputMode="search"
-                  className="min-h-tap w-full border-hair border-ink bg-paper px-3 font-body text-step-0 text-ink outline-none placeholder:text-muted"
-                />
-                {query !== '' && (
-                  <button
-                    type="button"
-                    onClick={() => setQuery('')}
-                    aria-label={t('xi.clear')}
-                    className="min-h-tap shrink-0 border-hair border-ink bg-paper px-3 font-body text-step-0 font-extrabold text-muted"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-              <p className="mt-1 font-mono text-[10.5px] tabular-nums text-muted">
-                {query === ''
-                  ? t('xi.count', { n: String(roster.total) })
-                  : t('xi.found', { n: String(results.length) })}
-              </p>
-
-              {/* the letter rail — family-name initials. 637 names need a way in that
-                  is not typing, and the initial a supporter reaches for is the family's */}
-              {grouped && (
-                <ol className="-mx-1 mt-1.5 flex gap-1 overflow-x-auto pb-1">
-                  {grouped.map((bucket) => (
-                    <li key={bucket.letter}>
-                      <a
-                        href={`#xi-letter-${bucket.letter}`}
-                        className="flex h-8 min-w-8 items-center justify-center border-hair border-ink/40 px-1.5 font-poster text-[17px] leading-none text-ink"
-                      >
-                        {bucket.letter}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-
-            {/* the fixed tab bar sits over the bottom of the sheet, so the list reserves
-                its height plus the home indicator — otherwise the last name is unreachable */}
-            <div className="px-2 pb-[calc(var(--tap)+2rem+env(safe-area-inset-bottom))]">
-              {grouped
-                ? grouped.map((bucket) => (
-                    <section key={bucket.letter}>
-                      <h4
-                        id={`xi-letter-${bucket.letter}`}
-                        className="sticky top-0 z-[5] scroll-mt-24 border-b-hair border-ink bg-ink px-2 py-1 font-poster text-[18px] leading-none text-paper"
-                      >
-                        {bucket.letter}
-                      </h4>
-                      <ol>
-                        {bucket.names.map((entry) => (
-                          <NameRow
-                            key={entry.slug}
-                            entry={entry}
-                            taken={takenSlugs.has(entry.slug)}
-                            onPick={() => choose(entry)}
-                          />
-                        ))}
-                      </ol>
-                    </section>
-                  ))
-                : (
-                    <ol>
-                      {results.map((entry) => (
-                        <NameRow
-                          key={entry.slug}
-                          entry={entry}
-                          taken={takenSlugs.has(entry.slug)}
-                          onPick={() => choose(entry)}
-                        />
-                      ))}
-                    </ol>
-                  )}
-              {results.length === 0 && (
-                <p className="px-2 py-6 text-center font-body text-step--1 text-muted">
-                  {t('xi.none')}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+        <RosterSheet
+          title={openSlot.roleHe}
+          roster={roster}
+          taken={takenSlugs}
+          onPick={(entry) => choose(entry)}
+          onClose={() => setOpenSlot(null)}
+        />
       )}
     </div>
-  )
-}
-
-/**
- * שורת שם — the family name first, in the display face, the given name after it.
- *
- * A roster row used to print the full name in one weight, which makes 637 of them a
- * grey wall you have to read rather than scan. Leading with the family name at a heavier
- * weight is what a squad list, a teamsheet and a phone book all do, and for the same
- * reason: it is the part you are looking for.
- */
-function NameRow({
-  entry,
-  taken,
-  onPick,
-}: {
-  entry: RosterEntry
-  taken: boolean
-  onPick: () => void
-}) {
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={onPick}
-        disabled={taken}
-        className="flex min-h-tap w-full items-baseline gap-2 border-b-hair border-ink/20 px-2 text-start disabled:opacity-35"
-      >
-        <span className="font-sign text-step-0 leading-tight text-ink">{entry.familyHe}</span>
-        {entry.givenHe !== '' && (
-          <span className="min-w-0 truncate font-body text-[12px] leading-tight text-muted">
-            {entry.givenHe}
-          </span>
-        )}
-      </button>
-    </li>
   )
 }
