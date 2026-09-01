@@ -68,6 +68,8 @@ describe('retired files are tombstones', () => {
     'app/kits/build/KitRun.tsx', // → KitBuildRun.tsx
     'app/derby/HateBracket.tsx', // → HateHill.tsx
     'app/goal/GoalBoard.tsx', // → GoalRun.tsx
+    'app/crest/CrestRun.tsx', // → cut by Maor; the crest DATA still dresses the kits
+    'app/crest/actions.ts',
   ]
 
   it('every retired path still exists and says it is retired', () => {

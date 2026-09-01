@@ -11,6 +11,10 @@ import type { MessageKey } from '@/lib/i18n'
  * there is no gate 3, 9 or 12 in the plan, and inventing one to tidy the grid would
  * be exactly the kind of small lie this project does not tell.
  *
+ * Gate 7 is deliberately absent: Maor cut the crest game, and the polls wing that
+ * replaces it has not shipped. A gate on the wall that goes nowhere is worse than a
+ * gap, and the numbers are the ground's own anyway — they were never contiguous.
+ *
  * Two gates are special and the rest follow one template:
  *   · **Gate 5** is the ultras' gate. It gets the full bill — rays, the flag, the
  *     marching ranks — because on a real fence that is the poster that got printed
@@ -97,14 +101,6 @@ export const GATES: readonly Gate[] = [
     latin: 'MEMORY · SOUTH-EAST',
     plate: 'plain',
     stain: 'b',
-  },
-  {
-    number: 7,
-    href: '/crest',
-    title: 'gate.7',
-    latin: 'THE CREST · SOUTH',
-    plate: 'plain',
-    stain: 'c',
   },
   {
     number: 8,

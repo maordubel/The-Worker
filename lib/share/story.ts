@@ -23,7 +23,7 @@ export const STORY_H = 1920
 /** Instagram's own furniture lives here. Nothing important may enter it. */
 export const SAFE = 260
 
-export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art'
+export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art' | 'xi'
 
 /**
  * הציורים — Maor's own artwork, and the only images this card system carries.
@@ -63,6 +63,15 @@ export type StoryCard = {
   marks?: boolean[]
   /** the kit template draws this instead of a hero line */
   kit?: KitSpec
+  /**
+   * הרכב — eleven names at their positions.
+   *
+   * The XI card used to print three of the eleven as facts and drop the other eight,
+   * which is the whole content of an all-time XI thrown away: nobody shares a team
+   * sheet to announce that they picked a goalkeeper. When this is present the card
+   * draws the pitch and every name on it.
+   */
+  xi?: Array<{ roleHe: string; nameHe: string; x: number; y: number }>
   /**
    * Which painting backs the card. Present means the `art` template is used and the
    * whole top of the plate is the picture; absent means the print card, which has to
@@ -212,6 +221,65 @@ function isLatinRun(text: string): boolean {
   return /^[\u0000-\u024F\s]+$/.test(text)
 }
 
+/**
+ * The real ink box of a line of text, in the font currently set on the context.
+ *
+ * Every collision on these cards came from the same shortcut: guessing a glyph's height
+ * as some multiple of its point size. That multiple is different for Suez One, for
+ * Karantina, for Hebrew and for Latin, and it is different again for a string with no
+ * ascenders — so a clearance that looked right for "90%" put "מוחמד קליל טראורה"
+ * straight through the number below it. The canvas will report the actual box; asking
+ * it is both simpler and correct.
+ */
+function textBox(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+): { ascent: number; descent: number; height: number } {
+  const metrics = ctx.measureText(text)
+  // `actualBoundingBox*` is the inked extent. The font-box fallback keeps this honest
+  // on any engine that does not report it rather than silently returning zero.
+  const ascent = metrics.actualBoundingBoxAscent || metrics.fontBoundingBoxAscent || 0
+  const descent = metrics.actualBoundingBoxDescent || metrics.fontBoundingBoxDescent || 0
+  return { ascent, descent, height: ascent + descent }
+}
+
+/**
+ * Every text box the last `drawStory` laid down.
+ *
+ * Eyeballing a preview is how three rounds of overlapping type shipped. A card can
+ * report where it actually put its ink, and then a TEST can assert that no two blocks
+ * intersect — which catches the long-name case that a screenshot of a short name never
+ * shows. `tests/story.test.ts` is the consumer.
+ */
+export type InkBox = { label: string; x: number; y: number; w: number; h: number }
+let inkBoxes: InkBox[] = []
+
+export function lastInkBoxes(): InkBox[] {
+  return inkBoxes
+}
+
+function recordInk(
+  ctx: CanvasRenderingContext2D,
+  label: string,
+  text: string,
+  right: number,
+  baseline: number,
+  extraBelow = 0,
+): void {
+  const metrics = ctx.measureText(text)
+  const width =
+    (metrics.actualBoundingBoxLeft || 0) + (metrics.actualBoundingBoxRight || 0) ||
+    metrics.width
+  const box = textBox(ctx, text)
+  inkBoxes.push({
+    label,
+    x: right - width,
+    y: baseline - box.ascent,
+    w: width,
+    h: box.height + extraBelow,
+  })
+}
+
 function plateText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -248,6 +316,40 @@ function rays(ctx: CanvasRenderingContext2D, cx: number, cy: number, alpha: numb
 }
 
 /** The credit strip every template ends with: the name, the badge, and the address. */
+/**
+ * פס הקרדיט — the marketing surface, and the only reason a share recruits anybody.
+ *
+ * The earlier strip had the priorities backwards. **THE WORKER** was set at 72px and
+ * the ADDRESS — the one string that turns a screenshot into a visitor — was 28px,
+ * jammed against a badge in the opposite corner and half the size of everything around
+ * it. Somebody who sees this card on a phone has about a second to catch where to go.
+ *
+ * So the address gets its own vermilion bar across the full width of the card. It is
+ * not a caption on the credit; it IS the credit, and everything else identifies who is
+ * asking. The badge sits on the reading side at a size where the drawing survives, with
+ * the name beside it rather than across the card from it.
+ *
+ * Every block is placed against a measured box and recorded, so `tests/story.test.ts`
+ * can prove the strip never collides with the line above it.
+ */
+/**
+ * פס הקרדיט — who is asking, and where to go.
+ *
+ * The badge is Maor's own artwork and is drawn at the size it has always been drawn at.
+ * What was wrong here was never the size of anything — it was the PLACEMENT: the badge
+ * sat in the opposite corner from the name, with the address wedged against it in the
+ * gap between them, so the three things that identify this product read as three
+ * unrelated scraps.
+ *
+ * They are now one block. Badge on the reading side, name and club beside it, and the
+ * address across the full width underneath — the address gets the width because it is
+ * the only line on the card that a reader has to be able to act on.
+ *
+ * Every position below is derived from a measured box and recorded into `inkBoxes`, so
+ * `story-preview` fails loudly if any two blocks ever touch again. The vertical budget
+ * is fixed and tight: the challenge line sits at `STORY_H - SAFE - 236` and Instagram's
+ * own furniture starts at `SAFE`, which leaves this strip 220px to work in.
+ */
 function foot(
   ctx: CanvasRenderingContext2D,
   card: StoryCard,
@@ -256,39 +358,63 @@ function foot(
 ) {
   const pad = 76
   const right = STORY_W - pad
+  const width = STORY_W - pad * 2
   const base = STORY_H - SAFE
+  /** unchanged — this is Maor's artwork at the size it has always been drawn */
+  const BADGE = 104
 
-  ctx.textAlign = 'start'
   ctx.direction = 'rtl'
-  ctx.fillStyle = tone.rule
-  ctx.fillRect(pad, base - 210, STORY_W - pad * 2, 8)
-
   ctx.textAlign = 'right'
-  const ctaSize = fit(ctx, card.cta, 62, STORY_W - pad * 2 - 150, '"Suez One", serif', '400')
+
+  // the rule that separates the run from the sender
+  ctx.fillStyle = tone.rule
+  ctx.fillRect(pad, base - 216, width, 8)
+
+  // the dare
+  const ctaSize = fit(ctx, card.cta, 56, width, '"Suez One", serif', '400')
   ctx.font = `400 ${ctaSize}px "Suez One", serif`
   ctx.fillStyle = tone.text
-  ctx.fillText(card.cta, right, base - 130)
+  const ctaBase = base - 164
+  ctx.fillText(card.cta, right, ctaBase)
+  recordInk(ctx, 'cta', card.cta, right, ctaBase)
 
-  // The credit strip carries the NAME and the ADDRESS, and nothing else. It used to
-  // print הפועל in the poster face with the name relegated to a grey subtitle — which
-  // put the brand system where the name belongs. The product is called The Worker.
+  // the identity block: badge, then the name and the club beside it
+  const badgeTop = base - 144
+  if (badge) ctx.drawImage(badge, right - BADGE, badgeTop, BADGE, BADGE)
+
+  const textRight = right - BADGE - 24
+
   ctx.direction = 'ltr'
   ctx.textAlign = 'right'
-  ctx.font = '700 72px Karantina, sans-serif'
+  ctx.font = '700 68px Karantina, sans-serif'
   ctx.fillStyle = tone.name
-  ctx.fillText('THE WORKER', right, base - 30)
+  const nameBase = base - 90
+  ctx.fillText('THE WORKER', textRight, nameBase)
+  recordInk(ctx, 'wordmark', 'THE WORKER', textRight, nameBase)
 
-  if (badge) ctx.drawImage(badge, pad, base - 118, 104, 104)
-
-  ctx.textAlign = 'left'
-  ctx.font = '800 28px Archivo, sans-serif'
-  ctx.fillStyle = tone.text
-  ctx.fillText(SITE_LABEL.toUpperCase(), pad + 122, base - 64)
-  ctx.font = '800 20px Archivo, sans-serif'
-  ctx.fillStyle = tone.rule
-  ctx.fillText('הפועל תל אביב · 1923', pad + 122, base - 30)
   ctx.direction = 'rtl'
+  ctx.font = '400 22px Heebo, sans-serif'
+  ctx.fillStyle = tone.text
+  const clubBase = base - 56
+  ctx.fillText('הפועל תל אביב · 1923', textRight, clubBase)
+  recordInk(ctx, 'club', 'הפועל תל אביב · 1923', textRight, clubBase)
+
+  // THE ADDRESS — full width, on the plate colour, in the Latin caps face the rest of
+  // the system uses for Latin. The one line on the card a reader has to act on.
+  const barH = 40
+  const barTop = base - barH
+  ctx.fillStyle = tone.rule
+  ctx.fillRect(pad, barTop, width, barH)
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'center'
+  ctx.font = '800 28px Archivo, sans-serif'
+  ctx.letterSpacing = '3px'
+  ctx.fillStyle = BRAND.sheet
+  const urlBox = textBox(ctx, SITE_LABEL.toUpperCase())
+  ctx.fillText(SITE_LABEL.toUpperCase(), STORY_W / 2, barTop + barH / 2 + urlBox.ascent / 2)
+  ctx.letterSpacing = '0px'
   ctx.textAlign = 'right'
+  ctx.direction = 'rtl'
 }
 
 /* ------------------------------------------------------------------ the kit, drawn */
@@ -404,6 +530,7 @@ export function drawStory(
   art: CanvasImageSource | null = null,
 ): void {
   ctx.save()
+  inkBoxes = []
   ctx.direction = 'rtl'
   ctx.textAlign = 'right'
   // A card with a painting behind it is a different card, not a variant — so the art
@@ -457,6 +584,13 @@ export function drawStory(
   // ART · the picture takes the top two thirds, the type is slammed over the cut, and
   //       the facts and the credit sit on the ink below it. This branch returns early
   //       because it is a whole card, not a variation on the print one.
+  // XI · the team sheet, drawn as a team sheet.
+  if (template === 'xi' && card.xi && card.xi.length > 0) {
+    drawXiCard(ctx, card, badge)
+    ctx.restore()
+    return
+  }
+
   if (template === 'art' && art) {
     // The card is laid out from the FOOT upward, not from the top down. Everything
     // below the picture is anchored — challenge line, facts panel, credit strip — so
@@ -471,60 +605,76 @@ export function drawStory(
 
     pressImage(ctx, art, cut)
 
-    // the kicker, printed ON the picture at the top safe line
+    // The kicker is printed ON the painting, and a painting is not a background you
+    // control: cream letterspaced caps vanished completely over the pale crowd in the
+    // number-seven artwork. It gets an ink plate of its own — which is also more honest
+    // to the language, since every other label in this system sits on a printed ground.
     ctx.direction = 'ltr'
     ctx.textAlign = 'right'
     ctx.font = '800 30px Archivo, sans-serif'
     ctx.letterSpacing = '6px'
+    const kickerBox = textBox(ctx, card.kicker)
+    const kickerW = ctx.measureText(card.kicker).width
+    ctx.fillStyle = BRAND.ink
+    ctx.fillRect(right - kickerW - 18, SAFE - 8 - kickerBox.ascent - 12, kickerW + 30, kickerBox.height + 24)
     ctx.fillStyle = BRAND.sheet
     ctx.fillText(card.kicker, right, SAFE - 8)
     ctx.letterSpacing = '0px'
     ctx.direction = 'rtl'
 
-    // The NAME sits on the picture, just above the cut. It is the half of the card a
-    // reader recognises, and on the ink below it was competing with the number for the
-    // same 70 pixels; over the painting it has the whole width and reads as a caption
-    // stamped on a photograph.
-    //
-    // The clearance is not a guess. The number below is set in Karantina at `heroSize`
-    // with its baseline at `cut + heroSize * 0.30`, and that face's caps reach about
-    // 0.72em above the baseline — so its glyph tops land near `cut - heroSize * 0.42`.
-    // The name's baseline has to clear THAT, not the cut, which is what the first
-    // version got wrong: the two printed straight through each other.
-    const heroSizePlanned = Math.min(fit(ctx, card.bigStat?.v ?? card.hero, 210, width), 210)
+    // The number first, because everything else is placed against its measured box.
+    const heroText = card.bigStat?.v ?? card.hero
+    const heroSize = Math.min(fit(ctx, heroText, 210, width), 210)
+    ctx.font = `700 ${heroSize}px Karantina, sans-serif`
+    const heroMetrics = textBox(ctx, heroText)
+    // The number straddles the cut: most of the glyph on the picture, its feet on the
+    // ink. One element crossing the join is what makes a card look built rather than
+    // stacked, and it is the only thing on the plate allowed to break the line.
+    const heroBase = cut + Math.round(heroMetrics.ascent * 0.30)
+
+    // The NAME sits on the picture, clear of the number's MEASURED top rather than a
+    // guessed fraction of its size.
     const nameText = card.bigStat ? card.hero : ''
     if (nameText) {
       const nameSize = fit(ctx, nameText, 86, width, '"Suez One", serif', '400')
       ctx.font = `400 ${nameSize}px "Suez One", serif`
-      plateText(ctx, nameText, right, cut - heroSizePlanned * 0.42 - 26, {
+      const nameMetrics = textBox(ctx, nameText)
+      // The gap has to clear the name's descenders AND its second plate: `plateText`
+      // prints the ink pass at `offset` BELOW the colour pass, so the block is taller
+      // than the measured glyph box by exactly that much. Forgetting it is what left
+      // the long name touching the number after the metrics fix.
+      const NAME_OFFSET = 8
+      const nameBase =
+        heroBase - heroMetrics.ascent - nameMetrics.descent - NAME_OFFSET - 30
+      plateText(ctx, nameText, right, nameBase, {
         under: BRAND.ink,
         over: BRAND.sheet,
-        offset: 8,
+        offset: NAME_OFFSET,
         skew: -6,
       })
+      recordInk(ctx, 'name', nameText, right, nameBase, NAME_OFFSET)
     }
 
-    // The number straddles the cut: most of the glyph on the picture, its feet on the
-    // ink. One element crossing the join is what makes a card look built rather than
-    // stacked, and it is the only thing on the plate allowed to break the line.
-    const heroText = card.bigStat?.v ?? card.hero
-    const heroSize = heroSizePlanned
     ctx.font = `700 ${heroSize}px Karantina, sans-serif`
     // "4-4-2" and "90%" are Latin runs and must print left to right, or the canvas's
     // RTL direction reverses them into 2-4-4 and %90.
     ctx.direction = isLatinRun(heroText) ? 'ltr' : 'rtl'
-    plateText(ctx, heroText, right, cut + heroSize * 0.30, {
+    plateText(ctx, heroText, right, heroBase, {
       under: BRAND.ink,
       over: BRAND.red,
       offset: 12,
       skew: -6,
     })
+    recordInk(ctx, 'hero', heroText, right, heroBase, 12)
     ctx.direction = 'rtl'
 
-    const labelY = cut + heroSize * 0.30 + 48
+    // The label clears the hero's own second plate too, not just its descenders.
+    const labelY = heroBase + heroMetrics.descent + 12 + 44
     ctx.fillStyle = BRAND.concrete
     ctx.font = '400 32px Heebo, sans-serif'
-    ctx.fillText(card.bigStat?.k ?? card.eyebrow, right, labelY)
+    const labelText = card.bigStat?.k ?? card.eyebrow
+    ctx.fillText(labelText, right, labelY)
+    recordInk(ctx, 'label', labelText, right, labelY)
 
     ctx.fillStyle = BRAND.red
     ctx.fillRect(pad, Math.min(labelY + 30, bandTop - 24), width, 10)
@@ -556,6 +706,7 @@ export function drawStory(
     ctx.fillStyle = BRAND.concrete
     ctx.font = '400 28px Heebo, sans-serif'
     ctx.fillText(card.challenge, right, artChallengeY)
+    recordInk(ctx, 'challenge', card.challenge, right, artChallengeY)
 
     foot(ctx, card, { name: BRAND.red, text: BRAND.sheet, rule: BRAND.red }, badge)
     ctx.restore()
@@ -712,6 +863,184 @@ export function drawStory(
     badge,
   )
   ctx.restore()
+}
+
+/**
+ * כרטיס ההרכב — a printed team sheet.
+ *
+ * The pitch occupies the middle band between the safe zones, and every chosen name sits
+ * at its formation position. Three things make it readable rather than eleven labels on
+ * a green rectangle:
+ *
+ *  · **The chip is a plate, not a pill.** Cream ground, ink keyline, zero radius — the
+ *    same object as every other printed element in this system, so the card reads as
+ *    one press rather than a UI screenshot.
+ *  · **The name is fitted per chip.** "אנייאמה" and "מוחמד קליל טראורה" cannot share a
+ *    type size, and scaling the longest name down to fit is what stops a row of five
+ *    from colliding.
+ *  · **Rows are found, not assumed.** Slots are grouped by their y and each row is
+ *    given the full width to share, so a back four and a front two are both spaced
+ *    correctly without the formation being hard-coded here.
+ */
+function drawXiCard(
+  ctx: CanvasRenderingContext2D,
+  card: StoryCard,
+  badge: CanvasImageSource | null,
+): void {
+  const pad = 56
+  const right = STORY_W - pad
+  const width = STORY_W - pad * 2
+  const xi = card.xi ?? []
+
+  ctx.fillStyle = BRAND.sheet
+  ctx.fillRect(0, 0, STORY_W, STORY_H)
+  dots(ctx, BRAND.ink, 0.09)
+
+  // ── head: title on one line, formation beside it ──────────────────────────
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'right'
+  ctx.font = '800 28px Archivo, sans-serif'
+  ctx.letterSpacing = '6px'
+  ctx.fillStyle = BRAND.sign
+  ctx.fillText(card.kicker, right, SAFE - 10)
+  ctx.letterSpacing = '0px'
+  ctx.direction = 'rtl'
+
+  ctx.font = '400 76px "Suez One", serif'
+  const titleBox = textBox(ctx, card.hero)
+  const titleBase = SAFE + 30 + titleBox.ascent
+  plateText(ctx, card.hero, right, titleBase, {
+    under: BRAND.red,
+    over: BRAND.ink,
+    offset: 8,
+    skew: -6,
+  })
+
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'left'
+  ctx.font = '700 84px Karantina, sans-serif'
+  ctx.fillStyle = BRAND.red
+  ctx.fillText(card.eyebrow, pad, titleBase)
+  ctx.textAlign = 'right'
+  ctx.direction = 'rtl'
+
+  // ── the pitch: everything left between the head and the credit strip ──────
+  const challengeY = STORY_H - SAFE - 236
+  const top = titleBase + titleBox.descent + 34
+  const bottom = challengeY - 54
+  const height = bottom - top
+
+  ctx.fillStyle = PITCH_GREEN
+  ctx.fillRect(pad, top, width, height)
+  ctx.fillStyle = PITCH_STRIPE
+  const stripe = height / 12
+  for (let index = 0; index < 12; index += 2) {
+    ctx.fillRect(pad, top + index * stripe, width, stripe)
+  }
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(pad, top, width, height)
+  ctx.clip()
+  dots(ctx, BRAND.ink, 0.1, 18)
+
+  ctx.strokeStyle = 'rgba(247,244,236,0.7)'
+  ctx.lineWidth = 4
+  ctx.strokeRect(pad + 16, top + 16, width - 32, height - 32)
+  ctx.beginPath()
+  ctx.moveTo(pad + 16, top + height / 2)
+  ctx.lineTo(right - 16, top + height / 2)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.arc(STORY_W / 2, top + height / 2, width * 0.15, 0, Math.PI * 2)
+  ctx.stroke()
+  // the box at each end, so the shape reads as a pitch and not as a field
+  ctx.strokeRect(pad + width * 0.22, top + 16, width * 0.56, height * 0.13)
+  ctx.strokeRect(pad + width * 0.22, top + height - 16 - height * 0.13, width * 0.56, height * 0.13)
+  ctx.restore()
+
+  ctx.strokeStyle = BRAND.ink
+  ctx.lineWidth = 8
+  ctx.strokeRect(pad, top, width, height)
+
+  // ── the eleven ────────────────────────────────────────────────────────────
+  //
+  // Rows are DERIVED, not assumed. Slots arrive as percentages and any formation is
+  // legal, so grouping by rounded depth means a 4-4-2 and a 3-5-2 both space correctly
+  // without either being written down here.
+  const rows = new Map<number, typeof xi>()
+  for (const slot of xi) {
+    const key = Math.round(slot.y / 8)
+    rows.set(key, [...(rows.get(key) ?? []), slot])
+  }
+
+  // Every chip on the card is the same width — the width the BUSIEST row can take. A
+  // row of two with fat chips beside a row of five with thin ones reads as a mistake,
+  // and the eye reads the difference as meaning that is not there.
+  const busiest = Math.max(...[...rows.values()].map((row) => row.length), 1)
+  const inset = 26
+  const usable = width - inset * 2
+  const gap = 12
+  const chipW = Math.min(206, (usable - gap * (busiest - 1)) / busiest)
+  const chipH = 82
+
+  // Depth is mapped into the band that keeps a chip fully inside the pitch, so the
+  // strikers' row cannot be clipped by the touchline the way it was.
+  const bandTop = top + chipH / 2 + 22
+  const bandBottom = top + height - chipH / 2 - 22
+
+  for (const row of rows.values()) {
+    const sorted = [...row].sort((a, b) => a.x - b.x)
+    const span = sorted.length * chipW + (sorted.length - 1) * gap
+    const startX = (STORY_W - span) / 2 + chipW / 2
+    const depth = (sorted[0]?.y ?? 50) / 100
+    const cy = bandTop + depth * (bandBottom - bandTop)
+    sorted.forEach((slot, index) => {
+      drawXiChip(ctx, slot.nameHe, slot.roleHe, startX + index * (chipW + gap), cy, chipW, chipH)
+    })
+  }
+
+  ctx.fillStyle = BRAND.sign
+  ctx.font = '400 28px Heebo, sans-serif'
+  ctx.fillText(card.challenge, right, challengeY)
+
+  foot(ctx, card, { name: BRAND.red, text: BRAND.ink, rule: BRAND.red }, badge)
+}
+
+const PITCH_GREEN = '#3D8B41'
+const PITCH_STRIPE = '#46A04B'
+
+function drawXiChip(
+  ctx: CanvasRenderingContext2D,
+  name: string,
+  role: string,
+  cx: number,
+  cy: number,
+  chipW: number,
+  chipH: number,
+): void {
+  const x = cx - chipW / 2
+  const y = cy - chipH / 2
+
+  // the ink plate under the cream one — the second pass, not a shadow
+  ctx.fillStyle = BRAND.ink
+  ctx.fillRect(x + 5, y + 5, chipW, chipH)
+  ctx.fillStyle = BRAND.sheet
+  ctx.fillRect(x, y, chipW, chipH)
+  ctx.strokeStyle = BRAND.ink
+  ctx.lineWidth = 4
+  ctx.strokeRect(x, y, chipW, chipH)
+
+  ctx.textAlign = 'center'
+  ctx.fillStyle = BRAND.red
+  ctx.font = '400 20px Heebo, sans-serif'
+  ctx.fillText(role, cx, y + 26)
+
+  const size = fit(ctx, name, 34, chipW - 18, '"Suez One", serif', '400')
+  ctx.font = `400 ${size}px "Suez One", serif`
+  ctx.fillStyle = BRAND.ink
+  const box = textBox(ctx, name)
+  ctx.fillText(name, cx, y + chipH - 16 - box.descent)
+  ctx.textAlign = 'right'
 }
 
 /** The mown pitch, for the grass template. */

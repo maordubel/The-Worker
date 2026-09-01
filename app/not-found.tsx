@@ -12,7 +12,7 @@ export default function NotFound() {
         href="/"
         className="mt-stack inline-flex min-h-tap items-center bg-ink px-4 font-body text-step-1 font-extrabold text-sheet"
       >
-        {t('tab.wall')}
+        {t('tab.ground')}
       </Link>
     </main>
   )

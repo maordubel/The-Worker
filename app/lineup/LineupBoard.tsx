@@ -213,7 +213,7 @@ export function LineupBoard({
             card={{
               template: 'grass' as const,
               art: artFor('lineup', 0),
-              kicker: 'GATE 1 · ALL-TIME XI',
+              kicker: 'GATE 3 · THE LINE-UP',
               label: t('screen.lineup.title'),
               eyebrow: t('lineup.exact'),
               hero: `${verdict.exact}/${verdict.total}`,

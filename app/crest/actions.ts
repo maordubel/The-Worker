@@ -1,12 +1,14 @@
-'use server'
-
-import { gradeCrest, type CrestVerdict } from '@/lib/game/crestRun'
-
-/** Server authority: the answer is derived from the seed, never sent ahead. */
-export async function submitCrest(
-  seed: number,
-  index: number,
-  answer: string,
-): Promise<CrestVerdict | null> {
-  return gradeCrest(seed, index, answer)
-}
+/**
+ * TOMBSTONE — retired 1.9.2026. Maor cut the crest game: "המשחק על סמל המועדון מיותר".
+ *
+ * The crest DATA is untouched and still load-bearing — `crestForSeason()` puts the right
+ * era's badge on every shirt (rule 25). Only the game is gone, and gate 7 is now the
+ * polls wing.
+ *
+ * It stays here inert because a delta reaches the repo through GitHub's web upload,
+ * which never deletes: a tree still holding the old file would import a server action
+ * that no longer exists, and that is a red deploy.
+ *
+ * Exports nothing, imports nothing.
+ */
+export {}

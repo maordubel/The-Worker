@@ -14,39 +14,44 @@ import { t, type MessageKey } from '@/lib/i18n'
  * matching space, so nothing hides behind it.
  */
 
-type Tab = { key: MessageKey; href: string; match: string; icon: 'wall' | 'game' | 'tower' | 'file' }
+type Tab = { key: MessageKey; href: string; match: string; icon: 'wall' | 'lamp' | 'bars' | 'card' }
 
 /**
- * Four WINGS of the ground, not four shortcuts.
+ * Four places, and each label names the place it actually goes to.
  *
- * The previous bar pointed at three arbitrary gates and the wall, which is why it read
- * as noise: the gate plan already navigates to gates, so a second list of gates is a
- * competing system saying nothing new. These four are the only top-level places that
- * are not a gate:
+ * The previous bar did not. "הארכיון" pointed at `/kits`, which is the kit DESIGNER —
+ * a toy, not an archive — and "התיק" pointed at `/tik`, which is כרטיס פועל and not the
+ * black file at `/derby/file`. Two of four labels described something that was not
+ * there, which is worse than no bar: a reader who follows a label once and lands
+ * somewhere else stops trusting the whole navigation.
  *
- *   בלומפילד  the ground — where the gate plan hangs
- *   הארכיון   the record behind the games: kits, seasons, sources
- *   אוסישקין  the basketball wing — a different club, kept apart by rule 14
- *   התיק      gate 10 — פנקס חבר: the card, the punches, the corrections
+ * The gate wall already navigates to gates, so this bar is not a second list of gates.
+ * It is the four things a person returns to:
+ *
+ *   בלומפילד   `/`           the ground — where the gate plan hangs
+ *   טריוויה    `/trivia`     the wing, five topics — the most-played thing in the app
+ *   אוסישקין   `/ussishkin`  the basketball wing, kept apart by rule 14
+ *   הכרטיס     `/tik`        gate 10 — the card, the punches, the corrections
+ *
+ * The icon follows the destination too: a wall for the ground, a lamp for the wing you
+ * play in, the bars for Ussishkin, a card for the card.
  */
 const TABS: Tab[] = [
   { key: 'tab.ground', href: '/', match: '/', icon: 'wall' },
-  { key: 'tab.archive', href: '/kits', match: '/kits', icon: 'file' },
-  { key: 'tab.ussishkin', href: '/ussishkin', match: '/ussishkin', icon: 'tower' },
-  { key: 'tab.file', href: '/tik', match: '/tik', icon: 'game' },
+  { key: 'tab.trivia', href: '/trivia', match: '/trivia', icon: 'lamp' },
+  { key: 'tab.ussishkin', href: '/ussishkin', match: '/ussishkin', icon: 'bars' },
+  { key: 'tab.card', href: '/tik', match: '/tik', icon: 'card' },
 ]
 
 function TabIcon({ icon, active }: { icon: Tab['icon']; active: boolean }) {
   const tone = active ? 'border-red bg-red' : 'border-sheet'
   if (icon === 'wall')
     return <span className={`mx-auto block h-[13px] w-[18px] border-rule ${tone}`} />
-  // The one permitted radius: this icon IS a lamp.
-  if (icon === 'game')
+  // The one permitted radius: this icon IS a floodlight lamp.
+  if (icon === 'lamp')
     return <span className={`mx-auto block h-[15px] w-[15px] rounded-full border-rule ${tone}`} />
-  if (icon === 'file')
-    return (
-      <span className={`mx-auto block h-[15px] w-[15px] rotate-45 border-rule ${tone}`} />
-    )
+  if (icon === 'card')
+    return <span className={`mx-auto block h-[12px] w-[17px] border-rule ${tone}`} />
   return (
     <span className="flex h-[15px] items-end justify-center gap-[3px]">
       <i className={`block h-[8px] w-[3px] ${active ? 'bg-red' : 'bg-sheet'}`} />

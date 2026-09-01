@@ -33,10 +33,6 @@
   "file.serial": "מספר תיק",
   "screen.home.title": "בלומפילד",
   "screen.home.sub": "بلومفيلد · BLOOMFIELD",
-  "tab.wall": "הקיר",
-  "tab.game": "משחק",
-  "tab.tower": "מגדל",
-  "tab.file": "התיק",
   "tab.aria": "ניווט ראשי",
   "mode.trivia": "טריוויה",
   "mode.lineup": "בניית הרכב",
@@ -200,11 +196,7 @@
   "gate.13": "ציר הזמן",
   "screen.derby.title": "משחק השנאה",
   "screen.derby.sub": "لعبة الكراهية · THE HATRED GAME",
-  "tab.gate2": "שער 2",
-  "tab.gate5": "שער 5",
-  "tab.gate11": "שער 11",
   "tab.ground": "בלומפילד",
-  "tab.archive": "הארכיון",
   "tab.ussishkin": "אוסישקין",
   "screen.ussishkin.title": "אוסישקין",
   "screen.ussishkin.sub": "أوسيشكين · USSISHKIN",
@@ -433,5 +425,7 @@
   "topic.numbers": "מספרי שחקנים",
   "topic.numbers.blade": "מי לבש איזה מספר ובאיזו עונה. מספר חולצה הוא עונתי, לא של אדם.",
   "topic.playerSongs": "שירי שחקנים",
-  "topic.playerSongs.blade": "השיר שהיציע כתב לשחקן, והלחן שהוא רכוב עליו."
+  "topic.playerSongs.blade": "השיר שהיציע כתב לשחקן, והלחן שהוא רכוב עליו.",
+  "tab.trivia": "טריוויה",
+  "tab.card": "הכרטיס"
 }

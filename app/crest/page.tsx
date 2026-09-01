@@ -1,26 +1,11 @@
-import { EmptyState } from '@/components/ui/EmptyState'
-import { ReportLink } from '@/components/ui/ReportLink'
-import { Screen } from '@/components/ui/Screen'
-import { buildCrestRound } from '@/lib/game/crestRun'
-import { RUN_LENGTH } from '@/lib/game/session'
-import { t } from '@/lib/i18n'
-import { CrestRun } from './CrestRun'
+import { redirect } from 'next/navigation'
 
-/** שער 7 — הסמל לאורך השנים. Gate 7 used to duplicate gate 5; now it has its own room. */
-export default function CrestPage({ searchParams }: { searchParams: { seed?: string } }) {
-  const seed = Number(searchParams.seed) || 7
-  const questions = buildCrestRound(seed)
-
-  return (
-    <Screen title={t('screen.crest.title')} sub={t('screen.crest.sub')} chrome={false}>
-      {questions.length >= RUN_LENGTH ? (
-        <>
-          <CrestRun questions={questions} seed={seed} />
-          <ReportLink />
-        </>
-      ) : (
-        <EmptyState title={t('empty.crest')} body={t('empty.crest.body')} />
-      )}
-    </Screen>
-  )
+/**
+ * TOMBSTONE — retired 1.9.2026. Maor cut the crest game as unnecessary, and gate 7 is
+ * now the polls wing. Anyone holding a link lands on the gate wall rather than a 404.
+ *
+ * The crest data stays: it dresses every shirt in its own era's badge (rule 25).
+ */
+export default function RetiredCrestPage() {
+  redirect('/')
 }

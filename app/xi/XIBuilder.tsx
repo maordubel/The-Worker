@@ -171,16 +171,22 @@ export function XIBuilder({
         params={{ s: '1' }}
         headline={`${chosen}/11`}
         card={{
-          template: 'grass',
-              art: artFor('xi', 0),
+          // The team sheet draws itself. Three names as "facts" threw eight of the
+          // eleven away, which is the entire content of an all-time XI.
+          template: 'xi' as const,
           kicker: 'GATE 1 · ALL-TIME XI',
           label: t('screen.xi.title'),
           eyebrow: formation.name,
           hero: t('screen.xi.title'),
-          stats: namesForCard.slice(0, 3).map((name, index) => ({
-            k: formation.slots[index]?.roleHe ?? '',
-            v: name,
-          })),
+          xi: formation.slots
+            .map((slot) => {
+              const entry = picked[slot.slotId]
+              return entry
+                ? { roleHe: slot.roleHe, nameHe: entry.familyHe, x: slot.x, y: slot.y }
+                : null
+            })
+            .filter((slot): slot is NonNullable<typeof slot> => slot !== null),
+          stats: [],
           cta: t('xi.cta'),
           challenge: t('share.sameRound'),
         }}
