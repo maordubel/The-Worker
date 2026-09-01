@@ -1,20 +1,21 @@
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { buildKitRound } from '@/lib/game/kitRun'
+import { buildKitBuildRound } from '@/lib/game/kitBuild'
 import { RUN_LENGTH } from '@/lib/game/session'
 import { t } from '@/lib/i18n'
-import { KitRun } from './KitRun'
+import { KitBuildRun } from './KitBuildRun'
 
 /**
- * שער 4 — אתגר החולצה, as a run.
+ * שער 4 — חידון מדים לפי עונה.
  *
- * The season label is stripped from every spec before it leaves the server, and the
- * answer is graded from the seed. What the client gets is a drawing and four years.
+ * The season is the QUESTION and the kit is the answer, so the shirt leaves the server
+ * with the asked layers already stripped out and the grading happens in a server action
+ * from the seed. What the client gets is a half-dressed shirt and a year.
  */
-export default function KitChallengePage({ searchParams }: { searchParams: { seed?: string } }) {
+export default function KitBuildPage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 1
-  const questions = buildKitRound(seed)
+  const questions = buildKitBuildRound(seed)
 
   return (
     <Screen
@@ -24,7 +25,7 @@ export default function KitChallengePage({ searchParams }: { searchParams: { see
     >
       {questions.length >= RUN_LENGTH ? (
         <>
-          <KitRun questions={questions} seed={seed} />
+          <KitBuildRun questions={questions} seed={seed} />
           <ReportLink />
         </>
       ) : (

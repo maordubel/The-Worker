@@ -122,7 +122,7 @@ function rays(ctx: CanvasRenderingContext2D, cx: number, cy: number, alpha: numb
   ctx.restore()
 }
 
-/** The credit strip every template ends with: הפועל, the mark, and the address. */
+/** The credit strip every template ends with: the name, the badge, and the address. */
 function foot(
   ctx: CanvasRenderingContext2D,
   card: StoryCard,
@@ -144,20 +144,24 @@ function foot(
   ctx.fillStyle = tone.text
   ctx.fillText(card.cta, right, base - 130)
 
-  ctx.font = '700 76px Karantina, sans-serif'
+  // The credit strip carries the NAME and the ADDRESS, and nothing else. It used to
+  // print הפועל in the poster face with the name relegated to a grey subtitle — which
+  // put the brand system where the name belongs. The product is called The Worker.
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'right'
+  ctx.font = '700 72px Karantina, sans-serif'
   ctx.fillStyle = tone.name
-  ctx.fillText('הפועל', right, base - 26)
+  ctx.fillText('THE WORKER', right, base - 30)
 
   if (badge) ctx.drawImage(badge, pad, base - 118, 104, 104)
 
-  ctx.direction = 'ltr'
   ctx.textAlign = 'left'
-  ctx.font = '800 26px Archivo, sans-serif'
+  ctx.font = '800 28px Archivo, sans-serif'
   ctx.fillStyle = tone.text
-  ctx.fillText(SITE_LABEL.toUpperCase(), pad + 122, base - 62)
+  ctx.fillText(SITE_LABEL.toUpperCase(), pad + 122, base - 64)
   ctx.font = '800 20px Archivo, sans-serif'
   ctx.fillStyle = tone.rule
-  ctx.fillText('THE WORKER · ARCHIVE', pad + 122, base - 30)
+  ctx.fillText('הפועל תל אביב · 1923', pad + 122, base - 30)
   ctx.direction = 'rtl'
   ctx.textAlign = 'right'
 }

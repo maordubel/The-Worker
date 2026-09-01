@@ -51,7 +51,7 @@ export function wallOrder(gates: readonly Gate[]): readonly Gate[] {
 export const GATES: readonly Gate[] = [
   {
     number: 1,
-    href: '/lineup?seed=1',
+    href: '/xi',
     title: 'gate.1',
     latin: 'ALL-TIME XI · NORTH STAND',
     plate: 'plain',
@@ -64,6 +64,14 @@ export const GATES: readonly Gate[] = [
     latin: 'TRIVIA · NORTH-EAST',
     plate: 'rays',
     stain: 'b',
+  },
+  {
+    number: 3,
+    href: '/lineup?seed=1',
+    title: 'gate.3',
+    latin: 'THE LINE-UP · NORTH',
+    plate: 'plain',
+    stain: 'c',
   },
   {
     number: 4,

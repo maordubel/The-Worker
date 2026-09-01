@@ -87,21 +87,22 @@ export function KitShirt({
       {/* 4 · collar */}
       <Collar type={spec.collar} ink={collar} base={base} />
 
-      {/* 5 · crest, chest right */}
+      {/* 5 · crest, chest right — the real one, from the era the shirt belongs to.
+             The old slot drew a circle and two strokes that were meant to suggest the
+             worker figure and did not look like anything. A club crest is not a thing to
+             approximate: either print the crest or leave the slot empty. */}
       {missing.includes('crest') ? (
         <DashBox x={112} y={32} w={28} h={28} />
-      ) : (
-        <g transform="translate(126 46)">
-          <circle r="13" fill={COLOUR_VAR.cream} stroke={COLOUR_VAR.ink} strokeWidth="2" />
-          <path
-            d="M-6 5 A 9 9 0 0 1 3 -5"
-            fill="none"
-            stroke={COLOUR_VAR.red}
-            strokeWidth="3"
-          />
-          <path d="M-4 6 L5 -3" stroke={COLOUR_VAR.red} strokeWidth="3" />
-        </g>
-      )}
+      ) : spec.crestKey ? (
+        <image
+          href={`/brand/crests/${spec.crestKey}.png`}
+          x="110"
+          y="30"
+          width="32"
+          height="34"
+          preserveAspectRatio="xMidYMid meet"
+        />
+      ) : null}
 
       {/* 6 · maker, chest left */}
       {missing.includes('maker') ? (
@@ -126,19 +127,22 @@ export function KitShirt({
         <DashBox x={58} y={112} w={84} h={36} mark="?" />
       ) : (
         spec.sponsorHe && (
-          <>
-            <rect x="58" y="112" width="84" height="36" fill={COLOUR_VAR.ink} />
-            <text
-              x="100"
-              y="138"
-              textAnchor="middle"
-              fill={COLOUR_VAR.cream}
-              className="font-poster"
-              style={{ fontSize: 24 }}
-            >
-              {spec.sponsorHe}
-            </text>
-          </>
+          // Lettered straight onto the shirt, not stamped inside a black plate. Every
+          // reference shows the sponsor printed on the fabric — אתא is white letters on
+          // red, not a box — and the black slab made every shirt in the rack look like
+          // the same shirt with a different label stuck on it.
+          <text
+            x="100"
+            y="140"
+            textAnchor="middle"
+            fill={
+              spec.base === 'cream' || spec.base === 'paper' ? COLOUR_VAR.red : COLOUR_VAR.cream
+            }
+            className="font-poster"
+            style={{ fontSize: sponsorSize(spec.sponsorHe) }}
+          >
+            {spec.sponsorHe}
+          </text>
         )
       )}
 
@@ -150,6 +154,14 @@ export function KitShirt({
       <path d={OUTLINE} fill="none" stroke={COLOUR_VAR.ink} strokeWidth="2.4" />
     </svg>
   )
+}
+
+/** Long names shrink so the whole word stays on the chest. */
+function sponsorSize(text: string): number {
+  if (text.length <= 4) return 30
+  if (text.length <= 7) return 24
+  if (text.length <= 10) return 18
+  return 15
 }
 
 function DashBox({

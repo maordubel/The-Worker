@@ -95,7 +95,15 @@ describe('brand acceptance — colour', () => {
     // The two palettes are separate systems, not a pool to pick from. The press tokens
     // dress the pitch, the figure and the share cards; a screen chrome element reaching
     // for --n-gold is the two languages starting to blur.
-    const PRESS_SURFACES = ['components/press/', 'app/kits/', 'app/lineup/', 'app/share/']
+    // `app/xi/` draws a printed pitch, which is a press surface by definition — the
+    // all-time XI builder is the same drawing as the lineup quiz, one gate over.
+    const PRESS_SURFACES = [
+      'components/press/',
+      'app/kits/',
+      'app/lineup/',
+      'app/xi/',
+      'app/share/',
+    ]
     for (const { path, text } of SOURCES) {
       if (PRESS_SURFACES.some((dir) => path.includes(dir))) continue
       const leak = /--[pn]-(?:paper|ink|gold|grass|mark|red|line|skin|hair|tekhelet)/.exec(text)

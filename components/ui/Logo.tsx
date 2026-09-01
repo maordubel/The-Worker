@@ -87,7 +87,9 @@ export function Logo({
         <span className="font-display text-[17px] font-black tracking-tight">
           <bdi dir="ltr">THE WORKER</bdi>
         </span>
-        <span className="font-sign text-[13px] text-red">{t('brand.name')}</span>
+        {/* The name is THE WORKER. The line under it is the CLUB, which is a different
+            thing — printing the brand system here made the lockup read as two names. */}
+        <span className="font-sign text-[13px] text-red">{t('brand.sub')}</span>
       </span>
     </span>
   )

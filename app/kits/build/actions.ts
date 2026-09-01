@@ -1,12 +1,12 @@
 'use server'
 
-import { gradeKit, type KitVerdictRun } from '@/lib/game/kitRun'
+import { gradeKitBuild, type KitBuildVerdict } from '@/lib/game/kitBuild'
 
-/** Server authority: the season is derived here from the seed, never sent ahead. */
-export async function submitKitGuess(
+/** Server authority: the season's real kit is derived here from the seed. */
+export async function submitKitBuild(
   seed: number,
   index: number,
-  answer: string,
-): Promise<KitVerdictRun | null> {
-  return gradeKit(seed, index, answer)
+  picked: Record<string, string>,
+): Promise<KitBuildVerdict | null> {
+  return gradeKitBuild(seed, index, picked)
 }

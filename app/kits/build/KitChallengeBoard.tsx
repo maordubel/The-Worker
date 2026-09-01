@@ -1,15 +1,13 @@
 /**
- * TOMBSTONE — retired 1.9.2026, replaced by `KitRun.tsx`.
+ * TOMBSTONE — retired 1.9.2026. Gate 4 is now `KitBuildRun.tsx`.
  *
- * This file used to be gate 4's board and imported a server action (`submitKit`) that
- * no longer exists. It is left here as a valid, inert re-export ON PURPOSE.
+ * Left as a valid, inert file ON PURPOSE. Deltas reach the repo through GitHub's web
+ * upload, which adds and overwrites but never deletes, so a retired file that still
+ * contains a broken import keeps failing the deploy long after the local tree is clean.
+ * A retired file must always compile.
  *
- * Why: deltas are uploaded to GitHub through the web UI, which ADDS and OVERWRITES
- * files but does not delete them. A retired file that still contains a broken import
- * therefore keeps failing `next build` on the deploy even though the local tree is
- * clean — which is exactly what happened here, twice. Asking for a delete command was
- * the wrong fix; the right one is that a retired file must always compile.
- *
- * Nothing imports this. It can be deleted whenever convenient.
+ * It exports NOTHING and imports NOTHING. An earlier version re-exported the file that
+ * replaced it, which broke the moment that file was itself renamed — a tombstone that
+ * depends on a living module is not a tombstone.
  */
-export { KitRun as KitChallengeBoard } from './KitRun'
+export {}

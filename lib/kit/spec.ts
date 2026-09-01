@@ -123,6 +123,17 @@ export type KitSpec = {
   /** the rest of the strip. A shirt on its own is a mockup; a kit is three pieces. */
   shorts: KitColour
   socks: KitColour
+  /**
+   * Which crest the shirt wears, as a key into `/public/brand/crests`.
+   *
+   * A shirt wears the crest OF ITS ERA — the 1978 shirt carries the worker mark, the
+   * 2002 shirt carries the one with KETER inside it, the 2008 shirt says 1927 and the
+   * 2018 shirt says 1923. `lib/kit/seasons.ts` resolves it from the season against the
+   * crest timeline, so nothing has to be typed twice. Null draws no crest at all, which
+   * is correct for a blank designer shirt and for the two eras with no photographed
+   * variant.
+   */
+  crestKey: string | null
 }
 
 export const DEFAULT_SPEC: KitSpec = {
@@ -141,6 +152,7 @@ export const DEFAULT_SPEC: KitSpec = {
   number: 10,
   shorts: 'cream',
   socks: 'red',
+  crestKey: 'worker-hapoel',
 }
 
 /*

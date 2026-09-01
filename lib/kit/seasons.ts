@@ -24,6 +24,32 @@ export type SeasonKit = {
   spec: KitSpec
 }
 
+/**
+ * Which crest a season's shirt wears.
+ *
+ * Resolved from the crest timeline rather than typed on every kit row: a season belongs
+ * to exactly one crest era, and duplicating that mapping into 33 kit rows would be 33
+ * chances to get it wrong. `1978/79` → the worker mark, `2002/03` → the one with KETER
+ * inside it, `2008/09` → the badge that said 1927, `2018/19` → the badge that says 1923.
+ */
+function crestForSeason(seasonLabel: string): string | null {
+  const year = Number(seasonLabel.slice(0, 4))
+  if (!Number.isFinite(year)) return null
+  // The club's own stages share boundary years — 2007—2008 and 2008—2015 both contain
+  // 2008 — so `find` would return whichever came first in the file and the 2008/09
+  // shirt would wear no crest at all. Take the LATEST era that contains the season, and
+  // fall back to the most recent era before it that actually has a variant.
+  const containing = archive.crests
+    .filter((row) => year >= row.fromYear && (row.toYear === null || year <= row.toYear))
+    .sort((a, b) => b.fromYear - a.fromYear)
+  const withImage = containing.find((row) => row.imageKey !== null)
+  if (withImage) return withImage.imageKey
+  const earlier = archive.crests
+    .filter((row) => row.fromYear <= year && row.imageKey !== null)
+    .sort((a, b) => b.fromYear - a.fromYear)[0]
+  return earlier?.imageKey ?? null
+}
+
 export function seasonKits(): SeasonKit[] {
   return archive.kitDesigns.map((row) => ({
     seasonLabel: row.seasonLabel,
@@ -49,6 +75,7 @@ export function seasonKits(): SeasonKit[] {
       number: null,
       shorts: row.shorts as KitColour,
       socks: row.socks as KitColour,
+      crestKey: crestForSeason(row.seasonLabel),
     },
   }))
 }

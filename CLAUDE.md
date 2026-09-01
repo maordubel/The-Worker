@@ -126,6 +126,36 @@ Read `docs/00-architecture.md` before changing anything structural.
     Type is skewed and printed twice (ink under at a hard offset, colour over): that is
     the second plate, not a drop shadow, and the brand has no shadows.
 
+23. **The product is called The Worker.** Not "The Worker · הפועל", not a bilingual
+    pair, not the brand system. A name with something appended to it is not a name. The
+    address is **theworker.dubelteam.com** (`SITE_URL`), printed on every share card.
+    הפועל תל אביב is the CLUB and belongs on the second line, never in the name slot.
+
+24. **Four game types, and they are different games.** Naming them stopped them
+    collapsing into each other:
+    - **gate 4 `/kits/build`** — חידון מדים לפי עונה: you are given a season and you
+      BUILD its kit. Stage 1 asks the cut, stage 2 adds the sponsor, stage 3 adds the
+      maker. The difficulty rises in the ASK, not only in the clock.
+    - **gate 5 `/kits`** — free design, no right answer, share it.
+    - **gate 1 `/xi`** — הרכב כל הזמנים: eleven from all 640, free play, no grading.
+    - **gate 3 `/lineup`** — חידון ההרכב: assemble the exact XI that started a match.
+    A quiz and a toy are not the same screen and must never share a route.
+
+25. **A shirt wears the crest of its era.** `crestForSeason()` resolves it from the crest
+    timeline, so 1978 carries the worker mark, 2002 the one with KETER inside it, 2008
+    the badge that said 1927 and 2018 the one that says 1923. The old slot drew a circle
+    and two strokes meant to suggest the figure; a club crest is not a thing to
+    approximate — print it or leave the slot empty. The sponsor is LETTERED on the
+    fabric, not stamped in a black plate, because every reference shows it printed on
+    the shirt.
+
+26. **A retired file becomes a tombstone, never a deletion.** Deltas reach the repo
+    through GitHub's web upload, which adds and overwrites but never deletes — so a
+    retired file with a broken import keeps failing the deploy long after the local tree
+    is clean. Every retired path keeps a valid, inert file that imports NOTHING (the one
+    exception is `next/navigation` for a redirect). Enforced in `tests/guards.test.ts`:
+    a tombstone that grows, gains an import, or disappears fails the suite.
+
 ## Commands
 
 ```

@@ -60,11 +60,11 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  // The product is called The Worker. The tab said "הפועל · אוסישקין", which is the
-  // brand system, not the name.
+  // The product is called The Worker. Full stop — no suffix, no bilingual pair, no
+  // brand-system tagline. A name with something appended to it is not a name.
   title: {
-    default: `The Worker · ${t('brand.name')}`,
-    template: `%s · The Worker`,
+    default: 'The Worker',
+    template: '%s · The Worker',
   },
   description: t('app.description'),
   applicationName: 'The Worker',

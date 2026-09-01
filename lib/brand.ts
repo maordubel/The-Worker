@@ -29,10 +29,11 @@ export const BRAND = {
  *
  * Every story, every WhatsApp message and every copied link carries this, because a
  * share that does not name where it came from is a share that recruits nobody. Set
- * `NEXT_PUBLIC_SITE_URL` on the deployment; the fallback is the production host.
+ * `NEXT_PUBLIC_SITE_URL` on the deployment; the fallback is the production host,
+ * theworker.dubelteam.com.
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://the-worker.vercel.app'
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://theworker.dubelteam.com'
 ).replace(/\/$/, '')
 
 /** The line printed along the foot of every share card, under the badge. */

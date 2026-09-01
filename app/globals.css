@@ -360,3 +360,31 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .animate-burst, .animate-slam, .animate-shake, .animate-flash { animation: none }
 }
+
+/* חגיגה — the confetti fall. One keyframe, no library. The pieces start above the
+   viewport so nothing pops into existence mid-screen, and they drift sideways as they
+   fall because paper does not fall straight. */
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, -12vh, 0) rotate(0deg); opacity: 0 }
+  12%  { opacity: 1 }
+  100% { transform: translate3d(var(--drift, 0), 112vh, 0) rotate(var(--spin, 360deg)); opacity: 1 }
+}
+.confetti {
+  top: 0;
+  animation: confetti-fall 1.35s cubic-bezier(.25,.55,.45,1) forwards;
+}
+
+/* מעבר בין שאלות — the wipe that carries one question off and the next one in.
+   A vermilion band crossing the plate, gone in 420ms: long enough to read as a
+   transition, short enough that it never sits between the player and the next tap. */
+@keyframes wipe {
+  0%   { transform: scaleX(0); transform-origin: 100% 50% }
+  45%  { transform: scaleX(1); transform-origin: 100% 50% }
+  55%  { transform: scaleX(1); transform-origin: 0% 50% }
+  100% { transform: scaleX(0); transform-origin: 0% 50% }
+}
+.animate-wipe { animation: wipe 420ms cubic-bezier(.65,0,.35,1) both }
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti, .animate-wipe { animation: none; opacity: 0 }
+}
