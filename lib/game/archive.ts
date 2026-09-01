@@ -14,6 +14,8 @@ import competitionsFile from '@/content/manual/competitions.json'
 import crestsFile from '@/content/manual/crest-versions.json'
 import candidatesFile from '@/content/manual/election-candidates.json'
 import electionsFile from '@/content/manual/elections.json'
+import goalsFile from '@/content/manual/goals.json'
+import ussishkinFile from '@/content/manual/ussishkin.json'
 import eventsFile from '@/content/manual/match-events.json'
 import kitSupplyFile from '@/content/manual/kit-supply.json'
 import manufacturersFile from '@/content/manual/manufacturers.json'
@@ -178,6 +180,7 @@ export const archive = {
     kind: 'crossing' | 'myth' | 'event'
     titleHe: string
     happenedOn: string | null
+    dateConfirmed?: boolean
     personNameHe?: string | null
     bodyHe: string
     feeEur?: number | null
@@ -274,6 +277,46 @@ export const archive = {
     claimB: string
     resolution?: string | null
   }>(conflictsFile),
+  /**
+   * שערים משוחזרים — the goal archive gate 8 plays and the trivia bank asks about.
+   *
+   * Twenty moves whose build-up a published report actually DESCRIBES. Twelve more were
+   * checked and dropped because no source described how they were scored: a famous goal
+   * with no reported build-up is a goal this project does not hold (rule 11).
+   */
+  goals: load<{
+    goalId: string
+    titleHe: string
+    subtitleHe: string
+    competitionHe: string
+    opponentHe: string
+    scoreHe: string
+    narrativeHe: string
+    sequence: Array<{
+      step: number
+      actorHe: string
+      action: 'pass' | 'dribble' | 'cross' | 'shot'
+      zone: string
+      positionHe: string
+      noteHe: string
+    }>
+  }>(goalsFile),
+  /**
+   * אגף אוסישקין — the basketball wing's own record.
+   *
+   * Held apart on purpose. Rule 14 keeps the sports from mixing, and the cleanest way
+   * to hold that is architectural: nothing that reads a football table reads this, and
+   * the file carries its own `sport` at the top rather than relying on omission.
+   */
+  ussishkin: load<{
+    slug: string
+    cat: 'building' | 'nights' | 'club' | 'players' | 'ussishkin-club'
+    periodHe: string
+    factHe: string
+    sourceTitle: string
+    sourceUrl: string
+    confidence: number
+  }>(ussishkinFile),
   electionCandidates: load<{
     electionSlug: string
     personNameHe: string

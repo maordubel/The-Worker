@@ -20,8 +20,8 @@ import {
 } from '@/lib/game/session'
 import { buildBoard } from '@/lib/game/memory'
 import { dealFile, dealPairs, judge, judgePair } from '@/lib/game/blackfile'
-import { dealBracket } from '@/lib/game/hate'
-import { BRACKET_SIZE, judgeRun } from '@/lib/game/hate-run'
+import { dealQueue } from '@/lib/game/hate'
+import { DUEL_COUNT, duelAt, judgeRun } from '@/lib/game/hate-run'
 import {
   COLLARS,
   COLOUR_VAR,
@@ -59,7 +59,17 @@ import {
   spellCoversSeason,
 } from '@/lib/game/seasons'
 import { TIMELINE_LENGTH, dealTimeline, gradeTimeline } from '@/lib/game/timeline'
-import { dealGoal, gradeGoal } from '@/lib/game/goal'
+import { rosterIndex } from '@/lib/game/allTimeXI'
+import { dealRun, goalCount, gradeGoal } from '@/lib/game/goal'
+import { fold, searchRoster } from '@/lib/game/roster-search'
+import {
+  COLS,
+  GOALS_PER_RUN,
+  gradeZone,
+  isZone,
+  reasonKey,
+  zoneParts,
+} from '@/lib/game/goal-zones'
 import {
   FORMATIONS,
   dealChallenge,
@@ -436,38 +446,237 @@ describe('lineup', () => {
   })
 })
 
-describe('goal re-enactment', () => {
-  it('deals the steps without their destinations', () => {
-    const challenge = dealGoal(1)
-    expect(challenge).not.toBeNull()
-    expect(challenge?.steps.length).toBeGreaterThanOrEqual(3)
-    // `to` is the answer and must never be in the payload
-    expect(JSON.stringify(challenge)).not.toContain('"to"')
+describe('רוחב מאגר השאלות', () => {
+  /**
+   * ידע זה כוח — so the bank has to be wide enough that a player meets a new question
+   * rather than the same forty. This walks a long stretch of seeds and counts DISTINCT
+   * question ids, which is the number that matters: one prompt asked of twenty
+   * different goals is twenty questions, not one.
+   *
+   * The floor is a ratchet. A template that stops producing, or data that quietly
+   * shrinks, fails here instead of being noticed by a player.
+   */
+  const ids = new Set<string>()
+  const templates = new Set<string>()
+  for (let seed = 1; seed < 300; seed += 1) {
+    for (let index = 0; index < ROUND_LENGTH; index += 1) {
+      const question = deal(seed, index)
+      if (!question) continue
+      ids.add(question.id)
+      templates.add(question.id.split(':')[0] as string)
+    }
+  }
+
+  it('holds hundreds of distinct questions, not dozens', () => {
+    expect(ids.size).toBeGreaterThan(450)
   })
 
-  it('accepts a placement inside the tolerance and rejects one outside', () => {
-    const truth = gradeGoal(1, [])?.steps.map((step) => step.actual) ?? []
+  it('draws on the whole archive — kits, goals, enemies, crossings included', () => {
+    expect(templates.size).toBeGreaterThan(30)
+    for (const template of [
+      'goal-scorer',
+      'goal-opponent',
+      'goal-assist',
+      'kit-look',
+      'kit-sponsor-season',
+      'kit-maker-season',
+      'crossing-club',
+      'enemy-fact',
+    ]) {
+      expect(templates.has(template), template).toBe(true)
+    }
+  })
+
+  it('never lets a basketball name onto the football bank', () => {
+    // The enemies table is deliberately cross-sport; the wall is the `sport` FIELD.
+    const basketballOnly = archive.enemies
+      .filter((row) => row.sport === 'basketball')
+      .map((row) => row.nameHe)
+    const football = new Set(
+      archive.enemies.filter((row) => row.sport === 'football').map((row) => row.nameHe),
+    )
+    for (let seed = 1; seed < 120; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (!question?.id.startsWith('enemy-fact')) continue
+        for (const option of question.options) {
+          expect(basketballOnly.includes(option) && !football.has(option), option).toBe(false)
+        }
+      }
+    }
+  })
+
+  it('asks a goal question from the report, and never from an invented one', () => {
+    let seen = 0
+    for (let seed = 1; seed < 200 && seen < 8; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (!question?.id.startsWith('goal-')) continue
+        seen += 1
+        // the clue is the reporter's own sentence; the ANSWER never travels with it
+        expect(question.quoteHe?.length ?? 0).toBeGreaterThan(20)
+        expect(JSON.stringify(question)).not.toContain('"correct"')
+        expect(question.options).toHaveLength(4)
+        // and the server can still name it from the seed alone
+        const verdict = grade(seed, index, [question.options[0] as string])
+        expect(verdict?.correctAnswers?.[0]).toBeDefined()
+        expect(question.options).toContain(verdict?.correctAnswers?.[0])
+        expect(verdict?.explanation.length ?? 0).toBeGreaterThan(4)
+      }
+    }
+    expect(seen).toBeGreaterThan(0)
+  })
+})
+
+describe('חיפוש שחקנים — the roster sheet', () => {
+  const roster = rosterIndex()
+
+  it('holds the whole roster, split into given and family names', () => {
+    expect(roster.total).toBeGreaterThan(600)
+    for (const entry of roster.all) {
+      expect(entry.familyHe.length, entry.nameHe).toBeGreaterThan(0)
+      expect(entry.initial.length, entry.nameHe).toBe(1)
+    }
+  })
+
+  it('buckets by the FAMILY initial, which is how a supporter looks a player up', () => {
+    const boaz = roster.all.find((entry) => entry.nameHe.includes('בוזגלו'))
+    if (boaz) {
+      expect(boaz.familyHe).toBe('בוזגלו')
+      expect(boaz.initial).toBe('ב')
+    }
+    for (const bucket of roster.letters) {
+      expect(bucket.names.every((entry) => entry.initial === bucket.letter)).toBe(true)
+    }
+    expect(roster.letters.reduce((sum, bucket) => sum + bucket.names.length, 0)).toBe(roster.total)
+  })
+
+  it('ranks a family-name match above a given-name match above anything else', () => {
+    const entries = [
+      { slug: 'a', nameHe: 'דן כהן', givenHe: 'דן', familyHe: 'כהן', initial: 'כ' },
+      { slug: 'b', nameHe: 'כהן לוי', givenHe: 'כהן', familyHe: 'לוי', initial: 'ל' },
+      { slug: 'c', nameHe: 'אבי מזרחי־כהנא', givenHe: 'אבי', familyHe: 'מזרחי־כהנא', initial: 'מ' },
+    ]
+    const found = searchRoster(entries, 'כהן')
+    expect(found[0]?.slug).toBe('a')
+    expect(found[1]?.slug).toBe('b')
+  })
+
+  it('folds final letters and quote marks, because Hebrew types back at you', () => {
+    // a medial mem where the name carries a final one, and an apostrophe for a geresh
+    expect(fold('אמסלם')).toBe(fold('אמסלמ'))
+    expect(fold("צ'רני")).toBe(fold('צרני'))
+    expect(fold('  שתי   מילים ')).toBe('שתי מילימ')
+    const entries = [{ slug: 'a', nameHe: 'שמעון אמסלם', givenHe: 'שמעון', familyHe: 'אמסלם', initial: 'א' }]
+    expect(searchRoster(entries, 'אמסלמ')).toHaveLength(1)
+    expect(searchRoster(entries, 'אמסל')).toHaveLength(1)
+  })
+
+  it('returns everything for an empty term and nothing for a term nobody matches', () => {
+    expect(searchRoster(roster.all, '')).toHaveLength(roster.total)
+    expect(searchRoster(roster.all, 'זזזזזז')).toHaveLength(0)
+  })
+
+  it('actually finds real players by family name alone', () => {
+    for (const family of ['אבוקסיס', 'זהבי', 'טועמה']) {
+      const found = searchRoster(roster.all, family)
+      expect(found.length, family).toBeGreaterThan(0)
+      expect(found[0]?.familyHe, family).toContain(family)
+    }
+  })
+})
+
+describe('שחזור השער — gate 8', () => {
+  it('carries a real archive, not one goal', () => {
+    // The old board dealt the single record it had. A game whose whole content is one
+    // move is a demo; the run needs three and the archive needs to be deeper than a run.
+    expect(goalCount()).toBeGreaterThanOrEqual(12)
+  })
+
+  it('deals three goals a run, easiest move first', () => {
+    const run = dealRun(1)
+    expect(run).toHaveLength(GOALS_PER_RUN)
+    const lengths = run.map((goal) => goal.steps.length)
+    expect([...lengths].sort((a, b) => a - b)).toEqual(lengths)
+    expect(new Set(run.map((goal) => goal.goalId)).size).toBe(GOALS_PER_RUN)
+  })
+
+  it('deals the touches without their zones, notes or narrative', () => {
+    const payload = JSON.stringify(dealRun(1))
+    expect(payload).not.toContain('"zone"')
+    expect(payload).not.toContain('"noteHe"')
+    expect(payload).not.toContain('narrativeHe')
+    // what the player IS given: who touched it, how, and the reporter's own words
+    expect(payload).toContain('positionHe')
+    expect(payload).toContain('actorHe')
+  })
+
+  it('draws a different three for different seeds', () => {
+    const runs = [1, 2, 3, 4, 5].map((seed) =>
+      dealRun(seed)
+        .map((goal) => goal.goalId)
+        .sort()
+        .join(','),
+    )
+    expect(new Set(runs).size).toBeGreaterThan(2)
+  })
+
+  it('grades an exact rebuild as all hits and a scrambled one as none', () => {
+    const truth = gradeGoal(1, 0, [])?.truthZones ?? []
     expect(truth.length).toBeGreaterThan(0)
 
-    const exact = gradeGoal(1, truth)
+    const exact = gradeGoal(1, 0, truth)
     expect(exact?.hits).toBe(exact?.total)
+    expect(exact?.steps.every((step) => step.grade === 'hit')).toBe(true)
 
-    const wayOff = gradeGoal(
-      1,
-      truth.map((point) => ({ x: (point.x + 50) % 100, y: (point.y + 60) % 100 })),
-    )
-    expect(wayOff?.hits).toBe(0)
+    // move every touch two columns and two bands away — never adjacent, so never "near"
+    const wayOff = truth.map((zone) => {
+      const parts = zoneParts(zone)
+      if (!parts) return zone
+      const col = COLS[(parts.col + 3) % COLS.length] as string
+      const row = ((parts.row + 2) % 4) + 1
+      return `${col}${row}`
+    })
+    const bad = gradeGoal(1, 0, wayOff)
+    expect(bad?.hits).toBe(0)
   })
 
-  it('reveals the real path and the narrative only after grading', () => {
-    const verdict = gradeGoal(1, [])
-    expect(verdict?.narrativeHe).toContain('קלשצ')
-    expect(verdict?.steps.every((step) => step.actual.x >= 0 && step.actual.y >= 0)).toBe(true)
+  it('calls one zone out a NEAR, not a miss — and says which half was right', () => {
+    // A near is the honest middle: the old tolerance was groping for it with a radius.
+    expect(gradeZone('C2', 'C2')).toBe('hit')
+    expect(gradeZone('B2', 'C2')).toBe('near')
+    expect(gradeZone('B1', 'C2')).toBe('near')
+    expect(gradeZone('E4', 'A1')).toBe('miss')
+    expect(gradeZone(undefined, 'C2')).toBe('miss')
+    expect(reasonKey('B2', 'C2')).toBe('goal.reason.depthRight')
+    expect(reasonKey('C3', 'C2')).toBe('goal.reason.sideRight')
+    expect(reasonKey('E4', 'A1')).toBe('goal.reason.far')
   })
 
-  it('scores an empty submission as zero rather than throwing', () => {
-    const verdict = gradeGoal(1, [])
+  it('holds the truth back until the player has committed', () => {
+    const verdict = gradeGoal(1, 0, [])
     expect(verdict?.hits).toBe(0)
+    expect(verdict?.narrativeHe.length).toBeGreaterThan(20)
+    expect(verdict?.truthZones.every((zone) => isZone(zone))).toBe(true)
+  })
+
+  it('never fabricates: every goal declares its source and its approximation', () => {
+    for (let index = 0; index < GOALS_PER_RUN; index += 1) {
+      const verdict = gradeGoal(1, index, [])
+      expect(verdict?.sourceTitle.length, String(index)).toBeGreaterThan(4)
+      expect(verdict?.narrativeHe.length, String(index)).toBeGreaterThan(20)
+    }
+    for (const goal of dealRun(1)) {
+      expect(goal.approximateCoords).toBe(true)
+      for (const step of goal.steps) {
+        // the reporter's own words travel with the touch; the grid is my reading of them
+        expect(step.positionHe.length, `${goal.goalId} ${step.step}`).toBeGreaterThan(2)
+      }
+    }
+  })
+
+  it('returns null for a goal index the run does not hold', () => {
+    expect(gradeGoal(1, 99, [])).toBeNull()
   })
 })
 
@@ -738,15 +947,15 @@ describe('התיק השחור — gate 11', () => {
   })
 })
 
-describe('משחק השנאה — gate 11', () => {
-  it('draws eight enemies and four opening duels', () => {
-    const { enemies, duels } = dealBracket(11)
-    expect(enemies).toHaveLength(BRACKET_SIZE)
-    expect(duels).toHaveLength(BRACKET_SIZE / 2)
-    expect(new Set(enemies.map((enemy) => enemy.slug)).size).toBe(BRACKET_SIZE)
+describe('משחק השנאה — gate 11, מלך הגבעה', () => {
+  it('deals eleven names — one to open the hill and ten challengers', () => {
+    const { enemies, order } = dealQueue(11)
+    expect(order).toHaveLength(DUEL_COUNT + 1)
+    expect(enemies).toHaveLength(DUEL_COUNT + 1)
+    expect(new Set(order).size).toBe(DUEL_COUNT + 1)
   })
 
-  it('pairs one from the top half of the ranking with one from the bottom, every duel', () => {
+  it('alternates the queue between the top half of the ranking and the bottom', () => {
     const midpoint = Math.ceil(archive.enemies.length / 2)
     const topHalf = new Set(
       [...archive.enemies]
@@ -755,25 +964,45 @@ describe('משחק השנאה — gate 11', () => {
         .map((row) => row.slug),
     )
     for (const seed of [1, 7, 11, 42, 99]) {
-      const { enemies, duels } = dealBracket(seed)
+      const { enemies, order } = dealQueue(seed)
       const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
-      for (const duel of duels) {
-        const seeded = [duel.aSlug, duel.bSlug].filter((slug) => topHalf.has(slug))
-        expect(seeded, `seed ${seed}: ${duel.aSlug} vs ${duel.bSlug}`).toHaveLength(1)
-        expect(bySlug.get(duel.aSlug)).toBeDefined()
-        expect(bySlug.get(duel.bSlug)).toBeDefined()
-      }
+      order.forEach((slug, index) => {
+        expect(bySlug.get(slug), `seed ${seed}: ${slug}`).toBeDefined()
+        expect(topHalf.has(slug), `seed ${seed} position ${index}: ${slug}`).toBe(index % 2 === 0)
+      })
     }
   })
 
-  it('draws a different eight for different seeds — fifty-six names is not one bracket', () => {
-    const runs = [1, 2, 3, 4, 5].map((seed) =>
-      dealBracket(seed)
-        .enemies.map((enemy) => enemy.slug)
-        .sort()
-        .join(','),
-    )
+  it('draws a different eleven for different seeds — fifty-six names is not one run', () => {
+    const runs = [1, 2, 3, 4, 5].map((seed) => [...dealQueue(seed).order].sort().join(','))
     expect(new Set(runs).size).toBeGreaterThan(3)
+  })
+
+  it('is a hill: the winner of a duel is the holder of the next one', () => {
+    const { order } = dealQueue(11)
+    const first = duelAt(order, [], 0)
+    expect(first).not.toBeNull()
+    expect(first?.holderSlug).toBe(order[0])
+    expect(first?.challengerSlug).toBe(order[1])
+    // the player keeps the challenger, so HE holds duel two
+    const kept = order[1] as string
+    const second = duelAt(order, [kept], 1)
+    expect(second?.holderSlug).toBe(kept)
+    expect(second?.challengerSlug).toBe(order[2])
+    // and if the player keeps the holder instead, the holder carries on
+    const stayed = order[0] as string
+    expect(duelAt(order, [stayed], 1)?.holderSlug).toBe(stayed)
+  })
+
+  it('runs exactly ten duels and then stops', () => {
+    const { order } = dealQueue(11)
+    const picks: string[] = []
+    for (let index = 0; index < DUEL_COUNT; index += 1) {
+      const duel = duelAt(order, picks, index)
+      expect(duel, `duel ${index}`).not.toBeNull()
+      picks.push(duel?.challengerSlug as string)
+    }
+    expect(duelAt(order, picks, DUEL_COUNT)).toBeNull()
   })
 
   it("carries Maor's ranking verbatim, 1..56, across both sports", () => {
@@ -804,34 +1033,46 @@ describe('משחק השנאה — gate 11', () => {
   })
 
   it('scores a run that always follows the terrace at 100%, and one that never does at 0%', () => {
-    const { enemies } = dealBracket(11)
-    const [a, b] = [...enemies].sort((x, y) => x.terraceRank - y.terraceRank)
-    if (!a || !b) throw new Error('bracket too small')
-    const withTerrace = judgeRun(enemies, [{ aSlug: a.slug, bSlug: b.slug, winner: a.slug }])
-    expect(withTerrace?.agreement).toBe(100)
-    expect(withTerrace?.champion.slug).toBe(a.slug)
-    const against = judgeRun(enemies, [{ aSlug: a.slug, bSlug: b.slug, winner: b.slug }])
-    expect(against?.agreement).toBe(0)
-    expect(against?.champion.slug).toBe(b.slug)
+    const { enemies, order } = dealQueue(11)
+    const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
+    const withTerrace: string[] = []
+    const against: string[] = []
+    for (let index = 0; index < DUEL_COUNT; index += 1) {
+      const hated = duelAt(order, withTerrace, index)
+      const loved = duelAt(order, against, index)
+      if (!hated || !loved) throw new Error('run too short')
+      const rank = (slug: string) => bySlug.get(slug)?.terraceRank ?? 999
+      withTerrace.push(
+        rank(hated.holderSlug) < rank(hated.challengerSlug)
+          ? hated.holderSlug
+          : hated.challengerSlug,
+      )
+      against.push(
+        rank(loved.holderSlug) < rank(loved.challengerSlug)
+          ? loved.challengerSlug
+          : loved.holderSlug,
+      )
+    }
+    expect(judgeRun(enemies, order, withTerrace)?.agreement).toBe(100)
+    expect(judgeRun(enemies, order, against)?.agreement).toBe(0)
   })
 
-  it('ranks the standings by how far the player carried each enemy', () => {
-    const { enemies, duels } = dealBracket(11)
-    const first = duels[0]
-    const second = duels[1]
-    if (!first || !second) throw new Error('bracket too small')
-    const picks = [
-      { aSlug: first.aSlug, bSlug: first.bSlug, winner: first.aSlug },
-      { aSlug: second.aSlug, bSlug: second.bSlug, winner: second.aSlug },
-      { aSlug: first.aSlug, bSlug: second.aSlug, winner: first.aSlug },
-    ]
-    const verdict = judgeRun(enemies, picks)
-    expect(verdict?.standings[0]?.enemy.slug).toBe(first.aSlug)
-    expect(verdict?.standings[0]?.wins).toBe(2)
+  it('ranks the standings by how long each enemy held the hill', () => {
+    const { enemies, order } = dealQueue(11)
+    const opener = order[0] as string
+    // keep the opening holder every single time: he holds all ten
+    const picks = Array.from({ length: DUEL_COUNT }, () => opener)
+    const verdict = judgeRun(enemies, order, picks)
+    expect(verdict?.champion.slug).toBe(opener)
+    expect(verdict?.streak).toBe(DUEL_COUNT)
+    expect(verdict?.standings[0]?.enemy.slug).toBe(opener)
+    expect(verdict?.standings[0]?.held).toBe(DUEL_COUNT)
+    expect(verdict?.standings).toHaveLength(1)
   })
 
-  it('never hands the bracket a name the roster does not carry', () => {
-    expect(judgeRun([], [{ aSlug: 'nobody', bSlug: 'nobody', winner: 'nobody' }])).toBeNull()
+  it('never hands the run a name the roster does not carry', () => {
+    expect(judgeRun([], ['nobody'], ['nobody'])).toBeNull()
+    expect(judgeRun([], [], [])).toBeNull()
   })
 })
 

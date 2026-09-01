@@ -66,6 +66,8 @@ describe('retired files are tombstones', () => {
     'app/derby/BlackFile.tsx', // → app/derby/file/BlackFile.tsx
     'app/derby/actions.ts', // → app/derby/file/actions.ts
     'app/kits/build/KitRun.tsx', // → KitBuildRun.tsx
+    'app/derby/HateBracket.tsx', // → HateHill.tsx
+    'app/goal/GoalBoard.tsx', // → GoalRun.tsx
   ]
 
   it('every retired path still exists and says it is retired', () => {

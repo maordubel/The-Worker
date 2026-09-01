@@ -102,6 +102,7 @@ describe('brand acceptance — colour', () => {
       'app/kits/',
       'app/lineup/',
       'app/xi/',
+      'app/goal/',
       'app/share/',
     ]
     for (const { path, text } of SOURCES) {

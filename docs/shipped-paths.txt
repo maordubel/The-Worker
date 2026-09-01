@@ -6,6 +6,7 @@ app/crest/actions.ts
 app/crest/page.tsx
 app/derby/BlackFile.tsx
 app/derby/HateBracket.tsx
+app/derby/HateHill.tsx
 app/derby/actions.ts
 app/derby/file/BlackFile.tsx
 app/derby/file/actions.ts
@@ -13,6 +14,7 @@ app/derby/file/page.tsx
 app/derby/page.tsx
 app/error.tsx
 app/goal/GoalBoard.tsx
+app/goal/GoalRun.tsx
 app/goal/actions.ts
 app/goal/page.tsx
 app/kits/KitDesigner.tsx
@@ -41,6 +43,7 @@ app/trivia/actions.ts
 app/trivia/page.tsx
 app/trivia/summary/ShareCard.tsx
 app/trivia/summary/page.tsx
+app/ussishkin/CardWall.tsx
 app/ussishkin/page.tsx
 app/xi/XIBuilder.tsx
 app/xi/page.tsx
@@ -53,6 +56,7 @@ components/play/Confetti.tsx
 components/play/HUD.tsx
 components/play/Punch.tsx
 components/play/StageCard.tsx
+components/press/GoalPitch.tsx
 components/press/PlayerFigure.tsx
 components/press/PressPitch.tsx
 components/press/StoryCard.tsx
@@ -79,6 +83,7 @@ lib/game/allTimeXI.ts
 lib/game/archive.ts
 lib/game/blackfile.ts
 lib/game/crestRun.ts
+lib/game/goal-zones.ts
 lib/game/goal.ts
 lib/game/hate-run.ts
 lib/game/hate.ts
@@ -89,6 +94,7 @@ lib/game/kits.ts
 lib/game/lineup.ts
 lib/game/member.ts
 lib/game/memory.ts
+lib/game/roster-search.ts
 lib/game/score.ts
 lib/game/seasons.ts
 lib/game/session.ts

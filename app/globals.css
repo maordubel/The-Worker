@@ -388,3 +388,29 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .confetti, .animate-wipe { animation: none; opacity: 0 }
 }
+
+/* ============================================================================
+   שחזור השער — the pitch
+   ----------------------------------------------------------------------------
+   Two motions and one offset, all of them from the Goal Rebuild handoff.
+
+   `.plate-card` is NOT a drop shadow. The brand has no shadows; what looks like one
+   here is the ink plate printing 3px off the cream plate, the same constant
+   misregistration the shell uses. It is a hard offset with no blur and no spread,
+   which is what separates a press from a UI card.
+   ========================================================================== */
+@keyframes ball-roll { to { stroke-dashoffset: -28 } }
+.ball-roll { animation: ball-roll 1.3s linear infinite }
+
+@keyframes fig-pop {
+  0%   { transform: scale(.4); opacity: 0 }
+  70%  { transform: scale(1.12) }
+  100% { transform: scale(1); opacity: 1 }
+}
+.fig-pop { animation: fig-pop 220ms cubic-bezier(.2,0,0,1) both; transform-origin: 50% 100% }
+
+.plate-card { box-shadow: 3px 3px 0 rgb(var(--ink) / 0.45) }
+
+@media (prefers-reduced-motion: reduce) {
+  .ball-roll, .fig-pop { animation: none; opacity: 1 }
+}

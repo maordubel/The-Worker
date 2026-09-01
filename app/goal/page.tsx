@@ -1,27 +1,26 @@
 import { EmptyState } from '@/components/ui/EmptyState'
-import { Num } from '@/components/ui/Num'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { dealGoal } from '@/lib/game/goal'
+import { dealRun, hasGoals } from '@/lib/game/goal'
 import { t } from '@/lib/i18n'
-import { GoalBoard } from './GoalBoard'
+import { GoalRun } from './GoalRun'
 
-/** שחזור השער — replay a real, sourced goal on the pitch. */
+/**
+ * שער 8 — שחזור השער.
+ *
+ * Three sourced goals a run, dealt here WITHOUT their zones: `dealRun()` strips the
+ * truth and the narrative, and `submitGoal` re-reads the record from the seed to grade.
+ * The player never receives an answer they have not earned.
+ */
 export default function GoalPage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 1
-  const challenge = dealGoal(seed)
+  const goals = hasGoals() ? dealRun(seed) : []
 
   return (
-    <Screen title={t('screen.goal.title')} sub={t('screen.goal.sub')}>
-      {challenge ? (
+    <Screen title={t('screen.goal.title')} sub={t('screen.goal.sub')} chrome={false}>
+      {goals.length > 0 ? (
         <>
-          <p className="mt-stack font-sign text-step-1 leading-tight text-ink">
-            {challenge.titleHe}
-          </p>
-          <p className="mt-1 font-mono text-[11px] text-sign">
-            <Num>{challenge.subtitleHe}</Num>
-          </p>
-          <GoalBoard challenge={challenge} seed={seed} />
+          <GoalRun goals={goals} seed={seed} />
           <ReportLink />
         </>
       ) : (

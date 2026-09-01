@@ -20,11 +20,19 @@ export function EnemyPlate({
   state = 'live',
   onPick,
   compact = false,
+  dense = false,
 }: {
   enemy: Enemy
   state?: 'live' | 'won' | 'out'
   onPick?: () => void
   compact?: boolean
+  /**
+   * The run variant. Two full plates plus the arena furniture came to ~950px on a
+   * 390×844 phone, which means the second name is below the fold — and a head to head
+   * you have to scroll to see is not a head to head. `dense` keeps every element,
+   * including the charge, and only takes the air out.
+   */
+  dense?: boolean
 }) {
   const out = state === 'out'
   const won = state === 'won'
@@ -56,10 +64,10 @@ export function EnemyPlate({
         </span>
       </div>
 
-      <div className="relative px-3 pb-3 pt-2.5">
+      <div className={`relative ${dense ? 'px-2.5 pb-2.5 pt-2' : 'px-3 pb-3 pt-2.5'}`}>
         <div className="flex items-baseline justify-between gap-2">
           <h3
-            className={`font-poster leading-[0.82] ${compact ? 'text-[30px]' : 'text-[38px] sm:text-[46px]'} ${
+            className={`font-poster leading-[0.82] ${compact ? 'text-[30px]' : dense ? 'text-[31px] sm:text-[40px]' : 'text-[38px] sm:text-[46px]'} ${
               won ? 'text-paper' : 'text-ink'
             }`}
           >
@@ -84,7 +92,9 @@ export function EnemyPlate({
 
         {!compact && (
           <p
-            className={`mt-2 max-w-[46ch] font-body text-step--1 leading-relaxed ${
+            className={`max-w-[46ch] font-body leading-snug ${
+              dense ? 'mt-1.5 text-[12px]' : 'mt-2 text-step--1 leading-relaxed'
+            } ${
               won ? 'text-paper' : 'text-ink'
             }`}
           >
@@ -93,7 +103,9 @@ export function EnemyPlate({
         )}
 
         <div
-          className={`mt-2.5 inline-block border-hair px-2 py-1 font-body text-[10.5px] font-extrabold ${
+          className={`inline-block border-hair px-2 py-1 font-body font-extrabold ${
+            dense ? 'mt-1.5 text-[10px]' : 'mt-2.5 text-[10.5px]'
+          } ${
             won ? 'border-paper/50 text-paper' : 'border-red text-red'
           }`}
         >

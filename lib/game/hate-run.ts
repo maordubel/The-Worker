@@ -1,11 +1,20 @@
 /**
- * משחק השנאה — the bracket's rules, with no archive behind them.
+ * משחק השנאה — king of the hill.
  *
- * This half runs on the CLIENT. `lib/game/hate.ts` reads the archive and is
- * `server-only` (the archive holds trivia answers, so it can never cross); everything
- * here works on the eight plain enemy objects the page already handed down, so a tap
- * resolves in the same frame instead of waiting on a round trip. There is nothing to
- * hide in a game with no right answer — that is exactly why it can be this fast.
+ * The first version was a knockout bracket in three rounds. Maor asked for something
+ * simpler and better: **always head to head, and whoever you pick stays for the next
+ * one.** That single change fixes the thing a bracket gets wrong — in a bracket your
+ * champion beats three people and you never learn whether he'd beat the other four. A
+ * king of the hill runs your pick against ten challengers in a row, so the name left
+ * standing at the end actually earned it against the field.
+ *
+ * Ten duels, ten different challengers, no stages and no clock. There is no right
+ * answer to any of it; what comes back is who survived and how far your run tracked
+ * the terrace's own ranking.
+ *
+ * This half runs on the CLIENT — `lib/game/hate.ts` reads the archive and is
+ * `server-only`. Nothing here is secret, which is why a swipe can resolve in the same
+ * frame instead of waiting on a round trip.
  */
 
 export type Enemy = {
@@ -21,81 +30,83 @@ export type Enemy = {
   terraceRank: number
 }
 
+/** Ten challengers, so eleven names appear in a run. */
+export const DUEL_COUNT = 10
+
 export type Duel = {
-  /** `r{round}-{index}` — stable, so a pick can be replayed */
   id: string
-  round: 0 | 1 | 2
-  aSlug: string
-  bSlug: string
+  /** the one still standing */
+  holderSlug: string
+  /** the one coming for him */
+  challengerSlug: string
 }
 
-export const BRACKET_SIZE = 8
-export const DUEL_COUNT = BRACKET_SIZE - 1
-
-/** The next round, built from the winners of the one before it. */
-export function nextRound(winners: string[], round: 1 | 2): Duel[] {
-  const duels: Duel[] = []
-  for (let index = 0; index + 1 < winners.length; index += 2) {
-    const a = winners[index]
-    const b = winners[index + 1]
-    if (!a || !b) continue
-    duels.push({ id: `r${round}-${index / 2}`, round, aSlug: a, bSlug: b })
-  }
-  return duels
+/**
+ * The queue for a run: the opening holder, then ten challengers in order.
+ *
+ * The duels themselves cannot be precomputed, because who holds the hill at duel 7
+ * depends on what you did at duel 6. The QUEUE can, and that is what the server deals.
+ */
+export function duelAt(order: string[], picks: string[], index: number): Duel | null {
+  const challenger = order[index + 1]
+  if (challenger === undefined) return null
+  const holder = picks[index - 1] ?? order[0]
+  if (holder === undefined) return null
+  return { id: `d${index}`, holderSlug: holder, challengerSlug: challenger }
 }
 
 export type Verdict = {
+  /** the name left standing */
   champion: Enemy
-  standings: { enemy: Enemy; wins: number }[]
-  /** how often the player's pick matched the terrace's ranking, 0..100 */
+  /** how many challengers he saw off in a row at the end of the run */
+  streak: number
+  /** everyone who held the hill, longest reign first */
+  standings: { enemy: Enemy; held: number }[]
+  /** how often the pick matched the terrace ranking, 0..100 */
   agreement: number
   duelsJudged: number
   terraceChampion: Enemy
 }
 
-/**
- * The verdict. `agreement` counts, over every duel actually fought, how often the
- * player put the higher-ranked enemy through — a measure of how close your terrace is
- * to the house terrace, never a score you can fail.
- */
-export function judgeRun(
-  enemies: Enemy[],
-  picks: { aSlug: string; bSlug: string; winner: string }[],
-): Verdict | null {
+export function judgeRun(enemies: Enemy[], order: string[], picks: string[]): Verdict | null {
   if (picks.length === 0) return null
   const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
-  const last = picks[picks.length - 1]
-  if (!last) return null
-  const champion = bySlug.get(last.winner)
+  const champion = bySlug.get(picks[picks.length - 1] as string)
   if (!champion) return null
 
-  const wins = new Map<string, number>()
-  const drawn = new Set<string>()
+  const held = new Map<string, number>()
   let matched = 0
-  for (const pick of picks) {
-    drawn.add(pick.aSlug)
-    drawn.add(pick.bSlug)
-    wins.set(pick.winner, (wins.get(pick.winner) ?? 0) + 1)
-    const a = bySlug.get(pick.aSlug)
-    const b = bySlug.get(pick.bSlug)
-    if (!a || !b) continue
-    const terraceWinner = a.terraceRank < b.terraceRank ? a.slug : b.slug
-    if (terraceWinner === pick.winner) matched += 1
-  }
+  let streak = 0
 
-  const standings = [...drawn]
+  picks.forEach((winner, index) => {
+    const duel = duelAt(order, picks, index)
+    if (!duel) return
+    held.set(winner, (held.get(winner) ?? 0) + 1)
+    const holder = bySlug.get(duel.holderSlug)
+    const challenger = bySlug.get(duel.challengerSlug)
+    if (holder && challenger) {
+      const terraceWinner =
+        holder.terraceRank < challenger.terraceRank ? holder.slug : challenger.slug
+      if (terraceWinner === winner) matched += 1
+    }
+    streak = winner === champion.slug ? streak + 1 : 0
+  })
+
+  const seen = new Set<string>([order[0] as string, ...picks, ...order.slice(1)])
+  const standings = [...held.entries()]
+    .map(([slug, count]) => ({ enemy: bySlug.get(slug), held: count }))
+    .filter((row): row is { enemy: Enemy; held: number } => row.enemy !== undefined)
+    .sort((a, b) => b.held - a.held || a.enemy.terraceRank - b.enemy.terraceRank)
+
+  const terraceChampion = [...seen]
     .map((slug) => bySlug.get(slug))
     .filter((enemy): enemy is Enemy => enemy !== undefined)
-    .map((enemy) => ({ enemy, wins: wins.get(enemy.slug) ?? 0 }))
-    .sort((x, y) => y.wins - x.wins || x.enemy.terraceRank - y.enemy.terraceRank)
-
-  const terraceChampion = [...standings].sort(
-    (x, y) => x.enemy.terraceRank - y.enemy.terraceRank,
-  )[0]?.enemy
+    .sort((a, b) => a.terraceRank - b.terraceRank)[0]
   if (!terraceChampion) return null
 
   return {
     champion,
+    streak,
     standings,
     agreement: Math.round((matched / picks.length) * 100),
     duelsJudged: picks.length,
@@ -103,7 +114,7 @@ export function judgeRun(
   }
 }
 
-/** What the terrace calls you, by how closely your bracket ran with its own. */
+/** What the terrace calls you, by how closely your run tracked its own ranking. */
 export function standingKey(agreement: number): string {
   if (agreement >= 100) return 'hate.standing.capo'
   if (agreement >= 72) return 'hate.standing.north'

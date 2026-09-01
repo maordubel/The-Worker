@@ -109,6 +109,17 @@ const DIFFICULTY: Record<string, Difficulty> = {
   'call-match': 3,
   'call-person': 2,
   'shirt-multi': 4,
+  'goal-scorer': 3,
+  'goal-opponent': 2,
+  'goal-competition': 3,
+  'goal-assist': 5,
+  'goal-title': 4,
+  'kit-sponsor-season': 3,
+  'kit-maker-season': 2,
+  'kit-look': 5,
+  'crossing-club': 3,
+  'crossing-year': 4,
+  'enemy-fact': 4,
 }
 
 type Template = {
@@ -180,6 +191,274 @@ const ASSOCIATION_NAMES = () =>
   ].filter((name) => name !== FOUNDER)
 
 const TEMPLATES: Template[] = [
+  {
+    /**
+     * מי כבש? A described move, and the man who finished it.
+     *
+     * The clue is the reporter's own sentence, which is the whole reason this template
+     * can exist honestly: the archive holds twenty goals whose build-up a published
+     * report describes, and the finisher is the actor of the last touch in that report.
+     * Twelve other famous goals were checked and dropped because no source said how
+     * they were scored.
+     */
+    slug: 'goal-scorer',
+    build: (random) => {
+      const finishers = archive.goals
+        .map((goal) => goal.sequence[goal.sequence.length - 1]?.actorHe)
+        .filter((name): name is string => name !== undefined)
+      return archive.goals
+        .map((goal) => {
+          const last = goal.sequence[goal.sequence.length - 1]
+          if (!last) return null
+          return {
+            id: `goal-scorer:${goal.goalId}`,
+            template: 'goal-scorer',
+            prompt: 'מי סיים את המהלך הזה?',
+            quoteHe: goal.narrativeHe,
+            quoteByHe: `${goal.competitionHe} · ${goal.opponentHe}`,
+            options: withDistractors(last.actorHe, finishers, random),
+            correct: last.actorHe,
+            source: sourceOf(goal),
+            explanation: `${goal.titleHe} · ${goal.subtitleHe}`,
+          }
+        })
+        .filter((question): question is NonNullable<typeof question> => question !== null)
+    },
+  },
+  {
+    /** מול מי? The same twenty moves, asked from the other end. */
+    slug: 'goal-opponent',
+    build: (random) => {
+      const opponents = archive.goals.map((goal) => goal.opponentHe)
+      return archive.goals.map((goal) => ({
+        id: `goal-opponent:${goal.goalId}`,
+        template: 'goal-opponent',
+        prompt: `מול מי נכבש השער הזה — "${goal.titleHe}"?`,
+        quoteHe: goal.narrativeHe,
+        options: withDistractors(goal.opponentHe, opponents, random),
+        correct: goal.opponentHe,
+        source: sourceOf(goal),
+        explanation: `${goal.subtitleHe} · ${goal.scoreHe}`,
+      }))
+    },
+  },
+  {
+    /** באיזה מפעל — the competition the move was scored in. */
+    slug: 'goal-competition',
+    build: (random) => {
+      const competitions = archive.goals.map((goal) => goal.competitionHe)
+      return archive.goals.map((goal) => ({
+        id: `goal-competition:${goal.goalId}`,
+        template: 'goal-competition',
+        prompt: `באיזה מפעל נכבש "${goal.titleHe}"?`,
+        quoteHe: goal.narrativeHe,
+        options: withDistractors(goal.competitionHe, competitions, random),
+        correct: goal.competitionHe,
+        source: sourceOf(goal),
+        explanation: `${goal.opponentHe} · ${goal.subtitleHe}`,
+      }))
+    },
+  },
+  {
+    /**
+     * מי בישל? The touch before the finish — the hardest thing in the archive to ask,
+     * because it is the detail a report drops first. Only moves whose penultimate touch
+     * has a NAMED actor qualify; "הכדור עבר את ההגנה" is not a person and is filtered.
+     */
+    slug: 'goal-assist',
+    build: (random) => {
+      const names = archive.goals
+        .flatMap((goal) => goal.sequence.map((step) => step.actorHe))
+        .filter((name) => name !== 'הכדור' && !name.startsWith('השוער'))
+      return archive.goals
+        .map((goal) => {
+          const finish = goal.sequence[goal.sequence.length - 1]
+          const before = [...goal.sequence]
+            .slice(0, -1)
+            .reverse()
+            .find(
+              (step) =>
+                step.actorHe !== finish?.actorHe &&
+                step.actorHe !== 'הכדור' &&
+                !step.actorHe.startsWith('השוער'),
+            )
+          if (!before || !finish) return null
+          return {
+            id: `goal-assist:${goal.goalId}`,
+            template: 'goal-assist',
+            prompt: `מי מסר את הכדור שממנו נולד "${goal.titleHe}"?`,
+            quoteHe: goal.narrativeHe,
+            options: withDistractors(before.actorHe, names, random),
+            correct: before.actorHe,
+            source: sourceOf(goal),
+            explanation: `${before.noteHe} · ${goal.subtitleHe}`,
+          }
+        })
+        .filter((question): question is NonNullable<typeof question> => question !== null)
+    },
+  },
+  {
+    /** התיאור → השם. The reporter's sentence, and what the terrace calls that goal. */
+    slug: 'goal-title',
+    build: (random) => {
+      const titles = archive.goals.map((goal) => goal.titleHe)
+      return archive.goals.map((goal) => ({
+        id: `goal-title:${goal.goalId}`,
+        template: 'goal-title',
+        prompt: 'איזה שער מתואר כאן?',
+        quoteHe: goal.narrativeHe,
+        options: withDistractors(goal.titleHe, titles, random),
+        correct: goal.titleHe,
+        source: sourceOf(goal),
+        explanation: `${goal.subtitleHe} · ${goal.opponentHe}`,
+      }))
+    },
+  },
+  {
+    /**
+     * הספונסר של העונה. Thirty-three kits read off the shirts Maor photographed, which
+     * is a far denser record than the deal table — a deal has a start and an end, a
+     * shirt has a season and a chest.
+     */
+    slug: 'kit-sponsor-season',
+    build: (random) => {
+      const rows = archive.kitDesigns.filter(
+        (row) => row.sponsorHe !== null && row.variant === 'home',
+      )
+      const sponsors = rows.map((row) => row.sponsorHe as string)
+      return rows.map((row) => ({
+        id: `kit-sponsor-season:${row.seasonLabel}`,
+        template: 'kit-sponsor-season',
+        prompt: `איזה ספונסר היה על חזה חולצת הבית בעונת ${row.seasonLabel}?`,
+        options: withDistractors(row.sponsorHe as string, sponsors, random),
+        correct: row.sponsorHe as string,
+        source: sourceOf(row),
+        explanation: row.noteHe ?? '',
+      }))
+    },
+  },
+  {
+    /** המלבישה של העונה, off the same thirty-three shirts. */
+    slug: 'kit-maker-season',
+    build: (random) => {
+      const rows = archive.kitDesigns.filter(
+        (row) => row.makerHe !== null && row.variant === 'home',
+      )
+      const makers = rows.map((row) => row.makerHe as string)
+      return rows.map((row) => ({
+        id: `kit-maker-season:${row.seasonLabel}`,
+        template: 'kit-maker-season',
+        prompt: `מי הלבישה את הפועל תל אביב בעונת ${row.seasonLabel}?`,
+        options: withDistractors(row.makerHe as string, makers, random),
+        correct: row.makerHe as string,
+        source: sourceOf(row),
+        explanation: row.noteHe ?? '',
+      }))
+    },
+  },
+  {
+    /**
+     * החולצה → העונה. The description of a shirt, and which season wore it.
+     *
+     * The hardest kit question there is, and the one a supporter actually plays: you
+     * know the shirt when you see it, and the year is the part you argue about.
+     */
+    slug: 'kit-look',
+    build: (random) => {
+      const rows = archive.kitDesigns.filter(
+        (row) => typeof row.noteHe === 'string' && row.noteHe.length > 20,
+      )
+      const seasons = rows.map((row) => row.seasonLabel)
+      return rows.map((row) => ({
+        id: `kit-look:${row.seasonLabel}:${row.variant}`,
+        template: 'kit-look',
+        prompt: 'מאיזו עונה החולצה הזאת?',
+        quoteHe: row.noteHe as string,
+        options: withDistractors(row.seasonLabel, seasons, random),
+        correct: row.seasonLabel,
+        source: sourceOf(row),
+        explanation: `${row.seasonLabel} · ${row.variant}`,
+      }))
+    },
+  },
+  {
+    /** לאן חצה. Only crossings the archive holds a destination club for. */
+    slug: 'crossing-club',
+    build: (random) => {
+      const rows = archive.grievances.filter(
+        (row) => row.kind === 'crossing' && typeof row.toClubHe === 'string',
+      )
+      const clubs = [
+        ...rows.map((row) => row.toClubHe as string),
+        ...archive.clubs.map((club) => club.nameHe),
+      ]
+      return rows.map((row) => ({
+        id: `crossing-club:${row.slug}`,
+        template: 'crossing-club',
+        prompt: `לאן עבר ${row.personNameHe} מהפועל תל אביב?`,
+        options: withDistractors(row.toClubHe as string, clubs, random),
+        correct: row.toClubHe as string,
+        source: sourceOf(row),
+        explanation: row.bodyHe,
+      }))
+    },
+  },
+  {
+    /** מתי חצה — the year, and only where the date is confirmed. */
+    slug: 'crossing-year',
+    build: (random) => {
+      const rows = archive.grievances.filter(
+        (row) =>
+          row.kind === 'crossing' &&
+          row.dateConfirmed === true &&
+          typeof row.happenedOn === 'string',
+      )
+      const years = archive.grievances
+        .filter((row) => typeof row.happenedOn === 'string')
+        .map((row) => (row.happenedOn as string).slice(0, 4))
+      return rows.map((row) => {
+        const year = (row.happenedOn as string).slice(0, 4)
+        return {
+          id: `crossing-year:${row.slug}`,
+          template: 'crossing-year',
+          prompt: `באיזו שנה חצה ${row.personNameHe} את הכביש?`,
+          options: withDistractors(year, years, random),
+          correct: year,
+          source: sourceOf(row),
+          explanation: row.bodyHe,
+        }
+      })
+    },
+  },
+  {
+    /**
+     * העובדה → הדמות. The charge sheet, asked as a fact rather than as a feeling.
+     *
+     * FOOTBALL ONLY, by the `sport` field and not by omission (rule 14): the enemies
+     * table is deliberately cross-sport because the terrace's enemies are, and the wall
+     * between the sports is held here by a filter that a reader can see.
+     *
+     * The fact asked is the sourced one on the row, never the charge — a charge is what
+     * the terrace feels and belongs on the plate in gate 11, not in a quiz with a right
+     * answer.
+     */
+    slug: 'enemy-fact',
+    build: (random) => {
+      const rows = archive.enemies.filter(
+        (row) => row.sport === 'football' && row.keyFactHe.length > 4,
+      )
+      const names = rows.map((row) => row.nameHe)
+      return rows.map((row) => ({
+        id: `enemy-fact:${row.slug}`,
+        template: 'enemy-fact',
+        prompt: `על מי זה נכון — "${row.keyFactHe}"?`,
+        options: withDistractors(row.nameHe, names, random),
+        correct: row.nameHe,
+        source: sourceOf(row),
+        explanation: row.detailHe !== '' ? row.detailHe : row.eraHe,
+      }))
+    },
+  },
   {
     /**
      * ציטוט → איפה נאמר. A call the terrace remembers, and four real fixtures.
@@ -1032,16 +1311,22 @@ function hasEnoughOptions(question: {
  * built questions by their prompt: if one prompt maps to more than one correct answer,
  * every question in that group is ill-formed and all of them go.
  */
-function dropAmbiguousPrompts<T extends { prompt: string; correct: string }>(
+function dropAmbiguousPrompts<T extends { prompt: string; correct: string; quoteHe?: string }>(
   questions: T[],
 ): T[] {
+  // The ASK is the prompt plus its clue, not the prompt alone. "איזה שער מתואר כאן?"
+  // over twenty different reports is twenty different questions with one answer each;
+  // grouping on the prompt alone declared all twenty ambiguous and threw the whole
+  // quote-led half of the bank away. The championship-count case the guard was written
+  // for carries no quote, so it is caught exactly as before.
+  const key = (question: T) => `${question.prompt}\u0000${question.quoteHe ?? ''}`
   const answers = new Map<string, Set<string>>()
   for (const question of questions) {
-    const seen = answers.get(question.prompt) ?? new Set<string>()
+    const seen = answers.get(key(question)) ?? new Set<string>()
     seen.add(question.correct)
-    answers.set(question.prompt, seen)
+    answers.set(key(question), seen)
   }
-  return questions.filter((question) => (answers.get(question.prompt)?.size ?? 0) === 1)
+  return questions.filter((question) => (answers.get(key(question))?.size ?? 0) === 1)
 }
 
 /**

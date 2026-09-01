@@ -10,32 +10,51 @@ import {
 } from '@/lib/kit/spec'
 
 /**
- * החולצה — the eight-layer shirt, rendered as SVG from one spec object.
+ * החולצה — rebuilt against `The Worker - Shirt Archive.dc.html`.
  *
- * Straight off the Kit Builder handoff, including its exact outline and clip paths.
- * There is not one image file in here: every season, real or invented, is the same
- * geometry with different fills, which is the only way 102 seasons can be drawn at all.
+ * The first version drew a flat tee with a straight shoulder and a black slab across
+ * the chest, and Maor's verdict — not close to the level, the sponsors look bad, the
+ * positions are wrong — was accurate. The handoff spells out seven anatomical rules and
+ * I had followed none of them. All seven are here now, each labelled with its number
+ * from the drawing:
  *
- * The ids are scoped with `useId` because a page shows a dozen of these at once and
- * SVG ids are global to the document — two racks sharing a `#kBody` is how a gallery
- * silently renders eleven identical shirts.
+ *   01 · **שיפוע כתף** — the shoulder DROPS from the neck instead of running flat.
+ *   02 · **תפר שרוול** — a hairline where sleeve meets body, visible even on a plain
+ *        shirt. It is most of what stops the silhouette reading as an icon.
+ *   03 · **הצרה במותן** — the body pulls in four units at the waist and back out at the
+ *        hem, so the outline is a garment and not a rectangle.
+ *   04 · **מכפלת שרוול** — a cuff band at the sleeve end.
+ *   05 · **שכבת קיפול** — a fold gradient: dark at both edges, light off-centre, 22%
+ *        maximum. This is the layer that makes flat fill read as cloth.
+ *   06 · **משבצות סימנים** — crest and maker sit in fixed slots. The MAKER is a dashed
+ *        frame with the name lettered in it, never a traced logo — the handoff says
+ *        trademarks are not drawn and that is also the right call. The club's own crest
+ *        IS printed, because Maor supplied it and it is his club's mark.
+ *   07 · **מכפלת תחתונה** — a hem line ten units above the edge.
+ *
+ * Plus a cast shadow at 16%, a knit texture at 7%, and a 4-unit outline. The sponsor
+ * sits at y=158 in Karantina for Hebrew and Archivo 800 for Latin, and clamps its own
+ * width rather than overflowing the chest — the two things that made the old sponsors
+ * look pasted on.
  */
 
-const OUTLINE =
-  'M78 20 L62 24 L18 48 L6 96 L46 110 L54 92 L54 214 L146 214 L146 92 L154 110 L194 96 L182 48 L138 24 L122 20 C116 34 84 34 78 20 Z'
-const BODY = 'M62 24 L54 92 L54 214 L146 214 L146 92 L138 24 L122 20 C116 34 84 34 78 20 Z'
-const SLEEVE_L = 'M62 24 L18 48 L6 96 L46 110 L54 92 Z'
-const SLEEVE_R = 'M138 24 L182 48 L194 96 L154 110 L146 92 Z'
+/** The handoff's outline. Curved hem, dropped shoulders, waist. */
+const OUT =
+  'M86 26 L68 30 L26 58 L14 104 Q33 116 52 120 L62 96 L58 176 L60 242 Q110 251 160 242 L162 176 L158 96 L168 120 Q187 116 206 104 L194 58 L152 30 L134 26 C128 42 92 42 86 26 Z'
+const BODY =
+  'M68 30 L62 96 L58 176 L60 242 Q110 251 160 242 L162 176 L158 96 L152 30 L134 26 C128 42 92 42 86 26 Z'
+const SLEEVE_L = 'M68 30 L26 58 L14 104 Q33 116 52 120 L62 96 Z'
+const SLEEVE_R = 'M152 30 L194 58 L206 104 Q187 116 168 120 L158 96 Z'
 
 export function KitShirt({
   spec,
   className = '',
-  /** slots the player has to fill in, drawn as a navy dashed box instead of content */
   missing = [],
   title,
 }: {
   spec: KitSpec
   className?: string
+  /** slots the player has to fill in, drawn as a navy dashed box instead of content */
   missing?: ('sponsor' | 'maker' | 'crest')[]
   title?: string
 }) {
@@ -45,13 +64,20 @@ export function KitShirt({
   const ink = COLOUR_VAR[spec.patternInk]
   const sleeve = COLOUR_VAR[spec.sleeveInk]
   const collar = COLOUR_VAR[spec.collarInk]
+  const light = spec.base === 'cream' || spec.base === 'paper'
 
   return (
-    <svg viewBox="0 0 200 240" className={className} role="img" aria-label={title ?? spec.seasonLabel}>
+    <svg
+      viewBox="-6 -4 236 274"
+      className={className}
+      style={{ overflow: 'visible' }}
+      role="img"
+      aria-label={title ?? spec.seasonLabel}
+    >
       {title && <title>{title}</title>}
       <defs>
         <clipPath id={id('all')}>
-          <path d={OUTLINE} />
+          <path d={OUT} />
         </clipPath>
         <clipPath id={id('body')}>
           <path d={BODY} />
@@ -62,16 +88,39 @@ export function KitShirt({
         <clipPath id={id('sr')}>
           <path d={SLEEVE_R} />
         </clipPath>
+
+        {/* the knit — diagonal hairlines at 7%, the texture that stops a fill being flat */}
+        <pattern id={id('knit')} width="6" height="6" patternUnits="userSpaceOnUse">
+          <path
+            d="M0 6 L6 0 M-1 1 L1 -1 M5 7 L7 5"
+            stroke={COLOUR_VAR.ink}
+            strokeWidth=".9"
+            opacity=".07"
+            fill="none"
+          />
+        </pattern>
+
+        {/* 05 · the fold. Dark at both edges, light off-centre, 22% maximum. */}
+        <linearGradient id={id('fold')} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor={COLOUR_VAR.ink} stopOpacity=".22" />
+          <stop offset=".16" stopColor={COLOUR_VAR.ink} stopOpacity="0" />
+          <stop offset=".62" stopColor={COLOUR_VAR.cream} stopOpacity=".07" />
+          <stop offset=".86" stopColor={COLOUR_VAR.ink} stopOpacity="0" />
+          <stop offset="1" stopColor={COLOUR_VAR.ink} stopOpacity=".2" />
+        </linearGradient>
+
         <Pattern id={id('pat')} pattern={spec.pattern} base={base} ink={ink} />
       </defs>
 
+      {/* the cast shadow — the shirt sits on the sheet rather than floating in it */}
+      <path d={OUT} fill={COLOUR_VAR.ink} opacity=".16" transform="translate(5,6)" />
+
       {/* 1 · base */}
       <g clipPath={`url(#${id('all')})`}>
-        <rect width="200" height="240" fill={base} />
+        <rect width="220" height="260" fill={base} />
       </g>
 
-      {/* 2 · the cut, on the body only — a pattern that runs into the sleeve reads as
-              wallpaper rather than as a shirt */}
+      {/* 2 · the cut, on the body only */}
       <g clipPath={`url(#${id('body')})`}>
         <PatternFill id={id('pat')} pattern={spec.pattern} base={base} ink={ink} />
       </g>
@@ -84,84 +133,114 @@ export function KitShirt({
         <SleeveFill treatment={spec.sleeves} ink={sleeve} base={base} side="r" />
       </g>
 
-      {/* 4 · collar */}
-      <Collar type={spec.collar} ink={collar} base={base} />
+      {/* the two fabric layers, over every fill and under every mark */}
+      <g clipPath={`url(#${id('all')})`}>
+        <rect width="220" height="260" fill={`url(#${id('knit')})`} />
+      </g>
+      <g clipPath={`url(#${id('all')})`}>
+        <rect width="220" height="260" fill={`url(#${id('fold')})`} />
+      </g>
 
-      {/* 5 · crest, chest right — the real one, from the era the shirt belongs to.
-             The old slot drew a circle and two strokes that were meant to suggest the
-             worker figure and did not look like anything. A club crest is not a thing to
-             approximate: either print the crest or leave the slot empty. */}
+      {/* 04 · cuffs */}
+      <g clipPath={`url(#${id('sl')})`}>
+        <path d="M16 96 L54 112 L52 122 L13 106 Z" fill={collar} />
+      </g>
+      <g clipPath={`url(#${id('sr')})`}>
+        <path d="M204 96 L166 112 L168 122 L207 106 Z" fill={collar} />
+      </g>
+
+      {/* the sponsor, on the fabric, clamped to the chest */}
+      {missing.includes('sponsor') ? (
+        <DashBox x={64} y={140} w={92} h={30} mark="?" />
+      ) : (
+        spec.sponsorHe && (
+          <g clipPath={`url(#${id('body')})`}>
+            <SponsorText text={spec.sponsorHe} light={light} />
+          </g>
+        )
+      )}
+
+      {/* 06 · the mark slots. The crest is printed; the maker is a dashed frame with the
+              name lettered inside it, because a manufacturer's trademark is not ours to
+              draw. Both sit exactly where the handoff puts them. */}
       {missing.includes('crest') ? (
-        <DashBox x={112} y={32} w={28} h={28} />
+        <DashBox x={128} y={62} w={22} h={26} />
       ) : spec.crestKey ? (
         <image
           href={`/brand/crests/${spec.crestKey}.png`}
-          x="110"
-          y="30"
-          width="32"
-          height="34"
+          x="126"
+          y="60"
+          width="26"
+          height="30"
           preserveAspectRatio="xMidYMid meet"
         />
       ) : null}
 
-      {/* 6 · maker, chest left */}
       {missing.includes('maker') ? (
-        <DashBox x={58} y={42} w={30} h={13} />
+        <DashBox x={72} y={66} w={20} h={10} />
       ) : (
         spec.makerHe && (
           <text
-            x="73"
-            y="53"
+            x="82"
+            y="74"
             textAnchor="middle"
-            fill={COLOUR_VAR.ink}
+            fill={light ? COLOUR_VAR.ink : COLOUR_VAR.cream}
             className="font-latin"
-            style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em' }}
+            style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.04em' }}
           >
             {spec.makerHe}
           </text>
         )
       )}
 
-      {/* 7 · sponsor, centre chest */}
-      {missing.includes('sponsor') ? (
-        <DashBox x={58} y={112} w={84} h={36} mark="?" />
-      ) : (
-        spec.sponsorHe && (
-          // Lettered straight onto the shirt, not stamped inside a black plate. Every
-          // reference shows the sponsor printed on the fabric — אתא is white letters on
-          // red, not a box — and the black slab made every shirt in the rack look like
-          // the same shirt with a different label stuck on it.
-          <text
-            x="100"
-            y="140"
-            textAnchor="middle"
-            fill={
-              spec.base === 'cream' || spec.base === 'paper' ? COLOUR_VAR.red : COLOUR_VAR.cream
-            }
-            className="font-poster"
-            style={{ fontSize: sponsorSize(spec.sponsorHe) }}
-          >
-            {spec.sponsorHe}
-          </text>
-        )
-      )}
+      {/* 4 · collar */}
+      <Collar type={spec.collar} ink={collar} />
 
-      {/* 8 · the number */}
+      {/* 02 · sleeve seams · 07 · the hem line · and the collar seam */}
+      <g fill="none" stroke={COLOUR_VAR.ink} strokeOpacity=".42" strokeWidth="1.6">
+        <path d="M68 30 L62 96" />
+        <path d="M152 30 L158 96" />
+        <path d="M60 232 Q110 241 160 232" />
+        <path d="M82 30 C90 48 130 48 138 30" />
+      </g>
+
       {spec.number !== null && (
-        <Number value={spec.number} nameset={spec.nameset} base={spec.base} />
+        <Number value={spec.number} nameset={spec.nameset} light={light} />
       )}
 
-      <path d={OUTLINE} fill="none" stroke={COLOUR_VAR.ink} strokeWidth="2.4" />
+      <path d={OUT} fill="none" stroke={COLOUR_VAR.ink} strokeWidth="4" strokeLinejoin="round" />
     </svg>
   )
 }
 
-/** Long names shrink so the whole word stays on the chest. */
-function sponsorSize(text: string): number {
-  if (text.length <= 4) return 30
-  if (text.length <= 7) return 24
-  if (text.length <= 10) return 18
-  return 15
+/**
+ * The sponsor, set the way the handoff sets it: Karantina for Hebrew, Archivo 800 for
+ * Latin, and a `textLength` clamp when the estimate says it would run past the chest.
+ * Clamping is what stops a long name either overflowing the shirt or being rendered so
+ * small it reads as a smudge — the two failure modes of the old version.
+ */
+function SponsorText({ text, light }: { text: string; light: boolean }) {
+  const latin = !/[\u0590-\u05FF]/.test(text)
+  const size = latin ? 26 : 30
+  const estimate = text.length * size * (latin ? 0.62 : 0.46)
+  const clamp = estimate > 92 ? { textLength: 92, lengthAdjust: 'spacingAndGlyphs' as const } : {}
+  return (
+    <text
+      x="110"
+      y="158"
+      textAnchor="middle"
+      {...clamp}
+      fill={light ? COLOUR_VAR.red : COLOUR_VAR.cream}
+      style={{
+        fontFamily: latin ? 'var(--font-latin)' : 'var(--font-poster)',
+        fontWeight: latin ? 800 : 700,
+        fontSize: size,
+        direction: latin ? 'ltr' : 'rtl',
+      }}
+    >
+      {text}
+    </text>
+  )
 }
 
 function DashBox({
@@ -186,17 +265,17 @@ function DashBox({
         height={h}
         fill="none"
         stroke={COLOUR_VAR.navy}
-        strokeWidth="2.4"
-        strokeDasharray="5 4"
+        strokeWidth="2.2"
+        strokeDasharray="3 2.5"
       />
       {mark && (
         <text
           x={x + w / 2}
-          y={y + h * 0.72}
+          y={y + h * 0.76}
           textAnchor="middle"
           fill={COLOUR_VAR.navy}
           className="font-poster"
-          style={{ fontSize: 26 }}
+          style={{ fontSize: 24 }}
         >
           {mark}
         </text>
@@ -205,7 +284,7 @@ function DashBox({
   )
 }
 
-/** The pattern library, as `<pattern>` defs. One def per cut, exactly as specified. */
+/** The pattern library, as `<pattern>` defs. */
 function Pattern({
   id,
   pattern,
@@ -220,54 +299,44 @@ function Pattern({
   switch (pattern) {
     case 'stripe-wide':
       return (
-        <pattern id={id} width="26" height="10" patternUnits="userSpaceOnUse">
-          <rect width="26" height="10" fill={base} />
-          <rect width="13" height="10" fill={ink} />
+        <pattern id={id} width="30" height="10" patternUnits="userSpaceOnUse">
+          <rect width="30" height="10" fill={base} />
+          <rect width="15" height="10" fill={ink} />
         </pattern>
       )
     case 'pinstripe':
       return (
-        <pattern id={id} width="10" height="10" patternUnits="userSpaceOnUse">
-          <rect width="10" height="10" fill={base} />
+        <pattern id={id} width="12" height="10" patternUnits="userSpaceOnUse">
+          <rect width="12" height="10" fill={base} />
           <rect width="3" height="10" fill={ink} />
         </pattern>
       )
     case 'hoop-tonal':
       return (
-        <pattern id={id} width="10" height="20" patternUnits="userSpaceOnUse">
-          <rect width="10" height="20" fill={base} />
-          <rect width="10" height="9" fill={ink} />
+        <pattern id={id} width="10" height="22" patternUnits="userSpaceOnUse">
+          <rect width="10" height="22" fill={base} />
+          <rect width="10" height="10" fill={ink} />
         </pattern>
       )
     case 'jacquard':
       return (
-        <pattern id={id} width="20" height="20" patternUnits="userSpaceOnUse">
-          <rect width="20" height="20" fill={base} />
-          <path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke={ink} strokeWidth="2.4" />
+        <pattern id={id} width="22" height="22" patternUnits="userSpaceOnUse">
+          <rect width="22" height="22" fill={base} />
+          <path d="M11 3 L19 11 L11 19 L3 11 Z" fill="none" stroke={ink} strokeWidth="2.6" />
         </pattern>
       )
     case 'chevron':
       return (
         <pattern id={id} width="18" height="12" patternUnits="userSpaceOnUse">
           <rect width="18" height="12" fill={base} />
-          <path
-            d="M0 10 L4.5 3 L9 10 L13.5 3 L18 10"
-            fill="none"
-            stroke={ink}
-            strokeWidth="2.2"
-          />
+          <path d="M0 10 L4.5 3 L9 10 L13.5 3 L18 10" fill="none" stroke={ink} strokeWidth="2.2" />
         </pattern>
       )
     case 'grid-tonal':
       return (
         <pattern id={id} width="16" height="16" patternUnits="userSpaceOnUse">
           <rect width="16" height="16" fill={base} />
-          <path
-            d="M0 0 H16 M0 8 H16 M0 0 V16 M8 0 V16"
-            stroke={ink}
-            strokeWidth="1.6"
-            fill="none"
-          />
+          <path d="M0 0 H16 M0 8 H16 M0 0 V16 M8 0 V16" stroke={ink} strokeWidth="1.6" fill="none" />
         </pattern>
       )
     case 'gradient':
@@ -283,7 +352,7 @@ function Pattern({
   }
 }
 
-/** Cuts that are shapes rather than repeats are drawn directly. */
+/** Cuts that are shapes rather than repeats, at the archive's own coordinates. */
 function PatternFill({
   id,
   pattern,
@@ -299,59 +368,56 @@ function PatternFill({
     case 'solid':
       return null
     case 'sash':
-      return <path d="M40 240 L150 0 L196 0 L86 240 Z" fill={ink} />
+      return <path d="M40 260 L156 0 L204 0 L88 260 Z" fill={ink} />
     case 'yoke-v':
-      return <path d="M54 20 L100 96 L146 20 L146 44 L100 118 L54 44 Z" fill={ink} />
+      return <path d="M58 26 L110 104 L162 26 L162 54 L110 132 L58 54 Z" fill={ink} />
     case 'side-panel':
       return (
         <>
-          <rect x="54" width="16" height="240" fill={ink} />
-          <rect x="130" width="16" height="240" fill={ink} />
+          <rect x="58" width="16" height="260" fill={ink} />
+          <rect x="146" width="16" height="260" fill={ink} />
         </>
       )
     case 'halves':
-      return <rect x="100" width="100" height="240" fill={ink} />
-    // — the four cuts read off the season photographs —
+      return <rect x="110" width="110" height="260" fill={ink} />
     case 'chest-band':
-      // 2002/03: one band across the chest with the sponsor inside it
       return (
         <>
-          <rect y="56" width="200" height="34" fill={ink} />
-          <rect y="52" width="200" height="4" fill={COLOUR_VAR.ink} opacity=".25" />
+          <rect y="96" width="220" height="36" fill={ink} />
+          <rect y="92" width="220" height="4" fill={COLOUR_VAR.ink} opacity=".25" />
         </>
       )
     case 'quarters':
-      // the Diadora shirt: red panels on a white ground, quartered
+      // The body spans x 58—162, so corner blocks have to be inside THAT, not inside
+      // the 220-wide canvas. Drawn full-canvas they clipped down to two vertical bars
+      // and the cross in the middle disappeared, which is the whole point of the cut.
       return (
         <>
-          <rect x="0" y="0" width="72" height="86" fill={ink} />
-          <rect x="128" y="0" width="72" height="86" fill={ink} />
-          <rect x="0" y="150" width="72" height="90" fill={ink} />
-          <rect x="128" y="150" width="72" height="90" fill={ink} />
+          <rect x="40" y="0" width="58" height="106" fill={ink} />
+          <rect x="122" y="0" width="58" height="106" fill={ink} />
+          <rect x="40" y="176" width="58" height="90" fill={ink} />
+          <rect x="122" y="176" width="58" height="90" fill={ink} />
         </>
       )
     case 'diagonal':
-      // the adidas shirt: fine diagonals across the whole body
       return (
         <g stroke={ink} strokeWidth="1.6" fill="none">
-          {Array.from({ length: 16 }, (_, index) => (
-            <path key={index} d={`M${-120 + index * 26} 240 L${60 + index * 26} 0`} />
+          {Array.from({ length: 18 }, (_, index) => (
+            <path key={index} d={`M${-140 + index * 28} 260 L${60 + index * 28} 0`} />
           ))}
         </g>
       )
     case 'twin-stripe':
-      // 1999/2000: two stripes down the front, nothing else
       return (
         <>
-          <rect x="72" width="11" height="240" fill={ink} />
-          <rect x="117" width="11" height="240" fill={ink} />
+          <rect x="78" width="12" height="260" fill={ink} />
+          <rect x="130" width="12" height="260" fill={ink} />
         </>
       )
     case 'shoulder-panel':
-      // 2011/12 and 2020/21: a panel across both shoulders
-      return <path d="M54 20 H146 L146 62 Q100 78 54 62 Z" fill={ink} />
+      return <path d="M58 26 H162 L160 74 Q110 90 60 74 Z" fill={ink} />
     default:
-      return <rect width="200" height="240" fill={`url(#${id})`} />
+      return <rect width="220" height="260" fill={`url(#${id})`} />
   }
 }
 
@@ -366,109 +432,97 @@ function SleeveFill({
   base: string
   side: 'l' | 'r'
 }) {
-  const flip = side === 'r' ? 'translate(200 0) scale(-1 1)' : undefined
+  const flip = side === 'r' ? 'translate(220 0) scale(-1 1)' : undefined
   switch (treatment) {
     case 'raglan':
-      return <rect width="200" height="240" fill={ink} transform={flip} />
+      return <rect width="220" height="260" fill={ink} transform={flip} />
     case 'cuff':
-      return (
-        <g transform={flip}>
-          <rect width="200" height="240" fill={base} />
-          <path d="M6 96 L46 110 L42 124 L2 110 Z" fill={ink} />
-        </g>
-      )
+      return <rect width="220" height="260" fill={base} transform={flip} />
     case 'shoulder-stripe':
       return (
         <g transform={flip}>
-          <rect width="200" height="240" fill={base} />
-          <path d="M56 20 L64 48 L28 66 L20 38 Z" fill={ink} />
-          <path d="M44 30 L50 50 L22 64 L16 44 Z" fill={base} />
+          <rect width="220" height="260" fill={base} />
+          <path d="M62 30 L72 58 L34 78 L24 50 Z" fill={ink} />
         </g>
       )
     case 'arc':
       return (
         <g transform={flip}>
-          <rect width="200" height="240" fill={base} />
-          <path d="M16 40 A 20 20 0 0 1 36 20" fill="none" stroke={ink} strokeWidth="4" />
+          <rect width="220" height="260" fill={base} />
+          <path d="M24 52 A 22 22 0 0 1 46 30" fill="none" stroke={ink} strokeWidth="4.5" />
         </g>
       )
     default:
-      return <rect width="200" height="240" fill={base} transform={flip} />
+      return <rect width="220" height="260" fill={base} transform={flip} />
   }
 }
 
-function Collar({ type, ink, base }: { type: CollarId; ink: string; base: string }) {
-  switch (type) {
-    case 'ringer':
-      return <path d="M78 20 C84 34 116 34 122 20 L129 24 C121 45 79 45 71 24 Z" fill={ink} />
-    case 'v-neck':
-      return (
-        <>
-          <path d="M78 20 L100 48 L122 20 L128 23 L100 58 L72 23 Z" fill={ink} />
-        </>
-      )
-    case 'polo':
-      return (
-        <>
-          <path
-            d="M76 18 L100 32 L124 18 L136 26 L108 46 L92 46 L64 26 Z"
-            fill={ink}
-            stroke={COLOUR_VAR.ink}
-            strokeWidth="1.6"
-          />
-          <rect
-            x="96"
-            y="32"
-            width="8"
-            height="26"
-            fill={ink}
-            stroke={COLOUR_VAR.ink}
-            strokeWidth="1.4"
-          />
-        </>
-      )
-    case 'laced':
-      return (
-        <>
-          <path d="M78 20 C84 34 116 34 122 20 L127 23 C120 41 80 41 73 23 Z" fill={ink} />
-          <path
-            d="M92 36 L108 36 M92 44 L108 44 M92 52 L108 52"
-            stroke={base}
-            strokeWidth="1.8"
-          />
-        </>
-      )
-    default:
-      return <path d="M78 20 C84 34 116 34 122 20 L128 24 C120 42 80 42 72 24 Z" fill={ink} />
-  }
+/** The collar shapes, straight off the handoff — two parts where the real one has two. */
+function Collar({ type, ink }: { type: CollarId; ink: string }) {
+  if (type === 'v-neck')
+    return (
+      <>
+        <path d="M86 26 L110 66 L134 26 L142 30 L110 84 L78 30 Z" fill={ink} />
+        <path d="M86 26 C92 42 128 42 134 26 L138 28 C131 46 89 46 82 28 Z" fill={ink} />
+      </>
+    )
+  if (type === 'polo')
+    return (
+      <>
+        <path
+          d="M84 22 L110 40 L136 22 L150 32 L118 58 L102 58 L70 32 Z"
+          fill={ink}
+          stroke={COLOUR_VAR.ink}
+          strokeWidth="2"
+        />
+        <rect
+          x="104"
+          y="40"
+          width="12"
+          height="34"
+          fill={ink}
+          stroke={COLOUR_VAR.ink}
+          strokeWidth="1.6"
+        />
+      </>
+    )
+  if (type === 'ringer')
+    return <path d="M86 26 C92 42 128 42 134 26 L141 30 C133 50 87 50 79 30 Z" fill={ink} />
+  if (type === 'laced')
+    return (
+      <>
+        <path d="M86 26 C92 42 128 42 134 26 L139 29 C132 47 88 47 81 29 Z" fill={ink} />
+        <path
+          d="M100 44 H120 M100 54 H120 M100 64 H120"
+          stroke={COLOUR_VAR.ink}
+          strokeOpacity=".5"
+          strokeWidth="1.6"
+        />
+      </>
+    )
+  return <path d="M86 26 C92 42 128 42 134 26 L139 29 C132 47 88 47 81 29 Z" fill={ink} />
 }
 
 function Number({
   value,
   nameset,
-  base,
+  light,
 }: {
   value: number
   nameset: KitSpec['nameset']
-  base: KitColour
+  light: boolean
 }) {
-  const solid = base === 'cream' || base === 'paper' ? COLOUR_VAR.ink : COLOUR_VAR.cream
-  const common = { x: 100, y: 202, textAnchor: 'middle' as const, className: 'font-poster' }
+  const solid = light ? COLOUR_VAR.ink : COLOUR_VAR.cream
+  const common = { x: 110, y: 224, textAnchor: 'middle' as const, className: 'font-poster' }
   if (nameset === 'block-hollow') {
     return (
-      <text
-        {...common}
-        fill="none"
-        stroke={solid}
-        strokeWidth="2"
-        style={{ fontSize: 46 }}
-      >
+      <text {...common} fill="none" stroke={solid} strokeWidth="2" style={{ fontSize: 44 }}>
         {value}
       </text>
     )
   }
   return (
-    <text {...common} fill={solid} style={{ fontSize: nameset === 'condensed' ? 40 : 46 }}>
+    <text {...common} fill={solid} style={{ fontSize: nameset === 'condensed' ? 38 : 44 }}>
       {value}
     </text>
   )
