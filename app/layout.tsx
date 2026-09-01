@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Courier_Prime, Frank_Ruhl_Libre, Heebo, Miriam_Libre } from 'next/font/google'
+import { Anton, Courier_Prime, Frank_Ruhl_Libre, Heebo, Miriam_Libre } from 'next/font/google'
 import { BRAND } from '@/lib/brand'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
 import './globals.css'
@@ -30,6 +30,17 @@ const courier = Courier_Prime({
   display: 'swap',
 })
 
+/**
+ * Anton is the shirt-number face from the DUBID press DNA: narrow, heavy, Latin-only.
+ * It carries FIGURES ONLY — scores, shirt numbers, vote counts — never Hebrew text.
+ */
+const anton = Anton({
+  subsets: ['latin'],
+  weight: '400',
+  display: 'swap',
+  variable: '--font-poster',
+})
+
 export const viewport: Viewport = {
   // Required for env(safe-area-inset-*) to report anything on a notched iPhone.
   viewportFit: 'cover',
@@ -55,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang={LOCALE}
       dir={DIRECTION}
-      className={`${frank.variable} ${miriam.variable} ${heebo.variable} ${courier.variable}`}
+      className={`${frank.variable} ${miriam.variable} ${heebo.variable} ${courier.variable} ${anton.variable}`}
     >
       <body className="font-body antialiased">
         <a

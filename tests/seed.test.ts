@@ -119,9 +119,23 @@ describe('what the research pass could not verify stays out', () => {
     expect(toto2025?.result).toBe('runner_up')
   })
 
-  it('ships no songs, because no melody attribution could be sourced', () => {
+  it('ships only songs whose melody or season a source states', () => {
+    // This used to assert the song file was EMPTY, because the first research pass
+    // could not source a single melody attribution. The research master now sources
+    // nine of them, so the rule it was standing in for is asserted directly instead:
+    // a song at or above the floor carries something a question can be built on.
     const { bundle } = seed()
-    expect(bundle.songs).toEqual([])
+    const usable = bundle.songs.filter((song) => song.confidence >= TRIVIA_CONFIDENCE_FLOOR)
+    expect(usable.length).toBeGreaterThan(5)
+    for (const song of usable) {
+      const anchored =
+        song.originalTitle !== null || song.seasonLabel !== null || song.personSlug !== null
+      expect(anchored, `${song.titleHe} is above the floor with nothing to anchor it`).toBe(true)
+    }
+
+    // A bare title with no melody, no season and no player stays below the floor.
+    const bare = bundle.songs.filter((song) => song.confidence < TRIVIA_CONFIDENCE_FLOOR)
+    expect(bare.length).toBeGreaterThan(0)
   })
 
   it('leaves the 1,000th-member date unconfirmed rather than picking one', () => {
@@ -224,6 +238,9 @@ describe('no bare scoreline survives in Hebrew content', () => {
           // Only prose the player reads. Claims quoted from a conflicting source keep
           // the wording that source used.
           if (!/^(titleHe|bodyHe|subtitleHe|noteHe)$/.test(field)) continue
+          // A chant that literally shouts a scoreline is folklore quoted verbatim.
+          // Rewriting it would falsify the thing being recorded.
+          if ((record as { verbatimQuote?: boolean }).verbatimQuote) continue
           // A draw cannot be reversed — 1:1 reads the same from either side — so only
           // a decisive score is a problem.
           const bare = /(?<!\d)(\d):(\d)(?!\d)/.exec(value)

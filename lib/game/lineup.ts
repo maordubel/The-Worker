@@ -111,6 +111,13 @@ type LineupRecord = {
    * order would be a claim the source does not make.
    */
   positionsInferred?: boolean
+  /**
+   * False when the SOURCE itself marks the XI unverified. The Chelsea away eleven has
+   * one slot the wiki stamps VERIFY, so the record is kept for the archive and withheld
+   * from the game: an XI with a guessed slot grades a player wrong for being right.
+   */
+  playable?: boolean
+  noteHe?: string
   sourceTitle?: string
   sourceUrl?: string
   confidence?: number
@@ -127,7 +134,9 @@ const CONFIDENCE_FLOOR = 2
 function verified(): LineupRecord[] {
   const file = lineupsFile as unknown as LineupFile
   return file.records.filter(
-    (record) => (record.confidence ?? file.confidence) >= CONFIDENCE_FLOOR,
+    (record) =>
+      (record.confidence ?? file.confidence) >= CONFIDENCE_FLOOR &&
+      record.playable !== false,
   )
 }
 

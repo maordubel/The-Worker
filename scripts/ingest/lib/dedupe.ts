@@ -6,7 +6,7 @@
  * would change a fact is recorded as a conflict rather than silently overwritten.
  */
 
-import { normalizeName } from './normalize'
+import { normalizeLoose, normalizeName } from './normalize'
 import type { Confidence, StagedBundle, BundleKey, Sport } from './types'
 
 export type Conflict = {
@@ -150,7 +150,12 @@ export function buildAliases(
 
   for (const entity of input) {
     for (const name of entity.names) {
-      const normalized = normalizeName(name)
+      // A person keeps their bracketed qualifier. `normalizeName` strips brackets
+      // because on a wiki page title "(כדורגל)" marks the sport, not the name — but on
+      // a PERSON "(חלוץ)" is the whole point: it is what separates two men called עומר
+      // פרץ. Stripping it silently merges two players into one.
+      const normalized =
+        entity.entityTable === 'person' ? normalizeLoose(name) : normalizeName(name)
       if (!normalized) continue
       const owner = `${entity.entityTable}:${entity.scope}:${entity.entitySlug}`
       const scopedKey = `${entity.entityTable}|${entity.scope}|${normalized}`

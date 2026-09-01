@@ -153,6 +153,76 @@
       "confidence": 1,
       "sourceUrl": "https://en.wikipedia.org/wiki/1967_Asian_Champion_Club_Tournament",
       "sourceTitle": "1967 Asian Champion Club Tournament — Wikipedia"
+    },
+    {
+      "slug": "ארארט-ירוואן",
+      "nameHe": "ארארט ירוואן",
+      "nameEn": "Ararat Yerevan",
+      "city": "ירוואן",
+      "sport": "football",
+      "aliases": [
+        "ארארט ירוואן",
+        "Ararat Yerevan"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "פרטיזני-טירנה",
+      "nameHe": "פרטיזני טירנה",
+      "nameEn": "Partizani Tirana",
+      "city": "טירנה",
+      "sport": "football",
+      "aliases": [
+        "פרטיזני טירנה",
+        "Partizani Tirana"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "קרנטן",
+      "nameHe": "קרנטן",
+      "nameEn": "Kärnten",
+      "city": "קלגנפורט",
+      "sport": "football",
+      "aliases": [
+        "קרנטן",
+        "Kärnten"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "לידס",
+      "nameHe": "לידס יונייטד",
+      "nameEn": "Leeds United",
+      "city": "לידס",
+      "sport": "football",
+      "aliases": [
+        "לידס יונייטד",
+        "Leeds United"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "זלצבורג",
+      "nameHe": "רד בול זלצבורג",
+      "nameEn": "Red Bull Salzburg",
+      "city": "זלצבורג",
+      "sport": "football",
+      "aliases": [
+        "רד בול זלצבורג",
+        "Red Bull Salzburg"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
     }
   ]
 }

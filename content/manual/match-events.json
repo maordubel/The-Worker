@@ -1,5 +1,5 @@
 {
-  "note": "Only goals a named source attributes to a named scorer with a minute.",
+  "note": "Only goals a named source attributes to a named scorer with a minute. Goals without a documented minute keep minute null rather than an invented one.",
   "confidence": 2,
   "source": {
     "kind": "other",
@@ -88,6 +88,100 @@
       "confidence": 3,
       "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
       "sourceTitle": "ויקיפועל · נגיחת קלשצ'נקו מבישול אבוקסיס מ-40 מטרים"
+    },
+    {
+      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|ארארט-ירוואן|מוקדמות משחק 1",
+      "seq": 1,
+      "minute": null,
+      "type": "goal",
+      "clubSlug": "הפועל-תל-אביב",
+      "personSlug": "מילאן-אוסטרץ",
+      "noteHe": "המקור נוקב בכובשים ולא בדקות.",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|ארארט-ירוואן|מוקדמות משחק 1",
+      "seq": 2,
+      "minute": null,
+      "type": "goal",
+      "clubSlug": "הפועל-תל-אביב",
+      "personSlug": "אסי-דומב",
+      "noteHe": "המקור נוקב בכובשים ולא בדקות.",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|ארארט-ירוואן|מוקדמות משחק 1",
+      "seq": 3,
+      "minute": null,
+      "type": "goal",
+      "clubSlug": "הפועל-תל-אביב",
+      "personSlug": "כפיר-אודי",
+      "noteHe": "המקור נוקב בכובשים ולא בדקות.",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|מילאן|רבע גמר משחק 1",
+      "seq": 2,
+      "minute": null,
+      "type": "yellow_card",
+      "clubSlug": "הפועל-תל-אביב",
+      "personSlug": "דניס-אונישנקו",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|מילאן|רבע גמר משחק 1",
+      "seq": 3,
+      "minute": null,
+      "type": "yellow_card",
+      "clubSlug": "הפועל-תל-אביב",
+      "personSlug": "יגאל-אנטבי",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|מילאן|רבע גמר משחק 1",
+      "seq": 4,
+      "minute": 69,
+      "type": "substitution",
+      "clubSlug": "הפועל-תל-אביב",
+      "personSlug": "סלים-טועמה",
+      "relatedPersonSlug": "אישטוון-פישונט",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|מילאן|רבע גמר משחק 1",
+      "seq": 5,
+      "minute": 81,
+      "type": "substitution",
+      "clubSlug": "הפועל-תל-אביב",
+      "personSlug": "פיני-בלילי",
+      "relatedPersonSlug": "סרגיי-קלשצנקו",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "matchNaturalKey": "2010/11|ליגת-האלופות|הפועל-תל-אביב|זלצבורג|פלייאוף משחק 2",
+      "seq": 1,
+      "minute": 92,
+      "type": "goal",
+      "clubSlug": "הפועל-תל-אביב",
+      "personSlug": "ערן-זהבי",
+      "noteHe": "שער השוויון שהעפיל את הפועל לשלב הבתים.",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
     }
   ]
 }

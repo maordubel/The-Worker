@@ -1,10 +1,311 @@
 {
-  "note": "EMPTY BY DESIGN. Per-season squads and shirt numbers need the Red Fans squad categories, which are still behind bot protection. Fill from Maor with confidence 3, or from the wiki once access is granted.",
-  "confidence": 1,
+  "note": "The current 2026/27 squad from the project's working spreadsheet. This is game-design/current-season data, NOT club history, and it is loaded as an ordinary season squad so that nothing downstream has to know the difference — except that its source names it as working data. Names are stored as the spreadsheet writes them; where a spelling differs from the all-time roster the importer's alias check reports it rather than merging by guess. The separate ranking/market-value sheet is deliberately NOT imported: a modern valuation is not a historical fact.",
+  "confidence": 2,
   "source": {
-    "kind": "manual",
-    "title": "Squad data — pending",
+    "kind": "other",
+    "title": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)",
     "url": null
   },
-  "records": []
+  "records": [
+    {
+      "personName": "דור בנימיני",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 1,
+      "position": "GK",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "צ'יקו",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 4,
+      "position": "DF",
+      "nationalityHe": "ברזיל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "פרנאן מאיימבו",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 5,
+      "position": "DF",
+      "nationalityHe": "קונגו",
+      "isCaptain": true,
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "אנדריאן קרייב",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 6,
+      "position": "MF",
+      "nationalityHe": "בולגריה",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "רוי קורין",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 7,
+      "position": "FW",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "יונתן פרבר",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 8,
+      "position": "MF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "עמנואל בואטנג (חלוץ)",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 9,
+      "position": "FW",
+      "nationalityHe": "גאנה",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)",
+      "personSlug": "עמנואל-בואטנג-חלוץ",
+      "noteHe": "הרשימה כוללת שני שחקנים בשם עמנואל בואטנג; החיבור לחלוץ נעשה לפי העמדה במקור."
+    },
+    {
+      "personName": "שאנדה סילבה",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 10,
+      "position": "FW",
+      "nationalityHe": "פורטוגל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "סתיו טוריאל",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 11,
+      "position": "MF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "אל-ים קנצפולסקי",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 14,
+      "position": "MF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "רועי אלקוקין",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 15,
+      "position": "MF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "דורון ליידנר",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 16,
+      "position": "DF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "טל ארצ'ל",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 18,
+      "position": "DF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "אנאס מחאמיד",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 19,
+      "position": "FW",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "שחר פיבן",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 21,
+      "position": "DF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "אסף צור",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 22,
+      "position": "GK",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "עמית למקין",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 23,
+      "position": "DF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "מור בוסקילה",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 27,
+      "position": "MF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "דגלאס אווסו",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 35,
+      "position": "FW",
+      "nationalityHe": "גאנה",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "רון תלמי",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 38,
+      "position": "FW",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "דניאל דאפה",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 44,
+      "position": "FW",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "עומרי אלטמן",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 51,
+      "position": "FW",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "ישי ברוש",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 66,
+      "position": "MF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "עופר גלברד",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 92,
+      "position": "DF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "מרקוס קוקו",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 97,
+      "position": "DF",
+      "nationalityHe": "צרפת",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "לוקאס פלקאו",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": 98,
+      "position": "MF",
+      "nationalityHe": "ברזיל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    },
+    {
+      "personName": "איתי שביט",
+      "seasonLabel": "2026/27",
+      "clubSlug": "הפועל-תל-אביב",
+      "shirtNumber": null,
+      "position": "MF",
+      "nationalityHe": "ישראל",
+      "confidence": 2,
+      "sourceUrl": null,
+      "sourceTitle": "ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה)"
+    }
+  ]
 }

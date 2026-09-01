@@ -18,12 +18,41 @@ const config: Config = {
         sign: 'rgb(var(--sign) / <alpha-value>)',
         muted: 'rgb(var(--muted) / <alpha-value>)',
         'lamp-off': 'rgb(var(--lamp-off) / <alpha-value>)',
+
+        /* שכבת הדפוס — the DUBID press layer. Scoped to the game surfaces:
+           the pitch, the drawn player, the kit plates and the share cards. */
+        press: {
+          paper: 'rgb(var(--p-paper) / <alpha-value>)',
+          paperDeep: 'rgb(var(--p-paper-deep) / <alpha-value>)',
+          card: 'rgb(var(--p-card) / <alpha-value>)',
+          ink: 'rgb(var(--p-ink) / <alpha-value>)',
+          red: 'rgb(var(--p-red) / <alpha-value>)',
+          redDeep: 'rgb(var(--p-red-deep) / <alpha-value>)',
+          grass: 'rgb(var(--p-grass) / <alpha-value>)',
+          grassDark: 'rgb(var(--p-grass-dark) / <alpha-value>)',
+          line: 'rgb(var(--p-line) / <alpha-value>)',
+          halo: 'rgb(var(--p-halo) / <alpha-value>)',
+          disc: 'rgb(var(--p-disc) / <alpha-value>)',
+        },
+        night: {
+          paper: 'rgb(var(--n-paper) / <alpha-value>)',
+          paperDeep: 'rgb(var(--n-paper-deep) / <alpha-value>)',
+          ink: 'rgb(var(--n-ink) / <alpha-value>)',
+          inkDim: 'rgb(var(--n-ink-dim) / <alpha-value>)',
+          inkFaint: 'rgb(var(--n-ink-faint) / <alpha-value>)',
+          rule: 'rgb(var(--n-rule) / <alpha-value>)',
+          accent: 'rgb(var(--n-accent) / <alpha-value>)',
+          red: 'rgb(var(--n-red) / <alpha-value>)',
+          grass: 'rgb(var(--n-grass) / <alpha-value>)',
+        },
       },
       fontFamily: {
         display: ['var(--font-frank)', 'Georgia', 'serif'],
         sign: ['var(--font-miriam)', 'system-ui', 'sans-serif'],
         body: ['var(--font-heebo)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-courier)', 'ui-monospace', 'monospace'],
+        // Figures only — shirt numbers, scores, counts. No Hebrew in this face.
+        poster: ['var(--font-poster)', 'Archivo', 'ui-monospace', 'monospace'],
       },
       // Fluid scale. Hebrew needs more body size than Latin to read comfortably, so
       // step-0 starts at 17px on a phone; the display steps grow faster than the body

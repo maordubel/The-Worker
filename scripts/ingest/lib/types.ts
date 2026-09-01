@@ -106,6 +106,40 @@ export type StagedSquadMembership = Fact & {
   goals: number | null
 }
 
+export type StagedShirtNumberHolding = Fact & {
+  naturalKey: string
+  shirtNumber: number
+  seasonLabel: string
+  personSlug: string
+  personNameHe: string
+  clubSlug: string
+  sport: Sport
+  noteHe: string | null
+}
+
+export type StagedSponsorYear = Fact & {
+  naturalKey: string
+  /** exactly as the source writes it — "1998" or "2017/18", never normalised */
+  yearLabelRaw: string
+  /** true when the label is a bare year and therefore not a season */
+  seasonAmbiguous: boolean
+  mainSponsorHe: string
+  additionalSponsorsHe: string[]
+  manufacturerHe: string | null
+  sport: Sport
+  noteHe: string | null
+}
+
+export type StagedFanCulture = Fact & {
+  slug: string
+  titleHe: string
+  category: 'chant' | 'song' | 'superstition' | 'derby' | 'gate' | 'travel' | 'choreography' | 'fence'
+  descriptionHe: string
+  periodHe: string | null
+  locationHe: string | null
+  sport: Sport
+}
+
 export type StagedMatch = Fact & {
   /** `season|competition|home|away|stage` — the loader's idempotency key. */
   naturalKey: string
@@ -119,6 +153,12 @@ export type StagedMatch = Fact & {
   venueSlug: string | null
   homeScore: number | null
   awayScore: number | null
+  attendance: number | null
+  /** the source contradicts itself on the gate — both values stay, neither is chosen */
+  attendanceDisputed: boolean
+  /** away supporters who travelled, when a source counts them */
+  travellingSupporters: number | null
+  noteHe: string | null
   status: 'played' | 'abandoned' | 'postponed' | 'awarded' | 'unknown'
   wikiPage: string | null
 }
@@ -229,6 +269,9 @@ export type StagedFanGroup = Fact & {
 export type StagedSong = Fact & {
   slug: string
   titleHe: string
+  /** never one undifferentiated table of songs */
+  songType: 'terrace_song' | 'player_song' | 'club_song' | 'derby_song' | 'historical'
+  personNameHe: string | null
   sport: Sport
   fanGroupSlug: string | null
   seasonLabel: string | null
@@ -387,6 +430,9 @@ export type StagedBundle = {
   elections: StagedElection[]
   electionCandidates: StagedElectionCandidate[]
   membershipMilestones: StagedMembershipMilestone[]
+  shirtNumbers: StagedShirtNumberHolding[]
+  sponsorYears: StagedSponsorYear[]
+  fanCulture: StagedFanCulture[]
   factConflicts: StagedFactConflict[]
 }
 
@@ -416,6 +462,9 @@ export const BUNDLE_KEYS = [
   'elections',
   'electionCandidates',
   'membershipMilestones',
+  'shirtNumbers',
+  'sponsorYears',
+  'fanCulture',
   'factConflicts',
 ] as const satisfies ReadonlyArray<keyof StagedBundle>
 
@@ -448,6 +497,9 @@ export function emptyBundle(): StagedBundle {
     elections: [],
     electionCandidates: [],
     membershipMilestones: [],
+    shirtNumbers: [],
+    sponsorYears: [],
+    fanCulture: [],
     factConflicts: [],
   }
 }

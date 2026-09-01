@@ -1,0 +1,841 @@
+{
+  "note": "Historic shirt-number holders, one row per (number, season, player). The season is never dropped: a number belongs to a season, not to a player. A season with two holders is recorded with both — a mid-season transfer is a real fact, and the question generator drops any (number, season) pair with more than one holder rather than choosing between them.",
+  "confidence": 2,
+  "source": {
+    "kind": "wiki",
+    "title": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+    "url": "https://wiki.red-fans.com/"
+  },
+  "records": [
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1977/78",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1978/79",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1979/80",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1980/81",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1981/82",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1982/83",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1983/84",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1984/85",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1984/85",
+      "personNameHe": "דב רמלר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1985/86",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1986/87",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1987/88",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1988/89",
+      "personNameHe": "שבתאי לוי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1990/91",
+      "personNameHe": "יוסי אבוקסיס",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1991/92",
+      "personNameHe": "חזי שירזי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1992/93",
+      "personNameHe": "איגור שקווירין",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1993/94",
+      "personNameHe": "קונסטנטין מרקו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "1993/94",
+      "personNameHe": "שגיב אליהו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2013/14",
+      "personNameHe": "רן יצחק",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2014/15",
+      "personNameHe": "רמזי ספורי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2015/16",
+      "personNameHe": "רמזי ספורי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2016/17",
+      "personNameHe": "ישראל זגורי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2016/17",
+      "personNameHe": "סער בנבנישתי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2017/18",
+      "personNameHe": "פדרו גלבאן",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2018/19",
+      "personNameHe": "ג'וזף גנדה",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2019/20",
+      "personNameHe": "מאור בוזגלו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2020/21",
+      "personNameHe": "ארמנדו קופר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2020/21",
+      "personNameHe": "דן איינבינדר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2021/22",
+      "personNameHe": "דן איינבינדר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2022/23",
+      "personNameHe": "דן איינבינדר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2023/24",
+      "personNameHe": "דן איינבינדר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2024/25",
+      "personNameHe": "סתיו טוריאל",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 11,
+      "seasonLabel": "2025/26",
+      "personNameHe": "סתיו טוריאל",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1968/69",
+      "personNameHe": "רוני קלדרון",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1980/81",
+      "personNameHe": "גבי לסרי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1984/85",
+      "personNameHe": "גבי לסרי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1985/86",
+      "personNameHe": "גבי לסרי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1987/88",
+      "personNameHe": "רפי שמואל",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1991/92",
+      "personNameHe": "פליקס חלפון",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1991/92",
+      "personNameHe": "חיים בכר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1993/94",
+      "personNameHe": "גל הרשליקוביץ",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1994/95",
+      "personNameHe": "תומר אליהו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1995/96",
+      "personNameHe": "תומר אליהו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1996/97",
+      "personNameHe": "תומר אליהו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1997/98",
+      "personNameHe": "סבסטיאן סימרוטיץ'",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1998/99",
+      "personNameHe": "פליקס חלפון",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "1999/00",
+      "personNameHe": "דניס אונישנקו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2000/01",
+      "personNameHe": "דניס אונישנקו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2001/02",
+      "personNameHe": "דניס אונישנקו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2002/03",
+      "personNameHe": "דניס אונישנקו",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2004/05",
+      "personNameHe": "ביסקוט אמבלה",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2005/06",
+      "personNameHe": "אוגנין לאקיץ'",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2006/07",
+      "personNameHe": "דני בונדר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2007/08",
+      "personNameHe": "ראובן עובד",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2008/09",
+      "personNameHe": "ראובן עובד",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2009/10",
+      "personNameHe": "ויקטור מרעי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2010/11",
+      "personNameHe": "ויקטור מרעי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2011/12",
+      "personNameHe": "עמרי עטיה",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2012/13",
+      "personNameHe": "טל בן חיים",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2013/14",
+      "personNameHe": "אוראל דגני",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2015/16",
+      "personNameHe": "ניר לקס",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2015/16",
+      "personNameHe": "ארון שוינפלד",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2016/17",
+      "personNameHe": "ארון שוינפלד",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2016/17",
+      "personNameHe": "ג'וזף גנדה",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2017/18",
+      "personNameHe": "ג'וזף גנדה",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2019/20",
+      "personNameHe": "פרנסיס קיירמה",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2019/20",
+      "personNameHe": "עמית מאיר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2020/21",
+      "personNameHe": "עמית מאיר",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 12,
+      "seasonLabel": "2022/23",
+      "personNameHe": "קייס גאנם",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2015/16",
+      "personNameHe": "בן רייכרט",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2016/17",
+      "personNameHe": "בן רייכרט",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2017/18",
+      "personNameHe": "שי אליאס",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2017/18",
+      "personNameHe": "אמיר עגייב",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2018/19",
+      "personNameHe": "אמיר עגייב",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2019/20",
+      "personNameHe": "רועי זיקרי",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2019/20",
+      "personNameHe": "דמבה קמארה",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2019/20",
+      "personNameHe": "מייקל אולהה",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2020/21",
+      "personNameHe": "שי אליאס",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2021/22",
+      "personNameHe": "שי אליאס",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2022/23",
+      "personNameHe": "אלן אוז'בולט",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2023/24",
+      "personNameHe": "אלן אוז'בולט",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2024/25",
+      "personNameHe": "מילאן מקאריץ'",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    },
+    {
+      "shirtNumber": 9,
+      "seasonLabel": "2025/26",
+      "personNameHe": "עמנואל בואטנג",
+      "clubSlug": "הפועל-תל-אביב",
+      "sport": "football",
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל"
+    }
+  ]
+}

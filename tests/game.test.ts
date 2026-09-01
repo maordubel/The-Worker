@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
-import { CONFIDENCE_FLOOR, archive } from '@/lib/game/archive'
+import { CONFIDENCE_FLOOR, archive, footballPeople } from '@/lib/game/archive'
+import {
+  EMPTY_RUN,
+  MAX_STREAK_BONUS,
+  applyAnswer,
+  decodeRun,
+  encodeRun,
+  lampsFor,
+  perfectScore,
+  rankFor,
+} from '@/lib/game/score'
 import { buildBoard } from '@/lib/game/memory'
 import {
   OPTION_COUNT,
@@ -9,6 +19,7 @@ import {
   availableQuestionCount,
   deal,
   grade,
+  roundDifficulties,
 } from '@/lib/game/trivia'
 import { verifiedKitSeasons } from '@/lib/game/kits'
 import { dealKitChallenge, gradeKitChallenge, kitChallengeCount } from '@/lib/game/kitChallenge'
@@ -452,7 +463,176 @@ describe('the verified Chelsea XI', () => {
   })
 
   it('marks a keeper played outfield as the wrong line', () => {
-    const verdict = gradeLineup(2, { F1: 'שביט אלימלך' })
+    // Seed-agnostic: the archive now holds several XIs, so the test finds a round that
+    // actually contains this keeper rather than assuming which seed deals which match.
+    let seed = 1
+    while (seed < 200 && !(dealChallenge(seed)?.bank ?? []).includes('שביט אלימלך')) seed += 1
+    expect(seed, 'no dealt XI contains the keeper').toBeLessThan(200)
+
+    const verdict = gradeLineup(seed, { F1: 'שביט אלימלך' })
     expect(verdict?.slots.find((slot) => slot.slotId === 'F1')?.status).toBe('wrong_slot')
+  })
+})
+
+describe('the run — difficulty, streak and rank', () => {
+  it('ramps a round from easy to hard', () => {
+    for (const seed of [1, 5, 23]) {
+      const ladder = roundDifficulties(seed)
+      expect(ladder.length).toBe(ROUND_LENGTH)
+      // Non-decreasing: a round opens on what a casual fan knows and closes on what
+      // only the archive knows.
+      for (let index = 1; index < ladder.length; index += 1) {
+        expect(ladder[index], `seed ${seed} step ${index}`).toBeGreaterThanOrEqual(
+          ladder[index - 1] as number,
+        )
+      }
+      expect(new Set(ladder).size, `seed ${seed} is all one difficulty`).toBeGreaterThan(1)
+    }
+  })
+
+  it('pays more for a longer streak, and never punishes below zero', () => {
+    expect(lampsFor(3, 0)).toBe(3)
+    expect(lampsFor(3, 4)).toBe(7)
+    // The bonus caps, so a long round cannot run away with the score.
+    expect(lampsFor(3, 40)).toBe(lampsFor(3, MAX_STREAK_BONUS))
+
+    let run = EMPTY_RUN
+    run = applyAnswer(run, false, 5)
+    expect(run.lamps).toBe(0)
+    expect(run.streak).toBe(0)
+    expect(run.answered).toBe(1)
+  })
+
+  it('breaks the streak on a wrong answer but keeps the best', () => {
+    let run = EMPTY_RUN
+    run = applyAnswer(run, true, 2)
+    run = applyAnswer(run, true, 2)
+    run = applyAnswer(run, true, 2)
+    expect(run.streak).toBe(3)
+    run = applyAnswer(run, false, 4)
+    expect(run.streak).toBe(0)
+    expect(run.bestStreak).toBe(3)
+    expect(run.correct).toBe(3)
+  })
+
+  it('gives a perfect run the top rank and an empty one the bottom', () => {
+    const ladder = roundDifficulties(1)
+    const perfect = perfectScore(ladder)
+
+    let run = EMPTY_RUN
+    for (const difficulty of ladder) run = applyAnswer(run, true, difficulty)
+    expect(run.lamps).toBe(perfect)
+    expect(rankFor(run.lamps, perfect).key).toBe('rank.archivist')
+    expect(rankFor(0, perfect).key).toBe('rank.newcomer')
+  })
+
+  it('round-trips a run through the URL', () => {
+    const run = { lamps: 41, streak: 0, bestStreak: 6, correct: 8, answered: 10 }
+    const code = encodeRun(run, 55, 12)
+    const back = decodeRun(code)
+    expect(back?.seed).toBe(12)
+    expect(back?.perfect).toBe(55)
+    expect(back?.run.lamps).toBe(41)
+    expect(back?.run.bestStreak).toBe(6)
+    // Junk decodes to nothing rather than to a fabricated score.
+    expect(decodeRun('')).toBeNull()
+    expect(decodeRun('1-2-3')).toBeNull()
+    expect(decodeRun('a-b-c-d-e-f')).toBeNull()
+  })
+})
+
+describe('the all-time roster', () => {
+  it('holds every player the list names, football only', () => {
+    // 637 names went in. They exist so a player question draws its distractors from
+    // people who actually wore the shirt.
+    expect(footballPeople.length).toBeGreaterThan(600)
+  })
+
+  it('keeps two players of the same name apart', () => {
+    const names = archive.people.map((person) => person.fullNameHe)
+    expect(names).toContain('עומר פרץ (חלוץ)')
+    expect(names).toContain('עומר פרץ (קשר)')
+    expect(new Set(names).size).toBe(names.length)
+  })
+
+  it('never lets an Ussishkin name into a football distractor pool', () => {
+    const football = new Set(footballPeople.map((person) => person.fullNameHe))
+    for (const candidate of archive.electionCandidates) {
+      expect(football.has(candidate.personNameHe), candidate.personNameHe).toBe(false)
+    }
+  })
+})
+
+describe('the research-master corpus', () => {
+  it('holds the shirt-number archive with the season always attached', () => {
+    expect(archive.shirtNumbers.length).toBeGreaterThan(70)
+    for (const row of archive.shirtNumbers) {
+      expect(row.seasonLabel).toMatch(/^\d{4}\/\d{2}$/)
+      expect(row.shirtNumber).toBeGreaterThan(0)
+    }
+  })
+
+  it('never asks about a shirt two players wore in one season', () => {
+    // 1984/85 had both שבתאי לוי and דב רמלר in 11 — a real mid-season fact and a
+    // broken question.
+    const asked = new Set<string>()
+    for (let seed = 1; seed < 200; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (question?.template === 'shirt-number') asked.add(question.id)
+      }
+    }
+    expect(asked.has('shirt:11:1984/85')).toBe(false)
+    expect(asked.size).toBeGreaterThan(5)
+  })
+
+  it('keeps a bare-year sponsor label out of any season-phrased question', () => {
+    // "1998" is not a season. Every row that carries a bare year says so, and the
+    // question it feeds is phrased "בשנת", never "בעונת".
+    const bare = archive.sponsorYears.filter((row) => row.seasonAmbiguous)
+    expect(bare.length).toBeGreaterThan(15)
+    for (const row of bare) expect(row.yearLabelRaw).not.toContain('/')
+
+    for (let seed = 1; seed < 120; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (question?.template !== 'sponsor-year') continue
+        expect(question.prompt).toContain('בשנת')
+        expect(question.prompt).not.toContain('בעונת')
+      }
+    }
+  })
+
+  it('never asks about a gate the source disputes', () => {
+    // Parma at home: the page says 16,300 and the article text says 17,500.
+    const disputed = archive.matches.filter((row) => row.attendanceDisputed)
+    expect(disputed.length).toBeGreaterThan(0)
+    for (let seed = 1; seed < 150; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (question?.template !== 'attendance') continue
+        expect(question.id).not.toContain('שמינית גמר משחק 1')
+      }
+    }
+  })
+
+  it('plays four historic XIs and withholds the one the source cannot verify', () => {
+    expect(hasVerifiedLineup()).toBe(true)
+    const ids = new Set<string>()
+    for (let seed = 1; seed < 200; seed += 1) ids.add(dealChallenge(seed)?.matchId ?? '')
+    expect(ids).toContain('2001-02-uefa-qf-milan')
+    expect(ids).toContain('2010-11-ucl-po-salzburg-2')
+    // The source stamps VERIFY on one slot of the Stamford Bridge eleven.
+    expect(ids).not.toContain('2001-02-uefa-r2-chelsea-away')
+  })
+
+  it('separates songs by type and keeps unverified terrace titles below the floor', () => {
+    const types = new Set(archive.songs.map((row) => row.songType))
+    expect(types).toContain('player_song')
+    expect(types).toContain('terrace_song')
+    // A title with no melody and no season is archive material, not a question.
+    for (const row of archive.songs) {
+      if (row.songType === 'player_song') expect(row.personNameHe).toBeTruthy()
+    }
   })
 })

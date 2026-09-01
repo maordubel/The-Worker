@@ -280,6 +280,11 @@ export function parseMatchPage(
     competitionSlug: context.competitionSlug,
     stage,
     playedOn: playedOn ?? null,
+    // A wiki match page does not carry a gate count in a field the parser reads.
+    attendance: null,
+    attendanceDisputed: false,
+    travellingSupporters: null,
+    noteHe: null,
     // Never invent a kickoff time: an unconfirmed time stays unconfirmed.
     kickoffConfirmed: false,
     homeClubSlug: homeSlug,

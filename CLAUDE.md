@@ -17,11 +17,20 @@ Read `docs/00-architecture.md` before changing anything structural.
 6. **Only `(כדורגל)` content.** The source wiki also covers basketball — filter and
    assert it in every ingest report.
 7. **Hebrew names are matched through `entity_alias`, never fuzzily.**
-8. **Design tokens only.** The brand system is **אוסישקין — התיק, הקיר והמגדל**;
-   the authority is `brand/THE-WORKER-BRAND-SPEC.md`. Eight tokens, four faces, six
-   components. **No yellow anywhere. Radius 0** (a lamp is the only circle). **No
-   shadow** except `shadow-lamp` at night. No raw hex. The twenty-point acceptance
-   checklist runs as `tests/brand.test.ts` — it fails the build, not the review.
+8. **Design tokens only, in TWO scoped systems.**
+   - **The shell** is **אוסישקין — התיק, הקיר והמגדל** (`brand/THE-WORKER-BRAND-SPEC.md`):
+     eight tokens, five faces, radius 0, no shadow except `shadow-lamp`, **no yellow**.
+     It owns the wall, the sign plates, the file and every screen chrome.
+   - **The press layer** is the DUBID DNA — "a printed 90s sports page" — declared in
+     the marked block in `app/globals.css`. It owns the pitch, the drawn player, the kit
+     rack and the share cards, and ONLY those. A shell component reaching for a press
+     token is a defect.
+   **No yellow is ABSOLUTE and applies to both.** The DUBID palette rules in dim gold
+   and discs its numbers in mark yellow; neither is here. Cream carries the rules, red
+   carries the emphasis, and the press language survives intact — misregistration,
+   halftone, flat colour and the closing ink line never needed yellow.
+   Never a raw hex in a component. The acceptance checklist runs as
+   `tests/brand.test.ts` — it fails the build, not the review.
 9. **RTL-first.** Logical properties. Wrap mixed-direction runs in `<bdi>`.
 10. **No user-facing string in code.** Everything through `messages/he.json` + `t()`.
 
@@ -35,10 +44,15 @@ Read `docs/00-architecture.md` before changing anything structural.
 14. **Football and basketball never mix.** Every sport-bearing table carries `sport`,
     a trigger rejects a cross-sport match, and aliases are scoped by sport. The Hapoel
     Ussishkin chapter is basketball.
-15. **Always expand the research.** Project rule from Maor: never stop at the first
+15. **A question must have exactly one right answer, four real options, and no open
+    conflict behind it.** Questions are grouped by prompt and a prompt with two correct
+    answers is dropped whole; a template that cannot field three real distractors is
+    dropped rather than padded; a fact recorded in `fact-conflicts.json` with no
+    resolution is never asked. All three run in `tests/game.test.ts`.
+16. **Always expand the research.** Project rule from Maor: never stop at the first
     answer — bring sources and additional information. Verdicts and sources for the
     current data live in `docs/04-verified-research.md`.
-16. **Maor Harel, founder of Hapoel Ussishkin, appears only where a source names him.**
+17. **Maor Harel, founder of Hapoel Ussishkin, appears only where a source names him.**
     At most one such question per session, never as a distractor, never in football
     records. His role is stored as `association_role` rows with sources, like anyone
     else's. Do not distort history to personalise it — the Ussishkin story does not

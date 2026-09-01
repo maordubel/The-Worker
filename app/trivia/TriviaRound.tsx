@@ -7,7 +7,10 @@ import { AnswerRow } from '@/components/ui/AnswerRow'
 import { LampGrid } from '@/components/ui/LampGrid'
 import { PastedSheet } from '@/components/ui/PastedSheet'
 import { Stamp } from '@/components/ui/Stamp'
+import { Num } from '@/components/ui/Num'
 import { t } from '@/lib/i18n'
+import { applyAnswer, encodeRun, lampsFor, perfectScore, type RunState } from '@/lib/game/score'
+import type { Difficulty } from '@/lib/game/score'
 import type { TriviaQuestion, Verdict } from '@/lib/game/trivia'
 import { submitAnswer } from './actions'
 
@@ -15,13 +18,16 @@ export function TriviaRound({
   question,
   seed,
   index,
-  score,
+  run,
+  difficulties,
   total,
 }: {
   question: TriviaQuestion
   seed: number
   index: number
-  score: number
+  /** the run so far, carried through the URL so a refresh cannot rewrite history */
+  run: RunState
+  difficulties: Difficulty[]
   total: number
 }) {
   const router = useRouter()
@@ -29,6 +35,7 @@ export function TriviaRound({
   const [verdict, setVerdict] = useState<Verdict | null>(null)
   const [pending, startTransition] = useTransition()
   const letters = t('trivia.letters').split(',')
+  const perfect = perfectScore(difficulties)
 
   function choose(option: string) {
     if (verdict) return
@@ -38,31 +45,56 @@ export function TriviaRound({
     })
   }
 
+  const nextRun = verdict
+    ? applyAnswer(run, verdict.correct, verdict.difficulty)
+    : run
+
   function next() {
-    const nextScore = score + (verdict?.correct ? 1 : 0)
     const nextIndex = index + 1
+    const code = encodeRun(nextRun, perfect, seed)
     router.push(
-      nextIndex >= total
-        ? `/trivia/summary?seed=${seed}&score=${nextScore}&total=${total}`
-        : `/trivia?seed=${seed}&i=${nextIndex}&score=${nextScore}`,
+      nextIndex >= total ? `/trivia/summary?r=${code}` : `/trivia?seed=${seed}&i=${nextIndex}&r=${code}`,
     )
   }
 
   return (
     <>
-      <div className="mt-stack flex items-center justify-between">
-        <LampGrid
-          total={total}
-          on={index + (verdict ? 1 : 0)}
-          cols={total}
-          stagger
-          label={`${index + 1} ${t('trivia.of')} ${total}`}
-        />
-        <span className="font-mono text-step--1 tabular-nums text-muted">
-          <bdi>
-            {String(index + 1).padStart(2, '0')}/{total}
-          </bdi>
-        </span>
+      <div className="mt-stack flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <LampGrid
+            total={total}
+            on={index + (verdict ? 1 : 0)}
+            cols={total}
+            stagger
+            label={`${index + 1} ${t('trivia.of')} ${total}`}
+          />
+          <p className="mt-1 font-body text-[10px] tracking-widest text-muted">
+            <bdi dir="ltr">
+              {String(index + 1).padStart(2, '0')}/{total}
+            </bdi>{' '}
+            {/* Filled and empty are different GLYPHS, not the same glyph at two
+                opacities: a dimmed dot is hard to count at 10px and identical to a
+                screen reader. */}
+            · {t('trivia.difficulty')}{' '}
+            <span aria-label={`${question.difficulty} ${t('trivia.outOfFive')}`}>
+              {'●'.repeat(question.difficulty)}
+              {'○'.repeat(5 - question.difficulty)}
+            </span>
+          </p>
+        </div>
+
+        {/* The run, always visible. A score you cannot see while playing is not a stake. */}
+        <div className="shrink-0 text-end">
+          <p className="font-poster text-step-3 leading-none text-red">
+            <Num>{nextRun.lamps}</Num>
+          </p>
+          <p className="font-body text-[10px] tracking-widest text-muted">{t('score.lamps')}</p>
+          {nextRun.streak > 1 && (
+            <p className="mt-0.5 font-body text-[11px] font-extrabold text-ink">
+              {t('score.streak')} <Num>{nextRun.streak}</Num>
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="relative mt-stack">
@@ -116,6 +148,16 @@ export function TriviaRound({
           <p className="mt-1 font-mono text-step--1 tabular-nums text-muted">
             {verdict.explanation}
           </p>
+          {verdict.correct ? (
+            <p className="mt-1 font-body text-step--1 text-red">
+              +<Num>{lampsFor(verdict.difficulty, run.streak)}</Num> {t('score.lamps')}
+              {run.streak > 0 && ` · ${t('score.streakBonus')}`}
+            </p>
+          ) : (
+            run.streak > 0 && (
+              <p className="mt-1 font-body text-step--1 text-muted">{t('score.streakLost')}</p>
+            )
+          )}
           <button
             type="button"
             onClick={next}

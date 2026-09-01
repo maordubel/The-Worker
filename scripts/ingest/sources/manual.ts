@@ -135,6 +135,24 @@ const SPECS: FileSpec[] = [
     }),
   },
   {
+    // The all-time roster: names only, merged into `people` by slug. A curated record
+    // at higher confidence wins the merge and keeps its detail; the roster entry only
+    // ever adds a person who was otherwise missing.
+    file: 'players-roster.json',
+    entity: 'people',
+    map: (row, ctx) => ({
+      slug: str(row, 'slug') ?? slugify(req(row, 'fullNameHe')),
+      fullNameHe: req(row, 'fullNameHe'),
+      fullNameEn: null,
+      birthDate: null,
+      nationalities: [],
+      isYouthProduct: null,
+      wikiPage: null,
+      aliases: list(row, 'aliases').length > 0 ? list(row, 'aliases') : [req(row, 'fullNameHe')],
+      ...fact(row, ctx),
+    }),
+  },
+  {
     file: 'squads.json',
     entity: 'squadMemberships',
     map: (row, ctx) => ({
@@ -325,6 +343,8 @@ const SPECS: FileSpec[] = [
     map: (row, ctx) => ({
       slug: str(row, 'slug') ?? slugify(req(row, 'titleHe')),
       titleHe: req(row, 'titleHe'),
+      songType: (str(row, 'songType') ?? 'terrace_song') as 'terrace_song',
+      personNameHe: str(row, 'personNameHe'),
       sport: sport(row),
       fanGroupSlug: str(row, 'fanGroupSlug'),
       seasonLabel: season(row, 'seasonLabel'),
@@ -451,6 +471,54 @@ const SPECS: FileSpec[] = [
       happenedOn: str(row, 'happenedOn'),
       dateConfirmed: bool(row, 'dateConfirmed'),
       contextHe: str(row, 'contextHe'),
+      ...fact(row, ctx),
+    }),
+  },
+  {
+    file: 'shirt-numbers.json',
+    entity: 'shirtNumbers',
+    map: (row, ctx) => ({
+      naturalKey: [
+        String(num(row, 'shirtNumber')),
+        canonicalSeasonLabel(req(row, 'seasonLabel')).label,
+        req(row, 'personNameHe'),
+      ].join('|'),
+      shirtNumber: num(row, 'shirtNumber') ?? 0,
+      seasonLabel: canonicalSeasonLabel(req(row, 'seasonLabel')).label,
+      personSlug: str(row, 'personSlug') ?? slugify(req(row, 'personNameHe')),
+      personNameHe: req(row, 'personNameHe'),
+      clubSlug: req(row, 'clubSlug'),
+      sport: sport(row),
+      noteHe: str(row, 'noteHe'),
+      ...fact(row, ctx),
+    }),
+  },
+  {
+    file: 'sponsor-years.json',
+    entity: 'sponsorYears',
+    map: (row, ctx) => ({
+      naturalKey: [req(row, 'yearLabelRaw'), req(row, 'mainSponsorHe')].join('|'),
+      yearLabelRaw: req(row, 'yearLabelRaw'),
+      seasonAmbiguous: bool(row, 'seasonAmbiguous'),
+      mainSponsorHe: req(row, 'mainSponsorHe'),
+      additionalSponsorsHe: list(row, 'additionalSponsorsHe'),
+      manufacturerHe: str(row, 'manufacturerHe'),
+      sport: sport(row),
+      noteHe: str(row, 'noteHe'),
+      ...fact(row, ctx),
+    }),
+  },
+  {
+    file: 'fan-culture.json',
+    entity: 'fanCulture',
+    map: (row, ctx) => ({
+      slug: req(row, 'slug'),
+      titleHe: req(row, 'titleHe'),
+      category: req(row, 'category') as 'chant',
+      descriptionHe: req(row, 'descriptionHe'),
+      periodHe: str(row, 'periodHe'),
+      locationHe: str(row, 'locationHe'),
+      sport: sport(row),
       ...fact(row, ctx),
     }),
   },

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+import { PlayerFigure, inkOn } from '@/components/press/PlayerFigure'
 import { KitPreview } from '@/components/ui/KitPreview'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { KitCollar, KitComponent, KitPattern, KitSpec } from '@/lib/game/kits'
@@ -71,7 +72,25 @@ export function KitDesigner({
 
   return (
     <div className="mt-stack grid grid-cols-1 gap-stack md:grid-cols-[260px_1fr]">
-      <div className="flex justify-center border-rule border-ink bg-sheet p-3">
+      {/* The kit is worn, not swatched. Every change lands on the figure immediately,
+          so the thing being designed is the thing being looked at. */}
+      <div className="tex-paper flex flex-col items-center gap-2 border-rule border-ink p-3">
+        <PlayerFigure
+          kit={{
+            primary: resolve(spec.jersey.base),
+            secondary: resolve(spec.jersey.secondary),
+            trim: resolve(spec.jersey.accent),
+            pattern: spec.jersey.pattern,
+            collar: spec.collar,
+            longSleeve: spec.longSleeve,
+            shorts: resolve(spec.shorts.base),
+            socks: resolve(spec.socks.base),
+            ink: inkOn(resolve(spec.jersey.base)),
+          }}
+          number={spec.number}
+          size={190}
+          title={t('kit.preview')}
+        />
         <KitPreview
           jersey={resolved(spec.jersey)}
           shorts={resolved(spec.shorts)}

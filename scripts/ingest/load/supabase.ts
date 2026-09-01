@@ -450,6 +450,54 @@ async function loadGraph(
       })
       .filter(nonNull))
 
+  counts.shirt_number_holding = await upsert(db, 'shirt_number_holding', 'natural_key',
+    bundle.shirtNumbers
+      .map((row) => {
+        const seasonId = seasonIds.get(row.seasonLabel)
+        const clubId = clubIds.get(row.clubSlug)
+        if (!seasonId || !clubId) return null
+        return {
+          natural_key: row.naturalKey,
+          shirt_number: row.shirtNumber,
+          season_id: seasonId,
+          person_id: personIds.get(row.personSlug) ?? null,
+          person_name_he: row.personNameHe,
+          club_id: clubId,
+          sport: row.sport,
+          note_he: row.noteHe,
+          source_id: sourceIdFor(row.source.naturalKey),
+          confidence: row.confidence,
+        }
+      })
+      .filter(nonNull))
+
+  counts.sponsor_year = await upsert(db, 'sponsor_year', 'natural_key',
+    bundle.sponsorYears.map((row) => ({
+      natural_key: row.naturalKey,
+      year_label_raw: row.yearLabelRaw,
+      season_ambiguous: row.seasonAmbiguous,
+      main_sponsor_he: row.mainSponsorHe,
+      additional_sponsors_he: row.additionalSponsorsHe,
+      manufacturer_he: row.manufacturerHe,
+      sport: row.sport,
+      note_he: row.noteHe,
+      source_id: sourceIdFor(row.source.naturalKey),
+      confidence: row.confidence,
+    })))
+
+  counts.fan_culture = await upsert(db, 'fan_culture', 'slug',
+    bundle.fanCulture.map((row) => ({
+      slug: row.slug,
+      title_he: row.titleHe,
+      category: row.category,
+      description_he: row.descriptionHe,
+      period_he: row.periodHe,
+      location_he: row.locationHe,
+      sport: row.sport,
+      source_id: sourceIdFor(row.source.naturalKey),
+      confidence: row.confidence,
+    })))
+
   counts.election = await upsert(db, 'election', 'slug',
     bundle.elections
       .map((row) => {

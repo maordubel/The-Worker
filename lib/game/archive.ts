@@ -1,6 +1,10 @@
 import 'server-only'
 
 import clubsFile from '@/content/manual/clubs.json'
+import fanCultureFile from '@/content/manual/fan-culture.json'
+import shirtNumbersFile from '@/content/manual/shirt-numbers.json'
+import songsFile from '@/content/manual/songs.json'
+import sponsorYearsFile from '@/content/manual/sponsor-years.json'
 import conflictsFile from '@/content/manual/fact-conflicts.json'
 import competitionsFile from '@/content/manual/competitions.json'
 import crestsFile from '@/content/manual/crest-versions.json'
@@ -12,6 +16,7 @@ import manufacturersFile from '@/content/manual/manufacturers.json'
 import matchesFile from '@/content/manual/matches.json'
 import momentsFile from '@/content/manual/moments.json'
 import peopleFile from '@/content/manual/people.json'
+import rosterFile from '@/content/manual/players-roster.json'
 import rolesFile from '@/content/manual/association-roles.json'
 import sponsorDealsFile from '@/content/manual/sponsor-deals.json'
 import sponsorsFile from '@/content/manual/sponsors.json'
@@ -62,6 +67,12 @@ function load<T>(file: unknown): Array<T & Sourced> {
     .filter((record) => record.confidence >= CONFIDENCE_FLOOR) as Array<T & Sourced>
 }
 
+/** First list wins a slug; the second fills the gaps. */
+function mergeBySlug<T extends { slug: string }>(primary: T[], secondary: T[]): T[] {
+  const seen = new Set(primary.map((row) => row.slug))
+  return [...primary, ...secondary.filter((row) => !seen.has(row.slug))]
+}
+
 function plain<T>(file: unknown): T[] {
   return (file as RawFile).records as unknown as T[]
 }
@@ -76,7 +87,16 @@ export const archive = {
   }>(clubsFile),
   competitions: plain<{ slug: string; nameHe: string; sport?: string }>(competitionsFile),
   venues: load<{ slug: string; nameHe: string; sport?: string }>(venuesFile),
-  people: load<{ slug: string; fullNameHe: string }>(peopleFile),
+  /**
+   * The curated people plus the all-time roster, merged by slug the same way the
+   * importer merges them: a curated record wins, and the roster only ever contributes
+   * someone who was otherwise missing. Without this the game archive knew 20 players
+   * while the database knew 637.
+   */
+  people: mergeBySlug(
+    load<{ slug: string; fullNameHe: string }>(peopleFile),
+    load<{ slug: string; fullNameHe: string }>(rosterFile),
+  ),
   matches: load<{
     seasonLabel: string
     competitionSlug: string
@@ -86,6 +106,10 @@ export const archive = {
     awayClubSlug: string
     homeScore: number | null
     awayScore: number | null
+    attendance?: number | null
+    attendanceDisputed?: boolean
+    travellingSupporters?: number | null
+    noteHe?: string | null
     venueSlug: string | null
   }>(matchesFile),
   matchEvents: load<{
@@ -137,6 +161,38 @@ export const archive = {
     toDate?: string | null
     replacedByNameHe?: string | null
   }>(rolesFile),
+  shirtNumbers: load<{
+    shirtNumber: number
+    seasonLabel: string
+    personNameHe: string
+  }>(shirtNumbersFile),
+  sponsorYears: load<{
+    yearLabelRaw: string
+    seasonAmbiguous: boolean
+    mainSponsorHe: string
+    additionalSponsorsHe: string[]
+    manufacturerHe: string | null
+    noteHe?: string | null
+  }>(sponsorYearsFile),
+  songs: load<{
+    slug: string
+    titleHe: string
+    songType: string
+    personNameHe?: string | null
+    originalTitle?: string | null
+    originalArtist?: string | null
+    seasonLabel?: string | null
+    lyricsAuthorHe?: string | null
+    backgroundHe?: string | null
+  }>(songsFile),
+  fanCulture: load<{
+    slug: string
+    titleHe: string
+    category: string
+    descriptionHe: string
+    periodHe?: string | null
+    locationHe?: string | null
+  }>(fanCultureFile),
   elections: load<{
     slug: string
     titleHe: string

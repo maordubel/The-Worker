@@ -1,7 +1,8 @@
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { ROUND_LENGTH, deal } from '@/lib/game/trivia'
+import { EMPTY_RUN, decodeRun } from '@/lib/game/score'
+import { ROUND_LENGTH, deal, roundDifficulties } from '@/lib/game/trivia'
 import { t } from '@/lib/i18n'
 import { TriviaRound } from './TriviaRound'
 
@@ -9,12 +10,15 @@ import { TriviaRound } from './TriviaRound'
 export default function TriviaPage({
   searchParams,
 }: {
-  searchParams: { seed?: string; i?: string; score?: string }
+  searchParams: { seed?: string; i?: string; r?: string }
 }) {
   const seed = Number(searchParams.seed) || 1
   const index = Number(searchParams.i) || 0
-  const score = Number(searchParams.score) || 0
+  // The run travels in the URL, so a back button rewinds the score with the question
+  // instead of leaving the two out of step.
+  const run = decodeRun(searchParams.r ?? '')?.run ?? EMPTY_RUN
   const question = deal(seed, index)
+  const difficulties = roundDifficulties(seed)
 
   return (
     <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')}>
@@ -30,7 +34,8 @@ export default function TriviaPage({
             question={question}
             seed={seed}
             index={index}
-            score={score}
+            run={run}
+            difficulties={difficulties}
             total={ROUND_LENGTH}
           />
           <ReportLink />

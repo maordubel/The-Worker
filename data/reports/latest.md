@@ -1,33 +1,33 @@
 # Ingestion report — all (dry-run)
 
-Started 2026-08-31T16:32:54.152Z · status **OK**
+Started 2026-09-01T06:30:46.139Z · status **OK**
 
 ## Totals
 
 | Metric | Count |
 |---|---:|
-| discovered | 322 |
-| imported | 322 |
+| discovered | 1141 |
+| imported | 1124 |
 | skipped | 0 |
 | rejected | 0 |
 | unresolved | 0 |
 | conflicts | 0 |
-| lowConfidence | 134 |
-| duplicatesMerged | 0 |
-| sources | 26 |
+| lowConfidence | 140 |
+| duplicatesMerged | 17 |
+| sources | 30 |
 
 ## Discovered
 
 | Source unit | Count |
 |---|---|
-| manual:clubs | 10 |
+| manual:clubs | 15 |
 | manual:venues | 5 |
 | manual:competitions | 11 |
 | manual:eras | 6 |
-| manual:people | 28 |
-| manual:squadMemberships | 0 |
-| manual:matches | 12 |
-| manual:matchEvents | 7 |
+| manual:people | 665 |
+| manual:squadMemberships | 27 |
+| manual:matches | 21 |
+| manual:matchEvents | 15 |
 | manual:trophies | 32 |
 | manual:moments | 5 |
 | manual:sponsors | 7 |
@@ -36,7 +36,7 @@ Started 2026-08-31T16:32:54.152Z · status **OK**
 | manual:kitSupplySpells | 16 |
 | manual:crestVersions | 9 |
 | manual:fanGroups | 1 |
-| manual:songs | 0 |
+| manual:songs | 18 |
 | manual:quotes | 1 |
 | manual:associations | 1 |
 | manual:associationEvents | 6 |
@@ -44,6 +44,9 @@ Started 2026-08-31T16:32:54.152Z · status **OK**
 | manual:elections | 2 |
 | manual:electionCandidates | 21 |
 | manual:membershipMilestones | 1 |
+| manual:shirtNumbers | 83 |
+| manual:sponsorYears | 23 |
+| manual:fanCulture | 9 |
 | manual:factConflicts | 15 |
 | manual:seasons | 104 |
 
@@ -52,14 +55,14 @@ Started 2026-08-31T16:32:54.152Z · status **OK**
 | Entity | Rows |
 |---|---|
 | eras | 6 |
-| clubs | 10 |
+| clubs | 15 |
 | venues | 5 |
 | competitions | 11 |
 | seasons | 104 |
-| people | 28 |
-| squadMemberships | 0 |
-| matches | 12 |
-| matchEvents | 7 |
+| people | 648 |
+| squadMemberships | 27 |
+| matches | 21 |
+| matchEvents | 15 |
 | trophies | 32 |
 | moments | 5 |
 | sponsors | 7 |
@@ -68,11 +71,14 @@ Started 2026-08-31T16:32:54.152Z · status **OK**
 | kitSupplySpells | 16 |
 | crestVersions | 9 |
 | fanGroups | 1 |
-| songs | 0 |
+| songs | 18 |
 | quotes | 1 |
 | associations | 1 |
 | associationEvents | 6 |
 | associationRoles | 8 |
+| shirtNumbers | 83 |
+| sponsorYears | 23 |
+| fanCulture | 9 |
 | elections | 2 |
 | electionCandidates | 21 |
 | membershipMilestones | 1 |
@@ -82,14 +88,14 @@ Started 2026-08-31T16:32:54.152Z · status **OK**
 
 | Entity | Field | Present | Total | % |
 |---|---|---|---|---|
-| people | birthDate | 0 | 28 | 0% |
-| people | nationalities | 0 | 28 | 0% |
-| squadMemberships | shirtNumber | 0 | 0 | — |
-| squadMemberships | position | 0 | 0 | — |
-| matches | playedOn | 12 | 12 | 100% |
-| matches | score | 12 | 12 | 100% |
+| people | birthDate | 0 | 648 | 0% |
+| people | nationalities | 0 | 648 | 0% |
+| squadMemberships | shirtNumber | 26 | 27 | 96% |
+| squadMemberships | position | 27 | 27 | 100% |
+| matches | playedOn | 21 | 21 | 100% |
+| matches | score | 21 | 21 | 100% |
 | seasons | eraSlug | 0 | 104 | 0% |
-| songs | originalTitle | 0 | 0 | — |
+| songs | originalTitle | 10 | 18 | 56% |
 | associationEvents | dateConfirmed | 3 | 6 | 50% |
 | sponsorDeals | fromLabel | 6 | 7 | 86% |
 
@@ -225,8 +231,6 @@ _none_
 | seasons | 2024/25 | 0 |
 | seasons | 2025/26 | 0 |
 | seasons | 2026/27 | 0 |
-| people | אסי-דומב | 1 |
-| people | מילאן-אוסטרץ | 1 |
 | people | נועה-סקלי | 1 |
 | people | יונתן-לרנר | 1 |
 | people | רמי-כהן | 1 |
@@ -239,6 +243,14 @@ _none_
 | matchEvents | 2001/02\|גביע-אופא\|הפועל-תל-אביב\|לוקומוטיב-מוסקבה\|סיבוב 3 משחק 1#1 | 1 |
 | trophies | גביע-אלופות-אסיה\|1967/68\|הפועל-תל-אביב | 1 |
 | sponsorDeals | הפועל-תל-אביב\|football\|ניו-דרייב\|front\|\|all | 1 |
+| songs | אדום-עולה-בבלומפילד | 1 |
+| songs | אדום-עולה-עולה | 1 |
+| songs | אדומה-לא-תצעדי-לבד | 1 |
+| songs | אדומה-שלי | 1 |
+| songs | אהבה-בת-מאה-—-שיר-המאה-של-הפועל-תל-אביב | 1 |
+| songs | אמרו-לו | 1 |
+| songs | גם-כשאת-מגמגמת | 1 |
+| songs | היה-לנו-טוב-נהיה-לנו-רע | 1 |
 | quotes | מאור הראל\|אין לי יותר כוח להמשיך ולתרום | 1 |
 | associationEvents | הפועל-אוסישקין\|election\|ארז זייצ'יק נבחר למקום שהתפנה | 1 |
 | associationRoles | הפועל-אוסישקין\|נועה סקלי\|יו"ר ראשונה\| | 1 |
@@ -257,7 +269,8 @@ _none_
 | manual:competitions.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:eras.json | manual | Proposed era taxonomy (awaiting confirmation) | — | — | — |
 | manual:people.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
-| manual:squads.json | manual | Squad data — pending | — | — | — |
+| manual:players-roster.json | wiki | ויקיפועל — קטגוריה: שחקני הפועל תל אביב (כדורגל), נמסר ע"י מאור הראל | https://wiki.red-fans.com/index.php?title=%D7%A7%D7%98%D7%92%D7%95%D7%A8%D7%99%D7%94:%D7%94%D7%A4%D7%95%D7%A2%D7%9C_%D7%AA%D7%9C_%D7%90%D7%91%D7%99%D7%91_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C) | — | — |
+| manual:squads.json | other | ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה) | — | — | — |
 | manual:matches.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:match-events.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:trophies.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
@@ -268,7 +281,7 @@ _none_
 | manual:kit-supply.json | other | Football Kit Archive — Hapoel Tel Aviv kit history | https://www.footballkitarchive.com/hapoel-tel-aviv-kits/ | — | — |
 | manual:crest-versions.json | official | הפועל תל אביב — היסטוריה והישגים | https://www.htafc.co.il/היסטוריה-והישגים/ | — | — |
 | manual:fan-groups.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
-| manual:songs.json | manual | Song archive — pending verification | — | — | — |
+| manual:songs.json | wiki | ויקיפועל — קטגוריות השירים, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
 | manual:quotes.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:associations.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:association-events.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
@@ -276,6 +289,9 @@ _none_
 | manual:elections.json | official | אתר עמותת הפועל אוסישקין — מצעי המועמדים ותוצאות הבחירות | http://www.hapoeluta.com/ | — | — |
 | manual:election-candidates.json | official | אתר עמותת הפועל אוסישקין — מצעי המועמדים ותוצאות הבחירות | http://www.hapoeluta.com/ | — | — |
 | manual:membership-milestones.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
+| manual:shirt-numbers.json | wiki | ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
+| manual:sponsor-years.json | wiki | ויקיפועל — עמוד "ספונסר", דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
+| manual:fan-culture.json | wiki | ויקיפועל — מילון בלומפילד ופגישות גדר, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
 | manual:fact-conflicts.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:seasons.json | manual | Season calendar scaffold | — | — | — |
 
@@ -286,9 +302,10 @@ _none_
 - competitions.json: Competition names and types. Participation is a season-level fact and is asserted only through trophies and matches, never here.
 - eras.json: PROPOSED product taxonomy for navigation and progression — not a historical claim. Names and boundaries await Maor's answers to docs/02-data-questions.md section 1. Loaded at confidence 0 so nothing here can reach question generation.
 - people.json: Only people named in a verified source. The 2001/02 Chelsea XI and bench were supplied by Maor Harel from the Red Fans wiki match report and carry confidence 3.
-- squads.json: EMPTY BY DESIGN. Per-season squads and shirt numbers need the Red Fans squad categories, which are still behind bot protection. Fill from Maor with confidence 3, or from the wiki once access is granted.
-- matches.json: Every match here was verified against a named source this session. The 2001/02 UEFA Cup run is complete from the second round onwards; the first-round opponent could not be resolved and is therefore absent rather than guessed. Kickoff times are never asserted — only dates.
-- match-events.json: Only goals a named source attributes to a named scorer with a minute.
+- players-roster.json: The all-time Hapoel Tel Aviv football roster as the Red Fans wiki category lists it, supplied by Maor Harel. Names only — no season, position, shirt number or appearance count, because the list carries none and inventing them would be a claim no source makes. These records exist so that every player question draws its distractors from people who actually wore the shirt. A bracketed qualifier (חלוץ / קשר / כדורגלן) is disambiguation between two people of the same name and is kept out of the display alias. Where two players reduce to the same bare name, neither record claims the bare name as an alias — an ambiguous alias is refused by the importer rather than assigned by guesswork.
+- squads.json: The current 2026/27 squad from the project's working spreadsheet. This is game-design/current-season data, NOT club history, and it is loaded as an ordinary season squad so that nothing downstream has to know the difference — except that its source names it as working data. Names are stored as the spreadsheet writes them; where a spelling differs from the all-time roster the importer's alias check reports it rather than merging by guess. The separate ranking/market-value sheet is deliberately NOT imported: a modern valuation is not a historical fact.
+- matches.json: Every match here was verified against a named source this session. The 2001/02 UEFA Cup run is complete from the second round onwards; the first-round opponent could not be resolved and is therefore absent rather than guessed. Kickoff times are never asserted — only dates. Attendance and travelling-supporter counts come from the Vikipoel match pages via Maor's research master. Where the source disagrees with itself the value is flagged, not chosen.
+- match-events.json: Only goals a named source attributes to a named scorer with a minute. Goals without a documented minute keep minute null rather than an invented one.
 - trophies.json: 13 championships is the IFA/club count; FIFA and UEFA recognise 12, because the abandoned 1934/35 and 1937/38 seasons are not universally counted — recorded as an open conflict rather than resolved here. Pre-state cups are named by bare year in the sources; the canonicaliser renders them YYYY/YY. The research document's claim of a 2025 Toto Cup WIN is wrong and is entered here as the runner-up place it actually was.
 - moments.json: Story units. Each one is anchored to a verified match, date or event.
 - sponsors.json: Shirt sponsors that a source actually shows on the shirt.
@@ -297,7 +314,7 @@ _none_
 - kit-supply.json: Supply spells, from Football Kit Archive season entries. Seasons FKA does not cover (1981/82, 2003/04) are gaps, not claims. Nike appears in three separate spells — that is the fact the kit game is built on. Pre-1980 kits carry no branded maker in FKA; 'self-produced' is an inference and is deliberately absent.
 - crest-versions.json: Stages as the club's own history page tells them. Football Kit Archive omits the 2008-2015 stage and the centenary stage — recorded as a conflict, not silently merged. The May 2023 design that removed the hammer and sickle was made for a US tournament to gauge reaction and was never an official crest; it is not listed here.
 - fan-groups.json: Supporter organisations with a sourced founding.
-- songs.json: EMPTY BY DESIGN. The research document lists melodies and seasons for several chants (Suavemente, Enola Gay, Fito Paez, Aviv Geffen, Attaque 77). None could be verified against a citable source this pass, and an unverified melody attribution is exactly the kind of fact that would embarrass the game. Fill from the Red Fans song archive once access is granted, or from Maor with confidence 3.
+- songs.json: Songs by type — never one undifferentiated table. A player song carries the player and the melody it borrows, which is what makes 'לאיזה שחקן הוקדש Creep?' answerable. Terrace titles the source names but does not describe are stored at confidence 1: they are in the archive and below the floor, so they cannot become questions until a melody or a season is attached. Lyrics are not stored — metadata only, per the copyright rule.
 - quotes.json: Quotes reproduced from the reporting that carries them.
 - associations.json: The supporter-owned association behind the basketball club.
 - association-events.json: The fan-ownership story as documented. Dates are marked confirmed only where a source gives the day. The research document's 25 June 2007 registration date, the fifth game of 14 November 2007, the 2008 election vote counts, the separate 413/10/18 association vote and the 2015 founders' ceremony could NOT be sourced and are absent.
@@ -305,6 +322,9 @@ _none_
 - elections.json: The first Hapoel Ussishkin association elections, from the association's own website as Maor supplied it: the double-envelope method, the full candidate list with the occupation each candidate declared, and the vote count for every candidate in both bodies. Two things in the source disagree with themselves and are recorded as conflicts rather than tidied: the envelope dates (July 2007 vs August 2008 in one sentence) and two names spelled differently in the candidate list and in the results. Turnout figures are given in the source as approximations and are stored as stated.
 - election-candidates.json: Every candidate in both bodies, with the vote count the association published and the occupation each candidate declared in their own manifesto. Names are stored exactly as the candidate list gives them; where the results table spells a name differently, the difference is a recorded conflict, not a silent correction.
 - membership-milestones.json: Arik Einstein as member #1,000 is attested by a founder in a Sport5 interview. The research document's January 2010 date is NOT sourced — and Walla reported Einstein joining in August 2007 — so the date is left unconfirmed rather than picked.
+- shirt-numbers.json: Historic shirt-number holders, one row per (number, season, player). The season is never dropped: a number belongs to a season, not to a player. A season with two holders is recorded with both — a mid-season transfer is a real fact, and the question generator drops any (number, season) pair with more than one holder rather than choosing between them.
+- sponsor-years.json: The full sponsor and manufacturer chronology from the Vikipoel 'ספונסר' page, including secondary sponsors, Europe-only deals and part-season deals. Most rows are labelled with a bare year ('1998'), which is NOT a season label — it could mean 1997/98 or 1998/99, and the source does not say. Those rows carry seasonAmbiguous: true, are stored with the raw label, and are never joined to a season. They feed questions phrased by year; the season-keyed sponsor_deal table is unchanged and still owns anything asked by season.
+- fan-culture.json: Supporter culture from the Bloomfield dictionary: chants, gate customs, fence meetings and superstition. Stored as folklore, deliberately separate from match statistics — a chant is not a fact about a football match. The source also indexes sensitive song categories (שירי שואה, שירי משטרה); their existence is noted in the research document and none of that material is imported as gameplay content.
 - fact-conflicts.json: Sources disagree. Recorded and displayed, never resolved by quietly picking one. The last five come from the kit-engine spec, which contradicts the verified kit archive — the spec drives the ENGINE, not the facts. Four further conflicts come from the association's own election page — two of them are the source disagreeing with itself.
 - seasons.json: Calendar scaffold. A season label is arithmetic, not a claim that the club competed that season. A source that names a bare year (pre-state cups) is rendered YYYY/YY by the canonicaliser — a labelling convention, documented, not a claim about the calendar.
 - seasons: generated 104 calendar labels 1923/24–2026/27. A label is a calendar scaffold, not a claim that the club competed that season.

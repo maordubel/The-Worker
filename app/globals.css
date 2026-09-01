@@ -33,6 +33,141 @@
 
 @media (min-width: 768px) { :root { --gutter: 40px; --stack: 24px; } }
 
+/* ============================================================================
+   שכבת הדפוס — the DUBID press layer
+   ----------------------------------------------------------------------------
+   A SECOND, SCOPED token set, taken verbatim from the DUBID design DNA:
+   "a printed 90s sports page". It governs the game surfaces only — the pitch,
+   the drawn player, the kit plates, the share cards — and never the shell.
+   The Ussishkin identity above still owns the wall, the sign plates and the file.
+
+   **NO YELLOW.** Rule 8 is absolute and it applies here too. The DUBID palette
+   rules in dim gold and discs its numbers in a bright mark yellow; both are yellow,
+   so both are out. The structure of the press language — misregistration, halftone, flat
+   colour, dot leaders, the ink line closing every printed surface — is what makes
+   it read as print, and none of it depends on yellow. Cream carries the rules and
+   red carries the emphasis.
+
+   Everything here is flat colour. Print cannot fade, so nothing printed carries a
+   gradient; gradients exist only for light (floodlight wash, wood).
+   ========================================================================== */
+:root {
+  /* 1א · PRESS — light paper */
+  --p-paper: 239 231 213;      /* #EFE7D5 yellowed newsprint — never white */
+  --p-paper-deep: 226 216 194; /* #E2D8C2 */
+  --p-card: 246 243 234;       /* #F6F3EA */
+  --p-ink: 18 16 14;           /* #12100E brown-black. Pure black does not exist in print */
+  --p-red: 217 59 59;          /* #D93B3B */
+  --p-red-deep: 178 42 42;     /* #B22A2A */
+  --p-grass: 143 190 99;       /* #8FBE63 printed grass, light screen */
+  --p-grass-dark: 125 174 82;  /* #7DAE52 mowing stripes */
+  --p-dot: 63 107 44;          /* #3F6B2C the halftone dots on the grass */
+  --p-line: 247 244 236;       /* #F7F4EC chalk — not pure white */
+  --p-halo: 239 243 230;       /* #EFF3E6 readability halo behind a name on grass */
+  --p-net: 232 234 217;        /* goal net, used at .72 alpha */
+  --p-net-line: 154 163 154;   /* #9AA39A net threads — grey-green, not ink */
+  --p-disc: 18 16 14;          /* #12100E number disc — ink. NO YELLOW (rule 8) */
+
+  /* 1ב · NIGHT_PRESS — the same paper, printed dark */
+  --n-paper: 16 13 10;         /* #100D0A warm dark. Never #000 — that reads as a screen */
+  --n-paper-deep: 11 9 7;      /* #0B0907 */
+  --n-ink: 237 228 206;        /* #EDE4CE cream, not white */
+  --n-ink-dim: 191 180 154;    /* #BFB49A */
+  --n-ink-faint: 138 128 105;  /* #8A8069 */
+  /* The DUBID night palette rules in dim gold. Gold is yellow, and yellow is
+     forbidden outright — so the rules are the same VALUE in cream instead. The
+     structure of the press language survives; its yellow does not. */
+  --n-rule: 237 228 206;       /* #EDE4CE cream, used at low alpha as a rule */
+  --n-accent: 196 52 47;       /* #C4342F the press red, for emphasis */
+  --n-red: 196 52 47;          /* #C4342F */
+  --n-red-light: 224 87 79;    /* #E0574F */
+  --n-grass: 43 48 38;         /* #2B3026 grass in negative — the dots light it */
+  --n-grass-dark: 26 33 22;    /* #1A2116 */
+
+  /* 1ג · fixed helper colours for the drawn figure */
+  --p-skin: 176 122 90;        /* #B07A5A drawn skin, kept clear of the yellow band */
+  --p-hair: 43 33 26;          /* #2B211A */
+  --p-tekhelet: 47 111 168;    /* #2F6FA8 vice-captain disc */
+}
+
+/* 2 · plate misregistration — the detail that sells the whole thing.
+   Cheap colour printing never aligned its plates, so every headline picked up a
+   red lip on one side and a blue one on the other. Must stay 0.7px: at two
+   pixels it stops reading as print and starts reading as a rendering bug. */
+.misregister {
+  text-shadow: 0.7px 0 0 rgba(196, 52, 47, 0.55), -0.7px 0 0 rgba(80, 150, 190, 0.3);
+}
+
+/* 5א · halftone — two radial layers offset by half a step make a real
+   interleaved screen rather than a dot grid. The most important texture here. */
+.halftone {
+  background-image:
+    radial-gradient(rgb(var(--p-dot)) 0.9px, transparent 1px),
+    radial-gradient(rgb(var(--p-dot)) 0.9px, transparent 1px);
+  background-size: 7px 7px, 7px 7px;
+  background-position: 0 0, 3.5px 3.5px;
+  opacity: 0.34;
+}
+
+/* 5ג · paper grain */
+.tex-paper {
+  background-color: rgb(var(--p-paper));
+  background-image:
+    radial-gradient(rgba(20, 24, 28, 0.045) 0.6px, transparent 0.7px),
+    radial-gradient(rgba(20, 24, 28, 0.03) 0.6px, transparent 0.7px);
+  background-size: 7px 7px, 11px 11px;
+  background-position: 0 0, 3px 4px;
+}
+
+.tex-paper-night {
+  background-color: rgb(var(--n-paper));
+  background-image:
+    radial-gradient(rgba(237, 228, 206, 0.1) 0.6px, transparent 0.7px),
+    radial-gradient(rgba(237, 228, 206, 0.06) 0.6px, transparent 0.7px);
+  background-size: 7px 7px, 11px 11px;
+  background-position: 0 0, 3px 4px;
+}
+
+/* 5ד · the spotlight behind a hero */
+.tex-spot {
+  background-image: radial-gradient(78% 52% at 50% 34%, rgba(237, 228, 206, 0.1), transparent 70%);
+}
+
+/* 4 · newspaper rules. On dark paper a separator is dim gold — never white or grey. */
+.press-rule-double {
+  border-top: 3px solid rgb(var(--n-rule) / 0.5);
+  border-bottom: 1px solid rgb(var(--n-rule) / 0.28);
+  height: 4px;
+}
+.press-rule-hair { border-top: 1px solid rgb(var(--n-rule) / 0.28); }
+.press-box { border: 3px double rgb(var(--n-rule) / 0.5); }
+
+/* the folio line beside a section head */
+.press-folio {
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+  color: rgb(var(--n-ink-faint));
+  white-space: nowrap;
+}
+.press-spaced { letter-spacing: 4px; }
+
+/* dot leaders — «label ····· value», straight off a results table */
+.press-lead {
+  flex: 1 1 auto;
+  min-width: 12px;
+  border-bottom: 1px dotted rgb(var(--n-rule) / 0.3);
+  transform: translateY(-3px);
+}
+
+/* 3 · numbers never reorder and never dance */
+.num {
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+
+
 html {
   /* iOS: stop Safari inflating text in landscape, and kill the grey tap flash. */
   -webkit-text-size-adjust: 100%;

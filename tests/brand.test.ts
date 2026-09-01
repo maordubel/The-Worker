@@ -50,21 +50,63 @@ describe('brand acceptance — colour', () => {
   })
 
   it('contains no yellow anywhere — the first absolute prohibition', () => {
+    // ABSOLUTE. It applies to the press layer too. The DUBID palette rules in dim
+    // gold (#D8B25C) and discs its numbers in #F5C518; both are yellow, so neither is
+    // here. Scoping this rule to "everywhere except the pictures" was overriding a
+    // decision that is not mine to make, and it is not scoped again.
     const css = readFileSync(TOKENS_FILE, 'utf8')
     const hexes = [...css.matchAll(/#([0-9a-fA-F]{6})/g)].map((match) => match[1] as string)
-    for (const hex of hexes) {
-      const r = parseInt(hex.slice(0, 2), 16)
-      const g = parseInt(hex.slice(2, 4), 16)
-      const b = parseInt(hex.slice(4, 6), 16)
-      // Yellow: red and green both high, blue clearly lower.
-      const isYellow = r > 150 && g > 130 && b < Math.min(r, g) - 40
-      expect(isYellow, `#${hex} reads as yellow`).toBe(false)
+    const rgbs = [...css.matchAll(/(\d{1,3})\s+(\d{1,3})\s+(\d{1,3});/g)].map(
+      (match) => [Number(match[1]), Number(match[2]), Number(match[3])] as const,
+    )
+    const fromHex = hexes.map(
+      (hex) =>
+        [
+          parseInt(hex.slice(0, 2), 16),
+          parseInt(hex.slice(2, 4), 16),
+          parseInt(hex.slice(4, 6), 16),
+        ] as const,
+    )
+
+    for (const [r, g, b] of [...fromHex, ...rgbs]) {
+      // Yellow: red and green both high, blue clearly lower, AND red not far below
+      // green. That last clause is what separates yellow from a yellow-GREEN: the
+      // printed grass is 143/190/99, where green leads by nearly fifty, and it is
+      // green. Gold (216/178/92) and mark yellow both lead with red.
+      const isYellow = r > 150 && g > 130 && b < Math.min(r, g) - 40 && r >= g - 20
+      expect(isYellow, `rgb(${r} ${g} ${b}) reads as yellow`).toBe(false)
+    }
+  })
+
+  it('never lets a press colour leak into a shell component', () => {
+    // The two palettes are separate systems, not a pool to pick from. The press tokens
+    // dress the pitch, the figure and the share cards; a screen chrome element reaching
+    // for --n-gold is the two languages starting to blur.
+    const PRESS_SURFACES = ['components/press/', 'app/kits/', 'app/lineup/', 'app/share/']
+    for (const { path, text } of SOURCES) {
+      if (PRESS_SURFACES.some((dir) => path.includes(dir))) continue
+      const leak = /--[pn]-(?:paper|ink|gold|grass|mark|red|line|skin|hair|tekhelet)/.exec(text)
+      expect(leak, `${path} uses the press token ${leak?.[0]} outside a press surface`).toBeNull()
     }
   })
 
   it('uses no raw hex in components — tokens only', () => {
     for (const { path, text } of SOURCES) {
       expect(/#[0-9a-fA-F]{3,8}\b/.test(text), `${path} contains a raw hex`).toBe(false)
+    }
+  })
+
+  it('declares every press token the press components use', () => {
+    // A component reaching for a token that globals.css does not define fails silently:
+    // the fill resolves to nothing and the shape renders invisible.
+    const css = readFileSync(TOKENS_FILE, 'utf8')
+    for (const { path, text } of SOURCES) {
+      for (const match of text.matchAll(/var\((--[pn]-[a-z-]+)\)/g)) {
+        const token = match[1] as string
+        expect(css.includes(`${token}:`), `${path} uses ${token}, which is not declared`).toBe(
+          true,
+        )
+      }
     }
   })
 })

@@ -114,3 +114,48 @@ export function verifiedKitSeasons(): SeasonKit[] {
 
   return [...rows.values()].sort((a, b) => b.season.localeCompare(a.season))
 }
+
+/* ------------------------------------------------------------- the drawn kit */
+
+/**
+ * What the drawn figure needs to wear a season's shirt.
+ *
+ * Only three things about a historical kit are actually verified in this archive: the
+ * club's colours, the maker, and the sponsor. The CUT is not — no source here states a
+ * collar, a sleeve length or a stripe pattern for a given season, so the figure wears
+ * the club's colours in a plain shirt and the screen says so. Drawing a V-neck for
+ * 1999/00 because V-necks were common then would be exactly the kind of invention
+ * rule 11 forbids, and it would be invisible to the player, which makes it worse.
+ */
+export type DrawnKit = {
+  season: string
+  maker: string
+  /** the sponsor lettered across the chest, per competition */
+  sponsors: SeasonKit['sponsors']
+  primary: string
+  secondary: string
+  trim: string
+  shorts: string
+  socks: string
+  ink: string
+}
+
+const RED = KIT_COLOURS['אדום'] as string
+const WHITE = KIT_COLOURS['לבן'] as string
+
+/** Every verified season, dressed. Newest first. */
+export function drawnKitSeasons(): DrawnKit[] {
+  return verifiedKitSeasons().map((row) => ({
+    season: row.season,
+    maker: row.maker,
+    sponsors: row.sponsors,
+    // Hapoel Tel Aviv play in red with white shorts. That is the club, not a guess
+    // about a particular season.
+    primary: RED,
+    secondary: WHITE,
+    trim: WHITE,
+    shorts: WHITE,
+    socks: RED,
+    ink: WHITE,
+  }))
+}

@@ -4,7 +4,21 @@ import { useState, useTransition } from 'react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Num } from '@/components/ui/Num'
+import { GK_KIT, NamePlate, PlayerFigure } from '@/components/press/PlayerFigure'
 import { Pitch } from '@/components/ui/Pitch'
+
+/** The club's colours. Every outfield figure on this pitch wears them. */
+const OUTFIELD = {
+  primary: 'rgb(var(--p-red))',
+  secondary: 'rgb(var(--p-line))',
+  trim: 'rgb(var(--p-line))',
+  pattern: 'solid' as const,
+  collar: 'crew' as const,
+  longSleeve: false,
+  shorts: 'rgb(var(--p-line))',
+  socks: 'rgb(var(--p-red))',
+  ink: 'rgb(var(--p-line))',
+}
 import { t, type MessageKey } from '@/lib/i18n'
 import type { PitchSlot, SlotStatus, LineupVerdict } from '@/lib/game/lineup'
 import { submitLineup } from './actions'
@@ -107,18 +121,29 @@ export function LineupBoard({
                 onClick={() => setActive(isActive ? null : slot.slotId)}
                 aria-pressed={isActive}
                 aria-label={`${slot.roleHe}${name ? ` — ${name}` : ''}`}
-                className={`flex min-h-tap w-full flex-col items-center justify-center border-rule px-1 py-1 text-center transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none ${
-                  verdict ? STATUS_STYLE[status] : 'border-ink bg-sheet text-ink'
-                } ${isActive ? 'outline outline-[3px] outline-red' : ''}`}
+                className={`flex w-full flex-col items-center justify-end transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none ${
+                  isActive ? 'outline outline-[3px] outline-press-red' : ''
+                }`}
               >
+                {/* A filled slot is a drawn player in the club's kit; an empty one is a
+                    dashed ghost. The pitch reads as a team sheet at a glance instead of
+                    as a grid of labelled boxes. */}
+                <PlayerFigure
+                  kit={name ? (slot.slotId === 'GK' ? GK_KIT : OUTFIELD) : undefined}
+                  ghost={!name}
+                  number={null}
+                  size={54}
+                  title={slot.roleHe}
+                />
                 {verdict && status !== 'empty' && (
-                  <span aria-hidden="true" className="font-sign text-[13px] leading-none">
+                  <span
+                    aria-hidden="true"
+                    className={`-mt-1 grid h-4 w-4 place-items-center border-hair font-sign text-[10px] leading-none ${STATUS_STYLE[status]}`}
+                  >
                     {STATUS_MARK[status]}
                   </span>
                 )}
-                <span className="mt-0.5 block w-full truncate font-sign text-[11px] leading-tight">
-                  {name ?? slot.roleHe}
-                </span>
+                <NamePlate name={name ?? slot.roleHe} />
               </button>
             )
           }}
