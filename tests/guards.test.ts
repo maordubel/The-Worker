@@ -45,32 +45,58 @@ describe('sport guard', () => {
 })
 
 /**
- * A delta that REPLACES a screen ships the new file — but the old one stays in git
- * until somebody deletes it, and a stale import is a red build on the deploy even
- * though everything local is green. That happened twice with
- * `app/kits/build/KitChallengeBoard.tsx`, which kept importing a server action that no
- * longer exists.
+ * מצבות — retired files that must always COMPILE.
  *
- * So the list of retired paths is a TEST. `npm run test` now fails on a machine that
- * still has one, before it can fail on Vercel, and `bash scripts/cleanup-retired.sh`
- * fixes it in one command. The two lists are checked against each other, so a path
- * added to the script is automatically enforced here.
+ * Deltas reach the repo through GitHub's web upload, which adds and overwrites files
+ * but never deletes them. A retired file that still contains a broken import therefore
+ * keeps failing `next build` on the deploy long after the local tree is clean — which
+ * is exactly what happened with `KitChallengeBoard.tsx`, twice. Asking for a delete
+ * command was the wrong fix. The right one: **a retired file is replaced by an inert
+ * tombstone, never left broken and never merely deleted.**
+ *
+ * This test is what stops a tombstone being quietly revived with real code again.
  */
-describe('retired files', () => {
+describe('retired files are tombstones', () => {
   const ROOT = process.cwd()
-  const script = readFileSync(join(ROOT, 'scripts/cleanup-retired.sh'), 'utf8')
-  const retired = [...script.matchAll(/^\s*"([^"]+)"\s*(?:#.*)?$/gm)].map((match) => match[1] as string)
+  const TOMBSTONES = [
+    'app/kits/build/KitChallengeBoard.tsx', // → KitRun.tsx
+    'app/trivia/summary/page.tsx', // → the run ends in place; this redirects
+    'app/trivia/summary/ShareCard.tsx', // → components/share/ShareRow.tsx
+    'components/press/StoryCard.tsx', // → lib/share/story.ts
+    'app/derby/BlackFile.tsx', // → app/derby/file/BlackFile.tsx
+    'app/derby/actions.ts', // → app/derby/file/actions.ts
+  ]
 
-  it('lists the paths the cleanup script knows about', () => {
-    expect(retired.length).toBeGreaterThan(5)
-    expect(retired).toContain('app/kits/build/KitChallengeBoard.tsx')
+  it('every retired path still exists and says it is retired', () => {
+    for (const path of TOMBSTONES) {
+      const full = join(ROOT, path)
+      expect(existsSync(full), `${path} is missing — a deleted tombstone is a red deploy`).toBe(
+        true,
+      )
+      expect(readFileSync(full, 'utf8'), path).toContain('TOMBSTONE')
+    }
   })
 
-  it('none of them are still in the tree', () => {
-    const left = retired.filter((path) => existsSync(join(ROOT, path)))
-    expect(
-      left,
-      `still present — run: bash scripts/cleanup-retired.sh\n  ${left.join('\n  ')}`,
-    ).toEqual([])
+  it('no tombstone imports anything that could break', () => {
+    // The whole point is that these compile forever. A tombstone may re-export a live
+    // module or redirect; it may not pull a server action, a deleted lib, or a type.
+    for (const path of TOMBSTONES) {
+      const text = readFileSync(join(ROOT, path), 'utf8')
+      const imports = [...text.matchAll(/from\s+'([^']+)'/g)].map((match) => match[1] as string)
+      for (const source of imports) {
+        expect(
+          source === 'next/navigation' || source.startsWith('./'),
+          `${path} imports ${source}`,
+        ).toBe(true)
+      }
+      expect(text, `${path} must not declare a server action`).not.toContain("'use server'")
+    }
+  })
+
+  it('is short — a tombstone that grows is a file somebody revived', () => {
+    for (const path of TOMBSTONES) {
+      const lines = readFileSync(join(ROOT, path), 'utf8').split('\n').length
+      expect(lines, path).toBeLessThan(30)
+    }
   })
 })
