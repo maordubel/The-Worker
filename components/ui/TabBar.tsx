@@ -16,11 +16,16 @@ import { t, type MessageKey } from '@/lib/i18n'
 
 type Tab = { key: MessageKey; href: string; match: string; icon: 'wall' | 'game' | 'tower' | 'file' }
 
+/**
+ * Four destinations, named the way the ground is named. The wall is where the gate
+ * plan hangs; gate 2 is trivia; gate 5 is the curva; gate 11 is the away end. The bar
+ * is a shortcut to four gates, not a second navigation system competing with them.
+ */
 const TABS: Tab[] = [
   { key: 'tab.wall', href: '/', match: '/', icon: 'wall' },
-  { key: 'tab.game', href: '/trivia?seed=3&i=0&score=0', match: '/trivia', icon: 'game' },
-  { key: 'tab.tower', href: '/timeline?seed=4', match: '/timeline', icon: 'tower' },
-  { key: 'tab.file', href: '/kits', match: '/kits', icon: 'file' },
+  { key: 'tab.gate2', href: '/trivia?seed=3', match: '/trivia', icon: 'game' },
+  { key: 'tab.gate5', href: '/kits', match: '/kits', icon: 'file' },
+  { key: 'tab.gate11', href: '/derby', match: '/derby', icon: 'tower' },
 ]
 
 function TabIcon({ icon, active }: { icon: Tab['icon']; active: boolean }) {

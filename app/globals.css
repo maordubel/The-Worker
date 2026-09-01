@@ -10,13 +10,16 @@
   Supersedes the "archival letterpress" territory. Spec: brand/THE-WORKER-BRAND-SPEC.md
 */
 :root {
-  --sheet: 247 245 240;      /* #F7F5F0 נייר, לוחית אמייל, פנס דולק */
-  --paper: 231 228 220;      /* #E7E4DC הקיר — רקע המסך */
-  --ink: 18 17 16;           /* #121110 טקסט, קווים, קיר לילה */
-  --red: 206 20 16;          /* #CE1410 חותמת, בד, פעולה ראשית */
-  --concrete: 169 164 155;   /* #A9A49B זרוע שילוט, בטון, מטא */
-  --sign: 20 53 126;         /* #14357E ערבית/אנגלית, מקורות, ודאות */
-  --muted: 90 86 79;         /* #5A564F טקסט משני על נייר */
+  /* שערי הפועל — the two-plate screenprint. Vermilion and navy on ageing cream,
+     drawn in ink. There is no third ink: what looks like a third colour is the two
+     plates overlapping. No yellow, at any strength, ever. */
+  --sheet: 240 232 212;      /* #F0E8D4 לוחית הכרזה — נייר בהיר */
+  --paper: 233 223 199;      /* #E9DFC7 נייר מזדקן — רקע המסך */
+  --ink: 21 18 14;           /* #15120E הרישום, השחור של הדפוס */
+  --red: 224 64 28;          /* #E0401C ורמיליון — המגש הראשון */
+  --concrete: 201 191 164;   /* #C9BFA4 שוליים, מטא, כיתוב משני על דיו */
+  --sign: 30 44 90;          /* #1E2C5A נייבי — המגש השני */
+  --muted: 90 82 66;         /* #5A5242 טקסט משני על נייר */
   --lamp-off: 31 29 27;      /* #1F1D1B פנס כבוי בלילה */
 
   --rule-hair: 1px;
@@ -96,6 +99,53 @@
    pixels it stops reading as print and starts reading as a rendering bug. */
 .misregister {
   text-shadow: 0.7px 0 0 rgba(196, 52, 47, 0.55), -0.7px 0 0 rgba(80, 150, 190, 0.3);
+}
+
+/* ============================================================================
+   שערי הפועל — the gate posters
+   ----------------------------------------------------------------------------
+   Two ink trays and nothing else. The navy plate is laid first, the vermilion
+   plate on top, and the press was 3px out — RIGHT and DOWN, the same way every
+   time, because that is how a misaligned machine fails. Random offsets read as a
+   bug; a constant one reads as a press.
+   The overlap is `mix-blend-mode: multiply`, so the third colour you see where
+   the plates cross is genuinely the two inks over each other, not a new swatch.
+   ========================================================================== */
+/* The navy plate goes down first and multiplies into the paper. */
+.plate-shift {
+  transform: translate(3px, 2px);
+  mix-blend-mode: multiply;
+}
+/* The vermilion plate is laid ON TOP of it and is OPAQUE — ink does not see through
+   ink. Blending it into the navy underneath multiplied two saturated colours to near
+   black and swallowed the whole glyph; the misregistration is supposed to show as a
+   3px navy sliver escaping on one side, not as a black number. */
+.plate-top { mix-blend-mode: normal; }
+
+/* קרני השמש — the rays behind a gate number. Gates 2, 5 and 8 only. */
+.rays {
+  background: repeating-conic-gradient(
+    from 12deg at 50% 50%,
+    rgb(var(--red)) 0deg 5deg,
+    transparent 5deg 11deg
+  );
+}
+
+/* כתם הדפוס — an ink blotch on the paper, so no two plates print identically */
+.stain-a { background-image: radial-gradient(circle at 70% 15%, rgb(var(--muted) / 0.16), transparent 45%); }
+.stain-b { background-image: radial-gradient(circle at 25% 80%, rgb(var(--muted) / 0.16), transparent 45%); }
+.stain-c { background-image: radial-gradient(circle at 50% 50%, rgb(var(--muted) / 0.13), transparent 55%); }
+
+/* הדגל — gate 5 only. The banner the ultras hang. */
+@keyframes flagwave {
+  0%, 100% { transform: skewY(-0.5deg) }
+  50%      { transform: skewY(0.5deg) }
+}
+.flag {
+  background: rgb(var(--red));
+  animation: flagwave 7s ease-in-out infinite;
+  clip-path: polygon(0 14%, 8% 2%, 20% 12%, 33% 1%, 46% 11%, 60% 0, 73% 10%, 86% 0, 100% 9%,
+                     100% 88%, 88% 100%, 74% 90%, 60% 100%, 46% 89%, 33% 100%, 20% 90%, 8% 100%, 0 90%);
 }
 
 /* 5א · halftone — two radial layers offset by half a step make a real

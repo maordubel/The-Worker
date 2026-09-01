@@ -2,6 +2,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { extname, join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+import { isYellow, isYellowHex } from '@/lib/isYellow'
+
 /**
  * The twenty-point acceptance checklist from brand/THE-WORKER-BRAND-SPEC.md, as tests.
  * These are the rules a review is supposed to fail on, so they fail here instead.
@@ -50,31 +52,40 @@ describe('brand acceptance — colour', () => {
   })
 
   it('contains no yellow anywhere — the first absolute prohibition', () => {
-    // ABSOLUTE. It applies to the press layer too. The DUBID palette rules in dim
-    // gold (#D8B25C) and discs its numbers in #F5C518; both are yellow, so neither is
-    // here. Scoping this rule to "everywhere except the pictures" was overriding a
-    // decision that is not mine to make, and it is not scoped again.
+    // ABSOLUTE, and it applies to the press layer and the gate posters too. The
+    // definition lives in lib/isYellow.ts so this test and the screenshot scanner
+    // cannot drift apart; see that file for why hue beats channel inequalities.
     const css = readFileSync(TOKENS_FILE, 'utf8')
     const hexes = [...css.matchAll(/#([0-9a-fA-F]{6})/g)].map((match) => match[1] as string)
-    const rgbs = [...css.matchAll(/(\d{1,3})\s+(\d{1,3})\s+(\d{1,3});/g)].map(
-      (match) => [Number(match[1]), Number(match[2]), Number(match[3])] as const,
-    )
-    const fromHex = hexes.map(
-      (hex) =>
-        [
-          parseInt(hex.slice(0, 2), 16),
-          parseInt(hex.slice(2, 4), 16),
-          parseInt(hex.slice(4, 6), 16),
-        ] as const,
-    )
+    for (const hex of hexes) {
+      expect(isYellowHex(hex), `#${hex} is yellow`).toBe(false)
+    }
 
-    for (const [r, g, b] of [...fromHex, ...rgbs]) {
-      // Yellow: red and green both high, blue clearly lower, AND red not far below
-      // green. That last clause is what separates yellow from a yellow-GREEN: the
-      // printed grass is 143/190/99, where green leads by nearly fifty, and it is
-      // green. Gold (216/178/92) and mark yellow both lead with red.
-      const isYellow = r > 150 && g > 130 && b < Math.min(r, g) - 40 && r >= g - 20
-      expect(isYellow, `rgb(${r} ${g} ${b}) reads as yellow`).toBe(false)
+    const rgbs = [...css.matchAll(/(\d{1,3})\s+(\d{1,3})\s+(\d{1,3});/g)]
+    for (const match of rgbs) {
+      const [r, g, b] = [Number(match[1]), Number(match[2]), Number(match[3])]
+      expect(isYellow(r as number, g as number, b as number), `rgb(${r} ${g} ${b}) is yellow`).toBe(
+        false,
+      )
+    }
+  })
+
+  it('knows what yellow is', () => {
+    // The guard is only worth as much as its definition, so the definition is tested.
+    for (const hex of ['#F5C518', '#D8B25C', '#F0D693', '#A9822F', '#FFD700', '#FFFF00']) {
+      expect(isYellowHex(hex), `${hex} should be yellow`).toBe(true)
+    }
+    for (const hex of [
+      '#E0401C', // vermilion ink
+      '#1E2C5A', // navy ink
+      '#E9DFC7', // ageing paper — a yellow hue, but 15% saturation is paper
+      '#8FBE63', // printed grass
+      '#B07A5A', // the drawn figure's skin
+      '#C09B71', // the badge's skin
+      '#EAA990', // vermilion antialiased into cream
+      '#CE1410', // the old club red
+    ]) {
+      expect(isYellowHex(hex), `${hex} should not be yellow`).toBe(false)
     }
   })
 

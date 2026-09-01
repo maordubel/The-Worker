@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Anton, Courier_Prime, Frank_Ruhl_Libre, Heebo, Miriam_Libre } from 'next/font/google'
+import { Archivo, Courier_Prime, Heebo, Karantina, Miriam_Libre, Suez_One } from 'next/font/google'
 import { BRAND } from '@/lib/brand'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
 import './globals.css'
 
 /** Four faces, fixed roles. See brand/THE-WORKER-BRAND-SPEC.md §3. */
-const frank = Frank_Ruhl_Libre({
+const frank = Suez_One({
   subsets: ['hebrew', 'latin'],
-  weight: ['700', '900'],
-  variable: '--font-frank',
+  weight: '400',
   display: 'swap',
+  variable: '--font-frank',
 })
 const miriam = Miriam_Libre({
   subsets: ['hebrew', 'latin'],
@@ -31,14 +31,23 @@ const courier = Courier_Prime({
 })
 
 /**
- * Anton is the shirt-number face from the DUBID press DNA: narrow, heavy, Latin-only.
- * It carries FIGURES ONLY — scores, shirt numbers, vote counts — never Hebrew text.
+ * Karantina 700 is the gate face. It carries the big figures — gate numbers, shirt
+ * numbers, scores — and it is the ONE face allowed to be larger than anything else on
+ * a poster. It replaces Anton, which had no Hebrew.
  */
-const anton = Anton({
-  subsets: ['latin'],
-  weight: '400',
+const anton = Karantina({
+  subsets: ['hebrew', 'latin'],
+  weight: '700',
   display: 'swap',
   variable: '--font-poster',
+})
+
+/** Archivo carries the Latin caps lines — GATE, BLOOMFIELD · JAFFA · EST. 1923. */
+const archivo = Archivo({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  display: 'swap',
+  variable: '--font-latin',
 })
 
 export const viewport: Viewport = {
@@ -58,7 +67,7 @@ export const metadata: Metadata = {
   },
   description: t('app.description'),
   applicationName: 'The Worker',
-  icons: { icon: '/icon.svg' },
+  icons: { icon: [{ url: '/brand/logo-192.png', type: 'image/png' }], apple: '/brand/logo-192.png' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -66,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang={LOCALE}
       dir={DIRECTION}
-      className={`${frank.variable} ${miriam.variable} ${heebo.variable} ${courier.variable} ${anton.variable}`}
+      className={`${frank.variable} ${miriam.variable} ${heebo.variable} ${courier.variable} ${anton.variable} ${archivo.variable}`}
     >
       <body className="font-body antialiased">
         <a

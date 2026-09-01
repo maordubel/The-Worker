@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { BannerCloth } from '@/components/ui/BannerCloth'
@@ -5,22 +6,19 @@ import { LampGrid, Mast } from '@/components/ui/LampGrid'
 import { Num } from '@/components/ui/Num'
 import { PastedSheet } from '@/components/ui/PastedSheet'
 import { Floodlights } from '@/components/ui/Floodlights'
-import { Logo } from '@/components/ui/Logo'
 import { Screen } from '@/components/ui/Screen'
 import { Stamp } from '@/components/ui/Stamp'
-import { t, type MessageKey } from '@/lib/i18n'
+import { GatePlate } from '@/components/gates/GatePlate'
+import { GATES } from '@/lib/gates'
+import { t } from '@/lib/i18n'
 
-/** Screen 1 — הקיר. Mode plates → streak → sheet stack → cloth. */
+/**
+ * Screen 1 — קיר המודעות.
+ *
+ * The wall is now the gate plan. A player does not pick a mode from a list; they walk
+ * in by a gate, and each gate carries its own printed bill.
+ */
 
-const MODES: Array<{ serial: string; href: string; title: MessageKey; sub: MessageKey }> = [
-  { serial: '01', href: '/trivia?seed=3&i=0&score=0', title: 'mode.trivia', sub: 'mode.trivia.sub' },
-  { serial: '02', href: '/lineup', title: 'mode.lineup', sub: 'mode.lineup.sub' },
-  { serial: '03', href: '/memory?seed=7', title: 'mode.memory', sub: 'mode.memory.sub' },
-  { serial: '04', href: '/kits', title: 'mode.kits', sub: 'mode.kits.sub' },
-  { serial: '05', href: '/timeline?seed=4', title: 'mode.timeline', sub: 'mode.timeline.sub' },
-  { serial: '06', href: '/goal?seed=1', title: 'mode.goal', sub: 'mode.goal.sub' },
-  { serial: '07', href: '/kits/build?seed=1', title: 'mode.kitChallenge', sub: 'mode.kitChallenge.sub' },
-]
 
 const STREAK_ON = 13
 const STREAK_TOTAL = 20
@@ -32,39 +30,58 @@ export default function WallPage() {
         <Stamp size={56} />
       </div>
 
-      {/* The masthead: a strip of night with the tower striking on above the name.
-          This is where the product says what it is called. */}
+      {/* המאסטהד — the masthead of the notice wall. The badge is Maor's own artwork
+          and it is the identity everywhere; nothing here re-draws it. */}
       <section
         aria-label="The Worker"
         className="relative mt-stack overflow-hidden border-rule border-ink bg-ink"
       >
-        <Floodlights height={116} />
-        <div className="relative flex items-end justify-between gap-3 px-4 pb-4 pt-[86px]">
-          <Logo night animate size={44} />
-          <p className="max-w-[46%] text-end font-body text-[11px] leading-relaxed text-concrete">
-            {t('brand.tagline')}
-          </p>
+        <Floodlights height={104} />
+        <div
+          aria-hidden="true"
+          className="rays pointer-events-none absolute -top-24 h-[420px] w-[420px] opacity-[.14]"
+          style={{ insetInlineEnd: -120 }}
+        />
+        <div className="relative flex items-center gap-4 px-4 pb-4 pt-[74px]">
+          <Image
+            src="/brand/logo-192.png"
+            alt="The Worker"
+            width={78}
+            height={78}
+            priority
+            className="shrink-0"
+          />
+          <div className="min-w-0">
+            <p className="font-latin text-[9px] font-bold tracking-[0.22em] text-red" dir="ltr">
+              BLOOMFIELD · JAFFA · EST. 1923
+            </p>
+            <h2 className="mt-1 font-poster text-[38px] leading-[0.82] text-paper">
+              {t('wall.gatesTitle')}
+            </h2>
+            <p className="font-latin text-[11px] font-extrabold tracking-[0.36em] text-sign" dir="ltr">
+              T H E · G A T E S
+            </p>
+          </div>
+        </div>
+        <div className="relative bg-ink px-4 pb-3">
+          <p className="font-display text-[14px] text-paper">{t('wall.ranks')}</p>
         </div>
       </section>
 
       <p className="mt-stack max-w-prose font-body text-step-0 text-muted">{t('build.status')}</p>
 
-      <section aria-label={t('tab.game')} className="mt-stack">
-        <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
-          {MODES.map((mode) => (
-            <li key={mode.serial}>
-              <Link
-                href={mode.href}
-                className="flex min-h-[92px] flex-col justify-between border-rule border-ink bg-sheet p-3 transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none"
-              >
-                <Num className="font-mono text-[11px] text-red">{mode.serial}</Num>
-                <span className="mt-3 font-sign text-step-1 leading-tight text-ink">
-                  {t(mode.title)}
-                </span>
-                <span className="mt-1 font-body text-[11px] leading-relaxed text-sign">
-                  {t(mode.sub)}
-                </span>
-              </Link>
+      {/* קיר המודעות — nine gates, nine posters. Choosing a game is walking in. */}
+      <section aria-label={t('wall.chooseGate')} className="mt-stack">
+        <div className="flex items-baseline justify-between">
+          <h2 className="font-latin text-[10px] font-bold tracking-[0.24em] text-sign" dir="ltr">
+            CHOOSE YOUR GATE
+          </h2>
+          <p className="font-display text-[15px] text-ink">{t('wall.chooseGate')}</p>
+        </div>
+        <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {GATES.map((gate) => (
+            <li key={gate.number}>
+              <GatePlate gate={gate} />
             </li>
           ))}
         </ul>

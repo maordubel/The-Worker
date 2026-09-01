@@ -48,10 +48,12 @@ const config: Config = {
       },
       fontFamily: {
         display: ['var(--font-frank)', 'Georgia', 'serif'],
+        // Latin caps on a poster plate: GATE · BLOOMFIELD · EST. 1923
+        latin: ['var(--font-latin)', 'system-ui', 'sans-serif'],
         sign: ['var(--font-miriam)', 'system-ui', 'sans-serif'],
         body: ['var(--font-heebo)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-courier)', 'ui-monospace', 'monospace'],
-        // Figures only — shirt numbers, scores, counts. No Hebrew in this face.
+        // The gate face — Karantina 700. Big figures and gate numbers.
         poster: ['var(--font-poster)', 'Archivo', 'ui-monospace', 'monospace'],
       },
       // Fluid scale. Hebrew needs more body size than Latin to read comfortably, so

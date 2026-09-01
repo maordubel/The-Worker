@@ -18,20 +18,32 @@ Read `docs/00-architecture.md` before changing anything structural.
    assert it in every ingest report.
 7. **Hebrew names are matched through `entity_alias`, never fuzzily.**
 8. **Design tokens only, in TWO scoped systems.**
-   - **The shell** is **אוסישקין — התיק, הקיר והמגדל** (`brand/THE-WORKER-BRAND-SPEC.md`):
-     eight tokens, five faces, radius 0, no shadow except `shadow-lamp`, **no yellow**.
-     It owns the wall, the sign plates, the file and every screen chrome.
+   - **The shell** is **שערי הפועל** — a two-plate screenprint. Vermilion `--red`
+     and navy `--sign` on ageing cream, drawn in `--ink`. **There is no third ink:**
+     what looks like a third colour is the two plates overlapping. Misregistration is
+     a CONSTANT 3px right-and-down (`.plate-shift`), never random — a random offset
+     reads as a bug, a constant one reads as a press. Radius 0. Six faces: Suez One
+     (display), Karantina 700 (poster/figures), Miriam Libre (sign), Heebo (body),
+     Courier Prime (mono), Archivo (Latin caps).
    - **The press layer** is the DUBID DNA — "a printed 90s sports page" — declared in
      the marked block in `app/globals.css`. It owns the pitch, the drawn player, the kit
      rack and the share cards, and ONLY those. A shell component reaching for a press
      token is a defect.
-   **No yellow is ABSOLUTE and applies to both.** The DUBID palette rules in dim gold
-   and discs its numbers in mark yellow; neither is here. Cream carries the rules, red
-   carries the emphasis, and the press language survives intact — misregistration,
-   halftone, flat colour and the closing ink line never needed yellow.
-   Never a raw hex in a component. The acceptance checklist runs as
+   **No yellow is ABSOLUTE**, in both systems, with no exemption for artwork or for
+   "the pictures". The one definition lives in `lib/isYellow.ts` — a HUE test, because
+   every channel-inequality version caught the grass, the badge's skin, or the edge
+   where vermilion meets cream. The unit test and the screenshot scanner import it, so
+   they cannot drift. Never a raw hex in a component. The checklist runs as
    `tests/brand.test.ts` — it fails the build, not the review.
-9. **RTL-first.** Logical properties. Wrap mixed-direction runs in `<bdi>`.
+   The **badge** (`public/brand/logo*.png`) is Maor's own artwork. It is the identity
+   everywhere — masthead, favicon, share card. Nothing re-draws it.
+9. **RTL-first.** Logical properties only — no `left-*`/`right-*`, not even inside a
+   comment (the guard reads source). Wrap mixed-direction runs in `<bdi>`.
+   The navigation is **שערי הפועל**, Bloomfield's real gate plan (`lib/gates.ts`): a
+   player does not pick a mode from a list, they walk in by a gate. The numbers are the
+   ground's own, which is why they are not 1..9. Gate 5 is the curva and gets the full
+   bill — rays, flag, the big number. **Gate 11 is the away end and carries no
+   vermilion at all**: whoever walks in is looking at somebody else's poster.
 10. **No user-facing string in code.** Everything through `messages/he.json` + `t()`.
 
 11. **The ingestion layer never invents.** Unreadable field → null. Unusable row →
