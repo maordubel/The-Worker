@@ -66,11 +66,10 @@ export function TopicWall({
 
         if (!ready) {
           return (
-            <li
-              key={topic}
-              className="overflow-hidden border-rule border-ink/40 bg-paper opacity-60"
-              aria-disabled="true"
-            >
+            // Not a link and not a button: there is nothing to press. `aria-disabled`
+            // is not a property a list item supports, and faking a disabled control
+            // here would announce something interactive that is not.
+            <li key={topic} className="overflow-hidden border-rule border-ink/40 bg-paper opacity-60">
               {body}
             </li>
           )

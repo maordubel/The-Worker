@@ -55,8 +55,23 @@ Read `docs/00-architecture.md` before changing anything structural.
 11. **The ingestion layer never invents.** Unreadable field → null. Unusable row →
     reported as skipped/rejected with a reason. Blocked source → documented, not
     substituted. See `docs/03-ingestion.md`.
-12. **One file knows MediaWiki:** `scripts/ingest/adapters/mediawiki.ts`. A provider
-    field name anywhere else is a defect.
+    **And say WHOSE block it is.** This file recorded for days that wiki.red-fans.com
+    "returns 403 to automated reads". It does return 403 from here — but so does
+    `he.wikipedia.org`, with `Host not in allowlist`. The build container allowlists
+    outbound hosts, so what was reported as the source refusing us may be this
+    environment refusing the source. A blocked source is documented with the evidence
+    that identifies which side blocked it, or it is documented as unknown.
+12. **One file knows MediaWiki:** `scripts/ingest/adapters/mediawiki.ts` — the API
+    client AND the `Special:Export` XML reader. A provider field name anywhere else is a
+    defect. The corpus importer (`sources/wiki-corpus.ts`, `docs/07-wiki-corpus.md`)
+    reads the WHOLE wiki: `list=allpages` past the 500/5,000 cap, one namespace at a
+    time, with paginated property lists MERGED rather than truncated — a page with 700
+    links answers with 500 and a cursor, and dropping it stores a page that looks
+    complete. Idempotent on the wiki's own `page_id`. 403 and 404 are never retried:
+    a refusal is an answer (rule 11).
+    **On songs:** the raw wikitext is stored because provenance and idempotency need the
+    original, but a question is built from a song's METADATA — title, tune, subject.
+    No question, explanation or share card prints verses.
 13. **A derby means Maccabi Tel Aviv. Nothing else.** It is a `club.is_derby_rival` flag
     and a DB trigger that derives `match.is_derby`. Never hand-set it, never widen it.
 14. **A question is never cross-sport. A ROUND may be.** Every sport-bearing table

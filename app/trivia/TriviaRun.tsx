@@ -117,7 +117,7 @@ export function TriviaRun({
       setSecondsLeft(left)
     }, 100)
     return () => window.clearInterval(tick)
-  }, [index, started, session.over, showStage, question, total, seed, settle])
+  }, [index, started, session.over, showStage, question, total, seed, settle, topic])
 
   /** The stage card, at the top of stages 2 and 3. */
   useEffect(() => {
