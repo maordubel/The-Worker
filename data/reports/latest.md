@@ -1,13 +1,13 @@
 # Ingestion report — all (dry-run)
 
-Started 2026-09-01T11:13:28.781Z · status **OK**
+Started 2026-09-01T11:40:28.059Z · status **OK**
 
 ## Totals
 
 | Metric | Count |
 |---|---:|
-| discovered | 1247 |
-| imported | 1230 |
+| discovered | 1248 |
+| imported | 1231 |
 | skipped | 0 |
 | rejected | 0 |
 | unresolved | 0 |
@@ -45,7 +45,7 @@ Started 2026-09-01T11:13:28.781Z · status **OK**
 | manual:electionCandidates | 21 |
 | manual:membershipMilestones | 1 |
 | manual:grievances | 14 |
-| manual:kitDesigns | 32 |
+| manual:kitDesigns | 33 |
 | manual:calls | 4 |
 | manual:enemies | 56 |
 | manual:shirtNumbers | 83 |
@@ -81,7 +81,7 @@ Started 2026-09-01T11:13:28.781Z · status **OK**
 | associationEvents | 6 |
 | associationRoles | 8 |
 | grievances | 14 |
-| kitDesigns | 32 |
+| kitDesigns | 33 |
 | calls | 4 |
 | enemies | 56 |
 | shirtNumbers | 83 |
@@ -287,7 +287,7 @@ _none_
 | manual:sponsor-deals.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:manufacturers.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:kit-supply.json | other | Football Kit Archive — Hapoel Tel Aviv kit history | https://www.footballkitarchive.com/hapoel-tel-aviv-kits/ | — | — |
-| manual:crest-versions.json | official | הפועל תל אביב — היסטוריה והישגים | https://www.htafc.co.il/היסטוריה-והישגים/ | — | — |
+| manual:crest-versions.json | club | אתר המועדון — היסטוריה והישגים · Ynet 2008 · Sport1 2015 | https://www.htafc.co.il/היסטוריה-והישגים/ | — | — |
 | manual:fan-groups.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:songs.json | wiki | ויקיפועל — קטגוריות השירים, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
 | manual:quotes.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
@@ -324,7 +324,7 @@ _none_
 - sponsor-deals.json: Only deals with a source. A deal may be scoped to one competition — confirmed for 2010/11, where Keter appeared in the Champions League and Bonei HaTichon in the league. Everything the research document listed before 2009 remains unsourced and absent.
 - manufacturers.json: Kit suppliers named in Football Kit Archive.
 - kit-supply.json: Supply spells, from Football Kit Archive season entries. Seasons FKA does not cover (1981/82, 2003/04) are gaps, not claims. Nike appears in three separate spells — that is the fact the kit game is built on. Pre-1980 kits carry no branded maker in FKA; 'self-produced' is an inference and is deliberately absent.
-- crest-versions.json: Stages as the club's own history page tells them. Football Kit Archive omits the 2008-2015 stage and the centenary stage — recorded as a conflict, not silently merged. The May 2023 design that removed the hammer and sickle was made for a US tournament to gauge reaction and was never an official crest; it is not listed here.
+- crest-versions.json: סמל המועדון לאורך השנים — the nine stages the club itself names on its own history page, with the visual variant that illustrates each one and the two facts the game asks about: which year the badge carried (1927 until 2015, 1923 after) and whether the sponsor's name sat inside the crest (2001—2007 only). Two stages have no photographed variant in the material supplied and carry imageKey null rather than a borrowed picture. One variant is deliberately data-only: the KETER wordmark appeared in yellow in part of that era, and rule 8 forbids yellow with no exemption for artwork, so the fact is stored as text and never painted. The 1923 correction is dated and attributed: it followed research by Dr Eyal Gertman and Kfir Frankel, who found Avraham Eshni's membership card no. 2 dated 3.10.1923 in the Wingate Institute archive.
 - fan-groups.json: Supporter organisations with a sourced founding.
 - songs.json: Songs by type — never one undifferentiated table. A player song carries the player and the melody it borrows, which is what makes 'לאיזה שחקן הוקדש Creep?' answerable. Terrace titles the source names but does not describe are stored at confidence 1: they are in the archive and below the floor, so they cannot become questions until a melody or a season is attached. Lyrics are not stored — metadata only, per the copyright rule.
 - quotes.json: Quotes reproduced from the reporting that carries them.
@@ -335,7 +335,7 @@ _none_
 - election-candidates.json: Every candidate in both bodies, with the vote count the association published and the occupation each candidate declared in their own manifesto. Names are stored exactly as the candidate list gives them; where the results table spells a name differently, the difference is a recorded conflict, not a silent correction.
 - membership-milestones.json: Arik Einstein as member #1,000 is attested by a founder in a Sport5 interview. The research document's January 2010 date is NOT sourced — and Walla reported Einstein joining in August 2007 — so the date is left unconfirmed rather than picked.
 - grievances.json: התיק השחור — documented grievances of Hapoel Tel Aviv supporters. FOOTBALL ONLY. Every row is a dated, sourced event: a transfer that happened, a court ruling, a protest that took place. Nothing here is an allegation about a person's character, and nothing is included that a source does not state. Three names Maor supplied are deliberately handled differently: Ofer Yanai and Shaul Eisenberg have no documented connection to the FOOTBALL club (both are basketball, and rule 14 keeps the sports apart), and Shimon Gershon never played for Maccabi at all — he left for Beitar Jerusalem, and he retired on medical grounds, which is not terrace material. Gershon and Zahavi are stored as `myth` rows: they are in the archive because the belief is widespread and the record says otherwise. Two things found in the record are deliberately EXCLUDED: graffiti on a public figure's family graves, and the liquidators' unproven findings about individuals. The first is desecration, not rivalry; the second is an allegation, not a fact.
-- kit-designs.json: ארון החולצות — per-season kit CUTS, read off the kit illustrations and shirt photographs Maor supplied on 1.9.2026. This file closes a gap the project has carried since the start: CLAUDE.md previously recorded that NO source stated a collar, sleeve or pattern for any given season, so the drawn figure wore the club's colours plain and the screen said so. These do. Every row is what is visible in the reference for that season and nothing more — where a reference does not show a detail the field takes the plain value rather than a guess, and the maker is recorded only where the mark is legible. colours-of-football.com itself returns 403 to automated reads and was NOT fetched; the illustrations came from Maor, and the source line says so. One deliberate omission: the 1988/89 adidas shirt's VISA block carries a colour the brand system forbids outright, so the sponsor is lettered as text like every other sponsor in this app rather than reproduced.
+- kit-designs.json: ארון החולצות — per-season kit CUTS, read off the kit illustrations and shirt photographs Maor supplied on 1.9.2026. This file closes a gap the project has carried since the start: CLAUDE.md previously recorded that NO source stated a collar, sleeve or pattern for any given season, so the drawn figure wore the club's colours plain and the screen said so. These do. Every row is what is visible in the reference for that season and nothing more — where a reference does not show a detail the field takes the plain value rather than a guess, and the maker is recorded only where the mark is legible. colours-of-football.com itself returns 403 to automated reads and was NOT fetched; the illustrations came from Maor, and the source line says so. One deliberate omission: the 1988/89 adidas shirt's VISA block carries a colour the brand system forbids outright, so the sponsor is lettered as text like every other sponsor in this app rather than reproduced. Makers were corrected on 1.9.2026 against Football Kit Archive: 1978/79 was IN-HOUSE with no branded maker (not Umbro), and 1997/98 was Nike, not Diadora — Diadora's spell ended in 1996/97. The 1992/93 Puma SUZUKI sash shirt was identified from the same source. Maker names are LETTERED in the app's own type rather than drawn as logos: naming the manufacturer of a kit is a fact about the kit, reproducing another company's trademark artwork is a different thing and this project does not do it.
 - calls.json: ציטוטים וקריאות — verbatim speech tied to a moment, for the quote questions. Two shapes: `match` asks WHERE it was said and `person` asks WHO said it. A `match` row carries its own three distractors, because a plausible wrong answer here is a real fixture from the same era and there is no pool the generator can safely draw one from — an invented fixture would break rule 11. Every distractor listed below is a real Hapoel Tel Aviv fixture. Maor Harel is the source for the Berkovic call: a dedicated research pass on 1.9.2026 could not find it in any indexed outlet, and he supplied it from his own knowledge as founder of Hapoel Ussishkin and a former capo of Ultras Hapoel. That is recorded as the source rather than dressed up as a press citation.
 - enemies.json: משחק השנאה — the terrace's cast, ranked by Maor Harel: founder of Hapoel Ussishkin, former capo of Ultras Hapoel. `terraceRank` IS his ranking, 1—56, not an editorial guess; the first fifty are the list he supplied on 1.9.2026 in his own order, and the last six are the names he added with it. The file is deliberately CROSS-SPORT — the enemies of הפועל תל אביב are enemies of the club as an idea — and rule 14 is held by the `sport` field on every row rather than by leaving anyone out. `chargeHe` is the terrace's charge in the terrace's voice: it is opinion, and it is his. `detailHe` is what a source actually states, with the source on the row; where a dedicated research pass on 1.9.2026 could not source a claim, `detailHe` is empty and the plate prints the charge alone rather than inventing a record. Nothing here reaches a football question — the hate game reads this file and only this file.
 - shirt-numbers.json: Historic shirt-number holders, one row per (number, season, player). The season is never dropped: a number belongs to a season, not to a player. A season with two holders is recorded with both — a mid-season transfer is a real fact, and the question generator drops any (number, season) pair with more than one holder rather than choosing between them.

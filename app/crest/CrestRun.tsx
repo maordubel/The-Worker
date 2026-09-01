@@ -1,10 +1,10 @@
 'use client'
 
+import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Burst } from '@/components/play/Burst'
 import { HUD } from '@/components/play/HUD'
-import { KitStrip } from '@/components/kit/KitStrip'
 import { Num } from '@/components/ui/Num'
 import { ShareRow } from '@/components/share/ShareRow'
 import { Punch } from '@/components/play/Punch'
@@ -22,21 +22,21 @@ import {
   type Session,
 } from '@/lib/game/session'
 import { t, type MessageKey } from '@/lib/i18n'
-import type { KitQuestion, KitVerdictRun } from '@/lib/game/kitRun'
-import { submitKitGuess } from './actions'
+import type { CrestQuestion, CrestVerdict } from '@/lib/game/crestRun'
+import { submitCrest } from './actions'
 
 /**
- * אתגר החולצה — twelve shirts, four seasons each, one screen.
+ * הסמל לאורך השנים — the crest run.
  *
- * The same loop as trivia, because the loop is the product: lives, a clock, combos,
- * three escalating stages and no "next" button. What changes is the question — here it
- * is a drawn kit, and the whole read is visual, which makes it the fastest gate in the
- * app to play and the easiest to be smug about.
+ * The crest images are Maor's own, cut out of their backgrounds by
+ * `scripts/brand/crests.py`. They are rendered `unoptimized` for the same reason the
+ * badge is: Next's WebP re-encode subsamples chroma, and on artwork this saturated that
+ * is exactly how a forbidden hue creeps back into a file that scanned clean.
  */
-export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: number }) {
+export function CrestRun({ questions, seed }: { questions: CrestQuestion[]; seed: number }) {
   const [session, setSession] = useState<Session>(NEW_SESSION)
   const [picked, setPicked] = useState<string | null>(null)
-  const [verdict, setVerdict] = useState<KitVerdictRun | null>(null)
+  const [verdict, setVerdict] = useState<CrestVerdict | null>(null)
   const [burst, setBurst] = useState<{ points: number; combo: number } | null>(null)
   const [showStage, setShowStage] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(secondsFor(0))
@@ -48,13 +48,15 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
   const total = secondsFor(index)
 
   const settle = useCallback(
-    (result: KitVerdictRun | null, left: number) => {
+    (result: CrestVerdict | null, left: number) => {
       if (!question) return
       const correct = result?.correct ?? false
-      const points = correct
-        ? pointsFor(result?.difficulty ?? question.difficulty, session.combo + 1, left, total)
-        : 0
-      if (correct) setBurst({ points, combo: session.combo + 1 })
+      if (correct) {
+        setBurst({
+          points: pointsFor(result?.difficulty ?? question.difficulty, session.combo + 1, left, total),
+          combo: session.combo + 1,
+        })
+      }
       window.setTimeout(
         () => {
           setBurst(null)
@@ -70,7 +72,7 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
             }),
           )
         },
-        correct ? 900 : 2100,
+        correct ? 900 : 2400,
       )
     },
     [question, session.combo, total],
@@ -87,7 +89,7 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
         setSecondsLeft(0)
         if (locked.current) return
         locked.current = true
-        void submitKitGuess(seed, index, '__timeout__').then((result) => {
+        void submitCrest(seed, index, '__timeout__').then((result) => {
           setVerdict(result)
           settle(result, 0)
         })
@@ -108,7 +110,7 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
     locked.current = true
     const left = secondsLeft
     setPicked(option)
-    void submitKitGuess(seed, index, option).then((result) => {
+    void submitCrest(seed, index, option).then((result) => {
       setVerdict(result)
       settle(result, left)
     })
@@ -118,12 +120,19 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
     return (
       <div className="mt-stack border-rule border-ink bg-ink p-6 text-center">
         <p className="font-latin text-[10px] font-bold tracking-[0.28em] text-red" dir="ltr">
-          GATE 4 · GUESS THE KIT
+          GATE 7 · THE CREST
         </p>
-        <p className="mt-3 font-poster text-[64px] leading-none text-paper">
-          <Num>{questions.length}</Num>
-        </p>
-        <p className="font-body text-step-0 text-concrete">{t('kitRun.lede')}</p>
+        <div className="mt-4 flex justify-center">
+          <Image
+            src="/brand/crests/circle-1923.png"
+            alt=""
+            width={110}
+            height={126}
+            unoptimized
+            priority
+          />
+        </div>
+        <p className="mt-3 font-body text-step-0 text-concrete">{t('crest.lede')}</p>
         <button
           type="button"
           onClick={() => setStarted(true)}
@@ -153,26 +162,25 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
           </p>
         </div>
         <ShareRow
-          kind="kit"
+          kind="crest"
           params={{ s: String(seed), total: String(RUN_LENGTH) }}
           headline={String(session.correct)}
           card={{
-            template: 'kit',
-            kicker: 'GATE 4 · GUESS THE KIT',
-            label: t('screen.kitChallenge.title'),
+            template: 'year',
+            kicker: 'GATE 7 · THE CREST',
+            label: t('screen.crest.title'),
             eyebrow: t('run.right'),
             hero: `${session.correct}/${RUN_LENGTH}`,
             stats: [
               { k: t('run.score'), v: String(session.score) },
               { k: t('rank.label'), v: rank },
             ],
-            cta: t('share.challenge'),
+            cta: t('crest.cta'),
             challenge: t('share.sameRound'),
-            kit: questions[0] ? { ...questions[0].spec, seasonLabel: '' } : undefined,
           }}
         />
         <a
-          href={`/kits/build?seed=${seed + 1}`}
+          href={`/crest?seed=${seed + 1}`}
           className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
         >
           {t('run.again')}
@@ -188,20 +196,47 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
       {showStage && <StageCard stage={stageOf(index)} onDone={() => setShowStage(false)} />}
       <HUD session={session} secondsLeft={secondsLeft} total={total} />
 
-      <div key={index} className={`relative mt-3 animate-slam ${verdict && !verdict.correct ? 'animate-shake' : ''}`}>
+      <div
+        key={index}
+        className={`relative mt-3 animate-slam ${verdict && !verdict.correct ? 'animate-shake' : ''}`}
+      >
         {burst && <Burst points={burst.points} combo={burst.combo} />}
 
-        <div className={`border-rule border-ink bg-paper p-4 ${verdict?.correct ? 'animate-flash' : ''}`}>
-          <div className="mx-auto max-w-[200px]">
-            <KitStrip spec={{ ...question.spec, seasonLabel: '' }} />
-          </div>
+        {/* Two stages of the nine have no photographed variant in the material
+            supplied, and borrowing another stage's picture would be a lie about the
+            crest. Those questions print the era instead — the years set big, which is
+            what the question is actually about anyway. */}
+        <div
+          className={`flex min-h-[186px] items-center justify-center border-rule border-ink bg-paper p-5 ${
+            verdict?.correct ? 'animate-flash' : ''
+          }`}
+        >
+          {question.imageKey ? (
+            <Image
+              src={`/brand/crests/${question.imageKey}.png`}
+              alt=""
+              width={150}
+              height={172}
+              unoptimized
+              className="h-[150px] w-auto"
+            />
+          ) : (
+            <span className="font-poster text-[68px] leading-none text-red" dir="ltr">
+              <span className="plate-shift absolute text-sign">{question.eraHe}</span>
+              <span className="plate-top relative">{question.eraHe}</span>
+            </span>
+          )}
         </div>
 
-        <p className="mt-3 text-center font-display text-step-2 leading-tight text-ink">
-          {t('kitRun.which')}
+        <p
+          className={`font-display text-step-2 leading-tight text-ink ${
+            question.imageKey ? 'mt-3 text-center' : 'border-rule border-ink bg-sheet p-4'
+          }`}
+        >
+          {question.promptHe}
         </p>
 
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-2 grid gap-2">
           {question.options.map((option) => {
             const right = verdict ? option === verdict.answer : false
             const wrongPick = verdict ? picked === option && !right : false
@@ -211,7 +246,7 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
                 type="button"
                 disabled={verdict !== null}
                 onClick={() => choose(option)}
-                className={`min-h-tap border-rule px-3 font-mono text-step-1 tabular-nums transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                className={`min-h-tap border-rule px-3 py-2.5 text-start font-body text-step-0 leading-snug transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
                   right
                     ? 'border-red bg-red text-paper'
                     : wrongPick
@@ -219,13 +254,13 @@ export function KitRun({ questions, seed }: { questions: KitQuestion[]; seed: nu
                       : 'border-ink text-ink'
                 }`}
               >
-                <bdi dir="ltr">{option}</bdi>
+                {option}
               </button>
             )
           })}
         </div>
 
-        {verdict && (
+        {verdict && verdict.noteHe && (
           <p className="mt-2 font-body text-step--1 leading-relaxed text-muted">{verdict.noteHe}</p>
         )}
       </div>

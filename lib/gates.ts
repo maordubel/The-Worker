@@ -92,9 +92,9 @@ export const GATES: readonly Gate[] = [
   },
   {
     number: 7,
-    href: '/kits',
+    href: '/crest',
     title: 'gate.7',
-    latin: 'ALL-TIME KITS · SOUTH',
+    latin: 'THE CREST · SOUTH',
     plate: 'plain',
     stain: 'c',
   },
@@ -105,6 +105,14 @@ export const GATES: readonly Gate[] = [
     latin: 'REBUILD THE GOAL · SOUTH-WEST',
     plate: 'rays',
     stain: 'a',
+  },
+  {
+    number: 10,
+    href: '/tik',
+    title: 'gate.10',
+    latin: 'MEMBER BOOK · WEST',
+    plate: 'plain',
+    stain: 'b',
   },
   {
     number: 11,

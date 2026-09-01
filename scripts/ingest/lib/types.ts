@@ -315,6 +315,14 @@ export type StagedCrestVersion = Fact & {
   toYear: number | null
   nameHe: string
   changeHe: string | null
+  /** which cut-out variant illustrates this stage, if any */
+  imageKey: string | null
+  /** the founding year printed on the badge */
+  yearOnBadge: number | null
+  hasKeter: boolean
+  stars: number
+  noteHe: string
+  sport: Sport
 }
 
 /* ------------------------------------------------------------- fan culture */

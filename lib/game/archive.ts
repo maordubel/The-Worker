@@ -158,6 +158,14 @@ export const archive = {
     toYear: number | null
     nameHe: string
     changeHe: string | null
+    /** which cut-out variant in /public/brand/crests illustrates this stage, if any */
+    imageKey: string | null
+    /** the founding year printed on the badge — 1927 until 2015, 1923 after */
+    yearOnBadge: number | null
+    /** the sponsor's name sat INSIDE the crest, 2001—2007 only */
+    hasKeter: boolean
+    stars: number
+    noteHe: string
   }>(crestsFile),
   associationRoles: load<{
     personNameHe: string

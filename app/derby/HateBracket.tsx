@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 
 import { EnemyPlate } from '@/components/hate/EnemyPlate'
+import { Punch } from '@/components/play/Punch'
 import { Num } from '@/components/ui/Num'
 import { ShareRow } from '@/components/share/ShareRow'
 import {
@@ -147,6 +148,7 @@ function Verdict({
 
   return (
     <div className="mt-stack">
+      <Punch />
       <div className="border-b-rule border-ink pb-2">
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           THE VERDICT

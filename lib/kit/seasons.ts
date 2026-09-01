@@ -41,7 +41,10 @@ export function seasonKits(): SeasonKit[] {
       collar: row.collar as CollarId,
       collarInk: row.collarInk as KitColour,
       sponsorHe: row.sponsorHe,
-      makerHe: null,
+      // Lettered, never traced. Naming the maker of a kit is a fact about the kit;
+      // reproducing another company's trademark artwork is a different thing, and this
+      // project letters the name in its own Latin face instead.
+      makerHe: row.makerHe,
       nameset: DEFAULT_SPEC.nameset as NamesetId,
       number: null,
       shorts: row.shorts as KitColour,

@@ -11,12 +11,21 @@ import { t, type MessageKey } from '@/lib/i18n'
  * CHALLENGEABLE instead of merely announced, and a challenge is the only kind of link a
  * football supporter forwards.
  */
-export type ShareKind = 'hate' | 'trivia' | 'kit' | 'lineup' | 'memory' | 'goal' | 'timeline'
+export type ShareKind =
+  | 'hate'
+  | 'trivia'
+  | 'kit'
+  | 'crest'
+  | 'lineup'
+  | 'memory'
+  | 'goal'
+  | 'timeline'
 
 const ROUTE: Record<ShareKind, string> = {
   hate: '/derby',
   trivia: '/trivia',
   kit: '/kits/build',
+  crest: '/crest',
   lineup: '/lineup',
   memory: '/memory',
   goal: '/goal',

@@ -8,6 +8,7 @@ import { HUD } from '@/components/play/HUD'
 import { StageCard } from '@/components/play/StageCard'
 import { Num } from '@/components/ui/Num'
 import { ShareRow } from '@/components/share/ShareRow'
+import { Punch } from '@/components/play/Punch'
 import {
   NEW_SESSION,
   RUN_LENGTH,
@@ -275,7 +276,8 @@ function Result({ session, seed }: { session: Session; seed: number }) {
 
   return (
     <div className="mt-stack animate-slam">
-      <div className="border-rule border-ink bg-ink p-6 text-center">
+      <Punch />
+        <div className="border-rule border-ink bg-ink p-6 text-center">
         <p className="font-latin text-[10px] font-bold tracking-[0.28em] text-red" dir="ltr">
           {out ? 'OUT OF LAMPS' : 'RUN COMPLETE'}
         </p>

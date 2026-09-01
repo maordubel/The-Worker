@@ -1,89 +1,88 @@
-# The Worker — delta 4, 1 Sep 2026
+# The Worker — delta 5, 1 Sep 2026
 
-Unzip over the repo root, delete what `DELETE-THESE.txt` lists, then
-`npm run typecheck && npm run test && npm run build`.
+## ⚠ קודם כל — התקלה בבילד
 
-**217 tests · build green · responsive clean · 0 yellow pixels** — including a scan of
-all 32 season kits drawn at once.
+הבילד נפל על `app/kits/build/KitChallengeBoard.tsx`. הקובץ הזה הוחלף ב-`KitRun.tsx`
+בדלתא הקודמת, אבל הוא נשאר אצלך. **מחק את השאריות לפני שאתה בונה:**
 
----
+```bash
+git rm -f app/kits/build/KitChallengeBoard.tsx \
+          app/trivia/TriviaRound.tsx \
+          app/trivia/summary/ShareCard.tsx \
+          app/trivia/summary/page.tsx \
+          components/press/StoryCard.tsx 2>/dev/null
+rm -rf app/trivia/summary
+```
 
-## 1 · הדירוג שלך, מילה במילה
+Then unzip this over the repo root and:
 
-`content/manual/enemies.json` — **56 rows, `terraceRank` 1–56 is your order.** Not an
-editorial guess, and no future session may "correct" it (CLAUDE.md rule 18).
+```bash
+npm run typecheck && npm run test && npm run build
+```
 
-Both corrections applied: **ים מדר** and **אמיר גרוס כבירי**.
-The six extras sit at 51–56. Every row carries your charge in the terrace's voice, what
-a source states, and the source URL.
-
-Research found the thread behind three of your extras: **משחק השרוכים, 2.5.1998** —
-Beit She'an lost 3–2 to Beitar at a neutral ground, Tayeb tied his laces at midfield as
-the equaliser went in. Tayeb, Meir Cohen and Beit She'an all trace to that night.
-
-Three rows have no sourceable detail and print the charge alone rather than an invented
-record: וויצ'יץ', ארל ויליאמס, and **אמיר גולה — no source anywhere ties him to injuring
-שלום תקוה. A rough date or competition from you would close it.**
-
-## 2 · משחק. לא טופס.
-
-`lib/game/session.ts` is the loop now, and it is shared:
-
-- **אין כפתור "הבא"** — a right answer advances itself after 900ms.
-- **הריצה לא מנווטת בכלל.** All twelve questions are dealt at once (answers stripped on
-  the server) and played on one screen. A page transition is a full stop.
-- **שלושה שלבים** that escalate, with a full-bleed card naming the new rule.
-- **שלושה פנסים.** Wrong costs one. Zero ends the run.
-- **מכפיל רצף** 1×→4×, and a clock that tightens **20s → 15s → 11s**. Fast pays more.
-- **תנועה**: points burst on a hit, the plate shakes on a miss, the stage card slams in.
-  All off under `prefers-reduced-motion`.
-- Game screens run `<Screen chrome={false}>` — no masthead, no footer. Those were eating
-  a third of a phone screen.
-
-Live on **gate 2 (טריוויה)** and **gate 4 (אתגר החולצה)**.
-
-## 3 · 32 חולצות עונה, מהתמונות ששלחת
-
-`content/manual/kit-designs.json` — **this closes the oldest hole in the project.**
-CLAUDE.md carried a line for weeks saying no source stated the cut of any season, so the
-shirt was drawn plain and the screen admitted it. Your references changed that: 32 season
-kits, every field read off a picture, with a source on every row.
-
-Five new cuts had to be added to draw them: **פס חזה** (2002/03 KETER), **רבעים**
-(מ.שקוביץ), **אלכסונים דקים** (the adidas Tiberias shirt), **שני פסים** (CAL 99/00),
-**כתפיים** (2011/12, 2020/21).
-
-- **בית החולצות** now opens on the club's real history, newest first — tap 1993/94 and
-  the Diadora quarters appear. There is a **הגרל חולצה** button.
-- **`KitStrip`** draws the full kit — shirt, shorts, **a pair of socks** — because every
-  reference you sent shows a strip.
-- **גייט 4 is a new game**: a drawn kit, four seasons, which one? Difficulty is derived —
-  a one-off cut is easy, plain red in the plain-red years is hard, because only the
-  sponsor separates them. Runs on the same loop.
-
-One deliberate omission: the 1988/89 VISA block carries a colour the brand forbids
-outright, so that sponsor is lettered as text like every other sponsor in the app.
-
-`colours-of-football.com` returns 403 to automated reads. I did not circumvent it — your
-screenshots are the source, and the row says so.
-
-## 4 · הסטוריז — שש התבניות
-
-`lib/share/story.ts` rebuilt on `The Worker - Story Templates.dc.html`: five grounds
-(`score` cream · `grass` · `ink` · `kit` silkscreen · `year` vermilion), each
-**headline · one graphic · credit strip**, with the handoff's **260px safe zone** top and
-bottom. Type is skewed and printed twice — ink under at a hard offset, colour over. That
-is the second plate, not a drop shadow.
-
-The kit template draws your actual shirt from the same path data the app uses, so the
-shirt on screen and the shirt on the story can never drift apart. Trivia gets the
-twelve-mark punch grid.
+**227 tests · build green · responsive clean · 0 yellow pixels** across 13 routes.
 
 ---
 
-## Still open
+## 1 · הסמלים — שער 7 הוא עכשיו משחק הסמל
 
-- **אמיר גולה / שלום תקוה** — needs a date from you.
-- The run loop is on gates 2 and 4. Memory, lineup, goal and timeline are next.
-- **wiki.red-fans.com** still 403s — shirt numbers, chants, older grievances. Emailing
-  the Red Fans owners is the highest-value unblock left.
+שער 7 הצביע על `/kits`, בדיוק כמו שער 5. שני שערים לאותו חדר זה באג, והתמונות ששלחת
+הן מה שהוא היה צריך להיות.
+
+`scripts/brand/crests.py` חותך את שבעת הסמלים מהרקע (מילוי הצפה מהפינות, לא מפתח צבע —
+בחצי מהם דמות הפועל לבנה, ומפתח צבע היה אוכל אותה) ושומר PNG שקוף לכל אחד.
+
+`content/manual/crest-versions.json` — **תשעת השלבים שהמועדון עצמו מונה באתר שלו**, עם
+הווריאנט שמאייר כל אחד, ושתי העובדות שהמשחק שואל עליהן:
+
+- **1927 עד 2015, 1923 מאז.** התיקון תוארך ויוחס: הוא בא בעקבות מחקר של ד״ר אייל גרטמן
+  וכפיר פרנקל, שני אוהדי הפועל, שאיתרו בארכיון מכון וינגייט את **כרטיס החבר מספר 2 של
+  אברהם אשני מ-3 באוקטובר 1923**. עד אז הסמל נשא 1927 — וזה לא היה סתם טעות: 1923 היא
+  ההיווסדות, 1926 ההקמה מחדש, ו-1927 המיזוג עם אלנבי ת״א שנתן למועדון את צורתו המודרנית.
+- **"כתר" בתוך הסמל, 2001—2007 בלבד.** לא רק על החולצה — בתוך הסמל ובתוך שם המועדון.
+
+**הכתר הצהוב:** הווריאנט הזה **לא נשלח כתמונה**. הוא נושא 912 פיקסלים בטווח הגוון האסור,
+ולחוק 8 אין פטור לאמנות. העובדה נשמרת בטקסט ב-`noteHe` והשאלה נשאלת במילים — האפליקציה
+אומרת את העובדה בלי לצייר אותה. יש טסט שמוודא שהקובץ הזה לא קיים.
+
+שני שלבים (1997—2000, 2007—2008) בלי וריאנט מצולם בחומרים — השאלה שלהם מדפיסה את השנים
+גדול במקום לשאול מסמל של שלב אחר.
+
+## 2 · המלבישות
+
+**המידע נכנס, הלוגואים לא.** לכל עונה יש עכשיו יצרן במאגר, והוא **מוטבע באותיות** במשבצת
+26×12 בחזה־שמאל שה-handoff מגדיר — בדיוק כמו שהחולצות ההיסטוריות עשו. לצייר את הסמלים של
+נייקי, פומה, אמברו ומקרון זה שעתוק סימן מסחרי של חברות אחרות, וזה קו שאני לא חוצה. לנקוב
+בשם היצרן של חולצה זו עובדה על החולצה; לשעתק את הלוגו זה משהו אחר.
+
+**המחקר תיקן שתי טעויות שלי:**
+- **1978/79 לא הייתה אמברו** — היא הייתה מיוצרת בבית, בלי יצרן ממותג.
+- **1997/98 הייתה נייקי, לא דיאדורה** — התקופה של דיאדורה הסתיימה ב-1996/97.
+
+ונמצאה חולצת פומה/סוזוקי עם הסאש: **1992/93**, העונה היחידה של פומה לפני דיאדורה.
+33 חולצות עונה במאגר עכשיו.
+
+## 3 · שער 10 — פנקס חבר
+
+`Gate 10 and States.dc.html`, מיושם. וזו החלטת מוצר, לא פריסה: **הפרופיל אינו לוח הישגים.**
+
+- כרטיס ממוספר עם מספר התיק מודפס אנכית על הספח השחור, לאורך קו הניקוב
+- תשעים משבצות לרבעון. **כל ריצה שנגמרת מחתימה את היום** — פעם אחת ביום, כמה שתשחק
+- **המספר הגדול היחיד בעמוד הוא מספר התיקונים שאושרו.** תיקון נרשם כ"ממתין לאישור
+  הארכיון" — האפליקציה לא מעמידה פנים שהיא מאשרת אותו בעצמה
+- החולצה שלך עם המספר שלך
+- אין בעמוד שום דבר שאפשר לקנות
+
+הפנקס יושב ב-`localStorage`, שזו הצורה הכנה לו היום: אין מערכת חשבונות, אז הפנקס שייך
+למכשיר כמו שפנקס נייר שייך לכיס.
+
+`התיק` בתפריט התחתון מצביע עליו עכשיו.
+
+---
+
+## פתוח
+
+- **אמיר גולה / שלום תקווה** — עדיין אין מקור. תאריך גס ממך יסגור את זה.
+- **הכוכב השני** — מתי בדיוק נוסף לא מתועד בשום מקום. ידוע שב-7.2008 הוא כבר היה שם,
+  ושהכלל בליגה הוא כוכב לכל חמש אליפויות.
+- **wiki.red-fans.com** עדיין 403. מייל לבעלי הוויקי הוא עדיין הפתיחה הכי שווה בפרויקט.

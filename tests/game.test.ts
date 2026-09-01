@@ -1,3 +1,6 @@
+import { readdirSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import { CONFIDENCE_FLOOR, archive, footballPeople } from '@/lib/game/archive'
@@ -40,6 +43,15 @@ import {
 import { verifiedKitSeasons } from '@/lib/game/kits'
 import { dealKitChallenge, gradeKitChallenge, kitChallengeCount } from '@/lib/game/kitChallenge'
 import { buildKitRound, gradeKit } from '@/lib/game/kitRun'
+import { buildCrestRound, gradeCrest } from '@/lib/game/crestRun'
+import {
+  QUARTER_SLOTS,
+  approvedCount,
+  emptyBook,
+  fileCorrection,
+  punchToday,
+  quarterGrid,
+} from '@/lib/game/member'
 import {
   seasonLabelOf,
   seasonStartYear,
@@ -935,5 +947,94 @@ describe('מערכת השכבות — the kit stack', () => {
       if (name === 'deep') continue
       expect(value, name).toMatch(/^rgb\(var\(--/)
     }
+  })
+})
+
+const ROOT = process.cwd()
+
+describe('סמל המועדון — gate 7', () => {
+  it('records the nine stages the club itself names', () => {
+    expect(archive.crests).toHaveLength(9)
+    const first = archive.crests[0]
+    const last = archive.crests[archive.crests.length - 1]
+    expect(first?.fromYear).toBe(1923)
+    expect(last?.toYear).toBeNull()
+  })
+
+  it('holds the 1927 → 1923 correction, which is the point of the whole gate', () => {
+    const before = archive.crests.find((row) => row.fromYear === 2008)
+    const after = archive.crests.find((row) => row.fromYear === 2015)
+    expect(before?.yearOnBadge).toBe(1927)
+    expect(after?.yearOnBadge).toBe(1923)
+    // and the correction is attributed, not asserted
+    expect(after?.noteHe).toContain('1923')
+    expect(after?.sourceUrl).toBeTruthy()
+  })
+
+  it('puts the sponsor inside the crest for exactly one era', () => {
+    const withKeter = archive.crests.filter((row) => row.hasKeter)
+    expect(withKeter).toHaveLength(1)
+    expect(withKeter[0]?.fromYear).toBe(2001)
+    expect(withKeter[0]?.toYear).toBe(2007)
+  })
+
+  it('never points at a crest image the repo does not ship', () => {
+    // the yellow-KETER variant is DATA ONLY — rule 8 has no artwork exemption, so the
+    // fact lives in noteHe and no file is written for it
+    const shipped = readdirSync(join(ROOT, 'public/brand/crests')).map((name) =>
+      name.replace(/\.png$/, ''),
+    )
+    expect(shipped).not.toContain('keter-yellow')
+    for (const row of archive.crests) {
+      if (row.imageKey === null) continue
+      expect(shipped, `${row.fromYear}: ${row.imageKey}`).toContain(row.imageKey)
+    }
+  })
+
+  it('deals four real options and grades on the server', () => {
+    const round = buildCrestRound(7)
+    expect(round.length).toBe(RUN_LENGTH)
+    round.forEach((question, index) => {
+      expect(new Set(question.options).size).toBe(4)
+      const verdict = gradeCrest(7, index, '__timeout__')
+      expect(verdict).not.toBeNull()
+      expect(question.options).toContain(verdict?.answer)
+      expect(gradeCrest(7, index, verdict?.answer ?? '')?.correct).toBe(true)
+    })
+  })
+
+  it('ramps the round instead of dealing it flat', () => {
+    const ladder = buildCrestRound(7).map((question) => question.difficulty)
+    for (let index = 1; index < ladder.length; index += 1) {
+      expect(ladder[index]).toBeGreaterThanOrEqual(ladder[index - 1] as number)
+    }
+  })
+})
+
+describe('פנקס חבר — gate 10', () => {
+  it('punches a day once however much you play, and never erases one', () => {
+    let book = emptyBook()
+    book = punchToday(book)
+    const after = punchToday(punchToday(book))
+    expect(after.punches).toHaveLength(1)
+    expect(after.punches).toEqual(book.punches)
+  })
+
+  it('files a correction as pending — only the archive may approve one', () => {
+    const book = fileCorrection(emptyBook(), 'GATE 7 · CREST', 'שנת הייסוד')
+    expect(book.corrections[0]?.status).toBe('pending')
+    expect(approvedCount(book)).toBe(0)
+  })
+
+  it('prints ninety slots, newest last', () => {
+    const grid = quarterGrid(punchToday(emptyBook()))
+    expect(grid).toHaveLength(QUARTER_SLOTS)
+    expect(grid[grid.length - 1]).toBe(true)
+    expect(grid[0]).toBe(false)
+  })
+
+  it('carries no score field at all — the profile is not a scoreboard', () => {
+    const book = emptyBook()
+    expect(Object.keys(book).some((key) => /score|points|lamps/i.test(key))).toBe(false)
   })
 })
