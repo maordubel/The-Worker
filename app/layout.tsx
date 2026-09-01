@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
-import { Archivo, Courier_Prime, Heebo, Karantina, Miriam_Libre, Suez_One } from 'next/font/google'
+const _f = (o: { variable: string; [k: string]: unknown }) => ({ variable: o.variable, className: '' })
+const Suez_One = _f, Miriam_Libre = _f, Heebo = _f, Courier_Prime = _f, Karantina = _f, Archivo = _f
 import { BRAND } from '@/lib/brand'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
 import './globals.css'

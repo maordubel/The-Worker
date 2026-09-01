@@ -1,12 +1,9 @@
-'use server'
-
-import { judge, judgePair, type CardVerdict, type PairVerdict, type Verdict } from '@/lib/game/blackfile'
-
-/** Server authority. The truth of a card never travels to the client before it is earned. */
-export async function submitCard(slug: string, answer: Verdict): Promise<CardVerdict | null> {
-  return judge(slug, answer)
-}
-
-export async function submitPair(id: string, pickedSlug: string): Promise<PairVerdict | null> {
-  return judgePair(id, pickedSlug)
-}
+/**
+ * TOMBSTONE — retired 1.9.2026, moved to `app/derby/file/actions.ts`.
+ *
+ * Left inert so a tree that still carries the old path compiles. Nothing imports it.
+ * Note there is deliberately no server-action directive at the top of this file: an
+ * empty server-action module is a build error in itself, and a tombstone must never be
+ * the thing that breaks the build.
+ */
+export {}
