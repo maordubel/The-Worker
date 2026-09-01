@@ -1,22 +1,36 @@
-# The Worker (הפועל)
+# תיקון הבילד — הרץ פקודה אחת
 
-A Hebrew game built on one shared historical data engine for Hapoel Tel Aviv:
-trivia, historical lineup building, memory, and kit reconstruction.
+הבילד ב-Vercel נופל על `app/kits/build/KitChallengeBoard.tsx`. הקובץ הזה הוחלף
+ב-`KitRun.tsx` בדלתא קודמת, אבל הוא עדיין ב-git אצלך — ולכן `next build` מקמפל אותו
+ונופל על `submitKit` שכבר לא קיים. אצלי הכל ירוק כי אצלי הוא נמחק.
 
-- Architecture and data model — `docs/00-architecture.md`
-- Visual identity — `brand/THE-WORKER-BRAND-SPEC.md` (authority) · `docs/01-brand-concept.md` (why)
-- Open data questions — `docs/02-data-questions.md`
-- Ingestion layer — `docs/03-ingestion.md`
-- Verified research and open conflicts — `docs/04-verified-research.md`
-- Schema — `supabase/migrations/`
+## מה לעשות
 
-## Setup
+פרוס את הזיפ הזה על שורש הריפו והרץ:
 
 ```bash
-cp .env.example .env.local     # fill in the Supabase keys
-npm install
-npm run dev
+bash scripts/cleanup-retired.sh
+git commit -am "remove retired files"
+git push
 ```
 
-Stack: Next.js (App Router) · TypeScript strict · Tailwind + design tokens ·
-Supabase (Postgres, RLS, Storage) · Vercel · Sentry.
+זהו. הסקריפט אידמפוטנטי — אפשר להריץ אותו אחרי כל דלתא, וגם פעמיים ברצף.
+
+## מה זה מוחק
+
+| קובץ | הוחלף ב־ |
+|---|---|
+| `app/kits/build/KitChallengeBoard.tsx` | `app/kits/build/KitRun.tsx` |
+| `app/trivia/TriviaRound.tsx` | `app/trivia/TriviaRun.tsx` |
+| `app/trivia/summary/` (כל התיקייה) | הריצה נגמרת במקום |
+| `components/press/StoryCard.tsx` | `lib/share/story.ts` |
+| `app/derby/BlackFile.tsx` · `actions.ts` | `app/derby/file/` |
+| `app/icon.svg` | `public/brand/logo-192.png` |
+
+## ולמה זה לא יקרה שוב
+
+`tests/guards.test.ts` קורא את רשימת הקבצים מתוך הסקריפט **ונכשל אם אחד מהם עדיין
+בעץ**. כלומר `npm run test` נופל אצלך במחשב לפני שהוא נופל ב-Vercel, וההודעה אומרת בדיוק
+איזו פקודה להריץ. שתי הרשימות הן אותה רשימה, אז שורה שנוספת לסקריפט נאכפת אוטומטית.
+
+229 טסטים עוברים אצלי אחרי התיקון.
