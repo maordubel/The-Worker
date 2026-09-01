@@ -475,6 +475,23 @@ const SPECS: FileSpec[] = [
     }),
   },
   {
+    file: 'grievances.json',
+    entity: 'grievances',
+    map: (row, ctx) => ({
+      slug: req(row, 'slug'),
+      kind: req(row, 'kind') as 'event',
+      titleHe: req(row, 'titleHe'),
+      happenedOn: str(row, 'happenedOn'),
+      dateConfirmed: bool(row, 'dateConfirmed'),
+      personNameHe: str(row, 'personNameHe'),
+      bodyHe: req(row, 'bodyHe'),
+      feeEur: num(row, 'feeEur'),
+      toClubHe: str(row, 'toClubHe'),
+      sport: sport(row),
+      ...fact(row, ctx),
+    }),
+  },
+  {
     file: 'shirt-numbers.json',
     entity: 'shirtNumbers',
     map: (row, ctx) => ({

@@ -2,6 +2,8 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { extname, join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+import { PNG } from 'pngjs'
+
 import { isYellow, isYellowHex } from '@/lib/isYellow'
 
 /**
@@ -266,6 +268,51 @@ describe('brand acceptance — system rules', () => {
         const isTranslated = /\bt\(/.test(line) || /aria-label=\{/.test(line)
         expect(isTranslated, `${path}: ${line.trim()}`).toBe(true)
       }
+    }
+  })
+})
+
+describe('הסמל — the badge ships without a yellow pixel in it', () => {
+  // Rule 8 has no exemption for artwork, so the drawing itself is scanned, not just
+  // the tokens. `scripts/brand/badge.py` rebuilds these from Maor's original and
+  // rotates the few dark edge pixels that land in the band onto a warm brown at the
+  // same saturation and value; if someone re-exports the badge without that pass, this
+  // fails before it reaches a screen.
+  const BADGES = ['logo.png', 'logo-512.png', 'logo-192.png', 'logo-96.png', 'logo-48.png', 'logo-32.png']
+
+  for (const name of BADGES) {
+    it(`${name} has no yellow pixel`, () => {
+      const png = PNG.sync.read(readFileSync(join(process.cwd(), 'public/brand', name)))
+      let hits = 0
+      let sample = ''
+      for (let i = 0; i < png.data.length; i += 4) {
+        const alpha = png.data[i + 3] as number
+        if (alpha < 8) continue
+        const r = png.data[i] as number
+        const g = png.data[i + 1] as number
+        const b = png.data[i + 2] as number
+        if (!isYellow(r, g, b)) continue
+        hits += 1
+        if (!sample) sample = `rgb(${r} ${g} ${b}) at index ${i / 4}`
+      }
+      expect(hits, `${name}: ${sample}`).toBe(0)
+    })
+  }
+
+  it('renders the badge unoptimized, so no re-encoder can invent one', () => {
+    // Next re-encodes to WebP/AVIF, both of which subsample chroma. On a 62px render
+    // that pushed edge pixels back into the band — a clean file is not enough on its
+    // own, the pipeline has to leave it alone.
+    const badge = readFileSync(join(process.cwd(), 'components/ui/Badge.tsx'), 'utf8')
+    expect(badge).toMatch(/\bunoptimized\b/)
+    // The favicon in layout.tsx points at the same PNG and is fine — metadata icons
+    // are served straight off /public. What must not exist is a second <Image> of it.
+    for (const { path, text } of SOURCES) {
+      if (path.endsWith('Badge.tsx')) continue
+      expect(
+        /src=\{?['"`]\/brand\/logo-\d+\.png/.test(text),
+        `${path} renders the badge outside Badge.tsx`,
+      ).toBe(false)
     }
   })
 })

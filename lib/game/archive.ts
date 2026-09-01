@@ -2,6 +2,7 @@ import 'server-only'
 
 import clubsFile from '@/content/manual/clubs.json'
 import fanCultureFile from '@/content/manual/fan-culture.json'
+import grievancesFile from '@/content/manual/grievances.json'
 import shirtNumbersFile from '@/content/manual/shirt-numbers.json'
 import songsFile from '@/content/manual/songs.json'
 import sponsorYearsFile from '@/content/manual/sponsor-years.json'
@@ -161,6 +162,16 @@ export const archive = {
     toDate?: string | null
     replacedByNameHe?: string | null
   }>(rolesFile),
+  grievances: load<{
+    slug: string
+    kind: 'crossing' | 'myth' | 'event'
+    titleHe: string
+    happenedOn: string | null
+    personNameHe?: string | null
+    bodyHe: string
+    feeEur?: number | null
+    toClubHe?: string | null
+  }>(grievancesFile),
   shirtNumbers: load<{
     shirtNumber: number
     seasonLabel: string

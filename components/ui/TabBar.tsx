@@ -17,15 +17,23 @@ import { t, type MessageKey } from '@/lib/i18n'
 type Tab = { key: MessageKey; href: string; match: string; icon: 'wall' | 'game' | 'tower' | 'file' }
 
 /**
- * Four destinations, named the way the ground is named. The wall is where the gate
- * plan hangs; gate 2 is trivia; gate 5 is the curva; gate 11 is the away end. The bar
- * is a shortcut to four gates, not a second navigation system competing with them.
+ * Four WINGS of the ground, not four shortcuts.
+ *
+ * The previous bar pointed at three arbitrary gates and the wall, which is why it read
+ * as noise: the gate plan already navigates to gates, so a second list of gates is a
+ * competing system saying nothing new. These four are the only top-level places that
+ * are not a gate:
+ *
+ *   בלומפילד  the ground — where the gate plan hangs
+ *   הארכיון   the record behind the games: kits, seasons, sources
+ *   אוסישקין  the basketball wing — a different club, kept apart by rule 14
+ *   התיק      the player's own file: last result, rank, share card
  */
 const TABS: Tab[] = [
-  { key: 'tab.wall', href: '/', match: '/', icon: 'wall' },
-  { key: 'tab.gate2', href: '/trivia?seed=3', match: '/trivia', icon: 'game' },
-  { key: 'tab.gate5', href: '/kits', match: '/kits', icon: 'file' },
-  { key: 'tab.gate11', href: '/derby', match: '/derby', icon: 'tower' },
+  { key: 'tab.ground', href: '/', match: '/', icon: 'wall' },
+  { key: 'tab.archive', href: '/kits', match: '/kits', icon: 'file' },
+  { key: 'tab.ussishkin', href: '/ussishkin', match: '/ussishkin', icon: 'tower' },
+  { key: 'tab.file', href: '/trivia/summary', match: '/trivia/summary', icon: 'game' },
 ]
 
 function TabIcon({ icon, active }: { icon: Tab['icon']; active: boolean }) {

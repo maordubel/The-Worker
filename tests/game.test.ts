@@ -12,6 +12,7 @@ import {
   rankFor,
 } from '@/lib/game/score'
 import { buildBoard } from '@/lib/game/memory'
+import { dealFile, dealPairs, judge, judgePair } from '@/lib/game/blackfile'
 import {
   OPTION_COUNT,
   ROUND_LENGTH,
@@ -633,6 +634,56 @@ describe('the research-master corpus', () => {
     // A title with no melody and no season is archive material, not a question.
     for (const row of archive.songs) {
       if (row.songType === 'player_song') expect(row.personNameHe).toBeTruthy()
+    }
+  })
+})
+
+describe('התיק השחור — gate 11', () => {
+  it('grades a crossing as crossed and a myth as not', () => {
+    // The two myth rows exist because the belief is widespread and the record is not.
+    expect(judge('vermouth-2015', 'crossed')?.correct).toBe(true)
+    expect(judge('vermouth-2015', 'did_not')?.correct).toBe(false)
+    expect(judge('gershon-beitar', 'did_not')?.correct).toBe(true)
+    expect(judge('zahavi-palermo', 'did_not')?.correct).toBe(true)
+    // Gershon went to Beitar, not Maccabi — the card says so.
+    expect(judge('gershon-beitar', 'did_not')?.toClubHe).toBe('בית"ר ירושלים')
+  })
+
+  it('never puts the answer in the dealt payload', () => {
+    const dealt = dealFile(11)
+    expect(dealt.length).toBeGreaterThan(3)
+    expect(JSON.stringify(dealt)).not.toContain('crossed')
+    expect(JSON.stringify(dealt)).not.toContain('did_not')
+  })
+
+  it('orders two dated events by their real dates', () => {
+    const pairs = dealPairs(11)
+    expect(pairs.length).toBeGreaterThan(2)
+    for (const pair of pairs) {
+      const verdict = judgePair(pair.id, pair.aSlug)
+      expect(verdict).not.toBeNull()
+      const first = verdict?.firstSlug
+      expect([pair.aSlug, pair.bSlug]).toContain(first)
+      // The earlier date really is earlier.
+      const [a, b] = [verdict?.aDate as string, verdict?.bDate as string]
+      expect(first === pair.aSlug ? a <= b : b <= a).toBe(true)
+    }
+  })
+
+  it('keeps the basketball figures out of the football file', () => {
+    // Two of the names Maor listed have no documented connection to the football club:
+    // rule 14 is what keeps them out, not editorial taste.
+    const names = archive.grievances
+      .map((row) => `${row.personNameHe ?? ''} ${row.titleHe} ${row.bodyHe}`)
+      .join(' ')
+    expect(names).not.toContain('עופר ינאי')
+    expect(names).not.toContain('שאול אייזנברג')
+  })
+
+  it('carries a source on every card in the file', () => {
+    for (const row of archive.grievances) {
+      expect(row.sourceTitle.length, row.slug).toBeGreaterThan(0)
+      expect(row.confidence, row.slug).toBeGreaterThanOrEqual(CONFIDENCE_FLOOR)
     }
   })
 })

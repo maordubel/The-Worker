@@ -28,25 +28,30 @@ export function GatePlate({ gate }: { gate: Gate }) {
       aria-label={`${t('gate.aria')} ${gate.number} — ${t(gate.title)}`}
       className={`group relative block overflow-hidden border-hair border-ink transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
         away ? 'bg-sign/[.07]' : 'bg-sheet'
-      } ${curva ? 'sm:col-span-2' : ''}`}
+      }`}
     >
       <div className={`pointer-events-none absolute inset-0 stain-${gate.stain}`} aria-hidden="true" />
 
       {/* 1 · the bilingual plate. It sits on solid paper so the sunburst behind the
           number cannot run up under the lettering — a plate is printed over the field,
           not through it. */}
-      <div className={`relative flex items-baseline justify-between border-b-hair border-ink px-3 py-1.5 ${
+      <div className={`relative flex items-baseline justify-between border-b-hair border-ink px-2.5 py-1.5 ${
         away ? 'bg-sign/[.04]' : 'bg-sheet'
       }`}>
-        <span className="font-latin text-[9px] font-bold tracking-[0.2em] text-sign" dir="ltr">
-          {curva ? 'GATE · THE CURVA' : 'GATE'}
+        {/* שער on the right, the Latin on the left. In an RTL row the FIRST child
+            lands on the right, so the Hebrew is written first. */}
+        <span className="font-display text-[13px] leading-none text-sign">{t('gate.word')}</span>
+        <span
+          className="font-latin text-[8.5px] font-bold tracking-[0.18em] text-sign"
+          dir="ltr"
+        >
+          {curva ? 'ULTRAS HAPOEL' : 'GATE'}
         </span>
-        <span className="font-display text-[13px] text-sign">{t('gate.word')}</span>
       </div>
 
       {/* 2 · the number well */}
       <div
-        className={`relative flex items-center justify-center ${curva ? 'h-[168px]' : 'h-[126px]'}`}
+        className={`relative flex items-center justify-center ${curva ? 'h-[140px] sm:h-[168px]' : 'h-[104px] sm:h-[126px]'}`}
       >
         {/* rays — gates 2, 5 and 8 only, never on the away end */}
         {(gate.plate === 'rays' || curva) && (
@@ -68,7 +73,7 @@ export function GatePlate({ gate }: { gate: Gate }) {
         <span
           aria-hidden="true"
           className={`plate-shift absolute font-poster leading-none text-sign ${
-            curva ? 'text-[130px]' : 'text-[96px]'
+            curva ? 'text-[104px] sm:text-[130px]' : 'text-[78px] sm:text-[96px]'
           }`}
         >
           <Num>{gate.number}</Num>
@@ -76,7 +81,7 @@ export function GatePlate({ gate }: { gate: Gate }) {
         <span
           className={`plate-top relative font-poster leading-none ${
             away ? 'text-sign' : 'text-red'
-          } ${curva ? 'text-[130px]' : 'text-[96px]'}`}
+          } ${curva ? 'text-[104px] sm:text-[130px]' : 'text-[78px] sm:text-[96px]'}`}
         >
           <Num>{gate.number}</Num>
         </span>
@@ -84,19 +89,21 @@ export function GatePlate({ gate }: { gate: Gate }) {
 
       {/* gate 5 gets the flag; nobody else does */}
       {curva && gate.callHe && (
-        <div className="relative mx-3 mb-2 flex h-8 items-center justify-center">
+        <div className="relative mx-2.5 mb-2 flex h-7 items-center justify-center sm:h-8">
           <div aria-hidden="true" className="flag absolute inset-0" />
-          <span className="relative font-poster text-[19px] tracking-[0.28em] text-paper">
+          <span className="relative font-poster text-[15px] tracking-[0.22em] text-paper sm:text-[19px] sm:tracking-[0.28em]">
             {t(gate.callHe)}
           </span>
         </div>
       )}
 
       {/* 3 · the ink foot */}
-      <div className="relative bg-ink px-3 pb-3 pt-2">
-        <div className="font-display text-[17px] leading-tight text-paper">{t(gate.title)}</div>
+      <div className="relative bg-ink px-2.5 pb-2.5 pt-2">
+        <div className="font-display text-[14px] leading-tight text-paper sm:text-[17px]">
+          {t(gate.title)}
+        </div>
         <div
-          className="mt-1 font-latin text-[8.5px] font-semibold tracking-[0.16em] text-concrete"
+          className="mt-1 font-latin text-[7.5px] font-semibold leading-snug tracking-[0.12em] text-concrete sm:text-[8.5px]"
           dir="ltr"
         >
           {gate.latin}

@@ -1,20 +1,20 @@
 # Ingestion report — all (dry-run)
 
-Started 2026-09-01T06:30:46.139Z · status **OK**
+Started 2026-09-01T07:57:40.192Z · status **OK**
 
 ## Totals
 
 | Metric | Count |
 |---|---:|
-| discovered | 1141 |
-| imported | 1124 |
+| discovered | 1155 |
+| imported | 1138 |
 | skipped | 0 |
 | rejected | 0 |
 | unresolved | 0 |
 | conflicts | 0 |
 | lowConfidence | 140 |
 | duplicatesMerged | 17 |
-| sources | 30 |
+| sources | 31 |
 
 ## Discovered
 
@@ -44,6 +44,7 @@ Started 2026-09-01T06:30:46.139Z · status **OK**
 | manual:elections | 2 |
 | manual:electionCandidates | 21 |
 | manual:membershipMilestones | 1 |
+| manual:grievances | 14 |
 | manual:shirtNumbers | 83 |
 | manual:sponsorYears | 23 |
 | manual:fanCulture | 9 |
@@ -76,6 +77,7 @@ Started 2026-09-01T06:30:46.139Z · status **OK**
 | associations | 1 |
 | associationEvents | 6 |
 | associationRoles | 8 |
+| grievances | 14 |
 | shirtNumbers | 83 |
 | sponsorYears | 23 |
 | fanCulture | 9 |
@@ -289,6 +291,7 @@ _none_
 | manual:elections.json | official | אתר עמותת הפועל אוסישקין — מצעי המועמדים ותוצאות הבחירות | http://www.hapoeluta.com/ | — | — |
 | manual:election-candidates.json | official | אתר עמותת הפועל אוסישקין — מצעי המועמדים ותוצאות הבחירות | http://www.hapoeluta.com/ | — | — |
 | manual:membership-milestones.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
+| manual:grievances.json | newspaper | מעבר מחקר ייעודי, 1.9.2026 — Ynet · Walla · Globes · Calcalist · ONE | — | — | — |
 | manual:shirt-numbers.json | wiki | ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
 | manual:sponsor-years.json | wiki | ויקיפועל — עמוד "ספונסר", דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
 | manual:fan-culture.json | wiki | ויקיפועל — מילון בלומפילד ופגישות גדר, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
@@ -322,6 +325,7 @@ _none_
 - elections.json: The first Hapoel Ussishkin association elections, from the association's own website as Maor supplied it: the double-envelope method, the full candidate list with the occupation each candidate declared, and the vote count for every candidate in both bodies. Two things in the source disagree with themselves and are recorded as conflicts rather than tidied: the envelope dates (July 2007 vs August 2008 in one sentence) and two names spelled differently in the candidate list and in the results. Turnout figures are given in the source as approximations and are stored as stated.
 - election-candidates.json: Every candidate in both bodies, with the vote count the association published and the occupation each candidate declared in their own manifesto. Names are stored exactly as the candidate list gives them; where the results table spells a name differently, the difference is a recorded conflict, not a silent correction.
 - membership-milestones.json: Arik Einstein as member #1,000 is attested by a founder in a Sport5 interview. The research document's January 2010 date is NOT sourced — and Walla reported Einstein joining in August 2007 — so the date is left unconfirmed rather than picked.
+- grievances.json: התיק השחור — documented grievances of Hapoel Tel Aviv supporters. FOOTBALL ONLY. Every row is a dated, sourced event: a transfer that happened, a court ruling, a protest that took place. Nothing here is an allegation about a person's character, and nothing is included that a source does not state. Three names Maor supplied are deliberately handled differently: Ofer Yanai and Shaul Eisenberg have no documented connection to the FOOTBALL club (both are basketball, and rule 14 keeps the sports apart), and Shimon Gershon never played for Maccabi at all — he left for Beitar Jerusalem, and he retired on medical grounds, which is not terrace material. Gershon and Zahavi are stored as `myth` rows: they are in the archive because the belief is widespread and the record says otherwise. Two things found in the record are deliberately EXCLUDED: graffiti on a public figure's family graves, and the liquidators' unproven findings about individuals. The first is desecration, not rivalry; the second is an allegation, not a fact.
 - shirt-numbers.json: Historic shirt-number holders, one row per (number, season, player). The season is never dropped: a number belongs to a season, not to a player. A season with two holders is recorded with both — a mid-season transfer is a real fact, and the question generator drops any (number, season) pair with more than one holder rather than choosing between them.
 - sponsor-years.json: The full sponsor and manufacturer chronology from the Vikipoel 'ספונסר' page, including secondary sponsors, Europe-only deals and part-season deals. Most rows are labelled with a bare year ('1998'), which is NOT a season label — it could mean 1997/98 or 1998/99, and the source does not say. Those rows carry seasonAmbiguous: true, are stored with the raw label, and are never joined to a season. They feed questions phrased by year; the season-keyed sponsor_deal table is unchanged and still owns anything asked by season.
 - fan-culture.json: Supporter culture from the Bloomfield dictionary: chants, gate customs, fence meetings and superstition. Stored as folklore, deliberately separate from match statistics — a chant is not a fact about a football match. The source also indexes sensitive song categories (שירי שואה, שירי משטרה); their existence is noted in the research document and none of that material is imported as gameplay content.

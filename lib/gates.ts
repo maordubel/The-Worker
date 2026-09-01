@@ -36,6 +36,18 @@ export type Gate = {
   callHe?: MessageKey
 }
 
+/**
+ * סדר הקיר — the order the plates are hung in, which is not the same thing as the gate
+ * numbers. The curva is full-width, so anywhere but the head of the wall it wraps and
+ * leaves a hole in the row above it. Hanging it first fills the grid exactly at two and
+ * three columns AND puts the ultras' gate at the top of the ground, which is where it
+ * belongs. The numbers themselves are untouched — they are Bloomfield's.
+ */
+export function wallOrder(gates: readonly Gate[]): readonly Gate[] {
+  const curva = gates.filter((gate) => gate.plate === 'curva')
+  return [...curva, ...gates.filter((gate) => gate.plate !== 'curva')]
+}
+
 export const GATES: readonly Gate[] = [
   {
     number: 1,

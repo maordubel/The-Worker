@@ -36,7 +36,13 @@ Read `docs/00-architecture.md` before changing anything structural.
    they cannot drift. Never a raw hex in a component. The checklist runs as
    `tests/brand.test.ts` — it fails the build, not the review.
    The **badge** (`public/brand/logo*.png`) is Maor's own artwork. It is the identity
-   everywhere — masthead, favicon, share card. Nothing re-draws it.
+   everywhere — every screen header via `components/ui/Badge.tsx`, favicon, share card.
+   Nothing re-draws it. `scripts/brand/badge.py` rebuilds the six sizes from
+   `brand/source/badge-original.png` and rotates the ~280 dark edge pixels that land in
+   the yellow band onto a warm brown at the same S and V; `Badge.tsx` renders it
+   `unoptimized`, because Next's WebP/AVIF re-encode subsamples chroma and put yellow
+   back into a 62px render of a file that scanned clean. Both are asserted in
+   `tests/brand.test.ts`.
 9. **RTL-first.** Logical properties only — no `left-*`/`right-*`, not even inside a
    comment (the guard reads source). Wrap mixed-direction runs in `<bdi>`.
    The navigation is **שערי הפועל**, Bloomfield's real gate plan (`lib/gates.ts`): a
