@@ -121,6 +121,26 @@ export type StagedGrievance = Fact & {
   sport: Sport
 }
 
+/** חולצת עונה — the CUT of one season's kit, read off a reference image. */
+export type StagedKitDesign = Fact & {
+  naturalKey: string
+  seasonLabel: string
+  variant: 'home' | 'away' | 'third'
+  makerHe: string | null
+  sponsorHe: string | null
+  base: string
+  pattern: string
+  patternInk: string
+  sleeves: string
+  sleeveInk: string
+  collar: string
+  collarInk: string
+  shorts: string
+  socks: string
+  noteHe: string
+  sport: Sport
+}
+
 /** ציטוט או קריאה — verbatim speech, with the three real distractors it ships with. */
 export type StagedCall = Fact & {
   slug: string
@@ -139,10 +159,11 @@ export type StagedEnemy = Fact & {
   slug: string
   nameHe: string
   latin: string
-  category: 'owner' | 'crossed' | 'rival'
+  category: 'owner' | 'crossed' | 'rival' | 'official'
   eraHe: string
   terraceRank: number
   chargeHe: string
+  /** empty where no source could be found — the plate then prints the charge alone */
   detailHe: string
   keyFactHe: string
   happenedOn: string | null
@@ -474,6 +495,7 @@ export type StagedBundle = {
   electionCandidates: StagedElectionCandidate[]
   membershipMilestones: StagedMembershipMilestone[]
   grievances: StagedGrievance[]
+  kitDesigns: StagedKitDesign[]
   calls: StagedCall[]
   enemies: StagedEnemy[]
   shirtNumbers: StagedShirtNumberHolding[]
@@ -509,6 +531,7 @@ export const BUNDLE_KEYS = [
   'electionCandidates',
   'membershipMilestones',
   'grievances',
+  'kitDesigns',
   'calls',
   'enemies',
   'shirtNumbers',
@@ -547,6 +570,7 @@ export function emptyBundle(): StagedBundle {
     electionCandidates: [],
     membershipMilestones: [],
     grievances: [],
+    kitDesigns: [],
     calls: [],
     enemies: [],
     shirtNumbers: [],

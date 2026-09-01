@@ -299,6 +299,45 @@ function PatternFill({
       )
     case 'halves':
       return <rect x="100" width="100" height="240" fill={ink} />
+    // — the four cuts read off the season photographs —
+    case 'chest-band':
+      // 2002/03: one band across the chest with the sponsor inside it
+      return (
+        <>
+          <rect y="56" width="200" height="34" fill={ink} />
+          <rect y="52" width="200" height="4" fill={COLOUR_VAR.ink} opacity=".25" />
+        </>
+      )
+    case 'quarters':
+      // the Diadora shirt: red panels on a white ground, quartered
+      return (
+        <>
+          <rect x="0" y="0" width="72" height="86" fill={ink} />
+          <rect x="128" y="0" width="72" height="86" fill={ink} />
+          <rect x="0" y="150" width="72" height="90" fill={ink} />
+          <rect x="128" y="150" width="72" height="90" fill={ink} />
+        </>
+      )
+    case 'diagonal':
+      // the adidas shirt: fine diagonals across the whole body
+      return (
+        <g stroke={ink} strokeWidth="1.6" fill="none">
+          {Array.from({ length: 16 }, (_, index) => (
+            <path key={index} d={`M${-120 + index * 26} 240 L${60 + index * 26} 0`} />
+          ))}
+        </g>
+      )
+    case 'twin-stripe':
+      // 1999/2000: two stripes down the front, nothing else
+      return (
+        <>
+          <rect x="72" width="11" height="240" fill={ink} />
+          <rect x="117" width="11" height="240" fill={ink} />
+        </>
+      )
+    case 'shoulder-panel':
+      // 2011/12 and 2020/21: a panel across both shoulders
+      return <path d="M54 20 H146 L146 62 Q100 78 54 62 Z" fill={ink} />
     default:
       return <rect width="200" height="240" fill={`url(#${id})`} />
   }

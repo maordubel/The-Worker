@@ -21,11 +21,20 @@ export function Screen({
   title,
   sub,
   night = false,
+  /**
+   * A game screen runs `chrome={false}`: no sign plate, no badge, no footer.
+   * A masthead is for a page you are reading. During a run the screen belongs to the
+   * run — on a 390×844 phone the header and footer were eating a third of the glass,
+   * and a third of the glass is the difference between a game and a document with
+   * buttons on it.
+   */
+  chrome = true,
   children,
 }: {
   title: string
   sub: string
   night?: boolean
+  chrome?: boolean
   children: ReactNode
 }) {
   return (
@@ -35,14 +44,22 @@ export function Screen({
           night ? 'bg-ink' : ''
         }`}
       >
-        <main id="main" className="relative flex-1 px-gutter pb-stack pt-5 md:pt-10">
+        <main
+          id="main"
+          className={`relative flex-1 px-gutter pb-stack ${chrome ? 'pt-5 md:pt-10' : 'pt-2'}`}
+        >
           {/* The lights come on over a night screen. On a paper screen the sun is
               already up and there is nothing to switch on. */}
           {night && <Floodlights />}
-          <SignPlate title={title} sub={sub} />
+          {chrome ? (
+            <SignPlate title={title} sub={sub} />
+          ) : (
+            <h1 className="sr-only">{title}</h1>
+          )}
           {children}
         </main>
 
+        {chrome && (
         <footer className="bg-ink px-gutter py-5">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <p className="font-mono text-[11px] text-concrete">
@@ -51,6 +68,7 @@ export function Screen({
             <BuiltByDubel />
           </div>
         </footer>
+        )}
 
         {/* Space for the fixed bar + the iOS home indicator. */}
         <div

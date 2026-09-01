@@ -210,6 +210,7 @@ export function LineupBoard({
             params={{ s: String(seed) }}
             headline={`${verdict.exact}/${verdict.total}`}
             card={{
+              template: 'grass' as const,
               kicker: 'GATE 1 · ALL-TIME XI',
               label: t('screen.lineup.title'),
               eyebrow: t('lineup.exact'),

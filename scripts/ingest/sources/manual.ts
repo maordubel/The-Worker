@@ -492,6 +492,29 @@ const SPECS: FileSpec[] = [
     }),
   },
   {
+    file: 'kit-designs.json',
+    entity: 'kitDesigns',
+    map: (row, ctx) => ({
+      naturalKey: [req(row, 'seasonLabel'), req(row, 'variant')].join('|'),
+      seasonLabel: req(row, 'seasonLabel'),
+      variant: req(row, 'variant') as 'home',
+      makerHe: str(row, 'makerHe'),
+      sponsorHe: str(row, 'sponsorHe'),
+      base: req(row, 'base'),
+      pattern: req(row, 'pattern'),
+      patternInk: req(row, 'patternInk'),
+      sleeves: req(row, 'sleeves'),
+      sleeveInk: req(row, 'sleeveInk'),
+      collar: req(row, 'collar'),
+      collarInk: req(row, 'collarInk'),
+      shorts: req(row, 'shorts'),
+      socks: req(row, 'socks'),
+      noteHe: req(row, 'noteHe'),
+      sport: sport(row),
+      ...fact(row, ctx),
+    }),
+  },
+  {
     file: 'calls.json',
     entity: 'calls',
     map: (row, ctx) => ({
@@ -518,7 +541,11 @@ const SPECS: FileSpec[] = [
       eraHe: req(row, 'eraHe'),
       terraceRank: num(row, 'terraceRank') ?? 99,
       chargeHe: req(row, 'chargeHe'),
-      detailHe: req(row, 'detailHe'),
+      // detailHe is OPTIONAL on purpose. The charge is the terrace's, and it always
+      // exists; the detail is what a source states, and for three of the fifty-six no
+      // source could be found. An empty detail prints the charge alone — rule 11 says
+      // unreadable field → null, never a filled-in guess.
+      detailHe: str(row, 'detailHe') ?? '',
       keyFactHe: req(row, 'keyFactHe'),
       happenedOn: str(row, 'happenedOn'),
       sport: sport(row),

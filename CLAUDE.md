@@ -99,11 +99,32 @@ Read `docs/00-architecture.md` before changing anything structural.
     only announces a result recruits nobody — the link has to hand over the identical
     round. `components/share/ShareRow.tsx` is the only place a game reaches for it.
 
-20. **A shirt is eight layers, never an image.** `lib/kit/spec.ts` + `KitShirt.tsx`,
-    off the Kit Builder handoff: base, cut, sleeves, collar, crest, maker, sponsor,
-    nameset. One JSON object in, SVG out, no asset files. That is what makes "rebuild
-    the 1989 shirt" gradeable layer by layer instead of by eye, and what lets 102
-    seasons exist at all.
+20. **A shirt is eight layers, never an image.** `lib/kit/spec.ts` + `KitShirt.tsx` +
+    `KitStrip.tsx`, off the Kit Builder handoff: base, cut, sleeves, collar, crest,
+    maker, sponsor, nameset — drawn as a full STRIP, because every reference Maor sent
+    shows shirt, shorts and socks and a shirt alone reads as a mockup. One JSON object
+    in, SVG out, no asset files. `PRESETS` is the rack the designer opens on: eight real
+    Hapoel kits read off his references, because a blank designer is a blank page.
+    `colours-of-football.com` returns 403 to automated reads and was NOT circumvented —
+    documented here like any blocked source (rule 11).
+
+21. **A gate is a GAME, not a form.** `lib/game/session.ts` is the loop every run uses,
+    and its parts are not decoration: three escalating stages with a card between them,
+    three lives so a wrong answer costs something, a combo multiplier so the fourth
+    right answer feels different from the first, and a per-question clock so thinking
+    turns into playing. **There is no "next" button** — a correct answer advances itself
+    after 900ms of feedback, and a run never navigates: `TriviaRun` deals all twelve
+    questions at once (answers stripped server-side) and plays them on one screen,
+    because a page transition is a full stop and a game is a run-on sentence. Game
+    screens run `<Screen chrome={false}>`: no masthead, no footer, the glass belongs to
+    the run. Motion lives in the marked block in `app/globals.css` and every animation
+    is off under `prefers-reduced-motion`.
+
+22. **The story templates are the handoff's, including the safe zone.** Six grounds —
+    `score` `grass` `ink` `kit` `year` — each built as headline · one graphic · credit
+    strip, with **260px reserved top and bottom** where Instagram's own interface sits.
+    Type is skewed and printed twice (ink under at a hard offset, colour over): that is
+    the second plate, not a drop shadow, and the brand has no shadows.
 
 ## Commands
 

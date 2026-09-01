@@ -986,7 +986,12 @@ const TEMPLATES: Template[] = [
 
 /* ------------------------------------------------------------------- rounds */
 
-export const ROUND_LENGTH = 10
+/**
+ * Twelve, not ten: `lib/game/session.ts` runs three stages of four, and a round that
+ * does not divide into stages cannot escalate. The two constants are asserted equal in
+ * `tests/game.test.ts` so they can never drift apart again.
+ */
+export const ROUND_LENGTH = 12
 
 /**
  * Every question offers four choices. A template that cannot field three REAL

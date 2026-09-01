@@ -121,6 +121,7 @@ export function TimelineBoard({ cards, seed }: { cards: TimelineCard[]; seed: nu
             params={{ s: String(seed), total: String(verdict.solution.length) }}
             headline={verdict.correct ? String(verdict.solution.length) : '0'}
             card={{
+              template: 'year' as const,
               kicker: 'GATE 13 · TIMELINE',
               label: t('screen.timeline.title'),
               eyebrow: t('rank.label'),

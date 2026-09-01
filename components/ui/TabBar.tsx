@@ -27,13 +27,13 @@ type Tab = { key: MessageKey; href: string; match: string; icon: 'wall' | 'game'
  *   בלומפילד  the ground — where the gate plan hangs
  *   הארכיון   the record behind the games: kits, seasons, sources
  *   אוסישקין  the basketball wing — a different club, kept apart by rule 14
- *   התיק      the player's own file: last result, rank, share card
+ *   התיק      gate 11 — משחק השנאה and the black file behind it
  */
 const TABS: Tab[] = [
   { key: 'tab.ground', href: '/', match: '/', icon: 'wall' },
   { key: 'tab.archive', href: '/kits', match: '/kits', icon: 'file' },
   { key: 'tab.ussishkin', href: '/ussishkin', match: '/ussishkin', icon: 'tower' },
-  { key: 'tab.file', href: '/trivia/summary', match: '/trivia/summary', icon: 'game' },
+  { key: 'tab.file', href: '/derby', match: '/derby', icon: 'game' },
 ]
 
 function TabIcon({ icon, active }: { icon: Tab['icon']; active: boolean }) {

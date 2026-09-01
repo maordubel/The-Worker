@@ -3,6 +3,7 @@ import 'server-only'
 import clubsFile from '@/content/manual/clubs.json'
 import fanCultureFile from '@/content/manual/fan-culture.json'
 import callsFile from '@/content/manual/calls.json'
+import kitDesignsFile from '@/content/manual/kit-designs.json'
 import enemiesFile from '@/content/manual/enemies.json'
 import grievancesFile from '@/content/manual/grievances.json'
 import shirtNumbersFile from '@/content/manual/shirt-numbers.json'
@@ -174,6 +175,22 @@ export const archive = {
     feeEur?: number | null
     toClubHe?: string | null
   }>(grievancesFile),
+  kitDesigns: load<{
+    seasonLabel: string
+    variant: 'home' | 'away' | 'third'
+    makerHe: string | null
+    sponsorHe: string | null
+    base: string
+    pattern: string
+    patternInk: string
+    sleeves: string
+    sleeveInk: string
+    collar: string
+    collarInk: string
+    shorts: string
+    socks: string
+    noteHe: string
+  }>(kitDesignsFile),
   calls: load<{
     slug: string
     shape: 'match' | 'person'
@@ -188,7 +205,7 @@ export const archive = {
     slug: string
     nameHe: string
     latin: string
-    category: 'owner' | 'crossed' | 'rival'
+    category: 'owner' | 'crossed' | 'rival' | 'official'
     sport: 'football' | 'basketball'
     eraHe: string
     terraceRank: number

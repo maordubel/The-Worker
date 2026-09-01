@@ -48,6 +48,13 @@ export type PatternId =
   | 'gradient'
   | 'side-panel'
   | 'halves'
+  // added from the season photographs Maor sent on 1.9.2026 — these four are cuts the
+  // club actually wore, and without them a third of the history could not be drawn
+  | 'chest-band'
+  | 'quarters'
+  | 'diagonal'
+  | 'twin-stripe'
+  | 'shoulder-panel'
 
 export const PATTERNS: { id: PatternId; he: string; latin: string }[] = [
   { id: 'solid', he: 'חלק', latin: 'SOLID · 1978' },
@@ -62,6 +69,11 @@ export const PATTERNS: { id: PatternId; he: string; latin: string }[] = [
   { id: 'gradient', he: 'מעבר', latin: 'GRADIENT' },
   { id: 'side-panel', he: 'פאנלים צדדיים', latin: 'SIDE-PANEL · 2007 A' },
   { id: 'halves', he: 'חצאים', latin: 'HALVES' },
+  { id: 'chest-band', he: 'פס חזה', latin: 'CHEST BAND · 2002' },
+  { id: 'quarters', he: 'רבעים', latin: 'QUARTERS · 1990s' },
+  { id: 'diagonal', he: 'אלכסונים דקים', latin: 'DIAGONAL · 1980s' },
+  { id: 'twin-stripe', he: 'שני פסים', latin: 'TWIN STRIPE · 1999' },
+  { id: 'shoulder-panel', he: 'כתפיים', latin: 'SHOULDER PANEL · 2011' },
 ]
 
 export type CollarId = 'crew' | 'ringer' | 'v-neck' | 'polo' | 'laced'
@@ -108,23 +120,36 @@ export type KitSpec = {
   makerHe: string | null
   nameset: NamesetId
   number: number | null
+  /** the rest of the strip. A shirt on its own is a mockup; a kit is three pieces. */
+  shorts: KitColour
+  socks: KitColour
 }
 
 export const DEFAULT_SPEC: KitSpec = {
-  seasonLabel: '1989/90',
+  seasonLabel: '1978/79',
   variant: 'home',
   base: 'red',
   pattern: 'solid',
-  patternInk: 'ink',
-  sleeves: 'plain',
+  patternInk: 'cream',
+  sleeves: 'raglan',
   sleeveInk: 'cream',
   collar: 'crew',
-  collarInk: 'ink',
-  sponsorHe: null,
+  collarInk: 'cream',
+  sponsorHe: 'אתא',
   makerHe: null,
   nameset: 'block-solid',
   number: 10,
+  shorts: 'cream',
+  socks: 'red',
 }
+
+/*
+ * The house PRESETS that used to live here are gone. They were eight kits hand-typed
+ * from Maor's reference images, and `content/manual/kit-designs.json` now holds
+ * THIRTY-TWO of them with a source on every row — so the rack shows the club's real
+ * history instead of a designer's shortlist. `lib/kit/seasons.ts` turns those rows into
+ * specs.
+ */
 
 /** The eight layers, in order, for the rebuild game's scorecard. */
 export const LAYERS = [

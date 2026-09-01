@@ -219,6 +219,7 @@ function Verdict({
         params={{ a: String(verdict.agreement), s: String(seed) }}
         headline={verdict.champion.nameHe}
         card={{
+          template: 'ink' as const,
           kicker: 'GATE 11 · THE HATRED GAME',
           label: t('screen.derby.title'),
           eyebrow: t('hate.champion'),

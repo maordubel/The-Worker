@@ -47,17 +47,19 @@ export function rosterSize(): number {
 /**
  * The eight who make this bracket, and the four opening duels.
  *
- * The draw is seeded but not flat: the terrace's top four are spread one per quarter,
- * exactly as a cup draw seeds its favourites, so the big names cannot knock each other
- * out in the first round. A bracket where Taviv meets Yanai at the quarters is a
- * bracket that wasted its best fight.
+ * The draw is seeded but not flat. Four come from the top HALF of Maor's ranking and
+ * four from the bottom half, one of each per opening duel — a cup draw seeding its
+ * favourites, so the big names cannot knock each other out in the first round. With
+ * fifty-six names on the list that also means no two runs look alike: drawing the top
+ * four every time would have made the same four plates open every bracket forever.
  */
 export function dealBracket(seed: number): { enemies: Enemy[]; duels: Duel[] } {
   const random = rng(seed)
   const all = roster().sort((a, b) => a.terraceRank - b.terraceRank)
   const half = BRACKET_SIZE / 2
-  const seeded = shuffle(all.slice(0, half), random)
-  const rest = shuffle(all.slice(half), random).slice(0, half)
+  const midpoint = Math.ceil(all.length / 2)
+  const seeded = shuffle(all.slice(0, midpoint), random).slice(0, half)
+  const rest = shuffle(all.slice(midpoint), random).slice(0, half)
 
   const enemies: Enemy[] = []
   const duels: Duel[] = []

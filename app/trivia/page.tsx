@@ -1,43 +1,30 @@
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { EMPTY_RUN, decodeRun } from '@/lib/game/score'
-import { ROUND_LENGTH, deal, roundDifficulties } from '@/lib/game/trivia'
+import { ROUND_LENGTH, deal } from '@/lib/game/trivia'
 import { t } from '@/lib/i18n'
-import { TriviaRound } from './TriviaRound'
+import { TriviaRun } from './TriviaRun'
 
-/** Screen 2/3 — the question, and the same screen once the stamp has landed. */
-export default function TriviaPage({
-  searchParams,
-}: {
-  searchParams: { seed?: string; i?: string; r?: string }
-}) {
+/**
+ * שער 2 — טריוויה, as one run.
+ *
+ * The whole round is dealt here, server-side, WITHOUT its answers: `deal()` strips
+ * `correct` and `correctSet` before the payload leaves the server, and every answer is
+ * still graded by the server action from the seed. Dealing all twelve at once is what
+ * lets the run play on one screen with no navigation — the thing that separates a game
+ * from a form.
+ */
+export default function TriviaPage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 1
-  const index = Number(searchParams.i) || 0
-  // The run travels in the URL, so a back button rewinds the score with the question
-  // instead of leaving the two out of step.
-  const run = decodeRun(searchParams.r ?? '')?.run ?? EMPTY_RUN
-  const question = deal(seed, index)
-  const difficulties = roundDifficulties(seed)
+  const questions = Array.from({ length: ROUND_LENGTH }, (_, index) => deal(seed, index)).filter(
+    (question): question is NonNullable<typeof question> => question !== null,
+  )
 
   return (
-    <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')}>
-      {question ? (
+    <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')} chrome={false}>
+      {questions.length >= ROUND_LENGTH ? (
         <>
-          {/* The key is the fix for "from question 2 you cannot answer".
-              router.push to ?i=2 keeps the same element in the same slot, so React
-              REUSES the component and its state: the previous question's verdict is
-              still set, choose() early-returns, and every row is inert while looking
-              fresh. Keying on the question index forces a remount. */}
-          <TriviaRound
-            key={`${seed}:${index}`}
-            question={question}
-            seed={seed}
-            index={index}
-            run={run}
-            difficulties={difficulties}
-            total={ROUND_LENGTH}
-          />
+          <TriviaRun questions={questions} seed={seed} />
           <ReportLink />
         </>
       ) : (

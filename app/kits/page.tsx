@@ -2,6 +2,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { drawnKitSeasons } from '@/lib/game/kits'
+import { homeKits } from '@/lib/kit/seasons'
 import { t } from '@/lib/i18n'
 import { KitDesigner } from './KitDesigner'
 import { KitGallery } from './KitGallery'
@@ -20,7 +21,7 @@ export default function KitsPage() {
 
       <p className="mt-stack font-body text-step-0 text-muted">{t('kit.note')}</p>
 
-      <KitDesigner />
+      <KitDesigner rack={homeKits()} />
 
       <ReportLink />
     </Screen>

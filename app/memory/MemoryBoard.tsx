@@ -97,6 +97,7 @@ export function MemoryBoard({ cards, seed }: { cards: MemoryCard[]; seed: number
           params={{ s: String(seed) }}
           headline={String(pairs)}
           card={{
+            template: 'ink' as const,
             kicker: 'GATE 6 · MEMORY',
             label: t('screen.memory.title'),
             eyebrow: t('memory.pairs'),

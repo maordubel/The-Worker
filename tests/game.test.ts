@@ -2,15 +2,19 @@ import { describe, expect, it } from 'vitest'
 
 import { CONFIDENCE_FLOOR, archive, footballPeople } from '@/lib/game/archive'
 import {
-  EMPTY_RUN,
-  MAX_STREAK_BONUS,
-  applyAnswer,
-  decodeRun,
-  encodeRun,
-  lampsFor,
-  perfectScore,
+  LIVES,
+  NEW_SESSION,
+  RUN_LENGTH,
+  advance,
+  decodeSession,
+  encodeSession,
+  isStageBreak,
+  multiplierFor,
+  pointsFor,
   rankFor,
-} from '@/lib/game/score'
+  secondsFor,
+  stageOf,
+} from '@/lib/game/session'
 import { buildBoard } from '@/lib/game/memory'
 import { dealFile, dealPairs, judge, judgePair } from '@/lib/game/blackfile'
 import { dealBracket } from '@/lib/game/hate'
@@ -35,6 +39,7 @@ import {
 } from '@/lib/game/trivia'
 import { verifiedKitSeasons } from '@/lib/game/kits'
 import { dealKitChallenge, gradeKitChallenge, kitChallengeCount } from '@/lib/game/kitChallenge'
+import { buildKitRound, gradeKit } from '@/lib/game/kitRun'
 import {
   seasonLabelOf,
   seasonStartYear,
@@ -502,54 +507,76 @@ describe('the run — difficulty, streak and rank', () => {
     }
   })
 
-  it('pays more for a longer streak, and never punishes below zero', () => {
-    expect(lampsFor(3, 0)).toBe(3)
-    expect(lampsFor(3, 4)).toBe(7)
-    // The bonus caps, so a long round cannot run away with the score.
-    expect(lampsFor(3, 40)).toBe(lampsFor(3, MAX_STREAK_BONUS))
-
-    let run = EMPTY_RUN
-    run = applyAnswer(run, false, 5)
-    expect(run.lamps).toBe(0)
-    expect(run.streak).toBe(0)
-    expect(run.answered).toBe(1)
+  it('pays more for a longer combo, and pays for speed', () => {
+    // same question, same clock, different combo
+    expect(pointsFor(3, 1, 10, 20)).toBeLessThan(pointsFor(3, 3, 10, 20))
+    // same question, same combo, answered faster
+    expect(pointsFor(3, 2, 4, 20)).toBeLessThan(pointsFor(3, 2, 18, 20))
+    // the multiplier caps, so one hot run cannot run away with the board
+    expect(multiplierFor(40)).toBe(multiplierFor(4))
   })
 
-  it('breaks the streak on a wrong answer but keeps the best', () => {
-    let run = EMPTY_RUN
-    run = applyAnswer(run, true, 2)
-    run = applyAnswer(run, true, 2)
-    run = applyAnswer(run, true, 2)
-    expect(run.streak).toBe(3)
-    run = applyAnswer(run, false, 4)
-    expect(run.streak).toBe(0)
-    expect(run.bestStreak).toBe(3)
-    expect(run.correct).toBe(3)
+  it('costs a lamp for a miss and ends the run at zero', () => {
+    let session = NEW_SESSION
+    for (let i = 0; i < LIVES; i += 1) {
+      expect(session.over).toBe(false)
+      session = advance(session, { correct: false, difficulty: 3, secondsLeft: 5, total: 20 })
+    }
+    expect(session.lives).toBe(0)
+    expect(session.over).toBe(true)
+    expect(session.score).toBe(0)
   })
 
-  it('gives a perfect run the top rank and an empty one the bottom', () => {
-    const ladder = roundDifficulties(1)
-    const perfect = perfectScore(ladder)
+  it('breaks the combo on a miss but keeps the best', () => {
+    let session = NEW_SESSION
+    for (let i = 0; i < 3; i += 1) {
+      session = advance(session, { correct: true, difficulty: 2, secondsLeft: 10, total: 20 })
+    }
+    expect(session.combo).toBe(3)
+    session = advance(session, { correct: false, difficulty: 4, secondsLeft: 2, total: 20 })
+    expect(session.combo).toBe(0)
+    expect(session.bestCombo).toBe(3)
+    expect(session.correct).toBe(3)
+  })
 
-    let run = EMPTY_RUN
-    for (const difficulty of ladder) run = applyAnswer(run, true, difficulty)
-    expect(run.lamps).toBe(perfect)
-    expect(rankFor(run.lamps, perfect).key).toBe('rank.archivist')
-    expect(rankFor(0, perfect).key).toBe('rank.newcomer')
+  it('climbs the stages and tightens the clock as it goes', () => {
+    expect(stageOf(0)).toBe(0)
+    expect(stageOf(RUN_LENGTH - 1)).toBe(2)
+    expect(secondsFor(0)).toBeGreaterThan(secondsFor(RUN_LENGTH - 1))
+    // the card shows at the head of stages 2 and 3, and nowhere else
+    const breaks = Array.from({ length: RUN_LENGTH }, (_, i) => i).filter(isStageBreak)
+    expect(breaks).toHaveLength(2)
+    expect(breaks).not.toContain(0)
+  })
+
+  it('ends a clean run without ending it early', () => {
+    let session = NEW_SESSION
+    for (let i = 0; i < RUN_LENGTH; i += 1) {
+      expect(session.over, `ended early at ${i}`).toBe(false)
+      session = advance(session, { correct: true, difficulty: 3, secondsLeft: 12, total: 20 })
+    }
+    expect(session.over).toBe(true)
+    expect(session.lives).toBe(LIVES)
+    expect(session.correct).toBe(RUN_LENGTH)
+    expect(rankFor(session.score)).toBe('run.rank.capo')
+    expect(rankFor(0)).toBe('run.rank.new')
   })
 
   it('round-trips a run through the URL', () => {
-    const run = { lamps: 41, streak: 0, bestStreak: 6, correct: 8, answered: 10 }
-    const code = encodeRun(run, 55, 12)
-    const back = decodeRun(code)
+    const session = { ...NEW_SESSION, score: 4100, correct: 11, bestCombo: 6, lives: 2 }
+    const back = decodeSession(encodeSession(session, 12))
     expect(back?.seed).toBe(12)
-    expect(back?.perfect).toBe(55)
-    expect(back?.run.lamps).toBe(41)
-    expect(back?.run.bestStreak).toBe(6)
+    expect(back?.score).toBe(4100)
+    expect(back?.bestCombo).toBe(6)
     // Junk decodes to nothing rather than to a fabricated score.
-    expect(decodeRun('')).toBeNull()
-    expect(decodeRun('1-2-3')).toBeNull()
-    expect(decodeRun('a-b-c-d-e-f')).toBeNull()
+    expect(decodeSession('')).toBeNull()
+    expect(decodeSession('1.2.3')).toBeNull()
+    expect(decodeSession('a.b.c.d.e')).toBeNull()
+  })
+
+  it('keeps the round length and the run length the same number', () => {
+    // A round that does not divide into stages cannot escalate.
+    expect(ROUND_LENGTH).toBe(RUN_LENGTH)
   })
 })
 
@@ -707,15 +734,19 @@ describe('משחק השנאה — gate 11', () => {
     expect(new Set(enemies.map((enemy) => enemy.slug)).size).toBe(BRACKET_SIZE)
   })
 
-  it('spreads the terrace top four one per quarter, so the best fight is not a quarter-final', () => {
-    // Every opening duel must contain exactly one of the four highest-ranked enemies.
+  it('pairs one from the top half of the ranking with one from the bottom, every duel', () => {
+    const midpoint = Math.ceil(archive.enemies.length / 2)
+    const topHalf = new Set(
+      [...archive.enemies]
+        .sort((a, b) => a.terraceRank - b.terraceRank)
+        .slice(0, midpoint)
+        .map((row) => row.slug),
+    )
     for (const seed of [1, 7, 11, 42, 99]) {
       const { enemies, duels } = dealBracket(seed)
       const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
-      const ranks = [...enemies].sort((a, b) => a.terraceRank - b.terraceRank).slice(0, 4)
-      const top = new Set(ranks.map((enemy) => enemy.slug))
       for (const duel of duels) {
-        const seeded = [duel.aSlug, duel.bSlug].filter((slug) => top.has(slug))
+        const seeded = [duel.aSlug, duel.bSlug].filter((slug) => topHalf.has(slug))
         expect(seeded, `seed ${seed}: ${duel.aSlug} vs ${duel.bSlug}`).toHaveLength(1)
         expect(bySlug.get(duel.aSlug)).toBeDefined()
         expect(bySlug.get(duel.bSlug)).toBeDefined()
@@ -723,20 +754,37 @@ describe('משחק השנאה — gate 11', () => {
     }
   })
 
-  it('carries the enemies Maor named, across both sports', () => {
-    const names = archive.enemies.map((row) => row.nameHe)
-    for (const name of ['עופר ינאי', 'שאול אייזנברג', 'ערן זהבי', 'שמעון גרשון', 'גילי ורמוט', 'חיים רמון']) {
-      expect(names, name).toContain(name)
-    }
+  it('draws a different eight for different seeds — fifty-six names is not one bracket', () => {
+    const runs = [1, 2, 3, 4, 5].map((seed) =>
+      dealBracket(seed)
+        .enemies.map((enemy) => enemy.slug)
+        .sort()
+        .join(','),
+    )
+    expect(new Set(runs).size).toBeGreaterThan(3)
+  })
+
+  it("carries Maor's ranking verbatim, 1..56, across both sports", () => {
+    const ranks = archive.enemies.map((row) => row.terraceRank).sort((a, b) => a - b)
+    expect(ranks).toEqual(Array.from({ length: archive.enemies.length }, (_, i) => i + 1))
+    const byRank = new Map(archive.enemies.map((row) => [row.terraceRank, row.nameHe]))
+    // his own order, spot-checked at the head, the middle and the tail
+    expect(byRank.get(1)).toBe('שמעון מזרחי')
+    expect(byRank.get(2)).toBe('ערן זהבי')
+    expect(byRank.get(7)).toBe('אלי טביב')
+    expect(byRank.get(31)).toBe('דייוויד בלאט')
+    expect(byRank.get(50)).toBe('לירן ליאני')
     // and the wall between the sports is a FIELD, not an omission
-    const yanai = archive.enemies.find((row) => row.slug === 'yanai')
-    expect(yanai?.sport).toBe('basketball')
+    expect(archive.enemies.find((row) => row.slug === 'blatt')?.sport).toBe('basketball')
+    expect(archive.enemies.some((row) => row.sport === 'football')).toBe(true)
   })
 
   it('gives every enemy a charge, a fact and a source', () => {
     for (const row of archive.enemies) {
       expect(row.chargeHe.length, row.slug).toBeGreaterThan(20)
-      expect(row.detailHe.length, row.slug).toBeGreaterThan(60)
+      // detailHe may be empty: where research could not source a claim the plate prints
+      // the charge alone rather than inventing a record (rule 11)
+      if (row.detailHe !== '') expect(row.detailHe.length, row.slug).toBeGreaterThan(60)
       expect(row.keyFactHe.length, row.slug).toBeGreaterThan(2)
       expect(row.sourceTitle.length, row.slug).toBeGreaterThan(2)
       expect(row.terraceRank, row.slug).toBeGreaterThan(0)
@@ -843,11 +891,43 @@ describe('מערכת השכבות — the kit stack', () => {
     expect(Object.values(result).filter(Boolean)).toHaveLength(LAYERS.length - 1)
   })
 
-  it('offers every cut, collar and sleeve the handoff specifies', () => {
-    expect(PATTERNS).toHaveLength(12)
+  it('offers the handoff cuts plus the ones the club actually wore', () => {
+    // 12 from the Kit Builder handoff, plus 5 read off Maor's season photographs
+    expect(PATTERNS.length).toBeGreaterThanOrEqual(17)
     expect(COLLARS).toHaveLength(5)
     expect(SLEEVES).toHaveLength(5)
     expect(LAYERS).toHaveLength(8)
+    // every cut the archive uses must be one the renderer can draw
+    const drawable = new Set(PATTERNS.map((pattern) => pattern.id))
+    for (const row of archive.kitDesigns) {
+      expect(drawable.has(row.pattern as (typeof PATTERNS)[number]['id']), row.seasonLabel).toBe(
+        true,
+      )
+    }
+  })
+
+  it('draws every season kit from a source, with no invented cut', () => {
+    expect(archive.kitDesigns.length).toBeGreaterThanOrEqual(30)
+    for (const row of archive.kitDesigns) {
+      expect(row.sourceTitle.length, row.seasonLabel).toBeGreaterThan(5)
+      expect(row.noteHe.length, row.seasonLabel).toBeGreaterThan(5)
+      expect(row.confidence, row.seasonLabel).toBeGreaterThanOrEqual(2)
+      expect(/^\d{4}\/\d{2}$/.test(row.seasonLabel), row.seasonLabel).toBe(true)
+    }
+  })
+
+  it('never leaks the season into a kit question — that IS the answer', () => {
+    buildKitRound(3).forEach((question, index) => {
+      expect(question.spec.seasonLabel).toBe('')
+      expect(question.options).toHaveLength(4)
+      expect(new Set(question.options).size).toBe(4)
+      const truth = question.id.slice('kit:'.length)
+      expect(question.options).toContain(truth)
+      expect(gradeKit(3, index, truth)?.correct).toBe(true)
+      // and a wrong year grades wrong, from the seed, on the server
+      const wrong = question.options.find((option) => option !== truth) as string
+      expect(gradeKit(3, index, wrong)?.correct).toBe(false)
+    })
   })
 
   it('draws every colour from a token, never a literal — except the one tonal red', () => {

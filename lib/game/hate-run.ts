@@ -12,7 +12,7 @@ export type Enemy = {
   slug: string
   nameHe: string
   latin: string
-  category: 'owner' | 'crossed' | 'rival'
+  category: 'owner' | 'crossed' | 'rival' | 'official'
   sport: 'football' | 'basketball'
   eraHe: string
   chargeHe: string
