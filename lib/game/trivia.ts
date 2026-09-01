@@ -39,8 +39,22 @@ export type TriviaQuestion = {
   id: string
   template: string
   prompt: string
-  /** exactly four, always — see OPTION_COUNT */
+  /**
+   * `single` — four options, one right. `multi` — six options, exactly three right.
+   * The second shape exists because some of the best questions about a football club
+   * do not have one answer: "who wore number 11" is a list, and forcing it into a
+   * single-answer prompt either invents a "most famous" ranking no source supports or
+   * throws the question away. Maor asked for it directly, and he was right.
+   */
+  kind: 'single' | 'multi'
+  /** four for `single`, six for `multi` — see OPTION_COUNT / MULTI_OPTION_COUNT */
   options: string[]
+  /** how many the player must tick. 1 for `single`, 3 for `multi`. */
+  pickCount: number
+  /** a line of verbatim speech printed as a quote block above the prompt */
+  quoteHe?: string
+  /** who said it — only when the question is not asking that */
+  quoteByHe?: string
   /** 1 (a casual fan knows this) to 5 (only the archive knows this) */
   difficulty: Difficulty
   /** the archive row this came from, for the explanation after grading */
@@ -49,7 +63,13 @@ export type TriviaQuestion = {
 
 type SourceRef = { title: string; url: string | null; confidence: number }
 
-type Built = TriviaQuestion & { correct: string; source: SourceRef }
+type Built = TriviaQuestion & {
+  /** for `multi`, the three right answers joined with ' | ' in sorted order, so the
+   *  ambiguity check and the id both stay single-valued */
+  correct: string
+  correctSet: string[]
+  source: SourceRef
+}
 
 /**
  * How hard each template is. This is a judgement about the QUESTION, not a claim about
@@ -86,6 +106,9 @@ const DIFFICULTY: Record<string, Difficulty> = {
   'sponsor-year': 3,
   'maker-year': 2,
   'fan-culture': 5,
+  'call-match': 3,
+  'call-person': 2,
+  'shirt-multi': 4,
 }
 
 type Template = {
@@ -104,7 +127,11 @@ type Template = {
   build: (random: () => number) => Unrated[]
 }
 
-type Unrated = Omit<Built, 'difficulty'>
+type Unrated = Omit<Built, 'difficulty' | 'kind' | 'pickCount' | 'correctSet'> & {
+  kind?: 'single' | 'multi'
+  pickCount?: number
+  correctSet?: string[]
+}
 
 function pick<T>(items: readonly T[], random: () => number): T | undefined {
   if (items.length === 0) return undefined
@@ -153,6 +180,95 @@ const ASSOCIATION_NAMES = () =>
   ].filter((name) => name !== FOUNDER)
 
 const TEMPLATES: Template[] = [
+  {
+    /**
+     * ציטוט → איפה נאמר. A call the terrace remembers, and four real fixtures.
+     *
+     * The distractors ride on the row rather than being drawn from the match table:
+     * the archive's fixture list is thin, and a generated wrong answer here would be a
+     * fixture that may not have happened. Rule 11 says invent nothing, so the three
+     * alternatives are written down, checked, and stored beside the answer.
+     */
+    slug: 'call-match',
+    build: () =>
+      archive.calls
+        .filter((row) => row.shape === 'match' && row.distractorsHe.length >= 3)
+        .map((row) => ({
+          id: `call-match:${row.slug}`,
+          template: 'call-match',
+          prompt: 'באיזה משחק נאמר המשפט הזה?',
+          quoteHe: row.textHe,
+          quoteByHe: `${row.speakerHe} · ${row.roleHe}`,
+          options: [row.answerHe, ...row.distractorsHe.slice(0, 3)],
+          correct: row.answerHe,
+          source: sourceOf(row),
+          explanation: `${row.speakerHe} · ${row.contextHe}`,
+        })),
+  },
+  {
+    /** ציטוט → מי אמר. Same rows, the other way round. */
+    slug: 'call-person',
+    build: () =>
+      archive.calls
+        .filter((row) => row.shape === 'person' && row.distractorsHe.length >= 3)
+        .map((row) => ({
+          id: `call-person:${row.slug}`,
+          template: 'call-person',
+          prompt: 'מי אמר את זה?',
+          quoteHe: row.textHe,
+          options: [row.answerHe, ...row.distractorsHe.slice(0, 3)],
+          correct: row.answerHe,
+          source: sourceOf(row),
+          explanation: `${row.speakerHe} · ${row.contextHe}`,
+        })),
+  },
+  {
+    /**
+     * מי לבשו את המספר — six names, exactly three of them wore it.
+     *
+     * The three wrong names are real Hapoel footballers who are NOT recorded on that
+     * number, which is the only kind of distractor this question can honestly carry:
+     * "never wore 11" is a claim the archive can actually make, because the shirt-number
+     * table is complete for the numbers it covers.
+     */
+    slug: 'shirt-multi',
+    build: (random) => {
+      const holders = new Map<number, Set<string>>()
+      for (const row of archive.shirtNumbers) {
+        const set = holders.get(row.shirtNumber) ?? new Set<string>()
+        set.add(row.personNameHe)
+        holders.set(row.shirtNumber, set)
+      }
+      return [...holders.entries()]
+        .filter(([, names]) => names.size >= MULTI_PICK_COUNT + 2)
+        .map(([number, names]) => {
+          const wore = shuffle([...names], random).slice(0, MULTI_PICK_COUNT)
+          const neverWore = shuffle(
+            footballPeople
+              .map((person) => person.fullNameHe)
+              .filter((name) => !names.has(name)),
+            random,
+          ).slice(0, MULTI_OPTION_COUNT - MULTI_PICK_COUNT)
+          return {
+            id: `shirt-multi:${number}:${[...wore].sort().join('|')}`,
+            template: 'shirt-multi',
+            kind: 'multi' as const,
+            prompt: `בחרו שלושה — מי לבשו את חולצת מספר ${number} של הפועל תל אביב?`,
+            options: shuffle([...wore, ...neverWore], random),
+            correct: [...wore].sort().join(' | '),
+            correctSet: wore,
+            source: sourceOf(
+              archive.shirtNumbers.find((row) => row.shirtNumber === number) ?? {
+                sourceTitle: 'ארכיון',
+                sourceUrl: null,
+                confidence: 2,
+              },
+            ),
+            explanation: `${wore.join(' · ')} — מספר ${number}`,
+          }
+        })
+    },
+  },
   {
     slug: 'scorer',
     build: (random) =>
@@ -880,8 +996,26 @@ export const ROUND_LENGTH = 10
  */
 export const OPTION_COUNT = 4
 
-function hasFourOptions(question: { options: string[] }): boolean {
-  return new Set(question.options).size === OPTION_COUNT
+/** A multi-select question offers six and wants three. Six is the largest set a thumb
+ *  can scan on a phone without scrolling, and three-of-six is the ratio at which
+ *  guessing stops paying: one chance in twenty. */
+export const MULTI_OPTION_COUNT = 6
+export const MULTI_PICK_COUNT = 3
+
+function hasEnoughOptions(question: {
+  options: string[]
+  kind?: 'single' | 'multi'
+  correctSet?: string[]
+}): boolean {
+  const distinct = new Set(question.options).size
+  if (question.kind === 'multi') {
+    return (
+      distinct === MULTI_OPTION_COUNT &&
+      new Set(question.correctSet ?? []).size === MULTI_PICK_COUNT &&
+      (question.correctSet ?? []).every((value) => question.options.includes(value))
+    )
+  }
+  return distinct === OPTION_COUNT
 }
 
 /**
@@ -921,6 +1055,17 @@ export function isContested(entityTable: string, field: string): boolean {
   return CONTESTED.has(`${entityTable}.${field}`)
 }
 
+/** Fill in the shape a single-answer template does not bother to state. */
+function normalise(question: Unrated): Omit<Built, 'difficulty'> {
+  const kind = question.kind ?? 'single'
+  return {
+    ...question,
+    kind,
+    pickCount: kind === 'multi' ? MULTI_PICK_COUNT : 1,
+    correctSet: question.correctSet ?? [question.correct],
+  }
+}
+
 function buildRound(seed: number): Built[] {
   const random = rng(seed)
   const pool: Built[] = []
@@ -931,7 +1076,8 @@ function buildRound(seed: number): Built[] {
     const built = dropAmbiguousPrompts(
       template
         .build(random)
-        .filter(hasFourOptions)
+        .map(normalise)
+        .filter(hasEnoughOptions)
         .map((question) => ({ ...question, difficulty: DIFFICULTY[template.slug] ?? 3 })),
     )
     if (template.cappedGroup !== undefined) {
@@ -988,8 +1134,9 @@ export function availableQuestionCount(): number {
     TEMPLATES.flatMap((template) =>
       template
         .build(random)
+        .map(normalise)
         .map((question) => ({ ...question, difficulty: DIFFICULTY[template.slug] ?? 3 })),
-    ).filter(hasFourOptions),
+    ).filter(hasEnoughOptions),
   )
   return new Set(all.map((question) => question.id)).size
 }
@@ -1003,7 +1150,7 @@ export function roundDifficulties(seed: number): Difficulty[] {
 export function deal(seed: number, index: number): TriviaQuestion | null {
   const question = buildRound(seed)[index]
   if (!question) return null
-  const { correct: _correct, source: _source, ...rest } = question
+  const { correct: _correct, correctSet: _set, source: _source, ...rest } = question
   return rest
 }
 
@@ -1018,19 +1165,32 @@ export function auditRound(seed: number): Array<{ id: string; source: SourceRef 
 
 export type Verdict = {
   correct: boolean
-  correctAnswer: string
+  /** every right answer — one value for `single`, three for `multi` */
+  correctAnswers: string[]
+  /** how many of the right answers the player ticked, for the near-miss line */
+  hits: number
   explanation: string
   /** echoed back so the client can score without being trusted to know it */
   difficulty: Difficulty
 }
 
-/** Grading happens here, on the server, from the seed. The client is never trusted. */
-export function grade(seed: number, index: number, answer: string): Verdict | null {
+/**
+ * Grading happens here, on the server, from the seed. The client is never trusted.
+ *
+ * A `multi` question is all-or-nothing: three right and nothing wrong. Partial credit
+ * would reward ticking everything plausible, which is the opposite of knowing. The
+ * verdict still reports `hits`, because "you had two of the three" is worth being told.
+ */
+export function grade(seed: number, index: number, answer: string | string[]): Verdict | null {
   const question = buildRound(seed)[index]
   if (!question) return null
+  const picked = Array.isArray(answer) ? [...new Set(answer)] : [answer]
+  const truth = new Set(question.correctSet)
+  const hits = picked.filter((value) => truth.has(value)).length
   return {
-    correct: question.correct === answer,
-    correctAnswer: question.correct,
+    correct: hits === truth.size && picked.length === truth.size,
+    correctAnswers: question.correctSet,
+    hits,
     explanation: question.explanation,
     difficulty: question.difficulty,
   }

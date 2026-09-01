@@ -131,6 +131,20 @@
   );
 }
 
+/* רשת ההדפס — the shell's own halftone, in INK.
+   The press layer has a halftone too and it is NOT this one: that screen is printed in
+   grass green for a photographed pitch, this one is the black plate of a poster. A
+   shell component reaching across for `--p-dot` is the exact defect rule 8 forbids, so
+   the shell gets its own screen rather than borrowing. */
+.screen-dots {
+  background-image:
+    radial-gradient(rgb(var(--ink)) 0.85px, transparent 1px),
+    radial-gradient(rgb(var(--ink)) 0.85px, transparent 1px);
+  background-size: 8px 8px, 8px 8px;
+  background-position: 0 0, 4px 4px;
+  opacity: 0.11;
+}
+
 /* כתם הדפוס — an ink blotch on the paper, so no two plates print identically */
 .stain-a { background-image: radial-gradient(circle at 70% 15%, rgb(var(--muted) / 0.16), transparent 45%); }
 .stain-b { background-image: radial-gradient(circle at 25% 80%, rgb(var(--muted) / 0.16), transparent 45%); }

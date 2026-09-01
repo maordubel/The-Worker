@@ -22,6 +22,7 @@ const OUTFIELD = {
 import { t, type MessageKey } from '@/lib/i18n'
 import type { PitchSlot, SlotStatus, LineupVerdict } from '@/lib/game/lineup'
 import { submitLineup } from './actions'
+import { ShareRow } from '@/components/share/ShareRow'
 
 /**
  * Tap a slot, pick from the bank, submit. Feedback is per slot in three states.
@@ -204,6 +205,20 @@ export function LineupBoard({
               </li>
             ))}
           </ul>
+          <ShareRow
+            kind="lineup"
+            params={{ s: String(seed) }}
+            headline={`${verdict.exact}/${verdict.total}`}
+            card={{
+              kicker: 'GATE 1 · ALL-TIME XI',
+              label: t('screen.lineup.title'),
+              eyebrow: t('lineup.exact'),
+              hero: `${verdict.exact}/${verdict.total}`,
+              stats: [{ k: t('lineup.exact'), v: `${verdict.exact}` }],
+              cta: t('share.challenge'),
+              challenge: t('share.sameRound'),
+            }}
+          />
         </>
       )}
     </>

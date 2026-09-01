@@ -7,7 +7,7 @@ import { Screen } from '@/components/ui/Screen'
 import { EMPTY_RUN, decodeRun, rankFor } from '@/lib/game/score'
 import { ROUND_LENGTH } from '@/lib/game/trivia'
 import { t, type MessageKey } from '@/lib/i18n'
-import { ShareCard } from './ShareCard'
+import { ShareRow } from '@/components/share/ShareRow'
 
 /**
  * Screen 4 — the end of a run.
@@ -28,9 +28,6 @@ export default function SummaryPage({
   const perfect = decoded?.perfect ?? 0
   const rank = rankFor(run.lamps, perfect)
   const rankHe = t(rank.key as MessageKey)
-
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'the-worker.vercel.app'
-  const url = `${base}/trivia?seed=${seed}`
 
   return (
     <Screen title={t('screen.summary.title')} sub={t('screen.summary.sub')}>
@@ -63,29 +60,22 @@ export default function SummaryPage({
         />
       </div>
 
-      <h2 className="mt-stack font-body text-[11px] font-extrabold tracking-widest text-muted">
-        {t('share.title')}
-      </h2>
-
-      <ShareCard
-        data={{
-          lamps: run.lamps,
-          perfect,
-          correct: run.correct,
-          answered: run.answered,
-          bestStreak: run.bestStreak,
-          rankHe,
-          seed,
-          url,
-          headlineHe: t('summary.correctOf'),
-          kickerHe: t('brand.name'),
-          ctaHe: t('share.challenge'),
-          labels: {
-            lamps: t('score.lamps'),
-            streak: t('score.best'),
-            of: t('score.perfect'),
-            rank: t('summary.share.pct'),
-          },
+      <ShareRow
+        kind="trivia"
+        params={{ s: String(seed), total: String(ROUND_LENGTH) }}
+        headline={String(run.correct)}
+        card={{
+          kicker: 'GATE 2 · TRIVIA',
+          label: t('screen.trivia.title'),
+          eyebrow: t('summary.correctOf'),
+          hero: `${run.correct}/${ROUND_LENGTH}`,
+          bigStat: { v: String(run.lamps), k: t('score.lamps') },
+          stats: [
+            { k: t('rank.label'), v: rankHe },
+            { k: t('score.best'), v: String(run.bestStreak) },
+          ],
+          cta: t('share.challenge'),
+          challenge: t('share.sameRound'),
         }}
       />
 

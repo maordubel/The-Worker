@@ -1,0 +1,4 @@
+app/trivia/summary/ShareCard.tsx
+components/press/StoryCard.tsx
+app/derby/BlackFile.tsx  (moved to app/derby/file/)
+app/derby/actions.ts     (moved to app/derby/file/)

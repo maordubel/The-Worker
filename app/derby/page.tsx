@@ -1,26 +1,26 @@
-import { Screen } from '@/components/ui/Screen'
 import { ReportLink } from '@/components/ui/ReportLink'
-import { ROUND_SIZE, dealFile, dealPairs, fileSize } from '@/lib/game/blackfile'
+import { Screen } from '@/components/ui/Screen'
+import { dealBracket, rosterSize } from '@/lib/game/hate'
 import { t } from '@/lib/i18n'
-import { BlackFile } from './BlackFile'
+import { HateBracket } from './HateBracket'
 
 /**
- * שער 11 — התיק השחור.
+ * שער 11 — משחק השנאה.
  *
- * The away end. The one screen in the product printed in navy with no vermilion in it,
- * because whoever walks in is standing in somebody else's end.
+ * Maor asked for a hatred game and this is a hatred game: eight enemies, a knockout, no
+ * right answers. What the app supplies is not a judgement about people — it is the
+ * terrace's own charge sheet, every line of it sourced, and a verdict that belongs to
+ * whoever played it.
  */
-export default function DerbyPage({ searchParams }: { searchParams: { seed?: string } }) {
+export default function HatePage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 11
+  const { enemies, duels } = dealBracket(seed)
   return (
     <Screen title={t('screen.derby.title')} sub={t('screen.derby.sub')}>
-      <BlackFile
-        cards={dealFile(seed)}
-        pairs={dealPairs(seed)}
-        seed={seed}
-        total={ROUND_SIZE}
-        fileSize={fileSize()}
-      />
+      <p className="mt-stack max-w-prose font-body text-step-0 leading-relaxed text-ink">
+        {t('hate.lede')}
+      </p>
+      <HateBracket enemies={enemies} opening={duels} seed={seed} rosterSize={rosterSize()} />
       <ReportLink />
     </Screen>
   )

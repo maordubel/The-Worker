@@ -13,6 +13,17 @@ import {
 } from '@/lib/game/score'
 import { buildBoard } from '@/lib/game/memory'
 import { dealFile, dealPairs, judge, judgePair } from '@/lib/game/blackfile'
+import { dealBracket } from '@/lib/game/hate'
+import { BRACKET_SIZE, judgeRun } from '@/lib/game/hate-run'
+import {
+  COLLARS,
+  COLOUR_VAR,
+  DEFAULT_SPEC,
+  LAYERS,
+  PATTERNS,
+  SLEEVES,
+  compareSpecs,
+} from '@/lib/kit/spec'
 import {
   OPTION_COUNT,
   ROUND_LENGTH,
@@ -77,7 +88,7 @@ describe('trivia — the client never receives the answer', () => {
     const question = deal(1, 0)
     const verdict = grade(1, 0, question?.options[0] ?? '')
     expect(verdict).not.toBeNull()
-    expect(question?.options).toContain(verdict?.correctAnswer)
+    expect(question?.options).toEqual(expect.arrayContaining(verdict?.correctAnswers ?? []))
   })
 
   it('marks exactly one option correct', () => {
@@ -684,6 +695,165 @@ describe('התיק השחור — gate 11', () => {
     for (const row of archive.grievances) {
       expect(row.sourceTitle.length, row.slug).toBeGreaterThan(0)
       expect(row.confidence, row.slug).toBeGreaterThanOrEqual(CONFIDENCE_FLOOR)
+    }
+  })
+})
+
+describe('משחק השנאה — gate 11', () => {
+  it('draws eight enemies and four opening duels', () => {
+    const { enemies, duels } = dealBracket(11)
+    expect(enemies).toHaveLength(BRACKET_SIZE)
+    expect(duels).toHaveLength(BRACKET_SIZE / 2)
+    expect(new Set(enemies.map((enemy) => enemy.slug)).size).toBe(BRACKET_SIZE)
+  })
+
+  it('spreads the terrace top four one per quarter, so the best fight is not a quarter-final', () => {
+    // Every opening duel must contain exactly one of the four highest-ranked enemies.
+    for (const seed of [1, 7, 11, 42, 99]) {
+      const { enemies, duels } = dealBracket(seed)
+      const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
+      const ranks = [...enemies].sort((a, b) => a.terraceRank - b.terraceRank).slice(0, 4)
+      const top = new Set(ranks.map((enemy) => enemy.slug))
+      for (const duel of duels) {
+        const seeded = [duel.aSlug, duel.bSlug].filter((slug) => top.has(slug))
+        expect(seeded, `seed ${seed}: ${duel.aSlug} vs ${duel.bSlug}`).toHaveLength(1)
+        expect(bySlug.get(duel.aSlug)).toBeDefined()
+        expect(bySlug.get(duel.bSlug)).toBeDefined()
+      }
+    }
+  })
+
+  it('carries the enemies Maor named, across both sports', () => {
+    const names = archive.enemies.map((row) => row.nameHe)
+    for (const name of ['עופר ינאי', 'שאול אייזנברג', 'ערן זהבי', 'שמעון גרשון', 'גילי ורמוט', 'חיים רמון']) {
+      expect(names, name).toContain(name)
+    }
+    // and the wall between the sports is a FIELD, not an omission
+    const yanai = archive.enemies.find((row) => row.slug === 'yanai')
+    expect(yanai?.sport).toBe('basketball')
+  })
+
+  it('gives every enemy a charge, a fact and a source', () => {
+    for (const row of archive.enemies) {
+      expect(row.chargeHe.length, row.slug).toBeGreaterThan(20)
+      expect(row.detailHe.length, row.slug).toBeGreaterThan(60)
+      expect(row.keyFactHe.length, row.slug).toBeGreaterThan(2)
+      expect(row.sourceTitle.length, row.slug).toBeGreaterThan(2)
+      expect(row.terraceRank, row.slug).toBeGreaterThan(0)
+    }
+  })
+
+  it('scores a run that always follows the terrace at 100%, and one that never does at 0%', () => {
+    const { enemies } = dealBracket(11)
+    const [a, b] = [...enemies].sort((x, y) => x.terraceRank - y.terraceRank)
+    if (!a || !b) throw new Error('bracket too small')
+    const withTerrace = judgeRun(enemies, [{ aSlug: a.slug, bSlug: b.slug, winner: a.slug }])
+    expect(withTerrace?.agreement).toBe(100)
+    expect(withTerrace?.champion.slug).toBe(a.slug)
+    const against = judgeRun(enemies, [{ aSlug: a.slug, bSlug: b.slug, winner: b.slug }])
+    expect(against?.agreement).toBe(0)
+    expect(against?.champion.slug).toBe(b.slug)
+  })
+
+  it('ranks the standings by how far the player carried each enemy', () => {
+    const { enemies, duels } = dealBracket(11)
+    const first = duels[0]
+    const second = duels[1]
+    if (!first || !second) throw new Error('bracket too small')
+    const picks = [
+      { aSlug: first.aSlug, bSlug: first.bSlug, winner: first.aSlug },
+      { aSlug: second.aSlug, bSlug: second.bSlug, winner: second.aSlug },
+      { aSlug: first.aSlug, bSlug: second.aSlug, winner: first.aSlug },
+    ]
+    const verdict = judgeRun(enemies, picks)
+    expect(verdict?.standings[0]?.enemy.slug).toBe(first.aSlug)
+    expect(verdict?.standings[0]?.wins).toBe(2)
+  })
+
+  it('never hands the bracket a name the roster does not carry', () => {
+    expect(judgeRun([], [{ aSlug: 'nobody', bSlug: 'nobody', winner: 'nobody' }])).toBeNull()
+  })
+})
+
+describe('ציטוטים ובחירה מרובה — the new question shapes', () => {
+  it('asks the Berkovic call against four real fixtures', () => {
+    const call = archive.calls.find((row) => row.slug === 'berkovic-hine-lala')
+    expect(call?.distractorsHe).toHaveLength(3)
+    expect(call?.answerHe).toContain('2009/10')
+    // the source is Maor, and it says so rather than dressing up as a press citation
+    expect(call?.sourceTitle).toContain('מאור הראל')
+  })
+
+  it('gives a multi-select six options, exactly three of them right', () => {
+    let seen = 0
+    for (let seed = 1; seed < 40 && seen < 3; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (question?.kind !== 'multi') continue
+        seen += 1
+        expect(question.options).toHaveLength(6)
+        expect(new Set(question.options).size).toBe(6)
+        expect(question.pickCount).toBe(3)
+        const verdict = grade(seed, index, question.options)
+        // ticking everything is not an answer
+        expect(verdict?.correct).toBe(false)
+        const truth = grade(seed, index, verdict?.correctAnswers ?? [])
+        expect(truth?.correct).toBe(true)
+        expect(truth?.hits).toBe(3)
+        for (const answer of verdict?.correctAnswers ?? []) {
+          expect(question.options).toContain(answer)
+        }
+      }
+    }
+    expect(seen, 'no multi-select question was dealt in 40 seeds').toBeGreaterThan(0)
+  })
+
+  it('never marks a shirt-number distractor as someone who wore it', () => {
+    const wore = new Map<number, Set<string>>()
+    for (const row of archive.shirtNumbers) {
+      const set = wore.get(row.shirtNumber) ?? new Set<string>()
+      set.add(row.personNameHe)
+      wore.set(row.shirtNumber, set)
+    }
+    for (let seed = 1; seed < 25; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (question?.template !== 'shirt-multi') continue
+        const number = Number(question.id.split(':')[1])
+        const holders = wore.get(number) ?? new Set<string>()
+        const verdict = grade(seed, index, [])
+        const wrong = question.options.filter(
+          (option) => !(verdict?.correctAnswers ?? []).includes(option),
+        )
+        for (const name of wrong) {
+          expect(holders.has(name), `${name} is recorded on ${number}`).toBe(false)
+        }
+      }
+    }
+  })
+})
+
+describe('מערכת השכבות — the kit stack', () => {
+  it('scores a rebuild layer by layer, not as a similarity percentage', () => {
+    const truth = { ...DEFAULT_SPEC, pattern: 'stripe-wide' as const, collar: 'v-neck' as const }
+    const attempt = { ...truth, collar: 'crew' as const }
+    const result = compareSpecs(attempt, truth)
+    expect(result.pattern).toBe(true)
+    expect(result.collar).toBe(false)
+    expect(Object.values(result).filter(Boolean)).toHaveLength(LAYERS.length - 1)
+  })
+
+  it('offers every cut, collar and sleeve the handoff specifies', () => {
+    expect(PATTERNS).toHaveLength(12)
+    expect(COLLARS).toHaveLength(5)
+    expect(SLEEVES).toHaveLength(5)
+    expect(LAYERS).toHaveLength(8)
+  })
+
+  it('draws every colour from a token, never a literal — except the one tonal red', () => {
+    for (const [name, value] of Object.entries(COLOUR_VAR)) {
+      if (name === 'deep') continue
+      expect(value, name).toMatch(/^rgb\(var\(--/)
     }
   })
 })

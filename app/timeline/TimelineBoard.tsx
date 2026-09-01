@@ -6,6 +6,7 @@ import { Stamp } from '@/components/ui/Stamp'
 import { t } from '@/lib/i18n'
 import type { TimelineCard, TimelineVerdict } from '@/lib/game/timeline'
 import { submitOrder } from './actions'
+import { ShareRow } from '@/components/share/ShareRow'
 
 /**
  * Ordering by move-up / move-down rather than drag: dragging is not keyboard
@@ -115,6 +116,20 @@ export function TimelineBoard({ cards, seed }: { cards: TimelineCard[]; seed: nu
               </li>
             ))}
           </ol>
+          <ShareRow
+            kind="timeline"
+            params={{ s: String(seed), total: String(verdict.solution.length) }}
+            headline={verdict.correct ? String(verdict.solution.length) : '0'}
+            card={{
+              kicker: 'GATE 13 · TIMELINE',
+              label: t('screen.timeline.title'),
+              eyebrow: t('rank.label'),
+              hero: verdict.correct ? t('trivia.correct') : t('trivia.wrong'),
+              stats: verdict.solution.slice(0, 2).map((item) => ({ k: item.on, v: item.title })),
+              cta: t('share.challenge'),
+              challenge: t('share.sameRound'),
+            }}
+          />
         </>
       )}
     </>

@@ -31,18 +31,36 @@ export function TriviaRound({
   total: number
 }) {
   const router = useRouter()
-  const [picked, setPicked] = useState<string | null>(null)
+  // one array covers both shapes: a single-answer question just never holds more than
+  // one, which keeps the render and the submit paths identical
+  const [picked, setPicked] = useState<string[]>([])
   const [verdict, setVerdict] = useState<Verdict | null>(null)
   const [pending, startTransition] = useTransition()
   const letters = t('trivia.letters').split(',')
   const perfect = perfectScore(difficulties)
 
+  const multi = question.kind === 'multi'
+
   function choose(option: string) {
-    if (verdict) return
-    setPicked(option)
-    startTransition(async () => {
-      setVerdict(await submitAnswer(seed, index, option))
-    })
+    if (verdict || pending) return
+    if (!multi) {
+      setPicked([option])
+      startTransition(async () => setVerdict(await submitAnswer(seed, index, option)))
+      return
+    }
+    // multi-select: tick and untick freely until the player commits
+    setPicked((current) =>
+      current.includes(option)
+        ? current.filter((value) => value !== option)
+        : current.length >= question.pickCount
+          ? current
+          : [...current, option],
+    )
+  }
+
+  function commit() {
+    if (verdict || pending || picked.length !== question.pickCount) return
+    startTransition(async () => setVerdict(await submitAnswer(seed, index, picked)))
   }
 
   const nextRun = verdict
@@ -106,7 +124,28 @@ export function TriviaRound({
         >
           {/* No source line. Provenance gates which facts become questions; it is not
               furniture on the card. */}
-          <h2 className="mt-2 font-display text-step-2 leading-snug text-ink">{question.prompt}</h2>
+          {/* A quote is set as speech, not as a prompt: bigger, indented off a
+              vermilion rule, with the speaker under it when the question is not asking
+              who said it. A remembered line has to LOOK remembered. */}
+          {question.quoteHe && (
+            <blockquote className="mt-2 border-s-[4px] border-red ps-3">
+              <p className="font-display text-step-3 leading-tight text-ink">
+                {`\u201d${question.quoteHe}\u201c`}
+              </p>
+              {question.quoteByHe && (
+                <footer className="mt-1 font-body text-[11px] tracking-wide text-muted">
+                  {question.quoteByHe}
+                </footer>
+              )}
+            </blockquote>
+          )}
+          <h2
+            className={`mt-2 font-display leading-snug text-ink ${
+              question.quoteHe ? 'text-step-1' : 'text-step-2'
+            }`}
+          >
+            {question.prompt}
+          </h2>
         </PastedSheet>
 
         {verdict && (
@@ -128,15 +167,32 @@ export function TriviaRound({
             key={option}
             letter={letters[position] ?? ''}
             text={option}
-            picked={picked === option}
+            picked={picked.includes(option)}
+            correct={verdict ? verdict.correctAnswers.includes(option) : undefined}
             onPick={() => choose(option)}
           />
         ))}
       </div>
 
+      {multi && !verdict && (
+        <button
+          type="button"
+          onClick={commit}
+          disabled={picked.length !== question.pickCount || pending}
+          className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-sheet transition-transform duration-press ease-stamp active:scale-[.96] disabled:bg-concrete disabled:text-muted motion-reduce:transition-none"
+        >
+          {pending
+            ? t('state.loading')
+            : t('trivia.commit', {
+                picked: String(picked.length),
+                of: String(question.pickCount),
+              })}
+        </button>
+      )}
+
       {!verdict && (
         <p className="mt-stack font-body text-step--1 text-muted">
-          {pending ? t('state.loading') : t('trivia.prompt')}
+          {pending ? t('state.loading') : multi ? t('trivia.promptMulti') : t('trivia.prompt')}
         </p>
       )}
 
@@ -144,6 +200,15 @@ export function TriviaRound({
         <>
           <p className="mt-stack font-body text-step-0 text-ink">
             {verdict.correct ? t('trivia.correct') : t('trivia.wrong')}
+            {multi && !verdict.correct && (
+              <span className="text-muted">
+                {' '}
+                {t('trivia.hits', {
+                  hits: String(verdict.hits),
+                  of: String(question.pickCount),
+                })}
+              </span>
+            )}
           </p>
           <p className="mt-1 font-mono text-step--1 tabular-nums text-muted">
             {verdict.explanation}

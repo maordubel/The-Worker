@@ -106,6 +106,49 @@ export type StagedSquadMembership = Fact & {
   goals: number | null
 }
 
+export type StagedGrievance = Fact & {
+  slug: string
+  /** crossing = a move to the derby rival · myth = a belief the record contradicts
+   *  event = a dated thing that happened to the club */
+  kind: 'crossing' | 'myth' | 'event'
+  titleHe: string
+  happenedOn: string | null
+  dateConfirmed: boolean
+  personNameHe: string | null
+  bodyHe: string
+  feeEur: number | null
+  toClubHe: string | null
+  sport: Sport
+}
+
+/** ציטוט או קריאה — verbatim speech, with the three real distractors it ships with. */
+export type StagedCall = Fact & {
+  slug: string
+  shape: 'match' | 'person'
+  textHe: string
+  speakerHe: string
+  roleHe: string
+  answerHe: string
+  distractorsHe: string[]
+  contextHe: string
+  sport: Sport
+}
+
+/** משחק השנאה — one figure in the terrace's cast, cross-sport by design. */
+export type StagedEnemy = Fact & {
+  slug: string
+  nameHe: string
+  latin: string
+  category: 'owner' | 'crossed' | 'rival'
+  eraHe: string
+  terraceRank: number
+  chargeHe: string
+  detailHe: string
+  keyFactHe: string
+  happenedOn: string | null
+  sport: Sport
+}
+
 export type StagedShirtNumberHolding = Fact & {
   naturalKey: string
   shirtNumber: number
@@ -430,6 +473,9 @@ export type StagedBundle = {
   elections: StagedElection[]
   electionCandidates: StagedElectionCandidate[]
   membershipMilestones: StagedMembershipMilestone[]
+  grievances: StagedGrievance[]
+  calls: StagedCall[]
+  enemies: StagedEnemy[]
   shirtNumbers: StagedShirtNumberHolding[]
   sponsorYears: StagedSponsorYear[]
   fanCulture: StagedFanCulture[]
@@ -462,6 +508,9 @@ export const BUNDLE_KEYS = [
   'elections',
   'electionCandidates',
   'membershipMilestones',
+  'grievances',
+  'calls',
+  'enemies',
   'shirtNumbers',
   'sponsorYears',
   'fanCulture',
@@ -497,6 +546,9 @@ export function emptyBundle(): StagedBundle {
     elections: [],
     electionCandidates: [],
     membershipMilestones: [],
+    grievances: [],
+    calls: [],
+    enemies: [],
     shirtNumbers: [],
     sponsorYears: [],
     fanCulture: [],

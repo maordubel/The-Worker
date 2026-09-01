@@ -76,6 +76,35 @@ Read `docs/00-architecture.md` before changing anything structural.
     else's. Do not distort history to personalise it — the Ussishkin story does not
     need help.
 
+18. **Maor is a SOURCE, not a claim to be checked.** He founded Hapoel Ussishkin, he
+    stood as a capo of Ultras Hapoel, and on what the terrace feels and remembers he is
+    the primary source in this project — cite him as one (`sourceTitle: "מאור הראל —
+    ידע אישי, <date>"`) rather than dressing his knowledge up as a press citation or
+    quietly leaving it out because a search did not surface it. Research EXPANDS what he
+    gives; it does not overrule it. The rules that stay absolute are the ones about
+    fabrication: never publish a factual claim about a named person that no source
+    supports, and never invent a date, a fee or a fixture. Those are compatible — when
+    he names a figure the terrace hates, the figure goes in and the CHARGE is written
+    from the record. Gate 11 is what that looks like in practice.
+    A previous version of this file recorded a "correction" that scoped his hate game
+    down to a transfer quiz on the grounds that three of his six names were not
+    documented crossers. That was the wrong call twice over: it answered a request about
+    FEELING with a quiz about records, and it treated the club's own capo as a witness
+    to be fact-checked.
+
+19. **Sharing is a first-class surface, not a button.** `lib/share/story.ts` draws the
+    1080×1920 card on a canvas at true story size and hands it to
+    `navigator.share({ files })`; there is exactly ONE share system and it is this one.
+    Every card carries the badge, the address and a `?seed=` link, because a share that
+    only announces a result recruits nobody — the link has to hand over the identical
+    round. `components/share/ShareRow.tsx` is the only place a game reaches for it.
+
+20. **A shirt is eight layers, never an image.** `lib/kit/spec.ts` + `KitShirt.tsx`,
+    off the Kit Builder handoff: base, cut, sleeves, collar, crest, maker, sponsor,
+    nameset. One JSON object in, SVG out, no asset files. That is what makes "rebuild
+    the 1989 shirt" gradeable layer by layer instead of by eye, and what lets 102
+    seasons exist at all.
+
 ## Commands
 
 ```

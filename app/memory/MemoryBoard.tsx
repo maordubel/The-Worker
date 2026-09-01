@@ -5,14 +5,17 @@ import { useState } from 'react'
 import { Mast } from '@/components/ui/LampGrid'
 import { t } from '@/lib/i18n'
 import type { MemoryCard } from '@/lib/game/memory'
+import { ShareRow } from '@/components/share/ShareRow'
 
 /**
  * Screen 6 — always night. Twelve lamps in a 4×3 grid, tilted -1.5°.
  * Closed = 12% white. Open = white with the value. A completed pair = red.
  */
-export function MemoryBoard({ cards }: { cards: MemoryCard[] }) {
+export function MemoryBoard({ cards, seed }: { cards: MemoryCard[]; seed: number }) {
   const [open, setOpen] = useState<string[]>([])
   const [done, setDone] = useState<string[]>([])
+  // every flip of a second card is a move — the only number worth boasting about here
+  const [moves, setMoves] = useState(0)
 
   const pairs = cards.length / 2
 
@@ -21,6 +24,7 @@ export function MemoryBoard({ cards }: { cards: MemoryCard[] }) {
     const next = [...open, card.id]
     setOpen(next)
     if (next.length < 2) return
+    setMoves((count) => count + 1)
 
     const [first, second] = next
     const a = cards.find((item) => item.id === first)
@@ -86,6 +90,24 @@ export function MemoryBoard({ cards }: { cards: MemoryCard[] }) {
         </bdi>{' '}
         {t('memory.pairs')}
       </p>
+
+      {done.length === pairs && (
+        <ShareRow
+          kind="memory"
+          params={{ s: String(seed) }}
+          headline={String(pairs)}
+          card={{
+            kicker: 'GATE 6 · MEMORY',
+            label: t('screen.memory.title'),
+            eyebrow: t('memory.pairs'),
+            hero: `${pairs}/${pairs}`,
+            bigStat: { v: String(moves), k: t('memory.moves') },
+            stats: [{ k: t('memory.pairs'), v: String(pairs) }],
+            cta: t('share.challenge'),
+            challenge: t('share.sameRound'),
+          }}
+        />
+      )}
     </>
   )
 }

@@ -3,11 +3,14 @@
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
 
+import { KitShirt } from '@/components/kit/KitShirt'
 import { Num } from '@/components/ui/Num'
 import { Stamp } from '@/components/ui/Stamp'
 import { t } from '@/lib/i18n'
+import { DEFAULT_SPEC } from '@/lib/kit/spec'
 import type { KitChallenge, KitVerdict } from '@/lib/game/kitChallenge'
 import { submitKit } from './actions'
+import { ShareRow } from '@/components/share/ShareRow'
 
 /** Two choices, graded on the server, then the real answer with its source. */
 export function KitChallengeBoard({
@@ -42,6 +45,25 @@ export function KitChallengeBoard({
         <Num className="font-mono text-red">{challenge.season}</Num>
         <span>{challenge.competition ?? t('kitChallenge.allCompetitions')}</span>
       </p>
+
+      {/* The shirt with the two slots cut out of it. Asking "which maker, which
+          sponsor" over a bare season label is a form; asking it over the actual shirt
+          with two navy dashed boxes where the answers go is a game — the player is
+          looking at the gap they have to fill. Straight off the handoff's
+          "מה חסר בחולצה?" screen. */}
+      <div className="mt-3 border-rule border-ink bg-paper p-4">
+        <KitShirt
+          spec={{
+            ...DEFAULT_SPEC,
+            seasonLabel: challenge.season,
+            sponsorHe: verdict ? verdict.sponsor : null,
+            makerHe: verdict ? verdict.maker : null,
+          }}
+          missing={verdict ? [] : ['sponsor', 'maker']}
+          className="mx-auto block w-full max-w-[210px]"
+          title={challenge.season}
+        />
+      </div>
 
       <fieldset className="mt-stack border-rule border-ink p-3" disabled={verdict !== null}>
         <legend className="px-1 font-body text-[11px] font-extrabold tracking-widest text-muted">
@@ -126,6 +148,23 @@ export function KitChallengeBoard({
           >
             {t('kitChallenge.next')}
           </Link>
+          <ShareRow
+            kind="kit"
+            params={{ s: String(seed), total: '2' }}
+            headline={`${Number(verdict.makerCorrect) + Number(verdict.sponsorCorrect)}`}
+            card={{
+              kicker: 'GATE 4 · GUESS THE KIT',
+              label: t('screen.kitChallenge.title'),
+              eyebrow: t('kitChallenge.submit'),
+              hero: verdict.sponsor,
+              stats: [
+                { k: t('kitChallenge.maker'), v: verdict.maker },
+                { k: t('kitChallenge.sponsor'), v: verdict.sponsor },
+              ],
+              cta: t('share.challenge'),
+              challenge: t('share.sameRound'),
+            }}
+          />
         </>
       )}
     </>

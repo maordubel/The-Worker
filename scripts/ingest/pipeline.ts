@@ -80,6 +80,8 @@ export function runPipeline(input: StagedBundle, report: IngestReport): Pipeline
   collect('associationEvents', (record) => record.naturalKey)
   collect('associationRoles', (record) => record.naturalKey)
   collect('grievances', (record) => record.slug)
+  collect('calls', (record) => record.slug)
+  collect('enemies', (record) => record.slug)
   collect('shirtNumbers', (record) => record.naturalKey)
   collect('sponsorYears', (record) => record.naturalKey)
   collect('fanCulture', (record) => record.slug)

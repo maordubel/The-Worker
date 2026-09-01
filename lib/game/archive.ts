@@ -2,6 +2,8 @@ import 'server-only'
 
 import clubsFile from '@/content/manual/clubs.json'
 import fanCultureFile from '@/content/manual/fan-culture.json'
+import callsFile from '@/content/manual/calls.json'
+import enemiesFile from '@/content/manual/enemies.json'
 import grievancesFile from '@/content/manual/grievances.json'
 import shirtNumbersFile from '@/content/manual/shirt-numbers.json'
 import songsFile from '@/content/manual/songs.json'
@@ -172,6 +174,29 @@ export const archive = {
     feeEur?: number | null
     toClubHe?: string | null
   }>(grievancesFile),
+  calls: load<{
+    slug: string
+    shape: 'match' | 'person'
+    textHe: string
+    speakerHe: string
+    roleHe: string
+    answerHe: string
+    distractorsHe: string[]
+    contextHe: string
+  }>(callsFile),
+  enemies: load<{
+    slug: string
+    nameHe: string
+    latin: string
+    category: 'owner' | 'crossed' | 'rival'
+    sport: 'football' | 'basketball'
+    eraHe: string
+    terraceRank: number
+    chargeHe: string
+    detailHe: string
+    keyFactHe: string
+    happenedOn: string | null
+  }>(enemiesFile),
   shirtNumbers: load<{
     shirtNumber: number
     seasonLabel: string

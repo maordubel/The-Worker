@@ -13,7 +13,7 @@ export default function MemoryPage({ searchParams }: { searchParams: { seed?: st
     <Screen title={t('screen.memory.title')} sub={t('screen.memory.sub')} night>
       {cards.length >= 4 ? (
         <>
-          <MemoryBoard cards={cards} />
+          <MemoryBoard cards={cards} seed={seed} />
           <div className="mt-stack">
             <BannerCloth>{t('slogan.collective')}</BannerCloth>
           </div>
