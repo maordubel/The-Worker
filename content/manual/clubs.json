@@ -1,5 +1,5 @@
 {
-  "note": "Hapoel Tel Aviv is the club this product is about. Maccabi Tel Aviv is flagged as the derby rival — for this project a derby means Maccabi Tel Aviv and nothing else. Opponent clubs exist only to give verified matches something to point at.",
+  "note": "Hapoel Tel Aviv is the club this product is about. Maccabi Tel Aviv is flagged as the derby rival — for this project a derby means Maccabi Tel Aviv and nothing else. Opponent clubs exist only to give verified matches something to point at. The basketball records were added on 2.9.2026 from the wiki's own declaration: תבנית:שםקבוצה bolds exactly הפועל ת\"א, הפועל תל אביב and הפועל אוסישקין as the club the site is about, and תבנית:שליפת טבלת משחקים פשוטה queries basketball as department='כדורסל' OR department='הפועל אוסישקין'.",
   "confidence": 2,
   "source": {
     "kind": "other",
@@ -51,9 +51,14 @@
         "הפועל IBI תל אביב",
         "Hapoel Tel Aviv B.C."
       ],
-      "confidence": 2,
+      "confidence": 1,
       "sourceUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_B.C.",
-      "sourceTitle": "Hapoel Tel Aviv B.C. — Wikipedia"
+      "sourceTitle": "Hapoel Tel Aviv B.C. — Wikipedia",
+      "source": {
+        "kind": "wiki",
+        "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
+        "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
+      }
     },
     {
       "slug": "צלסי",
@@ -223,6 +228,64 @@
       "confidence": 2,
       "sourceUrl": "https://wiki.red-fans.com/",
       "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "הפועל-תל-אביב",
+      "nameHe": "הפועל תל אביב",
+      "nameEn": "Hapoel Tel Aviv",
+      "city": "תל אביב",
+      "sport": "basketball",
+      "isUs": true,
+      "isDerbyRival": false,
+      "aliases": [
+        "הפועל תל אביב",
+        "הפועל ת\"א",
+        "הפועל תל אביב (כדורסל)"
+      ],
+      "confidence": 1,
+      "source": {
+        "kind": "wiki",
+        "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
+        "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
+      }
+    },
+    {
+      "slug": "הפועל-אוסישקין",
+      "nameHe": "הפועל אוסישקין",
+      "nameEn": "Hapoel Ussishkin",
+      "city": "תל אביב",
+      "sport": "basketball",
+      "isUs": true,
+      "isDerbyRival": false,
+      "aliases": [
+        "הפועל אוסישקין",
+        "אוסישקין"
+      ],
+      "confidence": 1,
+      "source": {
+        "kind": "wiki",
+        "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
+        "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
+      }
+    },
+    {
+      "slug": "מכבי-תל-אביב",
+      "nameHe": "מכבי תל אביב",
+      "nameEn": "Maccabi Tel Aviv",
+      "city": "תל אביב",
+      "sport": "basketball",
+      "isUs": false,
+      "isDerbyRival": true,
+      "aliases": [
+        "מכבי תל אביב",
+        "מכבי ת\"א"
+      ],
+      "confidence": 1,
+      "source": {
+        "kind": "wiki",
+        "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
+        "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
+      }
     }
   ]
 }

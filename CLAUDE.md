@@ -83,6 +83,23 @@ Read `docs/00-architecture.md` before changing anything structural.
     outbound hosts, so what was reported as the source refusing us may be this
     environment refusing the source. A blocked source is documented with the evidence
     that identifies which side blocked it, or it is documented as unknown.
+    **Resolved on 2.9.2026, and the answer was BOTH.** The sandbox proxy denies
+    `wiki.red-fans.com` with `connect_rejected (organization policy)` — so nothing here
+    can ever reach it. Anthropic's own fetcher, on a different network path, gets a real
+    `403` from the target: Cloudflare bot protection. Maor's browser reaches the site and
+    is served `Just a moment...` — the JS challenge, which a human passes and an agent
+    must not. So the corpus can only come from a HUMAN BROWSER, and the importer must be
+    built around a file the owner exports, never around a command he runs.
+    The site has no `/wiki/` path: every page is `index.php?title=<encoded title>`.
+    Three attempts to drive the challenge through the desktop browser pane killed the
+    bridge at the same point each time. Three is where that stops being bad luck.
+    **`Special:Export` is therefore the route, not the fallback** — see
+    `sources/wiki-export.ts`. It costs the owner a form and a download and it yields page
+    id, namespace, revision id, timestamp and complete wikitext, which is every field a
+    corpus row needs; the same store, the same idempotency on `page_id`. What it cannot
+    give is the API's RESOLVED category, link and image lists, which are parsed out of
+    the wikitext instead — a template-added category is invisible, and that is stated,
+    not hidden.
 12. **One file knows MediaWiki:** `scripts/ingest/adapters/mediawiki.ts` — the API
     client AND the `Special:Export` XML reader. A provider field name anywhere else is a
     defect. The corpus importer (`sources/wiki-corpus.ts`, `docs/07-wiki-corpus.md`)
@@ -425,3 +442,77 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     mark בית/חוץ; a row that does neither is skipped and reported. Putting Hapoel at home
     by default would invent the half of a match's identity that decides which fixture it
     is.
+    **And the title that sounds like the schedule is a HUB.** The first real export
+    (2.9.2026) showed `לוח משחקים (כדורגל) 1980/81` to be five words and three links —
+    the actual fixtures live in `לוח משחקי ליגה …`, `לוח משחקי גביע …`,
+    `לוח משחקים גביעי אירופה …`, `לוח משחקי אימון …` and a merged
+    `לוח משחקים מלא …`, and which of those exist differs by season. 1980/81 also calls
+    `{{שליפת לוח משחקים פשוטה}}` and `{{1980/81}}`: the wiki runs Semantic MediaWiki
+    (namespaces `טופס`, `Widget`, `יחידה`), so part of a schedule is a QUERY over
+    per-match pages, not a table in the page. A parser that reads only tables will
+    report those seasons as empty and be wrong about why.
+    So the next export is never guessed: `wantedPages()` in `sources/wiki-export.ts`
+    lists every page the exported pages LINK to and the export did not contain, and that
+    list — the wiki's own words — is what gets requested next.
+    **And two exports in, that chain reached the real answer: the wiki runs CARGO, and
+    the matches are a DATABASE TABLE.** `תבנית:שליפת טבלת משחקים פשוטה` is a
+    `#cargo_query` over `tables=Games` with
+    `day, month, year, stage, host, oponent, homescore, awayscore, ona, department,
+    mifal, shootout, comments, liga, result`. So a schedule page holds no fixtures at
+    all; it holds a WHERE clause. Parsing schedule wikitext for matches was the wrong
+    plan against the right-looking pages.
+    Three consequences, and the third is the one that matters:
+    · `Special:CargoExport` answers that table as JSON to any reader with a browser —
+      structured rows, no wikitext, no table parser, every season in one request.
+    · **`department` IS the sport**, stated by the source on every row (`כדורגל`,
+      `כדורסל`, and `הפועל אוסישקין` as its own value). Rule 6 stops being a
+      classifier's judgement and becomes a filter on a field the wiki itself wrote.
+    · Friendly matches are the exception: `לוח משחקי אימון …` carries a hand-written
+      wikitable, so both readers are needed and the table parser is not retired.
+    **`Games` is 26 columns and the first export asked for 15.** The eleven that were
+    missing are not filler: `stadium` is the venue, `hour` the kickoff, `coach` who
+    managed, `shofet1..3` the officials, and `homegame` (1 / 0 / **x**) marks a tie
+    played on NEITHER ground. `Special:CargoTables/Games` states the schema, so the
+    schema is read before the export is written — never inferred from the columns a
+    template happened to query.
+
+37. **A squad is read from the PLAYER, not from the category file.**
+    The brief treated the 98 squad categories as the obstacle. The real export showed the
+    way through: every player page carries its own `סגל הפועל ת"א (<ענף>) <עונה>`
+    categories — משה סיני's lists thirteen — so one export of the player pages yields
+    every season each player belonged to, and the sport is INSIDE the category name, so
+    rule 6 is enforced by the same read that finds the season.
+    Membership taken from the file a page arrived in would be an artefact of how the
+    operator ran the export; membership taken from the page is what the wiki says, and
+    the same three files in any order produce the same rows.
+    **`מספר בהפועל` is not a per-season shirt.** It is one value on a page covering
+    thirteen seasons — the number the player is remembered by. Writing it into every
+    season's squad row would state thirteen facts from one, and would let two players
+    "share" a number they never shared. It becomes a single shirt-number holding; the
+    squad rows keep `null`.
+    **An unreadable value the source DID write is reported, not nulled.**
+    `parseIsoDate` answers `null` rather than throwing, so the obvious try/catch caught
+    nothing and a birth date vanished silently — the exact shape rule 11 forbids. It is
+    now reported (`19.5.63` — a two-digit year, and the century is not guessed).
+    **One export of `קטגוריה:שחקני הפועל תל אביב (כדורגל)` closed the whole thing:**
+    645 pages, 624 players, 1,787 memberships across 99 seasons, 1927/28 → 2026/27. The
+    three-season run done earlier from three separate category exports produced 19/17/17
+    for 1980–83; this one produces the same three numbers from a different file. That
+    agreement is the design being right, not a coincidence.
+    `1967/98` appears as a season label on one page — a typo for 1967/68 in the source. It
+    is reported and left alone; correcting a source is not this layer's job.
+
+38. **`הפועל אוסישקין` is a `department` value, and the wiki says which sport it is.**
+    `Games` holds 5,766 rows: 3,193 football, 2,483 basketball and **90 Hapoel
+    Ussishkin**. Rule 6 forbids a mixed or unknown record entering either walk — and
+    Ussishkin is neither: `תבנית:שליפת טבלת משחקים פשוטה` queries basketball as
+    `department='כדורסל' OR department='הפועל אוסישקין'`, so the SOURCE states the
+    relationship and the walk reads it. `DEPARTMENT` is a list per sport for exactly this.
+    `תבנית:שםקבוצה` bolds `הפועל ת"א`, `הפועל תל אביב` and `הפועל אוסישקין` — the wiki
+    declaring who "we" are — which is where the basketball club records in
+    `content/manual/clubs.json` come from. They carry **confidence 1**: one source, read
+    off a template, not yet reviewed, so rule 2 keeps them out of the trivia generator
+    until somebody checks them.
+    **`comments` is a football convention.** Reading it as scorers in the basketball rows
+    invented twenty goals in a sport that does not record them that way; the scorer read
+    is gated on football and the column is kept as a note elsewhere.

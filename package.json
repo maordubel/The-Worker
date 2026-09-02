@@ -17,7 +17,10 @@
     "story:overlap": "node scripts/brand/story-overlap.mjs",
     "story:cards": "node scripts/brand/story-cards.mjs",
     "qa:sweep": "node scripts/brand/qa-sweep.mjs",
-    "wiki:canon": "tsx scripts/ingest/canon-cli.ts"
+    "wiki:canon": "tsx scripts/ingest/canon-cli.ts",
+    "wiki:import": "tsx scripts/ingest/export-cli.ts",
+    "wiki:cargo": "tsx scripts/ingest/cargo-cli.ts",
+    "wiki:squads": "tsx scripts/ingest/squads-cli.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
