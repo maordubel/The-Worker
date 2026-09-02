@@ -90,7 +90,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
 
   game.registry.set(CONTEXT_KEY, context)
 
-  const worldScene = () => game.scene.getScene(WorldScene.KEY) as WorldScene | null
+  const worldScene = () => game.scene.getScene(WorldScene.KEY) as unknown as WorldScene | null
 
   return {
     input,
@@ -101,7 +101,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     choose: (id: string) => dialogue.choose(id),
     dismissEnding: () => worldScene()?.goHome(),
     skipIntro: () => {
-      const prologue = game.scene.getScene(PrologueScene.KEY) as PrologueScene | null
+      const prologue = game.scene.getScene(PrologueScene.KEY) as unknown as PrologueScene | null
       if (prologue && game.scene.isActive(PrologueScene.KEY)) prologue.skip()
     },
     destroy: () => {

@@ -6,6 +6,8 @@ import { AnchorCard } from '@/components/life/AnchorCard'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { EndingCard } from '@/components/life/EndingCard'
 import { LifeHud } from '@/components/life/LifeHud'
+import { Prompt } from '@/components/life/Prompt'
+import { Teach } from '@/components/life/Teach'
 import { TouchPad } from '@/components/life/TouchPad'
 import { t } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
@@ -45,7 +47,8 @@ export function LifeStage({
   const [ready, setReady] = useState(false)
   const [hud, setHud] = useState<HudState>(EMPTY_HUD)
   const [dialogue, setDialogue] = useState<LifeBusEvents['dialogue']>(null)
-  const [prompt, setPrompt] = useState<string | null>(null)
+  const [prompt, setPrompt] = useState<LifeBusEvents['prompt']>(null)
+  const [teach, setTeach] = useState<LifeBusEvents['teach']>(null)
   const [toast, setToast] = useState<LifeBusEvents['toast']>(null)
   const [ending, setEnding] = useState<LifeBusEvents['ending']>(null)
   const [card, setCard] = useState<HistoricalAnchor | null>(null)
@@ -70,6 +73,7 @@ export function LifeStage({
     unsubscribe.push(bus.on('hud', setHud))
     unsubscribe.push(bus.on('dialogue', setDialogue))
     unsubscribe.push(bus.on('prompt', setPrompt))
+    unsubscribe.push(bus.on('teach', setTeach))
     unsubscribe.push(bus.on('toast', setToast))
     unsubscribe.push(bus.on('ending', setEnding))
     unsubscribe.push(bus.on('controls', (value) => setControls(value.visible)))
@@ -117,6 +121,54 @@ export function LifeStage({
   }, [ready])
 
   /**
+   * המקלדת — held in the shell, because a scene restart forgets what is held.
+   *
+   * Phaser rebuilds its Key objects when a scene restarts, and the browser never re-sends
+   * a keydown for a key that never came up — so crossing a doorway with an arrow held
+   * left the child frozen in the next room until the player let go and pressed again. The
+   * document's own key state survives every scene change, so it is the source of truth
+   * and the runtime is simply told what it says.
+   */
+  useEffect(() => {
+    if (!ready) return
+    const held = new Set<string>()
+    const send = () => {
+      const input = runtime.current?.input
+      if (!input) return
+      let x = 0
+      let y = 0
+      if (held.has('arrowleft') || held.has('a')) x -= 1
+      if (held.has('arrowright') || held.has('d')) x += 1
+      if (held.has('arrowup') || held.has('w')) y -= 1
+      if (held.has('arrowdown') || held.has('s')) y += 1
+      input.setKeys(x, y)
+      input.setKeyAction(held.has('e') || held.has(' ') || held.has('enter'))
+      input.setRun(held.has('shift'))
+    }
+    const onDown = (event: KeyboardEvent) => {
+      held.add(event.key.toLowerCase())
+      send()
+    }
+    const onUp = (event: KeyboardEvent) => {
+      held.delete(event.key.toLowerCase())
+      send()
+    }
+    const clear = () => {
+      held.clear()
+      send()
+    }
+    window.addEventListener('keydown', onDown)
+    window.addEventListener('keyup', onUp)
+    window.addEventListener('blur', clear)
+    return () => {
+      window.removeEventListener('keydown', onDown)
+      window.removeEventListener('keyup', onUp)
+      window.removeEventListener('blur', clear)
+      clear()
+    }
+  }, [ready])
+
+  /**
    * The game owns the arrow keys and the space bar for as long as it is on screen.
    *
    * Without this the browser scrolls the page on every step and every "continue", the
@@ -131,7 +183,10 @@ export function LifeStage({
       const target = event.target as HTMLElement | null
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return
       if (owned.has(event.key)) event.preventDefault()
-      if (event.key !== ' ' && event.key !== 'Enter') return
+      // E is the game's action key everywhere — including inside the dialogue box, so a
+      // player never has to change hands to read a line.
+      const advances = event.key === ' ' || event.key === 'Enter' || event.key.toLowerCase() === 'e'
+      if (!advances) return
       if (!dialogue) return
       event.preventDefault()
       if (!dialogue.choices || dialogue.choices.length === 0) runtime.current?.advance()
@@ -186,17 +241,14 @@ export function LifeStage({
         {ready && <LifeHud hud={hud} />}
 
         {ready && !dialogue && !ending && !card && controls && touch && (
-          <TouchPad onAxis={onAxis} onAction={onAction} />
+          <TouchPad onAxis={onAxis} onAction={onAction} verb={prompt?.verb ?? null} />
         )}
 
-        {/* the reach prompt — one word, above the action button, never a tutorial */}
         {ready && prompt && !dialogue && !ending && !card && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-[108px] z-20 flex justify-center px-gutter">
-            <span className="border-hair border-ink bg-sheet/95 px-2 py-1 font-body text-[10px] leading-none text-ink">
-              <bdi>{prompt}</bdi>
-            </span>
-          </div>
+          <Prompt verb={prompt.verb} label={prompt.label} touch={touch} />
         )}
+
+        {ready && teach && !dialogue && !ending && !card && <Teach id={teach.id} touch={touch} />}
 
         {toast && (
           <div className="pointer-events-none absolute inset-x-0 top-[68px] z-30 flex justify-center px-gutter">

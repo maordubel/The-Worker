@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react'
 
-import { t } from '@/lib/i18n'
+import { t, type MessageKey } from '@/lib/i18n'
 
 /**
  * הבקרים — a thumb that lands anywhere, and one button.
@@ -25,9 +25,12 @@ const RADIUS = 46
 export function TouchPad({
   onAxis,
   onAction,
+  verb,
 }: {
   onAxis: (x: number, y: number) => void
   onAction: (down: boolean) => void
+  /** the verb of whatever is in reach — the button SAYS what it will do, or waits */
+  verb?: string | null
 }) {
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null)
   const [nub, setNub] = useState({ x: 0, y: 0 })
@@ -103,10 +106,20 @@ export function TouchPad({
         </div>
       )}
 
+      {/*
+        One button, and it tells you what it is for.
+
+        Idle it is quiet and half-present; the moment something is in reach it fills with
+        vermilion and takes the verb — דבר, קח, צא — so a player on a phone never has to
+        work out whether pressing it will do anything. 72px, half again the 48px minimum,
+        because it is pressed hundreds of times.
+      */}
       <button
         type="button"
-        aria-label={t('life.action')}
-        className="pointer-events-auto absolute bottom-5 end-5 flex h-[72px] min-h-tap w-[72px] touch-none items-center justify-center border-rule border-ink bg-red/90 transition-transform duration-press ease-stamp active:scale-95 motion-reduce:transition-none"
+        aria-label={verb ? t(`life.verb.short.${verb}` as MessageKey) : t('life.action')}
+        className={`pointer-events-auto absolute bottom-5 end-5 flex h-[76px] min-h-tap w-[76px] touch-none items-center justify-center border-rule transition-all duration-plate ease-stamp active:scale-95 motion-reduce:transition-none ${
+          verb ? 'border-ink bg-red' : 'border-sheet/50 bg-ink/40'
+        }`}
         onPointerDown={(event) => {
           event.preventDefault()
           onAction(true)
@@ -114,7 +127,13 @@ export function TouchPad({
         onPointerUp={() => onAction(false)}
         onPointerCancel={() => onAction(false)}
       >
-        <span className="h-5 w-5 bg-sheet" aria-hidden="true" />
+        {verb ? (
+          <span className="font-display text-[15px] leading-none text-sheet">
+            <bdi>{t(`life.verb.short.${verb}` as MessageKey)}</bdi>
+          </span>
+        ) : (
+          <span className="h-4 w-4 bg-sheet/60" aria-hidden="true" />
+        )}
       </button>
     </div>
   )

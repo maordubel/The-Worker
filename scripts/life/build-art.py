@@ -43,6 +43,10 @@ SRC = {
     'stageAenv': 'b176780f-image.png',
     'bloom': '2c06559c-image.png',
     'stageA2': '441a30fa-image.png',
+    # 2.9.2026 — the first purpose-drawn room, delivered as a flat painting plus the
+    # separated foreground furniture that makes the child walk BEHIND something.
+    'livingRoom': '6864c990-image.png',
+    'livingFore': '2f74f424-image.png',
 }
 
 # The scanner's band is hue 38–70 at saturation and value 0.35 (`lib/isYellow.ts`). The
@@ -250,7 +254,7 @@ def main():
         spec = json.load(fh)
     os.makedirs(OUT, exist_ok=True)
 
-    report = {'backdrops': {}, 'figures': {}, 'props': {}, 'portraits': {}}
+    report = {'backdrops': {}, 'figures': {}, 'props': {}, 'portraits': {}, 'layers': {}}
     total_yellow = 0
     total_bytes = 0
 
@@ -262,27 +266,35 @@ def main():
         # the dialogue box, not cut-outs, and keying a pale face off a pale background
         # eats the face.
         ('portraits', False),
+        # Already delivered with an alpha channel: no keying, only trim and de-yellow.
+        ('layers', 'alpha'),
     ):
         for key, (src, box, factor) in spec.get(group, {}).items():
-            im = board(src).crop(tuple(box))
+            im = board(src).crop(tuple(box)) if transparent != 'alpha' else Image.open(
+                os.path.join(BOARDS, SRC[src])
+            ).convert('RGBA').crop(tuple(box))
             im = upscale(im, factor)
-            if transparent:
+            if transparent is True:
                 im = trim(defringe(cutout(im)))
-            im, moved = deyellow(im)
-            left = count_yellow(im)
-            total_yellow += left
-
+            elif transparent == 'alpha':
+                im = trim(im)
             if transparent:
-                out = im.convert('RGBA')
-                flat = out.convert('RGB').quantize(colors=200, method=Image.FASTOCTREE)
-                flat = flat.convert('RGBA')
-                flat.putalpha(out.split()[-1])
-                out = flat
+                src2 = im.convert('RGBA')
+                out = src2.convert('RGB').quantize(colors=200, method=Image.FASTOCTREE).convert('RGBA')
+                out.putalpha(src2.split()[-1])
             else:
-                out = im.convert('RGB').quantize(colors=192, method=Image.MEDIANCUT, dither=Image.FLOYDSTEINBERG)
+                out = im.convert('RGB').quantize(colors=160, method=Image.MEDIANCUT, dither=Image.FLOYDSTEINBERG)
+                out = out.convert('RGB')
 
+            # De-yellow LAST, after quantisation: an octree palette averages colours and
+            # can invent a hue that was not in the de-yellowed image. Then measure the
+            # FILE, not an intermediate — a zero that the saved bytes do not honour is
+            # worse than no check at all.
+            out, moved = deyellow(out)
             path = os.path.join(OUT, f'{key}.png')
             out.save(path, optimize=True)
+            left = count_yellow(Image.open(path))
+            total_yellow += left
             size = os.path.getsize(path)
             total_bytes += size
             report[group][key] = {

@@ -100,10 +100,32 @@ To re-cut an asset: change its box in the manifest and run `python3 scripts/life
 Nothing in the game moves — every position in `world/scenes.ts` is a fraction of the
 backdrop, not a pixel.
 
+## Playability
+
+One playtest, one sentence: *the player stayed in the house because leaving was unclear,
+and time took Kobi to the match while he was still learning to walk.* The pass that
+followed is rule 41 in `CLAUDE.md`. The short version:
+
+| problem | fix |
+|---|---|
+| doors invisible | every exit has a painted glow; the front door's is daylight and nothing else's is |
+| `לגעת` says nothing | verb + name on everything: `דבר עם קובי`, `לך לרחוב`, `קח את הבקבוקים` |
+| which key? | **E** everywhere (Space/Enter too); on a phone one button that shows the verb |
+| walked into a door, nothing | walking in works after a dwell; the button works instantly |
+| walked out, walked back in | the door you came through is inert until you step off it; no exit fires in a room's first 700ms |
+| frozen after a transition | the shell owns the keyboard, not the scene |
+| clock punished onboarding | the day starts when the child reaches the street |
+| lost with no help | 30s brighter doors → 50s a line from the room → 70s an arrow |
+| spawn inside a door | a failing test |
+
+`npm run life:play` proves it: from a fresh save it holds ONE direction and must arrive in
+the street through the living room, on a phone, a tablet and a desktop.
+
 ## Still temporary
 
-- **One pose per character.** The boards are presentation art, not sprite sheets, so a
-  walking child is a static figure with a bob and a lean rather than a walk cycle.
+- **One pose per character, except the child.** The player has a real eight-frame walk
+  cycle and a four-way turnaround from the green-screen sheet; everybody else is one
+  drawn pose with a slow sway.
 - **Kobi and Rachel are half-figures** and are staged where that reads: seated, behind a
   table, inside a crowd.
 - **Ussishkin's two backdrops are cut and shipped but not yet placed** in a scene — the

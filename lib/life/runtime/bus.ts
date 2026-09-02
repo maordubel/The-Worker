@@ -44,7 +44,16 @@ export type HudState = {
 export type LifeBusEvents = {
   hud: HudState
   dialogue: { lines: DialogueLine[]; choices?: DialogueChoice[]; portrait?: string | null } | null
-  prompt: string | null
+  /**
+   * What the button will do, and to what.
+   *
+   * The old prompt said `לגעת`, which is not information. A verb plus a name — `דבר עם
+   * קובי`, `צא לרחוב` — is the whole of the interaction language, and it is the same
+   * string on a desktop key cap and on a phone's action button.
+   */
+  prompt: { verb: string; label: string } | null
+  /** the one line of onboarding the game shows, or null once it is done */
+  teach: { id: 'move' | 'act' } | null
   toast: { text: string; tone: 'plain' | 'red' } | null
   place: { id: LocationId; title: string }
   anchor: { anchor: HistoricalAnchor; showing: boolean }

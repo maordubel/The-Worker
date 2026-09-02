@@ -1,20 +1,17 @@
 /**
  * הנכסים — the approved concept art, as game assets.
  *
- * Every backdrop and every figure in the game is a rectangle of one of Maor's concept
- * boards, cut by `scripts/life/build-art.py` and written to `public/life/art/`. This
- * file is the only place the game names a file: a scene asks for `ART.bedroom` and a
- * character asks for `FIGURE.kobi`, so re-cutting an asset, or replacing a temporary cut
- * with a final production PNG, is a change to the build script and to nothing else.
- *
- * The art is TEMPORARY in exactly one sense: it is cut from presentation boards rather
- * than drawn as sprites, so a figure has one pose and a room has one camera. It is NOT
- * temporary in look — this IS the approved direction, at the resolution the boards hold.
+ * Every backdrop and every person in the game is a rectangle of one of Maor's boards,
+ * cut by `scripts/life/build-art.py` (paintings, props, portraits) and
+ * `scripts/life/slice-sheets.py` (character sheets, sliced automatically on the gaps
+ * between figures). This file is the only place the game names a file: a scene asks for
+ * a key, so re-cutting an asset — or dropping in a final production painting — is a
+ * change to the manifest and to nothing else.
  */
 
 export const ART_ROOT = '/life/art'
 
-/** Painted rooms and places. The key is the file name. */
+/** Painted rooms and places. */
 export const BACKDROP = [
   'living',
   'bedroom',
@@ -33,7 +30,14 @@ export const BACKDROP = [
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
-/** Cut-out people. Kobi and Rachel are half-figures — see the note in `scenes.ts`. */
+/**
+ * Painted furniture separated from its room, so the child can walk BEHIND something.
+ * A flat painting can only ever be behind the player; one separated object is the whole
+ * difference between a backdrop and a room.
+ */
+export const LAYER = ['livingTable'] as const
+
+/** Cut-out people. */
 export const FIGURE = [
   'kid',
   'ofir',
@@ -42,6 +46,7 @@ export const FIGURE = [
   'keren',
   'kobi',
   'rachel',
+  'rachel-tray',
   'fanA',
   'fanB',
   'fanC',
@@ -52,6 +57,28 @@ export const FIGURE = [
   'oldMan',
 ] as const
 export type FigureKey = (typeof FIGURE)[number]
+
+/**
+ * The child's own frames — a turnaround and an eight-frame walk, from the green-screen
+ * sheet. Everybody else has one pose; the player has an animation, because the player is
+ * the thing you look at for fifteen minutes.
+ */
+export const KID_POSE = {
+  down: 'kid',
+  downSide: 'kid-3q',
+  side: 'kid-side',
+  up: 'kid-back',
+} as const
+
+export const KID_WALK = [
+  'kid-walk2',
+  'kid-walk3',
+  'kid-walk4',
+  'kid-walk5',
+  'kid-walk6',
+  'kid-walk7',
+  'kid-walk8',
+] as const
 
 export const PROP = [
   'propNewspaper',
@@ -81,11 +108,5 @@ export function artUrl(key: string): string {
   return `${ART_ROOT}/${key}.png`
 }
 
-/**
- * Loading is per scene, not up front.
- *
- * The whole folder is a little under six megabytes; a bedroom is a hundred and thirty
- * kilobytes. Boot loads the figures the chapter uses and each scene loads its own
- * backdrop, so opening the game costs a room rather than a stadium.
- */
-export const BOOT_FIGURES: FigureKey[] = ['kid', 'ofir', 'kobi', 'rachel']
+/** Loading is per scene. Boot warms only what the child is made of. */
+export const BOOT_FIGURES: string[] = [...Object.values(KID_POSE), ...KID_WALK]

@@ -20,6 +20,8 @@
 
 export const LIFE_PALETTE = {
   // --- sky and light -------------------------------------------------------------
+  /** the one pure white in the game: the door-glow texture, which is always tinted */
+  glow: 0xffffff,
   sky: 0x8fb4ce,
   skyDeep: 0x6f9ab8,
   skyDusk: 0x5d6f8c,

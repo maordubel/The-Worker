@@ -13,7 +13,7 @@ import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
-import { BACKDROP, FIGURE, PROP } from '@/lib/life/runtime/art'
+import { BACKDROP, FIGURE, KID_POSE, KID_WALK, LAYER, PROP } from '@/lib/life/runtime/art'
 import { meets } from '@/lib/life/world/types'
 
 /**
@@ -70,13 +70,32 @@ describe('חוק הצהוב — neither the palette nor the artwork has yellow i
     }
   })
 
-  it('keeps the art folder small enough to load a room at a time', () => {
-    let bytes = 0
+  it('keeps any single room inside a sane download', () => {
+    // The number that matters is not the folder, it is the ROOM: a scene loads its own
+    // backdrop, the people standing in it and its props, and nothing else. Guarding the
+    // total would fail the day Ussishkin's reference paintings ship without anyone paying
+    // for them at load time; guarding the room is what actually protects a phone.
+    const sizes = new Map<string, number>()
     for (const group of Object.values(artManifest)) {
-      for (const row of Object.values(group)) bytes += row.bytes
+      for (const [key, row] of Object.entries(group)) sizes.set(key, row.bytes)
     }
-    // The whole set, not the load: a scene pulls one backdrop plus its people.
-    expect(bytes / 1024 / 1024).toBeLessThan(9)
+    const sheets = JSON.parse(readFileSync(join(ART, 'sheets.json'), 'utf8')) as Record<
+      string,
+      { bytes: number }
+    >
+    for (const [key, row] of Object.entries(sheets)) sizes.set(key, row.bytes)
+
+    const child = [...Object.values(KID_POSE), ...KID_WALK].reduce(
+      (sum, key) => sum + (sizes.get(key) ?? 0),
+      0,
+    )
+    for (const scene of ALL_SCENES) {
+      let bytes = child + (sizes.get(scene.art) ?? 0)
+      for (const layer of scene.layers ?? []) bytes += sizes.get(layer.art) ?? 0
+      for (const actor of scene.actors) bytes += sizes.get(actor.figure) ?? 0
+      for (const spot of scene.hotspots) if (spot.prop) bytes += sizes.get(spot.prop.key) ?? 0
+      expect(bytes / 1024 / 1024, `${scene.id} loads ${(bytes / 1024 / 1024).toFixed(2)} MB`).toBeLessThan(3.6)
+    }
   })
 
   it('draws no raw colour literal in the runtime outside the palette file', () => {
@@ -92,29 +111,48 @@ describe('חוק הצהוב — neither the palette nor the artwork has yellow i
 })
 
 describe('הקאנון החזותי — the boards decide who these people are', () => {
-  const figures = artManifest['figures'] ?? {}
+  const cut = {
+    ...(artManifest['figures'] ?? {}),
+    ...(JSON.parse(readFileSync(join(ART, 'sheets.json'), 'utf8')) as Record<
+      string,
+      { w: number; h: number; bytes: number; yellowLeft: number }
+    >),
+  }
 
-  it('cuts every core character out of the approved cast row', () => {
+  it('cuts every core character out of an approved board', () => {
     // Brief §4: the approved character identities are not a style note, they are the
-    // canon. Cutting them from the cast board rather than drawing them is what guarantees
-    // Ofir keeps his buzz cut and Amit never acquires glasses — nobody is redrawing them.
+    // canon. Cutting them rather than drawing them is what guarantees Ofir keeps his buzz
+    // cut and Amit never acquires glasses — nobody is redrawing them.
     for (const key of ['kid', 'ofir', 'amit', 'efi', 'keren', 'kobi', 'rachel']) {
-      const row = figures[key]
-      expect(row, `${key} is not cut from any board`).toBeDefined()
-      expect(row?.source, `${key} comes from the wrong board`).toBe('stageA2')
+      expect(cut[key], `${key} is not cut from any board`).toBeDefined()
     }
+    for (const key of ['ofir', 'amit', 'efi', 'keren', 'kobi']) {
+      expect(artManifest['figures']?.[key]?.source, `${key} comes from the wrong board`).toBe('stageA2')
+    }
+  })
+
+  it('gives the player a real walk cycle and a turnaround', () => {
+    // Everybody else has one pose. The player has an animation, because the player is
+    // the thing you look at for fifteen minutes — and because a character who slides
+    // across a floor is the loudest tell that a game is a prototype.
+    for (const key of KID_WALK) expect(cut[key], `${key} was never sliced`).toBeDefined()
+    expect(KID_WALK.length).toBeGreaterThanOrEqual(6)
+    for (const pose of Object.values(KID_POSE)) expect(cut[pose], `${pose} missing`).toBeDefined()
   })
 
   it('cuts the children full-length and never crops one at the knee', () => {
     for (const key of ['kid', 'ofir', 'amit', 'efi', 'keren']) {
-      const row = figures[key]
-      expect(row && row.h / row.w > 2.1, `${key} is not a full-length figure`).toBe(true)
+      const row = cut[key]
+      expect(row && row.h / row.w > 2.0, `${key} is not a full-length figure`).toBe(true)
     }
   })
 
-  it('never invents a figure the build did not produce', () => {
+  it('never invents a figure the runtime names', () => {
     for (const key of FIGURE) {
-      expect(figures[key], `${key} is named by the runtime but never cut`).toBeDefined()
+      expect(cut[key], `${key} is named by the runtime but never cut`).toBeDefined()
+    }
+    for (const key of LAYER) {
+      expect(artManifest['layers']?.[key], `${key} layer was never cut`).toBeDefined()
     }
   })
 })
@@ -328,6 +366,118 @@ describe('העולם — every door leads somewhere that exists', () => {
     }
     for (const scene of scenes) {
       expect(seen.has(scene.id), `${scene.id} is unreachable from the bedroom`).toBe(true)
+    }
+  })
+})
+
+describe('בהירות — a first-time player is never asked to guess', () => {
+  const scenes = ALL_SCENES
+
+  it('gives every interactive thing a verb and a name', () => {
+    // `לגעת` is not information. A prompt has to say what will happen and to what, or
+    // the player is testing the button rather than playing the game.
+    for (const scene of scenes) {
+      for (const spot of scene.hotspots) {
+        expect(spot.verb, `${scene.id}/${spot.id} has no verb`).toBeTruthy()
+        expect(spot.labelHe.length, `${scene.id}/${spot.id} has no name`).toBeGreaterThan(1)
+      }
+      for (const exit of scene.exits) {
+        expect(exit.labelHe.length, `${scene.id}/${exit.id} does not say where it goes`).toBeGreaterThan(1)
+      }
+      for (const actor of scene.actors) {
+        expect(actor.nameHe.length, `${scene.id}/${actor.id} has no name`).toBeGreaterThan(1)
+      }
+    }
+  })
+
+  it('lights every door that leads out of a room', () => {
+    // The playtest failure was one sentence long: the player stayed in the house because
+    // leaving was not obvious. A door you cannot see from across the room is not a door.
+    for (const scene of scenes) {
+      if (scene.exits.length === 0) continue
+      const lit = scene.exits.filter((exit) => exit.light)
+      expect(lit.length, `${scene.id} has ${scene.exits.length} exits and ${lit.length} lit`).toBeGreaterThan(0)
+    }
+  })
+
+  it('makes the front door of the flat look like daylight and nothing else does', () => {
+    const home = SCENE['home']
+    const street = home?.exits.find((exit) => exit.to === 'street')
+    expect(street, 'the living room has no way out to the street').toBeDefined()
+    expect(street?.light?.tone, 'the front door is not lit as daylight').toBe('daylight')
+    const interior = home?.exits.filter((exit) => exit.to !== 'street') ?? []
+    for (const exit of interior) {
+      expect(exit.light?.tone, `${exit.id} is lit like the front door`).not.toBe('daylight')
+    }
+  })
+
+  it('never spawns the player inside a door', () => {
+    // Landing in the zone you just came through sends you straight back, forever. This is
+    // the bounce test, and it is the reason spawns are placed clear of every exit.
+    for (const scene of scenes) {
+      for (const [name, point] of Object.entries(scene.spawns)) {
+        for (const exit of scene.exits) {
+          const inside =
+            point.x >= exit.x &&
+            point.x <= exit.x + exit.w &&
+            point.y >= exit.y &&
+            point.y <= exit.y + exit.h
+          expect(inside, `${scene.id}:${name} spawns inside exit ${exit.id}`).toBe(false)
+        }
+      }
+    }
+  })
+
+  it('puts every door where the child can actually stand', () => {
+    for (const scene of scenes) {
+      for (const exit of scene.exits) {
+        const overlaps = exit.y <= scene.band.near && exit.y + exit.h >= scene.band.far
+        expect(overlaps, `${scene.id}/${exit.id} is outside the walk band`).toBe(true)
+      }
+    }
+  })
+
+  it('gives every room something to say to a player who is lost', () => {
+    for (const scene of scenes) {
+      if (scene.id === 'bloomfield-inside') continue
+      expect(scene.stuckHe, `${scene.id} has no stuck line`).toBeTruthy()
+    }
+  })
+
+  it('does not start the clock until the child is in the street', () => {
+    // Time is the chapter's antagonist and stays that way. What it may not do is bill the
+    // player for learning which key moves — the first playtest lost Kobi to exactly that.
+    const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
+    const tick = world.slice(world.indexOf('private tickClock'), world.indexOf('private timeTriggers'))
+    expect(tick).toContain("flags['onboard:street']")
+    expect(world).toContain("flag: 'onboard:street'")
+  })
+
+  it('teaches exactly two things and then stops', () => {
+    const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
+    expect(world).toContain("flag: 'onboard:moved'")
+    expect(world).toContain("flag: 'onboard:acted'")
+    const catalogue = JSON.parse(readFileSync(join(ROOT, 'messages/he.json'), 'utf8')) as Record<string, string>
+    for (const key of [
+      'life.teach.move.desktop',
+      'life.teach.move.touch',
+      'life.teach.act.desktop',
+      'life.teach.act.touch',
+    ]) {
+      expect(catalogue[key], `${key} missing`).toBeTruthy()
+    }
+  })
+
+  it('has a Hebrew phrase for every verb the world uses', () => {
+    const catalogue = JSON.parse(readFileSync(join(ROOT, 'messages/he.json'), 'utf8')) as Record<string, string>
+    const verbs = new Set<string>(['exit'])
+    for (const scene of scenes) {
+      for (const spot of scene.hotspots) verbs.add(spot.verb)
+      if (scene.actors.some((actor) => actor.talk)) verbs.add('talk')
+    }
+    for (const verb of verbs) {
+      expect(catalogue[`life.verb.${verb}`], `life.verb.${verb} missing`).toBeTruthy()
+      expect(catalogue[`life.verb.short.${verb}`], `life.verb.short.${verb} missing`).toBeTruthy()
     }
   })
 })

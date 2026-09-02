@@ -39,6 +39,19 @@ export class BootScene extends Phaser.Scene {
       g.destroy()
     }
 
+    // The door glow: one soft radial falloff, tinted warm for an inside door and pale
+    // for daylight. Every exit in the game is lit with this and nothing else.
+    if (!this.textures.exists('life-glow')) {
+      const g = this.add.graphics()
+      const size = 96
+      for (let i = 24; i > 0; i -= 1) {
+        g.fillStyle(LIFE_PALETTE.glow, 0.05)
+        g.fillEllipse(size / 2, size / 2, (size * i) / 24, (size * i) / 24)
+      }
+      g.generateTexture('life-glow', size, size)
+      g.destroy()
+    }
+
     const ctx = this.registry.get(CONTEXT_KEY) as LifeContext
     const state = ctx.engine.state
 

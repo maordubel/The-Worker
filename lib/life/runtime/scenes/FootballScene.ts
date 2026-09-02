@@ -63,7 +63,6 @@ export class FootballScene extends Phaser.Scene {
   private endsAt = 0
   private finished = false
   private lockUntil = 0
-  private keys?: Record<string, Phaser.Input.Keyboard.Key>
 
   constructor() {
     super(FootballScene.KEY)
@@ -116,13 +115,6 @@ export class FootballScene extends Phaser.Scene {
     this.ctx.bus.emit('place', { id: 'pitch', title: 'שניים על שניים' })
     this.pushHud()
 
-    const keyboard = this.input.keyboard
-    if (keyboard) {
-      this.keys = keyboard.addKeys('W,A,S,D,UP,LEFT,DOWN,RIGHT,SPACE,ENTER') as Record<
-        string,
-        Phaser.Input.Keyboard.Key
-      >
-    }
   }
 
   private onResize() {
@@ -158,7 +150,6 @@ export class FootballScene extends Phaser.Scene {
   override update(time: number, delta: number) {
     if (this.finished) return
     this.ctx.input.beginFrame()
-    this.readKeyboard()
     const step = delta / 1000
     const holder = this.holder()
 
@@ -209,18 +200,11 @@ export class FootballScene extends Phaser.Scene {
     if (time > this.endsAt) this.finish()
   }
 
-  private readKeyboard() {
-    if (!this.keys) return
-    const down = (name: string) => this.keys?.[name]?.isDown === true
-    let x = 0
-    let y = 0
-    if (down('A') || down('LEFT')) x -= 1
-    if (down('D') || down('RIGHT')) x += 1
-    if (down('W') || down('UP')) y -= 1
-    if (down('S') || down('DOWN')) y += 1
-    this.ctx.input.setKeys(x, y)
-    this.ctx.input.setKeyAction(down('SPACE') || down('ENTER'))
-  }
+  /**
+   * The keyboard is read by the shell (`app/life/LifeStage.tsx`) and written into
+   * `ctx.input`, because a scene restart forgets which keys are held and the document
+   * does not. The scene only ever reads.
+   */
 
   private moveKid(kid: Kid, vx: number, vy: number, step: number) {
     kid.image.x = Phaser.Math.Clamp(kid.image.x + vx * step, this.W * 0.04, this.W * 0.96)

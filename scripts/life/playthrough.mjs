@@ -130,20 +130,21 @@ for (const size of SIZES) {
 
   // The prologue is nine lines; press through them and out the other side.
   for (let i = 0; i < 14; i += 1) {
-    await page.keyboard.press('Space')
-    await page.waitForTimeout(320)
+    await page.keyboard.press('e')
+    await page.waitForTimeout(300)
   }
-  await page.waitForTimeout(2200)
-
-  // The prologue takes a variable number of presses; the ones that overshoot land in the
-  // bedroom and may open whatever the child is standing next to. Close anything that is
-  // open before measuring, or the world is paused for the rest of the run.
+  await page.waitForTimeout(1800)
   for (let i = 0; i < 8; i += 1) {
     if ((await page.locator('[data-life="dialogue"]').count()) === 0) break
-    await page.keyboard.press('Space')
-    await page.waitForTimeout(280)
+    await page.keyboard.press('e')
+    await page.waitForTimeout(260)
   }
   await shot('02-bedroom')
+
+  const clockNow = () =>
+    page.evaluate(() => document.querySelector('[data-life="clock"]')?.textContent?.trim() ?? null)
+  const placeNow = () =>
+    page.evaluate(() => document.querySelector('[data-life="place"]')?.textContent?.trim() ?? null)
 
   const hold = async (key, ms) => {
     await page.keyboard.down(key)
@@ -152,67 +153,110 @@ for (const size of SIZES) {
     await page.waitForTimeout(140)
   }
 
-  // Walk. If the child cannot move, everything after this is theatre.
-  await hold('ArrowRight', 700)
-  await hold('ArrowDown', 400)
-  await shot('03-walked')
+  const clockInBedroom = await clockNow()
 
-  // Out of the bedroom: the door is the start edge of the painting, so walking that way
-  // long enough has to change the room. This is the exit zone, the scene restart, the
-  // second backdrop loading, and the HUD following the child — in one press.
-  await hold('ArrowLeft', 4200)
-  await page.waitForTimeout(1200)
-  await shot('04-home')
-  const place = await page.evaluate(
-    () => document.querySelector('[data-life="place"]')?.textContent?.trim() ?? null,
-  )
-  if (place !== 'הבית') {
+  // The teaching line must be on screen before the player has moved.
+  if ((await page.locator('text=/לזוז|גרור/').count()) === 0) {
     faults += 1
-    report.push(`NO EXIT  ${size.name}: still in "${place ?? '—'}" after walking into the door`)
+    report.push(`NO TEACH ${size.name}: the movement line never appeared`)
   }
 
-  // Kobi is sitting two thirds of the way across the living room. Walk to him and talk.
-  await hold('ArrowLeft', 260)
-  // Kobi is the one thing in the room with a face, so the harness aims at a SPEAKER
-  // rather than at whatever it happens to be standing next to: an object opens a box with
-  // no portrait in it, and that box gets closed and the search continues.
-  const nudges = [null, 'ArrowLeft', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight']
-  let spoke = false
-  for (const nudge of nudges) {
-    if (nudge) await hold(nudge, 130)
-    await page.keyboard.press('Space')
-    await page.waitForTimeout(460)
-    const open = (await page.locator('[data-life="dialogue"]').count()) > 0
-    if (!open) continue
-    if ((await page.locator('[data-life="dialogue"] img').count()) > 0) {
-      spoke = true
+  /**
+   * ONE DIRECTION OUT.
+   *
+   * This is the whole claim of the pass, tested the way a new player would find out: hold
+   * left and keep holding. The bedroom door, the living room and the front door are all
+   * that way, they are all lit, and none of them needs a different key. The harness only
+   * records what it passes through.
+   */
+  const seen = []
+  const clocks = []
+  for (let i = 0; i < 30; i += 1) {
+    const place = await placeNow()
+    if (place && seen[seen.length - 1] !== place) seen.push(place)
+    clocks.push([place, await clockNow()])
+    if (place === 'הרחוב') break
+    await hold('ArrowLeft', 420)
+  }
+  // A transition that began on the last sample still has to finish before we judge it.
+  await page.waitForTimeout(1400)
+  const settled = await placeNow()
+  if (settled && seen[seen.length - 1] !== settled) seen.push(settled)
+  await shot('03-out')
+
+  if (!seen.includes('הסלון')) {
+    faults += 1
+    report.push(`NO EXIT  ${size.name}: never reached the living room (saw ${seen.join(' → ') || '—'})`)
+  }
+  if (!seen.includes('הרחוב')) {
+    faults += 1
+    report.push(`NO DOOR  ${size.name}: never reached the street (saw ${seen.join(' → ') || '—'})`)
+  } else {
+    report.push(`walk    ${size.name}: ${seen.join(' → ')}`)
+  }
+
+  // Onboarding is not billed to the clock: nothing may move until the child is outside.
+  for (const [place, clock] of clocks) {
+    if (place === 'הרחוב') break
+    if (clock !== clockInBedroom) {
+      faults += 1
+      report.push(`CLOCK    ${size.name}: ran indoors during onboarding (${clockInBedroom} → ${clock})`)
       break
     }
-    for (let i = 0; i < 4; i += 1) {
-      if ((await page.locator('[data-life="dialogue"]').count()) === 0) break
-      await page.keyboard.press('Space')
-      await page.waitForTimeout(240)
-    }
   }
-  await shot('05-kobi')
 
+  // …and now the day starts.
+  await page.waitForTimeout(3000)
+  const clockOutside = await clockNow()
+  if (seen.includes('הרחוב') && clockOutside === clockInBedroom) {
+    faults += 1
+    report.push(`CLOCK    ${size.name}: never started after reaching the street`)
+  }
+  await shot('04-street')
+
+  // Ofir is a few steps along the pavement. Walk until somebody is in reach, then talk.
+  // Doors are skipped on purpose: the prompt names what it will do, so the harness can
+  // tell a person from a door exactly the way a player can.
+  let spoke = false
+  let sawPrompt = false
+  let sawNoPrompt = false
+  for (let i = 0; i < 46; i += 1) {
+    const promptText = await page.evaluate(
+      () => document.querySelector('[data-life="prompt"]')?.textContent?.trim() ?? null,
+    )
+    if (promptText) sawPrompt = true
+    else sawNoPrompt = true
+    if (promptText && !promptText.includes('לך')) {
+      await page.keyboard.press('e')
+      await page.waitForTimeout(460)
+      if ((await page.locator('[data-life="dialogue"] img').count()) > 0) {
+        spoke = true
+        break
+      }
+      for (let j = 0; j < 4; j += 1) {
+        if ((await page.locator('[data-life="dialogue"]').count()) === 0) break
+        await page.keyboard.press('e')
+        await page.waitForTimeout(220)
+      }
+    }
+    await hold('ArrowRight', 120)
+  }
+  // A box may have opened on the very last step; look once more before judging.
+  if (!spoke) spoke = (await page.locator('[data-life="dialogue"] img').count()) > 0
+  await shot('05-talk')
+  if (!sawPrompt || !sawNoPrompt) {
+    faults += 1
+    report.push(`PROMPT   ${size.name}: the prompt never appeared and disappeared with range`)
+  }
   if (!spoke) {
     faults += 1
-    report.push(`NO TALK  ${size.name}: pressing the button next to Kobi opened nothing`)
+    report.push(`NO TALK  ${size.name}: nobody in the street could be spoken to`)
   } else {
-    for (let i = 0; i < 4; i += 1) {
-      await page.keyboard.press('Space')
-      await page.waitForTimeout(320)
+    for (let i = 0; i < 3; i += 1) {
+      await page.keyboard.press('e')
+      await page.waitForTimeout(300)
     }
-    const choice = page.getByRole('button', { name: 'יש היום משחק?' })
-    if ((await choice.count()) > 0) {
-      await choice.first().click()
-      await page.waitForTimeout(500)
-      await shot('06-choice')
-    } else {
-      faults += 1
-      report.push(`NO CHOICE ${size.name}: the conversation never offered its choices`)
-    }
+    await shot('06-choice')
   }
 
   const overflow = await page.evaluate(
@@ -223,9 +267,7 @@ for (const size of SIZES) {
     report.push(`OVERFLOW ${size.name}: ${overflow}px`)
   }
 
-  const clock = await page.evaluate(
-    () => document.querySelector('[data-life="clock"]')?.textContent?.trim() ?? null,
-  )
+  const clock = await clockNow()
   if (!clock) {
     faults += 1
     report.push(`NO CLOCK ${size.name}: the HUD never rendered a time`)
@@ -237,7 +279,7 @@ for (const size of SIZES) {
   }
 
   report.push(
-    `ok      ${size.name}: clock ${clock ?? '—'}, place ${place ?? '—'}, overflow ${overflow}px, errors ${errors.length}`,
+    `ok      ${size.name}: clock ${clock ?? '—'}, place ${(await placeNow()) ?? '—'}, overflow ${overflow}px, errors ${errors.length}`,
   )
   await context.close()
 }
