@@ -516,3 +516,33 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     **`comments` is a football convention.** Reading it as scorers in the basketball rows
     invented twenty goals in a sport that does not record them that way; the scorer read
     is gated on football and the column is kept as a note elsewhere.
+
+39. **The songs are read as metadata, and the wiki's own marks decide what ships.**
+    261 pages: 175 `שירים מהיציע`, 49 `שירי שחקנים`, 37 `שירים`, and inside those
+    6 `שירי משטרה` and 9 `שירי שואה`. The shape is a `{{שיר מהיציע}}` infobox —
+    שם · ביצוע · שיר מקורי · מנגינה · מחבר · שנה · הערות — then `==רקע==`, then
+    `==מילות השיר==`.
+    `sources/redfans-songs.ts` locates the lyrics heading **in order to stop before it**.
+    Rule 12 said a question is built from a song's title, tune, subject and year and never
+    prints verses; this is where that stops being a habit and becomes structural — there
+    is no lyrics field on `StagedSong`, so there is nowhere for a verse to go, and
+    `tests/redfans-songs.test.ts` asserts it. 92 songs name their tune, 56 an author,
+    213 carry a background paragraph: that is enough for a real game without a single
+    line of verse.
+    **The first version gated 14 of 261 out of the app** on the wiki's own marks
+    (`{{צנזורה}}`, `שירי שואה`) — and that was RAISED with Maor rather than shipped
+    quietly, because four of the fourteen are the anthems and a song wing without
+    `אדום עולה בבלומפילד` is not a song wing. On 2.9.2026 he approved the whole corpus and
+    the language in it, in his own words. `usableInApp` is true for all 261: a song is a
+    legitimate subject — tune, year, player, background — and no question was ever going
+    to print a verse.
+    What survives is `lyricsRestricted`, and it means one narrow thing: **if a feature is
+    ever built that DISPLAYS lyrics, these fourteen are not in it.** Nothing displays
+    lyrics today and nothing stores them, so the flag costs nothing now; it exists so a
+    later feature cannot quietly acquire them. The Holocaust chants are archived in full
+    with their sources and their history — the wiki's own article on the controversy is
+    the best material in the corpus — and they are not verses this project prints.
+    **Blanket rules got this wrong in both directions**, which is the lesson: the mark
+    caught the anthems it should not have, and "the owner approved it" does not extend to
+    every use of every line. The decision was made out loud, once, by the person whose
+    terrace it is (rule 18), and the narrow part that remains is written down.

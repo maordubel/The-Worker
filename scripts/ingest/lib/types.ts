@@ -352,6 +352,14 @@ export type StagedSong = Fact & {
   originalArtist: string | null
   personSlug: string | null
   backgroundHe: string | null
+  /**
+   * Same gate as `media.usable_in_app` (rule 5): the archive keeps everything, the
+   * PRODUCT ships a subset. False means the song is stored, sourced and searchable and
+   * the question generator may not touch it. Set false by the importer for anything the
+   * wiki itself marks `{{צנזורה}}` or files under `שירי שואה`; never flipped to true by
+   * a parser.
+   */
+  usableInApp: boolean
 }
 
 export type StagedQuote = Fact & {

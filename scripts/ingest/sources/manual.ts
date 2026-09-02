@@ -358,6 +358,9 @@ const SPECS: FileSpec[] = [
       originalTitle: str(row, 'originalTitle'),
       originalArtist: str(row, 'originalArtist'),
       personSlug: str(row, 'personSlug'),
+      // A hand-curated song is usable unless the file says otherwise; an IMPORTED one
+      // is decided by the wiki's own marks (see sources/redfans-songs.ts).
+      usableInApp: row.usableInApp !== false,
       backgroundHe: str(row, 'backgroundHe'),
       ...fact(row, ctx),
     }),

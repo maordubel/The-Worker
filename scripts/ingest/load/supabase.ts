@@ -373,6 +373,7 @@ async function loadGraph(
     lyrics_author_he: row.lyricsAuthorHe,
     original_title: row.originalTitle,
     original_artist: row.originalArtist,
+    usable_in_app: row.usableInApp,
     person_id: row.personSlug ? (personIds.get(row.personSlug) ?? null) : null,
     background_he: row.backgroundHe,
     source_id: sourceIdFor(row.source.naturalKey),

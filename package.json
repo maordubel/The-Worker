@@ -20,7 +20,8 @@
     "wiki:canon": "tsx scripts/ingest/canon-cli.ts",
     "wiki:import": "tsx scripts/ingest/export-cli.ts",
     "wiki:cargo": "tsx scripts/ingest/cargo-cli.ts",
-    "wiki:squads": "tsx scripts/ingest/squads-cli.ts"
+    "wiki:squads": "tsx scripts/ingest/squads-cli.ts",
+    "wiki:songs": "tsx scripts/ingest/songs-cli.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
