@@ -146,12 +146,17 @@ Read `docs/00-architecture.md` before changing anything structural.
     ONLY file exempt from the brand string guards — `tests/brand.test.ts` asserts the
     exemption stays sealed.
 
-20. **A shirt is eight layers, never an image.** `lib/kit/spec.ts` + `KitShirt.tsx` +
-    `KitStrip.tsx`, off the Kit Builder handoff: base, cut, sleeves, collar, crest,
-    maker, sponsor, nameset — drawn as a full STRIP, because every reference Maor sent
-    shows shirt, shorts and socks and a shirt alone reads as a mockup. One JSON object
-    in, SVG out, no asset files. `PRESETS` is the rack the designer opens on: eight real
-    Hapoel kits read off his references, because a blank designer is a blank page.
+20. **A shirt is eight layers, never an image.** `lib/kit/spec.ts` is the contract:
+    base, cut, sleeves, collar, crest, maker, sponsor, nameset. One JSON object in, SVG
+    out, no asset files — which is what lets a shirt be recoloured per season and lets
+    the archive state which LAYER a season got wrong.
+    **`components/kit/KitPlate.tsx` is the renderer**, rebuilt to `Kit Game.dc.html` on
+    2.9.2026. The garment is drawn on a 340×320 board with curved beziers, a drawn fold
+    layer, dashed seams and a turbulence weave at 13% — the four things that separate
+    cloth from a flat vector tee. Patterns are FULL-BLEED shapes the garment clips, so a
+    hoop is a rectangle across the whole board and adding an eighteenth cut is a few
+    lines. `KitShirt.tsx`/`KitStrip.tsx` still serve the free designer and the strip and
+    are scheduled to move onto the plate when gate 5 is rebuilt.
     `colours-of-football.com` returns 403 to automated reads and was NOT circumvented —
     documented here like any blocked source (rule 11).
 
@@ -187,10 +192,28 @@ Read `docs/00-architecture.md` before changing anything structural.
     11 `/derby` משחק השנאה → התיק השחור · 12 ON TOUR · 13 `/timeline` ציר הזמן.
     `/ussishkin` is a memorial wing, not a gate. Naming the game types is what stopped
     them collapsing into each other:
-    - **gate 4 `/kits/build`** — חידון מדים לפי עונה: you are given a season and you
-      BUILD its kit. Stage 1 asks the cut, stage 2 adds the sponsor, stage 3 adds the
-      maker. The difficulty rises in the ASK, not only in the clock.
-    - **gate 5 `/kits`** — free design, no right answer, share it.
+    - **gate 4 `/kits/build`** — משחק המדים, rebuilt 2.9.2026 to Maor's mockup: one
+      shirt, FIVE parts (body+cut · sleeves · sponsor · maker · crest), all open at
+      once, and one **בדוק את החולצה**. The version before it asked the three layers as
+      three multiple-choice questions in sequence, and that is a quiz about a shirt
+      rather than the building of one — you cannot change your mind about the sleeves
+      after the sponsor tells you which era you are in, and that reconsideration IS the
+      game. Five shirts to a round, 40 a part, 100 for a perfect shirt.
+      **A tap places.** The mockup offers drag OR select-then-tap; select-then-tap was
+      built literally first and is wrong, because a part has exactly one home so the
+      second tap carries no decision — it is a dexterity step charged for nothing, and
+      on a phone it doubles every action in the game.
+    - **gate 5 `/kits`** — אגף המדים, rebuilt 2.9.2026: **the collection**, the shirt
+      card, and the free designer as a third view. All 33 archive kits are hangers; a
+      shirt enters the collection when you ASSEMBLE it in gate 4, at any score. That
+      seam is why the two gates are worth having separately — gate 4 is the act, gate 5
+      is what the act leaves behind. `lib/kit/collection.ts` is the store, shaped like
+      `lib/polls/store.ts`.
+      **A locked shirt shows nothing.** The first version drew it as an outline in the
+      grid and then printed its sponsor underneath, and opening its card drew the whole
+      shirt plus sponsor, maker and crest — the complete answer sheet to that shirt's
+      puzzle in gate 4, one tap away. A shirt you have not built shows its season, an
+      outline, and the way in. `tests/kit.test.ts` asserts it.
     - **gate 1 `/xi`** — הרכב כל הזמנים: eleven from all 640, free play, no grading.
     - **gate 3 `/lineup`** — חידון ההרכב: assemble the exact XI that started a match.
     - **gate 7 `/polls`** — אגף הסקרים, built as a BALLOT rather than a bar chart. A
@@ -212,13 +235,26 @@ Read `docs/00-architecture.md` before changing anything structural.
     The search ranking was tuned once against Maor's "it has to find a man by his family
     name"; a second copy would have drifted from it.
 
-25. **A shirt wears the crest of its era.** `crestForSeason()` resolves it from the crest
-    timeline, so 1978 carries the worker mark, 2002 the one with KETER inside it, 2008
-    the badge that said 1927 and 2018 the one that says 1923. The old slot drew a circle
-    and two strokes meant to suggest the figure; a club crest is not a thing to
-    approximate — print it or leave the slot empty. The sponsor is LETTERED on the
-    fabric, not stamped in a black plate, because every reference shows it printed on
-    the shirt.
+25. **A shirt wears the crest of its era, and the crest is PRINTED.** `crestForSeason()`
+    resolves the era from the timeline; `lib/kit/crestMarks.ts` says which of Maor's
+    seven artworks prints for it. A club crest is not a thing to approximate — print it
+    or leave the slot empty. I broke this once more building the kit plate, drawing a
+    shield with a stroke for the hammer, and Maor's correction was the right one: the
+    marks are the heart of the thing.
+    **The variant follows the cloth.** The club drew its early mark in red and in white
+    for the same reason every club does: a red crest on a red shirt is a texture, not a
+    badge. `onRed` names the light artwork and the shirt picks by its own base colour —
+    the difference between having the assets and using them.
+    **The maker is the alternative set** (`components/kit/MakerMark.tsx`). A
+    manufacturer's trademark is not ours to redraw, so Maor supplied six alternative
+    marks (STRIKE, ADIO, CLASSIC, BLACK DOG, ROMBUS, MICRON) and the archive needed two
+    more, drawn in the same idiom for Kappa and Diadora. They are monochrome vector, and
+    the NAME on the card stays the real one from the archive — who made a shirt is a
+    sourced fact about the shirt; only the artwork was never ours. adidas takes the
+    trefoil before 1992 and the bars after, which is the distinction the club's own
+    shirts make.
+    The sponsor is LETTERED on the fabric, not stamped in a black plate, because every
+    reference shows it printed on the shirt.
 
 26. **A retired file becomes a tombstone, never a deletion.** Deltas reach the repo
     through GitHub's web upload, which adds and overwrites but never deletes — so a
@@ -323,3 +359,26 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     Retiring a screen retires its strings: the timeline's old `submit`/`up`/`down` keys
     outlived the form they belonged to. A tombstone is for a FILE (rule 26); a dead
     string is just deleted.
+
+33. **A modal goes above the navigation. Always.** The tab bar is `z-50`; every
+    `role="dialog"` overlay is `z-[60]`, and `tests/guards.test.ts` fails the build if
+    one is not. This is not a z-index nitpick: the kit game's reveal sat at z-40, so
+    **"לחולצה הבאה" landed inside the tab bar's strip and the tap that should have
+    advanced the round navigated to the trivia wing** — on every shirt, on every phone.
+    The roster sheet and the polls picker had the same defect and were fixed with it.
+    Found by playing a round end to end in a browser, which is the only way this class
+    of bug is ever found. **Play the whole thing, not one screen of it**: the same
+    playthrough also caught the fifth shirt skipping its reveal, because the round was
+    ending on `log.length` rather than on the last reveal being dismissed.
+
+34. **Derive what the wiki already told you; never re-ask for it.** Maor's research brief
+    (2.9.2026) requires `redirect_target` and `backlinks[]` on every imported page, and
+    the obvious implementation of each is another API call per page — thousands of extra
+    requests against a source this project is deliberately polite to (rule 11).
+    Both answers are already in hand. A redirect page's whole content is
+    `#REDIRECT [[Target]]` and the importer stores every page's complete wikitext, so
+    `redirectTarget()` is a parse (it accepts `#הפניה` too). Backlinks are the inverse of
+    the `links[]` the walk already collects, so `backlinkIndex()` inverts the map once
+    after the walk. **What inversion cannot know is inbound links from pages that were
+    never imported — a partial walk yields partial backlinks, and that is stated rather
+    than papered over.**

@@ -6,7 +6,7 @@ import { join } from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { MediaWikiAdapter, parseXmlDump } from '@/scripts/ingest/adapters/mediawiki'
+import { MediaWikiAdapter, parseXmlDump, backlinkIndex, redirectTarget } from '@/scripts/ingest/adapters/mediawiki'
 import { fileCorpusSink } from '@/scripts/ingest/load/wiki-corpus'
 import { importCorpus, importFromDump } from '@/scripts/ingest/sources/wiki-corpus'
 
@@ -441,3 +441,40 @@ function writeDump(path: string, xml: string): void {
   const { writeFileSync } = require('node:fs') as typeof import('node:fs')
   writeFileSync(path, xml, 'utf8')
 }
+
+describe('הפניות וקישורים נכנסים — derived, never re-fetched', () => {
+  it('reads a redirect target out of the wikitext already stored', () => {
+    expect(redirectTarget('#REDIRECT [[הפועל תל אביב (כדורגל)]]')).toBe('הפועל תל אביב (כדורגל)')
+    expect(redirectTarget('#הפניה [[עונת 1980/81 (כדורגל)]]')).toBe('עונת 1980/81 (כדורגל)')
+    expect(redirectTarget('#redirect:[[Bloomfield]]')).toBe('Bloomfield')
+  })
+
+  it('strips a pipe and a fragment — the target is a page, not a section', () => {
+    expect(redirectTarget('#REDIRECT [[מגרש|בלומפילד]]')).toBe('מגרש')
+    expect(redirectTarget('#REDIRECT [[עונה#גביע]]')).toBe('עונה')
+  })
+
+  it('returns null for a page that is not a redirect', () => {
+    expect(redirectTarget('הפועל תל אביב היא קבוצת כדורגל.')).toBeNull()
+    expect(redirectTarget('')).toBeNull()
+    expect(redirectTarget(null)).toBeNull()
+  })
+
+  it('inverts the link graph instead of asking the wiki page by page', () => {
+    // `list=backlinks` answers one page per request. Every page's outbound links are
+    // already stored, so the inverse is exact for the imported set and free.
+    const index = backlinkIndex([
+      { title: 'עונת 1980/81', links: ['שבתאי לוי', 'בלומפילד'] },
+      { title: 'עונת 1981/82', links: ['שבתאי לוי'] },
+      { title: 'שבתאי לוי', links: ['בלומפילד'] },
+    ])
+    expect(index.get('שבתאי לוי')).toEqual(['עונת 1980/81', 'עונת 1981/82'])
+    expect(index.get('בלומפילד')).toEqual(['עונת 1980/81', 'שבתאי לוי'])
+    expect(index.get('לא קיים')).toBeUndefined()
+  })
+
+  it('never lists the same backlink twice', () => {
+    const index = backlinkIndex([{ title: 'א', links: ['ב', 'ב', 'ב'] }])
+    expect(index.get('ב')).toEqual(['א'])
+  })
+})

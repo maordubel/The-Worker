@@ -320,7 +320,7 @@ export class MediaWikiAdapter {
       url: page.fullurl ?? this.pageUrl(page.title),
       contentModel: revision?.slots?.main?.contentmodel ?? page.contentmodel ?? 'wikitext',
       isRedirect: page.redirect === true,
-      redirectTo: null,
+      redirectTo: redirectTarget(content),
       byteSize: revision?.size ?? (content ? Buffer.byteLength(content, 'utf8') : null),
       revTimestamp: revision?.timestamp ?? null,
       revUser: revision?.user ?? null,
@@ -478,6 +478,60 @@ function sleep(ms: number): Promise<void> {
  * are read out of the wikitext instead (`extractCategories`, `extractLinks`), which is
  * a fallback and is marked as one — templates and redirects are not resolved.
  */
+
+/**
+ * The target of a redirect, read from the wikitext the importer already stores.
+ *
+ * Maor's research brief lists `redirect_target` among the fields every imported page
+ * must preserve, and this adapter was writing `null` into it. The obvious fix is another
+ * API round trip; the right one is that **the answer is already in hand.** A redirect
+ * page's entire content is `#REDIRECT [[Target]]`, and this importer stores the complete
+ * wikitext of every page — so the target is a parse, not a request. On a wiki of several
+ * thousand pages that is the difference between one extra field and several thousand
+ * extra HTTP calls.
+ *
+ * Hebrew MediaWiki accepts `#הפניה` alongside `#REDIRECT`, and the magic word is
+ * case-insensitive with an optional colon. A pipe or a fragment in the link is stripped:
+ * the target is a page, not a section.
+ */
+const REDIRECT = /^\s*#\s*(?:REDIRECT|הפניה|הפנייה)\s*:?\s*\[\[([^\]|#]+)/iu
+
+export function redirectTarget(wikitext: string | null | undefined): string | null {
+  if (!wikitext) return null
+  const match = REDIRECT.exec(wikitext)
+  return match?.[1]?.trim() || null
+}
+
+/**
+ * Backlinks, derived by inverting the link graph rather than fetched.
+ *
+ * The brief asks for `backlinks[]` per page. `list=backlinks` answers that one page at a
+ * time — thousands of requests for information the corpus already contains, because
+ * every page's outbound `links[]` is stored. Inverting that map once, after the walk, is
+ * exact for every page inside the import and costs nothing.
+ *
+ * What it cannot know is inbound links from pages that were never imported. That is a
+ * real limitation and it is stated rather than papered over: a partial import yields
+ * partial backlinks, and a full walk yields complete ones.
+ */
+export function backlinkIndex(
+  pages: ReadonlyArray<{ title: string; links: string[] }>,
+): Map<string, string[]> {
+  const index = new Map<string, string[]>()
+  for (const page of pages) {
+    for (const target of page.links) {
+      const list = index.get(target)
+      if (list) {
+        if (!list.includes(page.title)) list.push(page.title)
+      } else {
+        index.set(target, [page.title])
+      }
+    }
+  }
+  for (const list of index.values()) list.sort()
+  return index
+}
+
 export function parseXmlDump(xml: string, baseUrl: string): WikiPageRecord[] {
   const out: WikiPageRecord[] = []
   const host = baseUrl.replace(/\/$/, '')

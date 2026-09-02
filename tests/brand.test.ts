@@ -194,7 +194,7 @@ describe('brand acceptance — RTL', () => {
  * the test below asserts the route returns `notFound()` in production, so the exemption
  * cannot quietly become a hole somebody ships a real screen through.
  */
-const QA_HARNESS = 'app/qa/story'
+const QA_HARNESS = 'app/qa/'
 
 describe('brand acceptance — typography', () => {
   it('uses only the four declared families', () => {
@@ -342,9 +342,13 @@ describe('הסמל — the badge ships without a yellow pixel in it', () => {
 
 describe('מתקן הבדיקה — the QA harness is exempt only because it cannot ship', () => {
   it('returns notFound() in production, so the brand exemption cannot leak', () => {
-    const page = readFileSync(join(ROOT, 'app/qa/story/page.tsx'), 'utf8')
-    expect(page).toContain('notFound()')
-    expect(page).toContain("process.env.NODE_ENV === 'production'")
+    // Every harness under app/qa/, not just the story one: the exemption is scoped to
+    // the directory, so anything that lands in it has to be unreachable in production.
+    for (const page of ['app/qa/story/page.tsx', 'app/qa/marks/page.tsx']) {
+      const text = readFileSync(join(ROOT, page), 'utf8')
+      expect(text, page).toContain('notFound()')
+      expect(text, page).toContain("process.env.NODE_ENV === 'production'")
+    }
   })
 
   it('draws every template the share system can produce', () => {
