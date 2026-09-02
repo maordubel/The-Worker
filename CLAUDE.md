@@ -516,33 +516,49 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     **`comments` is a football convention.** Reading it as scorers in the basketball rows
     invented twenty goals in a sport that does not record them that way; the scorer read
     is gated on football and the column is kept as a note elsewhere.
-
-39. **The songs are read as metadata, and the wiki's own marks decide what ships.**
-    261 pages: 175 `שירים מהיציע`, 49 `שירי שחקנים`, 37 `שירים`, and inside those
-    6 `שירי משטרה` and 9 `שירי שואה`. The shape is a `{{שיר מהיציע}}` infobox —
-    שם · ביצוע · שיר מקורי · מנגינה · מחבר · שנה · הערות — then `==רקע==`, then
-    `==מילות השיר==`.
-    `sources/redfans-songs.ts` locates the lyrics heading **in order to stop before it**.
-    Rule 12 said a question is built from a song's title, tune, subject and year and never
-    prints verses; this is where that stops being a habit and becomes structural — there
-    is no lyrics field on `StagedSong`, so there is nowhere for a verse to go, and
-    `tests/redfans-songs.test.ts` asserts it. 92 songs name their tune, 56 an author,
-    213 carry a background paragraph: that is enough for a real game without a single
-    line of verse.
-    **The first version gated 14 of 261 out of the app** on the wiki's own marks
-    (`{{צנזורה}}`, `שירי שואה`) — and that was RAISED with Maor rather than shipped
-    quietly, because four of the fourteen are the anthems and a song wing without
-    `אדום עולה בבלומפילד` is not a song wing. On 2.9.2026 he approved the whole corpus and
-    the language in it, in his own words. `usableInApp` is true for all 261: a song is a
-    legitimate subject — tune, year, player, background — and no question was ever going
-    to print a verse.
-    What survives is `lyricsRestricted`, and it means one narrow thing: **if a feature is
-    ever built that DISPLAYS lyrics, these fourteen are not in it.** Nothing displays
-    lyrics today and nothing stores them, so the flag costs nothing now; it exists so a
-    later feature cannot quietly acquire them. The Holocaust chants are archived in full
-    with their sources and their history — the wiki's own article on the controversy is
-    the best material in the corpus — and they are not verses this project prints.
-    **Blanket rules got this wrong in both directions**, which is the lesson: the mark
-    caught the anthems it should not have, and "the owner approved it" does not extend to
-    every use of every line. The decision was made out loud, once, by the person whose
-    terrace it is (rule 18), and the narrow part that remains is written down.
+39. **THE WORKER LIFE is a GAME RUNTIME, not a fourteenth gate.**
+    `/life` is the vertical slice of the life simulation: 1980, a child of eight, one
+    Saturday in south Tel Aviv. It is not on the gate wall (rule 24 — the numbers are
+    Bloomfield's and Maor's), it hangs above it as its own plate.
+    The architecture is four layers and the boundaries are the point, because each one is
+    a rule this repo already has, expressed as a module edge:
+    - **`lib/life/` — the Life Engine.** Pure TypeScript, no React, no Phaser, no canvas.
+      The save is an **append-only `LifeEvent[]`** and `LifeState` is what you get by
+      folding it: that is what lets a chapter be rewritten without breaking a save, what
+      makes "you went to Bloomfield alone at eight" a row rather than a stat, and what
+      makes the eventual move to Supabase an insert rather than a migration. An unknown
+      event from a newer build folds to a no-op; `tests/life.test.ts` asserts it.
+    - **`lib/life/runtime/` — Phaser.** Scenes, placeholder art, physics, camera. Imported
+      **dynamically, client-side only** — Phaser touches `window` at module scope. One
+      `WorldScene` reads a `MapDef`; there are nine locations and one scene class, which
+      is what makes a 1990 version of the same street a second layer list rather than a
+      second scene.
+    - **`lib/life/content/` — the authored fiction.** A family, a friend, a kiosk. It
+      states **no date, no opponent, no score and no scorer**, and the test suite fails on
+      a scoreline or on any year but the two the chapter is set in.
+    - **`lib/life/anchor-server.ts` — the ONLY bridge to history.** `server-only`,
+      resolved in the route, handed to the client as a plain object. THE WORKER LIFE never
+      reads `content/manual/*`, never parses anything, never sees Red-Fans. Asserted.
+    **The anchor is the 1980/81 championship** — a sourced row in `trophies.json` at
+    confidence 2 — and the deciding MATCH is not in the archive, so the game shows a
+    marked `DEVELOPMENT PLACEHOLDER` on the historical card instead of inventing one
+    (rule 11, brief §24). When a curated 1980/81 match row lands, `placeholder` goes null
+    and the scene gets a scoreline. Nothing else changes.
+    **All art is placeholder and generated, never shipped.** `runtime/figures.ts` draws
+    the cast from a spec and `runtime/textures.ts` hands out texture keys, so production
+    PNGs replace the drawing without touching a scene. The canon that is already fixed is
+    encoded as data and tested: **Ofir has a buzz cut and nobody else does; Kobi keeps his
+    approved direction; there is no glasses layer at all, so Amit cannot get a pair by
+    accident; the child wears Hapoel red.** Every colour comes from `runtime/palette.ts`
+    and every value in it is run through `lib/isYellow.ts` — rule 8 does not care that a
+    pixel came from a `Graphics` call.
+    **All text is DOM, never canvas.** Hebrew in WebGL has no bidi, no selection, no
+    screen reader and no reflow. Scenes emit intents on a bus; React renders the words.
+    **`npm run life:play` is the acceptance script** (rule 29, applied to a game): it
+    opens the real build at three widths, plays the prologue, walks the child, leaves the
+    room, talks to Kobi, takes a choice, and scans every frame for yellow and the document
+    for overflow and page errors. Two bugs it caught that no screenshot would have:
+    `scene.restart()` REUSES the instance, so every mutable field must be reset in
+    `init()` or the pause set during a fade leaks into the next room and the child can
+    never move again; and letting the keyboard and the thumb pad write the same axis meant
+    releasing an arrow key left the child walking forever — they are separate channels now.

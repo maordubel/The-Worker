@@ -1,0 +1,247 @@
+'use client'
+
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { AnchorCard } from '@/components/life/AnchorCard'
+import { DialogueBox } from '@/components/life/DialogueBox'
+import { EndingCard } from '@/components/life/EndingCard'
+import { LifeHud } from '@/components/life/LifeHud'
+import { TouchPad } from '@/components/life/TouchPad'
+import { t } from '@/lib/i18n'
+import type { HistoricalAnchor } from '@/lib/life/anchors'
+import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1980'
+import { loadLife } from '@/lib/life/engine'
+import { lifeStore } from '@/lib/life/save'
+import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/bus'
+import type { LifeRuntime } from '@/lib/life/runtime/game'
+
+/**
+ * הבמה — React mounts the game and then gets out of its way.
+ *
+ * Everything below the canvas is one Phaser instance created in an effect and destroyed
+ * with the component. Everything above it is DOM: the clock, the dialogue, the thumb pad,
+ * the two cards. They talk through the bus and nothing else — no shared object, no ref
+ * into a scene, no game state in React except what the bus has published.
+ *
+ * That boundary is what brief §28 asks for, and it pays for itself immediately: the shell
+ * re-renders on every line of dialogue and the game never drops a frame for it.
+ *
+ * Phaser is imported dynamically. It is a large library that touches `window` at module
+ * scope, so it must never reach the server bundle or any route but this one.
+ */
+
+const EMPTY_HUD: HudState = { clock: '', agorot: 0, showMoney: false, place: '', objective: null }
+
+export function LifeStage({
+  anchor,
+  prologueAnchor,
+}: {
+  anchor: HistoricalAnchor
+  prologueAnchor: HistoricalAnchor
+}) {
+  const holder = useRef<HTMLDivElement | null>(null)
+  const runtime = useRef<LifeRuntime | null>(null)
+
+  const [ready, setReady] = useState(false)
+  const [hud, setHud] = useState<HudState>(EMPTY_HUD)
+  const [dialogue, setDialogue] = useState<LifeBusEvents['dialogue']>(null)
+  const [prompt, setPrompt] = useState<string | null>(null)
+  const [toast, setToast] = useState<LifeBusEvents['toast']>(null)
+  const [ending, setEnding] = useState<LifeBusEvents['ending']>(null)
+  const [card, setCard] = useState<HistoricalAnchor | null>(null)
+  const [controls, setControls] = useState(true)
+  const [touch, setTouch] = useState(false)
+  const [confirmReset, setConfirmReset] = useState(false)
+  const [persisted, setPersisted] = useState(true)
+
+  // --- boot -------------------------------------------------------------------------
+  useEffect(() => {
+    let cancelled = false
+    const bus = new LifeBus()
+    const unsubscribe: Array<() => void> = []
+
+    setPersisted(lifeStore.usable())
+    setTouch(
+      typeof window !== 'undefined' &&
+        (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window),
+    )
+
+    unsubscribe.push(bus.on('hud', setHud))
+    unsubscribe.push(bus.on('dialogue', setDialogue))
+    unsubscribe.push(bus.on('prompt', setPrompt))
+    unsubscribe.push(bus.on('toast', setToast))
+    unsubscribe.push(bus.on('ending', setEnding))
+    unsubscribe.push(bus.on('controls', (value) => setControls(value.visible)))
+    unsubscribe.push(bus.on('anchor', (value) => setCard(value.showing ? value.anchor : null)))
+
+    void (async () => {
+      const [engine, module] = await Promise.all([
+        loadLife(DEFAULT_IDENTITY, 1980),
+        import('@/lib/life/runtime/game'),
+      ])
+      if (cancelled || !holder.current) return
+      runtime.current = module.createLifeGame({
+        parent: holder.current,
+        engine,
+        bus,
+        anchor,
+        prologueAnchor,
+      })
+      const box = holder.current.getBoundingClientRect()
+      runtime.current.resize(box.width, box.height)
+      setReady(true)
+    })()
+
+    return () => {
+      cancelled = true
+      for (const off of unsubscribe) off()
+      bus.clear()
+      runtime.current?.destroy()
+      runtime.current = null
+    }
+  }, [anchor, prologueAnchor])
+
+  // --- the shell owns the box -------------------------------------------------------
+  useEffect(() => {
+    const node = holder.current
+    if (!node || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (!entry) return
+      runtime.current?.resize(entry.contentRect.width, entry.contentRect.height)
+    })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [ready])
+
+  /**
+   * The game owns the arrow keys and the space bar for as long as it is on screen.
+   *
+   * Without this the browser scrolls the page on every step and every "continue", the
+   * canvas drifts out of the viewport, and the player is fighting the document instead of
+   * walking. Space also advances a line — but only when there is a line and no choice to
+   * make, because a choice is a decision and a space bar is not one.
+   */
+  useEffect(() => {
+    if (!ready) return
+    const owned = new Set([' ', 'Spacebar', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return
+      if (owned.has(event.key)) event.preventDefault()
+      if (event.key !== ' ' && event.key !== 'Enter') return
+      if (!dialogue) return
+      event.preventDefault()
+      if (!dialogue.choices || dialogue.choices.length === 0) runtime.current?.advance()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [dialogue, ready])
+
+  // --- a toast is a sentence, not a notification centre ------------------------------
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => setToast(null), 2600)
+    return () => clearTimeout(timer)
+  }, [toast])
+
+  const onAxis = useCallback((x: number, y: number) => {
+    runtime.current?.input.setAxis(x, y)
+  }, [])
+
+  const onAction = useCallback((down: boolean) => {
+    runtime.current?.input.setAction(down)
+  }, [])
+
+  const reset = useCallback(() => {
+    void (async () => {
+      await lifeStore.clear()
+      window.location.reload()
+    })()
+  }, [])
+
+  return (
+    <div className="relative -mx-gutter">
+      <div className="relative h-[calc(100dvh-var(--tap)-3.25rem-env(safe-area-inset-bottom))] w-full overflow-hidden border-y-hair border-ink bg-ink">
+        <div ref={holder} className="absolute inset-0" />
+
+        {!ready && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-ink">
+            <p className="font-display text-[15px] text-sheet">{t('life.loading')}</p>
+          </div>
+        )}
+
+        {ready && <LifeHud hud={hud} />}
+
+        {ready && !dialogue && !ending && !card && controls && touch && (
+          <TouchPad onAxis={onAxis} onAction={onAction} />
+        )}
+
+        {/* the reach prompt — one word, above the action button, never a tutorial */}
+        {ready && prompt && !dialogue && !ending && !card && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-[108px] z-20 flex justify-center px-gutter">
+            <span className="border-hair border-ink bg-sheet/95 px-2 py-1 font-body text-[10px] leading-none text-ink">
+              <bdi>{prompt}</bdi>
+            </span>
+          </div>
+        )}
+
+        {toast && (
+          <div className="pointer-events-none absolute inset-x-0 top-[68px] z-30 flex justify-center px-gutter">
+            <div
+              className={`border-hair px-3 py-1.5 ${
+                toast.tone === 'red' ? 'border-red bg-red' : 'border-ink bg-sheet'
+              }`}
+            >
+              <p
+                className={`font-body text-[12px] leading-none ${
+                  toast.tone === 'red' ? 'text-sheet' : 'text-ink'
+                }`}
+              >
+                <bdi>{toast.text}</bdi>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {dialogue && (
+          <DialogueBox
+            lines={dialogue.lines}
+            {...(dialogue.choices ? { choices: dialogue.choices } : {})}
+            onAdvance={() => runtime.current?.advance()}
+            onChoose={(id) => runtime.current?.choose(id)}
+          />
+        )}
+
+        {card && <AnchorCard anchor={card} onClose={() => setCard(null)} />}
+
+        {ending && (
+          <EndingCard
+            titleHe={ending.titleHe}
+            bodyHe={ending.bodyHe}
+            memoryHe={ending.memoryHe}
+            onClose={() => {
+              setEnding(null)
+              runtime.current?.dismissEnding()
+            }}
+          />
+        )}
+      </div>
+
+      {/* Under the glass: the two controls that are not part of the world. */}
+      <div className="flex items-center justify-between gap-3 px-gutter pt-2">
+        <p className="font-body text-[10px] leading-snug text-muted">
+          {persisted ? t('life.autosave') : t('life.storageOff')}
+        </p>
+        <button
+          type="button"
+          onClick={() => (confirmReset ? reset() : setConfirmReset(true))}
+          onBlur={() => setConfirmReset(false)}
+          className="flex min-h-tap items-center border-hair border-ink px-3 font-body text-[11px] text-ink transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none"
+        >
+          {confirmReset ? t('life.reset.confirm') : t('life.reset')}
+        </button>
+      </div>
+    </div>
+  )
+}

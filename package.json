@@ -17,17 +17,18 @@
     "story:overlap": "node scripts/brand/story-overlap.mjs",
     "story:cards": "node scripts/brand/story-cards.mjs",
     "qa:sweep": "node scripts/brand/qa-sweep.mjs",
+    "life:play": "node scripts/life/playthrough.mjs",
     "wiki:canon": "tsx scripts/ingest/canon-cli.ts",
     "wiki:import": "tsx scripts/ingest/export-cli.ts",
     "wiki:cargo": "tsx scripts/ingest/cargo-cli.ts",
-    "wiki:squads": "tsx scripts/ingest/squads-cli.ts",
-    "wiki:songs": "tsx scripts/ingest/songs-cli.ts"
+    "wiki:squads": "tsx scripts/ingest/squads-cli.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
     "@tanstack/react-query": "^5.59.0",
     "next": "14.2.15",
+    "phaser": "^3.90.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

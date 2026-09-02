@@ -1,4 +1,5 @@
 import { BannerCloth } from '@/components/ui/BannerCloth'
+import { LifeEntry } from '@/components/life/LifeEntry'
 import { Screen } from '@/components/ui/Screen'
 import { GatePlate } from '@/components/gates/GatePlate'
 import { Intro } from '@/components/ui/Intro'
@@ -23,6 +24,12 @@ export default function BloomfieldPage() {
       {/* An overlay, not a route: the wall below is already rendered and complete, so
           the opening never stands between a shared link and the gates. */}
       <Intro />
+
+      {/* THE WORKER LIFE hangs above the wall rather than in it — see LifeEntry. */}
+      <div className="mt-stack">
+        <LifeEntry />
+      </div>
+
       <section aria-label={t('wall.chooseGate')} className="mt-stack">
         <div className="flex items-baseline justify-between gap-3">
           <p className="font-display text-[15px] text-ink">{t('wall.chooseGate')}</p>

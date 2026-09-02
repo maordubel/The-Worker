@@ -536,5 +536,21 @@
   "kits.back": "חזרה לאוסף",
   "kits.empty": "אין עדיין חולצות באוסף",
   "kits.emptyBody": "כל חולצה שתרכיב בשער 4 נכנסת לכאן — גם אם לא הרכבת אותה מושלם.",
-  "kits.source": "מקור"
+  "kits.source": "מקור",
+  "life.title": "THE WORKER LIFE",
+  "life.sub": "פרוסה אנכית — שבת אחת בדרום תל אביב, 1980",
+  "life.loading": "טוען את השכונה…",
+  "life.money": "אגורות",
+  "life.action": "פעולה",
+  "life.continue": "המשך",
+  "life.autosave": "המשחק נשמר אצלך במכשיר, אוטומטית.",
+  "life.storageOff": "הדפדפן חוסם שמירה מקומית — אפשר לשחק, אבל לא יישמר.",
+  "life.reset": "התחלה מחדש",
+  "life.reset.confirm": "בטוח? לחיצה נוספת מוחקת",
+  "life.anchor.source": "מקור:",
+  "life.anchor.unverified": "העוגן הזה עדיין לא אומת מול הארכיון הקנוני.",
+  "life.ending.home": "הביתה",
+  "life.entry.kicker": "משחק החיים",
+  "life.entry.line": "ילד בן שמונה, שבת אחת ב-1980, ואצטדיון שהוא לא אמור להגיע אליו לבד. משחק דו־ממדי מלא — תנועה, זמן, כסף, אנשים.",
+  "life.entry.cta": "להיכנס"
 }

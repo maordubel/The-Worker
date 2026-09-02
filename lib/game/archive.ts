@@ -132,6 +132,10 @@ export const archive = {
     seasonLabel: string
     result: string
     noteHe?: string | null
+    /* Present on every row in the file and required by rule 6 — a consumer that has to
+       stay sport-scoped (THE WORKER LIFE) cannot filter on a field the type hides. */
+    sport?: string
+    clubSlug?: string
   }>(trophiesFile),
   moments: load<{
     slug: string

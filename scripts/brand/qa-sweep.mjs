@@ -34,6 +34,10 @@ const VAL_MIN = 0.35
 const ROUTES = [
   '/', '/xi', '/trivia', '/trivia/general', '/lineup', '/kits', '/kits/build',
   '/memory', '/polls', '/goal', '/tik', '/derby', '/timeline', '/ussishkin',
+  // THE WORKER LIFE is swept like any other screen — its canvas is pixels on the wall
+  // and rule 8 does not care that they were drawn by a Graphics call. What this sweep
+  // cannot do is PLAY it; `scripts/life/playthrough.mjs` does that.
+  '/life',
 ]
 const WIDTHS = [320, 390, 768, 1440]
 
