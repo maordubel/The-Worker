@@ -13,6 +13,13 @@ import { t } from '@/lib/i18n'
  *
  * The box takes the whole width at the foot of the glass, and the tap target for
  * "continue" is the box itself — a 16px chevron is not a control on a phone.
+ *
+ * And there is always an X. A conversation you cannot leave is a softlock, and this build
+ * had one: speak to somebody a second time, land on a branch you no longer qualify for,
+ * and there was nothing left to press. The X is in the same corner on every line, of
+ * every conversation, whether or not there is a speaker plate to hang it on, and it
+ * applies nothing — walking off mid-sentence earns a child exactly nothing, and leaves
+ * the conversation ready to be started again from its first line.
  */
 export function DialogueBox({
   lines,
@@ -21,6 +28,7 @@ export function DialogueBox({
   offsetTop,
   onAdvance,
   onChoose,
+  onLeave,
 }: {
   lines: DialogueLine[]
   choices?: DialogueChoice[]
@@ -29,6 +37,8 @@ export function DialogueBox({
   offsetTop?: number
   onAdvance: () => void
   onChoose: (id: string) => void
+  /** walk away without finishing — always available, on every line */
+  onLeave: () => void
 }) {
   const line = lines[0]
   if (!line) return null
@@ -43,25 +53,43 @@ export function DialogueBox({
       data-life="dialogue"
     >
       <div className="w-full border-rule border-ink bg-sheet">
-        {line.who && (
-          <div className="flex items-stretch gap-2.5 border-b-hair border-ink bg-ink">
+        <div
+          className={`flex items-stretch gap-2.5 border-b-hair border-ink ${
+            line.who ? 'bg-ink' : 'bg-ink/90'
+          }`}
+        >
             {/* The speaker's printed plate, cut from the cast board. It is square and
                 borderless on the start side because it is pasted onto the ink strip, not
                 framed by it — the brand has no rounded corners and no shadows. */}
-            {portrait && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={artUrl(portrait)}
-                alt=""
-                aria-hidden="true"
-                className="h-[54px] w-[62px] shrink-0 border-e-hair border-ink object-cover"
-              />
-            )}
+          {portrait && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={artUrl(portrait)}
+              alt=""
+              aria-hidden="true"
+              className="h-[54px] w-[62px] shrink-0 border-e-hair border-ink object-cover"
+            />
+          )}
+          {line.who ? (
             <p className="self-center px-3 py-1.5 font-display text-[13px] leading-none text-sheet">
               <bdi>{line.who}</bdi>
             </p>
-          </div>
-        )}
+          ) : (
+            <span className="px-3 py-1.5" aria-hidden="true" />
+          )}
+
+          {/* היציאה — the same corner, every line, every conversation. */}
+          <button
+            type="button"
+            onClick={onLeave}
+            aria-label={t('life.leave')}
+            title={t('life.leave')}
+            data-life="leave"
+            className="ms-auto flex min-h-tap w-11 shrink-0 items-center justify-center self-stretch border-s-hair border-sheet/25 font-display text-[15px] leading-none text-sheet/70 transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none"
+          >
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
 
         {choices && choices.length > 0 ? (
           <>

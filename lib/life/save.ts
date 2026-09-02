@@ -18,7 +18,7 @@ import type { PlayerIdentity } from './types'
  */
 
 const KEY = 'the-worker:life'
-export const SAVE_VERSION = 1
+export const SAVE_VERSION = 2
 
 export type SaveFile = {
   version: number
@@ -50,14 +50,23 @@ function browserStore(): Storage | null {
 
 /**
  * A file from a future version folds fine (unknown events are no-ops) but a file from a
- * version this build has never heard of is not something to guess at. Older versions get
- * a migration branch here; today there is one version, so the check is an equality and
- * the branch is a comment rather than dead code pretending to be a plan.
+ * version this build has never heard of is not something to guess at.
+ *
+ * **Version 2 — the timeline rebase.** The protagonist's birth year moved from 1972 to
+ * 1978 and the chapter moved from 1980 to 1986. A version-1 file therefore describes a
+ * person who is now eight years older than the game believes, in a year the game no
+ * longer has: its flags, its bonds and its memories are all keyed to a life that does
+ * not exist any more. There is no honest migration for that — reinterpreting an
+ * impossible age silently is worse than starting again — so a version-1 file is DROPPED
+ * and the player begins the rebased chapter with a clean log. That is deliberate, it
+ * only affects development saves from before this build, and the alternative is a save
+ * that quietly lies about how old somebody is.
  */
 function migrate(raw: unknown): SaveFile | null {
   if (!raw || typeof raw !== 'object') return null
   const file = raw as Partial<SaveFile>
   if (typeof file.version !== 'number' || file.version > SAVE_VERSION) return null
+  if (file.version < SAVE_VERSION) return null
   if (!Array.isArray(file.events) || !file.identity || typeof file.year !== 'number') return null
   return {
     version: SAVE_VERSION,

@@ -28,7 +28,7 @@ import { DEVELOPMENT_ANCHOR, type HistoricalAnchor } from './anchors'
  * a scoreline. Nothing else changes.
  */
 
-const SEASON = '1980/81'
+const SEASON = '1985/86'
 const LEAGUE = 'ליגת-העל'
 
 export function resolveChapterAnchor(): HistoricalAnchor {
@@ -49,7 +49,7 @@ export function resolveChapterAnchor(): HistoricalAnchor {
     id: `trophy:${LEAGUE}:${SEASON}`,
     sport: 'football',
     seasonLabel: trophy.seasonLabel,
-    year: 1981,
+    year: 1986,
     competitionSlug: trophy.competitionSlug,
     // Built from canonical fields only. No opponent, no score, no date.
     headlineHe: `אליפות ${trophy.seasonLabel}`,
@@ -59,23 +59,30 @@ export function resolveChapterAnchor(): HistoricalAnchor {
     confidence: trophy.confidence,
     placeholder: {
       what: 'המשחק המכריע עצמו — יריבה, תאריך, תוצאה ומבקיעים — אינו מוצג, ואינו קיים בארכיון.',
-      needs: 'שורת משחק מעונת 1980/81 ב-content/manual/matches.json ברמת ודאות 2 ומעלה.',
+      needs: 'שורת משחק מעונת 1985/86 ב-content/manual/matches.json ברמת ודאות 2 ומעלה.',
     },
   }
 }
 
 /**
- * The prologue's anchor — 1971/72, the State Cup.
+ * The prologue's anchor — 1982/83, the State Cup.
+ *
+ * Rebased with everything else. The prologue used to be 1971/72 and used to belong to
+ * the father; now the protagonist is born in 1978, so the earliest thing he can possibly
+ * remember is the cup of 1982/83, when he was five and on somebody's shoulders. That is
+ * a better prologue than the old one for a reason that has nothing to do with dates: the
+ * first line of this game is now something that happened TO him, and the last line of the
+ * chapter is something he does himself.
  *
  * Same discipline as the chapter anchor and the same limit: `content/manual/trophies.json`
  * records that the club won that season's cup, at confidence 2, with a source. It records
- * nothing about the final itself. The prologue therefore shows a young man in a crowd and
- * names the trophy, and says nothing about who was beaten or by how much.
+ * nothing about the final itself. The prologue therefore shows a crowd and names the
+ * trophy, and says nothing about who was beaten or by how much.
  */
 export function resolvePrologueAnchor(): HistoricalAnchor {
   const trophy = archive.trophies.find(
     (row) =>
-      row.seasonLabel === '1971/72' &&
+      row.seasonLabel === '1982/83' &&
       row.competitionSlug === 'גביע-המדינה' &&
       row.result === 'won' &&
       row.sport === 'football',
@@ -85,17 +92,17 @@ export function resolvePrologueAnchor(): HistoricalAnchor {
     return {
       ...DEVELOPMENT_ANCHOR,
       id: 'DEV-PLACEHOLDER-PROLOGUE',
-      seasonLabel: '1971/72',
-      year: 1972,
+      seasonLabel: '1982/83',
+      year: 1983,
       competitionSlug: 'גביע-המדינה',
     }
   }
 
   return {
-    id: `trophy:גביע-המדינה:1971/72`,
+    id: `trophy:גביע-המדינה:1982/83`,
     sport: 'football',
     seasonLabel: trophy.seasonLabel,
-    year: 1972,
+    year: 1983,
     competitionSlug: trophy.competitionSlug,
     headlineHe: `גביע המדינה ${trophy.seasonLabel}`,
     venueSlug: null,
@@ -104,7 +111,7 @@ export function resolvePrologueAnchor(): HistoricalAnchor {
     confidence: trophy.confidence,
     placeholder: {
       what: 'הגמר עצמו — יריבה, תאריך ותוצאה — אינו מוצג, ואינו קיים בארכיון.',
-      needs: 'שורת משחק גמר גביע 1971/72 בארכיון הקנוני ברמת ודאות 2 ומעלה.',
+      needs: 'שורת משחק גמר גביע 1982/83 בארכיון הקנוני ברמת ודאות 2 ומעלה.',
     },
   }
 }

@@ -71,6 +71,15 @@ export type ExitDef = {
   when?: Condition
   /** the glow drawn on the doorway itself, so the way out is visible from anywhere */
   light?: { x: number; y: number; w: number; h: number; tone: 'inside' | 'daylight' }
+  /**
+   * What the child needs before this door means anything.
+   *
+   * A locked door is not hidden and it is not silent: the light dims, the prompt keeps
+   * the door's name, and pressing the button gets a sentence explaining what is missing.
+   * "You cannot go out without the key" is a game; a door that does nothing is a bug.
+   */
+  needs?: Condition
+  blockedHe?: string
   /** walking in triggers after a short dwell; the button always works immediately */
   dwellMs?: number
   priority?: number
@@ -107,13 +116,17 @@ const SCENES: SceneDef[] = [
     band: { far: 0.84, near: 0.97 },
     size: { far: 0.3, near: 0.38 },
     ambience: 'interior',
-    stuckHe: 'הדלת לסלון בצד שמאל של החדר.',
+    stuckHe: 'המפתח במגירה, בקצה שמאל. משם גם הדלת לסלון.',
     spawns: { start: { x: 0.3, y: 0.93, facing: 'left' }, fromHome: { x: 0.14, y: 0.9, facing: 'right' } },
     actors: [],
     hotspots: [
       { id: 'bed', x: 0.47, y: 0.92, w: 0.14, act: 'bed', verb: 'look', labelHe: 'המיטה' },
       { id: 'poster', x: 0.72, y: 0.9, w: 0.1, act: 'poster', verb: 'look', labelHe: 'הכרזה' },
-      { id: 'desk', x: 0.17, y: 0.9, w: 0.08, act: 'desk', verb: 'look', labelHe: 'המגירה' },
+      // Wider than a drawer needs to be: it is the one thing in this room the chapter
+      // cannot start without, so a child crossing the room at any speed is offered it.
+      // It is NOT given priority — the door beside it must still win in the doorway, or
+      // the way out of the first room disappears behind the furniture.
+      { id: 'desk', x: 0.17, y: 0.9, w: 0.16, act: 'desk', verb: 'look', labelHe: 'המגירה' },
       {
         id: 'redbox',
         x: 0.89,
@@ -136,7 +149,10 @@ const SCENES: SceneDef[] = [
         spawn: 'fromBedroom',
         labelHe: 'לסלון',
         light: { x: 0.0, y: 0.62, w: 0.075, h: 0.36, tone: 'inside' },
-        dwellMs: 200,
+        // Half a second, not a fifth of one. This is the first door in the game and the
+        // drawer beside it is the thing the morning needs — sliding out of your own room
+        // before you have looked at anything is how a chapter starts locked.
+        dwellMs: 520,
       },
     ],
   },
@@ -149,7 +165,7 @@ const SCENES: SceneDef[] = [
     band: { far: 0.73, near: 0.97 },
     size: { far: 0.33, near: 0.43 },
     ambience: 'interior',
-    stuckHe: 'הדלת החוצה בקצה שמאל של הסלון.',
+    stuckHe: 'בלי מפתח אמא לא נותנת לצאת. ואבא בכורסה — תשאל אותו מה יש היום.',
     // The coffee table is the room's own foreground: walk up to the sofa and you pass
     // behind it. One separated object is what turns a painting into a place.
     layers: [{ art: 'livingTable', x: 0.3659, y: 0.5625, w: 0.1751, depth: 0.79 }],
@@ -164,10 +180,13 @@ const SCENES: SceneDef[] = [
     actors: [
       {
         id: 'kobi',
-        figure: 'kobi',
-        x: 0.62,
-        y: 0.7,
-        size: 0.4,
+        // He sits in his own chair with the sports page, which is the pose the sheet was
+        // drawn for and the reason the living room has somebody in it rather than a
+        // cut-out standing on a rug.
+        figure: 'kobi-chair',
+        x: 0.63,
+        y: 0.78,
+        size: 0.34,
         nameHe: 'קובי',
         talk: 'kobi-morning',
         when: { beforeMinute: KOBI_LEAVES },
@@ -193,6 +212,10 @@ const SCENES: SceneDef[] = [
         // the only cold-warm light in a room lit by an afternoon window, which is the
         // whole reason it reads as OUTSIDE rather than as another room.
         light: { x: 0.0, y: 0.6, w: 0.085, h: 0.4, tone: 'daylight' },
+        // The first lock in the game, and it is the reason the bedroom is not scenery: a
+        // child in 1980 does not leave the flat without the key on the string.
+        needs: { hasItem: 'house-key' },
+        blockedHe: 'בלי המפתח אמא לא נותנת לצאת. הוא במגירה בחדר שלך.',
         dwellMs: 260,
         priority: 2,
       },
@@ -273,7 +296,7 @@ const SCENES: SceneDef[] = [
     band: { far: 0.7, near: 0.94 },
     size: { far: 0.2, near: 0.32 },
     ambience: 'day',
-    stuckHe: 'הכל פה: הקיוסק משמאל, המגרש בסמטה, והדרך מזרחה.',
+    stuckHe: 'הקיוסק משמאל, המגרש בסמטה. מזרחה הולכים רק כשיודעים לאן — תשאל מישהו.',
     spawns: {
       // Far enough from the front door that arriving in the street does not immediately
       // offer to send you back inside. A place you have just entered should not greet you
@@ -391,6 +414,10 @@ const SCENES: SceneDef[] = [
         light: { x: 0.95, y: 0.55, w: 0.05, h: 0.42, tone: 'daylight' },
         dwellMs: 420,
         priority: 2,
+        // You cannot follow a crowd you have not noticed. Either Kobi told you there is a
+        // match, or Ofir did — otherwise east is just a street, and the child says so.
+        needs: { flag: 'knows:match' },
+        blockedHe: 'לאן? אתה בכלל לא יודע מה קורה שם היום.',
       },
     ],
   },
@@ -652,7 +679,7 @@ const SCENES: SceneDef[] = [
     actors: [
       {
         id: 'kobi-crowd',
-        figure: 'kobi',
+        figure: 'kobi-cheer',
         x: 0.74,
         y: 0.9,
         size: 0.3,

@@ -3,7 +3,7 @@ import { KOBI_LEAVES } from '../world/scenes'
 import type { Conversation } from './script'
 
 /**
- * שבת אחת ב-1980 — the chapter's words.
+ * שבת אחת ב-1986 — the chapter's words.
  *
  * Written to brief §7: dialogue supports the game, it is not the game. Nothing here
  * hands out a quest, nothing prints a number, and no line tells the player where to go.
@@ -59,9 +59,14 @@ const CONVERSATIONS: Conversation[] = [
       {
         lines: [
           { who: null, text: 'כרזה אדומה על הקיר. קרעת אותה מעמוד חשמל ברחוב סלמה והדבקת פה.' },
+          { who: null, text: 'משה סיני. שבע. הוא עומד שם עם הידיים על המותניים כאילו הוא יודע משהו שאתה לא.' },
           { who: null, text: 'אבא אמר שזה לא מכובד לתלות דברים מהרחוב. אמא אמרה שיישאר.' },
+          { who: null, text: 'אבא עומד מולה לפעמים כשהוא חושב שאתה ישן.' },
         ],
-        then: [{ e: 'trait', trait: 'footballAffinity', delta: 2 }],
+        then: [
+          { e: 'trait', trait: 'footballAffinity', delta: 3 },
+          { e: 'flag', flag: 'knows:sinai' },
+        ],
       },
     ],
   },
@@ -413,6 +418,7 @@ const CONVERSATIONS: Conversation[] = [
         ],
         then: [
           { e: 'flag', flag: 'route:known' },
+          { e: 'flag', flag: 'knows:match' },
           { e: 'bond', who: 'ofir', delta: 4 },
           { e: 'trait', trait: 'courage', delta: 3 },
         ],
@@ -425,7 +431,11 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         when: { afterMinute: KOBI_LEAVES },
-        lines: [{ who: 'שכן', text: 'אבא שלך יצא לפני עשר דקות. רץ כמו ילד.' }],
+        lines: [
+          { who: 'שכן', text: 'אבא שלך יצא לפני עשר דקות. רץ כמו ילד.' },
+          { who: 'שכן', text: 'כולם הולכים מזרחה היום. יש משחק.' },
+        ],
+        then: [{ e: 'flag', flag: 'knows:match' }],
       },
       {
         lines: [{ who: 'שכן', text: 'תגיד לאמא שלך שהמים חזרו.' }],
@@ -585,10 +595,26 @@ const CONVERSATIONS: Conversation[] = [
       {
         lines: [
           { who: 'ילד מהשכונה', text: 'שלושה על שלושה. עד שלוש שערים.' },
-          { who: 'ילד מהשכונה', text: 'אתה איתנו. תיכנס.' },
+          { who: 'ילד מהשכונה', text: 'אני סיני. אמרתי ראשון.' },
+          { who: null, text: 'תמיד מישהו אומר ראשון. אף פעם לא אתה.' },
         ],
         choices: [
-          { id: 'play', text: 'בוא נשחק.', then: [{ e: 'minigame', id: 'football' }] },
+          {
+            id: 'play',
+            text: 'בוא נשחק.',
+            then: [{ e: 'minigame', id: 'football' }],
+          },
+          {
+            id: 'sinai',
+            text: 'אז אני סיני אחריו.',
+            when: { flag: 'knows:sinai' },
+            noteHe: 'צריך להכיר אותו',
+            then: [
+              { e: 'trait', trait: 'footballAffinity', delta: 4 },
+              { e: 'trait', trait: 'courage', delta: 2 },
+              { e: 'minigame', id: 'football' },
+            ],
+          },
           { id: 'later', text: 'אחר כך.', then: [] },
         ],
       },

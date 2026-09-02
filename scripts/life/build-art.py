@@ -57,6 +57,25 @@ SRC = {
 HUE_MIN, HUE_MAX, SAFE_HUE = 30.0, 80.0, 26.0
 SAT_MIN, VAL_MIN = 0.18, 0.18
 
+# Above this saturation, a pixel in the yellow hues is actually YELLOW — gold, mark
+# yellow, a hi-vis vest — and rule 8 wants it gone, hue and all. Below it, the same hues
+# are olive, khaki, brass, dry grass and skin in warm light: things that are not yellow,
+# that the wide build-time band catches anyway, and that turn to mud if their hue is
+# rotated. An IDF uniform is the case that proved it — the first pass shipped a brown
+# army. So those are DESATURATED instead, down to a value the canonical scanner
+# (`lib/isYellow.ts`, S ≥ 0.35) cannot call yellow, with their hue left exactly where the
+# painting put it.
+# What the build REPORTS as yellow. Stricter than the paint band above (so a legal olive
+# is not counted as a fault) and looser than the canonical scanner in `lib/isYellow.ts`
+# (hue 38–70, S ≥ 0.35, V ≥ 0.35), so a pixel that passes here still has room to survive
+# a browser's bilinear resampling without crossing the real line.
+SCAN_HUE = (34.0, 74.0)
+SCAN_SAT, SCAN_VAL = 0.30, 0.30
+
+TRUE_YELLOW_SAT = 0.55
+TRUE_YELLOW_HUE = (38.0, 70.0)
+SAFE_SAT = 0.26
+
 _cache = {}
 
 
@@ -113,9 +132,16 @@ def deyellow(im):
             q = _LUT.get(p)
             if q is None:
                 hh, s, v = rgb_to_hsv(*p)
-                q = hsv_to_rgb(SAFE_HUE, min(0.86, s * 0.9), v) if (
-                    s >= SAT_MIN and v >= VAL_MIN and HUE_MIN <= hh <= HUE_MAX
-                ) else p
+                if s < SAT_MIN or v < VAL_MIN or not (HUE_MIN <= hh <= HUE_MAX):
+                    q = p
+                elif s >= TRUE_YELLOW_SAT and TRUE_YELLOW_HUE[0] <= hh <= TRUE_YELLOW_HUE[1]:
+                    # a real yellow: move the hue off the band entirely
+                    q = hsv_to_rgb(SAFE_HUE, min(0.86, s * 0.9), v)
+                elif s > SAFE_SAT:
+                    # olive, khaki, brass, warm skin: keep the colour, lose the claim
+                    q = hsv_to_rgb(hh, SAFE_SAT, v)
+                else:
+                    q = p
                 _LUT[p] = q
             if q != p:
                 px[x, y] = q
@@ -137,7 +163,7 @@ def count_yellow(im):
             if a < 8:
                 continue
             hh, s, v = rgb_to_hsv(r, g, b)
-            if s >= SAT_MIN and v >= VAL_MIN and HUE_MIN <= hh <= HUE_MAX:
+            if s >= SCAN_SAT and v >= SCAN_VAL and SCAN_HUE[0] <= hh <= SCAN_HUE[1]:
                 n += 1
     return n
 

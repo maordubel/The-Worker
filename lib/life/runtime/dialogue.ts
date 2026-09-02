@@ -1,5 +1,5 @@
 import type { HistoricalAnchor } from '../anchors'
-import { PORTRAIT } from '../content/chapter1980'
+import { PORTRAIT } from '../content/chapter1986'
 import { DIALOGUE } from '../content/dialogue'
 import type { ChoiceDef, Conversation, Effect, Say } from '../content/script'
 import type { LifeEngine } from '../engine'
@@ -110,6 +110,25 @@ export class DialogueRunner {
     if (!meets(this.engine.state, choice.when)) return
     this.pendingChoices = null
     this.finish(choice.then)
+  }
+
+  /**
+   * ללכת באמצע — the player walked away, and the game let them.
+   *
+   * A conversation you cannot leave is the oldest trap in the genre, and this build had
+   * it: talk to somebody twice, land on a branch whose choices you no longer qualify for,
+   * and the box stays on screen with nothing you can press. It was reported by the person
+   * who owns this game, in those words, and the fix is not a better branch — it is that
+   * leaving is always allowed, on every line, in every conversation.
+   *
+   * Leaving applies NOTHING. No `then`, no chained node, no time. Nobody gives a child
+   * anything for walking off mid-sentence, so the state after this call is exactly the
+   * state before the box opened — which also means the conversation can simply be started
+   * again, from its first line, by pressing the button once more.
+   */
+  leave() {
+    if (!this.conversation) return
+    this.close()
   }
 
   close() {

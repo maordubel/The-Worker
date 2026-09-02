@@ -648,5 +648,76 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     - **No spawn may sit inside an exit.** That is an infinite bounce, it existed in three
       scenes, and it is now a failing test rather than a bug report.
     Every one of these is asserted twice: as data, in `tests/life.test.ts`, and as
-    behaviour, in `npm run life:play`, which now holds ONE direction from a fresh save and
-    fails unless the child gets from the bedroom through the living room to the street.
+    behaviour, in `npm run life:play`.
+
+42. **THE WORKER LIFE — the console, the locks, and the way out of a conversation.**
+    Three failures were reported by the person who owns this game, in one sentence each,
+    and each one has a rule now.
+
+    - **"לא ברור איזה מקש מפעיל" — the controls are a PLACE on the screen.**
+      `components/life/ControlDeck.tsx` is the only console, and it draws two different
+      ones: on a touch device a visible stick and a labelled action button, on a keyboard
+      a legend of keycaps — arrows/WASD, E, Shift — lit exactly when the game is listening
+      to them. It is never a shrunken copy of the other. It sizes off the band left under
+      the painting, so a 360×640 phone gets a smaller but complete console rather than a
+      clipped one, and it pads for `env(safe-area-inset-bottom)`. Every touch target is at
+      least 44px, measured in the harness on every viewport. `TouchPad.tsx` and
+      `Prompt.tsx` are tombstones (rule 26).
+    - **"אין שום אתגר" — a door may have NEEDS.** `ExitDef.needs` plus `ExitDef.blockedHe`:
+      the flat's front door needs the house key from the drawer, the road east needs to
+      know there is a match on. A locked door is never hidden and never silent — it keeps
+      its light at low alpha, keeps its name in the prompt, and pressing the button gets a
+      sentence saying what is missing. `autoExits` skips locked doors, so nobody is walked
+      into a refusal. There must always be at least one unconditional way through a gate
+      (the veteran at Bloomfield takes the child in and charges twenty-two minutes for
+      it), because a chapter that can dead-lock is not a chapter.
+    - **"המשחק נתקע כשפונים למישהו שכבר דיברת איתו" — leaving is ALWAYS allowed.**
+      Every line of every conversation draws an X in the same corner, and Escape does the
+      same thing. `DialogueRunner.leave()` closes the box and applies NOTHING — no `then`,
+      no chained node, no time — so the conversation can simply be started again from its
+      first line. A branch the player no longer qualifies for is a normal thing to reach;
+      a box with nothing left to press is not.
+
+43. **THE WORKER LIFE — one cast, several ages, and no year on the caption.**
+    The 1980 cast, the nineties cast (`kobi90-*`, `ofir90-*`, `amit90-*`) and the player's
+    own three later ages (`hero80-*`, `hero90-*`, `soldier-*`) all ship at once, under
+    decade-suffixed names; nothing replaces anybody. Stage A walks around as none of them.
+    They are for showing a day as one point on a life — the ending's `after` pair and
+    `components/life/LifeLine.tsx` — and for the chapters that come next. Captions there
+    say ages and spans (`כעבור חמש־עשרה שנה`), never dates: the archive has no nineties
+    match on file and a caption is not the place to invent one (rule 11).
+
+44. **THE WORKER LIFE — de-yellow desaturates before it rotates.**
+    `scripts/life/build-art.py` now has three bands, not one. The PAINT band (hue 30–80,
+    S ≥ 0.18) is what gets touched. Inside it, only a TRUE yellow — hue 38–70 at S ≥ 0.55,
+    which is gold, mark yellow, hi-vis — has its hue rotated to 26°. Everything else keeps
+    its hue and is desaturated to S 0.26: olive, khaki, brass, dry grass, warm skin. The
+    SCAN band the build reports against (hue 34–74, S ≥ 0.30) sits between the paint band
+    and the canonical scanner in `lib/isYellow.ts` (hue 38–70, S ≥ 0.35), so a legal pixel
+    keeps margin against a browser's resampling without being counted as a fault. This
+    rule exists because the first pass shipped an IDF uniform in brown.
+
+
+45. **THE WORKER LIFE — the master timeline, and the one place it is written down.**
+    The protagonist is born in **1978**. He is five in 1983 (the prologue), eight in 1986
+    (the Stage A climax), twelve in 1990, eighteen and conscripted in 1996, twenty-two in
+    2000, thirty-two in 2010, forty-eight in 2026. There is no other timeline; a file that
+    disagrees with this paragraph is the file that is wrong.
+
+    Consequences already applied, and the pattern for the rest:
+    - `DEFAULT_IDENTITY.birthYear` is 1978 and `loadLife(..., 1986)` sets the chapter year.
+    - The chapter anchor is the **1985/86** league title and the prologue anchor is the
+      **1982/83** State Cup — both real rows in `content/manual/trophies.json`, both at
+      confidence 2 with a source. The archive holds no MATCH from this decade, so the
+      deciding game stays an explicit placeholder. A brief that names a date, an opponent,
+      a scoreline or a scorer does not override rule 11: put the match in the archive and
+      the scene picks it up with no code change.
+    - `lib/life/content/chapter1980.ts` is a tombstone; the content lives in
+      `chapter1986.ts`. **Never re-date a file in place** — a file named for a year it no
+      longer contains is how a codebase starts lying about itself.
+    - `SAVE_VERSION` is **2**, and a version-1 file is DROPPED rather than migrated. A v1
+      save describes somebody six years older than the game now believes, in a year that
+      no longer exists. Silently reinterpreting an impossible age is worse than starting
+      again.
+    - `tests/life.test.ts` allows exactly the years **1978 / 1983 / 1986** in authored
+      content. Adding a year to that list is a decision, not a fix.

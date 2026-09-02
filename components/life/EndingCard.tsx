@@ -1,5 +1,7 @@
 'use client'
 
+import { LifeLine } from '@/components/life/LifeLine'
+import { artUrl } from '@/lib/life/runtime/art'
 import { t } from '@/lib/i18n'
 
 /**
@@ -14,16 +16,19 @@ export function EndingCard({
   titleHe,
   bodyHe,
   memoryHe,
+  after,
   onClose,
 }: {
   titleHe: string
   bodyHe: string
   memoryHe: string
+  /** two plates of one person, one from today and one from a decade away */
+  after?: { fromArt: string; toArt: string; lineHe: string } | null
   onClose: () => void
 }) {
   return (
     <div className="pointer-events-auto absolute inset-0 z-50 flex items-center justify-center bg-ink/85 p-gutter">
-      <div className="w-full max-w-md border-rule border-sheet bg-ink">
+      <div className="max-h-full w-full max-w-md overflow-y-auto border-rule border-sheet bg-ink">
         <div className="px-5 pb-5 pt-6">
           <div className="h-[6px] w-16 bg-red" aria-hidden="true" />
           <h2 className="mt-3 font-display text-step-3 leading-tight text-sheet">
@@ -35,6 +40,41 @@ export function EndingCard({
           <p className="mt-4 border-t-hair border-concrete/30 pt-3 font-body text-[13px] leading-relaxed text-sheet">
             <bdi>{memoryHe}</bdi>
           </p>
+
+          {/* כעבור חמש־עשרה שנה. Two plates, one caption, and no claim about what happened
+              in between — the picture does the work a paragraph would do worse. */}
+          {after && (
+            <div className="mt-4 border-t-hair border-concrete/30 pt-4" data-life="after">
+              <div className="grid grid-cols-2 gap-px bg-concrete/30">
+                {[
+                  { art: after.fromArt, label: t('life.after.then') },
+                  { art: after.toArt, label: t('life.after.now') },
+                ].map((plate) => (
+                  <figure key={plate.art} className="bg-ink">
+                    <div className="flex h-[132px] items-end justify-center overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={artUrl(plate.art)}
+                        alt=""
+                        aria-hidden="true"
+                        className="max-h-full w-auto object-contain"
+                      />
+                    </div>
+                    <figcaption className="border-t-hair border-concrete/30 px-2 py-1.5 text-center font-body text-[10px] leading-none text-concrete">
+                      <bdi>{plate.label}</bdi>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+              <p className="mt-3 font-body text-[13px] leading-relaxed text-concrete">
+                <bdi>{after.lineHe}</bdi>
+              </p>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <LifeLine reached={0} />
+          </div>
 
           <button
             type="button"

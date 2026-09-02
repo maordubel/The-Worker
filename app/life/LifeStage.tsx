@@ -3,15 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AnchorCard } from '@/components/life/AnchorCard'
+import { ControlDeck } from '@/components/life/ControlDeck'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { EndingCard } from '@/components/life/EndingCard'
 import { LifeHud } from '@/components/life/LifeHud'
-import { Prompt } from '@/components/life/Prompt'
 import { Teach } from '@/components/life/Teach'
-import { TouchPad } from '@/components/life/TouchPad'
-import { t } from '@/lib/i18n'
+import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
-import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1980'
+import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { loadLife } from '@/lib/life/engine'
 import { lifeStore } from '@/lib/life/save'
 import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/bus'
@@ -57,6 +56,7 @@ export function LifeStage({
   const [confirmReset, setConfirmReset] = useState(false)
   const [persisted, setPersisted] = useState(true)
   const [frame, setFrame] = useState(0)
+  const [stage, setStage] = useState(0)
 
   // --- boot -------------------------------------------------------------------------
   useEffect(() => {
@@ -82,7 +82,7 @@ export function LifeStage({
 
     void (async () => {
       const [engine, module] = await Promise.all([
-        loadLife(DEFAULT_IDENTITY, 1980),
+        loadLife(DEFAULT_IDENTITY, 1986),
         import('@/lib/life/runtime/game'),
       ])
       if (cancelled || !holder.current) return
@@ -95,6 +95,7 @@ export function LifeStage({
       })
       const box = holder.current.getBoundingClientRect()
       runtime.current.resize(box.width, box.height)
+      setStage(box.height)
       setReady(true)
     })()
 
@@ -115,6 +116,7 @@ export function LifeStage({
       const entry = entries[0]
       if (!entry) return
       runtime.current?.resize(entry.contentRect.width, entry.contentRect.height)
+      setStage(entry.contentRect.height)
     })
     observer.observe(node)
     return () => observer.disconnect()
@@ -185,6 +187,13 @@ export function LifeStage({
       if (owned.has(event.key)) event.preventDefault()
       // E is the game's action key everywhere — including inside the dialogue box, so a
       // player never has to change hands to read a line.
+      // Escape always leaves the conversation, on every line — the keyboard twin of the X.
+      if (event.key === 'Escape') {
+        if (!dialogue) return
+        event.preventDefault()
+        runtime.current?.leave()
+        return
+      }
       const advances = event.key === ' ' || event.key === 'Enter' || event.key.toLowerCase() === 'e'
       if (!advances) return
       if (!dialogue) return
@@ -209,6 +218,24 @@ export function LifeStage({
   const onAction = useCallback((down: boolean) => {
     runtime.current?.input.setAction(down)
   }, [])
+
+  /**
+   * B — the other half of the arcade pair, and it does what B has always done.
+   *
+   * While you are walking it is RUN. While somebody is talking it is LEAVE, which is the
+   * same thing the X in the corner does and the same thing Escape does on a keyboard. One
+   * button, one idea — "not this" — rather than a third button for a third mechanic.
+   */
+  const onCancel = useCallback(
+    (down: boolean) => {
+      if (dialogue) {
+        if (down) runtime.current?.leave()
+        return
+      }
+      runtime.current?.input.setRun(down)
+    },
+    [dialogue],
+  )
 
   const reset = useCallback(() => {
     void (async () => {
@@ -240,12 +267,18 @@ export function LifeStage({
 
         {ready && <LifeHud hud={hud} />}
 
-        {ready && !dialogue && !ending && !card && controls && touch && (
-          <TouchPad onAxis={onAxis} onAction={onAction} verb={prompt?.verb ?? null} />
-        )}
-
-        {ready && prompt && !dialogue && !ending && !card && (
-          <Prompt verb={prompt.verb} label={prompt.label} touch={touch} />
+        {ready && !dialogue && !ending && !card && controls && (
+          <ControlDeck
+            top={frame > 0 ? frame : Math.max(0, stage - 132)}
+            height={frame > 0 ? Math.max(0, stage - frame) : 132}
+            touch={touch}
+            verb={prompt?.verb ?? null}
+            label={prompt ? `${t(`life.verb.${prompt.verb}` as MessageKey)} ${prompt.label}` : null}
+            locked={prompt?.locked ?? false}
+            onAxis={onAxis}
+            onAction={onAction}
+            onCancel={onCancel}
+          />
         )}
 
         {ready && teach && !dialogue && !ending && !card && <Teach id={teach.id} touch={touch} />}
@@ -276,6 +309,7 @@ export function LifeStage({
             {...(dialogue.choices ? { choices: dialogue.choices } : {})}
             onAdvance={() => runtime.current?.advance()}
             onChoose={(id) => runtime.current?.choose(id)}
+            onLeave={() => runtime.current?.leave()}
           />
         )}
 
@@ -286,6 +320,7 @@ export function LifeStage({
             titleHe={ending.titleHe}
             bodyHe={ending.bodyHe}
             memoryHe={ending.memoryHe}
+            after={ending.after ?? null}
             onClose={() => {
               setEnding(null)
               runtime.current?.dismissEnding()

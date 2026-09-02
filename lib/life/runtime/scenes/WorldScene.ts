@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
 import { clockLabel } from '../../clock'
-import { ENDINGS, OBJECTIVES } from '../../content/chapter1980'
+import { ENDINGS, OBJECTIVES } from '../../content/chapter1986'
 import type { LifeState, LocationId } from '../../types'
 import { FULL_TIME, KICKOFF, KOBI_LEAVES, sceneFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, SceneDef, Verb } from '../../world/scenes'
@@ -53,7 +53,17 @@ type Hotspot = { def: HotspotDef; x: number; y: number; w: number; prop?: Phaser
 
 type Target =
   | { kind: 'act'; act: string; verb: Verb; label: string; x: number; y: number; priority: number }
-  | { kind: 'exit'; exit: ExitDef; verb: Verb; label: string; x: number; y: number; priority: number }
+  | {
+      kind: 'exit'
+      exit: ExitDef
+      verb: Verb
+      label: string
+      /** shown, named and refused — never silent */
+      locked: boolean
+      x: number
+      y: number
+      priority: number
+    }
 
 const WALK = 1.5
 const RUN = 2.5
@@ -518,6 +528,13 @@ export class WorldScene extends Phaser.Scene {
     }
     for (const light of this.doorLights) {
       light.image.setVisible(meets(state, light.exit.when))
+      // A locked door still shows, dimmer: you can see where it goes and you can see it
+      // is not for you yet.
+      light.base = meets(state, light.exit.needs)
+        ? light.exit.light?.tone === 'daylight'
+          ? 0.4
+          : 0.24
+        : 0.1
     }
     this.flagCount = Object.keys(state.flags).length
     this.pushHud()
@@ -534,15 +551,22 @@ export class WorldScene extends Phaser.Scene {
     })
   }
 
+  /**
+   * המטרה — one short line that follows the actual chain of locks.
+   *
+   * It never says where to click. It says what the day is about right now, and it changes
+   * only when the state that produced it changes: find the key, talk to your father, then
+   * the door east means something, then get in, then find him.
+   */
   private objective(state: LifeState): string | null {
     if (state.flags['found:kobi']) return null
     if (this.def.id === 'bloomfield-inside' && this.matchPhase === 'over') return OBJECTIVES.findKobi
     if (state.flags['entry:granted']) return null
     if (this.def.id === 'bloomfield-outside') return OBJECTIVES.atGround
-    if (state.flags['kobi:left'] && (this.def.id === 'route' || this.def.id === 'street'))
-      return OBJECTIVES.onTheWay
-    if (state.flags['kobi:left']) return OBJECTIVES.afterKobi
-    return OBJECTIVES.morning
+    if (state.flags['kobi:left']) return OBJECTIVES.onTheWay
+    if (state.flags['knows:match']) return OBJECTIVES.matchToday
+    if ((state.inventory['house-key'] ?? 0) > 0) return OBJECTIVES.askDad
+    return OBJECTIVES.findKey
   }
 
   // ------------------------------------------------------------------ onboarding --
@@ -680,6 +704,7 @@ export class WorldScene extends Phaser.Scene {
         exit,
         verb: 'exit',
         label: exit.labelHe,
+        locked: !meets(state, exit.needs),
         x: cx,
         y: cy,
         priority: exit.priority ?? 2,
@@ -688,9 +713,16 @@ export class WorldScene extends Phaser.Scene {
 
     this.target = best
     this.focus(best)
+    const chosen = best as Target | null
     this.ctx.bus.emit(
       'prompt',
-      best ? { verb: (best as Target).verb, label: (best as Target).label } : null,
+      chosen
+        ? {
+            verb: chosen.verb,
+            label: chosen.label,
+            locked: chosen.kind === 'exit' ? chosen.locked : false,
+          }
+        : null,
     )
   }
 
@@ -725,6 +757,13 @@ export class WorldScene extends Phaser.Scene {
     }
     this.progress()
     if (target.kind === 'exit') {
+      if (target.locked) {
+        this.ctx.bus.emit('toast', {
+          text: target.exit.blockedHe ?? 'עוד לא.',
+          tone: 'plain',
+        })
+        return
+      }
       this.travel(target.exit.to, target.exit.spawn)
       return
     }
@@ -759,6 +798,7 @@ export class WorldScene extends Phaser.Scene {
     for (const exit of this.def.exits) {
       if (!meets(state, exit.when)) continue
       if (!within(exit)) continue
+      if (!meets(state, exit.needs)) continue
       if (!this.clearedReturn && exit.to === this.cameFrom) continue
       inside = exit
       break
@@ -895,7 +935,12 @@ export class WorldScene extends Phaser.Scene {
     )
     void this.ctx.engine.save()
     this.paused = true
-    this.ctx.bus.emit('ending', { titleHe: card.titleHe, bodyHe: card.bodyHe, memoryHe: card.memoryHe })
+    this.ctx.bus.emit('ending', {
+      titleHe: card.titleHe,
+      bodyHe: card.bodyHe,
+      memoryHe: card.memoryHe,
+      ...(card.after ? { after: card.after } : {}),
+    })
   }
 
   goHome() {

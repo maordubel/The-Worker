@@ -33,6 +33,8 @@ export type LifeRuntime = {
   resize(width: number, height: number): void
   advance(): void
   choose(id: string): void
+  /** walk away mid-conversation: nothing is applied, the box just closes */
+  leave(): void
   dismissEnding(): void
   skipIntro(): void
   destroy(): void
@@ -99,6 +101,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     },
     advance: () => dialogue.advance(),
     choose: (id: string) => dialogue.choose(id),
+    leave: () => dialogue.leave(),
     dismissEnding: () => worldScene()?.goHome(),
     skipIntro: () => {
       const prologue = game.scene.getScene(PrologueScene.KEY) as unknown as PrologueScene | null

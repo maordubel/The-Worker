@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 
-import { PROLOGUE } from '../../content/chapter1980'
+import { PROLOGUE } from '../../content/chapter1986'
 import { artUrl } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import { LIFE_PALETTE } from '../palette'

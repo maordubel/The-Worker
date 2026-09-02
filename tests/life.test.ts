@@ -7,7 +7,7 @@ import { isYellow } from '@/lib/isYellow'
 import { resolveChapterAnchor, resolvePrologueAnchor } from '@/lib/life/anchor-server'
 import { isPlaceholder } from '@/lib/life/anchors'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
-import { DEFAULT_IDENTITY, ENDINGS, PROLOGUE } from '@/lib/life/content/chapter1980'
+import { DEFAULT_IDENTITY, ENDINGS, PROLOGUE } from '@/lib/life/content/chapter1986'
 import type { Conversation } from '@/lib/life/content/script'
 import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
@@ -162,17 +162,17 @@ describe('העוגן ההיסטורי — canonical, sourced, and honest about t
     const anchor = resolveChapterAnchor()
     expect(anchor.confidence).toBeGreaterThanOrEqual(2)
     expect(anchor.sport).toBe('football')
-    expect(anchor.seasonLabel).toBe('1980/81')
+    expect(anchor.seasonLabel).toBe('1985/86')
     expect(anchor.sourceTitle.length).toBeGreaterThan(3)
     expect(anchor.id).not.toBe('DEV-PLACEHOLDER')
   })
 
   it('marks the missing match as a placeholder rather than filling it in', () => {
     // The archive has the championship and not the game that decided it. Until a curated
-    // 1980/81 match row exists, the game must say so on screen.
+    // 1985/86 match row exists, the game must say so on screen.
     const anchor = resolveChapterAnchor()
     expect(anchor.placeholder).not.toBeNull()
-    expect(anchor.placeholder?.needs).toContain('1980/81')
+    expect(anchor.placeholder?.needs).toContain('1985/86')
     expect(isPlaceholder(anchor)).toBe(true)
   })
 
@@ -190,7 +190,7 @@ describe('העוגן ההיסטורי — canonical, sourced, and honest about t
 describe('הבדיון אינו היסטוריה — the content layer invents no facts', () => {
   const authored = [
     readFileSync(join(ROOT, 'lib/life/content/dialogue.ts'), 'utf8'),
-    readFileSync(join(ROOT, 'lib/life/content/chapter1980.ts'), 'utf8'),
+    readFileSync(join(ROOT, 'lib/life/content/chapter1986.ts'), 'utf8'),
   ].join('\n')
 
   it('never prints a scoreline', () => {
@@ -200,10 +200,10 @@ describe('הבדיון אינו היסטוריה — the content layer invents n
     }
   })
 
-  it('names no year but the two the chapter is set in', () => {
+  it('names no year but the ones the rebased chapter is set in', () => {
     const years = new Set([...authored.matchAll(/\b(19|20)\d{2}\b/g)].map((match) => match[0]))
     for (const year of years) {
-      expect(['1972', '1980', '1981'], `unexpected year ${year} in authored content`).toContain(year)
+      expect(['1978', '1983', '1986'], `unexpected year ${year} in authored content`).toContain(year)
     }
   })
 
@@ -479,6 +479,151 @@ describe('בהירות — a first-time player is never asked to guess', () => {
       expect(catalogue[`life.verb.${verb}`], `life.verb.${verb} missing`).toBeTruthy()
       expect(catalogue[`life.verb.short.${verb}`], `life.verb.short.${verb} missing`).toBeTruthy()
     }
+  })
+})
+
+describe('לוח ההפעלה — the controls are a place on the screen, on every device', () => {
+  const deck = readFileSync(join(ROOT, 'components/life/ControlDeck.tsx'), 'utf8')
+  const stage = readFileSync(join(ROOT, 'app/life/LifeStage.tsx'), 'utf8')
+
+  it('the deck is what the stage renders — there is only one console', () => {
+    expect(stage).toContain('<ControlDeck')
+    expect(stage).not.toContain('<TouchPad')
+    expect(stage).not.toContain('<Prompt')
+  })
+
+  it('the deck knows which device it is on, and draws two different consoles', () => {
+    expect(deck).toContain('touch')
+    // the keyboard legend and the arcade cabinet are separate returns, not one shrunk layout
+    expect(deck).toContain('if (!touch)')
+    expect(deck).toContain('Shift')
+    expect(deck).toContain('↑')
+  })
+
+  it('the stick is a physical object, not a translucent circle', () => {
+    // the directive asks for arcade hardware: a ball top, a shaft, a deck plate, travel
+    expect(deck).toContain('radial-gradient')
+    expect(deck).toContain('boxShadow')
+    expect(deck).toContain('ArcadeButton')
+  })
+
+  it('there are exactly two buttons, and B is the one that means "not this"', () => {
+    const presses = [...deck.matchAll(/letter="([AB])"/g)].map((match) => match[1])
+    expect(presses.sort()).toEqual(['A', 'B'])
+    expect(deck).toContain('onCancel')
+    // B runs while walking and leaves while talking — one idea, never a third button
+    expect(stage).toContain('runtime.current?.leave()')
+    expect(stage).toContain('input.setRun(down)')
+  })
+
+  it('the name of what is in reach carries the harness handle, and only when there is one', () => {
+    const chip = deck.slice(deck.indexOf('const centre'), deck.indexOf('// --- desktop'))
+    expect(chip).toContain('data-life="prompt"')
+    // the empty state is a different element, so an empty deck never reads as a prompt
+    const empty = chip.slice(chip.indexOf("t('life.deck.nothing')"))
+    expect(empty).not.toContain('data-life="prompt"')
+  })
+
+  it('every string the deck says is in the catalogue', () => {
+    const catalogue = JSON.parse(readFileSync(join(ROOT, 'messages/he.json'), 'utf8')) as Record<
+      string,
+      string
+    >
+    for (const key of ['life.deck.move', 'life.deck.act', 'life.deck.run', 'life.deck.locked', 'life.deck.nothing']) {
+      expect(catalogue[key], `${key} missing`).toBeTruthy()
+    }
+  })
+
+  it('a locked door keeps its name and says so, rather than going quiet', () => {
+    expect(deck).toContain("t('life.deck.locked')")
+    const scenes = readFileSync(join(ROOT, 'lib/life/world/scenes.ts'), 'utf8')
+    expect(scenes).toContain('blockedHe')
+  })
+
+  it('the retired console imports nothing, so the old file cannot break a deploy', () => {
+    for (const file of ['components/life/TouchPad.tsx', 'components/life/Prompt.tsx']) {
+      const text = readFileSync(join(ROOT, file), 'utf8')
+      expect(text.includes('import '), `${file} still imports`).toBe(false)
+      expect(text).toContain('REPLACED_BY')
+    }
+  })
+
+  it('the console sizes off the band it is given, so a small phone gets all of it', () => {
+    expect(deck).toContain('clamp(')
+    expect(deck).toContain('env(safe-area-inset-bottom)')
+  })
+})
+
+describe('לצאת מהשיחה — no conversation is a room without a door', () => {
+  const box = readFileSync(join(ROOT, 'components/life/DialogueBox.tsx'), 'utf8')
+  const runner = readFileSync(join(ROOT, 'lib/life/runtime/dialogue.ts'), 'utf8')
+  const stage = readFileSync(join(ROOT, 'app/life/LifeStage.tsx'), 'utf8')
+
+  it('the box always draws the X, whether or not the line has a speaker', () => {
+    expect(box).toContain('data-life="leave"')
+    // the header strip is unconditional now — the X hangs on it either way
+    expect(box).not.toContain('{line.who && (')
+  })
+
+  it('leaving is wired from the box, from Escape, and through the runtime', () => {
+    expect(box).toContain('onLeave')
+    expect(stage).toContain('onLeave={() => runtime.current?.leave()}')
+    expect(stage).toContain("event.key === 'Escape'")
+    expect(runner).toContain('leave()')
+  })
+
+  it('walking away applies nothing — leave() closes, it never finishes', () => {
+    const body = runner.slice(runner.indexOf('  leave()'), runner.indexOf('  close()'))
+    expect(body).toContain('this.close()')
+    expect(body).not.toContain('this.finish')
+  })
+})
+
+describe('שני עשורים — the cast is on disk at both ages', () => {
+  const sheets = JSON.parse(readFileSync(join(ART, 'sheets.json'), 'utf8')) as Record<
+    string,
+    { yellowLeft: number }
+  >
+
+  it('the nineties cast was cut, and cut clean', () => {
+    const nineties = Object.keys(sheets).filter((key) => /90(-|$)/.test(key))
+    expect(nineties.length).toBeGreaterThanOrEqual(24)
+    for (const key of nineties) {
+      expect(sheets[key]?.yellowLeft, `${key} has yellow`).toBe(0)
+      expect(existsSync(join(ART, `${key}.png`)), `${key}.png missing`).toBe(true)
+    }
+  })
+
+  it('both ages of all three are present — the point is the pair, not the file', () => {
+    for (const [then, now] of [
+      ['kobi-chair', 'kobi90-paper'],
+      ['kobi-cheer', 'kobi90-cheer'],
+      ['ofir', 'ofir90-smoke'],
+      ['amit', 'amit90'],
+    ]) {
+      expect(existsSync(join(ART, `${then}.png`)), `${then} missing`).toBe(true)
+      expect(existsSync(join(ART, `${now}.png`)), `${now} missing`).toBe(true)
+    }
+  })
+
+  it('every epilogue names art that exists and is a known figure', () => {
+    for (const ending of Object.values(ENDINGS)) {
+      if (!ending.after) continue
+      for (const art of [ending.after.fromArt, ending.after.toArt]) {
+        expect(FIGURE as readonly string[], `${art} is not a figure`).toContain(art)
+        expect(existsSync(join(ART, `${art}.png`)), `${art}.png missing`).toBe(true)
+      }
+      expect(ending.after.lineHe.length).toBeGreaterThan(20)
+    }
+  })
+
+  it('the epilogue dates nothing — the caption is a span, never a year', () => {
+    const authored = readFileSync(join(ROOT, 'lib/life/content/chapter1986.ts'), 'utf8')
+    for (const ending of Object.values(ENDINGS)) {
+      if (!ending.after) continue
+      expect(/\b(19|20)\d{2}\b/.test(ending.after.lineHe), 'the epilogue names a year').toBe(false)
+    }
+    expect(authored).toContain('after?')
   })
 })
 

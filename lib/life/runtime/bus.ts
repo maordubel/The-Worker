@@ -51,14 +51,19 @@ export type LifeBusEvents = {
    * קובי`, `צא לרחוב` — is the whole of the interaction language, and it is the same
    * string on a desktop key cap and on a phone's action button.
    */
-  prompt: { verb: string; label: string } | null
+  prompt: { verb: string; label: string; locked?: boolean } | null
   /** the one line of onboarding the game shows, or null once it is done */
   teach: { id: 'move' | 'act' } | null
   toast: { text: string; tone: 'plain' | 'red' } | null
   place: { id: LocationId; title: string }
   anchor: { anchor: HistoricalAnchor; showing: boolean }
   /** the runtime asking the shell to show the closing card */
-  ending: { titleHe: string; bodyHe: string; memoryHe: string } | null
+  ending: {
+    titleHe: string
+    bodyHe: string
+    memoryHe: string
+    after?: { fromArt: string; toArt: string; lineHe: string }
+  } | null
   /** touch controls only matter on a touch device; the runtime says when they help */
   controls: { visible: boolean }
   saved: number

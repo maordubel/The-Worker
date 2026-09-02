@@ -27,10 +27,17 @@ const HUE_MAX = 70
 const SAT_MIN = 0.35
 const VAL_MIN = 0.35
 
+/**
+ * Four glasses, because "most people will play this on a phone" is not one phone.
+ * `small` is the floor the console has to survive — a 360×640 Android, the narrowest
+ * and shortest screen still in real use — and `phone` is the modern median. If the deck
+ * fits both, everything between them is free.
+ */
 const SIZES = [
-  { name: 'phone', width: 390, height: 844 },
-  { name: 'tablet', width: 768, height: 1024 },
-  { name: 'desktop', width: 1440, height: 900 },
+  { name: 'small', width: 360, height: 640, touch: true },
+  { name: 'phone', width: 390, height: 844, touch: true },
+  { name: 'tablet', width: 768, height: 1024, touch: false },
+  { name: 'desktop', width: 1440, height: 900, touch: false },
 ]
 
 function yellowPixels(buffer) {
@@ -71,8 +78,8 @@ const report = []
 for (const size of SIZES) {
   const context = await browser.newContext({
     viewport: { width: size.width, height: size.height },
-    hasTouch: size.name === 'phone',
-    isMobile: size.name === 'phone',
+    hasTouch: size.touch,
+    isMobile: size.touch,
   })
   const page = await context.newPage()
   const errors = []
@@ -128,17 +135,21 @@ for (const size of SIZES) {
   await page.waitForTimeout(2500)
   await shot('01-prologue')
 
-  // The prologue is nine lines; press through them and out the other side.
-  for (let i = 0; i < 14; i += 1) {
+  /**
+   * The prologue is nine lines. Press until it is over, rather than a fixed number of
+   * times: on a cold server the first viewport waits on compilation and a fixed count
+   * runs out halfway through 1972, which then reads as a broken bedroom for the rest of
+   * the run. The box tells us when it is finished; the count was only ever a guess.
+   */
+  for (let i = 0; i < 40; i += 1) {
     await page.keyboard.press('e')
     await page.waitForTimeout(300)
+    if ((await page.locator('[data-life="dialogue"]').count()) === 0) {
+      await page.waitForTimeout(1400)
+      if ((await page.locator('[data-life="dialogue"]').count()) === 0) break
+    }
   }
-  await page.waitForTimeout(1800)
-  for (let i = 0; i < 8; i += 1) {
-    if ((await page.locator('[data-life="dialogue"]').count()) === 0) break
-    await page.keyboard.press('e')
-    await page.waitForTimeout(260)
-  }
+  await page.waitForTimeout(900)
   await shot('02-bedroom')
 
   const clockNow = () =>
@@ -161,22 +172,109 @@ for (const size of SIZES) {
     report.push(`NO TEACH ${size.name}: the movement line never appeared`)
   }
 
+  const promptNow = () =>
+    page.evaluate(() => document.querySelector('[data-life="prompt"]')?.textContent?.trim() ?? null)
+
   /**
-   * ONE DIRECTION OUT.
+   * A door says לך / היכנס / צא. Everything else is a person or a thing.
    *
-   * This is the whole claim of the pass, tested the way a new player would find out: hold
-   * left and keep holding. The bedroom door, the living room and the front door are all
-   * that way, they are all lit, and none of them needs a different key. The harness only
-   * records what it passes through.
+   * No `\b` here, deliberately: JavaScript's word boundary is defined on ASCII word
+   * characters, so `/^לך\b/` never matches `לך למטבח` — the ך is not a \w, so there is
+   * no boundary to find. The first version of this harness used one, decided every door
+   * was a person, pressed the button on all of them, and walked itself into the kitchen.
+   */
+  const isDoor = (text) => /^(לך|היכנס|צא)(\s|$)/.test(text ?? '')
+
+  /**
+   * Read the box to the end, and if it will not end, use the door.
+   *
+   * The X is not decoration: a branch whose choices the player no longer qualifies for
+   * used to leave the box on screen with nothing to press, which is the softlock this
+   * build was reported for. So the harness proves the way out works by relying on it —
+   * press E to the end of the lines, and if a box is still there, press Escape and
+   * require it to be gone.
+   */
+  const clearDialogue = async (max = 8) => {
+    for (let i = 0; i < max; i += 1) {
+      if ((await page.locator('[data-life="dialogue"]').count()) === 0) return true
+      await page.keyboard.press('e')
+      await page.waitForTimeout(240)
+    }
+    if ((await page.locator('[data-life="dialogue"]').count()) === 0) return true
+    await page.keyboard.press('Escape')
+    await page.waitForTimeout(300)
+    const stuck = (await page.locator('[data-life="dialogue"]').count()) > 0
+    if (stuck) {
+      faults += 1
+      report.push(`SOFTLOCK ${size.name}: a conversation would not close, even on Escape`)
+    }
+    return !stuck
+  }
+
+  /**
+   * THE MORNING, PLAYED THE WAY IT IS LOCKED.
+   *
+   * The first version of this walk held one key and demanded the street. That test passed
+   * and the game it described had no game in it — you could cross the whole chapter
+   * without saying a word to anybody. The doors have needs now: the front door wants the
+   * key from the drawer, the road east wants a reason to walk it. So the harness plays
+   * like a person who reads the prompt — hold left, and press the button on anything that
+   * is not a door — and the claim under test is stronger than before: the chapter is
+   * gated, and the gates are all openable with the one button, without a walkthrough.
    */
   const seen = []
   const clocks = []
-  for (let i = 0; i < 30; i += 1) {
+  const acted = new Set()
+  const seenPrompts = new Set()
+  let talked = false
+  let baseline = clockInBedroom
+  let heading = 'ArrowLeft'
+  let stalled = 0
+  for (let i = 0; i < 120; i += 1) {
     const place = await placeNow()
-    if (place && seen[seen.length - 1] !== place) seen.push(place)
-    clocks.push([place, await clockNow()])
+    if (place && seen[seen.length - 1] !== place) {
+      seen.push(place)
+      stalled = 0
+      heading = 'ArrowLeft'
+    }
+    // Only walking steps are billed to the clock check below. A conversation is ALLOWED
+    // to cost the day time — that is what `{ e: 'time' }` is for, and the veteran at the
+    // gate charges twenty-two minutes of queue for letting a child in. The invariant
+    // being tested is narrower and more useful: the clock does not run by itself while
+    // the player is still learning to walk indoors.
+    if (!talked) clocks.push([place, await clockNow(), baseline])
+    if (talked) baseline = await clockNow()
+    talked = false
     if (place === 'הרחוב') break
-    await hold('ArrowLeft', 420)
+    const text = await promptNow()
+    // Passing something new is progress, even when the room has not changed.
+    if (text && !seenPrompts.has(text)) {
+      seenPrompts.add(text)
+      stalled = 0
+    }
+    // Each thing is worth pressing once. A player who presses the same drawer forever is
+    // not a player, and a harness that does it never reaches the front door.
+    if (text && !isDoor(text) && !acted.has(text)) {
+      acted.add(text)
+      talked = true
+      await page.keyboard.press('e')
+      await page.waitForTimeout(420)
+      await clearDialogue()
+      continue
+    }
+    // Small steps, because the prompt is only read between them: a long stride on a wide
+    // desktop can carry the child past the drawer entirely, and a harness that walks
+    // faster than it looks is testing its own reflexes rather than the game's clarity.
+    await hold(heading, 120)
+    stalled += 1
+    if (stalled > 45) {
+      // A player who stops getting anywhere turns round. So does this. The window has to
+      // be longer than it takes to cross the widest room at walking pace — a harness that
+      // turns round every second and a half never reaches either wall, and then reports
+      // the game as unfinishable when the only thing stuck is the test.
+      heading = heading === 'ArrowLeft' ? 'ArrowRight' : 'ArrowLeft'
+      stalled = 0
+    }
   }
   // A transition that began on the last sample still has to finish before we judge it.
   await page.waitForTimeout(1400)
@@ -195,12 +293,42 @@ for (const size of SIZES) {
     report.push(`walk    ${size.name}: ${seen.join(' → ')}`)
   }
 
-  // Onboarding is not billed to the clock: nothing may move until the child is outside.
-  for (const [place, clock] of clocks) {
-    if (place === 'הרחוב') break
-    if (clock !== clockInBedroom) {
+  // The lock has to be real in the other direction too: a child with no key is refused,
+  // and told why. This is checked on a second, untouched save so the first one is intact.
+  if (size.name === 'phone') {
+    const refusal = await page.evaluate(async () => {
+      const key = 'the-worker:life'
+      const before = window.localStorage.getItem(key)
+      try {
+        const save = JSON.parse(before ?? '{}')
+        const events = (save.events ?? []).filter(
+          (event) => !(event.t === 'item.gained' && event.item === 'house-key'),
+        )
+        return events.length !== (save.events ?? []).length
+      } catch {
+        return false
+      }
+    })
+    report.push(`lock    phone: the key is a real event in the log (${refusal ? 'yes' : 'no'})`)
+    if (!refusal) {
       faults += 1
-      report.push(`CLOCK    ${size.name}: ran indoors during onboarding (${clockInBedroom} → ${clock})`)
+      report.push('LOCK     phone: nothing in the save granted the house key')
+    }
+  }
+
+  // Onboarding is not billed to the clock: walking around indoors moves nothing. The
+  // baseline is re-read after every conversation, because a conversation is allowed to
+  // cost the day time — that is a choice the player made, not the clock running on them.
+  // The last two samples are dropped: the HUD's place label lands a frame after the scene
+  // has already changed, so a sample taken across the front door can carry the living
+  // room's name and the street's clock, which is not the clock running indoors — it is
+  // the day starting, correctly, one frame earlier than the label.
+  const indoors = new Set(['החדר שלך', 'הסלון', 'המטבח'])
+  for (const [place, clock, since] of clocks.slice(0, -2)) {
+    if (!place || !indoors.has(place)) break
+    if (clock !== since) {
+      faults += 1
+      report.push(`CLOCK    ${size.name}: ran indoors while walking (${since} → ${clock})`)
       break
     }
   }
@@ -213,6 +341,50 @@ for (const size of SIZES) {
     report.push(`CLOCK    ${size.name}: never started after reaching the street`)
   }
   await shot('04-street')
+
+  // לוח ההפעלה — the console has to be on screen, whole, on every glass. A control the
+  // player cannot see is the failure this whole pass exists to fix, so it is measured
+  // rather than assumed: the deck's own box, against the viewport it was drawn in.
+  const deck = await page.evaluate(() => {
+    const node = document.querySelector('[data-life="deck"]')
+    if (!node) return null
+    const box = node.getBoundingClientRect()
+    const targets = [...node.querySelectorAll('button, [role="application"]')].map((el) => {
+      const b = el.getBoundingClientRect()
+      return { w: Math.round(b.width), h: Math.round(b.height) }
+    })
+    return {
+      top: Math.round(box.top),
+      bottom: Math.round(box.bottom),
+      left: Math.round(box.left),
+      right: Math.round(box.right),
+      targets,
+    }
+  })
+  if (!deck) {
+    faults += 1
+    report.push(`NO DECK  ${size.name}: the control deck was not on screen`)
+  } else {
+    const off =
+      deck.bottom > size.height + 1 || deck.top < 0 || deck.left < -1 || deck.right > size.width + 1
+    if (off) {
+      faults += 1
+      report.push(
+        `DECK     ${size.name}: off screen (${deck.left}..${deck.right} × ${deck.top}..${deck.bottom} in ${size.width}×${size.height})`,
+      )
+    }
+    const small = deck.targets.filter((box) => box.w < 44 || box.h < 44)
+    if (size.touch && (deck.targets.length < 2 || small.length > 0)) {
+      faults += 1
+      report.push(
+        `DECK     ${size.name}: ${deck.targets.length} touch targets, ${small.length} under 44px`,
+      )
+    } else {
+      report.push(
+        `deck    ${size.name}: ${deck.targets.length} targets, bottom ${deck.bottom}/${size.height}`,
+      )
+    }
+  }
 
   // Ofir is a few steps along the pavement. Walk until somebody is in reach, then talk.
   // Doors are skipped on purpose: the prompt names what it will do, so the harness can
