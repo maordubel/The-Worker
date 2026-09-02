@@ -2,103 +2,1555 @@
  "kid": {
   "w": 166,
   "h": 593,
-  "bytes": 116112,
+  "bytes": 116254,
   "yellowLeft": 0
  },
  "kid-3q": {
   "w": 164,
   "h": 592,
-  "bytes": 115552,
+  "bytes": 115762,
   "yellowLeft": 0
  },
  "kid-side": {
   "w": 158,
   "h": 576,
-  "bytes": 92916,
+  "bytes": 93043,
   "yellowLeft": 0
  },
  "kid-side-b": {
   "w": 152,
   "h": 574,
-  "bytes": 85459,
+  "bytes": 85528,
   "yellowLeft": 0
  },
  "kid-back": {
   "w": 156,
   "h": 576,
-  "bytes": 107160,
+  "bytes": 107559,
   "yellowLeft": 0
  },
  "kid-back-b": {
   "w": 158,
   "h": 569,
-  "bytes": 104493,
+  "bytes": 105113,
   "yellowLeft": 0
  },
  "kid-walk1": {
   "w": 100,
   "h": 384,
-  "bytes": 53529,
+  "bytes": 53695,
   "yellowLeft": 0
  },
  "kid-walk2": {
   "w": 208,
   "h": 369,
-  "bytes": 67067,
+  "bytes": 67031,
   "yellowLeft": 0
  },
  "kid-walk3": {
   "w": 193,
   "h": 368,
-  "bytes": 65256,
+  "bytes": 65692,
   "yellowLeft": 0
  },
  "kid-walk4": {
   "w": 180,
   "h": 372,
-  "bytes": 64858,
+  "bytes": 65111,
   "yellowLeft": 0
  },
  "kid-walk5": {
   "w": 200,
   "h": 369,
-  "bytes": 66740,
+  "bytes": 67163,
   "yellowLeft": 0
  },
  "kid-walk6": {
   "w": 198,
   "h": 369,
-  "bytes": 66555,
+  "bytes": 66733,
   "yellowLeft": 0
  },
  "kid-walk7": {
   "w": 208,
   "h": 368,
-  "bytes": 67133,
+  "bytes": 67364,
   "yellowLeft": 0
  },
  "kid-walk8": {
   "w": 209,
   "h": 374,
-  "bytes": 67814,
+  "bytes": 68119,
   "yellowLeft": 0
  },
  "rachel-tray": {
   "w": 396,
   "h": 654,
-  "bytes": 193597,
+  "bytes": 205110,
   "yellowLeft": 0
  },
  "rachel": {
   "w": 306,
   "h": 654,
-  "bytes": 162398,
+  "bytes": 174230,
   "yellowLeft": 0
  },
  "rachel-smoke": {
   "w": 294,
   "h": 654,
-  "bytes": 151557,
+  "bytes": 156483,
+  "yellowLeft": 0
+ },
+ "ofir-arms": {
+  "w": 206,
+  "h": 597,
+  "bytes": 124844,
+  "yellowLeft": 0
+ },
+ "ofir": {
+  "w": 205,
+  "h": 599,
+  "bytes": 134871,
+  "yellowLeft": 0
+ },
+ "ofir-side": {
+  "w": 107,
+  "h": 601,
+  "bytes": 88328,
+  "yellowLeft": 0
+ },
+ "ofir-back": {
+  "w": 193,
+  "h": 598,
+  "bytes": 110635,
+  "yellowLeft": 0
+ },
+ "ofir-3q": {
+  "w": 194,
+  "h": 605,
+  "bytes": 118608,
+  "yellowLeft": 0
+ },
+ "ofir-walk": {
+  "w": 264,
+  "h": 597,
+  "bytes": 144933,
+  "yellowLeft": 0
+ },
+ "ofir-scarf": {
+  "w": 226,
+  "h": 609,
+  "bytes": 140968,
+  "yellowLeft": 0
+ },
+ "ofir-sitA": {
+  "w": 261,
+  "h": 410,
+  "bytes": 131518,
+  "yellowLeft": 0
+ },
+ "ofir-sitB": {
+  "w": 255,
+  "h": 378,
+  "bytes": 123500,
+  "yellowLeft": 0
+ },
+ "ofir-cross": {
+  "w": 326,
+  "h": 412,
+  "bytes": 130012,
+  "yellowLeft": 0
+ },
+ "ofir-sitC": {
+  "w": 300,
+  "h": 435,
+  "bytes": 156853,
+  "yellowLeft": 0
+ },
+ "ofir-crouch": {
+  "w": 331,
+  "h": 430,
+  "bytes": 164095,
+  "yellowLeft": 0
+ },
+ "amit-arms": {
+  "w": 218,
+  "h": 603,
+  "bytes": 137748,
+  "yellowLeft": 0
+ },
+ "amit": {
+  "w": 239,
+  "h": 599,
+  "bytes": 133519,
+  "yellowLeft": 0
+ },
+ "amit-back": {
+  "w": 218,
+  "h": 603,
+  "bytes": 114575,
+  "yellowLeft": 0
+ },
+ "amit-scarfstand": {
+  "w": 201,
+  "h": 603,
+  "bytes": 137402,
+  "yellowLeft": 0
+ },
+ "amit-side": {
+  "w": 286,
+  "h": 588,
+  "bytes": 124063,
+  "yellowLeft": 0
+ },
+ "amit-walk": {
+  "w": 198,
+  "h": 603,
+  "bytes": 130209,
+  "yellowLeft": 0
+ },
+ "amit-scarf": {
+  "w": 215,
+  "h": 599,
+  "bytes": 137178,
+  "yellowLeft": 0
+ },
+ "amit-sitA": {
+  "w": 251,
+  "h": 435,
+  "bytes": 123546,
+  "yellowLeft": 0
+ },
+ "amit-sitB": {
+  "w": 276,
+  "h": 421,
+  "bytes": 131835,
+  "yellowLeft": 0
+ },
+ "amit-cross": {
+  "w": 276,
+  "h": 397,
+  "bytes": 123245,
+  "yellowLeft": 0
+ },
+ "amit-sitC": {
+  "w": 250,
+  "h": 387,
+  "bytes": 105732,
+  "yellowLeft": 0
+ },
+ "amit-sitD": {
+  "w": 255,
+  "h": 434,
+  "bytes": 131254,
+  "yellowLeft": 0
+ },
+ "amit-hold": {
+  "w": 306,
+  "h": 451,
+  "bytes": 151106,
+  "yellowLeft": 0
+ },
+ "kobi90": {
+  "w": 212,
+  "h": 625,
+  "bytes": 147553,
+  "yellowLeft": 0
+ },
+ "kobi90-arms": {
+  "w": 212,
+  "h": 625,
+  "bytes": 142898,
+  "yellowLeft": 0
+ },
+ "kobi90-side": {
+  "w": 225,
+  "h": 638,
+  "bytes": 124958,
+  "yellowLeft": 0
+ },
+ "kobi90-back": {
+  "w": 225,
+  "h": 638,
+  "bytes": 137240,
+  "yellowLeft": 0
+ },
+ "kobi90-stand": {
+  "w": 249,
+  "h": 638,
+  "bytes": 149122,
+  "yellowLeft": 0
+ },
+ "kobi90-cheer": {
+  "w": 249,
+  "h": 638,
+  "bytes": 172745,
+  "yellowLeft": 0
+ },
+ "kobi90-bag": {
+  "w": 265,
+  "h": 638,
+  "bytes": 176412,
+  "yellowLeft": 0
+ },
+ "kobi90-lean": {
+  "w": 376,
+  "h": 381,
+  "bytes": 167599,
+  "yellowLeft": 0
+ },
+ "kobi90-sitA": {
+  "w": 228,
+  "h": 436,
+  "bytes": 134708,
+  "yellowLeft": 0
+ },
+ "kobi90-point": {
+  "w": 240,
+  "h": 436,
+  "bytes": 140275,
+  "yellowLeft": 0
+ },
+ "kobi90-paper": {
+  "w": 302,
+  "h": 441,
+  "bytes": 182104,
+  "yellowLeft": 0
+ },
+ "kobi90-sitB": {
+  "w": 309,
+  "h": 451,
+  "bytes": 165655,
+  "yellowLeft": 0
+ },
+ "ofir90-arms": {
+  "w": 200,
+  "h": 633,
+  "bytes": 144324,
+  "yellowLeft": 0
+ },
+ "ofir90": {
+  "w": 228,
+  "h": 632,
+  "bytes": 143630,
+  "yellowLeft": 0
+ },
+ "ofir90-side": {
+  "w": 198,
+  "h": 633,
+  "bytes": 121712,
+  "yellowLeft": 0
+ },
+ "ofir90-back": {
+  "w": 206,
+  "h": 638,
+  "bytes": 125056,
+  "yellowLeft": 0
+ },
+ "ofir90-3q": {
+  "w": 203,
+  "h": 633,
+  "bytes": 143504,
+  "yellowLeft": 0
+ },
+ "ofir90-smoke": {
+  "w": 207,
+  "h": 636,
+  "bytes": 140834,
+  "yellowLeft": 0
+ },
+ "ofir90-walk": {
+  "w": 292,
+  "h": 624,
+  "bytes": 152353,
+  "yellowLeft": 0
+ },
+ "ofir90-crouch": {
+  "w": 265,
+  "h": 397,
+  "bytes": 127735,
+  "yellowLeft": 0
+ },
+ "ofir90-point": {
+  "w": 315,
+  "h": 442,
+  "bytes": 159767,
+  "yellowLeft": 0
+ },
+ "ofir90-sitA": {
+  "w": 303,
+  "h": 443,
+  "bytes": 154267,
+  "yellowLeft": 0
+ },
+ "ofir90-sitB": {
+  "w": 298,
+  "h": 443,
+  "bytes": 142370,
+  "yellowLeft": 0
+ },
+ "ofir90-scarf": {
+  "w": 338,
+  "h": 441,
+  "bytes": 178611,
+  "yellowLeft": 0
+ },
+ "amit90": {
+  "w": 204,
+  "h": 609,
+  "bytes": 144640,
+  "yellowLeft": 0
+ },
+ "amit90-3q": {
+  "w": 214,
+  "h": 607,
+  "bytes": 142002,
+  "yellowLeft": 0
+ },
+ "amit90-side": {
+  "w": 152,
+  "h": 606,
+  "bytes": 111173,
+  "yellowLeft": 0
+ },
+ "amit90-back": {
+  "w": 203,
+  "h": 606,
+  "bytes": 137610,
+  "yellowLeft": 0
+ },
+ "amit90-turn": {
+  "w": 217,
+  "h": 607,
+  "bytes": 151571,
+  "yellowLeft": 0
+ },
+ "amit90-cheer": {
+  "w": 225,
+  "h": 596,
+  "bytes": 156213,
+  "yellowLeft": 0
+ },
+ "amit90-walk": {
+  "w": 161,
+  "h": 570,
+  "bytes": 110310,
+  "yellowLeft": 0
+ },
+ "amit90-scarf": {
+  "w": 191,
+  "h": 578,
+  "bytes": 135093,
+  "yellowLeft": 0
+ },
+ "amit90-cross": {
+  "w": 273,
+  "h": 401,
+  "bytes": 146757,
+  "yellowLeft": 0
+ },
+ "amit90-sitA": {
+  "w": 299,
+  "h": 443,
+  "bytes": 159700,
+  "yellowLeft": 0
+ },
+ "amit90-sitB": {
+  "w": 284,
+  "h": 424,
+  "bytes": 148372,
+  "yellowLeft": 0
+ },
+ "amit90-point": {
+  "w": 420,
+  "h": 443,
+  "bytes": 200002,
+  "yellowLeft": 0
+ },
+ "amit90-drum": {
+  "w": 341,
+  "h": 444,
+  "bytes": 179859,
+  "yellowLeft": 0
+ },
+ "hero80": {
+  "w": 170,
+  "h": 484,
+  "bytes": 103501,
+  "yellowLeft": 0
+ },
+ "hero80-3q": {
+  "w": 182,
+  "h": 476,
+  "bytes": 102898,
+  "yellowLeft": 0
+ },
+ "hero80-side": {
+  "w": 179,
+  "h": 472,
+  "bytes": 89645,
+  "yellowLeft": 0
+ },
+ "hero80-back": {
+  "w": 169,
+  "h": 471,
+  "bytes": 89046,
+  "yellowLeft": 0
+ },
+ "hero80-pack": {
+  "w": 182,
+  "h": 462,
+  "bytes": 96961,
+  "yellowLeft": 0
+ },
+ "hero80-walk": {
+  "w": 212,
+  "h": 452,
+  "bytes": 97608,
+  "yellowLeft": 0
+ },
+ "hero80-ball": {
+  "w": 226,
+  "h": 432,
+  "bytes": 109132,
+  "yellowLeft": 0
+ },
+ "hero80-kick": {
+  "w": 187,
+  "h": 394,
+  "bytes": 89524,
+  "yellowLeft": 0
+ },
+ "hero80-scarf": {
+  "w": 214,
+  "h": 352,
+  "bytes": 86882,
+  "yellowLeft": 0
+ },
+ "hero80-cheer": {
+  "w": 247,
+  "h": 352,
+  "bytes": 89001,
+  "yellowLeft": 0
+ },
+ "hero80-point": {
+  "w": 150,
+  "h": 341,
+  "bytes": 69900,
+  "yellowLeft": 0
+ },
+ "hero80-crouch": {
+  "w": 165,
+  "h": 340,
+  "bytes": 63910,
+  "yellowLeft": 0
+ },
+ "hero80-tie": {
+  "w": 141,
+  "h": 229,
+  "bytes": 53286,
+  "yellowLeft": 0
+ },
+ "hero80-sit": {
+  "w": 192,
+  "h": 295,
+  "bytes": 83916,
+  "yellowLeft": 0
+ },
+ "hero80-away": {
+  "w": 143,
+  "h": 352,
+  "bytes": 60821,
+  "yellowLeft": 0
+ },
+ "hero80-leave": {
+  "w": 129,
+  "h": 352,
+  "bytes": 61429,
+  "yellowLeft": 0
+ },
+ "faceHero80": {
+  "w": 117,
+  "h": 174,
+  "bytes": 30688,
+  "yellowLeft": 0
+ },
+ "faceHero80-3q": {
+  "w": 134,
+  "h": 173,
+  "bytes": 31680,
+  "yellowLeft": 0
+ },
+ "faceHero80-smile": {
+  "w": 118,
+  "h": 173,
+  "bytes": 30735,
+  "yellowLeft": 0
+ },
+ "faceHero80-shout": {
+  "w": 113,
+  "h": 174,
+  "bytes": 31181,
+  "yellowLeft": 0
+ },
+ "faceHero80-side": {
+  "w": 123,
+  "h": 173,
+  "bytes": 31102,
+  "yellowLeft": 0
+ },
+ "faceHero80-profile": {
+  "w": 127,
+  "h": 172,
+  "bytes": 29982,
+  "yellowLeft": 0
+ },
+ "faceHero80-back": {
+  "w": 115,
+  "h": 160,
+  "bytes": 23780,
+  "yellowLeft": 0
+ },
+ "propPack80": {
+  "w": 117,
+  "h": 174,
+  "bytes": 22982,
+  "yellowLeft": 0
+ },
+ "propScarf80": {
+  "w": 151,
+  "h": 181,
+  "bytes": 37860,
+  "yellowLeft": 0
+ },
+ "propBall80": {
+  "w": 69,
+  "h": 125,
+  "bytes": 10780,
+  "yellowLeft": 0
+ },
+ "hero90": {
+  "w": 171,
+  "h": 482,
+  "bytes": 102550,
+  "yellowLeft": 0
+ },
+ "hero90-3q": {
+  "w": 171,
+  "h": 480,
+  "bytes": 101052,
+  "yellowLeft": 0
+ },
+ "hero90-side": {
+  "w": 142,
+  "h": 471,
+  "bytes": 79476,
+  "yellowLeft": 0
+ },
+ "hero90-back": {
+  "w": 179,
+  "h": 480,
+  "bytes": 100644,
+  "yellowLeft": 0
+ },
+ "hero90-pack": {
+  "w": 179,
+  "h": 462,
+  "bytes": 91738,
+  "yellowLeft": 0
+ },
+ "hero90-walk": {
+  "w": 195,
+  "h": 467,
+  "bytes": 96448,
+  "yellowLeft": 0
+ },
+ "hero90-ball": {
+  "w": 212,
+  "h": 478,
+  "bytes": 125998,
+  "yellowLeft": 0
+ },
+ "hero90-kick": {
+  "w": 243,
+  "h": 452,
+  "bytes": 118076,
+  "yellowLeft": 0
+ },
+ "hero90-scarf": {
+  "w": 249,
+  "h": 352,
+  "bytes": 100654,
+  "yellowLeft": 0
+ },
+ "hero90-cheer": {
+  "w": 198,
+  "h": 352,
+  "bytes": 83695,
+  "yellowLeft": 0
+ },
+ "hero90-think": {
+  "w": 173,
+  "h": 350,
+  "bytes": 80325,
+  "yellowLeft": 0
+ },
+ "hero90-crouch": {
+  "w": 157,
+  "h": 277,
+  "bytes": 66323,
+  "yellowLeft": 0
+ },
+ "hero90-tie": {
+  "w": 171,
+  "h": 246,
+  "bytes": 58339,
+  "yellowLeft": 0
+ },
+ "hero90-sit": {
+  "w": 203,
+  "h": 312,
+  "bytes": 87063,
+  "yellowLeft": 0
+ },
+ "hero90-away": {
+  "w": 130,
+  "h": 344,
+  "bytes": 60223,
+  "yellowLeft": 0
+ },
+ "hero90-leave": {
+  "w": 155,
+  "h": 352,
+  "bytes": 64710,
+  "yellowLeft": 0
+ },
+ "faceHero90": {
+  "w": 124,
+  "h": 169,
+  "bytes": 31448,
+  "yellowLeft": 0
+ },
+ "faceHero90-3q": {
+  "w": 124,
+  "h": 169,
+  "bytes": 33334,
+  "yellowLeft": 0
+ },
+ "faceHero90-smile": {
+  "w": 135,
+  "h": 168,
+  "bytes": 34183,
+  "yellowLeft": 0
+ },
+ "faceHero90-shout": {
+  "w": 125,
+  "h": 172,
+  "bytes": 32823,
+  "yellowLeft": 0
+ },
+ "faceHero90-back": {
+  "w": 116,
+  "h": 167,
+  "bytes": 27437,
+  "yellowLeft": 0
+ },
+ "faceHero90-look": {
+  "w": 119,
+  "h": 169,
+  "bytes": 30674,
+  "yellowLeft": 0
+ },
+ "faceHero90-grin": {
+  "w": 139,
+  "h": 171,
+  "bytes": 34553,
+  "yellowLeft": 0
+ },
+ "faceHero90-shades": {
+  "w": 113,
+  "h": 172,
+  "bytes": 30451,
+  "yellowLeft": 0
+ },
+ "propScarf90": {
+  "w": 134,
+  "h": 173,
+  "bytes": 34642,
+  "yellowLeft": 0
+ },
+ "propPack90": {
+  "w": 119,
+  "h": 179,
+  "bytes": 24780,
+  "yellowLeft": 0
+ },
+ "propBall90": {
+  "w": 89,
+  "h": 93,
+  "bytes": 12716,
+  "yellowLeft": 0
+ },
+ "soldier": {
+  "w": 178,
+  "h": 504,
+  "bytes": 99588,
+  "yellowLeft": 0
+ },
+ "soldier-rifle": {
+  "w": 190,
+  "h": 500,
+  "bytes": 111743,
+  "yellowLeft": 0
+ },
+ "soldier-march": {
+  "w": 217,
+  "h": 499,
+  "bytes": 104546,
+  "yellowLeft": 0
+ },
+ "soldier-back": {
+  "w": 180,
+  "h": 502,
+  "bytes": 104393,
+  "yellowLeft": 0
+ },
+ "soldier-pack": {
+  "w": 221,
+  "h": 491,
+  "bytes": 111156,
+  "yellowLeft": 0
+ },
+ "soldier-side": {
+  "w": 177,
+  "h": 492,
+  "bytes": 101576,
+  "yellowLeft": 0
+ },
+ "soldier-aim": {
+  "w": 350,
+  "h": 405,
+  "bytes": 132112,
+  "yellowLeft": 0
+ },
+ "soldier-tired": {
+  "w": 192,
+  "h": 354,
+  "bytes": 88504,
+  "yellowLeft": 0
+ },
+ "soldier-shout": {
+  "w": 269,
+  "h": 354,
+  "bytes": 108248,
+  "yellowLeft": 0
+ },
+ "soldier-salute": {
+  "w": 230,
+  "h": 354,
+  "bytes": 92716,
+  "yellowLeft": 0
+ },
+ "soldier-sit": {
+  "w": 217,
+  "h": 354,
+  "bytes": 80898,
+  "yellowLeft": 0
+ },
+ "soldier-crate": {
+  "w": 226,
+  "h": 322,
+  "bytes": 89775,
+  "yellowLeft": 0
+ },
+ "soldier-tie": {
+  "w": 201,
+  "h": 272,
+  "bytes": 71731,
+  "yellowLeft": 0
+ },
+ "soldier-away": {
+  "w": 172,
+  "h": 354,
+  "bytes": 68850,
+  "yellowLeft": 0
+ },
+ "faceSoldier": {
+  "w": 105,
+  "h": 148,
+  "bytes": 25537,
+  "yellowLeft": 0
+ },
+ "faceSoldier-3q": {
+  "w": 117,
+  "h": 148,
+  "bytes": 26696,
+  "yellowLeft": 0
+ },
+ "faceSoldier-look": {
+  "w": 115,
+  "h": 149,
+  "bytes": 26833,
+  "yellowLeft": 0
+ },
+ "faceSoldier-smile": {
+  "w": 116,
+  "h": 149,
+  "bytes": 28182,
+  "yellowLeft": 0
+ },
+ "faceSoldier-shout": {
+  "w": 117,
+  "h": 148,
+  "bytes": 27225,
+  "yellowLeft": 0
+ },
+ "faceSoldier-side": {
+  "w": 112,
+  "h": 148,
+  "bytes": 25996,
+  "yellowLeft": 0
+ },
+ "faceSoldier-shades": {
+  "w": 117,
+  "h": 148,
+  "bytes": 27243,
+  "yellowLeft": 0
+ },
+ "faceSoldier-beret": {
+  "w": 106,
+  "h": 141,
+  "bytes": 20730,
+  "yellowLeft": 0
+ },
+ "faceSoldier-back": {
+  "w": 131,
+  "h": 152,
+  "bytes": 29994,
+  "yellowLeft": 0
+ },
+ "propBeret": {
+  "w": 54,
+  "h": 133,
+  "bytes": 6289,
+  "yellowLeft": 0
+ },
+ "soldierKitA": {
+  "w": 60,
+  "h": 138,
+  "bytes": 9734,
+  "yellowLeft": 0
+ },
+ "soldierKitB": {
+  "w": 78,
+  "h": 151,
+  "bytes": 15893,
+  "yellowLeft": 0
+ },
+ "soldierKitC": {
+  "w": 103,
+  "h": 151,
+  "bytes": 22530,
+  "yellowLeft": 0
+ },
+ "soldierKitD": {
+  "w": 94,
+  "h": 148,
+  "bytes": 17918,
+  "yellowLeft": 0
+ },
+ "sinai": {
+  "w": 204,
+  "h": 464,
+  "bytes": 97222,
+  "yellowLeft": 0
+ },
+ "sinai-run": {
+  "w": 212,
+  "h": 456,
+  "bytes": 100249,
+  "yellowLeft": 0
+ },
+ "sinai-ball": {
+  "w": 197,
+  "h": 459,
+  "bytes": 100492,
+  "yellowLeft": 0
+ },
+ "sinai-kick": {
+  "w": 272,
+  "h": 437,
+  "bytes": 100295,
+  "yellowLeft": 0
+ },
+ "sinai-cheer": {
+  "w": 236,
+  "h": 479,
+  "bytes": 103074,
+  "yellowLeft": 0
+ },
+ "sinai-point": {
+  "w": 242,
+  "h": 454,
+  "bytes": 102070,
+  "yellowLeft": 0
+ },
+ "sinai-back": {
+  "w": 126,
+  "h": 438,
+  "bytes": 55931,
+  "yellowLeft": 0
+ },
+ "sinai-civA": {
+  "w": 220,
+  "h": 308,
+  "bytes": 106181,
+  "yellowLeft": 0
+ },
+ "sinai-civB": {
+  "w": 168,
+  "h": 302,
+  "bytes": 52937,
+  "yellowLeft": 0
+ },
+ "sinai-civC": {
+  "w": 204,
+  "h": 302,
+  "bytes": 80189,
+  "yellowLeft": 0
+ },
+ "sinai-civD": {
+  "w": 207,
+  "h": 305,
+  "bytes": 71047,
+  "yellowLeft": 0
+ },
+ "sinai-bustA": {
+  "w": 305,
+  "h": 304,
+  "bytes": 97771,
+  "yellowLeft": 0
+ },
+ "sinai-bustB": {
+  "w": 250,
+  "h": 300,
+  "bytes": 62335,
+  "yellowLeft": 0
+ },
+ "faceSinai": {
+  "w": 213,
+  "h": 214,
+  "bytes": 49297,
+  "yellowLeft": 0
+ },
+ "faceSinai-b": {
+  "w": 215,
+  "h": 212,
+  "bytes": 46800,
+  "yellowLeft": 0
+ },
+ "faceSinai-side": {
+  "w": 188,
+  "h": 209,
+  "bytes": 42707,
+  "yellowLeft": 0
+ },
+ "faceSinai-look": {
+  "w": 178,
+  "h": 210,
+  "bytes": 39000,
+  "yellowLeft": 0
+ },
+ "faceSinai-shout": {
+  "w": 212,
+  "h": 217,
+  "bytes": 51565,
+  "yellowLeft": 0
+ },
+ "faceSinai-kit": {
+  "w": 208,
+  "h": 219,
+  "bytes": 50629,
+  "yellowLeft": 0
+ },
+ "faceSinai-point": {
+  "w": 275,
+  "h": 210,
+  "bytes": 57721,
+  "yellowLeft": 0
+ },
+ "tikva-run": {
+  "w": 257,
+  "h": 476,
+  "bytes": 121954,
+  "yellowLeft": 0
+ },
+ "tikva": {
+  "w": 207,
+  "h": 479,
+  "bytes": 112727,
+  "yellowLeft": 0
+ },
+ "tikva-shout": {
+  "w": 273,
+  "h": 470,
+  "bytes": 116205,
+  "yellowLeft": 0
+ },
+ "tikva-back": {
+  "w": 253,
+  "h": 472,
+  "bytes": 86518,
+  "yellowLeft": 0
+ },
+ "tikva-side": {
+  "w": 244,
+  "h": 476,
+  "bytes": 118474,
+  "yellowLeft": 0
+ },
+ "tikva-ball": {
+  "w": 246,
+  "h": 477,
+  "bytes": 107348,
+  "yellowLeft": 0
+ },
+ "tikva-away": {
+  "w": 266,
+  "h": 315,
+  "bytes": 102143,
+  "yellowLeft": 0
+ },
+ "tikva-away-back": {
+  "w": 227,
+  "h": 315,
+  "bytes": 88346,
+  "yellowLeft": 0
+ },
+ "tikva-away-smile": {
+  "w": 276,
+  "h": 315,
+  "bytes": 104075,
+  "yellowLeft": 0
+ },
+ "tikva-away-side": {
+  "w": 200,
+  "h": 315,
+  "bytes": 70975,
+  "yellowLeft": 0
+ },
+ "tikva-home": {
+  "w": 250,
+  "h": 315,
+  "bytes": 83873,
+  "yellowLeft": 0
+ },
+ "tikva-captain": {
+  "w": 246,
+  "h": 315,
+  "bytes": 83705,
+  "yellowLeft": 0
+ },
+ "tikva-civA": {
+  "w": 275,
+  "h": 224,
+  "bytes": 72605,
+  "yellowLeft": 0
+ },
+ "tikva-civB": {
+  "w": 247,
+  "h": 224,
+  "bytes": 65008,
+  "yellowLeft": 0
+ },
+ "tikva-civC": {
+  "w": 228,
+  "h": 224,
+  "bytes": 78602,
+  "yellowLeft": 0
+ },
+ "tikva-civD": {
+  "w": 244,
+  "h": 224,
+  "bytes": 74782,
+  "yellowLeft": 0
+ },
+ "tikva-third": {
+  "w": 257,
+  "h": 224,
+  "bytes": 62573,
+  "yellowLeft": 0
+ },
+ "tikva-third-back": {
+  "w": 241,
+  "h": 224,
+  "bytes": 62247,
+  "yellowLeft": 0
+ },
+ "gershon-bust": {
+  "w": 301,
+  "h": 438,
+  "bytes": 133074,
+  "yellowLeft": 0
+ },
+ "gershon": {
+  "w": 301,
+  "h": 443,
+  "bytes": 143283,
+  "yellowLeft": 0
+ },
+ "gershon-back": {
+  "w": 309,
+  "h": 443,
+  "bytes": 131448,
+  "yellowLeft": 0
+ },
+ "gershon-run": {
+  "w": 193,
+  "h": 442,
+  "bytes": 94865,
+  "yellowLeft": 0
+ },
+ "gershon-head": {
+  "w": 184,
+  "h": 417,
+  "bytes": 98785,
+  "yellowLeft": 0
+ },
+ "gershon-side": {
+  "w": 246,
+  "h": 440,
+  "bytes": 117644,
+  "yellowLeft": 0
+ },
+ "gershon-rival-look": {
+  "w": 294,
+  "h": 350,
+  "bytes": 109315,
+  "yellowLeft": 0
+ },
+ "gershon-rival-captain": {
+  "w": 325,
+  "h": 350,
+  "bytes": 116056,
+  "yellowLeft": 0
+ },
+ "gershon-rival": {
+  "w": 258,
+  "h": 350,
+  "bytes": 96019,
+  "yellowLeft": 0
+ },
+ "gershon-rival-back": {
+  "w": 293,
+  "h": 350,
+  "bytes": 94448,
+  "yellowLeft": 0
+ },
+ "gershon-rival-shout": {
+  "w": 314,
+  "h": 350,
+  "bytes": 118302,
+  "yellowLeft": 0
+ },
+ "gershon-civA": {
+  "w": 239,
+  "h": 215,
+  "bytes": 44175,
+  "yellowLeft": 0
+ },
+ "gershon-civB": {
+  "w": 259,
+  "h": 223,
+  "bytes": 47811,
+  "yellowLeft": 0
+ },
+ "gershon-civC": {
+  "w": 266,
+  "h": 224,
+  "bytes": 49282,
+  "yellowLeft": 0
+ },
+ "gershon-civD": {
+  "w": 252,
+  "h": 224,
+  "bytes": 55732,
+  "yellowLeft": 0
+ },
+ "gershon-civE": {
+  "w": 264,
+  "h": 224,
+  "bytes": 60517,
+  "yellowLeft": 0
+ },
+ "elimelech-point": {
+  "w": 234,
+  "h": 444,
+  "bytes": 101730,
+  "yellowLeft": 0
+ },
+ "elimelech-shout": {
+  "w": 263,
+  "h": 440,
+  "bytes": 98643,
+  "yellowLeft": 0
+ },
+ "elimelech-ready": {
+  "w": 274,
+  "h": 442,
+  "bytes": 92734,
+  "yellowLeft": 0
+ },
+ "elimelech-catch": {
+  "w": 356,
+  "h": 406,
+  "bytes": 107201,
+  "yellowLeft": 0
+ },
+ "elimelech-back": {
+  "w": 161,
+  "h": 441,
+  "bytes": 58741,
+  "yellowLeft": 0
+ },
+ "elimelech-claim": {
+  "w": 226,
+  "h": 442,
+  "bytes": 73760,
+  "yellowLeft": 0
+ },
+ "elimelech-civA": {
+  "w": 220,
+  "h": 320,
+  "bytes": 77376,
+  "yellowLeft": 0
+ },
+ "elimelech-civB": {
+  "w": 213,
+  "h": 320,
+  "bytes": 59973,
+  "yellowLeft": 0
+ },
+ "elimelech-civC": {
+  "w": 223,
+  "h": 320,
+  "bytes": 65423,
+  "yellowLeft": 0
+ },
+ "elimelech-civD": {
+  "w": 207,
+  "h": 320,
+  "bytes": 53127,
+  "yellowLeft": 0
+ },
+ "elimelech-civE": {
+  "w": 206,
+  "h": 320,
+  "bytes": 77070,
+  "yellowLeft": 0
+ },
+ "elimelech-civF": {
+  "w": 212,
+  "h": 320,
+  "bytes": 56094,
+  "yellowLeft": 0
+ },
+ "elimelech-civG": {
+  "w": 203,
+  "h": 320,
+  "bytes": 50611,
+  "yellowLeft": 0
+ },
+ "faceElimelech": {
+  "w": 238,
+  "h": 249,
+  "bytes": 60704,
+  "yellowLeft": 0
+ },
+ "faceElimelech-smile": {
+  "w": 242,
+  "h": 249,
+  "bytes": 59544,
+  "yellowLeft": 0
+ },
+ "faceElimelech-side": {
+  "w": 178,
+  "h": 249,
+  "bytes": 51529,
+  "yellowLeft": 0
+ },
+ "faceElimelech-look": {
+  "w": 198,
+  "h": 249,
+  "bytes": 50993,
+  "yellowLeft": 0
+ },
+ "faceElimelech-shout": {
+  "w": 202,
+  "h": 249,
+  "bytes": 54168,
+  "yellowLeft": 0
+ },
+ "faceElimelech-calm": {
+  "w": 194,
+  "h": 249,
+  "bytes": 50178,
+  "yellowLeft": 0
+ },
+ "faceElimelech-ball": {
+  "w": 257,
+  "h": 249,
+  "bytes": 73504,
+  "yellowLeft": 0
+ },
+ "keren90": {
+  "w": 270,
+  "h": 444,
+  "bytes": 160249,
+  "yellowLeft": 0
+ },
+ "keren90-side": {
+  "w": 189,
+  "h": 443,
+  "bytes": 106751,
+  "yellowLeft": 0
+ },
+ "keren90-smile": {
+  "w": 287,
+  "h": 441,
+  "bytes": 166249,
+  "yellowLeft": 0
+ },
+ "keren90-sit": {
+  "w": 280,
+  "h": 432,
+  "bytes": 158501,
+  "yellowLeft": 0
+ },
+ "keren90-arms": {
+  "w": 202,
+  "h": 434,
+  "bytes": 94344,
+  "yellowLeft": 0
+ },
+ "keren90-band": {
+  "w": 265,
+  "h": 250,
+  "bytes": 91483,
+  "yellowLeft": 0
+ },
+ "keren90-scarf": {
+  "w": 535,
+  "h": 251,
+  "bytes": 157372,
+  "yellowLeft": 0
+ },
+ "keren90-look": {
+  "w": 260,
+  "h": 250,
+  "bytes": 81014,
+  "yellowLeft": 0
+ },
+ "keren90-shout": {
+  "w": 323,
+  "h": 250,
+  "bytes": 103319,
+  "yellowLeft": 0
+ },
+ "faceKeren90": {
+  "w": 308,
+  "h": 317,
+  "bytes": 118757,
+  "yellowLeft": 0
+ },
+ "faceKeren90-b": {
+  "w": 324,
+  "h": 318,
+  "bytes": 133452,
+  "yellowLeft": 0
+ },
+ "faceKeren90-side": {
+  "w": 279,
+  "h": 318,
+  "bytes": 126864,
+  "yellowLeft": 0
+ },
+ "faceKeren90-profile": {
+  "w": 272,
+  "h": 315,
+  "bytes": 107315,
+  "yellowLeft": 0
+ },
+ "faceKeren90-smile": {
+  "w": 309,
+  "h": 311,
+  "bytes": 111098,
+  "yellowLeft": 0
+ },
+ "kobi": {
+  "w": 117,
+  "h": 523,
+  "bytes": 95323,
+  "yellowLeft": 0
+ },
+ "kobi-side": {
+  "w": 106,
+  "h": 527,
+  "bytes": 81393,
+  "yellowLeft": 0
+ },
+ "kobi-back": {
+  "w": 141,
+  "h": 522,
+  "bytes": 85015,
+  "yellowLeft": 0
+ },
+ "kobi-scarf": {
+  "w": 154,
+  "h": 527,
+  "bytes": 112816,
+  "yellowLeft": 0
+ },
+ "kobi-walk": {
+  "w": 166,
+  "h": 485,
+  "bytes": 104089,
+  "yellowLeft": 0
+ },
+ "kobi-cheer": {
+  "w": 288,
+  "h": 464,
+  "bytes": 190011,
+  "yellowLeft": 0
+ },
+ "kobi-rail": {
+  "w": 299,
+  "h": 462,
+  "bytes": 204597,
+  "yellowLeft": 0
+ },
+ "kobi-chair": {
+  "w": 341,
+  "h": 444,
+  "bytes": 218870,
+  "yellowLeft": 0
+ },
+ "kobi-bag": {
+  "w": 189,
+  "h": 459,
+  "bytes": 106073,
+  "yellowLeft": 0
+ },
+ "kobi-arms": {
+  "w": 150,
+  "h": 510,
+  "bytes": 85557,
+  "yellowLeft": 0
+ },
+ "kobi-point": {
+  "w": 200,
+  "h": 510,
+  "bytes": 139640,
   "yellowLeft": 0
  }
 }
