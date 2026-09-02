@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -11,9 +11,9 @@ import { DEFAULT_IDENTITY, ENDINGS, PROLOGUE } from '@/lib/life/content/chapter1
 import type { Conversation } from '@/lib/life/content/script'
 import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
-import { cast } from '@/lib/life/runtime/figures'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
-import { MAPS } from '@/lib/life/world/maps'
+import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
+import { BACKDROP, FIGURE, PROP } from '@/lib/life/runtime/art'
 import { meets } from '@/lib/life/world/types'
 
 /**
@@ -30,8 +30,14 @@ const ROOT = process.cwd()
 const state = () => emptyState(DEFAULT_IDENTITY, 1980)
 
 // ---------------------------------------------------------------------------------
-describe('חוק הצהוב — the world has no yellow in it', () => {
-  it('has no yellow value in the palette', () => {
+const ART = join(ROOT, 'public/life/art')
+const artManifest = JSON.parse(readFileSync(join(ART, 'manifest.json'), 'utf8')) as Record<
+  string,
+  Record<string, { w: number; h: number; bytes: number; source: string; box: number[]; deyellowed: number; yellowLeft: number }>
+>
+
+describe('חוק הצהוב — neither the palette nor the artwork has yellow in it', () => {
+  it('has no yellow value in the runtime palette', () => {
     for (const [name, colour] of Object.entries(LIFE_PALETTE)) {
       const r = (colour >> 16) & 0xff
       const g = (colour >> 8) & 0xff
@@ -40,16 +46,37 @@ describe('חוק הצהוב — the world has no yellow in it', () => {
     }
   })
 
-  it('dresses every character out of the palette and nowhere else', () => {
-    // Rule 8 has no exemption for generated artwork (rule 27). A figure that picked its
-    // own colour would be a yellow shirt one refactor away.
-    const allowed = new Set<number>(Object.values(LIFE_PALETTE))
-    for (const figure of Object.values(cast(LIFE_PALETTE))) {
-      for (const [field, value] of Object.entries(figure)) {
-        if (typeof value !== 'number' || field === 'height') continue
-        expect(allowed.has(value), `${figure.id}.${field} is not a palette colour`).toBe(true)
+  it('ships not one yellow pixel of concept art', () => {
+    // Rule 8 has no exemption for artwork and rule 27 says lossy formats put it back at
+    // decode. `scripts/life/build-art.py` rotates every pixel in the yellow hue band onto
+    // hue 33 at the same saturation and value — the badge's own treatment — and writes a
+    // palette PNG, then records the count here. A non-zero number means somebody shipped
+    // an asset without running the build.
+    let assets = 0
+    for (const group of Object.values(artManifest)) {
+      for (const [key, row] of Object.entries(group)) {
+        assets += 1
+        expect(row.yellowLeft, `${key} ships ${row.yellowLeft} yellow pixels`).toBe(0)
       }
     }
+    expect(assets).toBeGreaterThan(20)
+  })
+
+  it('has a real file behind every asset the manifest claims', () => {
+    for (const group of Object.values(artManifest)) {
+      for (const key of Object.keys(group)) {
+        expect(existsSync(join(ART, `${key}.png`)), `${key}.png is missing`).toBe(true)
+      }
+    }
+  })
+
+  it('keeps the art folder small enough to load a room at a time', () => {
+    let bytes = 0
+    for (const group of Object.values(artManifest)) {
+      for (const row of Object.values(group)) bytes += row.bytes
+    }
+    // The whole set, not the load: a scene pulls one backdrop plus its people.
+    expect(bytes / 1024 / 1024).toBeLessThan(9)
   })
 
   it('draws no raw colour literal in the runtime outside the palette file', () => {
@@ -58,46 +85,40 @@ describe('חוק הצהוב — the world has no yellow in it', () => {
       if (path.endsWith('palette.ts')) continue
       const text = readFileSync(path, 'utf8')
       const hits = [...text.matchAll(/0x[0-9a-fA-F]{6}/g)].map((match) => match[0])
-      // 0x000000 is the eyes: pure ink at an alpha, and it cannot be a hue.
       const bad = hits.filter((hit) => hit.toLowerCase() !== '0x000000')
       expect(bad, `${path} uses raw colours ${bad.join(', ')}`).toEqual([])
     }
   })
 })
 
-// ---------------------------------------------------------------------------------
-describe('אופיר, עמית, קובי — the visual canon the brief already fixed', () => {
-  const figures = cast(LIFE_PALETTE)
+describe('הקאנון החזותי — the boards decide who these people are', () => {
+  const figures = artManifest['figures'] ?? {}
 
-  it('gives Ofir a buzz cut, and only Ofir', () => {
-    expect(figures['ofir']?.hairStyle).toBe('buzz')
-    const buzzed = Object.values(figures).filter((figure) => figure.hairStyle === 'buzz')
-    expect(buzzed.map((figure) => figure.id)).toEqual(['ofir'])
+  it('cuts every core character out of the approved cast row', () => {
+    // Brief §4: the approved character identities are not a style note, they are the
+    // canon. Cutting them from the cast board rather than drawing them is what guarantees
+    // Ofir keeps his buzz cut and Amit never acquires glasses — nobody is redrawing them.
+    for (const key of ['kid', 'ofir', 'amit', 'efi', 'keren', 'kobi', 'rachel']) {
+      const row = figures[key]
+      expect(row, `${key} is not cut from any board`).toBeDefined()
+      expect(row?.source, `${key} comes from the wrong board`).toBe('stageA2')
+    }
   })
 
-  it('keeps Kobi in his approved direction', () => {
-    const kobi = figures['kobi']
-    expect(kobi?.moustache).toBe(true)
-    expect(kobi?.shirt).toBe(LIFE_PALETTE.workShirt)
-    expect(kobi?.legs).toBe(LIFE_PALETTE.denimDark)
+  it('cuts the children full-length and never crops one at the knee', () => {
+    for (const key of ['kid', 'ofir', 'amit', 'efi', 'keren']) {
+      const row = figures[key]
+      expect(row && row.h / row.w > 2.1, `${key} is not a full-length figure`).toBe(true)
+    }
   })
 
-  it('has no glasses layer at all, so Amit can never get a pair by accident', () => {
-    // Comments are prose about the rule; the rule applies to the code — the same split
-    // `tests/brand.test.ts` makes, and for the same reason.
-    const source = readFileSync(join(ROOT, 'lib/life/runtime/figures.ts'), 'utf8')
-      .replace(/\/\*[\s\S]*?\*\//g, '')
-      .replace(/^\s*\/\/.*$/gm, '')
-    expect(/glasses|spectacle/i.test(source)).toBe(false)
-    expect(source.includes('hairStyle')).toBe(true)
-  })
-
-  it('puts the child in Hapoel red', () => {
-    expect(figures['kid']?.shirt).toBe(LIFE_PALETTE.red)
+  it('never invents a figure the build did not produce', () => {
+    for (const key of FIGURE) {
+      expect(figures[key], `${key} is named by the runtime but never cut`).toBeDefined()
+    }
   })
 })
 
-// ---------------------------------------------------------------------------------
 describe('העוגן ההיסטורי — canonical, sourced, and honest about the gap', () => {
   it('resolves the chapter anchor from the archive at confidence 2', () => {
     const anchor = resolveChapterAnchor()
@@ -225,81 +246,92 @@ describe('מנוע החיים — the log is the save', () => {
 
 // ---------------------------------------------------------------------------------
 describe('העולם — every door leads somewhere that exists', () => {
-  const maps = Object.values(MAPS)
+  const scenes = ALL_SCENES
 
-  it('resolves every exit to a real map and a real spawn point', () => {
-    for (const map of maps) {
-      for (const exit of map.exits) {
-        const target = MAPS[exit.to as keyof typeof MAPS]
-        expect(target, `${map.id}/${exit.id} → ${exit.to}`).toBeDefined()
+  it('resolves every exit to a real scene and a real spawn point', () => {
+    for (const scene of scenes) {
+      for (const exit of scene.exits) {
+        const target = SCENE[exit.to as keyof typeof SCENE]
+        expect(target, `${scene.id}/${exit.id} → ${exit.to}`).toBeDefined()
         expect(
           target && exit.spawn in target.spawns,
-          `${map.id}/${exit.id} → ${exit.to}:${exit.spawn}`,
+          `${scene.id}/${exit.id} → ${exit.to}:${exit.spawn}`,
         ).toBe(true)
       }
     }
   })
 
-  it('spawns nobody inside a wall', () => {
-    for (const map of maps) {
-      for (const [name, point] of Object.entries(map.spawns)) {
-        for (const solid of map.solids) {
-          const inside =
-            point.x > solid.x &&
-            point.x < solid.x + solid.w &&
-            point.y > solid.y &&
-            point.y < solid.y + solid.h
-          expect(inside, `${map.id}:${name} spawns inside a solid`).toBe(false)
-        }
+  it('spawns everybody inside the walk band', () => {
+    // A spawn above the band puts the child on a wall; below it puts them off the
+    // painting. Both are invisible in a screenshot and obvious in ten seconds of play.
+    for (const scene of scenes) {
+      for (const [name, point] of Object.entries(scene.spawns)) {
+        expect(point.x > 0 && point.x < 1, `${scene.id}:${name} x`).toBe(true)
+        expect(
+          point.y >= scene.band.far - 0.02 && point.y <= scene.band.near + 0.02,
+          `${scene.id}:${name} y ${point.y} outside band ${scene.band.far}..${scene.band.near}`,
+        ).toBe(true)
       }
     }
   })
 
-  it('keeps every prop, person and spawn inside the map', () => {
-    for (const map of maps) {
-      for (const prop of map.props) {
-        expect(prop.x >= 0 && prop.x + prop.w <= map.width, `${map.id}/${prop.id} is off the map`).toBe(true)
+  it('keeps every actor and hotspot on the painting', () => {
+    for (const scene of scenes) {
+      for (const actor of scene.actors) {
+        expect(actor.x > 0 && actor.x < 1 && actor.y > 0.4 && actor.y < 1.01, `${scene.id}/${actor.id}`).toBe(true)
+        expect(actor.size > 0.05 && actor.size < 0.8, `${scene.id}/${actor.id} size`).toBe(true)
       }
-      for (const npc of map.npcs) {
-        expect(npc.x > 0 && npc.x < map.width && npc.y > 0 && npc.y < map.height, `${map.id}/${npc.id}`).toBe(true)
+      for (const spot of scene.hotspots) {
+        expect(spot.x > 0 && spot.x < 1 && spot.y > 0.4 && spot.y < 1.01, `${scene.id}/${spot.id}`).toBe(true)
+      }
+    }
+  })
+
+  it('names only art that the build script actually produced', () => {
+    const backdrops = new Set<string>(BACKDROP)
+    const figures = new Set<string>(FIGURE)
+    const props = new Set<string>(PROP)
+    for (const scene of scenes) {
+      expect(backdrops.has(scene.art), `${scene.id} → ${scene.art}`).toBe(true)
+      if (scene.arrival) expect(backdrops.has(scene.arrival.art), `${scene.id} arrival`).toBe(true)
+      for (const actor of scene.actors) {
+        expect(figures.has(actor.figure), `${scene.id}/${actor.id} → ${actor.figure}`).toBe(true)
+      }
+      for (const spot of scene.hotspots) {
+        if (spot.prop) expect(props.has(spot.prop.key), `${scene.id}/${spot.id} → ${spot.prop.key}`).toBe(true)
       }
     }
   })
 
   it('points every interaction at a conversation that exists', () => {
-    for (const map of maps) {
-      for (const prop of map.props) {
-        if (!prop.act) continue
-        expect(DIALOGUE[prop.act], `${map.id}/${prop.id} → ${prop.act}`).toBeDefined()
+    for (const scene of scenes) {
+      for (const spot of scene.hotspots) {
+        expect(DIALOGUE[spot.act], `${scene.id}/${spot.id} → ${spot.act}`).toBeDefined()
       }
-      for (const npc of map.npcs) {
-        if (!npc.talk) continue
-        expect(DIALOGUE[npc.talk], `${map.id}/${npc.id} → ${npc.talk}`).toBeDefined()
+      for (const actor of scene.actors) {
+        if (!actor.talk) continue
+        expect(DIALOGUE[actor.talk], `${scene.id}/${actor.id} → ${actor.talk}`).toBeDefined()
       }
     }
   })
 
   it('walks from the bedroom to the terrace', () => {
-    // The vertical slice is only a slice if it is connected. This is the whole of brief
-    // §30's flow reduced to a graph search: every location must be reachable from the
-    // room the game starts in.
     const seen = new Set<string>(['bedroom'])
     const queue = ['bedroom']
     while (queue.length > 0) {
-      const id = queue.shift() as keyof typeof MAPS
-      for (const exit of MAPS[id]?.exits ?? []) {
+      const id = queue.shift() as keyof typeof SCENE
+      for (const exit of SCENE[id]?.exits ?? []) {
         if (seen.has(exit.to)) continue
         seen.add(exit.to)
         queue.push(exit.to)
       }
     }
-    for (const map of maps) {
-      expect(seen.has(map.id), `${map.id} is unreachable from the bedroom`).toBe(true)
+    for (const scene of scenes) {
+      expect(seen.has(scene.id), `${scene.id} is unreachable from the bedroom`).toBe(true)
     }
   })
 })
 
-// ---------------------------------------------------------------------------------
 describe('השיחות — a conversation always has a way out', () => {
   const conversations = Object.values(DIALOGUE) as Conversation[]
 
