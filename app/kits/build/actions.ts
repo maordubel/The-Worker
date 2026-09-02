@@ -1,12 +1,18 @@
 'use server'
 
-import { gradeKitBuild, type KitBuildVerdict } from '@/lib/game/kitBuild'
+import { gradeKitPuzzle, type KitVerdict, type PartKind } from '@/lib/game/kitBuild'
 
-/** Server authority: the season's real kit is derived here from the seed. */
-export async function submitKitBuild(
+/**
+ * The grade happens on the server, from the seed (rule 4).
+ *
+ * The client is dealt drawers of parts with hashed ids and no marker of which one is
+ * right; the answer is never in the payload, so the only way to know is to place a part
+ * and ask. `placed` is a map of kind → part id, which is exactly what the table holds.
+ */
+export async function submitKit(
   seed: number,
   index: number,
-  picked: Record<string, string>,
-): Promise<KitBuildVerdict | null> {
-  return gradeKitBuild(seed, index, picked)
+  placed: Partial<Record<PartKind, string>>,
+): Promise<KitVerdict | null> {
+  return gradeKitPuzzle(seed, index, placed)
 }

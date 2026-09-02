@@ -22,6 +22,11 @@ export type SeasonKit = {
   variant: 'home' | 'away' | 'third'
   noteHe: string
   spec: KitSpec
+  /** Carried through from the archive row, so a screen that draws a shirt can say
+   *  which photograph it was read off (rule 16 — showing the source is the product). */
+  sourceTitle: string
+  sourceUrl: string | null
+  confidence: number
 }
 
 /**
@@ -55,6 +60,9 @@ export function seasonKits(): SeasonKit[] {
     seasonLabel: row.seasonLabel,
     variant: row.variant,
     noteHe: row.noteHe,
+    sourceTitle: row.sourceTitle,
+    sourceUrl: row.sourceUrl,
+    confidence: row.confidence,
     spec: {
       ...DEFAULT_SPEC,
       seasonLabel: row.seasonLabel,

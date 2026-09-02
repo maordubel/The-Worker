@@ -1,14 +1,12 @@
 /**
- * TOMBSTONE — retired 1.9.2026. Gate 4 is now `KitBuildRun.tsx`.
+ * TOMBSTONE · מצבה — retired when gate 4 became משחק המדים (the assembly game).
  *
- * This file shipped for one day as "which season is this kit". Gate 4 is now the
- * reverse — you are given the season and you build the kit — so the component was
- * replaced and its server action renamed from `submitKitGuess` to `submitKitBuild`.
+ * The screen this file held asked three multiple-choice questions in sequence. It is
+ * replaced by `KitGameRun.tsx`, which assembles one shirt from five parts.
  *
- * It is left here inert because deleting it was the mistake. A tree that still holds
- * the old file would import an action that no longer exists, which is the same red
- * deploy that has already happened twice. A retired file always compiles.
- *
- * Exports nothing, imports nothing.
+ * Kept as an inert file rather than deleted: deltas reach the repo through GitHub's web
+ * upload, which adds and overwrites but never deletes, so a removed file with live
+ * imports keeps failing the deploy long after the local tree is clean (rule 26). This
+ * imports nothing and exports nothing anyone renders.
  */
 export {}

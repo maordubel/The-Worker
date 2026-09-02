@@ -19,8 +19,10 @@ app/goal/actions.ts
 app/goal/page.tsx
 app/kits/KitDesigner.tsx
 app/kits/KitGallery.tsx
+app/kits/KitWing.tsx
 app/kits/build/KitBuildRun.tsx
 app/kits/build/KitChallengeBoard.tsx
+app/kits/build/KitGameRun.tsx
 app/kits/build/KitRun.tsx
 app/kits/build/actions.ts
 app/kits/build/page.tsx
@@ -35,6 +37,7 @@ app/not-found.tsx
 app/page.tsx
 app/polls/BallotSheet.tsx
 app/polls/page.tsx
+app/qa/marks/page.tsx
 app/qa/story/StoryProof.tsx
 app/qa/story/page.tsx
 app/tik/MemberBook.tsx
@@ -57,8 +60,10 @@ components/ads/AdSlot.tsx
 components/ads/Analytics.tsx
 components/gates/GatePlate.tsx
 components/hate/EnemyPlate.tsx
+components/kit/KitPlate.tsx
 components/kit/KitShirt.tsx
 components/kit/KitStrip.tsx
+components/kit/MakerMark.tsx
 components/play/Burst.tsx
 components/play/Confetti.tsx
 components/play/HUD.tsx
@@ -99,6 +104,7 @@ lib/game/goal-zones.ts
 lib/game/goal.ts
 lib/game/hate-run.ts
 lib/game/hate.ts
+lib/game/kit-build-run.ts
 lib/game/kitBuild.ts
 lib/game/kitChallenge.ts
 lib/game/kitRun.ts
@@ -117,6 +123,9 @@ lib/game/trivia.ts
 lib/gates.ts
 lib/i18n.ts
 lib/isYellow.ts
+lib/kit/catalog.ts
+lib/kit/collection.ts
+lib/kit/crestMarks.ts
 lib/kit/seasons.ts
 lib/kit/spec.ts
 lib/polls/ballot.ts

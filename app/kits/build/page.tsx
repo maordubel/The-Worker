@@ -1,31 +1,29 @@
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { buildKitBuildRound } from '@/lib/game/kitBuild'
-import { RUN_LENGTH } from '@/lib/game/session'
+import { dealKitRound, kitPuzzleCount } from '@/lib/game/kitBuild'
+import { KIT_ROUND } from '@/lib/game/kit-build-run'
 import { t } from '@/lib/i18n'
-import { KitBuildRun } from './KitBuildRun'
+
+import { KitGameRun } from './KitGameRun'
 
 /**
- * שער 4 — חידון מדים לפי עונה.
+ * שער 4 — משחק המדים.
  *
- * The season is the QUESTION and the kit is the answer, so the shirt leaves the server
- * with the asked layers already stripped out and the grading happens in a server action
- * from the seed. What the client gets is a half-dressed shirt and a year.
+ * The season is the question and the kit is the answer, so the shirt leaves the server
+ * already stripped of all five graded parts and the grading happens in a server action
+ * from the seed (rule 4). What the client gets is a blank shirt, a year, and fifteen
+ * parts with hashed ids — none of which says which one is right.
  */
-export default function KitBuildPage({ searchParams }: { searchParams: { seed?: string } }) {
+export default function KitGamePage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 1
-  const questions = buildKitBuildRound(seed)
+  const puzzles = dealKitRound(seed)
 
   return (
-    <Screen
-      title={t('screen.kitChallenge.title')}
-      sub={t('screen.kitChallenge.sub')}
-      chrome={false}
-    >
-      {questions.length >= RUN_LENGTH ? (
+    <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false}>
+      {kitPuzzleCount() >= KIT_ROUND ? (
         <>
-          <KitBuildRun questions={questions} seed={seed} />
+          <KitGameRun puzzles={puzzles} seed={seed} />
           <ReportLink />
         </>
       ) : (

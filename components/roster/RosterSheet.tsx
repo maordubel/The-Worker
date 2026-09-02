@@ -51,7 +51,7 @@ export function RosterSheet({
   )
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-ink/70" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-ink/70" role="dialog" aria-modal="true">
       <button type="button" aria-label={t('xi.close')} className="flex-1" onClick={onClose} />
       <div className="max-h-[76vh] animate-slam overflow-y-auto border-t-rule border-ink bg-sheet">
         <div className="sticky top-0 z-10 border-b-hair border-ink bg-sheet px-4 pb-2 pt-3">
