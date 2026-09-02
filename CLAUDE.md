@@ -14,8 +14,19 @@ Read `docs/00-architecture.md` before changing anything structural.
 4. **Answers never reach the client.** `trivia_answer` has RLS with no read policy.
    Grading happens in `rpc_submit_answer` (`SECURITY DEFINER`, idempotency key).
 5. **`media.usable_in_app` stays false** until rights are settled. The DB enforces it.
-6. **Only `(כדורגל)` content.** The source wiki also covers basketball — filter and
-   assert it in every ingest report.
+6. **Strict sport isolation.** Red-Fans contains both football and basketball. Football
+   ingestion may accept only records explicitly classified as `football`; basketball
+   ingestion may accept only records explicitly classified as `basketball`. `unknown` or
+   mixed records enter neither. The two sports must never share canonical match, squad or
+   competition records. THE WORKER LIFE may consume both sports through explicit
+   sport-scoped canonical references.
+   **The gate runs before every route, not before most of them.** `acceptFootballPage`
+   sat in front of the schedule, season and round parsers and not in front of the squad
+   categories, on the reasoning that a category page has no body to classify. A corpus
+   containing `קטגוריה:סגל הפועל ת"א (כדורסל) 1980/81` walked past it and put a
+   basketball player into a football squad — eleven characters in a page title. The gate
+   classifies on title, categories AND body, so it catches this; what it cannot do is
+   catch a route that never calls it.
 7. **Hebrew names are matched through `entity_alias`, never fuzzily.**
 8. **Design tokens only, in TWO scoped systems.**
    - **The shell** is **שערי הפועל** — a two-plate screenprint. Vermilion `--red`
@@ -382,3 +393,35 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     after the walk. **What inversion cannot know is inbound links from pages that were
     never imported — a partial walk yields partial backlinks, and that is stated rather
     than papered over.**
+
+35. **A natural key deduplicates. A stable id is what gets PERSISTED.**
+    `MatchNaturalKey` is `sport|season|competition|home|away|stage` — the tuple the
+    schema already declares unique and `match-events.json` already keys on. It is derived
+    from the record's own fields, which is what makes it right for ingestion and wrong
+    for anything stored: normalise a club slug, correct a misread stage, and the key
+    changes.
+    `CanonicalMatchId` (`lib/canon/matchId.ts`) is opaque and minted once. On a
+    correction the id stays, the new key becomes `naturalKey`, and the superseded key
+    joins `aliases` — so re-importing the uncorrected source resolves to the same match
+    instead of minting a duplicate. `scripts/ingest/lib/matchIds.ts` is the only thing
+    allowed to mint one, `content/manual/match-ids.json` is the registry, and
+    `--write-ids` is opt-in because minting is one-way.
+    **`sport` leads the natural key** because a club slug is unique only within a sport
+    (`club_slug_sport_idx on club (slug, sport)`) — `הפועל-תל-אביב` names two clubs.
+    **THE WORKER LIFE persists ids, never keys.** A saved life outlives many corrections
+    to the archive under it; a life holding `football|1980/81|ליגה-לאומית|…` would lose
+    that memory the day somebody fixed the competition slug. `m_9f2c0a41b7d3` cannot.
+
+36. **The corpus is not the canon, and the step between them is a parser pass over
+    disk.** `sources/wiki-corpus.ts` fetches pages; `sources/redfans-canon.ts` routes
+    them to parsers and produces canonical rows; nothing in that second pass touches the
+    network, so a parser change re-runs for free and a fact is always traceable to the
+    revision it came from. Routing is by TITLE, because on this wiki the title states the
+    shape: `לוח משחקים (כדורגל) 1980/81` is a schedule table,
+    `קטגוריה:סגל … 1980/81` is a squad whose members are pages (not a table — the brief's
+    headline finding, and the reason the old table parser would have reported all 98
+    squad categories as unreadable), `עונת 1980/81 (כדורגל) מחזור 12` is one match.
+    **Home and away are never defaulted.** A schedule that names only the opponent must
+    mark בית/חוץ; a row that does neither is skipped and reported. Putting Hapoel at home
+    by default would invent the half of a match's identity that decides which fixture it
+    is.

@@ -96,6 +96,7 @@ components/ui/TabBar.tsx
 lib/ads.ts
 lib/brand.ts
 lib/brand/yellowExemptions.ts
+lib/canon/matchId.ts
 lib/game/allTimeXI.ts
 lib/game/archive.ts
 lib/game/blackfile.ts

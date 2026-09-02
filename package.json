@@ -16,7 +16,8 @@
     "wiki:corpus": "tsx scripts/ingest/corpus-cli.ts",
     "story:overlap": "node scripts/brand/story-overlap.mjs",
     "story:cards": "node scripts/brand/story-cards.mjs",
-    "qa:sweep": "node scripts/brand/qa-sweep.mjs"
+    "qa:sweep": "node scripts/brand/qa-sweep.mjs",
+    "wiki:canon": "tsx scripts/ingest/canon-cli.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
