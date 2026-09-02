@@ -1,0 +1,104 @@
+{
+ "kid": {
+  "w": 166,
+  "h": 593,
+  "bytes": 116112,
+  "yellowLeft": 0
+ },
+ "kid-3q": {
+  "w": 164,
+  "h": 592,
+  "bytes": 115552,
+  "yellowLeft": 0
+ },
+ "kid-side": {
+  "w": 158,
+  "h": 576,
+  "bytes": 92916,
+  "yellowLeft": 0
+ },
+ "kid-side-b": {
+  "w": 152,
+  "h": 574,
+  "bytes": 85459,
+  "yellowLeft": 0
+ },
+ "kid-back": {
+  "w": 156,
+  "h": 576,
+  "bytes": 107160,
+  "yellowLeft": 0
+ },
+ "kid-back-b": {
+  "w": 158,
+  "h": 569,
+  "bytes": 104493,
+  "yellowLeft": 0
+ },
+ "kid-walk1": {
+  "w": 100,
+  "h": 384,
+  "bytes": 53529,
+  "yellowLeft": 0
+ },
+ "kid-walk2": {
+  "w": 208,
+  "h": 369,
+  "bytes": 67067,
+  "yellowLeft": 0
+ },
+ "kid-walk3": {
+  "w": 193,
+  "h": 368,
+  "bytes": 65256,
+  "yellowLeft": 0
+ },
+ "kid-walk4": {
+  "w": 180,
+  "h": 372,
+  "bytes": 64858,
+  "yellowLeft": 0
+ },
+ "kid-walk5": {
+  "w": 200,
+  "h": 369,
+  "bytes": 66740,
+  "yellowLeft": 0
+ },
+ "kid-walk6": {
+  "w": 198,
+  "h": 369,
+  "bytes": 66555,
+  "yellowLeft": 0
+ },
+ "kid-walk7": {
+  "w": 208,
+  "h": 368,
+  "bytes": 67133,
+  "yellowLeft": 0
+ },
+ "kid-walk8": {
+  "w": 209,
+  "h": 374,
+  "bytes": 67814,
+  "yellowLeft": 0
+ },
+ "rachel-tray": {
+  "w": 396,
+  "h": 654,
+  "bytes": 193597,
+  "yellowLeft": 0
+ },
+ "rachel": {
+  "w": 306,
+  "h": 654,
+  "bytes": 162398,
+  "yellowLeft": 0
+ },
+ "rachel-smoke": {
+  "w": 294,
+  "h": 654,
+  "bytes": 151557,
+  "yellowLeft": 0
+ }
+}
