@@ -99,9 +99,6 @@
   "screen.timeline.title": "ציר הזמן",
   "screen.timeline.sub": "الخط الزمني · TIMELINE",
   "timeline.note": "לחץ על הרווח שאליו הקלף שייך. גם אם טעית — הקלף נכנס למקום האמיתי שלו, כדי שהציר תמיד יהיה נכון.",
-  "timeline.submit": "שלח לאימות",
-  "timeline.up": "העבר למעלה",
-  "timeline.down": "העבר למטה",
   "empty.timeline": "אין מספיק אירועים מתוארכים",
   "empty.timeline.body": "צריך חמישה אירועים בוודאות 2 ומעלה עם תאריך מלא.",
   "mode.timeline": "ציר הזמן",
@@ -465,10 +462,9 @@
   "poll.cta": "תמלא פתק משלך",
   "poll.pickNumber": "בחר מספר",
   "poll.pickPosition": "בחר עמדה",
-  "poll.pickPlayer": "בחר שחקן",
   "poll.done": "הפתק מלא",
-  "poll.sealed": "חתום",
   "share.msg.polls": "מילאתי את פתק ההצבעה של הפועל.\nהשוער, הבלם, החלוץ — הכל בפנים.\nבוא תמלא אחד משלך ותראה אם אנחנו מסכימים.",
   "poll.challenge": "הפתק שלך מחכה",
-  "share.dare.polls": "הקישור פותח פתק ריק. מי שפותח אותו מצביע בעצמו — ואז אפשר לריב."
+  "share.dare.polls": "הקישור פותח פתק ריק. מי שפותח אותו מצביע בעצמו — ואז אפשר לריב.",
+  "intro.skip": "דלג"
 }

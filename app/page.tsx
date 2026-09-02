@@ -1,6 +1,7 @@
 import { BannerCloth } from '@/components/ui/BannerCloth'
 import { Screen } from '@/components/ui/Screen'
 import { GatePlate } from '@/components/gates/GatePlate'
+import { Intro } from '@/components/ui/Intro'
 import { GATES, wallOrder } from '@/lib/gates'
 import { t } from '@/lib/i18n'
 
@@ -19,6 +20,9 @@ import { t } from '@/lib/i18n'
 export default function BloomfieldPage() {
   return (
     <Screen title={t('screen.home.title')} sub={t('screen.home.sub')}>
+      {/* An overlay, not a route: the wall below is already rendered and complete, so
+          the opening never stands between a shared link and the gates. */}
+      <Intro />
       <section aria-label={t('wall.chooseGate')} className="mt-stack">
         <div className="flex items-baseline justify-between gap-3">
           <p className="font-display text-[15px] text-ink">{t('wall.chooseGate')}</p>

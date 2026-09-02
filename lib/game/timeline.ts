@@ -44,6 +44,13 @@ import { TIMELINE_LENGTH, type BlindCard, type DatedCard } from './timeline-run'
  *
  * A hash keeps it deterministic (the board is re-derived from the seed on every grade,
  * so ids must be stable across calls) while carrying no information at all.
+ *
+ * **The date goes INTO the key, precisely because the key is hashed.** The first
+ * version keyed a match on `season:awayClub`, which is not unique: Hapoel played four
+ * matches in 2001/02 recorded with itself as the away side, and the Salzburg tie has two
+ * legs. Nine cards collapsed onto three ids, and seed 95 dealt a nine-card run that
+ * could never be finished — the last card had no verdict. Hashing is what makes it safe
+ * to key on the one field that is guaranteed to differ.
  */
 function publicId(key: string): string {
   return createHash('sha256').update(key).digest('hex').slice(0, 12)
@@ -76,7 +83,7 @@ function pool(): DatedCard[] {
   for (const moment of archive.moments) {
     if (!moment.happenedOn) continue
     out.push({
-      id: publicId(`moment:${moment.slug}`),
+      id: publicId(`moment:${moment.slug}:${moment.happenedOn}`),
       title: moment.titleHe,
       hint: safeHint(moment.sourceTitle),
       on: moment.happenedOn,
@@ -86,7 +93,7 @@ function pool(): DatedCard[] {
   for (const match of archive.matches) {
     if (!match.playedOn) continue
     out.push({
-      id: publicId(`match:${match.seasonLabel}:${match.awayClubSlug}`),
+      id: publicId(`match:${match.seasonLabel}:${match.homeClubSlug}:${match.awayClubSlug}:${match.playedOn}`),
       title: matchLine(
         nameOf.club(match.homeClubSlug),
         match.homeScore,
@@ -121,7 +128,7 @@ function pool(): DatedCard[] {
   for (const grievance of archive.grievances) {
     if (!grievance.happenedOn || grievance.dateConfirmed !== true) continue
     out.push({
-      id: publicId(`grievance:${grievance.slug}`),
+      id: publicId(`grievance:${grievance.slug}:${grievance.happenedOn}`),
       title: grievance.titleHe,
       hint: safeHint(grievance.sourceTitle),
       on: grievance.happenedOn,
@@ -136,7 +143,16 @@ function pool(): DatedCard[] {
     if (YEAR.test(item.title)) continue
     if (!byDate.has(item.on)) byDate.set(item.on, item)
   }
-  return [...byDate.values()].sort((a, b) => a.on.localeCompare(b.on))
+
+  // And one card per ID, structurally, rather than because the keys above happen to be
+  // unique. They did not: a duplicate id dealt a run that could not be finished, and it
+  // took a sweep of three hundred seeds to see it because it only bites when the
+  // shuffle draws both halves of a collision. Uniqueness is enforced here, once, so no
+  // future key can reintroduce it.
+  const byId = new Map<string, DatedCard>()
+  for (const item of byDate.values()) if (!byId.has(item.id)) byId.set(item.id, item)
+
+  return [...byId.values()].sort((a, b) => a.on.localeCompare(b.on))
 }
 
 export function timelineAvailable(): boolean {
@@ -160,7 +176,15 @@ function runCards(seed: number): DatedCard[] {
   const drawn = shuffle(all, rng(seed)).slice(0, TIMELINE_LENGTH + 1)
   const byDate = [...drawn].sort((a, b) => a.on.localeCompare(b.on))
   const middle = byDate[Math.floor(byDate.length / 2)] as DatedCard
-  return [middle, ...drawn.filter((card) => card.id !== middle.id)]
+
+  // The anchor is removed by POSITION, not by matching its id. Filtering on equality
+  // means one duplicate id removes two cards and the run is dealt a card short — which
+  // is exactly what happened, and it is worth being immune to it here as well as
+  // preventing it in `pool()`. Two defences, because a run that cannot be finished is
+  // the worst failure this mode has.
+  const anchorAt = drawn.indexOf(middle)
+  const rest = drawn.filter((_, index) => index !== anchorAt)
+  return [middle, ...rest]
 }
 
 function blind({ id, title, hint }: DatedCard): BlindCard {

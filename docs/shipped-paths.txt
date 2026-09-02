@@ -76,6 +76,7 @@ components/ui/BannerCloth.tsx
 components/ui/BuiltByDubel.tsx
 components/ui/EmptyState.tsx
 components/ui/Floodlights.tsx
+components/ui/Intro.tsx
 components/ui/KitPreview.tsx
 components/ui/LampGrid.tsx
 components/ui/Logo.tsx
@@ -89,6 +90,7 @@ components/ui/Stamp.tsx
 components/ui/TabBar.tsx
 lib/ads.ts
 lib/brand.ts
+lib/brand/yellowExemptions.ts
 lib/game/allTimeXI.ts
 lib/game/archive.ts
 lib/game/blackfile.ts

@@ -389,6 +389,22 @@ select {
   .confetti, .animate-wipe { animation: none; opacity: 0 }
 }
 
+/* יציאת המסך הפותח — the intro getting out of the way.
+   It lifts and fades rather than cross-fading: a cross-fade puts the wall and the pitch
+   on screen at the same weight for a moment and both read as ghosts. Lifting says the
+   sheet was pulled off the ground, which is the same gesture every plate in this app
+   uses. 420ms, matched to the timeout in `Intro.tsx` — a mismatch there leaves either a
+   flash of ink or a frozen frame. */
+@keyframes liftOff {
+  from { opacity: 1; transform: translateY(0) }
+  to   { opacity: 0; transform: translateY(-3%) }
+}
+.animate-liftOff { animation: liftOff 420ms cubic-bezier(.65,0,.35,1) both }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-liftOff { animation: none; opacity: 0 }
+}
+
 /* ============================================================================
    שחזור השער — the pitch
    ----------------------------------------------------------------------------
