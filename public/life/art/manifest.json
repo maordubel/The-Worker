@@ -3,7 +3,7 @@
   "living": {
    "w": 1105,
    "h": 737,
-   "bytes": 1435020,
+   "bytes": 1452083,
    "source": "livingRoom",
    "box": [
     0,
@@ -17,7 +17,7 @@
   "bedroom": {
    "w": 543,
    "h": 417,
-   "bytes": 242826,
+   "bytes": 244674,
    "source": "stageAenv",
    "box": [
     166,
@@ -31,7 +31,7 @@
   "kitchen": {
    "w": 372,
    "h": 450,
-   "bytes": 183489,
+   "bytes": 186331,
    "source": "stageA2",
    "box": [
     344,
@@ -45,7 +45,7 @@
   "street": {
    "w": 1337,
    "h": 523,
-   "bytes": 1001752,
+   "bytes": 1006931,
    "source": "stageAenv",
    "box": [
     486,
@@ -53,13 +53,13 @@
     1094,
     268
    ],
-   "deyellowed": 284654,
+   "deyellowed": 232230,
    "yellowLeft": 0
   },
   "pitch": {
    "w": 1068,
    "h": 530,
-   "bytes": 758020,
+   "bytes": 773389,
    "source": "stageAenv",
    "box": [
     1110,
@@ -67,13 +67,13 @@
     1521,
     238
    ],
-   "deyellowed": 365353,
+   "deyellowed": 325474,
    "yellowLeft": 0
   },
   "kiosk": {
    "w": 518,
    "h": 476,
-   "bytes": 243479,
+   "bytes": 250286,
    "source": "assets1",
    "box": [
     604,
@@ -81,13 +81,13 @@
     766,
     886
    ],
-   "deyellowed": 55676,
+   "deyellowed": 43187,
    "yellowLeft": 0
   },
   "approach": {
    "w": 1227,
    "h": 404,
-   "bytes": 754884,
+   "bytes": 772884,
    "source": "bloom",
    "box": [
     406,
@@ -95,13 +95,13 @@
     964,
     218
    ],
-   "deyellowed": 136081,
+   "deyellowed": 112358,
    "yellowLeft": 0
   },
   "gate7": {
    "w": 1205,
    "h": 451,
-   "bytes": 761014,
+   "bytes": 780090,
    "source": "bloom",
    "box": [
     975,
@@ -109,13 +109,13 @@
     1523,
     235
    ],
-   "deyellowed": 144931,
+   "deyellowed": 137073,
    "yellowLeft": 0
   },
   "ground": {
    "w": 1066,
    "h": 447,
-   "bytes": 864389,
+   "bytes": 863622,
    "source": "venues",
    "box": [
     12,
@@ -123,13 +123,13 @@
     865,
     450
    ],
-   "deyellowed": 136161,
+   "deyellowed": 109304,
    "yellowLeft": 0
   },
   "corridor": {
    "w": 1111,
    "h": 543,
-   "bytes": 742332,
+   "bytes": 771283,
    "source": "bloom",
    "box": [
     0,
@@ -137,13 +137,13 @@
     397,
     546
    ],
-   "deyellowed": 222009,
+   "deyellowed": 219885,
    "yellowLeft": 0
   },
   "reveal": {
    "w": 1348,
    "h": 470,
-   "bytes": 768934,
+   "bytes": 796436,
    "source": "bloom",
    "box": [
     404,
@@ -151,13 +151,13 @@
     966,
     548
    ],
-   "deyellowed": 135381,
+   "deyellowed": 120523,
    "yellowLeft": 0
   },
   "stand": {
    "w": 1017,
    "h": 508,
-   "bytes": 701557,
+   "bytes": 711817,
    "source": "venues",
    "box": [
     12,
@@ -165,13 +165,13 @@
     436,
     706
    ],
-   "deyellowed": 181563,
+   "deyellowed": 154173,
    "yellowLeft": 0
   },
   "ussExt": {
    "w": 1028,
    "h": 429,
-   "bytes": 767686,
+   "bytes": 764438,
    "source": "venues",
    "box": [
     902,
@@ -179,13 +179,13 @@
     1759,
     450
    ],
-   "deyellowed": 197308,
+   "deyellowed": 175679,
    "yellowLeft": 0
   },
   "ussHall": {
    "w": 1016,
    "h": 466,
-   "bytes": 743035,
+   "bytes": 752452,
    "source": "venues",
    "box": [
     905,
@@ -193,7 +193,7 @@
     1367,
     706
    ],
-   "deyellowed": 235935,
+   "deyellowed": 200539,
    "yellowLeft": 0
   }
  },
@@ -201,7 +201,7 @@
   "kid": {
    "w": 184,
    "h": 520,
-   "bytes": 106045,
+   "bytes": 107945,
    "source": "stageA2",
    "box": [
     382,
@@ -209,13 +209,13 @@
     444,
     238
    ],
-   "deyellowed": 11460,
+   "deyellowed": 9858,
    "yellowLeft": 0
   },
   "ofir": {
    "w": 192,
    "h": 527,
-   "bytes": 97528,
+   "bytes": 100066,
    "source": "stageA2",
    "box": [
     654,
@@ -223,13 +223,13 @@
     718,
     238
    ],
-   "deyellowed": 10487,
+   "deyellowed": 7268,
    "yellowLeft": 0
   },
   "amit": {
    "w": 202,
    "h": 522,
-   "bytes": 120847,
+   "bytes": 123204,
    "source": "stageA2",
    "box": [
     756,
@@ -237,13 +237,13 @@
     826,
     238
    ],
-   "deyellowed": 32871,
+   "deyellowed": 20447,
    "yellowLeft": 0
   },
   "efi": {
    "w": 190,
    "h": 526,
-   "bytes": 111937,
+   "bytes": 113792,
    "source": "stageA2",
    "box": [
     844,
@@ -251,13 +251,13 @@
     916,
     238
    ],
-   "deyellowed": 17350,
+   "deyellowed": 15299,
    "yellowLeft": 0
   },
   "keren": {
    "w": 186,
    "h": 503,
-   "bytes": 113759,
+   "bytes": 115701,
    "source": "stageA2",
    "box": [
     934,
@@ -265,13 +265,13 @@
     1006,
     238
    ],
-   "deyellowed": 8936,
+   "deyellowed": 5828,
    "yellowLeft": 0
   },
   "kobi": {
    "w": 240,
    "h": 498,
-   "bytes": 139016,
+   "bytes": 143399,
    "source": "stageA2",
    "box": [
     473,
@@ -279,13 +279,13 @@
     553,
     222
    ],
-   "deyellowed": 9059,
+   "deyellowed": 7041,
    "yellowLeft": 0
   },
   "rachel": {
    "w": 246,
    "h": 498,
-   "bytes": 138874,
+   "bytes": 142243,
    "source": "stageA2",
    "box": [
     566,
@@ -293,13 +293,13 @@
     648,
     222
    ],
-   "deyellowed": 12408,
+   "deyellowed": 10417,
    "yellowLeft": 0
   },
   "fanA": {
    "w": 129,
    "h": 390,
-   "bytes": 60578,
+   "bytes": 60764,
    "source": "bloom",
    "box": [
     2,
@@ -307,13 +307,13 @@
     46,
     802
    ],
-   "deyellowed": 20471,
+   "deyellowed": 6824,
    "yellowLeft": 0
   },
   "fanB": {
    "w": 124,
    "h": 390,
-   "bytes": 61011,
+   "bytes": 61466,
    "source": "bloom",
    "box": [
     58,
@@ -321,13 +321,13 @@
     106,
     802
    ],
-   "deyellowed": 17440,
+   "deyellowed": 2783,
    "yellowLeft": 0
   },
   "fanC": {
    "w": 132,
    "h": 390,
-   "bytes": 58598,
+   "bytes": 59134,
    "source": "bloom",
    "box": [
     116,
@@ -335,13 +335,13 @@
     164,
     802
    ],
-   "deyellowed": 25335,
+   "deyellowed": 6498,
    "yellowLeft": 0
   },
   "fanD": {
    "w": 132,
    "h": 390,
-   "bytes": 62055,
+   "bytes": 62614,
    "source": "bloom",
    "box": [
     176,
@@ -349,13 +349,13 @@
     224,
     802
    ],
-   "deyellowed": 16093,
+   "deyellowed": 2354,
    "yellowLeft": 0
   },
   "fanE": {
    "w": 136,
    "h": 390,
-   "bytes": 71956,
+   "bytes": 73545,
    "source": "bloom",
    "box": [
     234,
@@ -363,13 +363,13 @@
     284,
     802
    ],
-   "deyellowed": 22684,
+   "deyellowed": 6415,
    "yellowLeft": 0
   },
   "fanF": {
    "w": 144,
    "h": 390,
-   "bytes": 72702,
+   "bytes": 73613,
    "source": "bloom",
    "box": [
     290,
@@ -377,13 +377,13 @@
     340,
     802
    ],
-   "deyellowed": 21663,
+   "deyellowed": 3656,
    "yellowLeft": 0
   },
   "fanG": {
    "w": 143,
    "h": 390,
-   "bytes": 66532,
+   "bytes": 67030,
    "source": "bloom",
    "box": [
     346,
@@ -391,13 +391,13 @@
     394,
     802
    ],
-   "deyellowed": 25542,
+   "deyellowed": 7174,
    "yellowLeft": 0
   },
   "oldMan": {
    "w": 102,
    "h": 292,
-   "bytes": 37451,
+   "bytes": 37645,
    "source": "stageA2",
    "box": [
     1088,
@@ -405,7 +405,7 @@
     1118,
     224
    ],
-   "deyellowed": 10652,
+   "deyellowed": 6756,
    "yellowLeft": 0
   }
  },
@@ -413,7 +413,7 @@
   "propNewspaper": {
    "w": 264,
    "h": 138,
-   "bytes": 53326,
+   "bytes": 53570,
    "source": "stageAenv",
    "box": [
     30,
@@ -421,13 +421,13 @@
     118,
     872
    ],
-   "deyellowed": 14689,
+   "deyellowed": 997,
    "yellowLeft": 0
   },
   "propRadio": {
    "w": 234,
    "h": 160,
-   "bytes": 38990,
+   "bytes": 38982,
    "source": "stageAenv",
    "box": [
     122,
@@ -435,13 +435,13 @@
     200,
     872
    ],
-   "deyellowed": 10254,
+   "deyellowed": 3452,
    "yellowLeft": 0
   },
   "propScarf": {
    "w": 252,
    "h": 114,
-   "bytes": 37026,
+   "bytes": 37152,
    "source": "stageAenv",
    "box": [
     16,
@@ -449,13 +449,13 @@
     100,
     916
    ],
-   "deyellowed": 7141,
+   "deyellowed": 3405,
    "yellowLeft": 0
   },
   "propHat": {
    "w": 192,
    "h": 126,
-   "bytes": 28088,
+   "bytes": 28069,
    "source": "stageAenv",
    "box": [
     104,
@@ -463,13 +463,13 @@
     168,
     918
    ],
-   "deyellowed": 2035,
+   "deyellowed": 175,
    "yellowLeft": 0
   },
   "propTicket": {
    "w": 202,
    "h": 96,
-   "bytes": 25125,
+   "bytes": 25461,
    "source": "stageAenv",
    "box": [
     172,
@@ -477,13 +477,13 @@
     240,
     916
    ],
-   "deyellowed": 3128,
+   "deyellowed": 2366,
    "yellowLeft": 0
   },
   "propCoffee": {
    "w": 180,
    "h": 166,
-   "bytes": 36022,
+   "bytes": 36291,
    "source": "stageAenv",
    "box": [
     300,
@@ -491,13 +491,13 @@
     360,
     886
    ],
-   "deyellowed": 5622,
+   "deyellowed": 3409,
    "yellowLeft": 0
   },
   "propBall": {
    "w": 126,
    "h": 100,
-   "bytes": 12189,
+   "bytes": 12394,
    "source": "stageAenv",
    "box": [
     1436,
@@ -505,7 +505,7 @@
     1478,
     282
    ],
-   "deyellowed": 520,
+   "deyellowed": 433,
    "yellowLeft": 0
   }
  },
@@ -513,7 +513,7 @@
   "faceKid": {
    "w": 216,
    "h": 200,
-   "bytes": 46343,
+   "bytes": 48160,
    "source": "stageA2",
    "box": [
     388,
@@ -521,13 +521,13 @@
     442,
     112
    ],
-   "deyellowed": 9178,
+   "deyellowed": 8586,
    "yellowLeft": 0
   },
   "faceOfir": {
    "w": 232,
    "h": 200,
-   "bytes": 32063,
+   "bytes": 32892,
    "source": "stageA2",
    "box": [
     658,
@@ -535,13 +535,13 @@
     716,
     112
    ],
-   "deyellowed": 7784,
+   "deyellowed": 7586,
    "yellowLeft": 0
   },
   "faceAmit": {
    "w": 256,
    "h": 200,
-   "bytes": 48793,
+   "bytes": 49429,
    "source": "stageA2",
    "box": [
     760,
@@ -549,13 +549,13 @@
     824,
     112
    ],
-   "deyellowed": 6689,
+   "deyellowed": 5341,
    "yellowLeft": 0
   },
   "faceEfi": {
    "w": 264,
    "h": 200,
-   "bytes": 49378,
+   "bytes": 49394,
    "source": "stageA2",
    "box": [
     848,
@@ -563,13 +563,13 @@
     914,
     112
    ],
-   "deyellowed": 7584,
+   "deyellowed": 6654,
    "yellowLeft": 0
   },
   "faceKeren": {
    "w": 264,
    "h": 200,
-   "bytes": 40926,
+   "bytes": 41208,
    "source": "stageA2",
    "box": [
     938,
@@ -577,13 +577,13 @@
     1004,
     112
    ],
-   "deyellowed": 5524,
+   "deyellowed": 4229,
    "yellowLeft": 0
   },
   "faceKobi": {
    "w": 304,
    "h": 264,
-   "bytes": 84180,
+   "bytes": 85934,
    "source": "stageA2",
    "box": [
     476,
@@ -591,13 +591,13 @@
     552,
     128
    ],
-   "deyellowed": 15807,
+   "deyellowed": 12555,
    "yellowLeft": 0
   },
   "faceRachel": {
    "w": 328,
    "h": 264,
-   "bytes": 86022,
+   "bytes": 87924,
    "source": "stageA2",
    "box": [
     566,
@@ -605,13 +605,13 @@
     648,
     128
    ],
-   "deyellowed": 14889,
+   "deyellowed": 12938,
    "yellowLeft": 0
   },
   "faceFan": {
    "w": 220,
    "h": 160,
-   "bytes": 29238,
+   "bytes": 30247,
    "source": "bloom",
    "box": [
     118,
@@ -619,13 +619,13 @@
     162,
     706
    ],
-   "deyellowed": 18390,
+   "deyellowed": 805,
    "yellowLeft": 0
   },
   "faceOldMan": {
    "w": 150,
    "h": 130,
-   "bytes": 16053,
+   "bytes": 16370,
    "source": "stageA2",
    "box": [
     1088,
@@ -633,7 +633,7 @@
     1118,
     166
    ],
-   "deyellowed": 3226,
+   "deyellowed": 2375,
    "yellowLeft": 0
   }
  },
@@ -641,7 +641,7 @@
   "livingTable": {
    "w": 753,
    "h": 264,
-   "bytes": 260798,
+   "bytes": 260696,
    "source": "livingFore",
    "box": [
     150,
@@ -649,7 +649,7 @@
     1520,
     610
    ],
-   "deyellowed": 10422,
+   "deyellowed": 9616,
    "yellowLeft": 0
   }
  }
