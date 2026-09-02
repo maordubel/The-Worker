@@ -23,6 +23,7 @@ export type LocationId =
   | 'prologue-1972'
   | 'bedroom'
   | 'home'
+  | 'kitchen'
   | 'street'
   | 'kiosk'
   | 'pitch'

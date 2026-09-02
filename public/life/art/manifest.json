@@ -1,0 +1,640 @@
+{
+ "backdrops": {
+  "living": {
+   "w": 438,
+   "h": 417,
+   "bytes": 120122,
+   "source": "stageAenv",
+   "box": [
+    11,
+    223,
+    157,
+    362
+   ],
+   "deyellowed": 89225,
+   "yellowLeft": 0
+  },
+  "bedroom": {
+   "w": 543,
+   "h": 417,
+   "bytes": 130538,
+   "source": "stageAenv",
+   "box": [
+    166,
+    223,
+    347,
+    362
+   ],
+   "deyellowed": 99110,
+   "yellowLeft": 0
+  },
+  "kitchen": {
+   "w": 372,
+   "h": 450,
+   "bytes": 102655,
+   "source": "stageA2",
+   "box": [
+    344,
+    366,
+    468,
+    516
+   ],
+   "deyellowed": 121332,
+   "yellowLeft": 0
+  },
+  "street": {
+   "w": 1337,
+   "h": 523,
+   "bytes": 480663,
+   "source": "stageAenv",
+   "box": [
+    486,
+    30,
+    1094,
+    268
+   ],
+   "deyellowed": 249458,
+   "yellowLeft": 0
+  },
+  "pitch": {
+   "w": 1068,
+   "h": 530,
+   "bytes": 358303,
+   "source": "stageAenv",
+   "box": [
+    1110,
+    34,
+    1521,
+    238
+   ],
+   "deyellowed": 322259,
+   "yellowLeft": 0
+  },
+  "kiosk": {
+   "w": 518,
+   "h": 476,
+   "bytes": 123829,
+   "source": "assets1",
+   "box": [
+    604,
+    737,
+    766,
+    886
+   ],
+   "deyellowed": 50019,
+   "yellowLeft": 0
+  },
+  "approach": {
+   "w": 1227,
+   "h": 404,
+   "bytes": 367337,
+   "source": "bloom",
+   "box": [
+    406,
+    34,
+    964,
+    218
+   ],
+   "deyellowed": 112301,
+   "yellowLeft": 0
+  },
+  "gate7": {
+   "w": 1205,
+   "h": 451,
+   "bytes": 359881,
+   "source": "bloom",
+   "box": [
+    975,
+    30,
+    1523,
+    235
+   ],
+   "deyellowed": 139681,
+   "yellowLeft": 0
+  },
+  "ground": {
+   "w": 1364,
+   "h": 572,
+   "bytes": 529485,
+   "source": "venues",
+   "box": [
+    12,
+    92,
+    865,
+    450
+   ],
+   "deyellowed": 198848,
+   "yellowLeft": 0
+  },
+  "corridor": {
+   "w": 1111,
+   "h": 543,
+   "bytes": 423723,
+   "source": "bloom",
+   "box": [
+    0,
+    352,
+    397,
+    546
+   ],
+   "deyellowed": 196675,
+   "yellowLeft": 0
+  },
+  "reveal": {
+   "w": 1348,
+   "h": 470,
+   "bytes": 388783,
+   "source": "bloom",
+   "box": [
+    404,
+    352,
+    966,
+    548
+   ],
+   "deyellowed": 139922,
+   "yellowLeft": 0
+  },
+  "stand": {
+   "w": 1017,
+   "h": 508,
+   "bytes": 316223,
+   "source": "venues",
+   "box": [
+    12,
+    494,
+    436,
+    706
+   ],
+   "deyellowed": 175216,
+   "yellowLeft": 0
+  },
+  "ussExt": {
+   "w": 1371,
+   "h": 572,
+   "bytes": 536882,
+   "source": "venues",
+   "box": [
+    902,
+    92,
+    1759,
+    450
+   ],
+   "deyellowed": 327528,
+   "yellowLeft": 0
+  },
+  "ussHall": {
+   "w": 1016,
+   "h": 466,
+   "bytes": 336998,
+   "source": "venues",
+   "box": [
+    905,
+    494,
+    1367,
+    706
+   ],
+   "deyellowed": 214793,
+   "yellowLeft": 0
+  }
+ },
+ "figures": {
+  "kid": {
+   "w": 184,
+   "h": 520,
+   "bytes": 106415,
+   "source": "stageA2",
+   "box": [
+    382,
+    58,
+    444,
+    238
+   ],
+   "deyellowed": 11477,
+   "yellowLeft": 0
+  },
+  "ofir": {
+   "w": 192,
+   "h": 527,
+   "bytes": 98302,
+   "source": "stageA2",
+   "box": [
+    654,
+    58,
+    718,
+    238
+   ],
+   "deyellowed": 13244,
+   "yellowLeft": 0
+  },
+  "amit": {
+   "w": 202,
+   "h": 522,
+   "bytes": 118872,
+   "source": "stageA2",
+   "box": [
+    756,
+    58,
+    826,
+    238
+   ],
+   "deyellowed": 30631,
+   "yellowLeft": 0
+  },
+  "efi": {
+   "w": 190,
+   "h": 526,
+   "bytes": 112099,
+   "source": "stageA2",
+   "box": [
+    844,
+    58,
+    916,
+    238
+   ],
+   "deyellowed": 17289,
+   "yellowLeft": 0
+  },
+  "keren": {
+   "w": 186,
+   "h": 503,
+   "bytes": 115023,
+   "source": "stageA2",
+   "box": [
+    934,
+    58,
+    1006,
+    238
+   ],
+   "deyellowed": 9652,
+   "yellowLeft": 0
+  },
+  "kobi": {
+   "w": 240,
+   "h": 498,
+   "bytes": 139003,
+   "source": "stageA2",
+   "box": [
+    473,
+    56,
+    553,
+    222
+   ],
+   "deyellowed": 11801,
+   "yellowLeft": 0
+  },
+  "rachel": {
+   "w": 246,
+   "h": 498,
+   "bytes": 140146,
+   "source": "stageA2",
+   "box": [
+    566,
+    56,
+    648,
+    222
+   ],
+   "deyellowed": 14438,
+   "yellowLeft": 0
+  },
+  "fanA": {
+   "w": 129,
+   "h": 390,
+   "bytes": 60795,
+   "source": "bloom",
+   "box": [
+    2,
+    672,
+    46,
+    802
+   ],
+   "deyellowed": 17505,
+   "yellowLeft": 0
+  },
+  "fanB": {
+   "w": 124,
+   "h": 390,
+   "bytes": 61962,
+   "source": "bloom",
+   "box": [
+    58,
+    672,
+    106,
+    802
+   ],
+   "deyellowed": 15854,
+   "yellowLeft": 0
+  },
+  "fanC": {
+   "w": 132,
+   "h": 390,
+   "bytes": 59226,
+   "source": "bloom",
+   "box": [
+    116,
+    672,
+    164,
+    802
+   ],
+   "deyellowed": 23920,
+   "yellowLeft": 0
+  },
+  "fanD": {
+   "w": 132,
+   "h": 390,
+   "bytes": 63013,
+   "source": "bloom",
+   "box": [
+    176,
+    672,
+    224,
+    802
+   ],
+   "deyellowed": 15688,
+   "yellowLeft": 0
+  },
+  "fanE": {
+   "w": 136,
+   "h": 390,
+   "bytes": 72508,
+   "source": "bloom",
+   "box": [
+    234,
+    672,
+    284,
+    802
+   ],
+   "deyellowed": 22709,
+   "yellowLeft": 0
+  },
+  "fanF": {
+   "w": 144,
+   "h": 390,
+   "bytes": 73695,
+   "source": "bloom",
+   "box": [
+    290,
+    672,
+    340,
+    802
+   ],
+   "deyellowed": 20874,
+   "yellowLeft": 0
+  },
+  "fanG": {
+   "w": 143,
+   "h": 390,
+   "bytes": 66829,
+   "source": "bloom",
+   "box": [
+    346,
+    672,
+    394,
+    802
+   ],
+   "deyellowed": 23913,
+   "yellowLeft": 0
+  },
+  "oldMan": {
+   "w": 102,
+   "h": 292,
+   "bytes": 37040,
+   "source": "stageA2",
+   "box": [
+    1088,
+    138,
+    1118,
+    224
+   ],
+   "deyellowed": 9620,
+   "yellowLeft": 0
+  }
+ },
+ "props": {
+  "propNewspaper": {
+   "w": 264,
+   "h": 138,
+   "bytes": 51851,
+   "source": "stageAenv",
+   "box": [
+    30,
+    826,
+    118,
+    872
+   ],
+   "deyellowed": 11785,
+   "yellowLeft": 0
+  },
+  "propRadio": {
+   "w": 234,
+   "h": 160,
+   "bytes": 38919,
+   "source": "stageAenv",
+   "box": [
+    122,
+    818,
+    200,
+    872
+   ],
+   "deyellowed": 8276,
+   "yellowLeft": 0
+  },
+  "propScarf": {
+   "w": 252,
+   "h": 114,
+   "bytes": 36279,
+   "source": "stageAenv",
+   "box": [
+    16,
+    878,
+    100,
+    916
+   ],
+   "deyellowed": 6955,
+   "yellowLeft": 0
+  },
+  "propHat": {
+   "w": 192,
+   "h": 126,
+   "bytes": 27657,
+   "source": "stageAenv",
+   "box": [
+    104,
+    876,
+    168,
+    918
+   ],
+   "deyellowed": 1869,
+   "yellowLeft": 0
+  },
+  "propTicket": {
+   "w": 202,
+   "h": 96,
+   "bytes": 24902,
+   "source": "stageAenv",
+   "box": [
+    172,
+    884,
+    240,
+    916
+   ],
+   "deyellowed": 2756,
+   "yellowLeft": 0
+  },
+  "propCoffee": {
+   "w": 180,
+   "h": 166,
+   "bytes": 35691,
+   "source": "stageAenv",
+   "box": [
+    300,
+    826,
+    360,
+    886
+   ],
+   "deyellowed": 5304,
+   "yellowLeft": 0
+  },
+  "propBall": {
+   "w": 126,
+   "h": 100,
+   "bytes": 12147,
+   "source": "stageAenv",
+   "box": [
+    1436,
+    240,
+    1478,
+    282
+   ],
+   "deyellowed": 568,
+   "yellowLeft": 0
+  }
+ },
+ "portraits": {
+  "faceKid": {
+   "w": 216,
+   "h": 200,
+   "bytes": 25186,
+   "source": "stageA2",
+   "box": [
+    388,
+    62,
+    442,
+    112
+   ],
+   "deyellowed": 8724,
+   "yellowLeft": 0
+  },
+  "faceOfir": {
+   "w": 232,
+   "h": 200,
+   "bytes": 20516,
+   "source": "stageA2",
+   "box": [
+    658,
+    62,
+    716,
+    112
+   ],
+   "deyellowed": 7655,
+   "yellowLeft": 0
+  },
+  "faceAmit": {
+   "w": 256,
+   "h": 200,
+   "bytes": 28310,
+   "source": "stageA2",
+   "box": [
+    760,
+    62,
+    824,
+    112
+   ],
+   "deyellowed": 6698,
+   "yellowLeft": 0
+  },
+  "faceEfi": {
+   "w": 264,
+   "h": 200,
+   "bytes": 27982,
+   "source": "stageA2",
+   "box": [
+    848,
+    62,
+    914,
+    112
+   ],
+   "deyellowed": 7494,
+   "yellowLeft": 0
+  },
+  "faceKeren": {
+   "w": 264,
+   "h": 200,
+   "bytes": 25492,
+   "source": "stageA2",
+   "box": [
+    938,
+    62,
+    1004,
+    112
+   ],
+   "deyellowed": 5235,
+   "yellowLeft": 0
+  },
+  "faceKobi": {
+   "w": 304,
+   "h": 264,
+   "bytes": 45277,
+   "source": "stageA2",
+   "box": [
+    476,
+    62,
+    552,
+    128
+   ],
+   "deyellowed": 14915,
+   "yellowLeft": 0
+  },
+  "faceRachel": {
+   "w": 328,
+   "h": 264,
+   "bytes": 48177,
+   "source": "stageA2",
+   "box": [
+    566,
+    62,
+    648,
+    128
+   ],
+   "deyellowed": 14665,
+   "yellowLeft": 0
+  },
+  "faceFan": {
+   "w": 220,
+   "h": 160,
+   "bytes": 17747,
+   "source": "bloom",
+   "box": [
+    118,
+    674,
+    162,
+    706
+   ],
+   "deyellowed": 18496,
+   "yellowLeft": 0
+  },
+  "faceOldMan": {
+   "w": 150,
+   "h": 130,
+   "bytes": 10291,
+   "source": "stageA2",
+   "box": [
+    1088,
+    140,
+    1118,
+    166
+   ],
+   "deyellowed": 2857,
+   "yellowLeft": 0
+  }
+ }
+}

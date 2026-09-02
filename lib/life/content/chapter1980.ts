@@ -36,6 +36,29 @@ export const PROLOGUE: Say[] = [
   { who: null, text: 'אתה בן שמונה.' },
 ]
 
+/**
+ * מי מדבר — the speaker's printed plate.
+ *
+ * Keyed by the name the content layer puts in `who`, because that is the only thing a
+ * line knows about itself. A speaker with no plate simply gets none; the box is designed
+ * to read either way, so a new character is a line of dialogue rather than a blocked one.
+ */
+export const PORTRAIT: Record<string, string> = {
+  'קובי': 'faceKobi',
+  'רחל': 'faceRachel',
+  'אופיר': 'faceOfir',
+  'עמית': 'faceAmit',
+  'אפי': 'faceEfi',
+  'קרן': 'faceKeren',
+  'ילד מהשכונה': 'faceEfi',
+  'אוהד': 'faceFan',
+  'אוהד ותיק': 'faceFan',
+  'סדרן': 'faceFan',
+  'הקופאי': 'faceFan',
+  'בעל הקיוסק': 'faceOldMan',
+  'שכן': 'faceOldMan',
+}
+
 export type EndingCard = {
   id: string
   titleHe: string

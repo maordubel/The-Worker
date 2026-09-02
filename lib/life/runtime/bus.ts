@@ -53,6 +53,15 @@ export type LifeBusEvents = {
   /** touch controls only matter on a touch device; the runtime says when they help */
   controls: { visible: boolean }
   saved: number
+  /**
+   * How tall the painting actually is on screen, in CSS pixels.
+   *
+   * On a phone held upright a room cannot fill the glass without losing its composition,
+   * so the camera frames it and the rest of the canvas is empty. The shell needs to know
+   * where the picture ends, because that is where the dialogue box belongs — not floating
+   * over the painting, and not stranded at the bottom of a black field.
+   */
+  frame: { picture: number }
 }
 
 type Handler<K extends keyof LifeBusEvents> = (payload: LifeBusEvents[K]) => void

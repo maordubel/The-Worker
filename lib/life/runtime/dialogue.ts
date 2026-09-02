@@ -1,4 +1,5 @@
 import type { HistoricalAnchor } from '../anchors'
+import { PORTRAIT } from '../content/chapter1980'
 import { DIALOGUE } from '../content/dialogue'
 import type { ChoiceDef, Conversation, Effect, Say } from '../content/script'
 import type { LifeEngine } from '../engine'
@@ -132,6 +133,7 @@ export class DialogueRunner {
     const last = this.index === this.lines.length - 1
     this.bus.emit('dialogue', {
       lines: [line],
+      portrait: line.who ? (PORTRAIT[line.who] ?? null) : null,
       choices: last && this.pendingChoices ? this.renderChoices(this.pendingChoices) : undefined,
     })
   }
@@ -140,6 +142,7 @@ export class DialogueRunner {
     const line = this.lines[this.lines.length - 1]
     this.bus.emit('dialogue', {
       lines: line ? [line] : [],
+      portrait: line?.who ? (PORTRAIT[line.who] ?? null) : null,
       choices: this.renderChoices(this.pendingChoices ?? []),
     })
   }

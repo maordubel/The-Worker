@@ -53,6 +53,7 @@ export function LifeStage({
   const [touch, setTouch] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [persisted, setPersisted] = useState(true)
+  const [frame, setFrame] = useState(0)
 
   // --- boot -------------------------------------------------------------------------
   useEffect(() => {
@@ -73,6 +74,7 @@ export function LifeStage({
     unsubscribe.push(bus.on('ending', setEnding))
     unsubscribe.push(bus.on('controls', (value) => setControls(value.visible)))
     unsubscribe.push(bus.on('anchor', (value) => setCard(value.showing ? value.anchor : null)))
+    unsubscribe.push(bus.on('frame', (value) => setFrame(value.picture)))
 
     void (async () => {
       const [engine, module] = await Promise.all([
@@ -165,6 +167,16 @@ export function LifeStage({
       <div className="relative h-[calc(100dvh-var(--tap)-3.25rem-env(safe-area-inset-bottom))] w-full overflow-hidden border-y-hair border-ink bg-ink">
         <div ref={holder} className="absolute inset-0" />
 
+        {/* Where the painting ends. A vermilion hairline turns the empty band under a
+            framed picture into the foot of a printed sheet instead of dead space. */}
+        {ready && frame > 0 && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 z-10 h-[2px] bg-red/70"
+            style={{ top: frame - 1 }}
+          />
+        )}
+
         {!ready && (
           <div className="absolute inset-0 z-40 flex items-center justify-center bg-ink">
             <p className="font-display text-[15px] text-sheet">{t('life.loading')}</p>
@@ -207,6 +219,8 @@ export function LifeStage({
         {dialogue && (
           <DialogueBox
             lines={dialogue.lines}
+            portrait={dialogue.portrait ?? null}
+            {...(frame > 0 ? { offsetTop: frame + 8 } : {})}
             {...(dialogue.choices ? { choices: dialogue.choices } : {})}
             onAdvance={() => runtime.current?.advance()}
             onChoose={(id) => runtime.current?.choose(id)}

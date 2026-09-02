@@ -1,4 +1,4 @@
-import { KOBI_LEAVES } from '../world/maps'
+import { KOBI_LEAVES } from '../world/scenes'
 
 import type { Conversation } from './script'
 
@@ -309,6 +309,17 @@ const CONVERSATIONS: Conversation[] = [
         lines: [
           { who: null, text: 'תמונה בשחור־לבן. אבא צעיר, בלי שפם, עם עוד שני בחורים.' },
           { who: null, text: 'מאחוריהם גדר, ומעל הגדר משהו גדול שלא נכנס לפריים.' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'coffee-table',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'שולחן נמוך: מאפרה מלאה, ספל קפה הפוך, וקופסת סיגריות ריקה למחצה.' },
+          { who: null, text: 'אבא יושב פה כל ערב ולא מזיז את זה אף פעם.' },
         ],
       },
     ],

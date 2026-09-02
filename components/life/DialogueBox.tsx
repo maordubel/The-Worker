@@ -1,6 +1,7 @@
 'use client'
 
 import type { DialogueChoice, DialogueLine } from '@/lib/life/runtime/bus'
+import { artUrl } from '@/lib/life/runtime/art'
 import { t } from '@/lib/i18n'
 
 /**
@@ -16,11 +17,16 @@ import { t } from '@/lib/i18n'
 export function DialogueBox({
   lines,
   choices,
+  portrait,
+  offsetTop,
   onAdvance,
   onChoose,
 }: {
   lines: DialogueLine[]
   choices?: DialogueChoice[]
+  portrait?: string | null
+  /** where the painting ends — the box sits directly under it, never on top of it */
+  offsetTop?: number
   onAdvance: () => void
   onChoose: (id: string) => void
 }) {
@@ -31,11 +37,27 @@ export function DialogueBox({
     // `data-life` hooks are for `scripts/life/playthrough.mjs`, which plays the real
     // build in a browser. Asserting on rendered Hebrew would tie the harness to the
     // wording of a line, and the wording is content — it is meant to change.
-    <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 p-2.5" data-life="dialogue">
-      <div className="border-rule border-ink bg-sheet">
+    <div
+      className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 flex items-end p-2.5"
+      style={offsetTop ? { top: offsetTop, alignItems: 'flex-start' } : undefined}
+      data-life="dialogue"
+    >
+      <div className="w-full border-rule border-ink bg-sheet">
         {line.who && (
-          <div className="border-b-hair border-ink bg-ink px-3 py-1.5">
-            <p className="font-display text-[13px] leading-none text-sheet">
+          <div className="flex items-stretch gap-2.5 border-b-hair border-ink bg-ink">
+            {/* The speaker's printed plate, cut from the cast board. It is square and
+                borderless on the start side because it is pasted onto the ink strip, not
+                framed by it — the brand has no rounded corners and no shadows. */}
+            {portrait && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={artUrl(portrait)}
+                alt=""
+                aria-hidden="true"
+                className="h-[54px] w-[62px] shrink-0 border-e-hair border-ink object-cover"
+              />
+            )}
+            <p className="self-center px-3 py-1.5 font-display text-[13px] leading-none text-sheet">
               <bdi>{line.who}</bdi>
             </p>
           </div>

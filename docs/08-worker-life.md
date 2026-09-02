@@ -78,11 +78,35 @@ itself marked missing.
 | `npm run life:play` | plays the real build at 3 widths: prologue, movement, a scene change, a conversation, a choice — then scans for yellow, overflow and page errors |
 | `npm run qa:sweep` | `/life` is swept like every other screen |
 
-## Placeholders
+## The art
 
-Everything visual. See the handoff; the short version is that no production sprite exists
-yet and none is needed to judge the gameplay. `runtime/textures.ts` hands out texture keys
-and `registerSheet()` is the seam that fills the same keys from a loaded PNG.
+Every backdrop and every person is a rectangle of one of Maor's approved concept boards.
 
-There is **no audio at all** — the crowd rising on the walk to the ground is currently
-told in paint and crowd density, not sound.
+```
+scripts/life/art-manifest.json   which crop of which board becomes which asset
+scripts/life/build-art.py        upscale → de-yellow → de-fringe → palette PNG
+public/life/art/*.png            48 assets, ~6 MB, loaded one room at a time
+lib/life/runtime/art.ts          the only place the game names a file
+```
+
+| group | what |
+|---|---|
+| backdrops | living · bedroom · kitchen · kiosk · street · pitch · approach · gate7 · ground · corridor · reveal · stand · ussExt · ussHall |
+| figures | kid · ofir · amit · efi · keren · kobi · rachel · seven Bloomfield fans · oldMan |
+| portraits | nine printed plates for the dialogue box |
+| props | newspaper · radio · scarf · hat · ticket · coffee · ball |
+
+To re-cut an asset: change its box in the manifest and run `python3 scripts/life/build-art.py`.
+Nothing in the game moves — every position in `world/scenes.ts` is a fraction of the
+backdrop, not a pixel.
+
+## Still temporary
+
+- **One pose per character.** The boards are presentation art, not sprite sheets, so a
+  walking child is a static figure with a bob and a lean rather than a walk cycle.
+- **Kobi and Rachel are half-figures** and are staged where that reads: seated, behind a
+  table, inside a crowd.
+- **Ussishkin's two backdrops are cut and shipped but not yet placed** in a scene — the
+  wing is preserved and reference-ready, as the brief asks, and no gameplay was built for it.
+- **There is no audio at all.** The crowd rising on the walk to the ground is told in
+  paint, crowd density and grade, not in sound.

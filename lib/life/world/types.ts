@@ -1,4 +1,3 @@
-import type { PaintOp } from '../runtime/painter'
 import type { BondId, FlagId, ItemId, LifeState, LocationId } from '../types'
 
 /**
@@ -41,70 +40,4 @@ export function meets(state: LifeState, condition?: Condition): boolean {
   if (condition.beforeMinute !== undefined && state.minute >= condition.beforeMinute) return false
   if (condition.bond && state.bonds[condition.bond.who] < condition.bond.min) return false
   return true
-}
-
-export type NpcDef = {
-  id: string
-  /** a key in `cast()` — the figure spec, never a sprite path */
-  figure: string
-  x: number
-  y: number
-  facing?: 'down' | 'up' | 'left' | 'right'
-  /** a loop of places to stand. Empty means the person stays put. */
-  route?: Array<Point & { wait?: number }>
-  /** conversation id in `content/dialogue.ts` */
-  talk?: string
-  /** the name shown in the dialogue box, from the content layer */
-  nameHe: string
-  when?: Condition
-}
-
-export type PropDef = {
-  id: string
-  x: number
-  y: number
-  w: number
-  h: number
-  /** interaction id in `content/interactions.ts` */
-  act?: string
-  solid?: boolean
-  when?: Condition
-  /** painted only while `when` holds — how the red box fills up */
-  layers?: PaintOp[]
-}
-
-export type ExitDef = {
-  id: string
-  x: number
-  y: number
-  w: number
-  h: number
-  to: LocationId
-  spawn: string
-  when?: Condition
-  /** shown instead of walking through, when the condition fails */
-  blockedTalk?: string
-  /** true = you must press the action button; false = walking in is enough */
-  manual?: boolean
-}
-
-export type MapDef = {
-  id: LocationId
-  titleHe: string
-  width: number
-  height: number
-  base: 'sky' | 'night' | 'interior'
-  /** painted under everything that moves */
-  layers: PaintOp[]
-  /** painted over everything that moves — a near wall, a doorway, a foreground crowd */
-  overlay?: PaintOp[]
-  /** conditional paint, so a room can change without a second map */
-  extra?: Array<{ when: Condition; layers: PaintOp[] }>
-  solids: Rect[]
-  spawns: Record<string, Point>
-  npcs: NpcDef[]
-  props: PropDef[]
-  exits: ExitDef[]
-  /** how far the camera pulls back — bigger rooms want a wider view */
-  zoom?: number
 }
