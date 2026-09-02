@@ -29,8 +29,19 @@ Read `docs/00-architecture.md` before changing anything structural.
      the marked block in `app/globals.css`. It owns the pitch, the drawn player, the kit
      rack and the share cards, and ONLY those. A shell component reaching for a press
      token is a defect.
-   **No yellow is ABSOLUTE**, in both systems, with no exemption for artwork or for
-   "the pictures". The one definition lives in `lib/isYellow.ts` — a HUE test, because
+   **No yellow is ABSOLUTE**, in both systems — with exactly ONE named exception, and
+   the shape of that exception matters more than the exception itself.
+   On 1.9.2026 Maor was shown the frame and the hex and answered **"הצהוב הזה מאושר"**.
+   It is the opposition's shirt in the opening animation (`#f2c500`): the yellow is on
+   the other team, and they are losing. `lib/brand/yellowExemptions.ts` records it as a
+   **file path**, not a colour — `#f2c500` anywhere else still fails — with who approved
+   it, when, and why. `tests/brand.test.ts` asserts the list is exactly one entry long,
+   that every entry carries an approver and a date, that the path is matched exactly so
+   a folder can never be exempted by accident, and that the exempt file is referenced by
+   `Intro.tsx` and nothing else. Widening it is a decision somebody has to make out
+   loud, not a line that slips into a delta. **Only the owner grants one, in his own
+   words, about a specific asset.** The definition lives in `lib/isYellow.ts` — a HUE
+   test, because
    every channel-inequality version caught the grass, the badge's skin, or the edge
    where vermilion meets cream. The unit test and the screenshot scanner import it, so
    they cannot drift. Never a raw hex in a component. The checklist runs as
@@ -242,9 +253,73 @@ npm run ingest -- --source wiki --fetch      # network; needs wiki access
 npm run db:types
 npm run story:overlap                        # needs a dev server; fails on any collision
 npm run story:cards                          # the same harness, as pictures
+npm run qa:sweep                             # 14 routes × 4 widths: overflow, errors, yellow
 ```
 
 ## House skills that apply
 
 `dubel-guidelines` · `brand-concept` (done) · `frontend-standards` · `football-data`
 · `supabase-server-authority` · `responsive-qa` · `dubel-credit` (in the footer)
+
+29. **The three acceptance claims are a script, not a memory.** Every delta says "no
+    overflow, no console errors, no yellow". `npm run qa:sweep` is what establishes it:
+    14 routes × 4 widths, antialiasing off (subpixel rendering invented 23,643 false
+    yellow pixels the first time), and the hue band read back out of the script by
+    `tests/brand.test.ts` so the scanner and `lib/isYellow.ts` cannot drift apart.
+    It separates **a page that threw** from **a host this sandbox refused**: the ad and
+    analytics scripts fail to load here on all 56 screens, and counting that as a fault
+    made every screen red and buried the real signal. The test is the REQUEST's origin,
+    not the message text.
+    The opening animation is dismissed before each screen is measured rather than the
+    home route being skipped — the exemption covers one file, and a scanner that looked
+    away from a whole screen would hide the next real defect on the most important one.
+
+30. **The opening plays over the wall, never instead of it.** `components/ui/Intro.tsx`
+    is an overlay on `/`; the gates are rendered and complete underneath, so a shared
+    link, a crawler and a slow connection all reach the ground either way. Once a
+    SESSION (`sessionStorage`), dismissed by a tap anywhere, the plate, Escape, the
+    clip ending, or the browser refusing to autoplay — a frozen poster waiting for an
+    `ended` event that will never fire is worse than no opening. Off entirely under
+    `prefers-reduced-motion`.
+    Two things this got wrong first, both worth remembering:
+    · **The seen-flag was written when the intro was chosen**, so React's development
+      double-invoke read back the flag its own first pass had written and the opening
+      never appeared. It is written when the intro ENDS, which is also what the name
+      says.
+    · **The clip is 1:1 and a phone is 1:2**, so `object-cover` cropped away the goal,
+      the crowd and the שער 5 banner and left one torso. It is CONTAINED, and the ink
+      the letterbox leaves carries the mark above and the skip below — a title card made
+      out of the dead space beats a crop that throws the animation away.
+    The QA browser is open-source Chromium with no h.264 decoder, so the video ships as
+    **both** VP9/WebM and h.264/mp4: the client takes whichever one it can play, and the
+    opening is verifiable here instead of assumed.
+
+31. **An id a run deals must be unique, and that is checked, not assumed.**
+    The timeline keyed a match card on `season:awayClub`. It looked unique and was not —
+    Hapoel is recorded as the away side four times in 2001/02 and the Salzburg tie has
+    two legs — so nine cards collapsed onto three ids. The anchor was then removed by
+    matching its id, one duplicate removed two cards, and **seed 95 dealt a nine-card run
+    that could never be finished**: the last card had no verdict. Four hand-picked seeds
+    in the suite never touched it.
+    Three things came out of that and all three stay:
+    · **A hashed key may carry the date.** `publicId()` is a sha256, so putting
+      `playedOn` inside the key is what makes it unique WITHOUT leaking anything — the
+      reason the date was left out in the first place does not apply to a hash.
+    · **Uniqueness is enforced where the pool is built**, by id as well as by date, so no
+      future key can reintroduce it.
+    · **The anchor is removed by position, not by equality.** Two defences, because a run
+      that cannot be finished is the worst failure a mode has.
+    `tests/timeline.test.ts` sweeps 300 seeds; `tests/identity.test.ts` does the same for
+    every other mode — hate, goal, memory, kits, lineup, trivia — because the assumption
+    that concatenated fields are unique is made all over this codebase and was only ever
+    checked by whether anything happened to look wrong. They are all clean; the test is
+    what keeps them that way.
+
+32. **A key that is asked for must exist.** A missing message renders as the key itself —
+    Latin, mid-sentence, in a Hebrew screen — and nothing was checking. `tests/i18n.test.ts`
+    resolves every literal `t('…')` in `app`, `components` and `lib`, and rejects an empty
+    message or an unfinished `{}` placeholder. Keys built at runtime cannot be checked
+    statically and are not pretended to be.
+    Retiring a screen retires its strings: the timeline's old `submit`/`up`/`down` keys
+    outlived the form they belonged to. A tombstone is for a FILE (rule 26); a dead
+    string is just deleted.

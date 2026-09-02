@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { PNG } from 'pngjs'
 
 import { isYellow, isYellowHex } from '@/lib/isYellow'
+import { YELLOW_EXEMPTIONS, yellowAllowed } from '@/lib/brand/yellowExemptions'
 
 /**
  * The twenty-point acceptance checklist from brand/THE-WORKER-BRAND-SPEC.md, as tests.
@@ -358,5 +359,76 @@ describe('מתקן הבדיקה — the QA harness is exempt only because it can
       expect(declared, `${template} is not a declared template`).toContain(template)
       expect(proof, `${template} is not in the overlap harness`).toContain(`'${template}'`)
     }
+  })
+})
+
+describe('חוק הצהוב — the one exemption, and the fence around it', () => {
+  it('names exactly one exempt asset', () => {
+    // Widening this list is a decision somebody has to make out loud. If this test
+    // fails, an exemption was added — go and read who approved it and why, and if the
+    // answer is not an owner quoting themselves, take it back out.
+    expect(YELLOW_EXEMPTIONS).toHaveLength(1)
+    expect(YELLOW_EXEMPTIONS[0]?.path).toBe('public/video/intro.mp4')
+  })
+
+  it('records who approved it and when, for every entry', () => {
+    for (const exemption of YELLOW_EXEMPTIONS) {
+      expect(exemption.approvedBy, exemption.path).toMatch(/\S/)
+      expect(exemption.approvedOn, exemption.path).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+      expect(exemption.why.length, exemption.path).toBeGreaterThan(20)
+    }
+  })
+
+  it('exempts a FILE, never a colour', () => {
+    // The approved yellow is the opposition shirt in one clip. The same hex anywhere
+    // else is still a defect, and the definition in lib/isYellow.ts is untouched.
+    expect(isYellowHex('#f2c500')).toBe(true)
+    expect(yellowAllowed('public/video/intro.mp4')).toBe(true)
+    expect(yellowAllowed('public/art/celebration.png')).toBe(false)
+    expect(yellowAllowed('public/brand/logo-512.png')).toBe(false)
+  })
+
+  it('matches the path exactly, so a folder can never be exempted by accident', () => {
+    expect(yellowAllowed('public/video')).toBe(false)
+    expect(yellowAllowed('public/video/intro.mp4.bak')).toBe(false)
+    expect(yellowAllowed('public/video/other.mp4')).toBe(false)
+  })
+
+  it('keeps the exempt asset out of every screen but the opening', () => {
+    const sources = SOURCES.filter(({ text }) => text.includes('/video/intro.mp4'))
+    expect(sources.map(({ path }) => path.split('/').pop())).toEqual(['Intro.tsx'])
+  })
+})
+
+describe('סורק הפיקסלים — the sweep and the module agree on what yellow is', () => {
+  it('carries the same hue band as lib/isYellow.ts', () => {
+    // The scanner cannot import TypeScript, so the band is duplicated. Duplication is
+    // exactly how "no yellow" became "no yellow according to whichever check ran last",
+    // so the numbers are read back out and compared rather than trusted.
+    const sweep = readFileSync(join(ROOT, 'scripts/brand/qa-sweep.mjs'), 'utf8')
+    const module_ = readFileSync(join(ROOT, 'lib/isYellow.ts'), 'utf8')
+
+    const band = {
+      HUE_MIN: Number(sweep.match(/const HUE_MIN = ([\d.]+)/)?.[1]),
+      HUE_MAX: Number(sweep.match(/const HUE_MAX = ([\d.]+)/)?.[1]),
+      SAT_MIN: Number(sweep.match(/const SAT_MIN = ([\d.]+)/)?.[1]),
+      VAL_MIN: Number(sweep.match(/const VAL_MIN = ([\d.]+)/)?.[1]),
+    }
+    expect(band).toEqual({ HUE_MIN: 38, HUE_MAX: 70, SAT_MIN: 0.35, VAL_MIN: 0.35 })
+    expect(module_).toContain('hue >= 38 && hue <= 70')
+    expect(module_).toContain('saturation < 0.35 || value < 0.35')
+  })
+
+  it('turns antialiasing off, or it measures the renderer instead of the design', () => {
+    const sweep = readFileSync(join(ROOT, 'scripts/brand/qa-sweep.mjs'), 'utf8')
+    expect(sweep).toContain('--disable-lcd-text')
+  })
+
+  it('dismisses the opening rather than skipping the wall', () => {
+    // The exemption is one FILE. A sweep that excluded the whole home route to avoid
+    // the intro's yellow would hide the next real defect on the most important screen.
+    const sweep = readFileSync(join(ROOT, 'scripts/brand/qa-sweep.mjs'), 'utf8')
+    expect(sweep).toContain('worker.intro.v1')
+    expect(sweep).toMatch(/ROUTES = \[\s*'\/'/)
   })
 })
