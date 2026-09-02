@@ -1,0 +1,153 @@
+import { at } from '../clock'
+import type { NPCScheduleEntry } from '../schedules'
+import { FULL_TIME, KOBI_LEAVES } from '../world/scenes'
+
+/**
+ * מי איפה, ומתי — the afternoon's timetable.
+ *
+ * Read this top to bottom and you can see the chapter: everybody drains eastwards. Efi
+ * is gone by two. Ofir moves from the wall to the pitch and then, at ten past three,
+ * starts walking the same way as the grown-ups. Amit gives up on his newspaper at twenty
+ * to three. The street the child walks back into at half past three is not the street he
+ * left, and nothing in the code had to say so — it is six rows of data.
+ *
+ * The point is not realism. It is that the player who spent forty minutes on the pitch
+ * comes back to an emptier street, and understands, without being told, what forty
+ * minutes cost.
+ */
+
+const DAY_START = at(12, 0)
+
+export const SCHEDULE_1986: NPCScheduleEntry[] = [
+  // ------------------------------------------------------------------------- Kobi ---
+  {
+    characterId: 'kobi',
+    actorId: 'kobi',
+    location: 'home',
+    start: DAY_START,
+    end: KOBI_LEAVES,
+    behavior: 'wait',
+    x: 0.63,
+    y: 0.78,
+  },
+
+  // ------------------------------------------------------------------------ Ofir ----
+  {
+    characterId: 'ofir',
+    actorId: 'ofir',
+    location: 'street',
+    start: DAY_START,
+    end: at(13, 40),
+    behavior: 'wait',
+    x: 0.3,
+    y: 0.88,
+    drift: 0.008,
+  },
+  {
+    characterId: 'ofir',
+    actorId: 'ofir-pitch',
+    location: 'pitch',
+    start: at(13, 40),
+    end: at(14, 50),
+    behavior: 'play',
+    x: 0.6,
+    y: 0.88,
+    drift: 0.02,
+  },
+  {
+    characterId: 'ofir',
+    actorId: 'ofir-later',
+    location: 'street',
+    start: at(14, 50),
+    end: at(15, 40),
+    behavior: 'walk',
+    x: 0.72,
+    y: 0.86,
+    drift: 0.012,
+    facing: 'right',
+  },
+  {
+    characterId: 'ofir',
+    actorId: 'ofir-ground',
+    location: 'bloomfield-outside',
+    start: at(15, 40),
+    end: FULL_TIME,
+    behavior: 'wait',
+    x: 0.4,
+    y: 0.92,
+  },
+
+  // ------------------------------------------------------------------------ Amit ----
+  {
+    characterId: 'amit',
+    actorId: 'amit-kiosk',
+    location: 'kiosk',
+    start: DAY_START,
+    end: at(13, 0),
+    behavior: 'buy',
+    x: 0.62,
+    y: 0.9,
+  },
+  {
+    characterId: 'amit',
+    actorId: 'amit-street',
+    location: 'street',
+    start: at(13, 0),
+    end: at(14, 40),
+    behavior: 'wait',
+    x: 0.37,
+    y: 0.87,
+    drift: 0.004,
+  },
+  {
+    characterId: 'amit',
+    actorId: 'amit',
+    location: 'pitch',
+    start: at(14, 40),
+    end: at(15, 30),
+    behavior: 'play',
+    x: 0.83,
+    y: 0.86,
+  },
+
+  // -------------------------------------------------------------------------- Efi ---
+  // He is the missable one, and he is missable on purpose: the hall is the other life
+  // this child could have, and it closes at two whether or not anybody went.
+  {
+    characterId: 'efi',
+    actorId: 'efi',
+    location: 'pitch',
+    start: DAY_START,
+    end: at(14, 0),
+    behavior: 'wait',
+    x: 0.26,
+    y: 0.9,
+    drift: 0.01,
+  },
+
+  // ------------------------------------------------------------------------ Keren ---
+  {
+    characterId: 'keren',
+    actorId: 'keren',
+    location: 'street',
+    start: at(13, 30),
+    end: at(15, 30),
+    behavior: 'wait',
+    x: 0.55,
+    y: 0.9,
+    drift: 0.003,
+  },
+
+  // ---------------------------------------------------------------------- neighbour -
+  {
+    characterId: 'neighbour',
+    actorId: 'neighbour',
+    location: 'street',
+    start: DAY_START,
+    end: at(16, 10),
+    behavior: 'wait',
+    x: 0.44,
+    y: 0.83,
+    drift: 0.005,
+  },
+]

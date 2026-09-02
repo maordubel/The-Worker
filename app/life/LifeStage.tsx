@@ -4,9 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AnchorCard } from '@/components/life/AnchorCard'
 import { ControlDeck } from '@/components/life/ControlDeck'
+import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { EndingCard } from '@/components/life/EndingCard'
 import { LifeHud } from '@/components/life/LifeHud'
+import { ProfileCard } from '@/components/life/ProfileCard'
 import { Teach } from '@/components/life/Teach'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
@@ -14,7 +16,7 @@ import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { loadLife } from '@/lib/life/engine'
 import { lifeStore } from '@/lib/life/save'
 import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/bus'
-import type { LifeRuntime } from '@/lib/life/runtime/game'
+import type { LifeRuntime, LifeSnapshot } from '@/lib/life/runtime/game'
 
 /**
  * הבמה — React mounts the game and then gets out of its way.
@@ -57,6 +59,16 @@ export function LifeStage({
   const [persisted, setPersisted] = useState(true)
   const [frame, setFrame] = useState(0)
   const [stage, setStage] = useState(0)
+  /**
+   * התיק — the profile, opened by the player and never by the game.
+   *
+   * It is a SNAPSHOT taken at the moment it opens, not a subscription: React must never
+   * hold the life, and a card that re-rendered on every clock tick would be a card that
+   * animates while you read it. The world is paused underneath — reading about yourself
+   * may not cost you the afternoon.
+   */
+  const [snapshot, setSnapshot] = useState<LifeSnapshot | null>(null)
+  const [debug, setDebug] = useState(false)
 
   // --- boot -------------------------------------------------------------------------
   useEffect(() => {
@@ -237,6 +249,20 @@ export function LifeStage({
     [dialogue],
   )
 
+  const openProfile = useCallback((withDebug: boolean) => {
+    const current = runtime.current
+    if (!current) return
+    current.pause(true)
+    setSnapshot(current.snapshot())
+    setDebug(withDebug)
+  }, [])
+
+  const closeProfile = useCallback(() => {
+    setSnapshot(null)
+    setDebug(false)
+    runtime.current?.pause(false)
+  }, [])
+
   const reset = useCallback(() => {
     void (async () => {
       await lifeStore.clear()
@@ -266,6 +292,27 @@ export function LifeStage({
         )}
 
         {ready && <LifeHud hud={hud} />}
+
+        {/* התיק — one small plate under the clock. It is the only permanent control on
+            the glass that is not the console: everything else about the player's state
+            is learned by looking at people. */}
+        {ready && !dialogue && !ending && !card && !snapshot && (
+          <button
+            type="button"
+            onClick={() => openProfile(false)}
+            data-life="profile-open"
+            className="group absolute z-30 flex min-h-tap items-start"
+            style={{ insetInlineStart: 10, top: 54 }}
+          >
+            {/* The visible chip is small because the HUD is small; the TARGET is the full
+                48px the brand requires, and it is the transparent button around it. On a
+                phone that difference is the whole difference between a control and a
+                decoration you keep missing. */}
+            <span className="mt-2 border-hair border-ink bg-sheet/95 px-2.5 py-1.5 font-body text-[10px] leading-none text-ink transition-colors duration-press group-active:bg-red group-active:text-sheet motion-reduce:transition-none">
+              {t('life.profile')}
+            </span>
+          </button>
+        )}
 
         {ready && !dialogue && !ending && !card && controls && (
           <ControlDeck
@@ -315,6 +362,11 @@ export function LifeStage({
 
         {card && <AnchorCard anchor={card} onClose={() => setCard(null)} />}
 
+        {snapshot && !debug && <ProfileCard snapshot={snapshot} onClose={closeProfile} />}
+        {snapshot && debug && (
+          <DebugPanel snapshot={snapshot} runtime={runtime.current} onClose={closeProfile} />
+        )}
+
         {ending && (
           <EndingCard
             titleHe={ending.titleHe}
@@ -334,6 +386,18 @@ export function LifeStage({
         <p className="font-body text-[10px] leading-snug text-muted">
           {persisted ? t('life.autosave') : t('life.storageOff')}
         </p>
+        {/* Never in production (rule 44): the panel is not behind a flag, it is behind a
+            build. A debug door that can be opened by a query string is a debug door that
+            will be opened by a player. */}
+        {process.env.NODE_ENV !== 'production' && (
+          <button
+            type="button"
+            onClick={() => openProfile(true)}
+            className="flex min-h-tap items-center border-hair border-red px-3 font-body text-[11px] text-red"
+          >
+            {t('life.debug')}
+          </button>
+        )}
         <button
           type="button"
           onClick={() => (confirmReset ? reset() : setConfirmReset(true))}

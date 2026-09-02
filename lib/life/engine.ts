@@ -1,6 +1,18 @@
 import { apply, emptyState, type LifeEvent } from './events'
+import { freshSeed } from './rng'
 import { lifeStore, SAVE_VERSION, type SaveFile } from './save'
-import type { BondId, ItemId, LifeState, PlayerIdentity, TraitId } from './types'
+import {
+  relationshipOf,
+  type CharacterId,
+  type ItemId,
+  type LifeState,
+  type PersonalityId,
+  type PlayerIdentity,
+  type RedHeartId,
+  type RelationshipAxis,
+  type RelationshipMemory,
+  type TraitId,
+} from './types'
 
 /**
  * מנוע החיים — what is true, and who is allowed to change it.
@@ -33,6 +45,11 @@ const IMMEDIATE: ReadonlySet<LifeEvent['t']> = new Set([
   'chapter.entered',
   'chapter.completed',
   'item.gained',
+  'redbox.item_added',
+  'opportunity.accepted',
+  'opportunity.missed',
+  'relationship.memory_added',
+  'rng.seeded',
 ])
 
 export class LifeEngine {
@@ -87,16 +104,48 @@ export class LifeEngine {
     return this.state.agorot >= agorot
   }
 
-  bond(who: BondId): number {
-    return this.state.bonds[who]
+  bond(who: CharacterId): number {
+    return this.state.bonds[who] ?? 0
+  }
+
+  relationship(who: CharacterId, axis: RelationshipAxis): number {
+    return relationshipOf(this.state, who)[axis]
   }
 
   trait(trait: TraitId): number {
     return this.state.traits[trait]
   }
 
+  personality(key: PersonalityId): number {
+    return this.state.personality[key]
+  }
+
+  redHeart(key: RedHeartId): number {
+    return this.state.redHeart[key]
+  }
+
   flag(name: string): boolean {
     return this.state.flags[name] === true
+  }
+
+  /**
+   * מישהו יזכור את זה — the one call that writes another person's memory.
+   *
+   * Everything downstream of it (what Kobi says on the terrace, whether Ofir waits for
+   * you at the gate) reads the same list, which is the whole point: NPC memory is one
+   * queryable structure, not scene flags scattered through a Phaser file.
+   */
+  remember(who: CharacterId, eventId: string, significance: RelationshipMemory['significance'] = 'notable') {
+    this.dispatch({
+      t: 'relationship.memory_added',
+      memory: {
+        characterId: who,
+        eventId,
+        significance,
+        year: this.state.year,
+        atMinute: this.state.minute,
+      },
+    })
   }
 
   // ---- persistence ---------------------------------------------------------------
@@ -134,9 +183,20 @@ export class LifeEngine {
   }
 }
 
-/** Open the saved life, or start one. The caller never touches the store directly. */
+/**
+ * Open the saved life, or start one. The caller never touches the store directly.
+ *
+ * A brand new life gets its seed here, as the first row in its own log — which is the
+ * only place in the game `Math.random` is allowed to be called. From that moment the
+ * whole playthrough is reproducible from the save alone, and the second playthrough is
+ * different because it is a different seed rather than because anything is unpredictable.
+ */
 export async function loadLife(fallback: PlayerIdentity, year: number): Promise<LifeEngine> {
   const file = await lifeStore.read()
-  if (!file) return new LifeEngine(fallback, year)
+  if (!file) {
+    const engine = new LifeEngine(fallback, year)
+    engine.dispatch({ t: 'rng.seeded', seed: freshSeed(year) })
+    return engine
+  }
   return new LifeEngine(file.identity, file.year, file.events)
 }

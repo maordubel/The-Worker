@@ -1,7 +1,15 @@
 import Phaser from 'phaser'
 
 import { clockLabel } from '../../clock'
+import { AMBIENT_1986, type AmbientActor } from '../../content/ambient1986'
 import { ENDINGS, OBJECTIVES } from '../../content/chapter1986'
+import { ENCOUNTERS_1986 } from '../../content/encounters1986'
+import { OPPORTUNITIES_1986 } from '../../content/opportunities1986'
+import { SCHEDULE_1986 } from '../../content/schedules1986'
+import type { ConversationShot } from '../../content/script'
+import { encounterEvents, rollEncounter } from '../../encounters'
+import { tickOpportunities } from '../../opportunities'
+import { placementsAt } from '../../schedules'
 import type { LifeState, LocationId } from '../../types'
 import { FULL_TIME, KICKOFF, KOBI_LEAVES, sceneFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, SceneDef, Verb } from '../../world/scenes'
@@ -51,6 +59,15 @@ type Actor = {
 
 type Hotspot = { def: HotspotDef; x: number; y: number; w: number; prop?: Phaser.GameObjects.Image }
 
+/** Somebody crossing the picture who is not there for the player. */
+type Ambient = {
+  def: AmbientActor
+  image: Phaser.GameObjects.Image
+  shadow: Phaser.GameObjects.Ellipse
+  /** ms into this actor's own cycle */
+  clock: number
+}
+
 type Target =
   | { kind: 'act'; act: string; verb: Verb; label: string; x: number; y: number; priority: number }
   | {
@@ -71,6 +88,28 @@ const STUCK_HINT = 30000
 const STUCK_VOICE = 50000
 const STUCK_POINT = 70000
 
+/**
+ * How fast the afternoon runs while the child is simply walking.
+ *
+ * One game minute per real second made the whole day five real minutes long, which meant
+ * the opportunity windows closed faster than a player could read the street they were
+ * standing in. Slowing the base rate does not make the chapter longer by making walking
+ * slower (brief §41 forbids exactly that) — it makes the CHOICES legible, because every
+ * real cost in this chapter is paid in explicit minutes by conversations and journeys,
+ * and those are what should dominate the clock rather than the walk between them.
+ */
+const BASE_TIME = 0.72
+
+/** How often the world offers to surprise you, and how likely it is when it does. */
+const ENCOUNTER_EVERY = 22000
+const ENCOUNTER_CHANCE: Partial<Record<LocationId, number>> = {
+  street: 0.42,
+  route: 0.5,
+  kiosk: 0.3,
+  pitch: 0.28,
+  'bloomfield-outside': 0.45,
+}
+
 export class WorldScene extends Phaser.Scene {
   static readonly KEY = 'life-world'
 
@@ -90,6 +129,7 @@ export class WorldScene extends Phaser.Scene {
   private stride = 0
 
   private actors: Actor[] = []
+  private ambient: Ambient[] = []
   private hotspots: Hotspot[] = []
   private doorLights: Array<{ exit: ExitDef; image: Phaser.GameObjects.Image; base: number }> = []
   private mark!: Phaser.GameObjects.Triangle
@@ -114,6 +154,10 @@ export class WorldScene extends Phaser.Scene {
   private idleFor = 0
   private stuckLevel = 0
   private breathe = 0
+  private lastMinute = -1
+  private sinceEncounter = 0
+  private baseZoom = 1
+  private shotting = false
 
   constructor() {
     super(WorldScene.KEY)
@@ -137,6 +181,7 @@ export class WorldScene extends Phaser.Scene {
     this.flagCount = 0
     this.matchPhase = 'none'
     this.actors = []
+    this.ambient = []
     this.hotspots = []
     this.doorLights = []
     this.target = null
@@ -147,12 +192,17 @@ export class WorldScene extends Phaser.Scene {
     this.idleFor = 0
     this.stuckLevel = 0
     this.breathe = 0
+    this.lastMinute = -1
+    this.sinceEncounter = 0
+    this.baseZoom = 1
+    this.shotting = false
   }
 
   preload() {
     const need = new Set<string>([this.def.art, ...Object.values(KID_POSE), ...KID_WALK])
     if (this.def.arrival) need.add(this.def.arrival.art)
     for (const actor of this.def.actors) need.add(actor.figure)
+    for (const actor of AMBIENT_1986) if (actor.location === this.def.id) need.add(actor.figure)
     for (const spot of this.def.hotspots) if (spot.prop) need.add(spot.prop.key)
     for (const layer of this.def.layers ?? []) need.add(layer.art)
     for (const key of need) {
@@ -172,6 +222,7 @@ export class WorldScene extends Phaser.Scene {
     this.buildLights()
     this.buildLayers()
     this.buildActors(state)
+    this.buildAmbient(state)
     this.buildHotspots(state)
     this.buildPlayer()
     this.buildAir()
@@ -196,10 +247,13 @@ export class WorldScene extends Phaser.Scene {
     this.scale.on('resize', this.onResize, this)
 
 
+    this.baseZoom = this.cameras.main.zoom
+
     this.ctx.dialogue.setHooks({
       travel: (to, spawn) => this.travel(to as LocationId, spawn),
       minigame: () => this.startMinigame(),
       ending: (id) => this.finishChapter(id),
+      shot: (shot) => this.frameShot(shot),
       onOpen: (open) => {
         this.paused = open
         if (open) {
@@ -213,6 +267,12 @@ export class WorldScene extends Phaser.Scene {
     })
 
     this.ctx.engine.dispatch({ t: 'moved', to: this.def.id })
+    // The timetable applies the MOMENT the room is drawn, not on the next minute tick.
+    // Building the scene from the definition and then correcting it a second later is
+    // how a player sees somebody who is not supposed to be there — and it is how the
+    // playthrough harness found Amit standing in the kiosk doorway twenty minutes
+    // before he arrives.
+    this.applySchedule()
     this.ctx.bus.emit('place', { id: this.def.id, title: this.def.titleHe })
     this.flagCount = Object.keys(this.ctx.engine.state.flags).length
     this.pushHud()
@@ -302,6 +362,71 @@ export class WorldScene extends Phaser.Scene {
       image.setVisible(visible)
       shadow.setVisible(visible)
       this.actors.push({ def, image, shadow, baseX: x, phase: Math.random() * Math.PI * 2 })
+    }
+  }
+
+  /**
+   * הרקע החי — people crossing the picture, on their own clocks, for nobody.
+   *
+   * Each one is a single image that walks its own line, waits, and starts again. There is
+   * no pathfinding and no schedule to keep: an ambient actor is not a person, it is the
+   * evidence that people exist. They are drawn WITHOUT interaction — no name, no prompt,
+   * no reach — so a player never walks up to one and finds out the street is scenery.
+   *
+   * The one thing they carry is the chapter's argument. Before ten past three the street
+   * has two people going about a Saturday; after it, the same street has supporters, all
+   * walking east, more of them every twenty minutes. Nobody says which way Bloomfield is.
+   */
+  private buildAmbient(state: LifeState) {
+    for (const def of AMBIENT_1986) {
+      if (def.location !== this.def.id) continue
+      const y = def.y * this.H
+      const shadow = this.add.ellipse(0, y, 40, 12, LIFE_PALETTE.ink, 0.2)
+      const image = this.add.image(def.from * this.W, y, `art-${def.figure}`).setOrigin(0.5, 1)
+      this.fit(image, def.size * this.H)
+      image.setFlipX(def.to < def.from)
+      shadow.setSize(image.displayWidth * 0.55, image.displayWidth * 0.16)
+      const visible = meets(state, def.when)
+      image.setVisible(visible)
+      shadow.setVisible(visible)
+      this.ambient.push({ def, image, shadow, clock: def.offsetMs ?? 0 })
+    }
+  }
+
+  private moveAmbient(delta: number) {
+    const state = this.ctx.engine.state
+    for (const entry of this.ambient) {
+      const { def } = entry
+      const on = meets(state, def.when)
+      entry.clock += delta
+      const cycle = def.ms + def.everyMs + (def.pauseMs ?? 0)
+      if (entry.clock > cycle) entry.clock -= cycle
+      if (!on || entry.clock < 0 || entry.clock > def.ms + (def.pauseMs ?? 0)) {
+        entry.image.setVisible(false)
+        entry.shadow.setVisible(false)
+        continue
+      }
+
+      // A pause partway across, because nobody walks a street at a constant speed and a
+      // figure that does reads as a sprite on a conveyor belt.
+      let progress: number
+      const pauseStart = (def.pauseAt ?? 2) * def.ms
+      if (def.pauseMs && entry.clock > pauseStart && entry.clock <= pauseStart + def.pauseMs) {
+        progress = pauseStart / def.ms
+      } else if (def.pauseMs && entry.clock > pauseStart + def.pauseMs) {
+        progress = (entry.clock - def.pauseMs) / def.ms
+      } else {
+        progress = entry.clock / def.ms
+      }
+
+      const x = Phaser.Math.Linear(def.from, def.to, Phaser.Math.Clamp(progress, 0, 1)) * this.W
+      const bob = Math.abs(Math.sin((entry.clock / 1000) * 5)) * this.H * 0.004
+      entry.image.setPosition(x, def.y * this.H - bob)
+      entry.shadow.setPosition(x, def.y * this.H + 1)
+      entry.image.setDepth(def.y * this.H)
+      entry.shadow.setDepth(def.y * this.H - 1)
+      entry.image.setVisible(true)
+      entry.shadow.setVisible(true)
     }
   }
 
@@ -400,7 +525,9 @@ export class WorldScene extends Phaser.Scene {
     this.since += delta
     this.movePlayer(delta)
     this.moveActors(delta)
+    this.moveAmbient(delta)
     this.tickClock(delta)
+    this.tickEncounters(delta)
     this.aim()
     if (this.ctx.input.actionPressed) this.act()
     this.autoExits(delta)
@@ -486,13 +613,110 @@ export class WorldScene extends Phaser.Scene {
    */
   private tickClock(delta: number) {
     if (!this.ctx.engine.state.flags['onboard:street']) return
-    this.minuteAcc += (delta / 1000) * this.timeScale
+    this.minuteAcc += (delta / 1000) * this.timeScale * BASE_TIME
     if (this.minuteAcc < 1) return
     const minutes = Math.floor(this.minuteAcc)
     this.minuteAcc -= minutes
     this.ctx.engine.dispatch({ t: 'clock.advanced', minutes })
     this.timeTriggers()
+    this.onMinute()
     this.pushHud()
+  }
+
+  /**
+   * הדקה — everything that is allowed to notice that time passed.
+   *
+   * One place, once a minute, in a fixed order: the timetable moves people, then the
+   * windows open and close. Spreading either of those through the update loop is how a
+   * scene ends up with two clocks that disagree.
+   */
+  private onMinute() {
+    const state = this.ctx.engine.state
+    if (state.minute === this.lastMinute) return
+    this.lastMinute = state.minute
+    this.applySchedule()
+    this.tickWindows()
+  }
+
+  /**
+   * מי פה עכשיו — the timetable, applied to the people standing in this painting.
+   *
+   * A scheduled actor is moved and shown or hidden; an actor nobody scheduled keeps
+   * exactly the position the scene gave them. The scene's own `when` still applies on
+   * top, so "Ofir is at the ground after twenty to four" and "and only if he likes you"
+   * are two separate statements that compose instead of one that has to be rewritten.
+   */
+  private applySchedule() {
+    const state = this.ctx.engine.state
+    const placements = placementsAt(state, SCHEDULE_1986, this.def.id)
+    for (const actor of this.actors) {
+      const placement = placements.get(actor.def.id)
+      if (!placement) continue
+      const visible = placement.visible && meets(state, actor.def.when)
+      actor.image.setVisible(visible)
+      actor.shadow.setVisible(visible)
+      if (!visible) continue
+      if (placement.x !== undefined) {
+        actor.baseX = placement.x * this.W
+        actor.image.x = actor.baseX
+        actor.shadow.x = actor.baseX
+      }
+      if (placement.y !== undefined) {
+        const y = placement.y * this.H
+        this.applyScale(actor.image, actor.shadow, y, { far: actor.def.size, near: actor.def.size })
+        actor.image.y = y
+      }
+      if (placement.facing) actor.image.setFlipX(placement.facing === 'left')
+    }
+  }
+
+  /**
+   * החלונות — an opportunity that has just become real, and one the afternoon just took.
+   *
+   * The notice is one quiet sentence about the WORLD ("somebody is kicking a ball down
+   * the alley"), never an objective and never a name with a marker on it. A window that
+   * closes says nothing at all: the player finds out by going to look and finding an
+   * empty step, which is the only version of that information worth having.
+   */
+  private tickWindows() {
+    const { events, opened } = tickOpportunities(this.ctx.engine.state, OPPORTUNITIES_1986)
+    if (events.length === 0) return
+    this.ctx.engine.dispatch(...events)
+    const notice = opened.find((entry) => entry.noticeHe)
+    if (notice?.noticeHe) this.ctx.bus.emit('toast', { text: notice.noticeHe, tone: 'plain' })
+  }
+
+  /**
+   * המקריות — rolled off the save's own seed, on a timer, only where a place is busy.
+   *
+   * It never fires while a conversation is open, never in the first seconds of a room,
+   * and never indoors: a coin in the gutter of your own kitchen is not a surprise, it is
+   * a slot machine. Everything it can produce is in `content/encounters1986.ts`, so the
+   * question "what can happen to me on this street" has a file for an answer.
+   */
+  private tickEncounters(delta: number) {
+    const chance = ENCOUNTER_CHANCE[this.def.id]
+    if (!chance) return
+    if (!this.ctx.engine.state.flags['onboard:street']) return
+    if (this.since < 2500) return
+    this.sinceEncounter += delta
+    if (this.sinceEncounter < ENCOUNTER_EVERY) return
+    this.sinceEncounter = 0
+
+    const state = this.ctx.engine.state
+    const { picked, consumed } = rollEncounter(state, ENCOUNTERS_1986, '1986', this.def.id, chance)
+    this.ctx.engine.dispatch(...encounterEvents(picked, consumed))
+    if (!picked) return
+    this.ctx.dialogue.startLines([{ who: picked.who ?? null, text: picked.lineHe }], () =>
+      this.applyEncounter(picked.id),
+    )
+  }
+
+  private applyEncounter(id: string) {
+    const found = ENCOUNTERS_1986.find((entry) => entry.id === id)
+    if (!found) return
+    this.ctx.dialogue.applyEffects(found.effects)
+    this.refresh()
   }
 
   private timeTriggers() {
@@ -839,6 +1063,55 @@ export class WorldScene extends Phaser.Scene {
     })
   }
 
+  // -------------------------------------------------------------- the camera ------
+
+  /**
+   * הבמאי — one controller, every conversation in the game.
+   *
+   * The content says who the camera is on and how close (`ConversationShot`); this
+   * executes it and, crucially, puts the camera back. Writing this per conversation
+   * would mean eleven implementations of "return to the world camera", and the tenth one
+   * would be the one that forgets.
+   *
+   * It is restrained on purpose. A push-in of a few per cent and a slow pan onto a face
+   * reads as attention; a hard cut to a close-up in a game with no facial animation reads
+   * as a bug. On a phone the picture is already framed to a band, so the zoom is scaled
+   * down again — a big push on a small viewport just loses the speaker off the edge.
+   */
+  private frameShot(shot: ConversationShot | null) {
+    const cam = this.cameras.main
+    if (!shot) {
+      if (!this.shotting) return
+      this.shotting = false
+      cam.stopFollow()
+      this.tweens.add({ targets: cam, zoom: this.baseZoom, duration: 420, ease: 'Sine.easeInOut' })
+      cam.startFollow(this.player, true, 0.09, 0.09)
+      return
+    }
+
+    const subject =
+      shot.focus === 'player'
+        ? this.player
+        : (this.actors.find((actor) => actor.def.id === shot.focus || actor.def.nameHe === shot.focus)
+            ?.image ?? null)
+
+    const push = { close: 1.16, ots: 1.1, medium: 1.05, wide: 0.96 }[shot.framing]
+    const narrow = cam.width < 520 ? 0.55 : 1
+    this.shotting = true
+    cam.stopFollow()
+
+    const targetX = subject ? (subject.x + this.player.x) / 2 : this.player.x
+    const targetY = subject ? (subject.y + this.player.y) / 2 - this.H * 0.06 : this.player.y
+
+    this.tweens.add({
+      targets: cam,
+      zoom: this.baseZoom * (1 + (push - 1) * narrow),
+      duration: shot.duration ?? 520,
+      ease: 'Sine.easeInOut',
+    })
+    cam.pan(targetX, targetY, shot.duration ?? 520, 'Sine.easeInOut')
+  }
+
   // ------------------------------------------------------------------- the wow ----
 
   private playArrival() {
@@ -875,6 +1148,12 @@ export class WorldScene extends Phaser.Scene {
             this.time.delayedCall(2200, () =>
               this.ctx.bus.emit('anchor', { anchor: this.ctx.anchor, showing: true }),
             )
+            // הגעת לבד — the single fact Stage A is really about, recorded once, at the
+            // only moment it is unambiguously true: the child is inside the ground and
+            // his father did not bring him.
+            if (!this.ctx.engine.state.flags['went:alone']) {
+              this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'went:alone' })
+            }
             if (this.ctx.engine.state.flags['match:over']) {
               this.matchPhase = 'over'
               this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'arrived:late' })
@@ -941,6 +1220,30 @@ export class WorldScene extends Phaser.Scene {
       memoryHe: card.memoryHe,
       ...(card.after ? { after: card.after } : {}),
     })
+  }
+
+  /**
+   * A card is open over the world, so the world stops — and the clock with it.
+   *
+   * Reading your own profile may not cost you the afternoon. That is not generosity: a
+   * screen that charges the player for looking at it is a screen they stop opening, and
+   * a life simulation whose life screen is a trap has built the wrong thing.
+   */
+  setPaused(on: boolean) {
+    this.paused = on
+    if (on) {
+      this.vx = 0
+      this.vy = 0
+      this.ctx.bus.emit('prompt', null)
+    } else {
+      this.idleFor = 0
+    }
+  }
+
+  /** Developer-only: put the child somewhere, with no door in between. */
+  debugTravel(location: string) {
+    this.paused = false
+    this.travel(location as LocationId, 'start')
   }
 
   goHome() {

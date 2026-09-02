@@ -1,3 +1,4 @@
+import { at } from '../clock'
 import { KOBI_LEAVES } from '../world/scenes'
 
 import type { Conversation } from './script'
@@ -97,6 +98,10 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'הקופסה האדומה. עד היום היא הייתה ריקה.' },
           { who: null, text: 'עכשיו יש בה משהו, ואתה יודע בדיוק מאיפה הוא.' },
         ],
+        choices: [
+          { id: 'open', text: 'לפתוח את הקופסה', then: [{ e: 'flag', flag: 'open:redbox' }] },
+          { id: 'shut', text: 'להשאיר סגורה', then: [] },
+        ],
       },
       {
         lines: [
@@ -193,13 +198,38 @@ const CONVERSATIONS: Conversation[] = [
     nameHe: 'קובי',
     branches: [
       {
+        shot: { focus: 'kobi', framing: 'close', ambienceDuck: 0.55 },
         lines: [
           { who: 'קובי', text: 'אתה בן שמונה.' },
           { who: null, text: 'הוא מניח את העיתון על הברך. זה הרגע שבו הוא בדרך כלל מתרכך.' },
           { who: 'קובי', text: 'שם יש עשרים אלף איש. אתה נעלם לי בשתי שניות.' },
           { who: 'קובי', text: 'עוד שנה־שנתיים. תבטיח לי שתחכה.' },
         ],
-        then: [{ e: 'flag', flag: 'asked:ticket' }],
+        // ההבטחה. It costs nothing now and it is the single line the last scene of the
+        // chapter is built on: a father who was promised, and a child who came anyway,
+        // are a different reunion from a father who was told the truth in the doorway.
+        choices: [
+          {
+            id: 'promise',
+            text: 'אני מבטיח.',
+            then: [
+              { e: 'flag', flag: 'asked:ticket' },
+              { e: 'personality', key: 'reliability', delta: 6 },
+              { e: 'rel', who: 'kobi', axis: 'trust', delta: 8 },
+              { e: 'remember', who: 'kobi', eventId: 'promised-to-wait', significance: 'major' },
+            ],
+          },
+          {
+            id: 'silence',
+            text: 'לא לענות.',
+            then: [
+              { e: 'flag', flag: 'asked:ticket' },
+              { e: 'personality', key: 'stubbornness', delta: 6 },
+              { e: 'rel', who: 'kobi', axis: 'tension', delta: 6 },
+              { e: 'remember', who: 'kobi', eventId: 'would-not-promise', significance: 'notable' },
+            ],
+          },
+        ],
       },
     ],
   },
@@ -220,6 +250,45 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'flag', flag: 'rachel:secret' },
           { e: 'bond', who: 'rachel', delta: 4 },
           { e: 'trait', trait: 'independence', delta: 3 },
+        ],
+      },
+      {
+        // אמא בדלת — the fork the reunion reads, and the player does not know it yet.
+        // Telling her the truth is expensive and telling her a story is free, which is
+        // exactly the shape of the decision at eight years old.
+        when: { all: [{ afterMinute: KOBI_LEAVES }, { notFlag: 'told:rachel' }, { flag: 'knows:match' }] },
+        shot: { focus: 'rachel', framing: 'medium', ambienceDuck: 0.4 },
+        lines: [
+          { who: null, text: 'היא עומדת בפתח המטבח עם המגבת ביד ורואה שאתה כבר בנעליים.' },
+          { who: 'רחל', text: 'לאן?' },
+        ],
+        choices: [
+          {
+            id: 'truth',
+            text: 'לבלומפילד. אחרי אבא.',
+            then: [
+              { e: 'flag', flag: 'told:rachel' },
+              { e: 'flag', flag: 'rachel:knows' },
+              { e: 'rel', who: 'rachel', axis: 'trust', delta: 10 },
+              { e: 'rel', who: 'rachel', axis: 'tension', delta: 14 },
+              { e: 'personality', key: 'courage', delta: 6 },
+              { e: 'remember', who: 'rachel', eventId: 'told-the-truth', significance: 'major' },
+              { e: 'goto', node: 'rachel-doorway' },
+            ],
+          },
+          {
+            id: 'lie',
+            text: 'לאופיר, למטה.',
+            then: [
+              { e: 'flag', flag: 'told:rachel' },
+              { e: 'flag', flag: 'lied:rachel' },
+              { e: 'rel', who: 'rachel', axis: 'trust', delta: -12 },
+              { e: 'personality', key: 'impulsiveness', delta: 5 },
+              { e: 'wellbeing', key: 'stress', delta: 12 },
+              { e: 'remember', who: 'rachel', eventId: 'lied-about-bloomfield', significance: 'major' },
+              { e: 'toast', text: 'היא מהנהנת ולא מורידה ממך את העיניים.' },
+            ],
+          },
         ],
       },
       {
@@ -435,10 +504,18 @@ const CONVERSATIONS: Conversation[] = [
           { who: 'שכן', text: 'אבא שלך יצא לפני עשר דקות. רץ כמו ילד.' },
           { who: 'שכן', text: 'כולם הולכים מזרחה היום. יש משחק.' },
         ],
-        then: [{ e: 'flag', flag: 'knows:match' }],
+        then: [
+          { e: 'flag', flag: 'knows:match' },
+          { e: 'trait', trait: 'streetSmarts', delta: 4 },
+          { e: 'redheart', key: 'community', delta: 4 },
+        ],
       },
       {
-        lines: [{ who: 'שכן', text: 'תגיד לאמא שלך שהמים חזרו.' }],
+        lines: [
+          { who: 'שכן', text: 'תגיד לאמא שלך שהמים חזרו.' },
+          { who: 'שכן', text: 'ואל תעבור את הכביש הגדול לבד. שמעת?' },
+        ],
+        then: [{ e: 'trait', trait: 'streetSmarts', delta: 3 }],
       },
     ],
   },
@@ -450,7 +527,11 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'על הקיר, באדום, בכתב יד גדול: משהו שנכתב בלילה ולא נמחק מאז.' },
           { who: null, text: 'אתה יודע מה כתוב שם גם בלי לקרוא.' },
         ],
-        then: [{ e: 'trait', trait: 'footballAffinity', delta: 2 }],
+        then: [
+          { e: 'trait', trait: 'footballAffinity', delta: 2 },
+          { e: 'trait', trait: 'streetSmarts', delta: 3 },
+          { e: 'redheart', key: 'terraceCulture', delta: 4 },
+        ],
       },
     ],
   },
@@ -465,7 +546,7 @@ const CONVERSATIONS: Conversation[] = [
         then: [
           { e: 'money', agorot: 20, why: 'מציאה' },
           { e: 'flag', flag: 'found:coin' },
-          { e: 'trait', trait: 'streetSmarts', delta: 2 },
+          { e: 'trait', trait: 'streetSmarts', delta: 4 },
           { e: 'toast', text: 'עשרים אגורות' },
         ],
       },
@@ -836,8 +917,107 @@ const CONVERSATIONS: Conversation[] = [
   {
     id: 'kobi-found',
     nameHe: 'קובי',
+    /**
+     * המפגש — the same four feelings every time, in a different order.
+     *
+     * Brief §31: fear, anger, disbelief and love, and never a speech. What changes is
+     * WHICH of them arrives first, and that is read off the save rather than off a
+     * dialogue tree the player can feel branching: whether he was promised, whether he
+     * was lied to at home, whether somebody he knows brought the child in, and how long
+     * he has been looking. Every branch is six lines or fewer.
+     */
     branches: [
       {
+        // He has been searching. The mother told him the truth on the phone at the
+        // kiosk, or a neighbour did, and the match went past him.
+        when: { flag: 'rachel:knows' },
+        shot: { focus: 'kobi', framing: 'close', ambienceDuck: 0.7 },
+        lines: [
+          { who: null, text: 'הוא מוצא אותך לפני שאתה מוצא אותו. הוא כבר חיפש.' },
+          { who: 'קובי', text: 'אמא אמרה לי.' },
+          { who: null, text: 'הוא לא מרים את הקול. הוא מוריד אותו, וזה הרבה יותר גרוע.' },
+          { who: 'קובי', text: 'תסתכל עליי. שאני אראה שאתה שלם.' },
+          { who: null, text: 'ואז הוא מחבק אותך חזק מדי, ולא אומר כלום עוד הרבה זמן.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'found:kobi' },
+          { e: 'rel', who: 'kobi', axis: 'trust', delta: 10 },
+          { e: 'rel', who: 'kobi', axis: 'tension', delta: 10 },
+          { e: 'bond', who: 'kobi', delta: 12 },
+          { e: 'trait', trait: 'independence', delta: 10 },
+          { e: 'remember', who: 'kobi', eventId: 'came-anyway', significance: 'major' },
+          { e: 'keep' },
+          { e: 'ending', id: 'home' },
+        ],
+      },
+      {
+        // He was promised, and the promise is standing next to him in a red t-shirt.
+        when: { relationshipMemory: { who: 'kobi', eventId: 'promised-to-wait' } },
+        shot: { focus: 'kobi', framing: 'close', ambienceDuck: 0.7 },
+        lines: [
+          { who: null, text: 'הוא מסתובב עם כולם ואז נעצר, כי משהו בשורה מתחת לא במקום.' },
+          { who: 'קובי', text: 'הבטחת לי.' },
+          { who: null, text: 'אתה לא עונה. אין מה לענות.' },
+          { who: null, text: 'הוא מרים אותך באוויר, וזה לוקח לו שנייה יותר מדי לשים אותך בחזרה.' },
+          { who: 'קובי', text: 'טעיתי. לא אתה.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'found:kobi' },
+          { e: 'bond', who: 'kobi', delta: 14 },
+          { e: 'rel', who: 'kobi', axis: 'tension', delta: 8 },
+          { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 12 },
+          { e: 'trait', trait: 'independence', delta: 12 },
+          { e: 'remember', who: 'kobi', eventId: 'broke-the-promise', significance: 'major' },
+          { e: 'keep' },
+          { e: 'ending', id: 'home' },
+        ],
+      },
+      {
+        // Somebody at the gate said his name, and word travels along a terrace faster
+        // than a child does.
+        when: { flag: 'entry:name' },
+        shot: { focus: 'both', framing: 'medium', ambienceDuck: 0.6 },
+        lines: [
+          { who: null, text: 'הוא כבר יודע. מישהו אמר לו לפני עשר דקות ששאלו עליו בשער.' },
+          { who: 'קובי', text: 'אמרו לי שיש פה ילד ששואל את השם שלי.' },
+          { who: null, text: 'הוא מנסה להיראות כועס. הוא לא מצליח, כי כל מי שסביבו מסתכל עליכם.' },
+          { who: 'קובי', text: 'אמא הולכת להרוג את שנינו.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'found:kobi' },
+          { e: 'bond', who: 'kobi', delta: 12 },
+          { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 14 },
+          { e: 'redheart', key: 'community', delta: 10 },
+          { e: 'trait', trait: 'independence', delta: 9 },
+          { e: 'keep' },
+          { e: 'ending', id: 'home' },
+        ],
+      },
+      {
+        // The child lied on the way out and has been carrying it up the stairs.
+        when: { flag: 'lied:rachel' },
+        shot: { focus: 'kobi', framing: 'ots', ambienceDuck: 0.7 },
+        lines: [
+          { who: null, text: 'הוא מסתובב, ולרגע אחד הפנים שלו לא מבינות מה הן רואות.' },
+          { who: 'קובי', text: 'איך…' },
+          { who: null, text: 'ואז הוא נזכר לשאול את השאלה השנייה, וזאת הקשה.' },
+          { who: 'קובי', text: 'מה אמרת לאמא?' },
+          { who: null, text: 'אתה מסתכל על הנעליים. הוא לא שואל שוב.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'found:kobi' },
+          { e: 'bond', who: 'kobi', delta: 9 },
+          { e: 'rel', who: 'kobi', axis: 'trust', delta: -6 },
+          { e: 'rel', who: 'kobi', axis: 'tension', delta: 16 },
+          { e: 'wellbeing', key: 'regret', delta: 12 },
+          { e: 'trait', trait: 'independence', delta: 10 },
+          { e: 'remember', who: 'kobi', eventId: 'came-anyway', significance: 'major' },
+          { e: 'keep' },
+          { e: 'ending', id: 'home' },
+        ],
+      },
+      {
+        shot: { focus: 'kobi', framing: 'close', ambienceDuck: 0.7 },
         lines: [
           { who: null, text: 'הוא עומד עם הגב אליך, הידיים על הראש, וצועק משהו לאוויר.' },
           { who: null, text: 'ואז הוא מסתובב.' },
@@ -851,8 +1031,389 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'flag', flag: 'found:kobi' },
           { e: 'bond', who: 'kobi', delta: 12 },
           { e: 'trait', trait: 'independence', delta: 10 },
+          { e: 'keep' },
           { e: 'ending', id: 'home' },
         ],
+      },
+    ],
+  },
+
+  // =================================================================================
+  // ההתנגשות — the people who are only there for part of the afternoon.
+  // =================================================================================
+
+  {
+    id: 'rachel-doorway',
+    nameHe: 'רחל',
+    branches: [
+      {
+        shot: { focus: 'rachel', framing: 'close', ambienceDuck: 0.5 },
+        lines: [
+          { who: null, text: 'היא לא אומרת לא. היא גם לא אומרת כן.' },
+          { who: 'רחל', text: 'אתה יודע איפה שער שבע?' },
+          { who: null, text: 'אתה מהנהן, וזה חצי נכון.' },
+          { who: 'רחל', text: 'אם משהו — אתה עומד במקום אחד ולא זז עד שהוא מוצא אותך. שמעת?' },
+        ],
+        then: [
+          { e: 'flag', flag: 'knows:gate7' },
+          { e: 'bond', who: 'rachel', delta: 6 },
+          { e: 'wellbeing', key: 'stress', delta: -6 },
+        ],
+      },
+    ],
+  },
+
+  // ------------------------------------------------------------------ המידע: עמית ---
+  {
+    id: 'amit-kiosk',
+    nameHe: 'עמית',
+    branches: [
+      {
+        when: { flag: 'knows:gate7' },
+        lines: [
+          { who: 'עמית', text: 'כבר אמרתי לך הכול. תלך כבר.' },
+        ],
+      },
+      {
+        // Before one o'clock, and he is twenty agorot short. What the player does here
+        // is remembered for the rest of the afternoon.
+        when: { minAgorot: 20 },
+        shot: { focus: 'amit', framing: 'medium' },
+        lines: [
+          { who: null, text: 'עמית עומד ליד הדלפק וסופר מטבעות בכף היד. שוב.' },
+          { who: 'עמית', text: 'חסר לי עשרים. תמיד חסר לי עשרים.' },
+        ],
+        choices: [
+          {
+            id: 'pay',
+            text: 'קח, יש לי.',
+            then: [
+              { e: 'money', agorot: -20, why: 'לעמית' },
+              { e: 'bond', who: 'amit', delta: 14 },
+              { e: 'personality', key: 'empathy', delta: 8 },
+              { e: 'remember', who: 'amit', eventId: 'paid-for-the-paper', significance: 'major' },
+              { e: 'toast', text: 'הוא לא אומר תודה. הוא יזכור.' },
+            ],
+          },
+          { id: 'watch', text: 'לא להגיד כלום.', then: [{ e: 'personality', key: 'curiosity', delta: 2 }] },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'עמית סופר מטבעות ליד הדלפק, ובעל הקיוסק מחכה בסבלנות של מישהו שראה את זה כבר.' },
+          { who: 'עמית', text: 'העיתון עולה יותר מאתמול. אני נשבע לך.' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'amit-street',
+    nameHe: 'עמית',
+    branches: [
+      {
+        when: { flag: 'knows:gate7' },
+        lines: [{ who: 'עמית', text: 'מה, שכחת? שער שבע. לך.' }],
+      },
+      {
+        // He remembers the twenty agorot, and the information is free.
+        when: { relationshipMemory: { who: 'amit', eventId: 'paid-for-the-paper' } },
+        shot: { focus: 'amit', framing: 'ots', ambienceDuck: 0.4 },
+        lines: [
+          { who: null, text: 'הוא רואה אותך מרחוק ומקפל את העיתון כך שהעמוד הנכון למעלה.' },
+          { who: 'עמית', text: 'בגלל שנתת לי — תשמע טוב.' },
+          { who: 'עמית', text: 'זה לא סתם משחק היום. אם מנצחים, נגמר. אם לא — לא נגמר.' },
+          { who: 'עמית', text: 'והשער שבו כולם מהשכונה עומדים זה שבע. לא שש, לא שמונה.' },
+        ],
+        then: [
+          { e: 'seize', opportunity: 'amit-paper' },
+          { e: 'give', item: 'newspaper' },
+          { e: 'toast', text: 'קרעת את עמוד הספורט. הוא נתן לך.' },
+        ],
+      },
+      {
+        when: { minAgorot: 30 },
+        shot: { focus: 'amit', framing: 'medium' },
+        lines: [
+          { who: null, text: 'עמית יושב על המדרכה עם עיתון פתוח על הברכיים, ומכסה חצי ממנו ביד.' },
+          { who: 'עמית', text: 'מה, אתה רוצה לדעת? זה שלי, קניתי אותו.' },
+        ],
+        choices: [
+          {
+            id: 'buy',
+            text: 'שלושים אגורות, ואני קורא איתך.',
+            then: [
+              { e: 'money', agorot: -30, why: 'עמית' },
+              { e: 'seize', opportunity: 'amit-paper' },
+              { e: 'give', item: 'newspaper' },
+            ],
+          },
+          {
+            id: 'ask',
+            text: 'רק תגיד לי מה כתוב.',
+            then: [
+              { e: 'seize', opportunity: 'amit-paper' },
+              { e: 'rel', who: 'amit', axis: 'tension', delta: 4 },
+            ],
+          },
+          { id: 'go', text: 'עזוב.', then: [] },
+        ],
+      },
+      {
+        shot: { focus: 'amit', framing: 'medium' },
+        lines: [
+          { who: null, text: 'עמית יושב על המדרכה עם עיתון פתוח על הברכיים.' },
+          { who: 'עמית', text: 'אתה יודע לקרוא מהר? כי אני לא נותן לך אותו ביד.' },
+        ],
+        choices: [
+          {
+            id: 'read',
+            text: 'להסתכל מעבר לכתף שלו.',
+            then: [
+              { e: 'seize', opportunity: 'amit-paper' },
+              { e: 'personality', key: 'curiosity', delta: 6 },
+            ],
+          },
+          { id: 'go', text: 'אחר כך.', then: [] },
+        ],
+      },
+    ],
+  },
+
+  // -------------------------------------------------------------------- קרן ---------
+  {
+    id: 'keren-street',
+    nameHe: 'קרן',
+    branches: [
+      {
+        when: { bond: { who: 'keren', min: 20 } },
+        lines: [
+          { who: 'קרן', text: 'אם אתה הולך — תלך כבר, לפני שאמא שלך תראה אותך.' },
+        ],
+      },
+      {
+        shot: { focus: 'keren', framing: 'medium', ambienceDuck: 0.3 },
+        lines: [
+          { who: null, text: 'קרן יושבת על המדרגה עם צעיף אדום על הברכיים ומותחת חוט שיצא ממנו.' },
+          { who: 'קרן', text: 'זה של אח שלי. הוא שכח אותו והוא ימות.' },
+          { who: null, text: 'היא מסתכלת עליך כמו מישהי שכבר יודעת לאן אתה הולך.' },
+        ],
+        choices: [
+          {
+            id: 'ask',
+            text: 'איך זה שם? ביציע.',
+            then: [
+              { e: 'bond', who: 'keren', delta: 12 },
+              { e: 'redheart', key: 'terraceCulture', delta: 10 },
+              { e: 'wellbeing', key: 'belonging', delta: 6 },
+              { e: 'goto', node: 'keren-terrace' },
+            ],
+          },
+          {
+            id: 'scarf',
+            text: 'אני יכול לקחת לו אותו.',
+            when: { flag: 'knows:match' },
+            noteHe: 'צריך לדעת שיש היום משחק',
+            then: [
+              { e: 'give', item: 'scarf' },
+              { e: 'bond', who: 'keren', delta: 16 },
+              { e: 'personality', key: 'responsibility', delta: 6 },
+              { e: 'remember', who: 'keren', eventId: 'took-the-scarf', significance: 'notable' },
+              { e: 'toast', text: 'צעיף אדום, מקופל לרבע, בתוך החולצה.', tone: 'red' },
+            ],
+          },
+          { id: 'nothing', text: 'להמשיך.', then: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'keren-terrace',
+    nameHe: 'קרן',
+    branches: [
+      {
+        lines: [
+          { who: 'קרן', text: 'רועש. ואף אחד לא יושב, גם כשיש כיסא.' },
+          { who: 'קרן', text: 'ואם מבקיעים אתה לא רואה כלום, כי כולם קופצים עליך.' },
+          { who: null, text: 'היא אומרת את זה כאילו זה חיסרון. אתה שומע את זה אחרת.' },
+        ],
+        then: [{ e: 'redheart', key: 'travelDrive', delta: 6 }],
+      },
+    ],
+  },
+
+  // --------------------------------------------------------------------- אפי --------
+  {
+    id: 'efi-hall',
+    nameHe: 'אפי',
+    branches: [
+      {
+        when: { flag: 'saw:hall' },
+        lines: [{ who: 'אפי', text: 'אמרתי לך שזה שווה. עכשיו תלך לאבא שלך.' }],
+      },
+      {
+        when: { afterMinute: at(14, 0) },
+        lines: [
+          { who: null, text: 'אפי כבר לא פה. הכדור שלו נשאר ליד האבן, והוא לא כזה שמשאיר כדור.' },
+        ],
+      },
+      {
+        // The other life. It closes at two, and the player almost certainly does not
+        // know that — which is the point of a missable thing.
+        shot: { focus: 'efi', framing: 'medium' },
+        lines: [
+          { who: null, text: 'אפי מחזיק כדור שהוא לא בועט בו. הוא מקפיץ אותו על הרצפה, פעם, ועוד פעם.' },
+          { who: 'אפי', text: 'זה לא כדורגל. זה אחר.' },
+          { who: 'אפי', text: 'יש אולם. אני הולך לשם עוד רגע, זה חמש דקות מפה.' },
+        ],
+        choices: [
+          {
+            id: 'go',
+            text: 'בוא נלך.',
+            then: [
+              { e: 'seize', opportunity: 'efi-hall' },
+              { e: 'goto', node: 'efi-hall-after' },
+            ],
+          },
+          {
+            id: 'no',
+            text: 'היום יש משחק.',
+            when: { flag: 'knows:match' },
+            noteHe: 'צריך לדעת שיש היום משחק',
+            then: [
+              { e: 'redheart', key: 'footballLove', delta: 5 },
+              { e: 'rel', who: 'efi', axis: 'distance', delta: 8 },
+            ],
+          },
+          { id: 'later', text: 'אולי אחר כך.', then: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'efi-hall-after',
+    nameHe: 'אפי',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'אולם קטן, ריח של גומי ושל פרקט. הכדור נשמע אחרת פה — גבוה, יבש, מהיר.' },
+          { who: 'אפי', text: 'תראה. אני זורק מפה ואתה תופס.' },
+          { who: null, text: 'אתה לא תופס. אתם צוחקים. חוזרים על זה עשרים פעם.' },
+          { who: null, text: 'כשאתה יוצא החוצה השמש כבר נמוכה, והרחוב מלא אנשים שהולכים לכיוון אחד.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'saw:hall' },
+          { e: 'wellbeing', key: 'happiness', delta: 10 },
+          { e: 'wellbeing', key: 'exhaustion', delta: 8 },
+        ],
+      },
+    ],
+  },
+
+  // ============================================================ הדרך לבלומפילד =======
+  {
+    id: 'route-shortcut',
+    branches: [
+      {
+        when: { flag: 'used:shortcut' },
+        lines: [{ who: null, text: 'הרווח בין הבתים. אתה כבר יודע לאן הוא יוצא.' }],
+      },
+      {
+        // The street family's payoff: two minutes and a piece of knowledge, for a child
+        // who has been paying attention to his own neighbourhood.
+        when: { personalityAbove: { key: 'streetSmarts', min: 14 } },
+        lines: [
+          { who: null, text: 'רווח בין שני בתים, רחב בדיוק כמו ילד. מהצד השני שומעים את אותו רעש, רק קרוב יותר.' },
+          { who: null, text: 'אתה נכנס, מסובב את הכתפיים, ויוצא שלושה בניינים אחרי כולם.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'used:shortcut' },
+          { e: 'flag', flag: 'knows:route' },
+          { e: 'trait', trait: 'streetSmarts', delta: 8 },
+          { e: 'toast', text: 'קיצור דרך. חסכת כמה דקות.' },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'רווח צר בין שני בתים, מלא ארגזים. אולי הוא מוביל לאנשהו ואולי לא.' },
+          { who: null, text: 'אתה לא מכיר את הצד השני מספיק טוב כדי להיכנס לבד.' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'gate-turnstile',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'קרוסלת ברזל, גבוהה ממך. כל אחד שנכנס דוחף אותה פעם אחת והיא מקרקשת.' },
+          { who: null, text: 'ילדים עוברים עם מבוגר, מתחת ליד שלו. סדרן מסתכל ולא אומר כלום.' },
+        ],
+        then: [{ e: 'trait', trait: 'streetSmarts', delta: 3 }],
+      },
+    ],
+  },
+  {
+    id: 'gate-family',
+    nameHe: 'אבא עם ילד',
+    branches: [
+      {
+        when: { flag: 'entry:granted' },
+        lines: [{ who: 'אבא עם ילד', text: 'נו, קדימה, זה מתחיל.' }],
+      },
+      {
+        // The RESOURCE route ends here too: a child with a ticket and no adult still
+        // needs somebody to walk in beside.
+        when: { hasItem: 'ticket-stub' },
+        shot: { focus: 'both', framing: 'medium' },
+        lines: [
+          { who: null, text: 'אבא ובן, בערך בגיל שלך, בתור לקרוסלה. הוא רואה את הכרטיס ביד שלך.' },
+          { who: 'אבא עם ילד', text: 'לבד עם כרטיס? יאללה, תיכנס לידנו, שלא ידחפו אותך.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'entry:granted' },
+          { e: 'flag', flag: 'entry:ticket' },
+          { e: 'wellbeing', key: 'belonging', delta: 8 },
+          { e: 'toast', text: 'אתה נכנס', tone: 'red' },
+        ],
+      },
+      {
+        // The STREET route: no ticket, no name, no friend. Just a child who knows how a
+        // queue works and is willing to ask. Nothing is climbed and nothing is stolen.
+        when: { personalityAbove: { key: 'streetSmarts', min: 20 } },
+        shot: { focus: 'both', framing: 'ots' },
+        lines: [
+          { who: null, text: 'אתה עומד ליד הבן שלו ומחזיק את הקצה של החולצה שלך, כאילו אתה מחכה למישהו.' },
+          { who: null, text: 'האבא סופר ראשים כמו כל אבא, מגיע לשלושה במקום שניים, ועוצר.' },
+          { who: 'אבא עם ילד', text: 'ואתה של מי?' },
+        ],
+        choices: [
+          {
+            id: 'truth',
+            text: 'אבא שלי בפנים. בשער שבע.',
+            then: [
+              { e: 'flag', flag: 'entry:granted' },
+              { e: 'flag', flag: 'entry:family' },
+              { e: 'personality', key: 'courage', delta: 8 },
+              { e: 'redheart', key: 'community', delta: 8 },
+              { e: 'toast', text: 'הוא מניח לך יד על הכתף ומעביר אותך איתם.', tone: 'red' },
+            ],
+          },
+          {
+            id: 'silent',
+            text: 'לא לענות.',
+            then: [
+              { e: 'wellbeing', key: 'stress', delta: 10 },
+              { e: 'toast', text: 'הוא מושך את הבן שלו קדימה ואתה נשאר מאחור.' },
+            ],
+          },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'אבא ובן בתור לקרוסלה. האבא מחזיק שני כרטיסים ומסתכל קדימה.' },
+          { who: null, text: 'אתה לא מצליח לומר כלום, והתור זז.' },
+        ],
+        then: [{ e: 'wellbeing', key: 'loneliness', delta: 5 }],
       },
     ],
   },

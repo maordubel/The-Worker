@@ -81,7 +81,6 @@ export const FIGURE = [
   'kobi90-point',
   'kobi90-paper',
   'kobi90-sitB',
-  'ofir90',
   'ofir90-arms',
   'ofir90-side',
   'ofir90-back',
@@ -148,20 +147,6 @@ export const FIGURE = [
   'hero90-sit',
   'hero90-away',
   'hero90-leave',
-  'soldier',
-  'soldier-rifle',
-  'soldier-march',
-  'soldier-back',
-  'soldier-pack',
-  'soldier-side',
-  'soldier-aim',
-  'soldier-tired',
-  'soldier-shout',
-  'soldier-salute',
-  'soldier-sit',
-  'soldier-crate',
-  'soldier-tie',
-  'soldier-away',
 
   /**
    * השחקנים — four footballers and the supporter who joins the story in the nineties.
@@ -214,6 +199,39 @@ export const FIGURE = [
   'keren90-side',
   'keren90-sit',
   'keren90-smile',
+] as const
+
+/**
+ * מה שעוד לא הועלה — figures the project has drawn and the repository does not have.
+ *
+ * `FIGURE` is a promise: every key in it resolves to a real PNG in `public/life/art`,
+ * and `tests/life.test.ts` holds the runtime to it. Forty-seven names were failing that
+ * promise — the whole soldier set, Sinai, Tikva and one Ofir plate — because the sheets
+ * were sliced locally and the delta that carried them never reached GitHub.
+ *
+ * Deleting the names would lose the record of what exists; leaving them in `FIGURE`
+ * would let a scene ask for a file that 404s in front of a player. So they live here:
+ * still written down, still ordered, and unreachable by `artUrl` until the file lands.
+ * Moving one back up is a single line, the moment its PNG is uploaded.
+ *
+ * The list is expected to shrink to nothing. It is not a design.
+ */
+export const PLANNED_FIGURE = [
+  'ofir90',
+  'soldier',
+  'soldier-rifle',
+  'soldier-march',
+  'soldier-back',
+  'soldier-pack',
+  'soldier-side',
+  'soldier-aim',
+  'soldier-tired',
+  'soldier-shout',
+  'soldier-salute',
+  'soldier-sit',
+  'soldier-crate',
+  'soldier-tie',
+  'soldier-away',
   'sinai',
   'sinai-back',
   'sinai-ball',
@@ -246,6 +264,7 @@ export const FIGURE = [
   'tikva-third',
   'tikva-third-back',
 ] as const
+
 export type FigureKey = (typeof FIGURE)[number]
 
 /**

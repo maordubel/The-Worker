@@ -18,7 +18,7 @@ import type { PlayerIdentity } from './types'
  */
 
 const KEY = 'the-worker:life'
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 
 export type SaveFile = {
   version: number
@@ -56,17 +56,27 @@ function browserStore(): Storage | null {
  * 1978 and the chapter moved from 1980 to 1986. A version-1 file therefore describes a
  * person who is now eight years older than the game believes, in a year the game no
  * longer has: its flags, its bonds and its memories are all keyed to a life that does
- * not exist any more. There is no honest migration for that — reinterpreting an
- * impossible age silently is worse than starting again — so a version-1 file is DROPPED
- * and the player begins the rebased chapter with a clean log. That is deliberate, it
- * only affects development saves from before this build, and the alternative is a save
- * that quietly lies about how old somebody is.
+ * not exist any more. There is no honest migration for that, so a version-1 file is
+ * dropped and the player begins the rebased chapter with a clean log.
+ *
+ * **Version 3 — the real game systems pass.** Resources, wellbeing, personality, the Red
+ * Heart, relationships with six axes, the Red Box, opportunities and a seeded random
+ * cursor. A version-2 file needs NO conversion and loses NOTHING, and that is not luck:
+ * the save is an event log, so a richer reducer simply reads the same rows and produces
+ * a richer life. A save made before the Red Heart existed still contains the moments
+ * that would have moved it, and folding it now moves it. Version 2 is therefore accepted
+ * as-is and re-saved as version 3.
+ *
+ * The rule the whole file exists for: never silently destroy a save. Anything that
+ * cannot be honestly carried forward is refused loudly rather than reinterpreted.
  */
+const READABLE = new Set([2, 3])
+
 function migrate(raw: unknown): SaveFile | null {
   if (!raw || typeof raw !== 'object') return null
   const file = raw as Partial<SaveFile>
   if (typeof file.version !== 'number' || file.version > SAVE_VERSION) return null
-  if (file.version < SAVE_VERSION) return null
+  if (!READABLE.has(file.version)) return null
   if (!Array.isArray(file.events) || !file.identity || typeof file.year !== 'number') return null
   return {
     version: SAVE_VERSION,

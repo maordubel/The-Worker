@@ -1,7 +1,12 @@
 import Phaser from 'phaser'
 
 import type { HistoricalAnchor } from '../anchors'
+import { castFor } from '../characters'
+import { OPPORTUNITIES_1986 } from '../content/opportunities1986'
 import type { LifeEngine } from '../engine'
+import { missedIn, takenIn } from '../opportunities'
+import { buildProfile, type LifeProfile } from '../profile'
+import type { LifeState } from '../types'
 
 import type { LifeBus } from './bus'
 import { CONTEXT_KEY, type LifeContext } from './context'
@@ -27,6 +32,24 @@ import { WorldScene } from './scenes/WorldScene'
  * the same world is playable on a 390px phone and a laptop without a second layout.
  */
 
+/**
+ * מה שמסך יכול לשאול — the shell's whole view of the life.
+ *
+ * Deliberately a snapshot rather than a live object: React must never hold the engine,
+ * or the day arrives when a re-render writes to it. Everything a card needs is already
+ * translated into words by `lib/life/profile.ts`; the raw state comes along only for the
+ * developer panel, which is the one screen allowed to see numbers.
+ */
+export type LifeSnapshot = {
+  profile: LifeProfile
+  /** what the afternoon actually offered, and what it took away again */
+  taken: string[]
+  missed: string[]
+  /** developer-only: the whole truth, never rendered in production */
+  state: LifeState
+  events: number
+}
+
 export type LifeRuntime = {
   input: InputState
   /** the shell owns the box; Phaser's own listener only fires on a window resize */
@@ -37,6 +60,28 @@ export type LifeRuntime = {
   leave(): void
   dismissEnding(): void
   skipIntro(): void
+  /** the profile screen: everything the shell may know, as words */
+  snapshot(): LifeSnapshot
+  /** the world stops while a card is open over it */
+  pause(on: boolean): void
+  /**
+   * לוח הפיתוח — the only door into the life that is not a decision.
+   *
+   * Every one of these writes a real event through the engine, so a debugged life is
+   * still a valid log and still reloads. It is exposed on the runtime rather than reached
+   * for through a global, and the shell only renders the panel outside production
+   * (`NODE_ENV`), which is what keeps rule 44 — never in production — a build fact rather
+   * than a promise.
+   */
+  debug: {
+    jump(minutes: number): void
+    money(agorot: number): void
+    energy(delta: number): void
+    goTo(location: string): void
+    bond(who: string, delta: number): void
+    raise(flag: string): void
+    reseed(seed: string): void
+  }
   destroy(): void
 }
 
@@ -94,6 +139,18 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
 
   const worldScene = () => game.scene.getScene(WorldScene.KEY) as unknown as WorldScene | null
 
+  const snapshot = (): LifeSnapshot => {
+    const state = options.engine.state
+    const cast = castFor(String(state.year)).map((entry) => entry.id)
+    return {
+      profile: buildProfile(state, options.engine.log(), cast, ''),
+      taken: takenIn(state, OPPORTUNITIES_1986).map((entry) => entry.titleHe),
+      missed: missedIn(state, OPPORTUNITIES_1986).map((entry) => entry.titleHe),
+      state,
+      events: options.engine.log().length,
+    }
+  }
+
   return {
     input,
     resize: (width: number, height: number) => {
@@ -103,6 +160,17 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     choose: (id: string) => dialogue.choose(id),
     leave: () => dialogue.leave(),
     dismissEnding: () => worldScene()?.goHome(),
+    snapshot,
+    pause: (on: boolean) => worldScene()?.setPaused(on),
+    debug: {
+      jump: (minutes: number) => options.engine.dispatch({ t: 'clock.advanced', minutes }),
+      money: (agorot: number) => options.engine.dispatch({ t: 'money.changed', agorot, why: 'debug' }),
+      energy: (delta: number) => options.engine.dispatch({ t: 'energy.changed', delta }),
+      goTo: (location: string) => worldScene()?.debugTravel(location),
+      bond: (who: string, delta: number) => options.engine.dispatch({ t: 'bond.shifted', who, delta }),
+      raise: (flag: string) => options.engine.dispatch({ t: 'flag.raised', flag }),
+      reseed: (seed: string) => options.engine.dispatch({ t: 'rng.seeded', seed }),
+    },
     skipIntro: () => {
       const prologue = game.scene.getScene(PrologueScene.KEY) as unknown as PrologueScene | null
       if (prologue && game.scene.isActive(PrologueScene.KEY)) prologue.skip()

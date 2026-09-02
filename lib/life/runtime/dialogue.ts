@@ -1,9 +1,12 @@
 import type { HistoricalAnchor } from '../anchors'
 import { PORTRAIT } from '../content/chapter1986'
 import { DIALOGUE } from '../content/dialogue'
-import type { ChoiceDef, Conversation, Effect, Say } from '../content/script'
+import { OPPORTUNITY } from '../content/opportunities1986'
+import type { ChoiceDef, Conversation, ConversationShot, Effect, Say } from '../content/script'
 import type { LifeEngine } from '../engine'
 import type { LifeEvent } from '../events'
+import { acceptEvents, isAvailable, resolveOutcome } from '../opportunities'
+import { keepEvents, pickRedBoxItem } from '../redbox'
 import { meets } from '../world/types'
 
 import type { DialogueChoice, LifeBus } from './bus'
@@ -27,6 +30,8 @@ export type DialogueHooks = {
   ending(id: string): void
   /** the scene stops the world while this is true */
   onOpen(open: boolean): void
+  /** how this beat is framed; the scene owns the camera, the content owns the shot */
+  shot?(shot: ConversationShot | null): void
 }
 
 export class DialogueRunner {
@@ -81,6 +86,7 @@ export class DialogueRunner {
     this.pendingChoices = branch.choices ?? null
     this.pendingThen = branch.then ?? []
     this.hooks.onOpen(true)
+    this.hooks.shot?.(branch.shot ?? null)
     this.show()
     return true
   }
@@ -109,6 +115,14 @@ export class DialogueRunner {
     if (!choice) return
     if (!meets(this.engine.state, choice.when)) return
     this.pendingChoices = null
+    // The log is a biography, so what was CHOSEN is a row in it — separately from what
+    // the choice did. Nothing derives state from this; it is what makes a second
+    // playthrough legible in the debug panel and to any future telemetry.
+    this.engine.dispatch({
+      t: 'dialogue.choice_made',
+      conversation: this.conversation?.id ?? '',
+      choice: choice.id,
+    })
     this.finish(choice.then)
   }
 
@@ -139,6 +153,7 @@ export class DialogueRunner {
     this.pendingChoices = null
     this.pendingThen = []
     this.bus.emit('dialogue', null)
+    this.hooks.shot?.(null)
     this.hooks.onOpen(false)
     if (done) done()
   }
@@ -183,6 +198,8 @@ export class DialogueRunner {
     const events: LifeEvent[] = []
     let goto: string | null = null
     const after: Array<() => void> = []
+    /** effects an opportunity's own outcome contributed, applied in the same pass */
+    const extra: Effect[] = []
 
     for (const effect of effects) {
       switch (effect.e) {
@@ -241,12 +258,73 @@ export class DialogueRunner {
         case 'ending':
           after.push(() => this.hooks.ending(effect.id))
           break
+
+        // --- the systems pass ---------------------------------------------------
+        case 'wellbeing':
+          events.push({ t: 'wellbeing.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'personality':
+          events.push({ t: 'personality.shifted', key: effect.key, delta: effect.delta })
+          break
+        case 'redheart':
+          events.push({ t: 'redheart.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'rel':
+          events.push({ t: 'relationship.changed', who: effect.who, axis: effect.axis, delta: effect.delta })
+          break
+        case 'remember':
+          events.push({
+            t: 'relationship.memory_added',
+            memory: {
+              characterId: effect.who,
+              eventId: effect.eventId,
+              significance: effect.significance ?? 'notable',
+              year: this.engine.state.year,
+              atMinute: this.engine.state.minute,
+            },
+          })
+          break
+        case 'flagValue':
+          events.push({ t: 'flag.set', flag: effect.flag, value: effect.value })
+          break
+
+        /**
+         * לקחת הזדמנות — a conversation may CLOSE a window, and only that.
+         *
+         * The window itself is defined in the opportunity file with its cost and its
+         * outcomes; the line of dialogue names it. That is what stops the same afternoon
+         * being balanced in two places, and it is why a choice cannot quietly give
+         * itself a cheaper price than the window it belongs to.
+         */
+        case 'seize': {
+          const opportunity = OPPORTUNITY[effect.opportunity]
+          if (!opportunity) break
+          if (!isAvailable(this.engine.state, opportunity)) break
+          for (const event of acceptEvents(opportunity)) events.push(event)
+          const outcome = resolveOutcome(this.engine.state, opportunity)
+          if (outcome) extra.push(...outcome.effects)
+          break
+        }
+
+        /**
+         * מה נשאר — the red box roll, off the seed, out of what the day actually gave
+         * the player. Two saves that ended the same way can still keep different things.
+         */
+        case 'keep': {
+          const { item, consumed } = pickRedBoxItem(this.engine.state)
+          for (const event of keepEvents(item, consumed)) events.push(event)
+          break
+        }
+
         default:
           break
       }
     }
 
     if (events.length > 0) this.engine.dispatch(...events)
+    // An outcome cannot itself open a window, so one level of recursion is the whole
+    // depth this can ever reach — and a cycle is therefore impossible by construction.
+    if (extra.length > 0) this.finishOutcome(extra)
 
     if (goto) {
       this.conversation = null
@@ -257,5 +335,75 @@ export class DialogueRunner {
     }
 
     for (const run of after) run()
+  }
+
+  /**
+   * Apply a list of effects with no conversation around them — a random encounter's
+   * consequence, after its line has been read. It deliberately cannot travel, chain or
+   * end the chapter: those belong to the scene, and an encounter that could end a
+   * chapter would be a lottery rather than a life.
+   */
+  applyEffects(effects: readonly Effect[]) {
+    this.finishOutcome(effects)
+  }
+
+  /** An opportunity outcome's effects: the same vocabulary, minus the ones that leave. */
+  private finishOutcome(effects: readonly Effect[]) {
+    const safe = effects.filter(
+      (effect) => effect.e !== 'goto' && effect.e !== 'travel' && effect.e !== 'ending' && effect.e !== 'seize',
+    )
+    const events: LifeEvent[] = []
+    for (const effect of safe) {
+      switch (effect.e) {
+        case 'flag':
+          events.push({ t: 'flag.raised', flag: effect.flag })
+          break
+        case 'money':
+          events.push({ t: 'money.changed', agorot: effect.agorot, why: effect.why })
+          break
+        case 'give':
+          events.push({ t: 'item.gained', item: effect.item, count: effect.count ?? 1 })
+          break
+        case 'take':
+          events.push({ t: 'item.lost', item: effect.item, count: effect.count ?? 1 })
+          break
+        case 'bond':
+          events.push({ t: 'bond.shifted', who: effect.who, delta: effect.delta })
+          break
+        case 'trait':
+          events.push({ t: 'trait.shifted', trait: effect.trait, delta: effect.delta })
+          break
+        case 'time':
+          events.push({ t: 'clock.advanced', minutes: effect.minutes })
+          break
+        case 'wellbeing':
+          events.push({ t: 'wellbeing.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'personality':
+          events.push({ t: 'personality.shifted', key: effect.key, delta: effect.delta })
+          break
+        case 'redheart':
+          events.push({ t: 'redheart.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'rel':
+          events.push({ t: 'relationship.changed', who: effect.who, axis: effect.axis, delta: effect.delta })
+          break
+        case 'remember':
+          events.push({
+            t: 'relationship.memory_added',
+            memory: {
+              characterId: effect.who,
+              eventId: effect.eventId,
+              significance: effect.significance ?? 'notable',
+              year: this.engine.state.year,
+              atMinute: this.engine.state.minute,
+            },
+          })
+          break
+        default:
+          break
+      }
+    }
+    if (events.length > 0) this.engine.dispatch(...events)
   }
 }

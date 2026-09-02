@@ -1,4 +1,15 @@
-import type { BondId, ItemId, LocationId, TraitId } from '../types'
+import type {
+  BondId,
+  CharacterId,
+  ItemId,
+  LocationId,
+  PersonalityId,
+  RedHeartId,
+  RelationshipAxis,
+  RelationshipMemory,
+  TraitId,
+  WellbeingId,
+} from '../types'
 import type { Condition } from '../world/types'
 
 /**
@@ -42,6 +53,23 @@ export type Effect =
   | { e: 'attend' }
   | { e: 'missed' }
   | { e: 'ending'; id: string }
+  // --- the systems pass -------------------------------------------------------------
+  // Everything below writes to a model that did not exist when this chapter was first
+  // authored. The old verbs still work and still mean what they meant — `trait` routes
+  // itself into personality or the Red Heart — so nothing had to be rewritten. These
+  // exist for the lines that want to be precise: a father losing trust while the bond
+  // holds, a supporter putting the terrace into a child's head, a promise somebody will
+  // remember two hours later.
+  | { e: 'wellbeing'; key: WellbeingId; delta: number }
+  | { e: 'personality'; key: PersonalityId; delta: number }
+  | { e: 'redheart'; key: RedHeartId; delta: number }
+  | { e: 'rel'; who: CharacterId; axis: RelationshipAxis; delta: number }
+  | { e: 'remember'; who: CharacterId; eventId: string; significance?: RelationshipMemory['significance'] }
+  /** seize a window that is currently open; the engine applies its cost and its outcome */
+  | { e: 'seize'; opportunity: string }
+  /** roll what this Saturday leaves in the red box, out of what actually happened */
+  | { e: 'keep' }
+  | { e: 'flagValue'; flag: string; value: boolean | string | number }
 
 export type ChoiceDef = {
   id: string
@@ -53,9 +81,28 @@ export type ChoiceDef = {
   then: Effect[]
 }
 
+/**
+ * הבמאי כנתונים — how a conversation is SHOT, described beside what is said.
+ *
+ * Every conversation used to be framed the same way, which is why every conversation
+ * felt the same. Cinematography written per scene would be worse: eleven places to fix
+ * one mistake. So a beat is data — who the camera is on, how close, and for how long —
+ * and one controller in the runtime executes it for every conversation in the game.
+ */
+export type ConversationShot = {
+  focus: CharacterId | 'player' | 'both'
+  framing: 'close' | 'medium' | 'ots' | 'wide'
+  duration?: number
+  gesture?: string
+  /** how far the world's own sound steps back, 0..1 — never to silence */
+  ambienceDuck?: number
+}
+
 export type Branch = {
   when?: Condition
   lines: Say[]
+  /** the framing this branch is played in; absent means the world's default two-shot */
+  shot?: ConversationShot
   choices?: ChoiceDef[]
   /** applied when the branch's lines finish and there are no choices */
   then?: Effect[]

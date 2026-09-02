@@ -338,6 +338,33 @@ const SCENES: SceneDef[] = [
         talk: 'neighbour',
         sway: 0.005,
       },
+      // עמית עם העיתון — the information family, standing outside the kiosk with the
+      // sports page open at the wrong page. Gone by twenty to three; the schedule takes
+      // him to the pitch and the newspaper goes with him.
+      {
+        id: 'amit-street',
+        figure: 'amit',
+        // Clear of the kiosk doorway at 0.13–0.21 AND of Ofir at 0.30. Two people close
+        // enough to share a reach are one person as far as the button is concerned.
+        x: 0.37,
+        y: 0.87,
+        size: 0.27,
+        nameHe: 'עמית',
+        talk: 'amit-street',
+        sway: 0.004,
+      },
+      // קרן על המדרגה — small, entirely missable, and the only person in the chapter who
+      // talks about the terrace as a place rather than as a result.
+      {
+        id: 'keren',
+        figure: 'keren',
+        x: 0.57,
+        y: 0.91,
+        size: 0.28,
+        nameHe: 'קרן',
+        talk: 'keren-street',
+        sway: 0.003,
+      },
       {
         id: 'fan-passing',
         figure: 'fanD',
@@ -443,6 +470,19 @@ const SCENES: SceneDef[] = [
         talk: 'kiosk-man',
         sway: 0.004,
       },
+      // Before one o'clock he is in here spending his own money on the paper. Catch him
+      // at the counter and the information costs you nothing; catch him in the street an
+      // hour later and he has already read it and wants something for it.
+      {
+        id: 'amit-kiosk',
+        figure: 'amit',
+        x: 0.66,
+        y: 0.9,
+        size: 0.27,
+        nameHe: 'עמית',
+        talk: 'amit-kiosk',
+        flip: true,
+      },
     ],
     hotspots: [{ id: 'counter', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' }],
     exits: [
@@ -479,10 +519,23 @@ const SCENES: SceneDef[] = [
         y: 0.9,
         size: 0.28,
         nameHe: 'אפי',
-        talk: 'pitch-kids',
+        talk: 'efi-hall',
         sway: 0.01,
       },
       { id: 'amit', figure: 'amit', x: 0.83, y: 0.86, size: 0.26, nameHe: 'עמית', talk: 'pitch-kids', flip: true },
+      // Ofir moves here at twenty to two. The street he was leaning on is empty by then,
+      // and a player who goes looking for him where he was is a player learning that
+      // people have afternoons of their own.
+      {
+        id: 'ofir-pitch',
+        figure: 'ofir',
+        x: 0.6,
+        y: 0.88,
+        size: 0.3,
+        nameHe: 'אופיר',
+        talk: 'ofir-pitch',
+        sway: 0.009,
+      },
     ],
     hotspots: [
       {
@@ -528,7 +581,23 @@ const SCENES: SceneDef[] = [
       { id: 'fan2', figure: 'fanC', x: 0.58, y: 0.84, size: 0.28, nameHe: 'אוהד ותיק', talk: 'route-veteran', flip: true },
       { id: 'fan3', figure: 'fanF', x: 0.78, y: 0.9, size: 0.31, nameHe: 'אוהד', talk: 'route-fan' },
     ],
-    hotspots: [{ id: 'banner', x: 0.42, y: 0.82, w: 0.08, act: 'route-banner', verb: 'look', labelHe: 'השלט' }],
+    hotspots: [
+      { id: 'banner', x: 0.42, y: 0.82, w: 0.08, act: 'route-banner', verb: 'look', labelHe: 'השלט' },
+      // The street family's reward: a gap between two buildings that everybody who grew
+      // up here uses and nobody who did not would see. It costs nothing and saves the
+      // walk — but only a child who has been paying attention to the neighbourhood can
+      // read it as a way through rather than as a wall.
+      {
+        id: 'shortcut',
+        x: 0.66,
+        y: 0.8,
+        w: 0.07,
+        act: 'route-shortcut',
+        verb: 'look',
+        labelHe: 'הרווח בין הבתים',
+        priority: 2,
+      },
+    ],
     exits: [
       {
         id: 'back',
@@ -591,10 +660,31 @@ const SCENES: SceneDef[] = [
         when: { bond: { who: 'ofir', min: 40 } },
       },
       { id: 'crowd-a', figure: 'fanE', x: 0.7, y: 0.94, size: 0.27, nameHe: 'אוהד', talk: 'route-fan', flip: true },
+      // The safe way in, and the one the brief insists on (§26): a child goes through a
+      // turnstile with a family, in front of a steward, in daylight. Nobody climbs
+      // anything. What it costs is the nerve to ask a stranger.
+      {
+        id: 'family',
+        figure: 'fanB',
+        x: 0.66,
+        y: 0.88,
+        size: 0.26,
+        nameHe: 'אבא עם ילד',
+        talk: 'gate-family',
+      },
     ],
     hotspots: [
       { id: 'gate7', x: 0.5, y: 0.8, w: 0.1, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
       { id: 'fence', x: 0.14, y: 0.82, w: 0.08, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
+      {
+        id: 'turnstile',
+        x: 0.34,
+        y: 0.86,
+        w: 0.08,
+        act: 'gate-turnstile',
+        verb: 'look',
+        labelHe: 'הקרוסלה',
+      },
     ],
     exits: [
       {
