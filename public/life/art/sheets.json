@@ -2,86 +2,100 @@
  "adultA1": {
   "w": 144,
   "h": 430,
-  "bytes": 75162,
-  "yellowLeft": 0
+  "bytes": 74904,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultA2": {
   "w": 138,
   "h": 430,
-  "bytes": 81762,
-  "yellowLeft": 0
+  "bytes": 81288,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultA3": {
   "w": 143,
   "h": 430,
-  "bytes": 78542,
-  "yellowLeft": 0
+  "bytes": 78225,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultA4": {
   "w": 137,
   "h": 430,
-  "bytes": 77052,
-  "yellowLeft": 0
+  "bytes": 76863,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultA5": {
   "w": 148,
   "h": 430,
-  "bytes": 73162,
-  "yellowLeft": 0
+  "bytes": 73046,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultA6": {
   "w": 150,
   "h": 430,
-  "bytes": 81954,
-  "yellowLeft": 0
+  "bytes": 81448,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultA7": {
   "w": 153,
   "h": 430,
-  "bytes": 79475,
-  "yellowLeft": 0
+  "bytes": 79371,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultB1": {
   "w": 164,
   "h": 430,
-  "bytes": 68447,
-  "yellowLeft": 0
+  "bytes": 68329,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultB2": {
   "w": 138,
   "h": 430,
-  "bytes": 73036,
-  "yellowLeft": 0
+  "bytes": 72500,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultB3": {
   "w": 142,
   "h": 430,
-  "bytes": 74261,
-  "yellowLeft": 0
+  "bytes": 73626,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultB4": {
   "w": 179,
   "h": 430,
-  "bytes": 85838,
-  "yellowLeft": 0
+  "bytes": 85405,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultB5": {
   "w": 144,
   "h": 430,
-  "bytes": 73209,
-  "yellowLeft": 0
+  "bytes": 71768,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultB6": {
   "w": 147,
   "h": 430,
-  "bytes": 84297,
-  "yellowLeft": 0
+  "bytes": 83408,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "adultB7": {
   "w": 202,
   "h": 430,
-  "bytes": 66180,
-  "yellowLeft": 0
+  "bytes": 65330,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "amit-3q": {
   "w": 214,
@@ -1278,22 +1292,25 @@
   "yellowLeft": 0
  },
  "ofir90-3q": {
-  "w": 203,
-  "h": 633,
-  "bytes": 143504,
-  "yellowLeft": 0
+  "w": 124,
+  "h": 406,
+  "bytes": 50782,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "ofir90-arms": {
-  "w": 200,
-  "h": 633,
-  "bytes": 144324,
-  "yellowLeft": 0
+  "w": 126,
+  "h": 406,
+  "bytes": 52580,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "ofir90-back": {
-  "w": 206,
-  "h": 638,
-  "bytes": 125056,
-  "yellowLeft": 0
+  "w": 128,
+  "h": 405,
+  "bytes": 51202,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "ofir90-crouch": {
   "w": 265,
@@ -1314,16 +1331,18 @@
   "yellowLeft": 0
  },
  "ofir90-side": {
-  "w": 198,
-  "h": 633,
-  "bytes": 121712,
-  "yellowLeft": 0
+  "w": 78,
+  "h": 406,
+  "bytes": 36322,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "ofir90-sitA": {
-  "w": 303,
-  "h": 443,
-  "bytes": 154267,
-  "yellowLeft": 0
+  "w": 155,
+  "h": 344,
+  "bytes": 51154,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "ofir90-sitB": {
   "w": 298,
@@ -1338,10 +1357,11 @@
   "yellowLeft": 0
  },
  "ofir90-walk": {
-  "w": 292,
-  "h": 624,
-  "bytes": 152353,
-  "yellowLeft": 0
+  "w": 125,
+  "h": 402,
+  "bytes": 44376,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "oldMan": {
   "w": 102,
@@ -1376,260 +1396,303 @@
  "pogi-3q": {
   "w": 148,
   "h": 430,
-  "bytes": 57126,
-  "yellowLeft": 0
+  "bytes": 57048,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-arms": {
   "w": 144,
   "h": 430,
-  "bytes": 57722,
-  "yellowLeft": 0
+  "bytes": 57382,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-back": {
   "w": 135,
   "h": 430,
-  "bytes": 54808,
-  "yellowLeft": 0
+  "bytes": 54476,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-cheer": {
   "w": 299,
   "h": 409,
-  "bytes": 133102,
-  "yellowLeft": 0
+  "bytes": 132370,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-cross": {
   "w": 249,
   "h": 350,
-  "bytes": 108176,
-  "yellowLeft": 0
+  "bytes": 107061,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-hold": {
   "w": 353,
   "h": 430,
-  "bytes": 122121,
-  "yellowLeft": 0
+  "bytes": 121741,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-kneel": {
   "w": 260,
   "h": 367,
-  "bytes": 114393,
-  "yellowLeft": 0
+  "bytes": 114034,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-scarf": {
   "w": 153,
   "h": 430,
-  "bytes": 69148,
-  "yellowLeft": 0
+  "bytes": 68834,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-side": {
   "w": 186,
   "h": 430,
-  "bytes": 54081,
-  "yellowLeft": 0
+  "bytes": 54057,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-sit": {
   "w": 219,
   "h": 430,
-  "bytes": 85265,
-  "yellowLeft": 0
+  "bytes": 84745,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi-walk": {
   "w": 201,
   "h": 430,
-  "bytes": 69616,
-  "yellowLeft": 0
+  "bytes": 69227,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi": {
   "w": 153,
   "h": 430,
-  "bytes": 65966,
-  "yellowLeft": 0
+  "bytes": 65422,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-1": {
   "w": 170,
   "h": 430,
   "bytes": 87063,
-  "yellowLeft": 0
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-2": {
   "w": 169,
   "h": 430,
   "bytes": 86528,
-  "yellowLeft": 0
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-3": {
   "w": 138,
   "h": 430,
-  "bytes": 68527,
-  "yellowLeft": 0
+  "bytes": 68809,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-4": {
   "w": 179,
   "h": 430,
   "bytes": 87273,
-  "yellowLeft": 0
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-5": {
   "w": 179,
   "h": 424,
-  "bytes": 81197,
-  "yellowLeft": 0
+  "bytes": 81201,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-6": {
   "w": 195,
   "h": 427,
-  "bytes": 84826,
-  "yellowLeft": 0
+  "bytes": 84824,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-7": {
   "w": 212,
   "h": 430,
-  "bytes": 113063,
-  "yellowLeft": 0
+  "bytes": 113039,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-8": {
   "w": 237,
   "h": 406,
-  "bytes": 104893,
-  "yellowLeft": 0
+  "bytes": 105298,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-b1": {
   "w": 254,
   "h": 350,
-  "bytes": 99358,
-  "yellowLeft": 0
+  "bytes": 99078,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-b2": {
   "w": 201,
   "h": 350,
-  "bytes": 79813,
-  "yellowLeft": 0
+  "bytes": 79860,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-b3": {
   "w": 170,
   "h": 350,
-  "bytes": 78766,
-  "yellowLeft": 0
+  "bytes": 78587,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-b4": {
   "w": 154,
   "h": 350,
-  "bytes": 65260,
-  "yellowLeft": 0
+  "bytes": 65203,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-b5": {
   "w": 163,
   "h": 350,
-  "bytes": 59930,
-  "yellowLeft": 0
+  "bytes": 59833,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-b6": {
   "w": 188,
   "h": 274,
   "bytes": 72718,
-  "yellowLeft": 0
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-b7": {
   "w": 130,
   "h": 350,
-  "bytes": 58489,
-  "yellowLeft": 0
+  "bytes": 58399,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogi90-b8": {
   "w": 158,
   "h": 350,
-  "bytes": 61016,
-  "yellowLeft": 0
+  "bytes": 60979,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-1": {
   "w": 175,
   "h": 410,
-  "bytes": 82963,
-  "yellowLeft": 0
+  "bytes": 86834,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-2": {
   "w": 190,
   "h": 408,
-  "bytes": 95060,
-  "yellowLeft": 0
+  "bytes": 99536,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-3": {
   "w": 176,
   "h": 407,
-  "bytes": 78876,
-  "yellowLeft": 0
+  "bytes": 82196,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-4": {
   "w": 180,
   "h": 410,
-  "bytes": 86846,
-  "yellowLeft": 0
+  "bytes": 91713,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-5": {
   "w": 204,
   "h": 399,
-  "bytes": 88826,
-  "yellowLeft": 0
+  "bytes": 93212,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-6": {
   "w": 190,
   "h": 410,
-  "bytes": 91977,
-  "yellowLeft": 0
+  "bytes": 96524,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-7": {
   "w": 330,
   "h": 313,
-  "bytes": 107286,
-  "yellowLeft": 0
+  "bytes": 112467,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-b1": {
   "w": 185,
   "h": 370,
-  "bytes": 89176,
-  "yellowLeft": 0
+  "bytes": 91453,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-b2": {
   "w": 103,
   "h": 370,
-  "bytes": 33153,
-  "yellowLeft": 0
+  "bytes": 34350,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-b3": {
   "w": 162,
   "h": 370,
-  "bytes": 79893,
-  "yellowLeft": 0
+  "bytes": 81265,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-b4": {
   "w": 224,
   "h": 370,
-  "bytes": 97784,
-  "yellowLeft": 0
+  "bytes": 99666,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-b5": {
   "w": 207,
   "h": 370,
-  "bytes": 77897,
-  "yellowLeft": 0
+  "bytes": 80697,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-b6": {
   "w": 217,
   "h": 370,
-  "bytes": 91086,
-  "yellowLeft": 0
+  "bytes": 95383,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-b7": {
   "w": 201,
   "h": 370,
-  "bytes": 64541,
-  "yellowLeft": 0
+  "bytes": 69444,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "pogiIDF-b8": {
   "w": 166,
   "h": 370,
-  "bytes": 76450,
-  "yellowLeft": 0
+  "bytes": 80587,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "rachel-smoke": {
   "w": 294,
@@ -1652,85 +1715,589 @@
  "youngA1": {
   "w": 194,
   "h": 422,
-  "bytes": 83692,
-  "yellowLeft": 0
+  "bytes": 82750,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngA2": {
   "w": 143,
   "h": 430,
-  "bytes": 67536,
-  "yellowLeft": 0
+  "bytes": 66439,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngA3": {
   "w": 178,
   "h": 430,
-  "bytes": 78597,
-  "yellowLeft": 0
+  "bytes": 76646,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngA4": {
   "w": 125,
   "h": 427,
-  "bytes": 72771,
-  "yellowLeft": 0
+  "bytes": 72703,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngA5": {
   "w": 134,
   "h": 423,
-  "bytes": 76827,
-  "yellowLeft": 0
+  "bytes": 75771,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngA6": {
   "w": 144,
   "h": 430,
-  "bytes": 75428,
-  "yellowLeft": 0
+  "bytes": 73923,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngA7": {
   "w": 166,
   "h": 430,
-  "bytes": 62836,
-  "yellowLeft": 0
+  "bytes": 61307,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngB1": {
   "w": 210,
   "h": 430,
-  "bytes": 77258,
-  "yellowLeft": 0
+  "bytes": 77006,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngB2": {
   "w": 127,
   "h": 430,
-  "bytes": 76521,
-  "yellowLeft": 0
+  "bytes": 75614,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngB3": {
   "w": 145,
   "h": 430,
-  "bytes": 65852,
-  "yellowLeft": 0
+  "bytes": 64445,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngB4": {
   "w": 164,
   "h": 430,
-  "bytes": 89339,
-  "yellowLeft": 0
+  "bytes": 88082,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngB5": {
   "w": 153,
   "h": 430,
-  "bytes": 78827,
-  "yellowLeft": 0
+  "bytes": 77723,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngB6": {
   "w": 187,
   "h": 430,
-  "bytes": 82559,
-  "yellowLeft": 0
+  "bytes": 81056,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "youngB7": {
   "w": 144,
   "h": 419,
-  "bytes": 73061,
-  "yellowLeft": 0
+  "bytes": 73499,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pogi-w1": {
+  "w": 227,
+  "h": 425,
+  "bytes": 50549,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pogi-w2": {
+  "w": 199,
+  "h": 423,
+  "bytes": 49780,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pogi-w3": {
+  "w": 110,
+  "h": 425,
+  "bytes": 41974,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pogi-w4": {
+  "w": 221,
+  "h": 423,
+  "bytes": 46443,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pogi-w5": {
+  "w": 215,
+  "h": 425,
+  "bytes": 48917,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pogi-w6": {
+  "w": 176,
+  "h": 426,
+  "bytes": 46675,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pogi-w7": {
+  "w": 206,
+  "h": 426,
+  "bytes": 47164,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pogi-w8": {
+  "w": 227,
+  "h": 426,
+  "bytes": 52539,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-sit": {
+  "w": 176,
+  "h": 340,
+  "bytes": 46239,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-lean": {
+  "w": 162,
+  "h": 406,
+  "bytes": 44112,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-crouch": {
+  "w": 159,
+  "h": 259,
+  "bytes": 44157,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-cheer": {
+  "w": 209,
+  "h": 417,
+  "bytes": 55669,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-scarf": {
+  "w": 255,
+  "h": 402,
+  "bytes": 62959,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-look": {
+  "w": 142,
+  "h": 393,
+  "bytes": 45490,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-away": {
+  "w": 125,
+  "h": 381,
+  "bytes": 40258,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-civA": {
+  "w": 133,
+  "h": 403,
+  "bytes": 48582,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-civB": {
+  "w": 161,
+  "h": 406,
+  "bytes": 53231,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-civC": {
+  "w": 195,
+  "h": 395,
+  "bytes": 43286,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-civD": {
+  "w": 144,
+  "h": 399,
+  "bytes": 44297,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-point": {
+  "w": 220,
+  "h": 406,
+  "bytes": 53561,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-civE": {
+  "w": 201,
+  "h": 342,
+  "bytes": 48553,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-civF": {
+  "w": 138,
+  "h": 399,
+  "bytes": 45348,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-away": {
+  "w": 124,
+  "h": 386,
+  "bytes": 39565,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-away-smile": {
+  "w": 143,
+  "h": 387,
+  "bytes": 40261,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-away-side": {
+  "w": 174,
+  "h": 383,
+  "bytes": 34363,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-away-back": {
+  "w": 119,
+  "h": 385,
+  "bytes": 34226,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-away-ball": {
+  "w": 250,
+  "h": 372,
+  "bytes": 49034,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-point": {
+  "w": 213,
+  "h": 387,
+  "bytes": 41939,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-captain": {
+  "w": 155,
+  "h": 387,
+  "bytes": 42203,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen": {
+  "w": 129,
+  "h": 430,
+  "bytes": 58940,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-3q": {
+  "w": 127,
+  "h": 430,
+  "bytes": 56852,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-side": {
+  "w": 80,
+  "h": 430,
+  "bytes": 38838,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-back": {
+  "w": 128,
+  "h": 430,
+  "bytes": 57202,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-walk": {
+  "w": 236,
+  "h": 426,
+  "bytes": 58734,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-pockets": {
+  "w": 129,
+  "h": 430,
+  "bytes": 60437,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teen-cross": {
+  "w": 106,
+  "h": 422,
+  "bytes": 47229,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai": {
+  "w": 127,
+  "h": 405,
+  "bytes": 48669,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-3q": {
+  "w": 120,
+  "h": 406,
+  "bytes": 46007,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-side": {
+  "w": 74,
+  "h": 407,
+  "bytes": 32684,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-back": {
+  "w": 131,
+  "h": 403,
+  "bytes": 44984,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-ball": {
+  "w": 254,
+  "h": 390,
+  "bytes": 56645,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-kick": {
+  "w": 336,
+  "h": 368,
+  "bytes": 48524,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "sinai-cheer": {
+  "w": 220,
+  "h": 407,
+  "bytes": 50801,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva": {
+  "w": 125,
+  "h": 388,
+  "bytes": 41338,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-3q": {
+  "w": 111,
+  "h": 389,
+  "bytes": 37842,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-side": {
+  "w": 70,
+  "h": 389,
+  "bytes": 26483,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-back": {
+  "w": 118,
+  "h": 387,
+  "bytes": 35540,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-ball": {
+  "w": 250,
+  "h": 362,
+  "bytes": 47987,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-kick": {
+  "w": 323,
+  "h": 356,
+  "bytes": 45594,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "tikva-cheer": {
+  "w": 225,
+  "h": 393,
+  "bytes": 44829,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier": {
+  "w": 132,
+  "h": 430,
+  "bytes": 65243,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-stand": {
+  "w": 120,
+  "h": 430,
+  "bytes": 60885,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-side": {
+  "w": 76,
+  "h": 430,
+  "bytes": 42254,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-back": {
+  "w": 129,
+  "h": 430,
+  "bytes": 60020,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-march": {
+  "w": 239,
+  "h": 423,
+  "bytes": 63412,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-pack": {
+  "w": 173,
+  "h": 430,
+  "bytes": 76787,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-crate": {
+  "w": 213,
+  "h": 360,
+  "bytes": 55821,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-tired": {
+  "w": 226,
+  "h": 338,
+  "bytes": 50175,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-shout": {
+  "w": 144,
+  "h": 418,
+  "bytes": 54628,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-tie": {
+  "w": 159,
+  "h": 267,
+  "bytes": 44900,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-away": {
+  "w": 159,
+  "h": 399,
+  "bytes": 53687,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-lean": {
+  "w": 146,
+  "h": 417,
+  "bytes": 51818,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-look": {
+  "w": 135,
+  "h": 418,
+  "bytes": 51437,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "soldier-beret": {
+  "w": 133,
+  "h": 418,
+  "bytes": 55999,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "ofir90": {
+  "w": 125,
+  "h": 405,
+  "bytes": 52407,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "facePogi": {
+  "w": 211,
+  "h": 260,
+  "bytes": 53861,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "facePogi-smile": {
+  "w": 213,
+  "h": 260,
+  "bytes": 54591,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "facePogi-wide": {
+  "w": 216,
+  "h": 260,
+  "bytes": 55008,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "facePogi-shout": {
+  "w": 214,
+  "h": 260,
+  "bytes": 55958,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "facePogi-down": {
+  "w": 210,
+  "h": 260,
+  "bytes": 53702,
+  "yellowLeft": 0,
+  "source": "2026-09"
  }
 }

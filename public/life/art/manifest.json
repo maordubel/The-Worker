@@ -1,18 +1,11 @@
 {
  "backdrops": {
   "living": {
-   "w": 1105,
-   "h": 737,
-   "bytes": 1452083,
-   "source": "livingRoom",
-   "box": [
-    0,
-    0,
-    1536,
-    1024
-   ],
-   "deyellowed": 498160,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 900,
+   "bytes": 479178,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "bedroom": {
    "w": 543,
@@ -29,156 +22,107 @@
    "yellowLeft": 0
   },
   "kitchen": {
-   "w": 372,
-   "h": 450,
-   "bytes": 186331,
-   "source": "stageA2",
-   "box": [
-    344,
-    366,
-    468,
-    516
-   ],
-   "deyellowed": 125617,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 900,
+   "bytes": 470117,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "street": {
    "w": 1600,
    "h": 625,
-   "bytes": 419369,
+   "bytes": 419407,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "pitch": {
-   "w": 1068,
-   "h": 530,
-   "bytes": 773389,
-   "source": "stageAenv",
-   "box": [
-    1110,
-    34,
-    1521,
-    238
-   ],
-   "deyellowed": 325474,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 615,
+   "bytes": 384368,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "kiosk": {
-   "w": 518,
-   "h": 476,
-   "bytes": 250286,
-   "source": "assets1",
-   "box": [
-    604,
-    737,
-    766,
-    886
-   ],
-   "deyellowed": 43187,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 900,
+   "bytes": 467352,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "approach": {
    "w": 1600,
    "h": 532,
-   "bytes": 343102,
+   "bytes": 343311,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "gate7": {
    "w": 1600,
    "h": 600,
-   "bytes": 337157,
+   "bytes": 337675,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "ground": {
-   "w": 1066,
-   "h": 447,
-   "bytes": 863622,
-   "source": "venues",
-   "box": [
-    12,
-    92,
-    865,
-    450
-   ],
-   "deyellowed": 109304,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 900,
+   "bytes": 567438,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "corridor": {
-   "w": 1111,
-   "h": 543,
-   "bytes": 771283,
-   "source": "bloom",
-   "box": [
-    0,
-    352,
-    397,
-    546
-   ],
-   "deyellowed": 219885,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 616,
+   "bytes": 274603,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "reveal": {
-   "w": 1348,
-   "h": 470,
-   "bytes": 796436,
-   "source": "bloom",
-   "box": [
-    404,
-    352,
-    966,
-    548
-   ],
-   "deyellowed": 120523,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 900,
+   "bytes": 571159,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "stand": {
-   "w": 1017,
-   "h": 508,
-   "bytes": 711817,
-   "source": "venues",
-   "box": [
-    12,
-    494,
-    436,
-    706
-   ],
-   "deyellowed": 154173,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 616,
+   "bytes": 348936,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "ussExt": {
-   "w": 1028,
-   "h": 429,
-   "bytes": 764438,
-   "source": "venues",
-   "box": [
-    902,
-    92,
-    1759,
-    450
-   ],
-   "deyellowed": 175679,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 900,
+   "bytes": 602742,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "ussHall": {
-   "w": 1016,
-   "h": 466,
-   "bytes": 752452,
-   "source": "venues",
-   "box": [
-    905,
-    494,
-    1367,
-    706
-   ],
-   "deyellowed": 200539,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 900,
+   "bytes": 550056,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "streetEast": {
    "w": 1600,
    "h": 625,
-   "bytes": 422782,
+   "bytes": 422718,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "ussHallPre": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 476754,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "undercroft": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 567438,
    "yellowLeft": 0,
    "source": "2026-09"
   }
@@ -497,126 +441,126 @@
   "propScarfRed": {
    "w": 561,
    "h": 141,
-   "bytes": 89635,
+   "bytes": 89415,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propPennant": {
    "w": 146,
    "h": 276,
-   "bytes": 52293,
+   "bytes": 51522,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propFlag": {
    "w": 206,
    "h": 161,
-   "bytes": 38959,
+   "bytes": 38892,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propSticker": {
    "w": 146,
    "h": 158,
-   "bytes": 29413,
+   "bytes": 29386,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propBadges": {
    "w": 107,
    "h": 78,
-   "bytes": 11127,
+   "bytes": 11133,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propMatchbox": {
    "w": 131,
    "h": 91,
-   "bytes": 17816,
+   "bytes": 17763,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propColumn": {
    "w": 118,
    "h": 236,
-   "bytes": 60173,
+   "bytes": 60065,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propBallReal": {
    "w": 105,
    "h": 111,
-   "bytes": 27662,
+   "bytes": 27583,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propPapers": {
    "w": 192,
    "h": 100,
-   "bytes": 35385,
+   "bytes": 35560,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propCoins": {
    "w": 114,
    "h": 61,
-   "bytes": 13366,
+   "bytes": 13380,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propCar": {
    "w": 318,
    "h": 156,
-   "bytes": 75054,
+   "bytes": 75222,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propBus": {
    "w": 504,
    "h": 263,
-   "bytes": 195777,
+   "bytes": 196088,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propBin": {
    "w": 60,
    "h": 190,
-   "bytes": 18648,
+   "bytes": 18712,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propPlanter": {
    "w": 264,
    "h": 223,
-   "bytes": 94615,
+   "bytes": 95235,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propBunting": {
    "w": 262,
    "h": 46,
-   "bytes": 9206,
+   "bytes": 9241,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propBarrier": {
    "w": 255,
    "h": 166,
-   "bytes": 29194,
+   "bytes": 29256,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propBarriers": {
    "w": 301,
    "h": 183,
-   "bytes": 84087,
+   "bytes": 84226,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propPosters": {
    "w": 182,
    "h": 151,
-   "bytes": 62279,
+   "bytes": 61993,
    "yellowLeft": 0,
    "source": "2026-09"
   },
@@ -630,7 +574,7 @@
   "propSign": {
    "w": 301,
    "h": 142,
-   "bytes": 48305,
+   "bytes": 48298,
    "yellowLeft": 0,
    "source": "2026-09"
   }
@@ -781,14 +725,14 @@
   "streetFore": {
    "w": 1600,
    "h": 625,
-   "bytes": 610638,
+   "bytes": 608815,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "streetGround": {
    "w": 1600,
    "h": 625,
-   "bytes": 321714,
+   "bytes": 321580,
    "yellowLeft": 0,
    "source": "2026-09"
   }
