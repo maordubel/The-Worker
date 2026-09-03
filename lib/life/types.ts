@@ -59,6 +59,8 @@ export type LocationId =
   | 'bloomfield-outside'
   | 'bloomfield-tunnel'
   | 'bloomfield-inside'
+  | 'ussishkin-outside'
+  | 'ussishkin-hall'
 
 /**
  * מי — a character is a string, deliberately.

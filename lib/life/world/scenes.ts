@@ -403,6 +403,7 @@ const SCENES: SceneDef[] = [
       fromKiosk: { x: 0.37, y: 0.8, facing: 'right' },
       fromPitch: { x: 0.55, y: 0.79, facing: 'left' },
       fromRoute: { x: 0.9, y: 0.81, facing: 'left' },
+      fromUss: { x: 0.58, y: 0.8, facing: 'left' },
     },
     actors: [
       {
@@ -519,6 +520,22 @@ const SCENES: SceneDef[] = [
         spawn: 'fromStreet',
         labelHe: 'לסמטה ולמגרש',
         light: { x: 0.425, y: 0.44, w: 0.07, h: 0.3, tone: 'inside' },
+        dwellMs: 900,
+      },
+      {
+        // The neighbourhood sports hall, Ussishkin. A place you STOP (dwell 900), set
+        // back from the pavement so walking east never pulls the child inside. Its real
+        // home is a dedicated 1980s basketball beat; for now the door is open so the
+        // hall can be walked into and seen.
+        id: 'ussishkin',
+        x: 0.64,
+        y: 0.705,
+        w: 0.08,
+        h: 0.15,
+        to: 'ussishkin-outside',
+        spawn: 'fromStreet',
+        labelHe: 'לאולם אוסישקין',
+        light: { x: 0.645, y: 0.46, w: 0.07, h: 0.3, tone: 'inside' },
         dwellMs: 900,
       },
       {
@@ -789,6 +806,11 @@ const SCENES: SceneDef[] = [
     band: { far: 0.8, near: 0.95 },
     size: { far: 0.2, near: 0.29 },
     ambience: 'day',
+    // The first sight of the ground: a wide establishing frame of Bloomfield from the
+    // street outside — played once, the moment the child first reaches it, then it cuts
+    // to the turnstiles. Same mechanism as the road's `streetEast` and the terrace's
+    // `reveal`; the arrival is the arrival, not a place you stand.
+    arrival: { art: 'ground', ms: 3200, flag: 'saw:ground' },
     stuckHe: 'תדבר עם מישהו. מישהו פה ייקח אותך פנימה.',
     // Outside a ground on a matchday: barriers stacked where the stewards left them, a
     // wall somebody has been fly-posting for twenty years, and — taped up by a hand, not
@@ -993,6 +1015,87 @@ const SCENES: SceneDef[] = [
     // which is the whole reason to walk over and look at it.
     hotspots: [{ id: 'rail', x: 0.155, y: 0.92, w: 0.12, act: 'terrace-rail', verb: 'look', labelHe: 'המעקה' }],
     exits: [],
+  },
+
+  // ------------------------------------------------------ אולם אוסישקין — מבחוץ ----
+  // The three Ussishkin backdrops (`ussExt`, `ussHall`, `ussHallPre`) shipped as art in
+  // September and had NO scene, so nothing in the game ever drew them — a backdrop with
+  // no room is invisible by construction. These two scenes give them a room. Kept
+  // deliberately bare (no actors, no hotspots): the point of this first pass is to walk
+  // in and SEE the hall in-engine. The basketball night that belongs here is authored
+  // next, to the directing standard the football Saturday is held to.
+  {
+    id: 'ussishkin-outside',
+    titleHe: 'אולם אוסישקין — מבחוץ',
+    art: 'ussExt',
+    band: { far: 0.82, near: 0.96 },
+    size: { far: 0.19, near: 0.28 },
+    ambience: 'dusk',
+    stuckHe: 'הכניסה לאולם באמצע, מתחת לגג. חזרה לרחוב — משמאל.',
+    spawns: {
+      fromStreet: { x: 0.12, y: 0.9, facing: 'right' },
+      fromHall: { x: 0.62, y: 0.93, facing: 'left' },
+    },
+    actors: [],
+    hotspots: [],
+    exits: [
+      {
+        id: 'back',
+        x: 0.0,
+        y: 0.82,
+        w: 0.05,
+        h: 0.14,
+        to: 'street',
+        spawn: 'fromUss',
+        labelHe: 'חזרה לרחוב',
+        light: { x: 0.006, y: 0.55, w: 0.05, h: 0.3, tone: 'daylight' },
+        dwellMs: 500,
+      },
+      {
+        id: 'in',
+        x: 0.47,
+        y: 0.8,
+        w: 0.12,
+        h: 0.15,
+        to: 'ussishkin-hall',
+        spawn: 'fromOut',
+        labelHe: 'פנימה, לאולם',
+        light: { x: 0.475, y: 0.5, w: 0.115, h: 0.3, tone: 'inside' },
+        dwellMs: 300,
+        priority: 2,
+      },
+    ],
+  },
+
+  // ------------------------------------------------------- אולם אוסישקין — פנים ----
+  {
+    id: 'ussishkin-hall',
+    titleHe: 'אולם אוסישקין',
+    art: 'ussHall',
+    band: { far: 0.86, near: 0.98 },
+    size: { far: 0.2, near: 0.3 },
+    ambience: 'stadium',
+    // The hall fills before it roars: `ussHallPre` is the warm-up, played once as the
+    // arrival card, then it cuts to `ussHall`, the game. Same room, fifteen minutes apart.
+    arrival: { art: 'ussHallPre', ms: 3600, flag: 'saw:ussPre' },
+    stuckHe: 'המשחק על הפרקט. היציאה משמאל, מאיפה שנכנסת.',
+    spawns: { fromOut: { x: 0.12, y: 0.93, facing: 'right' } },
+    actors: [],
+    hotspots: [],
+    exits: [
+      {
+        id: 'back',
+        x: 0.0,
+        y: 0.86,
+        w: 0.05,
+        h: 0.12,
+        to: 'ussishkin-outside',
+        spawn: 'fromHall',
+        labelHe: 'החוצה',
+        light: { x: 0.006, y: 0.6, w: 0.05, h: 0.28, tone: 'inside' },
+        dwellMs: 500,
+      },
+    ],
   },
 ]
 
