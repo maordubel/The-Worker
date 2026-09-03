@@ -71,6 +71,15 @@ export type LifeRuntime = {
    * nobody started — both are no-ops.
    */
   endCutscene(outcome: import('../cutscenes').CutsceneOutcome): void
+  /**
+   * הצבעה מהמעטפת — a tap the DOM caught before the canvas could, handed back.
+   *
+   * The control deck's drag zone lies over the lower half of the painting so a thumb that
+   * lands there can steer. That makes it the only thing that sees a tap there, and a tap
+   * there means "go to that place". Client coordinates, because that is what a DOM event
+   * carries; the scene converts.
+   */
+  pointAtScreen(clientX: number, clientY: number): void
   skipIntro(): void
   /** the profile screen: everything the shell may know, as words */
   snapshot(): LifeSnapshot
@@ -174,6 +183,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     dismissEnding: () => worldScene()?.goHome(),
     dismissFinale: () => worldScene()?.dismissFinale(),
     endCutscene: (outcome) => worldScene()?.endCutscene(outcome),
+    pointAtScreen: (x, y) => worldScene()?.pointAtScreen(x, y),
     snapshot,
     pause: (on: boolean) => worldScene()?.setPaused(on),
     debug: {

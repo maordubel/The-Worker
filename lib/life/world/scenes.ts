@@ -613,7 +613,17 @@ const SCENES: SceneDef[] = [
     // the size range widens with it: a pitch is the one place in this chapter with real
     // depth in it, and a child at the far end should read as a child at the far end.
     band: { far: 0.56, near: 0.945 },
-    size: { far: 0.13, near: 0.3 },
+    /**
+     * 1.68×, not 2.31×, and the pitch is the screen this was found on.
+     *
+     * A walk band is a ground plane, and a ground plane has a scale ratio the camera
+     * decides. 0.13→0.30 is a 2.3× ramp across a band that fills a third of the frame,
+     * which is not perspective — it is a zoom, and it is why crossing this yard read as
+     * being pushed towards the camera rather than as walking. Every other scene in this
+     * game sits between 1.27× and 1.68×; the yard is the deepest space in the chapter and
+     * it now sits at the top of that range instead of half again beyond it.
+     */
+    size: { far: 0.17, near: 0.285 },
     ambience: 'day',
     stuckHe: 'הכדור באמצע. חזרה לרחוב — שמאלה.',
     spawns: { fromStreet: { x: 0.13, y: 0.84, facing: 'right' } },
@@ -863,7 +873,9 @@ const SCENES: SceneDef[] = [
     // beyond — and the band had to move with it, because 0.6 put the child THROUGH the
     // opening and standing on the pitch. The concrete under his feet starts at 0.76.
     band: { far: 0.76, near: 0.985 },
-    size: { far: 0.19, near: 0.36 },
+    // 1.79×, and it stays: a tunnel is a genuinely deep space seen down its own axis, and
+    // this is the one frame in the game where the vanishing point is dead centre.
+    size: { far: 0.2, near: 0.358 },
     ambience: 'tunnel',
     stuckHe: 'קדימה, לכיוון האור.',
     spawns: { start: { x: 0.5, y: 0.95 } },

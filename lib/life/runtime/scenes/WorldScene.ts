@@ -21,6 +21,16 @@ import { artUrl, KID_POSE, KID_WALK } from '../art'
 import { frameCamera } from '../camera'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import { LIFE_PALETTE } from '../palette'
+import {
+  arrivalEase,
+  clampToBand,
+  DEPTH,
+  groundDistance,
+  nextWaypoint,
+  strideAdvance,
+  type Blocker,
+  type Bounds,
+} from '../walk'
 
 /**
  * הסצנה — one painted place, the strip of floor you may stand on, and the rule that you
@@ -153,6 +163,24 @@ export class WorldScene extends Phaser.Scene {
   private target: Target | null = null
   private focused: Phaser.GameObjects.Image | null = null
 
+  /**
+   * המקום שהצבעת עליו — where the player pointed, and what to do on arrival.
+   *
+   * This is the whole point-and-click layer in one field. `then` is null for "just walk
+   * over there" and carries a `Target` for "walk over there and talk to him", which is the
+   * grammar every LucasArts adventure used and the only grammar that works with a thumb.
+   */
+  private goal: { x: number; y: number; then: Target | null; run: boolean } | null = null
+  /** the best ground distance this walk has managed, and how long since it improved */
+  private goalBest = Infinity
+  private goalStalled = 0
+  /** timestamp of the last tap, for the double-tap-to-run every game of this era had */
+  private lastTapAt = 0
+  private goalMark!: Phaser.GameObjects.Ellipse
+  /** the interactable the pointer is currently over, for the hover ring */
+  private hovering: Target | null = null
+  private hoverRing!: Phaser.GameObjects.Ellipse
+
   private paused = false
   private minuteAcc = 0
   private timeScale = 1
@@ -216,6 +244,11 @@ export class WorldScene extends Phaser.Scene {
     this.doorLights = []
     this.target = null
     this.focused = null
+    this.goal = null
+    this.goalBest = Infinity
+    this.goalStalled = 0
+    this.hovering = null
+    this.lastTapAt = 0
     this.dwell = 0
     this.dwellExit = null
     this.travelled = 0
@@ -260,6 +293,27 @@ export class WorldScene extends Phaser.Scene {
     this.buildAir()
     this.buildGrade()
 
+    /**
+     * המקום שהצבעת עליו — a ring on the floor, and it is not decoration.
+     *
+     * Every point-and-click game of the era drew one, because a click that produces no
+     * visible acknowledgement for the third of a second before the character starts moving
+     * reads as a click that did not register — and the player clicks again, and again.
+     * It sits at the destination, at the destination's own scale, and fades as he arrives.
+     */
+    this.goalMark = this.add
+      .ellipse(0, 0, 26, 26 * DEPTH, LIFE_PALETTE.red, 0)
+      .setStrokeStyle(2, LIFE_PALETTE.red, 0.85)
+      .setDepth(1)
+      .setVisible(false)
+
+    /** …and the same ring under whatever the pointer is hovering, which is the sentence line's other half. */
+    this.hoverRing = this.add
+      .ellipse(0, 0, 30, 30 * DEPTH, LIFE_PALETTE.sheet, 0)
+      .setStrokeStyle(2, LIFE_PALETTE.sheet, 0.5)
+      .setDepth(2)
+      .setVisible(false)
+
     this.mark = this.add
       .triangle(0, 0, 0, 0, 14, 0, 7, 11, LIFE_PALETTE.red)
       .setDepth(9500)
@@ -284,6 +338,27 @@ export class WorldScene extends Phaser.Scene {
     this.ctx.bus.emit('frame', { picture: this.cameras.main.height })
     this.scale.on('resize', this.onResize, this)
 
+    /**
+     * הצבעה — the control scheme this game should always have had.
+     *
+     * Phaser gives world coordinates on the pointer, so a tap is a place: the same handler
+     * serves a mouse, a trackpad and a thumb, and no code below this line knows which one
+     * it was. Movement keys still work and still win — `movePlayer` drops the goal the
+     * instant an axis moves — because the two schemes are not rivals. Full Throttle shipped
+     * both as well.
+     */
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (this.paused || this.matchPhase === 'archive') return
+      if (!this.onPicture(pointer.x, pointer.y)) return
+      this.pointAt(pointer.worldX, pointer.worldY)
+    })
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (this.paused) return
+      // Hover is a mouse idea. A finger dragging across the glass is a drag, not a hover,
+      // and lighting up every object it passes over is noise.
+      if (pointer.isDown || pointer.wasTouch) return
+      this.hovering = this.onPicture(pointer.x, pointer.y) ? this.pickAt(pointer.worldX, pointer.worldY) : null
+    })
 
     this.baseZoom = this.cameras.main.zoom
 
@@ -297,6 +372,7 @@ export class WorldScene extends Phaser.Scene {
         if (open) {
           this.vx = 0
           this.vy = 0
+          this.clearGoal()
           this.ctx.bus.emit('prompt', null)
         } else {
           this.progress()
@@ -656,7 +732,11 @@ export class WorldScene extends Phaser.Scene {
     this.moveAmbient(delta)
     this.tickClock(delta)
     this.tickEncounters(delta)
-    this.aim()
+    // `aim` picks what the ACTION BUTTON would do, from proximity. It must not overwrite a
+    // target the player pointed at and is still walking towards, or the sentence line
+    // flickers between "talk to Kobi" and whatever he happens to be passing.
+    if (!this.goal?.then) this.aim()
+    this.paintHover()
     if (this.ctx.input.actionPressed) this.act()
     this.autoExits(delta)
     this.tickStuck(delta)
@@ -670,34 +750,400 @@ export class WorldScene extends Phaser.Scene {
    * does not. The scene only ever reads.
    */
 
+  // ------------------------------------------------------------- point and click ---
+
+  /**
+   * הרצפה — the rectangle the child may stand on, in pixels.
+   *
+   * Two percent of the width is kept at each edge because a figure is drawn from its feet
+   * and a walker pressed flat against the frame has half of himself off it.
+   */
+  private bounds(): Bounds {
+    return {
+      left: this.W * 0.02,
+      right: this.W * 0.98,
+      top: this.def.band.far * this.H,
+      bottom: this.def.band.near * this.H,
+    }
+  }
+
+  /**
+   * מה עומד בדרך — everything standing on the floor that a walker has to go round.
+   *
+   * People and dressing, and nothing else: the backdrop has no collision because a painted
+   * wall is above the band by construction. Radii come from the drawn object rather than
+   * from a number in a scene file, so re-cutting a bin at a different size moves its
+   * footprint with it. The vertical radius is squashed by `DEPTH` for the same reason the
+   * whole band is: an object as deep as it is wide occupies about a third as much screen
+   * height as screen width.
+   */
+  private blockers(): Blocker[] {
+    const out: Blocker[] = []
+    for (const actor of this.actors) {
+      if (!actor.image.visible) continue
+      const rx = actor.image.displayWidth * 0.34
+      out.push({ x: actor.image.x, y: actor.image.y, rx, ry: rx * DEPTH })
+    }
+    for (const entry of this.layers) {
+      const layer = entry.def
+      if (!layer.foot || !entry.image.visible) continue
+      if (layer.depth < this.def.band.far) continue
+      const rx = entry.image.displayWidth * 0.36
+      out.push({ x: entry.image.x, y: entry.baseY, rx, ry: rx * DEPTH })
+    }
+    return out
+  }
+
+  /**
+   * מה יש שם — what is under a point on the painting, if anything.
+   *
+   * Hit boxes are DELIBERATELY bigger than the art. `docs` and the mobile directive both
+   * say the same thing and it is the difference between a game and a test of finger
+   * accuracy: the visible object stays small, the thing you have to hit does not. A person
+   * is hit anywhere in their own silhouette plus a third; a hotspot gets a generous
+   * ellipse; a door gets its whole declared rectangle. Priority breaks ties, so tapping
+   * Kobi never opens the door behind him.
+   */
+  private pickAt(x: number, y: number): Target | null {
+    const state = this.ctx.engine.state
+    let best: Target | null = null
+    let bestScore = -Infinity
+    const take = (candidate: Target, near: number) => {
+      const score = candidate.priority * 1000 - near
+      if (score > bestScore) {
+        bestScore = score
+        best = candidate
+      }
+    }
+
+    for (const actor of this.actors) {
+      if (!actor.image.visible || !actor.def.talk) continue
+      const rx = Math.max(actor.image.displayWidth * 0.7, this.W * 0.022)
+      const ry = Math.max(actor.image.displayHeight * 0.55, this.H * 0.05)
+      const dx = (x - actor.image.x) / rx
+      const dy = (y - (actor.image.y - actor.image.displayHeight * 0.45)) / ry
+      if (dx * dx + dy * dy > 1) continue
+      take(
+        {
+          kind: 'act',
+          act: actor.def.talk,
+          verb: 'talk',
+          label: actor.def.nameHe,
+          x: actor.image.x,
+          y: actor.image.y,
+          priority: 4,
+        },
+        Math.hypot(dx, dy),
+      )
+    }
+
+    for (const spot of this.hotspots) {
+      if (!meets(state, spot.def.when)) continue
+      const rx = Math.max(spot.w, this.W * 0.03)
+      const ry = Math.max(this.H * 0.09, rx * 0.5)
+      const dx = (x - spot.x) / rx
+      const dy = (y - spot.y) / ry
+      if (dx * dx + dy * dy > 1) continue
+      take(
+        {
+          kind: 'act',
+          act: spot.def.act,
+          verb: spot.def.verb,
+          label: spot.def.labelHe,
+          x: spot.x,
+          y: spot.y,
+          priority: spot.def.priority ?? 1,
+        },
+        Math.hypot(dx, dy),
+      )
+    }
+
+    for (const exit of this.def.exits) {
+      if (!meets(state, exit.when)) continue
+      const left = exit.x * this.W
+      const right = (exit.x + exit.w) * this.W
+      const top = exit.y * this.H
+      const bottom = (exit.y + exit.h) * this.H
+      // A door is worth reaching for from a little outside itself, because its art is
+      // usually a dark rectangle at the edge of the frame.
+      const pad = this.W * 0.02
+      if (x < left - pad || x > right + pad || y < top - pad || y > bottom + pad) continue
+      take(
+        {
+          kind: 'exit',
+          exit,
+          verb: 'exit',
+          label: exit.labelHe,
+          locked: !meets(state, exit.needs),
+          x: (left + right) / 2,
+          y: (top + bottom) / 2,
+          priority: exit.priority ?? 2,
+        },
+        0,
+      )
+    }
+    return best
+  }
+
+  /**
+   * איפה עומדים כדי לעשות את זה — the spot a walker has to reach to use a thing.
+   *
+   * Never the thing's own position: standing inside a person is not talking to them, and
+   * standing in the middle of a doorway is how the auto-exit swallows you before the
+   * conversation opens. So the stand-point is on the walker's side of the target, one
+   * body-width out, clamped into the band — which is exactly what those games did and why
+   * their characters always stopped in a natural place.
+   */
+  private standPoint(target: Target): { x: number; y: number } {
+    const bounds = this.bounds()
+    const y = Math.min(bounds.bottom, Math.max(bounds.top, target.y))
+    if (target.kind === 'exit') {
+      // Doors are entered from the room, not from the frame edge.
+      const inward = target.x < this.W * 0.5 ? 1 : -1
+      return clampToBand({ x: target.x + inward * this.W * 0.03, y }, bounds)
+    }
+    // Wide enough to be BESIDE them rather than on top of them: the walker's own width
+    // and the target's, so a conversation with a seated man in an armchair does not end
+    // with a child standing in the armchair.
+    const theirs = target.kind === 'act' ? this.actorWidth(target.act) : 0
+    const gap = Math.max(this.player.displayWidth * 0.75 + theirs * 0.5, this.W * 0.03)
+    const side = this.player.x <= target.x ? -1 : 1
+    return clampToBand({ x: target.x + side * gap, y }, bounds)
+  }
+
+  /** How wide the person behind this conversation is drawn, or 0 if it is not a person. */
+  private actorWidth(act: string): number {
+    const actor = this.actors.find((entry) => entry.def.talk === act && entry.image.visible)
+    return actor ? actor.image.displayWidth : 0
+  }
+
+  /**
+   * הצבעת. עכשיו הוא הולך.
+   *
+   * The one thing this must never do is teleport him, and the second thing is refuse. A tap
+   * on a wall is not an error — it is a player saying "over there", and the honest answer
+   * is to walk as far in that direction as the floor allows.
+   */
+  private pointAt(x: number, y: number) {
+    // Double-tap to run, which is what every game on Maor's list did and what makes a long
+    // walk across the yard a decision rather than a wait. The second tap does not have to
+    // land in the same place — a player who taps twice is a player saying "hurry".
+    const now = this.time.now
+    const run = now - this.lastTapAt < 420
+    this.lastTapAt = now
+
+    const target = this.pickAt(x, y)
+    const bounds = this.bounds()
+    if (target) {
+      const stand = this.standPoint(target)
+      this.goal = { x: stand.x, y: stand.y, then: target, run }
+      this.goalBest = Infinity
+      this.goalStalled = 0
+      this.showGoalMark(target.x, target.y)
+      // Show what is about to happen before it happens, which is the sentence line.
+      this.target = target
+      this.pushPrompt(target)
+      return
+    }
+    const spot = clampToBand({ x, y }, bounds)
+    this.goal = { x: spot.x, y: spot.y, then: null, run }
+    this.goalBest = Infinity
+    this.goalStalled = 0
+    this.showGoalMark(spot.x, spot.y)
+  }
+
+  /** True when this walk has stopped getting closer for long enough to call it stuck. */
+  private stalled(left: number, delta: number, reach: number): boolean {
+    if (left < this.goalBest - reach * 0.12) {
+      this.goalBest = left
+      this.goalStalled = 0
+      return false
+    }
+    this.goalStalled += delta
+    return this.goalStalled > 1500
+  }
+
+  /**
+   * Is this canvas point ON THE PAINTING?
+   *
+   * הקנבס גדול מהתמונה. On a phone held upright the camera's viewport shrinks to the
+   * picture and keeps its composition (rule 40) — but the CANVAS is still the whole box,
+   * so there is a strip of live canvas under the picture where the dialogue box and the
+   * console live. Phaser computes `worldX` from the main camera for a pointer anywhere on
+   * that canvas, so a thumb landing on the console band came back as a perfectly
+   * plausible place in the room and the child walked to it. A tap on a button is not a
+   * tap on the floor, and this is the line that says so.
+   */
+  private onPicture(canvasX: number, canvasY: number): boolean {
+    const cam = this.cameras.main
+    return (
+      canvasX >= cam.x &&
+      canvasY >= cam.y &&
+      canvasX <= cam.x + cam.width &&
+      canvasY <= cam.y + cam.height
+    )
+  }
+
+  /**
+   * A tap the shell caught, in CLIENT pixels, turned into a place in the painting.
+   *
+   * The obvious version of this — scale the client offset by `cam.width / rect.width` —
+   * is right on a desktop and WRONG ON EVERY PHONE, which is exactly where it was needed.
+   * `rect` is the canvas; `cam.width × cam.height` is the framed picture inside it, and
+   * on a tall screen those are different rectangles. Scaling one onto the other squashed
+   * the whole world into the top of the glass: a thumb on the boy's feet arrived at his
+   * chest, a thumb near the bottom of the picture arrived in the middle of the room, and
+   * the further down you touched the wronger it got.
+   *
+   * So the conversion goes through the canvas's own coordinate space — `scale.width`,
+   * which is what `rect` actually maps to — and only then subtracts the camera's viewport
+   * origin. A point outside the picture is not a place, and is refused rather than
+   * clamped: clamping would walk the child to the nearest floor tile every time somebody
+   * pressed a button.
+   */
+  pointAtScreen(clientX: number, clientY: number) {
+    if (this.paused || this.matchPhase === 'archive') return
+    const canvas = this.game.canvas
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    if (rect.width <= 0 || rect.height <= 0) return
+    const canvasX = ((clientX - rect.left) / rect.width) * this.scale.width
+    const canvasY = ((clientY - rect.top) / rect.height) * this.scale.height
+    if (!this.onPicture(canvasX, canvasY)) return
+    const cam = this.cameras.main
+    this.pointAt(cam.scrollX + (canvasX - cam.x) / cam.zoom, cam.scrollY + (canvasY - cam.y) / cam.zoom)
+  }
+
+  private showGoalMark(x: number, y: number) {
+    const size = Math.max(18, this.player.displayHeight * 0.34)
+    this.goalMark.setPosition(x, y).setSize(size, size * DEPTH).setVisible(true).setAlpha(1)
+    this.goalMark.setDisplaySize(size, size * DEPTH)
+    this.tweens.killTweensOf(this.goalMark)
+    this.tweens.add({ targets: this.goalMark, alpha: 0.15, duration: 620, yoyo: true, repeat: -1 })
+  }
+
+  private clearGoal() {
+    this.goal = null
+    this.goalBest = Infinity
+    this.goalStalled = 0
+    this.tweens.killTweensOf(this.goalMark)
+    this.goalMark.setVisible(false)
+  }
+
+  /** The ring under whatever the mouse is over, sized to it. Touch never sees this. */
+  private paintHover() {
+    const target = this.hovering
+    if (!target) {
+      this.hoverRing.setVisible(false)
+      return
+    }
+    const size = Math.max(22, this.player.displayHeight * 0.4)
+    this.hoverRing.setPosition(target.x, target.y).setDisplaySize(size, size * DEPTH).setVisible(true)
+  }
+
+  private pushPrompt(target: Target | null) {
+    if (!target) {
+      this.ctx.bus.emit('prompt', null)
+      return
+    }
+    this.ctx.bus.emit('prompt', {
+      verb: target.verb,
+      label: target.label,
+      locked: target.kind === 'exit' && target.locked,
+    })
+  }
+
   private movePlayer(delta: number) {
     const input = this.ctx.input
-    const running = input.run && this.ctx.engine.state.energy > 6
+    const bounds = this.bounds()
+
+    /**
+     * שני מקורות תנועה, ואחד מהם תמיד מנצח.
+     *
+     * A stick or an arrow key is a person taking the wheel, so it cancels wherever they had
+     * pointed — instantly, before any of the arithmetic below. Anything else and the child
+     * fights the player for the last half-second of a walk, which is the single most
+     * irritating bug a point-and-click game can have.
+     */
+    const manual = Math.abs(input.x) + Math.abs(input.y) > 0.08
+    if (manual && this.goal) this.clearGoal()
+
+    let ax = input.x
+    let ay = input.y
+    let arrived: Target | null | undefined
+
+    if (!manual && this.goal) {
+      const here = { x: this.player.x, y: this.player.y }
+      const way = nextWaypoint(here, this.goal, this.blockers(), this.player.displayWidth * 0.28)
+      const left = groundDistance(here, this.goal)
+      // Close enough is a body-width, measured on the GROUND — the same tolerance at both
+      // ends of a band, where a pixel radius would be generous up close and impossible far
+      // away.
+      const reach = Math.max(this.player.displayWidth * 0.5, this.W * 0.012)
+      if (left <= reach) {
+        arrived = this.goal.then
+        this.clearGoal()
+      } else if (this.stalled(left, delta, reach)) {
+        /**
+         * הליכה שלא מתקדמת נעצרת. תמיד.
+         *
+         * Nothing in a point-and-click game may leave the player watching a character
+         * shuffle against something forever, and a steering behaviour CAN — a destination
+         * in a corner behind two obstacles, an actor who moved into the last gap. So the
+         * walk is watched: if a second and a half passes without getting meaningfully
+         * closer, it ends. If we got close enough to be useful the thing still happens;
+         * otherwise control simply comes back, and the player can point again.
+         */
+        arrived = left <= reach * 2.6 ? this.goal.then : null
+        this.clearGoal()
+      } else {
+        const dx = way.x - here.x
+        const dy = (way.y - here.y) / DEPTH
+        const len = Math.hypot(dx, dy) || 1
+        const ease = arrivalEase(left, reach * 3.2)
+        ax = (dx / len) * ease
+        ay = (dy / len) * ease
+      }
+    }
+
+    const running = (input.run || this.goal?.run === true) && this.ctx.engine.state.energy > 6
     const speed = (running ? RUN : WALK) * this.player.displayHeight
     const ease = 1 - Math.pow(0.0015, delta / 1000)
 
-    this.vx = Phaser.Math.Linear(this.vx, input.x * speed, ease)
-    this.vy = Phaser.Math.Linear(this.vy, input.y * speed * 0.52, ease)
+    this.vx = Phaser.Math.Linear(this.vx, ax * speed, ease)
+    this.vy = Phaser.Math.Linear(this.vy, ay * speed * DEPTH, ease)
 
     const step = delta / 1000
-    const nx = Phaser.Math.Clamp(this.player.x + this.vx * step, this.W * 0.02, this.W * 0.98)
-    const ny = Phaser.Math.Clamp(
-      this.player.y + this.vy * step,
-      this.def.band.far * this.H,
-      this.def.band.near * this.H,
-    )
-    this.travelled += Math.abs(nx - this.player.x) + Math.abs(ny - this.player.y)
+    const nx = Phaser.Math.Clamp(this.player.x + this.vx * step, bounds.left, bounds.right)
+    const ny = Phaser.Math.Clamp(this.player.y + this.vy * step, bounds.top, bounds.bottom)
+    const movedX = nx - this.player.x
+    const movedY = ny - this.player.y
+    this.travelled += Math.abs(movedX) + Math.abs(movedY)
     this.player.setPosition(nx, ny)
 
-    const moving = Math.abs(input.x) + Math.abs(input.y) > 0.08
+    const moving = Math.abs(ax) + Math.abs(ay) > 0.08
     if (moving) {
-      if (Math.abs(input.x) > Math.abs(input.y) * 0.8) {
+      if (Math.abs(ax) > Math.abs(ay) * 0.8) {
         this.lastDir = 'side'
-        this.facing = input.x < 0 ? -1 : 1
+        this.facing = ax < 0 ? -1 : 1
       } else {
-        this.lastDir = input.y < 0 ? 'up' : 'down'
+        this.lastDir = ay < 0 ? 'up' : 'down'
       }
-      this.stride += (delta / 1000) * (running ? 11 : 7.5)
+      /**
+       * הרגליים לא מחליקות יותר.
+       *
+       * This was `(delta / 1000) * 7.5` — frames per second, regardless of speed, size or
+       * distance — and it is why Maor said the movement fakes it. A walk cycle belongs to
+       * the FLOOR: the planted foot must stay planted, so the cycle advances by ground
+       * covered divided by the length of a stride, and a stride is a fraction of a body.
+       * At the far end of the pitch the child is half the size and covers half the ground,
+       * and his legs now move half as fast to match, which is the whole illusion.
+       */
+      this.stride += strideAdvance(
+        Math.hypot(movedX, movedY / DEPTH),
+        this.player.displayHeight,
+        KID_WALK.length,
+      )
       this.idleFor = 0
     }
 
@@ -728,6 +1174,38 @@ export class WorldScene extends Phaser.Scene {
 
     if (running) this.ctx.engine.dispatch({ t: 'energy.changed', delta: -delta / 2400 })
     if (this.travelled > this.W * 0.06) this.progress()
+
+    // …and if this frame ended a walk that was going somewhere for a reason, do the thing.
+    // After the move, so the child is standing where he will be seen to be standing.
+    if (arrived) {
+      this.turnTo(arrived)
+      this.target = arrived
+      this.act()
+    }
+  }
+
+  /**
+   * מסתובבים אל מי שבאת לדבר איתו.
+   *
+   * A child who walks across the room to his father and then delivers the conversation
+   * with his back to him is the tell that the arrival was a distance check rather than a
+   * meeting — and it is the single frame the player looks at for the whole conversation,
+   * because the box that opens next freezes the world. Every game on Maor's list turns the
+   * character before the first line. Side-on gets the flip; a target that is mostly above
+   * or below gets the matching standing pose, so a hotspot on the floor is looked DOWN at.
+   */
+  private turnTo(target: Target) {
+    const dx = target.x - this.player.x
+    const dy = (target.y - this.player.y) / DEPTH
+    if (Math.abs(dx) > Math.abs(dy) * 0.8) {
+      this.lastDir = 'side'
+      this.facing = dx < 0 ? -1 : 1
+      this.player.setTexture(`art-${KID_POSE.side}`)
+    } else {
+      this.lastDir = dy < 0 ? 'up' : 'down'
+      this.player.setTexture(`art-${this.lastDir === 'up' ? KID_POSE.up : KID_POSE.down}`)
+    }
+    this.player.setFlipX(this.facing < 0)
   }
 
   private moveActors(delta: number) {
@@ -1098,17 +1576,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.target = best
     this.focus(best)
-    const chosen = best as Target | null
-    this.ctx.bus.emit(
-      'prompt',
-      chosen
-        ? {
-            verb: chosen.verb,
-            label: chosen.label,
-            locked: chosen.kind === 'exit' ? chosen.locked : false,
-          }
-        : null,
-    )
+    this.pushPrompt(best as Target | null)
   }
 
   /** The mark over what you are about to touch, and a lift on the thing itself. */
@@ -1136,6 +1604,9 @@ export class WorldScene extends Phaser.Scene {
   private act() {
     const target = this.target
     if (!target) return
+    // Whatever the player pointed at, this is it happening. A goal that survives its own
+    // arrival sends the child walking again the moment the dialogue closes.
+    if (this.goal) this.clearGoal()
     if (!this.ctx.engine.state.flags['onboard:acted']) {
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'onboard:acted' })
       this.teach()

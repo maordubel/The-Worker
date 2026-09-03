@@ -251,6 +251,8 @@ export function HistoricalCutscene({
     <div
       dir="rtl"
       role="dialog"
+      data-life="cutscene"
+      data-phase={phase}
       className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink"
       aria-modal="true"
       aria-label={scene.titleHe}
@@ -287,12 +289,37 @@ export function HistoricalCutscene({
                 className="absolute inset-0 h-full w-full border-0"
               />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-gutter text-center">
-                <p className="font-body text-[13px] leading-relaxed text-concrete">{scene.fallbackHe}</p>
+              /**
+               * מסך שלא נפתח הוא עדיין מסך.
+               *
+               * The first version of this was a black rectangle with one sentence in the
+               * middle of it, and it is the screen a player meets when their connection
+               * hiccups — the ONLY frame of this sequence some people will ever see. An
+               * empty box reads as the game breaking. So the slate the projectionist would
+               * have left up stays up: the ground, the date, the fixture, the competition,
+               * exactly as the title card printed them, and the apology is a caption under
+               * it rather than the whole picture. Nothing here is invented — every line
+               * comes from the same archive row the film was going to illustrate.
+               */
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-gutter text-center">
+                <div>
+                  <p className="font-mono text-[10px] tracking-[0.32em] tabular-nums text-concrete/55">
+                    {[card.placeHe, card.dateHe].filter(Boolean).join(' · ')}
+                  </p>
+                  {card.fixtureHe ? (
+                    <p className="mt-4 font-display text-[20px] leading-tight text-sheet sm:text-[26px]">
+                      {card.fixtureHe}
+                    </p>
+                  ) : null}
+                  <p className="mt-2 font-body text-[13px] text-red sm:text-[15px]">{card.titleHe}</p>
+                </div>
+                <p className="max-w-[42ch] font-body text-[12px] leading-relaxed text-concrete/70">
+                  {scene.fallbackHe}
+                </p>
                 <button
                   type="button"
                   onClick={() => finish('unavailable')}
-                  className="flex min-h-tap items-center border-hair border-concrete/40 px-5 font-body text-[13px] text-sheet"
+                  className="flex min-h-tap items-center border-hair border-red/60 px-6 font-body text-[13px] text-sheet"
                 >
                   {t('life.cutscene.continue')}
                 </button>

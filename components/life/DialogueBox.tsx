@@ -42,6 +42,10 @@ export function DialogueBox({
 }) {
   const line = lines[0]
   if (!line) return null
+  /** narration: no speaker, no plate — so the X sits in the sheet's own corner, and the
+      text has to leave it room rather than run underneath it */
+  const bare = !line.who && !portrait
+  const clear = bare ? ' pe-12' : ''
 
   return (
     // `data-life` hooks are for `scripts/life/playthrough.mjs`, which plays the real
@@ -52,48 +56,68 @@ export function DialogueBox({
       style={offsetTop ? { top: offsetTop, alignItems: 'flex-start' } : undefined}
       data-life="dialogue"
     >
-      <div className="w-full border-rule border-ink bg-sheet">
-        <div
-          className={`flex items-stretch gap-2.5 border-b-hair border-ink ${
-            line.who ? 'bg-ink' : 'bg-ink/90'
-          }`}
-        >
+      <div className="relative w-full border-rule border-ink bg-sheet">
+        {/**
+         * הכותרת קיימת רק כשיש מי שמדבר.
+         *
+         * A narration line has no speaker and no plate, and the strip was drawn for it
+         * anyway: a 54px band of solid ink, empty except for the X in the corner. On a
+         * phone that is the height of the sentence underneath it, and it reads exactly
+         * like a portrait that failed to load — which is the worst thing a caption can
+         * look like in a game whose art is the point. Narration is the room talking, so
+         * it gets no talking head; the X moves into the sheet's own corner, where it is
+         * still in the same place on every line of every conversation.
+         */}
+        {line.who || portrait ? (
+          <div className="flex items-stretch gap-2.5 border-b-hair border-ink bg-ink">
             {/* The speaker's printed plate, cut from the cast board. It is square and
                 borderless on the start side because it is pasted onto the ink strip, not
                 framed by it — the brand has no rounded corners and no shadows. */}
-          {portrait && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={artUrl(portrait)}
-              alt=""
-              aria-hidden="true"
-              className="h-[54px] w-[62px] shrink-0 border-e-hair border-ink object-cover"
-            />
-          )}
-          {line.who ? (
-            <p className="self-center px-3 py-1.5 font-display text-[13px] leading-none text-sheet">
-              <bdi>{line.who}</bdi>
-            </p>
-          ) : (
-            <span className="px-3 py-1.5" aria-hidden="true" />
-          )}
+            {portrait && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={artUrl(portrait)}
+                alt=""
+                aria-hidden="true"
+                className="h-[54px] w-[62px] shrink-0 border-e-hair border-ink object-cover"
+              />
+            )}
+            {line.who ? (
+              <p className="self-center px-3 py-1.5 font-display text-[13px] leading-none text-sheet">
+                <bdi>{line.who}</bdi>
+              </p>
+            ) : (
+              <span className="px-3 py-1.5" aria-hidden="true" />
+            )}
 
-          {/* היציאה — the same corner, every line, every conversation. */}
+            {/* היציאה — the same corner, every line, every conversation. */}
+            <button
+              type="button"
+              onClick={onLeave}
+              aria-label={t('life.leave')}
+              title={t('life.leave')}
+              data-life="leave"
+              className="ms-auto flex min-h-tap w-11 shrink-0 items-center justify-center self-stretch border-s-hair border-sheet/25 font-display text-[15px] leading-none text-sheet/70 transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none"
+            >
+              <span aria-hidden="true">✕</span>
+            </button>
+          </div>
+        ) : (
           <button
             type="button"
             onClick={onLeave}
             aria-label={t('life.leave')}
             title={t('life.leave')}
             data-life="leave"
-            className="ms-auto flex min-h-tap w-11 shrink-0 items-center justify-center self-stretch border-s-hair border-sheet/25 font-display text-[15px] leading-none text-sheet/70 transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none"
+            className="absolute end-0 top-0 z-10 flex min-h-tap w-11 items-center justify-center border-s-hair border-b-hair border-ink/15 font-display text-[15px] leading-none text-ink/45 transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none"
           >
             <span aria-hidden="true">✕</span>
           </button>
-        </div>
+        )}
 
         {choices && choices.length > 0 ? (
           <>
-            <p className="px-3 pb-2 pt-3 font-body text-[15px] leading-relaxed text-ink" data-life="line">
+            <p className={`px-3 pb-2 pt-3 font-body text-[15px] leading-relaxed text-ink${clear}`} data-life="line">
               <bdi>{line.text}</bdi>
             </p>
             <ul className="border-t-hair border-ink">
@@ -125,7 +149,7 @@ export function DialogueBox({
             type="button"
             onClick={onAdvance}
             aria-label={t('life.continue')}
-            className="flex min-h-tap w-full items-start gap-3 px-3 py-3 text-start"
+            className={`flex min-h-tap w-full items-start gap-3 px-3 py-3 text-start${clear}`}
           >
             <span className="flex-1 font-body text-[15px] leading-relaxed text-ink" data-life="line">
               <bdi>{line.text}</bdi>

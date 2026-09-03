@@ -259,27 +259,16 @@ export function ControlDeck({
   // --- touch: the cabinet ----------------------------------------------------------
   return (
     <>
-      {/* The whole start half of the painting is also the stick, so a thumb that lands on
-          the picture still steers. The cabinet below is where the thumb rests. */}
-      <div
-        className="pointer-events-auto absolute bottom-0 start-0 z-10 w-1/2 touch-none"
-        style={{ top: Math.max(56, top * 0.35) }}
-        onPointerDown={(event) => {
-          if (pointer.current !== null) return
-          pointer.current = event.pointerId
-          event.currentTarget.setPointerCapture(event.pointerId)
-          const from = { x: event.clientX, y: event.clientY }
-          setOrigin(from)
-          move(event.clientX, event.clientY, from)
-        }}
-        onPointerMove={(event) => {
-          if (pointer.current !== event.pointerId || !origin) return
-          move(event.clientX, event.clientY, origin)
-        }}
-        onPointerUp={release}
-        onPointerCancel={release}
-        aria-hidden="true"
-      />
+      {/*
+          התמונה היא לא ג'ויסטיק.
+
+          Half the lower painting used to be an invisible drag pad: a thumb that landed on
+          a person standing there steered instead of pointing, and on a phone that is most
+          of the screen. Telling a tap from a drag made it *work*, but it did not make it
+          right — none of the games Maor named have a stick over the picture, because in a
+          point-and-click the painting means one thing and it means it everywhere. The
+          stick is hardware and lives on the deck below, where a player who wants to steer
+          can find it and where it can never eat a tap on the world. */}
 
       {/* the name of what is in reach — its own line, full width, above the hardware */}
       <div
