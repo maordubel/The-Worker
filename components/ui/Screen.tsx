@@ -31,12 +31,14 @@ export function Screen({
    * buttons on it.
    */
   chrome = true,
+  fullBleed = false,
   children,
 }: {
   title: string
   sub: string
   night?: boolean
   chrome?: boolean
+  fullBleed?: boolean
   children: ReactNode
 }) {
   return (
@@ -48,7 +50,9 @@ export function Screen({
       >
         <main
           id="main"
-          className={`relative flex-1 px-gutter pb-stack ${chrome ? 'pt-5 md:pt-10' : 'pt-2'}`}
+          className={`relative flex-1 ${
+            fullBleed ? 'p-0' : `px-gutter pb-stack ${chrome ? 'pt-5 md:pt-10' : 'pt-2'}`
+          }`}
         >
           {/* The lights come on over a night screen. On a paper screen the sun is
               already up and there is nothing to switch on. */}
@@ -103,14 +107,16 @@ export function Screen({
         </footer>
         )}
 
-        {/* Space for the fixed bar + the iOS home indicator. */}
-        <div
-          aria-hidden="true"
-          className="h-[calc(var(--tap)+1.25rem+env(safe-area-inset-bottom))]"
-        />
+        {!fullBleed && (
+          /* Space for the fixed bar + the iOS home indicator. */
+          <div
+            aria-hidden="true"
+            className="h-[calc(var(--tap)+1.25rem+env(safe-area-inset-bottom))]"
+          />
+        )}
       </div>
 
-      <TabBar />
+      {!fullBleed && <TabBar />}
     </div>
   )
 }

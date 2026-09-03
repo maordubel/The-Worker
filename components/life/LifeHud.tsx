@@ -16,7 +16,7 @@ import { t } from '@/lib/i18n'
  */
 export function LifeHud({ hud }: { hud: HudState }) {
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 p-2.5">
+    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 px-2.5 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))]">
       <div className="border-hair border-ink bg-sheet/95 px-2.5 py-1.5">
         <p className="font-mono text-[12px] leading-none tabular-nums text-ink" data-life="clock">
           {hud.clock}
