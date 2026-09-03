@@ -400,7 +400,36 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: 'kitchen-table',
-    branches: [{ lines: [{ who: null, text: 'שולחן מכוסה בשעוונית. פירורים, וסכין לחם.' }] }],
+    branches: [
+      /**
+       * העיתון של אבא — the stakes, in 1986's own words, on a Saturday morning table.
+       *
+       * This is the pre-match page of מעריב ספורט: both line-ups printed in boxes, the
+       * league table down the middle, and a headline that says the whole season is
+       * decided tomorrow at Bloomfield. Nothing in this game had to write that sentence,
+       * and nothing in this game is allowed to — so the child picks up his father's paper
+       * and reads it, which is how an eight-year-old would have found out anyway.
+       *
+       * It is also the honest way to raise `knows:match`: the flag that opens the road
+       * east is now something the player LEARNED rather than something the game granted.
+       */
+      {
+        when: { notFlag: 'knows:match' },
+        lines: [
+          { who: null, text: 'העיתון של אבא פתוח על השעוונית, בעמוד האמצעי. הוא קרא את זה הבוקר שלוש פעמים.' },
+        ],
+        then: [
+          { e: 'doc', art: 'paperBefore', captionHe: 'מעריב ספורט, 23.5.1986 — מארכיון מאור דובל' },
+          { e: 'flag', flag: 'knows:match' },
+          { e: 'redheart', key: 'footballLove', delta: 4 },
+          { e: 'toast', text: 'מחר. בבלומפילד.', tone: 'red' },
+        ],
+      },
+      {
+        lines: [{ who: null, text: 'שולחן מכוסה בשעוונית. פירורים, סכין לחם, והעיתון של אבא.' }],
+        then: [{ e: 'doc', art: 'paperBefore', captionHe: 'מעריב ספורט, 23.5.1986 — מארכיון מאור דובל' }],
+      },
+    ],
   },
 
   // ----------------------------------------------------------------- the street ----

@@ -8,6 +8,7 @@ import type { LifeEvent } from '../events'
 import { acceptEvents, isAvailable, resolveOutcome } from '../opportunities'
 import { keepEvents, pickRedBoxItem } from '../redbox'
 import { meets } from '../world/types'
+import { DOC } from './art'
 
 import type { DialogueChoice, LifeBus } from './bus'
 
@@ -245,6 +246,15 @@ export class DialogueRunner {
           break
         case 'toast':
           after.push(() => this.bus.emit('toast', { text: effect.text, tone: effect.tone ?? 'plain' }))
+          break
+        case 'doc':
+          // Only a key the art layer actually declares. A dialogue file may hold up a
+          // document; it may not name an arbitrary URL and it may not name a sprite.
+          if (DOC.includes(effect.art as (typeof DOC)[number])) {
+            const art = effect.art
+            const captionHe = effect.captionHe ?? null
+            after.push(() => this.bus.emit('doc', { art, captionHe }))
+          }
           break
         case 'goto':
           goto = effect.node

@@ -245,6 +245,12 @@
   "bytes": 144640,
   "yellowLeft": 0
  },
+ "docTicket": {
+  "w": 776,
+  "h": 474,
+  "bytes": 126583,
+  "yellowLeft": 0
+ },
  "efi": {
   "w": 190,
   "h": 526,
@@ -1341,6 +1347,30 @@
   "w": 102,
   "h": 292,
   "bytes": 37451,
+  "yellowLeft": 0
+ },
+ "paperAdumim": {
+  "w": 430,
+  "h": 599,
+  "bytes": 81028,
+  "yellowLeft": 0
+ },
+ "paperBefore": {
+  "w": 1500,
+  "h": 1307,
+  "bytes": 499577,
+  "yellowLeft": 0
+ },
+ "paperCollector": {
+  "w": 421,
+  "h": 599,
+  "bytes": 78302,
+  "yellowLeft": 0
+ },
+ "paperFive": {
+  "w": 427,
+  "h": 600,
+  "bytes": 84642,
   "yellowLeft": 0
  },
  "pogi-3q": {

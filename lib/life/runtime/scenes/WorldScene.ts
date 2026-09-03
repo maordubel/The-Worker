@@ -8,9 +8,11 @@ import { OPPORTUNITIES_1986 } from '../../content/opportunities1986'
 import { SCHEDULE_1986 } from '../../content/schedules1986'
 import type { ConversationShot } from '../../content/script'
 import { encounterEvents, rollEncounter } from '../../encounters'
+import { buildFinale } from '../../finale'
 import { tickOpportunities } from '../../opportunities'
 import { placementsAt } from '../../schedules'
 import type { LifeState, LocationId } from '../../types'
+import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
 import { FULL_TIME, KICKOFF, KOBI_LEAVES, sceneFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, SceneDef, Verb } from '../../world/scenes'
 import { meets } from '../../world/types'
@@ -141,7 +143,12 @@ export class WorldScene extends Phaser.Scene {
   private minuteAcc = 0
   private timeScale = 1
   private flagCount = 0
-  private matchPhase: 'none' | 'watching' | 'over' = 'none'
+  private matchPhase: 'none' | 'watching' | 'goal' | 'celebrating' | 'over' = 'none'
+  private goalMinute: number | null = null
+  /** the one line before the goal, said once — its OWN latch, never `flagCount` */
+  private saidTense = false
+  private lastMatchLabel = ''
+  private streamers: Phaser.GameObjects.Rectangle[] = []
 
   private dwell = 0
   private dwellExit: ExitDef | null = null
@@ -180,6 +187,10 @@ export class WorldScene extends Phaser.Scene {
     this.timeScale = 1
     this.flagCount = 0
     this.matchPhase = 'none'
+    this.goalMinute = null
+    this.saidTense = false
+    this.lastMatchLabel = ''
+    this.streamers = []
     this.actors = []
     this.ambient = []
     this.hotspots = []
@@ -286,6 +297,7 @@ export class WorldScene extends Phaser.Scene {
     this.teach()
 
     if (this.def.arrival && !state.flags[this.def.arrival.flag]) this.playArrival()
+    else this.beginMatch()
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', this.onResize, this))
   }
@@ -697,10 +709,25 @@ export class WorldScene extends Phaser.Scene {
    * windows open and close. Spreading either of those through the update loop is how a
    * scene ends up with two clocks that disagree.
    */
+  /**
+   * Everything that is allowed to notice a minute passed — and nothing during a fast-
+   * forward, which is what made the fast-forward slow.
+   *
+   * At twenty-six times speed the clock produces about twenty game minutes a second, and
+   * each one was folding the whole event log, re-running the NPC timetable and ticking
+   * every opportunity window. The frame budget went, Phaser clamped `delta` to stop the
+   * loop spiralling, and the "time-lapse" then ran at roughly ONE times speed — a
+   * ninety-minute match at real speed, from a number that says 26.
+   *
+   * Neither job means anything inside a stadium: no scheduled NPC stands in this scene
+   * and no window is open in it. So during the match the minute is just a number, which
+   * is exactly what a scoreboard wants.
+   */
   private onMinute() {
     const state = this.ctx.engine.state
     if (state.minute === this.lastMinute) return
     this.lastMinute = state.minute
+    if (this.matchPhase === 'watching' || this.matchPhase === 'goal') return
     this.applySchedule()
     this.tickWindows()
   }
@@ -1252,7 +1279,7 @@ export class WorldScene extends Phaser.Scene {
               this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'arrived:late' })
               this.refresh()
             } else {
-              this.watchMatch()
+              this.beginMatch()
             }
           },
         })
@@ -1260,27 +1287,255 @@ export class WorldScene extends Phaser.Scene {
     })
   }
 
+  /**
+   * The final starts when the child is INSIDE, not when a transition finishes playing.
+   *
+   * `watchMatch` used to be called from one place: the completion of the reveal card. A
+   * player who had already seen that card — a second run, a save reloaded inside the
+   * ground, the QA tour — walked into Bloomfield and stood in a stadium where no match
+   * ever kicked off. It did not show while the match was a time-lapse the clock drove by
+   * itself; the moment the ninety minutes became a scene, it became the whole chapter
+   * silently not happening.
+   *
+   * So the condition is a fact about the world — this is the ground, the match is not
+   * over, and nothing is already running — and both entry paths ask it.
+   */
+  private beginMatch() {
+    if (this.def.id !== 'bloomfield-inside') return
+    if (this.matchPhase !== 'none') return
+    if (this.ctx.engine.state.flags['match:over']) {
+      this.matchPhase = 'over'
+      this.pushMatch()
+      return
+    }
+    this.watchMatch()
+  }
+
+  /**
+   * תשעים דקות — the final, and the only scene in this game that takes the controls away.
+   *
+   * Everything before this point in the chapter is a child deciding things. This is the
+   * one stretch where he decides nothing, because that is what being eight in a crowd at
+   * a title decider actually is: you are carried. So the match runs itself, and the whole
+   * design problem is PACING — eighty minutes of nothing, six minutes of held breath, and
+   * one minute that the entire chapter has been walking towards.
+   *
+   * `matchPace` in `lib/life/match.ts` owns the four numbers that do that, and this
+   * method owns none of them. It asks what minute it is, sets the speed it is told, and
+   * watches for one number: the minute the archive says the goal went in. Not a constant
+   * — the eighty-sixth minute is a sourced row in `content/manual/match-events.json`, and
+   * if that row ever changed the scene would hold its breath somewhere else without a
+   * line here changing.
+   */
   private watchMatch() {
     this.matchPhase = 'watching'
+    this.goalMinute = decidingMinute(this.ctx.anchor)
     this.timeScale = 26
     this.ctx.bus.emit('toast', { text: 'המשחק מתחיל.', tone: 'red' })
+    this.pushMatch()
+
     const check = this.time.addEvent({
-      delay: 500,
+      delay: 200,
       loop: true,
       callback: () => {
-        if (this.ctx.engine.state.minute < FULL_TIME) return
-        check.remove()
-        this.timeScale = 1
-        this.matchPhase = 'over'
-        this.ctx.engine.dispatch(
-          { t: 'flag.raised', flag: 'match:over' },
-          { t: 'anchor.attended', anchorId: this.ctx.anchor.id },
-        )
-        this.refresh()
-        this.ctx.bus.emit('anchor', { anchor: this.ctx.anchor, showing: true })
-        this.cameras.main.shake(700, 0.004)
+        if (this.matchPhase !== 'watching') return
+        const clock = matchClock(this.ctx.engine.state.minute, KICKOFF)
+        this.timeScale = this.goalMinute === null ? 26 : matchPace(clock.minute, this.goalMinute)
+        this.pushMatch()
+
+        // …the six minutes before it. One line, once, and then nothing until the ball.
+        if (this.goalMinute !== null && clock.minute >= this.goalMinute - 5 && !this.saidTense) {
+          this.saidTense = true
+          this.ctx.bus.emit('toast', { text: 'היציע כבר לא שר. כולם רק מסתכלים.', tone: 'plain' })
+        }
+
+        if (this.goalMinute !== null && clock.minute >= this.goalMinute) {
+          check.remove()
+          this.scoreGoal()
+          return
+        }
+        if (this.ctx.engine.state.minute >= FULL_TIME) {
+          check.remove()
+          this.endMatch()
+        }
       },
     })
+  }
+
+  /**
+   * דקה 86 — a chip, a lob, and a stadium.
+   *
+   * The one moment in the chapter that is authored frame by frame rather than simulated,
+   * because it is the one moment every person who was there can still describe. The clock
+   * stops. The picture pushes in and everything drains out of it but the pitch. Then a
+   * beat of nothing — long enough to be uncomfortable, which is the point — and then the
+   * whole thing comes back at once: white, a shake, the terrace, and paper in the air.
+   *
+   * The names are read off the anchor. `משה סיני` and `גילי לנדאו` are not written in this
+   * file and could not be: they are two `personSlug` fields in the archive, resolved by
+   * `anchor-server.ts`. A game that may not invent a fact (rule 11) can still stop time
+   * for one, and this is what that looks like.
+   */
+  private scoreGoal() {
+    this.matchPhase = 'goal'
+    this.timeScale = 0
+    this.paused = true
+    const goal = this.ctx.anchor.match?.decidedBy ?? null
+    this.ctx.bus.emit('controls', { visible: false })
+    this.ctx.bus.emit('prompt', null)
+
+    const camera = this.cameras.main
+    const holdZoom = Math.min(7, this.baseZoom * 1.16)
+    this.tweens.add({ targets: camera, zoom: holdZoom, duration: 1400, ease: 'Sine.easeInOut' })
+    if (goal?.assistHe) {
+      this.ctx.bus.emit('toast', { text: `${goal.assistHe} מרים את הראש.`, tone: 'plain' })
+    }
+
+    this.time.delayedCall(1500, () => {
+      // the beat of nothing
+      this.ctx.bus.emit('toast', null)
+    })
+
+    this.time.delayedCall(2600, () => {
+      const flash = this.add
+        .rectangle(0, 0, camera.width * 3, camera.height * 3, LIFE_PALETTE.sheet, 0.92)
+        .setOrigin(0, 0)
+        .setScrollFactor(0)
+        .setDepth(9800)
+      this.tweens.add({ targets: flash, alpha: 0, duration: 900, onComplete: () => flash.destroy() })
+      camera.shake(1200, 0.009)
+      this.tweens.add({ targets: camera, zoom: this.baseZoom, duration: 1600, ease: 'Back.easeOut' })
+
+      this.ctx.engine.dispatch(
+        { t: 'flag.raised', flag: 'saw:goal' },
+        { t: 'redheart.changed', key: 'footballLove', delta: 14 },
+        { t: 'redheart.changed', key: 'community', delta: 10 },
+        {
+          t: 'memory.kept',
+          memory: {
+            id: '1986-the-goal',
+            item: 'ticket-stub',
+            atMinute: this.ctx.engine.state.minute,
+            year: this.ctx.engine.state.year,
+            anchorId: this.ctx.anchor.id,
+          },
+        },
+      )
+      if (goal) {
+        this.ctx.bus.emit('toast', { text: `${goal.scorerHe}. דקה ${goal.minute}.`, tone: 'red' })
+      }
+      this.matchPhase = 'celebrating'
+      this.pushMatch()
+      this.startCarnival()
+      this.refresh()
+    })
+
+    // …and then the last few minutes, which nobody who was there remembers.
+    this.time.delayedCall(7200, () => {
+      if (this.matchPhase !== 'celebrating') return
+      this.paused = false
+      this.timeScale = 8
+      this.ctx.bus.emit('controls', { visible: true })
+      const rest = this.time.addEvent({
+        delay: 250,
+        loop: true,
+        callback: () => {
+          this.pushMatch()
+          if (this.ctx.engine.state.minute < FULL_TIME) return
+          rest.remove()
+          this.endMatch()
+        },
+      })
+    })
+  }
+
+  /**
+   * נייר באוויר — the carnival, which is thirty rectangles and a lot of gravity.
+   *
+   * Real streamers were in the props delivery and were deliberately not used: a photograph
+   * of a paper roll lying on a floor is an object, and what a terrace needs is MOTION —
+   * hundreds of strips of red and white coming down through the light for a minute and a
+   * half. Thirty tumbling rectangles in the club's own two colours read as that at a
+   * fraction of the cost, and they are the only thing in this game drawn as a primitive
+   * rather than as art, because they are the only thing that is not a thing.
+   */
+  private startCarnival() {
+    const camera = this.cameras.main
+    for (let i = 0; i < 34; i += 1) {
+      const red = i % 3 !== 0
+      const strip = this.add
+        .rectangle(
+          Phaser.Math.Between(0, Math.round(camera.width)),
+          Phaser.Math.Between(-260, -20),
+          Phaser.Math.Between(3, 6),
+          Phaser.Math.Between(14, 30),
+          red ? LIFE_PALETTE.red : LIFE_PALETTE.sheet,
+          0.92,
+        )
+        .setScrollFactor(0)
+        .setDepth(7200)
+      this.streamers.push(strip)
+      this.tweens.add({
+        targets: strip,
+        y: camera.height + 60,
+        duration: Phaser.Math.Between(3200, 7000),
+        delay: Phaser.Math.Between(0, 2600),
+        repeat: -1,
+        ease: 'Sine.easeIn',
+        onRepeat: () => strip.setX(Phaser.Math.Between(0, Math.round(camera.width))),
+      })
+      this.tweens.add({
+        targets: strip,
+        angle: Phaser.Math.Between(-220, 220),
+        duration: Phaser.Math.Between(1400, 3000),
+        repeat: -1,
+        yoyo: true,
+      })
+    }
+  }
+
+  private endMatch() {
+    this.timeScale = 1
+    this.paused = false
+    this.matchPhase = 'over'
+    if (!this.ctx.engine.state.flags['match:over']) {
+      this.ctx.engine.dispatch(
+        { t: 'flag.raised', flag: 'match:over' },
+        { t: 'anchor.attended', anchorId: this.ctx.anchor.id },
+      )
+    }
+    this.ctx.bus.emit('controls', { visible: true })
+    this.pushMatch()
+    this.refresh()
+    this.ctx.bus.emit('anchor', { anchor: this.ctx.anchor, showing: true })
+    this.cameras.main.shake(700, 0.004)
+  }
+
+  /** The scoreboard, pushed only when it changes — a strip that rerenders is a strip. */
+  private pushMatch() {
+    if (this.def.id !== 'bloomfield-inside' || this.matchPhase === 'none') {
+      this.ctx.bus.emit('match', null)
+      return
+    }
+    const scored = this.matchPhase === 'goal' || this.matchPhase === 'celebrating' || this.matchPhase === 'over'
+    const board = scoreboardAt(this.ctx.anchor, scored)
+    if (!board) return
+    const clock = matchClock(this.ctx.engine.state.minute, KICKOFF)
+    // Once it goes in, the board holds the minute it went in — the archive's minute, not
+    // whichever tick the loop happened to be on when the check fired. A scoreboard that
+    // says 87 for a goal history records at 86 is a small lie in the one place this
+    // chapter has spent three passes earning the right not to tell one.
+    const scoredLabel = this.goalMinute !== null ? `${this.goalMinute}'` : clock.labelHe
+    const label =
+      this.matchPhase === 'over'
+        ? 'סיום'
+        : this.matchPhase === 'goal' || this.matchPhase === 'celebrating'
+          ? scoredLabel
+          : clock.labelHe
+    const signature = `${label}|${board.homeScore}|${board.awayScore}`
+    if (signature === this.lastMatchLabel) return
+    this.lastMatchLabel = signature
+    this.ctx.bus.emit('match', { ...board, labelHe: label, scored })
   }
 
   private finishChapter(endingId: string) {
@@ -1339,9 +1594,35 @@ export class WorldScene extends Phaser.Scene {
     this.travel(location as LocationId, 'start')
   }
 
+  /**
+   * Closing the ending card does not go home any more. It opens the end of the STAGE.
+   *
+   * Two screens, in this order, because they answer different questions. `EndingCard`
+   * closes a Saturday: what happened when you walked back through your own front door.
+   * `StageFinale` closes a chapter of a life: what happened in the world, whether you
+   * were there for it, what it made of you, and where the next one starts.
+   *
+   * Collapsing them into one card was tried and it does not work — the private ending and
+   * the public celebration undercut each other, and the player ends up reading a
+   * scoreline over a sentence about their father's hand.
+   */
   goHome() {
-    this.paused = false
     this.ctx.bus.emit('ending', null)
+    const card = buildFinale(this.ctx.engine.state, this.ctx.engine.log())
+    this.ctx.bus.emit('finale', {
+      anchor: this.ctx.anchor,
+      titleHe: card.titleHe,
+      bodyHe: card.bodyHe,
+      becameHe: card.becameHe,
+      keptTicket: card.keptTicket,
+    })
+  }
+
+  /** …and the finale's own button is what actually goes home. */
+  dismissFinale() {
+    this.paused = false
+    this.ctx.bus.emit('finale', null)
+    this.ctx.bus.emit('match', null)
     this.travel('bedroom', 'start')
   }
 }

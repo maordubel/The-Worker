@@ -3,6 +3,8 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { archive } from '@/lib/game/archive'
+
 import { isYellow } from '@/lib/isYellow'
 import { resolveChapterAnchor, resolvePrologueAnchor } from '@/lib/life/anchor-server'
 import { isPlaceholder } from '@/lib/life/anchors'
@@ -177,13 +179,50 @@ describe('העוגן ההיסטורי — canonical, sourced, and honest about t
     expect(anchor.id).not.toBe('DEV-PLACEHOLDER')
   })
 
-  it('marks the missing match as a placeholder rather than filling it in', () => {
-    // The archive has the championship and not the game that decided it. Until a curated
-    // 1985/86 match row exists, the game must say so on screen.
+  /**
+   * This test used to assert the opposite, and the change is the point.
+   *
+   * For three passes the archive held the championship and not the game that decided it,
+   * so the anchor carried a placeholder note and this test insisted on it — a placeholder
+   * you can see is one somebody replaces. On 3.9.2026 somebody did: a ticket kept for
+   * forty years and two dated pages of מעריב ספורט became rows in `content/manual`.
+   *
+   * So the assertion is now the RULE rather than the state — the note is present exactly
+   * when the archive cannot answer, and absent exactly when it can. That version of the
+   * test survives the archive changing again in either direction.
+   */
+  it('carries the placeholder note if and only if the archive cannot answer', () => {
     const anchor = resolveChapterAnchor()
-    expect(anchor.placeholder).not.toBeNull()
-    expect(anchor.placeholder?.needs).toContain('1985/86')
-    expect(isPlaceholder(anchor)).toBe(true)
+    if (anchor.match) {
+      expect(anchor.placeholder, 'the archive answered, so the note must be gone').toBeNull()
+      expect(isPlaceholder(anchor)).toBe(false)
+    } else {
+      expect(anchor.placeholder, 'the archive cannot answer, so the note must be shown').not.toBeNull()
+      expect(anchor.placeholder?.needs).toContain('1985/86')
+      expect(isPlaceholder(anchor)).toBe(true)
+    }
+  })
+
+  it('states nothing about the deciding match that the archive does not hold', () => {
+    const match = resolveChapterAnchor().match
+    if (!match) return
+    // Every field is copied, never computed from prose — so every one of them has to be
+    // findable in the files. The names especially: a scorer this test cannot find in
+    // `people.json` is a name somebody typed into a scene.
+    const clubs = new Set(archive.clubs.filter((row) => row.sport === 'football').map((row) => row.nameHe))
+    expect(clubs.has(match.opponentHe), `${match.opponentHe} is not a club in the archive`).toBe(true)
+    expect(match.playedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    expect(match.sourceTitle.length).toBeGreaterThan(3)
+
+    const named = new Set(archive.people.map((row) => row.fullNameHe))
+    if (match.decidedBy) {
+      expect(match.decidedBy.minute).toBeGreaterThan(0)
+      expect(match.decidedBy.minute).toBeLessThanOrEqual(120)
+      expect(named.has(match.decidedBy.scorerHe), `${match.decidedBy.scorerHe} is not in people.json`).toBe(true)
+      if (match.decidedBy.assistHe) {
+        expect(named.has(match.decidedBy.assistHe), `${match.decidedBy.assistHe} is not in people.json`).toBe(true)
+      }
+    }
   })
 
   it('builds the headline from canonical fields only — no opponent, no score', () => {

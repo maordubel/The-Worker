@@ -124,6 +124,9 @@ export const archive = {
     minute: number | null
     minuteExtra?: number | null
     type: string
+    /* Present on every row in the file. A consumer that has to know WHOSE goal it was —
+       THE WORKER LIFE's anchor resolver — cannot filter on a field the type hides. */
+    clubSlug?: string | null
     personSlug: string | null
     relatedPersonSlug?: string | null
   }>(eventsFile),

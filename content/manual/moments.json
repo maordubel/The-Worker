@@ -1,68 +1,80 @@
 {
-  "note": "Story units. Each one is anchored to a verified match, date or event.",
-  "confidence": 2,
-  "source": {
-    "kind": "other",
-    "title": "Verified research pass, 31 Aug 2026",
-    "url": null
+ "note": "Story units. Each one is anchored to a verified match, date or event.",
+ "confidence": 2,
+ "source": {
+  "kind": "other",
+  "title": "Verified research pass, 31 Aug 2026",
+  "url": null
+ },
+ "records": [
+  {
+   "slug": "מילאן-2002",
+   "titleHe": "הלילה שבו הפועל ניצחה את מילאן",
+   "happenedOn": "2002-03-14",
+   "seasonLabel": "2001/02",
+   "category": "europe",
+   "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|מילאן|רבע גמר משחק 1",
+   "bodyHe": "ברבע גמר גביע אופ\"א, באצטדיון GSP בניקוסיה, סרגיי קלשצ'נקו הבקיע בדקה ה-32 מבישול של יוסי אבוקסיס — הפועל תל אביב 1 — מילאן 0. במשחק הגומלין בסן סירו הפכה מילאן את התוצאה, מילאן 2 — הפועל תל אביב 0, והעפילה במצטבר בשער אחד.",
+   "confidence": 2,
+   "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/0183-0eaa43ba228a-d6fe8d77e124-1000--clescenko-stuns-milan/",
+   "sourceTitle": "UEFA report"
   },
-  "records": [
-    {
-      "slug": "מילאן-2002",
-      "titleHe": "הלילה שבו הפועל ניצחה את מילאן",
-      "happenedOn": "2002-03-14",
-      "seasonLabel": "2001/02",
-      "category": "europe",
-      "matchNaturalKey": "2001/02|גביע-אופא|הפועל-תל-אביב|מילאן|רבע גמר משחק 1",
-      "bodyHe": "ברבע גמר גביע אופ\"א, באצטדיון GSP בניקוסיה, סרגיי קלשצ'נקו הבקיע בדקה ה-32 מבישול של יוסי אבוקסיס — הפועל תל אביב 1 — מילאן 0. במשחק הגומלין בסן סירו הפכה מילאן את התוצאה, מילאן 2 — הפועל תל אביב 0, והעפילה במצטבר בשער אחד.",
-      "confidence": 2,
-      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/0183-0eaa43ba228a-d6fe8d77e124-1000--clescenko-stuns-milan/",
-      "sourceTitle": "UEFA report"
-    },
-    {
-      "slug": "בנפיקה-2010",
-      "titleHe": "הניצחון על בנפיקה בליגת האלופות",
-      "happenedOn": "2010-11-24",
-      "seasonLabel": "2010/11",
-      "category": "europe",
-      "matchNaturalKey": "2010/11|ליגת-האלופות|הפועל-תל-אביב|בנפיקה|בית B מחזור 5",
-      "bodyHe": "בבית B של ליגת האלופות, מול שאלקה, ליון ובנפיקה, רשמה הפועל את ניצחונה הראשון בשלב הבתים — הפועל תל אביב 3 — בנפיקה 0 בבלומפילד, שערים של ערן זהבי (24, 90+2) ודאגלס דה סילבה (74).",
-      "confidence": 2,
-      "sourceUrl": "https://www.skysports.com/football/hap-tel-aviv-vs-benfica/report/227534",
-      "sourceTitle": "Sky Sports match report"
-    },
-    {
-      "slug": "בלומפילד-נפתח",
-      "titleHe": "בלומפילד נפתח",
-      "happenedOn": "1962-10-13",
-      "seasonLabel": "1962/63",
-      "category": "stadium",
-      "matchNaturalKey": "1962/63|ליגת-העל|הפועל-תל-אביב|שמשון-תל-אביב|משחק הפתיחה של בלומפילד",
-      "bodyHe": "האצטדיון נבנה במזרח יפו, על הקרקע שעליה עמד אצטדיון בסה — ביתה של הפועל תל אביב מ-1950. המשחק הראשון נערך ב-13 באוקטובר 1962 מול שמשון תל אביב.",
-      "confidence": 2,
-      "sourceUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
-      "sourceTitle": "Wikipedia + StadiumDB"
-    },
-    {
-      "slug": "היכל-אוסישקין-נהרס",
-      "titleHe": "היכל אוסישקין נהרס",
-      "happenedOn": "2007-07-25",
-      "sport": "basketball",
-      "category": "protest",
-      "bodyHe": "ב-25 ביולי 2007, ב-06:39 בבוקר, החלה הריסת היכל אוסישקין. עיריית תל אביב החליטה כשנה וחצי קודם לכן שהמתחם אינו מתאים כמרכז ספורט; ראש העיר רון חולדאי אמר שהשטח יהפוך לגן, כחלק מפארק הירקון. האוהדים מחו לאורך יותר משנה וחצי.",
-      "confidence": 2,
-      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3429531,00.html",
-      "sourceTitle": "ynet, דנה סידי, 25.7.2007"
-    },
-    {
-      "slug": "1923-שנת-ההיווסדות",
-      "titleHe": "שנת ההיווסדות שונתה ל-1923",
-      "happenedOn": "2015-06-12",
-      "category": "club",
-      "bodyHe": "מחקר של ד\"ר אייל גרטמן וכפיר פרנקל קבע שהמועדון נוסד ב-1923 ולא ב-1927 כפי שסברו קודם; בין הראיות כרטיס חבר מספר 2 של אברהם אשני מאוקטובר 1923. בעקבות זאת תוקן הסמל.",
-      "confidence": 2,
-      "sourceUrl": "https://sport1.maariv.co.il/israeli-soccer/ligat-haal/Article-728080/",
-      "sourceTitle": "ספורט1/מעריב, 12.6.2015 + אתר המועדון"
-    }
-  ]
+  {
+   "slug": "בנפיקה-2010",
+   "titleHe": "הניצחון על בנפיקה בליגת האלופות",
+   "happenedOn": "2010-11-24",
+   "seasonLabel": "2010/11",
+   "category": "europe",
+   "matchNaturalKey": "2010/11|ליגת-האלופות|הפועל-תל-אביב|בנפיקה|בית B מחזור 5",
+   "bodyHe": "בבית B של ליגת האלופות, מול שאלקה, ליון ובנפיקה, רשמה הפועל את ניצחונה הראשון בשלב הבתים — הפועל תל אביב 3 — בנפיקה 0 בבלומפילד, שערים של ערן זהבי (24, 90+2) ודאגלס דה סילבה (74).",
+   "confidence": 2,
+   "sourceUrl": "https://www.skysports.com/football/hap-tel-aviv-vs-benfica/report/227534",
+   "sourceTitle": "Sky Sports match report"
+  },
+  {
+   "slug": "בלומפילד-נפתח",
+   "titleHe": "בלומפילד נפתח",
+   "happenedOn": "1962-10-13",
+   "seasonLabel": "1962/63",
+   "category": "stadium",
+   "matchNaturalKey": "1962/63|ליגת-העל|הפועל-תל-אביב|שמשון-תל-אביב|משחק הפתיחה של בלומפילד",
+   "bodyHe": "האצטדיון נבנה במזרח יפו, על הקרקע שעליה עמד אצטדיון בסה — ביתה של הפועל תל אביב מ-1950. המשחק הראשון נערך ב-13 באוקטובר 1962 מול שמשון תל אביב.",
+   "confidence": 2,
+   "sourceUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
+   "sourceTitle": "Wikipedia + StadiumDB"
+  },
+  {
+   "slug": "היכל-אוסישקין-נהרס",
+   "titleHe": "היכל אוסישקין נהרס",
+   "happenedOn": "2007-07-25",
+   "sport": "basketball",
+   "category": "protest",
+   "bodyHe": "ב-25 ביולי 2007, ב-06:39 בבוקר, החלה הריסת היכל אוסישקין. עיריית תל אביב החליטה כשנה וחצי קודם לכן שהמתחם אינו מתאים כמרכז ספורט; ראש העיר רון חולדאי אמר שהשטח יהפוך לגן, כחלק מפארק הירקון. האוהדים מחו לאורך יותר משנה וחצי.",
+   "confidence": 2,
+   "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3429531,00.html",
+   "sourceTitle": "ynet, דנה סידי, 25.7.2007"
+  },
+  {
+   "slug": "1923-שנת-ההיווסדות",
+   "titleHe": "שנת ההיווסדות שונתה ל-1923",
+   "happenedOn": "2015-06-12",
+   "category": "club",
+   "bodyHe": "מחקר של ד\"ר אייל גרטמן וכפיר פרנקל קבע שהמועדון נוסד ב-1923 ולא ב-1927 כפי שסברו קודם; בין הראיות כרטיס חבר מספר 2 של אברהם אשני מאוקטובר 1923. בעקבות זאת תוקן הסמל.",
+   "confidence": 2,
+   "sourceUrl": "https://sport1.maariv.co.il/israeli-soccer/ligat-haal/Article-728080/",
+   "sourceTitle": "ספורט1/מעריב, 12.6.2015 + אתר המועדון"
+  },
+  {
+   "slug": "אליפות-1986",
+   "titleHe": "דקה 86",
+   "happenedOn": "1986-05-24",
+   "seasonLabel": "1985/86",
+   "category": "league",
+   "matchNaturalKey": "1985/86|ליגת-העל|הפועל-תל-אביב|מכבי-חיפה|מחזור אחרון",
+   "bodyHe": "במחזור האחרון של עונת 1985/86 אירחה הפועל תל אביב את מכבי חיפה בבלומפילד. חיפה הובילה את הטבלה ותיקו הספיק לה. בדקה ה-86 נתן משה סיני צ'יפ קטן לגילי לנדאו, שהקשית מעל אבי רן. שער אחד, בלי תשובה — והפועל תל אביב זכתה באליפות בפעם העשירית בתולדותיה. זה היה משחק הליגה הישראלי הראשון ששודר בשידור חי בטלוויזיה. לנדאו סיפר לפני המשחק שחלם בדיוק את זה: שהוא נכנס כמחליף וכובש בדקות הסיום.",
+   "confidence": 2,
+   "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html",
+   "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86"
+  }
+ ]
 }

@@ -23,6 +23,36 @@ export type PlaceholderNote = {
   needs: string
 }
 
+/**
+ * המשחק עצמו — the deciding match, once the archive can actually answer.
+ *
+ * Every field here is copied out of `content/manual/*` and nothing is computed from a
+ * sentence. `decidedBy` is the row in `match-events.json` that says a goal was scored, by
+ * whom, in which minute, from whose pass — which is why the scene can put the ball in the
+ * net at exactly the minute it went in, and could not have before this row existed.
+ *
+ * `null` on an anchor means the archive still cannot answer, and the placeholder note
+ * says so on screen. That is the state the 1985/86 anchor was in until 3.9.2026.
+ */
+export type AnchorGoal = {
+  minute: number
+  scorerHe: string
+  assistHe: string | null
+}
+
+export type AnchorMatch = {
+  playedOn: string
+  opponentHe: string
+  /** goals for the club this product is about, and against — never a "0:1" string */
+  scoredFor: number
+  scoredAgainst: number
+  atHome: boolean
+  venueHe: string | null
+  decidedBy: AnchorGoal | null
+  sourceTitle: string
+  sourceUrl: string | null
+}
+
 export type HistoricalAnchor = {
   /** stable ID stored in the save — never a description */
   id: string
@@ -37,6 +67,18 @@ export type HistoricalAnchor = {
   sourceTitle: string
   sourceUrl: string | null
   confidence: number
+  /**
+   * How many times the club had won this competition, counting this one.
+   *
+   * COMPUTED from `trophies.json`, never typed in. The archive holds ten league titles at
+   * or before 1985/86 and the sources call this one the tenth, which is the agreement
+   * worth having: the number on the celebration screen is a count of rows a reader can go
+   * and check, not a sentence somebody copied out of an article.
+   * Null when the archive cannot count them.
+   */
+  titlesSoFar: number | null
+  /** the deciding match, when the archive holds one; null when it does not */
+  match: AnchorMatch | null
   /** null once the archive can answer the whole question */
   placeholder: PlaceholderNote | null
 }
@@ -59,6 +101,8 @@ export const DEVELOPMENT_ANCHOR: HistoricalAnchor = {
   sourceTitle: 'DEVELOPMENT PLACEHOLDER — לא מקור',
   sourceUrl: null,
   confidence: 0,
+  titlesSoFar: null,
+  match: null,
   placeholder: {
     what: 'אין עוגן היסטורי מאושר מהארכיון; המסך מציג ממלא מקום מסומן.',
     needs: 'שורת גביע או משחק עונת 1980/81 בארכיון הקנוני, ברמת ודאות 2 ומעלה.',

@@ -46,6 +46,15 @@ export type Effect =
   | { e: 'trait'; trait: TraitId; delta: number }
   | { e: 'time'; minutes: number }
   | { e: 'toast'; text: string; tone?: 'plain' | 'red' }
+  /**
+   * Hold up a real document.
+   *
+   * The only verb in this vocabulary that shows the player something nobody in this
+   * project drew: a ticket somebody kept, or a page of מעריב ספורט printed the morning
+   * before the match. `art` is a key in `DOC` and the runtime will not accept anything
+   * else, which is what stops this becoming a general-purpose image popup.
+   */
+  | { e: 'doc'; art: string; captionHe?: string }
   | { e: 'goto'; node: string }
   | { e: 'travel'; to: LocationId; spawn: string }
   | { e: 'minigame'; id: 'football' }

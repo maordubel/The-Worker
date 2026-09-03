@@ -57,6 +57,48 @@ export type LifeBusEvents = {
   toast: { text: string; tone: 'plain' | 'red' } | null
   place: { id: LocationId; title: string }
   anchor: { anchor: HistoricalAnchor; showing: boolean }
+  /**
+   * הלוח — the scoreboard, while a match is actually happening in front of the child.
+   *
+   * The HUD has a clock on it and that clock says `שבת • 17:41`, which is the time of day
+   * and not the thing anybody in the ground is looking at. During the final the shell
+   * shows a second, different clock — two club names, a score, a minute — and it is the
+   * only moment in the chapter that a number on screen means what a number on a
+   * scoreboard means. `null` the rest of the time, which is most of the game.
+   */
+  match: {
+    homeHe: string
+    awayHe: string
+    homeScore: number
+    awayScore: number
+    labelHe: string
+    /** true from the goal until the whistle, so the strip can carry the moment */
+    scored: boolean
+  } | null
+  /**
+   * סוף שלב א' — the end of the stage, which is not the end of a scene.
+   *
+   * `ending` closes a Saturday. This closes a CHAPTER OF A LIFE: it carries the archive's
+   * own record of the match, the ticket that got the child in, the next morning's front
+   * pages, and the one sentence that says what he became. It exists as its own channel
+   * because it is the only screen in the game a player is meant to sit with.
+   */
+  finale: {
+    anchor: import('../anchors').HistoricalAnchor
+    titleHe: string
+    bodyHe: string
+    becameHe: string
+    keptTicket: boolean
+  } | null
+  /**
+   * מסמך — a real printed thing, held up over the world until the player puts it down.
+   *
+   * Not a dialogue portrait and not a prop: a scan of something that exists. It gets its
+   * own channel because it obeys a different rule from every other picture in the game —
+   * nothing may be written on it, nothing may be cropped out of it to make a point, and
+   * the caption underneath says where it came from rather than what to think about it.
+   */
+  doc: { art: string; captionHe: string | null } | null
   /** the runtime asking the shell to show the closing card */
   ending: {
     titleHe: string

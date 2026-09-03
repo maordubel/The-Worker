@@ -36,6 +36,44 @@ export function AnchorCard({ anchor, onClose }: { anchor: HistoricalAnchor; onCl
             {anchor.seasonLabel}
           </p>
 
+          {/* המשחק שהכריע — printed only once the archive can answer for it.
+              Every field below is a row in `content/manual`, and the score is written as
+              two numbers beside the clubs they belong to rather than as "1:0", because a
+              bare scoreline in an RTL line is genuinely ambiguous about who scored it. */}
+          {anchor.match && (
+            <div className="mt-3 border-hair border-ink/25 px-3 py-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-display text-[13px] leading-none text-ink">
+                  <bdi>{anchor.match.atHome ? t('life.finale.us') : anchor.match.opponentHe}</bdi>
+                </span>
+                <span className="font-mono text-[15px] leading-none tabular-nums text-ink" dir="ltr">
+                  {anchor.match.atHome ? anchor.match.scoredFor : anchor.match.scoredAgainst}
+                </span>
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <span className="font-display text-[13px] leading-none text-muted">
+                  <bdi>{anchor.match.atHome ? anchor.match.opponentHe : t('life.finale.us')}</bdi>
+                </span>
+                <span className="font-mono text-[15px] leading-none tabular-nums text-muted" dir="ltr">
+                  {anchor.match.atHome ? anchor.match.scoredAgainst : anchor.match.scoredFor}
+                </span>
+              </div>
+              {anchor.match.decidedBy && (
+                <p className="mt-2 border-t-hair border-ink/15 pt-2 font-body text-[11px] leading-snug text-ink">
+                  <bdi>
+                    {t('life.anchor.scored', {
+                      who: anchor.match.decidedBy.scorerHe,
+                      minute: String(anchor.match.decidedBy.minute),
+                    })}
+                    {anchor.match.decidedBy.assistHe
+                      ? ` · ${t('life.anchor.assisted', { who: anchor.match.decidedBy.assistHe })}`
+                      : ''}
+                  </bdi>
+                </p>
+              )}
+            </div>
+          )}
+
           <p className="mt-4 border-t-hair border-ink/25 pt-3 font-body text-[11px] leading-snug text-muted">
             <span className="text-ink">{t('life.anchor.source')}</span>{' '}
             <bdi>{anchor.sourceTitle}</bdi>

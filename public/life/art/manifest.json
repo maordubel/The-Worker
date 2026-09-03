@@ -792,5 +792,42 @@
    "yellowLeft": 0,
    "source": "2026-09"
   }
+ },
+ "docs": {
+  "docTicket": {
+   "w": 776,
+   "h": 474,
+   "bytes": 126583,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "paperBefore": {
+   "w": 1500,
+   "h": 1307,
+   "bytes": 499577,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "paperAdumim": {
+   "w": 430,
+   "h": 599,
+   "bytes": 81028,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "paperFive": {
+   "w": 427,
+   "h": 600,
+   "bytes": 84642,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "paperCollector": {
+   "w": 421,
+   "h": 599,
+   "bytes": 78302,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  }
  }
 }

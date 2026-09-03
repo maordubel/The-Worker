@@ -392,6 +392,22 @@ export const PROP = [
 ] as const
 export type PropKey = (typeof PROP)[number]
 
+/**
+ * הנייר האמיתי — the documents, which are not art at all.
+ *
+ * Everything else in this file was DRAWN for the game. These five were printed in 1986:
+ * a child's ticket to משחק 15 — הפועל תל-אביב / מכבי חיפה, seven shekels, number 053 —
+ * and four pages of מעריב ספורט from the two days either side of it. They are separated
+ * from `PROP` because they obey a different rule. A prop can be redrawn; a document
+ * cannot, and nothing in this game may put a word in one of them.
+ *
+ * They exist because rule 11 says the game may not invent a fact, and because the honest
+ * way to end Stage A is not to describe what winning felt like. It is to hand the player
+ * the front page and let 1986 say it: אדומים.
+ */
+export const DOC = ['docTicket', 'paperBefore', 'paperAdumim', 'paperFive', 'paperCollector'] as const
+export type DocKey = (typeof DOC)[number]
+
 /** Printed portrait plates for the dialogue box — cream ground kept, not cut out. */
 export const PORTRAIT_ART = [
   'faceKid',

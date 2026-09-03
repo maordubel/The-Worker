@@ -59,6 +59,8 @@ export type LifeRuntime = {
   /** walk away mid-conversation: nothing is applied, the box just closes */
   leave(): void
   dismissEnding(): void
+  /** the end-of-stage celebration's own button — the ending card no longer goes home */
+  dismissFinale(): void
   skipIntro(): void
   /** the profile screen: everything the shell may know, as words */
   snapshot(): LifeSnapshot
@@ -160,6 +162,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     choose: (id: string) => dialogue.choose(id),
     leave: () => dialogue.leave(),
     dismissEnding: () => worldScene()?.goHome(),
+    dismissFinale: () => worldScene()?.dismissFinale(),
     snapshot,
     pause: (on: boolean) => worldScene()?.setPaused(on),
     debug: {

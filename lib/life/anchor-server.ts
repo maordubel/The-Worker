@@ -13,19 +13,21 @@ import { DEVELOPMENT_ANCHOR, type HistoricalAnchor } from './anchors'
  * parses anything: it receives one typed object per anchor. That is the flow the brief
  * draws, enforced by the module boundary rather than by a convention.
  *
- * **What the archive can answer for 1980/81, and what it cannot.**
+ * **The placeholder retired itself, exactly as it said it would.**
  *
- * It holds `{ competitionSlug: 'ליגת-העל', seasonLabel: '1980/81', result: 'won',
- * sport: 'football' }` at confidence 2, sourced. That is a real, checkable fact: the
- * club were champions that season. It holds NO 1980s match, no fixture list, no date,
- * no opponent, no score, no scorer, and no attendance — `content/manual/matches.json`
- * starts at 2001/02.
+ * For three passes this resolver returned the CHAMPIONSHIP and a note saying the match
+ * that decided it was not in the archive: no date, no opponent, no score, no scorer. The
+ * scene was written around that limit and the note was printed on screen rather than
+ * hidden, because a placeholder you can see is one somebody replaces.
  *
- * So the anchor returned here is the CHAMPIONSHIP, and the placeholder note names
- * exactly the missing piece: the deciding match. The Bloomfield scene is written around
- * that limit — a crowd, a season, a title — and states nothing the archive cannot back.
- * When a curated 1980/81 match row lands, `placeholder` goes to null and the scene gets
- * a scoreline. Nothing else changes.
+ * On 3.9.2026 somebody did. `content/manual/matches.json` now holds 24.5.1986, Hapoel Tel
+ * Aviv v Maccabi Haifa at Bloomfield, and `match-events.json` holds the goal: minute 86,
+ * Gili Landau, from Moshe Sinai. Both at confidence 2, sourced, entered from a ticket
+ * kept for forty years and two dated pages of מעריב ספורט.
+ *
+ * So this function does now what its own comment promised: it looks the match up, fills
+ * `anchor.match`, and sets `placeholder` to null. Nothing else changed — which was the
+ * point of writing it this way. If the row ever goes away the note comes back by itself.
  */
 
 const SEASON = '1985/86'
@@ -44,6 +46,7 @@ export function resolveChapterAnchor(): HistoricalAnchor {
   if (!trophy) return DEVELOPMENT_ANCHOR
 
   const venue = archive.venues.find((row) => row.slug === 'בלומפילד' && row.sport === 'football')
+  const decider = findDecider()
 
   return {
     id: `trophy:${LEAGUE}:${SEASON}`,
@@ -57,11 +60,108 @@ export function resolveChapterAnchor(): HistoricalAnchor {
     sourceTitle: trophy.sourceTitle,
     sourceUrl: trophy.sourceUrl,
     confidence: trophy.confidence,
-    placeholder: {
-      what: 'המשחק המכריע עצמו — יריבה, תאריך, תוצאה ומבקיעים — אינו מוצג, ואינו קיים בארכיון.',
-      needs: 'שורת משחק מעונת 1985/86 ב-content/manual/matches.json ברמת ודאות 2 ומעלה.',
-    },
+    titlesSoFar: countTitles(SEASON, LEAGUE),
+    match: decider,
+    // The note survives for exactly as long as the archive cannot answer, and no longer.
+    placeholder: decider
+      ? null
+      : {
+          what: 'המשחק המכריע עצמו — יריבה, תאריך, תוצאה ומבקיעים — אינו מוצג, ואינו קיים בארכיון.',
+          needs: 'שורת משחק מעונת 1985/86 ב-content/manual/matches.json ברמת ודאות 2 ומעלה.',
+        },
   }
+}
+
+const US = 'הפועל-תל-אביב'
+
+/**
+ * How many of this competition the club had won by the end of this season.
+ *
+ * A season label sorts lexicographically in the right order (`1968/69` < `1980/81`), which
+ * is the one thing that makes this two lines instead of a date parser. It counts rows and
+ * says so; if a title is missing from the archive the number is smaller, which is the
+ * failure mode a count of rows should have.
+ */
+function countTitles(season: string, competitionSlug: string): number | null {
+  const won = archive.trophies.filter(
+    (row) =>
+      row.competitionSlug === competitionSlug &&
+      row.result === 'won' &&
+      row.sport === 'football' &&
+      (row.clubSlug ?? US) === US &&
+      row.seasonLabel <= season,
+  )
+  return won.length > 0 ? won.length : null
+}
+
+/**
+ * The deciding match of the season, read out of the archive and nowhere else.
+ *
+ * Deliberately narrow: the LAST played league fixture of the season that the club was in,
+ * with a score on it, at confidence 2 or better. It is found by the shape of the data —
+ * season, competition, status — rather than by a hard-coded date, so the same function
+ * answers for 1985/86 and for whatever season a later chapter is set in.
+ *
+ * The goal comes from `match-events.json` by natural key. If the events file says nothing,
+ * `decidedBy` is null and the scene shows a match with a result and no scorer, which is
+ * the truthful shape of "we know who won and not who scored".
+ */
+function findDecider(): HistoricalAnchor['match'] {
+  const played = archive.matches
+    .filter(
+      (row) =>
+        row.seasonLabel === SEASON &&
+        row.competitionSlug === LEAGUE &&
+        (row.homeClubSlug === US || row.awayClubSlug === US) &&
+        row.homeScore !== null &&
+        row.awayScore !== null &&
+        (row.confidence ?? 0) >= 2,
+    )
+    .sort((a, b) => String(a.playedOn ?? '').localeCompare(String(b.playedOn ?? '')))
+
+  const match = played[played.length - 1]
+  if (!match || !match.playedOn) return null
+
+  const atHome = match.homeClubSlug === US
+  const opponentSlug = atHome ? match.awayClubSlug : match.homeClubSlug
+  const opponent = archive.clubs.find((row) => row.slug === opponentSlug && row.sport === 'football')
+  const venue = match.venueSlug
+    ? archive.venues.find((row) => row.slug === match.venueSlug && row.sport === 'football')
+    : null
+
+  const key = [match.seasonLabel, match.competitionSlug, match.homeClubSlug, match.awayClubSlug, match.stage].join('|')
+  const goals = archive.matchEvents
+    .filter((row) => row.matchNaturalKey === key && row.type === 'goal' && row.clubSlug === US)
+    .sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0))
+  const last = goals[goals.length - 1]
+
+  return {
+    playedOn: match.playedOn,
+    opponentHe: opponent?.nameHe ?? opponentSlug.replace(/-/g, ' '),
+    scoredFor: (atHome ? match.homeScore : match.awayScore) ?? 0,
+    scoredAgainst: (atHome ? match.awayScore : match.homeScore) ?? 0,
+    atHome,
+    venueHe: venue?.nameHe ?? null,
+    decidedBy:
+      last && last.minute !== null
+        ? {
+            minute: last.minute,
+            scorerHe: nameOf(last.personSlug),
+            assistHe: last.relatedPersonSlug ? nameOf(last.relatedPersonSlug) : null,
+          }
+        : null,
+    sourceTitle: match.sourceTitle ?? trophySource(),
+    sourceUrl: match.sourceUrl ?? null,
+  }
+}
+
+function nameOf(slug: string | null): string {
+  if (!slug) return ''
+  return archive.people.find((row) => row.slug === slug)?.fullNameHe ?? slug.replace(/-/g, ' ')
+}
+
+function trophySource(): string {
+  return 'ארכיון הפרויקט'
 }
 
 /**
@@ -109,6 +209,10 @@ export function resolvePrologueAnchor(): HistoricalAnchor {
     sourceTitle: trophy.sourceTitle,
     sourceUrl: trophy.sourceUrl,
     confidence: trophy.confidence,
+    titlesSoFar: countTitles('1982/83', 'גביע-המדינה'),
+    // The prologue's final is not in the archive and this one is honest about it: the
+    // 1986 anchor earned its match row, and 1983's has not.
+    match: null,
     placeholder: {
       what: 'הגמר עצמו — יריבה, תאריך ותוצאה — אינו מוצג, ואינו קיים בארכיון.',
       needs: 'שורת משחק גמר גביע 1982/83 בארכיון הקנוני ברמת ודאות 2 ומעלה.',

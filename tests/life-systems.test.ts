@@ -3,6 +3,7 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { resolveChapterAnchor } from '@/lib/life/anchor-server'
 import { CHARACTERS } from '@/lib/life/characters'
 import { AMBIENT_1986 } from '@/lib/life/content/ambient1986'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
@@ -19,9 +20,11 @@ import { buildProfile } from '@/lib/life/profile'
 import { resolvePureLove } from '@/lib/life/pure-love'
 import { CANDIDATES_1986, pickRedBoxItem } from '@/lib/life/redbox'
 import { rollAt, Roller } from '@/lib/life/rng'
+import { buildFinale } from '@/lib/life/finale'
+import { dayMinuteOf, decidingMinute, matchClock, matchPace, scoreboardAt } from '@/lib/life/match'
 import { placementsAt } from '@/lib/life/schedules'
 import type { LifeState } from '@/lib/life/types'
-import { SCENE } from '@/lib/life/world/scenes'
+import { KICKOFF, SCENE } from '@/lib/life/world/scenes'
 import { meets } from '@/lib/life/world/types'
 
 /**
@@ -247,6 +250,98 @@ describe('לוח הזמנים — the street is not the street you left', () => 
    * nobody to talk to. That is too late and too expensive. This is the same question,
    * asked in eight milliseconds.
    */
+  /**
+   * ----------------------------------------------------------------- the final ----
+   *
+   * Stage A now ends with a match rather than with a time-lapse, and a match has one
+   * property nothing else in this chapter has: it must land on an exact minute, and that
+   * minute is not ours to choose. It is a row in `content/manual/match-events.json`.
+   */
+  it('runs a real ninety minutes off the day clock, break included', () => {
+    const kickoff = 16 * 60
+    expect(matchClock(kickoff - 1, kickoff).phase).toBe('before')
+    expect(matchClock(kickoff, kickoff)).toMatchObject({ phase: 'first', minute: 0 })
+    expect(matchClock(kickoff + 44, kickoff)).toMatchObject({ phase: 'first', minute: 44 })
+    // …and then a quarter of an hour in which the match clock does not move at all.
+    expect(matchClock(kickoff + 45, kickoff)).toMatchObject({ phase: 'half', minute: 45 })
+    expect(matchClock(kickoff + 59, kickoff)).toMatchObject({ phase: 'half', minute: 45 })
+    expect(matchClock(kickoff + 60, kickoff)).toMatchObject({ phase: 'second', minute: 45 })
+    expect(matchClock(kickoff + 101, kickoff)).toMatchObject({ phase: 'second', minute: 86 })
+    expect(matchClock(kickoff + 105, kickoff)).toMatchObject({ phase: 'after', minute: 90 })
+  })
+
+  it('is invertible — the minute of the goal has a place on the day clock', () => {
+    const kickoff = 16 * 60
+    for (const minute of [0, 12, 44, 45, 60, 86, 90]) {
+      expect(matchClock(dayMinuteOf(minute, kickoff), kickoff).minute).toBe(minute)
+    }
+  })
+
+  it('slows the afternoon down as the goal approaches, and never speeds it up again', () => {
+    const goal = 86
+    const paces = [10, 40, 65, 70, 80, 81, 85].map((minute) => matchPace(minute, goal))
+    for (let i = 1; i < paces.length; i += 1) {
+      expect(paces[i]!, `pace went back up at index ${i}`).toBeLessThanOrEqual(paces[i - 1]!)
+    }
+    // eighty minutes of nothing are cheap; the six before the goal are not
+    expect(matchPace(10, goal)).toBeGreaterThan(matchPace(82, goal) * 8)
+  })
+
+  it('takes the deciding minute from the archive rather than from a constant', () => {
+    const anchor = resolveChapterAnchor()
+    const minute = decidingMinute(anchor)
+    if (!anchor.match?.decidedBy) {
+      expect(minute).toBeNull()
+      return
+    }
+    expect(minute).toBe(anchor.match.decidedBy.minute)
+    // and it has to be a minute a match can actually reach
+    expect(matchClock(dayMinuteOf(minute!, KICKOFF), KICKOFF).minute).toBe(minute)
+  })
+
+  it('never prints a bare scoreline on the board', () => {
+    const anchor = resolveChapterAnchor()
+    const board = scoreboardAt(anchor, true)
+    if (!board) return
+    // the two numbers exist, and each one is attached to the club it belongs to
+    expect(board.homeHe.length).toBeGreaterThan(2)
+    expect(board.awayHe.length).toBeGreaterThan(2)
+    expect(board.homeScore + board.awayScore).toBeGreaterThan(0)
+    const before = scoreboardAt(anchor, false)
+    expect(before?.homeScore).toBe(0)
+    expect(before?.awayScore).toBe(0)
+  })
+
+  /**
+   * The end-of-stage card, which is the one screen that CONCLUDES rather than describes.
+   *
+   * Two things are worth failing a build over: that every afternoon gets a sentence, and
+   * that obviously different afternoons do not get the SAME sentence. A finale that says
+   * the same thing to the child who went alone and to the child who never got in is not
+   * an ending, it is a template.
+   */
+  it('gives every afternoon a finale, and different afternoons different ones', () => {
+    const afternoon = (flags: string[]) => {
+      let state = fresh()
+      for (const flag of flags) state = apply(state, { t: 'flag.raised', flag })
+      return buildFinale(state, [])
+    }
+    const inside = afternoon(['entry:granted', 'saw:goal', 'went:alone'])
+    const late = afternoon(['entry:granted'])
+    const outside = afternoon([])
+
+    for (const card of [inside, late, outside]) {
+      expect(card.titleHe.length).toBeGreaterThan(2)
+      expect(card.bodyHe.length).toBeGreaterThan(40)
+      expect(card.becameHe.length).toBeGreaterThan(20)
+    }
+    expect(new Set([inside.titleHe, late.titleHe, outside.titleHe]).size).toBe(3)
+    expect(inside.becameHe).not.toBe(outside.becameHe)
+    // paper in the air is earned by being inside the ground, not by finishing the chapter
+    expect(inside.carnival).toBe(true)
+    expect(outside.carnival).toBe(false)
+  })
+
   it('puts every scheduled person somewhere the child can actually reach', () => {
     for (const entry of SCHEDULE_1986) {
       const scene = SCENE[entry.location as keyof typeof SCENE]

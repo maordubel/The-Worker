@@ -365,9 +365,16 @@ describe('הסמל — the badge ships without a yellow pixel in it', () => {
 describe('מתקן הבדיקה — the QA harness is exempt only because it cannot ship', () => {
   it('returns notFound() in production, so the brand exemption cannot leak', () => {
     // Every harness under app/qa/, not just the story one: the exemption is scoped to
-    // the directory, so anything that lands in it has to be unreachable in production.
-    for (const page of ['app/qa/story/page.tsx', 'app/qa/marks/page.tsx']) {
-      const text = readFileSync(join(ROOT, page), 'utf8')
+    // the DIRECTORY, so anything that lands in it has to be unreachable in production.
+    //
+    // This used to be a hard-coded list of two files, which is the same shape of mistake
+    // as the rule it enforces — a guard that names its subjects protects the subjects it
+    // was written with and nothing added afterwards. The finale harness was the third
+    // page in this folder and no test would have noticed it shipping.
+    const pages = walk(join(ROOT, 'app/qa')).filter((path) => path.endsWith('page.tsx'))
+    expect(pages.length, 'no QA harness pages found — the walk is looking in the wrong place').toBeGreaterThan(1)
+    for (const page of pages) {
+      const text = readFileSync(page, 'utf8')
       expect(text, page).toContain('notFound()')
       expect(text, page).toContain("process.env.NODE_ENV === 'production'")
     }

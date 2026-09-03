@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AnchorCard } from '@/components/life/AnchorCard'
+import { DocSheet } from '@/components/life/DocSheet'
+import { ScoreStrip } from '@/components/life/ScoreStrip'
+import { StageFinale } from '@/components/life/StageFinale'
 import { ControlDeck } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
@@ -52,6 +55,9 @@ export function LifeStage({
   const [teach, setTeach] = useState<LifeBusEvents['teach']>(null)
   const [toast, setToast] = useState<LifeBusEvents['toast']>(null)
   const [ending, setEnding] = useState<LifeBusEvents['ending']>(null)
+  const [match, setMatch] = useState<LifeBusEvents['match']>(null)
+  const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
+  const [finale, setFinale] = useState<LifeBusEvents['finale']>(null)
   const [card, setCard] = useState<HistoricalAnchor | null>(null)
   const [controls, setControls] = useState(true)
   const [touch, setTouch] = useState(false)
@@ -88,6 +94,9 @@ export function LifeStage({
     unsubscribe.push(bus.on('teach', setTeach))
     unsubscribe.push(bus.on('toast', setToast))
     unsubscribe.push(bus.on('ending', setEnding))
+    unsubscribe.push(bus.on('match', setMatch))
+    unsubscribe.push(bus.on('doc', setDoc))
+    unsubscribe.push(bus.on('finale', setFinale))
     unsubscribe.push(bus.on('controls', (value) => setControls(value.visible)))
     unsubscribe.push(bus.on('anchor', (value) => setCard(value.showing ? value.anchor : null)))
     unsubscribe.push(bus.on('frame', (value) => setFrame(value.picture)))
@@ -291,7 +300,10 @@ export function LifeStage({
           </div>
         )}
 
-        {ready && <LifeHud hud={hud} />}
+        {/* Two clocks, never both. During the ninety minutes the board replaces the HUD:
+            the time of day stops being the thing anybody in the ground is looking at. */}
+        {ready && !match && <LifeHud hud={hud} />}
+        {ready && match && <ScoreStrip match={match} />}
 
         {/* התיק — one small plate under the clock. It is the only permanent control on
             the glass that is not the console: everything else about the player's state
@@ -360,7 +372,19 @@ export function LifeStage({
           />
         )}
 
+        {doc && <DocSheet art={doc.art} captionHe={doc.captionHe} onClose={() => setDoc(null)} />}
+
         {card && <AnchorCard anchor={card} onClose={() => setCard(null)} />}
+
+        {finale && (
+          <StageFinale
+            finale={finale}
+            onContinue={() => {
+              setFinale(null)
+              runtime.current?.dismissFinale()
+            }}
+          />
+        )}
 
         {snapshot && !debug && <ProfileCard snapshot={snapshot} onClose={closeProfile} />}
         {snapshot && debug && (
