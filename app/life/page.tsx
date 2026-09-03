@@ -27,7 +27,7 @@ export default function LifePage() {
   const prologueAnchor = resolvePrologueAnchor()
 
   return (
-    <Screen title={t('life.title')} sub={t('life.sub')} chrome={false} night>
+    <Screen title={t('life.title')} sub={t('life.sub')} chrome={false} fullBleed night>
       <LifeStage anchor={anchor} prologueAnchor={prologueAnchor} />
     </Screen>
   )

@@ -322,8 +322,8 @@ export function LifeStage({
   }, [])
 
   return (
-    <div className="relative -mx-gutter">
-      <div className="relative h-[calc(100dvh-var(--tap)-3.25rem-env(safe-area-inset-bottom))] w-full overflow-hidden border-y-hair border-ink bg-ink">
+    <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
+      <div className="relative h-full w-full overflow-hidden border-y-hair border-ink bg-ink">
         <div ref={holder} className="absolute inset-0" />
 
         {/* Where the painting ends. A vermilion hairline turns the empty band under a
