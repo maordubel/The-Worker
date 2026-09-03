@@ -142,6 +142,27 @@ for (const size of TOUR_ONLY ? [] : SIZES) {
   await page.reload({ waitUntil: 'networkidle' })
 
   await page.waitForSelector('canvas', { timeout: 20000 })
+
+  /**
+   * הפתיח — five pictures before anything, and the harness has to get past it.
+   *
+   * It is gated on `sessionStorage`, and every Playwright context is a fresh session, so
+   * it plays on every run. That is exactly right for a test of an opening sequence and
+   * exactly wrong for a test of a chapter: the overlay sits over the canvas for half a
+   * minute while the prologue advances underneath it, unwatched. So: photograph it once,
+   * then press the button a player presses.
+   */
+  await page.waitForTimeout(1600)
+  await shot('00-opening')
+  const skip = page.locator('[data-life="opening-skip"]')
+  if ((await skip.count()) > 0) {
+    await skip.click()
+    await page.waitForTimeout(600)
+  } else {
+    faults += 1
+    report.push(`NO OPENING ${size.name}: the sequence never appeared`)
+  }
+
   await page.waitForTimeout(2500)
   await shot('01-prologue')
 
@@ -629,6 +650,13 @@ const TOUR = [
     )
     await page.goto(`${BASE}/life`, { waitUntil: 'networkidle' })
     await page.waitForSelector('canvas', { timeout: 20000 })
+    // The opening plays on a fresh session, and every stop of the tour is one. It is not
+    // what this loop is measuring, and it covers the whole screen while it runs.
+    const skipOpening = page.locator('[data-life="opening-skip"]')
+    if ((await skipOpening.count()) > 0) {
+      await skipOpening.click()
+      await page.waitForTimeout(400)
+    }
     await page.waitForTimeout(place === 'bloomfield-inside' ? 9000 : 2600)
     /**
      * …and then wait for the game to agree it is there. A fixed wait is a guess about how

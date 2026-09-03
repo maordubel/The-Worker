@@ -169,12 +169,17 @@ describe('שכבות — a modal is above the navigation, always', () => {
     // "next shirt" button landed inside the bar's strip, so the tap that should have
     // advanced the round navigated to the trivia wing instead — on every shirt, on
     // every phone. Found by playing a round through; this is what stops it coming back.
+    // The ELEMENT, not the line. This used to read one line at a time, which quietly made
+    // it a test of code formatting: a dialog whose `role` and `className` sit on separate
+    // lines — which is what Prettier does to any element with more than three attributes —
+    // reported `z-none` whether it was at z-60 or z-5. So it now takes the whole opening
+    // tag from `<` to the first `>`, which is both stricter and no longer opinionated
+    // about where the attributes go.
     const bad: string[] = []
     for (const file of FILES) {
       const text = readFileSync(file, 'utf8')
-      for (const line of text.split('\n')) {
-        if (!line.includes('role="dialog"')) continue
-        const z = line.match(/z-\[?(\d+)\]?/)
+      for (const hit of text.matchAll(/<[a-zA-Z][^>]*role="dialog"[^>]*>/g)) {
+        const z = hit[0].match(/z-\[?(\d+)\]?/)
         const value = Number(z?.[1] ?? 0)
         if (value <= 50) bad.push(`${file.slice(ROOT.length + 1)}: z-${z?.[1] ?? 'none'}`)
       }

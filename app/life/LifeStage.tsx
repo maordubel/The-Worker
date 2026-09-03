@@ -12,11 +12,13 @@ import { DialogueBox } from '@/components/life/DialogueBox'
 import { EndingCard } from '@/components/life/EndingCard'
 import { HistoricalCutscene } from '@/components/life/HistoricalCutscene'
 import { LifeHud } from '@/components/life/LifeHud'
+import { OpeningSequence } from '@/components/life/OpeningSequence'
 import { ProfileCard } from '@/components/life/ProfileCard'
 import { Teach } from '@/components/life/Teach'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
 import type { CutsceneOutcome } from '@/lib/life/cutscenes'
+import { OPENING_SEEN } from '@/lib/life/opening'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { loadLife } from '@/lib/life/engine'
 import { lifeStore } from '@/lib/life/save'
@@ -78,6 +80,16 @@ export function LifeStage({
    */
   const [snapshot, setSnapshot] = useState<LifeSnapshot | null>(null)
   const [debug, setDebug] = useState(false)
+  /**
+   * הפתיח — five pictures before the game, once per sitting.
+   *
+   * `null` while we have not yet asked (the server render, and the first paint), so the
+   * sequence never flashes on for a frame before being told it has already played.
+   * `sessionStorage` rather than the save file: a reload during one sitting has already
+   * seen it, and a player who comes back next week is opening this game again. It also
+   * keeps the opening out of the append-only life log, which records what the CHILD did.
+   */
+  const [opening, setOpening] = useState<boolean | null>(null)
 
   // --- boot -------------------------------------------------------------------------
   useEffect(() => {
@@ -86,6 +98,13 @@ export function LifeStage({
     const unsubscribe: Array<() => void> = []
 
     setPersisted(lifeStore.usable())
+    try {
+      setOpening(window.sessionStorage.getItem(OPENING_SEEN) !== '1')
+    } catch {
+      // A browser that refuses session storage gets the opening every time, which is a
+      // better failure than a browser that never gets it at all.
+      setOpening(true)
+    }
     setTouch(
       typeof window !== 'undefined' &&
         (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window),
@@ -286,6 +305,15 @@ export function LifeStage({
     runtime.current?.endCutscene(outcome)
   }, [])
 
+  const closeOpening = useCallback(() => {
+    setOpening(false)
+    try {
+      window.sessionStorage.setItem(OPENING_SEEN, '1')
+    } catch {
+      /* it will simply play again */
+    }
+  }, [])
+
   const reset = useCallback(() => {
     void (async () => {
       await lifeStore.clear()
@@ -393,6 +421,13 @@ export function LifeStage({
             it does, because the point of it is that for two minutes the player is not
             playing. `key` on the cutscene id so a second film later in the life mounts a
             clean component rather than reusing this one's YouTube player. */}
+        {/* הפתיח — over everything, including the loading plate, because it IS the
+            loading plate: the game boots underneath it while the player watches a cot,
+            a bus and a man lifting a five-year-old over a crowd. */}
+        {opening && (
+          <OpeningSequence anchor={prologueAnchor} onDone={closeOpening} />
+        )}
+
         {cutscene && (
           <HistoricalCutscene
             key={cutscene.scene.id}

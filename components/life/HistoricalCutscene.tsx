@@ -250,8 +250,8 @@ export function HistoricalCutscene({
   return (
     <div
       dir="rtl"
-      className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-ink"
       role="dialog"
+      className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink"
       aria-modal="true"
       aria-label={scene.titleHe}
     >

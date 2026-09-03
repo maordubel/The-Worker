@@ -8,6 +8,7 @@ import { archive } from '@/lib/game/archive'
 import { isYellow } from '@/lib/isYellow'
 import { resolveChapterAnchor, resolvePrologueAnchor } from '@/lib/life/anchor-server'
 import { CUTSCENES, cutsceneCard, cutsceneFor, embedUrl, longDateHe } from '@/lib/life/cutscenes'
+import { OPENING, openingLines, openingMs } from '@/lib/life/opening'
 import { isPlaceholder, type HistoricalAnchor } from '@/lib/life/anchors'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { DEFAULT_IDENTITY, ENDINGS, PROLOGUE } from '@/lib/life/content/chapter1986'
@@ -1077,6 +1078,104 @@ describe('הסרט מהארכיון — real footage, and nothing said over it',
     expect(end.indexOf('completionFlag')).toBeLessThan(end.indexOf("outcome === 'unavailable'"))
     expect(end).toContain('watchMatch()')
     expect(end).toContain('returnFromArchive()')
+  })
+})
+
+/**
+ * הפתיח — five pictures before the player is allowed to touch anything.
+ *
+ * The sequence's job (vision §4) is to explain why this club already has a place in this
+ * child's life before he is old enough to choose it, and its danger is the same as every
+ * other screen in this game: it is the one place where a plausible-sounding invented date
+ * would never be questioned, because it plays over a photograph while nobody is reading
+ * critically. So the rule holds here too — a caption is written FOR a beat, and a fact is
+ * READ OFF the archive, and the two never swap places.
+ */
+describe('הפתיח — the opening, and the one line in it that is a fact', () => {
+  it('names every file it plays, and every file exists', () => {
+    expect(OPENING.length).toBeGreaterThanOrEqual(4)
+    for (const beat of OPENING) {
+      const base = join(ROOT, 'public/life/opening', beat.art)
+      if (beat.kind === 'still') {
+        expect(existsSync(`${base}.png`), `${beat.id} → ${beat.art}.png`).toBe(true)
+      } else {
+        expect(existsSync(`${base}.mp4`), `${beat.id} → ${beat.art}.mp4`).toBe(true)
+        // The poster is not optional: a crossfade INTO a video that has not buffered is a
+        // flash of black, which on a slow phone is most of the sequence.
+        expect(existsSync(`${base}-poster.png`), `${beat.id} has no poster`).toBe(true)
+      }
+    }
+  })
+
+  it('writes no fact into a caption', () => {
+    for (const beat of OPENING) {
+      // No year, no scoreline, no date. Those come off the anchor or they do not appear.
+      expect(/\b(19|20)\d{2}\b/.test(beat.captionHe), `${beat.id}: a year is in the caption`).toBe(false)
+      expect(/\d+\s*[:\-–]\s*\d+/.test(beat.captionHe), `${beat.id}: a scoreline is in the caption`).toBe(
+        false,
+      )
+      expect(beat.captionHe.length).toBeGreaterThan(8)
+      expect(beat.ms).toBeGreaterThanOrEqual(3000)
+    }
+  })
+
+  it('reads the 1983 final off the prologue anchor, or says less', () => {
+    const anchor = resolvePrologueAnchor()
+    const cup = OPENING.find((beat) => beat.archiveLine === 'fixture')
+    expect(cup, 'no beat carries the archive line').toBeDefined()
+    const lines = openingLines(cup!, anchor)
+    expect(lines.captionHe).toBe(cup!.captionHe)
+
+    if (!anchor.match) {
+      expect(lines.archiveHe, 'the archive cannot answer, so the beat must say less').toBeNull()
+      return
+    }
+    expect(lines.archiveHe).toContain(anchor.match.opponentHe)
+    expect(lines.archiveHe).toContain('הפועל תל אביב')
+    // The score, written in the direction the archive holds it — never a string typed in.
+    const forGoals = anchor.match.scoredFor
+    const against = anchor.match.scoredAgainst
+    expect(lines.archiveHe).toContain(
+      anchor.match.atHome ? `${forGoals}:${against}` : `${against}:${forGoals}`,
+    )
+    expect(lines.archiveHe).toContain(longDateHe(anchor.match.playedOn) as string)
+  })
+
+  it('a beat with no archive line gets exactly one line', () => {
+    const anchor = resolvePrologueAnchor()
+    for (const beat of OPENING) {
+      if (beat.archiveLine) continue
+      expect(openingLines(beat, anchor).archiveHe).toBeNull()
+    }
+  })
+
+  it('is short enough that a person watches it rather than skips it', () => {
+    // Half a minute is the outside edge. The skip is there from the first frame either way.
+    expect(openingMs()).toBeLessThanOrEqual(32000)
+    expect(openingMs()).toBeGreaterThan(12000)
+    const overlay = readFileSync(join(ROOT, 'components/life/OpeningSequence.tsx'), 'utf8')
+    expect(overlay).toContain("data-life=\"opening-skip\"")
+    expect(overlay).toContain("event.key === 'Escape'")
+    // Muted, inline and autoplaying is the one combination every mobile browser allows
+    // without a gesture. A sequence that needs a tap to start is a sequence nobody sees.
+    expect(overlay).toContain('muted')
+    expect(overlay).toContain('playsInline')
+  })
+
+  it('keeps no yellow in a single frame of it, film included', () => {
+    // The clips were 3.6% and 8.9% yellow as delivered. `count_yellow` runs on PNGs in
+    // `public/life/art` and an mp4 is neither, so nothing in the pipeline would ever have
+    // looked — which is why `scripts/life/ingest-opening.py` treats every frame before it
+    // encodes, and why this asserts the script still does.
+    const script = readFileSync(join(ROOT, 'scripts/life/ingest-opening.py'), 'utf8')
+    expect(script).toContain('def deyellow(')
+    expect(script).toContain('count_yellow(arr)')
+    expect(script).toContain('clean_palette(')
+    for (const beat of OPENING) {
+      if (beat.kind !== 'still') continue
+      const png = readFileSync(join(ROOT, 'public/life/opening', `${beat.art}.png`))
+      expect(png.length).toBeGreaterThan(1000)
+    }
   })
 })
 

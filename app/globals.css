@@ -427,6 +427,26 @@ select {
 
 .plate-card { box-shadow: 3px 3px 0 rgb(var(--ink) / 0.45) }
 
+/* הפתיח — how a 16:9 painting sits on a phone held upright.
+   `cover` is right on a laptop and wrong on a 390×844 screen: it crops a painting to its
+   middle third and throws away the pennant, the radio and the team photograph that are the
+   whole reason the frame was painted. So the picture is CONTAINED on anything narrower
+   than 6:5 and covers everything wider. The ink ground behind it is the bars, and the
+   caption sits over them, which is what a plate under a photograph looks like anyway. */
+.opening-frame { object-fit: contain; background-size: contain }
+@media (min-aspect-ratio: 6/5) {
+  .opening-frame { object-fit: cover; background-size: cover }
+}
+
+/* הפתיח — the slow push on a held painting.
+   Six percent over seven seconds and no more. A still frame under a caption reads as a
+   loading screen; anything faster than this reads as a camera move, and these are
+   photographs of a family rather than shots in a film. */
+@keyframes openingDrift {
+  from { transform: scale(1.06) }
+  to   { transform: scale(1.00) }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ball-roll, .fig-pop { animation: none; opacity: 1 }
 }
