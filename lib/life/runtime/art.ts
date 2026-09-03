@@ -38,6 +38,25 @@ export const BACKDROP = [
    * road plays the first time the child leaves his own neighbourhood.
    */
   'streetEast',
+
+  /**
+   * ספטמבר 2026, המסירה השנייה — the frames that answered the prompt pack.
+   *
+   * Eight of the keys above were REPLACED rather than added, and nothing in this list
+   * records that, which is correct: a scene asks for `kitchen` and gets whatever
+   * `kitchen.png` currently is. What changed is that `kitchen`, `living`, `kiosk`,
+   * `pitch`, `stand`, `ussExt` and `ussHall` stopped being rectangles of a concept board
+   * — the kitchen was a 4.3× upscale of a panel and the terrace was an ILLUSTRATED AERIAL
+   * of the whole bowl, which is a map and not a place to stand — and `corridor` stopped
+   * being a dim interior standing in for a tunnel. All eight are now purpose-drawn frames
+   * with an empty floor to walk on.
+   *
+   * These two are the only genuinely new names. Neither has a scene yet, and that is on
+   * purpose (rule 43): the art lands first so the 1983–2000 plan can name a place instead
+   * of describing one.
+   */
+  'undercroft',
+  'ussHallPre',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -251,71 +270,95 @@ export const FIGURE = [
   'keren90-side',
   'keren90-sit',
   'keren90-smile',
+
+  /**
+   * ---------------------------------------------------------------------------------
+   * המסירה השנייה — forty-nine figures that were names in `PLANNED_FIGURE` yesterday.
+   *
+   * `PLANNED_FIGURE` existed because forty-six names in this list resolved to files that
+   * were sliced locally and never reached the repository, and a name that 404s in front
+   * of a player is worse than a name that is written down as missing. `ART-PROMPTS.md`
+   * asked for the sheets they needed. They arrived, and the list below is what came back.
+   *
+   * Four of those names are NOT here and never will be. `soldier-rifle` and `soldier-aim`
+   * were poses nobody drew, because the prompt that asked for this sheet said `no weapons
+   * in any frame` — this game is about a child growing up in a neighbourhood, and its own
+   * brief forbids offering him anything dangerous. `soldier-salute` and `soldier-sit` are
+   * gone for the duller reason: the sheet holds standing-to-attention, sitting on a crate
+   * and sitting exhausted, and naming a pose that was not drawn is how a name ends up
+   * pointing at a file somebody cut to fill the gap.
+   */
+
+  // פוגי, שמונה פריימים של הליכה — indexed by `KID_WALK`, never named by a scene
+  'pogi-w1', 'pogi-w2', 'pogi-w3', 'pogi-w4',
+  'pogi-w5', 'pogi-w6', 'pogi-w7', 'pogi-w8',
+
+  /**
+   * פוגי נער — the same boy at thirteen, and the reason he ships before he is needed.
+   *
+   * Nothing in Stage A walks around as this. He exists so the chapter after 1986 opens on
+   * a face the player already knows rather than on a stranger with the protagonist's
+   * name, and so the life-line can put eight and thirteen in the same frame.
+   */
+  'teen', 'teen-3q', 'teen-side', 'teen-back', 'teen-walk', 'teen-pockets', 'teen-cross',
+  'teen-sit', 'teen-lean', 'teen-crouch', 'teen-cheer', 'teen-scarf', 'teen-look', 'teen-away',
+
+  /**
+   * משה סיני ושלום תקוה — two footballers, each drawn twice.
+   *
+   * Sinai gets a kit and a second row in a shirt and slacks, because in a life simulation
+   * a footballer is not only somebody on a pitch: he is a poster on a wall, a man in a
+   * queue, a face on a newspaper page. Tikva gets home red and away white instead, and
+   * the last away frame wears the captain's armband — which is the one detail that makes
+   * a second kit worth drawing rather than a recolour.
+   */
+  'sinai', 'sinai-3q', 'sinai-side', 'sinai-back', 'sinai-ball', 'sinai-kick', 'sinai-cheer',
+  'sinai-civA', 'sinai-civB', 'sinai-civC', 'sinai-civD', 'sinai-point', 'sinai-civE', 'sinai-civF',
+  'tikva', 'tikva-3q', 'tikva-side', 'tikva-back', 'tikva-ball', 'tikva-kick', 'tikva-cheer',
+  'tikva-away', 'tikva-away-smile', 'tikva-away-side', 'tikva-away-back',
+  'tikva-away-ball', 'tikva-point', 'tikva-captain',
+
+  // פוגי חייל, 1996 — fourteen poses and not one weapon in any of them
+  'soldier', 'soldier-stand', 'soldier-side', 'soldier-back',
+  'soldier-march', 'soldier-pack', 'soldier-crate',
+  'soldier-tired', 'soldier-shout', 'soldier-tie', 'soldier-away',
+  'soldier-lean', 'soldier-look', 'soldier-beret',
+
+  /**
+   * אופיר בן העשרים — seven poses that REPLACE six plates of a different-looking man.
+   *
+   * The six `ofir90-*` files that were already here came off an older concept board. The
+   * seven below are one sheet of one person, drawn from the 1986 Ofir with the buzz cut he
+   * is not allowed to lose. Keeping both would have put two faces under one name, which is
+   * the exact failure the Pogi rewrite was for. `ofir90-smoke`, `-crouch`, `-point`,
+   * `-sitB` and `-scarf` are still the older man and are the next thing to redraw.
+   */
+  'ofir90',
 ] as const
 
 /**
  * מה שעוד לא הועלה — figures the project has drawn and the repository does not have.
  *
- * `FIGURE` is a promise: every key in it resolves to a real PNG in `public/life/art`,
- * and `tests/life.test.ts` holds the runtime to it. Forty-seven names were failing that
- * promise — the whole soldier set, Sinai, Tikva and one Ofir plate — because the sheets
- * were sliced locally and the delta that carried them never reached GitHub.
+ * **It is empty, and that was always the plan.**
  *
- * Deleting the names would lose the record of what exists; leaving them in `FIGURE`
- * would let a scene ask for a file that 404s in front of a player. So they live here:
- * still written down, still ordered, and unreachable by `artUrl` until the file lands.
- * Moving one back up is a single line, the moment its PNG is uploaded.
+ * `FIGURE` is a promise: every key in it resolves to a real PNG in `public/life/art`, and
+ * `tests/life.test.ts` holds the runtime to it. Forty-six names were failing that promise
+ * — the whole soldier set, Sinai, Tikva and one Ofir plate — because the sheets were
+ * sliced locally and the delta that carried them never reached GitHub. Deleting the names
+ * would have lost the record of what exists; leaving them in `FIGURE` would have let a
+ * scene ask for a file that 404s in front of a player. So they lived here, still written
+ * down, still ordered, and unreachable by `artUrl`.
  *
- * The list is expected to shrink to nothing. It is not a design.
+ * The note ended `The list is expected to shrink to nothing. It is not a design.` On
+ * 3.9.2026 it shrank to nothing: the sheets were drawn to `docs/life/ART-PROMPTS.md`, cut
+ * by `scripts/life/ingest-2026-09b.py`, and thirty of the names moved up into `FIGURE`.
+ * The other sixteen were deleted rather than moved, for the reasons written beside them
+ * there — two of them because the pose is a weapon and this game does not draw one.
+ *
+ * The export stays, and stays empty, because the next delivery will want it again: a name
+ * that is written down as missing is a name somebody supplies.
  */
-export const PLANNED_FIGURE = [
-  'ofir90',
-  'soldier',
-  'soldier-rifle',
-  'soldier-march',
-  'soldier-back',
-  'soldier-pack',
-  'soldier-side',
-  'soldier-aim',
-  'soldier-tired',
-  'soldier-shout',
-  'soldier-salute',
-  'soldier-sit',
-  'soldier-crate',
-  'soldier-tie',
-  'soldier-away',
-  'sinai',
-  'sinai-back',
-  'sinai-ball',
-  'sinai-bustA',
-  'sinai-bustB',
-  'sinai-cheer',
-  'sinai-civA',
-  'sinai-civB',
-  'sinai-civC',
-  'sinai-civD',
-  'sinai-kick',
-  'sinai-point',
-  'sinai-run',
-  'tikva',
-  'tikva-away',
-  'tikva-away-back',
-  'tikva-away-side',
-  'tikva-away-smile',
-  'tikva-back',
-  'tikva-ball',
-  'tikva-captain',
-  'tikva-civA',
-  'tikva-civB',
-  'tikva-civC',
-  'tikva-civD',
-  'tikva-home',
-  'tikva-run',
-  'tikva-shout',
-  'tikva-side',
-  'tikva-third',
-  'tikva-third-back',
-] as const
+export const PLANNED_FIGURE = [] as const
 
 export type FigureKey = (typeof FIGURE)[number]
 
@@ -332,25 +375,47 @@ export const KID_POSE = {
 } as const
 
 /**
- * Two frames, and the scene adds the bob.
+ * שמונה פריימים — the walk, at last.
  *
- * The sheet holds two side-on strides. A two-frame cycle is a real and old solution —
- * it is what a walking figure reads as when the frames are a full stride apart — and it
- * is honest about what was drawn. What it must NOT be is the previous child's
- * eight-frame cycle under this child's shirt, which is a different person from the
- * knees down. When a proper Pogi walk sheet is drawn, this list grows and nothing else
- * changes.
+ * This list held TWO frames for three passes, and the comment that used to sit here was
+ * an apology for it: the sheet held two side-on strides, two honest strides read as
+ * walking, and borrowing the previous child's eight-frame cycle would have put a
+ * different boy's legs under this boy's shirt. It ended by promising that when a proper
+ * Pogi walk sheet was drawn this list would grow and nothing else would change.
+ *
+ * `docs/life/ART-PROMPTS.md` §2.1 asked for the sheet — contact, down, pass, up, twice,
+ * arms opposite the legs, a child's walk rather than a march — and it arrived on
+ * 3.9.2026. So the list grew, and nothing else changed. `WorldScene` indexes it modulo
+ * its own length and was always right; the bob it adds on top is now decoration on a real
+ * cycle rather than half the animation.
  */
-export const KID_WALK = ['pogi-side', 'pogi-walk'] as const
+export const KID_WALK = [
+  'pogi-w1', 'pogi-w2', 'pogi-w3', 'pogi-w4',
+  'pogi-w5', 'pogi-w6', 'pogi-w7', 'pogi-w8',
+] as const
 
 export const PROP = [
-  'propNewspaper',
-  'propRadio',
-  'propScarf',
-  'propHat',
-  'propTicket',
-  'propCoffee',
-  'propBall',
+  /**
+   * שבעה שמות שאינם כאן — the seven props this game shipped with, and why they are gone.
+   *
+   * `propNewspaper`, `propRadio`, `propScarf`, `propHat`, `propTicket`, `propCoffee` and
+   * `propBall` were rectangles of a concept board, and every one of them was cut a little
+   * wrong: each arrived with a fragment of the neighbouring drawing still in the frame —
+   * half a person beside the radio, a red sleeve beside the scarf, a coin where the ticket
+   * should be. The worst of them was `propBall`, which was not a ball at all but a
+   * 126×100 mis-cut of a CHILD with his arm raised, and it had been standing on the dirt
+   * pitch at seven percent of the frame since the scene was written. Nobody had looked at
+   * the file; the game only ever drew it 40 pixels tall.
+   *
+   * The September sheets drew the objects themselves, which is why the ten below replace
+   * them one for one where a use existed: `propBallReal` on the pitch and in the minigame,
+   * `propScarfRed` in the red box, `propPapers` and `propCoins` and `propSticker` already
+   * in `ITEM_ART`. The ticket went further and became the real thing — `docTicket`, the
+   * scan of the ticket a person kept for forty years.
+   *
+   * Their PNGs are still in `public/life/art` and are now referenced by nothing. They can
+   * be deleted; leaving them costs 90KB and loses nothing.
+   */
   /**
    * הדברים עצמם — supporter goods and street furniture, cut from the September sheets.
    *
@@ -410,6 +475,26 @@ export type DocKey = (typeof DOC)[number]
 
 /** Printed portrait plates for the dialogue box — cream ground kept, not cut out. */
 export const PORTRAIT_ART = [
+  /**
+   * פוגי — five plates painted as portraits, not cropped out of a body.
+   *
+   * Every other name in this list is a bust lifted off a figure sheet, which is why they
+   * are soft: the top 30% of a 400-pixel man is a 120-pixel head. `docs/life/ART-PROMPTS.md`
+   * §2.3 asked for the protagonist's face to be drawn at portrait size instead, six
+   * expressions on a warm cream ground, and five of the six came back usable — the sixth
+   * ran off the right edge of the delivered frame and is not faked from a crop.
+   *
+   * They are also the only files in this project written without a colour table. A plate
+   * is 60% flat cream and 15% face; both quantisers spend their budget on the cream and
+   * map the lit side of a cheek onto it, which is five portraits with holes punched in
+   * them. `scripts/life/ingest-2026-09.py` carries the arithmetic.
+   */
+  'facePogi',
+  'facePogi-smile',
+  'facePogi-wide',
+  'facePogi-shout',
+  'facePogi-down',
+
   'faceKid',
   'faceOfir',
   'faceAmit',

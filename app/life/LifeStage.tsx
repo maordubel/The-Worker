@@ -10,11 +10,13 @@ import { ControlDeck } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { EndingCard } from '@/components/life/EndingCard'
+import { HistoricalCutscene } from '@/components/life/HistoricalCutscene'
 import { LifeHud } from '@/components/life/LifeHud'
 import { ProfileCard } from '@/components/life/ProfileCard'
 import { Teach } from '@/components/life/Teach'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
+import type { CutsceneOutcome } from '@/lib/life/cutscenes'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { loadLife } from '@/lib/life/engine'
 import { lifeStore } from '@/lib/life/save'
@@ -57,6 +59,7 @@ export function LifeStage({
   const [ending, setEnding] = useState<LifeBusEvents['ending']>(null)
   const [match, setMatch] = useState<LifeBusEvents['match']>(null)
   const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
+  const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
   const [finale, setFinale] = useState<LifeBusEvents['finale']>(null)
   const [card, setCard] = useState<HistoricalAnchor | null>(null)
   const [controls, setControls] = useState(true)
@@ -96,6 +99,7 @@ export function LifeStage({
     unsubscribe.push(bus.on('ending', setEnding))
     unsubscribe.push(bus.on('match', setMatch))
     unsubscribe.push(bus.on('doc', setDoc))
+    unsubscribe.push(bus.on('cutscene', setCutscene))
     unsubscribe.push(bus.on('finale', setFinale))
     unsubscribe.push(bus.on('controls', (value) => setControls(value.visible)))
     unsubscribe.push(bus.on('anchor', (value) => setCard(value.showing ? value.anchor : null)))
@@ -272,6 +276,16 @@ export function LifeStage({
     runtime.current?.pause(false)
   }, [])
 
+  /**
+   * The film reporting back. Stable, and it must be: `HistoricalCutscene` calls it from
+   * its own unmount, so a callback that changed identity would end the cutscene every
+   * time this shell re-rendered — which it does on every line of dialogue.
+   */
+  const endCutscene = useCallback((outcome: CutsceneOutcome) => {
+    setCutscene(null)
+    runtime.current?.endCutscene(outcome)
+  }, [])
+
   const reset = useCallback(() => {
     void (async () => {
       await lifeStore.clear()
@@ -302,13 +316,13 @@ export function LifeStage({
 
         {/* Two clocks, never both. During the ninety minutes the board replaces the HUD:
             the time of day stops being the thing anybody in the ground is looking at. */}
-        {ready && !match && <LifeHud hud={hud} />}
-        {ready && match && <ScoreStrip match={match} />}
+        {ready && !cutscene && !match && <LifeHud hud={hud} />}
+        {ready && !cutscene && match && <ScoreStrip match={match} />}
 
         {/* התיק — one small plate under the clock. It is the only permanent control on
             the glass that is not the console: everything else about the player's state
             is learned by looking at people. */}
-        {ready && !dialogue && !ending && !card && !snapshot && (
+        {ready && !dialogue && !ending && !card && !snapshot && !cutscene && (
           <button
             type="button"
             onClick={() => openProfile(false)}
@@ -326,7 +340,7 @@ export function LifeStage({
           </button>
         )}
 
-        {ready && !dialogue && !ending && !card && controls && (
+        {ready && !dialogue && !ending && !card && !cutscene && controls && (
           <ControlDeck
             top={frame > 0 ? frame : Math.max(0, stage - 132)}
             height={frame > 0 ? Math.max(0, stage - frame) : 132}
@@ -340,9 +354,9 @@ export function LifeStage({
           />
         )}
 
-        {ready && teach && !dialogue && !ending && !card && <Teach id={teach.id} touch={touch} />}
+        {ready && teach && !dialogue && !ending && !card && !cutscene && <Teach id={teach.id} touch={touch} />}
 
-        {toast && (
+        {toast && !cutscene && (
           <div className="pointer-events-none absolute inset-x-0 top-[68px] z-30 flex justify-center px-gutter">
             <div
               className={`border-hair px-3 py-1.5 ${
@@ -373,6 +387,20 @@ export function LifeStage({
         )}
 
         {doc && <DocSheet art={doc.art} captionHe={doc.captionHe} onClose={() => setDoc(null)} />}
+
+        {/* הארכיון — the one screen in this game that is not this game.
+            It renders over everything, and every other overlay above is suppressed while
+            it does, because the point of it is that for two minutes the player is not
+            playing. `key` on the cutscene id so a second film later in the life mounts a
+            clean component rather than reusing this one's YouTube player. */}
+        {cutscene && (
+          <HistoricalCutscene
+            key={cutscene.scene.id}
+            scene={cutscene.scene}
+            card={cutscene.card}
+            onDone={endCutscene}
+          />
+        )}
 
         {card && <AnchorCard anchor={card} onClose={() => setCard(null)} />}
 

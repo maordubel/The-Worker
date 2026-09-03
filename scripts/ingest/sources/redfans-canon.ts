@@ -26,7 +26,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 import type { WikiPageRecord } from '../adapters/mediawiki'
-import { CORPUS_PAGES_DIR } from './wiki-corpus'
+import { CORPUS_PAGES_DIR, recordFromStored, type StoredCorpusPage } from './wiki-corpus'
 import { acceptFootballPage, parsePlayerPage, parseSeasonPage } from '../parse'
 import {
   matchContextFromTitle,
@@ -70,18 +70,40 @@ export function classifyPage(title: string): PageShape {
   return 'other'
 }
 
-/** A corpus record, as the file sink writes it, mapped onto what the parsers read. */
+/**
+ * A corpus record, narrowed to the document the parsers read.
+ *
+ * `WikiPageRecord` IS a `RawPage` plus the wiki's own metadata — categories, links, the
+ * revision's author — none of which a parser is allowed to want. This drops that half
+ * and hands over the document alone, which is why a parser cannot start depending on
+ * something only MediaWiki can supply.
+ */
 export function toRawPage(record: WikiPageRecord): RawPage {
   return {
+    pageId: record.pageId,
     title: record.title,
-    url: record.url,
+    namespace: record.namespace,
     revisionId: record.revisionId,
-    fetchedAt: record.fetchedAt,
+    sourceText: record.sourceText,
+    format: record.format,
     contentHash: record.contentHash,
-    sourceText: record.wikitext ?? '',
+    fetchedAt: record.fetchedAt,
+    url: record.url,
   }
 }
 
+/**
+ * The corpus on disk, decoded.
+ *
+ * What the dry run writes is a `StoredCorpusPage` — the table's own column names — and
+ * this used to CAST the parsed JSON to `WikiPageRecord` and read it as though the two
+ * shapes were one. They never were: `content_hash` is not `contentHash`, so every page
+ * the canon build read arrived with no hash, no fetch time, no revision id and no page
+ * id, and rule 2's provenance was dropped on the floor where nothing could fail. The
+ * text survived only because `toRawPage` reached for the provider's own word for it,
+ * which is the same drift wearing the opposite mask. Decoding it is one call, and the
+ * compiler now holds both shapes.
+ */
 export function readCorpus(root: string): WikiPageRecord[] {
   const dir = join(root, CORPUS_PAGES_DIR)
   if (!existsSync(dir)) return []
@@ -89,7 +111,8 @@ export function readCorpus(root: string): WikiPageRecord[] {
   for (const name of readdirSync(dir)) {
     if (!name.endsWith('.json')) continue
     try {
-      out.push(JSON.parse(readFileSync(join(dir, name), 'utf8')) as WikiPageRecord)
+      const stored = JSON.parse(readFileSync(join(dir, name), 'utf8')) as Partial<StoredCorpusPage>
+      out.push(recordFromStored(stored))
     } catch {
       // a half-written file from a killed run is not a fatal error for a read pass
     }

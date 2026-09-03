@@ -12,9 +12,10 @@ import { buildFinale } from '../../finale'
 import { tickOpportunities } from '../../opportunities'
 import { placementsAt } from '../../schedules'
 import type { LifeState, LocationId } from '../../types'
+import { cutsceneCard, cutsceneFor, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
 import { FULL_TIME, KICKOFF, KOBI_LEAVES, sceneFor } from '../../world/scenes'
-import type { ActorDef, ExitDef, HotspotDef, SceneDef, Verb } from '../../world/scenes'
+import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import { meets } from '../../world/types'
 import { artUrl, KID_POSE, KID_WALK } from '../art'
 import { frameCamera } from '../camera'
@@ -103,6 +104,17 @@ const STUCK_POINT = 70000
 const BASE_TIME = 0.72
 
 /** How often the world offers to surprise you, and how likely it is when it does. */
+/**
+ * הסרט של הפרק — which piece of archival film this chapter opens onto, by id.
+ *
+ * A string and not an import of the definition, because the registry in
+ * `lib/life/cutscenes.ts` is the authority on what exists and a chapter is only allowed to
+ * name one. `cutsceneFor` returning null is a legitimate state — it means this build has
+ * no film for 1986 — and the scene falls through to the ninety-minute simulation without
+ * a word about it.
+ */
+const CHAPTER_CUTSCENE = '1986-championship'
+
 const ENCOUNTER_EVERY = 22000
 const ENCOUNTER_CHANCE: Partial<Record<LocationId, number>> = {
   street: 0.42,
@@ -132,6 +144,8 @@ export class WorldScene extends Phaser.Scene {
 
   private actors: Actor[] = []
   private ambient: Ambient[] = []
+  /** dressing that can appear mid-scene, and the two that bounce */
+  private layers: Array<{ def: LayerDef; image: Phaser.GameObjects.Image; baseY: number }> = []
   private hotspots: Hotspot[] = []
   private doorLights: Array<{ exit: ExitDef; image: Phaser.GameObjects.Image; base: number }> = []
   private mark!: Phaser.GameObjects.Triangle
@@ -143,7 +157,9 @@ export class WorldScene extends Phaser.Scene {
   private minuteAcc = 0
   private timeScale = 1
   private flagCount = 0
-  private matchPhase: 'none' | 'watching' | 'goal' | 'celebrating' | 'over' = 'none'
+  private matchPhase: 'none' | 'archive' | 'watching' | 'goal' | 'celebrating' | 'over' = 'none'
+  /** the film currently on screen, and the reason the world is stopped */
+  private cutscene: HistoricalCutscene | null = null
   private goalMinute: number | null = null
   /** the one line before the goal, said once — its OWN latch, never `flagCount` */
   private saidTense = false
@@ -161,6 +177,7 @@ export class WorldScene extends Phaser.Scene {
   private idleFor = 0
   private stuckLevel = 0
   private breathe = 0
+  private bobbing = 0
   private lastMinute = -1
   private sinceEncounter = 0
   private baseZoom = 1
@@ -187,12 +204,14 @@ export class WorldScene extends Phaser.Scene {
     this.timeScale = 1
     this.flagCount = 0
     this.matchPhase = 'none'
+    this.cutscene = null
     this.goalMinute = null
     this.saidTense = false
     this.lastMatchLabel = ''
     this.streamers = []
     this.actors = []
     this.ambient = []
+    this.layers = []
     this.hotspots = []
     this.doorLights = []
     this.target = null
@@ -203,6 +222,7 @@ export class WorldScene extends Phaser.Scene {
     this.idleFor = 0
     this.stuckLevel = 0
     this.breathe = 0
+    this.bobbing = 0
     this.lastMinute = -1
     this.sinceEncounter = 0
     this.baseZoom = 1
@@ -346,10 +366,21 @@ export class WorldScene extends Phaser.Scene {
    * That is deliberate: dressing that pops in while you are looking at it reads as a bug,
    * and every condition used here turns over on a door, not on a tick.
    */
+  /**
+   * Every layer is BUILT, and `when` decides whether it is visible rather than whether it
+   * exists.
+   *
+   * It used to `continue` past a layer whose condition was unmet, which was correct for
+   * every piece of dressing this game had: a car that is gone by four o'clock is gone
+   * because the player crossed the street again and the scene was rebuilt. The terrace is
+   * the first dressing whose condition turns TRUE while the player is standing in the
+   * room — the crowd appears at full time, in a scene nobody leaves — and a layer that was
+   * skipped at `create` can never come back. So they are all built, hidden, and toggled by
+   * `refresh` exactly as the actors are.
+   */
   private buildLayers() {
     const state = this.ctx.engine.state
     for (const layer of this.def.layers ?? []) {
-      if (!meets(state, layer.when)) continue
       const image = this.add.image(layer.x * this.W, layer.y * this.H, `art-${layer.art}`)
       const source = this.textures.get(image.texture.key).getSourceImage()
       const width = layer.w * this.W
@@ -360,6 +391,28 @@ export class WorldScene extends Phaser.Scene {
       if (layer.flip) image.setFlipX(true)
       if (layer.alpha !== undefined) image.setAlpha(layer.alpha)
       if (layer.tint !== undefined) image.setTint(layer.tint)
+      image.setVisible(meets(state, layer.when))
+      this.layers.push({ def: layer, image, baseY: image.y })
+    }
+  }
+
+  /**
+   * היציע קופץ — the only moving dressing in the game, and it costs one sine.
+   *
+   * Phase comes from the layer's own x, so thirty people on a terrace are never in step
+   * with each other; `Math.abs` makes it a bounce rather than a float, because a crowd
+   * that celebrates by hovering is a crowd of ghosts.
+   */
+  private bobLayers(delta: number) {
+    // Its OWN accumulator. `this.breathe` is in seconds and drives the pointer, the door
+    // lights and the player's own bob; borrowing a clock is how a fix to one of those
+    // silently changes the speed of a crowd.
+    this.bobbing += delta / 1000
+    for (const entry of this.layers) {
+      const amount = entry.def.bob
+      if (!amount || !entry.image.visible) continue
+      const phase = entry.def.x * 37
+      entry.image.y = entry.baseY - Math.abs(Math.sin(this.bobbing * 5.2 + phase)) * amount * this.H
     }
   }
 
@@ -591,6 +644,10 @@ export class WorldScene extends Phaser.Scene {
     this.ctx.input.beginFrame()
     this.breathe += delta / 1000
     this.pulseLights()
+    // BEFORE the pause check. A crowd that freezes the moment a dialogue box opens is a
+    // painted crowd, and the one place this runs is the terrace at full time — which is
+    // exactly where the player stops to talk to somebody.
+    this.bobLayers(delta)
     if (this.paused) return
 
     this.since += delta
@@ -843,6 +900,9 @@ export class WorldScene extends Phaser.Scene {
 
   private refresh() {
     const state = this.ctx.engine.state
+    for (const entry of this.layers) {
+      entry.image.setVisible(meets(state, entry.def.when))
+    }
     for (const actor of this.actors) {
       const visible = meets(state, actor.def.when)
       actor.image.setVisible(visible)
@@ -1308,7 +1368,134 @@ export class WorldScene extends Phaser.Scene {
       this.pushMatch()
       return
     }
+    // The archive first, and the simulation as its fallback — see `playCutscene`.
+    const film = cutsceneFor(CHAPTER_CUTSCENE)
+    if (film && !this.ctx.engine.state.flags[film.completionFlag]) {
+      this.playCutscene(film)
+      return
+    }
     this.watchMatch()
+  }
+
+  /**
+   * הזיכרון נפתח אל מה שבאמת קרה — the film, and everything the game stops doing for it.
+   *
+   * Up to here the chapter has been a child's afternoon reconstructed from an archive of
+   * rows. This is the archive itself: the broadcast summary of 24.5.1986, played inside
+   * the game because an eight-year-old on that terrace did not watch a clip of the
+   * eighty-sixth minute — he watched an afternoon, and so does the player.
+   *
+   * Everything stops. Not paused-with-a-card-over-it, which is what `doc` and the profile
+   * do: the clock stops, the schedule stops, the thumb pad goes, the prompt goes, no
+   * dialogue can start, and the world does not tick. For these minutes the player is not
+   * IN 1986 as a child; they are watching what a child watched, and the game has nothing
+   * to say over it.
+   *
+   * The shell owns the screen from here and reports back through `endCutscene`.
+   */
+  private playCutscene(film: HistoricalCutscene) {
+    this.matchPhase = 'archive'
+    this.cutscene = film
+    this.paused = true
+    this.timeScale = 0
+    this.ctx.bus.emit('controls', { visible: false })
+    this.ctx.bus.emit('prompt', null)
+    this.ctx.bus.emit('toast', null)
+    this.ctx.bus.emit('cutscene', { scene: film, card: cutsceneCard(film, this.ctx.anchor) })
+  }
+
+  /**
+   * הסרט נגמר — and the chapter continues, whichever of the three ways it ended.
+   *
+   * The completion flag is raised in ALL of them, because the flag records that this
+   * cutscene is behind the player and not that they enjoyed it; a player who skipped is
+   * not shown the same film again on the next visit. Only `watched` raises the second
+   * flag, and the only thing that turns on is which memory the Red Box keeps.
+   *
+   * The fallback for `unavailable` is the best one this game will ever have, and it is
+   * not a card apologising: it is the ninety minutes the engine was already able to play
+   * by itself, scoreboard, held breath, eighty-sixth minute and all. YouTube being down
+   * costs the player the footage and nothing else. A player who chose `דלג`, on the other
+   * hand, has said they do not want to sit through the match — dropping them into a
+   * simulated one would be answering "skip" with "here is a longer version".
+   */
+  endCutscene(outcome: CutsceneOutcome) {
+    const film = this.cutscene
+    if (this.matchPhase !== 'archive' || !film) return
+    this.cutscene = null
+    this.ctx.bus.emit('cutscene', null)
+    this.matchPhase = 'none'
+    this.paused = false
+    this.timeScale = 1
+    this.ctx.engine.dispatch({ t: 'flag.raised', flag: film.completionFlag })
+
+    if (outcome === 'unavailable') {
+      this.ctx.bus.emit('toast', { text: film.fallbackHe, tone: 'plain' })
+      this.watchMatch()
+      return
+    }
+    if (outcome === 'watched') {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: film.watchedFlag })
+    }
+    this.returnFromArchive()
+  }
+
+  /**
+   * חזרה אל היציע — out of the film and into the celebration, at full time.
+   *
+   * The dramatic principle Maor set for this ending is that the historical climax and the
+   * emotional one must stay apart: the goal is something the player WATCHES, and finding
+   * his father is something the player has to do. So this method does the first half
+   * completely and the second half not at all. It jumps the clock, records the goal, sets
+   * paper falling and hands the controls back — and then the chapter's objective is one
+   * line, `למצוא את אבא`, and Kobi is somewhere on a terrace of eight thousand people.
+   * Nothing teleports anybody.
+   *
+   * The clock jump is an EVENT, not an assignment. `clock.advanced` goes in the log like
+   * every other minute of this afternoon, so a save written here folds back to a life in
+   * which the match happened, rather than to one that skipped an hour (rule 45).
+   *
+   * The goal's own events are the same three the simulated path dispatches, deliberately:
+   * a player who watched the film and a player who watched the simulation must end the
+   * chapter holding the same object in the same box, or the Red Box is a record of which
+   * code path ran.
+   */
+  private returnFromArchive() {
+    const state = this.ctx.engine.state
+    if (state.minute < FULL_TIME) {
+      this.ctx.engine.dispatch({ t: 'clock.advanced', minutes: FULL_TIME - state.minute })
+    }
+    this.goalMinute = decidingMinute(this.ctx.anchor)
+    this.matchPhase = 'celebrating'
+    if (!state.flags['saw:goal']) {
+      this.ctx.engine.dispatch(
+        { t: 'flag.raised', flag: 'saw:goal' },
+        { t: 'redheart.changed', key: 'footballLove', delta: 14 },
+        { t: 'redheart.changed', key: 'community', delta: 10 },
+        {
+          t: 'memory.kept',
+          memory: {
+            id: '1986-the-goal',
+            item: 'ticket-stub',
+            atMinute: this.ctx.engine.state.minute,
+            year: this.ctx.engine.state.year,
+            anchorId: this.ctx.anchor.id,
+          },
+        },
+      )
+    }
+    this.startCarnival()
+    this.cameras.main.flash(700, 255, 252, 246)
+    this.endMatch(false)
+    const goal = this.ctx.anchor.match?.decidedBy ?? null
+    if (goal) {
+      this.ctx.bus.emit('toast', { text: `${goal.scorerHe}. דקה ${goal.minute}.`, tone: 'red' })
+    }
+    // …and then the only thing left in Stage A that is his to do.
+    this.time.delayedCall(2600, () => {
+      if (this.ctx.engine.state.flags['found:kobi']) return
+      this.ctx.bus.emit('toast', { text: 'הוא איפשהו כאן. תמצא אותו.', tone: 'plain' })
+    })
   }
 
   /**
@@ -1494,7 +1681,15 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
-  private endMatch() {
+  /**
+   * `showCard` is false on the way back from the archival film, and only there.
+   *
+   * The anchor card is this game's way of saying "that was real, here is where it is
+   * written down". After two minutes of the actual broadcast it would be a footnote to a
+   * primary source — so the film gets the last word, and the card is what the simulated
+   * path shows instead.
+   */
+  private endMatch(showCard = true) {
     this.timeScale = 1
     this.paused = false
     this.matchPhase = 'over'
@@ -1507,7 +1702,7 @@ export class WorldScene extends Phaser.Scene {
     this.ctx.bus.emit('controls', { visible: true })
     this.pushMatch()
     this.refresh()
-    this.ctx.bus.emit('anchor', { anchor: this.ctx.anchor, showing: true })
+    if (showCard) this.ctx.bus.emit('anchor', { anchor: this.ctx.anchor, showing: true })
     this.cameras.main.shake(700, 0.004)
   }
 
@@ -1546,8 +1741,16 @@ export class WorldScene extends Phaser.Scene {
     this.ctx.engine.dispatch(
       {
         t: 'memory.kept',
+        // Same prefix as the goal memory above, and the year the chapter is actually set
+        // in. This is FORWARD-ONLY and deliberately not migrated: the prefix is part of a
+        // PERSISTED id, and a readable save (version 2 or 3) written before this fix can
+        // hold `1980-home`. Memories are idempotent on id, so such a save keeps its old
+        // row and a replay adds the correctly-named one beside it — one duplicated ending
+        // memory in a save that has already finished the chapter. Rewriting an id inside
+        // somebody's log to tidy that up would be editing a record of what happened,
+        // which is the one thing an append-only save may never do (rule 45, rule 35).
         memory: {
-          id: `1980-${card.id}`,
+          id: `1986-${card.id}`,
           item: card.memoryItem,
           atMinute: state.minute,
           year: state.year,
@@ -1558,7 +1761,12 @@ export class WorldScene extends Phaser.Scene {
       state.flags['match:started'] && state.flags['entry:granted']
         ? { t: 'anchor.attended', anchorId: this.ctx.anchor.id }
         : { t: 'anchor.missed', anchorId: this.ctx.anchor.id },
-      { t: 'chapter.completed', chapter: '1980' },
+      // The chapter's own year, and it is not cosmetic: `chapter.entered` and this event
+      // are the only things that set `state.chapter`, and `lib/life/redbox.ts` stamps
+      // every kept object `sourceEventId: chapter:${state.chapter}`. While this said the
+      // pre-rebase year, every object in a 1986 player's Red Box was filed under a
+      // chapter that does not exist.
+      { t: 'chapter.completed', chapter: '1986' },
     )
     void this.ctx.engine.save()
     this.paused = true

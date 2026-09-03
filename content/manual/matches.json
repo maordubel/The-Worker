@@ -1,5 +1,5 @@
 {
- "note": "Every match here was verified against a named source this session. The 2001/02 UEFA Cup run is complete from the second round onwards; the first-round opponent could not be resolved and is therefore absent rather than guessed. Kickoff times are never asserted — only dates. Attendance and travelling-supporter counts come from the Vikipoel match pages via Maor's research master. Where the source disagrees with itself the value is flagged, not chosen. משחק האליפות של 24.5.1986 נוסף ב-3.9.2026 עם כרטיס מקורי וסריקות מעריב ספורט מלפני המשחק ואחריו.",
+ "note": "Every match here was verified against a named source this session. The 2001/02 UEFA Cup run is complete from the second round onwards; the first-round opponent could not be resolved and is therefore absent rather than guessed. Kickoff times are never asserted — only dates. Attendance and travelling-supporter counts come from the Vikipoel match pages via Maor's research master. Where the source disagrees with itself the value is flagged, not chosen. משחק האליפות של 24.5.1986 נוסף ב-3.9.2026 עם כרטיס מקורי וסריקות מעריב ספורט מלפני המשחק ואחריו. גמר גביע המדינה של 1.6.1983 נוסף ב-3.9.2026 ממסמך החזון של מאור הראל, עם ynet וויקיפועל כמקורות.",
  "confidence": 2,
  "source": {
   "kind": "other",
@@ -349,6 +349,22 @@
    "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html",
    "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86",
    "noteHe": "משחק ההכרעה על אליפות 1985/86 — האליפות העשירית של הפועל תל אביב. כרטיס משחק 15 של העונה מארכיון מאור דובל נושא את שמות שתי הקבוצות ואת אצטדיון בלומפילד. משחק הליגה הישראלי הראשון ששודר בשידור חי בטלוויזיה."
+  },
+  {
+   "seasonLabel": "1982/83",
+   "competitionSlug": "גביע-המדינה",
+   "stage": "גמר",
+   "playedOn": "1983-06-01",
+   "homeClubSlug": "הפועל-תל-אביב",
+   "awayClubSlug": "מכבי-תל-אביב",
+   "homeScore": 3,
+   "awayScore": 2,
+   "venueSlug": null,
+   "status": "played",
+   "confidence": 2,
+   "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-219628,00.html",
+   "sourceTitle": "ynet — יד אלוהים תוצרת הארץ: שער היד של גילי לנדאו בגמר גביע 1983",
+   "noteHe": "גמר גביע המדינה 1982/83 — דרבי תל אביב. שער הניצחון של גילי לנדאו בדקה ה-67 נכבש בעזרת ידו, שלוש שנים לפני 'יד האלוהים' של מראדונה. בית ובחוץ נרשמים כאן לפי הצד שנרשם ראשון במקור; גמר גביע מתקיים במגרש ניטרלי, והאצטדיון אינו מאושר בארכיון ולכן venueSlug ריק."
   }
  ]
 }

@@ -7,7 +7,8 @@ import { archive } from '@/lib/game/archive'
 
 import { isYellow } from '@/lib/isYellow'
 import { resolveChapterAnchor, resolvePrologueAnchor } from '@/lib/life/anchor-server'
-import { isPlaceholder } from '@/lib/life/anchors'
+import { CUTSCENES, cutsceneCard, cutsceneFor, embedUrl, longDateHe } from '@/lib/life/cutscenes'
+import { isPlaceholder, type HistoricalAnchor } from '@/lib/life/anchors'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { DEFAULT_IDENTITY, ENDINGS, PROLOGUE } from '@/lib/life/content/chapter1986'
 import type { Conversation } from '@/lib/life/content/script'
@@ -29,7 +30,13 @@ import { meets } from '@/lib/life/world/types'
  */
 
 const ROOT = process.cwd()
-const state = () => emptyState(DEFAULT_IDENTITY, 1980)
+const state = () => emptyState(DEFAULT_IDENTITY, 1986)
+
+/**
+ * The whole timeline this game is allowed to name (rule 45): born 1978, the prologue in
+ * 1983, the Stage A chapter in 1986. Adding a year here is a decision, not a fix.
+ */
+const TIMELINE = ['1978', '1983', '1986']
 
 // ---------------------------------------------------------------------------------
 const ART = join(ROOT, 'public/life/art')
@@ -179,51 +186,70 @@ describe('העוגן ההיסטורי — canonical, sourced, and honest about t
     expect(anchor.id).not.toBe('DEV-PLACEHOLDER')
   })
 
+  it('resolves the prologue anchor from the archive at confidence 2', () => {
+    const anchor = resolvePrologueAnchor()
+    expect(anchor.confidence).toBeGreaterThanOrEqual(2)
+    expect(anchor.sport).toBe('football')
+    expect(anchor.seasonLabel).toBe('1982/83')
+    expect(anchor.competitionSlug).toBe('גביע-המדינה')
+    expect(anchor.id.startsWith('DEV-PLACEHOLDER')).toBe(false)
+  })
+
   /**
-   * This test used to assert the opposite, and the change is the point.
+   * The pair, and the shape of the assertion, are both the point.
    *
-   * For three passes the archive held the championship and not the game that decided it,
-   * so the anchor carried a placeholder note and this test insisted on it — a placeholder
-   * you can see is one somebody replaces. On 3.9.2026 somebody did: a ticket kept for
-   * forty years and two dated pages of מעריב ספורט became rows in `content/manual`.
+   * This test used to assert that the note was THERE, because for three passes the archive
+   * held the championship and not the game that decided it — and a placeholder you can see
+   * is one somebody replaces. On 3.9.2026 somebody replaced both: a ticket kept for forty
+   * years and two dated pages of מעריב ספורט became 24.5.1986, and a ynet piece about a
+   * goal Landau put in with his hand became 1.6.1983.
    *
-   * So the assertion is now the RULE rather than the state — the note is present exactly
-   * when the archive cannot answer, and absent exactly when it can. That version of the
-   * test survives the archive changing again in either direction.
+   * So the assertion is the RULE rather than the state — the note is present exactly when
+   * the archive cannot answer, and absent exactly when it can — and it runs over BOTH
+   * anchors, because the prologue and the chapter now resolve through the same function
+   * and there is no reason for one of them to be held to a weaker standard.
    */
-  it('carries the placeholder note if and only if the archive cannot answer', () => {
-    const anchor = resolveChapterAnchor()
-    if (anchor.match) {
-      expect(anchor.placeholder, 'the archive answered, so the note must be gone').toBeNull()
-      expect(isPlaceholder(anchor)).toBe(false)
-    } else {
-      expect(anchor.placeholder, 'the archive cannot answer, so the note must be shown').not.toBeNull()
-      expect(anchor.placeholder?.needs).toContain('1985/86')
-      expect(isPlaceholder(anchor)).toBe(true)
-    }
-  })
+  const ANCHORS: ReadonlyArray<readonly [string, () => HistoricalAnchor, string]> = [
+    ['הפרק — אליפות 1985/86', resolveChapterAnchor, '1985/86'],
+    ['הפרולוג — גביע 1982/83', resolvePrologueAnchor, '1982/83'],
+  ]
 
-  it('states nothing about the deciding match that the archive does not hold', () => {
-    const match = resolveChapterAnchor().match
-    if (!match) return
-    // Every field is copied, never computed from prose — so every one of them has to be
-    // findable in the files. The names especially: a scorer this test cannot find in
-    // `people.json` is a name somebody typed into a scene.
-    const clubs = new Set(archive.clubs.filter((row) => row.sport === 'football').map((row) => row.nameHe))
-    expect(clubs.has(match.opponentHe), `${match.opponentHe} is not a club in the archive`).toBe(true)
-    expect(match.playedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-    expect(match.sourceTitle.length).toBeGreaterThan(3)
-
-    const named = new Set(archive.people.map((row) => row.fullNameHe))
-    if (match.decidedBy) {
-      expect(match.decidedBy.minute).toBeGreaterThan(0)
-      expect(match.decidedBy.minute).toBeLessThanOrEqual(120)
-      expect(named.has(match.decidedBy.scorerHe), `${match.decidedBy.scorerHe} is not in people.json`).toBe(true)
-      if (match.decidedBy.assistHe) {
-        expect(named.has(match.decidedBy.assistHe), `${match.decidedBy.assistHe} is not in people.json`).toBe(true)
+  for (const [label, resolve, season] of ANCHORS) {
+    it(`${label}: carries the placeholder note if and only if the archive cannot answer`, () => {
+      const anchor = resolve()
+      if (anchor.match) {
+        expect(anchor.placeholder, 'the archive answered, so the note must be gone').toBeNull()
+        expect(isPlaceholder(anchor)).toBe(false)
+      } else {
+        expect(anchor.placeholder, 'the archive cannot answer, so the note must be shown').not.toBeNull()
+        expect(anchor.placeholder?.needs).toContain(season)
+        expect(isPlaceholder(anchor)).toBe(true)
       }
-    }
-  })
+    })
+
+    it(`${label}: states nothing about the deciding match that the archive does not hold`, () => {
+      const match = resolve().match
+      if (!match) return
+      // Every field is copied, never computed from prose — so every one of them has to be
+      // findable in the files. The names especially: a scorer this test cannot find in
+      // `people.json` is a name somebody typed into a scene.
+      const clubs = new Set(archive.clubs.filter((row) => row.sport === 'football').map((row) => row.nameHe))
+      expect(clubs.has(match.opponentHe), `${match.opponentHe} is not a club in the archive`).toBe(true)
+      expect(match.playedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+      expect(match.playedOn.startsWith(season.slice(0, 2))).toBe(true)
+      expect(match.sourceTitle.length).toBeGreaterThan(3)
+
+      const named = new Set(archive.people.map((row) => row.fullNameHe))
+      if (match.decidedBy) {
+        expect(match.decidedBy.minute).toBeGreaterThan(0)
+        expect(match.decidedBy.minute).toBeLessThanOrEqual(120)
+        expect(named.has(match.decidedBy.scorerHe), `${match.decidedBy.scorerHe} is not in people.json`).toBe(true)
+        if (match.decidedBy.assistHe) {
+          expect(named.has(match.decidedBy.assistHe), `${match.decidedBy.assistHe} is not in people.json`).toBe(true)
+        }
+      }
+    })
+  }
 
   it('builds the headline from canonical fields only — no opponent, no score', () => {
     for (const anchor of [resolveChapterAnchor(), resolvePrologueAnchor()]) {
@@ -252,8 +278,48 @@ describe('הבדיון אינו היסטוריה — the content layer invents n
   it('names no year but the ones the rebased chapter is set in', () => {
     const years = new Set([...authored.matchAll(/\b(19|20)\d{2}\b/g)].map((match) => match[0]))
     for (const year of years) {
-      expect(['1978', '1983', '1986'], `unexpected year ${year} in authored content`).toContain(year)
+      expect(TIMELINE, `unexpected year ${year} in authored content`).toContain(year)
     }
+  })
+
+  /**
+   * The guard above reads the authored CONTENT, which is exactly why it never noticed the
+   * file it lives in: this suite built every one of its states at the pre-rebase year and
+   * kept doing it straight through the rebase, so the tests that assert the chapter is
+   * 1986 were themselves simulating a year the game no longer has, and nothing anywhere
+   * said so. A guard that names its subject protects only that subject (rule 49) — so
+   * this one reads the CALLS instead of one file's prose, everywhere a life can be
+   * constructed: the screens, the runtime and the suites that drive them. (It reads this
+   * file too, which is why the paragraph you are reading spells no call out in full.)
+   *
+   * It is deliberately narrow about what counts as constructing a year — the second
+   * argument to `emptyState` / `fold` / `loadLife` / `new LifeEngine`, and a `year:` field
+   * in the life suites. A four-digit number is not by itself a claim about the timeline:
+   * `1985/86` is a season label and `25.10.1980` is a fixture date in an ingestion test,
+   * and a guard that failed on those would be turned off within a week.
+   */
+  it('constructs a life at no year but 1978 / 1983 / 1986 — in the suites as well as the screens', () => {
+    const built = /(?:emptyState|fold|loadLife|LifeEngine)\s*\(\s*[A-Za-z_$][\w$.]*\s*,\s*(\d{4})/g
+    const wrong: string[] = []
+
+    for (const path of code(['app', 'components', 'lib', 'tests'])) {
+      for (const match of readFileSync(path, 'utf8').matchAll(built)) {
+        const year = match[1] as string
+        if (!TIMELINE.includes(year)) wrong.push(`${path.replace(`${ROOT}/`, '')}: ${match[0].trim()}`)
+      }
+    }
+
+    // The life suites additionally may not stamp a year onto a memory or an event by hand.
+    // Scoped to them by NAME PREFIX rather than a hand-written list, so the next
+    // `life-*.test.ts` is covered on the day it is created.
+    for (const path of code(['tests']).filter((file) => /\/life[.-][^/]*$/.test(file))) {
+      for (const match of readFileSync(path, 'utf8').matchAll(/\byear:\s*(\d{4})/g)) {
+        const year = match[1] as string
+        if (!TIMELINE.includes(year)) wrong.push(`${path.replace(`${ROOT}/`, '')}: ${match[0].trim()}`)
+      }
+    }
+
+    expect(wrong, wrong.join('\n')).toEqual([])
   })
 
   it('substitutes the canonical anchor into the prologue rather than writing it out', () => {
@@ -277,8 +343,8 @@ describe('מנוע החיים — the log is the save', () => {
       { t: 'bond.shifted', who: 'ofir', delta: 12 },
       { t: 'clock.advanced', minutes: 95 },
     ]
-    const a = fold(DEFAULT_IDENTITY, 1980, events)
-    const b = fold(DEFAULT_IDENTITY, 1980, events)
+    const a = fold(DEFAULT_IDENTITY, 1986, events)
+    const b = fold(DEFAULT_IDENTITY, 1986, events)
     expect(a).toEqual(b)
     expect(a.agorot).toBe(60)
     expect(a.minute).toBe(12 * 60 + 35 + 95)
@@ -304,8 +370,8 @@ describe('מנוע החיים — the log is the save', () => {
   })
 
   it('keeps one memory when the same one is replayed', () => {
-    const memory = { id: 'x', item: 'ticket-stub' as const, atMinute: 10, year: 1980, anchorId: null }
-    const after = fold(DEFAULT_IDENTITY, 1980, [
+    const memory = { id: 'x', item: 'ticket-stub' as const, atMinute: 10, year: 1986, anchorId: null }
+    const after = fold(DEFAULT_IDENTITY, 1986, [
       { t: 'memory.kept', memory },
       { t: 'memory.kept', memory },
     ])
@@ -318,13 +384,13 @@ describe('מנוע החיים — the log is the save', () => {
   })
 
   it('rebuilds the whole life from the log alone', () => {
-    const engine = new LifeEngine(DEFAULT_IDENTITY, 1980)
+    const engine = new LifeEngine(DEFAULT_IDENTITY, 1986)
     engine.dispatch(
       { t: 'flag.raised', flag: 'knows:match' },
       { t: 'money.changed', agorot: 150, why: 'test' },
       { t: 'item.gained', item: 'ticket-stub' },
     )
-    const reopened = new LifeEngine(DEFAULT_IDENTITY, 1980, engine.log())
+    const reopened = new LifeEngine(DEFAULT_IDENTITY, 1986, engine.log())
     expect(reopened.state).toEqual(engine.state)
     expect(reopened.has('ticket-stub')).toBe(true)
     expect(reopened.flag('knows:match')).toBe(true)
@@ -388,7 +454,15 @@ describe('העולם — every door leads somewhere that exists', () => {
         if (spot.prop) expect(props.has(spot.prop.key), `${scene.id}/${spot.id} → ${spot.prop.key}`).toBe(true)
       }
       for (const layer of scene.layers ?? []) {
-        const known = props.has(layer.art) || LAYER.includes(layer.art as (typeof LAYER)[number])
+        // Dressing is normally a prop or a separated piece of the painting. It may also be
+        // a FIGURE, and one scene needs that: the terrace at full time is sixteen people
+        // who cannot be talked to, and drawing them as actors would put sixteen dialogue
+        // boxes between the child and his father. The name still has to resolve to a file
+        // that the build produced, which is the only thing this guard was ever about.
+        const known =
+          props.has(layer.art) ||
+          figures.has(layer.art) ||
+          LAYER.includes(layer.art as (typeof LAYER)[number])
         expect(known, `${scene.id} layer → ${layer.art}`).toBe(true)
       }
     }
@@ -430,6 +504,67 @@ describe('העולם — every door leads somewhere that exists', () => {
         for (const exit of scene.exits) {
           const clear = right <= exit.x + 0.005 || left >= exit.x + exit.w - 0.005
           expect(clear, `${scene.id}: ${layer.art} covers the door "${exit.id}"`).toBe(true)
+        }
+      }
+    }
+  })
+
+  /**
+   * לא להסתיר את מה שביקשת למצוא — nothing you have to find may stand behind the scenery.
+   *
+   * The new hazard, and it arrived with the ending. The last thing Stage A asks of the
+   * player is to walk a celebrating terrace and find his father among sixteen strangers,
+   * and those sixteen are DRESSING: figures drawn as layers, depth-sorted into the same
+   * band the child walks in. That is what makes the search a search — and it is one
+   * careless x away from making it impossible, because a layer drawn NEARER than an actor
+   * covers him completely and the engine has no opinion about it.
+   *
+   * So: any on-the-ground layer standing in front of a talkable actor has to be clear of
+   * him horizontally. The half-width is a flat, generous 0.035 rather than anything
+   * derived from the figure's own art — a guard about hiding people should fail early and
+   * be tightened, not squeak past on an aspect ratio.
+   */
+  /**
+   * כל חפץ הוא חפץ אחד — every prop the game draws was drawn as that prop.
+   *
+   * The bug this exists for is small, invisible in code, and shipped for three passes: the
+   * seven original props were rectangles of a concept board, cut a little too wide, and
+   * every one carried a fragment of the drawing next door. `propBall` was not a ball at
+   * all — a 126×100 crop of a CHILD with his arm raised, standing on the dirt pitch at
+   * 7% of the frame where the football should be. Nobody saw it because nobody opens a
+   * 40-pixel PNG, and the tests only ever asked whether the file existed.
+   *
+   * `source` in the manifest is what separates them: `stageAenv` means somebody typed a
+   * crop box against a board, `2026-09` means a sheet was drawn of the object and a script
+   * cut it on its own gaps. So the rule is that a prop a SCENE names has to come from a
+   * sheet. It says nothing about the boards, which produced most of the good art in this
+   * project; it says that hand-cropping is not how this game gets its objects any more.
+   */
+  it('draws every prop from a sheet, never from a crop box somebody typed', () => {
+    const props = (artManifest['props'] ?? {}) as Record<string, { source?: string }>
+    const used = new Set<string>()
+    for (const scene of scenes) {
+      for (const spot of scene.hotspots) if (spot.prop) used.add(spot.prop.key)
+      for (const layer of scene.layers ?? []) if (layer.art.startsWith('prop')) used.add(layer.art)
+    }
+    expect(used.size).toBeGreaterThan(0)
+    for (const key of used) {
+      expect(props[key]?.source, `${key} was hand-cropped from a board`).toBe('2026-09')
+    }
+  })
+
+  it('never hides a person you have to find behind a piece of dressing', () => {
+    const ACTOR_HALF = 0.035
+    for (const scene of scenes) {
+      for (const layer of scene.layers ?? []) {
+        if (!onTheGround(scene, layer)) continue
+        for (const actor of scene.actors) {
+          if (!actor.talk) continue
+          // Only what is drawn NEARER than the actor can cover him.
+          if (layer.depth <= actor.y) continue
+          const clear =
+            layer.x + layer.w / 2 <= actor.x - ACTOR_HALF || layer.x - layer.w / 2 >= actor.x + ACTOR_HALF
+          expect(clear, `${scene.id}: ${layer.art} stands in front of ${actor.id}`).toBe(true)
         }
       }
     }
@@ -830,12 +965,132 @@ describe('הגבול — the life layer reads history only through the archive',
   })
 })
 
+/**
+ * הסרט מהארכיון — the historical cutscene system.
+ *
+ * Two things are being protected here and they pull in opposite directions. One is that
+ * the film must be able to fail: YouTube is somebody else's server and every way it can
+ * go wrong has to end with the chapter continuing. The other is that the card printed
+ * around the film may not say anything the archive does not hold — a black screen before
+ * archival footage is exactly the place a plausible-sounding invented date would never be
+ * questioned by anybody.
+ */
+describe('הסרט מהארכיון — real footage, and nothing said over it', () => {
+  it('builds the card from the anchor and never from a literal', () => {
+    const scene = CUTSCENES['1986-championship']!
+    const anchor = resolveChapterAnchor()
+    const card = cutsceneCard(scene, anchor)
+
+    if (!anchor.match) {
+      // The archive cannot answer: the card says less, and says nothing wrong.
+      expect(card.fixtureHe).toBeNull()
+      expect(card.dateHe).toBeNull()
+      return
+    }
+    expect(card.fixtureHe).toContain(anchor.match.opponentHe)
+    expect(card.fixtureHe).toContain('הפועל תל אביב')
+    expect(card.dateHe).toBe(longDateHe(anchor.match.playedOn))
+    expect(card.placeHe).toBe(anchor.match.venueHe)
+    // …and no scoreline anywhere on it. The player is about to watch the match.
+    for (const line of [card.titleHe, card.subtitleHe, card.fixtureHe, card.dateHe, card.placeHe]) {
+      if (!line) continue
+      expect(/\d+\s*[:\-–]\s*\d+/.test(line), `a scoreline reached the card: ${line}`).toBe(false)
+    }
+  })
+
+  it('writes a date a person reads, and refuses anything it cannot parse', () => {
+    expect(longDateHe('1986-05-24')).toBe('24 במאי 1986')
+    expect(longDateHe('1983-06-01')).toBe('1 ביוני 1983')
+    expect(longDateHe(null)).toBeNull()
+    expect(longDateHe('24.5.1986')).toBeNull()
+    expect(longDateHe('1986-13-01')).toBeNull()
+  })
+
+  it('gives every cutscene a flag, an objective and something to say when it cannot play', () => {
+    const entries = Object.entries(CUTSCENES)
+    expect(entries.length).toBeGreaterThan(0)
+    for (const [id, scene] of entries) {
+      expect(scene.id, `${id} disagrees with its own key`).toBe(id)
+      expect(scene.youtubeId.length).toBeGreaterThan(6)
+      // A cutscene that ends into nothing is a chapter that stops.
+      expect(scene.nextObjectiveHe.length, `${id} ends into nothing`).toBeGreaterThan(2)
+      expect(scene.fallbackHe.length, `${id} has nothing to say when the film is gone`).toBeGreaterThan(10)
+      expect(scene.completionFlag).not.toBe(scene.watchedFlag)
+      // Attribution is not optional on somebody else's film.
+      expect(scene.sourceTitle.length).toBeGreaterThan(3)
+      expect(scene.sourceUrl.startsWith('https://')).toBe(true)
+      expect(scene.sourceUrl).toContain(scene.youtubeId)
+    }
+  })
+
+  it('embeds without cookies, without related videos, and with the API on', () => {
+    const scene = CUTSCENES['1986-championship']!
+    const url = embedUrl(scene, 'https://example.test')
+    // nocookie: the player is a child in a game and does not need an ad profile for this
+    expect(url.startsWith('https://www.youtube-nocookie.com/embed/')).toBe(true)
+    expect(url).toContain(scene.youtubeId)
+    // enablejsapi is what lets the shell HEAR the video end rather than guess at it
+    expect(url).toContain('enablejsapi=1')
+    // rel=0 keeps three other videos off the last frame of a historical document
+    expect(url).toContain('rel=0')
+    expect(url).toContain('origin=https%3A%2F%2Fexample.test')
+  })
+
+  it('is a registry, not a special case in the world', () => {
+    expect(cutsceneFor('1986-championship')).not.toBeNull()
+    // An id nobody registered is a legitimate state — the chapter falls through to the
+    // ninety-minute simulation without a word about it — and must never throw.
+    expect(cutsceneFor('no-such-film')).toBeNull()
+
+    // The scene names the film by ID and imports the registry, rather than holding a
+    // YouTube id of its own. A video URL in a Phaser scene is the thing this file exists
+    // to prevent.
+    const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
+    expect(world).toContain("from '../../cutscenes'")
+    // Comments are prose about the rule; the rule applies to the code. The scene is
+    // allowed to explain what happens when YouTube is down and not to name it.
+    const code = world.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
+    expect(/youtube|youtu\.be/i.test(code), 'a video URL reached a scene').toBe(false)
+  })
+
+  /**
+   * The requirement above every other one on this feature, asserted as a property of the
+   * source rather than of a run: there is no way out of the overlay that does not report
+   * an outcome, INCLUDING unmount, and the runtime raises the completion flag on all
+   * three of them. A player cannot be left standing in a stadium because a video was
+   * pulled in 2029.
+   */
+  it('cannot trap the player, whichever way the film fails', () => {
+    const overlay = readFileSync(join(ROOT, 'components/life/HistoricalCutscene.tsx'), 'utf8')
+    // ended · skipped · YouTube error · API blocked · unmount
+    expect(overlay).toContain("finish('watched')")
+    expect(overlay).toContain("finish('skipped')")
+    expect(overlay).toContain("finish('unavailable')")
+    expect(overlay).toContain("setPhase('failed')")
+    // the unmount path, which is the one nobody remembers to write
+    expect(/return \(\) => \{[\s\S]{0,400}finish\('skipped'\)/.test(overlay)).toBe(true)
+
+    const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
+    const body = world.slice(world.indexOf('endCutscene(outcome: CutsceneOutcome)'))
+    const end = body.slice(0, body.indexOf('\n  private returnFromArchive'))
+    // the completion flag is raised BEFORE the branch, so all three outcomes carry it
+    expect(end.indexOf('completionFlag')).toBeLessThan(end.indexOf("outcome === 'unavailable'"))
+    expect(end).toContain('watchMatch()')
+    expect(end).toContain('returnFromArchive()')
+  })
+})
+
 function walk(dir: string): string[] {
   const out: string[] = []
   for (const entry of readdirSync(dir)) {
     const path = join(dir, entry)
     if (statSync(path).isDirectory()) out.push(...walk(path))
-    else if (path.endsWith('.ts')) out.push(path)
+    else if (path.endsWith('.ts') || path.endsWith('.tsx')) out.push(path)
   }
   return out
+}
+
+/** Every source file under the given repo-relative roots. */
+function code(roots: readonly string[]): string[] {
+  return roots.flatMap((root) => walk(join(ROOT, root)))
 }

@@ -61,6 +61,16 @@ export type LifeRuntime = {
   dismissEnding(): void
   /** the end-of-stage celebration's own button — the ending card no longer goes home */
   dismissFinale(): void
+  /**
+   * הסרט נגמר — the shell reporting how a historical cutscene ended.
+   *
+   * The only method on this facade that carries information INTO the game rather than a
+   * command, and it is one enum: watched, skipped, or the film could not be played. The
+   * scene decides what each of those means; the shell has no idea, which is the whole
+   * point of the boundary. Safe to call more than once and safe to call for a cutscene
+   * nobody started — both are no-ops.
+   */
+  endCutscene(outcome: import('../cutscenes').CutsceneOutcome): void
   skipIntro(): void
   /** the profile screen: everything the shell may know, as words */
   snapshot(): LifeSnapshot
@@ -163,6 +173,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     leave: () => dialogue.leave(),
     dismissEnding: () => worldScene()?.goHome(),
     dismissFinale: () => worldScene()?.dismissFinale(),
+    endCutscene: (outcome) => worldScene()?.endCutscene(outcome),
     snapshot,
     pause: (on: boolean) => worldScene()?.setPaused(on),
     debug: {

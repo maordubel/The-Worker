@@ -7,7 +7,7 @@ import { t } from '@/lib/i18n'
  * קו החיים — the same person, four times, in one row.
  *
  * This is the thing the whole architecture is for, and it is worth showing before any of
- * it is playable. A Saturday in 1980 is not a level; it is the first entry in a life that
+ * it is playable. A Saturday in 1986 is not a level; it is the first entry in a life that
  * runs through a bedroom, a terrace, a uniform and a man, and the cheapest honest way to
  * say so is to stand the four of him side by side and let the player do the arithmetic.
  *

@@ -160,7 +160,11 @@ export const ITEM_ART: Partial<Record<ItemId, string>> = {
   newspaper: 'propPapers',
   'folded-paper': 'propPapers',
   'football-card': 'propSticker',
-  'ticket-stub': 'propTicket',
+  // The REAL one. `propTicket` was a mis-cut of a coin and a fragment of a coat; the
+  // child's own ticket to משחק 15 is in this repository, scanned, because somebody
+  // kept it for forty years. A memory of a ticket drawn as the ticket is the whole
+  // argument of §50, and there was never a reason to draw a worse one beside it.
+  'ticket-stub': 'docTicket',
   coin: 'propCoins',
 }
 

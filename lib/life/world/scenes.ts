@@ -113,6 +113,18 @@ export type LayerDef = {
   y: number
   w: number
   depth: number
+  /**
+   * How far this piece of dressing lifts, as a fraction of the backdrop height.
+   *
+   * Almost every layer in this game is a thing — a table, a bin, a bus — and a thing that
+   * moves is a bug. One case is not: a terrace at full time. The championship crowd is
+   * drawn as dressing rather than as actors, because none of those eight thousand people
+   * can be talked to and an actor you cannot talk to is a conversation the player keeps
+   * walking into. But a still crowd at the moment the title is won is worse than no crowd,
+   * so a layer may bounce. Amplitude in band units, phase derived from its own x so no two
+   * of them are in step.
+   */
+  bob?: number
   /** treat (x, y) as the point the object stands on, not its top-left corner */
   foot?: boolean
   /** dressing that is only there when the world says it is */
@@ -167,7 +179,11 @@ const SCENES: SceneDef[] = [
         act: 'redbox',
         verb: 'look',
         labelHe: 'הקופסה',
-        prop: { key: 'propScarf', size: 0.1 },
+        // `propScarfRed`, not `propScarf`. The seven props this game shipped with were
+        // cut from a concept board and every one of them arrived with a piece of
+        // somebody else in the frame — the old scarf carries a red fragment of a
+        // figure beside it. The September sheet drew the objects themselves.
+        prop: { key: 'propScarfRed', size: 0.1 },
       },
     ],
     exits: [
@@ -245,7 +261,7 @@ const SCENES: SceneDef[] = [
         // whole reason it reads as OUTSIDE rather than as another room.
         light: { x: 0.0, y: 0.6, w: 0.085, h: 0.4, tone: 'daylight' },
         // The first lock in the game, and it is the reason the bedroom is not scenery: a
-        // child in 1980 does not leave the flat without the key on the string.
+        // child in 1986 does not leave the flat without the key on the string.
         needs: { hasItem: 'house-key' },
         blockedHe: 'בלי המפתח אמא לא נותנת לצאת. הוא במגירה בחדר שלך.',
         dwellMs: 260,
@@ -283,17 +299,24 @@ const SCENES: SceneDef[] = [
     id: 'kitchen',
     titleHe: 'המטבח',
     art: 'kitchen',
-    band: { far: 0.76, near: 0.95 },
-    size: { far: 0.27, near: 0.37 },
+    // Repainted 3.9.2026. The old kitchen was a 4.3× upscale of one panel of a concept
+    // board — the example `docs/life/ART-PROMPTS.md` opened with — and it was framed at a
+    // three-quarter angle onto a cluttered corner, which left a walk band eight percent of
+    // the frame deep. This one is straight-on with an empty floor, so the band nearly
+    // doubles, and its doorway is on the LEFT and shows a corner of the living room
+    // through it. That is why the exit, the spawn and both hotspots move: the room turned
+    // around, and the scene turns around with it.
+    band: { far: 0.68, near: 0.985 },
+    size: { far: 0.24, near: 0.38 },
     ambience: 'kitchen',
-    stuckHe: 'חזרה לסלון — מימין.',
-    spawns: { fromHome: { x: 0.86, y: 0.9, facing: 'left' } },
+    stuckHe: 'חזרה לסלון — משמאל.',
+    spawns: { fromHome: { x: 0.2, y: 0.9, facing: 'right' } },
     actors: [
       {
         id: 'rachel',
         figure: 'rachel',
         x: 0.55,
-        y: 0.88,
+        y: 0.9,
         size: 0.42,
         nameHe: 'רחל',
         talk: 'rachel-kitchen',
@@ -301,20 +324,23 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
-      { id: 'crate', x: 0.16, y: 0.9, w: 0.1, act: 'bottles', verb: 'take', labelHe: 'הבקבוקים' },
-      { id: 'table', x: 0.84, y: 0.93, w: 0.1, act: 'kitchen-table', verb: 'look', labelHe: 'השולחן' },
+      // On the floor at the end of the run of cupboards, which is where a crate of empties
+      // lives in a flat that takes them back for the deposit.
+      { id: 'crate', x: 0.3, y: 0.92, w: 0.11, act: 'bottles', verb: 'take', labelHe: 'הבקבוקים' },
+      // The little table under the mirror, with the oilcloth on it and the chairs pushed in.
+      { id: 'table', x: 0.86, y: 0.9, w: 0.12, act: 'kitchen-table', verb: 'look', labelHe: 'השולחן' },
     ],
     exits: [
       {
         id: 'out',
-        x: 0.93,
-        y: 0.76,
-        w: 0.07,
-        h: 0.22,
+        x: 0.0,
+        y: 0.66,
+        w: 0.09,
+        h: 0.32,
         to: 'home',
         spawn: 'fromKitchen',
         labelHe: 'לסלון',
-        light: { x: 0.93, y: 0.5, w: 0.07, h: 0.48, tone: 'inside' },
+        light: { x: 0.0, y: 0.38, w: 0.095, h: 0.6, tone: 'inside' },
         dwellMs: 220,
       },
     ],
@@ -402,8 +428,13 @@ const SCENES: SceneDef[] = [
       },
       {
         id: 'neighbour',
+        // Moved left of the planter on 3.9.2026, by a guard rather than by an eye: at
+        // 0.525 he stood at the back of the band with the planter drawn one thousandth of
+        // a band in front of him and overlapping. Nobody had noticed, because he is
+        // visible from the shoulders up — which is exactly the failure mode a person you
+        // are supposed to talk to should never have.
         figure: 'adultB1',
-        x: 0.525,
+        x: 0.468,
         y: 0.735,
         size: 0.22,
         nameHe: 'יוסף',
@@ -515,8 +546,15 @@ const SCENES: SceneDef[] = [
     id: 'kiosk',
     titleHe: 'הקיוסק',
     art: 'kiosk',
-    band: { far: 0.84, near: 0.96 },
-    size: { far: 0.24, near: 0.3 },
+    // Repainted 3.9.2026, and the old one was not a worse painting of this place — it was
+    // a painting of a DIFFERENT place. `kiosk` has always been an interior the child walks
+    // into, and the art was a shopfront seen from the pavement, so the backdrop and the
+    // scene disagreed about where the player was standing. This is the inside: the
+    // counter, the scale and the till, shelves of boxes, the ice-cream chest, and the
+    // doorway back out to the street. It is mirrored at ingest so that doorway is on the
+    // right, where this scene's exit has always been.
+    band: { far: 0.7, near: 0.985 },
+    size: { far: 0.2, near: 0.32 },
     ambience: 'day',
     stuckHe: 'בעל הקיוסק מחכה. לצאת — ימינה.',
     spawns: { fromStreet: { x: 0.74, y: 0.93, facing: 'left' } },
@@ -550,9 +588,9 @@ const SCENES: SceneDef[] = [
       {
         id: 'out',
         x: 0.9,
-        y: 0.84,
+        y: 0.7,
         w: 0.1,
-        h: 0.16,
+        h: 0.3,
         to: 'street',
         spawn: 'fromKiosk',
         labelHe: 'לרחוב',
@@ -567,23 +605,33 @@ const SCENES: SceneDef[] = [
     id: 'pitch',
     titleHe: 'המגרש',
     art: 'pitch',
-    band: { far: 0.68, near: 0.94 },
-    size: { far: 0.2, near: 0.3 },
+    // Repainted 3.9.2026, for the same reason the street was repainted a day earlier: the
+    // old pitch had TEN BOYS painted onto it, and every one of them was frozen there for
+    // the whole afternoon. A place with people painted into it cannot have people in it.
+    // This one is empty earth between a wall and a fence, and the children on it are the
+    // game's — which is also why the band goes back nearly to the far wall now, and why
+    // the size range widens with it: a pitch is the one place in this chapter with real
+    // depth in it, and a child at the far end should read as a child at the far end.
+    band: { far: 0.56, near: 0.945 },
+    size: { far: 0.13, near: 0.3 },
     ambience: 'day',
     stuckHe: 'הכדור באמצע. חזרה לרחוב — שמאלה.',
-    spawns: { fromStreet: { x: 0.1, y: 0.82, facing: 'right' } },
+    spawns: { fromStreet: { x: 0.13, y: 0.84, facing: 'right' } },
     actors: [
       {
         id: 'efi',
         figure: 'efi',
+        // Pushed to the back of the new band on purpose. The pitch is the one place in
+        // this chapter with real depth in it, and three people standing on the same line
+        // is what makes a deep band look like a shallow one.
         x: 0.26,
-        y: 0.9,
+        y: 0.74,
         size: 0.28,
         nameHe: 'אפי',
         talk: 'efi-hall',
         sway: 0.01,
       },
-      { id: 'amit', figure: 'amit', x: 0.83, y: 0.86, size: 0.26, nameHe: 'עמית', talk: 'pitch-kids', flip: true },
+      { id: 'amit', figure: 'amit', x: 0.83, y: 0.87, size: 0.26, nameHe: 'עמית', talk: 'pitch-kids', flip: true },
       // Ofir moves here at twenty to two. The street he was leaning on is empty by then,
       // and a player who goes looking for him where he was is a player learning that
       // people have afternoons of their own.
@@ -591,7 +639,7 @@ const SCENES: SceneDef[] = [
         id: 'ofir-pitch',
         figure: 'ofir',
         x: 0.6,
-        y: 0.88,
+        y: 0.92,
         size: 0.3,
         nameHe: 'אופיר',
         talk: 'ofir-pitch',
@@ -602,12 +650,16 @@ const SCENES: SceneDef[] = [
       {
         id: 'ball',
         x: 0.5,
-        y: 0.9,
+        y: 0.81,
         w: 0.1,
         act: 'pitch-ball',
         verb: 'play',
         labelHe: 'הכדור',
-        prop: { key: 'propBall', size: 0.07 },
+        // The old `propBall` was not a ball. It was a 126×100 mis-cut of a CHILD with
+        // his arm raised, and it has been standing on this pitch at seven percent of
+        // the frame — a tiny malformed person where the football should be — since
+        // the day the scene was written. Found by looking at a screenshot.
+        prop: { key: 'propBallReal', size: 0.075 },
         priority: 3,
       },
     ],
@@ -615,9 +667,9 @@ const SCENES: SceneDef[] = [
       {
         id: 'back',
         x: 0.0,
-        y: 0.68,
-        w: 0.05,
-        h: 0.3,
+        y: 0.6,
+        w: 0.06,
+        h: 0.38,
         to: 'street',
         spawn: 'fromPitch',
         labelHe: 'לרחוב',
@@ -716,7 +768,7 @@ const SCENES: SceneDef[] = [
   // -------------------------------------------------------------------- outside ---
   //
   // Gate seven, repainted to `docs/life/gate7-backdrop-spec.png` from Maor's approved
-  // 1980s board. Everything in the perimeter is an interaction at the x it is drawn at:
+  // 1986 board. Everything in the perimeter is an interaction at the x it is drawn at:
   // the green palisade, the bank of turnstiles, the barred ticket hatch, and the dark
   // portal in the middle. The portal is painted DARK on purpose — the engine lights it
   // from inside, and a doorway that is already bright burns out when the glow lands.
@@ -805,33 +857,40 @@ const SCENES: SceneDef[] = [
     id: 'bloomfield-tunnel',
     titleHe: 'המנהרה',
     art: 'corridor',
-    band: { far: 0.6, near: 0.94 },
-    size: { far: 0.14, near: 0.34 },
+    // `corridor` was a placeholder from the day this scene was written: a dim interior
+    // that stood in for a tunnel because there was no tunnel. On 3.9.2026 it became one —
+    // the mouth of the players' tunnel, the light at the end of it, and a full stand
+    // beyond — and the band had to move with it, because 0.6 put the child THROUGH the
+    // opening and standing on the pitch. The concrete under his feet starts at 0.76.
+    band: { far: 0.76, near: 0.985 },
+    size: { far: 0.19, near: 0.36 },
     ambience: 'tunnel',
     stuckHe: 'קדימה, לכיוון האור.',
-    spawns: { start: { x: 0.5, y: 0.92 } },
+    spawns: { start: { x: 0.5, y: 0.95 } },
     actors: [],
     hotspots: [],
     exits: [
       {
         id: 'up',
+        // At the MOUTH now, not out on the grass: the opening is the exit, and the child
+        // reaches it by walking to the back of the band rather than by leaving it.
         x: 0.36,
-        y: 0.6,
+        y: 0.72,
         w: 0.28,
         h: 0.06,
         to: 'bloomfield-inside',
         spawn: 'start',
         labelHe: 'אל האור',
-        light: { x: 0.4, y: 0.4, w: 0.2, h: 0.24, tone: 'daylight' },
+        light: { x: 0.4, y: 0.52, w: 0.2, h: 0.24, tone: 'daylight' },
         dwellMs: 120,
         priority: 3,
       },
       {
         id: 'back',
         x: 0.0,
-        y: 0.88,
+        y: 0.84,
         w: 0.07,
-        h: 0.12,
+        h: 0.16,
         to: 'bloomfield-outside',
         spawn: 'fromTunnel',
         labelHe: 'חזרה החוצה',
@@ -845,27 +904,82 @@ const SCENES: SceneDef[] = [
     id: 'bloomfield-inside',
     titleHe: 'בלומפילד',
     art: 'stand',
-    band: { far: 0.86, near: 0.97 },
-    size: { far: 0.18, near: 0.24 },
+    // The most important repaint in the delivery, and the one that was most obviously
+    // wrong before it. `stand` was an ILLUSTRATED AERIAL of the whole bowl — a map, drawn
+    // from somewhere no eight-year-old has ever been — and the child stood at 86 minutes
+    // on a drawing with no ground in it and nothing to hold onto. This is the terrace at
+    // his own eye level: concrete underfoot, a crash barrier across the frame, and
+    // somebody's red-and-white scarf knotted round it. The `rail` hotspot below has been
+    // labelled המעקה since the scene was written; there is finally a railing there.
+    band: { far: 0.872, near: 0.99 },
+    size: { far: 0.2, near: 0.27 },
     ambience: 'stadium',
     arrival: { art: 'reveal', ms: 5200, flag: 'saw:reveal' },
     stuckHe: 'הוא איפשהו ביציע. תסתכל טוב.',
-    spawns: { start: { x: 0.12, y: 0.93, facing: 'right' } },
+    spawns: { start: { x: 0.08, y: 0.96, facing: 'right' } },
+    /**
+     * היציע אחרי השריקה — sixteen people who appear the moment the title is won.
+     *
+     * They are DRESSING and not actors, and the distinction is the whole design of the
+     * ending. The chapter's last objective is `למצוא את אבא`, and the player has to walk a
+     * terrace and find one man in a crowd. An actor is somebody you can talk to; sixteen
+     * of them would turn a search into sixteen dialogue boxes opening as you brush past,
+     * and the two supporters who ARE actors would stop being worth talking to. Dressing is
+     * scenery you have to look through, which is precisely the obstacle this moment wants.
+     *
+     * They bounce, on their own phases, because a still crowd at the instant a
+     * championship is won is the one thing on this terrace that would read as a mistake.
+     * The `depth` of each is its own `y`, so the child walks in front of the ones nearer
+     * the rail and BEHIND the ones nearer the camera — which is what makes his father hard
+     * to see rather than merely far away.
+     *
+     * Every one of them is a different figure from the twenty-eight-person crowd sheets.
+     * Nobody in this stadium is standing next to himself.
+     */
+    layers: [
+      // Along the rail, backs to the pitch, smallest — the far row.
+      { art: 'youngA2', x: 0.215, y: 0.888, w: 0.036, depth: 0.888, foot: true, bob: 0.008, when: { flag: 'match:over' } },
+      { art: 'adultA3', x: 0.305, y: 0.884, w: 0.04, depth: 0.884, foot: true, bob: 0.005, when: { flag: 'match:over' } },
+      { art: 'youngB5', x: 0.4, y: 0.89, w: 0.037, depth: 0.89, foot: true, bob: 0.009, flip: true, when: { flag: 'match:over' } },
+      { art: 'adultB2', x: 0.585, y: 0.886, w: 0.041, depth: 0.886, foot: true, bob: 0.004, when: { flag: 'match:over' } },
+      { art: 'youngA6', x: 0.66, y: 0.892, w: 0.036, depth: 0.892, foot: true, bob: 0.01, when: { flag: 'match:over' } },
+      { art: 'adultA5', x: 0.83, y: 0.885, w: 0.04, depth: 0.885, foot: true, bob: 0.006, flip: true, when: { flag: 'match:over' } },
+      { art: 'youngB1', x: 0.915, y: 0.891, w: 0.036, depth: 0.891, foot: true, bob: 0.008, when: { flag: 'match:over' } },
+
+      // The middle of the terrace, where the child is walking.
+      { art: 'adultB6', x: 0.26, y: 0.925, w: 0.047, depth: 0.925, foot: true, bob: 0.007, flip: true, when: { flag: 'match:over' } },
+      { art: 'youngA4', x: 0.44, y: 0.932, w: 0.044, depth: 0.932, foot: true, bob: 0.011, when: { flag: 'match:over' } },
+      { art: 'adultA1', x: 0.63, y: 0.928, w: 0.048, depth: 0.928, foot: true, bob: 0.005, when: { flag: 'match:over' } },
+      { art: 'youngB3', x: 0.79, y: 0.935, w: 0.045, depth: 0.935, foot: true, bob: 0.01, flip: true, when: { flag: 'match:over' } },
+      { art: 'youngB7', x: 0.9, y: 0.938, w: 0.046, depth: 0.938, foot: true, bob: 0.013, when: { flag: 'match:over' } },
+
+      // Nearest the camera, biggest, and the ones he has to go round.
+      { art: 'adultB4', x: 0.135, y: 0.972, w: 0.058, depth: 0.972, foot: true, bob: 0.006, when: { flag: 'match:over' } },
+      { art: 'youngA1', x: 0.41, y: 0.98, w: 0.055, depth: 0.98, foot: true, bob: 0.012, flip: true, when: { flag: 'match:over' } },
+      { art: 'adultA7', x: 0.6, y: 0.975, w: 0.059, depth: 0.975, foot: true, bob: 0.005, when: { flag: 'match:over' } },
+      { art: 'adultB5', x: 0.885, y: 0.978, w: 0.058, depth: 0.978, foot: true, bob: 0.007, flip: true, when: { flag: 'match:over' } },
+    ],
     actors: [
       {
         id: 'kobi-crowd',
         figure: 'kobi-cheer',
-        x: 0.74,
-        y: 0.9,
+        // Between two rows of the celebrating crowd, on the far side of the terrace from
+        // where the child comes in. He is not hidden — nothing in this game hides the
+        // thing it is asking for — he is just one more man in a red shirt among sixteen,
+        // and the player has to walk over and look. That walk IS the ending.
+        x: 0.695,
+        y: 0.912,
         size: 0.3,
         nameHe: 'קובי',
         talk: 'kobi-found',
         when: { flag: 'match:over' },
       },
-      { id: 'terrace-a', figure: 'fanD', x: 0.34, y: 0.94, size: 0.22, nameHe: 'אוהד', talk: 'terrace-fan' },
-      { id: 'terrace-b', figure: 'fanF', x: 0.52, y: 0.96, size: 0.23, nameHe: 'אוהד', talk: 'terrace-fan', flip: true },
+      { id: 'terrace-a', figure: 'fanD', x: 0.34, y: 0.935, size: 0.22, nameHe: 'אוהד', talk: 'terrace-fan' },
+      { id: 'terrace-b', figure: 'fanF', x: 0.52, y: 0.965, size: 0.23, nameHe: 'אוהד', talk: 'terrace-fan', flip: true },
     ],
-    hotspots: [{ id: 'rail', x: 0.2, y: 0.9, w: 0.1, act: 'terrace-rail', verb: 'look', labelHe: 'המעקה' }],
+    // The scarf is tied to the barrier at the left of the frame — somebody left it there,
+    // which is the whole reason to walk over and look at it.
+    hotspots: [{ id: 'rail', x: 0.155, y: 0.92, w: 0.12, act: 'terrace-rail', verb: 'look', labelHe: 'המעקה' }],
     exits: [],
   },
 ]

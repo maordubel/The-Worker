@@ -32,6 +32,8 @@ import { DEVELOPMENT_ANCHOR, type HistoricalAnchor } from './anchors'
 
 const SEASON = '1985/86'
 const LEAGUE = 'ליגת-העל'
+const PROLOGUE_SEASON = '1982/83'
+const CUP = 'גביע-המדינה'
 
 export function resolveChapterAnchor(): HistoricalAnchor {
   const trophy = archive.trophies.find(
@@ -46,7 +48,7 @@ export function resolveChapterAnchor(): HistoricalAnchor {
   if (!trophy) return DEVELOPMENT_ANCHOR
 
   const venue = archive.venues.find((row) => row.slug === 'בלומפילד' && row.sport === 'football')
-  const decider = findDecider()
+  const decider = findDecider(SEASON, LEAGUE)
 
   return {
     id: `trophy:${LEAGUE}:${SEASON}`,
@@ -97,21 +99,22 @@ function countTitles(season: string, competitionSlug: string): number | null {
 /**
  * The deciding match of the season, read out of the archive and nowhere else.
  *
- * Deliberately narrow: the LAST played league fixture of the season that the club was in,
- * with a score on it, at confidence 2 or better. It is found by the shape of the data —
- * season, competition, status — rather than by a hard-coded date, so the same function
- * answers for 1985/86 and for whatever season a later chapter is set in.
+ * Deliberately narrow: the LAST played fixture of that season and competition that the
+ * club was in, with a score on it, at confidence 2 or better. It is found by the shape of
+ * the data — season, competition, status — rather than by a hard-coded date, which is why
+ * one function answers for the 1985/86 league AND for the 1982/83 cup, where "the last
+ * fixture in the competition" happens to mean the final. Later chapters get it free.
  *
  * The goal comes from `match-events.json` by natural key. If the events file says nothing,
  * `decidedBy` is null and the scene shows a match with a result and no scorer, which is
  * the truthful shape of "we know who won and not who scored".
  */
-function findDecider(): HistoricalAnchor['match'] {
+function findDecider(season: string, competitionSlug: string): HistoricalAnchor['match'] {
   const played = archive.matches
     .filter(
       (row) =>
-        row.seasonLabel === SEASON &&
-        row.competitionSlug === LEAGUE &&
+        row.seasonLabel === season &&
+        row.competitionSlug === competitionSlug &&
         (row.homeClubSlug === US || row.awayClubSlug === US) &&
         row.homeScore !== null &&
         row.awayScore !== null &&
@@ -174,16 +177,24 @@ function trophySource(): string {
  * first line of this game is now something that happened TO him, and the last line of the
  * chapter is something he does himself.
  *
- * Same discipline as the chapter anchor and the same limit: `content/manual/trophies.json`
- * records that the club won that season's cup, at confidence 2, with a source. It records
- * nothing about the final itself. The prologue therefore shows a crowd and names the
- * trophy, and says nothing about who was beaten or by how much.
+ * **This placeholder retired itself too, and by the same route.**
+ *
+ * Until 3.9.2026 this function ended with `match: null` and a comment saying the 1986
+ * anchor had earned its match row and 1983's had not. `content/manual/matches.json` now
+ * holds 1.6.1983, Hapoel Tel Aviv 3 Maccabi Tel Aviv 2 — the Tel Aviv derby final — and
+ * `match-events.json` holds Gili Landau's 67th-minute winner, put in with his hand three
+ * years before Maradona did the same thing in the same decade. Both rows at confidence 2,
+ * sourced to ynet.
+ *
+ * The venue stays null on purpose: a cup final is played somewhere neutral and the archive
+ * does not say where. `findDecider` copies that null through instead of guessing, so the
+ * prologue names a date, an opponent and a score, and no stadium.
  */
 export function resolvePrologueAnchor(): HistoricalAnchor {
   const trophy = archive.trophies.find(
     (row) =>
-      row.seasonLabel === '1982/83' &&
-      row.competitionSlug === 'גביע-המדינה' &&
+      row.seasonLabel === PROLOGUE_SEASON &&
+      row.competitionSlug === CUP &&
       row.result === 'won' &&
       row.sport === 'football',
   )
@@ -192,30 +203,39 @@ export function resolvePrologueAnchor(): HistoricalAnchor {
     return {
       ...DEVELOPMENT_ANCHOR,
       id: 'DEV-PLACEHOLDER-PROLOGUE',
-      seasonLabel: '1982/83',
+      seasonLabel: PROLOGUE_SEASON,
       year: 1983,
-      competitionSlug: 'גביע-המדינה',
+      competitionSlug: CUP,
+      venueSlug: null,
+      placeholder: {
+        what: 'אין עוגן היסטורי מאושר מהארכיון לפרולוג; המסך מציג ממלא מקום מסומן.',
+        needs: `שורת גביע עונת ${PROLOGUE_SEASON} בארכיון הקנוני, ברמת ודאות 2 ומעלה.`,
+      },
     }
   }
 
+  const decider = findDecider(PROLOGUE_SEASON, CUP)
+
   return {
-    id: `trophy:גביע-המדינה:1982/83`,
+    id: `trophy:${CUP}:${PROLOGUE_SEASON}`,
     sport: 'football',
     seasonLabel: trophy.seasonLabel,
     year: 1983,
     competitionSlug: trophy.competitionSlug,
     headlineHe: `גביע המדינה ${trophy.seasonLabel}`,
+    // Null, and it stays null: a cup final is neutral ground and the archive does not
+    // record which. The prologue is written to work without a stadium name.
     venueSlug: null,
     sourceTitle: trophy.sourceTitle,
     sourceUrl: trophy.sourceUrl,
     confidence: trophy.confidence,
-    titlesSoFar: countTitles('1982/83', 'גביע-המדינה'),
-    // The prologue's final is not in the archive and this one is honest about it: the
-    // 1986 anchor earned its match row, and 1983's has not.
-    match: null,
-    placeholder: {
-      what: 'הגמר עצמו — יריבה, תאריך ותוצאה — אינו מוצג, ואינו קיים בארכיון.',
-      needs: 'שורת משחק גמר גביע 1982/83 בארכיון הקנוני ברמת ודאות 2 ומעלה.',
-    },
+    titlesSoFar: countTitles(PROLOGUE_SEASON, CUP),
+    match: decider,
+    placeholder: decider
+      ? null
+      : {
+          what: 'הגמר עצמו — יריבה, תאריך ותוצאה — אינו מוצג, ואינו קיים בארכיון.',
+          needs: `שורת משחק גמר גביע ${PROLOGUE_SEASON} בארכיון הקנוני ברמת ודאות 2 ומעלה.`,
+        },
   }
 }

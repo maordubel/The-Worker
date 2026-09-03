@@ -75,7 +75,17 @@ const browser = await chromium.launch({
 let faults = 0
 const report = []
 
-for (const size of SIZES) {
+/**
+ * `WORKER_TOUR_ONLY=1` skips the four viewport walkthroughs and runs the tour alone.
+ *
+ * The full run is four browsers playing a chapter at whatever frame rate the machine can
+ * manage, which in this container is about twenty minutes. When what changed is a
+ * backdrop or a piece of dressing, the tour is the part that answers, and waiting twenty
+ * minutes to look at nine screenshots is how a verification step stops being run.
+ */
+const TOUR_ONLY = process.env.WORKER_TOUR_ONLY === '1'
+
+for (const size of TOUR_ONLY ? [] : SIZES) {
   const context = await browser.newContext({
     viewport: { width: size.width, height: size.height },
     hasTouch: size.touch,
@@ -525,15 +535,56 @@ for (const size of SIZES) {
  * tour is also the strongest save/restore test in the project — if the format drifts, the
  * tour lands in the bedroom and the screenshots say so.
  */
+/**
+ * `[location, the title the HUD must show, flags to raise, filename]`.
+ *
+ * The last two stops are the same room twice, which is the point of the fourth field.
+ * `bloomfield-inside` is a different PLACE before and after the whistle — empty terrace,
+ * then sixteen people celebrating on it and a father somewhere among them — and the whole
+ * ending depends on the second one looking right. Two saves, two screenshots, one room.
+ *
+ * `saw:reveal` is raised on both for the same class of reason as the cutscene flag, and
+ * it was found by this harness photographing the same picture twice: without it the scene
+ * opens on its 5.2-second arrival card, and on a 2 FPS software renderer that card is
+ * still on screen when the shutter goes. Two byte-identical screenshots of a card is not
+ * a test of a terrace.
+ *
+ * `cutscene:1986-championship` is raised on both, deliberately. The tour is a test of
+ * SCENES, and with that flag down the terrace opens onto two minutes of archival YouTube
+ * — which this sandbox cannot fetch, which is not what the stop is measuring, and which
+ * would hide the HUD label the stop checks. The cutscene has its own harness at
+ * `/qa/life-cutscene`, where it can be watched instead of stepped over.
+ */
 const TOUR = [
-  ['street', 'הרחוב', []],
-  ['kitchen', 'המטבח', []],
-  ['kiosk', 'הקיוסק', []],
-  ['pitch', 'המגרש', []],
-  ['route', 'בדרך לבלומפילד', ['kobi:left']],
-  ['bloomfield-outside', 'בלומפילד — מבחוץ', ['kobi:left', 'entry:granted']],
-  ['bloomfield-tunnel', 'המנהרה', ['kobi:left', 'entry:granted']],
-  ['bloomfield-inside', 'בלומפילד', ['kobi:left', 'entry:granted']],
+  ['street', 'הרחוב', [], 'street'],
+  ['kitchen', 'המטבח', [], 'kitchen'],
+  ['kiosk', 'הקיוסק', [], 'kiosk'],
+  ['pitch', 'המגרש', [], 'pitch'],
+  ['route', 'בדרך לבלומפילד', ['kobi:left'], 'route'],
+  ['bloomfield-outside', 'בלומפילד — מבחוץ', ['kobi:left', 'entry:granted'], 'bloomfield-outside'],
+  ['bloomfield-tunnel', 'המנהרה', ['kobi:left', 'entry:granted'], 'bloomfield-tunnel'],
+  [
+    'bloomfield-inside',
+    'בלומפילד',
+    ['kobi:left', 'entry:granted', 'saw:reveal', 'cutscene:1986-championship'],
+    'bloomfield-inside',
+  ],
+  // …and the same terrace after the whistle: the crowd is up, the paper is down, and the
+  // last thing the chapter asks for is somewhere in it.
+  [
+    'bloomfield-inside',
+    'בלומפילד',
+    [
+      'kobi:left',
+      'entry:granted',
+      'saw:reveal',
+      'cutscene:1986-championship',
+      'match:started',
+      'saw:goal',
+      'match:over',
+    ],
+    'bloomfield-celebrating',
+  ],
 ]
 
 {
@@ -543,7 +594,7 @@ const TOUR = [
   page.on('pageerror', (error) => errors.push(String(error)))
   await page.goto(`${BASE}/life`, { waitUntil: 'networkidle' })
 
-  for (const [place, titleHe, flags] of TOUR) {
+  for (const [place, titleHe, flags, label] of TOUR) {
     // Park on a page with no game on it before writing the save.
     //
     // The tour reuses one tab, so when it wrote the next stop's save the PREVIOUS stop was
@@ -578,33 +629,44 @@ const TOUR = [
     )
     await page.goto(`${BASE}/life`, { waitUntil: 'networkidle' })
     await page.waitForSelector('canvas', { timeout: 20000 })
-    await page.waitForTimeout(place === 'bloomfield-inside' ? 7600 : 2600)
-    // …and then wait for the HUD to agree. A fixed wait is a guess about how fast the
-    // machine is; on a loaded one the label still carries the PREVIOUS tour stop and the
-    // run fails for being slow rather than for being wrong.
+    await page.waitForTimeout(place === 'bloomfield-inside' ? 9000 : 2600)
+    /**
+     * …and then wait for the game to agree it is there. A fixed wait is a guess about how
+     * fast the machine is; on a loaded one the label still carries the PREVIOUS stop and
+     * the run fails for being slow rather than for being wrong.
+     *
+     * TWO clocks, never both, and the tour has to know that. Inside Bloomfield during the
+     * ninety minutes the shell replaces the HUD with the scoreboard — which is a feature,
+     * and which means `[data-life="place"]` is legitimately absent on exactly the two
+     * stops that matter most. A first version of this check asserted the label and
+     * reported the terrace as LOST twice. So: the label when there is one, and the
+     * scoreboard when the match has taken it away.
+     */
+    const arrived = async () =>
+      page.evaluate(() => {
+        const place = document.querySelector('[data-life="place"]')?.textContent?.trim()
+        if (place) return place
+        return document.querySelector('[data-life="scoreboard"]') ? '__scoreboard__' : null
+      })
+    const wanted = place === 'bloomfield-inside' ? '__scoreboard__' : titleHe
     for (let i = 0; i < 12; i += 1) {
-      const now = await page.evaluate(
-        () => document.querySelector('[data-life="place"]')?.textContent?.trim() ?? null,
-      )
-      if (now === titleHe) break
+      if ((await arrived()) === wanted) break
       await page.waitForTimeout(500)
     }
     const buffer = await page.screenshot()
-    writeFileSync(`${OUT}/tour-${place}.png`, buffer)
+    writeFileSync(`${OUT}/tour-${label}.png`, buffer)
     const { count, total } = yellowPixels(buffer)
-    const landed = await page.evaluate(
-      () => document.querySelector('[data-life="place"]')?.textContent?.trim() ?? null,
-    )
+    const landed = await arrived()
     const rate = count / Math.max(1, total)
     if (rate > 0.001) {
       faults += 1
-      report.push(`YELLOW  tour/${place}: ${count}px`)
+      report.push(`YELLOW  tour/${label}: ${count}px`)
     }
-    if (landed !== titleHe) {
+    if (landed !== wanted) {
       faults += 1
-      report.push(`LOST    tour/${place}: wanted "${titleHe}", the game says "${landed ?? '—'}"`)
+      report.push(`LOST    tour/${label}: wanted "${wanted}", the game says "${landed ?? '—'}"`)
     }
-    report.push(`tour    ${place.padEnd(20)} → ${landed ?? '—'}  hue ${count}px`)
+    report.push(`tour    ${label.padEnd(24)} → ${landed ?? '—'}  hue ${count}px`)
   }
 
   if (errors.length > 0) {

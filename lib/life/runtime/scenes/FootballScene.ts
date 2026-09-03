@@ -81,7 +81,7 @@ export class FootballScene extends Phaser.Scene {
   }
 
   preload() {
-    for (const key of ['pitch', 'kid', 'efi', 'ofir', 'amit', 'propBall']) {
+    for (const key of ['pitch', 'kid', 'efi', 'ofir', 'amit', 'propBallReal']) {
       if (!this.textures.exists(`art-${key}`)) this.load.image(`art-${key}`, artUrl(key))
     }
   }
@@ -94,7 +94,7 @@ export class FootballScene extends Phaser.Scene {
     this.H = backdrop.height
 
     this.ballShadow = this.add.ellipse(0, 0, 18, 7, LIFE_PALETTE.ink, 0.3)
-    this.ball = this.add.image(this.W * 0.5, this.H * 0.82, 'art-propBall').setOrigin(0.5, 1)
+    this.ball = this.add.image(this.W * 0.5, this.H * 0.82, 'art-propBallReal').setOrigin(0.5, 1)
     this.fit(this.ball, this.H * 0.055)
 
     this.me = this.spawn('kid', 0.26, 0.86, 'red', true, 1)

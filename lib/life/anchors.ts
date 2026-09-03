@@ -7,13 +7,15 @@
  *
  * So an anchor carries only what the canonical archive actually holds, plus its source,
  * plus — and this is the part that matters — an explicit note about what it does NOT
- * hold. The 1980/81 championship is a sourced row in `content/manual/trophies.json` at
- * confidence 2. The MATCH that decided it is not in the archive: no date, no opponent,
- * no score, no scorer. Nothing in this game may state one.
+ * hold. For three passes the 1985/86 championship was a sourced trophy row and nothing
+ * else: no date, no opponent, no score, no scorer, and nothing in this game was allowed
+ * to state one.
  *
  * That is why `PlaceholderNote` exists and why it is rendered rather than hidden. A
  * placeholder you can see is a placeholder somebody replaces; a placeholder you cannot
- * see is an invented fact with a comment above it.
+ * see is an invented fact with a comment above it. Both of this game's anchors —
+ * 1982/83's cup final and 1985/86's championship — have now been replaced by rows, and
+ * the resolver retired their notes on its own. That is the whole argument for the shape.
  */
 
 export type PlaceholderNote = {
@@ -93,8 +95,12 @@ export type HistoricalAnchor = {
 export const DEVELOPMENT_ANCHOR: HistoricalAnchor = {
   id: 'DEV-PLACEHOLDER',
   sport: 'football',
-  seasonLabel: '1980/81',
-  year: 1981,
+  // Rebased with the rest of the game. This used to say 1980/81, which was the season the
+  // first draft was set in and stopped being true the day the protagonist's birth year
+  // moved to 1978. A fallback that names the wrong season is worse than a fallback that
+  // names none: it reads as a fact to anyone who does not know it is the fallback.
+  seasonLabel: '1985/86',
+  year: 1986,
   competitionSlug: 'ליגת-העל',
   headlineHe: 'עוגן היסטורי — ממלא מקום לפיתוח',
   venueSlug: 'בלומפילד',
@@ -105,7 +111,7 @@ export const DEVELOPMENT_ANCHOR: HistoricalAnchor = {
   match: null,
   placeholder: {
     what: 'אין עוגן היסטורי מאושר מהארכיון; המסך מציג ממלא מקום מסומן.',
-    needs: 'שורת גביע או משחק עונת 1980/81 בארכיון הקנוני, ברמת ודאות 2 ומעלה.',
+    needs: 'שורת גביע או משחק עונת 1985/86 בארכיון הקנוני, ברמת ודאות 2 ומעלה.',
   },
 }
 

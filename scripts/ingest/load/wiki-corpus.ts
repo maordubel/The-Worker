@@ -22,7 +22,12 @@ import { join } from 'node:path'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { WikiPageRecord } from '../adapters/mediawiki'
-import { CORPUS_PAGES_DIR, type CorpusSink, type PageOutcome } from '../sources/wiki-corpus'
+import {
+  CORPUS_PAGES_DIR,
+  type CorpusSink,
+  type PageOutcome,
+  type StoredCorpusPage,
+} from '../sources/wiki-corpus'
 
 type Counts = Record<PageOutcome, number>
 
@@ -31,7 +36,21 @@ const EMPTY: Counts = { inserted: 0, updated: 0, unchanged: 0, failed: 0 }
 /** Chunked, because a single request carrying 6,000 pages of wikitext is a timeout. */
 const WRITE_CHUNK = 50
 
-function row(page: WikiPageRecord, sourceHost: string, runId: string | null) {
+/**
+ * Declared as `StoredCorpusPage` plus the columns only the writer knows about, so the
+ * encoder here and `recordFromStored` on the reading side cannot drift: renaming a field
+ * on one end now fails to compile on the other.
+ */
+function row(
+  page: WikiPageRecord,
+  sourceHost: string,
+  runId: string | null,
+): StoredCorpusPage & {
+  source_host: string
+  last_seen_at: string
+  last_changed_at: string
+  import_run_id: string | null
+} {
   return {
     page_id: page.pageId,
     title: page.title,

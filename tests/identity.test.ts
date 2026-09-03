@@ -91,15 +91,19 @@ describe('כל מה שמחולק — ids are unique', () => {
   it('הטריוויה — a round never asks the same question twice', () => {
     // Two cards with one id would grade against each other's answer; two identical
     // questions in one round is the same defect a player can actually see.
+    // `TOPICS` is the list of slugs itself — `Topic` is a string union, and the spec
+    // objects live in `TOPIC_SPECS` keyed by it. This read `topic.id` back when the
+    // topics were a list of records, which typechecked at the time and has been a
+    // property access on a string ever since.
     for (const topic of TOPICS) {
       for (const seed of SEEDS.slice(0, 40)) {
         const round = []
         for (let index = 0; index < ROUND_LENGTH; index += 1) {
-          const question = deal(seed, index, topic.id)
+          const question = deal(seed, index, topic)
           if (question) round.push(question)
         }
-        unique(round.map((question) => question.id), `trivia ${topic.id} seed ${seed}`)
-        unique(round.map((question) => question.prompt), `trivia prompts ${topic.id} seed ${seed}`)
+        unique(round.map((question) => question.id), `trivia ${topic} seed ${seed}`)
+        unique(round.map((question) => question.prompt), `trivia prompts ${topic} seed ${seed}`)
       }
     }
   })

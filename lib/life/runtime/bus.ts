@@ -91,6 +91,23 @@ export type LifeBusEvents = {
     keptTicket: boolean
   } | null
   /**
+   * סרט מהארכיון — the illustrated memory opening onto real film.
+   *
+   * Its own channel, and not a `doc` with a video in it, because it obeys a rule neither
+   * of them does: while it is on screen the WORLD IS STOPPED. No clock, no schedule, no
+   * dialogue, no thumb pad, no objective — the player is not in 1986 as a child for these
+   * two minutes, they are watching what a child watched. `doc` holds a page up over a
+   * world that is still running underneath.
+   *
+   * The payload is the configuration plus the card built from the anchor, so the shell
+   * renders it without importing the archive. `null` closes it, and closing it is the
+   * runtime's job: the shell reports how it ended and the scene decides what that means.
+   */
+  cutscene: {
+    scene: import('../cutscenes').HistoricalCutscene
+    card: import('../cutscenes').CutsceneCard
+  } | null
+  /**
    * מסמך — a real printed thing, held up over the world until the player puts it down.
    *
    * Not a dialogue portrait and not a prop: a scan of something that exists. It gets its

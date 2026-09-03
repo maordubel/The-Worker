@@ -550,7 +550,9 @@
   "life.anchor.source": "מקור:",
   "life.anchor.unverified": "העוגן הזה עדיין לא אומת מול הארכיון הקנוני.",
   "life.ending.home": "הביתה",
+  "life.place.prologue": "דרום תל אביב · 1983",
   "life.entry.kicker": "משחק החיים",
+  "life.entry.slice": "VERTICAL SLICE · 1986",
   "life.entry.line": "ילד בן שמונה, שבת אחת ב-1986, ואצטדיון שהוא לא אמור להגיע אליו לבד. משחק דו־ממדי מלא — תנועה, זמן, כסף, אנשים.",
   "life.entry.cta": "להיכנס",
   "life.verb.talk": "דבר עם",
@@ -657,5 +659,8 @@
   "life.finale.close": "סגור",
   "life.anchor.scored": "{who} · דקה {minute}",
   "life.anchor.assisted": "בישול {who}",
-  "life.finale.titleCount": "האליפות ה-{n} בתולדותיה"
+  "life.finale.titleCount": "האליפות ה-{n} בתולדותיה",
+  "life.cutscene.play": "הפעל את רגע האליפות",
+  "life.cutscene.skip": "דלג",
+  "life.cutscene.continue": "המשך"
 }

@@ -1,5 +1,7 @@
 import Phaser from 'phaser'
 
+import { t } from '@/lib/i18n'
+
 import { PROLOGUE } from '../../content/chapter1986'
 import { artUrl } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
@@ -8,15 +10,16 @@ import { LIFE_PALETTE } from '../palette'
 import { WorldScene } from './WorldScene'
 
 /**
- * 1972 — the prologue, and the only minute of the chapter you do not control.
+ * 1983 — the prologue, and the only minute of the chapter you do not control.
  *
  * It is one painting — a full terrace, seen from inside it — held for half a minute while
  * the camera drifts across the crowd and the lines come up in the same box every other
  * line in the game uses. The image is dark, warm and slightly overscanned, so the drift
  * never reaches an edge and the memory never has a frame around it.
  *
- * The one fact in it is the canonical anchor's headline, substituted into `{anchor}` by
- * the dialogue runner. Everything else is a child imagining his father young.
+ * The one fact in it is the canonical anchor's headline — the 1982/83 State Cup —
+ * substituted into `{anchor}` by the dialogue runner. Everything else is the protagonist
+ * at five, on his father's shoulders, three years before the Saturday he plays.
  */
 export class PrologueScene extends Phaser.Scene {
   static readonly KEY = 'life-prologue'
@@ -96,7 +99,7 @@ export class PrologueScene extends Phaser.Scene {
       onOpen: () => undefined,
     })
 
-    this.ctx.bus.emit('place', { id: 'prologue-1972', title: 'תל אביב · 1972' })
+    this.ctx.bus.emit('place', { id: 'prologue', title: t('life.place.prologue') })
     this.ctx.bus.emit('controls', { visible: false })
     this.ctx.dialogue.startLines(PROLOGUE, () => this.finish())
   }
@@ -111,7 +114,7 @@ export class PrologueScene extends Phaser.Scene {
     this.done = true
     this.ctx.engine.dispatch(
       { t: 'flag.raised', flag: 'prologue:done' },
-      { t: 'chapter.entered', chapter: '1980' },
+      { t: 'chapter.entered', chapter: '1986' },
     )
     this.ctx.bus.emit('controls', { visible: true })
     this.cameras.main.fadeOut(900, 0, 0, 0)

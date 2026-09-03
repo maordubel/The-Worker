@@ -53,7 +53,7 @@ MAX_BACKDROP_W = 1600
 MAX_FIGURE_H = 430
 
 
-def clean_palette(flat):
+def clean_palette(flat, shift=True):
     """
     De-yellow the PALETTE, not the pixels.
 
@@ -73,10 +73,10 @@ def clean_palette(flat):
         h, s, v = ba.rgb_to_hsv(r, g, b)
         if s < ba.SAT_MIN or v < ba.VAL_MIN or not (ba.HUE_MIN <= h <= ba.HUE_MAX):
             continue
-        if s >= ba.TRUE_YELLOW_SAT and ba.TRUE_YELLOW_HUE[0] <= h <= ba.TRUE_YELLOW_HUE[1]:
+        if shift and s >= ba.TRUE_YELLOW_SAT and ba.TRUE_YELLOW_HUE[0] <= h <= ba.TRUE_YELLOW_HUE[1]:
             out[i], out[i + 1], out[i + 2] = ba.hsv_to_rgb(ba.SAFE_HUE, min(0.86, s * 0.9), v)
         elif s > ba.SAFE_SAT:
-            out[i], out[i + 1], out[i + 2] = ba.hsv_to_rgb(h, ba.SAFE_SAT, v)
+            out[i], out[i + 1], out[i + 2] = ba.hsv_to_rgb(h, ba.safe_sat(s), v)
     flat.putpalette(out)
     return flat
 
@@ -147,7 +147,8 @@ def despill(im, strength=1.0):
     return im
 
 
-def write(im, key, quantise=180, max_w=None, max_h=None):
+def write(im, key, quantise=180, max_w=None, max_h=None, dey=None, shift=True,
+          method=Image.FASTOCTREE):
     """
     One asset: de-yellow, then resample, then quantise, then measure the file written.
 
@@ -156,6 +157,28 @@ def write(im, key, quantise=180, max_w=None, max_h=None):
     produced 1.4MB backdrops from a pipeline designed to produce 300KB ones. An opaque
     image is written as a true palette PNG (mode P); one with alpha keeps RGBA, because
     a palette plus a transparency table is not worth the edge cases on a cut-out.
+
+    `dey` and `shift` swap in a gentler de-yellow for BACKDROPS, and they exist because
+    of one frame. The default treatment moves a saturated yellow off the band by rotating
+    its HUE — the right answer for a shirt, a flag or a badge, which is what rule 8 was
+    written about. Bloomfield's interior is a sun-bleached pitch painted at hue 44 and
+    saturation 0.62, so the rule caught it correctly and rotated a third of the frame to
+    terracotta: a football ground the colour of a plant pot. A place is not a claim about
+    anybody's colours, so a backdrop passes `shift=False` and clears the band the other
+    way — saturation capped below the scanner's threshold, hue left where the painter put
+    it. Sun-bleached ground stays khaki, a yellow taxi in a street stays a pale yellow
+    taxi, and `count_yellow` still reads zero, which is the property rule 27 asked for.
+    Figures, props and documents keep the hue rotation, because a cut-out in a yellow
+    shirt is exactly the thing the rule is for.
+
+    `method` is the quantiser, and the default is the one every asset in the first
+    delivery was cut with. FASTOCTREE splits the RGB cube by POSITION rather than by how
+    many pixels are where, which is fast and fine for a painting full of mid-tones — and
+    which fails on an image that is 60% one flat colour. The child's portrait plate is
+    painted on flat cream, and the octree spent its leaves on cream and mapped the lit
+    side of his face to the nearest one it had: five portraits delivered with holes
+    punched in their cheeks. MEDIANCUT splits by population and lands 22 bad pixels at
+    3.9 mean error instead of 6.0, so anything cut from this point on asks for it.
     """
     # RESAMPLE FIRST. De-yellowing and then resampling puts yellow straight back —
     # LANCZOS averages a legal olive with its neighbour and lands the result inside the
@@ -164,13 +187,30 @@ def write(im, key, quantise=180, max_w=None, max_h=None):
         im = im.resize((max_w, round(max_w * im.height / im.width)), Image.LANCZOS)
     if max_h and im.height > max_h:
         im = im.resize((round(max_h * im.width / im.height), max_h), Image.LANCZOS)
-    im, moved = ba.deyellow(im)
+    im, moved = (dey or ba.deyellow)(im)
 
     path = os.path.join(OUT, f'{key}.png')
     alpha = im.split()[-1] if im.mode == 'RGBA' else None
     keyed = alpha is not None and alpha.getextrema()[0] < 250
-    flat = im.convert('RGB').quantize(colors=quantise, method=Image.FASTOCTREE)
-    flat = clean_palette(flat)
+
+    # `quantise=0` writes the pixels as painted. Every other asset in this project goes
+    # through a colour table because that is what makes "no yellow" a proof rather than a
+    # sample — but a colour table is a budget, and a budget is spent by POPULATION. A
+    # portrait plate is 60% flat cream and 15% face, so both quantisers spend their
+    # entries on cream and map the lit side of the child's cheek onto one of them: five
+    # portraits with holes punched in their faces, whichever method ran. The plates are
+    # 200 pixels wide and cost 60KB unquantised, which is the entire argument for the
+    # exception. `count_yellow` still runs on what is written.
+    if not quantise:
+        out = im.convert('RGBA') if keyed else im.convert('RGB')
+        out.save(path, optimize=True)
+        left = ba.count_yellow(Image.open(path))
+        size = os.path.getsize(path)
+        print(f'{key:18s} {out.width:5d}x{out.height:<5d} {size/1024:8.1f}KB  moved {moved:6d}  yellow {left}')
+        return {'w': out.width, 'h': out.height, 'bytes': size, 'yellowLeft': left, 'source': '2026-09'}
+
+    flat = im.convert('RGB').quantize(colors=quantise, method=method)
+    flat = clean_palette(flat, shift=shift)
     if keyed:
         out = flat.convert('RGBA')
         out.putalpha(alpha)

@@ -343,18 +343,35 @@ describe('לוח הזמנים — the street is not the street you left', () => 
   })
 
   it('puts every scheduled person somewhere the child can actually reach', () => {
+    // `x` and `y` are optional on a row, and that is not an oversight: a row may change
+    // what somebody is DOING without moving them, and `WorldScene` applies each
+    // coordinate only where the row actually carries one. So each coordinate is checked
+    // where it is given, rather than read through an `expect()` that swallows
+    // `undefined` and then compared as a number anyway.
+    //
+    // The count is checked too. A guard that would still pass if every position in the
+    // file were deleted is not guarding the thing rule 48 is about, and this one reads
+    // its subjects out of the data rather than naming them (rule 49).
+    let placed = 0
     for (const entry of SCHEDULE_1986) {
       const scene = SCENE[entry.location as keyof typeof SCENE]
       const where = `${entry.actorId} @ ${entry.location}`
-      expect(entry.y, `${where} is above the band`).toBeGreaterThanOrEqual(scene.band.far)
-      expect(entry.y, `${where} is below the band — that is the road`).toBeLessThanOrEqual(scene.band.near)
-      expect(entry.x, `${where} x`).toBeGreaterThan(0)
-      expect(entry.x, `${where} x`).toBeLessThan(1)
+      const { x, y } = entry
+
+      if (y !== undefined) {
+        expect(y, `${where} is above the band`).toBeGreaterThanOrEqual(scene.band.far)
+        expect(y, `${where} is below the band — that is the road`).toBeLessThanOrEqual(scene.band.near)
+      }
+      if (x === undefined) continue
+      placed += 1
+      expect(x, `${where} x`).toBeGreaterThan(0)
+      expect(x, `${where} x`).toBeLessThan(1)
       for (const exit of scene.exits) {
-        const inDoor = entry.x > exit.x - 0.01 && entry.x < exit.x + exit.w + 0.01
+        const inDoor = x > exit.x - 0.01 && x < exit.x + exit.w + 0.01
         expect(inDoor, `${where} is standing in the doorway "${exit.id}"`).toBe(false)
       }
     }
+    expect(placed, 'no schedule row places anybody — this guard checked nothing').toBeGreaterThan(0)
   })
 
   it('fills the street with people who are not the cast', () => {

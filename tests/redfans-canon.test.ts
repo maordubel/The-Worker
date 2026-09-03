@@ -17,6 +17,7 @@ import {
   stageFromTitle,
 } from '@/scripts/ingest/parse/redfans'
 import { canonFromCorpus, classifyPage, toRawPage } from '@/scripts/ingest/sources/redfans-canon'
+import { recordFromStored } from '@/scripts/ingest/sources/wiki-corpus'
 import { IngestReport } from '@/scripts/ingest/lib/report'
 import type { RawPage } from '@/scripts/ingest/lib/types'
 import type { WikiPageRecord } from '@/scripts/ingest/adapters/mediawiki'
@@ -34,11 +35,14 @@ import type { WikiPageRecord } from '@/scripts/ingest/adapters/mediawiki'
 
 function page(title: string, sourceText: string): RawPage {
   return {
+    pageId: 4242,
     title,
+    namespace: title.startsWith('קטגוריה:') ? 14 : 0,
     url: `https://wiki.red-fans.com/index.php?title=${encodeURIComponent(title)}`,
     revisionId: 4242,
     fetchedAt: '2026-09-02T00:00:00.000Z',
     contentHash: 'abc123',
+    format: 'wikitext',
     sourceText,
   }
 }
@@ -335,17 +339,22 @@ describe('מזהה קנוני — stable across a correction', () => {
 
 /* --------------------------------------------------------- the bridge */
 
-function corpusPage(title: string, wikitext: string, links: string[] = []): WikiPageRecord {
+function corpusPage(title: string, sourceText: string, links: string[] = []): WikiPageRecord {
   return {
     pageId: Math.abs([...title].reduce((n, c) => n * 31 + c.charCodeAt(0), 7)) % 100000,
     title,
     namespace: title.startsWith('קטגוריה:') ? 14 : 0,
-    wikitext,
+    // The field is `sourceText`, not the provider's word for it: `WikiPageRecord` is a
+    // `RawPage` and the adapter is the only file allowed to know what MediaWiki calls
+    // things. A fixture written in the provider's vocabulary is how a suite goes on
+    // passing against a shape the code stopped producing.
+    sourceText,
+    format: 'wikitext',
     contentHash: 'h',
     contentModel: 'wikitext',
     isRedirect: false,
     redirectTo: null,
-    byteSize: wikitext.length,
+    byteSize: sourceText.length,
     revisionId: 1,
     revTimestamp: null,
     revUser: null,
@@ -413,5 +422,29 @@ describe('הגשר — corpus on disk becomes canonical rows', () => {
     const raw = toRawPage(corpus[0]!)
     expect(raw.sourceText).toContain('wikitable')
     expect(raw.title).toBe('לוח משחקים (כדורגל) 1980/81')
+  })
+
+  it('decodes a stored page instead of casting it, so provenance survives the disk', () => {
+    // What the dry run writes under `data/wiki-corpus/pages` is the TABLE's shape —
+    // `content_hash`, `fetched_at`, `page_id`. `readCorpus` used to cast that JSON to a
+    // `WikiPageRecord` and hand it straight on, so every page the canon build read had
+    // no hash, no fetch time, no revision id and no page id, and rule 2's provenance was
+    // lost on a path where nothing could ever fail. A cast is not a conversion.
+    const record = recordFromStored({
+      page_id: 91,
+      title: 'לוח משחקים (כדורגל) 1980/81',
+      namespace: 0,
+      revision_id: 7,
+      wikitext: SCHEDULE_BOTH_CLUBS,
+      content_hash: 'deadbeef',
+      fetched_at: '2026-09-02T00:00:00.000Z',
+      url: 'https://wiki.red-fans.com/x',
+    })
+    const raw = toRawPage(record)
+    expect(raw.sourceText).toContain('wikitable')
+    expect(raw.contentHash).toBe('deadbeef')
+    expect(raw.fetchedAt).toBe('2026-09-02T00:00:00.000Z')
+    expect(raw.revisionId).toBe(7)
+    expect(raw.pageId).toBe(91)
   })
 })

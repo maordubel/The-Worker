@@ -1,5 +1,5 @@
 /**
- * לוח הצבעים של 1980 — the world's ink.
+ * לוח הצבעים של 1986 — the world's ink.
  *
  * Every colour the runtime can draw is declared here, once. Two reasons it is a file
  * and not a scattering of literals:
@@ -109,7 +109,7 @@ export function hex(colour: number): string {
 }
 
 /**
- * The decade seam. Stage 1 ships 1980 and returns the same table for every year, which
+ * The decade seam. Stage A ships 1986 and returns the same table for every year, which
  * is honest: there is no 1990 palette yet and inventing one now would be a guess baked
  * into the architecture. What matters is that every scene already asks for its colours
  * through this function rather than importing the table, so adding a decade is adding a

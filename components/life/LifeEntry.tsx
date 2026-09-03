@@ -19,7 +19,7 @@ export function LifeEntry() {
       <div className="flex items-center justify-between gap-3 border-b-hair border-concrete/30 px-3 py-1.5">
         <span className="font-display text-[13px] leading-none text-sheet">{t('life.entry.kicker')}</span>
         <span className="font-latin text-[8.5px] font-bold tracking-[0.2em] text-red" dir="ltr">
-          VERTICAL SLICE · 1980
+          {t('life.entry.slice')}
         </span>
       </div>
 

@@ -44,6 +44,76 @@ import {
 export const CORPUS_CHECKPOINT = 'data/wiki-corpus/checkpoint.json'
 export const CORPUS_PAGES_DIR = 'data/wiki-corpus/pages'
 
+/**
+ * A corpus page AS IT IS STORED — the `raw_wiki_page` column shape, which is also the
+ * JSON the dry run writes under `CORPUS_PAGES_DIR`.
+ *
+ * It is deliberately NOT a `WikiPageRecord`. The sink converts one into the other on the
+ * way out (`row()` in `load/wiki-corpus.ts`); anything reading the corpus back off disk
+ * has to convert the other way. `readCorpus` in `sources/redfans-canon.ts` did not — it
+ * cast, and a cast is not a conversion. It worked for exactly the fields whose column
+ * name happens to equal the record's (`title`, `url`, `namespace`, `links`) and silently
+ * produced `undefined` for every field renamed on the way to the table: `page_id`,
+ * `revision_id`, `content_hash`, `fetched_at`. So every page the canon build ever read
+ * arrived with no id, no revision, no hash and no fetch time, and the rows it produced
+ * lost the provenance rule 2 exists to carry — with nothing anywhere able to fail.
+ * Declaring the stored shape once, beside the directory it lives in and imported by both
+ * ends, is what stops the two drifting apart again.
+ */
+export type StoredCorpusPage = {
+  page_id: number | null
+  title: string
+  namespace: number
+  revision_id: number | null
+  /** the complete original, byte for byte — `WikiPageRecord.sourceText` */
+  wikitext: string
+  content_hash: string
+  fetched_at: string
+  url: string
+  content_model: string
+  is_redirect: boolean
+  redirect_to: string | null
+  byte_size: number | null
+  categories: string[]
+  links: string[]
+  images: string[]
+  rev_timestamp: string | null
+  rev_user: string | null
+  rev_comment: string | null
+}
+
+/**
+ * A stored row, back in the shape the adapter produces and the parsers read.
+ *
+ * A half-written file from a killed run can be missing anything, so every field is
+ * defended — but nothing is INVENTED (rule 11): a missing hash reads as an empty string
+ * and a missing id as null, which is what those fields already mean elsewhere, rather
+ * than as a value somebody could mistake for provenance.
+ */
+export function recordFromStored(stored: Partial<StoredCorpusPage>): WikiPageRecord {
+  return {
+    pageId: stored.page_id ?? null,
+    title: stored.title ?? '',
+    namespace: stored.namespace ?? 0,
+    revisionId: stored.revision_id ?? null,
+    sourceText: stored.wikitext ?? '',
+    format: 'wikitext',
+    contentHash: stored.content_hash ?? '',
+    fetchedAt: stored.fetched_at ?? '',
+    url: stored.url ?? '',
+    contentModel: stored.content_model ?? 'wikitext',
+    isRedirect: stored.is_redirect ?? false,
+    redirectTo: stored.redirect_to ?? null,
+    byteSize: stored.byte_size ?? null,
+    revTimestamp: stored.rev_timestamp ?? null,
+    revUser: stored.rev_user ?? null,
+    revComment: stored.rev_comment ?? null,
+    categories: stored.categories ?? [],
+    links: stored.links ?? [],
+    images: stored.images ?? [],
+  }
+}
+
 /** Where a page ends up. The importer reports these counts rather than a total. */
 export type PageOutcome = 'inserted' | 'updated' | 'unchanged' | 'failed'
 

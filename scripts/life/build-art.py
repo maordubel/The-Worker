@@ -50,12 +50,37 @@ SRC = {
 }
 
 # The scanner's band is hue 38–70 at saturation and value 0.35 (`lib/isYellow.ts`). The
-# BUILD band is deliberately wider on every side, because a pixel that sits just outside
-# the line in a file can land inside it on screen: a vignette darkens it, an added
+# BUILD band is deliberately wider on the green side, because a pixel that sits just
+# outside the line in a file can land inside it on screen: a vignette darkens it, an added
 # particle brightens it, and the browser's own scaling blends it with its neighbour. The
 # margin is what makes "no yellow in the artwork" survive being composited.
-HUE_MIN, HUE_MAX, SAFE_HUE = 30.0, 80.0, 26.0
+#
+# **`HUE_MIN` was 30 and ate skin.** Warm skin in this project's paintings sits at hue
+# 30–34: `isYellow` names `badge skin ~#C09B71 → 32°` as an example of a colour that is
+# NOT yellow, and `SCAN_HUE` starts at 34. A treatment band that begins at 30 therefore
+# desaturated four degrees of pure skin for no benefit whatsoever — nothing in 30–34 can
+# be reported by any scanner in this repo — and because it did so with a hard threshold at
+# `SAFE_SAT`, it did it to the lit half of a cheek and not the shaded half. The child's
+# portrait plate is where it finally became visible: five faces delivered clean and
+# written out with cream holes punched across the cheekbones, 93% of the moved pixels
+# below hue 34. `pogi.png` has been carrying the same blotches on his neck since the
+# September pass. 33.5 is the scanner's own floor with half a degree of margin.
+HUE_MIN, HUE_MAX, SAFE_HUE = 33.5, 80.0, 26.0
 SAT_MIN, VAL_MIN = 0.18, 0.18
+
+# ...and the second half of the same fix: fade the desaturation in instead of stepping it.
+#
+# A hard `s > SAFE_SAT → s = SAFE_SAT` is a cliff, and a cliff drawn across a face is a
+# contour line: the pixels either side of 0.26 differ by nothing in the painting and by a
+# third of their saturation in the file. That is what makes the artefact look like a rash
+# rather than like a slightly paler face. Ramping over the next 0.15 removes the contour,
+# and the arithmetic keeps the guarantee, with room for the rounding: the worst case sits
+# at `SAFE_SAT + SAFE_RAMP / 4`, so a 0.15 ramp peaks at 0.2975 and a first run of the
+# portrait plates came back reporting three yellow pixels at 0.3000, 0.3000 and 0.3007 —
+# the treatment was right and `hsv_to_rgb` rounded them onto the line. 0.09 peaks at
+# 0.2825, which is three whole units of an 8-bit channel clear of the floor, and still
+# wide enough to take the visible edge off. Anything more saturated is clamped outright.
+SAFE_RAMP = 0.09
 
 # Above this saturation, a pixel in the yellow hues is actually YELLOW — gold, mark
 # yellow, a hi-vis vest — and rule 8 wants it gone, hue and all. Below it, the same hues
@@ -121,6 +146,21 @@ def hsv_to_rgb(h, s, v):
 _LUT = {}
 
 
+def safe_sat(s):
+    """
+    Where a saturation above `SAFE_SAT` lands: at `SAFE_SAT` eventually, gradually.
+
+    Linear over the first `SAFE_RAMP` of excess and clamped after it, which makes the
+    treatment continuous — no pixel moves further than its neighbour a hair below it —
+    while still putting everything under the 0.30 the scanner reports at. The maximum of
+    `s - (s - SAFE_SAT)² / SAFE_RAMP` is at `SAFE_SAT + SAFE_RAMP / 2`, and it is 0.2975.
+    """
+    excess = s - SAFE_SAT
+    if excess <= 0:
+        return s
+    return s + (SAFE_SAT - s) * min(1.0, excess / SAFE_RAMP)
+
+
 def deyellow(im):
     rgb = im.convert('RGB')
     px = rgb.load()
@@ -138,8 +178,9 @@ def deyellow(im):
                     # a real yellow: move the hue off the band entirely
                     q = hsv_to_rgb(SAFE_HUE, min(0.86, s * 0.9), v)
                 elif s > SAFE_SAT:
-                    # olive, khaki, brass, warm skin: keep the colour, lose the claim
-                    q = hsv_to_rgb(hh, SAFE_SAT, v)
+                    # olive, khaki, brass, warm skin: keep the colour, lose the claim —
+                    # and lose it gradually, so the treatment has no visible edge in it
+                    q = hsv_to_rgb(hh, safe_sat(s), v)
                 else:
                     q = p
                 _LUT[p] = q

@@ -117,6 +117,16 @@ type LineupRecord = {
    * from the game: an XI with a guessed slot grades a player wrong for being right.
    */
   playable?: boolean
+  /**
+   * The bench and the manager, where the source names them.
+   *
+   * Held in the archive and not offered in the bank: a substitute is not in the XI, and
+   * putting one in the pool of names to place would grade a player wrong for knowing
+   * that he came on. They belong in the record because the source says them, and the
+   * moment a screen wants to print "who came on, and who sent him" they are there.
+   */
+  benchHe?: string[]
+  coachHe?: string
   noteHe?: string
   sourceTitle?: string
   sourceUrl?: string
@@ -131,12 +141,28 @@ type LineupFile = {
 
 const CONFIDENCE_FLOOR = 2
 
+/**
+ * An XI with no spare names is not a puzzle, it is a sorting exercise.
+ *
+ * Eleven correct names for eleven slots can be finished by elimination without knowing
+ * a single one of them, so a record like that grades everybody as an expert. Every
+ * curated record in the file carries five to seven extra names; the 1985/86 decider
+ * arrived with none and was dealt anyway, which is the defect this floor exists to make
+ * impossible. A record that cannot field five real spare names is kept in the archive
+ * and withheld from the game, exactly like one the source marks unverified.
+ *
+ * Five, not "some": it is what the corpus already does, so the number is the house's
+ * own practice rather than a threshold somebody picked today.
+ */
+const DISTRACTOR_FLOOR = 5
+
 function verified(): LineupRecord[] {
   const file = lineupsFile as unknown as LineupFile
   return file.records.filter(
     (record) =>
       (record.confidence ?? file.confidence) >= CONFIDENCE_FLOOR &&
-      record.playable !== false,
+      record.playable !== false &&
+      (record.distractors?.length ?? 0) >= DISTRACTOR_FLOOR,
   )
 }
 
