@@ -35,8 +35,19 @@
  * replaced it — a line that says `trait: 'footballAffinity'` moves the Red Heart.
  */
 
-/** Every place the game can put you. The list grows with the decades. */
+/**
+ * Every place the game can put you. The list grows with the decades.
+ *
+ * `prologue-1972` is a fossil of the timeline that was rebased in rule 45 — the
+ * prologue moved to 1983 and stopped being the father's youth — and it survived because
+ * it is a PERSISTED id: it sits inside `moved` rows in saves people are playing. So it
+ * is not renamed, it is RETIRED: `'prologue'` is the id the game writes now, the old one
+ * stays in the union so an existing log still type-checks, and `apply` folds it forward
+ * when the log is read. A persisted identifier is not a variable name (rule 35).
+ */
 export type LocationId =
+  | 'prologue'
+  /** @deprecated — folded to `prologue` on read; never written again */
   | 'prologue-1972'
   | 'bedroom'
   | 'home'

@@ -100,7 +100,7 @@ export function emptyState(identity: PlayerIdentity, year: number): LifeState {
     agorot: 0,
     energy: 100,
     resources: { money: 0, energy: 100, availableTime: 0 },
-    location: 'prologue-1972',
+    location: 'prologue',
     wellbeing: {
       happiness: 55,
       stress: 10,
@@ -208,7 +208,9 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
     }
 
     case 'moved':
-      return { ...state, location: event.to }
+      // The one place the retired prologue id is folded forward. A save recorded before
+      // the timeline was rebased still opens, and opens in the right room.
+      return { ...state, location: event.to === 'prologue-1972' ? 'prologue' : event.to }
 
     case 'money.changed': {
       // Money floors at zero. A child does not carry a debt, and a scene that tries to

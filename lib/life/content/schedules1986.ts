@@ -16,6 +16,19 @@ import { FULL_TIME, KOBI_LEAVES } from '../world/scenes'
  * minutes cost.
  */
 
+/**
+ * כל מיקום כאן הוא בתוך רצועת ההליכה של הסצנה שלו — every coordinate below stands inside
+ * the walk band of the scene it names, and clear of its doors.
+ *
+ * That is not a style note, it is the whole contract. A schedule row OVERRIDES the
+ * scene's own actor position at `create`, so a row a few hundredths below the band puts
+ * a person in the road where the child physically cannot reach them: no prompt, no
+ * conversation, and nothing anywhere that says so. Three street rows were exactly that
+ * after the September backdrops moved the street's band from 0.9 to 0.86 — Ofir was
+ * standing in the kiosk doorway and Amit and Keren were in the traffic — and the
+ * playthrough harness is what found it. `tests/life-systems.test.ts` now asserts it, so
+ * the next person to re-frame a backdrop gets a failing test instead of a silent street.
+ */
 const DAY_START = at(12, 0)
 
 export const SCHEDULE_1986: NPCScheduleEntry[] = [
@@ -39,8 +52,8 @@ export const SCHEDULE_1986: NPCScheduleEntry[] = [
     start: DAY_START,
     end: at(13, 40),
     behavior: 'wait',
-    x: 0.3,
-    y: 0.88,
+    x: 0.185,
+    y: 0.775,
     drift: 0.008,
   },
   {
@@ -61,8 +74,8 @@ export const SCHEDULE_1986: NPCScheduleEntry[] = [
     start: at(14, 50),
     end: at(15, 40),
     behavior: 'walk',
-    x: 0.72,
-    y: 0.86,
+    x: 0.665,
+    y: 0.79,
     drift: 0.012,
     facing: 'right',
   },
@@ -95,8 +108,8 @@ export const SCHEDULE_1986: NPCScheduleEntry[] = [
     start: at(13, 0),
     end: at(14, 40),
     behavior: 'wait',
-    x: 0.37,
-    y: 0.87,
+    x: 0.375,
+    y: 0.755,
     drift: 0.004,
   },
   {
@@ -133,8 +146,8 @@ export const SCHEDULE_1986: NPCScheduleEntry[] = [
     start: at(13, 30),
     end: at(15, 30),
     behavior: 'wait',
-    x: 0.55,
-    y: 0.9,
+    x: 0.715,
+    y: 0.815,
     drift: 0.003,
   },
 
@@ -146,8 +159,8 @@ export const SCHEDULE_1986: NPCScheduleEntry[] = [
     start: DAY_START,
     end: at(16, 10),
     behavior: 'wait',
-    x: 0.44,
-    y: 0.83,
+    x: 0.525,
+    y: 0.735,
     drift: 0.005,
   },
 ]

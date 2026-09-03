@@ -20,6 +20,11 @@ import { KICKOFF, KOBI_LEAVES } from '../world/scenes'
  * figure who looked like Ofir would be a bug the player reports as "Ofir was in two
  * places", and reusing a named face to fill a pavement is exactly how a world stops
  * meaning anything.
+ *
+ * The September delivery replaced the seven interchangeable `fan*` cut-outs with
+ * twenty-eight period-dressed people. Nobody now crosses the same street twice in the
+ * same shirt, which is the difference between "the street is busy" and "the same four
+ * strangers are on a loop".
  */
 
 export type AmbientActor = {
@@ -51,7 +56,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   // Quiet afternoon: two people with somewhere ordinary to be.
   {
     id: 'street-shopper',
-    figure: 'oldMan',
+    figure: 'adultA7',
     location: 'street',
     from: 1.05,
     to: -0.1,
@@ -65,7 +70,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   },
   {
     id: 'street-woman',
-    figure: 'fanE',
+    figure: 'adultB3',
     location: 'street',
     from: -0.08,
     to: 1.06,
@@ -80,7 +85,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   // Ten past three: the direction of the street changes, and it never changes back.
   {
     id: 'street-fan-1',
-    figure: 'fanA',
+    figure: 'adultA6',
     location: 'street',
     from: -0.1,
     to: 1.08,
@@ -92,7 +97,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   },
   {
     id: 'street-fan-2',
-    figure: 'fanD',
+    figure: 'youngB2',
     location: 'street',
     from: -0.14,
     to: 1.1,
@@ -105,7 +110,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   },
   {
     id: 'street-fan-3',
-    figure: 'fanF',
+    figure: 'adultB5',
     location: 'street',
     from: -0.12,
     to: 1.08,
@@ -120,7 +125,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   // --------------------------------------------------------------------- the kiosk --
   {
     id: 'kiosk-customer',
-    figure: 'fanB',
+    figure: 'adultA5',
     location: 'kiosk',
     from: 1.04,
     to: 0.62,
@@ -135,7 +140,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   // ---------------------------------------------------------------------- the pitch --
   {
     id: 'pitch-watcher',
-    figure: 'oldMan',
+    figure: 'adultB1',
     location: 'pitch',
     from: 0.94,
     to: 0.9,
@@ -150,7 +155,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   // moves one way, the density rises with the clock, and nothing points at anything.
   {
     id: 'route-a',
-    figure: 'fanA',
+    figure: 'adultA1',
     location: 'route',
     from: -0.1,
     to: 1.1,
@@ -161,7 +166,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   },
   {
     id: 'route-b',
-    figure: 'fanD',
+    figure: 'youngA5',
     location: 'route',
     from: -0.15,
     to: 1.12,
@@ -173,7 +178,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   },
   {
     id: 'route-c',
-    figure: 'fanG',
+    figure: 'adultB4',
     location: 'route',
     from: -0.12,
     to: 1.1,
@@ -185,7 +190,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   },
   {
     id: 'route-d',
-    figure: 'fanE',
+    figure: 'youngB6',
     location: 'route',
     from: -0.1,
     to: 1.1,
@@ -200,7 +205,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   // --------------------------------------------------------------------- the ground --
   {
     id: 'gate-a',
-    figure: 'fanF',
+    figure: 'adultA6',
     location: 'bloomfield-outside',
     from: -0.1,
     to: 0.62,
@@ -211,7 +216,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   },
   {
     id: 'gate-b',
-    figure: 'fanB',
+    figure: 'youngA7',
     location: 'bloomfield-outside',
     from: -0.14,
     to: 0.55,
@@ -223,7 +228,7 @@ export const AMBIENT_1986: AmbientActor[] = [
   },
   {
     id: 'gate-c',
-    figure: 'fanG',
+    figure: 'adultB7',
     location: 'bloomfield-outside',
     from: 1.06,
     to: 0.48,

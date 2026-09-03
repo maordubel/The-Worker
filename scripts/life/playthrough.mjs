@@ -222,15 +222,34 @@ for (const size of SIZES) {
    * is not a door — and the claim under test is stronger than before: the chapter is
    * gated, and the gates are all openable with the one button, without a walkthrough.
    */
+  const reachedStreet = () =>
+    page.evaluate(() => {
+      try {
+        const raw = window.localStorage.getItem('the-worker:life')
+        if (!raw) return false
+        return (JSON.parse(raw).events ?? []).some(
+          (event) => event.t === 'flag.raised' && event.flag === 'onboard:street',
+        )
+      } catch {
+        return false
+      }
+    })
+
   const seen = []
   const clocks = []
+  /** where in `clocks` the child first spoke to something — everything after is theirs */
+  let firstTalkAt = -1
   const acted = new Set()
   const seenPrompts = new Set()
   let talked = false
   let baseline = clockInBedroom
   let heading = 'ArrowLeft'
   let stalled = 0
-  for (let i = 0; i < 120; i += 1) {
+  // Two hundred rather than one hundred and twenty. The budget is in KEYPRESSES, but what
+  // it has to buy is DISTANCE, and a frame-starved browser moves the child less per press
+  // — so on a loaded machine the old budget ran out halfway across the living room and
+  // reported a door that works as a door that cannot be found.
+  for (let i = 0; i < 200; i += 1) {
     const place = await placeNow()
     if (place && seen[seen.length - 1] !== place) {
       seen.push(place)
@@ -242,10 +261,28 @@ for (const size of SIZES) {
     // gate charges twenty-two minutes of queue for letting a child in. The invariant
     // being tested is narrower and more useful: the clock does not run by itself while
     // the player is still learning to walk indoors.
-    if (!talked) clocks.push([place, await clockNow(), baseline])
-    if (talked) baseline = await clockNow()
+    // The invariant is about the CLOCK'S OWN FLAG, not about a label on the HUD.
+    //
+    // `onboard:street` is the exact thing that starts time, and reading it settles two
+    // questions the place label answers badly. A label lands a frame late, so a sample
+    // taken across the front door carries the living room's name and the street's clock;
+    // and a child who steps out and comes straight back in is INDOORS with a clock that
+    // is now, correctly, running — which is a game working, and used to be reported as a
+    // game broken. Once the flag is up, this walk has done its job: stop billing it.
+    const outside = await reachedStreet()
+    if (!talked && !outside) clocks.push([place, await clockNow(), baseline])
+    if (firstTalkAt < 0 && acted.size > 0) firstTalkAt = clocks.length - 1
+    // A conversation's cost commits when the box CLOSES, which is a frame or two after
+    // the last keypress that closed it. Reading the new baseline immediately therefore
+    // reads the clock from before the charge, and the very next sample looks like the
+    // clock running on its own — a race in the harness reported as a bug in the game.
+    // Half a second is longer than the box's close and shorter than a game minute.
+    if (talked) {
+      await page.waitForTimeout(520)
+      baseline = await clockNow()
+    }
     talked = false
-    if (place === 'הרחוב') break
+    if (place === 'הרחוב' || outside) break
     const text = await promptNow()
     // Passing something new is progress, even when the room has not changed.
     if (text && !seenPrompts.has(text)) {
@@ -319,12 +356,24 @@ for (const size of SIZES) {
   // Onboarding is not billed to the clock: walking around indoors moves nothing. The
   // baseline is re-read after every conversation, because a conversation is allowed to
   // cost the day time — that is a choice the player made, not the clock running on them.
-  // The last two samples are dropped: the HUD's place label lands a frame after the scene
-  // has already changed, so a sample taken across the front door can carry the living
-  // room's name and the street's clock, which is not the clock running indoors — it is
-  // the day starting, correctly, one frame earlier than the label.
+  /**
+   * Only the samples taken BEFORE the first conversation are billed here.
+   *
+   * A conversation is allowed to cost the day time — `{ e: 'time' }` exists, the veteran
+   * at the gate charges twenty-two minutes of queue — and the charge commits when the box
+   * closes, which is an unbounded number of frames after the keypress that closed it, and
+   * can arrive through a choice, a chained `goto`, or an opportunity the harness accepted
+   * on the player's behalf. No amount of settling makes that race safe, and every version
+   * of trying reported a working game as a broken one on one viewport or another.
+   *
+   * So this checks the part it can actually see: from the first frame to the first thing
+   * the child spoke to, the clock must not move at all. Everything after that is a player
+   * spending their afternoon, which is the game. The narrower invariant — that the tick
+   * itself is gated on `onboard:street` — is asserted on the source in `tests/life.test.ts`,
+   * where it is exact and costs eight milliseconds.
+   */
   const indoors = new Set(['החדר שלך', 'הסלון', 'המטבח'])
-  for (const [place, clock, since] of clocks.slice(0, -2)) {
+  for (const [place, clock, since] of clocks.slice(0, firstTalkAt < 0 ? clocks.length : firstTalkAt)) {
     if (!place || !indoors.has(place)) break
     if (clock !== since) {
       faults += 1
@@ -334,8 +383,17 @@ for (const size of SIZES) {
   }
 
   // …and now the day starts.
-  await page.waitForTimeout(3000)
-  const clockOutside = await clockNow()
+  //
+  // Polled rather than timed. The walk above now stops on `onboard:street` itself, which
+  // is raised while the street is still loading its textures, so a flat three-second wait
+  // can spend most of itself on a scene that has not begun ticking yet and then report a
+  // working clock as a stopped one. The invariant is "the day starts", not "the day
+  // starts inside three seconds": poll for eight, and pass the moment it moves.
+  let clockOutside = clockInBedroom
+  for (let i = 0; i < 16 && clockOutside === clockInBedroom; i += 1) {
+    await page.waitForTimeout(500)
+    clockOutside = await clockNow()
+  }
   if (seen.includes('הרחוב') && clockOutside === clockInBedroom) {
     faults += 1
     report.push(`CLOCK    ${size.name}: never started after reaching the street`)
@@ -468,14 +526,14 @@ for (const size of SIZES) {
  * tour lands in the bedroom and the screenshots say so.
  */
 const TOUR = [
-  ['street', []],
-  ['kitchen', []],
-  ['kiosk', []],
-  ['pitch', []],
-  ['route', ['kobi:left']],
-  ['bloomfield-outside', ['kobi:left', 'entry:granted']],
-  ['bloomfield-tunnel', ['kobi:left', 'entry:granted']],
-  ['bloomfield-inside', ['kobi:left', 'entry:granted']],
+  ['street', 'הרחוב', []],
+  ['kitchen', 'המטבח', []],
+  ['kiosk', 'הקיוסק', []],
+  ['pitch', 'המגרש', []],
+  ['route', 'בדרך לבלומפילד', ['kobi:left']],
+  ['bloomfield-outside', 'בלומפילד — מבחוץ', ['kobi:left', 'entry:granted']],
+  ['bloomfield-tunnel', 'המנהרה', ['kobi:left', 'entry:granted']],
+  ['bloomfield-inside', 'בלומפילד', ['kobi:left', 'entry:granted']],
 ]
 
 {
@@ -485,7 +543,16 @@ const TOUR = [
   page.on('pageerror', (error) => errors.push(String(error)))
   await page.goto(`${BASE}/life`, { waitUntil: 'networkidle' })
 
-  for (const [place, flags] of TOUR) {
+  for (const [place, titleHe, flags] of TOUR) {
+    // Park on a page with no game on it before writing the save.
+    //
+    // The tour reuses one tab, so when it wrote the next stop's save the PREVIOUS stop was
+    // still running — and a running game autosaves. Between `setItem` and `reload` the
+    // engine could put its own state back, and the tour would reload the stop it had just
+    // left: intermittent on a fast machine, reliable on a slow one, and indistinguishable
+    // from the game refusing to go somewhere. The origin is what owns localStorage, not
+    // the route, so any page on it will do — as long as nothing on it is playing.
+    await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' })
     await page.evaluate(
       ([where, raised]) => {
         const events = [{ t: 'flag.raised', flag: 'prologue:done' }, { t: 'moved', to: where }]
@@ -493,9 +560,15 @@ const TOUR = [
         window.localStorage.setItem(
           'the-worker:life',
           JSON.stringify({
-            version: 1,
-            identity: { name: 'הילד', sex: 'boy', birthYear: 1972 },
-            year: 1980,
+            // The save format, as the game reads it TODAY. This said `version: 1` for
+            // three passes, and v1 has not been readable since the systems pass — so the
+            // loader dropped every one of these saves, the tour never left the landing
+            // page, and eight screenshots of the same photograph passed a yellow scan
+            // eight times. A harness that cannot fail is not a harness, which is why the
+            // landing assertion below now exists as well.
+            version: 3,
+            identity: { name: 'פוגי', sex: 'boy', birthYear: 1978 },
+            year: 1986,
             events,
             savedAt: new Date().toISOString(),
           }),
@@ -503,9 +576,19 @@ const TOUR = [
       },
       [place, flags],
     )
-    await page.reload({ waitUntil: 'networkidle' })
+    await page.goto(`${BASE}/life`, { waitUntil: 'networkidle' })
     await page.waitForSelector('canvas', { timeout: 20000 })
     await page.waitForTimeout(place === 'bloomfield-inside' ? 7600 : 2600)
+    // …and then wait for the HUD to agree. A fixed wait is a guess about how fast the
+    // machine is; on a loaded one the label still carries the PREVIOUS tour stop and the
+    // run fails for being slow rather than for being wrong.
+    for (let i = 0; i < 12; i += 1) {
+      const now = await page.evaluate(
+        () => document.querySelector('[data-life="place"]')?.textContent?.trim() ?? null,
+      )
+      if (now === titleHe) break
+      await page.waitForTimeout(500)
+    }
     const buffer = await page.screenshot()
     writeFileSync(`${OUT}/tour-${place}.png`, buffer)
     const { count, total } = yellowPixels(buffer)
@@ -516,6 +599,10 @@ const TOUR = [
     if (rate > 0.001) {
       faults += 1
       report.push(`YELLOW  tour/${place}: ${count}px`)
+    }
+    if (landed !== titleHe) {
+      faults += 1
+      report.push(`LOST    tour/${place}: wanted "${titleHe}", the game says "${landed ?? '—'}"`)
     }
     report.push(`tour    ${place.padEnd(20)} → ${landed ?? '—'}  hue ${count}px`)
   }

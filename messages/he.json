@@ -592,7 +592,6 @@
   "life.line.title": "הקופסה האדומה",
   "life.line.lead": "היום הזה הוא הדבר הראשון בקופסה. אחריו יבואו עוד.",
   "life.line.age1": "בן שמונה",
-  "life.line.age2": "נער",
   "life.line.age3": "חייל",
   "life.line.age4": "בן אדם",
   "life.line.now": "כאן אתה עכשיו",
@@ -634,5 +633,6 @@
   "life.debug.memories": "זיכרונות",
   "life.debug.windows": "הזדמנויות",
   "life.debug.flags": "דגלים",
-  "life.debug.close": "לסגור"
+  "life.debug.close": "לסגור",
+  "life.profile.item": "מה שנשאר"
 }

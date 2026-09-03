@@ -196,6 +196,7 @@ export class WorldScene extends Phaser.Scene {
     this.sinceEncounter = 0
     this.baseZoom = 1
     this.shotting = false
+    this.repaintGrade = null
   }
 
   preload() {
@@ -239,6 +240,12 @@ export class WorldScene extends Phaser.Scene {
       .setVisible(false)
 
     frameCamera(this, this.cameras.main, this.W, this.H, 0.74)
+    // The grade is built BEFORE the camera is framed, so it sized its wash and its
+    // vignette to a viewport that does not exist yet — which on a tall phone painted a
+    // pale rectangle across two thirds of the picture and left the rest ungraded. One
+    // repaint, once the viewport is real. (It was invisible on the older, softer art and
+    // obvious the moment a clean sky arrived.)
+    this.repaintGrade?.()
     this.cameras.main.setBounds(0, 0, this.W, this.H)
     this.cameras.main.startFollow(this.player, true, 0.09, 0.09)
     this.cameras.main.setDeadzone(this.cameras.main.width * 0.3, this.cameras.main.height * 0.42)
@@ -314,13 +321,33 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * הרחוב מתלבש — layers, which since the living pass means dressing as well as occlusion.
+   *
+   * Two things happen here that did not before. A layer may be CONDITIONAL, so the road
+   * to the ground can be empty at noon and have a supporters' coach parked on it at four
+   * without a second scene or a line of code; and a layer may be anchored by its FOOT,
+   * which is the only honest way to stand a car on a pavement that recedes — the top-left
+   * of a car plate is a point in the sky and means nothing.
+   *
+   * Conditions are read once, at `create`, against the state the player walked in with.
+   * That is deliberate: dressing that pops in while you are looking at it reads as a bug,
+   * and every condition used here turns over on a door, not on a tick.
+   */
   private buildLayers() {
+    const state = this.ctx.engine.state
     for (const layer of this.def.layers ?? []) {
-      const image = this.add.image(layer.x * this.W, layer.y * this.H, `art-${layer.art}`).setOrigin(0, 0)
+      if (!meets(state, layer.when)) continue
+      const image = this.add.image(layer.x * this.W, layer.y * this.H, `art-${layer.art}`)
       const source = this.textures.get(image.texture.key).getSourceImage()
       const width = layer.w * this.W
-      image.setDisplaySize(width, width * ((source.height || 1) / (source.width || 1)))
+      const height = width * ((source.height || 1) / (source.width || 1))
+      image.setOrigin(layer.foot ? 0.5 : 0, layer.foot ? 1 : 0)
+      image.setDisplaySize(width, height)
       image.setDepth(layer.depth * this.H)
+      if (layer.flip) image.setFlipX(true)
+      if (layer.alpha !== undefined) image.setAlpha(layer.alpha)
+      if (layer.tint !== undefined) image.setTint(layer.tint)
     }
   }
 
@@ -474,35 +501,67 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(4000)
   }
 
+  /** the grade's own repaint, kept so it can be re-run once the camera is framed */
+  private repaintGrade: (() => void) | null = null
+
   private buildGrade() {
+    // Lighter than it was, on every outdoor state.
+    //
+    // The grade was tuned against paintings that were soft, warm and already low in
+    // contrast. The September frames arrive with their own depth — real shadow on the
+    // paving, a sky that goes somewhere — and the old wash sat on top of that like a
+    // dirty window. Interiors keep their weight, because a room genuinely is darker
+    // than a street at three in the afternoon.
     const grade: Record<string, { tint: number; alpha: number; vignette: number }> = {
       interior: { tint: LIFE_PALETTE.roof, alpha: 0.08, vignette: 0.42 },
       kitchen: { tint: LIFE_PALETTE.shutter, alpha: 0.07, vignette: 0.4 },
-      day: { tint: LIFE_PALETTE.sky, alpha: 0.05, vignette: 0.32 },
-      dusk: { tint: LIFE_PALETTE.redDeep, alpha: 0.09, vignette: 0.42 },
+      day: { tint: LIFE_PALETTE.sky, alpha: 0.035, vignette: 0.22 },
+      dusk: { tint: LIFE_PALETTE.redDeep, alpha: 0.06, vignette: 0.28 },
       tunnel: { tint: LIFE_PALETTE.night, alpha: 0.2, vignette: 0.72 },
-      stadium: { tint: LIFE_PALETTE.red, alpha: 0.06, vignette: 0.34 },
+      stadium: { tint: LIFE_PALETTE.red, alpha: 0.05, vignette: 0.3 },
     }
     const cfg = grade[this.def.ambience] ?? grade['day']
     if (!cfg) return
     const wash = this.add.rectangle(0, 0, 10, 10, cfg.tint, cfg.alpha).setOrigin(0, 0).setScrollFactor(0).setDepth(6000)
     const vignette = this.add.graphics().setScrollFactor(0).setDepth(6001)
+    /**
+     * `setScrollFactor(0)` pins a thing to the camera. It does NOT exempt it from zoom.
+     *
+     * Phaser places a scroll-locked object at `(p − half) × zoom + half`, so a rectangle
+     * of `cam.width × cam.height` drawn at (0, 0) covers the glass only when the zoom is
+     * exactly 1 — above it the wash overhangs harmlessly, and BELOW it the wash lands
+     * inset on all four sides and the eye reads a pale rectangle sitting on the picture.
+     * The street zooms past 1 on every viewport and looked perfect; gate seven zooms to
+     * 0.9 and wore a visible box around two thirds of Bloomfield.
+     *
+     * So the overlay is sized in world units — `cam.width / zoom` — and offset by half
+     * the difference, which is the exact inverse of the transform above. It now covers
+     * the glass, edge to edge, at any zoom.
+     */
     const paint = () => {
       const cam = this.cameras.main
-      wash.setSize(cam.width, cam.height)
+      const zoom = cam.zoom || 1
+      const w = cam.width / zoom
+      const h = cam.height / zoom
+      const left = (cam.width - w) / 2
+      const top = (cam.height - h) / 2
+      wash.setPosition(left, top)
+      wash.setSize(w, h)
       vignette.clear()
+      vignette.setPosition(left, top)
       const steps = 24
-      const band = Math.max(cam.width, cam.height) * 0.4
+      const band = Math.max(w, h) * 0.4
       for (let i = 0; i < steps; i += 1) {
         const a = (cfg.vignette * (i + 1)) / steps / steps
         const inset = (band * (steps - i)) / steps
         vignette.fillStyle(LIFE_PALETTE.ink, a)
-        vignette.fillRect(0, 0, cam.width, inset * 0.5)
-        vignette.fillRect(0, cam.height - inset * 0.6, cam.width, inset * 0.6)
-        vignette.fillRect(0, 0, inset * 0.5, cam.height)
-        vignette.fillRect(cam.width - inset * 0.5, 0, inset * 0.5, cam.height)
+        vignette.fillRect(0, 0, w, inset * 0.5)
+        vignette.fillRect(0, h - inset * 0.6, w, inset * 0.6)
+        vignette.fillRect(0, 0, inset * 0.5, h)
+        vignette.fillRect(w - inset * 0.5, 0, inset * 0.5, h)
       }
     }
+    this.repaintGrade = paint
     paint()
     this.scale.on('resize', paint, this)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', paint, this))
@@ -586,8 +645,16 @@ export class WorldScene extends Phaser.Scene {
     this.player.setFlipX(this.facing < 0)
 
     this.applyScale(this.player, this.shadow, ny, this.def.size)
-    if (moving && this.lastDir !== 'side') {
-      this.player.y = ny - Math.abs(Math.sin(this.stride)) * this.H * 0.005
+    if (moving) {
+      // The bob runs on EVERY heading now, side-on included.
+      //
+      // It used to be the substitute for an animation and was therefore suppressed
+      // exactly where the animation existed. Pogi's sheet holds two strides rather than
+      // eight, so the bob is no longer a substitute — it is half the walk, and the two
+      // frames read as steps because the body rises between them. It is smaller
+      // side-on, because there a real leg is already moving.
+      const lift = this.lastDir === 'side' ? 0.0032 : 0.005
+      this.player.y = ny - Math.abs(Math.sin(this.stride)) * this.H * lift
     }
 
     if (running) this.ctx.engine.dispatch({ t: 'energy.changed', delta: -delta / 2400 })
@@ -679,9 +746,16 @@ export class WorldScene extends Phaser.Scene {
    * empty step, which is the only version of that information worth having.
    */
   private tickWindows() {
-    const { events, opened } = tickOpportunities(this.ctx.engine.state, OPPORTUNITIES_1986)
+    const { events, opened, closed } = tickOpportunities(this.ctx.engine.state, OPPORTUNITIES_1986)
     if (events.length === 0) return
     this.ctx.engine.dispatch(...events)
+    // A window that CLOSES speaks first, because that is the one the player paid for.
+    const gone = closed.find((entry) => entry.goneHe)
+    if (gone?.goneHe) {
+      this.ctx.bus.emit('toast', { text: gone.goneHe, tone: 'plain' })
+      this.refresh()
+      return
+    }
     const notice = opened.find((entry) => entry.noticeHe)
     if (notice?.noticeHe) this.ctx.bus.emit('toast', { text: notice.noticeHe, tone: 'plain' })
   }
@@ -1036,6 +1110,25 @@ export class WorldScene extends Phaser.Scene {
       this.dwellExit = inside
       this.dwell = 0
     }
+
+    /**
+     * A door pulls you in while you are WALKING, and lets go when you stop.
+     *
+     * Standing still inside a doorway used to count, and that is the difference between
+     * a door and a drain: stop beside the kiosk to read who is in front of you and, nine
+     * hundred milliseconds later, you are inside the kiosk with the clock still running.
+     *
+     * The dwell therefore counts WALKING time inside the zone, and stopping PAUSES it
+     * rather than clearing it. Both halves matter, and each was a separate bug on the
+     * way here: clearing it on every pause meant one unbroken hold was required, so a
+     * player who taps a direction rather than leaning on it could never leave the
+     * bedroom; counting while stationary meant a player who stopped to read got pulled
+     * through the nearest door. Leaving the zone still clears it, which is what makes
+     * "walk past a shop" and "walk into a shop" different actions.
+     */
+    const input = this.ctx.input
+    if (Math.abs(input.x) + Math.abs(input.y) < 0.08) return
+
     this.dwell += delta
     if (this.dwell >= (inside.dwellMs ?? 320)) this.travel(inside.to, inside.spawn)
   }

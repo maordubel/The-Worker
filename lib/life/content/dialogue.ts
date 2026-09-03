@@ -496,13 +496,13 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: 'neighbour',
-    nameHe: 'שכן',
+    nameHe: 'יוסף',
     branches: [
       {
         when: { afterMinute: KOBI_LEAVES },
         lines: [
-          { who: 'שכן', text: 'אבא שלך יצא לפני עשר דקות. רץ כמו ילד.' },
-          { who: 'שכן', text: 'כולם הולכים מזרחה היום. יש משחק.' },
+          { who: 'יוסף', text: 'אבא שלך יצא לפני עשר דקות. רץ כמו ילד.' },
+          { who: 'יוסף', text: 'כולם הולכים מזרחה היום. יש משחק.' },
         ],
         then: [
           { e: 'flag', flag: 'knows:match' },
@@ -512,8 +512,8 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [
-          { who: 'שכן', text: 'תגיד לאמא שלך שהמים חזרו.' },
-          { who: 'שכן', text: 'ואל תעבור את הכביש הגדול לבד. שמעת?' },
+          { who: 'יוסף', text: 'תגיד לאמא שלך שהמים חזרו.' },
+          { who: 'יוסף', text: 'ואל תעבור את הכביש הגדול לבד. שמעת?' },
         ],
         then: [{ e: 'trait', trait: 'streetSmarts', delta: 3 }],
       },
@@ -849,19 +849,129 @@ const CONVERSATIONS: Conversation[] = [
         ],
       },
       {
+        /**
+         * הרשת — the way in that needs nothing, and is not therefore free.
+         *
+         * A chapter that can dead-lock is not a chapter (rule 42), so one route must
+         * always be open. But `talk → entry granted` is not a route, it is a hotspot
+         * wearing a face, and the production directive (§3.2) names it as a defect: a
+         * fail-safe is not a free solution. So the old man does not simply take the
+         * child in. He asks him the one question a stranger would ask, the child has to
+         * answer it out loud, and only then does the old man decide — and it still costs
+         * twenty-two minutes of queue, which at ten to four is most of what is left.
+         *
+         * Neither answer refuses him. Refusing would reintroduce the dead end this
+         * branch exists to prevent. What changes is what the man believes he is doing,
+         * what he remembers, and what the reunion later reads off it.
+         */
         lines: [
-          { who: null, text: 'הוא עומד ליד הגדר ומעשן, ורואה אותך כבר כמה דקות.' },
+          { who: null, text: 'הוא עומד ליד הגדר ומעשן, ורואה אותך כבר כמה דקות. בסוף הוא מכבה את הסיגריה בסוליה.' },
           { who: 'אוהד ותיק', text: 'לבד, מה?' },
-          { who: null, text: 'הוא נאנח, מכבה את הסיגריה בסוליה, ומניח יד על הכתף שלך.' },
-          { who: 'אוהד ותיק', text: 'תעמוד לידי ותשתוק. הילד איתי.' },
+          { who: null, text: 'הוא לא שואל את זה כמו מבוגר שעומד להגיד לך לחזור הביתה. הוא שואל כמו מישהו שבודק משהו.' },
+          { who: 'אוהד ותיק', text: 'ומי מחכה לך בפנים?' },
+        ],
+        choices: [
+          {
+            id: 'father',
+            text: 'אבא שלי. בשער שבע.',
+            then: [
+              { e: 'goto', node: 'gate-veteran-in' },
+              { e: 'flag', flag: 'entry:kindness' },
+              { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 6 },
+              { e: 'remember', who: 'veteran', eventId: 'told-him-about-kobi', significance: 'notable' },
+            ],
+          },
+          {
+            id: 'nobody',
+            text: 'אף אחד.',
+            then: [
+              { e: 'goto', node: 'gate-veteran-in' },
+              { e: 'flag', flag: 'entry:kindness' },
+              { e: 'flag', flag: 'entry:alone' },
+              { e: 'personality', key: 'independence', delta: 8 },
+              { e: 'wellbeing', key: 'loneliness', delta: 6 },
+              { e: 'remember', who: 'veteran', eventId: 'said-nobody', significance: 'major' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'gate-veteran-in',
+    nameHe: 'אוהד ותיק',
+    branches: [
+      {
+        // The cost is the same either way, and it is real: twenty-two minutes in a
+        // queue at ten to four is most of what is left of the afternoon. That is what
+        // makes the fail-safe a decision rather than a door.
+        when: { flag: 'entry:alone' },
+        shot: { focus: 'both', framing: 'ots', ambienceDuck: 0.5 },
+        lines: [
+          { who: null, text: 'הוא מסתכל עליך עוד שנייה, ואז מניח יד גדולה על הכתף שלך ולא מוריד אותה.' },
+          { who: 'אוהד ותיק', text: 'אז היום אני. תעמוד לידי ותשתוק.' },
+          { who: null, text: 'לוקח זמן עד שמגיעים לתור. הרבה זמן. הוא לא מדבר איתך ולא עוזב את הכתף.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'entry:granted' },
+          { e: 'time', minutes: 22 },
+          { e: 'trait', trait: 'courage', delta: 4 },
+          { e: 'redheart', key: 'community', delta: 10 },
+          { e: 'toast', text: 'אתה נכנס', tone: 'red' },
+        ],
+      },
+      {
+        shot: { focus: 'both', framing: 'ots', ambienceDuck: 0.5 },
+        lines: [
+          { who: 'אוהד ותיק', text: 'שער שבע. אז אתה יודע לפחות איפה אתה.' },
+          { who: null, text: 'הוא מהנהן לעצמו, מניח יד על הכתף שלך, ומכניס אותך לתור לפניו.' },
+          { who: 'אוהד ותיק', text: 'תעמוד לידי ותשתוק. ואם הוא לא שם — אתה נשאר איתי עד שהוא בא.' },
           { who: null, text: 'לוקח זמן עד שמגיעים לתור. הרבה זמן.' },
         ],
         then: [
           { e: 'flag', flag: 'entry:granted' },
-          { e: 'flag', flag: 'entry:kindness' },
           { e: 'time', minutes: 22 },
           { e: 'trait', trait: 'courage', delta: 3 },
+          { e: 'redheart', key: 'community', delta: 8 },
           { e: 'toast', text: 'אתה נכנס', tone: 'red' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'street-pole',
+    branches: [
+      {
+        when: { flag: 'knows:match' },
+        lines: [
+          { who: null, text: 'העמוד. מדבקה אדומה שמישהו הדביק גבוה מדי בשביל ילד, ומתחתיה שכבות של מודעות קרועות.' },
+          { who: null, text: 'אתה יודע מה כתוב עליה בעל פה, וזה אף פעם לא נמאס.' },
+        ],
+        then: [{ e: 'redheart', key: 'terraceCulture', delta: 4 }],
+      },
+      {
+        lines: [
+          { who: null, text: 'עמוד חשמל עם מדבקות. אחת מהן אדומה, וקרועה בדיוק במקום שבו כתוב מתי.' },
+          { who: null, text: 'מישהו קרע אותה בכוונה, או שהגשם עשה את זה. אין דרך לדעת.' },
+        ],
+        then: [{ e: 'personality', key: 'curiosity', delta: 3 }],
+      },
+    ],
+  },
+  {
+    id: 'route-shelter',
+    branches: [
+      {
+        when: { afterMinute: KOBI_LEAVES },
+        lines: [
+          { who: null, text: 'תחנת האוטובוס ריקה. הספסל חם מהשמש ויש עליו קליפות של גרעינים.' },
+          { who: null, text: 'אף אחד לא מחכה כאן היום. כולם כבר הולכים ברגל, וזה מהר יותר.' },
+        ],
+        then: [{ e: 'trait', trait: 'streetSmarts', delta: 3 }],
+      },
+      {
+        lines: [
+          { who: null, text: 'תחנת אוטובוס עם גג פח ושלוש ספסלים. מישהו חרט משהו בצד ומישהו אחר מחק חצי ממנו.' },
         ],
       },
     ],

@@ -788,3 +788,92 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
       six names in `FIGURE` had no PNG at all; they are in `PLANNED_FIGURE` until their
       files are uploaded, because a runtime that names a figure it cannot load will 404 in
       front of a player.
+
+47. **`lib/ingest/` was three stale copies, and the evidence is what settled it.**
+    The production directive (§3.3) says not to delete importer files just to make a
+    suite green — an ingestion capability destroyed as a side effect of Life QA is a bad
+    trade at any price. So they were inspected rather than swept:
+    · `guards.ts` is byte-identical to `scripts/ingest/lib/guards.ts`.
+    · `dedupe.ts` is 303 lines against the live file's 324; `types.ts` is 425 against 611.
+      Both are strictly OLDER, strictly SMALLER copies.
+    · All three import `./normalize`, which exists at `scripts/ingest/lib/normalize.ts`
+      and has no counterpart beside them — so they could never have compiled where they
+      stood.
+    · Nothing in `app`, `components`, `lib`, `scripts` or `content` imports the path.
+      `tsconfig.json` already excluded it and `tests/imports.test.ts` already asserted
+      the directory must not exist.
+    They are duplicates of live files that live in `scripts/ingest/lib/`, and the
+    importer keeps every capability it had. That is the difference between "delete it,
+    the test is red" and "here is why nothing is lost".
+
+48. **`THE WORKER LIFE` — the living pass: purpose-drawn art, and a street that is
+    somewhere rather than something.**
+    The systems pass gave the chapter its machinery. This one gave it a face. The rules
+    that came out of it, in the order they will bite somebody next:
+    - **`scripts/life/ingest-2026-09.py` is the pipeline for finished frames, and
+      `build-art.py` is the pipeline for concept boards.** They are different jobs. A
+      board arrives as a page of panels and is CROPPED; a delivery arrives as finished,
+      correctly-proportioned frames and green-screen sheets and is taken WHOLE. The new
+      script imports the old one's helpers rather than re-implementing de-yellow, because
+      two definitions of yellow is one too many.
+    - **Resample BEFORE de-yellowing, then de-yellow the PALETTE too.** LANCZOS averages
+      a legal olive with its neighbour and lands the result inside the band, and
+      quantising does the same thing to the 768-byte colour table. Rule 44 warned about
+      the first; the second is why `clean_palette()` exists and why "no yellow in this
+      file" is a proof rather than a sample.
+    - **Key props by DISTANCE from the sampled background, not by a channel ratio.**
+      `key_green` asks whether green beats red and blue by a third, which is right for a
+      figure and wrong for a string of pennants: every edge pixel there is half cloth and
+      half studio, the ratio says "not green enough", and the object arrives wearing the
+      screen. `key_flat` + an opt-in `despill` fixed a bunting line that was a third
+      moss by pixel count. `propPlanter` opts OUT of despill, because its green is real.
+    - **A `LayerDef` is dressing as well as occlusion.** It gained `when` (the same
+      `Condition` vocabulary everything else in `world/` speaks), `foot` (anchor by the
+      point the object stands on — the top-left of a car plate is a point in the sky),
+      and `flip`/`alpha`/`tint`. Conditions are read once at `create`, never on a tick:
+      dressing that pops in while you are looking at it reads as a bug.
+    - **Two guards in `tests/life.test.ts` make dressing safe, and they only look at
+      dressing that is ON THE GROUND** — `foot` and a depth that reaches the walk band.
+      That is exactly the set that can silently break a game: a car parked across a
+      doorway is a door the player cannot use, and nothing in the engine would complain.
+      A banner on a wall and pennants over a road are neither, and are not their business.
+      Both guards caught a real fault the first time they ran.
+    - **Ship no art that nothing places.** `propPylon`, `propHorn` and `propDrum` were
+      cut cleanly, looked good, and were deleted — a pylon in the street's sky gap read
+      as a sticker and a third pylon on the route read as a mistake. `PLANNED_FIGURE` is
+      for names WITHOUT files; this is the opposite case and has no list.
+    - **`scripts/life/playthrough.mjs` wrote `version: 1` saves for three passes.** v1
+      has not been readable since the systems pass, so the loader dropped every one of
+      them, the tour never left the landing page, and eight screenshots of the same
+      photograph passed a yellow scan eight times. A harness that cannot fail is not a
+      harness: the tour now writes the CURRENT save version and asserts the place it
+      landed in by name.
+    - **A schedule row OVERRIDES the scene's own actor position, so it has to stand inside
+      that scene's walk band.** Three street rows were a few hundredths below it after the
+      September backdrops moved the band from 0.9 to 0.86, which left Ofir in the kiosk
+      doorway and Amit and Keren in the traffic: no prompt, no conversation, and nothing
+      anywhere that said so. `tests/life-systems.test.ts` now asserts band and doorway
+      clearance for every row, so re-framing a backdrop fails a test instead of emptying
+      a street.
+    - **`setScrollFactor(0)` pins a thing to the camera; it does not exempt it from zoom.**
+      Phaser draws a scroll-locked object at `(p − half) × zoom + half`, so a full-screen
+      overlay sized `cam.width × cam.height` only covers the glass when zoom is exactly 1.
+      The street zooms past 1 on every viewport and looked perfect; gate seven zooms to 0.9
+      and wore a visible pale box across two thirds of Bloomfield. The grade is now sized
+      `cam.width / zoom` and offset by half the difference.
+    - **A browser harness cannot police an invariant that two different causes satisfy.**
+      "The clock ran indoors" and "a conversation charged the player twelve minutes" both
+      arrive as `clock.advanced`, and three attempts at settling the race each reported a
+      working game as a broken one on some viewport. The tick's `onboard:street` gate is
+      now asserted on the SOURCE in `tests/life.test.ts` — and asserted to be the first
+      statement in the method — while the harness checks only the part it can see: from
+      the first frame to the first thing the child speaks to, the clock does not move.
+    - **The tour reused one tab, and a running game autosaves.** Writing the next stop's
+      save while the previous stop was still playing let the engine put its own state back
+      before the reload, so the tour reloaded the stop it had just left. It now parks on a
+      page with no game on it before writing. Same lesson as the save-version bug above:
+      every one of these made the harness quietly agree with itself.
+    - **פוגי is the protagonist and has three ages on disk**; the character formerly
+      called "שלום" is **יוסף**, because שלום תקוה is a real footballer and two people
+      with one name is a bug in the fiction. `KID_POSE` and `KID_WALK` in
+      `runtime/art.ts` are the only place the runtime names his frames.

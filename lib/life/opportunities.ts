@@ -51,6 +51,16 @@ export type LifeOpportunity = {
   outcomes: OpportunityOutcome[]
   /** shown once, quietly, when the window opens — a hint of life, not an objective */
   noticeHe?: string
+  /**
+   * מה נשאר אחריה — one sentence about the WORLD when the window closes.
+   *
+   * Never "you missed it": the player is told that the ball is no longer in the alley,
+   * that the step is empty, that the crate is gone from the doorway. Production
+   * directive §13 — an expiry the player cannot perceive is hidden state, and hidden
+   * state that costs you something is the thing that makes a game feel unfair. It is
+   * also why this is a sentence and not a notification: nobody says the word "missed".
+   */
+  goneHe?: string
 }
 
 export type OpportunityView = {
@@ -100,9 +110,10 @@ export function view(state: LifeState, defs: readonly LifeOpportunity[]): Opport
 export function tickOpportunities(
   state: LifeState,
   defs: readonly LifeOpportunity[],
-): { events: LifeEvent[]; opened: LifeOpportunity[] } {
+): { events: LifeEvent[]; opened: LifeOpportunity[]; closed: LifeOpportunity[] } {
   const events: LifeEvent[] = []
   const opened: LifeOpportunity[] = []
+  const closed: LifeOpportunity[] = []
 
   for (const def of defs) {
     const runtime = state.opportunities.find((entry) => entry.id === def.id)
@@ -116,10 +127,11 @@ export function tickOpportunities(
 
     if (runtime && runtime.status === 'open' && state.minute >= def.expires) {
       events.push({ t: 'opportunity.missed', id: def.id })
+      closed.push(def)
     }
   }
 
-  return { events, opened }
+  return { events, opened, closed }
 }
 
 /**

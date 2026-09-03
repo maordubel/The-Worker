@@ -236,6 +236,32 @@ describe('לוח הזמנים — the street is not the street you left', () => 
     }
   })
 
+  /**
+   * A person the child cannot walk up to is not in the scene, whatever the data says.
+   *
+   * A schedule row OVERRIDES the scene's own actor position when the scene is created, so
+   * a row a few hundredths outside the walk band leaves somebody standing in the road:
+   * no prompt, no conversation, and nothing anywhere that says so. Three street rows were
+   * exactly that after the September backdrops moved the street's band from 0.9 to 0.86,
+   * and the only reason anybody found out is that a browser harness walked east and had
+   * nobody to talk to. That is too late and too expensive. This is the same question,
+   * asked in eight milliseconds.
+   */
+  it('puts every scheduled person somewhere the child can actually reach', () => {
+    for (const entry of SCHEDULE_1986) {
+      const scene = SCENE[entry.location as keyof typeof SCENE]
+      const where = `${entry.actorId} @ ${entry.location}`
+      expect(entry.y, `${where} is above the band`).toBeGreaterThanOrEqual(scene.band.far)
+      expect(entry.y, `${where} is below the band — that is the road`).toBeLessThanOrEqual(scene.band.near)
+      expect(entry.x, `${where} x`).toBeGreaterThan(0)
+      expect(entry.x, `${where} x`).toBeLessThan(1)
+      for (const exit of scene.exits) {
+        const inDoor = entry.x > exit.x - 0.01 && entry.x < exit.x + exit.w + 0.01
+        expect(inDoor, `${where} is standing in the doorway "${exit.id}"`).toBe(false)
+      }
+    }
+  })
+
   it('fills the street with people who are not the cast', () => {
     // An ambient figure who looked like Ofir is a bug the player reports as "Ofir was in
     // two places at once".
@@ -288,13 +314,30 @@ describe('שלוש דרכים לבלומפילד — the objective is a network,
     expect(people.size).toBeGreaterThanOrEqual(3)
   })
 
-  it('still has one that needs nothing at all', () => {
+  it('still has one that needs nothing at all — and it is no longer free', () => {
+    // §3.2 of the production directive: FAIL-SAFE ≠ FREE SOLUTION. The way in that needs
+    // nothing must still exist, or an eight-year-old can be soft-locked outside a
+    // stadium; but it may not be `talk → entry granted`. So the guard asserts both: that
+    // an unconditional path reaches `entry:granted`, and that reaching it costs minutes.
     const veteran = DIALOGUE['gate-veteran']
     const open = veteran?.branches.filter((branch) => !branch.when) ?? []
+    expect(open.length).toBeGreaterThan(0)
+
+    const chained = open.flatMap((branch) => [
+      ...(branch.then ?? []),
+      ...(branch.choices ?? []).filter((choice) => !choice.when).flatMap((choice) => choice.then),
+    ])
+    const nodes = chained.filter((effect) => effect.e === 'goto').map((effect) => (effect as { node: string }).node)
+    expect(nodes.length, 'the fallback resolves in one beat with no situation around it').toBeGreaterThan(0)
+
+    const reached = nodes.flatMap((node) => (DIALOGUE[node]?.branches ?? []).filter((branch) => !branch.when))
     expect(
-      open.some((branch) =>
-        (branch.then ?? []).some((effect) => effect.e === 'flag' && effect.flag === 'entry:granted'),
-      ),
+      reached.some((branch) => (branch.then ?? []).some((e) => e.e === 'flag' && e.flag === 'entry:granted')),
+      'no unconditional way into the ground',
+    ).toBe(true)
+    expect(
+      reached.some((branch) => (branch.then ?? []).some((e) => e.e === 'time' && e.minutes > 0)),
+      'the fail-safe costs the player nothing',
     ).toBe(true)
   })
 })

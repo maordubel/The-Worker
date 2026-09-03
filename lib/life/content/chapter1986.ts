@@ -20,15 +20,19 @@ import type { Say } from './script'
  */
 
 /**
- * מי אתה, עד שתבחר.
+ * פוגי.
  *
- * The architecture supports a name and a boy/girl choice (brief §9) and Stage 1 does not
- * ask for either — a character creator before the game is proven is the wrong order of
- * work. The default lives here, in the content layer, because "הילד" is a piece of
- * writing rather than a piece of interface: the day the chooser exists, this becomes its
- * placeholder value and nothing else changes.
+ * He had no name for two passes and was written as "הילד" — which reads as a placeholder
+ * because it IS one, and a life simulation whose protagonist is called "the child" is a
+ * life simulation nobody has decided about yet. Maor named him in the September pass and gave him
+ * a face at three ages: eight here, the conscript, and the young man.
+ *
+ * The architecture still supports a name and a boy/girl choice (brief §9) and Stage A
+ * still does not ask for either — a character creator before the game is proven is the
+ * wrong order of work. The day the chooser exists, this becomes its default and nothing
+ * else changes.
  */
-export const DEFAULT_IDENTITY: PlayerIdentity = { name: 'הילד', sex: 'boy', birthYear: 1978 }
+export const DEFAULT_IDENTITY: PlayerIdentity = { name: 'פוגי', sex: 'boy', birthYear: 1978 }
 
 /** `{anchor}` is filled from the canonical anchor's headline; nothing else is. */
 export const PROLOGUE: Say[] = [
@@ -68,6 +72,7 @@ export const PORTRAIT: Record<string, string> = {
   // name three children argue over, and the reason a father stands in a doorway at
   // night — but the plate exists so the day he does speak, it is one line of content.
   'משה סיני': 'faceSinai',
+  'יוסף': 'faceOldMan',
   'שכן': 'faceOldMan',
 }
 
@@ -141,6 +146,22 @@ export const ENDINGS: Record<string, EndingCard> = {
       lineHe: 'אופיר ילך לבד לבלומפילד גם בפעם הבאה, וגם בשנים הבאות. יבוא יום שתלך איתו.',
     },
   },
+}
+
+/**
+ * מה זה נראה — the art each object is drawn with, where there is art for it.
+ *
+ * The red box was a list of nouns on a card. An object you can LOOK at is a memory; a
+ * noun is a receipt, and the whole of §50 is about the difference. Anything with no
+ * plate simply gets none and the card still reads.
+ */
+export const ITEM_ART: Partial<Record<ItemId, string>> = {
+  scarf: 'propScarfRed',
+  newspaper: 'propPapers',
+  'folded-paper': 'propPapers',
+  'football-card': 'propSticker',
+  'ticket-stub': 'propTicket',
+  coin: 'propCoins',
 }
 
 export const ITEMS: Record<ItemId, { nameHe: string; noteHe: string }> = {

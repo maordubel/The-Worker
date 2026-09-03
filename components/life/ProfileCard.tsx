@@ -2,6 +2,8 @@
 
 import { Num } from '@/components/ui/Num'
 import { t } from '@/lib/i18n'
+import { ITEM_ART } from '@/lib/life/content/chapter1986'
+import { artUrl } from '@/lib/life/runtime/art'
 import type { LifeSnapshot } from '@/lib/life/runtime/game'
 import type { Band } from '@/lib/life/profile'
 
@@ -208,21 +210,46 @@ export function ProfileCard({ snapshot, onClose }: { snapshot: LifeSnapshot; onC
               </p>
             ) : (
               <ul className="flex flex-col gap-2">
-                {snapshot.state.redBox.map((item) => (
-                  <li key={item.id} className="border-hair border-red/60 bg-red/10 px-3 py-2">
-                    <p className="font-display text-[14px] leading-none text-sheet">
-                      <bdi>{item.titleHe}</bdi>
-                    </p>
-                    {item.noteHe && (
-                      <p className="mt-1.5 font-body text-[11px] leading-snug text-concrete">
-                        <bdi>{item.noteHe}</bdi>
-                      </p>
-                    )}
-                    <p className="mt-1.5 font-mono text-[9px] leading-none text-concrete/70">
-                      <Num>{item.year}</Num>
-                    </p>
-                  </li>
-                ))}
+                {snapshot.state.redBox.map((item) => {
+                  /**
+                   * A display case, not a line item.
+                   *
+                   * The box was a list of Hebrew nouns on a card, and §50 is entirely
+                   * about the difference between a noun and an object: "צעיף" is a
+                   * receipt, a striped scarf on a lit shelf is a memory. The shelf runs
+                   * the full width because half of these things are long and thin — a
+                   * scarf, a folded page — and a thumbnail turns them into a smudge.
+                   */
+                  const art = ITEM_ART[item.item]
+                  return (
+                    <li key={item.id} className="border-hair border-red/60 bg-red/10">
+                      {art && (
+                        <span className="flex h-[86px] items-center justify-center border-b-hair border-red/40 bg-sheet/10 px-3 py-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={artUrl(art)}
+                            alt=""
+                            aria-hidden="true"
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        </span>
+                      )}
+                      <span className="block px-3 py-2.5">
+                        <p className="font-display text-[14px] leading-none text-sheet">
+                          <bdi>{item.titleHe}</bdi>
+                        </p>
+                        {item.noteHe && (
+                          <p className="mt-1.5 font-body text-[11px] leading-snug text-concrete">
+                            <bdi>{item.noteHe}</bdi>
+                          </p>
+                        )}
+                        <p className="mt-1.5 font-mono text-[9px] leading-none tabular-nums text-concrete/70">
+                          <Num>{item.year}</Num>
+                        </p>
+                      </span>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </Section>

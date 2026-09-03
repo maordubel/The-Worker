@@ -59,7 +59,7 @@ export class BootScene extends Phaser.Scene {
       this.scene.start(PrologueScene.KEY)
       return
     }
-    const location = state.location === 'prologue-1972' ? 'bedroom' : state.location
+    const location = state.location === 'prologue' || state.location === 'prologue-1972' ? 'bedroom' : state.location
     this.scene.start(WorldScene.KEY, { mapId: location, spawn: 'start' })
   }
 }

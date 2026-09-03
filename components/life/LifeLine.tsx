@@ -18,11 +18,19 @@ import { t } from '@/lib/i18n'
  * one.
  */
 
+/**
+ * Three ages, not four, and all three are PoGi.
+ *
+ * The row used to mix him with two other figures and one — `soldier` — that had no file
+ * on disk at all, so the strip rendered a broken image between a boy and a stranger. It
+ * is the same person now: eight, the conscript, the young man. The fourth slot comes
+ * back the day a teenage Pogi is drawn, and not before: a life-line whose point is "this
+ * is you, later" cannot contain somebody else.
+ */
 const AGES = [
-  { art: 'kid', labelKey: 'life.line.age1' },
-  { art: 'hero80', labelKey: 'life.line.age2' },
-  { art: 'soldier', labelKey: 'life.line.age3' },
-  { art: 'hero90', labelKey: 'life.line.age4' },
+  { art: 'pogi', labelKey: 'life.line.age1' },
+  { art: 'pogiIDF-1', labelKey: 'life.line.age3' },
+  { art: 'pogi90-1', labelKey: 'life.line.age4' },
 ] as const
 
 export function LifeLine({ reached = 0 }: { reached?: number }) {
@@ -37,7 +45,7 @@ export function LifeLine({ reached = 0 }: { reached?: number }) {
         </p>
       </header>
 
-      <ol className="grid grid-cols-4 gap-px bg-concrete/25">
+      <ol className="grid grid-cols-3 gap-px bg-concrete/25">
         {AGES.map((age, index) => {
           const here = index === reached
           const later = index > reached

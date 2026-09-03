@@ -131,12 +131,22 @@ describe('הקאנון החזותי — the boards decide who these people are',
     }
   })
 
-  it('gives the player a real walk cycle and a turnaround', () => {
+  it('gives the player a walk that is animated, and a turnaround', () => {
     // Everybody else has one pose. The player has an animation, because the player is
-    // the thing you look at for fifteen minutes — and because a character who slides
-    // across a floor is the loudest tell that a game is a prototype.
+    // the thing you look at for fifteen minutes, and a character who slides across a
+    // floor is the loudest tell that a game is a prototype.
+    //
+    // The count moved from eight to two when Pogi arrived, and that is a deliberate
+    // trade rather than a regression: his sheet holds two side-on strides, and two full
+    // strides plus the scene's own bob read as walking. The alternative was to keep the
+    // previous child's eight-frame cycle under this child's shirt — a different boy from
+    // the knees down, in a game whose whole visual claim is that everybody belongs to
+    // the same painting. What the guard protects is that the walk MOVES: distinct
+    // frames, and a scene that lifts him between them.
     for (const key of KID_WALK) expect(cut[key], `${key} was never sliced`).toBeDefined()
-    expect(KID_WALK.length).toBeGreaterThanOrEqual(6)
+    expect(new Set(KID_WALK).size, 'the walk has no distinct frames').toBeGreaterThanOrEqual(2)
+    const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
+    expect(world, 'the walk has no bob, so the child slides').toContain('Math.abs(Math.sin(this.stride))')
     for (const pose of Object.values(KID_POSE)) expect(cut[pose], `${pose} missing`).toBeDefined()
   })
 
@@ -338,6 +348,51 @@ describe('העולם — every door leads somewhere that exists', () => {
       for (const spot of scene.hotspots) {
         if (spot.prop) expect(props.has(spot.prop.key), `${scene.id}/${spot.id} → ${spot.prop.key}`).toBe(true)
       }
+      for (const layer of scene.layers ?? []) {
+        const known = props.has(layer.art) || LAYER.includes(layer.art as (typeof LAYER)[number])
+        expect(known, `${scene.id} layer → ${layer.art}`).toBe(true)
+      }
+    }
+  })
+
+  // --- הריהוט — the dressing added by the living pass ---------------------------------
+  //
+  // Dressing is the one kind of art that can break a game rather than merely look wrong:
+  // a car parked across a doorway is a door the player cannot use, and nothing in the
+  // engine would ever complain about it. What makes a piece of dressing dangerous is
+  // exactly what makes it feel solid — being depth-sorted INTO the walk band, so the
+  // child passes behind it. So that is the set these two guards check: anything whose
+  // depth reaches the band is standing on the ground the player walks on, and it has to
+  // stand somewhere real and out of every doorway. A banner on a wall and a string of
+  // pennants over the road are neither, and are none of this test's business.
+  const onTheGround = (scene: (typeof scenes)[number], layer: NonNullable<(typeof scenes)[number]['layers']>[number]) =>
+    layer.foot === true && layer.depth >= scene.band.far
+
+  it('stands every piece of street dressing on the ground the player walks on', () => {
+    for (const scene of scenes) {
+      for (const layer of scene.layers ?? []) {
+        if (!onTheGround(scene, layer)) continue
+        expect(layer.x, `${scene.id}/${layer.art} x`).toBeGreaterThan(0)
+        expect(layer.x, `${scene.id}/${layer.art} x`).toBeLessThan(1)
+        expect(layer.y, `${scene.id}/${layer.art} y`).toBeGreaterThanOrEqual(scene.band.far)
+        expect(layer.y, `${scene.id}/${layer.art} y`).toBeLessThanOrEqual(1)
+        // a prop is drawn at the depth of the ground it stands on, or it sorts wrong
+        expect(Math.abs(layer.depth - layer.y), `${scene.id}/${layer.art} depth`).toBeLessThan(0.001)
+      }
+    }
+  })
+
+  it('never parks the dressing in a doorway', () => {
+    for (const scene of scenes) {
+      for (const layer of scene.layers ?? []) {
+        if (!onTheGround(scene, layer)) continue
+        const left = layer.x - layer.w / 2
+        const right = layer.x + layer.w / 2
+        for (const exit of scene.exits) {
+          const clear = right <= exit.x + 0.005 || left >= exit.x + exit.w - 0.005
+          expect(clear, `${scene.id}: ${layer.art} covers the door "${exit.id}"`).toBe(true)
+        }
+      }
     }
   })
 
@@ -451,6 +506,14 @@ describe('בהירות — a first-time player is never asked to guess', () => {
     const tick = world.slice(world.indexOf('private tickClock'), world.indexOf('private timeTriggers'))
     expect(tick).toContain("flags['onboard:street']")
     expect(world).toContain("flag: 'onboard:street'")
+    // …and it is the FIRST thing the tick does. This is the whole invariant, and it is
+    // asserted here rather than in the browser harness because a harness watching a clock
+    // cannot tell "time ran on its own" from "a conversation charged the player twelve
+    // minutes" — both arrive as `clock.advanced`, and one of them is the game working.
+    // The gate is a line of source; read the line.
+    const body = tick.slice(tick.indexOf('{', tick.indexOf('(delta: number)')) + 1)
+    const first = body.split('\n').map((line) => line.trim()).filter(Boolean)[0]
+    expect(first, 'something now runs before the clock gate').toContain("flags['onboard:street']")
   })
 
   it('teaches exactly two things and then stops', () => {
@@ -666,11 +729,36 @@ describe('השיחות — a conversation always has a way out', () => {
   it('offers a way into the ground that needs nothing', () => {
     // Brief §23: the finale may be reached in several believable ways, and §26 says the
     // game does not dead-end. So at least one entry route must be unconditional.
+    //
+    // It follows a `goto` now, and that is the point of the change it was rewritten for.
+    // The old fallback was `talk → entry granted`, which the production directive names
+    // as a defect (§3.2): a fail-safe is not a free solution. The old man now asks a
+    // question first and both answers lead on — so the guard has to check that the way
+    // in is REACHABLE without a condition, not that one branch object happens to carry
+    // the flag. Reachability is what "does not dead-end" always meant.
     const veteran = DIALOGUE['gate-veteran']
     const open = veteran?.branches.filter((branch) => !branch.when) ?? []
     expect(open.length).toBeGreaterThan(0)
-    const grants = open.some((branch) =>
-      (branch.then ?? []).some((effect) => effect.e === 'flag' && effect.flag === 'entry:granted'),
+
+    const grantsFrom = (effects: readonly { e: string; flag?: string; node?: string }[]): boolean => {
+      if (effects.some((effect) => effect.e === 'flag' && effect.flag === 'entry:granted')) return true
+      return effects.some((effect) => {
+        if (effect.e !== 'goto' || !effect.node) return false
+        const next = DIALOGUE[effect.node]
+        // Only an UNCONDITIONAL branch of the node counts — a chained node whose every
+        // branch is gated is a dead end one step further away.
+        return (next?.branches ?? []).some(
+          (branch) =>
+            !branch.when &&
+            (branch.then ?? []).some((e) => e.e === 'flag' && e.flag === 'entry:granted'),
+        )
+      })
+    }
+
+    const grants = open.some(
+      (branch) =>
+        grantsFrom(branch.then ?? []) ||
+        (branch.choices ?? []).some((choice) => !choice.when && grantsFrom(choice.then)),
     )
     expect(grants, 'no unconditional way into the ground').toBe(true)
   })

@@ -87,8 +87,40 @@ export type ExitDef = {
 
 export type Ambience = 'interior' | 'kitchen' | 'day' | 'dusk' | 'tunnel' | 'stadium'
 
-/** A painted object separated from its room, drawn in front of or behind the player. */
-export type LayerDef = { art: string; x: number; y: number; w: number; depth: number }
+/**
+ * A painted object separated from its room, drawn in front of or behind the player.
+ *
+ * The systems pass used this for one thing: splitting the street's foreground plate so a
+ * child could walk behind a pole. The living pass asks it to do a second, larger job —
+ * DRESSING. A backdrop is a photograph of a place with nobody in it; the dressing is
+ * what says people were here this morning. A car left at the kerb, a bin by the kiosk,
+ * pennants over the road, a supporters' coach that is not there at noon and is there at
+ * four. So a layer gained three things, all optional and all additive:
+ *
+ *   · `when` — the same `Condition` vocabulary everything else in this file speaks, so a
+ *     street can change without a line of scene code changing with it;
+ *   · `foot` — anchor the plate by the point it STANDS on rather than its top-left,
+ *     which is the only way to place a car on a pavement that recedes;
+ *   · `flip` / `alpha` / `tint` — the cheap variations, so one 56KB car is two cars.
+ *
+ * `depth` stays explicit and stays in band units (× H, like every actor), because a prop
+ * the child walks behind and a prop he walks in front of differ by one number and that
+ * number should be readable in the content, not inferred.
+ */
+export type LayerDef = {
+  art: string
+  x: number
+  y: number
+  w: number
+  depth: number
+  /** treat (x, y) as the point the object stands on, not its top-left corner */
+  foot?: boolean
+  /** dressing that is only there when the world says it is */
+  when?: Condition
+  flip?: boolean
+  alpha?: number
+  tint?: number
+}
 
 export type SceneDef = {
   id: LocationId
@@ -289,99 +321,125 @@ const SCENES: SceneDef[] = [
   },
 
   // -------------------------------------------------------------------- street ----
+  //
+  // Repainted 2.9.2026 to a purpose-drawn frame (`docs/life/street-backdrop-spec.png`).
+  // The picture that came before it was a beautiful painting with twelve people in it,
+  // and every one of them was frozen for the whole afternoon — which is why a street
+  // with a schedule and an ambient system still read as dead. This one is empty on
+  // purpose: everybody standing in it is drawn by the game.
+  //
+  // It ships in three plates. `streetGround` is the near paving, drawn BEHIND everyone;
+  // the backdrop is the buildings; `streetFore` is the doorway column, the utility pole
+  // and the gate pillar, drawn in FRONT. A child who walks behind a pole is the whole
+  // difference between a painting and a place (brief §27).
   {
     id: 'street',
     titleHe: 'הרחוב',
     art: 'street',
-    band: { far: 0.7, near: 0.94 },
-    size: { far: 0.2, near: 0.32 },
+    band: { far: 0.705, near: 0.86 },
+    size: { far: 0.185, near: 0.29 },
     ambience: 'day',
     stuckHe: 'הקיוסק משמאל, המגרש בסמטה. מזרחה הולכים רק כשיודעים לאן — תשאל מישהו.',
+    layers: [
+      // Behind everybody: the near paving and the kerb, with the tree shadows on it.
+      { art: 'streetGround', x: 0, y: 0, w: 1, depth: 0.69 },
+
+      // --- הרחוב ביום משחק — the dressing -----------------------------------------
+      //
+      // Nothing below changes what the street DOES. It changes what the street is: a
+      // painted set becomes somewhere people live, and — this is the part worth the
+      // work — it changes across the afternoon. Pennants and a flag off a balcony are
+      // up all day, because the neighbourhood knew before the child did. The car at the
+      // kerb belongs to somebody who has not left yet, so it is gone once Kobi goes and
+      // the street empties eastward. A player who crosses this street at noon and again
+      // at four is looking at two different afternoons, and never reads a word about it.
+      { art: 'propBunting', x: 0.245, y: 0.1, w: 0.62, depth: 0.1 },
+      { art: 'propBunting', x: 0.455, y: 0.212, w: 0.56, depth: 0.11, flip: true, alpha: 0.93 },
+      // hung over the wall the graffiti is on, at the height a person hangs a thing
+      { art: 'propBanner', x: 0.598, y: 0.398, w: 0.138, depth: 0.66 },
+      { art: 'propPlanter', x: 0.552, y: 0.736, w: 0.05, depth: 0.736, foot: true },
+      { art: 'propBin', x: 0.352, y: 0.742, w: 0.021, depth: 0.742, foot: true },
+      {
+        art: 'propCar',
+        x: 0.845,
+        y: 0.786,
+        w: 0.1,
+        depth: 0.786,
+        foot: true,
+        when: { beforeMinute: KOBI_LEAVES },
+      },
+
+      // In front of everybody: the pole, the pillar, the doorway column, the canopy.
+      { art: 'streetFore', x: 0, y: 0, w: 1, depth: 0.995 },
+    ],
     spawns: {
-      // Far enough from the front door that arriving in the street does not immediately
-      // offer to send you back inside. A place you have just entered should not greet you
-      // with its exit.
-      fromHome: { x: 0.1, y: 0.9, facing: 'right' },
-      fromKiosk: { x: 0.25, y: 0.9, facing: 'right' },
-      fromPitch: { x: 0.66, y: 0.86, facing: 'left' },
-      fromRoute: { x: 0.94, y: 0.86, facing: 'left' },
+      fromHome: { x: 0.115, y: 0.79, facing: 'right' },
+      fromKiosk: { x: 0.37, y: 0.8, facing: 'right' },
+      fromPitch: { x: 0.55, y: 0.79, facing: 'left' },
+      fromRoute: { x: 0.9, y: 0.81, facing: 'left' },
     },
     actors: [
       {
         id: 'ofir',
         figure: 'ofir',
-        x: 0.3,
-        y: 0.88,
-        size: 0.3,
+        x: 0.185,
+        y: 0.775,
+        size: 0.26,
         nameHe: 'אופיר',
         talk: 'ofir-wall',
         when: { beforeMinute: KOBI_LEAVES },
-        sway: 0.008,
+        sway: 0.006,
+      },
+      {
+        id: 'amit-street',
+        figure: 'amit',
+        x: 0.375,
+        y: 0.755,
+        size: 0.25,
+        nameHe: 'עמית',
+        talk: 'amit-street',
+        sway: 0.003,
+      },
+      {
+        id: 'neighbour',
+        figure: 'adultB1',
+        x: 0.525,
+        y: 0.735,
+        size: 0.22,
+        nameHe: 'יוסף',
+        talk: 'neighbour',
+        sway: 0.004,
       },
       {
         id: 'ofir-later',
         figure: 'ofir',
-        x: 0.62,
-        y: 0.86,
-        size: 0.29,
+        x: 0.665,
+        y: 0.79,
+        size: 0.26,
         nameHe: 'אופיר',
         talk: 'ofir-matchday',
         when: { afterMinute: KOBI_LEAVES },
       },
       {
-        id: 'neighbour',
-        figure: 'oldMan',
-        x: 0.44,
-        y: 0.83,
-        size: 0.26,
-        nameHe: 'שכן',
-        talk: 'neighbour',
-        sway: 0.005,
-      },
-      // עמית עם העיתון — the information family, standing outside the kiosk with the
-      // sports page open at the wrong page. Gone by twenty to three; the schedule takes
-      // him to the pitch and the newspaper goes with him.
-      {
-        id: 'amit-street',
-        figure: 'amit',
-        // Clear of the kiosk doorway at 0.13–0.21 AND of Ofir at 0.30. Two people close
-        // enough to share a reach are one person as far as the button is concerned.
-        x: 0.37,
-        y: 0.87,
-        size: 0.27,
-        nameHe: 'עמית',
-        talk: 'amit-street',
-        sway: 0.004,
-      },
-      // קרן על המדרגה — small, entirely missable, and the only person in the chapter who
-      // talks about the terrace as a place rather than as a result.
-      {
         id: 'keren',
         figure: 'keren',
-        x: 0.57,
-        y: 0.91,
-        size: 0.28,
+        x: 0.715,
+        y: 0.815,
+        size: 0.27,
         nameHe: 'קרן',
         talk: 'keren-street',
         sway: 0.003,
       },
-      {
-        id: 'fan-passing',
-        figure: 'fanD',
-        x: 0.78,
-        y: 0.88,
-        size: 0.3,
-        nameHe: 'אוהד',
-        talk: 'route-fan',
-        when: { afterMinute: KOBI_LEAVES },
-      },
     ],
     hotspots: [
-      { id: 'wall', x: 0.68, y: 0.84, w: 0.08, act: 'wall-writing', verb: 'look', labelHe: 'הכתובת על הקיר' },
+      { id: 'wall', x: 0.6, y: 0.745, w: 0.09, act: 'wall-writing', verb: 'look', labelHe: 'הכתובת על הקיר' },
+      // The pole the whole near side of the street hangs off — stickers, a scrap of a
+      // torn notice, and the one place a child would stop and read something.
+      { id: 'pole', x: 0.82, y: 0.82, w: 0.05, act: 'street-pole', verb: 'look', labelHe: 'העמוד' },
       {
         id: 'coin',
-        x: 0.5,
-        y: 0.92,
+        x: 0.47,
+        y: 0.83,
         w: 0.05,
         act: 'gutter-coin',
         verb: 'take',
@@ -394,51 +452,54 @@ const SCENES: SceneDef[] = [
       {
         id: 'home',
         x: 0.0,
-        y: 0.7,
-        w: 0.032,
-        h: 0.28,
+        y: 0.705,
+        w: 0.085,
+        h: 0.155,
         to: 'home',
         spawn: 'fromStreet',
         labelHe: 'הביתה',
-        light: { x: 0.0, y: 0.6, w: 0.05, h: 0.36, tone: 'inside' },
+        light: { x: 0.008, y: 0.44, w: 0.066, h: 0.3, tone: 'inside' },
         dwellMs: 300,
       },
       {
         id: 'kiosk',
-        x: 0.13,
-        y: 0.86,
-        w: 0.08,
-        h: 0.12,
+        x: 0.235,
+        y: 0.72,
+        w: 0.1,
+        h: 0.14,
         to: 'kiosk',
         spawn: 'fromStreet',
         labelHe: 'לקיוסק',
-        light: { x: 0.075, y: 0.5, w: 0.11, h: 0.42, tone: 'daylight' },
+        light: { x: 0.24, y: 0.42, w: 0.115, h: 0.32, tone: 'inside' },
         // A shop is somewhere you STOP, so its door takes a moment of standing still.
         // Walking past a kiosk on your way east must never put you inside it.
         dwellMs: 900,
       },
       {
         id: 'pitch',
-        x: 0.5,
-        y: 0.7,
-        w: 0.1,
-        h: 0.06,
+        // Shallow on purpose: the alley mouth sits at the BACK of the band, so a child
+        // walking the pavement never falls into it. You go up to it, or you press the
+        // button. A back alley you enter by accident is not a back alley.
+        x: 0.425,
+        y: 0.705,
+        w: 0.08,
+        h: 0.05,
         to: 'pitch',
         spawn: 'fromStreet',
         labelHe: 'לסמטה ולמגרש',
-        light: { x: 0.52, y: 0.42, w: 0.07, h: 0.36, tone: 'inside' },
+        light: { x: 0.425, y: 0.44, w: 0.07, h: 0.3, tone: 'inside' },
         dwellMs: 900,
       },
       {
         id: 'route',
-        x: 0.955,
-        y: 0.68,
-        w: 0.045,
-        h: 0.3,
+        x: 0.945,
+        y: 0.705,
+        w: 0.055,
+        h: 0.155,
         to: 'route',
         spawn: 'fromStreet',
         labelHe: 'מזרחה, אחרי האנשים',
-        light: { x: 0.95, y: 0.55, w: 0.05, h: 0.42, tone: 'daylight' },
+        light: { x: 0.935, y: 0.52, w: 0.065, h: 0.4, tone: 'daylight' },
         dwellMs: 420,
         priority: 2,
         // You cannot follow a crowd you have not noticed. Either Kobi told you there is a
@@ -567,44 +628,70 @@ const SCENES: SceneDef[] = [
   },
 
   // --------------------------------------------------------------------- route ----
+  //
+  // The road east, repainted to `docs/life/route-backdrop-spec.png`: an empty avenue
+  // with crowd barriers stacked against the far pavement, bunting overhead, and — over
+  // the rooftops on the right — the first sight of the ground. Two lattice floodlight
+  // pylons and the curve of one stand, and nothing else of it. That restraint is the
+  // point: the gate is the next scene and the inside is two after that, so this frame
+  // may only promise.
   {
     id: 'route',
     titleHe: 'בדרך לבלומפילד',
     art: 'approach',
-    band: { far: 0.72, near: 0.94 },
-    size: { far: 0.2, near: 0.32 },
+    band: { far: 0.69, near: 0.875 },
+    size: { far: 0.185, near: 0.3 },
     ambience: 'dusk',
+    // The one arrival card that is not the stadium. Stepping out of your own
+    // neighbourhood for the first time deserves a frame of its own, and it is the same
+    // street from further east — a place you know, seen from somewhere you have never
+    // stood (brief §33).
+    arrival: { art: 'streetEast', ms: 3200, flag: 'saw:road' },
     stuckHe: 'כולם הולכים מזרחה. פשוט אל תעצור.',
-    spawns: { fromStreet: { x: 0.05, y: 0.86, facing: 'right' }, fromGround: { x: 0.94, y: 0.86, facing: 'left' } },
+    // The road fills up. A coach parks halfway along it once the ground starts pulling
+    // people in, and the barrier the stewards drag out is there from the moment the
+    // child first walks this way — one of them is a clock, the other is a place.
+    layers: [
+      { art: 'propBarrier', x: 0.6, y: 0.712, w: 0.075, depth: 0.712, foot: true },
+      {
+        art: 'propBus',
+        x: 0.275,
+        y: 0.748,
+        w: 0.205,
+        depth: 0.748,
+        foot: true,
+        when: { afterMinute: KOBI_LEAVES },
+      },
+    ],
+    spawns: { fromStreet: { x: 0.085, y: 0.78, facing: 'right' }, fromGround: { x: 0.915, y: 0.78, facing: 'left' } },
     actors: [
-      { id: 'fan1', figure: 'fanA', x: 0.26, y: 0.88, size: 0.3, nameHe: 'אוהד', talk: 'route-fan' },
-      { id: 'fan2', figure: 'fanC', x: 0.58, y: 0.84, size: 0.28, nameHe: 'אוהד ותיק', talk: 'route-veteran', flip: true },
-      { id: 'fan3', figure: 'fanF', x: 0.78, y: 0.9, size: 0.31, nameHe: 'אוהד', talk: 'route-fan' },
+      { id: 'fan1', figure: 'adultA1', x: 0.135, y: 0.76, size: 0.26, nameHe: 'אוהד', talk: 'route-fan' },
+      { id: 'fan2', figure: 'adultB1', x: 0.45, y: 0.735, size: 0.24, nameHe: 'אוהד ותיק', talk: 'route-veteran' },
+      { id: 'fan3', figure: 'youngA4', x: 0.78, y: 0.8, size: 0.28, nameHe: 'אוהד', talk: 'route-fan' },
     ],
     hotspots: [
-      { id: 'banner', x: 0.42, y: 0.82, w: 0.08, act: 'route-banner', verb: 'look', labelHe: 'השלט' },
+      { id: 'banner', x: 0.2, y: 0.715, w: 0.09, act: 'route-banner', verb: 'look', labelHe: 'השלט' },
       // The street family's reward: a gap between two buildings that everybody who grew
-      // up here uses and nobody who did not would see. It costs nothing and saves the
-      // walk — but only a child who has been paying attention to the neighbourhood can
-      // read it as a way through rather than as a wall.
+      // up here uses and nobody who did not would see.
       {
         id: 'shortcut',
-        x: 0.66,
-        y: 0.8,
-        w: 0.07,
+        x: 0.31,
+        y: 0.7,
+        w: 0.05,
         act: 'route-shortcut',
         verb: 'look',
         labelHe: 'הרווח בין הבתים',
         priority: 2,
       },
+      { id: 'shelter', x: 0.7, y: 0.71, w: 0.08, act: 'route-shelter', verb: 'look', labelHe: 'תחנת האוטובוס' },
     ],
     exits: [
       {
         id: 'back',
         x: 0.0,
-        y: 0.72,
-        w: 0.035,
-        h: 0.26,
+        y: 0.69,
+        w: 0.055,
+        h: 0.185,
         to: 'street',
         spawn: 'fromRoute',
         labelHe: 'חזרה לרחוב',
@@ -612,14 +699,14 @@ const SCENES: SceneDef[] = [
       },
       {
         id: 'ground',
-        x: 0.965,
-        y: 0.72,
-        w: 0.035,
-        h: 0.26,
+        x: 0.945,
+        y: 0.69,
+        w: 0.055,
+        h: 0.185,
         to: 'bloomfield-outside',
         spawn: 'fromRoute',
         labelHe: 'לאצטדיון',
-        light: { x: 0.955, y: 0.5, w: 0.045, h: 0.46, tone: 'daylight' },
+        light: { x: 0.935, y: 0.5, w: 0.065, h: 0.4, tone: 'daylight' },
         dwellMs: 300,
         priority: 2,
       },
@@ -627,72 +714,70 @@ const SCENES: SceneDef[] = [
   },
 
   // -------------------------------------------------------------------- outside ---
+  //
+  // Gate seven, repainted to `docs/life/gate7-backdrop-spec.png` from Maor's approved
+  // 1980s board. Everything in the perimeter is an interaction at the x it is drawn at:
+  // the green palisade, the bank of turnstiles, the barred ticket hatch, and the dark
+  // portal in the middle. The portal is painted DARK on purpose — the engine lights it
+  // from inside, and a doorway that is already bright burns out when the glow lands.
   {
     id: 'bloomfield-outside',
     titleHe: 'בלומפילד — מבחוץ',
     art: 'gate7',
-    band: { far: 0.78, near: 0.96 },
-    size: { far: 0.18, near: 0.27 },
+    band: { far: 0.8, near: 0.95 },
+    size: { far: 0.2, near: 0.29 },
     ambience: 'day',
     stuckHe: 'תדבר עם מישהו. מישהו פה ייקח אותך פנימה.',
-    spawns: { fromRoute: { x: 0.05, y: 0.88, facing: 'right' }, fromTunnel: { x: 0.7, y: 0.92, facing: 'left' } },
+    // Outside a ground on a matchday: barriers stacked where the stewards left them, a
+    // wall somebody has been fly-posting for twenty years, and — taped up by a hand, not
+    // printed by a club — the only line of Hebrew in this frame.
+    layers: [
+      { art: 'propBarriers', x: 0.232, y: 0.826, w: 0.086, depth: 0.826, foot: true },
+      { art: 'propPosters', x: 0.688, y: 0.748, w: 0.084, depth: 0.6, foot: true },
+      { art: 'propSign', x: 0.622, y: 0.63, w: 0.048, depth: 0.6, foot: true },
+    ],
+    spawns: { fromRoute: { x: 0.06, y: 0.87, facing: 'right' }, fromTunnel: { x: 0.66, y: 0.93, facing: 'left' } },
     actors: [
-      { id: 'steward', figure: 'fanB', x: 0.57, y: 0.86, size: 0.24, nameHe: 'סדרן', talk: 'steward' },
-      { id: 'ticket', figure: 'fanG', x: 0.86, y: 0.92, size: 0.26, nameHe: 'הקופאי', talk: 'ticket-window', flip: true },
       {
         id: 'veteran',
-        figure: 'fanC',
-        x: 0.24,
-        y: 0.9,
-        size: 0.26,
+        figure: 'adultB1',
+        x: 0.17,
+        y: 0.88,
+        size: 0.24,
         nameHe: 'אוהד ותיק',
         talk: 'gate-veteran',
-        sway: 0.004,
+        sway: 0.003,
       },
       {
         id: 'ofir-ground',
         figure: 'ofir',
-        x: 0.4,
-        y: 0.92,
-        size: 0.24,
+        x: 0.27,
+        y: 0.91,
+        size: 0.26,
         nameHe: 'אופיר',
         talk: 'ofir-ground',
         when: { bond: { who: 'ofir', min: 40 } },
       },
-      { id: 'crowd-a', figure: 'fanE', x: 0.7, y: 0.94, size: 0.27, nameHe: 'אוהד', talk: 'route-fan', flip: true },
-      // The safe way in, and the one the brief insists on (§26): a child goes through a
+      { id: 'steward', figure: 'adultA4', x: 0.62, y: 0.86, size: 0.23, nameHe: 'סדרן', talk: 'steward' },
+      { id: 'ticket', figure: 'adultA2', x: 0.7, y: 0.9, size: 0.26, nameHe: 'הקופאי', talk: 'ticket-window', flip: true },
+      // The safe way in, and the one the brief insists on (§42): a child goes through a
       // turnstile with a family, in front of a steward, in daylight. Nobody climbs
       // anything. What it costs is the nerve to ask a stranger.
-      {
-        id: 'family',
-        figure: 'fanB',
-        x: 0.66,
-        y: 0.88,
-        size: 0.26,
-        nameHe: 'אבא עם ילד',
-        talk: 'gate-family',
-      },
+      { id: 'family', figure: 'adultA3', x: 0.8, y: 0.92, size: 0.27, nameHe: 'אבא עם ילד', talk: 'gate-family' },
+      { id: 'crowd-a', figure: 'youngB4', x: 0.9, y: 0.94, size: 0.28, nameHe: 'אוהד', talk: 'route-fan', flip: true },
     ],
     hotspots: [
-      { id: 'gate7', x: 0.5, y: 0.8, w: 0.1, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
-      { id: 'fence', x: 0.14, y: 0.82, w: 0.08, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
-      {
-        id: 'turnstile',
-        x: 0.34,
-        y: 0.86,
-        w: 0.08,
-        act: 'gate-turnstile',
-        verb: 'look',
-        labelHe: 'הקרוסלה',
-      },
+      { id: 'gate7', x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
+      { id: 'fence', x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
+      { id: 'turnstile', x: 0.36, y: 0.85, w: 0.09, act: 'gate-turnstile', verb: 'look', labelHe: 'הקרוסלה' },
     ],
     exits: [
       {
         id: 'back',
         x: 0.0,
-        y: 0.78,
-        w: 0.035,
-        h: 0.2,
+        y: 0.8,
+        w: 0.04,
+        h: 0.15,
         to: 'route',
         spawn: 'fromGround',
         labelHe: 'חזרה',
@@ -700,15 +785,15 @@ const SCENES: SceneDef[] = [
       },
       {
         id: 'in',
-        x: 0.44,
-        y: 0.78,
-        w: 0.18,
-        h: 0.12,
+        x: 0.45,
+        y: 0.8,
+        w: 0.13,
+        h: 0.13,
         to: 'bloomfield-tunnel',
         spawn: 'start',
         labelHe: 'פנימה, בשער 7',
         when: { flag: 'entry:granted' },
-        light: { x: 0.46, y: 0.42, w: 0.14, h: 0.42, tone: 'inside' },
+        light: { x: 0.455, y: 0.55, w: 0.125, h: 0.28, tone: 'inside' },
         dwellMs: 260,
         priority: 3,
       },

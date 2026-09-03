@@ -27,6 +27,17 @@ export const BACKDROP = [
   'stand',
   'ussExt',
   'ussHall',
+  /**
+   * ספטמבר 2026 — the purpose-drawn deliveries.
+   *
+   * Every backdrop above is a RECTANGLE of a concept board. These four arrived as
+   * finished frames, drawn to the layout specs in `docs/life/*-spec.png`: an empty
+   * street with no painted people in it, the road east with Bloomfield's floodlight
+   * pylons over the rooftops, and the ground itself at gate seven. `streetEast` is the
+   * same street from further east and is not a location — it is the arrival card the
+   * road plays the first time the child leaves his own neighbourhood.
+   */
+  'streetEast',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -35,10 +46,51 @@ export type BackdropKey = (typeof BACKDROP)[number]
  * A flat painting can only ever be behind the player; one separated object is the whole
  * difference between a backdrop and a room.
  */
-export const LAYER = ['livingTable'] as const
+export const LAYER = ['livingTable', 'streetFore', 'streetGround'] as const
 
 /** Cut-out people. */
 export const FIGURE = [
+  /**
+   * פוגי — the protagonist, and the reason this list changed shape.
+   *
+   * The game shipped with an ILLUSTRATED child standing in painted photographic
+   * streets. No grade fixes a mismatch of medium: he read as a sticker on somebody
+   * else's photograph, and it was the loudest remaining flaw in the build. Pogi is the
+   * same boy the rest of the world is drawn in, at three ages — eight here, then the
+   * conscript and the young man, who ship now so the chapters after this one have a
+   * face waiting for them rather than a placeholder (rule 43).
+   *
+   * The walk is TWO frames, not eight. That is what the sheet contains, and two honest
+   * side-on strides with a bob read as walking; borrowing the old child's eight-frame
+   * cycle would have put a different boy's legs under this boy's shirt.
+   */
+  'pogi',
+  'pogi-3q',
+  'pogi-side',
+  'pogi-back',
+  'pogi-walk',
+  'pogi-scarf',
+  'pogi-arms',
+  'pogi-sit',
+  'pogi-cross',
+  'pogi-cheer',
+  'pogi-kneel',
+  'pogi-hold',
+
+  /**
+   * השכונה — twenty-eight people who are not the cast.
+   *
+   * The ambient system had seven `fan*` cut-outs to work with, so a busy street was the
+   * same four strangers walking past on a loop — which is the exact opposite of what an
+   * ambient system is for. These are fourteen young people and fourteen adults, period
+   * dressed, keyed off green: enough that a player never sees the same face twice on
+   * one screen, and enough that the road east can fill up without repeating.
+   */
+  'youngA1', 'youngA2', 'youngA3', 'youngA4', 'youngA5', 'youngA6', 'youngA7',
+  'youngB1', 'youngB2', 'youngB3', 'youngB4', 'youngB5', 'youngB6', 'youngB7',
+  'adultA1', 'adultA2', 'adultA3', 'adultA4', 'adultA5', 'adultA6', 'adultA7',
+  'adultB1', 'adultB2', 'adultB3', 'adultB4', 'adultB5', 'adultB6', 'adultB7',
+
   'kid',
   'ofir',
   'amit',
@@ -273,21 +325,23 @@ export type FigureKey = (typeof FIGURE)[number]
  * the thing you look at for fifteen minutes.
  */
 export const KID_POSE = {
-  down: 'kid',
-  downSide: 'kid-3q',
-  side: 'kid-side',
-  up: 'kid-back',
+  down: 'pogi',
+  downSide: 'pogi-3q',
+  side: 'pogi-side',
+  up: 'pogi-back',
 } as const
 
-export const KID_WALK = [
-  'kid-walk2',
-  'kid-walk3',
-  'kid-walk4',
-  'kid-walk5',
-  'kid-walk6',
-  'kid-walk7',
-  'kid-walk8',
-] as const
+/**
+ * Two frames, and the scene adds the bob.
+ *
+ * The sheet holds two side-on strides. A two-frame cycle is a real and old solution —
+ * it is what a walking figure reads as when the frames are a full stride apart — and it
+ * is honest about what was drawn. What it must NOT be is the previous child's
+ * eight-frame cycle under this child's shirt, which is a different person from the
+ * knees down. When a proper Pogi walk sheet is drawn, this list grows and nothing else
+ * changes.
+ */
+export const KID_WALK = ['pogi-side', 'pogi-walk'] as const
 
 export const PROP = [
   'propNewspaper',
@@ -297,6 +351,44 @@ export const PROP = [
   'propTicket',
   'propCoffee',
   'propBall',
+  /**
+   * הדברים עצמם — supporter goods and street furniture, cut from the September sheets.
+   *
+   * The red box used to be a list of Hebrew nouns on a card. These are the objects: a
+   * striped scarf somebody put round a child's neck, a pennant, a sticker, a matchbox,
+   * a stack of newspapers. An object you can look at is a memory; a noun is a receipt.
+   */
+  'propScarfRed',
+  'propPennant',
+  'propFlag',
+  'propSticker',
+  'propBadges',
+  'propMatchbox',
+  'propColumn',
+  'propBallReal',
+  'propPapers',
+  'propCoins',
+  /**
+   * ריהוט הרחוב — the things a street holds rather than the things a hand holds.
+   *
+   * A backdrop is a photograph of a place with nobody in it. These are the objects that
+   * make it somewhere people were this morning: a car left at the kerb, a bin by the
+   * kiosk, a coach parked on the road to the ground, pennants strung over the road on
+   * the one day of the year they go up. They are placed as scene DRESSING (`LayerDef`),
+   * at fractions of the backdrop, so they hold their spot at any framing, and several of
+   * them are conditional — the street a player crosses at four o'clock is not the street
+   * they crossed at noon, and it should not look like it either.
+   */
+  'propCar',
+  'propBus',
+  'propBin',
+  'propPlanter',
+  'propBunting',
+  'propBarrier',
+  'propBarriers',
+  'propPosters',
+  'propBanner',
+  'propSign',
 ] as const
 export type PropKey = (typeof PROP)[number]
 

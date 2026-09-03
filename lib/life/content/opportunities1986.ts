@@ -35,6 +35,7 @@ export const OPPORTUNITIES_1986: LifeOpportunity[] = [
     solutionFamilies: ['information', 'social'],
     costs: { minutes: 10 },
     noticeHe: 'אבא בכורסה עם העיתון.',
+    goneHe: 'הכורסה ריקה. העיתון מקופל על המשענת.',
     outcomes: [
       {
         id: 'asked',
@@ -60,6 +61,7 @@ export const OPPORTUNITIES_1986: LifeOpportunity[] = [
     solutionFamilies: ['social', 'street'],
     costs: { minutes: 35, energy: 18 },
     noticeHe: 'שומעים כדור נבעט בסמטה.',
+    goneHe: 'הסמטה שקטה. מישהו לקח את הכדור.',
     outcomes: [
       {
         id: 'played',
@@ -86,6 +88,7 @@ export const OPPORTUNITIES_1986: LifeOpportunity[] = [
     solutionFamilies: ['information'],
     costs: { minutes: 15 },
     noticeHe: 'עמית עומד ליד הקיוסק עם עיתון פתוח.',
+    goneHe: 'המדרכה ליד הקיוסק ריקה. נשארו רק הארגזים.',
     outcomes: [
       {
         id: 'read',
@@ -113,6 +116,7 @@ export const OPPORTUNITIES_1986: LifeOpportunity[] = [
     solutionFamilies: ['social'],
     costs: { minutes: 25 },
     noticeHe: 'אפי מסתובב עם כדור שהוא לא בועט בו.',
+    goneHe: 'הכדור של אפי מונח ליד האבן. הוא לא כזה שמשאיר כדור.',
     outcomes: [
       {
         id: 'went',
@@ -139,6 +143,7 @@ export const OPPORTUNITIES_1986: LifeOpportunity[] = [
     solutionFamilies: ['resource'],
     costs: { minutes: 20 },
     noticeHe: 'הארגז של הבקבוקים עומד ליד הדלת.',
+    goneHe: 'הקיוסק כבר לא לוקח בקבוקים היום.',
     outcomes: [
       {
         id: 'returned',
@@ -163,6 +168,7 @@ export const OPPORTUNITIES_1986: LifeOpportunity[] = [
     solutionFamilies: ['social'],
     costs: { minutes: 10 },
     noticeHe: 'קרן יושבת על המדרגה עם משהו אדום בידיים.',
+    goneHe: 'המדרגה ריקה. נשאר עליה חוט אדום אחד.',
     outcomes: [
       {
         id: 'talked',
