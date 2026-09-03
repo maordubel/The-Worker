@@ -43,18 +43,11 @@
    "yellowLeft": 0
   },
   "street": {
-   "w": 1337,
-   "h": 523,
-   "bytes": 1006931,
-   "source": "stageAenv",
-   "box": [
-    486,
-    30,
-    1094,
-    268
-   ],
-   "deyellowed": 232230,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 625,
+   "bytes": 419369,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "pitch": {
    "w": 1068,
@@ -85,32 +78,18 @@
    "yellowLeft": 0
   },
   "approach": {
-   "w": 1227,
-   "h": 404,
-   "bytes": 772884,
-   "source": "bloom",
-   "box": [
-    406,
-    34,
-    964,
-    218
-   ],
-   "deyellowed": 112358,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 532,
+   "bytes": 343102,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "gate7": {
-   "w": 1205,
-   "h": 451,
-   "bytes": 780090,
-   "source": "bloom",
-   "box": [
-    975,
-    30,
-    1523,
-    235
-   ],
-   "deyellowed": 137073,
-   "yellowLeft": 0
+   "w": 1600,
+   "h": 600,
+   "bytes": 337157,
+   "yellowLeft": 0,
+   "source": "2026-09"
   },
   "ground": {
    "w": 1066,
@@ -195,6 +174,13 @@
    ],
    "deyellowed": 200539,
    "yellowLeft": 0
+  },
+  "streetEast": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 422782,
+   "yellowLeft": 0,
+   "source": "2026-09"
   }
  },
  "figures": {
@@ -507,6 +493,146 @@
    ],
    "deyellowed": 433,
    "yellowLeft": 0
+  },
+  "propScarfRed": {
+   "w": 561,
+   "h": 141,
+   "bytes": 89635,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propPennant": {
+   "w": 146,
+   "h": 276,
+   "bytes": 52293,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propFlag": {
+   "w": 206,
+   "h": 161,
+   "bytes": 38959,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propSticker": {
+   "w": 146,
+   "h": 158,
+   "bytes": 29413,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propBadges": {
+   "w": 107,
+   "h": 78,
+   "bytes": 11127,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propMatchbox": {
+   "w": 131,
+   "h": 91,
+   "bytes": 17816,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propColumn": {
+   "w": 118,
+   "h": 236,
+   "bytes": 60173,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propBallReal": {
+   "w": 105,
+   "h": 111,
+   "bytes": 27662,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propPapers": {
+   "w": 192,
+   "h": 100,
+   "bytes": 35385,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propCoins": {
+   "w": 114,
+   "h": 61,
+   "bytes": 13366,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propCar": {
+   "w": 318,
+   "h": 156,
+   "bytes": 75054,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propBus": {
+   "w": 504,
+   "h": 263,
+   "bytes": 195777,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propBin": {
+   "w": 60,
+   "h": 190,
+   "bytes": 18648,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propPlanter": {
+   "w": 264,
+   "h": 223,
+   "bytes": 94615,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propBunting": {
+   "w": 262,
+   "h": 46,
+   "bytes": 9206,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propBarrier": {
+   "w": 255,
+   "h": 166,
+   "bytes": 29194,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propBarriers": {
+   "w": 301,
+   "h": 183,
+   "bytes": 84087,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propPosters": {
+   "w": 182,
+   "h": 151,
+   "bytes": 62279,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propBanner": {
+   "w": 565,
+   "h": 121,
+   "bytes": 84375,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "propSign": {
+   "w": 301,
+   "h": 142,
+   "bytes": 48305,
+   "yellowLeft": 0,
+   "source": "2026-09"
   }
  },
  "portraits": {
@@ -651,6 +777,20 @@
    ],
    "deyellowed": 9616,
    "yellowLeft": 0
+  },
+  "streetFore": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 610638,
+   "yellowLeft": 0,
+   "source": "2026-09"
+  },
+  "streetGround": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 321714,
+   "yellowLeft": 0,
+   "source": "2026-09"
   }
  }
 }

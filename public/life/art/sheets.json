@@ -1,4 +1,88 @@
 {
+ "adultA1": {
+  "w": 144,
+  "h": 430,
+  "bytes": 75162,
+  "yellowLeft": 0
+ },
+ "adultA2": {
+  "w": 138,
+  "h": 430,
+  "bytes": 81762,
+  "yellowLeft": 0
+ },
+ "adultA3": {
+  "w": 143,
+  "h": 430,
+  "bytes": 78542,
+  "yellowLeft": 0
+ },
+ "adultA4": {
+  "w": 137,
+  "h": 430,
+  "bytes": 77052,
+  "yellowLeft": 0
+ },
+ "adultA5": {
+  "w": 148,
+  "h": 430,
+  "bytes": 73162,
+  "yellowLeft": 0
+ },
+ "adultA6": {
+  "w": 150,
+  "h": 430,
+  "bytes": 81954,
+  "yellowLeft": 0
+ },
+ "adultA7": {
+  "w": 153,
+  "h": 430,
+  "bytes": 79475,
+  "yellowLeft": 0
+ },
+ "adultB1": {
+  "w": 164,
+  "h": 430,
+  "bytes": 68447,
+  "yellowLeft": 0
+ },
+ "adultB2": {
+  "w": 138,
+  "h": 430,
+  "bytes": 73036,
+  "yellowLeft": 0
+ },
+ "adultB3": {
+  "w": 142,
+  "h": 430,
+  "bytes": 74261,
+  "yellowLeft": 0
+ },
+ "adultB4": {
+  "w": 179,
+  "h": 430,
+  "bytes": 85838,
+  "yellowLeft": 0
+ },
+ "adultB5": {
+  "w": 144,
+  "h": 430,
+  "bytes": 73209,
+  "yellowLeft": 0
+ },
+ "adultB6": {
+  "w": 147,
+  "h": 430,
+  "bytes": 84297,
+  "yellowLeft": 0
+ },
+ "adultB7": {
+  "w": 202,
+  "h": 430,
+  "bytes": 66180,
+  "yellowLeft": 0
+ },
  "amit-3q": {
   "w": 214,
   "h": 603,
@@ -1259,6 +1343,264 @@
   "bytes": 37451,
   "yellowLeft": 0
  },
+ "pogi-3q": {
+  "w": 148,
+  "h": 430,
+  "bytes": 57126,
+  "yellowLeft": 0
+ },
+ "pogi-arms": {
+  "w": 144,
+  "h": 430,
+  "bytes": 57722,
+  "yellowLeft": 0
+ },
+ "pogi-back": {
+  "w": 135,
+  "h": 430,
+  "bytes": 54808,
+  "yellowLeft": 0
+ },
+ "pogi-cheer": {
+  "w": 299,
+  "h": 409,
+  "bytes": 133102,
+  "yellowLeft": 0
+ },
+ "pogi-cross": {
+  "w": 249,
+  "h": 350,
+  "bytes": 108176,
+  "yellowLeft": 0
+ },
+ "pogi-hold": {
+  "w": 353,
+  "h": 430,
+  "bytes": 122121,
+  "yellowLeft": 0
+ },
+ "pogi-kneel": {
+  "w": 260,
+  "h": 367,
+  "bytes": 114393,
+  "yellowLeft": 0
+ },
+ "pogi-scarf": {
+  "w": 153,
+  "h": 430,
+  "bytes": 69148,
+  "yellowLeft": 0
+ },
+ "pogi-side": {
+  "w": 186,
+  "h": 430,
+  "bytes": 54081,
+  "yellowLeft": 0
+ },
+ "pogi-sit": {
+  "w": 219,
+  "h": 430,
+  "bytes": 85265,
+  "yellowLeft": 0
+ },
+ "pogi-walk": {
+  "w": 201,
+  "h": 430,
+  "bytes": 69616,
+  "yellowLeft": 0
+ },
+ "pogi": {
+  "w": 153,
+  "h": 430,
+  "bytes": 65966,
+  "yellowLeft": 0
+ },
+ "pogi90-1": {
+  "w": 170,
+  "h": 430,
+  "bytes": 87063,
+  "yellowLeft": 0
+ },
+ "pogi90-2": {
+  "w": 169,
+  "h": 430,
+  "bytes": 86528,
+  "yellowLeft": 0
+ },
+ "pogi90-3": {
+  "w": 138,
+  "h": 430,
+  "bytes": 68527,
+  "yellowLeft": 0
+ },
+ "pogi90-4": {
+  "w": 179,
+  "h": 430,
+  "bytes": 87273,
+  "yellowLeft": 0
+ },
+ "pogi90-5": {
+  "w": 179,
+  "h": 424,
+  "bytes": 81197,
+  "yellowLeft": 0
+ },
+ "pogi90-6": {
+  "w": 195,
+  "h": 427,
+  "bytes": 84826,
+  "yellowLeft": 0
+ },
+ "pogi90-7": {
+  "w": 212,
+  "h": 430,
+  "bytes": 113063,
+  "yellowLeft": 0
+ },
+ "pogi90-8": {
+  "w": 237,
+  "h": 406,
+  "bytes": 104893,
+  "yellowLeft": 0
+ },
+ "pogi90-b1": {
+  "w": 254,
+  "h": 350,
+  "bytes": 99358,
+  "yellowLeft": 0
+ },
+ "pogi90-b2": {
+  "w": 201,
+  "h": 350,
+  "bytes": 79813,
+  "yellowLeft": 0
+ },
+ "pogi90-b3": {
+  "w": 170,
+  "h": 350,
+  "bytes": 78766,
+  "yellowLeft": 0
+ },
+ "pogi90-b4": {
+  "w": 154,
+  "h": 350,
+  "bytes": 65260,
+  "yellowLeft": 0
+ },
+ "pogi90-b5": {
+  "w": 163,
+  "h": 350,
+  "bytes": 59930,
+  "yellowLeft": 0
+ },
+ "pogi90-b6": {
+  "w": 188,
+  "h": 274,
+  "bytes": 72718,
+  "yellowLeft": 0
+ },
+ "pogi90-b7": {
+  "w": 130,
+  "h": 350,
+  "bytes": 58489,
+  "yellowLeft": 0
+ },
+ "pogi90-b8": {
+  "w": 158,
+  "h": 350,
+  "bytes": 61016,
+  "yellowLeft": 0
+ },
+ "pogiIDF-1": {
+  "w": 175,
+  "h": 410,
+  "bytes": 82963,
+  "yellowLeft": 0
+ },
+ "pogiIDF-2": {
+  "w": 190,
+  "h": 408,
+  "bytes": 95060,
+  "yellowLeft": 0
+ },
+ "pogiIDF-3": {
+  "w": 176,
+  "h": 407,
+  "bytes": 78876,
+  "yellowLeft": 0
+ },
+ "pogiIDF-4": {
+  "w": 180,
+  "h": 410,
+  "bytes": 86846,
+  "yellowLeft": 0
+ },
+ "pogiIDF-5": {
+  "w": 204,
+  "h": 399,
+  "bytes": 88826,
+  "yellowLeft": 0
+ },
+ "pogiIDF-6": {
+  "w": 190,
+  "h": 410,
+  "bytes": 91977,
+  "yellowLeft": 0
+ },
+ "pogiIDF-7": {
+  "w": 330,
+  "h": 313,
+  "bytes": 107286,
+  "yellowLeft": 0
+ },
+ "pogiIDF-b1": {
+  "w": 185,
+  "h": 370,
+  "bytes": 89176,
+  "yellowLeft": 0
+ },
+ "pogiIDF-b2": {
+  "w": 103,
+  "h": 370,
+  "bytes": 33153,
+  "yellowLeft": 0
+ },
+ "pogiIDF-b3": {
+  "w": 162,
+  "h": 370,
+  "bytes": 79893,
+  "yellowLeft": 0
+ },
+ "pogiIDF-b4": {
+  "w": 224,
+  "h": 370,
+  "bytes": 97784,
+  "yellowLeft": 0
+ },
+ "pogiIDF-b5": {
+  "w": 207,
+  "h": 370,
+  "bytes": 77897,
+  "yellowLeft": 0
+ },
+ "pogiIDF-b6": {
+  "w": 217,
+  "h": 370,
+  "bytes": 91086,
+  "yellowLeft": 0
+ },
+ "pogiIDF-b7": {
+  "w": 201,
+  "h": 370,
+  "bytes": 64541,
+  "yellowLeft": 0
+ },
+ "pogiIDF-b8": {
+  "w": 166,
+  "h": 370,
+  "bytes": 76450,
+  "yellowLeft": 0
+ },
  "rachel-smoke": {
   "w": 294,
   "h": 654,
@@ -1275,6 +1617,90 @@
   "w": 246,
   "h": 498,
   "bytes": 138874,
+  "yellowLeft": 0
+ },
+ "youngA1": {
+  "w": 194,
+  "h": 422,
+  "bytes": 83692,
+  "yellowLeft": 0
+ },
+ "youngA2": {
+  "w": 143,
+  "h": 430,
+  "bytes": 67536,
+  "yellowLeft": 0
+ },
+ "youngA3": {
+  "w": 178,
+  "h": 430,
+  "bytes": 78597,
+  "yellowLeft": 0
+ },
+ "youngA4": {
+  "w": 125,
+  "h": 427,
+  "bytes": 72771,
+  "yellowLeft": 0
+ },
+ "youngA5": {
+  "w": 134,
+  "h": 423,
+  "bytes": 76827,
+  "yellowLeft": 0
+ },
+ "youngA6": {
+  "w": 144,
+  "h": 430,
+  "bytes": 75428,
+  "yellowLeft": 0
+ },
+ "youngA7": {
+  "w": 166,
+  "h": 430,
+  "bytes": 62836,
+  "yellowLeft": 0
+ },
+ "youngB1": {
+  "w": 210,
+  "h": 430,
+  "bytes": 77258,
+  "yellowLeft": 0
+ },
+ "youngB2": {
+  "w": 127,
+  "h": 430,
+  "bytes": 76521,
+  "yellowLeft": 0
+ },
+ "youngB3": {
+  "w": 145,
+  "h": 430,
+  "bytes": 65852,
+  "yellowLeft": 0
+ },
+ "youngB4": {
+  "w": 164,
+  "h": 430,
+  "bytes": 89339,
+  "yellowLeft": 0
+ },
+ "youngB5": {
+  "w": 153,
+  "h": 430,
+  "bytes": 78827,
+  "yellowLeft": 0
+ },
+ "youngB6": {
+  "w": 187,
+  "h": 430,
+  "bytes": 82559,
+  "yellowLeft": 0
+ },
+ "youngB7": {
+  "w": 144,
+  "h": 419,
+  "bytes": 73061,
   "yellowLeft": 0
  }
 }
