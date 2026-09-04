@@ -105,6 +105,14 @@ export type LifeRuntime = {
    * which doors are open right now.
    */
   places(): MapPlace[]
+  /** speak to something by conversation id — the panorama's marks use this */
+  talk(id: string): void
+  /** the panorama was closed by the player; the world resumes */
+  closePano(): void
+  /** the boy stepped out of the first-person tunnel */
+  finishTunnel(): void
+  /** how far down the tunnel he is, 0..1 — the shell's sound follows it */
+  tunnelProgress(p: number): void
   /** walk there — the minutes are charged to the clock like any journey; refused if locked */
   goTo(id: string): boolean
   /** cut the log back to the start of the chapter; false when there is none */
@@ -223,6 +231,10 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     // scene still exists but is not running, and a door pressed on it would restart it
     // underneath whatever is playing.
     places: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.places() ?? [] : []),
+    talk: (id: string) => worldScene()?.talk(id),
+    closePano: () => worldScene()?.closePano(),
+    finishTunnel: () => worldScene()?.finishTunnel(),
+    tunnelProgress: () => undefined,
     goTo: (id: string) => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.goTo(id) ?? false : false),
     restartDay: () => options.engine.restartDay(),
     debug: {

@@ -101,6 +101,7 @@ const config: Config = {
         'sheet-in': 'sheet-in 260ms var(--ease-stamp) both',
         'plate-bump': 'plate-bump 300ms var(--ease-stamp) both',
         'caret-blink': 'caret-blink 900ms steps(1, end) infinite',
+        'push-in': 'push-in 6000ms linear both',
       },
     },
   },

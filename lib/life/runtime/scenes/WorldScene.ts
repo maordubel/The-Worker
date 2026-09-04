@@ -13,6 +13,8 @@ import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type Histo
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
 import { ALL_SCENES, arrivalFor, artFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
+import type { PanoSpot } from '../bus'
+import { PANO_SPOTS } from '../../content/panoramas'
 import { KOBI_LEAVES_LATE, KOBI_SAYS_LEAVING } from '../../content/schedules1990'
 import type { HistoricalAnchor } from '../../anchors'
 import { buildFinale } from '../../finale'
@@ -498,13 +500,10 @@ export class WorldScene extends Phaser.Scene {
       const near = this.add.image(-0.075 * this.W, this.H, `art-${keys.near}`).setOrigin(0, 1).setDepth(7000)
       near.setScale(1.16)
       near.setScrollFactor(1.16, 1)
-      near.setAlpha(0.92)
-      // WebGL only; on canvas the plane is simply sharp, which is still a plane.
-      try {
-        near.postFX?.addBlur(0, 1, 1, 0.55)
-      } catch {
-        /* no post pipeline on this renderer */
-      }
+      // No blur: a post-FX pass on a full-screen plane halved the frame rate on the
+      // software renderer and would do the same on a 2019 phone. The scale and the
+      // speed are the depth; the alpha is the air between.
+      near.setAlpha(0.9)
     }
   }
 
@@ -1855,6 +1854,12 @@ export class WorldScene extends Phaser.Scene {
       this.net.talk(target.act)
       return
     }
+    if (target.act.startsWith('pano:')) {
+      const key = target.act.slice(5)
+      const look = PANO_SPOTS[key]
+      if (look) this.openPano(key, look.titleHe, look.spots, undefined, look.startYaw ?? 0)
+      return
+    }
     if (!this.ctx.dialogue.start(target.act)) this.ctx.bus.emit('prompt', null)
   }
 
@@ -1878,10 +1883,16 @@ export class WorldScene extends Phaser.Scene {
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'saw:morning' })
       this.time.delayedCall(900, () => {
         this.ctx.dialogue.startLines(SCHOOL_MORNING_1990, () => {
-          // The next movement is the derby, not the decade: the brief's order is
-          // Ussishkin (11.3.1991) first, and only then 1991–1993.
-          this.ctx.bus.emit('card', { titleHe: 'אוסישקין', subHe: 'המערכה השנייה של שלב ב׳ — בקרוב', ms: 2600 })
-          this.refresh()
+          // Sitting up in bed: the morning after, from his own eyes — then the card.
+          const look = PANO_SPOTS['panoBedroomMorning90']
+          const card = () => {
+            // The next movement is the derby, not the decade: the brief's order is
+            // Ussishkin (11.3.1991) first, and only then 1991–1993.
+            this.ctx.bus.emit('card', { titleHe: 'אוסישקין', subHe: 'המערכה השנייה של שלב ב׳ — בקרוב', ms: 2600 })
+            this.refresh()
+          }
+          if (look) this.openPano('panoBedroomMorning90', look.titleHe, look.spots, card, look.startYaw ?? 0)
+          else card()
         })
       })
     }
@@ -1994,8 +2005,23 @@ export class WorldScene extends Phaser.Scene {
     if (this.dwell >= (inside.dwellMs ?? 320)) this.travel(inside.to, inside.spawn)
   }
 
+  /** where the tunnel walk is taking him, while it plays */
+  private tunnelTo: { to: LocationId; spawn: string } | null = null
+
   private travel(to: LocationId, spawn: string) {
     if (this.paused) return
+    // 1986, the first time under the stand: the corridor is walked in first person
+    // (`TunnelWalk`), and the tunnel room itself is skipped — the walk IS the tunnel.
+    if (to === 'bloomfield-tunnel' && this.chapter === '1986' && !this.ctx.engine.state.flags['saw:tunnelWalk']) {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'saw:tunnelWalk' })
+      this.paused = true
+      this.tunnelTo = { to: 'bloomfield-inside', spawn: 'start' }
+      this.ctx.bus.emit('prompt', null)
+      this.ctx.bus.emit('controls', { visible: false })
+      this.ctx.bus.emit('sound', { kind: 'door' })
+      this.ctx.bus.emit('tunnel', this.tunnelTo)
+      return
+    }
     this.paused = true
     this.ctx.bus.emit('prompt', null)
     if (to === 'street' && !this.ctx.engine.state.flags['onboard:street']) {
@@ -2111,26 +2137,38 @@ export class WorldScene extends Phaser.Scene {
              * and they belong to the one room whose consequences they are.
              */
             if (this.def.id !== 'bloomfield-inside') return
-            this.time.delayedCall(2200, () =>
-              this.ctx.bus.emit('anchor', { anchor: this.anchor, showing: true }),
-            )
-            // הגעת לבד — the single fact Stage A is really about, recorded once, at the
-            // only moment it is unambiguously true: the child is inside the ground and
-            // his father did not bring him.
-            if (!this.ctx.engine.state.flags['went:alone']) {
-              this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'went:alone' })
+            // 1986, the first time: before the day goes on, the boy is allowed to LOOK.
+            // The panorama is his eyes at the mouth of the tunnel; the consequences of
+            // arriving wait until he has turned round in it.
+            const look = PANO_SPOTS['panoReveal']
+            if (this.chapter === '1986' && look && !this.ctx.engine.state.flags['saw:panoReveal']) {
+              this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'saw:panoReveal' })
+              this.openPano('panoReveal', look.titleHe, look.spots, () => this.arrivedInside(), look.startYaw ?? 0)
+              return
             }
-            if (this.ctx.engine.state.flags['match:over']) {
-              this.matchPhase = 'over'
-              this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'arrived:late' })
-              this.refresh()
-            } else {
-              this.beginMatch()
-            }
+            this.arrivedInside()
           },
         })
       },
     })
+  }
+
+  /** the consequences of being inside the ground — after the card, after the look */
+  private arrivedInside() {
+    this.time.delayedCall(2200, () => this.ctx.bus.emit('anchor', { anchor: this.anchor, showing: true }))
+    // הגעת לבד — the single fact Stage A is really about, recorded once, at the only
+    // moment it is unambiguously true: the child is inside the ground and his father
+    // did not bring him.
+    if (!this.ctx.engine.state.flags['went:alone']) {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'went:alone' })
+    }
+    if (this.ctx.engine.state.flags['match:over']) {
+      this.matchPhase = 'over'
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'arrived:late' })
+      this.refresh()
+    } else {
+      this.beginMatch()
+    }
   }
 
   /**
@@ -2685,6 +2723,58 @@ export class WorldScene extends Phaser.Scene {
     } else {
       this.idleFor = 0
     }
+  }
+
+  // ------------------------------------------------------------------- the look ---
+
+  /** what to do when the player closes the panorama */
+  private afterPano: (() => void) | null = null
+
+  /**
+   * מבט — hand the glass to the boy's eyes. The world pauses; the shell draws the
+   * panorama; the marks in it start conversations through `talk`; `closePano` gives
+   * the world back and runs whatever was waiting (the anchor card, the kickoff).
+   */
+  openPano(key: string, titleHe: string, hotspots: PanoSpot[], after?: () => void, startYaw = 0) {
+    this.paused = true
+    this.afterPano = after ?? null
+    this.ctx.bus.emit('prompt', null)
+    this.ctx.bus.emit('controls', { visible: false })
+    this.ctx.bus.emit('pano', { key, titleHe, startYaw, hotspots })
+  }
+
+  /** out of the corridor and into the light: the terrace, with its card and its look */
+  finishTunnel() {
+    const target = this.tunnelTo
+    this.tunnelTo = null
+    this.ctx.bus.emit('tunnel', null)
+    if (!target) {
+      this.paused = false
+      return
+    }
+    this.cameras.main.fadeOut(200, 237, 230, 216)
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      void this.ctx.engine.save()
+      this.scene.restart({ mapId: target.to, spawn: target.spawn, from: 'bloomfield-tunnel' })
+    })
+  }
+
+  closePano() {
+    this.ctx.bus.emit('pano', null)
+    this.ctx.bus.emit('controls', { visible: true })
+    this.paused = false
+    const after = this.afterPano
+    this.afterPano = null
+    after?.()
+  }
+
+  /** a conversation by id, from anywhere the shell can point — the panorama's marks */
+  talk(id: string) {
+    if (id.startsWith('net:') && this.net) {
+      this.net.talk(id)
+      return
+    }
+    this.ctx.dialogue.start(id)
   }
 
   /** Developer-only: where the child is, as the doors see him — for the probes. */

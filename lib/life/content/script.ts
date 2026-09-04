@@ -35,6 +35,13 @@ export type Say = {
   /** null is narration — the child's own eyes, not a speaker */
   who: string | null
   text: string
+  /**
+   * קלוז-אפ — the face fills the glass for this one line (4.9.2026). An art key from
+   * `CLOSE_UP` in `art.ts`; the box stays, the world behind it becomes the face. Used
+   * on a handful of lines per chapter — "איפה היית?!", "נו?" — never on a whole
+   * conversation, because a close-up that lasts is a portrait, not a beat.
+   */
+  closeUp?: string
 }
 
 export type Effect =

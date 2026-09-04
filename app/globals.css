@@ -537,6 +537,7 @@ select {
   100% { transform: rotate(-2deg) scale(1); }
 }
 @keyframes caret-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+@keyframes push-in { from { transform: scale(1.02); opacity: 0; } 8% { opacity: 1; } to { transform: scale(1.09); opacity: 1; } }
 
 @keyframes crawl {
   from { transform: translateX(0); }

@@ -626,6 +626,44 @@ export const PORTRAIT_ART = [
  * its sky slower than its wall and its lamp post faster, which is the whole of depth.
  */
 export const PARALLAX = ['street', 'approach', 'gate7', 'stand'] as const
+
+/**
+ * קלוז-אפ — a face filling the glass for one line (`Say.closeUp`). 1080×1350, the
+ * place blurred behind the person, painted in the moment's own light. Until the
+ * cinematic plates land, each key falls back to the speaker's portrait plate
+ * (`CLOSE_UP_FALLBACK`), drawn large — a stand-in, and an honest one.
+ */
+export const CLOSE_UP = [
+  'cuKobiWhere', 'cuKobiTable', 'cuRachelNu', 'cuRachelWatch',
+  'cuPogiReveal', 'cuOfir90', 'cuTeacherShare', 'cuUsherNight',
+] as const
+/** the plates that have actually been painted and ingested — the rest show the portrait */
+export const CLOSE_UP_PAINTED: readonly string[] = []
+export const CLOSE_UP_FALLBACK: Record<(typeof CLOSE_UP)[number], string> = {
+  cuKobiWhere: 'faceKobi',
+  cuKobiTable: 'faceKobi',
+  cuRachelNu: 'faceRachel90',
+  cuRachelWatch: 'faceRachel90',
+  cuPogiReveal: 'facePogi-wide',
+  cuOfir90: 'faceOfir',
+  cuTeacherShare: 'faceTeacher-glasses',
+  cuUsherNight: 'faceFan',
+}
+
+/**
+ * פנורמות — 360° cylindrical, 4096×1024, horizon at 48%. The moments the game turns
+ * into the boy's own eyes. Until the painted panoramas land, `make-panoramas.py`
+ * builds a stand-in for each from the room's flat painting (mirrored to wrap).
+ */
+export const PANORAMA = [
+  'panoReveal', 'panoTerrace1986', 'panoUssHall', 'panoUssDerby',
+  'panoKitchen90', 'panoBedroomMorning90', 'panoGate7', 'panoClassroom',
+] as const
+
+/** the tunnel, first person: six tiling textures and two sprites */
+export const TUNNEL_TEXTURE = [
+  'texTunnelWall', 'texTunnelWallPoster', 'texTunnelFloor', 'texTunnelCeiling', 'texTunnelSteps', 'texTunnelDoor',
+] as const
 export function parallaxKeys(art: string): { far: string; mid: string; near: string } {
   return { far: `${art}--far`, mid: `${art}--mid`, near: `${art}--near` }
 }

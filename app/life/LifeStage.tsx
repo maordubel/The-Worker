@@ -11,6 +11,9 @@ import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { EndingCard } from '@/components/life/EndingCard'
 import { PlaceCard, Stamp, TitleCard } from '@/components/life/Stamp'
+import { CloseUp } from '@/components/life/CloseUp'
+import { Panorama } from '@/components/life/Panorama'
+import { TunnelWalk } from '@/components/life/TunnelWalk'
 import { LifeAudio, type AmbienceKey } from '@/lib/life/runtime/audio'
 import { HistoricalCutscene } from '@/components/life/HistoricalCutscene'
 import { LifeHud } from '@/components/life/LifeHud'
@@ -76,6 +79,8 @@ export function LifeStage({
   const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
   const [finale, setFinale] = useState<LifeBusEvents['finale']>(null)
   const [titleCard, setTitleCard] = useState<LifeBusEvents['card']>(null)
+  const [pano, setPano] = useState<LifeBusEvents['pano']>(null)
+  const [tunnel, setTunnel] = useState<LifeBusEvents['tunnel']>(null)
   /** the plate that names a room as you step into it — not on the first room of a session */
   const [placeCard, setPlaceCard] = useState<{ titleHe: string; subHe: string | null } | null>(null)
   const lastPlace = useRef<string | null>(null)
@@ -197,6 +202,13 @@ export function LifeStage({
     unsubscribe.push(bus.on('cutscene', setCutscene))
     unsubscribe.push(bus.on('finale', setFinale))
     unsubscribe.push(bus.on('card', setTitleCard))
+    unsubscribe.push(bus.on('pano', setPano))
+    unsubscribe.push(
+      bus.on('tunnel', (value) => {
+        setTunnel(value)
+        if (value) sfx.setAmbience('tunnel')
+      }),
+    )
     unsubscribe.push(
       bus.on('place', (place) => {
         // The first room of a session is named by the HUD alone; every door after it gets
@@ -446,6 +458,19 @@ export function LifeStage({
     runtime.current?.pause(false)
   }, [])
 
+  const finishTunnel = useCallback(() => {
+    runtime.current?.finishTunnel()
+  }, [])
+  const tunnelHeard = useRef(false)
+  const tunnelProgress = useCallback((p: number) => {
+    // the crowd comes through the concrete halfway down; the terrace takes over at the end
+    if (p > 0.45 && !tunnelHeard.current) {
+      tunnelHeard.current = true
+      audio.current?.setAmbience('stadium')
+    }
+    if (p < 0.1) tunnelHeard.current = false
+  }, [])
+
   const openMap = useCallback(() => {
     const current = runtime.current
     if (!current) return
@@ -489,7 +514,7 @@ export function LifeStage({
   /** the painting fills the glass; the shell floats over it */
   const fullBleed = frame <= 0
   /** every overlay that must hide the in-world controls */
-  const covered = Boolean(dialogue || ending || card || cutscene || snapshot || menu || places)
+  const covered = Boolean(dialogue || ending || card || cutscene || snapshot || menu || places || pano || tunnel)
 
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
@@ -597,6 +622,16 @@ export function LifeStage({
         {toast && !cutscene && <Stamp toast={toast} />}
         {placeCard && !cutscene && !titleCard && !toast && <PlaceCard titleHe={placeCard.titleHe} subHe={placeCard.subHe} />}
 
+        {tunnel && !cutscene && (
+          <TunnelWalk
+            onDone={finishTunnel}
+            onProgress={tunnelProgress}
+          />
+        )}
+        {pano && !cutscene && (
+          <Panorama pano={pano} onTalk={(id) => runtime.current?.talk(id)} onClose={() => runtime.current?.closePano()} />
+        )}
+        {dialogue?.lines[0]?.closeUp && !cutscene && !pano && <CloseUp art={dialogue.lines[0].closeUp} />}
         {dialogue && (
           <DialogueBox
             lines={dialogue.lines}

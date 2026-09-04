@@ -17,7 +17,8 @@ import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
-import { BACKDROP, extensionKeys, FIGURE, KID_POSE, KID_WALK, LAYER, PROP } from '@/lib/life/runtime/art'
+import { BACKDROP, extensionKeys, FIGURE, KID_POSE, KID_WALK, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
+import { PANO_SPOTS } from '@/lib/life/content/panoramas'
 import { ERA_1986, ERA_1990 } from '@/lib/life/content/era'
 import { inEra } from '@/lib/life/world/scenes'
 import { meets } from '@/lib/life/world/types'
@@ -606,12 +607,37 @@ describe('העולם — every door leads somewhere that exists', () => {
       for (const spot of scene.hotspots) {
         // `net:*` is spoken by the 1990 match director, not by the registry
         if (spot.act.startsWith('net:')) continue
+        // `pano:*` opens a panorama; its marks are checked below
+        if (spot.act.startsWith('pano:')) {
+          const look = PANO_SPOTS[spot.act.slice(5)]
+          expect(look, `${scene.id}/${spot.id} → ${spot.act} has no panorama`).toBeDefined()
+          expect(PANORAMA as readonly string[], `${spot.act} is not a panorama key`).toContain(spot.act.slice(5))
+          for (const mark of look?.spots ?? []) {
+            if (mark.act.startsWith('net:')) continue
+            expect(DIALOGUE[mark.act], `${spot.act} → ${mark.labelHe} → ${mark.act}`).toBeDefined()
+          }
+          continue
+        }
         expect(DIALOGUE[spot.act], `${scene.id}/${spot.id} → ${spot.act}`).toBeDefined()
       }
       for (const actor of scene.actors) {
         if (actor.talk?.startsWith('net:')) continue
         if (!actor.talk) continue
         expect(DIALOGUE[actor.talk], `${scene.id}/${actor.id} → ${actor.talk}`).toBeDefined()
+      }
+    }
+  })
+
+  it('has a painting and living marks behind every panorama', () => {
+    for (const key of PANORAMA) {
+      expect(existsSync(join(ART, `${key}.png`)), `${key}.png`).toBe(true)
+      const look = PANO_SPOTS[key]
+      expect(look, `${key} has no marks`).toBeDefined()
+      for (const mark of look?.spots ?? []) {
+        if (mark.act.startsWith('net:')) continue
+        expect(DIALOGUE[mark.act], `${key} → ${mark.labelHe} → ${mark.act}`).toBeDefined()
+        expect(Math.abs(mark.yaw), `${key} → ${mark.labelHe}: yaw is degrees in (-180, 180]`).toBeLessThanOrEqual(180)
+        expect(Math.abs(mark.pitch), `${key} → ${mark.labelHe}: pitch is inside a 4:1 cylinder`).toBeLessThanOrEqual(40)
       }
     }
   })

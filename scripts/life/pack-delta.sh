@@ -15,9 +15,15 @@ git status --short --untracked-files=all \
   > /tmp/delta-files.txt
 grep -v '^public/life/art/' /tmp/delta-files.txt > /tmp/delta-code.txt
 grep '^public/life/art/' /tmp/delta-files.txt > /tmp/delta-art.txt || true
-# only files that exist (deletions cannot travel through the web uploader anyway)
-while read -r f; do [ -f "$f" ] && echo "$f"; done < /tmp/delta-code.txt > /tmp/delta-code-ok.txt
-while read -r f; do [ -f "$f" ] && echo "$f"; done < /tmp/delta-art.txt > /tmp/delta-art-ok.txt
+# only files that exist (deletions cannot travel through the web uploader anyway), and
+# only files whose bytes differ from origin/main — what Maor already uploaded stays out
+git fetch -q origin 2>/dev/null || true
+same_as_origin() {
+  theirs=$(git rev-parse -q --verify "origin/main:$1" 2>/dev/null) || return 1
+  [ "$theirs" = "$(git hash-object "$1")" ]
+}
+while read -r f; do [ -f "$f" ] && ! same_as_origin "$f" && echo "$f"; done < /tmp/delta-code.txt > /tmp/delta-code-ok.txt
+while read -r f; do [ -f "$f" ] && ! same_as_origin "$f" && echo "$f"; done < /tmp/delta-art.txt > /tmp/delta-art-ok.txt
 # GitHub's web uploader takes at most 100 files per drop, so every archive is split into
 # parts of 100 — code-1, code-2, art-1, art-2 … — and Maor uploads them one after another.
 rm -f "$OUT"/the-worker-delta-"$N"-*.zip

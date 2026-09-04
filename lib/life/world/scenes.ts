@@ -23,7 +23,7 @@ export const KOBI_LEAVES = at(15, 10)
 export const FULL_TIME = at(17, 45)
 
 /** What pressing the button will DO. The prompt is built from this plus the name. */
-export type Verb = 'talk' | 'look' | 'take' | 'buy' | 'enter' | 'exit' | 'play' | 'watch'
+export type Verb = 'talk' | 'look' | 'take' | 'buy' | 'enter' | 'exit' | 'play' | 'watch' | 'gaze' | 'sit'
 
 /**
  * לאיזה עידן — which chapter a thing in a room belongs to.
@@ -456,6 +456,8 @@ const SCENES: SceneDef[] = [
       { id: 'table', x: 0.86, y: 0.9, w: 0.12, act: 'kitchen-table', verb: 'look', labelHe: 'השולחן' },
       // 1990: the paper open on the table, and the radio beside it.
       { id: 'table-1990', era: '1990', x: 0.86, y: 0.78, w: 0.07, act: 'table-1990', verb: 'look', labelHe: 'הטבלה', priority: 2 },
+      // sit down at the table: the kitchen from the boy's own chair
+      { id: 'chair-1990', era: '1990', x: 0.7, y: 0.8, w: 0.06, act: 'pano:panoKitchen90', verb: 'sit', labelHe: 'לשולחן' },
       // ON the table, beside the paper: drawn on the oilcloth, reached from the floor in
       // front of it.
       { id: 'radio-1990', era: '1990', x: 0.93, y: 0.78, w: 0.05, act: 'radio-table-1990', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
@@ -1057,6 +1059,7 @@ const SCENES: SceneDef[] = [
     ],
     hotspots: [
       { id: 'gate7', era: '*', x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
+      { id: 'look-gate', era: '1990', x: 0.25, y: 0.9, w: 0.07, act: 'pano:panoGate7', verb: 'gaze', labelHe: 'סביב' },
       { id: 'fence', era: '*', x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
       { id: 'turnstile', era: '*', x: 0.36, y: 0.85, w: 0.09, act: 'gate-turnstile', verb: 'look', labelHe: 'הקרוסלה' },
     ],
@@ -1237,6 +1240,7 @@ const SCENES: SceneDef[] = [
     // which is the whole reason to walk over and look at it.
     hotspots: [
       { id: 'rail', era: '*', x: 0.155, y: 0.92, w: 0.12, act: 'terrace-rail', verb: 'look', labelHe: 'המעקה' },
+      { id: 'look-terrace', era: '1986', x: 0.3, y: 0.93, w: 0.08, act: 'pano:panoTerrace1986', verb: 'gaze', labelHe: 'סביב', when: { flag: 'saw:reveal' } },
       // 1990: the radio on the concrete, only while it is there (see the director).
       { id: 'radio-floor', era: '1990', x: 0.38, y: 0.96, w: 0.09, act: 'net:floor', verb: 'take', labelHe: 'הטרנזיסטור על הרצפה', when: { flag: 'radio:dropped' }, priority: 5, prop: { key: 'propRadio', size: 0.04 } },
     ],
@@ -1347,6 +1351,7 @@ const SCENES: SceneDef[] = [
       { id: 'usher', era: '*', figure: 'usher', x: 0.2, y: 0.9, size: 0.3, nameHe: 'סדרן', talk: 'usher-hall', sway: 0.003 },
     ],
     hotspots: [
+      { id: 'look-hall', era: '*', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssHall', verb: 'gaze', labelHe: 'סביב', priority: 3 },
       { id: 'parquet', era: '*', x: 0.4, y: 0.88, w: 0.1, act: 'uss-parquet', verb: 'look', labelHe: 'הפרקט' },
       { id: 'stand', era: '*', x: 0.55, y: 0.78, w: 0.12, act: 'uss-stand', verb: 'look', labelHe: 'היציע' },
       { id: 'windows', era: '*', x: 0.75, y: 0.8, w: 0.1, act: 'uss-windows', verb: 'look', labelHe: 'החלונות' },

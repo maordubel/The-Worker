@@ -178,7 +178,7 @@ export class DialogueRunner {
     }
     const last = this.index === this.lines.length - 1
     this.bus.emit('dialogue', {
-      lines: [line],
+      lines: [line.closeUp ? { who: line.who, text: line.text, closeUp: line.closeUp } : { who: line.who, text: line.text }],
       portrait: line.who ? (this.portraits[line.who] ?? null) : null,
       choices: last && this.pendingChoices ? this.renderChoices(this.pendingChoices) : undefined,
     })

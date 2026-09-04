@@ -17,10 +17,14 @@ import type { LocationId } from '../types'
  * listeners is a dependency to maintain forever.
  */
 
+export type PanoSpot = { yaw: number; pitch: number; labelHe: string; act: string }
+
 export type DialogueLine = {
   /** speaker's display name, or null for narration */
   who: string | null
   text: string
+  /** the face that fills the glass for this line — see `Say.closeUp` */
+  closeUp?: string
 }
 
 export type DialogueChoice = {
@@ -64,6 +68,13 @@ export type LifeBusEvents = {
    */
   toast: { text: string; tone: 'plain' | 'red'; art?: string; kickerHe?: string } | null
   place: { id: LocationId; title: string; ambience?: string }
+  /**
+   * מבט — the world seen from the boy's eyes, for a moment. The shell draws
+   * `Panorama`; the scene under it is paused until `closePano`.
+   */
+  pano: { key: string; titleHe: string; startYaw?: number; hotspots: PanoSpot[] } | null
+  /** the tunnel, first person: the shell draws `TunnelWalk`; `finishTunnel` arrives */
+  tunnel: { to: LocationId; spawn: string } | null
   /** the sound of the world — one-shots the shell's synthesiser plays; see `audio.ts` */
   sound: { kind: 'step'; surface: 'floor' | 'street' | 'terrace' } | { kind: 'door' } | { kind: 'whistle'; blasts: number } | { kind: 'roar'; big?: number } | { kind: 'radio'; on: boolean }
   anchor: { anchor: HistoricalAnchor; showing: boolean }

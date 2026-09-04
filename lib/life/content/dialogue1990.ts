@@ -191,7 +191,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { flag: 'found:kobi' },
         lines: [
-          { who: 'רחל', text: 'נו?' },
+          { who: 'רחל', text: 'נו?', closeUp: 'cuRachelNu' },
           { who: null, text: 'שניכם, ביחד:' },
           { who: 'פוגי', text: 'עלינו.' },
           { who: 'רחל', text: 'יופי. נעליים בחוץ.' },
@@ -661,7 +661,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
       },
       {
         lines: [
-          { who: 'פוגי', text: 'איפה היית?!' },
+          { who: 'פוגי', text: 'איפה היית?!', closeUp: 'cuKobiWhere' },
           { who: 'קובי', text: 'אני?! איפה אתה היית?!' },
           { who: 'פוגי', text: 'עלינו!' },
           { who: 'קובי', text: 'אני יודע!' },

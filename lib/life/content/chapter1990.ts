@@ -64,7 +64,7 @@ export const PASSAGE_CARD_HE = 'מאי 1990'
 /** The first thing said in 1990, at the kitchen table, before the player has control. */
 export const TABLE_1990: Say[] = [
   { who: null, text: 'שולחן המטבח. עיתון, עיפרון, קפה, וטרנזיסטור עם אנטנה מכופפת.' },
-  { who: 'קובי', text: 'נו, כמה צריך?' },
+  { who: 'קובי', text: 'נו, כמה צריך?', closeUp: 'cuKobiTable' },
   { who: 'פוגי', text: 'רגע.' },
   { who: 'קובי', text: 'מה רגע?' },
   { who: 'פוגי', text: 'אני מחשב.' },
@@ -160,5 +160,5 @@ export const SCHOOL_MORNING_1990: Say[] = [
   { who: 'רחל', text: 'מה זה שם?' },
   { who: 'פוגי', text: 'כלום.' },
   { who: null, text: 'אתה דוחף אותו עמוק יותר, ויוצא לבוקר רגיל לגמרי.' },
-  { who: 'אופיר', text: 'בא לאוסישקין השבוע?' },
+  { who: 'אופיר', text: 'בא לאוסישקין השבוע?', closeUp: 'cuOfir90' },
 ]
