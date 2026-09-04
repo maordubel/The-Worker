@@ -1043,6 +1043,34 @@
    "bytes": 321580,
    "yellowLeft": 0,
    "source": "2026-09"
+  },
+  "overlaySmoke": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 126771,
+   "yellowLeft": 0,
+   "source": "2026-09d"
+  },
+  "overlayConfetti": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 144315,
+   "yellowLeft": 0,
+   "source": "2026-09d"
+  },
+  "overlayHaze": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 258767,
+   "yellowLeft": 0,
+   "source": "2026-09d"
+  },
+  "overlayMist": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 156903,
+   "yellowLeft": 0,
+   "source": "2026-09d"
   }
  },
  "docs": {
