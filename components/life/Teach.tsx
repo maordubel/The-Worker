@@ -13,7 +13,7 @@ import { t, type MessageKey } from '@/lib/i18n'
 export function Teach({ id, touch }: { id: 'move' | 'act'; touch: boolean }) {
   const key = `life.teach.${id}.${touch ? 'touch' : 'desktop'}` as MessageKey
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-[62px] z-20 flex justify-center px-gutter">
+    <div className="pointer-events-none absolute inset-x-0 top-[calc(104px+env(safe-area-inset-top))] z-20 flex justify-center px-gutter">
       <span className="border-hair border-ink bg-ink/85 px-3 py-1.5 font-body text-[11px] leading-none text-sheet">
         <bdi>{t(key)}</bdi>
       </span>

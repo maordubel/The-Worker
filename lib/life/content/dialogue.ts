@@ -1,6 +1,7 @@
 import { at } from '../clock'
 import { KOBI_LEAVES } from '../world/scenes'
 
+import { CONVERSATIONS_1990 } from './dialogue1990'
 import type { Conversation } from './script'
 
 /**
@@ -1558,6 +1559,11 @@ const CONVERSATIONS: Conversation[] = [
   },
 ]
 
+/**
+ * One registry, every chapter. A conversation id is global on purpose — `steward` is the
+ * 1986 steward and `steward-1990` the 1990 one, and a scene names which it wants — so a
+ * second chapter is a second content file and not a second runner (brief §52).
+ */
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
-  CONVERSATIONS.map((conversation) => [conversation.id, conversation]),
+  [...CONVERSATIONS, ...CONVERSATIONS_1990].map((conversation) => [conversation.id, conversation]),
 )

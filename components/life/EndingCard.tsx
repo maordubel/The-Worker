@@ -1,6 +1,6 @@
 'use client'
 
-import { LifeLine } from '@/components/life/LifeLine'
+import { LifeLine, ageReached } from '@/components/life/LifeLine'
 import { artUrl } from '@/lib/life/runtime/art'
 import { t } from '@/lib/i18n'
 
@@ -17,6 +17,7 @@ export function EndingCard({
   bodyHe,
   memoryHe,
   after,
+  chapter = '1986',
   onClose,
 }: {
   titleHe: string
@@ -24,10 +25,14 @@ export function EndingCard({
   memoryHe: string
   /** two plates of one person, one from today and one from a decade away */
   after?: { fromArt: string; toArt: string; lineHe: string } | null
+  /** which Saturday this card closes — it decides which slot of the life lights up */
+  chapter?: string
   onClose: () => void
 }) {
+  // 1986's second plate is the man fifteen years on; 1990's is the same man tomorrow.
+  const nowKey = chapter === '1990' ? 'life.after.next' : 'life.after.now'
   return (
-    <div className="pointer-events-auto absolute inset-0 z-50 flex items-center justify-center bg-ink/85 p-gutter">
+    <div className="pointer-events-auto absolute inset-0 z-50 flex items-center justify-center bg-ink/85 p-gutter" data-life="ending">
       <div className="max-h-full w-full max-w-md overflow-y-auto border-rule border-sheet bg-ink">
         <div className="px-5 pb-5 pt-6">
           <div className="h-[6px] w-16 bg-red" aria-hidden="true" />
@@ -48,7 +53,7 @@ export function EndingCard({
               <div className="grid grid-cols-2 gap-px bg-concrete/30">
                 {[
                   { art: after.fromArt, label: t('life.after.then') },
-                  { art: after.toArt, label: t('life.after.now') },
+                  { art: after.toArt, label: t(nowKey) },
                 ].map((plate) => (
                   <figure key={plate.art} className="bg-ink">
                     <div className="flex h-[132px] items-end justify-center overflow-hidden">
@@ -73,7 +78,7 @@ export function EndingCard({
           )}
 
           <div className="mt-4">
-            <LifeLine reached={0} />
+            <LifeLine reached={ageReached(chapter)} />
           </div>
 
           <button

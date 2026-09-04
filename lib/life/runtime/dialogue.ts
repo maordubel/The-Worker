@@ -1,7 +1,6 @@
 import type { HistoricalAnchor } from '../anchors'
-import { PORTRAIT } from '../content/chapter1986'
 import { DIALOGUE } from '../content/dialogue'
-import { OPPORTUNITY } from '../content/opportunities1986'
+import { anchorFor, eraFor, type AnchorSet } from '../content/era'
 import type { ChoiceDef, Conversation, ConversationShot, Effect, Say } from '../content/script'
 import type { LifeEngine } from '../engine'
 import type { LifeEvent } from '../events'
@@ -47,8 +46,19 @@ export class DialogueRunner {
     private readonly engine: LifeEngine,
     private readonly bus: LifeBus,
     private hooks: DialogueHooks,
-    private anchor: HistoricalAnchor,
+    private readonly fallbackAnchor: HistoricalAnchor,
+    private readonly anchors: AnchorSet = {},
   ) {}
+
+  /** the plates of the chapter being played — the boy's face is four years older in 1990 */
+  private get portraits(): Record<string, string> {
+    return eraFor(this.engine.state.chapter).portraits
+  }
+
+  /** the anchor of the chapter being played — `{anchor}` in a 1990 line is the 1990 fact */
+  private get anchor(): HistoricalAnchor {
+    return anchorFor(this.anchors, eraFor(this.engine.state.chapter), this.fallbackAnchor)
+  }
 
   setHooks(hooks: DialogueHooks) {
     this.hooks = hooks
@@ -168,7 +178,7 @@ export class DialogueRunner {
     const last = this.index === this.lines.length - 1
     this.bus.emit('dialogue', {
       lines: [line],
-      portrait: line.who ? (PORTRAIT[line.who] ?? null) : null,
+      portrait: line.who ? (this.portraits[line.who] ?? null) : null,
       choices: last && this.pendingChoices ? this.renderChoices(this.pendingChoices) : undefined,
     })
   }
@@ -177,7 +187,7 @@ export class DialogueRunner {
     const line = this.lines[this.lines.length - 1]
     this.bus.emit('dialogue', {
       lines: line ? [line] : [],
-      portrait: line?.who ? (PORTRAIT[line.who] ?? null) : null,
+      portrait: line?.who ? (this.portraits[line.who] ?? null) : null,
       choices: this.renderChoices(this.pendingChoices ?? []),
     })
   }
@@ -307,7 +317,7 @@ export class DialogueRunner {
          * itself a cheaper price than the window it belongs to.
          */
         case 'seize': {
-          const opportunity = OPPORTUNITY[effect.opportunity]
+          const opportunity = eraFor(this.engine.state.chapter).opportunities.find((entry) => entry.id === effect.opportunity)
           if (!opportunity) break
           if (!isAvailable(this.engine.state, opportunity)) break
           for (const event of acceptEvents(opportunity)) events.push(event)

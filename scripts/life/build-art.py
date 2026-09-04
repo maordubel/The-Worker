@@ -101,6 +101,18 @@ TRUE_YELLOW_SAT = 0.55
 TRUE_YELLOW_HUE = (38.0, 70.0)
 SAFE_SAT = 0.26
 
+# Which way a real yellow leaves the band depends on which side of it the pixel came from.
+#
+# The first finished terrace painting (`stand`, 3.9.2026) had a sunlit pitch — yellow-green
+# grass at hue 58–68, saturated — and rotating every true yellow DOWN to hue 26 turned the
+# whole pitch to rust: a brown field in a game about a football ground. Grass is not
+# yellow, it is green that the sun has leaned on, and the way off the band for it is UP,
+# past the scanner's ceiling, not down into orange. Anything from the split upward goes to
+# a green just clear of `SCAN_HUE`; anything below it is gold or mustard and still goes to
+# the badge's warm brown.
+GREEN_SPLIT = 55.0
+SAFE_GREEN_HUE = 82.0
+
 _cache = {}
 
 
@@ -175,8 +187,12 @@ def deyellow(im):
                 if s < SAT_MIN or v < VAL_MIN or not (HUE_MIN <= hh <= HUE_MAX):
                     q = p
                 elif s >= TRUE_YELLOW_SAT and TRUE_YELLOW_HUE[0] <= hh <= TRUE_YELLOW_HUE[1]:
-                    # a real yellow: move the hue off the band entirely
-                    q = hsv_to_rgb(SAFE_HUE, min(0.86, s * 0.9), v)
+                    # a real yellow: move the hue off the band entirely — down for gold,
+                    # UP for sunlit grass (see GREEN_SPLIT)
+                    if hh >= GREEN_SPLIT:
+                        q = hsv_to_rgb(SAFE_GREEN_HUE, min(0.86, s * 0.9), v)
+                    else:
+                        q = hsv_to_rgb(SAFE_HUE, min(0.86, s * 0.9), v)
                 elif s > SAFE_SAT:
                     # olive, khaki, brass, warm skin: keep the colour, lose the claim —
                     # and lose it gradually, so the treatment has no visible edge in it

@@ -25,8 +25,29 @@ export const FULL_TIME = at(17, 45)
 /** What pressing the button will DO. The prompt is built from this plus the name. */
 export type Verb = 'talk' | 'look' | 'take' | 'buy' | 'enter' | 'exit' | 'play' | 'watch'
 
+/**
+ * לאיזה עידן — which chapter a thing in a room belongs to.
+ *
+ * The rooms are shared between chapters; the people in them are not. An actor, hotspot or
+ * layer with no `era` belongs to 1986 — the chapter every room was written for — so that
+ * adding a second chapter did not mean touching four hundred lines that were already
+ * right. `'*'` is for the things that are true in every year: a wall, a pole, a rail.
+ */
+export type EraTag = string | '*'
+
+export function inEra(def: { era?: EraTag }, chapter: string, fallback: EraTag = '1986'): boolean {
+  const era = def.era ?? fallback
+  return era === '*' || era === chapter
+}
+
+/** Doors are geography: a door with no era is a door in every year. */
+export function exitInEra(exit: ExitDef, chapter: string): boolean {
+  return inEra(exit, chapter, '*')
+}
+
 export type ActorDef = {
   id: string
+  era?: EraTag
   figure: string
   x: number
   y: number
@@ -40,6 +61,7 @@ export type ActorDef = {
 
 export type HotspotDef = {
   id: string
+  era?: EraTag
   x: number
   y: number
   w?: number
@@ -48,7 +70,12 @@ export type HotspotDef = {
   verb: Verb
   labelHe: string
   when?: Condition
-  prop?: { key: string; size: number }
+  /**
+   * A thing drawn in the world for this hotspot. `at` is where it is DRAWN when that is
+   * not where you stand to use it — a radio on a table is drawn on the tabletop and
+   * reached from the floor in front of it.
+   */
+  prop?: { key: string; size: number; at?: { x: number; y: number } }
   /** higher wins when two things are within reach at once */
   priority?: number
 }
@@ -61,6 +88,7 @@ export type HotspotDef = {
  */
 export type ExitDef = {
   id: string
+  era?: EraTag
   x: number
   y: number
   w: number
@@ -109,6 +137,7 @@ export type Ambience = 'interior' | 'kitchen' | 'day' | 'dusk' | 'tunnel' | 'sta
  */
 export type LayerDef = {
   art: string
+  era?: EraTag
   x: number
   y: number
   w: number
@@ -147,8 +176,26 @@ export type SceneDef = {
   layers?: LayerDef[]
   ambience: Ambience
   arrival?: { art: string; ms: number; flag: string }
+  /**
+   * The arrival card by chapter, where a chapter needs a different one — or none. `null`
+   * means the room plays NO card in that year: in 1990 the boy is not seeing the road or
+   * the terrace for the first time (brief §12: "he knows this place").
+   */
+  arrivalByEra?: Record<string, { art: string; ms: number; flag: string } | null>
   /** what somebody in the room says if the player has been lost for a while */
   stuckHe?: string
+  /** the same line, for a chapter whose locks are different */
+  stuckByEra?: Record<string, string>
+}
+
+/** the arrival card this room plays in this chapter, if any */
+export function arrivalFor(scene: SceneDef, chapter: string): { art: string; ms: number; flag: string } | null {
+  if (scene.arrivalByEra && chapter in scene.arrivalByEra) return scene.arrivalByEra[chapter] ?? null
+  return scene.arrival ?? null
+}
+
+export function stuckFor(scene: SceneDef, chapter: string): string | null {
+  return scene.stuckByEra?.[chapter] ?? scene.stuckHe ?? null
 }
 
 const SCENES: SceneDef[] = [
@@ -161,11 +208,15 @@ const SCENES: SceneDef[] = [
     size: { far: 0.3, near: 0.38 },
     ambience: 'interior',
     stuckHe: 'המפתח במגירה, בקצה שמאל. משם גם הדלת לסלון.',
+    stuckByEra: { '1990': 'הדלת לסלון — משמאל. אבא במטבח.' },
     spawns: { start: { x: 0.3, y: 0.93, facing: 'left' }, fromHome: { x: 0.14, y: 0.9, facing: 'right' } },
     actors: [],
     hotspots: [
       { id: 'bed', x: 0.47, y: 0.92, w: 0.14, act: 'bed', verb: 'look', labelHe: 'המיטה' },
       { id: 'poster', x: 0.72, y: 0.9, w: 0.1, act: 'poster', verb: 'look', labelHe: 'הכרזה' },
+      // 1990: the same room, four years on. The drawer holds the scarf now, not a key.
+      { id: 'bed-1990', era: '1990', x: 0.47, y: 0.92, w: 0.14, act: 'bed-1990', verb: 'look', labelHe: 'המיטה' },
+      { id: 'drawer-1990', era: '1990', x: 0.17, y: 0.9, w: 0.16, act: 'drawer-1990', verb: 'look', labelHe: 'המגירה' },
       // Wider than a drawer needs to be: it is the one thing in this room the chapter
       // cannot start without, so a child crossing the room at any speed is offered it.
       // It is NOT given priority — the door beside it must still win in the doorway, or
@@ -240,11 +291,28 @@ const SCENES: SceneDef[] = [
         when: { beforeMinute: KOBI_LEAVES },
         sway: 0.003,
       },
+      // 1990: Rachel moves through the flat; the schedule puts her here after half past one.
+      {
+        id: 'rachel-home',
+        era: '1990',
+        figure: 'rachel',
+        // By the sofa, not on the kitchen doorway's spawn — a mother the boy walked
+        // out of the kitchen INTO was the first thing the 1990 board showed.
+        x: 0.6,
+        y: 0.84,
+        size: 0.45,
+        nameHe: 'רחל',
+        talk: 'rachel-1990',
+        sway: 0.004,
+      },
     ],
     hotspots: [
       { id: 'radio', x: 0.13, y: 0.78, w: 0.1, act: 'radio', verb: 'watch', labelHe: 'הטלוויזיה' },
       { id: 'photo', x: 0.42, y: 0.76, w: 0.08, act: 'family-photo', verb: 'look', labelHe: 'התמונות' },
       { id: 'table', x: 0.45, y: 0.84, w: 0.1, act: 'coffee-table', verb: 'look', labelHe: 'השולחן' },
+      // 1990: the phone rings when you pass it, and the photograph is four years older.
+      { id: 'phone-1990', era: '1990', x: 0.13, y: 0.78, w: 0.1, act: 'phone-1990', verb: 'look', labelHe: 'הטלפון' },
+      { id: 'photo-1990', era: '1990', x: 0.42, y: 0.76, w: 0.08, act: 'photo-1990', verb: 'look', labelHe: 'התמונות' },
     ],
     exits: [
       {
@@ -310,6 +378,7 @@ const SCENES: SceneDef[] = [
     size: { far: 0.24, near: 0.38 },
     ambience: 'kitchen',
     stuckHe: 'חזרה לסלון — משמאל.',
+    stuckByEra: { '1990': 'הטבלה על השולחן, אבא לידה. חזרה לסלון — משמאל.' },
     spawns: { fromHome: { x: 0.2, y: 0.9, facing: 'right' } },
     actors: [
       {
@@ -322,6 +391,36 @@ const SCENES: SceneDef[] = [
         talk: 'rachel-kitchen',
         sway: 0.004,
       },
+      // ---- 1990: the kitchen table is where the chapter opens ----
+      {
+        id: 'kobi-table',
+        era: '1990',
+        figure: 'kobi90-paper',
+        // At the table, on the near chair, at the back of the room — the table in the
+        // painting stands against the far wall, so a father "at the table" sits on the
+        // far line of the band, small, not in the middle of the floor at full size.
+        // On the near chair itself — the chairs in the painting stand at 0.77–0.8, feet
+        // on the 0.68 line, the band's far edge. Actor size is absolute, not banded: a
+        // man sitting that far back is drawn at the far line's size, times a sitting man.
+        x: 0.785,
+        y: 0.68,
+        size: 0.2,
+        nameHe: 'קובי',
+        talk: 'kobi-table-1990',
+      },
+      {
+        id: 'rachel-kitchen',
+        era: '1990',
+        figure: 'rachel',
+        // At the sink, on the far line — out of the doorway the boy walks in through.
+        // At 0.3/0.9 she stood on the spawn's path and he walked into her.
+        x: 0.42,
+        y: 0.73,
+        size: 0.32,
+        nameHe: 'רחל',
+        talk: 'rachel-1990',
+        sway: 0.004,
+      },
     ],
     hotspots: [
       // On the floor at the end of the run of cupboards, which is where a crate of empties
@@ -329,6 +428,11 @@ const SCENES: SceneDef[] = [
       { id: 'crate', x: 0.3, y: 0.92, w: 0.11, act: 'bottles', verb: 'take', labelHe: 'הבקבוקים' },
       // The little table under the mirror, with the oilcloth on it and the chairs pushed in.
       { id: 'table', x: 0.86, y: 0.9, w: 0.12, act: 'kitchen-table', verb: 'look', labelHe: 'השולחן' },
+      // 1990: the paper open on the table, and the radio beside it.
+      { id: 'table-1990', era: '1990', x: 0.86, y: 0.78, w: 0.07, act: 'table-1990', verb: 'look', labelHe: 'הטבלה', priority: 2 },
+      // ON the table, beside the paper: drawn on the oilcloth, reached from the floor in
+      // front of it.
+      { id: 'radio-1990', era: '1990', x: 0.93, y: 0.78, w: 0.05, act: 'radio-table-1990', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
     ],
     exits: [
       {
@@ -366,6 +470,7 @@ const SCENES: SceneDef[] = [
     size: { far: 0.185, near: 0.29 },
     ambience: 'day',
     stuckHe: 'הקיוסק משמאל, המגרש בסמטה. מזרחה הולכים רק כשיודעים לאן — תשאל מישהו.',
+    stuckByEra: { '1990': 'אופיר ועמית ליד הקיוסק. מזרחה — אחרי האדומים.' },
     layers: [
       // Behind everybody: the near paving and the kerb, with the tree shadows on it.
       { art: 'streetGround', x: 0, y: 0, w: 1, depth: 0.69 },
@@ -403,7 +508,7 @@ const SCENES: SceneDef[] = [
       fromKiosk: { x: 0.37, y: 0.8, facing: 'right' },
       fromPitch: { x: 0.55, y: 0.79, facing: 'left' },
       fromRoute: { x: 0.9, y: 0.81, facing: 'left' },
-      fromUss: { x: 0.58, y: 0.8, facing: 'left' },
+      fromUss: { x: 0.83, y: 0.81, facing: 'left' },
     },
     actors: [
       {
@@ -422,7 +527,7 @@ const SCENES: SceneDef[] = [
         figure: 'amit',
         x: 0.375,
         y: 0.755,
-        size: 0.25,
+        size: 0.28,
         nameHe: 'עמית',
         talk: 'amit-street',
         sway: 0.003,
@@ -462,9 +567,45 @@ const SCENES: SceneDef[] = [
         talk: 'keren-street',
         sway: 0.003,
       },
+      // ---- 1990: the same street, older children ----
+      {
+        id: 'ofir-street',
+        era: '1990',
+        figure: 'ofir90',
+        x: 0.2,
+        y: 0.78,
+        size: 0.28,
+        nameHe: 'אופיר',
+        talk: 'ofir-1990',
+        sway: 0.004,
+      },
+      {
+        id: 'amit-street',
+        era: '1990',
+        figure: 'amit90',
+        x: 0.57,
+        y: 0.79,
+        size: 0.31,
+        nameHe: 'עמית',
+        talk: 'amit-1990',
+      },
+      { id: 'kobi-walk', era: '1990', figure: 'kobi90-side', x: 0.15, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-found-1990', flip: true, when: { flag: 'found:kobi' } },
+      {
+        id: 'veteran',
+        era: '1990',
+        figure: 'adultA3',
+        x: 0.66,
+        y: 0.8,
+        size: 0.32,
+        nameHe: 'אוהד ותיק',
+        talk: 'veteran-1990',
+        flip: true,
+        sway: 0.003,
+      },
     ],
     hotspots: [
-      { id: 'wall', x: 0.6, y: 0.745, w: 0.09, act: 'wall-writing', verb: 'look', labelHe: 'הכתובת על הקיר' },
+      { id: 'wall', era: '*', x: 0.6, y: 0.745, w: 0.09, act: 'wall-writing', verb: 'look', labelHe: 'הכתובת על הקיר' },
+      { id: 'poster-1990', era: '1990', x: 0.82, y: 0.82, w: 0.05, act: 'poster-1990', verb: 'look', labelHe: 'המודעה על העמוד' },
       // The pole the whole near side of the street hangs off — stickers, a scrap of a
       // torn notice, and the one place a child would stop and read something.
       { id: 'pole', x: 0.82, y: 0.82, w: 0.05, act: 'street-pole', verb: 'look', labelHe: 'העמוד' },
@@ -523,19 +664,23 @@ const SCENES: SceneDef[] = [
         dwellMs: 900,
       },
       {
-        // The neighbourhood sports hall, Ussishkin. A place you STOP (dwell 900), set
-        // back from the pavement so walking east never pulls the child inside. Its real
-        // home is a dedicated 1980s basketball beat; for now the door is open so the
-        // hall can be walked into and seen.
+        // The neighbourhood sports hall, Ussishkin. Not a door in this frame — the hall is
+        // down the side street that opens east of the painted wall, so the exit sits in
+        // that gap (0.725–0.79), between the wall's end and the pole. It was first placed
+        // ON the wall (0.64–0.72): a doorway through the graffiti, on top of the `wall`
+        // hotspot and on the exact spot where Ofir (14:50) and Keren stand — the
+        // schedule guard in life-systems caught it. A place you STOP (dwell 900), so
+        // walking east never pulls the child in. Its real home is a dedicated 1980s
+        // basketball beat; for now the way is open so the hall can be walked to and seen.
         id: 'ussishkin',
-        x: 0.64,
+        x: 0.725,
         y: 0.705,
-        w: 0.08,
+        w: 0.065,
         h: 0.15,
         to: 'ussishkin-outside',
         spawn: 'fromStreet',
         labelHe: 'לאולם אוסישקין',
-        light: { x: 0.645, y: 0.46, w: 0.07, h: 0.3, tone: 'inside' },
+        light: { x: 0.73, y: 0.5, w: 0.055, h: 0.26, tone: 'daylight' },
         dwellMs: 900,
       },
       {
@@ -574,11 +719,16 @@ const SCENES: SceneDef[] = [
     size: { far: 0.2, near: 0.32 },
     ambience: 'day',
     stuckHe: 'בעל הקיוסק מחכה. לצאת — ימינה.',
+    stuckByEra: { '1990': 'אופיר ועמית פה. הרחוב — ימינה, ומשם מזרחה.' },
     spawns: { fromStreet: { x: 0.74, y: 0.93, facing: 'left' } },
     actors: [
       {
         id: 'shopkeeper',
-        figure: 'oldMan',
+        // `oldMan` is a chibi cut from the first concept board — big head, painted
+        // outline — standing in a photoreal kiosk beside a photoreal Amit. Until a drawn
+        // shopkeeper arrives (ART-PROMPTS §2.3) he is one of the September adults: a man
+        // in a white shirt and glasses, which is what a kiosk owner in Jaffa looks like.
+        figure: 'adultB2',
         x: 0.3,
         y: 0.9,
         size: 0.34,
@@ -594,13 +744,27 @@ const SCENES: SceneDef[] = [
         figure: 'amit',
         x: 0.66,
         y: 0.9,
-        size: 0.27,
+        size: 0.31,
         nameHe: 'עמית',
         talk: 'amit-kiosk',
         flip: true,
       },
+      // ---- 1990 ----
+      {
+        id: 'shopkeeper-1990',
+        era: '1990',
+        figure: 'adultB2',
+        x: 0.3,
+        y: 0.9,
+        size: 0.38,
+        nameHe: 'בעל הקיוסק',
+        talk: 'kiosk-man-1990',
+        sway: 0.004,
+      },
+      { id: 'ofir-kiosk', era: '1990', figure: 'ofir90', x: 0.6, y: 0.92, size: 0.3, nameHe: 'אופיר', talk: 'ofir-1990', flip: true },
+      { id: 'amit-kiosk', era: '1990', figure: 'amit90', x: 0.5, y: 0.95, size: 0.33, nameHe: 'עמית', talk: 'amit-1990' },
     ],
-    hotspots: [{ id: 'counter', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' }],
+    hotspots: [{ id: 'counter', era: '*', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' }],
     exits: [
       {
         id: 'out',
@@ -726,7 +890,9 @@ const SCENES: SceneDef[] = [
     // street from further east — a place you know, seen from somewhere you have never
     // stood (brief §33).
     arrival: { art: 'streetEast', ms: 3200, flag: 'saw:road' },
+    arrivalByEra: { '1990': null },
     stuckHe: 'כולם הולכים מזרחה. פשוט אל תעצור.',
+    stuckByEra: { '1990': 'שער 7 בקצה הדרך. אבא כבר שם.' },
     // The road fills up. A coach parks halfway along it once the ground starts pulling
     // people in, and the barrier the stewards drag out is there from the moment the
     // child first walks this way — one of them is a clock, the other is a place.
@@ -747,9 +913,13 @@ const SCENES: SceneDef[] = [
       { id: 'fan1', figure: 'adultA1', x: 0.135, y: 0.76, size: 0.26, nameHe: 'אוהד', talk: 'route-fan' },
       { id: 'fan2', figure: 'adultB1', x: 0.45, y: 0.735, size: 0.24, nameHe: 'אוהד ותיק', talk: 'route-veteran' },
       { id: 'fan3', figure: 'youngA4', x: 0.78, y: 0.8, size: 0.28, nameHe: 'אוהד', talk: 'route-fan' },
+      // ---- 1990: a man walking with a radio to his ear, and Kobi beside you on the way home ----
+      { id: 'radio-walker', era: '1990', figure: 'adultA5', x: 0.5, y: 0.8, size: 0.32, nameHe: 'אוהד עם רדיו', talk: 'radio-walker-1990', sway: 0.03 },
+      { id: 'kobi-walk', era: '1990', figure: 'kobi90-side', x: 0.84, y: 0.8, size: 0.3, nameHe: 'קובי', talk: 'kobi-found-1990', flip: true, when: { flag: 'found:kobi' } },
     ],
     hotspots: [
-      { id: 'banner', x: 0.2, y: 0.715, w: 0.09, act: 'route-banner', verb: 'look', labelHe: 'השלט' },
+      { id: 'banner', era: '*', x: 0.2, y: 0.715, w: 0.09, act: 'route-banner', verb: 'look', labelHe: 'השלט' },
+      { id: 'stream-1990', era: '1990', x: 0.5, y: 0.86, w: 0.12, act: 'route-stream-1990', verb: 'look', labelHe: 'הנהר האדום' },
       // The street family's reward: a gap between two buildings that everybody who grew
       // up here uses and nobody who did not would see.
       {
@@ -812,6 +982,7 @@ const SCENES: SceneDef[] = [
     // `reveal`; the arrival is the arrival, not a place you stand.
     arrival: { art: 'ground', ms: 3200, flag: 'saw:ground' },
     stuckHe: 'תדבר עם מישהו. מישהו פה ייקח אותך פנימה.',
+    stuckByEra: { '1990': 'שער 7. אבא אמר ליד העמוד. הקופה — מימין.' },
     // Outside a ground on a matchday: barriers stacked where the stewards left them, a
     // wall somebody has been fly-posting for twenty years, and — taped up by a hand, not
     // printed by a club — the only line of Hebrew in this frame.
@@ -837,7 +1008,7 @@ const SCENES: SceneDef[] = [
         figure: 'ofir',
         x: 0.27,
         y: 0.91,
-        size: 0.26,
+        size: 0.29,
         nameHe: 'אופיר',
         talk: 'ofir-ground',
         when: { bond: { who: 'ofir', min: 40 } },
@@ -849,11 +1020,17 @@ const SCENES: SceneDef[] = [
       // anything. What it costs is the nerve to ask a stranger.
       { id: 'family', figure: 'adultA3', x: 0.8, y: 0.92, size: 0.27, nameHe: 'אבא עם ילד', talk: 'gate-family' },
       { id: 'crowd-a', figure: 'youngB4', x: 0.9, y: 0.94, size: 0.28, nameHe: 'אוהד', talk: 'route-fan', flip: true },
+      // ---- 1990: gate seven is home ----
+      { id: 'kobi-gate', era: '1990', figure: 'kobi90-stand', x: 0.62, y: 0.9, size: 0.33, nameHe: 'קובי', talk: 'kobi-gate-1990', flip: true },
+      { id: 'steward-1990', era: '1990', figure: 'adultA4', x: 0.5, y: 0.86, size: 0.3, nameHe: 'סדרן', talk: 'steward-1990' },
+      { id: 'ticket-1990', era: '1990', figure: 'adultA2', x: 0.7, y: 0.9, size: 0.32, nameHe: 'הקופאי', talk: 'ticket-window-1990', flip: true },
+      { id: 'ofir-ground', era: '1990', figure: 'ofir90', x: 0.33, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'ofir-ground-1990' },
+      { id: 'vendor-1990', era: '1990', figure: 'adultA6', x: 0.88, y: 0.93, size: 0.34, nameHe: 'מוכר', talk: 'vendor-1990', flip: true },
     ],
     hotspots: [
-      { id: 'gate7', x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
-      { id: 'fence', x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
-      { id: 'turnstile', x: 0.36, y: 0.85, w: 0.09, act: 'gate-turnstile', verb: 'look', labelHe: 'הקרוסלה' },
+      { id: 'gate7', era: '*', x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
+      { id: 'fence', era: '*', x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
+      { id: 'turnstile', era: '*', x: 0.36, y: 0.85, w: 0.09, act: 'gate-turnstile', verb: 'look', labelHe: 'הקרוסלה' },
     ],
     exits: [
       {
@@ -949,7 +1126,10 @@ const SCENES: SceneDef[] = [
     size: { far: 0.2, near: 0.27 },
     ambience: 'stadium',
     arrival: { art: 'reveal', ms: 5200, flag: 'saw:reveal' },
+    // 1990: he knows this terrace. The card is the arithmetic in his head, not the bowl.
+    arrivalByEra: { '1990': null },
     stuckHe: 'הוא איפשהו ביציע. תסתכל טוב.',
+    stuckByEra: { '1990': 'מי שיודע משהו — אומר. הרדיו, הילדים, הוותיקים. אבא ליד העמוד.' },
     spawns: { start: { x: 0.08, y: 0.96, facing: 'right' } },
     /**
      * היציע אחרי השריקה — sixteen people who appear the moment the title is won.
@@ -972,26 +1152,26 @@ const SCENES: SceneDef[] = [
      */
     layers: [
       // Along the rail, backs to the pitch, smallest — the far row.
-      { art: 'youngA2', x: 0.215, y: 0.888, w: 0.036, depth: 0.888, foot: true, bob: 0.008, when: { flag: 'match:over' } },
-      { art: 'adultA3', x: 0.305, y: 0.884, w: 0.04, depth: 0.884, foot: true, bob: 0.005, when: { flag: 'match:over' } },
-      { art: 'youngB5', x: 0.4, y: 0.89, w: 0.037, depth: 0.89, foot: true, bob: 0.009, flip: true, when: { flag: 'match:over' } },
-      { art: 'adultB2', x: 0.585, y: 0.886, w: 0.041, depth: 0.886, foot: true, bob: 0.004, when: { flag: 'match:over' } },
-      { art: 'youngA6', x: 0.66, y: 0.892, w: 0.036, depth: 0.892, foot: true, bob: 0.01, when: { flag: 'match:over' } },
-      { art: 'adultA5', x: 0.83, y: 0.885, w: 0.04, depth: 0.885, foot: true, bob: 0.006, flip: true, when: { flag: 'match:over' } },
-      { art: 'youngB1', x: 0.915, y: 0.891, w: 0.036, depth: 0.891, foot: true, bob: 0.008, when: { flag: 'match:over' } },
+      { art: 'youngA2', x: 0.215, y: 0.888, w: 0.036, depth: 0.888, foot: true, bob: 0.008, era: '*', when: { flag: 'match:over' } },
+      { art: 'adultA3', x: 0.305, y: 0.884, w: 0.04, depth: 0.884, foot: true, bob: 0.005, era: '*', when: { flag: 'match:over' } },
+      { art: 'youngB5', x: 0.4, y: 0.89, w: 0.037, depth: 0.89, foot: true, bob: 0.009, flip: true, era: '*', when: { flag: 'match:over' } },
+      { art: 'adultB2', x: 0.585, y: 0.886, w: 0.041, depth: 0.886, foot: true, bob: 0.004, era: '*', when: { flag: 'match:over' } },
+      { art: 'youngA6', x: 0.66, y: 0.892, w: 0.036, depth: 0.892, foot: true, bob: 0.01, era: '*', when: { flag: 'match:over' } },
+      { art: 'adultA5', x: 0.83, y: 0.885, w: 0.04, depth: 0.885, foot: true, bob: 0.006, flip: true, era: '*', when: { flag: 'match:over' } },
+      { art: 'youngB1', x: 0.915, y: 0.891, w: 0.036, depth: 0.891, foot: true, bob: 0.008, era: '*', when: { flag: 'match:over' } },
 
       // The middle of the terrace, where the child is walking.
-      { art: 'adultB6', x: 0.26, y: 0.925, w: 0.047, depth: 0.925, foot: true, bob: 0.007, flip: true, when: { flag: 'match:over' } },
-      { art: 'youngA4', x: 0.44, y: 0.932, w: 0.044, depth: 0.932, foot: true, bob: 0.011, when: { flag: 'match:over' } },
-      { art: 'adultA1', x: 0.63, y: 0.928, w: 0.048, depth: 0.928, foot: true, bob: 0.005, when: { flag: 'match:over' } },
-      { art: 'youngB3', x: 0.79, y: 0.935, w: 0.045, depth: 0.935, foot: true, bob: 0.01, flip: true, when: { flag: 'match:over' } },
-      { art: 'youngB7', x: 0.9, y: 0.938, w: 0.046, depth: 0.938, foot: true, bob: 0.013, when: { flag: 'match:over' } },
+      { art: 'adultB6', x: 0.26, y: 0.925, w: 0.047, depth: 0.925, foot: true, bob: 0.007, flip: true, era: '*', when: { flag: 'match:over' } },
+      { art: 'youngA4', x: 0.44, y: 0.932, w: 0.044, depth: 0.932, foot: true, bob: 0.011, era: '*', when: { flag: 'match:over' } },
+      { art: 'adultA1', x: 0.63, y: 0.928, w: 0.048, depth: 0.928, foot: true, bob: 0.005, era: '*', when: { flag: 'match:over' } },
+      { art: 'youngB3', x: 0.79, y: 0.935, w: 0.045, depth: 0.935, foot: true, bob: 0.01, flip: true, era: '*', when: { flag: 'match:over' } },
+      { art: 'youngB7', x: 0.9, y: 0.938, w: 0.046, depth: 0.938, foot: true, bob: 0.013, era: '*', when: { flag: 'match:over' } },
 
       // Nearest the camera, biggest, and the ones he has to go round.
-      { art: 'adultB4', x: 0.135, y: 0.972, w: 0.058, depth: 0.972, foot: true, bob: 0.006, when: { flag: 'match:over' } },
-      { art: 'youngA1', x: 0.41, y: 0.98, w: 0.055, depth: 0.98, foot: true, bob: 0.012, flip: true, when: { flag: 'match:over' } },
-      { art: 'adultA7', x: 0.6, y: 0.975, w: 0.059, depth: 0.975, foot: true, bob: 0.005, when: { flag: 'match:over' } },
-      { art: 'adultB5', x: 0.885, y: 0.978, w: 0.058, depth: 0.978, foot: true, bob: 0.007, flip: true, when: { flag: 'match:over' } },
+      { art: 'adultB4', x: 0.135, y: 0.972, w: 0.058, depth: 0.972, foot: true, bob: 0.006, era: '*', when: { flag: 'match:over' } },
+      { art: 'youngA1', x: 0.41, y: 0.98, w: 0.055, depth: 0.98, foot: true, bob: 0.012, flip: true, era: '*', when: { flag: 'match:over' } },
+      { art: 'adultA7', x: 0.6, y: 0.975, w: 0.059, depth: 0.975, foot: true, bob: 0.005, era: '*', when: { flag: 'match:over' } },
+      { art: 'adultB5', x: 0.885, y: 0.978, w: 0.058, depth: 0.978, foot: true, bob: 0.007, flip: true, era: '*', when: { flag: 'match:over' } },
     ],
     actors: [
       {
@@ -1010,11 +1190,47 @@ const SCENES: SceneDef[] = [
       },
       { id: 'terrace-a', figure: 'fanD', x: 0.34, y: 0.935, size: 0.22, nameHe: 'אוהד', talk: 'terrace-fan' },
       { id: 'terrace-b', figure: 'fanF', x: 0.52, y: 0.965, size: 0.23, nameHe: 'אוהד', talk: 'terrace-fan', flip: true },
+      /**
+       * ---- 1990: the transistor network ----
+       * Every `net:*` conversation is GENERATED by the match director from the anchor and
+       * the rumour state, never authored: these people say what their radio says, at the
+       * delay their radio has, and the kids say what kids say. Kobi stands by the second
+       * pillar, as the veteran promised, until the whistle — then he is one man in a
+       * crowd again, and the walk to him is the ending, as it was in 1986.
+       */
+      { id: 'net-kobi', era: '1990', figure: 'kobi90-lean', x: 0.34, y: 0.905, size: 0.18, nameHe: 'קובי', talk: 'net:kobi', when: { notFlag: 'match:over' } },
+      { id: 'net-radio', era: '1990', figure: 'fanC', x: 0.52, y: 0.9, size: 0.29, nameHe: 'אוהד עם רדיו', talk: 'net:radio', flip: true, when: { notFlag: 'match:over' } },
+      { id: 'net-brain', era: '1990', figure: 'adultB3', x: 0.71, y: 0.902, size: 0.29, nameHe: 'אוהד שיודע', talk: 'net:brain', when: { notFlag: 'match:over' } },
+      { id: 'net-kids', era: '1990', figure: 'youngB5', x: 0.96, y: 0.9, size: 0.23, nameHe: 'ילדים', talk: 'net:kids', flip: true, when: { notFlag: 'match:over' } },
+      { id: 'net-ofir', era: '1990', figure: 'ofir90', x: 0.2, y: 0.9, size: 0.26, nameHe: 'אופיר', talk: 'net:ofir', when: { all: [{ flag: 'went:withFriends' }, { notFlag: 'match:over' }] } },
+      { id: 'kobi-lost', era: '1990', figure: 'kobi90-cheer', x: 0.695, y: 0.912, size: 0.3, nameHe: 'קובי', talk: 'kobi-found-1990', when: { flag: 'match:over' } },
     ],
     // The scarf is tied to the barrier at the left of the frame — somebody left it there,
     // which is the whole reason to walk over and look at it.
-    hotspots: [{ id: 'rail', x: 0.155, y: 0.92, w: 0.12, act: 'terrace-rail', verb: 'look', labelHe: 'המעקה' }],
-    exits: [],
+    hotspots: [
+      { id: 'rail', era: '*', x: 0.155, y: 0.92, w: 0.12, act: 'terrace-rail', verb: 'look', labelHe: 'המעקה' },
+      // 1990: the radio on the concrete, only while it is there (see the director).
+      { id: 'radio-floor', era: '1990', x: 0.38, y: 0.96, w: 0.09, act: 'net:floor', verb: 'take', labelHe: 'הטרנזיסטור על הרצפה', when: { flag: 'radio:dropped' }, priority: 5, prop: { key: 'propRadio', size: 0.04 } },
+    ],
+    exits: [
+      // The way home. It opens the moment the chapter's last objective is met — you found
+      // him — and not before: nobody walks out of a final. Straight to the street outside
+      // the ground; the tunnel is a way IN.
+      {
+        id: 'home',
+        era: '*',
+        x: 0.0,
+        y: 0.87,
+        w: 0.05,
+        h: 0.12,
+        to: 'bloomfield-outside',
+        spawn: 'fromTunnel',
+        labelHe: 'החוצה, הביתה',
+        when: { flag: 'found:kobi' },
+        light: { x: 0.006, y: 0.6, w: 0.05, h: 0.28, tone: 'daylight' },
+        dwellMs: 700,
+      },
+    ],
   },
 
   // ------------------------------------------------------ אולם אוסישקין — מבחוץ ----
@@ -1034,7 +1250,7 @@ const SCENES: SceneDef[] = [
     stuckHe: 'הכניסה לאולם באמצע, מתחת לגג. חזרה לרחוב — משמאל.',
     spawns: {
       fromStreet: { x: 0.12, y: 0.9, facing: 'right' },
-      fromHall: { x: 0.62, y: 0.93, facing: 'left' },
+      fromHall: { x: 0.5, y: 0.93, facing: 'left' },
     },
     actors: [],
     hotspots: [],
@@ -1052,15 +1268,18 @@ const SCENES: SceneDef[] = [
         dwellMs: 500,
       },
       {
+        // The glass doors under the canopy, at 0.33–0.45 of the frame. First placed at
+        // 0.47–0.59 — the corner pillar, where the painting has three men standing and
+        // no door at all. Rendered with the boxes on 3.9.2026 and moved.
         id: 'in',
-        x: 0.47,
+        x: 0.33,
         y: 0.8,
         w: 0.12,
         h: 0.15,
         to: 'ussishkin-hall',
         spawn: 'fromOut',
         labelHe: 'פנימה, לאולם',
-        light: { x: 0.475, y: 0.5, w: 0.115, h: 0.3, tone: 'inside' },
+        light: { x: 0.335, y: 0.5, w: 0.11, h: 0.3, tone: 'inside' },
         dwellMs: 300,
         priority: 2,
       },

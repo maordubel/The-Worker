@@ -453,10 +453,13 @@ memorial wing and they should feel quiet and slightly too empty.
 ```
 Character sheet, green screen #00B140, flat, no gradient.
 
-The same eight-year-old boy in all eight frames — dark curly hair, plain red
-t-shirt, blue shorts, white socks pulled up, worn trainers. South Tel Aviv,
-1986. Photorealistic painted style matching the attached reference of the same
-character.
+The same eight-year-old boy in all eight frames — and he MUST be the boy in the
+attached `pogi.png` and `pogi-side.png`: dark straight-curly hair over the
+forehead, red t-shirt with the small white club badge on the chest, long blue
+jeans, white trainers with green stripes. NOT shorts, NOT plain shirt, NOT
+socks — the first delivery (3.9.2026) drew a different, younger boy in shorts
+and was shelved for that reason alone. South Tel Aviv, 1986. Photorealistic
+painted style matching the attached reference of the same character.
 
 EIGHT FRAMES OF A WALK CYCLE, SEEN FROM THE SIDE, WALKING TO THE LEFT.
 Full body, feet included, head to toe inside the frame, all eight at exactly
@@ -525,6 +528,43 @@ The six: neutral · half-smile · wide-eyed / surprised · shouting with joy ·
 looking down, disappointed · three-quarter, looking off to the side.
 
 Even 40px gaps between portraits.
+```
+
+---
+
+# חלק 2ב׳ — שלוש דמויות שעדיין מצוירות בסגנון הישן (דחוף, נראה בכל משחק)
+
+בסריקה של 3.9.2026 של כל דמות שהמשחק מציב על הבמה, שלוש בלבד נשארו חיתוכים מלוח
+הקונספט הראשון — ראש גדול, קו-מתאר צבוע, "צ'יבי" — ועומדות ליד פוגי, אופיר ועמית
+הפוטוריאליסטיים: **קרן** (הרחוב), **אפי** (המגרש), **בעל הקיוסק** (`oldMan`, הוחלף
+זמנית באחד ה-adults). כל אחת מהן שוברת את התמונה יותר מכל רקע חסר. מפרט אחד לשלושתן:
+
+**גודל: 2048 × 1024 לדמות. שתי שורות. אותו סגנון ואותו גובה-מצלמה כמו הרפרנס של פוגי.**
+
+```
+Character sheet, green screen #00B140, flat, no gradient.
+Photorealistic painted style matching the attached reference of Pugi.
+Full body, feet included, seven poses per row, even gaps, same height.
+
+KEREN — an eight-year-old girl, dark hair in a ponytail, red-and-white striped
+t-shirt, blue shorts, sandals. South Tel Aviv, 1986.
+ROW 1: standing front · three-quarter · side · back · sitting on a low wall,
+legs dangling · arms crossed · pointing.
+ROW 2: walking side-on, four strides · laughing · shouting · hands on hips.
+
+EFI — a nine-year-old boy, big dark curls, plain red t-shirt, dark shorts,
+scuffed trainers, a football under his arm in two poses.
+ROW 1: standing front · three-quarter · side · back · crouching over a ball ·
+kicking · arms wide.
+ROW 2: walking side-on, four strides · dribbling · celebrating · sulking.
+
+KIOSK OWNER — a man about sixty, heavy, grey moustache, white short-sleeved
+shirt over a vest, dark slacks, reading glasses pushed up. Behind a counter in
+two poses.
+ROW 1: standing front · three-quarter · side · back · leaning on the counter ·
+handing something over · reading a newspaper.
+ROW 2: pointing outside · arms folded · laughing · shrugging · counting coins ·
+wiping the counter · sitting on a stool.
 ```
 
 ---
@@ -636,6 +676,30 @@ Same size as the reference: 2048 × 787.
 ```
 
 אותו רעיון, אותה מסגרת בדיוק, ל: **הסלון**, **שער 7** ו**המטבח** ב-1990.
+
+---
+
+# חלק 4ב׳ — 1990 רץ עכשיו. מה חסר לו כדי להיראות כמו 1990
+
+השלב השני נבנה על אותם חדרים של 1986 עם אנשים אחרים בהם. הקוד יודע להחליף רקע לפי שנה
+(`era` על כל דבר בחדר); מה שאין לו הוא ציורים של 1990. לפי סדר החשיבות:
+
+## 4ב.1 הרחוב ב-1990 — אותו רחוב, אחרת
+**גודל: 1600 × 625, כמו `street.png`. אותה זווית בדיוק.** אותם בניינים, אותה פינה עם
+הקיר, אותו קיוסק — ארבע שנים מאוחר יותר: מכוניות של 1990 (סובארו, אוטוביאנקי), מודעות
+"מחזור אחרון" על העמוד, כביסה, אנטנות, קצת יותר שחיקה. בלי אנשים. בלי צהוב.
+
+## 4ב.2 חדר השינה ב-1990
+**גודל: 1600 × 900 (החדר הישן הוא 543px ומטושטש — לצייר מחדש גם ל-1986).** אותו חדר,
+אותה מיטה — אבל: פוסטרים של הפועל במקום ציורי ילדים, תיק בית ספר גדול, קלטות, צעיף על
+מסמר ליד הדלת, הכדור נעלם. שתי גרסאות מאותה זווית: 1986 (נקי, ילד) ו-1990 (מלא, נער).
+
+## 4ב.3 רחל ב-1990
+**גודל: 2048 × 1024.** אותה אישה מ-`faceRachel`, ארבע שנים מאוחר יותר, פוטוריאליסטי כמו
+קובי. שורה 1: עומדת · ידיים משולבות · עם סל כביסה · מצביעה · יושבת · פרופיל · מהגב.
+שורה 2: במטבח ליד השיש · מוזגת · מדברת בטלפון · מחייכת · מרימה גבה · צוחקת · דלת.
+
+## 4ב.4 בעל הקיוסק (כבר במפרט 2ב׳) — ב-1990 הוא אותו אדם, יותר אפור.
 
 ---
 

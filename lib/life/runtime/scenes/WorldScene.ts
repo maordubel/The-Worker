@@ -1,25 +1,28 @@
 import Phaser from 'phaser'
 
 import { clockLabel } from '../../clock'
-import { AMBIENT_1986, type AmbientActor } from '../../content/ambient1986'
-import { ENDINGS, OBJECTIVES } from '../../content/chapter1986'
-import { ENCOUNTERS_1986 } from '../../content/encounters1986'
-import { OPPORTUNITIES_1986 } from '../../content/opportunities1986'
-import { SCHEDULE_1986 } from '../../content/schedules1986'
+import type { AmbientActor } from '../../content/ambient1986'
+import { SCHOOL_MORNING_1990, TABLE_1990 } from '../../content/chapter1990'
+import { anchorFor, eraFor, type Era } from '../../content/era'
 import type { ConversationShot } from '../../content/script'
 import { encounterEvents, rollEncounter } from '../../encounters'
-import { buildFinale } from '../../finale'
 import { tickOpportunities } from '../../opportunities'
 import { placementsAt } from '../../schedules'
 import type { LifeState, LocationId } from '../../types'
-import { cutsceneCard, cutsceneFor, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
+import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
-import { FULL_TIME, KICKOFF, KOBI_LEAVES, sceneFor } from '../../world/scenes'
+import { ALL_SCENES, arrivalFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
+import { KOBI_LEAVES_LATE, KOBI_SAYS_LEAVING } from '../../content/schedules1990'
+import type { HistoricalAnchor } from '../../anchors'
+import { buildFinale } from '../../finale'
+import { TransistorNet } from '../match1990'
+import { PassageScene } from './PassageScene'
 import { meets } from '../../world/types'
-import { artUrl, KID_POSE, KID_WALK } from '../art'
-import { frameCamera } from '../camera'
+import { artUrl, extensionKeys } from '../art'
+import { fillCamera } from '../camera'
 import { CONTEXT_KEY, type LifeContext } from '../context'
+import type { MapPlace } from '../game'
 import { LIFE_PALETTE } from '../palette'
 import {
   arrivalEase,
@@ -115,15 +118,9 @@ const BASE_TIME = 0.72
 
 /** How often the world offers to surprise you, and how likely it is when it does. */
 /**
- * הסרט של הפרק — which piece of archival film this chapter opens onto, by id.
- *
- * A string and not an import of the definition, because the registry in
- * `lib/life/cutscenes.ts` is the authority on what exists and a chapter is only allowed to
- * name one. `cutsceneFor` returning null is a legitimate state — it means this build has
- * no film for 1986 — and the scene falls through to the ninety-minute simulation without
- * a word about it.
+ * הסרט של הפרק — comes from the era now (`Era.cutscene`); `cutsceneFor` returning null is
+ * still a legitimate state, and 1990 has no film by design (media not rights-cleared).
  */
-const CHAPTER_CUTSCENE = '1986-championship'
 
 const ENCOUNTER_EVERY = 22000
 const ENCOUNTER_CHANCE: Partial<Record<LocationId, number>> = {
@@ -139,7 +136,13 @@ export class WorldScene extends Phaser.Scene {
 
   private ctx!: LifeContext
   private def!: SceneDef
+  /** the chapter this room is being played in — every 1986/1990 difference reads from here */
+  private era!: Era
+  /** the doors that exist in this era; `def.exits` filtered once, used everywhere */
+  private exits: ExitDef[] = []
   private spawnName = 'start'
+  /** 1990: the match as an information game, or null in any other year */
+  private net: TransistorNet | null = null
 
   private W = 1
   private H = 1
@@ -201,6 +204,14 @@ export class WorldScene extends Phaser.Scene {
   private clearedReturn = false
   /** ms since the room was entered — no door may swallow the player on arrival */
   private since = 0
+  /**
+   * Where the feet actually are. The drawn sprite bobs above this while walking, and for
+   * one pass the bob was written back into `player.y` and read out again next frame as
+   * the ground — so every side-on walk crept toward the horizon, a third of a per cent a
+   * frame, until the child stood on the far edge of the band with every door he walked
+   * through missing him by a hair. The ground is a number the bob never touches.
+   */
+  private groundY = 0
   private travelled = 0
   private idleFor = 0
   private stuckLevel = 0
@@ -210,6 +221,8 @@ export class WorldScene extends Phaser.Scene {
   private sinceEncounter = 0
   private baseZoom = 1
   private shotting = false
+  /** how far the painted world continues above and below the painting (see `buildExtensions`) */
+  private ext = 0
 
   constructor() {
     super(WorldScene.KEY)
@@ -260,29 +273,49 @@ export class WorldScene extends Phaser.Scene {
     this.sinceEncounter = 0
     this.baseZoom = 1
     this.shotting = false
+    this.ext = 0
     this.repaintGrade = null
   }
 
   preload() {
-    const need = new Set<string>([this.def.art, ...Object.values(KID_POSE), ...KID_WALK])
-    if (this.def.arrival) need.add(this.def.arrival.art)
-    for (const actor of this.def.actors) need.add(actor.figure)
-    for (const actor of AMBIENT_1986) if (actor.location === this.def.id) need.add(actor.figure)
-    for (const spot of this.def.hotspots) if (spot.prop) need.add(spot.prop.key)
-    for (const layer of this.def.layers ?? []) need.add(layer.art)
+    const ctx = this.registry.get(CONTEXT_KEY) as LifeContext
+    const era = eraFor(ctx.engine.state.chapter)
+    const need = new Set<string>([this.def.art, ...Object.values(era.player.pose), ...era.player.walk])
+    const ext = extensionKeys(this.def.art)
+    need.add(ext.sky)
+    need.add(ext.ground)
+    const arrival = arrivalFor(this.def, era.chapter)
+    if (arrival) need.add(arrival.art)
+    for (const actor of this.def.actors) if (inEra(actor, era.chapter)) need.add(actor.figure)
+    for (const actor of era.ambient) if (actor.location === this.def.id) need.add(actor.figure)
+    for (const spot of this.def.hotspots) if (inEra(spot, era.chapter) && spot.prop) need.add(spot.prop.key)
+    for (const layer of this.def.layers ?? []) if (inEra(layer, era.chapter)) need.add(layer.art)
     for (const key of need) {
       if (!this.textures.exists(`art-${key}`)) this.load.image(`art-${key}`, artUrl(key))
     }
   }
 
+  /** the anchor of the chapter being played — never the 1986 one by habit */
+  private get anchor(): HistoricalAnchor {
+    return anchorFor(this.ctx.anchors, this.era, this.ctx.anchor)
+  }
+
+  private get chapter(): string {
+    return this.era.chapter
+  }
+
   create() {
     this.ctx = this.registry.get(CONTEXT_KEY) as LifeContext
     const state = this.ctx.engine.state
+    this.era = eraFor(state.chapter)
+    this.exits = this.def.exits.filter((exit) => exitInEra(exit, this.era.chapter))
+    this.net = null
 
     this.cameras.main.setBackgroundColor(LIFE_PALETTE.night)
     const backdrop = this.add.image(0, 0, `art-${this.def.art}`).setOrigin(0, 0).setDepth(-1000)
     this.W = backdrop.width
     this.H = backdrop.height
+    this.buildExtensions()
 
     this.buildLights()
     this.buildLayers()
@@ -324,18 +357,27 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(9600)
       .setVisible(false)
 
-    frameCamera(this, this.cameras.main, this.W, this.H, 0.74)
+    this.frameWorld()
     // The grade is built BEFORE the camera is framed, so it sized its wash and its
     // vignette to a viewport that does not exist yet — which on a tall phone painted a
     // pale rectangle across two thirds of the picture and left the rest ungraded. One
     // repaint, once the viewport is real. (It was invisible on the older, softer art and
     // obvious the moment a clean sky arrived.)
     this.repaintGrade?.()
-    this.cameras.main.setBounds(0, 0, this.W, this.H)
+    this.cameras.main.setBounds(0, -this.ext, this.W, this.H + 2 * this.ext)
     this.cameras.main.startFollow(this.player, true, 0.09, 0.09)
-    this.cameras.main.setDeadzone(this.cameras.main.width * 0.3, this.cameras.main.height * 0.42)
+    this.followPlayer()
+    /**
+     * הכניסה — a settle, not a cut.
+     *
+     * Every door used to land on a still frame. The camera now arrives a hair tighter
+     * than it will rest and eases out over the fade-in: the room is entered in movement,
+     * which is the fourth of the five tricks in the roadmap's grammar of entering a scene
+     * (establish → cross the threshold → settle). Small — 4% — so it is felt, not watched.
+     */
+    this.cameras.main.setZoom(this.baseZoom * 1.04)
+    this.tweens.add({ targets: this.cameras.main, zoom: this.baseZoom, duration: 760, ease: 'Sine.easeOut' })
     this.cameras.main.fadeIn(300, 0, 0, 0)
-    this.ctx.bus.emit('frame', { picture: this.cameras.main.height })
     this.scale.on('resize', this.onResize, this)
 
     /**
@@ -359,8 +401,6 @@ export class WorldScene extends Phaser.Scene {
       if (pointer.isDown || pointer.wasTouch) return
       this.hovering = this.onPicture(pointer.x, pointer.y) ? this.pickAt(pointer.worldX, pointer.worldY) : null
     })
-
-    this.baseZoom = this.cameras.main.zoom
 
     this.ctx.dialogue.setHooks({
       travel: (to, spawn) => this.travel(to as LocationId, spawn),
@@ -390,15 +430,38 @@ export class WorldScene extends Phaser.Scene {
     this.ctx.bus.emit('place', { id: this.def.id, title: this.def.titleHe })
     this.flagCount = Object.keys(this.ctx.engine.state.flags).length
     this.pushHud()
+    // The board belongs to the terrace. Walk out through the tunnel after the whistle and
+    // the strip used to follow the boy into the street, over the HUD, all the way home.
+    if (this.def.id !== 'bloomfield-inside') this.ctx.bus.emit('match', null)
     this.teach()
 
-    if (this.def.arrival && !state.flags[this.def.arrival.flag]) this.playArrival()
+    const arrival = arrivalFor(this.def, this.chapter)
+    if (arrival && !state.flags[arrival.flag]) this.playArrival()
     else this.beginMatch()
+
+    this.openChapterBeat(state)
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', this.onResize, this))
   }
 
   // ---------------------------------------------------------------------- build ---
+
+  /**
+   * שמיים ומדרכה — the painting continued, so a tall screen has something to show.
+   *
+   * Both strips are the same width as the painting and sit flush against it, sky above
+   * (bottom edge at y = 0) and ground below (top edge at y = H). If either failed to load
+   * the world simply ends at the painting, as it always did, and the camera bounds say so.
+   */
+  private buildExtensions() {
+    const keys = extensionKeys(this.def.art)
+    if (!this.textures.exists(`art-${keys.sky}`) || !this.textures.exists(`art-${keys.ground}`)) return
+    const sky = this.add.image(0, 0, `art-${keys.sky}`).setOrigin(0, 1).setDepth(-1001)
+    const ground = this.add.image(0, this.H, `art-${keys.ground}`).setOrigin(0, 0).setDepth(-1001)
+    sky.setDisplaySize(this.W, sky.height * (this.W / sky.width))
+    ground.setDisplaySize(this.W, ground.height * (this.W / ground.width))
+    this.ext = Math.min(sky.displayHeight, ground.displayHeight)
+  }
 
   private fit(image: Phaser.GameObjects.Image, height: number) {
     const source = this.textures.get(image.texture.key).getSourceImage()
@@ -414,7 +477,7 @@ export class WorldScene extends Phaser.Scene {
    * the way OUT of a building — it is how a front door stops looking like a bedroom door.
    */
   private buildLights() {
-    for (const exit of this.def.exits) {
+    for (const exit of this.exits) {
       if (!exit.light) continue
       const image = this.add
         .image(exit.light.x * this.W, exit.light.y * this.H, 'life-glow')
@@ -457,6 +520,7 @@ export class WorldScene extends Phaser.Scene {
   private buildLayers() {
     const state = this.ctx.engine.state
     for (const layer of this.def.layers ?? []) {
+      if (!inEra(layer, this.chapter)) continue
       const image = this.add.image(layer.x * this.W, layer.y * this.H, `art-${layer.art}`)
       const source = this.textures.get(image.texture.key).getSourceImage()
       const width = layer.w * this.W
@@ -498,8 +562,15 @@ export class WorldScene extends Phaser.Scene {
     const y = Phaser.Math.Clamp(spawn.y, this.def.band.far, this.def.band.near) * this.H
     this.facing = spawn.facing === 'left' ? -1 : 1
     this.shadow = this.add.ellipse(x, y, 40, 12, LIFE_PALETTE.ink, 0.3).setDepth(y - 1)
-    this.player = this.add.image(x, y, `art-${KID_POSE.down}`).setOrigin(0.5, 1).setDepth(y)
-    this.applyScale(this.player, this.shadow, y, this.def.size)
+    this.player = this.add.image(x, y, `art-${this.era.player.pose.down}`).setOrigin(0.5, 1).setDepth(y)
+    this.groundY = y
+    this.applyScale(this.player, this.shadow, y, this.playerSize())
+  }
+
+  /** the band's child size, grown for the year — see `PlayerFigure.scale` */
+  private playerSize(): { far: number; near: number } {
+    const k = this.era.player.scale ?? 1
+    return { far: this.def.size.far * k, near: this.def.size.near * k }
   }
 
   private applyScale(
@@ -520,6 +591,7 @@ export class WorldScene extends Phaser.Scene {
 
   private buildActors(state: LifeState) {
     for (const def of this.def.actors) {
+      if (!inEra(def, this.chapter)) continue
       const x = def.x * this.W
       const y = def.y * this.H
       const shadow = this.add.ellipse(x, y, 40, 12, LIFE_PALETTE.ink, 0.26)
@@ -546,7 +618,7 @@ export class WorldScene extends Phaser.Scene {
    * walking east, more of them every twenty minutes. Nobody says which way Bloomfield is.
    */
   private buildAmbient(state: LifeState) {
-    for (const def of AMBIENT_1986) {
+    for (const def of this.era.ambient) {
       if (def.location !== this.def.id) continue
       const y = def.y * this.H
       const shadow = this.add.ellipse(0, y, 40, 12, LIFE_PALETTE.ink, 0.2)
@@ -600,13 +672,17 @@ export class WorldScene extends Phaser.Scene {
 
   private buildHotspots(state: LifeState) {
     for (const def of this.def.hotspots) {
+      if (!inEra(def, this.chapter)) continue
       const x = def.x * this.W
       const y = def.y * this.H
       const spot: Hotspot = { def, x, y, w: (def.w ?? 0.06) * this.W }
       if (def.prop) {
-        const image = this.add.image(x, y, `art-${def.prop.key}`).setOrigin(0.5, 1)
+        const at = def.prop.at ?? def
+        const image = this.add.image(at.x * this.W, at.y * this.H, `art-${def.prop.key}`).setOrigin(0.5, 1)
         this.fit(image, def.prop.size * this.H)
-        image.setDepth(y)
+        // Drawn above the floor (on a table, a shelf): it sits behind whoever stands in
+        // front of it, so its depth is the stand-point's, not the tabletop's.
+        image.setDepth(Math.min(y, at.y * this.H) - 2)
         image.setVisible(meets(state, def.when))
         spot.prop = image
       }
@@ -708,10 +784,78 @@ export class WorldScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', paint, this))
   }
 
+  /**
+   * המסגור — full-bleed, camera-framed. The rule of the whole mobile pass, in one place.
+   *
+   * The painting covers the glass (see `fillCamera`); on a phone held upright that means
+   * a tall slice of the room and the camera travelling along it with the child. `lift`
+   * magnifies a touch past cover so a portrait screen has some vertical travel too —
+   * enough for `followPlayer` to hold the floor band above a thumb resting on the bottom
+   * of the glass, not enough to turn a room into a close-up.
+   *
+   * The shell is told `picture: 0` — "there is no frame; the picture is the glass" — and
+   * lays its dialogue, deck and hairline out over the painting instead of under it.
+   */
+  private frameWorld() {
+    const cam = this.cameras.main
+    const view = this.scale.gameSize
+    const portrait = view.height > view.width
+    // The world is the painting plus its sky and ground strips; that is what must cover
+    // the glass. In portrait the zoom is chosen so that about 42% of a 16:9 room's width is
+    // on screen at once — a street you can read, a child a fifth of the screen tall —
+    // unless even that would expose the top or bottom of the world, in which case cover
+    // wins. Landscape is simply cover, with a hair of magnification so no edge ever shows.
+    const tall = this.H + 2 * this.ext
+    const { zoom: cover } = fillCamera(this, cam, this.W, tall, portrait ? 1 : 1.03)
+    if (portrait) {
+      // 42% of a 16:9 room; a squarer room shows proportionally more of itself, a wider
+      // one proportionally less (and then cover usually wins anyway).
+      const share = Math.min(0.8, 0.42 * (16 / 9) / (this.W / this.H))
+      const wanted = Number(Math.max(cover, view.width / (this.W * share)).toFixed(3))
+      cam.setZoom(Math.min(wanted, 7))
+    }
+    this.baseZoom = cam.zoom
+    this.ctx.bus.emit('frame', { picture: 0 })
+  }
+
+  /**
+   * איפה הילד עומד על הזכוכית — low, but never under the thumb.
+   *
+   * With the picture covering the screen there is no band under it for the controls, so
+   * they float over the floor. The camera therefore aims to keep the child's feet around
+   * 68% of the way down the glass rather than at its centre: he stands in the lower third
+   * where a walker belongs, and the strip of floor beneath him is the strip the deck
+   * covers. The bounds clamp wins at the edges of the painting, which is fine — at the top
+   * of a room there is nothing to lift.
+   *
+   * The deadzone is narrow on purpose. A wide one let him walk a third of the screen
+   * before the camera moved, which on a phone is most of the visible street.
+   */
+  private followPlayer() {
+    const cam = this.cameras.main
+    cam.setDeadzone(cam.width * 0.14, cam.height * 0.1)
+    this.aimCamera()
+  }
+
+  /**
+   * המבט קדימה — the camera leans the way the child is facing.
+   *
+   * A camera locked to the character's spine shows as much of the street behind him as in
+   * front, and on a phone that is half the screen spent on where he has already been.
+   * Leaning a twelfth of the view toward his facing is what every side-scroller since the
+   * 16-bit era did; the follow lerp turns the change of heading into a slow pan rather
+   * than a snap. Vertical: feet at 68% of the glass (see `followPlayer`).
+   */
+  private aimCamera() {
+    const cam = this.cameras.main
+    const view = cam.height / cam.zoom
+    const lead = (this.lastDir === 'side' ? this.facing : 0) * (cam.width / cam.zoom) * 0.08
+    cam.setFollowOffset(-lead, (0.68 - 0.5) * view)
+  }
+
   private onResize() {
-    frameCamera(this, this.cameras.main, this.W, this.H, 0.74)
-    this.cameras.main.setDeadzone(this.cameras.main.width * 0.3, this.cameras.main.height * 0.42)
-    this.ctx.bus.emit('frame', { picture: this.cameras.main.height })
+    this.frameWorld()
+    this.followPlayer()
   }
 
   // --------------------------------------------------------------------- update ---
@@ -728,9 +872,11 @@ export class WorldScene extends Phaser.Scene {
 
     this.since += delta
     this.movePlayer(delta)
+    if (!this.shotting) this.aimCamera()
     this.moveActors(delta)
     this.moveAmbient(delta)
     this.tickClock(delta)
+    this.net?.tick(delta)
     this.tickEncounters(delta)
     // `aim` picks what the ACTION BUTTON would do, from proximity. It must not overwrite a
     // target the player pointed at and is still walking towards, or the sentence line
@@ -858,7 +1004,7 @@ export class WorldScene extends Phaser.Scene {
       )
     }
 
-    for (const exit of this.def.exits) {
+    for (const exit of this.exits) {
       if (!meets(state, exit.when)) continue
       const left = exit.x * this.W
       const right = (exit.x + exit.w) * this.W
@@ -1115,10 +1261,11 @@ export class WorldScene extends Phaser.Scene {
 
     const step = delta / 1000
     const nx = Phaser.Math.Clamp(this.player.x + this.vx * step, bounds.left, bounds.right)
-    const ny = Phaser.Math.Clamp(this.player.y + this.vy * step, bounds.top, bounds.bottom)
+    const ny = Phaser.Math.Clamp(this.groundY + this.vy * step, bounds.top, bounds.bottom)
     const movedX = nx - this.player.x
-    const movedY = ny - this.player.y
+    const movedY = ny - this.groundY
     this.travelled += Math.abs(movedX) + Math.abs(movedY)
+    this.groundY = ny
     this.player.setPosition(nx, ny)
 
     const moving = Math.abs(ax) + Math.abs(ay) > 0.08
@@ -1142,7 +1289,7 @@ export class WorldScene extends Phaser.Scene {
       this.stride += strideAdvance(
         Math.hypot(movedX, movedY / DEPTH),
         this.player.displayHeight,
-        KID_WALK.length,
+        this.era.player.walk.length,
       )
       this.idleFor = 0
     }
@@ -1151,15 +1298,17 @@ export class WorldScene extends Phaser.Scene {
     // green-screen sheet — and it only exists side-on, which is where the walking mostly
     // happens. Facing the camera or away, a bob does the work.
     if (moving && this.lastDir === 'side') {
-      const frame = KID_WALK[Math.floor(this.stride) % KID_WALK.length] ?? KID_WALK[0]
+      const walk = this.era.player.walk
+      const frame = walk[Math.floor(this.stride) % walk.length] ?? walk[0]
       this.player.setTexture(`art-${frame}`)
     } else {
-      const pose = this.lastDir === 'up' ? KID_POSE.up : this.lastDir === 'side' ? KID_POSE.side : KID_POSE.down
+      const poses = this.era.player.pose
+      const pose = this.lastDir === 'up' ? poses.up : this.lastDir === 'side' ? poses.side : poses.down
       this.player.setTexture(`art-${pose}`)
     }
     this.player.setFlipX(this.facing < 0)
 
-    this.applyScale(this.player, this.shadow, ny, this.def.size)
+    this.applyScale(this.player, this.shadow, ny, this.playerSize())
     if (moving) {
       // The bob runs on EVERY heading now, side-on included.
       //
@@ -1200,10 +1349,10 @@ export class WorldScene extends Phaser.Scene {
     if (Math.abs(dx) > Math.abs(dy) * 0.8) {
       this.lastDir = 'side'
       this.facing = dx < 0 ? -1 : 1
-      this.player.setTexture(`art-${KID_POSE.side}`)
+      this.player.setTexture(`art-${this.era.player.pose.side}`)
     } else {
       this.lastDir = dy < 0 ? 'up' : 'down'
-      this.player.setTexture(`art-${this.lastDir === 'up' ? KID_POSE.up : KID_POSE.down}`)
+      this.player.setTexture(`art-${this.lastDir === 'up' ? this.era.player.pose.up : this.era.player.pose.down}`)
     }
     this.player.setFlipX(this.facing < 0)
   }
@@ -1277,7 +1426,7 @@ export class WorldScene extends Phaser.Scene {
    */
   private applySchedule() {
     const state = this.ctx.engine.state
-    const placements = placementsAt(state, SCHEDULE_1986, this.def.id)
+    const placements = placementsAt(state, this.era.schedule, this.def.id)
     for (const actor of this.actors) {
       const placement = placements.get(actor.def.id)
       if (!placement) continue
@@ -1308,7 +1457,7 @@ export class WorldScene extends Phaser.Scene {
    * empty step, which is the only version of that information worth having.
    */
   private tickWindows() {
-    const { events, opened, closed } = tickOpportunities(this.ctx.engine.state, OPPORTUNITIES_1986)
+    const { events, opened, closed } = tickOpportunities(this.ctx.engine.state, this.era.opportunities)
     if (events.length === 0) return
     this.ctx.engine.dispatch(...events)
     // A window that CLOSES speaks first, because that is the one the player paid for.
@@ -1340,7 +1489,7 @@ export class WorldScene extends Phaser.Scene {
     this.sinceEncounter = 0
 
     const state = this.ctx.engine.state
-    const { picked, consumed } = rollEncounter(state, ENCOUNTERS_1986, '1986', this.def.id, chance)
+    const { picked, consumed } = rollEncounter(state, this.era.encounters, this.chapter, this.def.id, chance)
     this.ctx.engine.dispatch(...encounterEvents(picked, consumed))
     if (!picked) return
     this.ctx.dialogue.startLines([{ who: picked.who ?? null, text: picked.lineHe }], () =>
@@ -1349,7 +1498,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private applyEncounter(id: string) {
-    const found = ENCOUNTERS_1986.find((entry) => entry.id === id)
+    const found = this.era.encounters.find((entry) => entry.id === id)
     if (!found) return
     this.ctx.dialogue.applyEffects(found.effects)
     this.refresh()
@@ -1358,7 +1507,23 @@ export class WorldScene extends Phaser.Scene {
   private timeTriggers() {
     const engine = this.ctx.engine
     const state = engine.state
-    if (state.minute >= KOBI_LEAVES && !state.flags['kobi:left']) {
+    if (this.chapter === '1990') {
+      // 1990: he says he is leaving, and then he waits — for a while.
+      if (state.minute >= KOBI_SAYS_LEAVING && !state.flags['kobi:leaving'] && !state.flags['kobi:left']) {
+        engine.dispatch({ t: 'flag.raised', flag: 'kobi:leaving' })
+        this.ctx.bus.emit('toast', {
+          text: this.def.id === 'kitchen' ? 'אבא מקפל את העיתון. "יוצאים."' : 'מהמטבח: "יוצאים!"',
+          tone: 'red',
+        })
+        this.refresh()
+      }
+      const leavesAt = state.flags['asked:five'] ? KOBI_LEAVES_LATE : KOBI_LEAVES
+      if (state.minute >= leavesAt && !state.flags['kobi:left']) {
+        engine.dispatch({ t: 'flag.raised', flag: 'kobi:left' })
+        this.ctx.bus.emit('toast', { text: 'הדלת נסגרת. אבא הלך. אמר שער 7.', tone: 'red' })
+        this.refresh()
+      }
+    } else if (state.minute >= KOBI_LEAVES && !state.flags['kobi:left']) {
       engine.dispatch({ t: 'flag.raised', flag: 'kobi:left' })
       this.ctx.bus.emit('toast', { text: 'הדלת נטרקת. אבא יצא.', tone: 'red' })
       this.refresh()
@@ -1369,7 +1534,7 @@ export class WorldScene extends Phaser.Scene {
         this.ctx.bus.emit('toast', { text: 'רעש רחוק, מכיוון מזרח.', tone: 'plain' })
       }
     }
-    if (state.minute >= FULL_TIME && !state.flags['match:over']) {
+    if (state.minute >= FULL_TIME && !state.flags['match:over'] && !this.net) {
       engine.dispatch({ t: 'flag.raised', flag: 'match:over' })
       if (this.def.id !== 'bloomfield-inside') engine.dispatch({ t: 'flag.raised', flag: 'arrived:late' })
       this.refresh()
@@ -1407,6 +1572,7 @@ export class WorldScene extends Phaser.Scene {
     const state = this.ctx.engine.state
     this.ctx.bus.emit('hud', {
       clock: clockLabel(state.weekday, state.minute),
+      date: longDateHe(this.anchor.match?.playedOn) ?? String(state.year),
       agorot: state.agorot,
       showMoney: state.agorot > 0,
       place: this.def.titleHe,
@@ -1422,14 +1588,7 @@ export class WorldScene extends Phaser.Scene {
    * the door east means something, then get in, then find him.
    */
   private objective(state: LifeState): string | null {
-    if (state.flags['found:kobi']) return null
-    if (this.def.id === 'bloomfield-inside' && this.matchPhase === 'over') return OBJECTIVES.findKobi
-    if (state.flags['entry:granted']) return null
-    if (this.def.id === 'bloomfield-outside') return OBJECTIVES.atGround
-    if (state.flags['kobi:left']) return OBJECTIVES.onTheWay
-    if (state.flags['knows:match']) return OBJECTIVES.matchToday
-    if ((state.inventory['house-key'] ?? 0) > 0) return OBJECTIVES.askDad
-    return OBJECTIVES.findKey
+    return this.era.objective(state, this.def.id, this.matchPhase === 'over' || Boolean(state.flags['match:over']))
   }
 
   // ------------------------------------------------------------------ onboarding --
@@ -1471,8 +1630,9 @@ export class WorldScene extends Phaser.Scene {
       return
     }
     this.stuckLevel = level
-    if (level === 2 && this.def.stuckHe) {
-      this.ctx.bus.emit('toast', { text: this.def.stuckHe, tone: 'plain' })
+    const stuck = stuckFor(this.def, this.chapter)
+    if (level === 2 && stuck) {
+      this.ctx.bus.emit('toast', { text: stuck, tone: 'plain' })
     }
     if (level < 3) this.pointer.setVisible(false)
     else this.aimPointer()
@@ -1496,7 +1656,7 @@ export class WorldScene extends Phaser.Scene {
 
   private bestExit(): ExitDef | null {
     const state = this.ctx.engine.state
-    const open = this.def.exits.filter((exit) => meets(state, exit.when))
+    const open = this.exits.filter((exit) => meets(state, exit.when))
     if (open.length === 0) return null
     return open.sort((a, b) => (b.priority ?? 1) - (a.priority ?? 1))[0] ?? null
   }
@@ -1558,7 +1718,7 @@ export class WorldScene extends Phaser.Scene {
         priority: 4,
       }))
     }
-    for (const exit of this.def.exits) {
+    for (const exit of this.exits) {
       if (!meets(state, exit.when)) continue
       const cx = (exit.x + exit.w / 2) * this.W
       const cy = (exit.y + exit.h / 2) * this.H
@@ -1623,7 +1783,79 @@ export class WorldScene extends Phaser.Scene {
       this.travel(target.exit.to, target.exit.spawn)
       return
     }
+    if (target.act.startsWith('net:') && this.net) {
+      this.net.talk(target.act)
+      return
+    }
     if (!this.ctx.dialogue.start(target.act)) this.ctx.bus.emit('prompt', null)
+  }
+
+  /**
+   * הפתיחה של הפרק — the one beat a room plays by itself, once.
+   *
+   * 1990 opens at the kitchen table with the exchange from the brief (§6): the age is
+   * established by a father saying "you are twelve" and nothing else. And it closes, after
+   * the finale, with a school morning in the bedroom — history made small again (§25).
+   */
+  private openChapterBeat(state: LifeState) {
+    if (this.chapter !== '1990') return
+    if (this.def.id === 'kitchen' && !state.flags['saw:table']) {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'saw:table' })
+      this.time.delayedCall(700, () => {
+        this.ctx.dialogue.startLines(TABLE_1990, () => this.refresh())
+      })
+      return
+    }
+    if (this.def.id === 'bedroom' && state.chapterDone && !state.flags['saw:morning']) {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'saw:morning' })
+      this.time.delayedCall(900, () => {
+        this.ctx.dialogue.startLines(SCHOOL_MORNING_1990, () => {
+          // The next movement is the derby, not the decade: the brief's order is
+          // Ussishkin (11.3.1991) first, and only then 1991–1993.
+          this.ctx.bus.emit('card', { titleHe: 'אוסישקין', subHe: 'המערכה השנייה של שלב ב׳ — בקרוב', ms: 2600 })
+          this.refresh()
+        })
+      })
+    }
+  }
+
+  /** 1990: the whistle. The director has already written the score; this hands the terrace back. */
+  private endNet() {
+    this.net = null
+    this.timeScale = 1
+    this.paused = false
+    this.matchPhase = 'over'
+    const state = this.ctx.engine.state
+    // The afternoon catches up with the match: an EVENT, like 1986's `returnFromArchive`.
+    if (state.minute < FULL_TIME) this.ctx.engine.dispatch({ t: 'clock.advanced', minutes: FULL_TIME - state.minute })
+    if (!state.flags['match:over']) {
+      this.ctx.engine.dispatch(
+        { t: 'flag.raised', flag: 'match:over' },
+        { t: 'flag.raised', flag: 'saw:goal' },
+        { t: 'anchor.attended', anchorId: this.anchor.id },
+        { t: 'redheart.changed', key: 'footballLove', delta: 12 },
+        { t: 'redheart.changed', key: 'community', delta: 8 },
+        {
+          t: 'memory.kept',
+          memory: {
+            id: `${this.era.memoryPrefix}-promotion`,
+            item: 'promotion-table',
+            atMinute: state.minute,
+            year: state.year,
+            anchorId: this.anchor.id,
+          },
+        },
+      )
+    }
+    this.startCarnival()
+    this.cameras.main.shake(900, 0.006)
+    this.ctx.bus.emit('controls', { visible: true })
+    this.refresh()
+    this.pushMatch()
+    this.time.delayedCall(2600, () => {
+      if (this.ctx.engine.state.flags['found:kobi']) return
+      this.ctx.bus.emit('toast', { text: 'הוא איפשהו כאן. ליד העמוד, אמרו. תמצא אותו.', tone: 'plain' })
+    })
   }
 
   /**
@@ -1641,17 +1873,20 @@ export class WorldScene extends Phaser.Scene {
     if (this.since < 700) return
     const state = this.ctx.engine.state
     const x = this.player.x / this.W
-    const y = this.player.y / this.H
+    const y = this.groundY / this.H
+    // A hair of tolerance on every edge: a zone drawn to the band's far line and feet
+    // clamped to that same line are the same number twice, rounded two different ways.
+    const eps = 0.004
     const within = (exit: ExitDef) =>
-      x >= exit.x && x <= exit.x + exit.w && y >= exit.y && y <= exit.y + exit.h
+      x >= exit.x - eps && x <= exit.x + exit.w + eps && y >= exit.y - eps && y <= exit.y + exit.h + eps
 
     if (!this.clearedReturn) {
-      const back = this.def.exits.filter((exit) => exit.to === this.cameFrom)
+      const back = this.exits.filter((exit) => exit.to === this.cameFrom)
       if (back.length === 0 || !back.some(within)) this.clearedReturn = true
     }
 
     let inside: ExitDef | null = null
-    for (const exit of this.def.exits) {
+    for (const exit of this.exits) {
       if (!meets(state, exit.when)) continue
       if (!within(exit)) continue
       if (!meets(state, exit.needs)) continue
@@ -1737,6 +1972,7 @@ export class WorldScene extends Phaser.Scene {
       cam.stopFollow()
       this.tweens.add({ targets: cam, zoom: this.baseZoom, duration: 420, ease: 'Sine.easeInOut' })
       cam.startFollow(this.player, true, 0.09, 0.09)
+      this.followPlayer()
       return
     }
 
@@ -1766,7 +2002,7 @@ export class WorldScene extends Phaser.Scene {
   // ------------------------------------------------------------------- the wow ----
 
   private playArrival() {
-    const arrival = this.def.arrival
+    const arrival = arrivalFor(this.def, this.chapter)
     if (!arrival) return
     this.paused = true
     this.ctx.bus.emit('controls', { visible: false })
@@ -1796,8 +2032,18 @@ export class WorldScene extends Phaser.Scene {
             this.idleFor = 0
             this.ctx.bus.emit('controls', { visible: true })
             this.ctx.engine.dispatch({ t: 'flag.raised', flag: arrival.flag })
+            /**
+             * רק בפנים. An arrival card used to exist for one room — the terrace — and
+             * everything below was written as if that were the only place a card could
+             * play. Then the street outside the ground and the Ussishkin hall got cards
+             * of their own, and every one of them raised `went:alone`, opened the 1986
+             * anchor card and started the match. Walking up to the OUTSIDE of Bloomfield
+             * is not arriving at the final. The card is direction; these are consequences,
+             * and they belong to the one room whose consequences they are.
+             */
+            if (this.def.id !== 'bloomfield-inside') return
             this.time.delayedCall(2200, () =>
-              this.ctx.bus.emit('anchor', { anchor: this.ctx.anchor, showing: true }),
+              this.ctx.bus.emit('anchor', { anchor: this.anchor, showing: true }),
             )
             // הגעת לבד — the single fact Stage A is really about, recorded once, at the
             // only moment it is unambiguously true: the child is inside the ground and
@@ -1839,8 +2085,28 @@ export class WorldScene extends Phaser.Scene {
       this.pushMatch()
       return
     }
+    if (this.chapter === '1990') {
+      this.matchPhase = 'watching'
+      // The director owns time now: the day clock stops, so the old full-time trigger
+      // cannot end a match that is being played minute by minute in real seconds.
+      this.timeScale = 0
+      this.net = new TransistorNet(this, this.ctx, this.anchor, {
+        onBoard: (board) => this.ctx.bus.emit('match', board),
+        onOver: () => this.endNet(),
+        onDrop: (dropped) => {
+          this.ctx.engine.dispatch(dropped ? { t: 'flag.raised', flag: 'radio:dropped' } : { t: 'flag.set', flag: 'radio:dropped', value: false })
+          this.refresh()
+        },
+        radioAt: () => {
+          const kobi = this.actors.find((entry) => entry.def.id === 'net-kobi')
+          return kobi ? { x: kobi.image.x / this.W, y: kobi.image.y / this.H } : null
+        },
+      })
+      this.net.start()
+      return
+    }
     // The archive first, and the simulation as its fallback — see `playCutscene`.
-    const film = cutsceneFor(CHAPTER_CUTSCENE)
+    const film = this.era.cutscene ? cutsceneFor(this.era.cutscene) : null
     if (film && !this.ctx.engine.state.flags[film.completionFlag]) {
       this.playCutscene(film)
       return
@@ -1872,7 +2138,7 @@ export class WorldScene extends Phaser.Scene {
     this.ctx.bus.emit('controls', { visible: false })
     this.ctx.bus.emit('prompt', null)
     this.ctx.bus.emit('toast', null)
-    this.ctx.bus.emit('cutscene', { scene: film, card: cutsceneCard(film, this.ctx.anchor) })
+    this.ctx.bus.emit('cutscene', { scene: film, card: cutsceneCard(film, this.anchor) })
   }
 
   /**
@@ -1936,7 +2202,7 @@ export class WorldScene extends Phaser.Scene {
     if (state.minute < FULL_TIME) {
       this.ctx.engine.dispatch({ t: 'clock.advanced', minutes: FULL_TIME - state.minute })
     }
-    this.goalMinute = decidingMinute(this.ctx.anchor)
+    this.goalMinute = decidingMinute(this.anchor)
     this.matchPhase = 'celebrating'
     if (!state.flags['saw:goal']) {
       this.ctx.engine.dispatch(
@@ -1946,11 +2212,11 @@ export class WorldScene extends Phaser.Scene {
         {
           t: 'memory.kept',
           memory: {
-            id: '1986-the-goal',
+            id: `${this.era.memoryPrefix}-the-goal`,
             item: 'ticket-stub',
             atMinute: this.ctx.engine.state.minute,
             year: this.ctx.engine.state.year,
-            anchorId: this.ctx.anchor.id,
+            anchorId: this.anchor.id,
           },
         },
       )
@@ -1958,7 +2224,7 @@ export class WorldScene extends Phaser.Scene {
     this.startCarnival()
     this.cameras.main.flash(700, 255, 252, 246)
     this.endMatch(false)
-    const goal = this.ctx.anchor.match?.decidedBy ?? null
+    const goal = this.anchor.match?.decidedBy ?? null
     if (goal) {
       this.ctx.bus.emit('toast', { text: `${goal.scorerHe}. דקה ${goal.minute}.`, tone: 'red' })
     }
@@ -1987,7 +2253,7 @@ export class WorldScene extends Phaser.Scene {
    */
   private watchMatch() {
     this.matchPhase = 'watching'
-    this.goalMinute = decidingMinute(this.ctx.anchor)
+    this.goalMinute = decidingMinute(this.anchor)
     this.timeScale = 26
     this.ctx.bus.emit('toast', { text: 'המשחק מתחיל.', tone: 'red' })
     this.pushMatch()
@@ -2038,7 +2304,7 @@ export class WorldScene extends Phaser.Scene {
     this.matchPhase = 'goal'
     this.timeScale = 0
     this.paused = true
-    const goal = this.ctx.anchor.match?.decidedBy ?? null
+    const goal = this.anchor.match?.decidedBy ?? null
     this.ctx.bus.emit('controls', { visible: false })
     this.ctx.bus.emit('prompt', null)
 
@@ -2071,11 +2337,11 @@ export class WorldScene extends Phaser.Scene {
         {
           t: 'memory.kept',
           memory: {
-            id: '1986-the-goal',
+            id: `${this.era.memoryPrefix}-the-goal`,
             item: 'ticket-stub',
             atMinute: this.ctx.engine.state.minute,
             year: this.ctx.engine.state.year,
-            anchorId: this.ctx.anchor.id,
+            anchorId: this.anchor.id,
           },
         },
       )
@@ -2167,13 +2433,13 @@ export class WorldScene extends Phaser.Scene {
     if (!this.ctx.engine.state.flags['match:over']) {
       this.ctx.engine.dispatch(
         { t: 'flag.raised', flag: 'match:over' },
-        { t: 'anchor.attended', anchorId: this.ctx.anchor.id },
+        { t: 'anchor.attended', anchorId: this.anchor.id },
       )
     }
     this.ctx.bus.emit('controls', { visible: true })
     this.pushMatch()
     this.refresh()
-    if (showCard) this.ctx.bus.emit('anchor', { anchor: this.ctx.anchor, showing: true })
+    if (showCard) this.ctx.bus.emit('anchor', { anchor: this.anchor, showing: true })
     this.cameras.main.shake(700, 0.004)
   }
 
@@ -2183,8 +2449,13 @@ export class WorldScene extends Phaser.Scene {
       this.ctx.bus.emit('match', null)
       return
     }
+    if (this.chapter === '1990') {
+      if (this.net) this.net.pushBoard()
+      else this.ctx.bus.emit('match', TransistorNet.finalBoard(this.anchor))
+      return
+    }
     const scored = this.matchPhase === 'goal' || this.matchPhase === 'celebrating' || this.matchPhase === 'over'
-    const board = scoreboardAt(this.ctx.anchor, scored)
+    const board = scoreboardAt(this.anchor, scored)
     if (!board) return
     const clock = matchClock(this.ctx.engine.state.minute, KICKOFF)
     // Once it goes in, the board holds the minute it went in — the archive's minute, not
@@ -2201,13 +2472,13 @@ export class WorldScene extends Phaser.Scene {
     const signature = `${label}|${board.homeScore}|${board.awayScore}`
     if (signature === this.lastMatchLabel) return
     this.lastMatchLabel = signature
-    this.ctx.bus.emit('match', { ...board, labelHe: label, scored })
+    this.ctx.bus.emit('match', { ...board, labelHe: label, scored, over: this.matchPhase === 'over' })
   }
 
   private finishChapter(endingId: string) {
     const state = this.ctx.engine.state
     const key = state.flags['arrived:late'] && endingId === 'home' ? 'late' : endingId
-    const card = ENDINGS[key] ?? ENDINGS['missed']
+    const card = this.era.endings[key] ?? this.era.endings['missed']
     if (!card) return
     this.ctx.engine.dispatch(
       {
@@ -2221,23 +2492,23 @@ export class WorldScene extends Phaser.Scene {
         // somebody's log to tidy that up would be editing a record of what happened,
         // which is the one thing an append-only save may never do (rule 45, rule 35).
         memory: {
-          id: `1986-${card.id}`,
+          id: `${this.era.memoryPrefix}-${card.id}`,
           item: card.memoryItem,
           atMinute: state.minute,
           year: state.year,
-          anchorId: this.ctx.anchor.id,
+          anchorId: this.anchor.id,
         },
       },
       { t: 'flag.raised', flag: 'memory:first' },
       state.flags['match:started'] && state.flags['entry:granted']
-        ? { t: 'anchor.attended', anchorId: this.ctx.anchor.id }
-        : { t: 'anchor.missed', anchorId: this.ctx.anchor.id },
+        ? { t: 'anchor.attended', anchorId: this.anchor.id }
+        : { t: 'anchor.missed', anchorId: this.anchor.id },
       // The chapter's own year, and it is not cosmetic: `chapter.entered` and this event
       // are the only things that set `state.chapter`, and `lib/life/redbox.ts` stamps
       // every kept object `sourceEventId: chapter:${state.chapter}`. While this said the
       // pre-rebase year, every object in a 1986 player's Red Box was filed under a
       // chapter that does not exist.
-      { t: 'chapter.completed', chapter: '1986' },
+      { t: 'chapter.completed', chapter: this.chapter },
     )
     void this.ctx.engine.save()
     this.paused = true
@@ -2245,6 +2516,7 @@ export class WorldScene extends Phaser.Scene {
       titleHe: card.titleHe,
       bodyHe: card.bodyHe,
       memoryHe: card.memoryHe,
+      chapter: this.chapter,
       ...(card.after ? { after: card.after } : {}),
     })
   }
@@ -2256,6 +2528,78 @@ export class WorldScene extends Phaser.Scene {
    * screen that charges the player for looking at it is a screen they stop opening, and
    * a life simulation whose life screen is a trap has built the wrong thing.
    */
+  // ------------------------------------------------------------------- the map ----
+
+  /** a room crossed on foot costs about this much of the afternoon */
+  private static readonly MINUTES_PER_ROOM = 4
+
+  /**
+   * המפה — every room the doors lead to from here, by the shortest way through them.
+   *
+   * Breadth-first over the scene graph, through doors that EXIST right now (`when`) —
+   * a door that `needs` something the child does not have is still on the map, and the
+   * place behind it is listed with that door's name as the reason it is shut, because
+   * "the ground is there, you need a ticket" is information and a missing entry is not.
+   * Nothing is teleported: choosing a place charges the walk's minutes and plays the same
+   * fade every door plays. The rule "going somewhere IS the choice" survives, it just
+   * stops charging the player's thumb for the corridor between two decisions.
+   */
+  places(): MapPlace[] {
+    const state = this.ctx.engine.state
+    const known = new Set(ALL_SCENES.map((scene) => scene.id))
+    type Step = { id: LocationId; hops: number; lockedHe: string | null; spawn: string }
+    const seen = new Map<LocationId, Step>()
+    const queue: Step[] = [{ id: this.def.id, hops: 0, lockedHe: null, spawn: this.spawnName }]
+    seen.set(this.def.id, queue[0]!)
+    while (queue.length) {
+      const here = queue.shift()!
+      const scene = sceneFor(here.id)
+      for (const exit of scene.exits) {
+        if (!exitInEra(exit, this.chapter)) continue
+        if (!known.has(exit.to) || !meets(state, exit.when)) continue
+        if (seen.has(exit.to)) continue
+        const lockedHe = here.lockedHe ?? (meets(state, exit.needs) ? null : exit.labelHe)
+        const step: Step = { id: exit.to, hops: here.hops + 1, lockedHe, spawn: exit.spawn }
+        seen.set(exit.to, step)
+        queue.push(step)
+      }
+    }
+    return [...seen.values()].map((step) => ({
+      id: step.id,
+      titleHe: sceneFor(step.id).titleHe,
+      here: step.id === this.def.id,
+      minutes: step.hops * WorldScene.MINUTES_PER_ROOM,
+      lockedHe: step.lockedHe,
+    }))
+  }
+
+  goTo(id: string): boolean {
+    const place = this.places().find((entry) => entry.id === id)
+    if (!place || place.here || place.lockedHe) return false
+    // Re-walk the graph for the spawn the last door lands on — the list above does not
+    // carry it, because the shell has no business knowing spawn names.
+    const state = this.ctx.engine.state
+    const prev = new Map<LocationId, { from: LocationId; spawn: string }>()
+    const queue: LocationId[] = [this.def.id]
+    const seen = new Set<LocationId>([this.def.id])
+    while (queue.length) {
+      const here = queue.shift()!
+      for (const exit of sceneFor(here).exits) {
+        if (!exitInEra(exit, this.chapter)) continue
+        if (seen.has(exit.to) || !meets(state, exit.when)) continue
+        seen.add(exit.to)
+        prev.set(exit.to, { from: here, spawn: exit.spawn })
+        queue.push(exit.to)
+      }
+    }
+    const last = prev.get(id as LocationId)
+    if (!last) return false
+    this.paused = false
+    this.ctx.engine.dispatch({ t: 'clock.advanced', minutes: place.minutes })
+    this.travel(id as LocationId, last.spawn)
+    return true
+  }
+
   setPaused(on: boolean) {
     this.paused = on
     if (on) {
@@ -2264,6 +2608,18 @@ export class WorldScene extends Phaser.Scene {
       this.ctx.bus.emit('prompt', null)
     } else {
       this.idleFor = 0
+    }
+  }
+
+  /** Developer-only: where the child is, as the doors see him — for the probes. */
+  where() {
+    const state = this.ctx.engine.state
+    return {
+      scene: this.def.id,
+      x: Number((this.player.x / this.W).toFixed(3)),
+      y: Number((this.groundY / this.H).toFixed(3)),
+      paused: this.paused,
+      exits: this.exits.map((exit) => `${exit.id}${meets(state, exit.when) ? '' : '(shut)'}`),
     }
   }
 
@@ -2287,9 +2643,9 @@ export class WorldScene extends Phaser.Scene {
    */
   goHome() {
     this.ctx.bus.emit('ending', null)
-    const card = buildFinale(this.ctx.engine.state, this.ctx.engine.log())
+    const card = buildFinale(this.ctx.engine.state, this.ctx.engine.log(), this.chapter)
     this.ctx.bus.emit('finale', {
-      anchor: this.ctx.anchor,
+      anchor: this.anchor,
       titleHe: card.titleHe,
       bodyHe: card.bodyHe,
       becameHe: card.becameHe,
@@ -2298,10 +2654,24 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /** …and the finale's own button is what actually goes home. */
+  /**
+   * …and the finale's own button is what actually goes on. In 1986 that is the passage —
+   * four years, played (`PassageScene`) — which is the bug the roadmap named: this used to
+   * `travel('bedroom')` and put the player back in the Saturday he had just finished. In
+   * 1990 the day ends in the bedroom the next morning, and the school line plays there.
+   */
   dismissFinale() {
     this.paused = false
     this.ctx.bus.emit('finale', null)
     this.ctx.bus.emit('match', null)
+    if (this.chapter === '1986') {
+      this.cameras.main.fadeOut(600, 0, 0, 0)
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        void this.ctx.engine.save()
+        this.scene.start(PassageScene.KEY)
+      })
+      return
+    }
     this.travel('bedroom', 'start')
   }
 }

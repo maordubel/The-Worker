@@ -92,6 +92,23 @@ export class InputState implements LifeInput {
     this.consumed = true
   }
 
+  /**
+   * הלחיצה הזאת כבר שימשה — the key that closed a dialogue must not also act.
+   *
+   * E advances a line in the shell AND is the game's action key. The press that closed
+   * the last line therefore arrived at the scene as a fresh edge on the very next frame,
+   * with the world unpaused and the person you were talking to still in reach — and the
+   * conversation started again. Every keyboard player saw it; the browser harness talked
+   * to Rachel four times in a row before anybody read the log. Swallowing the edge is the
+   * fix: the held key is remembered as already-down, so no press is reported until it is
+   * released and pressed again.
+   */
+  swallow() {
+    this.wasAction = true
+    this.consumed = true
+    this._pressed = false
+  }
+
   reset() {
     this.padX = 0
     this.padY = 0

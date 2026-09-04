@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 
+import { longDateHe } from '../../cutscenes'
 import type { LocationId } from '../../types'
 import { artUrl } from '../art'
 import { frameCamera } from '../camera'
@@ -316,6 +317,7 @@ export class FootballScene extends Phaser.Scene {
     const left = Math.max(0, Math.ceil((this.endsAt - this.time.now) / 1000))
     this.ctx.bus.emit('hud', {
       clock: `${this.score.red} — ${this.score.other}`,
+      date: longDateHe(this.ctx.anchor.match?.playedOn) ?? String(this.ctx.engine.state.year),
       agorot: left,
       showMoney: false,
       place: 'שניים על שניים',

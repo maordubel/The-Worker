@@ -39,6 +39,12 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
   const scroller = useRef<HTMLDivElement>(null)
   const match = finale.anchor.match
   const verified = !isPlaceholder(finale.anchor)
+  /**
+   * Which stage this closes. The 1986 card is a champions' card with the real ticket and
+   * the next morning's papers; the 1990 one is a promotion, and the archive holds no
+   * ticket and no paper for it yet — so those sections do not pretend.
+   */
+  const stageB = finale.anchor.year >= 1990
 
   // A card that opens halfway down is a card somebody scrolled by accident.
   useEffect(() => {
@@ -63,10 +69,10 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
           {/* ---------------------------------------------------------- the title -- */}
           <div className="border-rule border-red bg-red px-4 py-5 text-center">
             <p className="font-latin text-[10px] font-bold tracking-[0.28em] text-sheet" dir="ltr">
-              {t('life.finale.kicker')}
+              {stageB ? t('life.finale.kicker1990') : t('life.finale.kicker')}
             </p>
             <p className="mt-2 font-poster text-[46px] leading-[0.92] text-sheet sm:text-[68px]">
-              {t('life.finale.champions')}
+              {stageB ? t('life.finale.promoted') : t('life.finale.champions')}
             </p>
             <p className="mt-2 font-mono text-[13px] leading-none tabular-nums text-sheet/90" dir="ltr">
               {finale.anchor.seasonLabel}
@@ -113,7 +119,7 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
           )}
 
           {/* --------------------------------------------------------- the ticket -- */}
-          {finale.keptTicket && (
+          {finale.keptTicket && !stageB && (
             <section className="mt-3 border-rule border-sheet/25 bg-ink px-4 py-4">
               <h2 className="font-display text-step-1 leading-tight text-sheet">
                 <bdi>{t('life.finale.ticketTitle')}</bdi>
@@ -133,6 +139,7 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
           )}
 
           {/* ------------------------------------------------- the morning after -- */}
+          {!stageB && (
           <section className="mt-3 border-rule border-sheet/25 bg-ink px-4 py-4">
             <h2 className="font-display text-step-1 leading-tight text-sheet">
               <bdi>{t('life.finale.papersTitle')}</bdi>
@@ -152,6 +159,7 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
               </div>
             </div>
           </section>
+          )}
 
           {/* ------------------------------------------------------ what you became -- */}
           <section className="mt-3 border-rule border-red bg-sheet px-4 py-4">
@@ -171,15 +179,15 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
             <div className="flex items-center gap-2">
               <Pip done label="A" />
               <div className="h-[2px] flex-1 bg-red" />
-              <Pip label="B" />
-              <div className="h-[2px] flex-1 bg-concrete/30" />
+              <Pip done={stageB} label="B" />
+              <div className={`h-[2px] flex-1 ${stageB ? 'bg-red' : 'bg-concrete/30'}`} />
               <Pip label="C" />
             </div>
             <p className="mt-3 font-display text-step-2 leading-tight text-sheet">
-              <bdi>{t('life.finale.stageDone')}</bdi>
+              <bdi>{stageB ? t('life.finale.stageDone1990') : t('life.finale.stageDone')}</bdi>
             </p>
             <p className="mt-1 font-body text-[12px] leading-snug text-concrete">
-              <bdi>{t('life.finale.stageNext')}</bdi>
+              <bdi>{stageB ? t('life.finale.stageNext1990') : t('life.finale.stageNext')}</bdi>
             </p>
 
             <button
@@ -189,7 +197,7 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
               data-life="finale-continue"
             >
               <span className="font-display text-step-1 leading-none text-sheet">
-                <bdi>{t('life.finale.cta')}</bdi>
+                <bdi>{stageB ? t('life.finale.cta1990') : t('life.finale.cta')}</bdi>
               </span>
               <span className="font-latin text-[10px] font-bold tracking-[0.2em] text-sheet/80" dir="ltr">
                 1990

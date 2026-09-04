@@ -58,6 +58,44 @@ export function frameZoom(
 }
 
 /**
+ * מסך מלא — the painting fills the glass, edge to edge, and the camera does the rest.
+ *
+ * `frameCamera` below was the right answer for the day the game was a painting shown in
+ * a frame with a console under it. It is the wrong answer for a phone held upright, which
+ * is where this game is actually played: it left the picture in the top two thirds of the
+ * screen with a hairline and a dead band under it, and Maor's note on the result was one
+ * word — "cut". The model he named instead (Very Little Nightmares) does the opposite:
+ * the room fills the whole screen, the character stands in a tall slice of it, and the
+ * camera follows him along the room. Nothing is letterboxed because nothing needs to be:
+ * the picture is bigger than the glass on one axis, and that axis scrolls.
+ *
+ * So: whichever axis needs more magnification wins (COVER, not contain), the viewport is
+ * the entire canvas, and the scene sets bounds and follows. A 16:9 backdrop on a 9:19.5
+ * phone shows about a quarter of the room's width at once — a corridor of the street, not
+ * the street — which is exactly the framing VLN uses and the reason a small child in a
+ * big painted world reads as a small child in a big painted world.
+ *
+ * `lift` is a fraction of the viewport height by which the picture may be magnified past
+ * cover, so a portrait phone has a little vertical room to scroll and the floor band can
+ * be lifted clear of a thumb resting at the bottom of the glass. 1 = exact cover.
+ */
+export function fillCamera(
+  scene: PhaserNS.Scene,
+  camera: PhaserNS.Cameras.Scene2D.Camera,
+  width: number,
+  height: number,
+  lift = 1,
+): { zoom: number; viewWidth: number; viewHeight: number } {
+  const viewWidth = scene.scale.gameSize.width || camera.width || 800
+  const viewHeight = scene.scale.gameSize.height || camera.height || 600
+  const cover = Math.max(viewWidth / width, viewHeight / height)
+  const zoom = Number(Math.min(cover * Math.max(1, lift), 7).toFixed(3))
+  camera.setViewport(0, 0, viewWidth, viewHeight)
+  camera.setZoom(zoom)
+  return { zoom, viewWidth, viewHeight }
+}
+
+/**
  * Frame the painting and hand back the strip it actually occupies.
  *
  * On a phone held upright, a room painted across the frame cannot both fill the glass and

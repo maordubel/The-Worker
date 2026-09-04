@@ -1,307 +1,355 @@
 {
- "note": "Hapoel Tel Aviv is the club this product is about. Maccabi Tel Aviv is flagged as the derby rival — for this project a derby means Maccabi Tel Aviv and nothing else. Opponent clubs exist only to give verified matches something to point at. The basketball records were added on 2.9.2026 from the wiki's own declaration: תבנית:שםקבוצה bolds exactly הפועל ת\"א, הפועל תל אביב and הפועל אוסישקין as the club the site is about, and תבנית:שליפת טבלת משחקים פשוטה queries basketball as department='כדורסל' OR department='הפועל אוסישקין'. מכבי חיפה נוספה ב-3.9.2026 כיריבה במשחק האליפות של 1985/86 — היא קיימת כאן רק כדי שלמשחק מאומת יהיה למה להצביע, ואינה יריבת דרבי.",
- "confidence": 2,
- "source": {
-  "kind": "other",
-  "title": "Verified research pass, 31 Aug 2026",
-  "url": null
- },
- "records": [
-  {
-   "slug": "הפועל-תל-אביב",
-   "nameHe": "הפועל תל אביב",
-   "nameEn": "Hapoel Tel Aviv",
-   "city": "תל אביב",
-   "sport": "football",
-   "isUs": true,
-   "aliases": [
-    "הפועל תל אביב",
-    "הפועל ת\"א",
-    "הפועל תל אביב (כדורגל)",
-    "Hapoel Tel Aviv"
-   ],
-   "confidence": 3,
-   "sourceTitle": "Maor Harel — project owner",
-   "sourceKind": "manual"
+  "note": "Hapoel Tel Aviv is the club this product is about. Maccabi Tel Aviv is flagged as the derby rival — for this project a derby means Maccabi Tel Aviv and nothing else. Opponent clubs exist only to give verified matches something to point at. The basketball records were added on 2.9.2026 from the wiki's own declaration: תבנית:שםקבוצה bolds exactly הפועל ת\"א, הפועל תל אביב and הפועל אוסישקין as the club the site is about, and תבנית:שליפת טבלת משחקים פשוטה queries basketball as department='כדורסל' OR department='הפועל אוסישקין'. מכבי חיפה נוספה ב-3.9.2026 כיריבה במשחק האליפות של 1985/86 — היא קיימת כאן רק כדי שלמשחק מאומת יהיה למה להצביע, ואינה יריבת דרבי.",
+  "confidence": 2,
+  "source": {
+    "kind": "other",
+    "title": "Verified research pass, 31 Aug 2026",
+    "url": null
   },
-  {
-   "slug": "מכבי-תל-אביב",
-   "nameHe": "מכבי תל אביב",
-   "nameEn": "Maccabi Tel Aviv",
-   "city": "תל אביב",
-   "sport": "football",
-   "isDerbyRival": true,
-   "aliases": [
-    "מכבי תל אביב",
-    "מכבי ת\"א",
-    "Maccabi Tel Aviv"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://en.wikipedia.org/wiki/Tel_Aviv_derby",
-   "sourceTitle": "Tel Aviv derby — Wikipedia"
-  },
-  {
-   "slug": "הפועל-תל-אביב-כדורסל",
-   "nameHe": "הפועל תל אביב (כדורסל)",
-   "nameEn": "Hapoel Tel Aviv B.C.",
-   "city": "תל אביב",
-   "sport": "basketball",
-   "aliases": [
-    "הפועל תל אביב כדורסל",
-    "הפועל IBI תל אביב",
-    "Hapoel Tel Aviv B.C."
-   ],
-   "confidence": 1,
-   "sourceUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_B.C.",
-   "sourceTitle": "Hapoel Tel Aviv B.C. — Wikipedia",
-   "source": {
-    "kind": "wiki",
-    "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
-    "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
-   }
-  },
-  {
-   "slug": "צלסי",
-   "nameHe": "צ'לסי",
-   "nameEn": "Chelsea",
-   "city": "לונדון",
-   "sport": "football",
-   "aliases": [
-    "צ'לסי",
-    "Chelsea"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://www.uefa.com/uefaeuropaleague/match/68550--h-tel-aviv-vs-chelsea/",
-   "sourceTitle": "UEFA match centre"
-  },
-  {
-   "slug": "לוקומוטיב-מוסקבה",
-   "nameHe": "לוקומוטיב מוסקבה",
-   "nameEn": "Lokomotiv Moscow",
-   "city": "מוסקבה",
-   "sport": "football",
-   "aliases": [
-    "לוקומוטיב מוסקבה",
-    "Lokomotiv Moscow"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/025a-0eab13c1f1d5-dab99f819385-1000--tel-aviv-triumph-in-russia",
-   "sourceTitle": "UEFA report"
-  },
-  {
-   "slug": "פארמה",
-   "nameHe": "פארמה",
-   "nameEn": "Parma",
-   "city": "פארמה",
-   "sport": "football",
-   "aliases": [
-    "פארמה",
-    "Parma"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/025a-0eab0ace3480-d3cf7a771c8b-1000--tel-aviv-fairy-tale-continues/",
-   "sourceTitle": "UEFA report"
-  },
-  {
-   "slug": "מילאן",
-   "nameHe": "מילאן",
-   "nameEn": "AC Milan",
-   "city": "מילאנו",
-   "sport": "football",
-   "aliases": [
-    "מילאן",
-    "איי סי מילאן",
-    "AC Milan"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/0183-0eaa43ba228a-d6fe8d77e124-1000--clescenko-stuns-milan/",
-   "sourceTitle": "UEFA report"
-  },
-  {
-   "slug": "בנפיקה",
-   "nameHe": "בנפיקה",
-   "nameEn": "Benfica",
-   "city": "ליסבון",
-   "sport": "football",
-   "aliases": [
-    "בנפיקה",
-    "Benfica"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://www.skysports.com/football/hap-tel-aviv-vs-benfica/report/227534",
-   "sourceTitle": "Sky Sports match report"
-  },
-  {
-   "slug": "שמשון-תל-אביב",
-   "nameHe": "שמשון תל אביב",
-   "nameEn": "Shimshon Tel Aviv",
-   "city": "תל אביב",
-   "sport": "football",
-   "aliases": [
-    "שמשון תל אביב",
-    "Shimshon Tel Aviv"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
-   "sourceTitle": "Bloomfield Stadium — Wikipedia"
-  },
-  {
-   "slug": "סלנגור",
-   "nameHe": "סלנגור",
-   "nameEn": "Selangor",
-   "city": "סלנגור",
-   "sport": "football",
-   "aliases": [
-    "סלנגור",
-    "Selangor"
-   ],
-   "confidence": 1,
-   "sourceUrl": "https://en.wikipedia.org/wiki/1967_Asian_Champion_Club_Tournament",
-   "sourceTitle": "1967 Asian Champion Club Tournament — Wikipedia"
-  },
-  {
-   "slug": "ארארט-ירוואן",
-   "nameHe": "ארארט ירוואן",
-   "nameEn": "Ararat Yerevan",
-   "city": "ירוואן",
-   "sport": "football",
-   "aliases": [
-    "ארארט ירוואן",
-    "Ararat Yerevan"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
-  },
-  {
-   "slug": "פרטיזני-טירנה",
-   "nameHe": "פרטיזני טירנה",
-   "nameEn": "Partizani Tirana",
-   "city": "טירנה",
-   "sport": "football",
-   "aliases": [
-    "פרטיזני טירנה",
-    "Partizani Tirana"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
-  },
-  {
-   "slug": "קרנטן",
-   "nameHe": "קרנטן",
-   "nameEn": "Kärnten",
-   "city": "קלגנפורט",
-   "sport": "football",
-   "aliases": [
-    "קרנטן",
-    "Kärnten"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
-  },
-  {
-   "slug": "לידס",
-   "nameHe": "לידס יונייטד",
-   "nameEn": "Leeds United",
-   "city": "לידס",
-   "sport": "football",
-   "aliases": [
-    "לידס יונייטד",
-    "Leeds United"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
-  },
-  {
-   "slug": "זלצבורג",
-   "nameHe": "רד בול זלצבורג",
-   "nameEn": "Red Bull Salzburg",
-   "city": "זלצבורג",
-   "sport": "football",
-   "aliases": [
-    "רד בול זלצבורג",
-    "Red Bull Salzburg"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
-  },
-  {
-   "slug": "הפועל-תל-אביב",
-   "nameHe": "הפועל תל אביב",
-   "nameEn": "Hapoel Tel Aviv",
-   "city": "תל אביב",
-   "sport": "basketball",
-   "isUs": true,
-   "isDerbyRival": false,
-   "aliases": [
-    "הפועל תל אביב",
-    "הפועל ת\"א",
-    "הפועל תל אביב (כדורסל)"
-   ],
-   "confidence": 1,
-   "source": {
-    "kind": "wiki",
-    "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
-    "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
-   }
-  },
-  {
-   "slug": "הפועל-אוסישקין",
-   "nameHe": "הפועל אוסישקין",
-   "nameEn": "Hapoel Ussishkin",
-   "city": "תל אביב",
-   "sport": "basketball",
-   "isUs": true,
-   "isDerbyRival": false,
-   "aliases": [
-    "הפועל אוסישקין",
-    "אוסישקין"
-   ],
-   "confidence": 1,
-   "source": {
-    "kind": "wiki",
-    "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
-    "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
-   }
-  },
-  {
-   "slug": "מכבי-תל-אביב",
-   "nameHe": "מכבי תל אביב",
-   "nameEn": "Maccabi Tel Aviv",
-   "city": "תל אביב",
-   "sport": "basketball",
-   "isUs": false,
-   "isDerbyRival": true,
-   "aliases": [
-    "מכבי תל אביב",
-    "מכבי ת\"א"
-   ],
-   "confidence": 1,
-   "source": {
-    "kind": "wiki",
-    "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
-    "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
-   }
-  },
-  {
-   "slug": "מכבי-חיפה",
-   "nameHe": "מכבי חיפה",
-   "nameEn": "Maccabi Haifa",
-   "city": "חיפה",
-   "sport": "football",
-   "aliases": [
-    "מכבי חיפה",
-    "מכבי-חיפה",
-    "Maccabi Haifa",
-    "הירוקים"
-   ],
-   "confidence": 2,
-   "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html",
-   "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86"
-  }
- ]
+  "records": [
+    {
+      "slug": "הפועל-תל-אביב",
+      "nameHe": "הפועל תל אביב",
+      "nameEn": "Hapoel Tel Aviv",
+      "city": "תל אביב",
+      "sport": "football",
+      "isUs": true,
+      "aliases": [
+        "הפועל תל אביב",
+        "הפועל ת\"א",
+        "הפועל תל אביב (כדורגל)",
+        "Hapoel Tel Aviv"
+      ],
+      "confidence": 3,
+      "sourceTitle": "Maor Harel — project owner",
+      "sourceKind": "manual"
+    },
+    {
+      "slug": "מכבי-תל-אביב",
+      "nameHe": "מכבי תל אביב",
+      "nameEn": "Maccabi Tel Aviv",
+      "city": "תל אביב",
+      "sport": "football",
+      "isDerbyRival": true,
+      "aliases": [
+        "מכבי תל אביב",
+        "מכבי ת\"א",
+        "Maccabi Tel Aviv"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tel_Aviv_derby",
+      "sourceTitle": "Tel Aviv derby — Wikipedia"
+    },
+    {
+      "slug": "הפועל-תל-אביב-כדורסל",
+      "nameHe": "הפועל תל אביב (כדורסל)",
+      "nameEn": "Hapoel Tel Aviv B.C.",
+      "city": "תל אביב",
+      "sport": "basketball",
+      "aliases": [
+        "הפועל תל אביב כדורסל",
+        "הפועל IBI תל אביב",
+        "Hapoel Tel Aviv B.C."
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_B.C.",
+      "sourceTitle": "Hapoel Tel Aviv B.C. — Wikipedia",
+      "source": {
+        "kind": "wiki",
+        "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
+        "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
+      }
+    },
+    {
+      "slug": "צלסי",
+      "nameHe": "צ'לסי",
+      "nameEn": "Chelsea",
+      "city": "לונדון",
+      "sport": "football",
+      "aliases": [
+        "צ'לסי",
+        "Chelsea"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/match/68550--h-tel-aviv-vs-chelsea/",
+      "sourceTitle": "UEFA match centre"
+    },
+    {
+      "slug": "לוקומוטיב-מוסקבה",
+      "nameHe": "לוקומוטיב מוסקבה",
+      "nameEn": "Lokomotiv Moscow",
+      "city": "מוסקבה",
+      "sport": "football",
+      "aliases": [
+        "לוקומוטיב מוסקבה",
+        "Lokomotiv Moscow"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/025a-0eab13c1f1d5-dab99f819385-1000--tel-aviv-triumph-in-russia",
+      "sourceTitle": "UEFA report"
+    },
+    {
+      "slug": "פארמה",
+      "nameHe": "פארמה",
+      "nameEn": "Parma",
+      "city": "פארמה",
+      "sport": "football",
+      "aliases": [
+        "פארמה",
+        "Parma"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/025a-0eab0ace3480-d3cf7a771c8b-1000--tel-aviv-fairy-tale-continues/",
+      "sourceTitle": "UEFA report"
+    },
+    {
+      "slug": "מילאן",
+      "nameHe": "מילאן",
+      "nameEn": "AC Milan",
+      "city": "מילאנו",
+      "sport": "football",
+      "aliases": [
+        "מילאן",
+        "איי סי מילאן",
+        "AC Milan"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.uefa.com/uefaeuropaleague/news/0183-0eaa43ba228a-d6fe8d77e124-1000--clescenko-stuns-milan/",
+      "sourceTitle": "UEFA report"
+    },
+    {
+      "slug": "בנפיקה",
+      "nameHe": "בנפיקה",
+      "nameEn": "Benfica",
+      "city": "ליסבון",
+      "sport": "football",
+      "aliases": [
+        "בנפיקה",
+        "Benfica"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.skysports.com/football/hap-tel-aviv-vs-benfica/report/227534",
+      "sourceTitle": "Sky Sports match report"
+    },
+    {
+      "slug": "שמשון-תל-אביב",
+      "nameHe": "שמשון תל אביב",
+      "nameEn": "Shimshon Tel Aviv",
+      "city": "תל אביב",
+      "sport": "football",
+      "aliases": [
+        "שמשון תל אביב",
+        "Shimshon Tel Aviv"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
+      "sourceTitle": "Bloomfield Stadium — Wikipedia"
+    },
+    {
+      "slug": "סלנגור",
+      "nameHe": "סלנגור",
+      "nameEn": "Selangor",
+      "city": "סלנגור",
+      "sport": "football",
+      "aliases": [
+        "סלנגור",
+        "Selangor"
+      ],
+      "confidence": 1,
+      "sourceUrl": "https://en.wikipedia.org/wiki/1967_Asian_Champion_Club_Tournament",
+      "sourceTitle": "1967 Asian Champion Club Tournament — Wikipedia"
+    },
+    {
+      "slug": "ארארט-ירוואן",
+      "nameHe": "ארארט ירוואן",
+      "nameEn": "Ararat Yerevan",
+      "city": "ירוואן",
+      "sport": "football",
+      "aliases": [
+        "ארארט ירוואן",
+        "Ararat Yerevan"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "פרטיזני-טירנה",
+      "nameHe": "פרטיזני טירנה",
+      "nameEn": "Partizani Tirana",
+      "city": "טירנה",
+      "sport": "football",
+      "aliases": [
+        "פרטיזני טירנה",
+        "Partizani Tirana"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "קרנטן",
+      "nameHe": "קרנטן",
+      "nameEn": "Kärnten",
+      "city": "קלגנפורט",
+      "sport": "football",
+      "aliases": [
+        "קרנטן",
+        "Kärnten"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "לידס",
+      "nameHe": "לידס יונייטד",
+      "nameEn": "Leeds United",
+      "city": "לידס",
+      "sport": "football",
+      "aliases": [
+        "לידס יונייטד",
+        "Leeds United"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "זלצבורג",
+      "nameHe": "רד בול זלצבורג",
+      "nameEn": "Red Bull Salzburg",
+      "city": "זלצבורג",
+      "sport": "football",
+      "aliases": [
+        "רד בול זלצבורג",
+        "Red Bull Salzburg"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://wiki.red-fans.com/",
+      "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+    },
+    {
+      "slug": "הפועל-תל-אביב",
+      "nameHe": "הפועל תל אביב",
+      "nameEn": "Hapoel Tel Aviv",
+      "city": "תל אביב",
+      "sport": "basketball",
+      "isUs": true,
+      "isDerbyRival": false,
+      "aliases": [
+        "הפועל תל אביב",
+        "הפועל ת\"א",
+        "הפועל תל אביב (כדורסל)"
+      ],
+      "confidence": 1,
+      "source": {
+        "kind": "wiki",
+        "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
+        "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
+      }
+    },
+    {
+      "slug": "הפועל-אוסישקין",
+      "nameHe": "הפועל אוסישקין",
+      "nameEn": "Hapoel Ussishkin",
+      "city": "תל אביב",
+      "sport": "basketball",
+      "isUs": true,
+      "isDerbyRival": false,
+      "aliases": [
+        "הפועל אוסישקין",
+        "אוסישקין"
+      ],
+      "confidence": 1,
+      "source": {
+        "kind": "wiki",
+        "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
+        "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
+      }
+    },
+    {
+      "slug": "מכבי-תל-אביב",
+      "nameHe": "מכבי תל אביב",
+      "nameEn": "Maccabi Tel Aviv",
+      "city": "תל אביב",
+      "sport": "basketball",
+      "isUs": false,
+      "isDerbyRival": true,
+      "aliases": [
+        "מכבי תל אביב",
+        "מכבי ת\"א"
+      ],
+      "confidence": 1,
+      "source": {
+        "kind": "wiki",
+        "title": "ויקיפועל — תבנית:שםקבוצה / תבנית:שליפת טבלת משחקים פשוטה",
+        "url": "https://wiki.red-fans.com/index.php?title=%D7%AA%D7%91%D7%A0%D7%99%D7%AA:%D7%A9%D7%9D%D7%A7%D7%91%D7%95%D7%A6%D7%94"
+      }
+    },
+    {
+      "slug": "מכבי-חיפה",
+      "nameHe": "מכבי חיפה",
+      "nameEn": "Maccabi Haifa",
+      "city": "חיפה",
+      "sport": "football",
+      "aliases": [
+        "מכבי חיפה",
+        "מכבי-חיפה",
+        "Maccabi Haifa",
+        "הירוקים"
+      ],
+      "confidence": 2,
+      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html",
+      "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86"
+    },
+    {
+      "slug": "מכבי-רמת-עמידר",
+      "nameHe": "מכבי רמת עמידר",
+      "nameEn": "Maccabi Ramat Amidar",
+      "city": "רמת גן",
+      "sport": "football",
+      "isUs": false,
+      "aliases": [
+        "מכבי רמת עמידר",
+        "Maccabi Ramat Amidar"
+      ],
+      "confidence": 2,
+      "sourceTitle": "וואלה ספורט — לא סתם עוד שבת של כדורגל: 30 שנה לסערת העלייה של הפועל תל אביב (12.5.2020)",
+      "sourceKind": "web",
+      "sourceUrl": "https://sports.walla.co.il/item/3356277"
+    },
+    {
+      "slug": "מכבי-יבנה",
+      "nameHe": "מכבי יבנה",
+      "nameEn": "Maccabi Yavne",
+      "city": "יבנה",
+      "sport": "football",
+      "isUs": false,
+      "aliases": [
+        "מכבי יבנה",
+        "Maccabi Yavne"
+      ],
+      "confidence": 2,
+      "sourceTitle": "וואלה ספורט — לא סתם עוד שבת של כדורגל: 30 שנה לסערת העלייה של הפועל תל אביב (12.5.2020)",
+      "sourceKind": "web",
+      "sourceUrl": "https://sports.walla.co.il/item/3356277"
+    },
+    {
+      "slug": "בית\"ר-נתניה",
+      "nameHe": "בית\"ר נתניה",
+      "nameEn": "Beitar Netanya",
+      "city": "נתניה",
+      "sport": "football",
+      "isUs": false,
+      "aliases": [
+        "בית\"ר נתניה",
+        "Beitar Netanya"
+      ],
+      "confidence": 2,
+      "sourceTitle": "וואלה ספורט — לא סתם עוד שבת של כדורגל: 30 שנה לסערת העלייה של הפועל תל אביב (12.5.2020)",
+      "sourceKind": "web",
+      "sourceUrl": "https://sports.walla.co.il/item/3356277"
+    }
+  ]
 }

@@ -18,6 +18,8 @@
     "story:cards": "node scripts/brand/story-cards.mjs",
     "qa:sweep": "node scripts/brand/qa-sweep.mjs",
     "life:play": "node scripts/life/playthrough.mjs",
+    "life:boards": "node scripts/life/scene-boards.mjs",
+    "art:finish": "python3 scripts/life/finish-backdrops.py",
     "wiki:canon": "tsx scripts/ingest/canon-cli.ts",
     "wiki:import": "tsx scripts/ingest/export-cli.ts",
     "wiki:cargo": "tsx scripts/ingest/cargo-cli.ts",

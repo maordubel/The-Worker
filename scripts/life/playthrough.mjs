@@ -92,6 +92,9 @@ for (const size of TOUR_ONLY ? [] : SIZES) {
     isMobile: size.touch,
   })
   const page = await context.newPage()
+  // The ad and analytics hosts are refused by this sandbox; `networkidle` would wait on
+  // them forever. Same line as `tap-probe.mjs`, for the same reason.
+  await page.route('**://{pagead2.googlesyndication.com,www.googletagmanager.com,www.google.com,accounts.google.com}/**', (r) => r.abort())
   const errors = []
   const origin = new URL(BASE).origin
   page.on('requestfailed', (request) => {
@@ -198,7 +201,9 @@ for (const size of TOUR_ONLY ? [] : SIZES) {
   const clockInBedroom = await clockNow()
 
   // The teaching line must be on screen before the player has moved.
-  if ((await page.locator('text=/לזוז|גרור/').count()) === 0) {
+  // On a phone the line now says "touch a place and he walks" (3.9.2026); on a desktop it
+  // still names the keys.
+  if ((await page.locator('text=/לזוז|גרור|ילך לשם/').count()) === 0) {
     faults += 1
     report.push(`NO TEACH ${size.name}: the movement line never appeared`)
   }
@@ -463,7 +468,10 @@ for (const size of TOUR_ONLY ? [] : SIZES) {
       )
     }
     const small = deck.targets.filter((box) => box.w < 44 || box.h < 44)
-    if (size.touch && (deck.targets.length < 2 || small.length > 0)) {
+    // Since the full-bleed pass the phone's default deck is the single TapChip — one
+    // target that names the action and IS the button. The arcade pair is a menu toggle
+    // away. So a touch layout needs at least one target, and none under 44px.
+    if (size.touch && (deck.targets.length < 1 || small.length > 0)) {
       faults += 1
       report.push(
         `DECK     ${size.name}: ${deck.targets.length} touch targets, ${small.length} under 44px`,
@@ -611,6 +619,9 @@ const TOUR = [
 {
   const context = await browser.newContext({ viewport: { width: 1280, height: 820 } })
   const page = await context.newPage()
+  // The ad and analytics hosts are refused by this sandbox; `networkidle` would wait on
+  // them forever. Same line as `tap-probe.mjs`, for the same reason.
+  await page.route('**://{pagead2.googlesyndication.com,www.googletagmanager.com,www.google.com,accounts.google.com}/**', (r) => r.abort())
   const errors = []
   page.on('pageerror', (error) => errors.push(String(error)))
   await page.goto(`${BASE}/life`, { waitUntil: 'networkidle' })

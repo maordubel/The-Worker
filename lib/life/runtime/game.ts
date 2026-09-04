@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 
 import type { HistoricalAnchor } from '../anchors'
 import { castFor } from '../characters'
-import { OPPORTUNITIES_1986 } from '../content/opportunities1986'
+import { eraFor, type AnchorSet } from '../content/era'
 import type { LifeEngine } from '../engine'
 import { missedIn, takenIn } from '../opportunities'
 import { buildProfile, type LifeProfile } from '../profile'
@@ -15,6 +15,7 @@ import { InputState } from './input'
 import { LIFE_PALETTE } from './palette'
 import { BootScene } from './scenes/BootScene'
 import { FootballScene } from './scenes/FootballScene'
+import { PassageScene } from './scenes/PassageScene'
 import { PrologueScene } from './scenes/PrologueScene'
 import { WorldScene } from './scenes/WorldScene'
 
@@ -48,6 +49,16 @@ export type LifeSnapshot = {
   /** developer-only: the whole truth, never rendered in production */
   state: LifeState
   events: number
+}
+
+export type MapPlace = {
+  id: string
+  titleHe: string
+  here: boolean
+  /** how many game minutes the walk costs */
+  minutes: number
+  /** the shut door on the way, by its own label — null when the way is open */
+  lockedHe: string | null
 }
 
 export type LifeRuntime = {
@@ -86,6 +97,19 @@ export type LifeRuntime = {
   /** the world stops while a card is open over it */
   pause(on: boolean): void
   /**
+   * המפה — the places the child knows, from where he stands.
+   *
+   * Every entry is a room the neighbourhood's doors connect to this one, with how many
+   * game minutes the walk would cost and whether a door on the way is still shut. The
+   * shell draws the list; the scene decides what is on it, because only the scene knows
+   * which doors are open right now.
+   */
+  places(): MapPlace[]
+  /** walk there — the minutes are charged to the clock like any journey; refused if locked */
+  goTo(id: string): boolean
+  /** cut the log back to the start of the chapter; false when there is none */
+  restartDay(): boolean
+  /**
    * לוח הפיתוח — the only door into the life that is not a decision.
    *
    * Every one of these writes a real event through the engine, so a debugged life is
@@ -102,6 +126,7 @@ export type LifeRuntime = {
     bond(who: string, delta: number): void
     raise(flag: string): void
     reseed(seed: string): void
+    where(): unknown
   }
   destroy(): void
 }
@@ -112,6 +137,8 @@ export type LifeGameOptions = {
   bus: LifeBus
   anchor: HistoricalAnchor
   prologueAnchor: HistoricalAnchor
+  /** every chapter's anchor, by `Era.anchorKey` — 1986 and 1990 today */
+  anchors: AnchorSet
 }
 
 export function createLifeGame(options: LifeGameOptions): LifeRuntime {
@@ -124,7 +151,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     onOpen: () => undefined,
   }
 
-  const dialogue = new DialogueRunner(options.engine, options.bus, noop, options.anchor)
+  const dialogue = new DialogueRunner(options.engine, options.bus, noop, options.anchor, options.anchors)
 
   const context: LifeContext = {
     engine: options.engine,
@@ -133,6 +160,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     dialogue,
     anchor: options.anchor,
     prologueAnchor: options.prologueAnchor,
+    anchors: options.anchors,
   }
 
   const game = new Phaser.Game({
@@ -153,7 +181,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     },
     // The canvas must never eat a two-finger page gesture on a phone.
     input: { activePointers: 3 },
-    scene: [BootScene, PrologueScene, WorldScene, FootballScene],
+    scene: [BootScene, PrologueScene, WorldScene, FootballScene, PassageScene],
   })
 
   game.registry.set(CONTEXT_KEY, context)
@@ -163,16 +191,17 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
   const snapshot = (): LifeSnapshot => {
     const state = options.engine.state
     const cast = castFor(String(state.year)).map((entry) => entry.id)
+    const era = eraFor(state.chapter)
     return {
       profile: buildProfile(state, options.engine.log(), cast, ''),
-      taken: takenIn(state, OPPORTUNITIES_1986).map((entry) => entry.titleHe),
-      missed: missedIn(state, OPPORTUNITIES_1986).map((entry) => entry.titleHe),
+      taken: takenIn(state, era.opportunities).map((entry) => entry.titleHe),
+      missed: missedIn(state, era.opportunities).map((entry) => entry.titleHe),
       state,
       events: options.engine.log().length,
     }
   }
 
-  return {
+  const facade: LifeRuntime = {
     input,
     resize: (width: number, height: number) => {
       if (width > 0 && height > 0) game.scale.resize(width, height)
@@ -183,9 +212,19 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     dismissEnding: () => worldScene()?.goHome(),
     dismissFinale: () => worldScene()?.dismissFinale(),
     endCutscene: (outcome) => worldScene()?.endCutscene(outcome),
-    pointAtScreen: (x, y) => worldScene()?.pointAtScreen(x, y),
+    pointAtScreen: (x, y) => {
+      const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
+      if (passage && game.scene.isActive(PassageScene.KEY)) passage.pointAtScreen(x, y)
+      else worldScene()?.pointAtScreen(x, y)
+    },
     snapshot,
     pause: (on: boolean) => worldScene()?.setPaused(on),
+    // The map is a map of the WORLD: during the passage (or any other scene) the world
+    // scene still exists but is not running, and a door pressed on it would restart it
+    // underneath whatever is playing.
+    places: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.places() ?? [] : []),
+    goTo: (id: string) => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.goTo(id) ?? false : false),
+    restartDay: () => options.engine.restartDay(),
     debug: {
       jump: (minutes: number) => options.engine.dispatch({ t: 'clock.advanced', minutes }),
       money: (agorot: number) => options.engine.dispatch({ t: 'money.changed', agorot, why: 'debug' }),
@@ -194,6 +233,11 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       bond: (who: string, delta: number) => options.engine.dispatch({ t: 'bond.shifted', who, delta }),
       raise: (flag: string) => options.engine.dispatch({ t: 'flag.raised', flag }),
       reseed: (seed: string) => options.engine.dispatch({ t: 'rng.seeded', seed }),
+      where: () => {
+        const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
+        if (passage && game.scene.isActive(PassageScene.KEY)) return passage.where()
+        return game.scene.isActive(WorldScene.KEY) ? worldScene()?.where() ?? null : null
+      },
     },
     skipIntro: () => {
       const prologue = game.scene.getScene(PrologueScene.KEY) as unknown as PrologueScene | null
@@ -204,4 +248,14 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       game.destroy(true)
     },
   }
+  // The probes read the runtime through the glass. Opt-in per browser, never by default:
+  // a game object on `window` is a debug surface, and rule 44 keeps those off the page.
+  try {
+    if (window.localStorage.getItem('the-worker:life:probe') === '1') {
+      ;(window as unknown as { __life?: LifeRuntime }).__life = facade
+    }
+  } catch {
+    // storage may be unavailable; the probes are the only reader
+  }
+  return facade
 }

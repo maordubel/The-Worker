@@ -34,6 +34,8 @@ export type DialogueChoice = {
 
 export type HudState = {
   clock: string
+  /** `24 במאי 1986` — the day this chapter is, written out; the year alone when the archive has no date */
+  date: string
   agorot: number
   /** shown for a moment when it changes, then it goes away again (brief §15) */
   showMoney: boolean
@@ -74,6 +76,8 @@ export type LifeBusEvents = {
     labelHe: string
     /** true from the goal until the whistle, so the strip can carry the moment */
     scored: boolean
+    /** the whistle has gone: the board is now a fact, and the boy has somewhere to be */
+    over?: boolean
   } | null
   /**
    * סוף שלב א' — the end of the stage, which is not the end of a scene.
@@ -116,12 +120,19 @@ export type LifeBusEvents = {
    * the caption underneath says where it came from rather than what to think about it.
    */
   doc: { art: string; captionHe: string | null } | null
+  /**
+   * כרטיס-ביסוס — a title over black, held for `ms`, then gone: `מאי 1990`,
+   * `בלומפילד · 12 במאי 1990`. The first of the five tricks in the roadmap's grammar of
+   * entering a scene. It says one thing and is never a menu.
+   */
+  card: { titleHe: string; subHe: string | null; ms: number } | null
   /** the runtime asking the shell to show the closing card */
   ending: {
     titleHe: string
     bodyHe: string
     memoryHe: string
     after?: { fromArt: string; toArt: string; lineHe: string }
+    chapter?: string
   } | null
   /** touch controls only matter on a touch device; the runtime says when they help */
   controls: { visible: boolean }

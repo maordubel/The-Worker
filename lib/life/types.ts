@@ -102,6 +102,10 @@ export type ItemId =
   | 'folded-paper'
   | 'ticket-stub'
   | 'scarf'
+  // --- 1990 ---
+  | 'transistor'
+  | 'promotion-table'
+  | 'pocket-money'
 
 /** A flag is a thing that happened once and can never un-happen. */
 export type FlagId = string

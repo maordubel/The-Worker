@@ -6,12 +6,14 @@ import { AnchorCard } from '@/components/life/AnchorCard'
 import { DocSheet } from '@/components/life/DocSheet'
 import { ScoreStrip } from '@/components/life/ScoreStrip'
 import { StageFinale } from '@/components/life/StageFinale'
-import { ControlDeck } from '@/components/life/ControlDeck'
+import { ControlDeck, TapChip } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { EndingCard } from '@/components/life/EndingCard'
 import { HistoricalCutscene } from '@/components/life/HistoricalCutscene'
 import { LifeHud } from '@/components/life/LifeHud'
+import { LifeMap } from '@/components/life/LifeMap'
+import { LifeMenu } from '@/components/life/LifeMenu'
 import { OpeningSequence } from '@/components/life/OpeningSequence'
 import { ProfileCard } from '@/components/life/ProfileCard'
 import { Teach } from '@/components/life/Teach'
@@ -23,7 +25,7 @@ import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { loadLife } from '@/lib/life/engine'
 import { lifeStore } from '@/lib/life/save'
 import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/bus'
-import type { LifeRuntime, LifeSnapshot } from '@/lib/life/runtime/game'
+import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/game'
 
 /**
  * הבמה — React mounts the game and then gets out of its way.
@@ -40,14 +42,19 @@ import type { LifeRuntime, LifeSnapshot } from '@/lib/life/runtime/game'
  * scope, so it must never reach the server bundle or any route but this one.
  */
 
-const EMPTY_HUD: HudState = { clock: '', agorot: 0, showMoney: false, place: '', objective: null }
+const EMPTY_HUD: HudState = { clock: '', date: '', agorot: 0, showMoney: false, place: '', objective: null }
+/** a preference about the glass, not about the life — so it is not in the save */
+const DECK_PREF = 'the-worker:life:deck'
 
 export function LifeStage({
   anchor,
   prologueAnchor,
+  anchors,
 }: {
   anchor: HistoricalAnchor
   prologueAnchor: HistoricalAnchor
+  /** every chapter's anchor, by era key — resolved on the server like the two above */
+  anchors: Record<string, HistoricalAnchor>
 }) {
   const holder = useRef<HTMLDivElement | null>(null)
   const runtime = useRef<LifeRuntime | null>(null)
@@ -63,13 +70,32 @@ export function LifeStage({
   const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
   const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
   const [finale, setFinale] = useState<LifeBusEvents['finale']>(null)
+  const [titleCard, setTitleCard] = useState<LifeBusEvents['card']>(null)
   const [card, setCard] = useState<HistoricalAnchor | null>(null)
   const [controls, setControls] = useState(true)
   const [touch, setTouch] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [persisted, setPersisted] = useState(true)
+  /**
+   * המסגרת — where the painting ends, in CSS pixels; 0 means "it does not end".
+   *
+   * The world scene fills the glass and reports 0; the street-ball minigame still frames
+   * its pitch and reports the height of the strip it occupies. Everything below lays out
+   * from this one number: a framed picture gets its dialogue and deck UNDER it, a full-bleed
+   * one gets them floating OVER it.
+   */
   const [frame, setFrame] = useState(0)
   const [stage, setStage] = useState(0)
+  const [menu, setMenu] = useState(false)
+  /** the map sheet: a snapshot of the places, taken when it opens, like the profile */
+  const [places, setPlaces] = useState<MapPlace[] | null>(null)
+  const [confirmDay, setConfirmDay] = useState(false)
+  /**
+   * the arcade deck on a phone — OFF by default. The picture is the controller: you touch
+   * a place and the boy walks, touch a person and he goes and talks. The stick is there in
+   * the menu for whoever wants it, and the choice is remembered on the device.
+   */
+  const [deck, setDeck] = useState(false)
   /**
    * התיק — the profile, opened by the player and never by the game.
    *
@@ -109,6 +135,11 @@ export function LifeStage({
       typeof window !== 'undefined' &&
         (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window),
     )
+    try {
+      setDeck(window.localStorage.getItem(DECK_PREF) === '0')
+    } catch {
+      /* the deck simply shows */
+    }
 
     unsubscribe.push(bus.on('hud', setHud))
     unsubscribe.push(bus.on('dialogue', setDialogue))
@@ -120,6 +151,7 @@ export function LifeStage({
     unsubscribe.push(bus.on('doc', setDoc))
     unsubscribe.push(bus.on('cutscene', setCutscene))
     unsubscribe.push(bus.on('finale', setFinale))
+    unsubscribe.push(bus.on('card', setTitleCard))
     unsubscribe.push(bus.on('controls', (value) => setControls(value.visible)))
     unsubscribe.push(bus.on('anchor', (value) => setCard(value.showing ? value.anchor : null)))
     unsubscribe.push(bus.on('frame', (value) => setFrame(value.picture)))
@@ -136,6 +168,7 @@ export function LifeStage({
         bus,
         anchor,
         prologueAnchor,
+        anchors,
       })
       const box = holder.current.getBoundingClientRect()
       runtime.current.resize(box.width, box.height)
@@ -150,7 +183,7 @@ export function LifeStage({
       runtime.current?.destroy()
       runtime.current = null
     }
-  }, [anchor, prologueAnchor])
+  }, [anchor, prologueAnchor, anchors])
 
   // --- the shell owns the box -------------------------------------------------------
   useEffect(() => {
@@ -236,13 +269,18 @@ export function LifeStage({
         if (!dialogue) return
         event.preventDefault()
         runtime.current?.leave()
+        runtime.current?.input.swallow()
         return
       }
       const advances = event.key === ' ' || event.key === 'Enter' || event.key.toLowerCase() === 'e'
       if (!advances) return
       if (!dialogue) return
       event.preventDefault()
-      if (!dialogue.choices || dialogue.choices.length === 0) runtime.current?.advance()
+      if (!dialogue.choices || dialogue.choices.length === 0) {
+        runtime.current?.advance()
+        // the same key is the action key — see `InputState.swallow`
+        runtime.current?.input.swallow()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -254,6 +292,13 @@ export function LifeStage({
     const timer = setTimeout(() => setToast(null), 2600)
     return () => clearTimeout(timer)
   }, [toast])
+
+  // A title card holds for as long as it was told to, and then it is simply gone.
+  useEffect(() => {
+    if (!titleCard) return
+    const timer = setTimeout(() => setTitleCard(null), titleCard.ms)
+    return () => clearTimeout(timer)
+  }, [titleCard])
 
   const onAxis = useCallback((x: number, y: number) => {
     runtime.current?.input.setAxis(x, y)
@@ -321,6 +366,65 @@ export function LifeStage({
     })()
   }, [])
 
+  const openMenu = useCallback(() => {
+    runtime.current?.pause(true)
+    setConfirmReset(false)
+    setConfirmDay(false)
+    setMenu(true)
+  }, [])
+
+  const closeMenu = useCallback(() => {
+    setMenu(false)
+    setConfirmReset(false)
+    setConfirmDay(false)
+    runtime.current?.pause(false)
+  }, [])
+
+  const openMap = useCallback(() => {
+    const current = runtime.current
+    if (!current) return
+    current.pause(true)
+    setPlaces(current.places())
+  }, [])
+
+  const closeMap = useCallback(() => {
+    setPlaces(null)
+    runtime.current?.pause(false)
+  }, [])
+
+  const goTo = useCallback((id: string) => {
+    const current = runtime.current
+    if (!current) return
+    setPlaces(null)
+    if (!current.goTo(id)) current.pause(false)
+  }, [])
+
+  /**
+   * היום מחדש — the log is cut, then the page reloads so every scene, timer and texture
+   * starts from the cut log rather than from whatever was on screen. Reload is the honest
+   * restart; a scene restart over a rewritten engine is a second save system in disguise.
+   */
+  const restartDay = useCallback(() => {
+    const current = runtime.current
+    if (!current) return
+    if (current.restartDay()) window.location.reload()
+    else setConfirmDay(false)
+  }, [])
+
+  const toggleDeck = useCallback((on: boolean) => {
+    setDeck(on)
+    try {
+      window.localStorage.setItem(DECK_PREF, on ? '0' : '1')
+    } catch {
+      /* it simply does not persist */
+    }
+  }, [])
+
+  /** the painting fills the glass; the shell floats over it */
+  const fullBleed = frame <= 0
+  /** every overlay that must hide the in-world controls */
+  const covered = Boolean(dialogue || ending || card || cutscene || snapshot || menu || places)
+
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
       <div className="relative h-full w-full overflow-hidden border-y-hair border-ink bg-ink">
@@ -328,7 +432,7 @@ export function LifeStage({
 
         {/* Where the painting ends. A vermilion hairline turns the empty band under a
             framed picture into the foot of a printed sheet instead of dead space. */}
-        {ready && frame > 0 && (
+        {ready && !fullBleed && (
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 z-10 h-[2px] bg-red/70"
@@ -344,34 +448,65 @@ export function LifeStage({
 
         {/* Two clocks, never both. During the ninety minutes the board replaces the HUD:
             the time of day stops being the thing anybody in the ground is looking at. */}
-        {ready && !cutscene && !match && <LifeHud hud={hud} />}
-        {ready && !cutscene && match && <ScoreStrip match={match} />}
+        {/* No plate before there is a place: during the prologue the HUD has nothing to
+            say, and an empty plate with a lone "·" in it sat in the corner of the 1983
+            terrace like a bug. */}
+        {ready && !cutscene && !match && hud.place && <LifeHud hud={hud} />}
+        {ready && !cutscene && match && (
+          <ScoreStrip match={match} objective={match.over ? hud.objective : null} />
+        )}
 
         {/* התיק — one small plate under the clock. It is the only permanent control on
             the glass that is not the console: everything else about the player's state
             is learned by looking at people. */}
-        {ready && !dialogue && !ending && !card && !snapshot && !cutscene && (
-          <button
-            type="button"
-            onClick={() => openProfile(false)}
-            data-life="profile-open"
-            className="group absolute z-30 flex min-h-tap items-start"
-            style={{ insetInlineStart: 10, top: 54 }}
+        {ready && !covered && (
+          <div
+            className="absolute z-30 flex items-start gap-1.5"
+            style={{ insetInlineStart: 10, top: 'calc(54px + env(safe-area-inset-top))' }}
           >
-            {/* The visible chip is small because the HUD is small; the TARGET is the full
-                48px the brand requires, and it is the transparent button around it. On a
-                phone that difference is the whole difference between a control and a
-                decoration you keep missing. */}
-            <span className="mt-2 border-hair border-ink bg-sheet/95 px-2.5 py-1.5 font-body text-[10px] leading-none text-ink transition-colors duration-press group-active:bg-red group-active:text-sheet motion-reduce:transition-none">
-              {t('life.profile')}
-            </span>
-          </button>
+            {/* ☰ — the one door to everything that is not the world. The visible chips are
+                small because the HUD is small; the TARGET is the full 48px the brand
+                requires, and it is the transparent button around each. On a phone that
+                difference is the whole difference between a control and a decoration you
+                keep missing. */}
+            <button
+              type="button"
+              onClick={openMenu}
+              data-life="menu-open"
+              aria-label={t('life.menu.title')}
+              className="group flex min-h-tap min-w-tap items-start"
+            >
+              <span className="mt-2 border-hair border-ink bg-sheet/95 px-2.5 py-1 font-mono text-[13px] leading-none tabular-nums text-ink transition-colors duration-press group-active:bg-red group-active:text-sheet motion-reduce:transition-none">
+                ☰
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => openProfile(false)}
+              data-life="profile-open"
+              className="group flex min-h-tap items-start"
+            >
+              <span className="mt-2 border-hair border-ink bg-sheet/95 px-2.5 py-1.5 font-body text-[10px] leading-none text-ink transition-colors duration-press group-active:bg-red group-active:text-sheet motion-reduce:transition-none">
+                {t('life.profile')}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={openMap}
+              data-life="map-open"
+              className="group flex min-h-tap items-start"
+            >
+              <span className="mt-2 border-hair border-ink bg-sheet/95 px-2.5 py-1.5 font-body text-[10px] leading-none text-ink transition-colors duration-press group-active:bg-red group-active:text-sheet motion-reduce:transition-none">
+                {t('life.map')}
+              </span>
+            </button>
+          </div>
         )}
 
-        {ready && !dialogue && !ending && !card && !cutscene && controls && (
+        {ready && !covered && controls && (touch ? deck : true) && (
           <ControlDeck
-            top={frame > 0 ? frame : Math.max(0, stage - 132)}
-            height={frame > 0 ? Math.max(0, stage - frame) : 132}
+            top={fullBleed ? stage : frame}
+            height={fullBleed ? 0 : Math.max(0, stage - frame)}
             touch={touch}
             verb={prompt?.verb ?? null}
             label={prompt ? `${t(`life.verb.${prompt.verb}` as MessageKey)} ${prompt.label}` : null}
@@ -382,10 +517,19 @@ export function LifeStage({
           />
         )}
 
-        {ready && teach && !dialogue && !ending && !card && !cutscene && <Teach id={teach.id} touch={touch} />}
+        {ready && !covered && controls && touch && !deck && (
+          <TapChip
+            verb={prompt?.verb ?? null}
+            label={prompt ? `${t(`life.verb.${prompt.verb}` as MessageKey)} ${prompt.label}` : null}
+            locked={prompt?.locked ?? false}
+            onAction={onAction}
+          />
+        )}
+
+        {ready && teach && !covered && <Teach id={teach.id} touch={touch} />}
 
         {toast && !cutscene && (
-          <div className="pointer-events-none absolute inset-x-0 top-[68px] z-30 flex justify-center px-gutter">
+          <div className="pointer-events-none absolute inset-x-0 top-[calc(104px+env(safe-area-inset-top))] z-30 flex justify-center px-gutter">
             <div
               className={`border-hair px-3 py-1.5 ${
                 toast.tone === 'red' ? 'border-red bg-red' : 'border-ink bg-sheet'
@@ -406,7 +550,7 @@ export function LifeStage({
           <DialogueBox
             lines={dialogue.lines}
             portrait={dialogue.portrait ?? null}
-            {...(frame > 0 ? { offsetTop: frame + 8 } : {})}
+            {...(!fullBleed ? { offsetTop: frame + 8 } : {})}
             {...(dialogue.choices ? { choices: dialogue.choices } : {})}
             onAdvance={() => runtime.current?.advance()}
             onChoose={(id) => runtime.current?.choose(id)}
@@ -439,6 +583,20 @@ export function LifeStage({
 
         {card && <AnchorCard anchor={card} onClose={() => setCard(null)} />}
 
+        {/* כרטיס-ביסוס — over black, one line, then the scene. */}
+        {titleCard && (
+          <div className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center bg-ink" data-life="title-card">
+            <p className="font-display text-[28px] leading-none text-sheet">
+              <bdi>{titleCard.titleHe}</bdi>
+            </p>
+            {titleCard.subHe && (
+              <p className="mt-3 font-body text-[13px] leading-none text-sheet/70">
+                <bdi>{titleCard.subHe}</bdi>
+              </p>
+            )}
+          </div>
+        )}
+
         {finale && (
           <StageFinale
             finale={finale}
@@ -448,6 +606,35 @@ export function LifeStage({
             }}
           />
         )}
+
+        {menu && (
+          <LifeMenu
+            touch={touch}
+            deck={deck}
+            persisted={persisted}
+            debug={process.env.NODE_ENV !== 'production'}
+            onClose={closeMenu}
+            onProfile={() => {
+              setMenu(false)
+              openProfile(false)
+            }}
+            onDeck={toggleDeck}
+            onDebug={() => {
+              setMenu(false)
+              openProfile(true)
+            }}
+            onReset={() => (confirmReset ? reset() : setConfirmReset(true))}
+            confirmReset={confirmReset}
+            onRestartDay={() => (confirmDay ? restartDay() : setConfirmDay(true))}
+            confirmDay={confirmDay}
+            onMap={() => {
+              setMenu(false)
+              setPlaces(runtime.current?.places() ?? [])
+            }}
+          />
+        )}
+
+        {places && <LifeMap places={places} onGo={goTo} onClose={closeMap} />}
 
         {snapshot && !debug && <ProfileCard snapshot={snapshot} onClose={closeProfile} />}
         {snapshot && debug && (
@@ -460,6 +647,7 @@ export function LifeStage({
             bodyHe={ending.bodyHe}
             memoryHe={ending.memoryHe}
             after={ending.after ?? null}
+            chapter={ending.chapter ?? '1986'}
             onClose={() => {
               setEnding(null)
               runtime.current?.dismissEnding()
@@ -468,32 +656,6 @@ export function LifeStage({
         )}
       </div>
 
-      {/* Under the glass: the two controls that are not part of the world. */}
-      <div className="flex items-center justify-between gap-3 px-gutter pt-2">
-        <p className="font-body text-[10px] leading-snug text-muted">
-          {persisted ? t('life.autosave') : t('life.storageOff')}
-        </p>
-        {/* Never in production (rule 44): the panel is not behind a flag, it is behind a
-            build. A debug door that can be opened by a query string is a debug door that
-            will be opened by a player. */}
-        {process.env.NODE_ENV !== 'production' && (
-          <button
-            type="button"
-            onClick={() => openProfile(true)}
-            className="flex min-h-tap items-center border-hair border-red px-3 font-body text-[11px] text-red"
-          >
-            {t('life.debug')}
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={() => (confirmReset ? reset() : setConfirmReset(true))}
-          onBlur={() => setConfirmReset(false)}
-          className="flex min-h-tap items-center border-hair border-ink px-3 font-body text-[11px] text-ink transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none"
-        >
-          {confirmReset ? t('life.reset.confirm') : t('life.reset')}
-        </button>
-      </div>
     </div>
   )
 }

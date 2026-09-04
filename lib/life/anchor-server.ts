@@ -239,3 +239,41 @@ export function resolvePrologueAnchor(): HistoricalAnchor {
         },
   }
 }
+
+/**
+ * שלב ב׳ — 12.5.1990, the promotion. Not a trophy, so it does not come from
+ * `trophies.json`: it is the last played match of the 1989/90 second-division season in
+ * `matches.json`, at confidence 2, with its source — and the headline is built from the
+ * competition name and the season, nothing else. The parallel match that decided the
+ * race is in the same file with NO score, at confidence 1, and `findDecider` skips it
+ * for exactly that reason: a row with no score is a row the game may not read a number
+ * from. If the row is ever removed, the placeholder comes back and says what is missing.
+ */
+const STAGE_B_SEASON = '1989/90'
+const SECOND_TIER = 'ליגה-ארצית'
+
+export function resolveStageBAnchor(): HistoricalAnchor {
+  const competition = archive.competitions.find((row) => row.slug === SECOND_TIER && row.sport === 'football')
+  const venue = archive.venues.find((row) => row.slug === 'בלומפילד' && row.sport === 'football')
+  const decider = findDecider(STAGE_B_SEASON, SECOND_TIER)
+  return {
+    id: `promotion:${SECOND_TIER}:${STAGE_B_SEASON}`,
+    sport: 'football',
+    seasonLabel: STAGE_B_SEASON,
+    year: 1990,
+    competitionSlug: SECOND_TIER,
+    headlineHe: `העלייה מ${competition?.nameHe ?? 'הליגה הארצית'}, ${STAGE_B_SEASON}`,
+    venueSlug: venue?.slug ?? null,
+    sourceTitle: decider?.sourceTitle ?? 'content/manual/matches.json',
+    sourceUrl: decider?.sourceUrl ?? null,
+    confidence: decider ? 2 : 0,
+    titlesSoFar: null,
+    match: decider,
+    placeholder: decider
+      ? null
+      : {
+          what: 'משחק העלייה של 1989/90 — יריבה, תאריך ותוצאה — אינו בארכיון.',
+          needs: 'שורת משחק מעונת 1989/90 בליגה הארצית ב-content/manual/matches.json ברמת ודאות 2 ומעלה.',
+        },
+  }
+}

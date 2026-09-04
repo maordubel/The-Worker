@@ -19,19 +19,25 @@ import { t } from '@/lib/i18n'
  */
 
 /**
- * Three ages, not four, and all three are PoGi.
+ * Four ages, and all four are PoGi.
  *
  * The row used to mix him with two other figures and one — `soldier` — that had no file
  * on disk at all, so the strip rendered a broken image between a boy and a stranger. It
- * is the same person now: eight, the conscript, the young man. The fourth slot comes
- * back the day a teenage Pogi is drawn, and not before: a life-line whose point is "this
- * is you, later" cannot contain somebody else.
+ * is the same person now: eight, twelve (the `hero80` turnaround Stage B walks in), the
+ * conscript, the young man. A life-line whose point is "this is you, later" cannot
+ * contain somebody else.
  */
 const AGES = [
   { art: 'pogi', labelKey: 'life.line.age1' },
+  { art: 'hero80', labelKey: 'life.line.age2' },
   { art: 'pogiIDF-1', labelKey: 'life.line.age3' },
   { art: 'pogi90-1', labelKey: 'life.line.age4' },
 ] as const
+
+/** the slot a chapter lights: the eight-year-old, then the twelve-year-old */
+export function ageReached(chapter: string): number {
+  return chapter === '1990' ? 1 : 0
+}
 
 export function LifeLine({ reached = 0 }: { reached?: number }) {
   return (
@@ -41,11 +47,11 @@ export function LifeLine({ reached = 0 }: { reached?: number }) {
           <bdi>{t('life.line.title')}</bdi>
         </h3>
         <p className="truncate font-body text-[10px] leading-none text-concrete">
-          <bdi>{t('life.line.lead')}</bdi>
+          <bdi>{t(reached >= 1 ? 'life.line.lead2' : 'life.line.lead')}</bdi>
         </p>
       </header>
 
-      <ol className="grid grid-cols-3 gap-px bg-concrete/25">
+      <ol className="grid grid-cols-4 gap-px bg-concrete/25">
         {AGES.map((age, index) => {
           const here = index === reached
           const later = index > reached

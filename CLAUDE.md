@@ -990,3 +990,123 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     every file where it belongs, and prints the deletions separately — because GitHub's web
     upload adds and overwrites but never deletes (rule 26), so a retired path is a manual
     step stated in text or it is a broken deploy.
+
+52. **THE WORKER LIFE — full-bleed, camera-framed: the picture is the glass (3.9.2026).**
+    Maor's word for the framed picture with a console under it was "cut", and the bar he
+    named was Very Little Nightmares: the room fills the phone, the child is small in it,
+    you touch and he goes. Four things carry that, and each has a reason it is shaped the
+    way it is.
+    **Cover, not contain — but of the WORLD, not the painting.** Our rooms are 16:9 and
+    wider; a phone is 9:19.5. Covering the glass with the painting alone shows a quarter of
+    the street with a child a third of the screen tall; keeping the width leaves black bars.
+    So `scripts/life/finish-backdrops.py` continues every painting: a `--sky` strip above
+    and a `--ground` strip below, the picture's own edge rows stretched, blurred and faded
+    fast into the ink. The room stands in the dark like a diorama — which is how VLN lights
+    its rooms — and every coordinate in every scene file is still a fraction of the ORIGINAL
+    painting. `fillCamera` covers the tall world; in portrait the zoom then aims to show ~42%
+    of a 16:9 room's width (`WorldScene.frameWorld`), the camera follows with the child's
+    feet at 68% of the glass (`followPlayer`), and the shell is told `frame: 0` — no frame.
+    **The picture is the controller.** On a phone the arcade deck is OFF by default; the
+    `TapChip` at the foot of the glass names what a tap would do and is itself the button.
+    The deck is one toggle away in ☰ and the choice lives in `localStorage`, not the save.
+    **Housekeeping lives in ☰ (`LifeMenu`), because the strip under the glass no longer
+    exists.** `100dvh` + `overflow-hidden` pushed autosave/reset below the fold; a control
+    nobody can reach is not a control. The menu pauses the world. Restart-mission and
+    restart-day are NOT in it yet — they need the checkpoint layer over the event log, and a
+    menu entry that lies about what it can do is worse than one that is missing.
+    **An arrival card is direction; its consequences belong to one room.** `playArrival`
+    raised `went:alone`, opened the 1986 anchor card and started the match for ANY scene
+    with a card — and the outside of Bloomfield and the Ussishkin hall had just been given
+    cards. Walking up to a ground is not arriving at the final; the side effects are gated
+    on `bloomfield-inside`.
+    **Finishing is a pass, not a hope.** Six backdrops landed at 2048×1152 and ~3MB each,
+    skipped `build-art.py`, and the manifest still described the files they replaced — so
+    the room-budget test and the yellow scan were both blind. `npm run art:finish` shrinks to
+    1600, quantises, de-yellows, writes the strips and rewrites the manifest; `tests/life`
+    now fails if any backdrop is missing its strips. Two lessons inside it: de-yellowing a
+    sunlit pitch by rotating it to the badge's brown made a RUST field — grass leaves the
+    band upward, to green (`GREEN_SPLIT`, and `GREEN_BELOW` for the one painting whose
+    grass is genuinely ochre); and a walk sheet of a DIFFERENT boy (shorts, no badge) is
+    worse than two frames of the right one — `KID_WALK` rolled back until a matching sheet
+    arrives.
+    **A door is placed by looking, not by reading.** Two doors in one day were placed by
+    numbers: one on a graffiti wall where two children stand, one on a corner pillar with
+    three painted men. `npm run life:boards` draws every scene with its exits, lights, band,
+    actors, hotspots and spawns onto the painting (`docs/life-shots/board-*.png`), and that
+    picture is the definition of "placed".
+
+53. **THE WORKER LIFE — the map is a list, the day restarts from the log, the HUD says the date (3.9.2026).**
+    Maor asked for two things on top of the full-bleed pass: the day's date in the top bar,
+    and a "מפה" button to move between screens. The date is `longDateHe(anchor.match.playedOn)`
+    — the archive's own date, never typed in — so the bar reads `24 במאי 1986 · הרחוב`.
+    The map (`LifeMap`) is deliberately a LIST and not a drawing: a drawn neighbourhood
+    invites reading the world off a diagram, and "going somewhere is the choice" is a rule
+    here. `WorldScene.places()` walks the door graph breadth-first from the current room
+    through the doors that exist right now; a place behind a door that `needs` something is
+    still listed, shut, with that door's own label as the reason (`סגור — מזרחה, אחרי
+    האנשים`). Choosing charges `hops × 4` game minutes as a `clock.advanced` event and plays
+    the door's own fade — nothing teleports, the log stays honest. Restart-day is
+    `LifeEngine.restartDay()`: the log cut back to the last `chapter.entered`, then a page
+    reload, because a scene restart over a rewritten engine is a second save system in
+    disguise. Restart-mission is still not offered — the 1986 log has no mission markers.
+    `scripts/life/map-probe.mjs` proves all three in a browser.
+
+54. **THE WORKER LIFE — Stage B, first movement: 12.5.1990, and the four years before it (4.9.2026).**
+    The chapter is DATA now. `lib/life/content/era.ts` is one record per chapter —
+    timetable, opportunities, encounters, ambient, endings, objective, cutscene, player
+    figure, portraits, memory prefix — looked up from `state.chapter`; `WorldScene` asks
+    the record and imports no 1986 file by name. Rooms are shared and redressed: an actor,
+    hotspot or layer carries `era` (`'1986'` by default, `'1990'`, or `'*'`), and doors are
+    geography (`exitInEra`, default every year). `arrivalByEra` / `stuckByEra` let a room
+    play no card and say a different sentence in a year the boy already knows it.
+    **The four years are a scene** (`PassageScene`): the same bedroom, four objects, and
+    each look moves time — the ball goes, the bag grows, the wall fills, and between the
+    second and third look he is drawn older (`hero80`). It writes ONE event,
+    `year.entered`, which resets the day and keeps the person — memories, Red Box,
+    relationships, seed, and every `life:` / `onboard:` / `cutscene:` / `prologue:` flag.
+    (The first cut dropped `prologue:done` and replayed 1983 on the terrace.) The 1986
+    finale's button starts the passage — the roadmap's bug; it used to `travel('bedroom')`
+    into the Saturday that had just ended — and `BootScene` reopens a finished-1986 life in
+    the passage, not the Saturday.
+    **The match is an information game** (`runtime/match1990.ts`, brief §15–§20): three
+    states kept apart — canonical (Hapoel's goals from the anchor; Yavne in the SOURCE's
+    words, level/ahead/further, never a number), known (what he heard, from whom, how
+    stale), rumour (the kids, off the seed, recorded as `rumor:*`). Sources have latency,
+    so a boy can bring his father news the father's radio has not played (`net:toldKobi`).
+    The director owns the clock while it runs (`timeScale = 0`) and jumps the afternoon to
+    full time as an EVENT at the whistle — the first run let the old `FULL_TIME` trigger
+    end the match from the day clock. No minute is ever shown for a goal, because the
+    archive holds none. The parallel match's score is in `matches.json` as NULL at
+    confidence 1 — the brief's 4–0 is unverified, and `findDecider` cannot read a row with
+    no score, which is the point.
+    **The archive rows came first.** `ליגה-ארצית`, three clubs, the 6–0 with its walla
+    source, the scorers as a recorded CONFLICT (walla: Jano ×2 + Albez; the brief: Jano
+    ×3) — and so no line in the game attributes a goal to a name.
+    **Headless is 6 fps.** Every probe that walks by key must hold a key for several frames
+    (340 ms) and wait for the box after E, or it re-triggers the person it just left. And
+    `pkill -f <pattern>` kills the shell that ran it.
+
+55. **THE WORKER LIFE — the feet are a number the bob never touches; a person's size is absolute (4.9.2026).**
+    Two things the second pass over delta 16 found by walking, not by reading.
+    **The drift.** The walk bob wrote `player.y = ny - bob` and the next frame read
+    `player.y` back as the ground, so every side-on walk crept toward the horizon — a
+    third of a per cent a frame — until the boy stood on the band's far line and the door
+    zones he walked through (drawn to that same line) missed him by a rounding error.
+    `groundY` is the feet; the sprite bobs above it; `autoExits` reads `groundY` with a
+    hair of tolerance on every edge. It had been there since the bob was added and was
+    invisible in the 1986 probes because those walk short distances. **Any movement
+    change is verified with `gate-probe` (walk through a door zone in BOTH directions,
+    log `where()`), not by eye.**
+    **The size.** `ActorDef.size` is absolute — the band scales the BOY, not the people —
+    so a man "at the table" on the far line drawn at a near-line size sits on the floor
+    in the middle of the room at the size of a wardrobe. `ERA=1990 npm run life:boards`
+    draws every room with its people at the size the runtime draws them and the boy at
+    both ends of the band (the 12-year-old is `PlayerFigure.scale` = 1.12 taller than the
+    rooms were measured for); `ERA=1990 npx tsx scripts/life/actor-sizes.ts` prints the
+    ratio of every person to the boy standing on his line. A placement is not done until
+    its board has been looked at. Props that live on furniture use `prop.at` — drawn on
+    the tabletop, reached from the floor.
+    **The probe hook.** `window.__life` exists only when `localStorage` holds
+    `the-worker:life:probe = 1`, and `debug.where()` answers for the world scene or the
+    passage, never for a scene that is not running (`getScene` returns instances that
+    were never initialised; calling into one reads `ctx` of undefined).

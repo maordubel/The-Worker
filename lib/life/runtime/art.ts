@@ -389,7 +389,23 @@ export const KID_POSE = {
  * its own length and was always right; the bob it adds on top is now decoration on a real
  * cycle rather than half the animation.
  */
-export const KID_WALK = [
+/**
+ * …and then it was looked at in motion, on 3.9.2026, and rolled back the same day.
+ *
+ * `pogi-w1…w8` is a clean eight-frame walk — of a DIFFERENT BOY. Shorts, white socks, no
+ * badge on the shirt, a rounder head: put beside `pogi` and `pogi-side` (jeans, the club
+ * badge, the older face) he is visibly not the same child, and the game swapped between
+ * the two every time the player started or stopped walking. That is worse than the
+ * two-frame stride it replaced, because a walk with two frames looks like a cheap walk,
+ * and a walk that changes the boy looks like a bug. So the list is back to the frames
+ * that are HIM — standing side-on and mid-stride — until a sheet arrives that matches
+ * the turnaround (ART-PROMPTS §2.1 now says so in those words). The eight frames stay
+ * sliced and on disk; the day the right sheet lands, this list grows again.
+ */
+export const KID_WALK = ['pogi-side', 'pogi-walk'] as const
+
+/** the mismatched eight — kept sliced so the scanner still checks them, used by nothing */
+export const KID_WALK_SHELVED = [
   'pogi-w1', 'pogi-w2', 'pogi-w3', 'pogi-w4',
   'pogi-w5', 'pogi-w6', 'pogi-w7', 'pogi-w8',
 ] as const
@@ -425,6 +441,13 @@ export const PROP = [
    */
   'propScarfRed',
   'propPennant',
+  /**
+   * …and one of the seven came back, re-cut. Stage B is a chapter about a transistor
+   * radio, and the board's boombox is the only radio drawn in this project. On 3.9.2026
+   * it was cropped at the first empty column past the body, which is where the neighbour
+   * began, and it now ends where the radio ends.
+   */
+  'propRadio',
   'propFlag',
   'propSticker',
   'propBadges',
@@ -531,6 +554,20 @@ export const PORTRAIT_ART = [
 
 export function artUrl(key: string): string {
   return `${ART_ROOT}/${key}.png`
+}
+
+/**
+ * ההמשך של הציור — the two strips `scripts/life/finish-backdrops.py` writes for every
+ * backdrop: the sky continued above it and the ground continued below it.
+ *
+ * They exist for one reason. A phone held upright is much taller than any room we own,
+ * and the only ways to fill it were to crop the room to a slot or to leave black bands.
+ * With the strips, the camera can frame a tall slice of the WORLD — sky, room, pavement —
+ * and the room itself keeps every coordinate it had: the strips hang off the painting at
+ * y < 0 and y > H and nothing in a scene file knows they are there.
+ */
+export function extensionKeys(art: string): { sky: string; ground: string } {
+  return { sky: `${art}--sky`, ground: `${art}--ground` }
 }
 
 /** Loading is per scene. Boot warms only what the child is made of. */

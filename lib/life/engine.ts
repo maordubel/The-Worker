@@ -148,6 +148,34 @@ export class LifeEngine {
     })
   }
 
+  // ---- checkpoints ---------------------------------------------------------------
+
+  /**
+   * להתחיל את היום מחדש — the log cut back to the moment the chapter began.
+   *
+   * There is no separate checkpoint store, because the log IS the checkpoint store:
+   * `chapter.entered` is written once at the top of every chapter, and everything after
+   * the last one is "today". Cutting there keeps the identity, the seed, the prologue and
+   * every earlier chapter exactly as they were, which is what makes the restarted day the
+   * same day with the same Pogi rather than a new life. Returns false when there is no
+   * chapter to return to — the caller must not pretend otherwise.
+   */
+  restartDay(): boolean {
+    let at = -1
+    for (let i = this.events.length - 1; i >= 0; i -= 1) {
+      if (this.events[i]?.t === 'chapter.entered') {
+        at = i
+        break
+      }
+    }
+    if (at < 0) return false
+    this.events = this.events.slice(0, at + 1)
+    this.state = this.events.reduce<LifeState>(apply, emptyState(this.identity, this.year))
+    for (const listener of this.listeners) listener(this.state)
+    this.markDirty(true)
+    return true
+  }
+
   // ---- persistence ---------------------------------------------------------------
 
   private markDirty(immediate: boolean) {

@@ -366,3 +366,76 @@ export function ControlDeck({
     </>
   )
 }
+
+/**
+ * הצ׳יפ — the deck folded down to the one thing a tap-first player still needs.
+ *
+ * On a phone the default is now no stick and no buttons: you touch the world and the boy
+ * goes (Very Little Nightmares, which Maor named as the bar, has no controls at all). But
+ * the deck did two jobs the picture cannot do on its own — it NAMED what the red button
+ * would do, and it gave a big forgiving target for doing it. This is those two jobs and
+ * nothing else: one strip at the foot of the glass, the verb and the name, and the strip
+ * itself is the button. It only exists while something is in reach, so most of the time
+ * the glass is just the painting.
+ */
+export function TapChip({
+  verb,
+  label,
+  locked,
+  onAction,
+}: {
+  verb: string | null
+  label: string | null
+  locked: boolean
+  onAction: (down: boolean) => void
+}) {
+  const [held, setHeld] = useState(false)
+  if (!verb || !label) return null
+  return (
+    <div
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center px-3 pb-[max(14px,env(safe-area-inset-bottom))]"
+      data-life="deck"
+    >
+      <button
+        type="button"
+        data-life="prompt"
+        aria-label={label}
+        onPointerDown={(event) => {
+          event.preventDefault()
+          setHeld(true)
+          onAction(true)
+        }}
+        onPointerUp={() => {
+          setHeld(false)
+          onAction(false)
+        }}
+        onPointerCancel={() => {
+          setHeld(false)
+          onAction(false)
+        }}
+        className={`pointer-events-auto flex min-h-tap max-w-full items-center gap-2.5 border-rule px-4 py-2 font-body text-[14px] leading-none transition-colors duration-press motion-reduce:transition-none ${
+          locked
+            ? 'border-red bg-ink text-red'
+            : held
+              ? 'border-red bg-red text-sheet'
+              : 'border-ink bg-sheet/95 text-ink'
+        }`}
+        dir="rtl"
+      >
+        <span
+          aria-hidden="true"
+          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[9px] tabular-nums ${
+            locked ? 'bg-red/30 text-red' : 'bg-red text-sheet'
+          }`}
+          dir="ltr"
+        >
+          A
+        </span>
+        <span className="truncate">
+          <bdi>{label}</bdi>
+          {locked ? <bdi> · {t('life.deck.locked')}</bdi> : null}
+        </span>
+      </button>
+    </div>
+  )
+}

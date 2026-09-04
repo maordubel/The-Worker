@@ -243,6 +243,16 @@
       "resolution": null,
       "resolvedBy": null,
       "confidence": 3
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1989/90|ליגה-ארצית|1990-05-12",
+      "field": "scorers",
+      "claimA": "וואלה ספורט: ז'אנו ×2, מאיה, שמואל, אבוקסיס, אלבז",
+      "claimB": "הבריף הפנימי של שלב ב׳ (3.9.2026): ז'אנו ×3, שמואל, מאיה, אבוקסיס",
+      "sourceAUrl": "https://sports.walla.co.il/item/3356277",
+      "sourceBUrl": null,
+      "noteHe": "עד שיימצא מקור שני, המשחק בחיים של פוגי לא מייחס שער לשם — רק הסך: הפועל תל אביב 6 — רמת עמידר 0."
     }
   ]
 }

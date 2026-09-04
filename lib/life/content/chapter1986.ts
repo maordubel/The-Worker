@@ -56,6 +56,7 @@ export const PROLOGUE: Say[] = [
  * to read either way, so a new character is a line of dialogue rather than a blocked one.
  */
 export const PORTRAIT: Record<string, string> = {
+  'פוגי': 'facePogi',
   'קובי': 'faceKobi',
   'רחל': 'faceRachel',
   'אופיר': 'faceOfir',
@@ -166,6 +167,9 @@ export const ITEM_ART: Partial<Record<ItemId, string>> = {
   // argument of §50, and there was never a reason to draw a worse one beside it.
   'ticket-stub': 'docTicket',
   coin: 'propCoins',
+  transistor: 'propRadio',
+  'promotion-table': 'propPapers',
+  'pocket-money': 'propCoins',
 }
 
 export const ITEMS: Record<ItemId, { nameHe: string; noteHe: string }> = {
@@ -177,6 +181,10 @@ export const ITEMS: Record<ItemId, { nameHe: string; noteHe: string }> = {
   'folded-paper': { nameHe: 'נייר מקופל', noteHe: 'נאסף מהרצפה' },
   'ticket-stub': { nameHe: 'ספח כרטיס', noteHe: 'קרטון קטן, נקרע בכניסה' },
   scarf: { nameHe: 'צעיף', noteHe: 'אדום' },
+  // --- 1990 ---
+  transistor: { nameHe: 'טרנזיסטור', noteHe: 'של אבא. האנטנה מכופפת' },
+  'promotion-table': { nameHe: 'טבלה מקופלת', noteHe: 'החשבון של הבוקר, בעיפרון' },
+  'pocket-money': { nameHe: 'דמי כיס', noteHe: 'שטר אחד, מקופל לארבע' },
 }
 
 /**

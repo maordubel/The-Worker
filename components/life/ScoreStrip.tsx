@@ -25,10 +25,10 @@ type Match = NonNullable<LifeBusEvents['match']>
  * Every value here came off `content/manual` by way of the anchor. The component invents
  * nothing and cannot: it is handed four fields and a label.
  */
-export function ScoreStrip({ match }: { match: Match }) {
+export function ScoreStrip({ match, objective = null }: { match: Match; objective?: string | null }) {
   return (
     <div
-      className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center p-2.5"
+      className="pointer-events-none absolute inset-x-0 top-0 z-30 flex flex-col items-center p-2.5"
       data-life="scoreboard"
     >
       <div
@@ -50,6 +50,15 @@ export function ScoreStrip({ match }: { match: Match }) {
 
         <Side nameHe={match.awayHe} score={match.awayScore} lit={match.scored && match.awayScore > 0} />
       </div>
+      {/* After the whistle the board stays — it is the fact of the day — but the boy has
+          somewhere to be, and the one line under the clock comes back beneath it. */}
+      {objective && (
+        <div className="absolute end-2.5 top-[54px] border-hair border-red bg-red px-2.5 py-1.5">
+          <p className="font-body text-[10px] leading-none text-sheet" data-life="objective">
+            <bdi>{objective}</bdi>
+          </p>
+        </div>
+      )}
     </div>
   )
 }

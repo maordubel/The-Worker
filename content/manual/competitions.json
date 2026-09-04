@@ -123,6 +123,18 @@
       "aliases": [
         "ליגה לאומית כדורסל"
       ]
+    },
+    {
+      "slug": "ליגה-ארצית",
+      "nameHe": "ליגה ארצית",
+      "type": "league",
+      "tier": 2,
+      "sport": "football",
+      "aliases": [
+        "ליגה ארצית",
+        "הליגה הארצית",
+        "Liga Artzit"
+      ]
     }
   ]
 }

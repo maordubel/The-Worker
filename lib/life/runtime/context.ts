@@ -1,4 +1,5 @@
 import type { HistoricalAnchor } from '../anchors'
+import type { AnchorSet } from '../content/era'
 import type { LifeEngine } from '../engine'
 
 import type { LifeBus } from './bus'
@@ -16,8 +17,11 @@ export type LifeContext = {
   input: InputState
   dialogue: DialogueRunner
   /** the chapter's canonical anchor, resolved server-side from the archive */
+  /** the 1986 anchor — the one the game shipped with; every scene reads `anchors` by era first */
   anchor: HistoricalAnchor
   prologueAnchor: HistoricalAnchor
+  /** every chapter's anchor, keyed by `Era.anchorKey`, resolved server-side */
+  anchors: AnchorSet
 }
 
 export const CONTEXT_KEY = 'life'

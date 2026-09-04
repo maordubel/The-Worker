@@ -4,6 +4,7 @@ import { artUrl, BOOT_FIGURES } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import { LIFE_PALETTE } from '../palette'
 
+import { PassageScene } from './PassageScene'
 import { PrologueScene } from './PrologueScene'
 import { WorldScene } from './WorldScene'
 
@@ -57,6 +58,13 @@ export class BootScene extends Phaser.Scene {
 
     if (!state.flags['prologue:done']) {
       this.scene.start(PrologueScene.KEY)
+      return
+    }
+    // A life that finished 1986 and has not yet crossed into 1990 reopens in the passage —
+    // the four years are a scene, and a reload in the middle of it lands in it, not back
+    // in the Saturday that already ended.
+    if (state.chapter === '1986' && state.chapterDone) {
+      this.scene.start(PassageScene.KEY)
       return
     }
     const location = state.location === 'prologue' || state.location === 'prologue-1972' ? 'bedroom' : state.location

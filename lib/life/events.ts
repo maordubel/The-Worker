@@ -75,6 +75,17 @@ export type LifeEvent =
   | { t: 'encounter.triggered'; id: string }
   | { t: 'redbox.item_added'; item: RedBoxItem }
   | { t: 'dialogue.choice_made'; conversation: string; choice: string }
+  // --- version 3, Stage B ------------------------------------------------------------
+  /**
+   * ארבע שנים עוברות — the calendar moves, and the life does not start again.
+   *
+   * Everything that is HIM stays: personality, the Red Heart, every relationship and every
+   * memory, the Red Box, the seed. Everything that is the DAY resets: the clock, the
+   * weekday, the pockets, the energy, the flags of an afternoon that ended. Age is
+   * arithmetic off the identity, as it always was. A save that folds this event is one
+   * biography four years on, not two biographies stapled together (brief §52).
+   */
+  | { t: 'year.entered'; year: number; weekday: number; minute: number }
 
 /** A day is 24×60. The clock wraps rather than running past midnight into nonsense. */
 export const MINUTES_IN_DAY = 24 * 60
@@ -302,6 +313,35 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
 
     case 'chapter.entered':
       return { ...state, chapter: event.chapter, chapterDone: false }
+
+    case 'year.entered': {
+      const kept: Record<string, boolean | string | number> = {}
+      // Flags that describe the PERSON rather than the afternoon survive the years.
+      for (const [flag, value] of Object.entries(state.flags)) {
+        if (
+          flag.startsWith('life:') ||
+          flag.startsWith('onboard:') ||
+          flag.startsWith('cutscene:') ||
+          flag.startsWith('prologue:')
+        )
+          kept[flag] = value
+      }
+      return {
+        ...state,
+        year: event.year,
+        age: event.year - state.identity.birthYear,
+        weekday: event.weekday,
+        minute: event.minute,
+        energy: 100,
+        resources: { ...state.resources, energy: 100, availableTime: 0 },
+        agorot: 0,
+        inventory: {},
+        flags: kept,
+        opportunities: [],
+        encounters: {},
+        wellbeing: { ...state.wellbeing, exhaustion: 0, stress: Math.round(state.wellbeing.stress * 0.5) },
+      }
+    }
 
     case 'chapter.completed':
       return { ...state, chapterDone: true }
