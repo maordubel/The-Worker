@@ -113,7 +113,7 @@ export class FootballScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', this.onResize, this))
 
     this.endsAt = this.time.now + LENGTH_MS
-    this.ctx.bus.emit('place', { id: 'pitch', title: 'שניים על שניים' })
+    this.ctx.bus.emit('place', { id: 'pitch', title: 'שניים על שניים', ambience: 'day' })
     this.pushHud()
 
   }

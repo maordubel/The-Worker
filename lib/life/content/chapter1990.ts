@@ -81,7 +81,7 @@ export const TABLE_1990: Say[] = [
 export const PORTRAIT_1990: Record<string, string> = {
   'פוגי': 'faceHero80',
   'קובי': 'faceKobi',
-  'רחל': 'faceRachel',
+  'רחל': 'faceRachel90',
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
   'בעל הקיוסק': 'faceOldMan',
@@ -100,6 +100,8 @@ export const OBJECTIVES_1990 = {
   leaving: 'אבא מחכה. יוצאים.',
   leftWithout: 'אבא כבר בדרך. ללכת אחרי האדומים.',
   gate7: 'שער 7. שם עומדים.',
+  halfGate: 'מחצית. הסדרן פותח את השער.',
+  heardIt: 'נגמר. שמעת מהרחוב. הביתה.',
   promoted: 'עלינו?',
   findKobi: 'למצוא את אבא.',
   walkHome: 'הביתה. ביחד.',

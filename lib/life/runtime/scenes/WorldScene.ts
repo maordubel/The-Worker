@@ -11,7 +11,7 @@ import { placementsAt } from '../../schedules'
 import type { LifeState, LocationId } from '../../types'
 import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
-import { ALL_SCENES, arrivalFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor } from '../../world/scenes'
+import { ALL_SCENES, arrivalFor, artFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import { KOBI_LEAVES_LATE, KOBI_SAYS_LEAVING } from '../../content/schedules1990'
 import type { HistoricalAnchor } from '../../anchors'
@@ -19,7 +19,7 @@ import { buildFinale } from '../../finale'
 import { TransistorNet } from '../match1990'
 import { PassageScene } from './PassageScene'
 import { meets } from '../../world/types'
-import { artUrl, extensionKeys } from '../art'
+import { artUrl, extensionKeys, PARALLAX, parallaxKeys } from '../art'
 import { fillCamera } from '../camera'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import type { MapPlace } from '../game'
@@ -140,6 +140,10 @@ export class WorldScene extends Phaser.Scene {
   private era!: Era
   /** the doors that exist in this era; `def.exits` filtered once, used everywhere */
   private exits: ExitDef[] = []
+  /** the painting under this room in this era — `bedroom` in 1986, `bedroom90` in 1990 */
+  private art = ''
+  /** the walk frame last drawn, so a footstep sounds once per contact */
+  private lastFrame = -1
   private spawnName = 'start'
   /** 1990: the match as an information game, or null in any other year */
   private net: TransistorNet | null = null
@@ -280,10 +284,17 @@ export class WorldScene extends Phaser.Scene {
   preload() {
     const ctx = this.registry.get(CONTEXT_KEY) as LifeContext
     const era = eraFor(ctx.engine.state.chapter)
-    const need = new Set<string>([this.def.art, ...Object.values(era.player.pose), ...era.player.walk])
-    const ext = extensionKeys(this.def.art)
+    this.art = artFor(this.def, era.chapter)
+    const need = new Set<string>([this.art, ...Object.values(era.player.pose), ...era.player.walk])
+    const ext = extensionKeys(this.art)
     need.add(ext.sky)
     need.add(ext.ground)
+    if ((PARALLAX as readonly string[]).includes(this.art)) {
+      const planes = parallaxKeys(this.art)
+      need.add(planes.far)
+      need.add(planes.mid)
+      need.add(planes.near)
+    }
     const arrival = arrivalFor(this.def, era.chapter)
     if (arrival) need.add(arrival.art)
     for (const actor of this.def.actors) if (inEra(actor, era.chapter)) need.add(actor.figure)
@@ -312,10 +323,11 @@ export class WorldScene extends Phaser.Scene {
     this.net = null
 
     this.cameras.main.setBackgroundColor(LIFE_PALETTE.night)
-    const backdrop = this.add.image(0, 0, `art-${this.def.art}`).setOrigin(0, 0).setDepth(-1000)
+    const backdrop = this.add.image(0, 0, `art-${this.art}`).setOrigin(0, 0).setDepth(-1000)
     this.W = backdrop.width
     this.H = backdrop.height
     this.buildExtensions()
+    this.buildParallax(backdrop)
 
     this.buildLights()
     this.buildLayers()
@@ -427,7 +439,7 @@ export class WorldScene extends Phaser.Scene {
     // playthrough harness found Amit standing in the kiosk doorway twenty minutes
     // before he arrives.
     this.applySchedule()
-    this.ctx.bus.emit('place', { id: this.def.id, title: this.def.titleHe })
+    this.ctx.bus.emit('place', { id: this.def.id, title: this.def.titleHe, ambience: this.def.ambience })
     this.flagCount = Object.keys(this.ctx.engine.state.flags).length
     this.pushHud()
     // The board belongs to the terrace. Walk out through the tunnel after the whistle and
@@ -453,8 +465,51 @@ export class WorldScene extends Phaser.Scene {
    * (bottom edge at y = 0) and ground below (top edge at y = H). If either failed to load
    * the world simply ends at the painting, as it always did, and the camera bounds say so.
    */
+  /**
+   * עומק — three planes where the painter gave us three (4.9.2026).
+   *
+   * The flat painting stays exactly where it was — it is what the extension strips,
+   * the doors and every fraction in the scene file are measured against — and it is
+   * hidden under the planes. FAR scrolls at 0.86 of the camera, so the sky and the far
+   * facades slide slower than the wall; MID is the wall and the ground at 1.0, pixel-
+   * aligned with the flat painting, so nothing the player touches has moved; NEAR is a
+   * lamp post, a car bonnet, a branch at 1.16, drawn OVER the child and scaled up by
+   * the same amount so it reads as nearer, with a breath of blur where the renderer
+   * can afford one. That last plane is the whole reason a phone can feel like a
+   * diorama: something passes between you and the boy.
+   *
+   * Only X scrolls. Vertically the camera roams the extension strips, and a far plane
+   * that lagged vertically would peel off the strips; a near plane is mostly empty and
+   * needs no vertical coverage at all.
+   */
+  private buildParallax(flat: Phaser.GameObjects.Image) {
+    if (!(PARALLAX as readonly string[]).includes(this.art)) return
+    const keys = parallaxKeys(this.art)
+    if (!this.textures.exists(`art-${keys.far}`) || !this.textures.exists(`art-${keys.mid}`)) return
+    flat.setVisible(false)
+    const far = this.add.image(0, 0, `art-${keys.far}`).setOrigin(0, 0).setDepth(-999)
+    far.setScrollFactor(0.86, 1)
+    const mid = this.add.image(0, 0, `art-${keys.mid}`).setOrigin(0, 0).setDepth(-998)
+    mid.setScrollFactor(1, 1)
+    if (this.textures.exists(`art-${keys.near}`)) {
+      // Pulled a twelfth of the room to the left, so the object painted at the left edge
+      // sits mostly off the glass when the boy starts by the front door — a foreground
+      // that covers the first door of the game is a wall, not depth.
+      const near = this.add.image(-0.075 * this.W, this.H, `art-${keys.near}`).setOrigin(0, 1).setDepth(7000)
+      near.setScale(1.16)
+      near.setScrollFactor(1.16, 1)
+      near.setAlpha(0.92)
+      // WebGL only; on canvas the plane is simply sharp, which is still a plane.
+      try {
+        near.postFX?.addBlur(0, 1, 1, 0.55)
+      } catch {
+        /* no post pipeline on this renderer */
+      }
+    }
+  }
+
   private buildExtensions() {
-    const keys = extensionKeys(this.def.art)
+    const keys = extensionKeys(this.art)
     if (!this.textures.exists(`art-${keys.sky}`) || !this.textures.exists(`art-${keys.ground}`)) return
     const sky = this.add.image(0, 0, `art-${keys.sky}`).setOrigin(0, 1).setDepth(-1001)
     const ground = this.add.image(0, this.H, `art-${keys.ground}`).setOrigin(0, 0).setDepth(-1001)
@@ -698,6 +753,8 @@ export class WorldScene extends Phaser.Scene {
       dusk: { n: 34, tint: LIFE_PALETTE.sheet, speed: 18, alpha: 0.2, scale: 1.2 },
       tunnel: { n: 14, tint: LIFE_PALETTE.lamp, speed: 5, alpha: 0.16, scale: 0.7 },
       stadium: { n: 46, tint: LIFE_PALETTE.sheet, speed: 26, alpha: 0.5, scale: 1.6 },
+      // a low hall under a tin roof: warm dust in the window light, slower than a terrace
+      hall: { n: 30, tint: LIFE_PALETTE.lamp, speed: 9, alpha: 0.3, scale: 1.1 },
     }
     const cfg = air[this.def.ambience] ?? air['day']
     if (!cfg) return
@@ -736,6 +793,7 @@ export class WorldScene extends Phaser.Scene {
       dusk: { tint: LIFE_PALETTE.redDeep, alpha: 0.06, vignette: 0.28 },
       tunnel: { tint: LIFE_PALETTE.night, alpha: 0.2, vignette: 0.72 },
       stadium: { tint: LIFE_PALETTE.red, alpha: 0.05, vignette: 0.3 },
+      hall: { tint: LIFE_PALETTE.redDeep, alpha: 0.07, vignette: 0.46 },
     }
     const cfg = grade[this.def.ambience] ?? grade['day']
     if (!cfg) return
@@ -1020,7 +1078,7 @@ export class WorldScene extends Phaser.Scene {
           exit,
           verb: 'exit',
           label: exit.labelHe,
-          locked: !meets(state, exit.needs),
+          locked: !meets(state, needsFor(exit, this.chapter)),
           x: (left + right) / 2,
           y: (top + bottom) / 2,
           priority: exit.priority ?? 2,
@@ -1299,8 +1357,18 @@ export class WorldScene extends Phaser.Scene {
     // happens. Facing the camera or away, a bob does the work.
     if (moving && this.lastDir === 'side') {
       const walk = this.era.player.walk
-      const frame = walk[Math.floor(this.stride) % walk.length] ?? walk[0]
+      const index = Math.floor(this.stride) % walk.length
+      const frame = walk[index] ?? walk[0]
       this.player.setTexture(`art-${frame}`)
+      // A foot lands on the contact frames (the first of each half of the cycle) — and
+      // on a two-frame stand-in, on every frame change.
+      if (index !== this.lastFrame) {
+        this.lastFrame = index
+        if (walk.length < 6 || index % Math.floor(walk.length / 2) === 0) {
+          const surface = this.def.ambience === 'stadium' ? 'terrace' : this.def.ambience === 'day' || this.def.ambience === 'dusk' ? 'street' : 'floor'
+          this.ctx.bus.emit('sound', { kind: 'step', surface })
+        }
+      }
     } else {
       const poses = this.era.player.pose
       const pose = this.lastDir === 'up' ? poses.up : this.lastDir === 'side' ? poses.side : poses.down
@@ -1558,7 +1626,7 @@ export class WorldScene extends Phaser.Scene {
       light.image.setVisible(meets(state, light.exit.when))
       // A locked door still shows, dimmer: you can see where it goes and you can see it
       // is not for you yet.
-      light.base = meets(state, light.exit.needs)
+      light.base = meets(state, needsFor(light.exit, this.chapter))
         ? light.exit.light?.tone === 'daylight'
           ? 0.4
           : 0.24
@@ -1727,7 +1795,7 @@ export class WorldScene extends Phaser.Scene {
         exit,
         verb: 'exit',
         label: exit.labelHe,
-        locked: !meets(state, exit.needs),
+        locked: !meets(state, needsFor(exit, this.chapter)),
         x: cx,
         y: cy,
         priority: exit.priority ?? 2,
@@ -1889,7 +1957,7 @@ export class WorldScene extends Phaser.Scene {
     for (const exit of this.exits) {
       if (!meets(state, exit.when)) continue
       if (!within(exit)) continue
-      if (!meets(state, exit.needs)) continue
+      if (!meets(state, needsFor(exit, this.chapter))) continue
       if (!this.clearedReturn && exit.to === this.cameFrom) continue
       inside = exit
       break
@@ -1934,6 +2002,7 @@ export class WorldScene extends Phaser.Scene {
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'onboard:street' })
       this.ctx.bus.emit('teach', null)
     }
+    this.ctx.bus.emit('sound', { kind: 'door' })
     this.cameras.main.fadeOut(240, 0, 0, 0)
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       void this.ctx.engine.save()
@@ -2082,6 +2151,11 @@ export class WorldScene extends Phaser.Scene {
     if (this.matchPhase !== 'none') return
     if (this.ctx.engine.state.flags['match:over']) {
       this.matchPhase = 'over'
+      // Walking in after the whistle, in 1990, is its own ending ("אחרי השריקה"): the
+      // fact is recorded the moment he is inside, so the walk home can read it.
+      if (this.chapter === '1990' && !this.ctx.engine.state.flags['saw:goal'] && !this.ctx.engine.state.flags['entry:late']) {
+        this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'entry:late' })
+      }
       this.pushMatch()
       return
     }
@@ -2102,7 +2176,7 @@ export class WorldScene extends Phaser.Scene {
           return kobi ? { x: kobi.image.x / this.W, y: kobi.image.y / this.H } : null
         },
       })
-      this.net.start()
+      this.net.start(this.ctx.engine.state.minute, KICKOFF)
       return
     }
     // The archive first, and the simulation as its fallback — see `playCutscene`.
@@ -2256,6 +2330,7 @@ export class WorldScene extends Phaser.Scene {
     this.goalMinute = decidingMinute(this.anchor)
     this.timeScale = 26
     this.ctx.bus.emit('toast', { text: 'המשחק מתחיל.', tone: 'red' })
+    this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 1 })
     this.pushMatch()
 
     const check = this.time.addEvent({
@@ -2348,6 +2423,7 @@ export class WorldScene extends Phaser.Scene {
       if (goal) {
         this.ctx.bus.emit('toast', { text: `${goal.scorerHe}. דקה ${goal.minute}.`, tone: 'red' })
       }
+      this.ctx.bus.emit('sound', { kind: 'roar', big: 1.5 })
       this.matchPhase = 'celebrating'
       this.pushMatch()
       this.startCarnival()
@@ -2558,7 +2634,7 @@ export class WorldScene extends Phaser.Scene {
         if (!exitInEra(exit, this.chapter)) continue
         if (!known.has(exit.to) || !meets(state, exit.when)) continue
         if (seen.has(exit.to)) continue
-        const lockedHe = here.lockedHe ?? (meets(state, exit.needs) ? null : exit.labelHe)
+        const lockedHe = here.lockedHe ?? (meets(state, needsFor(exit, this.chapter)) ? null : exit.labelHe)
         const step: Step = { id: exit.to, hops: here.hops + 1, lockedHe, spawn: exit.spawn }
         seen.set(exit.to, step)
         queue.push(step)

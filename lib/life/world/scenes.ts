@@ -108,12 +108,19 @@ export type ExitDef = {
    */
   needs?: Condition
   blockedHe?: string
+  /**
+   * The lock by chapter. `null` means the door is simply open that year: the 1986 key
+   * on the string is a fact about an eight-year-old, and the twelve-year-old of 1990
+   * walked out of the flat for a week with the door telling him to find a key that was
+   * not in any drawer — the first bug Maor met in Stage B.
+   */
+  needsByEra?: Record<string, Condition | null>
   /** walking in triggers after a short dwell; the button always works immediately */
   dwellMs?: number
   priority?: number
 }
 
-export type Ambience = 'interior' | 'kitchen' | 'day' | 'dusk' | 'tunnel' | 'stadium'
+export type Ambience = 'interior' | 'kitchen' | 'day' | 'dusk' | 'tunnel' | 'stadium' | 'hall'
 
 /**
  * A painted object separated from its room, drawn in front of or behind the player.
@@ -167,6 +174,8 @@ export type SceneDef = {
   id: LocationId
   titleHe: string
   art: string
+  /** the same room painted in another year — `bedroom90`, `street90` */
+  artByEra?: Record<string, string>
   band: { far: number; near: number }
   size: { far: number; near: number }
   spawns: Record<string, { x: number; y: number; facing?: 'left' | 'right' }>
@@ -188,6 +197,17 @@ export type SceneDef = {
   stuckByEra?: Record<string, string>
 }
 
+/** what this door needs in this chapter — `undefined` is an open door */
+export function needsFor(exit: ExitDef, chapter: string): Condition | undefined {
+  if (exit.needsByEra && chapter in exit.needsByEra) return exit.needsByEra[chapter] ?? undefined
+  return exit.needs
+}
+
+/** the painting under this room in this chapter */
+export function artFor(scene: SceneDef, chapter: string): string {
+  return scene.artByEra?.[chapter] ?? scene.art
+}
+
 /** the arrival card this room plays in this chapter, if any */
 export function arrivalFor(scene: SceneDef, chapter: string): { art: string; ms: number; flag: string } | null {
   if (scene.arrivalByEra && chapter in scene.arrivalByEra) return scene.arrivalByEra[chapter] ?? null
@@ -204,6 +224,7 @@ const SCENES: SceneDef[] = [
     id: 'bedroom',
     titleHe: 'החדר שלך',
     art: 'bedroom',
+    artByEra: { '1990': 'bedroom90' },
     band: { far: 0.84, near: 0.97 },
     size: { far: 0.3, near: 0.38 },
     ambience: 'interior',
@@ -212,10 +233,11 @@ const SCENES: SceneDef[] = [
     spawns: { start: { x: 0.3, y: 0.93, facing: 'left' }, fromHome: { x: 0.14, y: 0.9, facing: 'right' } },
     actors: [],
     hotspots: [
-      { id: 'bed', x: 0.47, y: 0.92, w: 0.14, act: 'bed', verb: 'look', labelHe: 'המיטה' },
-      { id: 'poster', x: 0.72, y: 0.9, w: 0.1, act: 'poster', verb: 'look', labelHe: 'הכרזה' },
+      { id: 'bed', x: 0.45, y: 0.92, w: 0.14, act: 'bed', verb: 'look', labelHe: 'המיטה' },
+      // the wall of pictures over the bed, 0.35–0.65 in the 4.9 painting
+      { id: 'poster', x: 0.63, y: 0.9, w: 0.08, act: 'poster', verb: 'look', labelHe: 'הכרזה' },
       // 1990: the same room, four years on. The drawer holds the scarf now, not a key.
-      { id: 'bed-1990', era: '1990', x: 0.47, y: 0.92, w: 0.14, act: 'bed-1990', verb: 'look', labelHe: 'המיטה' },
+      { id: 'bed-1990', era: '1990', x: 0.45, y: 0.92, w: 0.14, act: 'bed-1990', verb: 'look', labelHe: 'המיטה' },
       { id: 'drawer-1990', era: '1990', x: 0.17, y: 0.9, w: 0.16, act: 'drawer-1990', verb: 'look', labelHe: 'המגירה' },
       // Wider than a drawer needs to be: it is the one thing in this room the chapter
       // cannot start without, so a child crossing the room at any speed is offered it.
@@ -234,7 +256,9 @@ const SCENES: SceneDef[] = [
         // cut from a concept board and every one of them arrived with a piece of
         // somebody else in the frame — the old scarf carries a red fragment of a
         // figure beside it. The September sheet drew the objects themselves.
-        prop: { key: 'propScarfRed', size: 0.1 },
+        // Draped over the corner of the bedside cabinet in the 4.9 painting, reached
+        // from the floor beside it.
+        prop: { key: 'propScarfRed', size: 0.085, at: { x: 0.905, y: 0.69 } },
       },
     ],
     exits: [
@@ -295,7 +319,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'rachel-home',
         era: '1990',
-        figure: 'rachel',
+        figure: 'rachel90',
         // By the sofa, not on the kitchen doorway's spawn — a mother the boy walked
         // out of the kitchen INTO was the first thing the 1990 board showed.
         x: 0.6,
@@ -331,32 +355,34 @@ const SCENES: SceneDef[] = [
         // The first lock in the game, and it is the reason the bedroom is not scenery: a
         // child in 1986 does not leave the flat without the key on the string.
         needs: { hasItem: 'house-key' },
+        needsByEra: { '1990': null },
         blockedHe: 'בלי המפתח אמא לא נותנת לצאת. הוא במגירה בחדר שלך.',
         dwellMs: 260,
         priority: 2,
       },
       {
         id: 'kitchen',
-        x: 0.185,
+        // the doorway in the back wall of the 4.9 painting: 0.33–0.44
+        x: 0.325,
         y: 0.73,
-        w: 0.11,
+        w: 0.12,
         h: 0.055,
         to: 'kitchen',
         spawn: 'fromHome',
         labelHe: 'למטבח',
-        light: { x: 0.195, y: 0.2, w: 0.09, h: 0.55, tone: 'inside' },
+        light: { x: 0.335, y: 0.14, w: 0.1, h: 0.6, tone: 'inside' },
         dwellMs: 420,
       },
       {
         id: 'bedroom',
-        x: 0.84,
+        x: 0.895,
         y: 0.73,
-        w: 0.13,
+        w: 0.105,
         h: 0.06,
         to: 'bedroom',
         spawn: 'fromHome',
         labelHe: 'לחדר שלך',
-        light: { x: 0.848, y: 0.1, w: 0.105, h: 0.62, tone: 'inside' },
+        light: { x: 0.9, y: 0.06, w: 0.095, h: 0.66, tone: 'inside' },
         dwellMs: 420,
       },
     ],
@@ -411,7 +437,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'rachel-kitchen',
         era: '1990',
-        figure: 'rachel',
+        figure: 'rachel90-apron',
         // At the sink, on the far line — out of the doorway the boy walks in through.
         // At 0.3/0.9 she stood on the spawn's path and he walked into her.
         x: 0.42,
@@ -466,6 +492,7 @@ const SCENES: SceneDef[] = [
     id: 'street',
     titleHe: 'הרחוב',
     art: 'street',
+    artByEra: { '1990': 'street90' },
     band: { far: 0.705, near: 0.86 },
     size: { far: 0.185, near: 0.29 },
     ambience: 'day',
@@ -698,6 +725,8 @@ const SCENES: SceneDef[] = [
         // You cannot follow a crowd you have not noticed. Either Kobi told you there is a
         // match, or Ofir did — otherwise east is just a street, and the child says so.
         needs: { flag: 'knows:match' },
+        // 1990: the table told him there is a match before he had control. East is open.
+        needsByEra: { '1990': null },
         blockedHe: 'לאן? אתה בכלל לא יודע מה קורה שם היום.',
       },
     ],
@@ -724,11 +753,10 @@ const SCENES: SceneDef[] = [
     actors: [
       {
         id: 'shopkeeper',
-        // `oldMan` is a chibi cut from the first concept board — big head, painted
-        // outline — standing in a photoreal kiosk beside a photoreal Amit. Until a drawn
-        // shopkeeper arrives (ART-PROMPTS §2.3) he is one of the September adults: a man
-        // in a white shirt and glasses, which is what a kiosk owner in Jaffa looks like.
-        figure: 'adultB2',
+        // 4.9.2026: the kiosk owner drawn at last — heavy, grey moustache, white shirt over
+        // a vest, reading glasses pushed up. For a week he was one of the September adults
+        // because the old `oldMan` was a chibi cut from the first concept board.
+        figure: 'oldMan',
         x: 0.3,
         y: 0.9,
         size: 0.34,
@@ -753,7 +781,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'shopkeeper-1990',
         era: '1990',
-        figure: 'adultB2',
+        figure: 'oldMan-arms',
         x: 0.3,
         y: 0.9,
         size: 0.38,
@@ -1287,31 +1315,98 @@ const SCENES: SceneDef[] = [
   },
 
   // ------------------------------------------------------- אולם אוסישקין — פנים ----
+  //
+  // 4.9.2026: the hall is the RECONSTRUCTION now — five angles of one room rebuilt from
+  // the weinstocka footage (`USSISHKIN-RECONSTRUCTION-V2`): the red-and-charcoal stand,
+  // the cream stand opposite, the end wall with the old basket, the high corner, the
+  // floor at a child's eye. The roof, the beams and the window strip never move between
+  // them, which is what makes them one place. The main stand is the room you walk; the
+  // high corner is how you first see it; the end wall is where the basket is, one door
+  // along. Empty on purpose: on a Saturday in 1986 the hall IS empty, the parquet is
+  // reflecting the windows, and two men are shooting around. The derby night (11.3.1991)
+  // layers its crowd over this same geometry.
   {
     id: 'ussishkin-hall',
     titleHe: 'אולם אוסישקין',
-    art: 'ussHall',
-    band: { far: 0.86, near: 0.98 },
-    size: { far: 0.2, near: 0.3 },
-    ambience: 'stadium',
-    // The hall fills before it roars: `ussHallPre` is the warm-up, played once as the
-    // arrival card, then it cuts to `ussHall`, the game. Same room, fifteen minutes apart.
-    arrival: { art: 'ussHallPre', ms: 3600, flag: 'saw:ussPre' },
-    stuckHe: 'המשחק על הפרקט. היציאה משמאל, מאיפה שנכנסת.',
-    spawns: { fromOut: { x: 0.12, y: 0.93, facing: 'right' } },
-    actors: [],
-    hotspots: [],
+    art: 'ussMain',
+    band: { far: 0.72, near: 0.96 },
+    size: { far: 0.17, near: 0.3 },
+    ambience: 'hall',
+    // The first sight of the hall, from the high corner — almost all of it at once — held
+    // for a breath, then the cut down to the sideline at the boy's height.
+    arrival: { art: 'ussHigh', ms: 3800, flag: 'saw:ussHigh' },
+    stuckHe: 'הפרקט מבריק, הסל בקצה. היציאה משמאל, מאיפה שנכנסת.',
+    spawns: { fromOut: { x: 0.12, y: 0.93, facing: 'right' }, fromEnd: { x: 0.9, y: 0.9, facing: 'left' } },
+    actors: [
+      // Two men in plain red, shooting around at the far end of the floor: the hall is
+      // used, not abandoned. Nameless, no number, no talk — scenery that breathes.
+      { id: 'hooper-a', era: '*', figure: 'hooperRed-dribble', x: 0.62, y: 0.74, size: 0.17, nameHe: 'שחקן', sway: 0.006 },
+      { id: 'hooper-b', era: '*', figure: 'hooperRed-stretch', x: 0.45, y: 0.73, size: 0.16, nameHe: 'שחקן', sway: 0.004 },
+      // The usher by the door: the one person who talks, and what he says depends on
+      // whether there is a game tonight.
+      { id: 'usher', era: '*', figure: 'usher', x: 0.2, y: 0.9, size: 0.3, nameHe: 'סדרן', talk: 'usher-hall', sway: 0.003 },
+    ],
+    hotspots: [
+      { id: 'parquet', era: '*', x: 0.4, y: 0.88, w: 0.1, act: 'uss-parquet', verb: 'look', labelHe: 'הפרקט' },
+      { id: 'stand', era: '*', x: 0.55, y: 0.78, w: 0.12, act: 'uss-stand', verb: 'look', labelHe: 'היציע' },
+      { id: 'windows', era: '*', x: 0.75, y: 0.8, w: 0.1, act: 'uss-windows', verb: 'look', labelHe: 'החלונות' },
+    ],
     exits: [
       {
         id: 'back',
         x: 0.0,
-        y: 0.86,
+        y: 0.8,
         w: 0.05,
-        h: 0.12,
+        h: 0.18,
         to: 'ussishkin-outside',
         spawn: 'fromHall',
         labelHe: 'החוצה',
-        light: { x: 0.006, y: 0.6, w: 0.05, h: 0.28, tone: 'inside' },
+        light: { x: 0.006, y: 0.55, w: 0.05, h: 0.3, tone: 'inside' },
+        dwellMs: 500,
+      },
+      {
+        // along the sideline to the end wall, where the basket is
+        id: 'end',
+        x: 0.94,
+        y: 0.74,
+        w: 0.06,
+        h: 0.22,
+        to: 'ussishkin-end',
+        spawn: 'fromMain',
+        labelHe: 'לקצה, אל הסל',
+        light: { x: 0.9, y: 0.5, w: 0.1, h: 0.2, tone: 'inside' },
+        dwellMs: 420,
+      },
+    ],
+  },
+  {
+    id: 'ussishkin-end',
+    titleHe: 'אוסישקין — קיר הקצה',
+    art: 'ussEnd',
+    band: { far: 0.74, near: 0.96 },
+    size: { far: 0.17, near: 0.3 },
+    ambience: 'hall',
+    stuckHe: 'הסל מעליך. חזרה לאורך הקו — משמאל.',
+    spawns: { fromMain: { x: 0.08, y: 0.9, facing: 'right' } },
+    actors: [
+      { id: 'hooper-c', era: '*', figure: 'hooperRed-shoot', x: 0.5, y: 0.76, size: 0.2, nameHe: 'שחקן', sway: 0.004 },
+      { id: 'hooper-d', era: '*', figure: 'hooperRed-bent', x: 0.7, y: 0.8, size: 0.18, nameHe: 'שחקן', sway: 0.005 },
+    ],
+    hotspots: [
+      { id: 'basket', era: '*', x: 0.5, y: 0.9, w: 0.12, act: 'uss-basket', verb: 'look', labelHe: 'הסל' },
+      { id: 'board', era: '*', x: 0.28, y: 0.86, w: 0.1, act: 'uss-board', verb: 'look', labelHe: 'לוח התוצאות' },
+    ],
+    exits: [
+      {
+        id: 'back',
+        x: 0.0,
+        y: 0.78,
+        w: 0.05,
+        h: 0.2,
+        to: 'ussishkin-hall',
+        spawn: 'fromEnd',
+        labelHe: 'חזרה לאורך הקו',
+        light: { x: 0.006, y: 0.55, w: 0.05, h: 0.3, tone: 'inside' },
         dwellMs: 500,
       },
     ],

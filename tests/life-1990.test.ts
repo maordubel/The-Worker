@@ -8,7 +8,8 @@ import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, type LifeEvent } from '@/lib/life/events'
 import { buildFinale } from '@/lib/life/finale'
 import { FIGURE, PORTRAIT_ART } from '@/lib/life/runtime/art'
-import { ALL_SCENES, exitInEra, inEra } from '@/lib/life/world/scenes'
+import { ALL_SCENES, artFor, exitInEra, inEra, needsFor, sceneFor } from '@/lib/life/world/scenes'
+import { meets } from '@/lib/life/world/types'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { DEVELOPMENT_ANCHOR } from '@/lib/life/anchors'
 import { LifeBus } from '@/lib/life/runtime/bus'
@@ -301,5 +302,27 @@ describe('השיחות של 1990 — played headless through the runner', () => 
     poor.dialogue.start('ticket-window-1990')
     poor.drain()
     expect(poor.engine.state.flags['entry:granted']).toBeUndefined()
+  })
+})
+
+describe('הדלתות של 1990 — a twelve-year-old walks out of his own house', () => {
+  it('needs no key to leave the flat and no rumour to walk east', () => {
+    // The first bug Maor met in Stage B: the 1986 lock ("the key is in your drawer")
+    // applied to a year with no key in any drawer. And the road east was gated on
+    // `knows:match`, a flag only 1986 raises — the whole second chapter was a locked flat.
+    const state = { ...emptyState(DEFAULT_IDENTITY, 1990), chapter: '1990' }
+    const home = sceneFor('home').exits.find((exit) => exit.id === 'street')!
+    const street = sceneFor('street').exits.find((exit) => exit.id === 'route')!
+    expect(meets(state, needsFor(home, '1990'))).toBe(true)
+    expect(meets(state, needsFor(street, '1990'))).toBe(true)
+    // …and 1986 keeps both locks exactly as they were.
+    expect(meets(state, needsFor(home, '1986'))).toBe(false)
+    expect(meets(state, needsFor(street, '1986'))).toBe(false)
+  })
+
+  it('paints the bedroom and the street four years on', () => {
+    expect(artFor(sceneFor('bedroom'), '1990')).toBe('bedroom90')
+    expect(artFor(sceneFor('street'), '1990')).toBe('street90')
+    expect(artFor(sceneFor('bedroom'), '1986')).toBe('bedroom')
   })
 })

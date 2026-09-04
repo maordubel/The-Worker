@@ -7,6 +7,7 @@ import type { LifeState } from '../types'
 import { AMBIENT_1986, type AmbientActor } from './ambient1986'
 import { ENDINGS, OBJECTIVES, PORTRAIT, type EndingCard } from './chapter1986'
 import { ENDINGS_1990, OBJECTIVES_1990, PORTRAIT_1990 } from './chapter1990'
+import { HERO80_WALK, KID_WALK } from '../runtime/art'
 import { ENCOUNTERS_1986 } from './encounters1986'
 import { ENCOUNTERS_1990 } from './encounters1990'
 import { OPPORTUNITIES_1986 } from './opportunities1986'
@@ -82,7 +83,7 @@ export const ERA_1986: Era = {
   cutscene: '1986-championship',
   player: {
     pose: { down: 'pogi', downSide: 'pogi-3q', side: 'pogi-side', up: 'pogi-back' },
-    walk: ['pogi-side', 'pogi-walk'],
+    walk: KID_WALK,
   },
   memoryPrefix: '1986',
   portraits: PORTRAIT,
@@ -108,7 +109,9 @@ export const ERA_1990: Era = {
     if (state.flags['found:kobi']) return state.flags['walked:home'] ? null : OBJECTIVES_1990.walkHome
     if (sceneId === 'bloomfield-inside' && matchOver) return OBJECTIVES_1990.findKobi
     if (sceneId === 'bloomfield-inside') return OBJECTIVES_1990.promoted
+    if (matchOver && !state.flags['entry:granted']) return OBJECTIVES_1990.heardIt
     if (state.flags['entry:granted']) return null
+    if (sceneId === 'bloomfield-outside' && state.minute >= 16 * 60 + 48 && !matchOver) return OBJECTIVES_1990.halfGate
     if (sceneId === 'bloomfield-outside' || sceneId === 'route') return OBJECTIVES_1990.gate7
     if (state.flags['kobi:left']) return OBJECTIVES_1990.leftWithout
     if (state.flags['knows:math']) return OBJECTIVES_1990.leaving
@@ -117,7 +120,7 @@ export const ERA_1990: Era = {
   cutscene: null,
   player: {
     pose: { down: 'hero80', downSide: 'hero80-3q', side: 'hero80-side', up: 'hero80-back' },
-    walk: ['hero80-side', 'hero80-walk'],
+    walk: HERO80_WALK,
     scale: 1.12,
   },
   memoryPrefix: '1990',

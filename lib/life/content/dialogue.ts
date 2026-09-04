@@ -2,6 +2,7 @@ import { at } from '../clock'
 import { KOBI_LEAVES } from '../world/scenes'
 
 import { CONVERSATIONS_1990 } from './dialogue1990'
+import { CONVERSATIONS_USSISHKIN } from './dialogueUssishkin'
 import type { Conversation } from './script'
 
 /**
@@ -1565,5 +1566,5 @@ const CONVERSATIONS: Conversation[] = [
  * second chapter is a second content file and not a second runner (brief §52).
  */
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
-  [...CONVERSATIONS, ...CONVERSATIONS_1990].map((conversation) => [conversation.id, conversation]),
+  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_USSISHKIN].map((conversation) => [conversation.id, conversation]),
 )

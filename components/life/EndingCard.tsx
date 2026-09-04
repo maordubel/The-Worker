@@ -33,7 +33,7 @@ export function EndingCard({
   const nowKey = chapter === '1990' ? 'life.after.next' : 'life.after.now'
   return (
     <div className="pointer-events-auto absolute inset-0 z-50 flex items-center justify-center bg-ink/85 p-gutter" data-life="ending">
-      <div className="max-h-full w-full max-w-md overflow-y-auto border-rule border-sheet bg-ink">
+      <div className="max-h-full w-full max-w-md animate-paste-in overflow-y-auto border-rule border-sheet bg-ink">
         <div className="px-5 pb-5 pt-6">
           <div className="h-[6px] w-16 bg-red" aria-hidden="true" />
           <h2 className="mt-3 font-display text-step-3 leading-tight text-sheet">

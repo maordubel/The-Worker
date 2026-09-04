@@ -56,8 +56,16 @@ export type LifeBusEvents = {
   prompt: { verb: string; label: string; locked?: boolean } | null
   /** the one line of onboarding the game shows, or null once it is done */
   teach: { id: 'move' | 'act' } | null
-  toast: { text: string; tone: 'plain' | 'red' } | null
-  place: { id: LocationId; title: string }
+  /**
+   * A toast is a sentence — and since 4.9.2026 it can carry a thing: the art of the
+   * object that just changed hands (`art`) and a one-word kicker over it ("לקופסה
+   * האדומה", "קיבלת"). The shell draws a plain sentence as a strip and a sentence with
+   * a thing as a ticket.
+   */
+  toast: { text: string; tone: 'plain' | 'red'; art?: string; kickerHe?: string } | null
+  place: { id: LocationId; title: string; ambience?: string }
+  /** the sound of the world — one-shots the shell's synthesiser plays; see `audio.ts` */
+  sound: { kind: 'step'; surface: 'floor' | 'street' | 'terrace' } | { kind: 'door' } | { kind: 'whistle'; blasts: number } | { kind: 'roar'; big?: number } | { kind: 'radio'; on: boolean }
   anchor: { anchor: HistoricalAnchor; showing: boolean }
   /**
    * הלוח — the scoreboard, while a match is actually happening in front of the child.

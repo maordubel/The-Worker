@@ -54,6 +54,15 @@
   `scripts/life/shots1990.mjs`; `window.__life` נחשף לבדיקות רק כש-`localStorage`
   מכיל `the-worker:life:probe=1`.
 
+## הגופנים — התיקון הכי גדול בדלתא הזאת, ולא ידענו שהוא חסר
+ב-1.9.2026 (`d71228a`) טעינת הגופנים מ-`next/font/google` הוחלפה ב-stub כדי שבילד בלי רשת
+יעבור — וה-stub עלה לאתר. **מאז כל האתר מוצג ב-Georgia ובגופן המערכת.** עכשיו הגופנים
+מגיעים עם הריפו: `public/fonts/*.woff2` (21 קבצים, 276KB, מפוצלים לעברית/לטינית) ו-`@font-face`
+ב-`globals.css` עם `:root { --font-frank … }`. Frank Ruhl Libre 700/900 (כותרות, לפי מפרט
+המותג §3 — לא Suez One), Miriam Libre, Heebo, Courier Prime, Karantina, Archivo. `app/layout.tsx`
+בלי `next/font`. בנוסף: טקסט ה-HUD 10→11px, שורת הדיאלוג 15→16px, שם הדובר 13→14px.
+**חובה להעלות את `public/fonts/` בשלמותו** (הוא ב-ZIP של הקוד).
+
 ## אומת בענן
 typecheck · vitest (615) · build · `gate-probe` (שער 7 בשני הכיוונים) · `stageb-probe`
 (מעבר עם השנים מתקתקות + יציע) · `day1990-probe` (חמש פעימות של היום) · `shots1990` ·

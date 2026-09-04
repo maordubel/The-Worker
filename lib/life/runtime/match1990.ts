@@ -120,8 +120,31 @@ export class TransistorNet {
     }
   }
 
-  start() {
-    this.ctx.bus.emit('toast', { text: 'המשחק מתחיל. הרדיו של אבא מדבר.', tone: 'red' })
+  /**
+   * `dayMinute` is the day clock at the moment the boy reaches the terrace. Before
+   * kickoff the match starts from nothing; after it, the network picks up mid-match —
+   * the goals already scored are on the board, the phase is where the clock says — so a
+   * boy the stewards let in at half-time (the old Israeli mercy: the gates open for the
+   * second half) walks into a match that has been happening without him, which is the
+   * brief's whole point about history not waiting.
+   */
+  start(dayMinute = 0, kickoff = 0) {
+    const elapsed = Math.max(0, Math.min(HALF + INTERVAL + HALF - 1, dayMinute - kickoff))
+    if (elapsed > 0) {
+      this.minute = elapsed
+      const played = this.playedMinute()
+      const total = this.anchor.match?.scoredFor ?? 0
+      this.goals = Math.min(total, GOAL_AT.filter((at) => at <= played).length)
+      this.phase = this.minute >= HALF + INTERVAL ? 'second' : this.minute >= HALF ? 'half' : 'first'
+      this.halfSaid = this.phase !== 'first'
+      // What he knows is what he heard on the way in: the score, from nobody in particular.
+      this.known = { ...this.known, hapoel: this.goals, from: this.goals ? 'הרחוב' : null }
+      this.ctx.bus.emit('toast', { text: this.phase === 'half' ? 'מחצית. באת באמצע.' : 'באת באמצע. הרעש אמר לך את הרוב.', tone: 'red' })
+    } else {
+      this.ctx.bus.emit('toast', { text: 'המשחק מתחיל. הרדיו של אבא מדבר.', tone: 'red' })
+      this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 1 })
+    }
+    this.ctx.bus.emit('sound', { kind: 'radio', on: true })
     this.pushBoard()
   }
 
@@ -144,12 +167,17 @@ export class TransistorNet {
     const played = this.playedMinute()
     if (this.phase === 'first' && this.minute >= HALF) {
       this.phase = 'half'
+      this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 2 })
       this.halftime()
     } else if (this.phase === 'half' && this.minute >= HALF + INTERVAL) {
       this.phase = 'second'
+      this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 1 })
       this.ctx.bus.emit('toast', { text: 'מחצית שנייה.', tone: 'plain' })
     } else if (this.phase === 'second' && played >= FULL) {
       this.phase = 'over'
+      this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 3 })
+      this.ctx.bus.emit('sound', { kind: 'roar', big: 1.4 })
+      this.ctx.bus.emit('sound', { kind: 'radio', on: false })
       this.hooks.onBoard(TransistorNet.finalBoard(this.anchor))
       this.hooks.onOver()
       return
@@ -158,6 +186,7 @@ export class TransistorNet {
     const nextGoal = GOAL_AT[this.goals]
     if (nextGoal !== undefined && this.goals < total && played >= nextGoal && this.phase !== 'half') {
       this.goals += 1
+      this.ctx.bus.emit('sound', { kind: 'roar' })
       this.goal()
     }
     this.pushBoard()

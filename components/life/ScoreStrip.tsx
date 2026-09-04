@@ -54,7 +54,7 @@ export function ScoreStrip({ match, objective = null }: { match: Match; objectiv
           somewhere to be, and the one line under the clock comes back beneath it. */}
       {objective && (
         <div className="absolute end-2.5 top-[54px] border-hair border-red bg-red px-2.5 py-1.5">
-          <p className="font-body text-[10px] leading-none text-sheet" data-life="objective">
+          <p className="font-body text-[11px] leading-none text-sheet" data-life="objective">
             <bdi>{objective}</bdi>
           </p>
         </div>

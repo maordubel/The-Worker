@@ -23,7 +23,7 @@ export function LifeHud({ hud }: { hud: HudState }) {
         </p>
         {/* `data-life="place"` stays on the place ALONE: the playthrough harness reads it
             by name, and a date in front of the room made every room "lost". */}
-        <p className="mt-1 font-body text-[10px] leading-none text-muted">
+        <p className="mt-1 font-body text-[11px] leading-none text-muted">
           <bdi data-life="date">{hud.date}</bdi>
           <span aria-hidden="true"> · </span>
           <bdi data-life="place">{hud.place}</bdi>
@@ -39,7 +39,7 @@ export function LifeHud({ hud }: { hud: HudState }) {
         )}
         {hud.objective && (
           <div className="border-hair border-red bg-red px-2.5 py-1.5">
-            <p className="font-body text-[10px] leading-none text-sheet" data-life="objective">
+            <p className="font-body text-[11px] leading-none text-sheet" data-life="objective">
               <bdi>{hud.objective}</bdi>
             </p>
           </div>

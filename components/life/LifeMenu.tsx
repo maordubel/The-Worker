@@ -20,11 +20,13 @@ import { t } from '@/lib/i18n'
 export function LifeMenu({
   touch,
   deck,
+  sound,
   persisted,
   debug,
   onClose,
   onProfile,
   onDeck,
+  onSound,
   onDebug,
   onReset,
   confirmReset,
@@ -34,12 +36,14 @@ export function LifeMenu({
 }: {
   touch: boolean
   deck: boolean
+  sound: boolean
   persisted: boolean
   /** the developer panel is offered only outside production — a build fact, not a flag */
   debug: boolean
   onClose: () => void
   onProfile: () => void
   onDeck: (on: boolean) => void
+  onSound: (on: boolean) => void
   onDebug: () => void
   onReset: () => void
   confirmReset: boolean
@@ -82,6 +86,12 @@ export function LifeMenu({
         </button>
         <button type="button" className={row} onClick={onMap} data-life="menu-map">
           <span>{t('life.map')}</span>
+        </button>
+        <button type="button" className={row} onClick={() => onSound(!sound)} data-life="menu-sound">
+          <span>{t('life.menu.sound')}</span>
+          <span className="font-mono text-[11px] tabular-nums" dir="ltr">
+            {sound ? t('life.menu.soundOn') : t('life.menu.soundOff')}
+          </span>
         </button>
         {touch && (
           <button type="button" className={row} onClick={() => onDeck(!deck)} data-life="menu-deck">

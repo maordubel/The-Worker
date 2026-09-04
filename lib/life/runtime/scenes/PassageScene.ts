@@ -7,6 +7,7 @@ import { artUrl, extensionKeys } from '../art'
 import { fillCamera } from '../camera'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import { LIFE_PALETTE } from '../palette'
+import { strideAdvance } from '../walk'
 
 import { WorldScene } from './WorldScene'
 
@@ -129,7 +130,7 @@ export class PassageScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', onResize, this))
 
     this.ctx.bus.emit('frame', { picture: 0 })
-    this.ctx.bus.emit('place', { id: 'bedroom', title: ROOM.titleHe })
+    this.ctx.bus.emit('place', { id: 'bedroom', title: ROOM.titleHe, ambience: 'interior' })
     this.ctx.bus.emit('controls', { visible: true })
     this.ctx.bus.emit('match', null)
     this.ctx.bus.emit('hud', {
@@ -208,7 +209,7 @@ export class PassageScene extends Phaser.Scene {
     this.player.x = Phaser.Math.Clamp(this.player.x + moved, this.W * 0.04, this.W * 0.96)
     if (Math.abs(ax) > 0.08) {
       this.facing = ax < 0 ? -1 : 1
-      this.stride += Math.abs(moved) / (this.player.displayHeight * 0.21)
+      this.stride += strideAdvance(Math.abs(moved), this.player.displayHeight, era.player.walk.length)
       const frame = era.player.walk[Math.floor(this.stride) % era.player.walk.length] ?? era.player.walk[0]
       this.player.setTexture(`art-${frame}`)
     } else {

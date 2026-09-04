@@ -10,6 +10,8 @@ import { ControlDeck, TapChip } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { EndingCard } from '@/components/life/EndingCard'
+import { PlaceCard, Stamp, TitleCard } from '@/components/life/Stamp'
+import { LifeAudio, type AmbienceKey } from '@/lib/life/runtime/audio'
 import { HistoricalCutscene } from '@/components/life/HistoricalCutscene'
 import { LifeHud } from '@/components/life/LifeHud'
 import { LifeMap } from '@/components/life/LifeMap'
@@ -65,12 +67,18 @@ export function LifeStage({
   const [prompt, setPrompt] = useState<LifeBusEvents['prompt']>(null)
   const [teach, setTeach] = useState<LifeBusEvents['teach']>(null)
   const [toast, setToast] = useState<LifeBusEvents['toast']>(null)
+  /** the synthesiser — made on the first gesture, remembered muted or not per browser */
+  const audio = useRef<LifeAudio | null>(null)
+  const [sound, setSound] = useState(true)
   const [ending, setEnding] = useState<LifeBusEvents['ending']>(null)
   const [match, setMatch] = useState<LifeBusEvents['match']>(null)
   const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
   const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
   const [finale, setFinale] = useState<LifeBusEvents['finale']>(null)
   const [titleCard, setTitleCard] = useState<LifeBusEvents['card']>(null)
+  /** the plate that names a room as you step into it — not on the first room of a session */
+  const [placeCard, setPlaceCard] = useState<{ titleHe: string; subHe: string | null } | null>(null)
+  const lastPlace = useRef<string | null>(null)
   const [card, setCard] = useState<HistoricalAnchor | null>(null)
   const [controls, setControls] = useState(true)
   const [touch, setTouch] = useState(false)
@@ -141,17 +149,65 @@ export function LifeStage({
       /* the deck simply shows */
     }
 
+    // --- the sound -------------------------------------------------------------------
+    const sfx = new LifeAudio()
+    audio.current = sfx
+    setSound(!sfx.muted)
+    const wake = () => sfx.wake()
+    window.addEventListener('pointerdown', wake, { passive: true })
+    window.addEventListener('keydown', wake)
+    unsubscribe.push(() => {
+      window.removeEventListener('pointerdown', wake)
+      window.removeEventListener('keydown', wake)
+    })
+    unsubscribe.push(
+      bus.on('sound', (event) => {
+        if (event.kind === 'step') sfx.step(event.surface)
+        else if (event.kind === 'door') sfx.door()
+        else if (event.kind === 'whistle') sfx.whistle(event.blasts)
+        else if (event.kind === 'roar') sfx.roar(event.big ?? 1)
+        else if (event.kind === 'radio') sfx.radioOn(event.on)
+      }),
+    )
+
     unsubscribe.push(bus.on('hud', setHud))
-    unsubscribe.push(bus.on('dialogue', setDialogue))
-    unsubscribe.push(bus.on('prompt', setPrompt))
+    unsubscribe.push(
+      bus.on('dialogue', (value) => {
+        setDialogue(value)
+        sfx.duck(Boolean(value))
+        if (value) sfx.page()
+      }),
+    )
+    unsubscribe.push(
+      bus.on('prompt', (value) => {
+        setPrompt(value)
+        if (value) sfx.tick()
+      }),
+    )
     unsubscribe.push(bus.on('teach', setTeach))
-    unsubscribe.push(bus.on('toast', setToast))
+    unsubscribe.push(
+      bus.on('toast', (value) => {
+        setToast(value)
+        if (value?.art) sfx.thud()
+      }),
+    )
     unsubscribe.push(bus.on('ending', setEnding))
     unsubscribe.push(bus.on('match', setMatch))
     unsubscribe.push(bus.on('doc', setDoc))
     unsubscribe.push(bus.on('cutscene', setCutscene))
     unsubscribe.push(bus.on('finale', setFinale))
     unsubscribe.push(bus.on('card', setTitleCard))
+    unsubscribe.push(
+      bus.on('place', (place) => {
+        // The first room of a session is named by the HUD alone; every door after it gets
+        // the plate. Same room twice in a row (a scene restart) is not a door.
+        if (lastPlace.current && lastPlace.current !== place.id) {
+          setPlaceCard({ titleHe: place.title, subHe: null })
+        }
+        lastPlace.current = place.id
+        sfx.setAmbience((place.ambience as AmbienceKey | undefined) ?? (place.id === 'prologue' ? 'stadium' : 'interior'))
+      }),
+    )
     unsubscribe.push(bus.on('controls', (value) => setControls(value.visible)))
     unsubscribe.push(bus.on('anchor', (value) => setCard(value.showing ? value.anchor : null)))
     unsubscribe.push(bus.on('frame', (value) => setFrame(value.picture)))
@@ -277,7 +333,11 @@ export function LifeStage({
       if (!dialogue) return
       event.preventDefault()
       if (!dialogue.choices || dialogue.choices.length === 0) {
-        runtime.current?.advance()
+        // Through the box, not past it: a line still typing itself prints first, and the
+        // second press turns the page — the same two beats a thumb gets.
+        const button = document.querySelector<HTMLButtonElement>('[data-life="dialogue"] [data-life="continue"]')
+        if (button) button.click()
+        else runtime.current?.advance()
         // the same key is the action key — see `InputState.swallow`
         runtime.current?.input.swallow()
       }
@@ -289,9 +349,15 @@ export function LifeStage({
   // --- a toast is a sentence, not a notification centre ------------------------------
   useEffect(() => {
     if (!toast) return
-    const timer = setTimeout(() => setToast(null), 2600)
+    const timer = setTimeout(() => setToast(null), toast.art ? 3600 : 2600)
     return () => clearTimeout(timer)
   }, [toast])
+
+  useEffect(() => {
+    if (!placeCard) return
+    const timer = setTimeout(() => setPlaceCard(null), 1700)
+    return () => clearTimeout(timer)
+  }, [placeCard])
 
   // A title card holds for as long as it was told to, and then it is simply gone.
   useEffect(() => {
@@ -528,23 +594,8 @@ export function LifeStage({
 
         {ready && teach && !covered && <Teach id={teach.id} touch={touch} />}
 
-        {toast && !cutscene && (
-          <div className="pointer-events-none absolute inset-x-0 top-[calc(104px+env(safe-area-inset-top))] z-30 flex justify-center px-gutter">
-            <div
-              className={`border-hair px-3 py-1.5 ${
-                toast.tone === 'red' ? 'border-red bg-red' : 'border-ink bg-sheet'
-              }`}
-            >
-              <p
-                className={`font-body text-[12px] leading-none ${
-                  toast.tone === 'red' ? 'text-sheet' : 'text-ink'
-                }`}
-              >
-                <bdi>{toast.text}</bdi>
-              </p>
-            </div>
-          </div>
-        )}
+        {toast && !cutscene && <Stamp toast={toast} />}
+        {placeCard && !cutscene && !titleCard && !toast && <PlaceCard titleHe={placeCard.titleHe} subHe={placeCard.subHe} />}
 
         {dialogue && (
           <DialogueBox
@@ -584,18 +635,7 @@ export function LifeStage({
         {card && <AnchorCard anchor={card} onClose={() => setCard(null)} />}
 
         {/* כרטיס-ביסוס — over black, one line, then the scene. */}
-        {titleCard && (
-          <div className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center bg-ink" data-life="title-card">
-            <p className="font-display text-[28px] leading-none text-sheet">
-              <bdi>{titleCard.titleHe}</bdi>
-            </p>
-            {titleCard.subHe && (
-              <p className="mt-3 font-body text-[13px] leading-none text-sheet/70">
-                <bdi>{titleCard.subHe}</bdi>
-              </p>
-            )}
-          </div>
-        )}
+        {titleCard && <TitleCard titleHe={titleCard.titleHe} subHe={titleCard.subHe} />}
 
         {finale && (
           <StageFinale
@@ -619,6 +659,11 @@ export function LifeStage({
               openProfile(false)
             }}
             onDeck={toggleDeck}
+            sound={sound}
+            onSound={(on) => {
+              setSound(on)
+              audio.current?.setMuted(!on)
+            }}
             onDebug={() => {
               setMenu(false)
               openProfile(true)

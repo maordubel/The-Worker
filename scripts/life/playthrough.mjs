@@ -84,8 +84,10 @@ const report = []
  * minutes to look at nine screenshots is how a verification step stops being run.
  */
 const TOUR_ONLY = process.env.WORKER_TOUR_ONLY === '1'
+/** WORKER_SIZES=small,phone — run a subset of the viewports */
+const ONLY_SIZES = process.env.WORKER_SIZES?.split(',').filter(Boolean) ?? null
 
-for (const size of TOUR_ONLY ? [] : SIZES) {
+for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZES.includes(s.name))) {
   const context = await browser.newContext({
     viewport: { width: size.width, height: size.height },
     hasTouch: size.touch,

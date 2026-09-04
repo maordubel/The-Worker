@@ -42,7 +42,8 @@ ERA=d['era']; PREFIX='board-' if ERA=='1986' else f'board-{ERA}-'
 def in_era(x, fallback='1986'):
     e=x.get('era', fallback); return e=='*' or e==ERA
 for sc in d['scenes']:
-    im=Image.open(f"{ART}/{sc['art']}.png").convert('RGBA'); W,H=im.size
+    art=(sc.get('artByEra') or {}).get(ERA, sc['art'])
+    im=Image.open(f"{ART}/{art}.png").convert('RGBA'); W,H=im.size
     for L in sc.get('layers') or []:
         if not in_era(L): continue
         try: la=Image.open(f"{ART}/{L['art']}.png").convert('RGBA')

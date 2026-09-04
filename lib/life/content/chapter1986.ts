@@ -168,7 +168,7 @@ export const ITEM_ART: Partial<Record<ItemId, string>> = {
   'ticket-stub': 'docTicket',
   coin: 'propCoins',
   transistor: 'propRadio',
-  'promotion-table': 'propPapers',
+  'promotion-table': 'propClipping90',
   'pocket-money': 'propCoins',
 }
 

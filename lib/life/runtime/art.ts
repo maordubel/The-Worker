@@ -57,6 +57,32 @@ export const BACKDROP = [
    */
   'undercroft',
   'ussHallPre',
+
+  /**
+   * 4.9.2026, המסירה השלישית — the answers to `ART-BRIEF-COMPLETE.md`.
+   *
+   * `bedroom`, `living` and `reveal` were replaced under their own names (the bedroom
+   * had been a 3× upscale of a panel since the first build — the first room of the game
+   * and the worst painting in it). The rest are new rooms: the same bedroom and street
+   * four years on, and the school the second movement of Stage B opens in.
+   */
+  'bedroom90',
+  'street90',
+  'classroom',
+  'schoolyard',
+
+  /**
+   * אוסישקין — five angles of ONE hall, reconstructed from the weinstocka footage
+   * (`USSISHKIN-RECONSTRUCTION-V2`): the red-and-charcoal stand, the cream stand
+   * opposite, the end wall with the basket, the high corner, and the floor at a child's
+   * eye. The roof, the beams, the window strip and the basket never move between them —
+   * that is the rule the package was built on, and it is what makes them one place.
+   */
+  'ussMain',
+  'ussCream',
+  'ussEnd',
+  'ussHigh',
+  'ussLow',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -334,6 +360,29 @@ export const FIGURE = [
    * `-sitB` and `-scarf` are still the older man and are the next thing to redraw.
    */
   'ofir90',
+
+  // ---- 4.9.2026 — the third delivery: the sheets ART-BRIEF-COMPLETE.md asked for -------
+  // Keren (1986), Efi and the kiosk owner, redrawn in the photoreal style at last: the
+  // three chibi cut-outs that stood beside the painted children are gone from the stage.
+  'keren-3q', 'keren-side', 'keren-back', 'keren-sit', 'keren-cross', 'keren-point',
+  'keren-w1', 'keren-w2', 'keren-w3', 'keren-w4', 'keren-laugh', 'keren-shout', 'keren-hips',
+  'efi-3q', 'efi-side', 'efi-back', 'efi-crouch', 'efi-kick', 'efi-arms',
+  'efi-w1', 'efi-w2', 'efi-w3', 'efi-w4', 'efi-dribble', 'efi-cheer', 'efi-sulk',
+  'oldMan-3q', 'oldMan-side', 'oldMan-back', 'oldMan-lean', 'oldMan-hand', 'oldMan-paper',
+  'oldMan-point', 'oldMan-arms', 'oldMan-laugh', 'oldMan-shrug', 'oldMan-coins', 'oldMan-wipe', 'oldMan-stool',
+  // Rachel, four years on — the mother of 12.5.1990 and of the derby night.
+  'rachel90', 'rachel90-3q', 'rachel90-side', 'rachel90-back', 'rachel90-arms', 'rachel90-hips', 'rachel90-note',
+  'rachel90-apron', 'rachel90-point', 'rachel90-watch', 'rachel90-hug', 'rachel90-sit', 'rachel90-door', 'rachel90-call',
+  // The school, March 1991.
+  'teacher', 'teacher-3q', 'teacher-side', 'teacher-back', 'teacher-arms', 'teacher-note', 'teacher-look',
+  'teacher-point', 'teacher-hand', 'teacher-sit', 'teacher-lean', 'teacher-walk', 'teacher-watch', 'teacher-turn',
+  'pupil-back1', 'pupil-back2', 'pupil-back3', 'pupil-back4', 'pupil-sideA', 'pupil-sideB', 'pupil-turn', 'pupil-pass',
+  // Ussishkin: nameless players in plain red, an usher, a vendor with a tray.
+  'hooperRed-ball', 'hooperRed-dribble', 'hooperRed-shoot', 'hooperRed-stretch', 'hooperRed-away', 'hooperRed-bent',
+  'usher', 'usher-block', 'usher-up', 'usher-wave',
+  'hallVendor', 'hallVendor-hand', 'hallVendor-change', 'hallVendor-shout',
+  // The twelve-year-old's eight-frame walk (the eight-year-old's is `KID_WALK`).
+  'hero80-w1', 'hero80-w2', 'hero80-w3', 'hero80-w4', 'hero80-w5', 'hero80-w6', 'hero80-w7', 'hero80-w8',
 ] as const
 
 /**
@@ -402,12 +451,23 @@ export const KID_POSE = {
  * the turnaround (ART-PROMPTS §2.1 now says so in those words). The eight frames stay
  * sliced and on disk; the day the right sheet lands, this list grows again.
  */
-export const KID_WALK = ['pogi-side', 'pogi-walk'] as const
-
-/** the mismatched eight — kept sliced so the scanner still checks them, used by nothing */
-export const KID_WALK_SHELVED = [
+/**
+ * 4.9.2026: the eight frames that ARE him. The third delivery drew the walk from
+ * `pogi.png` / `pogi-side.png` — dark curls, the badge, long jeans — and the two-frame
+ * stand-in retires. The sheet was drawn walking left and was mirrored on ingest, so
+ * every side-on frame in the folder faces right and `setFlipX` does the rest.
+ */
+export const KID_WALK = [
   'pogi-w1', 'pogi-w2', 'pogi-w3', 'pogi-w4',
   'pogi-w5', 'pogi-w6', 'pogi-w7', 'pogi-w8',
+] as const
+
+/** the two frames the game walked on for a week — still a valid pose pair */
+export const KID_WALK_SHELVED = ['pogi-side', 'pogi-walk'] as const
+
+export const HERO80_WALK = [
+  'hero80-w1', 'hero80-w2', 'hero80-w3', 'hero80-w4',
+  'hero80-w5', 'hero80-w6', 'hero80-w7', 'hero80-w8',
 ] as const
 
 export const PROP = [
@@ -477,6 +537,9 @@ export const PROP = [
   'propPosters',
   'propBanner',
   'propSign',
+  // 4.9.2026 — the objects of the second movement, and two more for the box.
+  'propNote', 'propNoteOpen', 'propBasketball', 'propTicket91', 'propScorePaper',
+  'propWrapper', 'propClipping90', 'propCassette', 'propChalk', 'propBagStrap90',
 ] as const
 export type PropKey = (typeof PROP)[number]
 
@@ -550,7 +613,22 @@ export const PORTRAIT_ART = [
   'faceSinai-point',
   'faceSinai-shout',
   'faceSinai-side',
+  // 4.9.2026
+  'faceRachel90', 'faceRachel90-smile', 'faceRachel90-worried', 'faceRachel90-nu', 'faceRachel90-angry', 'faceRachel90-side',
+  'faceTeacher', 'faceTeacher-glasses', 'faceTeacher-share', 'faceTeacher-tired', 'faceTeacher-smile', 'faceTeacher-angry',
+  'faceOldMan-smile', 'faceOldMan-what', 'faceOldMan-story', 'faceOldMan-over', 'faceOldMan-laugh',
 ] as const
+
+/**
+ * עומק — the three planes a purpose-drawn exterior was split into (4.9.2026), aligned
+ * pixel-for-pixel to the flat painting under the same key. FAR is opaque; MID and NEAR
+ * carry alpha. A room without planes is drawn flat, as before; a room with them scrolls
+ * its sky slower than its wall and its lamp post faster, which is the whole of depth.
+ */
+export const PARALLAX = ['street', 'approach', 'gate7', 'stand'] as const
+export function parallaxKeys(art: string): { far: string; mid: string; near: string } {
+  return { far: `${art}--far`, mid: `${art}--mid`, near: `${art}--near` }
+}
 
 export function artUrl(key: string): string {
   return `${ART_ROOT}/${key}.png`

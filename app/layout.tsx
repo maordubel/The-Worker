@@ -1,6 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-const _f = (o: { variable: string; [k: string]: unknown }) => ({ variable: o.variable, className: '' })
-const Suez_One = _f, Miriam_Libre = _f, Heebo = _f, Courier_Prime = _f, Karantina = _f, Archivo = _f
 import Script from 'next/script'
 
 import { Analytics } from '@/components/ads/Analytics'
@@ -9,52 +7,11 @@ import { BRAND } from '@/lib/brand'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
 import './globals.css'
 
-/** Four faces, fixed roles. See brand/THE-WORKER-BRAND-SPEC.md §3. */
-const frank = Suez_One({
-  subsets: ['hebrew', 'latin'],
-  weight: '400',
-  display: 'swap',
-  variable: '--font-frank',
-})
-const miriam = Miriam_Libre({
-  subsets: ['hebrew', 'latin'],
-  weight: ['400', '700'],
-  variable: '--font-miriam',
-  display: 'swap',
-})
-const heebo = Heebo({
-  subsets: ['hebrew', 'latin'],
-  weight: ['400', '500', '800'],
-  variable: '--font-heebo',
-  display: 'swap',
-})
-const courier = Courier_Prime({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-courier',
-  display: 'swap',
-})
-
 /**
- * Karantina 700 is the gate face. It carries the big figures — gate numbers, shirt
- * numbers, scores — and it is the ONE face allowed to be larger than anything else on
- * a poster. It replaces Anton, which had no Hebrew.
+ * The faces live in `globals.css` as self-hosted @font-face rules (brand spec §3) —
+ * `next/font/google` needs the network at build time, and the one time it did not have
+ * it the stub that replaced it shipped, and the whole site fell back to Georgia.
  */
-const anton = Karantina({
-  subsets: ['hebrew', 'latin'],
-  weight: '700',
-  display: 'swap',
-  variable: '--font-poster',
-})
-
-/** Archivo carries the Latin caps lines — GATE, BLOOMFIELD · JAFFA · EST. 1923. */
-const archivo = Archivo({
-  subsets: ['latin'],
-  weight: ['600', '700', '800'],
-  display: 'swap',
-  variable: '--font-latin',
-})
-
 export const viewport: Viewport = {
   // Required for env(safe-area-inset-*) to report anything on a notched iPhone.
   viewportFit: 'cover',
@@ -77,11 +34,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang={LOCALE}
-      dir={DIRECTION}
-      className={`${frank.variable} ${miriam.variable} ${heebo.variable} ${courier.variable} ${anton.variable} ${archivo.variable}`}
-    >
+    <html lang={LOCALE} dir={DIRECTION}>
       <body className="font-body antialiased">
         <a
           href="#main"

@@ -177,6 +177,17 @@ export const CONVERSATIONS_1990: Conversation[] = [
     id: 'rachel-1990',
     nameHe: 'רחל',
     branches: [
+      // In through the gate after the whistle: he saw the pitch full of people and not
+      // one minute of football, and found his father in it. The ending is "late".
+      {
+        when: { all: [{ flag: 'found:kobi' }, { flag: 'entry:late' }] },
+        lines: [
+          { who: 'רחל', text: 'נו?' },
+          { who: 'קובי', text: 'עלינו. הוא הגיע לחגיגה.' },
+          { who: 'רחל', text: 'העיקר שהגיע. נעליים בחוץ.' },
+        ],
+        then: [{ e: 'flag', flag: 'walked:home' }, { e: 'keep' }, { e: 'ending', id: 'late' }],
+      },
       {
         when: { flag: 'found:kobi' },
         lines: [
@@ -518,6 +529,21 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { flag: 'entry:granted' },
         lines: [{ who: 'סדרן', text: 'קדימה, פנימה, לא לעצור בקרוסלה.' }],
+      },
+      // The old mercy of Israeli grounds: at half-time the gates open and whoever is
+      // still outside walks in for the second half. A boy with no ticket, no father at
+      // the gate and no friends inside is not stuck — he is early for the half.
+      {
+        when: { afterMinute: 16 * 60 + 48 },
+        lines: [
+          { who: 'סדרן', text: 'מחצית. פותחים. תיכנס, רק לא לרוץ.' },
+          { who: null, text: 'הקרוסלה מסתובבת בלי כרטיס. מאחוריך עוד עשרים ילדים שחיכו לזה.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'entry:granted' },
+          { e: 'flag', flag: 'entry:half' },
+          { e: 'toast', text: 'המחצית. נכנסים.', tone: 'red' },
+        ],
       },
       {
         when: { flag: 'went:withKobi' },

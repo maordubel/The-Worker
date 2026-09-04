@@ -1,3 +1,4 @@
+import { ITEM_ART } from '../content/chapter1986'
 import type { HistoricalAnchor } from '../anchors'
 import { DIALOGUE } from '../content/dialogue'
 import { anchorFor, eraFor, type AnchorSet } from '../content/era'
@@ -212,6 +213,9 @@ export class DialogueRunner {
     /** effects an opportunity's own outcome contributed, applied in the same pass */
     const extra: Effect[] = []
 
+    /** the last thing handed over in this list — a toast that follows it shows it */
+    let handed: string | null = null
+    let kept: string | null = null
     for (const effect of effects) {
       switch (effect.e) {
         case 'flag':
@@ -222,6 +226,7 @@ export class DialogueRunner {
           break
         case 'give':
           events.push({ t: 'item.gained', item: effect.item, count: effect.count ?? 1 })
+          handed = ITEM_ART[effect.item] ?? null
           break
         case 'take':
           events.push({ t: 'item.lost', item: effect.item, count: effect.count ?? 1 })
@@ -247,6 +252,7 @@ export class DialogueRunner {
             },
           })
           events.push({ t: 'flag.raised', flag: 'memory:first' })
+          kept = ITEM_ART[effect.item] ?? null
           break
         case 'attend':
           events.push({ t: 'anchor.attended', anchorId: this.anchor.id })
@@ -254,9 +260,19 @@ export class DialogueRunner {
         case 'missed':
           events.push({ t: 'anchor.missed', anchorId: this.anchor.id })
           break
-        case 'toast':
-          after.push(() => this.bus.emit('toast', { text: effect.text, tone: effect.tone ?? 'plain' }))
+        case 'toast': {
+          const art = kept ?? handed
+          const kickerHe = kept ? 'לקופסה האדומה' : handed ? 'קיבלת' : undefined
+          after.push(() =>
+            this.bus.emit('toast', {
+              text: effect.text,
+              tone: effect.tone ?? 'plain',
+              ...(art ? { art } : {}),
+              ...(kickerHe ? { kickerHe } : {}),
+            }),
+          )
           break
+        }
         case 'doc':
           // Only a key the art layer actually declares. A dialogue file may hold up a
           // document; it may not name an arbitrary URL and it may not name a sprite.
