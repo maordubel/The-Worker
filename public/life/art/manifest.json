@@ -1906,5 +1906,107 @@
    "yellowLeft": 0,
    "source": "2026-09c"
   }
+ },
+ "panoramas": {
+  "panoReveal": {
+   "w": 4096,
+   "h": 1024,
+   "bytes": 2019707,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "panoTerrace1986": {
+   "w": 4096,
+   "h": 1024,
+   "bytes": 1859660,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "panoUssHall": {
+   "w": 4096,
+   "h": 1024,
+   "bytes": 1684299,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "panoUssDerby": {
+   "w": 4096,
+   "h": 1024,
+   "bytes": 1553175,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "panoKitchen90": {
+   "w": 4096,
+   "h": 1024,
+   "bytes": 2036563,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "panoBedroomMorning90": {
+   "w": 4096,
+   "h": 1024,
+   "bytes": 2490401,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "panoGate7": {
+   "w": 4096,
+   "h": 1024,
+   "bytes": 1913887,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "panoClassroom": {
+   "w": 4096,
+   "h": 1024,
+   "bytes": 2015226,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  }
+ },
+ "textures": {
+  "texTunnelWall": {
+   "w": 512,
+   "h": 512,
+   "bytes": 51638,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "texTunnelWallPoster": {
+   "w": 512,
+   "h": 512,
+   "bytes": 46770,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "texTunnelFloor": {
+   "w": 512,
+   "h": 512,
+   "bytes": 36367,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "texTunnelCeiling": {
+   "w": 512,
+   "h": 512,
+   "bytes": 30568,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "texTunnelSteps": {
+   "w": 512,
+   "h": 512,
+   "bytes": 41058,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  },
+  "texTunnelDoor": {
+   "w": 512,
+   "h": 512,
+   "bytes": 37189,
+   "yellowLeft": 0,
+   "source": "stand-in"
+  }
  }
 }
