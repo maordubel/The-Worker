@@ -23,23 +23,55 @@ import { t } from '@/lib/i18n'
  * and scaled up with the painted textures' own grain.
  */
 
-const MAP = [
-  '#####',
-  '#...#',
-  '#...#',
-  'P...#',
-  '#...#',
-  '#...D',
-  '#...#',
-  '#...P',
-  '#...#',
-  '#...#',
-  'D...#',
-  '#...#',
-  '#...#',
-  '#SSS#',
-  '#LLL#',
-]
+/**
+ * שני מסדרונות, מנוע אחד (5.9.2026).
+ *
+ * `bloomfield` is the original: fifteen cells of concrete under a stand in 1986, walked
+ * once, whose whole meaning is the light at the end of it. `ussishkin` is its opposite and
+ * the brief says so in one line — Bloomfield says the world is bigger than the boy, and
+ * Ussishkin says the world is TOO CLOSE to him (§34). So the second corridor is half the
+ * length, the people in it are slower and nearer, and the light it opens into is the warm
+ * light of a room rather than a sky. Same renderer, two configurations, no second engine.
+ */
+export type TunnelVariant = 'bloomfield' | 'ussishkin'
+
+const MAPS: Record<TunnelVariant, string[]> = {
+  bloomfield: [
+    '#####',
+    '#...#',
+    '#...#',
+    'P...#',
+    '#...#',
+    '#...D',
+    '#...#',
+    '#...P',
+    '#...#',
+    '#...#',
+    'D...#',
+    '#...#',
+    '#...#',
+    '#SSS#',
+    '#LLL#',
+  ],
+  ussishkin: [
+    '#####',
+    '#...#',
+    '#...#',
+    'D...#',
+    '#...#',
+    '#...P',
+    '#...#',
+    '#...#',
+    '#SSS#',
+    '#LLL#',
+  ],
+}
+
+/** where the fog goes as the light grows: a sky, or a hall's own lamps */
+const FOG_END: Record<TunnelVariant, [number, number, number]> = {
+  bloomfield: [237, 230, 216],
+  ussishkin: [226, 196, 168],
+}
 const FOV = Math.PI / 2.9
 const SPEED = 1.9 // cells per second
 const TURN = 1.4 // radians per second (keys)
@@ -48,18 +80,40 @@ const WALL_H = 1.0
 type Tex = { img: HTMLImageElement; data: ImageData | null }
 
 /** people ahead of the boy: x, y in cells, a figure key, and a walking speed */
-const PEOPLE = [
+const CROWDS: Record<TunnelVariant, Array<{ x: number; y: number; art: string; speed: number; h: number }>> = {
   // ahead of the boy and nearly his pace: he walks BEHIND the adults, he does not pass through them
-  { x: 1.8, y: 4.6, art: 'adultA3', speed: 1.55, h: 0.82 },
-  { x: 3.1, y: 5.8, art: 'youngB4', speed: 1.5, h: 0.78 },
-  { x: 2.3, y: 7.6, art: 'adultB5', speed: 1.45, h: 0.86 },
-  { x: 3.3, y: 9.2, art: 'fanC', speed: 1.6, h: 0.84 },
-]
+  bloomfield: [
+    { x: 1.8, y: 4.6, art: 'adultA3', speed: 1.55, h: 0.82 },
+    { x: 3.1, y: 5.8, art: 'youngB4', speed: 1.5, h: 0.78 },
+    { x: 2.3, y: 7.6, art: 'adultB5', speed: 1.45, h: 0.86 },
+    { x: 3.3, y: 9.2, art: 'fanC', speed: 1.6, h: 0.84 },
+  ],
+  // Slower and closer: the corridor into Ussishkin is not a walk, it is a queue that
+  // happens to be moving. He is stuck behind shoulders the whole way.
+  ussishkin: [
+    { x: 1.7, y: 3.6, art: 'fanD', speed: 1.5, h: 0.9 },
+    { x: 3.2, y: 4.2, art: 'adultB2', speed: 1.45, h: 0.88 },
+    { x: 2.5, y: 5.4, art: 'fanB', speed: 1.55, h: 0.86 },
+    { x: 3.3, y: 6.4, art: 'youngB1', speed: 1.6, h: 0.76 },
+  ],
+}
 
-export function TunnelWalk({ onDone, onProgress }: { onDone: () => void; onProgress?: (p: number) => void }) {
+export function TunnelWalk({
+  onDone,
+  onProgress,
+  variant = 'bloomfield',
+}: {
+  onDone: () => void
+  onProgress?: (p: number) => void
+  variant?: TunnelVariant
+}) {
+  const MAP = MAPS[variant]
+  const PEOPLE = CROWDS[variant]
+  const [fogEndR, fogEndG, fogEndB] = FOG_END[variant]
   const canvas = useRef<HTMLCanvasElement | null>(null)
   const [hint, setHint] = useState(true)
   const state = useRef({
+    // the middle of the corridor, whichever corridor it is
     x: 2.5,
     y: 1.5,
     angle: Math.PI / 2, // +y is "down the corridor"
@@ -150,9 +204,9 @@ export function TunnelWalk({ onDone, onProgress }: { onDone: () => void; onProgr
 
       // ---- fog colour: ink → cream as the light grows ---------------------------------
       const glow = Math.pow(progress, 1.6)
-      const fogR = 20 + (237 - 20) * glow
-      const fogG = 18 + (230 - 18) * glow
-      const fogB = 16 + (216 - 16) * glow
+      const fogR = 20 + (fogEndR - 20) * glow
+      const fogG = 18 + (fogEndG - 18) * glow
+      const fogB = 16 + (fogEndB - 16) * glow
 
       // ---- ceiling and floor, then the walls, into one buffer ---------------------------
       const px = buffer.data
@@ -328,7 +382,7 @@ export function TunnelWalk({ onDone, onProgress }: { onDone: () => void; onProgr
       window.removeEventListener('keydown', kd)
       window.removeEventListener('keyup', ku)
     }
-  }, [onDone, onProgress])
+  }, [onDone, onProgress, variant])
 
   const down = (event: React.PointerEvent) => {
     ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)

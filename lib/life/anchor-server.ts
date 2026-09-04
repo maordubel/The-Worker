@@ -277,3 +277,79 @@ export function resolveStageBAnchor(): HistoricalAnchor {
         },
   }
 }
+
+/**
+ * שלב ב׳, המערכה השנייה — 11.3.1991, אוסישקין. הכדורסל, ורק הכדורסל.
+ *
+ * The football resolvers above read `matches.json`; this one may not, and the separation
+ * is enforced by the file it reads rather than by a comment: `basketball-matches.json` is
+ * its own store, its rows carry `sport: 'basketball'`, and nothing in the football canon
+ * can reach them. That is the rule the research pass turned into schema — a Ussishkin
+ * night is stored as basketball throughout, and a basketball record never leaks into a
+ * football one.
+ *
+ * The row is the league administration's own archive of the 1990/91 season: round 15,
+ * 11.3.1991, Hapoel Tel Aviv 97 Maccabi Tel Aviv 87, at the club's listed home hall. The
+ * chapter states none of that in a line of dialogue — the director reads the final off
+ * this anchor at the horn, and the one number anybody says out loud (the margin, whispered
+ * across a classroom the next morning) is computed from it.
+ *
+ * If the row ever goes away, the placeholder comes back by itself and says exactly what
+ * the archive would have to hold, which is the shape every anchor in this file has.
+ */
+const USSISHKIN_SEASON = '1990/91'
+const BASKETBALL_LEAGUE = 'ליגה-לאומית-כדורסל'
+
+export function resolveUssishkinAnchor(): HistoricalAnchor {
+  const derby = archive.basketballMatches
+    .filter(
+      (row) =>
+        row.sport === 'basketball' &&
+        row.seasonLabel === USSISHKIN_SEASON &&
+        row.homeScore !== null &&
+        row.awayScore !== null &&
+        (row.confidence ?? 0) >= 2,
+    )
+    .sort((a, b) => String(a.playedOn ?? '').localeCompare(String(b.playedOn ?? '')))
+    .at(-1)
+
+  const atHome = derby?.homeClubSlug === US
+  const match = derby
+    ? {
+        playedOn: derby.playedOn ?? '',
+        opponentHe: atHome ? derby.awayClubHe : derby.homeClubHe,
+        scoredFor: (atHome ? derby.homeScore : derby.awayScore) ?? 0,
+        scoredAgainst: (atHome ? derby.awayScore : derby.homeScore) ?? 0,
+        atHome,
+        venueHe: derby.venueHe,
+        // A basketball row holds no minute-by-minute events in this archive and the game
+        // is written so that it never needs one: `decidedBy` stays null on purpose, and
+        // the hall's mood is authored rather than derived from a scoring run nobody
+        // recorded (brief §38).
+        decidedBy: null,
+        sourceTitle: derby.sourceTitle,
+        sourceUrl: derby.sourceUrl,
+      }
+    : null
+
+  return {
+    id: `derby:${BASKETBALL_LEAGUE}:${USSISHKIN_SEASON}`,
+    sport: 'basketball',
+    seasonLabel: USSISHKIN_SEASON,
+    year: 1991,
+    competitionSlug: BASKETBALL_LEAGUE,
+    headlineHe: `הדרבי באוסישקין, ${USSISHKIN_SEASON}`,
+    venueSlug: derby?.venueSlug ?? null,
+    sourceTitle: derby?.sourceTitle ?? 'content/manual/basketball-matches.json',
+    sourceUrl: derby?.sourceUrl ?? null,
+    confidence: derby?.confidence ?? 0,
+    titlesSoFar: null,
+    match,
+    placeholder: match
+      ? null
+      : {
+          what: 'הדרבי של 11.3.1991 באוסישקין — יריבה, תאריך ותוצאה — אינו בארכיון.',
+          needs: `שורת משחק כדורסל מעונת ${USSISHKIN_SEASON} ב-content/manual/basketball-matches.json ברמת ודאות 2 ומעלה.`,
+        },
+  }
+}

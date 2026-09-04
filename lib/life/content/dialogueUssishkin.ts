@@ -18,6 +18,14 @@ export const CONVERSATIONS_USSISHKIN: Conversation[] = [
     id: 'usher-hall',
     nameHe: 'סדרן',
     branches: [
+      // 11.3.1991. The same man, the same chair, and a room that has stopped being empty.
+      {
+        when: { flag: 'uss:arrived' },
+        lines: [
+          { who: 'סדרן', text: 'לא לעמוד על המדרגה. לעמוד ליד המדרגה.' },
+          { who: null, text: 'הוא אומר את זה בלי להסתכל עליך, ומיד אחר כך אומר את זה בדיוק לעוד שני ילדים.' },
+        ],
+      },
       {
         when: { flag: 'uss:met' },
         lines: [
@@ -39,6 +47,13 @@ export const CONVERSATIONS_USSISHKIN: Conversation[] = [
     id: 'uss-parquet',
     branches: [
       {
+        when: { flag: 'uss:arrived' },
+        lines: [
+          { who: null, text: 'הפרקט לא מבריק הערב. הוא מלא סימני נעליים, וכל חריקה נשמעת עד למעלה.' },
+          { who: null, text: 'אתה עומד מספיק קרוב כדי לשמוע אנשים נושמים בתוך משחק.' },
+        ],
+      },
+      {
         lines: [
           { who: null, text: 'הפרקט מבריק כמו מים. רואים בו את פס החלונות הפוך.' },
           { who: null, text: 'אלפי סוליות עברו כאן, וכולן השאירו את אותו צליל.' },
@@ -51,6 +66,13 @@ export const CONVERSATIONS_USSISHKIN: Conversation[] = [
     id: 'uss-stand',
     branches: [
       {
+        when: { flag: 'uss:arrived' },
+        lines: [
+          { who: null, text: 'היציע מלא מלמעלה עד למטה. אין אוויר, ואף אחד לא יושב.' },
+          { who: null, text: 'הכיסאות האדומים בכלל לא נראים. רק אנשים.' },
+        ],
+      },
+      {
         lines: [
           { who: null, text: 'יציע אחד, אדום ופחם, קרוב כל כך למגרש שאפשר לגעת בשחקן.' },
           { who: null, text: 'ביום משחק אין כאן אוויר. עכשיו יש רק כיסאות, ומישהו שכח כובע.' },
@@ -61,6 +83,13 @@ export const CONVERSATIONS_USSISHKIN: Conversation[] = [
   {
     id: 'uss-windows',
     branches: [
+      {
+        when: { flag: 'uss:arrived' },
+        lines: [
+          { who: null, text: 'פס החלונות שחור. כל האור הערב בא מהמנורות שמתחת לגג, והן רועדות.' },
+          { who: null, text: 'הן באמת רועדות. אתה מסתכל למעלה ורואה את זה.' },
+        ],
+      },
       {
         lines: [
           { who: null, text: 'פס חלונות צמוד לגג הפח. האור שנכנס קר, והכול מתחתיו חם.' },

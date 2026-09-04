@@ -68,13 +68,12 @@ export const PORTRAIT: Record<string, string> = {
   'אוהד ותיק': 'faceFan',
   'סדרן': 'faceFan',
   'הקופאי': 'faceFan',
-  'בעל הקיוסק': 'faceOldMan',
+  'רפי מהקיוסק': 'faceOldMan',
   // The hero on the bedroom wall. He never speaks in this chapter — he is a poster, a
   // name three children argue over, and the reason a father stands in a doorway at
   // night — but the plate exists so the day he does speak, it is one line of content.
   'משה סיני': 'faceSinai',
-  'יוסף': 'faceOldMan',
-  'שכן': 'faceOldMan',
+  'אילן השכן': 'faceOldMan',
 }
 
 export type EndingCard = {
@@ -170,6 +169,12 @@ export const ITEM_ART: Partial<Record<ItemId, string>> = {
   transistor: 'propRadio',
   'promotion-table': 'propClipping90',
   'pocket-money': 'propCoins',
+  // 1991 — the objects a Monday in March leaves in a pocket
+  'school-note': 'propNote',
+  'hall-ticket': 'propTicket91',
+  'score-paper': 'propScorePaper',
+  wrapper: 'propWrapper',
+  clipping: 'propClipping90',
 }
 
 export const ITEMS: Record<ItemId, { nameHe: string; noteHe: string }> = {
@@ -185,6 +190,12 @@ export const ITEMS: Record<ItemId, { nameHe: string; noteHe: string }> = {
   transistor: { nameHe: 'טרנזיסטור', noteHe: 'של אבא. האנטנה מכופפת' },
   'promotion-table': { nameHe: 'טבלה מקופלת', noteHe: 'החשבון של הבוקר, בעיפרון' },
   'pocket-money': { nameHe: 'דמי כיס', noteHe: 'שטר אחד, מקופל לארבע' },
+  // --- 1991 ---
+  'school-note': { nameHe: 'פתק מהכיתה', noteHe: 'מקופל לארבע, שתי מילים וסימן שאלה' },
+  'hall-ticket': { nameHe: 'כרטיס לאולם', noteHe: 'קרטון קטן, קרוע בפינה' },
+  'score-paper': { nameHe: 'פתק עם מספרים', noteHe: 'מישהו חישב באמצע, ולא צדק' },
+  wrapper: { nameHe: 'נייר עטיפה', noteHe: 'ריח של גריל שנשאר בכיס' },
+  clipping: { nameHe: 'גזיר מהעיתון', noteHe: 'נגזר ביד, לא ישר' },
 }
 
 /**

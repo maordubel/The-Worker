@@ -84,7 +84,7 @@ export const PORTRAIT_1990: Record<string, string> = {
   'רחל': 'faceRachel90',
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
-  'בעל הקיוסק': 'faceOldMan',
+  'רפי מהקיוסק': 'faceOldMan',
   'אוהד': 'faceFan',
   'אוהד ותיק': 'faceFan',
   'אוהד עם רדיו': 'faceFan',

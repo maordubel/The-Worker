@@ -2,6 +2,7 @@ import { at } from '../clock'
 import { KOBI_LEAVES } from '../world/scenes'
 
 import { CONVERSATIONS_1990 } from './dialogue1990'
+import { CONVERSATIONS_1991 } from './dialogue1991'
 import { CONVERSATIONS_USSISHKIN } from './dialogueUssishkin'
 import { CONVERSATIONS_PANORAMAS } from './dialoguePanoramas'
 import type { Conversation } from './script'
@@ -528,13 +529,13 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: 'neighbour',
-    nameHe: 'יוסף',
+    nameHe: 'אילן השכן',
     branches: [
       {
         when: { afterMinute: KOBI_LEAVES },
         lines: [
-          { who: 'יוסף', text: 'אבא שלך יצא לפני עשר דקות. רץ כמו ילד.' },
-          { who: 'יוסף', text: 'כולם הולכים מזרחה היום. יש משחק.' },
+          { who: 'אילן השכן', text: 'אבא שלך יצא לפני עשר דקות. רץ כמו ילד.' },
+          { who: 'אילן השכן', text: 'כולם הולכים מזרחה היום. יש משחק.' },
         ],
         then: [
           { e: 'flag', flag: 'knows:match' },
@@ -544,8 +545,8 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [
-          { who: 'יוסף', text: 'תגיד לאמא שלך שהמים חזרו.' },
-          { who: 'יוסף', text: 'ואל תעבור את הכביש הגדול לבד. שמעת?' },
+          { who: 'אילן השכן', text: 'תגיד לאמא שלך שהמים חזרו.' },
+          { who: 'אילן השכן', text: 'ואל תעבור את הכביש הגדול לבד. שמעת?' },
         ],
         then: [{ e: 'trait', trait: 'streetSmarts', delta: 3 }],
       },
@@ -604,11 +605,11 @@ const CONVERSATIONS: Conversation[] = [
   // ------------------------------------------------------------------ the kiosk ----
   {
     id: 'kiosk-man',
-    nameHe: 'בעל הקיוסק',
+    nameHe: 'רפי מהקיוסק',
     branches: [
       {
         lines: [
-          { who: 'בעל הקיוסק', text: 'נו, מה אתה רוצה. אני סוגר בשלוש וחצי היום.' },
+          { who: 'רפי מהקיוסק', text: 'נו, מה אתה רוצה. אני סוגר בשלוש וחצי היום.' },
         ],
         choices: [
           {
@@ -639,12 +640,12 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: 'kiosk-bottles',
-    nameHe: 'בעל הקיוסק',
+    nameHe: 'רפי מהקיוסק',
     branches: [
       {
         lines: [
           { who: null, text: 'הוא סופר אותם באצבע, אחד־שניים־שלושה, ומוציא מטבעות מקופסת פח.' },
-          { who: 'בעל הקיוסק', text: 'תגיד לאמא שלך שהיא צודקת תמיד.' },
+          { who: 'רפי מהקיוסק', text: 'תגיד לאמא שלך שהיא צודקת תמיד.' },
         ],
         then: [
           { e: 'take', item: 'bottle', count: 3 },
@@ -657,7 +658,7 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: 'kiosk-paper',
-    nameHe: 'בעל הקיוסק',
+    nameHe: 'רפי מהקיוסק',
     branches: [
       {
         lines: [
@@ -675,7 +676,7 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: 'kiosk-card',
-    nameHe: 'בעל הקיוסק',
+    nameHe: 'רפי מהקיוסק',
     branches: [
       {
         lines: [
@@ -1242,7 +1243,7 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'עמית סופר מטבעות ליד הדלפק, ובעל הקיוסק מחכה בסבלנות של מישהו שראה את זה כבר.' },
+          { who: null, text: 'עמית סופר מטבעות ליד הדלפק, ורפי מחכה בסבלנות של מישהו שראה את זה כבר.' },
           { who: 'עמית', text: 'העיתון עולה יותר מאתמול. אני נשבע לך.' },
         ],
       },
@@ -1567,5 +1568,7 @@ const CONVERSATIONS: Conversation[] = [
  * second chapter is a second content file and not a second runner (brief §52).
  */
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
-  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS].map((conversation) => [conversation.id, conversation]),
+  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS].map(
+    (conversation) => [conversation.id, conversation],
+  ),
 )

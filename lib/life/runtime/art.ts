@@ -91,7 +91,22 @@ export type BackdropKey = (typeof BACKDROP)[number]
  * A flat painting can only ever be behind the player; one separated object is the whole
  * difference between a backdrop and a room.
  */
-export const LAYER = ['livingTable', 'streetFore', 'streetGround'] as const
+/**
+ * ...and the AIR. The four overlay plates from the September master package are painted
+ * weather rather than painted objects: floodlight haze, coastal mist, red smoke, and
+ * paper in the air at the moment a thing is won. They are drawn over a room at a low
+ * alpha, they belong to no chapter, and they are the only layers in this list that are
+ * not a piece of somebody's furniture.
+ */
+export const LAYER = [
+  'livingTable',
+  'streetFore',
+  'streetGround',
+  'overlayHaze',
+  'overlaySmoke',
+  'overlayConfetti',
+  'overlayMist',
+] as const
 
 /** Cut-out people. */
 export const FIGURE = [

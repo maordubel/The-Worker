@@ -11,7 +11,7 @@ import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { ENCOUNTERS_1986 } from '@/lib/life/content/encounters1986'
 import { OPPORTUNITIES_1986 } from '@/lib/life/content/opportunities1986'
 import { SCHEDULE_1986 } from '@/lib/life/content/schedules1986'
-import { ERA_1986, ERA_1990 } from '@/lib/life/content/era'
+import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
 import { exitInEra, inEra } from '@/lib/life/world/scenes'
 import type { Conversation, Effect } from '@/lib/life/content/script'
 import { rollEncounter } from '@/lib/life/encounters'
@@ -231,7 +231,7 @@ describe('לוח הזמנים — the street is not the street you left', () => 
   })
 
   it('drives only actors the world actually has — in every era', () => {
-    for (const era of [ERA_1986, ERA_1990]) {
+    for (const era of [ERA_1986, ERA_1990, ERA_1991]) {
       const actors = new Set<string>()
       for (const scene of Object.values(SCENE)) for (const actor of scene.actors) if (inEra(actor, era.chapter)) actors.add(actor.id)
       for (const entry of era.schedule) {
@@ -360,7 +360,9 @@ describe('לוח הזמנים — the street is not the street you left', () => 
     // file were deleted is not guarding the thing rule 48 is about, and this one reads
     // its subjects out of the data rather than naming them (rule 49).
     let placed = 0
-    for (const entry of [...SCHEDULE_1986, ...ERA_1990.schedule]) {
+    const chapterOf = (entry: (typeof SCHEDULE_1986)[number]) =>
+      SCHEDULE_1986.includes(entry) ? '1986' : ERA_1990.schedule.includes(entry) ? '1990' : '1991'
+    for (const entry of [...SCHEDULE_1986, ...ERA_1990.schedule, ...ERA_1991.schedule]) {
       const scene = SCENE[entry.location as keyof typeof SCENE]
       const where = `${entry.actorId} @ ${entry.location}`
       const { x, y } = entry
@@ -375,7 +377,7 @@ describe('לוח הזמנים — the street is not the street you left', () => 
       expect(x, `${where} x`).toBeLessThan(1)
       for (const exit of scene.exits) {
         // a door of another era is not a door he can be standing in
-        if (!exitInEra(exit, SCHEDULE_1986.includes(entry) ? '1986' : '1990')) continue
+        if (!exitInEra(exit, chapterOf(entry))) continue
         const inDoor = x > exit.x - 0.01 && x < exit.x + exit.w + 0.01
         expect(inDoor, `${where} is standing in the doorway "${exit.id}"`).toBe(false)
       }

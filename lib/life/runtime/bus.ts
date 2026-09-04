@@ -74,7 +74,7 @@ export type LifeBusEvents = {
    */
   pano: { key: string; titleHe: string; startYaw?: number; hotspots: PanoSpot[] } | null
   /** the tunnel, first person: the shell draws `TunnelWalk`; `finishTunnel` arrives */
-  tunnel: { to: LocationId; spawn: string } | null
+  tunnel: { to: LocationId; spawn: string; variant?: 'bloomfield' | 'ussishkin' } | null
   /** the sound of the world — one-shots the shell's synthesiser plays; see `audio.ts` */
   sound: { kind: 'step'; surface: 'floor' | 'street' | 'terrace' } | { kind: 'door' } | { kind: 'whistle'; blasts: number } | { kind: 'roar'; big?: number } | { kind: 'radio'; on: boolean }
   anchor: { anchor: HistoricalAnchor; showing: boolean }
@@ -145,6 +145,14 @@ export type LifeBusEvents = {
    * entering a scene. It says one thing and is never a menu.
    */
   card: { titleHe: string; subHe: string | null; ms: number } | null
+  /**
+   * החיים האחרים — the championship was missed, so the chapter does NOT end (Stage A §14).
+   *
+   * A separate channel from `ending` on purpose: an ending closes a Saturday and opens the
+   * next thing, and this closes nothing. It shows what happened, shows the life Pogi would
+   * have had if that were really the end of it, and hands back the morning.
+   */
+  retry: import('../content/retry1986').RetryScene | null
   /** the runtime asking the shell to show the closing card */
   ending: {
     titleHe: string

@@ -21,6 +21,7 @@ import eventsFile from '@/content/manual/match-events.json'
 import kitSupplyFile from '@/content/manual/kit-supply.json'
 import manufacturersFile from '@/content/manual/manufacturers.json'
 import matchesFile from '@/content/manual/matches.json'
+import basketballMatchesFile from '@/content/manual/basketball-matches.json'
 import momentsFile from '@/content/manual/moments.json'
 import peopleFile from '@/content/manual/people.json'
 import rosterFile from '@/content/manual/players-roster.json'
@@ -119,6 +120,32 @@ export const archive = {
     noteHe?: string | null
     venueSlug: string | null
   }>(matchesFile),
+  /**
+   * כדורסל, בנפרד — and the separation is the point (rule 6, and the research pass that
+   * turned it into schema): football and basketball never share a table, an alias or a
+   * canonical store. THE WORKER LIFE's 1991 chapter resolves its anchor from here and
+   * from nowhere else, and nothing in the football canon can see these rows.
+   *
+   * Club and venue NAMES travel with the row rather than being looked up, because the
+   * basketball club rows in `clubs.json` sit at confidence 1 and the archive's floor —
+   * correctly — drops them. A name in a row carries that row's own source with it.
+   */
+  basketballMatches: load<{
+    sport: string
+    seasonLabel: string
+    competitionSlug: string
+    stage: string | null
+    playedOn: string | null
+    homeClubSlug: string
+    homeClubHe: string
+    awayClubSlug: string
+    awayClubHe: string
+    homeScore: number | null
+    awayScore: number | null
+    venueSlug: string | null
+    venueHe: string | null
+    noteHe?: string | null
+  }>(basketballMatchesFile),
   matchEvents: load<{
     matchNaturalKey: string
     minute: number | null

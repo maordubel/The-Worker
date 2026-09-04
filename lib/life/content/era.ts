@@ -7,13 +7,17 @@ import type { LifeState } from '../types'
 import { AMBIENT_1986, type AmbientActor } from './ambient1986'
 import { ENDINGS, OBJECTIVES, PORTRAIT, type EndingCard } from './chapter1986'
 import { ENDINGS_1990, OBJECTIVES_1990, PORTRAIT_1990 } from './chapter1990'
+import { ENDINGS_1991, OBJECTIVES_1991, PORTRAIT_1991, TIP_OFF } from './chapter1991'
 import { HERO80_WALK, KID_WALK } from '../runtime/art'
 import { ENCOUNTERS_1986 } from './encounters1986'
 import { ENCOUNTERS_1990 } from './encounters1990'
+import { ENCOUNTERS_1991 } from './encounters1991'
 import { OPPORTUNITIES_1986 } from './opportunities1986'
 import { OPPORTUNITIES_1990 } from './opportunities1990'
+import { OPPORTUNITIES_1991 } from './opportunities1991'
 import { SCHEDULE_1986 } from './schedules1986'
 import { SCHEDULE_1990 } from './schedules1990'
+import { SCHEDULE_1991 } from './schedules1991'
 
 /**
  * העידן — everything about a chapter that the runtime used to import by name.
@@ -127,7 +131,55 @@ export const ERA_1990: Era = {
   portraits: PORTRAIT_1990,
 }
 
-const ERAS: Record<string, Era> = { '1986': ERA_1986, '1990': ERA_1990 }
+/**
+ * 1991 — the same boy, ten months later, on a Monday.
+ *
+ * Everything about this record is a small edit to 1990 and one large idea: the day is
+ * not built around a match the father is taking him to. The timetable belongs to a
+ * school; the windows compete with each other rather than with a kickoff; the objective
+ * chain runs note → homework → permission → the road → the step → a clock on a wall.
+ * `cutscene` is null and will stay null until the archive holds film of 11.3.1991 that
+ * anybody has the right to play (rule 11): the derby is a row, and a row is enough.
+ */
+export const ERA_1991: Era = {
+  chapter: '1991',
+  year: 1991,
+  anchorKey: '1991',
+  schedule: SCHEDULE_1991,
+  opportunities: OPPORTUNITIES_1991,
+  encounters: ENCOUNTERS_1991,
+  ambient: AMBIENT_1986,
+  endings: ENDINGS_1991,
+  objective: (state, sceneId) => {
+    if (state.chapterDone) return OBJECTIVES_1991.morning
+    if (state.flags['derby:over']) return state.flags['walked:home'] ? null : OBJECTIVES_1991.home
+    if (sceneId === 'ussishkin-hall') {
+      if (state.flags['curfew:now']) return OBJECTIVES_1991.curfew
+      if (state.flags['spot:asked'] && !state.flags['spot:held'] && !state.flags['spot:lost']) {
+        return OBJECTIVES_1991.spot
+      }
+      return state.minute < TIP_OFF ? OBJECTIVES_1991.tipoff : null
+    }
+    if (sceneId === 'classroom' && !state.flags['school:done']) return OBJECTIVES_1991.note
+    if (state.flags['permission:yes'] || state.flags['sneak:ready']) return OBJECTIVES_1991.onTheWay
+    if (state.flags['hw:done'] || state.flags['hw:half'] || state.flags['hw:faked']) {
+      return OBJECTIVES_1991.permission
+    }
+    if (state.flags['hw:given'] && state.flags['school:done']) return OBJECTIVES_1991.homework
+    return OBJECTIVES_1991.school
+  },
+  cutscene: null,
+  player: {
+    pose: { down: 'hero80', downSide: 'hero80-3q', side: 'hero80-side', up: 'hero80-back' },
+    walk: HERO80_WALK,
+    // A centimetre on 1990. He is not a new person; he is the same one, in March.
+    scale: 1.14,
+  },
+  memoryPrefix: '1991',
+  portraits: PORTRAIT_1991,
+}
+
+const ERAS: Record<string, Era> = { '1986': ERA_1986, '1990': ERA_1990, '1991': ERA_1991 }
 
 /** The prologue and any unknown chapter fall through to 1986 — the chapter the game started as. */
 export function eraFor(chapter: string): Era {

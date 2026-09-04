@@ -105,7 +105,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     locations: ['kiosk'],
     weight: 5,
     cooldown: 80,
-    who: 'שכן',
+    who: 'אילן השכן',
     lineHe: 'אתה של קובי, נכון? תגיד לו שאני עוד מחכה לו עם הדבר ההוא.',
     effects: [
       { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 4 },

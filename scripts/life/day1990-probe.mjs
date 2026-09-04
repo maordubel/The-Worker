@@ -54,28 +54,52 @@ const DOOR = /^(לך|צא|חזרה|פנימה|החוצה|מזרחה|לאולם|�
  */
 const whereIs = () => page.evaluate(() => window.__life?.debug?.where?.() ?? null)
 const reach = async (label, ms = 70000, first = 'ArrowRight') => {
-  const t0 = Date.now(); let dir = first
+  /**
+   * Hold the key DOWN and poll (5.9.2026).
+   *
+   * This used to press the key for 700 ms at a time, which crosses a room at about a
+   * hundredth of it per second — and the kitchen is two thirds of a frame wide, so the
+   * beat was always one slow afternoon away from timing out. The walk has a ramp; holding
+   * the key is what a player does and what the tunnel probe already did.
+   */
+  const t0 = Date.now()
+  let dir = first
   const startedIn = (await read()).place
-  let lastX = (await whereIs())?.x ?? -1; let stuckSince = Date.now()
-  while (Date.now() - t0 < ms) {
-    if (await open()) { await clear(); if ((await page.locator('[data-life="choice"]').count()) > 0) return true }
-    const r = await read()
-    // a door pulls you through while you walk: arriving somewhere else IS reaching it
-    if (DOOR.test(label) && r.place !== startedIn) return true
-    if (r.prompt && r.prompt.includes(label)) {
-      await page.keyboard.press('e')
-      // six frames a second: the box can take a moment to open after the press
-      await page.waitForSelector('[data-life="dialogue"]', { timeout: 3000 }).catch(() => undefined)
-      await page.waitForTimeout(300)
-      return true
+  let lastX = (await whereIs())?.x ?? -1
+  let stuckSince = Date.now()
+  const release = async () => { await page.keyboard.up('ArrowLeft'); await page.keyboard.up('ArrowRight') }
+  await page.keyboard.down(dir)
+  try {
+    while (Date.now() - t0 < ms) {
+      await page.waitForTimeout(250)
+      if (await open()) {
+        await release(); await clear()
+        if ((await page.locator('[data-life="choice"]').count()) > 0) return true
+        await page.keyboard.down(dir)
+      }
+      const r = await read()
+      if (DOOR.test(label) && r.place !== startedIn) return true
+      if (r.prompt && r.prompt.includes(label)) {
+        await release(); await page.waitForTimeout(150)
+        await page.keyboard.press('e')
+        await page.waitForSelector('[data-life="dialogue"]', { timeout: 3000 }).catch(() => undefined)
+        await page.waitForTimeout(300)
+        return true
+      }
+      const w = await whereIs()
+      if (process.env.DEBUG) log(`  · ${label} dir=${dir} x=${w?.x} y=${w?.y} prompt=${r.prompt}`)
+      if (w && Math.abs(w.x - lastX) > 0.003) { lastX = w.x; stuckSince = Date.now() }
+      else if (Date.now() - stuckSince > 4000) {
+        await release()
+        dir = dir === 'ArrowLeft' ? 'ArrowRight' : 'ArrowLeft'
+        stuckSince = Date.now()
+        await page.keyboard.down(dir)
+      }
     }
-    await page.keyboard.down(dir); await page.waitForTimeout(700); await page.keyboard.up(dir); await page.waitForTimeout(250)
-    const w = await whereIs()
-    if (process.env.DEBUG) log(`  · ${label} dir=${dir} x=${w?.x} y=${w?.y} prompt=${r.prompt}`)
-    if (w && Math.abs(w.x - lastX) > 0.004) { lastX = w.x; stuckSince = Date.now() }
-    else if (Date.now() - stuckSince > 3500) { dir = dir === 'ArrowLeft' ? 'ArrowRight' : 'ArrowLeft'; stuckSince = Date.now() }
+    return false
+  } finally {
+    await release()
   }
-  return false
 }
 /** ONLY=B4 node scripts/life/day1990-probe.mjs — one beat, for chasing a fault */
 const only = process.env.ONLY

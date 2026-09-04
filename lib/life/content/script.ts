@@ -86,6 +86,17 @@ export type Effect =
   /** roll what this Saturday leaves in the red box, out of what actually happened */
   | { e: 'keep' }
   | { e: 'flagValue'; flag: string; value: boolean | string | number }
+  /**
+   * הקופה והבגד — Stage A's economy, in two verbs.
+   *
+   * `save` moves agorot out of a pocket and into the tin under the bed, where a day
+   * transition cannot spend them; `own` records a thing the boy keeps owning — the first
+   * shirt, and whatever a later summer adds. Both exist because the difference between
+   * "I have fifty agorot" and "I have been saving since June" is the difference between an
+   * afternoon and a childhood (Stage A §9).
+   */
+  | { e: 'save'; agorot: number; why: string }
+  | { e: 'own'; item: string }
 
 export type ChoiceDef = {
   id: string

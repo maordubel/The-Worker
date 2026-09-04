@@ -86,6 +86,31 @@ export type LifeEvent =
    * biography four years on, not two biographies stapled together (brief §52).
    */
   | { t: 'year.entered'; year: number; weekday: number; minute: number }
+  /**
+   * יום — a day inside a chapter (Stage A §5).
+   *
+   * `year.entered` is a four-year jump: it empties the pockets, clears the afternoon and
+   * starts a life again in a new age. Stage A needs something an order of magnitude
+   * smaller — eight days across three years, each of which resets a clock and an energy
+   * level and keeps everything that makes the boy who he is by the eighth. So this event
+   * resets the DAY and preserves the biography: bonds, memories, personality, the Red
+   * Heart, the Red Box, the savings tin, the clothes he owns, and every flag that
+   * describes the person rather than the afternoon (`life:`, `onboard:`, `own:`,
+   * `promise:`, `cutscene:`, `prologue:`).
+   */
+  | {
+      t: 'day.entered'
+      dayId: string
+      year: number
+      month?: number
+      day?: number
+      weekday: number
+      minute: number
+    }
+  /** the tin under the bed — never the pocket */
+  | { t: 'savings.changed'; agorot: number; why: string }
+  /** something he owns and keeps owning: `shirt:1985` */
+  | { t: 'clothing.gained'; item: string }
 
 /** A day is 24×60. The clock wraps rather than running past midnight into nonsense. */
 export const MINUTES_IN_DAY = 24 * 60
@@ -164,6 +189,8 @@ export function emptyState(identity: PlayerIdentity, year: number): LifeState {
     },
     inventory: {},
     flags: {},
+    savings: 0,
+    clothing: [],
     memories: [],
     redBox: [],
     opportunities: [],
@@ -197,6 +224,32 @@ function withRelationship(
  * One event, one state. Pure, total, and tolerant of an event it has never seen —
  * a save written by a newer build must open, not explode.
  */
+/**
+ * מה שנשאר מהאדם — the flags that are not about this afternoon.
+ *
+ * `life:` is a milestone of the whole life, `onboard:` is a thing the player learned to do
+ * with their thumbs, `cutscene:` is a film they have already sat through, `prologue:` is
+ * where they came in — and, since Stage A, `own:` is something they OWN and `promise:` is
+ * something they said they would do. The last two are the reason a promise made on one day
+ * can be broken on the next: a flag that a day transition deletes is a promise nobody can
+ * remember.
+ */
+function personFlags(flags: Record<string, boolean | string | number>): Record<string, boolean | string | number> {
+  const kept: Record<string, boolean | string | number> = {}
+  for (const [flag, value] of Object.entries(flags)) {
+    if (
+      flag.startsWith('life:') ||
+      flag.startsWith('onboard:') ||
+      flag.startsWith('cutscene:') ||
+      flag.startsWith('prologue:') ||
+      flag.startsWith('own:') ||
+      flag.startsWith('promise:')
+    )
+      kept[flag] = value
+  }
+  return kept
+}
+
 export function apply(state: LifeState, event: LifeEvent): LifeState {
   switch (event.t) {
     case 'life.started': {
@@ -314,18 +367,42 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
     case 'chapter.entered':
       return { ...state, chapter: event.chapter, chapterDone: false }
 
-    case 'year.entered': {
-      const kept: Record<string, boolean | string | number> = {}
-      // Flags that describe the PERSON rather than the afternoon survive the years.
-      for (const [flag, value] of Object.entries(state.flags)) {
-        if (
-          flag.startsWith('life:') ||
-          flag.startsWith('onboard:') ||
-          flag.startsWith('cutscene:') ||
-          flag.startsWith('prologue:')
-        )
-          kept[flag] = value
+    /**
+     * יום חדש בתוך אותו פרק — the small transition (Stage A §5).
+     *
+     * Everything `year.entered` keeps, this keeps; everything it resets, this resets —
+     * except the two things a childhood is actually accumulated in. The tin under the bed
+     * and the shirt in the drawer are not part of an afternoon and are not cleared by one,
+     * which is the whole reason the summer of 1985 can be a day about saving.
+     */
+    case 'day.entered':
+      return {
+        ...state,
+        stageADay: event.dayId,
+        year: event.year,
+        age: event.year - state.identity.birthYear,
+        weekday: event.weekday,
+        minute: event.minute,
+        energy: 100,
+        resources: { ...state.resources, energy: 100, availableTime: 0 },
+        agorot: 0,
+        inventory: {},
+        flags: personFlags(state.flags),
+        opportunities: [],
+        encounters: {},
+        wellbeing: { ...state.wellbeing, exhaustion: 0 },
       }
+
+    case 'savings.changed':
+      return { ...state, savings: Math.max(0, state.savings + Math.round(event.agorot)) }
+
+    case 'clothing.gained':
+      return state.clothing.includes(event.item)
+        ? state
+        : { ...state, clothing: [...state.clothing, event.item] }
+
+    case 'year.entered': {
+      const kept = personFlags(state.flags)
       return {
         ...state,
         year: event.year,

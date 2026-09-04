@@ -109,6 +109,12 @@ export type ItemId =
   | 'transistor'
   | 'promotion-table'
   | 'pocket-money'
+  // --- 1991, and every one of them is a piece of paper or a piece of rubbish ---
+  | 'school-note'
+  | 'hall-ticket'
+  | 'score-paper'
+  | 'wrapper'
+  | 'clipping'
 
 /** A flag is a thing that happened once and can never un-happen. */
 export type FlagId = string
@@ -371,6 +377,20 @@ export type LifeState = {
   /** canonical anchor IDs — never a match description */
   attendedAnchors: string[]
   missedAnchors: string[]
+
+  /**
+   * הכסף של הילד — savings, which are not pocket money (Stage A §5).
+   *
+   * `agorot` is what is in a pocket today and it is emptied by every year and every day,
+   * because a child does not carry last summer's coins around. This is the tin under the
+   * bed: it survives a day transition, it is what the first shirt is bought with, and it
+   * is the only number in this state that a chapter may not reset.
+   */
+  savings: number
+  /** what he OWNS — `shirt:1985` and whatever a later summer adds. Survives every day. */
+  clothing: string[]
+  /** which of Stage A's eight days is being played, when one of them is */
+  stageADay?: string
 
   /** the chapter the runtime should be showing */
   chapter: string

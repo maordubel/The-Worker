@@ -19,7 +19,7 @@ import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
 import { BACKDROP, extensionKeys, FIGURE, KID_POSE, KID_WALK, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
 import { PANO_SPOTS } from '@/lib/life/content/panoramas'
-import { ERA_1986, ERA_1990 } from '@/lib/life/content/era'
+import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
 import { inEra } from '@/lib/life/world/scenes'
 import { meets } from '@/lib/life/world/types'
 
@@ -38,9 +38,10 @@ const state = () => emptyState(DEFAULT_IDENTITY, 1986)
 
 /**
  * The whole timeline this game is allowed to name (rule 45): born 1978, the prologue in
- * 1983, the Stage A chapter in 1986. Adding a year here is a decision, not a fix.
+ * 1983, Stage A in 1986, Stage B's first movement in 1990 and its second — the Ussishkin
+ * derby — in March 1991. Adding a year here is a decision, not a fix.
  */
-const TIMELINE = ['1978', '1983', '1986', '1990']
+const TIMELINE = ['1978', '1983', '1986', '1990', '1991']
 
 // ---------------------------------------------------------------------------------
 const ART = join(ROOT, 'public/life/art')
@@ -115,7 +116,7 @@ describe('חוק הצהוב — neither the palette nor the artwork has yellow i
 
     // A room is loaded in ONE era at a time: the 1986 people or the 1990 people, never
     // both. So the budget is checked per era, with that era's child.
-    for (const era of [ERA_1986, ERA_1990]) {
+    for (const era of [ERA_1986, ERA_1990, ERA_1991]) {
       const child = [...Object.values(era.player.pose), ...era.player.walk].reduce(
         (sum, key) => sum + (sizes.get(key) ?? 0),
         0,

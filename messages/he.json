@@ -695,5 +695,7 @@
   "life.finale.titleCount": "האליפות ה-{n} בתולדותיה",
   "life.cutscene.play": "הפעל את רגע האליפות",
   "life.cutscene.skip": "דלג",
-  "life.cutscene.continue": "המשך"
+  "life.cutscene.continue": "המשך",
+  "life.retry.otherLife": "החיים האחרים",
+  "life.retry.again": "חזרה לבוקר של 24 במאי"
 }

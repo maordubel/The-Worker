@@ -323,6 +323,17 @@ export class DialogueRunner {
         case 'flagValue':
           events.push({ t: 'flag.set', flag: effect.flag, value: effect.value })
           break
+        case 'save':
+          // Out of the pocket and into the tin in one beat, so a scene cannot create money
+          // by saving what it never took.
+          events.push(
+            { t: 'money.changed', agorot: -Math.abs(effect.agorot), why: effect.why },
+            { t: 'savings.changed', agorot: Math.abs(effect.agorot), why: effect.why },
+          )
+          break
+        case 'own':
+          events.push({ t: 'clothing.gained', item: effect.item }, { t: 'flag.raised', flag: `own:${effect.item}` })
+          break
 
         /**
          * לקחת הזדמנות — a conversation may CLOSE a window, and only that.
@@ -435,6 +446,15 @@ export class DialogueRunner {
               atMinute: this.engine.state.minute,
             },
           })
+          break
+        case 'save':
+          events.push(
+            { t: 'money.changed', agorot: -Math.abs(effect.agorot), why: effect.why },
+            { t: 'savings.changed', agorot: Math.abs(effect.agorot), why: effect.why },
+          )
+          break
+        case 'own':
+          events.push({ t: 'clothing.gained', item: effect.item }, { t: 'flag.raised', flag: `own:${effect.item}` })
           break
         default:
           break

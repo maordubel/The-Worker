@@ -9,6 +9,7 @@ import { StageFinale } from '@/components/life/StageFinale'
 import { ControlDeck, TapChip } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
+import { RetryCard } from '@/components/life/RetryCard'
 import { EndingCard } from '@/components/life/EndingCard'
 import { PlaceCard, Stamp, TitleCard } from '@/components/life/Stamp'
 import { CloseUp } from '@/components/life/CloseUp'
@@ -74,6 +75,7 @@ export function LifeStage({
   const audio = useRef<LifeAudio | null>(null)
   const [sound, setSound] = useState(true)
   const [ending, setEnding] = useState<LifeBusEvents['ending']>(null)
+  const [retry, setRetry] = useState<LifeBusEvents['retry']>(null)
   const [match, setMatch] = useState<LifeBusEvents['match']>(null)
   const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
   const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
@@ -197,6 +199,7 @@ export function LifeStage({
       }),
     )
     unsubscribe.push(bus.on('ending', setEnding))
+    unsubscribe.push(bus.on('retry', setRetry))
     unsubscribe.push(bus.on('match', setMatch))
     unsubscribe.push(bus.on('doc', setDoc))
     unsubscribe.push(bus.on('cutscene', setCutscene))
@@ -514,7 +517,7 @@ export function LifeStage({
   /** the painting fills the glass; the shell floats over it */
   const fullBleed = frame <= 0
   /** every overlay that must hide the in-world controls */
-  const covered = Boolean(dialogue || ending || card || cutscene || snapshot || menu || places || pano || tunnel)
+  const covered = Boolean(dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel)
 
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
@@ -624,6 +627,7 @@ export function LifeStage({
 
         {tunnel && !cutscene && (
           <TunnelWalk
+            variant={tunnel.variant ?? 'bloomfield'}
             onDone={finishTunnel}
             onProgress={tunnelProgress}
           />
@@ -719,6 +723,19 @@ export function LifeStage({
         {snapshot && !debug && <ProfileCard snapshot={snapshot} onClose={closeProfile} />}
         {snapshot && debug && (
           <DebugPanel snapshot={snapshot} runtime={runtime.current} onClose={closeProfile} />
+        )}
+
+        {retry && (
+          <RetryCard
+            titleHe={retry.titleHe}
+            bodyHe={retry.bodyHe}
+            otherLifeHe={retry.otherLifeHe}
+            closeHe={retry.closeHe}
+            onRetry={() => {
+              setRetry(null)
+              restartDay()
+            }}
+          />
         )}
 
         {ending && (

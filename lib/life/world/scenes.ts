@@ -115,6 +115,15 @@ export type ExitDef = {
    * not in any drawer — the first bug Maor met in Stage B.
    */
   needsByEra?: Record<string, Condition | null>
+  /**
+   * ...and what the door SAYS when it is shut, by chapter.
+   *
+   * A lock is only information if the sentence beside it is true. "Without the key your
+   * mother will not let you out" is the right sentence for an eight-year-old and the
+   * wrong one for a thirteen-year-old who was told no an hour ago, and the difference
+   * between them is the difference between a game and a bug report.
+   */
+  blockedByEra?: Record<string, string>
   /** walking in triggers after a short dwell; the button always works immediately */
   dwellMs?: number
   priority?: number
@@ -203,6 +212,11 @@ export function needsFor(exit: ExitDef, chapter: string): Condition | undefined 
   return exit.needs
 }
 
+/** what this door says when it refuses, in this chapter */
+export function blockedFor(exit: ExitDef, chapter: string): string | null {
+  return exit.blockedByEra?.[chapter] ?? exit.blockedHe ?? null
+}
+
 /** the painting under this room in this chapter */
 export function artFor(scene: SceneDef, chapter: string): string {
   return scene.artByEra?.[chapter] ?? scene.art
@@ -224,12 +238,14 @@ const SCENES: SceneDef[] = [
     id: 'bedroom',
     titleHe: 'החדר שלך',
     art: 'bedroom',
-    artByEra: { '1990': 'bedroom90' },
+    // The same room in three chapters. 1991 is the 1990 painting again on purpose: ten
+    // months is not a repaint, and the boy who sleeps here is the same boy.
+    artByEra: { '1990': 'bedroom90', '1991': 'bedroom90' },
     band: { far: 0.84, near: 0.97 },
     size: { far: 0.3, near: 0.38 },
     ambience: 'interior',
     stuckHe: 'המפתח במגירה, בקצה שמאל. משם גם הדלת לסלון.',
-    stuckByEra: { '1990': 'הדלת לסלון — משמאל. אבא במטבח.' },
+    stuckByEra: { '1990': 'הדלת לסלון — משמאל. אבא במטבח.', '1991': 'המחברת על השולחן. הדלת לסלון — משמאל.' },
     spawns: { start: { x: 0.3, y: 0.93, facing: 'left' }, fromHome: { x: 0.14, y: 0.9, facing: 'right' } },
     actors: [],
     hotspots: [
@@ -239,6 +255,20 @@ const SCENES: SceneDef[] = [
       // 1990: the same room, four years on. The drawer holds the scarf now, not a key.
       { id: 'bed-1990', era: '1990', x: 0.45, y: 0.92, w: 0.14, act: 'bed-1990', verb: 'look', labelHe: 'המיטה' },
       { id: 'drawer-1990', era: '1990', x: 0.17, y: 0.9, w: 0.16, act: 'drawer-1990', verb: 'look', labelHe: 'המגירה' },
+      // 1991: the notebook, page forty-one, and the whole evening hanging off it (§30).
+      {
+        id: 'desk-1991',
+        era: '1991',
+        x: 0.17,
+        y: 0.9,
+        w: 0.16,
+        act: 'homework-1991',
+        verb: 'sit',
+        labelHe: 'המחברת',
+        priority: 3,
+        prop: { key: 'propNote', size: 0.05, at: { x: 0.19, y: 0.7 } },
+      },
+      { id: 'bed-1991', era: '1991', x: 0.45, y: 0.92, w: 0.14, act: 'bed-1990', verb: 'look', labelHe: 'המיטה' },
       // Wider than a drawer needs to be: it is the one thing in this room the chapter
       // cannot start without, so a child crossing the room at any speed is offered it.
       // It is NOT given priority — the door beside it must still win in the doorway, or
@@ -316,6 +346,32 @@ const SCENES: SceneDef[] = [
         sway: 0.003,
       },
       // 1990: Rachel moves through the flat; the schedule puts her here after half past one.
+      // 1991: the same two people in the same room, on a Monday evening that has a
+      // question in it. Rachel is the chapter's boss fight (§30) and Kobi is not a
+      // second key to the same door — he can nudge, once, and only if he is close.
+      {
+        id: 'rachel-1991',
+        era: '1991',
+        figure: 'rachel90-arms',
+        x: 0.6,
+        y: 0.84,
+        size: 0.45,
+        nameHe: 'רחל',
+        talk: 'rachel-1991',
+        sway: 0.004,
+      },
+      {
+        id: 'kobi-1991',
+        era: '1991',
+        figure: 'kobi90-sitA',
+        x: 0.28,
+        y: 0.8,
+        size: 0.36,
+        nameHe: 'קובי',
+        talk: 'kobi-1991',
+        when: { afterMinute: 17 * 60 + 40 },
+        sway: 0.003,
+      },
       {
         id: 'rachel-home',
         era: '1990',
@@ -355,8 +411,25 @@ const SCENES: SceneDef[] = [
         // The first lock in the game, and it is the reason the bedroom is not scenery: a
         // child in 1986 does not leave the flat without the key on the string.
         needs: { hasItem: 'house-key' },
-        needsByEra: { '1990': null },
+        /**
+         * 1991 is the first year the front door is locked by a SENTENCE rather than by an
+         * object. Until seven in the evening it is an ordinary door; after that it needs
+         * either the permission Rachel gave or the note left under the glass on the
+         * kitchen table (§32). Refusing is a branch, not a wall: the note is always there.
+         */
+        needsByEra: {
+          '1990': null,
+          '1991': {
+            any: [
+              { beforeMinute: 19 * 60 },
+              { flag: 'permission:yes' },
+              { flag: 'sneak:ready' },
+              { flag: 'derby:over' },
+            ],
+          },
+        },
         blockedHe: 'בלי המפתח אמא לא נותנת לצאת. הוא במגירה בחדר שלך.',
+        blockedByEra: { '1991': 'אמא אמרה לא. לא הערב. (במטבח יש פנקס ועיפרון.)' },
         dwellMs: 260,
         priority: 2,
       },
@@ -404,7 +477,10 @@ const SCENES: SceneDef[] = [
     size: { far: 0.24, near: 0.38 },
     ambience: 'kitchen',
     stuckHe: 'חזרה לסלון — משמאל.',
-    stuckByEra: { '1990': 'הטבלה על השולחן, אבא לידה. חזרה לסלון — משמאל.' },
+    stuckByEra: {
+      '1990': 'הטבלה על השולחן, אבא לידה. חזרה לסלון — משמאל.',
+      '1991': 'פנקס ועיפרון על השולחן. חזרה לסלון — משמאל.',
+    },
     spawns: { fromHome: { x: 0.2, y: 0.9, facing: 'right' } },
     actors: [
       {
@@ -461,6 +537,9 @@ const SCENES: SceneDef[] = [
       // ON the table, beside the paper: drawn on the oilcloth, reached from the floor in
       // front of it.
       { id: 'radio-1990', era: '1990', x: 0.93, y: 0.78, w: 0.05, act: 'radio-table-1990', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
+      // 1991: the pad and the pencil Rachel writes her lists with — and the only way out
+      // of a "no" that is not a lie (§32).
+      { id: 'pad-1991', era: '1991', x: 0.86, y: 0.82, w: 0.08, act: 'kitchen-note-1991', verb: 'look', labelHe: 'הפנקס' },
     ],
     exits: [
       {
@@ -494,12 +573,15 @@ const SCENES: SceneDef[] = [
     id: 'street',
     titleHe: 'הרחוב',
     art: 'street',
-    artByEra: { '1990': 'street90' },
+    artByEra: { '1990': 'street90', '1991': 'street90' },
     band: { far: 0.705, near: 0.86 },
     size: { far: 0.185, near: 0.29 },
     ambience: 'day',
     stuckHe: 'הקיוסק משמאל, המגרש בסמטה. מזרחה הולכים רק כשיודעים לאן — תשאל מישהו.',
-    stuckByEra: { '1990': 'אופיר ועמית ליד הקיוסק. מזרחה — אחרי האדומים.' },
+    stuckByEra: {
+      '1990': 'אופיר ועמית ליד הקיוסק. מזרחה — אחרי האדומים.',
+      '1991': 'בית הספר משמאל, האולם מזרחה, הבית מאחורייך.',
+    },
     layers: [
       // Behind everybody: the near paving and the kerb, with the tree shadows on it.
       { art: 'streetGround', x: 0, y: 0, w: 1, depth: 0.69 },
@@ -538,6 +620,7 @@ const SCENES: SceneDef[] = [
       fromPitch: { x: 0.55, y: 0.79, facing: 'left' },
       fromRoute: { x: 0.9, y: 0.81, facing: 'left' },
       fromUss: { x: 0.83, y: 0.81, facing: 'left' },
+      fromSchool: { x: 0.7, y: 0.8, facing: 'left' },
     },
     actors: [
       {
@@ -572,7 +655,7 @@ const SCENES: SceneDef[] = [
         x: 0.468,
         y: 0.735,
         size: 0.22,
-        nameHe: 'יוסף',
+        nameHe: 'אילן השכן',
         talk: 'neighbour',
         sway: 0.004,
       },
@@ -595,6 +678,19 @@ const SCENES: SceneDef[] = [
         nameHe: 'קרן',
         talk: 'keren-street',
         sway: 0.003,
+      },
+      // ---- 1991: the same street after school, on a day with a night in it ----
+      {
+        id: 'ofir-street-1991',
+        era: '1991',
+        figure: 'ofir90-walk',
+        // West of the kiosk door, so a boy walking home from the school gate passes him.
+        x: 0.16,
+        y: 0.79,
+        size: 0.28,
+        nameHe: 'אופיר',
+        talk: 'ofir-afternoon-1991',
+        sway: 0.005,
       },
       // ---- 1990: the same street, older children ----
       {
@@ -693,6 +789,29 @@ const SCENES: SceneDef[] = [
         dwellMs: 900,
       },
       {
+        /**
+         * בית הספר — the gate in the gap between the painted wall and the pole (0.62–0.69).
+         *
+         * Tagged 1991 and not `*`, which is the one place this file bends its own rule
+         * that a door is geography. The gap is exactly where the 1990 street stands its
+         * veteran with the radio, and a door drawn through a person is worse than a door
+         * that is not there on a Saturday — when the school is shut anyway. The day this
+         * neighbourhood gets a weekday in 1986, this gate gets that era too and a lock
+         * with a sentence on it, like every other shut door in the game.
+         */
+        id: 'school',
+        era: '1991',
+        x: 0.62,
+        y: 0.705,
+        w: 0.07,
+        h: 0.15,
+        to: 'schoolyard',
+        spawn: 'fromStreet',
+        labelHe: 'לחצר בית הספר',
+        light: { x: 0.625, y: 0.5, w: 0.06, h: 0.26, tone: 'daylight' },
+        dwellMs: 900,
+      },
+      {
         // The neighbourhood sports hall, Ussishkin. Not a door in this frame — the hall is
         // down the side street that opens east of the painted wall, so the exit sits in
         // that gap (0.725–0.79), between the wall's end and the pole. It was first placed
@@ -749,7 +868,7 @@ const SCENES: SceneDef[] = [
     band: { far: 0.7, near: 0.985 },
     size: { far: 0.2, near: 0.32 },
     ambience: 'day',
-    stuckHe: 'בעל הקיוסק מחכה. לצאת — ימינה.',
+    stuckHe: 'רפי מחכה. לצאת — ימינה.',
     stuckByEra: { '1990': 'אופיר ועמית פה. הרחוב — ימינה, ומשם מזרחה.' },
     spawns: { fromStreet: { x: 0.74, y: 0.93, facing: 'left' } },
     actors: [
@@ -762,7 +881,7 @@ const SCENES: SceneDef[] = [
         x: 0.3,
         y: 0.9,
         size: 0.34,
-        nameHe: 'בעל הקיוסק',
+        nameHe: 'רפי מהקיוסק',
         talk: 'kiosk-man',
         sway: 0.004,
       },
@@ -787,7 +906,7 @@ const SCENES: SceneDef[] = [
         x: 0.3,
         y: 0.9,
         size: 0.38,
-        nameHe: 'בעל הקיוסק',
+        nameHe: 'רפי מהקיוסק',
         talk: 'kiosk-man-1990',
         sway: 0.004,
       },
@@ -1280,12 +1399,45 @@ const SCENES: SceneDef[] = [
     size: { far: 0.19, near: 0.28 },
     ambience: 'dusk',
     stuckHe: 'הכניסה לאולם באמצע, מתחת לגג. חזרה לרחוב — משמאל.',
+    stuckByEra: { '1991': 'הסדרן ליד הדלת, המוכר מימין. פנימה — באמצע.' },
     spawns: {
       fromStreet: { x: 0.12, y: 0.9, facing: 'right' },
       fromHall: { x: 0.5, y: 0.93, facing: 'left' },
     },
-    actors: [],
-    hotspots: [],
+    actors: [
+      // ---- 11.3.1991, an hour before the doors ----
+      // The usher stands BESIDE the door and not in it: a person in a doorway wins the
+      // prompt over the door, and the way into the room disappears behind a conversation.
+      {
+        id: 'usher-night',
+        era: '1991',
+        figure: 'usher-wave',
+        x: 0.55,
+        y: 0.9,
+        size: 0.3,
+        nameHe: 'סדרן',
+        talk: 'usher-night',
+        flip: true,
+        sway: 0.003,
+      },
+      // The corridor kiosk (§36). It is OUT here and not inside the hall, because that is
+      // what makes it cost something: history does not wait for a queue.
+      {
+        id: 'hall-vendor',
+        era: '1991',
+        figure: 'hallVendor',
+        x: 0.72,
+        y: 0.92,
+        size: 0.31,
+        nameHe: 'מוכר',
+        talk: 'hall-vendor',
+        flip: true,
+        sway: 0.004,
+      },
+    ],
+    hotspots: [
+      { id: 'queue', era: '1991', x: 0.25, y: 0.9, w: 0.12, act: 'uss-queue', verb: 'look', labelHe: 'התור' },
+    ],
     exits: [
       {
         id: 'back',
@@ -1339,8 +1491,62 @@ const SCENES: SceneDef[] = [
     // The first sight of the hall, from the high corner — almost all of it at once — held
     // for a breath, then the cut down to the sideline at the boy's height.
     arrival: { art: 'ussHigh', ms: 3800, flag: 'saw:ussHigh' },
+    /**
+     * 11.3.1991 — a different arrival, and deliberately the opposite one (§34).
+     *
+     * The empty hall is met from the high corner: almost all of it at once, held, then
+     * the cut down to the floor. A derby night may not use that card. Bloomfield says
+     * the world is bigger than the boy; Ussishkin says the world is TOO CLOSE to him —
+     * so the night arrives on `ussLow`, the floor at a child's eye height, where the
+     * court is a strip of light between other people's shoulders.
+     */
+    arrivalByEra: { '1991': { art: 'ussLow', ms: 2600, flag: 'saw:ussNight' } },
     stuckHe: 'הפרקט מבריק, הסל בקצה. היציאה משמאל, מאיפה שנכנסת.',
+    stuckByEra: { '1991': 'עמית שמר מדרגה. המעקה לפניך, השעון מעל הדלת, והיציאה — משמאל.' },
     spawns: { fromOut: { x: 0.12, y: 0.93, facing: 'right' }, fromEnd: { x: 0.9, y: 0.9, facing: 'left' } },
+    /**
+     * הקהל — eight hundred people, drawn the way the terrace at full time is drawn.
+     *
+     * Dressing, not actors, for the reason the 1986 terrace gives at length: a crowd you
+     * can talk to is a crowd that opens a dialogue box every time you brush past it. The
+     * far rows sit BEHIND the walk band, packed along the base of the stand, so the boy
+     * moves along the sideline in front of them; the four nearest are inside the band,
+     * so he has to go round them. Every one of them bounces on its own phase, because a
+     * still crowd in a hall this size is the one thing that would read as a mistake.
+     *
+     * Over all of it: two plates from the September package — the floodlight haze that
+     * a tin roof's lamps make of the dust, and, once it is won, red smoke.
+     */
+    layers: [
+      { art: 'fanC', era: '1991', x: 0.035, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.004, flip: true },
+      { art: 'fanB', era: '1991', x: 0.071, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.006 },
+      { art: 'youngB3', era: '1991', x: 0.106, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.008 },
+      { art: 'fanD', era: '1991', x: 0.142, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.01, flip: true },
+      { art: 'adultB2', era: '1991', x: 0.177, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.012 },
+      { art: 'fanG', era: '1991', x: 0.213, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.004 },
+      { art: 'youngA4', era: '1991', x: 0.248, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.006, flip: true },
+      { art: 'fanA', era: '1991', x: 0.284, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.008 },
+      { art: 'adultA1', era: '1991', x: 0.319, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.01 },
+      { art: 'fanF', era: '1991', x: 0.354, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.012, flip: true },
+      { art: 'youngB5', era: '1991', x: 0.39, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.004 },
+      { art: 'adultB6', era: '1991', x: 0.425, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.006 },
+      { art: 'fanC', era: '1991', x: 0.461, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.008, flip: true },
+      { art: 'youngA6', era: '1991', x: 0.496, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.01 },
+      { art: 'fanD', era: '1991', x: 0.532, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.012 },
+      { art: 'adultA3', era: '1991', x: 0.567, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.004, flip: true },
+      { art: 'fanB', era: '1991', x: 0.603, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.006 },
+      { art: 'youngB1', era: '1991', x: 0.638, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.008 },
+      { art: 'fanG', era: '1991', x: 0.674, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.01, flip: true },
+      { art: 'adultB5', era: '1991', x: 0.709, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.012 },
+
+      // Two on the boy's own step, at the far end, so there is somebody to walk behind.
+      { art: 'adultB4', era: '1991', x: 0.78, y: 0.79, w: 0.062, depth: 0.79, foot: true, bob: 0.006 },
+      { art: 'youngB7', era: '1991', x: 0.87, y: 0.83, w: 0.06, depth: 0.83, foot: true, bob: 0.011, flip: true },
+
+      // The air of the room, and then the smoke that only exists once it is over.
+      { art: 'overlayHaze', era: '1991', x: 0, y: 0, w: 1, depth: 0.995, alpha: 0.5 },
+      { art: 'overlaySmoke', era: '1991', x: 0, y: 0, w: 1, depth: 0.996, alpha: 0.55, when: { flag: 'derby:over' } },
+    ],
     actors: [
       // Two men in plain red, shooting around at the far end of the floor: the hall is
       // used, not abandoned. Nameless, no number, no talk — scenery that breathes.
@@ -1349,25 +1555,41 @@ const SCENES: SceneDef[] = [
       // The usher by the door: the one person who talks, and what he says depends on
       // whether there is a game tonight.
       { id: 'usher', era: '*', figure: 'usher', x: 0.2, y: 0.9, size: 0.3, nameHe: 'סדרן', talk: 'usher-hall', sway: 0.003 },
+      // ---- 11.3.1991: the two people you came with ----
+      { id: 'amit-hall', era: '1991', figure: 'amit90-cheer', x: 0.42, y: 0.9, size: 0.29, nameHe: 'עמית', talk: 'amit-hall', sway: 0.006 },
+      { id: 'ofir-hall', era: '1991', figure: 'ofir90-arms', x: 0.3, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'derby:friend', flip: true, sway: 0.007 },
     ],
     hotspots: [
-      { id: 'look-hall', era: '*', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssHall', verb: 'gaze', labelHe: 'סביב', priority: 3 },
+      { id: 'look-hall', era: '*', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssHall', verb: 'gaze', labelHe: 'סביב', priority: 3, when: { notFlag: 'uss:arrived' } },
+      // 1991: the same look, on a night when the hall is full of people (§38).
+      { id: 'look-derby', era: '1991', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssDerby', verb: 'gaze', labelHe: 'סביב', priority: 3, when: { flag: 'uss:arrived' } },
+      // The step Amit asked you to hold, the rail a metre from the line, and the clock
+      // over the door that this whole chapter is really about.
+      // Priority 5: higher than a person, because a boy standing on the step he promised
+      // to hold should not have to push past his own friend to press the button.
+      { id: 'the-spot', era: '1991', x: 0.5, y: 0.88, w: 0.09, act: 'hall-spot', verb: 'sit', labelHe: 'המדרגה', priority: 5 },
+      { id: 'hall-rail', era: '1991', x: 0.68, y: 0.84, w: 0.1, act: 'hall-rail', verb: 'look', labelHe: 'המעקה' },
+      { id: 'hall-clock', era: '1991', x: 0.86, y: 0.8, w: 0.08, act: 'hall-clock', verb: 'look', labelHe: 'השעון' },
       { id: 'parquet', era: '*', x: 0.4, y: 0.88, w: 0.1, act: 'uss-parquet', verb: 'look', labelHe: 'הפרקט' },
       { id: 'stand', era: '*', x: 0.55, y: 0.78, w: 0.12, act: 'uss-stand', verb: 'look', labelHe: 'היציע' },
       { id: 'windows', era: '*', x: 0.75, y: 0.8, w: 0.1, act: 'uss-windows', verb: 'look', labelHe: 'החלונות' },
     ],
     exits: [
       {
+        // Wider than the room needs on an empty Saturday, because on 11.3.1991 this door
+        // IS the choice (§41): half past nine arrives while the hall is shaking, and a
+        // way out that has to be hunted for is not an answer a thirteen-year-old can give.
         id: 'back',
         x: 0.0,
-        y: 0.8,
-        w: 0.05,
-        h: 0.18,
+        y: 0.78,
+        w: 0.085,
+        h: 0.2,
         to: 'ussishkin-outside',
         spawn: 'fromHall',
         labelHe: 'החוצה',
-        light: { x: 0.006, y: 0.55, w: 0.05, h: 0.3, tone: 'inside' },
+        light: { x: 0.006, y: 0.55, w: 0.06, h: 0.3, tone: 'inside' },
         dwellMs: 500,
+        priority: 3,
       },
       {
         // along the sideline to the end wall, where the basket is
@@ -1413,6 +1635,170 @@ const SCENES: SceneDef[] = [
         labelHe: 'חזרה לאורך הקו',
         light: { x: 0.006, y: 0.55, w: 0.05, h: 0.3, tone: 'inside' },
         dwellMs: 500,
+      },
+    ],
+  },
+
+  // ------------------------------------------------------------------ הכיתה ------
+  //
+  // 11.3.1991, and the first room in this game that is not a Saturday.
+  //
+  // The painting is a real classroom with nobody in it: windows down the left wall, the
+  // board and the teacher's desk in the middle, two clusters of desks, and — this is what
+  // makes it a room rather than a picture — an empty floor across the whole front, from
+  // the near desks to the camera. That strip is the walk band, so the boy moves along the
+  // front of the class in front of everybody, which is exactly the wrong place to be
+  // holding a folded piece of paper.
+  //
+  // The children are DRESSING and not actors, for the same reason as the terrace at full
+  // time: eight seated twelve-year-olds who each open a dialogue box would turn a lesson
+  // into a corridor of text. Two people in this room talk, and one of them is the teacher.
+  {
+    id: 'classroom',
+    titleHe: 'הכיתה',
+    art: 'classroom',
+    band: { far: 0.74, near: 0.97 },
+    size: { far: 0.22, near: 0.32 },
+    ambience: 'interior',
+    stuckHe: 'הפתק על השולחן שלך. המורה ליד הלוח. הדלת למסדרון — ימינה.',
+    spawns: {
+      start: { x: 0.34, y: 0.88, facing: 'right' },
+      fromYard: { x: 0.8, y: 0.9, facing: 'left' },
+    },
+    actors: [
+      {
+        // In the aisle in front of her own desk, where a teacher stands when she is
+        // talking and not writing.
+        id: 'teacher',
+        era: '1991',
+        figure: 'teacher',
+        x: 0.47,
+        y: 0.76,
+        size: 0.3,
+        nameHe: 'המורה',
+        talk: 'teacher-1991',
+        sway: 0.004,
+      },
+      {
+        id: 'keren-desk',
+        era: '1991',
+        figure: 'keren90-sit',
+        x: 0.78,
+        y: 0.745,
+        size: 0.24,
+        nameHe: 'קרן',
+        talk: 'keren-class',
+        flip: true,
+        sway: 0.003,
+      },
+    ],
+    layers: [
+      // Seated children at the two clusters. Their depth is BEHIND the band on purpose:
+      // the boy walks along the front of the class, never between the rows.
+      { art: 'pupil-back1', era: '1991', x: 0.16, y: 0.7, w: 0.055, depth: 0.7, foot: true },
+      { art: 'pupil-back2', era: '1991', x: 0.27, y: 0.71, w: 0.055, depth: 0.71, foot: true },
+      { art: 'pupil-sideA', era: '1991', x: 0.35, y: 0.69, w: 0.05, depth: 0.69, foot: true, flip: true },
+      { art: 'pupil-back3', era: '1991', x: 0.68, y: 0.7, w: 0.055, depth: 0.7, foot: true },
+      { art: 'pupil-pass', era: '1991', x: 0.88, y: 0.71, w: 0.055, depth: 0.71, foot: true, flip: true },
+      { art: 'pupil-turn', era: '1991', x: 0.6, y: 0.68, w: 0.05, depth: 0.68, foot: true },
+    ],
+    hotspots: [
+      {
+        id: 'my-desk',
+        era: '1991',
+        x: 0.3,
+        y: 0.82,
+        w: 0.1,
+        act: 'note-1991',
+        verb: 'look',
+        labelHe: 'השולחן שלך',
+        priority: 3,
+        prop: { key: 'propNote', size: 0.04, at: { x: 0.29, y: 0.645 } },
+      },
+      { id: 'board', era: '1991', x: 0.52, y: 0.79, w: 0.1, act: 'class-board', verb: 'look', labelHe: 'הלוח' },
+      { id: 'class-window', era: '1991', x: 0.1, y: 0.8, w: 0.09, act: 'class-window', verb: 'look', labelHe: 'החלון' },
+      { id: 'class-bag', era: '1991', x: 0.21, y: 0.9, w: 0.08, act: 'class-bag', verb: 'look', labelHe: 'התיק' },
+      { id: 'look-class', era: '1991', x: 0.42, y: 0.9, w: 0.09, act: 'pano:panoClassroom', verb: 'gaze', labelHe: 'סביב' },
+    ],
+    exits: [
+      {
+        id: 'yard',
+        x: 0.93,
+        y: 0.72,
+        w: 0.07,
+        h: 0.26,
+        to: 'schoolyard',
+        spawn: 'fromSchool',
+        labelHe: 'למסדרון ולחצר',
+        light: { x: 0.95, y: 0.5, w: 0.05, h: 0.32, tone: 'inside' },
+        // A lesson you can slide out of is not a lesson: the door works, and it takes a
+        // decision to walk through it.
+        dwellMs: 800,
+      },
+    ],
+  },
+
+  // ------------------------------------------------------------------ החצר -------
+  {
+    id: 'schoolyard',
+    titleHe: 'החצר',
+    art: 'schoolyard',
+    band: { far: 0.68, near: 0.95 },
+    size: { far: 0.18, near: 0.28 },
+    ambience: 'day',
+    stuckHe: 'הכיתה מאחורייך, דרך הדלת. השער לרחוב — משמאל. הסל בקצה החצר.',
+    spawns: {
+      fromSchool: { x: 0.34, y: 0.86, facing: 'right' },
+      fromStreet: { x: 0.14, y: 0.9, facing: 'right' },
+    },
+    actors: [
+      { id: 'ofir-yard', era: '1991', figure: 'ofir90', x: 0.36, y: 0.82, size: 0.26, nameHe: 'אופיר', talk: 'ofir-yard', sway: 0.005 },
+      { id: 'amit-yard', era: '1991', figure: 'amit90', x: 0.6, y: 0.86, size: 0.27, nameHe: 'עמית', talk: 'amit-yard', flip: true },
+      { id: 'keren-yard', era: '1991', figure: 'keren90', x: 0.82, y: 0.8, size: 0.25, nameHe: 'קרן', talk: 'keren-yard', flip: true },
+    ],
+    hotspots: [
+      {
+        id: 'hoop',
+        era: '1991',
+        x: 0.66,
+        y: 0.74,
+        w: 0.1,
+        act: 'yard-ball',
+        verb: 'play',
+        labelHe: 'הסל בחצר',
+        prop: { key: 'propBasketball', size: 0.03, at: { x: 0.62, y: 0.72 } },
+      },
+      // Clear of the gate's own zone: a thing to look at must never stand in a doorway.
+      { id: 'fence', era: '1991', x: 0.15, y: 0.76, w: 0.06, act: 'yard-fence', verb: 'look', labelHe: 'הגדר' },
+    ],
+    exits: [
+      {
+        // Wide, because it is the way OUT of a school and because a child walking left
+        // along a yard at six frames a second should meet it, not miss it by a thumb.
+        id: 'street',
+        x: 0.0,
+        y: 0.68,
+        w: 0.1,
+        h: 0.28,
+        to: 'street',
+        spawn: 'fromSchool',
+        labelHe: 'מהשער, לרחוב',
+        light: { x: 0.005, y: 0.42, w: 0.06, h: 0.4, tone: 'daylight' },
+        dwellMs: 420,
+        priority: 2,
+      },
+      {
+        // the dark doorway in the middle of the building, at 0.22–0.27 of the painting
+        id: 'school',
+        x: 0.2,
+        y: 0.66,
+        w: 0.09,
+        h: 0.16,
+        to: 'classroom',
+        spawn: 'fromYard',
+        labelHe: 'חזרה לכיתה',
+        light: { x: 0.215, y: 0.44, w: 0.07, h: 0.2, tone: 'inside' },
+        dwellMs: 900,
       },
     ],
   },

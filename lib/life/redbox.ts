@@ -95,6 +95,76 @@ export const CANDIDATES_1986: RedBoxCandidate[] = [
 ]
 
 /**
+ * 11.3.1991 — what a Monday night leaves in a pocket.
+ *
+ * Same shape, same discipline: nothing goes in that the player did not physically end up
+ * holding, and the two objects that matter most are the ones you only get by choosing —
+ * the note that came back answered, and the ticket of somebody who left while it was
+ * still going. The clipping is the one the box keeps for a boy who was never there, and
+ * §31 is emphatic that it is not a lesser memory.
+ */
+export const CANDIDATES_1991: RedBoxCandidate[] = [
+  {
+    id: 'note',
+    titleHe: 'היום אוסישקין?',
+    noteHe: 'מקופל לארבע, ועוד מקופל. הסימן שאלה נמרח.',
+    item: 'school-note',
+    rarity: 'unique_memory',
+    weight: 6,
+    when: { hasItem: 'school-note' },
+  },
+  {
+    id: 'score',
+    titleHe: 'הפתק עם המספרים',
+    noteHe: 'מישהו חישב באמצע המשחק, ולא צדק, ולא היה אכפת לו.',
+    item: 'score-paper',
+    rarity: 'rare',
+    // A scrap somebody did arithmetic on in the fourth row is not something you can pick
+    // up from a living-room floor: it requires having been in the hall.
+    weight: 5,
+    when: { all: [{ flag: 'derby:over' }, { flag: 'uss:arrived' }] },
+  },
+  {
+    id: 'stub-1991',
+    titleHe: 'ספח מהאולם',
+    noteHe: 'קרטון קטן. הצד הקרוע כלפי חוץ.',
+    item: 'hall-ticket',
+    rarity: 'uncommon',
+    weight: 4,
+    when: { flag: 'uss:arrived' },
+  },
+  {
+    id: 'wrapper',
+    titleHe: 'נייר עטיפה',
+    noteHe: 'ריח של גריל שנשאר בכיס של המעיל עד סוף החורף.',
+    item: 'wrapper',
+    rarity: 'common',
+    weight: 3,
+    when: { hasItem: 'wrapper' },
+  },
+  {
+    id: 'clipping-1991',
+    titleHe: 'גזיר מהעיתון',
+    noteHe: 'גזרת אותו למחרת בבוקר, ביד, לא ישר.',
+    item: 'clipping',
+    rarity: 'uncommon',
+    weight: 3,
+  },
+]
+
+/**
+ * הקופסה של הפרק — which list a chapter rolls from.
+ *
+ * A chapter with no list of its own falls back to 1986's, which is what 1990 does and
+ * what it did before this function existed: its only always-eligible candidate is a
+ * folded piece of paper, which is exactly the right thing for a boy who walked home from
+ * Bloomfield with something he picked off the grass.
+ */
+export function candidatesFor(chapter: string): readonly RedBoxCandidate[] {
+  return chapter === '1991' ? CANDIDATES_1991 : CANDIDATES_1986
+}
+
+/**
  * One object, chosen off the seed from what the day actually produced.
  *
  * The weight table exists so the rare thing stays rare without ever being impossible,
@@ -103,7 +173,7 @@ export const CANDIDATES_1986: RedBoxCandidate[] = [
  */
 export function pickRedBoxItem(
   state: LifeState,
-  candidates: readonly RedBoxCandidate[] = CANDIDATES_1986,
+  candidates: readonly RedBoxCandidate[] = candidatesFor(state.chapter),
 ): { item: RedBoxItem | null; consumed: number } {
   const roller = new Roller(state.rng)
   const eligible = candidates.filter((candidate) => meets(state, candidate.when))
