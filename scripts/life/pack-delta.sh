@@ -18,9 +18,20 @@ grep '^public/life/art/' /tmp/delta-files.txt > /tmp/delta-art.txt || true
 # only files that exist (deletions cannot travel through the web uploader anyway)
 while read -r f; do [ -f "$f" ] && echo "$f"; done < /tmp/delta-code.txt > /tmp/delta-code-ok.txt
 while read -r f; do [ -f "$f" ] && echo "$f"; done < /tmp/delta-art.txt > /tmp/delta-art-ok.txt
-zip -q "$OUT/the-worker-delta-$N-code.zip" -@ < /tmp/delta-code-ok.txt
-[ -s /tmp/delta-art-ok.txt ] && zip -q "$OUT/the-worker-delta-$N-art.zip" -@ < /tmp/delta-art-ok.txt
-echo "code: $(wc -l < /tmp/delta-code-ok.txt) files, $(du -h "$OUT/the-worker-delta-$N-code.zip" | cut -f1)"
-[ -f "$OUT/the-worker-delta-$N-art.zip" ] && echo "art:  $(wc -l < /tmp/delta-art-ok.txt) files, $(du -h "$OUT/the-worker-delta-$N-art.zip" | cut -f1)"
+# GitHub's web uploader takes at most 100 files per drop, so every archive is split into
+# parts of 100 — code-1, code-2, art-1, art-2 … — and Maor uploads them one after another.
+rm -f "$OUT"/the-worker-delta-"$N"-*.zip
+pack() {
+  kind="$1"; list="$2"; n=0; part=1
+  [ -s "$list" ] || return 0
+  split -l 100 -d -a 1 "$list" /tmp/delta-part-
+  for chunk in /tmp/delta-part-*; do
+    zip -q "$OUT/the-worker-delta-$N-$kind-$part.zip" -@ < "$chunk"
+    echo "$kind-$part: $(wc -l < "$chunk") files, $(du -h "$OUT/the-worker-delta-$N-$kind-$part.zip" | cut -f1)"
+    part=$((part + 1)); rm -f "$chunk"
+  done
+}
+pack code /tmp/delta-code-ok.txt
+pack art /tmp/delta-art-ok.txt
 # dotfiles never survive the GitHub web uploader — say so if any are in the list
 grep -E '(^|/)\.[^/]+$' /tmp/delta-code-ok.txt && echo "WARNING: dotfiles above will be dropped by the web uploader" || true
