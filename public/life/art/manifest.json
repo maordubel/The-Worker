@@ -1,16 +1,23 @@
 {
  "backdrops": {
   "living": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 479178,
+   "w": 1105,
+   "h": 737,
+   "bytes": 590881,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1105,
+    737
+   ]
   },
   "bedroom": {
    "w": 543,
    "h": 417,
-   "bytes": 244674,
+   "bytes": 119368,
    "source": "stageAenv",
    "box": [
     166,
@@ -18,113 +25,218 @@
     347,
     362
    ],
-   "deyellowed": 111341,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "kitchen": {
    "w": 1600,
    "h": 900,
-   "bytes": 470117,
+   "bytes": 470353,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 22003,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   },
   "street": {
    "w": 1600,
    "h": 625,
-   "bytes": 419407,
+   "bytes": 418488,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
   },
   "pitch": {
    "w": 1600,
    "h": 615,
-   "bytes": 384368,
+   "bytes": 384124,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    615
+   ]
   },
   "kiosk": {
    "w": 1600,
    "h": 900,
-   "bytes": 467352,
+   "bytes": 467203,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 1546,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   },
   "approach": {
    "w": 1600,
    "h": 532,
-   "bytes": 343311,
+   "bytes": 341796,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    532
+   ]
   },
   "gate7": {
    "w": 1600,
-   "h": 600,
-   "bytes": 337675,
+   "h": 900,
+   "bytes": 724244,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 61142,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   },
   "ground": {
    "w": 1600,
    "h": 900,
-   "bytes": 567438,
+   "bytes": 748231,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 459105,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   },
   "corridor": {
    "w": 1600,
    "h": 616,
-   "bytes": 274603,
+   "bytes": 274261,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 1665,
+   "box": [
+    0,
+    0,
+    1600,
+    616
+   ]
   },
   "reveal": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 571159,
+   "w": 1348,
+   "h": 470,
+   "bytes": 348474,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1348,
+    470
+   ]
   },
   "stand": {
    "w": 1600,
-   "h": 616,
-   "bytes": 348936,
+   "h": 900,
+   "bytes": 690519,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 207698,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   },
   "ussExt": {
    "w": 1600,
    "h": 900,
-   "bytes": 602742,
+   "bytes": 786418,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 187602,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   },
   "ussHall": {
    "w": 1600,
    "h": 900,
-   "bytes": 550056,
+   "bytes": 792236,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 114100,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   },
   "streetEast": {
    "w": 1600,
    "h": 625,
-   "bytes": 422718,
+   "bytes": 421020,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
   },
   "ussHallPre": {
    "w": 1600,
    "h": 900,
-   "bytes": 476754,
+   "bytes": 661885,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 209933,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   },
   "undercroft": {
    "w": 1600,
    "h": 900,
-   "bytes": 567438,
+   "bytes": 565946,
    "yellowLeft": 0,
-   "source": "2026-09"
+   "source": "2026-09",
+   "deyellowed": 34328,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   }
  },
  "figures": {
@@ -355,17 +467,17 @@
    "yellowLeft": 0
   },
   "propRadio": {
-   "w": 234,
+   "w": 169,
    "h": 160,
-   "bytes": 38982,
+   "bytes": 28502,
    "source": "stageAenv",
    "box": [
-    122,
-    818,
-    200,
-    872
+    0,
+    0,
+    169,
+    160
    ],
-   "deyellowed": 3452,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "propScarf": {
@@ -772,6 +884,484 @@
    "bytes": 78302,
    "yellowLeft": 0,
    "source": "2026-09"
+  }
+ },
+ "extensions": {
+  "living--sky": {
+   "w": 1105,
+   "h": 184,
+   "bytes": 17890,
+   "source": "living",
+   "box": [
+    0,
+    0,
+    1105,
+    184
+   ],
+   "deyellowed": 2967,
+   "yellowLeft": 0
+  },
+  "living--ground": {
+   "w": 1105,
+   "h": 184,
+   "bytes": 15936,
+   "source": "living",
+   "box": [
+    0,
+    0,
+    1105,
+    184
+   ],
+   "deyellowed": 3406,
+   "yellowLeft": 0
+  },
+  "bedroom--sky": {
+   "w": 543,
+   "h": 63,
+   "bytes": 3023,
+   "source": "bedroom",
+   "box": [
+    0,
+    0,
+    543,
+    63
+   ],
+   "deyellowed": 2715,
+   "yellowLeft": 0
+  },
+  "bedroom--ground": {
+   "w": 543,
+   "h": 63,
+   "bytes": 3320,
+   "source": "bedroom",
+   "box": [
+    0,
+    0,
+    543,
+    63
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kitchen--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 26715,
+   "source": "kitchen",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kitchen--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 13267,
+   "source": "kitchen",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "street--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 20435,
+   "source": "street",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "street--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 32553,
+   "source": "street",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "pitch--sky": {
+   "w": 1600,
+   "h": 215,
+   "bytes": 22994,
+   "source": "pitch",
+   "box": [
+    0,
+    0,
+    1600,
+    215
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "pitch--ground": {
+   "w": 1600,
+   "h": 215,
+   "bytes": 20622,
+   "source": "pitch",
+   "box": [
+    0,
+    0,
+    1600,
+    215
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kiosk--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 24664,
+   "source": "kiosk",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kiosk--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 11767,
+   "source": "kiosk",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "approach--sky": {
+   "w": 1600,
+   "h": 186,
+   "bytes": 9688,
+   "source": "approach",
+   "box": [
+    0,
+    0,
+    1600,
+    186
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "approach--ground": {
+   "w": 1600,
+   "h": 186,
+   "bytes": 24684,
+   "source": "approach",
+   "box": [
+    0,
+    0,
+    1600,
+    186
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "gate7--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 18735,
+   "source": "gate7",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 10380,
+   "yellowLeft": 0
+  },
+  "gate7--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 17624,
+   "source": "gate7",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 24258,
+   "yellowLeft": 0
+  },
+  "ground--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 23729,
+   "source": "ground",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 51240,
+   "yellowLeft": 0
+  },
+  "ground--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 19089,
+   "source": "ground",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 138063,
+   "yellowLeft": 0
+  },
+  "corridor--sky": {
+   "w": 1600,
+   "h": 215,
+   "bytes": 8856,
+   "source": "corridor",
+   "box": [
+    0,
+    0,
+    1600,
+    215
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "corridor--ground": {
+   "w": 1600,
+   "h": 215,
+   "bytes": 18618,
+   "source": "corridor",
+   "box": [
+    0,
+    0,
+    1600,
+    215
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "reveal--sky": {
+   "w": 1348,
+   "h": 164,
+   "bytes": 15634,
+   "source": "reveal",
+   "box": [
+    0,
+    0,
+    1348,
+    164
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "reveal--ground": {
+   "w": 1348,
+   "h": 164,
+   "bytes": 18440,
+   "source": "reveal",
+   "box": [
+    0,
+    0,
+    1348,
+    164
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "stand--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 4816,
+   "source": "stand",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "stand--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 28772,
+   "source": "stand",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 42830,
+   "yellowLeft": 0
+  },
+  "ussExt--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 9162,
+   "source": "ussExt",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 10607,
+   "yellowLeft": 0
+  },
+  "ussExt--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 27078,
+   "source": "ussExt",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ussHall--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 18297,
+   "source": "ussHall",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 6507,
+   "yellowLeft": 0
+  },
+  "ussHall--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 31402,
+   "source": "ussHall",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "streetEast--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 14991,
+   "source": "streetEast",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "streetEast--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 17924,
+   "source": "streetEast",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ussHallPre--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 15335,
+   "source": "ussHallPre",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ussHallPre--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 23966,
+   "source": "ussHallPre",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "undercroft--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 25793,
+   "source": "undercroft",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 48110,
+   "yellowLeft": 0
+  },
+  "undercroft--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 19259,
+   "source": "undercroft",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 157982,
+   "yellowLeft": 0
   }
  }
 }
