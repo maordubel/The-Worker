@@ -266,10 +266,11 @@
   "yellowLeft": 0
  },
  "efi": {
-  "w": 190,
-  "h": 526,
-  "bytes": 113792,
-  "yellowLeft": 0
+  "w": 143,
+  "h": 430,
+  "bytes": 61164,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "elimelech-back": {
   "w": 161,
@@ -938,10 +939,11 @@
   "yellowLeft": 0
  },
  "keren": {
-  "w": 186,
-  "h": 503,
-  "bytes": 115701,
-  "yellowLeft": 0
+  "w": 139,
+  "h": 430,
+  "bytes": 76279,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "keren90-arms": {
   "w": 202,
@@ -1364,10 +1366,11 @@
   "source": "2026-09"
  },
  "oldMan": {
-  "w": 102,
-  "h": 292,
-  "bytes": 37451,
-  "yellowLeft": 0
+  "w": 185,
+  "h": 430,
+  "bytes": 70966,
+  "yellowLeft": 0,
+  "source": "2026-09"
  },
  "paperAdumim": {
   "w": 430,
@@ -1811,58 +1814,58 @@
   "source": "2026-09"
  },
  "pogi-w1": {
-  "w": 227,
-  "h": 425,
-  "bytes": 50549,
+  "w": 159,
+  "h": 430,
+  "bytes": 64036,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w2": {
-  "w": 199,
-  "h": 423,
-  "bytes": 49780,
+  "w": 115,
+  "h": 430,
+  "bytes": 54926,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w3": {
-  "w": 110,
-  "h": 425,
-  "bytes": 41974,
+  "w": 125,
+  "h": 430,
+  "bytes": 54669,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w4": {
-  "w": 221,
-  "h": 423,
-  "bytes": 46443,
+  "w": 238,
+  "h": 430,
+  "bytes": 68862,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w5": {
-  "w": 215,
-  "h": 425,
-  "bytes": 48917,
+  "w": 118,
+  "h": 430,
+  "bytes": 57302,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w6": {
-  "w": 176,
-  "h": 426,
-  "bytes": 46675,
+  "w": 149,
+  "h": 430,
+  "bytes": 57055,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w7": {
-  "w": 206,
-  "h": 426,
-  "bytes": 47164,
+  "w": 143,
+  "h": 430,
+  "bytes": 62442,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w8": {
-  "w": 227,
-  "h": 426,
-  "bytes": 52539,
+  "w": 198,
+  "h": 430,
+  "bytes": 65955,
   "yellowLeft": 0,
   "source": "2026-09"
  },
@@ -2297,6 +2300,811 @@
   "w": 210,
   "h": 260,
   "bytes": 53702,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hero80-w1": {
+  "w": 201,
+  "h": 430,
+  "bytes": 76581,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hero80-w2": {
+  "w": 158,
+  "h": 430,
+  "bytes": 64015,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hero80-w3": {
+  "w": 208,
+  "h": 430,
+  "bytes": 77328,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hero80-w4": {
+  "w": 194,
+  "h": 430,
+  "bytes": 70210,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hero80-w5": {
+  "w": 149,
+  "h": 430,
+  "bytes": 66370,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hero80-w6": {
+  "w": 157,
+  "h": 430,
+  "bytes": 68433,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hero80-w7": {
+  "w": 222,
+  "h": 430,
+  "bytes": 72473,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hero80-w8": {
+  "w": 114,
+  "h": 430,
+  "bytes": 61624,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pupil-back1": {
+  "w": 190,
+  "h": 430,
+  "bytes": 71748,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pupil-back2": {
+  "w": 194,
+  "h": 430,
+  "bytes": 77877,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pupil-back3": {
+  "w": 176,
+  "h": 430,
+  "bytes": 79192,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pupil-back4": {
+  "w": 185,
+  "h": 430,
+  "bytes": 79614,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pupil-sideA": {
+  "w": 247,
+  "h": 421,
+  "bytes": 80252,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pupil-sideB": {
+  "w": 212,
+  "h": 430,
+  "bytes": 83276,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pupil-turn": {
+  "w": 232,
+  "h": 423,
+  "bytes": 75440,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "pupil-pass": {
+  "w": 224,
+  "h": 418,
+  "bytes": 69401,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hooperRed-ball": {
+  "w": 171,
+  "h": 430,
+  "bytes": 63337,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hooperRed-dribble": {
+  "w": 227,
+  "h": 430,
+  "bytes": 83484,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hooperRed-shoot": {
+  "w": 83,
+  "h": 430,
+  "bytes": 45572,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hooperRed-stretch": {
+  "w": 179,
+  "h": 430,
+  "bytes": 70024,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hooperRed-away": {
+  "w": 147,
+  "h": 430,
+  "bytes": 57598,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hooperRed-bent": {
+  "w": 208,
+  "h": 430,
+  "bytes": 81588,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "usher": {
+  "w": 135,
+  "h": 346,
+  "bytes": 33492,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "usher-block": {
+  "w": 231,
+  "h": 346,
+  "bytes": 37754,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "usher-up": {
+  "w": 184,
+  "h": 346,
+  "bytes": 36841,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "usher-wave": {
+  "w": 229,
+  "h": 341,
+  "bytes": 38224,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hallVendor": {
+  "w": 128,
+  "h": 355,
+  "bytes": 40297,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hallVendor-hand": {
+  "w": 226,
+  "h": 351,
+  "bytes": 47316,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hallVendor-change": {
+  "w": 129,
+  "h": 351,
+  "bytes": 41014,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "hallVendor-shout": {
+  "w": 218,
+  "h": 356,
+  "bytes": 44516,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceRachel90": {
+  "w": 102,
+  "h": 260,
+  "bytes": 47157,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceRachel90-smile": {
+  "w": 145,
+  "h": 260,
+  "bytes": 67621,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceRachel90-worried": {
+  "w": 168,
+  "h": 260,
+  "bytes": 77784,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceRachel90-nu": {
+  "w": 143,
+  "h": 260,
+  "bytes": 65240,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceRachel90-angry": {
+  "w": 178,
+  "h": 260,
+  "bytes": 82391,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceRachel90-side": {
+  "w": 202,
+  "h": 260,
+  "bytes": 91896,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceTeacher": {
+  "w": 172,
+  "h": 260,
+  "bytes": 68412,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceTeacher-glasses": {
+  "w": 159,
+  "h": 260,
+  "bytes": 63476,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceTeacher-share": {
+  "w": 131,
+  "h": 260,
+  "bytes": 54041,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceTeacher-tired": {
+  "w": 173,
+  "h": 260,
+  "bytes": 68993,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceTeacher-smile": {
+  "w": 186,
+  "h": 260,
+  "bytes": 73204,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceTeacher-angry": {
+  "w": 117,
+  "h": 260,
+  "bytes": 49718,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceOldMan": {
+  "w": 190,
+  "h": 260,
+  "bytes": 80276,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceOldMan-smile": {
+  "w": 200,
+  "h": 260,
+  "bytes": 83829,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceOldMan-what": {
+  "w": 227,
+  "h": 260,
+  "bytes": 93418,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceOldMan-story": {
+  "w": 200,
+  "h": 260,
+  "bytes": 86323,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceOldMan-over": {
+  "w": 216,
+  "h": 260,
+  "bytes": 89574,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "faceOldMan-laugh": {
+  "w": 171,
+  "h": 260,
+  "bytes": 74669,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-3q": {
+  "w": 135,
+  "h": 430,
+  "bytes": 71970,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-side": {
+  "w": 105,
+  "h": 430,
+  "bytes": 56890,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-back": {
+  "w": 132,
+  "h": 430,
+  "bytes": 70527,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-sit": {
+  "w": 250,
+  "h": 412,
+  "bytes": 77957,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-cross": {
+  "w": 138,
+  "h": 430,
+  "bytes": 70283,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-point": {
+  "w": 230,
+  "h": 430,
+  "bytes": 80994,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-w1": {
+  "w": 234,
+  "h": 422,
+  "bytes": 66500,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-w2": {
+  "w": 235,
+  "h": 419,
+  "bytes": 67565,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-w3": {
+  "w": 219,
+  "h": 418,
+  "bytes": 63391,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-w4": {
+  "w": 230,
+  "h": 415,
+  "bytes": 62297,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-laugh": {
+  "w": 146,
+  "h": 430,
+  "bytes": 67165,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-shout": {
+  "w": 172,
+  "h": 430,
+  "bytes": 76825,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "keren-hips": {
+  "w": 172,
+  "h": 430,
+  "bytes": 77136,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-3q": {
+  "w": 136,
+  "h": 430,
+  "bytes": 57795,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-side": {
+  "w": 99,
+  "h": 430,
+  "bytes": 46294,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-back": {
+  "w": 141,
+  "h": 430,
+  "bytes": 56255,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-crouch": {
+  "w": 181,
+  "h": 299,
+  "bytes": 56117,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-kick": {
+  "w": 328,
+  "h": 430,
+  "bytes": 73961,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-arms": {
+  "w": 338,
+  "h": 408,
+  "bytes": 54926,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-w1": {
+  "w": 247,
+  "h": 409,
+  "bytes": 52249,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-w2": {
+  "w": 245,
+  "h": 408,
+  "bytes": 54722,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-w3": {
+  "w": 240,
+  "h": 408,
+  "bytes": 53082,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-w4": {
+  "w": 206,
+  "h": 414,
+  "bytes": 49811,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-dribble": {
+  "w": 246,
+  "h": 403,
+  "bytes": 60426,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-cheer": {
+  "w": 226,
+  "h": 407,
+  "bytes": 52737,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "efi-sulk": {
+  "w": 140,
+  "h": 401,
+  "bytes": 46639,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-3q": {
+  "w": 159,
+  "h": 430,
+  "bytes": 61737,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-side": {
+  "w": 121,
+  "h": 430,
+  "bytes": 52069,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-back": {
+  "w": 183,
+  "h": 430,
+  "bytes": 61500,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-lean": {
+  "w": 186,
+  "h": 222,
+  "bytes": 44111,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-hand": {
+  "w": 187,
+  "h": 430,
+  "bytes": 70153,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-paper": {
+  "w": 218,
+  "h": 430,
+  "bytes": 66830,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-point": {
+  "w": 253,
+  "h": 429,
+  "bytes": 61516,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-arms": {
+  "w": 156,
+  "h": 429,
+  "bytes": 54700,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-laugh": {
+  "w": 185,
+  "h": 430,
+  "bytes": 63731,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-shrug": {
+  "w": 297,
+  "h": 430,
+  "bytes": 76481,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-coins": {
+  "w": 187,
+  "h": 430,
+  "bytes": 69511,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-wipe": {
+  "w": 188,
+  "h": 277,
+  "bytes": 53431,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "oldMan-stool": {
+  "w": 213,
+  "h": 374,
+  "bytes": 64042,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90": {
+  "w": 143,
+  "h": 430,
+  "bytes": 90908,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-3q": {
+  "w": 137,
+  "h": 430,
+  "bytes": 82540,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-side": {
+  "w": 102,
+  "h": 430,
+  "bytes": 63289,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-back": {
+  "w": 137,
+  "h": 430,
+  "bytes": 87984,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-arms": {
+  "w": 133,
+  "h": 430,
+  "bytes": 80604,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-hips": {
+  "w": 207,
+  "h": 430,
+  "bytes": 99417,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-note": {
+  "w": 138,
+  "h": 430,
+  "bytes": 81154,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-apron": {
+  "w": 141,
+  "h": 430,
+  "bytes": 85488,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-point": {
+  "w": 219,
+  "h": 430,
+  "bytes": 87448,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-watch": {
+  "w": 158,
+  "h": 430,
+  "bytes": 83308,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-hug": {
+  "w": 308,
+  "h": 430,
+  "bytes": 95216,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-sit": {
+  "w": 159,
+  "h": 411,
+  "bytes": 83323,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-door": {
+  "w": 169,
+  "h": 430,
+  "bytes": 89819,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "rachel90-call": {
+  "w": 202,
+  "h": 430,
+  "bytes": 94961,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher": {
+  "w": 131,
+  "h": 430,
+  "bytes": 45662,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-3q": {
+  "w": 119,
+  "h": 430,
+  "bytes": 44976,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-side": {
+  "w": 92,
+  "h": 430,
+  "bytes": 33805,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-back": {
+  "w": 202,
+  "h": 430,
+  "bytes": 42312,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-arms": {
+  "w": 123,
+  "h": 430,
+  "bytes": 42532,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-note": {
+  "w": 128,
+  "h": 430,
+  "bytes": 44489,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-look": {
+  "w": 150,
+  "h": 430,
+  "bytes": 50130,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-point": {
+  "w": 235,
+  "h": 430,
+  "bytes": 50879,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-hand": {
+  "w": 212,
+  "h": 430,
+  "bytes": 50762,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-sit": {
+  "w": 166,
+  "h": 398,
+  "bytes": 47894,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-lean": {
+  "w": 417,
+  "h": 429,
+  "bytes": 74378,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-walk": {
+  "w": 203,
+  "h": 413,
+  "bytes": 38061,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-watch": {
+  "w": 139,
+  "h": 426,
+  "bytes": 36079,
+  "yellowLeft": 0,
+  "source": "2026-09"
+ },
+ "teacher-turn": {
+  "w": 175,
+  "h": 413,
+  "bytes": 31288,
   "yellowLeft": 0,
   "source": "2026-09"
  }
