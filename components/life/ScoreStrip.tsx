@@ -52,8 +52,10 @@ export function ScoreStrip({ match, objective = null }: { match: Match; objectiv
       </div>
       {/* After the whistle the board stays — it is the fact of the day — but the boy has
           somewhere to be, and the one line under the clock comes back beneath it. */}
+      {/* Under the board, centred, in the flow — not pinned to the corner. Pinned, it sat
+          on top of the menu button at every viewport (5.9.2026, seen on the terrace). */}
       {objective && (
-        <div className="absolute start-2.5 top-[54px] border-hair border-red bg-red px-2.5 py-1.5">
+        <div className="mt-1.5 border-hair border-red bg-red px-2.5 py-1.5">
           <p className="font-body text-[11px] leading-none text-sheet" data-life="objective">
             <bdi>{objective}</bdi>
           </p>

@@ -121,6 +121,14 @@ export type BackdropKey = (typeof BACKDROP)[number]
  * not a piece of somebody's furniture.
  */
 export const LAYER = [
+  /**
+   * היציע — the terrace behind the front rows, composited once out of the crowd sheets
+   * rather than drawn as two and a half thousand sprites
+   * (`scripts/life/bake-gate7-crowd.py`). It is a LAYER and not a backdrop because it is
+   * laid over `stand` at the seam of the walk band, and because a year may want the same
+   * terrace empty.
+   */
+  'standCrowd',
   'livingTable',
   'streetFore',
   'streetGround',
@@ -711,7 +719,13 @@ export const PORTRAIT_ART = [
  * carry alpha. A room without planes is drawn flat, as before; a room with them scrolls
  * its sky slower than its wall and its lamp post faster, which is the whole of depth.
  */
-export const PARALLAX = ['street', 'approach', 'gate7', 'stand'] as const
+// 5.9.2026 — `stand` left this list when the terrace was repainted from the pitch. Its
+// three planes were cut from the OLD painting and aligned to it pixel for pixel, so they
+// were wrong the moment the picture changed; and a stand seen head-on has nothing to
+// parallax — the camera pans along one flat wall of concrete. The crowd that used to be
+// the mid plane is `standCrowd`, a layer, which can be turned off in a year when the
+// ground is empty.
+export const PARALLAX = ['street', 'approach', 'gate7'] as const
 
 /**
  * קלוז-אפ — a face filling the glass for one line (`Say.closeUp`). 1080×1350, the

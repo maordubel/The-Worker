@@ -155,17 +155,17 @@
    ]
   },
   "stand": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 690519,
+   "w": 1458,
+   "h": 720,
+   "bytes": 431372,
    "yellowLeft": 0,
-   "source": "2026-09",
-   "deyellowed": 207698,
+   "source": "2026-09-05-gate7",
+   "deyellowed": 0,
    "box": [
     0,
     0,
-    1600,
-    900
+    1458,
+    720
    ]
   },
   "ussExt": {
@@ -1764,6 +1764,13 @@
    "bytes": 156903,
    "yellowLeft": 0,
    "source": "2026-09d"
+  },
+  "standCrowd": {
+   "w": 1458,
+   "h": 720,
+   "bytes": 260780,
+   "yellowLeft": 0,
+   "source": "baked-from-crowd-sheets"
   }
  },
  "docs": {
@@ -2113,31 +2120,31 @@
    "yellowLeft": 0
   },
   "stand--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 4816,
+   "w": 1458,
+   "h": 251,
+   "bytes": 32916,
    "source": "stand",
    "box": [
     0,
     0,
-    1600,
-    315
+    1458,
+    251
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "stand--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 28772,
+   "w": 1458,
+   "h": 251,
+   "bytes": 12148,
    "source": "stand",
    "box": [
     0,
     0,
-    1600,
-    315
+    1458,
+    251
    ],
-   "deyellowed": 42830,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussExt--sky": {
@@ -3378,27 +3385,6 @@
    "w": 1600,
    "h": 900,
    "bytes": 66379,
-   "yellowLeft": 0,
-   "source": "2026-09c"
-  },
-  "stand--far": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 506463,
-   "yellowLeft": 0,
-   "source": "2026-09"
-  },
-  "stand--mid": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 370290,
-   "yellowLeft": 0,
-   "source": "2026-09c"
-  },
-  "stand--near": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 60974,
    "yellowLeft": 0,
    "source": "2026-09c"
   }

@@ -270,6 +270,117 @@ export function stuckFor(scene: SceneDef, chapter: string): string | null {
   return scene.stuckHe ?? null
 }
 
+/**
+ * ---------------------------------------------------------------- שער 7, 1986 ----
+ *
+ * The terrace was repainted on 5.9.2026 from the angle its owner asked for: the camera
+ * stands on the grass and the stand fills the frame, so the STEPS are the floor of the
+ * scene and the pitch-side railing is in front of the child rather than behind him.
+ *
+ * Every number below was measured off the painting rather than agreed in advance — the
+ * tread lines, the top of the railing, the mouth of the entrance (see
+ * `docs/life/GATE7-GEOMETRY.md`). That is the right way round for a room where people
+ * have to stand ON step edges, and it is why the file must never be re-cropped.
+ *
+ * The crowd is drawn twice, on purpose. A full terrace is about nine hundred people and
+ * nine hundred sprites is a frame-rate bug, so everything from the ninth step back is
+ * ONE baked image (`standCrowd`, composited from the same crowd sheets by
+ * `scripts/life/bake-gate7-crowd.py`) and only the front rows — the ones the child walks
+ * among and has to go round — are live figures that bounce. The seam is the top of the
+ * walk band, where a painted shoulder and a sprite shoulder are the same size.
+ */
+
+/** the painting is 1458 x 720; a crowd sheet is 0.335 as wide as it is tall */
+const GATE7_FIGURE = 0.335 / (1458 / 720)
+
+/**
+ * Eleven sheets, not twenty-eight. Every sheet a room names is a file the room downloads,
+ * and this one already carries a baked terrace; the variety that matters is in the paint
+ * behind these rows, and eleven bodies with flips and four sizes do not read as a pattern
+ * across fifty people.
+ */
+const GATE7_SHEETS = [
+  'adultA1', 'youngB3', 'adultB5', 'youngA4', 'adultA6', 'youngB1',
+  'adultB2', 'youngA6', 'adultA3', 'youngB5', 'adultB7',
+] as const
+
+type TerraceRow = { y: number; h: number; n: number; from?: number; to?: number }
+
+/**
+ * A row of step edges turned into people.
+ *
+ * Deterministic, every one of it: the wobble, the lift, the sheet, the flip and the bob
+ * all come from the row and column index, so the terrace is identical on every machine
+ * and every run, and a diff of this file is readable. `holes` are the places nobody may
+ * stand — the mouth of the entrance, which is a hole in the concrete, and the patch of
+ * step where the chapter's last conversation is waiting.
+ */
+function terraceCrowd(
+  rows: readonly TerraceRow[],
+  holes: readonly { from: number; to: number }[] = [],
+  clear: readonly { x: number; y: number }[] = [],
+): LayerDef[] {
+  const out: LayerDef[] = []
+  rows.forEach((row, r) => {
+    const from = row.from ?? 0.02
+    const to = row.to ?? 0.98
+    for (let k = 0; k < row.n; k += 1) {
+      const t = row.n === 1 ? 0.5 : k / (row.n - 1)
+      const wobble = (((r * 71 + k * 37) % 13) / 13 - 0.5) * ((to - from) / row.n) * 0.8
+      const x = Number(Math.min(to, Math.max(from, from + (to - from) * t + wobble)).toFixed(4))
+      if (holes.some((hole) => x > hole.from && x < hole.to)) continue
+      const y = Number((row.y + ((((r * 29 + k * 53) % 7) - 3) / 3) * 0.003).toFixed(4))
+      // Nobody stands in front of somebody you have to talk to. Only a figure NEARER than
+      // the actor can cover him, so the rows further up the terrace are left alone.
+      if (clear.some((who) => y >= who.y && Math.abs(x - who.x) < 0.055)) continue
+      out.push({
+        art: GATE7_SHEETS[(r * 5 + k * 9 + ((r * k) % 3)) % GATE7_SHEETS.length] as string,
+        x,
+        y,
+        w: Number((row.h * GATE7_FIGURE).toFixed(4)),
+        depth: y,
+        foot: true,
+        bob: Number((0.003 + (((r * 17 + k * 11) % 9) / 9) * 0.006).toFixed(4)),
+        era: '*',
+        ...((r + k) % 2 === 0 ? { flip: true } : {}),
+      })
+    }
+  })
+  return out
+}
+
+/** the front nine steps, front to back — the rows the baked crowd deliberately leaves empty */
+const GATE7_ROWS: readonly TerraceRow[] = [
+  { y: 0.752, h: 0.108, n: 5 },
+  { y: 0.736, h: 0.106, n: 5 },
+  { y: 0.720, h: 0.104, n: 6 },
+  { y: 0.704, h: 0.102, n: 6 },
+  { y: 0.688, h: 0.100, n: 7 },
+  { y: 0.672, h: 0.098, n: 7 },
+  { y: 0.656, h: 0.096, n: 8 },
+  { y: 0.640, h: 0.094, n: 8 },
+  { y: 0.626, h: 0.092, n: 9 },
+]
+
+/** the mouth of the entrance is a hole in the concrete — nobody stands in mid-air */
+const GATE7_HOLES = [{ from: 0.258, to: 0.42 }]
+
+/**
+ * Everybody in this room who can be TALKED to, across every year it is played in, and the
+ * step they stand on. The generator leaves each of them a body's width of air, so the
+ * chapter's last conversation is never behind a stranger's back.
+ */
+const GATE7_CLEAR = [
+  { x: 0.7, y: 0.688 },   // קובי, 1986 and 1990 — the ending
+  { x: 0.47, y: 0.722 },  // אוהד
+  { x: 0.56, y: 0.749 },  // אוהד
+  { x: 0.2, y: 0.7 },     // קובי ליד העמוד, 1990
+  { x: 0.52, y: 0.706 },  // האוהד עם הרדיו
+  { x: 0.78, y: 0.716 },  // האוהד שיודע
+  { x: 0.93, y: 0.74 },   // הילדים
+  { x: 0.41, y: 0.752 },  // אופיר
+]
+
 const SCENES: SceneDef[] = [
   // ------------------------------------------------------------------- bedroom ----
   {
@@ -1582,6 +1693,8 @@ const SCENES: SceneDef[] = [
     ],
   },
 
+
+
   // --------------------------------------------------------------------- inside ---
   {
     id: 'bloomfield-inside',
@@ -1594,8 +1707,17 @@ const SCENES: SceneDef[] = [
     // his own eye level: concrete underfoot, a crash barrier across the frame, and
     // somebody's red-and-white scarf knotted round it. The `rail` hotspot below has been
     // labelled המעקה since the scene was written; there is finally a railing there.
-    band: { far: 0.872, near: 0.99 },
-    size: { far: 0.2, near: 0.27 },
+    // Measured off the repainted terrace (5.9.2026): the lowest tread sits at 0.747 and
+    // the top of the pitch-side railing at 0.761, so the child's feet stop on the bottom
+    // step and the railing is always in FRONT of him — which is the whole reason this
+    // frame says "you are in the stand". `far` is the ninth step back, where the baked
+    // crowd begins.
+    band: { far: 0.632, near: 0.752 },
+    // A metre is 0.056 of this frame (the railing is 1.1m and measures 0.061), so a child
+    // of eight is 0.072 and a man 0.098. Everybody here is drawn at 1.3 times that — one
+    // consistent cheat across every figure, which reads as a camera four metres closer
+    // rather than as an error, and keeps an eight-year-old findable on a phone.
+    size: { far: 0.098, near: 0.108 },
     ambience: 'stadium',
     // 5.9.2026: the boy himself at the tunnel mouth, painted — the ground opening in front of him
     arrival: { art: 'tunnelReveal', ms: 5200, flag: 'saw:reveal' },
@@ -1603,7 +1725,7 @@ const SCENES: SceneDef[] = [
     arrivalByEra: { '1990': null, '1990s': null, '2000s': null },
     stuckHe: 'הוא איפשהו ביציע. תסתכל טוב.',
     stuckByEra: { '1990': 'מי שיודע משהו — אומר. הרדיו, הילדים, הוותיקים. אבא ליד העמוד.' },
-    spawns: { start: { x: 0.08, y: 0.96, facing: 'right' } },
+    spawns: { start: { x: 0.08, y: 0.748, facing: 'right' } },
     /**
      * היציע אחרי השריקה — sixteen people who appear the moment the title is won.
      *
@@ -1624,27 +1746,18 @@ const SCENES: SceneDef[] = [
      * Nobody in this stadium is standing next to himself.
      */
     layers: [
-      // Along the rail, backs to the pitch, smallest — the far row.
-      { art: 'youngA2', x: 0.215, y: 0.888, w: 0.036, depth: 0.888, foot: true, bob: 0.008, era: '*', when: { flag: 'match:over' } },
-      { art: 'adultA3', x: 0.305, y: 0.884, w: 0.04, depth: 0.884, foot: true, bob: 0.005, era: '*', when: { flag: 'match:over' } },
-      { art: 'youngB5', x: 0.4, y: 0.89, w: 0.037, depth: 0.89, foot: true, bob: 0.009, flip: true, era: '*', when: { flag: 'match:over' } },
-      { art: 'adultB2', x: 0.585, y: 0.886, w: 0.041, depth: 0.886, foot: true, bob: 0.004, era: '*', when: { flag: 'match:over' } },
-      { art: 'youngA6', x: 0.66, y: 0.892, w: 0.036, depth: 0.892, foot: true, bob: 0.01, era: '*', when: { flag: 'match:over' } },
-      { art: 'adultA5', x: 0.83, y: 0.885, w: 0.04, depth: 0.885, foot: true, bob: 0.006, flip: true, era: '*', when: { flag: 'match:over' } },
-      { art: 'youngB1', x: 0.915, y: 0.891, w: 0.036, depth: 0.891, foot: true, bob: 0.008, era: '*', when: { flag: 'match:over' } },
-
-      // The middle of the terrace, where the child is walking.
-      { art: 'adultB6', x: 0.26, y: 0.925, w: 0.047, depth: 0.925, foot: true, bob: 0.007, flip: true, era: '*', when: { flag: 'match:over' } },
-      { art: 'youngA4', x: 0.44, y: 0.932, w: 0.044, depth: 0.932, foot: true, bob: 0.011, era: '*', when: { flag: 'match:over' } },
-      { art: 'adultA1', x: 0.63, y: 0.928, w: 0.048, depth: 0.928, foot: true, bob: 0.005, era: '*', when: { flag: 'match:over' } },
-      { art: 'youngB3', x: 0.79, y: 0.935, w: 0.045, depth: 0.935, foot: true, bob: 0.01, flip: true, era: '*', when: { flag: 'match:over' } },
-      { art: 'youngB7', x: 0.9, y: 0.938, w: 0.046, depth: 0.938, foot: true, bob: 0.013, era: '*', when: { flag: 'match:over' } },
-
-      // Nearest the camera, biggest, and the ones he has to go round.
-      { art: 'adultB4', x: 0.135, y: 0.972, w: 0.058, depth: 0.972, foot: true, bob: 0.006, era: '*', when: { flag: 'match:over' } },
-      { art: 'youngA1', x: 0.41, y: 0.98, w: 0.055, depth: 0.98, foot: true, bob: 0.012, flip: true, era: '*', when: { flag: 'match:over' } },
-      { art: 'adultA7', x: 0.6, y: 0.975, w: 0.059, depth: 0.975, foot: true, bob: 0.005, era: '*', when: { flag: 'match:over' } },
-      { art: 'adultB5', x: 0.885, y: 0.978, w: 0.058, depth: 0.978, foot: true, bob: 0.007, flip: true, era: '*', when: { flag: 'match:over' } },
+      /**
+       * היציע, אפוי — nine hundred people for one draw.
+       *
+       * Everything from the ninth step back is a single image composited out of the same
+       * twenty-eight crowd sheets the live figures are cut from, so a man in the tenth row
+       * and a man in the eighth are the same painting at the same size
+       * (`scripts/life/bake-gate7-crowd.py`). Its depth is the seam: anybody standing
+       * lower on the terrace draws in front of it.
+       */
+      { art: 'standCrowd', x: 0, y: 0, w: 1, depth: 0.616, era: '*' },
+      // and the front nine steps, live — a terrace that does not move is a photograph
+      ...terraceCrowd(GATE7_ROWS, GATE7_HOLES, GATE7_CLEAR),
     ],
     actors: [
       {
@@ -1654,15 +1767,15 @@ const SCENES: SceneDef[] = [
         // where the child comes in. He is not hidden — nothing in this game hides the
         // thing it is asking for — he is just one more man in a red shirt among sixteen,
         // and the player has to walk over and look. That walk IS the ending.
-        x: 0.695,
-        y: 0.912,
-        size: 0.3,
+        x: 0.7,
+        y: 0.688,
+        size: 0.128,
         nameHe: 'קובי',
         talk: 'kobi-found',
         when: { flag: 'match:over' },
       },
-      { id: 'terrace-a', figure: 'adultA4', x: 0.34, y: 0.935, size: 0.22, nameHe: 'אוהד', talk: 'terrace-fan' },
-      { id: 'terrace-b', figure: 'adultB1', x: 0.52, y: 0.965, size: 0.23, nameHe: 'אוהד', talk: 'terrace-fan', flip: true },
+      { id: 'terrace-a', figure: 'adultA4', x: 0.47, y: 0.722, size: 0.122, nameHe: 'אוהד', talk: 'terrace-fan' },
+      { id: 'terrace-b', figure: 'adultB1', x: 0.56, y: 0.749, size: 0.13, nameHe: 'אוהד', talk: 'terrace-fan', flip: true },
       /**
        * ---- 1990: the transistor network ----
        * Every `net:*` conversation is GENERATED by the match director from the anchor and
@@ -1671,20 +1784,20 @@ const SCENES: SceneDef[] = [
        * pillar, as the veteran promised, until the whistle — then he is one man in a
        * crowd again, and the walk to him is the ending, as it was in 1986.
        */
-      { id: 'net-kobi', era: '1990', figure: 'kobi90-lean', x: 0.34, y: 0.905, size: 0.18, nameHe: 'קובי', talk: 'net:kobi', when: { notFlag: 'match:over' } },
-      { id: 'net-radio', era: '1990', figure: 'adultA1', x: 0.52, y: 0.9, size: 0.29, nameHe: 'אוהד עם רדיו', talk: 'net:radio', flip: true, when: { notFlag: 'match:over' } },
-      { id: 'net-brain', era: '1990', figure: 'adultB3', x: 0.71, y: 0.902, size: 0.29, nameHe: 'אוהד שיודע', talk: 'net:brain', when: { notFlag: 'match:over' } },
-      { id: 'net-kids', era: '1990', figure: 'youngB5', x: 0.96, y: 0.9, size: 0.23, nameHe: 'ילדים', talk: 'net:kids', flip: true, when: { notFlag: 'match:over' } },
-      { id: 'net-ofir', era: '1990', figure: 'ofir90', x: 0.2, y: 0.9, size: 0.26, nameHe: 'אופיר', talk: 'net:ofir', when: { all: [{ flag: 'went:withFriends' }, { notFlag: 'match:over' }] } },
-      { id: 'kobi-lost', era: '1990', figure: 'kobi90-cheer', x: 0.695, y: 0.912, size: 0.3, nameHe: 'קובי', talk: 'kobi-found-1990', when: { flag: 'match:over' } },
+      { id: 'net-kobi', era: '1990', figure: 'kobi90-lean', x: 0.2, y: 0.7, size: 0.118, nameHe: 'קובי', talk: 'net:kobi', when: { notFlag: 'match:over' } },
+      { id: 'net-radio', era: '1990', figure: 'adultA1', x: 0.52, y: 0.706, size: 0.125, nameHe: 'אוהד עם רדיו', talk: 'net:radio', flip: true, when: { notFlag: 'match:over' } },
+      { id: 'net-brain', era: '1990', figure: 'adultB3', x: 0.78, y: 0.716, size: 0.126, nameHe: 'אוהד שיודע', talk: 'net:brain', when: { notFlag: 'match:over' } },
+      { id: 'net-kids', era: '1990', figure: 'youngB5', x: 0.93, y: 0.74, size: 0.105, nameHe: 'ילדים', talk: 'net:kids', flip: true, when: { notFlag: 'match:over' } },
+      { id: 'net-ofir', era: '1990', figure: 'ofir90', x: 0.41, y: 0.752, size: 0.115, nameHe: 'אופיר', talk: 'net:ofir', when: { all: [{ flag: 'went:withFriends' }, { notFlag: 'match:over' }] } },
+      { id: 'kobi-lost', era: '1990', figure: 'kobi90-cheer', x: 0.7, y: 0.688, size: 0.128, nameHe: 'קובי', talk: 'kobi-found-1990', when: { flag: 'match:over' } },
     ],
     // The scarf is tied to the barrier at the left of the frame — somebody left it there,
     // which is the whole reason to walk over and look at it.
     hotspots: [
-      { id: 'rail', era: '*', x: 0.155, y: 0.92, w: 0.12, act: 'terrace-rail', verb: 'look', labelHe: 'המעקה' },
-      { id: 'look-terrace', era: '1986', x: 0.3, y: 0.93, w: 0.08, act: 'pano:panoTerrace1986', verb: 'gaze', labelHe: 'סביב', when: { flag: 'saw:reveal' } },
+      { id: 'rail', era: '*', x: 0.15, y: 0.753, w: 0.13, act: 'terrace-rail', verb: 'look', labelHe: 'המעקה' },
+      { id: 'look-terrace', era: '1986', x: 0.88, y: 0.744, w: 0.09, act: 'pano:panoTerrace1986', verb: 'gaze', labelHe: 'סביב', when: { flag: 'saw:reveal' } },
       // 1990: the radio on the concrete, only while it is there (see the director).
-      { id: 'radio-floor', era: '1990', x: 0.38, y: 0.96, w: 0.09, act: 'net:floor', verb: 'take', labelHe: 'הטרנזיסטור על הרצפה', when: { flag: 'radio:dropped' }, priority: 5, prop: { key: 'propRadio', size: 0.04 } },
+      { id: 'radio-floor', era: '1990', x: 0.46, y: 0.75, w: 0.09, act: 'net:floor', verb: 'take', labelHe: 'הטרנזיסטור על הרצפה', when: { flag: 'radio:dropped' }, priority: 5, prop: { key: 'propRadio', size: 0.032 } },
     ],
     exits: [
       // The way home. It opens the moment the chapter's last objective is met — you found
@@ -1693,15 +1806,18 @@ const SCENES: SceneDef[] = [
       {
         id: 'home',
         era: '*',
-        x: 0.0,
-        y: 0.87,
-        w: 0.05,
-        h: 0.12,
+        // The way out is the thing the painter put there: the mouth of the entrance,
+        // black under its red canopy, with the white handrails round it. It used to be
+        // the left edge of the frame, which is where doors go when a room has none.
+        x: 0.278,
+        y: 0.66,
+        w: 0.115,
+        h: 0.095,
         to: 'bloomfield-outside',
         spawn: 'fromTunnel',
         labelHe: 'החוצה, הביתה',
         when: { flag: 'found:kobi' },
-        light: { x: 0.006, y: 0.6, w: 0.05, h: 0.28, tone: 'daylight' },
+        light: { x: 0.292, y: 0.645, w: 0.088, h: 0.085, tone: 'daylight' },
         dwellMs: 700,
       },
     ],
