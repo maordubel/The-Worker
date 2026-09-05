@@ -124,13 +124,19 @@ describe('חוק הצהוב — neither the palette nor the artwork has yellow i
         0,
       )
       for (const scene of ALL_SCENES) {
-        let bytes = child + (sizes.get(scene.art) ?? 0)
+        // a texture is downloaded once however many times a room places it — a crowd of
+        // four men drawn twelve times costs four files, which is what this counts
+        const keys = new Set<string>([...Object.values(era.player.pose), ...era.player.walk, scene.art])
         // the sky and ground strips load with the room they continue
         const ext = extensionKeys(scene.art)
-        bytes += (sizes.get(ext.sky) ?? 0) + (sizes.get(ext.ground) ?? 0)
-        for (const layer of scene.layers ?? []) if (inEra(layer, era.chapter)) bytes += sizes.get(layer.art) ?? 0
-        for (const actor of scene.actors) if (inEra(actor, era.chapter)) bytes += sizes.get(actor.figure) ?? 0
-        for (const spot of scene.hotspots) if (inEra(spot, era.chapter) && spot.prop) bytes += sizes.get(spot.prop.key) ?? 0
+        keys.add(ext.sky)
+        keys.add(ext.ground)
+        for (const layer of scene.layers ?? []) if (inEra(layer, era.chapter)) keys.add(layer.art)
+        for (const actor of scene.actors) if (inEra(actor, era.chapter)) keys.add(actor.figure)
+        for (const spot of scene.hotspots) if (inEra(spot, era.chapter) && spot.prop) keys.add(spot.prop.key)
+        let bytes = 0
+        for (const key of keys) bytes += sizes.get(key) ?? 0
+        expect(child).toBeGreaterThan(0)
         expect(bytes / 1024 / 1024, `${scene.id} (${era.chapter}) loads ${(bytes / 1024 / 1024).toFixed(2)} MB`).toBeLessThan(3.6)
       }
     }
