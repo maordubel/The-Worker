@@ -1363,6 +1363,181 @@
    ],
    "deyellowed": 2375,
    "yellowLeft": 0
+  },
+  "faceShachor": {
+   "w": 320,
+   "h": 320,
+   "bytes": 102740,
+   "yellowLeft": 0,
+   "source": "cut from shachor"
+  },
+  "faceSoko": {
+   "w": 320,
+   "h": 320,
+   "bytes": 82784,
+   "yellowLeft": 0,
+   "source": "cut from soko"
+  },
+  "faceAsaf": {
+   "w": 320,
+   "h": 320,
+   "bytes": 89776,
+   "yellowLeft": 0,
+   "source": "cut from asaf"
+  },
+  "faceFreddy": {
+   "w": 320,
+   "h": 320,
+   "bytes": 89532,
+   "yellowLeft": 0,
+   "source": "cut from adultA2"
+  },
+  "faceMelamed": {
+   "w": 320,
+   "h": 320,
+   "bytes": 77393,
+   "yellowLeft": 0,
+   "source": "cut from adultB4"
+  },
+  "faceHermesh": {
+   "w": 320,
+   "h": 320,
+   "bytes": 117556,
+   "yellowLeft": 0,
+   "source": "cut from hermesh"
+  },
+  "faceYosef": {
+   "w": 320,
+   "h": 320,
+   "bytes": 80870,
+   "yellowLeft": 0,
+   "source": "cut from yosef"
+  },
+  "faceUsher": {
+   "w": 320,
+   "h": 320,
+   "bytes": 75715,
+   "yellowLeft": 0,
+   "source": "cut from usher"
+  },
+  "faceVendor": {
+   "w": 320,
+   "h": 320,
+   "bytes": 67649,
+   "yellowLeft": 0,
+   "source": "cut from hallVendor"
+  },
+  "faceLiron": {
+   "w": 320,
+   "h": 320,
+   "bytes": 78319,
+   "yellowLeft": 0,
+   "source": "cut from adultB2"
+  },
+  "faceMichel": {
+   "w": 320,
+   "h": 320,
+   "bytes": 87066,
+   "yellowLeft": 0,
+   "source": "cut from adultA6"
+  },
+  "faceLimor": {
+   "w": 320,
+   "h": 320,
+   "bytes": 88552,
+   "yellowLeft": 0,
+   "source": "cut from adultB5"
+  },
+  "faceDudu": {
+   "w": 320,
+   "h": 320,
+   "bytes": 82594,
+   "yellowLeft": 0,
+   "source": "cut from adultA4"
+  },
+  "faceBarry": {
+   "w": 320,
+   "h": 320,
+   "bytes": 70680,
+   "yellowLeft": 0,
+   "source": "cut from adultA7"
+  },
+  "faceAliza": {
+   "w": 320,
+   "h": 320,
+   "bytes": 84044,
+   "yellowLeft": 0,
+   "source": "cut from adultB6"
+  },
+  "faceYaron": {
+   "w": 320,
+   "h": 320,
+   "bytes": 73717,
+   "yellowLeft": 0,
+   "source": "cut from soldier"
+  },
+  "faceCommander": {
+   "w": 320,
+   "h": 320,
+   "bytes": 81385,
+   "yellowLeft": 0,
+   "source": "cut from adultA1"
+  },
+  "faceBoss": {
+   "w": 320,
+   "h": 320,
+   "bytes": 72306,
+   "yellowLeft": 0,
+   "source": "cut from adultB1"
+  },
+  "faceDriver": {
+   "w": 320,
+   "h": 320,
+   "bytes": 75125,
+   "yellowLeft": 0,
+   "source": "cut from adultA5"
+  },
+  "faceSupporter": {
+   "w": 320,
+   "h": 320,
+   "bytes": 81385,
+   "yellowLeft": 0,
+   "source": "cut from adultA1"
+  },
+  "faceSupporterB": {
+   "w": 320,
+   "h": 320,
+   "bytes": 72306,
+   "yellowLeft": 0,
+   "source": "cut from adultB1"
+  },
+  "faceWoman": {
+   "w": 320,
+   "h": 320,
+   "bytes": 86069,
+   "yellowLeft": 0,
+   "source": "cut from adultB3"
+  },
+  "faceYoung": {
+   "w": 320,
+   "h": 320,
+   "bytes": 79893,
+   "yellowLeft": 0,
+   "source": "cut from youngB4"
+  },
+  "faceOfir90": {
+   "w": 320,
+   "h": 320,
+   "bytes": 66251,
+   "yellowLeft": 0,
+   "source": "cut from ofir90"
+  },
+  "faceAmit90": {
+   "w": 320,
+   "h": 320,
+   "bytes": 87421,
+   "yellowLeft": 0,
+   "source": "cut from amit90"
   }
  },
  "layers": {
