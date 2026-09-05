@@ -1,0 +1,529 @@
+{
+ "crowd-goal": {
+  "seconds": 8.0,
+  "loop": false,
+  "tags": [
+   "terrace"
+  ]
+ },
+ "crowd-swell": {
+  "seconds": 3.5,
+  "loop": false,
+  "tags": [
+   "terrace"
+  ]
+ },
+ "crowd-groan": {
+  "seconds": 2.6,
+  "loop": false,
+  "tags": [
+   "terrace"
+  ]
+ },
+ "crowd-hush": {
+  "seconds": 3.0,
+  "loop": false,
+  "tags": [
+   "terrace"
+  ]
+ },
+ "crowd-claps": {
+  "seconds": 4.0,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "rhythm"
+  ]
+ },
+ "amb-stadium": {
+  "seconds": 8.3,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "amb-hall": {
+  "seconds": 8.3,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "whistle-1": {
+  "seconds": 0.84,
+  "loop": false,
+  "tags": [
+   "pitch"
+  ]
+ },
+ "whistle-2": {
+  "seconds": 1.18,
+  "loop": false,
+  "tags": [
+   "pitch"
+  ]
+ },
+ "whistle-3": {
+  "seconds": 1.52,
+  "loop": false,
+  "tags": [
+   "pitch"
+  ]
+ },
+ "buzzer": {
+  "seconds": 1.3,
+  "loop": false,
+  "tags": [
+   "hall"
+  ]
+ },
+ "ball-bounce": {
+  "seconds": 0.12,
+  "loop": false,
+  "tags": [
+   "hall"
+  ]
+ },
+ "ball-kick": {
+  "seconds": 0.18,
+  "loop": false,
+  "tags": [
+   "pitch"
+  ]
+ },
+ "darbuka-dum": {
+  "seconds": 0.42,
+  "loop": false,
+  "tags": [
+   "rhythm"
+  ]
+ },
+ "darbuka-tek": {
+  "seconds": 0.2,
+  "loop": false,
+  "tags": [
+   "rhythm"
+  ]
+ },
+ "darbuka-ka": {
+  "seconds": 0.14,
+  "loop": false,
+  "tags": [
+   "rhythm"
+  ]
+ },
+ "darbuka-three-two": {
+  "seconds": 3.2,
+  "loop": false,
+  "tags": [
+   "rhythm"
+  ]
+ },
+ "step-floor-1": {
+  "seconds": 0.07,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-floor-2": {
+  "seconds": 0.07,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-floor-3": {
+  "seconds": 0.07,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-street-1": {
+  "seconds": 0.08,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-street-2": {
+  "seconds": 0.08,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-street-3": {
+  "seconds": 0.08,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-terrace-1": {
+  "seconds": 0.09,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-terrace-2": {
+  "seconds": 0.09,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-terrace-3": {
+  "seconds": 0.09,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-stairs-1": {
+  "seconds": 0.08,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-stairs-2": {
+  "seconds": 0.08,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "step-stairs-3": {
+  "seconds": 0.08,
+  "loop": false,
+  "tags": [
+   "step"
+  ]
+ },
+ "door": {
+  "seconds": 0.75,
+  "loop": false,
+  "tags": [
+   "room"
+  ]
+ },
+ "page": {
+  "seconds": 0.14,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "stamp": {
+  "seconds": 0.18,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "tick": {
+  "seconds": 0.03,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "coins": {
+  "seconds": 0.5,
+  "loop": false,
+  "tags": [
+   "kiosk"
+  ]
+ },
+ "bell-shop": {
+  "seconds": 0.9,
+  "loop": false,
+  "tags": [
+   "kiosk"
+  ]
+ },
+ "bell-school": {
+  "seconds": 1.6,
+  "loop": false,
+  "tags": [
+   "school"
+  ]
+ },
+ "amb-radio": {
+  "seconds": 3.6,
+  "loop": true,
+  "tags": [
+   "amb",
+   "radio"
+  ]
+ },
+ "radio-tune": {
+  "seconds": 1.2,
+  "loop": false,
+  "tags": [
+   "radio"
+  ]
+ },
+ "amb-bus": {
+  "seconds": 4.5,
+  "loop": true,
+  "tags": [
+   "amb",
+   "bus"
+  ]
+ },
+ "bus-door": {
+  "seconds": 1.1,
+  "loop": false,
+  "tags": [
+   "bus"
+  ]
+ },
+ "car-pass": {
+  "seconds": 2.4,
+  "loop": false,
+  "tags": [
+   "street"
+  ]
+ },
+ "car-door": {
+  "seconds": 0.14,
+  "loop": false,
+  "tags": [
+   "street"
+  ]
+ },
+ "amb-room": {
+  "seconds": 7.1,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "amb-kitchen": {
+  "seconds": 7.1,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "amb-street-day": {
+  "seconds": 9.1,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "amb-street-dusk": {
+  "seconds": 9.1,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "amb-tunnel": {
+  "seconds": 9.1,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "amb-base": {
+  "seconds": 9.1,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "amb-station": {
+  "seconds": 9.1,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "amb-classroom": {
+  "seconds": 9.1,
+  "loop": true,
+  "tags": [
+   "amb"
+  ]
+ },
+ "year-turn": {
+  "seconds": 2.2,
+  "loop": false,
+  "tags": [
+   "film"
+  ]
+ },
+ "finale-hit": {
+  "seconds": 3.6,
+  "loop": false,
+  "tags": [
+   "film"
+  ]
+ },
+ "stage-sting": {
+  "seconds": 2.0,
+  "loop": false,
+  "tags": [
+   "film",
+   "ui"
+  ]
+ },
+ "reveal": {
+  "seconds": 2.4,
+  "loop": false,
+  "tags": [
+   "film",
+   "ui"
+  ]
+ },
+ "gauge-up": {
+  "seconds": 0.16,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "gauge-down": {
+  "seconds": 0.18,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "heart": {
+  "seconds": 0.7,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "ui-open": {
+  "seconds": 0.07,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "ui-close": {
+  "seconds": 0.07,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "ui-click": {
+  "seconds": 0.03,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "choice": {
+  "seconds": 0.15,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "ending": {
+  "seconds": 3.0,
+  "loop": false,
+  "tags": [
+   "film"
+  ]
+ },
+ "box-item": {
+  "seconds": 0.09,
+  "loop": false,
+  "tags": [
+   "ui"
+  ]
+ },
+ "crowd-real-goal": {
+  "seconds": 9.0,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "a goal, nine seconds down"
+ },
+ "crowd-real-murmur": {
+  "seconds": 23.5,
+  "loop": true,
+  "tags": [
+   "terrace",
+   "real",
+   "amb"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "the murmur between things"
+ },
+ "crowd-real-build": {
+  "seconds": 6.0,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "something is building"
+ },
+ "crowd-real-miss": {
+  "seconds": 6.5,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "a near miss: peak and fall"
+ },
+ "crowd-real-after": {
+  "seconds": 4.5,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "the settle after a chance"
+ },
+ "crowd-real-final": {
+  "seconds": 11.2,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "the final whistle: burst, then the ground empties"
+ },
+ "amb-park": {
+  "seconds": 37.5,
+  "loop": true,
+  "tags": [
+   "amb",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "a park by a street; the street outside the ground"
+ },
+ "park-wave": {
+  "seconds": 14.0,
+  "loop": false,
+  "tags": [
+   "amb",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "a passing wave in the park"
+ }
+}
