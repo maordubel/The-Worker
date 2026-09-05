@@ -1,0 +1,587 @@
+import { ITEM_ART } from '../content/chapter1986'
+import type { HistoricalAnchor } from '../anchors'
+import { DIALOGUE } from '../content/dialogue'
+import { anchorFor, eraFor, type AnchorSet } from '../content/era'
+import type { ChoiceDef, Conversation, ConversationShot, Effect, Say } from '../content/script'
+import type { LifeEngine } from '../engine'
+import type { LifeEvent } from '../events'
+import { acceptEvents, isAvailable, resolveOutcome } from '../opportunities'
+import { keepEvents, pickRedBoxItem } from '../redbox'
+import { meets } from '../world/types'
+import { BACKDROP, DOC } from './art'
+
+import type { DialogueChoice, LifeBus } from './bus'
+import { describeMoneyChange } from '../money'
+import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
+import { characterName } from '../characters'
+import type { CharacterId } from '../types'
+
+/**
+ * מנהל השיחה — reads the content, writes to the life, and stops there.
+ *
+ * A conversation is data (`content/dialogue.ts`); this walks it. The separation is what
+ * keeps rule 7 of the brief enforceable: dialogue can hand out money, an item, a flag or
+ * twenty minutes, and it CANNOT do anything else — there is no effect in the vocabulary
+ * that moves the player, opens a door or wins the chapter without the world agreeing.
+ *
+ * Effects that leave the conversation (`travel`, `minigame`, `ending`) are not applied
+ * here at all: they are handed to the scene through hooks, because a text box has no
+ * business changing scene and a runtime that lets it will eventually do it mid-line.
+ */
+
+export type DialogueHooks = {
+  travel(to: string, spawn: string): void
+  minigame(id: 'football'): void
+  ending(id: string): void
+  /** the scene stops the world while this is true */
+  onOpen(open: boolean): void
+  /** how this beat is framed; the scene owns the camera, the content owns the shot */
+  shot?(shot: ConversationShot | null): void
+}
+
+/** the people a boy does not "meet": his parents, the friends from the alley, the neighbour, the kiosk */
+const KNOWN_FROM_HOME: ReadonlySet<string> = new Set(['kobi', 'rachel', 'ofir', 'amit', 'efi', 'keren', 'ilan', 'rafi'])
+
+export class DialogueRunner {
+  private conversation: Conversation | null = null
+  private lines: Say[] = []
+  private index = 0
+  private pendingChoices: ChoiceDef[] | null = null
+  private pendingThen: Effect[] = []
+  private onDone: (() => void) | null = null
+
+  constructor(
+    private readonly engine: LifeEngine,
+    private readonly bus: LifeBus,
+    private hooks: DialogueHooks,
+    private readonly fallbackAnchor: HistoricalAnchor,
+    private readonly anchors: AnchorSet = {},
+  ) {}
+
+  /** the plates of the chapter being played — the boy's face is four years older in 1990 */
+  private get portraits(): Record<string, string> {
+    return eraFor(this.engine.state.chapter).portraits
+  }
+
+  /** the anchor of the chapter being played — `{anchor}` in a 1990 line is the 1990 fact */
+  private get anchor(): HistoricalAnchor {
+    return anchorFor(this.anchors, eraFor(this.engine.state.chapter), this.fallbackAnchor)
+  }
+
+  setHooks(hooks: DialogueHooks) {
+    this.hooks = hooks
+  }
+
+  get open(): boolean {
+    return this.conversation !== null
+  }
+
+  /**
+   * An ad-hoc sequence with no conversation behind it — the prologue, and one day a
+   * cutscene. It shares the box, the pacing and the advance button with everything else,
+   * because a second way to show a line is a second way for a line to look wrong.
+   */
+  startLines(lines: readonly Say[], done?: () => void): void {
+    this.conversation = { id: '__lines__', branches: [] }
+    this.lines = lines.map((line) => ({ ...line, text: this.fill(line.text) }))
+    this.index = 0
+    this.pendingChoices = null
+    this.pendingThen = []
+    this.onDone = done ?? null
+    this.hooks.onOpen(true)
+    this.show()
+  }
+
+  /**
+   * Returns false when the conversation id does not exist — a missing prop talks about
+   * nothing. `done` runs when the conversation closes however it closes (a beat waits
+   * on it); a `goto` inside the conversation keeps the same `done`.
+   */
+  start(id: string, done?: () => void): boolean {
+    const conversation = DIALOGUE[id]
+    if (!conversation) return false
+    const branch = conversation.branches.find((candidate) => meets(this.engine.state, candidate.when))
+    if (!branch) return false
+
+    if (done) this.onDone = done
+    this.conversation = conversation
+    this.lines = branch.lines.map((line) => ({ ...line, text: this.fill(line.text) }))
+    this.index = 0
+    this.pendingChoices = branch.choices ?? null
+    this.pendingThen = branch.then ?? []
+    this.hooks.onOpen(true)
+    this.hooks.shot?.(branch.shot ?? null)
+    this.show()
+    return true
+  }
+
+  /** The only substitution the content layer gets, and it is a canonical fact. */
+  private fill(text: string): string {
+    return text.replaceAll('{anchor}', this.anchor.headlineHe)
+  }
+
+  advance() {
+    if (!this.conversation) return
+    if (this.index < this.lines.length - 1) {
+      this.index += 1
+      this.show()
+      return
+    }
+    if (this.pendingChoices) {
+      this.showChoices()
+      return
+    }
+    this.finish(this.pendingThen)
+  }
+
+  choose(id: string) {
+    const choice = this.pendingChoices?.find((candidate) => candidate.id === id)
+    if (!choice) return
+    if (!meets(this.engine.state, choice.when)) return
+    this.pendingChoices = null
+    // The log is a biography, so what was CHOSEN is a row in it — separately from what
+    // the choice did. Nothing derives state from this; it is what makes a second
+    // playthrough legible in the debug panel and to any future telemetry.
+    this.engine.dispatch({
+      t: 'dialogue.choice_made',
+      conversation: this.conversation?.id ?? '',
+      choice: choice.id,
+    })
+    this.finish(choice.then)
+  }
+
+  /**
+   * ללכת באמצע — the player walked away, and the game let them.
+   *
+   * A conversation you cannot leave is the oldest trap in the genre, and this build had
+   * it: talk to somebody twice, land on a branch whose choices you no longer qualify for,
+   * and the box stays on screen with nothing you can press. It was reported by the person
+   * who owns this game, in those words, and the fix is not a better branch — it is that
+   * leaving is always allowed, on every line, in every conversation.
+   *
+   * Leaving applies NOTHING. No `then`, no chained node, no time. Nobody gives a child
+   * anything for walking off mid-sentence, so the state after this call is exactly the
+   * state before the box opened — which also means the conversation can simply be started
+   * again, from its first line, by pressing the button once more.
+   */
+  leave() {
+    if (!this.conversation) return
+    this.close()
+  }
+
+  close() {
+    const done = this.onDone
+    this.onDone = null
+    this.conversation = null
+    this.lines = []
+    this.pendingChoices = null
+    this.pendingThen = []
+    this.bus.emit('dialogue', null)
+    this.hooks.shot?.(null)
+    this.hooks.onOpen(false)
+    if (done) done()
+  }
+
+  private show() {
+    const line = this.lines[this.index]
+    if (!line) {
+      this.finish(this.pendingThen)
+      return
+    }
+    const last = this.index === this.lines.length - 1
+    this.bus.emit('dialogue', {
+      lines: [line.closeUp ? { who: line.who, text: line.text, closeUp: line.closeUp } : { who: line.who, text: line.text }],
+      portrait: line.who ? (this.portraits[line.who] ?? null) : null,
+      choices: last && this.pendingChoices ? this.renderChoices(this.pendingChoices) : undefined,
+    })
+  }
+
+  private showChoices() {
+    const line = this.lines[this.lines.length - 1]
+    this.bus.emit('dialogue', {
+      lines: line ? [line] : [],
+      portrait: line?.who ? (this.portraits[line.who] ?? null) : null,
+      choices: this.renderChoices(this.pendingChoices ?? []),
+    })
+  }
+
+  private renderChoices(choices: readonly ChoiceDef[]): DialogueChoice[] {
+    return choices.flatMap((choice) => {
+      const enabled = meets(this.engine.state, choice.when)
+      if (!enabled && choice.hidden) return []
+      return {
+        id: choice.id,
+        text: choice.text,
+        enabled,
+        ...(enabled ? {} : { noteHe: choice.noteHe ?? '' }),
+      }
+    })
+  }
+
+  /** Apply, then either chain into another node or shut the box. */
+  private finish(effects: readonly Effect[]) {
+    const events: LifeEvent[] = []
+    let goto: string | null = null
+    const after: Array<() => void> = []
+    /** effects an opportunity's own outcome contributed, applied in the same pass */
+    const extra: Effect[] = []
+
+    /** the last thing handed over in this list — a toast that follows it shows it */
+    let handed: string | null = null
+    let kept: string | null = null
+    /** shekels in or out of the pocket in this list; said once at the end unless a toast already says it */
+    let moneyDelta = 0
+    let saidIt = false
+    /** the first person this list touched who was not yet met, and the first who will remember it */
+    let met: CharacterId | null = null
+    let remembered: CharacterId | null = null
+    const touch = (who: CharacterId) => {
+      if (KNOWN_FROM_HOME.has(who)) return
+      if (met === null && !this.engine.state.flags[`life:met:${who}`]) met = who
+    }
+    for (const effect of effects) {
+      switch (effect.e) {
+        case 'flag':
+          events.push({ t: 'flag.raised', flag: effect.flag })
+          break
+        case 'money':
+          events.push({ t: 'money.changed', agorot: effect.agorot, why: effect.why })
+          moneyDelta += effect.agorot
+          break
+        case 'give':
+          events.push({ t: 'item.gained', item: effect.item, count: effect.count ?? 1 })
+          handed = ITEM_ART[effect.item] ?? null
+          break
+        case 'take':
+          events.push({ t: 'item.lost', item: effect.item, count: effect.count ?? 1 })
+          break
+        case 'bond':
+          events.push({ t: 'bond.shifted', who: effect.who, delta: effect.delta })
+          break
+        case 'trait':
+          events.push({ t: 'trait.shifted', trait: effect.trait, delta: effect.delta })
+          break
+        case 'time':
+          events.push({ t: 'clock.advanced', minutes: effect.minutes })
+          break
+        case 'memory':
+          events.push({
+            t: 'memory.kept',
+            memory: {
+              id: effect.id,
+              item: effect.item,
+              atMinute: this.engine.state.minute,
+              year: this.engine.state.year,
+              anchorId: this.anchor.id,
+            },
+          })
+          events.push({ t: 'flag.raised', flag: 'memory:first' })
+          kept = ITEM_ART[effect.item] ?? null
+          break
+        case 'attend':
+          events.push({ t: 'anchor.attended', anchorId: this.anchor.id })
+          break
+        case 'missed':
+          events.push({ t: 'anchor.missed', anchorId: this.anchor.id })
+          break
+        case 'sfx':
+          after.push(() => this.bus.emit('sound', { kind: 'sample', key: effect.key, ...(effect.level !== undefined ? { level: effect.level } : {}), ...(effect.delayMs !== undefined ? { delayMs: effect.delayMs } : {}) }))
+          break
+        case 'plate': {
+          // a dialogue may cut to a painted place, never to an arbitrary file: the key must be a backdrop
+          if ((BACKDROP as readonly string[]).includes(effect.art)) {
+            const { art, titleHe, ms } = effect
+            const subHe = effect.subHe ?? null
+            after.push(() => this.bus.emit('card', { titleHe, subHe, ms: ms ?? 2600, art }))
+          }
+          break
+        }
+        case 'consequence': {
+          const text = effect.text
+          after.push(() => this.bus.emit('toast', { text, tone: 'red', kickerHe: CONSEQUENCE_KICKER_HE }))
+          if (effect.laterText) events.push(...scheduleLater(this.engine.state, effect.id, effect.laterText, effect.afterMinutes ?? 60))
+          break
+        }
+        case 'toast': {
+          const art = kept ?? handed
+          const kickerHe = kept ? 'לקופסה האדומה' : handed ? 'קיבלת' : undefined
+          saidIt = true
+          after.push(() =>
+            this.bus.emit('toast', {
+              text: effect.text,
+              tone: effect.tone ?? 'plain',
+              ...(art ? { art } : {}),
+              ...(kickerHe ? { kickerHe } : {}),
+            }),
+          )
+          break
+        }
+        case 'doc':
+          // Only a key the art layer actually declares. A dialogue file may hold up a
+          // document; it may not name an arbitrary URL and it may not name a sprite.
+          if (DOC.includes(effect.art as (typeof DOC)[number])) {
+            const art = effect.art
+            const captionHe = effect.captionHe ?? null
+            after.push(() => this.bus.emit('doc', { art, captionHe }))
+          }
+          break
+        case 'goto':
+          goto = effect.node
+          break
+        case 'travel':
+          after.push(() => this.hooks.travel(effect.to, effect.spawn))
+          break
+        case 'minigame':
+          after.push(() => this.hooks.minigame(effect.id))
+          break
+        case 'ending':
+          after.push(() => this.hooks.ending(effect.id))
+          break
+
+        // --- the systems pass ---------------------------------------------------
+        case 'wellbeing':
+          events.push({ t: 'wellbeing.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'personality':
+          events.push({ t: 'personality.shifted', key: effect.key, delta: effect.delta })
+          break
+        case 'redheart':
+          events.push({ t: 'redheart.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'rel':
+          events.push({ t: 'relationship.changed', who: effect.who, axis: effect.axis, delta: effect.delta })
+          if (effect.delta > 0) touch(effect.who)
+          break
+        case 'remember':
+          events.push({
+            t: 'relationship.memory_added',
+            memory: {
+              characterId: effect.who,
+              eventId: effect.eventId,
+              significance: effect.significance ?? 'notable',
+              year: this.engine.state.year,
+              atMinute: this.engine.state.minute,
+            },
+          })
+          touch(effect.who)
+          if ((effect.significance ?? 'notable') === 'major' && remembered === null) remembered = effect.who
+          break
+        case 'flagValue':
+          events.push({ t: 'flag.set', flag: effect.flag, value: effect.value })
+          break
+        case 'save':
+          // Out of the pocket and into the tin in one beat, so a scene cannot create money
+          // by saving what it never took.
+          events.push(
+            { t: 'money.changed', agorot: -Math.abs(effect.agorot), why: effect.why },
+            { t: 'savings.changed', agorot: Math.abs(effect.agorot), why: effect.why },
+          )
+          break
+        case 'withdraw':
+          events.push(
+            { t: 'savings.changed', agorot: -Math.abs(effect.agorot), why: effect.why },
+            { t: 'money.changed', agorot: Math.abs(effect.agorot), why: effect.why },
+          )
+          break
+        case 'own':
+          events.push({ t: 'clothing.gained', item: effect.item }, { t: 'flag.raised', flag: `own:${effect.item}` })
+          break
+        case 'energy':
+          events.push({ t: 'energy.changed', delta: effect.delta })
+          break
+        case 'gate':
+          events.push({ t: 'gate.moved', to: effect.to, reason: effect.reason, year: this.engine.state.year })
+          break
+        case 'armyRoute':
+          events.push({ t: 'army.route', route: effect.route })
+          break
+        case 'army':
+          events.push({ t: 'army.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'sinai':
+          events.push({ t: 'institution.sinai', stance: effect.stance })
+          break
+        case 'institution':
+          events.push({ t: 'institution.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'presence':
+          events.push({ t: 'presence.recorded', anchorId: this.anchor.id, mode: effect.mode })
+          break
+        case 'laces':
+          events.push({ t: 'laces.marked', response: effect.response })
+          break
+
+        /**
+         * לקחת הזדמנות — a conversation may CLOSE a window, and only that.
+         *
+         * The window itself is defined in the opportunity file with its cost and its
+         * outcomes; the line of dialogue names it. That is what stops the same afternoon
+         * being balanced in two places, and it is why a choice cannot quietly give
+         * itself a cheaper price than the window it belongs to.
+         */
+        case 'seize': {
+          const opportunity = eraFor(this.engine.state.chapter).opportunities.find((entry) => entry.id === effect.opportunity)
+          if (!opportunity) break
+          if (!isAvailable(this.engine.state, opportunity)) break
+          for (const event of acceptEvents(opportunity)) events.push(event)
+          const outcome = resolveOutcome(this.engine.state, opportunity)
+          if (outcome) extra.push(...outcome.effects)
+          break
+        }
+
+        /**
+         * מה נשאר — the red box roll, off the seed, out of what the day actually gave
+         * the player. Two saves that ended the same way can still keep different things.
+         */
+        case 'keep': {
+          const { item, consumed } = pickRedBoxItem(this.engine.state)
+          for (const event of keepEvents(item, consumed)) events.push(event)
+          break
+        }
+
+        default:
+          break
+      }
+    }
+
+    // the pocket changed and nobody said so: one line, the shared words, no agorot
+    if (moneyDelta !== 0 && !saidIt) {
+      const said = describeMoneyChange(moneyDelta)
+      if (said) after.push(() => this.bus.emit('toast', { text: said, tone: 'plain', kickerHe: moneyDelta > 0 ? 'קיבלת' : 'שילמת' }))
+    }
+    // the reward the brief asked for: a person met, a person who will remember — one line, live
+    if (met !== null) {
+      const who = met
+      events.push({ t: 'flag.raised', flag: `life:met:${who}` })
+      after.push(() => this.bus.emit('toast', { text: `הכרת את ${characterName(who)}.`, tone: 'plain', kickerHe: 'הכרת' }))
+    }
+    if (remembered !== null) {
+      const who = remembered
+      after.push(() => this.bus.emit('toast', { text: `${characterName(who)} יזכור את זה.`, tone: 'plain', kickerHe: 'יזכור' }))
+    }
+
+    if (events.length > 0) this.engine.dispatch(...events)
+    // An outcome cannot itself open a window, so one level of recursion is the whole
+    // depth this can ever reach — and a cycle is therefore impossible by construction.
+    if (extra.length > 0) this.finishOutcome(extra)
+
+    if (goto) {
+      this.conversation = null
+      const started = this.start(goto)
+      if (!started) this.close()
+    } else {
+      this.close()
+    }
+
+    for (const run of after) run()
+  }
+
+  /**
+   * Apply a list of effects with no conversation around them — a random encounter's
+   * consequence, after its line has been read. It deliberately cannot travel, chain or
+   * end the chapter: those belong to the scene, and an encounter that could end a
+   * chapter would be a lottery rather than a life.
+   */
+  applyEffects(effects: readonly Effect[]) {
+    this.finishOutcome(effects)
+  }
+
+  /** An opportunity outcome's effects: the same vocabulary, minus the ones that leave. */
+  private finishOutcome(effects: readonly Effect[]) {
+    const safe = effects.filter(
+      (effect) => effect.e !== 'goto' && effect.e !== 'travel' && effect.e !== 'ending' && effect.e !== 'seize',
+    )
+    const events: LifeEvent[] = []
+    for (const effect of safe) {
+      switch (effect.e) {
+        case 'flag':
+          events.push({ t: 'flag.raised', flag: effect.flag })
+          break
+        case 'money':
+          events.push({ t: 'money.changed', agorot: effect.agorot, why: effect.why })
+          break
+        case 'give':
+          events.push({ t: 'item.gained', item: effect.item, count: effect.count ?? 1 })
+          break
+        case 'take':
+          events.push({ t: 'item.lost', item: effect.item, count: effect.count ?? 1 })
+          break
+        case 'bond':
+          events.push({ t: 'bond.shifted', who: effect.who, delta: effect.delta })
+          break
+        case 'trait':
+          events.push({ t: 'trait.shifted', trait: effect.trait, delta: effect.delta })
+          break
+        case 'time':
+          events.push({ t: 'clock.advanced', minutes: effect.minutes })
+          break
+        case 'wellbeing':
+          events.push({ t: 'wellbeing.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'personality':
+          events.push({ t: 'personality.shifted', key: effect.key, delta: effect.delta })
+          break
+        case 'redheart':
+          events.push({ t: 'redheart.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'rel':
+          events.push({ t: 'relationship.changed', who: effect.who, axis: effect.axis, delta: effect.delta })
+          break
+        case 'remember':
+          events.push({
+            t: 'relationship.memory_added',
+            memory: {
+              characterId: effect.who,
+              eventId: effect.eventId,
+              significance: effect.significance ?? 'notable',
+              year: this.engine.state.year,
+              atMinute: this.engine.state.minute,
+            },
+          })
+          break
+        case 'save':
+          events.push(
+            { t: 'money.changed', agorot: -Math.abs(effect.agorot), why: effect.why },
+            { t: 'savings.changed', agorot: Math.abs(effect.agorot), why: effect.why },
+          )
+          break
+        case 'withdraw':
+          events.push(
+            { t: 'savings.changed', agorot: -Math.abs(effect.agorot), why: effect.why },
+            { t: 'money.changed', agorot: Math.abs(effect.agorot), why: effect.why },
+          )
+          break
+        case 'own':
+          events.push({ t: 'clothing.gained', item: effect.item }, { t: 'flag.raised', flag: `own:${effect.item}` })
+          break
+        case 'energy':
+          events.push({ t: 'energy.changed', delta: effect.delta })
+          break
+        case 'gate':
+          events.push({ t: 'gate.moved', to: effect.to, reason: effect.reason, year: this.engine.state.year })
+          break
+        case 'armyRoute':
+          events.push({ t: 'army.route', route: effect.route })
+          break
+        case 'army':
+          events.push({ t: 'army.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'sinai':
+          events.push({ t: 'institution.sinai', stance: effect.stance })
+          break
+        case 'institution':
+          events.push({ t: 'institution.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'presence':
+          events.push({ t: 'presence.recorded', anchorId: this.anchor.id, mode: effect.mode })
+          break
+        case 'laces':
+          events.push({ t: 'laces.marked', response: effect.response })
+          break
+        default:
+          break
+      }
+    }
+    if (events.length > 0) this.engine.dispatch(...events)
+  }
+}
