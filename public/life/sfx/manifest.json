@@ -444,5 +444,86 @@
   "tags": [
    "ui"
   ]
+ },
+ "crowd-real-goal": {
+  "seconds": 9.0,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "a goal, nine seconds down"
+ },
+ "crowd-real-murmur": {
+  "seconds": 23.5,
+  "loop": true,
+  "tags": [
+   "terrace",
+   "real",
+   "amb"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "the murmur between things"
+ },
+ "crowd-real-build": {
+  "seconds": 6.0,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "something is building"
+ },
+ "crowd-real-miss": {
+  "seconds": 6.5,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "a near miss: peak and fall"
+ },
+ "crowd-real-after": {
+  "seconds": 4.5,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "the settle after a chance"
+ },
+ "crowd-real-final": {
+  "seconds": 11.2,
+  "loop": false,
+  "tags": [
+   "terrace",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "the final whistle: burst, then the ground empties"
+ },
+ "amb-park": {
+  "seconds": 37.5,
+  "loop": true,
+  "tags": [
+   "amb",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "a park by a street; the street outside the ground"
+ },
+ "park-wave": {
+  "seconds": 14.0,
+  "loop": false,
+  "tags": [
+   "amb",
+   "real"
+  ],
+  "source": "maor-2026-09-05",
+  "note": "a passing wave in the park"
  }
 }

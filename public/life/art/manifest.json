@@ -587,6 +587,174 @@
     1600,
     900
    ]
+  },
+  "busStation": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 399672,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
+  },
+  "ramatGan": {
+   "w": 1600,
+   "h": 624,
+   "bytes": 425034,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    624
+   ]
+  },
+  "hatikva": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 509893,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 3969,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
+  },
+  "armyRoom": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 339418,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 5,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
+  },
+  "lironCar": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 181468,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
+  },
+  "gate5": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 440241,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
+  },
+  "kioskNight": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 352835,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
+  },
+  "alley": {
+   "w": 1600,
+   "h": 624,
+   "bytes": 522719,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    624
+   ]
+  },
+  "cup83": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 496849,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "street90Flags": {
+   "w": 1600,
+   "h": 625,
+   "bytes": 428330,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    625
+   ]
+  },
+  "ussHallNight": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 457834,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "classroom98": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 518070,
+   "yellowLeft": 0,
+   "source": "2026-09-05",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   }
  },
  "figures": {
@@ -2811,6 +2979,342 @@
    ],
    "deyellowed": 0,
    "yellowLeft": 0
+  },
+  "busStation--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 13422,
+   "source": "busStation",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "busStation--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 26648,
+   "source": "busStation",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ramatGan--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 11550,
+   "source": "ramatGan",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ramatGan--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 33258,
+   "source": "ramatGan",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "hatikva--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 12260,
+   "source": "hatikva",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "hatikva--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 28280,
+   "source": "hatikva",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "armyRoom--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 24346,
+   "source": "armyRoom",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "armyRoom--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 31960,
+   "source": "armyRoom",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "lironCar--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 10472,
+   "source": "lironCar",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "lironCar--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 2307,
+   "source": "lironCar",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "gate5--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 32768,
+   "source": "gate5",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "gate5--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 26055,
+   "source": "gate5",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kioskNight--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 16324,
+   "source": "kioskNight",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kioskNight--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 22332,
+   "source": "kioskNight",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "alley--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 37868,
+   "source": "alley",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "alley--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 36875,
+   "source": "alley",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "cup83--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 10050,
+   "source": "cup83",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "cup83--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 20727,
+   "source": "cup83",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "street90Flags--sky": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 19083,
+   "source": "street90Flags",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "street90Flags--ground": {
+   "w": 1600,
+   "h": 218,
+   "bytes": 32548,
+   "source": "street90Flags",
+   "box": [
+    0,
+    0,
+    1600,
+    218
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ussHallNight--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 16444,
+   "source": "ussHallNight",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ussHallNight--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 39206,
+   "source": "ussHallNight",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "classroom98--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 16990,
+   "source": "classroom98",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 16041,
+   "yellowLeft": 0
+  },
+  "classroom98--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 34433,
+   "source": "classroom98",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
   }
  },
  "parallax": {
@@ -3150,6 +3654,13 @@
    "bytes": 66612,
    "source": "plates",
    "yellowLeft": 0
+  },
+  "tunnelReveal": {
+   "w": 788,
+   "h": 1400,
+   "bytes": 463533,
+   "yellowLeft": 0,
+   "source": "2026-09-05"
   }
  }
 }
