@@ -185,10 +185,10 @@
   "ussHall": {
    "w": 1600,
    "h": 900,
-   "bytes": 792236,
+   "bytes": 430016,
    "yellowLeft": 0,
-   "source": "2026-09",
-   "deyellowed": 114100,
+   "source": "production-clean-2026-09-05",
+   "deyellowed": 0,
    "box": [
     0,
     0,
@@ -213,10 +213,10 @@
   "ussHallPre": {
    "w": 1600,
    "h": 900,
-   "bytes": 661885,
+   "bytes": 505867,
    "yellowLeft": 0,
-   "source": "2026-09",
-   "deyellowed": 209933,
+   "source": "production-clean-2026-09-05",
+   "deyellowed": 0,
    "box": [
     0,
     0,
@@ -660,16 +660,16 @@
   },
   "gate5": {
    "w": 1600,
-   "h": 625,
-   "bytes": 440241,
+   "h": 900,
+   "bytes": 428653,
    "yellowLeft": 0,
-   "source": "2026-09-05",
+   "source": "production-clean-2026-09-05",
    "deyellowed": 0,
    "box": [
     0,
     0,
     1600,
-    625
+    900
    ]
   },
   "kioskNight": {
@@ -843,18 +843,11 @@
    "yellowLeft": 0
   },
   "rachel": {
-   "w": 246,
-   "h": 498,
-   "bytes": 142243,
-   "source": "stageA2",
-   "box": [
-    566,
-    56,
-    648,
-    222
-   ],
-   "deyellowed": 10417,
-   "yellowLeft": 0
+   "w": 512,
+   "h": 1024,
+   "bytes": 117462,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
   },
   "fanA": {
    "w": 129,
@@ -1093,6 +1086,188 @@
    "yellowLeft": 0,
    "source": "2026-09e",
    "soft": true
+  },
+  "rachel-3q": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 117529,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel-side": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 93254,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel-back": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 92820,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel-speak": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 115024,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel-listen": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 123126,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel-concern": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 115523,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel-laugh": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 122339,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "efi96": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 83210,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "efi96-3q": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 80682,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "efi96-side": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 56714,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "efi96-back": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 70079,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "efi96-speak": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 85529,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "efi96-listen": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 87094,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "efi96-concern": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 88231,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "efi96-laugh": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 82879,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "barry96": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 102971,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "barry96-3q": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 102077,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "barry96-side": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 83494,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "barry96-back": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 86734,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "barry96-speak": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 108973,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "barry96-listen": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 106346,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "barry96-concern": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 98486,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "barry96-laugh": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 109190,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "michel96-walk1": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 121789,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "michel96-walk3": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 122739,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "michel96-walk5": {
+   "w": 512,
+   "h": 1024,
+   "bytes": 117361,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
   }
  },
  "props": {
@@ -2178,7 +2353,7 @@
   "ussHall--sky": {
    "w": 1600,
    "h": 315,
-   "bytes": 18297,
+   "bytes": 34485,
    "source": "ussHall",
    "box": [
     0,
@@ -2186,13 +2361,13 @@
     1600,
     315
    ],
-   "deyellowed": 6507,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussHall--ground": {
    "w": 1600,
    "h": 315,
-   "bytes": 31402,
+   "bytes": 20960,
    "source": "ussHall",
    "box": [
     0,
@@ -2234,7 +2409,7 @@
   "ussHallPre--sky": {
    "w": 1600,
    "h": 315,
-   "bytes": 15335,
+   "bytes": 47377,
    "source": "ussHallPre",
    "box": [
     0,
@@ -2248,7 +2423,7 @@
   "ussHallPre--ground": {
    "w": 1600,
    "h": 315,
-   "bytes": 23966,
+   "bytes": 20195,
    "source": "ussHallPre",
    "box": [
     0,
@@ -3129,28 +3304,28 @@
   },
   "gate5--sky": {
    "w": 1600,
-   "h": 218,
-   "bytes": 32768,
+   "h": 315,
+   "bytes": 12551,
    "source": "gate5",
    "box": [
     0,
     0,
     1600,
-    218
+    315
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "gate5--ground": {
    "w": 1600,
-   "h": 218,
-   "bytes": 26055,
+   "h": 315,
+   "bytes": 22016,
    "source": "gate5",
    "box": [
     0,
     0,
     1600,
-    218
+    315
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -3391,113 +3566,113 @@
  },
  "ui": {
   "titleWorker": {
-   "w": 883,
-   "h": 372,
-   "bytes": 75485,
+   "w": 1919,
+   "h": 820,
+   "bytes": 1349048,
    "yellowLeft": 0,
-   "source": "2026-09c"
+   "source": "production-clean-2026-09-05"
   }
  },
  "panoramas": {
   "panoReveal": {
-   "w": 4096,
-   "h": 1024,
-   "bytes": 2019707,
+   "w": 1774,
+   "h": 887,
+   "bytes": 537776,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "panoTerrace1986": {
-   "w": 4096,
-   "h": 1024,
-   "bytes": 1859660,
+   "w": 1774,
+   "h": 887,
+   "bytes": 445584,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "panoUssHall": {
-   "w": 4096,
-   "h": 1024,
-   "bytes": 1684299,
+   "w": 1774,
+   "h": 887,
+   "bytes": 533112,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "panoUssDerby": {
-   "w": 4096,
-   "h": 1024,
-   "bytes": 1553175,
+   "w": 1774,
+   "h": 887,
+   "bytes": 590811,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "panoKitchen90": {
-   "w": 4096,
-   "h": 1024,
-   "bytes": 2036563,
+   "w": 1774,
+   "h": 887,
+   "bytes": 515112,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "panoBedroomMorning90": {
-   "w": 4096,
-   "h": 1024,
-   "bytes": 2490401,
+   "w": 1774,
+   "h": 887,
+   "bytes": 374542,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "panoGate7": {
-   "w": 4096,
-   "h": 1024,
-   "bytes": 1913887,
+   "w": 1672,
+   "h": 941,
+   "bytes": 596361,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "panoClassroom": {
-   "w": 4096,
-   "h": 1024,
-   "bytes": 2015226,
+   "w": 1774,
+   "h": 887,
+   "bytes": 398833,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   }
  },
  "textures": {
   "texTunnelWall": {
-   "w": 512,
-   "h": 512,
-   "bytes": 51638,
+   "w": 1254,
+   "h": 1254,
+   "bytes": 656372,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "texTunnelWallPoster": {
-   "w": 512,
-   "h": 512,
-   "bytes": 46770,
+   "w": 1254,
+   "h": 1254,
+   "bytes": 759928,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "texTunnelFloor": {
-   "w": 512,
-   "h": 512,
-   "bytes": 36367,
+   "w": 1254,
+   "h": 1254,
+   "bytes": 595318,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "texTunnelCeiling": {
-   "w": 512,
-   "h": 512,
-   "bytes": 30568,
+   "w": 1254,
+   "h": 1254,
+   "bytes": 621386,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "texTunnelSteps": {
-   "w": 512,
-   "h": 512,
-   "bytes": 41058,
+   "w": 1254,
+   "h": 1254,
+   "bytes": 644201,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   },
   "texTunnelDoor": {
-   "w": 512,
-   "h": 512,
-   "bytes": 37189,
+   "w": 1254,
+   "h": 1254,
+   "bytes": 661043,
    "yellowLeft": 0,
-   "source": "stand-in"
+   "source": "production-clean-2026-09-05"
   }
  },
  "plates": {

@@ -171,6 +171,24 @@ export class WorldScene extends Phaser.Scene {
   private vx = 0
   private vy = 0
   private facing = 1
+
+  /**
+   * לאיזה צד מסתכל הציור — every profile in this game faces LEFT.
+   *
+   * Not a preference, a fact about the art: `pogi-side`, `pogi-walk`, `hero80-side`,
+   * `hero90-side`, `teen-side`, `soldier-side`, `soldier-march` and every walk frame in
+   * the approved character packs are painted walking to the left of the frame. The engine
+   * assumed the opposite — flip when heading left — so the child faced left while walking
+   * right and right while walking left. He moonwalked in both directions, in every
+   * chapter, since the first sheet shipped, and Maor reported it in four words: "many of
+   * them are actually walking backwards".
+   *
+   * One constant, used everywhere a body is turned, so the convention lives in one place
+   * and a new sheet is checked against it rather than against somebody's memory.
+   * `flip: true` in scene data is untouched — that is a raw mirror an author set by eye.
+   */
+  private static readonly ART_FACES = -1
+
   private lastDir: 'down' | 'up' | 'side' = 'down'
   private stride = 0
 
@@ -739,7 +757,7 @@ export class WorldScene extends Phaser.Scene {
       const shadow = this.add.ellipse(0, y, 40, 12, LIFE_PALETTE.ink, 0.2)
       const image = this.add.image(def.from * this.W, y, `art-${def.figure}`).setOrigin(0.5, 1)
       this.fit(image, def.size * this.H)
-      image.setFlipX(def.to < def.from)
+      image.setFlipX(def.to > def.from === (WorldScene.ART_FACES < 0))
       shadow.setSize(image.displayWidth * 0.55, image.displayWidth * 0.16)
       const visible = meets(state, def.when)
       image.setVisible(visible)
@@ -1442,7 +1460,7 @@ export class WorldScene extends Phaser.Scene {
       const pose = this.lastDir === 'up' ? poses.up : this.lastDir === 'side' ? poses.side : poses.down
       this.player.setTexture(`art-${pose}`)
     }
-    this.player.setFlipX(this.facing < 0)
+    this.player.setFlipX(this.facing !== WorldScene.ART_FACES)
 
     this.applyScale(this.player, this.shadow, ny, this.playerSize())
     if (moving) {
@@ -1490,7 +1508,7 @@ export class WorldScene extends Phaser.Scene {
       this.lastDir = dy < 0 ? 'up' : 'down'
       this.player.setTexture(`art-${this.lastDir === 'up' ? this.era.player.pose.up : this.era.player.pose.down}`)
     }
-    this.player.setFlipX(this.facing < 0)
+    this.player.setFlipX(this.facing !== WorldScene.ART_FACES)
   }
 
   private moveActors(delta: number) {
@@ -1590,7 +1608,7 @@ export class WorldScene extends Phaser.Scene {
         this.applyScale(actor.image, actor.shadow, y, { far: actor.def.size, near: actor.def.size })
         actor.image.y = y
       }
-      if (placement.facing) actor.image.setFlipX(placement.facing === 'left')
+      if (placement.facing) actor.image.setFlipX((placement.facing === 'left') === (WorldScene.ART_FACES > 0))
     }
   }
 

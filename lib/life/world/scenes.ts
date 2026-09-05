@@ -991,11 +991,11 @@ const SCENES: SceneDef[] = [
       { id: 'amit-laces', era: '1998-laces', figure: 'amit90-point', x: 0.63, y: 0.8, size: 0.283, nameHe: 'עמית', talk: 'ofir-laces', flip: true },
       { id: 'soko-laces', era: '1998-laces', figure: 'soko', x: 0.3, y: 0.8, size: 0.283, nameHe: 'סוקו', talk: 'soko-laces' },
       { id: 'liron-cup99', era: '1999-cup', figure: 'adultB2', x: 0.3, y: 0.8, size: 0.283, nameHe: 'לירון', talk: 'liron-cup99' },
-      { id: 'michel-cup99', era: '1999-cup', figure: 'adultA3', x: 0.44, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-cup99' },
+      { id: 'michel-cup99', era: '1999-cup', figure: 'michel96-walk1', x: 0.44, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-cup99' },
       { id: 'ofir-cup99', era: '1999-cup', figure: 'ofir90-arms', x: 0.58, y: 0.79, size: 0.275, nameHe: 'אופיר', talk: 'ofir-cup99' },
-      { id: 'efi-cup99', era: '1999-cup', figure: 'youngA2', x: 0.72, y: 0.8, size: 0.262, nameHe: 'אפי', talk: 'efi-cup99', flip: true },
-      { id: 'michel-title', era: '2000-title', figure: 'adultA3', x: 0.44, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-title' },
-      { id: 'efi-title', era: '2000-title', figure: 'youngA2', x: 0.72, y: 0.8, size: 0.262, nameHe: 'אפי', talk: 'efi-title', flip: true },
+      { id: 'efi-cup99', era: '1999-cup', figure: 'efi96-3q', x: 0.72, y: 0.8, size: 0.262, nameHe: 'אפי', talk: 'efi-cup99', flip: true },
+      { id: 'michel-title', era: '2000-title', figure: 'michel96-walk3', x: 0.44, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-title' },
+      { id: 'efi-title', era: '2000-title', figure: 'efi96-speak', x: 0.72, y: 0.8, size: 0.262, nameHe: 'אפי', talk: 'efi-title', flip: true },
       // ---- 1990: the same street, older children ----
       {
         id: 'ofir-street',
@@ -1318,7 +1318,7 @@ const SCENES: SceneDef[] = [
       // 1999 — the kiosk at night: Gate 5 as work before it is iconography
       { id: 'asaf-seed', era: '1999-basket', figure: 'asaf-back', x: 0.5, y: 0.84, size: 0.294, nameHe: 'אסף', talk: 'seed-gate5' },
       { id: 'melamed-seed', era: '1999-basket', figure: 'melamed', x: 0.3, y: 0.85, size: 0.298, nameHe: 'מלמד', talk: 'seed-gate5' },
-      { id: 'michel-seed', era: '1999-basket', figure: 'adultA3', x: 0.72, y: 0.85, size: 0.298, nameHe: 'מישל', talk: 'seed-gate5', flip: true },
+      { id: 'michel-seed', era: '1999-basket', figure: 'michel96-walk5', x: 0.72, y: 0.85, size: 0.298, nameHe: 'מישל', talk: 'seed-gate5', flip: true },
       { id: 'dudu-seed', era: '1999-basket', figure: 'adultA5', x: 0.86, y: 0.86, size: 0.303, nameHe: 'דודו', talk: 'seed-gate5', flip: true },
       { id: 'omer-seed', era: '1999-basket', figure: 'hermesh', x: 0.14, y: 0.86, size: 0.303, nameHe: 'עומר', talk: 'seed-gate5' },
       { id: 'ofir-kiosk', era: '1990', figure: 'ofir90', x: 0.6, y: 0.92, size: 0.3, nameHe: 'אופיר', talk: 'ofir-1990', flip: true },

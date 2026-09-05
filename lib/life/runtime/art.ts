@@ -141,6 +141,21 @@ export const LAYER = [
 /** Cut-out people. */
 export const FIGURE = [
   /**
+   * חבילת ה־Production Clean (5.9.2026) — the four Maor filtered by hand and approved.
+   *
+   * Rachel's eight poses REPLACE hers under the same keys; Barry, Efi grown up and
+   * Michel are new, and they take over from the crowd sheets that were standing in for
+   * them in 1996 and after. Every profile here faces left, which is this game's
+   * convention (`WorldScene.ART_FACES`) — `barry96-side` arrived facing right and was
+   * mirrored on ingest rather than at runtime.
+   */
+  'barry96', 'barry96-3q', 'barry96-side', 'barry96-back',
+  'barry96-speak', 'barry96-listen', 'barry96-concern', 'barry96-laugh',
+  'efi96', 'efi96-3q', 'efi96-side', 'efi96-back',
+  'efi96-speak', 'efi96-listen', 'efi96-concern', 'efi96-laugh',
+  'michel96-walk1', 'michel96-walk3', 'michel96-walk5',
+  'rachel-3q', 'rachel-speak', 'rachel-listen', 'rachel-concern', 'rachel-laugh',
+  /**
    * פוגי — the protagonist, and the reason this list changed shape.
    *
    * The game shipped with an ILLUSTRATED child standing in painted photographic
