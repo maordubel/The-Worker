@@ -1244,18 +1244,28 @@ const SCENES: SceneDef[] = [
     // counter, the scale and the till, shelves of boxes, the ice-cream chest, and the
     // doorway back out to the street. It is mirrored at ingest so that doorway is on the
     // right, where this scene's exit has always been.
-    band: { far: 0.7, near: 0.985 },
-    size: { far: 0.2, near: 0.32 },
+    /**
+     * הדלפק הוא הסרגל — the counter is what this room is measured against.
+     *
+     * Maor photographed the fault: the counter was several times the size of the man
+     * behind it, which is the same sentence upside down — the PEOPLE were half the size
+     * the room says they are. At the size the game draws this painting the counter
+     * measures 205px and a shop counter is about 1.05m, so a metre here is 0.315 of the
+     * frame: a man 0.55, a child of eight 0.40. Every figure in the room was multiplied
+     * by 1.85 to get there, which is why the numbers are not round.
+     */
+    band: { far: 0.80, near: 0.985 },
+    size: { far: 0.37, near: 0.41 },
     ambience: 'day',
     stuckHe: 'רפי מחכה. לצאת — ימינה.',
     stuckByEra: { '1990': 'אופיר ועמית פה. הרחוב — ימינה, ומשם מזרחה.' },
     spawns: { fromStreet: { x: 0.74, y: 0.93, facing: 'left' } , start: { x: 0.74, y: 0.93, facing: 'left' } },
     actors: [
-      { id: 'ofir-a2', era: 'a2-alley', figure: 'ofir', x: 0.6, y: 0.92, size: 0.3, nameHe: 'אופיר', talk: 'alley-a2', sway: 0.009 },
-      { id: 'amit-a2', era: 'a2-alley', figure: 'amit', x: 0.83, y: 0.87, size: 0.26, nameHe: 'עמית', talk: 'alley-a2', flip: true },
-      { id: 'efi-a2', era: 'a2-alley', figure: 'efi', x: 0.26, y: 0.74, size: 0.28, nameHe: 'אפי', talk: 'alley-a2', sway: 0.01 },
-      { id: 'rafi-a2', era: 'a2-alley', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.34, nameHe: 'רפי מהקיוסק', talk: 'rafi-a2', sway: 0.004 },
-      { id: 'rafi-a4', era: 'a4-shirt', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.34, nameHe: 'רפי מהקיוסק', talk: 'rafi-a4', sway: 0.004 },
+      { id: 'ofir-a2', era: 'a2-alley', figure: 'ofir', x: 0.6, y: 0.92, size: 0.403, nameHe: 'אופיר', talk: 'alley-a2', sway: 0.009 },
+      { id: 'amit-a2', era: 'a2-alley', figure: 'amit', x: 0.83, y: 0.87, size: 0.403, nameHe: 'עמית', talk: 'alley-a2', flip: true },
+      { id: 'efi-a2', era: 'a2-alley', figure: 'efi', x: 0.26, y: 0.74, size: 0.403, nameHe: 'אפי', talk: 'alley-a2', sway: 0.01 },
+      { id: 'rafi-a2', era: 'a2-alley', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-a2', sway: 0.004 },
+      { id: 'rafi-a4', era: 'a4-shirt', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-a4', sway: 0.004 },
       {
         id: 'shopkeeper',
         // 4.9.2026: the kiosk owner drawn at last — heavy, grey moustache, white shirt over
@@ -1264,7 +1274,7 @@ const SCENES: SceneDef[] = [
         figure: 'oldMan',
         x: 0.3,
         y: 0.9,
-        size: 0.34,
+        size: 0.535,
         nameHe: 'רפי מהקיוסק',
         talk: 'kiosk-man',
         sway: 0.004,
@@ -1277,7 +1287,7 @@ const SCENES: SceneDef[] = [
         figure: 'amit',
         x: 0.66,
         y: 0.9,
-        size: 0.31,
+        size: 0.403,
         nameHe: 'עמית',
         talk: 'amit-kiosk',
         flip: true,
@@ -1289,7 +1299,7 @@ const SCENES: SceneDef[] = [
         figure: 'oldMan-arms',
         x: 0.3,
         y: 0.9,
-        size: 0.38,
+        size: 0.535,
         nameHe: 'רפי מהקיוסק',
         talk: 'kiosk-man-1990',
         sway: 0.004,
@@ -1300,30 +1310,30 @@ const SCENES: SceneDef[] = [
         figure: 'oldMan-lean',
         x: 0.5,
         y: 0.8,
-        size: 0.275,
+        size: 0.535,
         nameHe: 'רפי מהקיוסק',
         talk: 'rafi-1993',
         sway: 0.003,
       },
       // the winter of 1996/97 at the kiosk: the court sits again, with a lawyer in it
-      { id: 'shopkeeper-army', era: '1996-army', figure: 'oldMan-wipe', x: 0.5, y: 0.8, size: 0.275, nameHe: 'רפי מהקיוסק', talk: 'a4-winter', sway: 0.003 },
-      { id: 'amit-army', era: '1996-army', figure: 'amit90-point', x: 0.3, y: 0.84, size: 0.294, nameHe: 'עמית', talk: 'a4-winter', when: { flag: 'life:army:d4' } },
-      { id: 'freddy-army', era: '1996-army', figure: 'freddy-glass', x: 0.72, y: 0.85, size: 0.298, nameHe: 'פרדי', talk: 'a4-freddy', when: { flag: 'life:army:d4' }, flip: true },
-      { id: 'liron-army', era: '1996-army', figure: 'adultB2', x: 0.86, y: 0.86, size: 0.303, nameHe: 'לירון', talk: 'a4-liron', when: { flag: 'life:army:d4' }, flip: true },
-      { id: 'yaron-army', era: '1996-army', figure: 'adultA4', x: 0.14, y: 0.86, size: 0.303, nameHe: 'ירון', talk: 'yaron-base', when: { flag: 'life:army:d4' } },
+      { id: 'shopkeeper-army', era: '1996-army', figure: 'oldMan-wipe', x: 0.5, y: 0.8, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'a4-winter', sway: 0.003 },
+      { id: 'amit-army', era: '1996-army', figure: 'amit90-point', x: 0.3, y: 0.84, size: 0.544, nameHe: 'עמית', talk: 'a4-winter', when: { flag: 'life:army:d4' } },
+      { id: 'freddy-army', era: '1996-army', figure: 'freddy-glass', x: 0.72, y: 0.85, size: 0.551, nameHe: 'פרדי', talk: 'a4-freddy', when: { flag: 'life:army:d4' }, flip: true },
+      { id: 'liron-army', era: '1996-army', figure: 'adultB2', x: 0.86, y: 0.86, size: 0.561, nameHe: 'לירון', talk: 'a4-liron', when: { flag: 'life:army:d4' }, flip: true },
+      { id: 'yaron-army', era: '1996-army', figure: 'adultA4', x: 0.14, y: 0.86, size: 0.561, nameHe: 'ירון', talk: 'yaron-base', when: { flag: 'life:army:d4' } },
       // the same kiosk, June 1994 and August 1995: the court of the poster
-      { id: 'shopkeeper-sinai', era: '1995-sinai', figure: 'oldMan-lean', x: 0.5, y: 0.8, size: 0.275, nameHe: 'רפי מהקיוסק', talk: 'rafi-sinai', sway: 0.003 },
-      { id: 'ofir-sinai', era: '1995-sinai', figure: 'ofir90-arms', x: 0.28, y: 0.84, size: 0.294, nameHe: 'אופיר', talk: 'ofir-sinai' },
-      { id: 'amit-sinai', era: '1995-sinai', figure: 'amit90', x: 0.74, y: 0.85, size: 0.298, nameHe: 'עמית', talk: 'amit-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
-      { id: 'freddy-sinai', era: '1995-sinai', figure: 'freddy', x: 0.86, y: 0.86, size: 0.303, nameHe: 'פרדי', talk: 'freddy-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
+      { id: 'shopkeeper-sinai', era: '1995-sinai', figure: 'oldMan-lean', x: 0.5, y: 0.8, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-sinai', sway: 0.003 },
+      { id: 'ofir-sinai', era: '1995-sinai', figure: 'ofir90-arms', x: 0.28, y: 0.84, size: 0.479, nameHe: 'אופיר', talk: 'ofir-sinai' },
+      { id: 'amit-sinai', era: '1995-sinai', figure: 'amit90', x: 0.74, y: 0.85, size: 0.551, nameHe: 'עמית', talk: 'amit-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
+      { id: 'freddy-sinai', era: '1995-sinai', figure: 'freddy', x: 0.86, y: 0.86, size: 0.561, nameHe: 'פרדי', talk: 'freddy-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
       // 1999 — the kiosk at night: Gate 5 as work before it is iconography
-      { id: 'asaf-seed', era: '1999-basket', figure: 'asaf-back', x: 0.5, y: 0.84, size: 0.294, nameHe: 'אסף', talk: 'seed-gate5' },
-      { id: 'melamed-seed', era: '1999-basket', figure: 'melamed', x: 0.3, y: 0.85, size: 0.298, nameHe: 'מלמד', talk: 'seed-gate5' },
-      { id: 'michel-seed', era: '1999-basket', figure: 'michel96-walk5', x: 0.72, y: 0.85, size: 0.298, nameHe: 'מישל', talk: 'seed-gate5', flip: true },
-      { id: 'dudu-seed', era: '1999-basket', figure: 'adultA5', x: 0.86, y: 0.86, size: 0.303, nameHe: 'דודו', talk: 'seed-gate5', flip: true },
-      { id: 'omer-seed', era: '1999-basket', figure: 'hermesh', x: 0.14, y: 0.86, size: 0.303, nameHe: 'עומר', talk: 'seed-gate5' },
-      { id: 'ofir-kiosk', era: '1990', figure: 'ofir90', x: 0.6, y: 0.92, size: 0.3, nameHe: 'אופיר', talk: 'ofir-1990', flip: true },
-      { id: 'amit-kiosk', era: '1990', figure: 'amit90', x: 0.5, y: 0.95, size: 0.33, nameHe: 'עמית', talk: 'amit-1990' },
+      { id: 'asaf-seed', era: '1999-basket', figure: 'asaf-back', x: 0.5, y: 0.84, size: 0.551, nameHe: 'אסף', talk: 'seed-gate5' },
+      { id: 'melamed-seed', era: '1999-basket', figure: 'melamed', x: 0.3, y: 0.85, size: 0.551, nameHe: 'מלמד', talk: 'seed-gate5' },
+      { id: 'michel-seed', era: '1999-basket', figure: 'michel96-walk5', x: 0.72, y: 0.85, size: 0.551, nameHe: 'מישל', talk: 'seed-gate5', flip: true },
+      { id: 'dudu-seed', era: '1999-basket', figure: 'adultA5', x: 0.86, y: 0.86, size: 0.551, nameHe: 'דודו', talk: 'seed-gate5', flip: true },
+      { id: 'omer-seed', era: '1999-basket', figure: 'hermesh', x: 0.14, y: 0.86, size: 0.551, nameHe: 'עומר', talk: 'seed-gate5' },
+      { id: 'ofir-kiosk', era: '1990', figure: 'ofir90', x: 0.6, y: 0.92, size: 0.479, nameHe: 'אופיר', talk: 'ofir-1990', flip: true },
+      { id: 'amit-kiosk', era: '1990', figure: 'amit90', x: 0.5, y: 0.95, size: 0.479, nameHe: 'עמית', talk: 'amit-1990' },
     ],
     hotspots: [
       /**
@@ -1336,18 +1346,18 @@ const SCENES: SceneDef[] = [
        * `Condition` cannot ask which year it is but an `era` can — and each of those opens
        * the conversation generated for that year's rail (`lib/life/shirts.ts`).
        */
-      { id: 'shirt-rail', era: 'a4-shirt', x: 0.13, y: 0.88, w: 0.12, act: 'rafi-a4', verb: 'look', labelHe: 'החולצה על הקולב', priority: 4, prop: { key: 'shirtVisa86', size: 0.26, at: { x: 0.13, y: 0.5 } } },
+      { id: 'shirt-rail', era: 'a4-shirt', x: 0.17, y: 0.88, w: 0.12, act: 'rafi-a4', verb: 'look', labelHe: 'החולצה על הקולב', priority: 4, prop: { key: 'shirtVisa86', size: 0.227, at: { x: 0.185, y: 0.44 } } },
       ...SHOP_CHAPTERS.map((chapter) => ({
         id: `fan-shop-${chapter}`,
         era: chapter,
-        x: 0.13,
+        x: 0.17,
         y: 0.88,
         w: 0.12,
         act: shopId(chapter),
         verb: 'look' as const,
         labelHe: 'חנות האוהדים',
         priority: 4,
-        prop: { key: 'shirtDiadoraRed', size: 0.26, at: { x: 0.13, y: 0.5 } },
+        prop: { key: 'shirtDiadoraRed', size: 0.227, at: { x: 0.185, y: 0.44 } },
       })),
       { id: 'bottles-a4', era: 'a4-shirt', x: 0.82, y: 0.88, w: 0.1, act: 'bottles-a4', verb: 'look', labelHe: 'הבקבוקים ליד הפח', when: { none: [{ flag: 'a4:bottles' }] } },{ id: 'counter', era: '*', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' }],
     exits: [
@@ -1887,7 +1897,18 @@ const SCENES: SceneDef[] = [
     titleHe: 'אולם אוסישקין — מבחוץ',
     art: 'ussExt',
     band: { far: 0.82, near: 0.96 },
-    size: { far: 0.19, near: 0.28 },
+    /**
+     * מדוד מהקהל שעל הקיר — the painted crowd along the front of the building.
+     *
+     * A man standing at the doors measures 116px at the size the game draws this
+     * painting, and he is about eight metres behind the kerb the child stands on, which
+     * at this camera makes an adult at the FRONT about 178px — so a child of eight is
+     * 130px, or 0.203 of the frame, and the room's metre is 0.159. The child was rendering
+     * at 0.331: two and a half times a painted adult, standing in a crowd of people half
+     * his size, with the usher exactly his height. Every figure here is now derived from
+     * that metre and a real body height.
+     */
+    size: { far: 0.185, near: 0.203 },
     ambience: 'dusk',
     stuckHe: 'הכניסה לאולם באמצע, מתחת לגג. חזרה לרחוב — משמאל.',
     stuckByEra: { '1991': 'הסדרן ליד הדלת, המוכר מימין. פנימה — באמצע.' },
@@ -1898,8 +1919,8 @@ const SCENES: SceneDef[] = [
       start: { x: 0.62, y: 0.92, facing: 'left' },
     },
     actors: [
-      { id: 'usher-a3', era: 'a3-hall', figure: 'usher-wave', x: 0.2, y: 0.9, size: 0.3, nameHe: 'סדרן', talk: 'usher-a3', sway: 0.004 },
-      { id: 'efi-a3-door', era: 'a3-hall', figure: 'efi', x: 0.55, y: 0.92, size: 0.27, nameHe: 'אפי', talk: 'efi-a3', flip: true },
+      { id: 'usher-a3', era: 'a3-hall', figure: 'usher-wave', x: 0.2, y: 0.9, size: 0.278, nameHe: 'סדרן', talk: 'usher-a3', sway: 0.004 },
+      { id: 'efi-a3-door', era: 'a3-hall', figure: 'efi', x: 0.55, y: 0.92, size: 0.204, nameHe: 'אפי', talk: 'efi-a3', flip: true },
       // ---- 11.3.1991, an hour before the doors ----
       // The usher stands BESIDE the door and not in it: a person in a doorway wins the
       // prompt over the door, and the way into the room disappears behind a conversation.
@@ -1909,7 +1930,7 @@ const SCENES: SceneDef[] = [
         figure: 'usher-wave',
         x: 0.55,
         y: 0.9,
-        size: 0.3,
+        size: 0.278,
         nameHe: 'סדרן',
         talk: 'usher-night',
         flip: true,
@@ -1923,7 +1944,7 @@ const SCENES: SceneDef[] = [
         figure: 'hallVendor',
         x: 0.72,
         y: 0.92,
-        size: 0.31,
+        size: 0.278,
         nameHe: 'מוכר',
         talk: 'hall-vendor',
         flip: true,
@@ -1936,7 +1957,7 @@ const SCENES: SceneDef[] = [
         figure: 'youngB3',
         x: 0.62,
         y: 0.9,
-        size: 0.263,
+        size: 0.262,
         nameHe: 'לימור',
         talk: 'limor-1993',
         sway: 0.003,
@@ -1947,7 +1968,7 @@ const SCENES: SceneDef[] = [
         figure: 'shachor',
         x: 0.8,
         y: 0.92,
-        size: 0.297,
+        size: 0.278,
         nameHe: 'שחור',
         talk: 'shachor-1993',
         flip: true,
@@ -1960,7 +1981,7 @@ const SCENES: SceneDef[] = [
         figure: 'youngA2',
         x: 0.68,
         y: 0.9,
-        size: 0.263,
+        size: 0.262,
         nameHe: 'אפי',
         talk: 'efi-galil',
         sway: 0.003,
@@ -1971,7 +1992,7 @@ const SCENES: SceneDef[] = [
         figure: 'youngB3',
         x: 0.58,
         y: 0.92,
-        size: 0.275,
+        size: 0.262,
         nameHe: 'לימור',
         talk: 'g4-limor',
         sway: 0.003,
@@ -1983,7 +2004,7 @@ const SCENES: SceneDef[] = [
         figure: 'shachor-back',
         x: 0.84,
         y: 0.92,
-        size: 0.297,
+        size: 0.278,
         nameHe: 'שחור',
         talk: 'shachor-galil',
         when: { flag: 'life:galil:after' },
@@ -1994,19 +2015,19 @@ const SCENES: SceneDef[] = [
         figure: 'soko',
         x: 0.2,
         y: 0.92,
-        size: 0.297,
+        size: 0.278,
         nameHe: 'סוקו',
         talk: 'after-soko',
         when: { flag: 'life:galil:after' },
       },
       // 1997 and 1999 — the two relegation nights, and the corner that works through them
-      { id: 'shachor-hall97', era: '1997-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.297, nameHe: 'שחור', talk: 'h1-corner', flip: true, when: { none: [{ flag: 'life:hall:d2' }] } },
-      { id: 'shachor-hall98', era: '1997-basket', figure: 'shachor-back', x: 0.8, y: 0.92, size: 0.297, nameHe: 'שחור', talk: 'h2-corner', when: { flag: 'life:hall:d2' } },
-      { id: 'limor-hall', era: '1997-basket', figure: 'youngB3', x: 0.62, y: 0.9, size: 0.263, nameHe: 'לימור', talk: 'h1-corner', sway: 0.003 },
-      { id: 'freddy-hall', era: '1997-basket', figure: 'freddy-drink', x: 0.16, y: 0.92, size: 0.297, nameHe: 'פרדי', talk: 'h1-freddy', when: { none: [{ flag: 'life:hall:d2' }] } },
-      { id: 'shachor-seed', era: '1999-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.297, nameHe: 'שחור', talk: 'seed-corner', flip: true },
-      { id: 'limor-seed', era: '1999-basket', figure: 'youngB3', x: 0.62, y: 0.9, size: 0.263, nameHe: 'לימור', talk: 'seed-corner', sway: 0.003 },
-      { id: 'soko-seed', era: '1999-basket', figure: 'soko', x: 0.2, y: 0.92, size: 0.297, nameHe: 'סוקו', talk: 'seed-inside' },
+      { id: 'shachor-hall97', era: '1997-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'h1-corner', flip: true, when: { none: [{ flag: 'life:hall:d2' }] } },
+      { id: 'shachor-hall98', era: '1997-basket', figure: 'shachor-back', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'h2-corner', when: { flag: 'life:hall:d2' } },
+      { id: 'limor-hall', era: '1997-basket', figure: 'youngB3', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'h1-corner', sway: 0.003 },
+      { id: 'freddy-hall', era: '1997-basket', figure: 'freddy-drink', x: 0.16, y: 0.92, size: 0.278, nameHe: 'פרדי', talk: 'h1-freddy', when: { none: [{ flag: 'life:hall:d2' }] } },
+      { id: 'shachor-seed', era: '1999-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'seed-corner', flip: true },
+      { id: 'limor-seed', era: '1999-basket', figure: 'youngB3', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'seed-corner', sway: 0.003 },
+      { id: 'soko-seed', era: '1999-basket', figure: 'soko', x: 0.2, y: 0.92, size: 0.278, nameHe: 'סוקו', talk: 'seed-inside' },
     ],
     hotspots: [
       { id: 'bus-1993', era: '1993-cup', x: 0.15, y: 0.84, w: 0.14, act: 'bus-1993', verb: 'enter', labelHe: 'האוטובוס', priority: 3 },

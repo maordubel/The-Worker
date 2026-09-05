@@ -843,9 +843,9 @@
    "yellowLeft": 0
   },
   "rachel": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 117462,
+   "w": 201,
+   "h": 628,
+   "bytes": 106308,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
@@ -1088,184 +1088,282 @@
    "soft": true
   },
   "rachel-3q": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 117529,
+   "w": 205,
+   "h": 626,
+   "bytes": 106647,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-side": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 93254,
+   "w": 167,
+   "h": 622,
+   "bytes": 82324,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-back": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 92820,
+   "w": 207,
+   "h": 618,
+   "bytes": 82287,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-speak": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 115024,
+   "w": 236,
+   "h": 618,
+   "bytes": 103170,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-listen": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 123126,
+   "w": 256,
+   "h": 618,
+   "bytes": 113292,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-concern": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 115523,
+   "w": 220,
+   "h": 619,
+   "bytes": 104229,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-laugh": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 122339,
+   "w": 225,
+   "h": 618,
+   "bytes": 110980,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "efi96": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 83210,
+   "w": 181,
+   "h": 498,
+   "bytes": 73042,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "efi96-3q": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 80682,
+   "w": 178,
+   "h": 497,
+   "bytes": 70666,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "efi96-side": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 56714,
+   "w": 110,
+   "h": 499,
+   "bytes": 46705,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "efi96-back": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 70079,
+   "w": 177,
+   "h": 497,
+   "bytes": 60150,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "efi96-speak": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 85529,
+   "w": 262,
+   "h": 470,
+   "bytes": 77880,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "efi96-listen": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 87094,
+   "w": 214,
+   "h": 472,
+   "bytes": 77919,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "efi96-concern": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 88231,
+   "w": 211,
+   "h": 471,
+   "bytes": 78919,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "efi96-laugh": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 82879,
+   "w": 170,
+   "h": 471,
+   "bytes": 72749,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "barry96": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 102971,
+   "w": 255,
+   "h": 548,
+   "bytes": 93121,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "barry96-3q": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 102077,
+   "w": 212,
+   "h": 548,
+   "bytes": 90700,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "barry96-side": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 83494,
+   "w": 164,
+   "h": 546,
+   "bytes": 72028,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "barry96-back": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 86734,
+   "w": 250,
+   "h": 548,
+   "bytes": 76278,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "barry96-speak": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 108973,
+   "w": 295,
+   "h": 529,
+   "bytes": 100077,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "barry96-listen": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 106346,
+   "w": 247,
+   "h": 517,
+   "bytes": 95646,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "barry96-concern": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 98486,
+   "w": 214,
+   "h": 529,
+   "bytes": 87145,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "barry96-laugh": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 109190,
+   "w": 260,
+   "h": 527,
+   "bytes": 99417,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "michel96-walk1": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 121789,
+   "w": 259,
+   "h": 576,
+   "bytes": 112616,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "michel96-walk3": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 122739,
+   "w": 252,
+   "h": 568,
+   "bytes": 112637,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "michel96-walk5": {
-   "w": 512,
-   "h": 1024,
-   "bytes": 117361,
+   "w": 219,
+   "h": 561,
+   "bytes": 106169,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel-tray": {
+   "w": 201,
+   "h": 628,
+   "bytes": 106308,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel-smoke": {
+   "w": 167,
+   "h": 622,
+   "bytes": 82324,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90": {
+   "w": 201,
+   "h": 628,
+   "bytes": 106308,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-3q": {
+   "w": 205,
+   "h": 626,
+   "bytes": 106647,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-side": {
+   "w": 167,
+   "h": 622,
+   "bytes": 82324,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-back": {
+   "w": 207,
+   "h": 618,
+   "bytes": 82287,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-arms": {
+   "w": 220,
+   "h": 619,
+   "bytes": 104229,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-apron": {
+   "w": 201,
+   "h": 628,
+   "bytes": 106308,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-door": {
+   "w": 236,
+   "h": 618,
+   "bytes": 103170,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-hug": {
+   "w": 225,
+   "h": 618,
+   "bytes": 110980,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-call": {
+   "w": 220,
+   "h": 619,
+   "bytes": 104229,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-note": {
+   "w": 256,
+   "h": 618,
+   "bytes": 113292,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-point": {
+   "w": 236,
+   "h": 618,
+   "bytes": 103170,
+   "yellowLeft": 0,
+   "source": "production-clean-2026-09-05"
+  },
+  "rachel90-hips": {
+   "w": 220,
+   "h": 619,
+   "bytes": 104229,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   }

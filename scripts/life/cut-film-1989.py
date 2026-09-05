@@ -37,6 +37,18 @@ CLIPS = [
      'לפני ערב גדול: הליכה אל משהו'),
     ('palms-evening', 1078, 4.5, 'דקלים וכיסאות על הטיילת, ערב',
      'סוף פרק שנגמר טוב'),
+    # …and six more from the rest of the reel, because a transition that repeats is a
+    # transition you stop seeing (5.9.2026, at Maor's ask).
+    ('street-morning', 121, 4.5, 'רחוב בבוקר, תריסים ומרפסות',
+     'יציאה מהבית — כל בוקר בשלב א׳'),
+    ('market', 268, 4.5, 'דוכנים, ארגזים, אנשים קונים',
+     'הדרך לקיוסק, ולכל שליחות'),
+    ('plaza-evening', 611, 4.0, 'כיכר מוארת בערב, אנשים עוברים',
+     'מעבר בין שנים — אותה עיר, ארבע שנים אחר כך'),
+    ('alley-shade', 733, 4.0, 'סמטה צרה, כביסה, צל',
+     'הסמטה והמגרש'),
+    ('night-lights', 1301, 4.5, 'ערב, אורות, אנשים ברחוב',
+     'ערב משחק — היציאה מהבית אל האור'),
 ]
 
 # cooler, flatter, and off the yellow band — the same grade the paintings get

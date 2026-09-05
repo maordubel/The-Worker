@@ -26,5 +26,40 @@
   "whatHe": "דקלים וכיסאות על הטיילת, ערב",
   "whereHe": "סוף פרק שנגמר טוב",
   "source": "Meir Mendelssohn, Tel Aviv 1989"
+ },
+ "street-morning": {
+  "seconds": 4.5,
+  "bytes": 324847,
+  "whatHe": "רחוב בבוקר, תריסים ומרפסות",
+  "whereHe": "יציאה מהבית — כל בוקר בשלב א׳",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
+ },
+ "market": {
+  "seconds": 4.5,
+  "bytes": 233068,
+  "whatHe": "דוכנים, ארגזים, אנשים קונים",
+  "whereHe": "הדרך לקיוסק, ולכל שליחות",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
+ },
+ "alley-shade": {
+  "seconds": 4.0,
+  "bytes": 177628,
+  "whatHe": "סמטה צרה, כביסה, צל",
+  "whereHe": "הסמטה והמגרש",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
+ },
+ "night-lights": {
+  "seconds": 4.5,
+  "bytes": 262235,
+  "whatHe": "ערב, אורות, אנשים ברחוב",
+  "whereHe": "ערב משחק — היציאה מהבית אל האור",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
+ },
+ "plaza-evening": {
+  "seconds": 4.0,
+  "bytes": 259165,
+  "whatHe": "כיכר מוארת בערב, אנשים עוברים",
+  "whereHe": "מעבר בין שנים — אותה עיר, ארבע שנים אחר כך",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
  }
 }
