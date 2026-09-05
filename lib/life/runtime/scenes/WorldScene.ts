@@ -226,6 +226,13 @@ export class WorldScene extends Phaser.Scene {
   /** where we came from, and whether the child has stepped clear of that doorway yet */
   private cameFrom: LocationId | null = null
   private clearedReturn = false
+  /** ms in this room, for the doorway you came through (see `checkExits`) */
+  private sinceArrival = 0
+  /** where the child was on the previous door check — a wall is not a walk */
+  private lastX = 0
+  private lastY = 0
+  /** how far outside a doorway counts as "behind you", as a fraction of the painting */
+  private static readonly RETURN_CLEARANCE = 0.055
   /** ms since the room was entered — no door may swallow the player on arrival */
   private since = 0
   /**
@@ -260,6 +267,9 @@ export class WorldScene extends Phaser.Scene {
     this.spawnName = data.spawn ?? 'start'
     this.cameFrom = data.from ?? null
     this.clearedReturn = false
+    this.sinceArrival = 0
+    this.lastX = 0
+    this.lastY = 0
     this.since = 0
     this.vx = 0
     this.vy = 0
@@ -2278,9 +2288,31 @@ export class WorldScene extends Phaser.Scene {
     const within = (exit: ExitDef) =>
       x >= exit.x - eps && x <= exit.x + exit.w + eps && y >= exit.y - eps && y <= exit.y + exit.h + eps
 
+    /**
+     * הדלת שיצאת ממנה — shut until you have actually walked away from it.
+     *
+     * This used to clear the moment the child stood outside the doorway's rectangle,
+     * which is always true at the spawn (a test fails the build on a spawn placed inside
+     * its own exit). So it cleared on frame one and guarded nothing: step out of the
+     * flat, lean left for a third of a second, and you are back in the flat — and then
+     * out, and then in. Maor reported it as "the house and the kiosk are too close to
+     * walk between", and the robot that plays a fresh life reproduced it as a loop
+     * between the living room and the pavement that never reached the kiosk, so the
+     * first day never ended and nothing after it — the key, the father — ever happened.
+     *
+     * A door is now behind you when you are a real distance from it, or when a couple of
+     * seconds have passed. Neither blocks INTENT: pressing the button on a doorway
+     * travels immediately, as it always did. What is blocked is the accidental dwell.
+     */
     if (!this.clearedReturn) {
       const back = this.exits.filter((exit) => exit.to === this.cameFrom)
-      if (back.length === 0 || !back.some(within)) this.clearedReturn = true
+      const away = (exit: ExitDef) =>
+        x < exit.x - WorldScene.RETURN_CLEARANCE ||
+        x > exit.x + exit.w + WorldScene.RETURN_CLEARANCE ||
+        y < exit.y - WorldScene.RETURN_CLEARANCE ||
+        y > exit.y + exit.h + WorldScene.RETURN_CLEARANCE
+      this.sinceArrival += delta
+      if (back.length === 0 || back.every(away) || this.sinceArrival > 2400) this.clearedReturn = true
     }
 
     let inside: ExitDef | null = null
@@ -2319,6 +2351,20 @@ export class WorldScene extends Phaser.Scene {
      */
     const input = this.ctx.input
     if (Math.abs(input.x) + Math.abs(input.y) < 0.08) return
+    /**
+     * ...and WALKING means moving, not merely holding a direction.
+     *
+     * The last door on a street is against a wall, and a child held against that wall is
+     * pressing a direction while going nowhere — which the old test counted as walking,
+     * so the doorway in the corner drained anybody who leaned that way. On this street
+     * that is the front door, and it turned "walk to the kiosk" into a loop between the
+     * pavement and the living room that a fresh save could never escape: the first day
+     * never ended, so the key was never taken and the father was never found (5.9.2026).
+     */
+    const moved = Math.abs(this.player.x - this.lastX) + Math.abs(this.player.y - this.lastY)
+    this.lastX = this.player.x
+    this.lastY = this.player.y
+    if (moved < this.W * 0.0008) return
 
     this.dwell += delta
     if (this.dwell >= (inside.dwellMs ?? 320)) this.travel(inside.to, inside.spawn)

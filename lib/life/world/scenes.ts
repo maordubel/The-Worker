@@ -842,8 +842,10 @@ const SCENES: SceneDef[] = [
       { art: 'streetFore', x: 0, y: 0, w: 1, depth: 0.995 },
     ],
     spawns: {
-      fromHome: { x: 0.115, y: 0.79, facing: 'right' },
-      fromKiosk: { x: 0.37, y: 0.8, facing: 'right' },
+      // Clear of the doorway by more than the return clearance, so the pavement outside
+      // your own front door is somewhere you can stand and look around.
+      fromHome: { x: 0.175, y: 0.79, facing: 'right' },
+      fromKiosk: { x: 0.395, y: 0.8, facing: 'right' },
       fromPitch: { x: 0.55, y: 0.79, facing: 'left' },
       fromRoute: { x: 0.935, y: 0.81, facing: 'left' },
       fromUss: { x: 0.82, y: 0.81, facing: 'left' },
@@ -1059,14 +1061,29 @@ const SCENES: SceneDef[] = [
         spawn: 'fromStreet',
         labelHe: 'הביתה',
         light: { x: 0.008, y: 0.44, w: 0.066, h: 0.3, tone: 'inside' },
-        dwellMs: 300,
+        // 900, like the kiosk and the alley. Three hundred was the only door on this
+        // street a passing step could fall through, and it is the door the whole
+        // neighbourhood is arranged around: leaning left on the pavement put you back in
+        // the flat before you had walked a body's width.
+        dwellMs: 900,
       },
       {
         id: 'kiosk',
+        /**
+         * רדוד, כמו פי הסמטה — the doorway sits at the BACK of the pavement.
+         *
+         * Six doors open off sixteen hundred pixels of street and the child is a hundred
+         * and eighty tall, so a full-height zone on each of them turns a walk east into a
+         * row of drains: you cannot pass the kiosk on the way to the alley without being
+         * pulled into the kiosk. The alley mouth already solved this — "you go up to it,
+         * or you press the button" — and every door on this street now follows it.
+         * Walking ALONG the pavement passes them; turning INTO one, or pressing the
+         * button, enters. (5.9.2026, found by the robot that plays a fresh life.)
+         */
         x: 0.235,
-        y: 0.72,
+        y: 0.705,
         w: 0.1,
-        h: 0.14,
+        h: 0.055,
         to: 'kiosk',
         spawn: 'fromStreet',
         labelHe: 'לקיוסק',
@@ -1106,7 +1123,7 @@ const SCENES: SceneDef[] = [
         x: 0.62,
         y: 0.705,
         w: 0.07,
-        h: 0.15,
+        h: 0.055,
         to: 'schoolyard',
         spawn: 'fromStreet',
         labelHe: 'לחצר בית הספר',
@@ -1121,12 +1138,23 @@ const SCENES: SceneDef[] = [
         // hotspot and on the exact spot where Ofir (14:50) and Keren stand — the
         // schedule guard in life-systems caught it. A place you STOP (dwell 900), so
         // walking east never pulls the child in. Its real home is a dedicated 1980s
-        // basketball beat; for now the way is open so the hall can be walked to and seen.
+        // basketball beat. Since 5.9.2026 it is not open from the first frame: see `when`.
         id: 'ussishkin',
+        /**
+         * ולא לפני שאפי אמר לו — the turning does not exist until somebody names it.
+         *
+         * It was open from the first frame of the game, which is a map handing out its
+         * own surprises: a boy in 1984 has no reason to know there is a hall down that
+         * gap, and the chapter that gives it to him (A3 — "אחרי הקיר, ימינה") arrived
+         * with nothing to give. `when` and not `needs`, deliberately: a locked door with
+         * a sentence on it is still a door you can see, and this one is a gap between
+         * two walls until Efi turns into it.
+         */
+        when: { flag: 'life:knows:hall' },
         x: 0.725,
         y: 0.705,
         w: 0.065,
-        h: 0.15,
+        h: 0.055,
         to: 'ussishkin-outside',
         spawn: 'fromStreet',
         labelHe: 'לאולם אוסישקין',

@@ -244,7 +244,10 @@ export const CONVERSATIONS_A3: Conversation[] = [
     nameHe: 'אפי',
     branches: [
       { when: { at: 'ussishkin-outside' }, lines: [{ who: 'אפי', text: 'זה פה. הסדרן מכיר אותי. תגיד לו את השם שלך, הוא אוהב שמות.' }] },
-      { lines: [{ who: 'אפי', text: 'אחרי הקיר, ימינה. אני הולך. אתה בא או לא?' }], then: [{ e: 'flag', flag: 'knows:hall' }] },
+      // `life:` as well as the day flag: a place you have been told about stays told
+      // about. `knows:hall` is cleared with every other flag at midnight (§day.entered),
+      // which is right for a beat and wrong for a street that now exists in his head.
+      { lines: [{ who: 'אפי', text: 'אחרי הקיר, ימינה. אני הולך. אתה בא או לא?' }], then: [{ e: 'flag', flag: 'knows:hall' }, { e: 'flag', flag: 'life:knows:hall' }] },
     ],
   },
   {
