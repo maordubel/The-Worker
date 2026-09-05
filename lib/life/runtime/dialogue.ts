@@ -12,6 +12,7 @@ import { BACKDROP, DOC } from './art'
 
 import type { DialogueChoice, LifeBus } from './bus'
 import { describeMoneyChange } from '../money'
+import { SHIRTS, ownedShirts, shirtById, shirtFlag } from '../shirts'
 import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
 import { characterName } from '../characters'
 import type { CharacterId } from '../types'
@@ -325,6 +326,30 @@ export class DialogueRunner {
             after.push(() => this.bus.emit('doc', { art, captionHe }))
           }
           break
+        /**
+         * A shirt is filed, and then it is HELD UP. The flag is `own:`, so it outlives
+         * the day, the year and the decade; the card is the only purchase in this game
+         * that stops the world for two seconds, and the first one says what it is.
+         */
+        case 'shirt': {
+          const shirt = shirtById(effect.id)
+          if (!shirt) break
+          const had = ownedShirts(this.engine.state).length
+          events.push({ t: 'flag.raised', flag: shirtFlag(shirt.id) })
+          after.push(() =>
+            this.bus.emit('shirt', {
+              art: shirt.art,
+              titleHe: had === 0 ? 'קנית את חולצת הפועל הראשונה שלך!' : 'עוד אחת לארון.',
+              nameHe: shirt.nameHe,
+              sponsorHe: shirt.sponsorHe,
+              yearsHe: shirt.yearsHe,
+              noteHe: shirt.noteHe,
+              have: had + 1,
+              total: SHIRTS.length,
+            }),
+          )
+          break
+        }
         case 'goto':
           goto = effect.node
           break

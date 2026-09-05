@@ -69,6 +69,14 @@ export type Effect =
   | { e: 'consequence'; id: string; text: string; laterText?: string; afterMinutes?: number }
   /** a cut to a painted place for a moment — a room the day has no walk in (the base, Liron's car); only a registered backdrop */
   | { e: 'plate'; art: string; titleHe: string; subHe?: string; ms?: number }
+  /**
+   * חולצה לארון — the one thing in this game that is kept for life.
+   *
+   * `own:shirt:<id>` survives every reset (see `personFlags`), so a shirt bought in 1985
+   * is still in the collection in 2000. The card it raises is the moment, not a receipt:
+   * the first one says so in as many words.
+   */
+  | { e: 'shirt'; id: string }
   /** a sound from the library at the moment the choice lands */
   | { e: 'sfx'; key: SampleKey; level?: number; delayMs?: number }
   /**

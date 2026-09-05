@@ -120,6 +120,16 @@ export type BackdropKey = (typeof BACKDROP)[number]
  * alpha, they belong to no chapter, and they are the only layers in this list that are
  * not a piece of somebody's furniture.
  */
+/**
+ * החולצות — the collection, cut off the photographs Maor took of the real shirts
+ * (`scripts/life/cut-shirts-2026-09-05.py`). One 1024 canvas each, so twelve of them hang
+ * at one scale on a rail without a number tuned per shirt.
+ */
+export const SHIRT = [
+  'shirtVisa86', 'shirtDiadoraRed', 'shirtDiadoraWhite',
+  'shirtKing', 'shirtShikun', 'shirtCrt', 'shirtBasket90',
+] as const
+
 export const LAYER = [
   /**
    * היציע — the terrace behind the front rows, composited once out of the crowd sheets

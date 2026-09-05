@@ -1,6 +1,7 @@
 import { at } from '../clock'
 import type { LocationId } from '../types'
 
+import { SHOP_CHAPTERS, shopId } from '../shirts'
 import type { Condition } from './types'
 
 /**
@@ -1325,6 +1326,29 @@ const SCENES: SceneDef[] = [
       { id: 'amit-kiosk', era: '1990', figure: 'amit90', x: 0.5, y: 0.95, size: 0.33, nameHe: 'עמית', talk: 'amit-1990' },
     ],
     hotspots: [
+      /**
+       * החולצה בחלון, ואז חנות האוהדים.
+       *
+       * A4 is the chapter about counting a tin three times, so the shirt has to be VISIBLE
+       * in the room the counting is for: it hangs at the left of Rafi's window from the
+       * summer of 1985, and it is the same painting the card holds up when it is finally
+       * bought. From 1990 the same rail is a shop, one hotspot per chapter because a
+       * `Condition` cannot ask which year it is but an `era` can — and each of those opens
+       * the conversation generated for that year's rail (`lib/life/shirts.ts`).
+       */
+      { id: 'shirt-rail', era: 'a4-shirt', x: 0.13, y: 0.88, w: 0.12, act: 'rafi-a4', verb: 'look', labelHe: 'החולצה על הקולב', priority: 4, prop: { key: 'shirtVisa86', size: 0.26, at: { x: 0.13, y: 0.5 } } },
+      ...SHOP_CHAPTERS.map((chapter) => ({
+        id: `fan-shop-${chapter}`,
+        era: chapter,
+        x: 0.13,
+        y: 0.88,
+        w: 0.12,
+        act: shopId(chapter),
+        verb: 'look' as const,
+        labelHe: 'חנות האוהדים',
+        priority: 4,
+        prop: { key: 'shirtDiadoraRed', size: 0.26, at: { x: 0.13, y: 0.5 } },
+      })),
       { id: 'bottles-a4', era: 'a4-shirt', x: 0.82, y: 0.88, w: 0.1, act: 'bottles-a4', verb: 'look', labelHe: 'הבקבוקים ליד הפח', when: { none: [{ flag: 'a4:bottles' }] } },{ id: 'counter', era: '*', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' }],
     exits: [
       {

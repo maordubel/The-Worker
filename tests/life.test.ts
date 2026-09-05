@@ -17,7 +17,7 @@ import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
-import { BACKDROP, extensionKeys, FIGURE, KID_POSE, KID_WALK, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
+import { SHIRT, BACKDROP, extensionKeys, FIGURE, KID_POSE, KID_WALK, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
 import { PANO_SPOTS } from '@/lib/life/content/panoramas'
 import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
 import { exitInEra, inEra } from '@/lib/life/world/scenes'
@@ -487,7 +487,9 @@ describe('העולם — every door leads somewhere that exists', () => {
         expect(figures.has(actor.figure), `${scene.id}/${actor.id} → ${actor.figure}`).toBe(true)
       }
       for (const spot of scene.hotspots) {
-        if (spot.prop) expect(props.has(spot.prop.key), `${scene.id}/${spot.id} → ${spot.prop.key}`).toBe(true)
+        // A hotspot may hold up a SHIRT as well as a prop: the rail in Rafi's window is
+        // the collection's first entry, cut from a photograph rather than from a sheet.
+        if (spot.prop) expect(props.has(spot.prop.key) || SHIRT.includes(spot.prop.key as (typeof SHIRT)[number]), `${scene.id}/${spot.id} → ${spot.prop.key}`).toBe(true)
       }
       for (const layer of scene.layers ?? []) {
         // Dressing is normally a prop or a separated piece of the painting. It may also be
@@ -595,6 +597,8 @@ describe('העולם — every door leads somewhere that exists', () => {
     const RECUT_OK = new Set(['propRadio'])
     for (const key of used) {
       if (RECUT_OK.has(key)) continue
+      // …and a shirt comes off a photograph of the real thing, which is the point of it
+      if (SHIRT.includes(key as (typeof SHIRT)[number])) continue
       expect(props[key]?.source, `${key} was hand-cropped from a board`).toBe('2026-09')
     }
   })

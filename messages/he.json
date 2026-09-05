@@ -729,5 +729,9 @@
   "life.reveal.close": "המשך",
   "life.map.placed": "מיקום משוער",
   "life.map.minutesAt": "{n} דק׳",
-  "life.map.near": "השכונה"
+  "life.map.near": "השכונה",
+  "life.shirt.club": "הפועל תל אביב",
+  "life.shirt.collection": "באוסף",
+  "life.shirt.tap": "לגעת כדי להמשיך",
+  "life.shirt.close": "לסגור"
 }

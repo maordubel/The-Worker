@@ -162,6 +162,21 @@ export type LifeBusEvents = {
    * `בלומפילד · 12 במאי 1990`. The first of the five tricks in the roadmap's grammar of
    * entering a scene. It says one thing and is never a menu.
    */
+  /**
+   * החולצה שקנית — held up big, with the year it was worn and where the collection
+   * stands. A shirt is the only purchase in this game that gets a card of its own.
+   */
+  shirt: {
+    art: string
+    titleHe: string
+    nameHe: string
+    sponsorHe: string
+    yearsHe: string
+    noteHe: string
+    have: number
+    total: number
+  } | null
+
   card: {
     titleHe: string
     subHe: string | null

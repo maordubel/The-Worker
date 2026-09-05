@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnchorCard } from '@/components/life/AnchorCard'
 import { DocSheet } from '@/components/life/DocSheet'
 import { ScoreStrip } from '@/components/life/ScoreStrip'
+import { ShirtCard } from '@/components/life/ShirtCard'
 import { StageFinale } from '@/components/life/StageFinale'
 import { ControlDeck, TapChip } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
@@ -101,6 +102,7 @@ export function LifeStage({
   /** a flash frame on the biggest beats — a goal's roar, a final whistle */
   const [flash, setFlash] = useState<{ tone: 'white' | 'red'; nonce: number }>({ tone: 'red', nonce: 0 })
   const [titleCard, setTitleCard] = useState<LifeBusEvents['card']>(null)
+  const [shirt, setShirt] = useState<LifeBusEvents['shirt']>(null)
   const [pano, setPano] = useState<LifeBusEvents['pano']>(null)
   const [tunnel, setTunnel] = useState<LifeBusEvents['tunnel']>(null)
   /** the plate that names a room as you step into it — not on the first room of a session */
@@ -297,6 +299,7 @@ export function LifeStage({
     )
     unsubscribe.push(bus.on('love', setLove))
     unsubscribe.push(
+      bus.on('shirt', (value) => setShirt(value)),
       bus.on('card', (value) => {
         setTitleCard(value)
         // a chapter card with a year on it is a year turning; a room card is a stamp
@@ -658,7 +661,7 @@ export function LifeStage({
   /** the painting fills the glass; the shell floats over it */
   const fullBleed = frame <= 0
   /** every overlay that must hide the in-world controls */
-  const covered = Boolean(dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel || gauges || coda || reveal)
+  const covered = Boolean(shirt || dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel || gauges || coda || reveal)
 
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
@@ -819,6 +822,7 @@ export function LifeStage({
         {card && <AnchorCard anchor={card} onClose={() => setCard(null)} />}
 
         {/* כרטיס-ביסוס — over black, one line, then the scene. */}
+        {shirt && <ShirtCard shirt={shirt} onClose={() => setShirt(null)} />}
         {titleCard &&
           (titleCard.art ? (
             <ChapterCard

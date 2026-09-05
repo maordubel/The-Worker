@@ -1,0 +1,30 @@
+{
+ "promenade-dusk": {
+  "seconds": 5.0,
+  "bytes": 123267,
+  "whatHe": "הטיילת מול הים, בין מנחת לחוף",
+  "whereHe": "הנסיעה דרומה→צפונה: בלומפילד → אוסישקין",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
+ },
+ "promenade-walk": {
+  "seconds": 5.0,
+  "bytes": 156499,
+  "whatHe": "אנשים על הטיילת, אור אחרון",
+  "whereHe": "מעבר בין הרחוב לתחנה — כל נסיעה בתוך העיר",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
+ },
+ "sea-wall": {
+  "seconds": 4.5,
+  "bytes": 173413,
+  "whatHe": "גבר הולך על שובר הגלים, גל נשבר",
+  "whereHe": "לפני ערב גדול: הליכה אל משהו",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
+ },
+ "palms-evening": {
+  "seconds": 4.5,
+  "bytes": 202504,
+  "whatHe": "דקלים וכיסאות על הטיילת, ערב",
+  "whereHe": "סוף פרק שנגמר טוב",
+  "source": "Meir Mendelssohn, Tel Aviv 1989"
+ }
+}
