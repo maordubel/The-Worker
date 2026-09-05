@@ -20,7 +20,8 @@ import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
 import { BACKDROP, extensionKeys, FIGURE, KID_POSE, KID_WALK, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
 import { PANO_SPOTS } from '@/lib/life/content/panoramas'
 import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
-import { inEra } from '@/lib/life/world/scenes'
+import { exitInEra, inEra } from '@/lib/life/world/scenes'
+import { CHAPTERS } from '@/lib/life/content/chapters'
 import { meets } from '@/lib/life/world/types'
 
 /**
@@ -41,7 +42,8 @@ const state = () => emptyState(DEFAULT_IDENTITY, 1986)
  * 1983, Stage A in 1986, Stage B's first movement in 1990 and its second — the Ussishkin
  * derby — in March 1991. Adding a year here is a decision, not a fix.
  */
-const TIMELINE = ['1978', '1983', '1986', '1990', '1991']
+// Stage B extends the life through the decade (brief §2.1), and the frame of 2026 the film opens on.
+const TIMELINE = ['1978', '1983', '1986', '1990', '1991', '1992', '1993', '1994', '1995', '1996', '1997', '1998', '1999', '2000', '2026']
 
 // ---------------------------------------------------------------------------------
 const ART = join(ROOT, 'public/life/art')
@@ -523,12 +525,16 @@ describe('העולם — every door leads somewhere that exists', () => {
   })
 
   it('never parks the dressing in a doorway', () => {
+    // A door and a prop only collide in a year they share: Kobi's 1986 car may stand
+    // where the 1996 bus-station door is, because nobody is in both years at once.
     for (const scene of scenes) {
       for (const layer of scene.layers ?? []) {
         if (!onTheGround(scene, layer)) continue
         const left = layer.x - layer.w / 2
         const right = layer.x + layer.w / 2
         for (const exit of scene.exits) {
+          const shared = CHAPTERS.some((c) => inEra(layer, c.id) && exitInEra(exit, c.id))
+          if (!shared) continue
           const clear = right <= exit.x + 0.005 || left >= exit.x + exit.w - 0.005
           expect(clear, `${scene.id}: ${layer.art} covers the door "${exit.id}"`).toBe(true)
         }
@@ -954,7 +960,7 @@ describe('השיחות — a conversation always has a way out', () => {
     for (const conversation of conversations) {
       for (const branch of conversation.branches) {
         for (const choice of branch.choices ?? []) {
-          if (!choice.when) continue
+          if (!choice.when || choice.hidden) continue
           expect(choice.noteHe, `${conversation.id}/${choice.id} locks without saying why`).toBeTruthy()
         }
       }
@@ -1155,7 +1161,7 @@ describe('הפתיח — the opening, and the one line in it that is a fact', ()
   it('names every file it plays, and every file exists', () => {
     expect(OPENING.length).toBeGreaterThanOrEqual(4)
     for (const beat of OPENING) {
-      const base = join(ROOT, 'public/life/opening', beat.art)
+      const base = join(ROOT, beat.from === 'art' ? 'public/life/art' : 'public/life/opening', beat.art)
       if (beat.kind === 'still') {
         expect(existsSync(`${base}.png`), `${beat.id} → ${beat.art}.png`).toBe(true)
       } else {
@@ -1233,7 +1239,7 @@ describe('הפתיח — the opening, and the one line in it that is a fact', ()
     expect(script).toContain('clean_palette(')
     for (const beat of OPENING) {
       if (beat.kind !== 'still') continue
-      const png = readFileSync(join(ROOT, 'public/life/opening', `${beat.art}.png`))
+      const png = readFileSync(join(ROOT, beat.from === 'art' ? 'public/life/art' : 'public/life/opening', `${beat.art}.png`))
       expect(png.length).toBeGreaterThan(1000)
     }
   })

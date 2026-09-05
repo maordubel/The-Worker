@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { ALL_CHARACTERS, CHARACTERS, castFor } from '@/lib/life/characters'
+import { ALL_CHARACTERS, CHARACTERS, castFor, isActiveIn } from '@/lib/life/characters'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
 import { RETRY_1986, retryFor } from '@/lib/life/content/retry1986'
@@ -113,7 +113,7 @@ describe('הקהל — twelve people, chosen off the seed, never twice in one ro
     for (const era of ['1986', '1990', '1991']) {
       for (const person of crowdFor(era)) {
         expect(CROWD_POOL, `${person.id} is not reusable`).toContain(person.id)
-        expect(person.activeEras.includes(era)).toBe(true)
+        expect(isActiveIn(person.id, era)).toBe(true)
       }
     }
     // nobody the story owns can ever be drawn as scenery
