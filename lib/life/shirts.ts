@@ -1,3 +1,4 @@
+import { SHIRT as SHIRT_BY_DECADE, decadeOf } from './prices'
 import type { Conversation } from './content/script'
 import type { Condition } from './world/types'
 import type { LifeState } from './types'
@@ -23,7 +24,13 @@ export type Shirt = {
   nameHe: string
   sponsorHe: string
   yearsHe: string
-  /** whole shekels, in the money of its own decade */
+  /**
+   * whole shekels, in the money of its own decade — and NOT typed here.
+   *
+   * Maor set the table on 5.9.2026 (30 · 60 · 110 · 160) and a shirt now takes its price
+   * from the decade of the chapter it first hangs in, so a row cannot drift from the
+   * table and a new shirt cannot invent a price. `SHIRTS` fills this in below.
+   */
   price: number
   /** the chapter it first appears on a rail */
   from: string
@@ -38,14 +45,13 @@ const ORDER = [
   '1997-basket', '1998-laces', '1999-basket', '1999-cup', '2000-title', '2000-double',
 ]
 
-export const SHIRTS: readonly Shirt[] = [
+const SHIRT_ROWS: readonly Omit<Shirt, 'price'>[] = [
   {
     id: 'visa86',
     art: 'shirtVisa86',
     nameHe: 'החולצה האדומה, פסים',
     sponsorHe: 'VISA',
     yearsHe: 'אמצע שנות ה־80',
-    price: 18,
     from: 'a4-shirt',
     noteHe: 'אדידס, פסי רוחב לבנים על השרוול, וסמל הפועל מעל הלב. זו החולצה בחלון של רפי.',
     kind: 'football',
@@ -56,7 +62,6 @@ export const SHIRTS: readonly Shirt[] = [
     nameHe: 'דיאדורה, אדומה',
     sponsorHe: 'diadora',
     yearsHe: 'תחילת שנות ה־90',
-    price: 95,
     from: '1990',
     noteHe: 'צווארון, אלכסונים בשני אדומים, והלוגו הלבן על כל החזה. החולצה של הילדות שאחרי.',
     kind: 'football',
@@ -67,7 +72,6 @@ export const SHIRTS: readonly Shirt[] = [
     nameHe: 'דיאדורה, לבנה',
     sponsorHe: 'DIADORA',
     yearsHe: 'שנות ה־90, חוץ',
-    price: 95,
     from: '1993-cup',
     noteHe: 'החולצה שנוסעים בה. אפור־לבן עם פסים דקים, ואדום רק על השרוול ועל הצווארון.',
     kind: 'football',
@@ -78,7 +82,6 @@ export const SHIRTS: readonly Shirt[] = [
     nameHe: 'גופיית הכדורסל',
     sponsorHe: 'בירה מכבי',
     yearsHe: 'שנות ה־90',
-    price: 80,
     from: '1993-galil',
     noteHe: 'מספר 8. שם של בירה על החזה של הפועל — ככה זה היה, ואף אחד לא צחק.',
     kind: 'basketball',
@@ -89,7 +92,6 @@ export const SHIRTS: readonly Shirt[] = [
     nameHe: 'שיכון עובדים',
     sponsorHe: 'שיכון עובדים',
     yearsHe: 'אמצע שנות ה־90',
-    price: 110,
     from: '1996-army',
     noteHe: 'שתי מילים על החזה שאומרות מאיפה המועדון הזה בא. אין עליהן ויכוח.',
     kind: 'football',
@@ -100,7 +102,6 @@ export const SHIRTS: readonly Shirt[] = [
     nameHe: 'king מוצרי חשמל',
     sponsorHe: 'king',
     yearsHe: 'סוף שנות ה־90',
-    price: 130,
     from: '1998-laces',
     noteHe: 'העונה של 2.5.98. אם אתה זוכר את החולצה הזאת, אתה זוכר גם איפה עמדת באותו ערב.',
     kind: 'football',
@@ -111,12 +112,23 @@ export const SHIRTS: readonly Shirt[] = [
     nameHe: 'נייקי, crt',
     sponsorHe: 'crt',
     yearsHe: 'שנות ה־2000',
-    price: 160,
     from: '2000-title',
     noteHe: 'צווארון לבן, שרוולים לבנים, והסמל העגול. החולצה של השנה שהכול קרה בה.',
     kind: 'football',
   },
 ]
+
+/**
+ * המחירון — every shirt priced off `prices.ts`, by the decade it first hangs in.
+ *
+ * 18 · 95 · 95 · 80 · 110 · 130 · 160 was what these rows said, which is not a price list,
+ * it is seven separate opinions. The table is 30 in the eighties, 60 in the nineties, 110
+ * in the two-thousands, and the shirt in the window costs what a shirt cost that year.
+ */
+export const SHIRTS: readonly Shirt[] = SHIRT_ROWS.map((row) => ({
+  ...row,
+  price: SHIRT_BY_DECADE[decadeOf(row.from)],
+}))
 
 export const shirtFlag = (id: string) => `own:shirt:${id}`
 

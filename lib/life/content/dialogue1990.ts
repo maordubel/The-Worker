@@ -223,7 +223,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         ],
         then: [
           { e: 'flag', flag: 'got:pocket' },
-          { e: 'money', agorot: 1200, why: 'מאמא' },
+          { e: 'money', agorot: 3200, why: 'מאמא' },
           { e: 'give', item: 'pocket-money' },
           { e: 'rel', who: 'rachel', axis: 'trust', delta: 4 },
           { e: 'toast', text: 'שטר אחד, מקופל לארבע', tone: 'red' },
@@ -566,13 +566,13 @@ export const CONVERSATIONS_1990: Conversation[] = [
         lines: [{ who: 'הקופאי', text: 'יש לך. לך.' }],
       },
       {
-        when: { minAgorot: 1000 },
+        when: { minAgorot: 3000 },
         lines: [
-          { who: 'הקופאי', text: 'ילד — מאתיים וחמישים. היום זה המחיר.' },
+          { who: 'הקופאי', text: 'ילד — שלושים. היום זה המחיר.' },
           { who: null, text: 'השטר של אמא. מקופל לארבע. אתה פותח אותו לאט, כאילו זה יעזור.' },
         ],
         then: [
-          { e: 'money', agorot: -1000, why: 'כרטיס' },
+          { e: 'money', agorot: -3000, why: 'כרטיס' },
           { e: 'take', item: 'pocket-money' },
           { e: 'give', item: 'ticket-stub' },
           { e: 'flag', flag: 'entry:granted' },
@@ -583,7 +583,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
       },
       {
         lines: [
-          { who: 'הקופאי', text: 'מאתיים וחמישים לילד. היום.' },
+          { who: 'הקופאי', text: 'שלושים לילד. היום.' },
           { who: null, text: 'אין לך. לא היום, לא בכיס הזה.' },
         ],
       },

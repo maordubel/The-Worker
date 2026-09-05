@@ -16,6 +16,7 @@ import { CONVERSATIONS_CUP99 } from './chapter1999cup'
 import { CONVERSATIONS_DOUBLE, CONVERSATIONS_TITLE } from './chapter2000double'
 import { CONVERSATIONS_MATCH } from './dialogueMatch'
 import { CONVERSATIONS_A2, CONVERSATIONS_A3, CONVERSATIONS_A4, CONVERSATIONS_A5, CONVERSATIONS_A6, CONVERSATIONS_A7 } from './chapterStageA'
+import { gigConversations } from '../gigs'
 import { fanShops } from '../shirts'
 import type { Conversation } from './script'
 
@@ -824,13 +825,13 @@ const CONVERSATIONS: Conversation[] = [
         lines: [{ who: 'הקופאי', text: 'כבר סידרת. לך.' }],
       },
       {
-        when: { minAgorot: 800 },
+        when: { minAgorot: 1500 },
         lines: [
-          { who: 'הקופאי', text: 'ילד — מאה וחמישים.' },
+          { who: 'הקופאי', text: 'ילד — חמישה־עשר.' },
           { who: null, text: 'אתה שם את הכסף על השיש. הוא סופר, ומעביר לך פתק קרטון קטן.' },
         ],
         then: [
-          { e: 'money', agorot: -800, why: 'כרטיס' },
+          { e: 'money', agorot: -1500, why: 'כרטיס' },
           { e: 'give', item: 'ticket-stub' },
           { e: 'flag', flag: 'entry:granted' },
           { e: 'flag', flag: 'entry:ticket' },
@@ -840,7 +841,7 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [
-          { who: 'הקופאי', text: 'מאה וחמישים לילד.' },
+          { who: 'הקופאי', text: 'חמישה־עשר לילד.' },
           { who: null, text: 'אתה סופר בכיס בלי להוציא את היד. זה לא מספיק, וזה לא ישתנה מספירה שנייה.' },
         ],
       },
@@ -1580,7 +1581,7 @@ const CONVERSATIONS: Conversation[] = [
  * second chapter is a second content file and not a second runner (brief §52).
  */
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
-  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_MATCH, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7, ...fanShops()].map(
+  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_MATCH, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7, ...fanShops(), ...gigConversations()].map(
     (conversation) => [conversation.id, conversation],
   ),
 )

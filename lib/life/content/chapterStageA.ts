@@ -1,4 +1,5 @@
 import { at } from '../clock'
+import { shirtAgorot } from '../prices'
 import type { LifeState } from '../types'
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
@@ -268,7 +269,14 @@ export const CONVERSATIONS_A3: Conversation[] = [
 
 // ------------------------------------------------------------------- A4 · the shirt ---
 
-export const SHIRT_PRICE = 1800
+/**
+ * מה שרפי מבקש — thirty shekels, from the table, not from a guess.
+ *
+ * It was 1800 (eighteen shekels) until 5.9.2026, which made the chapter about counting a
+ * tin winnable without counting anything. Maor set the price of a shirt in the eighties at
+ * thirty, and the afternoon around it grew the work to match (`lib/life/gigs.ts`).
+ */
+export const SHIRT_PRICE = shirtAgorot('a4-shirt')
 
 export function objectiveA4(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
@@ -311,7 +319,7 @@ export const BEATS_A4: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'flag', flag: A4 },
-      { a: 'events', events: [{ t: 'savings.changed', agorot: 900, why: 'הפחית' }, { t: 'money.changed', agorot: 200, why: 'מהכיס' }] },
+      { a: 'events', events: [{ t: 'savings.changed', agorot: 1200, why: 'הפחית' }, { t: 'money.changed', agorot: 200, why: 'מהכיס' }] },
       { a: 'lines', lines: [{ who: null, text: 'קיץ. שבע. בחלון של רפי תלויה חולצה אדומה בלי מספר, ומתחת למיטה שלך יש פחית עם חריץ.' }, { who: null, text: 'רפי סוגר בשבע.' }] },
     ],
   },
@@ -342,7 +350,7 @@ export const CONVERSATIONS_A4: Conversation[] = [
   {
     id: 'tin-a4-out',
     nameHe: null,
-    branches: [{ lines: [{ who: null, text: 'המטבעות בכיס. הכיס כבד. זה מרגיש כמו משהו.' }], then: [{ e: 'withdraw', agorot: 900, why: 'הפחית' }, { e: 'sfx', key: 'coins', level: 0.6 }, { e: 'flagValue', flag: 'a4:tin', value: true }] }],
+    branches: [{ lines: [{ who: null, text: 'המטבעות בכיס. הכיס כבד. זה מרגיש כמו משהו.' }], then: [{ e: 'withdraw', agorot: 1200, why: 'הפחית' }, { e: 'sfx', key: 'coins', level: 0.6 }, { e: 'flagValue', flag: 'a4:tin', value: true }] }],
   },
   {
     id: 'bottles-a4',
@@ -378,7 +386,7 @@ export const CONVERSATIONS_A4: Conversation[] = [
       {
         lines: [{ who: 'רפי מהקיוסק', text: 'החולצה? שמונה־עשרה. אין לך שמונה־עשרה. יש לך פנים של ילד שסופר.' }],
         choices: [
-          { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'time', minutes: 50 }, { e: 'energy', delta: -15 }, { e: 'money', agorot: 400, why: 'ארגזים' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'toast', text: 'שעה של ארגזים. 4 ₪ ובקבוק קולה פתוח.', tone: 'plain' }] },
+          { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'time', minutes: 50 }, { e: 'energy', delta: -15 }, { e: 'money', agorot: 500, why: 'ארגזים' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'toast', text: 'שעה של ארגזים. 5 ₪ ובקבוק קולה פתוח.', tone: 'plain' }] },
           { id: 'no', text: '"רק מסתכל."', then: [] },
         ],
       },

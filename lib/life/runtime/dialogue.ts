@@ -32,7 +32,7 @@ import type { CharacterId } from '../types'
 
 export type DialogueHooks = {
   travel(to: string, spawn: string): void
-  minigame(id: 'football'): void
+  minigame(id: string): void
   ending(id: string): void
   /** the scene stops the world while this is true */
   onOpen(open: boolean): void

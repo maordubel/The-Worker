@@ -500,16 +500,16 @@ export const CONVERSATIONS_1993: Conversation[] = [
         lines: [{ who: null, text: 'המקום שבו האוטובוס עמד. שמן על הכביש וכרטיס קרוע. הוא יצא.' }],
       },
       {
-        when: { any: [{ flag: 'route:efi' }, { flag: 'route:ofir' }], minAgorot: 1200 },
+        when: { any: [{ flag: 'route:efi' }, { flag: 'route:ofir' }], minAgorot: 3600 },
         lines: [
-          { who: null, text: 'אוטובוס לבן, מנוע דולק, הנהג מעשן בחלון. אפי בפנים דופק על הזכוכית. לימור בדלת עם שתי אצבעות: שתיים־עשרה שקל.' },
+          { who: null, text: 'אוטובוס לבן, מנוע דולק, הנהג מעשן בחלון. אפי בפנים דופק על הזכוכית. לימור בדלת, אצבעות פרושות: שלושים ושש — הנסיעה והכרטיס ביחד.' },
         ],
         choices: [
           {
             id: 'board',
-            text: 'לעלות. שתים־עשרה שקל.',
+            text: 'לעלות. שלושים ושש.',
             then: [
-              { e: 'money', agorot: -1200, why: 'אוטובוס וכרטיס' },
+              { e: 'money', agorot: -3600, why: 'אוטובוס וכרטיס' },
               { e: 'give', item: 'hall-ticket' },
               { e: 'flag', flag: 'on:bus' },
               { e: 'time', minutes: 35 },

@@ -128,10 +128,12 @@ PROPS = {
     'propTicketBasketball.png': 'propTicketBasketball',
 }
 
-# A profile in this game faces LEFT (see `WorldScene.ART_FACES`). The approved walk cycles
-# already do; a sheet that does not is mirrored here rather than at runtime, so the file on
-# disk is the truth and nobody has to remember an exception.
-FACE_LEFT = True
+# A profile in this game faces RIGHT (see `WorldScene.ART_FACES`). This said LEFT on
+# 5.9.2026 and it was wrong: `pogi-side`, `hero80-side` and every walk frame the earlier
+# ingests cut face right, and the one file this flag actually mirrored — `barry96-side` —
+# had to be mirrored back. A sheet that arrives facing left is mirrored here rather than
+# at runtime, so the file on disk is the truth; `scripts/life/facing-check.py` says so.
+FACE_RIGHT = True
 
 
 def write(path, group, key, manifest, backdrop=False, cutout=False):

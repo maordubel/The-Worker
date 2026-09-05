@@ -155,9 +155,11 @@ export const FIGURE = [
    *
    * Rachel's eight poses REPLACE hers under the same keys; Barry, Efi grown up and
    * Michel are new, and they take over from the crowd sheets that were standing in for
-   * them in 1996 and after. Every profile here faces left, which is this game's
-   * convention (`WorldScene.ART_FACES`) — `barry96-side` arrived facing right and was
-   * mirrored on ingest rather than at runtime.
+   * them in 1996 and after. Every profile in this folder faces RIGHT, which is this game's
+   * convention (`WorldScene.ART_FACES = 1`). This comment said "left" for a day, the
+   * ingest that read it mirrored `barry96-side` INTO the wrong direction, and the boy
+   * walked backwards in every chapter until 5.9.2026. Fifteen files were mirrored back;
+   * `scripts/life/facing-check.py` now fails rather than a comment being trusted.
    */
   'barry96', 'barry96-3q', 'barry96-side', 'barry96-back',
   'barry96-speak', 'barry96-listen', 'barry96-concern', 'barry96-laugh',

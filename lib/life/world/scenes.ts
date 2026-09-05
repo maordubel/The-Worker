@@ -1,6 +1,7 @@
 import { at } from '../clock'
 import type { LocationId } from '../types'
 
+import { GIGS, gigChapters, gigId } from '../gigs'
 import { SHOP_CHAPTERS, shopId } from '../shirts'
 import type { Condition } from './types'
 
@@ -382,6 +383,29 @@ const GATE7_CLEAR = [
   { x: 0.41, y: 0.752 },  // אופיר
 ]
 
+/**
+ * הג׳ובים על המפה — one hotspot per gig per chapter it exists in.
+ *
+ * A `Condition` cannot ask which year it is, but a hotspot's `era` can, and that is the
+ * same trick the fan shop uses. So the broom is against the wall in Ussishkin from 1984
+ * and the bucket appears in the car park in 1990, and neither of them is typed twice.
+ */
+function gigSpots(where: string) {
+  return GIGS.filter((gig) => gig.where === where).flatMap((gig) =>
+    gigChapters(gig).map((chapter) => ({
+      id: `${gig.id}-${chapter}`,
+      era: chapter,
+      x: gig.at.x,
+      y: gig.at.y,
+      w: gig.at.w,
+      act: gigId(gig, chapter),
+      verb: 'look' as const,
+      labelHe: gig.labelHe,
+      priority: 3,
+    })),
+  )
+}
+
 const SCENES: SceneDef[] = [
   // ------------------------------------------------------------------- bedroom ----
   {
@@ -749,7 +773,7 @@ const SCENES: SceneDef[] = [
         sway: 0.004,
       },
     ],
-    hotspots: [
+    hotspots: [...gigSpots('street'), 
       { id: 'radio-a6', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
       // On the floor at the end of the run of cupboards, which is where a crate of empties
       // lives in a flat that takes them back for the deposit.
@@ -1335,7 +1359,7 @@ const SCENES: SceneDef[] = [
       { id: 'ofir-kiosk', era: '1990', figure: 'ofir90', x: 0.6, y: 0.92, size: 0.479, nameHe: 'אופיר', talk: 'ofir-1990', flip: true },
       { id: 'amit-kiosk', era: '1990', figure: 'amit90', x: 0.5, y: 0.95, size: 0.479, nameHe: 'עמית', talk: 'amit-1990' },
     ],
-    hotspots: [
+    hotspots: [...gigSpots('kiosk'), 
       /**
        * החולצה בחלון, ואז חנות האוהדים.
        *
@@ -1653,7 +1677,7 @@ const SCENES: SceneDef[] = [
       { id: 'ofir-ground', era: '1990', figure: 'ofir90', x: 0.33, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'ofir-ground-1990' },
       { id: 'vendor-1990', era: '1990', figure: 'adultA6', x: 0.88, y: 0.93, size: 0.34, nameHe: 'מוכר', talk: 'vendor-1990', flip: true },
     ],
-    hotspots: [
+    hotspots: [...gigSpots('bloomfield-outside'), 
       { id: 'gate7', era: '*', x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
       { id: 'look-gate', era: '1990', x: 0.25, y: 0.9, w: 0.07, act: 'pano:panoGate7', verb: 'gaze', labelHe: 'סביב' },
       { id: 'fence', era: '*', x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
@@ -2029,7 +2053,7 @@ const SCENES: SceneDef[] = [
       { id: 'limor-seed', era: '1999-basket', figure: 'youngB3', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'seed-corner', sway: 0.003 },
       { id: 'soko-seed', era: '1999-basket', figure: 'soko', x: 0.2, y: 0.92, size: 0.278, nameHe: 'סוקו', talk: 'seed-inside' },
     ],
-    hotspots: [
+    hotspots: [...gigSpots('ussishkin-outside'), 
       { id: 'bus-1993', era: '1993-cup', x: 0.15, y: 0.84, w: 0.14, act: 'bus-1993', verb: 'enter', labelHe: 'האוטובוס', priority: 3 },
 
       { id: 'queue', era: '1991', x: 0.25, y: 0.9, w: 0.12, act: 'uss-queue', verb: 'look', labelHe: 'התור' },
@@ -2160,7 +2184,7 @@ const SCENES: SceneDef[] = [
       { id: 'amit-hall', era: '1991', figure: 'amit90-cheer', x: 0.42, y: 0.9, size: 0.29, nameHe: 'עמית', talk: 'amit-hall', sway: 0.006 },
       { id: 'ofir-hall', era: '1991', figure: 'ofir90-arms', x: 0.3, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'derby:friend', flip: true, sway: 0.007 },
     ],
-    hotspots: [
+    hotspots: [...gigSpots('ussishkin-hall'), 
       { id: 'look-hall', era: '*', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssHall', verb: 'gaze', labelHe: 'סביב', priority: 3, when: { notFlag: 'uss:arrived' } },
       // 1991: the same look, on a night when the hall is full of people (§38).
       { id: 'look-derby', era: '1991', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssDerby', verb: 'gaze', labelHe: 'סביב', priority: 3, when: { flag: 'uss:arrived' } },

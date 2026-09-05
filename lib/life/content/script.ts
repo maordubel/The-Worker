@@ -90,7 +90,12 @@ export type Effect =
   | { e: 'doc'; art: string; captionHe?: string }
   | { e: 'goto'; node: string }
   | { e: 'travel'; to: LocationId; spawn: string }
-  | { e: 'minigame'; id: 'football' }
+  /**
+   * A minigame to play now: `football` is the two-a-side on the pitch, `chore:<gig>` is
+   * one of the jobs in `lib/life/gigs.ts` played rather than agreed to (Maor, 5.9.2026:
+   * "מיני־משחק אמיתי לשחק בו").
+   */
+  | { e: 'minigame'; id: string }
   | { e: 'memory'; item: ItemId; id: string }
   | { e: 'attend' }
   | { e: 'missed' }

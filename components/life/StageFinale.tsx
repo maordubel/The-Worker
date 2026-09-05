@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { isPlaceholder } from '@/lib/life/anchors'
 import { artUrl } from '@/lib/life/runtime/art'
-import { chapterFor } from '@/lib/life/content/chapters'
+import { chapterFor, nextPlayable } from '@/lib/life/content/chapters'
 import { Grain, Letterbox } from '@/components/life/FilmFx'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { t } from '@/lib/i18n'
@@ -51,6 +51,15 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
   // named by its registry row — the unit, the date, the title.
   const chapter = chapterFor(finale.chapter)
   const later = stageB && finale.chapter !== '1990'
+  /**
+   * The year on the button used to be the string "1990", on every card in the game.
+   * It was written when 1990 was the last chapter and the card was only ever shown at the
+   * end of stage A. Now it is the year of the chapter this button actually opens — and on
+   * the 1990 card that is 1991, which is what the line above the button has been
+   * promising all along ("ואוסישקין מחכה — 1990/91").
+   */
+  const nextChapter = nextPlayable(finale.chapter)
+  const nextYearLabel = nextChapter ? String(nextChapter.year) : ''
 
   // A card that opens halfway down is a card somebody scrolled by accident.
   useEffect(() => {
@@ -245,9 +254,11 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
               <span className="font-display text-step-1 leading-none text-sheet">
                 <bdi>{stageB ? t('life.finale.cta1990') : t('life.finale.cta')}</bdi>
               </span>
-              <span className="font-latin text-[10px] font-bold tracking-[0.2em] text-sheet/80" dir="ltr">
-                1990
-              </span>
+              {nextYearLabel && (
+                <span className="font-latin text-[10px] font-bold tracking-[0.2em] text-sheet/80" dir="ltr">
+                  {nextYearLabel}
+                </span>
+              )}
             </button>
           </section>
         </div>

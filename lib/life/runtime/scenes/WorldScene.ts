@@ -173,21 +173,31 @@ export class WorldScene extends Phaser.Scene {
   private facing = 1
 
   /**
-   * לאיזה צד מסתכל הציור — every profile in this game faces LEFT.
+   * לאיזה צד מסתכל הציור — every profile in this game faces RIGHT.
    *
-   * Not a preference, a fact about the art: `pogi-side`, `pogi-walk`, `hero80-side`,
-   * `hero90-side`, `teen-side`, `soldier-side`, `soldier-march` and every walk frame in
-   * the approved character packs are painted walking to the left of the frame. The engine
-   * assumed the opposite — flip when heading left — so the child faced left while walking
-   * right and right while walking left. He moonwalked in both directions, in every
-   * chapter, since the first sheet shipped, and Maor reported it in four words: "many of
-   * them are actually walking backwards".
+   * This constant was born on 4.9.2026 with the wrong sign, and it is the whole of Maor's
+   * "he walks with his back to the direction he is walking". The claim in the old comment
+   * — that the art faces left — was made from a screen recording rather than from the
+   * files. The files say otherwise, and they were opened one by one on 5.9.2026: `pogi`,
+   * `pogi-side`, `pogi-w1…w8`, `hero80-side` and its eight, `hero90-side`, `teen-side`,
+   * `soldier-side`, `soldier-march`, `kobi-side`, `rachel-side`, `efi-side`, `ofir-side`,
+   * `tikva-side`, `sinai-side`, `gershon-side`, `oldMan-side` — every one of them has the
+   * nose on the right of the head and the leading foot to the right of the body. The
+   * ingest scripts say so too, in writing: 09c mirrored both walk sheets on the way in
+   * *because* `pogi-side` and `hero80-side` face right.
    *
-   * One constant, used everywhere a body is turned, so the convention lives in one place
-   * and a new sheet is checked against it rather than against somebody's memory.
+   * So `-1` mirrored a right-facing boy every time he walked right: he travelled right
+   * with his back leading. `PassageScene` and `FootballScene` never used the constant and
+   * were therefore never wrong — `setFlipX(facing < 0)` is exactly `ART_FACES = 1`, and
+   * their being right while this scene was wrong is the last piece of the proof.
+   *
+   * Six files in the folder disagreed with the other seventy-six and were mirrored back
+   * on disk the same day (`scripts/life/face-right-2026-09-05.py`), so the rule now has
+   * no exceptions: one constant, one direction, and `scripts/life/facing-check.py` fails
+   * if a new sheet arrives facing the other way.
    * `flip: true` in scene data is untouched — that is a raw mirror an author set by eye.
    */
-  private static readonly ART_FACES = -1
+  private static readonly ART_FACES = 1
 
   private lastDir: 'down' | 'up' | 'side' = 'down'
   private stride = 0
@@ -483,7 +493,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.ctx.dialogue.setHooks({
       travel: (to, spawn) => this.travel(to as LocationId, spawn),
-      minigame: () => this.startMinigame(),
+      minigame: (id: string) => this.startMinigame(id),
       ending: (id) => this.finishChapter(id),
       shot: (shot) => this.frameShot(shot),
       onOpen: (open) => {
@@ -2459,10 +2469,24 @@ export class WorldScene extends Phaser.Scene {
     })
   }
 
-  private startMinigame() {
+  /**
+   * למשחק — the pitch, or a job.
+   *
+   * `football` is the two-a-side and returns to the pitch; `chore:<gig>` is one of the
+   * jobs, played in the room it belongs to and returning to the room the player was
+   * standing in, which is the same room. The spawn is the one the scene came in on, so a
+   * boy who finishes carrying crates is standing where he was when he agreed to.
+   */
+  private startMinigame(id: string) {
     this.paused = true
+    const chore = id.startsWith('chore:') ? id.slice(6) : null
     this.cameras.main.fadeOut(240, 0, 0, 0)
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      void this.ctx.engine.save()
+      if (chore) {
+        this.scene.start('life-chore', { gig: chore, returnTo: this.def.id, spawn: this.spawnName })
+        return
+      }
       this.scene.start('life-football', { returnTo: this.def.id, spawn: 'fromStreet' })
     })
   }
@@ -3479,8 +3503,20 @@ export class WorldScene extends Phaser.Scene {
       this.travel('classroom', 'start')
       return
     }
-    // Every chapter after 1991 ends the way the registry says: the next one, or the coda.
-    if (chapterFor(this.chapter) && this.chapter !== '1990') {
+    /**
+     * Every other chapter ends the way the registry says: the next one, or the coda.
+     *
+     * `&& this.chapter !== '1990'` stood here until 5.9.2026 and it is the whole of "after
+     * the promotion mission it does not move to the next mission". 1990 was the last
+     * chapter that existed when this line was written, so it ended by putting the boy to
+     * bed — and it kept doing that after 1991, 1993 and everything to 2000 were built.
+     * The card behind it had been promising the opposite for weeks, in Hebrew, on the
+     * button: "מחר בית ספר. ואוסישקין מחכה — 1990/91."
+     *
+     * There is no chapter-specific case left except the two that genuinely are special:
+     * 1986 hands over to `PassageScene`, and 1991 ends in the room it started in.
+     */
+    if (chapterFor(this.chapter)) {
       this.advanceChapter()
       return
     }

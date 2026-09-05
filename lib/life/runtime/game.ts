@@ -17,6 +17,7 @@ import { DialogueRunner } from './dialogue'
 import { InputState } from './input'
 import { LIFE_PALETTE } from './palette'
 import { BootScene } from './scenes/BootScene'
+import { ChoreScene } from './scenes/ChoreScene'
 import { FootballScene } from './scenes/FootballScene'
 import { PassageScene } from './scenes/PassageScene'
 import { PrologueScene } from './scenes/PrologueScene'
@@ -241,7 +242,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     },
     // The canvas must never eat a two-finger page gesture on a phone.
     input: { activePointers: 3 },
-    scene: [BootScene, PrologueScene, WorldScene, FootballScene, PassageScene],
+    scene: [BootScene, PrologueScene, WorldScene, FootballScene, ChoreScene, PassageScene],
   })
 
   game.registry.set(CONTEXT_KEY, context)
