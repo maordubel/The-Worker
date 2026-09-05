@@ -363,6 +363,230 @@
     1600,
     900
    ]
+  },
+  "bloomOldGates": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 405311,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomOldCorner": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 337261,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomOldStand": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 312915,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomOldEnd": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 339350,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomOldHigh": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 341529,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomOldTunnel": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 328509,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomNewInside": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 454136,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomNewPitch": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 421236,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomNewDay": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 571077,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomNewPlaza": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 459360,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomNewSea": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 553331,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "bloomNewNight": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 431282,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "introFirstSight": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 222169,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "introDerbyNight": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 341488,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "introReturnHome": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 356651,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "introBeacon": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 313086,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "deyellowed": 0,
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   }
  },
  "figures": {
@@ -575,6 +799,132 @@
    ],
    "deyellowed": 6756,
    "yellowLeft": 0
+  },
+  "shachor": {
+   "w": 197,
+   "h": 430,
+   "bytes": 80083,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "shachor-back": {
+   "w": 166,
+   "h": 428,
+   "bytes": 67694,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "soko": {
+   "w": 151,
+   "h": 430,
+   "bytes": 81094,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "soko-back": {
+   "w": 136,
+   "h": 430,
+   "bytes": 68451,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "asaf": {
+   "w": 170,
+   "h": 430,
+   "bytes": 67205,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "asaf-back": {
+   "w": 156,
+   "h": 428,
+   "bytes": 58080,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "yosef": {
+   "w": 140,
+   "h": 430,
+   "bytes": 62443,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "yosef-back": {
+   "w": 146,
+   "h": 430,
+   "bytes": 55560,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "hermesh": {
+   "w": 145,
+   "h": 430,
+   "bytes": 94287,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "hermesh-back": {
+   "w": 164,
+   "h": 425,
+   "bytes": 102947,
+   "yellowLeft": 0,
+   "source": "2026-09e"
+  },
+  "melamed": {
+   "w": 230,
+   "h": 331,
+   "bytes": 113248,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "soft": true
+  },
+  "melamed-play": {
+   "w": 189,
+   "h": 331,
+   "bytes": 93519,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "soft": true
+  },
+  "melamed-lean": {
+   "w": 146,
+   "h": 331,
+   "bytes": 69027,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "soft": true
+  },
+  "melamed-listen": {
+   "w": 182,
+   "h": 304,
+   "bytes": 78225,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "soft": true
+  },
+  "freddy": {
+   "w": 199,
+   "h": 331,
+   "bytes": 61748,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "soft": true
+  },
+  "freddy-glass": {
+   "w": 189,
+   "h": 309,
+   "bytes": 62472,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "soft": true
+  },
+  "freddy-drink": {
+   "w": 127,
+   "h": 314,
+   "bytes": 43944,
+   "yellowLeft": 0,
+   "source": "2026-09e",
+   "soft": true
   }
  },
  "props": {
@@ -1838,6 +2188,454 @@
    ],
    "deyellowed": 0,
    "yellowLeft": 0
+  },
+  "bloomOldGates--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 3446,
+   "source": "bloomOldGates",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldGates--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 22962,
+   "source": "bloomOldGates",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldCorner--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 6400,
+   "source": "bloomOldCorner",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldCorner--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 18676,
+   "source": "bloomOldCorner",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldStand--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 9820,
+   "source": "bloomOldStand",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldStand--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 10081,
+   "source": "bloomOldStand",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldEnd--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 6423,
+   "source": "bloomOldEnd",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldEnd--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 21082,
+   "source": "bloomOldEnd",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldHigh--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 8848,
+   "source": "bloomOldHigh",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldHigh--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 38095,
+   "source": "bloomOldHigh",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldTunnel--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 18393,
+   "source": "bloomOldTunnel",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldTunnel--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 21850,
+   "source": "bloomOldTunnel",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewInside--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 13442,
+   "source": "bloomNewInside",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewInside--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 37783,
+   "source": "bloomNewInside",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewPitch--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 14450,
+   "source": "bloomNewPitch",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewPitch--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 15455,
+   "source": "bloomNewPitch",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewDay--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 5810,
+   "source": "bloomNewDay",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewDay--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 32028,
+   "source": "bloomNewDay",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewPlaza--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 11147,
+   "source": "bloomNewPlaza",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewPlaza--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 18616,
+   "source": "bloomNewPlaza",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewSea--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 11635,
+   "source": "bloomNewSea",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewSea--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 44359,
+   "source": "bloomNewSea",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewNight--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 8300,
+   "source": "bloomNewNight",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewNight--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 12235,
+   "source": "bloomNewNight",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "introFirstSight--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 8437,
+   "source": "introFirstSight",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "introFirstSight--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 1139,
+   "source": "introFirstSight",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "introDerbyNight--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 1109,
+   "source": "introDerbyNight",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "introDerbyNight--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 21958,
+   "source": "introDerbyNight",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "introReturnHome--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 11677,
+   "source": "introReturnHome",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "introReturnHome--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 21735,
+   "source": "introReturnHome",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "introBeacon--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 7397,
+   "source": "introBeacon",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "introBeacon--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 25294,
+   "source": "introBeacon",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
   }
  },
  "parallax": {
@@ -2035,6 +2833,148 @@
    "bytes": 37189,
    "yellowLeft": 0,
    "source": "stand-in"
+  }
+ },
+ "plates": {
+  "plate-1986": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 358309,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1990": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 337264,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1991": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 350556,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1993-cup": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 389179,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1993-galil": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 312477,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1995-sinai": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 333253,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1996-army": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 394850,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1997-basket": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 377101,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1998-laces": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 398830,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1999-basket": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 330428,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-1999-cup": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 277000,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-2000-title": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 399492,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-2000-double": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 277000,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-today": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 264476,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-stageA": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 376922,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "plate-stageB": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 339221,
+   "yellowLeft": 0,
+   "source": "plates"
+  },
+  "fxGrain": {
+   "w": 256,
+   "h": 256,
+   "bytes": 86633,
+   "source": "plates",
+   "yellowLeft": 0
+  },
+  "fxLeak1": {
+   "w": 800,
+   "h": 450,
+   "bytes": 66420,
+   "source": "plates",
+   "yellowLeft": 0
+  },
+  "fxLeak2": {
+   "w": 800,
+   "h": 450,
+   "bytes": 80581,
+   "source": "plates",
+   "yellowLeft": 0
+  },
+  "fxLeak3": {
+   "w": 800,
+   "h": 450,
+   "bytes": 66612,
+   "source": "plates",
+   "yellowLeft": 0
   }
  }
 }
