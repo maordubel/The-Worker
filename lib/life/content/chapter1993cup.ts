@@ -32,13 +32,13 @@ export const PORTRAIT_1993: Record<string, string> = {
   'קובי': 'faceKobi',
   'רחל': 'faceRachel90',
   'אפי': 'faceEfi',
-  'לימור': 'faceFan',
+  'לימור': 'faceLimor',
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
   'רפי מהקיוסק': 'faceOldMan',
-  'שחור': 'faceFan',
-  'אוהד': 'faceFan',
-  'אוהדת': 'faceFan',
+  'שחור': 'faceShachor',
+  'אוהד': 'faceSupporter',
+  'אוהדת': 'faceWoman',
   'אוהד ותיק': 'faceOldMan',
 }
 

@@ -30,12 +30,12 @@ export const PORTRAIT_GALIL: Record<string, string> = {
   'קובי': 'faceKobi',
   'רחל': 'faceRachel90',
   'אפי': 'faceEfi',
-  'לימור': 'faceFan',
+  'לימור': 'faceLimor',
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
-  'שחור': 'faceFan',
-  'סוקו': 'faceFan',
-  'אוהד': 'faceFan',
+  'שחור': 'faceShachor',
+  'סוקו': 'faceSoko',
+  'אוהד': 'faceSupporter',
   'אוהד ותיק': 'faceOldMan',
 }
 

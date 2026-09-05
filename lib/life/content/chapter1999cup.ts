@@ -27,13 +27,13 @@ export const PORTRAIT_CUP99: Record<string, string> = {
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
   'אפי': 'faceEfi',
-  'לירון': 'faceFan',
-  'מישל': 'faceFan',
-  'אסף': 'faceFan',
-  'שחור': 'faceFan',
-  'המפקד': 'faceFan',
-  'הבוס': 'faceFan',
-  'אוהד': 'faceFan',
+  'לירון': 'faceLiron',
+  'מישל': 'faceMichel',
+  'אסף': 'faceAsaf',
+  'שחור': 'faceShachor',
+  'המפקד': 'faceCommander',
+  'הבוס': 'faceBoss',
+  'אוהד': 'faceSupporter',
 }
 
 export function objectiveCup99(state: LifeState, sceneId: string): string | null {

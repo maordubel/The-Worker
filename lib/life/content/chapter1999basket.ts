@@ -18,17 +18,17 @@ import type { Conversation } from './script'
 
 export const PORTRAIT_SEED: Record<string, string> = {
   'פוגי': 'faceHero80',
-  'שחור': 'faceFan',
-  'לימור': 'faceFan',
-  'פרדי': 'faceFan',
-  'סוקו': 'faceFan',
-  'אסף': 'faceFan',
-  'מלמד': 'faceFan',
-  'מישל': 'faceFan',
-  'דודו': 'faceFan',
-  'עומר': 'faceFan',
+  'שחור': 'faceShachor',
+  'לימור': 'faceLimor',
+  'פרדי': 'faceFreddy',
+  'סוקו': 'faceSoko',
+  'אסף': 'faceAsaf',
+  'מלמד': 'faceMelamed',
+  'מישל': 'faceMichel',
+  'דודו': 'faceDudu',
+  'עומר': 'faceHermesh',
   'רפי מהקיוסק': 'faceOldMan',
-  'אוהד': 'faceFan',
+  'אוהד': 'faceSupporter',
 }
 
 export function objectiveSeed(state: LifeState, sceneId: string): string | null {

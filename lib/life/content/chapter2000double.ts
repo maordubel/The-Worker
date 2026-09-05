@@ -29,14 +29,14 @@ export const PORTRAIT_2000: Record<string, string> = {
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
   'אפי': 'faceEfi',
-  'לירון': 'faceFan',
-  'מישל': 'faceFan',
-  'אסף': 'faceFan',
-  'שחור': 'faceFan',
-  'סוקו': 'faceFan',
-  'לימור': 'faceFan',
-  'הבוס': 'faceFan',
-  'אוהד': 'faceFan',
+  'לירון': 'faceLiron',
+  'מישל': 'faceMichel',
+  'אסף': 'faceAsaf',
+  'שחור': 'faceShachor',
+  'סוקו': 'faceSoko',
+  'לימור': 'faceLimor',
+  'הבוס': 'faceBoss',
+  'אוהד': 'faceSupporter',
 }
 
 // ------------------------------------------------------------------ Part I ------

@@ -105,6 +105,23 @@ export function LifeStage({
   const [card, setCard] = useState<HistoricalAnchor | null>(null)
   const [controls, setControls] = useState(true)
   const [touch, setTouch] = useState(false)
+  /**
+   * The shell was drawn for a 390px phone in CSS pixels, and on a laptop it stayed
+   * 390px-small over a picture ten times the size — a postage-stamp HUD. Everything that
+   * floats over the painting scales with the glass: one on a phone, up to 1.5× on a
+   * desktop, never so much that the sheets outgrow the height.
+   */
+  const [uiScale, setUiScale] = useState(1)
+  useEffect(() => {
+    const measure = () => {
+      const w = window.innerWidth
+      const h = window.innerHeight
+      setUiScale(Number(Math.max(1, Math.min(1.5, w / 430, h / 620)).toFixed(2)))
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
   const [confirmReset, setConfirmReset] = useState(false)
   const [persisted, setPersisted] = useState(true)
   /**
@@ -623,8 +640,12 @@ export function LifeStage({
 
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
-      <div className="life-glass relative h-full w-full overflow-hidden border-y-hair border-ink bg-ink" data-decade={decadeOf(hud.year)}>
-        <div ref={holder} className="absolute inset-0" />
+      <div
+        className="life-glass relative h-full w-full overflow-hidden border-y-hair border-ink bg-ink"
+        data-decade={decadeOf(hud.year)}
+        style={{ '--ui-scale': uiScale } as React.CSSProperties}
+      >
+        <div ref={holder} className="absolute inset-0" data-life="holder" />
 
         {/* Where the painting ends. A vermilion hairline turns the empty band under a
             framed picture into the foot of a printed sheet instead of dead space. */}

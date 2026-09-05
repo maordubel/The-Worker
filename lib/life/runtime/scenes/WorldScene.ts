@@ -30,7 +30,6 @@ import { DerbyFromAfar, DerbyNight, derbyMarginHe, type DerbyMood } from '../der
 import { PassageScene } from './PassageScene'
 import { meets } from '../../world/types'
 import { artUrl, extensionKeys, PARALLAX, parallaxKeys } from '../art'
-import { fillCamera } from '../camera'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import type { MapPlace } from '../game'
 import { LIFE_PALETTE } from '../palette'
@@ -400,7 +399,10 @@ export class WorldScene extends Phaser.Scene {
     // repaint, once the viewport is real. (It was invisible on the older, softer art and
     // obvious the moment a clean sky arrived.)
     this.repaintGrade?.()
-    this.cameras.main.setBounds(0, -this.ext, this.W, this.H + 2 * this.ext)
+    // The camera may never wander further than the thin margin above and below the
+    // painting: the extension strips exist for the edge case, not as scenery.
+    const margin = Math.min(this.ext, this.H * WorldScene.MARGIN)
+    this.cameras.main.setBounds(0, -margin, this.W, this.H + 2 * margin)
     this.cameras.main.startFollow(this.player, true, 0.09, 0.09)
     this.followPlayer()
     /**
@@ -883,24 +885,30 @@ export class WorldScene extends Phaser.Scene {
    * The shell is told `picture: 0` — "there is no frame; the picture is the glass" — and
    * lays its dialogue, deck and hairline out over the painting instead of under it.
    */
+  /** how much dark margin may show above and below the painting, as a fraction of its height */
+  private static readonly MARGIN = 0.06
+
   private frameWorld() {
     const cam = this.cameras.main
     const view = this.scale.gameSize
-    const portrait = view.height > view.width
-    // The world is the painting plus its sky and ground strips; that is what must cover
-    // the glass. In portrait the zoom is chosen so that about 42% of a 16:9 room's width is
-    // on screen at once — a street you can read, a child a fifth of the screen tall —
-    // unless even that would expose the top or bottom of the world, in which case cover
-    // wins. Landscape is simply cover, with a hair of magnification so no edge ever shows.
-    const tall = this.H + 2 * this.ext
-    const { zoom: cover } = fillCamera(this, cam, this.W, tall, portrait ? 1 : 1.03)
-    if (portrait) {
-      // 42% of a 16:9 room; a squarer room shows proportionally more of itself, a wider
-      // one proportionally less (and then cover usually wins anyway).
-      const share = Math.min(0.8, 0.42 * (16 / 9) / (this.W / this.H))
-      const wanted = Number(Math.max(cover, view.width / (this.W * share)).toFixed(3))
-      cam.setZoom(Math.min(wanted, 7))
-    }
+    /**
+     * 5.9.2026 — the painting owns the glass.
+     *
+     * The old rule showed 42% of a room's width on a phone and paid for it with a third
+     * of the screen of stretched, blurred "ground" under the picture — the smear Maor
+     * photographed. The rule now is the one every side-scroller uses: the picture is
+     * scaled so its HEIGHT fills the glass (plus a thin dark margin, top and bottom, that
+     * reads as the room standing in the dark), the camera follows the child sideways, and
+     * what you cannot see of the street is off to the side where it belongs. A landscape
+     * window simply covers.
+     */
+    const margin = this.H * WorldScene.MARGIN
+    const frame = this.H + 2 * margin
+    const byHeight = view.height / frame
+    const byWidth = view.width / this.W
+    const zoom = Number(Math.min(7, Math.max(byHeight, byWidth) * 1.005).toFixed(3))
+    cam.setViewport(0, 0, view.width, view.height)
+    cam.setZoom(zoom)
     this.baseZoom = cam.zoom
     this.ctx.bus.emit('frame', { picture: 0 })
   }

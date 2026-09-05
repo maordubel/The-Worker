@@ -1,6 +1,6 @@
 import { chromium } from 'playwright'
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] })
-const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })).newPage()
+const page = await (await browser.newContext({ viewport: { width: Number(process.env.VW ?? 390), height: Number(process.env.VH ?? 844) }, hasTouch: true, isMobile: true })).newPage()
 page.on('pageerror', (e) => console.log('PAGEERROR', e.message))
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log('CONSOLE', m.type(), m.text().slice(0, 200)) })
 await page.goto('http://127.0.0.1:3000/', { waitUntil: 'domcontentloaded' })
@@ -20,5 +20,5 @@ for (let i = 0; i < Number(process.argv[3] ?? 6); i += 1) {
   if (r.reveal) await page.locator('[data-life="reveal-close"]').click().catch(() => {})
   if (r.dialogue && !r.choices.length && process.argv[4] === 'advance') await page.evaluate(() => window.__life.advance())
 }
-await page.screenshot({ path: 'data/life-shots/mini.png' })
+await page.screenshot({ path: `data/life-shots/mini-${process.env.TAG ?? 'x'}.png` })
 await browser.close()

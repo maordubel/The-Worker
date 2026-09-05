@@ -745,7 +745,9 @@ select {
    serif, the nineties a printed sticker and a heavier sign face, the two-thousands a
    flatter, tighter poster face. Tuned through three variables the plates read.
    ------------------------------------------------------------------------------------ */
-.life-glass { --life-sign: var(--font-miriam); --life-sign-weight: 700; --life-sign-tracking: 0; --life-plate-texture: none; }
+.life-glass { --life-sign: var(--font-miriam); --life-sign-weight: 700; --life-sign-tracking: 0; --life-plate-texture: none; --ui-scale: 1; }
+/* the shell over the painting scales with the glass; the painting (the holder) does not */
+.life-glass > *:not([data-life="holder"]) { zoom: var(--ui-scale); }
 .life-glass[data-decade="80s"] {
   --life-sign: var(--font-frank);
   --life-sign-weight: 900;

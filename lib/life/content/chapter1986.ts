@@ -64,10 +64,10 @@ export const PORTRAIT: Record<string, string> = {
   'אפי': 'faceEfi',
   'קרן': 'faceKeren',
   'ילד מהשכונה': 'faceEfi',
-  'אוהד': 'faceFan',
-  'אוהד ותיק': 'faceFan',
-  'סדרן': 'faceFan',
-  'הקופאי': 'faceFan',
+  'אוהד': 'faceSupporter',
+  'אוהד ותיק': 'faceBarry',
+  'סדרן': 'faceUsher',
+  'הקופאי': 'faceVendor',
   'רפי מהקיוסק': 'faceOldMan',
   // The hero on the bedroom wall. He never speaks in this chapter — he is a poster, a
   // name three children argue over, and the reason a father stands in a doorway at

@@ -27,10 +27,10 @@ export const PORTRAIT_SINAI: Record<string, string> = {
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
   'רפי מהקיוסק': 'faceOldMan',
-  'בארי': 'faceOldMan',
-  'פרדי': 'faceFan',
-  'אוהד צעיר': 'faceFan',
-  'אוהד': 'faceFan',
+  'בארי': 'faceBarry',
+  'פרדי': 'faceFreddy',
+  'אוהד צעיר': 'faceYoung',
+  'אוהד': 'faceSupporter',
 }
 
 export function objectiveSinai(state: LifeState): string | null {

@@ -40,10 +40,10 @@ export const PORTRAIT_STAGE_A: Record<string, string> = {
   'קרן': 'faceKeren',
   'רפי מהקיוסק': 'faceOldMan',
   'אילן השכן': 'faceOldMan',
-  'סדרן': 'faceFan',
-  'לירון': 'faceFan',
-  'עליזה': 'faceFan',
-  'בארי': 'faceOldMan',
+  'סדרן': 'faceUsher',
+  'לירון': 'faceLiron',
+  'עליזה': 'faceAliza',
+  'בארי': 'faceBarry',
 }
 
 // ------------------------------------------------------------------- A2 · the alley ---

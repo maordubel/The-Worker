@@ -125,7 +125,7 @@ const REGISTRY: CharacterDefinition[] = [
     displayNameHe: 'סדרן',
     category: 'other',
     activeEras: ['1980', '1990'],
-    portraitSet: 'faceFan',
+    portraitSet: 'faceUsher',
     tags: ['ussishkin'],
   },
   {
@@ -133,7 +133,7 @@ const REGISTRY: CharacterDefinition[] = [
     displayNameHe: 'מוכר',
     category: 'other',
     activeEras: ['1991'],
-    portraitSet: 'faceFan',
+    portraitSet: 'faceVendor',
     tags: ['ussishkin'],
   },
   /**
@@ -335,7 +335,7 @@ const REGISTRY: CharacterDefinition[] = [
     displayNameHe: 'אוהד ותיק',
     category: 'supporter',
     activeEras: ['1986', '1990'],
-    portraitSet: 'faceFan',
+    portraitSet: 'faceBarry',
     tags: ['terrace', 'gate7'],
   },
 ]

@@ -32,13 +32,13 @@ export const PORTRAIT_LACES: Record<string, string> = {
   'רחל': 'faceRachel90',
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
-  'סוקו': 'faceFan',
-  'אסף': 'faceFan',
-  'שחור': 'faceFan',
+  'סוקו': 'faceSoko',
+  'אסף': 'faceAsaf',
+  'שחור': 'faceShachor',
   'המורה': 'faceTeacher',
-  'אוהד': 'faceFan',
+  'אוהד': 'faceSupporter',
   'אוהד ותיק': 'faceOldMan',
-  'קול מהרדיו': 'faceFan',
+  'קול מהרדיו': 'faceSupporterB',
 }
 
 export function objectiveLaces(state: LifeState, sceneId: string): string | null {

@@ -22,13 +22,13 @@ export const H2 = 'life:hall:d2'
 export const PORTRAIT_HALL: Record<string, string> = {
   'פוגי': 'faceHero80',
   'קובי': 'faceKobi',
-  'שחור': 'faceFan',
-  'לימור': 'faceFan',
-  'פרדי': 'faceFan',
+  'שחור': 'faceShachor',
+  'לימור': 'faceLimor',
+  'פרדי': 'faceFreddy',
   'אפי': 'faceEfi',
-  'סוקו': 'faceFan',
-  'סדרן': 'faceFan',
-  'אוהד': 'faceFan',
+  'סוקו': 'faceSoko',
+  'סדרן': 'faceUsher',
+  'אוהד': 'faceSupporter',
 }
 
 export function objectiveHall(state: LifeState): string | null {

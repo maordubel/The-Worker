@@ -663,6 +663,36 @@ export const PORTRAIT_ART = [
   'faceRachel90', 'faceRachel90-smile', 'faceRachel90-worried', 'faceRachel90-nu', 'faceRachel90-angry', 'faceRachel90-side',
   'faceTeacher', 'faceTeacher-glasses', 'faceTeacher-share', 'faceTeacher-tired', 'faceTeacher-smile', 'faceTeacher-angry',
   'faceOldMan-smile', 'faceOldMan-what', 'faceOldMan-story', 'faceOldMan-over', 'faceOldMan-laugh',
+  /**
+   * 5.9.2026 — a face for everybody who spoke through `faceFan`, cut from their own
+   * figure by `scripts/life/make-faces.py`. Freddy and Melamed borrow a clean adult until
+   * their sheets are drawn (GRAPHICS-REQUESTS §6).
+   */
+  'faceShachor',
+  'faceSoko',
+  'faceAsaf',
+  'faceFreddy',
+  'faceMelamed',
+  'faceHermesh',
+  'faceYosef',
+  'faceUsher',
+  'faceVendor',
+  'faceLiron',
+  'faceMichel',
+  'faceLimor',
+  'faceDudu',
+  'faceBarry',
+  'faceAliza',
+  'faceYaron',
+  'faceCommander',
+  'faceBoss',
+  'faceDriver',
+  'faceSupporter',
+  'faceSupporterB',
+  'faceWoman',
+  'faceYoung',
+  'faceOfir90',
+  'faceAmit90',
 ] as const
 
 /**

@@ -224,9 +224,11 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     type: probing ? Phaser.CANVAS : Phaser.AUTO,
     parent: options.parent,
     backgroundColor: LIFE_PALETTE.ink,
-    // Flat colour, hard edges, no filtering: the art is drawn at world scale and any
-    // smoothing turns a 34px child into a smudge.
-    pixelArt: true,
+    // 5.9.2026: the art is painted and photographic now, not pixel — nearest-neighbour
+    // sampling turned every scaled figure into a jagged cut-out and every slow pan into a
+    // shimmer. Linear filtering, like the film it is trying to be.
+    pixelArt: false,
+    antialias: true,
     roundPixels: true,
     scale: {
       mode: Phaser.Scale.RESIZE,
