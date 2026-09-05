@@ -73,7 +73,7 @@ export const ENCOUNTERS_1991: RandomEncounter[] = [
     lineHe: 'מטבע על המדרכה, חצי בתוך סדק. לוקח לך שלוש נסיעות עם הציפורן להוציא אותו.',
     who: null,
     effects: [
-      { e: 'money', agorot: 50, why: 'מהמדרכה' },
+      { e: 'money', agorot: 200, why: 'מהמדרכה' },
       { e: 'give', item: 'coin' },
     ],
   },

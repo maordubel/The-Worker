@@ -1,5 +1,5 @@
 /**
- * הקול — the game's sound, synthesised. No files.
+ * הקול — the game's sound. Synthesised files, and since 5.9.2026 two real recordings.
  *
  * Every sound here is made from noise and sine waves in the browser at the moment it is
  * needed: a room tone, a street, a terrace that breathes; the boy's footsteps; a page
@@ -20,7 +20,20 @@
  *   touched the glass — autoplay policy, and manners.
  */
 
-export type AmbienceKey = 'interior' | 'kitchen' | 'day' | 'dusk' | 'tunnel' | 'stadium' | 'hall' | 'station' | 'base' | 'classroom' | 'none'
+export type AmbienceKey = 'interior' | 'kitchen' | 'day' | 'park' | 'dusk' | 'tunnel' | 'stadium' | 'hall' | 'station' | 'base' | 'classroom' | 'none'
+
+/**
+ * הקהל — 5.9.2026: the crowd is a STATE, not a loop.
+ *
+ * Seven states the match director moves through. Each one is a level and a colour on
+ * the real murmur (the owner's recording, cut in `ingest-audio-2026-09-05.py`) plus at
+ * most one cut fired on entry. Moving between states is a crossfade on one gain node —
+ * there is never a second loop, on pause, on resume, on a tab that went dark and came
+ * back. `OFF` empties the ground.
+ */
+export type CrowdState = 'OFF' | 'LOW_MURMUR' | 'BUILDING_TENSION' | 'CHANT' | 'NEAR_MISS' | 'GOAL_BURST' | 'AFTERMATH' | 'FINAL_WHISTLE'
+
+export const CROWD_STATES: readonly CrowdState[] = ['LOW_MURMUR', 'BUILDING_TENSION', 'CHANT', 'NEAR_MISS', 'GOAL_BURST', 'AFTERMATH', 'FINAL_WHISTLE']
 
 /**
  * הספרייה — 5.9.2026: the sounds are FILES now, still synthesised, never recorded.
@@ -40,11 +53,15 @@ export type SampleKey =
   | 'bus-door' | 'car-pass' | 'car-door'
   | 'year-turn' | 'finale-hit' | 'stage-sting' | 'reveal' | 'gauge-up' | 'gauge-down' | 'heart'
   | 'ui-open' | 'ui-close' | 'ui-click' | 'choice' | 'ending' | 'box-item'
+  // real recordings (5.9.2026)
+  | 'crowd-real-goal' | 'crowd-real-murmur' | 'crowd-real-build' | 'crowd-real-miss' | 'crowd-real-after' | 'crowd-real-final'
+  | 'amb-park' | 'park-wave'
 
 const AMBIENCE_FILE: Record<AmbienceKey, string | null> = {
   interior: 'amb-room',
   kitchen: 'amb-kitchen',
-  day: 'amb-street-day',
+  day: 'amb-park',
+  park: 'amb-park',
   dusk: 'amb-street-dusk',
   tunnel: 'amb-tunnel',
   stadium: 'amb-stadium',
@@ -56,6 +73,17 @@ const AMBIENCE_FILE: Record<AmbienceKey, string | null> = {
 }
 
 const STORE = 'the-worker:life:sound'
+
+/** per state: the loop's level, its lowpass colour, the cut fired on entry and its level */
+export const CROWD_PLAN: Record<Exclude<CrowdState, 'OFF'>, { level: number; colour: number; cut?: SampleKey; cutLevel?: number }> = {
+  LOW_MURMUR: { level: 0.42, colour: 1600 },
+  BUILDING_TENSION: { level: 0.6, colour: 3200, cut: 'crowd-real-build', cutLevel: 0.55 },
+  CHANT: { level: 0.55, colour: 2600 },
+  NEAR_MISS: { level: 0.5, colour: 3600, cut: 'crowd-real-miss', cutLevel: 0.85 },
+  GOAL_BURST: { level: 0.85, colour: 5200, cut: 'crowd-real-goal', cutLevel: 1.0 },
+  AFTERMATH: { level: 0.34, colour: 1200, cut: 'crowd-real-after', cutLevel: 0.55 },
+  FINAL_WHISTLE: { level: 0.0, colour: 2200, cut: 'crowd-real-final', cutLevel: 0.9 },
+}
 
 type Layer = { gain: GainNode; stop: (when: number) => void; tag?: string }
 
@@ -70,7 +98,7 @@ export class LifeAudio {
   private sfx: GainNode | null = null
   private ui: GainNode | null = null
   private layers: Layer[] = []
-  private crowd: { gain: GainNode; lfo: OscillatorNode; lfoGain: GainNode } | null = null
+  private swell: { gain: GainNode; lfo: OscillatorNode; lfoGain: GainNode } | null = null
   private current: AmbienceKey = 'none'
   private wanted: AmbienceKey = 'none'
   private _muted = false
@@ -79,6 +107,15 @@ export class LifeAudio {
   private samples = new Map<string, Promise<AudioBuffer | null>>()
   private ext: 'ogg' | 'm4a' = 'ogg'
   private ambientFile: { source: AudioBufferSourceNode; gain: GainNode } | null = null
+  private waveTimer = 0
+  // the crowd: one bus, one loop, one state
+  private crowdBus: GainNode | null = null
+  private crowdLoop: { source: AudioBufferSourceNode; gain: GainNode; filter: BiquadFilterNode } | null = null
+  private crowdLoopStarting = false
+  private _crowdState: CrowdState = 'OFF'
+  private crowdWanted: CrowdState = 'OFF'
+  private crowdTimers: number[] = []
+  private crowdLog: { state: CrowdState; at: number }[] = []
 
   constructor() {
     try {
@@ -113,7 +150,21 @@ export class LifeAudio {
     this.ui = this.ctx.createGain()
     this.ui.gain.value = 0.5
     this.ui.connect(this.master)
+    this.crowdBus = this.ctx.createGain()
+    this.crowdBus.gain.value = 0.8
+    this.crowdBus.connect(this.master)
     this.noise = this.makeNoise()
+    // a tab that goes dark freezes the clock; nothing is started twice when it comes back
+    try {
+      document.addEventListener('visibilitychange', () => {
+        const ctx = this.ctx
+        if (!ctx) return
+        if (document.visibilityState === 'hidden') void ctx.suspend()
+        else if (ctx.state === 'suspended') void ctx.resume()
+      })
+    } catch {
+      /* no document */
+    }
     // Safari has no Vorbis; everything else prefers it (half the bytes of AAC at this quality)
     try {
       const probe = document.createElement('audio')
@@ -123,6 +174,150 @@ export class LifeAudio {
     }
     for (const key of ['page', 'tick', 'stamp', 'ui-open', 'ui-close', 'choice', 'gauge-up', 'gauge-down'] as SampleKey[]) void this.sample(key)
     if (this.wanted !== 'none') this.setAmbience(this.wanted, true)
+    if (this.crowdWanted !== 'OFF') this.crowd(this.crowdWanted, true)
+  }
+
+  // ---------------------------------------------------------------------- crowd ---
+
+  get crowdState(): CrowdState {
+    return this._crowdState
+  }
+
+  /** every state the crowd has been through since the engine woke, with the audio clock */
+  get crowdHistory(): readonly { state: CrowdState; at: number }[] {
+    return this.crowdLog
+  }
+
+  /**
+   * Move the crowd to `state`. Idempotent: the same state twice is nothing; a state that
+   * fires a cut fires it once, on entry. All timers belonging to the old state are
+   * cancelled so a tension that was still breathing does not fire under a goal.
+   */
+  crowd(state: CrowdState, force = false) {
+    this.crowdWanted = state
+    if (!this.ctx || !this.crowdBus) return
+    if (!force && state === this._crowdState) return
+    const previous = this._crowdState
+    this._crowdState = state
+    this.crowdLog.push({ state, at: this.ctx.currentTime })
+    if (this.crowdLog.length > 64) this.crowdLog.shift()
+    for (const timer of this.crowdTimers) window.clearTimeout(timer)
+    this.crowdTimers = []
+    const ctx = this.ctx
+    const t = ctx.currentTime
+    if (state === 'OFF') {
+      if (this.crowdLoop) {
+        const old = this.crowdLoop
+        old.gain.gain.setTargetAtTime(0, t, 1.2)
+        old.source.stop(t + 5)
+        this.crowdLoop = null
+      }
+      // the synthesised bed comes back up to carry the room alone
+      if (this.ambientFile) this.ambientFile.gain.gain.setTargetAtTime(this.current === 'stadium' || this.current === 'hall' ? 0.5 : 0.32, t, 1.5)
+      return
+    }
+    // the ground has a voice now; the synth bed under it steps back
+    if (this.ambientFile) this.ambientFile.gain.gain.setTargetAtTime(0.16, t, 1.0)
+    this.ensureCrowdLoop()
+    if (previous === 'OFF') this.warm(['crowd-real-goal', 'crowd-real-build', 'crowd-real-miss', 'crowd-real-after', 'crowd-real-final', 'crowd-claps', 'darbuka-three-two', 'whistle-3'])
+    const p = CROWD_PLAN[state]
+    this.shapeCrowd(p.level, p.colour, state === 'GOAL_BURST' || state === 'NEAR_MISS' ? 0.25 : 1.1)
+    // the entry cut waits for its bytes if it must (a goal is not a click), but only while the state holds
+    if (p.cut) this.playWhenReady(p.cut, p.cutLevel ?? 0.8, () => this._crowdState === state)
+    const later = (ms: number, fn: () => void) => {
+      const id = window.setTimeout(() => {
+        // the state moved on, or the tab is dark: the timer belongs to nobody
+        if (this._crowdState !== state || ctx.state !== 'running') return
+        fn()
+      }, ms)
+      this.crowdTimers.push(id)
+    }
+    switch (state) {
+      case 'BUILDING_TENSION': {
+        // it keeps building: every few seconds another rise, a little higher
+        const again = (n: number) => later(4800 + Math.random() * 1800, () => {
+          this.play('crowd-real-build', { bus: 'crowd', level: Math.min(0.8, 0.55 + n * 0.08), jitter: 0.05 })
+          again(n + 1)
+        })
+        again(1)
+        break
+      }
+      case 'CHANT': {
+        // the terrace claps in time; the darbuka answers every second bar
+        const bar = (n: number) => {
+          this.play('crowd-claps', { bus: 'crowd', level: 0.7, jitter: 0.03 })
+          if (n % 2 === 1) this.play('darbuka-three-two', { bus: 'crowd', level: 0.45, delayMs: 120 })
+          later(3900, () => bar(n + 1))
+        }
+        bar(0)
+        break
+      }
+      case 'NEAR_MISS':
+        // the "ohhh" falls back into the murmur on its own
+        later(2600, () => this.shapeCrowd(0.46, 2400, 1.4))
+        break
+      case 'GOAL_BURST':
+        // eight seconds up, then the ground settles but stays higher than before
+        later(5000, () => this.shapeCrowd(0.55, 2800, 2.5))
+        break
+      case 'FINAL_WHISTLE':
+        // the cut carries the burst; the loop goes to nothing and is dropped
+        later(9000, () => this.crowd('OFF'))
+        break
+      default:
+        break
+    }
+  }
+
+  /** a cut that must be heard: loads first if it has to, plays if `still()` holds when it can */
+  private playWhenReady(key: SampleKey, level: number, still: () => boolean) {
+    const ctx = this.ctx
+    const bus = this.crowdBus
+    if (!ctx || !bus) return
+    void this.sample(key).then((buffer) => {
+      if (!buffer || !still()) return
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      source.playbackRate.value = jitter(1, 0.04)
+      const gain = ctx.createGain()
+      gain.gain.value = jitter(level, 0.04)
+      source.connect(gain).connect(bus)
+      source.start(ctx.currentTime)
+    })
+  }
+
+  private ensureCrowdLoop() {
+    if (this.crowdLoop || this.crowdLoopStarting || !this.ctx || !this.crowdBus) return
+    const ctx = this.ctx
+    const bus = this.crowdBus
+    this.crowdLoopStarting = true
+    void this.sample('crowd-real-murmur').then((buffer) => {
+      this.crowdLoopStarting = false
+      if (!buffer || this.crowdLoop || this._crowdState === 'OFF') return
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      source.loop = true
+      source.playbackRate.value = jitter(1, 0.015)
+      const filter = ctx.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.value = 1600
+      filter.Q.value = 0.5
+      const gain = ctx.createGain()
+      gain.gain.value = 0
+      source.connect(filter).connect(gain).connect(bus)
+      source.start(ctx.currentTime, Math.random() * Math.max(0.1, buffer.duration - 2))
+      this.crowdLoop = { source, gain, filter }
+      // the state that asked for the loop sets its level now that it exists (no second cut)
+      const p = CROWD_PLAN[this._crowdState as Exclude<CrowdState, 'OFF'>]
+      if (p) this.shapeCrowd(p.level, p.colour, 0.8)
+    })
+  }
+
+  private shapeCrowd(level: number, colour: number, seconds: number) {
+    if (!this.ctx || !this.crowdLoop) return
+    const t = this.ctx.currentTime
+    this.crowdLoop.gain.gain.setTargetAtTime(level, t, seconds)
+    this.crowdLoop.filter.frequency.setTargetAtTime(colour, t, seconds)
   }
 
   // ------------------------------------------------------------------- samples ---
@@ -145,9 +340,9 @@ export class LifeAudio {
    * a hundred footsteps; a sample that has not loaded yet plays nothing this time and
    * is ready the next — a game never waits for a click.
    */
-  play(key: SampleKey, opts: { level?: number; rate?: number; bus?: 'sfx' | 'ui' | 'ambient'; jitter?: number; delayMs?: number } = {}): boolean {
+  play(key: SampleKey, opts: { level?: number; rate?: number; bus?: 'sfx' | 'ui' | 'ambient' | 'crowd'; jitter?: number; delayMs?: number } = {}): boolean {
     if (!this.ctx) return false
-    const bus = opts.bus === 'ui' ? this.ui : opts.bus === 'ambient' ? this.ambient : this.sfx
+    const bus = opts.bus === 'ui' ? this.ui : opts.bus === 'ambient' ? this.ambient : opts.bus === 'crowd' ? this.crowdBus : this.sfx
     if (!bus) return false
     const cached = this.samples.get(key)
     // not yet decoded: start it loading, and let the caller fall back to the synth
@@ -190,6 +385,8 @@ export class LifeAudio {
     if (this.ducked === on) return
     this.ducked = on
     if (this.ambient && this.ctx) this.ambient.gain.setTargetAtTime(on ? 0.28 : 0.55, this.ctx.currentTime, 0.25)
+    // the crowd steps back less than the room: a terrace does not go quiet for a sentence
+    if (this.crowdBus && this.ctx) this.crowdBus.gain.setTargetAtTime(on ? 0.5 : 0.8, this.ctx.currentTime, 0.3)
   }
 
   // ---------------------------------------------------------------- ambience ---
@@ -205,11 +402,17 @@ export class LifeAudio {
       layer.stop(t + 2.5)
     }
     this.layers = []
-    if (this.crowd) {
-      this.crowd.gain.gain.setTargetAtTime(0, t, 0.6)
-      this.crowd.lfo.stop(t + 2.5)
-      this.crowd = null
+    if (this.swell) {
+      this.swell.gain.gain.setTargetAtTime(0, t, 0.6)
+      this.swell.lfo.stop(t + 2.5)
+      this.swell = null
     }
+    if (this.waveTimer) {
+      window.clearTimeout(this.waveTimer)
+      this.waveTimer = 0
+    }
+    // leaving the ground empties it; the director sets the state again on the next match
+    if (key !== 'stadium' && key !== 'hall' && this._crowdState !== 'OFF') this.crowd('OFF')
     if (this.ambientFile) {
       const old = this.ambientFile
       old.gain.gain.setTargetAtTime(0, t, 0.8)
@@ -231,7 +434,8 @@ export class LifeAudio {
         gain.gain.value = 0
         source.connect(gain).connect(ambient)
         source.start(ctx.currentTime, Math.random() * Math.max(0.1, buffer.duration - 1))
-        gain.gain.setTargetAtTime(key === 'stadium' || key === 'hall' ? 0.5 : 0.32, ctx.currentTime, 1.4)
+        const under = this._crowdState !== 'OFF' ? 0.16 : key === 'stadium' || key === 'hall' ? 0.5 : key === 'park' ? 0.4 : 0.32
+        gain.gain.setTargetAtTime(under, ctx.currentTime, 1.4)
         this.ambientFile = { source, gain }
         // the synth bed under it steps back to a third: texture, not a second room
         for (const layer of this.layers) layer.gain.gain.setTargetAtTime(layer.gain.gain.value * 0.35, ctx.currentTime, 1.0)
@@ -270,6 +474,18 @@ export class LifeAudio {
         add('bandpass', 900, 0.6, 0.05, 0.9)
         add('lowpass', 160, 0.7, 0.06, 0.4)
         break
+      case 'park': {
+        // the recording alone, and now and then the wave that is in it — a loop that is not a loop
+        const wave = () => {
+          this.waveTimer = window.setTimeout(() => {
+            if (this.current !== 'park' || !this.ctx || this.ctx.state !== 'running') return
+            this.play('park-wave', { bus: 'ambient', level: 0.35, jitter: 0.1 })
+            wave()
+          }, 28000 + Math.random() * 30000)
+        }
+        wave()
+        break
+      }
       case 'tunnel':
         add('lowpass', 140, 1.2, 0.12, 0.35)
         break
@@ -285,7 +501,7 @@ export class LifeAudio {
         lfoGain.gain.value = 0.05
         lfo.connect(lfoGain).connect(body.gain)
         lfo.start()
-        this.crowd = { gain: body, lfo, lfoGain }
+        this.swell = { gain: body, lfo, lfoGain }
         break
       }
       case 'station':
@@ -398,6 +614,11 @@ export class LifeAudio {
 
   /** a goal: the terrace goes up and takes eight seconds to come down */
   roar(big = 1) {
+    // a directed match owns the crowd: a roar there is the state machine's burst
+    if (this._crowdState !== 'OFF') {
+      this.crowd(big >= 2 ? 'GOAL_BURST' : 'NEAR_MISS', true)
+      return
+    }
     if (this.play('crowd-goal', { level: Math.min(1, 0.55 * big), jitter: 0.05 })) {
       if (this.ambientFile && this.ctx) {
         const g = this.ambientFile.gain.gain
@@ -425,9 +646,9 @@ export class LifeAudio {
     source.connect(filter).connect(gain).connect(this.sfx)
     source.start(t)
     source.stop(t + 8.2)
-    if (this.crowd) {
-      this.crowd.gain.gain.setTargetAtTime(0.28, t, 0.3)
-      this.crowd.gain.gain.setTargetAtTime(0.16, t + 4, 2)
+    if (this.swell) {
+      this.swell.gain.gain.setTargetAtTime(0.28, t, 0.3)
+      this.swell.gain.gain.setTargetAtTime(0.16, t + 4, 2)
     }
   }
 

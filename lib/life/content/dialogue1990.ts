@@ -223,7 +223,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         ],
         then: [
           { e: 'flag', flag: 'got:pocket' },
-          { e: 'money', agorot: 300, why: 'מאמא' },
+          { e: 'money', agorot: 1200, why: 'מאמא' },
           { e: 'give', item: 'pocket-money' },
           { e: 'rel', who: 'rachel', axis: 'trust', delta: 4 },
           { e: 'toast', text: 'שטר אחד, מקופל לארבע', tone: 'red' },
@@ -399,7 +399,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         ],
       },
       {
-        when: { minAgorot: 120 },
+        when: { minAgorot: 300 },
         lines: [
           { who: 'רפי מהקיוסק', text: 'עיתון? מאה ועשרים. יש שם טבלה, ויש שם עמוד שלם שמסביר למה זה לא פשוט.' },
         ],
@@ -408,7 +408,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
             id: 'buy',
             text: 'לקנות עיתון.',
             then: [
-              { e: 'money', agorot: -120, why: 'עיתון' },
+              { e: 'money', agorot: -300, why: 'עיתון' },
               { e: 'give', item: 'newspaper' },
               { e: 'flag', flag: 'knows:table' },
               { e: 'trait', trait: 'knowledge', delta: 3 },
@@ -419,7 +419,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
             id: 'snack',
             text: 'משהו לאכול במקום.',
             then: [
-              { e: 'money', agorot: -80, why: 'גרעינים' },
+              { e: 'money', agorot: -200, why: 'גרעינים' },
               { e: 'flag', flag: 'bought:snack' },
               { e: 'wellbeing', key: 'happiness', delta: 3 },
               { e: 'toast', text: 'שקית גרעינים', tone: 'red' },
@@ -566,13 +566,13 @@ export const CONVERSATIONS_1990: Conversation[] = [
         lines: [{ who: 'הקופאי', text: 'יש לך. לך.' }],
       },
       {
-        when: { minAgorot: 250 },
+        when: { minAgorot: 1000 },
         lines: [
           { who: 'הקופאי', text: 'ילד — מאתיים וחמישים. היום זה המחיר.' },
           { who: null, text: 'השטר של אמא. מקופל לארבע. אתה פותח אותו לאט, כאילו זה יעזור.' },
         ],
         then: [
-          { e: 'money', agorot: -250, why: 'כרטיס' },
+          { e: 'money', agorot: -1000, why: 'כרטיס' },
           { e: 'take', item: 'pocket-money' },
           { e: 'give', item: 'ticket-stub' },
           { e: 'flag', flag: 'entry:granted' },
@@ -628,14 +628,14 @@ export const CONVERSATIONS_1990: Conversation[] = [
     nameHe: 'מוכר',
     branches: [
       {
-        when: { minAgorot: 60 },
+        when: { minAgorot: 200 },
         lines: [{ who: 'מוכר', text: 'גרעינים, שישים. גזוז, שמונים. רדיו — אין, תשאל את השכן.' }],
         choices: [
           {
             id: 'seeds',
             text: 'גרעינים.',
             then: [
-              { e: 'money', agorot: -60, why: 'גרעינים' },
+              { e: 'money', agorot: -200, why: 'גרעינים' },
               { e: 'flag', flag: 'bought:snack' },
               { e: 'wellbeing', key: 'happiness', delta: 3 },
               { e: 'toast', text: 'שקית גרעינים', tone: 'red' },

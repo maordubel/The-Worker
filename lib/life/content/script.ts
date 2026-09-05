@@ -62,6 +62,13 @@ export type Effect =
   | { e: 'trait'; trait: TraitId; delta: number }
   | { e: 'time'; minutes: number }
   | { e: 'toast'; text: string; tone?: 'plain' | 'red' }
+  /**
+   * a price, said out loud: a red line now (`text`), and — when `laterText` is given — a
+   * second line `afterMinutes` later, kept in the state so it lands after a reload too
+   */
+  | { e: 'consequence'; id: string; text: string; laterText?: string; afterMinutes?: number }
+  /** a cut to a painted place for a moment — a room the day has no walk in (the base, Liron's car); only a registered backdrop */
+  | { e: 'plate'; art: string; titleHe: string; subHe?: string; ms?: number }
   /** a sound from the library at the moment the choice lands */
   | { e: 'sfx'; key: SampleKey; level?: number; delayMs?: number }
   /**

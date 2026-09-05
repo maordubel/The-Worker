@@ -96,6 +96,15 @@ export const BACKDROP = [
   'bloomOldGates', 'bloomOldCorner', 'bloomOldStand', 'bloomOldEnd', 'bloomOldHigh', 'bloomOldTunnel',
   'bloomNewInside', 'bloomNewPitch', 'bloomNewDay', 'bloomNewPlaza', 'bloomNewSea', 'bloomNewNight',
   'introFirstSight', 'introDerbyNight', 'introReturnHome', 'introBeacon',
+  /**
+   * 5.9.2026 (evening) — nine rooms Maor painted against `ART-REQUIRED.md`, each on the
+   * key the code had already named for it, so the stand-ins went without a coordinate
+   * moving: the station, Ramat Gan, the Hatikva, the base, Liron's car, under Gate 5,
+   * the kiosk at night, the alley of Stage A, and the terrace of 1983 from a child's height.
+   */
+  'busStation', 'ramatGan', 'hatikva', 'armyRoom', 'lironCar', 'gate5', 'kioskNight', 'alley', 'cup83',
+  // …and from the desktop folder the same night: the match-day street, the hall at night, the 1998 classroom
+  'street90Flags', 'ussHallNight', 'classroom98',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -176,13 +185,6 @@ export const FIGURE = [
   'kobi-bag',
   'rachel',
   'rachel-tray',
-  'fanA',
-  'fanB',
-  'fanC',
-  'fanD',
-  'fanE',
-  'fanF',
-  'fanG',
   'oldMan',
 
   /**
@@ -455,6 +457,14 @@ export const FIGURE = [
  */
 export const PLANNED_FIGURE = [] as const
 
+/**
+ * RETIRED — 5.9.2026 asset audit (docs/life/ART-REQUIRED.md). The concept-board fans
+ * (pixel sprites with a white halo) were replaced in every room by the September adults
+ * in delta 20; the files stay in `public/life/art` for the manifest's sake and nothing
+ * loads them. A retired key is not a figure: naming one in a scene fails `tests/life.test.ts`.
+ */
+export const RETIRED_FIGURE = ['fanA', 'fanB', 'fanC', 'fanD', 'fanE', 'fanF', 'fanG'] as const
+
 export type FigureKey = (typeof FIGURE)[number]
 
 /**
@@ -720,7 +730,7 @@ export const CLOSE_UP_FALLBACK: Record<(typeof CLOSE_UP)[number], string> = {
   cuKobiTable: 'faceKobi',
   cuRachelNu: 'faceRachel90',
   cuRachelWatch: 'faceRachel90',
-  cuPogiReveal: 'facePogi-wide',
+  cuPogiReveal: 'tunnelReveal',
   cuOfir90: 'faceOfir',
   cuTeacherShare: 'faceTeacher-glasses',
   cuUsherNight: 'faceFan',

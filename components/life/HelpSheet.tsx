@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { Cloth, SheetHead } from '@/components/life/Plate'
 import { t } from '@/lib/i18n'
+import type { ChecklistItem } from '@/lib/life/checklist'
 import { HELP_DISCLAIMER_HE, HELP_RULES_HE, HELP_STORY_HE } from '@/lib/life/help'
 
 /**
@@ -17,10 +18,13 @@ import { HELP_DISCLAIMER_HE, HELP_RULES_HE, HELP_STORY_HE } from '@/lib/life/hel
 export function HelpSheet({
   objective,
   hint,
+  checklist = [],
   onClose,
 }: {
   objective: string | null
   hint: string
+  /** the day's steps, discovered so far — see `lib/life/checklist.ts` */
+  checklist?: ChecklistItem[]
   onClose: () => void
 }) {
   const [more, setMore] = useState(false)
@@ -50,6 +54,21 @@ export function HelpSheet({
             <p className="mt-3 font-body text-[15px] leading-snug text-ink" data-life="help-hint">
               <bdi>{hint}</bdi>
             </p>
+            {checklist.length > 0 && (
+              <ol className="mt-3 list-none border-t-hair border-ink pt-2" data-life="checklist">
+                {checklist.map((item) => (
+                  <li
+                    key={item.id}
+                    className={`flex items-start gap-2 py-1 font-body text-[14px] leading-snug ${item.done ? 'text-muted line-through' : 'text-ink'}`}
+                    data-life="checklist-step"
+                    data-done={item.done ? '1' : '0'}
+                  >
+                    <span className={`mt-[3px] inline-block h-[12px] w-[12px] shrink-0 border-hair border-ink ${item.done ? 'bg-red' : 'bg-sheet'}`} aria-hidden="true" />
+                    <bdi>{item.textHe}</bdi>
+                  </li>
+                ))}
+              </ol>
+            )}
           </div>
 
           <button

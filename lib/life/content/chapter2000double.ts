@@ -104,7 +104,7 @@ export const BEATS_TITLE: Beat[] = [
     delayMs: 1000,
     do: [
       { a: 'card', titleHe: 'שכונת התקווה', subHe: 'המחזור שמכריע', ms: 2600, art: 'plate-2000-title' },
-      { a: 'talk', conversation: 't-match' },
+      { a: 'match', script: 'title-00' },
     ],
   },
 ]
@@ -172,12 +172,7 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     nameHe: null,
     branches: [
       {
-        lines: [
-          { who: null, text: 'מגרש קטן. יציע בטון, רשת, שכונה מסביב שמסתכלת מהמרפסות. שש אלף איש שלא נושמים.' },
-          { who: null, text: 'הם קודם. כמובן שהם קודם. אתה לא מחשב. אתה מסתכל על אבא — או על מי שלידך — ורואה שגם הוא לא.' },
-          { who: null, text: 'ואז השוויון. ואז עשרים דקות שהן שנתיים.' },
-          { who: null, text: 'השריקה.' },
-        ],
+        lines: [{ who: null, text: 'השריקה. שש אלף איש לא בטוחים שמותר.' }],
         choices: [
           { id: 'believe', text: 'להאמין. עכשיו.', then: [{ e: 'wellbeing', key: 'happiness', delta: 12 }, { e: 'goto', node: 't-champions' }] },
           { id: 'wait', text: 'לחכות. שמישהו יגיד את המילה.', when: { lacesIs: 'witness' }, hidden: true, then: [{ e: 'goto', node: 't-champions' }] },
@@ -335,7 +330,7 @@ export const BEATS_DOUBLE: Beat[] = [
     delayMs: 1000,
     do: [
       { a: 'card', titleHe: 'אצטדיון רמת גן', subHe: 'גמר גביע המדינה · הדאבל', ms: 2600, art: 'plate-2000-double' },
-      { a: 'talk', conversation: 'd-match' },
+      { a: 'match', script: 'double-00' },
     ],
   },
 ]
@@ -388,9 +383,7 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'רמת גן. שוב. אותה קערה, אותו יריב, שנה אחרי. ארבעים אלף שכבר יודעים שזה יכול להיגמר בפנדלים, ומקללים את הידיעה.' },
-          { who: null, text: 'זיכרונות באים כשלא מזמינים אותם: שתיים ותשעים, וגביע ואחריו הפסד. שש ותשעים, כשלא היה בטוח שיהיה מועדון. שתיים ותשעים, כשלמדת שוודאות היא מלכודת. שנה שעברה, החיבוק ההוא.' },
-          { who: null, text: 'תשעים דקות ואף אחד לא מוותר. הארכה, ואף אחד לא מוותר. ואז השופט מסתכל בשעון.' },
+          { who: null, text: 'השופט מסתכל בשעון. ארבעים אלף מקללים את הידיעה.' },
         ],
         choices: [
           { id: 'breathe', text: 'לנשום. להסתכל. הפעם עד הסוף.', then: [{ e: 'personality', key: 'courage', delta: 3 }, { e: 'goto', node: 'd-pens' }] },

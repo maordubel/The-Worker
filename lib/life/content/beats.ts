@@ -1,4 +1,4 @@
-import type { SampleKey } from '../runtime/audio'
+import type { CrowdState, SampleKey } from '../runtime/audio'
 import type { LifeEvent } from '../events'
 import type { LifeState, LocationId, PresenceMode } from '../types'
 import type { Condition } from '../world/types'
@@ -42,6 +42,10 @@ export type BeatAction =
   | { a: 'sound'; kind: 'roar' | 'whistle' | 'radio' | 'door'; big?: number; blasts?: number; on?: boolean }
   /** one rendered sound from the library — a darbuka, a buzzer, a bus door, a groan */
   | { a: 'sfx'; key: SampleKey; level?: number; delayMs?: number }
+  /** the terrace changes state: murmur, tension, chant, a miss, a goal, the settle, the end */
+  | { a: 'crowd'; state: CrowdState }
+  /** a directed match (~60 s): a script from `matchScripts.ts`; the next action runs at the whistle */
+  | { a: 'match'; script: string }
   /** record how he was there for this chapter's anchor */
   | { a: 'presence'; mode: PresenceMode }
   /** the archive film this chapter may open onto (by cutscene registry id) */

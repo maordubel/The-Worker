@@ -36,7 +36,7 @@ export const ENCOUNTERS_1990: RandomEncounter[] = [
     lineHe: 'מטבע בין האבנים. פחות ממה שהיה שווה פעם, אבל מטבע.',
     who: null,
     effects: [
-      { e: 'money', agorot: 50, why: 'מהרחוב' },
+      { e: 'money', agorot: 200, why: 'מהרחוב' },
       { e: 'give', item: 'coin' },
     ],
   },

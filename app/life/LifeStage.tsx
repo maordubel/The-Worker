@@ -40,6 +40,8 @@ import { lifeStore } from '@/lib/life/save'
 import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/bus'
 import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/game'
 import type { LifeState } from '@/lib/life/types'
+import { checklistFor, type ChecklistItem } from '@/lib/life/checklist'
+import { CONSEQUENCE_KICKER_HE } from '@/lib/life/consequence'
 
 /**
  * הבמה — React mounts the game and then gets out of its way.
@@ -81,6 +83,8 @@ export function LifeStage({
   const [prompt, setPrompt] = useState<LifeBusEvents['prompt']>(null)
   const [teach, setTeach] = useState<LifeBusEvents['teach']>(null)
   const [toast, setToast] = useState<LifeBusEvents['toast']>(null)
+  const toastNow = useRef<LifeBusEvents['toast']>(null)
+  const toastQueue = useRef<NonNullable<LifeBusEvents['toast']>[]>([])
   /** the synthesiser — made on the first gesture, remembered muted or not per browser */
   const audio = useRef<LifeAudio | null>(null)
   const [sound, setSound] = useState(true)
@@ -209,6 +213,7 @@ export function LifeStage({
           // the big roars — a goal, the buzzer — get one frame of red, like a cut to the crowd
           if ((event.big ?? 1) >= 2) setFlash((f) => ({ tone: 'red', nonce: f.nonce + 1 }))
         } else if (event.kind === 'radio') sfx.radioOn(event.on)
+        else if (event.kind === 'crowd') sfx.crowd(event.state)
         else if (event.kind === 'sample') sfx.play(event.key, { ...(event.level !== undefined ? { level: event.level } : {}), ...(event.delayMs !== undefined ? { delayMs: event.delayMs } : {}) })
       }),
     )
@@ -230,8 +235,18 @@ export function LifeStage({
     unsubscribe.push(bus.on('teach', setTeach))
     unsubscribe.push(
       bus.on('toast', (value) => {
+        // a reward or a price ("הכרת", "תוצאה") waits its turn behind the line on screen;
+        // a plain line replaces whatever is there — a sentence, not a notification centre
+        if (value && value.kickerHe && toastNow.current) {
+          if (toastQueue.current.length < 3) toastQueue.current.push(value)
+          return
+        }
+        if (!value) toastQueue.current = []
+        toastNow.current = value
         setToast(value)
         if (value?.art) sfx.thud()
+        if (value?.kickerHe === CONSEQUENCE_KICKER_HE) sfx.play('gauge-down', { bus: 'ui', level: 0.5 })
+        else if (value?.kickerHe) sfx.play('gauge-up', { bus: 'ui', level: 0.45 })
       }),
     )
     unsubscribe.push(
@@ -451,7 +466,11 @@ export function LifeStage({
   // --- a toast is a sentence, not a notification centre ------------------------------
   useEffect(() => {
     if (!toast) return
-    const timer = setTimeout(() => setToast(null), toast.art ? 3600 : 2600)
+    const timer = setTimeout(() => {
+      const next = toastQueue.current.shift() ?? null
+      toastNow.current = next
+      setToast(next)
+    }, toast.art ? 3600 : toast.kickerHe ? 2200 : 2600)
     return () => clearTimeout(timer)
   }, [toast])
 
@@ -526,8 +545,11 @@ export function LifeStage({
   }, [])
 
   const [help, setHelp] = useState(false)
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([])
   const openHelp = useCallback(() => {
     runtime.current?.pause(true)
+    const state = runtime.current?.snapshot().state
+    setChecklist(state ? checklistFor(state) : [])
     setHelp(true)
     audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
   }, [])
@@ -643,6 +665,7 @@ export function LifeStage({
       <div
         className="life-glass relative h-full w-full overflow-hidden border-y-hair border-ink bg-ink"
         data-decade={decadeOf(hud.year)}
+        data-controls={controls ? '1' : '0'}
         style={{ '--ui-scale': uiScale } as React.CSSProperties}
       >
         <div ref={holder} className="absolute inset-0" data-life="holder" />
@@ -714,7 +737,7 @@ export function LifeStage({
             </Chip>
           </div>
         )}
-        {help && <HelpSheet objective={hud.objective} hint={hud.hint} onClose={closeHelp} />}
+        {help && <HelpSheet objective={hud.objective} hint={hud.hint} checklist={checklist} onClose={closeHelp} />}
 
         {ready && !covered && controls && (touch ? deck : true) && (
           <ControlDeck

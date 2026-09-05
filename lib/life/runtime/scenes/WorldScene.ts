@@ -26,6 +26,9 @@ import type { HistoricalAnchor } from '../../anchors'
 import { buildFinale } from '../../finale'
 import { retryFor } from '../../content/retry1986'
 import { TransistorNet } from '../match1990'
+import { MatchDirector } from '../matchDirector'
+import { CONSEQUENCE_KICKER_HE, dueConsequences, shownEvent } from '../../consequence'
+import { matchScriptFor, type MatchScript } from '../../content/matchScripts'
 import { DerbyFromAfar, DerbyNight, derbyMarginHe, type DerbyMood } from '../derby1991'
 import { PassageScene } from './PassageScene'
 import { meets } from '../../world/types'
@@ -207,6 +210,11 @@ export class WorldScene extends Phaser.Scene {
   private matchPhase: 'none' | 'archive' | 'watching' | 'goal' | 'celebrating' | 'over' = 'none'
   /** the film currently on screen, and the reason the world is stopped */
   private cutscene: HistoricalCutscene | null = null
+  /** the ~60-second match, when one is running — see `matchDirector.ts` */
+  private director: MatchDirector | null = null
+  /** the director's goal step, waiting for the film or the authored minute to come back */
+  private afterGoal: (() => void) | null = null
+  private filmWatched = false
   private goalMinute: number | null = null
   /** the one line before the goal, said once — its OWN latch, never `flagCount` */
   private saidTense = false
@@ -263,6 +271,11 @@ export class WorldScene extends Phaser.Scene {
     this.timeScale = 1
     this.flagCount = 0
     this.matchPhase = 'none'
+    // a match cannot outlive its room: the director's timers die with the scene
+    this.director?.stop()
+    this.director = null
+    this.afterGoal = null
+    this.filmWatched = false
     this.derby = null
     this.afar = null
     this.cutscene = null
@@ -477,6 +490,12 @@ export class WorldScene extends Phaser.Scene {
     // the strip used to follow the boy into the street, over the HUD, all the way home.
     if (this.def.id !== 'bloomfield-inside') this.ctx.bus.emit('match', null)
     this.teach()
+    // The deck is part of the room (5.9.2026). A chapter cut (`enterChapter`) hides it
+    // for its card and restarts the scene, and nothing on this side ever said "back":
+    // from 1993 on the joystick was simply gone for the whole chapter, and a thumb could
+    // not move the boy. Every room now shows it on arrival; an arrival card, a film or
+    // the match director hide it again themselves for exactly as long as they run.
+    this.ctx.bus.emit('controls', { visible: true })
 
     const arrival = arrivalFor(this.def, this.chapter)
     if (arrival && !state.flags[arrival.flag]) this.playArrival()
@@ -1521,6 +1540,16 @@ export class WorldScene extends Phaser.Scene {
     if (this.matchPhase === 'watching' || this.matchPhase === 'goal') return
     this.applySchedule()
     this.tickWindows()
+    this.tickLater()
+  }
+
+  /** a price booked earlier comes due: one red line, once, on the minute it was owed */
+  private tickLater() {
+    if (this.paused) return
+    const due = dueConsequences(this.ctx.engine.state)[0]
+    if (!due) return
+    this.ctx.engine.dispatch(shownEvent(due.flag))
+    this.ctx.bus.emit('toast', { text: due.text, tone: 'red', kickerHe: CONSEQUENCE_KICKER_HE })
   }
 
   /**
@@ -1673,23 +1702,26 @@ export class WorldScene extends Phaser.Scene {
       const leavesAt = state.flags['asked:five'] ? KOBI_LEAVES_LATE : KOBI_LEAVES
       if (state.minute >= leavesAt && !state.flags['kobi:left']) {
         engine.dispatch({ t: 'flag.raised', flag: 'kobi:left' })
-        this.ctx.bus.emit('toast', { text: 'הדלת נסגרת. אבא הלך. אמר שער 7.', tone: 'red' })
+        this.ctx.bus.emit('toast', { text: 'הדלת נסגרת. אבא הלך. אמר שער 7.', tone: 'red', kickerHe: CONSEQUENCE_KICKER_HE })
         this.refresh()
       }
     } else if (state.minute >= KOBI_LEAVES && !state.flags['kobi:left']) {
       engine.dispatch({ t: 'flag.raised', flag: 'kobi:left' })
-      this.ctx.bus.emit('toast', { text: 'הדלת נטרקת. אבא יצא.', tone: 'red' })
+      this.ctx.bus.emit('toast', { text: 'הדלת נטרקת. אבא יצא.', tone: 'red', kickerHe: CONSEQUENCE_KICKER_HE })
       this.refresh()
     }
     if (state.minute >= KICKOFF && !state.flags['match:started']) {
       engine.dispatch({ t: 'flag.raised', flag: 'match:started' })
       if (this.def.id !== 'bloomfield-inside') {
-        this.ctx.bus.emit('toast', { text: 'רעש רחוק, מכיוון מזרח.', tone: 'plain' })
+        this.ctx.bus.emit('toast', { text: 'רעש רחוק, מכיוון מזרח. המשחק התחיל בלעדיך.', tone: 'red', kickerHe: CONSEQUENCE_KICKER_HE })
       }
     }
     if (state.minute >= FULL_TIME && !state.flags['match:over'] && !this.net) {
       engine.dispatch({ t: 'flag.raised', flag: 'match:over' })
-      if (this.def.id !== 'bloomfield-inside') engine.dispatch({ t: 'flag.raised', flag: 'arrived:late' })
+      if (this.def.id !== 'bloomfield-inside') {
+        engine.dispatch({ t: 'flag.raised', flag: 'arrived:late' })
+        this.ctx.bus.emit('toast', { text: 'שריקה, מרחוק. נגמר. לא היית שם.', tone: 'red', kickerHe: CONSEQUENCE_KICKER_HE })
+      }
       this.refresh()
     }
   }
@@ -2047,7 +2079,7 @@ export class WorldScene extends Phaser.Scene {
         { t: 'item.gained', item: 'school-note' },
         // Pocket money, because `year.entered` empties the pockets and a thirteen-year-old
         // with nothing in them cannot buy anything at a hall kiosk. One coin, once.
-        { t: 'money.changed', agorot: 150, why: 'דמי כיס' },
+        { t: 'money.changed', agorot: 500, why: 'דמי כיס' },
       )
       this.time.delayedCall(700, () => {
         this.ctx.dialogue.startLines(CLASSROOM_1991, () => this.refresh())
@@ -2550,6 +2582,15 @@ export class WorldScene extends Phaser.Scene {
       this.net.start(this.ctx.engine.state.minute, KICKOFF)
       return
     }
+    // 5.9.2026: the final is a DIRECTED sequence (`final-86`) — the board, the minute,
+    // the boy's hands twice, the terrace answering — and the archive film, when it has
+    // not been seen, plays at the goal step inside it. See `runMatch`.
+    if (this.chapter === '1986' && matchScriptFor('final-86')) {
+      this.runMatch('final-86', () => undefined)
+      return
+    }
+    // every later match is a beat's `{ a: 'match' }` in its own chapter; nothing to start here
+    if (this.chapter !== '1986') return
     // The archive first, and the simulation as its fallback — see `playCutscene`.
     const film = this.era.cutscene ? cutsceneFor(this.era.cutscene) : null
     if (film && !this.ctx.engine.state.flags[film.completionFlag]) {
@@ -2557,6 +2598,104 @@ export class WorldScene extends Phaser.Scene {
       return
     }
     this.watchMatch()
+  }
+
+  /**
+   * ~60 שניות — a match as the brief asks for it: directed, fast, the player's hands in
+   * it two or three times, the crowd answering, the archive's result on the board and
+   * nothing invented on it. The script is data (`content/matchScripts.ts`); the runner
+   * is `MatchDirector`; this method is the bridge to the scene's clock, camera and
+   * dialogue. `done` is the beat's continuation, called once the last step has run.
+   */
+  private runMatch(scriptId: string, done: () => void) {
+    const script = matchScriptFor(scriptId)
+    if (!script) {
+      done()
+      return
+    }
+    this.director?.stop()
+    const isFinal = script.id === 'final-86'
+    if (isFinal) {
+      this.matchPhase = 'watching'
+      this.timeScale = 0
+      this.goalMinute = decidingMinute(this.anchor)
+    }
+    this.ctx.bus.emit('controls', { visible: false })
+    this.ctx.bus.emit('prompt', null)
+    const director = new MatchDirector(
+      {
+        emit: (name, value) => this.ctx.bus.emit(name, value),
+        dispatch: (...events) => this.ctx.engine.dispatch(...events),
+        minute: () => this.ctx.engine.state.minute,
+        talk: (conversation, then) => this.ctx.dialogue.start(conversation, then),
+        after: (ms, fn) => {
+          // the probes run the minute at a quarter of its length; a person gets the whole minute
+          const event = this.time.delayedCall(Math.round(ms * (this.ctx.probing ? 0.25 : 1)), fn)
+          return { remove: () => event.remove(false) }
+        },
+        setPaused: (on) => {
+          this.paused = on
+          if (on) this.ctx.bus.emit('prompt', null)
+        },
+        onAuthoredGoal: (_step, then) => this.stageGoal(then),
+        onGoal: (side) => this.reactToGoal(side),
+        onEnd: (finished) => this.closeMatch(finished),
+        onFinished: () => {
+          if (this.director === director) this.director = null
+          done()
+        },
+      },
+      script,
+      this.anchor,
+    )
+    this.director = director
+    director.start()
+  }
+
+  /** the picture answers a goal: ours is a flash and a shake; theirs is a dip */
+  private reactToGoal(side: 'for' | 'against') {
+    const camera = this.cameras.main
+    if (side === 'for') {
+      const flash = this.add
+        .rectangle(0, 0, camera.width * 3, camera.height * 3, LIFE_PALETTE.sheet, 0.85)
+        .setOrigin(0, 0)
+        .setScrollFactor(0)
+        .setDepth(9800)
+      this.tweens.add({ targets: flash, alpha: 0, duration: 700, onComplete: () => flash.destroy() })
+      camera.shake(900, 0.007)
+      this.ctx.engine.dispatch({ t: 'redheart.changed', key: 'footballLove', delta: 3 }, { t: 'wellbeing.changed', key: 'happiness', delta: 6 })
+      this.startCarnival()
+    } else {
+      camera.shake(400, 0.003)
+      this.ctx.engine.dispatch({ t: 'wellbeing.changed', key: 'stress', delta: 4 })
+    }
+  }
+
+  /**
+   * The 1986 goal step: the archive film if it has not been seen (tension built before
+   * it by the script, the boy's own eyes straight after — brief §13), else the authored
+   * eighty-sixth minute. Both hand the director back through `afterGoal`; a film that
+   * cannot play falls through to the authored minute and never blocks.
+   */
+  private stageGoal(then: () => void) {
+    const film = this.era.cutscene ? cutsceneFor(this.era.cutscene) : null
+    if (film && !this.ctx.engine.state.flags[film.completionFlag]) {
+      this.afterGoal = then
+      this.playCutscene(film)
+      return
+    }
+    this.scoreGoal(then)
+  }
+
+  /** the director's last step: the 1986 final closes as before; a Stage B match hands the night back */
+  private closeMatch(script: MatchScript) {
+    if (script.id === 'final-86') {
+      this.endMatch(!this.filmWatched)
+      return
+    }
+    this.paused = false
+    this.ctx.bus.emit('controls', { visible: true })
+    this.refresh()
   }
 
   /**
@@ -2622,6 +2761,26 @@ export class WorldScene extends Phaser.Scene {
     this.timeScale = 1
     this.ctx.engine.dispatch({ t: 'flag.raised', flag: film.completionFlag })
 
+    // the director opened the film at its goal step: it gets the goal back, either way
+    const afterGoal = this.afterGoal
+    if (afterGoal) {
+      this.afterGoal = null
+      this.matchPhase = 'watching'
+      this.paused = true
+      this.timeScale = 0
+      if (outcome === 'unavailable') {
+        this.ctx.bus.emit('toast', { text: film.fallbackHe, tone: 'plain' })
+        this.scoreGoal(afterGoal)
+        return
+      }
+      if (outcome === 'watched') {
+        this.filmWatched = true
+        this.ctx.engine.dispatch({ t: 'flag.raised', flag: film.watchedFlag })
+      }
+      this.returnFromArchive(afterGoal)
+      return
+    }
+
     if (outcome === 'unavailable') {
       this.ctx.bus.emit('toast', { text: film.fallbackHe, tone: 'plain' })
       this.watchMatch()
@@ -2653,9 +2812,10 @@ export class WorldScene extends Phaser.Scene {
    * chapter holding the same object in the same box, or the Red Box is a record of which
    * code path ran.
    */
-  private returnFromArchive() {
+  private returnFromArchive(then?: () => void) {
     const state = this.ctx.engine.state
-    if (state.minute < FULL_TIME) {
+    // under the director the clock is the script's; alone, the film was the whole match
+    if (!then && state.minute < FULL_TIME) {
       this.ctx.engine.dispatch({ t: 'clock.advanced', minutes: FULL_TIME - state.minute })
     }
     this.goalMinute = decidingMinute(this.anchor)
@@ -2679,13 +2839,16 @@ export class WorldScene extends Phaser.Scene {
     }
     this.startCarnival()
     this.cameras.main.flash(700, 255, 252, 246)
-    this.endMatch(false)
+    if (then) {
+      this.ctx.bus.emit('sound', { kind: 'roar', big: 2 })
+      this.time.delayedCall(1800, then)
+    } else this.endMatch(false)
     const goal = this.anchor.match?.decidedBy ?? null
     if (goal) {
       this.ctx.bus.emit('toast', { text: `${goal.scorerHe}. דקה ${goal.minute}.`, tone: 'red' })
     }
     // …and then the only thing left in Stage A that is his to do.
-    this.time.delayedCall(2600, () => {
+    this.time.delayedCall(then ? 7000 : 2600, () => {
       if (this.ctx.engine.state.flags['found:kobi']) return
       this.ctx.bus.emit('toast', { text: 'הוא איפשהו כאן. תמצא אותו.', tone: 'plain' })
     })
@@ -2757,7 +2920,7 @@ export class WorldScene extends Phaser.Scene {
    * `anchor-server.ts`. A game that may not invent a fact (rule 11) can still stop time
    * for one, and this is what that looks like.
    */
-  private scoreGoal() {
+  private scoreGoal(then?: () => void) {
     this.matchPhase = 'goal'
     this.timeScale = 0
     this.paused = true
@@ -2815,6 +2978,11 @@ export class WorldScene extends Phaser.Scene {
     // …and then the last few minutes, which nobody who was there remembers.
     this.time.delayedCall(7200, () => {
       if (this.matchPhase !== 'celebrating') return
+      // under the director the script plays those minutes; the picture stays held
+      if (then) {
+        then()
+        return
+      }
       this.paused = false
       this.timeScale = 8
       this.ctx.bus.emit('controls', { visible: true })
@@ -3170,6 +3338,8 @@ export class WorldScene extends Phaser.Scene {
       exits: this.exits.map((exit) => `${exit.id}${meets(state, whenFor(exit, this.chapter)) ? '' : '(shut)'}`),
       // 11.3.1991: how far into the night the hall is, for the derby probe
       derby: this.derby?.debugState() ?? null,
+      // the match director, for the probes: which script, how far, is it over
+      match: this.director ? { script: this.director.script.id, steps: this.director.log.length, over: !this.director.active } : null,
       // the beat runner, for the chapter probes
       beat: { busy: this.beatBusy, pending: this.beatPending, since: Math.round(this.since), due: beatsAt(this.era.beats, 'enter', this.def.id).filter((b) => !state.flags[beatFlag(b.id)] && meets(state, b.when)).map((b) => b.id) },
     }
@@ -3392,6 +3562,13 @@ export class WorldScene extends Phaser.Scene {
       case 'sfx':
         this.ctx.bus.emit('sound', { kind: 'sample', key: next.key, ...(next.level !== undefined ? { level: next.level } : {}), ...(next.delayMs !== undefined ? { delayMs: next.delayMs } : {}) })
         then()
+        return
+      case 'crowd':
+        this.ctx.bus.emit('sound', { kind: 'crowd', state: next.state })
+        then()
+        return
+      case 'match':
+        this.runMatch(next.script, then)
         return
       case 'presence':
         this.ctx.engine.dispatch({ t: 'presence.recorded', anchorId: this.anchor.id, mode: next.mode })

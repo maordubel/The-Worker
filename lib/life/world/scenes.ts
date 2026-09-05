@@ -158,7 +158,7 @@ export type ExitDef = {
   priority?: number
 }
 
-export type Ambience = 'interior' | 'kitchen' | 'day' | 'dusk' | 'tunnel' | 'stadium' | 'hall' | 'station' | 'base' | 'classroom'
+export type Ambience = 'interior' | 'kitchen' | 'day' | 'park' | 'dusk' | 'tunnel' | 'stadium' | 'hall' | 'station' | 'base' | 'classroom'
 
 /**
  * A painted object separated from its room, drawn in front of or behind the player.
@@ -688,10 +688,11 @@ const SCENES: SceneDef[] = [
     id: 'street',
     titleHe: 'הרחוב',
     art: 'street',
-    artByEra: { '1990': 'street90', '1991': 'street90', '1990s': 'street90', '2000s': 'street90' },
+    // a match day has bunting between the balconies (5.9.2026): the promotion, the last round, the finals
+    artByEra: { '1990': 'street90', '1991': 'street90', '1998-laces': 'street90Flags', '1999-cup': 'street90Flags', '2000-title': 'street90Flags', '2000-double': 'street90Flags', '1990s': 'street90', '2000s': 'street90' },
     band: { far: 0.705, near: 0.86 },
     size: { far: 0.185, near: 0.29 },
-    ambience: 'day',
+    ambience: 'park',
     stuckHe: 'הקיוסק משמאל, המגרש בסמטה. מזרחה הולכים רק כשיודעים לאן — תשאל מישהו.',
     stuckByEra: {
       '1990': 'אופיר ועמית ליד הקיוסק. מזרחה — אחרי האדומים.',
@@ -1094,6 +1095,8 @@ const SCENES: SceneDef[] = [
     id: 'kiosk',
     titleHe: 'הקיוסק',
     art: 'kiosk',
+    // the two evenings at the kiosk are painted as evenings
+    artByEra: { '1995-sinai': 'kioskNight', '1999-basket': 'kioskNight' },
     // Repainted 3.9.2026, and the old one was not a worse painting of this place — it was
     // a painting of a DIFFERENT place. `kiosk` has always been an interior the child walks
     // into, and the art was a shopfront seen from the pavement, so the backdrop and the
@@ -1205,6 +1208,8 @@ const SCENES: SceneDef[] = [
     id: 'pitch',
     titleHe: 'המגרש',
     art: 'pitch',
+    // 5.9.2026: Stage A plays in the alley itself — the improvised goal, the lane, the washing
+    artByEra: { A: 'alley' },
     // Repainted 3.9.2026, for the same reason the street was repainted a day earlier: the
     // old pitch had TEN BOYS painted onto it, and every one of them was frozen there for
     // the whole afternoon. A place with people painted into it cannot have people in it.
@@ -1224,7 +1229,7 @@ const SCENES: SceneDef[] = [
      * it now sits at the top of that range instead of half again beyond it.
      */
     size: { far: 0.17, near: 0.285 },
-    ambience: 'day',
+    ambience: 'park',
     stuckHe: 'הכדור באמצע. חזרה לרחוב — שמאלה.',
     spawns: { fromStreet: { x: 0.13, y: 0.84, facing: 'right' } , start: { x: 0.13, y: 0.84, facing: 'right' } },
     actors: [
@@ -1395,7 +1400,7 @@ const SCENES: SceneDef[] = [
     band: { far: 0.8, near: 0.95 },
     // the painted men at the turnstiles are big; a child at 0.2 stood at their knees
     size: { far: 0.23, near: 0.33 },
-    ambience: 'day',
+    ambience: 'park',
     // The first sight of the ground: a wide establishing frame of Bloomfield from the
     // street outside — played once, the moment the child first reaches it, then it cuts
     // to the turnstiles. Same mechanism as the road's `streetEast` and the terrace's
@@ -1592,7 +1597,8 @@ const SCENES: SceneDef[] = [
     band: { far: 0.872, near: 0.99 },
     size: { far: 0.2, near: 0.27 },
     ambience: 'stadium',
-    arrival: { art: 'reveal', ms: 5200, flag: 'saw:reveal' },
+    // 5.9.2026: the boy himself at the tunnel mouth, painted — the ground opening in front of him
+    arrival: { art: 'tunnelReveal', ms: 5200, flag: 'saw:reveal' },
     // 1990: he knows this terrace. The card is the arithmetic in his head, not the bowl.
     arrivalByEra: { '1990': null, '1990s': null, '2000s': null },
     stuckHe: 'הוא איפשהו ביציע. תסתכל טוב.',
@@ -1889,6 +1895,8 @@ const SCENES: SceneDef[] = [
     id: 'ussishkin-hall',
     titleHe: 'אולם אוסישקין',
     art: 'ussMain',
+    // 5.9.2026: the two relegation nights are painted as nights — the hall lit, half empty
+    artByEra: { '1997-basket': 'ussHallNight', '1999-basket': 'ussHallNight' },
     band: { far: 0.72, near: 0.96 },
     size: { far: 0.17, near: 0.3 },
     ambience: 'hall',
@@ -2061,6 +2069,8 @@ const SCENES: SceneDef[] = [
     id: 'classroom',
     titleHe: 'הכיתה',
     art: 'classroom',
+    // 5.9.2026: the Sunday morning of 1998 has its own room — a map on the wall, a radiator
+    artByEra: { '1998-laces': 'classroom98' },
     band: { far: 0.74, near: 0.97 },
     size: { far: 0.22, near: 0.32 },
     ambience: 'classroom',
@@ -2150,7 +2160,7 @@ const SCENES: SceneDef[] = [
     art: 'schoolyard',
     band: { far: 0.68, near: 0.95 },
     size: { far: 0.18, near: 0.28 },
-    ambience: 'day',
+    ambience: 'park',
     stuckHe: 'הכיתה מאחורייך, דרך הדלת. השער לרחוב — משמאל. הסל בקצה החצר.',
     spawns: {
       fromSchool: { x: 0.34, y: 0.86, facing: 'right' },
@@ -2213,7 +2223,7 @@ const SCENES: SceneDef[] = [
   {
     id: 'gate5',
     titleHe: 'שער 5',
-    art: 'undercroft',
+    art: 'gate5',
     band: { far: 0.74, near: 0.95 },
     size: { far: 0.24, near: 0.32 },
     ambience: 'stadium',
@@ -2266,7 +2276,7 @@ const SCENES: SceneDef[] = [
   {
     id: 'bus-station',
     titleHe: 'התחנה המרכזית — רציף',
-    art: 'street90',
+    art: 'busStation',
     band: { far: 0.705, near: 0.86 },
     size: { far: 0.185, near: 0.29 },
     ambience: 'station',
@@ -2298,7 +2308,7 @@ const SCENES: SceneDef[] = [
   {
     id: 'ramat-gan',
     titleHe: 'אצטדיון רמת גן',
-    art: 'stand',
+    art: 'ramatGan',
     band: { far: 0.872, near: 0.99 },
     size: { far: 0.2, near: 0.27 },
     ambience: 'stadium',
@@ -2331,7 +2341,7 @@ const SCENES: SceneDef[] = [
   {
     id: 'hatikva',
     titleHe: 'שכונת התקווה',
-    art: 'ground',
+    art: 'hatikva',
     band: { far: 0.8, near: 0.95 },
     size: { far: 0.2, near: 0.29 },
     ambience: 'stadium',

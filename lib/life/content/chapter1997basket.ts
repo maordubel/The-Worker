@@ -86,7 +86,7 @@ export const BEATS_HALL: Beat[] = [
       { a: 'flag', flag: 'h1:decided' },
       { a: 'flag', flag: 'h1:hall' },
       { a: 'card', titleHe: 'הערב האחרון', subHe: 'אוסישקין · ליגה', ms: 2400 },
-      { a: 'talk', conversation: 'h1-inside' },
+      { a: 'match', script: 'hall-97' },
       { a: 'events', events: DAY(H2, 1998, 2, at(19, 30), 'אביב 1998') },
       { a: 'card', titleHe: 'שנה אחרי', subHe: 'אוסישקין', ms: 2600 },
       { a: 'travel', to: 'ussishkin-outside', spawn: 'start' },

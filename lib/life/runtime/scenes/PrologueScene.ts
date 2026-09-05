@@ -33,7 +33,8 @@ export class PrologueScene extends Phaser.Scene {
   }
 
   preload() {
-    if (!this.textures.exists('art-stand')) this.load.image('art-stand', artUrl('stand'))
+    // 5.9.2026: the terrace from a child's height on his father's shoulders — painted for this minute
+    if (!this.textures.exists('art-cup83')) this.load.image('art-cup83', artUrl('cup83'))
   }
 
   create() {
@@ -41,8 +42,8 @@ export class PrologueScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(LIFE_PALETTE.night)
 
     const cam = this.cameras.main
-    const image = this.add.image(0, 0, 'art-stand').setOrigin(0.5, 0.5).setScrollFactor(0)
-    const source = this.textures.get('art-stand').getSourceImage()
+    const image = this.add.image(0, 0, 'art-cup83').setOrigin(0.5, 0.5).setScrollFactor(0)
+    const source = this.textures.get('art-cup83').getSourceImage()
 
     const place = () => {
       const scale = Math.max(cam.width / source.width, cam.height / source.height) * 1.18

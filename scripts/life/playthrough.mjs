@@ -100,11 +100,17 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
   const errors = []
   const origin = new URL(BASE).origin
   page.on('requestfailed', (request) => {
+    // a request the harness's own navigation cut short is not the product failing
+    if (request.failure()?.errorText === 'net::ERR_ABORTED') return
     if (request.url().startsWith(origin)) errors.push(`request failed: ${request.url()}`)
   })
   page.on('console', (message) => {
     if (message.type() !== 'error') return
     if (message.text().startsWith('Failed to load resource')) return
+    // Next prefetches the landing page's links; the harness leaves that page for /life
+    // before they land, and the router logs the cut-off fetch as an error and falls back
+    // to a plain navigation. The harness's own navigation, like `net::ERR_ABORTED` above.
+    if (message.text().startsWith('Failed to fetch RSC payload')) return
     errors.push(message.text())
   })
   page.on('pageerror', (error) => errors.push(String(error)))
@@ -185,7 +191,31 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
       if ((await page.locator('[data-life="dialogue"]').count()) === 0) break
     }
   }
-  await page.waitForTimeout(900)
+  /**
+   * 5.9.2026: a new life no longer lands in 1986 — it lands in the alley of 1984 (Stage A,
+   * delta 20), which `newgame-probe.mjs` walks. The morning this harness plays "the way it
+   * is locked" is the 1986 morning, so from here the run is SEEDED at the first minute of
+   * 1986: the same flags a finished Stage A leaves, and nothing else.
+   */
+  await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' })
+  await page.evaluate(() => {
+    const events = [
+      { t: 'flag.raised', flag: 'life:opening' }, { t: 'flag.raised', flag: 'prologue:done' },
+      { t: 'chapter.entered', chapter: '1986' }, { t: 'moved', to: 'bedroom' },
+    ]
+    window.localStorage.setItem('the-worker:life', JSON.stringify({ version: 3, identity: { name: 'פוגי', sex: 'boy', birthYear: 1978 }, year: 1986, events, savedAt: new Date().toISOString() }))
+    // The probe flag, like every chapter probe: the game picks its Canvas renderer under
+    // it. Without it headless Chromium draws WebGL in software at a frame every few
+    // hundred milliseconds — a 120ms key hold falls between two frames and the child
+    // never moves, and the harness reported a door that works as a door it could not
+    // find (5.9.2026: forty presses to cross the bedroom, none to cross the living room).
+    window.localStorage.setItem('the-worker:life:probe', '1')
+  })
+  // `domcontentloaded`, not `networkidle`: a room with a running ambience keeps fetching
+  // audio, and the idle the harness waited for never came (5.9.2026 — same as the tour).
+  await page.goto(`${BASE}/life`, { waitUntil: 'domcontentloaded' })
+  await page.waitForSelector('canvas', { timeout: 20000 })
+  await page.waitForTimeout(2600)
   await shot('02-bedroom')
 
   const clockNow = () =>
@@ -210,8 +240,13 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
     report.push(`NO TEACH ${size.name}: the movement line never appeared`)
   }
 
+  // The touch chip prints the button's glyph before its label, so its TEXT is `Aלך לסלון`
+  // and `isDoor` below never saw the door; its `aria-label` is the label alone.
   const promptNow = () =>
-    page.evaluate(() => document.querySelector('[data-life="prompt"]')?.textContent?.trim() ?? null)
+    page.evaluate(() => {
+      const el = document.querySelector('[data-life="prompt"]')
+      return el?.getAttribute('aria-label') ?? el?.textContent?.trim() ?? null
+    })
 
   /**
    * A door says לך / היכנס / צא. Everything else is a person or a thing.
@@ -232,9 +267,17 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
    * press E to the end of the lines, and if a box is still there, press Escape and
    * require it to be gone.
    */
-  const clearDialogue = async (max = 8) => {
+  const clearDialogue = async (max = 16) => {
     for (let i = 0; i < max; i += 1) {
       if ((await page.locator('[data-life="dialogue"]').count()) === 0) return true
+      // a ballot on screen: a player picks; the harness picks the first row (5.9.2026 —
+      // Kobi's morning conversation ends in a choice, and eight presses of E never chose)
+      const choice = page.locator('[data-life="choice"] button').first()
+      if ((await choice.count()) > 0) {
+        await choice.click().catch(() => {})
+        await page.waitForTimeout(420)
+        continue
+      }
       await page.keyboard.press('e')
       await page.waitForTimeout(240)
     }
@@ -322,6 +365,8 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
     talked = false
     if (place === 'הרחוב' || outside) break
     const text = await promptNow()
+    // WORKER_WALK_DEBUG=1 prints every step of the walk — the one way to see WHY a door was not found
+    if (process.env.WORKER_WALK_DEBUG) console.log(`walk ${size.name} #${i} ${place} heading=${heading} stalled=${stalled} prompt=${text}`)
     // Passing something new is progress, even when the room has not changed.
     if (text && !seenPrompts.has(text)) {
       seenPrompts.add(text)
@@ -661,7 +706,9 @@ const TOUR = [
       },
       [place, flags],
     )
-    await page.goto(`${BASE}/life`, { waitUntil: 'networkidle' })
+    // `domcontentloaded`, not `networkidle` (5.9.2026): the game now warms a crowd of sound
+    // files on its first gesture, and on a loaded box the network never goes idle in time.
+    await page.goto(`${BASE}/life`, { waitUntil: 'domcontentloaded' })
     await page.waitForSelector('canvas', { timeout: 20000 })
     // The opening plays on a fresh session, and every stop of the tour is one. It is not
     // what this loop is measuring, and it covers the whole screen while it runs.

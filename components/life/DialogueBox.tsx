@@ -44,7 +44,8 @@ import { t } from '@/lib/i18n'
  */
 
 /** characters per second — the pace of somebody talking, not of a modem */
-const TYPE_CPS = 42
+// 5.9.2026: faster — a ninety-character line in a second and a half; a tap completes it at once
+const TYPE_CPS = 60
 
 /**
  * צדדים — comic grammar (5.9.2026).
@@ -244,9 +245,10 @@ export function DialogueBox({
             )}
           </button>
 
-          {/* the choices — a ballot, one row each, the red square filling on press */}
+          {/* the choices — a ballot, one row each, the red square filling on press. A phone on
+              its side has 390px of height: the ballot scrolls rather than losing its last row. */}
           {hasChoices && done && (
-            <ul className={`border-t-hair ${spoken ? 'border-ink' : 'border-sheet/30'}`}>
+            <ul className={`max-h-[46vh] overflow-y-auto border-t-hair ${spoken ? 'border-ink' : 'border-sheet/30'}`} data-life="choices">
               {choices!.map((choice, index) => (
                 <li
                   key={choice.id}

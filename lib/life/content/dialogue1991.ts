@@ -748,7 +748,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
         lines: [{ who: 'מוכר', text: 'נגמר. תבוא במחצית.' }],
       },
       {
-        when: { minAgorot: 50 },
+        when: { minAgorot: 300 },
         lines: [
           { who: 'מוכר', text: 'יש חם, יש קר, יש מה שנשאר.' },
           { who: null, text: 'הריח של הגריל נכנס לך לחולצה ויישאר שם עד מחר.' },
@@ -758,7 +758,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
             id: 'buy',
             text: 'לקנות משהו חם.',
             then: [
-              { e: 'money', agorot: -50, why: 'בקיוסק של האולם' },
+              { e: 'money', agorot: -300, why: 'בקיוסק של האולם' },
               { e: 'flag', flag: 'bought:food' },
               { e: 'give', item: 'wrapper' },
               { e: 'time', minutes: 8 },

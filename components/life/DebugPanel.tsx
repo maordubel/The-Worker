@@ -2,6 +2,7 @@
 
 import { t } from '@/lib/i18n'
 import type { LifeRuntime, LifeSnapshot } from '@/lib/life/runtime/game'
+import { formatMoney } from '@/lib/life/money'
 
 /**
  * לוח הפיתוח — the one screen allowed to show numbers, and it never ships.
@@ -80,7 +81,7 @@ export function DebugPanel({
           {state.rng.seed} @ {state.rng.cursor} · {t('life.debug.events')} {snapshot.events}
         </Row>
         <Row label={t('life.debug.resources')}>
-          money={state.agorot} energy={Math.round(state.energy)}{' '}
+          money={formatMoney(state.agorot)} energy={Math.round(state.energy)}{' '}
           {Object.entries(state.inventory)
             .map(([key, value]) => `${key}×${value}`)
             .join(' ')}

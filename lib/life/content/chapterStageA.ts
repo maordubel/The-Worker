@@ -308,7 +308,7 @@ export const BEATS_A4: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'flag', flag: A4 },
-      { a: 'events', events: [{ t: 'savings.changed', agorot: 900, why: 'הפחית' }, { t: 'money.changed', agorot: 150, why: 'מהכיס' }] },
+      { a: 'events', events: [{ t: 'savings.changed', agorot: 900, why: 'הפחית' }, { t: 'money.changed', agorot: 200, why: 'מהכיס' }] },
       { a: 'lines', lines: [{ who: null, text: 'קיץ. שבע. בחלון של רפי תלויה חולצה אדומה בלי מספר, ומתחת למיטה שלך יש פחית עם חריץ.' }, { who: null, text: 'רפי סוגר בשבע.' }] },
     ],
   },
@@ -361,8 +361,8 @@ export const CONVERSATIONS_A4: Conversation[] = [
       { when: { flag: 'own:shirt85' }, lines: [{ who: 'רפי מהקיוסק', text: 'תלבש אותה בכבוד. ותכבס ביד.' }] },
       {
         when: { hasItem: 'bottle' },
-        lines: [{ who: 'רפי מהקיוסק', text: 'בקבוקים? תביא. עשר אגורות אחד. ואל תביא לי את המלוכלכים של הסמטה — טוב, תביא.' }],
-        then: [{ e: 'take', item: 'bottle', count: 3 }, { e: 'money', agorot: 300, why: 'פיקדון' }, { e: 'sfx', key: 'coins', level: 0.6 }, { e: 'toast', text: 'שלושים אגורות. הכיס מצלצל.', tone: 'plain' }],
+        lines: [{ who: 'רפי מהקיוסק', text: 'בקבוקים? תביא. שקל אחד. ואל תביא לי את המלוכלכים של הסמטה — טוב, תביא.' }],
+        then: [{ e: 'take', item: 'bottle', count: 3 }, { e: 'money', agorot: 300, why: 'פיקדון' }, { e: 'sfx', key: 'coins', level: 0.6 }, { e: 'toast', text: '3 ₪. הכיס מצלצל.', tone: 'plain' }],
       },
       {
         when: { minAgorot: SHIRT_PRICE },
@@ -375,7 +375,7 @@ export const CONVERSATIONS_A4: Conversation[] = [
       {
         lines: [{ who: 'רפי מהקיוסק', text: 'החולצה? שמונה־עשרה. אין לך שמונה־עשרה. יש לך פנים של ילד שסופר.' }],
         choices: [
-          { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'time', minutes: 50 }, { e: 'energy', delta: -15 }, { e: 'money', agorot: 400, why: 'ארגזים' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'toast', text: 'שעה של ארגזים. ארבעים אגורות ובקבוק קולה פתוח.', tone: 'plain' }] },
+          { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'time', minutes: 50 }, { e: 'energy', delta: -15 }, { e: 'money', agorot: 400, why: 'ארגזים' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'toast', text: 'שעה של ארגזים. 4 ₪ ובקבוק קולה פתוח.', tone: 'plain' }] },
           { id: 'no', text: '"רק מסתכל."', then: [] },
         ],
       },
@@ -404,7 +404,7 @@ export const CONVERSATIONS_A4: Conversation[] = [
     id: 'rachel-a4',
     nameHe: 'רחל',
     branches: [
-      { when: { flag: 'a4:gave' }, lines: [{ who: 'רחל', text: 'אני מחזירה לך. כל אגורה. שמעת?' }] },
+      { when: { flag: 'a4:gave' }, lines: [{ who: 'רחל', text: 'אני מחזירה לך. כל שקל. שמעת?' }] },
       {
         when: { flag: 'a4:tin' },
         lines: [{ who: null, text: 'אמא ליד הארנק. הארנק פתוח, ואין בו הרבה. היא לא ביקשה. היא רק הסתכלה על הכיס שלך ואז על הרצפה.' }],

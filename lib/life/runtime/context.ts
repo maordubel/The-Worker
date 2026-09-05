@@ -22,6 +22,8 @@ export type LifeContext = {
   prologueAnchor: HistoricalAnchor
   /** every chapter's anchor, keyed by `Era.anchorKey`, resolved server-side */
   anchors: AnchorSet
+  /** the headless probes: canvas renderer, and a directed match at a quarter of its length */
+  probing: boolean
 }
 
 export const CONTEXT_KEY = 'life'

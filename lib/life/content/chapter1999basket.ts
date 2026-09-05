@@ -81,7 +81,7 @@ export const BEATS_SEED: Beat[] = [
     delayMs: 900,
     do: [
       { a: 'card', titleHe: 'הערב האחרון', subHe: 'שוב', ms: 2200 },
-      { a: 'talk', conversation: 'seed-inside' },
+      { a: 'match', script: 'hall-99' },
       { a: 'flag', flag: 'seed:hall' },
       { a: 'toast', text: 'הקיוסק. אסף אמר שיהיו שם.', tone: 'plain' },
     ],

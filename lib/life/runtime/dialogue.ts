@@ -8,9 +8,13 @@ import type { LifeEvent } from '../events'
 import { acceptEvents, isAvailable, resolveOutcome } from '../opportunities'
 import { keepEvents, pickRedBoxItem } from '../redbox'
 import { meets } from '../world/types'
-import { DOC } from './art'
+import { BACKDROP, DOC } from './art'
 
 import type { DialogueChoice, LifeBus } from './bus'
+import { describeMoneyChange } from '../money'
+import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
+import { characterName } from '../characters'
+import type { CharacterId } from '../types'
 
 /**
  * מנהל השיחה — reads the content, writes to the life, and stops there.
@@ -34,6 +38,9 @@ export type DialogueHooks = {
   /** how this beat is framed; the scene owns the camera, the content owns the shot */
   shot?(shot: ConversationShot | null): void
 }
+
+/** the people a boy does not "meet": his parents, the friends from the alley, the neighbour, the kiosk */
+const KNOWN_FROM_HOME: ReadonlySet<string> = new Set(['kobi', 'rachel', 'ofir', 'amit', 'efi', 'keren', 'ilan', 'rafi'])
 
 export class DialogueRunner {
   private conversation: Conversation | null = null
@@ -222,6 +229,16 @@ export class DialogueRunner {
     /** the last thing handed over in this list — a toast that follows it shows it */
     let handed: string | null = null
     let kept: string | null = null
+    /** shekels in or out of the pocket in this list; said once at the end unless a toast already says it */
+    let moneyDelta = 0
+    let saidIt = false
+    /** the first person this list touched who was not yet met, and the first who will remember it */
+    let met: CharacterId | null = null
+    let remembered: CharacterId | null = null
+    const touch = (who: CharacterId) => {
+      if (KNOWN_FROM_HOME.has(who)) return
+      if (met === null && !this.engine.state.flags[`life:met:${who}`]) met = who
+    }
     for (const effect of effects) {
       switch (effect.e) {
         case 'flag':
@@ -229,6 +246,7 @@ export class DialogueRunner {
           break
         case 'money':
           events.push({ t: 'money.changed', agorot: effect.agorot, why: effect.why })
+          moneyDelta += effect.agorot
           break
         case 'give':
           events.push({ t: 'item.gained', item: effect.item, count: effect.count ?? 1 })
@@ -269,9 +287,25 @@ export class DialogueRunner {
         case 'sfx':
           after.push(() => this.bus.emit('sound', { kind: 'sample', key: effect.key, ...(effect.level !== undefined ? { level: effect.level } : {}), ...(effect.delayMs !== undefined ? { delayMs: effect.delayMs } : {}) }))
           break
+        case 'plate': {
+          // a dialogue may cut to a painted place, never to an arbitrary file: the key must be a backdrop
+          if ((BACKDROP as readonly string[]).includes(effect.art)) {
+            const { art, titleHe, ms } = effect
+            const subHe = effect.subHe ?? null
+            after.push(() => this.bus.emit('card', { titleHe, subHe, ms: ms ?? 2600, art }))
+          }
+          break
+        }
+        case 'consequence': {
+          const text = effect.text
+          after.push(() => this.bus.emit('toast', { text, tone: 'red', kickerHe: CONSEQUENCE_KICKER_HE }))
+          if (effect.laterText) events.push(...scheduleLater(this.engine.state, effect.id, effect.laterText, effect.afterMinutes ?? 60))
+          break
+        }
         case 'toast': {
           const art = kept ?? handed
           const kickerHe = kept ? 'לקופסה האדומה' : handed ? 'קיבלת' : undefined
+          saidIt = true
           after.push(() =>
             this.bus.emit('toast', {
               text: effect.text,
@@ -316,6 +350,7 @@ export class DialogueRunner {
           break
         case 'rel':
           events.push({ t: 'relationship.changed', who: effect.who, axis: effect.axis, delta: effect.delta })
+          if (effect.delta > 0) touch(effect.who)
           break
         case 'remember':
           events.push({
@@ -328,6 +363,8 @@ export class DialogueRunner {
               atMinute: this.engine.state.minute,
             },
           })
+          touch(effect.who)
+          if ((effect.significance ?? 'notable') === 'major' && remembered === null) remembered = effect.who
           break
         case 'flagValue':
           events.push({ t: 'flag.set', flag: effect.flag, value: effect.value })
@@ -405,6 +442,22 @@ export class DialogueRunner {
         default:
           break
       }
+    }
+
+    // the pocket changed and nobody said so: one line, the shared words, no agorot
+    if (moneyDelta !== 0 && !saidIt) {
+      const said = describeMoneyChange(moneyDelta)
+      if (said) after.push(() => this.bus.emit('toast', { text: said, tone: 'plain', kickerHe: moneyDelta > 0 ? 'קיבלת' : 'שילמת' }))
+    }
+    // the reward the brief asked for: a person met, a person who will remember — one line, live
+    if (met !== null) {
+      const who = met
+      events.push({ t: 'flag.raised', flag: `life:met:${who}` })
+      after.push(() => this.bus.emit('toast', { text: `הכרת את ${characterName(who)}.`, tone: 'plain', kickerHe: 'הכרת' }))
+    }
+    if (remembered !== null) {
+      const who = remembered
+      after.push(() => this.bus.emit('toast', { text: `${characterName(who)} יזכור את זה.`, tone: 'plain', kickerHe: 'יזכור' }))
     }
 
     if (events.length > 0) this.engine.dispatch(...events)

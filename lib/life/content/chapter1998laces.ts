@@ -123,38 +123,18 @@ export const BEATS_LACES: Beat[] = [
       { a: 'lines', lines: [{ who: null, text: 'שבת, המחזור האחרון. אתם ראשונים בנקודה אחת, או שהם — תלוי את מי שואלים ומתי. המשחק שלכם בבלומפילד. שלהם — רחוק, בעיר שאתה לא בטוח איפה היא על המפה.' }, { who: null, text: 'עשרים. שמונה שנים מאז השבת ההיא, שתים־עשרה מאז הראשונה. אבא בכורסה, זהיר. בחוץ, החבר\'ה בטוחים.' }] },
     ],
   },
-  // the away-from-here match reaches the terrace through delay
+  // the match — ours on the grass, theirs in a transistor — directed in one minute (`laces-98`)
   {
-    id: 'l1-half',
+    id: 'l1-match',
     at: 'bloomfield-inside',
-    trigger: 'clock',
-    when: { flag: L1, afterMinute: HALF_98, none: [{ flag: 'l1:half' }] },
+    trigger: 'enter',
+    when: { flag: L1, none: [{ flag: 'l1:match' }] },
+    delayMs: 900,
     do: [
-      { a: 'flag', flag: 'l1:half' },
-      { a: 'toast', text: 'מאחור, טרנזיסטור: "שם — יתרון להם." ואז מישהו אחר: "לא, לא, שוויון." ואז: "מי אמר?"', tone: 'plain' },
-    ],
-  },
-  {
-    id: 'l1-late',
-    at: 'bloomfield-inside',
-    trigger: 'clock',
-    when: { flag: L1, afterMinute: FULL_98 - 8, none: [{ flag: 'l1:late' }] },
-    do: [
-      { a: 'flag', flag: 'l1:late' },
-      { a: 'toast', text: 'פייג׳ר אצל מישהו. "שוויון שם! שוויון!" היציע עולה באוויר על משחק שלא רואים.', tone: 'red' },
-      { a: 'sound', kind: 'roar', big: 2 },
-    ],
-  },
-  {
-    id: 'l1-end',
-    at: 'bloomfield-inside',
-    trigger: 'clock',
-    when: { flag: L1, afterMinute: FULL_98, none: [{ flag: 'l1:end' }] },
-    do: [
+      { a: 'flag', flag: 'l1:match' },
+      { a: 'card', titleHe: 'בלומפילד', subHe: 'המחזור האחרון', ms: 2200 },
+      { a: 'match', script: 'laces-98' },
       { a: 'flag', flag: 'l1:end' },
-      { a: 'sound', kind: 'whistle', blasts: 3 },
-      { a: 'sfx', key: 'crowd-hush', level: 0.8, delayMs: 2400 },
-      { a: 'talk', conversation: 'l1-whistle' },
     ],
   },
   // radio route: not at the ground when it happens

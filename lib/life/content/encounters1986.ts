@@ -28,7 +28,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     lineHe: 'משהו מבהיק בין האבנים. מטבע, שטוח מהצמיגים.',
     who: null,
     effects: [
-      { e: 'money', agorot: 35, why: 'מהרחוב' },
+      { e: 'money', agorot: 100, why: 'מהרחוב' },
       { e: 'give', item: 'coin' },
       { e: 'trait', trait: 'streetSmarts', delta: 3 },
     ],
@@ -93,7 +93,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     who: null,
     effects: [
       { e: 'take', item: 'coin' },
-      { e: 'money', agorot: -20, why: 'נפל' },
+      { e: 'money', agorot: -100, why: 'נפל' },
       { e: 'wellbeing', key: 'stress', delta: 6 },
     ],
   },

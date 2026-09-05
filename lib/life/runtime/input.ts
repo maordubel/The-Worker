@@ -36,6 +36,17 @@ export class InputState implements LifeInput {
 
   private _pressed = false
 
+  /**
+   * לחיצה קצרה מפריים — a press that came and went between two frames.
+   *
+   * `beginFrame` samples the button once a frame, so a tap whose down AND up both landed
+   * inside one frame (a fast thumb on the chip, a quick E, the harness's `press`) was never
+   * seen at all: the drawer did not open and Kobi did not answer, and the player pressed
+   * again, harder. The down is therefore remembered until the next frame reads it — one
+   * press, one action, however short.
+   */
+  private latched = false
+
   /** the pad wins while it is being held, because a thumb is a deliberate act */
   get x(): number {
     return this.padX !== 0 || this.padY !== 0 ? this.padX : this.keyX
@@ -73,10 +84,12 @@ export class InputState implements LifeInput {
 
   setAction(down: boolean) {
     this.padAction = down
+    if (down) this.latched = true
   }
 
   setKeyAction(down: boolean) {
     this.keyAction = down
+    if (down) this.latched = true
   }
 
   setRun(down: boolean) {
@@ -85,9 +98,12 @@ export class InputState implements LifeInput {
 
   /** Called once per frame by the scene, at the top of update. */
   beginFrame() {
-    const down = this.action
+    const down = this.action || this.latched
+    this.latched = false
     if (down && !this.wasAction) this.consumed = false
-    this.wasAction = down
+    // what is HELD going into the next frame is the real button, not the remembered tap —
+    // or the second of two quick presses would be read as the first one still held
+    this.wasAction = this.action
     this._pressed = !this.consumed
     this.consumed = true
   }
@@ -107,6 +123,7 @@ export class InputState implements LifeInput {
     this.wasAction = true
     this.consumed = true
     this._pressed = false
+    this.latched = false
   }
 
   reset() {
@@ -120,6 +137,7 @@ export class InputState implements LifeInput {
     this.wasAction = false
     this.consumed = true
     this._pressed = false
+    this.latched = false
   }
 }
 

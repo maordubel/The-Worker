@@ -21,7 +21,8 @@ import {
 import { CHAPTER, CHAPTERS, lastPlayable, nextPlayable, playableChapters } from '@/lib/life/content/chapters'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { ERA_KEYS, eraFor } from '@/lib/life/content/era'
-import type { Conversation, EndingCard } from '@/lib/life/content/script'
+import type { EndingCard } from '@/lib/life/content/chapter1986'
+import type { Conversation } from '@/lib/life/content/script'
 import { LifeEngine } from '@/lib/life/engine'
 import type { PresenceMode } from '@/lib/life/types'
 import { ALL_SCENES, inEra, SCENE } from '@/lib/life/world/scenes'
@@ -64,7 +65,7 @@ const everyText = (unit: Unit): string[] => [
       ...(b.then ?? []).map((fx) => ('text' in fx ? String(fx.text) : '')),
     ]),
   ),
-  ...unit.beats.flatMap((b) => b.do.flatMap((a) => ('text' in a ? [String(a.text)] : 'lines' in a ? (a.lines as { text: string }[]).map((l) => l.text) : []))),
+  ...unit.beats.flatMap((b) => b.do.flatMap((a) => ('text' in a ? [String(a.text)] : 'lines' in a ? (a.lines as readonly { text: string }[]).map((l) => l.text) : []))),
   ...Object.values(unit.endings).flatMap((e) => [e.titleHe, e.bodyHe, e.memoryHe ?? '']),
 ]
 

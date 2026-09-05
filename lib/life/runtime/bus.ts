@@ -90,6 +90,8 @@ export type LifeBusEvents = {
     | { kind: 'radio'; on: boolean }
     /** one rendered sound by name — see `SampleKey` in audio.ts */
     | { kind: 'sample'; key: import('./audio').SampleKey; level?: number; delayMs?: number }
+    /** the crowd moves to a state — see `CrowdState` in audio.ts; the match director's voice */
+    | { kind: 'crowd'; state: import('./audio').CrowdState }
   anchor: { anchor: HistoricalAnchor; showing: boolean }
   /**
    * הלוח — the scoreboard, while a match is actually happening in front of the child.
@@ -103,8 +105,9 @@ export type LifeBusEvents = {
   match: {
     homeHe: string
     awayHe: string
-    homeScore: number
-    awayScore: number
+    /** null when the archive holds the night as a season and not a score: the strip prints a dash */
+    homeScore: number | null
+    awayScore: number | null
     labelHe: string
     /** true from the goal until the whistle, so the strip can carry the moment */
     scored: boolean

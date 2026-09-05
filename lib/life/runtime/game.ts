@@ -200,16 +200,6 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     if (changes.length > 0) options.bus.emit('gauge', changes)
   })
 
-  const context: LifeContext = {
-    engine: options.engine,
-    bus: options.bus,
-    input,
-    dialogue,
-    anchor: options.anchor,
-    prologueAnchor: options.prologueAnchor,
-    anchors: options.anchors,
-  }
-
   // The probes run in a headless browser whose WebGL is a software rasteriser; a frame
   // there costs a second and every timed beat drifts. Under the probe flag the game draws
   // with the 2D canvas instead — same scenes, same code, a renderer that keeps up.
@@ -218,6 +208,17 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     probing = window.localStorage.getItem('the-worker:life:probe') === '1'
   } catch {
     probing = false
+  }
+
+  const context: LifeContext = {
+    engine: options.engine,
+    bus: options.bus,
+    input,
+    dialogue,
+    anchor: options.anchor,
+    prologueAnchor: options.prologueAnchor,
+    anchors: options.anchors,
+    probing,
   }
 
   const game = new Phaser.Game({

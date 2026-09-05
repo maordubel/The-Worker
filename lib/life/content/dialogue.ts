@@ -14,6 +14,7 @@ import { CONVERSATIONS_LACES } from './chapter1998laces'
 import { CONVERSATIONS_SEED } from './chapter1999basket'
 import { CONVERSATIONS_CUP99 } from './chapter1999cup'
 import { CONVERSATIONS_DOUBLE, CONVERSATIONS_TITLE } from './chapter2000double'
+import { CONVERSATIONS_MATCH } from './dialogueMatch'
 import { CONVERSATIONS_A2, CONVERSATIONS_A3, CONVERSATIONS_A4, CONVERSATIONS_A5, CONVERSATIONS_A6, CONVERSATIONS_A7 } from './chapterStageA'
 import type { Conversation } from './script'
 
@@ -141,10 +142,10 @@ const CONVERSATIONS: Conversation[] = [
           { who: 'קובי', text: 'לא היום. אבל קח, תקנה לך משהו בקיוסק. ותהיה בבית.' },
         ],
         then: [
-          { e: 'money', agorot: 50, why: 'קובי' },
+          { e: 'money', agorot: 500, why: 'קובי' },
           { e: 'flag', flag: 'kobi:softened' },
           { e: 'bond', who: 'kobi', delta: 3 },
-          { e: 'toast', text: 'קובי נתן לך חמישים אגורות' },
+          { e: 'toast', text: 'קובי נתן לך 5 ₪' },
         ],
       },
       {
@@ -260,7 +261,7 @@ const CONVERSATIONS: Conversation[] = [
           { who: 'רחל', text: 'לא סיפרתי לאבא. ואתה גם לא.' },
         ],
         then: [
-          { e: 'money', agorot: 100, why: 'רחל' },
+          { e: 'money', agorot: 500, why: 'רחל' },
           { e: 'flag', flag: 'rachel:secret' },
           { e: 'bond', who: 'rachel', delta: 4 },
           { e: 'trait', trait: 'independence', delta: 3 },
@@ -584,13 +585,13 @@ const CONVERSATIONS: Conversation[] = [
       {
         lines: [
           { who: null, text: 'משהו נוצץ בין האבן לשורש של העץ.' },
-          { who: null, text: 'עשרים אגורות. שלך.' },
+          { who: null, text: 'שקל. שלך.' },
         ],
         then: [
-          { e: 'money', agorot: 20, why: 'מציאה' },
+          { e: 'money', agorot: 100, why: 'מציאה' },
           { e: 'flag', flag: 'found:coin' },
           { e: 'trait', trait: 'streetSmarts', delta: 4 },
-          { e: 'toast', text: 'עשרים אגורות' },
+          { e: 'toast', text: 'קיבלת 1 ₪' },
         ],
       },
     ],
@@ -632,14 +633,14 @@ const CONVERSATIONS: Conversation[] = [
           {
             id: 'paper',
             text: 'עיתון. (30)',
-            when: { minAgorot: 30 },
+            when: { minAgorot: 200 },
             noteHe: 'אין לך מספיק',
             then: [{ e: 'goto', node: 'kiosk-paper' }],
           },
           {
             id: 'card',
             text: 'קלף שחקן. (25)',
-            when: { minAgorot: 25 },
+            when: { minAgorot: 100 },
             noteHe: 'אין לך מספיק',
             then: [{ e: 'goto', node: 'kiosk-card' }],
           },
@@ -659,9 +660,9 @@ const CONVERSATIONS: Conversation[] = [
         ],
         then: [
           { e: 'take', item: 'bottle', count: 3 },
-          { e: 'money', agorot: 60, why: 'בקבוקים' },
+          { e: 'money', agorot: 300, why: 'בקבוקים' },
           { e: 'flag', flag: 'chore:done' },
-          { e: 'toast', text: 'שישים אגורות' },
+          { e: 'toast', text: 'קיבלת 3 ₪' },
         ],
       },
     ],
@@ -676,7 +677,7 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'יש שם תמונה של שחקן באמצע קפיצה, ומתחתיה שורות שאתה לא מספיק לקרוא.' },
         ],
         then: [
-          { e: 'money', agorot: -30, why: 'עיתון' },
+          { e: 'money', agorot: -200, why: 'עיתון' },
           { e: 'give', item: 'newspaper' },
           { e: 'trait', trait: 'knowledge', delta: 4 },
           { e: 'toast', text: 'עיתון' },
@@ -694,7 +695,7 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'שחקן באדום. אתה לא מכיר את הפנים, אבל את החולצה אתה מכיר.' },
         ],
         then: [
-          { e: 'money', agorot: -25, why: 'קלף' },
+          { e: 'money', agorot: -100, why: 'קלף' },
           { e: 'give', item: 'football-card' },
           { e: 'trait', trait: 'footballAffinity', delta: 3 },
           { e: 'toast', text: 'קלף שחקן' },
@@ -822,13 +823,13 @@ const CONVERSATIONS: Conversation[] = [
         lines: [{ who: 'הקופאי', text: 'כבר סידרת. לך.' }],
       },
       {
-        when: { minAgorot: 150 },
+        when: { minAgorot: 800 },
         lines: [
           { who: 'הקופאי', text: 'ילד — מאה וחמישים.' },
           { who: null, text: 'אתה שם את הכסף על השיש. הוא סופר, ומעביר לך פתק קרטון קטן.' },
         ],
         then: [
-          { e: 'money', agorot: -150, why: 'כרטיס' },
+          { e: 'money', agorot: -800, why: 'כרטיס' },
           { e: 'give', item: 'ticket-stub' },
           { e: 'flag', flag: 'entry:granted' },
           { e: 'flag', flag: 'entry:ticket' },
@@ -1230,7 +1231,7 @@ const CONVERSATIONS: Conversation[] = [
       {
         // Before one o'clock, and he is twenty agorot short. What the player does here
         // is remembered for the rest of the afternoon.
-        when: { minAgorot: 20 },
+        when: { minAgorot: 100 },
         shot: { focus: 'amit', framing: 'medium' },
         lines: [
           { who: null, text: 'עמית עומד ליד הדלפק וסופר מטבעות בכף היד. שוב.' },
@@ -1241,7 +1242,7 @@ const CONVERSATIONS: Conversation[] = [
             id: 'pay',
             text: 'קח, יש לי.',
             then: [
-              { e: 'money', agorot: -20, why: 'לעמית' },
+              { e: 'money', agorot: -100, why: 'לעמית' },
               { e: 'bond', who: 'amit', delta: 14 },
               { e: 'personality', key: 'empathy', delta: 8 },
               { e: 'remember', who: 'amit', eventId: 'paid-for-the-paper', significance: 'major' },
@@ -1284,7 +1285,7 @@ const CONVERSATIONS: Conversation[] = [
         ],
       },
       {
-        when: { minAgorot: 30 },
+        when: { minAgorot: 100 },
         shot: { focus: 'amit', framing: 'medium' },
         lines: [
           { who: null, text: 'עמית יושב על המדרכה עם עיתון פתוח על הברכיים, ומכסה חצי ממנו ביד.' },
@@ -1293,9 +1294,9 @@ const CONVERSATIONS: Conversation[] = [
         choices: [
           {
             id: 'buy',
-            text: 'שלושים אגורות, ואני קורא איתך.',
+            text: 'שקל, ואני קורא איתך.',
             then: [
-              { e: 'money', agorot: -30, why: 'עמית' },
+              { e: 'money', agorot: -100, why: 'עמית' },
               { e: 'seize', opportunity: 'amit-paper' },
               { e: 'give', item: 'newspaper' },
             ],
@@ -1578,7 +1579,7 @@ const CONVERSATIONS: Conversation[] = [
  * second chapter is a second content file and not a second runner (brief §52).
  */
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
-  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7].map(
+  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_MATCH, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7].map(
     (conversation) => [conversation.id, conversation],
   ),
 )

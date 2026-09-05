@@ -36,7 +36,7 @@ export function ScoreStrip({ match, objective = null }: { match: Match; objectiv
           match.scored ? 'border-red' : 'border-ink'
         }`}
       >
-        <Side nameHe={match.homeHe} score={match.homeScore} lit={match.scored && match.homeScore > 0} />
+        <Side nameHe={match.homeHe} score={match.homeScore} lit={match.scored && (match.homeScore ?? 0) > 0} />
 
         <div className="flex min-w-[52px] flex-col items-center justify-center border-x-hair border-concrete/40 px-2 py-1">
           <span
@@ -48,12 +48,12 @@ export function ScoreStrip({ match, objective = null }: { match: Match; objectiv
           </span>
         </div>
 
-        <Side nameHe={match.awayHe} score={match.awayScore} lit={match.scored && match.awayScore > 0} />
+        <Side nameHe={match.awayHe} score={match.awayScore} lit={match.scored && (match.awayScore ?? 0) > 0} />
       </div>
       {/* After the whistle the board stays — it is the fact of the day — but the boy has
           somewhere to be, and the one line under the clock comes back beneath it. */}
       {objective && (
-        <div className="absolute end-2.5 top-[54px] border-hair border-red bg-red px-2.5 py-1.5">
+        <div className="absolute start-2.5 top-[54px] border-hair border-red bg-red px-2.5 py-1.5">
           <p className="font-body text-[11px] leading-none text-sheet" data-life="objective">
             <bdi>{objective}</bdi>
           </p>
@@ -63,7 +63,8 @@ export function ScoreStrip({ match, objective = null }: { match: Match; objectiv
   )
 }
 
-function Side({ nameHe, score, lit }: { nameHe: string; score: number; lit: boolean }) {
+function Side({ nameHe, score, lit }: { nameHe: string; score: number | null; lit: boolean }) {
+  if (!nameHe) return null
   return (
     <div className="flex items-center gap-2 px-2.5 py-1.5">
       <span className="font-display text-[12px] leading-none text-sheet">
@@ -75,7 +76,7 @@ function Side({ nameHe, score, lit }: { nameHe: string; score: number; lit: bool
         }`}
         dir="ltr"
       >
-        {score}
+        {score ?? '–'}
       </span>
     </div>
   )

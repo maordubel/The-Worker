@@ -106,7 +106,19 @@ export const BEATS_CUP99: Beat[] = [
     id: 'c99-stadium',
     at: 'ramat-gan',
     trigger: 'enter',
-    when: { flag: 'c99:route', none: [{ flag: 'c99:over' }] },
+    when: { flag: 'c99:route', none: [{ flag: 'c99:over' }, { flag: 'arrived:late' }] },
+    delayMs: 1000,
+    do: [
+      { a: 'card', titleHe: 'אצטדיון רמת גן', subHe: 'גמר גביע המדינה', ms: 2600, art: 'plate-1999-cup' },
+      { a: 'match', script: 'cup-99' },
+    ],
+  },
+  // in after it started: no ninety minutes to direct — straight to the shootout
+  {
+    id: 'c99-stadium-late',
+    at: 'ramat-gan',
+    trigger: 'enter',
+    when: { all: [{ flag: 'c99:route' }, { flag: 'arrived:late' }], none: [{ flag: 'c99:over' }] },
     delayMs: 1000,
     do: [
       { a: 'card', titleHe: 'אצטדיון רמת גן', subHe: 'גמר גביע המדינה', ms: 2600, art: 'plate-1999-cup' },
@@ -128,7 +140,7 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
         ],
         choices: [
           { id: 'with-kobi', text: '"בא איתך."', then: [{ e: 'flag', flag: 'c99:route' }, { e: 'flag', flag: 'c99:with-kobi' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 5 }, { e: 'redheart', key: 'familyTradition', delta: 4 }, { e: 'time', minutes: 90 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
-          { id: 'other', text: '"אני מסתדר. נתראה שם."', then: [{ e: 'rel', who: 'kobi', axis: 'distance', delta: 2 }, { e: 'toast', text: '"נתראה שם." הוא לא שאל עם מי.', tone: 'plain' }] },
+          { id: 'other', text: '"אני מסתדר. נתראה שם."', then: [{ e: 'rel', who: 'kobi', axis: 'distance', delta: 2 }, { e: 'toast', text: '"נתראה שם." הוא לא שאל עם מי.', tone: 'plain' }, { e: 'consequence', id: 'c99:alone', text: 'אבא נסע בלעדיך.', laterText: 'אולי כבר לא יחכו לך בשער.', afterMinutes: 50 }] },
         ],
       },
     ],

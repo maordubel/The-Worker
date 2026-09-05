@@ -36,21 +36,21 @@ describe('character bible 5.9.2026', () => {
   })
 
   it('spells שלום תקוה with one vav and keeps him a footballer, not a fan', () => {
-    expect(CHARACTERS['shalom-tikva'].displayNameHe).toBe('שלום תקוה')
-    expect(CHARACTERS['shalom-tikva'].category).toBe('historical')
+    expect(CHARACTERS['shalom-tikva']!.displayNameHe).toBe('שלום תקוה')
+    expect(CHARACTERS['shalom-tikva']!.category).toBe('historical')
     expect(ALL_CHARACTERS.filter((c) => c.displayNameHe.startsWith('שלום'))).toHaveLength(1)
   })
 
   it('keeps the two ארזים apart', () => {
-    expect(CHARACTERS['crowd-erez'].displayNameHe).toBe('ארז')
-    expect(CHARACTERS['fan-erez-haifa'].displayNameHe).toBe('ארז מחיפה')
-    expect(CHARACTERS['fan-erez-haifa'].category).toBe('rival')
+    expect(CHARACTERS['crowd-erez']!.displayNameHe).toBe('ארז')
+    expect(CHARACTERS['fan-erez-haifa']!.displayNameHe).toBe('ארז מחיפה')
+    expect(CHARACTERS['fan-erez-haifa']!.category).toBe('rival')
   })
 
   it('flags the real owners and marks Yannay as open history', () => {
     for (const id of ['shaul-eisenberg', 'eli-tabib', 'ofer-yannay']) expect(isRealPerson(id), id).toBe(true)
-    expect(CHARACTERS['ofer-yannay'].provenance).toBe('open-history')
-    expect(CHARACTERS['ofer-yannay'].tags).toContain('open-history')
+    expect(CHARACTERS['ofer-yannay']!.provenance).toBe('open-history')
+    expect(CHARACTERS['ofer-yannay']!.tags).toContain('open-history')
     expect(isRealPerson('yosef')).toBe(false)
     expect(isRealPerson('yevgeny')).toBe(false)
   })

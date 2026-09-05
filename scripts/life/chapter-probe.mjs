@@ -18,6 +18,26 @@ const OUT = 'data/life-shots'
 mkdirSync(OUT, { recursive: true })
 
 const SCRIPTS = {
+  // the 1986 final as the directed sequence (`final-86`): the film already seen → the authored 86th minute
+  '1986-final': {
+    seed: [{ t: 'flag.raised', flag: 'knows:match' }, { t: 'flag.raised', flag: 'kobi:left' }, { t: 'flag.raised', flag: 'entry:granted' }, { t: 'flag.raised', flag: 'saw:reveal' }, { t: 'flag.raised', flag: 'cutscene:1986-championship' }, { t: 'clock.advanced', minutes: 16 * 60 + 5 - 14 * 60 }, { t: 'moved', to: 'bloomfield-inside' }],
+    steps: [
+      ['wait', 2500], ['shot', 'terrace'],
+      ['match', 'fence,breathe'], ['clear'],
+      ['expect-flag', 'saw:goal'], ['expect-flag', 'match:over'], ['shot', 'after'],
+    ],
+    noEnding: true,
+  },
+  // …and with the film not yet seen: the archive is asked for at the goal step, cannot play here, falls through
+  '1986-final-film': {
+    seed: [{ t: 'flag.raised', flag: 'knows:match' }, { t: 'flag.raised', flag: 'kobi:left' }, { t: 'flag.raised', flag: 'entry:granted' }, { t: 'flag.raised', flag: 'saw:reveal' }, { t: 'clock.advanced', minutes: 16 * 60 + 5 - 14 * 60 }, { t: 'moved', to: 'bloomfield-inside' }],
+    steps: [
+      ['wait', 2500], ['shot', 'terrace'],
+      ['match', 'step,hand'], ['clear'],
+      ['expect-flag', 'saw:goal'], ['expect-flag', 'match:over'], ['expect-flag', 'cutscene:1986-championship'], ['shot', 'after'],
+    ],
+    noEnding: true,
+  },
   '1993-cup': {
     seed: [{ t: 'year.entered', year: 1993, weekday: 1, minute: 15 * 60 + 30 }, { t: 'chapter.entered', chapter: '1993-cup' }, { t: 'money.changed', agorot: 2200, why: 'seed' }, { t: 'moved', to: 'home' }],
     steps: [
@@ -41,10 +61,10 @@ const SCRIPTS = {
     seed: [{ t: 'year.entered', year: 1993, weekday: 0, minute: 18 * 60 }, { t: 'chapter.entered', chapter: '1993-galil' }, { t: 'money.changed', agorot: 9500, why: 'seed' }, { t: 'moved', to: 'ussishkin-outside' }],
     steps: [
       ['wait', 2500], ['shot', 'd1'], ['clear'],
-      ['go', 'ussishkin-hall'], ['wait', 2500], ['clear'], ['choose', 'high'], ['clear'], ['shot', 'd1-hall'],
+      ['go', 'ussishkin-hall'], ['wait', 2500], ['shot', 'd1-hall'], ['match', 'high'], ['clear'],
       ['wait', 4500], ['clear'], ['shot', 'd2'],
       ['choose', 'stay'], ['clear'], ['wait', 4500], ['clear'], ['shot', 'd3'],
-      ['go', 'ussishkin-hall'], ['wait', 2500], ['clear'], ['choose', 'signup'], ['clear'], ['expect-flag', 'life:signed:bus'],
+      ['go', 'ussishkin-hall'], ['wait', 2500], ['match', 'signup'], ['clear'], ['expect-flag', 'life:signed:bus'],
       ['wait', 4500], ['clear'], ['shot', 'd4'],
       ['talk', 'g4-limor'], ['choose', 'broke'], ['clear'], ['shot', 'd4-broke'],
       ['talk', 'g4-ofir'], ['choose', 'car'], ['clear'], ['clear'], ['clear'], ['expect-flag', 'life:galil:there'],
@@ -86,7 +106,7 @@ const SCRIPTS = {
     steps: [
       ['wait', 2500], ['shot', 'h1'], ['clear'],
       ['choose', 'freddy'], ['clear'], ['clear'], ['choose', 'crates'], ['clear'], ['expect-flag', 'h1:crates'],
-      ['go', 'ussishkin-hall'], ['wait', 2500], ['clear'], ['shot', 'h1-hall'], ['choose', 'efi'], ['clear'], ['clear'], ['clear'],
+      ['go', 'ussishkin-hall'], ['wait', 2500], ['shot', 'h1-hall'], ['match', 'efi'], ['clear'], ['clear'],
       ['wait', 4500], ['clear'], ['shot', 'h2'],
       ['choose', 'doubt'], ['clear'], ['clear'],
       ['expect-flag', 'h2:done'],
@@ -100,8 +120,7 @@ const SCRIPTS = {
       ['go', 'street'], ['wait', 1200], ['talk', 'ofir-laces'], ['clear'],
       ['go', 'bloomfield-outside'], ['wait', 1500], ['shot', 'l1-gate'],
       ['go', 'bloomfield-inside'], ['wait', 1500], ['shot', 'l1-inside'],
-      ['jump-to', 17 * 60 + 48], ['wait', 1500], ['jump-to', 18 * 60 + 51], ['wait', 2500], ['clear'], ['shot', 'l1-whistle'],
-      ['choose', 'stay'], ['clear'], ['expect-flag', 'life:laces:d1'],
+      ['match', 'pitch,sing,stay'], ['clear'], ['shot', 'l1-whistle'], ['expect-flag', 'life:laces:d1'],
       ['wait', 4500], ['clear'], ['shot', 'l2'],
       ['choose', 'ask'], ['clear'], ['clear'], ['clear'],
       ['expect-flag', 'l2:done'],
@@ -112,7 +131,7 @@ const SCRIPTS = {
     steps: [
       ['wait', 2500], ['shot', 'seed'], ['clear'],
       ['choose', 'work'], ['clear'],
-      ['go', 'ussishkin-hall'], ['wait', 2500], ['clear'], ['choose', 'help'], ['clear'], ['shot', 'seed-hall'],
+      ['go', 'ussishkin-hall'], ['wait', 2500], ['match', 'help'], ['clear'], ['shot', 'seed-hall'],
       ['go', 'ussishkin-outside'], ['wait', 1000], ['go', 'kiosk'], ['wait', 2000], ['clear'], ['shot', 'seed-kiosk'],
       ['choose', 'list'], ['clear'], ['clear'],
       ['expect-flag', 'life:seed:list'],
@@ -122,9 +141,8 @@ const SCRIPTS = {
     seed: [{ t: 'year.entered', year: 1999, weekday: 3, minute: 14 * 60 }, { t: 'chapter.entered', chapter: '1999-cup' }, { t: 'money.changed', agorot: 3000, why: 'seed' }, { t: 'moved', to: 'home' }],
     steps: [
       ['wait', 2500], ['shot', 'c99'], ['clear'],
-      ['talk', 'kobi-cup99'], ['choose', 'with-kobi'], ['clear'], ['wait', 3000], ['clear'], ['shot', 'c99-stadium'],
-      ['clear'], ['choose', 'shoulder'], ['clear'], ['clear'], ['clear'], ['shot', 'c99-pens'],
-      ['choose', 'kobi'], ['clear'],
+      ['talk', 'kobi-cup99'], ['choose', 'with-kobi'], ['clear'], ['wait', 3000], ['shot', 'c99-stadium'],
+      ['match', 'scarf,shoulder,kobi'], ['clear'],
       ['expect-flag', 'life:cup99:together'],
     ],
   },
@@ -132,8 +150,8 @@ const SCRIPTS = {
     seed: [{ t: 'year.entered', year: 2000, weekday: 6, minute: 14 * 60 + 30 }, { t: 'chapter.entered', chapter: '2000-title' }, { t: 'money.changed', agorot: 3000, why: 'seed' }, { t: 'moved', to: 'home' }],
     steps: [
       ['wait', 2500], ['shot', 't'], ['clear'],
-      ['talk', 'kobi-title'], ['choose', 'yes'], ['clear'], ['wait', 3000], ['clear'], ['shot', 't-ground'],
-      ['choose', 'believe'], ['clear'], ['clear'], ['clear'],
+      ['talk', 'kobi-title'], ['choose', 'yes'], ['clear'], ['wait', 3000], ['shot', 't-ground'],
+      ['match', 'kobi,hold,believe'], ['clear'], ['clear'],
       ['expect-flag', 'life:title:kobi'],
     ],
   },
@@ -164,10 +182,11 @@ const SCRIPTS = {
     steps: [
       ['wait', 2500], ['shot', 'open'], ['clear'],
       ['talk', 'tin-a4'], ['choose', 'take'], ['clear'],
-      ['go', 'home'], ['wait', 1000], ['talk', 'kobi-a4'], ['choose', 'ask'], ['clear'],
+      // bottles and crates first (11 + 3 + 4 = 18 is exactly the shirt), then Kobi's five: the day's three ways to earn, all seen
       ['go', 'street'], ['wait', 800], ['go', 'pitch'], ['wait', 1200], ['talk', 'bottles-a4'], ['choose', 'collect'], ['clear'],
       ['go', 'street'], ['wait', 800], ['go', 'kiosk'], ['wait', 1200], ['talk', 'rafi-a4'], ['clear'], ['talk', 'rafi-a4'], ['choose', 'work'], ['clear'],
-      ['talk', 'rafi-a4'], ['choose', 'buy'], ['clear'], ['clear'], ['expect-flag', 'own:shirt85'],
+      ['go', 'street'], ['wait', 800], ['go', 'home'], ['wait', 1000], ['talk', 'kobi-a4'], ['choose', 'ask'], ['clear'],
+      ['go', 'street'], ['wait', 800], ['go', 'kiosk'], ['wait', 1200], ['talk', 'rafi-a4'], ['choose', 'buy'], ['clear'], ['clear'], ['expect-flag', 'own:shirt85'],
     ],
     dayEnd: true,
   },
@@ -206,8 +225,8 @@ const SCRIPTS = {
     seed: [{ t: 'year.entered', year: 2000, weekday: 3, minute: 15 * 60 }, { t: 'chapter.entered', chapter: '2000-double' }, { t: 'money.changed', agorot: 3000, why: 'seed' }, { t: 'moved', to: 'home' }],
     steps: [
       ['wait', 2500], ['shot', 'd'], ['clear'],
-      ['choose', 'family'], ['clear'], ['choose', 'ticket'], ['clear'], ['clear'], ['wait', 3000], ['clear'], ['shot', 'd-stadium'],
-      ['choose', 'hold'], ['clear'], ['clear'], ['shot', 'd-pens'], ['wait', 2500], ['clear'], ['clear'], ['shot', 'd-walk'],
+      ['choose', 'family'], ['clear'], ['choose', 'ticket'], ['clear'], ['clear'], ['wait', 3000], ['shot', 'd-stadium'],
+      ['match', 'shoulders,hold'], ['clear'], ['clear'], ['shot', 'd-walk'],
       ['expect-flag', 'd:walked'],
     ],
   },
@@ -294,6 +313,46 @@ for (const [op, arg] of script.steps) {
   else if (op === 'go') { const ok = await page.evaluate((id) => window.__life.goTo(id), arg); if (!ok) fault(`cannot go to ${arg} from ${(await read()).where?.scene}`); await page.waitForTimeout(1600); await clear() }
   else if (op === 'jump-to') { const r = await read(); const now = r.where?.minute ?? 0; if (arg > now) await page.evaluate((m) => window.__life.debug.jump(m), arg - now); await page.waitForTimeout(600) }
   else if (op === 'expect-flag') { const r = await read(); if (!r.flags[arg]) fault(`flag ${arg} not raised`) }
+  else if (op === 'match') {
+    // a directed match: let it run, answer every prompt (preferred ids first), note the board
+    const prefer = String(arg ?? '').split(',').filter(Boolean)
+    const boards = []
+    const t0 = Date.now()
+    let started = false
+    let shotBoard = false
+    while (Date.now() - t0 < 150000) {
+      const r = await read()
+      const board = await page.evaluate(() => document.querySelector('[data-life="scoreboard"]')?.textContent?.trim()?.replace(/\s+/g, ' ') ?? null)
+      if (board && boards[boards.length - 1] !== board) { boards.push(board); console.log(`   board: ${board}`) }
+      if (board && !shotBoard) { shotBoard = true; await shot(`${CHAPTER}-board`) }
+      if (r.where?.match) started = true
+      if (r.choices.length > 0) {
+        const ids = await page.evaluate(() => [...document.querySelectorAll('[data-life="choice"]')].map((li) => li.getAttribute('data-choice')))
+        const pick = prefer.find((id) => ids.includes(id)) ?? ids[0]
+        await page.evaluate((id) => { const li = document.querySelector(`[data-life="choice"][data-choice="${id}"]`); const b = li && li.querySelector('button'); if (b) b.click() }, pick)
+        console.log(`   chose: ${pick}`)
+        await page.waitForTimeout(500)
+        continue
+      }
+      if (r.dialogue) { await page.evaluate(() => window.__life.advance()); await page.waitForTimeout(350); continue }
+      // the archive film opened at the goal step: this sandbox has no YouTube — wait for its fallback, or skip it
+      if ((await page.locator('[data-life="cutscene"]').count()) > 0) {
+        console.log('   cutscene open')
+        await page.waitForTimeout(4000)
+        // the fallback's "המשך" button, or the skip: whichever the frame offers
+        const button = page.locator('[data-life="cutscene"] button').first()
+        if ((await button.count()) > 0) { const label = (await button.textContent().catch(() => ''))?.trim(); await button.click().catch(() => {}); console.log('   cutscene: pressed', label) }
+        await page.waitForTimeout(800)
+        continue
+      }
+      if (r.ending || r.finale) break
+      if (started && (!r.where?.match || r.where.match.over)) { await page.waitForTimeout(1200); break }
+      await page.waitForTimeout(600)
+    }
+    if (!started) fault('no match ran')
+    console.log(`   match ${Math.round((Date.now() - t0) / 1000)}s, boards: ${boards.length}`)
+    await shot(`${CHAPTER}-whistle`)
+  }
   await settle()
   const r = await read()
   console.log(`${op} ${arg ?? ''} → ${r.where?.scene ?? '?'} ${r.clock ?? ''} | ${r.dialogue ? 'D:' + r.dialogue : ''} ${r.choices.length ? 'C:' + r.choices.join('|') : ''} ${r.toast ? 'T:' + r.toast : ''} ${r.ending ? 'ENDING' : ''} ${r.finale ? 'FINALE' : ''} ${r.coda ? 'CODA' : ''} ${r.card ? 'CARD:' + r.card : ''}`)
@@ -322,6 +381,15 @@ if (script.noEnding) {
     await shot('next')
     const r3 = await read()
     console.log('after finale →', r3.where?.scene, r3.card, r3.coda ? 'CODA' : '')
+    // the next chapter's first room must hand the deck back (5.9.2026: it did not, from 1993 on)
+    if (!r3.coda && r3.where?.scene) {
+      await page.waitForTimeout(2500)
+      await clear()
+      const deck = (await page.locator('.life-glass[data-controls="1"]').count()) > 0
+      const covered = await open()
+      if (!deck && !covered) fault('the joystick is gone in the next chapter\'s first room')
+      else console.log(`controls in the next room: ${deck ? 'shown' : 'covered by a card/dialogue'}`)
+    }
   }
 }
 await browser.close()

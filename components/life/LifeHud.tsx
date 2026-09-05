@@ -4,6 +4,7 @@ import { Cloth, Plate } from '@/components/life/Plate'
 import { Num } from '@/components/ui/Num'
 import type { HudState } from '@/lib/life/runtime/bus'
 import { t } from '@/lib/i18n'
+import { formatMoney } from '@/lib/life/money'
 
 /**
  * הממשק — a sign plate, a cloth, and nothing else (brief §15).
@@ -42,7 +43,7 @@ export function LifeHud({ hud }: { hud: HudState }) {
           <Plate className="mt-1">
             <span className="flex items-center gap-1.5 px-2 py-1">
               <span className="font-sign text-[10px] leading-none text-muted">{t('life.money')}</span>
-              <Num className="font-mono text-[13px] font-bold leading-none text-ink">{hud.agorot}</Num>
+              <Num className="font-mono text-[13px] font-bold leading-none text-ink" data-life="money">{formatMoney(hud.agorot)}</Num>
             </span>
           </Plate>
         )}

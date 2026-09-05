@@ -121,11 +121,7 @@ export const BEATS_GALIL: Beat[] = [
     delayMs: 900,
     do: [
       { a: 'card', titleHe: 'משחק 1', subHe: 'אוסישקין', ms: 2200 },
-      { a: 'sfx', key: 'ball-bounce', level: 0.6 },
-      { a: 'sound', kind: 'roar', big: 1 },
-      { a: 'talk', conversation: 'g1-inside' },
-      { a: 'sfx', key: 'buzzer', level: 0.7 },
-      { a: 'sfx', key: 'crowd-groan', level: 0.7, delayMs: 900 },
+      { a: 'match', script: 'galil-93-g1' },
       { a: 'lines', lines: [{ who: null, text: 'הצפירה. האולם לא מבין. אנשים עומדים ולא יוצאים, כאילו אם לא יוצאים זה לא נגמר.' }, { who: 'אפי', text: 'זה רק אחד. זה רק אחד מארבעה.' }, { who: null, text: 'הוא אמר את זה לעצמו. לא לך.' }] },
       { a: 'events', events: DAY(D2, 1993, 3, at(19, 30), '12 במאי 1993') },
       { a: 'card', titleHe: 'יום רביעי', subHe: 'משחק 2 · בחוץ', ms: 2400 },
@@ -157,8 +153,7 @@ export const BEATS_GALIL: Beat[] = [
     delayMs: 900,
     do: [
       { a: 'card', titleHe: 'משחק 3', subHe: 'אוסישקין', ms: 2200 },
-      { a: 'sound', kind: 'roar', big: 2 },
-      { a: 'talk', conversation: 'g3-inside' },
+      { a: 'match', script: 'galil-93-g3' },
       { a: 'events', events: DAY(D4, 1993, 3, at(14, 0), '19 במאי 1993') },
       { a: 'card', titleHe: 'יום רביעי', subHe: 'משחק 4 · בצפון', ms: 2600 },
       { a: 'travel', to: 'street', spawn: 'start' },

@@ -135,7 +135,7 @@ export const BEATS_ARMY: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'flag', flag: 'a3:seen' },
-      { a: 'lines', lines: [{ who: null, text: 'התחנה המרכזית. חמש וארבעים. אוויר של סיגריות ודלק ולחם. בשש וחצי אתה צריך להיות בשער של הבסיס, וזה שעה נסיעה.' }, { who: null, text: 'יש אוטובוס אחד שמגיע בזמן. הוא עומד ברציף. הוא מלא אנשים בצהוב ושחור, בדרך למשחק שלהם. אוטובוס של אוהדי בית"ר.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'התחנה המרכזית. חמש וארבעים. אוויר של סיגריות ודלק ולחם. בשש וחצי אתה צריך להיות בשער של הבסיס, וזה שעה נסיעה.' }, { who: null, text: 'יש אוטובוס אחד שמגיע בזמן. הוא עומד ברציף. אוטובוס רגיל של אגד — אבל היום הוא ממותג בסמלי בית"ר ירושלים: האוטובוס של הקבוצה בימי משחק, ובימים רגילים אוטובוס ציבורי כמו כולם.' }] },
     ],
   },
   {
@@ -301,10 +301,10 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
         when: { flag: 'a3:bus-here' },
         lines: [
           { who: null, text: 'האוטובוס. הנהג בדלת: "חייל, עולה? אני נוסע דרך הצומת שלך. בזמן."' },
-          { who: null, text: 'מאחורי הנהג: אוטובוס של אוהדי בית"ר ירושלים. השעון: חמש חמישים ושש.' },
+          { who: null, text: 'מאחורי הנהג: אגד רגיל, עם הסמלים של בית"ר ירושלים על הצדדים. השעון: חמש חמישים ושש.' },
         ],
         choices: [
-          { id: 'refuse', text: '"לא. לא על האוטובוס הזה."', then: [{ e: 'sfx', key: 'bus-door', level: 0.6, delayMs: 900 }, { e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:refused' }, { e: 'redheart', key: 'loyaltyReturn', delta: 6 }, { e: 'personality', key: 'stubbornness', delta: 4 }, { e: 'goto', node: 'a3-refused' }] },
+          { id: 'refuse', text: '"לא. לא על האוטובוס הזה."', then: [{ e: 'sfx', key: 'bus-door', level: 0.6, delayMs: 900 }, { e: 'consequence', id: 'a3:refused', text: 'האוטובוס יצא. בלעדיך.', laterText: 'שעתיים איחור. זה יירשם.', afterMinutes: 30 }, { e: 'plate', art: 'armyRoom', titleHe: 'הבסיס', subHe: 'שעתיים אחרי השעה', ms: 2600 }, { e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:refused' }, { e: 'redheart', key: 'loyaltyReturn', delta: 6 }, { e: 'personality', key: 'stubbornness', delta: 4 }, { e: 'goto', node: 'a3-refused' }] },
           { id: 'board', text: 'לעלות. לשתוק. להגיע בזמן.', then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:boarded' }, { e: 'wellbeing', key: 'regret', delta: 8 }, { e: 'redheart', key: 'loyaltyReturn', delta: -3 }, { e: 'personality', key: 'responsibility', delta: 2 }, { e: 'goto', node: 'a3-boarded' }] },
           { id: 'other', text: 'לרוץ לחפש רציף אחר.', then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:searched' }, { e: 'personality', key: 'streetSmarts', delta: 2 }, { e: 'goto', node: 'a3-searched' }] },
           { id: 'wait', text: 'לעמוד. עוד רגע.', then: [{ e: 'personality', key: 'impulsiveness', delta: -1 }, { e: 'toast', text: 'הנהג הסתכל בשעון. אתה הסתכלת באוטובוס.', tone: 'plain' }] },
@@ -326,7 +326,7 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
           { who: 'המפקד', text: 'סיבה?' },
         ],
         choices: [
-          { id: 'truth', text: '"האוטובוס בזמן היה של אוהדי בית"ר. לא עליתי."', then: [{ e: 'army', key: 'commanderTrust', delta: -15 }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'armyRoute', route: 'rebellious' }, { e: 'flag', flag: 'a3:done' }, { e: 'toast', text: 'הוא הסתכל עליך זמן ארוך. ואז כתב משהו. לא ידעת אם זה עונש או סיפור.', tone: 'plain' }] },
+          { id: 'truth', text: '"האוטובוס בזמן היה ממותג בית"ר. לא עליתי."', then: [{ e: 'army', key: 'commanderTrust', delta: -15 }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'armyRoute', route: 'rebellious' }, { e: 'flag', flag: 'a3:done' }, { e: 'toast', text: 'הוא הסתכל עליך זמן ארוך. ואז כתב משהו. לא ידעת אם זה עונש או סיפור.', tone: 'plain' }] },
           { id: 'lie', text: '"האוטובוס התקלקל."', then: [{ e: 'army', key: 'commanderTrust', delta: -5 }, { e: 'flag', flag: 'life:lied:army' }, { e: 'personality', key: 'streetSmarts', delta: 1 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'flag', flag: 'a3:done' }, { e: 'toast', text: 'עבד. פעם אחת זה עובד.', tone: 'plain' }] },
           { id: 'silent', text: 'לשתוק.', then: [{ e: 'army', key: 'commanderTrust', delta: -20 }, { e: 'armyRoute', route: 'punished' }, { e: 'army', key: 'leaveDebt', delta: 2 }, { e: 'flag', flag: 'a3:done' }, { e: 'toast', text: 'שבת הבאה — בבסיס. הוא לא צעק. הוא רק אמר.', tone: 'red' }] },
         ],
@@ -425,8 +425,8 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
           { who: 'לירון', text: 'משחק חוץ הערב. יש לי אוטו, יש לי רדיו שתופס חצי, ויש לי מקום אחד. אתה חייל, יש לך שעה שצריך לחזור בה?' },
         ],
         choices: [
-          { id: 'go', text: '"יש. אני נוסע."', when: { armyAbove: { key: 'commanderTrust', min: 25 } }, noteHe: 'אחרי מה שהיה — אין חופשה.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'redheart', key: 'travelDrive', delta: 4 }, { e: 'goto', node: 'road-1' }] },
-          { id: 'go-anyway', text: '"אין לי חופשה. נוסע בכל זאת."', when: { armyBelow: { key: 'commanderTrust', max: 24 } }, noteHe: 'המפקד סומך עליך. אתה לא זורק את זה על משחק.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'flag', flag: 'life:awol' }, { e: 'army', key: 'commanderTrust', delta: -20 }, { e: 'armyRoute', route: 'punished' }, { e: 'personality', key: 'riskTolerance', delta: 4 }, { e: 'goto', node: 'road-1' }] },
+          { id: 'go', text: '"יש. אני נוסע."', when: { armyAbove: { key: 'commanderTrust', min: 25 } }, noteHe: 'אחרי מה שהיה — אין חופשה.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'redheart', key: 'travelDrive', delta: 4 }, { e: 'plate', art: 'lironCar', titleHe: 'האוטו של לירון', subHe: 'לילה. כביש. רדיו.', ms: 2600 }, { e: 'goto', node: 'road-1' }] },
+          { id: 'go-anyway', text: '"אין לי חופשה. נוסע בכל זאת."', when: { armyBelow: { key: 'commanderTrust', max: 24 } }, noteHe: 'המפקד סומך עליך. אתה לא זורק את זה על משחק.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'flag', flag: 'life:awol' }, { e: 'army', key: 'commanderTrust', delta: -20 }, { e: 'armyRoute', route: 'punished' }, { e: 'personality', key: 'riskTolerance', delta: 4 }, { e: 'plate', art: 'lironCar', titleHe: 'האוטו של לירון', subHe: 'לילה. כביש. רדיו.', ms: 2600 }, { e: 'goto', node: 'road-1' }] },
           { id: 'stay', text: '"לא הפעם. אני חוזר לבסיס."', then: [{ e: 'army', key: 'commanderTrust', delta: 6 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'flag', flag: 'a4:road' }, { e: 'presence', mode: 'army' }, { e: 'ending', id: 'home' }] },
         ],
       },

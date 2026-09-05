@@ -29,6 +29,11 @@ export function Stamp({ toast }: { toast: Toast }) {
           className={`animate-ticket-in border-hair px-3.5 py-2 ${red ? 'border-red bg-red' : 'border-ink bg-sheet'}`}
           data-life="toast"
         >
+          {toast.kickerHe && (
+            <span className={`mb-1.5 block w-fit px-1.5 py-0.5 font-sign text-[10px] leading-none ${red ? 'bg-sheet text-red' : 'bg-red text-sheet'}`} data-life="toast-kicker">
+              <bdi>{toast.kickerHe}</bdi>
+            </span>
+          )}
           <p className={`font-body text-[13px] leading-none ${red ? 'text-sheet' : 'text-ink'}`}>
             <bdi>{toast.text}</bdi>
           </p>

@@ -481,7 +481,8 @@ describe('העולם — every door leads somewhere that exists', () => {
     const props = new Set<string>(PROP)
     for (const scene of scenes) {
       expect(backdrops.has(scene.art), `${scene.id} → ${scene.art}`).toBe(true)
-      if (scene.arrival) expect(backdrops.has(scene.arrival.art), `${scene.id} arrival`).toBe(true)
+      // an arrival is a card, and a card may be a painted plate (the boy at the tunnel mouth) as well as a room
+      if (scene.arrival) expect(backdrops.has(scene.arrival.art) || Boolean(artManifest['plates']?.[scene.arrival.art]), `${scene.id} arrival`).toBe(true)
       for (const actor of scene.actors) {
         expect(figures.has(actor.figure), `${scene.id}/${actor.id} → ${actor.figure}`).toBe(true)
       }
