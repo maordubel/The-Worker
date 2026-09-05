@@ -5,6 +5,16 @@ import { CONVERSATIONS_1990 } from './dialogue1990'
 import { CONVERSATIONS_1991 } from './dialogue1991'
 import { CONVERSATIONS_USSISHKIN } from './dialogueUssishkin'
 import { CONVERSATIONS_PANORAMAS } from './dialoguePanoramas'
+import { CONVERSATIONS_1993 } from './chapter1993cup'
+import { CONVERSATIONS_GALIL } from './chapter1993galil'
+import { CONVERSATIONS_SINAI } from './chapter1995sinai'
+import { CONVERSATIONS_ARMY } from './chapter1996army'
+import { CONVERSATIONS_HALL } from './chapter1997basket'
+import { CONVERSATIONS_LACES } from './chapter1998laces'
+import { CONVERSATIONS_SEED } from './chapter1999basket'
+import { CONVERSATIONS_CUP99 } from './chapter1999cup'
+import { CONVERSATIONS_DOUBLE, CONVERSATIONS_TITLE } from './chapter2000double'
+import { CONVERSATIONS_A2, CONVERSATIONS_A3, CONVERSATIONS_A4, CONVERSATIONS_A5, CONVERSATIONS_A6, CONVERSATIONS_A7 } from './chapterStageA'
 import type { Conversation } from './script'
 
 /**
@@ -1568,7 +1578,7 @@ const CONVERSATIONS: Conversation[] = [
  * second chapter is a second content file and not a second runner (brief §52).
  */
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
-  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS].map(
+  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7].map(
     (conversation) => [conversation.id, conversation],
   ),
 )

@@ -45,6 +45,12 @@ export type HudState = {
   showMoney: boolean
   place: string
   objective: string | null
+  /** the year the life is in — the shell keys its type and texture off the decade */
+  year: number
+  /** the room, by id — the help sheet picks its sentence off it */
+  scene: string
+  /** "מה עליי לעשות?" — one plain sentence for the help sheet, never on the glass itself */
+  hint: string
 }
 
 export type LifeBusEvents = {
@@ -76,7 +82,14 @@ export type LifeBusEvents = {
   /** the tunnel, first person: the shell draws `TunnelWalk`; `finishTunnel` arrives */
   tunnel: { to: LocationId; spawn: string; variant?: 'bloomfield' | 'ussishkin' } | null
   /** the sound of the world — one-shots the shell's synthesiser plays; see `audio.ts` */
-  sound: { kind: 'step'; surface: 'floor' | 'street' | 'terrace' } | { kind: 'door' } | { kind: 'whistle'; blasts: number } | { kind: 'roar'; big?: number } | { kind: 'radio'; on: boolean }
+  sound:
+    | { kind: 'step'; surface: 'floor' | 'street' | 'terrace' }
+    | { kind: 'door' }
+    | { kind: 'whistle'; blasts: number }
+    | { kind: 'roar'; big?: number }
+    | { kind: 'radio'; on: boolean }
+    /** one rendered sound by name — see `SampleKey` in audio.ts */
+    | { kind: 'sample'; key: import('./audio').SampleKey; level?: number; delayMs?: number }
   anchor: { anchor: HistoricalAnchor; showing: boolean }
   /**
    * הלוח — the scoreboard, while a match is actually happening in front of the child.
@@ -108,6 +121,8 @@ export type LifeBusEvents = {
    */
   finale: {
     anchor: import('../anchors').HistoricalAnchor
+    /** the chapter that ended — its plate is the hero of the card */
+    chapter: string
     titleHe: string
     bodyHe: string
     becameHe: string
@@ -144,7 +159,21 @@ export type LifeBusEvents = {
    * `בלומפילד · 12 במאי 1990`. The first of the five tricks in the roadmap's grammar of
    * entering a scene. It says one thing and is never a menu.
    */
-  card: { titleHe: string; subHe: string | null; ms: number } | null
+  card: {
+    titleHe: string
+    subHe: string | null
+    ms: number
+    /**
+     * הלוח — a chapter cut is a title over a PICTURE (5.9.2026). `art` is a plate key
+     * (`plate-1993-cup`) from `make-plates.py`; with it the card becomes the graded key
+     * painting of the next chapter under bars and grain, and the title is a year that
+     * rolls from `fromYear`. Without it the card is the word over black it always was.
+     */
+    art?: string
+    fromYear?: number | null
+    /** a wider sub line under the rule — the chapter's name */
+    nameHe?: string
+  } | null
   /**
    * החיים האחרים — the championship was missed, so the chapter does NOT end (Stage A §14).
    *
@@ -153,6 +182,30 @@ export type LifeBusEvents = {
    * have had if that were really the end of it, and hands back the morning.
    */
   retry: import('../content/retry1986').RetryScene | null
+  /**
+   * הקודה — the life as BUILT is over, and the game says so instead of promising.
+   *
+   * Emitted by the runtime when a chapter ends and the registry has no playable chapter
+   * after it. The shell shows the frame of 2026 — the man in front of the new ground —
+   * and the one honest line: this is as far as the life goes today. `null` closes it.
+   */
+  coda: { chapter: string } | null
+  /**
+   * המדדים זזים — what moved in the life on the last dispatch, for the pops.
+   *
+   * A batch, not a value: one dispatch of five events is one beat on screen, and the
+   * shell decides how many of them to show. Computed by the runtime from the state
+   * before and after (`lib/life/gauges.ts`), never authored by a scene — a scene cannot
+   * announce a rise it did not cause.
+   */
+  gauge: import('../gauges').GaugeChange[]
+  /** the love meter on the glass — the one number always visible */
+  love: { value: number; bump: number }
+  /**
+   * מקום נחשף — a place went on the city map for the first time, and it is a moment.
+   * The map zooms to it, the fog lifts, a red stamp lands. `null` closes it.
+   */
+  reveal: { place: import('../map').MapPlaceDef } | null
   /** the runtime asking the shell to show the closing card */
   ending: {
     titleHe: string

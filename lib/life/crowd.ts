@@ -1,4 +1,4 @@
-import { ALL_CHARACTERS, type CharacterDefinition } from './characters'
+import { ALL_CHARACTERS, isActiveIn, type CharacterDefinition } from './characters'
 import { Roller } from './rng'
 import type { CharacterId, LifeState } from './types'
 
@@ -42,9 +42,7 @@ const POOL = new Set<CharacterId>(CROWD_POOL)
 
 /** Everybody in the pool who exists in this chapter. */
 export function crowdFor(era: string): readonly CharacterDefinition[] {
-  return ALL_CHARACTERS.filter(
-    (entry) => POOL.has(entry.id) && (entry.activeEras.includes('*') || entry.activeEras.includes(era)),
-  )
+  return ALL_CHARACTERS.filter((entry) => POOL.has(entry.id) && isActiveIn(entry.id, era))
 }
 
 export type CrowdPick = {

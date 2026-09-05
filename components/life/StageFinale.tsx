@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 
 import { isPlaceholder } from '@/lib/life/anchors'
 import { artUrl } from '@/lib/life/runtime/art'
+import { chapterFor } from '@/lib/life/content/chapters'
+import { Grain, Letterbox } from '@/components/life/FilmFx'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { t } from '@/lib/i18n'
 
@@ -45,6 +47,10 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
    * ticket and no paper for it yet — so those sections do not pretend.
    */
   const stageB = finale.anchor.year >= 1990
+  // 1986 and 1990 have their own cards (champions, promoted); every later chapter is
+  // named by its registry row — the unit, the date, the title.
+  const chapter = chapterFor(finale.chapter)
+  const later = stageB && finale.chapter !== '1990'
 
   // A card that opens halfway down is a card somebody scrolled by accident.
   useEffect(() => {
@@ -65,17 +71,40 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
       <Confetti />
 
       <div ref={scroller} className="relative h-full overflow-y-auto overscroll-contain">
-        <div className="mx-auto w-full max-w-2xl px-gutter py-8">
+        {/* ------------------------------------------------- the hero: a slow push-in -- */}
+        {/* The finale used to open on a red box of type. A film ends on a PICTURE: the
+            chapter's graded key plate pushing in under bars and grain, the year in the
+            poster face, and only then the sheet of what happened. */}
+        <div className="relative h-[38vh] min-h-[200px] w-full overflow-hidden" data-life="finale-hero">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-cover bg-center motion-reduce:animate-none"
+            style={{ backgroundImage: `url(${artUrl(`plate-${finale.chapter}`)})`, animation: 'plate-push 9000ms ease-out both' }}
+          />
+          <div aria-hidden="true" className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgb(var(--ink)) 0%, rgb(var(--ink) / .2) 50%, rgb(var(--ink) / .3) 100%)' }} />
+          <Grain opacity={0.2} />
+          <Letterbox height={0.09} ms={700} />
+          <p
+            aria-hidden="true"
+            className="absolute bottom-4 font-poster text-[64px] leading-none text-sheet sm:text-[88px]"
+            style={{ insetInlineEnd: 20, textShadow: '0 2px 24px rgb(var(--ink) / .9)' }}
+            dir="ltr"
+          >
+            {finale.anchor.year}
+          </p>
+        </div>
+
+        <div className="mx-auto w-full max-w-2xl px-gutter pb-8 pt-3">
           {/* ---------------------------------------------------------- the title -- */}
           <div className="border-rule border-red bg-red px-4 py-5 text-center">
             <p className="font-latin text-[10px] font-bold tracking-[0.28em] text-sheet" dir="ltr">
-              {stageB ? t('life.finale.kicker1990') : t('life.finale.kicker')}
+              {later && chapter ? `${t('life.finale.stageB')} · ${chapter.unit} · ${finale.anchor.year}` : stageB ? t('life.finale.kicker1990') : t('life.finale.kicker')}
             </p>
             <p className="mt-2 font-poster text-[46px] leading-[0.92] text-sheet sm:text-[68px]">
-              {stageB ? t('life.finale.promoted') : t('life.finale.champions')}
+              <bdi>{later && chapter ? chapter.titleHe : stageB ? t('life.finale.promoted') : t('life.finale.champions')}</bdi>
             </p>
             <p className="mt-2 font-mono text-[13px] leading-none tabular-nums text-sheet/90" dir="ltr">
-              {finale.anchor.seasonLabel}
+              {later && chapter ? chapter.dateHe : finale.anchor.seasonLabel}
             </p>
             {/* Counted out of `trophies.json`, never typed in — see `countTitles`. */}
             {finale.anchor.titlesSoFar !== null && (
@@ -114,6 +143,23 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
               <p className="mt-3 border-t-hair border-ink/20 pt-3 font-body text-[11px] leading-snug text-muted">
                 <span className="text-ink">{t('life.anchor.source')}</span> <bdi>{match.sourceTitle}</bdi>
                 {!verified && <span className="ms-1 text-red"> · {t('life.anchor.unverified')}</span>}
+              </p>
+            </section>
+          )}
+
+          {/* ------------------------------------------ a season that is a fact, not a match -- */}
+          {!match && finale.anchor.summaryHe && (
+            <section className="mt-3 border-rule border-sheet/25 bg-sheet px-4 py-4" data-life="finale-summary">
+              <h2 className="font-display text-step-1 leading-tight text-ink">
+                <bdi>{t('life.finale.matchTitle')}</bdi>
+              </h2>
+              <p className="mt-2 font-body text-[15px] leading-relaxed text-ink">
+                <bdi>{finale.anchor.summaryHe}</bdi>
+              </p>
+              <p className="mt-3 border-t-hair border-ink/20 pt-2 font-body text-[11px] leading-snug text-muted">
+                <bdi>
+                  {t('life.finale.source')}: {finale.anchor.sourceTitle}
+                </bdi>
               </p>
             </section>
           )}

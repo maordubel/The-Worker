@@ -83,6 +83,12 @@ export type EndingCard = {
   memoryHe: string
   memoryItem: ItemId
   /**
+   * How he was there for the chapter's anchor, when the ending knows (Stage B §4.4).
+   * Recorded as `presence.recorded`, which folds into attended/missed as well; endings
+   * without it keep the 1986 heuristic (inside the ground when it started = attended).
+   */
+  presence?: import('../types').PresenceMode
+  /**
    * כעבור חמש־עשרה שנה — the last thing the day shows you is the same person, older.
    *
    * This is the hinge the whole life simulation turns on, and it is cheaper and truer to

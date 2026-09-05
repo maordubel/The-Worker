@@ -85,13 +85,18 @@ export class DialogueRunner {
     this.show()
   }
 
-  /** Returns false when the conversation id does not exist — a missing prop talks about nothing. */
-  start(id: string): boolean {
+  /**
+   * Returns false when the conversation id does not exist — a missing prop talks about
+   * nothing. `done` runs when the conversation closes however it closes (a beat waits
+   * on it); a `goto` inside the conversation keeps the same `done`.
+   */
+  start(id: string, done?: () => void): boolean {
     const conversation = DIALOGUE[id]
     if (!conversation) return false
     const branch = conversation.branches.find((candidate) => meets(this.engine.state, candidate.when))
     if (!branch) return false
 
+    if (done) this.onDone = done
     this.conversation = conversation
     this.lines = branch.lines.map((line) => ({ ...line, text: this.fill(line.text) }))
     this.index = 0
@@ -194,8 +199,9 @@ export class DialogueRunner {
   }
 
   private renderChoices(choices: readonly ChoiceDef[]): DialogueChoice[] {
-    return choices.map((choice) => {
+    return choices.flatMap((choice) => {
       const enabled = meets(this.engine.state, choice.when)
+      if (!enabled && choice.hidden) return []
       return {
         id: choice.id,
         text: choice.text,
@@ -259,6 +265,9 @@ export class DialogueRunner {
           break
         case 'missed':
           events.push({ t: 'anchor.missed', anchorId: this.anchor.id })
+          break
+        case 'sfx':
+          after.push(() => this.bus.emit('sound', { kind: 'sample', key: effect.key, ...(effect.level !== undefined ? { level: effect.level } : {}), ...(effect.delayMs !== undefined ? { delayMs: effect.delayMs } : {}) }))
           break
         case 'toast': {
           const art = kept ?? handed
@@ -331,8 +340,38 @@ export class DialogueRunner {
             { t: 'savings.changed', agorot: Math.abs(effect.agorot), why: effect.why },
           )
           break
+        case 'withdraw':
+          events.push(
+            { t: 'savings.changed', agorot: -Math.abs(effect.agorot), why: effect.why },
+            { t: 'money.changed', agorot: Math.abs(effect.agorot), why: effect.why },
+          )
+          break
         case 'own':
           events.push({ t: 'clothing.gained', item: effect.item }, { t: 'flag.raised', flag: `own:${effect.item}` })
+          break
+        case 'energy':
+          events.push({ t: 'energy.changed', delta: effect.delta })
+          break
+        case 'gate':
+          events.push({ t: 'gate.moved', to: effect.to, reason: effect.reason, year: this.engine.state.year })
+          break
+        case 'armyRoute':
+          events.push({ t: 'army.route', route: effect.route })
+          break
+        case 'army':
+          events.push({ t: 'army.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'sinai':
+          events.push({ t: 'institution.sinai', stance: effect.stance })
+          break
+        case 'institution':
+          events.push({ t: 'institution.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'presence':
+          events.push({ t: 'presence.recorded', anchorId: this.anchor.id, mode: effect.mode })
+          break
+        case 'laces':
+          events.push({ t: 'laces.marked', response: effect.response })
           break
 
         /**
@@ -453,8 +492,38 @@ export class DialogueRunner {
             { t: 'savings.changed', agorot: Math.abs(effect.agorot), why: effect.why },
           )
           break
+        case 'withdraw':
+          events.push(
+            { t: 'savings.changed', agorot: -Math.abs(effect.agorot), why: effect.why },
+            { t: 'money.changed', agorot: Math.abs(effect.agorot), why: effect.why },
+          )
+          break
         case 'own':
           events.push({ t: 'clothing.gained', item: effect.item }, { t: 'flag.raised', flag: `own:${effect.item}` })
+          break
+        case 'energy':
+          events.push({ t: 'energy.changed', delta: effect.delta })
+          break
+        case 'gate':
+          events.push({ t: 'gate.moved', to: effect.to, reason: effect.reason, year: this.engine.state.year })
+          break
+        case 'armyRoute':
+          events.push({ t: 'army.route', route: effect.route })
+          break
+        case 'army':
+          events.push({ t: 'army.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'sinai':
+          events.push({ t: 'institution.sinai', stance: effect.stance })
+          break
+        case 'institution':
+          events.push({ t: 'institution.changed', key: effect.key, delta: effect.delta })
+          break
+        case 'presence':
+          events.push({ t: 'presence.recorded', anchorId: this.anchor.id, mode: effect.mode })
+          break
+        case 'laces':
+          events.push({ t: 'laces.marked', response: effect.response })
           break
         default:
           break

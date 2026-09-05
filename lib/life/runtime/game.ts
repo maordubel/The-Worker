@@ -1,6 +1,9 @@
 import Phaser from 'phaser'
 
 import type { HistoricalAnchor } from '../anchors'
+import { OPENING_FLAG } from '../opening'
+import { diffGauges, hapoelLove } from '../gauges'
+import { newlyRevealed, revealFlagOf } from '../map'
 import { castFor } from '../characters'
 import { eraFor, type AnchorSet } from '../content/era'
 import type { LifeEngine } from '../engine'
@@ -72,6 +75,14 @@ export type LifeRuntime = {
   dismissEnding(): void
   /** the end-of-stage celebration's own button — the ending card no longer goes home */
   dismissFinale(): void
+  /** the opening film has played for this life — written into the log, once */
+  markOpening: () => void
+  /** the coda card was closed — back to the last room, the life stays where it is */
+  dismissCoda: () => void
+  /** every chapter this life has entered, in the order the log holds them */
+  livedChapters: () => string[]
+  /** the reveal moment was closed — the world runs again */
+  closeReveal: () => void
   /**
    * הסרט נגמר — the shell reporting how a historical cutscene ended.
    *
@@ -161,6 +172,34 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
 
   const dialogue = new DialogueRunner(options.engine, options.bus, noop, options.anchor, options.anchors)
 
+  /**
+   * המדדים החיים — every dispatch is diffed against the state before it, and what moved
+   * is put on the bus as one beat. The love meter is emitted separately, always, so the
+   * badge on the glass never waits for a change to know its number.
+   */
+  let before = options.engine.state
+  let bumps = 0
+  options.bus.emit('love', { value: hapoelLove(before), bump: 0 })
+  const offGauges = options.engine.subscribe((after) => {
+    if (after === before) return
+    const changes = diffGauges(before, after)
+    const revealed = newlyRevealed(before, after)
+    before = after
+    if (revealed.length > 0) {
+      // Written as a person-flag so the map remembers across every year; dispatched on a
+      // microtask so a listener never dispatches from inside a dispatch.
+      queueMicrotask(() => {
+        options.engine.dispatch(...revealed.map((place) => ({ t: 'flag.raised', flag: revealFlagOf(place.id) }) as const))
+        const moment = revealed.find((place) => place.revealHe)
+        if (moment) options.bus.emit('reveal', { place: moment })
+      })
+    }
+    const love = hapoelLove(after)
+    if (changes.some((c) => c.id === 'love')) bumps += 1
+    options.bus.emit('love', { value: love, bump: bumps })
+    if (changes.length > 0) options.bus.emit('gauge', changes)
+  })
+
   const context: LifeContext = {
     engine: options.engine,
     bus: options.bus,
@@ -171,8 +210,18 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     anchors: options.anchors,
   }
 
+  // The probes run in a headless browser whose WebGL is a software rasteriser; a frame
+  // there costs a second and every timed beat drifts. Under the probe flag the game draws
+  // with the 2D canvas instead — same scenes, same code, a renderer that keeps up.
+  let probing = false
+  try {
+    probing = window.localStorage.getItem('the-worker:life:probe') === '1'
+  } catch {
+    probing = false
+  }
+
   const game = new Phaser.Game({
-    type: Phaser.AUTO,
+    type: probing ? Phaser.CANVAS : Phaser.AUTO,
     parent: options.parent,
     backgroundColor: LIFE_PALETTE.ink,
     // Flat colour, hard edges, no filtering: the art is drawn at world scale and any
@@ -198,7 +247,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
 
   const snapshot = (): LifeSnapshot => {
     const state = options.engine.state
-    const cast = castFor(String(state.year)).map((entry) => entry.id)
+    const cast = castFor(state.chapter).map((entry) => entry.id)
     const era = eraFor(state.chapter)
     return {
       profile: buildProfile(state, options.engine.log(), cast, ''),
@@ -219,6 +268,19 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     leave: () => dialogue.leave(),
     dismissEnding: () => worldScene()?.goHome(),
     dismissFinale: () => worldScene()?.dismissFinale(),
+    markOpening: () => {
+      if (!options.engine.state.flags[OPENING_FLAG]) options.engine.dispatch({ t: 'flag.raised', flag: OPENING_FLAG })
+    },
+    dismissCoda: () => worldScene()?.dismissCoda(),
+    closeReveal: () => {
+      options.bus.emit('reveal', null)
+      worldScene()?.setPaused(false)
+    },
+    livedChapters: () => {
+      const seen = new Set<string>()
+      for (const event of options.engine.log()) if (event.t === 'chapter.entered') seen.add(event.chapter)
+      return [...seen]
+    },
     endCutscene: (outcome) => worldScene()?.endCutscene(outcome),
     pointAtScreen: (x, y) => {
       const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
@@ -256,6 +318,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       if (prologue && game.scene.isActive(PrologueScene.KEY)) prologue.skip()
     },
     destroy: () => {
+      offGauges()
       void options.engine.save()
       game.destroy(true)
     },

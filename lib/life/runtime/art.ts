@@ -83,6 +83,19 @@ export const BACKDROP = [
   'ussEnd',
   'ussHigh',
   'ussLow',
+
+  /**
+   * בלומפילד אחרי — the ground the way it was between 2000 and 2016, and the way it was
+   * rebuilt in 2019, sixteen frames reconstructed from the four videos in the master
+   * package (`BLOOMFIELD-2000-2019-PLUS`). None of them is a place this game's boy has
+   * stood in yet: the old set belongs to the decade after the Double, and the new set is
+   * the ground the game OPENS on — the frame of 2026, a man in front of the white shell
+   * before the film cuts back to 1978. `intro*` are the four cinematic plates: the tunnel
+   * mouth, the packed red night, the plaza on the way home, the beacon over Jaffa.
+   */
+  'bloomOldGates', 'bloomOldCorner', 'bloomOldStand', 'bloomOldEnd', 'bloomOldHigh', 'bloomOldTunnel',
+  'bloomNewInside', 'bloomNewPitch', 'bloomNewDay', 'bloomNewPlaza', 'bloomNewSea', 'bloomNewNight',
+  'introFirstSight', 'introDerbyNight', 'introReturnHome', 'introBeacon',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -398,6 +411,24 @@ export const FIGURE = [
   'hallVendor', 'hallVendor-hand', 'hallVendor-change', 'hallVendor-shout',
   // The twelve-year-old's eight-frame walk (the eight-year-old's is `KID_WALK`).
   'hero80-w1', 'hero80-w2', 'hero80-w3', 'hero80-w4', 'hero80-w5', 'hero80-w6', 'hero80-w7', 'hero80-w8',
+  /**
+   * האוהדים — the Stage B supporters, off the sheet Maor drew on 2.9.2026.
+   *
+   * `KNOWN-GAPS.md` in the September master package listed twelve supporters with no PNG.
+   * The same package carried, under "user references", a green-screen sheet of five of
+   * them front and back at a height the game can use, and a pose sheet of seven at a
+   * third of that height. `ingest-2026-09e.py` cut both. The five from the tall sheet are
+   * finished figures; מלמד and פרדי come off the small sheet upscaled 2.4× and are marked
+   * `soft` in the manifest — they stand in a doorway until their own sheet is drawn, and
+   * the gaps document says so. The figure the sheet labelled שלום is יוסף (`yosef`) — the
+   * bible of 5.9.2026 is explicit: "שלום בתמונות הישנות → יוסף", no supporter named
+   * Shalom exists, and שלום תקוה is only ever the footballer. Yosef enters no chapter
+   * before 2000.
+   */
+  'shachor', 'shachor-back', 'soko', 'soko-back', 'asaf', 'asaf-back',
+  'yosef', 'yosef-back', 'hermesh', 'hermesh-back',
+  'melamed', 'melamed-play', 'melamed-lean', 'melamed-listen',
+  'freddy', 'freddy-glass', 'freddy-drink',
 ] as const
 
 /**

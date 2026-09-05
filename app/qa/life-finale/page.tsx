@@ -37,6 +37,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
       <Preview
         finale={{
           anchor: resolveChapterAnchor(),
+          chapter: '1986',
           titleHe: card.titleHe,
           bodyHe: card.bodyHe,
           becameHe: card.becameHe,

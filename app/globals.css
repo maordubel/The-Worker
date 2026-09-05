@@ -537,6 +537,21 @@ select {
   100% { transform: rotate(-2deg) scale(1); }
 }
 @keyframes caret-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+/* בלוני קומיקס — a balloon pops from its tail, overshoots a hair, settles with a lean */
+@keyframes balloon-pop {
+  0%   { transform: rotate(-0.8deg) scale(0.86) translateY(10px); opacity: 0; }
+  70%  { transform: rotate(-0.8deg) scale(1.02) translateY(-2px); opacity: 1; }
+  100% { transform: rotate(-0.8deg) scale(1) translateY(0); opacity: 1; }
+}
+@keyframes balloon-pop-end {
+  0%   { transform: rotate(0.8deg) scale(0.86) translateY(10px); opacity: 0; }
+  70%  { transform: rotate(0.8deg) scale(1.02) translateY(-2px); opacity: 1; }
+  100% { transform: rotate(0.8deg) scale(1) translateY(0); opacity: 1; }
+}
+@keyframes face-in {
+  0%   { transform: translateY(8px) rotate(-3deg) scale(0.92); opacity: 0; }
+  100% { transform: translateY(0) rotate(-2deg) scale(1); opacity: 1; }
+}
 @keyframes push-in { from { transform: scale(1.02); opacity: 0; } 8% { opacity: 1; } to { transform: scale(1.09); opacity: 1; } }
 
 @keyframes crawl {
@@ -673,3 +688,81 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .ball-roll, .fig-pop { animation: none; opacity: 1 }
 }
+
+/* ------------------------------------------------------------------------------------
+   5.9.2026 — the director's cut. Film stock over the cuts: grain that jitters like a
+   projector gate, bars that close the frame to widescreen, a light leak that sweeps a
+   year change, a flash frame on the biggest beats, and digits that roll like a counter.
+   ------------------------------------------------------------------------------------ */
+@keyframes grain-jitter {
+  0%   { background-position: 0 0 }
+  25%  { background-position: -37px 19px }
+  50%  { background-position: 23px -41px }
+  75%  { background-position: -11px -7px }
+  100% { background-position: 0 0 }
+}
+@keyframes bars-in {
+  from { transform: scaleY(0) }
+  to   { transform: scaleY(1) }
+}
+@keyframes leak-sweep {
+  0%   { transform: translateX(-60%) scale(1.4); opacity: 0 }
+  25%  { opacity: .9 }
+  100% { transform: translateX(70%) scale(1.1); opacity: 0 }
+}
+@keyframes flash-frame {
+  0%   { opacity: .95 }
+  100% { opacity: 0 }
+}
+@keyframes digit-roll {
+  from { transform: translateY(-100%) }
+  to   { transform: translateY(0) }
+}
+@keyframes plate-push {
+  from { transform: scale(1.0) }
+  to   { transform: scale(1.08) }
+}
+@keyframes shake-frame {
+  0%, 100% { transform: translate(0, 0) }
+  20% { transform: translate(-6px, 3px) }
+  40% { transform: translate(5px, -4px) }
+  60% { transform: translate(-4px, 2px) }
+  80% { transform: translate(3px, -2px) }
+}
+.film-grain {
+  background-image: url('/life/art/fxGrain.png');
+  background-size: 256px 256px;
+  mix-blend-mode: overlay;
+  animation: grain-jitter .42s steps(1, end) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .film-grain { animation: none }
+}
+
+/* ------------------------------------------------------------------------------------
+   העשור על הזכוכית — the life's chrome follows the decade it is in. Same devices (the
+   sign plate, the cloth, the stamp), a different hand: the eighties are enamel and a
+   serif, the nineties a printed sticker and a heavier sign face, the two-thousands a
+   flatter, tighter poster face. Tuned through three variables the plates read.
+   ------------------------------------------------------------------------------------ */
+.life-glass { --life-sign: var(--font-miriam); --life-sign-weight: 700; --life-sign-tracking: 0; --life-plate-texture: none; }
+.life-glass[data-decade="80s"] {
+  --life-sign: var(--font-frank);
+  --life-sign-weight: 900;
+  --life-sign-tracking: 0.01em;
+  --life-plate-texture: repeating-linear-gradient(94deg, rgb(var(--ink) / 0.06) 0 1px, transparent 1px 9px);
+}
+.life-glass[data-decade="90s"] {
+  --life-sign: var(--font-miriam);
+  --life-sign-weight: 700;
+  --life-sign-tracking: 0.02em;
+  --life-plate-texture: repeating-linear-gradient(0deg, rgb(var(--ink) / 0.045) 0 1px, transparent 1px 4px);
+}
+.life-glass[data-decade="00s"] {
+  --life-sign: var(--font-poster);
+  --life-sign-weight: 700;
+  --life-sign-tracking: 0.04em;
+  --life-plate-texture: none;
+}
+.life-glass .font-sign { font-family: var(--life-sign), var(--font-miriam), system-ui, sans-serif; font-weight: var(--life-sign-weight); letter-spacing: var(--life-sign-tracking); }
+.life-glass [data-life="hud-plate"] > span:last-child { background-image: var(--life-plate-texture); }

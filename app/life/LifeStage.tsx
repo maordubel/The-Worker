@@ -21,17 +21,25 @@ import { LifeHud } from '@/components/life/LifeHud'
 import { LifeMap } from '@/components/life/LifeMap'
 import { LifeMenu } from '@/components/life/LifeMenu'
 import { OpeningSequence } from '@/components/life/OpeningSequence'
+import { CodaCard } from '@/components/life/CodaCard'
+import { MapReveal } from '@/components/life/MapReveal'
+import { ChapterCard } from '@/components/life/ChapterCard'
+import { Flash, Grain, Letterbox } from '@/components/life/FilmFx'
+import { GaugePops, GaugesSheet, HeartBadge } from '@/components/life/Gauges'
+import { HelpSheet } from '@/components/life/HelpSheet'
+import { Chip } from '@/components/life/Plate'
 import { ProfileCard } from '@/components/life/ProfileCard'
 import { Teach } from '@/components/life/Teach'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
 import type { CutsceneOutcome } from '@/lib/life/cutscenes'
-import { OPENING_SEEN } from '@/lib/life/opening'
+import { lifeHasBegun } from '@/lib/life/opening'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { loadLife } from '@/lib/life/engine'
 import { lifeStore } from '@/lib/life/save'
 import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/bus'
 import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/game'
+import type { LifeState } from '@/lib/life/types'
 
 /**
  * הבמה — React mounts the game and then gets out of its way.
@@ -48,7 +56,9 @@ import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/gam
  * scope, so it must never reach the server bundle or any route but this one.
  */
 
-const EMPTY_HUD: HudState = { clock: '', date: '', agorot: 0, showMoney: false, place: '', objective: null }
+const EMPTY_HUD: HudState = { clock: '', date: '', agorot: 0, showMoney: false, place: '', objective: null, year: 1986, scene: 'bedroom', hint: '' }
+/** the decade the glass is dressed for — type and texture follow it (`app/globals.css`) */
+const decadeOf = (year: number) => (year >= 2000 ? '00s' : year >= 1990 ? '90s' : '80s')
 /** a preference about the glass, not about the life — so it is not in the save */
 const DECK_PREF = 'the-worker:life:deck'
 
@@ -80,6 +90,12 @@ export function LifeStage({
   const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
   const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
   const [finale, setFinale] = useState<LifeBusEvents['finale']>(null)
+  const [coda, setCoda] = useState<LifeBusEvents['coda']>(null)
+  const [gaugeBeat, setGaugeBeat] = useState<LifeBusEvents['gauge'] | null>(null)
+  const [love, setLove] = useState<LifeBusEvents['love']>({ value: 0, bump: 0 })
+  const [gauges, setGauges] = useState<LifeState | null>(null)
+  /** a flash frame on the biggest beats — a goal's roar, a final whistle */
+  const [flash, setFlash] = useState<{ tone: 'white' | 'red'; nonce: number }>({ tone: 'red', nonce: 0 })
   const [titleCard, setTitleCard] = useState<LifeBusEvents['card']>(null)
   const [pano, setPano] = useState<LifeBusEvents['pano']>(null)
   const [tunnel, setTunnel] = useState<LifeBusEvents['tunnel']>(null)
@@ -104,6 +120,9 @@ export function LifeStage({
   const [menu, setMenu] = useState(false)
   /** the map sheet: a snapshot of the places, taken when it opens, like the profile */
   const [places, setPlaces] = useState<MapPlace[] | null>(null)
+  /** the state the map and the reveal draw from — a snapshot taken when they open */
+  const [mapState, setMapState] = useState<LifeState | null>(null)
+  const [reveal, setReveal] = useState<LifeBusEvents['reveal']>(null)
   const [confirmDay, setConfirmDay] = useState(false)
   /**
    * the arcade deck on a phone — OFF by default. The picture is the controller: you touch
@@ -139,13 +158,6 @@ export function LifeStage({
     const unsubscribe: Array<() => void> = []
 
     setPersisted(lifeStore.usable())
-    try {
-      setOpening(window.sessionStorage.getItem(OPENING_SEEN) !== '1')
-    } catch {
-      // A browser that refuses session storage gets the opening every time, which is a
-      // better failure than a browser that never gets it at all.
-      setOpening(true)
-    }
     setTouch(
       typeof window !== 'undefined' &&
         (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window),
@@ -171,9 +183,16 @@ export function LifeStage({
       bus.on('sound', (event) => {
         if (event.kind === 'step') sfx.step(event.surface)
         else if (event.kind === 'door') sfx.door()
-        else if (event.kind === 'whistle') sfx.whistle(event.blasts)
-        else if (event.kind === 'roar') sfx.roar(event.big ?? 1)
-        else if (event.kind === 'radio') sfx.radioOn(event.on)
+        else if (event.kind === 'whistle') {
+          sfx.whistle(event.blasts)
+          // three blasts is the end of something — one white frame, like a cut to black
+          if (event.blasts >= 3) setFlash((f) => ({ tone: 'white', nonce: f.nonce + 1 }))
+        } else if (event.kind === 'roar') {
+          sfx.roar(event.big ?? 1)
+          // the big roars — a goal, the buzzer — get one frame of red, like a cut to the crowd
+          if ((event.big ?? 1) >= 2) setFlash((f) => ({ tone: 'red', nonce: f.nonce + 1 }))
+        } else if (event.kind === 'radio') sfx.radioOn(event.on)
+        else if (event.kind === 'sample') sfx.play(event.key, { ...(event.level !== undefined ? { level: event.level } : {}), ...(event.delayMs !== undefined ? { delayMs: event.delayMs } : {}) })
       }),
     )
 
@@ -198,13 +217,61 @@ export function LifeStage({
         if (value?.art) sfx.thud()
       }),
     )
-    unsubscribe.push(bus.on('ending', setEnding))
+    unsubscribe.push(
+      bus.on('ending', (value) => {
+        setEnding(value)
+        if (value) sfx.play('ending', { level: 0.7 })
+      }),
+    )
     unsubscribe.push(bus.on('retry', setRetry))
     unsubscribe.push(bus.on('match', setMatch))
-    unsubscribe.push(bus.on('doc', setDoc))
+    unsubscribe.push(
+      bus.on('doc', (value) => {
+        setDoc(value)
+        if (value) sfx.play('box-item', { bus: 'ui', level: 0.6 })
+      }),
+    )
     unsubscribe.push(bus.on('cutscene', setCutscene))
-    unsubscribe.push(bus.on('finale', setFinale))
-    unsubscribe.push(bus.on('card', setTitleCard))
+    unsubscribe.push(
+      bus.on('finale', (value) => {
+        setFinale(value)
+        if (value) sfx.play('finale-hit', { level: 0.8, jitter: 0.02 })
+      }),
+    )
+    unsubscribe.push(
+      bus.on('coda', (value) => {
+        setCoda(value)
+        if (value) sfx.play('stage-sting', { bus: 'ui', level: 0.6, jitter: 0.02 })
+      }),
+    )
+    unsubscribe.push(
+      bus.on('reveal', (value) => {
+        if (value) {
+          runtime.current?.pause(true)
+          setMapState(runtime.current?.snapshot().state ?? null)
+          if (!sfx.play('reveal', { bus: 'ui', level: 0.6, jitter: 0.02 })) sfx.thud()
+        }
+        setReveal(value)
+      }),
+    )
+    unsubscribe.push(
+      bus.on('gauge', (changes) => {
+        setGaugeBeat(changes)
+        // one blip per beat, not per number: up if the meter that matters went up
+        const lead = changes.find((c) => c.id === 'love') ?? changes[0]
+        if (lead) sfx.play(lead.delta >= 0 ? 'gauge-up' : 'gauge-down', { bus: 'ui', level: 0.4, delayMs: 120 })
+        if (changes.some((c) => c.id === 'love')) sfx.play('heart', { bus: 'ui', level: 0.5, delayMs: 60 })
+      }),
+    )
+    unsubscribe.push(bus.on('love', setLove))
+    unsubscribe.push(
+      bus.on('card', (value) => {
+        setTitleCard(value)
+        // a chapter card with a year on it is a year turning; a room card is a stamp
+        if (value?.art || value?.fromYear) sfx.play('year-turn', { level: 0.7, jitter: 0.02 })
+        else if (value) sfx.thud()
+      }),
+    )
     unsubscribe.push(bus.on('pano', setPano))
     unsubscribe.push(
       bus.on('tunnel', (value) => {
@@ -233,6 +300,9 @@ export function LifeStage({
         import('@/lib/life/runtime/game'),
       ])
       if (cancelled || !holder.current) return
+      // The opening is for a life that has not begun. A save that has been lived in —
+      // any room entered, any chapter — opens where it was, with no film in front of it.
+      setOpening(!lifeHasBegun(engine.log(), engine.state.flags))
       runtime.current = module.createLifeGame({
         parent: holder.current,
         engine,
@@ -413,12 +483,41 @@ export function LifeStage({
     current.pause(true)
     setSnapshot(current.snapshot())
     setDebug(withDebug)
+    audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
   }, [])
 
   const closeProfile = useCallback(() => {
     setSnapshot(null)
     setDebug(false)
     runtime.current?.pause(false)
+    audio.current?.play('ui-close', { bus: 'ui', level: 0.45 })
+  }, [])
+
+  const openGauges = useCallback(() => {
+    const current = runtime.current
+    if (!current) return
+    current.pause(true)
+    setGauges(current.snapshot().state)
+    audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
+    audio.current?.play('heart', { bus: 'ui', level: 0.5, delayMs: 80 })
+  }, [])
+
+  const closeGauges = useCallback(() => {
+    setGauges(null)
+    runtime.current?.pause(false)
+    audio.current?.play('ui-close', { bus: 'ui', level: 0.45 })
+  }, [])
+
+  const [help, setHelp] = useState(false)
+  const openHelp = useCallback(() => {
+    runtime.current?.pause(true)
+    setHelp(true)
+    audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
+  }, [])
+  const closeHelp = useCallback(() => {
+    setHelp(false)
+    runtime.current?.pause(false)
+    audio.current?.play('ui-close', { bus: 'ui', level: 0.45 })
   }, [])
 
   /**
@@ -433,11 +532,8 @@ export function LifeStage({
 
   const closeOpening = useCallback(() => {
     setOpening(false)
-    try {
-      window.sessionStorage.setItem(OPENING_SEEN, '1')
-    } catch {
-      /* it will simply play again */
-    }
+    // Written into the life, not the browser: this life has had its opening.
+    runtime.current?.markOpening()
   }, [])
 
   const reset = useCallback(() => {
@@ -452,6 +548,7 @@ export function LifeStage({
     setConfirmReset(false)
     setConfirmDay(false)
     setMenu(true)
+    audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
   }, [])
 
   const closeMenu = useCallback(() => {
@@ -459,6 +556,7 @@ export function LifeStage({
     setConfirmReset(false)
     setConfirmDay(false)
     runtime.current?.pause(false)
+    audio.current?.play('ui-close', { bus: 'ui', level: 0.45 })
   }, [])
 
   const finishTunnel = useCallback(() => {
@@ -478,12 +576,16 @@ export function LifeStage({
     const current = runtime.current
     if (!current) return
     current.pause(true)
+    setMapState(current.snapshot().state)
     setPlaces(current.places())
+    audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
+    audio.current?.play('page', { bus: 'ui', level: 0.5, delayMs: 90 })
   }, [])
 
   const closeMap = useCallback(() => {
     setPlaces(null)
     runtime.current?.pause(false)
+    audio.current?.play('ui-close', { bus: 'ui', level: 0.45 })
   }, [])
 
   const goTo = useCallback((id: string) => {
@@ -517,11 +619,11 @@ export function LifeStage({
   /** the painting fills the glass; the shell floats over it */
   const fullBleed = frame <= 0
   /** every overlay that must hide the in-world controls */
-  const covered = Boolean(dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel)
+  const covered = Boolean(dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel || gauges || coda || reveal)
 
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
-      <div className="relative h-full w-full overflow-hidden border-y-hair border-ink bg-ink">
+      <div className="life-glass relative h-full w-full overflow-hidden border-y-hair border-ink bg-ink" data-decade={decadeOf(hud.year)}>
         <div ref={holder} className="absolute inset-0" />
 
         {/* Where the painting ends. A vermilion hairline turns the empty band under a
@@ -546,6 +648,19 @@ export function LifeStage({
             say, and an empty plate with a lone "·" in it sat in the corner of the 1983
             terrace like a bug. */}
         {ready && !cutscene && !match && hud.place && <LifeHud hud={hud} />}
+
+        {/* מד האהבה — always on the glass, under the HUD, on the reading side. The one
+            number the game is allowed to show; tapping it opens all of them. */}
+        {ready && !cutscene && !opening && hud.place && (
+          <div className="absolute z-30" style={{ insetInlineEnd: 10, top: 'calc(58px + env(safe-area-inset-top))' }}>
+            <HeartBadge value={love.value} bump={love.bump} onOpen={openGauges} />
+          </div>
+        )}
+        {ready && !cutscene && !opening && (
+          <GaugePops changes={gaugeBeat} top="calc(150px + env(safe-area-inset-top))" />
+        )}
+        {gauges && <GaugesSheet state={gauges} onClose={closeGauges} />}
+        <Flash tone={flash.tone} nonce={flash.nonce} />
         {ready && !cutscene && match && (
           <ScoreStrip match={match} objective={match.over ? hud.objective : null} />
         )}
@@ -555,47 +670,30 @@ export function LifeStage({
             is learned by looking at people. */}
         {ready && !covered && (
           <div
-            className="absolute z-30 flex items-start gap-1.5"
-            style={{ insetInlineStart: 10, top: 'calc(54px + env(safe-area-inset-top))' }}
+            className="absolute z-30 flex items-start gap-1"
+            style={{ insetInlineStart: 10, top: 'calc(58px + env(safe-area-inset-top))' }}
           >
-            {/* ☰ — the one door to everything that is not the world. The visible chips are
-                small because the HUD is small; the TARGET is the full 48px the brand
-                requires, and it is the transparent button around each. On a phone that
-                difference is the whole difference between a control and a decoration you
-                keep missing. */}
-            <button
-              type="button"
-              onClick={openMenu}
-              data-life="menu-open"
-              aria-label={t('life.menu.title')}
-              className="group flex min-h-tap min-w-tap items-start"
-            >
-              <span className="mt-2 border-hair border-ink bg-sheet/95 px-2.5 py-1 font-mono text-[13px] leading-none tabular-nums text-ink transition-colors duration-press group-active:bg-red group-active:text-sheet motion-reduce:transition-none">
-                ☰
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => openProfile(false)}
-              data-life="profile-open"
-              className="group flex min-h-tap items-start"
-            >
-              <span className="mt-2 border-hair border-ink bg-sheet/95 px-2.5 py-1.5 font-body text-[10px] leading-none text-ink transition-colors duration-press group-active:bg-red group-active:text-sheet motion-reduce:transition-none">
-                {t('life.profile')}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={openMap}
-              data-life="map-open"
-              className="group flex min-h-tap items-start"
-            >
-              <span className="mt-2 border-hair border-ink bg-sheet/95 px-2.5 py-1.5 font-body text-[10px] leading-none text-ink transition-colors duration-press group-active:bg-red group-active:text-sheet motion-reduce:transition-none">
-                {t('life.map')}
-              </span>
-            </button>
+            {/* ☰ — the one door to everything that is not the world. Sign-plate chips, the
+                same object as every button on the site; the TARGET is the full 48px the
+                brand requires, and it is the transparent button around each. */}
+            <Chip onClick={openMenu} data-life="menu-open" aria-label={t('life.menu.title')}>
+              <span className="font-mono tabular-nums text-[13px] leading-none">☰</span>
+            </Chip>
+            <Chip onClick={() => openProfile(false)} data-life="profile-open">
+              {t('life.profile')}
+            </Chip>
+            <Chip onClick={openMap} data-life="map-open">
+              {t('life.map')}
+            </Chip>
+            {/* ? — almost transparent until it is needed. "מה עליי לעשות?" lives behind
+                it: the day's shape, one plain sentence, and — folded — the story, the
+                rules and the disclaimer. */}
+            <Chip onClick={openHelp} data-life="help-open" aria-label={t('life.help.title')} className="opacity-45 transition-opacity duration-press active:opacity-100 motion-reduce:transition-none">
+              <span className="font-mono tabular-nums text-[13px] font-bold leading-none">?</span>
+            </Chip>
           </div>
         )}
+        {help && <HelpSheet objective={hud.objective} hint={hud.hint} onClose={closeHelp} />}
 
         {ready && !covered && controls && (touch ? deck : true) && (
           <ControlDeck
@@ -643,7 +741,10 @@ export function LifeStage({
             {...(!fullBleed ? { offsetTop: frame + 8 } : {})}
             {...(dialogue.choices ? { choices: dialogue.choices } : {})}
             onAdvance={() => runtime.current?.advance()}
-            onChoose={(id) => runtime.current?.choose(id)}
+            onChoose={(id) => {
+              audio.current?.play('choice', { bus: 'ui', level: 0.6 })
+              runtime.current?.choose(id)
+            }}
             onLeave={() => runtime.current?.leave()}
           />
         )}
@@ -674,7 +775,29 @@ export function LifeStage({
         {card && <AnchorCard anchor={card} onClose={() => setCard(null)} />}
 
         {/* כרטיס-ביסוס — over black, one line, then the scene. */}
-        {titleCard && <TitleCard titleHe={titleCard.titleHe} subHe={titleCard.subHe} />}
+        {titleCard &&
+          (titleCard.art ? (
+            <ChapterCard
+              titleHe={titleCard.titleHe}
+              subHe={titleCard.subHe}
+              nameHe={titleCard.nameHe}
+              art={titleCard.art}
+              fromYear={titleCard.fromYear}
+            />
+          ) : (
+            <TitleCard titleHe={titleCard.titleHe} subHe={titleCard.subHe} />
+          ))}
+
+        {coda && (
+          <CodaCard
+            chapter={coda.chapter}
+            lived={runtime.current?.livedChapters() ?? []}
+            onBack={() => {
+              setCoda(null)
+              runtime.current?.dismissCoda()
+            }}
+          />
+        )}
 
         {finale && (
           <StageFinale
@@ -713,12 +836,26 @@ export function LifeStage({
             confirmDay={confirmDay}
             onMap={() => {
               setMenu(false)
+              setMapState(runtime.current?.snapshot().state ?? null)
               setPlaces(runtime.current?.places() ?? [])
             }}
           />
         )}
 
-        {places && <LifeMap places={places} onGo={goTo} onClose={closeMap} />}
+        {places && mapState && <LifeMap places={places} state={mapState} here={mapState.location} onGo={goTo} onClose={closeMap} />}
+
+        {reveal && mapState && (
+          <MapReveal
+            place={reveal.place}
+            state={mapState}
+            places={runtime.current?.places() ?? []}
+            here={mapState.location}
+            onClose={() => {
+              setReveal(null)
+              runtime.current?.closeReveal()
+            }}
+          />
+        )}
 
         {snapshot && !debug && <ProfileCard snapshot={snapshot} onClose={closeProfile} />}
         {snapshot && debug && (

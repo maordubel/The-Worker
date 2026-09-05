@@ -7,6 +7,7 @@ import { artUrl } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import { LIFE_PALETTE } from '../palette'
 
+import { CHAPTERS } from '../../content/chapters'
 import { WorldScene } from './WorldScene'
 
 /**
@@ -112,14 +113,22 @@ export class PrologueScene extends Phaser.Scene {
   private finish() {
     if (this.done) return
     this.done = true
+    // The first day with a floor under it is whatever the registry lists first — the
+    // spring of 1984 since 5.9.2026, the Saturday of 1986 before that. Its year and its
+    // clock are dispatched here the way every later cut dispatches them.
+    const first = CHAPTERS.find((c) => c.playable) ?? CHAPTERS[0]!
+    const state = this.ctx.engine.state
     this.ctx.engine.dispatch(
       { t: 'flag.raised', flag: 'prologue:done' },
-      { t: 'chapter.entered', chapter: '1986' },
+      { t: 'year.entered', year: first.year, weekday: first.weekday, minute: first.minute },
+      { t: 'chapter.entered', chapter: first.id },
+      { t: 'flag.raised', flag: `life:bridge-${first.id}` },
+      ...(first.entry?.(state) ?? []),
     )
     this.ctx.bus.emit('controls', { visible: true })
     this.cameras.main.fadeOut(900, 0, 0, 0)
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-      this.scene.start(WorldScene.KEY, { mapId: 'bedroom', spawn: 'start' })
+      this.scene.start(WorldScene.KEY, { mapId: first.start.location, spawn: first.start.spawn })
     })
   }
 }

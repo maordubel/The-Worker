@@ -3,11 +3,27 @@ import type { RandomEncounter } from '../encounters'
 import type { LifeOpportunity } from '../opportunities'
 import type { NPCScheduleEntry } from '../schedules'
 import type { LifeState } from '../types'
+import type { Beat } from './beats'
 
 import { AMBIENT_1986, type AmbientActor } from './ambient1986'
 import { ENDINGS, OBJECTIVES, PORTRAIT, type EndingCard } from './chapter1986'
 import { ENDINGS_1990, OBJECTIVES_1990, PORTRAIT_1990 } from './chapter1990'
 import { ENDINGS_1991, OBJECTIVES_1991, PORTRAIT_1991, TIP_OFF } from './chapter1991'
+import { BEATS_1993, ENCOUNTERS_1993, ENDINGS_1993, objective1993, PORTRAIT_1993, TIP_OFF_93 } from './chapter1993cup'
+import { BEATS_GALIL, ENDINGS_GALIL, objectiveGalil, PORTRAIT_GALIL } from './chapter1993galil'
+import { BEATS_SINAI, ENDINGS_SINAI, objectiveSinai, PORTRAIT_SINAI } from './chapter1995sinai'
+import { BEATS_ARMY, ENDINGS_ARMY, objectiveArmy, PORTRAIT_ARMY } from './chapter1996army'
+import { BEATS_HALL, ENDINGS_HALL, objectiveHall, PORTRAIT_HALL } from './chapter1997basket'
+import {
+  BEATS_A2, BEATS_A3, BEATS_A4, BEATS_A5, BEATS_A6, BEATS_A7,
+  ENDINGS_A2, ENDINGS_A3, ENDINGS_A4, ENDINGS_A5, ENDINGS_A6, ENDINGS_A7,
+  objectiveA2, objectiveA3, objectiveA4, objectiveA5, objectiveA6, objectiveA7,
+  PORTRAIT_STAGE_A,
+} from './chapterStageA'
+import { BEATS_LACES, ENDINGS_LACES, objectiveLaces, PORTRAIT_LACES } from './chapter1998laces'
+import { BEATS_SEED, ENDINGS_SEED, objectiveSeed, PORTRAIT_SEED } from './chapter1999basket'
+import { BEATS_CUP99, ENDINGS_CUP99, objectiveCup99, PORTRAIT_CUP99 } from './chapter1999cup'
+import { BEATS_DOUBLE, BEATS_TITLE, ENDINGS_DOUBLE, ENDINGS_TITLE, objectiveDouble, objectiveTitle, PORTRAIT_2000 } from './chapter2000double'
 import { HERO80_WALK, KID_WALK } from '../runtime/art'
 import { ENCOUNTERS_1986 } from './encounters1986'
 import { ENCOUNTERS_1990 } from './encounters1990'
@@ -63,6 +79,37 @@ export type Era = {
   memoryPrefix: string
   /** speaker → portrait plate, for this chapter's faces */
   portraits: Record<string, string>
+  /**
+   * הביטים — what the chapter does by itself, as rows (`beats.ts`). Chapters after 1991
+   * have no branch in `WorldScene`; everything they play unprompted is here.
+   */
+  beats?: readonly Beat[]
+  /**
+   * The clock the chapter's history happens on, for the HUD's second clock and the
+   * objective: minute of the anchor's start, or null for a chapter with no fixed hour.
+   */
+  eventMinute?: number | null
+}
+
+/**
+ * הגוף לפי גיל — the four figures the September sheets drew for him, as player records.
+ * Each walks on two frames (side + walk) the way 1990 does; only the eight-year-old and
+ * the twelve-year-old have an eight-frame cycle.
+ */
+export const TEEN: PlayerFigure = {
+  pose: { down: 'teen', downSide: 'teen-3q', side: 'teen-side', up: 'teen-back' },
+  walk: ['teen-side', 'teen-walk'],
+  scale: 1.22,
+}
+export const SOLDIER: PlayerFigure = {
+  pose: { down: 'soldier', downSide: 'soldier-stand', side: 'soldier-side', up: 'soldier-back' },
+  walk: ['soldier-side', 'soldier-march'],
+  scale: 1.26,
+}
+export const YOUNG_MAN: PlayerFigure = {
+  pose: { down: 'hero90', downSide: 'hero90-3q', side: 'hero90-side', up: 'hero90-back' },
+  walk: ['hero90-side', 'hero90-walk'],
+  scale: 1.26,
 }
 
 export const ERA_1986: Era = {
@@ -179,7 +226,204 @@ export const ERA_1991: Era = {
   portraits: PORTRAIT_1991,
 }
 
-const ERAS: Record<string, Era> = { '1986': ERA_1986, '1990': ERA_1990, '1991': ERA_1991 }
+/**
+ * 1993 — fifteen, and the day is not built around a father at all.
+ *
+ * The first chapter written as DATA: no branch in `WorldScene`, everything the day does
+ * by itself is a row in `BEATS_1993`, and the chapter file holds its people, its ends and
+ * its objective. `teen` is the figure the September sheets drew for him at this age.
+ */
+export const ERA_1993_CUP: Era = {
+  chapter: '1993-cup',
+  year: 1993,
+  anchorKey: '1993-cup',
+  schedule: [],
+  opportunities: [],
+  encounters: ENCOUNTERS_1993,
+  ambient: AMBIENT_1986,
+  endings: ENDINGS_1993,
+  objective: (state, sceneId) => objective1993(state, sceneId),
+  cutscene: null,
+  player: TEEN,
+  memoryPrefix: '1993-cup',
+  portraits: PORTRAIT_1993,
+  beats: BEATS_1993,
+  eventMinute: TIP_OFF_93,
+}
+
+export const ERA_1993_GALIL: Era = {
+  chapter: '1993-galil',
+  year: 1993,
+  anchorKey: '1993-galil',
+  schedule: [],
+  opportunities: [],
+  encounters: [],
+  ambient: AMBIENT_1986,
+  endings: ENDINGS_GALIL,
+  objective: (state, sceneId) => objectiveGalil(state, sceneId),
+  cutscene: null,
+  player: TEEN,
+  memoryPrefix: '1993-galil',
+  portraits: PORTRAIT_GALIL,
+  beats: BEATS_GALIL,
+  eventMinute: null,
+}
+
+export const ERA_1995_SINAI: Era = {
+  chapter: '1995-sinai',
+  year: 1994,
+  anchorKey: '1994-cup',
+  schedule: [],
+  opportunities: [],
+  encounters: [],
+  ambient: AMBIENT_1986,
+  endings: ENDINGS_SINAI,
+  objective: (state) => objectiveSinai(state),
+  cutscene: null,
+  player: TEEN,
+  memoryPrefix: '1995-sinai',
+  portraits: PORTRAIT_SINAI,
+  beats: BEATS_SINAI,
+  eventMinute: null,
+}
+
+export const ERA_1996_ARMY: Era = {
+  chapter: '1996-army',
+  year: 1996,
+  anchorKey: '1997-sale',
+  schedule: [],
+  opportunities: [],
+  encounters: [],
+  ambient: AMBIENT_1986,
+  endings: ENDINGS_ARMY,
+  objective: (state, sceneId) => objectiveArmy(state, sceneId),
+  cutscene: null,
+  player: SOLDIER,
+  memoryPrefix: '1996-army',
+  portraits: PORTRAIT_ARMY,
+  beats: BEATS_ARMY,
+  eventMinute: null,
+}
+
+/**
+ * B7–B11 — the second half of the decade, one record each.
+ *
+ * They share a shape on purpose: no timetable (the beats ARE the timetable), no
+ * opportunities, no random encounters. A chapter that is a single evening does not need
+ * a neighbourhood that goes on without you; it needs the four people who matter placed
+ * where the beat says, and a clock that only moves when the story does.
+ */
+function stageB(chapter: string, year: number, anchorKey: string, extra: Pick<Era, 'endings' | 'objective' | 'portraits' | 'beats' | 'player'>): Era {
+  return {
+    chapter,
+    year,
+    anchorKey,
+    schedule: [],
+    opportunities: [],
+    encounters: [],
+    ambient: AMBIENT_1986,
+    cutscene: null,
+    memoryPrefix: chapter,
+    eventMinute: null,
+    ...extra,
+  }
+}
+
+export const ERA_1997_BASKET = stageB('1997-basket', 1997, '1997-relegation', {
+  endings: ENDINGS_HALL,
+  objective: (state) => objectiveHall(state),
+  portraits: PORTRAIT_HALL,
+  beats: BEATS_HALL,
+  player: YOUNG_MAN,
+})
+
+export const ERA_1998_LACES = stageB('1998-laces', 1998, '1998', {
+  endings: ENDINGS_LACES,
+  objective: (state, sceneId) => objectiveLaces(state, sceneId),
+  portraits: PORTRAIT_LACES,
+  beats: BEATS_LACES,
+  player: YOUNG_MAN,
+})
+
+export const ERA_1999_BASKET = stageB('1999-basket', 1999, '1999-relegation', {
+  endings: ENDINGS_SEED,
+  objective: (state, sceneId) => objectiveSeed(state, sceneId),
+  portraits: PORTRAIT_SEED,
+  beats: BEATS_SEED,
+  player: YOUNG_MAN,
+})
+
+export const ERA_1999_CUP = stageB('1999-cup', 1999, '1999-cup', {
+  endings: ENDINGS_CUP99,
+  objective: (state, sceneId) => objectiveCup99(state, sceneId),
+  portraits: PORTRAIT_CUP99,
+  beats: BEATS_CUP99,
+  player: YOUNG_MAN,
+})
+
+export const ERA_2000_TITLE = stageB('2000-title', 2000, '2000-title', {
+  endings: ENDINGS_TITLE,
+  objective: (state, sceneId) => objectiveTitle(state, sceneId),
+  portraits: PORTRAIT_2000,
+  beats: BEATS_TITLE,
+  player: YOUNG_MAN,
+})
+
+export const ERA_2000_DOUBLE = stageB('2000-double', 2000, '2000-cup', {
+  endings: ENDINGS_DOUBLE,
+  objective: (state, sceneId) => objectiveDouble(state, sceneId),
+  portraits: PORTRAIT_2000,
+  beats: BEATS_DOUBLE,
+  player: YOUNG_MAN,
+})
+
+/** the six days before the Saturday — the same boy, the same rooms, a beat each */
+function stageA(chapter: string, year: number, extra: Pick<Era, 'endings' | 'objective' | 'beats'>): Era {
+  return {
+    chapter,
+    year,
+    anchorKey: '1986',
+    schedule: [],
+    opportunities: [],
+    encounters: [],
+    ambient: AMBIENT_1986,
+    cutscene: null,
+    player: ERA_1986.player,
+    memoryPrefix: chapter,
+    portraits: PORTRAIT_STAGE_A,
+    eventMinute: null,
+    ...extra,
+  }
+}
+
+export const ERA_A2 = stageA('a2-alley', 1984, { endings: ENDINGS_A2, objective: (state, sceneId) => objectiveA2(state, sceneId), beats: BEATS_A2 })
+export const ERA_A3 = stageA('a3-hall', 1984, { endings: ENDINGS_A3, objective: (state, sceneId) => objectiveA3(state, sceneId), beats: BEATS_A3 })
+export const ERA_A4 = stageA('a4-shirt', 1985, { endings: ENDINGS_A4, objective: (state, sceneId) => objectiveA4(state, sceneId), beats: BEATS_A4 })
+export const ERA_A5 = stageA('a5-first', 1985, { endings: ENDINGS_A5, objective: (state, sceneId) => objectiveA5(state, sceneId), beats: BEATS_A5 })
+export const ERA_A6 = stageA('a6-radio', 1986, { endings: ENDINGS_A6, objective: (state, sceneId) => objectiveA6(state, sceneId), beats: BEATS_A6 })
+export const ERA_A7 = stageA('a7-week', 1986, { endings: ENDINGS_A7, objective: (state, sceneId) => objectiveA7(state, sceneId), beats: BEATS_A7 })
+
+const ERAS: Record<string, Era> = {
+  'a2-alley': ERA_A2,
+  'a3-hall': ERA_A3,
+  'a4-shirt': ERA_A4,
+  'a5-first': ERA_A5,
+  'a6-radio': ERA_A6,
+  'a7-week': ERA_A7,
+  '1986': ERA_1986,
+  '1990': ERA_1990,
+  '1991': ERA_1991,
+  '1993-cup': ERA_1993_CUP,
+  '1993-galil': ERA_1993_GALIL,
+  '1995-sinai': ERA_1995_SINAI,
+  '1996-army': ERA_1996_ARMY,
+  '1997-basket': ERA_1997_BASKET,
+  '1998-laces': ERA_1998_LACES,
+  '1999-basket': ERA_1999_BASKET,
+  '1999-cup': ERA_1999_CUP,
+  '2000-title': ERA_2000_TITLE,
+  '2000-double': ERA_2000_DOUBLE,
+}
 
 /** The prologue and any unknown chapter fall through to 1986 — the chapter the game started as. */
 export function eraFor(chapter: string): Era {

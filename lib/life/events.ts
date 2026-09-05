@@ -1,4 +1,7 @@
 import {
+  blankArmy,
+  blankGate,
+  blankInstitution,
   blankRelationship,
   clamp,
   RELATIONSHIP_AXES,
@@ -18,6 +21,14 @@ import {
   type RelationshipMemory,
   type TraitId,
   type WellbeingId,
+  type ArmyGauge,
+  type ArmyRoute,
+  type GateIdentity,
+  type GateReason,
+  type InstitutionGauge,
+  type LacesResponse,
+  type PresenceMode,
+  type SinaiStance,
 } from './types'
 
 /**
@@ -106,11 +117,25 @@ export type LifeEvent =
       day?: number
       weekday: number
       minute: number
+      /** how the HUD names this day — a Stage B chapter spans weeks and the anchor's date is one of them */
+      dateHe?: string
     }
   /** the tin under the bed — never the pocket */
   | { t: 'savings.changed'; agorot: number; why: string }
   /** something he owns and keeps owning: `shirt:1985` */
   | { t: 'clothing.gained'; item: string }
+  // --- version 4, the decade (Stage B brief §4) ---------------------------------------
+  /** he changed where he stands; the reason and the year are kept with it */
+  | { t: 'gate.moved'; to: GateIdentity; reason: GateReason; year: number }
+  | { t: 'army.route'; route: ArmyRoute }
+  | { t: 'army.changed'; key: ArmyGauge; delta: number }
+  /** a match the army cost him — kept on the army, beside the life's own missed list */
+  | { t: 'army.missed'; anchorId: string }
+  | { t: 'institution.sinai'; stance: SinaiStance }
+  | { t: 'institution.changed'; key: InstitutionGauge; delta: number }
+  /** HOW he was there — folds into attended/missed as well, so old readers agree */
+  | { t: 'presence.recorded'; anchorId: string; mode: PresenceMode }
+  | { t: 'laces.marked'; response: LacesResponse }
 
 /** A day is 24×60. The clock wraps rather than running past midnight into nonsense. */
 export const MINUTES_IN_DAY = 24 * 60
@@ -200,8 +225,17 @@ export function emptyState(identity: PlayerIdentity, year: number): LifeState {
     missedAnchors: [],
     chapter: 'prologue',
     chapterDone: false,
+    dateHe: null,
+    gate: blankGate(),
+    army: blankArmy(),
+    institution: blankInstitution(),
+    presence: {},
+    laces: null,
   }
 }
+
+/** The presence modes that count as having been there — the rest fold to `missed`. */
+export const PRESENT_MODES: ReadonlySet<PresenceMode> = new Set(['inside', 'late'])
 
 // ---------------------------------------------------------------------------------
 
@@ -365,7 +399,7 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
         : { ...state, missedAnchors: [...state.missedAnchors, event.anchorId] }
 
     case 'chapter.entered':
-      return { ...state, chapter: event.chapter, chapterDone: false }
+      return { ...state, chapter: event.chapter, chapterDone: false, dateHe: null }
 
     /**
      * יום חדש בתוך אותו פרק — the small transition (Stage A §5).
@@ -378,6 +412,7 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
     case 'day.entered':
       return {
         ...state,
+        dateHe: event.dateHe ?? null,
         stageADay: event.dayId,
         year: event.year,
         age: event.year - state.identity.birthYear,
@@ -409,6 +444,7 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
         age: event.year - state.identity.birthYear,
         weekday: event.weekday,
         minute: event.minute,
+        dateHe: null,
         energy: 100,
         resources: { ...state.resources, energy: 100, availableTime: 0 },
         agorot: 0,
@@ -508,6 +544,53 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
       return state.redBox.some((entry) => entry.id === event.item.id)
         ? state
         : { ...state, redBox: [...state.redBox, event.item] }
+
+    // --- version 4, the decade -------------------------------------------------------
+
+    case 'gate.moved': {
+      if (state.gate.identity === event.to) return state
+      return {
+        ...state,
+        gate: {
+          identity: event.to,
+          history: [...state.gate.history, { from: state.gate.identity, to: event.to, year: event.year, reason: event.reason }],
+        },
+      }
+    }
+
+    case 'army.route':
+      return { ...state, army: { ...state.army, route: event.route } }
+
+    case 'army.changed':
+      return { ...state, army: { ...state.army, [event.key]: clamp(state.army[event.key] + event.delta) } }
+
+    case 'army.missed':
+      return state.army.missedAnchors.includes(event.anchorId)
+        ? state
+        : { ...state, army: { ...state.army, missedAnchors: [...state.army.missedAnchors, event.anchorId] } }
+
+    case 'institution.sinai':
+      return { ...state, institution: { ...state.institution, sinai: event.stance } }
+
+    case 'institution.changed':
+      return {
+        ...state,
+        institution: { ...state.institution, [event.key]: clamp(state.institution[event.key] + event.delta) },
+      }
+
+    case 'presence.recorded': {
+      const withMode = { ...state, presence: { ...state.presence, [event.anchorId]: event.mode } }
+      // The old two lists still get written, so a reader that only knows them still agrees
+      // with one that knows the mode. Being there late is being there.
+      return PRESENT_MODES.has(event.mode)
+        ? apply(withMode, { t: 'anchor.attended', anchorId: event.anchorId })
+        : apply(withMode, { t: 'anchor.missed', anchorId: event.anchorId })
+    }
+
+    case 'laces.marked':
+      // A mark, once. The first answer he gave to 2.5.1998 is the one the decade keeps;
+      // `unresolved` may be overwritten because it is the absence of an answer.
+      return state.laces && state.laces !== 'unresolved' ? state : { ...state, laces: event.response }
 
     case 'dialogue.choice_made':
       // Recorded so the log reads as a biography rather than a diff, and so telemetry

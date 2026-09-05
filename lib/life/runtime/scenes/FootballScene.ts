@@ -322,6 +322,9 @@ export class FootballScene extends Phaser.Scene {
       showMoney: false,
       place: 'שניים על שניים',
       objective: null,
+      year: this.ctx.engine.state.year,
+      scene: 'pitch',
+      hint: 'שניים על שניים. תזוז, תמסור, תבעט.',
     })
   }
 

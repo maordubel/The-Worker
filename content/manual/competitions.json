@@ -1,140 +1,148 @@
 {
-  "note": "Competition names and types. Participation is a season-level fact and is asserted only through trophies and matches, never here.",
-  "confidence": 2,
-  "source": {
-    "kind": "other",
-    "title": "Verified research pass, 31 Aug 2026",
-    "url": null
+ "note": "Competition names and types. Participation is a season-level fact and is asserted only through trophies and matches, never here.",
+ "confidence": 2,
+ "source": {
+  "kind": "other",
+  "title": "Verified research pass, 31 Aug 2026",
+  "url": null
+ },
+ "records": [
+  {
+   "slug": "ליגת-העל",
+   "nameHe": "ליגת העל",
+   "type": "league",
+   "tier": 1,
+   "sport": "football",
+   "aliases": [
+    "ליגת העל",
+    "הליגה הלאומית",
+    "ליגת הבכירה",
+    "Israeli Premier League"
+   ]
   },
-  "records": [
-    {
-      "slug": "ליגת-העל",
-      "nameHe": "ליגת העל",
-      "type": "league",
-      "tier": 1,
-      "sport": "football",
-      "aliases": [
-        "ליגת העל",
-        "הליגה הלאומית",
-        "ליגת הבכירה",
-        "Israeli Premier League"
-      ]
-    },
-    {
-      "slug": "גביע-המדינה",
-      "nameHe": "גביע המדינה",
-      "type": "national_cup",
-      "sport": "football",
-      "aliases": [
-        "גביע המדינה",
-        "גביע המדינה בכדורגל",
-        "Israel State Cup"
-      ]
-    },
-    {
-      "slug": "גביע-הטוטו",
-      "nameHe": "גביע הטוטו",
-      "type": "league_cup",
-      "sport": "football",
-      "aliases": [
-        "גביע הטוטו",
-        "גביע הטוטו על",
-        "Toto Cup"
-      ]
-    },
-    {
-      "slug": "גביע-אופא",
-      "nameHe": "גביע אופ\"א",
-      "type": "europe",
-      "sport": "football",
-      "aliases": [
-        "גביע אופא",
-        "גביע אופ\"א",
-        "UEFA Cup"
-      ]
-    },
-    {
-      "slug": "הליגה-האירופית",
-      "nameHe": "הליגה האירופית",
-      "type": "europe",
-      "sport": "football",
-      "aliases": [
-        "הליגה האירופית",
-        "יורופה ליג",
-        "Europa League"
-      ]
-    },
-    {
-      "slug": "ליגת-האלופות",
-      "nameHe": "ליגת האלופות",
-      "type": "europe",
-      "sport": "football",
-      "aliases": [
-        "ליגת האלופות",
-        "Champions League"
-      ]
-    },
-    {
-      "slug": "גביע-אלופות-אסיה",
-      "nameHe": "גביע אלופות אסיה",
-      "type": "other",
-      "sport": "football",
-      "aliases": [
-        "גביע אלופות אסיה",
-        "Asian Champion Club Tournament"
-      ]
-    },
-    {
-      "slug": "ליגה-ב-כדורסל",
-      "nameHe": "ליגה ב' בכדורסל",
-      "type": "league",
-      "tier": 5,
-      "sport": "basketball",
-      "aliases": [
-        "ליגה ב' כדורסל"
-      ]
-    },
-    {
-      "slug": "ליגה-א-כדורסל",
-      "nameHe": "ליגה א' בכדורסל",
-      "type": "league",
-      "tier": 4,
-      "sport": "basketball",
-      "aliases": [
-        "ליגה א' כדורסל"
-      ]
-    },
-    {
-      "slug": "ליגה-ארצית-כדורסל",
-      "nameHe": "ליגה ארצית בכדורסל",
-      "type": "league",
-      "tier": 3,
-      "sport": "basketball",
-      "aliases": [
-        "ליגה ארצית כדורסל"
-      ]
-    },
-    {
-      "slug": "ליגה-לאומית-כדורסל",
-      "nameHe": "ליגה לאומית בכדורסל",
-      "type": "league",
-      "tier": 2,
-      "sport": "basketball",
-      "aliases": [
-        "ליגה לאומית כדורסל"
-      ]
-    },
-    {
-      "slug": "ליגה-ארצית",
-      "nameHe": "ליגה ארצית",
-      "type": "league",
-      "tier": 2,
-      "sport": "football",
-      "aliases": [
-        "ליגה ארצית",
-        "הליגה הארצית",
-        "Liga Artzit"
-      ]
-    }
-  ]
+  {
+   "slug": "גביע-המדינה",
+   "nameHe": "גביע המדינה",
+   "type": "national_cup",
+   "sport": "football",
+   "aliases": [
+    "גביע המדינה",
+    "גביע המדינה בכדורגל",
+    "Israel State Cup"
+   ]
+  },
+  {
+   "slug": "גביע-הטוטו",
+   "nameHe": "גביע הטוטו",
+   "type": "league_cup",
+   "sport": "football",
+   "aliases": [
+    "גביע הטוטו",
+    "גביע הטוטו על",
+    "Toto Cup"
+   ]
+  },
+  {
+   "slug": "גביע-אופא",
+   "nameHe": "גביע אופ\"א",
+   "type": "europe",
+   "sport": "football",
+   "aliases": [
+    "גביע אופא",
+    "גביע אופ\"א",
+    "UEFA Cup"
+   ]
+  },
+  {
+   "slug": "הליגה-האירופית",
+   "nameHe": "הליגה האירופית",
+   "type": "europe",
+   "sport": "football",
+   "aliases": [
+    "הליגה האירופית",
+    "יורופה ליג",
+    "Europa League"
+   ]
+  },
+  {
+   "slug": "ליגת-האלופות",
+   "nameHe": "ליגת האלופות",
+   "type": "europe",
+   "sport": "football",
+   "aliases": [
+    "ליגת האלופות",
+    "Champions League"
+   ]
+  },
+  {
+   "slug": "גביע-אלופות-אסיה",
+   "nameHe": "גביע אלופות אסיה",
+   "type": "other",
+   "sport": "football",
+   "aliases": [
+    "גביע אלופות אסיה",
+    "Asian Champion Club Tournament"
+   ]
+  },
+  {
+   "slug": "ליגה-ב-כדורסל",
+   "nameHe": "ליגה ב' בכדורסל",
+   "type": "league",
+   "tier": 5,
+   "sport": "basketball",
+   "aliases": [
+    "ליגה ב' כדורסל"
+   ]
+  },
+  {
+   "slug": "ליגה-א-כדורסל",
+   "nameHe": "ליגה א' בכדורסל",
+   "type": "league",
+   "tier": 4,
+   "sport": "basketball",
+   "aliases": [
+    "ליגה א' כדורסל"
+   ]
+  },
+  {
+   "slug": "ליגה-ארצית-כדורסל",
+   "nameHe": "ליגה ארצית בכדורסל",
+   "type": "league",
+   "tier": 3,
+   "sport": "basketball",
+   "aliases": [
+    "ליגה ארצית כדורסל"
+   ]
+  },
+  {
+   "slug": "ליגה-לאומית-כדורסל",
+   "nameHe": "ליגה לאומית בכדורסל",
+   "type": "league",
+   "tier": 2,
+   "sport": "basketball",
+   "aliases": [
+    "ליגה לאומית כדורסל"
+   ]
+  },
+  {
+   "slug": "ליגה-ארצית",
+   "nameHe": "ליגה ארצית",
+   "type": "league",
+   "tier": 2,
+   "sport": "football",
+   "aliases": [
+    "ליגה ארצית",
+    "הליגה הארצית",
+    "Liga Artzit"
+   ]
+  },
+  {
+   "slug": "גביע-המדינה-כדורסל",
+   "nameHe": "גביע המדינה בכדורסל",
+   "sport": "basketball",
+   "confidence": 2,
+   "sourceUrl": "https://he.wikipedia.org/wiki/גביע_המדינה_בכדורסל",
+   "sourceTitle": "ויקיפדיה"
+  }
+ ]
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { Grain, Letterbox } from '@/components/life/FilmFx'
 import { t } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
 import { OPENING, openingLines } from '@/lib/life/opening'
@@ -120,12 +121,15 @@ export function OpeningSequence({
             ) : (
               <div
                 className="opening-frame h-full w-full bg-center bg-no-repeat motion-safe:animate-[openingDrift_7s_ease-out_forwards]"
-                style={{ backgroundImage: `url(/life/opening/${entry.art}.png)` }}
+                style={{ backgroundImage: `url(/life/${entry.from === 'art' ? 'art' : 'opening'}/${entry.art}.png)` }}
               />
             )}
           </div>
         )
       })}
+
+      <Grain opacity={0.16} />
+      {beat.from === 'art' && <Letterbox height={0.1} ms={600} />}
 
       {/* The picture is a photograph and the caption is print. The wash is what stops the
           second from disappearing into the first — a band of ink at the foot of the frame,
@@ -135,6 +139,20 @@ export function OpeningSequence({
         className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5"
         style={{ background: 'linear-gradient(to top, rgb(var(--ink)) 8%, rgb(var(--ink) / 0) 100%)' }}
       />
+
+      {/* The year, stamped on the frame the way a film names its time — big, poster
+          face, top corner, gone with the cut. */}
+      {beat.stampHe && (
+        <p
+          key={`stamp-${beat.id}`}
+          aria-hidden="true"
+          className="absolute top-[max(14px,env(safe-area-inset-top))] z-[4] font-poster text-[44px] leading-none text-sheet/90 transition-opacity duration-500 sm:text-[64px] motion-reduce:transition-none"
+          style={{ insetInlineEnd: 16, opacity: showing ? 1 : 0, textShadow: '0 2px 18px rgb(var(--ink) / .9)' }}
+          dir="ltr"
+        >
+          {beat.stampHe}
+        </p>
+      )}
 
       <div className="absolute inset-x-0 bottom-[16%] px-gutter text-center">
         <p

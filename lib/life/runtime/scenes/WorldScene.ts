@@ -1,10 +1,14 @@
 import Phaser from 'phaser'
 
+import { hintFor } from '../../help'
+import type { EndingCard } from '../../content/chapter1986'
 import { clockLabel } from '../../clock'
 import type { AmbientActor } from '../../content/ambient1986'
 import { SCHOOL_MORNING_1990, TABLE_1990 } from '../../content/chapter1990'
 import { CLASSROOM_1991, closing1991, HOME_NIGHT_1991, SCHOOL_STARTS, TIP_OFF } from '../../content/chapter1991'
 import { anchorFor, ERA_1991, eraFor, type Era } from '../../content/era'
+import { chapterFor, nextPlayable, type ChapterDef } from '../../content/chapters'
+import { beatFlag, beatsAt, type Beat, type BeatAction } from '../../content/beats'
 import type { ConversationShot } from '../../content/script'
 import { crowdSpeaker } from '../../crowd'
 import { encounterEvents, rollEncounter } from '../../encounters'
@@ -13,7 +17,7 @@ import { placementsAt } from '../../schedules'
 import type { LifeState, LocationId } from '../../types'
 import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
-import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor } from '../../world/scenes'
+import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, whenFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import type { PanoSpot } from '../bus'
 import { PANO_SPOTS } from '../../content/panoramas'
@@ -293,6 +297,10 @@ export class WorldScene extends Phaser.Scene {
     this.shotting = false
     this.ext = 0
     this.repaintGrade = null
+    // A beat that was mid-sentence when the room changed is over: the room it spoke in
+    // is gone, and a `beatBusy` left true here silences every beat in the next one.
+    this.beatBusy = false
+    this.beatPending = false
   }
 
   preload() {
@@ -456,6 +464,11 @@ export class WorldScene extends Phaser.Scene {
     // before he arrives.
     this.applySchedule()
     this.ctx.bus.emit('place', { id: this.def.id, title: this.def.titleHe, ambience: this.def.ambience })
+    // The first time in a room, ever, is a fact of the life (`life:been:*` survives every
+    // year) — and it is what puts a place on the city map (`lib/life/map.ts`).
+    if (!this.ctx.engine.state.flags[`life:been:${this.def.id}`]) {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: `life:been:${this.def.id}` })
+    }
     this.flagCount = Object.keys(this.ctx.engine.state.flags).length
     this.pushHud()
     // The board belongs to the terrace. Walk out through the tunnel after the whistle and
@@ -945,6 +958,7 @@ export class WorldScene extends Phaser.Scene {
     if (this.paused) return
 
     this.since += delta
+    if (this.beatPending) this.runBeats('enter')
     this.movePlayer(delta)
     if (!this.shotting) this.aimCamera()
     this.moveActors(delta)
@@ -1080,7 +1094,7 @@ export class WorldScene extends Phaser.Scene {
     }
 
     for (const exit of this.exits) {
-      if (!meets(state, exit.when)) continue
+      if (!meets(state, whenFor(exit, this.chapter))) continue
       const left = exit.x * this.W
       const right = (exit.x + exit.w) * this.W
       const top = exit.y * this.H
@@ -1608,6 +1622,11 @@ export class WorldScene extends Phaser.Scene {
     const engine = this.ctx.engine
     const state = engine.state
 
+    if (this.era.beats) {
+      this.runBeats('clock')
+      return
+    }
+
     /**
      * 1991 has one time trigger and it is the whole evening: eight o'clock happens
      * whether or not the boy is in the building (§14, and §36's "history does not wait").
@@ -1681,7 +1700,7 @@ export class WorldScene extends Phaser.Scene {
       if (spot.prop) spot.prop.setVisible(meets(state, spot.def.when))
     }
     for (const light of this.doorLights) {
-      light.image.setVisible(meets(state, light.exit.when))
+      light.image.setVisible(meets(state, whenFor(light.exit, this.chapter)))
       // A locked door still shows, dimmer: you can see where it goes and you can see it
       // is not for you yet.
       light.base = meets(state, needsFor(light.exit, this.chapter))
@@ -1694,15 +1713,27 @@ export class WorldScene extends Phaser.Scene {
     this.pushHud()
   }
 
+  /** Stage B: the chapter names its own days; the anchor's date is one of many */
+  private chapterDate(): string | null {
+    const def = chapterFor(this.chapter)
+    if (!def) return null
+    if (def.hudDateHe) return def.hudDateHe
+    // 1986, 1990 and 1991 hang on one match and its date is the day; every other chapter names its own
+    return def.stage === 'B' && !['1990', '1991'].includes(def.id) ? def.dateHe : null
+  }
+
   private pushHud() {
     const state = this.ctx.engine.state
     this.ctx.bus.emit('hud', {
       clock: clockLabel(state.weekday, state.minute),
-      date: longDateHe(this.anchor.match?.playedOn) ?? String(state.year),
+      date: state.dateHe ?? this.chapterDate() ?? longDateHe(this.anchor.match?.playedOn) ?? String(state.year),
       agorot: state.agorot,
       showMoney: state.agorot > 0,
       place: this.def.titleHe,
       objective: this.objective(state),
+      year: state.year,
+      scene: this.def.id,
+      hint: hintFor(state, this.def.id),
     })
   }
 
@@ -1782,7 +1813,7 @@ export class WorldScene extends Phaser.Scene {
 
   private bestExit(): ExitDef | null {
     const state = this.ctx.engine.state
-    const open = this.exits.filter((exit) => meets(state, exit.when))
+    const open = this.exits.filter((exit) => meets(state, whenFor(exit, this.chapter)))
     if (open.length === 0) return null
     return open.sort((a, b) => (b.priority ?? 1) - (a.priority ?? 1))[0] ?? null
   }
@@ -1845,7 +1876,7 @@ export class WorldScene extends Phaser.Scene {
       }))
     }
     for (const exit of this.exits) {
-      if (!meets(state, exit.when)) continue
+      if (!meets(state, whenFor(exit, this.chapter))) continue
       const cx = (exit.x + exit.w / 2) * this.W
       const cy = (exit.y + exit.h / 2) * this.H
       consider(cx, cy, (exit.w / 2 + 0.035) * this.W, () => ({
@@ -1930,6 +1961,11 @@ export class WorldScene extends Phaser.Scene {
    * the finale, with a school morning in the bedroom — history made small again (§25).
    */
   private openChapterBeat(state: LifeState) {
+    // Chapters written as data: their beats are rows, and this is the only hook they get.
+    if (this.era.beats) {
+      this.runBeats('enter')
+      return
+    }
     if (this.chapter === '1991') {
       this.openBeat1991(state)
       return
@@ -2015,12 +2051,9 @@ export class WorldScene extends Phaser.Scene {
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'saw:closing1991' })
       this.time.delayedCall(900, () => {
         this.ctx.dialogue.startLines(closing1991(derbyMarginHe(this.anchor)), () => {
-          this.ctx.bus.emit('card', {
-            titleHe: 'סוף שלב ב׳',
-            subHe: '1991–1993 — גיבורים, חברים, שירים',
-            ms: 3200,
-          })
-          this.refresh()
+          // The whisper in the classroom was the last thing in Stage B for a year. It is
+          // now a cut: whatever chapter the registry says comes next, and has rooms.
+          this.advanceChapter()
         })
       })
     }
@@ -2212,7 +2245,7 @@ export class WorldScene extends Phaser.Scene {
 
     let inside: ExitDef | null = null
     for (const exit of this.exits) {
-      if (!meets(state, exit.when)) continue
+      if (!meets(state, whenFor(exit, this.chapter))) continue
       if (!within(exit)) continue
       if (!meets(state, needsFor(exit, this.chapter))) continue
       if (!this.clearedReturn && exit.to === this.cameFrom) continue
@@ -2561,6 +2594,17 @@ export class WorldScene extends Phaser.Scene {
    * simulated one would be answering "skip" with "here is a longer version".
    */
   endCutscene(outcome: CutsceneOutcome) {
+    // a film a BEAT opened: no match phase, no terrace to return to — just the next action
+    if (this.afterCutscene) {
+      const then = this.afterCutscene
+      this.afterCutscene = null
+      this.ctx.bus.emit('cutscene', null)
+      this.paused = false
+      this.ctx.bus.emit('controls', { visible: true })
+      if (outcome === 'watched') this.ctx.engine.dispatch({ t: 'flag.raised', flag: `cutscene:watched:${this.chapter}` })
+      then()
+      return
+    }
     const film = this.cutscene
     if (this.matchPhase !== 'archive' || !film) return
     this.cutscene = null
@@ -2929,9 +2973,11 @@ export class WorldScene extends Phaser.Scene {
         },
       },
       { t: 'flag.raised', flag: 'memory:first' },
-      state.flags['match:started'] && state.flags['entry:granted']
-        ? { t: 'anchor.attended', anchorId: this.anchor.id }
-        : { t: 'anchor.missed', anchorId: this.anchor.id },
+      card.presence
+        ? { t: 'presence.recorded', anchorId: this.anchor.id, mode: card.presence }
+        : state.flags['match:started'] && state.flags['entry:granted']
+          ? { t: 'anchor.attended', anchorId: this.anchor.id }
+          : { t: 'anchor.missed', anchorId: this.anchor.id },
       // The chapter's own year, and it is not cosmetic: `chapter.entered` and this event
       // are the only things that set `state.chapter`, and `lib/life/redbox.ts` stamps
       // every kept object `sourceEventId: chapter:${state.chapter}`. While this said the
@@ -2941,6 +2987,7 @@ export class WorldScene extends Phaser.Scene {
     )
     void this.ctx.engine.save()
     this.paused = true
+    this.lastEnding = card
     this.ctx.bus.emit('ending', {
       titleHe: card.titleHe,
       bodyHe: card.bodyHe,
@@ -2949,6 +2996,9 @@ export class WorldScene extends Phaser.Scene {
       ...(card.after ? { after: card.after } : {}),
     })
   }
+
+  /** the card the day just closed on — the finale of a data chapter is built from it */
+  private lastEnding: EndingCard | null = null
 
   /**
    * A card is open over the world, so the world stops — and the clock with it.
@@ -2985,7 +3035,7 @@ export class WorldScene extends Phaser.Scene {
       const scene = sceneFor(here.id)
       for (const exit of scene.exits) {
         if (!exitInEra(exit, this.chapter)) continue
-        if (!known.has(exit.to) || !meets(state, exit.when)) continue
+        if (!known.has(exit.to) || !meets(state, whenFor(exit, this.chapter))) continue
         if (seen.has(exit.to)) continue
         const lockedHe = here.lockedHe ?? (meets(state, needsFor(exit, this.chapter)) ? null : exit.labelHe)
         const step: Step = { id: exit.to, hops: here.hops + 1, lockedHe, spawn: exit.spawn }
@@ -3015,7 +3065,7 @@ export class WorldScene extends Phaser.Scene {
       const here = queue.shift()!
       for (const exit of sceneFor(here).exits) {
         if (!exitInEra(exit, this.chapter)) continue
-        if (seen.has(exit.to) || !meets(state, exit.when)) continue
+        if (seen.has(exit.to) || !meets(state, whenFor(exit, this.chapter))) continue
         seen.add(exit.to)
         prev.set(exit.to, { from: here, spawn: exit.spawn })
         queue.push(exit.to)
@@ -3103,13 +3153,17 @@ export class WorldScene extends Phaser.Scene {
   where() {
     const state = this.ctx.engine.state
     return {
+      minute: state.minute,
+      chapter: this.chapter,
       scene: this.def.id,
       x: Number((this.player.x / this.W).toFixed(3)),
       y: Number((this.groundY / this.H).toFixed(3)),
       paused: this.paused,
-      exits: this.exits.map((exit) => `${exit.id}${meets(state, exit.when) ? '' : '(shut)'}`),
+      exits: this.exits.map((exit) => `${exit.id}${meets(state, whenFor(exit, this.chapter)) ? '' : '(shut)'}`),
       // 11.3.1991: how far into the night the hall is, for the derby probe
       derby: this.derby?.debugState() ?? null,
+      // the beat runner, for the chapter probes
+      beat: { busy: this.beatBusy, pending: this.beatPending, since: Math.round(this.since), due: beatsAt(this.era.beats, 'enter', this.def.id).filter((b) => !state.flags[beatFlag(b.id)] && meets(state, b.when)).map((b) => b.id) },
     }
   }
 
@@ -3133,9 +3187,25 @@ export class WorldScene extends Phaser.Scene {
    */
   goHome() {
     this.ctx.bus.emit('ending', null)
-    const card = buildFinale(this.ctx.engine.state, this.ctx.engine.log(), this.chapter)
+    const def = chapterFor(this.chapter)
+    // A day before the Saturday ends on its card and cuts to the next day. The finale —
+    // the sheet with the archive on it — is for a chapter that hangs on history.
+    if (def && def.stage === 'A' && this.chapter !== '1986') {
+      this.advanceChapter()
+      return
+    }
+    const card =
+      this.chapter === '1986' || this.chapter === '1990' || !this.lastEnding
+        ? buildFinale(this.ctx.engine.state, this.ctx.engine.log(), this.chapter)
+        : {
+            titleHe: this.lastEnding.titleHe,
+            bodyHe: this.lastEnding.bodyHe,
+            becameHe: this.lastEnding.memoryHe,
+            keptTicket: (this.ctx.engine.state.inventory['ticket-stub'] ?? 0) > 0,
+          }
     this.ctx.bus.emit('finale', {
       anchor: this.anchor,
+      chapter: this.chapter,
       titleHe: card.titleHe,
       bodyHe: card.bodyHe,
       becameHe: card.becameHe,
@@ -3167,6 +3237,209 @@ export class WorldScene extends Phaser.Scene {
       this.travel('classroom', 'start')
       return
     }
+    // Every chapter after 1991 ends the way the registry says: the next one, or the coda.
+    if (chapterFor(this.chapter) && this.chapter !== '1990') {
+      this.advanceChapter()
+      return
+    }
     this.travel('bedroom', 'start')
+  }
+
+  /**
+   * הקאט — from the end of one chapter to the first room of the next, by the registry.
+   *
+   * One method for every transition after 1991, so a chapter is data (`chapters.ts`) and
+   * not a branch in this file. The card is the bridge the NEXT chapter declares, the
+   * events are the two that every year-jump in this game has always dispatched plus the
+   * chapter's own `entry` (pocket money, a thing in a pocket — never history), and the
+   * save is written before the room changes so the cut cannot be crossed twice.
+   *
+   * When there is no next chapter with rooms behind it, the life as built is over, and
+   * the shell is told so (`coda`) instead of being shown a card that promises a chapter.
+   */
+  private advanceChapter() {
+    const next = nextPlayable(this.chapter)
+    if (!next) {
+      this.paused = true
+      this.ctx.bus.emit('controls', { visible: false })
+      this.ctx.bus.emit('prompt', null)
+      this.ctx.bus.emit('coda', { chapter: this.chapter })
+      return
+    }
+    this.enterChapter(next)
+  }
+
+  // ------------------------------------------------------------------ the beats ----
+
+  /** a beat is running: nothing else may start one until its last action is done */
+  private beatBusy = false
+  /** a beat opened the archive film; this is what runs when it closes */
+  private afterCutscene: (() => void) | null = null
+
+  /**
+   * מריץ הביטים — the one hook every data chapter gets.
+   *
+   * On `enter` and on every clock tick the chapter's rows are filtered to this room and
+   * this trigger, their conditions checked, and the FIRST one that has not fired is run:
+   * its flag is raised before its first action so a reload cannot replay it, and its
+   * actions run one after another, each waiting for the one before (a conversation
+   * waits for its last line, a card for its hold). One beat at a time; a second row that
+   * is also due fires on the next tick, which is the next frame.
+   */
+  private runBeats(trigger: Beat['trigger']) {
+    if (this.beatBusy) return
+    // An arrival shot, a reveal or a sheet has the room paused: an `enter` beat waits at
+    // the door instead of being dropped, and `update` knocks again once the room runs.
+    if (this.paused) {
+      if (trigger === 'enter') this.beatPending = true
+      return
+    }
+    const state = this.ctx.engine.state
+    const due = beatsAt(this.era.beats, trigger, this.def.id).find(
+      (beat) => !state.flags[beatFlag(beat.id)] && meets(state, beat.when),
+    )
+    if (!due) return
+    // A breath first: the room is seen before it speaks. The beat is found again on the
+    // next tick until the breath is over — the flag is raised only when it actually
+    // starts, so a scene restart in that gap cannot swallow it.
+    if (due.delayMs && this.since < due.delayMs) {
+      this.beatPending = true
+      return
+    }
+    this.beatPending = false
+    this.ctx.engine.dispatch({ t: 'flag.raised', flag: beatFlag(due.id) })
+    this.beatBusy = true
+    this.runActions([...due.do], () => {
+      this.beatBusy = false
+      this.refresh()
+    })
+  }
+
+  /** an `enter` beat is waiting out its breath; `update` asks again each frame */
+  private beatPending = false
+
+  private runActions(actions: BeatAction[], done: () => void) {
+    const next = actions.shift()
+    if (!next) {
+      done()
+      return
+    }
+    const then = () => this.runActions(actions, done)
+    switch (next.a) {
+      case 'lines':
+        this.ctx.dialogue.startLines(next.lines, then)
+        return
+      case 'talk':
+        if (!this.ctx.dialogue.start(next.conversation, then)) then()
+        return
+      case 'card': {
+        const ms = next.ms ?? 2400
+        this.ctx.bus.emit('card', { titleHe: next.titleHe, subHe: next.subHe ?? null, ms, ...(next.art ? { art: next.art } : {}) })
+        this.time.delayedCall(ms + 80, then)
+        return
+      }
+      case 'toast':
+        this.ctx.bus.emit('toast', { text: next.text, tone: next.tone ?? 'plain' })
+        then()
+        return
+      case 'flag':
+        this.ctx.engine.dispatch({ t: 'flag.raised', flag: next.flag })
+        then()
+        return
+      case 'events':
+        this.ctx.engine.dispatch(...next.events)
+        then()
+        return
+      case 'derive': {
+        const events = next.events(this.ctx.engine.state)
+        if (events.length > 0) this.ctx.engine.dispatch(...events)
+        then()
+        return
+      }
+      case 'travel':
+        // the room changes under us; the beat is over by definition
+        this.beatBusy = false
+        this.travel(next.to, next.spawn)
+        return
+      case 'ending':
+        this.beatBusy = false
+        this.finishChapter(next.id)
+        return
+      case 'pano': {
+        const look = PANO_SPOTS[next.key]
+        if (look) this.openPano(next.key, look.titleHe, look.spots, then, look.startYaw ?? 0)
+        else then()
+        return
+      }
+      case 'wait':
+        this.time.delayedCall(next.ms, then)
+        return
+      case 'sound':
+        if (next.kind === 'roar') this.ctx.bus.emit('sound', { kind: 'roar', big: next.big ?? 1 })
+        else if (next.kind === 'whistle') this.ctx.bus.emit('sound', { kind: 'whistle', blasts: next.blasts ?? 1 })
+        else if (next.kind === 'radio') this.ctx.bus.emit('sound', { kind: 'radio', on: next.on ?? true })
+        else this.ctx.bus.emit('sound', { kind: 'door' })
+        then()
+        return
+      case 'sfx':
+        this.ctx.bus.emit('sound', { kind: 'sample', key: next.key, ...(next.level !== undefined ? { level: next.level } : {}), ...(next.delayMs !== undefined ? { delayMs: next.delayMs } : {}) })
+        then()
+        return
+      case 'presence':
+        this.ctx.engine.dispatch({ t: 'presence.recorded', anchorId: this.anchor.id, mode: next.mode })
+        then()
+        return
+      case 'cutscene': {
+        const scene = cutsceneFor(next.id)
+        if (!scene) {
+          then()
+          return
+        }
+        this.afterCutscene = then
+        this.paused = true
+        this.ctx.bus.emit('controls', { visible: false })
+        this.ctx.bus.emit('cutscene', { scene, card: cutsceneCard(scene, this.anchor) })
+        return
+      }
+      default:
+        then()
+    }
+  }
+
+  /** The coda closed: the world is handed back, in the last room, and the life waits. */
+  dismissCoda() {
+    this.paused = false
+    this.ctx.bus.emit('coda', null)
+    this.ctx.bus.emit('controls', { visible: true })
+    this.refresh()
+  }
+
+  /** The cut itself. Public so the shell's coda can hand the life to a chapter too. */
+  enterChapter(next: ChapterDef) {
+    const state = this.ctx.engine.state
+    this.paused = true
+    this.ctx.bus.emit('controls', { visible: false })
+    this.ctx.bus.emit('prompt', null)
+    this.ctx.bus.emit('card', {
+      titleHe: next.bridge.titleHe,
+      subHe: next.bridge.subHe,
+      ms: next.bridge.ms,
+      art: `plate-${next.id}`,
+      fromYear: state.year,
+      nameHe: next.titleHe,
+    })
+    this.time.delayedCall(next.bridge.ms + 100, () => {
+      this.ctx.engine.dispatch(
+        { t: 'year.entered', year: next.year, weekday: next.weekday, minute: next.minute },
+        { t: 'chapter.entered', chapter: next.id },
+        { t: 'flag.raised', flag: `life:bridge-${next.id}` },
+        ...(next.entry ? next.entry(state) : []),
+      )
+      void this.ctx.engine.save()
+      this.cameras.main.fadeOut(500, 0, 0, 0)
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.restart({ mapId: next.start.location, spawn: next.start.spawn, from: this.def.id })
+      })
+    })
   }
 }

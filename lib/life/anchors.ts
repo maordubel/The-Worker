@@ -83,6 +83,11 @@ export type HistoricalAnchor = {
   match: AnchorMatch | null
   /** null once the archive can answer the whole question */
   placeholder: PlaceholderNote | null
+  /**
+   * A season that is a FACT and not a match — a relegation, a sale. One sourced sentence
+   * the finale prints where a scoreline would go. Never invented dialogue, never a score.
+   */
+  summaryHe?: string
 }
 
 /**

@@ -413,25 +413,26 @@ export function TapChip({
           setHeld(false)
           onAction(false)
         }}
-        className={`pointer-events-auto flex min-h-tap max-w-full items-center gap-2.5 border-rule px-4 py-2 font-body text-[14px] leading-none transition-colors duration-press motion-reduce:transition-none ${
+        className={`pointer-events-auto relative flex min-h-tap max-w-full items-center gap-2.5 border-rule px-4 py-2 font-sign text-[15px] leading-none transition-colors duration-press motion-reduce:transition-none ${
           locked
             ? 'border-red bg-ink text-red'
             : held
-              ? 'border-red bg-red text-sheet'
-              : 'border-ink bg-sheet/95 text-ink'
+              ? 'border-ink bg-red text-sheet'
+              : 'border-ink bg-sheet text-ink'
         }`}
         dir="rtl"
       >
+        <span aria-hidden="true" className={`pointer-events-none absolute inset-[2px] border-hair ${held || locked ? 'border-sheet/40' : 'border-ink/40'}`} />
         <span
           aria-hidden="true"
-          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[9px] tabular-nums ${
-            locked ? 'bg-red/30 text-red' : 'bg-red text-sheet'
+          className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[9px] font-bold tabular-nums ${
+            locked ? 'bg-red/30 text-red' : held ? 'bg-sheet text-red' : 'bg-red text-sheet'
           }`}
           dir="ltr"
         >
           A
         </span>
-        <span className="truncate">
+        <span className="relative truncate">
           <bdi>{label}</bdi>
           {locked ? <bdi> · {t('life.deck.locked')}</bdi> : null}
         </span>

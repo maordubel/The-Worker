@@ -20,7 +20,40 @@
  *   touched the glass — autoplay policy, and manners.
  */
 
-export type AmbienceKey = 'interior' | 'kitchen' | 'day' | 'dusk' | 'tunnel' | 'stadium' | 'hall' | 'none'
+export type AmbienceKey = 'interior' | 'kitchen' | 'day' | 'dusk' | 'tunnel' | 'stadium' | 'hall' | 'station' | 'base' | 'classroom' | 'none'
+
+/**
+ * הספרייה — 5.9.2026: the sounds are FILES now, still synthesised, never recorded.
+ *
+ * `scripts/life/make-sfx.py` renders sixty-odd sounds offline — forty-voice crowds, a
+ * darbuka with a skin, a buzzer with the right harmonics, a bus that idles — into
+ * `public/life/sfx` as Vorbis and AAC. This class plays them through the same three
+ * buses, with the same jitter so no two plays match, and falls back to the in-browser
+ * synth below for any file that has not arrived yet. The synth is the understudy, not
+ * the act.
+ */
+export type SampleKey =
+  | 'crowd-goal' | 'crowd-swell' | 'crowd-groan' | 'crowd-hush' | 'crowd-claps'
+  | 'whistle-1' | 'whistle-2' | 'whistle-3' | 'buzzer' | 'ball-bounce' | 'ball-kick'
+  | 'darbuka-dum' | 'darbuka-tek' | 'darbuka-ka' | 'darbuka-three-two'
+  | 'door' | 'page' | 'stamp' | 'tick' | 'coins' | 'bell-shop' | 'bell-school' | 'radio-tune'
+  | 'bus-door' | 'car-pass' | 'car-door'
+  | 'year-turn' | 'finale-hit' | 'stage-sting' | 'reveal' | 'gauge-up' | 'gauge-down' | 'heart'
+  | 'ui-open' | 'ui-close' | 'ui-click' | 'choice' | 'ending' | 'box-item'
+
+const AMBIENCE_FILE: Record<AmbienceKey, string | null> = {
+  interior: 'amb-room',
+  kitchen: 'amb-kitchen',
+  day: 'amb-street-day',
+  dusk: 'amb-street-dusk',
+  tunnel: 'amb-tunnel',
+  stadium: 'amb-stadium',
+  hall: 'amb-hall',
+  station: 'amb-station',
+  base: 'amb-base',
+  classroom: 'amb-classroom',
+  none: null,
+}
 
 const STORE = 'the-worker:life:sound'
 
@@ -43,6 +76,9 @@ export class LifeAudio {
   private _muted = false
   private ducked = false
   private noise: AudioBuffer | null = null
+  private samples = new Map<string, Promise<AudioBuffer | null>>()
+  private ext: 'ogg' | 'm4a' = 'ogg'
+  private ambientFile: { source: AudioBufferSourceNode; gain: GainNode } | null = null
 
   constructor() {
     try {
@@ -78,7 +114,65 @@ export class LifeAudio {
     this.ui.gain.value = 0.5
     this.ui.connect(this.master)
     this.noise = this.makeNoise()
+    // Safari has no Vorbis; everything else prefers it (half the bytes of AAC at this quality)
+    try {
+      const probe = document.createElement('audio')
+      this.ext = probe.canPlayType('audio/ogg; codecs=vorbis') ? 'ogg' : 'm4a'
+    } catch {
+      this.ext = 'm4a'
+    }
+    for (const key of ['page', 'tick', 'stamp', 'ui-open', 'ui-close', 'choice', 'gauge-up', 'gauge-down'] as SampleKey[]) void this.sample(key)
     if (this.wanted !== 'none') this.setAmbience(this.wanted, true)
+  }
+
+  // ------------------------------------------------------------------- samples ---
+
+  private sample(key: string): Promise<AudioBuffer | null> {
+    const known = this.samples.get(key)
+    if (known) return known
+    const ctx = this.ctx
+    if (!ctx) return Promise.resolve(null)
+    const loading = fetch(`/life/sfx/${key}.${this.ext}`)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+      .then((bytes) => ctx.decodeAudioData(bytes))
+      .catch(() => null)
+    this.samples.set(key, loading)
+    return loading
+  }
+
+  /**
+   * One sound, once. `rate` and `level` are jittered a little so a hundred footsteps are
+   * a hundred footsteps; a sample that has not loaded yet plays nothing this time and
+   * is ready the next — a game never waits for a click.
+   */
+  play(key: SampleKey, opts: { level?: number; rate?: number; bus?: 'sfx' | 'ui' | 'ambient'; jitter?: number; delayMs?: number } = {}): boolean {
+    if (!this.ctx) return false
+    const bus = opts.bus === 'ui' ? this.ui : opts.bus === 'ambient' ? this.ambient : this.sfx
+    if (!bus) return false
+    const cached = this.samples.get(key)
+    // not yet decoded: start it loading, and let the caller fall back to the synth
+    if (!cached) {
+      void this.sample(key)
+      return false
+    }
+    const ctx = this.ctx
+    const j = opts.jitter ?? 0.06
+    void cached.then((buffer) => {
+      if (!buffer) return
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      source.playbackRate.value = jitter(opts.rate ?? 1, j)
+      const gain = ctx.createGain()
+      gain.gain.value = jitter(opts.level ?? 1, j)
+      source.connect(gain).connect(bus)
+      source.start(ctx.currentTime + (opts.delayMs ?? 0) / 1000)
+    })
+    return true
+  }
+
+  /** the sounds a chapter is about to need — the darbuka before the kiosk, the buzzer before the hall */
+  warm(keys: SampleKey[]) {
+    for (const key of keys) void this.sample(key)
   }
 
   setMuted(on: boolean) {
@@ -115,6 +209,33 @@ export class LifeAudio {
       this.crowd.gain.gain.setTargetAtTime(0, t, 0.6)
       this.crowd.lfo.stop(t + 2.5)
       this.crowd = null
+    }
+    if (this.ambientFile) {
+      const old = this.ambientFile
+      old.gain.gain.setTargetAtTime(0, t, 0.8)
+      old.source.stop(t + 3)
+      this.ambientFile = null
+    }
+    // the rendered bed, when it is there: a real room, a real street, a crowd of forty
+    const file = AMBIENCE_FILE[key]
+    if (file) {
+      const ctx = this.ctx
+      const ambient = this.ambient
+      void this.sample(file).then((buffer) => {
+        if (!buffer || this.current !== key || this.ambientFile) return
+        const source = ctx.createBufferSource()
+        source.buffer = buffer
+        source.loop = true
+        source.playbackRate.value = jitter(1, 0.02)
+        const gain = ctx.createGain()
+        gain.gain.value = 0
+        source.connect(gain).connect(ambient)
+        source.start(ctx.currentTime, Math.random() * Math.max(0.1, buffer.duration - 1))
+        gain.gain.setTargetAtTime(key === 'stadium' || key === 'hall' ? 0.5 : 0.32, ctx.currentTime, 1.4)
+        this.ambientFile = { source, gain }
+        // the synth bed under it steps back to a third: texture, not a second room
+        for (const layer of this.layers) layer.gain.gain.setTargetAtTime(layer.gain.gain.value * 0.35, ctx.currentTime, 1.0)
+      })
     }
     const add = (type: BiquadFilterType, freq: number, q: number, level: number, rate = 1) => {
       const source = this.ctx!.createBufferSource()
@@ -167,6 +288,16 @@ export class LifeAudio {
         this.crowd = { gain: body, lfo, lfoGain }
         break
       }
+      case 'station':
+        add('lowpass', 200, 0.8, 0.08, 0.5)
+        add('bandpass', 600, 0.5, 0.05, 0.9)
+        break
+      case 'base':
+        add('bandpass', 500, 0.5, 0.05, 0.7)
+        break
+      case 'classroom':
+        add('lowpass', 260, 0.7, 0.05, 0.5)
+        break
       case 'none':
         break
     }
@@ -189,6 +320,7 @@ export class LifeAudio {
 
   /** a footstep: a click of noise, darker on stone, lighter on a terrace */
   step(surface: 'floor' | 'street' | 'terrace' = 'floor') {
+    if (this.play(`step-${surface}-${1 + Math.floor(Math.random() * 3)}` as SampleKey, { level: 0.55, jitter: 0.12 })) return
     const p: Record<typeof surface, [number, number, number]> = { floor: [900, 0.05, 0.045], street: [1400, 0.06, 0.05], terrace: [600, 0.07, 0.05] }
     const [freq, seconds, level] = p[surface]
     this.burst(jitter(freq, 0.25), jitter(seconds, 0.3), level, 'bandpass', this.sfx)
@@ -196,16 +328,19 @@ export class LifeAudio {
 
   /** a page turned: a soft sweep of noise */
   page() {
+    if (this.play('page', { bus: 'ui', level: 0.5 })) return
     this.burst(2400, 0.09, 0.05, 'highpass', this.ui, 0.5)
   }
 
   /** the prompt found something: a very small tick */
   tick() {
+    if (this.play('tick', { bus: 'ui', level: 0.35 })) return
     this.burst(3200, 0.02, 0.025, 'bandpass', this.ui)
   }
 
   /** a stamp landing / a thing put down */
   thud() {
+    if (this.play('stamp', { bus: 'ui', level: 0.7 })) return
     if (!this.ctx || !this.ui) return
     const osc = this.ctx.createOscillator()
     osc.type = 'sine'
@@ -224,12 +359,14 @@ export class LifeAudio {
 
   /** a door: a breath of the next room and a latch */
   door() {
+    if (this.play('door', { level: 0.6 })) return
     this.burst(500, 0.32, 0.06, 'lowpass', this.sfx, 0.6)
     window.setTimeout(() => this.burst(2200, 0.03, 0.05, 'bandpass', this.sfx), 260)
   }
 
   /** the referee: one, two or three blasts */
   whistle(blasts = 1) {
+    if (this.play((`whistle-${Math.min(3, Math.max(1, blasts))}`) as SampleKey, { level: 0.55, jitter: 0.03 })) return
     if (!this.ctx || !this.sfx) return
     const t0 = this.ctx.currentTime
     for (let i = 0; i < blasts; i += 1) {
@@ -261,6 +398,14 @@ export class LifeAudio {
 
   /** a goal: the terrace goes up and takes eight seconds to come down */
   roar(big = 1) {
+    if (this.play('crowd-goal', { level: Math.min(1, 0.55 * big), jitter: 0.05 })) {
+      if (this.ambientFile && this.ctx) {
+        const g = this.ambientFile.gain.gain
+        g.setTargetAtTime(0.75, this.ctx.currentTime, 0.3)
+        g.setTargetAtTime(0.5, this.ctx.currentTime + 4, 2)
+      }
+      return
+    }
     if (!this.ctx || !this.sfx || !this.noise) return
     const t = this.ctx.currentTime
     const source = this.ctx.createBufferSource()
@@ -292,6 +437,21 @@ export class LifeAudio {
     const key = 'radio'
     const existing = this.layers.find((layer) => layer.tag === key)
     if (on && !existing) {
+      this.play('radio-tune', { bus: 'ambient', level: 0.5 })
+      const ctx = this.ctx
+      const ambient = this.ambient
+      void this.sample('amb-radio').then((buffer) => {
+        if (!buffer || this.layers.some((layer) => layer.tag === key + ':file')) return
+        const source = ctx.createBufferSource()
+        source.buffer = buffer
+        source.loop = true
+        const gain = ctx.createGain()
+        gain.gain.value = 0
+        source.connect(gain).connect(ambient)
+        source.start(ctx.currentTime + 0.9)
+        gain.gain.setTargetAtTime(0.22, ctx.currentTime + 0.9, 0.6)
+        this.layers.push({ gain, stop: (when) => source.stop(when), tag: key + ':file' })
+      })
       const source = this.ctx.createBufferSource()
       source.buffer = this.noise
       source.loop = true
@@ -307,9 +467,11 @@ export class LifeAudio {
       gain.gain.setTargetAtTime(0.035, this.ctx.currentTime, 0.8)
       this.layers.push({ gain, stop: (when) => source.stop(when), tag: key })
     } else if (!on && existing) {
-      existing.gain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.4)
-      existing.stop(this.ctx.currentTime + 1.5)
-      this.layers = this.layers.filter((layer) => layer !== existing)
+      for (const layer of this.layers.filter((l) => l.tag === key || l.tag === key + ':file')) {
+        layer.gain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.4)
+        layer.stop(this.ctx.currentTime + 1.5)
+      }
+      this.layers = this.layers.filter((layer) => layer.tag !== key && layer.tag !== key + ':file')
     }
   }
 

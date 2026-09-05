@@ -1,6 +1,11 @@
 'use client'
 
+import { useState } from 'react'
+
+import { CityMap } from '@/components/life/CityMap'
 import type { MapPlace } from '@/lib/life/runtime/game'
+import type { LifeState, LocationId } from '@/lib/life/types'
+import { SheetHead } from '@/components/life/Plate'
 import { t } from '@/lib/i18n'
 
 /**
@@ -16,13 +21,18 @@ import { t } from '@/lib/i18n'
  */
 export function LifeMap({
   places,
+  state,
+  here,
   onGo,
   onClose,
 }: {
   places: MapPlace[]
+  state: LifeState
+  here: LocationId
   onGo: (id: string) => void
   onClose: () => void
 }) {
+  const [wide, setWide] = useState(false)
   return (
     <div
       className="absolute inset-0 z-40 flex items-end justify-center bg-ink/70 p-2.5 pb-[max(10px,env(safe-area-inset-bottom))] sm:items-center"
@@ -35,15 +45,19 @@ export function LifeMap({
         role="dialog"
         aria-label={t('life.map.title')}
       >
-        <div className="flex items-center justify-between border-b-hair border-ink bg-ink px-3 py-2">
-          <p className="font-display text-[15px] leading-none text-sheet">{t('life.map.title')}</p>
+        <SheetHead title={t('life.map.title')} onClose={onClose} closeLabel={t('life.map.close')} />
+        {/* the city, printed — the drawn map Maor asked for; the list under it is the same
+            doors as text, for a screen reader and for a thumb that wants a row */}
+        <div className="relative aspect-square w-full shrink-0 overflow-hidden border-b-rule border-ink bg-sheet">
+          <CityMap state={state} places={places} here={here} onGo={onGo} wide={wide} className="h-full w-full" />
           <button
             type="button"
-            onClick={onClose}
-            className="flex min-h-tap min-w-tap items-center justify-center font-mono text-[16px] tabular-nums text-sheet"
-            aria-label={t('life.map.close')}
+            onClick={() => setWide((w) => !w)}
+            data-life="map-wide"
+            className="absolute bottom-2 flex min-h-[36px] items-center border-hair border-ink bg-sheet/95 px-2.5 font-body text-[11px] text-ink active:bg-red active:text-sheet"
+            style={{ insetInlineStart: 8 }}
           >
-            ✕
+            {wide ? t('life.map.near') : t('life.map.city')}
           </button>
         </div>
         <div className="overflow-y-auto">
@@ -62,7 +76,7 @@ export function LifeMap({
                 onClick={() => onGo(place.id)}
                 data-life="map-place"
                 data-place={place.id}
-                className={`flex min-h-tap w-full items-center justify-between gap-3 border-b-hair border-ink/30 px-3 text-start font-body text-[14px] transition-colors duration-press motion-reduce:transition-none ${
+                className={`flex min-h-tap w-full items-center justify-between gap-3 border-b-hair border-ink/30 px-3 text-start font-sign text-[15px] transition-colors duration-press motion-reduce:transition-none ${
                   place.here
                     ? 'bg-ink text-sheet'
                     : shut

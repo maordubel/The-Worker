@@ -1,6 +1,13 @@
 import {
   flagOn,
   relationshipOf,
+  type ArmyGauge,
+  type ArmyRoute,
+  type GateIdentity,
+  type InstitutionGauge,
+  type LacesResponse,
+  type PresenceMode,
+  type SinaiStance,
   type CharacterId,
   type FlagId,
   type ItemId,
@@ -69,6 +76,21 @@ export type Condition = {
   missedAnchor?: string
   at?: LocationId
 
+  // --- the decade (Stage B brief §4) --------------------------------------------------
+  gateIs?: GateIdentity
+  gateNot?: GateIdentity
+  armyRoute?: ArmyRoute
+  armyAbove?: { key: ArmyGauge; min: number }
+  armyBelow?: { key: ArmyGauge; max: number }
+  sinaiIs?: SinaiStance
+  institutionAbove?: { key: InstitutionGauge; min: number }
+  institutionBelow?: { key: InstitutionGauge; max: number }
+  /** how he was there for an anchor — `presenceIs: { anchor: '1998', mode: 'radio' }` */
+  presenceIs?: { anchor: string; mode: PresenceMode }
+  lacesIs?: LacesResponse
+  /** he has EVER stood at this gate, whatever he does now */
+  gateEver?: GateIdentity
+
   // --- composition ------------------------------------------------------------------
   /** every one of these must hold */
   all?: Condition[]
@@ -131,6 +153,19 @@ export function meets(state: LifeState, condition?: Condition): boolean {
   if (condition.wellbeingBelow && state.wellbeing[condition.wellbeingBelow.key] > condition.wellbeingBelow.max)
     return false
   if (condition.minEnergy !== undefined && state.energy < condition.minEnergy) return false
+
+  if (condition.gateIs && state.gate.identity !== condition.gateIs) return false
+  if (condition.gateNot && state.gate.identity === condition.gateNot) return false
+  if (condition.gateEver && state.gate.identity !== condition.gateEver && !state.gate.history.some((h) => h.to === condition.gateEver))
+    return false
+  if (condition.armyRoute && state.army.route !== condition.armyRoute) return false
+  if (condition.armyAbove && state.army[condition.armyAbove.key] < condition.armyAbove.min) return false
+  if (condition.armyBelow && state.army[condition.armyBelow.key] > condition.armyBelow.max) return false
+  if (condition.sinaiIs && state.institution.sinai !== condition.sinaiIs) return false
+  if (condition.institutionAbove && state.institution[condition.institutionAbove.key] < condition.institutionAbove.min) return false
+  if (condition.institutionBelow && state.institution[condition.institutionBelow.key] > condition.institutionBelow.max) return false
+  if (condition.presenceIs && state.presence[condition.presenceIs.anchor] !== condition.presenceIs.mode) return false
+  if (condition.lacesIs && state.laces !== condition.lacesIs) return false
 
   if (condition.opportunityTaken && opportunityStatus(state, condition.opportunityTaken) !== 'taken') return false
   if (condition.opportunityMissed && opportunityStatus(state, condition.opportunityMissed) !== 'missed') return false

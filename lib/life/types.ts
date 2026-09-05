@@ -64,6 +64,15 @@ export type LocationId =
   | 'ussishkin-end'
   | 'classroom'
   | 'schoolyard'
+  // --- the decade (Stage B) ---
+  /** under the stand at Bloomfield, where the younger crowd gathers from 1996 */
+  | 'gate5'
+  /** the new central bus station — a platform at dawn; a stand-in painting until its own */
+  | 'bus-station'
+  /** the national stadium, for the two cup finals — a stand-in painting until its own */
+  | 'ramat-gan'
+  /** the small ground in the Hatikva quarter, 13.5.2000 — a stand-in painting until its own */
+  | 'hatikva'
 
 /**
  * מי — a character is a string, deliberately.
@@ -330,6 +339,84 @@ export type HistoricalMemoryState = {
 }
 
 // ---------------------------------------------------------------------------------
+// STAGE B — the decade's four persistent surfaces (brief §4). Typed, folded, migratable:
+// a save written before they existed folds to their defaults, and a dialogue line reads
+// them instead of a hundred flags.
+// ---------------------------------------------------------------------------------
+
+/**
+ * שער 7 / שער 5 — where he stands when the people he loves split apart.
+ *
+ * `between` is a temporary state and never a consequence-free permanent answer;
+ * `outside` is valid after fear or exhaustion and is not a game-over. The HISTORY is
+ * stored, not only the identity, so a later decade can author a move into or out of
+ * Gate 5 and the game can say when and why.
+ */
+export type GateIdentity = 'gate7' | 'gate5' | 'between' | 'outside'
+export type GateReason = 'family' | 'friends' | 'closure' | 'culture' | 'conflict' | 'safety' | 'return'
+export type GateHistoryEntry = { from: GateIdentity; to: GateIdentity; year: number; reason: GateReason }
+export type GateState = { identity: GateIdentity; history: GateHistoryEntry[] }
+
+/** הצבא — attendance now spends institutional trust. */
+export type ArmyRoute = 'trusted' | 'negotiator' | 'rebellious' | 'punished' | 'detached'
+export type ArmyState = {
+  route: ArmyRoute
+  commanderTrust: number
+  leaveDebt: number
+  fatigue: number
+  missedAnchors: string[]
+  coveredForOthers: number
+}
+export type ArmyGauge = 'commanderTrust' | 'leaveDebt' | 'fatigue' | 'coveredForOthers'
+
+/** המוסד — distinct positions, never one loyalty number. */
+export type SinaiStance = 'defending' | 'doubting' | 'broken' | 'reconciled-memory'
+export type InstitutionState = {
+  sinai: SinaiStance
+  footballOwnershipTrust: number
+  basketballOwnershipTrust: number
+  protestEscalation: number
+  legalUnderstanding: number
+  ussishkinWound: number
+  /** the prehistory of Hapoel Ussishkin — a seed, never a founding, in this stage */
+  supporterOwnershipSeed: number
+}
+export type InstitutionGauge = Exclude<keyof InstitutionState, 'sinai'>
+
+/** נוכחות — "missed" is a route, not empty content. */
+export type PresenceMode =
+  | 'inside'
+  | 'late'
+  | 'outside'
+  | 'radio'
+  | 'television'
+  | 'army'
+  | 'working'
+  | 'heard-from-friend'
+  | 'archive-later'
+
+/** השרוכים — a permanent character mark from 2.5.1998, never a bonus class. */
+export type LacesResponse = 'witness' | 'protector' | 'organizer' | 'avenger' | 'withdrawn' | 'unresolved'
+
+export function blankGate(): GateState {
+  return { identity: 'gate7', history: [] }
+}
+export function blankArmy(): ArmyState {
+  return { route: 'negotiator', commanderTrust: 50, leaveDebt: 0, fatigue: 0, missedAnchors: [], coveredForOthers: 0 }
+}
+export function blankInstitution(): InstitutionState {
+  return {
+    sinai: 'defending',
+    footballOwnershipTrust: 50,
+    basketballOwnershipTrust: 50,
+    protestEscalation: 0,
+    legalUnderstanding: 0,
+    ussishkinWound: 0,
+    supporterOwnershipSeed: 0,
+  }
+}
+
+// ---------------------------------------------------------------------------------
 
 export type LifeState = {
   /** the shape of this object, not the shape of the save file */
@@ -396,6 +483,16 @@ export type LifeState = {
   chapter: string
   /** true once the chapter's closing beat has played */
   chapterDone: boolean
+  /** the day's date as the chapter names it ('16.11.1996', 'נובמבר 1996'); null = the anchor's date */
+  dateHe: string | null
+
+  // --- Stage B (version 4) — folded from their own events, defaulted for old saves ---
+  gate: GateState
+  army: ArmyState
+  institution: InstitutionState
+  /** anchor id → how he was present for it. Attended/missed still fold beside it. */
+  presence: Record<string, PresenceMode>
+  laces: LacesResponse | null
 }
 
 export const BOND_IDS: readonly BondId[] = ['kobi', 'rachel', 'ofir', 'amit', 'efi', 'keren']

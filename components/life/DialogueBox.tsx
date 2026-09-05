@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import type { DialogueChoice, DialogueLine } from '@/lib/life/runtime/bus'
 import { artUrl } from '@/lib/life/runtime/art'
+import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { t } from '@/lib/i18n'
 
 /**
@@ -34,11 +35,45 @@ import { t } from '@/lib/i18n'
  * and there was nothing left to press. It is in the same corner on every line and applies
  * nothing — walking off mid-sentence earns a child exactly nothing.
  *
+ * **5.9.2026 — comic grammar.** Speech is a balloon now: it has a tail, it is 92% of the
+ * glass and sits on its speaker's side, it pops from the tail with a hair of a lean, and
+ * two people talking face each other across the screen (`useSides`). Narration is still
+ * the room talking — full width, on ink, no tail.
+ *
  * No rounded corners, no shadows, tokens only.
  */
 
 /** characters per second — the pace of somebody talking, not of a modem */
 const TYPE_CPS = 42
+
+/**
+ * צדדים — comic grammar (5.9.2026).
+ *
+ * Every speaker owns a side of the glass for the length of a conversation. The player
+ * is always on the START side (the right, in Hebrew), the first other person to speak
+ * takes the END side, the next takes start, and so on; a face that has already been
+ * given a side keeps it. Two people in a row on the same side is what makes a dialogue
+ * read like subtitles — and this box is a page of a comic, so the balloons face each
+ * other, lean a hair toward the person, and pop from their tail.
+ */
+type Side = 'start' | 'end'
+const PLAYER = DEFAULT_IDENTITY.name
+
+function useSides(who: string | null, serial: number): Side {
+  const sides = useRef<Map<string, Side>>(new Map())
+  // a new conversation (serial reset to 1) forgets the seating
+  const last = useRef(0)
+  if (serial < last.current) sides.current.clear()
+  last.current = serial
+  if (!who) return 'start'
+  if (who === PLAYER) return 'start'
+  const known = sides.current.get(who)
+  if (known) return known
+  const others = [...sides.current.keys()].filter((k) => k !== PLAYER).length
+  const side: Side = others % 2 === 0 ? 'end' : 'start'
+  sides.current.set(who, side)
+  return side
+}
 
 /** the probes read whole lines; a browser under `the-worker:life:probe` prints at once */
 function instant(): boolean {
@@ -103,11 +138,13 @@ export function DialogueBox({
   }
   const text = line?.text ?? ''
   const { shown, done, finish } = useTypewriter(text, `${serial.current}`)
+  const side = useSides(line?.who ?? null, serial.current)
 
   if (!line) return null
   const spoken = Boolean(line.who)
   const hasChoices = Boolean(choices && choices.length > 0)
   const visible = text.slice(0, shown)
+  const atEnd = side === 'end'
 
   const advance = () => {
     if (!done) finish()
@@ -123,10 +160,13 @@ export function DialogueBox({
       style={offsetTop ? { top: offsetTop, alignItems: 'flex-start' } : undefined}
       data-life="dialogue"
     >
-      <div className="relative w-full">
-        {/* ---- the speaker, standing over the top edge ------------------------------- */}
+      <div className={`relative flex w-full flex-col ${spoken ? (atEnd ? 'items-start' : 'items-end') : 'items-stretch'}`} data-side={spoken ? side : 'wide'}>
+        {/* ---- the speaker, standing over the top edge, on their side ------------------- */}
         {spoken && (
-          <div className="pointer-events-none relative z-10 ms-3 flex items-end gap-2" data-life="speaker">
+          <div
+            className={`pointer-events-none relative z-10 flex items-end gap-2 ${atEnd ? 'me-auto ms-3 flex-row' : 'me-3 ms-auto flex-row-reverse'}`}
+            data-life="speaker"
+          >
             {portrait && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -134,7 +174,7 @@ export function DialogueBox({
                 src={artUrl(portrait)}
                 alt=""
                 aria-hidden="true"
-                className="-mb-2 h-[78px] w-[78px] origin-bottom-left animate-plate-bump border-rule border-ink bg-sheet object-cover"
+                className={`-mb-2 h-[84px] w-[84px] animate-face-in border-rule border-ink bg-sheet object-cover ${atEnd ? 'origin-bottom-left' : 'origin-bottom-right'}`}
               />
             )}
             <span className="mb-2 bg-ink px-2.5 py-1.5 font-sign text-[13px] font-bold leading-none text-sheet">
@@ -143,18 +183,29 @@ export function DialogueBox({
           </div>
         )}
 
-        {/* ---- the sheet ----------------------------------------------------------------- */}
+        {/* ---- the balloon --------------------------------------------------------------- */}
         <div
           key={`sheet-${serial.current}`}
-          className={`relative animate-sheet-in border-rule border-ink ${spoken ? 'bg-sheet' : 'bg-ink'}`}
+          className={`relative border-rule border-ink ${
+            spoken
+              ? `w-[92%] bg-sheet ${atEnd ? 'animate-balloon-pop-end origin-bottom-left' : 'animate-balloon-pop origin-bottom-right'}`
+              : 'w-full animate-sheet-in bg-ink'
+          }`}
         >
           {/* a second, inner hairline: the sheet is printed, not drawn */}
           <span
             className={`pointer-events-none absolute inset-[3px] border-hair ${spoken ? 'border-ink/25' : 'border-sheet/20'}`}
             aria-hidden="true"
           />
-          {/* the red tab on the start edge: this is a page of the same book, every time */}
-          <span className="pointer-events-none absolute inset-y-0 start-0 w-[4px] bg-red" aria-hidden="true" />
+          {/* the tail — a balloon points at the mouth it came from */}
+          {spoken && (
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute -top-[9px] z-10 h-4 w-4 rotate-45 border-s-rule border-t-rule border-ink bg-sheet ${atEnd ? 'start-9' : 'end-9'}`}
+            />
+          )}
+          {/* the red tab on the speaker's edge: this is a page of the same book, every time */}
+          <span className={`pointer-events-none absolute inset-y-0 w-[4px] bg-red ${atEnd ? 'start-0' : spoken ? 'end-0' : 'start-0'}`} aria-hidden="true" />
 
           {/* היציאה — the same corner, every line, every conversation. */}
           <button
@@ -163,9 +214,9 @@ export function DialogueBox({
             aria-label={t('life.leave')}
             title={t('life.leave')}
             data-life="leave"
-            className={`absolute end-0 top-0 z-10 flex h-10 w-10 items-center justify-center font-display text-[15px] leading-none transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none ${
+            className={`absolute top-0 z-10 flex h-10 w-10 items-center justify-center font-display text-[15px] leading-none transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none ${
               spoken ? 'text-ink/45' : 'text-sheet/55'
-            }`}
+            } ${spoken && !atEnd ? 'start-0' : 'end-0'}`}
           >
             <span aria-hidden="true">✕</span>
           </button>
@@ -176,7 +227,7 @@ export function DialogueBox({
             onClick={hasChoices ? finish : advance}
             aria-label={hasChoices ? undefined : t('life.continue')}
             data-life="continue"
-            className="flex min-h-tap w-full items-start gap-3 ps-4 pe-11 pb-3 pt-3.5 text-start"
+            className={`flex min-h-tap w-full items-start gap-3 pb-3 pt-3.5 text-start ${spoken && !atEnd ? 'pe-4 ps-11' : 'pe-11 ps-4'}`}
           >
             <span className="sr-only" data-life="line">
               {text}
@@ -202,6 +253,7 @@ export function DialogueBox({
                   className={`animate-sheet-in border-b-hair last:border-b-0 ${spoken ? 'border-ink/20' : 'border-sheet/15'}`}
                   style={{ animationDelay: `${90 + index * 70}ms` }}
                   data-life="choice"
+                  data-choice={choice.id}
                 >
                   <button
                     type="button"

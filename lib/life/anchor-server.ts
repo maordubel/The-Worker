@@ -353,3 +353,261 @@ export function resolveUssishkinAnchor(): HistoricalAnchor {
         },
   }
 }
+
+/**
+ * העשור — the anchors of Stage B after 1991, one resolver for all of them.
+ *
+ * Every chapter from 1993 to 2000 hangs on ONE row the archive holds, found by its
+ * natural key — season, competition, the day it was played — in `matches.json` or, for a
+ * hall, `basketball-matches.json`. The chapter's text never states the row; it reads the
+ * anchor at the moment it needs a number, and if the row is ever removed the placeholder
+ * comes back and says what the archive would have to hold.
+ *
+ * `ANCHOR_SPECS` is the whole map from a chapter's `anchorKey` to its row. A chapter that
+ * hangs on an EVENT rather than a match (the sale of the club in 1997, a relegation) is
+ * given the last match the archive holds for that season, and a headline of its own —
+ * the fact the chapter is about is in `noteHe` of the trophies and seasons files and in
+ * the chapter's own honest lines, never in a score.
+ */
+type AnchorSpec = {
+  sport: 'football' | 'basketball'
+  seasonLabel: string
+  competitionSlug: string
+  playedOn: string
+  year: number
+  headlineHe: string
+  /** count titles of this competition up to this season, for a card that celebrates one */
+  countTitles?: boolean
+  placeholderHe: string
+  /** a season anchor: no match row is looked up, this sentence and source are the fact */
+  summaryHe?: string
+  summarySourceTitle?: string
+  summarySourceUrl?: string
+}
+
+const ANCHOR_SPECS: Record<string, AnchorSpec> = {
+  '1993-cup': {
+    sport: 'basketball',
+    seasonLabel: '1992/93',
+    competitionSlug: 'גביע-המדינה-כדורסל',
+    playedOn: '1993-04-19',
+    year: 1993,
+    headlineHe: 'גמר גביע המדינה בכדורסל, 1992/93',
+    placeholderHe: 'גמר גביע המדינה בכדורסל של 19.4.1993',
+  },
+  '1993-galil': {
+    sport: 'basketball',
+    seasonLabel: '1992/93',
+    competitionSlug: 'ליגה-לאומית-כדורסל',
+    playedOn: '1993-05-19',
+    year: 1993,
+    headlineHe: 'סדרת הגמר, 1992/93 — המשחק המכריע',
+    placeholderHe: 'המשחק המכריע של סדרת הגמר מול גליל עליון, 19.5.1993',
+  },
+  '1994-cup': {
+    sport: 'football',
+    seasonLabel: '1993/94',
+    competitionSlug: 'גביע-המדינה',
+    playedOn: '1994-06-07',
+    year: 1994,
+    headlineHe: 'גמר גביע המדינה, 1993/94',
+    placeholderHe: 'גמר גביע המדינה של 7.6.1994',
+  },
+  '1995-europe': {
+    sport: 'football',
+    seasonLabel: '1995/96',
+    competitionSlug: 'גביע-אופא',
+    playedOn: '1995-08-22',
+    year: 1995,
+    headlineHe: 'הסיבוב המוקדם של גביע אופ"א, 1995/96',
+    placeholderHe: 'משחק הגומלין מול זימברו קישינב, אוגוסט 1995',
+  },
+  /**
+   * Three SEASON anchors. They used to borrow another season's match row so the card
+   * would have a scoreline — which put a 1995 European tie on the 1996/97 finale. A
+   * season that is a fact and not a match gets a sentence and a source instead.
+   */
+  '1997-sale': {
+    sport: 'football',
+    seasonLabel: '1996/97',
+    competitionSlug: 'ליגת-העל',
+    playedOn: '1997-06-01',
+    year: 1997,
+    headlineHe: 'החורף של 1996/97 — הישרדות ומכירה',
+    placeholderHe: 'שורת ההקשר של עונת 1996/97',
+    summaryHe: 'עונת 1996/97: הפועל תל אביב נאבקה בתחתית הליגה ושרדה. באותה עונה נמכרה קבוצת הכדורגל מידי ההסתדרות לקבוצת בעלים פרטית — סוף העידן ההסתדרותי.',
+    summarySourceTitle: 'ynet — הפועל תל אביב, 1989–2017 (רטרוספקטיבה)',
+    summarySourceUrl: 'https://www.ynet.co.il/articles/0,7340,L-4958060,00.html',
+  },
+  '1997-relegation': {
+    sport: 'basketball',
+    seasonLabel: '1996/97',
+    competitionSlug: 'ליגה-לאומית-כדורסל',
+    playedOn: '1997-06-01',
+    year: 1997,
+    headlineHe: 'הירידה של הכדורסל, 1996/97',
+    placeholderHe: 'שורת הקשר לעונת 1996/97 בכדורסל',
+    summaryHe: 'עונת 1996/97: קבוצת הכדורסל של הפועל תל אביב ירדה מהליגה הבכירה — הירידה הראשונה בתולדותיה. בעונה שאחריה עלתה חזרה.',
+    summarySourceTitle: 'basket.co.il — דף הקבוצה, עונות',
+    summarySourceUrl: 'https://basket.co.il/team.asp?TeamId=399&sType=p2',
+  },
+  '1998': {
+    sport: 'football',
+    seasonLabel: '1997/98',
+    competitionSlug: 'ליגת-העל',
+    playedOn: '1998-05-02',
+    year: 1998,
+    headlineHe: 'המחזור האחרון, 1997/98',
+    placeholderHe: 'המשחק של 2.5.1998 בבלומפילד',
+  },
+  '1999-relegation': {
+    sport: 'basketball',
+    seasonLabel: '1998/99',
+    competitionSlug: 'ליגה-לאומית-כדורסל',
+    playedOn: '1999-06-01',
+    year: 1999,
+    headlineHe: 'הירידה השנייה של הכדורסל, 1998/99',
+    placeholderHe: 'שורת הקשר לעונת 1998/99 בכדורסל',
+    summaryHe: 'עונת 1998/99: שנה אחת אחרי העלייה חזרה, קבוצת הכדורסל של הפועל תל אביב ירדה שוב. המשבר לא נגמר בעלייה — הוא רק חיכה.',
+    summarySourceTitle: 'basket.co.il — דף הקבוצה, עונות',
+    summarySourceUrl: 'https://basket.co.il/team.asp?TeamId=399&sType=p2',
+  },
+  '1999-cup': {
+    sport: 'football',
+    seasonLabel: '1998/99',
+    competitionSlug: 'גביע-המדינה',
+    playedOn: '1999-05-26',
+    year: 1999,
+    headlineHe: 'גמר גביע המדינה, 1998/99',
+    countTitles: true,
+    placeholderHe: 'גמר גביע המדינה של 26.5.1999 ברמת גן',
+  },
+  '2000-title': {
+    sport: 'football',
+    seasonLabel: '1999/00',
+    competitionSlug: 'ליגת-העל',
+    playedOn: '2000-05-13',
+    year: 2000,
+    headlineHe: 'האליפות הוכרעה, 1999/00',
+    countTitles: true,
+    placeholderHe: 'המשחק של 13.5.2000 בשכונת התקווה',
+  },
+  '2000-cup': {
+    sport: 'football',
+    seasonLabel: '1999/00',
+    competitionSlug: 'גביע-המדינה',
+    playedOn: '2000-05-17',
+    year: 2000,
+    headlineHe: 'גמר גביע המדינה, 1999/00 — הדאבל',
+    countTitles: true,
+    placeholderHe: 'גמר גביע המדינה של 17.5.2000 ברמת גן',
+  },
+}
+
+export const STAGE_B_ANCHOR_KEYS = Object.keys(ANCHOR_SPECS)
+
+export function resolveStageBAnchors(): Record<string, HistoricalAnchor> {
+  return Object.fromEntries(Object.entries(ANCHOR_SPECS).map(([key, spec]) => [key, resolveSpec(key, spec)]))
+}
+
+function resolveSpec(key: string, spec: AnchorSpec): HistoricalAnchor {
+  if (spec.summaryHe) {
+    return {
+      id: `${key}:${spec.competitionSlug}:${spec.seasonLabel}`,
+      sport: spec.sport,
+      seasonLabel: spec.seasonLabel,
+      year: spec.year,
+      competitionSlug: spec.competitionSlug,
+      headlineHe: spec.headlineHe,
+      venueSlug: null,
+      sourceTitle: spec.summarySourceTitle ?? 'content/manual',
+      sourceUrl: spec.summarySourceUrl ?? null,
+      confidence: 2,
+      titlesSoFar: null,
+      match: null,
+      placeholder: null,
+      summaryHe: spec.summaryHe,
+    }
+  }
+  if (spec.sport === 'basketball') {
+    const row = archive.basketballMatches.find(
+      (r) => r.sport === 'basketball' && r.seasonLabel === spec.seasonLabel && r.competitionSlug === spec.competitionSlug && r.playedOn === spec.playedOn,
+    )
+    const atHome = row?.homeClubSlug === US
+    const match =
+      row && row.homeScore !== null && row.awayScore !== null
+        ? {
+            playedOn: row.playedOn ?? '',
+            opponentHe: atHome ? row.awayClubHe : row.homeClubHe,
+            scoredFor: (atHome ? row.homeScore : row.awayScore) ?? 0,
+            scoredAgainst: (atHome ? row.awayScore : row.homeScore) ?? 0,
+            atHome,
+            venueHe: row.venueHe,
+            decidedBy: null,
+            sourceTitle: (row as { sourceTitle?: string }).sourceTitle ?? 'content/manual/basketball-matches.json',
+            sourceUrl: (row as { sourceUrl?: string | null }).sourceUrl ?? null,
+          }
+        : null
+    return {
+      id: `${key}:${spec.competitionSlug}:${spec.seasonLabel}`,
+      sport: 'basketball',
+      seasonLabel: spec.seasonLabel,
+      year: spec.year,
+      competitionSlug: spec.competitionSlug,
+      headlineHe: spec.headlineHe,
+      venueSlug: row?.venueSlug ?? null,
+      sourceTitle: match?.sourceTitle ?? 'content/manual/basketball-matches.json',
+      sourceUrl: match?.sourceUrl ?? null,
+      confidence: (row as { confidence?: number } | undefined)?.confidence ?? 0,
+      titlesSoFar: null,
+      match,
+      placeholder: match
+        ? null
+        : { what: `${spec.placeholderHe} — אינו בארכיון.`, needs: `שורת כדורסל מעונת ${spec.seasonLabel} ב-content/manual/basketball-matches.json.` },
+    }
+  }
+
+  const row = archive.matches.find(
+    (r) =>
+      r.seasonLabel === spec.seasonLabel &&
+      r.competitionSlug === spec.competitionSlug &&
+      r.playedOn === spec.playedOn &&
+      (r.homeClubSlug === US || r.awayClubSlug === US),
+  )
+  let match: HistoricalAnchor['match'] = null
+  if (row && row.playedOn && row.homeScore !== null && row.awayScore !== null) {
+    const atHome = row.homeClubSlug === US
+    const opponentSlug = atHome ? row.awayClubSlug : row.homeClubSlug
+    const opponent = archive.clubs.find((r) => r.slug === opponentSlug && r.sport === 'football')
+    const venue = row.venueSlug ? archive.venues.find((r) => r.slug === row.venueSlug && r.sport === 'football') : null
+    match = {
+      playedOn: row.playedOn,
+      opponentHe: opponent?.nameHe ?? opponentSlug.replace(/-/g, ' '),
+      scoredFor: (atHome ? row.homeScore : row.awayScore) ?? 0,
+      scoredAgainst: (atHome ? row.awayScore : row.homeScore) ?? 0,
+      atHome,
+      venueHe: venue?.nameHe ?? null,
+      decidedBy: null,
+      sourceTitle: row.sourceTitle ?? trophySource(),
+      sourceUrl: row.sourceUrl ?? null,
+    }
+  }
+  const venue = row?.venueSlug ? archive.venues.find((r) => r.slug === row.venueSlug) : null
+  return {
+    id: `${key}:${spec.competitionSlug}:${spec.seasonLabel}`,
+    sport: 'football',
+    seasonLabel: spec.seasonLabel,
+    year: spec.year,
+    competitionSlug: spec.competitionSlug,
+    headlineHe: spec.headlineHe,
+    venueSlug: venue?.slug ?? null,
+    sourceTitle: match?.sourceTitle ?? 'content/manual/matches.json',
+    sourceUrl: match?.sourceUrl ?? null,
+    confidence: (row as { confidence?: number } | undefined)?.confidence ?? 0,
+    titlesSoFar: spec.countTitles ? countTitles(spec.seasonLabel, spec.competitionSlug) : null,
+    match,
+    placeholder: match
+      ? null
+      : { what: `${spec.placeholderHe} — אינו בארכיון.`, needs: `שורת משחק מעונת ${spec.seasonLabel} ב-content/manual/matches.json ברמת ודאות 2 ומעלה.` },
+  }
+}

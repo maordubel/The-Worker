@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { Screen } from '@/components/ui/Screen'
 import { t } from '@/lib/i18n'
-import { resolveChapterAnchor, resolvePrologueAnchor, resolveStageBAnchor, resolveUssishkinAnchor } from '@/lib/life/anchor-server'
+import { resolveChapterAnchor, resolvePrologueAnchor, resolveStageBAnchor, resolveUssishkinAnchor, resolveStageBAnchors } from '@/lib/life/anchor-server'
 
 import { LifeStage } from './LifeStage'
 
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function LifePage() {
   const anchor = resolveChapterAnchor()
   const prologueAnchor = resolvePrologueAnchor()
-  const anchors = { '1986': anchor, '1990': resolveStageBAnchor(), '1991': resolveUssishkinAnchor() }
+  const anchors = { '1986': anchor, '1990': resolveStageBAnchor(), '1991': resolveUssishkinAnchor(), ...resolveStageBAnchors() }
 
   return (
     <Screen title={t('life.title')} sub={t('life.sub')} chrome={false} fullBleed night>

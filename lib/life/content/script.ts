@@ -1,12 +1,21 @@
+import type { SampleKey } from '../runtime/audio'
 import type {
+  ArmyGauge,
+  ArmyRoute,
   BondId,
   CharacterId,
+  GateIdentity,
+  GateReason,
+  InstitutionGauge,
   ItemId,
+  LacesResponse,
   LocationId,
   PersonalityId,
+  PresenceMode,
   RedHeartId,
   RelationshipAxis,
   RelationshipMemory,
+  SinaiStance,
   TraitId,
   WellbeingId,
 } from '../types'
@@ -53,6 +62,8 @@ export type Effect =
   | { e: 'trait'; trait: TraitId; delta: number }
   | { e: 'time'; minutes: number }
   | { e: 'toast'; text: string; tone?: 'plain' | 'red' }
+  /** a sound from the library at the moment the choice lands */
+  | { e: 'sfx'; key: SampleKey; level?: number; delayMs?: number }
   /**
    * Hold up a real document.
    *
@@ -96,7 +107,25 @@ export type Effect =
    * afternoon and a childhood (Stage A §9).
    */
   | { e: 'save'; agorot: number; why: string }
+  /** the tin into the pocket — the day the saving is spent */
+  | { e: 'withdraw'; agorot: number; why: string }
   | { e: 'own'; item: string }
+  /** legs and lungs — a banner carried, a night stood through */
+  | { e: 'energy'; delta: number }
+  /**
+   * העשור — Stage B's four surfaces, as verbs a line can speak (brief §4).
+   *
+   * A choice that moves him to Gate 5 says `gate`; a leave he argued for says `army`; a
+   * line that stops defending Sinai says `sinai`; the way he was there for a match says
+   * `presence`. None of these is a flag, so none of them can be forgotten by a day.
+   */
+  | { e: 'gate'; to: GateIdentity; reason: GateReason }
+  | { e: 'armyRoute'; route: ArmyRoute }
+  | { e: 'army'; key: ArmyGauge; delta: number }
+  | { e: 'sinai'; stance: SinaiStance }
+  | { e: 'institution'; key: InstitutionGauge; delta: number }
+  | { e: 'presence'; mode: PresenceMode }
+  | { e: 'laces'; response: LacesResponse }
 
 export type ChoiceDef = {
   id: string
@@ -105,6 +134,13 @@ export type ChoiceDef = {
       can see you cannot open is information; a door that is not drawn is a dead end */
   when?: Condition
   noteHe?: string
+  /**
+   * The one exception to "never hidden": a choice that is the SAME sentence as another
+   * one with a different price (1998: "לקום" is one line; what it costs depends on who
+   * you were at the ten-year-olds). Two copies of a line, one greyed, is a bug, not
+   * information — so a `hidden` choice that fails its condition is not drawn at all.
+   */
+  hidden?: boolean
   then: Effect[]
 }
 

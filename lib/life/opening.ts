@@ -35,6 +35,14 @@ export type OpeningBeat = {
   kind: 'still' | 'clip'
   /** file stem under `/life/opening` — `.png`, or `.mp4` plus `-poster.png` */
   art: string
+  /**
+   * Where the still lives. The five original beats are photographs in `/life/opening`;
+   * the frame of 2026 is a painted backdrop from the art manifest (`/life/art`), so the
+   * same picture the coda ends on is the one the film opens on.
+   */
+  from?: 'opening' | 'art'
+  /** a year stamped on the frame in the poster face — the way a film names its time */
+  stampHe?: string
   /** how long it holds, in milliseconds, when nobody touches anything */
   ms: number
   /** the line under the picture. Written for the beat; never a fact. */
@@ -57,11 +65,28 @@ export type OpeningBeat = {
  * after the cup, with the streets still carrying the night before.
  */
 export const OPENING: OpeningBeat[] = [
+  /**
+   * 2026 — the cold open. A film about a life starts at the end of it: the new ground,
+   * white and lit, a beacon over Jaffa at dusk, and one line that says the man is still
+   * going there. Then the cut to a cot in 1978, which is where the answer begins. The
+   * picture is `introBeacon` from the master package, and the coda at the end of the
+   * built life returns to the same ground, so the frame closes on what it opened.
+   */
+  {
+    id: 'today',
+    kind: 'still',
+    art: 'introBeacon',
+    from: 'art',
+    stampHe: '2026',
+    ms: 4800,
+    captionHe: 'ארבעים ושמונה שנה. הוא עדיין הולך לשם.',
+  },
   {
     id: 'born',
     kind: 'still',
     art: 'born',
-    ms: 5200,
+    stampHe: '1978',
+    ms: 4600,
     // The one caption the vision document wrote itself, kept word for word.
     captionHe: 'עוד לפני שידע לדבר, כבר החליטו בשבילו איפה הלב שלו יהיה.',
   },
@@ -69,14 +94,14 @@ export const OPENING: OpeningBeat[] = [
     id: 'first-time',
     kind: 'clip',
     art: 'clip-family',
-    ms: 6000,
+    ms: 5600,
     captionHe: 'בפעם הראשונה הוא לא זכר כלום. אבא זוכר הכול.',
   },
   {
     id: 'cup',
     kind: 'still',
     art: 'shoulders',
-    ms: 6400,
+    ms: 6000,
     captionHe: 'הוא לא הבין את החוקים. הוא הבין את אבא.',
     archiveLine: 'fixture',
   },
@@ -84,14 +109,14 @@ export const OPENING: OpeningBeat[] = [
     id: 'crest',
     kind: 'still',
     art: 'drawing',
-    ms: 5000,
+    ms: 4400,
     captionHe: 'אחר כך ציירו אותו שוב ושוב, עד שהילד ידע לצייר אותו לבד.',
   },
   {
     id: 'window',
     kind: 'clip',
     art: 'clip-memory',
-    ms: 6400,
+    ms: 6000,
     captionHe: 'ומהחלון שלו רואים את הזרקורים.',
   },
 ]
@@ -133,11 +158,23 @@ export function openingMs(): number {
 }
 
 /**
- * The key the shell writes when the sequence has played.
+ * הפתיח מתנגן פעם אחת — for a life that is starting, and never again for that life.
  *
- * `sessionStorage`, deliberately, and not the save file. A player who reloads the tab
- * during one sitting has already watched it; a player who comes back next week is opening
- * this game again, and the opening is what this game opens with. It also keeps the
- * sequence entirely out of the append-only life log, which records what the CHILD did.
+ * The first version of this used `sessionStorage`, which meant every new tab was a new
+ * opening: a player who had been in 1991 for a week sat through the cot and the bus every
+ * time they came back. That is not what a film does. The opening belongs to a NEW GAME —
+ * a life with nothing in its log yet — and once it has played it is written into that
+ * life as `life:opening`, a person-flag that survives every year and every day. Reset the
+ * life and the opening comes back, because it is a new life. Reload in the middle of the
+ * sequence and it plays again, because it never finished.
  */
+export const OPENING_FLAG = 'life:opening'
+
+/** True when this life has been lived past its first minute — the opening is not for it. */
+export function lifeHasBegun(events: readonly { t: string }[], flags: Record<string, unknown>): boolean {
+  if (flags[OPENING_FLAG]) return true
+  return events.some((event) => event.t === 'chapter.entered' || event.t === 'moved')
+}
+
+/** @deprecated — the key the shell used to write into `sessionStorage`; read nowhere now */
 export const OPENING_SEEN = 'the-worker:life:opening'
