@@ -4012,65 +4012,65 @@
  },
  "shirts": {
   "shirtVisa86": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 372011,
+   "w": 963,
+   "h": 855,
+   "bytes": 377841,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtDiadoraRed": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 403791,
+   "w": 963,
+   "h": 886,
+   "bytes": 420541,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtDiadoraWhite": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 346697,
+   "w": 963,
+   "h": 812,
+   "bytes": 364123,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtKing": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 344974,
+   "w": 946,
+   "h": 900,
+   "bytes": 543067,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtShikun": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 211509,
+   "w": 938,
+   "h": 900,
+   "bytes": 279938,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtCrt": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 218747,
+   "w": 761,
+   "h": 900,
+   "bytes": 313861,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtRedDevil": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 307944,
+   "w": 963,
+   "h": 853,
+   "bytes": 311048,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtBasket90": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 263286,
+   "w": 714,
+   "h": 900,
+   "bytes": 354572,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtVisa85": {
-   "w": 1024,
-   "h": 1024,
-   "bytes": 479370,
+   "w": 963,
+   "h": 894,
+   "bytes": 467876,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   }

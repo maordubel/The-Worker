@@ -218,6 +218,17 @@ export type SceneDef = {
   artByEra?: Record<string, string>
   band: { far: number; near: number }
   size: { far: number; near: number }
+  /**
+   * המטר — how much of the frame one metre occupies at the NEAR line of this room.
+   *
+   * Every body except the player is drawn at `metre × its height in metres`
+   * (`world/heights.ts`), so a size is never typed again and a grown man can never be
+   * eighty-seven centimetres tall standing next to Rafi. The value is derived from the
+   * player himself — his own drawn height divided by his real height in the era the room
+   * was tuned for — which is why the kiosk comes out at 0.3154 and the counter, measured
+   * independently off the painting in September, comes out at 0.315.
+   */
+  metre: number
   spawns: Record<string, { x: number; y: number; facing?: 'left' | 'right' }>
   actors: ActorDef[]
   hotspots: HotspotDef[]
@@ -416,6 +427,7 @@ const SCENES: SceneDef[] = [
     artByEra: { '1990': 'bedroom90', '1991': 'bedroom90', '1990s': 'bedroom90', '2000s': 'bedroom90' },
     band: { far: 0.84, near: 0.97 },
     size: { far: 0.3, near: 0.38 },
+    metre: 0.2923,
     ambience: 'interior',
     stuckHe: 'המפתח במגירה, בקצה שמאל. משם גם הדלת לסלון.',
     stuckByEra: { '1990': 'הדלת לסלון — משמאל. אבא במטבח.', '1991': 'המחברת על השולחן. הדלת לסלון — משמאל.' },
@@ -493,6 +505,7 @@ const SCENES: SceneDef[] = [
     art: 'living',
     band: { far: 0.73, near: 0.97 },
     size: { far: 0.33, near: 0.43 },
+    metre: 0.3308,
     ambience: 'interior',
     stuckHe: 'בלי מפתח אמא לא נותנת לצאת. ואבא בכורסה — תשאל אותו מה יש היום.',
     // The coffee table is the room's own foreground: walk up to the sofa and you pass
@@ -723,6 +736,7 @@ const SCENES: SceneDef[] = [
     // around, and the scene turns around with it.
     band: { far: 0.68, near: 0.985 },
     size: { far: 0.24, near: 0.38 },
+    metre: 0.2923,
     ambience: 'kitchen',
     stuckHe: 'חזרה לסלון — משמאל.',
     stuckByEra: {
@@ -846,6 +860,7 @@ const SCENES: SceneDef[] = [
     artByEra: { '1990': 'street90', '1991': 'street90', '1998-laces': 'street90Flags', '1999-cup': 'street90Flags', '2000-title': 'street90Flags', '2000-double': 'street90Flags', '1990s': 'street90', '2000s': 'street90' },
     band: { far: 0.705, near: 0.86 },
     size: { far: 0.185, near: 0.29 },
+    metre: 0.2231,
     ambience: 'park',
     stuckHe: 'הקיוסק משמאל, המגרש בסמטה. מזרחה הולכים רק כשיודעים לאן — תשאל מישהו.',
     stuckByEra: {
@@ -1299,6 +1314,7 @@ const SCENES: SceneDef[] = [
      */
     band: { far: 0.80, near: 0.985 },
     size: { far: 0.37, near: 0.41 },
+    metre: 0.3154,
     /**
      * מה שעומד בקיוסק — dressing that knows which decade it is.
      *
@@ -1476,6 +1492,7 @@ const SCENES: SceneDef[] = [
      * it now sits at the top of that range instead of half again beyond it.
      */
     size: { far: 0.17, near: 0.285 },
+    metre: 0.2375,
     ambience: 'park',
     stuckHe: 'הכדור באמצע. חזרה לרחוב — שמאלה.',
     spawns: { fromStreet: { x: 0.13, y: 0.84, facing: 'right' } , start: { x: 0.13, y: 0.84, facing: 'right' } },
@@ -1555,6 +1572,7 @@ const SCENES: SceneDef[] = [
     art: 'approach',
     band: { far: 0.69, near: 0.875 },
     size: { far: 0.185, near: 0.3 },
+    metre: 0.2308,
     ambience: 'dusk',
     // The one arrival card that is not the stadium. Stepping out of your own
     // neighbourhood for the first time deserves a frame of its own, and it is the same
@@ -1647,6 +1665,7 @@ const SCENES: SceneDef[] = [
     band: { far: 0.8, near: 0.95 },
     // the painted men at the turnstiles are big; a child at 0.2 stood at their knees
     size: { far: 0.23, near: 0.33 },
+    metre: 0.2538,
     ambience: 'park',
     // The first sight of the ground: a wide establishing frame of Bloomfield from the
     // street outside — played once, the moment the child first reaches it, then it cuts
@@ -1807,6 +1826,7 @@ const SCENES: SceneDef[] = [
     // 1.79×, and it stays: a tunnel is a genuinely deep space seen down its own axis, and
     // this is the one frame in the game where the vanishing point is dead centre.
     size: { far: 0.2, near: 0.358 },
+    metre: 0.2754,
     ambience: 'tunnel',
     stuckHe: 'קדימה, לכיוון האור.',
     spawns: { start: { x: 0.5, y: 0.95 } },
@@ -1867,6 +1887,7 @@ const SCENES: SceneDef[] = [
     // consistent cheat across every figure, which reads as a camera four metres closer
     // rather than as an error, and keeps an eight-year-old findable on a phone.
     size: { far: 0.098, near: 0.108 },
+    metre: 0.0831,
     ambience: 'stadium',
     // 5.9.2026: the boy himself at the tunnel mouth, painted — the ground opening in front of him
     arrival: { art: 'tunnelReveal', ms: 5200, flag: 'saw:reveal' },
@@ -1996,6 +2017,7 @@ const SCENES: SceneDef[] = [
      * that metre and a real body height.
      */
     size: { far: 0.185, near: 0.203 },
+    metre: 0.1465,
     ambience: 'dusk',
     stuckHe: 'הכניסה לאולם באמצע, מתחת לגג. חזרה לרחוב — משמאל.',
     stuckByEra: { '1991': 'הסדרן ליד הדלת, המוכר מימין. פנימה — באמצע.' },
@@ -2175,6 +2197,7 @@ const SCENES: SceneDef[] = [
     artByEra: { '1997-basket': 'ussHallNight', '1999-basket': 'ussHallNight' },
     band: { far: 0.72, near: 0.96 },
     size: { far: 0.17, near: 0.3 },
+    metre: 0.2165,
     ambience: 'hall',
     // The first sight of the hall, from the high corner — almost all of it at once — held
     // for a breath, then the cut down to the sideline at the boy's height.
@@ -2300,6 +2323,7 @@ const SCENES: SceneDef[] = [
     art: 'ussEnd',
     band: { far: 0.74, near: 0.96 },
     size: { far: 0.17, near: 0.3 },
+    metre: 0.2165,
     ambience: 'hall',
     stuckHe: 'הסל מעליך. חזרה לאורך הקו — משמאל.',
     spawns: { fromMain: { x: 0.08, y: 0.9, facing: 'right' } , start: { x: 0.08, y: 0.9, facing: 'right' } },
@@ -2349,6 +2373,7 @@ const SCENES: SceneDef[] = [
     artByEra: { '1998-laces': 'classroom98' },
     band: { far: 0.74, near: 0.97 },
     size: { far: 0.22, near: 0.32 },
+    metre: 0.2309,
     ambience: 'classroom',
     stuckHe: 'הפתק על השולחן שלך. המורה ליד הלוח. הדלת למסדרון — ימינה.',
     spawns: {
@@ -2436,6 +2461,7 @@ const SCENES: SceneDef[] = [
     art: 'schoolyard',
     band: { far: 0.68, near: 0.95 },
     size: { far: 0.18, near: 0.28 },
+    metre: 0.202,
     ambience: 'park',
     stuckHe: 'הכיתה מאחורייך, דרך הדלת. השער לרחוב — משמאל. הסל בקצה החצר.',
     spawns: {
@@ -2502,6 +2528,7 @@ const SCENES: SceneDef[] = [
     art: 'gate5',
     band: { far: 0.74, near: 0.95 },
     size: { far: 0.24, near: 0.32 },
+    metre: 0.2265,
     ambience: 'stadium',
     stuckHe: 'מתחת ליציע. התוף לא מפסיק.',
     layers: [{ art: 'overlaySmoke', x: 0.5, y: 0.5, w: 1.0, depth: 0.1, era: '*' }],
@@ -2555,6 +2582,7 @@ const SCENES: SceneDef[] = [
     art: 'busStation',
     band: { far: 0.705, near: 0.86 },
     size: { far: 0.185, near: 0.29 },
+    metre: 0.2106,
     ambience: 'station',
     stuckHe: 'רציף. שעון. אוטובוס אחד שמגיע בזמן.',
     actors: [],
@@ -2587,6 +2615,7 @@ const SCENES: SceneDef[] = [
     art: 'ramatGan',
     band: { far: 0.872, near: 0.99 },
     size: { far: 0.2, near: 0.27 },
+    metre: 0.1911,
     ambience: 'stadium',
     stuckHe: 'ארבעים אלף. אתה אחד מהם.',
     layers: [
@@ -2620,6 +2649,7 @@ const SCENES: SceneDef[] = [
     art: 'hatikva',
     band: { far: 0.8, near: 0.95 },
     size: { far: 0.2, near: 0.29 },
+    metre: 0.2053,
     ambience: 'stadium',
     stuckHe: 'מגרש קטן. שכונה שמסתכלת מהמרפסות.',
     layers: [{ art: 'overlaySmoke', x: 0.5, y: 0.5, w: 1.0, depth: 0.1, era: '*' }],

@@ -146,6 +146,7 @@ export type LifeRuntime = {
     bond(who: string, delta: number): void
     raise(flag: string): void
     reseed(seed: string): void
+    bodies(): unknown[]
     where(): unknown
   }
   destroy(): void
@@ -311,6 +312,8 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       bond: (who: string, delta: number) => options.engine.dispatch({ t: 'bond.shifted', who, delta }),
       raise: (flag: string) => options.engine.dispatch({ t: 'flag.raised', flag }),
       reseed: (seed: string) => options.engine.dispatch({ t: 'rng.seeded', seed }),
+      /** every body the room is drawing, with its height in metres — for the scale probe */
+      bodies: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.bodies() ?? [] : []),
       where: () => {
         const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
         if (passage && game.scene.isActive(PassageScene.KEY)) return passage.where()

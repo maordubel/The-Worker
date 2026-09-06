@@ -20,6 +20,7 @@ import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type Histo
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
 import type { Condition } from '../../world/types'
 import { cutFor, filmFlag } from '../../world/transitions'
+import { bodySize } from '../../world/heights'
 
 /**
  * הערבים שבהם יש כדורסל באוסישקין — the chapters whose evening happens inside the hall.
@@ -758,6 +759,27 @@ export class WorldScene extends Phaser.Scene {
     image.setDepth(y)
   }
 
+  /**
+   * כמה גבוה מישהו כאן — the only place a body's drawn size is decided.
+   *
+   * Not `def.size` any more. A size typed by hand, per actor, per room, is a number that
+   * is right on its own and wrong beside the man next to it — measured off the running
+   * game on 6.9.2026 it had produced a 0.87-metre customer in the kiosk, a 0.89-metre
+   * steward on the gate at Bloomfield and two basketball players under seventy centimetres
+   * on the parquet at Ussishkin. Thirty-four bodies in all.
+   *
+   * Now: the room says what a metre is, `heights.ts` says how tall this person is, and the
+   * depth down the walk band applies the room's own perspective. A body cannot be the
+   * wrong size unless the room's metre is wrong, and the room's metre is one number that
+   * one test checks.
+   */
+  private bodySizeAt(figure: string, y: number): number {
+    const band = this.def.band
+    const depth = Phaser.Math.Clamp((y / this.H - band.far) / Math.max(1e-6, band.near - band.far), 0, 1)
+    const taper = this.def.size.far / Math.max(1e-6, this.def.size.near)
+    return bodySize(figure, this.def.metre, depth, taper)
+  }
+
   private buildActors(state: LifeState) {
     for (const def of this.def.actors) {
       if (!inEra(def, this.chapter)) continue
@@ -766,7 +788,8 @@ export class WorldScene extends Phaser.Scene {
       const shadow = this.add.ellipse(x, y, 40, 12, LIFE_PALETTE.ink, 0.26)
       const image = this.add.image(x, y, `art-${def.figure}`).setOrigin(0.5, 1)
       image.setFlipX(def.flip === true)
-      this.applyScale(image, shadow, y, { far: def.size, near: def.size })
+      const size = this.bodySizeAt(def.figure, y)
+      this.applyScale(image, shadow, y, { far: size, near: size })
       const visible = meets(state, def.when)
       image.setVisible(visible)
       shadow.setVisible(visible)
@@ -792,7 +815,7 @@ export class WorldScene extends Phaser.Scene {
       const y = def.y * this.H
       const shadow = this.add.ellipse(0, y, 40, 12, LIFE_PALETTE.ink, 0.2)
       const image = this.add.image(def.from * this.W, y, `art-${def.figure}`).setOrigin(0.5, 1)
-      this.fit(image, def.size * this.H)
+      this.fit(image, this.bodySizeAt(def.figure, y) * this.H)
       image.setFlipX(def.to > def.from === (WorldScene.ART_FACES < 0))
       shadow.setSize(image.displayWidth * 0.55, image.displayWidth * 0.16)
       const visible = meets(state, def.when)
@@ -1641,7 +1664,8 @@ export class WorldScene extends Phaser.Scene {
       }
       if (placement.y !== undefined) {
         const y = placement.y * this.H
-        this.applyScale(actor.image, actor.shadow, y, { far: actor.def.size, near: actor.def.size })
+        const size = this.bodySizeAt(actor.def.figure, y)
+        this.applyScale(actor.image, actor.shadow, y, { far: size, near: size })
         actor.image.y = y
       }
       if (placement.facing) actor.image.setFlipX((placement.facing === 'left') === (WorldScene.ART_FACES > 0))
@@ -3498,6 +3522,48 @@ export class WorldScene extends Phaser.Scene {
       return
     }
     this.ctx.dialogue.start(id)
+  }
+
+  /**
+   * הסרגל, חי — every body the room is actually drawing, with the height it is drawn at.
+   *
+   * Proportion faults are invisible in the data and obvious in the picture, which is the
+   * worst combination: every `size` in `scenes.ts` can be correct in isolation while the
+   * screen shows a grown man at a child's height. This reports what is ON THE GLASS —
+   * texture, foot line, drawn height as a fraction of the frame, and what that height
+   * means in metres against the room's own metre — so the fault can be measured instead
+   * of argued about.
+   */
+  bodies() {
+    const band = this.def.band
+    const taper = this.def.size.far / Math.max(1e-6, this.def.size.near)
+    const rows: Array<{ who: string; art: string; y: number; h: number; metres: number }> = []
+    const push = (who: string, art: string, y: number, h: number) => {
+      /**
+       * The height is reported CORRECTED FOR DEPTH, so the number means "how tall is this
+       * person" and not "how many pixels of him are on the screen". A man at the back of a
+       * room is drawn smaller and is not a smaller man; an audit that cannot tell those
+       * apart reports perspective as a fault and buries the real ones.
+       */
+      const depth = Phaser.Math.Clamp((y / this.H - band.far) / Math.max(1e-6, band.near - band.far), 0, 1)
+      const metre = this.def.metre * (taper + (1 - taper) * depth)
+      rows.push({
+        who,
+        art,
+        y: Number((y / this.H).toFixed(3)),
+        h: Number((h / this.H).toFixed(3)),
+        metres: Number((h / this.H / metre).toFixed(2)),
+      })
+    }
+    push('player', this.player.texture.key.replace('art-', ''), this.groundY, this.player.displayHeight)
+    for (const actor of this.actors) {
+      push(actor.def.id, actor.image.texture.key.replace('art-', ''), actor.image.y, actor.image.displayHeight)
+    }
+    for (const walker of this.ambient) {
+      if (!walker.image.visible) continue
+      push(`~${walker.def.id}`, walker.image.texture.key.replace('art-', ''), walker.image.y, walker.image.displayHeight)
+    }
+    return rows.sort((a, b) => b.h - a.h)
   }
 
   /** Developer-only: where the child is, as the doors see him — for the probes. */
