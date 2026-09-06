@@ -1,12 +1,16 @@
 import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { chapterFor, lastPlayable, nextPlayable, playableChapters } from '@/lib/life/content/chapters'
+import { CHAPTERS, chapterFor, lastPlayable, nextPlayable, playableChapters } from '@/lib/life/content/chapters'
 import { GIGS, gigChapters, gigConversations, gigPay, gigsIn, isPaid, offeredIn } from '@/lib/life/gigs'
 import { SHIRT, TICKET, WAGE, decadeOf, decadeOfYear } from '@/lib/life/prices'
 import { SHIRTS } from '@/lib/life/shirts'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
+import { SCENE } from '@/lib/life/world/scenes'
+
+const ROOT = process.cwd()
 
 /**
  * שאין תקיעה — Maor, 5.9.2026: "אחרי סיום משימת עליית ליגה לא עובר למשימה הבא. בבקשה
@@ -185,6 +189,38 @@ describe('הג׳ובים — a boy with no money has somewhere to earn it', () =
   it('is reachable — every gig conversation is registered', () => {
     for (const conversation of gigConversations()) {
       expect(DIALOGUE[conversation.id], conversation.id).toBeTruthy()
+    }
+  })
+})
+
+/**
+ * השעון חייב לזוז — the class of bug behind two of Maor's reports in one day.
+ *
+ * 11.3.1991 froze at ten past eight because the clock was gated on `onboard:street`, a
+ * 1986 tutorial flag raised only by walking into the street — a room that chapter never
+ * visits. Every scheduled person in the day was then waiting for an hour that could not
+ * arrive, which is what "אמא בכלל לא מגיעה… השלב הזה לא זורם" looks like from the inside.
+ */
+describe('הזמן עובר בכל פרק — a day that cannot reach its own evening is not a day', () => {
+  const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
+
+  it('never gates the clock on the street flag alone', () => {
+    // the guard belongs in one place, and it has to know which chapter it is in
+    expect(world, 'the clock is gated on a raw flag read again').not.toMatch(
+      /private tickClock\(delta: number\) \{\s*if \(!this\.ctx\.engine\.state\.flags\['onboard:street'\]\)/,
+    )
+    expect(world, 'the clock guard is not chapter-aware').toContain('private clockWaiting()')
+    expect(world, 'the guard does not consult the chapter it is in').toMatch(
+      /clockWaiting\(\)[\s\S]{0,400}chapterFor\(this\.chapter\)\?\.start\.location/,
+    )
+  })
+
+  it('starts every playable chapter in a room it can leave', () => {
+    for (const chapter of CHAPTERS.filter((row) => row.playable)) {
+      const scene = SCENE[chapter.start.location]
+      expect(scene, `${chapter.id} starts in ${chapter.start.location}, which is not a room`).toBeTruthy()
+      const ways = (scene?.exits ?? []).filter((exit) => !exit.era || exit.era === '*' || exit.era === chapter.id)
+      expect(ways.length, `${chapter.id} starts in a room with no way out`).toBeGreaterThan(0)
     }
   })
 })

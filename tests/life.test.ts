@@ -768,21 +768,27 @@ describe('בהירות — a first-time player is never asked to guess', () => {
     }
   })
 
-  it('does not start the clock until the child is in the street', () => {
+  it('does not start the clock until the child is out of the room he woke in', () => {
     // Time is the chapter's antagonist and stays that way. What it may not do is bill the
     // player for learning which key moves — the first playtest lost Kobi to exactly that.
+    //
+    // 6.9.2026: this test used to demand that the gate be the raw `onboard:street` flag,
+    // and that demand WAS the bug. The flag is raised by walking into the street, 11.3.1991
+    // starts in a classroom and never goes there, and so the clock in that chapter could
+    // never start: Rachel comes home at three, and three never arrived. The invariant is
+    // the one the comment always described — the clock waits while the boy is still in the
+    // room he woke up in, and not a second longer — so that is what is asserted now.
     const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
     const tick = world.slice(world.indexOf('private tickClock'), world.indexOf('private timeTriggers'))
-    expect(tick).toContain("flags['onboard:street']")
-    expect(world).toContain("flag: 'onboard:street'")
-    // …and it is the FIRST thing the tick does. This is the whole invariant, and it is
-    // asserted here rather than in the browser harness because a harness watching a clock
-    // cannot tell "time ran on its own" from "a conversation charged the player twelve
-    // minutes" — both arrive as `clock.advanced`, and one of them is the game working.
-    // The gate is a line of source; read the line.
+    expect(tick, 'the clock is no longer gated at all').toContain('this.clockWaiting()')
+    expect(world, 'the day never begins').toContain("flag: 'onboard:street'")
+    // …and the gate is the FIRST thing the tick does.
     const body = tick.slice(tick.indexOf('{', tick.indexOf('(delta: number)')) + 1)
     const first = body.split('\n').map((line) => line.trim()).filter(Boolean)[0]
-    expect(first, 'something now runs before the clock gate').toContain("flags['onboard:street']")
+    expect(first, 'something now runs before the clock gate').toContain('clockWaiting()')
+    // the gate knows which chapter it is in, which is the whole fix
+    const guard = world.slice(world.indexOf('private clockWaiting()'), world.indexOf('private tickClock'))
+    expect(guard, 'the gate cannot tell a classroom from a bedroom').toContain('chapterFor(this.chapter)')
   })
 
   it('teaches exactly two things and then stops', () => {

@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { t } from '@/lib/i18n'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
-import { ballTexture, daylightRig, disposeThree, mountThree, resizeThree, shadowDecal, type Three3D } from '@/lib/life/runtime/three3d'
+import { billboard, daylightRig, disposeThree, faceCamera, imageTexture, mountThree, resizeThree, shadowDecal, type Three3D } from '@/lib/life/runtime/three3d'
 
 /**
  * פנדלים — five real kicks against a keeper, on the neighbourhood pitch, in three
@@ -31,6 +31,8 @@ const KEEPER_REACH = 1.15
 const ZONES = [-2.5, -1.15, 0, 1.15, 2.5]
 
 type Outcome = 'goal' | 'save' | 'out'
+/** the five pictures of him, and the only five states this game needs him in */
+type KeeperPose = 'ready' | 'left' | 'right' | 'caught' | 'beaten'
 type Phase = 'ready' | 'flight' | 'result' | 'summary'
 
 export function PenaltyCard({
@@ -44,6 +46,7 @@ export function PenaltyCard({
   const threeRef = useRef<Three3D | null>(null)
   const ballRef = useRef<THREE.Mesh | null>(null)
   const keeperRef = useRef<THREE.Group | null>(null)
+  const posesRef = useRef<Record<KeeperPose, THREE.Mesh> | null>(null)
   const rafRef = useRef<number | null>(null)
   const flightRef = useRef<{ start: number; from: THREE.Vector3; targetX: number; targetY: number; keeperX: number; ms: number } | null>(
     null,
@@ -69,7 +72,22 @@ export function PenaltyCard({
 
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(40, 40),
-      new THREE.MeshStandardMaterial({ color: LIFE_PALETTE.dirt, roughness: 1 }),
+      /**
+       * העפר של המגרש — his photograph of it, tiled.
+       *
+       * A flat brown plane is a colour; this is dust, stones, the ghost of a chalk line
+       * somebody drew last week. Repeated four times across the pitch so the grain stays
+       * the size of grain rather than turning into a pattern.
+       */
+      new THREE.MeshStandardMaterial({
+        map: imageTexture('/life/art/pen-ground.png', (texture) => {
+          texture.wrapS = THREE.RepeatWrapping
+          texture.wrapT = THREE.RepeatWrapping
+          texture.repeat.set(4, 4)
+        }),
+        color: LIFE_PALETTE.dirt,
+        roughness: 1,
+      }),
     )
     ground.rotation.x = -Math.PI / 2
     ground.position.z = GOAL_Z / 2
@@ -100,25 +118,41 @@ export function PenaltyCard({
     goal.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(netPts), netMat))
     scene.add(goal)
 
-    // the keeper — a low-poly figure that dives sideways, never a painted sprite
+    /**
+     * השוער — הילד הגדול מהשכונה, מצולם.
+     *
+     * He was a capsule, a sphere and a cylinder: correct proportions, no person. Maor sent
+     * him on 6.9.2026 in the five poses this game actually needs — set, diving each way,
+     * on the floor with the ball, and walking back to fetch it — so the keeper is now his
+     * photograph on a billboard, and the pose changes with what just happened rather than
+     * the whole figure rotating like a signpost.
+     *
+     * All five are added at once and hidden; swapping a pose is one boolean, which is the
+     * only way this can stay at sixty frames on a phone.
+     */
     const keeper = new THREE.Group()
-    const shirt = new THREE.MeshStandardMaterial({ color: 0x5c6a72, roughness: 0.8 })
-    const skin = new THREE.MeshStandardMaterial({ color: 0xb98a63, roughness: 0.9 })
-    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 0.6, 4, 8), shirt)
-    torso.position.y = 0.72
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 10), skin)
-    head.position.y = 1.22
-    const legs = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 0.55, 8), new THREE.MeshStandardMaterial({ color: 0x2f3f34 }))
-    legs.position.y = 0.28
-    keeper.add(torso, head, legs)
+    const poses: Record<KeeperPose, THREE.Mesh> = {
+      ready: billboard('/life/art/pen-keeper-ready.png', 1.62),
+      left: billboard('/life/art/pen-keeper-left.png', 1.15),
+      right: billboard('/life/art/pen-keeper-right.png', 1.15),
+      caught: billboard('/life/art/pen-keeper-caught.png', 1.0),
+      beaten: billboard('/life/art/pen-keeper-beaten.png', 1.6),
+    }
+    for (const [name, mesh] of Object.entries(poses)) {
+      mesh.position.y = name === 'ready' || name === 'beaten' ? 0.81 : 0.62
+      mesh.visible = name === 'ready'
+      keeper.add(mesh)
+    }
     keeper.position.set(0, 0, GOAL_Z + 0.3)
     scene.add(keeper)
     keeperRef.current = keeper
+    posesRef.current = poses
 
     // the ball
     const ball = new THREE.Mesh(
       new THREE.SphereGeometry(BALL_R, 20, 16),
-      new THREE.MeshStandardMaterial({ map: ballTexture('football'), roughness: 0.55 }),
+      // his own scuffed leather ball, with the drawn one still there if the file is missing
+      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/pen-ball.png'), roughness: 0.55 }),
     )
     ball.position.set(0, BALL_R, 0)
     scene.add(ball)
@@ -127,6 +161,8 @@ export function PenaltyCard({
     shadow.position.set(0, 0.01, 0)
     scene.add(shadow)
 
+    // probe hook: what the scene actually contains, for the screenshot audit
+    ;(window as unknown as { __penaltyDebug?: unknown }).__penaltyDebug = () => 0
     camera.position.set(0, 1.55, 2.6)
     camera.lookAt(0, 1.1, GOAL_Z)
 
@@ -145,9 +181,18 @@ export function PenaltyCard({
         ball.rotation.x += 0.35
         const diveT = Math.min(1, elapsed / 420)
         keeper.position.x = THREE.MathUtils.lerp(0, flight.keeperX, diveT)
-        keeper.rotation.z = THREE.MathUtils.lerp(0, flight.keeperX > 0 ? -0.9 : flight.keeperX < 0 ? 0.9 : 0, diveT)
+        /**
+         * הוא לא מסתובב — he changes picture.
+         *
+         * The old figure rotated ninety degrees, which is what a signpost does, not a
+         * goalkeeper. Now the moment he commits, the still of him standing is swapped for
+         * the still of him in the air on that side, and when it is over he is either on the
+         * floor holding it or walking back to fetch it out of the net.
+         */
+        if (diveT > 0.08) showPose(flight.keeperX > 0.05 ? 'right' : flight.keeperX < -0.05 ? 'left' : 'ready')
         if (tRaw >= 1) flightRef.current = null
       }
+      faceCamera(scene, camera)
       three.renderer.render(scene, camera)
     }
     animate()
@@ -164,6 +209,13 @@ export function PenaltyCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  /** one of his five stills is visible at a time; the rest are loaded and hidden */
+  function showPose(pose: KeeperPose) {
+    const poses = posesRef.current
+    if (!poses) return
+    for (const [name, mesh] of Object.entries(poses)) mesh.visible = name === pose
+  }
+
   function resetBall() {
     const ball = ballRef.current
     const keeper = keeperRef.current
@@ -172,6 +224,7 @@ export function PenaltyCard({
       keeper.position.x = 0
       keeper.rotation.z = 0
     }
+    showPose('ready')
   }
 
   function kick(dx: number, dy: number) {
@@ -196,6 +249,8 @@ export function PenaltyCard({
     setPhase('flight')
     window.setTimeout(() => {
       setLastOutcome(outcome)
+      // caught it, or fetching it out of the net
+      showPose(outcome === 'save' ? 'caught' : 'beaten')
       setResults((prev) => [...prev, outcome])
       setPhase('result')
       window.setTimeout(() => {

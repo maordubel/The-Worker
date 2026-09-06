@@ -106,6 +106,37 @@ const FULL = 90
  * times and short enough that nobody checks whether the game has frozen.
  */
 const PACE = 0.85
+
+/**
+ * צפיפות דרמטית — the match does not run at one speed, because a match is not felt at one
+ * speed (Mission 01 screenplay §25).
+ *
+ * Maor's brief for 12.5.1990 asks for the last five minutes to be given nearly as much
+ * real time as the entire first half: the first forty-five in about sixty-five seconds,
+ * the middle stretch quicker, the boring quarter of an hour between the seventieth and the
+ * eighty-fourth minute almost thrown away, and then the closing minutes — the Yavne
+ * penalty, the corners, Abukasis — slowed almost to a stop.
+ *
+ * That is exactly how anybody remembers this game, and it is the same principle the 1986
+ * finale already uses. Every row is game-minutes per real second; `PACE` above stays as
+ * the fallback for anything outside the table.
+ */
+const DENSITY: ReadonlyArray<{ until: number; pace: number }> = [
+  // 0–45' in ~65s
+  { until: 45, pace: 0.69 },
+  // 46–70' in ~45s
+  { until: 70, pace: 0.56 },
+  // 70–84' in ~10s: the quarter of an hour nobody remembers
+  { until: 84, pace: 1.4 },
+  // 85–90+' in ~45s: the five minutes everybody remembers, one game-minute every 7 seconds
+  { until: 999, pace: 0.14 },
+]
+
+/** how fast the clock is running right now, in game-minutes per real second */
+function paceAt(playedMinute: number): number {
+  for (const row of DENSITY) if (playedMinute < row.until) return row.pace
+  return PACE
+}
 /** real seconds the dropped radio waits on the concrete */
 const DROP_WINDOW_MS = 42000
 
@@ -173,7 +204,7 @@ export class TransistorNet {
   /** Called every frame by the scene, with real milliseconds. */
   tick(delta: number) {
     if (this.phase === 'over') return
-    this.acc += (delta / 1000) * PACE
+    this.acc += (delta / 1000) * (this.phase === 'half' ? PACE : paceAt(this.playedMinute()))
     while (this.acc >= 1) {
       this.acc -= 1
       this.advance()
@@ -272,6 +303,8 @@ export class TransistorNet {
     if (this.goals === 6 && state.flags['math:six'] && !this.saidSix) {
       this.saidSix = true
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'net:six' })
+      // §24: at 6:0 the radio is worth nothing and the ground is worth everything
+      this.ctx.bus.emit('sound', { kind: 'listen', weight: 1 })
       this.scene.time.delayedCall(1400, () =>
         this.say([
           { who: null, text: 'שש. הוא מסתובב אליך לאט.' },
@@ -425,6 +458,19 @@ export class TransistorNet {
     this.known.yavne = state
     this.known.yavneAt = this.minute
     this.known.from = from
+    /**
+     * המיקס מתהפך — Mission 01 §24, and the cheapest drama in the chapter.
+     *
+     * The instant somebody is actually listening to the other match, Bloomfield drops to
+     * a third of itself and comes back over the next few seconds. Nothing is said about it
+     * and nothing on the glass changes; the ears do the work. Late on — when a single
+     * result is the whole question — the ground drops almost to silence instead.
+     */
+    const late = this.playedMinute() >= 80
+    this.ctx.bus.emit('sound', { kind: 'listen', weight: late ? 0.08 : 0.3 })
+    this.scene.time.delayedCall(late ? 5200 : 3000, () => {
+      if (this.phase !== 'over') this.ctx.bus.emit('sound', { kind: 'listen', weight: 1 })
+    })
     // The banner on the glass reads one fact — "has he heard anything yet" — and every
     // source in this chapter passes through here, so it is raised in one place.
     if (!this.ctx.engine.state.flags['net:heard']) {

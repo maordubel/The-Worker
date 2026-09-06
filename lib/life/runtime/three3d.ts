@@ -110,6 +110,58 @@ export function ballTexture(kind: 'football' | 'basketball'): THREE.CanvasTextur
   return texture
 }
 
+/**
+ * תמונה אמיתית על משטח — Maor's own cut-outs, standing up in the 3D scene.
+ *
+ * Delivered 6.9.2026: a keeper photographed in five poses, a rusted goal, two balls, a
+ * backboard, a hoop with what is left of its net. They belong in the minigames as real
+ * pictures rather than as the primitives that were standing in for them, and the cheapest
+ * honest way to put a photograph into a 3D scene is a plane that always faces the camera.
+ *
+ * The loader is deliberately forgiving: if a file is missing the caller keeps whatever it
+ * was drawing before, so a half-delivered art drop degrades to the old primitive rather
+ * than to a hole in the pitch.
+ */
+export function imageTexture(url: string, onReady?: (t: THREE.Texture) => void): THREE.Texture {
+  const texture = new THREE.TextureLoader().load(url, (t) => {
+    t.colorSpace = THREE.SRGBColorSpace
+    onReady?.(t)
+  })
+  texture.colorSpace = THREE.SRGBColorSpace
+  return texture
+}
+
+/**
+ * דמות מצולמת, עומדת בסצנה — a billboard: a transparent plane that turns to face the
+ * camera every frame, scaled to the picture's own proportions so nobody is stretched.
+ */
+export function billboard(url: string, height: number): THREE.Mesh {
+  const material = new THREE.MeshBasicMaterial({
+    map: imageTexture(url, (t) => {
+      const image = t.image as { width?: number; height?: number } | undefined
+      if (!image?.width || !image?.height) return
+      // re-shape once the real proportions are known
+      const width = height * (image.width / image.height)
+      mesh.scale.set(width, height, 1)
+    }),
+    transparent: true,
+    alphaTest: 0.35,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  })
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material)
+  mesh.scale.set(height * 0.6, height, 1)
+  mesh.userData.billboard = true
+  return mesh
+}
+
+/** turn every billboard in the scene to face the camera — called once a frame */
+export function faceCamera(scene: THREE.Scene, camera: THREE.Camera) {
+  scene.traverse((object) => {
+    if (object.userData?.billboard) object.quaternion.copy(camera.quaternion)
+  })
+}
+
 /** the light rig every outdoor 3D scene here uses — cheap, and it is always daylight */
 export function daylightRig(scene: THREE.Scene) {
   const hemi = new THREE.HemisphereLight(LIFE_PALETTE.sky, LIFE_PALETTE.dirtDark, 0.95)

@@ -69,6 +69,7 @@ class FakeBuffer {
 }
 
 class FakeContext {
+  gains: FakeGain[] = []
   static last: FakeContext
   state: 'running' | 'suspended' = 'running'
   currentTime = 0
@@ -79,7 +80,10 @@ class FakeContext {
     FakeContext.last = this
   }
   createGain() {
-    return new FakeGain()
+    const gain = new FakeGain()
+    // every gain the game makes, so a test can ask what was ducked and by how much
+    this.gains.push(gain)
+    return gain
   }
   createBiquadFilter() {
     return new FakeFilter()
@@ -362,15 +366,22 @@ describe('רק מה שמאור הקליט', () => {
    * lets them through, and until the files are in `public/life/sfx` they simply resolve to
    * nothing and the ground sounds exactly as it did. This list is what keeps that honest.
    */
-  const PENDING = ['crowd-bed', 'chant-derby']
+  /**
+   * שלוש הקלטות נוספות — delivered 6.9.2026, hours after the wiring went in: the constant
+   * match bed, "על הזין" for the derby, and the opening of "שירים ושערים" for the radio.
+   * They are his recordings like the rest, so they belong in REAL rather than in a pending
+   * list, and every rule below applies to them: a manifest row, both encodings, and a
+   * source that starts with his name.
+   */
+  const DELIVERED_0609 = ['crowd-bed', 'chant-derby', 'radio-open']
 
-  it('the allow-list is his cuts plus the two matchday layers, and nothing else', () => {
-    expect([...LifeAudio.allowed].sort()).toEqual([...REAL, ...PENDING].sort())
+  it('the allow-list is exactly his recordings, and nothing else', () => {
+    expect([...LifeAudio.allowed].sort()).toEqual([...REAL, ...DELIVERED_0609].sort())
   })
 
   it('the library says nothing exists that he did not record', () => {
     const manifest = JSON.parse(require('node:fs').readFileSync('public/life/sfx/manifest.json', 'utf8')) as Record<string, { source?: string }>
-    for (const key of REAL) expect(Object.keys(manifest), key).toContain(key)
+    for (const key of [...REAL, ...DELIVERED_0609]) expect(Object.keys(manifest), key).toContain(key)
     for (const key of Object.keys(manifest)) {
       expect(manifest[key]!.source, `${key} has no recording behind it`).toMatch(/^maor-/)
     }
@@ -378,7 +389,7 @@ describe('רק מה שמאור הקליט', () => {
 
   it('every allowed cut is two files on disk, ogg and m4a', () => {
     const { existsSync } = require('node:fs')
-    for (const key of REAL) {
+    for (const key of [...REAL, ...DELIVERED_0609]) {
       for (const ext of ['ogg', 'm4a']) {
         expect(existsSync(`public/life/sfx/${key}.${ext}`), `${key}.${ext}`).toBe(true)
       }
@@ -395,7 +406,7 @@ describe('רק מה שמאור הקליט', () => {
   it('a matchday layer is either fully delivered or not delivered at all', () => {
     const { existsSync, readFileSync } = require('node:fs')
     const manifest = JSON.parse(readFileSync('public/life/sfx/manifest.json', 'utf8')) as Record<string, unknown>
-    for (const key of PENDING) {
+    for (const key of DELIVERED_0609) {
       const parts = [existsSync(`public/life/sfx/${key}.ogg`), existsSync(`public/life/sfx/${key}.m4a`), key in manifest]
       const there = parts.filter(Boolean).length
       expect(there === 0 || there === 3, `${key} is half-delivered: ogg/m4a/manifest = ${parts.join('/')}`).toBe(true)
@@ -444,5 +455,55 @@ describe('רק מה שמאור הקליט', () => {
     await tick()
     // nothing new is started for a kitchen: the tune is already running, the street stops
     expect(FakeContext.last.started.length).toBe(outdoors)
+  })
+})
+
+/**
+ * המיקס שמספר את הסיפור — Mission 01 §24.
+ *
+ * Standing in a stadium listening to a radio from another one is the whole mechanic of
+ * 12.5.1990, and the mix is how it is felt: the ground ducks while somebody listens and
+ * comes back afterwards. These lock the shape of that, not the exact numbers.
+ */
+describe('להקשיב לרדיו באמצע אצטדיון', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    install()
+    visibility = 'visible'
+    for (const k of Object.keys(listeners)) delete listeners[k]
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('ducks the whole ground and lets it back up', async () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.crowd('LOW_MURMUR')
+    await tick()
+    await tick()
+    audio.listen(0.3)
+    const ducked = FakeContext.last.gains.some((g) => g.gain.calls.some((c) => c.value === 0.3))
+    expect(ducked, 'nothing ducked when the radio came up').toBe(true)
+    audio.listen(1)
+    const back = FakeContext.last.gains.some((g) => g.gain.calls.filter((c) => c.value === 1).length > 0)
+    expect(back, 'the ground never came back').toBe(true)
+  })
+
+  it('takes the bed and the chant down with it', async () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.setDerby(true)
+    audio.crowd('LOW_MURMUR')
+    await tick()
+    await tick()
+    const [bed] = beds()
+    const [chant] = chants()
+    expect(bed, 'no bed to duck').toBeTruthy()
+    expect(chant, 'no chant to duck').toBeTruthy()
+    audio.listen(0.05)
+    // both layers were asked to go almost silent, not stopped
+    expect(bed!.stopped, 'the bed was stopped instead of ducked').toBe(0)
+    expect(chant!.stopped, 'the chant was stopped instead of ducked').toBe(0)
   })
 })

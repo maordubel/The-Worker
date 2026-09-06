@@ -87,5 +87,37 @@
    "music"
   ],
   "source": "maor-theme-2026-09-05"
+ },
+ "crowd-bed": {
+  "seconds": 88.81,
+  "loop": true,
+  "tags": [
+   "crowd",
+   "real",
+   "match"
+  ],
+  "source": "maor-2026-09-06",
+  "note": "the constant bed under every match, football or basketball; reacts to nothing"
+ },
+ "chant-derby": {
+  "seconds": 8.2,
+  "loop": true,
+  "tags": [
+   "crowd",
+   "real",
+   "derby"
+  ],
+  "source": "maor-2026-09-06",
+  "note": "the derby only, mixed over the bed; ducks under a goal rather than stopping"
+ },
+ "radio-open": {
+  "seconds": 23.57,
+  "loop": false,
+  "tags": [
+   "radio",
+   "real"
+  ],
+  "source": "maor-2026-09-06",
+  "note": "the opening of \"שירים ושערים\" — the sound a transistor makes before the results"
  }
 }

@@ -113,6 +113,12 @@ export type LifeBusEvents = {
      * it only when this is true (6.9.2026). The audio never guesses which night it is.
      */
     | { kind: 'derby'; on: boolean }
+    /**
+     * כמה מהאצטדיון להשאיר — the mix inverts while somebody is listening to a radio in the
+     * middle of a crowd (Mission 01 §24). 1 = an ordinary match, 0.3 = news from the other
+     * ground, 0.05 = a penalty nobody in this stadium can see.
+     */
+    | { kind: 'listen'; weight: number }
   anchor: { anchor: HistoricalAnchor; showing: boolean }
   /**
    * הלוח — the scoreboard, while a match is actually happening in front of the child.

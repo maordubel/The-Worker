@@ -248,6 +248,7 @@ export function LifeStage({
         } else if (event.kind === 'radio') sfx.radioOn(event.on)
         else if (event.kind === 'crowd') sfx.crowd(event.state)
         else if (event.kind === 'derby') sfx.setDerby(event.on)
+        else if (event.kind === 'listen') sfx.listen(event.weight)
         else if (event.kind === 'sample') sfx.play(event.key, { ...(event.level !== undefined ? { level: event.level } : {}), ...(event.delayMs !== undefined ? { delayMs: event.delayMs } : {}) })
       }),
     )

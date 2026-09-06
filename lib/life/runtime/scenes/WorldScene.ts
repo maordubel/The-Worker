@@ -1703,8 +1703,34 @@ export class WorldScene extends Phaser.Scene {
    * the front door. Missing the newspaper because you stayed with Ofir is a life; missing
    * your father because you could not find a door is a bug with a stopwatch.
    */
+  /**
+   * האם השעון עומד — and the bug that froze an entire chapter.
+   *
+   * Maor, 6.9.2026: *"במשימה של רשות מאמא התחלתי את היום מחדש, אמא בכלל לא מגיעה, אני לא
+   * מוצא אותה באף מקום באף שעה. השלב הזה לא זורם."*
+   *
+   * He was describing a stopped clock without knowing it. `onboard:street` is the 1986
+   * tutorial guard — the clock does not run while an eight-year-old is still learning to
+   * open his own front door — and it is raised in exactly one place: walking into the
+   * STREET. 11.3.1991 starts in a classroom and its day runs school → home → hall, a route
+   * that never touches the street. So the clock sat at ten past eight for ever: Rachel is
+   * scheduled home from three, Kobi from twenty to six, tip-off is at eight in the evening,
+   * and not one of those hours could ever arrive. Every actor in the chapter was waiting
+   * for a minute that was never going to come.
+   *
+   * The guard now applies only where it was meant to: a chapter that begins in the flat,
+   * before the boy has been outside. Any chapter that starts anywhere else runs its clock
+   * from the first frame, which is what "the world does not wait for you" has always meant
+   * everywhere else in this game.
+   */
+  private clockWaiting(): boolean {
+    if (this.ctx.engine.state.flags['onboard:street']) return false
+    const start = chapterFor(this.chapter)?.start.location
+    return start === 'home' || start === 'bedroom' || start === 'kitchen'
+  }
+
   private tickClock(delta: number) {
-    if (!this.ctx.engine.state.flags['onboard:street']) return
+    if (this.clockWaiting()) return
     this.minuteAcc += (delta / 1000) * this.timeScale * BASE_TIME
     if (this.minuteAcc < 1) return
     const minutes = Math.floor(this.minuteAcc)
@@ -1822,7 +1848,7 @@ export class WorldScene extends Phaser.Scene {
   private tickEncounters(delta: number) {
     const chance = ENCOUNTER_CHANCE[this.def.id]
     if (!chance) return
-    if (!this.ctx.engine.state.flags['onboard:street']) return
+    if (this.clockWaiting()) return
     if (this.since < 2500) return
     this.sinceEncounter += delta
     if (this.sinceEncounter < ENCOUNTER_EVERY) return
@@ -2719,9 +2745,10 @@ export class WorldScene extends Phaser.Scene {
     }
     this.paused = true
     this.ctx.bus.emit('prompt', null)
-    if (to === 'street' && !this.ctx.engine.state.flags['onboard:street']) {
+    if (!this.ctx.engine.state.flags['onboard:street'] && (to === 'street' || this.def.id !== chapterFor(this.chapter)?.start.location)) {
+      // the day has begun: he is out of the room he woke up in, whichever room that was
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'onboard:street' })
-      this.ctx.bus.emit('teach', null)
+      if (to === 'street') this.ctx.bus.emit('teach', null)
     }
     this.ctx.bus.emit('sound', { kind: 'door' })
 

@@ -70,7 +70,7 @@ export type SampleKey =
   | 'amb-park' | 'park-wave'
   | 'amb-theme'
   // ---- 6.9.2026 — the two Maor sent for matchdays ----
-  | 'crowd-bed' | 'chant-derby'
+  | 'crowd-bed' | 'chant-derby' | 'radio-open'
 
 /**
  * מה מותר להישמע — the allow-list, and the whole of the sound policy.
@@ -110,6 +110,14 @@ const ALLOWED: ReadonlySet<string> = new Set<string>([
    */
   'crowd-bed',
   'chant-derby',
+  /**
+   * "שירים ושערים" — the opening of the programme, sent 6.9.2026.
+   *
+   * Not a sound effect: it is the thing a transistor DOES on a Saturday afternoon in this
+   * country, and every radio moment in the game — 1990's promotion arithmetic, the 1998
+   * evening that breaks everybody — starts with somebody finding this station.
+   */
+  'radio-open',
 ])
 
 /**
@@ -190,6 +198,8 @@ export class LifeAudio {
   private derbyChant: { source: AudioBufferSourceNode; gain: GainNode } | null = null
   /** whether the fixture on now is a derby — set by the directors before the first minute */
   private derbyNight = false
+  /** whether a transistor is currently on, so its signature plays once and not per frame */
+  private radio = false
   private crowdLog: { state: CrowdState; at: number }[] = []
 
   constructor() {
@@ -388,6 +398,30 @@ export class LifeAudio {
       source.connect(gain).connect(bus)
       source.start(ctx.currentTime)
     })
+  }
+
+  /**
+   * להקשיב לרדיו באמצע אצטדיון — the mix inverts, and the story is told by the mix.
+   *
+   * Mission 01 §24: normally Bloomfield is ninety per cent of what you can hear and the
+   * transistor is the other ten. When news comes in from the parallel match the priority
+   * flips; on the Yavne penalty the ground is all but gone and there is nothing in the
+   * world except a small speaker held above somebody's head. Then the sixth goal goes in
+   * and the radio does not matter at all any more.
+   *
+   * `weight` is how much of the room to keep: 1 is a normal match, 0.3 is a Yavne update,
+   * 0.05 is the penalty. It ducks the crowd bus, the bed and the chant together, because
+   * a chant that keeps singing under a held breath is nobody's memory of this.
+   */
+  listen(weight: number) {
+    const ctx = this.ctx
+    if (!ctx) return
+    const t = ctx.currentTime
+    const w = Math.max(0, Math.min(1, weight))
+    const fast = w < 0.5 ? 0.25 : 1.1
+    if (this.crowdBus) this.crowdBus.gain.setTargetAtTime(w, t, fast)
+    if (this.matchBed) this.matchBed.gain.gain.setTargetAtTime(BED_LEVEL * w, t, fast)
+    if (this.derbyChant) this.derbyChant.gain.gain.setTargetAtTime(CHANT_LEVEL * w, t, fast)
   }
 
   /**
@@ -688,8 +722,25 @@ export class LifeAudio {
   }
 
   /** AM radio — the set is still in the scene and still in the dialogue; it has no voice */
-  radioOn(_on: boolean) {
-    void _on
+  /**
+   * מדליקים רדיו — and since 6.9.2026 there is something to hear when you do.
+   *
+   * This was an empty stub for months, because the only radio sound in the library was a
+   * synthesised hiss and the synthesiser is gone. Maor sent the opening of "שירים ושערים",
+   * so switching a transistor on now does what switching one on did: the programme's own
+   * signature comes out of it, once, quietly enough to talk over — and switching it off
+   * takes it away. The looping match layers are not touched; this is the set, not the
+   * ground.
+   */
+  radioOn(on: boolean) {
+    if (!this.ctx) return
+    if (on) {
+      if (this.radio) return
+      this.radio = true
+      this.play('radio-open', { bus: 'ambient', level: 0.5 })
+      return
+    }
+    this.radio = false
   }
 
   /**

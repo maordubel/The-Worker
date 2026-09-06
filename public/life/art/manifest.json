@@ -1806,6 +1806,119 @@
    "yellowLeft": 0,
    "source": "maor-2026-09-06",
    "whatHe": "ארגז בקבוקים אדום — הפיקדון, הסחיבה, הישיבה עליו"
+  },
+  "pen-keeper-ready": {
+   "w": 138,
+   "h": 188,
+   "bytes": 31027,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "pen-keeper-left": {
+   "w": 201,
+   "h": 130,
+   "bytes": 26380,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "pen-keeper-right": {
+   "w": 208,
+   "h": 110,
+   "bytes": 24552,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "pen-keeper-caught": {
+   "w": 127,
+   "h": 108,
+   "bytes": 19758,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "pen-keeper-beaten": {
+   "w": 101,
+   "h": 194,
+   "bytes": 27704,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "pen-goal": {
+   "w": 633,
+   "h": 412,
+   "bytes": 438039,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "pen-ball": {
+   "w": 387,
+   "h": 446,
+   "bytes": 303479,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "pen-ball--wet": {
+   "w": 418,
+   "h": 447,
+   "bytes": 322293,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "hoop-board": {
+   "w": 812,
+   "h": 625,
+   "bytes": 922648,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "hoop-ring": {
+   "w": 493,
+   "h": 545,
+   "bytes": 300780,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "hoop-ring--net": {
+   "w": 537,
+   "h": 543,
+   "bytes": 470787,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "hoop-ball": {
+   "w": 581,
+   "h": 611,
+   "bytes": 673863,
+   "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
+   "yellowLeft": 0
+  },
+  "pen-ground": {
+   "w": 512,
+   "h": 512,
+   "bytes": 554081,
+   "source": "maor-2026-09-06-minigames (tileable patch, mirrored)",
+   "yellowLeft": 0
+  },
+  "hoop-court": {
+   "w": 512,
+   "h": 512,
+   "bytes": 505542,
+   "source": "maor-2026-09-06-minigames (tileable patch, mirrored)",
+   "yellowLeft": 0
+  },
+  "pen-kids": {
+   "w": 660,
+   "h": 425,
+   "bytes": 460767,
+   "source": "maor-2026-09-06-minigames (cut from his sheets)",
+   "yellowLeft": 0,
+   "deyellowed": 52
+  },
+  "hoop-building": {
+   "w": 880,
+   "h": 600,
+   "bytes": 930941,
+   "source": "maor-2026-09-06-minigames (cut from his sheets)",
+   "yellowLeft": 0
   }
  },
  "portraits": {

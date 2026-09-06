@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { t } from '@/lib/i18n'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
-import { ballTexture, daylightRig, disposeThree, mountThree, resizeThree, shadowDecal, type Three3D } from '@/lib/life/runtime/three3d'
+import { daylightRig, disposeThree, faceCamera, imageTexture, mountThree, resizeThree, shadowDecal, type Three3D } from '@/lib/life/runtime/three3d'
 
 /**
  * תחרות חיובים — five free throws at the schoolyard hoop, in three dimensions.
@@ -58,7 +58,16 @@ export function HoopsCard({
 
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(30, 30),
-      new THREE.MeshStandardMaterial({ color: LIFE_PALETTE.asphalt, roughness: 1 }),
+      // his schoolyard: cracked asphalt with the faded lines still on it, tiled six ways
+      new THREE.MeshStandardMaterial({
+        map: imageTexture('/life/art/hoop-court.png', (texture) => {
+          texture.wrapS = THREE.RepeatWrapping
+          texture.wrapT = THREE.RepeatWrapping
+          texture.repeat.set(6, 6)
+        }),
+        color: LIFE_PALETTE.asphalt,
+        roughness: 1,
+      }),
     )
     ground.rotation.x = -Math.PI / 2
     ground.position.z = RIM_Z / 2
@@ -84,9 +93,16 @@ export function HoopsCard({
     )
     pole.position.set(0, (RIM_HEIGHT + 0.6) / 2, RIM_Z - 0.55)
     scene.add(pole)
+    /**
+     * הלוח — הלוח שלו, לא מלבן לבן.
+     *
+     * Maor sent the real thing on 6.9.2026: rusted at the corners, the square repainted so
+     * many times it has stopped being white. It is mapped onto the same box the primitive
+     * used, so the physics that were tuned against that box do not move a millimetre.
+     */
     const board = new THREE.Mesh(
       new THREE.BoxGeometry(1.4, 0.9, 0.05),
-      new THREE.MeshStandardMaterial({ color: LIFE_PALETTE.chalk, roughness: 0.5, transparent: true, opacity: 0.92 }),
+      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/hoop-board.png'), roughness: 0.6, transparent: true }),
     )
     board.position.set(0, RIM_HEIGHT + 0.45, RIM_Z - 0.2)
     scene.add(board)
@@ -97,16 +113,22 @@ export function HoopsCard({
     rim.rotation.x = Math.PI / 2
     rim.position.set(0, RIM_HEIGHT, RIM_Z)
     scene.add(rim)
+    // his net: half of it torn away, which is what a schoolyard hoop looks like
     const net = new THREE.Mesh(
       new THREE.ConeGeometry(RIM_RADIUS * 0.95, 0.38, 10, 1, true),
-      new THREE.MeshBasicMaterial({ color: LIFE_PALETTE.chalk, wireframe: true, transparent: true, opacity: 0.6 }),
+      new THREE.MeshBasicMaterial({
+        map: imageTexture('/life/art/hoop-ring--net.png'),
+        transparent: true,
+        alphaTest: 0.25,
+        side: THREE.DoubleSide,
+      }),
     )
     net.position.set(0, RIM_HEIGHT - 0.19, RIM_Z)
     scene.add(net)
 
     const ball = new THREE.Mesh(
       new THREE.SphereGeometry(BALL_R, 20, 16),
-      new THREE.MeshStandardMaterial({ map: ballTexture('basketball'), roughness: 0.6 }),
+      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/hoop-ball.png'), roughness: 0.6 }),
     )
     ball.position.set(0, 1.1, 0)
     scene.add(ball)
