@@ -1,7 +1,7 @@
 import { at } from '../clock'
 import type { LocationId } from '../types'
 
-import { GIGS, gigChapters, gigId } from '../gigs'
+import { GIGS, gigChapters, gigId, isPaid, offerFlag } from '../gigs'
 import { SHOP_CHAPTERS, shopId } from '../shirts'
 import type { Condition } from './types'
 
@@ -227,6 +227,16 @@ export type SceneDef = {
   /** the same room painted in another year — `bedroom90`, `street90` */
   artByEra?: Record<string, string>
   band: { far: number; near: number }
+  /**
+   * רצועת ההליכה של הערב הזה — the same room, a different floor to stand on.
+   *
+   * A hall on a Saturday morning is a room you cross; a hall on a derby night is a place
+   * you are allowed to stand at the EDGE of, because eight hundred people are in it and
+   * the parquet is not yours. Rather than build a second Ussishkin, the night narrows the
+   * band to the near strip: the boy is at courtside, on the step, where he belongs, and
+   * he physically cannot wander into the middle of a game.
+   */
+  bandByEra?: Record<string, { far: number; near: number }>
   size: { far: number; near: number }
   /**
    * המטר — how much of the frame one metre occupies at the NEAR line of this room.
@@ -423,6 +433,13 @@ function gigSpots(where: string) {
       verb: 'look' as const,
       labelHe: gig.labelHe,
       priority: 3,
+      /**
+       * הרוטציה — a paid job is only in the room if this life was offered it this chapter
+       * (`gigs.ts` → `offeredIn`, raised as a flag when the room is built). The two
+       * contests carry no offer flag and are always there, because a ball in a yard does
+       * not need anybody's permission.
+       */
+      ...(isPaid(gig) ? { when: { flag: offerFlag(gig) } as Condition } : {}),
     })),
   )
 }
@@ -797,6 +814,7 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
+      ...gigSpots('kitchen'),
       { id: 'radio-a6', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
       // On the floor at the end of the run of cupboards, which is where a crate of empties
       // lives in a flat that takes them back for the deposit.
@@ -1634,6 +1652,7 @@ const SCENES: SceneDef[] = [
       { id: 'kobi-walk', era: '1990', figure: 'kobi90-side', x: 0.84, y: 0.8, size: 0.3, nameHe: 'קובי', talk: 'kobi-found-1990', flip: true, when: { flag: 'found:kobi' } },
     ],
     hotspots: [
+      ...gigSpots('route'),
       { id: 'banner', era: '*', x: 0.2, y: 0.715, w: 0.09, act: 'route-banner', verb: 'look', labelHe: 'השלט' },
       { id: 'stream-1990', era: '1990', x: 0.5, y: 0.86, w: 0.12, act: 'route-stream-1990', verb: 'look', labelHe: 'הנהר האדום' },
       // The street family's reward: a gap between two buildings that everybody who grew
@@ -2492,6 +2511,8 @@ const SCENES: SceneDef[] = [
     // 5.9.2026: the two relegation nights are painted as nights — the hall lit, half empty
     artByEra: { '1997-basket': 'ussHallNight', '1999-basket': 'ussHallNight' },
     band: { far: 0.72, near: 0.96 },
+    // 11.3.1991 — courtside, not centre court (Maor, 6.9.2026: "הפרקט עדיין מלא בדמויות")
+    bandByEra: { '1991': { far: 0.855, near: 0.965 } },
     /**
      * גם הילד — `size` is the player's OWN near/far height (`playerSize()`), not only the
      * taper ratio `bodySizeAt` borrows from it (`size.far / size.near`). Shrinking `metre`
@@ -2549,30 +2570,33 @@ const SCENES: SceneDef[] = [
      * a tin roof's lamps make of the dust, and, once it is won, red smoke.
      */
     layers: [
-      { art: 'adultA7', era: '1991', x: 0.035, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.004, flip: true },
-      { art: 'adultB1', era: '1991', x: 0.071, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.006 },
-      { art: 'youngB3', era: '1991', x: 0.106, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.008 },
-      { art: 'adultB4', era: '1991', x: 0.142, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.01, flip: true },
-      { art: 'adultB1', era: '1991', x: 0.177, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.012 },
-      { art: 'adultA7', era: '1991', x: 0.213, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.004 },
-      { art: 'youngA4', era: '1991', x: 0.248, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.006, flip: true },
-      { art: 'adultA4', era: '1991', x: 0.284, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.008 },
-      { art: 'adultA1', era: '1991', x: 0.319, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.01 },
-      { art: 'adultB1', era: '1991', x: 0.354, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.012, flip: true },
-      { art: 'youngB5', era: '1991', x: 0.39, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.004 },
-      { art: 'adultB6', era: '1991', x: 0.425, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.006 },
-      { art: 'adultA7', era: '1991', x: 0.461, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.008, flip: true },
-      { art: 'youngA6', era: '1991', x: 0.496, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.01 },
-      { art: 'adultB4', era: '1991', x: 0.532, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.012 },
-      { art: 'adultA3', era: '1991', x: 0.567, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.004, flip: true },
-      { art: 'adultB1', era: '1991', x: 0.603, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.006 },
-      { art: 'youngB1', era: '1991', x: 0.638, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.008 },
-      { art: 'adultA7', era: '1991', x: 0.674, y: 0.648, w: 0.046, depth: 0.648, foot: true, bob: 0.01, flip: true },
-      { art: 'adultB5', era: '1991', x: 0.709, y: 0.676, w: 0.046, depth: 0.676, foot: true, bob: 0.012 },
-
-      // Two on the boy's own step, at the far end, so there is somebody to walk behind.
-      { art: 'adultB4', era: '1991', x: 0.78, y: 0.79, w: 0.062, depth: 0.79, foot: true, bob: 0.006 },
-      { art: 'youngB7', era: '1991', x: 0.87, y: 0.83, w: 0.06, depth: 0.83, foot: true, bob: 0.011, flip: true },
+      /**
+       * הקהל ביציע — ולא על הפרקט.
+       *
+       * Maor, 6.9.2026: *"האוהדים אינם ביציע, הפרקט עדיין מלא בדמויות"* — and he was right,
+       * completely. Twenty supporter cut-outs were standing in a line ON THE COURT, between
+       * the advertising boards and the sideline, on a night eight hundred people were
+       * supposedly packed into the stand behind them. The stand itself was empty painted
+       * seats. It read as a school hall with some men loitering on the parquet, which is the
+       * opposite of the memory this room exists to hold.
+       *
+       * The crowd is now ONE piece: the stand Maor drew and sent — a packed 1980s Ussishkin
+       * terrace, higher on the left, sloping away to the right, with its own staircases and
+       * a diagonal handrail — keyed off its white ground and fitted to the painted tiers.
+       * The fit is measured, not eyeballed: the painting's front row sits at y=505 of 900
+       * and its top row runs from y=190 on the left to y=300 on the right; the crowd plate
+       * is 1672x453 and at a width of 1170px its own slope lands on that same line, bottom
+       * edge on the front row. Nothing on the parquet at all.
+       *
+       * The two hall nights at the end of the decade are NOT this. 1997 and 1999 are the
+       * relegation years and the hall was half empty, so the same plate is placed narrower
+       * and only over the left block — a full corner and bare seats beside it, which is what
+       * a bad night actually looks like from the floor.
+       */
+      { art: 'ussCrowd', era: '1991', x: 0.3656, y: 0.5611, w: 0.731, depth: 0.56, foot: true },
+      { art: 'ussCrowd', era: '1993-cup', x: 0.3656, y: 0.5611, w: 0.731, depth: 0.56, foot: true },
+      { art: 'ussCrowd', era: '1997-basket', x: 0.17, y: 0.5611, w: 0.34, depth: 0.56, foot: true },
+      { art: 'ussCrowd', era: '1999-basket', x: 0.17, y: 0.5611, w: 0.34, depth: 0.56, foot: true },
 
       // The air of the room, and then the smoke that only exists once it is over.
       { art: 'overlayHaze', era: '1991', x: 0, y: 0, w: 1, depth: 0.995, alpha: 0.5 },
@@ -2652,6 +2676,7 @@ const SCENES: SceneDef[] = [
       { id: 'hooper-d', era: '*', figure: 'hooperRed-bent', x: 0.7, y: 0.8, size: 0.18, nameHe: 'שחקן', sway: 0.005 },
     ],
     hotspots: [
+      ...gigSpots('ussishkin-end'),
       { id: 'basket', era: '*', x: 0.5, y: 0.9, w: 0.12, act: 'uss-basket', verb: 'look', labelHe: 'הסל' },
       { id: 'board', era: '*', x: 0.28, y: 0.86, w: 0.1, act: 'uss-board', verb: 'look', labelHe: 'לוח התוצאות' },
     ],
@@ -2739,6 +2764,7 @@ const SCENES: SceneDef[] = [
       { art: 'pupil-turn', era: '1991', x: 0.6, y: 0.68, w: 0.05, depth: 0.68, foot: true },
     ],
     hotspots: [
+      ...gigSpots('classroom'),
       {
         id: 'my-desk',
         era: '1991',
@@ -2875,7 +2901,7 @@ const SCENES: SceneDef[] = [
         flip: true,
       },
     ],
-    hotspots: [],
+    hotspots: [...gigSpots('gate5')],
     exits: [
       {
         id: 'back',
@@ -2907,6 +2933,7 @@ const SCENES: SceneDef[] = [
     stuckHe: 'רציף. שעון. אוטובוס אחד שמגיע בזמן.',
     actors: [],
     hotspots: [
+      ...gigSpots('bus-station'),
       { id: 'bus', era: '1996-army', x: 0.5, y: 0.8, w: 0.18, act: 'a3-bus', verb: 'look', labelHe: 'האוטובוס', priority: 3 },
     ],
     exits: [

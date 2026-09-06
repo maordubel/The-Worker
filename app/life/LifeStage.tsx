@@ -247,6 +247,7 @@ export function LifeStage({
           if ((event.big ?? 1) >= 2) setFlash((f) => ({ tone: 'red', nonce: f.nonce + 1 }))
         } else if (event.kind === 'radio') sfx.radioOn(event.on)
         else if (event.kind === 'crowd') sfx.crowd(event.state)
+        else if (event.kind === 'derby') sfx.setDerby(event.on)
         else if (event.kind === 'sample') sfx.play(event.key, { ...(event.level !== undefined ? { level: event.level } : {}), ...(event.delayMs !== undefined ? { delayMs: event.delayMs } : {}) })
       }),
     )

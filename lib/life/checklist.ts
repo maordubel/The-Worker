@@ -49,6 +49,16 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'school', textHe: 'בית ספר. עד הצלצול.', doneWhen: F('school:done') },
     { id: 'hw', textHe: 'שיעורי בית — או משהו שנראה כמו.', revealWhen: F('hw:given'), doneWhen: ANY('hw:done', 'hw:half', 'hw:faked') },
     { id: 'permission', textHe: 'רשות מאמא. או דרך אחרת.', revealWhen: ANY('hw:done', 'hw:half', 'hw:faked'), doneWhen: ANY('permission:yes', 'sneak:ready') },
+    /**
+     * אמרה לא — and the list says where the other way is, by name.
+     *
+     * A boy told "no" at seven in the evening has two routes and neither of them is a
+     * locked door: the pad on the kitchen table (leave a note and go, and pay for it
+     * later), or the evening at home by the radio, which is a real 11.3.1991 and ends the
+     * chapter like any other. This line exists because the version without it left a
+     * player standing in a flat with nothing to press (6.9.2026).
+     */
+    { id: 'refused', textHe: 'אמרה לא. הפנקס במטבח — אפשר להשאיר פתק. אפשר גם להישאר.', revealWhen: F('permission:no'), doneWhen: ANY('sneak:ready', 'night:home', 'derby:over') },
     { id: 'hall', textHe: 'אוסישקין. הדלת.', revealWhen: ANY('permission:yes', 'sneak:ready'), doneWhen: F('spot:asked') },
     { id: 'derby', textHe: 'הדרבי.', revealWhen: F('spot:asked'), doneWhen: F('derby:over') },
     { id: 'home', textHe: 'הביתה. לפני שמישהו שם לב.', revealWhen: F('derby:over'), doneWhen: F('walked:home') },

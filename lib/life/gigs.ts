@@ -65,6 +65,21 @@ export type Gig = {
    * two above — a real thing to be good or bad at is worth more than a number.
    */
   opens?: 'toto' | 'coin' | 'penalty' | 'hoops'
+  /**
+   * האם זו עבודה — or is it just a thing boys do.
+   *
+   * Maor, 6.9.2026: *"זריקה לסל ובעיטת פנדלים לא צריכים להיות רווח כספי, זה להנאה בלבד."*
+   * He is right, and it was a design smell: the moment a penalty shoot-out pays a wage,
+   * the pitch stops being the pitch and becomes a cash machine with a ball in it, and
+   * every kick is arithmetic instead of nerve. Unpaid gigs cost the same afternoon and the
+   * same energy, pay nothing, and are worth playing for the only thing they were ever
+   * about — being the one who scored.
+   *
+   * Unpaid work is also outside the one-job-per-chapter rule below, because a rule that
+   * stops a boy kicking a ball because he already carried crates is a rule about a
+   * spreadsheet, not about a childhood.
+   */
+  paid?: boolean
 }
 
 /**
@@ -306,12 +321,13 @@ export const GIGS: readonly Gig[] = [
     hours: 0.5,
     minutes: 25,
     energy: 10,
-    askHe: 'חמש בעיטות. שקל לכל גול.',
+    askHe: 'חמש בעיטות. בלי כסף — בשביל השם.',
     openHe: 'הם מעמידים שני מוטות עץ לרוחב, ואחד מהגדולים עומד בשער. "חמש בעיטות. תראה מה יש לך."',
-    doneHe: 'הם סופרים בקול, גם כשאתה לא רוצה שיספרו.',
+    doneHe: 'הם סופרים בקול, גם כשאתה לא רוצה שיספרו. אף אחד לא מוציא כסף.',
     trait: { key: 'courage', delta: 2 },
     at: { x: 0.9, y: 0.87, w: 0.08 },
     opens: 'penalty',
+    paid: false,
   },
   {
     id: 'hoops-contest',
@@ -323,12 +339,13 @@ export const GIGS: readonly Gig[] = [
     hours: 0.5,
     minutes: 20,
     energy: 8,
-    askHe: 'חמש זריקות מהקו. שקל לכל סל.',
+    askHe: 'חמש זריקות מהקו. מי שקולע — מלך ההפסקה.',
     openHe: 'קו לבן מצויר על האספלט, כבר דהוי. "חמש זריקות. מי שקולע יותר משלוש הוא המלך של ההפסקה."',
     doneHe: 'הכדור מקפץ על החישוק בלי רשת, ואף אחד לא מסכים על הספירה.',
     trait: { key: 'independence', delta: 2 },
     at: { x: 0.5, y: 0.84, w: 0.09 },
     opens: 'hoops',
+    paid: false,
   },
   {
     id: 'wash-cars',
@@ -345,15 +362,177 @@ export const GIGS: readonly Gig[] = [
     trait: { key: 'independence', delta: 3 },
     at: { x: 0.58, y: 0.87, w: 0.09 },
   },
+
+  /**
+   * שש עבודות בשישה מקומות אחרים — 6.9.2026.
+   *
+   * *"צריך לחלק את נקודות ה'עבודה' האלו ביותר מקומות במפה וביותר מגוון מסכים, עם היגיון."*
+   * Eleven of the sixteen jobs stood in three rooms, and five of them in the street alone,
+   * so a boy who needed money went to the same corner every chapter and the rest of the
+   * city had nothing to offer him. These six are placed where that decade actually paid a
+   * child: the road to the ground on a matchday, the platform, the kitchen table at home,
+   * the classroom after the bell, the end wall of the hall, and Gate 5 in the years the
+   * terrace was building itself. Every one of them is in a room the player already walks
+   * through for another reason, so the work is on the way rather than a detour.
+   */
+  {
+    id: 'seeds-route',
+    where: 'route',
+    nameHe: 'הדוכן על הדרך',
+    labelHe: 'שקיות גרעינים',
+    from: 'a5-first',
+    hours: 0.8,
+    minutes: 30,
+    energy: 12,
+    askHe: 'למכור גרעינים לאנשים שהולכים למשחק.',
+    openHe: 'ארגז על שרפרף, שקיות נייר חומות, ורחוב שלם שהולך לכיוון אחד. "תעמוד פה ותצעק. אני חוזר."',
+    doneHe: 'הארגז ריק, הידיים מלוחות, והרחוב עוד הולך.',
+    trait: { key: 'courage', delta: 2 },
+    at: { x: 0.3, y: 0.83, w: 0.09 },
+  },
+  {
+    id: 'kitchen-help',
+    where: 'kitchen',
+    nameHe: 'אמא',
+    labelHe: 'לעזור לאמא במטבח',
+    from: 'a3-hall',
+    hours: 0.6,
+    minutes: 25,
+    energy: 8,
+    askHe: 'לקלף, לשטוף, לסדר. זה לא משכורת — זה תודה.',
+    openHe: 'היא לא מבקשת פעמיים. היא רק מזיזה את הקערה לכיוון שלך ומחכה.',
+    doneHe: 'היא נותנת לך משהו קטן מהארנק ואומרת "זה לא משכורת".',
+    rel: { who: 'rachel', axis: 'trust', delta: 3 },
+    trait: { key: 'responsibility', delta: 3 },
+    at: { x: 0.62, y: 0.9, w: 0.1 },
+  },
+  {
+    id: 'chairs-end',
+    where: 'ussishkin-end',
+    nameHe: 'הכיסאות בקצה',
+    labelHe: 'לסדר כיסאות',
+    from: '1991',
+    hours: 1,
+    minutes: 35,
+    energy: 16,
+    askHe: 'לסדר את הכיסאות מתחת לסל.',
+    openHe: 'ערימה של כיסאות פלסטיק אדומים, חצי מהם שבורים, וכל אחד שסוחב שניים סוחב פחות.',
+    doneHe: 'שורה ישרה של כיסאות, וכתפיים שכואבות מחר.',
+    rel: { who: 'shachor', axis: 'bond', delta: 3 },
+    trait: { key: 'reliability', delta: 3 },
+    at: { x: 0.3, y: 0.88, w: 0.1 },
+  },
+  {
+    id: 'board-classroom',
+    where: 'classroom',
+    nameHe: 'המורה',
+    labelHe: 'למחוק את הלוח',
+    from: '1991',
+    hours: 0.4,
+    minutes: 15,
+    energy: 5,
+    askHe: 'למחוק לוח, לסדר כיסאות, לנקות מטליות.',
+    openHe: 'הכיתה ריקה, האבק מהמטלית עולה בקו של האור, והמורה כותב משהו בפנקס.',
+    doneHe: 'לוח נקי, ידיים לבנות, ומטבע שהוא מוציא בלי לספור.',
+    rel: { who: 'teacher', axis: 'trust', delta: 3 },
+    trait: { key: 'reliability', delta: 2 },
+    at: { x: 0.42, y: 0.9, w: 0.1 },
+  },
+  {
+    id: 'platform-bags',
+    where: 'bus-station',
+    nameHe: 'הרציף',
+    labelHe: 'לעזור עם תיקים',
+    from: '1996-army',
+    hours: 0.7,
+    minutes: 25,
+    energy: 12,
+    askHe: 'לעזור לאנשים עם תיקים אל האוטובוס.',
+    openHe: 'רציף, שמונה בבוקר, ומזוודה אחת שאף אחד לא מצליח להרים לבד.',
+    doneHe: 'שלושה תיקים, שתי תודות, ומטבע אחד ביד.',
+    trait: { key: 'empathy', delta: 3 },
+    at: { x: 0.7, y: 0.82, w: 0.1 },
+  },
+  {
+    id: 'banner-gate5',
+    where: 'gate5',
+    nameHe: 'אסף',
+    labelHe: 'להרים את הבד',
+    from: '1998-laces',
+    hours: 1,
+    minutes: 35,
+    energy: 18,
+    askHe: 'לפרוש בד, לקשור, להחזיק. אף אחד לא מדבר על כסף.',
+    openHe: 'הוא לא מציג את עצמו. הוא רק אומר "תרים", ומראה על הקצה השני של הבד.',
+    doneHe: 'הבד פרוש, הידיים שחורות מהחבל, ומישהו קורא לך בשם.',
+    rel: { who: 'asaf', axis: 'trust', delta: 4 },
+    trait: { key: 'reliability', delta: 4 },
+    at: { x: 0.36, y: 0.88, w: 0.1 },
+  },
 ]
 
 export const gigId = (gig: Gig, chapter: string) => `gig-${gig.id}-${chapter}`
 export const gigFlag = (gig: Gig) => `gig:${gig.id}`
 
+/** whether this is work at all — everything is, except the two contests */
+export const isPaid = (gig: Gig) => gig.paid !== false
+
 /** whole shekels for one turn of this gig, in the money of the chapter's decade */
 export function gigPay(gig: Gig, chapter: string): number {
+  if (!isPaid(gig)) return 0
   if (gig.id === 'bottles-round') return Math.round(BOTTLE[decadeOf(chapter)] * 4)
   return Math.max(1, Math.round(WAGE[decadeOf(chapter)] * gig.hours))
+}
+
+/**
+ * עבודה אחת לפרק — the flag that says this chapter's paid work has been done.
+ *
+ * Maor, 6.9.2026: *"צריך להגביל את האפשרות להרוויח כסף, פעם אחת בכל משימה."* Before this,
+ * money was a tap: every job was once a DAY, and a day is short, so a determined player
+ * could stand in the street doing bottles, cars, papers and crates in one afternoon and
+ * buy the shirt on the first Saturday. One paid job per chapter puts the shirt back where
+ * §13 of the Stage A bible wants it — several memory days away — and makes WHICH job you
+ * took a decision rather than a queue.
+ */
+export const workDoneFlag = (chapter: string) => `work:paid:${chapter}`
+
+/** the flag that says this particular job is on offer in this life, this chapter */
+export const offerFlag = (gig: Gig) => `work:offer:${gig.id}`
+
+/**
+ * מה מוצע היום — the rotation, and the reason two players never have the same week.
+ *
+ * *"וכל פעם הצעות רנדומליות, לא תמיד כל האופציות קיימות. ליצור רוטציות חכמות, ליצור שוני
+ * ביום יום של פוגי."* Every eligible paid job in a room used to be on offer, always, which
+ * made the street a menu. Now a chapter offers a SUBSET, chosen from the save's own seed:
+ * the same save sees the same jobs every time it loads that chapter (so it is a world, not
+ * a slot machine), and two saves see different ones (so it is a life, not a script).
+ *
+ * Two rules keep it from being merely random:
+ *   · at least one paid job is always reachable somewhere in the chapter, because a
+ *     chapter that offers no way to earn is a chapter that cannot be played by a boy who
+ *     needs money;
+ *   · the unpaid contests are never rotated out — the ball is always there.
+ */
+export function offeredIn(chapter: string, seed: string): Set<string> {
+  const eligible = GIGS.filter((gig) => isPaid(gig) && gigChapters(gig).includes(chapter))
+  if (eligible.length === 0) return new Set()
+  const scored = eligible
+    .map((gig) => ({ id: gig.id, score: hash(`${seed}|${chapter}|${gig.id}`) }))
+    .sort((a, b) => a.score - b.score)
+  // between a third and two thirds of what exists, never fewer than one, never all of it
+  const take = Math.max(1, Math.min(eligible.length - (eligible.length > 2 ? 1 : 0), Math.round(eligible.length * 0.45)))
+  return new Set(scored.slice(0, take).map((entry) => entry.id))
+}
+
+/** a small, stable string hash — the rotation has to survive a reload, not a cryptanalyst */
+function hash(text: string): number {
+  let h = 2166136261
+  for (let i = 0; i < text.length; i += 1) {
+    h ^= text.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return (h >>> 0) / 4294967295
 }
 
 /** the gigs that exist in this chapter, in this room */
@@ -396,6 +575,20 @@ export function gigConversations(): Conversation[] {
             when: { flag: gigFlag(gig) } as Condition,
             lines: [{ who: null, text: 'עשית את זה היום כבר. מחר יש עוד.' }],
           },
+          /**
+           * כבר עבדת — the refusal that enforces one paid job per chapter, in a person's
+           * voice rather than a greyed-out button. The work still exists; today it is
+           * somebody else's turn, which is exactly how a street with four kids in it and
+           * one crate to carry actually behaves.
+           */
+          ...(isPaid(gig)
+            ? [
+                {
+                  when: { flag: workDoneFlag(chapter) } as Condition,
+                  lines: [{ who: null, text: 'היום כבר יש מי שעושה את זה. תבוא בפעם הבאה.' }],
+                },
+              ]
+            : []),
           {
             lines: [{ who: null, text: gig.openHe }],
             choices: [
@@ -410,13 +603,18 @@ export function gigConversations(): Conversation[] {
                 then: [
                   ...(gig.rel ? [{ e: 'rel' as const, who: gig.rel.who, axis: gig.rel.axis, delta: gig.rel.delta }] : []),
                   ...(gig.opens === 'toto'
-                    ? [{ e: 'flag' as const, flag: gigFlag(gig) }, { e: 'toto' as const }]
+                    ? [
+                        { e: 'flag' as const, flag: gigFlag(gig) },
+                        { e: 'flag' as const, flag: workDoneFlag(chapter) },
+                        { e: 'toto' as const },
+                      ]
                     : gig.opens === 'coin'
-                      ? [{ e: 'coin' as const }]
+                      ? [{ e: 'flag' as const, flag: workDoneFlag(chapter) }, { e: 'coin' as const }]
                       : gig.opens === 'penalty'
-                        ? [{ e: 'penalty' as const, attempts: 5, perGoal: Math.max(1, Math.round(pay / 5)) }]
+                        ? // no money: five kicks, and whatever the big boys say afterwards
+                          [{ e: 'penalty' as const, attempts: 5, perGoal: 0 }]
                         : gig.opens === 'hoops'
-                          ? [{ e: 'hoops' as const, attempts: 5, perBasket: Math.max(1, Math.round(pay / 5)) }]
+                          ? [{ e: 'hoops' as const, attempts: 5, perBasket: 0 }]
                           : [{ e: 'minigame' as const, id: `chore:${gig.id}` }]),
                 ],
               },

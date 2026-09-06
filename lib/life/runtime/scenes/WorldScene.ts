@@ -5,7 +5,7 @@ import type { EndingCard } from '../../content/chapter1986'
 import { clockLabel } from '../../clock'
 import type { AmbientActor } from '../../content/ambient1986'
 import { SCHOOL_MORNING_1990, TABLE_1990 } from '../../content/chapter1990'
-import { CLASSROOM_1991, closing1991, HOME_NIGHT_1991, SCHOOL_STARTS, TIP_OFF } from '../../content/chapter1991'
+import { CLASSROOM_1991, closing1991, CURFEW, HOME_NIGHT_1991, SCHOOL_STARTS, TIP_OFF } from '../../content/chapter1991'
 import { anchorFor, ERA_1991, eraFor, type Era } from '../../content/era'
 import { chapterFor, nextPlayable, playableChapters, type ChapterDef } from '../../content/chapters'
 import { arrivedBetween, onSale, ownedShirts, wearingAt, wornFlag, SHIRT_NEW_HE } from '../../shirts'
@@ -21,6 +21,8 @@ import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match
 import type { Condition } from '../../world/types'
 import { cutFor, filmFlag } from '../../world/transitions'
 import { bodySize } from '../../world/heights'
+import { LivingWorld } from '../living'
+import { GIGS, isPaid, offerFlag, offeredIn } from '../../gigs'
 
 /**
  * הערבים שבהם יש כדורסל באוסישקין — the chapters whose evening happens inside the hall.
@@ -214,6 +216,8 @@ export class WorldScene extends Phaser.Scene {
 
   private actors: Actor[] = []
   private ambient: Ambient[] = []
+  /** birds, a cat, dust off his own shoes, light that breathes — `runtime/living.ts` */
+  private living: LivingWorld | null = null
   /** dressing that can appear mid-scene, and the two that bounce */
   private layers: Array<{ def: LayerDef; image: Phaser.GameObjects.Image; baseY: number }> = []
   private hotspots: Hotspot[] = []
@@ -417,9 +421,11 @@ export class WorldScene extends Phaser.Scene {
     this.buildLayers()
     this.buildActors(state)
     this.buildAmbient(state)
+    this.rollWorkOffers(state)
     this.buildHotspots(state)
     this.buildPlayer()
     this.buildAir()
+    this.buildLiving()
     this.buildGrade()
 
     /**
@@ -718,18 +724,35 @@ export class WorldScene extends Phaser.Scene {
     // lights and the player's own bob; borrowing a clock is how a fix to one of those
     // silently changes the speed of a crowd.
     this.bobbing += delta / 1000
+    const gust = this.living?.gustNow() ?? 0
     for (const entry of this.layers) {
       const amount = entry.def.bob
-      if (!amount || !entry.image.visible) continue
       const phase = entry.def.x * 37
-      entry.image.y = entry.baseY - Math.abs(Math.sin(this.bobbing * 5.2 + phase)) * amount * this.H
+      if (amount && entry.image.visible) {
+        entry.image.y = entry.baseY - Math.abs(Math.sin(this.bobbing * 5.2 + phase)) * amount * this.H
+      }
+      /**
+       * הרוח עוברת בחדר — every piece of dressing leans, not only the ones that bounce.
+       *
+       * A gust crosses the room every ten seconds or so (`runtime/living.ts`) and this is
+       * where it lands: a fifth of a per cent of the frame, sheared by the object's own
+       * phase so a washing line and a poster four metres away do not move together. It is
+       * the difference between air and no air. Objects standing on the floor lean less
+       * than things hanging on a wall, which is why the amount is scaled by depth.
+       */
+      if (gust > 0.01 && entry.image.visible) {
+        const lean = entry.def.foot ? 0.15 : 1
+        entry.image.rotation = Math.sin(this.bobbing * 3.1 + phase) * gust * 0.02 * lean
+      } else if (entry.image.rotation !== 0) {
+        entry.image.rotation *= 0.9
+      }
     }
   }
 
   private buildPlayer() {
     const spawn = this.def.spawns[this.spawnName] ?? Object.values(this.def.spawns)[0] ?? { x: 0.5, y: 0.9 }
     const x = spawn.x * this.W
-    const y = Phaser.Math.Clamp(spawn.y, this.def.band.far, this.def.band.near) * this.H
+    const y = Phaser.Math.Clamp(spawn.y, this.band().far, this.band().near) * this.H
     this.facing = spawn.facing === 'left' ? -1 : 1
     this.shadow = this.add.ellipse(x, y, 40, 12, LIFE_PALETTE.ink, 0.3).setDepth(y - 1)
     this.player = this.add.image(x, y, `art-${this.era.player.pose.down}`).setOrigin(0.5, 1).setDepth(y)
@@ -749,7 +772,7 @@ export class WorldScene extends Phaser.Scene {
     y: number,
     size: { far: number; near: number },
   ) {
-    const band = this.def.band
+    const band = this.band()
     const t = Phaser.Math.Clamp((y / this.H - band.far) / Math.max(0.0001, band.near - band.far), 0, 1)
     const height = Phaser.Math.Linear(size.far, size.near, t) * this.H
     this.fit(image, height)
@@ -774,7 +797,7 @@ export class WorldScene extends Phaser.Scene {
    * one test checks.
    */
   private bodySizeAt(figure: string, y: number): number {
-    const band = this.def.band
+    const band = this.band()
     const depth = Phaser.Math.Clamp((y / this.H - band.far) / Math.max(1e-6, band.near - band.far), 0, 1)
     const taper = this.def.size.far / Math.max(1e-6, this.def.size.near)
     return bodySize(figure, this.def.metre, depth, taper)
@@ -912,6 +935,74 @@ export class WorldScene extends Phaser.Scene {
       .setDepth(4000)
   }
 
+  /**
+   * מה מוצע לעבוד השבוע — the rotation, written once per chapter and then left alone.
+   *
+   * `offeredIn` is pure: the same save and the same chapter always choose the same jobs,
+   * so this can be re-run on every room build without the street changing under the boy's
+   * feet. It is written as flags rather than computed in the hotspot filter because flags
+   * are what a `Condition` can read, what a save persists and what a probe can print.
+   */
+  private rollWorkOffers(state: LifeState) {
+    const offered = offeredIn(this.chapter, state.rng.seed)
+    for (const gig of GIGS) {
+      if (!isPaid(gig)) continue
+      const flag = offerFlag(gig)
+      if (!offered.has(gig.id) || state.flags[flag]) continue
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag })
+    }
+  }
+
+  /**
+   * העולם החי — built last of the world objects, so it can measure the room it lives in.
+   *
+   * Everything it draws is procedural (`runtime/living.ts`), so this costs no art and
+   * runs in every room including the ones nobody has painted dressing for yet.
+   */
+  private buildLiving() {
+    this.living = new LivingWorld({
+      scene: this,
+      W: this.W,
+      H: this.H,
+      ambience: this.def.ambience,
+      band: this.band(),
+      player: () =>
+        this.player
+          ? { x: this.player.x, y: this.groundY, moving: Math.abs(this.vx) > 4 || Math.abs(this.vy) > 4 }
+          : null,
+    })
+    this.living.build()
+  }
+
+  /**
+   * מישהו שם לב שנכנסת — the cheapest thing in this whole pass, and the one that changes
+   * the most.
+   *
+   * A room whose people face the same way whatever you do is a diorama. When the boy
+   * comes within about a metre and a half of somebody, that person turns towards him;
+   * when he walks away, they go back to whatever they were facing. Nothing is said, no
+   * bubble opens, no state is written — they just turn, which is what people do.
+   *
+   * Actors that were authored flipped keep their own default, so a man drawn looking at a
+   * wall goes back to looking at the wall.
+   */
+  private noticePlayer() {
+    if (!this.player) return
+    const reach = this.def.metre * 1.6 * this.W
+    for (const actor of this.actors) {
+      if (!actor.image.visible) continue
+      const dx = this.player.x - actor.image.x
+      const dy = (this.groundY - actor.image.y) / DEPTH
+      const near = Math.hypot(dx, dy) < reach
+      if (near) {
+        // face him: the sprite's own default direction decides which flip means "towards"
+        actor.image.setFlipX(actor.def.flip === true ? dx > 0 : dx < 0)
+      } else {
+        actor.image.setFlipX(actor.def.flip === true)
+      }
+    }
+  }
+
   /** the grade's own repaint, kept so it can be re-run once the camera is framed */
   private repaintGrade: (() => void) | null = null
 
@@ -1047,11 +1138,23 @@ export class WorldScene extends Phaser.Scene {
    * 16-bit era did; the follow lerp turns the change of heading into a slow pan rather
    * than a snap. Vertical: feet at 68% of the glass (see `followPlayer`).
    */
+  /**
+   * המצלמה נושמת — the lead, plus a drift small enough that nobody can point at it.
+   *
+   * A camera locked to a walking sprite is the exact feeling Maor asked to get rid of
+   * (6.9.2026): the boy moves, the picture does not, and the room reads as wallpaper
+   * behind him. Two sines — one slow and horizontal, one slower and vertical, at a fifth
+   * of a per cent of the view — put the frame permanently, invisibly in motion, the way a
+   * shoulder-held camera is never quite still. It is felt in the shot and cannot be seen
+   * in a screenshot, which is exactly the right size for it.
+   */
   private aimCamera() {
     const cam = this.cameras.main
     const view = cam.height / cam.zoom
     const lead = (this.lastDir === 'side' ? this.facing : 0) * (cam.width / cam.zoom) * 0.08
-    cam.setFollowOffset(-lead, (0.68 - 0.5) * view)
+    const driftX = Math.sin(this.breathe * 0.37) * (cam.width / cam.zoom) * 0.006
+    const driftY = Math.sin(this.breathe * 0.23 + 1.4) * view * 0.005
+    cam.setFollowOffset(-lead + driftX, (0.68 - 0.5) * view + driftY)
   }
 
   private onResize() {
@@ -1077,6 +1180,8 @@ export class WorldScene extends Phaser.Scene {
     if (!this.shotting) this.aimCamera()
     this.moveActors(delta)
     this.moveAmbient(delta)
+    this.living?.update(delta)
+    this.noticePlayer()
     this.tickClock(delta)
     this.net?.tick(delta)
     this.derby?.tick(delta)
@@ -1107,12 +1212,23 @@ export class WorldScene extends Phaser.Scene {
    * Two percent of the width is kept at each edge because a figure is drawn from its feet
    * and a walker pressed flat against the frame has half of himself off it.
    */
+  /**
+   * רצועת ההליכה — the room's band, or the one this chapter overrides it with.
+   *
+   * Every reader of the band goes through here, so a night that narrows the floor
+   * (`bandByEra`) narrows it for walking, for perspective, for body size and for what
+   * counts as an obstacle, all at once — rather than in four places that drift apart.
+   */
+  private band(): { far: number; near: number } {
+    return this.def.bandByEra?.[this.chapter] ?? this.def.band
+  }
+
   private bounds(): Bounds {
     return {
       left: this.W * 0.02,
       right: this.W * 0.98,
-      top: this.def.band.far * this.H,
-      bottom: this.def.band.near * this.H,
+      top: this.band().far * this.H,
+      bottom: this.band().near * this.H,
     }
   }
 
@@ -1136,7 +1252,7 @@ export class WorldScene extends Phaser.Scene {
     for (const entry of this.layers) {
       const layer = entry.def
       if (!layer.foot || !entry.image.visible) continue
-      if (layer.depth < this.def.band.far) continue
+      if (layer.depth < this.band().far) continue
       const rx = entry.image.displayWidth * 0.36
       out.push({ x: entry.image.x, y: entry.baseY, rx, ry: rx * DEPTH })
     }
@@ -1773,6 +1889,27 @@ export class WorldScene extends Phaser.Scene {
           this.beginNight()
         }
         this.refresh()
+      } else if (state.flags['tipoff:1991'] && !state.flags['derby:over'] && !state.chapterDone) {
+        /**
+         * הערב חייב להיגמר — Maor, 6.9.2026, and it is the most serious kind of bug there
+         * is: *"אני אחרי הדרבי, אבל ללא רשות מאמא, לכן לא יכול להתקדם… אסור שאף מתמודד
+         * יגיע לרגע שאין לו דרך להתקדם במשחק."*
+         *
+         * The evening used to start on ONE tick — the minute the clock passed eight — and
+         * only in the room the boy happened to be standing in. Stand in the street at
+         * eight because your mother said no, walk home at a quarter past, and nothing was
+         * ever going to happen again: no derby, no radio, no `derby:over`, so no ending,
+         * so no chapter. The night was unreachable and the day could not be finished.
+         *
+         * Two guards, and between them there is no gap:
+         *   · the night is offered EVERY minute until it has been resolved, so walking
+         *     into a room that can play it — the hall, or home — plays it, however late;
+         *   · and half an hour after the curfew, wherever he is standing, the night ends
+         *     by itself. He hears the end of it from a street, which is a real way to
+         *     experience a derby and a legitimate biography — not a failure state.
+         */
+        this.beginNight()
+        if (state.minute >= CURFEW + 30 && !this.afar) this.resolveNightFromWherever()
       }
       return
     }
@@ -2276,6 +2413,34 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * סוף הערב, בכל מקום שהוא — the last-resort close of 11.3.1991.
+   *
+   * Nothing about this is a punishment and nothing about it is a menu: the horn reaches a
+   * street, a stairwell or a kiosk the way it actually did, the archive records that he
+   * was not there, and the chapter can be finished by going home and talking to his
+   * mother like every other version of this night. It exists so that the answer to "what
+   * do I do now" is never "nothing".
+   */
+  private resolveNightFromWherever() {
+    const state = this.ctx.engine.state
+    if (state.flags['derby:over'] || state.chapterDone) return
+    this.ctx.engine.dispatch(
+      { t: 'flag.raised', flag: 'derby:over' },
+      { t: 'flag.raised', flag: 'heard:street' },
+      { t: 'anchor.missed', anchorId: this.anchor.id },
+      { t: 'redheart.changed', key: 'basketballLove', delta: 3 },
+      { t: 'wellbeing.changed', key: 'regret', delta: 10 },
+    )
+    this.ctx.bus.emit('sound', { kind: 'roar', big: 0.6 })
+    this.ctx.bus.emit('toast', {
+      text: 'מאיפשהו מזרחה, דרך הרחוב: רעש אחד ארוך, ואז כלום. נגמר, ולא היית שם.',
+      tone: 'plain',
+      kickerHe: CONSEQUENCE_KICKER_HE,
+    })
+    this.refresh()
+  }
+
   /** the horn heard through concrete, and then the night is over for him too */
   private wallBeat() {
     this.paused = true
@@ -2572,12 +2737,43 @@ export class WorldScene extends Phaser.Scene {
     const cut = cutFor(this.def.id, to, this.ctx.engine.state.minute, this.chapter, this.ctx.engine.state.flags)
     if (cut) this.ctx.engine.dispatch({ t: 'flag.raised', flag: filmFlag(cut.clip, this.chapter) })
 
-    this.cameras.main.fadeOut(240, 0, 0, 0)
+    this.leak()
+    this.cameras.main.fadeOut(300, 0, 0, 0)
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       void this.ctx.engine.save()
       if (cut) this.ctx.bus.emit('film', { clip: cut.clip, captionHe: cut.captionHe })
       this.scene.restart({ mapId: to, spawn, from: this.def.id })
     })
+  }
+
+  /**
+   * דלף אור — the light that crosses the frame as one room becomes another.
+   *
+   * A hard fade to black between two paintings is a slideshow, and a slideshow is the
+   * other half of the feeling Maor named: a character on backgrounds. Film does not cut
+   * to black, it blooms — the gate opens, the frame washes warm from one side, and by the
+   * time the picture returns you are somewhere else. This is a warm bar swept across the
+   * screen at low alpha under the fade, on the screen layer so it does not care where the
+   * camera happens to be pointing. 300ms, once, then it destroys itself.
+   */
+  private leak() {
+    const cam = this.cameras.main
+    const w = cam.width
+    const h = cam.height
+    const bar = this.add
+      .rectangle(-w * 0.45, h / 2, w * 0.5, h * 1.4, LIFE_PALETTE.lamp, 0.5)
+      .setScrollFactor(0)
+      .setDepth(7200)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setAngle(-8)
+    this.tweens.add({
+      targets: bar,
+      x: w * 1.4,
+      duration: 300,
+      ease: 'Quad.easeIn',
+      onComplete: () => bar.destroy(),
+    })
+    this.tweens.add({ targets: bar, alpha: 0.16, duration: 300, ease: 'Sine.easeIn' })
   }
 
   /**
@@ -3535,7 +3731,7 @@ export class WorldScene extends Phaser.Scene {
    * of argued about.
    */
   bodies() {
-    const band = this.def.band
+    const band = this.band()
     const taper = this.def.size.far / Math.max(1e-6, this.def.size.near)
     const rows: Array<{ who: string; art: string; y: number; h: number; metres: number }> = []
     const push = (who: string, art: string, y: number, h: number) => {

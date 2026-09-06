@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { chapterFor, lastPlayable, nextPlayable, playableChapters } from '@/lib/life/content/chapters'
-import { GIGS, gigChapters, gigConversations, gigPay, gigsIn } from '@/lib/life/gigs'
+import { GIGS, gigChapters, gigConversations, gigPay, gigsIn, isPaid, offeredIn } from '@/lib/life/gigs'
 import { SHIRT, TICKET, WAGE, decadeOf, decadeOfYear } from '@/lib/life/prices'
 import { SHIRTS } from '@/lib/life/shirts'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
@@ -100,16 +100,51 @@ describe('המחירים — one table, every decade', () => {
 })
 
 describe('הג׳ובים — a boy with no money has somewhere to earn it', () => {
-  it('pays the decade wage for the hours worked', () => {
+  it('pays the decade wage for the hours worked — and nothing at all for the two contests', () => {
     for (const gig of GIGS) {
       for (const chapter of gigChapters(gig)) {
         const pay = gigPay(gig, chapter)
+        if (!isPaid(gig)) {
+          // penalties and free throws are play, not work (Maor, 6.9.2026)
+          expect(pay, `${gig.id} in ${chapter} is a contest and must not pay`).toBe(0)
+          continue
+        }
         expect(pay, `${gig.id} in ${chapter}`).toBeGreaterThan(0)
         if (gig.id !== 'bottles-round') {
           expect(pay).toBe(Math.max(1, Math.round(WAGE[decadeOf(chapter)] * gig.hours)))
         }
       }
     }
+  })
+
+  /**
+   * הרוטציה — a chapter offers SOME of its work, never all of it, and never none of it.
+   *
+   * Maor, 6.9.2026: *"וכל פעם הצעות רנדומליות, לא תמיד כל האופציות קיימות… ליצור שוני ביום
+   * יום של פוגי."* The two failure modes are equally bad and this pins both: a chapter that
+   * offers everything is a menu, and a chapter that offers nothing is a boy who cannot earn
+   * the shirt. Different seeds must also actually differ, or the rotation is decoration.
+   */
+  it('rotates the work: some of it, never all of it, never none of it', () => {
+    const chapters = [...new Set(GIGS.flatMap((gig) => gigChapters(gig)))]
+    for (const chapter of chapters) {
+      const eligible = GIGS.filter((gig) => isPaid(gig) && gigChapters(gig).includes(chapter))
+      if (eligible.length === 0) continue
+      const offered = offeredIn(chapter, 'seed-one')
+      expect(offered.size, `${chapter} offers nothing`).toBeGreaterThan(0)
+      if (eligible.length > 2) {
+        expect(offered.size, `${chapter} offers everything`).toBeLessThan(eligible.length)
+      }
+      for (const id of offered) {
+        expect(eligible.some((gig) => gig.id === id), `${chapter} offers ${id}, which is not in it`).toBe(true)
+      }
+    }
+    // the same save always sees the same week; a different save does not
+    const a = [...offeredIn('1990', 'seed-one')].sort().join(',')
+    const again = [...offeredIn('1990', 'seed-one')].sort().join(',')
+    expect(again, 'the rotation is not stable within a save').toBe(a)
+    const seeds = ['s1', 's2', 's3', 's4', 's5', 's6'].map((seed) => [...offeredIn('1990', seed)].sort().join(','))
+    expect(new Set(seeds).size, 'every save gets the same week').toBeGreaterThan(1)
   })
 
   it('gives a1985 boy enough afternoons to buy the thirty-shekel shirt', () => {

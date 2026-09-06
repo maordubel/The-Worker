@@ -252,7 +252,9 @@ export function PenaltyCard({
         {phase === 'summary' ? (
           <>
             <p className="mb-3 font-body text-[14px] text-concrete">
-              {t('life.penalty.total', { scored: String(scored), n: String(penalty.attempts), sum: String(earned) })}
+              {earned > 0
+                ? t('life.penalty.total', { scored: String(scored), n: String(penalty.attempts), sum: String(earned) })
+                : t('life.penalty.tally', { scored: String(scored), n: String(penalty.attempts) })}
             </p>
             <button
               type="button"

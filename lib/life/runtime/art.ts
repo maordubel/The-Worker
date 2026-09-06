@@ -148,6 +148,13 @@ export const LAYER = [
    * terrace empty.
    */
   'standCrowd',
+  /**
+   * היציע של אוסישקין — the hall's own crowd, drawn by Maor and sent on 6.9.2026 for
+   * exactly this: a packed 1980s terrace with the slope, the two staircases and the
+   * handrail of the room it belongs to. Keyed off its white ground and trimmed to the
+   * crowd itself (1672x453), so a width and a bottom edge are all the placement it needs.
+   */
+  'ussCrowd',
   'livingTable',
   'streetFore',
   'streetGround',

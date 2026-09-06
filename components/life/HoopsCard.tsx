@@ -227,7 +227,9 @@ export function HoopsCard({
         {phase === 'summary' ? (
           <>
             <p className="mb-3 font-body text-[14px] text-concrete">
-              {t('life.hoops.total', { scored: String(scored), n: String(hoops.attempts), sum: String(earned) })}
+              {earned > 0
+                ? t('life.hoops.total', { scored: String(scored), n: String(hoops.attempts), sum: String(earned) })
+                : t('life.hoops.tally', { scored: String(scored), n: String(hoops.attempts) })}
             </p>
             <button
               type="button"

@@ -63,6 +63,15 @@ export class MatchDirector {
 
   start() {
     this.host.setPaused(true)
+    /**
+     * דרבי — the one fixture that gets the chant over the constant bed (Maor, 6.9.2026).
+     *
+     * Read off the archive's own opponent name rather than typed per chapter, so a derby
+     * is a derby in every year the archive holds one, and a season the archive cannot name
+     * an opponent for is simply not one. Nothing here decides history; it decides which
+     * recording is playing while the boy watches it.
+     */
+    this.host.emit('sound', { kind: 'derby', on: isDerby(this.anchor.match?.opponentHe ?? null) })
     this.next()
   }
 
@@ -173,4 +182,16 @@ export class MatchDirector {
     this.lastSignature = signature
     this.host.emit('match', board)
   }
+}
+
+/**
+ * מכבי תל אביב, וזהו — the only opponent whose name turns a match into a derby.
+ *
+ * A substring test on the archive's own Hebrew club name, deliberately narrow: Maccabi
+ * Haifa and Maccabi Netanya are not derbies and must not get the chant.
+ */
+export function isDerby(opponentHe: string | null): boolean {
+  if (!opponentHe) return false
+  const name = opponentHe.replace(/[\u0591-\u05C7"'׳״]/g, '').trim()
+  return name.includes('מכבי תל אביב') || name.includes('מכבי ת"א') || name.includes('מכבי תא')
 }

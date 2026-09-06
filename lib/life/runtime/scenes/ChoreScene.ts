@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
 import { eraFor } from '../../content/era'
-import { GIGS, gigFlag, gigPay, type Gig } from '../../gigs'
+import { GIGS, gigFlag, gigPay, workDoneFlag, type Gig } from '../../gigs'
 import { shekels } from '../../prices'
 import type { LocationId } from '../../types'
 import { SCENE, artFor } from '../../world/scenes'
@@ -332,6 +332,8 @@ export class ChoreScene extends Phaser.Scene {
 
     this.ctx.engine.dispatch(
       { t: 'flag.raised', flag: gigFlag(this.gig) },
+      // one paid job per chapter (Maor, 6.9.2026) — the street says so in `gigs.ts`
+      { t: 'flag.raised', flag: workDoneFlag(chapter) },
       { t: 'clock.advanced', minutes: this.gig.minutes },
       { t: 'energy.changed', delta: -this.gig.energy },
       { t: 'money.changed', agorot: shekels(paid), why: this.gig.labelHe },

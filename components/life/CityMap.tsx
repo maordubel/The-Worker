@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import { t } from '@/lib/i18n'
 import { CITY_LABELS, CITY_LINES, isRevealed, MAP_PLACES, MAP_SIZE, placeOfScene, project, type MapPlaceDef } from '@/lib/life/map'
 import type { MapPlace } from '@/lib/life/runtime/game'
+import { placeLabel } from '@/lib/life/world/labels'
 import type { LifeState, LocationId } from '@/lib/life/types'
 
 /**
@@ -158,6 +159,7 @@ export function CityMap({
           if (!shown) return null
           const p = project(place.lat, place.lon)
           const isHere = herePlace?.id === place.id
+          const name = placeLabel(place, state)
           const door = place.scene ? reachable.get(place.scene) : undefined
           const open = Boolean(door && !door.here && !door.lockedHe)
           const dim = !open && !isHere
@@ -195,8 +197,31 @@ export function CityMap({
                 strokeWidth="5"
                 paintOrder="stroke"
               >
-                {place.labelHe}
+                {name.labelHe}
               </text>
+              {/*
+                המשנה — the line the map keeps under the name. It is the biography, not the
+                address: which gate this Pugi stands at, whether the hall became home, what
+                he did at that kiosk. Drawn only where the pin is not already saying
+                something more urgent (a shut door, or "you are here").
+              */}
+              {!isHere && !door?.lockedHe && !(door && !door.here) && name.subHe && (
+                <text
+                  x={p.x}
+                  y={p.y + 34}
+                  textAnchor="middle"
+                  direction="rtl"
+                  fontFamily="var(--font-courier)"
+                  fontSize="15"
+                  fill={dim ? 'rgb(var(--muted))' : 'rgb(var(--ink))'}
+                  stroke="rgb(var(--sheet))"
+                  strokeWidth="4"
+                  paintOrder="stroke"
+                  opacity="0.8"
+                >
+                  {name.subHe}
+                </text>
+              )}
               {(door?.lockedHe || (door && !door.here)) && (
                 <text x={p.x} y={p.y + 34} textAnchor="middle" direction="rtl" fontFamily="var(--font-courier)" fontSize="15" fill={dim ? 'rgb(var(--muted))' : 'rgb(var(--red))'} stroke="rgb(var(--sheet))" strokeWidth="4" paintOrder="stroke">
                   {door?.lockedHe ?? t('life.map.minutesAt', { n: String(door?.minutes ?? 0) })}

@@ -168,6 +168,8 @@ export class DerbyNight {
     const state = this.ctx.engine.state
     this.phase = 'q1'
     this.settleSpot()
+    // 11.3.1991 is a derby, and the derby is the one night the chant goes over the bed
+    this.ctx.bus.emit('sound', { kind: 'derby', on: true })
     this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 1 })
     this.ctx.bus.emit('toast', {
       text: state.flags['missed:tipoff']

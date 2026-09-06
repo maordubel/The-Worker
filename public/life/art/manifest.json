@@ -2182,6 +2182,13 @@
    "yellowLeft": 0,
    "source": "maor-2026-09-05-street",
    "whatHe": "חזית חנות נטושה מעבר לכביש"
+  },
+  "ussCrowd": {
+   "w": 1672,
+   "h": 453,
+   "bytes": 1482752,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-06-ussishkin-crowd (white keyed, trimmed)"
   }
  },
  "docs": {

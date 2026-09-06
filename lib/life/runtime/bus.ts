@@ -106,6 +106,13 @@ export type LifeBusEvents = {
     | { kind: 'sample'; key: import('./audio').SampleKey; level?: number; delayMs?: number }
     /** the crowd moves to a state — see `CrowdState` in audio.ts; the match director's voice */
     | { kind: 'crowd'; state: import('./audio').CrowdState }
+    /**
+     * דרבי או לא — said once, before the first minute, by the director running the match.
+     *
+     * The constant match bed plays at every fixture; the chant Maor sent is layered over
+     * it only when this is true (6.9.2026). The audio never guesses which night it is.
+     */
+    | { kind: 'derby'; on: boolean }
   anchor: { anchor: HistoricalAnchor; showing: boolean }
   /**
    * הלוח — the scoreboard, while a match is actually happening in front of the child.

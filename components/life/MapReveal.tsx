@@ -8,6 +8,7 @@ import { t } from '@/lib/i18n'
 import type { MapPlaceDef } from '@/lib/life/map'
 import type { MapPlace } from '@/lib/life/runtime/game'
 import type { LifeState, LocationId } from '@/lib/life/types'
+import { placeLabel } from '@/lib/life/world/labels'
 
 /**
  * מקום נחשף — the map plays a moment.
@@ -53,7 +54,8 @@ export function MapReveal({
               {t('life.reveal.kicker')}
             </p>
             <p className="mt-3 animate-title-rise font-poster text-[56px] leading-none text-sheet sm:text-[72px]" style={{ textShadow: '0 2px 20px rgb(var(--ink))' }}>
-              <bdi>{place.labelHe}</bdi>
+              {/* the name this life gives it — the reveal card says what the map will say */}
+              <bdi>{placeLabel(place, state).labelHe}</bdi>
             </p>
             <span className="mt-3 block h-[3px] w-16 animate-rule-draw bg-red" aria-hidden="true" />
           </div>

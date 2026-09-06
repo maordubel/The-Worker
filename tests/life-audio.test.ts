@@ -8,6 +8,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+
 import { CROWD_PLAN, CROWD_STATES, LifeAudio } from '@/lib/life/runtime/audio'
 
 type Call = { target: string; value: number; at: number }
@@ -92,8 +93,10 @@ class FakeContext {
   createBuffer(_c: number, length: number, rate: number) {
     return new FakeBuffer(length / rate)
   }
-  decodeAudioData() {
-    return Promise.resolve(new FakeBuffer(23.5))
+  decodeAudioData(bytes?: ArrayBuffer) {
+    const buffer = new FakeBuffer(23.5)
+    ;(buffer as FakeBuffer & { key?: string }).key = (bytes as (ArrayBuffer & { key?: string }) | undefined)?.key ?? ''
+    return Promise.resolve(buffer)
   }
   suspend() {
     this.state = 'suspended'
@@ -129,7 +132,19 @@ function install() {
       },
       createElement: () => ({ canPlayType: () => 'probably' }),
     },
-    fetch: () => Promise.resolve({ ok: true, arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)) }),
+    /**
+     * The fake remembers WHICH cut was asked for, because since 6.9.2026 a match has more
+     * than one looping layer in it — the reactive murmur, the constant bed, and on a derby
+     * the chant — and a test that cannot tell them apart cannot check any of them.
+     */
+    fetch: (url: string) => {
+      // the key rides ON the bytes, not in a module variable: two cuts load at once and a
+      // shared variable is whichever of them resolved last
+      const key = String(url).split('/').pop()?.replace(/\.(ogg|m4a)$/, '') ?? ''
+      const bytes = new ArrayBuffer(8) as ArrayBuffer & { key?: string }
+      bytes.key = key
+      return Promise.resolve({ ok: true, arrayBuffer: () => Promise.resolve(bytes) })
+    },
   })
 }
 
@@ -139,7 +154,13 @@ const tick = async () => {
 }
 
 /** the sources started on the crowd bus that loop — there must only ever be one alive */
-const loops = () => FakeContext.last.started.filter((s) => s.loop && (s.buffer as FakeBuffer)?.duration === 23.5)
+const keyOf = (s: { buffer?: unknown }) => ((s.buffer ?? {}) as { key?: string }).key ?? ''
+const allLoops = () => FakeContext.last.started.filter((s) => s.loop && (s.buffer as FakeBuffer)?.duration === 23.5)
+/** the reactive ground — the one the state machine opens, closes and colours */
+const loops = () => allLoops().filter((s) => keyOf(s) === 'crowd-real-murmur')
+/** the constant bed under every match, and the derby chant over it */
+const beds = () => allLoops().filter((s) => keyOf(s) === 'crowd-bed')
+const chants = () => allLoops().filter((s) => keyOf(s) === 'chant-derby')
 const oneShots = () => FakeContext.last.started.filter((s) => !s.loop)
 
 describe('the crowd state machine', () => {
@@ -175,6 +196,57 @@ describe('the crowd state machine', () => {
     expect(loops()).toHaveLength(1)
     expect(audio.crowdState).toBe('AFTERMATH')
     expect(audio.crowdHistory.map((h) => h.state)).toEqual(['LOW_MURMUR', 'BUILDING_TENSION', 'CHANT', 'NEAR_MISS', 'GOAL_BURST', 'AFTERMATH'])
+  })
+
+  /**
+   * שתי שכבות של יום משחק — Maor, 6.9.2026: the constant bed under every match, and the
+   * chant over it only when the fixture is a derby.
+   *
+   * The bed must not care what the ground is doing (it is the room, not the reaction), and
+   * the chant must never appear at an ordinary match — that is the whole point of it.
+   */
+  it('lays the constant bed under every match, derby or not', async () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.crowd('LOW_MURMUR')
+    await tick()
+    await tick()
+    expect(beds(), 'no bed under the match').toHaveLength(1)
+    expect(chants(), 'a chant at a match that is not a derby').toHaveLength(0)
+    for (const state of ['BUILDING_TENSION', 'GOAL_BURST', 'AFTERMATH'] as const) {
+      audio.crowd(state)
+      await tick()
+    }
+    expect(beds(), 'the bed restarted with a state change').toHaveLength(1)
+  })
+
+  it('puts the chant over the bed on a derby, and only there', async () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.setDerby(true)
+    audio.crowd('LOW_MURMUR')
+    await tick()
+    await tick()
+    expect(beds()).toHaveLength(1)
+    expect(chants(), 'the derby has no chant').toHaveLength(1)
+    audio.crowd('GOAL_BURST')
+    await tick()
+    // a goal swallows the song; it does not stop it
+    expect(chants(), 'the chant was restarted by a goal').toHaveLength(1)
+  })
+
+  it('takes both layers down with the match', async () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.setDerby(true)
+    audio.crowd('LOW_MURMUR')
+    await tick()
+    await tick()
+    const [bed] = beds()
+    const [chant] = chants()
+    audio.crowd('OFF')
+    expect(bed!.stopped, 'the bed played on after the match').toBe(1)
+    expect(chant!.stopped, 'the chant played on after the match').toBe(1)
   })
 
   it('fires the entry cut once per state, not once per call', async () => {
@@ -282,13 +354,23 @@ describe('רק מה שמאור הקליט', () => {
     'amb-theme',
   ]
 
-  it('the allow-list is exactly his nine cuts', () => {
-    expect([...LifeAudio.allowed].sort()).toEqual([...REAL].sort())
+  /**
+   * שתי ההקלטות של יום המשחק — wired on 6.9.2026, still on their way.
+   *
+   * Maor sent two more: a constant bed for every match, and the derby chant to sit over
+   * it. The code that mixes them is in (`audio.ts` → `ensureMatchLayers`), the allow-list
+   * lets them through, and until the files are in `public/life/sfx` they simply resolve to
+   * nothing and the ground sounds exactly as it did. This list is what keeps that honest.
+   */
+  const PENDING = ['crowd-bed', 'chant-derby']
+
+  it('the allow-list is his cuts plus the two matchday layers, and nothing else', () => {
+    expect([...LifeAudio.allowed].sort()).toEqual([...REAL, ...PENDING].sort())
   })
 
   it('the library says nothing exists that he did not record', () => {
     const manifest = JSON.parse(require('node:fs').readFileSync('public/life/sfx/manifest.json', 'utf8')) as Record<string, { source?: string }>
-    expect(Object.keys(manifest).sort()).toEqual([...REAL].sort())
+    for (const key of REAL) expect(Object.keys(manifest), key).toContain(key)
     for (const key of Object.keys(manifest)) {
       expect(manifest[key]!.source, `${key} has no recording behind it`).toMatch(/^maor-/)
     }
@@ -300,6 +382,23 @@ describe('רק מה שמאור הקליט', () => {
       for (const ext of ['ogg', 'm4a']) {
         expect(existsSync(`public/life/sfx/${key}.${ext}`), `${key}.${ext}`).toBe(true)
       }
+    }
+  })
+
+  /**
+   * A pending recording is either fully here or fully absent — never half.
+   *
+   * Half a delivery is the worst state: one browser plays it, the other is silent, and
+   * nobody notices for a month. When Maor's two files land, this is what makes sure both
+   * encodings and the manifest row arrived with them.
+   */
+  it('a matchday layer is either fully delivered or not delivered at all', () => {
+    const { existsSync, readFileSync } = require('node:fs')
+    const manifest = JSON.parse(readFileSync('public/life/sfx/manifest.json', 'utf8')) as Record<string, unknown>
+    for (const key of PENDING) {
+      const parts = [existsSync(`public/life/sfx/${key}.ogg`), existsSync(`public/life/sfx/${key}.m4a`), key in manifest]
+      const there = parts.filter(Boolean).length
+      expect(there === 0 || there === 3, `${key} is half-delivered: ogg/m4a/manifest = ${parts.join('/')}`).toBe(true)
     }
   })
 

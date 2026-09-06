@@ -69,6 +69,8 @@ export type SampleKey =
   | 'crowd-real-goal' | 'crowd-real-murmur' | 'crowd-real-build' | 'crowd-real-miss' | 'crowd-real-after' | 'crowd-real-final'
   | 'amb-park' | 'park-wave'
   | 'amb-theme'
+  // ---- 6.9.2026 — the two Maor sent for matchdays ----
+  | 'crowd-bed' | 'chant-derby'
 
 /**
  * מה מותר להישמע — the allow-list, and the whole of the sound policy.
@@ -90,6 +92,24 @@ const ALLOWED: ReadonlySet<string> = new Set<string>([
   'crowd-real-final',
   // המוזיקה
   'amb-theme',
+  /**
+   * המשחק — שתי שכבות, 6.9.2026.
+   *
+   * Maor: *"רוצה לשלב את הסאונד רקע הקבוע כשפוגי נמצא במשחק כדורגל/כדורסל, ו'על הזין'
+   * לערבב עם הקבוע כשזה דרבי."*
+   *
+   *   · `crowd-bed`   — the constant. It runs under EVERY match, football or basketball,
+   *                     from the first minute to the whistle, and it never reacts to
+   *                     anything. It is the sound of being inside a ground.
+   *   · `chant-derby` — the derby, and only the derby. It is mixed OVER the bed rather
+   *                     than replacing it, ducked while the ground itself is doing
+   *                     something (a goal, a miss), and it comes back up after.
+   *
+   * The existing six `crowd-real-*` cuts keep doing exactly what they did — they are the
+   * moments; these two are the room the moments happen in.
+   */
+  'crowd-bed',
+  'chant-derby',
 ])
 
 /**
@@ -107,6 +127,11 @@ const MUSIC_LEVEL = 0.11
 
 /** how loud his street sits under an ordinary scene */
 const STREET_LEVEL = 0.4
+
+/** the constant bed under every match — present, never in the way */
+const BED_LEVEL = 0.34
+/** the derby chant over it: heard, but the ground is still louder than the song */
+const CHANT_LEVEL = 0.42
 
 const STORE = 'the-worker:life:sound'
 
@@ -152,6 +177,19 @@ export class LifeAudio {
   private _crowdState: CrowdState = 'OFF'
   private crowdWanted: CrowdState = 'OFF'
   private crowdTimers: number[] = []
+  /**
+   * שתי השכבות של המשחק — the bed under every match, and the chant over the derby.
+   *
+   * Separate nodes from `crowdLoop` on purpose: the murmur loop is the ground REACTING —
+   * it opens, closes, brightens and ducks with the state machine — and these two do not
+   * react to anything. The bed is a room and the chant is a stand full of people who have
+   * decided what they are singing. Mixing them into the reactive loop would make both of
+   * them flinch every time somebody nearly scored.
+   */
+  private matchBed: { source: AudioBufferSourceNode; gain: GainNode } | null = null
+  private derbyChant: { source: AudioBufferSourceNode; gain: GainNode } | null = null
+  /** whether the fixture on now is a derby — set by the directors before the first minute */
+  private derbyNight = false
   private crowdLog: { state: CrowdState; at: number }[] = []
 
   constructor() {
@@ -254,13 +292,38 @@ export class LifeAudio {
         old.source.stop(t + 5)
         this.crowdLoop = null
       }
+      for (const layer of [this.matchBed, this.derbyChant]) {
+        if (!layer) continue
+        layer.gain.gain.setTargetAtTime(0, t, 1.4)
+        layer.source.stop(t + 6)
+      }
+      this.matchBed = null
+      this.derbyChant = null
+      this.derbyNight = false
       if (this.ambientFile) this.ambientFile.gain.gain.setTargetAtTime(STREET_LEVEL, t, 1.5)
       return
     }
     // the ground has a voice; his street steps back under it
     if (this.ambientFile) this.ambientFile.gain.gain.setTargetAtTime(0.16, t, 1.0)
     this.ensureCrowdLoop()
+    this.ensureMatchLayers()
     if (previous === 'OFF') this.warm(['crowd-real-goal', 'crowd-real-build', 'crowd-real-miss', 'crowd-real-after', 'crowd-real-final'])
+    /**
+     * הקהל שר — until the ground itself says something.
+     *
+     * A chant does not stop for a goal; it is swallowed by one, and it comes back a few
+     * seconds later louder than it was. So the derby layer ducks under the burst and the
+     * near-miss and rides back up on everything else, and it goes quiet for good at the
+     * final whistle while the ground is still roaring.
+     */
+    if (this.derbyChant) {
+      const loud = state === 'GOAL_BURST' || state === 'NEAR_MISS'
+      const target = state === 'FINAL_WHISTLE' ? 0 : loud ? CHANT_LEVEL * 0.3 : state === 'CHANT' ? CHANT_LEVEL * 1.15 : CHANT_LEVEL
+      this.derbyChant.gain.gain.setTargetAtTime(target, t, loud ? 0.35 : 2.2)
+    }
+    if (this.matchBed) {
+      this.matchBed.gain.gain.setTargetAtTime(state === 'FINAL_WHISTLE' ? BED_LEVEL * 0.5 : BED_LEVEL, t, 1.6)
+    }
     const p = CROWD_PLAN[state]
     this.shapeCrowd(p.level, p.colour, state === 'GOAL_BURST' || state === 'NEAR_MISS' ? 0.25 : 1.1)
     // the entry cut waits for its bytes if it must (a goal is not a click), but only while the state holds
@@ -325,6 +388,53 @@ export class LifeAudio {
       source.connect(gain).connect(bus)
       source.start(ctx.currentTime)
     })
+  }
+
+  /**
+   * הדרבי — told once, before the first minute, by whoever is directing the night.
+   *
+   * `derby1991.ts` and the match director know what fixture this is; the audio does not
+   * and must not guess. Calling this with `true` is what puts the chant over the bed.
+   */
+  setDerby(on: boolean) {
+    if (this.derbyNight === on) return
+    this.derbyNight = on
+    if (this._crowdState !== 'OFF') this.ensureMatchLayers()
+    if (!on && this.derbyChant && this.ctx) {
+      this.derbyChant.gain.gain.setTargetAtTime(0, this.ctx.currentTime, 1.2)
+    }
+  }
+
+  /**
+   * שתי השכבות — started once per match, looped, and never restarted by a state change.
+   *
+   * Each one begins at a random point in its own buffer, so two visits to the same ground
+   * do not open on the same second of somebody's recording.
+   */
+  private ensureMatchLayers() {
+    const ctx = this.ctx
+    const bus = this.crowdBus
+    if (!ctx || !bus) return
+    const start = (key: SampleKey, level: number, into: 'matchBed' | 'derbyChant') => {
+      if (this[into]) return
+      void this.sample(key).then((buffer) => {
+        // the match may have ended while the bytes were in the air
+        if (!buffer || this[into] || this._crowdState === 'OFF') return
+        if (into === 'derbyChant' && !this.derbyNight) return
+        const source = ctx.createBufferSource()
+        source.buffer = buffer
+        source.loop = true
+        source.playbackRate.value = jitter(1, 0.01)
+        const gain = ctx.createGain()
+        gain.gain.value = 0
+        source.connect(gain).connect(bus)
+        source.start(ctx.currentTime, Math.random() * Math.max(0.1, buffer.duration - 2))
+        gain.gain.setTargetAtTime(level, ctx.currentTime, 2.4)
+        this[into] = { source, gain }
+      })
+    }
+    start('crowd-bed', BED_LEVEL, 'matchBed')
+    if (this.derbyNight) start('chant-derby', CHANT_LEVEL, 'derbyChant')
   }
 
   private ensureCrowdLoop() {

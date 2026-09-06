@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { DIALOGUE } from '@/lib/life/content/dialogue'
-import { GIGS, gigChapters, gigConversations, gigId } from '@/lib/life/gigs'
-import { decadeOf, WAGE } from '@/lib/life/prices'
+import { GIGS, gigChapters, gigConversations, gigId, gigPay } from '@/lib/life/gigs'
 import { HOOPS_WHY_HE, PENALTY_WHY_HE } from '@/lib/life/toto'
 import { SCENE } from '@/lib/life/world/scenes'
 
@@ -31,15 +30,22 @@ describe('פנדלים — חמש בעיטות במגרש השכונתי', () =>
     expect(pitch.hotspots.some((spot) => spot.act === 'pitch-ball')).toBe(true)
   })
 
-  it('pays five shekels a goal, scaled to the chapter\'s own decade', () => {
+  /**
+   * לא משלמים על פנדלים — Maor, 6.9.2026: *"זריקה לסל ובעיטת פנדלים לא צריכים להיות רווח
+   * כספי, זה להנאה בלבד."* The contest used to pay a shekel a goal, which quietly turned
+   * the pitch into a wage and every kick into arithmetic. This test is the opposite of the
+   * one it replaces, and it exists so nobody re-attaches money to a childhood.
+   */
+  it('pays nothing at all — five kicks, for the name and not for the money', () => {
+    expect(gig!.paid, 'the penalty contest is not work').toBe(false)
+    expect(gigPay(gig!, '1991'), 'a contest that pays is a job').toBe(0)
     for (const chapter of gigChapters(gig!)) {
       const conversation = gigConversations().find((row) => row.id === gigId(gig!, chapter))
       const json = JSON.stringify(conversation)
       expect(json, chapter).toContain('"e":"penalty"')
       expect(json, chapter).toContain('"attempts":5')
-      const wage = WAGE[decadeOf(chapter)]
-      const expected = Math.max(1, Math.round((wage * gig!.hours) / 5))
-      expect(json, chapter).toContain(`"perGoal":${expected}`)
+      expect(json, chapter).toContain('"perGoal":0')
+      expect(json, chapter).not.toContain('work:paid')
     }
   })
 
@@ -70,15 +76,16 @@ describe('תחרות חיובים — חמש זריקות בחצר בית הספ
     expect(gigChapters(gig!)).toEqual(['1991'])
   })
 
-  it('pays a shekel a basket, scaled to the chapter\'s own decade', () => {
+  it('pays nothing at all — five throws, for the break and not for the money', () => {
+    expect(gig!.paid, 'the free-throw contest is not work').toBe(false)
+    expect(gigPay(gig!, '1991'), 'a contest that pays is a job').toBe(0)
     for (const chapter of gigChapters(gig!)) {
       const conversation = gigConversations().find((row) => row.id === gigId(gig!, chapter))
       const json = JSON.stringify(conversation)
       expect(json, chapter).toContain('"e":"hoops"')
       expect(json, chapter).toContain('"attempts":5')
-      const wage = WAGE[decadeOf(chapter)]
-      const expected = Math.max(1, Math.round((wage * gig!.hours) / 5))
-      expect(json, chapter).toContain(`"perBasket":${expected}`)
+      expect(json, chapter).toContain('"perBasket":0')
+      expect(json, chapter).not.toContain('work:paid')
     }
   })
 
