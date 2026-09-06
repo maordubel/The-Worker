@@ -74,6 +74,7 @@ export type LocationId =
   /** the small ground in the Hatikva quarter, 13.5.2000 — a stand-in painting until its own */
   | 'hatikva'
 
+
 /**
  * מי — a character is a string, deliberately.
  *

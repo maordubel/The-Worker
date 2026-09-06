@@ -5,7 +5,7 @@ import type { NPCScheduleEntry } from '../schedules'
 import type { LifeState } from '../types'
 import type { Beat } from './beats'
 
-import { AMBIENT_1986, type AmbientActor } from './ambient1986'
+import { AMBIENT_1986, AMBIENT_1990, type AmbientActor } from './ambient1986'
 import { ENDINGS, OBJECTIVES, PORTRAIT, type EndingCard } from './chapter1986'
 import { ENDINGS_1990, OBJECTIVES_1990, PORTRAIT_1990 } from './chapter1990'
 import { ENDINGS_1991, OBJECTIVES_1991, PORTRAIT_1991, TIP_OFF } from './chapter1991'
@@ -154,7 +154,7 @@ export const ERA_1990: Era = {
   encounters: ENCOUNTERS_1990,
   // The same neighbourhood traffic: the ambient list is location-keyed and nameless, and
   // the people crossing a street in 1990 are the same shapes as in 1986.
-  ambient: AMBIENT_1986,
+  ambient: AMBIENT_1990,
   endings: ENDINGS_1990,
   objective: (state, sceneId, matchOver) => {
     if (state.flags['found:kobi']) return state.flags['walked:home'] ? null : OBJECTIVES_1990.walkHome
@@ -195,7 +195,7 @@ export const ERA_1991: Era = {
   schedule: SCHEDULE_1991,
   opportunities: OPPORTUNITIES_1991,
   encounters: ENCOUNTERS_1991,
-  ambient: AMBIENT_1986,
+  ambient: AMBIENT_1990,
   endings: ENDINGS_1991,
   objective: (state, sceneId) => {
     if (state.chapterDone) return OBJECTIVES_1991.morning
@@ -240,7 +240,7 @@ export const ERA_1993_CUP: Era = {
   schedule: [],
   opportunities: [],
   encounters: ENCOUNTERS_1993,
-  ambient: AMBIENT_1986,
+  ambient: AMBIENT_1990,
   endings: ENDINGS_1993,
   objective: (state, sceneId) => objective1993(state, sceneId),
   cutscene: null,
@@ -258,7 +258,7 @@ export const ERA_1993_GALIL: Era = {
   schedule: [],
   opportunities: [],
   encounters: [],
-  ambient: AMBIENT_1986,
+  ambient: AMBIENT_1990,
   endings: ENDINGS_GALIL,
   objective: (state, sceneId) => objectiveGalil(state, sceneId),
   cutscene: null,
@@ -276,7 +276,7 @@ export const ERA_1995_SINAI: Era = {
   schedule: [],
   opportunities: [],
   encounters: [],
-  ambient: AMBIENT_1986,
+  ambient: AMBIENT_1990,
   endings: ENDINGS_SINAI,
   objective: (state) => objectiveSinai(state),
   cutscene: null,
@@ -294,7 +294,7 @@ export const ERA_1996_ARMY: Era = {
   schedule: [],
   opportunities: [],
   encounters: [],
-  ambient: AMBIENT_1986,
+  ambient: AMBIENT_1990,
   endings: ENDINGS_ARMY,
   objective: (state, sceneId) => objectiveArmy(state, sceneId),
   cutscene: null,
@@ -321,7 +321,7 @@ function stageB(chapter: string, year: number, anchorKey: string, extra: Pick<Er
     schedule: [],
     opportunities: [],
     encounters: [],
-    ambient: AMBIENT_1986,
+    ambient: AMBIENT_1990,
     cutscene: null,
     memoryPrefix: chapter,
     eventMinute: null,
@@ -386,7 +386,7 @@ function stageA(chapter: string, year: number, extra: Pick<Era, 'endings' | 'obj
     schedule: [],
     opportunities: [],
     encounters: [],
-    ambient: AMBIENT_1986,
+    ambient: AMBIENT_1990,
     cutscene: null,
     player: ERA_1986.player,
     memoryPrefix: chapter,

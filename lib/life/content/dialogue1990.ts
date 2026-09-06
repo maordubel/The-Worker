@@ -24,14 +24,14 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { flag: 'knows:math' },
         lines: [
-          { who: null, text: 'הטבלה, העיתון, העיפרון. החשבון כבר עשוי — בראש שלך, או של אבא.' },
-          { who: null, text: 'מה שנשאר זה לראות אם הוא נכון.' },
+          { who: null, text: 'העיתון עדיין פתוח על הטבלה. החשבון כבר עשוי — שלך, או שלו.' },
+          { who: null, text: 'מה שנשאר זה משחק אחד פה, ומשחק אחד שאף אחד בשולחן הזה לא יראה.' },
         ],
       },
       {
         lines: [
-          { who: null, text: 'העיתון פתוח על הטבלה. שתי שורות מסומנות בעיפרון: שלנו, ושל יבנה.' },
-          { who: null, text: 'אותן נקודות. אותו הפרש. ליד השורה שלהם אבא כתב מספר קטן ועיגל אותו פעמיים.' },
+          { who: null, text: 'העיתון פתוח על הטבלה מאתמול בלילה. שתי שורות מסומנות בעיפרון: שלנו, ושל יבנה.' },
+          { who: null, text: 'אותן נקודות. אותו הפרש. ליד השורה שלהם אבא כתב מספר קטן, עיגל אותו פעמיים, ולא מחק.' },
         ],
         choices: [
           {
@@ -43,7 +43,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
               { e: 'flag', flag: 'math:careful' },
               { e: 'personality', key: 'curiosity', delta: 6 },
               { e: 'trait', trait: 'knowledge', delta: 5 },
-              { e: 'toast', text: 'הבנת: הם כבשו יותר. לנצח לא מספיק — צריך לנצח בגדול יותר מהם.', tone: 'plain' },
+              { e: 'toast', text: 'הבנת: הם כבשו יותר כל העונה. לנצח לא מספיק — וגם המשחק שלהם לא כאן.', tone: 'plain' },
             ],
           },
           {
@@ -54,7 +54,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
               { e: 'flag', flag: 'math:six' },
               { e: 'personality', key: 'impulsiveness', delta: 6 },
               { e: 'redheart', key: 'footballLove', delta: 4 },
-              { e: 'toast', text: 'אבא מרים את העיניים מהעיתון. לא אומר כלום.', tone: 'plain' },
+              { e: 'toast', text: 'אבא מרים את העיניים מהעיתון, מסתכל עליך רגע, וחוזר לטבלה. לא אומר כלום.', tone: 'plain' },
             ],
           },
           {
@@ -64,7 +64,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
               { e: 'flag', flag: 'knows:math' },
               { e: 'flag', flag: 'math:wrong' },
               { e: 'personality', key: 'stubbornness', delta: 5 },
-              { e: 'toast', text: 'אבא: "לא בטוח." אתה: "בטוח." הוא לא מתווכח. זה גרוע יותר.', tone: 'plain' },
+              { e: 'toast', text: 'אבא: "לא בטוח." אתה: "בטוח." הוא לא מתווכח איתך. זה גרוע יותר.', tone: 'plain' },
             ],
           },
           {
@@ -93,7 +93,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
               { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 6 },
               { e: 'redheart', key: 'familyTradition', delta: 6 },
               { e: 'time', minutes: 30 },
-              { e: 'toast', text: 'הלכתם. הוא לא החזיק לך את היד.', tone: 'plain' },
+              { e: 'toast', text: 'יצאתם ביחד. הוא לא החזיק לך את היד, וגם לא הלך לפניך.', tone: 'plain' },
               { e: 'travel', to: 'bloomfield-outside', spawn: 'fromRoute' },
             ],
           },
@@ -105,7 +105,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
             then: [
               { e: 'flag', flag: 'asked:five' },
               { e: 'rel', who: 'kobi', axis: 'tension', delta: 3 },
-              { e: 'toast', text: '"חמש. ואני לא סופר עד שש."', tone: 'plain' },
+              { e: 'toast', text: '"חמש. ואני לא סופר עד שש." הוא לא מסתכל על השעון. הוא לא צריך.', tone: 'plain' },
             ],
           },
           {
@@ -118,7 +118,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
               { e: 'flag', flag: 'kobi:left' },
               { e: 'personality', key: 'independence', delta: 6 },
               { e: 'rel', who: 'kobi', axis: 'trust', delta: 3 },
-              { e: 'toast', text: '"שער 7. ליד העמוד. אל תאחר." הדלת נסגרת.', tone: 'plain' },
+              { e: 'toast', text: '"שער 7, ליד העמוד. אל תאחר לי." הדלת נסגרת, ואתה נשאר עם השעון.', tone: 'plain' },
             ],
           },
         ],
@@ -126,18 +126,18 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { flag: 'knows:math' },
         lines: [
-          { who: 'קובי', text: 'יוצאים בשלוש ועשרה. אל תיעלם לי.' },
-          { who: null, text: 'הוא חוזר לעיתון. הטרנזיסטור לידו, כבוי, כמו כלב שמחכה.' },
+          { who: 'קובי', text: 'יוצאים בשלוש ועשרה. ואל תיעלם לי — היום אני צריך אותך עם הרגליים.' },
+          { who: null, text: 'הוא חוזר לעיתון. הטרנזיסטור לידו, כבוי, כמו כלב שמחכה שיפתחו לו את הדלת.' },
         ],
       },
       {
         lines: [
-          { who: 'קובי', text: 'תראה. אותן נקודות. אותו הפרש.' },
-          { who: 'קובי', text: 'הם כבשו יותר מאיתנו במשך העונה. אז אם שניהם מנצחים באותו דבר — הם עולים.' },
-          { who: 'קובי', text: 'אנחנו צריכים לנצח יותר ממה שהם מנצחים. וזה לא תלוי רק בנו.' },
+          { who: 'קובי', text: 'תראה. אותן נקודות, אותו הפרש. אצבע פה, אצבע פה.' },
+          { who: 'קובי', text: 'הם כבשו יותר מאיתנו כל העונה. אם שנינו ננצח באותה תוצאה — הם עולים, ואנחנו נשארים.' },
+          { who: 'קובי', text: 'אז לא מספיק לנצח. צריך לנצח יותר בגדול מהם, והם משחקים דרומה מכאן באותה שעה בדיוק.' },
           { who: 'פוגי', text: 'אז איך נדע?' },
-          { who: 'קובי', text: 'ככה.' },
-          { who: null, text: 'הוא מקיש באצבע על הטרנזיסטור.' },
+          { who: 'קובי', text: 'הקופסה הזאת שומעת חצי מילה. תלך, תעמוד ליד רדיו של מישהו אחר, ותחזור להגיד לי.' },
+          { who: null, text: 'הוא מקיש באצבע על הטרנזיסטור. אחר כך על החזה שלך.' },
         ],
         then: [
           { e: 'time', minutes: 8 },
@@ -156,15 +156,15 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { flag: 'knows:radio' },
         lines: [
-          { who: null, text: 'הטרנזיסטור. האנטנה מכופפת מהפעם שנפל בשנה שעברה.' },
-          { who: 'קובי', text: 'הרדיו בא איתי. אתה בא איתי, הרדיו בא איתך.' },
+          { who: null, text: 'הטרנזיסטור. האנטנה מכופפת מהפעם שנפל בשנה שעברה, וקשורה בגומייה.' },
+          { who: 'קובי', text: 'הוא בא איתי. את מה שקורה אצלנו הוא שומע טוב. את מה שקורה שם — באיחור.' },
         ],
       },
       {
         lines: [
-          { who: null, text: 'טרנזיסטור קטן, שחור, עם אנטנה מכופפת. אתה מסובב את הכפתור.' },
-          { who: null, text: 'רעש. קול. רעש. מישהו אומר "שבת" ו"מחזור אחרון" ונעלם ברעש.' },
-          { who: 'קובי', text: 'עזוב את זה. בארבע זה ידבר.' },
+          { who: null, text: 'טרנזיסטור קטן ושחור, חם מהחלון. אתה מסובב את הכפתור לאט, כמו שראית אותו עושה.' },
+          { who: null, text: 'רעש. קול. רעש. מישהו אומר "מחזור אחרון", ואחריו מקריאים רשימה של מגרשים ואחד מהם הוא יבנה.' },
+          { who: 'קובי', text: 'עזוב אותו. בארבע הוא יתחיל לדבר, וגם אז לא על הכול.' },
         ],
         then: [
           { e: 'flag', flag: 'knows:radio' },
@@ -183,8 +183,8 @@ export const CONVERSATIONS_1990: Conversation[] = [
         when: { all: [{ flag: 'found:kobi' }, { flag: 'entry:late' }] },
         lines: [
           { who: 'רחל', text: 'נו?' },
-          { who: 'קובי', text: 'עלינו. הוא הגיע לחגיגה.' },
-          { who: 'רחל', text: 'העיקר שהגיע. נעליים בחוץ.' },
+          { who: 'קובי', text: 'עלינו. הוא הגיע בדיוק לחלק שכולם רצים בו.' },
+          { who: 'רחל', text: 'העיקר שחזרתם ביחד. נעליים בחוץ.' },
         ],
         then: [{ e: 'flag', flag: 'walked:home' }, { e: 'keep' }, { e: 'ending', id: 'late' }],
       },
@@ -204,7 +204,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         lines: [
           { who: 'רחל', text: 'לא הלכת?' },
           { who: 'פוגי', text: 'הלכתי. לא נכנסתי.' },
-          { who: 'רחל', text: 'אבא יחזור צרוד. תשים לו מים.' },
+          { who: 'רחל', text: 'אבא יחזור צרוד. תמלא לו כוס מים ותשים ליד המיטה.' },
         ],
         then: [{ e: 'keep' }, { e: 'ending', id: 'missed' }],
       },
@@ -212,21 +212,21 @@ export const CONVERSATIONS_1990: Conversation[] = [
         when: { flag: 'got:pocket' },
         lines: [
           { who: 'רחל', text: 'שיעורים יש מחר. אני לא שוכחת.' },
-          { who: 'רחל', text: 'ואל תבזבז את הכסף על שטויות.' },
+          { who: 'רחל', text: 'ואם אתה מתחיל לקנות שם דברים — אל תבוא אחר כך לבכות שחסר לך.' },
         ],
       },
       {
         lines: [
           { who: 'רחל', text: 'שניכם עוד פה?' },
-          { who: null, text: 'היא עוברת מאחוריך עם סל כביסה, ומניחה משהו על השולחן בלי להסתכל.' },
-          { who: 'רחל', text: 'קח. תקנה משהו לאכול שם. ותחזור עם אבא, לא לבד.' },
+          { who: null, text: 'היא עוברת מאחוריך עם סל כביסה על הירך, ומניחה משהו על השולחן בלי להסתכל.' },
+          { who: 'רחל', text: 'קח. אם תרעב שם, שיהיה. ותחזור עם אבא, לא לבד.' },
         ],
         then: [
           { e: 'flag', flag: 'got:pocket' },
           { e: 'money', agorot: 3200, why: 'מאמא' },
           { e: 'give', item: 'pocket-money' },
           { e: 'rel', who: 'rachel', axis: 'trust', delta: 4 },
-          { e: 'toast', text: 'שטר אחד, מקופל לארבע', tone: 'red' },
+          { e: 'toast', text: 'שטר, מקופל לארבע', tone: 'red' },
         ],
       },
     ],
@@ -243,10 +243,10 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { notFlag: 'kobi:left' },
         lines: [
-          { who: null, text: 'הטלפון מצלצל בדיוק כשאתה עובר לידו. כאילו חיכה.' },
-          { who: 'אופיר', text: 'פוגי? באים בשלוש. קיוסק. עמית מביא כסף, אני מביא את הראש.' },
+          { who: null, text: 'הטלפון מצלצל בדיוק כשאתה עובר לידו, כאילו חיכה שתעבור.' },
+          { who: 'אופיר', text: 'פוגי? קיוסק, בשלוש. עמית מביא כסף, אני מביא את הראש.' },
           { who: 'פוגי', text: 'אבא לוקח אותי.' },
-          { who: 'אופיר', text: 'אבא לוקח אותך. יופי. גם אותנו לוקחים. הרגליים.' },
+          { who: 'אופיר', text: 'אבא לוקח אותך. יופי. גם אותנו לוקחים — הרגליים.' },
           { who: null, text: 'הוא מנתק. הוא תמיד מנתק ראשון.' },
         ],
         then: [
@@ -255,7 +255,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         ],
       },
       {
-        lines: [{ who: null, text: 'הטלפון. שקט. כולם כבר בדרך.' }],
+        lines: [{ who: null, text: 'הטלפון שותק. בשעה הזאת כבר כולם ברחוב.' }],
       },
     ],
   },
@@ -264,7 +264,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'התמונה על המזנון. אתה בן חמש, על הכתפיים של מישהו, ורואה רק ראשים.' },
+          { who: null, text: 'התמונה על המזנון. אתה בן חמש, על הכתפיים של מישהו, ורואה בעיקר ראשים.' },
           { who: null, text: 'היום אתה רואה מעל רוב הראשים. לא מעל של אבא.' },
         ],
         then: [{ e: 'redheart', key: 'historyMemory', delta: 3 }],
@@ -276,7 +276,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'המיטה. הפוסטר מעליה החליף ידיים לפני שנה. הפינות שלו כבר מתקלפות.' },
+          { who: null, text: 'המיטה. הפוסטר מעליה החליף ידיים לפני שנה, והפינות שלו כבר מתקלפות מהלחות.' },
         ],
       },
     ],
@@ -286,11 +286,11 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         when: { hasItem: 'scarf' },
-        lines: [{ who: null, text: 'המגירה ריקה. הצעיף על הצוואר שלך.' }],
+        lines: [{ who: null, text: 'המגירה ריקה. הצעיף כבר על הצוואר שלך, בחום הזה.' }],
       },
       {
         lines: [
-          { who: null, text: 'הצעיף. אדום, קצת דהוי, עם ריח של ארון. מישהו שם לך אותו על הצוואר לפני ארבע שנים ולא ביקש אותו בחזרה.' },
+          { who: null, text: 'הצעיף. אדום, דהוי בקצוות, עם ריח של ארון. מישהו שם לך אותו על הצוואר לפני ארבע שנים ולא ביקש בחזרה.' },
         ],
         choices: [
           {
@@ -302,7 +302,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
               { e: 'toast', text: 'הצעיף', tone: 'red' },
             ],
           },
-          { id: 'leave', text: 'להשאיר. חם היום.', then: [{ e: 'personality', key: 'independence', delta: 2 }] },
+          { id: 'leave', text: 'להשאיר אותו. חם מדי היום.', then: [{ e: 'personality', key: 'independence', delta: 2 }] },
         ],
       },
     ],
@@ -320,10 +320,10 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { flag: 'going:friends' },
         lines: [
-          { who: 'אופיר', text: 'אמרת לאבא שלך? יופי. אז הוא לא יחפש אותך בקהל.' },
+          { who: 'אופיר', text: 'אמרת לאבא שלך? יופי. אז הוא לא יחפש אותך בין הראשים כל המשחק.' },
           { who: 'אופיר', text: 'עמית — הכסף.' },
           { who: 'עמית', text: 'יש. ספרתי שלוש פעמים.' },
-          { who: 'אופיר', text: 'הוא טעה שלוש פעמים. יאללה.' },
+          { who: 'אופיר', text: 'טעה שלוש פעמים, בקיצור. יאללה, זזים.' },
         ],
         then: [
           { e: 'flag', flag: 'went:withFriends' },
@@ -345,7 +345,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
             text: '"איתכם."',
             then: [
               { e: 'flag', flag: 'going:friends' },
-              { e: 'toast', text: 'אופיר מהנהן כאילו ידע. הוא תמיד "ידע".', tone: 'plain' },
+              { e: 'toast', text: 'אופיר מהנהן כאילו ידע מראש. הוא תמיד "ידע מראש".', tone: 'plain' },
             ],
           },
           {
@@ -354,16 +354,16 @@ export const CONVERSATIONS_1990: Conversation[] = [
             then: [
               { e: 'bond', who: 'ofir', delta: -2 },
               { e: 'rel', who: 'ofir', axis: 'distance', delta: 3 },
-              { e: 'toast', text: '"שער 7. כמו תמיד."', tone: 'plain' },
+              { e: 'toast', text: '"שער 7. כמו תמיד." הוא לא נפגע. אתה לא בטוח בזה.', tone: 'plain' },
             ],
           },
         ],
       },
       {
         lines: [
-          { who: 'אופיר', text: 'פוגי. כמה צריך?' },
+          { who: 'אופיר', text: 'פוגי. כמה צריך היום?' },
           { who: 'פוגי', text: 'תלוי ביבנה.' },
-          { who: 'אופיר', text: 'הכל תלוי ביבנה. אני לא סובל את יבנה. לא הייתי שם אף פעם.' },
+          { who: 'אופיר', text: 'הכול תלוי ביבנה. אני שונא את יבנה. לא הייתי שם בחיים.' },
         ],
         then: [{ e: 'bond', who: 'ofir', delta: 2 }],
       },
@@ -376,9 +376,9 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         lines: [
           { who: null, text: 'עמית מחשב בקול. הוא טועה בכל שורה, ובטוח בכל שורה.' },
-          { who: 'עמית', text: 'אז אם הם מנצחים ואנחנו מנצחים אז זה תלוי מי מנצח יותר, אלא אם כן…' },
-          { who: 'אופיר', text: 'אלא אם כן תשתוק.' },
-          { who: 'עמית', text: '…אלא אם כן זה שוויון, ואז אני לא יודע.' },
+          { who: 'עמית', text: 'שמעתי שביבנה כבר מובילים. אז אנחנו צריכים שניים. או שלושה. תלוי.' },
+          { who: 'אופיר', text: 'מובילים? עוד לא התחיל שם כלום. שמעת ממי?' },
+          { who: 'עמית', text: 'ממישהו ששמע. זה מהרדיו, זה לא סתם דיבורים.' },
         ],
         then: [
           { e: 'wellbeing', key: 'happiness', delta: 4 },
@@ -394,14 +394,14 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { hasItem: 'newspaper' },
         lines: [
-          { who: 'רפי מהקיוסק', text: 'קנית עיתון, קרא עיתון. הטבלה לא משתנה מלהסתכל עליה.' },
-          { who: 'רפי מהקיוסק', text: 'ואם אתה שואל — יבנה בבית. בבית לא מפסידים במחזור אחרון. אף אחד.' },
+          { who: 'רפי מהקיוסק', text: 'קנית עיתון — תקרא עיתון. הטבלה לא זזה מזה שמסתכלים עליה.' },
+          { who: 'רפי מהקיוסק', text: 'ואם אתה שואל אותי — יבנה משחקת בבית שלה. ובבית, במחזור אחרון, אף אחד לא מפסיד. תרשום.' },
         ],
       },
       {
         when: { minAgorot: 300 },
         lines: [
-          { who: 'רפי מהקיוסק', text: 'עיתון? מאה ועשרים. יש שם טבלה, ויש שם עמוד שלם שמסביר למה זה לא פשוט.' },
+          { who: 'רפי מהקיוסק', text: 'עיתון? שלושה שקלים. יש בו טבלה, ויש בו עמוד שלם שמסביר למה זה לא פשוט.' },
         ],
         choices: [
           {
@@ -425,13 +425,13 @@ export const CONVERSATIONS_1990: Conversation[] = [
               { e: 'toast', text: 'שקית גרעינים', tone: 'red' },
             ],
           },
-          { id: 'no', text: 'לשמור את הכסף.', then: [{ e: 'personality', key: 'responsibility', delta: 3 }] },
+          { id: 'no', text: 'לא לגעת בכסף של אמא.', then: [{ e: 'personality', key: 'responsibility', delta: 3 }] },
         ],
       },
       {
         lines: [
-          { who: 'רפי מהקיוסק', text: 'בלי כסף אין עיתון. אבל אני אגיד לך בחינם: יבנה בבית.' },
-          { who: null, text: 'זה לא מידע. זה מה שכולם אומרים, ולכן זה נשמע כמו מידע.' },
+          { who: 'רפי מהקיוסק', text: 'בלי כסף אין עיתון. בחינם אני נותן לך רק את זה: יבנה משחקת בבית.' },
+          { who: null, text: 'החצי הראשון נכון. החצי השני זה מה שכולם אומרים, ולכן זה נשמע כמו מידע.' },
         ],
         then: [{ e: 'flagValue', flag: 'rumor:home', value: true }],
       },
@@ -443,13 +443,13 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         when: { flag: 'knows:pillar' },
-        lines: [{ who: 'אוהד ותיק', text: 'ליד העמוד. תגיד לו שיוסי שאל.' }],
+        lines: [{ who: 'אוהד ותיק', text: 'ליד העמוד, כמו שאמרתי. ותגיד לו שיוסי שאל עליו.' }],
       },
       {
         lines: [
-          { who: null, text: 'אדם עם צעיף ביד, לא על הצוואר. חם מדי בשביל זה, וקר מדי בשבילו בלי.' },
+          { who: null, text: 'אדם עם צעיף ביד, לא על הצוואר. חם מדי בשביל ללבוש אותו, וקר מדי בשבילו בלי.' },
           { who: 'אוהד ותיק', text: 'אתה הבן של קובי. אתם בשער 7, ליד העמוד השני. כמו תמיד.' },
-          { who: 'אוהד ותיק', text: 'ואם תאבד אותו — הוא לא זז מהעמוד. שנים.' },
+          { who: 'אוהד ותיק', text: 'ואם תאבד אותו בהפסקה — הגדר בין שער 5 לשער 7. שם כולם נפגשים, שם מוצאים אנשים.' },
         ],
         then: [
           { e: 'flag', flag: 'knows:pillar' },
@@ -478,8 +478,8 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'אדם הולך עם טרנזיסטור צמוד לאוזן, ומדבר אליו כאילו הוא שומע.' },
-          { who: 'אוהד עם רדיו', text: 'עוד לא התחיל כלום. בארבע. תלך, תלך, אחרי האדומים.' },
+          { who: null, text: 'אדם הולך עם טרנזיסטור צמוד לאוזן. הוא לא מגביר אותו. מי שרוצה לשמוע מצמיד את הראש.' },
+          { who: 'אוהד עם רדיו', text: 'עוד לא התחיל כלום, לא פה ולא שם. בארבע. תלך אחרי האדומים, ילד.' },
         ],
         then: [{ e: 'flag', flag: 'saw:radio-walker' }],
       },
@@ -490,7 +490,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'יותר אדום מכל שבת. אנשים שלא הולכים בדרך כלל הולכים היום, ואתה מזהה חצי מהם.' },
+          { who: null, text: 'יותר אדום מכל שבת, ולכל שלישי יש טרנזיסטור ביד. אנשים שלא באים בדרך כלל באים היום.' },
         ],
       },
     ],
@@ -508,8 +508,8 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         lines: [
           { who: 'קובי', text: 'הנה אתה.' },
-          { who: null, text: 'הוא מוציא שני כרטיסים מהכיס של החולצה. הוא הוציא אותם משם כבר שלוש פעמים היום.' },
-          { who: 'קובי', text: 'תחזיק את שלך. אם נתפזר — שער 7, העמוד השני.' },
+          { who: null, text: 'הוא מוציא שני כרטיסים מכיס החולצה. הוציא אותם משם כבר שלוש פעמים היום, רק לבדוק.' },
+          { who: 'קובי', text: 'תחזיק את שלך בכיס. אם נתפזר — שער 7, העמוד השני. ואם אני קורא לך, זה בגלל יבנה.' },
         ],
         then: [
           { e: 'flag', flag: 'entry:granted' },
@@ -528,7 +528,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         when: { flag: 'entry:granted' },
-        lines: [{ who: 'סדרן', text: 'קדימה, פנימה, לא לעצור בקרוסלה.' }],
+        lines: [{ who: 'סדרן', text: 'קדימה, פנימה, לא לעצור בקרוסלה. אחריך יש עוד אלף.' }],
       },
       // The old mercy of Israeli grounds: at half-time the gates open and whoever is
       // still outside walks in for the second half. A boy with no ticket, no father at
@@ -536,8 +536,8 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { afterMinute: 16 * 60 + 48 },
         lines: [
-          { who: 'סדרן', text: 'מחצית. פותחים. תיכנס, רק לא לרוץ.' },
-          { who: null, text: 'הקרוסלה מסתובבת בלי כרטיס. מאחוריך עוד עשרים ילדים שחיכו לזה.' },
+          { who: 'סדרן', text: 'מחצית. פותחים. תיכנס, רק לא בריצה.' },
+          { who: null, text: 'הקרוסלה מסתובבת בלי כרטיס. מאחוריך עוד עשרים ילדים שעמדו פה בשביל הרגע הזה.' },
         ],
         then: [
           { e: 'flag', flag: 'entry:granted' },
@@ -547,12 +547,12 @@ export const CONVERSATIONS_1990: Conversation[] = [
       },
       {
         when: { flag: 'went:withKobi' },
-        lines: [{ who: 'סדרן', text: 'הבן של קובי? הוא מחכה לך ליד הקופה. תמיד אותו דבר אתם.' }],
+        lines: [{ who: 'סדרן', text: 'הבן של קובי? הוא עומד לך ליד הקופה כבר עשר דקות. תמיד אותו דבר, אתם.' }],
       },
       {
         lines: [
-          { who: 'סדרן', text: 'כרטיס. אין כרטיס — אין שער. היום לא.' },
-          { who: null, text: 'הוא לא רשע. היום פשוט יש יותר אנשים ממקומות.' },
+          { who: 'סדרן', text: 'כרטיס. אין כרטיס — אין שער. היום בטח שלא.' },
+          { who: null, text: 'הוא לא רשע. היום פשוט יש יותר אנשים מאשר מקומות, וזה לא הוא שסופר.' },
         ],
       },
     ],
@@ -563,13 +563,13 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         when: { flag: 'entry:granted' },
-        lines: [{ who: 'הקופאי', text: 'יש לך. לך.' }],
+        lines: [{ who: 'הקופאי', text: 'יש לך כרטיס. לך, אתה מעכב.' }],
       },
       {
         when: { minAgorot: 3000 },
         lines: [
           { who: 'הקופאי', text: 'ילד — שלושים. היום זה המחיר.' },
-          { who: null, text: 'השטר של אמא. מקופל לארבע. אתה פותח אותו לאט, כאילו זה יעזור.' },
+          { who: null, text: 'השטר של אמא, מקופל לארבע. אתה פותח אותו לאט, כאילו זה ישנה משהו במחיר.' },
         ],
         then: [
           { e: 'money', agorot: -3000, why: 'כרטיס' },
@@ -584,7 +584,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         lines: [
           { who: 'הקופאי', text: 'שלושים לילד. היום.' },
-          { who: null, text: 'אין לך. לא היום, לא בכיס הזה.' },
+          { who: null, text: 'אתה סופר שוב, בכיס, בלי להוציא את היד. זה לא נהיה יותר.' },
         ],
       },
     ],
@@ -595,12 +595,12 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         when: { flag: 'entry:granted' },
-        lines: [{ who: 'אופיר', text: 'תיכנס. אנחנו בשער 7, למעלה, איפה שרואים את הרדיו של כולם.' }],
+        lines: [{ who: 'אופיר', text: 'תיכנס. אנחנו למעלה בשער 7, איפה שכל מי שיש לו רדיו עומד.' }],
       },
       {
         when: { flag: 'went:withFriends' },
         lines: [
-          { who: 'אופיר', text: 'עמית שילם על שלושה. אל תשאל מאיפה.' },
+          { who: 'אופיר', text: 'עמית שילם על שלושה כרטיסים. אל תשאל מאיפה.' },
           { who: 'עמית', text: 'מהחיסכון.' },
           { who: 'אופיר', text: 'אמרתי אל תשאל.' },
         ],
@@ -616,7 +616,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         lines: [
           { who: 'אופיר', text: 'אתה לבד? איפה אבא שלך?' },
           { who: 'פוגי', text: 'בפנים.' },
-          { who: 'אופיר', text: 'אז תיכנס. אתה כבר לא בן שמונה.' },
+          { who: 'אופיר', text: 'אז תסתדר ותיכנס. אתה כבר לא בן שמונה.' },
           { who: null, text: 'הוא לא מציע כלום. זו לא רשעות. זה 1990.' },
         ],
         then: [{ e: 'rel', who: 'ofir', axis: 'distance', delta: 2 }],
@@ -629,7 +629,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         when: { minAgorot: 200 },
-        lines: [{ who: 'מוכר', text: 'גרעינים, שישים. גזוז, שמונים. רדיו — אין, תשאל את השכן.' }],
+        lines: [{ who: 'מוכר', text: 'גרעינים — שניים. גזוז נגמר. רדיו אין לי — יש למי שעומד למעלה. תעמוד לידו ותשמע.' }],
         choices: [
           {
             id: 'seeds',
@@ -645,7 +645,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         ],
       },
       {
-        lines: [{ who: 'מוכר', text: 'בלי כסף, בלי גרעינים. אבל הרעש חינם.' }],
+        lines: [{ who: 'מוכר', text: 'בלי כסף, בלי גרעינים. הרעש פה חינם, וממנו יש היום הרבה.' }],
       },
     ],
   },
@@ -657,7 +657,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         when: { flag: 'found:kobi' },
-        lines: [{ who: 'קובי', text: 'הביתה. ביחד. אמא מחכה.' }],
+        lines: [{ who: 'קובי', text: 'הביתה. ברגל, שנינו. אמא מחכה.' }],
       },
       {
         lines: [
@@ -665,7 +665,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
           { who: 'קובי', text: 'אני?! איפה אתה היית?!' },
           { who: 'פוגי', text: 'עלינו!' },
           { who: 'קובי', text: 'אני יודע!' },
-          { who: null, text: 'חיבוק קצר. לא יותר מזה. לא צריך יותר מזה.' },
+          { who: null, text: 'חיבוק קצר, בתוך הרעש. לא יותר מזה. לא צריך יותר מזה.' },
         ],
         then: [
           { e: 'flag', flag: 'found:kobi' },
@@ -673,7 +673,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
           { e: 'rel', who: 'kobi', axis: 'bond', delta: 8 },
           { e: 'redheart', key: 'familyTradition', delta: 10 },
           { e: 'remember', who: 'kobi', eventId: '1990-found', significance: 'major' },
-          { e: 'toast', text: 'הביתה. ביחד.', tone: 'red' },
+          { e: 'toast', text: 'הביתה. ברגל, ביחד.', tone: 'red' },
         ],
       },
     ],

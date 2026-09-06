@@ -325,6 +325,7 @@ export class FootballScene extends Phaser.Scene {
       year: this.ctx.engine.state.year,
       scene: 'pitch',
       hint: 'שניים על שניים. תזוז, תמסור, תבעט.',
+      waitingHe: null,
     })
   }
 

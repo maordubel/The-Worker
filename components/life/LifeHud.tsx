@@ -60,6 +60,34 @@ export function LifeHud({ hud }: { hud: HudState }) {
           </Cloth>
         </div>
       )}
+
+      {/*
+        ממתין — the strip that says nothing is broken.
+
+        It sits at the FOOT of the glass, above the thumb deck and clear of every button,
+        because it is not an instruction — it is the game telling you, for as long as it
+        is true, that standing still is the correct move and naming what is coming. A
+        pulsing dot rather than a spinner: a spinner says "loading", and nothing is
+        loading; a slow pulse says "running". Maor asked for this on 5.9.2026 in one
+        sentence, and it is the difference between a quiet minute and a bug report.
+      */}
+      {hud.waitingHe && (
+        <div
+          className="absolute inset-x-2.5 flex justify-center"
+          style={{ bottom: 'calc(76px + env(safe-area-inset-bottom))' }}
+          data-life="waiting"
+        >
+          <Cloth className="max-w-[92%]">
+            <span className="flex items-center gap-2">
+              <span
+                aria-hidden
+                className="inline-block h-1.5 w-1.5 shrink-0 bg-red motion-safe:animate-[waiting-pulse_1800ms_ease-in-out_infinite]"
+              />
+              <bdi className="text-[12px] leading-snug">{hud.waitingHe}</bdi>
+            </span>
+          </Cloth>
+        </div>
+      )}
     </div>
   )
 }

@@ -2,6 +2,8 @@
 
 import Image from 'next/image'
 
+import { KitShirt } from '@/components/kit/KitShirt'
+
 import { t } from '@/lib/i18n'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 
@@ -35,15 +37,29 @@ export function ShirtCard({ shirt, onClose }: { shirt: NonNullable<LifeBusEvents
         {shirt.titleHe}
       </h2>
 
-      <div className="relative my-4 aspect-square w-[min(62vw,320px)]">
-        <Image
-          src={`/life/art/${shirt.art}.png`}
-          alt={shirt.nameHe}
-          fill
-          sizes="(max-width: 640px) 62vw, 320px"
-          className="object-contain"
-          priority
-        />
+      {/*
+        שתי דרכים לצייר חולצה — a photograph, or the club's own spec.
+        The seven Maor photographed are held up as photographs. The archive's season kits
+        have no photograph and never will, so they are DRAWN, by the same component the
+        kits screen draws them with: same cut, same crest, same lettered sponsor. A
+        collection that mixed a photograph with a placeholder would be a collection with
+        holes in it; this one has thirty-three shirts nobody had to photograph.
+      */}
+      <div className="my-4 flex aspect-square w-[min(62vw,320px)] items-center justify-center">
+        {shirt.spec ? (
+          <KitShirt spec={shirt.spec} className="h-full w-full" title={shirt.nameHe} />
+        ) : (
+          <div className="relative h-full w-full">
+            <Image
+              src={`/life/art/${shirt.art}.png`}
+              alt={shirt.nameHe}
+              fill
+              sizes="(max-width: 640px) 62vw, 320px"
+              className="object-contain"
+              priority
+            />
+          </div>
+        )}
       </div>
 
       <p className="font-body text-[15px] text-sheet">{shirt.nameHe}</p>
@@ -55,8 +71,21 @@ export function ShirtCard({ shirt, onClose }: { shirt: NonNullable<LifeBusEvents
 
       <p className="mt-3 max-w-[34ch] font-body text-[13px] leading-relaxed text-concrete">{shirt.noteHe}</p>
 
+      {shirt.sourceHe && (
+        <p className="mt-2 max-w-[34ch] font-body text-[11px] leading-snug text-concrete/70">
+          <bdi>{shirt.sourceHe}</bdi>
+        </p>
+      )}
+
+      {/*
+        A purchase counts; an ARRIVAL does not. "3 / 9" under a shirt you have just been
+        told exists, and do not own, reads as a scoreline you are losing. The arrival card
+        says what it is and what it costs to want it, and nothing else.
+      */}
       <p className="mt-5 border-hair border-red px-3 py-1.5 font-mono text-[12px] tabular-nums text-sheet">
-        {shirt.have} / {shirt.total} {t('life.shirt.collection')}
+        {shirt.kind === 'arrived'
+          ? t('life.shirt.onRail')
+          : `${shirt.have} / ${shirt.total} ${t('life.shirt.collection')}`}
       </p>
 
       <p className="mt-4 font-body text-[11px] text-concrete/70">{t('life.shirt.tap')}</p>

@@ -43,7 +43,7 @@ export const ENDINGS_HALL: Record<string, EndingCard> = {
     id: 'hall',
     titleHe: 'עלינו. לא הבראנו.',
     bodyHe:
-      'היית באולם בלילה שירדו, ובאולם בלילה שעלו. בשני הלילות סחבת משהו. בלילה השני מישהו אמר "עלינו" ואף אחד לא ענה, כי כולם ידעו מה זה שווה. הבית השני עדיין עומד. על מה — זו השאלה שהתחילה בך הערב.',
+      'היית באולם בלילה שירדו — הראשון בתולדות הקבוצה — ובאולם בלילה שעלו חזרה. בשני הלילות סחבת משהו. בשני מישהו אמר "עלינו" ואף אחד לא ענה, כי כולם ידעו מה זה שווה. הגג עוד עומד. על מה הוא עומד — זו השאלה שהתחילה בך הערב.',
     memoryHe: 'כרטיס מהלילה של הירידה, ומאחוריו, בעט, כמה עלו שני הארגזים. לימור כתבה.',
     memoryItem: 'hall-ticket',
     presence: 'inside',
@@ -52,7 +52,7 @@ export const ENDINGS_HALL: Record<string, EndingCard> = {
     id: 'football',
     titleHe: 'בבלומפילד, כשהאולם ירד',
     bodyHe:
-      'בחרת באבא ובכדורגל בערב שהאולם ירד. שמעת את זה מחבר, מאוחר, על מדרגות היציע. שחור לא הזכיר את זה אף פעם. זה היה יותר גרוע מאשר אם היה מזכיר. שנה אחרי היית שם כשעלו, וזה תיקן חצי.',
+      'בחרת באבא ובכדורגל בערב שהאולם ירד בפעם הראשונה בתולדותיו. שמעת את זה במחצית, מטרנזיסטור של מישהו מאחור. שחור לא הזכיר את זה אף פעם. זה היה יותר גרוע מאשר אם היה מזכיר. שנה אחרי היית שם כשעלו, וזה תיקן חצי.',
     memoryHe: 'כרטיס לבלומפילד מאותו ערב. מישהו כתב עליו בעט שעה, ומחק.',
     memoryItem: 'ticket-stub',
     presence: 'heard-from-friend',
@@ -72,7 +72,7 @@ export const BEATS_HALL: Beat[] = [
     do: [
       { a: 'flag', flag: H1 },
       { a: 'events', events: [{ t: 'money.changed', agorot: 3000, why: 'חופשה' }] },
-      { a: 'lines', lines: [{ who: null, text: 'אביב. חופשה של ארבעים ושמונה שעות. הגעת ישר מהתחנה, עם התיק, לפינה של אוסישקין.' }, { who: null, text: 'הערב, אם זה נגמר רע, האולם יורד ליגה. ובאותו ערב בדיוק, בבלומפילד, משחק שאבא אמר עליו "אתה חייב להיות".' }] },
+      { a: 'lines', lines: [{ who: null, text: 'אביב. חופשה של ארבעים ושמונה שעות. הגעת ישר מהתחנה, עם התיק, לפינה של אוסישקין.' }, { who: null, text: 'הערב, אם זה נגמר רע, הקבוצה הזאת יורדת ליגה בפעם הראשונה מאז שנוסדה ב-1935. ובאותו ערב בדיוק, בבלומפילד, משחק שאבא אמר עליו "אתה חייב להיות".' }] },
       { a: 'talk', conversation: 'h1-corner' },
     ],
   },
@@ -121,13 +121,13 @@ export const CONVERSATIONS_HALL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'שחור ליד שני ארגזים. לימור עם רשימה. פרדי בחליפה, מדבר עם מישהו בטלפון נייד בגודל של לבנה.' },
-          { who: 'שחור', text: 'אתה. הגעת. יש שני ארגזים שצריכים להיכנס פנימה לפני שהקהל נכנס, ואין לי גב.' },
-          { who: 'לימור', text: 'ואבא שלך התקשר לקיוסק. אמר שאם אתה עובר פה, שתדע: הוא בבלומפילד בשמונה, שער 7, ומחכה.' },
+          { who: null, text: 'שחור ליד שני ארגזים. לימור עם פנקס. פרדי בחליפה, מדבר עם מישהו בטלפון נייד בגודל של לבנה.' },
+          { who: 'שחור', text: 'אתה. יופי. שני ארגזים צריכים להיכנס לפני הקהל, ואין לי גב. אני לא מבקש פעמיים.' },
+          { who: 'לימור', text: 'ואבא שלך התקשר לקיוסק של רפי. רפי אמר לשחור, שחור אמר לי. הוא בשער 7 בשמונה, והוא מחכה.' },
           { who: null, text: 'שמונה. בשני המקומות.' },
         ],
         choices: [
-          { id: 'crates', text: 'לסחוב את הארגזים. להישאר באולם.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'remember', who: 'shachor', eventId: 'crates-relegation-1997', significance: 'major' }, { e: 'energy', delta: -12 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 4 }, { e: 'redheart', key: 'basketballLove', delta: 4 }, { e: 'flag', flag: 'h1:crates' }, { e: 'toast', text: 'שני ארגזים. כבדים כמו החלטה.', tone: 'plain' }] },
+          { id: 'crates', text: 'לסחוב את הארגזים. להישאר באולם.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'remember', who: 'shachor', eventId: 'crates-relegation-1997', significance: 'major' }, { e: 'energy', delta: -12 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 4 }, { e: 'redheart', key: 'basketballLove', delta: 4 }, { e: 'flag', flag: 'h1:crates' }, { e: 'toast', text: 'לארגז השני חסרה ידית. שחור לא אמר תודה — אמר "עוד אחד".', tone: 'plain' }] },
           { id: 'football', text: 'להתנצל. ללכת לאבא.', then: [{ e: 'flag', flag: 'h1:decided' }, { e: 'flag', flag: 'h1:football' }, { e: 'flag', flag: 'life:hall:football-night' }, { e: 'rel', who: 'shachor', axis: 'trust', delta: -5 }, { e: 'remember', who: 'shachor', eventId: 'left-relegation-night-1997', significance: 'major' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 4 }, { e: 'time', minutes: 40 }] },
           { id: 'freddy', text: 'לשאול את פרדי מה קורה עם הכסף.', then: [{ e: 'goto', node: 'h1-freddy' }] },
         ],
@@ -140,8 +140,8 @@ export const CONVERSATIONS_HALL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: 'פרדי', text: 'מה קורה עם הכסף. (סוגר את הטלפון.) אין. זה מה שקורה. הכדורגל נמכר ויש לו מי שידאג. לאולם — אין מי.' },
-          { who: 'פרדי', text: 'ומי שרוצה שיהיה — יצטרך להיות זה. לא הערב. אבל שיתחיל לחשוב מי "זה".' },
+          { who: 'פרדי', text: 'מה קורה עם הכסף. (מקפל את הטלפון.) אין. זה מה שקורה. הכדורגל עבר לידיים שיש להן אינטרס לשמור עליו. לאולם אין ידיים כאלה.' },
+          { who: 'פרדי', text: 'ומי שרוצה שיהיו — יצטרך להיות הידיים. לא הערב. אבל שיתחיל לחשוב מי זה "מישהו".' },
         ],
         then: [{ e: 'institution', key: 'supporterOwnershipSeed', delta: 8 }, { e: 'institution', key: 'basketballOwnershipTrust', delta: -8 }, { e: 'goto', node: 'h1-corner' }],
       },
@@ -153,11 +153,11 @@ export const CONVERSATIONS_HALL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'האולם חצי מלא. זה הכי נורא שראית אותו. חצי מלא באולם הזה נשמע כמו ריק.' },
-          { who: null, text: 'זה לא היה קרוב. זה היה ברור מהתחלה, וזה מה שהפך את זה לארוך.' },
-          { who: 'לימור', text: 'תעמוד לידי. אני צריכה למנות משהו.' },
-          { who: null, text: 'הצפירה. שקט. לא של אבל — של אנשים שמחשבים כמה עולה להישאר.' },
-          { who: 'שחור', text: 'הארגזים. חזרה החוצה.' },
+          { who: null, text: 'גג הפח, החום, ריח של גרעינים ונקניקיות מהמזנון. הפרקט שוקע בדיוק במקום שהוא תמיד שוקע.' },
+          { who: null, text: 'אלפיים מקומות באולם הזה. הערב אפשר לספור אחד־אחד את מי שבא, ואף אחד לא רוצה.' },
+          { who: 'לימור', text: 'תעמוד לידי. אני סופרת כמה אנחנו. אני רוצה שיהיה רשום.' },
+          { who: null, text: 'שתי דקות על השעון והאולם כבר שותק. לא שקט של אבל — של אנשים שמחשבים כמה עולה להישאר.' },
+          { who: 'שחור', text: 'הארגזים. אותו סדר, הפוך.' },
         ],
         choices: [
           { id: 'carry', text: 'לסחוב חזרה. עד הסוף.', then: [{ e: 'rel', who: 'shachor', axis: 'sharedHistory', delta: 6 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'presence', mode: 'inside' }, { e: 'goto', node: 'h1-out' }] },
@@ -176,7 +176,7 @@ export const CONVERSATIONS_HALL: Conversation[] = [
         then: [{ e: 'wellbeing', key: 'loneliness', delta: 4 }, { e: 'presence', mode: 'inside' }, { e: 'goto', node: 'h1-out' }],
       },
       {
-        lines: [{ who: 'אפי', text: 'ירדנו.' }, { who: 'פוגי', text: 'ירדנו.' }, { who: 'אפי', text: 'אני זוכר אותך על הגב שלי אחרי הגביע. ארבע שנים. ארבע שנים זה כלום.' }],
+        lines: [{ who: 'אפי', text: 'ירדנו.' }, { who: 'פוגי', text: 'ירדנו.' }, { who: 'אפי', text: 'הקבוצה הזאת קיימת מ-1935 ואף פעם לא ירדה. ואני זוכר אותך על הגב שלי אחרי הגביע. ארבע שנים.' }],
         then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 6 }, { e: 'presence', mode: 'inside' }, { e: 'goto', node: 'h1-out' }],
       },
     ],
@@ -184,7 +184,7 @@ export const CONVERSATIONS_HALL: Conversation[] = [
   {
     id: 'h1-out',
     nameHe: null,
-    branches: [{ lines: [{ who: null, text: 'בחוץ, בפינה, סוקו כתב. גם את זה.' }] }],
+    branches: [{ lines: [{ who: null, text: 'בחוץ, בפינה, סוקו רשם בפנקס. את התאריך קודם. גם את זה כותבים.' }] }],
   },
   {
     id: 'h1-bloomfield',
@@ -192,7 +192,7 @@ export const CONVERSATIONS_HALL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'שער 7. אבא. "טוב שבאת." המשחק היה משחק של הישרדות — לא שלהם, שלכם. כל כדור היה שאלה.' },
+          { who: null, text: 'שער 7. אבא, ו"טוב שבאת" בשתי מילים. המשחק היה משחק של הישרדות — לא שלהם, שלכם. כל כדור היה שאלה.' },
           { who: null, text: 'במחצית, מישהו עם טרנזיסטור מאחור: "באוסישקין נגמר. ירדו." אבא שמע. הסתכל עליך. לא אמר כלום.' },
           { who: 'קובי', text: 'היית צריך להיות שם?' },
         ],
@@ -209,7 +209,7 @@ export const CONVERSATIONS_HALL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'שנה. אותה פינה. הפעם האולם עולה — הערב, אם זה נגמר טוב, חוזרים לליגה שירדו ממנה.' },
+          { who: null, text: 'שנה. אותה פינה, אותו ריח, ארגזים אחרים. הערב, אם זה נגמר טוב, חוזרים לליגה שירדו ממנה.' },
           { who: 'שחור', text: 'עולים. אל תגיד לי "הבראנו". עולים.' },
           { who: 'לימור', text: 'שלושה עשר אנשים עבדו השנה בשביל הערב הזה. אני יודעת כי רשמתי.' },
         ],
@@ -227,11 +227,11 @@ export const CONVERSATIONS_HALL: Conversation[] = [
     branches: [
       {
         when: { flag: 'life:hall:football-night' },
-        lines: [{ who: null, text: 'האולם מלא. עלו. שרו. שחור עמד לידך ולא הזכיר את הערב ההוא. זה היה יותר גרוע מאשר אם היה מזכיר.' }, { who: null, text: '"עלינו," מישהו אמר. אף אחד לא ענה.' }],
+        lines: [{ who: null, text: 'האולם מלא. עלו. שרו. שחור עמד לידך שנה שלמה אחרי, ולא הזכיר את הערב ההוא אף במילה. זה היה יותר גרוע מאשר אם היה מזכיר.' }, { who: null, text: '"עלינו," מישהו אמר. אף אחד לא ענה.' }],
         then: [{ e: 'flag', flag: 'h2:done' }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 4 }, { e: 'ending', id: 'football' }],
       },
       {
-        lines: [{ who: null, text: 'האולם מלא. עלו. שרו. ובסוף, במקום לחגוג, אנשים התחילו לסחוב ארגזים, כי מחר יש עוד שנה.' }, { who: null, text: '"עלינו," מישהו אמר. אף אחד לא ענה.' }],
+        lines: [{ who: null, text: 'האולם מלא. עלו. שרו. ובסוף, במקום לחגוג, אנשים התחילו לקפל כיסאות ולסחוב ארגזים, כי מחר יש עוד שנה.' }, { who: null, text: '"עלינו," מישהו אמר. אף אחד לא ענה.' }],
         then: [{ e: 'flag', flag: 'h2:done' }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'redheart', key: 'basketballLove', delta: 3 }, { e: 'ending', id: 'hall' }],
       },
     ],

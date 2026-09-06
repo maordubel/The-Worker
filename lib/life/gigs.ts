@@ -51,6 +51,15 @@ export type Gig = {
   trait?: { key: 'reliability' | 'responsibility' | 'empathy' | 'independence' | 'courage'; delta: number }
   /** where it sits in the painting */
   at: { x: number; y: number; w: number }
+  /**
+   * שני משחקי הכסף — a gig that opens a CARD instead of the chore scene.
+   *
+   * `toto` is the slip: five questions from the site's own trivia bank, two shekels a
+   * right answer. `coin` is עץ או פלי in the alley: a shekel in, five out. Both were
+   * Maor's, on 5.9.2026, and both are here rather than in their own system because they
+   * are jobs — they sit in a room, they cost the afternoon, and they are once a day.
+   */
+  opens?: 'toto' | 'coin'
 }
 
 /**
@@ -206,6 +215,38 @@ export const GIGS: readonly Gig[] = [
     at: { x: 0.72, y: 0.86, w: 0.09 },
   },
   {
+    id: 'toto-slip',
+    where: 'kiosk',
+    nameHe: 'הטופס אצל רפי',
+    labelHe: 'שליחת טוטו',
+    from: 'a4-shirt',
+    hours: 0.5,
+    minutes: 20,
+    energy: 4,
+    askHe: 'למלא טופס. חמש שאלות.',
+    openHe: 'רפי דוחף לך טופס וקצה של עיפרון. "אם אתה כזה חכם על הפועל — תמלא."',
+    doneHe: 'הטופס על הדלפק, והוא ספר לך את מה שהגיע.',
+    trait: { key: 'independence', delta: 2 },
+    at: { x: 0.52, y: 0.87, w: 0.08 },
+    opens: 'toto',
+  },
+  {
+    id: 'alley-coin',
+    where: 'pitch',
+    nameHe: 'הגדולים בסמטה',
+    labelHe: 'הימורים בשכונה',
+    from: 'a4-shirt',
+    hours: 0.2,
+    minutes: 10,
+    energy: 3,
+    askHe: 'שקל להיכנס.',
+    openHe: 'שניים גדולים ממך, מטבע של חצי שקל על הציפורן. "עץ או פלי. שקל להיכנס, חמישה אם קלעת."',
+    doneHe: 'המטבע נפל.',
+    trait: { key: 'courage', delta: 2 },
+    at: { x: 0.66, y: 0.9, w: 0.08 },
+    opens: 'coin',
+  },
+  {
     id: 'wash-cars',
     where: 'street',
     nameHe: 'החניה מתחת לבניין',
@@ -276,7 +317,7 @@ export function gigConversations(): Conversation[] {
             choices: [
               {
                 id: 'do',
-                text: `${gig.askHe} — עד ${pay} ₪`,
+                text: gig.opens === 'coin' ? gig.askHe : `${gig.askHe} — עד ${pay} ₪`,
                 /**
                  * The conversation agrees to the work; `ChoreScene` is the work. Nothing is
                  * paid here on purpose — the pay depends on how it went, and a gig that
@@ -284,7 +325,11 @@ export function gigConversations(): Conversation[] {
                  */
                 then: [
                   ...(gig.rel ? [{ e: 'rel' as const, who: gig.rel.who, axis: gig.rel.axis, delta: gig.rel.delta }] : []),
-                  { e: 'minigame' as const, id: `chore:${gig.id}` },
+                  ...(gig.opens === 'toto'
+                    ? [{ e: 'flag' as const, flag: gigFlag(gig) }, { e: 'toto' as const }]
+                    : gig.opens === 'coin'
+                      ? [{ e: 'coin' as const }]
+                      : [{ e: 'minigame' as const, id: `chore:${gig.id}` }]),
                 ],
               },
               { id: 'later', text: 'לא עכשיו.', then: [] },

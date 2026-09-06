@@ -31,8 +31,11 @@ import type { LifeContext } from './context'
  * from the far radio back to his father can arrive with news the father's radio has not
  * played yet — and that inversion (`net:toldKobi`) is the whole point of the chapter.
  *
- * Time is compressed: about one game-minute per two real seconds, so the ninety minutes
- * and the interval take a little over three real minutes, with room to walk.
+ * Time is compressed: about one game-minute per 1.2 real seconds, so the ninety minutes
+ * and a short interval take a little over two real minutes, with room to walk between the
+ * radios three or four times. It was half that speed until 5.9.2026 and Maor's verdict was
+ * the correct one: a chapter whose point is running between two radios cannot spend its
+ * length standing still.
  */
 
 export type NetBoard = {
@@ -80,10 +83,29 @@ const YAVNE_AT: Array<{ minute: number; state: YavneState }> = [
   { minute: 63, state: 'further' },
 ]
 const HALF = 45
-const INTERVAL = 15
+/**
+ * ההפסקה — five game-minutes, not fifteen.
+ *
+ * A real half-time is fifteen minutes and in this game that was thirty real seconds with
+ * nothing to do in them, which is the single longest dead stretch in the chapter. The
+ * interval still HAPPENS — the whistle, the seeds along the row, the radios still talking
+ * — it is just not a wait you sit through.
+ */
+const INTERVAL = 5
 const FULL = 90
 /** game-minutes per real second */
-const PACE = 0.5
+/**
+ * כמה מהר רץ המשחק — game-minutes per real second.
+ *
+ * It was 0.5: two real seconds a minute, so ninety minutes plus a fifteen-minute interval
+ * ran three and a half real minutes with the interval alone taking thirty seconds of
+ * standing still. Maor played it and said the two true things about it — "עורך זמן רב
+ * מידי" and "העובדה שהוא צריך פשוט להמתין לא ברורה". The second half of that is answered
+ * on the glass (`WorldScene.waitingFor`); this is the first half. At 0.85 the match is a
+ * little over two minutes, which is long enough to run between two radios three or four
+ * times and short enough that nobody checks whether the game has frozen.
+ */
+const PACE = 0.85
 /** real seconds the dropped radio waits on the concrete */
 const DROP_WINDOW_MS = 42000
 
@@ -403,6 +425,11 @@ export class TransistorNet {
     this.known.yavne = state
     this.known.yavneAt = this.minute
     this.known.from = from
+    // The banner on the glass reads one fact — "has he heard anything yet" — and every
+    // source in this chapter passes through here, so it is raised in one place.
+    if (!this.ctx.engine.state.flags['net:heard']) {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'net:heard' })
+    }
     this.ctx.engine.dispatch({ t: 'flag.set', flag: 'net:known', value: state })
   }
 

@@ -14,6 +14,13 @@ import type { Conversation } from './script'
  * fourth; the fourth, far north, where getting there IS the game. The aftermath is in
  * the corner outside Ussishkin, where Shachor stacks chairs and Efi does not speak.
  *
+ * The series is first-to-three, not four games — the archive's four rows end on one
+ * marked המכריע, and no line here counts a game that was never played. The two archive
+ * details the lines do borrow are the hall itself (`ussishkin.json`: two thousand seats,
+ * a low tin roof, the buffet's seeds and sausages, "כבר בכניסה קבוצות היו עם מינוס
+ * עשר") and the last championship, 1968/69 — twenty-four years before this one, which
+ * is Soko's line and nobody else's.
+ *
  * Days inside a chapter are `day.entered` events dispatched by beats. A day clears the
  * afternoon's flags, so every day marker is a `life:` flag and every beat says which day
  * it belongs to. **No line here states a score, a margin or an opponent's name.**
@@ -56,7 +63,7 @@ export const ENDINGS_GALIL: Record<string, EndingCard> = {
     id: 'inside',
     titleHe: 'הגביע היה אמיתי',
     bodyHe:
-      'הייתם שם, בצפון, בסוף. ראית את זה נגמר מקרוב, ראית את הפנים של אנשים שלא הכרת ושיכולת לצייר בעל פה. בדרך חזרה האוטובוס היה שקט כמו כיתה בבחינה. לימור לא רשמה כלום. אפי ישן, או העמיד פנים.',
+      'הייתם שם, בצפון, בסוף. ראית את זה נגמר מקרוב, וראית פנים של אנשים שלא הכרת ושאתה יכול לצייר בעל פה. בדרך חזרה האוטובוס היה שקט כמו כיתה בבחינה. לימור לא פתחה את הפנקס. אפי ישן, או העמיד פנים.',
     memoryHe: 'פתק הנסיעה, מקופל ארבע. עליו, בכתב של לימור, שעת היציאה. שום דבר על שעת החזרה.',
     memoryItem: 'folded-paper',
     presence: 'inside',
@@ -65,8 +72,8 @@ export const ENDINGS_GALIL: Record<string, EndingCard> = {
     id: 'late',
     titleHe: 'הגעת. מאוחר.',
     bodyHe:
-      'האוטובוס איחר, או הטרמפ, או אתה. הגעת לאולם בצפון כשהמשחק כבר ידע איך הוא נגמר. עמדת בכניסה ושמעת מבפנים את הדבר שלא רצית, ואז נכנסת בכל זאת, כי ללכת עד לשם ולא להיכנס — זה לא.',
-    memoryHe: 'קרע מכרטיס אוטובוס עם חותמת של עיר שלא היית בה קודם.',
+      'האוטובוס איחר, או הטרמפ, או אתה. הגעת לאולם בצפון כשהמשחק כבר ידע איך הוא נגמר. עמדת בכניסה ושמעת מבפנים את הדבר שלא רצית, ואז נכנסת בכל זאת — כי לנסוע עד לשם ולא להיכנס, זה לא.',
+    memoryHe: 'חצי כרטיס נסיעה, מוחתם במקום שלא היית בו קודם ולא תדע להגיע אליו שוב.',
     memoryItem: 'ticket-stub',
     presence: 'late',
   },
@@ -75,7 +82,7 @@ export const ENDINGS_GALIL: Record<string, EndingCard> = {
     titleHe: 'מהמטבח',
     bodyHe:
       'שמעת את זה ברדיו, במטבח, עם אמא שעשתה שהיא לא מקשיבה ואבא שעשה שהוא קורא. כשזה נגמר הרדיו המשיך לדבר על משהו אחר, ואתה ישבת מול הטרנזיסטור עד שהוא נגמר לבד. "היה משחק טוב," אמא אמרה. היא לא שמעה משחק.',
-    memoryHe: 'הטרנזיסטור. אתה יודע איזה תחנה, בלי להסתכל.',
+    memoryHe: 'הטרנזיסטור. אתה יודע איפה התחנה בלי להסתכל, לפי הסדק בחוגה.',
     memoryItem: 'transistor',
     presence: 'radio',
   },
@@ -83,7 +90,7 @@ export const ENDINGS_GALIL: Record<string, EndingCard> = {
     id: 'heard',
     titleHe: 'מפי אפי',
     bodyHe:
-      'לא הלכת ולא שמעת. אפי סיפר לך למחרת, בחצר, בשלושה משפטים. בשלישי הקול שלו נשבר והוא הפסיק. לא שאלת עוד. את השאר ידעת מהפנים של כולם.',
+      'לא נסעת ולא שמעת. אפי סיפר לך למחרת, בחצר, בשלושה משפטים. בשלישי הקול שלו נשבר והוא הפסיק. לא שאלת עוד. את השאר ידעת מהפנים של כולם.',
     memoryHe: 'כלום. אבל שלושה משפטים של אפי, ואחד שהוא לא סיים.',
     memoryItem: 'folded-paper',
     presence: 'heard-from-friend',
@@ -106,8 +113,8 @@ export const BEATS_GALIL: Beat[] = [
       {
         a: 'lines',
         lines: [
-          { who: null, text: 'שלושה שבועות אחרי הגביע. אותה פינה, אותם אנשים, ואוויר אחר לגמרי: עכשיו זה לא חג, זה סדרה.' },
-          { who: 'אפי', text: 'ארבעה משחקים. מי שמנצח שלושה. אנחנו בבית ראשונים. מה כבר יכול לקרות.' },
+          { who: null, text: 'שלושה שבועות אחרי הגביע. אותה פינה, אותם אנשים, ואוויר אחר לגמרי: זה כבר לא חג, זו סדרה.' },
+          { who: 'אפי', text: 'הראשון לשלושה ניצחונות לוקח הכול. ואנחנו בבית ראשונים. מה כבר יכול לקרות.' },
           { who: 'לימור', text: 'אל תגיד "מה כבר יכול לקרות". זה משפט שהמשחקים שומעים.' },
         ],
       },
@@ -122,7 +129,7 @@ export const BEATS_GALIL: Beat[] = [
     do: [
       { a: 'card', titleHe: 'משחק 1', subHe: 'אוסישקין', ms: 2200 },
       { a: 'match', script: 'galil-93-g1' },
-      { a: 'lines', lines: [{ who: null, text: 'הצפירה. האולם לא מבין. אנשים עומדים ולא יוצאים, כאילו אם לא יוצאים זה לא נגמר.' }, { who: 'אפי', text: 'זה רק אחד. זה רק אחד מארבעה.' }, { who: null, text: 'הוא אמר את זה לעצמו. לא לך.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'הצפירה. האולם לא מבין. אנשים עומדים ולא יוצאים, כאילו אם לא יוצאים זה לא נגמר.' }, { who: 'אפי', text: 'זה רק אחד. עוד לא קרה כלום.' }, { who: null, text: 'הוא אמר את זה לעצמו. לא לך.' }] },
       { a: 'events', events: DAY(D2, 1993, 3, at(19, 30), '12 במאי 1993') },
       { a: 'card', titleHe: 'יום רביעי', subHe: 'משחק 2 · בחוץ', ms: 2400 },
       { a: 'travel', to: 'kitchen', spawn: 'start' },
@@ -168,7 +175,7 @@ export const BEATS_GALIL: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'events', events: [{ t: 'money.changed', agorot: 4500, why: 'מה שיש בכיס באמצע שבוע' }] },
-      { a: 'lines', lines: [{ who: null, text: 'המשחק המכריע. שלוש שעות נסיעה צפונה, ואף אחד לא מסדר לך אותן.' }, { who: null, text: 'יש אוטובוס מאורגן מהפינה בארבע, אם נרשמת. יש בן דוד של אופיר עם אוטו, אם יש כסף לדלק. ויש מטבח עם רדיו.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'המשחק המכריע. שלוש שעות נסיעה צפונה, ואף אחד לא מסדר לך אותן.' }, { who: null, text: 'יש אוטובוס מאורגן מהפינה בארבע, למי שנרשם. יש בן דוד של אופיר עם אוטו, אם יש כסף לדלק. ויש מטבח עם רדיו.' }] },
     ],
   },
   // four o'clock: the bus leaves; five: the car; eight: the radio
@@ -176,13 +183,13 @@ export const BEATS_GALIL: Beat[] = [
     id: 'g4-bus-gone',
     trigger: 'clock',
     when: { flag: D4, afterMinute: at(16, 10), none: [{ flag: 'g4:decided' }] },
-    do: [{ a: 'toast', text: 'ארבע ועשרה. האוטובוס המאורגן יצא. מי שלא היה עליו, לא עליו.', tone: 'red' }, { a: 'flag', flag: 'g4:bus-gone' }],
+    do: [{ a: 'toast', text: 'ארבע ועשרה. האוטובוס המאורגן יצא מלא. מי שלא היה עליו כבר לא יהיה.', tone: 'red' }, { a: 'flag', flag: 'g4:bus-gone' }],
   },
   {
     id: 'g4-radio-time',
     trigger: 'clock',
     when: { flag: D4, afterMinute: at(20, 0), none: [{ flag: 'g4:decided' }] },
-    do: [{ a: 'flag', flag: 'g4:decided' }, { a: 'flag', flag: 'g4:heard' }, { a: 'lines', lines: [{ who: null, text: 'שמונה. לא נסעת ולא הדלקת רדיו. איפשהו רחוק זה קורה, ואתה תשמע מחר.' }] }, { a: 'events', events: DAY(D5, 1993, 4, at(18, 30), '20 במאי 1993') }, { a: 'card', titleHe: 'למחרת', subHe: 'הפינה', ms: 2400 }, { a: 'travel', to: 'ussishkin-outside', spawn: 'start' }],
+    do: [{ a: 'flag', flag: 'g4:decided' }, { a: 'flag', flag: 'g4:heard' }, { a: 'lines', lines: [{ who: null, text: 'שמונה. לא נסעת, וגם לא הדלקת. איפשהו רחוק זה קורה עכשיו בלעדיך, ואת השאר תשמע מחר בחצר.' }] }, { a: 'events', events: DAY(D5, 1993, 4, at(18, 30), '20 במאי 1993') }, { a: 'card', titleHe: 'למחרת', subHe: 'הפינה', ms: 2400 }, { a: 'travel', to: 'ussishkin-outside', spawn: 'start' }],
   },
   // the night ends however it ended; the next evening is the corner
   {
@@ -210,9 +217,9 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     nameHe: 'אפי',
     branches: [
       { when: { flag: D5 }, lines: [{ who: 'אפי', text: '…' }, { who: null, text: 'הוא לא מדבר. עוד לא.' }] },
-      { when: { flag: D4 }, lines: [{ who: 'אפי', text: 'אני על האוטובוס. תהיה עליו.' }] },
+      { when: { flag: D4 }, lines: [{ who: 'אפי', text: 'אני על האוטובוס בארבע. תהיה עליו.' }] },
       { when: { flag: D3 }, lines: [{ who: 'אפי', text: 'הערב. הבית. אין ברירה, וזה טוב שאין.' }] },
-      { lines: [{ who: 'אפי', text: 'ארבעה משחקים. אנחנו בבית ראשונים. מה כבר יכול לקרות.' }] },
+      { lines: [{ who: 'אפי', text: 'הראשון לשלושה ניצחונות. ואנחנו בבית ראשונים. מה כבר יכול לקרות.' }] },
     ],
   },
   {
@@ -230,7 +237,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'האולם מלא עד הקירות. הביטחון של אחרי גביע: אנשים מדברים על המשחק הבא לפני שהזה התחיל.' },
+          { who: null, text: 'אלפיים מקומות, ובתוכם יותר. הגג הנמוך מחזיר עליך את כל הרעש, והמזנון מריח מגרעינים ומנקניקיות.' },
           { who: 'לימור', text: 'איפה עומדים? למעלה רואים הכל. למטה מרגישים הכל.' },
         ],
         choices: [
@@ -247,8 +254,8 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'זה מתחיל טוב. ואז זה מפסיק להיות טוב, לאט, בלי רגע אחד שאפשר להצביע עליו.' },
-          { who: null, text: 'האולם מנסה. שר יותר חזק, ואז עוד יותר חזק, ואז מגלה שיש רמת רעש שממנה זה כבר לא עוזר.' },
+          { who: null, text: 'האולם מנסה. שר חזק יותר, ואז עוד יותר חזק, ואז מגלה שיש רמת רעש שממנה זה כבר לא עוזר.' },
+          { who: null, text: 'מאחוריך מישהו ותיק אומר לשכן שלו: "פה קבוצות נכנסות עם מינוס עשר." הוא אומר את זה בלשון עבר.' },
           { who: 'אפי', text: 'זה יתהפך. זה תמיד מתהפך אצלנו.' },
           { who: null, text: 'זה לא התהפך.' },
         ],
@@ -263,7 +270,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'המטבח. הטרנזיסטור על השולחן, האנטנה מכוונת לצפון כאילו זה עוזר. אמא מקלפת משהו שלא צריך קילוף.' },
+          { who: null, text: 'המטבח. הטרנזיסטור על השולחן, האנטנה מכוונת צפונה כאילו זה עוזר. אמא מקלפת משהו שלא צריך קילוף.' },
           { who: 'קובי', text: 'שמעתי שהפסדתם בבית.' },
           { who: 'פוגי', text: 'הפסדנו.' },
           { who: 'קובי', text: '"הפסדנו." טוב. אז זה כבר "אנחנו".' },
@@ -299,10 +306,10 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'אולם של גב אל הקיר. אנשים לא שרים — הם צורחים, ובין צרחה לצרחה שומעים נשימות.' },
-          { who: null, text: 'ואז זה בא. לא לאט כמו במשחק הראשון — בבת אחת. הם לא יכולים לפספס והאחרים לא יכולים לקלוע, והאולם מגלה שיש עוד רמת רעש.' },
+          { who: null, text: 'הרבע האחרון כבר לא משחק. הוא מסיבה. הסדרן ויתר על כל מי שעומד על הכיסאות.' },
+          { who: null, text: 'למעלה, מתחת לגג, האוויר נגמר. אף אחד לא יוצא לנשום.' },
           { who: null, text: 'הצפירה. שחור מרים את לימור באוויר. אפי בוכה וצוחק וטוען שלא.' },
-          { who: 'אפי', text: 'יום רביעי! יום רביעי בצפון! אנחנו באים! כולנו!' },
+          { who: 'אפי', text: 'יום רביעי בצפון. אנחנו באים, כולנו.' },
           { who: 'לימור', text: 'אפי. שלוש שעות נסיעה. תשעים שקל. אמצע שבוע.' },
         ],
         choices: [
@@ -324,14 +331,14 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
       },
       {
         when: { flag: 'life:signed:bus' },
-        lines: [{ who: 'לימור', text: 'אתה רשום. תשעים שקל בעלייה. יש לך?' }],
+        lines: [{ who: 'לימור', text: 'אתה רשום. תשעים שקל בעלייה. אני לא מלווה, אני רק סופרת. יש לך?' }],
         choices: [
           { id: 'pay', text: 'לשלם. לעלות.', when: { minAgorot: 9000 }, noteHe: 'אין תשעים שקל.', then: [{ e: 'money', agorot: -9000, why: 'אוטובוס לצפון' }, { e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:bus' }, { e: 'time', minutes: 200 }, { e: 'goto', node: 'g4-north' }] },
           { id: 'broke', text: 'אין לי.', then: [{ e: 'goto', node: 'g4-broke' }] },
         ],
       },
       {
-        lines: [{ who: 'לימור', text: 'לא נרשמת. יש מקום אחד אם מישהו לא יגיע. תשעים שקל. תחכה פה עד ארבע.' }],
+        lines: [{ who: 'לימור', text: 'לא נרשמת. יש מקום אחד אם מישהו לא יגיע. תשעים שקל. תחכה פה עד ארבע ותראה.' }],
         choices: [
           { id: 'wait', text: 'לחכות ולקוות.', when: { minAgorot: 9000 }, noteHe: 'אין תשעים שקל.', then: [{ e: 'money', agorot: -9000, why: 'אוטובוס לצפון' }, { e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:bus' }, { e: 'flag', flag: 'arrived:late' }, { e: 'time', minutes: 230 }, { e: 'goto', node: 'g4-north' }] },
           { id: 'no', text: 'לא.', then: [] },
@@ -345,7 +352,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     branches: [
       {
         when: { relationship: { who: 'shachor', axis: 'bond', min: 5 } },
-        lines: [{ who: null, text: 'שחור, מאחור, בלי להסתכל: "הילד של הבד נוסע. אני משלים." לימור לא התווכחה.' }],
+        lines: [{ who: null, text: 'שחור, מאחור, בלי להרים את הראש: "הילד של הבד נוסע. את ההפרש אני משלים." לימור לא התווכחה, רק רשמה.' }],
         then: [{ e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:bus' }, { e: 'flag', flag: 'owe:shachor' }, { e: 'redheart', key: 'community', delta: 4 }, { e: 'time', minutes: 200 }, { e: 'goto', node: 'g4-north' }],
       },
       {
@@ -381,7 +388,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
         lines: [
           { who: null, text: 'בן הדוד איחר. עשרים דקות, ואז עוד עשר. אחר כך נסע כאילו הוא מנסה להחזיר אותן.' },
           { who: null, text: 'הצפון בחלון: ירוק, ואז יותר ירוק, ואז חושך. עמית מאחור עם הטרנזיסטור מדווח על משחק שעוד לא התחיל.' },
-          { who: null, text: 'הגעתם כשהאולם כבר בפנים. הסדרן הסתכל על שלושה ילדים מתל אביב ופתח.' },
+          { who: null, text: 'הגעתם כשכולם כבר בפנים. הסדרן הסתכל על שלושה ילדים מתל אביב ופתח את הדלת בלי לשאול.' },
         ],
         then: [{ e: 'flag', flag: 'arrived:late' }, { e: 'redheart', key: 'travelDrive', delta: 4 }, { e: 'goto', node: 'g4-north' }],
       },
@@ -396,7 +403,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
         lines: [{ who: null, text: 'הטרנזיסטור. כבר החלטת מה אתה עושה הערב.' }],
       },
       {
-        lines: [{ who: null, text: 'הטרנזיסטור על השולחן. שמונה בערב, תחנה שלושים ושתיים, ואמא שתעשה שהיא לא מקשיבה.' }],
+        lines: [{ who: null, text: 'הטרנזיסטור על השולחן, האנטנה כבר מכופפת לצד הנכון. שמונה בערב, ואמא שתעשה שהיא לא מקשיבה.' }],
         choices: [
           { id: 'radio', text: 'להישאר. לשמוע.', then: [{ e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:radio' }, { e: 'time', minutes: 60 }, { e: 'goto', node: 'g4-radio-night' }] },
           { id: 'not-yet', text: 'עוד לא.', then: [] },
@@ -432,9 +439,9 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'אולם זר. תקרה נמוכה, ריח אחר, וקהל שיודע לצעוק את השם של העיר שלו כמו שאתם צועקים את שלכם.' },
+          { who: null, text: 'אולם זר. תקרה נמוכה, ריח אחר, וקהל שיודע לצעוק את השם של המקום שלו בדיוק כמו שאתם צועקים את שלכם.' },
           { who: 'אפי', text: 'זה כמו בבית. רק הפוך.' },
-          { who: null, text: 'זה היה קרוב. קרוב מדי. יש רגע, לקראת הסוף, שבו כולם עומדים ואף אחד לא נושם, ואתה יודע שאת הרגע הזה תזכור יותר מהתוצאה.' },
+          { who: null, text: 'זה היה קרוב. קרוב מדי. יש רגע לקראת הסוף שבו כולם עומדים ואף אחד לא נושם, ואתה יודע שאת הרגע הזה תזכור יותר מהתוצאה.' },
           { who: null, text: 'הצפירה. לא שלכם.' },
         ],
         then: [{ e: 'wellbeing', key: 'stress', delta: 5 }, { e: 'redheart', key: 'travelDrive', delta: 3 }, { e: 'flag', flag: 'life:galil:there' }, { e: 'goto', node: 'g4-done' }],
@@ -504,9 +511,9 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'בפינה, על מדרגה, בחור עם משקפיים ומחברת. כותב. בזמן שכולם צועקים, הוא כותב.' },
+          { who: null, text: 'בפינה, על מדרגה, בחור עם משקפיים ומחברת. כותב. בזמן שכולם מדברים, הוא כותב.' },
           { who: 'סוקו', text: 'אתה זוכר מי זרק אחרון במשחק הראשון? לא? אף אחד לא זוכר. עוד שנה כולם יגידו שזה היה מישהו אחר.' },
-          { who: 'סוקו', text: 'אז אני כותב. שיהיה מישהו שיודע מה באמת היה.' },
+          { who: 'סוקו', text: 'עשרים וארבע שנה לא היינו אלופים, ומהערב זה עשרים וחמש. אז אני כותב, שיהיה מישהו שיודע מה באמת היה.' },
         ],
         choices: [
           { id: 'ask', text: 'מה כתבת עליי?', then: [{ e: 'rel', who: 'soko', axis: 'familiarity', delta: 5 }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'toast', text: '"שהיית." הוא הראה לך את השורה. שורה אחת. מספיק.', tone: 'plain' }, { e: 'goto', node: 'after-close' }] },
@@ -520,7 +527,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { flag: 'g4:bus', none: [{ flag: 'arrived:late' }] }, lines: [{ who: null, text: 'הלכת הביתה דרך הרחוב הרגיל. הוא נראה אותו דבר. זה מה שהיה מוזר.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'inside' }] },
-      { when: { flag: 'arrived:late' }, lines: [{ who: null, text: 'הלכת הביתה. הכרטיס הקרוע בכיס, עם חותמת של עיר.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'late' }] },
+      { when: { flag: 'arrived:late' }, lines: [{ who: null, text: 'הלכת הביתה. הכרטיס הקרוע בכיס, עם חותמת של מקום שלא היית בו קודם.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'late' }] },
       { when: { flag: 'g4:radio' }, lines: [{ who: null, text: 'הלכת הביתה. הטרנזיסטור עוד על השולחן במטבח, כבוי.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'radio' }] },
       { lines: [{ who: null, text: 'הלכת הביתה. שלושה משפטים של אפי בראש, ואחד שהוא לא סיים.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'heard' }] },
     ],

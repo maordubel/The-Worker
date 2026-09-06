@@ -43,10 +43,10 @@ export const PORTRAIT_LACES: Record<string, string> = {
 
 export function objectiveLaces(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
-  if (state.flags[L2]) return state.flags['l2:done'] ? null : 'יום ראשון. שיעור.'
+  if (state.flags[L2]) return state.flags['l2:done'] ? null : 'יום ראשון. שיעור ערבית, שעה שנייה.'
   if (state.flags['l1:after']) return null
   if (state.flags['l1:inside']) return null
-  if (sceneId === 'home') return 'שבת. המחזור האחרון. אבא זהיר. החבר\'ה בטוחים.'
+  if (sceneId === 'home') return 'שבת. המחזור האחרון. אבא זהיר, החבר\'ה בטוחים.'
   return 'לבלומפילד. חמש.'
 }
 
@@ -55,7 +55,7 @@ export const ENDINGS_LACES: Record<string, EndingCard> = {
     id: 'witness',
     titleHe: 'ראית. זה מה שנשאר.',
     bodyHe:
-      'לא צעקת ולא רצת. עמדת וראית — את הפנים, את השקט אחרי הרעש, את האיש עם הטרנזיסטור שלא הפסיק להקשיב לתחנה שכבר לא שידרה. למחרת, בשיעור, מילה אחת רגילה נכנסה לך דרך הפצע. עוד לא ידעת מה תעשה עם היום הזה. ידעת שתזכור אותו.',
+      'לא צעקת ולא רצת. עמדת וראית — את הפנים, את השקט שבא אחרי הרעש, את האיש עם הטרנזיסטור שהמשיך להקשיב לתחנה שכבר עברה לפרסומות. למחרת, בשיעור, מילה רגילה אחת נכנסה לך דרך הפצע. עוד לא ידעת מה תעשה עם היום הזה. ידעת שתזכור אותו.',
     memoryHe: 'העיתון של מחרת. לא קראת. קיפלת.',
     memoryItem: 'newspaper',
     presence: 'inside',
@@ -64,7 +64,7 @@ export const ENDINGS_LACES: Record<string, EndingCard> = {
     id: 'protector',
     titleHe: 'החזקת מישהו',
     bodyHe:
-      'כשכולם רצו לאיזשהו כיוון, נשארת עם מי שלא יכול היה לזוז. ישבתם על המדרגות עד שהאצטדיון התרוקן. לא אמרתם הרבה. למחרת בשיעור, מילה רגילה נשמעה לך כמו לעג, ועצרת את עצמך שנייה לפני. השנייה הזאת — זה מה שהיום הזה עשה ממך.',
+      'כשכולם רצו לאיזשהו כיוון, נשארת עם מי שלא יכול היה לזוז. ישבתם על מדרגות הבטון עד שכיבו את הזרקורים. אמרתם אולי חמישה משפטים. למחרת בשיעור, מילה רגילה נשמעה לך כמו לעג, ועצרת את עצמך שנייה לפני. השנייה הזאת — זה מה שהיום הזה עשה ממך.',
     memoryHe: 'כרטיס מקומט. לא שלך. של מי שהחזקת.',
     memoryItem: 'ticket-stub',
     presence: 'inside',
@@ -73,7 +73,7 @@ export const ENDINGS_LACES: Record<string, EndingCard> = {
     id: 'organizer',
     titleHe: 'אז נכתוב את זה',
     bodyHe:
-      'הלכת עם סוקו לאסוף עיתונים, מהיום ומחר. "אם לא נכתוב, בעוד שנה יגידו שזה לא היה." אתם עוד לא יודעים בשביל מה. אתם יודעים שמישהו צריך. למחרת, בשיעור, כשמילה רגילה נשמעה לך אחרת — שאלת מה היא אמרה. זו הייתה השאלה הראשונה מסוג חדש.',
+      'הלכת עם סוקו לאסוף עיתונים — של היום, ושל מחר בבוקר. "אם לא נכתוב, בעוד שנה יגידו שזה לא היה." אתם עוד לא יודעים בשביל מה. אתם יודעים שמישהו צריך. למחרת, בשיעור, כשמילה רגילה נשמעה לך אחרת — שאלת מה היא אומרת. זו הייתה השאלה הראשונה מסוג חדש.',
     memoryHe: 'קטע עיתון, גזור ישר, עם תאריך בעט למעלה. הכתב של סוקו.',
     memoryItem: 'clipping',
     presence: 'inside',
@@ -120,7 +120,7 @@ export const BEATS_LACES: Beat[] = [
     do: [
       { a: 'flag', flag: L1 },
       { a: 'events', events: [{ t: 'money.changed', agorot: 4000, why: 'שבת' }] },
-      { a: 'lines', lines: [{ who: null, text: 'שבת, המחזור האחרון. אתם ראשונים בנקודה אחת, או שהם — תלוי את מי שואלים ומתי. המשחק שלכם בבלומפילד. שלהם — רחוק, בעיר שאתה לא בטוח איפה היא על המפה.' }, { who: null, text: 'עשרים. שמונה שנים מאז השבת ההיא, שתים־עשרה מאז הראשונה. אבא בכורסה, זהיר. בחוץ, החבר\'ה בטוחים.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'שבת, המחזור האחרון. אתם ראשונים בנקודה אחת, או שהם — תלוי את מי שואלים ומתי. המשחק שלכם בבלומפילד. שלהם — רחוק, בעיר שאתה לא בטוח איפה היא על המפה.' }, { who: null, text: 'עשרים. שתים־עשרה שנה מאז המשחק הראשון שלך, שמונה מאז השבת שבבית לא מזכירים. אבא בכורסה, בגרביים, לא נוגע ברדיו. מלמטה שורקים לך.' }] },
     ],
   },
   // the match — ours on the grass, theirs in a transistor — directed in one minute (`laces-98`)
@@ -178,7 +178,7 @@ export const CONVERSATIONS_LACES: Conversation[] = [
       { when: { flag: 'l1:after' }, lines: [{ who: 'קובי', text: '…' }, { who: null, text: 'הרדיו כבוי. הוא לא כיבה אותו. הוא נגמר.' }] },
       {
         lines: [
-          { who: 'קובי', text: 'לא לחגוג. שומע? לא לפני שזה נגמר שם. אני זוכר תשעים. אני זוכר שהסתובבתי בין שערים כי לא ידעתי.' },
+          { who: 'קובי', text: 'לא לחגוג. לא לנאחס. לא לפני שזה נגמר גם שם. בתשעים הסתובבתי בין שערים ושאלתי אנשים מה קרה, ואף אחד לא ידע.' },
           { who: 'קובי', text: 'היום יש פייג׳ר. אז מה. פייג׳ר לא יודע יותר ממה שמישהו אמר לו.' },
         ],
         choices: [
@@ -194,7 +194,7 @@ export const CONVERSATIONS_LACES: Conversation[] = [
     nameHe: 'אופיר',
     branches: [
       { when: { flag: 'l1:after' }, lines: [{ who: 'אופיר', text: 'אל תדבר איתי. לא עכשיו. לא הערב.' }] },
-      { lines: [{ who: 'אופיר', text: 'זהו. היום. אני מרגיש את זה. אתה מרגיש?' }, { who: 'עמית', text: 'הוא מרגיש. אני סופר. יש הבדל.' }], then: [{ e: 'rel', who: 'ofir', axis: 'familiarity', delta: 1 }] },
+      { lines: [{ who: 'אופיר', text: 'זהו. היום. אני מרגיש את זה. אתה מרגיש?' }, { who: 'עמית', text: 'הוא מרגיש. אני סופר. ההפרש הוא נקודה, ולשניהם יש משחק. יש הבדל.' }], then: [{ e: 'rel', who: 'ofir', axis: 'familiarity', delta: 1 }] },
     ],
   },
   /**
@@ -210,7 +210,7 @@ export const CONVERSATIONS_LACES: Conversation[] = [
       { when: { lacesIs: 'protector' }, lines: [{ who: 'אסף', text: 'נשארת עם החבר שלך. יפה. אני נשארתי עם ארבעים ילדים. גם יפה.' }, { who: 'אסף', text: 'מחר אנחנו מתחילים משהו. לא צעקות. משהו.' }], then: [{ e: 'rel', who: 'asaf', axis: 'familiarity', delta: 2 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 2 }] },
       { when: { lacesIs: 'organizer' }, lines: [{ who: 'אסף', text: 'אתה וסוקו. עיתונים. טוב. מישהו צריך לכתוב מה קרה פה לפני שיכתבו את זה בשבילנו.' }], then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 3 }] },
       { when: { lacesIs: 'withdrawn' }, lines: [{ who: 'אסף', text: 'הביתה? לך. אף אחד לא שופט. רק תזכור איך זה נראה פה. תצטרך את זה.' }], then: [{ e: 'rel', who: 'asaf', axis: 'familiarity', delta: 1 }] },
-      { lines: [{ who: 'אסף', text: 'עמדת והסתכלת. גם זה משהו. עדים צריך. בשנה הבאה כשיגידו לך שלא היה ככה — היית פה.' }], then: [{ e: 'redheart', key: 'historyMemory', delta: 2 }] },
+      { lines: [{ who: 'אסף', text: 'עמדת והסתכלת. גם זה משהו. תשאל מה עשו לשלום תקוה — לא תמצא שורה בשום עיתון, תמצא אנשים שראו. עדים זה כל מה שיש לנו.' }], then: [{ e: 'redheart', key: 'historyMemory', delta: 2 }] },
     ],
   },
   {
@@ -218,7 +218,7 @@ export const CONVERSATIONS_LACES: Conversation[] = [
     nameHe: 'סוקו',
     branches: [
       { when: { flag: 'l1:after' }, lines: [{ who: 'סוקו', text: 'מה אנחנו יודעים. מה שמענו. מה אנחנו ממציאים. שלוש רשימות. אני עושה את הראשונה.' }] },
-      { lines: [{ who: 'סוקו', text: 'אני יושב ליד מי שיש לו טרנזיסטור. לא בשביל הרעש. בשביל לדעת מי אמר מה ומתי.' }] },
+      { lines: [{ who: 'סוקו', text: 'אני יושב ליד מי שיש לו טרנזיסטור. לא בשביל הרעש — בשביל לדעת מי אמר מה, ובאיזו דקה.' }] },
     ],
   },
   {
@@ -230,7 +230,7 @@ export const CONVERSATIONS_LACES: Conversation[] = [
           { who: null, text: 'השריקה. המשחק שלכם נגמר, ונגמר טוב. אנשים מחבקים. אנשים מסתכלים על אנשים עם טרנזיסטור.' },
           { who: null, text: 'האיש עם הטרנזיסטור לא מחבק.' },
           { who: null, text: 'שם, במשחק שלא רואים, זה עוד לא נגמר. יש שם דקות שאף אחד לא ספר.' },
-          { who: 'קול מהרדיו', text: '…' },
+          { who: 'קול מהרדיו', text: 'רגע, רגע — אני מקבל משהו. תישארו איתי. אני מקבל—' },
           { who: null, text: 'האיש עם הטרנזיסטור הוריד אותו. לא כיבה. הוריד.' },
           { who: null, text: 'ואז ראית איך זה עובר ביציע: לא צעקה. גל של פנים שמבינות, שורה אחרי שורה, כמו כשמכבים אורות.' },
         ],
@@ -281,8 +281,8 @@ export const CONVERSATIONS_LACES: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'יום ראשון. שיעור ערבית. הראש שלך עדיין ביציע, ובעיר שאתה לא בטוח איפה היא.' },
-          { who: 'המורה', text: 'טַיֵּב. (היא כותבת על הלוח.) טוב. "טייב" זה טוב. תגידו אחריי.' },
+          { who: null, text: 'יום ראשון, שעה שנייה. ערבית. ריח גיר, חלון פתוח לרחוב, והראש שלך עדיין ביציע — ובעיר ההיא שאתה לא בטוח איפה היא.' },
+          { who: 'המורה', text: 'טַיֵּב. (כותבת על הלוח, מימין לשמאל, לאט.) זה "טוב". תגידו אחריי. טַיֵּב.' },
           { who: null, text: 'המילה נכנסה דרך הפצע. השם ההוא. השרוכים. היא אמרה את זה ישר אליך? היא הסתכלה עליך?' },
         ],
         choices: [
@@ -308,12 +308,12 @@ export const CONVERSATIONS_LACES: Conversation[] = [
     id: 'l2-close',
     nameHe: null,
     branches: [
-      { when: { lacesIs: 'protector' }, lines: [{ who: null, text: 'המשחק שינה איך שאתה שומע מילה. את זה למדת ביום ראשון.' }], then: [{ e: 'ending', id: 'protector' }] },
-      { when: { lacesIs: 'organizer' }, lines: [{ who: null, text: 'המשחק שינה איך שאתה שומע מילה. את זה למדת ביום ראשון.' }], then: [{ e: 'ending', id: 'organizer' }] },
-      { when: { lacesIs: 'avenger' }, lines: [{ who: null, text: 'המשחק שינה איך שאתה שומע מילה. את זה למדת ביום ראשון.' }], then: [{ e: 'ending', id: 'avenger' }] },
-      { when: { lacesIs: 'withdrawn' }, lines: [{ who: null, text: 'המשחק שינה איך שאתה שומע מילה. את זה למדת ביום ראשון.' }], then: [{ e: 'ending', id: 'withdrawn' }] },
-      { when: { flag: 'l1:radio' }, lines: [{ who: null, text: 'המשחק שינה איך שאתה שומע מילה. גם מרחוק.' }], then: [{ e: 'ending', id: 'radio' }] },
-      { lines: [{ who: null, text: 'המשחק שינה איך שאתה שומע מילה. את זה למדת ביום ראשון.' }], then: [{ e: 'ending', id: 'witness' }] },
+      { when: { lacesIs: 'protector' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. את זה למדת ביום ראשון, בכיתה, בלי אף אחד מהמדרגות.' }], then: [{ e: 'ending', id: 'protector' }] },
+      { when: { lacesIs: 'organizer' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. סוקו היה אומר: תרשום גם את זה. רשמת.' }], then: [{ e: 'ending', id: 'organizer' }] },
+      { when: { lacesIs: 'avenger' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. את זה למדת ביום ראשון, אחרי שכבר קמת פעם אחת.' }], then: [{ e: 'ending', id: 'avenger' }] },
+      { when: { lacesIs: 'withdrawn' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. את זה למדת ביום ראשון, אחרי לילה שלם של שקט בסלון.' }], then: [{ e: 'ending', id: 'withdrawn' }] },
+      { when: { flag: 'l1:radio' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. גם ממי שלא היה שם. במיוחד ממי שלא היה שם.' }], then: [{ e: 'ending', id: 'radio' }] },
+      { lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. את זה למדת ביום ראשון, בשעה שנייה.' }], then: [{ e: 'ending', id: 'witness' }] },
     ],
   },
 ]

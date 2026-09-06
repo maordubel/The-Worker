@@ -181,6 +181,16 @@ export const FIGURE = [
    * side-on strides with a bob read as walking; borrowing the old child's eight-frame
    * cycle would have put a different boy's legs under this boy's shirt.
    */
+  /**
+   * ארבעה זרים — 5.9.2026, from Maor's own batch, and the reason they are here is his:
+   * "עוד דמויות שאתה יכול לשלב כאנשים אקראיים ברחוב כדי ליצור מגוון". Nobody in this
+   * group can be talked to (`ambient1986.ts` says why), and none of them is a face the
+   * cast uses.
+   */
+  'manCap',
+  'manBack',
+  'girlTeen',
+  'boySkate',
   'pogi',
   'pogi-3q',
   'pogi-side',
@@ -592,6 +602,19 @@ export const PROP = [
    */
   'propScarfRed',
   'propPennant',
+  /**
+   * הזכוכית — 5.9.2026. A deposit bottle and a full one, both cut from the same photograph
+   * and both turned to bottle green: rule 8 does not let an amber bottle ship, and the
+   * bottles a child picked off a Tel Aviv pavement in 1985 were green anyway. The empty
+   * one is what the bottle job is made of; the full one stands on the kiosk floor beside
+   * it, so the two states of the same object are both in the room.
+   */
+  'propBottle',
+  'propBottleFull',
+  /** the newspaper stand by the kiosk door, from the nineties on */
+  'propNewsRack',
+  /** a wooden hand cart against the wall — the eighties, and only the eighties */
+  'propCart',
   /**
    * …and one of the seven came back, re-cut. Stage B is a chapter about a transistor
    * radio, and the board's boombox is the only radio drawn in this project. On 3.9.2026

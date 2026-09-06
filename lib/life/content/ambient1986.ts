@@ -239,4 +239,77 @@ export const AMBIENT_1986: AmbientActor[] = [
     offsetMs: 8000,
     when: { beforeMinute: KICKOFF },
   },
+  /**
+   * ארבעה זרים חדשים — 5.9.2026. Maor sent people and asked for variety, and variety in an
+   * ambient system is not more crossings, it is more KINDS of crossing: somebody who
+   * strolls, somebody walking away from you, somebody stopping to look in a window, and
+   * one person going faster than everybody else. Four bodies, four speeds.
+   *
+   * Sizes are the street's own metre — an adult is 1.75 m and reads 0.29 at the near
+   * line — so nobody here is a different scale from the child standing beside them.
+   */
+  {
+    id: 'street-old-cap',
+    figure: 'manCap',
+    location: 'street',
+    from: 1.05,
+    to: -0.1,
+    y: 0.79,
+    size: 0.255,
+    ms: 34000,
+    everyMs: 21000,
+    offsetMs: 3000,
+    pauseAt: 0.62,
+    pauseMs: 5200,
+  },
+  {
+    id: 'street-old-back',
+    figure: 'manBack',
+    location: 'street',
+    from: 0.34,
+    to: 1.12,
+    y: 0.735,
+    size: 0.225,
+    ms: 30000,
+    everyMs: 26000,
+    offsetMs: 12000,
+  },
+  {
+    id: 'street-girl',
+    figure: 'girlTeen',
+    location: 'street',
+    from: -0.08,
+    to: 1.06,
+    y: 0.83,
+    size: 0.245,
+    ms: 21000,
+    everyMs: 17000,
+    offsetMs: 7000,
+    pauseAt: 0.3,
+    pauseMs: 2600,
+  },
+]
+
+/**
+ * הרחוב בשנות ה־90 — the same street, four years on, with one more kind of person in it.
+ *
+ * A decade shows in a street through who is on it, not only through what is painted on
+ * the walls. The eighties list still runs; the nineties add a boy on a skateboard going
+ * faster than everybody else, which is exactly the thing a twelve-year-old notices and an
+ * eight-year-old had not seen yet.
+ */
+export const AMBIENT_1990: AmbientActor[] = [
+  ...AMBIENT_1986,
+  {
+    id: 'street-skater',
+    figure: 'boySkate',
+    location: 'street',
+    from: 1.1,
+    to: -0.12,
+    y: 0.8,
+    size: 0.243,
+    ms: 11000,
+    everyMs: 24000,
+    offsetMs: 9000,
+  },
 ]

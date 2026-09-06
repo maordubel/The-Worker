@@ -55,18 +55,19 @@ type Shape = { mode: Mode; art?: string; target: number; seconds: number; hintHe
 
 /** which shape of work each gig is, and what it uses for a piece */
 /**
- * The prop each job is done with. Three of them are stand-ins and say so: a real bottle,
- * a real wooden crate and a real shopping bag are on the art list (a wrapper standing in
- * for a bottle is the kind of small lie this project does not keep). Everything else is
- * the object itself, from the September sheets.
+ * The prop each job is done with. The bottle arrived on 5.9.2026 and the job is a bottle
+ * job now rather than a wrapper job. Two stand-ins are left and they say so here: a
+ * wooden CRATE and a cloth shopping BAG are still on the art list, and until they land the
+ * crate job carries a cigarette pack and the shopping job carries a satchel. That is a
+ * small lie and it is written down rather than hidden.
  */
 const SHAPE: Record<string, Shape> = {
-  'bottles-round': { mode: 'collect', art: 'propWrapper', target: 8, seconds: 45, hintHe: 'תאסוף את הבקבוקים לפני שמישהו אחר יגיע.' },
+  'bottles-round': { mode: 'collect', art: 'propBottle', target: 8, seconds: 45, hintHe: 'תאסוף את הבקבוקים לפני שמישהו אחר יגיע.' },
   'crates-kiosk': { mode: 'carry', art: 'propPack80', target: 6, seconds: 60, hintHe: 'ארגז אחד כל פעם. מהערימה לדלת.' },
   'sweep-hall': { mode: 'sweep', target: 10, seconds: 55, hintHe: 'מהשורה העליונה למטה. תעבור על הכל.' },
   'papers-round': { mode: 'carry', art: 'propPapers', target: 7, seconds: 55, hintHe: 'עיתון לכל תיבה. אל תפספס בניין.' },
   'shopping-neighbour': { mode: 'carry', art: 'propBagStrap90', target: 4, seconds: 45, hintHe: 'שתי שקיות, שלוש קומות. תחזיק מלמטה.' },
-  'drinks-hall': { mode: 'carry', art: 'propPack90', target: 6, seconds: 55, hintHe: 'לפני שפותחים את השערים.' },
+  'drinks-hall': { mode: 'carry', art: 'propBottleFull', target: 6, seconds: 55, hintHe: 'לפני שפותחים את השערים.' },
   'wash-cars': { mode: 'sweep', target: 12, seconds: 60, hintHe: 'לעבור על כל הרכב. פינות גם.' },
   'errands-rafi': { mode: 'carry', art: 'propBagStrap90', target: 5, seconds: 55, hintHe: 'הזמנה לכל בניין. רפי סופר.' },
   'sell-scarves': { mode: 'serve', art: 'propScarfRed', target: 8, seconds: 55, hintHe: 'הם עוברים. תגיע אליהם ותלחץ.' },
@@ -306,6 +307,7 @@ export class ChoreScene extends Phaser.Scene {
       year: this.ctx.engine.state.year,
       scene: this.gig.where as LocationId,
       hint: this.shape.hintHe,
+      waitingHe: null,
     })
   }
 

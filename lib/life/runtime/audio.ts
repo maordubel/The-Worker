@@ -56,6 +56,13 @@ export type SampleKey =
   // real recordings (5.9.2026)
   | 'crowd-real-goal' | 'crowd-real-murmur' | 'crowd-real-build' | 'crowd-real-miss' | 'crowd-real-after' | 'crowd-real-final'
   | 'amb-park' | 'park-wave'
+  /**
+   * המנגינה — eighteen seconds of "ימים טובים" (Leah Katamin, with the מקהלת טוב שוער
+   * choir), cut at the bar Maor named (1:30–1:48) and folded into a 15.8-second loop.
+   * It plays under every ordinary room and street in the game and under nothing that has
+   * a voice of its own — a terrace, a hall, a tunnel do not need a tune, they ARE one.
+   */
+  | 'amb-theme'
 
 const AMBIENCE_FILE: Record<AmbienceKey, string | null> = {
   interior: 'amb-room',
@@ -71,6 +78,9 @@ const AMBIENCE_FILE: Record<AmbienceKey, string | null> = {
   classroom: 'amb-classroom',
   none: null,
 }
+
+/** how loud the tune sits under an ordinary room — quiet, and then the bus takes more off */
+const MUSIC_LEVEL = 0.11
 
 const STORE = 'the-worker:life:sound'
 
@@ -107,6 +117,8 @@ export class LifeAudio {
   private samples = new Map<string, Promise<AudioBuffer | null>>()
   private ext: 'ogg' | 'm4a' = 'ogg'
   private ambientFile: { source: AudioBufferSourceNode; gain: GainNode } | null = null
+  /** the tune under the ordinary rooms — one node for the whole session, never restarted */
+  private music: { source: AudioBufferSourceNode; gain: GainNode } | null = null
   private waveTimer = 0
   // the crowd: one bus, one loop, one state
   private crowdBus: GainNode | null = null
@@ -389,13 +401,63 @@ export class LifeAudio {
     if (this.crowdBus && this.ctx) this.crowdBus.gain.setTargetAtTime(on ? 0.5 : 0.8, this.ctx.currentTime, 0.3)
   }
 
+  // -------------------------------------------------------------------- music ---
+
+  /**
+   * המנגינה מתחת לכל השאר — one loop, started once, faded in and out by the room.
+   *
+   * Maor asked for this in his own words on 5.9.2026: the background of walking in the
+   * street, of being at home, of everything ordinary, taken from his own file between 1:30
+   * and 1:48, "באווירה שקטה, ברקע, בנעימות. במקום רעש הצעדים הלא נעים שיש עכשיו" — and
+   * then, so it could not be misread: "תייצר מזה לופ נעים וזורם, שוב, לא בווליום גבוהה".
+   *
+   * So: it never restarts. A tune that begins again every time you walk through a door is
+   * a menu jingle; this one runs underneath the whole afternoon and the rooms only decide
+   * whether you can hear it. Six seconds to fade either way, which is slow enough that
+   * nobody catches it moving, and 0.11 of the ambient bus, which is under the room and
+   * far under a voice.
+   */
+  private setMusic(on: boolean) {
+    if (!this.ctx || !this.ambient) return
+    const ctx = this.ctx
+    const ambient = this.ambient
+    if (this.music) {
+      this.music.gain.gain.setTargetAtTime(on ? MUSIC_LEVEL : 0, ctx.currentTime, 2.2)
+      return
+    }
+    if (!on) return
+    void this.sample('amb-theme').then((buffer) => {
+      if (!buffer || this.music) return
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      source.loop = true
+      const gain = ctx.createGain()
+      gain.gain.value = 0
+      source.connect(gain).connect(ambient)
+      source.start()
+      gain.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 2.6)
+      this.music = { source, gain }
+    })
+  }
+
   // ---------------------------------------------------------------- ambience ---
+
+  /**
+   * המקומות שיש להם מנגינה — the ordinary ones.
+   *
+   * A street, a flat, a kitchen, a classroom, a park: places where nothing is happening
+   * except a life. A terrace, a hall, a tunnel, a bus station and an army base are left
+   * alone — each already has a sound that IS the place, and a tune under a crowd is a tune
+   * nobody hears and a crowd nobody believes.
+   */
+  private static readonly MUSIC_UNDER: readonly AmbienceKey[] = ['interior', 'kitchen', 'day', 'park', 'dusk', 'classroom']
 
   setAmbience(key: AmbienceKey, force = false) {
     this.wanted = key
     if (!this.ctx || !this.ambient || !this.noise) return
     if (!force && key === this.current) return
     this.current = key
+    this.setMusic(LifeAudio.MUSIC_UNDER.includes(key))
     const t = this.ctx.currentTime
     for (const layer of this.layers) {
       layer.gain.gain.setTargetAtTime(0, t, 0.6)
@@ -534,10 +596,18 @@ export class LifeAudio {
 
   // ------------------------------------------------------------------- one-shots ---
 
-  /** a footstep: a click of noise, darker on stone, lighter on a terrace */
+  /**
+   * a footstep — and much quieter than it was.
+   *
+   * Maor, 5.9.2026: "במקום רעש הצעדים הלא נעים שיש עכשיו". He is right about what it was:
+   * a click at 0.55 on every contact frame, forty times a minute, at the front of the mix,
+   * which is a metronome rather than a walk. It is not deleted — a boy crossing a room in
+   * silence is a boy floating — but it is now at 0.16 and under a low-pass, so it reads as
+   * the floor rather than as a sound effect, and the music sits over it.
+   */
   step(surface: 'floor' | 'street' | 'terrace' = 'floor') {
-    if (this.play(`step-${surface}-${1 + Math.floor(Math.random() * 3)}` as SampleKey, { level: 0.55, jitter: 0.12 })) return
-    const p: Record<typeof surface, [number, number, number]> = { floor: [900, 0.05, 0.045], street: [1400, 0.06, 0.05], terrace: [600, 0.07, 0.05] }
+    if (this.play(`step-${surface}-${1 + Math.floor(Math.random() * 3)}` as SampleKey, { level: 0.16, jitter: 0.14 })) return
+    const p: Record<typeof surface, [number, number, number]> = { floor: [700, 0.05, 0.014], street: [1000, 0.06, 0.016], terrace: [520, 0.07, 0.016] }
     const [freq, seconds, level] = p[surface]
     this.burst(jitter(freq, 0.25), jitter(seconds, 0.3), level, 'bandpass', this.sfx)
   }

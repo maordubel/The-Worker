@@ -143,6 +143,7 @@ export class PassageScene extends Phaser.Scene {
       year: this.ctx.engine.state.year,
       scene: 'bedroom',
       hint: 'ארבע שנים עוברות בחדר אחד. תסתכל על מה שהשתנה.',
+      waitingHe: null,
     })
 
     this.ctx.dialogue.setHooks({
@@ -280,6 +281,7 @@ export class PassageScene extends Phaser.Scene {
       year: this.ctx.engine.state.year,
       scene: 'bedroom',
       hint: 'ארבע שנים עוברות בחדר אחד. תסתכל על מה שהשתנה.',
+      waitingHe: null,
     })
     const dark = 1 - n * 0.09
     for (const child of this.children.list) {

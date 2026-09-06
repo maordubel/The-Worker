@@ -46,8 +46,8 @@ export const ENDINGS_SINAI: Record<string, EndingCard> = {
     id: 'defending',
     titleHe: 'המספר שבע נשאר על הקיר',
     bodyHe:
-      'שנה אחת, שני ערבים, והפוסטר עדיין תלוי. הגנת עליו כשזה היה קל, והגנת עליו כשזה כבר עלה לך בחברים. אבא מבין. אופיר פחות. בלילה אתה מסתכל על הפוסטר ויודע שאתה לא מגן על מאמן — אתה מגן על ילד בן שמונה על כתפיים.',
-    memoryHe: 'הפוסטר. אותו פוסטר, אותו מסמר, אותו קיר.',
+      'שנה, שני ערבים, ואותו מסמר. הגנת עליו כשזה היה קל, והגנת עליו כשזה כבר עלה לך באופיר. אבא הבין. אופיר לא. בלילה, לפני שכיבית את האור, חשבת על הכדור הקטן שהוא נתן בדקה שמונים ושש — ועל זה שהוא בכלל לא הבקיע אותו.',
+    memoryHe: 'הפוסטר. אותו מסמר, אותו קיר, ופינה אחת שכבר לא מתיישרת.',
     memoryItem: 'clipping',
     presence: 'radio',
   },
@@ -55,8 +55,8 @@ export const ENDINGS_SINAI: Record<string, EndingCard> = {
     id: 'doubting',
     titleHe: 'הפוסטר מקופל',
     bodyHe:
-      'לא זרקת. קיפלת. שמת במגירה עם דברים שלא זורקים. יש הבדל בין להפסיק להאמין למישהו ולהפסיק לאהוב אותו, ובגיל שבע־עשרה מצאת אותו לבד, בלילה, עם נעץ ביד.',
-    memoryHe: 'הפוסטר, מקופל לארבע, במגירה. הפינות שלו כבר לא ישרות לעולם.',
+      'לא זרקת. קיפלת. שמת במגירה עם הדברים שלא זורקים. יש הבדל בין להפסיק להאמין למישהו ובין להפסיק לאהוב אותו, ובגיל שבע־עשרה מצאת אותו לבד, בלילה, עם נעץ בין האצבעות.',
+    memoryHe: 'הפוסטר, מקופל לארבע, במגירה. הקפל עובר לו בדיוק על הפנים.',
     memoryItem: 'clipping',
     presence: 'radio',
   },
@@ -64,7 +64,7 @@ export const ENDINGS_SINAI: Record<string, EndingCard> = {
     id: 'torn',
     titleHe: 'הקיר ריק',
     bodyHe:
-      'הורדת. מהר, כדי שלא תספיק לחשוב. על הקיר נשאר ריבוע בהיר בצורת פוסטר, ואמא שאלה למחרת אם אתה בסדר. אמרת שכן. הריבוע הבהיר נשאר שם שנים.',
+      'הורדת. מהר, כדי שלא תספיק לחשוב. על הקיר נשאר ריבוע בהיר בצורת פוסטר. אמא ראתה אותו למחרת ולא שאלה עליו — שאלה אם אכלת. הריבוע נשאר שם שנים.',
     memoryHe: 'ריבוע בהיר על קיר. אין חפץ. יש צורה.',
     memoryItem: 'folded-paper',
     presence: 'radio',
@@ -83,7 +83,7 @@ export const BEATS_SINAI: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'flag', flag: S1 },
-      { a: 'lines', lines: [{ who: null, text: 'יוני. ערב גמר גביע, נגד השכנים, באצטדיון הגדול בצד השני של העיר. אין כרטיס, אין כסף לכרטיס, ויש רדיו על הדלפק של רפי.' }, { who: null, text: 'שש־עשרה. הפוסטר של מספר שבע עדיין תלוי מעל המיטה מגיל שמונה. הוא כבר לא שחקן. הוא המאמן.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'ערב של יוני. גמר גביע נגד השכנים, באצטדיון הגדול בצד השני של העיר. כרטיס עולה כסף, כסף אין, ולרפי יש רדיו על הדלפק.' }, { who: null, text: 'שש־עשרה. מעל המיטה שלך תלוי מגיל שמונה פוסטר של מספר שבע. הוא כבר לא משחק. עכשיו הוא זה שמחליף.' }] },
       { a: 'sound', kind: 'radio', on: true },
       { a: 'talk', conversation: 's1-radio' },
       { a: 'sound', kind: 'radio', on: false },
@@ -115,7 +115,7 @@ export const BEATS_SINAI: Beat[] = [
     when: { flag: S2, none: [{ flag: 's2:done' }] },
     delayMs: 700,
     do: [
-      { a: 'lines', lines: [{ who: null, text: 'שנה אחרי. שבע־עשרה. עונה שלמה של "עוד לא" ו"בשבוע הבא", ואז נסיעה לאירופה שחזרו ממנה מהר.' }, { who: null, text: 'הקיוסק הפך לבית משפט. רפי מוכר, ובין קפה לקפה פוסק.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'שנה אחרי. שבע־עשרה. עונה שלמה של "עוד לא" ו"בשבוע הבא", ואז שני משחקים באירופה, שבועיים ביניהם, וחזרה הביתה.' }, { who: null, text: 'הקיוסק נהיה בית משפט. רפי מוכר גרעינים, ובין קפה לקפה פוסק.' }] },
       { a: 'talk', conversation: 's2-court' },
     ],
   },
@@ -123,21 +123,21 @@ export const BEATS_SINAI: Beat[] = [
 
 export const CONVERSATIONS_SINAI: Conversation[] = [
   { id: 'rafi-sinai', nameHe: 'רפי מהקיוסק', branches: [
-    { when: { flag: S2 }, lines: [{ who: 'רפי מהקיוסק', text: 'שוב בית משפט אצלי. תשתה משהו לפחות.' }] },
+    { when: { flag: S2 }, lines: [{ who: 'רפי מהקיוסק', text: 'שוב בית משפט אצלי. אם עומדים פה שעה — קונים משהו.' }] },
     { when: { flag: 's1:heard' }, lines: [{ who: 'רפי מהקיוסק', text: 'מה שנאמר פה — נאמר פה. אני לא מספר לאבא שלך.' }] },
-    { lines: [{ who: 'רפי מהקיוסק', text: 'הרדיו על הדלפק, כמו תמיד. בשבע מתחילים.' }] },
+    { lines: [{ who: 'רפי מהקיוסק', text: 'הרדיו על הדלפק, כמו תמיד. בשבע מתחילים. תזיז את המרפק, יש פה אנשים שקונים.' }] },
   ] },
   { id: 'ofir-sinai', nameHe: 'אופיר', branches: [
     { when: { sinaiIs: 'defending', flag: S2 }, lines: [{ who: 'אופיר', text: 'אתה עדיין שם. בסדר. רק תדע שאתה שם לבד.' }] },
     { when: { flag: S2 }, lines: [{ who: 'אופיר', text: 'טוב שהתעוררת. לא כיף, אבל טוב.' }] },
-    { lines: [{ who: 'אופיר', text: 'גרעינים? קח. הערב נצטרך.' }] },
+    { lines: [{ who: 'אופיר', text: 'גרעינים? קח, קח. הערב יהיה ארוך.' }] },
   ] },
-  { id: 'amit-sinai', nameHe: 'עמית', branches: [{ lines: [{ who: 'עמית', text: 'אני לא אומר כלום. העיתון אומר. תקרא.' }] }] },
-  { id: 'freddy-sinai', nameHe: 'פרדי', branches: [{ lines: [{ who: 'פרדי', text: 'השאלה היא אף פעם לא "מי אשם". השאלה היא "מי מחליט". תזכור את זה, יהיה לך שימושי.' }], then: [{ e: 'institution', key: 'legalUnderstanding', delta: 2 }] }] },
+  { id: 'amit-sinai', nameHe: 'עמית', branches: [{ lines: [{ who: 'עמית', text: 'אני לא אומר כלום. העיתון אומר. תקרא לבד, זה יותר משכנע.' }] }] },
+  { id: 'freddy-sinai', nameHe: 'פרדי', branches: [{ lines: [{ who: 'פרדי', text: '"מי אשם" זו שאלה של קיוסק. "מי מחליט" זו שאלה של עורך דין. תזכור את ההבדל, הוא יעבוד בשבילך עוד עשרים שנה.' }], then: [{ e: 'institution', key: 'legalUnderstanding', delta: 2 }] }] },
   { id: 'poster-look', nameHe: null, branches: [
     { when: { flag: 'life:poster:gone' }, lines: [{ who: null, text: 'ריבוע בהיר על הקיר.' }] },
     { when: { flag: 'life:poster:drawer' }, lines: [{ who: null, text: 'הקיר. הפוסטר במגירה. אתה יודע בדיוק איפה.' }] },
-    { lines: [{ who: null, text: 'מספר שבע. מחייך. מגיל שמונה.' }] },
+    { lines: [{ who: null, text: 'מספר שבע. צעיר, עם כדור, מחייך. תלוי שם מגיל שמונה.' }] },
   ] },
   {
     id: 's1-radio',
@@ -145,15 +145,15 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'הרדיו על הדלפק. רפי מגביר, מנמיך, מגביר. אופיר בפינה עם גרעינים. בחור צעיר שלא הכרת עומד ליד הדלת ומקלל בשקט.' },
-          { who: null, text: 'זה נגמר כמו שזה נגמר. הרדיו אמר את זה בנימוס. הבחור ליד הדלת לא.' },
-          { who: 'אוהד צעיר', text: 'שבע! מספר שבע הזה. כשהוא שיחק היה שחקן, עכשיו הוא שום דבר. שיילך.' },
-          { who: null, text: 'אופיר הנהן. רפי שתק. כולם הסתכלו עליך, כי כולם יודעים מה תלוי לך מעל המיטה.' },
+          { who: null, text: 'הרדיו על הדלפק, בין המקרר לקופה. רפי מגביר, מנמיך, מגביר. אופיר על הארגז עם גרעינים, ובחור שלא ראית פה קודם עומד בדלת ומקלל בשקט.' },
+          { who: null, text: 'זה נגמר כמו שזה נגמר. השדר אמר את זה בנימוס. הבחור בדלת לא.' },
+          { who: 'אוהד צעיר', text: 'שבע. מספר שבע שלכם. כששיחק הוא היה שחקן. מאמן הוא לא. שיילך הביתה.' },
+          { who: null, text: 'אופיר הנהן. רפי הוריד את הרדיו ולא אמר כלום. ואז כולם הסתכלו עליך, כי בשכונה הזאת כולם יודעים מה תלוי לך מעל המיטה.' },
         ],
         choices: [
           {
             id: 'defend',
-            text: '"אתה לא יודע מה הוא נתן לקבוצה הזאת."',
+            text: '"אתה לא היית שם כשהוא נתן את הכדור ההוא."',
             then: [{ e: 'flag', flag: 's1:argued' }, { e: 'flag', flag: 's1:heard' }, { e: 'sinai', stance: 'defending' }, { e: 'rel', who: 'ofir', axis: 'tension', delta: 4 }, { e: 'redheart', key: 'loyaltyReturn', delta: 4 }, { e: 'personality', key: 'courage', delta: 2 }, { e: 'goto', node: 's1-after' }],
           },
           {
@@ -177,7 +177,7 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
       {
         when: { sinaiIs: 'defending' },
         lines: [
-          { who: null, text: 'הבחור ליד הדלת צחק. אופיר לא. רפי הגיש לך קפה שלא ביקשת.' },
+          { who: null, text: 'הבחור בדלת צחק. אופיר לא. רפי שם לפניך קפה שלא ביקשת, ולא רשם אותו על הפתק.' },
           { who: 'רפי מהקיוסק', text: 'אבא שלך היה אומר אותו דבר. בדיוק אותו דבר. עם אותו פרצוף.' },
           { who: null, text: 'זו הייתה מחמאה. זו גם הייתה אזהרה.' },
         ],
@@ -185,8 +185,8 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'הבחור ליד הדלת יצא. אופיר קם אחריו. רפי כיבה את הרדיו ואמר "ערב טוב" בקול של סוף משמרת.' },
-          { who: null, text: 'הלכת הביתה עם משהו שלא אמרת, וזה שוקל יותר ממשהו שאמרת.' },
+          { who: null, text: 'הבחור בדלת יצא. אופיר קם אחריו. רפי כיבה את הרדיו ואמר "ערב טוב" בקול של סוף משמרת.' },
+          { who: null, text: 'הלכת הביתה עם משפט שלא אמרת. הוא כבד יותר ממשפט שאומרים.' },
         ],
       },
     ],
@@ -197,11 +197,11 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'החדר. הפוסטר מעל המיטה, מגיל שמונה. הוא מחייך שם, צעיר, עם כדור, בחולצה שאין כבר.' },
+          { who: null, text: 'החדר. הפוסטר מעל המיטה, מגיל שמונה, בחולצה שכבר לא מייצרים. הנייר התכהה בפינות ואחד הנעצים נשען.' },
           { who: null, text: 'מהסלון: אבא ואמא, בקול נמוך. שמעת את השם שלו פעם אחת.' },
         ],
         choices: [
-          { id: 'look', text: 'להסתכל עליו רגע ולכבות את האור.', then: [{ e: 'redheart', key: 'historyMemory', delta: 2 }, { e: 'toast', text: 'בחושך הוא עדיין מחייך. זה מה שפוסטרים עושים.', tone: 'plain' }] },
+          { id: 'look', text: 'להסתכל עליו רגע ולכבות את האור.', then: [{ e: 'redheart', key: 'historyMemory', delta: 2 }, { e: 'toast', text: 'כיבית את האור והוא המשיך לחייך. זה מה שפוסטרים עושים.', tone: 'plain' }] },
           { id: 'kobi', text: 'לצאת לסלון. לשאול את אבא מה הוא חושב.', then: [{ e: 'goto', node: 'kobi-sinai-1994' }] },
         ],
       },
@@ -214,8 +214,8 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
       {
         lines: [
           { who: 'קובי', text: 'מה אני חושב.' },
-          { who: 'קובי', text: 'אני חושב שראיתי אותו משחק כשאתה היית על הכתפיים שלי. ואני חושב שהערב הוא היה מאמן גרוע.' },
-          { who: 'קובי', text: 'שני הדברים. באותו ראש. תתרגל, זה החיים.' },
+          { who: 'קובי', text: 'ראיתי אותו משחק כשעוד סחבתי אותך על הכתפיים. ובדקה שמונים ושש, כשכבר עמדת לידי, ראיתי אותו נותן את הכדור במקום לקחת אותו.' },
+          { who: 'קובי', text: 'והערב הוא היה מאמן גרוע. שני הדברים, באותו ראש. תתרגל, זה החיים.' },
         ],
         then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'remember', who: 'kobi', eventId: 'two-things-one-head-1994', significance: 'notable' }, { e: 'redheart', key: 'familyTradition', delta: 2 }],
       },
@@ -227,16 +227,16 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: 'עמית', text: 'אני לא אומר כלום. אני רק שם עובדות על הדלפק. עונה שלמה. תסתכל בעצמך.' },
-          { who: null, text: 'עמית מניח עיתון מקופל. הטבלה בו לא צריכה הסבר.' },
-          { who: 'פרדי', text: 'עובדות זה יפה. אבל תשאלו את השאלה הנכונה: מי נתן לו את התפקיד, ומי משאיר אותו בו? המאמן הוא לא הבעיה. המאמן הוא הכיסוי.' },
-          { who: null, text: 'פרדי. עורך דין, בחליפה, בקיוסק. מדבר במשפטים שיש להם סעיפים.' },
+          { who: 'עמית', text: 'אני לא מתווכח איתך. אני שם עובדות על הדלפק. עונה שלמה. תסתכל בעצמך.' },
+          { who: null, text: 'עמית פותח עיתון על הדלפק, בעמוד שכבר היה מקופל שם. הטבלה לא צריכה הסבר.' },
+          { who: 'פרדי', text: 'עובדות זה יפה. תשאלו שאלה אחרת: מי נתן לו את התפקיד, ומי משאיר אותו בו. המאמן הוא לא הבעיה. המאמן הוא הכיסוי.' },
+          { who: null, text: 'פרדי. עורך דין. חליפה מקומטת, תיק על הרצפה, ומשפטים שיש להם סעיפי משנה.' },
           { who: 'אוהד צעיר', text: 'כיסוי־שמיסוי. שיילך.' },
         ],
         choices: [
           { id: 'cut', text: 'לקטוע את פרדי: "מה השורה התחתונה?"', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 3 }, { e: 'rel', who: 'freddy', axis: 'familiarity', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
           { id: 'listen', text: 'לתת לו לסיים.', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 6 }, { e: 'personality', key: 'curiosity', delta: 2 }, { e: 'time', minutes: 20 }, { e: 'goto', node: 's2-verdict' }] },
-          { id: 'defend', text: '"תנו לו עוד עונה. הוא מגיע לו."', then: [{ e: 'sinai', stance: 'defending' }, { e: 'rel', who: 'ofir', axis: 'tension', delta: 5 }, { e: 'rel', who: 'amit', axis: 'tension', delta: 3 }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'redheart', key: 'loyaltyReturn', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
+          { id: 'defend', text: '"תנו לו עוד עונה. מגיע לו."', then: [{ e: 'sinai', stance: 'defending' }, { e: 'rel', who: 'ofir', axis: 'tension', delta: 5 }, { e: 'rel', who: 'amit', axis: 'tension', delta: 3 }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'redheart', key: 'loyaltyReturn', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
         ],
       },
     ],
@@ -248,15 +248,15 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
       {
         when: { sinaiIs: 'defending' },
         lines: [
-          { who: null, text: 'הקיוסק התפזר. אופיר יצא בלי להגיד לילה טוב. עמית נשאר לרגע, ואז גם.' },
-          { who: null, text: 'רפי: "אתה יודע שאתה לבד בזה." אמרת שכן. הוא הנהן. "גם אבא שלך היה."' },
+          { who: null, text: 'השורה התחתונה של פרדי הייתה שלוש מילים: "זה לא עליו." אחר כך הקיוסק התפזר. אופיר יצא בלי להגיד לילה טוב, ועמית אחריו.' },
+          { who: null, text: 'רפי ניגב את הדלפק. "אתה יודע שאתה לבד בזה." אמרת שכן. הוא הנהן. "גם אבא שלך היה."' },
         ],
         then: [{ e: 'flag', flag: 's2:done' }, { e: 'goto', node: 's2-poster' }],
       },
       {
         lines: [
-          { who: null, text: 'שאלת את עצמך, בפעם הראשונה, בקול שקט מאוד: אולי.' },
-          { who: null, text: 'זה לא הרגיש כמו בגידה. זה הרגיש כמו לגדול. ולא אהבת את זה.' },
+          { who: null, text: 'השורה התחתונה של פרדי הייתה שלוש מילים: "זה לא עליו." ואתה שמעת את עצמך אומר, בפעם הראשונה, בקול שקט מאוד: אולי.' },
+          { who: null, text: 'זה לא הרגיש כמו בגידה. זה הרגיש כמו לגדול, ולא אהבת את זה.' },
         ],
         then: [{ e: 'sinai', stance: 'doubting' }, { e: 'flag', flag: 's2:done' }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'goto', node: 's2-poster' }],
       },
@@ -267,7 +267,7 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
     nameHe: null,
     branches: [
       {
-        lines: [{ who: null, text: 'בלילה, בחדר. הפוסטר. מה עושים איתו.' }],
+        lines: [{ who: null, text: 'בלילה, בחדר. אתה עומד מול הקיר עם נעץ בין האצבעות ולא זוכר מתי שלפת אותו.' }],
         choices: [
           { id: 'keep', text: 'משאיר. על הקיר.', then: [{ e: 'flag', flag: 'life:poster:wall' }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'ending', id: 'defending' }] },
           { id: 'fold', text: 'מקפל. למגירה.', then: [{ e: 'flag', flag: 'life:poster:drawer' }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'ending', id: 'doubting' }] },

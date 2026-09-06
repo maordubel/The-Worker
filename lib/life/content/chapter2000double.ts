@@ -60,10 +60,10 @@ export const ENDINGS_TITLE: Record<string, EndingCard> = {
   },
   working: {
     id: 'working',
-    titleHe: 'אלופים, במשמרת',
+    titleHe: 'אלופים, ולא היית שם',
     bodyHe:
-      'חוב ישן הבשיל: משמרת שאי אפשר היה לזוז ממנה. שמעת את זה מרדיו של לקוח. כשזה נגמר, מישהו שלא הכרת חיבק אותך מעל הדלפק. עוד ארבעה ימים גמר גביע — ואת המשמרת הזאת כבר סידרת.',
-    memoryHe: 'קבלה מהמשמרת עם השעה של השריקה מסומנת בעט.',
+      'אלופים — ואת זה שמעת מרדיו של מישהו אחר. של לקוח מעל הדלפק, או של הסלון בשלוש אחר הצהריים. כשהשריקה באה לא היה לידך אף אחד שחיכה לזה כמוך, וצעקת בכל זאת, ומישהו ענה. עוד ארבעה ימים גמר גביע — ואת יום רביעי כבר סידרת.',
+    memoryHe: 'דף עם שעה אחת מסומנת בעט. השעה שבה זה נגמר.',
     memoryItem: 'folded-paper',
     presence: 'working',
   },
@@ -129,7 +129,7 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
   {
     id: 't-shift',
     nameHe: null,
-    branches: [{ lines: [{ who: null, text: 'המשמרת. רדיו של לקוח. השריקה. מישהו שלא הכרת חיבק אותך מעל הדלפק.' }, { who: null, text: 'אלופים. לא היית שם. עוד ארבעה ימים.' }], then: [{ e: 'flag', flag: 't:over' }, { e: 'ending', id: 'working' }] }],
+    branches: [{ lines: [{ who: null, text: 'המשמרת. שלוש עד עשר. רדיו של לקוח על הדלפק, ומישהו שלא הכרת חיבק אותך מעליו כשהשריקה באה.' }, { who: null, text: 'אלופים. לא היית שם. עוד ארבעה ימים.' }], then: [{ e: 'flag', flag: 't:over' }, { e: 'ending', id: 'working' }] }],
   },
   {
     id: 't-radio',
@@ -140,7 +140,7 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     id: 'kobi-title',
     nameHe: 'קובי',
     branches: [
-      { when: { flag: 't:route' }, lines: [{ who: 'קובי', text: 'נתראה שם. או שלא. יש שם רק שש אלף, נתראה.' }] },
+      { when: { flag: 't:route' }, lines: [{ who: 'קובי', text: 'נתראה שם. או שלא. שש אלף איש במגרש בגודל של חצר. אני אמצא אותך.' }] },
       {
         lines: [{ who: 'קובי', text: 'תיקו. רק תיקו. אני לא מאמין למילה הזאת מאז שתיים ותשעים. אתה בא איתי? מגרש קטן. הולכים ברגל חצי דרך.' }],
         choices: [
@@ -185,7 +185,7 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     id: 't-champions',
     nameHe: null,
     branches: [
-      { when: { flag: 't:with-kobi' }, lines: [{ who: 'קובי', text: 'אלופים.' }, { who: null, text: 'הוא אמר את זה אליך. לא למגרש. אליך. ואז חיבק, וזה היה הרבה יותר ממה שהיה בשמונים ושש, כי עכשיו היית בגובה שלו.' }], then: [{ e: 'sfx', key: 'crowd-goal', level: 0.8 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 8 }, { e: 'remember', who: 'kobi', eventId: 'champions-hug-2000', significance: 'major' }, { e: 'flag', flag: 'life:title:kobi' }, { e: 'goto', node: 't-close' }] },
+      { when: { flag: 't:with-kobi' }, lines: [{ who: 'קובי', text: 'אלופים. שתים־עשרה שנה.' }, { who: null, text: 'הוא אמר את זה אליך. לא למגרש. אליך. ואז חיבק, וזה היה הרבה יותר ממה שהיה בשמונים ושש, כי עכשיו היית בגובה שלו.' }], then: [{ e: 'sfx', key: 'crowd-goal', level: 0.8 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 8 }, { e: 'remember', who: 'kobi', eventId: 'champions-hug-2000', significance: 'major' }, { e: 'flag', flag: 'life:title:kobi' }, { e: 'goto', node: 't-close' }] },
       { when: { flag: 't:with-efi' }, lines: [{ who: 'אפי', text: 'אז ככה זה אצלכם.' }, { who: 'פוגי', text: 'ככה.' }, { who: 'אפי', text: 'טוב. יפה.' }, { who: null, text: 'הוא חיבק אותך כמו אחרי הגביע ההוא. שבע שנים. אתה קפצת עליו הפעם.' }], then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 8 }, { e: 'flag', flag: 'life:title:efi' }, { e: 'goto', node: 't-close' }] },
       { when: { flag: 't:with-gate5' }, lines: [{ who: null, text: 'הבד עלה. אסף לא חייך — אסף אף פעם לא מחייך — אבל הוא הניח יד על הראש שלך רגע.' }], then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'flag', flag: 'life:title:gate5' }, { e: 'goto', node: 't-close' }] },
       { lines: [{ who: null, text: 'לבד באמצע שש אלף. אלופים. חיפשת פנים מוכרות ולא מצאת, ואז מצאת אחת, ואז זה לא היה משנה.' }], then: [{ e: 'wellbeing', key: 'loneliness', delta: 3 }, { e: 'goto', node: 't-close' }] },
@@ -347,7 +347,7 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
         ],
         choices: [
           { id: 'sleep', text: 'לישון. יום שלם.', then: [{ e: 'energy', delta: 40 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
-          { id: 'work', text: 'משמרת כפולה. כסף לכרטיס.', then: [{ e: 'money', agorot: 9000, why: 'משמרת כפולה' }, { e: 'energy', delta: -15 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
+          { id: 'work', text: 'משמרת כפולה. תשעים שקל, וכרטיס לגמר עולה שישים.', then: [{ e: 'money', agorot: 9000, why: 'משמרת כפולה' }, { e: 'energy', delta: -15 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
           { id: 'family', text: 'ערב עם אבא ואמא. לתקן משהו.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 6 }, { e: 'energy', delta: 10 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
           { id: 'gate5', text: 'להכין בד עם שער 5. לילה שלם.', when: { gateEver: 'gate5' }, noteHe: 'אף פעם לא עמדת בשער 5. הבד לא שלך.', then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'energy', delta: -20 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
         ],
@@ -362,7 +362,7 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
         lines: [{ who: null, text: 'עוד דבר אחד. רק אחד.' }],
         choices: [
           { id: 'uss', text: 'ערב באוסישקין. שחור צריך עזרה, גם השבוע.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'energy', delta: -10 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
-          { id: 'ticket', text: 'לסדר כרטיס והסעה. ברור.', then: [{ e: 'give', item: 'ticket-stub' }, { e: 'flag', flag: 'd:ticket' }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
+          { id: 'ticket', text: 'לסדר כרטיס — שישים שקל — והסעה. ברור.', then: [{ e: 'give', item: 'ticket-stub' }, { e: 'flag', flag: 'd:ticket' }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
           { id: 'box', text: 'לפתוח את הקופסה האדומה. לעבור על הכל.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'wellbeing', key: 'happiness', delta: 4 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
           { id: 'army', text: 'לסגור חוב עם מישהו שכיסה עליך פעם.', when: { armyAbove: { key: 'coveredForOthers', min: 0 } }, noteHe: 'אף אחד לא כיסה עליך בצבא. אין חוב.', then: [{ e: 'army', key: 'leaveDebt', delta: -2 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
         ],
@@ -400,8 +400,8 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'פנדלים. שוב. השוער שלכם ניגש לקו כמו מישהו שעשה את זה כבר, כי עשה.' },
-          { who: null, text: 'בעיטה. עוד בעיטה. השוער שלכם — עצירה. האצטדיון לא צועק, הוא נושף. עוד אחת. הם מפספסים לבד. ואז—' },
+          { who: null, text: 'פנדלים. שוב, ובאותה קערה. היציע קורא את השם עוד לפני שהוא מגיע לקו — שביט — כמו קוראים למישהו שכבר עשה את זה, כי כבר עשה.' },
+          { who: null, text: 'בעיטה. עוד בעיטה. ואז שביט — והיציע לא צועק, הוא נושף. עוד אחת. הם מפספסים לבד. ואז—' },
           { who: null, text: 'זה נגמר. דאבל.' },
         ],
         then: [{ e: 'sfx', key: 'crowd-goal', level: 1 }, { e: 'sfx', key: 'crowd-claps', level: 0.6, delayMs: 2600 }, { e: 'wellbeing', key: 'happiness', delta: 20 }, { e: 'redheart', key: 'footballLove', delta: 8 }, { e: 'redheart', key: 'loyaltyReturn', delta: 5 }, { e: 'flag', flag: 'd:over' }],

@@ -1,5 +1,6 @@
 import type { HistoricalAnchor } from '../anchors'
 import type { LocationId } from '../types'
+import type { KitSpec } from '../../kit/spec'
 
 /**
  * הגשר — the one channel between the canvas and the DOM.
@@ -51,6 +52,19 @@ export type HudState = {
   scene: string
   /** "מה עליי לעשות?" — one plain sentence for the help sheet, never on the glass itself */
   hint: string
+  /**
+   * ממתין — the one thing on the glass that says "nothing is broken".
+   *
+   * Maor, 5.9.2026: "במידה והמתמודד עשה הכל נכון עד כה וכעת נותר לו להמתין למשהו הבא באותו
+   * מקום נא לציין את זה קבוע על המסך בזמן ההמתנה. למנוע חשד של המתמודד שמשהו נתקע במשחק."
+   *
+   * That is a real fault and it has a real cause: this game has stretches where the
+   * correct move is to stand still — a match running, a father who has not come back yet,
+   * a clock that has to reach a number. Every other game signals that with a spinner. This
+   * one says it in words, permanently, for as long as it is true, and names WHAT is being
+   * waited for. Null the rest of the time; a banner that is always there is wallpaper.
+   */
+  waitingHe: string | null
 }
 
 export type LifeBusEvents = {
@@ -166,7 +180,62 @@ export type LifeBusEvents = {
    * החולצה שקנית — held up big, with the year it was worn and where the collection
    * stands. A shirt is the only purchase in this game that gets a card of its own.
    */
+  /**
+   * כרטיס היכרות — the first time somebody walks into this life.
+   *
+   * Maor asked for "סרטון הכרות קצר" for every character, humorous and light. There is no
+   * film here and there should not be: three lines revealed a tap at a time over the
+   * figure at full height IS a title sequence — it has a beat and an edit — and it costs
+   * writing instead of a shoot. It plays once per person, ever (`own:met:*`).
+   */
+  cast: {
+    nameHe: string
+    roleHe: string
+    art: string
+    linesHe: readonly string[]
+    sinceHe: string
+  } | null
+
+  /**
+   * חנות האוהדים — not a room, a counter.
+   *
+   * It WAS a room for one delta, cut out of a 360° panorama Maor sent, and his verdict on
+   * the screenshot was the right one: "החנות שאתה מעלה בתמונות נראית נורא ואיום… אולי שווה
+   * לעשות חנות כפיצ׳ר פנימי, ולא כחלל". He is right twice over. An empty room with one
+   * shirt floating on a wall is worse than no room, and a shop is not a place you walk
+   * about in — it is a rail you look along. So the door on the street opens THIS: the
+   * whole collection, drawn, with what it costs and what you already own.
+   */
+  shop: { chapter: string } | null
+
+  /**
+   * הטוטו — a Toto slip is, in this game, five questions about the club.
+   *
+   * Maor asked for it in the shape it already exists in: the site's own trivia bank, five
+   * questions a round, two shekels a correct answer. The questions arrive from the server
+   * WITHOUT their answers and are graded there, exactly the way גשר 2 does it, so a boy
+   * filling in a Toto slip cannot read the results off the page.
+   */
+  toto: { seed: number; perAnswerHe: string } | null
+
+  /**
+   * עץ או פלי — a half shekel, in the air, in the alley.
+   *
+   * A shekel in, five out. That is the bet the street offered and it is Maor's number.
+   * The coin is his photograph of a half shekel: the lyre is עץ and the numeral is פלי.
+   */
+  coin: { stake: number; prize: number } | null
+
   shirt: {
+    /**
+     * למה הכרטיס הזה פתוח — a purchase, or a new kit arriving on the rail.
+     *
+     * Maor, 5.9.2026: "בחנות אוהדים חולצות צריכות להתגלות רק מתי שמגיעים לעונה בה שיחקו
+     * עם החולצה ולא לפני. גם המתמודד מקבל על זה פופ אפ שנכנסה חולצה חדשה לחנות." The
+     * first half was already true (`onSale` gates on the season); the second half is this.
+     */
+    kind: 'bought' | 'arrived'
+    /** a photograph — empty when the shirt is drawn from the archive's spec instead */
     art: string
     titleHe: string
     nameHe: string
@@ -175,6 +244,10 @@ export type LifeBusEvents = {
     noteHe: string
     have: number
     total: number
+    /** the club's own kit spec, when this shirt came out of the archive */
+    spec: KitSpec | null
+    seasonHe: string | null
+    sourceHe: string | null
   } | null
 
   card: {

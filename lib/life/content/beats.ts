@@ -63,6 +63,16 @@ export type Beat = {
   trigger: 'enter' | 'clock'
   /** a breath before it starts, so the room is seen first */
   delayMs?: number
+  /**
+   * מה מחכים לו — what a player standing here is waiting for, in his own words.
+   *
+   * Only for `clock` beats, and only when the wait is the intended experience: the game
+   * puts this on the glass, permanently, for as long as the beat has not fired and the
+   * player has nothing else to do in the room. Maor asked for it on 5.9.2026 in one
+   * sentence — a player who has done everything right and is now standing still must be
+   * TOLD he is waiting, or he assumes the game is broken. Omit it and no banner shows.
+   */
+  waitingHe?: string
   do: readonly BeatAction[]
 }
 

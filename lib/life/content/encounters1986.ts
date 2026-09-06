@@ -25,7 +25,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     era: '1986',
     locations: ['street', 'route'],
     weight: 6,
-    lineHe: 'משהו מבהיק בין האבנים. מטבע, שטוח מהצמיגים.',
+    lineHe: 'משהו מבהיק בין אבני המדרכה. מטבע, שטוח מהצמיגים וחם מהשמש.',
     who: null,
     effects: [
       { e: 'money', agorot: 100, why: 'מהרחוב' },
@@ -38,7 +38,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     era: '1986',
     locations: ['street', 'pitch'],
     weight: 3,
-    lineHe: 'קלף שחקן על המדרכה, פנים למטה. אדום. מישהו הפסיד אותו במשחק.',
+    lineHe: 'קלף שחקן על המדרכה, פנים למטה. אתה הופך אותו — אדום. מישהו הפסיד אותו במשחק.',
     who: null,
     effects: [
       { e: 'give', item: 'football-card' },
@@ -52,7 +52,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     locations: ['street'],
     weight: 5,
     cooldown: 90,
-    lineHe: 'רדיו מרפסת, בקול מלא. מישהו למעלה מקלל ומיד מצחקק.',
+    lineHe: 'רדיו ממרפסת, בקול מלא, ובו מישהו שמדבר מהר מדי. למעלה מקללים, ומיד אחר כך צוחקים.',
     who: null,
     effects: [
       { e: 'flag', flag: 'knows:match' },
@@ -89,7 +89,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     locations: ['street', 'route'],
     weight: 2,
     requirements: [{ hasItem: 'coin' }],
-    lineHe: 'החור בכיס. אתה ממשש ומבין שמשהו כבר לא שם.',
+    lineHe: 'החור בכיס. אתה ממשש שוב, ועוד פעם, ומבין.',
     who: null,
     effects: [
       { e: 'take', item: 'coin' },
@@ -120,7 +120,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     locations: ['route'],
     weight: 6,
     cooldown: 45,
-    lineHe: 'אוטובוס עובר לאט, מלא, והחלונות פתוחים. מישהו שר משהו שכולם יודעים חוץ ממך.',
+    lineHe: 'אוטובוס עובר לאט, מלא, והחלונות פתוחים. מישהו שר משהו שכל האוטובוס יודע חוץ ממך.',
     who: null,
     effects: [
       { e: 'redheart', key: 'terraceCulture', delta: 6 },
@@ -146,7 +146,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     era: '1986',
     locations: ['route', 'bloomfield-outside'],
     weight: 3,
-    lineHe: 'דף עיתון נדבק לגדר, ספורט כלפי חוץ. אתה מוציא אותו ומקפל אותו לרבע.',
+    lineHe: 'דף עיתון נדבק לגדר, עמוד הספורט כלפי חוץ. אתה מקלף אותו ומקפל לרבע.',
     who: null,
     effects: [
       { e: 'give', item: 'folded-paper' },
@@ -175,7 +175,7 @@ export const ENCOUNTERS_1986: RandomEncounter[] = [
     locations: ['bloomfield-outside'],
     weight: 4,
     cooldown: 50,
-    lineHe: 'הקהל נדחף קדימה בבת אחת ואתה מוצא את עצמך שלושה מטר מהמקום שעמדת בו.',
+    lineHe: 'הקהל נדחף קדימה בבת אחת, ואתה מוצא את עצמך שלושה מטר מהמקום שעמדת בו בלי שהרגליים שלך זזו.',
     who: null,
     effects: [
       { e: 'wellbeing', key: 'stress', delta: 10 },

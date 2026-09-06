@@ -168,7 +168,7 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
       { when: { flag: 'c99:route' }, lines: [{ who: 'מישל', text: 'המיניבוס מלא. נתראה ביציע.' }] },
       {
         when: { gateEver: 'gate5' },
-        lines: [{ who: 'מישל', text: 'מיניבוס של שער 5. עשרים שקל, יוצאים בשש וחצי מהקיוסק. אסף כבר בפנים עם הבד.' }],
+        lines: [{ who: 'מישל', text: 'מיניבוס של שער 5. עשרים שקל לראש, יוצאים בשש וחצי מהקיוסק. אסף כבר בפנים עם הבד על הברכיים.' }],
         choices: [
           { id: 'go', text: '"עשרים. בא."', when: { minAgorot: 2000 }, noteHe: 'אין עשרים.', then: [{ e: 'money', agorot: -2000, why: 'מיניבוס של שער 5' }, { e: 'flag', flag: 'c99:route' }, { e: 'flag', flag: 'c99:with-gate5' }, { e: 'rel', who: 'michel', axis: 'bond', delta: 3 }, { e: 'rel', who: 'asaf', axis: 'bond', delta: 3 }, { e: 'time', minutes: 90 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
           { id: 'no', text: '"לא הפעם."', then: [] },
@@ -181,9 +181,9 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
     id: 'ofir-cup99',
     nameHe: 'אופיר',
     branches: [
-      { when: { flag: 'c99:route' }, lines: [{ who: 'אופיר', text: 'תראה אותי שם. או שלא. יש שם ארבעים אלף.' }] },
+      { when: { flag: 'c99:route' }, lines: [{ who: 'אופיר', text: 'תראה אותי שם. או שלא. הקערה הזאת בולעת אנשים.' }] },
       {
-        lines: [{ who: 'אופיר', text: 'אוטובוס רגיל. עשר שקל, שתי החלפות, ואם מאחרים — מאחרים. אבל זה אנחנו, כמו פעם.' }],
+        lines: [{ who: 'אופיר', text: 'אוטובוס רגיל. עשרה שקלים, שתי החלפות, ואם מאחרים — מאחרים. אבל זה אנחנו, כמו פעם.' }],
         choices: [
           { id: 'go', text: '"כמו פעם."', when: { minAgorot: 1000 }, noteHe: 'אין עשרה.', then: [{ e: 'money', agorot: -1000, why: 'אוטובוס' }, { e: 'flag', flag: 'c99:route' }, { e: 'flag', flag: 'c99:with-ofir' }, { e: 'flag', flag: 'arrived:late' }, { e: 'rel', who: 'ofir', axis: 'sharedHistory', delta: 5 }, { e: 'time', minutes: 150 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
           { id: 'no', text: '"לא הפעם."', then: [] },
@@ -209,7 +209,7 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
         then: [{ e: 'flag', flag: 'c99:over' }, { e: 'army', key: 'fatigue', delta: 5 }, { e: 'ending', id: 'away' }],
       },
       {
-        lines: [{ who: null, text: 'לא יצאת. איפשהו ברמת גן ארבעים אלף אנשים, ואתה עם רדיו. כשזה נגמר צעקת לבד, ומישהו מהקומה למעלה דפק ברצפה.' }],
+        lines: [{ who: null, text: 'לא יצאת. איפשהו ברמת גן אצטדיון מלא, ואתה עם רדיו על השיש. כשזה נגמר צעקת לבד, ומישהו מהקומה למעלה דפק ברצפה.' }],
         then: [{ e: 'flag', flag: 'c99:over' }, { e: 'ending', id: 'away' }],
       },
     ],
@@ -225,8 +225,8 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'ארבעים אלף. הקערה הגדולה. הצבע שלכם בצד אחד, הצבע שלהם בשני, והרעש — לא רעש. לחץ. כמו מים.' },
-          { who: null, text: 'התשעים דקות: הם קודם. אתם אחר כך. השוויון — האצטדיון עולה באוויר ונשאר שם. הארכה. שקט של אנשים שאין להם כבר קול.' },
+          { who: null, text: 'הקערה הגדולה, מלאה עד המעקות. הצבע שלכם בצד אחד, שלהם בשני, והרעש — לא רעש. לחץ. כמו מים.' },
+          { who: null, text: 'הם קודם, ואתם אחר כך, ובאמצע שם עמדת על מושב בטון ולא ידעת שאתה עומד. הארכה. שקט של אנשים שאין להם כבר קול.' },
           { who: null, text: 'ואז השופט מסתכל בשעון, ואתה יודע מה זה אומר.' },
         ],
         then: [{ e: 'goto', node: 'c99-pens' }],
@@ -239,7 +239,7 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'פנדלים.' },
+          { who: null, text: 'פנדלים. ומהיציע עולה שם אחד, שוב ושוב, כמו תוף: שביט. שביט.' },
           { who: null, text: 'אין לך שליטה על שום דבר שקורה עכשיו. יש לך שליטה על דבר אחד: מה אתה עושה עם הגוף שלך.' },
         ],
         choices: [
@@ -256,11 +256,11 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
     branches: [
       {
         when: { flag: 'pens:turned' },
-        lines: [{ who: null, text: 'שמעת את זה בגב. פעם, ופעמיים — השוער. הקהל מאחוריך עשה קול שלא שמעת קודם. ואז השקט הכי ארוך בעולם, ואז—' }, { who: null, text: 'הסתובבת. בזמן.' }],
+        lines: [{ who: null, text: 'שמעת את זה בגב. פעם, ופעמיים — שביט. הקהל מאחוריך עשה קול שלא שמעת קודם. ואז השקט הכי ארוך בעולם, ואז—' }, { who: null, text: 'הסתובבת. בזמן.' }],
         then: [{ e: 'goto', node: 'c99-won' }],
       },
       {
-        lines: [{ who: null, text: 'השוער. פעם. ואז עוד פעם. אתה לא יודע איך אדם עומד שם. השני, שלכם, ניגש לאט. הרעש נעלם. יש רק את הרגליים שלו.' }, { who: null, text: 'ואז—' }],
+        lines: [{ who: null, text: 'שביט. פעם. ואז עוד פעם. אתה לא יודע איך אדם עומד שם לבד מול כל זה. אחר כך אחד משלכם ניגש לאט. הרעש נעלם. יש רק את הרגליים שלו.' }, { who: null, text: 'ואז—' }],
         then: [{ e: 'goto', node: 'c99-won' }],
       },
     ],
@@ -275,7 +275,7 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
         then: [{ e: 'sfx', key: 'crowd-goal', level: 0.9 }, { e: 'wellbeing', key: 'happiness', delta: 15 }, { e: 'redheart', key: 'footballLove', delta: 6 }, { e: 'goto', node: 'c99-after' }],
       },
       {
-        lines: [{ who: null, text: 'ארבעים אלף אנשים באוויר. אתה ביניהם. גביע. הראשון מאז הכתפיים.' }],
+        lines: [{ who: null, text: 'אצטדיון שלם באוויר בבת אחת. אתה ביניהם. גביע. הראשון מאז הכתפיים.' }],
         then: [{ e: 'sfx', key: 'crowd-goal', level: 0.9 }, { e: 'wellbeing', key: 'happiness', delta: 15 }, { e: 'redheart', key: 'footballLove', delta: 6 }, { e: 'goto', node: 'c99-after' }],
       },
     ],
@@ -291,7 +291,7 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'אחר כך. שער 7 בצד אחד עם הדגלים הישנים. שער 5 בצד השני עם הבד. ובאמצע — אתה.' },
+          { who: null, text: 'אחר כך. שער 7 בצד אחד עם הדגלים הישנים, שער 5 בצד השני עם הבד, ובאמצע — אתה. ליד המעקה בוכה מישהו זקן ואומר "שלום תקוה", ולא מסביר למה.' },
         ],
         choices: [
           { id: 'both', text: 'ללכת לאבא, ואז לאסף. לחבק את שניהם.', when: { gateEver: 'gate5' }, noteHe: 'אף פעם לא עמדת בשער 5. אסף לא מחכה לך.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 5 }, { e: 'rel', who: 'asaf', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'loyaltyReturn', delta: 5 }, { e: 'flag', flag: 'c99:over' }, { e: 'flag', flag: 'life:cup99:together' }, { e: 'ending', id: 'together' }] },

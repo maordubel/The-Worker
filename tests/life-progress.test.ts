@@ -69,9 +69,16 @@ describe('המחירים — one table, every decade', () => {
     expect(decadeOfYear(2014)).toBe('10s')
   })
 
-  it('prices every shirt off the decade it first hangs in', () => {
+  it('prices every shirt off its own decade', () => {
     for (const shirt of SHIRTS) {
-      expect(shirt.price, shirt.id).toBe(SHIRT[decadeOf(shirt.from)])
+      // A shirt out of the club's archive is priced by the SEASON it was worn, not by the
+      // chapter it first appears in: the 1988/89 kit cost 1980s money even though a boy
+      // who missed it does not see it on a rail until 1990. A photographed shirt has no
+      // season, so it takes the decade of the chapter it hangs in.
+      const want = shirt.seasonLabel
+        ? SHIRT[decadeOfYear(Number(shirt.seasonLabel.slice(0, 4)))]
+        : SHIRT[decadeOf(shirt.from)]
+      expect(shirt.price, shirt.id).toBe(want)
     }
     expect(SHIRTS.find((s) => s.id === 'visa86')?.price).toBe(30)
     expect(SHIRTS.find((s) => s.id === 'crt')?.price).toBe(110)
@@ -113,14 +120,29 @@ describe('הג׳ובים — a boy with no money has somewhere to earn it', () =
     expect(14 + day).toBeGreaterThanOrEqual(SHIRT['80s'])
   })
 
-  it('generates one conversation per gig per chapter, and every one starts the minigame', () => {
+  it('generates one conversation per gig per chapter, and every one opens something playable', () => {
     const conversations = gigConversations()
     expect(conversations.length).toBe(GIGS.reduce((n, gig) => n + gigChapters(gig).length, 0))
     for (const conversation of conversations) {
+      const gig = GIGS.find((row) => conversation.id.startsWith(`gig-${row.id}-`))
       const json = JSON.stringify(conversation)
-      expect(json, conversation.id).toContain('"e":"minigame"')
-      expect(json, conversation.id).toContain('"id":"chore:')
+      if (gig?.opens === 'toto') expect(json, conversation.id).toContain('"e":"toto"')
+      else if (gig?.opens === 'coin') expect(json, conversation.id).toContain('"e":"coin"')
+      else {
+        expect(json, conversation.id).toContain('"e":"minigame"')
+        expect(json, conversation.id).toContain('"id":"chore:')
+      }
     }
+  })
+
+  it('the two money cards are Maor\'s numbers', () => {
+    // 5.9.2026: a Toto slip is five questions at two shekels; the coin is one in, five out.
+    const toto = gigConversations().find((row) => row.id.startsWith('gig-toto-slip-'))
+    const coin = gigConversations().find((row) => row.id.startsWith('gig-alley-coin-'))
+    expect(JSON.stringify(toto)).toContain('"e":"toto"')
+    expect(JSON.stringify(coin)).toContain('"e":"coin"')
+    expect(GIGS.find((row) => row.id === 'alley-coin')?.where).toBe('pitch')
+    expect(GIGS.find((row) => row.id === 'toto-slip')?.where).toBe('kiosk')
   })
 
   it('is reachable — every gig conversation is registered', () => {

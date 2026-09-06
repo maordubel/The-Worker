@@ -12,7 +12,8 @@ import { BACKDROP, DOC } from './art'
 
 import type { DialogueChoice, LifeBus } from './bus'
 import { describeMoneyChange } from '../money'
-import { SHIRTS, ownedShirts, shirtById, shirtFlag } from '../shirts'
+import { cardForName, metFlag } from '../castCards'
+import { knownBy, ownedShirts, shirtById, shirtFlag } from '../shirts'
 import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
 import { characterName } from '../characters'
 import type { CharacterId } from '../types'
@@ -103,6 +104,20 @@ export class DialogueRunner {
     if (!conversation) return false
     const branch = conversation.branches.find((candidate) => meets(this.engine.state, candidate.when))
     if (!branch) return false
+
+    // The first time you meet somebody, you meet them: the card plays over the top of the
+    // conversation that opened it, and the conversation is still there when it closes.
+    const card = cardForName(conversation.nameHe)
+    if (card && !this.engine.state.flags[metFlag(card.id)]) {
+      this.engine.dispatch({ t: 'flag.raised', flag: metFlag(card.id) })
+      this.bus.emit('cast', {
+        nameHe: conversation.nameHe ?? '',
+        roleHe: card.roleHe,
+        art: card.art,
+        linesHe: card.linesHe,
+        sinceHe: card.sinceHe,
+      })
+    }
 
     if (done) this.onDone = done
     this.conversation = conversation
@@ -338,6 +353,7 @@ export class DialogueRunner {
           events.push({ t: 'flag.raised', flag: shirtFlag(shirt.id) })
           after.push(() =>
             this.bus.emit('shirt', {
+              kind: 'bought' as const,
               art: shirt.art,
               titleHe: had === 0 ? 'קנית את חולצת הפועל הראשונה שלך!' : 'עוד אחת לארון.',
               nameHe: shirt.nameHe,
@@ -345,11 +361,41 @@ export class DialogueRunner {
               yearsHe: shirt.yearsHe,
               noteHe: shirt.noteHe,
               have: had + 1,
-              total: SHIRTS.length,
+              /**
+               * The denominator is what EXISTS by now, not the whole archive. "1 / 40" in
+               * 1985 is a promise about 2025 and reads as a mountain; "1 / 3" is the rail
+               * in front of him and reads as a collection with a gap in it.
+               */
+              total: knownBy(this.engine.state.chapter).length,
+              spec: shirt.spec ?? null,
+              seasonHe: shirt.seasonLabel ?? null,
+              sourceHe: shirt.sourceHe ?? null,
             }),
           )
           break
         }
+        /** the rail, as a screen: everything that exists by this chapter, drawn */
+        case 'shop':
+          after.push(() => this.bus.emit('shop', { chapter: this.engine.state.chapter }))
+          break
+        /**
+         * שליחת טוטו — the slip is filled in, and the questions are the site's own.
+         *
+         * Nothing is paid here: the card pays what was earned when it closes, because a
+         * Toto slip that pays on the handshake is not a Toto slip. The seed is the day
+         * and the minute, so the same afternoon does not deal the same five questions
+         * twice and a save reloaded does not re-deal a round already answered.
+         */
+        case 'toto': {
+          const state = this.engine.state
+          const seed = state.year * 100000 + state.weekday * 1440 + state.minute
+          after.push(() => this.bus.emit('toto', { seed, perAnswerHe: '2 ₪ לכל תשובה נכונה' }))
+          break
+        }
+        /** עץ או פלי — the stake leaves the pocket in the card, with the flip. */
+        case 'coin':
+          after.push(() => this.bus.emit('coin', { stake: 1, prize: 5 }))
+          break
         case 'goto':
           goto = effect.node
           break

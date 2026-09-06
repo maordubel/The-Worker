@@ -30,15 +30,15 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { flag: 'note:answered' },
         lines: [
-          { who: null, text: 'הפתק כבר לא אצלך. הוא איפשהו בין השורה השנייה לשלישית, מתחת לשולחנות.' },
-          { who: null, text: 'מישהו מאחוריך צוחק בלי קול.' },
+          { who: null, text: 'הפתק כבר לא אצלך. הוא עובר מתחת לשולחנות, בין השורה השנייה לשלישית.' },
+          { who: null, text: 'מישהו מאחוריך צוחק בלי קול. אז הוא הגיע.' },
         ],
       },
       // --- confiscated ---------------------------------------------------------------
       {
         when: { flag: 'note:caught' },
         lines: [
-          { who: null, text: 'הפתק על השולחן שלה, מקופל בדיוק כמו שהיה. היא לא פתחה אותו שוב.' },
+          { who: null, text: 'הפתק על השולחן שלה, ליד הגיר, מקופל בדיוק כמו שהיה. היא לא פתחה אותו שוב.' },
           { who: null, text: 'זה איכשהו יותר גרוע מזה שהיא כן.' },
         ],
       },
@@ -46,9 +46,9 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { flag: 'note:read' },
         lines: [
-          { who: null, text: 'הפתק פתוח על הברכיים שלך. שתי מילים, סימן שאלה, ומתחת — שלוש תשובות מוכנות שצריך רק להקיף.' },
+          { who: null, text: 'הפתק פתוח על הברכיים. שתי מילים, סימן שאלה, ומתחת — שלוש תשובות מוכנות שצריך רק להקיף.' },
           { who: null, text: 'כן · ברור · נראה לך שלא?' },
-          { who: null, text: 'המורה כותבת על הלוח. הגב שלה אליך. לא לאורך זמן.' },
+          { who: null, text: 'המורה כותבת על הלוח. הגב שלה אליך, וזה לא מצב קבוע.' },
         ],
         choices: [
           {
@@ -59,7 +59,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'take', item: 'school-note' },
               { e: 'time', minutes: 12 },
               { e: 'personality', key: 'impulsiveness', delta: 5 },
-              { e: 'toast', text: 'היד שלך באוויר כשהיא מסתובבת. היא לא צועקת. זה יותר גרוע.', tone: 'plain' },
+              { e: 'toast', text: 'היד שלך באוויר כשהיא מסתובבת. היא לא צועקת. היא רק מושיטה יד.', tone: 'plain' },
               { e: 'goto', node: 'note-caught' },
             ],
           },
@@ -72,7 +72,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'time', minutes: 6 },
               { e: 'personality', key: 'streetSmarts', delta: 5 },
               { e: 'bond', who: 'ofir', delta: 3 },
-              { e: 'toast', text: 'הקפת "ברור", חיכית לגיר, והעברת. הפתק נעלם קדימה.', tone: 'plain' },
+              { e: 'toast', text: 'חיכית שהגיר יתחיל לחרוק, הקפת "ברור", והעברת. הפתק נעלם קדימה.', tone: 'plain' },
             ],
           },
           {
@@ -82,13 +82,13 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'flag', flag: 'note:kept' },
               { e: 'flag', flag: 'plan:tonight' },
               { e: 'personality', key: 'responsibility', delta: 4 },
-              { e: 'toast', text: 'שמת אותו בכיס. תענה בהפסקה. זה גם תשובה.', tone: 'plain' },
+              { e: 'toast', text: 'הכנסת אותו לכיס. תענה בהפסקה, פנים אל פנים. גם זאת תשובה.', tone: 'plain' },
             ],
           },
         ],
       },
       {
-        lines: [{ who: null, text: 'נייר מקופל לארבע על השולחן שלך.' }],
+        lines: [{ who: null, text: 'נייר מקופל לארבע על השולחן. לא ראית מי שלח אותו.' }],
         then: [{ e: 'flag', flag: 'note:read' }, { e: 'give', item: 'school-note' }],
       },
     ],
@@ -99,11 +99,11 @@ export const CONVERSATIONS_1991: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: 'המורה', text: 'תודה. אני אשמור עליו.' },
-          { who: null, text: 'היא מקפלת אותו שוב לארבע ומניחה על השולחן שלה, ליד הגיר.' },
+          { who: 'המורה', text: 'תודה. אני אשמור עליו טוב.' },
+          { who: null, text: 'היא מקפלת אותו שוב לארבע ומניחה על השולחן שלה, ליד הגיר, בלי למהר.' },
           { who: 'המורה', text: 'אוסישקין.' },
-          { who: null, text: 'היא לא שואלת. היא אומרת את זה כמו מישהי שכבר שמעה את המילה הזאת בכיתה הזאת.' },
-          { who: 'המורה', text: 'אתה נשאר חמש דקות אחרי השיעור. ויש שיעורי בית.' },
+          { who: null, text: 'היא לא שואלת. היא אומרת את המילה כמו מי ששמעה אותה בכיתה הזאת כבר עשר שנים.' },
+          { who: 'המורה', text: 'אתה נשאר חמש דקות אחרי השיעור. ויש שיעורי בית, כמו לכולם.' },
         ],
         then: [
           { e: 'flag', flag: 'hw:given' },
@@ -122,23 +122,23 @@ export const CONVERSATIONS_1991: Conversation[] = [
         lines: [
           { who: 'המורה', text: 'אתה עדיין כאן.' },
           { who: 'פוגי', text: 'אמרת חמש דקות.' },
-          { who: 'המורה', text: 'אמרתי. שיעורי הבית לעמוד ארבעים ואחת. לא בגלל הפתק.' },
+          { who: 'המורה', text: 'אמרתי. שיעורי הבית עמוד ארבעים ואחת. לא בגלל הפתק — לכל הכיתה.' },
           { who: null, text: 'היא מסתכלת עליך מעל המשקפיים עוד שנייה אחת, ואז חוזרת ללוח.', },
-          { who: 'המורה', text: 'תלך. אתה תאחר.' },
+          { who: 'המורה', text: 'לך כבר. אתה תאחר.' },
         ],
         then: [{ e: 'flag', flag: 'school:done' }, { e: 'time', minutes: 5 }],
       },
       {
         when: { afterMinute: BREAK },
         lines: [
-          { who: 'המורה', text: 'צלצל. עמוד ארבעים ואחת להיום.' },
+          { who: 'המורה', text: 'צלצל. עמוד ארבעים ואחת להיום, וכן, כולו.' },
           { who: null, text: 'היא מוחקת את הלוח באותה תנועה כל בוקר. חצי מעגל, ואז שורה.' },
         ],
         then: [{ e: 'flag', flag: 'hw:given' }, { e: 'flag', flag: 'school:done' }],
       },
       {
         lines: [
-          { who: 'המורה', text: 'אנחנו באמצע.' },
+          { who: 'המורה', text: 'אנחנו באמצע משפט.' },
           { who: null, text: 'נכון. אתה לא.' },
         ],
       },
@@ -150,7 +150,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         lines: [
           { who: null, text: 'הלוח מלא בסימנים לבנים. אתה מעתיק אותם למחברת בלי לקרוא אותם.' },
-          { who: null, text: 'בעמוד ליד, בשוליים, אתה מצייר אולם קטן עם גג פח.' },
+          { who: null, text: 'בעמוד ליד, בשוליים, אתה מצייר אולם קטן עם גג פח ומדרגה אחת.' },
         ],
         then: [{ e: 'personality', key: 'curiosity', delta: 2 }],
       },
@@ -162,7 +162,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         lines: [
           { who: null, text: 'החלונות גבוהים, ומהמקום שלך רואים רק שמיים ופינה של גג.' },
-          { who: null, text: 'ככה זה בנוי. כדי שלא תסתכל החוצה.' },
+          { who: null, text: 'ככה זה בנוי, בכוונה. כדי שלא תסתכל החוצה.' },
         ],
       },
     ],
@@ -186,24 +186,24 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { flag: 'note:caught' },
         lines: [
-          { who: 'קרן', text: 'איזה גאון.' },
+          { who: 'קרן', text: 'איזה גאון אתה.' },
           { who: 'פוגי', text: 'היא הסתובבה.' },
-          { who: 'קרן', text: 'היא תמיד מסתובבת. זה התפקיד שלה.' },
+          { who: 'קרן', text: 'היא מסתובבת תמיד בדיוק ברגע הזה. זה התפקיד שלה.' },
         ],
         then: [{ e: 'bond', who: 'keren', delta: 2 }],
       },
       {
         when: { flag: 'plan:tonight' },
         lines: [
-          { who: 'קרן', text: 'אתה הולך?' },
+          { who: 'קרן', text: 'אתה בכלל הולך?' },
           { who: 'פוגי', text: 'אני צריך לשאול.' },
-          { who: 'קרן', text: 'אז תשאל יפה. אמא שלך לא אמא שלי.' },
+          { who: 'קרן', text: 'אז תשאל יפה, ולפני שהיא עייפה. אמא שלך לא אמא שלי.' },
         ],
       },
       {
         lines: [
           { who: 'קרן', text: 'תפסיק לזוז. היא מסתכלת לכיוון שלנו.' },
-          { who: null, text: 'אתה קופא. היא לא מסתכלת. קרן צוחקת בלי קול.' },
+          { who: null, text: 'אתה קופא במקום. היא לא מסתכלת. קרן צוחקת בלי קול.' },
         ],
       },
     ],
@@ -220,16 +220,16 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: 'אופיר', text: 'שמעתי שהמורה קוראת פתקים עכשיו.' },
           { who: 'פוגי', text: 'היא לא קראה.' },
           { who: 'אופיר', text: 'ברור שהיא קראה.' },
-          { who: 'אופיר', text: 'לא משנה. בשמונה בערב. אתה מכיר את הדרך.' },
+          { who: 'אופיר', text: 'לא משנה. בשמונה מתחילים. אתה מכיר את הדרך, זאת אותה דרך.' },
         ],
         then: [{ e: 'flag', flag: 'plan:tonight' }, { e: 'bond', who: 'ofir', delta: 3 }],
       },
       {
         when: { flag: 'plan:tonight' },
         lines: [
-          { who: 'אופיר', text: 'קיבלתי "ברור". יופי.' },
+          { who: 'אופיר', text: 'קיבלתי "ברור". יופי. אז אל תעשה לי בעיות בערב.' },
           { who: 'אופיר', text: 'עמית שומר מקומות. אבל עמית שומר מקומות כמו שעמית שומר סודות.' },
-          { who: null, text: 'הוא צוחק מהבדיחה של עצמו כל הדרך לכיתה.' },
+          { who: null, text: 'הוא צוחק מהבדיחה של עצמו כל הדרך חזרה לכיתה.' },
         ],
         then: [{ e: 'redheart', key: 'basketballLove', delta: 4 }],
       },
@@ -237,7 +237,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
         lines: [
           { who: 'אופיר', text: 'נו? קיבלת את הפתק או לא?' },
           { who: 'פוגי', text: 'קיבלתי.' },
-          { who: 'אופיר', text: 'אז זהו. בערב.' },
+          { who: 'אופיר', text: 'אז זהו, סגור. בערב.' },
         ],
         then: [{ e: 'flag', flag: 'plan:tonight' }],
       },
@@ -250,8 +250,8 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         lines: [
           { who: 'עמית', text: 'תשמע, אני נכנס מוקדם. אני תמיד נכנס מוקדם.' },
-          { who: 'עמית', text: 'תגיע לפני שמכניסים את כולם, אחרת תעמוד ליד הדלת עם הסדרן.' },
-          { who: null, text: 'הוא אומר את זה כאילו הוא מסביר משהו טכני לילד קטן. הוא בן שתים עשרה וחצי.' },
+          { who: 'עמית', text: 'יש שם אלפיים מקומות ובאים יותר. תגיע לפני שפותחים, אחרת תעמוד ליד הדלת עם הסדרן.' },
+          { who: null, text: 'הוא מסביר את זה כמו מהנדס. הוא בן שתים עשרה וחצי.' },
         ],
         then: [{ e: 'flag', flag: 'knows:early' }, { e: 'trait', trait: 'knowledge', delta: 3 }],
       },
@@ -263,8 +263,8 @@ export const CONVERSATIONS_1991: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: 'קרן', text: 'אני לא הולכת. יש לי מבחן.' },
-          { who: 'פוגי', text: 'גם לי יש מבחן.' },
+          { who: 'קרן', text: 'אני לא הולכת. יש לי מבחן מחר.' },
+          { who: 'פוגי', text: 'גם לי יש מבחן מחר.' },
           { who: 'קרן', text: 'אני יודעת.' },
           { who: null, text: 'היא לא אומרת את זה רע. זה יותר גרוע.' },
         ],
@@ -293,7 +293,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'time', minutes: 20 },
               { e: 'redheart', key: 'basketballLove', delta: 6 },
               { e: 'personality', key: 'impulsiveness', delta: 3 },
-              { e: 'toast', text: 'משחק אחד. ואז עוד אחד. ואז הצלצול.', tone: 'plain' },
+              { e: 'toast', text: 'משחק אחד. ואז עוד אחד. ואז הצלצול, ואתה מזיע בשיעור.', tone: 'plain' },
             ],
           },
           {
@@ -314,7 +314,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         lines: [
           { who: null, text: 'הגדר של החצר, ומעבר לה הרחוב שאתה הולך בו הביתה כל יום.' },
-          { who: null, text: 'מכאן זה נראה קצר. זה לא קצר.' },
+          { who: null, text: 'מכאן הדרך לאולם נראית קצרה. היא לא קצרה.' },
         ],
       },
     ],
@@ -329,13 +329,13 @@ export const CONVERSATIONS_1991: Conversation[] = [
         lines: [
           { who: 'אופיר', text: 'אז מה, אתה לא בא?' },
           { who: 'פוגי', text: 'לא יודע.' },
-          { who: 'אופיר', text: 'תגיד לי עד שבע. אני לא מחכה לך ברחוב כמו אידיוט.' },
+          { who: 'אופיר', text: 'תגיד לי עד שבע. אני לא עומד לחכות לך ברחוב כמו אידיוט.' },
         ],
       },
       {
         when: { afterMinute: 17 * 60 },
         lines: [
-          { who: 'אופיר', text: 'אני הולך מוקדם. בשבע וחצי אני שם.' },
+          { who: 'אופיר', text: 'אני יוצא מוקדם. בשבע וחצי אני כבר שם.' },
           { who: null, text: 'הוא כבר הולך אחורה בזמן שהוא מדבר, כמו שהוא עושה מאז כיתה ב׳.' },
         ],
       },
@@ -357,16 +357,16 @@ export const CONVERSATIONS_1991: Conversation[] = [
     branches: [
       {
         when: { flag: 'hw:done' },
-        lines: [{ who: null, text: 'המחברת סגורה על השולחן. עמוד ארבעים ואחת, כולו, בכתב יד שלך.' }],
+        lines: [{ who: null, text: 'המחברת סגורה על השולחן. עמוד ארבעים ואחת, כולו, בכתב היד שלך.' }],
       },
       {
         when: { notFlag: 'hw:given' },
-        lines: [{ who: null, text: 'השולחן. אין מה לעשות עליו עכשיו.' }],
+        lines: [{ who: null, text: 'השולחן פנוי. אין מה לעשות עליו עכשיו.' }],
       },
       {
         lines: [
-          { who: null, text: 'עמוד ארבעים ואחת. שלוש עשרה שאלות, וכל אחת מהן ארוכה יותר מהקודמת.' },
-          { who: null, text: 'מהמטבח נשמע רדיו. השעון בסלון עושה את הקול שלו.' },
+          { who: null, text: 'עמוד ארבעים ואחת. שלוש עשרה שאלות, וכל אחת ארוכה יותר מהקודמת.' },
+          { who: null, text: 'מהמטבח רדיו נמוך. השעון בסלון עושה את הקול שלו, ואתה שומע כל תקתוק.' },
         ],
         choices: [
           {
@@ -377,7 +377,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'time', minutes: 50 },
               { e: 'personality', key: 'responsibility', delta: 8 },
               { e: 'wellbeing', key: 'exhaustion', delta: 6 },
-              { e: 'toast', text: 'שלוש עשרה שאלות. הידיים כואבות. אבל זה גמור.', tone: 'plain' },
+              { e: 'toast', text: 'שלוש עשרה שאלות. האצבעות כואבות. אבל זה גמור, והיא תוכל לפתוח.', tone: 'plain' },
             ],
           },
           {
@@ -387,7 +387,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'flag', flag: 'hw:half' },
               { e: 'time', minutes: 20 },
               { e: 'personality', key: 'streetSmarts', delta: 4 },
-              { e: 'toast', text: 'שש שאלות, והמחברת נשארת פתוחה על השולחן כאילו קמת לרגע.', tone: 'plain' },
+              { e: 'toast', text: 'שש שאלות, והמחברת נשארת פתוחה על השולחן כאילו קמת רק לרגע.', tone: 'plain' },
             ],
           },
           {
@@ -398,7 +398,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'time', minutes: 8 },
               { e: 'personality', key: 'riskTolerance', delta: 5 },
               { e: 'wellbeing', key: 'stress', delta: 5 },
-              { e: 'toast', text: 'שורות מלאות. אם לא מסתכלים מקרוב, זה עובד.', tone: 'plain' },
+              { e: 'toast', text: 'שורות מלאות בכתב יפה. אם לא מסתכלים מקרוב, זה עובד.', tone: 'plain' },
             ],
           },
         ],
@@ -413,12 +413,12 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { all: [{ flag: 'derby:over' }, { flag: 'curfew:broken' }] },
         lines: [
-          { who: 'פוגי', text: 'ניצחנו.' },
+          { who: 'פוגי', text: 'הגג רעד. באמת רעד.' },
           { who: 'רחל', text: 'ראיתי מה השעה.', closeUp: 'cuRachelWatch' },
-          { who: 'פוגי', text: 'בדרבי.' },
+          { who: 'פוגי', text: 'זה היה דרבי.' },
           { who: 'רחל', text: 'ראיתי מה השעה.' },
-          { who: null, text: 'היא לא מרימה את הקול. היא לא צריכה.' },
-          { who: 'רחל', text: 'לך תישן. מחר בית ספר.' },
+          { who: null, text: 'היא לא מרימה את הקול. היא אף פעם לא צריכה.' },
+          { who: 'רחל', text: 'לך לישון. מחר בית ספר, ואתה קם ראשון.' },
         ],
         then: [
           { e: 'flag', flag: 'walked:home' },
@@ -432,11 +432,11 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { all: [{ flag: 'derby:over' }, { flag: 'curfew:kept' }] },
         lines: [
-          { who: 'רחל', text: 'ראית עד הסוף?' },
+          { who: 'רחל', text: 'הספקת לראות עד הסוף?' },
           { who: 'פוגי', text: 'לא.' },
-          { who: null, text: 'היא מסתכלת עליך שנייה יותר מדי.' },
+          { who: null, text: 'היא מסתכלת עליך שנייה אחת יותר מדי.' },
           { who: 'רחל', text: 'טוב.' },
-          { who: null, text: 'זה כואב קצת. שניכם יודעים.' },
+          { who: null, text: 'זה כואב קצת. שניכם יודעים את זה.' },
         ],
         then: [
           { e: 'flag', flag: 'walked:home' },
@@ -452,7 +452,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: 'רחל', text: 'נגמר?' },
           { who: 'פוגי', text: 'נגמר.' },
           { who: 'רחל', text: 'שמעתי מהרדיו של השכנים. כל הבניין שמע.' },
-          { who: null, text: 'היא מכבה את האור במטבח.' },
+          { who: null, text: 'היא מכבה את האור במטבח והולכת לישון.' },
         ],
         then: [{ e: 'keep' }, { e: 'ending', id: 'missed' }],
       },
@@ -463,7 +463,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
         lines: [
           { who: 'רחל', text: 'בתשע וחצי אתה בבית. לא בתשע וארבעים.' },
           { who: 'פוגי', text: 'טוב.' },
-          { who: 'רחל', text: 'תגיד "טוב" עוד פעם, ככה שאני אאמין.' },
+          { who: 'רחל', text: 'תגיד "טוב" עוד פעם, ככה שאני אאמין לך.' },
           { who: 'פוגי', text: 'טוב!' },
         ],
       },
@@ -481,7 +481,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: 'פוגי', text: 'עשיתי.' },
           { who: 'רחל', text: 'הכול?' },
           { who: 'פוגי', text: 'הכול.' },
-          { who: null, text: 'היא הולכת לחדר, פותחת את המחברת, ומסתכלת בעמוד שלוש שניות.' },
+          { who: null, text: 'היא הולכת לחדר, פותחת את המחברת, ומסתכלת בעמוד שלוש שניות בדיוק.' },
           { who: 'רחל', text: 'יש היום משחק, נכון.' },
         ],
         choices: [
@@ -502,7 +502,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'flag', flag: 'asked:mum' },
               { e: 'flag', flag: 'permission:yes' },
               { e: 'personality', key: 'stubbornness', delta: 4 },
-              { e: 'toast', text: 'רחל: "לך כבר. בתשע וחצי בבית."', tone: 'red' },
+              { e: 'toast', text: 'רחל: "לך כבר, לפני שאני מתחרטת. בתשע וחצי בבית."', tone: 'red' },
             ],
           },
         ],
@@ -512,7 +512,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
         lines: [
           { who: 'רחל', text: 'שיעורים.' },
           { who: 'פוגי', text: 'עשיתי.' },
-          { who: null, text: 'היא הולכת לחדר. את המחברת היא לא פותחת — היא רק מסתכלת עליה מהדלת.' },
+          { who: null, text: 'היא הולכת לחדר. את המחברת היא לא פותחת — רק מסתכלת עליה מהדלת.' },
           { who: 'רחל', text: 'יש היום משחק.' },
           { who: 'פוגי', text: 'יש.' },
         ],
@@ -525,7 +525,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'flag', flag: 'permission:yes' },
               { e: 'rel', who: 'rachel', axis: 'trust', delta: 8 },
               { e: 'remember', who: 'rachel', eventId: 'told-the-truth-1991', significance: 'notable' },
-              { e: 'toast', text: 'רחל: "בתשע וחצי. ובבוקר אתה קם לפני כולם."', tone: 'red' },
+              { e: 'toast', text: 'רחל: "בתשע וחצי. ובבוקר אתה קם לפני כולם וגומר."', tone: 'red' },
             ],
           },
           {
@@ -563,8 +563,8 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: 'קובי', text: 'שמעתי.' },
           { who: 'פוגי', text: 'היא אמרה לא.' },
           { who: 'קובי', text: 'היא אמרה לא כי אמרת לה משהו שהיא ידעה שהוא לא נכון.' },
-          { who: null, text: 'הוא מקפל את העיתון על הברך.' },
-          { who: 'קובי', text: 'אני לא הולך לדבר בשבילך. אבל אם תלך אליה ותגיד את זה בלי לשקר — אני לא אפריע.' },
+          { who: null, text: 'הוא מקפל את העיתון על הברך ומניח אותו בצד.' },
+          { who: 'קובי', text: 'אני לא אדבר בשבילך. אבל אם תלך אליה ותגיד את זה בלי לשקר — אני לא אפריע.' },
         ],
         then: [{ e: 'flag', flag: 'kobi:nudged' }, { e: 'rel', who: 'kobi', axis: 'trust', delta: 4 }],
       },
@@ -574,7 +574,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: 'קובי', text: 'כדורסל זה לא אותו דבר.' },
           { who: 'פוגי', text: 'זה אותה קבוצה.' },
           { who: 'קובי', text: 'זה אותה קבוצה.' },
-          { who: null, text: 'הוא לא מרים את העיניים מהעיתון, אבל הוא אומר את זה פעמיים.' },
+          { who: null, text: 'הוא לא מרים את העיניים מהעיתון. אבל הוא אמר את זה פעמיים.' },
         ],
         then: [{ e: 'redheart', key: 'familyTradition', delta: 3 }],
       },
@@ -592,13 +592,13 @@ export const CONVERSATIONS_1991: Conversation[] = [
     branches: [
       {
         when: { flag: 'sneak:ready' },
-        lines: [{ who: null, text: 'הפתק שלך על השולחן, מתחת לכוס. "חוזר בעשר. פוגי."' }],
+        lines: [{ who: null, text: 'הפתק שלך על השולחן, מתחת לכוס ההפוכה. "חוזר בעשר. פוגי."' }],
       },
       {
         when: { flag: 'permission:no' },
         lines: [
-          { who: null, text: 'שולחן המטבח. עיפרון, ופנקס שאמא כותבת בו רשימות.' },
-          { who: null, text: 'אפשר לצאת בלי להגיד כלום. אפשר גם לא לצאת.' },
+          { who: null, text: 'שולחן המטבח. עיפרון, ופנקס שאמא כותבת בו רשימות של מכולת.' },
+          { who: null, text: 'אפשר לכתוב ולצאת. אפשר גם לא לצאת.' },
         ],
         choices: [
           {
@@ -608,7 +608,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'flag', flag: 'sneak:ready' },
               { e: 'personality', key: 'riskTolerance', delta: 6 },
               { e: 'wellbeing', key: 'stress', delta: 8 },
-              { e: 'toast', text: 'כתבת "חוזר בעשר" ושמת מתחת לכוס. הדלת נסגרת בשקט.', tone: 'plain' },
+              { e: 'toast', text: 'כתבת "חוזר בעשר" ושמת מתחת לכוס. סגרת את הדלת בשתי ידיים, שלא תעשה קול.', tone: 'plain' },
             ],
           },
           {
@@ -617,7 +617,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
             then: [
               { e: 'flag', flag: 'night:home' },
               { e: 'personality', key: 'responsibility', delta: 6 },
-              { e: 'toast', text: 'החזרת את העיפרון למקום.', tone: 'plain' },
+              { e: 'toast', text: 'החזרת את העיפרון למקום שלו בפנקס. הערב הזה קורה בלעדיך.', tone: 'plain' },
             ],
           },
         ],
@@ -637,20 +637,20 @@ export const CONVERSATIONS_1991: Conversation[] = [
         when: { flag: 'derby:over' },
         lines: [
           { who: 'סדרן', text: 'לילה טוב, פוגי.', closeUp: 'cuUsherNight' },
-          { who: null, text: 'הוא לא שאל אותך איך קוראים לך. אף פעם. פשוט יודע.' },
+          { who: null, text: 'הוא אף פעם לא שאל איך קוראים לך. הוא פשוט יודע.' },
         ],
         then: [{ e: 'redheart', key: 'community', delta: 5 }],
       },
       {
         when: { flag: 'uss:arrived' },
         lines: [
-          { who: 'סדרן', text: 'פנימה, פנימה. תעמוד ליד המדרגה, לא על המדרגה.' },
+          { who: 'סדרן', text: 'פנימה, פנימה. ליד המדרגה, לא על המדרגה.' },
           { who: null, text: 'הוא אומר את זה לכל מי שנכנס. אף אחד לא מקשיב, כולל אתה.' },
         ],
       },
       {
         lines: [
-          { who: 'סדרן', text: 'היום יש. אתה יודע שיש.' },
+          { who: 'סדרן', text: 'יש קבוצות שנכנסות לפה כבר במינוס עשר, לפני שזרקו כדור. ככה זה כאן.' },
           { who: 'סדרן', text: 'תיכנס מוקדם אם אתה רוצה לראות משהו. אחר כך זה קיר של אנשים.' },
         ],
         then: [{ e: 'flag', flag: 'knows:early' }],
@@ -662,7 +662,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'תור קצר וצפוף לפני הדלת. אנשים מכירים אנשים; אף אחד לא באמת עומד בתור.' },
+          { who: null, text: 'תור קצר וצפוף, וריח של נקניקיות וסיגריות. אף אחד פה לא באמת עומד בתור.' },
           { who: 'אוהד', text: 'מה קורה פוגי.' },
           { who: null, text: 'אתה לא יודע איך קוראים לו. הוא יודע איך קוראים לך. ככה זה כאן.' },
         ],
@@ -682,7 +682,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: 'עמית', text: 'איפה היית?' },
           { who: 'פוגי', text: 'הלכתי רגע.' },
           { who: 'עמית', text: 'רגע.' },
-          { who: null, text: 'עכשיו אתם עומדים מאחורי בן אדם ששני ראשים יותר גבוה ממך, וזה המקום שלכם.' },
+          { who: null, text: 'עכשיו אתם עומדים מאחורי גב אחד גדול, ורואים חצי מגרש. זה המקום שלכם הערב.' },
         ],
         then: [{ e: 'bond', who: 'amit', delta: -2 }, { e: 'wellbeing', key: 'happiness', delta: -4 }],
       },
@@ -699,14 +699,14 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { flag: 'spot:asked' },
         lines: [
-          { who: 'עמית', text: 'אני חוזר עוד רגע. אל תזוז מהמקום.' },
-          { who: null, text: 'הוא נעלם בין האנשים. המקום ריק מצדך אחד ומלא מהצד השני.' },
+          { who: 'עמית', text: 'אני חוזר עוד רגע. אל תזוז מהמקום, שנייה אחת לא.' },
+          { who: null, text: 'הוא נעלם בין האנשים. המדרגה ריקה מצד אחד ומתמלאת מהצד השני.' },
         ],
       },
       {
         lines: [
-          { who: 'עמית', text: 'טוב, זה המקום. משם רואים את כל המגרש חוץ מהפינה.' },
-          { who: 'עמית', text: 'אני הולך להביא משהו. תשמור.' },
+          { who: 'עמית', text: 'זה המקום. מכאן רואים את כל הפרקט חוץ מהפינה.' },
+          { who: 'עמית', text: 'אני הולך להביא משהו לאכול. תשמור.' },
           { who: null, text: 'הוא לא מחכה לתשובה.' },
         ],
         then: [{ e: 'flag', flag: 'spot:asked' }],
@@ -718,23 +718,23 @@ export const CONVERSATIONS_1991: Conversation[] = [
     branches: [
       {
         when: { flag: 'spot:held' },
-        lines: [{ who: null, text: 'המקום שלכם. שני זוגות רגליים על מדרגה אחת, וזה בסדר.' }],
+        lines: [{ who: null, text: 'המקום שלכם. שני זוגות רגליים על מדרגה אחת, וזה בסדר גמור.' }],
       },
       {
         when: { flag: 'spot:asked' },
         lines: [
           { who: null, text: 'המדרגה. אתה עומד רחב כמה שילד בן שתים עשרה יכול לעמוד רחב.' },
-          { who: null, text: 'מישהו נדחף. אתה לא זז. הוא מוצא מקום אחר.' },
+          { who: null, text: 'מישהו נדחף בכתף. אתה לא זז. הוא מוצא לעצמו מקום אחר.' },
         ],
         then: [
           { e: 'flag', flag: 'spot:held' },
           { e: 'personality', key: 'stubbornness', delta: 5 },
-          { e: 'toast', text: 'שמרת על המקום. הכתף כואבת קצת.', tone: 'plain' },
+          { e: 'toast', text: 'שמרת על המקום. הכתף כואבת קצת, וזה שווה את זה.', tone: 'plain' },
         ],
       },
       {
         lines: [
-          { who: null, text: 'מדרגת בטון, שחוקה באמצע מרגליים. מכאן רואים.' },
+          { who: null, text: 'מדרגת בטון, שחוקה באמצע מרגליים. מעליך גג פח שנוטף כשיורד גשם, ואף אחד לא זז בגללו.' },
         ],
       },
     ],
@@ -745,13 +745,13 @@ export const CONVERSATIONS_1991: Conversation[] = [
     branches: [
       {
         when: { flag: 'bought:food' },
-        lines: [{ who: 'מוכר', text: 'נגמר. תבוא במחצית.' }],
+        lines: [{ who: 'מוכר', text: 'קנית כבר. לך תפוס מקום, ילד, עוד מעט מתחילים.' }],
       },
       {
         when: { minAgorot: 300 },
         lines: [
-          { who: 'מוכר', text: 'יש חם, יש קר, יש מה שנשאר.' },
-          { who: null, text: 'הריח של הגריל נכנס לך לחולצה ויישאר שם עד מחר.' },
+          { who: 'מוכר', text: 'נקניקייה, גרעינים, שתייה. מה שנשאר.' },
+          { who: null, text: 'הריח של הגריל נכנס לך לחולצה ויישאר שם עד מחר בבוקר.' },
         ],
         choices: [
           {
@@ -774,7 +774,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'flag', flag: 'told:home' },
               { e: 'time', minutes: 6 },
               { e: 'rel', who: 'rachel', axis: 'trust', delta: 5 },
-              { e: 'toast', text: 'הוא נותן לך את הטלפון של המזנון. שתי צלצולים, ואמא עונה. אמרת איפה אתה.', tone: 'plain' },
+              { e: 'toast', text: 'הוא מסובב אליך את הטלפון של המזנון. שני צלצולים, ואמא עונה. אמרת איפה אתה.', tone: 'plain' },
             ],
           },
           { id: 'no', text: 'לא עכשיו.', then: [] },
@@ -782,7 +782,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       },
       {
         lines: [
-          { who: 'מוכר', text: 'בלי כסף אין כלום, ילד. אבל אתה יכול לעמוד ליד ולהריח.' },
+          { who: 'מוכר', text: 'בלי כסף אין כלום, ילד. לעמוד ליד ולהריח — בחינם.' },
           { who: null, text: 'אתה עומד ליד ומריח.' },
         ],
       },
@@ -794,7 +794,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         lines: [
           { who: null, text: 'מעקה ברזל בקצה המדרגה, קר וחלק מאלף ידיים.' },
-          { who: null, text: 'מכאן עד הקו הלבן יש פחות ממטר. אתה יכול לשמוע נעליים חורקות על הפרקט.' },
+          { who: null, text: 'מכאן עד הקו הלבן פחות ממטר. מי שמחליק על הקו נופל כמעט לתוך הידיים שלך.' },
         ],
         then: [{ e: 'redheart', key: 'basketballLove', delta: 4 }],
       },
@@ -806,7 +806,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { afterMinute: CURFEW },
         lines: [
-          { who: null, text: 'השעון על הקיר. אתה מסתכל עליו ומיד מסתכל למגרש, כאילו זה יעזור.' },
+          { who: null, text: 'השעון על הקיר. אתה מסתכל עליו ומיד חוזר למגרש, כאילו זה יעזור.' },
         ],
         then: [{ e: 'wellbeing', key: 'stress', delta: 5 }],
       },
@@ -826,9 +826,9 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         lines: [
           { who: null, text: 'מישהו מתחיל, שתי מדרגות מעליך. אחר כך עוד שניים. אחר כך כל הצד הזה.' },
-          { who: 'אופיר', text: 'זה מה שאני שר.' },
-          { who: 'פוגי', text: 'זה לא המילים.' },
-          { who: 'אוהד ותיק', text: 'שניכם שרים לא נכון.' },
+          { who: 'אופיר', text: 'זה מה שאני שר!' },
+          { who: 'פוגי', text: 'אלה לא המילים!' },
+          { who: 'אוהד ותיק', text: 'שניכם שרים לא נכון, ובקול.' },
         ],
         choices: [
           {
@@ -848,7 +848,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'flag', flag: 'chant:helped' },
               { e: 'bond', who: 'ofir', delta: 5 },
               { e: 'redheart', key: 'community', delta: 6 },
-              { e: 'toast', text: 'אתה לוחש. הוא חוזר אחריך בקול רם מדי. הוותיק מרים גבה ולא מתקן.', tone: 'plain' },
+              { e: 'toast', text: 'אתה לוחש לו. הוא חוזר אחריך בקול רם מדי. הוותיק מרים גבה ולא מתקן.', tone: 'plain' },
             ],
           },
           {
@@ -871,14 +871,14 @@ export const CONVERSATIONS_1991: Conversation[] = [
         when: { flag: 'told:home' },
         lines: [
           { who: null, text: 'תשע וחצי. אתה יודע את זה בלי להסתכל על השעון.' },
-          { who: null, text: 'אבל התקשרת. אמרת איפה אתה. זה לא הופך את זה למותר — זה רק הופך את זה למשהו שסיפרת.' },
+          { who: null, text: 'התקשרת, אמרת איפה אתה. זה לא הופך את זה למותר. זה רק הופך את זה למשהו שסיפרת.' },
         ],
       },
       {
         lines: [
           { who: null, text: 'תשע וחצי. השעה שהיא אמרה, והמשחק עוד חי.' },
-          { who: 'אופיר', text: 'אתה הולך עכשיו?' },
-          { who: null, text: 'הדלת מאחוריך. המגרש לפניך. אף אחד לא יבחר בשבילך.' },
+          { who: 'אופיר', text: 'מה, אתה הולך עכשיו?' },
+          { who: null, text: 'הדלת מאחוריך. המגרש לפניך. אף אחד כאן לא יבחר בשבילך.' },
         ],
         then: [{ e: 'wellbeing', key: 'stress', delta: 6 }],
       },
@@ -893,14 +893,14 @@ export const CONVERSATIONS_1991: Conversation[] = [
         lines: [
           { who: 'אופיר', text: 'אמא שלך אמרה שעה?' },
           { who: 'פוגי', text: 'אמרה.' },
-          { who: 'אופיר', text: 'אז זה עניין שלך.' },
+          { who: 'אופיר', text: 'אז זה עניין שלך, לא שלי.' },
           { who: null, text: 'הוא לא מנסה לשכנע אותך להישאר. זה מה שהופך את זה לקשה.' },
         ],
       },
       {
         lines: [
           { who: 'אופיר', text: 'תראה את זה. תראה!' },
-          { who: null, text: 'אתה לא מספיק לראות מה. כולם קמים באותו רגע, וגם אתה.' },
+          { who: null, text: 'אתה לא מספיק לראות מה. כולם קמים באותו רגע, וגם אתה, ואתה צועק עם כולם.' },
         ],
         then: [{ e: 'wellbeing', key: 'happiness', delta: 5 }],
       },
@@ -914,14 +914,14 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { flag: 'heard:wall' },
         lines: [
-          { who: null, text: 'רחוב ריק. מאחוריך, מבעד לקיר, גל של קול עולה ונשבר ועולה שוב.' },
+          { who: null, text: 'רחוב ריק, ורוח קרה מהירקון. מאחוריך, מבעד לקיר, גל של קול עולה ונשבר ועולה שוב.' },
           { who: null, text: 'אתה עומד. אתה לא חוזר. אתה גם לא ממשיך ללכת.' },
         ],
         then: [{ e: 'wellbeing', key: 'regret', delta: 6 }, { e: 'redheart', key: 'loyaltyReturn', delta: 6 }],
       },
       {
         lines: [
-          { who: null, text: 'הרחוב בלילה קצר יותר מהרחוב ביום. אותו רחוב.' },
+          { who: null, text: 'הרחוב בלילה קצר יותר מהרחוב ביום. אותו רחוב בדיוק.' },
         ],
       },
     ],

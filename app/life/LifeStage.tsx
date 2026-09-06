@@ -6,7 +6,11 @@ import { AnchorCard } from '@/components/life/AnchorCard'
 import { DocSheet } from '@/components/life/DocSheet'
 import { ScoreStrip } from '@/components/life/ScoreStrip'
 import { ShirtCard } from '@/components/life/ShirtCard'
+import { CastCard } from '@/components/life/CastCard'
+import { CoinCard } from '@/components/life/CoinCard'
+import { ShopCard } from '@/components/life/ShopCard'
 import { StageFinale } from '@/components/life/StageFinale'
+import { TotoCard } from '@/components/life/TotoCard'
 import { ControlDeck, TapChip } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
@@ -43,6 +47,10 @@ import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/gam
 import type { LifeState } from '@/lib/life/types'
 import { checklistFor, type ChecklistItem } from '@/lib/life/checklist'
 import { CONSEQUENCE_KICKER_HE } from '@/lib/life/consequence'
+import { COIN_WHY_HE, TOTO_PER_ANSWER, TOTO_WHY_HE } from '@/lib/life/toto'
+import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE } from '@/lib/life/shirts'
+
+
 
 /**
  * הבמה — React mounts the game and then gets out of its way.
@@ -59,7 +67,7 @@ import { CONSEQUENCE_KICKER_HE } from '@/lib/life/consequence'
  * scope, so it must never reach the server bundle or any route but this one.
  */
 
-const EMPTY_HUD: HudState = { clock: '', date: '', agorot: 0, showMoney: false, place: '', objective: null, year: 1986, scene: 'bedroom', hint: '' }
+const EMPTY_HUD: HudState = { clock: '', date: '', agorot: 0, showMoney: false, place: '', objective: null, year: 1986, scene: 'bedroom', hint: '', waitingHe: null }
 /** the decade the glass is dressed for — type and texture follow it (`app/globals.css`) */
 const decadeOf = (year: number) => (year >= 2000 ? '00s' : year >= 1990 ? '90s' : '80s')
 /** a preference about the glass, not about the life — so it is not in the save */
@@ -103,6 +111,13 @@ export function LifeStage({
   const [flash, setFlash] = useState<{ tone: 'white' | 'red'; nonce: number }>({ tone: 'red', nonce: 0 })
   const [titleCard, setTitleCard] = useState<LifeBusEvents['card']>(null)
   const [shirt, setShirt] = useState<LifeBusEvents['shirt']>(null)
+  /** שני משחקי הכסף — the Toto slip and the coin in the alley (5.9.2026) */
+  const [toto, setToto] = useState<LifeBusEvents['toto']>(null)
+  const [coin, setCoin] = useState<LifeBusEvents['coin']>(null)
+  const [shop, setShop] = useState<LifeBusEvents['shop']>(null)
+  const [cast, setCast] = useState<LifeBusEvents['cast']>(null)
+  /** the state the shop screen is drawn against, re-read after every purchase */
+  const [shopState, setShopState] = useState<LifeState | null>(null)
   const [pano, setPano] = useState<LifeBusEvents['pano']>(null)
   const [tunnel, setTunnel] = useState<LifeBusEvents['tunnel']>(null)
   /** the plate that names a room as you step into it — not on the first room of a session */
@@ -110,6 +125,10 @@ export function LifeStage({
   const lastPlace = useRef<string | null>(null)
   const [card, setCard] = useState<HistoricalAnchor | null>(null)
   const [controls, setControls] = useState(true)
+  /** the engine itself, so the two money cards can pay out what they earned */
+  const engineRef = useRef<Awaited<ReturnType<typeof loadLife>> | null>(null)
+  /** the bus itself, so a screen the shell owns can raise a card the scene usually raises */
+  const busRef = useRef<LifeBus | null>(null)
   const [touch, setTouch] = useState(false)
   /**
    * The shell was drawn for a 390px phone in CSS pixels, and on a laptop it stayed
@@ -178,6 +197,7 @@ export function LifeStage({
   useEffect(() => {
     let cancelled = false
     const bus = new LifeBus()
+    busRef.current = bus
     const unsubscribe: Array<() => void> = []
 
     setPersisted(lifeStore.usable())
@@ -300,6 +320,20 @@ export function LifeStage({
     unsubscribe.push(bus.on('love', setLove))
     unsubscribe.push(
       bus.on('shirt', (value) => setShirt(value)),
+      bus.on('toto', (value) => {
+        setToto(value)
+        runtime.current?.pause(Boolean(value))
+      }),
+      bus.on('coin', (value) => {
+        setCoin(value)
+        runtime.current?.pause(Boolean(value))
+      }),
+      bus.on('cast', (value) => setCast(value)),
+      bus.on('shop', (value) => {
+        setShop(value)
+        setShopState(value ? engineRef.current?.state ?? null : null)
+        runtime.current?.pause(Boolean(value))
+      }),
       bus.on('card', (value) => {
         setTitleCard(value)
         // a chapter card with a year on it is a year turning; a room card is a stamp
@@ -338,6 +372,7 @@ export function LifeStage({
       // The opening is for a life that has not begun. A save that has been lived in —
       // any room entered, any chapter — opens where it was, with no film in front of it.
       setOpening(!lifeHasBegun(engine.log(), engine.state.flags))
+      engineRef.current = engine
       runtime.current = module.createLifeGame({
         parent: holder.current,
         engine,
@@ -661,7 +696,7 @@ export function LifeStage({
   /** the painting fills the glass; the shell floats over it */
   const fullBleed = frame <= 0
   /** every overlay that must hide the in-world controls */
-  const covered = Boolean(shirt || dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel || gauges || coda || reveal)
+  const covered = Boolean(cast || shirt || dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel || gauges || coda || reveal)
 
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
@@ -823,6 +858,81 @@ export function LifeStage({
 
         {/* כרטיס-ביסוס — over black, one line, then the scene. */}
         {shirt && <ShirtCard shirt={shirt} onClose={() => setShirt(null)} />}
+
+        {/* ------------------------------------------------ שני משחקי הכסף -- */}
+        {cast && <CastCard cast={cast} onClose={() => setCast(null)} />}
+
+        {shop && shopState && (
+          <ShopCard
+            shop={shop}
+            state={shopState}
+            onBuy={(shirt) => {
+              const engine = engineRef.current
+              if (!engine) return
+              engine.dispatch(
+                { t: 'money.changed', agorot: -shirt.price * 100, why: shirt.nameHe },
+                { t: 'flag.raised', flag: `own:shirt:${shirt.id}` },
+              )
+              void engine.save()
+              setShopState(engine.state)
+              // the card that stops the world — the same one a shirt has always got
+              busRef.current?.emit('shirt', {
+                kind: 'bought' as const,
+                art: shirt.art,
+                titleHe: ownedShirts(engine.state).length > 1 ? SHIRT_MORE_HE : SHIRT_FIRST_HE,
+                nameHe: shirt.nameHe,
+                sponsorHe: shirt.sponsorHe,
+                yearsHe: shirt.yearsHe,
+                noteHe: shirt.noteHe,
+                have: ownedShirts(engine.state).length,
+                total: onSale(shop.chapter).length,
+                spec: shirt.spec ?? null,
+                seasonHe: shirt.seasonLabel ?? null,
+                sourceHe: shirt.sourceHe ?? null,
+              })
+            }}
+            onClose={() => {
+              setShop(null)
+              runtime.current?.pause(false)
+            }}
+          />
+        )}
+
+        {toto && (
+          <TotoCard
+            toto={toto}
+            perAnswer={TOTO_PER_ANSWER}
+            onDone={(shekels) => {
+              if (shekels > 0) {
+                engineRef.current?.dispatch({ t: 'money.changed', agorot: shekels * 100, why: TOTO_WHY_HE })
+              }
+              engineRef.current?.dispatch({ t: 'clock.advanced', minutes: 20 })
+              void engineRef.current?.save()
+              setToto(null)
+              runtime.current?.pause(false)
+            }}
+          />
+        )}
+
+        {coin && (
+          <CoinCard
+            coin={coin}
+            canAfford={(engineRef.current?.state.agorot ?? 0) >= coin.stake * 100}
+            onDone={({ played, won }) => {
+              if (played) {
+                const net = won ? coin.prize - coin.stake : -coin.stake
+                engineRef.current?.dispatch(
+                  { t: 'money.changed', agorot: net * 100, why: COIN_WHY_HE },
+                  { t: 'clock.advanced', minutes: 10 },
+                  { t: 'flag.raised', flag: 'gig:coin' },
+                )
+                void engineRef.current?.save()
+              }
+              setCoin(null)
+              runtime.current?.pause(false)
+            }}
+          />
+        )}
         {titleCard &&
           (titleCard.art ? (
             <ChapterCard

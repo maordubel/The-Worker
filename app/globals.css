@@ -768,3 +768,31 @@ select {
 }
 .life-glass .font-sign { font-family: var(--life-sign), var(--font-miriam), system-ui, sans-serif; font-weight: var(--life-sign-weight); letter-spacing: var(--life-sign-tracking); }
 .life-glass [data-life="hud-plate"] > span:last-child { background-image: var(--life-plate-texture); }
+
+
+/*
+ * ממתין — the slow pulse under the waiting strip (5.9.2026).
+ *
+ * Not a spinner. A spinner means "loading" and nothing is loading; this means "running,
+ * and you are meant to be standing here". Eighteen hundred milliseconds is about a slow
+ * breath, which is the pace of the thing it is describing.
+ */
+@keyframes waiting-pulse {
+  0%, 100% { opacity: 0.28; transform: scale(0.86); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+
+/* כרטיס היכרות — the person lands, the name stamps, the lines arrive (5.9.2026) */
+@keyframes cast-land {
+  from { opacity: 0; transform: translateX(6%) translateY(4%) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cast-stamp {
+  from { opacity: 0; transform: scale(1.14); letter-spacing: 0.12em; }
+  to { opacity: 1; transform: none; letter-spacing: normal; }
+}
+@keyframes cast-line {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}

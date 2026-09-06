@@ -1366,6 +1366,38 @@
    "bytes": 104229,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
+  },
+  "manCap": {
+   "w": 169,
+   "h": 430,
+   "bytes": 107023,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "זקן עם כובע קסקט, עומד"
+  },
+  "manBack": {
+   "w": 152,
+   "h": 430,
+   "bytes": 84812,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "זקן מאחור, ידיים מאחורי הגב"
+  },
+  "girlTeen": {
+   "w": 232,
+   "h": 374,
+   "bytes": 59161,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "נערה, ג׳ינס ומגפיים"
+  },
+  "boySkate": {
+   "w": 150,
+   "h": 430,
+   "bytes": 70975,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "נער על סקייטבורד"
   }
  },
  "props": {
@@ -1676,6 +1708,54 @@
    "bytes": 155755,
    "yellowLeft": 0,
    "source": "2026-09"
+  },
+  "propBottle": {
+   "w": 101,
+   "h": 360,
+   "bytes": 37041,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "בקבוק זכוכית ריק — הפיקדון"
+  },
+  "propBottleFull": {
+   "w": 101,
+   "h": 360,
+   "bytes": 36878,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "בקבוק מלא על המדף"
+  },
+  "propNewsRack": {
+   "w": 151,
+   "h": 359,
+   "bytes": 116906,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "סטנד העיתונים ליד הדלפק"
+  },
+  "propCart": {
+   "w": 666,
+   "h": 323,
+   "bytes": 338844,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "עגלת עץ — שנות ה־80 ברחוב"
+  },
+  "coinTree": {
+   "w": 160,
+   "h": 160,
+   "bytes": 45680,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-coin",
+   "whatHe": "חצי שקל — עץ (הנבל)"
+  },
+  "coinPali": {
+   "w": 160,
+   "h": 160,
+   "bytes": 45184,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-coin",
+   "whatHe": "חצי שקל — פלי (הספרה)"
   }
  },
  "portraits": {
@@ -2044,6 +2124,14 @@
    "bytes": 260780,
    "yellowLeft": 0,
    "source": "baked-from-crowd-sheets"
+  },
+  "layerShopfront": {
+   "w": 417,
+   "h": 467,
+   "bytes": 241166,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-05-street",
+   "whatHe": "חזית חנות נטושה מעבר לכביש"
   }
  },
  "docs": {

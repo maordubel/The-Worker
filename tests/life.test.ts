@@ -595,11 +595,21 @@ describe('העולם — every door leads somewhere that exists', () => {
     // boombox re-cut on 3.9.2026 at the first empty column past its body — looked at, not
     // typed. The day a drawn radio ships, this line goes.
     const RECUT_OK = new Set(['propRadio'])
+    /**
+     * …and the batch Maor sent on 5.9.2026, which is not a sheet and was never going to
+     * be one: a glass bottle, a full one, a newspaper stand and a wooden cart, cut from
+     * photographs he chose, keyed off their own baked-in checkerboards and trimmed to
+     * their alpha (`scripts/life/ingest-street-2026-09-05.py`). The rule this line
+     * enforces is "nobody typed a crop box", and that script types none.
+     */
+    const HIS_OWN = new Set(['maor-2026-09-05-street', 'maor-2026-09-05-coin'])
     for (const key of used) {
       if (RECUT_OK.has(key)) continue
       // …and a shirt comes off a photograph of the real thing, which is the point of it
       if (SHIRT.includes(key as (typeof SHIRT)[number])) continue
-      expect(props[key]?.source, `${key} was hand-cropped from a board`).toBe('2026-09')
+      const source = props[key]?.source
+      if (source && HIS_OWN.has(source)) continue
+      expect(source, `${key} was hand-cropped from a board`).toBe('2026-09')
     }
   })
 

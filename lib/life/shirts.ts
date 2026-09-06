@@ -1,4 +1,6 @@
-import { SHIRT as SHIRT_BY_DECADE, decadeOf } from './prices'
+import { ARCHIVE_SHIRTS } from './generated/kitShirts'
+import { SHIRT as SHIRT_BY_DECADE, decadeOf, decadeOfYear, SHIRT as SHIRT_TABLE } from './prices'
+import type { KitSpec } from '../kit/spec'
 import type { Conversation } from './content/script'
 import type { Condition } from './world/types'
 import type { LifeState } from './types'
@@ -20,6 +22,14 @@ import type { LifeState } from './types'
  */
 export type Shirt = {
   id: string
+  /**
+   * The PNG this shirt is drawn from — a photograph Maor took of a shirt he owns.
+   *
+   * Empty for a shirt that comes out of the club's own kit archive: those are DRAWN, from
+   * a `KitSpec`, by the same component the kits screen uses. A photograph is a shirt
+   * somebody kept; a spec is a shirt the club wore. The collection holds both, and the
+   * card knows which it is looking at.
+   */
   art: string
   nameHe: string
   sponsorHe: string
@@ -36,6 +46,12 @@ export type Shirt = {
   from: string
   noteHe: string
   kind: 'football' | 'basketball'
+  /** drawn rather than photographed: the archive's own spec (`lib/kit/spec.ts`) */
+  spec?: KitSpec
+  /** the season it belongs to, when it came out of the archive */
+  seasonLabel?: string
+  /** where the row came from, printed on the card — rule 16 */
+  sourceHe?: string
 }
 
 /** chapters in the order the life plays them, so `from` can mean "this year or later" */
@@ -125,9 +141,64 @@ const SHIRT_ROWS: readonly Omit<Shirt, 'price'>[] = [
  * it is seven separate opinions. The table is 30 in the eighties, 60 in the nineties, 110
  * in the two-thousands, and the shirt in the window costs what a shirt cost that year.
  */
-export const SHIRTS: readonly Shirt[] = SHIRT_ROWS.map((row) => ({
+/** the year a chapter happens in, for placing a season against the life */
+const CHAPTER_YEAR: Record<string, number> = {
+  'a2-alley': 1984, 'a3-hall': 1984, 'a4-shirt': 1985, 'a5-first': 1985, 'a6-radio': 1985,
+  'a7-week': 1986, '1986': 1986, '1990': 1990, '1991': 1991, '1993-cup': 1993,
+  '1993-galil': 1993, '1995-sinai': 1995, '1996-army': 1996, '1997-basket': 1997,
+  '1998-laces': 1998, '1999-basket': 1999, '1999-cup': 1999, '2000-title': 2000,
+  '2000-double': 2000,
+}
+
+/**
+ * The first chapter a shirt from this season could hang in — or `LATER`, for a season
+ * this life has not reached.
+ *
+ * Twenty-six of the archive's thirty-three kits are from seasons after 2000, and the
+ * first version of this function fell back to the FIRST chapter for them: a 2025 Macron
+ * shirt on Rafi's rail in 1985. `LATER` is not a chapter, `onSale` refuses anything that
+ * is not a chapter, and the collection still counts them — they are shirts of this club
+ * that the boy has not lived yet.
+ */
+export const LATER = 'later'
+
+function chapterForSeason(seasonLabel: string): string {
+  const year = Number(seasonLabel.slice(0, 4))
+  const found = ORDER.find((chapter) => (CHAPTER_YEAR[chapter] ?? 1984) >= year)
+  return found ?? LATER
+}
+
+/**
+ * הארון של המועדון — the archive's thirty-three season kits, as shirts on a rail.
+ *
+ * Maor, 5.9.2026: "אל תזכור שהאתר הוא מקור המידע שלנו בסוף. אפשר לעשות ממש קולקציה מלאה
+ * וכך אני רוצה." So the collection is not seven photographs any more, it is the club's
+ * own kit history — season, sponsor, cut, and the note read off the photograph — drawn
+ * from the same specs the kits screen draws, priced by the decade of its season.
+ *
+ * Seven of the thirty-three fall inside the years this life is played in and can actually
+ * be bought; the rest are seasons that have not happened yet in 1986, which is exactly
+ * what a collection with gaps in it should feel like.
+ */
+const ARCHIVE_ROWS: readonly Omit<Shirt, 'price'>[] = ARCHIVE_SHIRTS.map((kit) => ({
+  id: kit.id,
+  art: '',
+  nameHe: `${kit.seasonLabel} · ${kit.variantHe}`,
+  sponsorHe: kit.sponsorHe ?? '—',
+  yearsHe: `עונת ${kit.seasonLabel}`,
+  from: chapterForSeason(kit.seasonLabel),
+  noteHe: kit.noteHe,
+  kind: 'football' as const,
+  spec: kit.spec as KitSpec,
+  seasonLabel: kit.seasonLabel,
+  sourceHe: kit.sourceTitle ?? undefined,
+}))
+
+export const SHIRTS: readonly Shirt[] = [...SHIRT_ROWS, ...ARCHIVE_ROWS].map((row) => ({
   ...row,
-  price: SHIRT_BY_DECADE[decadeOf(row.from)],
+  price: row.seasonLabel
+    ? SHIRT_TABLE[decadeOfYear(Number(row.seasonLabel.slice(0, 4)))]
+    : SHIRT_BY_DECADE[decadeOf(row.from)],
 }))
 
 export const shirtFlag = (id: string) => `own:shirt:${id}`
@@ -148,7 +219,19 @@ export function ownedShirts(state: LifeState): Shirt[] {
 export function onSale(chapter: string): Shirt[] {
   const now = ORDER.indexOf(chapter)
   if (now < 0) return []
-  return SHIRTS.filter((shirt) => ORDER.indexOf(shirt.from) <= now)
+  return SHIRTS.filter((shirt) => {
+    const at = ORDER.indexOf(shirt.from)
+    return at >= 0 && at <= now
+  })
+}
+
+/**
+ * כמה יש בכלל — how many shirts exist by this chapter, which is what a collection count
+ * should be measured against. "3 / 40" in 1985 is a promise about 2025; "3 / 9" is the
+ * rail the boy can actually see.
+ */
+export function knownBy(chapter: string): Shirt[] {
+  return onSale(chapter)
 }
 
 /** what the shop says when it has nothing new for you */
@@ -182,33 +265,36 @@ export const shopId = (chapter: string) => `fan-shop-${chapter}`
  * and the gaps in between are the years you were somewhere else.
  */
 export function fanShops(): Conversation[] {
-  return SHOP_CHAPTERS.map((chapter) => {
-    const rail = onSale(chapter)
-    return {
-      id: shopId(chapter),
-      nameHe: 'חנות האוהדים',
-      branches: [
-        {
-          lines: [
-            { who: 'המוכר', text: rail.length > 3 ? 'תסתכל טוב. מה שאין פה, אין באף מקום.' : 'מה שיש על הקולב, יש. תבחר.' },
-          ],
-          choices: [
-            ...rail.map((shirt) => ({
-              id: shirt.id,
-              text: `${shirt.nameHe} — ${shirt.price} ₪`,
-              when: { all: [affordable(shirt), { notFlag: shirtFlag(shirt.id) }] } as Condition,
-              noteHe: `${shirt.price} ₪. עוד לא.`,
-              then: [
-                { e: 'money' as const, agorot: -shirt.price * 100, why: shirt.nameHe },
-                { e: 'shirt' as const, id: shirt.id },
-                { e: 'sfx' as const, key: 'coins' as const, level: 0.7 },
-                { e: 'redheart' as const, key: 'footballLove' as const, delta: 3 },
-              ],
-            })),
-            { id: 'leave', text: 'רק מסתכל.', then: [] },
-          ],
-        },
-      ],
-    } as Conversation
-  })
+  return SHOP_CHAPTERS.map((chapter) => ({
+    id: shopId(chapter),
+    nameHe: 'חנות האוהדים',
+    branches: [
+      {
+        lines: [
+          { who: 'המוכר', text: onSale(chapter).length > 6 ? 'תסתכל טוב. מה שאין פה, אין באף מקום.' : 'מה שיש על הקולב, יש. תבחר.' },
+        ],
+        then: [{ e: 'shop' as const }],
+      },
+    ],
+  }))
+}
+
+/** what the card says the first time, and after — kept out of the app folder (rule: no strings there) */
+export const SHIRT_FIRST_HE = 'קנית את חולצת הפועל הראשונה שלך!'
+export const SHIRT_MORE_HE = 'עוד אחת לארון.'
+/** the card that opens when a season's kit reaches the rail for the first time */
+export const SHIRT_NEW_HE = 'חולצה חדשה בחנות האוהדים'
+
+/**
+ * מה נכנס לחנות מאז — the kits that exist in this chapter and did not in the last one.
+ *
+ * A rail that fills up silently is a rail nobody looks at twice. This is what the game
+ * holds up when a season turns: the kit the club actually started wearing that year, once,
+ * the first time it could be bought.
+ */
+export function arrivedBetween(previous: string | null, chapter: string): Shirt[] {
+  const now = onSale(chapter)
+  if (!previous) return []
+  const had = new Set(onSale(previous).map((shirt) => shirt.id))
+  return now.filter((shirt) => !had.has(shirt.id))
 }

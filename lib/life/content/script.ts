@@ -77,6 +77,12 @@ export type Effect =
    * the first one says so in as many words.
    */
   | { e: 'shirt'; id: string }
+  /** the fan shop: the whole rail, drawn, as a screen rather than a room */
+  | { e: 'shop' }
+  /** a Toto slip: five questions from the site's own bank, two shekels each */
+  | { e: 'toto' }
+  /** עץ או פלי in the alley: a shekel in, five out */
+  | { e: 'coin' }
   /** a sound from the library at the moment the choice lands */
   | { e: 'sfx'; key: SampleKey; level?: number; delayMs?: number }
   /**

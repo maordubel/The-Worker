@@ -407,7 +407,6 @@ function gigSpots(where: string) {
 }
 
 const SCENES: SceneDef[] = [
-  // ------------------------------------------------------------------- bedroom ----
   {
     id: 'bedroom',
     titleHe: 'החדר שלך',
@@ -773,7 +772,26 @@ const SCENES: SceneDef[] = [
         sway: 0.004,
       },
     ],
-    hotspots: [...gigSpots('street'), 
+    hotspots: [
+      /**
+       * חנות האוהדים — a doorway between the alley and the school, from 1990.
+       *
+       * It was a DOOR to a room for one delta and the room was bare, so it is a doorway
+       * that opens the shop screen instead (`components/life/ShopCard.tsx`). Maor's call,
+       * and the right one: buying a shirt is a rail and a pocket, not a room to walk about
+       * in. One hotspot per chapter, because a `Condition` cannot ask which year it is.
+       */
+      ...SHOP_CHAPTERS.map((chapter) => ({
+        id: `shop-${chapter}`,
+        era: chapter,
+        x: 0.525,
+        y: 0.735,
+        w: 0.07,
+        act: shopId(chapter),
+        verb: 'look' as const,
+        labelHe: 'חנות האוהדים',
+        priority: 4,
+      })),...gigSpots('street'), 
       { id: 'radio-a6', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
       // On the floor at the end of the run of cupboards, which is where a crate of empties
       // lives in a flat that takes them back for the deposit.
@@ -837,6 +855,7 @@ const SCENES: SceneDef[] = [
     layers: [
       // Behind everybody: the near paving and the kerb, with the tree shadows on it.
       { art: 'streetGround', x: 0, y: 0, w: 1, depth: 0.69 },
+
 
       // --- הרחוב ביום משחק — the dressing -----------------------------------------
       //
@@ -1280,6 +1299,41 @@ const SCENES: SceneDef[] = [
      */
     band: { far: 0.80, near: 0.985 },
     size: { far: 0.37, near: 0.41 },
+    /**
+     * מה שעומד בקיוסק — dressing that knows which decade it is.
+     *
+     * Maor, 5.9.2026: bottles in the kiosk and in the bottle job so it feels real, and
+     * things in nice places that can change by decade. So the room is measured off its
+     * own metre (1 m = 0.315 of the frame, the counter) and dressed three times:
+     *
+     *  · **the eighties** — the deposit crate is a real thing standing on the floor:
+     *    four green bottles somebody brought back this morning, the ones the child will
+     *    pick up off the pavement in his own job.
+     *  · **the nineties** — fewer empties, and the newspaper stand by the door, which is
+     *    when a kiosk stopped being only a counter.
+     *  · **the two-thousands** — the stand stays, the glass goes. Nobody was returning
+     *    bottles by then, and a room that does not change in fourteen years is a room
+     *    nobody lives in.
+     *
+     * Sizes are real: a bottle is 26 cm (0.082 of the frame), the stand is 1.4 m (0.441),
+     * and the width follows from the file's own aspect. No number here was chosen by eye.
+     */
+    layers: [
+      // The gap between Rafi (0.30) and whoever is at the counter (0.50): the only strip of
+      // this floor nobody stands on, which is why the empties end up there.
+      { art: 'propBottle', era: '1980s', x: 0.37, y: 0.834, w: 0.019, depth: 0.834, foot: true },
+      { art: 'propBottle', era: '1980s', x: 0.395, y: 0.836, w: 0.019, depth: 0.836, foot: true },
+      { art: 'propBottle', era: '1980s', x: 0.42, y: 0.832, w: 0.019, depth: 0.832, foot: true },
+      { art: 'propBottleFull', era: '1980s', x: 0.445, y: 0.838, w: 0.019, depth: 0.838, foot: true },
+      { art: 'propBottle', era: '1990s', x: 0.385, y: 0.835, w: 0.019, depth: 0.835, foot: true },
+      { art: 'propBottleFull', era: '1990s', x: 0.415, y: 0.831, w: 0.019, depth: 0.831, foot: true },
+      // Against the LEFT wall, and BEHIND everyone who works here: a stand a customer
+      // walks round is dressing, a stand a customer walks behind is a wall. It was on the
+      // right for an hour and it stood in the doorway, which is the one place in a shop a
+      // newspaper rack is never put.
+      { art: 'propNewsRack', era: '1990s', x: 0.105, y: 0.815, w: 0.185, depth: 0.815, foot: true },
+      { art: 'propNewsRack', era: '2000s', x: 0.105, y: 0.815, w: 0.185, depth: 0.815, foot: true },
+    ],
     ambience: 'day',
     stuckHe: 'רפי מחכה. לצאת — ימינה.',
     stuckByEra: { '1990': 'אופיר ועמית פה. הרחוב — ימינה, ומשם מזרחה.' },
@@ -1371,18 +1425,14 @@ const SCENES: SceneDef[] = [
        * the conversation generated for that year's rail (`lib/life/shirts.ts`).
        */
       { id: 'shirt-rail', era: 'a4-shirt', x: 0.17, y: 0.88, w: 0.12, act: 'rafi-a4', verb: 'look', labelHe: 'החולצה על הקולב', priority: 4, prop: { key: 'shirtVisa86', size: 0.227, at: { x: 0.185, y: 0.44 } } },
-      ...SHOP_CHAPTERS.map((chapter) => ({
-        id: `fan-shop-${chapter}`,
-        era: chapter,
-        x: 0.17,
-        y: 0.88,
-        w: 0.12,
-        act: shopId(chapter),
-        verb: 'look' as const,
-        labelHe: 'חנות האוהדים',
-        priority: 4,
-        prop: { key: 'shirtDiadoraRed', size: 0.227, at: { x: 0.185, y: 0.44 } },
-      })),
+      /**
+       * החנות עברה — the rail hung in this window until 5.9.2026 and it has moved upstairs.
+       *
+       * One shirt in a kiosk window is 1985 and it is perfect: a boy counts a tin for the
+       * thing he can see. A rail of fourteen kits in a kiosk window is a shop pretending
+       * to be a kiosk. So `a4-shirt` keeps its single shirt, above, and everything from
+       * 1990 is in `fan-shop` — a room, with a door, and a man who works there.
+       */
       { id: 'bottles-a4', era: 'a4-shirt', x: 0.82, y: 0.88, w: 0.1, act: 'bottles-a4', verb: 'look', labelHe: 'הבקבוקים ליד הפח', when: { none: [{ flag: 'a4:bottles' }] } },{ id: 'counter', era: '*', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' }],
     exits: [
       {

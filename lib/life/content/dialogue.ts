@@ -41,15 +41,15 @@ const CONVERSATIONS: Conversation[] = [
         // Saturday you were not at. Going to bed is a real choice with a real ending.
         when: { flag: 'match:over', notFlag: 'found:kobi' },
         lines: [
-          { who: null, text: 'המיטה. בחוץ כבר חושך, ואבא עוד לא חזר.' },
-          { who: null, text: 'אתה יכול לחכות לו ער. או לא.' },
+          { who: null, text: 'המיטה. בחוץ צופרים של מכוניות, רחוק, ואבא עוד לא חזר.' },
+          { who: null, text: 'השמיכה קרה מהצד של הקיר. אתה יכול לחכות לו ער, או לא.' },
         ],
         choices: [
           { id: 'sleep', text: 'לישון', then: [{ e: 'ending', id: 'missed' }] },
-          { id: 'wait', text: 'לחכות', then: [] },
+          { id: 'wait', text: 'לחכות לו ער', then: [] },
         ],
       },
-      { lines: [{ who: null, text: 'המיטה שלך. השמיכה עוד חמה מהלילה.' }] },
+      { lines: [{ who: null, text: 'המיטה שלך. השמיכה עוד חמה מהלילה, והכרית מריחה כמו סבון כביסה.' }] },
     ],
   },
   {
@@ -58,15 +58,15 @@ const CONVERSATIONS: Conversation[] = [
       {
         when: { afterMinute: KOBI_LEAVES },
         lines: [
-          { who: null, text: 'מהחלון רואים את הרחוב. אנשים הולכים מזרחה. לא אחד, לא שניים.' },
-          { who: null, text: 'כולם לאותו כיוון.' },
+          { who: null, text: 'מהחלון: הרחוב, ובו אנשים שהולכים מזרחה. אחד מהם מחזיק טרנזיסטור צמוד לאוזן.' },
+          { who: null, text: 'אף אחד לא הולך הביתה. כולם לאותו צד.' },
         ],
         then: [{ e: 'trait', trait: 'knowledge', delta: 2 }],
       },
       {
         lines: [
           { who: null, text: 'שבת בצהריים. חתול על גדר, מכונית אחת, וכביסה על כל מרפסת.' },
-          { who: null, text: 'מהחלון הזה אתה מכיר את כל הרחוב.' },
+          { who: null, text: 'את הרחוב הזה אתה מכיר לפי הקולות, גם בעיניים עצומות.' },
         ],
       },
     ],
@@ -76,10 +76,10 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'כרזה אדומה על הקיר. קרעת אותה מעמוד חשמל ברחוב סלמה והדבקת פה.' },
-          { who: null, text: 'משה סיני. שבע. הוא עומד שם עם הידיים על המותניים כאילו הוא יודע משהו שאתה לא.' },
-          { who: null, text: 'אבא אמר שזה לא מכובד לתלות דברים מהרחוב. אמא אמרה שיישאר.' },
-          { who: null, text: 'אבא עומד מולה לפעמים כשהוא חושב שאתה ישן.' },
+          { who: null, text: 'כרזה אדומה על הקיר. קרעת אותה מעמוד חשמל ברחוב סלמה, והדבק עוד דביק מאחורה.' },
+          { who: null, text: 'משה סיני, ידיים על המותניים, מסתכל על משהו שנמצא מחוץ לתמונה.' },
+          { who: null, text: 'אבא אמר שלא תולים בבית דברים שמצאת ברחוב. אמא אמרה שזה נשאר.' },
+          { who: null, text: 'לפעמים הוא עומד מולה בלילה, כשהוא חושב שאתה ישן.' },
         ],
         then: [
           { e: 'trait', trait: 'footballAffinity', delta: 3 },
@@ -94,8 +94,8 @@ const CONVERSATIONS: Conversation[] = [
       {
         when: { notFlag: 'has:key' },
         lines: [
-          { who: null, text: 'במגירה: עיפרון, גומייה, ומפתח הבית על חוט.' },
-          { who: null, text: 'אמא תולה אותו על הצוואר שלך כשאתה יוצא לבד.' },
+          { who: null, text: 'במגירה: עיפרון, גומייה שהתייבשה, ומפתח על שרוך נעליים.' },
+          { who: null, text: 'אמא קושרת לך אותו על הצוואר כשאתה יוצא לבד, ומכניסה אותו מתחת לחולצה.' },
         ],
         then: [
           { e: 'give', item: 'house-key' },
@@ -112,8 +112,8 @@ const CONVERSATIONS: Conversation[] = [
       {
         when: { flag: 'memory:first' },
         lines: [
-          { who: null, text: 'הקופסה האדומה. עד היום היא הייתה ריקה.' },
-          { who: null, text: 'עכשיו יש בה משהו, ואתה יודע בדיוק מאיפה הוא.' },
+          { who: null, text: 'קופסת הפח האדומה. עד היום היא הייתה ריקה.' },
+          { who: null, text: 'עכשיו יש בתוכה דבר אחד, ואתה יודע בדיוק מאיזה יום הוא.' },
         ],
         choices: [
           { id: 'open', text: 'לפתוח את הקופסה', then: [{ e: 'flag', flag: 'open:redbox' }] },
@@ -122,8 +122,8 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'קופסת פח ישנה מתחת לשולחן. ריקה.' },
-          { who: null, text: 'אתה שומר אותה בשביל משהו. עוד לא ברור מה.' },
+          { who: null, text: 'קופסת פח ישנה מתחת לשולחן, עם ציר שחורק. ריקה.' },
+          { who: null, text: 'אתה שומר אותה למשהו שעוד לא קרה.' },
         ],
       },
     ],
@@ -140,8 +140,8 @@ const CONVERSATIONS: Conversation[] = [
         when: { flag: 'asked:ticket', bond: { who: 'kobi', min: 66 } },
         lines: [
           { who: 'קובי', text: 'שוב אתה.' },
-          { who: null, text: 'הוא מקפל את העיתון ומסתכל עליך רגע ארוך.' },
-          { who: 'קובי', text: 'לא היום. אבל קח, תקנה לך משהו בקיוסק. ותהיה בבית.' },
+          { who: null, text: 'הוא מקפל את העיתון לחצי ומנמיך את הרדיו, וזה לוקח לו יותר מדי זמן.' },
+          { who: 'קובי', text: 'לא היום. קח, תקנה לך גזוז אצל רפי. ולהיות בבית.' },
         ],
         then: [
           { e: 'money', agorot: 500, why: 'קובי' },
@@ -153,7 +153,7 @@ const CONVERSATIONS: Conversation[] = [
       {
         when: { flag: 'asked:ticket' },
         lines: [
-          { who: 'קובי', text: 'אמרתי לא, ולא נדבר על זה יותר.' },
+          { who: 'קובי', text: 'אמרתי לא. גמרנו לדבר על זה.' },
           { who: null, text: 'הוא לא כועס. הוא פשוט לא זז.' },
         ],
       },
@@ -168,13 +168,13 @@ const CONVERSATIONS: Conversation[] = [
               { e: 'goto', node: 'kobi-refuse' },
             ],
           },
-          { id: 'leave', text: 'להסתובב', then: [] },
+          { id: 'leave', text: 'לתת לו לקרוא', then: [] },
         ],
       },
       {
         lines: [
-          { who: null, text: 'אבא בכורסה עם העיתון. הרדיו דולק חלש.' },
-          { who: 'קובי', text: 'התלבשת כבר? יופי.' },
+          { who: null, text: 'אבא בכורסה, העיתון על הברכיים, הרדיו מדבר חלש מאחורי הראש שלו.' },
+          { who: 'קובי', text: 'התלבשת? יופי. אל תסתובב לי פה יחף.' },
         ],
         choices: [
           {
@@ -198,8 +198,8 @@ const CONVERSATIONS: Conversation[] = [
       {
         lines: [
           { who: 'קובי', text: 'יש.' },
-          { who: null, text: 'הוא לא מרים את העיניים מהעיתון, אבל הקול משתנה קצת.' },
-          { who: 'קובי', text: 'אני הולך בארבע עם יעקב. אנחנו עומדים בשער שבע, איפה שתמיד.' },
+          { who: null, text: 'הוא לא מרים עיניים מהעיתון, אבל משהו בקול נפתח לשנייה.' },
+          { who: 'קובי', text: 'אני יוצא אחרי שלוש עם יעקב. אנחנו עומדים בשער שבע, איפה שתמיד.' },
           { who: 'קובי', text: 'ואתה נשאר עם אמא.' },
         ],
         then: [
@@ -218,8 +218,8 @@ const CONVERSATIONS: Conversation[] = [
         shot: { focus: 'kobi', framing: 'close', ambienceDuck: 0.55 },
         lines: [
           { who: 'קובי', text: 'אתה בן שמונה.' },
-          { who: null, text: 'הוא מניח את העיתון על הברך. זה הרגע שבו הוא בדרך כלל מתרכך.' },
-          { who: 'קובי', text: 'שם יש עשרים אלף איש. אתה נעלם לי בשתי שניות.' },
+          { who: null, text: 'הוא מכבה את הסיגריה במאפרה ומניח את העיתון על הברך. פה הוא בדרך כלל מתרכך.' },
+          { who: 'קובי', text: 'שם דוחפים. אתה נעלם לי בין הרגליים בשתי שניות.' },
           { who: 'קובי', text: 'עוד שנה־שנתיים. תבטיח לי שתחכה.' },
         ],
         // ההבטחה. It costs nothing now and it is the single line the last scene of the
@@ -259,7 +259,7 @@ const CONVERSATIONS: Conversation[] = [
         lines: [
           { who: null, text: 'היא מסתכלת עליך, ואז על הדלת שאבא יצא ממנה.' },
           { who: 'רחל', text: 'אתה חושב שאני לא רואה אותך מסתובב פה כמו חתול.' },
-          { who: null, text: 'היא פותחת את הארנק ושמה משהו בכף היד שלך, וסוגרת עליו את האצבעות.' },
+          { who: null, text: 'היא מוציאה מהארנק משהו, מניחה לך בכף היד וסוגרת עליו את האצבעות שלך.' },
           { who: 'רחל', text: 'לא סיפרתי לאבא. ואתה גם לא.' },
         ],
         then: [
@@ -276,7 +276,7 @@ const CONVERSATIONS: Conversation[] = [
         when: { all: [{ afterMinute: KOBI_LEAVES }, { notFlag: 'told:rachel' }, { flag: 'knows:match' }] },
         shot: { focus: 'rachel', framing: 'medium', ambienceDuck: 0.4 },
         lines: [
-          { who: null, text: 'היא עומדת בפתח המטבח עם המגבת ביד ורואה שאתה כבר בנעליים.' },
+          { who: null, text: 'היא עומדת בפתח המטבח עם המגבת ביד, ורואה שאתה כבר בנעליים סגורות.' },
           { who: 'רחל', text: 'לאן?' },
         ],
         choices: [
@@ -316,12 +316,12 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         when: { flag: 'chore:bottles' },
-        lines: [{ who: 'רחל', text: 'יופי. תודה, מותק.' }],
+        lines: [{ who: 'רחל', text: 'יופי. תודה, מותק. תשטוף ידיים.' }],
       },
       {
         lines: [
-          { who: null, text: 'ריח של אוכל שבת. היא מנגבת ידיים במגבת ומסתכלת עליך.' },
-          { who: 'רחל', text: 'אתה משעמם לך? יש לי בדיוק עבודה בשבילך.' },
+          { who: null, text: 'ריח של חמין ושל בצל מטוגן. היא מנגבת ידיים במגבת ומסתכלת עליך.' },
+          { who: 'רחל', text: 'משעמם לך? יופי. יש לי בדיוק עבודה בשבילך.' },
         ],
         choices: [
           {
@@ -360,7 +360,7 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         when: { flag: 'chore:bottles', lacksItem: 'bottle', notFlag: 'chore:done' },
-        lines: [{ who: null, text: 'ארגז עץ עם שלושה בקבוקי זכוכית. כבדים.' }],
+        lines: [{ who: null, text: 'ארגז עץ, שלושה בקבוקי זכוכית בפנים. כבדים יותר משנראה.' }],
         then: [
           { e: 'give', item: 'bottle', count: 3 },
           { e: 'toast', text: 'שלושה בקבוקים' },
@@ -375,8 +375,8 @@ const CONVERSATIONS: Conversation[] = [
       {
         when: { beforeMinute: KOBI_LEAVES },
         lines: [
-          { who: null, text: 'הרדיו על השידה. מוזיקה, ואז קול של גבר שמדבר מהר על ספורט.' },
-          { who: null, text: 'הוא מזכיר את בלומפילד. את השאר אתה לא מספיק לתפוס.' },
+          { who: null, text: 'הרדיו על השידה, בין מפית לתמונה. שיר, ואז גבר שמדבר מהר מדי.' },
+          { who: null, text: 'המילה בלומפילד נכנסת ויוצאת. את השאר אתה לא מספיק לתפוס.' },
         ],
         then: [
           { e: 'time', minutes: 4 },
@@ -398,8 +398,8 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'תמונה בשחור־לבן. אבא צעיר, בלי שפם, עם עוד שני בחורים.' },
-          { who: null, text: 'מאחוריהם גדר, ומעל הגדר משהו גדול שלא נכנס לפריים.' },
+          { who: null, text: 'תמונה בשחור־לבן: אבא צעיר בלי שפם, יעקב לידו, ועוד מישהו שאתה לא מכיר.' },
+          { who: null, text: 'מאחוריהם גדר, ומעל הגדר משהו גדול שלא נכנס לתמונה.' },
         ],
       },
     ],
@@ -409,8 +409,8 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'שולחן נמוך: מאפרה מלאה, ספל קפה הפוך, וקופסת סיגריות ריקה למחצה.' },
-          { who: null, text: 'אבא יושב פה כל ערב ולא מזיז את זה אף פעם.' },
+          { who: null, text: 'שולחן נמוך: מאפרה מלאה, ספל קפה הפוך, וקופסת סיגריות פתוחה למחצה.' },
+          { who: null, text: 'אמא מנקה את כל הבית. את השולחן הזה היא לא נוגעת.' },
         ],
       },
     ],
@@ -433,17 +433,17 @@ const CONVERSATIONS: Conversation[] = [
       {
         when: { notFlag: 'knows:match' },
         lines: [
-          { who: null, text: 'העיתון של אבא פתוח על השעוונית, בעמוד האמצעי. הוא קרא את זה הבוקר שלוש פעמים.' },
+          { who: null, text: 'העיתון של אבא פתוח על השעוונית בדיוק באמצע. את העמוד הזה הוא קרא הבוקר שלוש פעמים.' },
         ],
         then: [
           { e: 'doc', art: 'paperBefore', captionHe: 'מעריב ספורט, 23.5.1986 — מארכיון מאור דובל' },
           { e: 'flag', flag: 'knows:match' },
           { e: 'redheart', key: 'footballLove', delta: 4 },
-          { e: 'toast', text: 'מחר. בבלומפילד.', tone: 'red' },
+          { e: 'toast', text: 'היום. בבלומפילד.', tone: 'red' },
         ],
       },
       {
-        lines: [{ who: null, text: 'שולחן מכוסה בשעוונית. פירורים, סכין לחם, והעיתון של אבא.' }],
+        lines: [{ who: null, text: 'שעוונית פרחונית, פירורי לחם, סכין, והעיתון של אבא מקופל בצד.' }],
         then: [{ e: 'doc', art: 'paperBefore', captionHe: 'מעריב ספורט, 23.5.1986 — מארכיון מאור דובל' }],
       },
     ],
@@ -528,8 +528,8 @@ const CONVERSATIONS: Conversation[] = [
       {
         lines: [
           { who: null, text: 'אופיר עומד באמצע המדרכה, פונה מזרחה, כאילו חיכה לך.' },
-          { who: 'אופיר', text: 'הם כבר הולכים. אם נצא עכשיו נגיע לפני שסוגרים.' },
-          { who: 'אופיר', text: 'לך אחרי האנשים. פשוט אל תעצור.' },
+          { who: 'אופיר', text: 'הם כבר הולכים. אם תצא עכשיו תגיע לפני שסוגרים.' },
+          { who: 'אופיר', text: 'אני משיג אותך שם. לך אחרי האנשים ואל תעצור באמצע.' },
         ],
         then: [
           { e: 'flag', flag: 'route:known' },
@@ -547,8 +547,8 @@ const CONVERSATIONS: Conversation[] = [
       {
         when: { afterMinute: KOBI_LEAVES },
         lines: [
-          { who: 'אילן השכן', text: 'אבא שלך יצא לפני עשר דקות. רץ כמו ילד.' },
-          { who: 'אילן השכן', text: 'כולם הולכים מזרחה היום. יש משחק.' },
+          { who: 'אילן השכן', text: 'אבא שלך ירד לפני עשר דקות, עם החולצה בחוץ. רץ כמו ילד.' },
+          { who: 'אילן השכן', text: 'היום יש משחק, ואף אחד לא נשאר בבית. תראה בעצמך.' },
         ],
         then: [
           { e: 'flag', flag: 'knows:match' },
@@ -570,8 +570,8 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'על הקיר, באדום, בכתב יד גדול: משהו שנכתב בלילה ולא נמחק מאז.' },
-          { who: null, text: 'אתה יודע מה כתוב שם גם בלי לקרוא.' },
+          { who: null, text: 'על הקיר, באדום, בכתב יד גדול: משהו שנכתב בלילה ואף אחד לא מחק.' },
+          { who: null, text: 'אתה עוד לא קורא מהר, ואת זה אתה יודע בעל פה.' },
         ],
         then: [
           { e: 'trait', trait: 'footballAffinity', delta: 2 },
@@ -586,8 +586,8 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'משהו נוצץ בין האבן לשורש של העץ.' },
-          { who: null, text: 'שקל. שלך.' },
+          { who: null, text: 'משהו נוצץ בין המרצפת לשורש של הפיקוס.' },
+          { who: null, text: 'שקל. שלך עכשיו.' },
         ],
         then: [
           { e: 'money', agorot: 100, why: 'מציאה' },
@@ -602,7 +602,7 @@ const CONVERSATIONS: Conversation[] = [
     id: 'alley-look',
     branches: [
       {
-        lines: [{ who: null, text: 'הסמטה בין הבניינים. מאחוריה שומעים כדור נחבט בקיר.' }],
+        lines: [{ who: null, text: 'הסמטה בין הבניינים. מאחוריה כדור נחבט בקיר, ומישהו צועק שזה היה בחוץ.' }],
       },
     ],
   },
@@ -622,7 +622,7 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: 'רפי מהקיוסק', text: 'נו, מה אתה רוצה. אני סוגר בשלוש וחצי היום.' },
+          { who: 'רפי מהקיוסק', text: 'נו, מה אתה רוצה. בשלוש וחצי אני נועל — היום מעבירים את זה בטלוויזיה, בשידור חי.' },
         ],
         choices: [
           {
@@ -634,14 +634,14 @@ const CONVERSATIONS: Conversation[] = [
           },
           {
             id: 'paper',
-            text: 'עיתון. (30)',
+            text: 'עיתון. 2 ₪.',
             when: { minAgorot: 200 },
             noteHe: 'אין לך מספיק',
             then: [{ e: 'goto', node: 'kiosk-paper' }],
           },
           {
             id: 'card',
-            text: 'קלף שחקן. (25)',
+            text: 'קלף שחקן. 1 ₪.',
             when: { minAgorot: 100 },
             noteHe: 'אין לך מספיק',
             then: [{ e: 'goto', node: 'kiosk-card' }],
@@ -676,7 +676,7 @@ const CONVERSATIONS: Conversation[] = [
       {
         lines: [
           { who: null, text: 'עיתון של יום שישי, מקופל, עמוד הספורט כלפי חוץ.' },
-          { who: null, text: 'יש שם תמונה של שחקן באמצע קפיצה, ומתחתיה שורות שאתה לא מספיק לקרוא.' },
+          { who: null, text: 'תמונה של שחקן באמצע קפיצה, ומתחתיה שורות קטנות שאתה קורא לאט מדי.' },
         ],
         then: [
           { e: 'money', agorot: -200, why: 'עיתון' },
@@ -733,7 +733,7 @@ const CONVERSATIONS: Conversation[] = [
           },
           {
             id: 'sinai',
-            text: 'אז אני סיני אחריו.',
+            text: 'אז אני סיני אחריך.',
             when: { flag: 'knows:sinai' },
             noteHe: 'צריך להכיר אותו',
             then: [
@@ -783,7 +783,7 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: 'אוהד ותיק', text: 'לבד?' },
+          { who: 'אוהד ותיק', text: 'קטן. אתה יודע לאן אתה הולך?' },
           { who: null, text: 'אתה מהנהן. הוא לא אומר כלום, רק ממשיך ללכת לידך עוד קצת.' },
         ],
         then: [{ e: 'trait', trait: 'courage', delta: 2 }],
@@ -794,7 +794,7 @@ const CONVERSATIONS: Conversation[] = [
     id: 'route-banner',
     branches: [
       {
-        lines: [{ who: null, text: 'סדין קשור לגדר. אדום, מלוכלך, ומישהו תפר עליו אותיות.' }],
+        lines: [{ who: null, text: 'סדין קשור לגדר. אדום, מלוכלך, ומישהו תפר עליו אותיות לבנות עקומות.' }],
       },
     ],
   },
@@ -810,8 +810,8 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [
-          { who: 'סדרן', text: 'ילד, אתה לא נכנס לבד. תמצא את מי שהביא אותך.' },
-          { who: null, text: 'הוא לא רשע. הוא פשוט עומד שם.' },
+          { who: 'סדרן', text: 'ילד. לבד לא נכנסים. תמצא את מי שהביא אותך ותחזור איתו.' },
+          { who: null, text: 'הוא לא רשע ולא מרחם. הוא עומד פה מהבוקר.' },
         ],
       },
     ],
@@ -828,7 +828,7 @@ const CONVERSATIONS: Conversation[] = [
         when: { minAgorot: 1500 },
         lines: [
           { who: 'הקופאי', text: 'ילד — חמישה־עשר.' },
-          { who: null, text: 'אתה שם את הכסף על השיש. הוא סופר, ומעביר לך פתק קרטון קטן.' },
+          { who: null, text: 'אתה מניח את הכסף על השיש. הוא סופר, ודוחף לך פתק קרטון עם שני השמות מודפסים עליו.' },
         ],
         then: [
           { e: 'money', agorot: -1500, why: 'כרטיס' },
@@ -857,7 +857,7 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'אופיר יושב על מעקה כאילו הוא גר פה.' },
+          { who: null, text: 'אופיר יושב על מעקה מול הכניסה כאילו הוא גר פה.' },
           { who: 'אופיר', text: 'בן דוד שלי עובד פה. אמרתי לו שאני בא עם עוד אחד.' },
           { who: 'אופיר', text: 'תישאר לידי ואל תדבר.' },
         ],
@@ -885,7 +885,7 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'הוא מסתכל על העיתון המקופל ביד שלך, ואז על הפנים שלך.' },
           { who: 'אוהד ותיק', text: 'רגע. אתה של קובי?' },
           { who: null, text: 'אתה מהנהן.' },
-          { who: 'אוהד ותיק', text: 'הוא עומד בשבע. בוא, הילד איתי.' },
+          { who: 'אוהד ותיק', text: 'הוא עומד בשבע כל שבת. בוא, הילד איתי.' },
         ],
         then: [
           { e: 'flag', flag: 'entry:granted' },
@@ -913,7 +913,7 @@ const CONVERSATIONS: Conversation[] = [
         lines: [
           { who: null, text: 'הוא עומד ליד הגדר ומעשן, ורואה אותך כבר כמה דקות. בסוף הוא מכבה את הסיגריה בסוליה.' },
           { who: 'אוהד ותיק', text: 'לבד, מה?' },
-          { who: null, text: 'הוא לא שואל את זה כמו מבוגר שעומד להגיד לך לחזור הביתה. הוא שואל כמו מישהו שבודק משהו.' },
+          { who: null, text: 'הוא לא שואל כמו מבוגר שעומד לשלוח אותך הביתה. הוא שואל כמו מישהו שבודק.' },
           { who: 'אוהד ותיק', text: 'ומי מחכה לך בפנים?' },
         ],
         choices: [
@@ -972,7 +972,7 @@ const CONVERSATIONS: Conversation[] = [
           { who: 'אוהד ותיק', text: 'שער שבע. אז אתה יודע לפחות איפה אתה.' },
           { who: null, text: 'הוא מהנהן לעצמו, מניח יד על הכתף שלך, ומכניס אותך לתור לפניו.' },
           { who: 'אוהד ותיק', text: 'תעמוד לידי ותשתוק. ואם הוא לא שם — אתה נשאר איתי עד שהוא בא.' },
-          { who: null, text: 'לוקח זמן עד שמגיעים לתור. הרבה זמן.' },
+          { who: null, text: 'התור כמעט לא זז, ומבפנים כבר שומעים משהו.' },
         ],
         then: [
           { e: 'flag', flag: 'entry:granted' },
@@ -991,7 +991,7 @@ const CONVERSATIONS: Conversation[] = [
         when: { flag: 'knows:match' },
         lines: [
           { who: null, text: 'העמוד. מדבקה אדומה שמישהו הדביק גבוה מדי בשביל ילד, ומתחתיה שכבות של מודעות קרועות.' },
-          { who: null, text: 'אתה יודע מה כתוב עליה בעל פה, וזה אף פעם לא נמאס.' },
+          { who: null, text: 'אתה יודע מה כתוב עליה בעל פה, ואתה קורא את זה בכל זאת.' },
         ],
         then: [{ e: 'redheart', key: 'terraceCulture', delta: 4 }],
       },
@@ -1017,7 +1017,7 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'תחנת אוטובוס עם גג פח ושלוש ספסלים. מישהו חרט משהו בצד ומישהו אחר מחק חצי ממנו.' },
+          { who: null, text: 'תחנת אוטובוס עם גג פח ושלושה ספסלים. מישהו חרט שם משהו ומישהו אחר מחק חצי ממנו.' },
         ],
       },
     ],
@@ -1028,7 +1028,7 @@ const CONVERSATIONS: Conversation[] = [
       {
         lines: [
           { who: null, text: 'שער שבע. אבא עומד שם בכל שבת, באותו מקום, עם יעקב.' },
-          { who: null, text: 'מפה זה נראה קטן בהרבה משדמיינת.' },
+          { who: null, text: 'מפה זה נראה הרבה יותר קטן ממה שדמיינת.' },
         ],
         then: [{ e: 'trait', trait: 'knowledge', delta: 2 }],
       },
@@ -1056,7 +1056,7 @@ const CONVERSATIONS: Conversation[] = [
         lines: [{ who: 'אוהד', text: 'תזכור את היום הזה, ילד. שומע? תזכור אותו.' }],
       },
       {
-        lines: [{ who: 'אוהד', text: 'זוז קצת קדימה, ככה לא תראה כלום.' }],
+        lines: [{ who: 'אוהד', text: 'תעלה על המדרגה, ילד. מלמטה אתה רואה רק גב.' }],
       },
     ],
   },
@@ -1114,7 +1114,7 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'הוא מסתובב עם כולם ואז נעצר, כי משהו בשורה מתחת לא במקום.' },
           { who: 'קובי', text: 'הבטחת לי.' },
           { who: null, text: 'אתה לא עונה. אין מה לענות.' },
-          { who: null, text: 'הוא מרים אותך באוויר, וזה לוקח לו שנייה יותר מדי לשים אותך בחזרה.' },
+          { who: null, text: 'הוא לוקח אותך בשתי ידיים, מרים לגובה שלו, ולא ממהר להוריד.' },
           { who: 'קובי', text: 'טעיתי. לא אתה.' },
         ],
         then: [
@@ -1277,7 +1277,7 @@ const CONVERSATIONS: Conversation[] = [
         lines: [
           { who: null, text: 'הוא רואה אותך מרחוק ומקפל את העיתון כך שהעמוד הנכון למעלה.' },
           { who: 'עמית', text: 'בגלל שנתת לי — תשמע טוב.' },
-          { who: 'עמית', text: 'זה לא סתם משחק היום. אם מנצחים, נגמר. אם לא — לא נגמר.' },
+          { who: 'עמית', text: 'היום זה לא סתם משחק. אם מנצחים — נגמר היום. תיקו לא עוזר לנו.' },
           { who: 'עמית', text: 'והשער שבו כולם מהשכונה עומדים זה שבע. לא שש, לא שמונה.' },
         ],
         then: [
@@ -1350,7 +1350,7 @@ const CONVERSATIONS: Conversation[] = [
         shot: { focus: 'keren', framing: 'medium', ambienceDuck: 0.3 },
         lines: [
           { who: null, text: 'קרן יושבת על המדרגה עם צעיף אדום על הברכיים ומותחת חוט שיצא ממנו.' },
-          { who: 'קרן', text: 'זה של אח שלי. הוא שכח אותו והוא ימות.' },
+          { who: 'קרן', text: 'זה של אח שלי. שכח אותו על המיטה, והוא ימות בלעדיו.' },
           { who: null, text: 'היא מסתכלת עליך כמו מישהי שכבר יודעת לאן אתה הולך.' },
         ],
         choices: [
@@ -1389,7 +1389,7 @@ const CONVERSATIONS: Conversation[] = [
       {
         lines: [
           { who: 'קרן', text: 'רועש. ואף אחד לא יושב, גם כשיש כיסא.' },
-          { who: 'קרן', text: 'ואם מבקיעים אתה לא רואה כלום, כי כולם קופצים עליך.' },
+          { who: 'קרן', text: 'ואם מבקיעים, כולם צועקים איזה גול, ואתה לא רואה כלום כי קופצים עליך.' },
           { who: null, text: 'היא אומרת את זה כאילו זה חיסרון. אתה שומע את זה אחרת.' },
         ],
         then: [{ e: 'redheart', key: 'travelDrive', delta: 6 }],

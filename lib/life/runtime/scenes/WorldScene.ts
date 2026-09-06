@@ -7,7 +7,8 @@ import type { AmbientActor } from '../../content/ambient1986'
 import { SCHOOL_MORNING_1990, TABLE_1990 } from '../../content/chapter1990'
 import { CLASSROOM_1991, closing1991, HOME_NIGHT_1991, SCHOOL_STARTS, TIP_OFF } from '../../content/chapter1991'
 import { anchorFor, ERA_1991, eraFor, type Era } from '../../content/era'
-import { chapterFor, nextPlayable, type ChapterDef } from '../../content/chapters'
+import { chapterFor, nextPlayable, playableChapters, type ChapterDef } from '../../content/chapters'
+import { arrivedBetween, onSale, ownedShirts, SHIRT_NEW_HE } from '../../shirts'
 import { beatFlag, beatsAt, type Beat, type BeatAction } from '../../content/beats'
 import type { ConversationShot } from '../../content/script'
 import { crowdSpeaker } from '../../crowd'
@@ -17,6 +18,7 @@ import { placementsAt } from '../../schedules'
 import type { LifeState, LocationId } from '../../types'
 import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
+import type { Condition } from '../../world/types'
 import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, whenFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import type { PanoSpot } from '../bus'
@@ -541,6 +543,9 @@ export class WorldScene extends Phaser.Scene {
       this.beginMatch()
       this.beginNight()
     }
+
+    // …and if a season turned on the way into this room, the rail has something new on it
+    this.announceNewShirts()
 
     this.openChapterBeat(state)
 
@@ -1812,7 +1817,54 @@ export class WorldScene extends Phaser.Scene {
       year: state.year,
       scene: this.def.id,
       hint: hintFor(state, this.def.id),
+      waitingHe: this.waitingFor(state),
     })
+  }
+
+  /**
+   * ממתין ל… — the sentence that says nothing is broken.
+   *
+   * There are stretches of this game where the correct move is to stand still: a match
+   * running on the terrace, a father who has not come back yet, a clock that has to reach
+   * a number before the next thing can happen. To a player that is indistinguishable from
+   * a bug, and Maor said so: "למנוע חשד של המתמודד שמשהו נתקע במשחק".
+   *
+   * So: if a directed match is running, the banner says what the child's job is DURING it,
+   * because in 1990 he has one and it is not obvious. Otherwise, if a clock beat in this
+   * room is waiting on nothing but the time, the banner says what is coming and at what
+   * hour. Anything else returns null — a banner that is always up is wallpaper.
+   */
+  private waitingFor(state: LifeState): string | null {
+    if (this.net && !state.flags['match:over']) return this.netJobHe()
+    const beats = beatsAt(this.era.beats, 'clock', this.def.id)
+    for (const beat of beats) {
+      if (state.flags[beatFlag(beat.id)]) continue
+      if (!beat.waitingHe) continue
+      const at = beat.when?.afterMinute
+      if (typeof at !== 'number' || state.minute >= at) continue
+      // every OTHER condition has to already hold, or the player is not waiting on a
+      // clock — he is waiting on himself, and that is what the objective line is for.
+      const rest: Condition = { ...beat.when, afterMinute: undefined }
+      if (!meets(state, rest)) continue
+      return `${beat.waitingHe} · ${clockLabel(state.weekday, at)}`
+    }
+    return null
+  }
+
+  /**
+   * מה התפקיד שלך במשחק הזה — the 1990 terrace, in one line, permanently.
+   *
+   * Maor: "לא ברור מה תפקידו של פוגי, העובדה שהוא צריך פשוט להמתין לא ברורה". He is right,
+   * and the chapter's whole design was invisible because of it: the child is not watching
+   * a match, he is CARRYING NEWS between two radios about a match forty kilometres away
+   * that decides whether Hapoel go up. The line changes with what he has heard, so it is
+   * a job rather than a caption.
+   */
+  private netJobHe(): string {
+    const state = this.ctx.engine.state
+    if (!state.flags['net:heard']) return 'רדיו אצל אבא, רדיו אצל הסדרן. תשמע מה קורה ביבנה'
+    if (!state.flags['net:toldKobi']) return 'שמעת משהו על יבנה — תחזור לאבא ותגיד לו'
+    return 'תמשיך לרוץ בין הרדיו של אבא לרדיו של הסדרן. המשחק ההוא הוא זה שקובע'
   }
 
   /**
@@ -3700,6 +3752,46 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /** The cut itself. Public so the shell's coda can hand the life to a chapter too. */
+  /**
+   * חולצה חדשה בחנות — announced once, on the first room of the chapter that has it.
+   *
+   * Maor asked for both halves of this on 5.9.2026: a kit must not appear on the rail
+   * before the season it was worn in (that was already true — `onSale` gates on the
+   * season), and the player must be TOLD when one arrives. So the first room of a new
+   * chapter compares its rail with the previous chapter's and holds up whatever is new.
+   *
+   * The flag carries the `own:` prefix on purpose: it is one of the six that survive a new
+   * day and a new decade, so the card cannot come back tomorrow for the same shirt.
+   */
+  private announceNewShirts() {
+    const state = this.ctx.engine.state
+    const flag = `own:shopnews:${this.chapter}`
+    if (state.flags[flag]) return
+    const chapters = playableChapters()
+    const at = chapters.findIndex((row) => row.id === this.chapter)
+    const previous = at > 0 ? chapters[at - 1]?.id ?? null : null
+    const fresh = arrivedBetween(previous, this.chapter)
+    this.ctx.engine.dispatch({ t: 'flag.raised', flag })
+    const shirt = fresh[0]
+    if (!shirt) return
+    this.time.delayedCall(1400, () => {
+      this.ctx.bus.emit('shirt', {
+        kind: 'arrived',
+        art: shirt.art,
+        titleHe: SHIRT_NEW_HE,
+        nameHe: shirt.nameHe,
+        sponsorHe: shirt.sponsorHe,
+        yearsHe: shirt.yearsHe,
+        noteHe: shirt.noteHe,
+        have: ownedShirts(this.ctx.engine.state).length,
+        total: onSale(this.chapter).length,
+        spec: shirt.spec ?? null,
+        seasonHe: shirt.seasonLabel ?? null,
+        sourceHe: shirt.sourceHe ?? null,
+      })
+    })
+  }
+
   enterChapter(next: ChapterDef) {
     const state = this.ctx.engine.state
     this.paused = true

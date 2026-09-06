@@ -24,7 +24,7 @@ export const ENCOUNTERS_1990: RandomEncounter[] = [
     locations: ['street', 'kiosk', 'route'],
     weight: 5,
     cooldown: 60,
-    lineHe: 'שני גברים על מדרגה. אחד אומר שיבנה כבר סגרו את זה בשבוע שעבר. השני אומר שזה שטויות. שניהם בטוחים.',
+    lineHe: 'שני גברים על מדרגה. אחד אומר שיבנה כבר סגרה את זה בשבוע שעבר, השני אומר שזה שטויות. שניהם בטוחים באותה מידה.',
     who: null,
     effects: [{ e: 'flagValue', flag: 'rumor:yavneDone', value: true }],
   },
@@ -33,7 +33,7 @@ export const ENCOUNTERS_1990: RandomEncounter[] = [
     era: '1990',
     locations: ['street', 'route'],
     weight: 3,
-    lineHe: 'מטבע בין האבנים. פחות ממה שהיה שווה פעם, אבל מטבע.',
+    lineHe: 'מטבע בין האבנים. שווה פחות ממה שהיה שווה פעם, אבל מטבע.',
     who: null,
     effects: [
       { e: 'money', agorot: 200, why: 'מהרחוב' },
@@ -58,7 +58,7 @@ export const ENCOUNTERS_1990: RandomEncounter[] = [
     era: '1990',
     locations: ['bloomfield-outside'],
     weight: 4,
-    lineHe: 'זקן עם צעיף מ-1966, לפי איך שהוא נראה. "הייתי פה כשעלו בפעם הקודמת. אני אהיה פה גם בפעם הבאה."',
+    lineHe: 'זקן עם צעיף שנראה מבוגר ממך פי שניים. "אני עומד פה מלפני שנולדת, ואני אעמוד פה גם אחריך."',
     who: null,
     effects: [
       { e: 'redheart', key: 'historyMemory', delta: 4 },
