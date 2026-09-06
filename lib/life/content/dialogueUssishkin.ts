@@ -52,6 +52,7 @@ export const CONVERSATIONS_USSISHKIN: Conversation[] = [
           { who: null, text: 'הפרקט לא מבריק הערב. סימני גומי שחורים לכל האורך, וכל חריקה נשמעת עד לגג.' },
           { who: null, text: 'כשהם רצים לצד הזה, הרצפה זזה קצת. אתה מרגיש את זה בברכיים.' },
         ],
+        then: [{ e: 'flag', flag: 'saw:parquet' }],
       },
       {
         lines: [
@@ -71,12 +72,14 @@ export const CONVERSATIONS_USSISHKIN: Conversation[] = [
           { who: null, text: 'היציע מלא מלמעלה עד למטה ואף אחד לא יושב. אין אוויר, יש עשן.' },
           { who: null, text: 'את הכיסאות האדומים כבר לא רואים. רק גבים, ותוף אחד מהשורה השלישית.' },
         ],
+        then: [{ e: 'flag', flag: 'saw:stand' }],
       },
       {
         lines: [
           { who: null, text: 'היציע הזה אדום ופחם, וקרוב כל כך לקו שאפשר לגעת בשחקן בלי לקום.' },
           { who: null, text: 'אומרים שקבוצות נכנסות לפה כבר עם מינוס עשר. עכשיו יש רק כיסאות, ומישהו שכח כובע.' },
         ],
+        then: [{ e: 'flag', flag: 'saw:stand' }],
       },
     ],
   },
@@ -89,12 +92,14 @@ export const CONVERSATIONS_USSISHKIN: Conversation[] = [
           { who: null, text: 'פס החלונות שחור. כל האור בא מהמנורות שמתחת לגג הפח, והן רועדות.' },
           { who: null, text: 'הן באמת רועדות. ומהגג יורד חום, כאילו בחוץ עכשיו קיץ.' },
         ],
+        then: [{ e: 'flag', flag: 'saw:windows' }],
       },
       {
         lines: [
           { who: null, text: 'פס חלונות צמוד לגג הפח. האור שנכנס קר, והכול מתחתיו חם.' },
           { who: null, text: 'על הפח כתמי חלודה, ומתחתם סימנים על הבטון. כשיורד גשם, מי שיושב פה סופג.' },
         ],
+        then: [{ e: 'flag', flag: 'saw:windows' }],
       },
     ],
   },

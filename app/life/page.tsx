@@ -25,7 +25,10 @@ export const metadata: Metadata = {
 export default function LifePage() {
   const anchor = resolveChapterAnchor()
   const prologueAnchor = resolvePrologueAnchor()
-  const anchors = { '1986': anchor, '1990': resolveStageBAnchor(), '1991': resolveUssishkinAnchor(), ...resolveStageBAnchors() }
+  // `prologue` is in the map because `{anchor}` in a 1983 line must resolve to the 1983
+  // fact. Without it the era lookup fell through to 1986 and the first memory in the game
+  // printed a championship that had not happened yet.
+  const anchors = { prologue: prologueAnchor, '1986': anchor, '1990': resolveStageBAnchor(), '1991': resolveUssishkinAnchor(), ...resolveStageBAnchors() }
 
   return (
     <Screen title={t('life.title')} sub={t('life.sub')} chrome={false} fullBleed night>

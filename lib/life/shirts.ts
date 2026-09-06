@@ -63,13 +63,38 @@ const ORDER = [
 
 const SHIRT_ROWS: readonly Omit<Shirt, 'price'>[] = [
   {
+    /**
+     * החולצה של קיץ 1985 — the one the archive actually holds for that season.
+     *
+     * A4 is set in the summer of 1985 and it was handing the boy `visa86`: adidas, VISA,
+     * white bands. `content/manual/kit-designs.json` files that combination as **1988/89**,
+     * three years later, and Stage A §9 forbids inventing a sponsor, a manufacturer or a
+     * number. So the shirt in Rafi's window is the archive's 1984/85 home row, at
+     * confidence 3, from photographs Maor supplied on 1.9.2026 — adidas, גלאב הוטל טבריה,
+     * thin cream and blue diagonals on red, cream v-neck. Maor chose this over keeping the
+     * VISA one, on 6.9.2026.
+     *
+     * The art is a stand-in drawn from that row (`scripts/life/make-shirt-8485.py`) and
+     * carries no lettering; the sponsor's name is printed by `ShirtCard` off the archive
+     * row, where it has a source attached. `GRAPHICS-REQUESTS` asks for the photograph.
+     */
+    id: 'tveria85',
+    art: 'shirtTveria85',
+    nameHe: 'החולצה האדומה, אלכסונים',
+    sponsorHe: 'גלאב הוטל טבריה',
+    yearsHe: '1984/85',
+    from: 'a4-shirt',
+    noteHe: 'אדידס. אלכסונים דקים, קרם וכחול, על אדום. צווארון וי קרם. זו החולצה בחלון של רפי.',
+    kind: 'football',
+  },
+  {
     id: 'visa86',
     art: 'shirtVisa86',
     nameHe: 'החולצה האדומה, פסים',
     sponsorHe: 'VISA',
     yearsHe: 'אמצע שנות ה־80',
-    from: 'a4-shirt',
-    noteHe: 'אדידס, פסי רוחב לבנים על השרוול, וסמל הפועל מעל הלב. זו החולצה בחלון של רפי.',
+    from: '1986',
+    noteHe: 'אדידס, פסי רוחב לבנים על השרוול, וסמל הפועל מעל הלב.',
     kind: 'football',
   },
   {

@@ -271,12 +271,28 @@ function withRelationship(
 function personFlags(flags: Record<string, boolean | string | number>): Record<string, boolean | string | number> {
   const kept: Record<string, boolean | string | number> = {}
   for (const [flag, value] of Object.entries(flags)) {
+    /**
+     * מה שנשאר מיום ליום — the prefixes a year does not erase.
+     *
+     * A chapter cut clears the day: the errand, the homework, the hour you were told to be
+     * home. It may not clear the LIFE, and on 6.9.2026 an audit of the Stage B brief
+     * against the code found that it was doing exactly that. Who you went to the promotion
+     * with (`went:withKobi`), and the coins a stand collected so you could get on a bus
+     * (`owe:group`, `owe:shachor`), were ordinary day flags — so they were gone before any
+     * later chapter could ever mention them, and a decade the brief asks to be one life
+     * read as ten unconnected episodes.
+     *
+     * Two prefixes fix the class rather than the incidents: `went:` is who you were with,
+     * and `owe:` is a debt, and neither of those is true only until midnight.
+     */
     if (
       flag.startsWith('life:') ||
       flag.startsWith('onboard:') ||
       flag.startsWith('cutscene:') ||
       flag.startsWith('prologue:') ||
       flag.startsWith('own:') ||
+      flag.startsWith('went:') ||
+      flag.startsWith('owe:') ||
       flag.startsWith('promise:')
     )
       kept[flag] = value

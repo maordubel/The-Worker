@@ -1,4 +1,5 @@
 import { at } from '../clock'
+import type { PassageObject } from './chapter1990'
 import type { RandomEncounter } from '../encounters'
 import type { LifeState } from '../types'
 
@@ -66,6 +67,49 @@ export const OBJECTIVES_1993 = {
   after: 'הלילה עוד לא נגמר.',
   home: 'הביתה.',
 }
+
+
+/**
+ * הגשר מ-1991 ל-1993 — the two years the game skipped.
+ *
+ * Stage B §7 B2 asks for "11.3.1991 + season bridge", and the bridge was missing: the
+ * derby ended and April 1993 began, so the hall the whole unit is about was one Monday
+ * evening followed by silence. Four objects in the same bedroom say what actually
+ * happened in between — that a boy started going, kept going, and stopped asking
+ * permission — and none of them states a result, because the archive is what states
+ * results and a bedroom is not the archive.
+ *
+ * The mechanism is `PassageScene`, which stopped being 1986's private scene on 6.9.2026
+ * and became what it always was: how this game shows time passing.
+ */
+export const PASSAGE_1993: PassageObject[] = [
+  {
+    id: 'stubs',
+    labelHe: 'הכרטיסים',
+    lookHe: 'ערימה קטנה על המדף, חלקם קרועים בפינה. אתה לא זוכר את כולם. את השלושה הראשונים כן.',
+    afterHe: 'הערימה גדלה. מישהו התחיל לשים גומייה סביבה.',
+  },
+  {
+    id: 'ledger',
+    labelHe: 'הפנקס',
+    lookHe: 'פנקס משבצות, לא שלך. בפנים: תאריכים, שעות יציאה, ולידם שמות. אחד השמות הוא שלך.',
+    afterHe: 'לימור החזירה לך אותו והוסיפה עמוד. הכתב שלך בו עכשיו, בשורה השנייה.',
+  },
+  {
+    id: 'laces',
+    labelHe: 'הנעליים',
+    lookHe: 'הסוליה נשחקה מצד אחד. ככה נשחקות נעליים של מישהו שהולך לאותו מקום.',
+    afterHe: 'זוג אחר, גדול יותר. אותו צד נשחק.',
+  },
+  {
+    id: 'radio',
+    labelHe: 'הטרנזיסטור',
+    lookHe: 'על השידה, עם הכפתור מכוון לתחנה אחת. אתה כבר לא מחפש אותה בכל פעם מחדש.',
+    afterHe: 'הוא זז לכיס. אתה לוקח אותו איתך עכשיו.',
+  },
+]
+
+export const PASSAGE_CARD_1993_HE = 'אפריל 1993'
 
 export function objective1993(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
@@ -468,6 +512,22 @@ export const CONVERSATIONS_1993: Conversation[] = [
         lines: [{ who: 'לימור', text: 'האוטובוס יצא. אמרתי לאפי לחכות לך, והוא חיכה עד שהנהג צפר עליו.' }, { who: 'לימור', text: 'אין עוד אחד הערב. אני מצטערת. תשמע את זה מהרחוב, כמו חצי מהעיר.' }],
         then: [{ e: 'flag', flag: 'late:route' }],
       },
+      /**
+       * שנתיים אחרי — Limor remembers who admitted, in 1991, that he knew nothing.
+       *
+       * §17 asks the player to remember "the first time Ussishkin felt like another home",
+       * and a person remembering you is what makes a place a home rather than a venue.
+       * `knows:side` is a day flag and dies at the chapter cut; `life:limor:honest-1991` is
+       * the one that survives, and it is set only by the honest answer.
+       */
+      {
+        when: { flag: 'life:limor:honest-1991' },
+        lines: [
+          { who: 'לימור', text: 'אתה. הילד שאמר לי שהוא לא יודע כלום.' },
+          { who: 'לימור', text: 'מהצד, כמו תמיד. ואל תשוויץ שיש לך כרטיס אם אין — הסדרן מכיר את כולם, וגם אותי.' },
+        ],
+        then: [{ e: 'rel', who: 'crowd-limor', axis: 'bond', delta: 4 }, { e: 'flag', flag: 'knows:side' }],
+      },
       {
         lines: [
           { who: 'לימור', text: 'שמעת שיש כניסה מהצד, נכון? לא מהחזית. בחזית התור לוקח שעה.' },
@@ -485,6 +545,25 @@ export const CONVERSATIONS_1993: Conversation[] = [
     id: 'shachor-1993',
     nameHe: 'שחור',
     branches: [
+      /**
+       * שחור זוכר ידיים — 1991, two crates from a car to a door.
+       *
+       * `remember shachor 'carried-crates-1991'` is written on the pavement outside the
+       * hall the night of the derby; this is where it is read. The brief's whole thesis
+       * about this branch (§17) is that it is built out of people who noticed you doing
+       * something unglamorous, and a memory nobody ever reads back is not noticing.
+       */
+      {
+        when: { relationshipMemory: { who: 'shachor', eventId: 'carried-crates-1991' } },
+        lines: [
+          { who: 'שחור', text: 'אתה סחבת לי ארגזים בחורף של תשעים ואחת. אני זוכר ידיים.' },
+          { who: 'שחור', text: 'היום זה בד, לא ארגזים. אותו דבר.' },
+        ],
+        choices: [
+          { id: 'help', text: 'לקחת צד.', then: [{ e: 'flag', flag: 'helped:banner' }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 5 }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'energy', delta: -10 }, { e: 'time', minutes: 25 }] },
+          { id: 'no', text: '"לא הפעם."', then: [{ e: 'rel', who: 'shachor', axis: 'distance', delta: 1 }] },
+        ],
+      },
       {
         when: { flag: 'helped:banner' },
         lines: [{ who: 'שחור', text: 'אתה הילד של הבד. תזכור את זה, כי אני זוכר.' }],

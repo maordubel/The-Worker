@@ -2,7 +2,7 @@ import type { HistoricalAnchor } from '../anchors'
 import type { RandomEncounter } from '../encounters'
 import type { LifeOpportunity } from '../opportunities'
 import type { NPCScheduleEntry } from '../schedules'
-import type { LifeState } from '../types'
+import type { LocationId, LifeState } from '../types'
 import type { Beat } from './beats'
 
 import { AMBIENT_1986, AMBIENT_1990, type AmbientActor } from './ambient1986'
@@ -18,6 +18,7 @@ import {
   BEATS_A2, BEATS_A3, BEATS_A4, BEATS_A5, BEATS_A6, BEATS_A7,
   ENDINGS_A2, ENDINGS_A3, ENDINGS_A4, ENDINGS_A5, ENDINGS_A6, ENDINGS_A7,
   objectiveA2, objectiveA3, objectiveA4, objectiveA5, objectiveA6, objectiveA7,
+  goalA2, goalA3, goalA4, goalA5, goalA6, goalA7,
   PORTRAIT_STAGE_A,
 } from './chapterStageA'
 import { BEATS_LACES, ENDINGS_LACES, objectiveLaces, PORTRAIT_LACES } from './chapter1998laces'
@@ -31,6 +32,10 @@ import { ENCOUNTERS_1991 } from './encounters1991'
 import { OPPORTUNITIES_1986 } from './opportunities1986'
 import { OPPORTUNITIES_1990 } from './opportunities1990'
 import { OPPORTUNITIES_1991 } from './opportunities1991'
+import {
+  goal1986, goal1990, goal1991, goal1993Cup, goalGalil, goalSinai, goalArmy,
+  goalHall, goalLaces, goalSeed, goalCup99, goalTitle, goalDouble,
+} from './goals'
 import { SCHEDULE_1986 } from './schedules1986'
 import { SCHEDULE_1990 } from './schedules1990'
 import { SCHEDULE_1991 } from './schedules1991'
@@ -72,6 +77,20 @@ export type Era = {
   endings: Record<string, EndingCard>
   /** the one vague line under the clock — see `chapter1986.ts` OBJECTIVES */
   objective: (state: LifeState, sceneId: string, matchOver: boolean) => string | null
+  /**
+   * לאן הפרק רוצה אותך עכשיו — the room this chapter is currently pointing at, or null.
+   *
+   * The objective says what the day is ABOUT; this says where the day is. They are not the
+   * same thing and conflating them is how «אפי אמר שיש משהו אחרי הקיר» became a chapter a
+   * player could not leave: a true sentence, in the voice of a six-year-old giving
+   * directions, that names no door in a city with six of them on one street.
+   *
+   * With a destination the game can do the rest itself — `world/route.ts` walks the doors
+   * that are open in THIS chapter and finds the next one, so the room says the label that
+   * is actually painted on it and the arrow points at it. Return null when the chapter
+   * genuinely does not care where the player is; do not return a room he is already in.
+   */
+  goal?: (state: LifeState) => LocationId | null
   /** the archival film this chapter may open onto, by registry id; null when there is none */
   cutscene: string | null
   player: PlayerFigure
@@ -131,6 +150,7 @@ export const ERA_1986: Era = {
     if ((state.inventory['house-key'] ?? 0) > 0) return OBJECTIVES.askDad
     return OBJECTIVES.findKey
   },
+  goal: goal1986,
   cutscene: '1986-championship',
   player: {
     pose: { down: 'pogi', downSide: 'pogi-3q', side: 'pogi-side', up: 'pogi-back' },
@@ -168,6 +188,7 @@ export const ERA_1990: Era = {
     if (state.flags['knows:math']) return OBJECTIVES_1990.leaving
     return OBJECTIVES_1990.howMany
   },
+  goal: goal1990,
   cutscene: null,
   player: {
     pose: { down: 'hero80', downSide: 'hero80-3q', side: 'hero80-side', up: 'hero80-back' },
@@ -215,6 +236,7 @@ export const ERA_1991: Era = {
     if (state.flags['hw:given'] && state.flags['school:done']) return OBJECTIVES_1991.homework
     return OBJECTIVES_1991.school
   },
+  goal: goal1991,
   cutscene: null,
   player: {
     pose: { down: 'hero80', downSide: 'hero80-3q', side: 'hero80-side', up: 'hero80-back' },
@@ -243,6 +265,7 @@ export const ERA_1993_CUP: Era = {
   ambient: AMBIENT_1990,
   endings: ENDINGS_1993,
   objective: (state, sceneId) => objective1993(state, sceneId),
+  goal: goal1993Cup,
   cutscene: null,
   player: TEEN,
   memoryPrefix: '1993-cup',
@@ -261,6 +284,7 @@ export const ERA_1993_GALIL: Era = {
   ambient: AMBIENT_1990,
   endings: ENDINGS_GALIL,
   objective: (state, sceneId) => objectiveGalil(state, sceneId),
+  goal: goalGalil,
   cutscene: null,
   player: TEEN,
   memoryPrefix: '1993-galil',
@@ -279,6 +303,7 @@ export const ERA_1995_SINAI: Era = {
   ambient: AMBIENT_1990,
   endings: ENDINGS_SINAI,
   objective: (state) => objectiveSinai(state),
+  goal: goalSinai,
   cutscene: null,
   player: TEEN,
   memoryPrefix: '1995-sinai',
@@ -297,6 +322,7 @@ export const ERA_1996_ARMY: Era = {
   ambient: AMBIENT_1990,
   endings: ENDINGS_ARMY,
   objective: (state, sceneId) => objectiveArmy(state, sceneId),
+  goal: goalArmy,
   cutscene: null,
   player: SOLDIER,
   memoryPrefix: '1996-army',
@@ -313,7 +339,7 @@ export const ERA_1996_ARMY: Era = {
  * a neighbourhood that goes on without you; it needs the four people who matter placed
  * where the beat says, and a clock that only moves when the story does.
  */
-function stageB(chapter: string, year: number, anchorKey: string, extra: Pick<Era, 'endings' | 'objective' | 'portraits' | 'beats' | 'player'>): Era {
+function stageB(chapter: string, year: number, anchorKey: string, extra: Pick<Era, 'endings' | 'objective' | 'portraits' | 'beats' | 'player' | 'goal'>): Era {
   return {
     chapter,
     year,
@@ -332,6 +358,7 @@ function stageB(chapter: string, year: number, anchorKey: string, extra: Pick<Er
 export const ERA_1997_BASKET = stageB('1997-basket', 1997, '1997-relegation', {
   endings: ENDINGS_HALL,
   objective: (state) => objectiveHall(state),
+  goal: goalHall,
   portraits: PORTRAIT_HALL,
   beats: BEATS_HALL,
   player: YOUNG_MAN,
@@ -340,6 +367,7 @@ export const ERA_1997_BASKET = stageB('1997-basket', 1997, '1997-relegation', {
 export const ERA_1998_LACES = stageB('1998-laces', 1998, '1998', {
   endings: ENDINGS_LACES,
   objective: (state, sceneId) => objectiveLaces(state, sceneId),
+  goal: goalLaces,
   portraits: PORTRAIT_LACES,
   beats: BEATS_LACES,
   player: YOUNG_MAN,
@@ -348,6 +376,7 @@ export const ERA_1998_LACES = stageB('1998-laces', 1998, '1998', {
 export const ERA_1999_BASKET = stageB('1999-basket', 1999, '1999-relegation', {
   endings: ENDINGS_SEED,
   objective: (state, sceneId) => objectiveSeed(state, sceneId),
+  goal: goalSeed,
   portraits: PORTRAIT_SEED,
   beats: BEATS_SEED,
   player: YOUNG_MAN,
@@ -356,6 +385,7 @@ export const ERA_1999_BASKET = stageB('1999-basket', 1999, '1999-relegation', {
 export const ERA_1999_CUP = stageB('1999-cup', 1999, '1999-cup', {
   endings: ENDINGS_CUP99,
   objective: (state, sceneId) => objectiveCup99(state, sceneId),
+  goal: goalCup99,
   portraits: PORTRAIT_CUP99,
   beats: BEATS_CUP99,
   player: YOUNG_MAN,
@@ -364,6 +394,7 @@ export const ERA_1999_CUP = stageB('1999-cup', 1999, '1999-cup', {
 export const ERA_2000_TITLE = stageB('2000-title', 2000, '2000-title', {
   endings: ENDINGS_TITLE,
   objective: (state, sceneId) => objectiveTitle(state, sceneId),
+  goal: goalTitle,
   portraits: PORTRAIT_2000,
   beats: BEATS_TITLE,
   player: YOUNG_MAN,
@@ -372,13 +403,14 @@ export const ERA_2000_TITLE = stageB('2000-title', 2000, '2000-title', {
 export const ERA_2000_DOUBLE = stageB('2000-double', 2000, '2000-cup', {
   endings: ENDINGS_DOUBLE,
   objective: (state, sceneId) => objectiveDouble(state, sceneId),
+  goal: goalDouble,
   portraits: PORTRAIT_2000,
   beats: BEATS_DOUBLE,
   player: YOUNG_MAN,
 })
 
 /** the six days before the Saturday — the same boy, the same rooms, a beat each */
-function stageA(chapter: string, year: number, extra: Pick<Era, 'endings' | 'objective' | 'beats'>): Era {
+function stageA(chapter: string, year: number, extra: Pick<Era, 'endings' | 'objective' | 'beats' | 'goal'>): Era {
   return {
     chapter,
     year,
@@ -396,12 +428,12 @@ function stageA(chapter: string, year: number, extra: Pick<Era, 'endings' | 'obj
   }
 }
 
-export const ERA_A2 = stageA('a2-alley', 1984, { endings: ENDINGS_A2, objective: (state, sceneId) => objectiveA2(state, sceneId), beats: BEATS_A2 })
-export const ERA_A3 = stageA('a3-hall', 1984, { endings: ENDINGS_A3, objective: (state, sceneId) => objectiveA3(state, sceneId), beats: BEATS_A3 })
-export const ERA_A4 = stageA('a4-shirt', 1985, { endings: ENDINGS_A4, objective: (state, sceneId) => objectiveA4(state, sceneId), beats: BEATS_A4 })
-export const ERA_A5 = stageA('a5-first', 1985, { endings: ENDINGS_A5, objective: (state, sceneId) => objectiveA5(state, sceneId), beats: BEATS_A5 })
-export const ERA_A6 = stageA('a6-radio', 1986, { endings: ENDINGS_A6, objective: (state, sceneId) => objectiveA6(state, sceneId), beats: BEATS_A6 })
-export const ERA_A7 = stageA('a7-week', 1986, { endings: ENDINGS_A7, objective: (state, sceneId) => objectiveA7(state, sceneId), beats: BEATS_A7 })
+export const ERA_A2 = stageA('a2-alley', 1984, { endings: ENDINGS_A2, objective: (state, sceneId) => objectiveA2(state, sceneId), beats: BEATS_A2, goal: goalA2 })
+export const ERA_A3 = stageA('a3-hall', 1984, { endings: ENDINGS_A3, objective: (state, sceneId) => objectiveA3(state, sceneId), beats: BEATS_A3, goal: goalA3 })
+export const ERA_A4 = stageA('a4-shirt', 1985, { endings: ENDINGS_A4, objective: (state, sceneId) => objectiveA4(state, sceneId), beats: BEATS_A4, goal: goalA4 })
+export const ERA_A5 = stageA('a5-first', 1985, { endings: ENDINGS_A5, objective: (state, sceneId) => objectiveA5(state, sceneId), beats: BEATS_A5, goal: goalA5 })
+export const ERA_A6 = stageA('a6-radio', 1986, { endings: ENDINGS_A6, objective: (state, sceneId) => objectiveA6(state, sceneId), beats: BEATS_A6, goal: goalA6 })
+export const ERA_A7 = stageA('a7-week', 1986, { endings: ENDINGS_A7, objective: (state, sceneId) => objectiveA7(state, sceneId), beats: BEATS_A7, goal: goalA7 })
 
 const ERAS: Record<string, Era> = {
   'a2-alley': ERA_A2,
@@ -425,8 +457,34 @@ const ERAS: Record<string, Era> = {
   '2000-double': ERA_2000_DOUBLE,
 }
 
-/** The prologue and any unknown chapter fall through to 1986 — the chapter the game started as. */
+/**
+ * הפרולוג הוא לא 1986 — the one chapter that fell through and printed the wrong decade.
+ *
+ * `{anchor}` in a line is resolved from the era of the chapter being played, and the
+ * prologue had no era, so it fell through to 1986. The result: the single factual line in
+ * the first memory of this game — a State Cup final on 1 June 1983, on a five-year-old's
+ * father's shoulders — printed the 1985/86 championship. A game whose first rule is that
+ * it never states a fact it cannot source was stating the wrong one, in its first minute,
+ * to every player. (Found 6.9.2026 by auditing the brief against the code.)
+ *
+ * The prologue is an era now: 1983, its own anchor key, and nothing else — it has no
+ * timetable, no opportunities and no rooms, because it is one painting and four
+ * conversations. Everything unknown still falls through to 1986, which is correct: that is
+ * the chapter this game started as.
+ */
+export const ERA_PROLOGUE: Era = {
+  ...stageA('prologue', 1983, {
+    endings: {},
+    objective: () => null,
+    beats: [],
+    goal: () => null,
+  }),
+  anchorKey: 'prologue',
+  memoryPrefix: 'prologue',
+}
+
 export function eraFor(chapter: string): Era {
+  if (chapter === 'prologue') return ERA_PROLOGUE
   return ERAS[chapter] ?? ERA_1986
 }
 

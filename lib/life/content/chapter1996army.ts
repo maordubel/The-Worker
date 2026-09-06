@@ -24,6 +24,7 @@ export const A1 = 'life:army:d1'
 export const A2 = 'life:army:d2'
 export const A3 = 'life:army:d3'
 export const A4 = 'life:army:d4'
+export const A5 = 'life:army:d5'
 
 export const BUS_DEADLINE = at(6, 30)
 export const BUS_AT = at(5, 55)
@@ -48,6 +49,7 @@ export const PORTRAIT_ARMY: Record<string, string> = {
 
 export function objectiveArmy(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
+  if (state.flags[A5]) return state.flags['a5:done'] ? null : 'שתי נסיעות, ואפשר אחת. הקיוסק.'
   if (state.flags[A4]) return state.flags['a4:road'] ? null : 'שבת של חורף. הקיוסק, ואוטו של לירון.'
   if (state.flags[A3]) return state.flags['a3:decided'] ? null : 'שש וחצי בבסיס. האוטובוס ברציף.'
   if (state.flags[A2]) {
@@ -173,6 +175,52 @@ export const BEATS_ARMY: Beat[] = [
       { a: 'talk', conversation: 'a4-winter' },
     ],
   },
+
+  /**
+   * ---------------------------------------------------- A5 · שני מסעות ---
+   *
+   * שתי הנסיעות — the two journeys, and they are the user's, not the game's.
+   *
+   * Stage B §19 is the personal oral-history layer, and it lists two confirmed 1990s
+   * memories with their details still pending: hitchhiking north to a Toto Cup match
+   * because only about ten supporters went and no bus left, and a promised lift that was
+   * forgotten, after which supporters in the stand collected taxi money so he reached the
+   * match. Maor asked on 6.9.2026 that both be built now, WITHOUT dates.
+   *
+   * So neither states a date, an opponent, a competition round or a result. The Toto Cup
+   * and the road north are his words; everything around them is the journey, the people and
+   * the money, which is what §6 says supporter culture actually is — "seats, calls, coins,
+   * and a noticed absence".
+   *
+   * They are also a choice and not a checklist. One winter afternoon, one wallet, one
+   * curfew: taking one is giving up the other, which is §11 — no route attends everything
+   * without paying time, trust, money or a relationship.
+   */
+  {
+    id: 'a5-open',
+    at: 'kiosk',
+    trigger: 'enter',
+    when: { flag: 'a4:done', none: [{ flag: A5 }] },
+    delayMs: 700,
+    do: [
+      { a: 'events', events: DAY(A5, 1997, 4, at(14, 30), 'חורף 1997') },
+      { a: 'lines', lines: [
+        { who: null, text: 'אחרי הצבא ולפני האוטובוס. שעתיים בכיס, ארבעים שקל, ושתי שיחות שקורות באותו רגע ליד הדלפק.' },
+      ] },
+    ],
+  },
+  {
+    id: 'a5-night',
+    trigger: 'clock',
+    waitingHe: 'ממתין: מישהו יחליט משהו',
+    when: { flag: A5, afterMinute: at(21, 30), none: [{ flag: 'a5:done' }] },
+    do: [
+      { a: 'flag', flag: 'a5:done' },
+      { a: 'lines', lines: [{ who: null, text: 'בסוף לא נסעת לשום מקום. בבוקר, בבסיס, שאלו איך היה, ואמרת "לא הלכתי", וזה נשמע כמו משהו אחר ממה שהתכוונת.' }] },
+      { a: 'ending', id: 'home' },
+    ],
+  },
+
 ]
 
 export const CONVERSATIONS_ARMY: Conversation[] = [
@@ -493,6 +541,156 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
       {
         lines: [{ who: null, text: 'הדרך חזרה. תחנת דלק אחת, רדיו אחד, שיחה אחת שלא נגמרה. הגעת לבסיס בדקה האחרונה של החופשה, כמו שצריך.' }],
         then: [{ e: 'army', key: 'commanderTrust', delta: 2 }, { e: 'flag', flag: 'a4:done' }, { e: 'ending', id: 'road' }],
+      },
+    ],
+  },
+  {
+    id: 'a5-kiosk',
+    nameHe: 'רפי מהקיוסק',
+    branches: [
+      {
+        when: { flag: 'a5:done' },
+        lines: [{ who: 'רפי מהקיוסק', text: 'נסעת? יופי. עכשיו לך לישון, יש לך בסיס בבוקר.' }],
+      },
+      {
+        lines: [
+          { who: 'רפי מהקיוסק', text: 'שניים ביקשו ממני להעביר לך הודעה, ואני לא דואר.' },
+          { who: 'רפי מהקיוסק', text: 'אחד: יש משחק בצפון, גביע הטוטו, ואין הסעה כי נוסעים בערך עשרה. אם אתה רוצה — אתה מוצא דרך.' },
+          { who: 'רפי מהקיוסק', text: 'שתיים: מישהו הבטיח לאסוף אותך למשחק ולא בא. הוא הבטיח, ולא בא.' },
+          { who: null, text: 'אתה יכול להספיק אחד. לא שניים.' },
+        ],
+        choices: [
+          {
+            id: 'north',
+            text: 'לצאת צפונה. בטרמפים.',
+            then: [
+              { e: 'flag', flag: 'a5:north' },
+              { e: 'redheart', key: 'travelDrive', delta: 6 },
+              { e: 'personality', key: 'riskTolerance', delta: 3 },
+              { e: 'goto', node: 'a5-north-1' },
+            ],
+          },
+          {
+            id: 'wait',
+            text: 'לחכות להסעה שהבטיחו.',
+            then: [{ e: 'flag', flag: 'a5:pickup' }, { e: 'goto', node: 'a5-pickup-1' }],
+          },
+          { id: 'neither', text: 'לחזור לבסיס מוקדם.', then: [{ e: 'army', key: 'commanderTrust', delta: 5 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'flag', flag: 'a5:done' }, { e: 'ending', id: 'home' }] },
+        ],
+      },
+    ],
+  },
+  {
+    /** the road north — the journey IS the unit, per §7 B6 */
+    id: 'a5-north-1',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'בצומת שבקצה העיר עומדים שניים שאתה מכיר מהיציע ואחד שלא. ארבעה אנשים, יד אחת מורמת, וכל אוטו שעובר הוא הימור.' },
+          { who: null, text: 'הראשון שעצר לקח שניים. אמרו לך "תמשיך אחרינו" והלכו.' },
+        ],
+        choices: [
+          {
+            id: 'alone',
+            text: 'להישאר בצומת לבד.',
+            then: [
+              { e: 'personality', key: 'stubbornness', delta: 3 },
+              { e: 'wellbeing', key: 'loneliness', delta: 3 },
+              { e: 'time', minutes: 55 },
+              { e: 'goto', node: 'a5-north-2' },
+            ],
+          },
+          {
+            id: 'pair',
+            text: 'לעצור עם השלישי ולנסות ביחד.',
+            then: [
+              { e: 'redheart', key: 'community', delta: 4 },
+              { e: 'rel', who: 'shachor', axis: 'familiarity', delta: 2 },
+              { e: 'time', minutes: 35 },
+              { e: 'goto', node: 'a5-north-2' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a5-north-2',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'משאית, אחר כך מסחרית, אחר כך אחד שנסע לחתונה והוריד אותך במקום הלא נכון. שלוש שעות, ארבעה אוטואים, וגשם קטן שלא הפסיק.' },
+          { who: null, text: 'בשער היו בערך עשרה. אתה הכרת שמונה מהם.' },
+          { who: null, text: 'אחד מהם אמר "אתה הגעת בטרמפים?" ואז לא אמר כלום, וזה היה הדבר הכי טוב ששמעת באותו חורף.' },
+        ],
+        then: [
+          { e: 'presence', mode: 'inside' },
+          { e: 'flag', flag: 'life:north:hitched' },
+          { e: 'redheart', key: 'travelDrive', delta: 5 },
+          { e: 'redheart', key: 'community', delta: 4 },
+          { e: 'remember', who: 'shachor', eventId: 'hitched-north', significance: 'major' },
+          { e: 'flag', flag: 'a5:done' },
+          { e: 'ending', id: 'road' },
+        ],
+      },
+    ],
+  },
+  {
+    /** the lift that never came, and the coins that made up for it */
+    id: 'a5-pickup-1',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'עמדת בפינה שסיכמתם עליה. ארבע וחצי, חמש פחות רבע, חמש. האוטו לא בא.' },
+          { who: null, text: 'בטלפון הציבורי אין תשובה. בכיס יש ארבעים שקל, ומונית לשם עולה יותר.' },
+        ],
+        choices: [
+          {
+            id: 'ask',
+            text: 'ללכת לשער ולהגיד שאין לך.',
+            then: [
+              { e: 'personality', key: 'courage', delta: 3 },
+              { e: 'goto', node: 'a5-pickup-2' },
+            ],
+          },
+          {
+            id: 'home',
+            text: 'ללכת הביתה ולא להגיד לאף אחד.',
+            then: [
+              { e: 'wellbeing', key: 'loneliness', delta: 5 },
+              { e: 'wellbeing', key: 'regret', delta: 4 },
+              { e: 'flag', flag: 'a5:done' },
+              { e: 'ending', id: 'home' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a5-pickup-2',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'אמרת את זה מהר, כדי לגמור. מישהו הוציא עשרים. מישהו אחר עשר. אחד נתן חמישה ואמר "זה מה שיש".' },
+          { who: null, text: 'תוך שתי דקות היה מספיק למונית, ועוד עשרה שהוא לא לקח בחזרה.' },
+          { who: null, text: 'הנהג שאל למה אתם ממהרים. אף אחד לא ענה לו.' },
+        ],
+        then: [
+          { e: 'presence', mode: 'inside' },
+          { e: 'flag', flag: 'life:carried:taxi' },
+          { e: 'flag', flag: 'owe:stand' },
+          { e: 'redheart', key: 'community', delta: 7 },
+          { e: 'wellbeing', key: 'belonging', delta: 5 },
+          { e: 'personality', key: 'empathy', delta: 3 },
+          { e: 'remember', who: 'asaf', eventId: 'stand-paid-my-taxi', significance: 'major' },
+          { e: 'flag', flag: 'a5:done' },
+          { e: 'ending', id: 'road' },
+        ],
       },
     ],
   },

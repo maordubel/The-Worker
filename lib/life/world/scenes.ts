@@ -1431,9 +1431,14 @@ const SCENES: SceneDef[] = [
     actors: [
       { id: 'ofir-a2', era: 'a2-alley', figure: 'ofir', x: 0.6, y: 0.92, size: 0.403, nameHe: 'אופיר', talk: 'alley-a2', sway: 0.009 },
       { id: 'amit-a2', era: 'a2-alley', figure: 'amit', x: 0.83, y: 0.87, size: 0.403, nameHe: 'עמית', talk: 'alley-a2', flip: true },
-      { id: 'efi-a2', era: 'a2-alley', figure: 'efi', x: 0.26, y: 0.74, size: 0.403, nameHe: 'אפי', talk: 'alley-a2', sway: 0.01 },
+      // 6.9.2026: his own conversation. He used to route to `alley-a2` with everybody else,
+      // which meant the boy who opens the door to the whole basketball branch had nothing
+      // to say about it (Stage A §7).
+      { id: 'efi-a2', era: 'a2-alley', figure: 'efi', x: 0.26, y: 0.74, size: 0.403, nameHe: 'אפי', talk: 'efi-a2', sway: 0.01 },
       { id: 'rafi-a2', era: 'a2-alley', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-a2', sway: 0.004 },
       { id: 'rafi-a4', era: 'a4-shirt', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-a4', sway: 0.004 },
+      // 1996/97, the fifth day: Rafi passing on two messages he did not want to carry (§19)
+      { id: 'rafi-a5', era: '1996-army', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'a5-kiosk', sway: 0.004, when: { flag: 'life:army:d5' } },
       {
         id: 'shopkeeper',
         // 4.9.2026: the kiosk owner drawn at last — heavy, grey moustache, white shirt over
@@ -2376,6 +2381,15 @@ const SCENES: SceneDef[] = [
     actors: [
       { id: 'usher-a3', era: 'a3-hall', figure: 'usher-wave', x: 0.2, y: 0.9, size: 0.278, nameHe: 'סדרן', talk: 'usher-a3', sway: 0.004 },
       { id: 'efi-a3-door', era: 'a3-hall', figure: 'efi', x: 0.55, y: 0.92, size: 0.204, nameHe: 'אפי', talk: 'efi-a3', flip: true },
+      /**
+       * 11.3.1991 — the three people the initiation chapter is about, on the pavement it
+       * happens on. They were written for 1993 and the boy met them there, two years after
+       * the night he was supposedly initiated. `when` keeps them outside only until he is
+       * in: once `uss:arrived` is up the forecourt empties, because they went in too.
+       */
+      { id: 'efi-1991', era: '1991', figure: 'youngA2', x: 0.58, y: 0.9, size: 0.262, nameHe: 'אפי', talk: 'efi-1991', flip: true, sway: 0.006, when: { none: [{ flag: 'derby:over' }] } },
+      { id: 'limor-1991', era: '1991', figure: 'youngB3', x: 0.44, y: 0.9, size: 0.258, nameHe: 'לימור', talk: 'limor-1991', sway: 0.003, when: { none: [{ flag: 'uss:arrived' }] } },
+      { id: 'shachor-1991', era: '1991', figure: 'shachor', x: 0.82, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'shachor-1991', flip: true, when: { none: [{ flag: 'uss:arrived' }] } },
       // ---- 11.3.1991, an hour before the doors ----
       // The usher stands BESIDE the door and not in it: a person in a doorway wins the
       // prompt over the door, and the way into the room disappears behind a conversation.
@@ -2648,6 +2662,14 @@ const SCENES: SceneDef[] = [
       // The usher by the door: the one person who talks, and what he says depends on
       // whether there is a game tonight.
       { id: 'usher', era: '*', figure: 'usher', x: 0.2, y: 0.9, size: 0.3, nameHe: 'סדרן', talk: 'usher-hall', sway: 0.003 },
+      /**
+       * אפי ליד המעקה — the boy who brought him, standing where he said he would be.
+       *
+       * A3's arrival line ends with "אני פה, לא בורח", and until 6.9.2026 that was a
+       * promise the room could not keep: the chapter ended on the threshold and Efi was
+       * never in it. He is now, and he is also the way the evening closes.
+       */
+      { id: 'efi-a3-hall', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.9, size: 0.29, nameHe: 'אפי', talk: 'efi-a3-hall', sway: 0.006 },
       // ---- 11.3.1991: the two people you came with ----
       { id: 'amit-hall', era: '1991', figure: 'amit90-cheer', x: 0.42, y: 0.9, size: 0.29, nameHe: 'עמית', talk: 'amit-hall', sway: 0.006 },
       { id: 'ofir-hall', era: '1991', figure: 'ofir90-arms', x: 0.3, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'derby:friend', flip: true, sway: 0.007 },

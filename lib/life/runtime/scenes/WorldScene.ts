@@ -43,6 +43,8 @@ const HALL_NIGHTS: readonly string[] = ['1991', '1993-cup', '1997-basket', '1999
 const LAST_RESORT_MINUTES = 22 * 60
 import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, whenFor } from '../../world/scenes'
 import { compose as composeHint, holds as hintHolds } from '../../world/hints'
+import { unmet } from '../../world/why'
+import { nextStep } from '../../world/route'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import type { PanoSpot } from '../bus'
 import { PANO_SPOTS } from '../../content/panoramas'
@@ -1829,7 +1831,12 @@ export class WorldScene extends Phaser.Scene {
      * has not been told. Ninety game-minutes of it — a minute and a half at normal speed,
      * long enough that no written ending is ever cut short — and the day closes.
      */
-    const idle = !this.objective(state) && !this.beatBusy && !this.beatPending && !this.ctx.dialogue.open
+    const idle =
+      !this.objective(state) &&
+      !this.beatBusy &&
+      !this.beatPending &&
+      !this.ctx.dialogue.open &&
+      !this.waitingForTheClock()
     this.stalledFor = idle ? this.stalledFor + 1 : 0
     /**
      * `livedFor` counts minutes since this room started, not the wall clock, because the
@@ -1852,6 +1859,29 @@ export class WorldScene extends Phaser.Scene {
     // is what `scripts/life/finish-audit.mjs` reads to tell a written ending from a rescue
     this.ctx.engine.dispatch({ t: 'flag.raised', flag: `life:lastResort:${this.chapter}` })
     this.finishChapter(id)
+  }
+
+  /**
+   * האם יש ביט שפשוט עוד לא הגיע הזמן שלו.
+   *
+   * The stall detector closes a day that has stopped wanting anything. It was closing days
+   * that were merely EARLY: 1984 ends at half past five and the boy has nothing to want
+   * from four o'clock, so ninety idle minutes ran out before the chapter's own ending was
+   * due and the backstop stole it. A rescue that beats the written scene is worse than the
+   * bug it was built for.
+   *
+   * So a beat whose ONLY unmet clause is a time that has not arrived yet counts as
+   * something the chapter is still doing. Any other unmet clause — a flag, an item, a
+   * place — is not a wait, it is a requirement, and a requirement in a chapter that wants
+   * nothing is the dead end this whole mechanism exists to catch.
+   */
+  private waitingForTheClock(): boolean {
+    const state = this.ctx.engine.state
+    return (this.era.beats ?? []).some((beat) => {
+      if (state.flags[beatFlag(beat.id)]) return false
+      const needs = unmet(state, beat.when)
+      return needs.length > 0 && needs.every((need) => need.startsWith('אחרי '))
+    })
   }
 
   /** set the moment `lastResort` fires, so it cannot fire twice on consecutive minutes */
@@ -2272,6 +2302,18 @@ export class WorldScene extends Phaser.Scene {
     const people = this.actors
       .filter((actor) => actor.image.visible && actor.def.talk && actor.def.nameHe)
       .map((actor) => actor.def.nameHe as string)
+    /**
+     * הדלת הבאה בדרך — when the chapter has somewhere it wants the player, that comes
+     * first and it comes by NAME. An authored line is atmosphere; a door label is the
+     * thing a thumb can act on, and «אחרי הקיר, ימינה» taught us which of the two a
+     * player standing still actually needs.
+     */
+    const step = this.stepToGoal()
+    if (step) {
+      const way = step.locked ? `הדרך: ${step.labelHe} — עדיין סגורה.` : `בדרך: ${step.labelHe}.`
+      const objective = this.objective(state)
+      return [objective, way].filter(Boolean).join(' ')
+    }
     const authored = stuckFor(this.def, this.chapter)
     if (authored && hintHolds(authored, people)) return authored
     const doors = this.exits
@@ -2291,10 +2333,26 @@ export class WorldScene extends Phaser.Scene {
     })
   }
 
+  /**
+   * The next door towards wherever the chapter currently wants the player, or null when
+   * the chapter has no opinion or he is already there. `world/route.ts` does the walking.
+   */
+  private stepToGoal() {
+    const goal = this.era.goal?.(this.ctx.engine.state) ?? null
+    if (!goal || goal === this.def.id) return null
+    return nextStep(this.ctx.engine.state, this.chapter, this.def.id as LocationId, goal)
+  }
+
   private bestExit(): ExitDef | null {
     const state = this.ctx.engine.state
     const open = this.exits.filter((exit) => meets(state, whenFor(exit, this.chapter)))
     if (open.length === 0) return null
+    // The arrow at the edge of the glass points at the way to the chapter's own
+    // destination when it has one, and at the widest door only when it does not. Pointing
+    // confidently at the wrong door is worse than not pointing.
+    const step = this.stepToGoal()
+    const onTheWay = step ? open.find((exit) => exit.id === step.exitId) : null
+    if (onTheWay) return onTheWay
     return open.sort((a, b) => (b.priority ?? 1) - (a.priority ?? 1))[0] ?? null
   }
 
@@ -2530,9 +2588,17 @@ export class WorldScene extends Phaser.Scene {
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'saw:closing1991' })
       this.time.delayedCall(900, () => {
         this.ctx.dialogue.startLines(closing1991(derbyMarginHe(this.anchor)), () => {
-          // The whisper in the classroom was the last thing in Stage B for a year. It is
-          // now a cut: whatever chapter the registry says comes next, and has rooms.
-          this.advanceChapter()
+          /**
+           * The whisper in the classroom was the last thing in Stage B for a year, then it
+           * became a straight cut to April 1993 — two years crossed in a fade. Stage B §7
+           * B2 asks for a season bridge, because the point of 1991 is that a boy started
+           * GOING, and one Monday followed by silence says the opposite. It hands over to
+           * the same four-object bedroom 1986 uses, with 1993's objects in it.
+           */
+          this.fadeThen(600, () => {
+            void this.ctx.engine.save()
+            this.scene.start(PassageScene.KEY, { passage: '1993' })
+          })
         })
       })
     }
@@ -4006,6 +4072,31 @@ export class WorldScene extends Phaser.Scene {
     return this.hintNow()
   }
 
+  /**
+   * מה הפרק מחכה לו — every beat of this chapter that has not fired, and what it needs.
+   *
+   * The chapter's own writing is a list of beats and each one is gated by a condition. When
+   * a chapter will not end, exactly one of two things is true: no beat can end it (a hole
+   * in the writing), or one can and the player has not satisfied it (a hole in the
+   * signposting). From inside the room those look identical, which is why every report of
+   * this bug has arrived as the same unhelpful sentence. This tells them apart.
+   *
+   * Sorted so the beats that END the chapter come first, because when a day will not close
+   * those are the only ones anybody is asking about.
+   */
+  pending(): Array<{ id: string; ends: boolean; fired: boolean; needs: string[]; waitingHe: string | null }> {
+    const state = this.ctx.engine.state
+    return (this.era.beats ?? [])
+      .map((beat) => ({
+        id: beat.id,
+        ends: beat.do.some((action) => action.a === 'ending' || action.a === 'talk'),
+        fired: Boolean(state.flags[beatFlag(beat.id)]),
+        needs: unmet(state, beat.when),
+        waitingHe: beat.waitingHe ?? null,
+      }))
+      .sort((a, b) => Number(b.ends) - Number(a.ends))
+  }
+
   /** Developer-only: put the child somewhere, with no door in between. */
   debugTravel(location: string) {
     this.paused = false
@@ -4050,6 +4141,7 @@ export class WorldScene extends Phaser.Scene {
       bodyHe: card.bodyHe,
       becameHe: card.becameHe,
       keptTicket: card.keptTicket,
+      nextYear: nextPlayable(this.chapter, this.ctx.engine.state.flags)?.year ?? null,
     })
   }
 
@@ -4085,14 +4177,23 @@ export class WorldScene extends Phaser.Scene {
     this.paused = false
     this.ctx.bus.emit('finale', null)
     this.ctx.bus.emit('match', null)
+    /**
+     * שני גשרים — the two chapters that hand over through time rather than through a door.
+     *
+     * 1986 → 1990 was the only one until 6.9.2026, and 1991 → 1993 was a two-year jump the
+     * Stage B brief specifically forbids (§7 B2 asks for a season bridge, so that the hall
+     * reads as a habit rather than as one Monday). Both now play the same four-object
+     * bedroom; which one is a parameter.
+     */
     if (this.chapter === '1986') {
       this.fadeThen(600, () => {
         void this.ctx.engine.save()
-        this.scene.start(PassageScene.KEY)
+        this.scene.start(PassageScene.KEY, { passage: '1990' })
       })
       return
     }
-    // 1991 ends where it started, the next morning, in the same classroom (§46).
+    // 1991 ends where it started, the next morning, in the same classroom (§46) — and the
+    // classroom hands over to the bridge when the morning is done (`closing1991`).
     if (this.chapter === '1991') {
       this.travel('classroom', 'start')
       return
@@ -4130,7 +4231,7 @@ export class WorldScene extends Phaser.Scene {
    * the shell is told so (`coda`) instead of being shown a card that promises a chapter.
    */
   private advanceChapter() {
-    const next = nextPlayable(this.chapter)
+    const next = nextPlayable(this.chapter, this.ctx.engine.state.flags)
     if (!next) {
       this.paused = true
       this.ctx.bus.emit('controls', { visible: false })

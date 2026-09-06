@@ -42,6 +42,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ r
           bodyHe: card.bodyHe,
           becameHe: card.becameHe,
           keptTicket: card.keptTicket,
+          nextYear: 1990,
         }}
       />
     </div>

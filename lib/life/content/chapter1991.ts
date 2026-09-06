@@ -109,6 +109,12 @@ export const PORTRAIT_1991: Record<string, string> = {
   'אוהדת': 'faceWoman',
   'אוהד ותיק': 'faceOldMan',
   'ילד': 'faceKid',
+  // 6.9.2026 — the three people the Ussishkin initiation is actually about. They were
+  // written for 1993 and the boy met them there, two years after the night he was
+  // supposedly initiated; they stand on the pavement outside the hall now (§7 B2).
+  'אפי': 'faceEfi',
+  'לימור': 'faceLimor',
+  'שחור': 'faceShachor',
 }
 
 /**

@@ -157,6 +157,12 @@ export type LifeBusEvents = {
     bodyHe: string
     becameHe: string
     keptTicket: boolean
+    /**
+     * The year the NEXT chapter is set in, resolved by the runtime rather than by the
+     * card. Since 6.9.2026 a chapter can be conditional on the life (`chapterOpen`), so
+     * "what comes next" depends on flags the card has no business holding.
+     */
+    nextYear: number | null
   } | null
   /**
    * סרט מהארכיון — the illustrated memory opening onto real film.

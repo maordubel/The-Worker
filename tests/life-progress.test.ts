@@ -25,23 +25,48 @@ const ROOT = process.cwd()
 describe('הרצף — every chapter leads somewhere', () => {
   const source = readFileSync('lib/life/runtime/scenes/WorldScene.ts', 'utf8')
 
-  it('walks from the first chapter to the last without a gap', () => {
+  /**
+   * שני מסלולים, ושניהם שלמים.
+   *
+   * Since 6.9.2026 a chapter can be conditional on the life: `a3-hall` — the Ussishkin
+   * branch — happens only for a boy who stood with Efi in the spring of 1984, which is what
+   * Stage A §7 asks for and what makes the discovery worth anything. So there is no single
+   * chain any more; there are two, and both have to arrive.
+   *
+   * The test walks each. The full life reaches every chapter that exists; the life that
+   * never answered Efi reaches every chapter but that one, in the same order, ending in the
+   * same place. Neither may stall, and neither may repeat.
+   */
+  const walk = (flags: Record<string, boolean>) => {
     const chapters = playableChapters()
     let at = chapters[0]!
     const walked = [at.id]
-    for (let i = 0; i < 60 && nextPlayable(at.id); i += 1) {
-      at = nextPlayable(at.id)!
+    for (let i = 0; i < 60 && nextPlayable(at.id, flags); i += 1) {
+      at = nextPlayable(at.id, flags)!
       walked.push(at.id)
     }
-    expect(walked.length).toBe(chapters.length)
-    expect(at.id).toBe(lastPlayable().id)
+    return walked
+  }
+
+  it('walks from the first chapter to the last without a gap — the full life', () => {
+    const walked = walk({ 'life:a2:efi': true })
+    expect(walked.length).toBe(playableChapters().length)
+    expect(walked[walked.length - 1]).toBe(lastPlayable().id)
+    expect(new Set(walked).size).toBe(walked.length)
+  })
+
+  it('walks to the same end for a life that never answered Efi, one chapter shorter', () => {
+    const walked = walk({})
+    expect(walked).not.toContain('a3-hall')
+    expect(walked.length).toBe(playableChapters().length - 1)
+    expect(walked[walked.length - 1]).toBe(lastPlayable().id)
     expect(new Set(walked).size).toBe(walked.length)
   })
 
   it('every playable chapter but the last has a playable chapter after it', () => {
     for (const chapter of playableChapters()) {
       if (chapter.id === lastPlayable().id) continue
-      expect(nextPlayable(chapter.id), `${chapter.id} leads nowhere`).not.toBeNull()
+      expect(nextPlayable(chapter.id, { 'life:a2:efi': true }), `${chapter.id} leads nowhere`).not.toBeNull()
     }
   })
 

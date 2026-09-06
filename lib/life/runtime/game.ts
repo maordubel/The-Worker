@@ -151,6 +151,8 @@ export type LifeRuntime = {
     targets(): Array<{ kind: 'talk' | 'act' | 'exit'; id: string; labelHe: string }>
     /** the sentence the room would say to somebody who has stopped moving */
     hint(): string | null
+    /** every beat of this chapter, whether it fired, and what it is still waiting for */
+    pending(): Array<{ id: string; ends: boolean; fired: boolean; needs: string[]; waitingHe: string | null }>
     where(): unknown
   }
   destroy(): void
@@ -322,6 +324,8 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       targets: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.targets() ?? [] : []),
       /** the sentence the room would say to somebody who has stopped moving */
       hint: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.debugHint() ?? null : null),
+      /** every beat of this chapter, whether it fired, and what it is still waiting for */
+      pending: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.pending() ?? [] : []),
       where: () => {
         const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
         if (passage && game.scene.isActive(PassageScene.KEY)) return passage.where()

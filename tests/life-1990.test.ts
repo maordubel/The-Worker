@@ -95,7 +95,15 @@ describe('העידן — the chapter is data, and every chapter is complete', ()
   it('resolves every chapter and falls back to 1986 for anything else', () => {
     expect(eraFor('1986')).toBe(ERA_1986)
     expect(eraFor('1990')).toBe(ERA_1990)
-    expect(eraFor('prologue')).toBe(ERA_1986)
+    /**
+     * The prologue is its OWN era since 6.9.2026, and the assertion that it was not is
+     * the bug it was hiding: `{anchor}` in the 1983 memory resolved through 1986 and
+     * printed the 1985/86 championship — a fabricated fact in the first minute of a game
+     * whose first rule forbids exactly that. It has 1983, its own anchor key, and nothing
+     * else. Everything genuinely unknown still falls through to 1986.
+     */
+    expect(eraFor('prologue').year).toBe(1983)
+    expect(eraFor('prologue').anchorKey).toBe('prologue')
     expect(eraFor('2000')).toBe(ERA_1986)
   })
 

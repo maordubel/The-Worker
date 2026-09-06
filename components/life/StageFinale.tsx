@@ -58,8 +58,9 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
    * the 1990 card that is 1991, which is what the line above the button has been
    * promising all along ("ואוסישקין מחכה — 1990/91").
    */
-  const nextChapter = nextPlayable(finale.chapter)
-  const nextYearLabel = nextChapter ? String(nextChapter.year) : ''
+  // Resolved by the runtime, which holds the flags: a chapter can be conditional on the
+  // life since 6.9.2026, so what comes next is not a property of the chain alone.
+  const nextYearLabel = finale.nextYear ? String(finale.nextYear) : ''
 
   // A card that opens halfway down is a card somebody scrolled by accident.
   useEffect(() => {

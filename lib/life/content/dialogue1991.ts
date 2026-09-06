@@ -629,6 +629,163 @@ export const CONVERSATIONS_1991: Conversation[] = [
   },
 
   // ============================================================== outside the hall ==
+  /**
+   * ------------------------------------------- 11.3.1991 · מי שבזכותו אתה פה ---
+   *
+   * The chapter the Stage B brief calls the Ussishkin initiation (§7 B2) had none of the
+   * people it is about: Efi, who invited him; Limor, who knows which door; Shachor, who
+   * needs hands. All three entered the game two years later, in 1993, fully formed, as if
+   * the boy had met them off-screen. A player finished the initiation without meeting a
+   * single member of the branch he was being initiated into.
+   *
+   * They are here now, on the pavement outside, an hour before tip-off. Nothing they offer
+   * is free: the side door costs a lie or an admission, the crates cost twenty minutes of a
+   * night with a curfew in it (§11 — no route attends everything without paying), and both
+   * are remembered in 1993 by people who were standing here.
+   */
+  {
+    id: 'efi-1991',
+    nameHe: 'אפי',
+    branches: [
+      /**
+       * מי שאמר "כדורסל זה לבנות" — seven years later, and Efi has not forgotten.
+       *
+       * Stage A §7 asks that skipping the branch cost something real. This is the cost: not
+       * a locked door, but a boy who took you in anyway and mentions, once, that he asked
+       * you first and you laughed. `relationshipMemory` is the right test rather than a
+       * flag, because it is a thing a PERSON remembers about you.
+       */
+      {
+        when: { relationshipMemory: { who: 'efi', eventId: 'said-that-in-1984' } },
+        lines: [
+          { who: 'אפי', text: 'באת. אחרי שבע שנים.' },
+          { who: 'אפי', text: 'שאלתי אותך פעם, ליד הסמטה. אמרת שזה לבנות.' },
+          { who: null, text: 'הוא לא אמר את זה ברוגז. הוא אמר את זה כמו מישהו שסופר.' },
+        ],
+        then: [{ e: 'rel', who: 'efi', axis: 'bond', delta: 2 }, { e: 'wellbeing', key: 'regret', delta: 3 }],
+      },
+      {
+        when: { flag: 'uss:arrived' },
+        lines: [{ who: 'אפי', text: 'אמרתי לך. עכשיו תשתוק ותסתכל.' }],
+      },
+      {
+        when: { flag: 'derby:over' },
+        lines: [
+          { who: 'אפי', text: 'נו? עכשיו אתה מבין למה אני לא הולך לכדורגל בחורף.' },
+          { who: null, text: 'הוא צחק. הקול שלו היה גמור.' },
+        ],
+        then: [{ e: 'rel', who: 'efi', axis: 'bond', delta: 3 }],
+      },
+      {
+        lines: [
+          { who: 'אפי', text: 'באת. חשבתי שאמא שלך לא תיתן.' },
+          { who: 'אפי', text: 'תשמע — לימור פה, ולימור יודעת דברים. אם היא אומרת לך מאיפה להיכנס, תיכנס משם.' },
+        ],
+        choices: [
+          {
+            id: 'came',
+            text: '"אמרתי לך שאני בא."',
+            then: [
+              { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
+              { e: 'flag', flag: 'life:efi:kept-1991' },
+              { e: 'redheart', key: 'basketballLove', delta: 3 },
+            ],
+          },
+          {
+            id: 'sneaked',
+            text: '"היא לא נתנה."',
+            when: { flag: 'sneak:ready' },
+            hidden: true,
+            then: [
+              { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 4 },
+              { e: 'flag', flag: 'life:efi:kept-1991' },
+              { e: 'toast', text: 'הוא לא אמר "אתה משוגע". הוא אמר "אז בוא נזוז" ולקח אותך בשרוול.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'limor-1991',
+    nameHe: 'לימור',
+    branches: [
+      {
+        when: { flag: 'knows:side' },
+        lines: [{ who: 'לימור', text: 'מהצד, אמרתי. ואל תעמוד מתחת לחור בגג, אלא אם אתה אוהב לחזור רטוב.' }],
+      },
+      {
+        lines: [
+          { who: 'לימור', text: 'ראשונה בפעם? רואים.' },
+          { who: 'לימור', text: 'יש כניסה מהצד. בחזית התור לוקח חצי שעה, ובחצי שעה הזאת מתחילים.' },
+        ],
+        choices: [
+          {
+            id: 'admit',
+            text: '"אני לא יודע כלום פה."',
+            then: [
+              { e: 'flag', flag: 'knows:side' },
+              // `life:` — the day flag dies at the chapter cut, and this is the fact she
+              // remembers him by in 1993
+              { e: 'flag', flag: 'life:limor:honest-1991' },
+              { e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 4 },
+              { e: 'personality', key: 'reliability', delta: 2 },
+              { e: 'toast', text: '"יופי. מי שיודע הכל אף פעם לא לומד." היא רשמה משהו בפנקס.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'pretend',
+            text: '"אני מכיר. באתי כבר."',
+            then: [
+              { e: 'rel', who: 'crowd-limor', axis: 'distance', delta: 3 },
+              { e: 'personality', key: 'impulsiveness', delta: 2 },
+              { e: 'time', minutes: 25 },
+              { e: 'toast', text: 'היא לא תיקנה אותך. עמדת בתור בחזית עשרים וחמש דקות והיא עברה לידך פנימה.', tone: 'red' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'shachor-1991',
+    nameHe: 'שחור',
+    branches: [
+      {
+        when: { flag: 'helped:crates-1991' },
+        lines: [{ who: 'שחור', text: 'טוב. עכשיו תיכנס לפני שהם מתחילים.' }],
+      },
+      {
+        lines: [
+          { who: 'שחור', text: 'ילד. שני ארגזים, מהאוטו לדלת. זה הכל.' },
+          { who: null, text: 'הוא לא ביקש. הוא הניח את זה בין המשפטים, כמו מישהו שמניח שתעשה.' },
+        ],
+        choices: [
+          {
+            id: 'help',
+            text: 'לסחוב.',
+            then: [
+              { e: 'flag', flag: 'helped:crates-1991' },
+              { e: 'rel', who: 'shachor', axis: 'bond', delta: 5 },
+              { e: 'remember', who: 'shachor', eventId: 'carried-crates-1991', significance: 'major' },
+              { e: 'redheart', key: 'community', delta: 4 },
+              { e: 'energy', delta: -8 },
+              { e: 'time', minutes: 20 },
+              { e: 'toast', text: 'עשרים דקות. הכתפיים כואבות. הוא אמר "יאללה" וזה היה תודה.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'later',
+            text: '"אני ממהר."',
+            then: [
+              { e: 'rel', who: 'shachor', axis: 'distance', delta: 2 },
+              { e: 'toast', text: 'הוא הרים את שני הארגזים לבד. לא הסתכל אחורה.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   {
     id: 'usher-night',
     nameHe: 'סדרן',

@@ -135,7 +135,7 @@ export type BackdropKey = (typeof BACKDROP)[number]
  * at one scale on a rail without a number tuned per shirt.
  */
 export const SHIRT = [
-  'shirtVisa86', 'shirtDiadoraRed', 'shirtDiadoraWhite',
+  'shirtTveria85', 'shirtVisa86', 'shirtDiadoraRed', 'shirtDiadoraWhite',
   'shirtKing', 'shirtShikun', 'shirtCrt', 'shirtBasket90',
 ] as const
 

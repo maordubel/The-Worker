@@ -1,7 +1,8 @@
 import Phaser from 'phaser'
 
 import { PASSAGE_1990, PASSAGE_CARD_HE } from '../../content/chapter1990'
-import { ERA_1986, ERA_1990 } from '../../content/era'
+import { PASSAGE_1993, PASSAGE_CARD_1993_HE } from '../../content/chapter1993cup'
+import { ERA_1986, ERA_1990, ERA_1993_CUP } from '../../content/era'
 import { sceneFor } from '../../world/scenes'
 import { artUrl, extensionKeys } from '../art'
 import { fillCamera } from '../camera'
@@ -26,7 +27,47 @@ import { WorldScene } from './WorldScene'
  * It is its own scene rather than a WorldScene mode because it is the one place in the
  * game where the clock does not run, no schedule applies, no door works and nobody can
  * be spoken to — a WorldScene with all of that switched off is a scene pretending.
+ *
+ * מ-6.9.2026 זה גשר, ולא גשר אחד. The scene takes its objects, its card and its
+ * destination from `init`, because the Stage B brief (§7 B2) asks for a second one: after
+ * the derby of March 1991 the game jumped straight to April 1993, so the branch the whole
+ * unit is about — a hall that became a habit — was a single evening followed by two silent
+ * years. The bridge is what says otherwise, and it says it with four objects rather than
+ * with a sentence.
  */
+
+/** which bridge is being played — everything that differs between them, and nothing else */
+type Passage = {
+  objects: typeof PASSAGE_1990
+  cardHe: string
+  /** where each object sits along the room, by id */
+  at: Record<string, number>
+  /** the chapter this bridge lands in, and the room it lands in */
+  into: { chapter: string; year: number; weekday: number; minute: number; mapId: string; spawn: string }
+  /** the flag the arrival raises, so a save knows this bridge was walked */
+  flag: string
+  /** the line the kitchen says just before the picture changes */
+  toastHe: string
+}
+
+const PASSAGES: Record<string, Passage> = {
+  '1990': {
+    objects: PASSAGE_1990,
+    cardHe: PASSAGE_CARD_HE,
+    at: { clipping: 0.72, notebook: 0.17, scarf: 0.89, photo: 0.47 },
+    into: { chapter: ERA_1990.chapter, year: ERA_1990.year, weekday: 6, minute: 12 * 60 + 35, mapId: 'kitchen', spawn: 'fromHome' },
+    flag: 'life:passage-1990',
+    toastHe: 'מהמטבח: רדיו. מישהו מסובב את הכפתור.',
+  },
+  '1993': {
+    objects: PASSAGE_1993,
+    cardHe: PASSAGE_CARD_1993_HE,
+    at: { stubs: 0.72, ledger: 0.17, laces: 0.89, radio: 0.47 },
+    into: { chapter: ERA_1993_CUP.chapter, year: ERA_1993_CUP.year, weekday: 1, minute: 15 * 60 + 30, mapId: 'home', spawn: 'start' },
+    flag: 'life:passage-1993',
+    toastHe: 'מהסלון: הטלוויזיה. מישהו מדבר על גמר.',
+  },
+}
 
 const ROOM = sceneFor('bedroom')
 
@@ -47,9 +88,15 @@ export class PassageScene extends Phaser.Scene {
   private facing = -1
   private stride = 0
   private dressing: Phaser.GameObjects.Image[] = []
+  /** which bridge; defaults to the one this scene was written for */
+  private passage: Passage = PASSAGES['1990']!
 
   constructor() {
     super(PassageScene.KEY)
+  }
+
+  init(data?: { passage?: string }) {
+    this.passage = PASSAGES[data?.passage ?? '1990'] ?? PASSAGES['1990']!
   }
 
   preload() {
@@ -104,8 +151,8 @@ export class PassageScene extends Phaser.Scene {
     this.player = this.add.image(0.3 * this.W, y, `art-${ERA_1986.player.pose.down}`).setOrigin(0.5, 1).setDepth(y)
     this.sizePlayer(ROOM.size.near)
 
-    for (const def of PASSAGE_1990) {
-      const at = { clipping: 0.72, notebook: 0.17, scarf: 0.89, photo: 0.47 }[def.id] ?? 0.5
+    for (const def of this.passage.objects) {
+      const at = this.passage.at[def.id] ?? 0.5
       const mark = this.add
         .ellipse(at * this.W, 0.905 * this.H, 26, 26 * 0.32, LIFE_PALETTE.red, 0)
         .setStrokeStyle(2, LIFE_PALETTE.red, 0.7)
@@ -255,7 +302,7 @@ export class PassageScene extends Phaser.Scene {
       this.passYear(n)
       this.time.delayedCall(900, () => {
         this.ctx.dialogue.startLines([{ who: null, text: spot.def.afterHe }], () => {
-          if (this.seen >= PASSAGE_1990.length) this.finish()
+          if (this.seen >= this.passage.objects.length) this.finish()
         })
       })
     })
@@ -277,7 +324,7 @@ export class PassageScene extends Phaser.Scene {
       agorot: 0,
       showMoney: false,
       place: ROOM.titleHe,
-      objective: n >= PASSAGE_1990.length ? '' : 'החדר שלך. תסתכל מסביב.',
+      objective: n >= this.passage.objects.length ? '' : 'החדר שלך. תסתכל מסביב.',
       year: this.ctx.engine.state.year,
       scene: 'bedroom',
       hint: 'ארבע שנים עוברות בחדר אחד. תסתכל על מה שהשתנה.',
@@ -315,20 +362,21 @@ export class PassageScene extends Phaser.Scene {
     this.done = true
     this.ctx.bus.emit('prompt', null)
     this.ctx.bus.emit('controls', { visible: false })
-    this.ctx.bus.emit('toast', { text: 'מהמטבח: רדיו. מישהו מסובב את הכפתור.', tone: 'plain' })
+    this.ctx.bus.emit('toast', { text: this.passage.toastHe, tone: 'plain' })
     this.time.delayedCall(1600, () => {
       this.cameras.main.fadeOut(900, 0, 0, 0)
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        this.ctx.bus.emit('card', { titleHe: PASSAGE_CARD_HE, subHe: null, ms: 2200 })
+        const into = this.passage.into
+        this.ctx.bus.emit('card', { titleHe: this.passage.cardHe, subHe: null, ms: 2200 })
         this.time.delayedCall(2400, () => {
           this.ctx.engine.dispatch(
-            { t: 'year.entered', year: ERA_1990.year, weekday: 6, minute: 12 * 60 + 35 },
-            { t: 'chapter.entered', chapter: ERA_1990.chapter },
-            { t: 'flag.raised', flag: 'life:passage-1990' },
+            { t: 'year.entered', year: into.year, weekday: into.weekday, minute: into.minute },
+            { t: 'chapter.entered', chapter: into.chapter },
+            { t: 'flag.raised', flag: this.passage.flag },
           )
           void this.ctx.engine.save()
           this.ctx.bus.emit('controls', { visible: true })
-          this.scene.start(WorldScene.KEY, { mapId: 'kitchen', spawn: 'fromHome' })
+          this.scene.start(WorldScene.KEY, { mapId: into.mapId, spawn: into.spawn })
         })
       })
     })

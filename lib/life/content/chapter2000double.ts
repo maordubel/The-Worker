@@ -222,6 +222,18 @@ export function outcomeFamily(state: LifeState): OutcomeFamily {
   if (gate === 'gate5' && asaf >= 8) return kobi >= 55 ? 'inherited-chosen' : 'gate5-builder'
   if (travel >= 22) return 'always-travelling'
   if (gate === 'gate7' || gate === 'between') return kobi >= 55 && asaf >= 6 ? 'inherited-chosen' : 'gate7-keeper'
+  /**
+   * מי שלא עמד באף שער — the outcome that was being silently overwritten.
+   *
+   * In the winter of 1996 a player can walk away from both gates (`gate: 'outside'`,
+   * reason `'conflict'`). Until 6.9.2026 this function never tested for it, so four years
+   * later the game handed that person the "inherited and chose" walk — the one ending that
+   * is specifically about standing between two people who both wanted you. The brief is
+   * explicit that `outside` is not a neutral win (§7 B6); it is also not a defeat. It is a
+   * man in a crowd who belongs to no part of it, which is `alone-in-crowd` unless somebody
+   * has since found him.
+   */
+  if (gate === 'outside') return kobi >= 55 || asaf >= 8 || shachor >= 10 ? 'gate7-keeper' : 'alone-in-crowd'
   return 'inherited-chosen'
 }
 
@@ -412,6 +424,25 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
     id: 'd-walk',
     nameHe: null,
     branches: [
+      /**
+       * האוטובוס שלא עלית עליו — 1996, on the last walk of the decade.
+       *
+       * §16 asks that the decade be one life and §19 asks that a confirmed personal
+       * memory land somewhere real. This is where the bus lands: not as a callback the
+       * game congratulates itself for, but as the thing a person actually thinks about
+       * walking out of a stadium at twenty-two — that he was late twice for something,
+       * and that both times he would do it again.
+       */
+      {
+        when: { flag: 'life:bus:refused' },
+        lines: [
+          { who: null, text: 'בחוץ. לא על מסך תוצאות — בחוץ, ברחוב שמוביל מהאצטדיון, בתוך המון שהולך לכל הכיוונים בבת אחת.' },
+          { who: null, text: 'עברת ליד אוטובוס עם צבעים שאתה מכיר, והמחשבה הראשונה הייתה תחנה מרכזית, ארבע לפנות בוקר, ואיזה טמבל היית.' },
+          { who: null, text: 'והשנייה הייתה שהיית עושה את זה שוב.' },
+          { who: null, text: 'מי לידך.' },
+        ],
+        then: [{ e: 'presence', mode: 'inside' }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'goto', node: 'd-family' }],
+      },
       {
         lines: [
           { who: null, text: 'בחוץ. לא על מסך תוצאות — בחוץ, ברחוב שמוביל מהאצטדיון, בתוך המון שהולך לכל הכיוונים בבת אחת.' },

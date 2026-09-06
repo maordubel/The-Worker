@@ -1,6 +1,6 @@
 import { at } from '../clock'
 import { shirtAgorot } from '../prices'
-import type { LifeState } from '../types'
+import type { LifeState, LocationId } from '../types'
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
@@ -164,6 +164,60 @@ export const BEATS_A2: Beat[] = [
  * one factual line is `{anchor}`, substituted by the dialogue runner from the canonical
  * archive, and everything else is backs, smoke, concrete, cloth, hands and noise.
  */
+/**
+ * ------------------------------------------------------------------ לאן ללכת ---
+ *
+ * The room the day currently wants, per Stage A chapter. `world/route.ts` turns that into
+ * the next DOOR — by the label painted on it — for the hint and for the arrow at the edge
+ * of the glass.
+ *
+ * Maor, 6.9.2026, in the middle of A3: *"אפי אומר לך ללכת אחרי הקיר ימינה, אין לי מושג מה
+ * הכוונה במשפט הזה."* Efi's line is exactly right for a six-year-old and exactly useless as
+ * navigation, and the fix is not to make Efi talk like a signpost. It is that the chapter
+ * knows where it is sending him, and the room reads the label off the actual door.
+ *
+ * Every one of these returns null once the day's want is satisfied, so a chapter with
+ * nothing left to reach stops pointing anywhere.
+ */
+export const goalA2 = (state: LifeState): LocationId | null => {
+  if (state.flags['a2:played'] || state.flags['a2:late']) return null
+  if (state.flags['a2:errand'] && !state.flags['a2:bread']) return 'kiosk'
+  return 'pitch'
+}
+
+export const goalA3 = (state: LifeState): LocationId | null => {
+  if (state.flags['a3:done'] || state.flags['a3:inside']) return null
+  // Only once Efi has named it. Before that the hall is not a place the boy knows exists,
+  // and an arrow pointing at it would be the game telling him a secret he was about to be
+  // told properly.
+  if (!state.flags['knows:hall'] && !state.flags['life:knows:hall']) return null
+  return state.flags['entry:granted'] ? 'ussishkin-hall' : 'ussishkin-outside'
+}
+
+export const goalA4 = (state: LifeState): LocationId | null => {
+  if (state.flags['own:shirt85'] || state.flags['a4:gave']) return null
+  // with the thirty in hand the day has one destination; before that it has a job, not a
+  // place, and pointing at a door would be the game inventing an errand
+  return state.savings + state.agorot >= SHIRT_PRICE ? 'kiosk' : null
+}
+
+export const goalA5 = (state: LifeState): LocationId | null => {
+  if (state.flags['a5:there']) return null
+  if (!state.flags['a5:dressed']) return null
+  return 'bloomfield-outside'
+}
+
+export const goalA6 = (state: LifeState): LocationId | null => {
+  if (state.flags['a6:heard']) return null
+  if (state.flags['a6:radio-dead'] && !state.flags['a6:with-liron']) return 'street'
+  return null
+}
+
+export const goalA7 = (state: LifeState): LocationId | null => {
+  if (state.flags['a7:refused']) return null
+  return state.flags['a7:knows'] ? 'home' : 'street'
+}
+
 export const CONVERSATIONS_A1: Conversation[] = [
   {
     id: 'a1-1983',
@@ -419,6 +473,60 @@ export const CONVERSATIONS_A2: Conversation[] = [
     ],
   },
   {
+    /**
+     * אפי, באביב 1984 — the sentence that decides whether the autumn happens.
+     *
+     * Stage A §7 asks that the Ussishkin branch open "only after meaningful Efi engagement
+     * in A2" and that skipping it cost something real. This is the engagement: a boy with a
+     * basketball under his arm at the edge of a football game he will not be picked for,
+     * saying the thing children say when they want to be asked about the thing they love.
+     * Answering him raises `life:a2:efi`, which is what `a3-hall`'s `when` reads two
+     * autumns later.
+     *
+     * There is no prompt and no marker on him, and that is the cost working both ways: a
+     * player who talks to everybody finds it, and a player who goes straight to the
+     * football — which is exactly what the day is asking him to do — does not, and gets a
+     * different childhood. Efi remembers either way.
+     */
+    id: 'efi-a2',
+    nameHe: 'אפי',
+    branches: [
+      {
+        when: { flag: 'life:a2:efi' },
+        lines: [{ who: 'אפי', text: 'אמרתי לך. באחד הימים.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'אפי לא נכנס. הוא עומד בצד עם כדור אחר — כתום, גדול, מנוקד.' },
+          { who: 'אפי', text: 'אתה יודע שיש עוד משחק? לא כזה. בפנים, על עץ.' },
+        ],
+        choices: [
+          {
+            id: 'ask',
+            text: '"איפה בפנים?"',
+            then: [
+              { e: 'flag', flag: 'life:a2:efi' },
+              { e: 'rel', who: 'efi', axis: 'bond', delta: 4 },
+              { e: 'redheart', key: 'basketballLove', delta: 3 },
+              { e: 'remember', who: 'efi', eventId: 'asked-about-the-hall-1984', significance: 'major' },
+              { e: 'toast', text: '"לא עכשיו. באחד הימים אני לוקח אותך." הוא אמר את זה כמו הבטחה, ולא כמו תירוץ.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'shrug',
+            text: '"כדורסל זה לבנות."',
+            then: [
+              { e: 'rel', who: 'efi', axis: 'distance', delta: 3 },
+              { e: 'remember', who: 'efi', eventId: 'said-that-in-1984', significance: 'major' },
+              { e: 'toast', text: 'הוא לא ענה. הוא הלך לקיר עם הכדור הכתום והמשיך לבד.', tone: 'plain' },
+            ],
+          },
+          { id: 'later', text: 'לא עכשיו. הקבוצות מתמלאות.', then: [] },
+        ],
+      },
+    ],
+  },
+  {
     id: 'a2-after-game',
     nameHe: null,
     branches: [
@@ -432,9 +540,16 @@ export const CONVERSATIONS_A2: Conversation[] = [
 
 export function objectiveA3(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
-  if (state.flags['a3:inside']) return null
+  if (state.flags['a3:done']) return null
+  if (state.flags['a3:inside']) {
+    // inside, and the day is no longer about getting in — it is about being here
+    if (!state.flags['saw:parquet']) return 'אתה בפנים. תסתכל על הרצפה הזאת.'
+    if (!state.flags['saw:stand']) return 'הפרקט, היציע, החלונות. ואפי איפשהו.'
+    return 'תמצא את אפי כשתראה מספיק.'
+  }
   if (sceneId === 'ussishkin-outside') return 'הדלת. אפי מכיר את הסדרן, והסדרן אוהב שמות.'
-  return 'אפי אמר שיש משהו אחרי הקיר. תלך איתו.'
+  if (state.flags['knows:hall'] || state.flags['life:knows:hall']) return 'ללכת עם אפי — דרך מרכז תל אביב.'
+  return 'אפי מחכה ברחוב. תשאל אותו לאן.'
 }
 
 export const ENDINGS_A3: Record<string, EndingCard> = {
@@ -463,10 +578,25 @@ export const BEATS_A3: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'flag', flag: A3 },
-      { a: 'lines', lines: [{ who: null, text: 'אותו רחוב, שנה אחרי. אתה כבר יודע איפה הבור במדרכה.' }, { who: 'אפי', text: 'פוגי. יש מקום שאתה לא מכיר ואני כן. אחרי הקיר, ימינה. בוא.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'אותו רחוב, שנה אחרי. אתה כבר יודע איפה הבור במדרכה.' }, { who: 'אפי', text: 'פוגי. יש מקום שאתה לא מכיר ואני כן. אחרי הקיר, ימינה — למרכז תל אביב. בוא.' }] },
     ],
   },
   {
+    /**
+     * להיכנס לאולם — and then to be in it.
+     *
+     * This beat used to end the chapter nine hundred milliseconds after the boy walked
+     * through the door. Everything the hall is made of — the parquet, the stand, the
+     * windows, the usher, the smell off the counter, all of it already painted and already
+     * written — was on the far side of an ending card nobody could get past. Maor's
+     * sentence for the whole of Stage A, *"המשימות לא זורמות"*, is largely this: rooms that
+     * end instead of rooms you are in.
+     *
+     * So arriving is now a MILESTONE and not a curtain. The day closes when the boy has
+     * actually looked at the place (`a3-seen`), or when Efi decides it is time
+     * (`efi-a3-hall`), or when the evening runs out (`a3-late`). Three ways out of one
+     * room, and the room is open the whole time.
+     */
     id: 'a3-hall',
     at: 'ussishkin-hall',
     trigger: 'enter',
@@ -475,15 +605,41 @@ export const BEATS_A3: Beat[] = [
     do: [
       { a: 'flag', flag: 'a3:inside' },
       { a: 'sfx', key: 'ball-bounce', level: 0.6 },
-      { a: 'lines', lines: [{ who: null, text: 'פרקט. גובה. אור מהחלונות למעלה, ריח של גרעינים ונקניקיות מהמזנון, ורעש של הרבה אנשים בחדר סגור — כמו גשם על גג פח.' }, { who: 'אפי', text: 'זה אוסישקין. גם זה הפועל. אבא שלך לא סיפר לך?' }] },
-      { a: 'ending', id: 'hall' },
+      { a: 'lines', lines: [{ who: null, text: 'פרקט. גובה. אור מהחלונות למעלה, ריח של גרעינים ונקניקיות מהמזנון, ורעש של הרבה אנשים בחדר סגור — כמו גשם על גג פח.' }, { who: 'אפי', text: 'זה אוסישקין. גם זה הפועל. אבא שלך לא סיפר לך?' }, { who: 'אפי', text: 'תסתובב. תראה. אני פה, לא בורח.' }] },
+      { a: 'events', events: [{ t: 'redheart.changed', key: 'basketballLove', delta: 4 }] },
     ],
+  },
+  {
+    /**
+     * שראה את המקום — the day ends when the boy has actually looked at three things.
+     *
+     * Not a checklist he is shown: the room simply notices. Two of the four are enough to
+     * have been somewhere; the third is what makes it a memory, and the number is small
+     * enough that anybody who wanders at all will reach it without being told to.
+     */
+    id: 'a3-seen',
+    trigger: 'clock',
+    when: {
+      flag: 'a3:inside',
+      all: [{ flag: 'saw:parquet' }, { flag: 'saw:stand' }],
+      none: [{ flag: 'a3:done' }],
+    },
+    delayMs: 1200,
+    do: [{ a: 'flag', flag: 'a3:done' }, { a: 'talk', conversation: 'a3-leaving' }],
+  },
+  {
+    /** and if he stands there until they turn the lights off, that is also an evening */
+    id: 'a3-late',
+    trigger: 'clock',
+    waitingHe: 'ממתין: המשחק נגמר',
+    when: { flag: 'a3:inside', afterMinute: at(20, 40), none: [{ flag: 'a3:done' }] },
+    do: [{ a: 'flag', flag: 'a3:done' }, { a: 'talk', conversation: 'a3-leaving' }],
   },
   {
     id: 'a3-night',
     trigger: 'clock',
     waitingHe: 'ממתין: אפי יוצא מהדלת',
-    when: { flag: A3, afterMinute: at(20, 0), none: [{ flag: 'a3:inside' }] },
+    when: { flag: A3, afterMinute: at(20, 0), none: [{ flag: 'a3:inside' }, { flag: 'a3:done' }] },
     do: [{ a: 'lines', lines: [{ who: null, text: 'חושך. אפי יצא מהדלת מזיע ולא שאל למה חיכית בחוץ.' }] }, { a: 'ending', id: 'door' }],
   },
 ]
@@ -497,7 +653,89 @@ export const CONVERSATIONS_A3: Conversation[] = [
       // `life:` as well as the day flag: a place you have been told about stays told
       // about. `knows:hall` is cleared with every other flag at midnight (§day.entered),
       // which is right for a beat and wrong for a street that now exists in his head.
-      { lines: [{ who: 'אפי', text: 'אחרי הקיר, ימינה. אני הולך. אתה בא או לא?' }], then: [{ e: 'flag', flag: 'knows:hall' }, { e: 'flag', flag: 'life:knows:hall' }] },
+      /**
+       * "אחרי הקיר, ימינה" is how a six-year-old gives directions and it is the right line.
+       * It is also, on its own, not navigation — Maor stood in that street on 6.9.2026 and
+       * could not tell which of six painted doorways it meant. So Efi says it and then says
+       * the name of the turning, the way a child who has actually been somewhere does:
+       * first the landmark he remembers, then the words the grown-ups use.
+       */
+      {
+        lines: [
+          { who: 'אפי', text: 'אחרי הקיר, ימינה. זה מרכז תל אביב, ומשם אלנבי.' },
+          { who: 'אפי', text: 'אני הולך. אתה בא או לא?' },
+        ],
+        then: [
+          { e: 'flag', flag: 'knows:hall' },
+          { e: 'flag', flag: 'life:knows:hall' },
+          { e: 'toast', text: 'בקצה הרחוב, ליד הקיר: "למרכז תל אביב".', tone: 'plain' },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * אפי, בפנים — the person you came with, in the room you came to.
+     *
+     * A3's whole point is that somebody your own age knows a door you do not, and that
+     * behind it is a second red house. Until 6.9.2026 he said one line outside and then the
+     * chapter ended on the threshold. Now he is standing at the rail, and he is the way
+     * out of the evening as well as the way into it: talk to him when you have seen enough
+     * and the night closes on what you actually looked at.
+     */
+    id: 'efi-a3-hall',
+    nameHe: 'אפי',
+    branches: [
+      {
+        when: { all: [{ flag: 'saw:parquet' }, { flag: 'saw:stand' }] },
+        lines: [{ who: 'אפי', text: 'נו? אמרתי לך.' }],
+        choices: [
+          {
+            id: 'stay',
+            text: '"עוד קצת."',
+            then: [{ e: 'redheart', key: 'basketballLove', delta: 2 }, { e: 'rel', who: 'efi', axis: 'bond', delta: 2 }],
+          },
+          {
+            id: 'go',
+            text: '"בוא נלך."',
+            then: [{ e: 'flag', flag: 'a3:done' }, { e: 'goto', node: 'a3-leaving' }],
+          },
+        ],
+      },
+      {
+        when: { flag: 'saw:parquet' },
+        lines: [
+          { who: 'אפי', text: 'הרצפה, כן. עכשיו תסתכל למעלה — על היציע. שם עומדים אלה שבאים כל שבוע.' },
+        ],
+      },
+      {
+        lines: [
+          { who: 'אפי', text: 'אל תעמוד בדלת. תיכנס. תסתכל על הרצפה קודם, כולם מסתכלים על הרצפה קודם.' },
+          { who: null, text: 'הוא אמר את זה כמו מישהו שמראה לך את הבית שלו, ולא כמו מישהו שהביא אותך למקום.' },
+        ],
+      },
+    ],
+  },
+  {
+    /** the way the evening ends, whichever of the three doors closed it */
+    id: 'a3-leaving',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:windows' },
+        lines: [
+          { who: null, text: 'בחוץ כבר חושך, והחלונות שהסתכלת עליהם מבפנים נראים עכשיו כמו פס אור צהוב מעל הרחוב.' },
+          { who: 'אפי', text: 'בשבוע הבא יש עוד. אל תשאל את אבא שלך, פשוט תבוא.' },
+        ],
+        then: [{ e: 'flag', flag: 'life:knows:hall' }, { e: 'rel', who: 'efi', axis: 'bond', delta: 3 }, { e: 'ending', id: 'hall' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'יצאתם כשעוד שמעו את הכדור מבפנים. ברחוב היה קר, ולא היה אכפת לך.' },
+          { who: 'אפי', text: 'בשבוע הבא יש עוד.' },
+        ],
+        then: [{ e: 'flag', flag: 'life:knows:hall' }, { e: 'rel', who: 'efi', axis: 'bond', delta: 2 }, { e: 'ending', id: 'hall' }],
+      },
     ],
   },
   {
@@ -629,7 +867,7 @@ export const CONVERSATIONS_A4: Conversation[] = [
         when: { minAgorot: SHIRT_PRICE },
         lines: [{ who: 'רפי מהקיוסק', text: 'החולצה? 30 שקל. יש לך? תספור על הדלפק, לא בכיס.' }],
         choices: [
-          { id: 'buy', text: 'לספור על הדלפק. הכל.', then: [{ e: 'money', agorot: -SHIRT_PRICE, why: 'החולצה' }, { e: 'own', item: 'shirt85' }, { e: 'shirt', id: 'visa86' }, { e: 'redheart', key: 'footballLove', delta: 5 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'remember', who: 'shopkeeper', eventId: 'bought-shirt-1985', significance: 'major' }, { e: 'sfx', key: 'coins', level: 0.7 }, { e: 'toast', text: 'הוא קיפל אותה פעמיים והכניס לשקית של לחם.', tone: 'red' }, { e: 'goto', node: 'rafi-a4-bought' }] },
+          { id: 'buy', text: 'לספור על הדלפק. הכל.', then: [{ e: 'money', agorot: -SHIRT_PRICE, why: 'החולצה' }, { e: 'own', item: 'shirt85' }, { e: 'shirt', id: 'tveria85' }, { e: 'redheart', key: 'footballLove', delta: 5 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'remember', who: 'shopkeeper', eventId: 'bought-shirt-1985', significance: 'major' }, { e: 'sfx', key: 'coins', level: 0.7 }, { e: 'toast', text: 'הוא קיפל אותה פעמיים והכניס לשקית של לחם.', tone: 'red' }, { e: 'goto', node: 'rafi-a4-bought' }] },
           { id: 'wait', text: '"עוד לא. בשבוע הבא."', then: [{ e: 'toast', text: '"בשבוע הבא היא עוד פה." הוא לא היה בטוח.', tone: 'plain' }] },
         ],
       },
@@ -774,6 +1012,51 @@ export const CONVERSATIONS_A5: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { flag: 'a5:dressed' }, lines: [{ who: null, text: 'אתה בחולצה. השרוולים עד המרפק. זה בסדר, תגדל.' }] },
+      /**
+       * מי שלא קנה אותה בקיץ — the branch A4's two other endings needed and never had.
+       *
+       * `shirt-a5` was gated on the era alone, so a boy who put the tin on the table for
+       * his mother (`a4:gave`) or ran out of summer (`notYet`) was told, in September,
+       * "you bought it in the summer" — and then wore a shirt he does not own. Both of
+       * A4's non-purchase endings were cosmetic; a whole day's saving decided nothing.
+       *
+       * It decides something now. Without the shirt he goes in what he has, and the day
+       * still happens: the point of 28.9.1985 is being there, and a boy in a plain shirt at
+       * Gate 7 is a different memory, not a missing one.
+       */
+      {
+        when: { none: [{ flag: 'own:shirt85' }] },
+        lines: [
+          { who: null, text: 'על הכיסא: החולצה האדומה של אבא, גדולה עליך בשלוש מידות, ולידה חולצה רגילה שלך.' },
+          { who: null, text: 'את החולצה מהקיץ לא קנית. אתה יודע בדיוק כמה חסר היה.' },
+        ],
+        choices: [
+          {
+            id: 'plain',
+            text: 'ללבוש את שלך ולרדת.',
+            then: [
+              { e: 'flagValue', flag: 'a5:dressed', value: true },
+              { e: 'flag', flag: 'a5:plain' },
+              { e: 'flag', flag: 'knows:match' },
+              { e: 'time', minutes: 4 },
+              { e: 'toast', text: 'אין סמל מעל הלב. יש אותך.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'fathers',
+            text: 'ללבוש את של אבא.',
+            then: [
+              { e: 'flagValue', flag: 'a5:dressed', value: true },
+              { e: 'flag', flag: 'a5:fathers' },
+              { e: 'flag', flag: 'knows:match' },
+              { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 3 },
+              { e: 'redheart', key: 'familyTradition', delta: 4 },
+              { e: 'time', minutes: 6 },
+              { e: 'toast', text: 'הכתפיים נופלות עד המרפקים. קיפלת פעמיים ויצאת.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
       {
         lines: [{ who: null, text: 'החולצה. אדומה, וי לבן, סמל מעל הלב. קנית אותה בקיץ ועוד לא לבשת אותה למשחק.' }],
         choices: [
@@ -788,6 +1071,8 @@ export const CONVERSATIONS_A5: Conversation[] = [
     nameHe: 'קובי',
     branches: [
       { when: { flag: 'a5:kobi-left' }, lines: [{ who: null, text: 'האוטו לא פה. הכתם של השמן על האספלט עוד רטוב.' }] },
+      { when: { flag: 'a5:fathers' }, lines: [{ who: 'קובי', text: 'זאת שלי.' }, { who: null, text: 'הוא לא אמר לך להוריד אותה. הוא קיפל לך את השרוול פעם שלישית, בלי להסתכל עליך, ופתח את הדלת.' }], then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'remember', who: 'kobi', eventId: 'wore-my-shirt-1985', significance: 'major' }, { e: 'time', minutes: 25 }, { e: 'travel', to: 'bloomfield-outside', spawn: 'fromRoute' }] },
+      { when: { flag: 'a5:plain' }, lines: [{ who: 'קובי', text: 'בסדר. בשנה הבאה.' }, { who: null, text: 'הוא אמר את זה קצר מדי, כמו מישהו שכבר חישב כמה זה עולה ולא רצה שתראה שהוא מחשב.' }], then: [{ e: 'rel', who: 'kobi', axis: 'trust', delta: 2 }, { e: 'wellbeing', key: 'regret', delta: 2 }, { e: 'time', minutes: 25 }, { e: 'travel', to: 'bloomfield-outside', spawn: 'fromRoute' }] },
       { when: { flag: 'a5:dressed' }, lines: [{ who: 'קובי', text: '…' }, { who: null, text: 'הוא הסתכל על החולצה. שנייה יותר מדי. ואז פתח את הדלת.' }], then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'remember', who: 'kobi', eventId: 'saw-the-shirt-1985', significance: 'major' }, { e: 'time', minutes: 25 }, { e: 'travel', to: 'bloomfield-outside', spawn: 'fromRoute' }] },
       { lines: [{ who: 'קובי', text: 'ככה אתה בא? לך תתלבש. אמרתי רבע שעה, ורבע שעה זה רבע שעה.' }] },
     ],
@@ -819,6 +1104,16 @@ export const CONVERSATIONS_A5: Conversation[] = [
        * and the oil is still wet on the asphalt.
        */
       { when: { flag: 'a5:kobi-left' }, lines: [{ who: null, text: 'נכנסת לבד. אף אחד לא שם יד על הכתף, ואף אחד גם לא עצר אותך. אתה בחולצה, ובפנים כולם בחולצה, וזה מספיק.' }], then: [{ e: 'presence', mode: 'inside' }, { e: 'redheart', key: 'footballLove', delta: 4 }, { e: 'personality', key: 'independence', delta: 4 }, { e: 'ending', id: 'there' }] },
+      /**
+       * בלי החולצה — 28.9.1985 for a boy whose summer did not add up to thirty shekels.
+       *
+       * The day is not smaller. What is different is the one line about the shirt, and
+       * that line is the point of A4: a saving day whose two other endings decided nothing
+       * was a saving day that did not exist. `a5:plain` and `a5:fathers` are what those two
+       * endings buy, and they buy a different September rather than a worse one.
+       */
+      { when: { flag: 'a5:plain' }, lines: [{ who: null, text: 'אבא שם יד על הכתף ומכניס אותך פנימה, לפני הצעקה הראשונה. אתה בחולצה רגילה, ואף אחד לא מסתכל עליה חוץ ממך.' }], then: [{ e: 'presence', mode: 'inside' }, { e: 'redheart', key: 'footballLove', delta: 4 }, { e: 'wellbeing', key: 'belonging', delta: 3 }, { e: 'ending', id: 'there' }] },
+      { when: { flag: 'a5:fathers' }, lines: [{ who: null, text: 'אבא שם יד על הכתף ומכניס אותך פנימה. אתה בחולצה שלו, מקופלת שלוש פעמים, ומישהו ליד הגדר אמר "יש לך אחד קטן" והוא לא ענה.' }], then: [{ e: 'presence', mode: 'inside' }, { e: 'redheart', key: 'footballLove', delta: 4 }, { e: 'redheart', key: 'familyTradition', delta: 5 }, { e: 'ending', id: 'there' }] },
       { lines: [{ who: null, text: 'אבא שם יד על הכתף ומכניס אותך פנימה, לפני הצעקה הראשונה. אתה בחולצה. אף אחד לא צוחק.' }], then: [{ e: 'presence', mode: 'inside' }, { e: 'redheart', key: 'footballLove', delta: 4 }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'ending', id: 'there' }] },
     ],
   },

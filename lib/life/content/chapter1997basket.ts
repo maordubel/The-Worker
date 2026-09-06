@@ -213,10 +213,32 @@ export const CONVERSATIONS_HALL: Conversation[] = [
           { who: 'שחור', text: 'עולים. אל תגיד לי "הבראנו". עולים.' },
           { who: 'לימור', text: 'שלושה עשר אנשים עבדו השנה בשביל הערב הזה. אני יודעת כי רשמתי.' },
         ],
+        /**
+         * שבע שנים אחורה — the brief (§16) asks that the decade be one life and not ten
+         * episodes, and the promotion of 1990 is the obvious debt: a twelve-year-old
+         * learned that word standing outside a gate that opened late. `went:withKobi`
+         * survives the chapter cut since 6.9.2026, which is what makes this line possible
+         * at all.
+         */
         choices: [
           { id: 'hope', text: '"אולי הפעם זה באמת מתחיל."', then: [{ e: 'wellbeing', key: 'happiness', delta: 4 }, { e: 'institution', key: 'basketballOwnershipTrust', delta: 4 }, { e: 'goto', node: 'h2-inside' }] },
           { id: 'doubt', text: '"עלינו. זה הכל."', then: [{ e: 'rel', who: 'shachor', axis: 'trust', delta: 3 }, { e: 'personality', key: 'curiosity', delta: 1 }, { e: 'goto', node: 'h2-inside' }] },
           { id: 'tired', text: 'לשתוק. עייף.', then: [{ e: 'wellbeing', key: 'exhaustion', delta: 5 }, { e: 'goto', node: 'h2-inside' }] },
+          {
+            id: 'ninety',
+            text: '"בפעם הראשונה ששמעתי \'עולים\' הייתי בן שתים־עשרה."',
+            when: { flag: 'went:withKobi' },
+            // hidden, not greyed: a line about your own twelfth birthday is not a door you
+            // can see and cannot open — to a player who went with his friends in 1990 it is
+            // simply not a thing he would say
+            hidden: true,
+            then: [
+              { e: 'redheart', key: 'historyMemory', delta: 4 },
+              { e: 'rel', who: 'shachor', axis: 'sharedHistory', delta: 3 },
+              { e: 'toast', text: 'שחור הניח ארגז ולא הרים אותו. "ואיפה היית עומד אז?" "בחוץ. השער נפתח מאוחר."', tone: 'plain' },
+              { e: 'goto', node: 'h2-inside' },
+            ],
+          },
         ],
       },
     ],

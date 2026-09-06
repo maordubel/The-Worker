@@ -36,6 +36,11 @@ export type ChapterDef = {
   /** the unit in the brief — `A8`, `B3` */
   unit: string
   titleHe: string
+  /**
+   * הפרק הזה קיים רק אם — every `life:` flag that must be up for this chapter to be part
+   * of this life. Absent means the chapter always happens, which is true of all but one.
+   */
+  when?: readonly string[]
   /** what a card would say — never a scoreline */
   dateHe: string
   year: number
@@ -87,6 +92,10 @@ export const CHAPTERS: readonly ChapterDef[] = [
     id: 'a3-hall',
     stage: 'A',
     unit: 'A3',
+    // Only for a boy who actually stood with Efi in the spring (Stage A §7). Skipping it
+    // is a real loss: no hall, no usher who says your name, and an Efi who remembers being
+    // asked and not answered.
+    when: ['life:a2:efi'],
     titleHe: 'הבית האדום השני',
     dateHe: 'סתיו 1984',
     year: 1984,
@@ -373,13 +382,35 @@ export function chapterFor(id: string): ChapterDef | null {
   return CHAPTER[id] ?? null
 }
 
-/** The next chapter that has rooms behind it, or null when the life as built is over. */
-export function nextPlayable(id: string): ChapterDef | null {
+/**
+ * פרק שאפשר לדלג עליו — a chapter that is only in this life if the life earned it.
+ *
+ * Stage A §7 is explicit that the Ussishkin branch is OPTIONAL and "opens only after
+ * meaningful Efi engagement in A2", and that skipping it must cost something real. Until
+ * 6.9.2026 it was an unconditional link in the chain: every player discovered the second
+ * red house, so discovering it meant nothing and Efi's invitation was scenery.
+ *
+ * `when` is how a chapter says that. It is checked against the LIFE — the `life:` flags
+ * that survive a year — because whether a six-year-old chose to stand with somebody two
+ * autumns ago is exactly the kind of thing a chapter should be allowed to ask about.
+ */
+export function chapterOpen(def: ChapterDef, flags: Record<string, boolean | string | number>): boolean {
+  if (!def.playable) return false
+  if (!def.when) return true
+  return def.when.every((flag) => Boolean(flags[flag]))
+}
+
+/**
+ * The next chapter that has rooms behind it AND is open to this life, or null when the
+ * life as built is over. `flags` is optional so the callers that only need the shape of
+ * the chain (the finale card, the tests) keep working; the runtime passes the real ones.
+ */
+export function nextPlayable(id: string, flags: Record<string, boolean | string | number> = {}): ChapterDef | null {
   let cursor = chapterFor(id)?.next ?? null
   while (cursor) {
     const def = CHAPTER[cursor]
     if (!def) return null
-    if (def.playable) return def
+    if (chapterOpen(def, flags)) return def
     cursor = def.next
   }
   return null

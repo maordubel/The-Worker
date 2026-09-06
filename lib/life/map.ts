@@ -155,7 +155,12 @@ export const MAP_PLACES: readonly MapPlaceDef[] = [
     lon: 34.771,
     scene: 'allenby',
     scenes: ['allenby'],
-    revealFlag: 'life:been:allenby',
+    /**
+     * Town appears the moment anything north of the neighbourhood does, because everything
+     * north goes through it. `any` is not a thing a reveal flag can express, so it hangs on
+     * the earliest of them: the autumn afternoon Efi says the word "אלנבי" out loud.
+     */
+    revealFlag: 'life:knows:hall',
     revealHe: 'מרכז העיר. מכאן ממשיכים לכל מקום.',
     confidence: 'exact',
     fromYear: 1978,
@@ -182,10 +187,21 @@ export const MAP_PLACES: readonly MapPlaceDef[] = [
     lon: 34.7885,
     scene: 'ussishkin-outside',
     scenes: ['ussishkin-outside', 'ussishkin-hall', 'ussishkin-end'],
-    revealFlag: 'life:been:ussishkin-outside',
+    /**
+     * A place goes on the map when somebody TELLS you it exists, not when you have already
+     * walked there — a map that only shows where you have been is a diary. Efi names the
+     * hall in the autumn of 1984 (`life:knows:hall`), and from that sentence the pin is on
+     * the map, which is the difference between "go after the wall, right" and a direction.
+     *
+     * `fromYear` said 1990 until 6.9.2026, which put the hall out of reach in the one
+     * chapter that is ABOUT reaching it: A3 is 1984, so the pin could not exist and the
+     * player was told to go somewhere the map denied. It is 1984 now — the year of the
+     * chapter that walks there — and the hall itself stood long before that.
+     */
+    revealFlag: 'life:knows:hall',
     revealHe: 'הבית השני. מהיום הוא על המפה שלך.',
     confidence: 'placed',
-    fromYear: 1990,
+    fromYear: 1984,
   },
   {
     id: 'yad-eliyahu',

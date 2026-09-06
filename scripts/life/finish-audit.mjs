@@ -95,6 +95,9 @@ for (const chapter of CHAPTERS) {
       where: l?.debug?.where?.() ?? null,
       targets: l?.debug?.targets?.() ?? [],
       hint: l?.debug?.hint?.() ?? null,
+      // what the chapter's own writing is still waiting for — the difference between
+      // "there is no way to end this" and "the way is there and nobody can find it"
+      pending: (l?.debug?.pending?.() ?? []).filter((b) => !b.fired && b.ends).slice(0, 4),
       done: Boolean(snap?.state?.chapterDone),
       // a chapter closed by the engine's backstop rather than by its own writing
       rescued: Object.keys(snap?.state?.flags ?? {}).some((flag) => flag.startsWith('life:lastResort:')),
@@ -253,6 +256,11 @@ for (const chapter of CHAPTERS) {
 
   results.push({ chapter, done, restarted, rescued: Boolean(last?.rescued), steps, at: last?.where?.scene ?? '?', minute: last?.minute ?? -1, objective: last?.objective, hint: last?.hint, errors: errors.slice(0, 2) })
   console.log(`${done ? (restarted ? 'REPLAY ' : last?.rescued ? 'RESCUE ' : 'PASS   ') : 'FAIL   '}${chapter.padEnd(13)} steps=${String(steps).padStart(3)}  at=${(last?.where?.scene ?? '?').padEnd(20)} ${done ? '' : `objective=«${last?.objective ?? '—'}» hint=«${last?.hint ?? '—'}»`}`)
+  if ((!done || last?.rescued) && last?.pending?.length) {
+    for (const beat of last.pending) {
+      console.log(`      ממתין · ${beat.id}: ${beat.needs.join(' · ') || 'תנאי מתקיים — הביט פשוט לא רץ'}${beat.waitingHe ? `  («${beat.waitingHe}»)` : ''}`)
+    }
+  }
   if (errors.length) console.log(`      errors: ${errors.slice(0, 2).join(' | ')}`)
   await context.close()
 }
