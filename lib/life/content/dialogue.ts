@@ -779,12 +779,21 @@ const CONVERSATIONS: Conversation[] = [
     ],
   },
   {
+    /**
+     * בארי — Stage A Director's Cut §21/§53, 6.9.2026: Barry's canonical entry into
+     * Pugi's playable supporter world is 1986, Gate 7 — not the year-earlier kiosk one-liner he
+     * used to get. `characters.ts` already knew this (`activeEras: ['1986+']`, tag
+     * `gate7`); only the dialogue still called him "an old-timer" and banked the
+     * relationship on a throwaway `veteran` id instead of his own. Same lines, same
+     * scene — he simply has his name now, and Stage B inherits a real person instead of
+     * nobody.
+     */
     id: 'route-veteran',
-    nameHe: 'אוהד ותיק',
+    nameHe: 'בארי',
     branches: [
       {
         lines: [
-          { who: 'אוהד ותיק', text: 'קטן. אתה יודע לאן אתה הולך?' },
+          { who: 'בארי', text: 'קטן. אתה יודע לאן אתה הולך?' },
           { who: null, text: 'אתה מהנהן. הוא לא אומר כלום, רק ממשיך ללכת לידך עוד קצת.' },
         ],
         then: [{ e: 'trait', trait: 'courage', delta: 2 }],
@@ -874,19 +883,19 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: 'gate-veteran',
-    nameHe: 'אוהד ותיק',
+    nameHe: 'בארי',
     branches: [
       {
         when: { flag: 'entry:granted' },
-        lines: [{ who: 'אוהד ותיק', text: 'נו, מה אתה מחכה. זה מתחיל.' }],
+        lines: [{ who: 'בארי', text: 'נו, מה אתה מחכה. זה מתחיל.' }],
       },
       {
         when: { hasItem: 'newspaper', bond: { who: 'kobi', min: 60 } },
         lines: [
           { who: null, text: 'הוא מסתכל על העיתון המקופל ביד שלך, ואז על הפנים שלך.' },
-          { who: 'אוהד ותיק', text: 'רגע. אתה של קובי?' },
+          { who: 'בארי', text: 'רגע. אתה של קובי?' },
           { who: null, text: 'אתה מהנהן.' },
-          { who: 'אוהד ותיק', text: 'הוא עומד בשבע כל שבת. בוא, הילד איתי.' },
+          { who: 'בארי', text: 'הוא עומד בשבע כל שבת. בוא, הילד איתי.' },
         ],
         then: [
           { e: 'flag', flag: 'entry:granted' },
@@ -913,9 +922,9 @@ const CONVERSATIONS: Conversation[] = [
          */
         lines: [
           { who: null, text: 'הוא עומד ליד הגדר ומעשן, ורואה אותך כבר כמה דקות. בסוף הוא מכבה את הסיגריה בסוליה.' },
-          { who: 'אוהד ותיק', text: 'לבד, מה?' },
+          { who: 'בארי', text: 'לבד, מה?' },
           { who: null, text: 'הוא לא שואל כמו מבוגר שעומד לשלוח אותך הביתה. הוא שואל כמו מישהו שבודק.' },
-          { who: 'אוהד ותיק', text: 'ומי מחכה לך בפנים?' },
+          { who: 'בארי', text: 'ומי מחכה לך בפנים?' },
         ],
         choices: [
           {
@@ -925,7 +934,7 @@ const CONVERSATIONS: Conversation[] = [
               { e: 'goto', node: 'gate-veteran-in' },
               { e: 'flag', flag: 'entry:kindness' },
               { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 6 },
-              { e: 'remember', who: 'veteran', eventId: 'told-him-about-kobi', significance: 'notable' },
+              { e: 'remember', who: 'barry', eventId: 'told-him-about-kobi', significance: 'notable' },
             ],
           },
           {
@@ -937,7 +946,7 @@ const CONVERSATIONS: Conversation[] = [
               { e: 'flag', flag: 'entry:alone' },
               { e: 'personality', key: 'independence', delta: 8 },
               { e: 'wellbeing', key: 'loneliness', delta: 6 },
-              { e: 'remember', who: 'veteran', eventId: 'said-nobody', significance: 'major' },
+              { e: 'remember', who: 'barry', eventId: 'said-nobody', significance: 'major' },
             ],
           },
         ],
@@ -946,7 +955,7 @@ const CONVERSATIONS: Conversation[] = [
   },
   {
     id: 'gate-veteran-in',
-    nameHe: 'אוהד ותיק',
+    nameHe: 'בארי',
     branches: [
       {
         // The cost is the same either way, and it is real: twenty-two minutes in a
@@ -956,7 +965,7 @@ const CONVERSATIONS: Conversation[] = [
         shot: { focus: 'both', framing: 'ots', ambienceDuck: 0.5 },
         lines: [
           { who: null, text: 'הוא מסתכל עליך עוד שנייה, ואז מניח יד גדולה על הכתף שלך ולא מוריד אותה.' },
-          { who: 'אוהד ותיק', text: 'אז היום אני. תעמוד לידי ותשתוק.' },
+          { who: 'בארי', text: 'אז היום אני. תעמוד לידי ותשתוק.' },
           { who: null, text: 'לוקח זמן עד שמגיעים לתור. הרבה זמן. הוא לא מדבר איתך ולא עוזב את הכתף.' },
         ],
         then: [
@@ -970,9 +979,9 @@ const CONVERSATIONS: Conversation[] = [
       {
         shot: { focus: 'both', framing: 'ots', ambienceDuck: 0.5 },
         lines: [
-          { who: 'אוהד ותיק', text: 'שער שבע. אז אתה יודע לפחות איפה אתה.' },
+          { who: 'בארי', text: 'שער שבע. אז אתה יודע לפחות איפה אתה.' },
           { who: null, text: 'הוא מהנהן לעצמו, מניח יד על הכתף שלך, ומכניס אותך לתור לפניו.' },
-          { who: 'אוהד ותיק', text: 'תעמוד לידי ותשתוק. ואם הוא לא שם — אתה נשאר איתי עד שהוא בא.' },
+          { who: 'בארי', text: 'תעמוד לידי ותשתוק. ואם הוא לא שם — אתה נשאר איתי עד שהוא בא.' },
           { who: null, text: 'התור כמעט לא זז, ומבפנים כבר שומעים משהו.' },
         ],
         then: [

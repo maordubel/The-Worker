@@ -86,7 +86,8 @@ export const PORTRAIT_1990: Record<string, string> = {
   'עמית': 'faceAmit',
   'רפי מהקיוסק': 'faceOldMan',
   'אוהד': 'faceSupporter',
-  'אוהד ותיק': 'faceBarry',
+  // בארי, older — the same Gate 7 fixture from 1986 (Stage A Director's Cut §43).
+  'בארי': 'faceBarry',
   'אוהד עם רדיו': 'faceSupporter',
   'אוהד שיודע': 'faceSupporterB',
   'סדרן': 'faceUsher',

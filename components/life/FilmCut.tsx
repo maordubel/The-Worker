@@ -18,20 +18,38 @@ import type { LifeBusEvents } from '@/lib/life/runtime/bus'
  * rebuilding while it plays, so when the picture goes the game is already there.
  *
  * It fades in over 400ms and out over 600ms and removes itself when the clip ends. If the
- * file will not play — an old browser, a blocked codec, a missing file — `onError` closes
- * it immediately and the player sees the ordinary cut, which is what they would have seen
+ * file will not play — an old browser, a blocked codec, a missing file — it closes itself
+ * immediately and the player sees the ordinary cut, which is what they would have seen
  * anyway.
+ *
+ * מדוע play() ולא רק autoPlay — Maor reported the clip freezing on its still frame for
+ * several seconds before the game continued — "doesn't autoplay and is stuck". The HTML
+ * `autoPlay` attribute asks the browser to call `play()` for you, but when that internal
+ * call is refused (a device that briefly denies autoplay, a codec it will not decode) the
+ * refusal is a rejected *promise*, not a DOM `error` event — so nothing here ever heard it,
+ * and the clip sat on its poster until the 6.2s hard ceiling finally closed it. Calling
+ * `play()` ourselves gives us that promise: a rejection now closes the cut on the spot,
+ * the same graceful skip as a decode error, instead of six silent seconds first.
  */
 export function FilmCut({ film, onDone }: { film: NonNullable<LifeBusEvents['film']>; onDone: () => void }) {
   const [gone, setGone] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const video = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
-    // A hard ceiling, so a clip that never fires `ended` cannot hold the game.
+    // A hard ceiling, so a clip that never fires `ended` (or a play() that never
+    // settles at all) cannot hold the game.
     timer.current = setTimeout(() => setGone(true), 6200)
+
+    const attempt = video.current?.play()
+    if (attempt && typeof attempt.catch === 'function') {
+      attempt.catch(() => onDone())
+    }
+
     return () => {
       if (timer.current) clearTimeout(timer.current)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [film.clip])
 
   useEffect(() => {
@@ -65,6 +83,7 @@ export function FilmCut({ film, onDone }: { film: NonNullable<LifeBusEvents['fil
     >
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
+        ref={video}
         key={film.clip}
         src={`/life/film/${film.clip}.mp4`}
         poster={`/life/film/${film.clip}.jpg`}

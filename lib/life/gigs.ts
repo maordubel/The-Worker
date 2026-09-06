@@ -58,8 +58,13 @@ export type Gig = {
    * right answer. `coin` is עץ או פלי in the alley: a shekel in, five out. Both were
    * Maor's, on 5.9.2026, and both are here rather than in their own system because they
    * are jobs — they sit in a room, they cost the afternoon, and they are once a day.
+   *
+   * `penalty` and `hoops` are the two skill contests Maor asked for on 6.9.2026, played
+   * in three dimensions rather than painted: five penalty kicks against a keeper on the
+   * neighbourhood pitch, five free throws at the schoolyard hoop. Same reasoning as the
+   * two above — a real thing to be good or bad at is worth more than a number.
    */
-  opens?: 'toto' | 'coin'
+  opens?: 'toto' | 'coin' | 'penalty' | 'hoops'
 }
 
 /**
@@ -285,6 +290,46 @@ export const GIGS: readonly Gig[] = [
     at: { x: 0.66, y: 0.9, w: 0.08 },
     opens: 'coin',
   },
+  /**
+   * שני קרבות — 6.9.2026, בתלת מימד. "משחק פנדלים, בעיטות לשער במגרש השכונתי" ו"תחרות
+   * חיובים, זריקה לסל בחצר הבית ספר": the two contests Maor asked for by name, each its
+   * own real ball flying through a real depth rather than a painted one. The wage is the
+   * same table as every other job — `hours` here is what a determined afternoon of it is
+   * worth, split five ways, one shekel amount per kick or throw that actually goes in.
+   */
+  {
+    id: 'penalty-contest',
+    where: 'pitch',
+    nameHe: 'הגדולים במגרש',
+    labelHe: 'פנדלים עד חמש',
+    from: 'a2-alley',
+    hours: 0.5,
+    minutes: 25,
+    energy: 10,
+    askHe: 'חמש בעיטות. שקל לכל גול.',
+    openHe: 'הם מעמידים שני מוטות עץ לרוחב, ואחד מהגדולים עומד בשער. "חמש בעיטות. תראה מה יש לך."',
+    doneHe: 'הם סופרים בקול, גם כשאתה לא רוצה שיספרו.',
+    trait: { key: 'courage', delta: 2 },
+    at: { x: 0.9, y: 0.87, w: 0.08 },
+    opens: 'penalty',
+  },
+  {
+    id: 'hoops-contest',
+    where: 'schoolyard',
+    nameHe: 'קו העונשין',
+    labelHe: 'תחרות חיובים',
+    from: '1991',
+    until: '1991',
+    hours: 0.5,
+    minutes: 20,
+    energy: 8,
+    askHe: 'חמש זריקות מהקו. שקל לכל סל.',
+    openHe: 'קו לבן מצויר על האספלט, כבר דהוי. "חמש זריקות. מי שקולע יותר משלוש הוא המלך של ההפסקה."',
+    doneHe: 'הכדור מקפץ על החישוק בלי רשת, ואף אחד לא מסכים על הספירה.',
+    trait: { key: 'independence', delta: 2 },
+    at: { x: 0.5, y: 0.84, w: 0.09 },
+    opens: 'hoops',
+  },
   {
     id: 'wash-cars',
     where: 'street',
@@ -368,7 +413,11 @@ export function gigConversations(): Conversation[] {
                     ? [{ e: 'flag' as const, flag: gigFlag(gig) }, { e: 'toto' as const }]
                     : gig.opens === 'coin'
                       ? [{ e: 'coin' as const }]
-                      : [{ e: 'minigame' as const, id: `chore:${gig.id}` }]),
+                      : gig.opens === 'penalty'
+                        ? [{ e: 'penalty' as const, attempts: 5, perGoal: Math.max(1, Math.round(pay / 5)) }]
+                        : gig.opens === 'hoops'
+                          ? [{ e: 'hoops' as const, attempts: 5, perBasket: Math.max(1, Math.round(pay / 5)) }]
+                          : [{ e: 'minigame' as const, id: `chore:${gig.id}` }]),
                 ],
               },
               { id: 'later', text: 'לא עכשיו.', then: [] },

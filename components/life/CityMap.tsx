@@ -141,7 +141,11 @@ export function CityMap({
               fontWeight={label.size === 'town' ? 700 : 400}
               fill="rgb(var(--ink))"
               fillOpacity={label.size === 'town' ? 0.75 : 0.5}
-              letterSpacing={label.size === 'town' ? 2 : 0}
+              // לא — 6.9.2026: Maor found "יפו" printed as "ופי" on his phone. `letterSpacing`
+              // on RTL SVG text is a known WebKit fault — it inserts the tracking before
+              // re-running bidi, and a short RTL string comes out mirrored whole. The extra
+              // tracking on a town's name was never worth this; every label here is
+              // untracked now, and `tests/life-map.test.ts` keeps it that way.
             >
               {label.labelHe}
             </text>

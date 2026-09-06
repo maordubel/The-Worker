@@ -9,6 +9,12 @@ import { ShirtCard } from '@/components/life/ShirtCard'
 import { CastCard } from '@/components/life/CastCard'
 import { FilmCut } from '@/components/life/FilmCut'
 import { CoinCard } from '@/components/life/CoinCard'
+import dynamic from 'next/dynamic'
+// Three.js is real weight (~150KB+ gz) that nine players in ten never touch this
+// session — these two are the only 3D rooms in the game, so they load on demand,
+// the moment the bus actually opens one, rather than riding in on every /life visit.
+const PenaltyCard = dynamic(() => import('@/components/life/PenaltyCard').then((m) => m.PenaltyCard), { ssr: false })
+const HoopsCard = dynamic(() => import('@/components/life/HoopsCard').then((m) => m.HoopsCard), { ssr: false })
 import { ShopCard } from '@/components/life/ShopCard'
 import { StageFinale } from '@/components/life/StageFinale'
 import { TotoCard } from '@/components/life/TotoCard'
@@ -47,8 +53,9 @@ import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/b
 import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/game'
 import type { LifeState } from '@/lib/life/types'
 import { checklistFor, type ChecklistItem } from '@/lib/life/checklist'
+import { GIGS } from '@/lib/life/gigs'
 import { CONSEQUENCE_KICKER_HE } from '@/lib/life/consequence'
-import { COIN_WHY_HE, TOTO_PER_ANSWER, TOTO_WHY_HE } from '@/lib/life/toto'
+import { COIN_WHY_HE, HOOPS_WHY_HE, PENALTY_WHY_HE, TOTO_PER_ANSWER, TOTO_WHY_HE } from '@/lib/life/toto'
 import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE } from '@/lib/life/shirts'
 
 
@@ -115,6 +122,8 @@ export function LifeStage({
   /** שני משחקי הכסף — the Toto slip and the coin in the alley (5.9.2026) */
   const [toto, setToto] = useState<LifeBusEvents['toto']>(null)
   const [coin, setCoin] = useState<LifeBusEvents['coin']>(null)
+  const [penalty, setPenalty] = useState<LifeBusEvents['penalty']>(null)
+  const [hoops, setHoops] = useState<LifeBusEvents['hoops']>(null)
   const [shop, setShop] = useState<LifeBusEvents['shop']>(null)
   const [cast, setCast] = useState<LifeBusEvents['cast']>(null)
   const [film, setFilm] = useState<LifeBusEvents['film']>(null)
@@ -330,8 +339,16 @@ export function LifeStage({
         setCoin(value)
         runtime.current?.pause(Boolean(value))
       }),
+      bus.on('penalty', (value) => {
+        setPenalty(value)
+        runtime.current?.pause(Boolean(value))
+      }),
+      bus.on('hoops', (value) => {
+        setHoops(value)
+        runtime.current?.pause(Boolean(value))
+      }),
       bus.on('cast', (value) => setCast(value)),
-      bus.on('film', (value) => setFilm(value)),
+      bus.on('film', setFilm),
       bus.on('shop', (value) => {
         setShop(value)
         setShopState(value ? engineRef.current?.state ?? null : null)
@@ -934,6 +951,48 @@ export function LifeStage({
                 void engineRef.current?.save()
               }
               setCoin(null)
+              runtime.current?.pause(false)
+            }}
+          />
+        )}
+
+        {penalty && (
+          <PenaltyCard
+            penalty={penalty}
+            onDone={({ played, earned }) => {
+              if (played) {
+                const gig = GIGS.find((row) => row.id === 'penalty-contest')
+                engineRef.current?.dispatch(
+                  { t: 'money.changed', agorot: earned * 100, why: PENALTY_WHY_HE },
+                  { t: 'clock.advanced', minutes: gig?.minutes ?? 25 },
+                  { t: 'energy.changed', delta: -(gig?.energy ?? 10) },
+                  { t: 'flag.raised', flag: 'gig:penalty-contest' },
+                )
+                if (gig?.trait) engineRef.current?.dispatch({ t: 'personality.shifted', key: gig.trait.key, delta: gig.trait.delta })
+                void engineRef.current?.save()
+              }
+              setPenalty(null)
+              runtime.current?.pause(false)
+            }}
+          />
+        )}
+
+        {hoops && (
+          <HoopsCard
+            hoops={hoops}
+            onDone={({ played, earned }) => {
+              if (played) {
+                const gig = GIGS.find((row) => row.id === 'hoops-contest')
+                engineRef.current?.dispatch(
+                  { t: 'money.changed', agorot: earned * 100, why: HOOPS_WHY_HE },
+                  { t: 'clock.advanced', minutes: gig?.minutes ?? 20 },
+                  { t: 'energy.changed', delta: -(gig?.energy ?? 8) },
+                  { t: 'flag.raised', flag: 'gig:hoops-contest' },
+                )
+                if (gig?.trait) engineRef.current?.dispatch({ t: 'personality.shifted', key: gig.trait.key, delta: gig.trait.delta })
+                void engineRef.current?.save()
+              }
+              setHoops(null)
               runtime.current?.pause(false)
             }}
           />

@@ -1075,13 +1075,15 @@ const SCENES: SceneDef[] = [
       },
       { id: 'kobi-walk', era: '1990', figure: 'kobi90-side', x: 0.15, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-found-1990', flip: true, when: { flag: 'found:kobi' } },
       {
+        // בארי — the same Gate 7 fixture from 1986, older, remembering Kobi's son (Stage A
+        // Director's Cut §43: Barry's long-term seeds must pay off across decades).
         id: 'veteran',
         era: '1990',
         figure: 'adultA3',
         x: 0.66,
         y: 0.8,
         size: 0.32,
-        nameHe: 'אוהד ותיק',
+        nameHe: 'בארי',
         talk: 'veteran-1990',
         flip: true,
         sway: 0.003,
@@ -1625,7 +1627,7 @@ const SCENES: SceneDef[] = [
     spawns: { fromStreet: { x: 0.085, y: 0.78, facing: 'right' }, fromGround: { x: 0.915, y: 0.78, facing: 'left' } , start: { x: 0.085, y: 0.78, facing: 'right' } },
     actors: [
       { id: 'fan1', figure: 'adultA1', x: 0.135, y: 0.76, size: 0.26, nameHe: 'אוהד', talk: 'route-fan' },
-      { id: 'fan2', figure: 'adultB1', x: 0.45, y: 0.735, size: 0.24, nameHe: 'אוהד ותיק', talk: 'route-veteran' },
+      { id: 'fan2', figure: 'adultB1', x: 0.45, y: 0.735, size: 0.24, nameHe: 'בארי', talk: 'route-veteran' },
       { id: 'fan3', figure: 'youngA4', x: 0.78, y: 0.8, size: 0.28, nameHe: 'אוהד', talk: 'route-fan' },
       // ---- 1990: a man walking with a radio to his ear, and Kobi beside you on the way home ----
       { id: 'radio-walker', era: '1990', figure: 'adultA5', x: 0.5, y: 0.8, size: 0.32, nameHe: 'אוהד עם רדיו', talk: 'radio-walker-1990', sway: 0.03 },
@@ -1977,12 +1979,14 @@ const SCENES: SceneDef[] = [
        * arrival beat ended the chapter in the same breath as the arrival. So the first
        * time a child stands at gate seven with his father, the father was not there.
        *
-       * Barry is a stand-in figure. `barry96` is Barry at thirty-eight; this is Barry at
-       * twenty-seven, and the art list asks for him.
+       * לא בארי — Stage A Director's Cut §21/§53, 6.9.2026: Barry's canonical entry is
+       * 1986, Gate 7 (`gate-veteran`). This 1985 figure keeps the `barry-a5` id and its
+       * line (nobody is renaming assets over a name change), but the label above his head
+       * and in his dialogue box reads generic, matching `chapterStageA.ts`'s demotion.
        */
       { id: 'kobi-a5', era: 'a5-first', figure: 'kobi', x: 0.42, y: 0.9, size: 0.26, nameHe: 'קובי', talk: 'kobi-a5-gate', sway: 0.003 },
-      { id: 'barry-a5', era: 'a5-first', figure: 'adultB2', x: 0.63, y: 0.88, size: 0.255, nameHe: 'בארי', talk: 'barry-a5', flip: true },
-      { id: 'barry-a5', era: 'a5-first', figure: 'adultA6', x: 0.44, y: 0.91, size: 0.3, nameHe: 'בארי', talk: 'barry-a5', sway: 0.003 },
+      { id: 'barry-a5', era: 'a5-first', figure: 'adultB2', x: 0.63, y: 0.88, size: 0.255, nameHe: 'אוהד ותיק', talk: 'barry-a5', flip: true },
+      { id: 'barry-a5', era: 'a5-first', figure: 'adultA6', x: 0.44, y: 0.91, size: 0.3, nameHe: 'אוהד ותיק', talk: 'barry-a5', sway: 0.003 },
       { id: 'kobi-a5-gate', era: 'a5-first', figure: 'kobi', x: 0.36, y: 0.9, size: 0.3, nameHe: 'קובי', talk: 'kobi-a5-gate', sway: 0.002 },
       // 16.11.1996 — the two gates. Kobi and Barry at seven; Barry has no figure yet.
       {
@@ -2010,12 +2014,13 @@ const SCENES: SceneDef[] = [
       { id: 'asaf-laces', era: '1998-laces', figure: 'asaf', x: 0.86, y: 0.9, size: 0.3, nameHe: 'אסף', talk: 'asaf-laces', flip: true, when: { flag: 'l1:after' } },
 
       {
+        // בארי — Gate 7, 1986: his canonical debut (Stage A Director's Cut §21/§53).
         id: 'veteran',
         figure: 'adultB1',
         x: 0.17,
         y: 0.88,
         size: 0.24,
-        nameHe: 'אוהד ותיק',
+        nameHe: 'בארי',
         talk: 'gate-veteran',
         sway: 0.003,
       },
@@ -2487,8 +2492,32 @@ const SCENES: SceneDef[] = [
     // 5.9.2026: the two relegation nights are painted as nights — the hall lit, half empty
     artByEra: { '1997-basket': 'ussHallNight', '1999-basket': 'ussHallNight' },
     band: { far: 0.72, near: 0.96 },
-    size: { far: 0.17, near: 0.3 },
-    metre: 0.2165,
+    /**
+     * גם הילד — `size` is the player's OWN near/far height (`playerSize()`), not only the
+     * taper ratio `bodySizeAt` borrows from it (`size.far / size.near`). Shrinking `metre`
+     * alone fixed the usher against the stand and broke him against the boy: Pogi doesn't
+     * read off `metre` at all, so he stayed the old (too big) size and came out taller
+     * than the grown man beside him. Both endpoints scaled by the same 0.6374 the metre
+     * below did, so the ratio — and every era's `player.scale` multiple of it — is
+     * unchanged; only the absolute size is.
+     */
+    size: { far: 0.1084, near: 0.1912 },
+    /**
+     * המטר של `ussMain` — measured off the painting, not off the old number.
+     *
+     * Maor sent a measured reference of the real hall on 6.9.2026 (stand ≈4.5–5.0m, a row
+     * ≈0.32–0.35m) and the usher was standing eye-level with the TOP of the stand behind
+     * him — a grown man nearly as tall as ten rows of seats. Measured directly off
+     * `ussMain.png` itself, with no perspective assumed: the rim sits 3.05m above the
+     * floor (FIBA, fixed) at 215px in the 900px painting; the seating block above the same
+     * floor spans 310px — 4.4 metres, matching Maor's own reference almost exactly. The
+     * ART was right. `metre` was not: 0.2165 was carried over from a different room and
+     * never re-measured against this one's own painting. Converted through the room's own
+     * far/near taper (0.17/0.3), the painting's true scale is 0.138. `ussishkin-end`
+     * (`ussEnd.png`) was checked the same way, off its own free-throw circle — its 0.2165
+     * already matches its painting, so it is untouched.
+     */
+    metre: 0.138,
     ambience: 'hall',
     // The first sight of the hall, from the high corner — almost all of it at once — held
     // for a breath, then the cut down to the sideline at the boy's height.
@@ -2764,7 +2793,7 @@ const SCENES: SceneDef[] = [
       { id: 'amit-yard', era: '1991', figure: 'amit90', x: 0.6, y: 0.86, size: 0.27, nameHe: 'עמית', talk: 'amit-yard', flip: true },
       { id: 'keren-yard', era: '1991', figure: 'keren90', x: 0.82, y: 0.8, size: 0.25, nameHe: 'קרן', talk: 'keren-yard', flip: true },
     ],
-    hotspots: [
+    hotspots: [...gigSpots('schoolyard'),
       {
         id: 'hoop',
         era: '1991',

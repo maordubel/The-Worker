@@ -438,21 +438,26 @@ export const CONVERSATIONS_1990: Conversation[] = [
     ],
   },
   {
+    // בארי, ארבע שנים אחר כך — Stage A Director's Cut §43: "atrong long-term seed" that
+    // must pay off across decades rather than XP. Same fixture from Gate 7 in 1986, the
+    // same care in recognising whose son is standing there.
     id: 'veteran-1990',
-    nameHe: 'אוהד ותיק',
+    nameHe: 'בארי',
     branches: [
       {
         when: { flag: 'knows:pillar' },
-        lines: [{ who: 'אוהד ותיק', text: 'ליד העמוד, כמו שאמרתי. ותגיד לו שיוסי שאל עליו.' }],
+        lines: [{ who: 'בארי', text: 'ליד העמוד, כמו שאמרתי. ותגיד לו שיוסי שאל עליו.' }],
       },
       {
         lines: [
           { who: null, text: 'אדם עם צעיף ביד, לא על הצוואר. חם מדי בשביל ללבוש אותו, וקר מדי בשבילו בלי.' },
-          { who: 'אוהד ותיק', text: 'אתה הבן של קובי. אתם בשער 7, ליד העמוד השני. כמו תמיד.' },
-          { who: 'אוהד ותיק', text: 'ואם תאבד אותו בהפסקה — הגדר בין שער 5 לשער 7. שם כולם נפגשים, שם מוצאים אנשים.' },
+          { who: 'בארי', text: 'אתה הבן של קובי. אתם בשער 7, ליד העמוד השני. כמו תמיד.' },
+          { who: 'בארי', text: 'ואם תאבד אותו בהפסקה — הגדר בין שער 5 לשער 7. שם כולם נפגשים, שם מוצאים אנשים.' },
         ],
         then: [
           { e: 'flag', flag: 'knows:pillar' },
+          { e: 'rel', who: 'barry', axis: 'sharedHistory', delta: 6 },
+          { e: 'remember', who: 'barry', eventId: 'recognized-kobis-son-1990', significance: 'notable' },
           { e: 'redheart', key: 'community', delta: 5 },
           { e: 'redheart', key: 'terraceCulture', delta: 3 },
         ],

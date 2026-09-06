@@ -235,6 +235,18 @@ export type LifeBusEvents = {
    */
   coin: { stake: number; prize: number } | null
 
+  /**
+   * פנדלים — five real penalty kicks against a keeper, on the neighbourhood pitch,
+   * played in three dimensions rather than painted (Maor, 6.9.2026).
+   */
+  penalty: { attempts: number; perGoal: number } | null
+
+  /**
+   * תחרות חיובים — five free throws at the schoolyard hoop, from the painted-on line,
+   * played in three dimensions rather than painted (Maor, 6.9.2026).
+   */
+  hoops: { attempts: number; perBasket: number } | null
+
   shirt: {
     /**
      * למה הכרטיס הזה פתוח — a purchase, or a new kit arriving on the rail.

@@ -128,6 +128,8 @@ describe('הג׳ובים — a boy with no money has somewhere to earn it', () =
       const json = JSON.stringify(conversation)
       if (gig?.opens === 'toto') expect(json, conversation.id).toContain('"e":"toto"')
       else if (gig?.opens === 'coin') expect(json, conversation.id).toContain('"e":"coin"')
+      else if (gig?.opens === 'penalty') expect(json, conversation.id).toContain('"e":"penalty"')
+      else if (gig?.opens === 'hoops') expect(json, conversation.id).toContain('"e":"hoops"')
       else {
         expect(json, conversation.id).toContain('"e":"minigame"')
         expect(json, conversation.id).toContain('"id":"chore:')

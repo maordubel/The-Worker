@@ -65,7 +65,9 @@ export const PORTRAIT: Record<string, string> = {
   'קרן': 'faceKeren',
   'ילד מהשכונה': 'faceEfi',
   'אוהד': 'faceSupporter',
-  'אוהד ותיק': 'faceBarry',
+  // Barry — Gate 7, 1986: his canonical debut (Stage A Director's Cut §21/§53). He used
+  // to speak here under the generic "אוהד ותיק" plate before he had a name in the box.
+  'בארי': 'faceBarry',
   'סדרן': 'faceUsher',
   'הקופאי': 'faceVendor',
   'רפי מהקיוסק': 'faceOldMan',

@@ -552,9 +552,13 @@ export const CONVERSATIONS_A5: Conversation[] = [
     branches: [{ lines: [{ who: 'קובי', text: 'תעמוד לידי, לא לזוז. אם אתה מאבד אותי — פה, ליד הברזל הזה. לא בשער אחר.' }], then: [{ e: 'rel', who: 'kobi', axis: 'familiarity', delta: 1 }] }],
   },
   {
+    // לא בארי — Stage A Director's Cut §21/§53, 6.9.2026: Barry's canonical entry is
+    // 1986, Gate 7 (`gate-veteran` in `content/dialogue.ts`), not this 1985 line. The boy
+    // doesn't have his name yet — he is just a familiar face at the gate, same as every
+    // other Saturday's stranger — so the line stays and the identity moves.
     id: 'barry-a5',
-    nameHe: 'בארי',
-    branches: [{ lines: [{ who: 'בארי', text: 'בן שבע? אבא שלך עמד פה בדיוק בגובה הזה. תשאל אותו אם הוא זוכר איך קראו לאיש שמכר לו גרעינים.' }], then: [{ e: 'rel', who: 'barry', axis: 'familiarity', delta: 2 }, { e: 'redheart', key: 'historyMemory', delta: 2 }] }],
+    nameHe: 'אוהד ותיק',
+    branches: [{ lines: [{ who: 'אוהד ותיק', text: 'בן שבע? אבא שלך עמד פה בדיוק בגובה הזה. תשאל אותו אם הוא זוכר איך קראו לאיש שמכר לו גרעינים.' }], then: [{ e: 'redheart', key: 'historyMemory', delta: 2 }] }],
   },
   {
     id: 'a5-close',

@@ -2,7 +2,7 @@ import { ITEM_ART } from '../content/chapter1986'
 import type { HistoricalAnchor } from '../anchors'
 import { DIALOGUE } from '../content/dialogue'
 import { anchorFor, eraFor, type AnchorSet } from '../content/era'
-import type { ChoiceDef, Conversation, ConversationShot, Effect, Say } from '../content/script'
+import type { Branch, ChoiceDef, Conversation, ConversationShot, Effect, Say } from '../content/script'
 import type { LifeEngine } from '../engine'
 import type { LifeEvent } from '../events'
 import { acceptEvents, isAvailable, resolveOutcome } from '../opportunities'
@@ -16,6 +16,7 @@ import { cardForName, metFlag } from '../castCards'
 import { knownBy, ownedShirts, shirtById, shirtFlag } from '../shirts'
 import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
 import { characterName } from '../characters'
+import { flagOn } from '../types'
 import type { CharacterId } from '../types'
 
 /**
@@ -44,8 +45,52 @@ export type DialogueHooks = {
 /** the people a boy does not "meet": his parents, the friends from the alley, the neighbour, the kiosk */
 const KNOWN_FROM_HOME: ReadonlySet<string> = new Set(['kobi', 'rachel', 'ofir', 'amit', 'efi', 'keren', 'ilan', 'rafi'])
 
+/**
+ * שנייה, שלישית — "dialogue that already happened must not repeat", Maor, 6.9.2026.
+ *
+ * A conversation is data with one branch and no `when`, most of the time — a boy examines
+ * a poster, a friend says the same line every Saturday, forever, because nothing in the
+ * content ever said otherwise. `own:heard:<id>:<branch>` remembers which exact branch of
+ * which exact conversation was already sat through to its end, and `start()` below checks
+ * it before opening the box a second time.
+ *
+ * It only ever swaps the WORDS, never the outcome: a branch is only a candidate for this
+ * at all when it has no `choices` (nothing interactive to lose) and its `then` opens
+ * nothing the player must be free to redo (a shop, a gig, a minigame, a door) — those
+ * always play in full, because closing them early would close the thing they open. Every
+ * `then` effect still fires exactly as authored either way; only what is SHOWN changes.
+ */
+const heardFlag = (id: string, branch: number) => `own:heard:${id}:${branch}`
+
+/** effects that open or move something the player must be free to redo in full every time */
+const KEEPS_SCENE_LIVE: ReadonlySet<Effect['e']> = new Set([
+  'shop', 'toto', 'coin', 'penalty', 'hoops', 'goto', 'travel', 'minigame', 'ending', 'doc',
+])
+
+function opensSomething(effects: readonly Effect[] | undefined): boolean {
+  return (effects ?? []).some((effect) => KEEPS_SCENE_LIVE.has(effect.e))
+}
+
+/** short, warm, and doesn't pretend nothing happened — the second time answers differently than the first */
+const REPEAT_LINES_HE: readonly string[] = [
+  'כבר דיברתם על זה היום.',
+  'אין חדש להוסיף — כבר סיפר לך.',
+  'מהנהן לעברך. כבר עברתם על זה.',
+  'מחייך אליך, בלי לחזור על עצמו.',
+  'אותו דבר כמו קודם. ממשיכים הלאה.',
+]
+
+/** deterministic per conversation id, so the same beat gives the same short answer every time it repeats */
+function repeatLineFor(conversation: Conversation, branch: Branch): Say {
+  let hash = 0
+  for (let i = 0; i < conversation.id.length; i += 1) hash = (hash * 31 + conversation.id.charCodeAt(i)) | 0
+  const text = REPEAT_LINES_HE[Math.abs(hash) % REPEAT_LINES_HE.length] as string
+  return { who: branch.lines[0]?.who ?? null, text }
+}
+
 export class DialogueRunner {
   private conversation: Conversation | null = null
+  private branchIndex = -1
   private lines: Say[] = []
   private index = 0
   private pendingChoices: ChoiceDef[] | null = null
@@ -102,8 +147,9 @@ export class DialogueRunner {
   start(id: string, done?: () => void): boolean {
     const conversation = DIALOGUE[id]
     if (!conversation) return false
-    const branch = conversation.branches.find((candidate) => meets(this.engine.state, candidate.when))
-    if (!branch) return false
+    const branchIndex = conversation.branches.findIndex((candidate) => meets(this.engine.state, candidate.when))
+    if (branchIndex < 0) return false
+    const branch = conversation.branches[branchIndex] as Branch
 
     // The first time you meet somebody, you meet them: the card plays over the top of the
     // conversation that opened it, and the conversation is still there when it closes.
@@ -119,9 +165,16 @@ export class DialogueRunner {
       })
     }
 
+    // Second visit to the exact same branch, and nothing here needs to stay open for a
+    // choice or a door: say something shorter instead of the whole scene again.
+    const heard = flagOn(this.engine.state, heardFlag(id, branchIndex))
+    const repeats = heard && !branch.choices && !opensSomething(branch.then)
+    const lines = repeats ? [repeatLineFor(conversation, branch)] : branch.lines
+
     if (done) this.onDone = done
     this.conversation = conversation
-    this.lines = branch.lines.map((line) => ({ ...line, text: this.fill(line.text) }))
+    this.branchIndex = branchIndex
+    this.lines = lines.map((line) => ({ ...line, text: this.fill(line.text) }))
     this.index = 0
     this.pendingChoices = branch.choices ?? null
     this.pendingThen = branch.then ?? []
@@ -237,6 +290,11 @@ export class DialogueRunner {
   /** Apply, then either chain into another node or shut the box. */
   private finish(effects: readonly Effect[]) {
     const events: LifeEvent[] = []
+    // Captured before any `goto` below replaces `this.conversation` — this branch, of this
+    // conversation, was just sat through to its end, so its repeat is now free to shorten.
+    if (this.conversation && this.conversation.id !== '__lines__') {
+      events.push({ t: 'flag.raised', flag: heardFlag(this.conversation.id, this.branchIndex) })
+    }
     let goto: string | null = null
     const after: Array<() => void> = []
     /** effects an opportunity's own outcome contributed, applied in the same pass */
@@ -395,6 +453,20 @@ export class DialogueRunner {
         /** עץ או פלי — the stake leaves the pocket in the card, with the flip. */
         case 'coin':
           after.push(() => this.bus.emit('coin', { stake: 1, prize: 5 }))
+          break
+        /**
+         * פנדלים / חיובים — two real contests, in three dimensions (Maor, 6.9.2026).
+         *
+         * Nothing is paid here, same reasoning as the coin: the card pays what was
+         * actually scored when it closes. `attempts` and `perGoal`/`perBasket` were
+         * computed once in `gigConversations()` from that chapter's own wage table, so
+         * a kick in 1986 and a kick in 1999 are not worth the same shekel.
+         */
+        case 'penalty':
+          after.push(() => this.bus.emit('penalty', { attempts: effect.attempts, perGoal: effect.perGoal }))
+          break
+        case 'hoops':
+          after.push(() => this.bus.emit('hoops', { attempts: effect.attempts, perBasket: effect.perBasket }))
           break
         case 'goto':
           goto = effect.node

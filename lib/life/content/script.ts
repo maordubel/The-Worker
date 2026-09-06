@@ -83,6 +83,10 @@ export type Effect =
   | { e: 'toto' }
   /** עץ או פלי in the alley: a shekel in, five out */
   | { e: 'coin' }
+  /** פנדלים במגרש השכונתי — five real penalty kicks against a keeper, in three dimensions */
+  | { e: 'penalty'; attempts: number; perGoal: number }
+  /** תחרות חיובים בחצר — five free throws at the schoolyard hoop, in three dimensions */
+  | { e: 'hoops'; attempts: number; perBasket: number }
   /** a sound from the library at the moment the choice lands */
   | { e: 'sfx'; key: SampleKey; level?: number; delayMs?: number }
   /**
