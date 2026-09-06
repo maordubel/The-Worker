@@ -80,7 +80,17 @@ export type ActorDef = {
   figure: string
   x: number
   y: number
-  size: number
+  /**
+   * @deprecated נשאר בקבצים, לא נקרא יותר.
+   *
+   * Until delta 30 this was a fraction of the frame height, typed by hand, per actor, per
+   * room — which is how a man ended up drawn at eighty-seven centimetres beside Rafi. A
+   * body's size now comes from `heights.ts` and the room's own `metre`, and `WorldScene`
+   * never reads this field. It is optional so that a new actor cannot invent a number,
+   * and it is not deleted from the hundred and seventy-six rows that still carry it
+   * because a diff that touches every actor in the game hides everything else in it.
+   */
+  size?: number
   nameHe: string
   talk?: string
   when?: Condition
@@ -787,25 +797,6 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
-      /**
-       * חנות האוהדים — a doorway between the alley and the school, from 1990.
-       *
-       * It was a DOOR to a room for one delta and the room was bare, so it is a doorway
-       * that opens the shop screen instead (`components/life/ShopCard.tsx`). Maor's call,
-       * and the right one: buying a shirt is a rail and a pocket, not a room to walk about
-       * in. One hotspot per chapter, because a `Condition` cannot ask which year it is.
-       */
-      ...SHOP_CHAPTERS.map((chapter) => ({
-        id: `shop-${chapter}`,
-        era: chapter,
-        x: 0.525,
-        y: 0.735,
-        w: 0.07,
-        act: shopId(chapter),
-        verb: 'look' as const,
-        labelHe: 'חנות האוהדים',
-        priority: 4,
-      })),...gigSpots('street'), 
       { id: 'radio-a6', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
       // On the floor at the end of the run of cupboards, which is where a crate of empties
       // lives in a flat that takes them back for the deposit.
@@ -862,10 +853,10 @@ const SCENES: SceneDef[] = [
     size: { far: 0.185, near: 0.29 },
     metre: 0.2231,
     ambience: 'park',
-    stuckHe: 'הקיוסק משמאל, המגרש בסמטה. מזרחה הולכים רק כשיודעים לאן — תשאל מישהו.',
+    stuckHe: 'הקיוסק משמאל, המגרש בסמטה, בית הספר בקצה. מזרחה הולכים רק כשיודעים לאן — תשאל מישהו.',
     stuckByEra: {
       '1990': 'אופיר ועמית ליד הקיוסק. מזרחה — אחרי האדומים.',
-      '1991': 'בית הספר משמאל, האולם מזרחה, הבית מאחורייך.',
+      '1991': 'בית הספר בקצה הרחוב, מזרחה יוצאים מהשכונה, הבית מאחורייך.',
     },
     layers: [
       // Behind everybody: the near paving and the kerb, with the tree shadows on it.
@@ -888,8 +879,11 @@ const SCENES: SceneDef[] = [
       { art: 'propPlanter', x: 0.552, y: 0.736, w: 0.05, depth: 0.736, foot: true },
       { art: 'propBin', x: 0.352, y: 0.742, w: 0.021, depth: 0.742, foot: true },
       {
+        // West of the city-centre turning, clear of the school gate at 0.786. It used to
+        // stand at 0.845 — which since 6.9.2026 is the doorway the school gate is drawn
+        // on, and a car parked across a door is a door nobody finds.
         art: 'propCar',
-        x: 0.845,
+        x: 0.66,
         y: 0.786,
         w: 0.1,
         depth: 0.786,
@@ -908,6 +902,8 @@ const SCENES: SceneDef[] = [
       fromPitch: { x: 0.55, y: 0.79, facing: 'left' },
       fromRoute: { x: 0.935, y: 0.81, facing: 'left' },
       fromUss: { x: 0.82, y: 0.81, facing: 'left' },
+      // back out of town, onto the pavement beside the turning at 0.725–0.783
+      fromCentre: { x: 0.8, y: 0.81, facing: 'left' },
       fromSchool: { x: 0.7, y: 0.8, facing: 'left' },
       fromBus: { x: 0.8, y: 0.8, facing: 'right' },
       fromFar: { x: 0.8, y: 0.81, facing: 'right' },
@@ -1092,6 +1088,18 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
+      /**
+       * העבודות של הרחוב — 6.9.2026: they were being offered from the KITCHEN.
+       *
+       * `gigSpots('street')` had been appended to the kitchen's hotspot list, four hundred
+       * lines above this one, together with the fan shop. So the bottles by the bin, the
+       * scarves before the match and the errands for Rafi were all reachable by standing
+       * at the sink and unreachable by standing in the street they are set in — and every
+       * one of them still passed the orphan-conversation audit, because the ids WERE used,
+       * in the wrong room. `tests/life-doors.test.ts` now asserts that a gig's hotspot is
+       * in the room the gig says it is in.
+       */
+      ...gigSpots('street'),
       { id: 'wall', era: '*', x: 0.6, y: 0.745, w: 0.09, act: 'wall-writing', verb: 'look', labelHe: 'הכתובת על הקיר' },
       { id: 'poster-1990', era: '1990', x: 0.82, y: 0.82, w: 0.05, act: 'poster-1990', verb: 'look', labelHe: 'המודעה על העמוד' },
       // The pole the whole near side of the street hangs off — stickers, a scrap of a
@@ -1139,14 +1147,21 @@ const SCENES: SceneDef[] = [
          * Walking ALONG the pavement passes them; turning INTO one, or pressing the
          * button, enters. (5.9.2026, found by the robot that plays a fresh life.)
          */
-        x: 0.235,
+        /**
+         * 6.9.2026 — moved onto the kiosk it is the door of. It sat at 0.235–0.335, which
+         * is the right half of the counter plus three and a half percent of blank wall
+         * east of it: you could stand clear of the shop and be in the shop. The awning in
+         * the painting runs 0.145–0.30 and the counter under it 0.185–0.29, so that is
+         * where the door is now.
+         */
+        x: 0.185,
         y: 0.705,
-        w: 0.1,
+        w: 0.105,
         h: 0.055,
         to: 'kiosk',
         spawn: 'fromStreet',
         labelHe: 'לקיוסק',
-        light: { x: 0.24, y: 0.42, w: 0.115, h: 0.32, tone: 'inside' },
+        light: { x: 0.19, y: 0.42, w: 0.115, h: 0.32, tone: 'inside' },
         // A shop is somewhere you STOP, so its door takes a moment of standing still.
         // Walking past a kiosk on your way east must never put you inside it.
         dwellMs: 900,
@@ -1162,62 +1177,63 @@ const SCENES: SceneDef[] = [
         h: 0.05,
         to: 'pitch',
         spawn: 'fromStreet',
-        labelHe: 'לסמטה ולמגרש',
+        labelHe: 'למגרש השכונתי',
         light: { x: 0.425, y: 0.44, w: 0.07, h: 0.3, tone: 'inside' },
         dwellMs: 900,
       },
       {
         /**
-         * בית הספר — the gate in the gap between the painted wall and the pole (0.62–0.69).
+         * בית הספר — the shopfront under the awning, east of the pole (0.786–0.860).
          *
-         * Tagged 1991 and not `*`, which is the one place this file bends its own rule
-         * that a door is geography. The gap is exactly where the 1990 street stands its
-         * veteran with the radio, and a door drawn through a person is worse than a door
-         * that is not there on a Saturday — when the school is shut anyway. The day this
-         * neighbourhood gets a weekday in 1986, this gate gets that era too and a lock
-         * with a sentence on it, like every other shut door in the game.
+         * Maor photographed this door on 6.9.2026 and drew a red box around where it
+         * belongs. He was right twice over. The gate used to sit at 0.62–0.69, which in
+         * this painting is the middle of a solid concrete wall — he sent the shot with
+         * the marker floating on bare render and wrote "הדלת היא בתוך הקיר". It was also
+         * tagged `era: '1991'`, so the one gate a child walks to every weekday of his life
+         * existed in one chapter.
+         *
+         * Both are fixed here. The x and w are read off his own rectangle, measured back
+         * to the painting by cross-correlating the phone frame against `street90.png`
+         * (`scripts/life/where-is-that.py`): his box lands on 0.7859–0.8595, and the
+         * doorway under the near awning is inside it. And it is a door in every era,
+         * because a school is.
          */
         id: 'school',
-        era: '1991',
-        x: 0.62,
+        x: 0.786,
         y: 0.705,
-        w: 0.07,
+        w: 0.074,
         h: 0.055,
         to: 'schoolyard',
         spawn: 'fromStreet',
         labelHe: 'לחצר בית הספר',
-        light: { x: 0.625, y: 0.5, w: 0.06, h: 0.26, tone: 'daylight' },
+        light: { x: 0.79, y: 0.5, w: 0.066, h: 0.26, tone: 'daylight' },
         dwellMs: 900,
       },
       {
-        // The neighbourhood sports hall, Ussishkin. Not a door in this frame — the hall is
-        // down the side street that opens east of the painted wall, so the exit sits in
-        // that gap (0.725–0.79), between the wall's end and the pole. It was first placed
-        // ON the wall (0.64–0.72): a doorway through the graffiti, on top of the `wall`
-        // hotspot and on the exact spot where Ofir (14:50) and Keren stand — the
-        // schedule guard in life-systems caught it. A place you STOP (dwell 900), so
-        // walking east never pulls the child in. Its real home is a dedicated 1980s
-        // basketball beat. Since 5.9.2026 it is not open from the first frame: see `when`.
-        id: 'ussishkin',
         /**
-         * ולא לפני שאפי אמר לו — the turning does not exist until somebody names it.
+         * מרכז תל אביב — the turning in the gap east of the wall (0.725–0.783).
          *
-         * It was open from the first frame of the game, which is a map handing out its
-         * own surprises: a boy in 1984 has no reason to know there is a hall down that
-         * gap, and the chapter that gives it to him (A3 — "אחרי הקיר, ימינה") arrived
-         * with nothing to give. `when` and not `needs`, deliberately: a locked door with
-         * a sentence on it is still a door you can see, and this one is a gap between
-         * two walls until Efi turns into it.
+         * This is the same gap the hall used to be down, and that is the point. Maor,
+         * 6.9.2026: "דלת ל'מרכז תל אביב' — שתוביל לאלנבי. באלנבי צריכה להיות הדלת
+         * ל'אוסישקין' ודלת 'בלומפילד'." A boy from this neighbourhood does not walk to
+         * Ussishkin street; he walks into town, and the town is what carries him north.
+         * So the turning keeps its geography and loses its lie: it goes to Allenby, and
+         * Allenby has the hall.
+         *
+         * No `when` flag on it. The hall was a secret until Efi named it — a corner of
+         * your own city is not, and gating it would only hide the map from a child who
+         * lives here. The discovery moved with the hall: the door out of Allenby to
+         * Ussishkin is the one that waits for `life:knows:hall`.
          */
-        when: { flag: 'life:knows:hall' },
+        id: 'centre',
         x: 0.725,
         y: 0.705,
-        w: 0.065,
+        w: 0.058,
         h: 0.055,
-        to: 'ussishkin-outside',
-        spawn: 'fromStreet',
-        labelHe: 'לאולם אוסישקין',
-        light: { x: 0.73, y: 0.5, w: 0.055, h: 0.26, tone: 'daylight' },
+        to: 'allenby',
+        spawn: 'fromSouth',
+        labelHe: 'למרכז תל אביב',
+        light: { x: 0.728, y: 0.5, w: 0.052, h: 0.26, tone: 'daylight' },
         dwellMs: 900,
       },
       {
@@ -1228,7 +1244,7 @@ const SCENES: SceneDef[] = [
         h: 0.155,
         to: 'route',
         spawn: 'fromStreet',
-        labelHe: 'מזרחה, אחרי האנשים',
+        labelHe: 'לדרום תל אביב',
         light: { x: 0.935, y: 0.52, w: 0.065, h: 0.4, tone: 'daylight' },
         dwellMs: 420,
         priority: 2,
@@ -1249,40 +1265,40 @@ const SCENES: SceneDef[] = [
       {
         id: 'busStation',
         era: '1996-army',
-        x: 0.85,
+        x: 0.872,
         y: 0.705,
-        w: 0.075,
+        w: 0.06,
         h: 0.155,
         to: 'bus-station',
         spawn: 'start',
         labelHe: 'לתחנה המרכזית',
-        light: { x: 0.855, y: 0.52, w: 0.065, h: 0.38, tone: 'daylight' },
+        light: { x: 0.876, y: 0.52, w: 0.06, h: 0.38, tone: 'daylight' },
         dwellMs: 900,
       },
       {
         id: 'ramatGan',
         era: ['1999-cup', '2000-double'],
-        x: 0.85,
+        x: 0.872,
         y: 0.705,
-        w: 0.075,
+        w: 0.06,
         h: 0.155,
         to: 'ramat-gan',
         spawn: 'start',
         labelHe: 'לרמת גן, לגמר',
-        light: { x: 0.855, y: 0.52, w: 0.065, h: 0.38, tone: 'daylight' },
+        light: { x: 0.876, y: 0.52, w: 0.06, h: 0.38, tone: 'daylight' },
         dwellMs: 900,
       },
       {
         id: 'hatikva',
         era: '2000-title',
-        x: 0.85,
+        x: 0.872,
         y: 0.705,
-        w: 0.075,
+        w: 0.06,
         h: 0.155,
         to: 'hatikva',
         spawn: 'start',
         labelHe: 'לשכונת התקווה',
-        light: { x: 0.855, y: 0.52, w: 0.065, h: 0.38, tone: 'daylight' },
+        light: { x: 0.876, y: 0.52, w: 0.06, h: 0.38, tone: 'daylight' },
         dwellMs: 900,
       },
     ],
@@ -1567,8 +1583,17 @@ const SCENES: SceneDef[] = [
   // point: the gate is the next scene and the inside is two after that, so this frame
   // may only promise.
   {
+    /**
+     * דרום תל אביב — the road out of the neighbourhood, named for where it is.
+     *
+     * It was called "בדרך לבלומפילד", which describes one errand rather than a place, and
+     * the door into it said "מזרחה, אחרי האנשים", which describes one afternoon. Maor,
+     * 6.9.2026, listing what the street's doors should be: «"דרום תל אביב" (מה שנקרא כרגע
+     * "לך מזרחה" / "בדרך לבלומפילד")». A quarter you can be in on a Tuesday for no reason
+     * is worth more than a corridor to a stadium, and this is that quarter.
+     */
     id: 'route',
-    titleHe: 'בדרך לבלומפילד',
+    titleHe: 'דרום תל אביב',
     art: 'approach',
     band: { far: 0.69, near: 0.875 },
     size: { far: 0.185, near: 0.3 },
@@ -1625,15 +1650,46 @@ const SCENES: SceneDef[] = [
     ],
     exits: [
       {
+        /**
+         * The road home, and it is a ROAD: full height on the near line, because you walk
+         * back the way you came. It shares this corner of the frame with the avenue above
+         * it and never with its footprint — the avenue is a turning at the far line, this
+         * is the pavement at the near one.
+         */
         id: 'back',
         x: 0.0,
-        y: 0.69,
+        y: 0.78,
         w: 0.055,
-        h: 0.185,
+        h: 0.10,
         to: 'street',
         spawn: 'fromRoute',
         labelHe: 'חזרה לרחוב',
         dwellMs: 500,
+      },
+      {
+        /**
+         * מרכז תל אביב — the avenue that opens north out of this junction (0.026–0.124).
+         *
+         * Maor sent the frame with a red box drawn round it on 6.9.2026: "כאן צריכה להיות
+         * הדלת ל'מרכז תל-אביב' שמשם יגיעו גם לאוסישקין". The box was measured back to
+         * `approach.png` by correlating his phone frame against the painting, and it lands
+         * on the one thing in this picture that is genuinely a way somewhere: a street
+         * receding four blocks with balconies down both sides and a vanishing point at
+         * 0.10. Everything else here is a wall, a barrier or a stadium.
+         *
+         * Shallow, at the far line, like every turning in this game: you go UP to it. The
+         * road home is at the near line under it and the two never fight for a step.
+         */
+        id: 'centre',
+        x: 0.026,
+        y: 0.69,
+        w: 0.098,
+        h: 0.055,
+        to: 'allenby',
+        spawn: 'fromSouth',
+        labelHe: 'למרכז תל אביב',
+        light: { x: 0.03, y: 0.42, w: 0.09, h: 0.3, tone: 'daylight' },
+        dwellMs: 900,
       },
       {
         id: 'ground',
@@ -1647,6 +1703,234 @@ const SCENES: SceneDef[] = [
         light: { x: 0.935, y: 0.5, w: 0.065, h: 0.4, tone: 'daylight' },
         dwellMs: 300,
         priority: 2,
+      },
+    ],
+  },
+
+  // --------------------------------------------------------------------- אלנבי ----
+  //
+  // אלנבי פינת קינג ג'ורג' פינת נחלת בנימין — the junction the map now turns on.
+  //
+  // Maor opened it on 6.9.2026 and gave it a job: "בעמוד הרחוב… דלת ל'מרכז תל אביב' —
+  // שתוביל לאלנבי. באלנבי צריכה להיות הדלת ל'אוסישקין' ודלת 'בלומפילד'." Until that
+  // morning the world was a star with the neighbourhood at the middle: every place in Tel
+  // Aviv was one door off the child's own street, including a sports hall six kilometres
+  // north. With this corner in it the map is a city — you go into town, and town carries
+  // you to the rest of it, which is how anybody who grew up in south Tel Aviv moved.
+  //
+  // The painting is his, delivered the same day, and it tells its own decade: a record
+  // shop with vinyl in the window and wooden chairs at the café in the eighties; CDs,
+  // cassettes and red plastic chairs in the nineties; a phone shop in the two-thousands.
+  // Nobody reads a caption. The building, the green door at number 96, the archway through
+  // the block and the awning never move, so the corner stays the same corner for twenty
+  // years while everything sold on it changes — which is the whole point of a place you
+  // come back to.
+  {
+    id: 'allenby',
+    titleHe: 'אלנבי',
+    art: 'allenby',
+    artByEra: {
+      '1990': 'allenby90', '1991': 'allenby90', '1990s': 'allenby90',
+      '1993-cup': 'allenby90', '1993-galil': 'allenby90', '1995-sinai': 'allenby90',
+      '1996-army': 'allenby90', '1997-basket': 'allenby90', '1998-laces': 'allenby90',
+      '1999-basket': 'allenby90', '1999-cup': 'allenby90',
+      '2000-title': 'allenby2000', '2000-double': 'allenby2000', '2000s': 'allenby2000',
+    },
+    /**
+     * המדרכה היא הרצפה — the band is the pavement, and it stops at the kerb.
+     *
+     * This is a straight-on elevation: the buildings stand on 0.705 and the kerb runs at
+     * 0.82, so a hundred and fifteen thousandths of the frame is the entire walkable
+     * world. Letting the near line down into the road would double the band and put a
+     * child in the traffic, and it would also blow the scale up — at 0.90 an adult is
+     * three-quarters of the glass.
+     *
+     * `metre` is measured off the painting rather than guessed: the café door is 2.05 m
+     * and is drawn from 0.415 to 0.700, so a metre at the building line (0.705) is 0.139 of
+     * the frame. The horizon in this shot sits at 0.60 and ground scale goes as (y − 0.60).
+     *
+     * The far line is 0.725 and not the building line, and that is a camera limit rather
+     * than a taste: standing a figure right at the horizon ramps him 2.2× across a band a
+     * tenth of the frame deep, which no lens does, and `tests/life-walk.test.ts` says so.
+     * At 0.725 against 0.82 the ramp is 1.76. A metre at the far line is then 0.1655, the
+     * taper is 0.568, and a metre at the near line is 0.2914 — so the child is drawn 0.379
+     * and an adult 0.51 of the frame on the kerb, which is the kiosk's register.
+     */
+    band: { far: 0.725, near: 0.82 },
+    size: { far: 0.2152, near: 0.3788 },
+    metre: 0.2914,
+    ambience: 'day',
+    // The first time only: a card that says where this is, because a corner nobody names
+    // is a corridor. `arrival` is how `route` announced itself and how this does too.
+    arrival: { art: 'allenby', ms: 3000, flag: 'saw:allenby' },
+    stuckHe: 'אלנבי. הקשת באמצע עוברת דרך הבניין. שמאלה — חזרה לשכונה.',
+    stuckByEra: {
+      '1990': 'חנות התקליטים פתוחה, בית הקפה מלא. הקשת באמצע — משם ממשיכים צפונה.',
+      '1991': 'מהקשת ממשיכים לאוסישקין. שמאלה הביתה, ימינה ליפו.',
+    },
+    layers: [
+      /**
+       * הארגז — his own crate, delivered 6.9.2026, standing where the shop put it out.
+       *
+       * It has been on the art-required list since delta 27 and it arrived as six passes
+       * of one frame so the eighteen bottle wells could be keyed properly (see
+       * `scripts/life/ingest-allenby-2026-09-06.py`). It is here because a pavement with
+       * something ON it is a pavement somebody works on.
+       */
+      { art: 'propCrate', era: '*', x: 0.452, y: 0.792, w: 0.048, depth: 0.792, foot: true },
+      { art: 'propCrate', era: '*', x: 0.213, y: 0.7455, w: 0.031, depth: 0.7455, foot: true, flip: true, alpha: 0.96 },
+    ],
+    spawns: {
+      // in from the south — the neighbourhood, or the road out of it
+      fromSouth: { x: 0.085, y: 0.79, facing: 'right' },
+      // back down through the archway
+      fromNorth: { x: 0.62, y: 0.782, facing: 'left' },
+      // back from the ground
+      fromGround: { x: 0.925, y: 0.79, facing: 'left' },
+      start: { x: 0.085, y: 0.79, facing: 'right' },
+    },
+    actors: [
+      {
+        /**
+         * The man in the shop doorway. He is not a supporter, he is a shopkeeper, and the
+         * shirts are the rail at the back — which is exactly what a shop like this was on
+         * this street: records at the front, and whatever else sold.
+         */
+        id: 'records',
+        // `era` is not optional in the way it looks: `inEra` falls back to '1986', so an
+        // actor without one exists in exactly one chapter. He is here in all of them.
+        era: '*',
+        figure: 'manCap',
+        x: 0.318,
+        y: 0.752,
+        nameHe: 'המוכר בפינה',
+        talk: 'allenby-records',
+        sway: 0.004,
+      },
+      {
+        /**
+         * The city's other half, standing by a café table on ground that belongs to
+         * neither. This is the one place in the game where that conversation happens
+         * without a gate between them, and that is why he is here and not at one.
+         *
+         * He is drawn as an ordinary man in a white shirt and nothing tells you which club
+         * he follows until he says it. That is deliberate twice over: this game does not
+         * put the other colours on the glass, and a rivalry you can see coming from across
+         * the street is not the one worth writing.
+         */
+        id: 'rival',
+        era: '*',
+        figure: 'adultB2',
+        x: 0.862,
+        y: 0.768,
+        nameHe: 'הגבר מהשולחן',
+        talk: 'allenby-rival',
+        flip: true,
+      },
+    ],
+    hotspots: [
+      // The blue enamel plate on the corner: 96. The one thing in the frame that says where
+      // in the city this is.
+      { id: 'sign', era: '*', x: 0.352, y: 0.735, w: 0.05, act: 'allenby-sign', verb: 'look', labelHe: 'המספר על הפינה', priority: 2 },
+      // The window: sleeves in the eighties, jewel cases in the nineties, handsets after.
+      { id: 'window', era: '*', x: 0.14, y: 0.74, w: 0.11, act: 'allenby-window', verb: 'look', labelHe: 'החלון של החנות' },
+      // The tables under the awning, which are where the city sits and talks about it.
+      { id: 'cafe', era: '*', x: 0.795, y: 0.745, w: 0.12, act: 'allenby-cafe', verb: 'look', labelHe: 'בית הקפה' },
+      /**
+       * חנות האוהדים — the doorway on the corner, and the only one in the game.
+       *
+       * Maor, 6.9.2026: "הדלת ל'חנות אוהדים' צריכה להיות במסך אלנבי." It settles two
+       * things at once. It was a DOOR to a room for one delta and the room was bare, so it
+       * opens the shop SCREEN instead (`components/life/ShopCard.tsx`) — his call, and the
+       * right one: buying a shirt is a rail and a pocket, not a room to walk about in. And
+       * it was in the wrong room entirely: these hotspots were sitting in the KITCHEN's
+       * list, four hundred lines up, so the supporters' shop opened from beside the sink
+       * and from nowhere else.
+       *
+       * One hotspot per chapter, because a `Condition` cannot ask which year it is, and
+       * the rail's contents are the year.
+       */
+      ...SHOP_CHAPTERS.map((chapter) => ({
+        id: `shop-${chapter}`,
+        era: chapter,
+        x: 0.263,
+        y: 0.74,
+        w: 0.062,
+        act: shopId(chapter),
+        verb: 'look' as const,
+        labelHe: 'חנות האוהדים',
+        priority: 4,
+      })),
+      ...gigSpots('allenby'),
+    ],
+    exits: [
+      {
+        /**
+         * שמאלה, לאורך אלנבי — the way you came, and the way home.
+         *
+         * The street runs out of both sides of this frame and the whole band is the
+         * pavement between them, so these two are edges rather than doorways. The one
+         * doorway is the archway in the middle, and it is the one that goes somewhere you
+         * cannot see.
+         */
+        id: 'home',
+        x: 0.0,
+        y: 0.725,
+        w: 0.055,
+        h: 0.095,
+        to: 'street',
+        spawn: 'fromCentre',
+        labelHe: 'חזרה לשכונה',
+        light: { x: 0.0, y: 0.52, w: 0.05, h: 0.3, tone: 'daylight' },
+        dwellMs: 500,
+      },
+      {
+        /**
+         * בלומפילד — right, and south-west out of the frame.
+         *
+         * `saw:road` and not a plain door: the first sight of the floodlight pylons over
+         * the rooftops is a designed moment on the road out of the neighbourhood, and a
+         * short cut through town that skipped it would spend the moment before it
+         * happened. Once you have walked there once, town is the quicker way — which is
+         * also true, and is why the shortcut is a reward rather than a route.
+         */
+        id: 'bloomfield',
+        x: 0.945,
+        y: 0.725,
+        w: 0.055,
+        h: 0.095,
+        to: 'bloomfield-outside',
+        spawn: 'fromRoute',
+        labelHe: 'לבלומפילד',
+        light: { x: 0.95, y: 0.52, w: 0.05, h: 0.3, tone: 'daylight' },
+        dwellMs: 900,
+        needs: { flag: 'saw:road' },
+        blockedHe: 'משם ממשיכים לאצטדיון. אתה עוד לא יודע את הדרך — לך פעם אחת מהשכונה.',
+      },
+      {
+        /**
+         * הקשת — the passage through the building, and the way north.
+         *
+         * This is where the hall's discovery moved to. It used to be a gap in a wall on
+         * the child's own street, open from the first frame of the game, which handed a
+         * boy in 1984 a sports hall he had no reason to know existed. Efi still names it,
+         * the flag is still `life:knows:hall` — only now the turning he is describing is
+         * in town, where it is, and it is an archway with steps in it and daylight at the
+         * far end rather than a hole in some graffiti.
+         *
+         * Shallow, at the far line: you go UP to it. Walking the pavement never falls in.
+         */
+        id: 'ussishkin',
+        when: { flag: 'life:knows:hall' },
+        x: 0.566,
+        y: 0.725,
+        w: 0.058,
+        h: 0.045,
+        to: 'ussishkin-outside',
+        spawn: 'fromStreet',
+        labelHe: 'לאולם אוסישקין',
+        light: { x: 0.57, y: 0.42, w: 0.05, h: 0.3, tone: 'daylight' },
+        dwellMs: 900,
       },
     ],
   },
@@ -2145,14 +2429,21 @@ const SCENES: SceneDef[] = [
     ],
     exits: [
       {
+        /**
+         * Back the way you came, and since 6.9.2026 that is town rather than the child's
+         * own pavement. A boy on the Yarkon does not step through one door and find his
+         * own street; he walks back down through Allenby, and from Allenby he is one more
+         * door from home. That door is also where the film goes: `promenade-walk` plays
+         * on exactly this crossing.
+         */
         id: 'back',
         x: 0.0,
         y: 0.82,
         w: 0.05,
         h: 0.14,
-        to: 'street',
-        spawn: 'fromUss',
-        labelHe: 'חזרה לרחוב',
+        to: 'allenby',
+        spawn: 'fromNorth',
+        labelHe: 'חזרה לעיר',
         light: { x: 0.006, y: 0.55, w: 0.05, h: 0.3, tone: 'daylight' },
         dwellMs: 500,
       },

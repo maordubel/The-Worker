@@ -167,11 +167,25 @@ describe('העידן — 1991 is a chapter like the others', () => {
     }
   })
 
-  it('opens the school on a Monday and keeps it shut on the two Saturdays', () => {
+  /**
+   * 6.9.2026 — the gate is a gate in every year now.
+   *
+   * It used to be tagged `era: '1991'`, and this test used to check that. The reason was
+   * good and wrong: the gate was drawn at 0.62–0.69 of the street, which is the middle of
+   * the concrete wall and also exactly where the 1990 street stands its man with the
+   * radio, so the tag was hiding a placement bug. Maor found the placement bug from the
+   * other end — he sent the frame with the marker floating on bare wall — and listed the
+   * doors the street should have, with "בית ספר" in every one of them and no year on it.
+   *
+   * So the gate moved onto the shopfront he drew a box round, and the tag came off. A
+   * schoolyard on a Saturday is not shut in this neighbourhood; it is where the game is.
+   */
+  it('opens the school in every year, on the shopfront rather than in the wall', () => {
     const gate = sceneFor('street').exits.find((exit) => exit.id === 'school')
     expect(gate).toBeDefined()
     expect(exitInEra(gate!, '1991')).toBe(true)
-    expect(exitInEra(gate!, '1986')).toBe(false)
+    expect(exitInEra(gate!, '1986')).toBe(true)
+    expect(gate!.x).toBeGreaterThan(0.75)
     expect(sceneFor('classroom').exits.some((exit) => exit.to === 'schoolyard')).toBe(true)
     expect(sceneFor('schoolyard').exits.some((exit) => exit.to === 'classroom')).toBe(true)
   })

@@ -11,6 +11,7 @@ import { CUTSCENES, cutsceneCard, cutsceneFor, embedUrl, longDateHe } from '@/li
 import { OPENING, openingLines, openingMs } from '@/lib/life/opening'
 import { isPlaceholder, type HistoricalAnchor } from '@/lib/life/anchors'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
+import { bodySize } from '@/lib/life/world/heights'
 import { DEFAULT_IDENTITY, ENDINGS, PROLOGUE } from '@/lib/life/content/chapter1986'
 import type { Conversation } from '@/lib/life/content/script'
 import { LifeEngine } from '@/lib/life/engine'
@@ -467,7 +468,13 @@ describe('העולם — every door leads somewhere that exists', () => {
     for (const scene of scenes) {
       for (const actor of scene.actors) {
         expect(actor.x > 0 && actor.x < 1 && actor.y > 0.4 && actor.y < 1.01, `${scene.id}/${actor.id}`).toBe(true)
-        expect(actor.size > 0.05 && actor.size < 0.8, `${scene.id}/${actor.id} size`).toBe(true)
+        /**
+         * Since delta 30 nobody types a size: it comes from `heights.ts` and the room's
+         * own metre. What is worth asserting is the size the actor is DRAWN at, which is
+         * what this used to be a proxy for.
+         */
+        const drawn = bodySize(actor.figure, scene.metre, 1, scene.size.far / scene.size.near)
+        expect(drawn > 0.05 && drawn < 0.8, `${scene.id}/${actor.id} is drawn at ${drawn}`).toBe(true)
       }
       for (const spot of scene.hotspots) {
         expect(spot.x > 0 && spot.x < 1 && spot.y > 0.4 && spot.y < 1.01, `${scene.id}/${spot.id}`).toBe(true)
@@ -602,7 +609,7 @@ describe('העולם — every door leads somewhere that exists', () => {
      * their alpha (`scripts/life/ingest-street-2026-09-05.py`). The rule this line
      * enforces is "nobody typed a crop box", and that script types none.
      */
-    const HIS_OWN = new Set(['maor-2026-09-05-street', 'maor-2026-09-05-coin'])
+    const HIS_OWN = new Set(['maor-2026-09-05-street', 'maor-2026-09-05-coin', 'maor-2026-09-06'])
     for (const key of used) {
       if (RECUT_OK.has(key)) continue
       // …and a shirt comes off a photograph of the real thing, which is the point of it

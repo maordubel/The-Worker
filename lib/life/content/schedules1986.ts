@@ -52,7 +52,10 @@ export const SCHEDULE_1986: NPCScheduleEntry[] = [
     start: DAY_START,
     end: at(13, 40),
     behavior: 'wait',
-    x: 0.185,
+    // 6.9.2026: west of the counter rather than on it. The kiosk's door moved onto the
+    // counter it is the door of (0.185–0.29) and he was standing in the middle of it —
+    // a boy you have to walk through a shop to reach.
+    x: 0.135,
     y: 0.775,
     drift: 0.008,
   },

@@ -54,7 +54,22 @@ export function ShopCard({
       data-life="shop-card"
     >
       {/* ---------------------------------------------------------------- the sign -- */}
-      <header className="flex items-end justify-between gap-3 border-b-rule border-red px-4 pb-3 pt-5">
+      {/**
+       * המוט על הקיר — Maor's photograph of the rail, 6.9.2026, behind the shop's name.
+       *
+       * A shop that is a SCREEN and not a room has one problem: it has no walls, so it has
+       * nowhere to be. This is the wall. The empty hangers are the point — the rail below
+       * fills them in — and the ink wash over it is heavy enough that the name and the
+       * money read as type rather than as something photographed.
+       */}
+      <header
+        className="relative flex items-end justify-between gap-3 overflow-hidden border-b-rule border-red px-4 pb-3 pt-5"
+        style={{
+          backgroundImage: 'linear-gradient(to bottom, rgba(17,17,17,0.62), rgba(17,17,17,0.88)), url(/life/art/shopHanger.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 38%',
+        }}
+      >
         <div>
           <p className="font-display text-[12px] uppercase tracking-[0.24em] text-red">
             {t('life.shop.kicker')}

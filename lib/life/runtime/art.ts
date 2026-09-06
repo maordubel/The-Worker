@@ -105,6 +105,15 @@ export const BACKDROP = [
   'busStation', 'ramatGan', 'hatikva', 'armyRoom', 'lironCar', 'gate5', 'kioskNight', 'alley', 'cup83',
   // …and from the desktop folder the same night: the match-day street, the hall at night, the 1998 classroom
   'street90Flags', 'ussHallNight', 'classroom98',
+  /**
+   * 6.9.2026 — the corner of Allenby, told three times.
+   *
+   * The same elevation in every decade: the record shop with vinyl in the window and
+   * wooden chairs at the café; then compact discs, cassettes and red plastic chairs; then
+   * a phone shop. The building, the green door at 96, the archway through the block and
+   * the awning never move, so twenty years pass on one corner without a caption.
+   */
+  'allenby', 'allenby90', 'allenby2000',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -611,6 +620,8 @@ export const PROP = [
    */
   'propBottle',
   'propBottleFull',
+  /** ארגז בקבוקים אדום — his, 6.9.2026: the deposit, the carry, the thing you sit on */
+  'propCrate',
   /** the newspaper stand by the kiosk door, from the nineties on */
   'propNewsRack',
   /** a wooden hand cart against the wall — the eighties, and only the eighties */

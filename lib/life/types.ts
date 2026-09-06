@@ -56,6 +56,13 @@ export type LocationId =
   | 'kiosk'
   | 'pitch'
   | 'route'
+  /**
+   * אלנבי — the corner of Allenby, King George and Nahalat Binyamin: the middle of town,
+   * and from 6.9.2026 the junction the whole map turns on. Home is south of it, Bloomfield
+   * south-west, the hall on Ussishkin street north. A boy from this neighbourhood does not
+   * walk to the Yarkon; he goes into town first, like everybody else.
+   */
+  | 'allenby'
   | 'bloomfield-outside'
   | 'bloomfield-tunnel'
   | 'bloomfield-inside'

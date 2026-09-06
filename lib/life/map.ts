@@ -28,6 +28,7 @@ export type MapPlaceId =
   | 'pitch'
   | 'school'
   | 'route'
+  | 'allenby'
   | 'bloomfield'
   | 'ussishkin'
   | 'yad-eliyahu'
@@ -126,8 +127,8 @@ export const MAP_PLACES: readonly MapPlaceDef[] = [
   },
   {
     id: 'route',
-    labelHe: 'הדרך מזרחה',
-    subHe: 'לבלומפילד',
+    labelHe: 'דרום תל אביב',
+    subHe: 'הדרך מהשכונה',
     lat: 32.0531,
     lon: 34.7569,
     scene: 'route',
@@ -135,6 +136,28 @@ export const MAP_PLACES: readonly MapPlaceDef[] = [
     revealFlag: 'life:been:route',
     revealHe: null,
     confidence: 'placed',
+    fromYear: 1978,
+  },
+  {
+    /**
+     * אלנבי פינת קינג ג׳ורג׳ פינת נחלת בנימין — the junction the map turns on.
+     *
+     * Real coordinates, and it is still there: the corner where Allenby crosses King
+     * George and Nahalat Binyamin runs off it. Until 6.9.2026 the hall on Ussishkin street
+     * was one door off the child's own pavement, six kilometres away, which made the map a
+     * list rather than a city. Now town is in the middle of it, and everything north goes
+     * through here — which is how it works if you grew up south of it.
+     */
+    id: 'allenby',
+    labelHe: 'אלנבי',
+    subHe: 'פינת קינג ג׳ורג׳ · נחלת בנימין',
+    lat: 32.0667,
+    lon: 34.771,
+    scene: 'allenby',
+    scenes: ['allenby'],
+    revealFlag: 'life:been:allenby',
+    revealHe: 'מרכז העיר. מכאן ממשיכים לכל מקום.',
+    confidence: 'exact',
     fromYear: 1978,
   },
   {

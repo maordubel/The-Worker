@@ -31,6 +31,7 @@ const ROOMS = [
   ['kiosk', '1995-sinai'], ['kiosk', '1996-army'], ['ussishkin-outside', '1993-cup'],
   ['ussishkin-outside', '1997-basket'], ['ussishkin-outside', '1999-basket'],
   ['bloomfield-outside', '1999-cup'], ['gate5', '1998-laces'],
+  ['allenby', '1986'], ['allenby', '1991'], ['allenby', '2000-double'],
 ]
 
 /** what a person may plausibly be, in metres */
@@ -61,6 +62,7 @@ for (const [where, chapter] of ROOMS) {
         { t: 'flag.raised', flag: 'prologue:done' },
         { t: 'chapter.entered', chapter },
         { t: 'moved', to: where },
+        { t: 'flag.raised', flag: 'saw:allenby' },
         ...['onboard:street', 'onboard:moved', 'onboard:acted', 'life:knows:hall', 'saw:road', 'saw:reveal', 'entry:granted', 'uss:arrived']
           .map((flag) => ({ t: 'flag.raised', flag })),
       ]

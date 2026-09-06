@@ -46,19 +46,35 @@ export const FILM_CUTS: readonly FilmCut[] = [
   // ------------------------------------------------ דרום → צפון, ובחזרה ------------
   //
   // The one journey this film was cut for. Maor found it himself: the promenade at minute
-  // sixteen is the road between Bloomfield and Ussishkin, and in this world that road is
-  // the street — every door out of the neighbourhood goes through it.
+  // sixteen is the road between the south of the city and the Yarkon.
+  //
+  // 6.9.2026: it moved a door. The walk north used to start on the child's own pavement,
+  // because the hall was one turning off it; now it starts where a walk north actually
+  // starts, which is town. That is also the better cut — a boy leaving HIS street for the
+  // river is a bigger jump than the film can carry, and a boy leaving Allenby for it is
+  // exactly the distance the promenade covers.
   {
     clip: 'promenade-dusk',
-    from: 'street',
+    from: 'allenby',
     to: 'ussishkin-outside',
     captionHe: 'הטיילת, בדרך צפונה',
   },
   {
     clip: 'promenade-walk',
     from: 'ussishkin-outside',
-    to: 'street',
+    to: 'allenby',
     captionHe: 'הטיילת, בדרך חזרה',
+  },
+  // …and the way into town itself: out of the neighbourhood, into the city. `market` is
+  // the right four seconds for it — awnings, a pavement, people crossing in front of the
+  // lens — and it is free here because the kiosk cut below is capped at three in the
+  // afternoon while this one only plays after it.
+  {
+    clip: 'market',
+    from: 'street',
+    to: 'allenby',
+    after: HOUR(15),
+    captionHe: 'לתוך העיר',
   },
 
   // ------------------------------------------------------- הדרך למגרש -------------

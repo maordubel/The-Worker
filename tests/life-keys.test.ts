@@ -114,18 +114,22 @@ describe('מעברונים — nine clips, and the rules that stop them becoming
     expect(cutFor('bedroom', 'home', 12 * 60, '1986', {})).toBeNull()
   })
 
+  /**
+   * 6.9.2026: the walk north starts in town now, not on the child's own pavement — the
+   * hall stopped being one turning off his street and became one turning off Allenby.
+   */
   it('plays the promenade going north, and a different one coming back', () => {
-    expect(cutFor('street', 'ussishkin-outside', 12 * 60, '1991', {})?.clip).toBe('promenade-dusk')
-    expect(cutFor('ussishkin-outside', 'street', 12 * 60, '1991', {})?.clip).toBe('promenade-walk')
+    expect(cutFor('allenby', 'ussishkin-outside', 12 * 60, '1991', {})?.clip).toBe('promenade-dusk')
+    expect(cutFor('ussishkin-outside', 'allenby', 12 * 60, '1991', {})?.clip).toBe('promenade-walk')
   })
 
   it('plays once per chapter and then remembers', () => {
-    const cut = cutFor('street', 'ussishkin-outside', 12 * 60, '1991', {})
+    const cut = cutFor('allenby', 'ussishkin-outside', 12 * 60, '1991', {})
     expect(cut).not.toBeNull()
     const seen = { [filmFlag(cut!.clip, '1991')]: true }
-    expect(cutFor('street', 'ussishkin-outside', 12 * 60, '1991', seen)).toBeNull()
+    expect(cutFor('allenby', 'ussishkin-outside', 12 * 60, '1991', seen)).toBeNull()
     // …and a new chapter is a new first time
-    expect(cutFor('street', 'ussishkin-outside', 12 * 60, '1993-cup', seen)).not.toBeNull()
+    expect(cutFor('allenby', 'ussishkin-outside', 12 * 60, '1993-cup', seen)).not.toBeNull()
   })
 
   it('never cuts to a morning street at night', () => {

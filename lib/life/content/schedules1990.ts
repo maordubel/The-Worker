@@ -77,7 +77,8 @@ export const SCHEDULE_1990: NPCScheduleEntry[] = [
     start: DAY_START,
     end: FRIENDS_AT_KIOSK,
     behavior: 'wait',
-    x: 0.2,
+    // west of the counter, not on it — see the same move in `schedules1986.ts`
+    x: 0.14,
     y: 0.78,
     drift: 0.008,
   },

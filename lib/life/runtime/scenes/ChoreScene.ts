@@ -72,6 +72,9 @@ const SHAPE: Record<string, Shape> = {
   'errands-rafi': { mode: 'carry', art: 'propBagStrap90', target: 5, seconds: 55, hintHe: 'הזמנה לכל בניין. רפי סופר.' },
   'sell-scarves': { mode: 'serve', art: 'propScarfRed', target: 8, seconds: 55, hintHe: 'הם עוברים. תגיע אליהם ותלחץ.' },
   'balls-hall': { mode: 'collect', art: 'propBallReal', target: 9, seconds: 45, hintHe: 'כל הכדורים לעגלה, לפני שהאימון מתחיל.' },
+  // אלנבי (6.9.2026): the market and the shopfront
+  'crates-allenby': { mode: 'carry', art: 'propCrate', target: 7, seconds: 60, hintHe: 'ארגז אחד כל פעם, מהמדרכה פנימה.' },
+  'sweep-allenby': { mode: 'sweep', target: 9, seconds: 45, hintHe: 'מהשולחנות עד אבן השפה. הכל.' },
 }
 
 /** what a gig with no shape declared plays as — never reached, but never undefined either */

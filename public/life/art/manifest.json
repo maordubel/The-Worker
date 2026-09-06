@@ -755,6 +755,48 @@
     1600,
     900
    ]
+  },
+  "allenby": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 842741,
+   "deyellowed": 25424,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-06",
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "allenby90": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 800339,
+   "deyellowed": 43429,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-06",
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
+  },
+  "allenby2000": {
+   "w": 1600,
+   "h": 900,
+   "bytes": 774565,
+   "deyellowed": 40071,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-06",
+   "box": [
+    0,
+    0,
+    1600,
+    900
+   ]
   }
  },
  "figures": {
@@ -1756,6 +1798,14 @@
    "yellowLeft": 0,
    "source": "maor-2026-09-05-coin",
    "whatHe": "חצי שקל — פלי (הספרה)"
+  },
+  "propCrate": {
+   "w": 560,
+   "h": 410,
+   "bytes": 328767,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-06",
+   "whatHe": "ארגז בקבוקים אדום — הפיקדון, הסחיבה, הישיבה עליו"
   }
  },
  "portraits": {
@@ -3683,6 +3733,90 @@
    ],
    "deyellowed": 0,
    "yellowLeft": 0
+  },
+  "allenby--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 42534,
+   "source": "allenby",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "allenby--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 14688,
+   "source": "allenby",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "allenby90--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 41372,
+   "source": "allenby90",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "allenby90--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 15022,
+   "source": "allenby90",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "allenby2000--sky": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 42042,
+   "source": "allenby2000",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "allenby2000--ground": {
+   "w": 1600,
+   "h": 315,
+   "bytes": 16137,
+   "source": "allenby2000",
+   "box": [
+    0,
+    0,
+    1600,
+    315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
   }
  },
  "parallax": {
@@ -3757,6 +3891,14 @@
    "bytes": 1349048,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
+  },
+  "shopHanger": {
+   "w": 1400,
+   "h": 358,
+   "bytes": 320434,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-06",
+   "whatHe": "המוט והקולבים בחנות האוהדים"
   }
  },
  "panoramas": {

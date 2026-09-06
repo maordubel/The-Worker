@@ -266,3 +266,84 @@ describe('the crowd state machine', () => {
     expect(manifest['crowd-real-goal']!.loop).toBe(false)
   })
 })
+
+/**
+ * שלושה מקורות, ותו לא — 6.9.2026.
+ *
+ * Maor listened to the game and said what it was: everything that was synthesised sounds
+ * terrible, keep the three recordings I gave you. This is that instruction, written as a
+ * test, so the sixty-third synthesised footstep cannot come back by accident.
+ */
+describe('רק מה שמאור הקליט', () => {
+  const REAL = [
+    'amb-park', 'park-wave',
+    'crowd-real-murmur', 'crowd-real-build', 'crowd-real-goal',
+    'crowd-real-miss', 'crowd-real-after', 'crowd-real-final',
+    'amb-theme',
+  ]
+
+  it('the allow-list is exactly his nine cuts', () => {
+    expect([...LifeAudio.allowed].sort()).toEqual([...REAL].sort())
+  })
+
+  it('the library says nothing exists that he did not record', () => {
+    const manifest = JSON.parse(require('node:fs').readFileSync('public/life/sfx/manifest.json', 'utf8')) as Record<string, { source?: string }>
+    expect(Object.keys(manifest).sort()).toEqual([...REAL].sort())
+    for (const key of Object.keys(manifest)) {
+      expect(manifest[key]!.source, `${key} has no recording behind it`).toMatch(/^maor-/)
+    }
+  })
+
+  it('every allowed cut is two files on disk, ogg and m4a', () => {
+    const { existsSync } = require('node:fs')
+    for (const key of REAL) {
+      for (const ext of ['ogg', 'm4a']) {
+        expect(existsSync(`public/life/sfx/${key}.${ext}`), `${key}.${ext}`).toBe(true)
+      }
+    }
+  })
+
+  it('refuses a synthesised key without touching a bus, and says so to its caller', () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    const before = FakeContext.last.started.length
+    // the old library, one of each family: a step, a door, a whistle, a click, a room tone
+    for (const key of ['step-street-1', 'door', 'whistle-1', 'ui-click', 'amb-room', 'darbuka-dum', 'crowd-goal'] as never[]) {
+      // `true` is the contract: the caller must NOT fall back to anything
+      expect(audio.play(key), String(key)).toBe(true)
+    }
+    expect(FakeContext.last.started.length, 'a refused key started a source').toBe(before)
+  })
+
+  it('the one-shots the game still calls make no sound at all', () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    const before = FakeContext.last.started.length
+    audio.step('street'); audio.step('floor'); audio.page(); audio.tick(); audio.thud()
+    audio.door(); audio.whistle(3); audio.radioOn(true); audio.radioOn(false); audio.roar(2)
+    expect(FakeContext.last.started.length).toBe(before)
+  })
+
+  it('the tune plays under an ordinary room and not on the ground', async () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.setAmbience('interior')
+    await tick()
+    const music = FakeContext.last.started.filter((s) => s.loop)
+    expect(music.length, 'no tune under a room').toBeGreaterThan(0)
+  })
+
+  it('his street plays outdoors and stops indoors', async () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.setAmbience('day')
+    await tick()
+    await tick()
+    const outdoors = FakeContext.last.started.length
+    expect(outdoors).toBeGreaterThan(0)
+    audio.setAmbience('kitchen')
+    await tick()
+    // nothing new is started for a kitchen: the tune is already running, the street stops
+    expect(FakeContext.last.started.length).toBe(outdoors)
+  })
+})

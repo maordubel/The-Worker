@@ -183,6 +183,45 @@ export const GIGS: readonly Gig[] = [
     trait: { key: 'reliability', delta: 3 },
     at: { x: 0.4, y: 0.86, w: 0.08 },
   },
+  /**
+   * שני ג׳ובים באלנבי — 6.9.2026, with the corner itself.
+   *
+   * A junction is a junction a boy can earn on, and these are the two things somebody on
+   * this pavement actually needed doing: the crates outside the record shop have to come
+   * in before he pulls the shutter, and the pavement in front has to be swept before he
+   * opens it. They are also why the door into town is worth walking through on an ordinary
+   * Tuesday, which a door that only leads to a stadium never is.
+   */
+  {
+    id: 'crates-allenby',
+    where: 'allenby',
+    nameHe: 'המוכר בפינה',
+    labelHe: 'הארגזים על המדרכה',
+    from: 'a4-shirt',
+    hours: 1,
+    minutes: 45,
+    energy: 15,
+    askHe: '"להכניס? אני חזק."',
+    openHe: 'שני ארגזי עץ מלאים על המדרכה, ארגז בקבוקים אדום מתחתם, והוא רוצה לסגור בעוד רבע שעה.',
+    doneHe: 'הכול בפנים לפני שהוא הוריד את התריס, והוא נתן לך מטבע ותקליט שרוט "כי ממילא אף אחד לא ייקח".',
+    trait: { key: 'responsibility', delta: 3 },
+    at: { x: 0.15, y: 0.77, w: 0.09 },
+  },
+  {
+    id: 'sweep-allenby',
+    where: 'allenby',
+    nameHe: 'המלצר',
+    labelHe: 'המדרכה לפני בית הקפה',
+    from: '1990',
+    hours: 0.5,
+    minutes: 25,
+    energy: 7,
+    askHe: '"לטאטא לפני שהם מגיעים?"',
+    openHe: 'מטאטא מאחורי הדלת, וכל מה שהעיר הפילה כאן מאתמול.',
+    doneHe: 'המדרכה נקייה עד אבן השפה. הוא הביא לך לימונדה ולא לקח עליה כסף.',
+    trait: { key: 'reliability', delta: 2 },
+    at: { x: 0.78, y: 0.778, w: 0.09 },
+  },
   {
     id: 'sell-scarves',
     where: 'bloomfield-outside',
