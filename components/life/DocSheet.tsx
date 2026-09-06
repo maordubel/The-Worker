@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect } from 'react'
+
 import { artUrl } from '@/lib/life/runtime/art'
 import { t } from '@/lib/i18n'
 
@@ -24,6 +26,16 @@ export function DocSheet({
   captionHe: string | null
   onClose: () => void
 }) {
+  // Escape closes it too. A screen with exactly one way out is a screen somebody will get
+  // stuck on — the robot that plays every chapter did, for two hundred moves, on 6.9.2026.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   return (
     <button
       type="button"

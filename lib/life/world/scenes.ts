@@ -457,12 +457,19 @@ const SCENES: SceneDef[] = [
     metre: 0.2923,
     ambience: 'interior',
     stuckHe: 'המפתח במגירה, בקצה שמאל. משם גם הדלת לסלון.',
-    stuckByEra: { '1990': 'הדלת לסלון — משמאל. אבא במטבח.', '1991': 'המחברת על השולחן. הדלת לסלון — משמאל.' },
+    stuckByEra: { '1990': 'הדלת לסלון — משמאל, ומשם למטבח.', '1991': 'המחברת על השולחן. הדלת לסלון — משמאל.' },
     spawns: { start: { x: 0.3, y: 0.93, facing: 'left' }, fromHome: { x: 0.14, y: 0.9, facing: 'right' } },
     actors: [],
     hotspots: [
       { id: 'tin-a4', era: 'a4-shirt', x: 0.45, y: 0.92, w: 0.14, act: 'tin-a4', verb: 'look', labelHe: 'הפחית מתחת למיטה' },
       { id: 'shirt-a5', era: 'a5-first', x: 0.63, y: 0.9, w: 0.1, act: 'shirt-a5', verb: 'look', labelHe: 'החולצה על הכיסא', priority: 3 },
+      /**
+       * מתחת לכרית — the scrap of red cloth from 1983, in every Stage A year that follows
+       * it. The conversation itself checks whether it was ever picked up, so the hotspot
+       * exists either way: a pillow you can look under and find nothing is a room, and a
+       * pillow that only appears when there is something under it is a hint.
+       */
+      { id: 'pillow-a2', era: ['a2-alley', 'a3-hall', 'a4-shirt', 'a5-first', 'a6-radio', 'a7-week'], x: 0.52, y: 0.9, w: 0.08, act: 'a2-scrap', verb: 'look', labelHe: 'מתחת לכרית' },
       { id: 'poster-sinai', era: '1995-sinai', x: 0.5, y: 0.82, w: 0.12, act: 'poster-look', verb: 'look', labelHe: 'הפוסטר' },
       { id: 'bed', x: 0.45, y: 0.92, w: 0.14, act: 'bed', verb: 'look', labelHe: 'המיטה' },
       // the wall of pictures over the bed, 0.35–0.65 in the 4.9 painting
@@ -534,7 +541,22 @@ const SCENES: SceneDef[] = [
     size: { far: 0.33, near: 0.43 },
     metre: 0.3308,
     ambience: 'interior',
-    stuckHe: 'בלי מפתח אמא לא נותנת לצאת. ואבא בכורסה — תשאל אותו מה יש היום.',
+    /**
+     * A base hint may name a DOOR; it may not name a PERSON, because the base is what
+     * eighteen chapters inherit and no person is in this room in all eighteen. The named
+     * lines live in `stuckByEra`, one per year that actually has that person standing
+     * here, and the runtime (`hintNow`) drops any of them that stops being true —
+     * 1986's Kobi leaves at ten past three, and after that the room stops mentioning him.
+     */
+    stuckHe: 'הדלת לרחוב — שמאל. המטבח והחדר — מאחור.',
+    stuckByEra: {
+      '1986': 'בלי המפתח אי אפשר לצאת. ואבא בכורסה — תשאל אותו מה יש היום.',
+      '1990': 'אמא בסלון. הדלת לרחוב — שמאל, והמטבח מאחור.',
+      '1991': 'הדלת לרחוב — שמאל. המטבח מאחור, ובו פנקס.',
+      'a2-alley': 'אמא פה, והיא רוצה משהו. הדלת לרחוב — שמאל.',
+      'a4-shirt': 'אבא בכורסה עם העיתון. הדלת לרחוב — שמאל.',
+      'a7-week': 'אבא בכורסה. הדלת לרחוב — שמאל.',
+    },
     // The coffee table is the room's own foreground: walk up to the sofa and you pass
     // behind it. One separated object is what turns a painting into a place.
     layers: [{ art: 'livingTable', x: 0.3659, y: 0.5625, w: 0.1751, depth: 0.79 }],
@@ -667,6 +689,17 @@ const SCENES: SceneDef[] = [
       { id: 'radio', x: 0.13, y: 0.78, w: 0.1, act: 'radio', verb: 'watch', labelHe: 'הטלוויזיה' },
       { id: 'photo', x: 0.42, y: 0.76, w: 0.08, act: 'family-photo', verb: 'look', labelHe: 'התמונות' },
       { id: 'table', x: 0.45, y: 0.84, w: 0.1, act: 'coffee-table', verb: 'look', labelHe: 'השולחן' },
+      /**
+       * המגירה של אבא — the sideboard under the television, and the one thing in it.
+       *
+       * A championship booklet from 1980/81 is not a collectible and it is not a reward:
+       * it is a thing a man bought the year his son was born and then kept for forty-five
+       * years in a drawer he opens twice a decade. So it is not on the table where the
+       * newspaper is; you have to open the drawer, and the game never tells you to.
+       *
+       * Every era of this flat has it, because it never left the drawer.
+       */
+      { id: 'drawer', x: 0.24, y: 0.8, w: 0.07, act: 'sideboard-drawer', verb: 'look', labelHe: 'המגירה' },
       // 1990: the phone rings when you pass it, and the photograph is four years older.
       { id: 'phone-1990', era: '1990', x: 0.13, y: 0.78, w: 0.1, act: 'phone-1990', verb: 'look', labelHe: 'הטלפון' },
       { id: 'photo-1990', era: '1990', x: 0.42, y: 0.76, w: 0.08, act: 'photo-1990', verb: 'look', labelHe: 'התמונות' },
@@ -1387,8 +1420,13 @@ const SCENES: SceneDef[] = [
       { art: 'propNewsRack', era: '2000s', x: 0.105, y: 0.815, w: 0.185, depth: 0.815, foot: true },
     ],
     ambience: 'day',
-    stuckHe: 'רפי מחכה. לצאת — ימינה.',
-    stuckByEra: { '1990': 'אופיר ועמית פה. הרחוב — ימינה, ומשם מזרחה.' },
+    stuckHe: 'הדלפק מלפנים. לצאת — ימינה.',
+    stuckByEra: {
+      '1986': 'רפי מחכה. לצאת — ימינה.',
+      '1990': 'אופיר ועמית פה. הרחוב — ימינה, ומשם מזרחה.',
+      'a2-alley': 'רפי מאחורי הדלפק, והחבר׳ה בחוץ. לצאת — ימינה.',
+      'a4-shirt': 'רפי מאחורי הדלפק. לצאת — ימינה.',
+    },
     spawns: { fromStreet: { x: 0.74, y: 0.93, facing: 'left' } , start: { x: 0.74, y: 0.93, facing: 'left' } },
     actors: [
       { id: 'ofir-a2', era: 'a2-alley', figure: 'ofir', x: 0.6, y: 0.92, size: 0.403, nameHe: 'אופיר', talk: 'alley-a2', sway: 0.009 },

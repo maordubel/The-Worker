@@ -16,7 +16,7 @@ import { CONVERSATIONS_SEED } from './chapter1999basket'
 import { CONVERSATIONS_CUP99 } from './chapter1999cup'
 import { CONVERSATIONS_DOUBLE, CONVERSATIONS_TITLE } from './chapter2000double'
 import { CONVERSATIONS_MATCH } from './dialogueMatch'
-import { CONVERSATIONS_A2, CONVERSATIONS_A3, CONVERSATIONS_A4, CONVERSATIONS_A5, CONVERSATIONS_A6, CONVERSATIONS_A7 } from './chapterStageA'
+import { CONVERSATIONS_A1, CONVERSATIONS_A2, CONVERSATIONS_A3, CONVERSATIONS_A4, CONVERSATIONS_A5, CONVERSATIONS_A6, CONVERSATIONS_A7 } from './chapterStageA'
 import { gigConversations } from '../gigs'
 import { fanShops } from '../shirts'
 import type { Conversation } from './script'
@@ -412,6 +412,50 @@ const CONVERSATIONS: Conversation[] = [
         lines: [
           { who: null, text: 'שולחן נמוך: מאפרה מלאה, ספל קפה הפוך, וקופסת סיגריות פתוחה למחצה.' },
           { who: null, text: 'אמא מנקה את כל הבית. את השולחן הזה היא לא נוגעת.' },
+        ],
+      },
+    ],
+  },
+  /**
+   * המגירה — the sideboard under the television, and the booklet in it.
+   *
+   * Twenty-four pages of a championship booklet from the season before the boy was born,
+   * scanned off the copy Kobi kept. The game does not explain it and does not
+   * summarise it: it opens the drawer and hands it over, and everything the player takes
+   * out of those pages is theirs. The only line the game is allowed to print over a
+   * primary source is where it came from — that lives in `books.ts` as `sourceHe`.
+   *
+   * The second visit is written differently on purpose. The first time is a discovery;
+   * after that it is a thing you know is there, which is what a kept object actually is.
+   */
+  {
+    id: 'sideboard-drawer',
+    branches: [
+      {
+        when: { flag: 'book:8081' },
+        lines: [
+          { who: null, text: 'המגירה נפתחת בחריקה שאתה כבר מכיר. החוברת במקום שלה, בין הקבלות והמפתחות הישנים.' },
+        ],
+        choices: [
+          { id: 'read', text: 'לדפדף שוב.', then: [{ e: 'book', id: '8081' }] },
+          { id: 'shut', text: 'לסגור.', then: [] },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'מגירת השידה מתחת לטלוויזיה. אמא לא נוגעת בה, ואבא פותח אותה פעמיים בעשור.' },
+          { who: null, text: 'בפנים: קבלות, מפתח של דלת שכבר לא קיימת, ומתחת לכולם חוברת דקה עם פינה מקופלת.' },
+        ],
+        choices: [
+          {
+            id: 'open',
+            text: 'להוציא את החוברת.',
+            then: [
+              { e: 'book', id: '8081' },
+              { e: 'redheart', key: 'footballLove', delta: 3 },
+            ],
+          },
+          { id: 'leave', text: 'לסגור את המגירה.', then: [] },
         ],
       },
     ],
@@ -1591,7 +1635,7 @@ const CONVERSATIONS: Conversation[] = [
  * second chapter is a second content file and not a second runner (brief §52).
  */
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
-  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_ALLENBY, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_MATCH, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7, ...fanShops(), ...gigConversations()].map(
+  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_ALLENBY, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_MATCH, ...CONVERSATIONS_A1, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7, ...fanShops(), ...gigConversations()].map(
     (conversation) => [conversation.id, conversation],
   ),
 )

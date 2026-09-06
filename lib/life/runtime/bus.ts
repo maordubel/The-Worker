@@ -185,6 +185,14 @@ export type LifeBusEvents = {
    */
   doc: { art: string; captionHe: string | null } | null
   /**
+   * חוברת פתוחה — which booklet is being read, and on which page.
+   *
+   * Its own channel rather than a `doc` with a page number, because it obeys different
+   * rules: it does not stop the world for a beat and then go away, it stays open for as
+   * long as somebody is reading, and where they stopped is remembered.
+   */
+  book: { id: string; page: number } | null
+  /**
    * כרטיס-ביסוס — a title over black, held for `ms`, then gone: `מאי 1990`,
    * `בלומפילד · 12 במאי 1990`. The first of the five tricks in the roadmap's grammar of
    * entering a scene. It says one thing and is never a menu.

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AnchorCard } from '@/components/life/AnchorCard'
 import { DocSheet } from '@/components/life/DocSheet'
+import { BookSheet } from '@/components/life/BookSheet'
 import { ScoreStrip } from '@/components/life/ScoreStrip'
 import { ShirtCard } from '@/components/life/ShirtCard'
 import { CastCard } from '@/components/life/CastCard'
@@ -54,6 +55,7 @@ import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/gam
 import type { LifeState } from '@/lib/life/types'
 import { checklistFor, type ChecklistItem } from '@/lib/life/checklist'
 import { GIGS } from '@/lib/life/gigs'
+import { bookFor, bookPageFlag } from '@/lib/life/books'
 import { CONSEQUENCE_KICKER_HE } from '@/lib/life/consequence'
 import { COIN_WHY_HE, HOOPS_WHY_HE, PENALTY_WHY_HE, TOTO_PER_ANSWER, TOTO_WHY_HE } from '@/lib/life/toto'
 import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE } from '@/lib/life/shirts'
@@ -109,6 +111,7 @@ export function LifeStage({
   const [retry, setRetry] = useState<LifeBusEvents['retry']>(null)
   const [match, setMatch] = useState<LifeBusEvents['match']>(null)
   const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
+  const [book, setBook] = useState<LifeBusEvents['book']>(null)
   const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
   const [finale, setFinale] = useState<LifeBusEvents['finale']>(null)
   const [coda, setCoda] = useState<LifeBusEvents['coda']>(null)
@@ -296,6 +299,13 @@ export function LifeStage({
       bus.on('doc', (value) => {
         setDoc(value)
         if (value) sfx.play('box-item', { bus: 'ui', level: 0.6 })
+      }),
+    )
+    unsubscribe.push(
+      bus.on('book', (value) => {
+        setBook(value)
+        // paper, not a UI panel: the same soft handling sound a kept object gets
+        if (value) sfx.play('box-item', { bus: 'ui', level: 0.5 })
       }),
     )
     unsubscribe.push(bus.on('cutscene', setCutscene))
@@ -854,6 +864,25 @@ export function LifeStage({
         )}
 
         {doc && <DocSheet art={doc.art} captionHe={doc.captionHe} onClose={() => setDoc(null)} />}
+
+        {/* החוברת — a real object with pages, remembered where it was put down */}
+        {book && bookFor(book.id) && (
+          <BookSheet
+            book={bookFor(book.id)!}
+            page={book.page}
+            onPage={(page) => {
+              setBook({ id: book.id, page })
+              const engine = engineRef.current
+              if (!engine) return
+              engine.dispatch({ t: 'flag.set', flag: bookPageFlag(book.id), value: page })
+              void engine.save()
+            }}
+            onClose={() => {
+              audio.current?.play('ui-close', { bus: 'ui', level: 0.5 })
+              setBook(null)
+            }}
+          />
+        )}
 
         {/* הארכיון — the one screen in this game that is not this game.
             It renders over everything, and every other overlay above is suppressed while

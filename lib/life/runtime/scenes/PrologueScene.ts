@@ -11,16 +11,25 @@ import { CHAPTERS } from '../../content/chapters'
 import { WorldScene } from './WorldScene'
 
 /**
- * 1983 — the prologue, and the only minute of the chapter you do not control.
+ * 1 ביוני 1983 — the prologue, and the first minute of this life the player actually owns.
  *
- * It is one painting — a full terrace, seen from inside it — held for half a minute while
- * the camera drifts across the crowd and the lines come up in the same box every other
- * line in the game uses. The image is dark, warm and slightly overscanned, so the drift
- * never reaches an edge and the memory never has a frame around it.
+ * It is one painting: a full terrace seen from inside it, dark, warm and overscanned, so
+ * the slow drift across the crowd never reaches an edge and the memory never has a frame
+ * around it. That much has not changed.
  *
- * The one fact in it is the canonical anchor's headline — the 1982/83 State Cup —
- * substituted into `{anchor}` by the dialogue runner. Everything else is the protagonist
- * at five, on his father's shoulders, three years before the Saturday he plays.
+ * What changed on 6.9.2026 is that it stopped being narration. Stage A §6 asks for "an
+ * interactive prologue, not a passive movie", and it is right — a first memory you are
+ * TOLD belongs to whoever told it. So the half-minute is now a conversation (`a1-1983` in
+ * `chapterStageA.ts`): a five-year-old on a pair of shoulders who can do three things —
+ * look, copy the crowd, and notice the red thing on the concrete — none of which can be
+ * done wrong, and all of which decide who he is when the game hands him over to 1984.
+ *
+ * The scene stays thin on purpose. It owns the painting, the drift and the dust; the
+ * BEATS live in the content layer with every other conversation in the game, which is why
+ * adding a fourth one is a paragraph of Hebrew rather than a change to a Phaser scene.
+ *
+ * The one fact in it is the canonical anchor's headline, substituted into `{anchor}` by
+ * the dialogue runner. Everything else is backs, smoke, concrete, cloth, hands and noise.
  */
 export class PrologueScene extends Phaser.Scene {
   static readonly KEY = 'life-prologue'
@@ -103,7 +112,12 @@ export class PrologueScene extends Phaser.Scene {
 
     this.ctx.bus.emit('place', { id: 'prologue', title: t('life.place.prologue') })
     this.ctx.bus.emit('controls', { visible: false })
-    this.ctx.dialogue.startLines(PROLOGUE, () => this.finish())
+    // The interactive memory. `PROLOGUE` — the narrated version this replaced — stays as
+    // the floor: a save whose registry somehow lacks `a1-1983` still gets its 1983 rather
+    // than being dropped into 1984 with no first memory at all.
+    if (!this.ctx.dialogue.start('a1-1983', () => this.finish())) {
+      this.ctx.dialogue.startLines(PROLOGUE, () => this.finish())
+    }
   }
 
   skip() {

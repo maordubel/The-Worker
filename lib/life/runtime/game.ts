@@ -147,6 +147,10 @@ export type LifeRuntime = {
     raise(flag: string): void
     reseed(seed: string): void
     bodies(): unknown[]
+    /** everything a thumb could press in this room right now — for the dead-end probe */
+    targets(): Array<{ kind: 'talk' | 'act' | 'exit'; id: string; labelHe: string }>
+    /** the sentence the room would say to somebody who has stopped moving */
+    hint(): string | null
     where(): unknown
   }
   destroy(): void
@@ -314,6 +318,10 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       reseed: (seed: string) => options.engine.dispatch({ t: 'rng.seeded', seed }),
       /** every body the room is drawing, with its height in metres — for the scale probe */
       bodies: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.bodies() ?? [] : []),
+      /** everything a thumb could press in this room right now — for the dead-end probe */
+      targets: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.targets() ?? [] : []),
+      /** the sentence the room would say to somebody who has stopped moving */
+      hint: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.debugHint() ?? null : null),
       where: () => {
         const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
         if (passage && game.scene.isActive(PassageScene.KEY)) return passage.where()

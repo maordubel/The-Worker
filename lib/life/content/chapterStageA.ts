@@ -108,11 +108,23 @@ export const BEATS_A2: Beat[] = [
     do: [{ a: 'flag', flag: 'a2:full' }, { a: 'toast', text: 'מהסמטה: "שניים־שניים! מי בשער?" הקבוצות נסגרו בלעדיך.', tone: 'red' }],
   },
   {
-    // back on the pitch after the two-on-two: the evening closes on its own
+    /**
+     * After the two-on-two the evening closes on its own — and it has to close from where
+     * the boy IS. This used to be `trigger: 'enter'` on the pitch, which meant the one
+     * beat that ends the day waited for the player to walk into the room he was already
+     * standing in. Nothing else could end it either, because the night ending below
+     * excludes `a2:played` by name: play football in 1984 and the afternoon ran to
+     * midnight with nothing left to press. (Found by the robot, 6.9.2026.)
+     */
     id: 'a2-after',
-    at: 'pitch',
-    trigger: 'enter',
-    when: { all: [{ flag: 'a2:played' }, { flag: 'played:football' }], none: [{ flag: 'a2:done' }] },
+    trigger: 'clock',
+    /**
+     * `played:football` used to be required here as well. It is raised by the street-
+     * football minigame, and a boy who joined the game in the alley has not necessarily
+     * played THAT — so the one beat that ends the day was waiting on a flag the day does
+     * not have to produce. Joining is the beat; the kickabout is a bonus.
+     */
+    when: { flag: 'a2:played', afterMinute: at(17, 30), none: [{ flag: 'a2:done' }] },
     delayMs: 900,
     do: [{ a: 'flag', flag: 'a2:done' }, { a: 'talk', conversation: 'a2-after-game' }],
   },
@@ -125,7 +137,241 @@ export const BEATS_A2: Beat[] = [
   },
 ]
 
+/**
+ * -------------------------------------------------------------- A1 · 1 ביוני 1983 ---
+ *
+ * הזיכרון הראשון — the minute before the game, and the first minute the player owns.
+ *
+ * It was a narrated title card: seven lines that told you what you felt on your father's
+ * shoulders. Stage A §6 asks for the opposite — "a 5–8 minute interactive prologue, not a
+ * passive movie" — and it is right, because a memory you are TOLD is somebody else's.
+ *
+ * So it is the same painting and the same half-minute of drift, played as a conversation:
+ * a five-year-old on a pair of shoulders who can only do three things. He can look — and
+ * what he looks at is what he keeps. He can copy the crowd, or fail to. He can notice the
+ * red thing on the concrete, or not. None of it is a test, none of it is scored, and
+ * there is no way to get it wrong: §6 says the gestures are "emotional gestures, not QTE
+ * success checks", so every branch continues and every branch leaves a different child.
+ *
+ * What it actually sets is the shape of the boy the player will then play for fifteen
+ * years — clinging (family), reaching (terrace), covering his ears (caution) — and
+ * whether there is a scrap of red cloth in his pocket in 1984. That scrap is the first
+ * Red Box candidate in the game, and it is the only object in it whose provenance is
+ * "you picked it up off the floor when you were five".
+ *
+ * Rule 11 is tighter here than anywhere: this is a REAL final, and a five-year-old on
+ * shoulders is exactly where a fabricated match fact would slip past unnoticed. So the
+ * one factual line is `{anchor}`, substituted by the dialogue runner from the canonical
+ * archive, and everything else is backs, smoke, concrete, cloth, hands and noise.
+ */
+export const CONVERSATIONS_A1: Conversation[] = [
+  {
+    id: 'a1-1983',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'דרום תל אביב. 1 ביוני 1983.' },
+          { who: null, text: 'אתה בן חמש, ואתה על הכתפיים של מישהו. אתה לא רואה כלום חוץ מראשים.' },
+          { who: null, text: 'ריח של סיגריה, של זיעה, של גראס יבש. רדיו טרנזיסטור צורח באוזן של מישהו אחר.' },
+        ],
+        choices: [
+          {
+            id: 'look-down',
+            text: 'להסתכל למטה, על מי שנושא אותך.',
+            then: [
+              { e: 'flag', flag: 'life:a1:father' },
+              { e: 'rel', who: 'kobi', axis: 'familiarity', delta: 3 },
+              { e: 'redheart', key: 'familyTradition', delta: 3 },
+              { e: 'goto', node: 'a1-crowd' },
+            ],
+          },
+          {
+            id: 'look-out',
+            text: 'להסתכל קדימה, לאן שכולם מסתכלים.',
+            then: [
+              { e: 'flag', flag: 'life:a1:crowd' },
+              { e: 'redheart', key: 'terraceCulture', delta: 3 },
+              { e: 'personality', key: 'curiosity', delta: 3 },
+              { e: 'goto', node: 'a1-crowd' },
+            ],
+          },
+          {
+            id: 'look-floor',
+            text: 'להסתכל על הרצפה, בין הנעליים.',
+            then: [
+              { e: 'flag', flag: 'life:a1:floor' },
+              { e: 'personality', key: 'curiosity', delta: 2 },
+              { e: 'goto', node: 'a1-red' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /** the red thing: only offered to somebody who looked at the floor, and never twice */
+    id: 'a1-red',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'בין הנעליים, על הבטון, משהו אדום. מישהו הפיל אותו וכבר לא יחפש.' },
+          { who: null, text: 'אתה מושיט יד למטה. הכתפיים זזות ואתה כמעט נופל.' },
+        ],
+        choices: [
+          {
+            id: 'take',
+            text: 'להרים אותו בכל זאת.',
+            then: [
+              { e: 'give', item: 'scarf' },
+              /**
+               * `own:` and `life:`, not `a1:` — a year change empties the inventory and
+               * every flag that is not one of those prefixes (`personFlags`). A scrap of
+               * cloth picked up at five that vanished at the turn of 1984 would be a
+               * memory the game forgot, which is the one thing this object is for.
+               */
+              { e: 'flag', flag: 'own:red-scrap' },
+              { e: 'flag', flag: 'life:a1:red' },
+              { e: 'personality', key: 'impulsiveness', delta: 2 },
+              { e: 'redheart', key: 'historyMemory', delta: 3 },
+              { e: 'goto', node: 'a1-crowd' },
+            ],
+          },
+          {
+            id: 'hold',
+            text: 'להיאחז חזק ולא לזוז.',
+            then: [
+              { e: 'rel', who: 'kobi', axis: 'trust', delta: 2 },
+              { e: 'personality', key: 'reliability', delta: 2 },
+              { e: 'goto', node: 'a1-crowd' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /** copy the crowd — three ways to be five years old, and none of them is wrong */
+    id: 'a1-crowd',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הרעש עולה. כולם סביבך עושים אותו דבר, ואף אחד לא הסביר לך מה.' },
+        ],
+        choices: [
+          {
+            id: 'clap',
+            text: 'למחוא כפיים כמו כולם.',
+            then: [
+              { e: 'sfx', key: 'crowd-claps', level: 0.6 },
+              { e: 'redheart', key: 'community', delta: 4 },
+              { e: 'wellbeing', key: 'belonging', delta: 4 },
+              { e: 'goto', node: 'a1-goal' },
+            ],
+          },
+          {
+            id: 'reach',
+            text: 'להרים ידיים אל הרעש.',
+            then: [
+              { e: 'sfx', key: 'crowd-swell', level: 0.6 },
+              { e: 'redheart', key: 'terraceCulture', delta: 4 },
+              { e: 'personality', key: 'courage', delta: 3 },
+              { e: 'goto', node: 'a1-goal' },
+            ],
+          },
+          {
+            id: 'ears',
+            text: 'לכסות את האוזניים.',
+            then: [
+              // §6: covering your ears costs nothing. A frightened five-year-old is not a
+              // worse supporter, and the brief says so in as many words.
+              { e: 'personality', key: 'streetSmarts', delta: 3 },
+              { e: 'wellbeing', key: 'stress', delta: 3 },
+              { e: 'goto', node: 'a1-goal' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /** the eruption, the fall that does not happen, and the laugh */
+    id: 'a1-goal',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: '{anchor}' },
+          { who: null, text: 'ואז כולם צועקים בבת אחת, והכתפיים שאתה יושב עליהן קופצות, ואתה נאחז בשיער של אבא כדי לא ליפול.' },
+          { who: null, text: 'אתה לא מבין מה קרה. אתה בוכה.' },
+          { who: null, text: 'ואז אתה צוחק, כי כולם צוחקים.' },
+        ],
+        then: [
+          { e: 'sfx', key: 'crowd-real-goal', level: 0.8 },
+          { e: 'redheart', key: 'footballLove', delta: 6 },
+          { e: 'remember', who: 'kobi', eventId: 'shoulders-1983', significance: 'major' },
+          { e: 'goto', node: 'a1-home' },
+        ],
+      },
+    ],
+  },
+  {
+    /** carried home asleep, and the object that becomes 1984 */
+    id: 'a1-home',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'life:a1:red' },
+        lines: [
+          { who: null, text: 'אתה לא זוכר את הדרך הביתה. אתה זוכר את היד סביב הרגל שלך שלא הרפתה.' },
+          { who: null, text: 'בבוקר מצאת בכיס פיסת בד אדומה שלא שלך, והחזקת אותה עד שהיא הפכה לסמרטוט.' },
+          { who: null, text: 'זה הזיכרון הראשון שלך. לא בחרת בו.' },
+        ],
+        then: [{ e: 'flag', flag: 'life:a1:done' }, { e: 'travel', to: 'home', spawn: 'start' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'אתה לא זוכר את הדרך הביתה. אתה זוכר את היד סביב הרגל שלך שלא הרפתה.' },
+          { who: null, text: 'זה הזיכרון הראשון שלך. לא בחרת בו.' },
+        ],
+        then: [{ e: 'flag', flag: 'life:a1:done' }, { e: 'travel', to: 'home', spawn: 'start' }],
+      },
+    ],
+  },
+]
+
 export const CONVERSATIONS_A2: Conversation[] = [
+  {
+    /**
+     * הסמרטוט האדום — the only thing in 1984 that came out of 1983.
+     *
+     * A flag nobody reads is a promise the game made to itself and forgot, so the scrap of
+     * cloth a five-year-old picked up off the concrete has to be findable in the bedroom
+     * two years later. It does nothing: it is not a key, it does not open a door and
+     * nothing about the day changes because of it. It is a thing you kept, and the game's
+     * position on things you kept is that keeping them is the point.
+     *
+     * The `when` reads `life:a1:red`, which is the prefix that survives a year change.
+     */
+    id: 'a2-scrap',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'life:a1:red' },
+        lines: [
+          { who: null, text: 'מתחת לכרית, פיסת בד אדומה. היא הייתה גדולה יותר כשהבאת אותה.' },
+          { who: null, text: 'אתה לא זוכר מאיפה. אתה זוכר שהיה רועש, ושהיית גבוה.' },
+        ],
+        then: [{ e: 'redheart', key: 'historyMemory', delta: 2 }],
+      },
+      {
+        lines: [{ who: null, text: 'מיטה, שמיכה, וקיר. מתחת לכרית אין כלום.' }],
+      },
+    ],
+  },
+
   {
     id: 'rachel-a2',
     nameHe: 'רחל',

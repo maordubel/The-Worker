@@ -11,7 +11,7 @@ OUT=/tmp
 rm -f "$OUT/the-worker-delta-$N-code.zip" "$OUT/the-worker-delta-$N-art.zip"
 git status --short --untracked-files=all \
   | awk '{print $2}' \
-  | grep -v -E '^(\.next/|node_modules/|data/|docs/life-shots/|.*\.tsbuildinfo$|.*__pycache__.*|scripts/life/\.scene-dump\.ts$|tsconfig\.all\.tsbuildinfo$)' \
+  | grep -v -E '^(\.next/|node_modules/|data/|docs/life-shots/|delta/|.*\.tsbuildinfo$|.*__pycache__.*|scripts/life/\.scene-dump\.ts$|tsconfig\.all\.tsbuildinfo$)' \
   > /tmp/delta-files.txt
 grep -v '^public/life/art/' /tmp/delta-files.txt > /tmp/delta-code.txt
 grep '^public/life/art/' /tmp/delta-files.txt > /tmp/delta-art.txt || true

@@ -29,7 +29,20 @@ import { GIGS, isPaid, offerFlag, offeredIn } from '../../gigs'
  * `uss:arrived` means "there is a game here tonight" and every hall conversation reads it.
  */
 const HALL_NIGHTS: readonly string[] = ['1991', '1993-cup', '1997-basket', '1999-basket']
+
+/**
+ * כמה דקות משחק עד שיום הוא כבר לא יום.
+ *
+ * Every chapter is a single day that starts between nine in the morning and eight at
+ * night. Twenty-two game-hours after it opened, whatever it was about is over — late enough
+ * that no written ending is ever cut short, and early enough that a player who has run out
+ * of things to press is not left standing in it. Counted as ELAPSED minutes rather than as
+ * a time of day, because the clock wraps at midnight and a chapter that runs past it comes
+ * back round to a number that looks like the morning.
+ */
+const LAST_RESORT_MINUTES = 22 * 60
 import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, whenFor } from '../../world/scenes'
+import { compose as composeHint, holds as hintHolds } from '../../world/hints'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import type { PanoSpot } from '../bus'
 import { PANO_SPOTS } from '../../content/panoramas'
@@ -403,6 +416,9 @@ export class WorldScene extends Phaser.Scene {
 
   create() {
     this.ctx = this.registry.get(CONTEXT_KEY) as LifeContext
+    // read out of the log, because a scene is rebuilt on every doorway and a counter that
+    // starts at zero in `create` is one the player resets by walking into the kitchen
+    this.livedFor = this.countLived()
     const state = this.ctx.engine.state
     this.era = eraFor(state.chapter)
     this.exits = this.def.exits.filter((exit) => exitInEra(exit, this.era.chapter))
@@ -1736,6 +1752,9 @@ export class WorldScene extends Phaser.Scene {
     const minutes = Math.floor(this.minuteAcc)
     this.minuteAcc -= minutes
     this.ctx.engine.dispatch({ t: 'clock.advanced', minutes })
+    // counted here rather than per tick, because a minute is a minute whether it arrived
+    // one at a time or twenty-six at a time during a time-lapse
+    this.livedFor += minutes
     this.timeTriggers()
     this.onMinute()
     this.pushHud()
@@ -1770,6 +1789,94 @@ export class WorldScene extends Phaser.Scene {
     this.applySchedule()
     this.tickWindows()
     this.tickLater()
+    this.lastResort()
+  }
+
+  /**
+   * שאף יום לא יישאר פתוח — the day ends, whatever happened in it.
+   *
+   * Every chapter is closed by its own beats, and every one of those beats has a `when`.
+   * A `when` is a claim about which states can reach it, and on 6.9.2026 a robot that
+   * plays each chapter to the end found the claim was wrong in the very first one: play
+   * football in the alley in 1984 and `a2:played` goes up; the only beat that closes the
+   * day after that fires on ENTERING the pitch — the room the boy is already standing in
+   * — and the night ending excludes `a2:played` by name. The afternoon then runs to
+   * midnight and past it, with nothing left to press. That is the shape of every dead end
+   * Maor has hit: not a missing room, a missing WAY OUT of a state somebody did not
+   * think of.
+   *
+   * A backstop cannot be another `when`, because the bug is that a `when` was wrong. So
+   * it is unconditional: an hour past the last minute anything in this chapter is
+   * scheduled for, the day closes on the ending that best fits what actually happened —
+   * and the chapter's own beats keep their first chance at it, because a day that ends
+   * with its own written sentence is always better than one that ends because time ran
+   * out. This is the floor, not the plan.
+   */
+  private lastResort() {
+    if (this.paused || this.closing || this.ctx.engine.state.chapterDone) return
+    const state = this.ctx.engine.state
+    // a match still playing, a cutscene, a card: those own the screen and will end it
+    if (this.director?.active || this.matchPhase === 'watching' || this.matchPhase === 'goal') return
+
+    /**
+     * שני תנאים, ורק אחד מהם הוא השעון.
+     *
+     * The clock is the crude floor: half past midnight, an hour past the latest thing any
+     * chapter schedules. The other one is the honest signal, and it is the exact shape of
+     * every dead end reported so far — the chapter has stopped WANTING anything (its
+     * objective has gone null: the alley was played, the shirt was bought, the match was
+     * heard) and no beat is waiting to say so. A day in that state is finished; it just
+     * has not been told. Ninety game-minutes of it — a minute and a half at normal speed,
+     * long enough that no written ending is ever cut short — and the day closes.
+     */
+    const idle = !this.objective(state) && !this.beatBusy && !this.beatPending && !this.ctx.dialogue.open
+    this.stalledFor = idle ? this.stalledFor + 1 : 0
+    /**
+     * `livedFor` counts minutes since this room started, not the wall clock, because the
+     * wall clock WRAPS: a chapter that runs past midnight comes back round to 00:16 and a
+     * test against `state.minute` quietly stops being true. The a6 trace on 6.9.2026 shows
+     * exactly that — 1411, then 16 — with a day that had been over for hours.
+     */
+    if (this.livedFor < LAST_RESORT_MINUTES && this.stalledFor < 90) return
+    const endings = this.era.endings
+    // the chapter's own idea of "nothing happened", else whatever it lists first — a
+    // chapter with no endings at all cannot be closed and says so in the console rather
+    // than pretending
+    const id = ['home', 'missed', 'late', 'played'].find((key) => endings[key]) ?? Object.keys(endings)[0]
+    if (!id) {
+      if (process.env.NODE_ENV !== 'production') console.warn(`[life] ${this.chapter} has no endings; the day cannot close`)
+      return
+    }
+    this.closing = true
+    // a chapter that had to be closed from here is a chapter with a hole in it; the flag
+    // is what `scripts/life/finish-audit.mjs` reads to tell a written ending from a rescue
+    this.ctx.engine.dispatch({ t: 'flag.raised', flag: `life:lastResort:${this.chapter}` })
+    this.finishChapter(id)
+  }
+
+  /** set the moment `lastResort` fires, so it cannot fire twice on consecutive minutes */
+  private closing = false
+  /** game-minutes this chapter has wanted nothing and had nothing pending */
+  private stalledFor = 0
+  /**
+   * game-minutes since the CHAPTER started — not since this room did.
+   *
+   * A scene is rebuilt on every doorway, so a counter that starts at zero in `create` is a
+   * counter that a player resets by walking into the kitchen. It is read out of the event
+   * log instead: every minute this chapter has ever spent is a `clock.advanced` after the
+   * last `chapter.entered`, and that is exactly the span `restartDay()` keeps.
+   */
+  private livedFor = 0
+
+  private countLived(): number {
+    const log = this.ctx.engine.log()
+    let total = 0
+    for (let i = log.length - 1; i >= 0; i -= 1) {
+      const event = log[i]
+      if (event?.t === 'chapter.entered') break
+      if (event?.t === 'clock.advanced') total += event.minutes
+    }
+    return total
   }
 
   /** a price booked earlier comes due: one red line, once, on the minute it was owed */
@@ -2125,9 +2232,9 @@ export class WorldScene extends Phaser.Scene {
       return
     }
     this.stuckLevel = level
-    const stuck = stuckFor(this.def, this.chapter)
-    if (level === 2 && stuck) {
-      this.ctx.bus.emit('toast', { text: stuck, tone: 'plain' })
+    if (level === 2) {
+      const hint = this.hintNow()
+      if (hint) this.ctx.bus.emit('toast', { text: hint, tone: 'plain' })
     }
     if (level < 3) this.pointer.setVisible(false)
     else this.aimPointer()
@@ -2147,6 +2254,41 @@ export class WorldScene extends Phaser.Scene {
     this.pointer.setVisible(true)
     this.pointer.setPosition(edge, cam.height * 0.5 + Math.sin(this.breathe * 3) * 6)
     this.pointer.setRotation(screenX < cam.width / 2 ? Math.PI : 0)
+  }
+
+  /**
+   * מה שאפשר להגיד עכשיו, בלי לשקר — the hint, checked against the room it describes.
+   *
+   * The authored line in `scenes.ts` is a good line and it is used whenever it is TRUE:
+   * every person it names has to be standing here, in this chapter, at this minute. When
+   * it is not — 1984's living room, whose authored line sends the player to a father who
+   * will not be born into that chapter for two years — the room composes its own out of
+   * the cast and the doors it is actually rendering, so the sentence and the picture can
+   * never disagree. (6.9.2026, after a new game led Maor to a chair with nobody in it.)
+   */
+  private hintNow(): string | null {
+    const state = this.ctx.engine.state
+    // who is standing here AND can be spoken to AND is currently drawn
+    const people = this.actors
+      .filter((actor) => actor.image.visible && actor.def.talk && actor.def.nameHe)
+      .map((actor) => actor.def.nameHe as string)
+    const authored = stuckFor(this.def, this.chapter)
+    if (authored && hintHolds(authored, people)) return authored
+    const doors = this.exits
+      .filter((exit) => meets(state, whenFor(exit, this.chapter)))
+      .sort((a, b) => (b.priority ?? 1) - (a.priority ?? 1))
+      .map((exit) => exit.labelHe)
+      .filter((label): label is string => Boolean(label))
+    const things = this.hotspots
+      .filter((spot) => !spot.prop || spot.prop.visible)
+      .map((spot) => spot.def.labelHe)
+      .filter((label): label is string => Boolean(label))
+    return composeHint({
+      people: [...new Set(people)],
+      doors: [...new Set(doors)],
+      things: [...new Set(things)],
+      objectiveHe: this.objective(state),
+    })
   }
 
   private bestExit(): ExitDef | null {
@@ -2343,8 +2485,7 @@ export class WorldScene extends Phaser.Scene {
                 { t: 'flag.raised', flag: 'life:bridge-1991' },
               )
               void this.ctx.engine.save()
-              this.cameras.main.fadeOut(500, 0, 0, 0)
-              this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+              this.fadeThen(500, () => {
                 this.scene.restart({ mapId: 'classroom', spawn: 'start', from: 'bedroom' })
               })
             })
@@ -2765,8 +2906,7 @@ export class WorldScene extends Phaser.Scene {
     if (cut) this.ctx.engine.dispatch({ t: 'flag.raised', flag: filmFlag(cut.clip, this.chapter) })
 
     this.leak()
-    this.cameras.main.fadeOut(300, 0, 0, 0)
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+    this.fadeThen(300, () => {
       void this.ctx.engine.save()
       if (cut) this.ctx.bus.emit('film', { clip: cut.clip, captionHe: cut.captionHe })
       this.scene.restart({ mapId: to, spawn, from: this.def.id })
@@ -2811,18 +2951,41 @@ export class WorldScene extends Phaser.Scene {
    * standing in, which is the same room. The spawn is the one the scene came in on, so a
    * boy who finishes carrying crates is standing where he was when he agreed to.
    */
+  /**
+   * להחשיך ואז לעבור — every scene change in this room, through one guarded door.
+   *
+   * `this.cameras.main` is undefined once Phaser has shut a scene down, and a conversation
+   * can outlive the room it started in: the player answers, one effect travels or ends the
+   * chapter, and the NEXT effect in the same list asks a dead scene to fade. It threw, and
+   * because effects are applied in a list, every effect after the throw — a flag, a
+   * memory, the thing that lets the day close — never ran. A dead end made by an
+   * exception. Found by the robot playing 1985 and the winter of 1986, 6.9.2026.
+   *
+   * So the transition happens either way: with a fade when there is a camera to fade, and
+   * immediately when there is not.
+   */
+  private fadeThen(ms: number, then: () => void, red = 0, green = 0, blue = 0) {
+    const camera = this.cameras?.main
+    if (!camera || !this.scene.isActive()) {
+      then()
+      return
+    }
+    camera.fadeOut(ms, red, green, blue)
+    camera.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, then)
+  }
+
   private startMinigame(id: string) {
     this.paused = true
     const chore = id.startsWith('chore:') ? id.slice(6) : null
-    this.cameras.main.fadeOut(240, 0, 0, 0)
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+    const go = () => {
       void this.ctx.engine.save()
       if (chore) {
         this.scene.start('life-chore', { gig: chore, returnTo: this.def.id, spawn: this.spawnName })
         return
       }
       this.scene.start('life-football', { returnTo: this.def.id, spawn: 'fromStreet' })
-    })
+    }
+    this.fadeThen(240, go)
   }
 
   // -------------------------------------------------------------- the camera ------
@@ -3718,15 +3881,14 @@ export class WorldScene extends Phaser.Scene {
     // Out of a corridor and into whatever it opened onto: a sky over Jaffa, or the lamps
     // under a tin roof. The flash is the light of the room the boy just walked into.
     const hall = target.to === 'ussishkin-hall'
-    this.cameras.main.fadeOut(200, hall ? 226 : 237, hall ? 196 : 230, hall ? 168 : 216)
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+    this.fadeThen(200, () => {
       void this.ctx.engine.save()
       this.scene.restart({
         mapId: target.to,
         spawn: target.spawn,
         from: hall ? 'ussishkin-outside' : 'bloomfield-tunnel',
       })
-    })
+    }, hall ? 226 : 237, hall ? 196 : 230, hall ? 168 : 216)
   }
 
   closePano() {
@@ -3809,6 +3971,41 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * מה אפשר לעשות פה עכשיו — everything actionable in the room, as a list.
+   *
+   * The probes used to guess: talk to a conversation id somebody had typed into a script
+   * by hand, and hope the person was standing there this year. That is how a chapter can
+   * be "tested" and still be unfinishable. This answers what a PLAYER can see — the people
+   * currently drawn, the hotspots currently shown, the doors currently open — so a robot
+   * can play a chapter the way a thumb would, and a chapter with nothing to do in it
+   * reports an empty list instead of a passing test.
+   */
+  targets(): Array<{ kind: 'talk' | 'act' | 'exit'; id: string; labelHe: string }> {
+    const state = this.ctx.engine.state
+    const out: Array<{ kind: 'talk' | 'act' | 'exit'; id: string; labelHe: string }> = []
+    for (const actor of this.actors) {
+      if (!actor.image.visible || !actor.def.talk) continue
+      out.push({ kind: 'talk', id: actor.def.talk, labelHe: actor.def.nameHe ?? actor.def.id })
+    }
+    for (const spot of this.hotspots) {
+      if (!meets(state, spot.def.when)) continue
+      if (spot.prop && !spot.prop.visible) continue
+      const act = (spot.def as { act?: string }).act
+      if (act) out.push({ kind: 'act', id: act, labelHe: spot.def.labelHe ?? spot.def.id })
+    }
+    for (const exit of this.exits) {
+      if (!meets(state, whenFor(exit, this.chapter))) continue
+      out.push({ kind: 'exit', id: exit.to, labelHe: exit.labelHe ?? exit.id })
+    }
+    return out
+  }
+
+  /** The hint the room would give right now — the probes read it to catch a lying room. */
+  debugHint(): string | null {
+    return this.hintNow()
+  }
+
   /** Developer-only: put the child somewhere, with no door in between. */
   debugTravel(location: string) {
     this.paused = false
@@ -3889,8 +4086,7 @@ export class WorldScene extends Phaser.Scene {
     this.ctx.bus.emit('finale', null)
     this.ctx.bus.emit('match', null)
     if (this.chapter === '1986') {
-      this.cameras.main.fadeOut(600, 0, 0, 0)
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.fadeThen(600, () => {
         void this.ctx.engine.save()
         this.scene.start(PassageScene.KEY)
       })
@@ -3987,6 +4183,26 @@ export class WorldScene extends Phaser.Scene {
     this.beatBusy = true
     this.runActions([...due.do], () => {
       this.beatBusy = false
+      /**
+       * ביט שקרה ולא קרה — a beat the player walked out of has not happened.
+       *
+       * The flag is raised BEFORE the actions run, so a scene restart in the middle cannot
+       * swallow a beat. The cost of that is the opposite failure, and it is the one that
+       * cost Maor a chapter: `a6-end` fires at ten to five, opens the conversation that
+       * ends the winter of 1986 — and the conversation can be left. The flag is already up,
+       * so the beat never comes back, `a6:heard` is never raised, and the day runs to
+       * midnight, past it, and round again with an objective it can no longer satisfy.
+       *
+       * The rule is small and it closes the whole class: if the beat's own condition is
+       * STILL true after it finished, nothing it was supposed to do actually happened, so
+       * it is armed again. A beat that did its job stops matching its own `when` — that is
+       * what a `when` is — so this cannot loop; and `delayMs` gives the room its breath
+       * back before the second attempt.
+       */
+      if (this.scene.isActive() && meets(this.ctx.engine.state, due.when)) {
+        this.ctx.engine.dispatch({ t: 'flag.set', flag: beatFlag(due.id), value: false })
+        this.since = 0
+      }
       this.refresh()
     })
   }
@@ -4159,8 +4375,7 @@ export class WorldScene extends Phaser.Scene {
         ...(next.entry ? next.entry(state) : []),
       )
       void this.ctx.engine.save()
-      this.cameras.main.fadeOut(500, 0, 0, 0)
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.fadeThen(500, () => {
         this.scene.restart({ mapId: next.start.location, spawn: next.start.spawn, from: this.def.id })
       })
     })

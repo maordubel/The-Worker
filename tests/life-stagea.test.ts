@@ -162,8 +162,14 @@ describe('שמונה ימים — the day is data, and a day transition is not a
         expect(SCENE[day.startLocation as keyof typeof SCENE], `${day.id} starts nowhere`).toBeDefined()
       }
     }
-    // exactly one of them is playable today, and it is the championship
-    expect(playableStageADays().map((day) => day.id)).toEqual(['a8'])
+    /**
+     * Which days have a scene behind them. `a8` is the championship this game shipped
+     * with; `a1` is the 1983 memory, interactive since 6.9.2026 (§6 — look, copy the
+     * crowd, the red thing on the concrete). The rest are declared and honest about not
+     * being built, which is rule 43: data may land before its scene, and nothing may
+     * pretend to be playable when it is not.
+     */
+    expect(playableStageADays().map((day) => day.id)).toEqual(['a1', 'a8'])
     expect(STAGE_A_DAY.a8.anchorKey).toBe('1986')
   })
 

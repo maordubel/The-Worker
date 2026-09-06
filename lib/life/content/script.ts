@@ -98,6 +98,14 @@ export type Effect =
    * else, which is what stops this becoming a general-purpose image popup.
    */
   | { e: 'doc'; art: string; captionHe?: string }
+  /**
+   * לפתוח חוברת — a printed object with more than one page (`lib/life/books.ts`).
+   *
+   * `doc` holds ONE sheet up. A booklet is twenty-four of them and is read rather than
+   * shown, so it gets its own effect and its own reader; the id is a book in the registry,
+   * never a path.
+   */
+  | { e: 'book'; id: string }
   | { e: 'goto'; node: string }
   | { e: 'travel'; to: LocationId; spawn: string }
   /**

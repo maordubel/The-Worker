@@ -56,9 +56,10 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
     wantHe: 'לא לאבד את אבא',
     teachesHe: 'חושים, מבט, והליכה אחרי מישהו',
     anchorKey: 'prologue',
-    // The prologue exists and is played; the interactive version the brief asks for
-    // (§6 — look around, copy the crowd, the dropped red thing) is not built yet.
-    built: false,
+    // Built 6.9.2026: the interactive version §6 asks for — look around, copy the crowd,
+    // the red thing on the concrete — playing as the conversation `a1-1983` over the
+    // terrace painting, with three branches that decide who the boy is in 1984.
+    built: true,
   },
   {
     id: 'a2',

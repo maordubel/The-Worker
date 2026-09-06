@@ -1,5 +1,6 @@
 import { ITEM_ART } from '../content/chapter1986'
 import type { HistoricalAnchor } from '../anchors'
+import { bookFor, bookPageFlag } from '../books'
 import { DIALOGUE } from '../content/dialogue'
 import { anchorFor, eraFor, type AnchorSet } from '../content/era'
 import type { Branch, ChoiceDef, Conversation, ConversationShot, Effect, Say } from '../content/script'
@@ -388,6 +389,19 @@ export class DialogueRunner {
               ...(kickerHe ? { kickerHe } : {}),
             }),
           )
+          break
+        }
+        case 'book': {
+          // a booklet in the registry, opened where it was last put down
+          const book = bookFor(effect.id)
+          if (book) {
+            const at = Number(this.engine.state.flags[bookPageFlag(book.id)] ?? 0)
+            // the world may notice a thing has been picked up at least once
+            if (!this.engine.state.flags[book.seenFlag]) {
+              this.engine.dispatch({ t: 'flag.raised', flag: book.seenFlag })
+            }
+            after.push(() => this.bus.emit('book', { id: book.id, page: Number.isFinite(at) ? at : 0 }))
+          }
           break
         }
         case 'doc':
