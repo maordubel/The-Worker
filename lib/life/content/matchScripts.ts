@@ -156,7 +156,7 @@ const CUP_99: MatchScript = {
   sport: 'football',
   scored: true,
   steps: [
-    { wait: 0, id: 'kickoff', phaseHe: 'המשחק', board: { for: 0, against: 0 }, crowd: 'CHANT', whistle: 1, text: 'ארבעים אלף. הצבע שלכם בצד אחד, הצבע שלהם בשני, והרעש — לא רעש. לחץ. כמו מים.' },
+    { wait: 0, id: 'kickoff', phaseHe: 'המשחק', board: { for: 0, against: 0 }, crowd: 'CHANT', whistle: 1, text: 'הצבע שלכם בצד אחד, הצבע שלהם בשני, והקערה מלאה עד המדרגה האחרונה. והרעש — לא רעש. לחץ. כמו מים.' },
     { wait: 3400, id: 'scarf', talk: 'm99-scarf' },
     { wait: 900, id: 'theirs', goal: 'against', crowd: 'AFTERMATH', sfx: 'crowd-groan', level: 0.9, text: 'הם קודם. הצד השני של הקערה עולה באוויר. אצלכם — שקט של אנשים שסופרים דקות.' },
     { wait: 5200, id: 'react', talk: 'm99-behind' },
@@ -180,10 +180,10 @@ const TITLE_00: MatchScript = {
   sport: 'football',
   scored: true,
   steps: [
-    { wait: 0, id: 'kickoff', phaseHe: 'המשחק', board: { for: 0, against: 0 }, crowd: 'LOW_MURMUR', whistle: 1, text: 'מגרש קטן. יציע בטון, רשת, שכונה מסביב שמסתכלת מהמרפסות. שש אלף איש שלא נושמים.' },
+    { wait: 0, id: 'kickoff', phaseHe: 'המשחק', board: { for: 0, against: 0 }, crowd: 'LOW_MURMUR', whistle: 1, text: 'מגרש קטן. יציע בטון, רשת, שכונה מסביב שמסתכלת מהמרפסות. אין מקום פנוי ואף אחד לא נושם.' },
     { wait: 3400, id: 'stand', talk: 'm00-stand' },
     { wait: 900, id: 'theirs', goal: 'against', crowd: 'AFTERMATH', sfx: 'crowd-groan', level: 0.9, text: 'הם קודם. כמובן שהם קודם. אתה לא מחשב. אתה מסתכל על מי שלידך ורואה שגם הוא לא.' },
-    { wait: 6400, id: 'build', crowd: 'BUILDING_TENSION', text: 'היציע לא שר. הוא דוחף. שש אלף איש דוחפים כדור בעיניים.' },
+    { wait: 6400, id: 'build', crowd: 'BUILDING_TENSION', text: 'היציע לא שר. הוא דוחף. כל היציע דוחף כדור בעיניים.' },
     { wait: 4600, id: 'equaliser', goal: 'for', crowd: 'GOAL_BURST', text: 'השוויון.', tone: 'red' },
     { wait: 6800, id: 'twenty', crowd: 'CHANT', text: 'ואז עשרים דקות שהן שנתיים.' },
     { wait: 4200, id: 'hold', talk: 'm00-hold' },
@@ -204,11 +204,11 @@ const DOUBLE_00: MatchScript = {
   sport: 'football',
   scored: true,
   steps: [
-    { wait: 0, id: 'kickoff', phaseHe: 'המשחק', board: { for: 0, against: 0 }, crowd: 'CHANT', whistle: 1, text: 'רמת גן. שוב. אותה קערה, אותו יריב, שנה אחרי. ארבעים אלף שכבר יודעים שזה יכול להיגמר בפנדלים, ומקללים את הידיעה.' },
+    { wait: 0, id: 'kickoff', phaseHe: 'המשחק', board: { for: 0, against: 0 }, crowd: 'CHANT', whistle: 1, text: 'רמת גן. שוב. אותה קערה, אותו יריב, שנה אחרי. וכולם כאן כבר יודעים שזה יכול להיגמר בפנדלים, ומקללים את הידיעה.' },
     { wait: 3600, id: 'memory', talk: 'm00-memory' },
     { wait: 900, id: 'level', board: { for: 1, against: 1 }, crowd: 'NEAR_MISS', sfx: 'crowd-swell', level: 0.9, text: 'שער, ושער. תשעים דקות ואף אחד לא מוותר.' },
     { wait: 6400, id: 'extra', phaseHe: 'הארכה', crowd: 'BUILDING_TENSION', whistle: 2, text: 'הארכה. הרגליים של השחקנים נגמרות. הקולות ביציע לא.' },
-    { wait: 4800, id: 'ours', goal: 'for', crowd: 'GOAL_BURST', text: 'שלנו. הבמה זזה. ארבעים אלף בבת אחת.', tone: 'red' },
+    { wait: 4800, id: 'ours', goal: 'for', crowd: 'GOAL_BURST', text: 'שלנו. הבמה זזה. כל הצד הזה בבת אחת.', tone: 'red' },
     { wait: 5400, id: 'theirs', goal: 'against', crowd: 'AFTERMATH', sfx: 'crowd-groan', level: 0.9, text: 'ואז שלהם. הקערה נחתכת לשניים: צד שצועק וצד ששותק.' },
     { wait: 6000, id: 'clock', crowd: 'BUILDING_TENSION', text: 'ואף אחד לא מוותר. ואז השופט מסתכל בשעון.' },
     { wait: 3400, id: 'pens', phaseHe: 'פנדלים', crowd: 'LOW_MURMUR', whistle: 1, talk: 'd-match' },
@@ -265,6 +265,15 @@ const HALL_NIGHT = (id: string, talk: string, openHe: string): MatchScript => ({
   ],
 })
 
+/**
+ * כמה אנשים היו שם — לא כתוב כאן, כי הארכיון לא מחזיק את זה.
+ *
+ * Five lines in this file asserted crowd sizes — "ארבעים אלף" at Ramat Gan, "שש אלף איש"
+ * at Hatikva — and `content/manual/matches.json` holds an attendance figure for exactly
+ * six matches, all of them from the 2001/02 European run. None of these. The lines now
+ * describe a full bowl and a full terrace, which is true and is what a child sees anyway;
+ * a number is a claim, and rule 11 is that this game does not make claims it cannot source.
+ */
 export const MATCH_SCRIPTS: Record<string, MatchScript> = {
   'final-86': FINAL_86,
   'laces-98': LACES_98,

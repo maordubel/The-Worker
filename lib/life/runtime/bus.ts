@@ -181,6 +181,15 @@ export type LifeBusEvents = {
    * stands. A shirt is the only purchase in this game that gets a card of its own.
    */
   /**
+   * מעברון — four seconds of Tel Aviv, 1989, over the black between two rooms.
+   *
+   * Not the archive film channel (`cutscene`), which stops the world and is a document.
+   * This is a breath: it plays over a scene change that is happening anyway, cannot be
+   * interacted with, and is gone before anybody decides whether to skip it.
+   */
+  film: { clip: string; captionHe: string } | null
+
+  /**
    * כרטיס היכרות — the first time somebody walks into this life.
    *
    * Maor asked for "סרטון הכרות קצר" for every character, humorous and light. There is no

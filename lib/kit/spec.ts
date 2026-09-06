@@ -12,7 +12,17 @@
  *   1 base · 2 pattern · 3 sleeves · 4 collar · 5 crest · 6 maker · 7 sponsor · 8 nameset
  */
 
-export type KitColour = 'red' | 'cream' | 'ink' | 'paper' | 'navy' | 'deep'
+/**
+ * הצבעים שערכה יכולה להיות בהם.
+ *
+ * `concrete` joined on 5.9.2026, and it joined because it was already in the data: the
+ * 2020/21 away shirt has grey printed shoulders and `content/manual/kit-designs.json`
+ * records it as `concrete`. `seasonKits()` casts the archive's string to this type without
+ * checking, so that panel was being drawn with a CSS variable that does not exist — an
+ * invisible shoulder on the kits screen, for as long as the row has been there. The token
+ * exists in the palette; only this union had not been told.
+ */
+export type KitColour = 'red' | 'cream' | 'ink' | 'paper' | 'navy' | 'deep' | 'concrete'
 
 /** The palette, as CSS custom properties, so the tokens stay the single source. */
 export const COLOUR_VAR: Record<KitColour, string> = {
@@ -24,6 +34,8 @@ export const COLOUR_VAR: Record<KitColour, string> = {
   /** a darker red for tonal work — the one value with no shell token, since it exists
    *  only inside the shirt */
   deep: '#B81C14',
+  /** the grey on the 2020/21 away shoulders, as the archive records it */
+  concrete: 'rgb(var(--concrete))',
 }
 
 export const COLOUR_NAME: Record<KitColour, string> = {
@@ -33,6 +45,7 @@ export const COLOUR_NAME: Record<KitColour, string> = {
   paper: 'לבן',
   navy: 'נייבי',
   deep: 'אדום כהה',
+  concrete: 'אפור בטון',
 }
 
 export type PatternId =

@@ -759,7 +759,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
       "variant": "away",
       "base": "cream",
       "pattern": "shoulder-panel",
-      "patternInk": "paper",
+      "patternInk": "concrete",
       "sleeves": "plain",
       "sleeveInk": "cream",
       "collar": "crew",

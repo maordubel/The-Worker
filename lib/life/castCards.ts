@@ -17,7 +17,11 @@
  *      not know what they will do to you later.
  *   3. **Nobody real gets one.** Sinai, Elimelech, Tikva and the owners are in the
  *      registry as `historical`/`seen-only` and this game does not write comedy about a
- *      living person it has not asked. Only the invented and composite cast.
+ *      living person it has not asked. Only the invented and composite cast — and the test
+ *      checks the registry rather than my memory, which is how שחור was caught: he is
+ *      marked `provenance: 'real'` and had a card written for him for about an hour.
+ *   5. **A card nobody can meet is not a card.** Every entry has to answer to a name a
+ *      conversation actually says; מלמד was written before he had one.
  *   4. **Keyed by the name a conversation actually says.** The runtime matches on the
  *      conversation's `nameHe`, because that is the only handle a line carries.
  */
@@ -183,18 +187,6 @@ export const CAST_CARDS: readonly CastCard[] = [
     sinceHe: 'הצבא, 1996',
   },
   {
-    id: 'shachor',
-    namesHe: ['שחור'],
-    roleHe: 'מארגן את הנסיעות',
-    art: 'adultA5',
-    linesHe: [
-      'יש לו רשימה. תמיד יש לו רשימה. אתה בשורה 14.',
-      'מדבר בקול של מי שכבר צעק כל מה שהיה לו לצעוק.',
-      'אם הוא אמר "יוצאים בחמש", בחמש ואחת אתה מסתכל על אחורי האוטובוס.',
-    ],
-    sinceHe: 'הנסיעות, 1993',
-  },
-  {
     id: 'crowd-limor',
     namesHe: ['לימור'],
     roleHe: 'בדלת של האוטובוס',
@@ -205,42 +197,6 @@ export const CAST_CARDS: readonly CastCard[] = [
       'הדבר היחיד שמפחיד אותה הוא נסיעה שיוצאת חסרה שני אנשים.',
     ],
     sinceHe: 'האולם, 1993',
-  },
-  {
-    id: 'melamed',
-    namesHe: ['מלמד'],
-    roleHe: 'האיש עם הפתקים',
-    art: 'melamed',
-    linesHe: [
-      'רושם כל משחק במחברת. גם משחקי חורף. גם משחקי הפסד.',
-      'שואל אותך מה היה בדקה 63 ומחכה שתדע.',
-      'המחברות שלו הן היום הדבר הכי קרוב לארכיון שיש למועדון הזה.',
-    ],
-    sinceHe: 'שער 5, 1999',
-  },
-  {
-    id: 'michel',
-    namesHe: ['מישל'],
-    roleHe: 'מהאולם',
-    art: 'michel96-walk1',
-    linesHe: [
-      'בא לכדורסל מאז שהפרקט היה חדש, ומאז הפרקט זקן ממנו.',
-      'מדבר עם השופט בשקט מוחלט, כל המשחק, בלי שהשופט שומע מילה.',
-      'קורא לכולם "חביבי" חוץ ממי שהוא באמת אוהב.',
-    ],
-    sinceHe: 'אוסישקין, 1996',
-  },
-  {
-    id: 'asaf',
-    namesHe: ['אסף'],
-    roleHe: 'שער 5',
-    art: 'asaf-back',
-    linesHe: [
-      'מארגן. תמיד מארגן. גם כשאין מה לארגן.',
-      'יודע מה עשו לשלום תקוה ולא ימצא לך את זה בעיתון.',
-      'אומר "אנחנו" על אנשים שהוא לא מכיר, ומתכוון לזה.',
-    ],
-    sinceHe: 'שער 5, 1999',
   },
   {
     id: 'soko',
@@ -265,18 +221,6 @@ export const CAST_CARDS: readonly CastCard[] = [
       'שאל אותך פעם אחת למה, ואתה עדיין חושב על התשובה.',
     ],
     sinceHe: 'הצבא, 1996',
-  },
-  {
-    id: 'crowd-dudu',
-    namesHe: ['דודו'],
-    roleHe: 'מהיציע',
-    art: 'adultA5',
-    linesHe: [
-      'מגיע שעה לפני. תמיד. גם למשחק שנדחה.',
-      'לא שר. מוחא כפיים בקצב אחר משל כולם ובטוח שכולם טועים.',
-      'שומר מקומות לחמישה אנשים ומקבל בדיוק שניים.',
-    ],
-    sinceHe: 'היציע',
   },
 ]
 

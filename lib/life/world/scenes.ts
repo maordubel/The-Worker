@@ -1508,7 +1508,7 @@ const SCENES: SceneDef[] = [
         sway: 0.009,
       },
     ],
-    hotspots: [
+    hotspots: [...gigSpots('pitch'), 
       {
         id: 'ball',
         x: 0.5,
@@ -1666,6 +1666,19 @@ const SCENES: SceneDef[] = [
     ],
     spawns: { fromRoute: { x: 0.06, y: 0.87, facing: 'right' }, fromTunnel: { x: 0.66, y: 0.93, facing: 'left' }, fromGate5: { x: 0.9, y: 0.88, facing: 'left' }, start: { x: 0.22, y: 0.9, facing: 'right' } },
     actors: [
+      /**
+       * שני האנשים של 1985 — and the reason they were not here until 5.9.2026.
+       *
+       * `kobi-a5-gate` and `barry-a5` have existed as conversations since Stage A was
+       * written and NEITHER COULD BE REACHED: nobody put them in the scene, and the
+       * arrival beat ended the chapter in the same breath as the arrival. So the first
+       * time a child stands at gate seven with his father, the father was not there.
+       *
+       * Barry is a stand-in figure. `barry96` is Barry at thirty-eight; this is Barry at
+       * twenty-seven, and the art list asks for him.
+       */
+      { id: 'kobi-a5', era: 'a5-first', figure: 'kobi', x: 0.42, y: 0.9, size: 0.26, nameHe: 'קובי', talk: 'kobi-a5-gate', sway: 0.003 },
+      { id: 'barry-a5', era: 'a5-first', figure: 'adultB2', x: 0.63, y: 0.88, size: 0.255, nameHe: 'בארי', talk: 'barry-a5', flip: true },
       { id: 'barry-a5', era: 'a5-first', figure: 'adultA6', x: 0.44, y: 0.91, size: 0.3, nameHe: 'בארי', talk: 'barry-a5', sway: 0.003 },
       { id: 'kobi-a5-gate', era: 'a5-first', figure: 'kobi', x: 0.36, y: 0.9, size: 0.3, nameHe: 'קובי', talk: 'kobi-a5-gate', sway: 0.002 },
       // 16.11.1996 — the two gates. Kobi and Barry at seven; Barry has no figure yet.

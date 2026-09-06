@@ -215,6 +215,17 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
     ],
   },
   {
+    /**
+     * מי שאיחר — and only him.
+     *
+     * This conversation had a second branch, three paragraphs long, describing the ninety
+     * minutes for a player who arrived on time. It could never run: a player who arrives
+     * on time gets `{ a: 'match', script: 'cup-99' }`, the directed match, which describes
+     * those ninety minutes minute by minute. Two versions of the same night, one of them
+     * unreachable, and the unreachable one was the better written — which is exactly how
+     * dead content survives. It is gone; the fallback is one line, and it goes where the
+     * night goes anyway.
+     */
     id: 'c99-match',
     nameHe: null,
     branches: [
@@ -224,11 +235,7 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
         then: [{ e: 'goto', node: 'c99-pens' }],
       },
       {
-        lines: [
-          { who: null, text: 'הקערה הגדולה, מלאה עד המעקות. הצבע שלכם בצד אחד, שלהם בשני, והרעש — לא רעש. לחץ. כמו מים.' },
-          { who: null, text: 'הם קודם, ואתם אחר כך, ובאמצע שם עמדת על מושב בטון ולא ידעת שאתה עומד. הארכה. שקט של אנשים שאין להם כבר קול.' },
-          { who: null, text: 'ואז השופט מסתכל בשעון, ואתה יודע מה זה אומר.' },
-        ],
+        lines: [{ who: null, text: 'ואז השופט מסתכל בשעון, ואתה יודע מה זה אומר.' }],
         then: [{ e: 'goto', node: 'c99-pens' }],
       },
     ],

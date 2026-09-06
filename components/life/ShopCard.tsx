@@ -7,7 +7,8 @@ import { KitShirt } from '@/components/kit/KitShirt'
 import { t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/life/money'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
-import { onSale, owns, shirtFlag, type Shirt } from '@/lib/life/shirts'
+import { chapterFor } from '@/lib/life/content/chapters'
+import { onSale, owns, shirtFlag, wornIn, type Shirt } from '@/lib/life/shirts'
 import type { LifeState } from '@/lib/life/types'
 
 /**
@@ -96,7 +97,14 @@ export function ShopCard({
             </p>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {mine.map((shirt) => (
-                <Hanger key={shirt.id} shirt={shirt} owned affordable onPick={() => setLook(shirt)} />
+                <Hanger
+                  key={shirt.id}
+                  shirt={shirt}
+                  owned
+                  affordable
+                  days={wornIn(state, shirt.id).length}
+                  onPick={() => setLook(shirt)}
+                />
               ))}
             </div>
           </>
@@ -133,6 +141,14 @@ export function ShopCard({
                 <bdi>{look.sourceHe}</bdi>
               </p>
             )}
+
+            {/*
+              איפה היית איתה — the line that turns a wardrobe into a biography.
+
+              A price makes a shirt an object. "לבשת אותה ב־26.5.1999 · שש־עשרה שנה" makes
+              it the day itself, and it is printed here for as long as the save lives.
+            */}
+            <Worn state={state} shirt={look} />
           </div>
 
           <div className="flex gap-3">
@@ -169,16 +185,40 @@ export function ShopCard({
   )
 }
 
+/** every day this shirt was worn to, with the date the archive gives that day */
+function Worn({ state, shirt }: { state: LifeState; shirt: Shirt }) {
+  const days = wornIn(state, shirt.id)
+    .map((chapter) => chapterFor(chapter))
+    .filter((row): row is NonNullable<typeof row> => Boolean(row))
+    .sort((a, b) => a.year - b.year)
+  if (days.length === 0) return null
+  return (
+    <div className="mt-4 w-full max-w-[34ch] border-t-hair border-red/40 pt-3">
+      <p className="font-display text-[11px] uppercase tracking-[0.2em] text-red">{t('life.shop.worn')}</p>
+      {days.map((day) => (
+        <p key={day.id} className="mt-1 font-body text-[12px] leading-snug text-sheet">
+          <bdi>{day.dateHe}</bdi>
+          <span className="px-2 text-concrete">·</span>
+          <bdi className="text-concrete">{day.titleHe}</bdi>
+        </p>
+      ))}
+    </div>
+  )
+}
+
 /** one shirt on a hanger: drawn or photographed, with what it costs under it */
 function Hanger({
   shirt,
   owned,
   affordable,
+  days = 0,
   onPick,
 }: {
   shirt: Shirt
   owned: boolean
   affordable: boolean
+  /** how many days you wore it to — a shirt with a history is marked in the grid */
+  days?: number
   onPick: () => void
 }) {
   return (
@@ -201,6 +241,14 @@ function Hanger({
       >
         {owned ? t('life.shop.have') : `${shirt.price} ₪`}
       </p>
+      {days > 0 && (
+        <p className="mt-0.5 flex items-center justify-center gap-1 font-mono text-[10px] leading-none text-red">
+          {Array.from({ length: Math.min(days, 5) }, (_, i) => (
+            <span key={i} aria-hidden className="inline-block h-1 w-1 bg-red" />
+          ))}
+          <span className="ps-1">{t('life.shop.days', { n: String(days) })}</span>
+        </p>
+      )}
     </button>
   )
 }

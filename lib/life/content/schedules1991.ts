@@ -116,7 +116,16 @@ export const SCHEDULE_1991: NPCScheduleEntry[] = [
     actorId: 'usher-night',
     location: 'ussishkin-outside',
     start: EVENING,
-    end: TIP_OFF + 20,
+    /**
+     * …ועד אחרי שכולם יצאו.
+     *
+     * This was `TIP_OFF + 20` — twenty past eight — and `derby:over` does not land until
+     * about five to ten. Which meant the one line this man exists for, the one where he
+     * says goodnight to a boy by name after a night neither of them will forget, could
+     * never be heard. He stays until half past ten now, which is what a doorman does: he
+     * lets them in, and then he stands there while they come out.
+     */
+    end: at(22, 30),
     behavior: 'wait',
     // Beside the glass doors (0.33–0.45), never in them: a person standing in a doorway
     // wins the prompt over the door itself.

@@ -28,12 +28,12 @@ OUT = os.path.join(ROOT, 'lib/life/generated/kitShirts.ts')
 
 CLUB = 'הפועל-תל-אביב'
 
-# The archive records one colour the kit palette does not have: `concrete`, the grey on
-# the 2020/21 away shoulders. `lib/kit/spec.ts` knows red, cream, ink, paper, navy, deep.
-# The site casts the archive value straight to `KitColour` and therefore renders that
-# panel with an undefined CSS variable — a real bug on the kits screen, not only here.
-# Mapped to the nearest colour that exists, and written down so it can be fixed at source.
-COLOUR_FIX = {'concrete': 'paper'}
+# The archive once recorded a colour the kit palette did not have — `concrete`, the grey
+# on the 2020/21 away shoulders — and `seasonKits()` cast it straight to `KitColour`, so
+# the kits screen drew that panel with a CSS variable that did not exist. Fixed at source
+# on 5.9.2026: `concrete` is a real `KitColour` now. The map stays as the place any future
+# mismatch gets written down rather than silently rendered as nothing.
+COLOUR_FIX: dict[str, str] = {}
 
 
 def colour(value):

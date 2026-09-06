@@ -486,8 +486,32 @@ export const BEATS_A5: Beat[] = [
       { a: 'sfx', key: 'crowd-swell', level: 0.6 },
       { a: 'lines', lines: [{ who: null, text: 'שער 7. ברזל, ריח של גרעינים, וגברים שעומדים בדיוק איפה שהם עומדים כל שבת.' }, { who: 'בארי', text: 'הנה עוד אחד.' }] },
       { a: 'derive', events: (state) => [{ t: 'flag.raised', flag: state.minute > at(15, 40) ? 'a5:late' : 'a5:ontime' }] },
-      { a: 'talk', conversation: 'a5-close' },
+      /**
+       * …ולא לסגור את הפרק כאן.
+       *
+       * `a5-close` used to run in this same beat, which meant the chapter ended on the
+       * frame the child arrived — and `kobi-a5-gate` and `barry-a5`, the two conversations
+       * this whole scene exists for, could never happen. The close now waits at the mouth
+       * of the tunnel (`a5-in`), where going in is something the player does.
+       */
     ],
+  },
+  {
+    /** נכנסים — the chapter closes when he actually walks in, not when he arrives */
+    id: 'a5-in',
+    at: 'bloomfield-tunnel',
+    trigger: 'enter',
+    when: { flag: 'a5:there' },
+    delayMs: 400,
+    do: [{ a: 'talk', conversation: 'a5-close' }],
+  },
+  {
+    /** …ואם הוא נשאר בחוץ עד השריקה, הפרק נסגר בלעדיו */
+    id: 'a5-outside',
+    trigger: 'clock',
+    waitingHe: 'ממתין: השריקה הראשונה',
+    when: { flag: 'a5:there', afterMinute: at(16, 5) },
+    do: [{ a: 'flag', flag: 'a5:late' }, { a: 'talk', conversation: 'a5-close' }],
   },
   {
     id: 'a5-gone',
@@ -537,6 +561,14 @@ export const CONVERSATIONS_A5: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { flag: 'a5:late' }, lines: [{ who: null, text: 'מאחורי הברזל כבר צועקים "אדום, אדום". התחיל בלעדיך.' }], then: [{ e: 'presence', mode: 'late' }, { e: 'ending', id: 'late' }] },
+      /**
+       * בלי אבא — the branch that was missing, and it was the more likely one.
+       *
+       * If the car left at three (`a5:kobi-left`) and the boy walked, he still arrives, and
+       * the line said his father put a hand on his shoulder. He is not there. He drove off
+       * and the oil is still wet on the asphalt.
+       */
+      { when: { flag: 'a5:kobi-left' }, lines: [{ who: null, text: 'נכנסת לבד. אף אחד לא שם יד על הכתף, ואף אחד גם לא עצר אותך. אתה בחולצה, ובפנים כולם בחולצה, וזה מספיק.' }], then: [{ e: 'presence', mode: 'inside' }, { e: 'redheart', key: 'footballLove', delta: 4 }, { e: 'personality', key: 'independence', delta: 4 }, { e: 'ending', id: 'there' }] },
       { lines: [{ who: null, text: 'אבא שם יד על הכתף ומכניס אותך פנימה, לפני הצעקה הראשונה. אתה בחולצה. אף אחד לא צוחק.' }], then: [{ e: 'presence', mode: 'inside' }, { e: 'redheart', key: 'footballLove', delta: 4 }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'ending', id: 'there' }] },
     ],
   },

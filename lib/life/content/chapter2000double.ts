@@ -140,7 +140,7 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     id: 'kobi-title',
     nameHe: 'קובי',
     branches: [
-      { when: { flag: 't:route' }, lines: [{ who: 'קובי', text: 'נתראה שם. או שלא. שש אלף איש במגרש בגודל של חצר. אני אמצא אותך.' }] },
+      { when: { flag: 't:route' }, lines: [{ who: 'קובי', text: 'נתראה שם. או שלא. מגרש בגודל של חצר, וכל העיר בתוכו. אני אמצא אותך.' }] },
       {
         lines: [{ who: 'קובי', text: 'תיקו. רק תיקו. אני לא מאמין למילה הזאת מאז שתיים ותשעים. אתה בא איתי? מגרש קטן. הולכים ברגל חצי דרך.' }],
         choices: [
@@ -172,7 +172,7 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     nameHe: null,
     branches: [
       {
-        lines: [{ who: null, text: 'השריקה. שש אלף איש לא בטוחים שמותר.' }],
+        lines: [{ who: null, text: 'השריקה. יציע שלם לא בטוח שמותר.' }],
         choices: [
           { id: 'believe', text: 'להאמין. עכשיו.', then: [{ e: 'wellbeing', key: 'happiness', delta: 12 }, { e: 'goto', node: 't-champions' }] },
           { id: 'wait', text: 'לחכות. שמישהו יגיד את המילה.', when: { lacesIs: 'witness' }, hidden: true, then: [{ e: 'goto', node: 't-champions' }] },
@@ -188,7 +188,7 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
       { when: { flag: 't:with-kobi' }, lines: [{ who: 'קובי', text: 'אלופים. שתים־עשרה שנה.' }, { who: null, text: 'הוא אמר את זה אליך. לא למגרש. אליך. ואז חיבק, וזה היה הרבה יותר ממה שהיה בשמונים ושש, כי עכשיו היית בגובה שלו.' }], then: [{ e: 'sfx', key: 'crowd-goal', level: 0.8 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 8 }, { e: 'remember', who: 'kobi', eventId: 'champions-hug-2000', significance: 'major' }, { e: 'flag', flag: 'life:title:kobi' }, { e: 'goto', node: 't-close' }] },
       { when: { flag: 't:with-efi' }, lines: [{ who: 'אפי', text: 'אז ככה זה אצלכם.' }, { who: 'פוגי', text: 'ככה.' }, { who: 'אפי', text: 'טוב. יפה.' }, { who: null, text: 'הוא חיבק אותך כמו אחרי הגביע ההוא. שבע שנים. אתה קפצת עליו הפעם.' }], then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 8 }, { e: 'flag', flag: 'life:title:efi' }, { e: 'goto', node: 't-close' }] },
       { when: { flag: 't:with-gate5' }, lines: [{ who: null, text: 'הבד עלה. אסף לא חייך — אסף אף פעם לא מחייך — אבל הוא הניח יד על הראש שלך רגע.' }], then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'flag', flag: 'life:title:gate5' }, { e: 'goto', node: 't-close' }] },
-      { lines: [{ who: null, text: 'לבד באמצע שש אלף. אלופים. חיפשת פנים מוכרות ולא מצאת, ואז מצאת אחת, ואז זה לא היה משנה.' }], then: [{ e: 'wellbeing', key: 'loneliness', delta: 3 }, { e: 'goto', node: 't-close' }] },
+      { lines: [{ who: null, text: 'לבד באמצע כולם. אלופים. חיפשת פנים מוכרות ולא מצאת, ואז מצאת אחת, ואז זה לא היה משנה.' }], then: [{ e: 'wellbeing', key: 'loneliness', delta: 3 }, { e: 'goto', node: 't-close' }] },
     ],
   },
   {
@@ -383,7 +383,7 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'השופט מסתכל בשעון. ארבעים אלף מקללים את הידיעה.' },
+          { who: null, text: 'השופט מסתכל בשעון. כל הקערה מקללת את הידיעה.' },
         ],
         choices: [
           { id: 'breathe', text: 'לנשום. להסתכל. הפעם עד הסוף.', then: [{ e: 'personality', key: 'courage', delta: 3 }, { e: 'goto', node: 'd-pens' }] },
@@ -414,7 +414,7 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'בחוץ. לא על מסך תוצאות — בחוץ, ברחוב שמוביל מהאצטדיון, עם ארבעים אלף איש שהולכים לכל הכיוונים.' },
+          { who: null, text: 'בחוץ. לא על מסך תוצאות — בחוץ, ברחוב שמוביל מהאצטדיון, בתוך המון שהולך לכל הכיוונים בבת אחת.' },
           { who: null, text: 'מי לידך.' },
         ],
         then: [{ e: 'presence', mode: 'inside' }, { e: 'goto', node: 'd-family' }],

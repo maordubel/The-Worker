@@ -32,6 +32,13 @@ import type { Conversation } from './script'
  */
 
 export const BUS_LEAVES = at(18, 30)
+
+/**
+ * מתי נועל השער הצדדי — eight o'clock, and Efi has been saying so since the chapter was
+ * written: "תגיד לו שהשער הצדדי נסגר בשמונה, לא בתשע כמו שהוא חושב". It closes at eight.
+ * That line is now load-bearing rather than decorative.
+ */
+export const SIDE_GATE_SHUTS = at(20, 0)
 export const TIP_OFF_93 = at(20, 0)
 export const FINAL_HORN_93 = at(21, 40)
 
@@ -511,6 +518,72 @@ export const CONVERSATIONS_1993: Conversation[] = [
         when: { afterMinute: BUS_LEAVES + 12 },
         lines: [{ who: null, text: 'פה הוא עמד. כתם שמן על הכביש, וחצי כרטיס קרוע לידו.' }],
       },
+      /**
+       * הדרך של אופיר — and until 5.9.2026 it was not a way at all.
+       *
+       * `route:ofir` and `route:efi` landed on this same door, at the same corner, for the
+       * same 36 ₪, with the same result. A choice with one outcome is a paragraph, not a
+       * choice. Ofir's route is now what Efi's line has been describing all along: the side
+       * gate — no queue, no fare, thirty shekels instead of thirty-six — **and it shuts at
+       * eight.** Cheaper and earlier, or dearer and safe. That is a decision.
+       */
+      {
+        when: { all: [{ flag: 'route:ofir' }, { beforeMinute: SIDE_GATE_SHUTS }], minAgorot: 3000 },
+        lines: [
+          { who: null, text: 'האוטובוס בפינה, ומאה מטר אחריו הסמטה שאופיר דיבר עליה. שער צדדי, אחד מהאנשים של האולם עומד בו עם סיגריה.' },
+          { who: 'אופיר', text: 'שלושים, בלי תור, בלי לימור. רק שהוא נועל בשמונה ואז זהו.' },
+        ],
+        choices: [
+          {
+            id: 'side',
+            text: 'לצד. שלושים.',
+            then: [
+              { e: 'money', agorot: -3000, why: 'השער הצדדי' },
+              { e: 'give', item: 'hall-ticket' },
+              { e: 'flag', flag: 'in:sideGate' },
+              { e: 'rel', who: 'ofir', axis: 'sharedHistory', delta: 4 },
+              { e: 'personality', key: 'courage', delta: 2 },
+              { e: 'time', minutes: 40 },
+              { e: 'goto', node: 'ride-1993' },
+            ],
+          },
+          {
+            id: 'board-anyway',
+            text: 'לא. עם כולם, באוטובוס.',
+            when: { minAgorot: 3600 },
+            noteHe: 'אין שלושים ושש.',
+            then: [
+              { e: 'money', agorot: -3600, why: 'אוטובוס וכרטיס' },
+              { e: 'give', item: 'hall-ticket' },
+              { e: 'flag', flag: 'on:bus' },
+              { e: 'time', minutes: 35 },
+              { e: 'goto', node: 'ride-1993' },
+            ],
+          },
+        ],
+      },
+      {
+        /** …ואם השער כבר ננעל, נשאר האוטובוס, ואופיר ידע שזה מה שיקרה */
+        when: { all: [{ flag: 'route:ofir' }, { afterMinute: SIDE_GATE_SHUTS }], minAgorot: 3600 },
+        lines: [
+          { who: null, text: 'השער הצדדי נעול. האיש עם הסיגריה כבר לא שם, וגם הסיגריה לא.' },
+          { who: 'אופיר', text: 'אמרתי שמונה. נו. אוטובוס.' },
+        ],
+        choices: [
+          {
+            id: 'board',
+            text: 'לעלות. שלושים ושש.',
+            then: [
+              { e: 'money', agorot: -3600, why: 'אוטובוס וכרטיס' },
+              { e: 'give', item: 'hall-ticket' },
+              { e: 'flag', flag: 'on:bus' },
+              { e: 'time', minutes: 35 },
+              { e: 'goto', node: 'ride-1993' },
+            ],
+          },
+          { id: 'wait', text: 'עוד רגע.', then: [] },
+        ],
+      },
       {
         when: { any: [{ flag: 'route:efi' }, { flag: 'route:ofir' }], minAgorot: 3600 },
         lines: [
@@ -662,6 +735,15 @@ export const CONVERSATIONS_1993: Conversation[] = [
     ],
   },
   {
+    /**
+     * הסוף שתלוי במי שרצת אליו.
+     *
+     * The choice above — home to your father, staying with the group, or looking for Ofir
+     * — raised `after:home`, `after:group` and `after:ofir`, and NOTHING in this repository
+     * read any of them. Three endings that were the same ending. Now the walk home is the
+     * one you chose: the kitchen light on, or the last of the bus, or a boy on a wall who
+     * did not go.
+     */
     id: 'close-1993',
     nameHe: null,
     branches: [
@@ -669,6 +751,32 @@ export const CONVERSATIONS_1993: Conversation[] = [
         when: { flag: 'arrived:late' },
         lines: [{ who: null, text: 'ירדת בפינה והלכת את השאר לבד. חלון פתוח, רדיו במרפסת, מישהו צוחק בקומה שנייה. הרחוב כבר יודע — ואתה ראית את זה בעיניים.' }],
         then: [{ e: 'flag', flag: 'walked:home' }, { e: 'ending', id: 'late' }],
+      },
+      {
+        when: { flag: 'after:home' },
+        lines: [
+          { who: null, text: 'ירדת בפינה ורצת. האור במטבח דלוק, וזה אומר שהוא חיכה.' },
+          { who: 'קובי', text: 'נו?' },
+          { who: null, text: 'לא אמרת כלום. הוא הסתכל עליך שנייה וידע, וזה היה מספיק לשניכם.' },
+        ],
+        then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'flag', flag: 'walked:home' }, { e: 'ending', id: 'inside' }],
+      },
+      {
+        when: { flag: 'after:group' },
+        lines: [
+          { who: null, text: 'נשארת עד שהאוטובוס התרוקן והנהג כיבה את האורות ואמר "די, מספיק".' },
+          { who: null, text: 'את השאר הלכת ברגל, בשתיים בלילה, עם צרוד במקום קול. אף אחד בבית לא היה ער. זה היה שווה את זה.' },
+        ],
+        then: [{ e: 'wellbeing', key: 'exhaustion', delta: 6 }, { e: 'flag', flag: 'walked:home' }, { e: 'ending', id: 'inside' }],
+      },
+      {
+        when: { flag: 'after:ofir' },
+        lines: [
+          { who: null, text: 'אופיר ישב על המעקה ליד הקיוסק כאילו הוא לא זז משם כל הערב. אולי באמת לא.' },
+          { who: 'אופיר', text: 'שמעתי ברדיו. אל תספר לי, אני רוצה שתספר לי מחר לאט.' },
+          { who: null, text: 'ישבתם שם עד שכיבו את השלט של רפי, ולא סיפרת לו כלום.' },
+        ],
+        then: [{ e: 'rel', who: 'ofir', axis: 'sharedHistory', delta: 4 }, { e: 'flag', flag: 'walked:home' }, { e: 'ending', id: 'inside' }],
       },
       {
         lines: [{ who: null, text: 'ירדת בפינה והלכת את השאר לבד. חלון פתוח, רדיו במרפסת, מישהו צוחק בקומה שנייה. הרחוב שמע. אתה היית שם.' }],

@@ -8,7 +8,7 @@ import { SCHOOL_MORNING_1990, TABLE_1990 } from '../../content/chapter1990'
 import { CLASSROOM_1991, closing1991, HOME_NIGHT_1991, SCHOOL_STARTS, TIP_OFF } from '../../content/chapter1991'
 import { anchorFor, ERA_1991, eraFor, type Era } from '../../content/era'
 import { chapterFor, nextPlayable, playableChapters, type ChapterDef } from '../../content/chapters'
-import { arrivedBetween, onSale, ownedShirts, SHIRT_NEW_HE } from '../../shirts'
+import { arrivedBetween, onSale, ownedShirts, wearingAt, wornFlag, SHIRT_NEW_HE } from '../../shirts'
 import { beatFlag, beatsAt, type Beat, type BeatAction } from '../../content/beats'
 import type { ConversationShot } from '../../content/script'
 import { crowdSpeaker } from '../../crowd'
@@ -19,6 +19,13 @@ import type { LifeState, LocationId } from '../../types'
 import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
 import type { Condition } from '../../world/types'
+import { cutFor, filmFlag } from '../../world/transitions'
+
+/**
+ * הערבים שבהם יש כדורסל באוסישקין — the chapters whose evening happens inside the hall.
+ * `uss:arrived` means "there is a game here tonight" and every hall conversation reads it.
+ */
+const HALL_NIGHTS: readonly string[] = ['1991', '1993-cup', '1997-basket', '1999-basket']
 import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, whenFor } from '../../world/scenes'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import type { PanoSpot } from '../bus'
@@ -542,6 +549,20 @@ export class WorldScene extends Phaser.Scene {
     else {
       this.beginMatch()
       this.beginNight()
+    }
+
+    /**
+     * ערב שיש בו משחק — in any year, not only in 1991.
+     *
+     * `uss:arrived` was raised in exactly one place: the 1991 derby. Every conversation in
+     * `dialogueUssishkin.ts` reads it to decide whether the hall is full tonight or empty,
+     * so on the promotion evening of 1997 and both relegation nights the steward greeted a
+     * grown man with "אין היום כלום, חביבי" while the hall behind him was packed. The flag
+     * is a fact about the ROOM — is there basketball here tonight — so it is raised
+     * wherever the room is the hall and the chapter is one of the hall's own.
+     */
+    if (this.def.id === 'ussishkin-hall' && HALL_NIGHTS.includes(this.chapter) && !state.flags['uss:arrived']) {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'uss:arrived' })
     }
 
     // …and if a season turned on the way into this room, the rail has something new on it
@@ -2514,9 +2535,23 @@ export class WorldScene extends Phaser.Scene {
       this.ctx.bus.emit('teach', null)
     }
     this.ctx.bus.emit('sound', { kind: 'door' })
+
+    /**
+     * מעברון — four seconds of Tel Aviv, 1989, between here and there.
+     *
+     * Nine clips were cut out of Maor's own film and then sat unplayed. This is where they
+     * play: on the journeys that mean something (`world/transitions.ts`), once per chapter
+     * per clip, over the black between two rooms. The scene restarts underneath it while
+     * it runs, so the film is not a wait — the room is already built when the picture
+     * fades.
+     */
+    const cut = cutFor(this.def.id, to, this.ctx.engine.state.minute, this.chapter, this.ctx.engine.state.flags)
+    if (cut) this.ctx.engine.dispatch({ t: 'flag.raised', flag: filmFlag(cut.clip, this.chapter) })
+
     this.cameras.main.fadeOut(240, 0, 0, 0)
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       void this.ctx.engine.save()
+      if (cut) this.ctx.bus.emit('film', { clip: cut.clip, captionHe: cut.captionHe })
       this.scene.restart({ mapId: to, spawn, from: this.def.id })
     })
   }
@@ -3505,6 +3540,7 @@ export class WorldScene extends Phaser.Scene {
    */
   goHome() {
     this.ctx.bus.emit('ending', null)
+    this.rememberWhatYouWore()
     const def = chapterFor(this.chapter)
     // A day before the Saturday ends on its card and cuts to the next day. The finale —
     // the sheet with the archive on it — is for a chapter that hangs on history.
@@ -3529,6 +3565,27 @@ export class WorldScene extends Phaser.Scene {
       becameHe: card.becameHe,
       keptTicket: card.keptTicket,
     })
+  }
+
+  /**
+   * מה לבשת באותו יום — stamped once, at the end of the chapter, forever.
+   *
+   * The collection was a list of forty shirts with prices on them. This is what makes it a
+   * life: the shirt you owned on the day of the cup final now carries the date of the cup
+   * final, and says so on its own card, in 2000 and in every year after.
+   *
+   * It is recorded at the END of the chapter rather than the start, because what you wore
+   * is only interesting once the day has happened. Nothing is asked of the player and
+   * nothing can be got wrong — you wore the newest shirt you had, which is what everybody
+   * does.
+   */
+  private rememberWhatYouWore() {
+    const state = this.ctx.engine.state
+    const shirt = wearingAt(state, this.ctx.engine.log(), this.chapter)
+    if (!shirt) return
+    const flag = wornFlag(shirt.id, this.chapter)
+    if (state.flags[flag]) return
+    this.ctx.engine.dispatch({ t: 'flag.raised', flag })
   }
 
   /** …and the finale's own button is what actually goes home. */

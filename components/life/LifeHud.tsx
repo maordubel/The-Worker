@@ -17,8 +17,15 @@ import { formatMoney } from '@/lib/life/money'
  * the numbers live on the love meter and behind it.
  */
 export function LifeHud({ hud }: { hud: HudState }) {
+  /*
+   * The root spans the whole glass, not only the top strip. It was `top-0` with no height,
+   * which is fine for a row of chips and wrong the moment anything is anchored to the
+   * BOTTOM: the waiting strip was positioned 76 pixels above a box of zero height and
+   * landed off the top of the screen. It stays `pointer-events-none` and its children opt
+   * in, so covering the stage costs nothing.
+   */
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 px-2.5 pb-2.5 pt-[max(0.5rem,env(safe-area-inset-top))]">
+    <div className="pointer-events-none absolute inset-0 z-20 flex items-start justify-between gap-3 px-2.5 pb-2.5 pt-[max(0.5rem,env(safe-area-inset-top))]">
       <div className="flex items-stretch">
         <span aria-hidden="true" className="block w-[7px] self-stretch bg-concrete" />
         <Plate className="ms-1 mt-1" data-life="hud-plate">

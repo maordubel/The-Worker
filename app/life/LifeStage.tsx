@@ -7,6 +7,7 @@ import { DocSheet } from '@/components/life/DocSheet'
 import { ScoreStrip } from '@/components/life/ScoreStrip'
 import { ShirtCard } from '@/components/life/ShirtCard'
 import { CastCard } from '@/components/life/CastCard'
+import { FilmCut } from '@/components/life/FilmCut'
 import { CoinCard } from '@/components/life/CoinCard'
 import { ShopCard } from '@/components/life/ShopCard'
 import { StageFinale } from '@/components/life/StageFinale'
@@ -116,6 +117,7 @@ export function LifeStage({
   const [coin, setCoin] = useState<LifeBusEvents['coin']>(null)
   const [shop, setShop] = useState<LifeBusEvents['shop']>(null)
   const [cast, setCast] = useState<LifeBusEvents['cast']>(null)
+  const [film, setFilm] = useState<LifeBusEvents['film']>(null)
   /** the state the shop screen is drawn against, re-read after every purchase */
   const [shopState, setShopState] = useState<LifeState | null>(null)
   const [pano, setPano] = useState<LifeBusEvents['pano']>(null)
@@ -329,6 +331,7 @@ export function LifeStage({
         runtime.current?.pause(Boolean(value))
       }),
       bus.on('cast', (value) => setCast(value)),
+      bus.on('film', (value) => setFilm(value)),
       bus.on('shop', (value) => {
         setShop(value)
         setShopState(value ? engineRef.current?.state ?? null : null)
@@ -860,6 +863,8 @@ export function LifeStage({
         {shirt && <ShirtCard shirt={shirt} onClose={() => setShirt(null)} />}
 
         {/* ------------------------------------------------ שני משחקי הכסף -- */}
+        {film && <FilmCut film={film} onDone={() => setFilm(null)} />}
+
         {cast && <CastCard cast={cast} onClose={() => setCast(null)} />}
 
         {shop && shopState && (

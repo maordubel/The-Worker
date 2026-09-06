@@ -338,9 +338,20 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
         ],
       },
       {
+        /**
+         * מי שלא נרשם — and had one unusable choice until 5.9.2026.
+         *
+         * This branch offered exactly one thing to do, and it needed ninety shekels. A
+         * player who had not signed up and did not have ninety was shown a menu with
+         * nothing on it: the top-up (`g4-broke`) was only reachable THROUGH the
+         * signed-up branch, so the one act of generosity in this chapter was locked
+         * behind a form he had not filled in three days earlier. Asking is now a thing
+         * you can do standing here.
+         */
         lines: [{ who: 'לימור', text: 'לא נרשמת. יש מקום אחד אם מישהו לא יגיע. תשעים שקל. תחכה פה עד ארבע ותראה.' }],
         choices: [
           { id: 'wait', text: 'לחכות ולקוות.', when: { minAgorot: 9000 }, noteHe: 'אין תשעים שקל.', then: [{ e: 'money', agorot: -9000, why: 'אוטובוס לצפון' }, { e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:bus' }, { e: 'flag', flag: 'arrived:late' }, { e: 'time', minutes: 230 }, { e: 'goto', node: 'g4-north' }] },
+          { id: 'ask', text: 'להגיד שאין לי, ולעמוד שם.', then: [{ e: 'goto', node: 'g4-broke' }] },
           { id: 'no', text: 'לא.', then: [] },
         ],
       },

@@ -298,3 +298,44 @@ export function arrivedBetween(previous: string | null, chapter: string): Shirt[
   const had = new Set(onSale(previous).map((shirt) => shirt.id))
   return now.filter((shirt) => !had.has(shirt.id))
 }
+
+// --------------------------------------------------------------- הזיכרון של החולצה ---
+
+/**
+ * מה לבשת ומתי — the flag that turns a wardrobe into a biography.
+ *
+ * A collection of forty shirts is a list. A shirt that says "you wore this one on
+ * 26.5.1999" is a life. The flag carries the `own:` prefix, so like the shirt itself it
+ * survives a new day, a new year and a new decade — a thing you wore to a cup final is not
+ * cleared at midnight.
+ */
+export const wornFlag = (id: string, chapter: string) => `own:worn:${id}:${chapter}`
+
+/**
+ * איזו חולצה היית לובש — the newest one you own that already existed by this chapter.
+ *
+ * Nobody in 1999 puts on the shirt he queued for in 1985 to go to a cup final; he puts on
+ * the newest one he has. So: the most recently BOUGHT shirt, read off the event log in
+ * order, restricted to the ones that exist by now. A player who owns nothing wore nothing,
+ * and the chapter records nothing — which is also true, and is its own kind of memory.
+ */
+export function wearingAt(state: LifeState, log: readonly { t: string; flag?: string }[], chapter: string): Shirt | null {
+  const available = new Set(onSale(chapter).map((shirt) => shirt.id))
+  let latest: Shirt | null = null
+  for (const event of log) {
+    if (event.t !== 'flag.raised' || !event.flag?.startsWith('own:shirt:')) continue
+    const id = event.flag.slice('own:shirt:'.length)
+    if (!available.has(id)) continue
+    const shirt = SHIRTS.find((row) => row.id === id)
+    if (shirt) latest = shirt
+  }
+  return latest && owns(state, latest.id) ? latest : null
+}
+
+/** every chapter this shirt was worn to, in the order they were lived */
+export function wornIn(state: LifeState, id: string): string[] {
+  const prefix = `own:worn:${id}:`
+  return Object.keys(state.flags)
+    .filter((flag) => flag.startsWith(prefix) && state.flags[flag])
+    .map((flag) => flag.slice(prefix.length))
+}
