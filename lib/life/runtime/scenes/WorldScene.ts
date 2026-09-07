@@ -34,6 +34,8 @@ import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_T
 import { compose as composeHint, holds as hintHolds } from '../../world/hints'
 import { unmet } from '../../world/why'
 import { forcedEnding, isStalled, LAST_RESORT_MINUTES, waitingForTheClock } from '../../world/lastResort'
+import { QUIET_MINUTES, nextTimeGate, shouldOfferPass, type TimeGate } from '../../world/flow'
+import { reconcile } from '../../world/milestones'
 import { nextStep } from '../../world/route'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import type { PanoSpot } from '../bus'
@@ -1808,13 +1810,127 @@ export class WorldScene extends Phaser.Scene {
   private onMinute() {
     const state = this.ctx.engine.state
     if (state.minute === this.lastMinute) return
+    const minutes = Math.max(1, state.minute - this.lastMinute)
     this.lastMinute = state.minute
     if (this.matchPhase === 'watching' || this.matchPhase === 'goal') return
     this.applySchedule()
     this.tickWindows()
     this.tickLater()
-    this.lastResort()
+    /*
+     * Order matters here, and it cost a chapter to learn why (7.9.2026).
+     *
+     * `repair` can raise the very milestone a closing beat is waiting for — and in the
+     * same minute `lastResort` may decide the day has stalled and close it with the
+     * backstop instead. The robot found exactly that: `a3-seen` reported "the condition
+     * holds, the beat simply did not run", because the rescue got there first and the
+     * evening ended without its own written sentence. So a minute that repaired something
+     * gives the chapter's own beats their chance immediately, and the backstop waits for
+     * the next minute — a day that ends on what somebody wrote always beats a day that
+     * ends because time ran out.
+     */
+    const repaired = this.repair()
+    if (repaired) this.runBeats('clock')
+    this.quiet(minutes)
+    if (!repaired) this.lastResort()
   }
+
+  /**
+   * תיקון מצב — the world proves an experience happened; the flag catches up.
+   *
+   * Run every minute and on entering a room rather than only on load, because the state
+   * that proves a milestone is reached DURING a scene: the conversation that shows the boy
+   * the hall is the same minute the milestone becomes true. It raises flags and nothing
+   * else — no item, no bond, no memory (audit §7: repair technical state, never grant a
+   * consequence the player did not earn).
+   */
+  private repair(): boolean {
+    const raised = reconcile(this.ctx.engine.state)
+    for (const flag of raised) this.ctx.engine.dispatch({ t: 'flag.raised', flag })
+    return raised.length > 0
+  }
+
+  /**
+   * להציע לדלג — when the only thing left is the clock.
+   *
+   * Maor's flow document, 7.9.2026: *"Do not make the player walk in circles for 80 virtual
+   * minutes."* The quiet counter is the evidence: minutes in which the state did not change
+   * at all — no flag, no item, no room, no money. Any of those resets it, so a player who
+   * is doing anything is never interrupted. When the day's next beat is waiting for nothing
+   * but a time, the game says so and offers the jump; the card always has a "stay" on it,
+   * because optional content is still content.
+   */
+  /** count the minutes in which nothing this chapter cares about changed */
+  private quiet(minutes: number) {
+    if (this.closing) return
+    const state = this.ctx.engine.state
+    /*
+     * What counts as PROGRESS, and therefore resets the quiet counter.
+     *
+     * Not the room: walking street → kiosk → street is the behaviour the offer exists to
+     * end ("walk in circles for 80 virtual minutes"). And not any flag either — looking at
+     * a poster raises `saw:poster` and moves the day exactly nowhere. What moves a day is
+     * what the day itself is waiting for: its objective changing, one of its beats firing,
+     * money, or an object. Everything else is a player passing the time, which is the
+     * state this card is for.
+     */
+    const beats = Object.keys(state.flags).filter((flag) => flag.startsWith('beat:')).length
+    const print = `${beats}|${state.agorot}|${Object.keys(state.inventory).length}|${state.chapterDone ? 1 : 0}`
+    if (print !== this.quietPrint) {
+      this.quietPrint = print
+      this.quietFor = 0
+      this.passOffered = null
+      return
+    }
+    this.quietFor += minutes
+  }
+
+  /**
+   * להציע לדלג — offered from inside the backstop, where the counter that works lives.
+   *
+   * The first attempt counted its own quiet minutes and never got past zero: something in
+   * a live room changes every minute and the counter kept resetting, which is exactly the
+   * kind of heuristic that looks right and does nothing. `stalledFor` is the counter this
+   * scene has ALWAYS used to notice a day that has stopped wanting anything — it is what
+   * fires the rescue at ninety minutes — so the offer hangs off the same signal at a
+   * third of the distance. A day that would have been rescued silently now gets the
+   * player a card first, and the rescue stays where it was as the floor.
+   */
+  private offerPass(): boolean {
+    if (this.closing || this.passOffered) return false
+    const state = this.ctx.engine.state
+    const busy =
+      Boolean(this.director?.active) ||
+      this.matchPhase !== 'none' ||
+      this.beatBusy ||
+      this.beatPending ||
+      this.ctx.dialogue.open
+    const gate = shouldOfferPass({
+      state,
+      era: this.era,
+      objectiveHe: this.objective(state),
+      quietFor: Math.max(this.quietFor, this.stalledFor),
+      busy,
+      reachable: this.targetCount(),
+    })
+    if (!gate) return false
+    this.passOffered = gate.beatId
+    this.ctx.bus.emit('pass', gate)
+    return true
+  }
+
+  /** how many things this room currently offers a thumb — people, hotspots and doors */
+  private targetCount(): number {
+    try {
+      return this.targets().length
+    } catch {
+      return 1
+    }
+  }
+
+  /** the state fingerprint the quiet counter compares against, and the count itself */
+  private quietPrint = ''
+  private quietFor = 0
+  private passOffered: string | null = null
 
   /**
    * שאף יום לא יישאר פתוח — the day ends, whatever happened in it.
@@ -1855,6 +1971,8 @@ export class WorldScene extends Phaser.Scene {
       busy,
     }
     this.stalledFor = isStalled(input) ? this.stalledFor + 1 : 0
+    // before the floor, the offer: a day waiting for a clock is a card, not a rescue
+    if (this.offerPass()) return
     const id = forcedEnding({ ...input, stalledFor: this.stalledFor })
     if (!id) {
       if (this.livedFor >= LAST_RESORT_MINUTES && !busy && process.env.NODE_ENV !== 'production') {
@@ -4096,6 +4214,31 @@ export class WorldScene extends Phaser.Scene {
    * can play a chapter the way a thumb would, and a chapter with nothing to do in it
    * reports an empty list instead of a passing test.
    */
+  /**
+   * למה אי אפשר להתקדם — the flow watchdog, readable from outside.
+   *
+   * Maor's audit asks for exactly this (§20): in development, a blocked mission should be
+   * able to SAY what is blocking it rather than leaving somebody to guess. It is on the
+   * debug facade, which only exists when `the-worker:life:probe` is set, so it never
+   * reaches a player.
+   */
+  flow(): { quietFor: number; busy: boolean; reachable: number; gate: TimeGate | null; offering: string | null } {
+    const state = this.ctx.engine.state
+    const busy =
+      Boolean(this.director?.active) ||
+      this.matchPhase !== 'none' ||
+      this.beatBusy ||
+      this.beatPending ||
+      this.ctx.dialogue.open
+    return {
+      quietFor: this.quietFor,
+      busy,
+      reachable: this.targetCount(),
+      gate: nextTimeGate(state, this.era),
+      offering: this.passOffered,
+    }
+  }
+
   targets(): Array<{ kind: 'talk' | 'act' | 'exit'; id: string; labelHe: string }> {
     const state = this.ctx.engine.state
     const out: Array<{ kind: 'talk' | 'act' | 'exit'; id: string; labelHe: string }> = []

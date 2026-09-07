@@ -833,5 +833,10 @@
   "life.finale.albumTitle": "האלבום",
   "life.finale.albumCount": "אספת {have} מתוך {total}",
   "life.finale.albumTorn": "{n} נקרעו",
-  "life.finale.albumAgain": "כל חיים מדפיסים אלבום אחר. מה שחסר כאן לא יהיה חסר בפעם הבאה."
+  "life.finale.albumAgain": "כל חיים מדפיסים אלבום אחר. מה שחסר כאן לא יהיה חסר בפעם הבאה.",
+  "life.pass.title": "יש לך עוד קצת זמן.",
+  "life.pass.plain": "שום דבר לא קורה כרגע",
+  "life.pass.stay": "להסתובב",
+  "life.pass.go": "להמשיך",
+  "life.pass.passed": "ישבת על הקיר. אוטובוס עבר, הצל זז."
 }

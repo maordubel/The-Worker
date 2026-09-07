@@ -17,6 +17,9 @@ import dynamic from 'next/dynamic'
 const PenaltyCard = dynamic(() => import('@/components/life/PenaltyCard').then((m) => m.PenaltyCard), { ssr: false })
 const HoopsCard = dynamic(() => import('@/components/life/HoopsCard').then((m) => m.HoopsCard), { ssr: false })
 import { AlbumSheet } from '@/components/life/AlbumSheet'
+import { PassTime } from '@/components/life/PassTime'
+import { landingMinute } from '@/lib/life/world/flow'
+import { timeLabel } from '@/lib/life/clock'
 import { PacketCard } from '@/components/life/PacketCard'
 import { ShopCard } from '@/components/life/ShopCard'
 import { StageFinale } from '@/components/life/StageFinale'
@@ -137,6 +140,8 @@ export function LifeStage({
   const [packet, setPacket] = useState<LifeBusEvents['packet']>(null)
   /* what came out of the red box, waiting behind whatever is already on screen */
   const [kept, setKept] = useState<LifeBusEvents['kept']>(null)
+  /* the day's next beat is waiting for the clock and the room has gone quiet */
+  const [pass, setPass] = useState<LifeBusEvents['pass']>(null)
   const [cast, setCast] = useState<LifeBusEvents['cast']>(null)
   const [film, setFilm] = useState<LifeBusEvents['film']>(null)
   /** the state the shop screen is drawn against, re-read after every purchase */
@@ -402,6 +407,7 @@ export function LifeStage({
         setPacket(value)
         runtime.current?.pause(Boolean(value))
       }),
+      bus.on('pass', setPass),
       bus.on('kept', (value) => {
         // queued rather than shown: the packet that closed the page is still open, and
         // two overlays at once is how a reveal turns into a pile-up
@@ -1025,6 +1031,23 @@ export function LifeStage({
               // a card out of the box waits for the packet to be put down, and goes first:
               // the album can wait, an ace cannot be missed
               if (!kept) busRef.current?.emit('album', { open: true })
+            }}
+          />
+        )}
+
+        {pass && !packet && !kept && (
+          <PassTime
+            waitingHe={pass.waitingHe}
+            untilHe={timeLabel(landingMinute(pass))}
+            onStay={() => setPass(null)}
+            onPass={() => {
+              const engine = engineRef.current
+              setPass(null)
+              if (!engine) return
+              const jump = landingMinute(pass) - engine.state.minute
+              if (jump > 0) engine.dispatch({ t: 'clock.advanced', minutes: jump })
+              void engine.save()
+              busRef.current?.emit('toast', { text: t('life.pass.passed'), tone: 'plain' })
             }}
           />
         )}

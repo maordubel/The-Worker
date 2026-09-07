@@ -149,6 +149,8 @@ export type LifeRuntime = {
     bodies(): unknown[]
     /** everything a thumb could press in this room right now — for the dead-end probe */
     targets(): Array<{ kind: 'talk' | 'act' | 'exit'; id: string; labelHe: string }>
+    /** the flow watchdog: quiet minutes, what is blocking, and whether an offer is up */
+    flow(): { quietFor: number; busy: boolean; reachable: number; gate: unknown; offering: string | null } | null
     /** the sentence the room would say to somebody who has stopped moving */
     hint(): string | null
     /** every beat of this chapter, whether it fired, and what it is still waiting for */
@@ -333,6 +335,8 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       bodies: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.bodies() ?? [] : []),
       /** everything a thumb could press in this room right now — for the dead-end probe */
       targets: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.targets() ?? [] : []),
+      // why the day cannot move, in numbers (dev only — see `WorldScene.flow`)
+      flow: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.flow() ?? null : null),
       /** the sentence the room would say to somebody who has stopped moving */
       hint: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.debugHint() ?? null : null),
       /** every beat of this chapter, whether it fired, and what it is still waiting for */

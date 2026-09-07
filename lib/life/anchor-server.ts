@@ -457,7 +457,7 @@ const ANCHOR_SPECS: Record<string, AnchorSpec> = {
     competitionSlug: 'ליגת-העל',
     playedOn: '1998-05-02',
     year: 1998,
-    headlineHe: 'המחזור האחרון, 1997/98',
+    headlineHe: 'המחזור ה-29, 1997/98',
     placeholderHe: 'המשחק של 2.5.1998 בבלומפילד',
   },
   '1999-relegation': {

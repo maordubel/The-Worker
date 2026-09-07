@@ -146,6 +146,20 @@ for (const chapter of CHAPTERS) {
     if (now.done || now.ending) { done = true; last = now; break }
     last = now
 
+    /*
+     * "יש לך עוד קצת זמן" — the flow layer's offer (7.9.2026). A player who has nothing
+     * left to do presses «להמשיך»; a robot that ignored it would keep reporting the exact
+     * dead time the offer exists to end, so it presses it too. This is also the test: if
+     * the card never appears in a chapter that RESCUEs, the flow layer did not see the
+     * wait, and that is a bug in the flow layer rather than in the chapter.
+     */
+    const passed = await page.evaluate(() => {
+      const go = document.querySelector('[data-life="pass-go"]')
+      if (go instanceof HTMLElement) { go.click(); return true }
+      return false
+    })
+    if (passed) { await page.waitForTimeout(260); continue }
+
     /**
      * Any overlay: close it and carry on. Every card in this game closes on a press
      * SOMEWHERE — a close button, or the sheet itself — so the robot presses the close

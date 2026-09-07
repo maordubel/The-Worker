@@ -319,7 +319,7 @@ export const CHAPTERS: readonly ChapterDef[] = [
     minute: MIN(13, 0),
     start: { location: 'home', spawn: 'start' },
     next: '1999-basket',
-    bridge: { titleHe: '2.5.1998', subHe: 'המחזור האחרון', ms: 3000 },
+    bridge: { titleHe: '2.5.1998', subHe: 'המחזור ה-29', ms: 3000 },
     anchorKey: '1998',
     playable: true,
   },

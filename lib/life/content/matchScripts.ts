@@ -57,6 +57,15 @@ export type MatchStep = {
   clock?: number
   flag?: string
   events?: readonly LifeEvent[]
+  /**
+   * כמה מהאצטדיון להשאיר — the mix, as a step (Mission 01 §24, Shoelaces §24).
+   *
+   * 1 is an ordinary match. 0.3 is somebody listening to another ground. 0.05 is the
+   * moment nobody in this stadium can see and everybody in it is holding their breath.
+   * On 2.5.1998 this is the whole second half of the mission: the terrace is celebrating
+   * a win at ninety per cent while a transistor at five per cent decides the season.
+   */
+  listen?: number
   /** the whistle: the board holds, the crowd empties, the host closes the match */
   end?: boolean
 }
@@ -122,7 +131,9 @@ const FINAL_86: MatchScript = {
 
 // -------------------------------------------------------------------------- 1998 ---
 /**
- * The last round, 2.5.1998. The match on the pitch is won — the archive says 1:0 at home —
+ * Round 29, 2.5.1998 — the penultimate round, not the last one (the league finished on
+ * 9.5.1998; corrected 7.9.2026 from Maor's canonical audit, which found five places in
+ * the game calling this round the season's last). The match on the pitch is won — 1:0 —
  * and the title is lost by a point somewhere else, through a transistor. The board here
  * is OUR match; the other one has no board, because nobody in the ground could see it.
  */
@@ -139,8 +150,25 @@ const LACES_98: MatchScript = {
     { wait: 3600, id: 'listen', talk: 'm98-listen' },
     { wait: 800, id: 'late', crowd: 'BUILDING_TENSION', text: 'פייג׳ר אצל מישהו. "שוויון שם! שוויון!" היציע עולה באוויר על משחק שלא רואים.', tone: 'red', sfx: 'crowd-swell', level: 0.8, clock: FULL_98 - 8 },
     { wait: 6400, id: 'near', crowd: 'NEAR_MISS', text: 'הדקות האחרונות. אף אחד לא מסתכל על המגרש.' },
-    { wait: 4800, id: 'end', end: true, phaseHe: 'סיום', crowd: 'FINAL_WHISTLE', whistle: 3, clock: FULL_98 },
-    { wait: 1800, id: 'hush', sfx: 'crowd-hush', level: 0.8, talk: 'l1-whistle' },
+    /**
+     * השריקה איננה סוף המשימה — Shoelaces screenplay §22, and the whole shape of the day.
+     *
+     * *"זה הרגע שבו השחקן מצפה: MISSION COMPLETE. אבל שום דבר לא מופיע."* Their match at
+     * Bloomfield finished, and it finished WELL — that is the cruelty. The other ground
+     * kicked off later and is still playing, so the mission runs on past its own final
+     * whistle while a terrace celebrates a win that is about to mean nothing.
+     *
+     * The mix does the telling (§24): the celebration is at full volume, then a little
+     * less as people drift toward the transistor, and by the ninety-fourth minute there is
+     * a stadium singing somewhere behind a small speaker held in two hands. Nothing on
+     * screen says any of that.
+     */
+    { wait: 4800, id: 'ours-over', phaseHe: 'סיום', crowd: 'AFTERMATH', whistle: 3, clock: FULL_98, listen: 1, text: 'שריקה. המשחק שלכם נגמר, ונגמר טוב.' },
+    { wait: 4200, id: 'they-play-on', crowd: 'CHANT', listen: 0.5, text: 'היציע שר. ובאמצע השירה, שלושה־ארבעה אנשים לא זזים: שם עוד משחקים.' },
+    { wait: 5200, id: 'laces', listen: 0.12, talk: 'l1-laces' },
+    { wait: 4400, id: 'another', listen: 0.1, sfx: 'crowd-real-miss', level: 0.5, text: 'צעקה מהרדיו. האנשים סביבו מתכווצים. ואז — כלום. עוד לא.' },
+    { wait: 4600, id: 'ninety-four', listen: 0.05, text: 'הדקה הרביעית של תוספת הזמן. הרמקול הקטן הוא הדבר היחיד שנשמע.' },
+    { wait: 3600, id: 'end', end: true, crowd: 'FINAL_WHISTLE', listen: 0.05, talk: 'l1-whistle' },
   ],
 }
 

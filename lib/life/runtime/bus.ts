@@ -301,6 +301,14 @@ export type LifeBusEvents = {
    * whatever is already open.
    */
   kept: { ids: readonly string[] } | null
+  /**
+   * "יש לך עוד קצת זמן" — the day's next beat is waiting for the clock and nothing else.
+   *
+   * Emitted by `WorldScene` when the room has been quiet for `QUIET_MINUTES` and the flow
+   * layer (`world/flow.ts`) can name the minute the next beat wants. React answers with a
+   * card that offers to move the clock; it never moves on its own.
+   */
+  pass: { beatId: string; minute: number; waitingHe?: string } | null
 
   shirt: {
     /**

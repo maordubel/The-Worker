@@ -561,10 +561,12 @@ export function objectiveA3(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags['a3:done']) return null
   if (state.flags['a3:inside']) {
-    // inside, and the day is no longer about getting in — it is about being here
-    if (!state.flags['saw:parquet']) return 'אתה בפנים. תסתכל על הרצפה הזאת.'
-    if (!state.flags['saw:stand']) return 'הפרקט, היציע, החלונות. ואפי איפשהו.'
-    return 'תמצא את אפי כשתראה מספיק.'
+    // inside, and the day is no longer about getting in — it is about being here. The
+    // lines still point at the floor and the stand, because that is what a boy does in a
+    // hall he has never been in; none of them is a requirement any more (§milestones).
+    if (state.flags['life:seen:ussishkin']) return 'תמצא את אפי כשתראה מספיק.'
+    if (!state.flags['saw:parquet']) return 'אתה בפנים. תסתכל על הרצפה הזאת. ואפי איפשהו.'
+    return 'הפרקט, היציע, החלונות. ואפי איפשהו.'
   }
   if (sceneId === 'ussishkin-outside') return 'הדלת. אפי מכיר את הסדרן, והסדרן אוהב שמות.'
   if (state.flags['knows:hall'] || state.flags['life:knows:hall']) return 'ללכת עם אפי — דרך מרכז תל אביב.'
@@ -638,9 +640,16 @@ export const BEATS_A3: Beat[] = [
      */
     id: 'a3-seen',
     trigger: 'clock',
+    /*
+     * 7.9.2026 — this used to read `saw:parquet` AND `saw:stand`, two hotspots on a floor
+     * and a rail, and a boy who missed them stood in the hall until the 20:40 backstop
+     * closed the day for him. The milestone (`world/milestones.ts`) is the experience:
+     * either he looked at both things, or Efi showed him the place. Looking is still the
+     * richer route and still what the conversation rewards; it is no longer the only key.
+     */
     when: {
       flag: 'a3:inside',
-      all: [{ flag: 'saw:parquet' }, { flag: 'saw:stand' }],
+      all: [{ flag: 'life:seen:ussishkin' }],
       none: [{ flag: 'a3:done' }],
     },
     delayMs: 1200,
@@ -706,7 +715,7 @@ export const CONVERSATIONS_A3: Conversation[] = [
     nameHe: 'אפי',
     branches: [
       {
-        when: { all: [{ flag: 'saw:parquet' }, { flag: 'saw:stand' }] },
+        when: { any: [{ flag: 'life:seen:ussishkin' }, { all: [{ flag: 'saw:parquet' }, { flag: 'saw:stand' }] }] },
         lines: [{ who: 'אפי', text: 'נו? אמרתי לך.' }],
         choices: [
           {
@@ -732,6 +741,8 @@ export const CONVERSATIONS_A3: Conversation[] = [
           { who: 'אפי', text: 'אל תעמוד בדלת. תיכנס. תסתכל על הרצפה קודם, כולם מסתכלים על הרצפה קודם.' },
           { who: null, text: 'הוא אמר את זה כמו מישהו שמראה לך את הבית שלו, ולא כמו מישהו שהביא אותך למקום.' },
         ],
+        // being shown the place by the person who brought you here is the visit
+        then: [{ e: 'flag', flag: 'a3:shown' }],
       },
     ],
   },

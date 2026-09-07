@@ -46,7 +46,7 @@ export function objectiveLaces(state: LifeState, sceneId: string): string | null
   if (state.flags[L2]) return state.flags['l2:done'] ? null : 'יום ראשון. שיעור ערבית, שעה שנייה.'
   if (state.flags['l1:after']) return null
   if (state.flags['l1:inside']) return null
-  if (sceneId === 'home') return 'שבת. המחזור האחרון. אבא זהיר, החבר\'ה בטוחים.'
+  if (sceneId === 'home') return 'שבת. המחזור לפני האחרון. אבא זהיר, החבר\'ה בטוחים.'
   return 'לבלומפילד. חמש.'
 }
 
@@ -120,7 +120,7 @@ export const BEATS_LACES: Beat[] = [
     do: [
       { a: 'flag', flag: L1 },
       { a: 'events', events: [{ t: 'money.changed', agorot: 4000, why: 'שבת' }] },
-      { a: 'lines', lines: [{ who: null, text: 'שבת, המחזור האחרון. אתם ראשונים בנקודה אחת, או שהם — תלוי את מי שואלים ומתי. המשחק שלכם בבלומפילד. שלהם — רחוק, בעיר שאתה לא בטוח איפה היא על המפה.' }, { who: null, text: 'עשרים. שתים־עשרה שנה מאז המשחק הראשון שלך, שמונה מאז השבת שבבית לא מזכירים. אבא בכורסה, בגרביים, לא נוגע ברדיו. מלמטה שורקים לך.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'שבת, המחזור ה-29 — עוד אחד אחריו. אתם ראשונים בנקודה אחת, או שהם — תלוי את מי שואלים ומתי. המשחק שלכם בבלומפילד. שלהם — רחוק, בעיר שאתה לא בטוח איפה היא על המפה.' }, { who: null, text: 'עשרים. שתים־עשרה שנה מאז המשחק הראשון שלך, שמונה מאז השבת שבבית לא מזכירים. אבא בכורסה, בגרביים, לא נוגע ברדיו. מלמטה שורקים לך.' }] },
     ],
   },
   // the match — ours on the grass, theirs in a transistor — directed in one minute (`laces-98`)
@@ -132,7 +132,7 @@ export const BEATS_LACES: Beat[] = [
     delayMs: 900,
     do: [
       { a: 'flag', flag: 'l1:match' },
-      { a: 'card', titleHe: 'בלומפילד', subHe: 'המחזור האחרון', ms: 2200 },
+      { a: 'card', titleHe: 'בלומפילד', subHe: 'המחזור ה-29', ms: 2200 },
       { a: 'match', script: 'laces-98' },
       { a: 'flag', flag: 'l1:end' },
     ],
@@ -221,16 +221,54 @@ export const CONVERSATIONS_LACES: Conversation[] = [
       { lines: [{ who: 'סוקו', text: 'אני יושב ליד מי שיש לו טרנזיסטור. לא בשביל הרעש — בשביל לדעת מי אמר מה, ובאיזו דקה.' }] },
     ],
   },
+  /**
+   * השרוכים — the moment the day is named after, and the hardest one in the game to write.
+   *
+   * The screenplay's rule is the whole craft of it (§25): *"אסור להפוך את זה למם. אסור
+   * Zoom קומי."* Nobody in Bloomfield saw anything. What reached them was a commentator
+   * describing confusion and a sentence that made no sense, and the horror is precisely
+   * that it made no sense YET. So: no camera move, no stinger, no accusation. A man asks
+   * what is happening, somebody answers with a fact about a shoe, and nobody says anything
+   * after that. The player supplies the rest, which is exactly what happened to everyone
+   * who was there.
+   *
+   * What the game must never do here is state as fact what the archive holds as a claim.
+   * The line says what was heard. The archive card (`2.5.1998`) keeps verified events,
+   * contemporary accusations and later testimony in three separate lists, and that is the
+   * only place any of it is weighed.
+   *
+   * Named `l1-` rather than `m98-` on purpose: in this codebase an `m…` prompt is one the
+   * player answers, and the point of this one is that there is nothing to answer.
+   */
+  {
+    id: 'l1-laces',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: 'אוהד עם רדיו', text: 'מה הוא עושה?' },
+          { who: 'פוגי', text: 'מי?' },
+          { who: 'אוהד עם רדיו', text: 'שם. אחד מהם.' },
+          { who: 'פוגי', text: 'מה הוא עושה?' },
+          { who: null, text: 'הוא לא עונה מיד. הוא מקרב את הרדיו לאוזן, כאילו זה יעזור.' },
+          { who: 'אוהד עם רדיו', text: 'קושר נעל.' },
+          { who: 'פוגי', text: 'עכשיו?' },
+          { who: null, text: 'אף אחד לא עונה. מאחוריכם היציע עוד שר.' },
+        ],
+        then: [{ e: 'flag', flag: 'm98:laces' }, { e: 'redheart', key: 'historyMemory', delta: 3 }],
+      },
+    ],
+  },
   {
     id: 'l1-whistle',
     nameHe: null,
     branches: [
       {
         lines: [
-          { who: null, text: 'השריקה. המשחק שלכם נגמר, ונגמר טוב. אנשים מחבקים. אנשים מסתכלים על אנשים עם טרנזיסטור.' },
-          { who: null, text: 'האיש עם הטרנזיסטור לא מחבק.' },
-          { who: null, text: 'שם, במשחק שלא רואים, זה עוד לא נגמר. יש שם דקות שאף אחד לא ספר.' },
-          { who: 'קול מהרדיו', text: 'רגע, רגע — אני מקבל משהו. תישארו איתי. אני מקבל—' },
+          { who: null, text: 'עוד כדור. הרחקה. עוד כדור.' },
+          { who: null, text: 'לירון מחזיק את הרדיו בשתי ידיים. קובי מאחוריך. עמית הגיע. אופיר הגיע. כולם פה עכשיו, בלי שאף אחד קרא להם.' },
+          { who: 'קול מהרדיו', text: '…פישונט—' },
+          { who: null, text: 'ואז הקול של השדר עולה, ומקריית אליעזר עולה רעש דרך רמקול בגודל של מטבע.' },
           { who: null, text: 'האיש עם הטרנזיסטור הוריד אותו. לא כיבה. הוריד.' },
           { who: null, text: 'ואז ראית איך זה עובר ביציע: לא צעקה. גל של פנים שמבינות, שורה אחרי שורה, כמו כשמכבים אורות.' },
         ],
