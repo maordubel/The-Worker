@@ -4393,6 +4393,86 @@
     "deep": 3.2,
     "bytes": 70952
    }
+  },
+  "panoRoomBed": {
+   "w": 2560,
+   "h": 1086,
+   "horizon": 0.56,
+   "bytes": 1802862,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "החדר של פוגי — המיטה, הילקוט, הנעליים",
+   "nearRgb": [
+    108,
+    99,
+    91
+   ],
+   "tile": {
+    "key": "panoRoomBed--tile",
+    "wide": 1.4,
+    "deep": 1.6,
+    "bytes": 20900
+   }
+  },
+  "panoRoomKitchen": {
+   "w": 2560,
+   "h": 1086,
+   "horizon": 0.545,
+   "bytes": 1717014,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "המטבח — החלון, המקרר, שולחן האוכל",
+   "nearRgb": [
+    135,
+    125,
+    115
+   ],
+   "tile": {
+    "key": "panoRoomKitchen--tile",
+    "wide": 1.4,
+    "deep": 1.6,
+    "bytes": 19815
+   }
+  },
+  "panoRoomLiving": {
+   "w": 2560,
+   "h": 1086,
+   "horizon": 0.545,
+   "bytes": 1859629,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "הסלון — הספה, הטרנזיסטור, הדלת",
+   "nearRgb": [
+    126,
+    116,
+    108
+   ],
+   "tile": {
+    "key": "panoRoomLiving--tile",
+    "wide": 1.4,
+    "deep": 1.6,
+    "bytes": 20488
+   }
+  },
+  "panoRoomGrocery": {
+   "w": 2560,
+   "h": 1086,
+   "horizon": 0.56,
+   "bytes": 1786787,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "המכולת — הדלפק, המאזניים, הרחוב בחוץ",
+   "nearRgb": [
+    146,
+    135,
+    125
+   ],
+   "tile": {
+    "key": "panoRoomGrocery--tile",
+    "wide": 1.29,
+    "deep": 1.4,
+    "bytes": 16658
+   }
   }
  },
  "textures": {

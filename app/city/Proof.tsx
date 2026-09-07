@@ -6,7 +6,8 @@ import * as THREE from 'three'
 import { ControlDeck } from '@/components/life/ControlDeck'
 import { ACTOR_BACK, actorPose, loadActor } from '@/lib/life/city/actor'
 import { CITY_COPY } from '@/lib/life/city/copy'
-import { buildPano, PANOS, PLACE_ORDER, POCKET_METRES } from '@/lib/life/city/pano'
+import { buildPano, PANOS, PLACE_ORDER, walkLimit } from '@/lib/life/city/pano'
+import { buildStreet, STREETS } from '@/lib/life/city/street'
 import { actorBillboard, buildSlab, SLABS } from '@/lib/life/city/slab'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { disposeThree, mountThree, resizeThree, shadowDecal } from '@/lib/life/runtime/three3d'
@@ -30,6 +31,8 @@ export type Shot = {
   deck: boolean
   /** דריסת שדה הראייה של הפנורמה, לכיול בלבד; אפס = מה שרשום בלוח */
   hfov: number
+  /** רחוב שלם במקום מקום אחד — שרשרת תחנות, הליכה בלי גבול */
+  street: string
 }
 
 const RAD = Math.PI / 180
@@ -73,10 +76,17 @@ export function Proof({ shot }: { shot: Shot }) {
 
     let dispose = () => {}
     let eye = 1.7
+    let walk: ReturnType<typeof buildStreet> | null = null
 
+    const road = STREETS[shot.street]
     const listed = PANOS[shot.place]
     const panoSpec = listed && shot.hfov > 0 ? { ...listed, hFovDeg: shot.hfov } : listed
-    if (panoSpec) {
+    if (road) {
+      walk = buildStreet(road, loader)
+      three.scene.add(walk.group)
+      eye = walk.eye
+      dispose = walk.dispose
+    } else if (panoSpec) {
       const pano = buildPano(panoSpec, loader)
       three.scene.add(pano.group)
       eye = pano.eye
@@ -91,7 +101,8 @@ export function Proof({ shot }: { shot: Shot }) {
     }
 
     const view = { x: shot.x, z: shot.z, yaw: shot.yaw, pitch: shot.pitch, moved: 0, lateral: 0, moving: false }
-    const limit = panoSpec ? POCKET_METRES : 2.2
+    // ברחוב אין כיס: הגבול הוא אורך הרחוב, והתחנות מוסרות זו לזו לאורכו.
+    const limit = walk ? Infinity : panoSpec ? walkLimit(panoSpec) : 2.2
 
     let pugi: THREE.Sprite | null = null
     let shadow: THREE.Mesh | null = null
@@ -123,15 +134,21 @@ export function Proof({ shot }: { shot: Shot }) {
         view.x += Math.sin(view.yaw * RAD) * step
         view.z -= Math.cos(view.yaw * RAD) * step
         view.moved += Math.abs(step)
-        const away = Math.hypot(view.x, view.z)
-        if (away > limit) {
-          view.x = (view.x / away) * limit
-          view.z = (view.z / away) * limit
+        if (walk) {
+          view.z = Math.max(-walk.length, Math.min(0, view.z))
+          view.x = Math.max(-4, Math.min(4, view.x))
+        } else {
+          const away = Math.hypot(view.x, view.z)
+          if (away > limit) {
+            view.x = (view.x / away) * limit
+            view.z = (view.z / away) * limit
+          }
         }
       }
       // כמה מהתנועה היא לרוחב הפריים: המוט לצדדים מסובב, ולכן זה בעצם קצב הסיבוב
       view.lateral = view.moving ? stick.x : 0
 
+      walk?.update(-view.z)
       three.camera.position.set(view.x, shot.actor ? 0.22 : 0, view.z + (shot.actor ? 0.5 : 0))
       three.camera.rotation.set(view.pitch * RAD, -view.yaw * RAD, 0, 'YXZ')
 
@@ -154,6 +171,8 @@ export function Proof({ shot }: { shot: Shot }) {
         pugi.position.set(view.x + ax + 0.28, -eye + 0.84 + pose.bob, view.z + az)
         shadow.position.set(pugi.position.x, -eye + 0.006, pugi.position.z + 0.02)
       }
+      // כמה נהלך בפועל — הצילום האוטומטי קורא את זה, אחרת "לא זז" ו"זז קצת" נראים אותו דבר
+      box.dataset.along = (-view.z).toFixed(2)
       three.renderer.render(three.scene, three.camera)
       raf = requestAnimationFrame(frame)
     }

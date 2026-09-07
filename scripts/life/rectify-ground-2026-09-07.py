@@ -40,6 +40,12 @@ JOBS = {
     # בלומפילד: בטון החצר מתחת ליציע, ומדרכת הרחוב לאורך החזית — שניהם נקיים ישר קדימה
     'panoBloomGate':   dict(hfov=120, horizon=0.615, eye=1.7, r=(5.2, 8.4), half=14),
     'panoBloomFacade': dict(hfov=150, horizon=0.575, eye=1.7, r=(3.8, 6.8), half=15),
+    # החדרים. גובה העין נמדד מהרצפה עצמה: המרצפות, כשהן מיושרות, חייבות לצאת ריבועיות,
+    # וזה קורה סביב 1.1 מטר — מצלמה נמוכה, כמו שהחדרים האלה באמת צולמו.
+    'panoRoomBed':     dict(hfov=140, horizon=0.500, eye=1.10, r=(2.6, 4.2), half=16),
+    'panoRoomKitchen': dict(hfov=140, horizon=0.500, eye=1.10, r=(2.6, 4.2), half=16),
+    'panoRoomLiving':  dict(hfov=140, horizon=0.500, eye=1.10, r=(2.6, 4.2), half=16),
+    'panoRoomGrocery': dict(hfov=140, horizon=0.500, eye=1.10, r=(2.4, 3.8), half=16),
 }
 
 # 96 פיקסלים למטר: מעל זה רק מגדילים קובץ, מתחת לזה רואים את המרצף מטשטש מתחת לנעל

@@ -44,8 +44,13 @@ export type PanoSpec = {
    * המרחק ביניהן על התמונה הוא בדיוק 90°.
    */
   hFovDeg: number
-  /** גובה העין מעל הכביש, במטרים */
+  /** גובה העין מעל הרצפה, במטרים */
   eye: number
+  /**
+   * כמה רחוק מנקודת הצילום מותר ללכת. חדר הוא לא רחוב: בשדרה אפשר עשרה מטר ובחדר שני
+   * צעדים, כי הקירות בשלושה מטר וכל סנטימטר של תזוזה נראה עליהם.
+   */
+  walk?: number
   /**
    * צבע הכביש ממש מתחת לרגליים, כשלושה בייטים — **החציון הנמדד** של הרצועה התחתונה בתמונה
    * עצמה. משמש כרשת ביטחון בלבד, למקרה שאין מרצף.
@@ -76,9 +81,37 @@ export const PLACE_ORDER = [
   'panoTamar',
   'panoCinema',
   'panoPromenade',
+  'panoRoomBed',
+  'panoRoomKitchen',
+  'panoRoomLiving',
+  'panoRoomGrocery',
 ] as const
 
 export const PANOS: Record<string, PanoSpec> = {
+  // ארבעה חדרים. אלה לא רחובות — הקירות בארבעה מטר, לא בשלושים, ולכן גם הרדיוס קטן וגם
+  // מותר ללכת בהם שני צעדים בלבד. גובה המצלמה (1.10) נמדד מהמרצפות עצמן: רק בו הן יוצאות
+  // ריבועיות אחרי היישור, וזה מבחן שאי אפשר להתווכח איתו.
+  panoRoomBed: {
+    nameHe: 'החדר של פוגי',
+    key: 'panoRoomBed', aspect: 2560 / 1086, horizon: 0.56, hFovDeg: 140, eye: 1.1,
+    radius: 4.2, walk: 1.4, nearRgb: [108, 99, 91], tile: { key: 'panoRoomBed--tile', wide: 1.4, deep: 1.6 },
+  },
+  panoRoomKitchen: {
+    nameHe: 'המטבח',
+    key: 'panoRoomKitchen', aspect: 2560 / 1086, horizon: 0.545, hFovDeg: 140, eye: 1.1,
+    radius: 4.2, walk: 1.4, nearRgb: [135, 125, 115], tile: { key: 'panoRoomKitchen--tile', wide: 1.4, deep: 1.6 },
+  },
+  panoRoomLiving: {
+    nameHe: 'הסלון',
+    key: 'panoRoomLiving', aspect: 2560 / 1086, horizon: 0.545, hFovDeg: 140, eye: 1.1,
+    radius: 4.4, walk: 1.4, nearRgb: [126, 116, 108], tile: { key: 'panoRoomLiving--tile', wide: 1.4, deep: 1.6 },
+  },
+  panoRoomGrocery: {
+    nameHe: 'המכולת',
+    key: 'panoRoomGrocery', aspect: 2560 / 1086, horizon: 0.56, hFovDeg: 140, eye: 1.1,
+    radius: 3.8, walk: 1.2, nearRgb: [146, 135, 125], tile: { key: 'panoRoomGrocery--tile', wide: 1.29, deep: 1.4 },
+  },
+
   panoPromenade: {
     nameHe: 'הטיילת, הבניין העגול מול הים',
     key: 'panoPromenade', aspect: 2560 / 1029, horizon: 0.72, hFovDeg: 132, eye: 1.7,
@@ -130,14 +163,24 @@ const ART = '/life/art'
  * לתוך המדרכה, כי לתמונה שטוחה אין דרך לדעת שהם עומדים עליה. זה הגבול של כיס אחד, וממנו
  * מתחיל שרשור הבלוקים.
  */
-export const POCKET_METRES = 2.5
+export const POCKET_METRES = 9
 
 /**
  * כמה הדיסקה נמתחת מעבר לקצה התמונה. הקצה התחתון של הגליל והקצה של הדיסקה מתלכדים בדיוק
  * רק כשהמצלמה בנקודת האפס; ברגע שהיא זזה חצי מטר נפתח ביניהם קו. הטבעת הנוספת עולה כלום,
  * כי מעבר לקצה ההיטל מחזיר בדיוק את אותם פיקסלים שהגליל מראה שם ממילא.
  */
-export const DISC_FACTOR = 1.8
+export const DISC_FACTOR = 3.2
+
+/**
+ * כמה רחוק מותר ללכת מנקודת הצילום. שני גבולות, והנמוך שבהם קובע: הכיס עצמו
+ * (`POCKET_METRES` — מעבר לו הפרלקסה מספרת שזאת תמונה), והרצפה שיש בפועל (מחצית הדיסקה,
+ * כדי שגם אחרי הליכה עד הקצה אפשר יהיה להסתובב ולראות רצפה מסביב). מקום שרשם `walk` משלו
+ * מקבל אותו כמו שהוא — חדר הוא לא רחוב.
+ */
+export function walkLimit(spec: PanoSpec): number {
+  return spec.walk ?? Math.min(POCKET_METRES, (nearEdge(spec) * DISC_FACTOR) / 2.5)
+}
 
 /** המרחק שבו הקצה התחתון של הפנורמה פוגש את הכביש — הגבול בין הדיסקה לגליל */
 export function nearEdge(spec: PanoSpec): number {
@@ -170,6 +213,7 @@ uniform float edge;          // המרחק שבו הקצה התחתון של ה�
 uniform float hasTile;       // 1 אם יש מרצף
 uniform vec3 origin;         // מרכז הפנורמה בעולם
 uniform vec3 nearColour;     // רשת ביטחון: צבע הכביש הנמדד
+uniform float alpha;         // שקיפות, בשביל המעבר בין תחנה לתחנה בשרשרת
 varying vec3 vWorld;
 
 void main() {
@@ -189,7 +233,7 @@ void main() {
 
   // המעבר מתחיל בדיוק במקום שבו ההיטל מפסיק להיות אמין — קצה התמונה — ונגמר חצי מטר אחריו
   float k = smoothstep(edge, edge * 1.45, r);
-  gl_FragColor = vec4(mix(near, far, k), 1.0);
+  gl_FragColor = vec4(mix(near, far, k), alpha);
 }
 `
 
@@ -199,6 +243,13 @@ export type Pano = {
   eye: number
   /** מרחק המפגש בין הדיסקה לגליל */
   nearEdge: number
+  /**
+   * דעיכה. תחנה בשרשרת נכנסת ויוצאת ברציפות, ולכן גם הגליל וגם הרצפה חייבים שקיפות אחת
+   * משותפת. מתחת ל-0.01 הקבוצה כולה נכבית, כדי שתחנות רחוקות לא יעלו כלום.
+   */
+  setAlpha: (value: number) => void
+  /** מי נצבע מעל מי */
+  setOrder: (index: number) => void
   dispose: () => void
 }
 
@@ -235,6 +286,9 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
     shell,
     new THREE.MeshBasicMaterial({ map, side: THREE.BackSide, toneMapped: false, depthWrite: true }),
   )
+  // העולם נצבע לפני מי שעומד בו. בלי זה הרצפה — שהיא שקופה בגלל המסירה בין תחנות — נסרקת
+  // אחרי הספרייט של פוגי וצובעת מעליו, והוא נעלם מהצוואר ומטה.
+  wall.renderOrder = -3
   wall.position.copy(origin).add(new THREE.Vector3(0, centreY, 0))
   group.add(wall)
 
@@ -282,6 +336,7 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
         // ל-linear ברגע הבנייה, ואילו `texture2D` ב-ShaderMaterial גולמי מחזיר sRGB כמו
         // שהוא — הפלט לא עובר המרה בכלל. לערבב את השניים פירושו כביש שחור, וזה בדיוק מה
         // שנראה בשני הצילומים הראשונים. שלושת המספרים כאן הם הבייטים של התמונה עצמה.
+        alpha: { value: 1 },
         nearColour: {
           value: new THREE.Vector3(
             spec.nearRgb[0] / 255,
@@ -292,16 +347,35 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
       },
       vertexShader: GROUND_VERT,
       fragmentShader: GROUND_FRAG,
+      transparent: true,
+      depthWrite: true,
     }),
   )
   ground.rotation.x = -Math.PI / 2
   ground.position.copy(origin).add(new THREE.Vector3(0, -spec.eye, 0))
   group.add(ground)
 
+  const wallMaterial = wall.material as THREE.MeshBasicMaterial
+  const groundMaterial = ground.material as THREE.ShaderMaterial
+
   return {
     group,
     eye: spec.eye,
     nearEdge: edge,
+    /** סדר ציור. תחנה שנכנסת חייבת להיצבע מעל זו שיוצאת, אחרת הדעיכה מהבהבת. */
+    setOrder(index: number) {
+      wall.renderOrder = -3 + index * 0.02
+      ground.renderOrder = -2 + index * 0.02
+    },
+    setAlpha(value: number) {
+      const a = Math.max(0, Math.min(1, value))
+      group.visible = a > 0.01
+      wallMaterial.transparent = a < 0.999
+      wallMaterial.opacity = a
+      wallMaterial.depthWrite = a > 0.5
+      groundMaterial.uniforms.alpha!.value = a
+      groundMaterial.depthWrite = a > 0.5
+    },
     dispose() {
       wall.geometry.dispose()
       ;(wall.material as THREE.Material).dispose()

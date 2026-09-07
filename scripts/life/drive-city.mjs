@@ -9,13 +9,17 @@ for (const s of shots) {
   await page.waitForTimeout(700)
   if (s.drive) {
     // grab the stick and hold it
-    const box = await page.locator('body').boundingBox()
-    const sx = s.drive.x ?? 70, sy = s.drive.y ?? box.height - 90
+    // the stick itself, not a guessed corner: the deck moves with the band height
+    const stick = await page.locator('[data-life="deck"] [data-life="stick"], [data-life="deck"]').first().boundingBox()
+    const sx = s.drive.x ?? (stick ? stick.x + 52 : 70)
+    const sy = s.drive.y ?? (stick ? stick.y + stick.height / 2 : 700)
     await page.mouse.move(sx, sy)
     await page.mouse.down()
-    await page.mouse.move(sx + (s.drive.dx ?? 0), sy + (s.drive.dy ?? -60), { steps: 6 })
+    await page.mouse.move(sx + (s.drive.dx ?? 0), sy + (s.drive.dy ?? -55), { steps: 6 })
     await page.waitForTimeout(s.drive.ms ?? 1800)
     await page.screenshot({ path: `/tmp/cityproof/${s.name}.png` })
+    const along = await page.evaluate(() => document.querySelector('[data-along]')?.getAttribute('data-along'))
+    console.log('  along', along, 'm')
     await page.mouse.up()
   } else {
     await page.screenshot({ path: `/tmp/cityproof/${s.name}.png` })

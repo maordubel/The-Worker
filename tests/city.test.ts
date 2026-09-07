@@ -4,7 +4,8 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { isYellow } from '@/lib/isYellow'
-import { DISC_FACTOR, nearEdge, PANOS, POCKET_METRES } from '@/lib/life/city/pano'
+import { DISC_FACTOR, nearEdge, PANOS, PLACE_ORDER, walkLimit } from '@/lib/life/city/pano'
+import { STREETS } from '@/lib/life/city/street'
 import { SLABS } from '@/lib/life/city/slab'
 
 const ART = join(process.cwd(), 'public', 'life', 'art')
@@ -80,13 +81,39 @@ describe('העיר — הפנורמות מדויקות מול מה שנשמר', 
     // from there, and the far side of the disc has to still be under the picture.
     for (const [key, spec] of Object.entries(PANOS)) {
       expect(nearEdge(spec) * DISC_FACTOR, `${key} can walk to the rim of its own floor`).toBeGreaterThan(
-        POCKET_METRES * 2,
+        walkLimit(spec) * 2,
       )
+      expect(walkLimit(spec), `${key} allows no walk at all`).toBeGreaterThan(1)
+    }
+  })
+
+  it('מציגה כל מקום בבורר, ואף מקום שאינו קיים', () => {
+    // הבורר הוא הדרך היחידה של מאור להגיע למקום בלי להקליד כתובת. מקום שנקלט ולא נרשם בו
+    // פשוט לא קיים בשבילו, ומקום שנרשם ואין לו תמונה נותן מסך שחור.
+    for (const key of PLACE_ORDER) {
+      expect(PANOS[key], `${key} is in the chooser but not in the table`).toBeDefined()
+    }
+    for (const key of Object.keys(PANOS)) {
+      expect(PLACE_ORDER, `${key} exists but the chooser never shows it`).toContain(key)
+    }
+  })
+
+  it('בונה כל רחוב מתחנות שקיימות, בסדר עולה', () => {
+    // תחנה שיושבת לפני קודמתה שוברת את המסירה: הדעיכה מחושבת על הקטע, וקטע שלילי הופך
+    // את השקיפות לשלילית — כלומר תחנה שנעלמת בדיוק כשצריך להיכנס.
+    for (const [key, street] of Object.entries(STREETS)) {
+      expect(street.stops.length, `${key} is not a chain`).toBeGreaterThan(1)
+      let previous = -Infinity
+      for (const stop of street.stops) {
+        expect(PANOS[stop.pano], `${key} stops at ${stop.pano}, which does not exist`).toBeDefined()
+        expect(stop.at, `${key} stops are out of order`).toBeGreaterThan(previous)
+        previous = stop.at
+      }
     }
   })
 
   it('לא צובעת בצבע גולמי — הכל בייטים נמדדים', () => {
-    for (const file of ['lib/life/city/pano.ts', 'lib/life/city/slab.ts']) {
+    for (const file of ['lib/life/city/pano.ts', 'lib/life/city/slab.ts', 'lib/life/city/street.ts']) {
       const text = readFileSync(join(process.cwd(), file), 'utf8')
       expect(/#[0-9a-fA-F]{6}\b/.test(text), `${file} contains a raw hex`).toBe(false)
       expect([...text.matchAll(/0x[0-9a-fA-F]{6}/g)].map((m) => m[0]), `${file} contains a raw colour`).toEqual([])
