@@ -14,7 +14,7 @@
  * has finished; the ending policy says so out loud; and there is a crowd, standing in
  * rows, at measurable distances from the one small speaker that knows.
  */
-import { DAY_1990, DAY_1998 } from './days'
+import { DAY_1990, DAY_1998, DAY_1999, DAY_2000_DOUBLE, DAY_2000_TITLE } from './days'
 import type { DirectorConfig } from './director'
 
 /**
@@ -91,9 +91,78 @@ export const PRESET_1998: DirectorConfig = {
   ],
 }
 
+
+
+/**
+ * שלושת הימים של סוף הסיפור — 26.5.1999, 13.5.2000, 17.5.2000.
+ *
+ * אלה לא ימים מקבילים, ולא הפכתי אותם לכאלה. אין מגרש שני בארכיון לאף אחד מהשלושה, ולהמציא
+ * אחד רק כדי שלבמאי יהיו שני שעונים זו בדיוק ההמצאה שכלל 11 קיים כדי למנוע.
+ *
+ * מה שכן — הבמאי מביא לשם שני דברים ששני הימים המקבילים לימדו אותו, ושניהם חסרו:
+ *
+ *   · **גמר לא נגמר בתשעים.** `extraTime` הופך את השריקה לשלב ולא לסיום, בדיוק כמו שהשריקה
+ *     שלנו ב-2.5.1998 היא שלב. אותה מדיניות, מקרה אחר.
+ *   · **פנדלים הם הכרעה, לא שעון.** השלב `penalties` לא נגמר מעצמו — מישהו חייב להכריע אותו
+ *     (`settle`), והעובדה הזאת נשמרת בנקודת השמירה. טעינה מחדש באמצע דו־קרב פנדלים ממשיכה
+ *     ממנו, ולא מנגנת אותו שוב.
+ *
+ * הצפיפות הדרמטית של גמר היא הפוכה מזו של 12.5.1990: אין רבע שעה שאפשר לזרוק. ההארכה איטית
+ * מהמשחק, כי ככה היא מרגישה כשאין לך כבר מה לצעוק.
+ */
+const FINAL_BANDS = [
+  { until: 45, pace: 0.72 },
+  { until: 75, pace: 0.6 },
+  { until: 90, pace: 0.3 },
+  // הארכה: שלושים דקות שאף אחד לא זוכר מהן כלום חוץ מהשעון
+  { until: 120, pace: 0.34 },
+  { until: 999, pace: 0.2 },
+]
+
+export const PRESET_1999_CUP: DirectorConfig = {
+  day: DAY_1999,
+  bands: FINAL_BANDS,
+  fallbackPace: 0.6,
+  interval: { at: 45, length: 5 },
+  fullTime: 90,
+  extraTime: { length: 30 },
+  penalties: true,
+  ending: { primaryFullTimeIsNotCompletion: true, requireShootoutSettled: true },
+  channels: [],
+}
+
+export const PRESET_2000_TITLE: DirectorConfig = {
+  day: DAY_2000_TITLE,
+  bands: [
+    { until: 45, pace: 0.75 },
+    { until: 80, pace: 0.62 },
+    { until: 999, pace: 0.24 },
+  ],
+  fallbackPace: 0.65,
+  interval: { at: 45, length: 5 },
+  fullTime: 90,
+  ending: {},
+  channels: [],
+}
+
+export const PRESET_2000_DOUBLE: DirectorConfig = {
+  day: DAY_2000_DOUBLE,
+  bands: FINAL_BANDS,
+  fallbackPace: 0.6,
+  interval: { at: 45, length: 5 },
+  fullTime: 90,
+  extraTime: { length: 30 },
+  penalties: true,
+  ending: { primaryFullTimeIsNotCompletion: true, requireShootoutSettled: true },
+  channels: [],
+}
+
 export const PRESETS: Record<string, DirectorConfig> = {
   '1990': PRESET_1990,
   '1998-laces': PRESET_1998,
+  '1999-cup': PRESET_1999_CUP,
+  '2000-title': PRESET_2000_TITLE,
+  '2000-double': PRESET_2000_DOUBLE,
 }
 
 export const presetFor = (chapterId: string): DirectorConfig | null => PRESETS[chapterId] ?? null

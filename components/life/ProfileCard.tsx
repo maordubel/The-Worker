@@ -1,11 +1,15 @@
 'use client'
 
+import { useState } from 'react'
+
 import { Num } from '@/components/ui/Num'
 import { t } from '@/lib/i18n'
 import { ITEM_ART } from '@/lib/life/content/chapter1986'
 import { artUrl } from '@/lib/life/runtime/art'
 import type { LifeSnapshot } from '@/lib/life/runtime/game'
 import type { Band } from '@/lib/life/profile'
+import { cardForMemory, type ShareCard } from '@/lib/life/share'
+import { ShareSheet } from '@/components/life/ShareSheet'
 
 /**
  * התיק — the profile screen, and the one screen in the game that describes the player.
@@ -99,6 +103,14 @@ function Bond({
 
 export function ProfileCard({ snapshot, onClose }: { snapshot: LifeSnapshot; onClose: () => void }) {
   const { profile, taken, missed } = snapshot
+  /**
+   * מה שיוצא החוצה — one object at a time, and only when the player asks.
+   *
+   * The button sits on the shelf next to the thing itself rather than on the box, because
+   * what a person shares is never "my collection"; it is one ticket stub and the sentence
+   * that came with it. `ShareSheet` does the rest.
+   */
+  const [sharing, setSharing] = useState<ShareCard | null>(null)
 
   return (
     <div role="dialog" className="pointer-events-auto absolute inset-0 z-[60] flex items-stretch justify-center bg-ink/90 p-gutter" aria-modal="true">
@@ -246,6 +258,14 @@ export function ProfileCard({ snapshot, onClose }: { snapshot: LifeSnapshot; onC
                         <p className="mt-1.5 font-mono text-[9px] leading-none tabular-nums text-concrete/70">
                           <Num>{item.year}</Num>
                         </p>
+                        <button
+                          type="button"
+                          data-life="share-memory"
+                          onClick={() => setSharing(cardForMemory(snapshot.state, item))}
+                          className="mt-2 min-h-tap border-hair border-sheet/50 px-2 py-1 font-sign text-[11px] leading-none text-sheet/80"
+                        >
+                          <bdi>{t('life.share.take')}</bdi>
+                        </button>
                       </span>
                     </li>
                   )
@@ -255,6 +275,7 @@ export function ProfileCard({ snapshot, onClose }: { snapshot: LifeSnapshot; onC
           </Section>
         </div>
       </div>
+      {sharing ? <ShareSheet card={sharing} onClose={() => setSharing(null)} /> : null}
     </div>
   )
 }

@@ -149,6 +149,13 @@ export const BEATS_LACES: Beat[] = [
       { a: 'sound', kind: 'radio', on: false },
     ],
   },
+  /** הרגע השני של הצעיף — אופיר על המדרגות, ואין לו כלום ביד */
+  {
+    id: 'l1-scarf',
+    trigger: 'clock',
+    when: { all: [{ flag: 'l1:after' }, { flag: 'scarf:given' }], none: [{ flag: 'scarf:asked:98' }, { flag: 'l1:cut' }] },
+    do: [{ a: 'flag', flag: 'scarf:asked:98' }, { a: 'talk', conversation: 'scarf-ofir-98' }],
+  },
   // the morning after: a lesson
   {
     id: 'l1-to-class',

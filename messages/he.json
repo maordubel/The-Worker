@@ -838,5 +838,17 @@
   "life.pass.plain": "שום דבר לא קורה כרגע",
   "life.pass.stay": "להסתובב",
   "life.pass.go": "להמשיך",
-  "life.pass.passed": "ישבת על הקיר. אוטובוס עבר, הצל זז."
+  "life.pass.passed": "ישבת על הקיר. אוטובוס עבר, הצל זז.",
+  "life.share.title": "לקחת החוצה",
+  "life.share.close": "סגור",
+  "life.share.story": "סטורי",
+  "life.share.square": "ריבוע",
+  "life.share.painting": "מצייר…",
+  "life.share.failed": "לא הצלחתי לצייר את הכרטיס.",
+  "life.share.noNative": "הדפדפן הזה לא יודע לשתף תמונה. שמור אותה ושתף מהגלריה.",
+  "life.share.copied": "הטקסט הועתק.",
+  "life.share.copyFailed": "לא הצלחתי להעתיק. סמן והעתק ידנית.",
+  "life.share.saved": "התמונה נשמרה.",
+  "life.share.take": "לקחת החוצה",
+  "life.memory.saved": "נרשם בזיכרון"
 }

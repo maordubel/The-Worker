@@ -57,6 +57,8 @@ export type DramaticBand = { until: number; pace: number }
 export type EndingPolicy = {
   /** the primary ground's full time does not complete the mission (2.5.1998) */
   primaryFullTimeIsNotCompletion?: boolean
+  /** a shootout has to be settled by hand before the day can close (1999, 17.5.2000) */
+  requireShootoutSettled?: boolean
   /** every parallel ground must have reached full time */
   requiredParallelMatchesFinished?: boolean
   /** and the boy must have HEARD the final state, from someone */
@@ -85,9 +87,25 @@ export type DirectorConfig = {
   interval?: { at: number; length: number }
   /** the last minute the primary venue plays, before the clock is allowed to stop */
   fullTime?: number
+  /**
+   * הארכה — a cup final does not end at ninety, and the game should not pretend it does.
+   *
+   * `length` is in venue minutes (thirty, in both of these finals). When present, full time
+   * is a PHASE and not an ending, which is the same shape as 2.5.1998's parallel ground and
+   * the reason the ending policy is a policy rather than a timer.
+   */
+  extraTime?: { length: number }
+  /**
+   * פנדלים — and the only part of a directed day the player's hands are actually in.
+   *
+   * The shootout has no clock: it ends when somebody has won it. The director holds the
+   * phase and refuses to complete the day until `settle()` is called, which is what makes
+   * a reload in the middle of it resumable rather than replayable.
+   */
+  penalties?: boolean
 }
 
-export type VenuePhase = 'before' | 'first' | 'half' | 'second' | 'over'
+export type VenuePhase = 'before' | 'first' | 'half' | 'second' | 'extra' | 'penalties' | 'over'
 
 export type DirectorSignal =
   | { k: 'event'; event: HistoricalMatchEvent }
@@ -107,6 +125,8 @@ export type DirectorSnapshot = {
   waveFrom: number | null
   completed: boolean
   phase: VenuePhase
+  /** the shootout's result, once somebody has settled it — a cup final is not over at 120 */
+  shootout?: string | null
 }
 
 const HALF = 45
@@ -121,6 +141,7 @@ export class ParallelHistoricalDirector {
   private waveFrom: number | null = null
   private phases = new Map<string, VenuePhase>()
   private completed = false
+  private shootout: string | null = null
 
   constructor(private readonly config: DirectorConfig) {
     for (const venue of config.day.venues) this.phases.set(venue.venueId, 'before')
@@ -144,11 +165,31 @@ export class ParallelHistoricalDirector {
   private phaseNow(): VenuePhase {
     const interval = this.config.interval
     const played = this.playedMinute()
+    const full = this.config.fullTime ?? 90
+    const extra = this.config.extraTime?.length ?? 0
     if (interval && this.clock >= interval.at && this.clock < interval.at + interval.length) return 'half'
-    if (played >= (this.config.fullTime ?? 90)) return 'over'
+    if (played >= full + extra) return this.config.penalties && !this.shootout ? 'penalties' : 'over'
+    if (played >= full) return extra > 0 ? 'extra' : 'over'
     if (played >= HALF) return 'second'
     if (played > 0) return 'first'
     return 'before'
+  }
+
+  /**
+   * מי לקח את הפנדלים — the shootout, settled from outside.
+   *
+   * Nothing here decides it: the archive already did (3–1 in 1999, 4–2 in 2000) and the
+   * player's part is what he does with his body while it happens. What the director owns
+   * is the fact that it HAS been settled, because that is what the day's ending waits for
+   * and what a reload has to remember.
+   */
+  settle(resultHe: string) {
+    this.shootout = resultHe
+    this.phases.set(this.config.day.primaryVenueId, this.phaseNow())
+  }
+
+  settled(): string | null {
+    return this.shootout
   }
 
   /** how fast the clock runs right now, in game-minutes per real second */
@@ -373,7 +414,9 @@ export class ParallelHistoricalDirector {
     const policy = this.config.ending
     const primary = this.config.day.primaryVenueId
     const primaryOver = this.phaseOf(primary) === 'over'
+    if (this.phaseOf(primary) === 'penalties') return { done: false, reasonHe: 'פנדלים. עוד לא נגמר.' }
     if (!primaryOver) return { done: false, reasonHe: 'המשחק שלנו עוד רץ.' }
+    if (policy.requireShootoutSettled && !this.shootout) return { done: false, reasonHe: 'הפנדלים עוד לא הוכרעו.' }
     if (!policy.primaryFullTimeIsNotCompletion) return { done: true, reasonHe: 'שריקה.' }
 
     if (policy.requiredParallelMatchesFinished) {
@@ -416,6 +459,7 @@ export class ParallelHistoricalDirector {
       waveFrom: this.waveFrom,
       completed: this.completed,
       phase: this.phaseOf(this.config.day.primaryVenueId),
+      shootout: this.shootout,
     }
   }
 
@@ -427,6 +471,7 @@ export class ParallelHistoricalDirector {
     this.crowdState = new Map(Object.entries(snap.crowd) as Array<[string, CrowdKnowledge]>)
     this.waveFrom = snap.waveFrom
     this.completed = snap.completed
+    this.shootout = snap.shootout ?? null
     this.phases.set(this.config.day.primaryVenueId, snap.phase)
   }
 

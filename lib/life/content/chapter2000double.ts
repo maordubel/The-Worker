@@ -245,6 +245,22 @@ export function objectiveDouble(state: LifeState, sceneId: string): string | nul
 }
 
 export const ENDINGS_DOUBLE: Record<string, EndingCard> = {
+  /**
+   * הצעיף שעובר — הסיום היחיד כאן שלא נקבע לפי מי אתה, אלא לפי מה שעשית עם דבר אחד.
+   *
+   * אבא נתן לך אותו בשער בלומפילד ב-1986 ואמר מילה אחת. ארבע־עשרה שנה אחר כך, ילד שלא היה
+   * בשנות התשעים בכלל הסתכל עליו, ואתה הורדת אותו. זה לא סיום טוב יותר מהאחרים. הוא אחר,
+   * וזה מה שמאור ביקש: מי שנותן אותו ב-2000 מקבל סיום אחר.
+   */
+  'passed-on': {
+    id: 'passed-on',
+    titleHe: 'ככה זה עובר',
+    bodyHe:
+      'דאבל. ובדרך החוצה, ילד בן שבע שלא היה פה בשנות התשעים בכלל הסתכל על הצעיף שלך כמו שאתה הסתכלת פעם על משהו. הורדת אותו ושמת עליו, בלי לומר כלום — כמו שעשו לך, באותו שער, ארבע־עשרה שנה קודם. הוא נגרר לו על הרצפה. הצוואר שלך היה קר כל הדרך הביתה, ולא היה אכפת לך.',
+    memoryHe: 'כלום. שם ריק על המדף, ואתה יודע בדיוק מה היה שם.',
+    memoryItem: 'folded-paper',
+    presence: 'inside',
+  },
   'inherited-chosen': {
     id: 'inherited-chosen',
     titleHe: 'ירשת. ובחרת.',
@@ -311,6 +327,13 @@ export const ENDINGS_DOUBLE: Record<string, EndingCard> = {
 }
 
 export const BEATS_DOUBLE: Beat[] = [
+  /** הרגע השלישי של הצעיף — לפני שהערב נסגר, בזמן שעוד אפשר לתת */
+  {
+    id: 'd-scarf',
+    trigger: 'clock',
+    when: { all: [{ flag: 'd:stadium' }, { flag: 'scarf:given' }], none: [{ flag: 'scarf:asked:2000' }] },
+    do: [{ a: 'flag', flag: 'scarf:asked:2000' }, { a: 'talk', conversation: 'scarf-kid-2000' }],
+  },
   // the walk home: the family is read off the decade, once, and the conversation follows
   {
     id: 'd-after',
@@ -456,6 +479,7 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
     id: 'd-family',
     nameHe: null,
     branches: [
+      { when: { flag: 'scarf:passed:kid' }, lines: [{ who: null, text: 'הצוואר שלך ריק. איפשהו מקדימה, ילד גורר על הרצפה משהו שהיה של אבא שלך.' }], then: [{ e: 'ending', id: 'passed-on' }] },
       { when: { flag: 'life:family:inherited-chosen' }, lines: [{ who: null, text: 'אבא מצד אחד. אסף מהצד השני. אתה באמצע, מחזיק את שניהם.' }], then: [{ e: 'ending', id: 'inherited-chosen' }] },
       { when: { flag: 'life:family:gate5-builder' }, lines: [{ who: null, text: 'הבד על הכתף. אנשים שמכירים אותך בשם. ובבית — אבא, ושתיקה.' }], then: [{ e: 'ending', id: 'gate5-builder' }] },
       { when: { flag: 'life:family:gate7-keeper' }, lines: [{ who: null, text: 'אבא. השירים האיטיים. ומהצד השני — תוף.' }], then: [{ e: 'ending', id: 'gate7-keeper' }] },

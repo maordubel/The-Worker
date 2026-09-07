@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { CHECKPOINT_VERSION, checkpointOf, didOnce, onceIn, onceFlag, resume, usable } from '@/lib/life/checkpoint'
 import { ParallelHistoricalDirector, PRESET_1990, PRESET_1998 } from '@/lib/life/history'
 import { apply, emptyState } from '@/lib/life/events'
+import { ERA_KEYS, eraFor } from '@/lib/life/content/era'
 import { SAVE_VERSION } from '@/lib/life/save'
 import type { LifeState } from '@/lib/life/types'
 
@@ -162,5 +163,73 @@ describe('פעם אחת בחיים — הרשת מתחת לרשת', () => {
 describe('הקובץ', () => {
   it('is version 4 — the log, plus one field beside it', () => {
     expect(SAVE_VERSION).toBe(4)
+  })
+})
+
+/**
+ * ברז הכסף — 7.9.2026, found by a scanner written for something else.
+ *
+ * A beat re-arms when its own `when` is still true after it finishes. That rule exists for a
+ * good reason — a conversation the player walked out of has not happened, and the beat has
+ * to come back — but it has a sharp edge: a beat that GIVES something permanent and does not
+ * change any flag it is gated on comes back for ever.
+ *
+ * `g4-open` was exactly that. It hands the boy forty-five shekels on the fourth day of 1993,
+ * fires on entering the street, and was gated on three flags it never touched. Walk out of
+ * the street and back in and you were paid again. Nothing failed; the money simply grew.
+ *
+ * So: any beat that grants something permanent, and does not open a conversation, a match or
+ * an ending that could raise the flag for it, has to gate on a flag it raises itself. Eight
+ * beats in the game qualify. All eight pass. The ninth one somebody writes will not.
+ */
+describe('ביט שנותן משהו — פעם אחת בלבד', () => {
+  const GRANTS = new Set([
+    'money.changed',
+    'redheart.changed',
+    'wellbeing.changed',
+    'item.gained',
+    'relationship.changed',
+    'personality.shifted',
+    'bond.shifted',
+    'trait.shifted',
+    'relationship.memory_added',
+  ])
+
+  const flagsIn = (condition: unknown, out: string[] = []): string[] => {
+    const node = condition as { flag?: string; all?: unknown[]; any?: unknown[]; none?: unknown[] } | undefined
+    if (!node) return out
+    if (node.flag) out.push(node.flag)
+    for (const key of ['all', 'any', 'none'] as const) for (const part of node[key] ?? []) flagsIn(part, out)
+    return out
+  }
+
+  it('gates every rewarding beat on a flag it raises itself', () => {
+    let checked = 0
+    for (const key of ERA_KEYS) {
+      for (const beat of (eraFor(key).beats ?? []) as unknown as Array<{ id: string; when?: unknown; do: readonly Record<string, unknown>[] }>) {
+        // a beat that opens a conversation, a match or an ending may be gated by what THOSE raise
+        const opens = beat.do.some((a) => a['a'] === 'talk' || a['a'] === 'match' || a['a'] === 'ending' || a['a'] === 'travel')
+        const grants = beat.do.some(
+          (a) => a['a'] === 'events' && (a['events'] as Array<{ t: string }>).some((e) => GRANTS.has(e.t)),
+        )
+        if (!grants || opens) continue
+        checked += 1
+        const raises = new Set<string>()
+        for (const action of beat.do) {
+          if (action['a'] === 'flag') raises.add(action['flag'] as string)
+          if (action['a'] === 'events') {
+            for (const event of action['events'] as Array<{ t: string; flag?: string }>) {
+              if (event.t === 'flag.raised' && event.flag) raises.add(event.flag)
+            }
+          }
+        }
+        const gate = flagsIn(beat.when)
+        expect(
+          [...raises].some((flag) => gate.includes(flag)),
+          `${key}/${beat.id} gives something permanent and does not gate on anything it raises — it will re-arm and give it again`,
+        ).toBe(true)
+      }
+    }
+    expect(checked, 'the scan found no rewarding beats at all, which means it stopped working').toBeGreaterThan(4)
   })
 })

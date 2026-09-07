@@ -39,6 +39,7 @@ import {
 import { SCHEDULE_1986 } from './schedules1986'
 import { SCHEDULE_1990 } from './schedules1990'
 import { SCHEDULE_1991 } from './schedules1991'
+import { BEATS_1986 } from './threads'
 
 /**
  * העידן — everything about a chapter that the runtime used to import by name.
@@ -158,6 +159,11 @@ export const ERA_1986: Era = {
   },
   memoryPrefix: '1986',
   portraits: PORTRAIT,
+  /**
+   * הבוקר שאחרי — 25.5.1986, יום ראשון, בית ספר. הביט היחיד ב-1986, והוא נתלה על
+   * `found:kobi` ולא על סיום הפרק: לילד שלא נכנס ולא מצא את אבא שלו אין מה לספר למחרת.
+   */
+  beats: BEATS_1986,
 }
 
 /**

@@ -104,6 +104,16 @@ export type VenueTimeline = {
   kickoffOffset: number
   /** the archive's final score, home–away, or null where the archive refuses to hold one */
   finalHe: string | null
+  /**
+   * איזה מחזור — as a number, not as a sentence.
+   *
+   * 7.9.2026: the game called 2.5.1998 "המחזור ה-29" in its narration and `מחזור 30` in its
+   * archive at the same time, and both were strings nobody could test. It was the
+   * penultimate round — Ballerz: *"שני מחזורים לסיום העונה"*, and *"במחזור הסיום שתי הקבוצות
+   * ניצחו"* about the week after. So the round is data now, and
+   * `tests/life-history.test.ts` reads it here rather than grepping prose.
+   */
+  round?: { number: number; ofTotal: number; isFinal: boolean }
   events: HistoricalMatchEvent[]
   /** why this ground matters to the boy standing in the other one */
   stakeHe: string

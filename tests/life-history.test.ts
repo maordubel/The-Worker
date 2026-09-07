@@ -3,10 +3,16 @@ import { describe, expect, it } from 'vitest'
 import {
   DAY_1990,
   DAY_1998,
+  DAY_1999,
+  DAY_2000_DOUBLE,
+  DAY_2000_TITLE,
   HISTORY_DAYS,
   ParallelHistoricalDirector,
   PRESET_1990,
   PRESET_1998,
+  PRESET_1999_CUP,
+  PRESET_2000_DOUBLE,
+  PRESET_2000_TITLE,
   conflictsOf,
 } from '@/lib/life/history'
 import { LACES_LINES, eventById, terrace } from '@/lib/life/history/terrace'
@@ -270,5 +276,198 @@ describe('מה שלא אבד במעבר', () => {
   it('agrees with the archive about both final scores of 2.5.1998', () => {
     expect(DAY_1998.venues.find((v) => v.venueId === 'bloomfield')?.finalHe).toBe('1–0')
     expect(DAY_1998.venues.find((v) => v.venueId === 'beit-shean')?.finalHe).toBe('2–3')
+  })
+})
+
+describe('גמר לא נגמר בתשעים', () => {
+  const run = (d: ParallelHistoricalDirector, seconds: number) => {
+    for (let i = 0; i < seconds * 10; i += 1) d.advance(100)
+  }
+
+  it('goes to extra time instead of ending at the whistle', () => {
+    const director = new ParallelHistoricalDirector(PRESET_1999_CUP)
+    director.seek(96)
+    director.advance(0)
+    expect(director.phaseOf('ramat-gan-99')).toBe('extra')
+    expect(director.completion().done).toBe(false)
+  })
+
+  it('goes to penalties instead of ending at a hundred and twenty', () => {
+    const director = new ParallelHistoricalDirector(PRESET_1999_CUP)
+    director.seek(126)
+    director.advance(0)
+    expect(director.phaseOf('ramat-gan-99')).toBe('penalties')
+    const verdict = director.completion()
+    expect(verdict.done).toBe(false)
+    expect(verdict.reasonHe).toContain('פנדלים')
+  })
+
+  it('closes only when somebody has actually settled the shootout', () => {
+    const director = new ParallelHistoricalDirector(PRESET_1999_CUP)
+    run(director, 600)
+    expect(director.phaseOf('ramat-gan-99')).toBe('penalties')
+    expect(director.completion().done).toBe(false)
+    director.settle('3–1')
+    expect(director.phaseOf('ramat-gan-99')).toBe('over')
+    expect(director.completion().done).toBe(true)
+  })
+
+  it('remembers a settled shootout across a reload, so it is never taken twice', () => {
+    const first = new ParallelHistoricalDirector(PRESET_2000_DOUBLE)
+    first.seek(126)
+    first.advance(0)
+    first.settle('4–2')
+    const second = new ParallelHistoricalDirector(PRESET_2000_DOUBLE)
+    second.restore(first.snapshot())
+    expect(second.settled()).toBe('4–2')
+    expect(second.phaseOf('ramat-gan-2000')).toBe('over')
+    expect(second.completion().done).toBe(true)
+  })
+
+  it('ends 13.5.2000 at its own whistle — a league match has no extra time', () => {
+    const director = new ParallelHistoricalDirector(PRESET_2000_TITLE)
+    run(director, 400)
+    expect(director.phaseOf('hatikva-2000')).toBe('over')
+    expect(director.completion().done).toBe(true)
+  })
+
+  it('invents no parallel ground for the three days the archive holds only one match for', () => {
+    for (const preset of [PRESET_1999_CUP, PRESET_2000_TITLE, PRESET_2000_DOUBLE]) {
+      expect(preset.day.venues, `${preset.day.id} grew a second ground`).toHaveLength(1)
+      expect(preset.channels).toHaveLength(0)
+    }
+  })
+
+  it('agrees with the archive about all three results', () => {
+    expect(DAY_1999.venues[0]?.finalHe).toBe('1–1 (3–1 בפנדלים)')
+    expect(DAY_2000_TITLE.venues[0]?.finalHe).toBe('1–1')
+    expect(DAY_2000_DOUBLE.venues[0]?.finalHe).toBe('2–2 (4–2 בפנדלים)')
+  })
+})
+
+/**
+ * מחזור 29, ולא 30 — 7.9.2026.
+ *
+ * המשחק סתר את עצמו: הסיפור אמר "המחזור ה-29" בארבעה מקומות, והארכיון אמר `מחזור 30`
+ * ו"המחזור האחרון". Ballerz מכריע — *"שני מחזורים לסיום העונה"* ב-2.5.1998, ו*"במחזור
+ * הסיום שתי הקבוצות ניצחו את משחקיהן"* על השבוע שאחריו.
+ *
+ * הבדיקה קוראת את הנתון ולא את הפרוזה, כי מחרוזת אפשר לתקן במקום אחד ולשכוח בשני — וזה
+ * בדיוק מה שקרה.
+ */
+describe('מחזור — נתון, לא משפט', () => {
+  it('calls 2.5.1998 the twenty-ninth round, and not the last one', () => {
+    for (const venue of DAY_1998.venues) {
+      expect(venue.round, `${venue.nameHe} carries no round`).toBeTruthy()
+      expect(venue.round?.number, `${venue.nameHe} is not round 29`).toBe(29)
+      expect(venue.round?.ofTotal).toBe(30)
+      expect(venue.round?.isFinal, '2.5.1998 was the penultimate round, not the last').toBe(false)
+    }
+  })
+
+  it('still calls 12.5.1990 the last round, which it was', () => {
+    for (const venue of DAY_1990.venues) {
+      expect(venue.round?.number).toBe(30)
+      expect(venue.round?.isFinal).toBe(true)
+    }
+  })
+
+  it('lets no canonical 1998 identifier say round 30 again', () => {
+    const text = JSON.stringify(DAY_1998)
+    expect(text).not.toContain('מחזור 30')
+    expect(text).toContain('מחזור 29')
+  })
+})
+
+/**
+ * מסמך פנימי הוא לא מקור — ההוראה של מאור, כבדיקה.
+ *
+ * *"Do not treat our internal audit document as an external historical source."* המסמך
+ * נשאר רשום, כי הוא כן טוען טענות ואנחנו שומרים טענות. מה שהוא לא רשאי לעשות זה לתת לדמות
+ * רשות לדבר. כל אירוע שמישהו יכול לומר בקול חייב מקור `archive` אחד לפחות.
+ */
+describe('רק מקור חיצוני נותן רשות דיבור', () => {
+  it('gives no speakable event a purely internal provenance', () => {
+    for (const day of Object.values(HISTORY_DAYS)) {
+      const archives = new Set(day.sources.filter((s) => s.kind === 'archive').map((s) => s.id))
+      for (const venue of day.venues) {
+        for (const event of venue.events) {
+          if (!event.speakable) continue
+          expect(
+            event.sourceIds.some((id) => archives.has(id)),
+            `${event.id} may be spoken but rests only on internal documents`,
+          ).toBe(true)
+        }
+      }
+    }
+  })
+
+  it('keeps the internal document on file rather than deleting what it claims', () => {
+    const internal = DAY_1990.sources.find((s) => s.id === 'maor-audit-2026-09-07')
+    expect(internal?.kind).toBe('brief')
+    const claims = DAY_1990.venues
+      .flatMap((v) => v.events)
+      .filter((e) => e.sourceIds.includes('maor-audit-2026-09-07'))
+    expect(claims.length, 'the internal claims were deleted instead of marked').toBeGreaterThan(0)
+    for (const claim of claims) expect(claim.speakable).toBe(false)
+  })
+})
+
+/**
+ * מה שנגזר, ומה שלא — 12.5.1990 ביבנה.
+ *
+ * אף מקור לא נותן את התוצאה בבית של יבנה. שני מקורות כן נותנים מספיק כדי לגזור את המרווח:
+ * 52 נקודות והפרש 19+ לשתיהן לפני המחזור, ובסיום 55 והפרש 25+ להפועל ו-23+ ליבנה. ההפרש
+ * ארבעה, וזה כל מה שהאריתמטיקה של היום צריכה.
+ */
+describe('יבנה — המרווח נגזר, התוצאה לא', () => {
+  it('derives a four-goal margin and says so out loud in the note', () => {
+    const margin = DAY_1990.venues
+      .find((v) => v.venueId === 'yavne')
+      ?.events.find((e) => e.id === '1990-yavne-margin')
+    expect(margin, 'the derived margin is missing').toBeTruthy()
+    expect(margin?.sourceIds).toContain('wiki-artzit-8990')
+    expect(margin?.sourceIds).toContain('walla-3356277')
+    expect(margin?.conflictNote).toContain('נגזר')
+    expect(margin?.minute, 'a derivation is not a minute').toBeNull()
+  })
+
+  it('makes the goal stream agree with the derived margin', () => {
+    const director = new ParallelHistoricalDirector(PRESET_1990)
+    director.seek(95)
+    expect(director.goalsFor('yavne', 'מכבי-יבנה')).toBe(4)
+    expect(director.goalsFor('bloomfield', 'הפועל-תל-אביב')).toBe(6)
+  })
+
+  it('still refuses to state a Yavne scoreline', () => {
+    expect(DAY_1990.venues.find((v) => v.venueId === 'yavne')?.finalHe).toBeNull()
+  })
+})
+
+/**
+ * זמן היסטורי ≠ זמן משחק — הכלל שהמסמך קורא לו קריטי, כבדיקה.
+ */
+describe('הדקה של המקור והדקה של הבמאי לא נוגעות זו בזו', () => {
+  it('keeps the sourced minutes exactly where the sources put them', () => {
+    const by = (id: string) => eventById(id)
+    expect(by('1990-bloomfield-goal-1')?.minute).toBe(15)
+    expect(by('1998-parallel-goal-3')?.minute).toBe(61)
+    expect(by('1998-parallel-goal-4')?.minute).toBe(86)
+    expect(by('1998-parallel-goal-5')?.minute).toBe(93)
+  })
+
+  it('never lets a pacing minute be mistaken for a historical one', () => {
+    // the fifteenth minute is history; the twelfth is where the chapter plays it
+    const first = eventById('1990-bloomfield-goal-1')
+    expect(first?.minute).toBe(15)
+    expect(first?.pacingMinute).toBe(12)
+    expect(first?.minute).not.toBe(first?.pacingMinute)
+  })
+
+  it('says out loud, per event, why a minute is missing', () => {
+    for (const event of ALL_EVENTS) {
+      if (event.minute !== null || event.type === 'state') continue
+      expect(event.conflictNote, `${event.id} has no minute and no explanation`).toBeTruthy()
+    }
   })
 })

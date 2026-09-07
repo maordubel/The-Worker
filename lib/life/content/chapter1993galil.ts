@@ -203,9 +203,23 @@ export const BEATS_GALIL: Beat[] = [
     id: 'g4-open',
     at: 'street',
     trigger: 'enter',
-    when: { flag: D4, none: [{ flag: D5 }, { flag: 'g4:decided' }] },
+    /**
+     * `g4:opened` — 7.9.2026, and a hole you could have printed money through.
+     *
+     * A beat re-arms when its own `when` is still true after it finishes, which is the rule
+     * that stops a conversation the player walked out of from vanishing for good. This beat
+     * did not change any of the three flags it is gated on, so it re-armed every single
+     * time — and it hands over forty-five shekels. Walk out of the street and back in on the
+     * fourth day of 1993 and you were paid again. And again.
+     *
+     * The fix is its own flag, and the general one is `tests/life-checkpoint.test.ts`, which
+     * now refuses any beat that grants something permanent without gating on something it
+     * raises itself.
+     */
+    when: { flag: D4, none: [{ flag: D5 }, { flag: 'g4:decided' }, { flag: 'g4:opened' }] },
     delayMs: 700,
     do: [
+      { a: 'flag', flag: 'g4:opened' },
       { a: 'events', events: [{ t: 'money.changed', agorot: 4500, why: 'מה שיש בכיס באמצע שבוע' }] },
       { a: 'lines', lines: [{ who: null, text: 'המשחק המכריע. שלוש שעות נסיעה צפונה, ואף אחד לא מסדר לך אותן.' }, { who: null, text: 'יש אוטובוס מאורגן מהפינה בארבע, למי שנרשם. יש בן דוד של אופיר עם אוטו, אם יש כסף לדלק. ויש מטבח עם רדיו.' }] },
     ],

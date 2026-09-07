@@ -5,6 +5,7 @@ import { adDirector, adsEnabled, adsTestMode } from '@/lib/life/monetization'
 import type { LifeRuntime, LifeSnapshot } from '@/lib/life/runtime/game'
 import { formatMoney } from '@/lib/life/money'
 import { conflictsOf, HISTORY_DAYS } from '@/lib/life/history'
+import { direct } from '@/lib/life/story'
 
 /**
  * לוח הפיתוח — the one screen allowed to show numbers, and it never ships.
@@ -107,6 +108,17 @@ export function DebugPanel({
             })()}
           </Row>
         ) : null}
+        {/*
+          STORY — מי מוביל את הרגע, מה הכוונה, ובאיזו דרגת הדרכה אנחנו. זאת השורה שעונה על
+          השאלה של מאור — "אני יודע מה לעשות רק כי אני מכיר את התסריט" — כי היא מראה בדיוק
+          מה המשחק חושב שהוא מבקש עכשיו.
+        */}
+        <Row label="STORY">
+          {(() => {
+            const story = direct({ state, chapter: state.chapter, quietFor: 0, busy: false })
+            return `intent=${story.intent?.id ?? '—'}  control=${story.control}  lead=${story.leadHe ?? '—'}  guidance=${story.guidance}  now="${story.nowHe ?? '—'}"`
+          })()}
+        </Row>
         <Row label="CHECKPOINT">
           {(() => {
             const mark = snapshot.checkpoint

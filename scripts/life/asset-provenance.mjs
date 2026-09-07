@@ -71,6 +71,8 @@ const SHIPPED = [
   'public/life/film',
   'public/life/opening',
   'public/life/sfx',
+  // 7.9.2026 — תבניות השיתוף, שני קבצים שמאור צייר לפי הבריף
+  'public/life/share',
 ]
 
 const KIND = new Set([
