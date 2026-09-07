@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 /**
  * ~60 שניות — every directed match, walked without a browser.
  *
@@ -20,6 +23,8 @@ import { finalBoard, MATCH_SCRIPTS, REGULAR_MATCH_MAX_MS, SCRIPT_CHAPTER, script
 import type { LifeEvent } from '@/lib/life/events'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { MatchDirector, type MatchHost } from '@/lib/life/runtime/matchDirector'
+
+const ROOT = process.cwd()
 
 const stageB = resolveStageBAnchors()
 const anchorFor = (scriptId: string): HistoricalAnchor => {
@@ -233,5 +238,33 @@ describe('the director — steps in order, the board pushed, the clock moved for
       expect(board.awayScore).toBeNull()
     }
     vi.useRealTimers()
+  })
+})
+
+/**
+ * שדה שהתסריט כותב ואף אחד לא קורא — 7.9.2026, and the reason this test exists.
+ *
+ * `listen` was added to `MatchStep` for 2.5.1998: the whole second half of that mission is
+ * a terrace celebrating at ninety per cent while a transistor at five per cent decides the
+ * season. Four steps of the shoelaces script set it. The runner did not read it. Nothing
+ * failed, nothing warned, the types were perfectly happy — the mix simply never moved, and
+ * the one thing the chapter is built on quietly did not happen.
+ *
+ * That is the shape of failure this project keeps hitting: not a crash, a field nobody
+ * consumes. So every key any script actually uses has to appear in the runner's source.
+ * It is a coarse check and it is the correct one: a step that writes into the void is a
+ * bug whatever the reason.
+ */
+describe('הבמאי קורא כל מה שהתסריטים כותבים', () => {
+  it('handles every step field the scripts actually set', () => {
+    const runner = readFileSync(join(ROOT, 'lib/life/runtime/matchDirector.ts'), 'utf8')
+    const used = new Set<string>()
+    for (const script of Object.values(MATCH_SCRIPTS)) {
+      for (const step of script.steps) for (const key of Object.keys(step)) used.add(key)
+    }
+    // `wait` is the runner's own loop and `id` is for the tests; everything else is an instruction
+    for (const key of [...used].filter((k) => k !== 'wait' && k !== 'id')) {
+      expect(runner.includes(`step.${key}`), `matchDirector never reads step.${key}`).toBe(true)
+    }
   })
 })

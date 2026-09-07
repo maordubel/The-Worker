@@ -106,6 +106,7 @@ export class MatchDirector {
     if (step.flag) this.host.dispatch({ t: 'flag.raised', flag: step.flag })
     if (step.events && step.events.length > 0) this.host.dispatch(...step.events)
     if (step.crowd) this.crowd(step.crowd)
+    if (step.listen !== undefined) this.host.emit('sound', { kind: 'listen', weight: step.listen })
     if (step.whistle) this.host.emit('sound', { kind: 'whistle', blasts: step.whistle })
     if (step.sfx) this.host.emit('sound', { kind: 'sample', key: step.sfx, ...(step.level !== undefined ? { level: step.level } : {}) })
     if (step.text) this.host.emit('toast', { text: step.text, tone: step.tone ?? 'plain' })

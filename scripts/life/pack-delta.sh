@@ -14,8 +14,19 @@ N="${1:?delta number}"
 cd "$(dirname "$0")/../.." || exit 1
 OUT=/tmp
 rm -f "$OUT/the-worker-delta-$N-code.zip" "$OUT/the-worker-delta-$N-art.zip"
-git status --short --untracked-files=all \
-  | awk '{print $2}' \
+# 7.9.2026 — the hole that cost a line of the 1998 mix.
+#
+# The candidate list used to come from `git status` alone, which answers "what differs from
+# my last local commit". A file COMMITTED here and never uploaded to GitHub therefore looked
+# clean and silently stayed out of every zip after it. That is exactly how `matchDirector.ts`
+# reached Maor missing the one line that reads `step.listen`, and how sixteen panoramas were
+# registered in the art tables of a repo that does not contain them.
+#
+# The question this script has to ask is "what differs from ORIGIN", so it asks that: the
+# committed differences AND the working-tree changes, merged.
+{ git diff --name-only origin/main 2>/dev/null || true
+  git status --short --untracked-files=all | awk '{print $2}'; } \
+  | sort -u \
   | grep -v -E '^(\.next/|node_modules/|data/|docs/life-shots/|delta/|.*\.tsbuildinfo$|.*__pycache__.*|scripts/life/\.scene-dump\.ts$|tsconfig\.all\.tsbuildinfo$)' \
   > /tmp/delta-files.txt
 grep -v '^public/' /tmp/delta-files.txt > /tmp/delta-code.txt
@@ -45,4 +56,6 @@ pack() {
 pack code /tmp/delta-code-ok.txt
 pack art /tmp/delta-art-ok.txt
 # dotfiles never survive the GitHub web uploader — say so if any are in the list
-grep -E '(^|/)\.[^/]+$' /tmp/delta-code-ok.txt && echo "WARNING: dotfiles above will be dropped by the web uploader" || true
+# any path with a dot-segment anywhere — `.github/workflows/ci.yml` has none in its
+# basename and was dropped in silence for exactly that reason
+grep -E '(^|/)\.[^/]+' /tmp/delta-code-ok.txt && echo "WARNING: the paths above start with a dot somewhere and the GitHub web uploader will drop them — they have to be created through 'Create new file' instead" || true
