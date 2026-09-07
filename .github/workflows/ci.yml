@@ -1,0 +1,48 @@
+# השער — nothing reaches main without passing what a person would have run by hand.
+#
+# Maor does not use a terminal, which is the whole reason this file exists: until now the
+# only thing standing between a broken commit and the game was whether the assistant
+# remembered to run `npm run doctor` before saying "done". A push runs it here instead, on
+# GitHub's machine, and the answer is a green tick or a red cross on the commit page.
+#
+# The order is deliberate. `repo:hygiene` runs FIRST and takes seconds: if the repository
+# has grown a second copy of a runtime file, every result after it is untrustworthy — a
+# green typecheck on a tree with two `LifeStage.tsx` in it is exactly the false comfort the
+# audit of 7.9.2026 is about.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  doctor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Repository hygiene — one runtime concept, one source file
+        run: npm run repo:hygiene
+
+      - name: Asset provenance — every shipped file has a recorded origin
+        run: npm run assets:provenance
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
