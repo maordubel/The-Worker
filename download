@@ -1,9 +1,0 @@
-.next/
-data/life-shots/
-__pycache__/
-*.pyc
-*.log
-node_modules/.vite/
-tsconfig.all.tsbuildinfo
-tsconfig.tsbuildinfo
-.deliver/

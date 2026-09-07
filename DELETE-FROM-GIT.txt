@@ -1,4 +1,0 @@
-  git rm components/ui/Shirt.tsx
-
-Replaced by components/ui/KitPreview.tsx (jersey + shorts + socks).
-Nothing else to delete.
