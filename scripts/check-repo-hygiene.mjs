@@ -79,6 +79,20 @@ for (const name of readdirSync(ROOT)) {
     problems.push([name, twin ? `כפילות של ${twin.slice(ROOT.length + 1)}` : 'קוד בשורש — מקומו תחת app/ components/ lib/ scripts/ tests/'])
     continue
   }
+  /**
+   * מטמון של המהדר בתוך הריפו — 7.9.2026.
+   *
+   * `tsconfig.json` sets `incremental: true`, so `tsc` writes a `.tsbuildinfo` next to the
+   * config and reads it on the next run to decide which files it may skip. A COMMITTED one
+   * is a cache produced on somebody else's machine, at some other moment, possibly by
+   * another compiler version — and the failure it produces is the worst kind: a typecheck
+   * that reports clean while the errors are still there. It is generated output; it belongs
+   * nowhere near a repository.
+   */
+  if (name.endsWith('.tsbuildinfo')) {
+    problems.push([name, 'מטמון של המהדר — נוצר מחדש לבד, ובריפו הוא עלול לגרום ל-tsc לדווח נקי כשהוא לא'])
+    continue
+  }
   if (ASSET.has(ext)) {
     const twin = elsewhere.get(basename(name))
     problems.push([name, twin ? `נכס כפול — הקנוני הוא ${twin.slice(ROOT.length + 1)}` : 'נכס בשורש — מקומו תחת public/'])

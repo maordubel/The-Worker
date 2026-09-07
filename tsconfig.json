@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -13,9 +17,27 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./*"] }
+    /*
+     * `incremental` is deliberately OFF (7.9.2026).
+     *
+     * It wrote `tsconfig.all.tsbuildinfo` next to this file and `tsc` read it back to decide
+     * which files it was allowed to skip. A copy of that cache reached the repository, which
+     * is the worst kind of artefact to have there: a typecheck that reports clean while the
+     * errors are still in the tree. Ignoring it would have needed a `.gitignore`, and the
+     * GitHub web uploader silently drops every path that starts with a dot — so the cache
+     * would have kept coming back. The check takes half a minute either way. Off.
+     */
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "incremental": true
   },
   "include": [
     "next-env.d.ts",
