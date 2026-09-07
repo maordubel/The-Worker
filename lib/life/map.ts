@@ -120,10 +120,15 @@ export const MAP_PLACES: readonly MapPlaceDef[] = [
     lon: 34.7519,
     scene: 'schoolyard',
     scenes: ['classroom', 'schoolyard'],
+    /**
+     * 1984, not 1990 — a boy who is six in the spring of 1984 goes to school, and the
+     * schoolyard is a door off his own street in every chapter. `fromYear: 1984` kept the
+     * pin off the map for the whole of Stage A. (Map audit, 6.9.2026.)
+     */
     revealFlag: 'life:been:classroom',
     revealHe: 'גם פה יש לך מקום.',
     confidence: 'placed',
-    fromYear: 1990,
+    fromYear: 1984,
   },
   {
     id: 'route',

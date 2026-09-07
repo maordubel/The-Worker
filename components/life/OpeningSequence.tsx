@@ -92,7 +92,7 @@ export function OpeningSequence({
     <div
       dir="rtl"
       role="dialog"
-      className="absolute inset-0 z-[60] flex flex-col items-center justify-center overflow-hidden bg-ink"
+      className="absolute inset-0 z-[60] overflow-hidden bg-ink"
       aria-modal="true"
       aria-label={lines.captionHe}
     >
@@ -105,6 +105,23 @@ export function OpeningSequence({
             className="absolute inset-0 transition-opacity duration-700 ease-out motion-reduce:transition-none"
             style={{ opacity: active && showing ? 1 : 0 }}
           >
+            {/* הרקע — the same picture, blurred, filling the bars a phone leaves. It is
+                `aria-hidden` and it is never the thing being looked at; it exists so the
+                photograph has a room to hang in rather than a hole. */}
+            <div
+              aria-hidden="true"
+              className="opening-bed absolute inset-0"
+              style={{
+                backgroundImage: `url(/life/${
+                  entry.kind === 'clip' ? `opening/${entry.art}-poster` : `${entry.from === 'art' ? 'art' : 'opening'}/${entry.art}`
+                }.png)`,
+              }}
+            />
+            {/* המסגרת — on a phone the photograph is a framed plate in the upper half of
+                the glass, with the caption directly under it, which is what a film still
+                with a line of print beneath it looks like. On anything wider than 6:5 the
+                `opening-stage` rule releases it and the picture covers the whole frame. */}
+            <div className="opening-stage">
             {entry.kind === 'clip' ? (
               <video
                 // `key` on `active` so the clip restarts from its first frame each time it
@@ -116,14 +133,15 @@ export function OpeningSequence({
                 playsInline
                 autoPlay
                 preload="auto"
-                className="opening-frame h-full w-full"
+                className="opening-frame relative h-full w-full"
               />
             ) : (
               <div
-                className="opening-frame h-full w-full bg-center bg-no-repeat motion-safe:animate-[openingDrift_7s_ease-out_forwards]"
+                className="opening-frame relative h-full w-full bg-center bg-no-repeat motion-safe:animate-[openingDrift_7s_ease-out_forwards]"
                 style={{ backgroundImage: `url(/life/${entry.from === 'art' ? 'art' : 'opening'}/${entry.art}.png)` }}
               />
             )}
+            </div>
           </div>
         )
       })}
@@ -136,13 +154,13 @@ export function OpeningSequence({
           not a scrim over the whole picture. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3"
         style={{ background: 'linear-gradient(to top, rgb(var(--ink)) 8%, rgb(var(--ink) / 0) 100%)' }}
       />
 
       {/* The year, stamped on the frame the way a film names its time — big, poster
           face, top corner, gone with the cut. */}
-      {beat.stampHe && (
+      {lines.stampHe && (
         <p
           key={`stamp-${beat.id}`}
           aria-hidden="true"
@@ -150,11 +168,11 @@ export function OpeningSequence({
           style={{ insetInlineEnd: 16, opacity: showing ? 1 : 0, textShadow: '0 2px 18px rgb(var(--ink) / .9)' }}
           dir="ltr"
         >
-          {beat.stampHe}
+          {lines.stampHe}
         </p>
       )}
 
-      <div className="absolute inset-x-0 bottom-[16%] px-gutter text-center">
+      <div className="opening-caption absolute inset-x-0 px-gutter text-center">
         <p
           key={beat.id}
           className="mx-auto max-w-[28rem] font-display text-[17px] leading-relaxed text-sheet transition-opacity duration-500 sm:text-[20px] motion-reduce:transition-none"

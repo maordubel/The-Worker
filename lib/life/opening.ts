@@ -41,8 +41,19 @@ export type OpeningBeat = {
    * same picture the coda ends on is the one the film opens on.
    */
   from?: 'opening' | 'art'
-  /** a year stamped on the frame in the poster face — the way a film names its time */
+  /**
+   * שנה על הפריים — the year in the corner, the way a film names its time.
+   *
+   * A stamp is a DATE and never a caption — "אחר כך" in the corner of a frame is a second
+   * subtitle, and the poster face it is set in has no Hebrew. Only where the year is
+   * KNOWN, and never typed where the archive already holds it:
+   * `stampFrom: 'anchor'` takes the year off the prologue anchor's own date, so the beat
+   * that shows the cup final is stamped 1983 because the archive says 1 June 1983 and for
+   * no other reason. A beat with neither is a beat with no year on it, which is the honest
+   * state of a photograph nobody has dated.
+   */
   stampHe?: string
+  stampFrom?: 'anchor'
   /** how long it holds, in milliseconds, when nobody touches anything */
   ms: number
   /** the line under the picture. Written for the beat; never a fact. */
@@ -61,26 +72,19 @@ export type OpeningBeat = {
  * The order, and it is the order the vision document proposed.
  *
  * 1978 · the cot — the family on the way — 1983 · the shoulders — the crest at the table —
- * the window. Five pictures and no explanation, and then the game starts on the morning
- * after the cup, with the streets still carrying the night before.
+ * the window. Five pictures and no explanation, and then the boy is on his father's
+ * shoulders in a crowd he does not understand, and the player has the controls.
+ *
+ * There was a sixth at the front until 6.9.2026: a cold open on the new ground in 2026,
+ * "forty-eight years, he still goes there", cutting back to the cot. It was a good frame
+ * for a game whose first playable minute was a narrated title card. It stopped being one
+ * the moment 1983 became something you play: an opening that says "he is still going" and
+ * then hands you a five-year-old has already told you how it turns out, and it made the
+ * first thing in a childhood a picture of an old man's habit. Maor cut it, and he is
+ * right. The coda at the end of the built life still returns to that ground, which is
+ * where the sentence belongs — at the end of a life rather than in front of one.
  */
 export const OPENING: OpeningBeat[] = [
-  /**
-   * 2026 — the cold open. A film about a life starts at the end of it: the new ground,
-   * white and lit, a beacon over Jaffa at dusk, and one line that says the man is still
-   * going there. Then the cut to a cot in 1978, which is where the answer begins. The
-   * picture is `introBeacon` from the master package, and the coda at the end of the
-   * built life returns to the same ground, so the frame closes on what it opened.
-   */
-  {
-    id: 'today',
-    kind: 'still',
-    art: 'introBeacon',
-    from: 'art',
-    stampHe: '2026',
-    ms: 4800,
-    captionHe: 'ארבעים ושמונה שנה. הוא עדיין הולך לשם.',
-  },
   {
     id: 'born',
     kind: 'still',
@@ -101,7 +105,12 @@ export const OPENING: OpeningBeat[] = [
     id: 'cup',
     kind: 'still',
     art: 'shoulders',
-    ms: 6000,
+    // The year comes off the archive row, not out of this file. On 6.9.2026 the film ran
+    // 2026 → 1978 → (nothing) → (nothing) → (nothing): after the second beat it stopped
+    // telling the player when anything was, and the sequence stopped reading as a life
+    // and started reading as a mood board.
+    stampFrom: 'anchor',
+    ms: 6600,
     captionHe: 'הוא לא הבין את החוקים. הוא הבין את אבא.',
     archiveLine: 'fixture',
   },
@@ -125,17 +134,25 @@ export type OpeningLines = {
   captionHe: string
   /** the archive's line, or null when the archive cannot answer */
   archiveHe: string | null
+  /** what goes in the corner: a written stamp, the anchor's year, or nothing */
+  stampHe: string | null
 }
 
 const US_HE = 'הפועל תל אביב'
 
 export function openingLines(beat: OpeningBeat, anchor: HistoricalAnchor): OpeningLines {
-  if (!beat.archiveLine) return { captionHe: beat.captionHe, archiveHe: null }
   const match = anchor.match
-  if (!match) return { captionHe: beat.captionHe, archiveHe: null }
+  // the stamp: written, or the anchor's own year, or nothing at all
+  const stampHe =
+    beat.stampFrom === 'anchor'
+      ? (match?.playedOn?.slice(0, 4) ?? null)
+      : (beat.stampHe ?? null)
+
+  if (!beat.archiveLine) return { captionHe: beat.captionHe, archiveHe: null, stampHe }
+  if (!match) return { captionHe: beat.captionHe, archiveHe: null, stampHe }
 
   if (beat.archiveLine === 'date') {
-    return { captionHe: beat.captionHe, archiveHe: longDateHe(match.playedOn) }
+    return { captionHe: beat.captionHe, archiveHe: longDateHe(match.playedOn), stampHe }
   }
 
   const home = match.atHome ? US_HE : match.opponentHe
@@ -149,6 +166,7 @@ export function openingLines(beat: OpeningBeat, anchor: HistoricalAnchor): Openi
   return {
     captionHe: beat.captionHe,
     archiveHe: `${home} — ${away} · ${scoreHe}${date ? ` · ${date}` : ''}`,
+    stampHe,
   }
 }
 

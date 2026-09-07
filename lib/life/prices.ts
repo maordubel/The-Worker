@@ -41,6 +41,16 @@ export const WAGE: Record<Decade, number> = { '80s': 5, '90s': 10, '00s': 18, '1
 /** the deposit on one bottle, by decade — the child's first income in every chapter */
 export const BOTTLE: Record<Decade, number> = { '80s': 1, '90s': 2, '00s': 3, '10s': 4 }
 
+/**
+ * מעטפת סופרגול — a packet of stickers, by decade.
+ *
+ * Priced at exactly one bottle deposit on purpose. It makes the album and the shirt the
+ * same money: every packet is a bottle that did not go towards the shirt on the rail, and
+ * the child has to decide that dozens of times in an afternoon. A collection that costs
+ * nothing is not a collection.
+ */
+export const PACKET: Record<Decade, number> = { '80s': 1, '90s': 2, '00s': 4, '10s': 6 }
+
 /** a bus fare inside the city, by decade */
 export const FARE: Record<Decade, number> = { '80s': 3, '90s': 6, '00s': 12, '10s': 18 }
 

@@ -312,7 +312,18 @@ describe('הבדיון אינו היסטוריה — the content layer invents n
   })
 
   it('names no year but the ones the rebased chapter is set in', () => {
-    const years = new Set([...authored.matchAll(/\b(19|20)\d{2}\b/g)].map((match) => match[0]))
+    /**
+     * תווית עונה איננה שנה — `1980/81` is the name of a printed object, not a claim that
+     * the life reaches 1980.
+     *
+     * The guard below already says so in its own words two tests down ("`1985/86` is a
+     * season label… a guard that failed on those would be turned off within a week"), and
+     * on 7.9.2026 this one started failing on the album page for the booklet the father
+     * kept — a season label inside a comment. Season labels come out first; a BARE year
+     * outside the timeline still fails, which is the thing the test is actually for.
+     */
+    const prose = authored.replace(/\b(19|20)\d{2}\/\d{2}\b/g, ' ')
+    const years = new Set([...prose.matchAll(/\b(19|20)\d{2}\b/g)].map((match) => match[0]))
     for (const year of years) {
       expect(TIMELINE, `unexpected year ${year} in authored content`).toContain(year)
     }

@@ -87,6 +87,30 @@ export type Effect =
   | { e: 'penalty'; attempts: number; perGoal: number }
   /** תחרות חיובים בחצר — five free throws at the schoolyard hoop, in three dimensions */
   | { e: 'hoops'; attempts: number; perBasket: number }
+  /**
+   * סופרגול — the album, and the three verbs it needs.
+   *
+   * `packet` is a purchase: it takes the packet price out of the pocket in the decade's
+   * own money, rolls three stickers off the page the kiosk is selling, counts them in and
+   * raises the envelope. `sticker` puts one named sticker in (or takes one out, with a
+   * negative `count`) and is how a father hands over the one he kept and how a trade
+   * settles. `album` just opens it.
+   *
+   * `packet` is the only one that spends money, and it deliberately spends the SAME money
+   * the shirt costs — see `PACKET` in `prices.ts`.
+   */
+  | { e: 'packet' }
+  /**
+   * להחליף — a duplicate for the one you are missing, with a named child.
+   *
+   * The runtime decides three things this line cannot: WHICH sticker is missing (the
+   * rarest gap on the page being collected), WHO is holding it (`holderOf` — whoever the
+   * player has been worst to), and whether this particular child is that person. If he is
+   * not, he says who is, because that is what children do.
+   */
+  | { e: 'swap'; who: BondId }
+  | { e: 'sticker'; id: string; count?: number }
+  | { e: 'album' }
   /** a sound from the library at the moment the choice lands */
   | { e: 'sfx'; key: SampleKey; level?: number; delayMs?: number }
   /**

@@ -430,6 +430,20 @@ body {
   overscroll-behavior-y: none;
 }
 
+/*
+ * נייר — the wall texture, as a class, for the surfaces inside the game that are paper.
+ *
+ * `body` has carried it since the first pass, and everything drawn over the glass sat on
+ * flat `bg-sheet`. That is fine for a plate — enamel IS flat — and wrong for the two
+ * surfaces that are meant to read as a printed page you are holding: the album, and any
+ * sheet that fills the screen. One class rather than a repeated inline style, so a change
+ * of texture is a change in one place.
+ */
+.paper {
+  background-color: rgb(var(--paper));
+  background-image: repeating-linear-gradient(94deg, rgb(var(--ink) / 0.05) 0 1px, transparent 1px 15px);
+}
+
 /* Every control responds to the first tap, with no 300ms wait and no double-tap zoom. */
 :where(a, button, [role="button"], select, input, label) {
   touch-action: manipulation;
@@ -676,6 +690,55 @@ select {
   .opening-frame { object-fit: cover; background-size: cover }
 }
 
+/* הרקע שמאחורי הבד — what the bars are made of on a phone.
+   6.9.2026. Maor: "תסדר את הסרטון פתיח שיראה יפה." He was right and the letterboxing was
+   the reason: a 16:9 photograph contained inside a 390×844 phone is a strip of picture in
+   the middle of a black screen, roughly a third of the glass, with a caption floating in
+   the void under it. Cropping to cover is not the answer either — it is the reason the
+   contain rule above was written, and it throws away the pennant and the radio.
+   So the bars stop being black. The SAME picture fills the frame behind it, scaled up,
+   heavily blurred and pushed down, and the photograph sits on top of it untouched. It is
+   what a good video player does with a portrait phone, and it reads as a lit room rather
+   than as a hole. Nothing is cropped, nothing is invented, and on anything wider than 6:5
+   the backdrop is simply never seen because the picture covers it. */
+.opening-bed {
+  filter: blur(34px) saturate(0.7) brightness(0.42);
+  transform: scale(1.35);
+  background-size: cover;
+  background-position: center;
+}
+@media (min-aspect-ratio: 6/5) {
+  .opening-bed { display: none }
+}
+
+/* הבמה — where the photograph actually hangs.
+   Centring a 16:9 still inside a 390×844 phone leaves a third of the glass empty above it
+   and a third empty below, with the caption floating in the lower void a long way from the
+   picture it belongs to. A film still with a line of print under it does not look like
+   that. So on a portrait phone the picture is a plate in the upper half — pinned at 12% of
+   the height, full width, its own aspect — and the caption sits directly beneath it. A
+   hairline top and bottom makes it a frame rather than a strip. Anything wider than 6:5
+   releases both and the picture covers the whole screen, which is what a laptop wants. */
+.opening-stage {
+  position: absolute;
+  inset-inline: 0;
+  /* a quarter of the way down, so the plate sits on the eye line and the print under it
+     has room without leaving half the glass empty */
+  top: 24%;
+  /* the box IS the picture, so the hairlines land on the photograph's own edges rather
+     than on an invisible container a letterboxed still is floating inside */
+  aspect-ratio: 16 / 9;
+  box-shadow: 0 -1px 0 rgb(var(--concrete) / .22), 0 1px 0 rgb(var(--concrete) / .22), 0 22px 60px rgb(var(--ink) / .7);
+}
+.opening-stage > * { height: 100%; object-fit: cover; background-size: cover }
+/* 56.25vw is the plate's own height at 16:9 across the full width; the caption sits a
+   thumb's width under it, wherever the phone puts it */
+.opening-caption { top: calc(24% + 56.25vw + 26px); }
+@media (min-aspect-ratio: 6/5) {
+  .opening-stage { position: static; aspect-ratio: auto; height: 100%; box-shadow: none }
+  .opening-caption { top: auto; bottom: 16%; }
+}
+
 /* הפתיח — the slow push on a held painting.
    Six percent over seven seconds and no more. A still frame under a caption reads as a
    loading screen; anything faster than this reads as a camera move, and these are
@@ -745,7 +808,7 @@ select {
    serif, the nineties a printed sticker and a heavier sign face, the two-thousands a
    flatter, tighter poster face. Tuned through three variables the plates read.
    ------------------------------------------------------------------------------------ */
-.life-glass { --life-sign: var(--font-miriam); --life-sign-weight: 700; --life-sign-tracking: 0; --life-plate-texture: none; --ui-scale: 1; }
+.life-glass { --life-sign: var(--font-miriam); --life-sign-weight: 700; --life-sign-tracking: 0; --life-plate-texture: none; --life-cloth-texture: repeating-linear-gradient(96deg, rgb(var(--ink)/.09) 0 1px, transparent 1px 15px); --life-body-tracking: 0; --ui-scale: 1; }
 /* the shell over the painting scales with the glass; the painting (the holder) does not */
 .life-glass > *:not([data-life="holder"]) { zoom: var(--ui-scale); }
 .life-glass[data-decade="80s"] {
@@ -753,19 +816,35 @@ select {
   --life-sign-weight: 900;
   --life-sign-tracking: 0.01em;
   --life-plate-texture: repeating-linear-gradient(94deg, rgb(var(--ink) / 0.06) 0 1px, transparent 1px 9px);
+  /* צעיף תפור ביד — a coarse weave, the way a banner painted in somebody's yard reads */
+  --life-cloth-texture: repeating-linear-gradient(96deg, rgb(var(--ink)/.13) 0 2px, transparent 2px 11px);
+  --life-body-tracking: 0.004em;
 }
 .life-glass[data-decade="90s"] {
   --life-sign: var(--font-miriam);
   --life-sign-weight: 700;
   --life-sign-tracking: 0.02em;
   --life-plate-texture: repeating-linear-gradient(0deg, rgb(var(--ink) / 0.045) 0 1px, transparent 1px 4px);
+  /* דפוס מסך — the printed banner of the nineties: finer, regular, machine-made */
+  --life-cloth-texture: repeating-linear-gradient(96deg, rgb(var(--ink)/.08) 0 1px, transparent 1px 15px);
+  --life-body-tracking: 0;
 }
 .life-glass[data-decade="00s"] {
   --life-sign: var(--font-poster);
   --life-sign-weight: 700;
   --life-sign-tracking: 0.04em;
   --life-plate-texture: none;
+  /* בד מודפס דיגיטלית — flat, no weave at all */
+  --life-cloth-texture: none;
+  --life-body-tracking: -0.004em;
 }
+/*
+ * הבד לפי העשור — the cloth is the loudest object on the glass, so it carries the decade
+ * too, and not only the sign face. `Cloth` draws its own texture layer inline; that layer
+ * now reads this variable, so a banner in 1984 is woven and one in 2000 is printed flat.
+ */
+.life-glass .cloth > span[aria-hidden] { background-image: var(--life-cloth-texture) !important; }
+.life-glass .font-body { letter-spacing: var(--life-body-tracking); }
 .life-glass .font-sign { font-family: var(--life-sign), var(--font-miriam), system-ui, sans-serif; font-weight: var(--life-sign-weight); letter-spacing: var(--life-sign-tracking); }
 .life-glass [data-life="hud-plate"] > span:last-child { background-image: var(--life-plate-texture); }
 
@@ -795,6 +874,77 @@ select {
 @keyframes cast-line {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
+}
+
+
+/*
+ * הילה — the light a Supergoal sticker sits in (Maor, 7.9.2026).
+ *
+ * *"תעשה חיתוך יפה של הקלפים, תוסיף להם איזה 'הילה' מסביבם… תשדרג את התצוגה."* The crop
+ * is done at build time (`scripts/life/build-stickers.py`); this is the light. Three
+ * layers, and none of them touches the photograph:
+ *
+ *  · `::before` — a soft vermilion bloom behind the card, wider than it, so a sticker
+ *    reads as lit rather than pasted. Red because everything that glows in this product
+ *    glows red; a neutral white halo would look like a stock product shot.
+ *  · a lifted shadow — a hard 2px lip and a long soft one, which is a piece of card
+ *    sitting ON a page rather than printed into it.
+ *  · a tilt of a degree or two, set per sticker from its own id, because nobody ever
+ *    stuck one in straight. It is deterministic, so a card does not jump when the page
+ *    re-renders.
+ *
+ * The album page itself keeps its printed slot underneath, corner marks and all, so a
+ * page that is half-filled reads as half-filled from across the room.
+ */
+.sticker {
+  position: relative;
+  transform: rotate(var(--tilt, 0deg));
+  box-shadow: 0 2px 0 rgb(var(--ink) / .30), 0 10px 20px -6px rgb(var(--ink) / .55);
+  transition: transform .18s ease-out, box-shadow .18s ease-out;
+}
+.sticker::before {
+  content: '';
+  position: absolute;
+  inset: -16%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(var(--red) / .62), rgb(var(--red) / .18) 56%, transparent 76%);
+  filter: blur(12px);
+  pointer-events: none;
+}
+.sticker:active { transform: rotate(0deg) scale(1.02); box-shadow: 0 2px 0 rgb(var(--ink) / .3), 0 16px 26px -6px rgb(var(--ink) / .6); }
+/* held up on its own: the same light, larger and steadier, and the tilt comes out */
+.sticker-held { transform: none; box-shadow: 0 3px 0 rgb(var(--ink) / .5), 0 26px 48px -10px rgb(0 0 0 / .7); }
+.sticker-held::before { inset: -22%; filter: blur(22px); background: radial-gradient(closest-side, rgb(var(--red) / .62), rgb(var(--red) / .16) 56%, transparent 76%); }
+/* the empty slot: printed on the page, with the corner marks an album prints */
+.slot-marks {
+  background-image:
+    linear-gradient(rgb(var(--ink) / .55), rgb(var(--ink) / .55)), linear-gradient(rgb(var(--ink) / .55), rgb(var(--ink) / .55)),
+    linear-gradient(rgb(var(--ink) / .55), rgb(var(--ink) / .55)), linear-gradient(rgb(var(--ink) / .55), rgb(var(--ink) / .55));
+  background-repeat: no-repeat;
+  background-size: 10px 1px, 1px 10px, 10px 1px, 1px 10px;
+  background-position: left top, left top, right bottom, right bottom;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sticker, .sticker:active { transition: none }
+}
+
+
+/*
+ * מעטפה — a sticker coming out of a paper envelope (7.9.2026).
+ *
+ * Not a flip and not a shine. A sticker leaves a packet edge-first and lands slightly
+ * crooked, and the whole animation is 240ms because the interesting part is not the
+ * movement, it is the four hundred milliseconds of nothing between one sticker and the
+ * next while you wait to see what the next one is.
+ */
+@keyframes packet-in {
+  from { opacity: 0; transform: translateY(-10%) rotate(-4deg) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+.packet-in { animation: packet-in .24s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .packet-in { animation: none }
 }
 
 

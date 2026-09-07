@@ -34,6 +34,8 @@ export function LifeMenu({
   onRestartDay,
   confirmDay,
   onMap,
+  onAlbum,
+  hasAlbum,
 }: {
   touch: boolean
   deck: boolean
@@ -52,6 +54,15 @@ export function LifeMenu({
   onRestartDay: () => void
   confirmDay: boolean
   onMap: () => void
+  /**
+   * אלבום סופרגול — offered only once there is something in it.
+   *
+   * A menu row for an object the player does not own is a row that teaches them the menu
+   * lies. The album appears the first time a sticker is stuck in and never goes away
+   * again, because `album:` outlives the year.
+   */
+  onAlbum: () => void
+  hasAlbum: boolean
 }) {
   const row =
     'flex min-h-tap w-full items-center justify-between gap-3 border-b-hair border-ink/30 px-3 text-start font-sign text-[15px] text-ink transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none'
@@ -78,6 +89,11 @@ export function LifeMenu({
         <button type="button" className={row} onClick={onMap} data-life="menu-map">
           <span>{t('life.map')}</span>
         </button>
+        {hasAlbum && (
+          <button type="button" className={row} onClick={onAlbum} data-life="menu-album">
+            <span>{t('life.album.menu')}</span>
+          </button>
+        )}
         <button type="button" className={row} onClick={() => onSound(!sound)} data-life="menu-sound">
           <span>{t('life.menu.sound')}</span>
           <span className="font-mono text-[11px] tabular-nums" dir="ltr">

@@ -16,6 +16,8 @@ import dynamic from 'next/dynamic'
 // the moment the bus actually opens one, rather than riding in on every /life visit.
 const PenaltyCard = dynamic(() => import('@/components/life/PenaltyCard').then((m) => m.PenaltyCard), { ssr: false })
 const HoopsCard = dynamic(() => import('@/components/life/HoopsCard').then((m) => m.HoopsCard), { ssr: false })
+import { AlbumSheet } from '@/components/life/AlbumSheet'
+import { PacketCard } from '@/components/life/PacketCard'
 import { ShopCard } from '@/components/life/ShopCard'
 import { StageFinale } from '@/components/life/StageFinale'
 import { TotoCard } from '@/components/life/TotoCard'
@@ -56,6 +58,7 @@ import type { LifeState } from '@/lib/life/types'
 import { checklistFor, type ChecklistItem } from '@/lib/life/checklist'
 import { GIGS } from '@/lib/life/gigs'
 import { bookFor, bookPageFlag } from '@/lib/life/books'
+import { albumTotals } from '@/lib/life/stickers'
 import { CONSEQUENCE_KICKER_HE } from '@/lib/life/consequence'
 import { COIN_WHY_HE, HOOPS_WHY_HE, PENALTY_WHY_HE, TOTO_PER_ANSWER, TOTO_WHY_HE } from '@/lib/life/toto'
 import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE } from '@/lib/life/shirts'
@@ -128,6 +131,10 @@ export function LifeStage({
   const [penalty, setPenalty] = useState<LifeBusEvents['penalty']>(null)
   const [hoops, setHoops] = useState<LifeBusEvents['hoops']>(null)
   const [shop, setShop] = useState<LifeBusEvents['shop']>(null)
+  /** האלבום — open over a stopped world, drawn from a snapshot like the profile is */
+  const [album, setAlbum] = useState<LifeBusEvents['album']>(null)
+  const [albumState, setAlbumState] = useState<LifeState | null>(null)
+  const [packet, setPacket] = useState<LifeBusEvents['packet']>(null)
   const [cast, setCast] = useState<LifeBusEvents['cast']>(null)
   const [film, setFilm] = useState<LifeBusEvents['film']>(null)
   /** the state the shop screen is drawn against, re-read after every purchase */
@@ -161,6 +168,18 @@ export function LifeStage({
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
   }, [])
+  /**
+   * העשור לאוזן — the street is coloured by the year the life is in (`audio.setDecade`).
+   *
+   * One recording, filtered: 1984 has less top end and a tighter bottom than 2000, which
+   * is true of the street and not of the tape. It rides on the HUD's year because that is
+   * the one number in the shell that is always the life's own, and it is idempotent — the
+   * audio ignores a decade it is already in.
+   */
+  useEffect(() => {
+    audio.current?.setDecade(decadeOf(hud.year))
+  }, [hud.year])
+
   const [confirmReset, setConfirmReset] = useState(false)
   const [persisted, setPersisted] = useState(true)
   /**
@@ -299,6 +318,7 @@ export function LifeStage({
       bus.on('doc', (value) => {
         setDoc(value)
         if (value) sfx.play('box-item', { bus: 'ui', level: 0.6 })
+        sfx.duck(Boolean(value))
       }),
     )
     unsubscribe.push(
@@ -306,6 +326,8 @@ export function LifeStage({
         setBook(value)
         // paper, not a UI panel: the same soft handling sound a kept object gets
         if (value) sfx.play('box-item', { bus: 'ui', level: 0.5 })
+        // and the street steps back while somebody is reading, the way it does for a line
+        sfx.duck(Boolean(value))
       }),
     )
     unsubscribe.push(bus.on('cutscene', setCutscene))
@@ -364,6 +386,18 @@ export function LifeStage({
       bus.on('shop', (value) => {
         setShop(value)
         setShopState(value ? engineRef.current?.state ?? null : null)
+        runtime.current?.pause(Boolean(value))
+      }),
+      bus.on('album', (value) => {
+        setAlbum(value)
+        setAlbumState(value?.open ? engineRef.current?.state ?? null : null)
+        runtime.current?.pause(Boolean(value?.open))
+        // paper, not a panel: the album is handled like the booklet and the red box
+        if (value?.open) sfx.play('box-item', { bus: 'ui', level: 0.5 })
+        sfx.duck(Boolean(value?.open))
+      }),
+      bus.on('packet', (value) => {
+        setPacket(value)
         runtime.current?.pause(Boolean(value))
       }),
       bus.on('card', (value) => {
@@ -807,7 +841,7 @@ export function LifeStage({
             </Chip>
           </div>
         )}
-        {help && <HelpSheet objective={hud.objective} hint={hud.hint} checklist={checklist} onClose={closeHelp} />}
+        {help && <HelpSheet objective={hud.objective} hint={hud.hint} waitingOn={hud.waitingOn ?? null} checklist={checklist} onClose={closeHelp} />}
 
         {ready && !covered && controls && (touch ? deck : true) && (
           <ControlDeck
@@ -951,6 +985,31 @@ export function LifeStage({
           />
         )}
 
+        {album?.open && albumState && (
+          <AlbumSheet
+            state={albumState}
+            onClose={() => {
+              busRef.current?.emit('album', null)
+              setAlbum(null)
+              setAlbumState(null)
+              runtime.current?.pause(false)
+            }}
+          />
+        )}
+
+        {packet && (
+          <PacketCard
+            ids={packet.ids}
+            before={packet.before}
+            onClose={() => {
+              setPacket(null)
+              // straight into the album, which is where a torn packet actually ends up —
+              // through the bus, so the mix and the pause follow it like any other sheet
+              busRef.current?.emit('album', { open: true })
+            }}
+          />
+        )}
+
         {toto && (
           <TotoCard
             toto={toto}
@@ -1087,6 +1146,13 @@ export function LifeStage({
             confirmReset={confirmReset}
             onRestartDay={() => (confirmDay ? restartDay() : setConfirmDay(true))}
             confirmDay={confirmDay}
+            hasAlbum={engineRef.current ? albumTotals(engineRef.current.state).have > 0 : false}
+            onAlbum={() => {
+              setMenu(false)
+              setAlbumState(engineRef.current?.state ?? null)
+              setAlbum({ open: true })
+              runtime.current?.pause(true)
+            }}
             onMap={() => {
               setMenu(false)
               setMapState(runtime.current?.snapshot().state ?? null)

@@ -39,15 +39,15 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'kobi', textHe: 'למצוא את אבא.', revealWhen: F('saw:goal'), doneWhen: F('found:kobi') },
   ],
   '1990': [
-    { id: 'math', textHe: 'להבין כמה צריך היום.', doneWhen: F('knows:math') },
+    { id: 'math', textHe: 'להבין בכמה צריך לנצח היום.', doneWhen: F('knows:math') },
     { id: 'go', textHe: 'לצאת. מזרחה.', revealWhen: F('kobi:left'), doneWhen: ANY('entry:granted', 'entry:ticket', 'saw:goal') },
-    { id: 'gate', textHe: 'שער 7. אבא, או כרטיס, או חצי־שער.', revealWhen: F('kobi:left'), doneWhen: ANY('entry:granted', 'entry:ticket') },
+    { id: 'gate', textHe: 'שער 7. עם אבא, עם כרטיס, או לחכות למחצית.', revealWhen: F('kobi:left'), doneWhen: ANY('entry:granted', 'entry:ticket') },
     { id: 'kobi', textHe: 'למצוא את אבא.', revealWhen: F('entry:granted'), doneWhen: F('found:kobi') },
     { id: 'home', textHe: 'הביתה.', revealWhen: F('found:kobi'), doneWhen: F('walked:home') },
   ],
   '1991': [
     { id: 'school', textHe: 'בית ספר. עד הצלצול.', doneWhen: F('school:done') },
-    { id: 'hw', textHe: 'שיעורי בית — או משהו שנראה כמו.', revealWhen: F('hw:given'), doneWhen: ANY('hw:done', 'hw:half', 'hw:faked') },
+    { id: 'hw', textHe: 'שיעורי בית — או משהו שנראה כמו שיעורי בית.', revealWhen: F('hw:given'), doneWhen: ANY('hw:done', 'hw:half', 'hw:faked') },
     { id: 'permission', textHe: 'רשות מאמא. או דרך אחרת.', revealWhen: ANY('hw:done', 'hw:half', 'hw:faked'), doneWhen: ANY('permission:yes', 'sneak:ready') },
     /**
      * אמרה לא — and the list says where the other way is, by name.
@@ -121,7 +121,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   'a2-alley': [
     { id: 'mom', textHe: 'אמא רוצה משהו.', doneWhen: F('a2:errand') },
     { id: 'bread', textHe: 'לחם מהקיוסק.', revealWhen: F('a2:errand'), doneWhen: F('a2:bread') },
-    { id: 'alley', textHe: 'הסמטה. לפני שהקבוצות מלאות.', revealWhen: F('a2:errand'), doneWhen: ANY('a2:played', 'a2:late') },
+    { id: 'alley', textHe: 'הסמטה. לפני שהקבוצות מתמלאות.', revealWhen: F('a2:errand'), doneWhen: ANY('a2:played', 'a2:late') },
   ],
   'a3-hall': [
     { id: 'efi', textHe: 'אפי אמר שיש משהו אחרי הקיר.', doneWhen: F('a3:inside') },
@@ -129,18 +129,18 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   'a4-shirt': [
     { id: 'tin', textHe: 'הקופה מתחת למיטה.', doneWhen: F('a4:tin') },
     { id: 'earn', textHe: 'בקבוקים, שליחויות, מה שאבא נותן.', revealWhen: F('a4:tin'), doneWhen: ANY('a4:worked', 'a4:kobi', 'own:shirt85') },
-    { id: 'shirt', textHe: 'רפי סוגר בשבע.', revealWhen: F('a4:tin'), doneWhen: ANY('own:shirt85', 'a4:gave') },
+    { id: 'shirt', textHe: 'להספיק לרפי עד שבע.', revealWhen: F('a4:tin'), doneWhen: ANY('own:shirt85', 'a4:gave') },
   ],
   'a5-first': [
     { id: 'dress', textHe: 'להתלבש לבד.', doneWhen: F('a5:dressed') },
     { id: 'gate', textHe: 'שער 7. אבא.', revealWhen: F('a5:dressed'), doneWhen: F('a5:there') },
   ],
   'a6-radio': [
-    { id: 'radio', textHe: 'יש רדיו.', doneWhen: ANY('a6:radio-dead', 'a6:heard') },
+    { id: 'radio', textHe: 'לנסות את הרדיו.', doneWhen: ANY('a6:radio-dead', 'a6:heard') },
     { id: 'liron', textHe: 'לירון ברחוב מתקן רדיו.', revealWhen: F('a6:radio-dead'), doneWhen: F('a6:heard') },
   ],
   'a7-week': [
-    { id: 'hear', textHe: 'ברחוב מדברים על שבת הבאה.', doneWhen: F('a7:knows') },
+    { id: 'hear', textHe: 'לגלות על מה כולם מדברים.', doneWhen: F('a7:knows') },
     { id: 'dad', textHe: 'אבא. לשאול.', revealWhen: F('a7:knows'), doneWhen: F('a7:refused') },
   ],
 }

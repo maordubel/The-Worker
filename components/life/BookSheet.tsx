@@ -65,7 +65,7 @@ export function BookSheet({
   return (
     <div
       dir="rtl"
-      className="pointer-events-auto absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink/97"
+      className="pointer-events-auto absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink/95"
       data-life="book"
       data-book={book.id}
       data-page={String(at + 1)}

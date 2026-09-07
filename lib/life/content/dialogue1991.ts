@@ -39,7 +39,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
         when: { flag: 'note:caught' },
         lines: [
           { who: null, text: 'הפתק על השולחן שלה, ליד הגיר, מקופל בדיוק כמו שהיה. היא לא פתחה אותו שוב.' },
-          { who: null, text: 'זה איכשהו יותר גרוע מזה שהיא כן.' },
+          { who: null, text: 'זה איכשהו יותר גרוע מזה שהיא הייתה פותחת אותו.' },
         ],
       },
       // --- the note, and the only real decision of the morning ------------------------
@@ -716,7 +716,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       },
       {
         lines: [
-          { who: 'לימור', text: 'ראשונה בפעם? רואים.' },
+          { who: 'לימור', text: 'פעם ראשונה? רואים.' },
           { who: 'לימור', text: 'יש כניסה מהצד. בחזית התור לוקח חצי שעה, ובחצי שעה הזאת מתחילים.' },
         ],
         choices: [
@@ -807,7 +807,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       },
       {
         lines: [
-          { who: 'סדרן', text: 'יש קבוצות שנכנסות לפה כבר במינוס עשר, לפני שזרקו כדור. ככה זה כאן.' },
+          { who: 'סדרן', text: 'יש קבוצות שנכנסות לפה כבר מובסות, עוד לפני הקפיצה. ככה זה כאן.' },
           { who: 'סדרן', text: 'תיכנס מוקדם אם אתה רוצה לראות משהו. אחר כך זה קיר של אנשים.' },
         ],
         then: [{ e: 'flag', flag: 'knows:early' }],
@@ -880,7 +880,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
       {
         when: { flag: 'spot:asked' },
         lines: [
-          { who: null, text: 'המדרגה. אתה עומד רחב כמה שילד בן שתים עשרה יכול לעמוד רחב.' },
+          { who: null, text: 'המדרגה. אתה תופס כמה שיותר מקום, כמה שילד בן שתים־עשרה יכול לתפוס.' },
           { who: null, text: 'מישהו נדחף בכתף. אתה לא זז. הוא מוצא לעצמו מקום אחר.' },
         ],
         then: [
@@ -1028,7 +1028,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
         when: { flag: 'told:home' },
         lines: [
           { who: null, text: 'תשע וחצי. אתה יודע את זה בלי להסתכל על השעון.' },
-          { who: null, text: 'התקשרת, אמרת איפה אתה. זה לא הופך את זה למותר. זה רק הופך את זה למשהו שסיפרת.' },
+          { who: null, text: 'התקשרת, אמרת איפה אתה. זה עדיין אסור. זה רק אומר שסיפרת.' },
         ],
       },
       {

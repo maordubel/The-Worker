@@ -4,7 +4,7 @@ import { CAST_CARDS, cardForName, metFlag } from '@/lib/life/castCards'
 import { CHARACTERS } from '@/lib/life/characters'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { SHIRTS, onSale, wearingAt, wornFlag, wornIn } from '@/lib/life/shirts'
-import { FILM_CUTS, cutFor, filmFlag } from '@/lib/life/world/transitions'
+import { FILM_CUTS, clipOf, cutFor, eraOfYear, filmFlag } from '@/lib/life/world/transitions'
 import { fold } from '@/lib/life/events'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import type { LifeEvent } from '@/lib/life/events'
@@ -108,7 +108,7 @@ describe('כרטיסי היכרות — nineteen people, once each', () => {
   })
 })
 
-describe('מעברונים — nine clips, and the rules that stop them becoming a loading screen', () => {
+describe('מעברונים — the clips, and the rules that stop them becoming a loading screen', () => {
   it('says nothing on an ordinary door', () => {
     expect(cutFor('kiosk', 'street', 12 * 60, '1986', {})).toBeNull()
     expect(cutFor('bedroom', 'home', 12 * 60, '1986', {})).toBeNull()
@@ -119,8 +119,8 @@ describe('מעברונים — nine clips, and the rules that stop them becoming
    * hall stopped being one turning off his street and became one turning off Allenby.
    */
   it('plays the promenade going north, and a different one coming back', () => {
-    expect(cutFor('allenby', 'ussishkin-outside', 12 * 60, '1991', {})?.clip).toBe('promenade-dusk')
-    expect(cutFor('ussishkin-outside', 'allenby', 12 * 60, '1991', {})?.clip).toBe('promenade-walk')
+    expect(cutFor('allenby', 'ussishkin-outside', 12 * 60, '1991', {}, '80s')?.clip).toBe('promenade-dusk')
+    expect(cutFor('ussishkin-outside', 'allenby', 12 * 60, '1991', {}, '80s')?.clip).toBe('promenade-walk')
   })
 
   it('plays once per chapter and then remembers', () => {
@@ -133,9 +133,9 @@ describe('מעברונים — nine clips, and the rules that stop them becoming
   })
 
   it('never cuts to a morning street at night', () => {
-    expect(cutFor('home', 'street', 9 * 60, '1986', {})?.clip).toBe('street-morning')
+    expect(cutFor('home', 'street', 9 * 60, '1986', {}, '80s')?.clip).toBe('street-morning')
     expect(cutFor('home', 'street', 20 * 60, '1986', {})).toBeNull()
-    expect(cutFor('street', 'route', 20 * 60, '1986', {})?.clip).toBe('night-lights')
+    expect(cutFor('street', 'route', 20 * 60, '1986', {}, '80s')?.clip).toBe('night-lights')
     expect(cutFor('street', 'route', 12 * 60, '1986', {})).toBeNull()
   })
 
@@ -148,11 +148,60 @@ describe('מעברונים — nine clips, and the rules that stop them becoming
     }
   })
 
-  it('every clip it names is a file that was actually cut', async () => {
+  it('every clip it names, in every decade, is a file that was actually cut', async () => {
     const { existsSync } = await import('node:fs')
     for (const cut of FILM_CUTS) {
-      expect(existsSync(`public/life/film/${cut.clip}.mp4`), `${cut.clip}.mp4`).toBe(true)
-      expect(existsSync(`public/life/film/${cut.clip}.jpg`), `${cut.clip}.jpg`).toBe(true)
+      for (const clip of Object.values(cut.clip)) {
+        expect(existsSync(`public/life/film/${clip}.mp4`), `${clip}.mp4`).toBe(true)
+        expect(existsSync(`public/life/film/${clip}.jpg`), `${clip}.jpg`).toBe(true)
+      }
+    }
+  })
+
+  /**
+   * 7.9.2026 — the same journey, in the decade it is actually being made in.
+   *
+   * A boy walking to Ussishkin in 1986 and a young man walking there in 1996 saw two
+   * different cities, and the game now has film of both. What is locked here is that they
+   * are DIFFERENT clips and that neither decade falls through to nothing.
+   */
+  it('plays the decade the life is in', () => {
+    const eighties = cutFor('allenby', 'ussishkin-outside', 12 * 60, '1991', {}, '80s')
+    const nineties = cutFor('allenby', 'ussishkin-outside', 12 * 60, '1993-cup', {}, '90s')
+    expect(eighties?.clip).toBeTruthy()
+    expect(nineties?.clip).toBeTruthy()
+    expect(nineties?.clip).not.toBe(eighties?.clip)
+  })
+
+  it('falls back to the eighties reel for a decade nothing was cut for', () => {
+    for (const cut of FILM_CUTS) {
+      expect(clipOf(cut, '00s'), `${cut.from}→${cut.to} has no clip in 2000`).toBeTruthy()
+    }
+  })
+
+  it('reads the decade off the year the way the rest of the game does', () => {
+    expect(eraOfYear(1986)).toBe('80s')
+    expect(eraOfYear(1990)).toBe('90s')
+    expect(eraOfYear(1999)).toBe('90s')
+    expect(eraOfYear(2000)).toBe('00s')
+  })
+
+  it('records what every clip is and where it came from', async () => {
+    const { readFileSync } = await import('node:fs')
+    const manifest = JSON.parse(readFileSync('public/life/film/manifest.json', 'utf8')) as Record<
+      string,
+      { whatHe: string; source: string; era: string; yellowLeft?: number }
+    >
+    const named = new Set(FILM_CUTS.flatMap((cut) => Object.values(cut.clip)))
+    for (const clip of named) {
+      const row = manifest[clip]
+      expect(row, `${clip} is played but not in the manifest`).toBeTruthy()
+      // provenance, not interpretation — the same rule every document in this game obeys
+      expect(row?.source.length).toBeGreaterThan(6)
+      expect(row?.whatHe.length).toBeGreaterThan(6)
+      // rule 8 reaches film too; 4:2:0 chroma is allowed to put a handful of edge pixels
+      // back and nothing more (`scripts/life/cut-film.py`)
+      expect(row?.yellowLeft ?? 0, `${clip} ships yellow`).toBeLessThanOrEqual(0.0005)
     }
   })
 })

@@ -485,7 +485,9 @@ const SCENES: SceneDef[] = [
         y: 0.9,
         w: 0.16,
         act: 'homework-1991',
-        verb: 'sit',
+        // not `sit`: "תשב על המחברת" is what the old verb produced, and a boy does not sit
+        // on his exercise book. Looking at it is what opens the homework.
+        verb: 'look',
         labelHe: 'המחברת',
         priority: 3,
         prop: { key: 'propNote', size: 0.05, at: { x: 0.19, y: 0.7 } },
@@ -857,7 +859,7 @@ const SCENES: SceneDef[] = [
       // 1990: the paper open on the table, and the radio beside it.
       { id: 'table-1990', era: '1990', x: 0.86, y: 0.78, w: 0.07, act: 'table-1990', verb: 'look', labelHe: 'הטבלה', priority: 2 },
       // sit down at the table: the kitchen from the boy's own chair
-      { id: 'chair-1990', era: '1990', x: 0.7, y: 0.8, w: 0.06, act: 'pano:panoKitchen90', verb: 'sit', labelHe: 'לשולחן' },
+      { id: 'chair-1990', era: '1990', x: 0.7, y: 0.8, w: 0.06, act: 'pano:panoKitchen90', verb: 'sit', labelHe: 'הכיסא ליד השולחן' },
       // ON the table, beside the paper: drawn on the oilcloth, reached from the floor in
       // front of it.
       { id: 'radio-1990', era: '1990', x: 0.93, y: 0.78, w: 0.05, act: 'radio-table-1990', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
@@ -1508,7 +1510,17 @@ const SCENES: SceneDef[] = [
       { id: 'ofir-kiosk', era: '1990', figure: 'ofir90', x: 0.6, y: 0.92, size: 0.479, nameHe: 'אופיר', talk: 'ofir-1990', flip: true },
       { id: 'amit-kiosk', era: '1990', figure: 'amit90', x: 0.5, y: 0.95, size: 0.479, nameHe: 'עמית', talk: 'amit-1990' },
     ],
-    hotspots: [...gigSpots('kiosk'), 
+    hotspots: [
+      /**
+       * שני סימנים בקיוסק, חורף 1997 — a half-empty shelf and a column of numbers.
+       *
+       * Stage B §7 B6 asks that the club's financial danger be SEEN rather than explained.
+       * Two of its seven signs are in here, and neither states a fact: a row of stock that
+       * did not arrive, and a page of a newspaper with some of the figures in brackets.
+       */
+      { id: 'sign-shelf', era: '1996-army', x: 0.24, y: 0.86, w: 0.09, act: 'sign-shelf', verb: 'look', labelHe: 'המדף', when: { flag: 'life:army:d4' } },
+      { id: 'sign-paper', era: '1996-army', x: 0.47, y: 0.9, w: 0.08, act: 'sign-paper', verb: 'look', labelHe: 'העיתון על הדלפק', when: { flag: 'life:army:d4' } },
+      { id: 'sign-till', era: '1996-army', x: 0.36, y: 0.88, w: 0.08, act: 'sign-till', verb: 'talk', labelHe: 'הקופה', when: { all: [{ flag: 'life:army:d4' }, { lacksSticker: 'tikva' }] } },...gigSpots('kiosk'), 
       /**
        * החולצה בחלון, ואז חנות האוהדים.
        *
@@ -2110,7 +2122,19 @@ const SCENES: SceneDef[] = [
       { id: 'ofir-ground', era: '1990', figure: 'ofir90', x: 0.33, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'ofir-ground-1990' },
       { id: 'vendor-1990', era: '1990', figure: 'adultA6', x: 0.88, y: 0.93, size: 0.34, nameHe: 'מוכר', talk: 'vendor-1990', flip: true },
     ],
-    hotspots: [...gigSpots('bloomfield-outside'), 
+    hotspots: [
+      /**
+       * ארבעה סימנים בחוץ, חורף 1997 — the shutter, the ticket window, the man doing two
+       * jobs, and two men outside an office who stop talking when a boy walks past.
+       *
+       * The other four of §7 B6's seven. They are hotspots and not a cutscene because the
+       * brief's point is that a supporter finds out his club is in trouble by noticing
+       * things, in the order he happens to notice them, and never all of them.
+       */
+      { id: 'sign-window', era: '1996-army', x: 0.2, y: 0.84, w: 0.09, act: 'sign-window', verb: 'look', labelHe: 'חלון המשרד', when: { flag: 'life:army:d4' } },
+      { id: 'sign-tickets', era: '1996-army', x: 0.36, y: 0.86, w: 0.09, act: 'sign-tickets', verb: 'talk', labelHe: 'הקופה', when: { flag: 'life:army:d4' } },
+      { id: 'sign-two-jobs', era: '1996-army', x: 0.62, y: 0.88, w: 0.09, act: 'sign-two-jobs', verb: 'talk', labelHe: 'הסדרן', when: { flag: 'life:army:d4' } },
+      { id: 'sign-creditor', era: '1996-army', x: 0.78, y: 0.85, w: 0.1, act: 'sign-creditor', verb: 'look', labelHe: 'השניים ליד המשרד', when: { flag: 'life:army:d4' } },...gigSpots('bloomfield-outside'), 
       { id: 'gate7', era: '*', x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
       { id: 'look-gate', era: '1990', x: 0.25, y: 0.9, w: 0.07, act: 'pano:panoGate7', verb: 'gaze', labelHe: 'סביב' },
       { id: 'fence', era: '*', x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },

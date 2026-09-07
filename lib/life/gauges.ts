@@ -90,10 +90,10 @@ const WELL_HE: Record<WellbeingId, { he: string; good: GaugeDef['good'] }> = {
 }
 
 const ARMY_HE: Record<ArmyGauge, { he: string; good: GaugeDef['good'] }> = {
-  commanderTrust: { he: 'אמון המפקד', good: 'up' },
+  commanderTrust: { he: 'המפקד סומך עליך', good: 'up' },
   leaveDebt: { he: 'חוב חופשות', good: 'down' },
   fatigue: { he: 'שחיקה', good: 'down' },
-  coveredForOthers: { he: 'כיסה לאחרים', good: 'up' },
+  coveredForOthers: { he: 'כיסית על חברים', good: 'up' },
 }
 
 const INST_HE: Record<InstitutionGauge, { he: string; good: GaugeDef['good'] }> = {
@@ -102,7 +102,7 @@ const INST_HE: Record<InstitutionGauge, { he: string; good: GaugeDef['good'] }> 
   protestEscalation: { he: 'הסלמה', good: 'none' },
   legalUnderstanding: { he: 'הבנה משפטית', good: 'up' },
   ussishkinWound: { he: 'הפצע של אוסישקין', good: 'down' },
-  supporterOwnershipSeed: { he: 'הזרע של הבעלות', good: 'up' },
+  supporterOwnershipSeed: { he: 'ההתחלה של הבעלות', good: 'up' },
 }
 
 export const GATE_HE: Record<GateIdentity, string> = {

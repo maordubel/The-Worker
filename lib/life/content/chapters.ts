@@ -113,15 +113,25 @@ export const CHAPTERS: readonly ChapterDef[] = [
     stage: 'A',
     unit: 'A4',
     titleHe: 'החולצה',
-    dateHe: 'קיץ 1985',
+    /**
+     * ספטמבר, לא קיץ — the day the shirt costs thirty shekels has to be a day on which
+     * shekels exist.
+     *
+     * The new shekel came in on 4.9.1985. A4 was set in "קיץ 1985" and its whole mechanic
+     * is counting to thirty of them, which is a currency the summer of 1985 did not have —
+     * and in the old one, thirty bought nothing. It is the second half of September now:
+     * after the changeover, and before 28.9.1985, which is A5. Nothing else about the day
+     * moves. (Found by the language audit, 6.9.2026.)
+     */
+    dateHe: 'ספטמבר 1985',
     year: 1985,
     weekday: 0,
     minute: MIN(9, 30),
     start: { location: 'bedroom', spawn: 'start' },
     next: 'a5-first',
-    bridge: { titleHe: 'קיץ 1985', subHe: 'פחית עם חריץ', ms: 2600 },
+    bridge: { titleHe: 'ספטמבר 1985', subHe: 'פחית עם חריץ', ms: 2600 },
     anchorKey: '1986',
-    hudDateHe: 'קיץ 1985',
+    hudDateHe: 'ספטמבר 1985',
     playable: true,
   },
   {

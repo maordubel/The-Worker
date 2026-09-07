@@ -74,12 +74,27 @@ export class LifeEngine {
     return this.events
   }
 
+  /**
+   * גרסת הדגלים — a counter that changes whenever ANY flag does.
+   *
+   * `WorldScene` refreshed a room when the NUMBER of flags changed, which catches a flag
+   * being raised for the first time and misses a `flag.set` on a key that already exists.
+   * The room then keeps showing whoever the old value said was there, and the only way out
+   * is to walk through a door and back — a stale room the player cannot unstick.
+   *
+   * It is a version rather than a deep compare because the check runs every frame: an
+   * integer that only moves on a flag write costs nothing to read sixty times a second.
+   * (Code audit, 6.9.2026.)
+   */
+  flagVersion = 0
+
   dispatch(...events: LifeEvent[]): LifeState {
     let immediate = false
     for (const event of events) {
       this.events.push(event)
       this.state = apply(this.state, event)
       if (IMMEDIATE.has(event.t)) immediate = true
+      if (event.t === 'flag.raised' || event.t === 'flag.set') this.flagVersion += 1
     }
     for (const listener of this.listeners) listener(this.state)
     this.markDirty(immediate)

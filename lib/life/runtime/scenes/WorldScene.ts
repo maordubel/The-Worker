@@ -19,7 +19,7 @@ import type { LifeState, LocationId } from '../../types'
 import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
 import type { Condition } from '../../world/types'
-import { cutFor, filmFlag } from '../../world/transitions'
+import { cutFor, eraOfYear, filmFlag } from '../../world/transitions'
 import { bodySize } from '../../world/heights'
 import { LivingWorld } from '../living'
 import { GIGS, isPaid, offerFlag, offeredIn } from '../../gigs'
@@ -30,20 +30,10 @@ import { GIGS, isPaid, offerFlag, offeredIn } from '../../gigs'
  */
 const HALL_NIGHTS: readonly string[] = ['1991', '1993-cup', '1997-basket', '1999-basket']
 
-/**
- * כמה דקות משחק עד שיום הוא כבר לא יום.
- *
- * Every chapter is a single day that starts between nine in the morning and eight at
- * night. Twenty-two game-hours after it opened, whatever it was about is over — late enough
- * that no written ending is ever cut short, and early enough that a player who has run out
- * of things to press is not left standing in it. Counted as ELAPSED minutes rather than as
- * a time of day, because the clock wraps at midnight and a chapter that runs past it comes
- * back round to a number that looks like the morning.
- */
-const LAST_RESORT_MINUTES = 22 * 60
 import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, whenFor } from '../../world/scenes'
 import { compose as composeHint, holds as hintHolds } from '../../world/hints'
 import { unmet } from '../../world/why'
+import { forcedEnding, isStalled, LAST_RESORT_MINUTES, waitingForTheClock } from '../../world/lastResort'
 import { nextStep } from '../../world/route'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import type { PanoSpot } from '../bus'
@@ -263,7 +253,8 @@ export class WorldScene extends Phaser.Scene {
   private paused = false
   private minuteAcc = 0
   private timeScale = 1
-  private flagCount = 0
+  /** the engine's flag version as of the last refresh — see `LifeEngine.flagVersion` */
+  private flagCount = -1
   private matchPhase: 'none' | 'archive' | 'watching' | 'goal' | 'celebrating' | 'over' = 'none'
   /** the film currently on screen, and the reason the world is stopped */
   private cutscene: HistoricalCutscene | null = null
@@ -512,17 +503,33 @@ export class WorldScene extends Phaser.Scene {
      * instant an axis moves — because the two schemes are not rivals. Full Throttle shipped
      * both as well.
      */
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    /**
+     * The two pointer listeners are removed on shutdown, like the resize listener above.
+     *
+     * This scene is restarted on every doorway in the game — several thousand times in a
+     * full playthrough — and these were registered fresh each time with no `.off()`,
+     * trusting Phaser's input plugin to clear them. It does today. The `resize` listener
+     * four lines up is unregistered explicitly, which is the pattern; this is the same
+     * pattern, applied. If the framework assumption ever changes, the alternative is every
+     * tap firing N times for the rest of the session. (Code audit, 6.9.2026.)
+     */
+    const onPointerDown = (pointer: Phaser.Input.Pointer) => {
       if (this.paused || this.matchPhase === 'archive') return
       if (!this.onPicture(pointer.x, pointer.y)) return
       this.pointAt(pointer.worldX, pointer.worldY)
-    })
-    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+    }
+    const onPointerMove = (pointer: Phaser.Input.Pointer) => {
       if (this.paused) return
       // Hover is a mouse idea. A finger dragging across the glass is a drag, not a hover,
       // and lighting up every object it passes over is noise.
       if (pointer.isDown || pointer.wasTouch) return
       this.hovering = this.onPicture(pointer.x, pointer.y) ? this.pickAt(pointer.worldX, pointer.worldY) : null
+    }
+    this.input.on('pointerdown', onPointerDown)
+    this.input.on('pointermove', onPointerMove)
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.off('pointerdown', onPointerDown)
+      this.input.off('pointermove', onPointerMove)
     })
 
     this.ctx.dialogue.setHooks({
@@ -555,8 +562,21 @@ export class WorldScene extends Phaser.Scene {
     // year) — and it is what puts a place on the city map (`lib/life/map.ts`).
     if (!this.ctx.engine.state.flags[`life:been:${this.def.id}`]) {
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: `life:been:${this.def.id}` })
+      /**
+       * לראות את המגרש זה לראות את המגרש — however you got there.
+       *
+       * `saw:road` is the flag that puts Bloomfield on the map, and it was raised by ONE
+       * thing: the arrival plate on the road east, the first sight of the floodlights over
+       * the rooftops. That is the right moment and it is not the only one — 28.9.1985 puts
+       * a seven-year-old in his father's car and sets him down outside the ground, and a
+       * boy who has stood at Gate 7 with his father and then cannot find Bloomfield on his
+       * own map is being told he was never there. (Map audit, 6.9.2026.)
+       */
+      if (this.def.id === 'bloomfield-outside' && !this.ctx.engine.state.flags['saw:road']) {
+        this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'saw:road' })
+      }
     }
-    this.flagCount = Object.keys(this.ctx.engine.state.flags).length
+    this.flagCount = this.ctx.engine.flagVersion
     this.pushHud()
     // The board belongs to the terrace. Walk out through the tunnel after the whistle and
     // the strip used to follow the boy into the street, over the HUD, all the way home.
@@ -1213,7 +1233,9 @@ export class WorldScene extends Phaser.Scene {
     this.autoExits(delta)
     this.tickStuck(delta)
 
-    if (Object.keys(this.ctx.engine.state.flags).length !== this.flagCount) this.refresh()
+    // any flag write, not just a new key — a `flag.set` on an existing flag used to leave
+    // the room showing whoever the old value said was there (code audit, 6.9.2026)
+    if (this.ctx.engine.flagVersion !== this.flagCount) this.refresh()
   }
 
   /**
@@ -1815,43 +1837,29 @@ export class WorldScene extends Phaser.Scene {
    * out. This is the floor, not the plan.
    */
   private lastResort() {
-    if (this.paused || this.closing || this.ctx.engine.state.chapterDone) return
+    if (this.paused || this.closing) return
     const state = this.ctx.engine.state
-    // a match still playing, a cutscene, a card: those own the screen and will end it
-    if (this.director?.active || this.matchPhase === 'watching' || this.matchPhase === 'goal') return
-
-    /**
-     * שני תנאים, ורק אחד מהם הוא השעון.
-     *
-     * The clock is the crude floor: half past midnight, an hour past the latest thing any
-     * chapter schedules. The other one is the honest signal, and it is the exact shape of
-     * every dead end reported so far — the chapter has stopped WANTING anything (its
-     * objective has gone null: the alley was played, the shirt was bought, the match was
-     * heard) and no beat is waiting to say so. A day in that state is finished; it just
-     * has not been told. Ninety game-minutes of it — a minute and a half at normal speed,
-     * long enough that no written ending is ever cut short — and the day closes.
-     */
-    const idle =
-      !this.objective(state) &&
-      !this.beatBusy &&
-      !this.beatPending &&
-      !this.ctx.dialogue.open &&
-      !this.waitingForTheClock()
-    this.stalledFor = idle ? this.stalledFor + 1 : 0
-    /**
-     * `livedFor` counts minutes since this room started, not the wall clock, because the
-     * wall clock WRAPS: a chapter that runs past midnight comes back round to 00:16 and a
-     * test against `state.minute` quietly stops being true. The a6 trace on 6.9.2026 shows
-     * exactly that — 1411, then 16 — with a day that had been over for hours.
-     */
-    if (this.livedFor < LAST_RESORT_MINUTES && this.stalledFor < 90) return
-    const endings = this.era.endings
-    // the chapter's own idea of "nothing happened", else whatever it lists first — a
-    // chapter with no endings at all cannot be closed and says so in the console rather
-    // than pretending
-    const id = ['home', 'missed', 'late', 'played'].find((key) => endings[key]) ?? Object.keys(endings)[0]
+    const busy =
+      Boolean(this.director?.active) ||
+      this.matchPhase === 'watching' ||
+      this.matchPhase === 'goal' ||
+      this.beatBusy ||
+      this.beatPending ||
+      this.ctx.dialogue.open
+    const input = {
+      state,
+      era: this.era,
+      objectiveHe: this.objective(state),
+      livedFor: this.livedFor,
+      stalledFor: this.stalledFor,
+      busy,
+    }
+    this.stalledFor = isStalled(input) ? this.stalledFor + 1 : 0
+    const id = forcedEnding({ ...input, stalledFor: this.stalledFor })
     if (!id) {
-      if (process.env.NODE_ENV !== 'production') console.warn(`[life] ${this.chapter} has no endings; the day cannot close`)
+      if (this.livedFor >= LAST_RESORT_MINUTES && !busy && process.env.NODE_ENV !== 'production') {
+        console.warn(`[life] ${this.chapter} has no endings; the day cannot close`)
+      }
       return
     }
     this.closing = true
@@ -1875,14 +1883,6 @@ export class WorldScene extends Phaser.Scene {
    * place — is not a wait, it is a requirement, and a requirement in a chapter that wants
    * nothing is the dead end this whole mechanism exists to catch.
    */
-  private waitingForTheClock(): boolean {
-    const state = this.ctx.engine.state
-    return (this.era.beats ?? []).some((beat) => {
-      if (state.flags[beatFlag(beat.id)]) return false
-      const needs = unmet(state, beat.when)
-      return needs.length > 0 && needs.every((need) => need.startsWith('אחרי '))
-    })
-  }
 
   /** set the moment `lastResort` fires, so it cannot fire twice on consecutive minutes */
   private closing = false
@@ -2137,7 +2137,7 @@ export class WorldScene extends Phaser.Scene {
           : 0.24
         : 0.1
     }
-    this.flagCount = Object.keys(state.flags).length
+    this.flagCount = this.ctx.engine.flagVersion
     this.pushHud()
   }
 
@@ -2161,7 +2161,19 @@ export class WorldScene extends Phaser.Scene {
       objective: this.objective(state),
       year: state.year,
       scene: this.def.id,
-      hint: hintFor(state, this.def.id),
+      /**
+       * מה לעשות עכשיו — live, not a table.
+       *
+       * `hintFor` is a hard-coded sentence per chapter and room, which is the same shape as
+       * the bug that sent Maor looking for a father who was not in the chair: a line
+       * written once for one state, shown in every state. The "?" sheet is where a confused
+       * player goes, so it is the last place that should be guessing. `hintNow()` reads the
+       * room — who is in it, which doors are open, where the chapter is sending him — and
+       * the table is the floor under it for a room that has nothing to say.
+       */
+      hint: this.hintNow() ?? hintFor(state, this.def.id),
+      /** and what the DAY is waiting for, when the room itself is finished */
+      waitingOn: this.waitingOn(),
       waitingHe: this.waitingFor(state),
     })
   }
@@ -2191,6 +2203,16 @@ export class WorldScene extends Phaser.Scene {
       // clock — he is waiting on himself, and that is what the objective line is for.
       const rest: Condition = { ...beat.when, afterMinute: undefined }
       if (!meets(state, rest)) continue
+      /**
+       * ספירה לאחור, לא שעון — the last hour before something is a countdown.
+       *
+       * "ממתין: המשחק מתחיל · שבת 20:00" is a timetable. Twelve minutes before kickoff a
+       * person does not think in times of day, he thinks in how long, and the difference
+       * between those two sentences is the difference between a schedule and tension. Over
+       * an hour out it stays a clock, because "בעוד 214 דקות" is not a thing anybody feels.
+       */
+      const left = at - state.minute
+      if (left <= 60) return `${beat.waitingHe} · בעוד ${left} ${left === 1 ? 'דקה' : 'דקות'}`
       return `${beat.waitingHe} · ${clockLabel(state.weekday, at)}`
     }
     return null
@@ -2968,13 +2990,20 @@ export class WorldScene extends Phaser.Scene {
      * it runs, so the film is not a wait — the room is already built when the picture
      * fades.
      */
-    const cut = cutFor(this.def.id, to, this.ctx.engine.state.minute, this.chapter, this.ctx.engine.state.flags)
+    const cut = cutFor(
+      this.def.id,
+      to,
+      this.ctx.engine.state.minute,
+      this.chapter,
+      this.ctx.engine.state.flags,
+      eraOfYear(this.ctx.engine.state.year),
+    )
     if (cut) this.ctx.engine.dispatch({ t: 'flag.raised', flag: filmFlag(cut.clip, this.chapter) })
 
     this.leak()
     this.fadeThen(300, () => {
       void this.ctx.engine.save()
-      if (cut) this.ctx.bus.emit('film', { clip: cut.clip, captionHe: cut.captionHe })
+      if (cut) this.ctx.bus.emit('film', { clip: cut.clip, captionHe: cut.cut.captionHe })
       this.scene.restart({ mapId: to, spawn, from: this.def.id })
     })
   }
@@ -3273,6 +3302,26 @@ export class WorldScene extends Phaser.Scene {
     }
     this.ctx.bus.emit('controls', { visible: false })
     this.ctx.bus.emit('prompt', null)
+    /**
+     * כרטיס לפני המשחק — the fixture, held for a moment, before the first whistle.
+     *
+     * Every match in this game used to begin with the scoreboard simply appearing. A match
+     * is the biggest thing that happens in a chapter and it deserves the beat a broadcast
+     * gives it: the two names and the date, from the ARCHIVE — never typed — and then the
+     * game. Where the archive cannot answer there is no card, because a card that says
+     * "משחק" is a card about nothing.
+     */
+    const fixture = this.anchor.match
+    if (fixture) {
+      const us = 'הפועל תל אביב'
+      const home = fixture.atHome ? us : fixture.opponentHe
+      const away = fixture.atHome ? fixture.opponentHe : us
+      this.ctx.bus.emit('card', {
+        titleHe: `${home} — ${away}`,
+        subHe: longDateHe(fixture.playedOn) ?? null,
+        ms: 2200,
+      })
+    }
     const director = new MatchDirector(
       {
         emit: (name, value) => this.ctx.bus.emit(name, value),
@@ -4065,6 +4114,27 @@ export class WorldScene extends Phaser.Scene {
       out.push({ kind: 'exit', id: exit.to, labelHe: exit.labelHe ?? exit.id })
     }
     return out
+  }
+
+  /**
+   * מה הפרק מחכה לו, במשפט — the first unfired beat that can end the day, and what it
+   * needs, in the words `world/why.ts` puts on a condition.
+   *
+   * A player who has done everything in the room and is still standing there is either
+   * waiting for a time (which is fine, and the game should say so) or missing something
+   * (which is not, and the game should say that too). Before this the "?" sheet answered
+   * both with the same sentence written months earlier.
+   */
+  private waitingOn(): string | null {
+    const state = this.ctx.engine.state
+    if (state.chapterDone) return null
+    for (const beat of this.pending()) {
+      if (beat.fired || !beat.ends) continue
+      if (beat.waitingHe) return beat.waitingHe
+      if (beat.needs.length) return `ממתין: ${beat.needs.slice(0, 2).join(' · ')}`
+      return null
+    }
+    return null
   }
 
   /** The hint the room would give right now — the probes read it to catch a lying room. */

@@ -24,7 +24,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { flag: 'knows:math' },
         lines: [
-          { who: null, text: 'העיתון עדיין פתוח על הטבלה. החשבון כבר עשוי — שלך, או שלו.' },
+          { who: null, text: 'העיתון עדיין פתוח על הטבלה. החשבון כבר נעשה — שלך, או שלו.' },
           { who: null, text: 'מה שנשאר זה משחק אחד פה, ומשחק אחד שאף אחד בשולחן הזה לא יראה.' },
         ],
       },
@@ -425,6 +425,26 @@ export const CONVERSATIONS_1990: Conversation[] = [
               { e: 'toast', text: 'שקית גרעינים', tone: 'red' },
             ],
           },
+          /**
+           * מעטפה, 1990 — the same shekel decision as 1986 and a different album.
+           *
+           * `packet` resolves the page off the chapter's decade, so the boy who filled
+           * 1985/86 opens 1992/93 stickers here without a line of content saying so.
+           */
+          {
+            id: 'packet',
+            text: 'מעטפת סופרגול. 2 ₪.',
+            when: { minAgorot: 200 },
+            noteHe: 'אין לך מספיק',
+            then: [{ e: 'packet' }],
+          },
+          {
+            id: 'album',
+            text: 'לפתוח את האלבום.',
+            when: { flag: 'album:seen' },
+            hidden: true,
+            then: [{ e: 'album' }],
+          },
           { id: 'no', text: 'לא לגעת בכסף של אמא.', then: [{ e: 'personality', key: 'responsibility', delta: 3 }] },
         ],
       },
@@ -450,7 +470,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
       },
       {
         lines: [
-          { who: null, text: 'אדם עם צעיף ביד, לא על הצוואר. חם מדי בשביל ללבוש אותו, וקר מדי בשבילו בלי.' },
+          { who: null, text: 'אדם עם צעיף ביד, לא על הצוואר. חם מדי בשביל ללבוש אותו, ואי אפשר לבוא בלעדיו.' },
           { who: 'בארי', text: 'אתה הבן של קובי. אתם בשער 7, ליד העמוד השני. כמו תמיד.' },
           { who: 'בארי', text: 'ואם תאבד אותו בהפסקה — הגדר בין שער 5 לשער 7. שם כולם נפגשים, שם מוצאים אנשים.' },
         ],
@@ -557,7 +577,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         lines: [
           { who: 'סדרן', text: 'כרטיס. אין כרטיס — אין שער. היום בטח שלא.' },
-          { who: null, text: 'הוא לא רשע. היום פשוט יש יותר אנשים מאשר מקומות, וזה לא הוא שסופר.' },
+          { who: null, text: 'הוא לא רשע. היום פשוט יש יותר אנשים ממקומות, וזה לא הוא שסופר.' },
         ],
       },
     ],

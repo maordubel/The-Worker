@@ -137,10 +137,30 @@ export const BEATS_GALIL: Beat[] = [
   },
   // ------------------------------------------------------------------ day 2 · game 2 ---
   {
+    /**
+     * משחק 2 — the away night, and it stopped being a corridor.
+     *
+     * `g2-kitchen` fired on entering the kitchen and forced the radio, so one of the four
+     * games in an escalating series was a cutscene. Stage B §7 B4 asks that attendance
+     * compete with school, family and money, and that "hearing it on the way" be a real
+     * state and not flavour. It is a decision now, taken in the street before the kitchen:
+     * a coach is going north and there is a seat on it, there is homework that is due, and
+     * there is a father at a kitchen table with a transistor. All three are real, and one
+     * afternoon buys one of them.
+     */
+    id: 'g2-open',
+    at: 'street',
+    trigger: 'enter',
+    when: { flag: D2, none: [{ flag: 'g2:chose' }, { flag: D3 }] },
+    delayMs: 700,
+    do: [{ a: 'talk', conversation: 'g2-choose' }],
+  },
+  {
+    /** whichever way it went, the evening resolves and the next day starts */
     id: 'g2-kitchen',
     at: 'kitchen',
     trigger: 'enter',
-    when: { flag: D2, none: [{ flag: D3 }] },
+    when: { all: [{ flag: D2 }, { flag: 'g2:home' }], none: [{ flag: D3 }] },
     delayMs: 700,
     do: [
       { a: 'sound', kind: 'radio', on: true },
@@ -151,7 +171,19 @@ export const BEATS_GALIL: Beat[] = [
       { a: 'travel', to: 'ussishkin-outside', spawn: 'start' },
     ],
   },
-  // ------------------------------------------------------------------ day 3 · game 3 ---
+  {
+    /** the coach north: the result arrives on the road, through somebody else's radio */
+    id: 'g2-coach',
+    trigger: 'clock',
+    when: { all: [{ flag: D2 }, { flag: 'g2:coach' }], none: [{ flag: D3 }] },
+    delayMs: 900,
+    do: [
+      { a: 'talk', conversation: 'g2-road' },
+      { a: 'events', events: DAY(D3, 1993, 0, at(18, 0), '16 במאי 1993') },
+      { a: 'card', titleHe: 'יום ראשון', subHe: 'משחק 3 · אוסישקין', ms: 2400 },
+      { a: 'travel', to: 'ussishkin-outside', spawn: 'start' },
+    ],
+  },
   {
     id: 'g3-hall',
     at: 'ussishkin-hall',
@@ -212,6 +244,93 @@ export const BEATS_GALIL: Beat[] = [
 ]
 
 export const CONVERSATIONS_GALIL: Conversation[] = [
+  {
+    id: 'g2-choose',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'יום רביעי. משחק שני, אצלם, בצפון. ברחוב עומדת הסעה קטנה ולידה לימור עם הפנקס.' },
+          { who: 'לימור', text: 'שלושים שקל, יוצאים בארבע, חוזרים אחרי חצות. יש מקום אחד.' },
+          { who: null, text: 'בתיק יש מחברת עם שיעורים למחר. בבית יש אבא עם טרנזיסטור.' },
+        ],
+        choices: [
+          {
+            id: 'coach',
+            text: 'לעלות. שלושים שקל.',
+            when: { minAgorot: 3000 },
+            noteHe: 'אין שלושים.',
+            then: [
+              { e: 'money', agorot: -3000, why: 'הסעה לצפון' },
+              { e: 'flag', flag: 'g2:chose' },
+              { e: 'flag', flag: 'g2:coach' },
+              { e: 'flag', flag: 'hw:missed' },
+              { e: 'rel', who: 'crowd-limor', axis: 'bond', delta: 3 },
+              { e: 'redheart', key: 'travelDrive', delta: 5 },
+              { e: 'time', minutes: 120 },
+            ],
+          },
+          {
+            id: 'home',
+            text: 'להישאר. שיעורים, ואבא ליד הרדיו.',
+            then: [
+              { e: 'flag', flag: 'g2:chose' },
+              { e: 'flag', flag: 'g2:home' },
+              { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 2 },
+              { e: 'personality', key: 'responsibility', delta: 3 },
+            ],
+          },
+          {
+            id: 'neither',
+            text: 'לא זה ולא זה. לצאת לרחוב.',
+            then: [
+              { e: 'flag', flag: 'g2:chose' },
+              { e: 'flag', flag: 'g2:home' },
+              { e: 'flag', flag: 'g2:drifted' },
+              { e: 'wellbeing', key: 'loneliness', delta: 3 },
+              { e: 'toast', text: 'הסתובבת שעה וחצי ובסוף חזרת הביתה בדיוק כשהתחיל.', tone: 'plain' },
+              { e: 'time', minutes: 90 },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * לשמוע את זה בדרך — the state the brief asks for and the game did not have: the
+     * result arriving on a road, out of somebody else's radio, before anybody involved
+     * has stopped driving.
+     */
+    id: 'g2-road',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'ההסעה. שתים־עשרה מושבים, אחד־עשר אנשים, ונהג ששם תחנה שהוא אוהב ולא זזה משם.' },
+          { who: null, text: 'בחצי הדרך מישהו מאחור הרים טרנזיסטור לאוזן ואמר "רגע". כל האוטובוס נהיה שקט בבת אחת, ואז הוא אמר את זה.' },
+          { who: null, text: 'עוד שעה וחצי נסיעה, ואף אחד לא כיבה את המנוע ואף אחד לא דיבר.' },
+        ],
+        choices: [
+          {
+            id: 'sit',
+            text: 'לשבת ולהסתכל בחלון.',
+            then: [{ e: 'presence', mode: 'travelling' }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'redheart', key: 'travelDrive', delta: 3 }],
+          },
+          {
+            id: 'ledger',
+            text: 'לשאול את לימור מה כתוב בפנקס.',
+            then: [
+              { e: 'presence', mode: 'travelling' },
+              { e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 4 },
+              { e: 'redheart', key: 'community', delta: 3 },
+              { e: 'toast', text: '"מי נסע, מי איחר, כמה עלה." היא הראתה לך את העמוד ולא אמרה כלום על התוצאה.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   {
     id: 'efi-galil',
     nameHe: 'אפי',

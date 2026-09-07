@@ -41,7 +41,7 @@ export function DocSheet({
       type="button"
       onClick={onClose}
       aria-label={t('life.finale.close')}
-      className="pointer-events-auto absolute inset-0 z-[60] flex min-h-tap flex-col items-center justify-center gap-3 bg-ink/96 p-3"
+      className="pointer-events-auto absolute inset-0 z-[60] flex min-h-tap flex-col items-center justify-center gap-3 bg-ink/95 p-3"
       data-life="doc"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}

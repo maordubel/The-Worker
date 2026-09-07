@@ -205,7 +205,18 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     const love = hapoelLove(after)
     if (changes.some((c) => c.id === 'love')) bumps += 1
     options.bus.emit('love', { value: love, bump: bumps })
-    if (changes.length > 0) options.bus.emit('gauge', changes)
+    /**
+     * לא באמצע הזיכרון הראשון — the meters move during the prologue and they do not
+     * announce themselves while they do.
+     *
+     * 1.6.1983 is a five-year-old on his father's shoulders in a crowd he does not
+     * understand, and on 6.9.2026 it was also "אהבה להפועל +1 · 15%" sliding across the
+     * frame every time he looked at something. A number over a memory is the fastest way
+     * to turn a film back into a game. The gauges still change — the whole point of the
+     * prologue is that it decides who the boy is — they simply do it quietly, and the
+     * player meets them for the first time in 1984, in a room, where a read-out belongs.
+     */
+    if (changes.length > 0 && after.chapter !== 'prologue') options.bus.emit('gauge', changes)
   })
 
   // The probes run in a headless browser whose WebGL is a software rasteriser; a frame

@@ -36,6 +36,16 @@ const ORDER = [
   '1997-basket', '1998-laces', '1999-basket', '1999-cup', '2000-title', '2000-double',
 ]
 
+/** the room each chapter opens in — the robot stands there first so the opening beat fires */
+const START_ROOM = {
+  'a2-alley': 'home', 'a3-hall': 'street', 'a4-shirt': 'bedroom', 'a5-first': 'bedroom',
+  'a6-radio': 'home', 'a7-week': 'street', '1986': 'bedroom', '1990': 'kitchen',
+  '1991': 'classroom', '1993-cup': 'home', '1993-galil': 'ussishkin-hall',
+  '1995-sinai': 'kiosk', '1996-army': 'street', '1997-basket': 'ussishkin-outside',
+  '1998-laces': 'home', '1999-basket': 'ussishkin-hall', '1999-cup': 'street',
+  '2000-title': 'street', '2000-double': 'street',
+}
+
 /** the year each chapter is played in — the save file will not load without one */
 const YEAR_OF = {
   'a2-alley': 1984, 'a3-hall': 1984, 'a4-shirt': 1985, 'a5-first': 1985, 'a6-radio': 1986,
@@ -87,6 +97,17 @@ for (const chapter of CHAPTERS) {
   await page.goto(`${BASE}/life`, { waitUntil: 'domcontentloaded' })
   await page.waitForSelector('canvas', { timeout: 30000 }).catch(() => {})
   await page.waitForTimeout(2200)
+
+  /**
+   * A seeded save enters a chapter without ever standing in the room the chapter opens in,
+   * so the `enter` beat that raises the chapter's DAY flag (`life:a:d3`, `life:galil:d2`)
+   * never fires — and every later beat, which reads that flag, reports itself as waiting
+   * for something the robot cannot give it. That is a fact about the seeding, not about the
+   * game, and it was making the audit accuse working chapters. So the robot walks to the
+   * chapter's own starting room first, the way a player arrives.
+   */
+  await page.evaluate((room) => window.__life?.debug.goTo(room), START_ROOM[chapter] ?? 'home').catch(() => {})
+  await page.waitForTimeout(1200)
 
   const look = () => page.evaluate(() => {
     const l = window.__life

@@ -297,6 +297,33 @@ describe('brand acceptance — system rules', () => {
     expect(sheet).toContain('charCodeAt')
   })
 
+  /**
+   * שקיפות שלא קיימת — an opacity modifier Tailwind never generated.
+   *
+   * `bg-ink/97` reads like a slightly darker `bg-ink/95` and is not: Tailwind's opacity
+   * modifier resolves against the `opacity` scale, which goes in fives, and anything off
+   * it produces NO RULE AT ALL. The class name stays in the markup, the element is
+   * transparent, and nothing anywhere complains.
+   *
+   * On 7.9.2026 that was true of four full-screen backdrops at once — the booklet reader,
+   * the document viewer, the shop's detail panel and the new album — every one of them a
+   * sheet that is supposed to black out the world behind it, all four see-through in
+   * production and correct in every screenshot taken at a moment the world happened to be
+   * dark. An arbitrary value is still available as `bg-ink/[0.97]`; a bare `/97` is a bug.
+   */
+  it('uses no colour opacity outside Tailwind’s scale', () => {
+    const modifier = /\b(?:bg|text|border|from|to|via|ring|fill|stroke|divide|placeholder|decoration|outline|accent|caret)-[a-zA-Z][\w-]*\/(\d{1,3})\b/g
+    const wrong: string[] = []
+    for (const { path, text } of SOURCES) {
+      for (const match of withoutComments(text).matchAll(modifier)) {
+        const value = Number(match[1])
+        if (value % 5 === 0 && value <= 100) continue
+        wrong.push(`${path.replace(`${ROOT}/`, '')}: ${match[0]}`)
+      }
+    }
+    expect(wrong, wrong.join('\n')).toEqual([])
+  })
+
   it('keeps the club crest out of the codebase — the stamp is an original mark', () => {
     for (const { path, text } of SOURCES) {
       expect(/club-crest|official-crest|htafc-logo/i.test(text), `${path}`).toBe(false)

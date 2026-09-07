@@ -86,7 +86,10 @@ export const goalGalil = (state: LifeState): LocationId | null => {
 
 /** 1995 — a radio at Rafi's, an argument, a poster on a wall. */
 export const goalSinai = (state: LifeState): LocationId | null => {
-  if (flag(state, 'life:sinai:s2')) return flag(state, 's2:done') ? null : 'kiosk'
+  // the third day is a room, not an errand: the rupture happens alone (§7 B5)
+  if (flag(state, 'life:sinai:d3')) return null
+  if (flag(state, 's2:done')) return 'bedroom'
+  if (flag(state, 'life:sinai:d2')) return 'kiosk'
   if (flag(state, 's1:argued')) return 'bedroom'
   if (flag(state, 's1:heard')) return 'kiosk'
   return 'kiosk'

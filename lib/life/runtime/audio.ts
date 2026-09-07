@@ -136,6 +136,26 @@ const MUSIC_LEVEL = 0.11
 /** how loud his street sits under an ordinary scene */
 const STREET_LEVEL = 0.4
 
+/**
+ * צבע הרחוב לפי העשור — one recording, three rooms.
+ *
+ * Maor's street was recorded in the 2020s and the game runs from 1983 to 2000, and there
+ * is exactly one honest thing to do about that: do not fake a second recording, TREAT the
+ * one there is. A street in 1984 has fewer cars, no air conditioning on every balcony and
+ * no modern engine hiss, so the top end comes off and the bottom is tightened; the
+ * nineties open it back up; the two-thousands are the tape as it was recorded.
+ *
+ * This is a filter, not a performance. Nothing is added, nothing is synthesised, and
+ * `ALLOWED` is untouched — the sound is still his and only his.
+ */
+type StreetColour = { top: number; bottom: number; level: number }
+const STREET_ERA: Record<'80s' | '90s' | '00s' | '10s', StreetColour> = {
+  '80s': { top: 3400, bottom: 150, level: 0.9 },
+  '90s': { top: 5600, bottom: 95, level: 0.98 },
+  '00s': { top: 9000, bottom: 60, level: 1.04 },
+  '10s': { top: 12000, bottom: 45, level: 1.06 },
+}
+
 /** the constant bed under every match — present, never in the way */
 const BED_LEVEL = 0.34
 /** the derby chant over it: heard, but the ground is still louder than the song */
@@ -174,7 +194,14 @@ export class LifeAudio {
   private samples = new Map<string, Promise<AudioBuffer | null>>()
   private ext: 'ogg' | 'm4a' = 'ogg'
   /** his street, when the room is outdoors — one node, faded, never two */
-  private ambientFile: { source: AudioBufferSourceNode; gain: GainNode } | null = null
+  private ambientFile: {
+    source: AudioBufferSourceNode
+    gain: GainNode
+    top: BiquadFilterNode
+    bottom: BiquadFilterNode
+  } | null = null
+  /** which decade the life is in — the street is coloured by it, nothing else is */
+  private decade: '80s' | '90s' | '00s' | '10s' = '80s'
   /** the tune under the ordinary rooms — one node for the whole session, never restarted */
   private music: { source: AudioBufferSourceNode; gain: GainNode } | null = null
   private waveTimer = 0
@@ -310,11 +337,11 @@ export class LifeAudio {
       this.matchBed = null
       this.derbyChant = null
       this.derbyNight = false
-      if (this.ambientFile) this.ambientFile.gain.gain.setTargetAtTime(STREET_LEVEL, t, 1.5)
+      if (this.ambientFile) this.ambientFile.gain.gain.setTargetAtTime(STREET_LEVEL * STREET_ERA[this.decade].level, t, 1.5)
       return
     }
     // the ground has a voice; his street steps back under it
-    if (this.ambientFile) this.ambientFile.gain.gain.setTargetAtTime(0.16, t, 1.0)
+    if (this.ambientFile) this.ambientFile.gain.gain.setTargetAtTime(0.16 * STREET_ERA[this.decade].level, t, 1.0)
     this.ensureCrowdLoop()
     this.ensureMatchLayers()
     if (previous === 'OFF') this.warm(['crowd-real-goal', 'crowd-real-build', 'crowd-real-miss', 'crowd-real-after', 'crowd-real-final'])
@@ -626,6 +653,38 @@ export class LifeAudio {
    */
   private static readonly NO_MUSIC: readonly AmbienceKey[] = ['stadium', 'hall']
 
+  /**
+   * העשור — set once per chapter, and the only thing it moves is the street.
+   *
+   * The tune and the ground are left alone on purpose. `amb-theme` is a specific
+   * recording of a specific song and filtering it would be putting a hand over somebody's
+   * mouth; the crowd already has a colour per state, set by what is happening on the
+   * pitch rather than by what year it is.
+   */
+  setDecade(decade: '80s' | '90s' | '00s' | '10s') {
+    if (this.decade === decade) return
+    this.decade = decade
+    this.colourStreet(1.4)
+  }
+
+  /** push the current decade's colour and level onto the street that is playing */
+  private colourStreet(seconds = 1.2) {
+    const ctx = this.ctx
+    const file = this.ctx && this.ambientFile
+    if (!ctx || !file) return
+    const era = STREET_ERA[this.decade]
+    const t = ctx.currentTime
+    file.top.frequency.setTargetAtTime(era.top, t, seconds)
+    file.bottom.frequency.setTargetAtTime(era.bottom, t, seconds)
+    file.gain.gain.setTargetAtTime(this.streetLevel(), t, seconds)
+  }
+
+  /** how loud his street should be right now: quiet inside a ground, coloured by the decade */
+  private streetLevel(): number {
+    const base = this._crowdState !== 'OFF' ? 0.16 : STREET_LEVEL
+    return base * STREET_ERA[this.decade].level
+  }
+
   setAmbience(key: AmbienceKey, force = false) {
     this.wanted = key
     if (!this.ctx || !this.ambient) return
@@ -650,7 +709,8 @@ export class LifeAudio {
     if (!wantsStreet) return
     // already outdoors and staying outdoors: his street keeps running, uncut
     if (this.ambientFile) {
-      this.ambientFile.gain.gain.setTargetAtTime(this._crowdState !== 'OFF' ? 0.16 : STREET_LEVEL, t, 1.2)
+      this.ambientFile.gain.gain.setTargetAtTime(this.streetLevel(), t, 1.2)
+      this.colourStreet()
       this.waves()
       return
     }
@@ -662,12 +722,22 @@ export class LifeAudio {
       source.buffer = buffer
       source.loop = true
       source.playbackRate.value = jitter(1, 0.02)
+      const era = STREET_ERA[this.decade]
+      // the two filters are the decade: everything above `top` and below `bottom` is what
+      // a street of this year did not have. They are set here rather than left flat so the
+      // first second of the fade is already the right room.
+      const top = ctx.createBiquadFilter()
+      top.type = 'lowpass'
+      top.frequency.value = era.top
+      const bottom = ctx.createBiquadFilter()
+      bottom.type = 'highpass'
+      bottom.frequency.value = era.bottom
       const gain = ctx.createGain()
       gain.gain.value = 0
-      source.connect(gain).connect(ambient)
+      source.connect(bottom).connect(top).connect(gain).connect(ambient)
       source.start(ctx.currentTime, Math.random() * Math.max(0.1, buffer.duration - 1))
-      gain.gain.setTargetAtTime(this._crowdState !== 'OFF' ? 0.16 : STREET_LEVEL, ctx.currentTime, 1.4)
-      this.ambientFile = { source, gain }
+      gain.gain.setTargetAtTime(this.streetLevel(), ctx.currentTime, 1.4)
+      this.ambientFile = { source, gain, top, bottom }
       this.waves()
     })
   }

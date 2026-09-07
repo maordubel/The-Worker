@@ -18,11 +18,14 @@ import { HELP_DISCLAIMER_HE, HELP_RULES_HE, HELP_STORY_HE } from '@/lib/life/hel
 export function HelpSheet({
   objective,
   hint,
+  waitingOn = null,
   checklist = [],
   onClose,
 }: {
   objective: string | null
   hint: string
+  /** what the DAY is waiting for, when the room itself has nothing left to offer */
+  waitingOn?: string | null
   /** the day's steps, discovered so far — see `lib/life/checklist.ts` */
   checklist?: ChecklistItem[]
   onClose: () => void
@@ -54,6 +57,18 @@ export function HelpSheet({
             <p className="mt-3 font-body text-[15px] leading-snug text-ink" data-life="help-hint">
               <bdi>{hint}</bdi>
             </p>
+            {/* ממתין — the sentence that says nothing is broken. A player who has done
+                everything in the room and is standing still needs to know whether he is
+                waiting for a clock or missing a thing, and those look identical from
+                inside a room. */}
+            {waitingOn && (
+              <p
+                className="mt-2 border-s-rule border-red ps-2 font-body text-[13px] leading-snug text-muted"
+                data-life="help-waiting"
+              >
+                <bdi>{waitingOn}</bdi>
+              </p>
+            )}
             {checklist.length > 0 && (
               <ol className="mt-3 list-none border-t-hair border-ink pt-2" data-life="checklist">
                 {checklist.map((item) => (

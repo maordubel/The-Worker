@@ -70,6 +70,8 @@ class FakeBuffer {
 
 class FakeContext {
   gains: FakeGain[] = []
+  /** every filter the game makes, so a test can ask what colour the street was given */
+  filters: FakeFilter[] = []
   static last: FakeContext
   state: 'running' | 'suspended' = 'running'
   currentTime = 0
@@ -86,7 +88,9 @@ class FakeContext {
     return gain
   }
   createBiquadFilter() {
-    return new FakeFilter()
+    const filter = new FakeFilter()
+    this.filters.push(filter)
+    return filter
   }
   createOscillator() {
     return new FakeOsc()
@@ -505,5 +509,74 @@ describe('להקשיב לרדיו באמצע אצטדיון', () => {
     // both layers were asked to go almost silent, not stopped
     expect(bed!.stopped, 'the bed was stopped instead of ducked').toBe(0)
     expect(chant!.stopped, 'the chant was stopped instead of ducked').toBe(0)
+  })
+})
+
+/**
+ * העשור על הרחוב — one recording, three rooms (7.9.2026).
+ *
+ * The street in this game was recorded in the 2020s and plays from 1983 to 2000. The
+ * honest treatment is a filter, not a second recording, and these lock the two things
+ * that could go wrong with it: that the colour is actually applied to his street rather
+ * than sitting in a table nobody reads, and that it MOVES when the life moves on a decade
+ * instead of being frozen at whatever the first chapter set.
+ *
+ * Nothing here asserts a frequency. The numbers are a mix decision and will be tuned; the
+ * SHAPE — earlier is darker, later is brighter, and the two are different — is the promise.
+ */
+describe('צבע הרחוב לפי העשור', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    install()
+    visibility = 'visible'
+    for (const k of Object.keys(listeners)) delete listeners[k]
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('gives the street a top and a bottom, and the eighties are darker than the two-thousands', async () => {
+    const eighties = new LifeAudio()
+    eighties.wake()
+    eighties.setDecade('80s')
+    eighties.setAmbience('day')
+    await tick()
+    await tick()
+    const early = FakeContext.last.filters.filter((f) => f.type === 'lowpass').map((f) => f.frequency.value)
+    expect(early.length, 'the street got no colour at all').toBeGreaterThan(0)
+
+    install()
+    const noughties = new LifeAudio()
+    noughties.wake()
+    noughties.setDecade('00s')
+    noughties.setAmbience('day')
+    await tick()
+    await tick()
+    const late = FakeContext.last.filters.filter((f) => f.type === 'lowpass').map((f) => f.frequency.value)
+    expect(Math.max(...late)).toBeGreaterThan(Math.max(...early))
+  })
+
+  it('opens the street up when the life moves into a later decade', async () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.setDecade('80s')
+    audio.setAmbience('day')
+    await tick()
+    await tick()
+    const lowpass = FakeContext.last.filters.find((f) => f.type === 'lowpass')
+    const before = lowpass?.frequency.value ?? 0
+    audio.setDecade('90s')
+    const asked = lowpass?.frequency.calls.map((c) => c.value) ?? []
+    expect(asked.some((value) => value > before), 'the street stayed in 1984').toBe(true)
+  })
+
+  it('ignores a decade it is already in', () => {
+    const audio = new LifeAudio()
+    audio.wake()
+    audio.setDecade('80s')
+    audio.setAmbience('day')
+    const before = FakeContext.last.filters.length
+    audio.setDecade('80s')
+    expect(FakeContext.last.filters.length).toBe(before)
   })
 })

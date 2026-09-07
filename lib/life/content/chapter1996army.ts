@@ -224,6 +224,181 @@ export const BEATS_ARMY: Beat[] = [
 ]
 
 export const CONVERSATIONS_ARMY: Conversation[] = [
+  /**
+   * ------------------------------------------- 1996/97 · שבעת הסימנים ---
+   *
+   * מה שרואים כשמועדון בצרות — the crisis as things in rooms, not as a conversation.
+   *
+   * Stage B §7 B6 lists seven concrete signs and asks that the club's near-death be a
+   * LIVED event: delayed pay rumours, missing supplies, a closed office window, figures in
+   * a newspaper, an overheard creditor, uncertainty about next season's tickets, and one
+   * person doing two jobs. Until 6.9.2026 all seven were one kiosk conversation in which
+   * Freddy explained the situation — which is the unit's declared centre delivered as a
+   * briefing.
+   *
+   * None of these seven states a fact. Every one of them is a thing a nineteen-year-old
+   * standing in his own neighbourhood in the winter of 1997 could see with his eyes: a
+   * shutter, a shelf, a column of numbers he does not read, two men outside an office who
+   * stop talking when he passes. What they add up to is the player's to add up. The
+   * archive holds the sale (`ANCHOR_SPECS['1997-sale']`) and the archive is what says it.
+   */
+  {
+    id: 'sign-shelf',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:shelf' },
+        lines: [{ who: null, text: 'המדף עדיין חצי ריק.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'המדף מאחורי רפי חצי ריק. לא חסר משהו אחד — חסרה שורה שלמה.' },
+          { who: 'רפי מהקיוסק', text: 'לא הביאו השבוע. וגם לא בשבוע שעבר. אני לא שואל למה, הם לא עונים.' },
+        ],
+        then: [{ e: 'flag', flag: 'saw:shelf' }, { e: 'institution', key: 'footballOwnershipTrust', delta: -2 }],
+      },
+    ],
+  },
+  /**
+   * המדבקה של 96 — the last one, and nobody sells it.
+   *
+   * Number 231, Shalom Tikva, out of the album nobody in this neighbourhood finished.
+   * Rafi has had it in the till since the boy was collecting, and he gives it away in the
+   * year the boy stopped — which is what happens to the last sticker of every album.
+   * It closes its own page on its own, and there is nothing to complete after it.
+   */
+  {
+    id: 'sign-till',
+    nameHe: 'רפי מהקיוסק',
+    branches: [
+      {
+        when: { hasSticker: 'tikva' },
+        lines: [{ who: 'רפי מהקיוסק', text: 'שמת אותה באלבום? יופי. עכשיו זה כבר לא שלי.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'רפי פותח את הקופה ומזיז את המגש. מתחת למגש, בין שטרות ישנים, מדבקה אחת.' },
+          { who: 'רפי מהקיוסק', text: 'זאת נשארה לי משנה שעברה. מאתיים שלושים ואחת. אף אחד לא ביקש.' },
+          { who: 'רפי מהקיוסק', text: 'קח. אתה היחיד פה שעוד סופר.' },
+        ],
+        then: [
+          { e: 'sticker', id: 'tikva' },
+          { e: 'toast', text: 'שלום תקוה, 231.', tone: 'red' },
+          { e: 'bond', who: 'shopkeeper', delta: 4 },
+          { e: 'redheart', key: 'historyMemory', delta: 3 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sign-paper',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:figures' },
+        lines: [{ who: null, text: 'אותו עמוד. אותם מספרים.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'העיתון פתוח על הדלפק בעמוד שאף אחד לא קורא — טור של מספרים, וכמה מהם בסוגריים.' },
+          { who: null, text: 'אתה לא יודע מה זה סוגריים במספר. אתה יודע שאף אחד לא שם אותם שם סתם.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'saw:figures' },
+          { e: 'institution', key: 'legalUnderstanding', delta: 2 },
+          { e: 'redheart', key: 'historyMemory', delta: 2 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sign-window',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:window' },
+        lines: [{ who: null, text: 'התריס עדיין למטה.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'החלון של המשרד סגור בתריס פח, ועליו דף שנתלה במסקינטייפ ונקרע בפינה.' },
+          { who: null, text: 'מתחת לדף מישהו כתב בעט משהו קצר, ואז מחק. את המחיקה רואים יותר טוב מהמילה.' },
+        ],
+        then: [{ e: 'flag', flag: 'saw:window' }, { e: 'institution', key: 'footballOwnershipTrust', delta: -3 }],
+      },
+    ],
+  },
+  {
+    id: 'sign-tickets',
+    nameHe: 'קופאית',
+    branches: [
+      {
+        when: { flag: 'saw:tickets' },
+        lines: [{ who: 'קופאית', text: 'עוד לא. אמרתי לך, עוד לא.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'בקופה יש תור של ארבעה. השלט על הזכוכית הוא של העונה שעברה.' },
+          { who: 'קופאית', text: 'מנויים לעונה הבאה? עוד לא פתחנו. כשיהיה ברור — יהיה.' },
+        ],
+        choices: [
+          {
+            id: 'ask',
+            text: '"ברור לגבי מה?"',
+            then: [
+              { e: 'flag', flag: 'saw:tickets' },
+              { e: 'institution', key: 'legalUnderstanding', delta: 2 },
+              { e: 'toast', text: 'היא הסתכלה עליך שנייה ואמרה "אתה בן כמה?" ואז חייכה ולא ענתה.', tone: 'plain' },
+            ],
+          },
+          { id: 'go', text: 'לא לשאול.', then: [{ e: 'flag', flag: 'saw:tickets' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sign-two-jobs',
+    nameHe: 'סדרן',
+    branches: [
+      {
+        when: { flag: 'saw:twojobs' },
+        lines: [{ who: 'סדרן', text: 'מה, עוד לא הלכת? יאללה, יש לי עוד ערימה.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'הסדרן שמכיר אותך בשם עומד היום עם ערימת דפים ביד ומוכר אותם. את החולצה של הסדרנים הוא עוד לובש.' },
+          { who: 'סדרן', text: 'גם וגם. לא הוסיפו לי, הורידו למישהו אחר.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'saw:twojobs' },
+          { e: 'redheart', key: 'community', delta: 3 },
+          { e: 'institution', key: 'footballOwnershipTrust', delta: -2 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sign-creditor',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:creditor' },
+        lines: [{ who: null, text: 'הם כבר לא שם.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'שני גברים בחליפות עומדים ליד המשרד. אחד מחזיק תיק, השני מחזיק סיגריה שהוא לא מעשן.' },
+          { who: null, text: '"...בסוף החודש," אמר הראשון, ואז ראה אותך והפסיק.' },
+          { who: null, text: 'עברת לידם לאט יותר משהיית צריך, וזה לא עזר.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'saw:creditor' },
+          { e: 'institution', key: 'footballOwnershipTrust', delta: -4 },
+          { e: 'wellbeing', key: 'stress', delta: 3 },
+        ],
+      },
+    ],
+  },
   // ================================================================== A1 ==
   {
     id: 'rachel-army',
@@ -433,6 +608,27 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
     id: 'a4-winter',
     nameHe: null,
     branches: [
+      /**
+       * מי שכבר ראה — the version of this conversation for somebody who walked around
+       * first. Freddy explains less, because there is less to explain to a boy who has
+       * already seen the shutter and the brackets in the newspaper. The brief asks for
+       * lived signs; this is what makes them worth having noticed.
+       */
+      {
+        when: { all: [{ flag: 'saw:window' }, { flag: 'saw:figures' }] },
+        lines: [
+          { who: null, text: 'פברואר. הקיוסק, שבת בצהריים. הפעם לא מדברים על מאמן. מדברים על כסף.' },
+          { who: 'פוגי', text: 'החלון של המשרד סגור כבר שבועיים. ובעיתון יש מספרים בסוגריים.' },
+          { who: 'פרדי', text: 'אז אתה כבר יודע. סוגריים זה מינוס. וההסתדרות מוכרת.' },
+          { who: 'פרדי', text: 'יש קבוצת אנשי עסקים. זה יכול להציל את המועדון וזה יכול לקנות אותו. שני הדברים נכונים באותו רגע.' },
+          { who: 'עמית', text: 'ואנחנו נאבקים להישאר בליגה. המאמן הלך באמצע השבוע, אחרי כל השנים.' },
+        ],
+        choices: [
+          { id: 'legal', text: 'לפרדי: "מי חותם על זה בכלל?"', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 8 }, { e: 'rel', who: 'freddy', axis: 'trust', delta: 4 }, { e: 'goto', node: 'a4-freddy' }] },
+          { id: 'protest', text: '"אז נלך למשרדים. שיראו אותנו."', then: [{ e: 'institution', key: 'protestEscalation', delta: 8 }, { e: 'institution', key: 'footballOwnershipTrust', delta: -5 }, { e: 'rel', who: 'freddy', axis: 'tension', delta: 3 }, { e: 'goto', node: 'a4-freddy' }] },
+          { id: 'sinai', text: 'על המאמן: "הוא כבר לא התשובה."', then: [{ e: 'sinai', stance: 'broken' }, { e: 'flag', flag: 'life:sinai:broken' }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'goto', node: 'a4-liron' }] },
+        ],
+      },
       {
         lines: [
           { who: null, text: 'פברואר. הקיוסק, שבת בצהריים. הפעם לא מדברים על מאמן. מדברים על כסף.' },

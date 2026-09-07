@@ -52,9 +52,9 @@ export const PORTRAIT_STAGE_A: Record<string, string> = {
 export function objectiveA2(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags['a2:played'] || state.flags['a2:late']) return null
-  if (state.flags['a2:errand'] && !state.flags['a2:bread']) return 'לחם מהקיוסק. ואז — הסמטה, לפני שהקבוצות מלאות.'
+  if (state.flags['a2:errand'] && !state.flags['a2:bread']) return 'לחם מהקיוסק. ואז — הסמטה, לפני שהקבוצות מתמלאות.'
   if (sceneId === 'home') return 'אחר הצהריים. בסמטה משחקים. אמא רוצה משהו.'
-  return 'הסמטה. לפני שהקבוצות מלאות.'
+  return 'הסמטה. לפני שהקבוצות מתמלאות.'
 }
 
 export const ENDINGS_A2: Record<string, EndingCard> = {
@@ -95,7 +95,7 @@ export const BEATS_A2: Beat[] = [
         a: 'lines',
         lines: [
           { who: null, text: 'אביב. אתה בן שש. הסלון אחרי הצהריים, החלון פתוח, ומהסמטה שומעים כדור על פח.' },
-          { who: 'רחל', text: 'פוגי. לפני שאתה נעלם — לחם מרפי. שמתי לך 3 שקל בכיס, ותגיד לו על החשבון. אני עוברת מחר.' },
+          { who: 'רחל', text: 'פוגי. לפני שאתה נעלם — לחם מרפי. תגיד לו על החשבון, אני עוברת מחר.' },
         ],
       },
     ],
@@ -227,7 +227,7 @@ export const CONVERSATIONS_A1: Conversation[] = [
         lines: [
           { who: null, text: 'דרום תל אביב. 1 ביוני 1983.' },
           { who: null, text: 'אתה בן חמש, ואתה על הכתפיים של מישהו. אתה לא רואה כלום חוץ מראשים.' },
-          { who: null, text: 'ריח של סיגריה, של זיעה, של גראס יבש. רדיו טרנזיסטור צורח באוזן של מישהו אחר.' },
+          { who: null, text: 'ריח של סיגריה, של זיעה, של עשב יבש. רדיו טרנזיסטור צורח באוזן של מישהו אחר.' },
         ],
         choices: [
           {
@@ -450,7 +450,26 @@ export const CONVERSATIONS_A2: Conversation[] = [
         lines: [{ who: 'רפי מהקיוסק', text: 'לחם לרחל. על החשבון — תשאיר את המטבעות בכיס. ותגיד לה שהחשבון כבר לא זוכר את עצמו.' }],
         then: [{ e: 'flag', flag: 'a2:bread' }, { e: 'time', minutes: 6 }, { e: 'sfx', key: 'bell-shop', level: 0.5 }, { e: 'toast', text: 'לחם חם. הנייר נרטב מהחום.', tone: 'plain' }],
       },
-      { lines: [{ who: 'רפי מהקיוסק', text: 'ילד. אתה קונה, או שאתה עומד לי בשמש?' }] },
+      {
+        lines: [{ who: 'רפי מהקיוסק', text: 'ילד. אתה קונה, או שאתה עומד לי בשמש?' }],
+        choices: [
+          {
+            id: 'packet',
+            text: 'מעטפת סופרגול. 1 ₪.',
+            when: { minAgorot: 100 },
+            noteHe: 'אין לך מספיק',
+            then: [{ e: 'packet' }],
+          },
+          {
+            id: 'album',
+            text: 'לפתוח את האלבום.',
+            when: { flag: 'album:seen' },
+            hidden: true,
+            then: [{ e: 'album' }],
+          },
+          { id: 'no', text: 'רק עומד.', then: [] },
+        ],
+      },
     ],
   },
   {
@@ -460,7 +479,7 @@ export const CONVERSATIONS_A2: Conversation[] = [
       { when: { flag: 'a2:played' }, lines: [{ who: null, text: 'שיחקת. הברך שרוטה והרגליים עוד זוכרות.' }] },
       {
         when: { flag: 'a2:full' },
-        lines: [{ who: 'אופיר', text: 'מלא. שניים־שניים ואחד בשער. תעמוד בצד, תספור, מי שמפסיד יוצא.' }, { who: 'עמית', text: 'ספירה זה גם תפקיד. שאלה מי נותן אותו לך.' }],
+        lines: [{ who: 'אופיר', text: 'מלא. שניים־שניים ואחד בשער. תעמוד בצד, תספור, מי שמפסיד יוצא.' }, { who: 'עמית', text: 'ספירה זה גם תפקיד. השאלה היא מי נותן לך אותו.' }],
         then: [{ e: 'flag', flag: 'a2:late' }, { e: 'rel', who: 'ofir', axis: 'familiarity', delta: 1 }, { e: 'rel', who: 'amit', axis: 'bond', delta: 2 }, { e: 'time', minutes: 40 }, { e: 'ending', id: 'late' }],
       },
       {
@@ -769,7 +788,7 @@ export function objectiveA4(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags['own:shirt85']) return null
   if (state.savings + state.agorot >= SHIRT_PRICE) return 'יש את ה־30. לרפי, לפני שבע.'
-  if (sceneId === 'bedroom') return 'קיץ. החולצה בחלון של רפי, 30 שקל. הפחית מתחת למיטה.'
+  if (sceneId === 'bedroom') return 'ספטמבר. החולצה בחלון של רפי, 30 שקל. הפחית מתחת למיטה.'
   return 'צריך 30. בקבוקים, שליחויות, ומה שאבא נותן — עד שבע.'
 }
 
@@ -875,6 +894,27 @@ export const CONVERSATIONS_A4: Conversation[] = [
         lines: [{ who: 'רפי מהקיוסק', text: 'החולצה? 30 שקל. אין לך 30. יש לך פנים של ילד שסופר בראש.' }],
         choices: [
           { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'time', minutes: 50 }, { e: 'energy', delta: -15 }, { e: 'money', agorot: 500, why: 'ארגזים' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'toast', text: 'שעה של ארגזים, אחד־אחד. 5 ₪ ובקבוק קולה שלא ביקשת.', tone: 'plain' }] },
+          /**
+           * המעטפה מול החולצה — the whole economy of this chapter in one row of choices.
+           *
+           * It sits UNDER the "is there anything to do" line on purpose. A shekel spent
+           * here is a shekel that does not go into the thirty, and the boy is standing in
+           * front of the shirt while he decides. That is the feature.
+           */
+          {
+            id: 'packet',
+            text: 'מעטפת סופרגול. 1 ₪.',
+            when: { minAgorot: 100 },
+            noteHe: 'אין לך מספיק',
+            then: [{ e: 'packet' }],
+          },
+          {
+            id: 'album',
+            text: 'לפתוח את האלבום.',
+            when: { flag: 'album:seen' },
+            hidden: true,
+            then: [{ e: 'album' }],
+          },
           { id: 'no', text: '"רק מסתכל."', then: [] },
         ],
       },
@@ -1244,7 +1284,7 @@ export const CONVERSATIONS_A6: Conversation[] = [
 export function objectiveA7(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags['a7:refused']) return null
-  if (!state.flags['a7:knows']) return 'שבת. ברחוב מדברים על שבת הבאה. תבין על מה.'
+  if (!state.flags['a7:knows']) return 'שבת. ברחוב מדברים על שבת הבאה. תגלה על מה.'
   if (sceneId === 'home') return 'אבא. לשאול.'
   return 'עמית יודע. אופיר בטוח. אבא — בבית.'
 }

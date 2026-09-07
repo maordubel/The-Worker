@@ -401,6 +401,13 @@ export type PresenceMode =
   | 'army'
   | 'working'
   | 'heard-from-friend'
+  /**
+   * בדרך — heard it moving, out of somebody else's radio, on a road, before anybody
+   * involved has stopped driving. Stage B §7 B4 asks for this as a real presence and not
+   * as flavour: a boy on a coach north who learns the result an hour and a half from
+   * anywhere was neither inside, nor late, nor at home by a radio.
+   */
+  | 'travelling'
   | 'archive-later'
 
 /** השרוכים — a permanent character mark from 2.5.1998, never a bonus class. */

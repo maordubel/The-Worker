@@ -1,5 +1,5 @@
 /**
- * מעברונים — nine seconds of 1989 between one room and the next.
+ * מעברונים — the city between one room and the next, in the decade the life is in.
  *
  * Maor found the film (Meir Mendelssohn, Tel Aviv 1989), found the promenade in it at
  * minute sixteen, and said what it was: the road between Bloomfield and Ussishkin. The
@@ -22,13 +22,33 @@
  *     because there is no door between them. Three of nine cuts could never have played,
  *     which is the exact failure the clips were sitting in already. `tests/life-keys`
  *     now checks every cut against the world's own door graph.
+ *  6. **הסרט הוא של השנה.** 7.9.2026: Maor sent two more films and asked for a proper
+ *     spread across the whole set. The answer is not more clips from the same afternoon —
+ *     it is that the SAME journey looks different in 1986 and in 1996, because it was.
+ *     Every cut below names one clip per decade: the 1989 reel for the eighties, a home
+ *     video shot on 5.4.1995 for the nineties. A decade with no clip falls back to the
+ *     eighties one rather than playing nothing, so a new chapter is never silent by
+ *     omission.
+ *
+ *     The third film he sent — the Frishman promenade at 720p, the best-looking of the
+ *     three — is deliberately not in this table. It is contemporary footage and this game
+ *     ends in 2000; a 2015 bicycle between two rooms in 1986 is the one thing this project
+ *     does not do. `scripts/life/cut-film.py` records it and why.
  */
 
 import type { LocationId } from '../types'
 
+/** the decades this game has film for */
+export type FilmEra = '80s' | '90s' | '00s'
+
 export type FilmCut = {
-  /** the clip's key in `public/life/film` */
-  clip: string
+  /**
+   * the clip's key in `public/life/film`, per decade.
+   *
+   * `'80s'` is required and is the fallback: a chapter in a decade nobody has film for
+   * still gets a transition rather than a hard cut.
+   */
+  clip: { '80s': string; '90s'?: string; '00s'?: string }
   from: LocationId
   to: LocationId
   /** the hours it may play in, as minutes from midnight */
@@ -54,13 +74,13 @@ export const FILM_CUTS: readonly FilmCut[] = [
   // river is a bigger jump than the film can carry, and a boy leaving Allenby for it is
   // exactly the distance the promenade covers.
   {
-    clip: 'promenade-dusk',
+    clip: { '80s': 'promenade-dusk', '90s': 'promenade-95' },
     from: 'allenby',
     to: 'ussishkin-outside',
     captionHe: 'הטיילת, בדרך צפונה',
   },
   {
-    clip: 'promenade-walk',
+    clip: { '80s': 'promenade-walk', '90s': 'boardwalk-95' },
     from: 'ussishkin-outside',
     to: 'allenby',
     captionHe: 'הטיילת, בדרך חזרה',
@@ -70,7 +90,7 @@ export const FILM_CUTS: readonly FilmCut[] = [
   // lens — and it is free here because the kiosk cut below is capped at three in the
   // afternoon while this one only plays after it.
   {
-    clip: 'market',
+    clip: { '80s': 'market', '90s': 'promenade-rail-95' },
     from: 'street',
     to: 'allenby',
     after: HOUR(15),
@@ -79,20 +99,20 @@ export const FILM_CUTS: readonly FilmCut[] = [
 
   // ------------------------------------------------------- הדרך למגרש -------------
   {
-    clip: 'sea-wall',
+    clip: { '80s': 'sea-wall', '90s': 'breakwater-95' },
     from: 'route',
     to: 'bloomfield-outside',
     captionHe: 'הולכים אל משהו',
   },
   {
-    clip: 'night-lights',
+    clip: { '80s': 'night-lights', '90s': 'sea-road-95' },
     from: 'street',
     to: 'route',
     after: HOUR(18, 30),
     captionHe: 'הרחוב בערב משחק',
   },
   {
-    clip: 'palms-evening',
+    clip: { '80s': 'palms-evening', '90s': 'jaffa-95' },
     from: 'route',
     to: 'street',
     after: HOUR(19),
@@ -101,27 +121,27 @@ export const FILM_CUTS: readonly FilmCut[] = [
 
   // ------------------------------------------------------- היציאה מהבית -----------
   {
-    clip: 'street-morning',
+    clip: { '80s': 'street-morning', '90s': 'street-cars-95' },
     from: 'home',
     to: 'street',
     before: HOUR(11),
     captionHe: 'בוקר, בחוץ',
   },
   {
-    clip: 'market',
+    clip: { '80s': 'market', '90s': 'shops-95' },
     from: 'street',
     to: 'kiosk',
     before: HOUR(15),
     captionHe: 'הדרך לקיוסק',
   },
   {
-    clip: 'alley-shade',
+    clip: { '80s': 'alley-shade', '90s': 'shops-95' },
     from: 'street',
     to: 'pitch',
     captionHe: 'הסמטה',
   },
   {
-    clip: 'plaza-evening',
+    clip: { '80s': 'plaza-evening', '90s': 'bus-street-95' },
     from: 'street',
     to: 'bus-station',
     captionHe: 'העיר, בדרך החוצה',
@@ -137,20 +157,27 @@ export const filmFlag = (clip: string, chapter: string) => `own:film:${clip}:${c
  * Returns nothing far more often than it returns something, and that is the design: a
  * transition that plays on every door is a loading screen with a view.
  */
+export const eraOfYear = (year: number): FilmEra => (year >= 2000 ? '00s' : year >= 1990 ? '90s' : '80s')
+
+/** which clip this cut plays in this decade — the eighties reel is the fallback */
+export const clipOf = (cut: FilmCut, era: FilmEra): string => cut.clip[era] ?? cut.clip['80s']
+
 export function cutFor(
   from: LocationId,
   to: LocationId,
   minute: number,
   chapter: string,
   flags: Record<string, unknown>,
-): FilmCut | null {
+  era: FilmEra = '80s',
+): { cut: FilmCut; clip: string } | null {
   for (const cut of FILM_CUTS) {
     if (cut.from !== from || cut.to !== to) continue
     if (cut.eras && !cut.eras.includes(chapter)) continue
     if (cut.after !== undefined && minute < cut.after) continue
     if (cut.before !== undefined && minute >= cut.before) continue
-    if (flags[filmFlag(cut.clip, chapter)]) continue
-    return cut
+    const clip = clipOf(cut, era)
+    if (flags[filmFlag(clip, chapter)]) continue
+    return { cut, clip }
   }
   return null
 }

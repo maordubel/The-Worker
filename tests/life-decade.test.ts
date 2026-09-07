@@ -177,9 +177,24 @@ describe('הפתיח — once, for a life that is starting', () => {
     expect(shell).toContain('lifeHasBegun(')
   })
 
-  it('opens on 2026 and cuts to 1978', () => {
-    expect(OPENING[0]!.stampHe).toBe('2026')
-    expect(OPENING[0]!.from).toBe('art')
-    expect(OPENING[1]!.stampHe).toBe('1978')
+  /**
+   * הסרט מתחיל בהתחלה.
+   *
+   * It opened on 2026 — the new ground, "forty-eight years, he still goes there" — and cut
+   * back to the cot. That was the right frame for a game whose first playable minute was a
+   * narrated title card, and the wrong one from the moment 1983 became something you play:
+   * an opening that says he is still going has already told you how it turns out, and it
+   * made the first image of a childhood a picture of an old man's habit. Maor cut it on
+   * 6.9.2026. The coda at the end of the built life still returns to that ground, which is
+   * where the sentence belongs.
+   *
+   * What the test protects now is the chronology: the first frame is the cot, and every
+   * stamp after it moves forward or says nothing. A film about a life runs one way.
+   */
+  it('opens on the cot and never goes backwards', () => {
+    expect(OPENING[0]!.stampHe).toBe('1978')
+    expect(OPENING.some((beat) => beat.stampHe === '2026')).toBe(false)
+    const years = OPENING.map((beat) => Number(beat.stampHe)).filter((year) => Number.isFinite(year))
+    expect([...years].sort((a, b) => a - b)).toEqual(years)
   })
 })

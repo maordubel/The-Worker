@@ -139,7 +139,7 @@ export function ShopCard({
 
       {/* -------------------------------------------------- one shirt, held up -- */}
       {look && (
-        <div className="absolute inset-0 z-[10] flex flex-col bg-ink/97 px-5 py-6">
+        <div className="absolute inset-0 z-[10] flex flex-col bg-ink/95 px-5 py-6">
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center text-center">
             <div className="flex aspect-square w-[min(58vw,300px)] items-center justify-center">
               <Draw shirt={look} />

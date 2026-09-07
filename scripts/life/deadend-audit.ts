@@ -142,7 +142,32 @@ for (const scene of ALL_SCENES) {
 
 // the runtime raises plenty on its own; those are collected from the source, cheaply
 import { readFileSync, readdirSync } from 'node:fs'
-for (const dir of ['lib/life', 'lib/life/content', 'lib/life/runtime', 'lib/life/runtime/scenes', 'lib/life/world', 'components/life', 'app/life']) {
+const SOURCE_DIRS = ['lib/life', 'lib/life/content', 'lib/life/runtime', 'lib/life/runtime/scenes', 'lib/life/world', 'components/life', 'app/life']
+
+/**
+ * דגלים ששמם קבוע — a flag raised through a named constant.
+ *
+ * 7.9.2026: the album raises `ALBUM_SEEN`, which is `'album:seen'` declared once in
+ * `lib/life/stickers.ts`, and this audit reported the kiosk's album door as a dead end
+ * because the sweep below only ever looked for a quoted string. Naming a flag once
+ * instead of typing it in six places is the RIGHT thing to do, so the checker learns to
+ * follow the name rather than the code learning to stop using one.
+ *
+ * Only constants whose value looks like a flag (`something:something`) are collected, so
+ * an ordinary string constant cannot accidentally register itself as a raised flag.
+ */
+const namedFlags = new Map<string, string>()
+for (const dir of SOURCE_DIRS) {
+  let files: string[] = []
+  try { files = readdirSync(dir).filter((f) => /\.tsx?$/.test(f)) } catch { continue }
+  for (const file of files) {
+    const source = readFileSync(`${dir}/${file}`, 'utf8')
+    for (const m of source.matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*'([a-z][\w-]*:[\w:-]+)'/g)) {
+      namedFlags.set(m[1] as string, m[2] as string)
+    }
+  }
+}
+for (const dir of SOURCE_DIRS) {
   let files: string[] = []
   try { files = readdirSync(dir).filter((f) => /\.tsx?$/.test(f)) } catch { continue }
   for (const file of files) {
@@ -151,6 +176,11 @@ for (const dir of ['lib/life', 'lib/life/content', 'lib/life/runtime', 'lib/life
     for (const m of source.matchAll(/t:\s*'flag\.raised',\s*flag:\s*`([^`$]+)`/g)) raised.add(m[1])
     for (const m of source.matchAll(/raise\('([^']+)'\)/g)) raised.add(m[1])
     for (const m of source.matchAll(/e:\s*'flag',\s*flag:\s*'([^']+)'/g)) raised.add(m[1])
+    // …and the same three shapes written with a named constant instead of a literal
+    for (const m of source.matchAll(/flag:\s*([A-Za-z_$][\w$]*)\s*[,}]/g)) {
+      const value = namedFlags.get(m[1] as string)
+      if (value) raised.add(value)
+    }
   }
 }
 

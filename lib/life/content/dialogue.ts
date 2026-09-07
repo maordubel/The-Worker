@@ -42,8 +42,8 @@ const CONVERSATIONS: Conversation[] = [
         // Saturday you were not at. Going to bed is a real choice with a real ending.
         when: { flag: 'match:over', notFlag: 'found:kobi' },
         lines: [
-          { who: null, text: 'המיטה. בחוץ צופרים של מכוניות, רחוק, ואבא עוד לא חזר.' },
-          { who: null, text: 'השמיכה קרה מהצד של הקיר. אתה יכול לחכות לו ער, או לא.' },
+          { who: null, text: 'המיטה. בחוץ צפירות של מכוניות, רחוק, ואבא עוד לא חזר.' },
+          { who: null, text: 'השמיכה קרה מהצד של הקיר. אפשר לחכות לו ער. אפשר גם לישון.' },
         ],
         choices: [
           { id: 'sleep', text: 'לישון', then: [{ e: 'ending', id: 'missed' }] },
@@ -77,7 +77,7 @@ const CONVERSATIONS: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'כרזה אדומה על הקיר. קרעת אותה מעמוד חשמל ברחוב סלמה, והדבק עוד דביק מאחורה.' },
+          { who: null, text: 'פוסטר אדום על הקיר. קרעת אותו מעמוד חשמל ברחוב סלמה, והדבק עוד דביק מאחורה.' },
           { who: null, text: 'משה סיני, ידיים על המותניים, מסתכל על משהו שנמצא מחוץ לתמונה.' },
           { who: null, text: 'אבא אמר שלא תולים בבית דברים שמצאת ברחוב. אמא אמרה שזה נשאר.' },
           { who: null, text: 'לפעמים הוא עומד מולה בלילה, כשהוא חושב שאתה ישן.' },
@@ -451,7 +451,18 @@ const CONVERSATIONS: Conversation[] = [
             id: 'open',
             text: 'להוציא את החוברת.',
             then: [
+              /**
+               * הסימנייה — one sticker from 1980/81, used to keep a page.
+               *
+               * The album's first entry is not bought and cannot be. It is Bezredno,
+               * numbered 5, out of an album his father filled the year the boy was born,
+               * left inside the booklet at the page somebody wanted to come back to. It
+               * is the reason the album exists in this life at all, and it is the one
+               * sticker in the game that has nothing to do with completing anything.
+               */
               { e: 'book', id: '8081' },
+              { e: 'sticker', id: 'bezredno' },
+              { e: 'toast', text: 'מדבקה ישנה נפלה מבין הדפים.', tone: 'red' },
               { e: 'redheart', key: 'footballLove', delta: 3 },
             ],
           },
@@ -525,6 +536,21 @@ const CONVERSATIONS: Conversation[] = [
             when: { flag: 'knows:match' },
             noteHe: 'עוד לא שמעת על משחק',
             then: [{ e: 'goto', node: 'ofir-knows' }],
+          },
+          /**
+           * מחליף? — offered only with a spare in hand, and it may well come back "no".
+           *
+           * Whether אופיר is the one holding the sticker you are short of is not written
+           * here and is not fixed: it is whoever you have been worst to this afternoon
+           * (`swap` → `holderOf`). Some days that is him and some days he tells you to go
+           * and ask עמית, which is the joke and the mechanic at the same time.
+           */
+          {
+            id: 'swap',
+            text: 'יש לי כפולים. מחליף?',
+            when: { all: [{ flag: 'album:seen' }, { duplicatesAtLeast: 1 }] },
+            hidden: true,
+            then: [{ e: 'swap', who: 'ofir' }],
           },
         ],
       },
@@ -686,10 +712,17 @@ const CONVERSATIONS: Conversation[] = [
           },
           {
             id: 'card',
-            text: 'קלף שחקן. 1 ₪.',
+            text: 'מעטפת סופרגול. 1 ₪.',
             when: { minAgorot: 100 },
             noteHe: 'אין לך מספיק',
             then: [{ e: 'goto', node: 'kiosk-card' }],
+          },
+          {
+            id: 'album',
+            text: 'לפתוח את האלבום.',
+            when: { flag: 'album:seen' },
+            hidden: true,
+            then: [{ e: 'album' }],
           },
           { id: 'nothing', text: 'רק מסתכל.', then: [] },
         ],
@@ -732,20 +765,31 @@ const CONVERSATIONS: Conversation[] = [
       },
     ],
   },
+  /**
+   * מעטפת סופרגול — the shekel that does not go towards the shirt.
+   *
+   * This node used to hand over one generic `football-card` and a line saying the boy did
+   * not recognise the face, which was the honest placeholder while the album did not
+   * exist. It exists now (`lib/life/stickers.ts`), so the purchase does both halves of
+   * what a packet actually does: the paper envelope goes in the pocket — that is the
+   * `football-card` the Red Box can keep — and three stickers go in the album.
+   *
+   * `packet` spends the money itself, priced off `PACKET` in `prices.ts`, so nothing here
+   * types a number.
+   */
   {
     id: 'kiosk-card',
     nameHe: 'רפי מהקיוסק',
     branches: [
       {
         lines: [
-          { who: null, text: 'קלף קרטון בעטיפת נייר. אתה קורע אותה בשיניים.' },
-          { who: null, text: 'שחקן באדום. אתה לא מכיר את הפנים, אבל את החולצה אתה מכיר.' },
+          { who: null, text: 'מעטפת נייר קטנה, אדומה, עם כדור מודפס עליה. אתה קורע את הפינה בשיניים.' },
+          { who: 'רפי מהקיוסק', text: 'אל תפתח לי אותה על הדלפק. ותביא לי את הכפולים, אני אוסף בשביל הנכד.' },
         ],
         then: [
-          { e: 'money', agorot: -100, why: 'קלף' },
+          { e: 'packet' },
           { e: 'give', item: 'football-card' },
           { e: 'trait', trait: 'footballAffinity', delta: 3 },
-          { e: 'toast', text: 'קלף שחקן' },
         ],
       },
     ],
@@ -1306,6 +1350,13 @@ const CONVERSATIONS: Conversation[] = [
             ],
           },
           { id: 'watch', text: 'לא להגיד כלום.', then: [{ e: 'personality', key: 'curiosity', delta: 2 }] },
+          {
+            id: 'swap',
+            text: 'יש לי כפולים. מחליף?',
+            when: { all: [{ flag: 'album:seen' }, { duplicatesAtLeast: 1 }] },
+            hidden: true,
+            then: [{ e: 'swap', who: 'amit' }],
+          },
         ],
       },
       {

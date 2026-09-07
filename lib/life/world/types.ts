@@ -91,6 +91,14 @@ export type Condition = {
   /** he has EVER stood at this gate, whatever he does now */
   gateEver?: GateIdentity
 
+  // --- סופרגול ------------------------------------------------------------------------
+  /** this sticker is stuck in the album */
+  hasSticker?: string
+  /** this sticker is not */
+  lacksSticker?: string
+  /** at least this many spare copies are in hand — what a trade can actually be paid with */
+  duplicatesAtLeast?: number
+
   // --- composition ------------------------------------------------------------------
   /** every one of these must hold */
   all?: Condition[]
@@ -102,6 +110,23 @@ export type Condition = {
 
 function opportunityStatus(state: LifeState, id: string): string | null {
   return state.opportunities.find((entry) => entry.id === id)?.status ?? null
+}
+
+/** `stickerFlag()` in lib/life/stickers.ts — kept in step by tests/life-stickers.test.ts */
+const STICKER_PREFIX = 'album:sg:'
+
+function countStickers(state: LifeState, id: string): number {
+  const value = state.flags[`${STICKER_PREFIX}${id}`]
+  return typeof value === 'number' ? value : value === true ? 1 : 0
+}
+
+function spareStickers(state: LifeState): number {
+  let spare = 0
+  for (const [flag, value] of Object.entries(state.flags)) {
+    if (!flag.startsWith(STICKER_PREFIX)) continue
+    if (typeof value === 'number' && value > 1) spare += value - 1
+  }
+  return spare
 }
 
 export function meets(state: LifeState, condition?: Condition): boolean {
@@ -117,6 +142,19 @@ export function meets(state: LifeState, condition?: Condition): boolean {
   if (condition.bond && (state.bonds[condition.bond.who] ?? 0) < condition.bond.min) return false
 
   if (condition.flagIs && state.flags[condition.flagIs.flag] !== condition.flagIs.value) return false
+
+  /**
+   * סופרגול — read off the flags directly rather than through `lib/life/stickers.ts`.
+   *
+   * The key is duplicated here on purpose. `stickers.ts` imports `prices.ts`, which
+   * imports the chapter registry, which imports this file; going the other way would
+   * close the loop and a cycle in the condition evaluator is a cycle in everything. One
+   * string literal, with the constant that owns it named beside it, is the cheaper price.
+   * `tests/life-stickers.test.ts` asserts the two spellings agree.
+   */
+  if (condition.hasSticker !== undefined && countStickers(state, condition.hasSticker) < 1) return false
+  if (condition.lacksSticker !== undefined && countStickers(state, condition.lacksSticker) > 0) return false
+  if (condition.duplicatesAtLeast !== undefined && spareStickers(state) < condition.duplicatesAtLeast) return false
 
   if (condition.hasMemory && !state.memories.some((memory) => memory.id === condition.hasMemory)) return false
   if (condition.lacksMemory && state.memories.some((memory) => memory.id === condition.lacksMemory)) return false

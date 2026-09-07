@@ -15,6 +15,22 @@ import type { DialogueChoice, LifeBus } from './bus'
 import { describeMoneyChange } from '../money'
 import { cardForName, metFlag } from '../castCards'
 import { knownBy, ownedShirts, shirtById, shirtFlag } from '../shirts'
+import {
+  haveOf,
+  holderOf,
+  duplicates,
+  missingOn,
+  openPacket,
+  keptOnClose,
+  setSoldIn,
+  stickerFlag,
+  stickerFor,
+  ALBUM_SEEN,
+  PACKET_WHY_HE,
+  SETS,
+  closesPage,
+} from '../stickers'
+import { PACKET, decadeOf } from '../prices'
 import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
 import { characterName } from '../characters'
 import { flagOn } from '../types'
@@ -462,6 +478,120 @@ export class DialogueRunner {
           const state = this.engine.state
           const seed = state.year * 100000 + state.weekday * 1440 + state.minute
           after.push(() => this.bus.emit('toto', { seed, perAnswerHe: '2 ₪ לכל תשובה נכונה' }))
+          break
+        }
+        /**
+         * מעטפת סופרגול — bought, torn, and counted in, in that order.
+         *
+         * The money leaves here and not in the card, unlike the coin and the two
+         * contests: those are wagers whose outcome decides what is owed, and this is a
+         * purchase. You have paid the moment רפי hands it over, and what is inside is
+         * not a result — it is what was inside.
+         *
+         * The set is the one that decade's kiosk sells (`setSoldIn`). A chapter whose
+         * decade nobody printed an album for sells nothing, and the effect does nothing
+         * rather than inventing a page.
+         */
+        case 'packet': {
+          const state = this.engine.state
+          const set = setSoldIn(state)
+          if (!set) break
+          const price = (PACKET[decadeOf(state.chapter)] ?? 1) * 100
+          if (state.agorot < price) break
+          const ids = openPacket(state, set, state.minute)
+          if (ids.length === 0) break
+          const before: Record<string, number> = {}
+          for (const id of ids) before[id] = haveOf(state, id)
+          events.push({ t: 'money.changed', agorot: -price, why: PACKET_WHY_HE })
+          const counted: Record<string, number> = { ...before }
+          for (const id of ids) {
+            counted[id] = (counted[id] ?? 0) + 1
+            events.push({ t: 'flag.set', flag: stickerFlag(id), value: counted[id] as number })
+          }
+          events.push({ t: 'flag.raised', flag: ALBUM_SEEN })
+          const finished = closesPage(state, set, ids)
+          after.push(() => this.bus.emit('packet', { ids, before }))
+          if (finished) {
+            const kept = keptOnClose(state, set, ids)
+            for (const card of kept) events.push({ t: 'flag.set', flag: stickerFlag(card.id), value: 1 })
+            const names = kept.map((card) => card.nameHe).join(', ')
+            after.push(() =>
+              this.bus.emit('toast', {
+                text: names
+                  ? `${SETS[set].titleHe} — הדף מלא. אבא הוציא מהקופסה את ${names}.`
+                  : `${SETS[set].titleHe} — הדף מלא.`,
+                tone: 'red',
+              }),
+            )
+          }
+          break
+        }
+        /**
+         * מדבקה אחת — handed over, or handed back.
+         *
+         * A negative `count` is a trade going the other way: this is the only way a
+         * sticker ever LEAVES the album, and it leaves because the player agreed to give
+         * it to somebody, which is the entire social half of the feature.
+         */
+        case 'sticker': {
+          const sticker = stickerFor(effect.id)
+          if (!sticker) break
+          const now = haveOf(this.engine.state, effect.id)
+          const next = Math.max(0, now + (effect.count ?? 1))
+          events.push({ t: 'flag.set', flag: stickerFlag(effect.id), value: next })
+          if (next > now) events.push({ t: 'flag.raised', flag: ALBUM_SEEN })
+          break
+        }
+        case 'album':
+          after.push(() => this.bus.emit('album', { open: true }))
+          break
+        /**
+         * החלפה — one spare for the one that is missing, if this is the child who has it.
+         *
+         * Everything that could be a lie is computed here rather than written into a
+         * line: which sticker, who holds it, and what he takes for it. If this child is
+         * not the holder he names the one who is, which is both true and the fastest
+         * possible way to teach the player the rule the feature runs on.
+         */
+        case 'swap': {
+          const state = this.engine.state
+          const set = setSoldIn(state)
+          const missing = set ? missingOn(state, set) : null
+          const spare = duplicates(state)[0] ?? null
+          if (!missing || !spare) {
+            after.push(() =>
+              this.bus.emit('toast', { text: 'אין לך כפולים להחליף בהם.', tone: 'plain' }),
+            )
+            break
+          }
+          const holder = holderOf(state, missing.id)
+          if (holder !== effect.who) {
+            const name = holder ? characterName(holder) : null
+            after.push(() =>
+              this.bus.emit('toast', {
+                text: name ? `"אין לי את ${missing.nameHe}. תשאל את ${name}."` : `"אין לי את ${missing.nameHe}."`,
+                tone: 'plain',
+              }),
+            )
+            break
+          }
+          events.push({ t: 'flag.set', flag: stickerFlag(spare.id), value: haveOf(state, spare.id) - 1 })
+          events.push({ t: 'flag.set', flag: stickerFlag(missing.id), value: haveOf(state, missing.id) + 1 })
+          events.push({ t: 'bond.shifted', who: effect.who, delta: 4 })
+          const closed = set ? closesPage(state, set, [missing.id]) : false
+          const fromBox = closed && set ? keptOnClose(state, set, [missing.id]) : []
+          for (const card of fromBox) events.push({ t: 'flag.set', flag: stickerFlag(card.id), value: 1 })
+          const boxNames = fromBox.map((card) => card.nameHe).join(', ')
+          after.push(() =>
+            this.bus.emit('toast', {
+              text: closed
+                ? boxNames
+                  ? `${spare.nameHe} תמורת ${missing.nameHe}. הדף מלא — ו${boxNames} יצא מהקופסה.`
+                  : `${spare.nameHe} תמורת ${missing.nameHe}. הדף מלא.`
+                : `${spare.nameHe} תמורת ${missing.nameHe}.`,
+              tone: 'red',
+            }),
+          )
           break
         }
         /** עץ או פלי — the stake leaves the pocket in the card, with the flip. */

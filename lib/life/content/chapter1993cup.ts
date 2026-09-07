@@ -492,6 +492,20 @@ export const CONVERSATIONS_1993: Conversation[] = [
             text: 'לסדר את הארגזים.',
             then: [{ e: 'flag', flag: 'rafi:work' }, { e: 'time', minutes: 25 }, { e: 'money', agorot: 600, why: 'ארגזים אצל רפי' }, { e: 'personality', key: 'responsibility', delta: 2 }, { e: 'toast', text: 'הוא אמר עשרים דקות. יצא עשרים וחמש, ושישה שקלים.', tone: 'plain' }],
           },
+          {
+            id: 'packet',
+            text: 'מעטפת סופרגול. 2 ₪.',
+            when: { minAgorot: 200 },
+            noteHe: 'אין לך מספיק',
+            then: [{ e: 'packet' }],
+          },
+          {
+            id: 'album',
+            text: 'לפתוח את האלבום.',
+            when: { flag: 'album:seen' },
+            hidden: true,
+            then: [{ e: 'album' }],
+          },
           { id: 'no', text: 'אין זמן, רפי.', then: [{ e: 'toast', text: '"תמיד אין זמן. לך, לך."', tone: 'plain' }] },
         ],
       },
@@ -560,7 +574,7 @@ export const CONVERSATIONS_1993: Conversation[] = [
           { who: 'שחור', text: 'היום זה בד, לא ארגזים. אותו דבר.' },
         ],
         choices: [
-          { id: 'help', text: 'לקחת צד.', then: [{ e: 'flag', flag: 'helped:banner' }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 5 }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'energy', delta: -10 }, { e: 'time', minutes: 25 }] },
+          { id: 'help', text: 'לקחת צד.', then: [{ e: 'flag', flag: 'helped:banner' }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 5 }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'energy', delta: -10 }, { e: 'time', minutes: 30 }] },
           { id: 'no', text: '"לא הפעם."', then: [{ e: 'rel', who: 'shachor', axis: 'distance', delta: 1 }] },
         ],
       },
@@ -578,7 +592,17 @@ export const CONVERSATIONS_1993: Conversation[] = [
           {
             id: 'help',
             text: 'לסחוב את הבד.',
-            then: [{ e: 'flag', flag: 'helped:banner' }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'remember', who: 'shachor', eventId: 'carried-the-banner-1993', significance: 'major' }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'energy', delta: -10 }, { e: 'toast', text: 'הבד כבד כמו אדם. שחור לא אמר תודה. הוא אמר "יופי".', tone: 'plain' }],
+            /**
+             * חצי שעה. זה המחיר, ולא היה לו מחיר.
+             *
+             * Stage B §7 B3 asks that carrying the banner "risk a worse position or being
+             * late". It cost ten energy and UNLOCKED the better place, so the trade-off the
+             * brief describes was a free upgrade with a sentence attached. Thirty minutes
+             * is what a folded banner the size of a living room actually costs, and
+             * `BUS_LEAVES` is at half past six: help him late enough and the coach goes
+             * without you, which is the risk, and it is Limor at the corner who tells you.
+             */
+            then: [{ e: 'flag', flag: 'helped:banner' }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'remember', who: 'shachor', eventId: 'carried-the-banner-1993', significance: 'major' }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'energy', delta: -10 }, { e: 'time', minutes: 30 }, { e: 'toast', text: 'הבד כבד כמו אדם, וזה לקח חצי שעה. שחור לא אמר תודה. הוא אמר "יופי".', tone: 'plain' }],
           },
           {
             id: 'no',

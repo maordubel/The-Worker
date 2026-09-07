@@ -52,6 +52,8 @@ export type HudState = {
   scene: string
   /** "מה עליי לעשות?" — one plain sentence for the help sheet, never on the glass itself */
   hint: string
+  /** what the DAY is waiting for, when the room itself has nothing left — `world/why.ts` */
+  waitingOn?: string | null
   /**
    * ממתין — the one thing on the glass that says "nothing is broken".
    *
@@ -273,6 +275,24 @@ export type LifeBusEvents = {
    * played in three dimensions rather than painted (Maor, 6.9.2026).
    */
   hoops: { attempts: number; perBasket: number } | null
+
+  /**
+   * האלבום — the Supergoal album, open over a stopped world.
+   *
+   * Its own channel rather than a `doc`, for the same reason `book` has one: it is not
+   * held up for a beat and put down, it is a thing the player goes into and comes out of,
+   * and what is stuck in it is state rather than a picture.
+   */
+  album: { open: boolean } | null
+
+  /**
+   * מעטפה — three stickers coming out of a paper envelope.
+   *
+   * `before` is how many of each one was already in the album at the moment the packet
+   * was bought, so the card can say `חדש` truthfully after the engine has already
+   * counted them in.
+   */
+  packet: { ids: readonly string[]; before: Readonly<Record<string, number>> } | null
 
   shirt: {
     /**

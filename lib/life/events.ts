@@ -293,7 +293,13 @@ function personFlags(flags: Record<string, boolean | string | number>): Record<s
       flag.startsWith('own:') ||
       flag.startsWith('went:') ||
       flag.startsWith('owe:') ||
-      flag.startsWith('promise:')
+      flag.startsWith('promise:') ||
+      /**
+       * `album:` — the Supergoal album, and the one collection in this game that is
+       * explicitly ABOUT outliving the afternoon it was filled in. A page half-stuck in
+       * 1986 has to still be half-stuck in 1996, or the object means nothing.
+       */
+      flag.startsWith('album:')
     )
       kept[flag] = value
   }

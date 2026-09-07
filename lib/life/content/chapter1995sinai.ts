@@ -19,6 +19,7 @@ import type { Conversation } from './script'
 
 export const S1 = 'life:sinai:d1'
 export const S2 = 'life:sinai:d2'
+export const S3 = 'life:sinai:d3'
 
 export const PORTRAIT_SINAI: Record<string, string> = {
   'פוגי': 'faceHero80',
@@ -35,7 +36,9 @@ export const PORTRAIT_SINAI: Record<string, string> = {
 
 export function objectiveSinai(state: LifeState): string | null {
   if (state.chapterDone) return null
-  if (state.flags[S2]) return state.flags['s2:done'] ? null : 'הקיוסק. העובדות על הדלפק.'
+  if (state.flags[S3]) return null
+  if (state.flags['s2:done']) return 'החדר. הקיר.'
+  if (state.flags[S2]) return 'הקיוסק. העובדות על הדלפק.'
   if (state.flags['s1:argued']) return 'הביתה. הפוסטר על הקיר.'
   if (state.flags['s1:heard']) return 'הקיוסק. כולם מדברים.'
   return 'ערב גמר. הרדיו אצל רפי.'
@@ -119,6 +122,35 @@ export const BEATS_SINAI: Beat[] = [
       { a: 'talk', conversation: 's2-court' },
     ],
   },
+  {
+    /**
+     * ----------------------------------------------- S3 · הקרע ---
+     *
+     * היום השלישי — the break, in the chapter it belongs to.
+     *
+     * Stage B §7 B5 asks for three slices — defence, doubt, rupture — across 1993–1996, and
+     * the third one was living inside the ARMY chapter as one choice in a kiosk
+     * conversation about a sale. So the arc the brief calls "the decade's most personal
+     * conflict" had its ending filed under somebody else's crisis, and a player who defended
+     * him for two evenings never got a third to stop.
+     *
+     * The break is not an event and there is nothing to attend. It is a bad season, a wall
+     * with a poster on it or a square where one used to be, and a sentence a seventeen-year-
+     * old finally says out loud in his own room. Nobody else is present, which is the
+     * point: §7 B5 says the rupture is "gradual and remembered", and remembered means it
+     * happened where nobody could see it.
+     */
+    id: 's3-open',
+    at: 'bedroom',
+    trigger: 'enter',
+    when: { flag: S2, all: [{ flag: 's2:done' }], none: [{ flag: S3 }] },
+    delayMs: 800,
+    do: [
+      { a: 'events', events: DAY(S3, 1996, 6, at(22, 10), 'אביב 1996') },
+      { a: 'talk', conversation: 's3-room' },
+    ],
+  },
+
 ]
 
 export const CONVERSATIONS_SINAI: Conversation[] = [
@@ -269,9 +301,122 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
       {
         lines: [{ who: null, text: 'בלילה, בחדר. אתה עומד מול הקיר עם נעץ בין האצבעות ולא זוכר מתי שלפת אותו.' }],
         choices: [
-          { id: 'keep', text: 'משאיר. על הקיר.', then: [{ e: 'flag', flag: 'life:poster:wall' }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'ending', id: 'defending' }] },
-          { id: 'fold', text: 'מקפל. למגירה.', then: [{ e: 'flag', flag: 'life:poster:drawer' }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'ending', id: 'doubting' }] },
-          { id: 'tear', text: 'מוריד.', then: [{ e: 'flag', flag: 'life:poster:gone' }, { e: 'personality', key: 'impulsiveness', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 5 }, { e: 'ending', id: 'torn' }] },
+          /**
+           * The poster night stopped being the end of the chapter on 6.9.2026. It decides
+           * what is on the wall; the third day (S3) decides what he believes, which is the
+           * rupture Stage B §7 B5 asks for and which was living in the army chapter.
+           */
+          { id: 'keep', text: 'משאיר. על הקיר.', then: [{ e: 'flag', flag: 'life:poster:wall' }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'flag', flag: 's2:done' }] },
+          { id: 'fold', text: 'מקפל. למגירה.', then: [{ e: 'flag', flag: 'life:poster:drawer' }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'flag', flag: 's2:done' }] },
+          { id: 'tear', text: 'מוריד.', then: [{ e: 'flag', flag: 'life:poster:gone' }, { e: 'personality', key: 'impulsiveness', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 5 }, { e: 'flag', flag: 's2:done' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 's3-room',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'life:poster:gone' },
+        lines: [
+          { who: null, text: 'עוד עונה. הריבוע הבהיר על הקיר עדיין שם, ואתה עדיין יודע בדיוק מה היה בו.' },
+          { who: null, text: 'ברדיו מהמטבח מישהו אמר את השם שלו, ולא בטוב.' },
+        ],
+        choices: [
+          {
+            id: 'broken',
+            text: '"הוא לימד אותי מה זו החולצה. הוא כבר לא התשובה."',
+            then: [
+              { e: 'sinai', stance: 'broken' },
+              { e: 'flag', flag: 'life:sinai:broken' },
+              { e: 'wellbeing', key: 'regret', delta: 4 },
+              { e: 'redheart', key: 'historyMemory', delta: 4 },
+              { e: 'ending', id: 'torn' },
+            ],
+          },
+          {
+            id: 'memory',
+            text: '"את השחקן אני עדיין אוהב. על המאמן — בעוד עשר שנים."',
+            then: [
+              { e: 'sinai', stance: 'reconciled-memory' },
+              { e: 'flag', flag: 'life:sinai:reconciled' },
+              { e: 'personality', key: 'empathy', delta: 3 },
+              { e: 'redheart', key: 'loyaltyReturn', delta: 3 },
+              { e: 'ending', id: 'doubting' },
+            ],
+          },
+        ],
+      },
+      {
+        when: { sinaiIs: 'defending' },
+        lines: [
+          { who: null, text: 'עוד עונה, וגרועה מהקודמת. הפוסטר עדיין על הקיר, ואתה כבר לא מסתכל עליו כשאתה נכנס.' },
+          { who: null, text: 'זה לא קרה בערב אחד. זה קרה כמו שדברים כאלה קורים — קצת בכל פעם, עד שיום אחד אתה שומע את עצמך.' },
+        ],
+        choices: [
+          {
+            id: 'hold',
+            text: 'הוא נשאר. גם עכשיו.',
+            then: [
+              { e: 'redheart', key: 'loyaltyReturn', delta: 5 },
+              { e: 'wellbeing', key: 'loneliness', delta: 4 },
+              { e: 'remember', who: 'kobi', eventId: 'never-took-it-down', significance: 'major' },
+              { e: 'ending', id: 'defending' },
+            ],
+          },
+          {
+            id: 'broken',
+            text: '"הוא לימד אותי מה זו החולצה. הוא כבר לא התשובה."',
+            then: [
+              { e: 'sinai', stance: 'broken' },
+              { e: 'flag', flag: 'life:sinai:broken' },
+              { e: 'wellbeing', key: 'regret', delta: 5 },
+              { e: 'redheart', key: 'historyMemory', delta: 4 },
+              { e: 'ending', id: 'torn' },
+            ],
+          },
+          {
+            id: 'memory',
+            text: '"את השחקן אני עדיין אוהב. על המאמן — בעוד עשר שנים."',
+            then: [
+              { e: 'sinai', stance: 'reconciled-memory' },
+              { e: 'flag', flag: 'life:sinai:reconciled' },
+              { e: 'personality', key: 'empathy', delta: 3 },
+              { e: 'redheart', key: 'loyaltyReturn', delta: 4 },
+              { e: 'ending', id: 'doubting' },
+            ],
+          },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'עוד עונה. הפוסטר במגירה, ואתה לא הוצאת אותו אף פעם, וגם לא זרקת.' },
+          { who: null, text: 'ברדיו מהמטבח מישהו אמר את השם שלו. חיכית לראות מה אתה מרגיש, וזה לקח יותר זמן מפעם.' },
+        ],
+        choices: [
+          {
+            id: 'memory',
+            text: '"את השחקן אני עדיין אוהב. על המאמן — בעוד עשר שנים."',
+            then: [
+              { e: 'sinai', stance: 'reconciled-memory' },
+              { e: 'flag', flag: 'life:sinai:reconciled' },
+              { e: 'personality', key: 'empathy', delta: 3 },
+              { e: 'redheart', key: 'loyaltyReturn', delta: 3 },
+              { e: 'ending', id: 'doubting' },
+            ],
+          },
+          {
+            id: 'broken',
+            text: '"הוא כבר לא התשובה."',
+            then: [
+              { e: 'sinai', stance: 'broken' },
+              { e: 'flag', flag: 'life:sinai:broken' },
+              { e: 'wellbeing', key: 'regret', delta: 3 },
+              { e: 'redheart', key: 'historyMemory', delta: 4 },
+              { e: 'ending', id: 'torn' },
+            ],
+          },
         ],
       },
     ],
