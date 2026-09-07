@@ -109,10 +109,41 @@ export const QUIET_MINUTES = 25
  *     the clock, it is a dead end, and `lastResort` is the thing that answers that.
  */
 export function shouldOfferPass(input: FlowInput): TimeGate | null {
+  const move = flowMove(input)
+  return move?.kind === 'pass' ? move.gate : null
+}
+
+export type FlowMove = { kind: 'pass'; gate: TimeGate } | { kind: 'nudge' }
+
+/**
+ * מה לעשות עם מי שעומד — and the distinction the first version of this file was missing.
+ *
+ * `scripts/life/flow-probe.ts`, 7.9.2026: of the nineteen chapters, exactly three have a
+ * beat that is waiting for nothing but a clock. Everywhere else — a2-alley and a3-hall
+ * included, which are the two the robot kept closing through the safety net — the next
+ * thing the day wants is a REQUIREMENT: somebody to talk to, something to pick up. Time
+ * gates are simply not what is blocking those rooms.
+ *
+ * That is why the pass card never fired there, and offering it would have been the wrong
+ * help anyway: skipping the clock forward does not bring a conversation any closer, it
+ * just takes the afternoon away. So a quiet room with no time gate gets a NUDGE instead —
+ * the room's own composed hint, which is generated from who is standing in it and which
+ * doors are open, and therefore cannot say anything untrue.
+ *
+ *   quiet + a clock to skip to  → offer the jump
+ *   quiet + something to do     → say what is here
+ *   busy, or nothing at all     → say nothing; a match, a beat and a dead end are all
+ *                                 somebody else's job
+ */
+export function flowMove(input: FlowInput): FlowMove | null {
   if (input.busy) return null
   if (input.quietFor < QUIET_MINUTES) return null
   if (input.reachable === 0) return null
-  return nextTimeGate(input.state, input.era)
+  const gate = nextTimeGate(input.state, input.era)
+  if (gate) return { kind: 'pass', gate }
+  // a day that still has an objective is a day with something to do in it
+  if (!input.objectiveHe) return null
+  return { kind: 'nudge' }
 }
 
 /** the minute the jump lands on: just before the beat, so the beat still plays */

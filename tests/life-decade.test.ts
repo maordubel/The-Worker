@@ -172,9 +172,13 @@ describe('הפתיח — once, for a life that is starting', () => {
     state = apply(state, { t: 'flag.raised', flag: OPENING_FLAG })
     state = apply(state, { t: 'year.entered', year: 1990, weekday: 6, minute: 800 })
     expect(state.flags[OPENING_FLAG]).toBe(true)
+    // the boot moved into `app/life/stage/useLifeRuntime.ts` on 7.9.2026; the question is
+    // unchanged — whoever decides whether the film plays must ask the LOG, not the browser
     const shell = readFileSync('app/life/LifeStage.tsx', 'utf8')
+    const boot = readFileSync('app/life/stage/useLifeRuntime.ts', 'utf8')
     expect(shell).not.toContain('sessionStorage.getItem(OPENING_SEEN)')
-    expect(shell).toContain('lifeHasBegun(')
+    expect(boot).not.toContain('sessionStorage.getItem(OPENING_SEEN)')
+    expect(boot).toContain('lifeHasBegun(')
   })
 
   /**

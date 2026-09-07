@@ -114,6 +114,14 @@ export const BACKDROP = [
    * the awning never move, so twenty years pass on one corner without a caption.
    */
   'allenby', 'allenby90', 'allenby2000',
+  /**
+   * הטיילת ואלנבי — four wide streets Maor sent on 7.9.2026, cut to the room shape.
+   *
+   * Each also has a `-wide` file beside it (the uncut 2.63:1 original, treated): the
+   * promenade journey south→north is a street you WALK ALONG rather than a room you stand
+   * in, and when its geography arrives that is the picture it will move across.
+   */
+  'promenade', 'promenadeDusk', 'allenbyShops', 'allenbyShopsLate',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { GIGS } from '@/lib/life/gigs'
 import { MAP_PLACES } from '@/lib/life/map'
-import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
+import { ALL_SCENES, SCENE, sceneFor } from '@/lib/life/world/scenes'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 
 /**
@@ -95,7 +95,7 @@ describe('אלנבי — the junction the map turns on', () => {
   it('every door it names lands on a spawn that exists', () => {
     for (const scene of ALL_SCENES) {
       for (const exit of scene.exits) {
-        const target = SCENE[exit.to]
+        const target = sceneFor(exit.to)
         expect(target, `${scene.id} → ${exit.to} is not a scene`).toBeDefined()
         expect(target.spawns[exit.spawn], `${scene.id} → ${exit.to}: no spawn "${exit.spawn}"`).toBeDefined()
       }

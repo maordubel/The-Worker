@@ -1,5 +1,6 @@
 import type { LifeEvent } from './events'
 import type { PlayerIdentity } from './types'
+import type { MasterCheckpoint } from './checkpoint'
 
 /**
  * השמירה — the seam, and the only file that knows where a life is kept.
@@ -18,7 +19,7 @@ import type { PlayerIdentity } from './types'
  */
 
 const KEY = 'the-worker:life'
-export const SAVE_VERSION = 3
+export const SAVE_VERSION = 4
 
 export type SaveFile = {
   version: number
@@ -26,6 +27,14 @@ export type SaveFile = {
   year: number
   events: LifeEvent[]
   savedAt: string
+  /**
+   * The needle's position inside a directed master event — see `lib/life/checkpoint.ts`.
+   * Beside the log rather than inside it, because it is not something that happened to
+   * the boy; it is where the record player was when the power went out. Absent on every
+   * save made before version 4, which is why an older file loads with no resume and no
+   * complaint.
+   */
+  checkpoint?: MasterCheckpoint | null
 }
 
 export type LifeStore = {
@@ -70,7 +79,12 @@ function browserStore(): Storage | null {
  * The rule the whole file exists for: never silently destroy a save. Anything that
  * cannot be honestly carried forward is refused loudly rather than reinterpreted.
  */
-const READABLE = new Set([2, 3])
+/**
+ * **Version 4 — the master-event checkpoint.** One optional field beside the log. A
+ * version-3 file needs no conversion and loses nothing: it simply resumes nothing, which
+ * is exactly what it did before the field existed.
+ */
+const READABLE = new Set([2, 3, 4])
 
 function migrate(raw: unknown): SaveFile | null {
   if (!raw || typeof raw !== 'object') return null
@@ -84,6 +98,7 @@ function migrate(raw: unknown): SaveFile | null {
     year: file.year,
     events: file.events as LifeEvent[],
     savedAt: typeof file.savedAt === 'string' ? file.savedAt : new Date().toISOString(),
+    checkpoint: (file.checkpoint as MasterCheckpoint | null | undefined) ?? null,
   }
 }
 

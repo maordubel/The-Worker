@@ -18,7 +18,7 @@ for (const s of ALL_SCENES) {
     const t = Math.max(0, Math.min(1, (a.y - s.band.far) / (s.band.near - s.band.far)))
     const boy = (s.size.far + (s.size.near - s.size.far) * t) * k
     console.log(
-      `${s.id.padEnd(20)} ${a.id.padEnd(16)} x=${a.x} y=${a.y} size=${a.size} boyHere=${boy.toFixed(2)} ratio=${(a.size / boy).toFixed(2)}`,
+      `${s.id.padEnd(20)} ${a.id.padEnd(16)} x=${a.x} y=${a.y} size=${a.size ?? '-'} boyHere=${boy.toFixed(2)} ratio=${((a.size ?? boy) / boy).toFixed(2)}`,
     )
   }
 }

@@ -28,6 +28,7 @@ import { placementsAt } from '@/lib/life/schedules'
 import type { LifeState } from '@/lib/life/types'
 import { KICKOFF, SCENE } from '@/lib/life/world/scenes'
 import { meets } from '@/lib/life/world/types'
+import { SAVE_VERSION } from '@/lib/life/save'
 
 /**
  * THE WORKER LIFE — the systems, as guards.
@@ -82,11 +83,22 @@ describe('השמירה — a save from before the systems existed still opens', 
     expect(state.relationships.ofir?.familiarity).toBeGreaterThan(45)
   })
 
-  it('accepts a version-2 file rather than dropping it', () => {
+  /**
+   * The rule, rather than the number: every version from 2 up to today's is readable.
+   *
+   * This used to assert the literal `new Set([2, 3])`, which meant that adding version 4
+   * — one optional field beside the log, losing a version-3 file nothing at all — failed a
+   * test about version 2. Derived from `SAVE_VERSION` now, so it goes on meaning what it
+   * was written to mean the next time the file grows.
+   */
+  it('accepts every save version back to 2, rather than dropping any of them', () => {
     const save = readFileSync(join(ROOT, 'lib/life/save.ts'), 'utf8')
     expect(save).toContain('READABLE')
-    expect(save).toContain('new Set([2, 3])')
-    expect(save).toContain('SAVE_VERSION = 3')
+    const readable = save.match(/const READABLE = new Set\(\[([^\]]+)\]\)/)?.[1]
+    expect(readable, 'no READABLE set in save.ts').toBeTruthy()
+    const versions = (readable as string).split(',').map((n) => Number(n.trim()))
+    for (let v = 2; v <= SAVE_VERSION; v += 1) expect(versions, `version ${v} is no longer readable`).toContain(v)
+    expect(Math.max(...versions)).toBe(SAVE_VERSION)
   })
 
   it('still folds an event from the future to a no-op', () => {

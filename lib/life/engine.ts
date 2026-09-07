@@ -1,6 +1,7 @@
 import { apply, emptyState, type LifeEvent } from './events'
 import { freshSeed } from './rng'
 import { lifeStore, SAVE_VERSION, type SaveFile } from './save'
+import type { MasterCheckpoint } from './checkpoint'
 import {
   relationshipOf,
   type CharacterId,
@@ -57,6 +58,15 @@ export class LifeEngine {
   private listeners = new Set<LifeListener>()
   private timer: ReturnType<typeof setTimeout> | null = null
   private dirty = false
+  /**
+   * נקודת השמירה של אירוע־אב — where the needle was, beside the log rather than in it.
+   *
+   * The engine only carries it: it is written by whoever is directing the day and read
+   * back by whoever picks it up, and `lib/life/checkpoint.ts` decides whether it is still
+   * describing this life. Setting it marks the life dirty, so a checkpoint is never a
+   * write the player has to wait for.
+   */
+  private checkpoint: MasterCheckpoint | null = null
 
   state: LifeState
 
@@ -72,6 +82,17 @@ export class LifeEngine {
   /** The log itself — the thing that gets saved, and one day inserted into a table. */
   log(): readonly LifeEvent[] {
     return this.events
+  }
+
+  /** stash the position of a directed day; `null` clears it when the day is over */
+  mark(checkpoint: MasterCheckpoint | null) {
+    this.checkpoint = checkpoint
+    this.markDirty(false)
+  }
+
+  /** what was stashed, for whoever is about to try to resume it */
+  marked(): MasterCheckpoint | null {
+    return this.checkpoint
   }
 
   /**
@@ -215,6 +236,7 @@ export class LifeEngine {
       year: this.year,
       events: this.events,
       savedAt: new Date().toISOString(),
+      checkpoint: this.checkpoint,
     }
     return lifeStore.write(file)
   }
@@ -241,5 +263,7 @@ export async function loadLife(fallback: PlayerIdentity, year: number): Promise<
     engine.dispatch({ t: 'rng.seeded', seed: freshSeed(year) })
     return engine
   }
-  return new LifeEngine(file.identity, file.year, file.events)
+  const engine = new LifeEngine(file.identity, file.year, file.events)
+  if (file.checkpoint) engine.mark(file.checkpoint)
+  return engine
 }

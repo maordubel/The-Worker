@@ -172,13 +172,13 @@ for (const dir of SOURCE_DIRS) {
   try { files = readdirSync(dir).filter((f) => /\.tsx?$/.test(f)) } catch { continue }
   for (const file of files) {
     const source = readFileSync(`${dir}/${file}`, 'utf8')
-    for (const m of source.matchAll(/flag\.raised',\s*flag:\s*'([^']+)'/g)) raised.add(m[1])
-    for (const m of source.matchAll(/t:\s*'flag\.raised',\s*flag:\s*`([^`$]+)`/g)) raised.add(m[1])
-    for (const m of source.matchAll(/raise\('([^']+)'\)/g)) raised.add(m[1])
-    for (const m of source.matchAll(/e:\s*'flag',\s*flag:\s*'([^']+)'/g)) raised.add(m[1])
+    for (const m of source.matchAll(/flag\.raised',\s*flag:\s*'([^']+)'/g)) { if (m[1]) raised.add(m[1]) }
+    for (const m of source.matchAll(/t:\s*'flag\.raised',\s*flag:\s*`([^`$]+)`/g)) { if (m[1]) raised.add(m[1]) }
+    for (const m of source.matchAll(/raise\('([^']+)'\)/g)) { if (m[1]) raised.add(m[1]) }
+    for (const m of source.matchAll(/e:\s*'flag',\s*flag:\s*'([^']+)'/g)) { if (m[1]) raised.add(m[1]) }
     // …and the same three shapes written with a named constant instead of a literal
     for (const m of source.matchAll(/flag:\s*([A-Za-z_$][\w$]*)\s*[,}]/g)) {
-      const value = namedFlags.get(m[1] as string)
+      const value = m[1] ? namedFlags.get(m[1]) : undefined
       if (value) raised.add(value)
     }
   }
@@ -258,7 +258,7 @@ for (const scene of ALL_SCENES) {
   for (const spot of scene.hotspots) flagsOfCondition((spot as { when?: Condition }).when, wanted)
 }
 for (const id of Object.keys(DIALOGUE)) {
-  for (const branch of DIALOGUE[id].branches) {
+  for (const branch of DIALOGUE[id]?.branches ?? []) {
     for (const choice of branch.choices ?? []) flagsOfCondition(choice.when, wanted)
   }
 }

@@ -30,6 +30,7 @@ import type { LifeEvent } from '../events'
 
 import { FULL_TIME, KICKOFF } from '../world/scenes'
 import { FULL_98, HALF_98 } from './chapter1998laces'
+import { LACES_LINES } from '../history/terrace'
 
 export type MatchStep = {
   /** ms after the previous step ended (a `talk` pause does not count) */
@@ -145,10 +146,10 @@ const LACES_98: MatchScript = {
     { wait: 0, id: 'kickoff', phaseHe: 'המשחק', board: { for: 0, against: 0 }, crowd: 'BUILDING_TENSION', whistle: 1, text: 'שני משחקים בבת אחת: אחד על הדשא, אחד בטרנזיסטור של האיש מאחוריך.', clock: HALF_98 - 44 },
     { wait: 3200, id: 'where', talk: 'm98-where' },
     { wait: 800, id: 'goal', goal: 'for', crowd: 'GOAL_BURST', text: 'שער. שלנו. היציע קופץ — ומיד מסתובב לטרנזיסטור.', tone: 'red', clock: HALF_98 - 20 },
-    { wait: 6400, id: 'half', phaseHe: 'מחצית', crowd: 'LOW_MURMUR', whistle: 1, text: 'מאחור, טרנזיסטור: "שם — יתרון להם." ואז מישהו אחר: "לא, לא, שוויון." ואז: "מי אמר?"', clock: HALF_98 },
+    { wait: 6400, id: 'half', phaseHe: 'מחצית', crowd: 'LOW_MURMUR', whistle: 1, text: LACES_LINES.half, clock: HALF_98 },
     { wait: 6000, id: 'second', phaseHe: 'המשחק', crowd: 'CHANT', whistle: 1, clock: HALF_98 + 20 },
     { wait: 3600, id: 'listen', talk: 'm98-listen' },
-    { wait: 800, id: 'late', crowd: 'BUILDING_TENSION', text: 'פייג׳ר אצל מישהו. "שוויון שם! שוויון!" היציע עולה באוויר על משחק שלא רואים.', tone: 'red', sfx: 'crowd-swell', level: 0.8, clock: FULL_98 - 8 },
+    { wait: 800, id: 'late', crowd: 'BUILDING_TENSION', text: LACES_LINES.late, tone: 'red', sfx: 'crowd-swell', level: 0.8, clock: FULL_98 - 8 },
     { wait: 6400, id: 'near', crowd: 'NEAR_MISS', text: 'הדקות האחרונות. אף אחד לא מסתכל על המגרש.' },
     /**
      * השריקה איננה סוף המשימה — Shoelaces screenplay §22, and the whole shape of the day.
@@ -163,7 +164,7 @@ const LACES_98: MatchScript = {
      * a stadium singing somewhere behind a small speaker held in two hands. Nothing on
      * screen says any of that.
      */
-    { wait: 4800, id: 'ours-over', phaseHe: 'סיום', crowd: 'AFTERMATH', whistle: 3, clock: FULL_98, listen: 1, text: 'שריקה. המשחק שלכם נגמר, ונגמר טוב.' },
+    { wait: 4800, id: 'ours-over', phaseHe: 'סיום', crowd: 'AFTERMATH', whistle: 3, clock: FULL_98, listen: 1, text: LACES_LINES.oursOver },
     { wait: 4200, id: 'they-play-on', crowd: 'CHANT', listen: 0.5, text: 'היציע שר. ובאמצע השירה, שלושה־ארבעה אנשים לא זזים: שם עוד משחקים.' },
     { wait: 5200, id: 'laces', listen: 0.12, talk: 'l1-laces' },
     { wait: 4400, id: 'another', listen: 0.1, sfx: 'crowd-real-miss', level: 0.5, text: 'צעקה מהרדיו. האנשים סביבו מתכווצים. ואז — כלום. עוד לא.' },

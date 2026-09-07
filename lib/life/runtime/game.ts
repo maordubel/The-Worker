@@ -22,6 +22,7 @@ import { FootballScene } from './scenes/FootballScene'
 import { PassageScene } from './scenes/PassageScene'
 import { PrologueScene } from './scenes/PrologueScene'
 import { WorldScene } from './scenes/WorldScene'
+import type { MasterCheckpoint } from '../checkpoint'
 
 /**
  * ההרכבה — the only file that both React and Phaser touch, and the reason neither knows
@@ -53,6 +54,8 @@ export type LifeSnapshot = {
   /** developer-only: the whole truth, never rendered in production */
   state: LifeState
   events: number
+  /** the needle's position inside a directed master event, when one is open */
+  checkpoint: MasterCheckpoint | null
 }
 
 export type MapPlace = {
@@ -279,6 +282,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       missed: missedIn(state, era.opportunities).map((entry) => entry.titleHe),
       state,
       events: options.engine.log().length,
+      checkpoint: options.engine.marked(),
     }
   }
 

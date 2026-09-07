@@ -4,6 +4,9 @@ import type { HistoricalAnchor } from '../anchors'
 import { rollerFor } from '../rng'
 import { US_HE } from '../match'
 import type { Say } from '../content/script'
+import { ParallelHistoricalDirector, PRESET_1990 } from '../history'
+import { checkpointOf, onceIn, resume } from '../checkpoint'
+import type { HistoricalMatchEvent } from '../history'
 
 import type { LifeContext } from './context'
 
@@ -14,28 +17,35 @@ import type { LifeContext } from './context'
  * this file ever puts on a scoreboard is read off the anchor — six for us, none for
  * them, from `content/manual/matches.json` with its source attached. What the child
  * controls is what he KNOWS, and when: there is a second match forty kilometres away,
- * and whether we are going up at any given moment depends on it. The archive holds no
- * score for that match (rule 11), so this director never states one. It holds the race
- * in words the source uses — "they scored more", "at half-time the status quo held and
- * Yavne were going up" — and every specific number about Yavne that anybody says on this
- * terrace is a RUMOUR, generated off the save's seed and recorded as `rumor:*`.
+ * and whether we are going up at any given moment depends on it.
  *
  * Three states, kept apart on purpose (brief §15):
- *   · canonical — what is true. Hapoel's goals, and Yavne "level / ahead / further ahead"
- *     in the shape the source describes. Never shown directly.
+ *   · canonical — what is true, now read off `lib/life/history` rather than off a table
+ *     in this file. Never shown directly.
  *   · known — what the child has actually heard, from whom, and how stale it is.
  *   · rumour — what the kids are saying, which may be right by accident.
  *
- * Sources have LATENCY: Kobi's radio hears Yavne a minute late; the other radio, three;
- * the man who "knows" repeats the other radio; the kids repeat whatever. A child who walks
- * from the far radio back to his father can arrive with news the father's radio has not
- * played yet — and that inversion (`net:toldKobi`) is the whole point of the chapter.
+ * ── 7.9.2026: this file stopped owning history ──────────────────────────────────────
  *
- * Time is compressed: about one game-minute per 1.2 real seconds, so the ninety minutes
- * and a short interval take a little over two real minutes, with room to walk between the
- * radios three or four times. It was half that speed until 5.9.2026 and Maor's verdict was
- * the correct one: a chapter whose point is running between two radios cannot spend its
- * length standing still.
+ * It used to hold `GOAL_AT = [12, 29, 44, 58, 71, 84]` and a three-word model of Yavne,
+ * and Maor's audit said the true thing about both: internal pacing is not the historical
+ * record, and a mission about documentary information cannot keep its documents in a
+ * const. Everything factual now lives in `lib/life/history/days.ts` with a source id and
+ * a confidence on every claim, and everything about clocks, latency, rumour, crowd
+ * knowledge and endings lives in `ParallelHistoricalDirector`, which 2.5.1998 uses too.
+ *
+ * What is left in this file is the only thing that was ever really 1990's: the terrace.
+ * Kobi, the man who is certain and wrong, the kids, the radio that falls at the fourth
+ * goal, and a boy who can arrive at his father holding news the father's radio has not
+ * played yet. The pacing numbers moved to `PRESET_1990` unchanged, to the game-minute, so
+ * a save from before the extraction plays exactly the chapter it always played.
+ *
+ * Rule 11, as it applies here: nobody on this terrace ever says a Yavne scorer or a Yavne
+ * score, because no source holds either. What they say is an IMPRESSION of the race —
+ * "יבנה מובילה" — which is a fallible man's sentence, not an archive claim, and the
+ * archive's own note about that ground ("התוצאה במשחק יבנה לא אומתה במקור") is why it
+ * has to stay that way. The director enforces the line: identifying particulars — a name,
+ * a printed minute, a scoreline — reach the player only from an event marked `speakable`.
  */
 
 export type NetBoard = {
@@ -55,102 +65,37 @@ export type NetHooks = {
   radioAt: () => { x: number; y: number } | null
 }
 
-/** Yavne's canonical state, in the source's own shape — never a number. */
-type YavneState = 'level' | 'ahead' | 'further'
-
 type Known = {
   hapoel: number
-  yavne: YavneState | 'unknown'
+  /** how many they have scored there, as far as he has been told — -1 for "nothing yet" */
+  yavne: number
   /** the game-minute the Yavne news was last refreshed, for staleness */
   yavneAt: number
   /** which source told him last */
   from: string | null
 }
 
-const YAVNE_LABEL: Record<YavneState | 'unknown', string> = {
-  unknown: 'לא יודעים כלום על יבנה.',
-  level: 'ביבנה עוד אין שערים.',
-  ahead: 'יבנה מובילה.',
-  further: 'יבנה מובילה, ובגדול.',
-}
+const YAVNE_UNKNOWN = 'לא יודעים כלום על יבנה.'
+const US = 'הפועל-תל-אביב'
+const THEM = 'מכבי-יבנה'
+const HOME = 'bloomfield'
+const AWAY = 'yavne'
+const CHAPTER = '1990'
+const DAY_ID = '1990-05-12'
 
-/** the six, spread over the ninety — internal pacing, NEVER shown as minutes */
-const GOAL_AT = [12, 29, 44, 58, 71, 84] as const
-/** the parallel match, in the source's shape: level, then Yavne ahead by half-time, then more */
-const YAVNE_AT: Array<{ minute: number; state: YavneState }> = [
-  { minute: 0, state: 'level' },
-  { minute: 21, state: 'ahead' },
-  { minute: 63, state: 'further' },
-]
-const HALF = 45
-/**
- * ההפסקה — five game-minutes, not fifteen.
- *
- * A real half-time is fifteen minutes and in this game that was thirty real seconds with
- * nothing to do in them, which is the single longest dead stretch in the chapter. The
- * interval still HAPPENS — the whistle, the seeds along the row, the radios still talking
- * — it is just not a wait you sit through.
- */
-const INTERVAL = 5
-const FULL = 90
-/** game-minutes per real second */
-/**
- * כמה מהר רץ המשחק — game-minutes per real second.
- *
- * It was 0.5: two real seconds a minute, so ninety minutes plus a fifteen-minute interval
- * ran three and a half real minutes with the interval alone taking thirty seconds of
- * standing still. Maor played it and said the two true things about it — "עורך זמן רב
- * מידי" and "העובדה שהוא צריך פשוט להמתין לא ברורה". The second half of that is answered
- * on the glass (`WorldScene.waitingFor`); this is the first half. At 0.85 the match is a
- * little over two minutes, which is long enough to run between two radios three or four
- * times and short enough that nobody checks whether the game has frozen.
- */
-const PACE = 0.85
-
-/**
- * צפיפות דרמטית — the match does not run at one speed, because a match is not felt at one
- * speed (Mission 01 screenplay §25).
- *
- * Maor's brief for 12.5.1990 asks for the last five minutes to be given nearly as much
- * real time as the entire first half: the first forty-five in about sixty-five seconds,
- * the middle stretch quicker, the boring quarter of an hour between the seventieth and the
- * eighty-fourth minute almost thrown away, and then the closing minutes — the Yavne
- * penalty, the corners, Abukasis — slowed almost to a stop.
- *
- * That is exactly how anybody remembers this game, and it is the same principle the 1986
- * finale already uses. Every row is game-minutes per real second; `PACE` above stays as
- * the fallback for anything outside the table.
- */
-const DENSITY: ReadonlyArray<{ until: number; pace: number }> = [
-  // 0–45' in ~65s
-  { until: 45, pace: 0.69 },
-  // 46–70' in ~45s
-  { until: 70, pace: 0.56 },
-  // 70–84' in ~10s: the quarter of an hour nobody remembers
-  { until: 84, pace: 1.4 },
-  // 85–90+' in ~45s: the five minutes everybody remembers, one game-minute every 7 seconds
-  { until: 999, pace: 0.14 },
-]
-
-/** how fast the clock is running right now, in game-minutes per real second */
-function paceAt(playedMinute: number): number {
-  for (const row of DENSITY) if (playedMinute < row.until) return row.pace
-  return PACE
-}
 /** real seconds the dropped radio waits on the concrete */
 const DROP_WINDOW_MS = 42000
 
 export class TransistorNet {
-  private minute = 0
-  private acc = 0
-  private phase: 'first' | 'half' | 'second' | 'over' = 'first'
+  private readonly director = new ParallelHistoricalDirector(PRESET_1990)
   private goals = 0
-  private known: Known = { hapoel: 0, yavne: 'unknown', yavneAt: -1, from: null }
+  private known: Known = { hapoel: 0, yavne: -1, yavneAt: -1, from: null }
   private lastBoard = ''
   private dropAt: number | null = null
   private dropClock = 0
   private saidSix = false
   private halfSaid = false
+  private over = false
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -182,17 +127,32 @@ export class TransistorNet {
    * brief's whole point about history not waiting.
    */
   start(dayMinute = 0, kickoff = 0) {
-    const elapsed = Math.max(0, Math.min(HALF + INTERVAL + HALF - 1, dayMinute - kickoff))
+    /**
+     * הרצה מחדש באמצע — a reload in the eighty-first minute used to replay the fourth
+     * goal, and with it the roar, the falling radio and two points of football love the
+     * boy had already been given. The checkpoint puts the needle back instead; if it is
+     * stale, or from another chapter, or from a life that has since moved on, it is
+     * refused and the day starts from the day clock exactly as it always did.
+     */
+    if (resume(this.director, this.ctx.engine.marked(), CHAPTER, this.ctx.engine.log().length)) {
+      this.goals = Math.min(this.anchor.match?.scoredFor ?? 0, this.director.goalsFor(HOME, US))
+      this.halfSaid = this.director.playedMinute() >= 45
+      this.known = { ...this.known, hapoel: this.goals, from: this.goals ? 'הרחוב' : null }
+      this.ctx.bus.emit('toast', { text: 'המשחק ממשיך מאיפה שהיה.', tone: 'plain' })
+      this.ctx.bus.emit('sound', { kind: 'radio', on: true })
+      this.pushBoard()
+      return
+    }
+    const elapsed = Math.max(0, Math.min(99, dayMinute - kickoff))
     if (elapsed > 0) {
-      this.minute = elapsed
-      const played = this.playedMinute()
+      this.director.seek(elapsed)
       const total = this.anchor.match?.scoredFor ?? 0
-      this.goals = Math.min(total, GOAL_AT.filter((at) => at <= played).length)
-      this.phase = this.minute >= HALF + INTERVAL ? 'second' : this.minute >= HALF ? 'half' : 'first'
-      this.halfSaid = this.phase !== 'first'
+      this.goals = Math.min(total, this.director.goalsFor(HOME, US))
+      this.halfSaid = this.director.playedMinute() >= 45
       // What he knows is what he heard on the way in: the score, from nobody in particular.
       this.known = { ...this.known, hapoel: this.goals, from: this.goals ? 'הרחוב' : null }
-      this.ctx.bus.emit('toast', { text: this.phase === 'half' ? 'מחצית. באת באמצע.' : 'באת באמצע. הרעש אמר לך את הרוב.', tone: 'red' })
+      const half = this.director.phaseOf(HOME) === 'half'
+      this.ctx.bus.emit('toast', { text: half ? 'מחצית. באת באמצע.' : 'באת באמצע. הרעש אמר לך את הרוב.', tone: 'red' })
     } else {
       this.ctx.bus.emit('toast', { text: 'המשחק מתחיל. הרדיו של אבא מדבר.', tone: 'red' })
       this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 1 })
@@ -203,79 +163,74 @@ export class TransistorNet {
 
   /** Called every frame by the scene, with real milliseconds. */
   tick(delta: number) {
-    if (this.phase === 'over') return
-    this.acc += (delta / 1000) * (this.phase === 'half' ? PACE : paceAt(this.playedMinute()))
-    while (this.acc >= 1) {
-      this.acc -= 1
-      this.advance()
+    if (this.over) return
+    for (const signal of this.director.advance(delta)) {
+      if (signal.k === 'phase') {
+        if (signal.phase === 'half') {
+          this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 2 })
+          this.halftime()
+        } else if (signal.phase === 'second') {
+          this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 1 })
+          this.ctx.bus.emit('toast', { text: 'מחצית שנייה.', tone: 'plain' })
+        } else if (signal.phase === 'over') {
+          this.finish()
+          return
+        }
+        this.mark()
+      }
+      if (signal.k === 'event' && signal.event.venueId === HOME && signal.event.type === 'goal') {
+        const total = this.anchor.match?.scoredFor ?? 0
+        if (this.goals < total) {
+          this.goals += 1
+          this.ctx.bus.emit('sound', { kind: 'roar' })
+          this.goal()
+        }
+      }
     }
+    this.pushBoard()
     if (this.dropAt !== null) {
       this.dropClock += delta
       if (this.dropClock > DROP_WINDOW_MS) this.loseRadio()
     }
   }
 
-  private advance() {
-    this.minute += 1
-    const played = this.playedMinute()
-    if (this.phase === 'first' && this.minute >= HALF) {
-      this.phase = 'half'
-      this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 2 })
-      this.halftime()
-    } else if (this.phase === 'half' && this.minute >= HALF + INTERVAL) {
-      this.phase = 'second'
-      this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 1 })
-      this.ctx.bus.emit('toast', { text: 'מחצית שנייה.', tone: 'plain' })
-    } else if (this.phase === 'second' && played >= FULL) {
-      this.phase = 'over'
-      this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 3 })
-      this.ctx.bus.emit('sound', { kind: 'roar', big: 1.4 })
-      this.ctx.bus.emit('sound', { kind: 'radio', on: false })
-      this.hooks.onBoard(TransistorNet.finalBoard(this.anchor))
-      this.hooks.onOver()
-      return
-    }
-    const total = this.anchor.match?.scoredFor ?? 0
-    const nextGoal = GOAL_AT[this.goals]
-    if (nextGoal !== undefined && this.goals < total && played >= nextGoal && this.phase !== 'half') {
-      this.goals += 1
-      this.ctx.bus.emit('sound', { kind: 'roar' })
-      this.goal()
-    }
-    this.pushBoard()
+  /** stash the needle — on goals and on whistles, not on frames */
+  private mark() {
+    this.ctx.engine.mark(checkpointOf(CHAPTER, DAY_ID, this.director, this.ctx.engine.log().length))
   }
 
-  /** match minute with the interval taken out */
-  private playedMinute(): number {
-    return this.minute > HALF ? Math.max(HALF, this.minute - INTERVAL) : this.minute
+  private finish() {
+    this.over = true
+    this.ctx.engine.mark(null)
+    this.ctx.bus.emit('sound', { kind: 'whistle', blasts: 3 })
+    this.ctx.bus.emit('sound', { kind: 'roar', big: 1.4 })
+    this.ctx.bus.emit('sound', { kind: 'radio', on: false })
+    this.hooks.onBoard(TransistorNet.finalBoard(this.anchor))
+    this.hooks.onOver()
   }
 
-  private yavneNow(): YavneState {
-    const played = this.playedMinute()
-    let state: YavneState = 'level'
-    for (const step of YAVNE_AT) if (played >= step.minute) state = step.state
-    return state
+  /** how many they have scored at the other ground — the truth, and only the tests see it */
+  private yavneNow(): number {
+    return this.director.goalsFor(AWAY, THEM)
   }
 
-  /** what a radio with `delay` minutes of lag would say about Yavne right now */
-  private yavneHeard(delay: number): YavneState {
-    const played = Math.max(0, this.playedMinute() - delay)
-    let state: YavneState = 'level'
-    for (const step of YAVNE_AT) if (played >= step.minute) state = step.state
-    return state
+  /** what a given channel is able to say about the other ground right now */
+  private yavneOn(channelId: string): { margin: number; lineHe: string; event: HistoricalMatchEvent | null } {
+    const rows = this.director.heardOn(channelId, AWAY)
+    const margin = rows.filter((e) => e.type === 'goal' && e.teamSlug === THEM).length
+    const spoken = [...rows].reverse().find((e) => e.lineHe)
+    return { margin, lineHe: spoken?.lineHe ?? YAVNE_UNKNOWN, event: spoken ?? null }
   }
 
   /** the one question, answered from CANONICAL state — the child never sees this directly */
   private promotedNow(): boolean {
-    const margin = { level: 0, ahead: 1, further: 2 }[this.yavneNow()]
-    return this.goals > margin
+    return this.goals > this.yavneNow()
   }
 
   /** …and from what he KNOWS, which is what he shouts */
   private promotedKnown(): boolean | null {
-    if (this.known.yavne === 'unknown') return null
-    const margin = { level: 0, ahead: 1, further: 2 }[this.known.yavne]
-    return this.known.hapoel > margin
+    if (this.known.yavne < 0) return null
+    return this.known.hapoel > this.known.yavne
   }
 
   private goal() {
@@ -284,7 +239,10 @@ export class TransistorNet {
     this.scene.cameras.main.flash(420, 255, 252, 246)
     this.scene.cameras.main.shake(500, 0.006)
     this.ctx.bus.emit('toast', { text: this.goals === 1 ? 'שער! היציע קופץ.' : 'עוד אחד!', tone: 'red' })
-    this.ctx.engine.dispatch({ t: 'redheart.changed', key: 'footballLove', delta: 2 })
+    // exactly once in a life, whatever a reload does to the needle
+    const love = onceIn(state, `1990:goal:${this.goals}`, [{ t: 'redheart.changed', key: 'footballLove', delta: 2 }])
+    if (love.length) this.ctx.engine.dispatch(...love)
+    this.mark()
 
     // The child who did the arithmetic wrong celebrates too early (brief §16).
     if (this.goals === 1 && state.flags['math:wrong'] && !state.flags['net:tooEarly']) {
@@ -323,7 +281,7 @@ export class TransistorNet {
 
   private dropRadio() {
     if (!this.hooks.radioAt()) return
-    this.dropAt = this.minute
+    this.dropAt = this.director.playedMinute()
     this.dropClock = 0
     this.hooks.onDrop(true)
     this.say([
@@ -371,7 +329,7 @@ export class TransistorNet {
 
   /**
    * מה הוא אמר? — a source, spoken to. Everything here is generated from the three
-   * states above and from the source's latency; nothing is a line about a number the
+   * states above and from the channel's latency; nothing is a line about a number the
    * archive does not hold.
    */
   talk(id: string) {
@@ -381,17 +339,18 @@ export class TransistorNet {
       this.saveRadio()
       return
     }
-    if (this.phase === 'over') return
+    if (this.over) return
 
     if (id === 'net:kobi') {
       const lost = Boolean(state.flags['radio:lost'])
       const held = Boolean(state.flags['radio:saved'])
-      const fresh = this.known.from === 'radio' && this.known.yavneAt > this.minute - 4 && this.known.yavne !== this.yavneHeard(1)
+      const mine = this.yavneOn('radio')
+      const fresh = this.known.from === 'radio' && this.known.yavneAt > this.director.playedMinute() - 4 && this.known.yavne !== this.yavneOn('kobi').margin
       if (fresh && !state.flags['net:toldKobi']) {
         // He knows something his father's radio has not played yet (brief §17).
         this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'net:toldKobi' })
         this.say([
-          { who: 'פוגי', text: `אבא — ${YAVNE_LABEL[this.known.yavne]}` },
+          { who: 'פוגי', text: `אבא — ${mine.lineHe}` },
           { who: 'קובי', text: 'מאיפה אתה יודע?' },
           { who: 'פוגי', text: 'הרדיו של ההוא.' },
           { who: null, text: 'הוא מסתכל עליך שנייה יותר מדי. ואז מקרב את הרדיו שלו לאוזן, לבדוק.' },
@@ -402,11 +361,12 @@ export class TransistorNet {
         this.say([{ who: 'קובי', text: 'אין רדיו. תלך תשמע ותחזור. אתה הרדיו שלי עכשיו.' }])
         return
       }
-      const heard = this.yavneHeard(held ? 0 : 1)
+      // a rescued transistor is a transistor held to the ear: no lag left in it at all
+      const heard = held ? this.yavneOn('kobi-held') : this.yavneOn('kobi')
       this.learn(heard, 'kobi')
       const answer = this.promotedKnown()
       this.say([
-        { who: 'קובי', text: YAVNE_LABEL[heard] },
+        { who: 'קובי', text: heard.lineHe },
         { who: 'קובי', text: answer === null ? 'אז עוד לא יודעים.' : answer ? 'אז כרגע — עולים. כרגע.' : 'אז כרגע — לא. צריך עוד.' },
       ])
       return
@@ -419,18 +379,18 @@ export class TransistorNet {
         return
       }
       this.ctx.engine.dispatch({ t: 'rng.consumed', count: roll.consumed })
-      const heard = this.yavneHeard(3)
+      const heard = this.yavneOn('radio')
       this.learn(heard, 'radio')
       this.say([
         { who: null, text: 'אתה מקרב את הראש לרדיו שלו. הוא לא זז. ככה זה היום.' },
-        { who: 'אוהד עם רדיו', text: YAVNE_LABEL[heard] },
+        { who: 'אוהד עם רדיו', text: heard.lineHe },
       ])
       return
     }
     if (id === 'net:brain') {
-      const heard = this.yavneHeard(3)
-      const margin = { level: 0, ahead: 1, further: 2 }[heard]
-      const up = this.goals > margin
+      // he is repeating the slow radio and does not know it — `repeats: 'radio'` in the preset
+      const heard = this.yavneOn('brain')
+      const up = this.goals > heard.margin
       this.say([
         { who: 'אוהד שיודע', text: up ? 'לפי החשבון שלי — עולים. אבל החשבון שלי לפי הרדיו של ההוא, והרדיו של ההוא איטי.' : 'לפי החשבון שלי — עוד לא. צריך עוד אחד לפחות. אולי שניים.' },
         { who: null, text: 'הוא בטוח. הוא תמיד בטוח. זה לא אומר שהוא צודק.' },
@@ -438,13 +398,14 @@ export class TransistorNet {
       return
     }
     if (id === 'net:kids' || id === 'net:ofir') {
-      const truth = this.yavneNow()
+      const truth = this.yavneOn('kids')
       const wrong = roll.chance(0.5)
       this.ctx.engine.dispatch({ t: 'rng.consumed', count: roll.consumed })
       const text = wrong
         ? roll.pick(['יבנה מפסידה! שמעתי!', 'נתניה השוותה, אח שלי אמר!', 'ביבנה עצרו את המשחק!']) ?? 'יבנה מפסידה!'
-        : YAVNE_LABEL[truth]
+        : truth.lineHe
       this.ctx.engine.dispatch({ t: 'flag.set', flag: 'rumor:last', value: text })
+      if (truth.event) this.director.learn(truth.event, 'kids', wrong)
       const who = id === 'net:ofir' ? 'אופיר' : 'ילד'
       this.say([
         { who, text },
@@ -454,10 +415,11 @@ export class TransistorNet {
     }
   }
 
-  private learn(state: YavneState, from: string) {
-    this.known.yavne = state
-    this.known.yavneAt = this.minute
+  private learn(heard: { margin: number; lineHe: string; event: HistoricalMatchEvent | null }, from: string) {
+    this.known.yavne = heard.margin
+    this.known.yavneAt = this.director.playedMinute()
     this.known.from = from
+    if (heard.event) this.director.learn(heard.event, from)
     /**
      * המיקס מתהפך — Mission 01 §24, and the cheapest drama in the chapter.
      *
@@ -466,17 +428,17 @@ export class TransistorNet {
      * and nothing on the glass changes; the ears do the work. Late on — when a single
      * result is the whole question — the ground drops almost to silence instead.
      */
-    const late = this.playedMinute() >= 80
+    const late = this.director.playedMinute() >= 80
     this.ctx.bus.emit('sound', { kind: 'listen', weight: late ? 0.08 : 0.3 })
     this.scene.time.delayedCall(late ? 5200 : 3000, () => {
-      if (this.phase !== 'over') this.ctx.bus.emit('sound', { kind: 'listen', weight: 1 })
+      if (!this.over) this.ctx.bus.emit('sound', { kind: 'listen', weight: 1 })
     })
     // The banner on the glass reads one fact — "has he heard anything yet" — and every
     // source in this chapter passes through here, so it is raised in one place.
     if (!this.ctx.engine.state.flags['net:heard']) {
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'net:heard' })
     }
-    this.ctx.engine.dispatch({ t: 'flag.set', flag: 'net:known', value: state })
+    this.ctx.engine.dispatch({ t: 'flag.set', flag: 'net:known', value: heard.lineHe })
   }
 
   private say(lines: Say[]) {
@@ -486,8 +448,8 @@ export class TransistorNet {
   pushBoard() {
     const match = this.anchor.match
     if (!match) return
-    const label =
-      this.phase === 'first' ? 'מחצית ראשונה' : this.phase === 'half' ? 'מחצית' : this.phase === 'second' ? 'מחצית שנייה' : 'סיום'
+    const phase = this.director.phaseOf(HOME)
+    const label = phase === 'first' || phase === 'before' ? 'מחצית ראשונה' : phase === 'half' ? 'מחצית' : phase === 'second' ? 'מחצית שנייה' : 'סיום'
     const board: NetBoard = {
       homeHe: match.atHome ? US_HE : match.opponentHe,
       awayHe: match.atHome ? match.opponentHe : US_HE,
@@ -495,7 +457,7 @@ export class TransistorNet {
       awayScore: match.atHome ? 0 : this.goals,
       labelHe: label,
       scored: this.goals > 0,
-      over: this.phase === 'over',
+      over: this.over,
     }
     const signature = `${label}|${this.goals}`
     if (signature === this.lastBoard) return
@@ -505,6 +467,14 @@ export class TransistorNet {
 
   /** the truth, for the tests and for nobody on the terrace */
   debugState() {
-    return { minute: this.minute, phase: this.phase, goals: this.goals, yavne: this.yavneNow(), promoted: this.promotedNow(), known: { ...this.known } }
+    return {
+      minute: this.director.playedMinute(),
+      phase: this.director.phaseOf(HOME),
+      goals: this.goals,
+      yavne: this.yavneNow(),
+      promoted: this.promotedNow(),
+      known: { ...this.known },
+      history: this.director.debug(),
+    }
   }
 }

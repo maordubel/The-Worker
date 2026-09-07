@@ -834,6 +834,9 @@ describe('בהירות — a first-time player is never asked to guess', () => {
 describe('לוח ההפעלה — the controls are a place on the screen, on every device', () => {
   const deck = readFileSync(join(ROOT, 'components/life/ControlDeck.tsx'), 'utf8')
   const stage = readFileSync(join(ROOT, 'app/life/LifeStage.tsx'), 'utf8')
+  // the shell composes the console; the wiring behind the two buttons lives in the input
+  // hook since the 7.9.2026 split — same rule, one file down
+  const input = readFileSync(join(ROOT, 'app/life/stage/useLifeInput.ts'), 'utf8')
 
   it('the deck is what the stage renders — there is only one console', () => {
     expect(stage).toContain('<ControlDeck')
@@ -862,7 +865,8 @@ describe('לוח ההפעלה — the controls are a place on the screen, on eve
     expect(deck).toContain('onCancel')
     // B runs while walking and leaves while talking — one idea, never a third button
     expect(stage).toContain('runtime.current?.leave()')
-    expect(stage).toContain('input.setRun(down)')
+    expect(input).toContain('runtime.current?.leave()')
+    expect(input).toContain('input.setRun(down)')
   })
 
   it('the name of what is in reach carries the harness handle, and only when there is one', () => {
@@ -907,6 +911,8 @@ describe('לצאת מהשיחה — no conversation is a room without a door', (
   const box = readFileSync(join(ROOT, 'components/life/DialogueBox.tsx'), 'utf8')
   const runner = readFileSync(join(ROOT, 'lib/life/runtime/dialogue.ts'), 'utf8')
   const stage = readFileSync(join(ROOT, 'app/life/LifeStage.tsx'), 'utf8')
+  /** the keyboard moved out of the shell on 7.9.2026 — Escape is wired here now */
+  const keys = readFileSync(join(ROOT, 'app/life/stage/useLifeInput.ts'), 'utf8')
 
   it('the box always draws the X, whether or not the line has a speaker', () => {
     expect(box).toContain('data-life="leave"')
@@ -917,7 +923,8 @@ describe('לצאת מהשיחה — no conversation is a room without a door', (
   it('leaving is wired from the box, from Escape, and through the runtime', () => {
     expect(box).toContain('onLeave')
     expect(stage).toContain('onLeave={() => runtime.current?.leave()}')
-    expect(stage).toContain("event.key === 'Escape'")
+    expect(keys).toContain("event.key === 'Escape'")
+    expect(keys).toContain('runtime.current?.leave()')
     expect(runner).toContain('leave()')
   })
 

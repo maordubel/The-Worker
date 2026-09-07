@@ -8,7 +8,7 @@ import { GIGS, gigChapters, gigConversations, gigPay, gigsIn, isPaid, offeredIn 
 import { SHIRT, TICKET, WAGE, decadeOf, decadeOfYear } from '@/lib/life/prices'
 import { SHIRTS } from '@/lib/life/shirts'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
-import { SCENE } from '@/lib/life/world/scenes'
+import { sceneFor } from '@/lib/life/world/scenes'
 
 const ROOT = process.cwd()
 
@@ -242,9 +242,11 @@ describe('הזמן עובר בכל פרק — a day that cannot reach its own ev
 
   it('starts every playable chapter in a room it can leave', () => {
     for (const chapter of CHAPTERS.filter((row) => row.playable)) {
-      const scene = SCENE[chapter.start.location]
+      const scene = sceneFor(chapter.start.location)
       expect(scene, `${chapter.id} starts in ${chapter.start.location}, which is not a room`).toBeTruthy()
-      const ways = (scene?.exits ?? []).filter((exit) => !exit.era || exit.era === '*' || exit.era === chapter.id)
+      const ways = (scene?.exits ?? []).filter(
+        (exit) => !exit.era || exit.era === '*' || exit.era === chapter.id || (Array.isArray(exit.era) && exit.era.includes(chapter.id)),
+      )
       expect(ways.length, `${chapter.id} starts in a room with no way out`).toBeGreaterThan(0)
     }
   })

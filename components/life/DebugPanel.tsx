@@ -1,8 +1,10 @@
 'use client'
 
 import { t } from '@/lib/i18n'
+import { adDirector, adsEnabled, adsTestMode } from '@/lib/life/monetization'
 import type { LifeRuntime, LifeSnapshot } from '@/lib/life/runtime/game'
 import { formatMoney } from '@/lib/life/money'
+import { conflictsOf, HISTORY_DAYS } from '@/lib/life/history'
 
 /**
  * לוח הפיתוח — the one screen allowed to show numbers, and it never ships.
@@ -57,6 +59,10 @@ export function DebugPanel({
 }) {
   const { state } = snapshot
 
+  /** which documented day, if any, this chapter is — see `lib/life/history` */
+  const historyOf = (chapter: string) =>
+    chapter === '1990' ? HISTORY_DAYS['1990-05-12'] : chapter === '1998-laces' ? HISTORY_DAYS['1998-05-02'] : null
+
   return (
     <div role="dialog" className="pointer-events-auto absolute inset-0 z-[60] flex items-stretch justify-center bg-ink/95 p-gutter" aria-modal="true">
       <div className="max-h-full w-full max-w-lg overflow-y-auto border-rule border-red bg-ink p-4">
@@ -73,6 +79,41 @@ export function DebugPanel({
           </button>
         </div>
 
+        {/*
+          MONETIZATION — the plan (§18) asks for a panel that says why an ad did or did not
+          happen. Everything here is read from the director's own session, so a placement
+          that "should have fired" can be argued with rather than guessed at. Development
+          only: this whole panel is behind the probe flag.
+        */}
+        <Row label="MONETIZATION">
+          {(() => {
+            const ads = adDirector().state()
+            return `provider=${ads.provider}  enabled=${adsEnabled() ? '1' : '0'}  test=${adsTestMode() ? '1' : '0'}  lock=${ads.locked ? '1' : '0'}  shown=${ads.interstitials}/${ads.config.maxInterstitialsPerSession}  played=${Math.round(ads.playedSinceAd)}  last=${ads.lastResult ?? '—'}  point=${ads.lastSafePoint ?? '—'}`
+          })()}
+        </Row>
+        {/*
+          ההיסטוריה — what the archive holds about the day this chapter is, and what it
+          refuses to hold. The conflicts line is the important one: it is the count of
+          places where two sources disagree and the game has stored both instead of
+          picking, which is the whole discipline in one number.
+        */}
+        {historyOf(state.chapter) ? (
+          <Row label="HISTORY">
+            {(() => {
+              const day = historyOf(state.chapter)
+              if (!day) return ''
+              const venues = day.venues.map((v) => `${v.nameHe}=${v.finalHe ?? '—'}`).join('  ')
+              return `${day.dateHe}  ${venues}  conflicts=${conflictsOf(day).length}  silence: ${day.silenceHe}`
+            })()}
+          </Row>
+        ) : null}
+        <Row label="CHECKPOINT">
+          {(() => {
+            const mark = snapshot.checkpoint
+            if (!mark) return 'none open'
+            return `${mark.chapter} @ ${mark.snapshot.clock}'  fired=${mark.snapshot.fired.length}  known=${mark.snapshot.known.length}  log=${mark.logLength}`
+          })()}
+        </Row>
         <Row label={t('life.debug.clock')}>
           {state.weekday} · {String(Math.floor(state.minute / 60)).padStart(2, '0')}:
           {String(state.minute % 60).padStart(2, '0')} · {state.location} · {state.chapter}

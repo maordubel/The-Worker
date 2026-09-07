@@ -34,7 +34,8 @@ import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_T
 import { compose as composeHint, holds as hintHolds } from '../../world/hints'
 import { unmet } from '../../world/why'
 import { forcedEnding, isStalled, LAST_RESORT_MINUTES, waitingForTheClock } from '../../world/lastResort'
-import { QUIET_MINUTES, nextTimeGate, shouldOfferPass, type TimeGate } from '../../world/flow'
+import { QUIET_MINUTES, flowMove, nextTimeGate, type TimeGate } from '../../world/flow'
+import { adDirector } from '../../monetization'
 import { reconcile } from '../../world/milestones'
 import { nextStep } from '../../world/route'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
@@ -416,6 +417,9 @@ export class WorldScene extends Phaser.Scene {
     this.livedFor = this.countLived()
     const state = this.ctx.engine.state
     this.era = eraFor(state.chapter)
+    // a master event holds the advertising lock for its whole length (see MASTER_EVENTS)
+    if (WorldScene.MASTER_EVENTS.includes(state.chapter)) adDirector().lock()
+    else adDirector().unlock()
     this.exits = this.def.exits.filter((exit) => exitInEra(exit, this.era.chapter))
     this.net = null
     this.derby = null
@@ -1781,6 +1785,8 @@ export class WorldScene extends Phaser.Scene {
     // counted here rather than per tick, because a minute is a minute whether it arrived
     // one at a time or twenty-six at a time during a time-lapse
     this.livedFor += minutes
+    // the only number the advertising policy is ever given: how much was actually played
+    adDirector().played(minutes)
     this.timeTriggers()
     this.onMinute()
     this.pushHud()
@@ -1904,7 +1910,7 @@ export class WorldScene extends Phaser.Scene {
       this.beatBusy ||
       this.beatPending ||
       this.ctx.dialogue.open
-    const gate = shouldOfferPass({
+    const move = flowMove({
       state,
       era: this.era,
       objectiveHe: this.objective(state),
@@ -1912,9 +1918,24 @@ export class WorldScene extends Phaser.Scene {
       busy,
       reachable: this.targetCount(),
     })
-    if (!gate) return false
-    this.passOffered = gate.beatId
-    this.ctx.bus.emit('pass', gate)
+    if (!move) return false
+    if (move.kind === 'pass') {
+      this.passOffered = move.gate.beatId
+      this.ctx.bus.emit('pass', move.gate)
+      return true
+    }
+    /**
+     * דחיפה, לא דילוג — the two chapters the robot kept closing through the safety net
+     * (a2-alley, a3-hall) have no beat waiting on a clock, so there was never a jump to
+     * offer and the card could not have fired however long the room stayed quiet. What
+     * they have is something to do, so the room says what is in it — the composed hint,
+     * generated from the cast and the doors, which is the one sentence here that cannot
+     * be wrong about a room.
+     */
+    const nudge = this.hintNow()
+    if (!nudge) return false
+    this.passOffered = 'nudge'
+    this.ctx.bus.emit('toast', { text: nudge, tone: 'plain' })
     return true
   }
 
@@ -3919,6 +3940,19 @@ export class WorldScene extends Phaser.Scene {
     this.ctx.bus.emit('match', { ...board, labelHe: label, scored, over: this.matchPhase === 'over' })
   }
 
+  /**
+   * אירועי־אב — the days no advertisement may go anywhere near.
+   *
+   * The lock is held from the moment the chapter opens until its ending has been written
+   * into the log, so it covers the aftermath as well as the event: on 2.5.1998 that means
+   * the false celebration, the transistor, Pisont and the walk out of the gate are all
+   * inside it. The plan calls this `masterEventAdvertisingLock`; here it is simply the
+   * chapter list, because in this game the master event IS the chapter.
+   */
+  private static readonly MASTER_EVENTS: readonly string[] = [
+    '1986', '1990', '1998-laces', '1999-cup', '2000-title', '2000-double',
+  ]
+
   private finishChapter(endingId: string) {
     const state = this.ctx.engine.state
     const key = state.flags['arrived:late'] && endingId === 'home' ? 'late' : endingId
@@ -3981,6 +4015,15 @@ export class WorldScene extends Phaser.Scene {
     )
     void this.ctx.engine.save()
     this.paused = true
+    /*
+     * הרגע היחיד שמותר בו — the chapter's own ending has been written into the log and the
+     * card is about to be shown. The lock comes off here rather than on the next chapter's
+     * entry, because the aftermath is part of the event; and the safe point is REPORTED,
+     * never awaited. `AdDirector` decides, and with advertising switched off (the default)
+     * this line does nothing at all — which is the point of it being one line.
+     */
+    adDirector().unlock()
+    void adDirector().safePoint('chapter_completed')
     this.lastEnding = card
     this.ctx.bus.emit('ending', {
       titleHe: card.titleHe,

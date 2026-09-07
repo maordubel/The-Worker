@@ -65,7 +65,7 @@ describe('הזיכרון של החולצה — a wardrobe that is a biography', 
       ...base,
       { t: 'flag.raised', flag: 'own:shirt:king' },
       { t: 'flag.raised', flag: wornFlag('king', '1999-cup') },
-      { t: 'day.entered', weekday: 4, minute: 8 * 60 },
+      { t: 'day.entered', dayId: 'keys:next', year: 1999, weekday: 4, minute: 8 * 60 },
     ]
     const state = fold(DEFAULT_IDENTITY, 1999, log)
     expect(state.flags[wornFlag('king', '1999-cup')]).toBe(true)
@@ -208,7 +208,8 @@ describe('מעברונים — the clips, and the rules that stop them becoming 
 
 describe('אין שיחות יתומות — every conversation has a way in', () => {
   it('names no conversation that nothing in the game can open', async () => {
-    const { ALL_SCENES, PANO_SPOTS } = await import('@/lib/life/world/scenes')
+    const { ALL_SCENES } = await import('@/lib/life/world/scenes')
+    const { PANO_SPOTS } = await import('@/lib/life/content/panoramas')
     const { readFileSync, readdirSync } = await import('node:fs')
     const used = new Set<string>()
     for (const scene of ALL_SCENES) {

@@ -6,9 +6,12 @@ import { describe, expect, it } from 'vitest'
 import { ERA_KEYS, eraFor } from '@/lib/life/content/era'
 import { emptyState } from '@/lib/life/events'
 import { MILESTONES, reconcile, reached } from '@/lib/life/world/milestones'
-import { QUIET_MINUTES, landingMinute, nextTimeGate, shouldOfferPass } from '@/lib/life/world/flow'
+import { QUIET_MINUTES, flowMove, landingMinute, nextTimeGate, shouldOfferPass } from '@/lib/life/world/flow'
+import type { FlowInput } from '@/lib/life/world/flow'
 import { ALL_SCENES, exitInEra, whenFor } from '@/lib/life/world/scenes'
 import type { LifeState } from '@/lib/life/types'
+
+const IDENTITY = { name: 'פוגי', sex: 'boy', birthYear: 1978 } as const
 
 /**
  * הזרימה — the four rules Maor's flow audit asks for, as tests rather than promises.
@@ -195,5 +198,49 @@ describe('קנון — 2.5.1998 הוא המחזור ה-29', () => {
         expect(line.includes('המחזור האחרון'), `${file}: ${line.trim().slice(0, 90)}`).toBe(false)
       }
     }
+  })
+})
+
+/**
+ * דחיפה במקום דילוג — 7.9.2026, and the answer to the one thing that stayed open.
+ *
+ * The robot kept closing a2-alley and a3-hall through the safety net, and three attempts
+ * at making the pass card fire there failed. `scripts/life/flow-probe.ts` says why:
+ * neither chapter has a single beat waiting on a clock, so there was never a jump to
+ * offer. A quiet room with a requirement in it gets told what is in it instead.
+ */
+describe('כשאין שער־זמן — דוחפים, לא מדלגים', () => {
+  const quiet = (over: Partial<FlowInput> = {}): FlowInput => ({
+    state: { ...emptyState(IDENTITY, 1986), chapter: 'a2-alley', minute: 17 * 60 },
+    era: eraFor('a2-alley'),
+    objectiveHe: 'למצוא את הכדור',
+    quietFor: QUIET_MINUTES + 5,
+    busy: false,
+    reachable: 3,
+    ...over,
+  })
+
+  it('nudges in a chapter whose next step is a requirement rather than a clock', () => {
+    expect(flowMove(quiet())?.kind).toBe('nudge')
+    expect(shouldOfferPass(quiet())).toBeNull()
+  })
+
+  it('still offers the jump where a beat really is waiting for a time', () => {
+    const state = { ...emptyState(IDENTITY, 1993), chapter: '1993-cup', minute: 17 * 60 }
+    const move = flowMove(quiet({ state, era: eraFor('1993-cup') }))
+    expect(move?.kind).toBe('pass')
+  })
+
+  it('never interrupts a player who is doing something', () => {
+    expect(flowMove(quiet({ busy: true }))).toBeNull()
+    expect(flowMove(quiet({ quietFor: QUIET_MINUTES - 1 }))).toBeNull()
+  })
+
+  it('says nothing in a room with no way out — that is the dead-end net\'s job, not this one', () => {
+    expect(flowMove(quiet({ reachable: 0 }))).toBeNull()
+  })
+
+  it('says nothing on a day that wants nothing more', () => {
+    expect(flowMove(quiet({ objectiveHe: null }))).toBeNull()
   })
 })

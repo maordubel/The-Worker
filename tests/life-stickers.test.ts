@@ -346,7 +346,7 @@ describe('סופרגול — התנאים', () => {
 describe('סופרגול — האלבום שורד את השנה', () => {
   it('keeps what is stuck in when the life moves to the next chapter', () => {
     const before = state({ flags: { [stickerFlag('landau')]: 2, 'a2:bread': true } })
-    const after = apply(before, { t: 'year.entered', year: 1990, chapter: '1990' })
+    const after = apply(before, { t: 'year.entered', year: 1990, weekday: 6, minute: 8 * 60 })
     expect(haveOf(after, 'landau')).toBe(2)
     expect(hasSticker(after, 'landau')).toBe(true)
     // and the ordinary day flag is gone, which is what makes the first assertion mean something
