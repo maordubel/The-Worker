@@ -4266,7 +4266,13 @@
     136,
     104,
     74
-   ]
+   ],
+   "tile": {
+    "key": "panoPromenade--tile",
+    "wide": 4.1,
+    "deep": 3.0,
+    "bytes": 109819
+   }
   },
   "panoTamar": {
    "w": 2560,
@@ -4280,7 +4286,13 @@
     89,
     83,
     77
-   ]
+   ],
+   "tile": {
+    "key": "panoTamar--tile",
+    "wide": 3.96,
+    "deep": 1.95,
+    "bytes": 53806
+   }
   },
   "panoCinema": {
    "w": 2560,
@@ -4294,7 +4306,93 @@
     86,
     84,
     83
-   ]
+   ],
+   "tile": {
+    "key": "panoCinema--tile",
+    "wide": 5.61,
+    "deep": 3.8,
+    "bytes": 155394
+   }
+  },
+  "panoJaffa": {
+   "w": 2560,
+   "h": 1034,
+   "horizon": 0.7,
+   "bytes": 1998179,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "שדרות ירושלים, יפו — הדרך לבלומפילד",
+   "nearRgb": [
+    165,
+    137,
+    108
+   ],
+   "tile": {
+    "key": "panoJaffa--tile",
+    "wide": 3.0,
+    "deep": 4.0,
+    "bytes": 103924
+   }
+  },
+  "panoUssOutside": {
+   "w": 2560,
+   "h": 1029,
+   "horizon": 0.745,
+   "bytes": 1586268,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "אוסישקין מבחוץ — הפינה, הגג הירוק",
+   "nearRgb": [
+    79,
+    67,
+    60
+   ],
+   "tile": {
+    "key": "panoUssOutside--tile",
+    "wide": 3.98,
+    "deep": 3.0,
+    "bytes": 98766
+   }
+  },
+  "panoBloomFacade": {
+   "w": 2560,
+   "h": 1086,
+   "horizon": 0.575,
+   "bytes": 1609441,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "בלומפילד — החזית מהרחוב, עמוד התאורה",
+   "nearRgb": [
+    170,
+    142,
+    116
+   ],
+   "tile": {
+    "key": "panoBloomFacade--tile",
+    "wide": 1.91,
+    "deep": 3.0,
+    "bytes": 49270
+   }
+  },
+  "panoBloomGate": {
+   "w": 2560,
+   "h": 1086,
+   "horizon": 0.615,
+   "bytes": 1642303,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "בלומפילד — מתחת ליציע, הקרוסלות והדלת",
+   "nearRgb": [
+    188,
+    165,
+    143
+   ],
+   "tile": {
+    "key": "panoBloomGate--tile",
+    "wide": 2.44,
+    "deep": 3.2,
+    "bytes": 70952
+   }
   }
  },
  "textures": {

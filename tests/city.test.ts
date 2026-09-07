@@ -4,12 +4,18 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { isYellow } from '@/lib/isYellow'
-import { nearEdge, PANOS, POCKET_METRES } from '@/lib/life/city/pano'
+import { DISC_FACTOR, nearEdge, PANOS, POCKET_METRES } from '@/lib/life/city/pano'
 import { SLABS } from '@/lib/life/city/slab'
 
 const ART = join(process.cwd(), 'public', 'life', 'art')
 const manifest = JSON.parse(readFileSync(join(ART, 'manifest.json'), 'utf8')) as {
-  panoramas?: Record<string, { w: number; h: number; horizon: number; nearRgb: number[]; yellowLeft: number; source: string }>
+  panoramas?: Record<
+    string,
+    {
+      w: number; h: number; horizon: number; nearRgb: number[]; yellowLeft: number; source: string
+      tile?: { key: string; wide: number; deep: number }
+    }
+  >
 }
 
 /**
@@ -54,13 +60,28 @@ describe('העיר — הפנורמות מדויקות מול מה שנשמר', 
     }
   })
 
-  it('שומרת את הכיס בתוך הדיסקה', () => {
-    // The pocket is how far the player may walk from the point the panorama was shot. If it
-    // ever exceeds the radius at which the picture's own ground ends, the walk runs off the
-    // edge of the floor and the frame shows the void — which is exactly what the first
-    // screenshot of 5m showed.
+  it('נושאת מרצף מיושר לכל פנורמה, בקנה המידה שנמדד', () => {
+    // המרצף הוא מה שמכסה את המרחק הקצר, שבו הקרן משיקה לרצפה וההיטל מותח חמישה פיקסלים על
+    // עשרה מטר. אם המידות שלו יסטו ממה שהסקריפט ייצר, הרצפה תזוז מתחת לרגליים בקצב הלא נכון
+    // — וזה בדיוק סוג הבאג שלא נראה בתמונה סטטית.
     for (const [key, spec] of Object.entries(PANOS)) {
-      expect(nearEdge(spec), `${key} pocket is wider than its ground`).toBeGreaterThan(POCKET_METRES * 2)
+      const row = manifest.panoramas?.[key]
+      expect(spec.tile, `${key} has no rectified ground`).toBeDefined()
+      expect(spec.tile?.wide, `${key} tile width drifted`).toBeCloseTo(row?.tile?.wide ?? -1, 2)
+      expect(spec.tile?.deep, `${key} tile depth drifted`).toBeCloseTo(row?.tile?.deep ?? -1, 2)
+    }
+  })
+
+  it('שומרת את הכיס בתוך הדיסקה', () => {
+    // The pocket is how far the player may walk from the point the panorama was shot. The
+    // floor under him is the disc, and if he can reach its rim the frame shows the void —
+    // which is exactly what the first screenshot of a five-metre walk showed. The margin is
+    // doubled rather than exact: he walks to the rim of the pocket and then looks AROUND
+    // from there, and the far side of the disc has to still be under the picture.
+    for (const [key, spec] of Object.entries(PANOS)) {
+      expect(nearEdge(spec) * DISC_FACTOR, `${key} can walk to the rim of its own floor`).toBeGreaterThan(
+        POCKET_METRES * 2,
+      )
     }
   })
 

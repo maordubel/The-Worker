@@ -32,8 +32,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<Q> 
     yaw: num(q, 'yaw', 0),
     pitch: num(q, 'pitch', 0),
     fov: num(q, 'fov', 58),
+    hfov: num(q, 'hfov', 0),
     actor: q.actor !== '0',
-    touch: q.touch !== '0',
+    deck: q.deck !== '0',
   }
   return <Proof shot={shot} />
 }

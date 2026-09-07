@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 
+import { ControlDeck } from '@/components/life/ControlDeck'
+import { ACTOR_BACK, actorPose, loadActor } from '@/lib/life/city/actor'
+import { CITY_COPY } from '@/lib/life/city/copy'
+import { buildPano, PANOS, PLACE_ORDER, POCKET_METRES } from '@/lib/life/city/pano'
 import { actorBillboard, buildSlab, SLABS } from '@/lib/life/city/slab'
-import { buildPano, PANOS, POCKET_METRES } from '@/lib/life/city/pano'
-import { t } from '@/lib/i18n'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { disposeThree, mountThree, resizeThree, shadowDecal } from '@/lib/life/runtime/three3d'
 
@@ -24,23 +26,43 @@ export type Shot = {
   fov: number
   /** להעמיד את פוגי מול המצלמה */
   actor: boolean
-  /** אצבע על המסך מסובבת את הראש, וכפתור אחד הולך קדימה */
-  touch: boolean
+  /** הג׳ויסטיק והכפתורים — כבוי בצילומים האוטומטיים */
+  deck: boolean
+  /** דריסת שדה הראייה של הפנורמה, לכיול בלבד; אפס = מה שרשום בלוח */
+  hfov: number
 }
 
 const RAD = Math.PI / 180
+/** מטר וארבעים לשנייה — הליכה. B מכפיל. */
+const WALK = 1.4
+/** מעלות לשנייה בהטיית הג׳ויסטיק המלאה */
+const TURN = 78
 
 /**
- * מסך ההוכחה של שלב 1. הוא קיים כדי שאפשר יהיה **להסתכל**, ועם `touch=1` גם לזוז — כי
- * "לטייל בתל אביב" זה לא משהו שתמונה סטטית יכולה להראות.
+ * העיר, ובתוכה מישהו שהולך.
  *
- *   /city?place=panoTamar
+ * הפקד הוא **`ControlDeck` הקיים** ולא כפתור משלי, וזאת לא חסכנות: זה אותו ג׳ויסטיק ואותם
+ * A/B שהמשחק כבר מלמד בכל מסך אחר, ועכשיו גם המגרש התלת־ממדי רץ עליו. שפת שליטה אחת לכל
+ * המשחק. הכפתור שהיה כאן קודם דרש **החזקה**, ומאור הקיש עליו — שלוש מאות מילישניות הן
+ * ארבעים סנטימטר, כלומר שום דבר שהעין רואה. ג׳ויסטיק לא סובל מזה.
  *
- * כשהמצלמה בנקודת האפס התמונה חייבת להיראות בדיוק כמו הקובץ שנשלח. כל סטייה שם היא באג
- * בגיאומטריה, לא טעם.
+ *   מוט קדימה/אחורה — ללכת · מוט לצדדים — להסתובב · אצבע על התמונה — להביט · B — לרוץ
  */
 export function Proof({ shot }: { shot: Shot }) {
   const boxRef = useRef<HTMLDivElement>(null)
+  // הפקדים כותבים לכאן, והלולאה קוראת. אין `setState` בלולאה — ששים פריימים בשנייה של
+  // רינדור מחדש ב-React הם בדיוק איך שמשחק בטלפון מתחיל לגמגם.
+  const input = useRef({ x: 0, y: 0, run: false })
+  const [deck, setDeck] = useState({ top: 0, band: 0 })
+
+  const onAxis = useCallback((x: number, y: number) => {
+    input.current.x = x
+    input.current.y = y
+  }, [])
+  const onCancel = useCallback((down: boolean) => {
+    input.current.run = down
+  }, [])
+  const onAction = useCallback(() => {}, [])
 
   useEffect(() => {
     const box = boxRef.current
@@ -52,7 +74,8 @@ export function Proof({ shot }: { shot: Shot }) {
     let dispose = () => {}
     let eye = 1.7
 
-    const panoSpec = PANOS[shot.place]
+    const listed = PANOS[shot.place]
+    const panoSpec = listed && shot.hfov > 0 ? { ...listed, hFovDeg: shot.hfov } : listed
     if (panoSpec) {
       const pano = buildPano(panoSpec, loader)
       three.scene.add(pano.group)
@@ -67,18 +90,18 @@ export function Proof({ shot }: { shot: Shot }) {
       dispose = slab.dispose
     }
 
-    // המצב שהאצבע משנה. הגבול הוא הכיס — מעבר לו התמונה מתחילה לספר שהיא תמונה.
-    const view = { x: shot.x, z: shot.z, yaw: shot.yaw, pitch: shot.pitch, walking: 0 }
+    const view = { x: shot.x, z: shot.z, yaw: shot.yaw, pitch: shot.pitch, moved: 0, lateral: 0, moving: false }
     const limit = panoSpec ? POCKET_METRES : 2.2
 
     let pugi: THREE.Sprite | null = null
     let shadow: THREE.Mesh | null = null
+    let frames: Record<string, THREE.Texture> = {}
     if (shot.actor) {
-      // `pogi-back` ולא `kid-back`: הדמויות של המשחק מצולמות. מאור, 7.9.2026: *"תשתמש
-      // בהכל ריאלי. לא רוצה לראות דמויות מצוירות."*
-      pugi = actorBillboard(loader.load('/life/art/pogi-back.png'), 1.68)
+      // התצלומים, לא הילד המצויר. מאור, 7.9.2026: *"תשתמש בהכל ריאלי."*
+      frames = loadActor(loader)
+      pugi = actorBillboard(frames[ACTOR_BACK] as THREE.Texture, 1.68)
       three.scene.add(pugi)
-      // הצל הוא מה שמדביק אותו לכביש. בלעדיו הוא תמונה שהודבקה על רקע, וזה נראה בדיוק ככה.
+      // הצל הוא מה שמדביק אותו לכביש. בלעדיו הוא תמונה שהודבקה על רקע.
       shadow = shadowDecal(0.34)
       shadow.scale.set(0.92, 0.44, 1)
       three.scene.add(shadow)
@@ -91,25 +114,44 @@ export function Proof({ shot }: { shot: Shot }) {
       const dt = Math.min((now - last) / 1000, 0.05)
       last = now
 
-      if (view.walking !== 0) {
-        const step = view.walking * 1.35 * dt
+      const stick = input.current
+      view.yaw = Math.max(-70, Math.min(70, view.yaw + stick.x * TURN * dt))
+      const speed = -stick.y * WALK * (stick.run ? 1.9 : 1)
+      view.moving = Math.abs(speed) > 0.05
+      if (view.moving) {
+        const step = speed * dt
         view.x += Math.sin(view.yaw * RAD) * step
         view.z -= Math.cos(view.yaw * RAD) * step
+        view.moved += Math.abs(step)
         const away = Math.hypot(view.x, view.z)
         if (away > limit) {
           view.x = (view.x / away) * limit
           view.z = (view.z / away) * limit
         }
       }
+      // כמה מהתנועה היא לרוחב הפריים: המוט לצדדים מסובב, ולכן זה בעצם קצב הסיבוב
+      view.lateral = view.moving ? stick.x : 0
 
       three.camera.position.set(view.x, shot.actor ? 0.22 : 0, view.z + (shot.actor ? 0.5 : 0))
       three.camera.rotation.set(view.pitch * RAD, -view.yaw * RAD, 0, 'YXZ')
+
       if (pugi && shadow) {
-        // פוגי הולך עם המצלמה ולא עומד במקום — זה מה שהופך הזזה קדימה ל"הלכתי".
-        // כיוון המבט של מצלמת three הוא `(sin yaw, 0, −cos yaw)`. הסימן של `x` היה הפוך,
-        // ולכן בסיבוב ימינה פוגי יצא מהפריים במקום להישאר לפנים.
-        const ahead = new THREE.Vector3(Math.sin(view.yaw * RAD) * 3.5, 0, Math.cos(view.yaw * RAD) * -3.5)
-        pugi.position.set(view.x + ahead.x + 0.28, -eye + 0.84, view.z + ahead.z)
+        const pose = actorPose(view.lateral, view.moved, view.moving)
+        const map = frames[pose.key]
+        const material = pugi.material as THREE.SpriteMaterial
+        if (map && material.map !== map) {
+          material.map = map
+          material.needsUpdate = true
+          const w = map.image?.width ?? 0
+          const h = map.image?.height ?? 0
+          if (w > 0 && h > 0) pugi.scale.set((1.68 * w) / h, 1.68, 1)
+        }
+        pugi.material.rotation = 0
+        pugi.scale.x = Math.abs(pugi.scale.x) * (pose.flip ? -1 : 1)
+        // כיוון המבט של three הוא `(sin yaw, 0, −cos yaw)` — פוגי תמיד שלושה מטר וחצי לפנים
+        const ax = Math.sin(view.yaw * RAD) * 3.5
+        const az = Math.cos(view.yaw * RAD) * -3.5
+        pugi.position.set(view.x + ax + 0.28, -eye + 0.84 + pose.bob, view.z + az)
         shadow.position.set(pugi.position.x, -eye + 0.006, pugi.position.z + 0.02)
       }
       three.renderer.render(three.scene, three.camera)
@@ -126,25 +168,27 @@ export function Proof({ shot }: { shot: Shot }) {
     }
     const move = (e: PointerEvent) => {
       if (!finger || finger.id !== e.pointerId) return
-      // 0.16° לפיקסל: סיבוב מלא של הראש הוא בערך רוחב מסך, וזה הקצב שהיד קוראת כטבעי
       view.yaw = Math.max(-70, Math.min(70, view.yaw + (e.clientX - finger.x) * 0.16))
-      view.pitch = Math.max(-22, Math.min(22, view.pitch - (e.clientY - finger.y) * 0.1))
+      view.pitch = Math.max(-20, Math.min(20, view.pitch - (e.clientY - finger.y) * 0.1))
       finger = { id: e.pointerId, x: e.clientX, y: e.clientY }
     }
     const up = () => {
       finger = null
     }
-    if (shot.touch) {
-      box.addEventListener('pointerdown', down)
-      box.addEventListener('pointermove', move)
-      box.addEventListener('pointerup', up)
-      box.addEventListener('pointercancel', up)
-    }
-    ;(box as unknown as { walk?: (n: number) => void }).walk = (n: number) => {
-      view.walking = n
-    }
+    box.addEventListener('pointerdown', down)
+    box.addEventListener('pointermove', move)
+    box.addEventListener('pointerup', up)
+    box.addEventListener('pointercancel', up)
 
-    const onResize = () => resizeThree(three, box)
+    const onResize = () => {
+      resizeThree(three, box)
+      // הפס שנשאר לפקד. `ControlDeck` בונה את עצמו לפי הגובה הזה — עם אפס הוא מתקפל
+      // לגרסה צפה וקטנה, ועם מאה שלושים הוא הארון עצמו, כמו בכל מסך אחר במשחק.
+      const band = Math.round(Math.min(148, Math.max(112, window.innerHeight * 0.16)))
+      setDeck({ top: window.innerHeight - band, band })
+    }
+    onResize()
+
     window.addEventListener('resize', onResize)
     return () => {
       window.clearTimeout(ready)
@@ -154,35 +198,61 @@ export function Proof({ shot }: { shot: Shot }) {
       box.removeEventListener('pointermove', move)
       box.removeEventListener('pointerup', up)
       box.removeEventListener('pointercancel', up)
+      for (const map of Object.values(frames)) map.dispose()
       dispose()
       disposeThree(three, box)
     }
   }, [shot])
 
-  const walk = (n: number) => () => {
-    ;(boxRef.current as unknown as { walk?: (v: number) => void } | null)?.walk?.(n)
-  }
-
   return (
     <main className="fixed inset-0 z-[80] bg-ink">
-      <div ref={boxRef} className="absolute inset-0 touch-none" />
-      {shot.touch && (
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4">
-          <p className="max-w-[8rem] text-[11px] leading-tight text-cream/70">
-            {t('city.hint')}
-          </p>
-          <button
-            type="button"
-            aria-label={t('city.walk')}
-            className="min-h-tap min-w-tap border border-cream/40 bg-ink/70 px-6 py-3 text-cream"
-            onPointerDown={walk(1)}
-            onPointerUp={walk(0)}
-            onPointerLeave={walk(0)}
-            onPointerCancel={walk(0)}
-          >
-            ↑
-          </button>
-        </div>
+      <div
+        ref={boxRef}
+        className="absolute inset-x-0 top-0 touch-none"
+        style={{ bottom: shot.deck ? deck.band : 0 }}
+      />
+      {shot.deck && (
+        // בורר המקומות. הוא לא HUD של המשחק — הוא קיים כדי שאפשר יהיה לעבור בין המקומות
+        // בלי להקליד כתובת, וייעלם ברגע שהמקומות מחוברים זה לזה בדרך הליכה.
+        <nav
+          dir="rtl"
+          className="absolute inset-x-0 top-0 z-40 flex gap-1 overflow-x-auto bg-gradient-to-b from-ink/80 to-transparent px-2 pb-6 pt-[max(8px,env(safe-area-inset-top))]"
+        >
+          {PLACE_ORDER.map((key) => (
+            <a
+              key={key}
+              href={`/city?place=${key}`}
+              className={`min-h-tap shrink-0 border-hair px-2.5 py-1.5 text-[12px] leading-none ${
+                key === shot.place ? 'border-red bg-red text-sheet' : 'border-sheet/40 bg-ink/60 text-sheet/85'
+              }`}
+            >
+              <bdi>{PANOS[key]?.nameHe}</bdi>
+            </a>
+          ))}
+        </nav>
+      )}
+      {shot.deck && (
+        // שורה אחת, בפינה, פעם אחת. הכפתור הקודם דרש החזקה ומאור הקיש עליו — שלוש מאות
+        // מילישניות הן ארבעים סנטימטר, כלומר שום דבר שהעין רואה. עכשיו יש מוט, וכתוב מה הוא.
+        <p
+          dir="rtl"
+          className="pointer-events-none absolute inset-x-0 z-40 px-3 text-center font-body text-[11px] leading-none text-sheet/70"
+          style={{ bottom: deck.band + 10 }}
+        >
+          {CITY_COPY.hintHe}
+        </p>
+      )}
+      {shot.deck && (
+        <ControlDeck
+          top={deck.top}
+          height={deck.band}
+          touch
+          verb={null}
+          label={null}
+          onAxis={onAxis}
+          onAction={onAction}
+          onCancel={onCancel}
+        />
       )}
     </main>
   )
