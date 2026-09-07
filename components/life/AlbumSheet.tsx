@@ -13,6 +13,8 @@ import {
   hasSticker,
   haveOf,
   holderOf,
+  isAce,
+  isTorn,
   missingOn,
   stickersIn,
   type StickerDef,
@@ -42,9 +44,11 @@ import type { LifeState } from '@/lib/life/types'
  */
 export function AlbumSheet({
   state,
+  onTear,
   onClose,
 }: {
   state: LifeState
+  onTear: (id: string, nameHe: string) => void
   onClose: () => void
 }) {
   const first = SET_ORDER.find((id) => stickersIn(id).some((sticker) => hasSticker(state, sticker.id))) ?? '8586'
@@ -147,6 +151,7 @@ export function AlbumSheet({
               key={sticker.id}
               sticker={sticker}
               have={haveOf(state, sticker.id)}
+              torn={isTorn(state, sticker.id)}
               frame={set.frame}
               onOpen={() => setOpen(sticker)}
             />
@@ -176,12 +181,24 @@ export function AlbumSheet({
           onClick={() => setOpen(null)}
           className="min-h-tap absolute inset-0 z-10 flex cursor-default flex-col items-center justify-center bg-ink/95 px-5"
         >
+          {isAce(open) && (
+            <span aria-hidden className="ace-burst pointer-events-none absolute inset-0" />
+          )}
           {open.scan ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={open.scan} alt={open.nameHe} className="sticker sticker-held max-h-[62vh] max-w-full object-contain" />
+            <img
+              src={open.scan}
+              alt={open.nameHe}
+              className={`sticker sticker-held max-h-[62vh] max-w-full object-contain ${isAce(open) ? 'sticker-ace' : ''}`}
+            />
           ) : (
-            <span className="sticker sticker-held block">
+            <span className={`sticker sticker-held block ${isAce(open) ? 'sticker-ace' : ''}`}>
               <Printed sticker={open} frame={SETS[open.set].frame} big />
+            </span>
+          )}
+          {isAce(open) && (
+            <span className="mt-2 bg-red px-3 py-1 font-poster text-[13px] uppercase tracking-[0.2em] text-sheet">
+              {t('life.album.ace')}
             </span>
           )}
           {open.handHe && (
@@ -192,6 +209,49 @@ export function AlbumSheet({
           <p className="max-w-prose pt-2 text-center font-body text-[11px] leading-snug text-concrete">
             <bdi>{open.sourceHe}</bdi>
           </p>
+          {open.defector && hasSticker(state, open.id) && (
+            <span className="flex flex-col items-center gap-1.5 pt-3">
+              <span className="max-w-[24rem] text-center font-body text-[12px] leading-snug text-sheet">
+                {t('life.album.defector')}
+              </span>
+              <span className="flex gap-2">
+                <span
+                  role="button"
+                  tabIndex={0}
+                  data-life="album-keep"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setOpen(null)
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') setOpen(null)
+                  }}
+                  className="min-h-tap flex items-center border-rule border-sheet px-3 py-1 font-sign text-[13px] text-sheet"
+                >
+                  {t('life.album.keep')}
+                </span>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  data-life="album-tear"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    onTear(open.id, open.nameHe)
+                    setOpen(null)
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      onTear(open.id, open.nameHe)
+                      setOpen(null)
+                    }
+                  }}
+                  className="min-h-tap flex items-center bg-red px-3 py-1 font-sign text-[13px] text-sheet"
+                >
+                  {t('life.album.tear')}
+                </span>
+              </span>
+            </span>
+          )}
         </button>
       )}
     </div>
@@ -216,14 +276,37 @@ function tiltOf(id: string): string {
 function Slot({
   sticker,
   have,
+  torn,
   frame,
   onOpen,
 }: {
   sticker: StickerDef
   have: number
+  torn: boolean
   frame: StickerSet['frame']
   onOpen: () => void
 }) {
+  /*
+   * קרוע — an empty slot with a decision in it.
+   *
+   * A slot nobody filled and a slot somebody emptied must not look the same. The X is
+   * drawn across the whole frame in the album's own red, big enough to read at a glance
+   * from the top of the page, because that is the point of tearing a card out.
+   */
+  if (torn) {
+    return (
+      <div
+        data-life="album-slot"
+        data-have="0"
+        data-torn="1"
+        className="slot-torn relative flex aspect-[3/4] flex-col items-center justify-end border-hair border-dashed border-red/50 bg-sheet/40 p-1.5"
+      >
+        <span className="text-center font-body text-[11px] leading-tight text-red/80 line-through">
+          <bdi>{sticker.nameHe}</bdi>
+        </span>
+      </div>
+    )
+  }
   if (have === 0) {
     return (
       <div
@@ -250,7 +333,10 @@ function Slot({
     >
       {/* the bloom lives on the OUTER span: `overflow-hidden` on the same element clips
           its own ::before, which is how the first pass shipped a halo nobody could see */}
-      <span className="sticker block h-full w-full" style={{ ['--tilt' as string]: tiltOf(sticker.id) }}>
+      <span
+        className={`sticker block h-full w-full ${isAce(sticker) ? 'sticker-ace' : ''}`}
+        style={{ ['--tilt' as string]: tiltOf(sticker.id) }}
+      >
         <span className="relative block h-full w-full overflow-hidden bg-sheet/0">
           {sticker.scan ? (
             // eslint-disable-next-line @next/next/no-img-element

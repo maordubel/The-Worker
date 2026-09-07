@@ -293,6 +293,14 @@ export type LifeBusEvents = {
    * counted them in.
    */
   packet: { ids: readonly string[]; before: Readonly<Record<string, number>> } | null
+  /**
+   * מהקופסה — the card that comes out of the red box when a page closes.
+   *
+   * A different channel from `packet` on purpose: a packet is bought and this is given,
+   * and the two must not be able to open on top of each other. The stage queues it behind
+   * whatever is already open.
+   */
+  kept: { ids: readonly string[] } | null
 
   shirt: {
     /**

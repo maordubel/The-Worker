@@ -18,8 +18,15 @@ import {
   holderOf,
   missingOn,
   openPacket,
+  pageDone,
+  SHORT_PER_PAGE,
+  isAce,
+  isTorn,
   keptOnClose,
   nextKept,
+  settled,
+  shortPrints,
+  tornFlag,
   setSoldIn,
   stickerFlag,
   stickersIn,
@@ -202,6 +209,87 @@ describe('סופרגול — המעטפה', () => {
     // stops costing real money the decision stops existing.
     for (const decade of Object.keys(PACKET) as (keyof typeof PACKET)[]) {
       expect(PACKET[decade]).toBeGreaterThan(0)
+    }
+  })
+})
+
+describe('סופרגול — ההדפסה החסרה', () => {
+  it('short-prints two slots on a page and never puts them in a packet', () => {
+    const one = state({ chapter: '1986' })
+    const short = shortPrints(one, 'sg80a')
+    expect(short.size).toBe(SHORT_PER_PAGE)
+    for (let seed = 0; seed < 120; seed += 1) {
+      for (const id of openPacket(one, 'sg80a', seed)) expect(short.has(id), id).toBe(false)
+    }
+  })
+
+  it('is the same print run every time the same life is loaded', () => {
+    const a = shortPrints(state(), 'sg978')
+    const b = shortPrints(state(), 'sg978')
+    expect([...a].sort()).toEqual([...b].sort())
+  })
+
+  it('gives two different lives two different albums', () => {
+    // The whole point of Maor's note (7.9.2026): two players comparing what they got are
+    // not describing the same album, and neither finishes it alone.
+    const seen = new Set<string>()
+    for (let seed = 1; seed <= 40; seed += 1) {
+      const run = state({ rng: { seed: `life-${seed}`, cursor: 0 } })
+      seen.add([...shortPrints(run, 'sg80b')].sort().join('|'))
+    }
+    expect(seen.size).toBeGreaterThan(3)
+  })
+
+  it('still lets a trade bring a short print in', () => {
+    // Short-printed is not unobtainable — somebody else in the neighbourhood pulled it.
+    const run = state({ chapter: '1986' })
+    const short = [...shortPrints(run, 'sg80a')]
+    const flags: Record<string, number> = {}
+    for (const sticker of stickersIn('sg80a')) {
+      if (!short.includes(sticker.id)) flags[stickerFlag(sticker.id)] = 1
+    }
+    const nearly = state({ chapter: '1986', flags })
+    expect(short).toContain(missingOn(nearly, 'sg80a')?.id)
+  })
+})
+
+describe('סופרגול — מי שעבר', () => {
+  it('marks the men Maor marked, and nobody else', () => {
+    const marked = STICKERS.filter((sticker) => sticker.defector)
+    expect(marked.length).toBeGreaterThan(0)
+    for (const sticker of marked) expect(sticker.scan).toBeTruthy()
+  })
+
+  it('settles a slot that was torn, so the page can still close', () => {
+    const sticker = STICKERS.find((one) => one.defector) as (typeof STICKERS)[number]
+    const torn = state({ flags: { [tornFlag(sticker.id)]: true } })
+    expect(isTorn(torn, sticker.id)).toBe(true)
+    expect(hasSticker(torn, sticker.id)).toBe(false)
+    expect(settled(torn, sticker.id)).toBe(true)
+    const flags: Record<string, number | boolean> = { [tornFlag(sticker.id)]: true }
+    for (const one of stickersIn(sticker.set)) {
+      if (one.id !== sticker.id) flags[stickerFlag(one.id)] = 1
+    }
+    expect(pageDone(state({ flags }), sticker.set)).toBe(true)
+  })
+
+  it('never deals a torn card again', () => {
+    const sticker = STICKERS.find((one) => one.defector) as (typeof STICKERS)[number]
+    const torn = state({ chapter: '1997-basket', flags: { [tornFlag(sticker.id)]: true } })
+    for (let seed = 0; seed < 150; seed += 1) {
+      expect(openPacket(torn, sticker.set, seed)).not.toContain(sticker.id)
+    }
+  })
+})
+
+describe('סופרגול — האסים', () => {
+  it('counts only the five out of the red box as aces', () => {
+    const aces = STICKERS.filter(isAce)
+    expect(aces).toHaveLength(5)
+    for (const ace of aces) {
+      expect(ace.set).toBe('box')
+      expect(ace.neverInPacket).toBe(true)
+      expect(ace.scan).toBeTruthy()
     }
   })
 })

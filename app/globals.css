@@ -916,6 +916,46 @@ select {
 /* held up on its own: the same light, larger and steadier, and the tilt comes out */
 .sticker-held { transform: none; box-shadow: 0 3px 0 rgb(var(--ink) / .5), 0 26px 48px -10px rgb(0 0 0 / .7); }
 .sticker-held::before { inset: -22%; filter: blur(22px); background: radial-gradient(closest-side, rgb(var(--red) / .62), rgb(var(--red) / .16) 56%, transparent 76%); }
+/*
+ * קרוע — a slot somebody emptied on purpose.
+ *
+ * Two strokes drawn with gradients rather than a glyph, so the X is exactly the size of
+ * the frame at any column width and cannot be selected, copied or read out as a letter.
+ */
+.slot-torn {
+  background-image:
+    linear-gradient(to bottom right, transparent calc(50% - 1.5px), rgb(var(--red) / .75) calc(50% - 1.5px), rgb(var(--red) / .75) calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+    linear-gradient(to bottom left, transparent calc(50% - 1.5px), rgb(var(--red) / .75) calc(50% - 1.5px), rgb(var(--red) / .75) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+/*
+ * אס — the five out of the red box, and the only cards in the game that shine.
+ *
+ * The halo every sticker has is red and soft. An ace gets a second, harder ring in the
+ * sheet's own white plus a slow breath, so it reads as different at a glance on a page
+ * of forty. No gold: rule 8 has no exceptions, not even for a legend.
+ */
+.sticker-ace::before {
+  inset: -20%;
+  background:
+    radial-gradient(closest-side, rgb(var(--sheet) / .55), transparent 62%),
+    radial-gradient(closest-side, rgb(var(--red) / .72), rgb(var(--red) / .22) 58%, transparent 78%);
+  filter: blur(10px);
+  animation: ace-breath 3.2s ease-in-out infinite;
+}
+@keyframes ace-breath {
+  0%, 100% { opacity: .78; transform: scale(1) }
+  50%      { opacity: 1;   transform: scale(1.045) }
+}
+/* the rays behind a held ace — conic, so they cost one element and no images */
+.ace-burst {
+  background: repeating-conic-gradient(from 0deg at 50% 45%, rgb(var(--sheet) / .085) 0deg 6deg, transparent 6deg 18deg);
+  animation: ace-turn 26s linear infinite;
+}
+@keyframes ace-turn { to { transform: rotate(360deg) } }
+
 /* the empty slot: printed on the page, with the corner marks an album prints */
 .slot-marks {
   background-image:
@@ -938,6 +978,46 @@ select {
  * movement, it is the four hundred milliseconds of nothing between one sticker and the
  * next while you wait to see what the next one is.
  */
+/*
+ * הקריעה — half a second of paper before any information arrives.
+ *
+ * The envelope shakes once the way a thumb shakes it, then splits: a hard clip-path cuts
+ * the top strip away and the rest drops out of frame. Nothing is revealed by this — the
+ * cards mount afterwards — which is the point. A reveal that starts the moment you press
+ * is a list; a reveal that makes you wait half a second is an envelope.
+ */
+.packet-tearing {
+  animation: packet-shake .18s ease-in-out 1, packet-split .34s ease-in .18s forwards;
+  transform-origin: 50% 8%;
+}
+@keyframes packet-shake {
+  0%, 100% { transform: rotate(0deg) }
+  35%      { transform: rotate(-2.4deg) }
+  70%      { transform: rotate(2deg) }
+}
+@keyframes packet-split {
+  0%   { clip-path: inset(0 0 0 0); opacity: 1; transform: translateY(0) }
+  55%  { clip-path: inset(9% 0 0 0); opacity: 1 }
+  100% { clip-path: inset(9% 0 0 0); opacity: 0; transform: translateY(14px) }
+}
+
+/*
+ * הקלף מתהפך — a card comes out face-down and turns over.
+ *
+ * `packet-in` used to be a fade with a rise. A sticker that arrives already face-up has
+ * been handed to you; one that turns over has been PULLED. The flip is on the Y axis with
+ * a little perspective so it reads as card stock rather than a sprite.
+ */
+.packet-turn {
+  animation: packet-turn .46s cubic-bezier(.2, .8, .3, 1) both;
+  transform-origin: 50% 60%;
+}
+@keyframes packet-turn {
+  0%   { opacity: 0; transform: perspective(700px) rotateY(-96deg) translateY(16px) scale(.94) }
+  55%  { opacity: 1 }
+  100% { opacity: 1; transform: perspective(700px) rotateY(0deg) translateY(0) scale(1) }
+}
+
 @keyframes packet-in {
   from { opacity: 0; transform: translateY(-10%) rotate(-4deg) scale(0.94); }
   to { opacity: 1; transform: none; }
@@ -945,6 +1025,12 @@ select {
 .packet-in { animation: packet-in .24s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
   .packet-in { animation: none }
+  /* the tear, the turn and the ace's breath are all decoration: a reader who has asked
+     for less motion gets the same information without any of it */
+  .packet-tearing { animation: none; opacity: 0 }
+  .packet-turn { animation: none }
+  .sticker-ace::before { animation: none }
+  .ace-burst { animation: none }
 }
 
 

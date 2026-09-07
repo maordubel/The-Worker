@@ -59,12 +59,18 @@ SAFE_HUE, SAFE_SAT_CAP = 26.0, 0.86
 WIDE_HUE = (29.0, 84.0)
 WIDE_SAT, WIDE_VAL = 0.12, 0.16
 
-# sheet → (file, prefix, drop indexes, extra padding as fractions of the card l,t,r,b)
+# sheet → (file, prefix, drop indexes, extra padding l,t,r,b, ground threshold)
+#
+# The threshold is how far from the sheet's own ground a pixel has to be to count as card.
+# Sixty is right for a sheet printed on flat colour. The 1990s sheet is photographed on
+# creased paper with red confetti scattered over it, and at sixty the confetti joins the
+# cards into one blob — eighty-five separates them and keeps every card whole.
 SHEETS = [
-    ('הפועל שנות 80 3 לחתוך כל קלף בנפרד.jpg', 'sg80a', (), (0, 0, 0, 0)),
-    ('הפועל שנות 80 2 לחתוך כל קלף בנפרד.jpg', 'sg80b', (19,), (0, 0, 0, 0.10)),
-    ('הפועל שנות 80 לחתוך כל קלף בנפרד.jpg', 'sgcup', (14,), (-0.05, -0.04, -0.05, -0.04)),
-    ('הפועל97-8 לחתוך כל קלף בנפרד.jpg', 'sg978', (), (0, 0, 0, 0)),
+    ('הפועל שנות 80 3 לחתוך כל קלף בנפרד.jpg', 'sg80a', (), (0, 0, 0, 0), 60),
+    ('הפועל שנות 80 2 לחתוך כל קלף בנפרד.jpg', 'sg80b', (19,), (0, 0, 0, 0.10), 60),
+    ('הפועל שנות 80 לחתוך כל קלף בנפרד.jpg', 'sgcup', (14,), (-0.05, -0.04, -0.05, -0.04), 60),
+    ('הפועל97-8 לחתוך כל קלף בנפרד.jpg', 'sg978', (), (0, 0, 0, 0), 60),
+    ('הפועל שנות 90 לחתוך כל קלף בנפרד.jpg', 'sg90', (), (0, 0, 0, 0), 85),
 ]
 
 # single cards that need no detection — file → (name, crop box as fractions)
@@ -345,14 +351,14 @@ def contact(crops, tag):
 
 def main():
     bad, total = [], 0
-    for filename, prefix, drop, extra in SHEETS:
+    for filename, prefix, drop, extra, thr in SHEETS:
         path = os.path.join(SRC, filename)
         if not os.path.exists(path):
             print(f'{prefix}: source missing — archive left alone')
             continue
         a = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
         H, W, _ = a.shape
-        m = np.abs(a.astype(np.int16) - ground(a)).sum(-1) > 60
+        m = np.abs(a.astype(np.int16) - ground(a)).sum(-1) > thr
         grown = [grow(b, m, W, H) for b in complete_rows(seeds_of(path), m, W, H)]
         w = int(np.median([b[2] - b[0] for b in grown]))
         h = int(np.median([b[3] - b[1] for b in grown]))

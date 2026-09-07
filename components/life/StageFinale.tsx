@@ -36,7 +36,22 @@ type Finale = NonNullable<LifeBusEvents['finale']>
  * does not have to describe what winning felt like in 1986 if it can hand you the front
  * page and let מעריב ספורט say it: **אדומים**.
  */
-export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue: () => void }) {
+export type AlbumSummary = {
+  have: number
+  total: number
+  torn: number
+  pages: readonly { titleHe: string; have: number; total: number }[]
+}
+
+export function StageFinale({
+  finale,
+  album,
+  onContinue,
+}: {
+  finale: Finale
+  album?: AlbumSummary | null
+  onContinue: () => void
+}) {
   const [zoom, setZoom] = useState<string | null>(null)
   const scroller = useRef<HTMLDivElement>(null)
   const match = finale.anchor.match
@@ -170,6 +185,44 @@ export function StageFinale({ finale, onContinue }: { finale: Finale; onContinue
                 <bdi>
                   {t('life.finale.source')}: {finale.anchor.sourceTitle}
                 </bdi>
+              </p>
+            </section>
+          )}
+
+          {/* ---------------------------------------------------------- the album -- */}
+          {/*
+            מה נשאר באלבום — the one number on this card that is about the NEXT life.
+            Two lives never print the same album (`shortPrints`), so a page you did not
+            close is not a failure to grind: it is a different album, and the only way to
+            see the other one is to start again. So the card says what is still empty,
+            page by page, and says nothing about how to fix it.
+          */}
+          {album && album.total > 0 && album.have > 0 && (
+            <section className="mt-3 border-rule border-sheet/25 bg-sheet px-4 py-4" data-life="finale-album">
+              <h2 className="font-display text-step-1 leading-tight text-ink">
+                <bdi>{t('life.finale.albumTitle')}</bdi>
+              </h2>
+              <p className="mt-2 font-sign text-[15px] leading-tight text-ink">
+                {t('life.finale.albumCount', { have: String(album.have), total: String(album.total) })}
+                {album.torn > 0 ? ` · ${t('life.finale.albumTorn', { n: String(album.torn) })}` : ''}
+              </p>
+              <ul className="mt-2 flex flex-col gap-0.5">
+                {album.pages.map((page) => (
+                  <li
+                    key={page.titleHe}
+                    className={`flex items-baseline justify-between font-body text-[12px] leading-snug ${
+                      page.have >= page.total ? 'text-ink' : 'text-muted'
+                    }`}
+                  >
+                    <bdi>{page.titleHe}</bdi>
+                    <span className="font-mono text-[11px] tabular-nums" dir="ltr">
+                      {page.have}/{page.total}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 border-t-hair border-ink/20 pt-2 font-body text-[11px] leading-snug text-muted">
+                <bdi>{t('life.finale.albumAgain')}</bdi>
               </p>
             </section>
           )}

@@ -514,15 +514,13 @@ export class DialogueRunner {
           if (finished) {
             const kept = keptOnClose(state, set, ids)
             for (const card of kept) events.push({ t: 'flag.set', flag: stickerFlag(card.id), value: 1 })
-            const names = kept.map((card) => card.nameHe).join(', ')
             after.push(() =>
-              this.bus.emit('toast', {
-                text: names
-                  ? `${SETS[set].titleHe} — הדף מלא. אבא הוציא מהקופסה את ${names}.`
-                  : `${SETS[set].titleHe} — הדף מלא.`,
-                tone: 'red',
-              }),
+              this.bus.emit('toast', { text: `${SETS[set].titleHe} — הדף מלא.`, tone: 'red' }),
             )
+            if (kept.length > 0) {
+              const keptIds = kept.map((card) => card.id)
+              after.push(() => this.bus.emit('kept', { ids: keptIds }))
+            }
           }
           break
         }
@@ -581,17 +579,18 @@ export class DialogueRunner {
           const closed = set ? closesPage(state, set, [missing.id]) : false
           const fromBox = closed && set ? keptOnClose(state, set, [missing.id]) : []
           for (const card of fromBox) events.push({ t: 'flag.set', flag: stickerFlag(card.id), value: 1 })
-          const boxNames = fromBox.map((card) => card.nameHe).join(', ')
           after.push(() =>
             this.bus.emit('toast', {
               text: closed
-                ? boxNames
-                  ? `${spare.nameHe} תמורת ${missing.nameHe}. הדף מלא — ו${boxNames} יצא מהקופסה.`
-                  : `${spare.nameHe} תמורת ${missing.nameHe}. הדף מלא.`
+                ? `${spare.nameHe} תמורת ${missing.nameHe}. הדף מלא.`
                 : `${spare.nameHe} תמורת ${missing.nameHe}.`,
               tone: 'red',
             }),
           )
+          if (fromBox.length > 0) {
+            const boxIds = fromBox.map((card) => card.id)
+            after.push(() => this.bus.emit('kept', { ids: boxIds }))
+          }
           break
         }
         /** עץ או פלי — the stake leaves the pocket in the card, with the flip. */

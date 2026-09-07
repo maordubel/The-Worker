@@ -41,6 +41,7 @@ export type StickerSetId =
   | 'sgcup'
   | 'sg80b'
   | '9293'
+  | 'sg90'
   | 'sg978'
   | '96'
   | 'box'
@@ -80,6 +81,14 @@ export type StickerDef = {
   /** what Maor wrote under it in his own album, in his own hand */
   handHe?: string
   rarity: StickerRarity
+  /**
+   * מי שעבר — a player Maor marks as having gone over to the other side.
+   *
+   * The game says nothing about WHY, and never a date or a club: that would be a claim
+   * the archive has not given it (rule 11). It says only that this one is on his list,
+   * and hands the decision to the player — keep him in the album or tear him out.
+   */
+  defector?: boolean
   /**
    * לא נמכר במעטפה — the sticker a packet will never contain.
    *
@@ -141,6 +150,14 @@ export const SETS: Record<StickerSetId, StickerSet> = {
     posterArt: '/life/docs/sg-squad-93.jpg',
     posterSourceHe: 'תצלום הסגל, עונת 1992/93 — מהחומרים של מאור הראל.',
   },
+  sg90: {
+    id: 'sg90',
+    titleHe: 'הפועל תל־אביב · שנות התשעים',
+    seasonHe: 'הסגל, שנות התשעים',
+    shortHe: '90s',
+    frame: '93',
+    soldIn: '90s',
+  },
   sg978: {
     id: 'sg978',
     titleHe: 'הפועל · 1997/8',
@@ -175,6 +192,7 @@ const FROM_SHEET_A = 'גיליון קלפים — הסגל, שנות השמונ�
 const FROM_SHEET_CUP = 'גיליון קלפים — "הגביע הוא שלנו"; מהחומרים של מאור הראל.'
 const FROM_SHEET_B = 'גיליון קלפים ממוספר, שנות השמונים; מהחומרים של מאור הראל.'
 const FROM_SHEET_98 = 'גיליון קלפים — 1997/8; מהחומרים של מאור הראל.'
+const FROM_SHEET_90 = 'גיליון קלפים, שנות התשעים; מהחומרים של מאור הראל.'
 
 /**
  * הדף של אבא — one sticker, and the rest of the album gone.
@@ -264,7 +282,7 @@ S8586[S8586.length - 1] = { ...(S8586[S8586.length - 1] as StickerDef), rarity: 
  * Where a number sits under the crop line it is simply absent — the album says less
  * rather than guessing, the same rule the 1992/93 page has always obeyed.
  */
-type Row = [file: string, nameHe: string, roleHe?: string, printedN?: number]
+type Row = [file: string, nameHe: string, roleHe?: string, printedN?: number, defector?: boolean]
 
 const page = (
   set: StickerSetId,
@@ -272,7 +290,7 @@ const page = (
   source: string,
   rows: readonly Row[],
 ): StickerDef[] =>
-  rows.map(([file, nameHe, roleHe, printedN], index) => ({
+  rows.map(([file, nameHe, roleHe, printedN, defector], index) => ({
     // a file carries its extension only when it is not a JPEG: three of the cup cards
     // are PNG because the encoder kept ringing one pixel back into the yellow band
     id: `${prefix}-${file.replace(/\.\w+$/, '')}`,
@@ -281,6 +299,7 @@ const page = (
     nameHe,
     ...(roleHe ? { roleHe } : {}),
     ...(printedN ? { printedN } : {}),
+    ...(defector ? { defector: true } : {}),
     scan: `/life/docs/${file.includes('.') ? file : `${file}.jpg`}`,
     sourceHe: source,
     rarity: (index < 2 ? 'rare' : index < 7 ? 'uncommon' : 'common') as StickerRarity,
@@ -353,7 +372,7 @@ const SG978: StickerDef[] = page('sg978', 'd', FROM_SHEET_98, [
   ['sg978-04', 'אסי דומב'],
   ['sg978-05', 'יניב ירון'],
   ['sg978-06', 'יעקב הילל'],
-  ['sg978-07', 'שמעון גרשון'],
+  ['sg978-07', 'שמעון גרשון', undefined, undefined, true],
   ['sg978-08', 'ישראל כהן'],
   ['sg978-09', 'שחר כהן'],
   ['sg978-10', 'מירו מסטרוביץ׳'],
@@ -380,6 +399,31 @@ const SG978: StickerDef[] = page('sg978', 'd', FROM_SHEET_98, [
  * itself sits at the top of the page with everybody in it, uncaptioned, which is the
  * honest way to show eleven men whose names you cannot all read.
  */
+/**
+ * הדף של התשעים — with the advertisement on it, because it was on it.
+ *
+ * Every card on this sheet carries a cigarette banner across its head: that is what a
+ * sticker a child collected in 1993 looked like, and Maor asked for it kept (7.9.2026).
+ * The game does not repeat the slogan anywhere in its own voice; it shows a card that
+ * exists, and a card that exists is a fact about the decade, not an endorsement of it.
+ */
+const SG90: StickerDef[] = page('sg90', 'e', FROM_SHEET_90, [
+  ['sg90-00', 'דוד הרשליקוביץ׳'],
+  ['sg90-01', 'טל אוסובסקי'],
+  ['sg90-02', 'גל הרשליקוביץ׳'],
+  ['sg90-03', 'פיטר קרמנס'],
+  ['sg90-05.png', 'רפי שמואל'],
+  ['sg90-06.png', 'אלי כהן'],
+  ['sg90-07', 'רמי ארמה'],
+  ['sg90-08', 'משה מוסטרלי'],
+  ['sg90-09', 'יעקב אקהויז'],
+  ['sg90-10', 'אחמד מוסא'],
+  ['sg90-11.png', 'משה סיני'],
+  ['sg90-12', 'חזי שירזי'],
+  ['sg90-13', 'יובל פילוס'],
+  ['sg90-04', 'סמל הקבוצה'],
+])
+
 const S9293: StickerDef[] = [
   {
     id: 'halfon',
@@ -464,6 +508,7 @@ export const STICKERS: readonly StickerDef[] = [
   ...SGCUP,
   ...SG80B,
   ...S9293,
+  ...SG90,
   ...SG978,
   ...S96,
   ...SBOX,
@@ -482,6 +527,7 @@ export const SET_ORDER: readonly StickerSetId[] = [
   'sgcup',
   'sg80b',
   '9293',
+  'sg90',
   'sg978',
   '96',
   'box',
@@ -505,6 +551,21 @@ export function haveOf(state: LifeState, id: string): number {
 
 export const hasSticker = (state: LifeState, id: string) => haveOf(state, id) > 0
 
+/**
+ * קרוע — the slot a player decided to empty on purpose.
+ *
+ * Maor, 7.9.2026: a man who went over to the other side is still in the album, and the
+ * boy gets to decide. Tearing him out is not losing the card — it is spending it. The
+ * slot is settled either way: a torn page still closes, because the album is the boy's
+ * and he has said what he thinks.
+ */
+export const TORN_PREFIX = 'album:torn:'
+export const tornFlag = (id: string) => `${TORN_PREFIX}${id}`
+export const isTorn = (state: LifeState, id: string) => state.flags[tornFlag(id)] === true
+
+/** decided, one way or the other: stuck in, or torn out on purpose */
+export const settled = (state: LifeState, id: string) => hasSticker(state, id) || isTorn(state, id)
+
 /** how many DIFFERENT stickers of a page are stuck in */
 export function stuckIn(state: LifeState, set: StickerSetId): number {
   return stickersIn(set).filter((sticker) => hasSticker(state, sticker.id)).length
@@ -523,7 +584,7 @@ export function duplicates(state: LifeState): StickerDef[] {
 /** the pages that are finished, and the ones that never can be */
 export function pageDone(state: LifeState, set: StickerSetId): boolean {
   const page = stickersIn(set)
-  return page.length > 0 && page.every((sticker) => hasSticker(state, sticker.id))
+  return page.length > 0 && page.every((sticker) => settled(state, sticker.id))
 }
 
 /**
@@ -536,16 +597,62 @@ export function closesPage(state: LifeState, set: StickerSetId, extra: Iterable<
   const arriving = new Set(extra)
   const page = stickersIn(set)
   if (page.length === 0) return false
-  const already = page.filter((sticker) => hasSticker(state, sticker.id)).length
+  const already = page.filter((sticker) => settled(state, sticker.id)).length
   if (already === page.length) return false
-  return page.every((sticker) => hasSticker(state, sticker.id) || arriving.has(sticker.id))
+  return page.every((sticker) => settled(state, sticker.id) || arriving.has(sticker.id))
 }
 
-export function albumTotals(state: LifeState): { have: number; total: number } {
+export function albumTotals(state: LifeState): { have: number; total: number; torn: number } {
   return {
     have: STICKERS.filter((sticker) => hasSticker(state, sticker.id)).length,
     total: STICKERS.length,
+    torn: STICKERS.filter((sticker) => isTorn(state, sticker.id)).length,
   }
+}
+
+/**
+ * אס — the five men who played before the boy was born.
+ *
+ * They are not in any packet and not in any shop. They come out of the red box, one for
+ * each album finished, and the game treats them differently everywhere it can: bigger on
+ * the reveal, held longer, a star behind them. A card that is handed to you for finishing
+ * something should not arrive the same way as the fourth Eli Cohen of the afternoon.
+ */
+export const isAce = (sticker: StickerDef) => sticker.set === 'box' && sticker.id.startsWith('box-ace-')
+
+/**
+ * הדפסה — what this particular print run was short of.
+ *
+ * Maor, 7.9.2026: *"אני רוצה שיהיה מצב שמתמודד לא ימלא לגמרי את האלבום... ומתמודדים שונים
+ * ישיגו קלפים שונים."* So two slots on every sellable page are short-printed, chosen from
+ * the run's own seed: no packet in this life will ever contain them. They are still
+ * gettable — somebody else in the neighbourhood pulled them, and a trade still works —
+ * but only by asking, and only if you have kept a spare and the bond to ask with.
+ *
+ * Two consequences, both wanted: an album is hard to finish in one life, and two players
+ * telling each other what they got are not describing the same album.
+ */
+export const SHORT_PER_PAGE = 2
+
+export function shortPrints(state: LifeState, set: StickerSetId): Set<string> {
+  const pool = stickersIn(set).filter((sticker) => !sticker.neverInPacket)
+  if (pool.length <= SHORT_PER_PAGE + 1) return new Set()
+  // seeded on the run and the page, never on the clock: the same life short-prints the
+  // same cards every time it is loaded, which is what makes it a print run and not a bug
+  const roller = new Roller({ seed: state.rng.seed + hash(set), cursor: 0 })
+  const left = [...pool]
+  const out = new Set<string>()
+  for (let i = 0; i < SHORT_PER_PAGE; i += 1) {
+    const [taken] = left.splice(Math.floor(roller.next() * left.length), 1)
+    if (taken) out.add(taken.id)
+  }
+  return out
+}
+
+function hash(text: string): number {
+  let n = 0
+  for (let i = 0; i < text.length; i += 1) n = (n * 31 + text.charCodeAt(i)) % 100000
+  return n
 }
 
 // ---------------------------------------------------------------------------------
@@ -617,7 +724,11 @@ const WEIGHT: Record<StickerRarity, number> = { common: 10, uncommon: 6, rare: 2
  * mechanic: a duplicate is the only currency you can trade with.
  */
 export function openPacket(state: LifeState, set: StickerSetId, at = 0): string[] {
-  const pool = stickersIn(set).filter((sticker) => !sticker.neverInPacket && WEIGHT[sticker.rarity] > 0)
+  const short = shortPrints(state, set)
+  const pool = stickersIn(set).filter(
+    (sticker) =>
+      !sticker.neverInPacket && WEIGHT[sticker.rarity] > 0 && !short.has(sticker.id) && !isTorn(state, sticker.id),
+  )
   if (pool.length === 0) return []
   const roller = new Roller({ seed: state.rng.seed, cursor: state.rng.cursor + at })
   const out: string[] = []
@@ -682,7 +793,7 @@ export function tradeAsk(state: LifeState, id: string): StickerDef | null {
 /** the sticker to go asking for: the rarest one still missing on the page being collected */
 export function missingOn(state: LifeState, set: StickerSetId): StickerDef | null {
   const order: StickerRarity[] = ['rare', 'uncommon', 'common', 'kept']
-  const missing = stickersIn(set).filter((sticker) => !hasSticker(state, sticker.id))
+  const missing = stickersIn(set).filter((sticker) => !settled(state, sticker.id))
   missing.sort((a, b) => order.indexOf(a.rarity) - order.indexOf(b.rarity) || a.slot - b.slot)
   return missing[0] ?? null
 }

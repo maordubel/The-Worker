@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { Plate } from '@/components/life/Plate'
 import { t } from '@/lib/i18n'
-import { SETS, stickerFor, type StickerDef } from '@/lib/life/stickers'
+import { SETS, isAce, stickerFor, type StickerDef } from '@/lib/life/stickers'
 
 /**
  * המעטפה — the four seconds that are the whole reason anybody buys one.
@@ -18,30 +18,51 @@ import { SETS, stickerFor, type StickerDef } from '@/lib/life/stickers'
  * says only whether it is new. `כבר יש` on a duplicate rather than a red cross, because a
  * duplicate is not a failure — it is the currency you go and trade with, and the game
  * should not teach the player to be sad about the thing it wants them to use.
+ *
+ * 7.9.2026, on Maor's note: the tear is now animated rather than instant. The envelope
+ * shakes once, splits along its top and falls away, and each card turns face-up out of
+ * the gap — three hundred milliseconds of paper before any information arrives. And the
+ * same component does the RED BOX (`fromBox`): one card, twice the size, held on the
+ * screen with a star behind it, because a card you were given for finishing an album
+ * should not arrive the way the fourth Eli Cohen of the afternoon does.
  */
 export function PacketCard({
   ids,
   before,
+  fromBox = false,
   onClose,
 }: {
   /** what came out, in the order it comes out */
   ids: readonly string[]
   /** how many of each one was already stuck in, BEFORE this packet — so `חדש` is true */
   before: Readonly<Record<string, number>>
+  /** out of the red box rather than out of a packet: no envelope, one card, held */
+  fromBox?: boolean
   onClose: () => void
 }) {
-  const [torn, setTorn] = useState(false)
+  const [torn, setTorn] = useState(fromBox)
+  const [tearing, setTearing] = useState(false)
   const [shown, setShown] = useState(0)
   const cards = ids.map((id) => stickerFor(id)).filter((one): one is StickerDef => one !== null)
   const set = cards[0] ? SETS[cards[0].set] : null
 
+  /* the envelope has to actually come apart before anything is behind it */
+  useEffect(() => {
+    if (!tearing) return
+    const timer = window.setTimeout(() => setTorn(true), 520)
+    return () => window.clearTimeout(timer)
+  }, [tearing])
+
   useEffect(() => {
     if (!torn || shown >= cards.length) return
-    const timer = window.setTimeout(() => setShown((n) => n + 1), 420)
+    // an ace is held a beat longer than a packet card, on the way in as well as out
+    const wait = cards[shown] && isAce(cards[shown] as StickerDef) ? 760 : 420
+    const timer = window.setTimeout(() => setShown((n) => n + 1), wait)
     return () => window.clearTimeout(timer)
-  }, [torn, shown, cards.length])
+  }, [torn, shown, cards])
 
   const done = torn && shown >= cards.length
+  const big = fromBox || cards.some((card) => isAce(card))
 
   return (
     <div
@@ -51,10 +72,18 @@ export function PacketCard({
       className="pointer-events-auto absolute inset-0 z-[62] flex flex-col items-center justify-center bg-ink/95 px-5"
     >
       {!torn ? (
-        <button type="button" onClick={() => setTorn(true)} data-life="packet-open" className="min-h-tap">
+        <button
+          type="button"
+          onClick={() => setTearing(true)}
+          disabled={tearing}
+          data-life="packet-open"
+          className="min-h-tap"
+        >
           <Plate
             tone="red"
-            className="flex aspect-[3/4] w-[62vw] max-w-[15rem] items-center justify-center shadow-lamp sm:w-[18rem]"
+            className={`flex aspect-[3/4] w-[62vw] max-w-[15rem] items-center justify-center shadow-lamp sm:w-[18rem] ${
+              tearing ? 'packet-tearing' : ''
+            }`}
           >
             <span className="flex flex-col items-center px-3 py-6">
               <span className="font-poster text-[34px] leading-none tracking-[0.04em]">{t('life.packet.name')}</span>
@@ -64,8 +93,11 @@ export function PacketCard({
           </Plate>
         </button>
       ) : (
-        <div className="flex w-full max-w-[26rem] flex-col items-center">
-          <div className="grid w-full grid-cols-3 gap-2">
+        <div className={`flex w-full flex-col items-center ${big ? 'max-w-[22rem]' : 'max-w-[26rem]'}`}>
+          {big && (
+            <span aria-hidden className="ace-burst pointer-events-none absolute inset-0" />
+          )}
+          <div className={`grid w-full gap-2 ${big ? 'mx-auto max-w-[15rem] grid-cols-1' : 'grid-cols-3'}`}>
             {cards.map((sticker, index) => {
               const isNew = (before[sticker.id] ?? 0) === 0
               const out = index < shown
@@ -74,14 +106,15 @@ export function PacketCard({
                   key={`${sticker.id}-${index}`}
                   data-life="packet-card"
                   data-new={isNew ? '1' : '0'}
-                  className={`sticker flex aspect-[3/4] flex-col overflow-hidden bg-sheet transition-opacity duration-200 ${
-                    out ? 'packet-in opacity-100' : 'opacity-0'
-                  }`}
-                  style={{ ['--tilt' as string]: `${(index - 1) * 1.6}deg` }}
+                  className={`sticker flex aspect-[3/4] flex-col overflow-hidden bg-sheet ${
+                    isAce(sticker) ? 'sticker-ace' : ''
+                  } ${out ? 'packet-turn opacity-100' : 'opacity-0'}`}
+                  /* a card held up on its own is held straight; a packet fans */
+                  style={{ ['--tilt' as string]: big ? '0deg' : `${(index - 1) * 1.6}deg` }}
                 >
                   {sticker.scan ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={sticker.scan} alt={sticker.nameHe} className="h-full w-full object-cover" />
+                    <img src={sticker.scan} alt={sticker.nameHe} className="h-full w-full object-contain" />
                   ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center bg-paper p-1">
                       <span className="font-poster text-[22px] leading-none text-concrete" aria-hidden>
@@ -97,7 +130,7 @@ export function PacketCard({
             })}
           </div>
 
-          <div className="grid w-full grid-cols-3 gap-2 pt-1">
+          <div className={`grid w-full gap-2 pt-1 ${big ? 'mx-auto max-w-[15rem] grid-cols-1' : 'grid-cols-3'}`}>
             {cards.map((sticker, index) => (
               <span
                 key={`${sticker.id}-label-${index}`}
@@ -105,7 +138,9 @@ export function PacketCard({
                   index < shown ? 'opacity-100' : 'opacity-0'
                 } ${(before[sticker.id] ?? 0) === 0 ? 'text-sheet' : 'text-concrete/70'}`}
               >
-                {t((before[sticker.id] ?? 0) === 0 ? 'life.packet.new' : 'life.packet.dup')}
+                {isAce(sticker)
+                  ? t('life.packet.ace')
+                  : t((before[sticker.id] ?? 0) === 0 ? 'life.packet.new' : 'life.packet.dup')}
               </span>
             ))}
           </div>
@@ -118,7 +153,7 @@ export function PacketCard({
               done ? 'opacity-100' : 'pointer-events-none opacity-0'
             }`}
           >
-            {t('life.packet.toAlbum')}
+            {fromBox ? t('life.packet.fromBox') : t('life.packet.toAlbum')}
           </button>
         </div>
       )}

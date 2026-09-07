@@ -40,6 +40,11 @@ const SEED = [
   { t: 'flag.set', flag: 'album:sg:d-sg978-07', value: 1 },
   { t: 'flag.set', flag: 'album:sg:d-kt-dreslia', value: 1 },
   { t: 'flag.set', flag: 'album:sg:box-ace-chodorov', value: 1 },
+  { t: 'flag.set', flag: 'album:sg:box-ace-levkovich', value: 1 },
+  { t: 'flag.set', flag: 'album:sg:e-sg90-00', value: 1 },
+  { t: 'flag.set', flag: 'album:sg:e-sg90-03', value: 1 },
+  { t: 'flag.set', flag: 'album:sg:d-sg978-07', value: 1 },
+  { t: 'flag.raised', flag: 'album:torn:d-sg978-02' },
   { t: 'moved', to: 'street' },
 ]
 
@@ -93,6 +98,21 @@ for (const [name, vp, mobile] of [
       await tabs.nth(i).click({ force: true })
       await page.waitForTimeout(350)
       await page.screenshot({ path: `/tmp/shots/ui-${name}-album-${i + 1}.png` })
+    }
+  }
+  // the packet, the box and a torn page are shot on the QA screen (`/qa/life-album`)
+  // rather than by poking the bus: the runtime does not expose one, and a screen that
+  // exists to be looked at is the project's own convention for exactly this (rule 19).
+  for (const [show, waits] of [['packet', [400, 300, 1900]], ['box', [1500]], ['album', [700]]]) {
+    await page.goto(`${BASE}/qa/life-album?show=${show}`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(waits[0])
+    await page.screenshot({ path: `/tmp/shots/qa-${name}-${show}-1.png` })
+    if (show === 'packet') {
+      await page.locator('[data-life="packet-open"]').click({ force: true }).catch(() => {})
+      await page.waitForTimeout(waits[1])
+      await page.screenshot({ path: `/tmp/shots/qa-${name}-${show}-2.png` })
+      await page.waitForTimeout(waits[2])
+      await page.screenshot({ path: `/tmp/shots/qa-${name}-${show}-3.png` })
     }
   }
   console.log(name, 'errors:', errors.length ? errors.join(' | ') : 'none')

@@ -58,7 +58,7 @@ import type { LifeState } from '@/lib/life/types'
 import { checklistFor, type ChecklistItem } from '@/lib/life/checklist'
 import { GIGS } from '@/lib/life/gigs'
 import { bookFor, bookPageFlag } from '@/lib/life/books'
-import { albumTotals } from '@/lib/life/stickers'
+import { SETS, SET_ORDER, albumTotals, hasSticker, stickerFlag, stickersIn, tornFlag } from '@/lib/life/stickers'
 import { CONSEQUENCE_KICKER_HE } from '@/lib/life/consequence'
 import { COIN_WHY_HE, HOOPS_WHY_HE, PENALTY_WHY_HE, TOTO_PER_ANSWER, TOTO_WHY_HE } from '@/lib/life/toto'
 import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE } from '@/lib/life/shirts'
@@ -135,6 +135,8 @@ export function LifeStage({
   const [album, setAlbum] = useState<LifeBusEvents['album']>(null)
   const [albumState, setAlbumState] = useState<LifeState | null>(null)
   const [packet, setPacket] = useState<LifeBusEvents['packet']>(null)
+  /* what came out of the red box, waiting behind whatever is already on screen */
+  const [kept, setKept] = useState<LifeBusEvents['kept']>(null)
   const [cast, setCast] = useState<LifeBusEvents['cast']>(null)
   const [film, setFilm] = useState<LifeBusEvents['film']>(null)
   /** the state the shop screen is drawn against, re-read after every purchase */
@@ -399,6 +401,12 @@ export function LifeStage({
       bus.on('packet', (value) => {
         setPacket(value)
         runtime.current?.pause(Boolean(value))
+      }),
+      bus.on('kept', (value) => {
+        // queued rather than shown: the packet that closed the page is still open, and
+        // two overlays at once is how a reveal turns into a pile-up
+        setKept(value)
+        if (value) runtime.current?.pause(true)
       }),
       bus.on('card', (value) => {
         setTitleCard(value)
@@ -988,6 +996,17 @@ export function LifeStage({
         {album?.open && albumState && (
           <AlbumSheet
             state={albumState}
+            onTear={(id, nameHe) => {
+              // קורע — the one destructive thing the album can do, and it is the player's
+              // to do. The sticker leaves the album and the slot keeps the decision.
+              const engine = engineRef.current
+              if (!engine) return
+              engine.dispatch({ t: 'flag.set', flag: stickerFlag(id), value: 0 })
+              engine.dispatch({ t: 'flag.raised', flag: tornFlag(id) })
+              void engine.save()
+              setAlbumState(engine.state)
+              busRef.current?.emit('toast', { text: t('life.album.tore', { name: nameHe }), tone: 'red' })
+            }}
             onClose={() => {
               busRef.current?.emit('album', null)
               setAlbum(null)
@@ -1003,8 +1022,20 @@ export function LifeStage({
             before={packet.before}
             onClose={() => {
               setPacket(null)
-              // straight into the album, which is where a torn packet actually ends up —
-              // through the bus, so the mix and the pause follow it like any other sheet
+              // a card out of the box waits for the packet to be put down, and goes first:
+              // the album can wait, an ace cannot be missed
+              if (!kept) busRef.current?.emit('album', { open: true })
+            }}
+          />
+        )}
+
+        {!packet && kept && (
+          <PacketCard
+            ids={kept.ids}
+            before={{}}
+            fromBox
+            onClose={() => {
+              setKept(null)
               busRef.current?.emit('album', { open: true })
             }}
           />
@@ -1114,6 +1145,21 @@ export function LifeStage({
         {finale && (
           <StageFinale
             finale={finale}
+            album={(() => {
+              const live = engineRef.current?.state
+              if (!live) return null
+              const totals = albumTotals(live)
+              return {
+                have: totals.have,
+                total: totals.total,
+                torn: totals.torn,
+                pages: SET_ORDER.map((id) => ({
+                  titleHe: SETS[id].titleHe,
+                  have: stickersIn(id).filter((sticker) => hasSticker(live, sticker.id)).length,
+                  total: stickersIn(id).length,
+                })),
+              }
+            })()}
             onContinue={() => {
               setFinale(null)
               runtime.current?.dismissFinale()

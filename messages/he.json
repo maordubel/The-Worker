@@ -821,5 +821,17 @@
   "life.packet.dup": "כבר יש",
   "life.packet.toAlbum": "לאלבום",
   "life.album.club": "הפועל ת״א",
-  "life.album.holder": "חסר לך {card}. הוא אצל {name} — ולא במקרה."
+  "life.album.holder": "חסר לך {card}. הוא אצל {name} — ולא במקרה.",
+  "life.album.ace": "אס",
+  "life.album.defector": "הוא עבר לצד השני. להשאיר אותו באלבום, או לקרוע?",
+  "life.album.keep": "להשאיר",
+  "life.album.tear": "לקרוע",
+  "life.album.tore": "{name} נקרע מהאלבום.",
+  "life.album.torn": "נקרע",
+  "life.packet.ace": "אס",
+  "life.packet.fromBox": "לשים באלבום",
+  "life.finale.albumTitle": "האלבום",
+  "life.finale.albumCount": "אספת {have} מתוך {total}",
+  "life.finale.albumTorn": "{n} נקרעו",
+  "life.finale.albumAgain": "כל חיים מדפיסים אלבום אחר. מה שחסר כאן לא יהיה חסר בפעם הבאה."
 }
