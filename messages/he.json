@@ -850,5 +850,7 @@
   "life.share.copyFailed": "לא הצלחתי להעתיק. סמן והעתק ידנית.",
   "life.share.saved": "התמונה נשמרה.",
   "life.share.take": "לקחת החוצה",
-  "life.memory.saved": "נרשם בזיכרון"
+  "life.memory.saved": "נרשם בזיכרון",
+  "city.hint": "אצבע על המסך — להסתובב. הכפתור — ללכת.",
+  "city.walk": "ללכת קדימה"
 }

@@ -4253,6 +4253,48 @@
    "bytes": 398833,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
+  },
+  "panoPromenade": {
+   "w": 2560,
+   "h": 1029,
+   "horizon": 0.72,
+   "bytes": 1678704,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "הטיילת, הבניין העגול מול הים",
+   "nearRgb": [
+    136,
+    104,
+    74
+   ]
+  },
+  "panoTamar": {
+   "w": 2560,
+   "h": 1029,
+   "horizon": 0.735,
+   "bytes": 1459151,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "פינת קפה תמר — מאפייה, חנות ספרים, גלידריה",
+   "nearRgb": [
+    89,
+    83,
+    77
+   ]
+  },
+  "panoCinema": {
+   "w": 2560,
+   "h": 1086,
+   "horizon": 0.735,
+   "bytes": 1557079,
+   "yellowLeft": 0.0,
+   "source": "maor-2026-09-07-panoramas-b",
+   "whatHe": "קולנוע אלנבי, הצומת",
+   "nearRgb": [
+    86,
+    84,
+    83
+   ]
   }
  },
  "textures": {
