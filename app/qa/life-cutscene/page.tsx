@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { qaAllowed } from '@/lib/qa'
+
 import { Preview } from './Preview'
 import { resolveChapterAnchor } from '@/lib/life/anchor-server'
 import { CUTSCENES, cutsceneCard } from '@/lib/life/cutscenes'
@@ -23,7 +25,7 @@ import { CUTSCENES, cutsceneCard } from '@/lib/life/cutscenes'
 export const dynamic = 'force-dynamic'
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
-  if (process.env.NODE_ENV === 'production') notFound()
+  if (!qaAllowed()) notFound()
   const { id } = await searchParams
   const scene = (id ? CUTSCENES[id] : null) ?? Object.values(CUTSCENES)[0]
   if (!scene) notFound()

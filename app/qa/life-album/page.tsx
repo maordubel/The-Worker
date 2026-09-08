@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { qaAllowed } from '@/lib/qa'
+
 import { Preview } from './Preview'
 
 /**
@@ -16,7 +18,7 @@ import { Preview } from './Preview'
 export const dynamic = 'force-dynamic'
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ show?: string }> }) {
-  if (process.env.NODE_ENV === 'production') notFound()
+  if (!qaAllowed()) notFound()
   const { show } = await searchParams
   return <Preview show={show === 'box' || show === 'album' ? show : 'packet'} />
 }

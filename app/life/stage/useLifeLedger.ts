@@ -5,6 +5,7 @@ import { type MutableRefObject } from 'react'
 import { t } from '@/lib/i18n'
 import { bookPageFlag } from '@/lib/life/books'
 import type { loadLife } from '@/lib/life/engine'
+import { PITCH_SETTLEMENT } from '@/lib/life/football/door'
 import { GIGS } from '@/lib/life/gigs'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE, type Shirt } from '@/lib/life/shirts'
@@ -154,6 +155,33 @@ export function useLifeLedger({
         { t: 'flag.raised', flag: 'gig:penalty-contest' },
       )
       if (gig?.trait) engineRef.current?.dispatch({ t: 'personality.shifted', key: gig.trait.key, delta: gig.trait.delta })
+      void engineRef.current?.save()
+    },
+
+    /**
+     * המגרש — the afternoon the street match cost, and the one point winning as them is worth.
+     *
+     * The numbers come from `lib/life/football/door.ts`, not from here: the door owns what
+     * the match costs, the same way `GIGS` owns what a job costs. `loveOnWin` is one point
+     * and only for winning, on purpose — `אהבה להפועל` measures a life, and a kickabout that
+     * paid what Bloomfield pays would cheapen both. Losing costs nothing at all; this game
+     * does not fine a boy for losing a game.
+     */
+    settlePitch({ played, score }: { played: boolean; score: { home: number; away: number } }) {
+      if (!played) return
+      engineRef.current?.dispatch(
+        { t: 'clock.advanced', minutes: PITCH_SETTLEMENT.minutes },
+        { t: 'energy.changed', delta: -PITCH_SETTLEMENT.energy },
+        { t: 'flag.raised', flag: PITCH_SETTLEMENT.flag },
+        { t: 'personality.shifted', key: PITCH_SETTLEMENT.trait.key, delta: PITCH_SETTLEMENT.trait.delta },
+      )
+      if (score.home > score.away) {
+        engineRef.current?.dispatch({
+          t: 'redheart.changed',
+          key: 'footballLove',
+          delta: PITCH_SETTLEMENT.loveOnWin,
+        })
+      }
       void engineRef.current?.save()
     },
 

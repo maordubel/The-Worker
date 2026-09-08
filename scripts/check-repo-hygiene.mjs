@@ -42,6 +42,11 @@ const ALLOW = new Set([
   '.eslintrc.js',
 ])
 
+/** the only prose files allowed to sit at the root, by exact name */
+const ALLOW_PROSE = new Set(['README.md', 'CLAUDE.md'])
+/** prose lives under docs/ — everything else in the root is upload residue */
+const PROSE = new Set(['.md', '.txt'])
+
 const SOURCE = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'])
 const ASSET = new Set(['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ogg', '.m4a', '.mp3', '.mp4', '.webm', '.woff', '.woff2'])
 /** where a runtime concept is allowed to live */
@@ -91,6 +96,24 @@ for (const name of readdirSync(ROOT)) {
    */
   if (name.endsWith('.tsbuildinfo')) {
     problems.push([name, 'מטמון של המהדר — נוצר מחדש לבד, ובריפו הוא עלול לגרום ל-tsc לדווח נקי כשהוא לא'])
+    continue
+  }
+  /**
+   * מסמכים בשורש — הסיבוב האחרון של אותה מחלה (7.9.2026, דלתא 47).
+   *
+   * The 128-file cleanup removed the code and the assets, and left four prose files behind:
+   * `READ-ME-FIRST.md`, `READ-ME-FIRST.txt`, `README-SOURCE.md`, `README-UPLOAD.md`. They
+   * survived because this check only ever looked at source and asset extensions, so nothing
+   * ever said they were there — and a rule nobody enforces is a rule that comes back with
+   * the next upload.
+   *
+   * Every one of them already has a byte-identical copy under
+   * `docs/implementation-history/legacy/`, which is the tombstone rule 26 asks for, and not
+   * one of them is referenced by any file in the repository. `README.md` and `CLAUDE.md` are
+   * the two documents that genuinely belong at the root; everything else belongs in `docs/`.
+   */
+  if (PROSE.has(ext) && !ALLOW_PROSE.has(name)) {
+    problems.push([name, 'מסמך בשורש — מקומו תחת docs/. עותק שמור כבר קיים ב-docs/implementation-history/legacy/'])
     continue
   }
   if (ASSET.has(ext)) {

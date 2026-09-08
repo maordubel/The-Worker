@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { qaAllowed } from '@/lib/qa'
+
 import { Preview } from './Preview'
 import { resolveChapterAnchor } from '@/lib/life/anchor-server'
 import { buildFinale } from '@/lib/life/finale'
@@ -24,7 +26,7 @@ const RUNS: Array<{ id: string; flags: string[] }> = [
 ]
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ run?: string }> }) {
-  if (process.env.NODE_ENV === 'production') notFound()
+  if (!qaAllowed()) notFound()
   const { run } = await searchParams
   const picked = RUNS.find((entry) => entry.id === run) ?? RUNS[0]!
 

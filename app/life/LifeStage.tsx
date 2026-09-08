@@ -16,6 +16,10 @@ import dynamic from 'next/dynamic'
 // the moment the bus actually opens one, rather than riding in on every /life visit.
 const PenaltyCard = dynamic(() => import('@/components/life/PenaltyCard').then((m) => m.PenaltyCard), { ssr: false })
 const HoopsCard = dynamic(() => import('@/components/life/HoopsCard').then((m) => m.HoopsCard), { ssr: false })
+// The football engine is the heaviest room in the game — three.js plus a stadium, a crowd
+// and twenty-two figures. It is reachable from here and from nowhere else, and
+// `tests/life-football.test.ts` fails the build if any other module imports the renderer.
+const PitchCard = dynamic(() => import('@/components/life/PitchCard').then((m) => m.PitchCard), { ssr: false })
 import { AlbumSheet } from '@/components/life/AlbumSheet'
 import { PassTime } from '@/components/life/PassTime'
 import { landingMinute } from '@/lib/life/world/flow'
@@ -155,6 +159,8 @@ export function LifeStage({
     setPenalty,
     hoops,
     setHoops,
+    pitch,
+    setPitch,
     shop,
     setShop,
     shopState,
@@ -519,6 +525,17 @@ export function LifeStage({
             onDone={(result) => {
               ledger.settlePenalty(result)
               setPenalty(null)
+              runtime.current?.pause(false)
+            }}
+          />
+        )}
+
+        {pitch && (
+          <PitchCard
+            pitch={pitch}
+            onDone={(result) => {
+              ledger.settlePitch(result)
+              setPitch(null)
               runtime.current?.pause(false)
             }}
           />

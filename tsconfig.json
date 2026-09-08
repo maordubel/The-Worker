@@ -31,7 +31,16 @@
      * fills in the options it thinks are missing and writes them back into this file, so an
      * absent `incremental` came back as `true` on the very next build. An explicit value is
      * a decision, and Next leaves decisions alone.
+     *
+     * **And a belt as well as braces (delta 47).** An explicit `false` is a decision Next
+     * respects today, but the cache only ever reached the repository because it had nowhere
+     * else to go. `tsBuildInfoFile` gives it somewhere: inside `.next/`, which
+     * `tsconfig.all.json` already excludes and which the uploader will never carry. So even
+     * on the day some future Next flips the flag back, nothing lands in the root and
+     * `npm run repo:hygiene` keeps passing straight after `npm run typecheck` — which it did
+     * not, in a clean checkout, before this line existed.
      */
+    "tsBuildInfoFile": ".next/tsconfig.tsbuildinfo",
     "incremental": false,
     "plugins": [
       {

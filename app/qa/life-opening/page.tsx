@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { qaAllowed } from '@/lib/qa'
+
 import { Preview } from './Preview'
 import { resolvePrologueAnchor } from '@/lib/life/anchor-server'
 
@@ -14,7 +16,7 @@ import { resolvePrologueAnchor } from '@/lib/life/anchor-server'
 export const dynamic = 'force-dynamic'
 
 export default function Page() {
-  if (process.env.NODE_ENV === 'production') notFound()
+  if (!qaAllowed()) notFound()
   return (
     <div className="relative h-dvh w-full">
       <Preview anchor={resolvePrologueAnchor()} />

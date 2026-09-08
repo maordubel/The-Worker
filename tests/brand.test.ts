@@ -6,6 +6,7 @@ import { PNG } from 'pngjs'
 
 import { isYellow, isYellowHex } from '@/lib/isYellow'
 import { YELLOW_EXEMPTIONS, yellowAllowed } from '@/lib/brand/yellowExemptions'
+import { qaAllowed } from '@/lib/qa'
 
 /**
  * The twenty-point acceptance checklist from brand/THE-WORKER-BRAND-SPEC.md, as tests.
@@ -398,12 +399,54 @@ describe('מתקן הבדיקה — the QA harness is exempt only because it can
     // as the rule it enforces — a guard that names its subjects protects the subjects it
     // was written with and nothing added afterwards. The finale harness was the third
     // page in this folder and no test would have noticed it shipping.
+    //
+    // The test used to demand the literal `process.env.NODE_ENV === 'production'`, and that
+    // was the wrong question in a second way: EVERY Vercel deployment builds with
+    // `NODE_ENV=production`, a pull request's own preview included, so the harnesses were
+    // unreachable anywhere except a local `next dev` — and the person who needs to look at
+    // them does not use a terminal. `lib/qa.ts` asks `VERCEL_ENV` instead, which is the
+    // question that distinguishes the live site from a preview. The guard now checks the
+    // PROPERTY rather than the spelling: every page routes through the one gate, and the
+    // gate refuses Vercel production.
     const pages = walk(join(ROOT, 'app/qa')).filter((path) => path.endsWith('page.tsx'))
     expect(pages.length, 'no QA harness pages found — the walk is looking in the wrong place').toBeGreaterThan(1)
     for (const page of pages) {
       const text = readFileSync(page, 'utf8')
       expect(text, page).toContain('notFound()')
-      expect(text, page).toContain("process.env.NODE_ENV === 'production'")
+      expect(text, page).toContain('!qaAllowed()')
+      expect(text, page).toContain("from '@/lib/qa'")
+    }
+
+    const gate = readFileSync(join(ROOT, 'lib/qa.ts'), 'utf8')
+    expect(gate).toContain('VERCEL_ENV')
+    expect(gate).toContain("!== 'production'")
+  })
+
+  it('shuts the QA harness on the live site and opens it on a preview', () => {
+    // The truth table, asserted rather than described. A harness that is open on the
+    // production domain is the brand exemption leaking onto the public site, which is the
+    // whole reason this describe block exists.
+    const cases: [string | undefined, string, boolean][] = [
+      ['production', 'production', false],
+      ['preview', 'production', true],
+      [undefined, 'production', false],
+      [undefined, 'development', true],
+    ]
+    // `process.env.NODE_ENV` is typed as a literal union, so it is set through the record
+    // rather than by assignment — the value is a string at runtime either way
+    const env = process.env as Record<string, string | undefined>
+    const before = { vercel: env.VERCEL_ENV, node: env.NODE_ENV }
+    try {
+      for (const [vercel, node, expected] of cases) {
+        if (vercel === undefined) delete env.VERCEL_ENV
+        else env.VERCEL_ENV = vercel
+        env.NODE_ENV = node
+        expect(qaAllowed(), `VERCEL_ENV=${vercel ?? 'unset'} NODE_ENV=${node}`).toBe(expected)
+      }
+    } finally {
+      if (before.vercel === undefined) delete env.VERCEL_ENV
+      else env.VERCEL_ENV = before.vercel
+      env.NODE_ENV = before.node
     }
   })
 

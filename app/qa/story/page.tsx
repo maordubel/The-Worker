@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { qaAllowed } from '@/lib/qa'
+
 import { StoryProof } from './StoryProof'
 
 /**
@@ -19,6 +21,6 @@ import { StoryProof } from './StoryProof'
  * can land on, and this one renders eight cards' worth of canvas for no reason.
  */
 export default function StoryQaPage() {
-  if (process.env.NODE_ENV === 'production') notFound()
+  if (!qaAllowed()) notFound()
   return <StoryProof />
 }

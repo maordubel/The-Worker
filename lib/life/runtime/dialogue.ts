@@ -81,7 +81,7 @@ const heardFlag = (id: string, branch: number) => `own:heard:${id}:${branch}`
 
 /** effects that open or move something the player must be free to redo in full every time */
 const KEEPS_SCENE_LIVE: ReadonlySet<Effect['e']> = new Set([
-  'shop', 'toto', 'coin', 'penalty', 'hoops', 'goto', 'travel', 'minigame', 'ending', 'doc',
+  'shop', 'toto', 'coin', 'penalty', 'hoops', 'pitch', 'goto', 'travel', 'minigame', 'ending', 'doc',
 ])
 
 function opensSomething(effects: readonly Effect[] | undefined): boolean {
@@ -610,6 +610,13 @@ export class DialogueRunner {
           break
         case 'hoops':
           after.push(() => this.bus.emit('hoops', { attempts: effect.attempts, perBasket: effect.perBasket }))
+          break
+        /**
+         * המגרש — the 3D match. The effect carries the whole intent, so this line does not
+         * grow when a historical window is added: only the payload does.
+         */
+        case 'pitch':
+          after.push(() => this.bus.emit('pitch', effect.intent))
           break
         case 'goto':
           goto = effect.node

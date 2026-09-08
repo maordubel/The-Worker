@@ -45,3 +45,63 @@ export const YELLOW_EXEMPTIONS: readonly YellowExemption[] = [
 export function yellowAllowed(path: string): boolean {
   return YELLOW_EXEMPTIONS.some((exemption) => exemption.path === path)
 }
+
+/**
+ * החריג השני — הצהוב על היריבה, ורק עליה.
+ *
+ * A file exemption cannot cover a 3D scene, because a 3D scene has no file: it builds its
+ * colour at runtime and the pixel scanner never sees a PNG to count. So the football
+ * engine needed a second kind of entry, and it needed to be the same shape as the first —
+ * a NAMED SURFACE, an approver, a date, and a reason — rather than a relaxed rule.
+ *
+ * On 7.9.2026 Maor granted exactly that, in writing and with the limit inside the grant:
+ * **"במשחק הזה יש אישור להשתמש בצהוב על מנת לסמן יריבים בצהוב. אך על יריבים בלבד."**
+ *
+ * So: one surface, the away side's kit, and the code that produces it refuses to produce
+ * it for the player's own side — `awayMarkColour` throws rather than returns. A yellow
+ * Hapoel shirt is not a bug to be caught in review; it is not reachable.
+ *
+ *  · **The colour lives HERE, not in the runtime palette.** `tests/life.test.ts` asserts
+ *    that no value in `LIFE_PALETTE` is yellow and that no six-digit hex literal appears
+ *    anywhere under `lib/life/`. Both of those stay true, and the one approved yellow in
+ *    the product sits in the file that explains why it exists.
+ *  · **The list is asserted to be exactly this long**, like the file list above, so
+ *    widening it stays a decision somebody makes out loud.
+ */
+export type RuntimeYellowSurface = {
+  /** the surface id, matched exactly — never a prefix, never a folder */
+  surface: string
+  /** `#RRGGBB`; a string rather than a numeric literal so the runtime guard stays absolute */
+  colour: string
+  approvedBy: string
+  approvedOn: string
+  why: string
+}
+
+export const RUNTIME_YELLOW_SURFACES: readonly RuntimeYellowSurface[] = [
+  {
+    surface: 'football/away-kit',
+    colour: '#f2c500',
+    approvedBy: 'מאור הראל — "יש אישור להשתמש בצהוב על מנת לסמן יריבים בצהוב. אך על יריבים בלבד."',
+    approvedOn: '2026-09-07',
+    why: 'חולצת היריבה בשחזור התלת-מימד — הצהוב מסמן את הקבוצה השנייה בלבד, ולעולם לא את הפועל',
+  },
+] as const
+
+/** Is this named runtime surface allowed to be yellow? Exact match only. */
+export function yellowSurfaceAllowed(surface: string): boolean {
+  return RUNTIME_YELLOW_SURFACES.some((entry) => entry.surface === surface)
+}
+
+/**
+ * The one approved yellow, for the one approved surface.
+ *
+ * Throws for anything else — including, deliberately, for the player's own side. The
+ * grant was "on opponents only", and a function that can only be called correctly is a
+ * better guardrail than a rule somebody has to remember.
+ */
+export function runtimeYellow(surface: string): string {
+  const entry = RUNTIME_YELLOW_SURFACES.find((row) => row.surface === surface)
+  if (!entry) throw new Error(`runtimeYellow: "${surface}" is not an approved yellow surface`)
+  return entry.colour
+}

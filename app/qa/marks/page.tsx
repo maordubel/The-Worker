@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { qaAllowed } from '@/lib/qa'
+
 import { MakerMark, type MakerMarkId } from '@/components/kit/MakerMark'
 
 /**
@@ -21,7 +23,7 @@ const SHEET: { id: MakerMarkId; maker: string }[] = [
 ]
 
 export default function MarksQaPage() {
-  if (process.env.NODE_ENV === 'production') notFound()
+  if (!qaAllowed()) notFound()
   return (
     <main data-marks="ready" className="bg-paper p-6">
       <ul className="grid grid-cols-8 gap-3">

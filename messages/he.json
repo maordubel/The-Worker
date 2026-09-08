@@ -851,6 +851,11 @@
   "life.share.saved": "התמונה נשמרה.",
   "life.share.take": "לקחת החוצה",
   "life.memory.saved": "נרשם בזיכרון",
-  "city.hint": "אצבע על המסך — להסתובב. הכפתור — ללכת.",
-  "city.walk": "ללכת קדימה"
+  "life.pitch.kickoff": "פתיחה",
+  "life.pitch.menu": "תפריט המשחק",
+  "life.pitch.paused": "המשחק עצור",
+  "life.pitch.resume": "חזרה למגרש",
+  "life.pitch.leave": "לצאת מהמגרש",
+  "life.pitch.qa.title": "המגרש — בדיקה",
+  "life.pitch.qa.note": "מסך בדיקה בלבד. לא נגיש מתוך המשחק."
 }

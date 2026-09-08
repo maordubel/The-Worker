@@ -18,7 +18,15 @@ export type Three3D = {
   camera: THREE.PerspectiveCamera
 }
 
-export function mountThree(container: HTMLDivElement, fov = 52): Three3D {
+/**
+ * `far` defaults to the hundred metres the two minigames need — a penalty box and a
+ * driveway. A football ground is bigger than that: the far terrace of a 105-metre pitch
+ * sits about a hundred and ten metres from a broadcast camera, and with the old default it
+ * was silently CLIPPED — the first pitch screenshot had a horizon of bare grass and sky
+ * with the stand missing entirely, which reads as a bug in the stadium rather than in the
+ * camera. Callers that want a stadium pass their own.
+ */
+export function mountThree(container: HTMLDivElement, fov = 52, far = 100): Three3D {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'low-power' })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
   renderer.setSize(container.clientWidth || 1, container.clientHeight || 1)
@@ -27,7 +35,7 @@ export function mountThree(container: HTMLDivElement, fov = 52): Three3D {
   renderer.domElement.style.display = 'block'
 
   const scene = new THREE.Scene()
-  const camera = new THREE.PerspectiveCamera(fov, (container.clientWidth || 1) / (container.clientHeight || 1), 0.1, 100)
+  const camera = new THREE.PerspectiveCamera(fov, (container.clientWidth || 1) / (container.clientHeight || 1), 0.1, far)
 
   return { renderer, scene, camera }
 }

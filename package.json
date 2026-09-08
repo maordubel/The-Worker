@@ -20,6 +20,7 @@
     "story:cards": "node scripts/brand/story-cards.mjs",
     "qa:sweep": "node scripts/brand/qa-sweep.mjs",
     "life:play": "node scripts/life/playthrough.mjs",
+    "life:pitch": "node scripts/life/pitch-probe.mjs",
     "life:deadends": "tsx scripts/life/deadend-audit.ts",
     "life:flow": "tsx scripts/life/flow-probe.ts",
     "life:finish": "node scripts/life/finish-audit.mjs",

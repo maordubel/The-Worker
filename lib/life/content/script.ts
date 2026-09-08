@@ -20,6 +20,7 @@ import type {
   WellbeingId,
 } from '../types'
 import type { Condition } from '../world/types'
+import type { PitchIntent } from '../football/door'
 
 /**
  * הטקסט — the authored fiction, and the line it must not cross.
@@ -87,6 +88,14 @@ export type Effect =
   | { e: 'penalty'; attempts: number; perGoal: number }
   /** תחרות חיובים בחצר — five free throws at the schoolyard hoop, in three dimensions */
   | { e: 'hoops'; attempts: number; perBasket: number }
+  /**
+   * המגרש — the 3D football match, opened from inside the world.
+   *
+   * The payload is the whole match definition, so one effect serves both the kickabout on
+   * the neighbourhood pitch and, later, a historical window in documentary mode. See
+   * `lib/life/football/door.ts` — nothing about the engine is spelled out here.
+   */
+  | { e: 'pitch'; intent: PitchIntent }
   /**
    * סופרגול — the album, and the three verbs it needs.
    *

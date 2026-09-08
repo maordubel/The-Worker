@@ -4,7 +4,8 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { CHAPTERS, chapterFor, lastPlayable, nextPlayable, playableChapters } from '@/lib/life/content/chapters'
-import { GIGS, gigChapters, gigConversations, gigPay, gigsIn, isPaid, offeredIn } from '@/lib/life/gigs'
+import { PITCH_GIG_ID, eraForChapter } from '@/lib/life/football/door'
+import { GIGS, gigChapters, gigConversations, gigPay, gigsIn, isPaid, offeredIn, type Gig } from '@/lib/life/gigs'
 import { SHIRT, TICKET, WAGE, decadeOf, decadeOfYear } from '@/lib/life/prices'
 import { SHIRTS } from '@/lib/life/shirts'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
@@ -184,6 +185,23 @@ describe('הג׳ובים — a boy with no money has somewhere to earn it', () =
     expect(14 + day).toBeGreaterThanOrEqual(SHIRT['80s'])
   })
 
+  it('puts the door onto the neighbourhood pitch, unpaid, and names it in the boy’s own words', () => {
+    // Maor, 7.9.2026: on the pitch, an option that says "אני הפועל", and then you are in
+    // the match. The choice text IS the door, so it must not have a wage appended to it.
+    const gig = GIGS.find((row) => row.id === PITCH_GIG_ID)
+    expect(gig, 'the street match is not in GIGS').toBeDefined()
+    expect(gig?.where).toBe('pitch')
+    expect(gig?.opens).toBe('pitch')
+    expect(gig?.paid).toBe(false)
+    expect(gig?.askHe).toBe('אני הפועל.')
+
+    const chapter = gigChapters(gig as Gig)[0] as string
+    const conversation = gigConversations().find((row) => row.id === `gig-${PITCH_GIG_ID}-${chapter}`)
+    const json = JSON.stringify(conversation)
+    expect(json).toContain('"text":"אני הפועל."')
+    expect(json, 'an unpaid door must not quote a wage').not.toContain('₪')
+  })
+
   it('generates one conversation per gig per chapter, and every one opens something playable', () => {
     const conversations = gigConversations()
     expect(conversations.length).toBe(GIGS.reduce((n, gig) => n + gigChapters(gig).length, 0))
@@ -194,6 +212,14 @@ describe('הג׳ובים — a boy with no money has somewhere to earn it', () =
       else if (gig?.opens === 'coin') expect(json, conversation.id).toContain('"e":"coin"')
       else if (gig?.opens === 'penalty') expect(json, conversation.id).toContain('"e":"penalty"')
       else if (gig?.opens === 'hoops') expect(json, conversation.id).toContain('"e":"hoops"')
+      else if (gig?.opens === 'pitch') {
+        expect(json, conversation.id).toContain('"e":"pitch"')
+        // the era is derived from the chapter, so a boy in 1986 does not imagine a 2000 pitch
+        const chapter = conversation.id.replace(`gig-${gig.id}-`, '')
+        expect(json, conversation.id).toContain(`"era":"${eraForChapter(chapter)}"`)
+        // and the one approved yellow is on the OTHER team
+        expect(json, conversation.id).toContain('"awayYellow":true')
+      }
       else {
         expect(json, conversation.id).toContain('"e":"minigame"')
         expect(json, conversation.id).toContain('"id":"chore:')

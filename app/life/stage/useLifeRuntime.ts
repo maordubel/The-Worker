@@ -107,6 +107,8 @@ export function useLifeRuntime({
   const [coin, setCoin] = useState<LifeBusEvents['coin']>(null)
   const [penalty, setPenalty] = useState<LifeBusEvents['penalty']>(null)
   const [hoops, setHoops] = useState<LifeBusEvents['hoops']>(null)
+  /** המגרש — the 3D football reconstruction, opened from a beat and closed by its own card */
+  const [pitch, setPitch] = useState<LifeBusEvents['pitch']>(null)
   const [shop, setShop] = useState<LifeBusEvents['shop']>(null)
   /** האלבום — open over a stopped world, drawn from a snapshot like the profile is */
   const [album, setAlbum] = useState<LifeBusEvents['album']>(null)
@@ -326,6 +328,10 @@ export function useLifeRuntime({
         setHoops(value)
         runtime.current?.pause(Boolean(value))
       }),
+      bus.on('pitch', (value) => {
+        setPitch(value)
+        runtime.current?.pause(Boolean(value))
+      }),
       bus.on('cast', (value) => setCast(value)),
       bus.on('film', setFilm),
       bus.on('shop', (value) => {
@@ -527,6 +533,8 @@ export function useLifeRuntime({
     setPenalty,
     hoops,
     setHoops,
+    pitch,
+    setPitch,
     shop,
     setShop,
     shopState,

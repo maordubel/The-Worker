@@ -20,6 +20,7 @@
 import { BOTTLE, WAGE, decadeOf } from './prices'
 import type { Conversation } from './content/script'
 import type { Condition } from './world/types'
+import { PITCH_GIG, eraForChapter, streetMatch } from './football/door'
 
 /** the chapters, in the order the life plays them (mirrors `shirts.ts`) */
 const ORDER = [
@@ -64,7 +65,7 @@ export type Gig = {
    * neighbourhood pitch, five free throws at the schoolyard hoop. Same reasoning as the
    * two above — a real thing to be good or bad at is worth more than a number.
    */
-  opens?: 'toto' | 'coin' | 'penalty' | 'hoops'
+  opens?: 'toto' | 'coin' | 'penalty' | 'hoops' | 'pitch'
   /**
    * האם זו עבודה — or is it just a thing boys do.
    *
@@ -87,6 +88,15 @@ export type Gig = {
  * at eight, at twelve, at fifteen.
  */
 export const GIGS: readonly Gig[] = [
+  /**
+   * המגרש — "אני הפועל", and then you are on the grass (Maor, 7.9.2026).
+   *
+   * The row lives in `lib/life/football/door.ts` rather than here, so the whole entrance to
+   * the 3D engine is one import in one shared table instead of a block of football
+   * knowledge in the middle of the job list. `where: 'pitch'` puts its hotspot on the
+   * neighbourhood pitch automatically — `world/scenes.ts` builds them from `GIGS`.
+   */
+  PITCH_GIG,
   {
     id: 'bottles-round',
     where: 'street',
@@ -594,7 +604,14 @@ export function gigConversations(): Conversation[] {
             choices: [
               {
                 id: 'do',
-                text: gig.opens === 'coin' ? gig.askHe : `${gig.askHe} — עד ${pay} ₪`,
+                /**
+                 * An unpaid gig does not quote a wage. `coin` was the first exception and
+                 * `pitch` is the second, and the second one matters more: the choice text
+                 * IS the door — a boy says "אני הפועל" and the game takes him at his word.
+                 * Appending "— עד 0 ₪" to that would be the funniest possible way to break
+                 * a scene.
+                 */
+                text: gig.opens === 'coin' || gig.opens === 'pitch' ? gig.askHe : `${gig.askHe} — עד ${pay} ₪`,
                 /**
                  * The conversation agrees to the work; `ChoreScene` is the work. Nothing is
                  * paid here on purpose — the pay depends on how it went, and a gig that
@@ -615,7 +632,10 @@ export function gigConversations(): Conversation[] {
                           [{ e: 'penalty' as const, attempts: 5, perGoal: 0 }]
                         : gig.opens === 'hoops'
                           ? [{ e: 'hoops' as const, attempts: 5, perBasket: 0 }]
-                          : [{ e: 'minigame' as const, id: `chore:${gig.id}` }]),
+                          : gig.opens === 'pitch'
+                            ? // the era comes off the chapter, so 1986 imagines a 1986 pitch
+                              [{ e: 'pitch' as const, intent: streetMatch(eraForChapter(chapter)) }]
+                            : [{ e: 'minigame' as const, id: `chore:${gig.id}` }]),
                 ],
               },
               { id: 'later', text: 'לא עכשיו.', then: [] },

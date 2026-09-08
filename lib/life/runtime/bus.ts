@@ -271,6 +271,39 @@ export type LifeBusEvents = {
   penalty: { attempts: number; perGoal: number } | null
 
   /**
+   * המגרש — a 3D football reconstruction, opened from inside the story.
+   *
+   * One channel for the whole engine, the same way `penalty` and `hoops` are one channel
+   * each: the runtime says WHICH match and WHICH window, and `PitchCard` decides what that
+   * looks like. Everything here is either an identity or a fact the archive already holds —
+   * there is no scoreline in this payload that the caller invented.
+   *
+   * `showScore: false` is the honest state and it is not a placeholder: a reconstruction of
+   * a day the archive does not hold a score for prints a dash on the board rather than a
+   * number, because a scoreboard reading an unsourced score is a fabricated fact in a nice
+   * typeface (CLAUDE.md rule 60).
+   *
+   * `awayYellow` is the one approved use of yellow in this product — it marks the OPPONENT,
+   * and only the opponent (Maor, 7.9.2026). `lib/brand/yellowExemptions.ts` names the
+   * surface and `awayMarkColour` refuses to hand the colour to the player's own side.
+   */
+  pitch: {
+    matchId: string
+    windowId: string
+    mode: 'documentary' | 'replay'
+    /** the two abbreviations the board prints — never a claim, just names */
+    homeHe: string
+    awayHe: string
+    /** false when the archive does not hold a score for this moment; the board shows a dash */
+    showScore?: boolean
+    score?: { home: number; away: number }
+    startMinute?: number
+    era?: string
+    awayYellow?: boolean
+    quality?: 'low' | 'medium' | 'high'
+  } | null
+
+  /**
    * תחרות חיובים — five free throws at the schoolyard hoop, from the painted-on line,
    * played in three dimensions rather than painted (Maor, 6.9.2026).
    */
