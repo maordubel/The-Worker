@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+import { CITY_DEPTH, type CityDepth } from '../generated/cityDepth'
+
 /**
  * לעמוד בתוך התמונה — הפנורמות שמאור שלח ב-7.9.2026, כמו שהן.
  *
@@ -179,7 +181,31 @@ export const DISC_FACTOR = 3.2
  * מקבל אותו כמו שהוא — חדר הוא לא רחוב.
  */
 export function walkLimit(spec: PanoSpec): number {
-  return spec.walk ?? Math.min(POCKET_METRES, (nearEdge(spec) * DISC_FACTOR) / 2.5)
+  if (spec.walk !== undefined) return spec.walk
+  const floor = Math.min(POCKET_METRES, (nearEdge(spec) * DISC_FACTOR) / 2.5)
+  const depth = CITY_DEPTH[spec.key]
+  if (!depth) return floor
+  // **הקיר הקרוב ביותר הוא הגבול, ובניכוי מטר.** קו המגע נמדד שמרנית — הוא נעצר בכל דבר
+  // שעומד על הכביש — ולכן מותר לו להיות קרוב מדי; מה שאסור הוא לאפשר ללכת לתוכו. הגבול
+  // נגזר מאותה מדידה בדיוק, ולכן השתיים לא יכולות לסתור זו את זו.
+  const nearest = Math.min(...depth.metres)
+  return Math.max(1, Math.min(floor, nearest - 1.2))
+}
+
+/**
+ * שדה הראייה האנכי הגדול ביותר שהתמונה יכולה למלא, במעלות.
+ *
+ * לפנורמה גלילית יש כיסוי אנכי סופי, והוא נגזר מקו האופק: מהאופק כלפי מעלה היא מגיעה עד
+ * `atan(horizon / pxPerRad)`, וכלפי מטה עד `atan((1 − horizon) / pxPerRad)`. מצלמה שפותחת
+ * יותר מזה מראה **חור** מעל התמונה או מתחתיה, וזה בדיוק מה שנראה מתחת ליציע בבלומפילד —
+ * חלל מקורה שבו קו האופק נמוך, כלומר מעט מאוד תמונה מעל העין.
+ *
+ * רק הצד העליון נספר. מתחת לקו האופק אין חור לעולם, כי שם הרצפה — ההיטל ההפוך והמרצף
+ * המיושר — מכסה עד לרגליים ומעבר לזה. מה שמוגבל הוא כמה שמיים ובניין יש מעל.
+ */
+export function maxFovDeg(spec: PanoSpec): number {
+  const pxPerRad = spec.aspect / ((spec.hFovDeg * Math.PI) / 180)
+  return (2 * Math.atan(spec.horizon / pxPerRad) * 180) / Math.PI
 }
 
 /** המרחק שבו הקצה התחתון של הפנורמה פוגש את הכביש — הגבול בין הדיסקה לגליל */
@@ -237,6 +263,56 @@ void main() {
 }
 `
 
+/**
+ * הקיר בעל הצורה — מה שהופך "התמונה מתקרבת" ל"אני הולך".
+ *
+ * גליל ברדיוס אחד אומר שכל מה שנראה נמצא באותו מרחק, ולכן כשהמצלמה זזה הכול זז באותו קצב.
+ * כאן כל רצועת אזימוט יושבת ב**מרחק שלה**, כפי שנמדד מקו המגע שלה עם הרצפה
+ * (`scripts/life/depth-profile-2026-09-07.py`). חזית בשמונה מטר חולפת מהר, מגדל במאה כמעט
+ * לא זז, והשדרה שנמשכת קדימה נשארת פתוחה — וזה בדיוק מה שהעין קוראת כהליכה.
+ *
+ * הרצועה נבנית מלמעלה (`py = 0`) עד קו המגע שלה, כי מתחתיו הרצפה כבר מטופלת בהיטל ההפוך
+ * ולא צריך קיר. הגובה נגזר מאותה גיאומטריה: `y = r · tan ε`, ו-`tan ε` הוא בדיוק מה
+ * שהשורה בתמונה מודדת.
+ */
+function shapedWall(depth: CityDepth, spec: PanoSpec, hFov: number): THREE.BufferGeometry {
+  const n = depth.metres.length
+  const rows = 24
+  const pxPerRad = spec.aspect / hFov
+  const from = (depth.fromDeg * Math.PI) / 180
+  const to = (depth.toDeg * Math.PI) / 180
+
+  const position: number[] = []
+  const uv: number[] = []
+  const index: number[] = []
+
+  for (let i = 0; i < n; i += 1) {
+    const theta = from + ((to - from) * i) / (n - 1)
+    const r = depth.metres[i] ?? depth.far
+    // קו המגע של הרצועה הזאת: מתחתיו זו כבר רצפה, ולשם הקיר לא יורד
+    const contact = Math.min(0.999, spec.horizon + (pxPerRad * spec.eye) / Math.max(r, 0.5))
+    for (let j = 0; j < rows; j += 1) {
+      const py = (contact * j) / (rows - 1)
+      const y = r * ((spec.horizon - py) / pxPerRad)
+      position.push(r * Math.sin(theta), y, -r * Math.cos(theta))
+      uv.push(0.5 + theta / hFov, 1 - py)
+    }
+  }
+  for (let i = 0; i < n - 1; i += 1) {
+    for (let j = 0; j < rows - 1; j += 1) {
+      const a = i * rows + j
+      const b = a + rows
+      index.push(a, b, a + 1, b, b + 1, a + 1)
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3))
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2))
+  geometry.setIndex(index)
+  return geometry
+}
+
 export type Pano = {
   group: THREE.Group
   /** גובה העין — המצלמה יושבת ב-y=0 של הקבוצה, הכביש ב-`-eye` */
@@ -272,6 +348,8 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   const worldHeight = spec.radius / pxPerRad   // גובה הגליל כולו
   const centreY = worldHeight * (spec.horizon - 0.5)
 
+  const depth = CITY_DEPTH[spec.key]
+
   // `CylinderGeometry` מודד את הזווית מ-`+z`, כלומר מאחורי המצלמה; `π` מסובב אותו לקדימה.
   const shell = new THREE.CylinderGeometry(
     spec.radius, spec.radius, worldHeight, 160, 1, true, Math.PI - hFov / 2, hFov,
@@ -283,14 +361,38 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   uv.needsUpdate = true
 
   const wall = new THREE.Mesh(
-    shell,
-    new THREE.MeshBasicMaterial({ map, side: THREE.BackSide, toneMapped: false, depthWrite: true }),
+    depth ? shapedWall(depth, spec, hFov) : shell,
+    new THREE.MeshBasicMaterial({
+      map,
+      // הגליל נצפה מבפנים; הקיר בנוי כבר עם הפאה הנכונה, אבל שתי הפאות עולות כלום ומצילות
+      // מבאג ניווט שקשה לראות אותו בצילום סטטי.
+      side: depth ? THREE.DoubleSide : THREE.BackSide,
+      toneMapped: false,
+      depthWrite: true,
+    }),
   )
-  // העולם נצבע לפני מי שעומד בו. בלי זה הרצפה — שהיא שקופה בגלל המסירה בין תחנות — נסרקת
-  // אחרי הספרייט של פוגי וצובעת מעליו, והוא נעלם מהצוואר ומטה.
   wall.renderOrder = -3
-  wall.position.copy(origin).add(new THREE.Vector3(0, centreY, 0))
+  // הגליל נבנה סביב מרכזו ולכן צריך הסטה; הקיר בעל הצורה נבנה כבר בגבהים המוחלטים שלו,
+  // ולהוסיף לו את אותה הסטה זה להרים את כל הרחוב חמישה מטר באוויר. זה בדיוק מה שקרה.
+  wall.position.copy(origin)
+  if (!depth) wall.position.add(new THREE.Vector3(0, centreY, 0))
   group.add(wall)
+
+  let backdrop: THREE.Mesh | null = null
+  // **רשת ביטחון מאחורי הקיר.** לקיר בעל צורה יש מצוקים — עמוד קרוב ומאחוריו רחוב פתוח —
+  // וברגע שהמצלמה זזה נפתחים ביניהם חריצים. בלי משהו מאחור החריץ שחור, וזה נראה כתקלה.
+  // הגליל המקורי נשאר, ברדיוס הרחוק, ומצויר ראשון: אותה תמונה בדיוק, רק במרחק. חריץ מראה
+  // את הרחוב מרחוק במקום חור.
+  if (depth) {
+    backdrop = new THREE.Mesh(
+      shell.clone(),
+      new THREE.MeshBasicMaterial({ map, side: THREE.BackSide, toneMapped: false, depthWrite: true }),
+    )
+    backdrop.scale.setScalar(depth.far / spec.radius)
+    backdrop.position.copy(origin).add(new THREE.Vector3(0, (centreY * depth.far) / spec.radius, 0))
+    backdrop.renderOrder = -4
+    group.add(backdrop)
+  }
 
   // הרצפה מקבלת עותק **בלי מיפמאפים**, וזה לא פרט טכני: במבט משופע ה-GPU רואה שהטקסטורה
   // נדחסת מאוד לאורך הקרן, בוחר את רמת המיפמאפ הקטנה ביותר — ממוצע כל הפנורמה — וצובע את
@@ -381,6 +483,8 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
       ;(wall.material as THREE.Material).dispose()
       ground.geometry.dispose()
       ;(ground.material as THREE.Material).dispose()
+      backdrop?.geometry.dispose()
+      if (backdrop) (backdrop.material as THREE.Material).dispose()
       map.dispose()
       groundMap.dispose()
       tileMap?.dispose()

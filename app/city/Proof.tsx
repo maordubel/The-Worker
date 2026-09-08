@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import { ControlDeck } from '@/components/life/ControlDeck'
 import { ACTOR_BACK, actorPose, loadActor } from '@/lib/life/city/actor'
 import { CITY_COPY } from '@/lib/life/city/copy'
-import { buildPano, PANOS, PLACE_ORDER, walkLimit } from '@/lib/life/city/pano'
+import { buildPano, maxFovDeg, PANOS, PLACE_ORDER, walkLimit } from '@/lib/life/city/pano'
 import { buildStreet, STREETS } from '@/lib/life/city/street'
 import { actorBillboard, buildSlab, SLABS } from '@/lib/life/city/slab'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
@@ -70,7 +70,13 @@ export function Proof({ shot }: { shot: Shot }) {
   useEffect(() => {
     const box = boxRef.current
     if (!box) return
-    const three = mountThree(box, shot.fov)
+    // שדה הראייה נחתך למה שהתמונה באמת מכסה. מצלמה שפותחת יותר מהכיסוי האנכי של הפנורמה
+    // מראה חור מעל או מתחת, וזה מה שהשחיר את המסך מתחת ליציע בבלומפילד.
+    const cap = PANOS[shot.place] ? maxFovDeg(PANOS[shot.place] as (typeof PANOS)[string]) : 180
+    // מישור החיתוך הרחוק: ברירת המחדל של `mountThree` היא מאה מטר, וזה היה נכון לשני
+    // מיני־המשחקים שהיא נכתבה בשבילם. כאן הקיר בעל הצורה מציב רצועות "פתוח" ב-140 מטר,
+    // והן נחתכו לגמרי — מה שנראה על המסך כלוחות שחורים ענקיים מתחת ליציע ובאוסישקין.
+    const three = mountThree(box, Math.min(shot.fov, cap * 0.96), 600)
     three.scene.background = new THREE.Color(LIFE_PALETTE.night)
     const loader = new THREE.TextureLoader()
 
@@ -111,9 +117,14 @@ export function Proof({ shot }: { shot: Shot }) {
       // התצלומים, לא הילד המצויר. מאור, 7.9.2026: *"תשתמש בהכל ריאלי."*
       frames = loadActor(loader)
       pugi = actorBillboard(frames[ACTOR_BACK] as THREE.Texture, 1.68)
+      // הרצפה שקופה (בגלל המסירה בין תחנות), ולכן היא נצבעת במעבר השקוף — ובלי סדר מפורש
+      // היא נצבעה מעל פוגי וחתכה אותו מהמותניים ומטה. הוא תמיד שלושה מטר וחצי לפנים ואף
+      // קיר לא קרוב יותר, אז לצבוע אותו אחרון זה גם הפשוט וגם הנכון.
+      pugi.renderOrder = 10
       three.scene.add(pugi)
       // הצל הוא מה שמדביק אותו לכביש. בלעדיו הוא תמונה שהודבקה על רקע.
       shadow = shadowDecal(0.34)
+      shadow.renderOrder = 9
       shadow.scale.set(0.92, 0.44, 1)
       three.scene.add(shadow)
     }

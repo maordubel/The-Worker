@@ -4,7 +4,8 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { isYellow } from '@/lib/isYellow'
-import { DISC_FACTOR, nearEdge, PANOS, PLACE_ORDER, walkLimit } from '@/lib/life/city/pano'
+import { CITY_DEPTH } from '@/lib/life/generated/cityDepth'
+import { DISC_FACTOR, maxFovDeg, nearEdge, PANOS, PLACE_ORDER, walkLimit } from '@/lib/life/city/pano'
 import { STREETS } from '@/lib/life/city/street'
 import { SLABS } from '@/lib/life/city/slab'
 
@@ -109,6 +110,36 @@ describe('העיר — הפנורמות מדויקות מול מה שנשמר', 
         expect(stop.at, `${key} stops are out of order`).toBeGreaterThan(previous)
         previous = stop.at
       }
+    }
+  })
+
+  it('נושאת פרופיל עומק לכל מקום, וסנכרן מול המניפסט', () => {
+    // הפרופיל הוא קובץ נוצר, והוא נכתב יחד עם המניפסט. אם מישהו יערוך אחד מהם ביד הם
+    // ייפרדו בשקט — והרחוב ייראה נכון בעוד שהקירות יעמדו במקום הלא נכון.
+    for (const key of Object.keys(PANOS)) {
+      const depth = CITY_DEPTH[key]
+      expect(depth, `${key} has no measured depth`).toBeDefined()
+      const row = manifest.panoramas?.[key]?.depth
+      expect(depth?.metres.length, `${key} depth length drifted from the manifest`).toBe(row?.metres.length)
+      expect(depth?.far, `${key} far distance drifted`).toBe(row?.far)
+    }
+  })
+
+  it('לא נותנת ללכת לתוך קיר שנמדד', () => {
+    // קו המגע נמדד שמרנית: הוא נעצר על כל דבר שעומד על הכביש, ולכן מותר לו להיות קרוב
+    // מדי. מה שאסור הוא שההליכה תיכנס לתוכו — ולכן הגבול נגזר מאותה מדידה בעצמה.
+    for (const [key, spec] of Object.entries(PANOS)) {
+      const nearest = Math.min(...(CITY_DEPTH[key]?.metres ?? [Infinity]))
+      expect(walkLimit(spec), `${key} lets the player walk into its nearest wall`).toBeLessThan(nearest)
+    }
+  })
+
+  it('לא פותחת מצלמה רחבה ממה שהתמונה מכסה', () => {
+    // מעל הכיסוי האנכי של הפנורמה אין תמונה, ומה שנראה שם הוא חור. מתחת לאופק אין בעיה
+    // לעולם, כי הרצפה מכסה עד לרגליים — ולכן רק הצד העליון נספר.
+    for (const [key, spec] of Object.entries(PANOS)) {
+      expect(maxFovDeg(spec), `${key} covers almost nothing above the horizon`).toBeGreaterThan(24)
+      expect(maxFovDeg(spec), `${key} claims more coverage than a picture can have`).toBeLessThan(150)
     }
   })
 
