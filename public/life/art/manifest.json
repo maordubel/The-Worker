@@ -1504,6 +1504,42 @@
    "yellowLeft": 0,
    "source": "maor-2026-09-05-street",
    "whatHe": "נער על סקייטבורד"
+  },
+  "michel99": {
+   "w": 330,
+   "h": 934,
+   "metres": 1.75,
+   "bytes": 57126,
+   "whatHe": "מישל, עומד — 1999",
+   "yellowLeft": 0,
+   "source": "maor-2026-09-08-green-screen"
+  },
+  "michel99-3q": {
+   "w": 307,
+   "h": 914,
+   "metres": 1.75,
+   "bytes": 54669,
+   "whatHe": "מישל, שלושה־רבעים ימינה — 1999",
+   "yellowLeft": 0,
+   "source": "maor-2026-09-08-green-screen"
+  },
+  "barryToday": {
+   "w": 298,
+   "h": 951,
+   "metres": 1.74,
+   "bytes": 54801,
+   "whatHe": "בארי, עומד — היום",
+   "yellowLeft": 0,
+   "source": "maor-2026-09-08-green-screen"
+  },
+  "barryToday-3q": {
+   "w": 243,
+   "h": 855,
+   "metres": 1.74,
+   "bytes": 37663,
+   "whatHe": "בארי, שלושה־רבעים ימינה — היום",
+   "yellowLeft": 0,
+   "source": "maor-2026-09-08-green-screen"
   }
  },
  "props": {

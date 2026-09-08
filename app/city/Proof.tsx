@@ -5,6 +5,7 @@ import * as THREE from 'three'
 
 import { ControlDeck } from '@/components/life/ControlDeck'
 import { ACTOR_BACK, actorPose, loadActor } from '@/lib/life/city/actor'
+import { CITY_CAST } from '@/lib/life/generated/cityCast'
 import { CITY_COPY } from '@/lib/life/city/copy'
 import { buildPano, maxFovDeg, PANOS, PLACE_ORDER, walkLimit } from '@/lib/life/city/pano'
 import { buildStreet, STREETS } from '@/lib/life/city/street'
@@ -33,6 +34,10 @@ export type Shot = {
   hfov: number
   /** רחוב שלם במקום מקום אחד — שרשרת תחנות, הליכה בלי גבול */
   street: string
+  /** דמות להעמיד ברחוב, לפי מפתח מ-`CITY_CAST` */
+  cast: string
+  /** כמה מטרים לפנים היא עומדת */
+  castAt: number
 }
 
 const RAD = Math.PI / 180
@@ -127,6 +132,22 @@ export function Proof({ shot }: { shot: Shot }) {
       shadow.renderOrder = 9
       shadow.scale.set(0.92, 0.44, 1)
       three.scene.add(shadow)
+    }
+
+    // דמות מהצוות, בגובה האמיתי שלה במטרים. אין כאן שום מספר לכוונן: הגובה נמדד בקליטה,
+    // והמנוע גוזר ממנו את הגודל על המסך לפי המרחק. ככה כל אדם עומד ברחוב ולא מודבק עליו.
+    const member = CITY_CAST[shot.cast]
+    if (member) {
+      const map = loader.load(`/life/art/${shot.cast}.png`)
+      const figure = actorBillboard(map, member.metres)
+      figure.position.set(-0.9, -eye + member.metres / 2, -shot.castAt)
+      figure.renderOrder = 8
+      three.scene.add(figure)
+      const cast = shadowDecal(0.36)
+      cast.renderOrder = 7
+      cast.scale.set(1, 0.42, 1)
+      cast.position.set(-0.9, -eye + 0.005, -shot.castAt + 0.02)
+      three.scene.add(cast)
     }
 
     let raf = 0

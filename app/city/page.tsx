@@ -34,6 +34,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Q> 
     fov: num(q, 'fov', 58),
     hfov: num(q, 'hfov', 0),
     street: (Array.isArray(q.street) ? q.street[0] : q.street) ?? '',
+    cast: (Array.isArray(q.cast) ? q.cast[0] : q.cast) ?? '',
+    castAt: num(q, 'castAt', 5),
     actor: q.actor !== '0',
     deck: q.deck !== '0',
   }
