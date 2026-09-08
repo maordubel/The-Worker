@@ -42,11 +42,11 @@ JOBS = {
     'panoBloomFacade': dict(hfov=150, horizon=0.575, eye=1.7, r=(3.8, 6.8), half=15),
     # חמש תחנות ההליכה לאורך החזית. תצלומים רגילים, לא פנורמות — ולכן `proj='rect'`.
     # החלון בכולן הוא הכביש ישר קדימה, בין אבן השפה למעקות: אין בו אנשים ואין בו עמודים.
-    'panoBloomWalk1': dict(hfov=96, horizon=0.5964, eye=1.7, r=(5.4, 8.6), half=13, proj='rect'),
-    'panoBloomWalk2': dict(hfov=96, horizon=0.5784, eye=1.7, r=(5.1, 8.3), half=13, proj='rect'),
-    'panoBloomWalk3': dict(hfov=96, horizon=0.5918, eye=1.7, r=(5.3, 8.5), half=13, proj='rect'),
-    'panoBloomWalk4': dict(hfov=96, horizon=0.6404, eye=1.7, r=(6.2, 9.4), half=13, proj='rect'),
-    'panoBloomWalk5': dict(hfov=96, horizon=0.5914, eye=1.7, r=(5.3, 8.5), half=13, proj='rect'),
+    'panoBloomWalk1': dict(hfov=96, horizon=0.5964, eye=1.7, r=(4.8, 7.2), half=13, proj='rect'),
+    'panoBloomWalk2': dict(hfov=96, horizon=0.6090, eye=1.7, r=(4.7, 7.1), half=13, proj='rect'),
+    'panoBloomWalk3': dict(hfov=96, horizon=0.5918, eye=1.7, r=(4.8, 7.2), half=13, proj='rect'),
+    'panoBloomWalk4': dict(hfov=96, horizon=0.6404, eye=1.7, r=(5.4, 7.8), half=13, proj='rect'),
+    'panoBloomWalk5': dict(hfov=96, horizon=0.5914, eye=1.7, r=(4.8, 7.2), half=13, proj='rect'),
     # החדרים. גובה העין נמדד מהרצפה עצמה: המרצפות, כשהן מיושרות, חייבות לצאת ריבועיות,
     # וזה קורה סביב 1.1 מטר — מצלמה נמוכה, כמו שהחדרים האלה באמת צולמו.
     'panoRoomBed':     dict(hfov=140, horizon=0.500, eye=1.10, r=(2.6, 4.2), half=16),
@@ -56,7 +56,11 @@ JOBS = {
 }
 
 # 96 פיקסלים למטר: מעל זה רק מגדילים קובץ, מתחת לזה רואים את המרצף מטשטש מתחת לנעל
-PX_PER_M = 96
+# **כמה פיקסלים למטר.** תשעים ושש הספיקו כשהמצלמה מפולסת והרצפה הקרובה תופסת רצועה
+# דקה בתחתית; ברגע שהמצלמה מוטה מטה, המטר שמתחת לרגליים נמתח על שליש מסך והמרצף יוצא
+# מרוח. מאה תשעים הם בערך מה שהתמונה באמת מחזיקה בקצה הקרוב שלה, ולא יותר — להגדיל
+# מעבר לזה זה להמציא חדות שאין.
+PX_PER_M = 190
 
 
 def rectify(key: str, spec: dict) -> tuple[Image.Image, tuple[float, float]]:

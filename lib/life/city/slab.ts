@@ -191,7 +191,15 @@ export function buildSlab(spec: SlabSpec, loader: THREE.TextureLoader): Slab {
 export function actorBillboard(map: THREE.Texture, metres: number): THREE.Sprite {
   prepare(map)
   const sprite = new THREE.Sprite(
-    new THREE.SpriteMaterial({ map, transparent: true, toneMapped: false, depthWrite: false }),
+    new THREE.SpriteMaterial({
+      map, transparent: true, toneMapped: false, depthWrite: false,
+      // **אף פעם לא נחתך על ידי התמונה.** הקיר של פנורמה הוא לא בטון — הוא ניחוש עומק
+      // שנקרא מקו המגע, ומספיק שהניחוש בזווית אחת יגיד שמונה מטר כדי שאדם שעומד
+      // בארבעים ייעלם. ואז, כשהולכים, הזווית משתנה והוא חוזר. זה מה שנראה על המסך
+      // כדמויות שבאות ונעלמות, וזה לא באג בהצבה — זה בדיקת עומק מול משטח מדומה.
+      // הסדר בין הדמויות עצמן נשמר ב-`renderOrder` לפי המרחק.
+      depthTest: false,
+    }),
   )
   // `loader.load` מחזיר טקסטורה **ריקה** וממלא אותה כשהקובץ מגיע. לקרוא את `image.width`
   // מיד פירושו יחס 1:1 — וילד בגובה מטר ארבעים יוצא ברוחב מטר ארבעים, עם תסרוקת שנראית

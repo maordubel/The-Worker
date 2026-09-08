@@ -32,8 +32,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Q> 
     x: num(q, 'x', 0),
     z: num(q, 'z', 0),
     yaw: num(q, 'yaw', 0),
-    pitch: num(q, 'pitch', 0),
-    fov: num(q, 'fov', 58),
+    // ברירת מחדל: מבט מעט למטה. גובה העין נמצא בשני שלישים העליונים של התצלום, ולכן
+    // מצלמה מפולסת ממלאת שליש מסך בתחתית היציע — החלק היחיד בתמונה שאין בו כלום.
+    pitch: num(q, 'pitch', -7),
+    fov: num(q, 'fov', 68),
     hfov: num(q, 'hfov', 0),
     street: (Array.isArray(q.street) ? q.street[0] : q.street) ?? '',
     mission: (Array.isArray(q.mission) ? q.mission[0] : q.mission) ?? '',

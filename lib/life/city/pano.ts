@@ -103,6 +103,7 @@ export type PanoSpec = {
  * מתחת ליציע — ואז המקומות האחרים בעיר.
  */
 export const PLACE_ORDER = [
+  'panoBloom24',
   'panoJaffa',
   'panoBloomWalk1',
   'panoBloomWalk2',
@@ -190,31 +191,44 @@ export const PANOS: Record<string, PanoSpec> = {
     nameHe: 'בלומפילד, תחנה 1 — מרחוק',
     key: 'panoBloomWalk1', proj: 'rect', aspect: 1923 / 817, horizon: 0.5964, hFovDeg: 96, eye: 1.7, bearingDeg: -20.9,
     radius: 24, nearRgb: [190, 157, 129],
-    tile: { key: 'panoBloomWalk1--tile', wide: 2.34, deep: 3.2 },
+    tile: { key: 'panoBloomWalk1--tile', wide: 2.08, deep: 2.4 },
   },
   panoBloomWalk2: {
     nameHe: 'בלומפילד, תחנה 2',
     key: 'panoBloomWalk2', proj: 'rect', aspect: 1923 / 817, horizon: 0.609, hFovDeg: 96, eye: 1.7, bearingDeg: -19.1,
     radius: 24, nearRgb: [195, 154, 123],
-    tile: { key: 'panoBloomWalk2--tile', wide: 2.21, deep: 3.2 },
+    tile: { key: 'panoBloomWalk2--tile', wide: 2.04, deep: 2.4 },
   },
   panoBloomWalk3: {
     nameHe: 'בלומפילד, תחנה 3 — באמצע',
     key: 'panoBloomWalk3', proj: 'rect', aspect: 1925 / 817, horizon: 0.5918, hFovDeg: 96, eye: 1.7, bearingDeg: -10.3,
     radius: 24, nearRgb: [181, 140, 109],
-    tile: { key: 'panoBloomWalk3--tile', wide: 2.3, deep: 3.2 },
+    tile: { key: 'panoBloomWalk3--tile', wide: 2.08, deep: 2.4 },
   },
   panoBloomWalk4: {
     nameHe: 'בלומפילד, תחנה 4 — מתחת ליציע',
     key: 'panoBloomWalk4', proj: 'rect', aspect: 1925 / 817, horizon: 0.6404, hFovDeg: 96, eye: 1.7, bearingDeg: -12.4,
     radius: 24, nearRgb: [187, 148, 118],
-    tile: { key: 'panoBloomWalk4--tile', wide: 2.69, deep: 3.2 },
+    tile: { key: 'panoBloomWalk4--tile', wide: 2.34, deep: 2.4 },
   },
   panoBloomWalk5: {
     nameHe: 'בלומפילד, תחנה 5 — ליד העמוד',
     key: 'panoBloomWalk5', proj: 'rect', aspect: 1921 / 819, horizon: 0.5914, hFovDeg: 96, eye: 1.7, bearingDeg: -7.9,
     radius: 24, nearRgb: [185, 148, 120],
-    tile: { key: 'panoBloomWalk5--tile', wide: 2.3, deep: 3.2 },
+    tile: { key: 'panoBloomWalk5--tile', wide: 2.08, deep: 2.4 },
+  },
+  // **התחנה הראשונה שהיא באמת מקום.** ארבע תמונות ריבועיות של אותה נקודה — קדימה, ימינה,
+  // אחורה, שמאלה — נתפרו לגליל אחד שלם ב-`scripts/life/stitch-station-2026-09-08.py`.
+  // לגליל אין קצה: אפשר להסתובב בו סביב הציר בלי לפגוש גבול, כי הפיקסל שאחרי המעלה
+  // ה-359 הוא המעלה הראשונה. זה מה שפותר את הלוח החום שנפתח בצד המסך בתצלום בודד.
+  //
+  // המרצף כאן הוא **צלחת הרצפה עצמה** — מבט מלמעלה בקנה מידה ידוע של ארבעה על ארבעה
+  // מטר. אין כאן יישור ואין מתיחה: מה שמתחת לרגליים צולם, בפעם הראשונה.
+  panoBloom24: {
+    nameHe: 'בלומפילד, 24 מטר — 360°',
+    key: 'panoBloom24', aspect: 4096 / 1099, horizon: 0.6, hFovDeg: 360, eye: 1.7,
+    radius: 20, nearRgb: [183, 163, 152],
+    tile: { key: 'panoBloom24--tile', wide: 4, deep: 4 },
   },
   panoJaffa: {
     nameHe: 'שדרות ירושלים, יפו',
@@ -292,6 +306,8 @@ export function maxFovDeg(spec: PanoSpec): number {
  * כלום: המצלמה נעצרת חצי מעלה לפני הקצה, כדי שלא ייפתח פס ריק בצד המסך.
  */
 export function maxYawDeg(spec: PanoSpec, cameraFovDeg: number, aspect: number): number {
+  // גליל שלם אין לו קצה: הפיקסל שאחרי המעלה ה-359 הוא המעלה הראשונה, ולכן אין מה לחסום.
+  if (spec.hFovDeg >= 359) return 180
   const halfCam = (Math.atan(Math.tan((cameraFovDeg * Math.PI) / 360) * aspect) * 180) / Math.PI
   return Math.max(0, spec.hFovDeg / 2 - halfCam - 0.5)
 }
@@ -349,12 +365,16 @@ void main() {
   if (rect > 0.5 && abs(theta) > hFov * 0.5) u = -1.0;
 
   // הרחוק: מה שהפנורמה באמת צילמה — סימני כביש, אבני שפה, כתמים. אין תחליף לזה.
-  vec3 far = (u < 0.0 || u > 1.0) ? nearColour : texture2D(map, vec2(u, 1.0 - min(py, 0.998))).rgb;
+  // מעבר לקצה הפריים אין תמונה — אבל **יש מרצף**, והוא רצפה אמיתית באותו קנה מידה.
+  // לצבוע שם צבע שטוח פירושו לוח חום ריק על חצי מסך, וזה מה שנראה כשמסתובבים.
+  bool outside = u < 0.0 || u > 1.0;
+  vec3 shot = outside ? vec3(0.0) : texture2D(map, vec2(u, 1.0 - min(py, 0.998))).rgb;
 
   // הקרוב: המרצף המיושר, מרוצף במרחב העולם ולכן בפרספקטיבה נכונה בכל מרחק. זה מה שהחליף
   // שלושה ניסיונות שנכשלו — מריחת השורה האחרונה, קיפול הרצועה, וטשטוש לרוחב הזווית —
   // וכולם נכשלו מאותה סיבה: בזווית משיקה פשוט אין מספיק פיקסלים בתמונה.
   vec3 near = hasTile > 0.5 ? texture2D(tile, vWorld.xz / tileSize).rgb : nearColour;
+  vec3 far = outside ? near : shot;
 
   // **ומה שקורה בקצה השני.** ככל שמתרחקים, השורה שההיטל קורא מתקרבת לקו האופק, ובשני
   // אחוזים האחרונים לפניו כבר אין בתמונה מידע: כל הרחוק כולו דחוס שם לכמה שורות. לצייר
@@ -476,8 +496,14 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   // המעטפת. לפנורמה גלילית זה גליל; לתצלום זה **מסך שטוח** — כי בדיוק כך התמונה נוצרה,
   // וכל דבר אחר יעקם קווים שהיו ישרים. `CylinderGeometry` מודד את הזווית מ-`+z`, כלומר
   // מאחורי המצלמה; `π` מסובב אותו לקדימה.
+  // **המסך גדול מהתמונה.** תצלום נגמר בקצה הפריים, ומצלמה שזזה חמישה מטר קדימה רואה
+  // פחות ממנו בזווית — ואז נפתח בצד המסך שטח ריק. המישור נבנה רחב וגבוה פי אחד וחצי,
+  // וה-UV שלו חורג מהטווח: three עוצר בקצה הטקסטורה (`ClampToEdge`), ולכן מעבר לפריים
+  // נמשך הפיקסל האחרון. זאת בדיוק ההחלטה שכבר התקבלה לרצועה התחתונה של כל רקע במשחק:
+  // מריחה של הקצה היא לא המצאה, וחור שחור כן נראה כתקלה.
+  const OVER = 1.5
   const shell = rect
-    ? new THREE.PlaneGeometry(worldHeight * spec.aspect, worldHeight, 1, 1)
+    ? new THREE.PlaneGeometry(worldHeight * spec.aspect * OVER, worldHeight * OVER, 1, 1)
     : new THREE.CylinderGeometry(
       spec.radius, spec.radius, worldHeight, 160, 1, true, Math.PI - hFov / 2, hFov,
     )
@@ -491,15 +517,27 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
     // המישור נבנה סביב הראשית ופונה אל `+z`; המצלמה מסתכלת אל `-z`, ולכן הוא נדחף
     // לשם ונשאר פונה אליה. `u` כאן כבר רץ שמאלה-לימינה כמו בתמונה, בלי היפוך.
     shell.translate(0, 0, -spec.radius)
+    const uv = shell.getAttribute('uv') as THREE.BufferAttribute
+    const spill = (OVER - 1) / 2
+    for (let i = 0; i < uv.count; i += 1) {
+      uv.setXY(i, uv.getX(i) * OVER - spill, uv.getY(i) * OVER - spill)
+    }
+    uv.needsUpdate = true
   }
 
+  // **תצלום קרוב לא צריך קיר בעל צורה.** הקיר נבנה בשביל פנורמה בודדת שממנה מתרחקים
+  // עשרה מטר: שם הוא ההבדל בין "התמונה מתקרבת" ל"אני הולך". ברחוב שיש בו תחנה כל אחת
+  // עשרה מטר, הפרלקסה מגיעה מהתחנות עצמן — והקיר רק מזיק: כל מצוק בין רצועה בשמונה מטר
+  // לרצועה פתוחה נמתח למריחה חלקה ברגע שזזים שני מטר, והוא חוסם דמויות שעומדות מאחוריו
+  // כאילו הוא בטון. מסך שטוח לא עושה אף אחד מהשניים.
+  const shaped = depth && spec.proj !== 'rect' ? shapedWall(depth, spec, hFov) : null
   const wall = new THREE.Mesh(
-    depth ? shapedWall(depth, spec, hFov) : shell,
+    shaped ?? shell,
     new THREE.MeshBasicMaterial({
       map,
       // הגליל נצפה מבפנים; הקיר בנוי כבר עם הפאה הנכונה, אבל שתי הפאות עולות כלום ומצילות
       // מבאג ניווט שקשה לראות אותו בצילום סטטי.
-      side: depth || rect ? THREE.DoubleSide : THREE.BackSide,
+      side: shaped || rect ? THREE.DoubleSide : THREE.BackSide,
       toneMapped: false,
       depthWrite: true,
     }),
@@ -510,7 +548,7 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   wall.position.copy(origin)
   // הסיבוב הוא סביב נקודת הצילום עצמה, ולכן הוא מיישר את הרחוב בלי להזיז את התחנה
   wall.rotation.y = -bearing
-  if (!depth) wall.position.add(new THREE.Vector3(0, centreY, 0))
+  if (!shaped) wall.position.add(new THREE.Vector3(0, centreY, 0))
   group.add(wall)
 
   let backdrop: THREE.Mesh | null = null
@@ -518,15 +556,16 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   // וברגע שהמצלמה זזה נפתחים ביניהם חריצים. בלי משהו מאחור החריץ שחור, וזה נראה כתקלה.
   // הגליל המקורי נשאר, ברדיוס הרחוק, ומצויר ראשון: אותה תמונה בדיוק, רק במרחק. חריץ מראה
   // את הרחוב מרחוק במקום חור.
-  if (depth) {
+  if (shaped) {
     backdrop = new THREE.Mesh(
       shell.clone(),
       new THREE.MeshBasicMaterial({
         map, side: rect ? THREE.DoubleSide : THREE.BackSide, toneMapped: false, depthWrite: true,
       }),
     )
-    backdrop.scale.setScalar(depth.far / spec.radius)
-    backdrop.position.copy(origin).add(new THREE.Vector3(0, (centreY * depth.far) / spec.radius, 0))
+    const far = depth?.far ?? spec.radius
+    backdrop.scale.setScalar(far / spec.radius)
+    backdrop.position.copy(origin).add(new THREE.Vector3(0, (centreY * far) / spec.radius, 0))
     backdrop.rotation.y = -bearing
     backdrop.renderOrder = -4
     group.add(backdrop)
@@ -605,7 +644,10 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
       vertexShader: GROUND_VERT,
       fragmentShader: GROUND_FRAG,
       transparent: true,
-      depthWrite: true,
+      // **הרצפה לא כותבת עומק, לעולם.** שתי תחנות שכנות מציבות שתי דיסקות באותו גובה
+      // בדיוק; אם שתיהן כותבות, הן נלחמות על כל פיקסל של כביש והמסך מרצד. בלי כתיבה הן
+      // פשוט נצבעות זו אחרי זו לפי `renderOrder`, וזה גם הסדר הנכון ממילא.
+      depthWrite: false,
     }),
   )
   ground.rotation.x = -Math.PI / 2
@@ -631,7 +673,6 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
       wallMaterial.opacity = a
       wallMaterial.depthWrite = a > 0.5
       groundMaterial.uniforms.alpha!.value = a
-      groundMaterial.depthWrite = a > 0.5
     },
     dispose() {
       wall.geometry.dispose()

@@ -97,11 +97,13 @@ export type Walk = {
  * תמונה אחת מעקמים את גג היציע לקשת. המעבר שייך ל**אמצע**: כך אף פעם לא רחוקים מנקודת
  * צילום יותר מחמישה מטר, ובטווח הזה התמונה עוד מחזיקה.
  *
- * החלון קצר בכוונה — שישית מהמרווח. ארוך ממנו ורואים שתי תחנות בבת אחת; קצר ממנו והמעבר
- * נראה כמו מתג.
+ * החלון הוא שליש מהמרווח — כשלושה מטר וחצי, כשתי שניות וחצי של הליכה. קצר ממנו והמעבר
+ * נראה כמו חיתוך; ארוך ממנו ורואים שתי תחנות בבת אחת. שתי התמונות אינן זהות — הן צולמו
+ * בנפרד — ולכן ההמסה היא לא רק אלגנטיות: היא מה שהופך את ההפרש ביניהן ממשהו שקופץ
+ * למשהו שנמס.
  */
-const BLEND_FROM = 0.42
-const BLEND_TO = 0.58
+const BLEND_FROM = 0.34
+const BLEND_TO = 0.66
 
 export function buildStreet(street: Street, loader: THREE.TextureLoader): Walk {
   const group = new THREE.Group()
@@ -117,8 +119,8 @@ export function buildStreet(street: Street, loader: THREE.TextureLoader): Walk {
     const pano = buildPano(spec, loader, origin)
     eye = pano.eye
     pano.setAlpha(0)
-    group.add(pano.group)
     made.push(pano)
+    group.add(pano.group)
   }
 
   const stops = street.stops.slice(0, made.length)

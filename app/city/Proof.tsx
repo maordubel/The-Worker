@@ -89,6 +89,8 @@ export function Proof({ shot }: { shot: Shot }) {
   const sayingRef = useRef(saying)
   sayingRef.current = saying
   const nearRef = useRef<MissionBeat | null>(null)
+  // האם הפנורמה מקיפה. האצבע על התמונה קוראת מכאן, כי היא חיה מחוץ ללולאה.
+  const yawFree = useRef(false)
 
   const advance = useCallback(() => {
     const open = sayingRef.current
@@ -176,7 +178,9 @@ export function Proof({ shot }: { shot: Shot }) {
 
     const view = { x: shot.x, z: shot.z, yaw: shot.yaw, pitch: shot.pitch, moved: 0, lateral: 0, moving: false }
     const firstSpec = road ? PANOS[road.stops[0]?.pano ?? ''] : panoSpec
-    const yawCap = firstSpec?.proj === 'rect'
+    // כמה מותר להסתובב: פנורמה של 360 מעלות פותחת את הכל, תצלום נעצר בקצה הפריים,
+    // וציור רב־מישורי נשאר על השבעים הישנים.
+    const yawCap = firstSpec
       ? maxYawDeg(firstSpec, Math.min(shot.fov, cap * 0.96), box.clientWidth / Math.max(1, box.clientHeight))
       : 70
     // ברחוב אין כיס: הגבול הוא אורך הרחוב, והתחנות מוסרות זו לזו לאורכו.
@@ -227,17 +231,20 @@ export function Proof({ shot }: { shot: Shot }) {
         const map = loader.load(`/life/art/${beat.cast}.png`)
         const figure = actorBillboard(map, m.metres)
         figure.position.set(beat.side, -eye + m.metres / 2, -beat.at)
-        figure.renderOrder = 8
+        // רחוק נצבע לפני קרוב, כדי שמי שקרוב יכסה את מי שמאחוריו
+        figure.renderOrder = 4 + (100 - beat.at) / 100
         if (beat.flip) figure.scale.x = -Math.abs(figure.scale.x)
         three.scene.add(figure)
         const shade = shadowDecal(0.36)
-        shade.renderOrder = 7
+        shade.renderOrder = 3
         shade.scale.set(m.metres * 0.55, m.metres * 0.24, 1)
         shade.position.set(beat.side, -eye + 0.005, -beat.at + 0.02)
         three.scene.add(shade)
         people.set(beat.id, { figure, shade })
       }
     }
+
+    yawFree.current = yawCap >= 180
 
     let raf = 0
     let last = performance.now()
@@ -249,7 +256,11 @@ export function Proof({ shot }: { shot: Shot }) {
       const stick = input.current
       // תצלום רגיל נגמר בקצה הפריים, ומעבר לו אין תמונה — ולכן הסיבוב נעצר שם. פנורמה
       // גלילית מקיפה, ולה נשאר הגבול הישן.
-      view.yaw = Math.max(-yawCap, Math.min(yawCap, view.yaw + stick.x * TURN * dt))
+      view.yaw += stick.x * TURN * dt
+      // ‎180‎ פירושו בלי גבול: הזווית מתגלגלת סביב הציר במקום להיעצר בקיר.
+      view.yaw = yawCap >= 180
+        ? ((view.yaw + 180) % 360 + 360) % 360 - 180
+        : Math.max(-yawCap, Math.min(yawCap, view.yaw))
       const speed = -stick.y * WALK * (stick.run ? 1.9 : 1)
       view.moving = Math.abs(speed) > 0.05
       if (view.moving) {
@@ -293,9 +304,13 @@ export function Proof({ shot }: { shot: Shot }) {
         pugi.material.rotation = 0
         pugi.scale.x = Math.abs(pugi.scale.x) * (pose.flip ? -1 : 1)
         // כיוון המבט של three הוא `(sin yaw, 0, −cos yaw)` — פוגי תמיד שלושה מטר וחצי לפנים
-        const ax = Math.sin(view.yaw * RAD) * 3.5
-        const az = Math.cos(view.yaw * RAD) * -3.5
-        pugi.position.set(view.x + ax + 0.28, -eye + 0.84 + pose.bob, view.z + az)
+        // **חמישה מטר לפנים, לא שלושה וחצי.** בפריים אנכי צר, ילד בשלושה מטר תופס שליש
+        // מהמסך ומכסה בדיוק את מה שהולכים אליו. בחמישה הוא עדיין הגיבור של התמונה, והרחוב
+        // מאחוריו נפתח.
+        const AHEAD = 5
+        const ax = Math.sin(view.yaw * RAD) * AHEAD
+        const az = Math.cos(view.yaw * RAD) * -AHEAD
+        pugi.position.set(view.x + ax + 0.34, -eye + 0.84 + pose.bob, view.z + az)
         shadow.position.set(pugi.position.x, -eye + 0.006, pugi.position.z + 0.02)
       }
       // מי בטווח דיבור. הבדיקה רצה כל פריים אבל כותבת ל-React רק כשהתשובה משתנה.
@@ -326,7 +341,10 @@ export function Proof({ shot }: { shot: Shot }) {
     }
     const move = (e: PointerEvent) => {
       if (!finger || finger.id !== e.pointerId) return
-      view.yaw = Math.max(-70, Math.min(70, view.yaw + (e.clientX - finger.x) * 0.16))
+      const swung = view.yaw + (e.clientX - finger.x) * 0.16
+      view.yaw = yawFree.current
+        ? ((swung + 180) % 360 + 360) % 360 - 180
+        : Math.max(-70, Math.min(70, swung))
       view.pitch = Math.max(-20, Math.min(20, view.pitch - (e.clientY - finger.y) * 0.1))
       finger = { id: e.pointerId, x: e.clientX, y: e.clientY }
     }
