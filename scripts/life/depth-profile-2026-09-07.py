@@ -62,6 +62,12 @@ JOBS = {
     'panoRoomKitchen': (140, 0.500, 1.1),
     'panoRoomLiving': (140, 0.500, 1.1),
     'panoRoomGrocery': (140, 0.500, 1.1),
+    # חמש תחנות חזית בלומפילד — תצלומים רגילים, ולכן ההטלה הרביעית
+    'panoBloomWalk1': (96, 0.5964, 1.7, 'rect', 'bloomWalk'),
+    'panoBloomWalk2': (96, 0.5784, 1.7, 'rect', 'bloomWalk'),
+    'panoBloomWalk3': (96, 0.5918, 1.7, 'rect', 'bloomWalk'),
+    'panoBloomWalk4': (96, 0.6404, 1.7, 'rect', 'bloomWalk'),
+    'panoBloomWalk5': (96, 0.5914, 1.7, 'rect', 'bloomWalk'),
 }
 
 SAMPLES = 192      # דגימות אזימוט — כמעלה אחת, מתחת למה שהעין מבחינה בו כשקיר מתעקם
@@ -114,6 +120,33 @@ def _rows_at(small: np.ndarray, centres: np.ndarray, threshold: float, horizon: 
     return ndimage.median_filter(rows, size=11)
 
 
+def ladder_of(rgb: np.ndarray, horizon: float) -> dict:
+    """כל קווי המגע האפשריים לתמונה אחת, סף אחר סף. משמש גם לבחירה בתוך תמונה וגם
+    לבחירה משותפת לקבוצה של תחנות שצולמו באותו רחוב."""
+    h, w, _ = rgb.shape
+    lab = cv2.cvtColor(rgb, cv2.COLOR_RGB2LAB).astype(np.float32)
+    small = cv2.resize(lab, (w // 4, h // 4), interpolation=cv2.INTER_AREA)
+    sh, sw, _ = small.shape
+    seed = np.float32(small[int(sh * 0.98):].reshape(-1, 3))
+    _, _, centres = cv2.kmeans(
+        seed, 3, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 20, 1.0), 4,
+        cv2.KMEANS_PP_CENTERS,
+    )
+    return {t: _rows_at(small, centres, t, horizon).astype(float) for t in range(8, 19)}
+
+
+def plateau(tried: dict) -> tuple[int, float]:
+    """הסף שבו התוצאה משתנה הכי פחות בין שכניו — מישור בעקומה, ולא נקודה שנבחרה."""
+    ladder = sorted(tried)
+    best, score = ladder[0], None
+    for i, th in enumerate(ladder):
+        neighbours = [tried[ladder[j]] for j in (i - 1, i + 1) if 0 <= j < len(ladder)]
+        change = float(np.mean([np.abs(tried[th] - n).mean() for n in neighbours]))
+        if score is None or change < score:
+            best, score = th, change
+    return best, float(score or 0)
+
+
 def contact_rows(rgb: np.ndarray, horizon: float) -> tuple[np.ndarray, float]:
     """לכל עמודה: השורה שבה הרצפה נגמרת, ובאיזה סף היא נמצאה.
 
@@ -126,40 +159,45 @@ def contact_rows(rgb: np.ndarray, horizon: float) -> tuple[np.ndarray, float]:
     היכן הונח הכפתור. זה כיול, לא טעם.
     """
     h, w, _ = rgb.shape
-    lab = cv2.cvtColor(rgb, cv2.COLOR_RGB2LAB).astype(np.float32)
-    small = cv2.resize(lab, (w // 4, h // 4), interpolation=cv2.INTER_AREA)
-    sh, sw, _ = small.shape
-
-    seed = np.float32(small[int(sh * 0.98):].reshape(-1, 3))
-    _, _, centres = cv2.kmeans(
-        seed, 3, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 20, 1.0), 4,
-        cv2.KMEANS_PP_CENTERS,
-    )
-
-    ladder = list(range(8, 19))
-    tried = {t: _rows_at(small, centres, t, horizon).astype(float) for t in ladder}
-    best, score = ladder[0], None
-    for i, t in enumerate(ladder):
-        neighbours = [tried[ladder[j]] for j in (i - 1, i + 1) if 0 <= j < len(ladder)]
-        change = float(np.mean([np.abs(tried[t] - n).mean() for n in neighbours]))
-        if score is None or change < score:
-            best, score = t, change
+    tried = ladder_of(rgb, horizon)
+    best, _ = plateau(tried)
     rows = tried[best]
+    sw = len(rows)
     return np.interp(np.arange(w), np.arange(sw) * 4 + 2, rows * 4 + 2).astype(int), float(best)
 
 
-def profile(key: str, hfovdeg: float, horizon: float, eye: float):  # noqa: C901
+def profile(key: str, hfovdeg: float, horizon: float, eye: float, proj: str = 'cyl',
+            force: int | None = None):  # noqa: C901
     im = Image.open(os.path.join(ART, f'{key}.png')).convert('RGB')
     rgb = np.asarray(im)
     h, w, _ = rgb.shape
     aspect = w / h
     hfov = np.deg2rad(hfovdeg)
 
-    top, threshold = contact_rows(rgb, horizon)
+    if force is None:
+        top, threshold = contact_rows(rgb, horizon)
+    else:
+        # סף שנקבע לקבוצה. חמש תחנות של אותו רחוב חייבות סף אחד — אחרת שתיים מהן
+        # קוראות סימני כביש כקיר בשמונה מטר, ושלוש קוראות את אותו רחוב כפתוח. הבחירה
+        # היא אותו מבחן יציבות בדיוק, רק שהוא מסוכם על כל התחנות יחד.
+        rows = ndimage.median_filter(ladder_of(rgb, horizon)[force], size=11)
+        sw = len(rows)
+        top = np.interp(np.arange(w), np.arange(sw) * 4 + 2, rows * 4 + 2).astype(int)
+        threshold = float(force)
     py = top / (h - 1)
-    r = np.where(py - horizon > 1e-3, eye * (aspect / hfov) / np.maximum(py - horizon, 1e-3), FAR)
+    # אורך הקרן אל כל עמודה, ביחידות של גובה התמונה. בפנורמה גלילית הוא קבוע; בתצלום
+    # רגיל הוא נמתח לכיוון הקצוות, ולכן אותה שורה בקצה הפריים מסמנת מרחק **גדול יותר**.
+    rect = proj == 'rect'
+    fN = aspect / 2 / np.tan(hfov / 2) if rect else aspect / hfov
+    if rect:
+        theta = np.arctan(((np.arange(w) / (w - 1)) - 0.5) * aspect / fN)
+        k = fN / np.cos(theta)
+    else:
+        theta = ((np.arange(w) / (w - 1)) - 0.5) * hfov
+        k = np.full(w, fN)
+    r = np.where(py - horizon > 1e-3, eye * k / np.maximum(py - horizon, 1e-3), FAR)
 
-    theta = (np.arange(w) / (w - 1) - 0.5) * np.rad2deg(hfov)
+    theta = np.rad2deg(theta)
     edges = np.linspace(theta[0], theta[-1], SAMPLES + 1)
     centres = (edges[:-1] + edges[1:]) / 2
     out = np.empty(SAMPLES)
@@ -194,11 +232,32 @@ def main() -> None:
     manifest_path = os.path.join(ART, 'manifest.json')
     manifest = json.load(open(manifest_path, encoding='utf-8'))
     write = '--write' in sys.argv
-    for key, (hfovdeg, horizon, eye) in JOBS.items():
+    # --- סף משותף לכל קבוצה. זה המקום היחיד שבו תחנות מדברות זו עם זו: חמש תמונות של
+    # אותו רחוב חייבות סף אחד, אחרת שתיים מהן קוראות סימני כביש כקיר בשמונה מטר בעוד
+    # שלוש קוראות בדיוק את אותו רחוב כפתוח. המבחן הוא אותו מבחן יציבות, מסוכם על כולן.
+    shared: dict[str, int] = {}
+    groups: dict[str, list[str]] = {}
+    for key, job in JOBS.items():
+        if len(job) > 4 and os.path.exists(os.path.join(ART, f'{key}.png')):
+            groups.setdefault(job[4], []).append(key)
+    for name, keys in groups.items():
+        pooled: dict = {}
+        for key in keys:
+            rgb = np.asarray(Image.open(os.path.join(ART, f'{key}.png')).convert('RGB'))
+            for th, rows in ladder_of(rgb, JOBS[key][1]).items():
+                pooled.setdefault(th, []).append(rows)
+        merged = {th: np.concatenate(v) for th, v in pooled.items()}
+        shared[name], _ = plateau(merged)
+        print(f'group {name}: {len(keys)} stations share threshold {shared[name]}')
+
+    for key, job in JOBS.items():
+        hfovdeg, horizon, eye = job[0], job[1], job[2]
+        proj = job[3] if len(job) > 3 else 'cyl'
+        force = shared.get(job[4]) if len(job) > 4 else None
         if not os.path.exists(os.path.join(ART, f'{key}.png')):
             print(f'{key}: missing')
             continue
-        centres, r, check, threshold = profile(key, hfovdeg, horizon, eye)
+        centres, r, check, threshold = profile(key, hfovdeg, horizon, eye, proj, force)
         check.resize((900, int(900 * check.size[1] / check.size[0]))).save(os.path.join(SHOTS, f'{key}.png'))
         print(f'{key:16s} {r.min():6.1f}–{r.max():6.1f} m   median {np.median(r):6.1f}   '
               f'open {(r > FAR * 0.9).mean() * 100:3.0f}%   (threshold {threshold:.0f})')

@@ -65,6 +65,33 @@ export type PanoSpec = {
    */
   tile?: { key: string; wide: number; deep: number }
   /**
+   * איזו הטלה. שתי משפחות של תמונות נכנסות למשחק, והן לא אותו דבר:
+   *
+   * • `'cyl'` — פנורמה גלילית. הצלם הסתובב סביב עצמו, ולכן `x` הוא הזווית **באופן
+   *   ליניארי**, וקו ישר של מדרכה נמתח בה לקשת. זאת ברירת המחדל, וכל התמונות שהגיעו
+   *   עד 7.9 הן כאלה.
+   *
+   * • `'rect'` — תצלום רגיל. קו ישר נשאר ישר, ולכן `x` הוא `tan θ` ולא `θ`, והסקאלה
+   *   האנכית נמתחת ב-`1/cos θ`. חמש תחנות חזית בלומפילד הן כאלה: קו הגג של היציע
+   *   והמעקות בהן ישרים לגמרי, וזאת חתימה שאי אפשר לטעות בה.
+   *
+   * ההבדל אינו קוסמטי. בשדה ראייה של תשעים־ושש מעלות, פיקסל שההטלה הלא נכונה שמה
+   * בחמישים מעלות שייך באמת לשלושים ושמונה — עשרה מטר של רחוב, בקצה הפריים.
+   */
+  proj?: 'cyl' | 'rect'
+  /**
+   * לאן הרחוב הולך, במעלות מתוך התמונה. אפס = ישר קדימה במרכז הפריים.
+   *
+   * צלם לא מכוון את המצלמה במדויק לאורך הכביש, ולכן נקודת המגוז של הרחוב יושבת בכל תמונה
+   * במקום קצת אחר — בחמש תחנות בלומפילד היא נעה בין ‎−21°‎ ל-‎−8°‎. בלי לתקן את זה, "קדימה"
+   * במשחק הוא לא "לאורך הרחוב": השחקן דוחף את המוט קדימה והולך לתוך המעקות.
+   *
+   * לכן התמונה **מסתובבת** כך שהמגוז שלה יפנה אל `−z`. אחרי זה `yaw = 0` הוא הרחוב עצמו
+   * בכל תחנה, וללכת קדימה זה ללכת בכביש. הזווית נמדדת ב-
+   * `scripts/life/measure-bloomfield-2026-09-08.py`, לא מוערכת.
+   */
+  bearingDeg?: number
+  /**
    * רדיוס הגליל במטרים. הוא לא משנה את התמונה כשעומדים במרכז — רק את קצב הפרלקסה כשזזים.
    * שלושים מטר זה בערך המרחק לחזית שממול ברחוב תל־אביבי, ולכן הבתים זזים נכון והים כמעט לא.
    */
@@ -77,6 +104,11 @@ export type PanoSpec = {
  */
 export const PLACE_ORDER = [
   'panoJaffa',
+  'panoBloomWalk1',
+  'panoBloomWalk2',
+  'panoBloomWalk3',
+  'panoBloomWalk4',
+  'panoBloomWalk5',
   'panoBloomFacade',
   'panoBloomGate',
   'panoUssOutside',
@@ -150,6 +182,40 @@ export const PANOS: Record<string, PanoSpec> = {
   },
   // שדרות ירושלים ביפו — הדרך אל בלומפילד. הרחבה ביותר מבין הארבע, ולכן גם הרדיוס גדול
   // יותר: השדרה רחבה, החזיתות רחוקות, והמגדל בקצה כמעט לא זז כשהולכים.
+  // חמש תחנות ההליכה לאורך החזית — החבילה שמאור שלח ב-8.9.2026. אלה **תצלומים רגילים**
+  // ולא פנורמות: קו הגג של היציע והמעקות בהם ישרים לגמרי. קו האופק נמדד בכל אחת בנפרד
+  // מנקודת המגוז של הרחוב, ושדה הראייה — 96° — מזהות שתי נקודות מגוז ניצבות בתחנות 3
+  // ו-4. הרדיוס אחיד, כי זאת מצלמה אחת שהלכה קדימה.
+  panoBloomWalk1: {
+    nameHe: 'בלומפילד, תחנה 1 — מרחוק',
+    key: 'panoBloomWalk1', proj: 'rect', aspect: 1923 / 817, horizon: 0.5964, hFovDeg: 96, eye: 1.7, bearingDeg: -20.9,
+    radius: 24, nearRgb: [190, 157, 129],
+    tile: { key: 'panoBloomWalk1--tile', wide: 2.34, deep: 3.2 },
+  },
+  panoBloomWalk2: {
+    nameHe: 'בלומפילד, תחנה 2',
+    key: 'panoBloomWalk2', proj: 'rect', aspect: 1923 / 817, horizon: 0.609, hFovDeg: 96, eye: 1.7, bearingDeg: -19.1,
+    radius: 24, nearRgb: [195, 154, 123],
+    tile: { key: 'panoBloomWalk2--tile', wide: 2.21, deep: 3.2 },
+  },
+  panoBloomWalk3: {
+    nameHe: 'בלומפילד, תחנה 3 — באמצע',
+    key: 'panoBloomWalk3', proj: 'rect', aspect: 1925 / 817, horizon: 0.5918, hFovDeg: 96, eye: 1.7, bearingDeg: -10.3,
+    radius: 24, nearRgb: [181, 140, 109],
+    tile: { key: 'panoBloomWalk3--tile', wide: 2.3, deep: 3.2 },
+  },
+  panoBloomWalk4: {
+    nameHe: 'בלומפילד, תחנה 4 — מתחת ליציע',
+    key: 'panoBloomWalk4', proj: 'rect', aspect: 1925 / 817, horizon: 0.6404, hFovDeg: 96, eye: 1.7, bearingDeg: -12.4,
+    radius: 24, nearRgb: [187, 148, 118],
+    tile: { key: 'panoBloomWalk4--tile', wide: 2.69, deep: 3.2 },
+  },
+  panoBloomWalk5: {
+    nameHe: 'בלומפילד, תחנה 5 — ליד העמוד',
+    key: 'panoBloomWalk5', proj: 'rect', aspect: 1921 / 819, horizon: 0.5914, hFovDeg: 96, eye: 1.7, bearingDeg: -7.9,
+    radius: 24, nearRgb: [185, 148, 120],
+    tile: { key: 'panoBloomWalk5--tile', wide: 2.3, deep: 3.2 },
+  },
   panoJaffa: {
     nameHe: 'שדרות ירושלים, יפו',
     key: 'panoJaffa', aspect: 2560 / 1034, horizon: 0.70, hFovDeg: 128, eye: 1.7,
@@ -203,15 +269,36 @@ export function walkLimit(spec: PanoSpec): number {
  * רק הצד העליון נספר. מתחת לקו האופק אין חור לעולם, כי שם הרצפה — ההיטל ההפוך והמרצף
  * המיושר — מכסה עד לרגליים ומעבר לזה. מה שמוגבל הוא כמה שמיים ובניין יש מעל.
  */
+/**
+ * אורך המוקד, ביחידות של **גובה התמונה**. זה המספר היחיד שמתרגם מטרים לפיקסלים, ושתי
+ * ההטלות נבדלות רק בו ובמיפוי האופקי.
+ *
+ * בגלילית, `y` הוא `R·tan ε` כאשר `R` הוא רדיוס הגליל בפיקסלים — כלומר `רוחב/שדה ראייה`.
+ * בתצלום רגיל, `y` הוא `f·tan ε` כאשר `f = (רוחב/2)/tan(שדה/2)`. אותה נוסחה אנכית, שני
+ * מספרים שונים: לשדה של ‎96°‎ ויחס ‎2.35‎ יוצא ‎1.40‎ מול ‎0.94‎ — הפרש של חמישים אחוז
+ * בגובה של כל דבר בתמונה, ולכן גם במרחק שנגזר ממנו.
+ */
+export function focal(spec: PanoSpec): number {
+  const hFov = (spec.hFovDeg * Math.PI) / 180
+  return spec.proj === 'rect' ? spec.aspect / 2 / Math.tan(hFov / 2) : spec.aspect / hFov
+}
+
 export function maxFovDeg(spec: PanoSpec): number {
-  const pxPerRad = spec.aspect / ((spec.hFovDeg * Math.PI) / 180)
-  return (2 * Math.atan(spec.horizon / pxPerRad) * 180) / Math.PI
+  return (2 * Math.atan(spec.horizon / focal(spec)) * 180) / Math.PI
+}
+
+/**
+ * כמה מותר להסתובב. לפנורמה גלילית — כל מה שצולם. לתצלום, הפריים נגמר, ומעבר לו אין
+ * כלום: המצלמה נעצרת חצי מעלה לפני הקצה, כדי שלא ייפתח פס ריק בצד המסך.
+ */
+export function maxYawDeg(spec: PanoSpec, cameraFovDeg: number, aspect: number): number {
+  const halfCam = (Math.atan(Math.tan((cameraFovDeg * Math.PI) / 360) * aspect) * 180) / Math.PI
+  return Math.max(0, spec.hFovDeg / 2 - halfCam - 0.5)
 }
 
 /** המרחק שבו הקצה התחתון של הפנורמה פוגש את הכביש — הגבול בין הדיסקה לגליל */
 export function nearEdge(spec: PanoSpec): number {
-  const hFov = (spec.hFovDeg * Math.PI) / 180
-  return (spec.eye * spec.aspect) / (hFov * (1 - spec.horizon))
+  return (spec.eye * focal(spec)) / (1 - spec.horizon)
 }
 
 const GROUND_VERT = `
@@ -232,6 +319,9 @@ uniform sampler2D map;       // הפנורמה עצמה
 uniform sampler2D tile;      // הרצפה המיושרת, מלמעלה, בקנה מידה של מטרים
 uniform vec2 tileSize;       // כמה מטרים המרצף מכסה
 uniform float hFov;          // רדיאנים
+uniform float fN;            // אורך המוקד, ביחידות של גובה התמונה
+uniform float rect;          // 1 = תצלום רגיל, 0 = פנורמה גלילית
+uniform float bearing;       // לאן הרחוב הולך בתוך התמונה, ברדיאנים
 uniform float aspect;        // רוחב/גובה של התמונה
 uniform float horizon;       // שבר מהגובה
 uniform float eye;           // מטרים
@@ -245,9 +335,18 @@ varying vec3 vWorld;
 void main() {
   vec3 d = vWorld - origin;
   float r = length(vec2(d.x, d.z));
-  float theta = atan(d.x, -d.z);
-  float u = 0.5 + theta / hFov;
-  float py = horizon + (aspect / hFov) * (eye / max(r, 0.001));
+  // הזווית **בתוך התמונה**: כיוון העולם ועוד הסטיה של הרחוב מהמרכז. ככה מינוס-z בעולם הוא
+  // הרחוב, ולא איפה שהצלם במקרה עמד.
+  float theta = atan(d.x, -d.z) + bearing;
+  // שתי ההטלות, ושורש ההבדל: בגלילית הזווית עצמה היא הקואורדינטה, ובתצלום זה
+  // הטנגנס שלה. וכשהזווית גדולה, גם הסקאלה האנכית נמתחת ב-1/cos θ — שם הקרן ארוכה
+  // יותר, ולכן כל דבר בצד הפריים נמצא **נמוך יותר** מאשר אותו דבר בדיוק במרכזו.
+  float t = tan(clamp(theta, -1.45, 1.45));
+  float u = mix(0.5 + theta / hFov, 0.5 + fN * t / aspect, rect);
+  float stretch = mix(1.0, 1.0 / max(cos(theta), 0.06), rect);
+  float py = horizon + fN * stretch * (eye / max(r, 0.001));
+  // מאחורי הפריים אין תמונה, ולכן גם אין רצפה מוטלת — רק המרצף שמתחת לרגליים.
+  if (rect > 0.5 && abs(theta) > hFov * 0.5) u = -1.0;
 
   // הרחוק: מה שהפנורמה באמת צילמה — סימני כביש, אבני שפה, כתמים. אין תחליף לזה.
   vec3 far = (u < 0.0 || u > 1.0) ? nearColour : texture2D(map, vec2(u, 1.0 - min(py, 0.998))).rgb;
@@ -257,9 +356,17 @@ void main() {
   // וכולם נכשלו מאותה סיבה: בזווית משיקה פשוט אין מספיק פיקסלים בתמונה.
   vec3 near = hasTile > 0.5 ? texture2D(tile, vWorld.xz / tileSize).rgb : nearColour;
 
+  // **ומה שקורה בקצה השני.** ככל שמתרחקים, השורה שההיטל קורא מתקרבת לקו האופק, ובשני
+  // אחוזים האחרונים לפניו כבר אין בתמונה מידע: כל הרחוק כולו דחוס שם לכמה שורות. לצייר
+  // ממנו רצפה פירושו למרוח את קו הרקיע כלפי מטה על חצי מסך, בפסים אנכיים שטוחים — וזה
+  // בדיוק מה שנראה כשהדיסקה הוגדלה. לכן מעבר לגבול הזה חוזרים אל המרצף, שהוא רצפה
+  // אמיתית באותו קנה מידה ובפרספקטיבה נכונה.
+  float thin = smoothstep(horizon + 0.020, horizon + 0.006, py);
+  vec3 reach = mix(far, near, thin);
+
   // המעבר מתחיל בדיוק במקום שבו ההיטל מפסיק להיות אמין — קצה התמונה — ונגמר חצי מטר אחריו
   float k = smoothstep(edge, edge * 1.45, r);
-  gl_FragColor = vec4(mix(near, far, k), alpha);
+  gl_FragColor = vec4(mix(near, reach, k), alpha);
 }
 `
 
@@ -275,10 +382,21 @@ void main() {
  * ולא צריך קיר. הגובה נגזר מאותה גיאומטריה: `y = r · tan ε`, ו-`tan ε` הוא בדיוק מה
  * שהשורה בתמונה מודדת.
  */
+/**
+ * עד כמה רחוק מודדים קיר.
+ *
+ * "פתוח" נמדד כמאה וארבעים מטר, וזה נכון — אבל רצועה בשמונה מטר שכנה לרצועה במאה וארבעים
+ * יוצרת מצוק, והמשולש שנמתח ביניהן הוא **מריחה**: ברגע שהמצלמה זזה שני מטר, גג היציע
+ * נמשך לקשת חלקה על חצי מסך. מעבר לארבעים וחמישה מטר הפרלקסה ממילא כמעט אפסית — הליכה
+ * של חמישה מטר מזיזה שם פחות מחצי מעלה — ולכן אין מה להפסיד מלקצר את המצוק פי שלושה.
+ */
+const WALL_MAX = 45
+
 function shapedWall(depth: CityDepth, spec: PanoSpec, hFov: number): THREE.BufferGeometry {
   const n = depth.metres.length
   const rows = 24
-  const pxPerRad = spec.aspect / hFov
+  const fN = focal(spec)
+  const rect = spec.proj === 'rect'
   const from = (depth.fromDeg * Math.PI) / 180
   const to = (depth.toDeg * Math.PI) / 180
 
@@ -288,14 +406,18 @@ function shapedWall(depth: CityDepth, spec: PanoSpec, hFov: number): THREE.Buffe
 
   for (let i = 0; i < n; i += 1) {
     const theta = from + ((to - from) * i) / (n - 1)
-    const r = depth.metres[i] ?? depth.far
+    const r = Math.min(depth.metres[i] ?? depth.far, WALL_MAX)
+    // אורך הקרן אל העמודה הזאת, ביחידות של גובה התמונה. בגלילית היא תמיד `fN`; בתצלום
+    // היא נמתחת ככל שמתרחקים מהמרכז, וזה בדיוק מה שמחזיר את קווי הגג לישרים.
+    const k = rect ? fN / Math.cos(theta) : fN
+    const u = rect ? 0.5 + (fN * Math.tan(theta)) / spec.aspect : 0.5 + theta / hFov
     // קו המגע של הרצועה הזאת: מתחתיו זו כבר רצפה, ולשם הקיר לא יורד
-    const contact = Math.min(0.999, spec.horizon + (pxPerRad * spec.eye) / Math.max(r, 0.5))
+    const contact = Math.min(0.999, spec.horizon + (k * spec.eye) / Math.max(r, 0.5))
     for (let j = 0; j < rows; j += 1) {
       const py = (contact * j) / (rows - 1)
-      const y = r * ((spec.horizon - py) / pxPerRad)
+      const y = (r * (spec.horizon - py)) / k
       position.push(r * Math.sin(theta), y, -r * Math.cos(theta))
-      uv.push(0.5 + theta / hFov, 1 - py)
+      uv.push(u, 1 - py)
     }
   }
   for (let i = 0; i < n - 1; i += 1) {
@@ -343,22 +465,33 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   map.generateMipmaps = true
   map.anisotropy = 16
 
-  // R בפיקסלים: הרוחב חלקי שדה הראייה. ממנו נגזר גובה הגליל בעולם.
-  const pxPerRad = spec.aspect / hFov          // ביחידות של גובה התמונה
-  const worldHeight = spec.radius / pxPerRad   // גובה הגליל כולו
+  const rect = spec.proj === 'rect'
+  const bearing = ((spec.bearingDeg ?? 0) * Math.PI) / 180
+  const fN = focal(spec)
+  const worldHeight = spec.radius / fN         // גובה התמונה בעולם, במרחק הרדיוס
   const centreY = worldHeight * (spec.horizon - 0.5)
 
   const depth = CITY_DEPTH[spec.key]
 
-  // `CylinderGeometry` מודד את הזווית מ-`+z`, כלומר מאחורי המצלמה; `π` מסובב אותו לקדימה.
-  const shell = new THREE.CylinderGeometry(
-    spec.radius, spec.radius, worldHeight, 160, 1, true, Math.PI - hFov / 2, hFov,
-  )
-  // הגליל נצפה מבפנים, ולכן `u` רץ מימין לשמאל. ההיפוך על הגיאומטריה ולא על הטקסטורה,
-  // כי אותה טקסטורה משמשת גם את ה-shader של הרצפה — ושם `repeat`/`offset` לא חלים בכלל.
-  const uv = shell.getAttribute('uv') as THREE.BufferAttribute
-  for (let i = 0; i < uv.count; i += 1) uv.setX(i, 1 - uv.getX(i))
-  uv.needsUpdate = true
+  // המעטפת. לפנורמה גלילית זה גליל; לתצלום זה **מסך שטוח** — כי בדיוק כך התמונה נוצרה,
+  // וכל דבר אחר יעקם קווים שהיו ישרים. `CylinderGeometry` מודד את הזווית מ-`+z`, כלומר
+  // מאחורי המצלמה; `π` מסובב אותו לקדימה.
+  const shell = rect
+    ? new THREE.PlaneGeometry(worldHeight * spec.aspect, worldHeight, 1, 1)
+    : new THREE.CylinderGeometry(
+      spec.radius, spec.radius, worldHeight, 160, 1, true, Math.PI - hFov / 2, hFov,
+    )
+  if (!rect) {
+    // הגליל נצפה מבפנים, ולכן `u` רץ מימין לשמאל. ההיפוך על הגיאומטריה ולא על הטקסטורה,
+    // כי אותה טקסטורה משמשת גם את ה-shader של הרצפה — ושם `repeat`/`offset` לא חלים בכלל.
+    const uv = shell.getAttribute('uv') as THREE.BufferAttribute
+    for (let i = 0; i < uv.count; i += 1) uv.setX(i, 1 - uv.getX(i))
+    uv.needsUpdate = true
+  } else {
+    // המישור נבנה סביב הראשית ופונה אל `+z`; המצלמה מסתכלת אל `-z`, ולכן הוא נדחף
+    // לשם ונשאר פונה אליה. `u` כאן כבר רץ שמאלה-לימינה כמו בתמונה, בלי היפוך.
+    shell.translate(0, 0, -spec.radius)
+  }
 
   const wall = new THREE.Mesh(
     depth ? shapedWall(depth, spec, hFov) : shell,
@@ -366,7 +499,7 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
       map,
       // הגליל נצפה מבפנים; הקיר בנוי כבר עם הפאה הנכונה, אבל שתי הפאות עולות כלום ומצילות
       // מבאג ניווט שקשה לראות אותו בצילום סטטי.
-      side: depth ? THREE.DoubleSide : THREE.BackSide,
+      side: depth || rect ? THREE.DoubleSide : THREE.BackSide,
       toneMapped: false,
       depthWrite: true,
     }),
@@ -375,6 +508,8 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   // הגליל נבנה סביב מרכזו ולכן צריך הסטה; הקיר בעל הצורה נבנה כבר בגבהים המוחלטים שלו,
   // ולהוסיף לו את אותה הסטה זה להרים את כל הרחוב חמישה מטר באוויר. זה בדיוק מה שקרה.
   wall.position.copy(origin)
+  // הסיבוב הוא סביב נקודת הצילום עצמה, ולכן הוא מיישר את הרחוב בלי להזיז את התחנה
+  wall.rotation.y = -bearing
   if (!depth) wall.position.add(new THREE.Vector3(0, centreY, 0))
   group.add(wall)
 
@@ -386,10 +521,13 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   if (depth) {
     backdrop = new THREE.Mesh(
       shell.clone(),
-      new THREE.MeshBasicMaterial({ map, side: THREE.BackSide, toneMapped: false, depthWrite: true }),
+      new THREE.MeshBasicMaterial({
+        map, side: rect ? THREE.DoubleSide : THREE.BackSide, toneMapped: false, depthWrite: true,
+      }),
     )
     backdrop.scale.setScalar(depth.far / spec.radius)
     backdrop.position.copy(origin).add(new THREE.Vector3(0, (centreY * depth.far) / spec.radius, 0))
+    backdrop.rotation.y = -bearing
     backdrop.renderOrder = -4
     group.add(backdrop)
   }
@@ -415,13 +553,27 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
     // מראה־ריצוף ולא ריצוף רגיל: קצוות המרצף לא תואמים זה לזה, והמראה מבטלת את התפר בלי
     // לדרוש מרצף שנתפר ידנית.
     tileMap.wrapS = tileMap.wrapT = THREE.MirroredRepeatWrapping
-    tileMap.minFilter = THREE.LinearMipmapLinearFilter
+    // **בלי מיפמאפים, ומאותה סיבה בדיוק כמו הרצפה.** במבט מפולס הקרן משיקה לרצפה, ה-GPU
+    // רואה שהמרצף נדחס מאוד לאורכה ובוחר את רמת המיפמאפ הקטנה ביותר — ממוצע של המרצף
+    // כולו. עם מראה־ריצוף כל חזרה מקבלת אז צבע שטוח אחד, והרצפה יוצאת פסים אנכיים
+    // בגוונים של חול. זה בדיוק מה שנראה בחזית בלומפילד, ובשדרות ירושלים לא — כי שם קו
+    // האופק נמוך והמרצף בכלל לא מגיע לזווית הזאת.
+    //
+    // המרצף מכסה שישה מטר וחצי ותו לא — הוא תמיד קרוב, ולכן מיפמאפים לא קונים לו כלום.
+    tileMap.minFilter = THREE.LinearFilter
     tileMap.magFilter = THREE.LinearFilter
-    tileMap.generateMipmaps = true
+    tileMap.generateMipmaps = false
     tileMap.anisotropy = 16
   }
+  // **הדיסקה חייבת להגיע עד הקיר.** הקיר בעל הצורה נעצר בקו המגע שלו, ומתחתיו הרצפה
+  // אמורה לכסות — אבל דיסקה של ארבעה־עשר מטר מול חזית ב-140 משאירה ביניהם **חלון**,
+  // ובחלון הזה נראה הרקע הרחוק מלמטה: השורה התחתונה של התמונה, מתוחה על חצי מסך, בפסים
+  // אנכיים בגוון חול. זה מה שראינו בחזית בלומפילד ולא בשדרות ירושלים, שם הדיסקה גדולה
+  // יותר וקו האופק נמוך. ההיטל ההפוך תקף בכל מרחק — הוא רק נעשה משיק יותר — ולכן דיסקה
+  // גדולה היא תמיד הבחירה הנכונה, והמחיר שלה הוא אפס.
+  const reach = Math.min(140, Math.max(edge * DISC_FACTOR, depth ? depth.far : 0))
   const ground = new THREE.Mesh(
-    new THREE.CircleGeometry(edge * DISC_FACTOR, 160),
+    new THREE.CircleGeometry(reach, 192),
     new THREE.ShaderMaterial({
       uniforms: {
         map: { value: groundMap },
@@ -430,6 +582,9 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
         hasTile: { value: tileMap ? 1 : 0 },
         edge: { value: edge },
         hFov: { value: hFov },
+        fN: { value: fN },
+        rect: { value: rect ? 1 : 0 },
+        bearing: { value: ((spec.bearingDeg ?? 0) * Math.PI) / 180 },
         aspect: { value: spec.aspect },
         horizon: { value: spec.horizon },
         eye: { value: spec.eye },

@@ -55,6 +55,10 @@ const HEIGHTS: ReadonlyArray<readonly [string, number]> = [
   ['rachel', 1.63],
 
   // ------------------------------------------------------- מבוגרים בעלי שם ----------
+  // שלושת האנשים בחזית בלומפילד, מחבילת 8.9.2026. הם נמדדים כאן ולא בטבלה של העיר,
+  // כי גובה של אדם הוא עובדה אחת ויש לה בית אחד.
+  ['bfSteward', 1.78],
+  ['bfVendor', 1.70],
   ['oldMan', 1.70], // Rafi, stooped — the man the kiosk was measured against
   ['usher', 1.72],
   ['teacher', 1.66],

@@ -5,7 +5,13 @@ import { describe, expect, it } from 'vitest'
 
 import { isYellow } from '@/lib/isYellow'
 import { CITY_DEPTH } from '@/lib/life/generated/cityDepth'
-import { DISC_FACTOR, maxFovDeg, nearEdge, PANOS, PLACE_ORDER, walkLimit } from '@/lib/life/city/pano'
+import { DIALOGUE } from '@/lib/life/content/dialogue'
+import { CITY_CAST } from '@/lib/life/generated/cityCast'
+import { heightOf } from '@/lib/life/world/heights'
+import { branchFor, isOpen, MISSIONS, newMissionState, REACH } from '@/lib/life/city/mission'
+import {
+  DISC_FACTOR, focal, maxFovDeg, maxYawDeg, nearEdge, PANOS, PLACE_ORDER, walkLimit,
+} from '@/lib/life/city/pano'
 import { STREETS } from '@/lib/life/city/street'
 import { SLABS } from '@/lib/life/city/slab'
 
@@ -172,6 +178,129 @@ describe('העיר — הפנורמות מדויקות מול מה שנשמר', 
       const vertical = 2 * Math.atan(Math.tan((spec.hFovDeg * Math.PI) / 360) / spec.aspect)
       expect((vertical * 180) / Math.PI, `${key} cannot fill an upright frame`).toBeGreaterThan(52)
     }
+  })
+
+  // ---------------------------------------------------------------- ההטלה --------
+  it('מכריזה על ההטלה שהמניפסט מדד, ולא מנחשת אותה', () => {
+    // תצלום רגיל ופנורמה גלילית נראים אותו דבר בקובץ ונבדלים לגמרי בגיאומטריה. אם הלוח
+    // יכריז על אחת והתמונה תהיה השנייה, שום דבר לא ייפול — הרחוב פשוט יתעקם, וזה סוג
+    // הבאג שרואים רק בצילום מסך חודש אחר כך.
+    for (const [key, spec] of Object.entries(PANOS)) {
+      const row = manifest.panoramas?.[key] as { proj?: string; hFovDeg?: number } | undefined
+      if (!row?.proj) continue
+      expect(spec.proj ?? 'cyl', `${key} declares a projection the manifest does not`).toBe(row.proj)
+      if (row.hFovDeg) expect(spec.hFovDeg, `${key} field of view drifted`).toBe(row.hFovDeg)
+    }
+  })
+
+  it('לא נותנת למצלמה להסתובב אל מחוץ לפריים של תצלום', () => {
+    // לגליל אין קצה; לתצלום יש, ומעבר לו אין תמונה בכלל. הגבול חייב להיות בתוך חצי
+    // שדה הראייה, אחרת נפתח פס ריק בצד המסך ברגע שמזיזים את האגודל.
+    for (const [key, spec] of Object.entries(PANOS)) {
+      if (spec.proj !== 'rect') continue
+      const cap = maxYawDeg(spec, 56, 0.55)
+      expect(cap, `${key} lets the camera turn past its own frame`).toBeLessThan(spec.hFovDeg / 2)
+      expect(cap, `${key} cannot be turned at all`).toBeGreaterThan(4)
+    }
+  })
+
+  it('גוזרת אורך מוקד שמסכים עם המידות של הקובץ', () => {
+    for (const [key, spec] of Object.entries(PANOS)) {
+      const f = focal(spec)
+      expect(f, `${key} focal length is not a number`).toBeGreaterThan(0.2)
+      // גם בגליל וגם בתצלום, `y = f·tan ε` — ולכן קצה התמונה חייב לפגוש את הכביש במרחק
+      // סביר, לא בשני סנטימטר ולא במאה מטר.
+      expect(nearEdge(spec), `${key} bottom edge meets the road too close`).toBeGreaterThan(1)
+      expect(nearEdge(spec), `${key} bottom edge meets the road too far`).toBeLessThan(30)
+    }
+  })
+
+  // ---------------------------------------------------------------- המשימה --------
+  describe('המשימה ברחוב', () => {
+    it('עומדת על רחוב שקיים, ועל אנשים שיש להם גובה נמדד', () => {
+      for (const [id, mission] of Object.entries(MISSIONS)) {
+        expect(STREETS[mission.street], `${id} runs on a street that does not exist`).toBeTruthy()
+        for (const beat of mission.beats) {
+          expect(CITY_CAST[beat.cast], `${id}/${beat.id} has no measured height`).toBeTruthy()
+        }
+      }
+    })
+
+    it('מדברת דרך מאגר השיחות של המשחק ולא דרך מילים משלה', () => {
+      for (const [id, mission] of Object.entries(MISSIONS)) {
+        for (const beat of mission.beats) {
+          expect(DIALOGUE[beat.talk], `${id}/${beat.id} points at no conversation`).toBeTruthy()
+        }
+      }
+    })
+
+    it('מרימה בכל שיחה את הדגל שסוגר את הביט שלה', () => {
+      // בלי זה השיחה נגמרת והמשימה לא מתקדמת — הביט נשאר פתוח וחוזר על עצמו לנצח.
+      for (const [id, mission] of Object.entries(MISSIONS)) {
+        for (const beat of mission.beats) {
+          const flags = (DIALOGUE[beat.talk]?.branches ?? [])
+            .flatMap((branch) => branch.then ?? [])
+            .filter((e) => e.e === 'flag')
+            .map((e) => (e as { flag: string }).flag.replace(/^city:/, ''))
+          expect(flags, `${id}/${beat.id} raises no flag that closes it`).toContain(beat.id)
+        }
+      }
+    })
+
+    it('נגמרת — כל ביט נפתח בסופו של דבר, ואין תלות מעגלית', () => {
+      for (const [id, mission] of Object.entries(MISSIONS)) {
+        const state = newMissionState()
+        for (let round = 0; round < mission.beats.length + 1; round += 1) {
+          for (const beat of mission.beats) if (isOpen(beat, state)) state.done.add(beat.id)
+        }
+        for (const beat of mission.beats) {
+          expect(state.done.has(beat.id), `${id}/${beat.id} can never be reached`).toBe(true)
+        }
+      }
+    })
+
+    it('מעמידה כל אחד בטווח הליכה, ובלי שניים על אותה נקודה', () => {
+      for (const [id, mission] of Object.entries(MISSIONS)) {
+        const street = STREETS[mission.street]!
+        const length = street.stops[street.stops.length - 1]?.at ?? 0
+        for (const beat of mission.beats) {
+          expect(beat.at, `${id}/${beat.id} stands before the street starts`).toBeGreaterThanOrEqual(0)
+          expect(beat.at, `${id}/${beat.id} stands past the end of the street`).toBeLessThanOrEqual(length)
+          expect(Math.abs(beat.side), `${id}/${beat.id} stands off the road`).toBeLessThanOrEqual(4)
+        }
+        for (const a of mission.beats) {
+          for (const b of mission.beats) {
+            if (a.id >= b.id) continue
+            const gap = Math.hypot(a.side - b.side, a.at - b.at)
+            expect(gap, `${id}: ${a.id} and ${b.id} share one spot`).toBeGreaterThan(REACH)
+          }
+        }
+      }
+    })
+
+    it('אומרת משהו אחר אחרי שהביט נסגר', () => {
+      // שיחה שחוזרת על עצמה מילה במילה אחרי שמסרת את השקית הופכת אדם לרהיט.
+      for (const [id, mission] of Object.entries(MISSIONS)) {
+        for (const beat of mission.beats) {
+          const before = branchFor(beat.talk, newMissionState())
+          const after = newMissionState()
+          after.done.add(beat.id)
+          const said = branchFor(beat.talk, after)
+          expect(said?.lines[0]?.text, `${id}/${beat.id} repeats itself once it is done`)
+            .not.toBe(before?.lines[0]?.text)
+        }
+      }
+    })
+
+    it('מספרת את הגובה של כל אדם פעם אחת בלבד', () => {
+      // `heights.ts` הוא הבית של גובה של אדם. אם שתי טבלאות יחזיקו את אותו מספר, אחת
+      // מהן תתיישן — ואז אותו סדרן יהיה בגובה אחר בשני מסכים.
+      for (const [key, member] of Object.entries(CITY_CAST)) {
+        const canonical = heightOf(key)
+        if (canonical === 1.75) continue // ברירת המחדל: אין לו שורה משלו, ואין מה לסתור
+        expect(member.metres, `${key} height disagrees with heights.ts`).toBeCloseTo(canonical, 2)
+      }
+    })
   })
 
   it('לא מכריזה על צהוב בלוח', () => {

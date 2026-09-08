@@ -32,11 +32,18 @@ GENERATED = os.path.join(HERE, '..', '..', 'lib', 'life', 'generated', 'cityCast
 SRC = os.environ.get('MICHEL_SRC', '/tmp/michel')
 
 # file → (key, מה זה, גובה הדמות במטרים)
+# הגובה **לא נבחר כאן**. `lib/life/world/heights.ts` הוא הבית היחיד של גובה של אדם
+# במשחק, והמספרים למטה מועתקים ממנו: בארי מטר שמונים ואחת. שומר ב-`tests/city.test.ts`
+# מפיל את הבנייה אם השתיים ייפרדו.
 JOBS = [
     ('michel-front.png', 'michel99', 'מישל, עומד — 1999', 1.75),
     ('michel-3q.png', 'michel99-3q', 'מישל, שלושה־רבעים ימינה — 1999', 1.75),
-    ('barry-front.png', 'barryToday', 'בארי, עומד — היום', 1.74),
-    ('barry-3q.png', 'barryToday-3q', 'בארי, שלושה־רבעים ימינה — היום', 1.74),
+    ('barry-front.png', 'barryToday', 'בארי, עומד — היום', 1.81),
+    ('barry-3q.png', 'barryToday-3q', 'בארי, שלושה־רבעים ימינה — היום', 1.81),
+    # בארי עם הטרנזיסטור, 8.9.2026. החולצה כאן **חלקה, בלי הדפס ובלי כוכב** — ולכן, בניגוד
+    # ל-`barryToday`, היא לא אנכרוניזם באף שנה. זאת הגרסה שעומדת ברחוב.
+    ('barry-radio-front.png', 'barryRadio', 'בארי עם הרדיו, עומד', 1.81),
+    ('barry-radio-3q.png', 'barryRadio-3q', 'בארי עם הרדיו, שלושה־רבעים', 1.81),
 ]
 
 

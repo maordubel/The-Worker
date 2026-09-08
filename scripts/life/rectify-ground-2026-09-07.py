@@ -40,6 +40,13 @@ JOBS = {
     # בלומפילד: בטון החצר מתחת ליציע, ומדרכת הרחוב לאורך החזית — שניהם נקיים ישר קדימה
     'panoBloomGate':   dict(hfov=120, horizon=0.615, eye=1.7, r=(5.2, 8.4), half=14),
     'panoBloomFacade': dict(hfov=150, horizon=0.575, eye=1.7, r=(3.8, 6.8), half=15),
+    # חמש תחנות ההליכה לאורך החזית. תצלומים רגילים, לא פנורמות — ולכן `proj='rect'`.
+    # החלון בכולן הוא הכביש ישר קדימה, בין אבן השפה למעקות: אין בו אנשים ואין בו עמודים.
+    'panoBloomWalk1': dict(hfov=96, horizon=0.5964, eye=1.7, r=(5.4, 8.6), half=13, proj='rect'),
+    'panoBloomWalk2': dict(hfov=96, horizon=0.5784, eye=1.7, r=(5.1, 8.3), half=13, proj='rect'),
+    'panoBloomWalk3': dict(hfov=96, horizon=0.5918, eye=1.7, r=(5.3, 8.5), half=13, proj='rect'),
+    'panoBloomWalk4': dict(hfov=96, horizon=0.6404, eye=1.7, r=(6.2, 9.4), half=13, proj='rect'),
+    'panoBloomWalk5': dict(hfov=96, horizon=0.5914, eye=1.7, r=(5.3, 8.5), half=13, proj='rect'),
     # החדרים. גובה העין נמדד מהרצפה עצמה: המרצפות, כשהן מיושרות, חייבות לצאת ריבועיות,
     # וזה קורה סביב 1.1 מטר — מצלמה נמוכה, כמו שהחדרים האלה באמת צולמו.
     'panoRoomBed':     dict(hfov=140, horizon=0.500, eye=1.10, r=(2.6, 4.2), half=16),
@@ -71,8 +78,13 @@ def rectify(key: str, spec: dict) -> tuple[Image.Image, tuple[float, float]]:
     r = np.hypot(X, Z)
     theta = np.arctan2(X, -Z)
 
-    u = 0.5 + theta / hfov
-    py = spec['horizon'] + (aspect / hfov) * (spec['eye'] / np.maximum(r, 1e-3))
+    # שתי ההטלות. תצלום רגיל ממפה את `tan θ` ולא את `θ`, והסקאלה האנכית בו נמתחת
+    # ב-`1/cos θ`; להתעלם מזה זה למרוח את המדרכה בקצוות המרצף.
+    rect = spec.get('proj') == 'rect'
+    fN = aspect / 2 / np.tan(hfov / 2) if rect else aspect / hfov
+    u = 0.5 + fN * np.tan(theta) / aspect if rect else 0.5 + theta / hfov
+    stretch = 1 / np.cos(theta) if rect else 1.0
+    py = spec['horizon'] + fN * stretch * (spec['eye'] / np.maximum(r, 1e-3))
     inside = (u >= 0) & (u <= 1) & (py >= 0) & (py <= 1) & (np.abs(np.rad2deg(theta)) <= spec['half'])
 
     px = np.clip(u * (w - 1), 0, w - 1)
@@ -100,7 +112,7 @@ def rectify(key: str, spec: dict) -> tuple[Image.Image, tuple[float, float]]:
     # אם הכביש שם בצל והחלון בשמש, נפתחת רצועה כהה עם קו חד בדיוק במקום שאמור להיות מעבר.
     # לכן המרצף מוכפל בגורם אחד, כך שהממוצע שלו שווה לממוצע הרצפה **בטבעת התפר עצמה**. זאת
     # התאמה של חשיפה בין שני קטעים של אותה תמונה — לא צביעה, ולא הזזה של גוונים.
-    edge_r = spec['eye'] * aspect / (hfov * (1 - spec['horizon']))
+    edge_r = spec['eye'] * fN / (1 - spec['horizon'])
     ring = ring_mean(src, spec, aspect, hfov, edge_r * 1.15)
     have = tile[inside].reshape(-1, 3).mean(axis=0) if inside.any() else tile.reshape(-1, 3).mean(axis=0)
     if ring is not None and have.min() > 1:
@@ -112,8 +124,10 @@ def ring_mean(src, spec, aspect, hfov, r):
     """הממוצע של הרצפה בטבעת אחת סביב הצופה, נקרא מהפנורמה עצמה."""
     h, w, _ = src.shape
     theta = np.linspace(-np.deg2rad(spec['half']), np.deg2rad(spec['half']), 240)
-    u = 0.5 + theta / hfov
-    py = spec['horizon'] + (aspect / hfov) * (spec['eye'] / r)
+    rect = spec.get('proj') == 'rect'
+    fN = aspect / 2 / np.tan(hfov / 2) if rect else aspect / hfov
+    u = 0.5 + fN * np.tan(theta) / aspect if rect else 0.5 + theta / hfov
+    py = spec['horizon'] + fN * (spec['eye'] / r)
     if py < 0 or py > 1:
         return None
     xs = np.clip((u * (w - 1)).astype(int), 0, w - 1)

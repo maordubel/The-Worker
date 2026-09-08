@@ -53,6 +53,19 @@ export const STREETS: Record<string, Street> = {
       { pano: 'panoJaffa', at: 36 },
     ],
   },
+  // **הרחוב האמיתי הראשון במשחק.** חמש תמונות שונות של אותו מקום, אחת עשרה מטר זו מזו,
+  // מאותו גובה ובאותו אור — כלומר ארבעים־וארבעה מטר של הליכה שבהם שום תחנה לא נמתחת.
+  // המספרים אינם נבחרים כאן: הם המרווח שהחבילה נבנתה סביבו.
+  bloomfieldWalk: {
+    nameHe: 'בלומפילד — הדרך לאורך החזית',
+    stops: [
+      { pano: 'panoBloomWalk1', at: 0 },
+      { pano: 'panoBloomWalk2', at: 11 },
+      { pano: 'panoBloomWalk3', at: 22 },
+      { pano: 'panoBloomWalk4', at: 33 },
+      { pano: 'panoBloomWalk5', at: 44 },
+    ],
+  },
   bloomfield: {
     nameHe: 'בלומפילד — מהרחוב אל השער',
     noteHe: 'שתי תמונות אמיתיות של אותו מקום, במרחק 18 מטר.',
@@ -76,8 +89,19 @@ export type Walk = {
   dispose: () => void
 }
 
-/** רבע מהמרווח: מספיק ארוך שלא ייראה כהבהוב, קצר מספיק שלא ייראו שתי תחנות זו דרך זו */
-const BLEND = 0.25
+/**
+ * **איפה עוברים, ולא רק כמה זמן.**
+ *
+ * הניסיון הראשון העביר תחנה ברבע האחרון של המרווח, וזה נראה טוב בתחנה — ורע באמצע:
+ * בהפרש של אחת עשרה מטר זה אומר לעמוד תשעה מטר מנקודת הצילום, ותשעה מטר של פרלקסה על
+ * תמונה אחת מעקמים את גג היציע לקשת. המעבר שייך ל**אמצע**: כך אף פעם לא רחוקים מנקודת
+ * צילום יותר מחמישה מטר, ובטווח הזה התמונה עוד מחזיקה.
+ *
+ * החלון קצר בכוונה — שישית מהמרווח. ארוך ממנו ורואים שתי תחנות בבת אחת; קצר ממנו והמעבר
+ * נראה כמו מתג.
+ */
+const BLEND_FROM = 0.42
+const BLEND_TO = 0.58
 
 export function buildStreet(street: Street, loader: THREE.TextureLoader): Walk {
   const group = new THREE.Group()
@@ -116,7 +140,7 @@ export function buildStreet(street: Street, loader: THREE.TextureLoader): Walk {
       const next = stops[index + 1]?.at
       const span = next === undefined ? 0 : next - here
       const t = span > 0 ? (along - here) / span : 0
-      const rise = span > 0 ? Math.max(0, t - (1 - BLEND)) / BLEND : 0
+      const rise = span > 0 ? Math.max(0, Math.min(1, (t - BLEND_FROM) / (BLEND_TO - BLEND_FROM))) : 0
       // חלקה, לא ליניארית — התחלה וסוף רכים, כדי שהמעבר לא ייראה כמו מתג
       const incoming = rise * rise * (3 - 2 * rise)
 

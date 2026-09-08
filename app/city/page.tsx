@@ -3,7 +3,9 @@ import { Proof, type Shot } from './Proof'
 /**
  * העיר, כדי להסתכל עליה — **ולזוז בה**.
  *
- *   /city?place=panoTamar
+ *   /city?place=panoTamar                       — מקום אחד, להסתכל ולזוז בו
+ *   /city?street=bloomfieldWalk                 — רחוב שלם, חמש תחנות
+ *   /city?mission=bagForTheSteward              — ובתוכו משימה: ללכת, לדבר, למסור
  *
  * למה כאן ולא תחת `/qa`: מסכי ה-QA פטורים מכללי המותג בדיוק משום שהם לא נשלחים, ולכן כל
  * אחד מהם עושה `notFound()` בייצור — יש על זה שומר, והוא צדק כשהפיל את הניסיון הראשון
@@ -34,6 +36,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Q> 
     fov: num(q, 'fov', 58),
     hfov: num(q, 'hfov', 0),
     street: (Array.isArray(q.street) ? q.street[0] : q.street) ?? '',
+    mission: (Array.isArray(q.mission) ? q.mission[0] : q.mission) ?? '',
     cast: (Array.isArray(q.cast) ? q.cast[0] : q.cast) ?? '',
     castAt: num(q, 'castAt', 5),
     actor: q.actor !== '0',
