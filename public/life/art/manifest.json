@@ -1,9 +1,9 @@
 {
  "backdrops": {
   "living": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 499175,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1984943,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -15,9 +15,9 @@
    ]
   },
   "bedroom": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 560357,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 2130541,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -29,9 +29,9 @@
    ]
   },
   "kitchen": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 470354,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1985599,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -43,9 +43,9 @@
    ]
   },
   "street": {
-   "w": 1600,
-   "h": 625,
-   "bytes": 418489,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2557140,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -57,9 +57,9 @@
    ]
   },
   "pitch": {
-   "w": 1600,
-   "h": 615,
-   "bytes": 384124,
+   "w": 4000,
+   "h": 1536,
+   "bytes": 3036957,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -71,9 +71,9 @@
    ]
   },
   "kiosk": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 467204,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1760731,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -85,9 +85,9 @@
    ]
   },
   "approach": {
-   "w": 1600,
-   "h": 532,
-   "bytes": 341796,
+   "w": 4616,
+   "h": 1536,
+   "bytes": 2608408,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -99,12 +99,12 @@
    ]
   },
   "gate7": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 724250,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1764563,
    "yellowLeft": 0,
    "source": "2026-09",
-   "deyellowed": 23514,
+   "deyellowed": 0,
    "box": [
     0,
     0,
@@ -113,12 +113,12 @@
    ]
   },
   "ground": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 748217,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1738430,
    "yellowLeft": 0,
    "source": "2026-09",
-   "deyellowed": 61142,
+   "deyellowed": 0,
    "box": [
     0,
     0,
@@ -127,9 +127,9 @@
    ]
   },
   "corridor": {
-   "w": 1600,
-   "h": 616,
-   "bytes": 274259,
+   "w": 3992,
+   "h": 1536,
+   "bytes": 2073169,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -143,7 +143,7 @@
   "reveal": {
    "w": 1600,
    "h": 900,
-   "bytes": 515666,
+   "bytes": 484776,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -155,9 +155,9 @@
    ]
   },
   "stand": {
-   "w": 1458,
-   "h": 720,
-   "bytes": 431365,
+   "w": 3112,
+   "h": 1536,
+   "bytes": 1973490,
    "yellowLeft": 0,
    "source": "2026-09-05-gate7",
    "deyellowed": 0,
@@ -169,12 +169,12 @@
    ]
   },
   "ussExt": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 786416,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1781993,
    "yellowLeft": 0,
    "source": "2026-09",
-   "deyellowed": 13786,
+   "deyellowed": 65321,
    "box": [
     0,
     0,
@@ -185,7 +185,7 @@
   "ussHall": {
    "w": 1600,
    "h": 900,
-   "bytes": 430016,
+   "bytes": 401322,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05",
    "deyellowed": 0,
@@ -197,9 +197,9 @@
    ]
   },
   "streetEast": {
-   "w": 1600,
-   "h": 625,
-   "bytes": 421023,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2521400,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -213,7 +213,7 @@
   "ussHallPre": {
    "w": 1600,
    "h": 900,
-   "bytes": 505867,
+   "bytes": 474722,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05",
    "deyellowed": 0,
@@ -227,7 +227,7 @@
   "undercroft": {
    "w": 1600,
    "h": 900,
-   "bytes": 565939,
+   "bytes": 533975,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -239,9 +239,9 @@
    ]
   },
   "bedroom90": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 574387,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 2116785,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -253,9 +253,9 @@
    ]
   },
   "street90": {
-   "w": 1600,
-   "h": 625,
-   "bytes": 405599,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2652322,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -267,9 +267,9 @@
    ]
   },
   "classroom": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 492680,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1918980,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -281,9 +281,9 @@
    ]
   },
   "schoolyard": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 556187,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1968131,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -295,9 +295,9 @@
    ]
   },
   "ussMain": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 430016,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1435315,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -311,7 +311,7 @@
   "ussCream": {
    "w": 1600,
    "h": 900,
-   "bytes": 395002,
+   "bytes": 367865,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -323,9 +323,9 @@
    ]
   },
   "ussEnd": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 403319,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1382571,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -337,9 +337,9 @@
    ]
   },
   "ussHigh": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 505867,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1869998,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -351,9 +351,9 @@
    ]
   },
   "ussLow": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 408128,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1543275,
    "yellowLeft": 0,
    "source": "2026-09",
    "deyellowed": 0,
@@ -367,7 +367,7 @@
   "bloomOldGates": {
    "w": 1600,
    "h": 900,
-   "bytes": 405311,
+   "bytes": 365999,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -381,7 +381,7 @@
   "bloomOldCorner": {
    "w": 1600,
    "h": 900,
-   "bytes": 337261,
+   "bytes": 313955,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -395,7 +395,7 @@
   "bloomOldStand": {
    "w": 1600,
    "h": 900,
-   "bytes": 312915,
+   "bytes": 284566,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -409,7 +409,7 @@
   "bloomOldEnd": {
    "w": 1600,
    "h": 900,
-   "bytes": 339350,
+   "bytes": 316033,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -423,7 +423,7 @@
   "bloomOldHigh": {
    "w": 1600,
    "h": 900,
-   "bytes": 341529,
+   "bytes": 316396,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -437,7 +437,7 @@
   "bloomOldTunnel": {
    "w": 1600,
    "h": 900,
-   "bytes": 328509,
+   "bytes": 303823,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -451,7 +451,7 @@
   "bloomNewInside": {
    "w": 1600,
    "h": 900,
-   "bytes": 454136,
+   "bytes": 428784,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -465,7 +465,7 @@
   "bloomNewPitch": {
    "w": 1600,
    "h": 900,
-   "bytes": 421236,
+   "bytes": 390671,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -479,7 +479,7 @@
   "bloomNewDay": {
    "w": 1600,
    "h": 900,
-   "bytes": 571077,
+   "bytes": 539418,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -493,7 +493,7 @@
   "bloomNewPlaza": {
    "w": 1600,
    "h": 900,
-   "bytes": 459360,
+   "bytes": 431859,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -507,7 +507,7 @@
   "bloomNewSea": {
    "w": 1600,
    "h": 900,
-   "bytes": 553331,
+   "bytes": 522898,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -521,7 +521,7 @@
   "bloomNewNight": {
    "w": 1600,
    "h": 900,
-   "bytes": 431282,
+   "bytes": 405355,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -535,7 +535,7 @@
   "introFirstSight": {
    "w": 1600,
    "h": 900,
-   "bytes": 222169,
+   "bytes": 192698,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -549,7 +549,7 @@
   "introDerbyNight": {
    "w": 1600,
    "h": 900,
-   "bytes": 341488,
+   "bytes": 317633,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -563,7 +563,7 @@
   "introReturnHome": {
    "w": 1600,
    "h": 900,
-   "bytes": 356651,
+   "bytes": 333818,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -577,7 +577,7 @@
   "introBeacon": {
    "w": 1600,
    "h": 900,
-   "bytes": 313086,
+   "bytes": 290707,
    "yellowLeft": 0,
    "source": "2026-09e",
    "deyellowed": 0,
@@ -589,9 +589,9 @@
    ]
   },
   "busStation": {
-   "w": 1600,
-   "h": 625,
-   "bytes": 399658,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2105946,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -603,9 +603,9 @@
    ]
   },
   "ramatGan": {
-   "w": 1600,
-   "h": 624,
-   "bytes": 425033,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2289622,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -617,9 +617,9 @@
    ]
   },
   "hatikva": {
-   "w": 1600,
-   "h": 625,
-   "bytes": 509874,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2770636,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -631,9 +631,9 @@
    ]
   },
   "armyRoom": {
-   "w": 1600,
-   "h": 625,
-   "bytes": 339421,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2266519,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -645,9 +645,9 @@
    ]
   },
   "lironCar": {
-   "w": 1600,
-   "h": 625,
-   "bytes": 181459,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2427582,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -659,9 +659,9 @@
    ]
   },
   "gate5": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 428653,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1624633,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05",
    "deyellowed": 0,
@@ -675,7 +675,7 @@
   "kioskNight": {
    "w": 1600,
    "h": 625,
-   "bytes": 352836,
+   "bytes": 332968,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -689,7 +689,7 @@
   "alley": {
    "w": 1600,
    "h": 624,
-   "bytes": 522719,
+   "bytes": 501709,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -703,7 +703,7 @@
   "cup83": {
    "w": 1600,
    "h": 900,
-   "bytes": 496851,
+   "bytes": 466586,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -715,9 +715,9 @@
    ]
   },
   "street90Flags": {
-   "w": 1600,
-   "h": 625,
-   "bytes": 428329,
+   "w": 3936,
+   "h": 1536,
+   "bytes": 2631863,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -731,7 +731,7 @@
   "ussHallNight": {
    "w": 1600,
    "h": 900,
-   "bytes": 457832,
+   "bytes": 431674,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -745,7 +745,7 @@
   "classroom98": {
    "w": 1600,
    "h": 900,
-   "bytes": 518058,
+   "bytes": 485837,
    "yellowLeft": 0,
    "source": "2026-09-05",
    "deyellowed": 0,
@@ -757,9 +757,9 @@
    ]
   },
   "allenby": {
-   "w": 1600,
-   "h": 900,
-   "bytes": 842742,
+   "w": 2728,
+   "h": 1536,
+   "bytes": 1798539,
    "deyellowed": 0,
    "yellowLeft": 0,
    "source": "maor-2026-09-06",
@@ -773,7 +773,7 @@
   "allenby90": {
    "w": 1600,
    "h": 900,
-   "bytes": 800338,
+   "bytes": 720982,
    "deyellowed": 0,
    "yellowLeft": 0,
    "source": "maor-2026-09-06",
@@ -787,7 +787,7 @@
   "allenby2000": {
    "w": 1600,
    "h": 900,
-   "bytes": 774567,
+   "bytes": 705254,
    "deyellowed": 0,
    "yellowLeft": 0,
    "source": "maor-2026-09-06",
@@ -801,7 +801,7 @@
   "promenade": {
    "w": 1600,
    "h": 900,
-   "bytes": 724209,
+   "bytes": 654796,
    "yellowLeft": 0,
    "source": "maor-2026-09-07-panoramas",
    "whatHe": "הטיילת, אחר הצהריים",
@@ -817,7 +817,7 @@
   "promenadeDusk": {
    "w": 1600,
    "h": 900,
-   "bytes": 751338,
+   "bytes": 692060,
    "yellowLeft": 0,
    "source": "maor-2026-09-07-panoramas",
    "whatHe": "הטיילת, שקיעה",
@@ -833,7 +833,7 @@
   "allenbyShops": {
    "w": 1600,
    "h": 900,
-   "bytes": 846152,
+   "bytes": 756173,
    "yellowLeft": 0,
    "source": "maor-2026-09-07-panoramas",
    "whatHe": "אלנבי, חנות התקליטים",
@@ -849,7 +849,7 @@
   "allenbyShopsLate": {
    "w": 1600,
    "h": 900,
-   "bytes": 778923,
+   "bytes": 712801,
    "yellowLeft": 0,
    "source": "maor-2026-09-07-panoramas",
    "whatHe": "אלנבי, אחרי הצהריים",
@@ -867,7 +867,7 @@
   "kid": {
    "w": 184,
    "h": 520,
-   "bytes": 107945,
+   "bytes": 61442,
    "source": "stageA2",
    "box": [
     382,
@@ -881,7 +881,7 @@
   "ofir": {
    "w": 192,
    "h": 527,
-   "bytes": 100066,
+   "bytes": 65712,
    "source": "stageA2",
    "box": [
     654,
@@ -895,7 +895,7 @@
   "amit": {
    "w": 202,
    "h": 522,
-   "bytes": 123204,
+   "bytes": 66436,
    "source": "stageA2",
    "box": [
     756,
@@ -909,7 +909,7 @@
   "efi": {
    "w": 190,
    "h": 526,
-   "bytes": 113792,
+   "bytes": 61164,
    "source": "stageA2",
    "box": [
     844,
@@ -923,7 +923,7 @@
   "keren": {
    "w": 186,
    "h": 503,
-   "bytes": 115701,
+   "bytes": 76279,
    "source": "stageA2",
    "box": [
     934,
@@ -937,7 +937,7 @@
   "kobi": {
    "w": 240,
    "h": 498,
-   "bytes": 143399,
+   "bytes": 95323,
    "source": "stageA2",
    "box": [
     473,
@@ -951,7 +951,7 @@
   "rachel": {
    "w": 201,
    "h": 628,
-   "bytes": 106308,
+   "bytes": 55237,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
@@ -1056,7 +1056,7 @@
   "oldMan": {
    "w": 102,
    "h": 292,
-   "bytes": 37645,
+   "bytes": 70966,
    "source": "stageA2",
    "box": [
     1088,
@@ -1133,14 +1133,14 @@
   "hermesh-back": {
    "w": 164,
    "h": 425,
-   "bytes": 102947,
+   "bytes": 46553,
    "yellowLeft": 0,
    "source": "2026-09e"
   },
   "melamed": {
    "w": 230,
    "h": 331,
-   "bytes": 113248,
+   "bytes": 65147,
    "yellowLeft": 0,
    "source": "2026-09e",
    "soft": true
@@ -1196,7 +1196,7 @@
   "rachel-3q": {
    "w": 205,
    "h": 626,
-   "bytes": 106647,
+   "bytes": 52798,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
@@ -1217,28 +1217,28 @@
   "rachel-speak": {
    "w": 236,
    "h": 618,
-   "bytes": 103170,
+   "bytes": 56589,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-listen": {
    "w": 256,
    "h": 618,
-   "bytes": 113292,
+   "bytes": 60660,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-concern": {
    "w": 220,
    "h": 619,
-   "bytes": 104229,
+   "bytes": 54831,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-laugh": {
    "w": 225,
    "h": 618,
-   "bytes": 110980,
+   "bytes": 57860,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
@@ -1315,7 +1315,7 @@
   "barry96-side": {
    "w": 164,
    "h": 546,
-   "bytes": 72028,
+   "bytes": 72232,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
@@ -1357,28 +1357,28 @@
   "michel96-walk1": {
    "w": 259,
    "h": 576,
-   "bytes": 112616,
+   "bytes": 56176,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "michel96-walk3": {
    "w": 252,
    "h": 568,
-   "bytes": 112637,
+   "bytes": 55031,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "michel96-walk5": {
    "w": 219,
    "h": 561,
-   "bytes": 106169,
+   "bytes": 51879,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel-tray": {
    "w": 201,
    "h": 628,
-   "bytes": 106308,
+   "bytes": 55237,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
@@ -1392,14 +1392,14 @@
   "rachel90": {
    "w": 201,
    "h": 628,
-   "bytes": 106308,
+   "bytes": 55237,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel90-3q": {
    "w": 205,
    "h": 626,
-   "bytes": 106647,
+   "bytes": 52798,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
@@ -1420,63 +1420,63 @@
   "rachel90-arms": {
    "w": 220,
    "h": 619,
-   "bytes": 104229,
+   "bytes": 54831,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel90-apron": {
    "w": 201,
    "h": 628,
-   "bytes": 106308,
+   "bytes": 55237,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel90-door": {
    "w": 236,
    "h": 618,
-   "bytes": 103170,
+   "bytes": 56589,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel90-hug": {
    "w": 225,
    "h": 618,
-   "bytes": 110980,
+   "bytes": 57860,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel90-call": {
    "w": 220,
    "h": 619,
-   "bytes": 104229,
+   "bytes": 54831,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel90-note": {
    "w": 256,
    "h": 618,
-   "bytes": 113292,
+   "bytes": 60660,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel90-point": {
    "w": 236,
    "h": 618,
-   "bytes": 103170,
+   "bytes": 56589,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "rachel90-hips": {
    "w": 220,
    "h": 619,
-   "bytes": 104229,
+   "bytes": 54831,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "manCap": {
    "w": 169,
    "h": 430,
-   "bytes": 107023,
+   "bytes": 50024,
    "yellowLeft": 0,
    "source": "maor-2026-09-05-street",
    "whatHe": "זקן עם כובע קסקט, עומד"
@@ -1544,7 +1544,7 @@
   "bfSteward": {
    "w": 388,
    "h": 1200,
-   "bytes": 631790,
+   "bytes": 602626,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1560,7 +1560,7 @@
   "bfVendor": {
    "w": 385,
    "h": 1200,
-   "bytes": 529000,
+   "bytes": 500857,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1576,7 +1576,7 @@
   "pogi-w1": {
    "w": 835,
    "h": 1264,
-   "bytes": 593872,
+   "bytes": 207337,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1592,7 +1592,7 @@
   "pogi-w2": {
    "w": 835,
    "h": 1264,
-   "bytes": 638187,
+   "bytes": 218923,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1608,7 +1608,7 @@
   "pogi-w3": {
    "w": 835,
    "h": 1264,
-   "bytes": 472754,
+   "bytes": 167211,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1624,7 +1624,7 @@
   "pogi-w4": {
    "w": 835,
    "h": 1264,
-   "bytes": 550881,
+   "bytes": 195175,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1640,7 +1640,7 @@
   "pogi-w5": {
    "w": 835,
    "h": 1264,
-   "bytes": 465621,
+   "bytes": 170270,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1656,7 +1656,7 @@
   "pogi-w6": {
    "w": 835,
    "h": 1264,
-   "bytes": 574115,
+   "bytes": 198537,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1672,7 +1672,7 @@
   "pogi-w7": {
    "w": 835,
    "h": 1264,
-   "bytes": 547051,
+   "bytes": 193132,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1688,7 +1688,7 @@
   "pogi-w8": {
    "w": 835,
    "h": 1264,
-   "bytes": 582154,
+   "bytes": 204120,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1704,7 +1704,7 @@
   "pogi-3q-l": {
    "w": 366,
    "h": 1200,
-   "bytes": 540938,
+   "bytes": 515846,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1720,7 +1720,7 @@
   "pogi-3q-r": {
    "w": 347,
    "h": 1200,
-   "bytes": 601376,
+   "bytes": 576210,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1736,7 +1736,7 @@
   "bfSignGate": {
    "w": 1140,
    "h": 1163,
-   "bytes": 1840611,
+   "bytes": 1700911,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1752,7 +1752,7 @@
   "bfSignBox": {
    "w": 1153,
    "h": 1151,
-   "bytes": 2012694,
+   "bytes": 1958914,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1768,7 +1768,7 @@
   "ofir86": {
    "w": 389,
    "h": 1200,
-   "bytes": 567583,
+   "bytes": 543491,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1785,7 +1785,7 @@
    "w": 528,
    "h": 1584,
    "metres": 1.81,
-   "bytes": 121430,
+   "bytes": 109477,
    "whatHe": "בארי עם הרדיו, עומד",
    "yellowLeft": 0,
    "source": "maor-2026-09-08-green-screen"
@@ -1794,7 +1794,7 @@
    "w": 495,
    "h": 1578,
    "metres": 1.81,
-   "bytes": 109264,
+   "bytes": 97196,
    "whatHe": "בארי עם הרדיו, שלושה־רבעים",
    "yellowLeft": 0,
    "source": "maor-2026-09-08-green-screen"
@@ -1979,7 +1979,7 @@
   "propBus": {
    "w": 504,
    "h": 263,
-   "bytes": 196088,
+   "bytes": 122287,
    "yellowLeft": 0,
    "source": "2026-09"
   },
@@ -2042,70 +2042,70 @@
   "propBagStrap90": {
    "w": 328,
    "h": 320,
-   "bytes": 160535,
+   "bytes": 95449,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propBasketball": {
    "w": 319,
    "h": 320,
-   "bytes": 199537,
+   "bytes": 102830,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propCassette": {
    "w": 336,
    "h": 320,
-   "bytes": 130028,
+   "bytes": 78110,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propChalk": {
    "w": 319,
    "h": 320,
-   "bytes": 143486,
+   "bytes": 76202,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propClipping90": {
    "w": 321,
    "h": 320,
-   "bytes": 146919,
+   "bytes": 91410,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propNote": {
    "w": 312,
    "h": 320,
-   "bytes": 119179,
+   "bytes": 71204,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propNoteOpen": {
    "w": 312,
    "h": 320,
-   "bytes": 144982,
+   "bytes": 84305,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propScorePaper": {
    "w": 320,
    "h": 320,
-   "bytes": 138676,
+   "bytes": 77589,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propTicket91": {
    "w": 323,
    "h": 320,
-   "bytes": 117623,
+   "bytes": 65315,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propWrapper": {
    "w": 320,
    "h": 320,
-   "bytes": 155755,
+   "bytes": 78255,
    "yellowLeft": 0,
    "source": "2026-09"
   },
@@ -2128,7 +2128,7 @@
   "propNewsRack": {
    "w": 151,
    "h": 359,
-   "bytes": 116906,
+   "bytes": 64326,
    "yellowLeft": 0,
    "source": "maor-2026-09-05-street",
    "whatHe": "סטנד העיתונים ליד הדלפק"
@@ -2136,7 +2136,7 @@
   "propCart": {
    "w": 666,
    "h": 323,
-   "bytes": 338844,
+   "bytes": 166293,
    "yellowLeft": 0,
    "source": "maor-2026-09-05-street",
    "whatHe": "עגלת עץ — שנות ה־80 ברחוב"
@@ -2160,7 +2160,7 @@
   "propCrate": {
    "w": 560,
    "h": 410,
-   "bytes": 328767,
+   "bytes": 314705,
    "yellowLeft": 0,
    "source": "maor-2026-09-06",
    "whatHe": "ארגז בקבוקים אדום — הפיקדון, הסחיבה, הישיבה עליו"
@@ -2203,70 +2203,70 @@
   "pen-goal": {
    "w": 633,
    "h": 412,
-   "bytes": 438039,
+   "bytes": 376592,
    "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
    "yellowLeft": 0
   },
   "pen-ball": {
    "w": 387,
    "h": 446,
-   "bytes": 303479,
+   "bytes": 253511,
    "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
    "yellowLeft": 0
   },
   "pen-ball--wet": {
    "w": 418,
    "h": 447,
-   "bytes": 322293,
+   "bytes": 268747,
    "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
    "yellowLeft": 0
   },
   "hoop-board": {
    "w": 812,
    "h": 625,
-   "bytes": 922648,
+   "bytes": 805254,
    "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
    "yellowLeft": 0
   },
   "hoop-ring": {
    "w": 493,
    "h": 545,
-   "bytes": 300780,
+   "bytes": 256607,
    "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
    "yellowLeft": 0
   },
   "hoop-ring--net": {
    "w": 537,
    "h": 543,
-   "bytes": 470787,
+   "bytes": 400422,
    "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
    "yellowLeft": 0
   },
   "hoop-ball": {
    "w": 581,
    "h": 611,
-   "bytes": 673863,
+   "bytes": 560832,
    "source": "maor-2026-09-06-minigames (cut and keyed from his sheets)",
    "yellowLeft": 0
   },
   "pen-ground": {
    "w": 512,
    "h": 512,
-   "bytes": 554081,
+   "bytes": 450873,
    "source": "maor-2026-09-06-minigames (tileable patch, mirrored)",
    "yellowLeft": 0
   },
   "hoop-court": {
    "w": 512,
    "h": 512,
-   "bytes": 505542,
+   "bytes": 424636,
    "source": "maor-2026-09-06-minigames (tileable patch, mirrored)",
    "yellowLeft": 0
   },
   "pen-kids": {
    "w": 660,
    "h": 425,
-   "bytes": 460767,
+   "bytes": 422585,
    "source": "maor-2026-09-06-minigames (cut from his sheets)",
    "yellowLeft": 0,
    "deyellowed": 52
@@ -2274,7 +2274,7 @@
   "hoop-building": {
    "w": 880,
    "h": 600,
-   "bytes": 930941,
+   "bytes": 811359,
    "source": "maor-2026-09-06-minigames (cut from his sheets)",
    "yellowLeft": 0
   }
@@ -2395,7 +2395,7 @@
   "faceOldMan": {
    "w": 150,
    "h": 130,
-   "bytes": 16370,
+   "bytes": 80276,
    "source": "stageA2",
    "box": [
     1088,
@@ -2409,7 +2409,7 @@
   "faceShachor": {
    "w": 320,
    "h": 320,
-   "bytes": 102740,
+   "bytes": 101888,
    "yellowLeft": 0,
    "source": "cut from shachor"
   },
@@ -2444,7 +2444,7 @@
   "faceHermesh": {
    "w": 320,
    "h": 320,
-   "bytes": 117556,
+   "bytes": 116690,
    "yellowLeft": 0,
    "source": "cut from hermesh"
   },
@@ -2586,7 +2586,7 @@
   "livingTable": {
    "w": 753,
    "h": 264,
-   "bytes": 260696,
+   "bytes": 139779,
    "source": "livingFore",
    "box": [
     150,
@@ -2600,56 +2600,56 @@
   "streetFore": {
    "w": 1600,
    "h": 625,
-   "bytes": 608815,
+   "bytes": 385920,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "streetGround": {
    "w": 1600,
    "h": 625,
-   "bytes": 321580,
+   "bytes": 184989,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "overlaySmoke": {
    "w": 1600,
    "h": 900,
-   "bytes": 126771,
+   "bytes": 115627,
    "yellowLeft": 0,
    "source": "2026-09d"
   },
   "overlayConfetti": {
    "w": 1600,
    "h": 900,
-   "bytes": 144315,
+   "bytes": 134889,
    "yellowLeft": 0,
    "source": "2026-09d"
   },
   "overlayHaze": {
    "w": 1600,
    "h": 900,
-   "bytes": 258767,
+   "bytes": 234769,
    "yellowLeft": 0,
    "source": "2026-09d"
   },
   "overlayMist": {
    "w": 1600,
    "h": 900,
-   "bytes": 156903,
+   "bytes": 140762,
    "yellowLeft": 0,
    "source": "2026-09d"
   },
   "standCrowd": {
    "w": 1458,
    "h": 720,
-   "bytes": 260780,
+   "bytes": 250570,
    "yellowLeft": 0,
    "source": "baked-from-crowd-sheets"
   },
   "layerShopfront": {
    "w": 417,
    "h": 467,
-   "bytes": 241166,
+   "bytes": 130658,
    "yellowLeft": 0,
    "source": "maor-2026-09-05-street",
    "whatHe": "חזית חנות נטושה מעבר לכביש"
@@ -2657,7 +2657,7 @@
   "ussCrowd": {
    "w": 1672,
    "h": 453,
-   "bytes": 1482752,
+   "bytes": 1413971,
    "yellowLeft": 0,
    "source": "maor-2026-09-06-ussishkin-crowd (white keyed, trimmed)"
   }
@@ -2673,7 +2673,7 @@
   "paperBefore": {
    "w": 1500,
    "h": 1307,
-   "bytes": 499577,
+   "bytes": 450593,
    "yellowLeft": 0,
    "source": "2026-09"
   },
@@ -2701,281 +2701,281 @@
  },
  "extensions": {
   "living--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 22465,
+   "w": 2728,
+   "h": 537,
+   "bytes": 48033,
    "source": "living",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "living--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 39625,
+   "w": 2728,
+   "h": 537,
+   "bytes": 87800,
    "source": "living",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "bedroom--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 33109,
+   "w": 2728,
+   "h": 537,
+   "bytes": 64446,
    "source": "bedroom",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "bedroom--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 37704,
+   "w": 2728,
+   "h": 537,
+   "bytes": 90252,
    "source": "bedroom",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "kitchen--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 26715,
+   "w": 2728,
+   "h": 537,
+   "bytes": 42509,
    "source": "kitchen",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "kitchen--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 13267,
+   "w": 2728,
+   "h": 537,
+   "bytes": 22814,
    "source": "kitchen",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "street--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 20435,
+   "w": 3936,
+   "h": 537,
+   "bytes": 64064,
    "source": "street",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "street--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 32553,
+   "w": 3936,
+   "h": 537,
+   "bytes": 122692,
    "source": "street",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "pitch--sky": {
-   "w": 1600,
-   "h": 215,
-   "bytes": 22994,
+   "w": 4000,
+   "h": 537,
+   "bytes": 72636,
    "source": "pitch",
    "box": [
     0,
     0,
-    1600,
-    215
+    4000,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "pitch--ground": {
-   "w": 1600,
-   "h": 215,
-   "bytes": 20622,
+   "w": 4000,
+   "h": 537,
+   "bytes": 92643,
    "source": "pitch",
    "box": [
     0,
     0,
-    1600,
-    215
+    4000,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "kiosk--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 24664,
+   "w": 2728,
+   "h": 537,
+   "bytes": 52887,
    "source": "kiosk",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "kiosk--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 11767,
+   "w": 2728,
+   "h": 537,
+   "bytes": 24373,
    "source": "kiosk",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "approach--sky": {
-   "w": 1600,
-   "h": 186,
-   "bytes": 9688,
+   "w": 4616,
+   "h": 537,
+   "bytes": 32306,
    "source": "approach",
    "box": [
     0,
     0,
-    1600,
-    186
+    4616,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "approach--ground": {
-   "w": 1600,
-   "h": 186,
-   "bytes": 24684,
+   "w": 4616,
+   "h": 537,
+   "bytes": 134245,
    "source": "approach",
    "box": [
     0,
     0,
-    1600,
-    186
+    4616,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "gate7--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 18739,
+   "w": 2728,
+   "h": 537,
+   "bytes": 60312,
    "source": "gate7",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
-   "deyellowed": 10383,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "gate7--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 17638,
+   "w": 2728,
+   "h": 537,
+   "bytes": 38856,
    "source": "gate7",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
-   "deyellowed": 24253,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "ground--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 23703,
+   "w": 2728,
+   "h": 537,
+   "bytes": 39460,
    "source": "ground",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
-   "deyellowed": 51225,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "ground--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 19101,
+   "w": 2728,
+   "h": 537,
+   "bytes": 42587,
    "source": "ground",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
-   "deyellowed": 130653,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "corridor--sky": {
-   "w": 1600,
-   "h": 215,
-   "bytes": 8856,
+   "w": 3992,
+   "h": 537,
+   "bytes": 56096,
    "source": "corridor",
    "box": [
     0,
     0,
-    1600,
-    215
+    3992,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "corridor--ground": {
-   "w": 1600,
-   "h": 215,
-   "bytes": 18618,
+   "w": 3992,
+   "h": 537,
+   "bytes": 81039,
    "source": "corridor",
    "box": [
     0,
     0,
-    1600,
-    215
+    3992,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -3009,57 +3009,57 @@
    "yellowLeft": 0
   },
   "stand--sky": {
-   "w": 1458,
-   "h": 251,
-   "bytes": 32916,
+   "w": 3112,
+   "h": 537,
+   "bytes": 72890,
    "source": "stand",
    "box": [
     0,
     0,
-    1458,
-    251
+    3112,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "stand--ground": {
-   "w": 1458,
-   "h": 251,
-   "bytes": 12148,
+   "w": 3112,
+   "h": 537,
+   "bytes": 47114,
    "source": "stand",
    "box": [
     0,
     0,
-    1458,
-    251
+    3112,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussExt--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 9176,
+   "w": 2728,
+   "h": 537,
+   "bytes": 22005,
    "source": "ussExt",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
-   "deyellowed": 10604,
+   "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussExt--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 27087,
+   "w": 2728,
+   "h": 537,
+   "bytes": 69856,
    "source": "ussExt",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -3093,29 +3093,29 @@
    "yellowLeft": 0
   },
   "streetEast--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 14991,
+   "w": 3936,
+   "h": 537,
+   "bytes": 45441,
    "source": "streetEast",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "streetEast--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 17924,
+   "w": 3936,
+   "h": 537,
+   "bytes": 77836,
    "source": "streetEast",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -3177,141 +3177,141 @@
    "yellowLeft": 0
   },
   "bedroom90--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 33294,
+   "w": 2728,
+   "h": 537,
+   "bytes": 58212,
    "source": "bedroom90",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "bedroom90--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 41377,
+   "w": 2728,
+   "h": 537,
+   "bytes": 89276,
    "source": "bedroom90",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "street90--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 19983,
+   "w": 3936,
+   "h": 537,
+   "bytes": 59777,
    "source": "street90",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "street90--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 33437,
+   "w": 3936,
+   "h": 537,
+   "bytes": 126469,
    "source": "street90",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "classroom--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 19727,
+   "w": 2728,
+   "h": 537,
+   "bytes": 42501,
    "source": "classroom",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "classroom--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 20264,
+   "w": 2728,
+   "h": 537,
+   "bytes": 65245,
    "source": "classroom",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "schoolyard--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 24563,
+   "w": 2728,
+   "h": 537,
+   "bytes": 54496,
    "source": "schoolyard",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "schoolyard--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 13502,
+   "w": 2728,
+   "h": 537,
+   "bytes": 42705,
    "source": "schoolyard",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussMain--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 34485,
+   "w": 2728,
+   "h": 537,
+   "bytes": 75830,
    "source": "ussMain",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussMain--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 20960,
+   "w": 2728,
+   "h": 537,
+   "bytes": 39445,
    "source": "ussMain",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -3345,85 +3345,85 @@
    "yellowLeft": 0
   },
   "ussEnd--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 30481,
+   "w": 2728,
+   "h": 537,
+   "bytes": 57610,
    "source": "ussEnd",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussEnd--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 18782,
+   "w": 2728,
+   "h": 537,
+   "bytes": 39172,
    "source": "ussEnd",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussHigh--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 47377,
+   "w": 2728,
+   "h": 537,
+   "bytes": 88895,
    "source": "ussHigh",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussHigh--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 20195,
+   "w": 2728,
+   "h": 537,
+   "bytes": 42745,
    "source": "ussHigh",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussLow--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 38788,
+   "w": 2728,
+   "h": 537,
+   "bytes": 75275,
    "source": "ussLow",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ussLow--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 17769,
+   "w": 2728,
+   "h": 537,
+   "bytes": 35091,
    "source": "ussLow",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -3877,169 +3877,169 @@
    "yellowLeft": 0
   },
   "busStation--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 13422,
+   "w": 3936,
+   "h": 537,
+   "bytes": 44026,
    "source": "busStation",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "busStation--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 26648,
+   "w": 3936,
+   "h": 537,
+   "bytes": 93779,
    "source": "busStation",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ramatGan--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 11550,
+   "w": 3936,
+   "h": 537,
+   "bytes": 19254,
    "source": "ramatGan",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ramatGan--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 33258,
+   "w": 3936,
+   "h": 537,
+   "bytes": 125425,
    "source": "ramatGan",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "hatikva--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 12260,
+   "w": 3936,
+   "h": 537,
+   "bytes": 46136,
    "source": "hatikva",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "hatikva--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 28280,
+   "w": 3936,
+   "h": 537,
+   "bytes": 130698,
    "source": "hatikva",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "armyRoom--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 24346,
+   "w": 3936,
+   "h": 537,
+   "bytes": 79811,
    "source": "armyRoom",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "armyRoom--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 31960,
+   "w": 3936,
+   "h": 537,
+   "bytes": 148830,
    "source": "armyRoom",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "lironCar--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 10472,
+   "w": 3936,
+   "h": 537,
+   "bytes": 37752,
    "source": "lironCar",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "lironCar--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 2307,
+   "w": 3936,
+   "h": 537,
+   "bytes": 18086,
    "source": "lironCar",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "gate5--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 12551,
+   "w": 2728,
+   "h": 537,
+   "bytes": 19862,
    "source": "gate5",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "gate5--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 22016,
+   "w": 2728,
+   "h": 537,
+   "bytes": 58045,
    "source": "gate5",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -4129,29 +4129,29 @@
    "yellowLeft": 0
   },
   "street90Flags--sky": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 19083,
+   "w": 3936,
+   "h": 537,
+   "bytes": 58326,
    "source": "street90Flags",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "street90Flags--ground": {
-   "w": 1600,
-   "h": 218,
-   "bytes": 32548,
+   "w": 3936,
+   "h": 537,
+   "bytes": 127695,
    "source": "street90Flags",
    "box": [
     0,
     0,
-    1600,
-    218
+    3936,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -4213,29 +4213,29 @@
    "yellowLeft": 0
   },
   "allenby--sky": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 42534,
+   "w": 2728,
+   "h": 537,
+   "bytes": 89826,
    "source": "allenby",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "allenby--ground": {
-   "w": 1600,
-   "h": 315,
-   "bytes": 14688,
+   "w": 2728,
+   "h": 537,
+   "bytes": 43224,
    "source": "allenby",
    "box": [
     0,
     0,
-    1600,
-    315
+    2728,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -4413,35 +4413,35 @@
   "street--far": {
    "w": 1600,
    "h": 625,
-   "bytes": 417748,
+   "bytes": 394097,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "street--mid": {
    "w": 1600,
    "h": 625,
-   "bytes": 194724,
+   "bytes": 174166,
    "yellowLeft": 0,
    "source": "2026-09c"
   },
   "street--near": {
    "w": 1600,
    "h": 625,
-   "bytes": 157412,
+   "bytes": 149209,
    "yellowLeft": 0,
    "source": "2026-09c"
   },
   "approach--far": {
    "w": 1600,
    "h": 532,
-   "bytes": 339144,
+   "bytes": 320252,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "approach--mid": {
    "w": 1600,
    "h": 532,
-   "bytes": 183556,
+   "bytes": 169469,
    "yellowLeft": 0,
    "source": "2026-09c"
   },
@@ -4455,14 +4455,14 @@
   "gate7--far": {
    "w": 1600,
    "h": 900,
-   "bytes": 425126,
+   "bytes": 397557,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "gate7--mid": {
    "w": 1600,
    "h": 900,
-   "bytes": 263542,
+   "bytes": 234292,
    "yellowLeft": 0,
    "source": "2026-09c"
   },
@@ -4478,14 +4478,14 @@
   "titleWorker": {
    "w": 1919,
    "h": 820,
-   "bytes": 1349048,
+   "bytes": 811859,
    "yellowLeft": 0,
    "source": "production-clean-2026-09-05"
   },
   "shopHanger": {
    "w": 1400,
    "h": 358,
-   "bytes": 320434,
+   "bytes": 242844,
    "yellowLeft": 0,
    "source": "maor-2026-09-06",
    "whatHe": "המוט והקולבים בחנות האוהדים"
@@ -6978,15 +6978,15 @@
      8.48,
      8.59,
      8.7,
-     8.83,
+     8.82,
      12.3,
-     21.09,
-     29.87,
+     21.08,
+     29.86,
      38.65,
-     44.06,
+     44.05,
      49.46,
-     54.87,
-     60.27,
+     54.86,
+     60.26,
      65.65,
      71.03,
      76.4,
@@ -7457,33 +7457,33 @@
      123.78,
      115.66,
      107.54,
-     99.34,
-     91.13,
-     82.93,
-     74.72,
-     66.52,
-     58.31,
-     50.1,
-     41.9,
-     33.69,
-     25.49,
-     17.28,
-     17.18,
-     17.09,
-     25.21,
-     33.33,
-     41.53,
-     49.74,
-     57.94,
-     66.15,
-     74.35,
-     82.56,
-     90.77,
-     98.97,
-     107.18,
-     115.38,
-     123.59,
-     131.79,
+     99.42,
+     91.29,
+     83.17,
+     75.04,
+     66.92,
+     58.8,
+     50.67,
+     42.55,
+     34.42,
+     26.3,
+     18.17,
+     18.15,
+     18.14,
+     26.26,
+     34.38,
+     42.5,
+     50.63,
+     58.75,
+     66.88,
+     75.0,
+     83.13,
+     91.25,
+     99.38,
+     107.5,
+     115.63,
+     123.75,
+     131.88,
      140.0,
      140.0,
      140.0,
@@ -7498,21 +7498,21 @@
      116.98,
      109.03,
      101.07,
-     93.1,
-     85.01,
-     76.92,
-     68.82,
-     60.52,
-     52.22,
-     43.92,
-     35.62,
-     27.32,
-     19.02,
-     18.01,
-     17.49,
-     17.14,
-     16.79,
-     16.44,
+     92.98,
+     84.89,
+     76.8,
+     68.7,
+     60.4,
+     52.1,
+     43.8,
+     35.5,
+     27.2,
+     18.9,
+     17.89,
+     17.37,
+     17.02,
+     16.67,
+     16.32,
      16.11,
      15.91,
      15.7,
@@ -7567,42 +7567,42 @@
      140.0,
      140.0,
      140.0,
-     140.0,
-     131.32,
-     122.64,
-     113.96,
-     105.28,
-     96.6,
-     87.92,
-     79.24,
-     70.56,
-     61.88,
-     53.15,
-     44.41,
-     35.68,
-     26.94,
-     18.2,
+     132.02,
+     123.34,
+     114.66,
+     105.98,
+     97.3,
+     88.62,
+     79.94,
+     71.26,
+     62.58,
+     53.91,
+     45.17,
+     36.43,
+     27.7,
+     18.96,
+     10.23,
      9.47,
      9.41,
      9.36,
      9.3,
      9.24,
-     9.17,
-     9.11,
-     9.05,
-     8.98,
-     8.91,
-     8.9,
-     8.89,
-     8.88,
-     8.87,
-     8.86,
-     8.85,
-     8.84,
-     8.83,
-     8.82,
-     8.81,
-     8.81
+     9.19,
+     9.13,
+     9.08,
+     9.02,
+     8.96,
+     8.96,
+     8.96,
+     8.96,
+     8.96,
+     8.96,
+     8.96,
+     8.96,
+     8.96,
+     8.96,
+     8.96,
+     8.96
     ]
    },
    "w": 1925,
@@ -7641,21 +7641,21 @@
      8.79,
      8.79,
      8.79,
-     8.79,
-     9.8,
-     10.8,
-     11.81,
-     12.82,
-     13.83,
-     14.84,
-     15.85,
-     24.6,
-     33.35,
-     42.09,
-     50.84,
-     59.59,
-     68.34,
-     77.08,
+     9.51,
+     10.52,
+     11.52,
+     12.53,
+     13.54,
+     14.55,
+     15.56,
+     16.57,
+     25.32,
+     34.07,
+     42.81,
+     51.56,
+     60.31,
+     69.06,
+     77.8,
      85.83,
      93.57,
      101.31,
@@ -8078,7 +8078,7 @@
     "key": "panoBloom24--tile",
     "wide": 4.0,
     "deep": 4.0,
-    "bytes": 1368870
+    "bytes": 3560959
    },
    "source": "maor-2026-09-08-bloomfield-24m",
    "whatHe": "בלומפילד — 24 מטר מהעמוד, 360 מעלות",
@@ -8283,6 +8283,228 @@
      120.46
     ]
    }
+  },
+  "panoBloom18": {
+   "w": 4096,
+   "h": 1099,
+   "horizon": 0.6,
+   "nearRgb": [
+    184,
+    163,
+    152
+   ],
+   "yellowIn": 764,
+   "yellowLeft": 0,
+   "bytes": 6548868,
+   "tile": {
+    "key": "panoBloom18--tile",
+    "wide": 4.0,
+    "deep": 4.0,
+    "bytes": 3217503
+   },
+   "source": "maor-2026-09-09-bloomfield-18m",
+   "whatHe": "בלומפילד — 18 מטר מהעמוד, 360 מעלות",
+   "proj": "cyl",
+   "hFovDeg": 360,
+   "depth": {
+    "fromDeg": -179.062,
+    "toDeg": 179.062,
+    "far": 140.0,
+    "metres": [
+     102.54,
+     102.54,
+     101.94,
+     94.05,
+     85.81,
+     77.52,
+     69.22,
+     60.92,
+     52.63,
+     44.33,
+     36.03,
+     27.74,
+     19.44,
+     18.44,
+     17.77,
+     17.09,
+     16.42,
+     16.02,
+     18.42,
+     18.66,
+     18.96,
+     19.26,
+     19.47,
+     19.6,
+     19.66,
+     19.44,
+     19.14,
+     18.85,
+     18.45,
+     18.06,
+     17.66,
+     17.27,
+     16.87,
+     13.67,
+     12.97,
+     12.27,
+     11.58,
+     10.97,
+     10.44,
+     9.99,
+     9.82,
+     9.71,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.61,
+     9.63,
+     9.66,
+     9.68,
+     9.73,
+     9.8,
+     9.88,
+     9.95,
+     10.03,
+     10.1,
+     10.22,
+     10.52,
+     12.59,
+     14.66,
+     16.73,
+     25.43,
+     34.1,
+     42.77,
+     51.44,
+     60.08,
+     68.7,
+     77.32,
+     85.93,
+     94.55,
+     103.17,
+     111.74,
+     120.14,
+     126.76,
+     133.38,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     131.55,
+     123.11,
+     114.66,
+     106.22,
+     97.77,
+     89.32,
+     80.88,
+     72.43,
+     63.98,
+     55.54,
+     47.09,
+     38.65,
+     30.2,
+     22.2,
+     14.04,
+     14.32,
+     14.6,
+     14.88,
+     15.16,
+     15.44,
+     15.72,
+     16.0,
+     16.28,
+     16.57,
+     16.85,
+     17.13,
+     17.41,
+     17.24,
+     16.61,
+     16.16,
+     15.71,
+     15.26,
+     14.8,
+     14.35,
+     13.9,
+     13.45,
+     12.99,
+     12.54,
+     12.09,
+     11.63,
+     11.18,
+     10.73,
+     10.73,
+     10.73,
+     10.73,
+     10.73,
+     19.35,
+     27.97,
+     36.58,
+     36.56,
+     36.53,
+     36.5,
+     36.48,
+     36.45,
+     36.42,
+     36.4,
+     36.37,
+     36.34,
+     36.32,
+     36.29,
+     36.26,
+     27.62,
+     18.97,
+     10.33,
+     10.33,
+     10.33,
+     10.36,
+     10.91,
+     11.47,
+     12.49,
+     13.9,
+     15.31,
+     16.99,
+     18.66,
+     20.34,
+     22.02,
+     23.7,
+     25.37,
+     28.53,
+     37.17,
+     45.82,
+     54.44,
+     62.52,
+     70.61,
+     78.23,
+     85.47,
+     92.71,
+     99.67,
+     106.64,
+     113.61,
+     120.58,
+     127.54,
+     134.51,
+     140.0,
+     140.0,
+     140.0,
+     140.0,
+     140.0
+    ]
+   }
   }
  },
  "textures": {
@@ -8473,7 +8695,7 @@
   "tunnelReveal": {
    "w": 788,
    "h": 1400,
-   "bytes": 463533,
+   "bytes": 438969,
    "yellowLeft": 0,
    "source": "2026-09-05"
   }
@@ -8482,63 +8704,63 @@
   "shirtVisa86": {
    "w": 963,
    "h": 855,
-   "bytes": 377841,
+   "bytes": 234905,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtDiadoraRed": {
    "w": 963,
    "h": 886,
-   "bytes": 420541,
+   "bytes": 249743,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtDiadoraWhite": {
    "w": 963,
    "h": 812,
-   "bytes": 364123,
+   "bytes": 238551,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtKing": {
    "w": 946,
    "h": 900,
-   "bytes": 543067,
+   "bytes": 365531,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtShikun": {
    "w": 938,
    "h": 900,
-   "bytes": 279938,
+   "bytes": 203782,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtCrt": {
    "w": 761,
    "h": 900,
-   "bytes": 313861,
+   "bytes": 219598,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtRedDevil": {
    "w": 963,
    "h": 853,
-   "bytes": 311048,
+   "bytes": 211635,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtBasket90": {
    "w": 714,
    "h": 900,
-   "bytes": 354572,
+   "bytes": 234804,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   },
   "shirtVisa85": {
    "w": 963,
    "h": 894,
-   "bytes": 467876,
+   "bytes": 296050,
    "yellowLeft": 0,
    "source": "shirts-2026-09-05"
   }
