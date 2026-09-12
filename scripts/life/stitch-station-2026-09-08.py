@@ -157,10 +157,41 @@ def stitch(folder: Path, key: str, horizon: float, hfov_deg: float, width: int):
                 bytes=(OUT / f'{key}.png').stat().st_size)
 
 
-def floor_tile(folder: Path, key: str, metres: float):
+def seamless(rgb: np.ndarray, feather: float = 0.16) -> np.ndarray:
+    """
+    מרצף שחוזר על עצמו כל ארבעה מטר, ושפתו הימנית לא נראית כמו שפתו השמאלית, מצייר קו
+    ישר על הרצפה כל ארבעה מטר. מגלגלים את התמונה בחצי, וממסכים את **התפר** שנוצר במרכז
+    עם התמונה המקורית — כך שתי השפתיים המקוריות נעשות זהות, והחדשה נמסכת ולא נחתכת.
+    """
+    h, w, _ = rgb.shape
+    a = rgb.astype(np.float32)
+    b = np.roll(np.roll(a, w // 2, axis=1), h // 2, axis=0)
+    fx = np.clip((np.abs(np.arange(w) - w / 2) / (feather * w)), 0, 1)[None, :]
+    fy = np.clip((np.abs(np.arange(h) - h / 2) / (feather * h)), 0, 1)[:, None]
+    m = np.minimum(fx, fy)                       # 0 בדיוק על התפר, 1 הרחק ממנו
+    m = (m * m * (3 - 2 * m))[..., None]
+    return np.clip(np.roll(np.roll(b * m + a * (1 - m), -w // 2, axis=1), -h // 2, axis=0),
+                   0, 255).astype(np.uint8)
+
+
+def match_tone(tile: np.ndarray, target: list[int]) -> np.ndarray:
+    """
+    הצלחת והפנורמה מצלמות **את אותו אספלט**, ולכן כל הפרש גוון ביניהן הוא של המצלמה ולא
+    של המקום. בלי היישור הזה נראית על המדרכה מדרגת גוון אופקית בדיוק במקום שבו האחת
+    מוסרת לשנייה. מיישרים חציון לחציון, בערוצים בנפרד, ובכפל — כדי שהצללים יישארו צללים.
+    """
+    med = np.median(tile.reshape(-1, 3), axis=0)
+    gain = np.array(target, np.float32) / np.maximum(med, 1e-3)
+    gain = np.clip(gain, 0.75, 1.33)             # יישור, לא צביעה מחדש
+    return np.clip(tile.astype(np.float32) * gain, 0, 255).astype(np.uint8)
+
+
+def floor_tile(folder: Path, key: str, metres: float, near: list[int]):
     """צלחת הרצפה היא כבר מבט מלמעלה בקנה מידה ידוע — היא **המרצף עצמו**, בלי יישור."""
     path = next(folder.glob('*-floor.png'))
     rgb, _ = deyellow(np.array(Image.open(path).convert('RGB')))
+    rgb = match_tone(seamless(rgb), near)
+    rgb, _ = deyellow(rgb)                       # היישור עצמו יכול להסיט פיקסל אל תוך הפס
     left = int(yellow_mask(rgb).sum())
     if left:
         raise SystemExit(f'{key} floor: {left} yellow pixels survived')
@@ -178,13 +209,14 @@ def main() -> int:
     ap.add_argument('--width', type=int, default=4096)
     ap.add_argument('--floor-metres', type=float, default=4.0)
     ap.add_argument('--what', default='')
+    ap.add_argument('--source', default='maor-2026-09-08-bloomfield-24m')
     a = ap.parse_args()
 
     folder = Path(a.folder)
     print(f'{a.key}:')
     row = stitch(folder, a.key, a.horizon, a.hfov, a.width)
-    row['tile'] = floor_tile(folder, a.key, a.floor_metres)
-    row['source'] = 'maor-2026-09-08-bloomfield-24m'
+    row['tile'] = floor_tile(folder, a.key, a.floor_metres, row['nearRgb'])
+    row['source'] = a.source
     row['whatHe'] = a.what or a.key
     row['proj'] = 'cyl'
     row['hFovDeg'] = 360

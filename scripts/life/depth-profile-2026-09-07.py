@@ -64,6 +64,7 @@ JOBS = {
     'panoRoomGrocery': (140, 0.500, 1.1),
     # חמש תחנות חזית בלומפילד — תצלומים רגילים, ולכן ההטלה הרביעית
     'panoBloom24': (360, 0.60, 1.7),
+    'panoBloom18': (360, 0.60, 1.7),
     'panoBloomWalk1': (96, 0.5964, 1.7, 'rect', 'bloomWalk'),
     'panoBloomWalk2': (96, 0.5784, 1.7, 'rect', 'bloomWalk'),
     'panoBloomWalk3': (96, 0.5918, 1.7, 'rect', 'bloomWalk'),

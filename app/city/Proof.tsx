@@ -325,8 +325,10 @@ export function Proof({ shot }: { shot: Shot }) {
           if (body) body.figure.material.opacity = questRef.current.done.has(beat.id) ? 0.92 : 1
         }
       }
-      // כמה נהלך בפועל — הצילום האוטומטי קורא את זה, אחרת "לא זז" ו"זז קצת" נראים אותו דבר
+      // כמה נהלך בפועל ולאן מסתכלים — הצילום האוטומטי קורא את שניהם. בלי המספרים האלה
+      // "לא זז" ו"זז קצת" נראים אותו דבר, וסיבוב של שמונים מעלות נראה כמו סיבוב שלם.
       box.dataset.along = (-view.z).toFixed(2)
+      box.dataset.yaw = view.yaw.toFixed(1)
       three.renderer.render(three.scene, three.camera)
       raf = requestAnimationFrame(frame)
     }

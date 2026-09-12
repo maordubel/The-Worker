@@ -32,10 +32,19 @@ import type { MasterCheckpoint } from '../checkpoint'
  * a game object, and never reads game state except through the bus. That boundary is what
  * brief §28 is protecting: the React tree can be rebuilt, and the game keeps playing.
  *
- * `Scale.RESIZE` rather than `FIT` on purpose. `FIT` letterboxes a 16:9 design into a
- * portrait phone and wastes a third of the screen; `RESIZE` gives the canvas whatever
- * box the layout hands it and the scenes pick a camera zoom from the width. That is how
- * the same world is playable on a 390px phone and a laptop without a second layout.
+ * `Scale.NONE` — not `FIT`, and no longer `RESIZE`. `FIT` letterboxes a 16:9 design into
+ * a portrait phone and wastes a third of the screen. `RESIZE` gave the canvas whatever box
+ * the layout handed it, which was right — but it also **forces** the drawing buffer to the
+ * parent's size in CSS pixels and ignores `zoom` while doing it (`updateScale`, the RESIZE
+ * branch). On a phone that reports three device pixels per CSS pixel, that meant a buffer
+ * of 390×842 stretched by the browser across 1170×2526: the whole game, every painting,
+ * every face and every letter Phaser draws, magnified threefold before it reached the eye.
+ * Measured on 11.9.2026, and it was true of every room without exception.
+ *
+ * `NONE` hands the size over completely, which is what the shell already wanted: React
+ * measures the box, `resize` below turns it into device pixels for the buffer and back
+ * into CSS pixels for the element. The scenes are untouched — they work in world units and
+ * a camera zoom, and both grow together.
  */
 
 /**
@@ -57,6 +66,15 @@ export type LifeSnapshot = {
   /** the needle's position inside a directed master event, when one is open */
   checkpoint: MasterCheckpoint | null
 }
+
+/**
+ * כמה פיקסלים אמיתיים יש בפיקסל CSS אחד — חסום בשלוש.
+ *
+ * הטלפונים של היום מדווחים 2 או 3, ומעל זה כבר משלמים ברביעיית שטח על הבדל שאי אפשר
+ * לראות. על שרת (אין `window`) התשובה היא אחד, וכך הבנייה הסטטית לא נופלת.
+ */
+const pixels = (): number =>
+  typeof window === 'undefined' ? 1 : Math.min(Math.max(window.devicePixelRatio || 1, 1), 3)
 
 export type MapPlace = {
   id: string
@@ -245,6 +263,10 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     probing,
   }
 
+  // הקופסה שהפריסה כבר נתנה לאלמנט. בלי זה `NONE` נפתח על ברירת המחדל של פייזר
+  // (1024×768) לפריים אחד, והדבר הראשון שרואים הוא חדר בגודל הלא נכון.
+  const box = options.parent.getBoundingClientRect()
+
   const game = new Phaser.Game({
     type: probing ? Phaser.CANVAS : Phaser.AUTO,
     parent: options.parent,
@@ -256,8 +278,13 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     antialias: true,
     roundPixels: true,
     scale: {
-      mode: Phaser.Scale.RESIZE,
+      mode: Phaser.Scale.NONE,
       autoCenter: Phaser.Scale.CENTER_BOTH,
+      // החוצץ בפיקסלי מכשיר, האלמנט בפיקסלי CSS: פייזר קובע ‎canvas.width = width‎ ואת
+      // רוחב ה-CSS ל-‎width × zoom‎, ולכן מוסרים לו מידה מוכפלת ו-zoom הפוך.
+      zoom: 1 / pixels(),
+      width: Math.round(box.width * pixels()) || 390,
+      height: Math.round(box.height * pixels()) || 844,
     },
     physics: {
       default: 'arcade',
@@ -289,7 +316,13 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
   const facade: LifeRuntime = {
     input,
     resize: (width: number, height: number) => {
-      if (width > 0 && height > 0) game.scale.resize(width, height)
+      // הקליפה מודדת ב-CSS ולא צריכה לדעת על צפיפות פיקסלים; התרגום קורה כאן, במקום
+      // היחיד שנוגע בפייזר ממילא.
+      if (width > 0 && height > 0) {
+        const r = pixels()
+        game.scale.setZoom(1 / r)
+        game.scale.resize(width * r, height * r)
+      }
     },
     advance: () => dialogue.advance(),
     choose: (id: string) => dialogue.choose(id),

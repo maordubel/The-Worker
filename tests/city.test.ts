@@ -22,6 +22,12 @@ const manifest = JSON.parse(readFileSync(join(ART, 'manifest.json'), 'utf8')) as
     {
       w: number; h: number; horizon: number; nearRgb: number[]; yellowLeft: number; source: string
       tile?: { key: string; wide: number; deep: number }
+      // פרופיל העומק נכתב על ידי `depth-profile` רק לפנורמות שבמשחק. שורות ישנות שכבר
+      // אינן ב-PANOS נשארו בלעדיו, ולכן הוא אופציונלי כאן — והבדיקה עצמה היא זו שדורשת
+      // אותו לכל מפתח שכן נמצא ב-PANOS. בלי הסימן הזה TS מסיק את הצורה מהקובץ, מוצא שם
+      // שורה בלי `depth`, ונופל על שדה שקיים בכל שורה שהמשחק באמת קורא.
+      depth?: { fromDeg: number; toDeg: number; far: number; metres: number[] }
+      proj?: string; hFovDeg?: number; whatHe?: string; yellowIn?: number; bytes?: number
     }
   >
 }
@@ -301,6 +307,33 @@ describe('העיר — הפנורמות מדויקות מול מה שנשמר', 
         expect(member.metres, `${key} height disagrees with heights.ts`).toBeCloseTo(canonical, 2)
       }
     })
+  })
+
+  it('נותנת לשתי תחנות גליליות של אותו רחוב בדיוק אותה מצלמה', () => {
+    // **מה שנשבר כאן בשקט.** שתי פנורמות שנתפרו באופק שונה, או מגובה עין שונה, נראות כל
+    // אחת בסדר לחוד; הפגם מופיע רק בצעד שביניהן, כשהקרקע קופצת תחת הרגליים באמצע הליכה.
+    // ולא לזה מסתכלים כשבודקים תמונה אחת. לכן הבדיקה היא על **הזוג**.
+    //
+    // למה רק על גלילים: תחנה גלילית נתפרת כאן מארבעה ריבועים, ולכן אני זה שקובע לה את
+    // האופק ואת גובה העין — ומה שאני קובע אני יכול לשמור זהה. רחוב שבנוי מתצלומים
+    // בודדים מקבל את מה שיש בכל תצלום, ושם הפיזור הוא נתון ולא החלטה: חמש תחנות
+    // `bloomfieldWalk` נמדדו בפיזור של ארבעה אחוזים באופק, ושתי תחנות `bloomfield` צולמו
+    // בכלל בשתי עדשות שונות. זאת בדיוק השיטה שהתפירה הגלילית באה להחליף, והבדיקה שומרת
+    // שהחדשה לא תידרדר אליה בלי שמישהו ישים לב.
+    for (const [id, street] of Object.entries(STREETS)) {
+      const specs = street.stops.map((stop) => PANOS[stop.pano]).filter(Boolean)
+      const rings = specs.filter((spec) => spec!.hFovDeg >= 359)
+      if (rings.length < 2) continue
+      const first = rings[0]!
+      for (const spec of rings.slice(1)) {
+        expect(spec!.horizon, `${id}: ${spec!.key} sits at a different horizon`).toBeCloseTo(first.horizon, 4)
+        expect(spec!.eye, `${id}: ${spec!.key} was shot from a different height`).toBeCloseTo(first.eye, 3)
+        // יחס צלעות, ביחס ולא בהפרש: כמה פיקסלים הפרש בין קבצי מקור הם שברירי אחוז ואי
+        // אפשר לראות אותם. אחוז שלם כבר מותח את הרחוב לרוחב בתחנה אחת ולא באחרת — וזה כן.
+        expect(Math.abs(spec!.aspect / first.aspect - 1), `${id}: ${spec!.key} has a different aspect`)
+          .toBeLessThan(0.01)
+      }
+    }
   })
 
   it('לא מכריזה על צהוב בלוח', () => {

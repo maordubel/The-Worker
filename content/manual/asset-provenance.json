@@ -76,14 +76,14 @@
     "ussMain.png"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מסירות הגרפיקה של מאור הראל, ספטמבר 2026 — scripts/life/ingest-2026-09.py · ingest-2026-09b.py · ingest-2026-09c.py · ingest-2026-09-05-art.py · ingest-allenby-2026-09-06.py · ingest-panoramas-2026-09-07.py · ingest-gate7-2026-09-05.py",
+   "sourceTitle": "מסירות הגרפיקה של מאור הראל, ספטמבר 2026 — scripts/life/ingest-2026-09.py · ingest-2026-09b.py · ingest-2026-09c.py · ingest-2026-09-05-art.py · ingest-allenby-2026-09-06.py · ingest-panoramas-2026-09-07.py · ingest-gate7-2026-09-05.py · מסירת ההגדלה של מאור הראל, 11.9.2026 — THE-WORKER-2D-BACKGROUNDS-PASS-01..08, image-to-image מהציור הקיים · scripts/life/finish-backdrops.py",
    "treatment": [
     "de-yellow",
     "quantise",
     "palette-png"
    ],
    "confidence": 2,
-   "noteHe": "שישים ואחד החדרים שהמשחק עומד בהם. כל אחד מהם הגיע כפריים גמור באחת המסירות שלך, וסקריפט הקליטה שקלט אותו רשום בשדה המקור — כולל התאריך. אף אחד מהם לא צויר כאן ואף אחד מהם לא נלקח מהאינטרנט."
+   "noteHe": "שישים ואחד החדרים שהמשחק עומד בהם. כל אחד מהם הגיע כפריים גמור באחת המסירות שלך, וסקריפט הקליטה שקלט אותו רשום בשדה המקור — כולל התאריך. אף אחד מהם לא צויר כאן ואף אחד מהם לא נלקח מהאינטרנט. ב-11.9.2026 עברו 29 מהם מסירת הגדלה: אותה קומפוזיציה בדיוק, בגובה 1536 במקום 900 או 625, כי הקנבס התחיל לצייר בפיקסלים האמיתיים של המסך. נמדד לפני הכנסה — אפס הזזה בכל 29, מתאם 0.88 עד 0.99 מול הציור הקודם."
   },
   {
    "key": "art-backdrop-wide",
@@ -1642,6 +1642,53 @@
    "confidence": 2,
    "noteHe": "רקע בלבד, בלי טקסט מלבד המיתוג שמאור צייר לתוכו (שם המשחק, הסמל, והכתובת TheWorker.DubelTeam.com). הסטורי מ-941×1672 (9:16) שהוגדל ל-1080×1920; הריבוע מקובץ נפרד של 1254×1254 שהוקטן ל-1080. שניהם עברו נסיגה רחבה מהצהוב לפני ההקטנה ואחריה — הריבוע ייצר 7 פיקסלים צהובים בהקטנה עצמה, כי resample ממציא צבעים בין־פיקסליים — ושניהם נמדדו 0 על הדיסק. אזורי הטקסט ב-lib/life/runtime/shareCard.ts נמדדו מול הקבצים האלה ולא נוחשו.",
    "folder": "public/life/share"
+  },
+  {
+   "key": "art-figure-bloomfield-pack",
+   "kind": "figure",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "barryRadio-3q.png",
+    "barryRadio.png",
+    "barryToday-3q.png",
+    "barryToday.png",
+    "bfSteward.png",
+    "bfVendor.png",
+    "michel99-3q.png",
+    "michel99.png",
+    "ofir86.png",
+    "pogi-3q-l.png",
+    "pogi-3q-r.png"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "מסירות הגרפיקה של מאור הראל, 8–9.9.2026 — THE-WORKER-BLOOMFIELD-PACK ושתי תמונות בארי עם המקלט · scripts/life/ingest-bloomfield-pack-2026-09-08.py",
+   "treatment": [
+    "de-yellow",
+    "quantise",
+    "palette-png"
+   ],
+   "confidence": 2,
+   "noteHe": "אחת עשרה דמויות שהגיעו במסירת בלומפילד: בארי עם המקלט ובארי היום, מישל 99׳, אופיר 86׳, הסדרן והרוכל, ושתי פניות של פוגי. כולן הגיעו כמסך ירוק, וסקריפט הקליטה — הרשום בשדה המקור — הוא שהוריד את הרקע ויישר את מחזור ההליכה על החולצה. אף אחת מהן לא צוירה כאן."
+  },
+  {
+   "key": "art-prop-bloomfield-signs",
+   "kind": "prop",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "bfSignBox.png",
+    "bfSignGate.png"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "מסירות הגרפיקה של מאור הראל, 8.9.2026 — THE-WORKER-BLOOMFIELD-PACK · scripts/life/ingest-bloomfield-pack-2026-09-08.py",
+   "treatment": [
+    "de-yellow",
+    "quantise",
+    "palette-png"
+   ],
+   "confidence": 2,
+   "noteHe": "שני שלטים מחזית בלומפילד — קופה ושער. הגיעו באותה מסירה ובאותו מסך ירוק כמו הדמויות."
   }
  ]
 }

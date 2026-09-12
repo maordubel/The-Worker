@@ -8,8 +8,8 @@ Two jobs, one script, run after ANY backdrop lands in `public/life/art/`:
    at ~3 MB each — six of them, 18 MB, for a game whose room budget is 3.6 MB
    (`tests/life.test.ts`, "keeps any single room inside a sane download"). They also
    skipped `build-art.py`, so the manifest still described the files they replaced and
-   the yellow scan never saw them. Here each backdrop wider than 1600px is brought down to
-   1600, quantised to the same 160-colour dithered palette `build-art.py` uses, de-yellowed
+   the yellow scan never saw them. Here each backdrop taller than 1536px is brought down to
+   1536, quantised to the same 160-colour dithered palette `build-art.py` uses, de-yellowed
    with the same function, measured from the saved FILE, and its manifest row rewritten.
 
 2. **Extend for portrait.** A 16:9 painting on a 9:19.5 phone can either fill the glass —
@@ -34,6 +34,28 @@ import sys
 
 from PIL import Image, ImageFilter
 
+try:
+    import oxipng
+except ImportError:  # לא מותקן — הצינור עובד, הקבצים פשוט גדולים יותר
+    oxipng = None
+
+
+def squeeze(path):
+    """
+    דחיסה מחדש, בלי לאבד פיקסל אחד.
+
+    PNG הוא פורמט חסר-אובדן, אבל יש בו הרבה דרכים לקודד את אותה תמונה בדיוק, והן לא
+    שוות בגודל. ‎`optimize=True`‎ של PIL בוחר אחת סבירה; מעבר שסורק את כל צירופי המסננים
+    בוחר את הטובה ביותר, ומוריד בין 16% ל-22% — על אותם פיקסלים בדיוק, מאומת בגיבוב.
+    זה חשוב במיוחד עכשיו: החדרים גדלו פי שלושה בשטח כדי להתאים למסך, ורבע מזה חוזר חינם.
+    """
+    if oxipng is None:
+        return
+    try:
+        oxipng.optimize(path, level=4, strip=oxipng.StripChunks.safe())
+    except Exception:
+        pass
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -54,7 +76,13 @@ ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
 ART = os.path.join(ROOT, 'public', 'life', 'art')
 MANIFEST = os.path.join(ART, 'manifest.json')
 
-MAX_WIDTH = 1600
+# **הגובה הוא הגבול, לא הרוחב.** 11.9.2026.
+#
+# הציור ממלא את גובה הזכוכית, ולכן הגובה שלו הוא מה שקובע אם הוא חד. הגבול הישן — 1600
+# רוחב — נולד כשכל החדרים היו 16:9, ובחדר רחב הוא חתך דווקא את המימד שקובע: רחוב של
+# ‎1600×625‎ עבר בלי שינוי והוצג מוגדל פי 3.6. עכשיו הקנבס מצייר בפיקסלים של המכשיר,
+# והמסירה נבנתה לגובה 1536 בדיוק בשביל זה. גבול על הרוחב היה מוחק אותה בדרך פנימה.
+MAX_HEIGHT = 1536
 COLOURS = 160
 # how tall the extension may grow, as a fraction of the painting's height
 EXT_CAP = 0.35
@@ -151,13 +179,14 @@ def finish(key, manifest):
     path = os.path.join(ART, f'{key}.png')
     im = Image.open(path).convert('RGB')
     w, h = im.size
-    if w > MAX_WIDTH:
-        im = im.resize((MAX_WIDTH, round(h * MAX_WIDTH / w)), Image.LANCZOS)
+    if h > MAX_HEIGHT:
+        im = im.resize((round(w * MAX_HEIGHT / h), MAX_HEIGHT), Image.LANCZOS)
         w, h = im.size
     if key in GREEN_BELOW:
         im = green_grass(im, GREEN_BELOW[key])
     out, moved = quantised(im, COLOURS)
     out.save(path, optimize=True)
+    squeeze(path)
     left = count_yellow(Image.open(path))
     row = manifest['backdrops'].get(key, {})
     row.update({'w': w, 'h': h, 'bytes': os.path.getsize(path), 'deyellowed': moved, 'yellowLeft': left})
@@ -180,6 +209,7 @@ def finish(key, manifest):
             continue
         s, smoved = quantised(strip(band, ext, to_top), 64)
         s.save(epath, optimize=True)
+        squeeze(epath)
         sleft = count_yellow(Image.open(epath))
         manifest['extensions'][name] = {
             'w': w, 'h': ext, 'bytes': os.path.getsize(epath), 'source': key,

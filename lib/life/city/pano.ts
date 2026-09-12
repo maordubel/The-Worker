@@ -104,6 +104,7 @@ export type PanoSpec = {
  */
 export const PLACE_ORDER = [
   'panoBloom24',
+  'panoBloom18',
   'panoJaffa',
   'panoBloomWalk1',
   'panoBloomWalk2',
@@ -229,6 +230,14 @@ export const PANOS: Record<string, PanoSpec> = {
     key: 'panoBloom24', aspect: 4096 / 1099, horizon: 0.6, hFovDeg: 360, eye: 1.7,
     radius: 20, nearRgb: [183, 163, 152],
     tile: { key: 'panoBloom24--tile', wide: 4, deep: 4 },
+  },
+  // התחנה השנייה של אותו רחוב, שישה מטר קדימה. אותו אופק ואותו רוחב בדיוק כמו הראשונה —
+  // לא במקרה: אילו היו שונים, הקרקע הייתה קופצת תחת הרגליים בדיוק ברגע המעבר.
+  panoBloom18: {
+    nameHe: 'בלומפילד, 18 מטר — 360°',
+    key: 'panoBloom18', aspect: 4096 / 1099, horizon: 0.6, hFovDeg: 360, eye: 1.7,
+    radius: 20, nearRgb: [184, 163, 152],
+    tile: { key: 'panoBloom18--tile', wide: 4, deep: 4 },
   },
   panoJaffa: {
     nameHe: 'שדרות ירושלים, יפו',
@@ -384,8 +393,11 @@ void main() {
   float thin = smoothstep(horizon + 0.020, horizon + 0.006, py);
   vec3 reach = mix(far, near, thin);
 
-  // המעבר מתחיל בדיוק במקום שבו ההיטל מפסיק להיות אמין — קצה התמונה — ונגמר חצי מטר אחריו
-  float k = smoothstep(edge, edge * 1.45, r);
+  // **המעבר, ולמה הוא ארוך.** קצה התמונה הוא מעגל סביב המצלמה, וכשמסתכלים עליו מגובה
+  // העין הוא נראה כקו אופקי ישר על פני כל רוחב המסך. מעבר קצר הופך אותו לקו נראה —
+  // מדרגה בגוון שחוצה את המדרכה לרוחבה, וזה בדיוק מה שנראה בתחנה השנייה. הרמפה נפתחת
+  // לכן שלושה רבעי מטר לפני הקצה ונסגרת מטר וחצי אחריו: אין שום נקודה שבה הגוון קופץ.
+  float k = smoothstep(edge * 0.55, edge * 1.60, r);
   gl_FragColor = vec4(mix(near, reach, k), alpha);
 }
 `
