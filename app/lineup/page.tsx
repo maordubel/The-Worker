@@ -10,6 +10,7 @@ import {
   freeBuildBank,
   hasVerifiedLineup,
 } from '@/lib/game/lineup'
+import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
 import { LineupBoard } from './LineupBoard'
@@ -23,9 +24,13 @@ import { LineupBoard } from './LineupBoard'
  */
 export const metadata: Metadata = gateMetadata('lineup')
 
-export default function LineupPage({ searchParams }: { searchParams: { seed?: string } }) {
-  const seed = Number(searchParams.seed) || 2
-  const challenge = dealChallenge(seed)
+export default function LineupPage({
+  searchParams,
+}: {
+  searchParams: { seed?: string; r?: string }
+}) {
+  const round = roundFrom(searchParams)
+  const challenge = dealChallenge(round.seed, round.cursor)
   const graded = hasVerifiedLineup()
   const formation = challenge?.formation ?? (FORMATIONS[DEFAULT_FORMATION] as (typeof FORMATIONS)[string])
 
@@ -47,7 +52,8 @@ export default function LineupPage({ searchParams }: { searchParams: { seed?: st
       <LineupBoard
         slots={formation.slots}
         bank={challenge?.bank ?? freeBuildBank()}
-        seed={seed}
+        seed={round.seed}
+        cursor={round.cursor}
         graded={graded}
         formationName={formation.name}
       />

@@ -9,3 +9,4 @@ tsconfig.tsbuildinfo
 .deliver/
 scripts/life/.art-spec-dump.ts
 data/maor-shots/
+delta/

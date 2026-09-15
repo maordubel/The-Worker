@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
+import { roundFrom } from '@/lib/rotation/round'
 import { isTopic, topicSpec } from '@/lib/game/topics'
 import { ROUND_LENGTH, deal } from '@/lib/game/trivia'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -37,15 +38,15 @@ export default function TopicRoundPage({
   searchParams,
 }: {
   params: { topic: string }
-  searchParams: { seed?: string }
+  searchParams: { seed?: string; r?: string }
 }) {
   if (!isTopic(params.topic)) notFound()
   const topic = params.topic
-  const seed = Number(searchParams.seed) || 1
+  const round = roundFrom(searchParams)
   const spec = topicSpec(topic)
 
   const questions = Array.from({ length: ROUND_LENGTH }, (_, index) =>
-    deal(seed, index, topic),
+    deal(round.seed, index, topic, round.cursor),
   ).filter((question): question is NonNullable<typeof question> => question !== null)
 
   return (
@@ -56,7 +57,12 @@ export default function TopicRoundPage({
     >
       {questions.length >= ROUND_LENGTH ? (
         <>
-          <TriviaRun questions={questions} seed={seed} topic={topic} />
+          <TriviaRun
+            questions={questions}
+            seed={round.seed}
+            cursor={round.cursor}
+            topic={topic}
+          />
           <ReportLink />
         </>
       ) : (

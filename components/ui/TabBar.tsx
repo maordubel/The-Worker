@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+import { TabMark, type MarkName } from '@/components/ui/TabMark'
 import { t, type MessageKey } from '@/lib/i18n'
 
 /**
@@ -14,52 +15,31 @@ import { t, type MessageKey } from '@/lib/i18n'
  * matching space, so nothing hides behind it.
  */
 
-type Tab = { key: MessageKey; href: string; match: string; icon: 'wall' | 'lamp' | 'bars' | 'card' }
+type Tab = { key: MessageKey; href: string; match: string; mark: MarkName; latin: string }
 
 /**
- * Four places, and each label names the place it actually goes to.
+ * Four places, in the order Maor set them, and each label names the place it goes to.
  *
- * The previous bar did not. "הארכיון" pointed at `/kits`, which is the kit DESIGNER —
- * a toy, not an archive — and "התיק" pointed at `/tik`, which is כרטיס פועל and not the
- * black file at `/derby/file`. Two of four labels described something that was not
- * there, which is worse than no bar: a reader who follows a label once and lands
- * somewhere else stops trusting the whole navigation.
+ *   בלומפילד    `/`            the ground — the gate plan, and the way into every game
+ *   אוסישקין    `/ussishkin`   the hall: the reconstruction and the memorial
+ *   ה-פועל      `/hapoel`      the club itself — crests, honours, eras, songs, players
+ *   המנוי שלך   `/tik`         gate 10 — the card, the punches, everything you played
  *
- * The gate wall already navigates to gates, so this bar is not a second list of gates.
- * It is the four things a person returns to:
+ * What changed, and why. The old third tab was **טריוויה**, pointing at one game, which
+ * put a single mode on the same footing as the whole club and left the club itself with
+ * no front door at all — 1,604 archive rows reachable only by walking in through a quiz.
+ * The trivia wing is still gate 2 on the wall, where a game belongs.
  *
- *   בלומפילד   `/`           the ground — where the gate plan hangs
- *   טריוויה    `/trivia`     the wing, five topics — the most-played thing in the app
- *   אוסישקין   `/ussishkin`  the basketball wing, kept apart by rule 14
- *   הכרטיס     `/tik`        gate 10 — the card, the punches, the corrections
- *
- * The icon follows the destination too: a wall for the ground, a lamp for the wing you
- * play in, the bars for Ussishkin, a card for the card.
+ * The old fourth tab was **הכרטיס**. "המנוי שלך" is not a rename for its own sake: a
+ * card is a thing, a subscription is a relationship, and that tab is now where every
+ * gate reports what you did (`lib/profile/store.ts`). The label had to say so.
  */
 const TABS: Tab[] = [
-  { key: 'tab.ground', href: '/', match: '/', icon: 'wall' },
-  { key: 'tab.trivia', href: '/trivia', match: '/trivia', icon: 'lamp' },
-  { key: 'tab.ussishkin', href: '/ussishkin', match: '/ussishkin', icon: 'bars' },
-  { key: 'tab.card', href: '/tik', match: '/tik', icon: 'card' },
+  { key: 'tab.ground', href: '/', match: '/', mark: 'bloomfield', latin: 'BLOOMFIELD' },
+  { key: 'tab.ussishkin', href: '/ussishkin', match: '/ussishkin', mark: 'ussishkin', latin: 'USSISHKIN' },
+  { key: 'tab.hapoel', href: '/hapoel', match: '/hapoel', mark: 'hapoel', latin: 'HAPOEL' },
+  { key: 'tab.member', href: '/tik', match: '/tik', mark: 'member', latin: 'MEMBER' },
 ]
-
-function TabIcon({ icon, active }: { icon: Tab['icon']; active: boolean }) {
-  const tone = active ? 'border-red bg-red' : 'border-sheet'
-  if (icon === 'wall')
-    return <span className={`mx-auto block h-[13px] w-[18px] border-rule ${tone}`} />
-  // The one permitted radius: this icon IS a floodlight lamp.
-  if (icon === 'lamp')
-    return <span className={`mx-auto block h-[15px] w-[15px] rounded-full border-rule ${tone}`} />
-  if (icon === 'card')
-    return <span className={`mx-auto block h-[12px] w-[17px] border-rule ${tone}`} />
-  return (
-    <span className="flex h-[15px] items-end justify-center gap-[3px]">
-      <i className={`block h-[8px] w-[3px] ${active ? 'bg-red' : 'bg-sheet'}`} />
-      <i className={`block h-[13px] w-[3px] ${active ? 'bg-red' : 'bg-sheet'}`} />
-      <i className={`block h-[10px] w-[3px] ${active ? 'bg-red' : 'bg-sheet'}`} />
-    </span>
-  )
-}
 
 export function TabBar() {
   const pathname = usePathname()
@@ -73,19 +53,31 @@ export function TabBar() {
         {TABS.map((tab) => {
           const active = tab.match === '/' ? pathname === '/' : pathname.startsWith(tab.match)
           return (
-            <li key={tab.key}>
+            <li key={tab.key} className="relative">
+              {/* the vermilion cap over the live tab — the plate is "lit", not tinted */}
+              <span
+                aria-hidden="true"
+                className={`absolute inset-x-0 top-0 h-[3px] ${active ? 'bg-red' : 'bg-transparent'}`}
+              />
               <Link
                 href={tab.href}
                 aria-current={active ? 'page' : undefined}
-                className="flex min-h-tap flex-col items-center justify-center gap-1.5 py-2 text-sheet transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none"
+                className={`flex min-h-tap flex-col items-center justify-center gap-[5px] px-1 pb-2 pt-[9px] transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none ${
+                  active ? 'text-red' : 'text-sheet'
+                }`}
               >
-                <TabIcon icon={tab.icon} active={active} />
-                <span
-                  className={`font-body text-[10px] font-extrabold leading-none ${
-                    active ? 'text-red' : 'text-sheet'
-                  }`}
-                >
+                <TabMark name={tab.mark} active={active} />
+                <span className="font-body text-[10px] font-extrabold leading-none">
                   {t(tab.key)}
+                </span>
+                {/* the Latin foot, the way every plate in this product is set */}
+                <span
+                  className={`font-latin text-[6.5px] font-bold leading-none tracking-[0.2em] ${
+                    active ? 'text-red' : 'text-concrete'
+                  }`}
+                  dir="ltr"
+                >
+                  {tab.latin}
                 </span>
               </Link>
             </li>

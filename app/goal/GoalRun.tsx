@@ -8,6 +8,8 @@ import { GoalPitch } from '@/components/press/GoalPitch'
 import { Num } from '@/components/ui/Num'
 import { Punch } from '@/components/play/Punch'
 import { AdSlot } from '@/components/ads/AdSlot'
+import { PlayLink } from '@/components/play/PlayLink'
+import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
 import { GOAL_SECONDS, GOALS_PER_RUN, type Grade, type ZoneId } from '@/lib/game/goal-zones'
@@ -81,7 +83,15 @@ function pointsFor(grade: Grade, combo: number, secondsLeft: number, total: numb
   return Math.round((base + 90 * speed) * multiplier)
 }
 
-export function GoalRun({ goals, seed }: { goals: GoalChallenge[]; seed: number }) {
+export function GoalRun({
+  goals,
+  seed,
+  cursor = 0,
+}: {
+  goals: GoalChallenge[]
+  seed: number
+  cursor?: number
+}) {
   const [run, setRun] = useState<Run>(NEW_RUN)
   const [picks, setPicks] = useState<ZoneId[]>([])
   const [verdict, setVerdict] = useState<GoalVerdict | null>(null)
@@ -100,7 +110,7 @@ export function GoalRun({ goals, seed }: { goals: GoalChallenge[]; seed: number 
     async (placed: ZoneId[]) => {
       if (settled.current || !challenge) return
       settled.current = true
-      const result = await submitGoal(seed, run.goal, placed)
+      const result = await submitGoal(seed, run.goal, placed, cursor)
       if (!result) return
       setVerdict(result)
 
@@ -131,7 +141,7 @@ export function GoalRun({ goals, seed }: { goals: GoalChallenge[]; seed: number 
         over: previous.over,
       }))
     },
-    [challenge, run.combo, run.goal, run.lives, secondsLeft, seed, total],
+    [challenge, run.combo, run.goal, run.lives, secondsLeft, seed, cursor, total],
   )
 
   function place(zone: ZoneId) {
@@ -177,7 +187,7 @@ export function GoalRun({ goals, seed }: { goals: GoalChallenge[]; seed: number 
     return () => window.clearTimeout(wait)
   }, [verdict])
 
-  if (run.over || !challenge) return <Result run={run} seed={seed} />
+  if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} />
 
   const labels = picks.map((_, index) => {
     const line = challenge.steps[index]
@@ -328,13 +338,14 @@ export function GoalRun({ goals, seed }: { goals: GoalChallenge[]; seed: number 
 }
 
 /** הפסק — what the run came to, and the link that hands over the identical three goals. */
-function Result({ run, seed }: { run: Run; seed: number }) {
+function Result({ run, seed, cursor }: { run: Run; seed: number; cursor: number }) {
   const rank = rankFor(run.score) as MessageKey
   const accuracy = run.touches > 0 ? Math.round((run.hits / run.touches) * 100) : 0
 
   return (
     <div className="mt-stack">
       <Punch />
+      <RecordRun gate="/goal" score={run.score} correct={run.hits} asked={run.touches} />
       <div className="border-b-rule border-ink pb-2">
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           FULL TIME
@@ -372,7 +383,7 @@ function Result({ run, seed }: { run: Run; seed: number }) {
 
       <ShareRow
         kind="goal"
-        params={{ h: String(run.hits), s: String(seed) }}
+        params={{ h: String(run.hits), s: String(seed), r: String(cursor) }}
         headline={t('goal.shareHead', { hits: String(run.hits), total: String(run.touches) })}
         card={{
           template: 'grass' as const,
@@ -392,12 +403,12 @@ function Result({ run, seed }: { run: Run; seed: number }) {
       />
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <a
-          href={`/goal?seed=${seed + 1}`}
+        <PlayLink
+          gate="/goal"
           className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-4 font-body text-step-0 font-extrabold text-ink"
         >
           {t('run.again')}
-        </a>
+        </PlayLink>
         <a
           href="/"
           className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper"

@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { cycleSeed, rotate } from '@/lib/rotation/deck'
 import { archive, rng, shuffle } from './archive'
 
 /**
@@ -75,8 +76,11 @@ function datedEvents() {
   )
 }
 
-export function dealFile(seed: number): FileCard[] {
-  const random = rng(seed)
+export function dealFile(seed: number, cursor = 0): FileCard[] {
+  // Every transfer card is dealt — there are five — so the cursor only changes the
+  // ORDER they arrive in. That is the honest thing for it to do here: this half of the
+  // round is the whole file, not a sample of it.
+  const random = rng(cursor === 0 ? seed : cycleSeed(seed, cursor))
   return shuffle([...transferCards()], random).map((row) => ({
     slug: row.slug,
     subjectHe: row.personNameHe ?? row.titleHe,
@@ -119,8 +123,12 @@ export type PairCard = {
  * once is a memory test; two at a time is a judgement, and it moves fast enough to
  * keep a round alive.
  */
-export function dealPairs(seed: number, count = 4): PairCard[] {
-  const events = shuffle([...datedEvents()], rng(seed * 7 + 3))
+export function dealPairs(seed: number, count = 4, cursor = 0): PairCard[] {
+  const base = seed * 7 + 3
+  const events = rotate(
+    shuffle([...datedEvents()], rng(cursor === 0 ? base : cycleSeed(base, cursor))),
+    cursor * count * 2,
+  )
   const pairs: PairCard[] = []
   for (let index = 0; index + 1 < events.length && pairs.length < count; index += 2) {
     const a = events[index]

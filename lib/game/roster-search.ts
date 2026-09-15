@@ -58,6 +58,99 @@ export type Searchable = {
   givenHe: string
   familyHe: string
   initial: string
+  /**
+   * What a source says about this man, and which source said it. Absent means the
+   * archive has nothing — which is the honest answer for most of the 637 and is shown
+   * as its own bucket rather than hidden. Built in `lib/game/roster-facets.ts`.
+   */
+  position?: 'GK' | 'DF' | 'MF' | 'FW' | null
+  positionFrom?: 'squad' | 'lineup' | 'name' | null
+  origin?: 'israeli' | 'foreign' | null
+  originFrom?: 'squad' | 'lineup' | 'name' | null
+  fromYear?: number | null
+  toYear?: number | null
+}
+
+/**
+ * הסינון — what the sheet is currently narrowed to.
+ *
+ * `'any'` is no filter. `'unknown'` is a REAL choice, not the absence of one: a reader
+ * who wants to see who the archive cannot place is asking a useful question about the
+ * archive, and answering it is how the gap gets closed.
+ */
+export type RosterFilter = {
+  position: 'any' | 'GK' | 'DF' | 'MF' | 'FW' | 'unknown'
+  origin: 'any' | 'israeli' | 'foreign' | 'unknown'
+  /** a decade's opening year — 1970, 1980 … — or 'any' */
+  decade: number | 'any'
+  /** family-name initial, or 'any' */
+  letter: string | 'any'
+}
+
+export const NO_FILTER: RosterFilter = {
+  position: 'any',
+  origin: 'any',
+  decade: 'any',
+  letter: 'any',
+}
+
+export function isFiltered(filter: RosterFilter): boolean {
+  return (
+    filter.position !== 'any' ||
+    filter.origin !== 'any' ||
+    filter.decade !== 'any' ||
+    filter.letter !== 'any'
+  )
+}
+
+/** Did this man wear the shirt inside that decade, as far as the archive can tell? */
+function inDecade(entry: Searchable, decade: number): boolean {
+  const from = entry.fromYear
+  const to = entry.toYear
+  if (from === null || from === undefined) return false
+  return from <= decade + 9 && (to ?? from) >= decade
+}
+
+/**
+ * Narrow a list. Pure, synchronous and cheap enough to run on every keystroke — the
+ * whole roster is 637 objects and this is four comparisons each.
+ */
+export function filterRoster(entries: Searchable[], filter: RosterFilter): Searchable[] {
+  if (!isFiltered(filter)) return entries
+  return entries.filter((entry) => {
+    if (filter.letter !== 'any' && entry.initial !== filter.letter) return false
+    if (filter.position === 'unknown') {
+      if (entry.position) return false
+    } else if (filter.position !== 'any' && entry.position !== filter.position) return false
+    if (filter.origin === 'unknown') {
+      if (entry.origin) return false
+    } else if (filter.origin !== 'any' && entry.origin !== filter.origin) return false
+    if (filter.decade !== 'any' && !inDecade(entry, filter.decade)) return false
+    return true
+  })
+}
+
+/** How many names each choice would leave, so a filter chip can print its own count. */
+export function facetCounts(entries: Searchable[]): {
+  position: Record<string, number>
+  origin: Record<string, number>
+  decade: Record<number, number>
+} {
+  const position: Record<string, number> = { GK: 0, DF: 0, MF: 0, FW: 0, unknown: 0 }
+  const origin: Record<string, number> = { israeli: 0, foreign: 0, unknown: 0 }
+  const decade: Record<number, number> = {}
+  for (const entry of entries) {
+    position[entry.position ?? 'unknown'] = (position[entry.position ?? 'unknown'] ?? 0) + 1
+    origin[entry.origin ?? 'unknown'] = (origin[entry.origin ?? 'unknown'] ?? 0) + 1
+    const from = entry.fromYear
+    if (from !== null && from !== undefined) {
+      const to = entry.toYear ?? from
+      for (let year = Math.floor(from / 10) * 10; year <= to; year += 10) {
+        decade[year] = (decade[year] ?? 0) + 1
+      }
+    }
+  }
+  return { position, origin, decade }
 }
 
 /** 0 = no match. Higher is better: family prefix > given prefix > anywhere. */

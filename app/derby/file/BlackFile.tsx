@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react'
 
 import { AdSlot } from '@/components/ads/AdSlot'
 import { Num } from '@/components/ui/Num'
+import { PlayLink } from '@/components/play/PlayLink'
+import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -31,12 +33,14 @@ export function BlackFile({
   cards,
   pairs,
   seed,
+  cursor = 0,
   total,
   fileSize,
 }: {
   cards: FileCard[]
   pairs: PairCard[]
   seed: number
+  cursor?: number
   total: number
   fileSize: number
 }) {
@@ -97,7 +101,7 @@ export function BlackFile({
       </div>
 
       {done ? (
-        <Done hits={hits} total={total} fileSize={fileSize} seed={seed} />
+        <Done hits={hits} total={total} fileSize={fileSize} seed={seed} cursor={cursor} />
       ) : inCards && card ? (
         <>
           <p className="mt-stack font-body text-[11px] tracking-widest text-hate-muted">
@@ -235,15 +239,18 @@ function Done({
   total,
   fileSize,
   seed,
+  cursor,
 }: {
   hits: number
   total: number
   fileSize: number
   seed: number
+  cursor: number
 }) {
   const pct = total > 0 ? Math.round((hits / total) * 100) : 0
   return (
     <div className="mt-stack border-rule border-sign bg-hate-card p-5 text-center">
+      <RecordRun gate="/derby/file" score={hits} correct={hits} asked={total} />
       <p className="font-poster text-[74px] leading-none text-sign">
         <Num>{hits}</Num>
       </p>
@@ -253,16 +260,18 @@ function Done({
       <p className="mt-3 font-body text-step--1 leading-relaxed text-hate-muted">
         {t('derby.fileNote', { count: String(fileSize) })}
       </p>
-      <a
-        href="/derby/file?seed=12"
+      {/* It was a hardcoded `?seed=12`, so every replay after the first was the same
+          round, for ever. It now walks this device's own deck. */}
+      <PlayLink
+        gate="/derby/file"
         className="mt-4 flex min-h-tap w-full items-center justify-center bg-sign px-4 font-body text-step-0 font-extrabold text-hate-ink"
       >
         {t('derby.again')}
-      </a>
+      </PlayLink>
 
       <ShareRow
         kind="file"
-        params={{ s: String(seed), total: String(total) }}
+        params={{ s: String(seed), r: String(cursor), total: String(total) }}
         headline={String(hits)}
         card={{
           template: 'ink' as const,

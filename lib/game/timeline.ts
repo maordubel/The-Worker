@@ -4,6 +4,7 @@ import { matchLine } from '@/components/ui/Num'
 
 import { createHash } from 'node:crypto'
 
+import { positionOf, takeFrom } from '@/lib/rotation/deck'
 import { archive, nameOf, rng, shuffle } from './archive'
 import { TIMELINE_LENGTH, type BlindCard, type DatedCard } from './timeline-run'
 
@@ -171,9 +172,12 @@ export function timelinePoolSize(): number {
  * one-sided — every card lands on the same end — and a game whose opening moves cannot
  * be got wrong has thrown away its opening moves.
  */
-function runCards(seed: number): DatedCard[] {
+function runCards(seed: number, cursor: number): DatedCard[] {
   const all = pool()
-  const drawn = shuffle(all, rng(seed)).slice(0, TIMELINE_LENGTH + 1)
+  // Eleven cards out of roughly 160, so a lap of the pool is about fourteen runs before
+  // any card is seen twice — and the lap after that is a different shuffle.
+  const at = positionOf(seed, cursor, all.length, TIMELINE_LENGTH + 1)
+  const drawn = takeFrom(shuffle(all, rng(at.seed)), at.slot * (TIMELINE_LENGTH + 1), TIMELINE_LENGTH + 1)
   const byDate = [...drawn].sort((a, b) => a.on.localeCompare(b.on))
   const middle = byDate[Math.floor(byDate.length / 2)] as DatedCard
 
@@ -197,8 +201,8 @@ export type TimelineDeal = {
   queue: BlindCard[]
 }
 
-export function dealTimelineRun(seed: number): TimelineDeal {
-  const cards = runCards(seed)
+export function dealTimelineRun(seed: number, cursor = 0): TimelineDeal {
+  const cards = runCards(seed, cursor)
   const [anchor, ...queue] = cards
   return {
     anchor: anchor as DatedCard,
@@ -214,8 +218,8 @@ export function dealTimelineRun(seed: number): TimelineDeal {
  * at its true position whether or not the player was right — which is the design
  * decision that makes the run honest and the grading cheap at the same time.
  */
-export function boardAfter(seed: number, placed: number): DatedCard[] {
-  const cards = runCards(seed)
+export function boardAfter(seed: number, placed: number, cursor = 0): DatedCard[] {
+  const cards = runCards(seed, cursor)
   const anchor = cards[0] as DatedCard
   const resolved = cards.slice(1, 1 + Math.max(0, Math.min(placed, TIMELINE_LENGTH)))
   return [anchor, ...resolved].sort((a, b) => a.on.localeCompare(b.on))
@@ -237,12 +241,17 @@ export type InsertVerdict = {
  * Grade one placement. `slot` is the gap index: 0 is before the first card on the
  * board, `board.length` is after the last.
  */
-export function gradeInsert(seed: number, placed: number, slot: number): InsertVerdict | null {
-  const cards = runCards(seed)
+export function gradeInsert(
+  seed: number,
+  placed: number,
+  slot: number,
+  cursor = 0,
+): InsertVerdict | null {
+  const cards = runCards(seed, cursor)
   const card = cards[placed + 1]
   if (!card) return null
 
-  const board = boardAfter(seed, placed)
+  const board = boardAfter(seed, placed, cursor)
   // Where it belongs: the number of cards already on the board that are older than it.
   const position = board.filter((other) => other.on.localeCompare(card.on) < 0).length
 

@@ -7,6 +7,8 @@ import { Burst } from '@/components/play/Burst'
 import { Confetti } from '@/components/play/Confetti'
 import { Num } from '@/components/ui/Num'
 import { Punch } from '@/components/play/Punch'
+import { PlayLink } from '@/components/play/PlayLink'
+import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { LIVES, MAX_MULTIPLIER, rankFor } from '@/lib/game/session'
 import {
@@ -58,10 +60,12 @@ export function TimelineBoard({
   anchor,
   queue,
   seed,
+  cursor = 0,
 }: {
   anchor: DatedCard
   queue: BlindCard[]
   seed: number
+  cursor?: number
 }) {
   const [run, setRun] = useState<Run>(NEW_RUN)
   const [board, setBoard] = useState<DatedCard[]>([anchor])
@@ -82,7 +86,7 @@ export function TimelineBoard({
     async (slot: number) => {
       if (locked || !hand || run.over) return
       setLocked(true)
-      const verdict = await submitInsert(seed, run.placed, slot)
+      const verdict = await submitInsert(seed, run.placed, slot, cursor)
       if (!verdict) {
         setLocked(false)
         return
@@ -116,7 +120,7 @@ export function TimelineBoard({
         }
       })
     },
-    [hand, locked, run.combo, run.over, run.placed, secondsLeft, seed, total],
+    [hand, locked, run.combo, run.over, run.placed, secondsLeft, seed, cursor, total],
   )
 
   /** the clock — running out places the card in the worst slot, which is a miss */
@@ -151,7 +155,8 @@ export function TimelineBoard({
     return () => window.clearTimeout(wait)
   }, [feedback])
 
-  if (run.over && !feedback) return <Result run={run} board={board} seed={seed} />
+  if (run.over && !feedback)
+    return <Result run={run} board={board} seed={seed} cursor={cursor} />
 
   const fraction = total > 0 ? Math.max(0, secondsLeft / total) : 0
 
@@ -282,11 +287,27 @@ function Slot({
   )
 }
 
-function Result({ run, board, seed }: { run: Run; board: DatedCard[]; seed: number }) {
+function Result({
+  run,
+  board,
+  seed,
+  cursor,
+}: {
+  run: Run
+  board: DatedCard[]
+  seed: number
+  cursor: number
+}) {
   const rank = rankFor(run.score) as MessageKey
   return (
     <div className="mt-stack">
       <Punch />
+      <RecordRun
+        gate="/timeline"
+        score={run.score}
+        correct={run.correct}
+        asked={TIMELINE_LENGTH}
+      />
       <div className="border-b-rule border-ink pb-2">
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           FULL TIME
@@ -340,7 +361,7 @@ function Result({ run, board, seed }: { run: Run; board: DatedCard[]; seed: numb
 
       <ShareRow
         kind="timeline"
-        params={{ c: String(run.correct), s: String(seed) }}
+        params={{ c: String(run.correct), s: String(seed), r: String(cursor) }}
         headline={`${run.correct}/${TIMELINE_LENGTH}`}
         card={{
           template: 'year' as const,
@@ -360,12 +381,12 @@ function Result({ run, board, seed }: { run: Run; board: DatedCard[]; seed: numb
       />
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <a
-          href={`/timeline?seed=${seed + 1}`}
+        <PlayLink
+          gate="/timeline"
           className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-4 font-body text-step-0 font-extrabold text-ink"
         >
           {t('run.again')}
-        </a>
+        </PlayLink>
         <a
           href="/"
           className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper"

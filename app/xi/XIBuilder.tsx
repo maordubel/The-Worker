@@ -150,7 +150,12 @@ export function XIBuilder({
       </p>
 
       <ShareRow
+        // `kind="lineup"` with no route sent everyone who opened an all-time XI to
+        // `/lineup?seed=1` — the GRADED match quiz, a different game with a different
+        // gate number. The message template is still the line-up one, because that is
+        // what an XI card says; only the destination was wrong.
         kind="lineup"
+        route="/xi"
         params={{ s: '1' }}
         headline={`${chosen}/11`}
         card={{

@@ -13,6 +13,9 @@ export async function submitGoal(
   seed: number,
   goalIndex: number,
   picks: string[],
+  cursor = 0,
 ): Promise<GoalVerdict | null> {
-  return gradeGoal(seed, goalIndex, picks)
+  // A round is addressed by seed AND cursor once rotation is on; grading has to
+  // re-derive with both or it grades a different deal than the one on screen.
+  return gradeGoal(seed, goalIndex, picks, cursor)
 }

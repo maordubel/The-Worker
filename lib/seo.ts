@@ -36,6 +36,7 @@ export type GateSeoSlug =
   | 'derby-file'
   | 'timeline'
   | 'ussishkin'
+  | 'hapoel'
   | 'life'
 
 type GateSeoEntry = {
@@ -47,6 +48,14 @@ type GateSeoEntry = {
 }
 
 const GATE_SEO: Record<GateSeoSlug, GateSeoEntry> = {
+  // The club's own wing — the third tab. It has no gate number because it is not a
+  // game; it is the archive with a front door on it.
+  hapoel: {
+    path: '/hapoel',
+    titleKey: 'screen.hapoel.title',
+    descriptionKey: 'hapoel.lede',
+    image: 'default',
+  },
   xi: { path: '/xi', titleKey: 'screen.xi.title', descriptionKey: 'xi.lede', image: 'xi' },
   trivia: {
     path: '/trivia',

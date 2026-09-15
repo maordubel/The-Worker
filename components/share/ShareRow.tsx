@@ -26,10 +26,17 @@ export function ShareRow({
   params,
   headline,
   card,
+  route,
 }: {
   kind: ShareKind
-  /** whatever the message template needs, plus `s` for the seed */
+  /** whatever the message template needs, plus `s` for the seed and `r` for the cursor */
   params: Record<string, string>
+  /**
+   * The exact path the link should land on, when the gate's own route is not enough.
+   * Trivia is the case that forced it: the topic is a route SEGMENT, so `/trivia` sends
+   * a challenged friend to the picker instead of to the round being bragged about.
+   */
+  route?: string
   /** the value the message leads with */
   headline: string
   /** the story card; omit and the story button is hidden */
@@ -38,6 +45,7 @@ export function ShareRow({
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState<MessageKey | null>(null)
   const seed = params.s ?? '1'
+  const cursor = params.r ?? '0'
   const vars = { ...params, headline }
 
   async function story() {
@@ -53,7 +61,7 @@ export function ShareRow({
         typeof navigator.canShare === 'function' &&
         navigator.canShare({ files: [file] })
       if (shareable) {
-        await navigator.share({ files: [file], text: challengeUrl(kind, seed) })
+        await navigator.share({ files: [file], text: challengeUrl(kind, seed, cursor, route) })
       } else {
         const url = URL.createObjectURL(blob)
         const anchor = document.createElement('a')
@@ -72,7 +80,7 @@ export function ShareRow({
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(challengeUrl(kind, seed))
+      await navigator.clipboard.writeText(challengeUrl(kind, seed, cursor, route))
       setNote('share.copied')
     } catch {
       setNote('share.failed')
@@ -116,7 +124,7 @@ export function ShareRow({
           </button>
         )}
         <a
-          href={whatsappHref(kind, vars, seed)}
+          href={whatsappHref(kind, vars, seed, cursor, route)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex min-h-tap items-center justify-center border-hair border-concrete/50 px-3 font-body text-step-0 font-extrabold text-paper"
@@ -124,7 +132,7 @@ export function ShareRow({
           {t('share.whatsapp')}
         </a>
         <a
-          href={telegramHref(kind, vars, seed)}
+          href={telegramHref(kind, vars, seed, cursor, route)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex min-h-tap items-center justify-center border-hair border-concrete/50 px-3 font-body text-step-0 font-extrabold text-paper"

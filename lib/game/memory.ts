@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { positionOf, takeFrom } from '@/lib/rotation/deck'
 import { archive, nameOf, rng, shuffle } from './archive'
 import { currentSeasonStartYear, seasonsInSpell } from './seasons'
 
@@ -50,9 +51,10 @@ function kitCandidates(): Candidate[] {
     .filter((candidate) => candidate.b !== '')
 }
 
-export function buildBoard(seed: number, pairs = 6): MemoryCard[] {
-  const random = rng(seed)
-
+export function buildBoard(seed: number, pairs = 6, cursor = 0): MemoryCard[] {
+  // The board used to be one board: the gate linked `?seed=7`, the route defaulted to
+  // 7, and there was no replay link at all, so every player on every visit turned over
+  // the same twelve cards.
   const candidates: Candidate[] = [
     ...kitCandidates(),
     ...archive.trophies
@@ -81,18 +83,26 @@ export function buildBoard(seed: number, pairs = 6): MemoryCard[] {
       })),
   ]
 
+  // The pool is assembled BEFORE the deck is addressed, because the address needs its
+  // size: `positionOf` decides which lap of the pool this is, and a lap of an unknown
+  // pool is one slice long — which would re-seed the shuffle on every single visit and
+  // let a pair from the previous board come back on the next one.
+  const at = positionOf(seed, cursor, candidates.length, pairs)
+  const random = rng(at.seed)
+
   // One pair per distinct face value, so two cards can never read identically — and
   // one competition per board, so "גביע המדינה" never appears twice wanting two
   // different years.
   const seen = new Set<string>()
-  const chosen = shuffle(candidates, random)
-    .filter((candidate) => {
-      if (seen.has(candidate.a) || seen.has(candidate.b)) return false
-      seen.add(candidate.a)
-      seen.add(candidate.b)
-      return true
-    })
-    .slice(0, pairs)
+  const distinct = shuffle(candidates, random).filter((candidate) => {
+    if (seen.has(candidate.a) || seen.has(candidate.b)) return false
+    seen.add(candidate.a)
+    seen.add(candidate.b)
+    return true
+  })
+  // The window slides AFTER the de-duplication, so a later board is still six distinct
+  // faces rather than six rows that happen to sit next to each other in the raw pool.
+  const chosen = takeFrom(distinct, at.slot * pairs, pairs)
 
   return shuffle(
     chosen.flatMap((candidate) => [

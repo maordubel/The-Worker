@@ -4,6 +4,7 @@ import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { dealQueue, rosterSize } from '@/lib/game/hate'
 import { gateMetadata } from '@/lib/seo'
+import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { HateHill } from './HateHill'
 
@@ -21,12 +22,22 @@ import { HateHill } from './HateHill'
  */
 export const metadata: Metadata = gateMetadata('derby')
 
-export default function HatePage({ searchParams }: { searchParams: { seed?: string } }) {
-  const seed = Number(searchParams.seed) || 11
-  const { enemies, order } = dealQueue(seed)
+export default function HatePage({
+  searchParams,
+}: {
+  searchParams: { seed?: string; r?: string }
+}) {
+  const round = roundFrom(searchParams)
+  const { enemies, order } = dealQueue(round.seed, round.cursor)
   return (
     <Screen title={t('screen.derby.title')} sub={t('screen.derby.sub')} chrome={false}>
-      <HateHill enemies={enemies} order={order} seed={seed} rosterSize={rosterSize()} />
+      <HateHill
+        enemies={enemies}
+        order={order}
+        seed={round.seed}
+        cursor={round.cursor}
+        rosterSize={rosterSize()}
+      />
       <ReportLink />
     </Screen>
   )

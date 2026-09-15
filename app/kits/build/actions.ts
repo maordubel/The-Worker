@@ -13,6 +13,9 @@ export async function submitKit(
   seed: number,
   index: number,
   placed: Partial<Record<PartKind, string>>,
+  cursor = 0,
 ): Promise<KitVerdict | null> {
-  return gradeKitPuzzle(seed, index, placed)
+  // A round is addressed by seed AND cursor once rotation is on; grading has to
+  // re-derive with both or it grades a different deal than the one on screen.
+  return gradeKitPuzzle(seed, index, placed, cursor)
 }

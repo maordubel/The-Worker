@@ -1,5 +1,4 @@
-import Link from 'next/link'
-
+import { PlayLink } from '@/components/play/PlayLink'
 import { Num } from '@/components/ui/Num'
 import { TOPICS, topicSpec, type Topic } from '@/lib/game/topics'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -77,12 +76,22 @@ export function TopicWall({
 
         return (
           <li key={topic} className="overflow-hidden border-rule border-ink bg-sheet">
-            <Link
-              href={`/trivia/${topic}?seed=1`}
+            {/*
+              Each topic keeps its OWN deck, which is why the rotation id is the topic's
+              route and not `/trivia`: five topics sharing one cursor would mean that
+              playing Europe moved your place in the kit questions.
+
+              This link used to be a hardcoded `?seed=1` — the single line that made the
+              most-played mode in the app serve the same twelve questions, in the same
+              order, to everybody, for ever.
+            */}
+            <PlayLink
+              gate={`/trivia/${topic}`}
+              href={`/trivia/${topic}`}
               className="block min-h-tap transition-transform duration-press ease-stamp active:scale-[.985] motion-reduce:transition-none"
             >
               {body}
-            </Link>
+            </PlayLink>
           </li>
         )
       })}

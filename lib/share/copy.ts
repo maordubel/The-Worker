@@ -47,26 +47,68 @@ const ROUTE: Record<ShareKind, string> = {
  */
 const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls'])
 
-export function challengeUrl(kind: ShareKind, seed: string | number): string {
-  if (SEEDLESS.has(kind)) return `${SITE_URL}${ROUTE[kind]}?from=share`
-  return `${SITE_URL}${ROUTE[kind]}?seed=${seed}&from=share`
+/**
+ * Two things a challenge link has to carry that it did not.
+ *
+ *   · **The topic.** `trivia` points at `/trivia`, which is the PICKER — a route that
+ *     reads no seed. A trivia challenge therefore dropped the recipient on a wall of
+ *     five topics with the round it was bragging about nowhere in sight. The topic is a
+ *     route segment (`/trivia/europe`), so `route` overrides the gate's own path for
+ *     exactly that case. `/xi` needs it for the same reason in reverse: its card shares
+ *     as `kind="lineup"`, which would send an all-time XI to the graded match quiz.
+ *   · **The cursor.** With rotation on, a round is addressed by seed AND cursor
+ *     (`lib/rotation/deck.ts`); a link carrying only the seed reproduces the first
+ *     round of that deck rather than the one that was played.
+ *
+ * This is the one link in the app that is deliberately NOT re-rolled on arrival
+ * (`lib/rotation/round.ts`) — the point of a duel is that both people get the same
+ * questions.
+ */
+export function challengeUrl(
+  kind: ShareKind,
+  seed: string | number,
+  cursor: string | number = 0,
+  route?: string,
+): string {
+  const path = route ?? ROUTE[kind]
+  if (SEEDLESS.has(kind)) return `${SITE_URL}${path}?from=share`
+  const r = Number(cursor) > 0 ? `&r=${cursor}` : ''
+  return `${SITE_URL}${path}?seed=${seed}${r}&from=share`
 }
 
 /**
  * The WhatsApp body. Hebrew, three short lines, then the link on its own line so the
  * client renders a preview card rather than burying it mid-sentence.
  */
-export function whatsappText(kind: ShareKind, vars: Record<string, string>, seed: string | number) {
+export function whatsappText(
+  kind: ShareKind,
+  vars: Record<string, string>,
+  seed: string | number,
+  cursor: string | number = 0,
+  route?: string,
+) {
   const key = `share.msg.${kind}` as MessageKey
-  return `${t(key, vars)}\n\n${challengeUrl(kind, seed)}`
+  return `${t(key, vars)}\n\n${challengeUrl(kind, seed, cursor, route)}`
 }
 
-export function whatsappHref(kind: ShareKind, vars: Record<string, string>, seed: string | number) {
-  return `https://wa.me/?text=${encodeURIComponent(whatsappText(kind, vars, seed))}`
+export function whatsappHref(
+  kind: ShareKind,
+  vars: Record<string, string>,
+  seed: string | number,
+  cursor: string | number = 0,
+  route?: string,
+) {
+  return `https://wa.me/?text=${encodeURIComponent(whatsappText(kind, vars, seed, cursor, route))}`
 }
 
-export function telegramHref(kind: ShareKind, vars: Record<string, string>, seed: string | number) {
-  const url = challengeUrl(kind, seed)
+export function telegramHref(
+  kind: ShareKind,
+  vars: Record<string, string>,
+  seed: string | number,
+  cursor: string | number = 0,
+  route?: string,
+) {
+  const url = challengeUrl(kind, seed, cursor, route)
   const key = `share.msg.${kind}` as MessageKey
   return `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(t(key, vars))}`
 }

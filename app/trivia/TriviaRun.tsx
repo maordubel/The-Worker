@@ -8,6 +8,8 @@ import { Burst } from '@/components/play/Burst'
 import { HUD } from '@/components/play/HUD'
 import { StageCard } from '@/components/play/StageCard'
 import { Num } from '@/components/ui/Num'
+import { PlayLink } from '@/components/play/PlayLink'
+import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
 import { Punch } from '@/components/play/Punch'
@@ -46,10 +48,12 @@ import { submitAnswer } from './actions'
 export function TriviaRun({
   questions,
   seed,
+  cursor = 0,
   topic = DEFAULT_TOPIC,
 }: {
   questions: TriviaQuestion[]
   seed: number
+  cursor?: number
   topic?: Topic
 }) {
   const [session, setSession] = useState<Session>(NEW_SESSION)
@@ -133,7 +137,7 @@ export function TriviaRun({
         if (locked.current) return
         locked.current = true
         // running out is a miss, and it shows the answer like any other miss
-        void submitAnswer(seed, index, '__timeout__', topic).then((result) => {
+        void submitAnswer(seed, index, '__timeout__', topic, cursor).then((result) => {
           setVerdict(result)
           settle(result, 0)
         })
@@ -142,7 +146,7 @@ export function TriviaRun({
       setSecondsLeft(left)
     }, 100)
     return () => window.clearInterval(tick)
-  }, [index, started, session.over, showStage, question, total, seed, settle, topic])
+  }, [index, started, session.over, showStage, question, total, seed, cursor, settle, topic])
 
   /** The stage card, at the top of stages 2 and 3. */
   useEffect(() => {
@@ -165,7 +169,7 @@ export function TriviaRun({
     locked.current = true
     const left = secondsLeft
     setPicked([option])
-    void submitAnswer(seed, index, option, topic).then((result) => {
+    void submitAnswer(seed, index, option, topic, cursor).then((result) => {
       setVerdict(result)
       settle(result, left)
     })
@@ -175,14 +179,15 @@ export function TriviaRun({
     if (locked.current || !question || picked.length !== question.pickCount) return
     locked.current = true
     const left = secondsLeft
-    void submitAnswer(seed, index, picked, topic).then((result) => {
+    void submitAnswer(seed, index, picked, topic, cursor).then((result) => {
       setVerdict(result)
       settle(result, left)
     })
   }
 
   if (!started) return <Ready onStart={() => setStarted(true)} count={questions.length} />
-  if (session.over) return <Result session={session} seed={seed} />
+  if (session.over)
+    return <Result session={session} seed={seed} cursor={cursor} topic={topic} />
   if (!question) return null
 
   const stage = stageOf(index)
@@ -305,13 +310,29 @@ function Ready({ onStart, count }: { onStart: () => void; count: number }) {
   )
 }
 
-function Result({ session, seed }: { session: Session; seed: number }) {
+function Result({
+  session,
+  seed,
+  cursor,
+  topic,
+}: {
+  session: Session
+  seed: number
+  cursor: number
+  topic: Topic
+}) {
   const rank = t(rankFor(session.score) as MessageKey)
   const out = endReason(session) === 'out'
 
   return (
     <div className="mt-stack animate-slam">
       <Punch />
+      <RecordRun
+        gate="/trivia"
+        score={session.score}
+        correct={session.correct}
+        asked={RUN_LENGTH}
+      />
         <div className="border-rule border-ink bg-ink p-6 text-center">
         <p className="font-latin text-[10px] font-bold tracking-[0.28em] text-red" dir="ltr">
           {out ? 'OUT OF LAMPS' : 'RUN COMPLETE'}
@@ -334,7 +355,10 @@ function Result({ session, seed }: { session: Session; seed: number }) {
 
       <ShareRow
         kind="trivia"
-        params={{ s: String(seed), total: String(RUN_LENGTH) }}
+        params={{ s: String(seed), r: String(cursor), total: String(RUN_LENGTH) }}
+        // The topic is a route segment, so a bare `/trivia` link would land a
+        // challenged friend on the picker instead of on this round.
+        route={`/trivia/${topic}`}
         headline={String(session.score)}
         card={{
           template: 'score' as const,
@@ -354,14 +378,23 @@ function Result({ session, seed }: { session: Session; seed: number }) {
         }}
       />
 
-      <a
-        href={`/trivia?seed=${seed + 1}`}
+      {/*
+        "שוב" used to point at `/trivia` — the topic PICKER, which reads no seed — so
+        pressing it replayed the identical twelve questions you had just answered. It
+        goes back to THIS topic, at this device's next slice of its deck.
+      */}
+      <PlayLink
+        gate={`/trivia/${topic}`}
+        href={`/trivia/${topic}`}
         className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
       >
         {t('run.again')}
-      </a>
+      </PlayLink>
       <p className="mt-2 text-center font-mono text-[11px] tabular-nums text-muted">
-        <bdi dir="ltr">seed {seed}</bdi>
+        <bdi dir="ltr">
+          seed {seed}
+          {cursor > 0 ? `\u00b7${cursor}` : ''}
+        </bdi>
       </p>
 
       {/* the run is over — this is the stopping point rule 28 means, never mid-round */}

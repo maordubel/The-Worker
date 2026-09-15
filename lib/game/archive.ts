@@ -26,6 +26,8 @@ import momentsFile from '@/content/manual/moments.json'
 import peopleFile from '@/content/manual/people.json'
 import rosterFile from '@/content/manual/players-roster.json'
 import rolesFile from '@/content/manual/association-roles.json'
+import associationEventsFile from '@/content/manual/association-events.json'
+import milestonesFile from '@/content/manual/membership-milestones.json'
 import sponsorDealsFile from '@/content/manual/sponsor-deals.json'
 import sponsorsFile from '@/content/manual/sponsors.json'
 import trophiesFile from '@/content/manual/trophies.json'
@@ -203,13 +205,46 @@ export const archive = {
     hasKeter: boolean
     stars: number
     noteHe: string
+    /* Present on every row. Rule 14 again: a consumer that must stay sport-scoped
+       cannot filter on a field the type hides. */
+    sport?: string
   }>(crestsFile),
   associationRoles: load<{
     personNameHe: string
     roleHe: string
+    fromDate?: string | null
     toDate?: string | null
+    endReasonHe?: string | null
     replacedByNameHe?: string | null
+    sourceTitle?: string | null
+    sourceUrl?: string | null
   }>(rolesFile),
+  /**
+   * What the supporters did after the hall came down. Loaded here rather than read
+   * straight from JSON by the wing, so the confidence floor is enforced in ONE place
+   * for this table like every other — an association event at confidence 1 is as
+   * unprintable as a match at confidence 1.
+   */
+  associationEvents: load<{
+    kind: 'founding' | 'promotion' | 'vote' | 'resignation' | 'election' | 'meeting' | 'name_change' | 'ceremony' | 'other'
+    happenedOn: string | null
+    dateConfirmed?: boolean
+    titleHe: string
+    bodyHe: string
+    votesFor?: number | null
+    votesAgainst?: number | null
+    turnout?: number | null
+    sourceTitle?: string | null
+    sourceUrl?: string | null
+  }>(associationEventsFile),
+  membershipMilestones: load<{
+    number: number
+    personNameHe?: string | null
+    contextHe: string
+    dateConfirmed?: boolean
+    sourceTitle?: string | null
+    sourceUrl?: string | null
+  }>(milestonesFile),
   grievances: load<{
     slug: string
     kind: 'crossing' | 'myth' | 'event'
@@ -287,6 +322,7 @@ export const archive = {
     seasonLabel?: string | null
     lyricsAuthorHe?: string | null
     backgroundHe?: string | null
+    sport?: string
   }>(songsFile),
   fanCulture: load<{
     slug: string

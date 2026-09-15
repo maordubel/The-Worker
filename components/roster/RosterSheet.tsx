@@ -2,10 +2,19 @@
 
 import { useMemo, useState } from 'react'
 
-import { searchRoster, type Searchable } from '@/lib/game/roster-search'
+import { RosterFilters } from '@/components/roster/RosterFilters'
+import {
+  byInitial,
+  filterRoster,
+  isFiltered,
+  NO_FILTER,
+  searchRoster,
+  type RosterFilter,
+  type Searchable,
+} from '@/lib/game/roster-search'
 import type { RosterIndex } from '@/lib/game/allTimeXI'
 import { useDialog } from '@/components/ui/useDialog'
-import { t } from '@/lib/i18n'
+import { t, type MessageKey } from '@/lib/i18n'
 
 /**
  * גיליון השמות — the way into 637 names, owned in one place.
@@ -44,11 +53,17 @@ export function RosterSheet({
   onClose: () => void
 }) {
   const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState<RosterFilter>(NO_FILTER)
 
-  const results = useMemo(() => searchRoster(roster.all, query), [query, roster.all])
+  // Filter first, search second. The other order works and is wrong: a ranked list
+  // re-filtered loses nothing, but filtering after ranking means the counts printed on
+  // the chips describe a set the reader is not looking at.
+  const narrowed = useMemo(() => filterRoster(roster.all, filter), [roster.all, filter])
+  const results = useMemo(() => searchRoster(narrowed, query), [query, narrowed])
   const grouped = useMemo(
-    () => (query.trim() === '' ? roster.letters : null),
-    [query, roster.letters],
+    () =>
+      query.trim() !== '' ? null : isFiltered(filter) ? byInitial(narrowed) : roster.letters,
+    [query, filter, narrowed, roster.letters],
   )
   const dialogRef = useDialog<HTMLDivElement>(onClose)
 
@@ -95,10 +110,12 @@ export function RosterSheet({
             )}
           </div>
           <p className="mt-1 font-mono text-[10.5px] tabular-nums text-muted">
-            {query === ''
+            {query === '' && !isFiltered(filter)
               ? t('xi.count', { n: String(roster.total) })
-              : t('xi.found', { n: String(results.length) })}
+              : t('roster.count', { shown: String(results.length), total: String(roster.total) })}
           </p>
+
+          <RosterFilters all={roster.all} filter={filter} onChange={setFilter} />
 
           {/* the letter rail — family-name initials. 637 names need a way in that is
               not typing, and the initial a supporter reaches for is the family's */}
@@ -192,6 +209,19 @@ function NameRow({
         {entry.givenHe !== '' && (
           <span className="min-w-0 truncate font-body text-[12px] leading-tight text-muted">
             {entry.givenHe}
+          </span>
+        )}
+        {/*
+          The position, only when a source states one, and never as colour alone.
+          An inferred position (a man's slot in ONE recorded XI) is marked with a
+          degree sign rather than dropped: it is real evidence and it is weaker
+          evidence, and a row that flattens the two teaches the reader the archive
+          knows more than it does.
+        */}
+        {entry.position && (
+          <span className="ms-auto shrink-0 border-hair border-ink/30 px-1.5 py-[2px] font-body text-[9.5px] font-extrabold leading-none text-muted">
+            {t(`roster.pos.${entry.position}` as MessageKey)}
+            {entry.positionFrom === 'lineup' && <span aria-hidden="true">°</span>}
           </span>
         )}
       </button>

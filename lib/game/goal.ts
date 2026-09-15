@@ -1,6 +1,7 @@
 import 'server-only'
 
 import goalsFile from '@/content/manual/goals.json'
+import { positionOf, takeFrom } from '@/lib/rotation/deck'
 import { rng, shuffle } from './archive'
 import { GOALS_PER_RUN, gradeZone, reasonKey, type Grade, type ZoneId } from './goal-zones'
 
@@ -68,9 +69,15 @@ export function hasGoals(): boolean {
  * ASK as well as in the seconds, which is the thing that separates a stage from a
  * countdown.
  */
-function drawn(seed: number): GoalRecord[] {
-  const all = shuffle(records(), rng(seed))
-  const picked = all.slice(0, GOALS_PER_RUN)
+function drawn(seed: number, cursor: number): GoalRecord[] {
+  // 21 goals and three to a run: without a cursor, a player saw the same three every
+  // time the wall was tapped, because the gate link pinned `?seed=1`. The cursor slides
+  // a three-wide window along the same shuffled deck, so seven runs use every goal in
+  // the archive before one comes round again.
+  const all = records()
+  const at = positionOf(seed, cursor, all.length, GOALS_PER_RUN)
+  const deck = shuffle(all, rng(at.seed))
+  const picked = takeFrom(deck, at.slot * GOALS_PER_RUN, GOALS_PER_RUN)
   return picked.sort((a, b) => a.sequence.length - b.sequence.length)
 }
 
@@ -86,8 +93,8 @@ export type GoalChallenge = {
   steps: Array<{ step: number; actorHe: string; action: Action; positionHe: string }>
 }
 
-export function dealRun(seed: number): GoalChallenge[] {
-  return drawn(seed).map((record) => ({
+export function dealRun(seed: number, cursor = 0): GoalChallenge[] {
+  return drawn(seed, cursor).map((record) => ({
     goalId: record.goalId,
     titleHe: record.titleHe,
     subtitleHe: record.subtitleHe,
@@ -127,8 +134,16 @@ export type GoalVerdict = {
   sourceUrl: string | null
 }
 
-export function gradeGoal(seed: number, goalIndex: number, picks: ZoneId[]): GoalVerdict | null {
-  const record = drawn(seed)[goalIndex]
+export function gradeGoal(
+  seed: number,
+  goalIndex: number,
+  picks: ZoneId[],
+  cursor = 0,
+): GoalVerdict | null {
+  // The cursor is part of the round's ADDRESS, so grading has to re-derive with it or
+  // it grades a different three goals than the ones on screen. It is last and defaults
+  // to zero so a link with no cursor on it still means what it always meant.
+  const record = drawn(seed, cursor)[goalIndex]
   if (!record) return null
 
   const steps: StepVerdict[] = record.sequence.map((step, index) => {

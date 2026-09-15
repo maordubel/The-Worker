@@ -98,7 +98,14 @@ export const TOPIC_SPECS: Record<Topic, TopicSpec> = {
     titleKey: 'topic.playerSongs',
     bladeKey: 'topic.playerSongs.blade',
     sports: ['football'],
-    templates: ['player-song', 'song-tune-player', 'song-artist'],
+    /*
+     * `song-tune-player` and `song-artist` were never built. Naming a template that
+     * does not exist does not throw — the round builder skips what it cannot find —
+     * so the topic quietly ran on one template, eight questions, four short of a
+     * round, and has therefore been greyed out on the wall since the day it shipped.
+     * Listing only what exists is what makes the count on the plate true.
+     */
+    templates: ['player-song'],
   },
 }
 

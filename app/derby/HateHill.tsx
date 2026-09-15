@@ -6,6 +6,8 @@ import { EnemyPlate } from '@/components/hate/EnemyPlate'
 import { Punch } from '@/components/play/Punch'
 import { Num } from '@/components/ui/Num'
 import { AdSlot } from '@/components/ads/AdSlot'
+import { PlayLink } from '@/components/play/PlayLink'
+import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
 import { DUEL_COUNT, duelAt, type Enemy, judgeRun, standingKey } from '@/lib/game/hate-run'
@@ -40,11 +42,13 @@ export function HateHill({
   enemies,
   order,
   seed,
+  cursor = 0,
   rosterSize,
 }: {
   enemies: Enemy[]
   order: string[]
   seed: number
+  cursor?: number
   rosterSize: number
 }) {
   const [picks, setPicks] = useState<string[]>([])
@@ -121,7 +125,8 @@ export function HateHill({
     else setDrag(0)
   }
 
-  if (verdict) return <Verdict verdict={verdict} seed={seed} rosterSize={rosterSize} />
+  if (verdict)
+    return <Verdict verdict={verdict} seed={seed} cursor={cursor} rosterSize={rosterSize} />
   if (!duel || !holder || !challenger) return null
 
   const lean = Math.max(-1, Math.min(1, drag / THRESHOLD))
@@ -287,10 +292,12 @@ function SideTag({
 function Verdict({
   verdict,
   seed,
+  cursor,
   rosterSize,
 }: {
   verdict: NonNullable<ReturnType<typeof judgeRun>>
   seed: number
+  cursor: number
   rosterSize: number
 }) {
   const standing = standingKey(verdict.agreement) as MessageKey
@@ -303,6 +310,7 @@ function Verdict({
       <div aria-hidden="true" className="hate-dots pointer-events-none absolute inset-0" />
       <div className="relative">
       <Punch />
+      <RecordRun gate="/derby" score={verdict.agreement} />
       <div className="border-b-rule border-hate-red-light pb-2">
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-hate-red-light" dir="ltr">
           THE VERDICT
@@ -383,7 +391,7 @@ function Verdict({
 
       <ShareRow
         kind="hate"
-        params={{ a: String(verdict.agreement), s: String(seed) }}
+        params={{ a: String(verdict.agreement), s: String(seed), r: String(cursor) }}
         headline={verdict.champion.nameHe}
         card={{
           template: 'ink' as const,
@@ -403,14 +411,16 @@ function Verdict({
       />
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <a
-          href={`/derby?seed=${seed + 1}`}
+        <PlayLink
+          gate="/derby"
           className="flex min-h-tap items-center justify-center border-rule border-hate-ink/50 px-4 font-body text-step-0 font-extrabold text-hate-ink"
         >
           {t('hate.again')}
-        </a>
+        </PlayLink>
         <a
-          href={`/derby/file?seed=${seed}`}
+          // The second act keeps the SAME round address on purpose: the file is the
+          // argument the hill just started, not a new deal.
+          href={`/derby/file?seed=${seed}${cursor > 0 ? `&r=${cursor}` : ''}`}
           className="flex min-h-tap items-center justify-center border-rule border-hate-red-light bg-hate-red-deep px-4 font-body text-step-0 font-extrabold text-hate-ink"
         >
           {t('hate.blackfile')}

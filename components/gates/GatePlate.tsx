@@ -1,5 +1,4 @@
-import Link from 'next/link'
-
+import { PlayLink } from '@/components/play/PlayLink'
 import { Num } from '@/components/ui/Num'
 import { t } from '@/lib/i18n'
 import type { Gate } from '@/lib/gates'
@@ -23,9 +22,13 @@ export function GatePlate({ gate }: { gate: Gate }) {
   const curva = gate.plate === 'curva'
 
   return (
-    <Link
+    // The plate is the way IN, so it carries this device's place in that gate's deck:
+    // walk through gate 2 twice in an afternoon and the second round is not the first
+    // one again. Before this, every plate on the wall pointed at a hardcoded `?seed=1`.
+    <PlayLink
+      gate={gate.href.split('?')[0] ?? gate.href}
       href={gate.href}
-      aria-label={`${t('gate.aria')} ${gate.number} — ${t(gate.title)}`}
+      ariaLabel={`${t('gate.aria')} ${gate.number} — ${t(gate.title)}`}
       className={`group relative block overflow-hidden border-hair border-ink transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
         away ? 'bg-sign/[.07]' : 'bg-sheet'
       }`}
@@ -109,7 +112,7 @@ export function GatePlate({ gate }: { gate: Gate }) {
           {gate.latin}
         </div>
       </div>
-    </Link>
+    </PlayLink>
   )
 }
 

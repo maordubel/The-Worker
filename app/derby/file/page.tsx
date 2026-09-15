@@ -4,6 +4,7 @@ import { Screen } from '@/components/ui/Screen'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { dealFile, dealPairs, fileSize } from '@/lib/game/blackfile'
 import { gateMetadata } from '@/lib/seo'
+import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { BlackFile } from './BlackFile'
 
@@ -23,17 +24,28 @@ import { BlackFile } from './BlackFile'
  */
 export const metadata: Metadata = gateMetadata('derby-file')
 
-export default function BlackFilePage({ searchParams }: { searchParams: { seed?: string } }) {
-  const seed = Number(searchParams.seed) || 11
-  const cards = dealFile(seed)
-  const pairs = dealPairs(seed)
+export default function BlackFilePage({
+  searchParams,
+}: {
+  searchParams: { seed?: string; r?: string }
+}) {
+  const round = roundFrom(searchParams)
+  const cards = dealFile(round.seed, round.cursor)
+  const pairs = dealPairs(round.seed, undefined, round.cursor)
   // The total is counted from what this seed actually deals, never a declared
   // constant — see the note above `dealFile` in lib/game/blackfile.ts for the bug that
   // taught us this (rule 11/15: never print a number that is not true).
   const total = cards.length + pairs.length
   return (
     <Screen title={t('screen.file.title')} sub={t('screen.file.sub')} chrome={false}>
-      <BlackFile cards={cards} pairs={pairs} seed={seed} total={total} fileSize={fileSize()} />
+      <BlackFile
+        cards={cards}
+        pairs={pairs}
+        seed={round.seed}
+        cursor={round.cursor}
+        total={total}
+        fileSize={fileSize()}
+      />
       <ReportLink />
     </Screen>
   )

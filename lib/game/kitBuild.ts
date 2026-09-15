@@ -2,6 +2,7 @@ import 'server-only'
 
 import { createHash } from 'node:crypto'
 
+import { positionOf, takeFrom } from '@/lib/rotation/deck'
 import { rng, shuffle } from './archive'
 import { crestMark } from '@/lib/kit/crestMarks'
 import { seasonKits, type SeasonKit } from '@/lib/kit/seasons'
@@ -208,9 +209,16 @@ export function kitPuzzleCount(): number {
   return eligible().length
 }
 
-function puzzles(seed: number): { puzzle: KitPuzzle; truth: Record<PartKind, string>; kit: SeasonKit }[] {
+function puzzles(
+  seed: number,
+  cursor: number,
+): { puzzle: KitPuzzle; truth: Record<PartKind, string>; kit: SeasonKit }[] {
   const all = eligible()
-  const random = rng(seed)
+  // Thirty eligible shirts, five to a round: six rounds see every one of them. The
+  // window slides on the SAME shuffle so the distractor stream that follows is
+  // untouched — at cursor 0 this deals exactly what it dealt before rotation existed.
+  const at = positionOf(seed, cursor, all.length, KIT_ROUND)
+  const random = rng(at.seed)
 
   // Every distinct part in the archive, by kind — the pool the distractors come from.
   const pool = new Map<PartKind, Map<string, KitPart>>()
@@ -223,8 +231,7 @@ function puzzles(seed: number): { puzzle: KitPuzzle; truth: Record<PartKind, str
     }
   }
 
-  return shuffle([...all], random)
-    .slice(0, KIT_ROUND)
+  return takeFrom(shuffle([...all], random), at.slot * KIT_ROUND, KIT_ROUND)
     .map((kit) => {
       const parts = partsOf(kit)
       const truth = {} as Record<PartKind, string>
@@ -254,16 +261,17 @@ function puzzles(seed: number): { puzzle: KitPuzzle; truth: Record<PartKind, str
     })
 }
 
-export function dealKitRound(seed: number): KitPuzzle[] {
-  return puzzles(seed).map((row) => row.puzzle)
+export function dealKitRound(seed: number, cursor = 0): KitPuzzle[] {
+  return puzzles(seed, cursor).map((row) => row.puzzle)
 }
 
 export function gradeKitPuzzle(
   seed: number,
   index: number,
   placed: Partial<Record<PartKind, string>>,
+  cursor = 0,
 ): KitVerdict | null {
-  const row = puzzles(seed)[index]
+  const row = puzzles(seed, cursor)[index]
   if (!row) return null
 
   const parts: PartVerdict[] = PART_ORDER.map((kind) => ({

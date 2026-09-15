@@ -11,6 +11,9 @@ export async function submitInsert(
   seed: number,
   placed: number,
   slot: number,
+  cursor = 0,
 ): Promise<InsertVerdict | null> {
-  return gradeInsert(seed, placed, slot)
+  // A round is addressed by seed AND cursor once rotation is on; grading has to
+  // re-derive with both or it grades a different deal than the one on screen.
+  return gradeInsert(seed, placed, slot, cursor)
 }

@@ -2,6 +2,7 @@ import 'server-only'
 
 import { matchLine } from '@/components/ui/Num'
 
+import { rotate } from '@/lib/rotation/deck'
 import { currentSeasonStartYear, seasonsInSpell, spellCoversSeason } from './seasons'
 import { DEFAULT_TOPIC, TOPICS, topicSpec, type Topic } from './topics'
 import type { Difficulty } from './score'
@@ -416,7 +417,15 @@ const TEMPLATES: Template[] = [
       const rows = archive.songs.filter(
         (row) => row.songType !== 'player_song' && row.originalTitle,
       )
-      const titles = rows.map((row) => row.titleHe)
+      // The distractor pool has to be every terrace song, not just the ones that
+      // happen to record a tune. It was `rows.map(...)` — the already-filtered set,
+      // which is two rows — so `withDistractors` could never reach four options and
+      // `hasEnoughOptions` dropped every question this template built. A template that
+      // silently produces nothing is worse than one that is not there: it is counted
+      // in `topic.templates`, so it makes the topic look deeper than it is.
+      const titles = archive.songs
+        .filter((row) => row.songType !== 'player_song')
+        .map((row) => row.titleHe)
       return rows.map((row) => ({
         id: `song-tune:${row.slug}`,
         template: 'song-tune',
@@ -1641,7 +1650,7 @@ function normalise(question: Unrated): Omit<Built, 'difficulty'> {
  * narrow topic draws on the handful of templates that ask about it; `general` draws on
  * all of them, which is why general is the widest bank rather than a leftovers bin.
  */
-function buildRound(seed: number, topic: Topic = DEFAULT_TOPIC): Built[] {
+function buildRound(seed: number, topic: Topic = DEFAULT_TOPIC, cursor = 0): Built[] {
   const random = rng(seed)
   const pool: Built[] = []
   const byGroup = new Map<string, Built[]>()
@@ -1666,20 +1675,49 @@ function buildRound(seed: number, topic: Topic = DEFAULT_TOPIC): Built[] {
     pool.push(...built)
   }
 
-  // One question per capped group, at most.
+  // One question per capped group, at most — and a DIFFERENT one each round.
+  //
+  // `pick(group, random)` gave the same capped question every time the deck was walked,
+  // because the group is not part of the pool the cursor rotates. Gate 17 (at most one
+  // Maor Harel question per session) was therefore also "the same Maor Harel question,
+  // for ever". The cap is about how MANY, never about which.
   const capped: Built[] = []
   for (const group of byGroup.values()) {
-    const one = pick(group, random)
+    const one = pick(rotate(group, cursor), random)
     if (one) capped.push(one)
   }
 
   // Deduplicate by id, then spread across templates so a round is not all one kind.
   const unique = [...new Map(pool.map((question) => [question.id, question])).values()]
   const byTemplate = new Map<string, Built[]>()
-  for (const question of shuffle(unique, random)) {
+  //
+  // הרוטציה — where "a different round every time" actually happens for trivia.
+  //
+  // The shuffled pool is rotated `cursor × ROUND_LENGTH` places before the round-robin
+  // walks it, so round two starts twelve questions further along the same deck and
+  // nothing from round one can come back until the deck is used up. At cursor 0 the
+  // rotation is the identity, which is why this change did not move a single existing
+  // expectation.
+  //
+  // Rotating here rather than slicing at the end is what keeps the spread: the
+  // round-robin still takes one question per template in turn, so a rotated round is
+  // still a mixed round rather than twelve questions from whichever template happened
+  // to sit at the cut.
+  for (const question of rotate(shuffle(unique, random), cursor * ROUND_LENGTH)) {
     const list = byTemplate.get(question.template) ?? []
     list.push(question)
     byTemplate.set(question.template, list)
+  }
+
+  // And rotate each template's own list, which is the part that actually guarantees it.
+  //
+  // The round-robin below takes the HEAD of every template in turn, so rotating only
+  // the flat pool left a narrow template — one with three or four usable questions —
+  // presenting the same head twice running. Rotating per template by the cursor means
+  // round two takes each template's second question, round three its third, and a
+  // template only repeats after its own bank is exhausted.
+  if (cursor > 0) {
+    for (const [template, list] of byTemplate) byTemplate.set(template, rotate(list, cursor))
   }
 
   const round: Built[] = []
@@ -1736,13 +1774,22 @@ export function topicCounts(): Record<Topic, number> {
 }
 
 /** The difficulties of a round, in order — what a perfect run would be worth. */
-export function roundDifficulties(seed: number, topic: Topic = DEFAULT_TOPIC): Difficulty[] {
-  return buildRound(seed, topic).map((question) => question.difficulty)
+export function roundDifficulties(
+  seed: number,
+  topic: Topic = DEFAULT_TOPIC,
+  cursor = 0,
+): Difficulty[] {
+  return buildRound(seed, topic, cursor).map((question) => question.difficulty)
 }
 
 /** Public shape — no correct answer, and no source line, ever. */
-export function deal(seed: number, index: number, topic: Topic = DEFAULT_TOPIC): TriviaQuestion | null {
-  const question = buildRound(seed, topic)[index]
+export function deal(
+  seed: number,
+  index: number,
+  topic: Topic = DEFAULT_TOPIC,
+  cursor = 0,
+): TriviaQuestion | null {
+  const question = buildRound(seed, topic, cursor)[index]
   if (!question) return null
   const { correct: _correct, correctSet: _set, source: _source, ...rest } = question
   return rest
@@ -1756,8 +1803,12 @@ export function deal(seed: number, index: number, topic: Topic = DEFAULT_TOPIC):
 export function auditRound(
   seed: number,
   topic: Topic = DEFAULT_TOPIC,
+  cursor = 0,
 ): Array<{ id: string; source: SourceRef }> {
-  return buildRound(seed, topic).map((question) => ({ id: question.id, source: question.source }))
+  return buildRound(seed, topic, cursor).map((question) => ({
+    id: question.id,
+    source: question.source,
+  }))
 }
 
 export type Verdict = {
@@ -1783,8 +1834,9 @@ export function grade(
   index: number,
   answer: string | string[],
   topic: Topic = DEFAULT_TOPIC,
+  cursor = 0,
 ): Verdict | null {
-  const question = buildRound(seed, topic)[index]
+  const question = buildRound(seed, topic, cursor)[index]
   if (!question) return null
   const picked = Array.isArray(answer) ? [...new Set(answer)] : [answer]
   const truth = new Set(question.correctSet)

@@ -1,6 +1,7 @@
 import 'server-only'
 
 import lineupsFile from '@/content/manual/lineups.json'
+import { positionOf, takeFrom } from '@/lib/rotation/deck'
 import { footballPeople, nameOf, rng, shuffle } from './archive'
 
 /**
@@ -182,10 +183,29 @@ export function lineOf(slotId: SlotId): string {
   return slotId.replace(/\d+$/, '')
 }
 
-/** Null when no verified XI exists — the screen then says exactly that. */
-export function dealChallenge(seed: number): Challenge | null {
+/**
+ * The match this round asks about.
+ *
+ * It used to be `records[Math.floor(rng(seed)() * records.length)]`, and that is worse
+ * than it looks. `rng()`'s FIRST output is very nearly linear in the seed — for small
+ * seeds the three xorshifts carry no bits between the shifted copies, so `rng(s)()`
+ * works out to `(270369 × s mod 100000) / 100000`, a fixed −0.29631 ramp. With six
+ * playable records, "play again with seed + 1" therefore walked a short fixed cycle
+ * instead of drawing: seeds 1..10 give records 4, 2, 0, 4, 3, 1, 5, 3, 1, 0.
+ *
+ * A deck fixes both problems at once. Shuffling consumes the stream past its first
+ * output, and the cursor walks the deck one match at a time, so six rounds use all six
+ * records before any of them comes back.
+ */
+function chosen(seed: number, cursor: number) {
   const records = verified()
-  const record = records[Math.floor(rng(seed)() * records.length)]
+  const at = positionOf(seed, cursor, records.length, 1)
+  return takeFrom(shuffle(records, rng(at.seed)), at.slot, 1)[0]
+}
+
+/** Null when no verified XI exists — the screen then says exactly that. */
+export function dealChallenge(seed: number, cursor = 0): Challenge | null {
+  const record = chosen(seed, cursor)
   if (!record) return null
 
   const file = lineupsFile as unknown as LineupFile
@@ -231,9 +251,9 @@ export type LineupVerdict = {
 export function gradeLineup(
   seed: number,
   picks: Record<SlotId, string | null>,
+  cursor = 0,
 ): LineupVerdict | null {
-  const records = verified()
-  const record = records[Math.floor(rng(seed)() * records.length)]
+  const record = chosen(seed, cursor)
   if (!record) return null
 
   const file = lineupsFile as unknown as LineupFile

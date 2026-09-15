@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { positionOf, rotate } from '@/lib/rotation/deck'
 import { archive, rng, shuffle } from './archive'
 import { DUEL_COUNT, type Enemy } from './hate-run'
 
@@ -41,18 +42,35 @@ export function rosterSize(): number {
 }
 
 /** The eleven who appear in this run, in the order they walk on. */
-export function dealQueue(seed: number): { enemies: Enemy[]; order: string[] } {
-  const random = rng(seed)
+export function dealQueue(
+  seed: number,
+  cursor = 0,
+): { enemies: Enemy[]; order: string[] } {
   const all = roster().sort((a, b) => a.terraceRank - b.terraceRank)
+  // Fifty-six names, eleven to a hill. The alternation between the two halves of the
+  // ranking is what makes the duels feel graded rather than random, so the cursor
+  // advances INSIDE each half rather than over the merged order — five rounds use the
+  // whole file, and the sixth is a different shuffle of it.
+  const at = positionOf(seed, cursor, all.length, DUEL_COUNT + 1)
+  const random = rng(at.seed)
   const midpoint = Math.ceil(all.length / 2)
-  const top = shuffle(all.slice(0, midpoint), random)
-  const rest = shuffle(all.slice(midpoint), random)
+  const half = Math.ceil((DUEL_COUNT + 1) / 2)
+  const top = rotate(shuffle(all.slice(0, midpoint), random), at.slot * half)
+  const rest = rotate(shuffle(all.slice(midpoint), random), at.slot * half)
 
   const order: Enemy[] = []
+  const taken = new Set<string>()
   for (let index = 0; index <= DUEL_COUNT; index += 1) {
     const pool = index % 2 === 0 ? top : rest
-    const next = pool.shift()
-    if (next) order.push(next)
+    // A rotated half can hand back somebody the other half already produced only if the
+    // ranking split moved; guarding here costs nothing and a duel against oneself is
+    // the kind of thing that is only ever found by a player.
+    let next = pool.shift()
+    while (next && taken.has(next.slug)) next = pool.shift()
+    if (next) {
+      taken.add(next.slug)
+      order.push(next)
+    }
   }
   return { enemies: order, order: order.map((enemy) => enemy.slug) }
 }

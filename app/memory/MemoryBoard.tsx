@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { Mast } from '@/components/ui/LampGrid'
 import { t } from '@/lib/i18n'
 import type { MemoryCard } from '@/lib/game/memory'
+import { PlayLink } from '@/components/play/PlayLink'
+import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
 
@@ -12,7 +14,15 @@ import { artFor } from '@/lib/share/story'
  * Screen 6 — always night. Twelve lamps in a 4×3 grid, tilted -1.5°.
  * Closed = 12% white. Open = white with the value. A completed pair = red.
  */
-export function MemoryBoard({ cards, seed }: { cards: MemoryCard[]; seed: number }) {
+export function MemoryBoard({
+  cards,
+  seed,
+  cursor = 0,
+}: {
+  cards: MemoryCard[]
+  seed: number
+  cursor?: number
+}) {
   const [open, setOpen] = useState<string[]>([])
   const [done, setDone] = useState<string[]>([])
   // every flip of a second card is a move — the only number worth boasting about here
@@ -93,9 +103,11 @@ export function MemoryBoard({ cards, seed }: { cards: MemoryCard[]; seed: number
       </p>
 
       {done.length === pairs && (
+        <>
+        <RecordRun gate="/memory" correct={pairs} asked={pairs} />
         <ShareRow
           kind="memory"
-          params={{ s: String(seed) }}
+          params={{ s: String(seed), r: String(cursor) }}
           headline={String(pairs)}
           card={{
             template: 'ink' as const,
@@ -110,6 +122,13 @@ export function MemoryBoard({ cards, seed }: { cards: MemoryCard[]; seed: number
             challenge: t('share.sameRound'),
           }}
         />
+        <PlayLink
+          gate="/memory"
+          className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
+        >
+          {t('run.again')}
+        </PlayLink>
+        </>
       )}
     </>
   )

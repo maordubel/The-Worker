@@ -4,6 +4,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { dealRun, hasGoals } from '@/lib/game/goal'
+import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
 import { GoalRun } from './GoalRun'
@@ -17,15 +18,19 @@ import { GoalRun } from './GoalRun'
  */
 export const metadata: Metadata = gateMetadata('goal')
 
-export default function GoalPage({ searchParams }: { searchParams: { seed?: string } }) {
-  const seed = Number(searchParams.seed) || 1
-  const goals = hasGoals() ? dealRun(seed) : []
+export default function GoalPage({
+  searchParams,
+}: {
+  searchParams: { seed?: string; r?: string }
+}) {
+  const round = roundFrom(searchParams)
+  const goals = hasGoals() ? dealRun(round.seed, round.cursor) : []
 
   return (
     <Screen title={t('screen.goal.title')} sub={t('screen.goal.sub')} chrome={false}>
       {goals.length > 0 ? (
         <>
-          <GoalRun goals={goals} seed={seed} />
+          <GoalRun goals={goals} seed={round.seed} cursor={round.cursor} />
           <ReportLink />
         </>
       ) : (

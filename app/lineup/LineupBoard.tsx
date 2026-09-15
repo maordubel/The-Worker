@@ -22,6 +22,8 @@ const OUTFIELD = {
 import { t, type MessageKey } from '@/lib/i18n'
 import type { PitchSlot, SlotStatus, LineupVerdict } from '@/lib/game/lineup'
 import { submitLineup } from './actions'
+import { PlayLink } from '@/components/play/PlayLink'
+import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
 
@@ -58,12 +60,14 @@ export function LineupBoard({
   slots,
   bank,
   seed,
+  cursor = 0,
   graded,
   formationName,
 }: {
   slots: PitchSlot[]
   bank: string[]
   seed: number
+  cursor?: number
   /** false when no verified XI exists — the board is then a free build */
   graded: boolean
   formationName: string
@@ -90,7 +94,7 @@ export function LineupBoard({
   }
 
   function submit() {
-    startTransition(async () => setVerdict(await submitLineup(seed, picks)))
+    startTransition(async () => setVerdict(await submitLineup(seed, picks, cursor)))
   }
 
   return (
@@ -206,9 +210,15 @@ export function LineupBoard({
               </li>
             ))}
           </ul>
+          <RecordRun
+            gate="/lineup"
+            correct={verdict.exact}
+            asked={verdict.total}
+            score={verdict.exact}
+          />
           <ShareRow
             kind="lineup"
-            params={{ s: String(seed) }}
+            params={{ s: String(seed), r: String(cursor) }}
             headline={`${verdict.exact}/${verdict.total}`}
             card={{
               template: 'grass' as const,
@@ -222,6 +232,14 @@ export function LineupBoard({
               challenge: t('share.sameRound'),
             }}
           />
+          {/* The mode had no replay link at all: the only way to a different match was
+              to edit the URL. Six recorded XIs, one to a round — this walks them. */}
+          <PlayLink
+            gate="/lineup"
+            className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
+          >
+            {t('run.again')}
+          </PlayLink>
         </>
       )}
     </>

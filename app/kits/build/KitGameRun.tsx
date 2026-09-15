@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 
 import { AdSlot } from '@/components/ads/AdSlot'
 import { KitPlate } from '@/components/kit/KitPlate'
+import { PlayLink } from '@/components/play/PlayLink'
+import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { Num } from '@/components/ui/Num'
 import { artFor } from '@/lib/share/story'
@@ -38,7 +40,15 @@ import { submitKit } from './actions'
 
 type Placed = Partial<Record<PartKind, KitPart>>
 
-export function KitGameRun({ puzzles, seed }: { puzzles: KitPuzzle[]; seed: number }) {
+export function KitGameRun({
+  puzzles,
+  seed,
+  cursor = 0,
+}: {
+  puzzles: KitPuzzle[]
+  seed: number
+  cursor?: number
+}) {
   const [index, setIndex] = useState(0)
   const [placed, setPlaced] = useState<Placed>({})
   const [verdict, setVerdict] = useState<KitVerdict | null>(null)
@@ -106,6 +116,7 @@ export function KitGameRun({ puzzles, seed }: { puzzles: KitPuzzle[]; seed: numb
       Object.fromEntries(PART_ORDER.map((kind) => [kind, placed[kind]?.id])) as Partial<
         Record<PartKind, string>
       >,
+      cursor,
     )
     setBusy(false)
     if (!answer) return
@@ -131,7 +142,10 @@ export function KitGameRun({ puzzles, seed }: { puzzles: KitPuzzle[]; seed: numb
   const score = log.reduce((total, row) => total + row.score, 0)
   const rightSoFar = log.reduce((total, row) => total + row.right, 0)
 
-  if (done) return <RoundSummary log={log} seed={seed} score={score} right={rightSoFar} />
+  if (done)
+    return (
+      <RoundSummary log={log} seed={seed} cursor={cursor} score={score} right={rightSoFar} />
+    )
 
   return (
     <div className="mt-stack">
@@ -473,11 +487,13 @@ function Reveal({
 function RoundSummary({
   log,
   seed,
+  cursor,
   score,
   right,
 }: {
   log: KitVerdict[]
   seed: number
+  cursor: number
   score: number
   right: number
 }) {
@@ -552,9 +568,10 @@ function RoundSummary({
         </div>
       )}
 
+      <RecordRun gate="/kits/build" score={score} correct={right} asked={total} />
       <ShareRow
         kind="kit"
-        params={{ c: String(right), s: String(seed) }}
+        params={{ c: String(right), s: String(seed), r: String(cursor) }}
         headline={`${right}/${total}`}
         card={{
           template: 'kit' as const,
@@ -575,12 +592,12 @@ function RoundSummary({
       />
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <a
-          href={`/kits/build?seed=${seed + 1}`}
+        <PlayLink
+          gate="/kits/build"
           className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-4 font-body text-step-0 font-extrabold text-ink"
         >
           {t('run.again')}
-        </a>
+        </PlayLink>
         <a
           href="/"
           className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper"

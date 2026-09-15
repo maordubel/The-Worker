@@ -53,6 +53,14 @@ export function wallOrder(gates: readonly Gate[]): readonly Gate[] {
   return [...curva, ...gates.filter((gate) => gate.plate !== 'curva')]
 }
 
+/**
+ * **A gate's href carries no seed.** Every one of these used to end in `?seed=1`
+ * (`?seed=7` for the memory board), which meant the wall itself was the thing pinning
+ * the app to one round per gate: the plate handed the route a constant, the route read
+ * the constant, and every player in the world got the same deal for ever. The round is
+ * now decided by the device's own place in that gate's deck (`components/play/PlayLink.tsx`),
+ * or minted fresh on the server when there is no device to ask.
+ */
 export const GATES: readonly Gate[] = [
   {
     number: 1,
@@ -72,7 +80,7 @@ export const GATES: readonly Gate[] = [
   },
   {
     number: 3,
-    href: '/lineup?seed=1',
+    href: '/lineup',
     title: 'gate.3',
     latin: 'THE LINE-UP · NORTH',
     plate: 'plain',
@@ -80,7 +88,7 @@ export const GATES: readonly Gate[] = [
   },
   {
     number: 4,
-    href: '/kits/build?seed=1',
+    href: '/kits/build',
     title: 'gate.4',
     latin: 'GUESS THE KIT · EAST',
     plate: 'plain',
@@ -97,7 +105,7 @@ export const GATES: readonly Gate[] = [
   },
   {
     number: 6,
-    href: '/memory?seed=7',
+    href: '/memory',
     title: 'gate.6',
     latin: 'MEMORY · SOUTH-EAST',
     plate: 'plain',
@@ -113,7 +121,7 @@ export const GATES: readonly Gate[] = [
   },
   {
     number: 8,
-    href: '/goal?seed=1',
+    href: '/goal',
     title: 'gate.8',
     latin: 'REBUILD THE GOAL · SOUTH-WEST',
     plate: 'rays',
@@ -137,7 +145,7 @@ export const GATES: readonly Gate[] = [
   },
   {
     number: 13,
-    href: '/timeline?seed=1',
+    href: '/timeline',
     title: 'gate.13',
     latin: 'TIMELINE · NORTH-WEST',
     plate: 'plain',
