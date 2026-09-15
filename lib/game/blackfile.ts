@@ -52,7 +52,16 @@ export type CardVerdict = {
   sourceUrl: string | null
 }
 
-export const ROUND_SIZE = 8
+/**
+ * There used to be a `ROUND_SIZE = 8` here. The round is `transferCards()` (5 rows:
+ * `crossing` + `myth`) followed by `dealPairs()` (4 pairs, out of 9 dated `event`
+ * rows) — **nine** questions, not eight, and the archive can grow either half at any
+ * time. A declared constant cannot track that: the header printed "8 מתוך 8" while the
+ * ninth question was still being asked, and the Done screen could print "9 / 8" — a
+ * number that was not true (rule 11/15). There is no replacement constant. The caller
+ * deals `dealFile(seed)` and `dealPairs(seed)` once and sums their real lengths — see
+ * `app/derby/file/page.tsx` — so the total on screen is always what was actually dealt.
+ */
 
 /** Only the cards that can be judged crossed / did-not — the transfer questions. */
 function transferCards() {

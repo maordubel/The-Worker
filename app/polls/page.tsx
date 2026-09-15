@@ -1,9 +1,14 @@
+import type { Metadata } from 'next'
+
 import { Screen } from '@/components/ui/Screen'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { rosterIndex } from '@/lib/game/allTimeXI'
+import { gateMetadata } from '@/lib/seo'
 import { t } from '@/lib/i18n'
 
 import { BallotSheet } from './BallotSheet'
+
+export const metadata: Metadata = gateMetadata('polls')
 
 /**
  * שער 7 — אגף הסקרים.

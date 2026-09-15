@@ -30,9 +30,33 @@ export const D1 = 'life:galil:d1'
 export const D2 = 'life:galil:d2'
 export const D3 = 'life:galil:d3'
 export const D4 = 'life:galil:d4'
+/**
+ * `went:galil-*` — the three flags this chapter has to carry past midnight, and the
+ * reason they are spelled with the chapter's name in them.
+ *
+ * The Galil day ends and `DAY(D5, …)` opens the morning after, where `after-close`
+ * decides which of four endings the chapter printed. `personFlags()` in `events.ts`
+ * empties the save at every day change except for a named set of prefixes — so the
+ * original `g4:bus` / `g4:radio` / `arrived:late` were gone before the scene that reads
+ * them ever ran, and this chapter produced `heard` on 200 runs out of 200 with three
+ * endings written and unreachable. Found by simulation on 15.9.2026, not by reading.
+ *
+ * The first fix was to rename them all to `went:`, globally, and it was WRONG in a way
+ * worth recording: `went:` also survives `year.entered`, so a late arrival in 1993 stayed
+ * lit through 1996, 1998 and 2000. It faked every `late` ending in `1999-cup` (44 of 44
+ * came from the stale flag, not from a choice in 1999) and it permanently blocked this
+ * chapter's own `inside`, which tests `none: ['went:late']`. A flag that outlives its
+ * question stops being a memory and becomes a lie.
+ *
+ * So the survival is scoped to the thing it is about. The three chapters that also used
+ * `arrived:late` — `1993-cup`, `1999-cup`, `2000-double` — contain no `DAY()` at all, so
+ * they never needed it to survive anything and kept the day-scoped name.
+ */
 export const D5 = 'life:galil:after'
 
 export const PORTRAIT_GALIL: Record<string, string> = {
+  'מישל': 'faceMichel',
+  'אסף': 'faceAsaf',
   'פוגי': 'faceHero80',
   'קובי': 'faceKobi',
   'רחל': 'faceRachel90',
@@ -63,8 +87,8 @@ export const ENDINGS_GALIL: Record<string, EndingCard> = {
     id: 'inside',
     titleHe: 'הגביע היה אמיתי',
     bodyHe:
-      'הייתם שם, בצפון, בסוף. ראית את זה נגמר מקרוב, וראית פנים של אנשים שלא הכרת ושאתה יכול לצייר בעל פה. בדרך חזרה האוטובוס היה שקט כמו כיתה בבחינה. לימור לא פתחה את הפנקס. אפי ישן, או העמיד פנים.',
-    memoryHe: 'פתק הנסיעה, מקופל ארבע. עליו, בכתב של לימור, שעת היציאה. שום דבר על שעת החזרה.',
+      'הייתם שם, בצפון, בסוף. ראית את זה נגמר מקרוב, וראית פנים של אנשים שלא הכרת ושאתה יכול לצייר בעל פה. בדרך חזרה האוטובוס היה שקט כמו כיתה בבחינה. מישל לא פתח את הפנקס. אפי ישן, או העמיד פנים.',
+    memoryHe: 'פתק הנסיעה, מקופל ארבע. עליו, בכתב של מישל, שעת היציאה. שום דבר על שעת החזרה.',
     memoryItem: 'folded-paper',
     presence: 'inside',
   },
@@ -264,8 +288,8 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'יום רביעי. משחק שני, אצלם, בצפון. ברחוב עומדת הסעה קטנה ולידה לימור עם הפנקס.' },
-          { who: 'לימור', text: 'שלושים שקל, יוצאים בארבע, חוזרים אחרי חצות. יש מקום אחד.' },
+          { who: null, text: 'יום רביעי. משחק שני, אצלם, בצפון. ברחוב עומדת הסעה קטנה ולידה מישל עם הפנקס.' },
+          { who: 'מישל', text: 'שלושים שקל, יוצאים בארבע, חוזרים אחרי חצות. יש מקום אחד.' },
           { who: null, text: 'בתיק יש מחברת עם שיעורים למחר. בבית יש אבא עם טרנזיסטור.' },
         ],
         choices: [
@@ -333,7 +357,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
           },
           {
             id: 'ledger',
-            text: 'לשאול את לימור מה כתוב בפנקס.',
+            text: 'לשאול את מישל מה כתוב בפנקס.',
             then: [
               { e: 'presence', mode: 'travelling' },
               { e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 4 },
@@ -455,18 +479,26 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
   },
   // --------------------------------------------------------------------- game 4 ---
   {
-    id: 'g4-limor',
-    nameHe: 'לימור',
+    /**
+     * ההסעה היא של מישל.
+     *
+     * הצומת הזה — מי רשום, תשעים שקל בעלייה, מי סופר את הראשים, ומה קורה למי שלא
+     * הספיק — היה כתוב על לימור. זו עבודתו של מישל בר־כליפא, שהיה האיש שאחראי בפועל
+     * על הסעות האוהדים בשנות השמונים והתשעים (מאור הראל, ידע אישי, 15.9.2026).
+     * לימור שומרת את מה שתמיד היה שלה: הכניסה מהצד, התור, ומי שמכיר את הסדרן.
+     */
+    id: 'g4-michel',
+    nameHe: 'מישל',
     branches: [
       {
         when: { flag: 'g4:bus-gone' },
-        lines: [{ who: 'לימור', text: 'יצא. בארבע ועשרה, כמו שאמרתי. יש רכבת? אין רכבת. יש טרמפ. יש רדיו.' }],
+        lines: [{ who: 'מישל', text: 'יצא. בארבע ועשרה, כמו שאמרתי. יש רכבת? אין רכבת. יש טרמפ. יש רדיו.' }],
       },
       {
         when: { flag: 'life:signed:bus' },
-        lines: [{ who: 'לימור', text: 'אתה רשום. תשעים שקל בעלייה. אני לא מלווה, אני רק סופרת. יש לך?' }],
+        lines: [{ who: 'מישל', text: 'אתה רשום. תשעים שקל בעלייה. אני לא מלווה, אני רק סופר. יש לך?' }],
         choices: [
-          { id: 'pay', text: 'לשלם. לעלות.', when: { minAgorot: 9000 }, noteHe: 'אין תשעים שקל.', then: [{ e: 'money', agorot: -9000, why: 'אוטובוס לצפון' }, { e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:bus' }, { e: 'time', minutes: 200 }, { e: 'goto', node: 'g4-north' }] },
+          { id: 'pay', text: 'לשלם. לעלות.', when: { minAgorot: 9000 }, noteHe: 'אין תשעים שקל.', then: [{ e: 'money', agorot: -9000, why: 'אוטובוס לצפון' }, { e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'went:galil-bus' }, { e: 'time', minutes: 200 }, { e: 'goto', node: 'g4-north' }] },
           { id: 'broke', text: 'אין לי.', then: [{ e: 'goto', node: 'g4-broke' }] },
         ],
       },
@@ -481,9 +513,9 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
          * behind a form he had not filled in three days earlier. Asking is now a thing
          * you can do standing here.
          */
-        lines: [{ who: 'לימור', text: 'לא נרשמת. יש מקום אחד אם מישהו לא יגיע. תשעים שקל. תחכה פה עד ארבע ותראה.' }],
+        lines: [{ who: 'מישל', text: 'לא נרשמת. יש מקום אחד אם מישהו לא יגיע. תשעים שקל. תחכה פה עד ארבע ותראה.' }],
         choices: [
-          { id: 'wait', text: 'לחכות ולקוות.', when: { minAgorot: 9000 }, noteHe: 'אין תשעים שקל.', then: [{ e: 'money', agorot: -9000, why: 'אוטובוס לצפון' }, { e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:bus' }, { e: 'flag', flag: 'arrived:late' }, { e: 'time', minutes: 230 }, { e: 'goto', node: 'g4-north' }] },
+          { id: 'wait', text: 'לחכות ולקוות.', when: { minAgorot: 9000 }, noteHe: 'אין תשעים שקל.', then: [{ e: 'money', agorot: -9000, why: 'אוטובוס לצפון' }, { e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'went:galil-bus' }, { e: 'flag', flag: 'went:galil-late' }, { e: 'time', minutes: 230 }, { e: 'goto', node: 'g4-north' }] },
           { id: 'ask', text: 'להגיד שאין לי, ולעמוד שם.', then: [{ e: 'goto', node: 'g4-broke' }] },
           { id: 'no', text: 'לא.', then: [] },
         ],
@@ -497,7 +529,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
       {
         when: { relationship: { who: 'shachor', axis: 'bond', min: 5 } },
         lines: [{ who: null, text: 'שחור, מאחור, בלי להרים את הראש: "הילד של הבד נוסע. את ההפרש אני משלים." לימור לא התווכחה, רק רשמה.' }],
-        then: [{ e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:bus' }, { e: 'flag', flag: 'owe:shachor' }, { e: 'redheart', key: 'community', delta: 4 }, { e: 'time', minutes: 200 }, { e: 'goto', node: 'g4-north' }],
+        then: [{ e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'went:galil-bus' }, { e: 'flag', flag: 'owe:shachor' }, { e: 'redheart', key: 'community', delta: 4 }, { e: 'time', minutes: 200 }, { e: 'goto', node: 'g4-north' }],
       },
       {
         lines: [{ who: null, text: 'לימור הנהנה. "אז רדיו. אין בושה ברדיו." יש קצת.' }],
@@ -534,7 +566,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
           { who: null, text: 'הצפון בחלון: ירוק, ואז יותר ירוק, ואז חושך. עמית מאחור עם הטרנזיסטור מדווח על משחק שעוד לא התחיל.' },
           { who: null, text: 'הגעתם כשכולם כבר בפנים. הסדרן הסתכל על שלושה ילדים מתל אביב ופתח את הדלת בלי לשאול.' },
         ],
-        then: [{ e: 'flag', flag: 'arrived:late' }, { e: 'redheart', key: 'travelDrive', delta: 4 }, { e: 'goto', node: 'g4-north' }],
+        then: [{ e: 'flag', flag: 'went:galil-late' }, { e: 'redheart', key: 'travelDrive', delta: 4 }, { e: 'goto', node: 'g4-north' }],
       },
     ],
   },
@@ -549,7 +581,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
       {
         lines: [{ who: null, text: 'הטרנזיסטור על השולחן, האנטנה כבר מכופפת לצד הנכון. שמונה בערב, ואמא שתעשה שהיא לא מקשיבה.' }],
         choices: [
-          { id: 'radio', text: 'להישאר. לשמוע.', then: [{ e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'g4:radio' }, { e: 'time', minutes: 60 }, { e: 'goto', node: 'g4-radio-night' }] },
+          { id: 'radio', text: 'להישאר. לשמוע.', then: [{ e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'went:galil-radio' }, { e: 'time', minutes: 60 }, { e: 'goto', node: 'g4-radio-night' }] },
           { id: 'not-yet', text: 'עוד לא.', then: [] },
         ],
       },
@@ -574,7 +606,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     nameHe: null,
     branches: [
       {
-        when: { flag: 'arrived:late' },
+        when: { flag: 'went:galil-late' },
         lines: [
           { who: null, text: 'פספסת את ההתחלה. מבפנים, דרך הדלת, שמעת אולם שלם של אנשים שלא אתה.' },
           { who: null, text: 'נכנסת בכל זאת. עמדת מאחור. ראית איך זה נגמר, ואיך אנשים בצבע שלך אוספים דגלים בשקט.' },
@@ -670,9 +702,9 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     id: 'after-close',
     nameHe: null,
     branches: [
-      { when: { flag: 'g4:bus', none: [{ flag: 'arrived:late' }] }, lines: [{ who: null, text: 'הלכת הביתה דרך הרחוב הרגיל. הוא נראה אותו דבר. זה מה שהיה מוזר.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'inside' }] },
-      { when: { flag: 'arrived:late' }, lines: [{ who: null, text: 'הלכת הביתה. הכרטיס הקרוע בכיס, עם חותמת של מקום שלא היית בו קודם.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'late' }] },
-      { when: { flag: 'g4:radio' }, lines: [{ who: null, text: 'הלכת הביתה. הטרנזיסטור עוד על השולחן במטבח, כבוי.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'radio' }] },
+      { when: { flag: 'went:galil-bus', none: [{ flag: 'went:galil-late' }] }, lines: [{ who: null, text: 'הלכת הביתה דרך הרחוב הרגיל. הוא נראה אותו דבר. זה מה שהיה מוזר.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'inside' }] },
+      { when: { flag: 'went:galil-late' }, lines: [{ who: null, text: 'הלכת הביתה. הכרטיס הקרוע בכיס, עם חותמת של מקום שלא היית בו קודם.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'late' }] },
+      { when: { flag: 'went:galil-radio' }, lines: [{ who: null, text: 'הלכת הביתה. הטרנזיסטור עוד על השולחן במטבח, כבוי.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'radio' }] },
       { lines: [{ who: null, text: 'הלכת הביתה. שלושה משפטים של אפי בראש, ואחד שהוא לא סיים.' }], then: [{ e: 'flag', flag: 'after:done' }, { e: 'ending', id: 'heard' }] },
     ],
   },

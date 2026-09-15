@@ -18,6 +18,7 @@
     "wiki:corpus": "tsx scripts/ingest/corpus-cli.ts",
     "story:overlap": "node scripts/brand/story-overlap.mjs",
     "story:cards": "node scripts/brand/story-cards.mjs",
+    "og:cards": "node scripts/brand/og-cards.mjs",
     "qa:sweep": "node scripts/brand/qa-sweep.mjs",
     "life:play": "node scripts/life/playthrough.mjs",
     "life:pitch": "node scripts/life/pitch-probe.mjs",

@@ -128,13 +128,19 @@ export function HateHill({
   const opening = picks.length === 0
 
   return (
-    <div className="mt-stack select-none">
-      <div className="flex items-end justify-between gap-3 border-b-rule border-ink pb-2">
+    // שער 11 — the dead-grass ground (rule 8, the marked block at the foot of
+    // app/globals.css). Full-bleed on the phone, framed by the shell's own
+    // md:border-x-rule sheet from `md` up — `-mx-gutter` cancels the Screen's own
+    // gutter so the field genuinely reaches the edge rather than floating on paper.
+    <div className="relative -mx-gutter mt-stack select-none overflow-hidden bg-hate-field px-gutter pb-6 pt-3">
+      <div aria-hidden="true" className="hate-dots pointer-events-none absolute inset-0" />
+      <div className="relative">
+      <div className="flex items-end justify-between gap-3 border-b-rule border-hate-red-light pb-2">
         <div>
-          <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
+          <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-hate-red-light" dir="ltr">
             GATE 11 · KING OF THE HILL
           </p>
-          <p className="font-display text-step-1 leading-tight text-ink">
+          <p className="font-display text-step-1 leading-tight text-hate-ink">
             {t('hate.duelOf', { n: String(picks.length + 1), of: String(DUEL_COUNT) })}
           </p>
         </div>
@@ -142,8 +148,8 @@ export function HateHill({
           {Array.from({ length: DUEL_COUNT }, (_, index) => (
             <li
               key={index}
-              className={`h-2.5 w-2.5 border-hair border-ink ${
-                index < picks.length ? 'bg-red' : 'bg-transparent'
+              className={`h-2.5 w-2.5 border-hair border-hate-ink/50 ${
+                index < picks.length ? 'bg-hate-red-light' : 'bg-transparent'
               }`}
             />
           ))}
@@ -151,12 +157,12 @@ export function HateHill({
       </div>
 
       {opening && (
-        <p className="mt-2.5 max-w-prose font-body text-step--1 leading-relaxed text-muted">
+        <p className="mt-2.5 max-w-prose font-body text-step--1 leading-relaxed text-hate-muted">
           {t('hate.lede')}
         </p>
       )}
 
-      <p className="mt-2.5 font-display text-step-2 leading-tight text-ink">{t('hate.pick')}</p>
+      <p className="mt-2.5 font-display text-step-2 leading-tight text-hate-ink">{t('hate.pick')}</p>
 
       {/* the arena — one drag surface, two plates, direction points at a person.
           The clip is load-bearing: a translated child widens the document and the whole
@@ -200,11 +206,12 @@ export function HateHill({
             <EnemyPlate
               enemy={holder}
               state={stamped ? (stamped.won === holder.slug ? 'won' : 'out') : 'live'}
+              holder={!opening}
               onPick={() => pick('holder')}
               dense
             />
             {!opening && !stamped && (
-              <span className="pointer-events-none absolute -top-2 end-2 border-hair border-ink bg-ink px-2 py-0.5 font-body text-[10px] font-extrabold tracking-wide text-paper">
+              <span className="pointer-events-none absolute -top-2 end-2 bg-hate-red-deep px-2 py-0.5 font-body text-[10px] font-extrabold tracking-wide text-hate-ink">
                 {t('hate.streak', { n: String(streak) })}
               </span>
             )}
@@ -212,9 +219,9 @@ export function HateHill({
         </div>
 
         <div className="flex items-center gap-3 py-1.5" aria-hidden="true">
-          <span className="h-px flex-1 bg-ink/30" />
-          <span className="font-poster text-[20px] leading-none text-red">×</span>
-          <span className="h-px flex-1 bg-ink/30" />
+          <span className="h-px flex-1 bg-hate-ink/30" />
+          <span className="font-poster text-[20px] leading-none text-hate-red-light">×</span>
+          <span className="h-px flex-1 bg-hate-ink/30" />
         </div>
 
         <div
@@ -234,10 +241,11 @@ export function HateHill({
       </div>
       </div>
 
-      <p className="mt-3 font-body text-[11px] leading-snug text-muted">{t('hate.swipeHint')}</p>
-      <p className="mt-1 font-body text-[11px] text-muted">
+      <p className="mt-3 font-body text-[11px] leading-snug text-hate-muted">{t('hate.swipeHint')}</p>
+      <p className="mt-1 font-body text-[11px] text-hate-muted">
         {t('hate.rosterNote', { count: String(rosterSize) })}
       </p>
+      </div>
     </div>
   )
 }
@@ -260,7 +268,7 @@ function SideTag({
     <span
       className={`flex min-w-0 flex-1 basis-0 items-baseline gap-1.5 border-hair px-2 py-1 ${
         end ? 'text-end' : 'text-start'
-      } ${active ? 'border-red bg-red text-paper' : 'border-ink/35 text-muted'}`}
+      } ${active ? 'border-hate-red-light bg-hate-red-light text-hate-field' : 'border-hate-ink/35 text-hate-muted'}`}
     >
       <span className="font-mono text-[11px] leading-none" aria-hidden="true">
         {arrow}
@@ -288,16 +296,21 @@ function Verdict({
   const standing = standingKey(verdict.agreement) as MessageKey
 
   return (
-    <div className="mt-stack">
+    // הכרעת היציע — the verdict stays on the same dead-grass ground as the duel: one
+    // sheet, not a hand-off to a lighter screen (Task C: "keeps the ranked standings
+    // on the same sheet").
+    <div className="relative -mx-gutter mt-stack overflow-hidden bg-hate-field px-gutter pb-6 pt-3">
+      <div aria-hidden="true" className="hate-dots pointer-events-none absolute inset-0" />
+      <div className="relative">
       <Punch />
-      <div className="border-b-rule border-ink pb-2">
-        <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
+      <div className="border-b-rule border-hate-red-light pb-2">
+        <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-hate-red-light" dir="ltr">
           THE VERDICT
         </p>
-        <h2 className="font-display text-step-2 leading-tight text-ink">{t('hate.verdict')}</h2>
+        <h2 className="font-display text-step-2 leading-tight text-hate-ink">{t('hate.verdict')}</h2>
       </div>
 
-      <p className="mt-stack font-body text-[11px] tracking-widest text-muted">
+      <p className="mt-stack font-body text-[11px] tracking-widest text-hate-muted">
         {t('hate.champion')}
       </p>
       <div className="mt-2">
@@ -305,61 +318,61 @@ function Verdict({
       </div>
 
       {verdict.champion.detailHe !== '' && (
-        <div className="mt-2 border-rule border-ink bg-sheet p-4">
-          <p className="font-body text-[10px] tracking-widest text-muted">{t('hate.record')}</p>
-          <p className="mt-1 font-body text-step--1 leading-relaxed text-ink">
+        <div className="mt-2 border-rule border-hate-ink/40 bg-hate-card p-4">
+          <p className="font-body text-[10px] tracking-widest text-hate-muted">{t('hate.record')}</p>
+          <p className="mt-1 font-body text-step--1 leading-relaxed text-hate-ink">
             {verdict.champion.detailHe}
           </p>
         </div>
       )}
 
       <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-        <div className="border-rule border-ink bg-ink p-4 text-center">
-          <p className="font-poster text-[52px] leading-none text-red">
+        <div className="border-rule border-hate-red-light bg-hate-card p-4 text-center">
+          <p className="font-poster text-[52px] leading-none text-hate-red-light">
             <Num>{`${verdict.agreement}%`}</Num>
           </p>
-          <p className="mt-1 font-body text-[10px] tracking-widest text-concrete">
+          <p className="mt-1 font-body text-[10px] tracking-widest text-hate-muted">
             {t('hate.agreement')}
           </p>
-          <p className="mt-2 font-display text-step-0 leading-tight text-paper">{t(standing)}</p>
+          <p className="mt-2 font-display text-step-0 leading-tight text-hate-ink">{t(standing)}</p>
         </div>
-        <div className="border-rule border-ink bg-sheet p-4">
-          <p className="font-body text-[10px] tracking-widest text-muted">{t('hate.terrace')}</p>
-          <p className="mt-1 font-poster text-[28px] leading-[0.85] text-ink">
+        <div className="border-rule border-hate-ink/40 bg-hate-field p-4">
+          <p className="font-body text-[10px] tracking-widest text-hate-muted">{t('hate.terrace')}</p>
+          <p className="mt-1 font-poster text-[28px] leading-[0.85] text-hate-ink">
             {verdict.terraceChampion.nameHe}
           </p>
-          <p className="mt-2 font-body text-[11px] leading-snug text-muted">
+          <p className="mt-2 font-body text-[11px] leading-snug text-hate-muted">
             {verdict.terraceChampion.keyFactHe}
           </p>
         </div>
       </div>
 
-      <p className="mt-2.5 border-rule border-ink bg-sheet px-4 py-3 font-body text-step--1 leading-relaxed text-ink">
+      <p className="mt-2.5 border-rule border-hate-ink/40 bg-hate-card px-4 py-3 font-body text-step--1 leading-relaxed text-hate-ink">
         {t('hate.heldTheHill', {
           name: verdict.champion.nameHe,
           n: String(verdict.streak),
         })}
       </p>
 
-      <p className="mt-stack font-body text-[11px] tracking-widest text-muted">
+      <p className="mt-stack font-body text-[11px] tracking-widest text-hate-muted">
         {t('hate.standings')}
       </p>
-      <ol className="mt-2 border-t-hair border-ink/25">
+      <ol className="mt-2 border-t-hair border-hate-ink/25">
         {verdict.standings.map((row, index) => (
           <li
             key={row.enemy.slug}
-            className="flex items-baseline gap-2.5 border-b-hair border-ink/25 py-2"
+            className="flex items-baseline gap-2.5 border-b-hair border-hate-ink/25 py-2"
           >
-            <span className="w-5 shrink-0 font-poster text-[19px] leading-none text-red">
+            <span className="w-5 shrink-0 font-poster text-[19px] leading-none text-hate-red-light">
               <Num>{index + 1}</Num>
             </span>
-            <span className="min-w-0 flex-1 font-body text-step-0 text-ink">
+            <span className="min-w-0 flex-1 font-body text-step-0 text-hate-ink">
               {row.enemy.nameHe}
-              <span className="block font-body text-[10.5px] leading-snug text-muted">
+              <span className="block font-body text-[10.5px] leading-snug text-hate-muted">
                 {row.enemy.keyFactHe}
               </span>
             </span>
-            <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted">
+            <span className="shrink-0 font-mono text-[11px] tabular-nums text-hate-muted">
               <Num>{row.held}</Num>
             </span>
           </li>
@@ -392,23 +405,24 @@ function Verdict({
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <a
           href={`/derby?seed=${seed + 1}`}
-          className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-4 font-body text-step-0 font-extrabold text-ink"
+          className="flex min-h-tap items-center justify-center border-rule border-hate-ink/50 px-4 font-body text-step-0 font-extrabold text-hate-ink"
         >
           {t('hate.again')}
         </a>
         <a
           href={`/derby/file?seed=${seed}`}
-          className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper"
+          className="flex min-h-tap items-center justify-center border-rule border-hate-red-light bg-hate-red-deep px-4 font-body text-step-0 font-extrabold text-hate-ink"
         >
           {t('hate.blackfile')}
         </a>
       </div>
 
-      <p className="mt-3 font-body text-[11px] text-muted">
+      <p className="mt-3 font-body text-[11px] text-hate-muted">
         {t('hate.rosterNote', { count: String(rosterSize) })}
       </p>
 
       <AdSlot placement="result" />
+      </div>
     </div>
   )
 }

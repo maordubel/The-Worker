@@ -208,14 +208,21 @@ export function DialogueBox({
           {/* the red tab on the speaker's edge: this is a page of the same book, every time */}
           <span className={`pointer-events-none absolute inset-y-0 w-[4px] bg-red ${atEnd ? 'start-0' : spoken ? 'end-0' : 'start-0'}`} aria-hidden="true" />
 
-          {/* היציאה — the same corner, every line, every conversation. */}
+          {/* היציאה — the same corner, every line, every conversation.
+              This used to be a fixed 40px (`h-10 w-10`) — the project's own standard is
+              `min-h-tap`/`min-w-tap` (48px, `--tap`), which every other close control in
+              the game already meets. `min-*` rather than a fixed size so the button still
+              only takes what its content needs on anything wider than the minimum — it
+              does not grow the corner, just stops it from shrinking under the standard.
+              The line button's padding (`ps-11`/`pe-11`, 44px) is widened to `-12`
+              (48px) on the same edge so the two never overlap at the new size. */}
           <button
             type="button"
             onClick={onLeave}
             aria-label={t('life.leave')}
             title={t('life.leave')}
             data-life="leave"
-            className={`absolute top-0 z-10 flex h-10 w-10 items-center justify-center font-display text-[15px] leading-none transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none ${
+            className={`absolute top-0 z-10 flex min-h-tap min-w-tap items-center justify-center font-display text-[15px] leading-none transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none ${
               spoken ? 'text-ink/45' : 'text-sheet/55'
             } ${spoken && !atEnd ? 'start-0' : 'end-0'}`}
           >
@@ -228,7 +235,7 @@ export function DialogueBox({
             onClick={hasChoices ? finish : advance}
             aria-label={hasChoices ? undefined : t('life.continue')}
             data-life="continue"
-            className={`flex min-h-tap w-full items-start gap-3 pb-3 pt-3.5 text-start ${spoken && !atEnd ? 'pe-4 ps-11' : 'pe-11 ps-4'}`}
+            className={`flex min-h-tap w-full items-start gap-3 pb-3 pt-3.5 text-start ${spoken && !atEnd ? 'pe-4 ps-12' : 'pe-12 ps-4'}`}
           >
             <span className="sr-only" data-life="line">
               {text}

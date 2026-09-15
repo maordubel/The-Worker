@@ -10,6 +10,7 @@ import type { LifeSnapshot } from '@/lib/life/runtime/game'
 import type { Band } from '@/lib/life/profile'
 import { cardForMemory, type ShareCard } from '@/lib/life/share'
 import { ShareSheet } from '@/components/life/ShareSheet'
+import { useDialog } from '@/components/ui/useDialog'
 
 /**
  * התיק — the profile screen, and the one screen in the game that describes the player.
@@ -111,9 +112,17 @@ export function ProfileCard({ snapshot, onClose }: { snapshot: LifeSnapshot; onC
    * that came with it. `ShareSheet` does the rest.
    */
   const [sharing, setSharing] = useState<ShareCard | null>(null)
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
 
   return (
-    <div role="dialog" className="pointer-events-auto absolute inset-0 z-[60] flex items-stretch justify-center bg-ink/90 p-gutter" aria-modal="true">
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      role="dialog"
+      className="pointer-events-auto absolute inset-0 z-[60] flex items-stretch justify-center bg-ink/90 p-gutter outline-none"
+      aria-modal="true"
+      aria-label={profile.nameHe}
+    >
       <div className="max-h-full w-full max-w-md overflow-y-auto border-rule border-sheet bg-ink">
         <div className="flex items-start justify-between gap-3 px-5 pt-5">
           <div>

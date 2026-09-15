@@ -45,6 +45,19 @@ const config: Config = {
           red: 'rgb(var(--n-red) / <alpha-value>)',
           grass: 'rgb(var(--n-grass) / <alpha-value>)',
         },
+
+        /* שער 11 — "דשא כבוי". A THIRD scoped system, alongside שערי הפועל (the
+           shell) and the DUBID press layer above. Gate 11 is a shell route, so it
+           gets its own named tokens rather than reaching across for `night`/`press`
+           (rule 8 — see the marked block at the foot of app/globals.css). */
+        hate: {
+          field: 'rgb(var(--hate-field) / <alpha-value>)',
+          card: 'rgb(var(--hate-card) / <alpha-value>)',
+          'red-deep': 'rgb(var(--hate-red-deep) / <alpha-value>)',
+          'red-light': 'rgb(var(--hate-red-light) / <alpha-value>)',
+          ink: 'rgb(var(--hate-ink) / <alpha-value>)',
+          muted: 'rgb(var(--hate-muted) / <alpha-value>)',
+        },
       },
       fontFamily: {
         display: ['var(--font-frank)', 'Georgia', 'serif'],

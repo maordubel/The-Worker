@@ -5,6 +5,7 @@ import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
 import { RETRY_1986, retryFor } from '@/lib/life/content/retry1986'
 import { CROWD_POOL, crowdFor, pickCrowd } from '@/lib/life/crowd'
+import { CHAPTERS } from '@/lib/life/content/chapters'
 import { STAGE_A_DAYS, STAGE_A_DAY, playableStageADays } from '@/lib/life/content/stagea-days'
 import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState } from '@/lib/life/events'
@@ -163,13 +164,35 @@ describe('שמונה ימים — the day is data, and a day transition is not a
       }
     }
     /**
-     * Which days have a scene behind them. `a8` is the championship this game shipped
-     * with; `a1` is the 1983 memory, interactive since 6.9.2026 (§6 — look, copy the
-     * crowd, the red thing on the concrete). The rest are declared and honest about not
-     * being built, which is rule 43: data may land before its scene, and nothing may
-     * pretend to be playable when it is not.
+     * Which days have a scene behind them — asked of the SOURCE OF TRUTH, not of a list
+     * written here by hand.
+     *
+     * This assertion used to read `toEqual(['a1', 'a8'])`, and it stayed green for weeks
+     * after a2–a7 shipped: `stagea-days.ts` still said `built: false`, this test agreed
+     * with it, and both were wrong together. A hardcoded copy of a fact that lives in
+     * another file does not test that file — it tests that nobody changed two places at
+     * once, which is the failure it is supposed to catch.
+     *
+     * So the question is now put to `chapters.ts`, where `playable` is defined as the
+     * truth, and the two files are made to agree. `a1` is the exception in both
+     * directions: it is the 1983 prologue, it has no `ChapterDef`, and it is playable.
      */
-    expect(playableStageADays().map((day) => day.id)).toEqual(['a1', 'a8'])
+    const playableUnits = new Set(
+      CHAPTERS.filter((chapter) => chapter.playable).map((chapter) => chapter.unit.toLowerCase()),
+    )
+    for (const day of STAGE_A_DAYS) {
+      if (day.id === 'a1') {
+        expect(day.built, 'the 1983 prologue is playable and has been since 6.9.2026').toBe(true)
+        continue
+      }
+      expect(
+        day.built,
+        `${day.id}: stagea-days says built=${day.built}, chapters.ts says playable=${playableUnits.has(day.id)}`,
+      ).toBe(playableUnits.has(day.id))
+    }
+    expect(playableStageADays().map((day) => day.id)).toEqual(
+      STAGE_A_DAYS.filter((day) => day.built).map((day) => day.id),
+    )
     expect(STAGE_A_DAY.a8.anchorKey).toBe('1986')
   })
 

@@ -1,11 +1,16 @@
+import type { Metadata } from 'next'
+
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { homeKits } from '@/lib/kit/seasons'
 import { DEFAULT_SPEC } from '@/lib/kit/spec'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 import { MemberBook } from './MemberBook'
 
 /** שער 10 — התיק שלי. A member book, deliberately not a scoreboard. */
+export const metadata: Metadata = gateMetadata('tik')
+
 export default function TikPage() {
   const shirt = homeKits()[0]?.spec ?? DEFAULT_SPEC
   return (

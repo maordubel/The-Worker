@@ -1,6 +1,9 @@
+import type { Metadata } from 'next'
+
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { dealQueue, rosterSize } from '@/lib/game/hate'
+import { gateMetadata } from '@/lib/seo'
 import { t } from '@/lib/i18n'
 import { HateHill } from './HateHill'
 
@@ -16,6 +19,8 @@ import { HateHill } from './HateHill'
  * what the player did at duel six, so only the order of arrival can be deterministic —
  * and it must be, for a `?seed=` link to hand over the identical run.
  */
+export const metadata: Metadata = gateMetadata('derby')
+
 export default function HatePage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 11
   const { enemies, order } = dealQueue(seed)

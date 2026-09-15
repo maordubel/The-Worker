@@ -13,6 +13,7 @@ import { t, type MessageKey } from '@/lib/i18n'
  */
 export type ShareKind =
   | 'hate'
+  | 'file'
   | 'trivia'
   | 'kit'
   | 'crest'
@@ -24,6 +25,7 @@ export type ShareKind =
 
 const ROUTE: Record<ShareKind, string> = {
   hate: '/derby',
+  file: '/derby/file',
   trivia: '/trivia',
   kit: '/kits/build',
   crest: '/crest',

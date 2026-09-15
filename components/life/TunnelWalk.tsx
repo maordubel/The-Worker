@@ -107,9 +107,14 @@ export function TunnelWalk({
   onProgress?: (p: number) => void
   variant?: TunnelVariant
 }) {
-  const MAP = MAPS[variant]
+  // `PEOPLE` seeds the ref below, on the boy's own first step — a plain lookup into the
+  // module-level `CROWDS` table, kept here only because the ref initialiser needs it
+  // outside the effect. `MAP` and the fog end colour used to live here too, purely for
+  // the effect further down, which is what the missing-deps warning was about: they are
+  // read from `variant` inside a closure the effect never declared a dependency on. The
+  // effect now re-derives them from `variant` itself — already its own dependency —
+  // instead of capturing an outer variable.
   const PEOPLE = CROWDS[variant]
-  const [fogEndR, fogEndG, fogEndB] = FOG_END[variant]
   const canvas = useRef<HTMLCanvasElement | null>(null)
   const [hint, setHint] = useState(true)
   const state = useRef({
@@ -130,6 +135,12 @@ export function TunnelWalk({
     if (!el) return
     const ctx2d = el.getContext('2d', { alpha: false })
     if (!ctx2d) return
+
+    // Derived from `variant`, which is already this effect's own dependency — kept
+    // local rather than closed over from the render body, so nothing here can go stale.
+    const MAP = MAPS[variant]
+    const crowd = CROWDS[variant]
+    const [fogEndR, fogEndG, fogEndB] = FOG_END[variant]
 
     // ---- textures ------------------------------------------------------------------
     const load = (key: string) =>
@@ -354,7 +365,7 @@ export function TunnelWalk({
       keys.forEach((key, i) => {
         textures[key] = loaded[i]!
       })
-      for (const p of PEOPLE) {
+      for (const p of crowd) {
         const img = new Image()
         img.src = artUrl(p.art)
         sprites[p.art] = img

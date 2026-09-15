@@ -72,6 +72,7 @@ describe('retired files are tombstones', () => {
     'app/goal/GoalBoard.tsx', // → GoalRun.tsx
     'app/crest/CrestRun.tsx', // → cut by Maor; the crest DATA still dresses the kits
     'app/crest/actions.ts',
+    'components/life/LifeEntry.tsx', // → components/life/TunnelPlate.tsx, when LIFE moved into the wall
   ]
 
   it('every retired path still exists and says it is retired', () => {
@@ -144,23 +145,80 @@ describe('shipped paths', () => {
   })
 })
 
-describe('שכבות — a modal is above the navigation, always', () => {
-  const ROOT = join(__dirname, '..')
+/**
+ * every `.tsx` under `app/` and `components/` — shared by the two guards below that both
+ * need to walk the whole component tree (the dialog z-index rule and the logical-
+ * properties rule). One walk, one list, so the two never quietly drift onto different
+ * sets of files.
+ */
+const REPO_ROOT = join(__dirname, '..')
 
-  function sources(dir: string): string[] {
-    const out: string[] = []
-    for (const entry of readdirSync(dir)) {
-      const path = join(dir, entry)
-      if (statSync(path).isDirectory()) out.push(...sources(path))
-      else if (path.endsWith('.tsx')) out.push(path)
-    }
-    return out
+function sourceFiles(dir: string): string[] {
+  const out: string[] = []
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry)
+    if (statSync(path).isDirectory()) out.push(...sourceFiles(path))
+    else if (path.endsWith('.tsx')) out.push(path)
   }
+  return out
+}
 
-  const FILES = ['app', 'components'].flatMap((root) => sources(join(ROOT, root)))
+const TSX_FILES = ['app', 'components'].flatMap((root) => sourceFiles(join(REPO_ROOT, root)))
 
+/**
+ * The real end of a JSX opening tag — not the first `>`, the one that is not inside a
+ * quoted string or a `{…}` expression.
+ *
+ * `/<[a-zA-Z][^>]*role="dialog"[^>]*>/` looks reasonable and is blind: `[^>]*` stops at
+ * the FIRST literal `>` it meets, and an opening tag routinely contains one before its
+ * own close — `onClick={(event) => event.stopPropagation()}` is the arrow in "=>", and
+ * every one of the four dialogs below carries exactly that handler ahead of
+ * `role="dialog"`. The old regex truncated there, never reached `role="dialog"` at all,
+ * and `text.matchAll(...)` found nothing to check — a test that returns zero violations
+ * because it stopped reading the tag, not because the tag was fine. It shipped green
+ * against all four of them.
+ *
+ * So this walks the source by hand instead of trusting a character class: from `<Name`
+ * it tracks quote state (`"`, `'`, `` ` ``, so a `>` inside `className="…"` or inside a
+ * string an expression builds is never mistaken for the tag's own close) and brace depth
+ * (so the `>` in `=>`, or any comparison inside a `{…}` expression, is invisible while
+ * depth is above zero) and calls the tag done at the first `>` that is neither quoted nor
+ * nested. That is the actual grammar of a JSX opening tag; a character class was never
+ * going to have it.
+ */
+function openingTags(text: string): string[] {
+  const tags: string[] = []
+  const tagStart = /<[A-Za-z][\w.]*/g
+  let start: RegExpExecArray | null
+  while ((start = tagStart.exec(text))) {
+    let i = tagStart.lastIndex
+    let depth = 0
+    let quote: string | null = null
+    while (i < text.length) {
+      const ch = text[i]
+      if (quote) {
+        if (ch === '\\' && quote !== '`') i += 1 // an escaped char inside the string can't end it
+        else if (ch === quote) quote = null
+      } else if (ch === '"' || ch === "'" || ch === '`') {
+        quote = ch
+      } else if (ch === '{') {
+        depth += 1
+      } else if (ch === '}') {
+        depth = Math.max(0, depth - 1)
+      } else if (ch === '>' && depth === 0) {
+        tags.push(text.slice(start.index, i + 1))
+        break
+      }
+      i += 1
+    }
+    tagStart.lastIndex = i + 1
+  }
+  return tags
+}
+
+describe('שכבות — a modal is above the navigation, always', () => {
   it('keeps the tab bar at z-50 so there is one number to clear', () => {
-    const bar = readFileSync(join(ROOT, 'components/ui/TabBar.tsx'), 'utf8')
+    const bar = readFileSync(join(REPO_ROOT, 'components/ui/TabBar.tsx'), 'utf8')
     expect(bar).toContain('z-50')
   })
 
@@ -169,20 +227,51 @@ describe('שכבות — a modal is above the navigation, always', () => {
     // "next shirt" button landed inside the bar's strip, so the tap that should have
     // advanced the round navigated to the trivia wing instead — on every shirt, on
     // every phone. Found by playing a round through; this is what stops it coming back.
-    // The ELEMENT, not the line. This used to read one line at a time, which quietly made
-    // it a test of code formatting: a dialog whose `role` and `className` sit on separate
-    // lines — which is what Prettier does to any element with more than three attributes —
-    // reported `z-none` whether it was at z-60 or z-5. So it now takes the whole opening
-    // tag from `<` to the first `>`, which is both stricter and no longer opinionated
-    // about where the attributes go.
+    // `openingTags` finds the real tag — see its own comment for why the naive version
+    // never did.
     const bad: string[] = []
-    for (const file of FILES) {
+    for (const file of TSX_FILES) {
       const text = readFileSync(file, 'utf8')
-      for (const hit of text.matchAll(/<[a-zA-Z][^>]*role="dialog"[^>]*>/g)) {
-        const z = hit[0].match(/z-\[?(\d+)\]?/)
+      for (const tag of openingTags(text)) {
+        if (!tag.includes('role="dialog"')) continue
+        const z = tag.match(/z-\[?(\d+)\]?/)
         const value = Number(z?.[1] ?? 0)
-        if (value <= 50) bad.push(`${file.slice(ROOT.length + 1)}: z-${z?.[1] ?? 'none'}`)
+        if (value <= 50) bad.push(`${file.slice(REPO_ROOT.length + 1)}: z-${z?.[1] ?? 'none'}`)
       }
+    }
+    expect(bad, bad.join('\n')).toEqual([])
+  })
+})
+
+/**
+ * כיוון פיזי — rule 9 promises "no `left-*`/`right-*`, not even inside a comment", and
+ * until now nothing checked it. The repo is clean today, which is exactly the condition
+ * under which a guard is cheapest to add and easiest to forget: there is no failing case
+ * pushing anyone to write it. This is that guard, not a claim that it was ever needed yet.
+ */
+describe('כיוון — logical properties only, never left-*/right-*/ml-/mr-/pl-/pr-', () => {
+  // Six prefixes, one shape: the class name, a literal `-`, and then something that is
+  // actually a Tailwind value — a digit, an arbitrary `[…]`, or one of the few bare
+  // keywords the position/spacing scales use. That last part is what keeps this from
+  // firing on English prose: this project writes long explanatory comments, and a phrase
+  // like "right to left" or "outright" is exactly the kind of text a bare `right-` (or a
+  // lookbehind that only excludes letters) would light up on. Requiring a value after the
+  // dash — not just any word character — is the difference between a class and a
+  // sentence. `overflow-`, `scroll-smooth`, `border-s-rule` never reach the dash check at
+  // all: none of the six prefixes appear in them as a bounded token to begin with, and a
+  // preceding letter (as in a hypothetical "…overflow-left-4") is excluded by the
+  // lookbehind below. `scroll-ml-4` (scroll-margin-left — physical, not `scroll-ms-4`)
+  // DOES still match, on purpose: a `scroll-` prefix does not make a physical utility
+  // logical, and this guard has no reason to look away from it.
+  const VALUE = String.raw`(?:\d|\[|auto\b|full\b|px\b|screen\b)`
+  const PHYSICAL = new RegExp(String.raw`(?<![\w])(?:left|right|ml|mr|pl|pr)-${VALUE}`, 'g')
+
+  it('is clean today, and stays that way', () => {
+    const bad: string[] = []
+    for (const file of TSX_FILES) {
+      const text = readFileSync(file, 'utf8')
+      const hits = text.match(PHYSICAL)
+      if (hits) bad.push(`${file.slice(REPO_ROOT.length + 1)}: ${[...new Set(hits)].join(', ')}`)
     }
     expect(bad, bad.join('\n')).toEqual([])
   })

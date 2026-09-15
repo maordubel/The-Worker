@@ -7,6 +7,7 @@ import { artUrl } from '@/lib/life/runtime/art'
 import { chapterFor, nextPlayable } from '@/lib/life/content/chapters'
 import { Grain, Letterbox } from '@/components/life/FilmFx'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 
 type Finale = NonNullable<LifeBusEvents['finale']>
@@ -66,6 +67,8 @@ export function StageFinale({
   // named by its registry row — the unit, the date, the title.
   const chapter = chapterFor(finale.chapter)
   const later = stageB && finale.chapter !== '1990'
+  /** the same headline the card itself prints — reused as the dialog's accessible name */
+  const titleHe = later && chapter ? chapter.titleHe : stageB ? t('life.finale.promoted') : t('life.finale.champions')
   /**
    * The year on the button used to be the string "1990", on every card in the game.
    * It was written when 1990 was the last chapter and the card was only ever shown at the
@@ -82,17 +85,27 @@ export function StageFinale({
     scroller.current?.scrollTo({ top: 0 })
   }, [])
 
-  useEffect(() => {
-    if (!zoom) return
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setZoom(null)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [zoom])
+  /**
+   * Escape puts down whatever is held up first — a zoomed ticket or paper — and does
+   * NOTHING once your hands are empty. Same two-level rule `AlbumSheet` follows for its
+   * own held-up sticker, and for the same reason it is not mapped to `onContinue`: this
+   * is "the one screen in this game a player is meant to sit with", not a card you tap
+   * through, and a reflexive Escape press should not be able to end the chapter for you.
+   * `useDialog` replaces the zoom overlay's own former `window` listener too, so there
+   * is exactly one place this dialog's Tab-trap and Escape are decided, not two.
+   */
+  const dialogRef = useDialog<HTMLDivElement>(zoom ? () => setZoom(null) : () => {})
 
   return (
-    <div className="pointer-events-auto absolute inset-0 z-50 bg-ink" data-life="finale">
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      role="dialog"
+      aria-modal="true"
+      aria-label={titleHe}
+      className="pointer-events-auto absolute inset-0 z-[60] bg-ink outline-none"
+      data-life="finale"
+    >
       <Confetti />
 
       <div ref={scroller} className="relative h-full overflow-y-auto overscroll-contain">
@@ -126,7 +139,7 @@ export function StageFinale({
               {later && chapter ? `${t('life.finale.stageB')} · ${chapter.unit} · ${finale.anchor.year}` : stageB ? t('life.finale.kicker1990') : t('life.finale.kicker')}
             </p>
             <p className="mt-2 font-poster text-[46px] leading-[0.92] text-sheet sm:text-[68px]">
-              <bdi>{later && chapter ? chapter.titleHe : stageB ? t('life.finale.promoted') : t('life.finale.champions')}</bdi>
+              <bdi>{titleHe}</bdi>
             </p>
             <p className="mt-2 font-mono text-[13px] leading-none tabular-nums text-sheet/90" dir="ltr">
               {later && chapter ? chapter.dateHe : finale.anchor.seasonLabel}

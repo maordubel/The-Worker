@@ -1,4 +1,13 @@
+import type { Metadata } from 'next'
+
+/**
+ * `/city` is a proofing tool, not a gate — it is not on the wall, not in `GATES`, and
+ * not in the sitemap. A tool that answers on a public host and is not marked is a page
+ * a crawler will index and a stranger will find, so it says so itself.
+ */
 import { Proof, type Shot } from './Proof'
+
+export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 /**
  * העיר, כדי להסתכל עליה — **ולזוז בה**.

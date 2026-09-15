@@ -78,7 +78,7 @@ export const LIFE_PALETTE = {
   trackBlack: 0x23201c,
 
   // --- the club ------------------------------------------------------------------
-  red: 0xe0401c,
+  red: 0xb02d10,
   redDeep: 0xb22a2a,
   redInk: 0x8f2118,
   ink: 0x15120e,
@@ -103,7 +103,7 @@ export const LIFE_PALETTE = {
 
 export type LifeColour = keyof typeof LIFE_PALETTE
 
-/** `0xe0401c` → `#e0401c`, for the DOM overlay and for the yellow test's readback. */
+/** `0xb02d10` → `#b02d10`, for the DOM overlay and for the yellow test's readback. */
 export function hex(colour: number): string {
   return `#${colour.toString(16).padStart(6, '0')}`
 }

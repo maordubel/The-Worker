@@ -1,9 +1,12 @@
+import type { Metadata } from 'next'
+
 import { CardWall, type Fact } from './CardWall'
 import { Num } from '@/components/ui/Num'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { archive } from '@/lib/game/archive'
 import { t, type MessageKey } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 
 /**
  * אגף אוסישקין — a memorial, not a section of the football product.
@@ -23,6 +26,8 @@ import { t, type MessageKey } from '@/lib/i18n'
  * as open rather than filling them in. A memorial that invents details is not a
  * memorial, it is decoration.
  */
+
+export const metadata: Metadata = gateMetadata('ussishkin')
 
 const SECTIONS: Array<{ cat: Fact['cat']; key: MessageKey }> = [
   { cat: 'building', key: 'uss.cat.building' },

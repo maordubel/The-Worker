@@ -269,7 +269,7 @@ describe('הבאגים שדווחו — and were fixed rather than filed', () =>
   })
 
   it('1993 galil: asking for help does not require having signed up three days earlier', () => {
-    const bus = DIALOGUE['g4-limor']
+    const bus = DIALOGUE['g4-michel']
     const last = bus?.branches[bus.branches.length - 1]
     expect(JSON.stringify(last)).toContain('g4-broke')
   })

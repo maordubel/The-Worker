@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { Cloth, SheetHead } from '@/components/life/Plate'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import { FORMAT_SIZE, TARGET_LABEL, cardIsClean, shareHref, shareText, type ShareCard, type ShareFormat, type ShareTarget } from '@/lib/life/share'
 import { paintShareCard } from '@/lib/life/runtime/shareCard'
@@ -91,9 +92,17 @@ export function ShareSheet({ card, onClose }: { card: ShareCard; onClose: () => 
 
   const targets: ShareTarget[] = ['native', 'whatsapp', 'facebook', 'x', 'copy', 'download']
   const ratio = FORMAT_SIZE[format].w / FORMAT_SIZE[format].h
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 sm:items-center" role="dialog" aria-label={t('life.share.title')}>
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/70 outline-none sm:items-center"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('life.share.title')}
+    >
       <Cloth className="max-h-[92dvh] w-full max-w-md overflow-y-auto border-rule border-sheet px-4 pb-6 pt-3">
         <SheetHead title={t('life.share.title')} onClose={onClose} closeLabel={t('life.share.close')} />
 

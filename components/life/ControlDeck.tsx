@@ -107,7 +107,7 @@ function ArcadeButton({
           inset: 5,
           transform: held ? 'translateY(3px) scale(0.965)' : 'translateY(0) scale(1)',
           background: live
-            ? 'radial-gradient(120% 100% at 32% 24%, rgb(255 255 255 / 0.55), rgb(224 64 28) 46%, rgb(150 30 10) 100%)'
+            ? 'radial-gradient(120% 100% at 32% 24%, rgb(255 255 255 / 0.55), rgb(var(--red)) 46%, color-mix(in srgb, rgb(var(--red)) 62%, rgb(var(--ink))) 100%)'
             : warn
               ? 'radial-gradient(120% 100% at 32% 24%, rgb(255 255 255 / 0.3), rgb(70 66 62) 48%, rgb(24 22 21) 100%)'
               : 'radial-gradient(120% 100% at 32% 24%, rgb(255 255 255 / 0.24), rgb(58 55 52) 48%, rgb(20 19 18) 100%)',
@@ -332,7 +332,7 @@ export function ControlDeck({
               height: ball,
               transform: `translate(-50%, -50%) translate3d(${nub.x}px, ${nub.y}px, 0)`,
               background:
-                'radial-gradient(circle at 34% 26%, rgb(255 255 255 / 0.75) 0%, rgb(224 64 28) 34%, rgb(139 26 10) 100%)',
+                'radial-gradient(circle at 34% 26%, rgb(255 255 255 / 0.75) 0%, rgb(var(--red)) 34%, color-mix(in srgb, rgb(var(--red)) 58%, rgb(var(--ink))) 100%)',
               boxShadow: '0 4px 8px rgb(0 0 0 / 0.55), inset 0 -3px 6px rgb(0 0 0 / 0.35)',
               transition: origin ? 'none' : 'transform 120ms var(--ease-stamp)',
             }}

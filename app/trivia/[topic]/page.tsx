@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -6,7 +7,18 @@ import { Screen } from '@/components/ui/Screen'
 import { isTopic, topicSpec } from '@/lib/game/topics'
 import { ROUND_LENGTH, deal } from '@/lib/game/trivia'
 import { t, type MessageKey } from '@/lib/i18n'
+import { gateMetadata, topicMetadata } from '@/lib/seo'
 import { TriviaRun } from '../TriviaRun'
+
+/**
+ * An unknown topic 404s in the page itself; metadata is generated before that check
+ * runs, so a bad segment falls back to the wing's own metadata rather than crashing.
+ */
+export function generateMetadata({ params }: { params: { topic: string } }): Metadata {
+  if (!isTopic(params.topic)) return gateMetadata('trivia')
+  const spec = topicSpec(params.topic)
+  return topicMetadata(spec.titleKey as MessageKey, spec.bladeKey as MessageKey, params.topic)
+}
 
 /**
  * שער 2 — one topic's round.

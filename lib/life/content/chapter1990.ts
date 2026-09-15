@@ -79,6 +79,8 @@ export const TABLE_1990: Say[] = [
  * supporter plate, and the kids get the kid.
  */
 export const PORTRAIT_1990: Record<string, string> = {
+  'מישל': 'faceMichel',
+  'אסף': 'faceAsaf',
   'פוגי': 'faceHero80',
   'קובי': 'faceKobi',
   'רחל': 'faceRachel90',

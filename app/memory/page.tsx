@@ -1,9 +1,15 @@
+import type { Metadata } from 'next'
+
 import { BannerCloth } from '@/components/ui/BannerCloth'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Screen } from '@/components/ui/Screen'
 import { buildBoard } from '@/lib/game/memory'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 import { MemoryBoard } from './MemoryBoard'
+
+/** שער 6 — משחק הזיכרון: כל צמד הוא שתי פנים לעובדה אחת מהארכיון. */
+export const metadata: Metadata = gateMetadata('memory')
 
 export default function MemoryPage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 7

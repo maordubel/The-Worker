@@ -15,7 +15,7 @@ export const BRAND = {
   /** mirrors --ink */
   ink: '#15120E',
   /** mirrors --red */
-  red: '#E0401C',
+  red: '#B02D10',
   /** mirrors --sign */
   sign: '#1E2C5A',
   /** mirrors --concrete */

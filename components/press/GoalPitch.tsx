@@ -20,6 +20,16 @@ import { t } from '@/lib/i18n'
  * The opposition is already on the grass in chalk. They are scenery, not targets: a
  * pitch with nobody else on it is a diagram, and the move you are rebuilding happened
  * against eleven men.
+ *
+ * The twenty zones are real controls, not SVG rectangles with an `onClick`. `role`
+ * `"application"` on the `<svg>` told assistive tech to hand over ALL keyboard handling
+ * to an app that supplied none, and an `onClick` alone has no `tabIndex`, so the board
+ * was 100% unreachable without a mouse or a finger. `<rect>` cannot take real focus, so
+ * the twenty targets are drawn twice: once inside the SVG, as the exact same
+ * fill/stroke/ring the design has always used, now purely decorative; and once as
+ * ordinary HTML `<button>`s, invisible, laid over the pitch at the same coordinates and
+ * percentages — the pattern `KitGameRun.tsx` already uses to put real buttons over an
+ * SVG plate. The picture never moves; only who can reach it changed.
  */
 
 const POSES = ['#figRun', '#figRun', '#figKick', '#figVolley'] as const
@@ -54,8 +64,7 @@ export function GoalPitch({
       <svg
         viewBox={`0 0 ${PITCH.w} ${PITCH.h}`}
         className="block w-full touch-manipulation"
-        role="application"
-        aria-label={t('goal.pitchAria')}
+        aria-hidden="true"
       >
         <defs>
           <symbol id="figRun" viewBox="0 0 70 80">
@@ -191,7 +200,8 @@ export function GoalPitch({
           </>
         )}
 
-        {/* the tap targets, and the ring on a chosen zone */}
+        {/* the ring on a chosen zone — decorative only now. The real target is the
+            HTML button laid over this same rect, below the SVG. */}
         {ROWS.flatMap((row) =>
           COLS.map((col) => {
             const id = `${col}${row}`
@@ -208,9 +218,6 @@ export function GoalPitch({
                 fill={chosen ? 'rgb(var(--p-line) / 0.2)' : 'transparent'}
                 stroke={chosen ? 'rgb(var(--p-line))' : 'transparent'}
                 strokeWidth={chosen ? 2 : 0}
-                onClick={disabled ? undefined : () => onPick(id)}
-                style={{ cursor: disabled ? 'default' : 'pointer' }}
-                aria-label={id}
               />
             )
           }),
@@ -253,6 +260,43 @@ export function GoalPitch({
           })}
         </g>
       </svg>
+
+      {/* the real tap targets — twenty focusable, labelled buttons over the same rects
+          the SVG draws above. `dir="ltr"` because these coordinates are the pitch's own
+          fixed geometry, not a reading order — the same reason the name cards below are
+          positioned this way. Each carries a Hebrew label naming where in the goal it
+          is, built from the grid the pitch already uses rather than a guessed spot the
+          source never gave (rule 11 — the zones exist so nobody has to invent a pixel). */}
+      <div
+        dir="ltr"
+        role="group"
+        aria-label={t('goal.pitchAria')}
+        className="pointer-events-none absolute inset-0"
+      >
+        {ROWS.flatMap((row) =>
+          COLS.map((col) => {
+            const id = `${col}${row}`
+            const rect = zoneRect(id)
+            if (!rect) return null
+            return (
+              <button
+                key={id}
+                type="button"
+                disabled={disabled}
+                onClick={() => onPick(id)}
+                aria-label={t('goal.zoneAria', { zone: id, col, row: String(row) })}
+                className="pointer-events-auto absolute disabled:cursor-default"
+                style={{
+                  insetInlineStart: `${(rect.x / PITCH.w) * 100}%`,
+                  top: `${(rect.y / PITCH.h) * 100}%`,
+                  width: `${(rect.w / PITCH.w) * 100}%`,
+                  height: `${(rect.h / PITCH.h) * 100}%`,
+                }}
+              />
+            )
+          }),
+        )}
+      </div>
 
       {/* the name cards — cream tickets with an ink shadow, exactly as the handoff draws them */}
       {points.map((point, index) => {

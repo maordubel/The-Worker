@@ -95,6 +95,8 @@ export const HOME_NIGHT_1991: Say[] = [
  * the crowd" gets the supporter plate, because that is what they are.
  */
 export const PORTRAIT_1991: Record<string, string> = {
+  'מישל': 'faceMichel',
+  'אסף': 'faceAsaf',
   'פוגי': 'faceHero80',
   'קובי': 'faceKobi',
   'רחל': 'faceRachel90',

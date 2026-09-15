@@ -2443,7 +2443,19 @@ const SCENES: SceneDef[] = [
         flip: true,
         sway: 0.004,
       },
-      // 19.4.1993 — the corner the bus to the big hall leaves from
+      // 19.4.1993 — the corner the bus to the big hall leaves from.
+      // Michel runs the transport and Limor knows the way in; two jobs, two people.
+      {
+        id: 'michel-1993',
+        era: '1993-cup',
+        figure: 'michel96-walk1',
+        x: 0.5,
+        y: 0.9,
+        size: 0.278,
+        nameHe: 'מישל',
+        talk: 'michel-1993',
+        sway: 0.003,
+      },
       {
         id: 'limor-1993',
         era: '1993-cup',
@@ -2480,14 +2492,14 @@ const SCENES: SceneDef[] = [
         sway: 0.003,
       },
       {
-        id: 'limor-galil',
+        id: 'michel-galil',
         era: '1993-galil',
-        figure: 'youngB3',
-        x: 0.58,
+        figure: 'michel96-walk1',
+        x: 0.46,
         y: 0.92,
-        size: 0.262,
-        nameHe: 'לימור',
-        talk: 'g4-limor',
+        size: 0.278,
+        nameHe: 'מישל',
+        talk: 'g4-michel',
         sway: 0.003,
         when: { flag: 'life:galil:d4', none: [{ flag: 'life:galil:after' }] },
       },

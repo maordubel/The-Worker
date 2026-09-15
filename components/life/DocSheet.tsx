@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
-
+import { useDialog } from '@/components/ui/useDialog'
 import { artUrl } from '@/lib/life/runtime/art'
 import { t } from '@/lib/i18n'
 
@@ -28,20 +27,20 @@ export function DocSheet({
 }) {
   // Escape closes it too. A screen with exactly one way out is a screen somebody will get
   // stuck on — the robot that plays every chapter did, for two hundred moves, on 6.9.2026.
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  // `useDialog` is what listens now: the same hook every other sheet in the game uses, so
+  // this one also gets its focus moved in on open and given back to the caller on close —
+  // the button is already a native focus target, so nothing extra is needed for that half.
+  const dialogRef = useDialog<HTMLButtonElement>(onClose)
 
   return (
     <button
+      ref={dialogRef}
       type="button"
+      role="dialog"
+      aria-modal="true"
+      aria-label={captionHe ?? t('life.doc.title')}
       onClick={onClose}
-      aria-label={t('life.finale.close')}
-      className="pointer-events-auto absolute inset-0 z-[60] flex min-h-tap flex-col items-center justify-center gap-3 bg-ink/95 p-3"
+      className="pointer-events-auto absolute inset-0 z-[60] flex min-h-tap flex-col items-center justify-center gap-3 bg-ink/95 p-3 outline-none"
       data-life="doc"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}

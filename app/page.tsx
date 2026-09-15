@@ -1,8 +1,10 @@
 import { BannerCloth } from '@/components/ui/BannerCloth'
-import { LifeEntry } from '@/components/life/LifeEntry'
+import { TunnelPlate } from '@/components/life/TunnelPlate'
 import { Screen } from '@/components/ui/Screen'
 import { GatePlate } from '@/components/gates/GatePlate'
 import { Intro } from '@/components/ui/Intro'
+import { StructuredData } from '@/components/seo/StructuredData'
+import { Standfirst } from '@/components/ui/Standfirst'
 import { GATES, wallOrder } from '@/lib/gates'
 import { t } from '@/lib/i18n'
 
@@ -25,19 +27,30 @@ export default function BloomfieldPage() {
           the opening never stands between a shared link and the gates. */}
       <Intro />
 
-      {/* THE WORKER LIFE hangs above the wall rather than in it — see LifeEntry. */}
-      <div className="mt-stack">
-        <LifeEntry />
-      </div>
+      {/* The machine-readable half of the same masthead: who this is and what it is.
+          `/` only — it describes the site, and a node repeated on thirteen routes is
+          thirteen claims where there is one. */}
+      <StructuredData />
 
-      <section aria-label={t('wall.chooseGate')} className="mt-stack">
+      {/* And the human half. A wall of numbered plates is beautiful and says nothing to
+          somebody who arrived from a shared link; one line does. */}
+      <Standfirst />
+
+      {/* THE WORKER LIFE is now the wall's own first plate — a tunnel, not a gate — so
+          the section header names both what it contains. */}
+      <section aria-label={t('wall.howYouGetIn')} className="mt-stack">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="font-display text-[15px] text-ink">{t('wall.chooseGate')}</p>
+          <p className="font-display text-[15px] text-ink">{t('wall.howYouGetIn')}</p>
           <h2 className="font-latin text-[10px] font-bold tracking-[0.24em] text-sign" dir="ltr">
-            CHOOSE YOUR GATE
+            HOW YOU GET IN
           </h2>
         </div>
         <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
+          {/* The tunnel is the head of the grid, above gate 5 — full width, same span
+              rule as the curva below it, but never one of the eleven (rule 24, 39). */}
+          <li className="col-span-2 lg:col-span-3">
+            <TunnelPlate />
+          </li>
           {wallOrder(GATES).map((gate) => (
             // The curva takes the full width of the wall. The span has to sit on the
             // grid ITEM — a col-span on the link inside it spans nothing at all.

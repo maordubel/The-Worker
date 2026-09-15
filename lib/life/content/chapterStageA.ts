@@ -366,7 +366,77 @@ export const CONVERSATIONS_A1: Conversation[] = [
           { e: 'sfx', key: 'crowd-real-goal', level: 0.8 },
           { e: 'redheart', key: 'footballLove', delta: 6 },
           { e: 'remember', who: 'kobi', eventId: 'shoulders-1983', significance: 'major' },
-          { e: 'goto', node: 'a1-home' },
+          { e: 'goto', node: 'a1-stub' },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * שני הספחים — the fact the whole life is hung on, planted where it actually happened.
+     *
+     * The canon has two ends and they are the same act in opposite directions: in 1983
+     * somebody got the tickets and carried you in, and around 2026 you get the tickets and
+     * carry him. For the second one to land, the first one has to be a thing the save
+     * remembers rather than a thing the script asserts later — so this beat writes
+     * `own:tickets-1983`, and it writes it as a VALUE (`kobi`), not as a boolean, because
+     * the question 2026 asks is *who held them*, and a true/false cannot answer it.
+     *
+     * It is set unconditionally. That is deliberate: a five-year-old did not earn the
+     * tickets and cannot have got them wrong, and making it a reward for a correct choice
+     * would be the game congratulating a child for being carried. What the player chooses
+     * is only what happens to the torn half afterwards.
+     *
+     * The prologue never names him — "somebody", "the shoulders", "dad's hair" — because a
+     * child of five does not narrate a father. The flag knows who it was; the scene still
+     * does not say it.
+     */
+    id: 'a1-stub',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הרעש נרגע לאט. היד שמחזיקה אותך משחררת רגע אחד ונכנסת לכיס.' },
+          { who: null, text: 'שני ספחים. קרועים ביד של מישהו בשער, לפני שעה, כשעוד היה אור.' },
+          { who: null, text: 'אחד מהם מושט אליך.' },
+        ],
+        then: [{ e: 'flagValue', flag: 'own:tickets-1983', value: 'kobi' }],
+        choices: [
+          {
+            id: 'take-stub',
+            text: 'לקחת אותו.',
+            then: [
+              { e: 'give', item: 'ticket-stub' },
+              /** `own:` — the prefix a year change does not erase. Same reason as the scrap. */
+              { e: 'flag', flag: 'own:stub-1983' },
+              { e: 'flag', flag: 'life:a1:stub' },
+              { e: 'redheart', key: 'historyMemory', delta: 3 },
+              { e: 'remember', who: 'kobi', eventId: 'stub-1983', significance: 'minor' },
+              { e: 'goto', node: 'a1-home' },
+            ],
+          },
+          {
+            id: 'refuse-stub',
+            text: 'לא לקחת. הידיים תפוסות.',
+            then: [
+              // He keeps both, which is the honest version of 1983 too. Nothing is lost:
+              // 2026 asks who HELD them, and the answer is the same either way.
+              { e: 'rel', who: 'kobi', axis: 'trust', delta: 2 },
+              { e: 'goto', node: 'a1-home' },
+            ],
+          },
+          {
+            id: 'ask-stub',
+            text: 'לשאול מה זה.',
+            then: [
+              { e: 'give', item: 'ticket-stub' },
+              { e: 'flag', flag: 'own:stub-1983' },
+              { e: 'flag', flag: 'life:a1:stub' },
+              { e: 'personality', key: 'curiosity', delta: 3 },
+              { e: 'remember', who: 'kobi', eventId: 'stub-1983', significance: 'minor' },
+              { e: 'goto', node: 'a1-home' },
+            ],
+          },
         ],
       },
     ],

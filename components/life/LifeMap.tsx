@@ -6,6 +6,7 @@ import { CityMap } from '@/components/life/CityMap'
 import type { MapPlace } from '@/lib/life/runtime/game'
 import type { LifeState, LocationId } from '@/lib/life/types'
 import { SheetHead } from '@/components/life/Plate'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 
 /**
@@ -33,6 +34,7 @@ export function LifeMap({
   onClose: () => void
 }) {
   const [wide, setWide] = useState(false)
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
   return (
     <div
       className="absolute inset-0 z-40 flex items-end justify-center bg-ink/70 p-2.5 pb-[max(10px,env(safe-area-inset-bottom))] sm:items-center"
@@ -40,7 +42,9 @@ export function LifeMap({
       onClick={onClose}
     >
       <div
-        className="flex max-h-full w-full max-w-[420px] flex-col border-rule border-ink bg-sheet"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative z-[60] flex max-h-full w-full max-w-[420px] flex-col border-rule border-ink bg-sheet outline-none"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-label={t('life.map.title')}

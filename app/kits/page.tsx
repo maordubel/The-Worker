@@ -1,9 +1,12 @@
+import type { Metadata } from 'next'
+
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { facetCounts, kitCatalog } from '@/lib/kit/catalog'
 import { homeKits } from '@/lib/kit/seasons'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 
 import { KitDesigner } from './KitDesigner'
 import { KitWing } from './KitWing'
@@ -19,6 +22,8 @@ import { KitWing } from './KitWing'
  * which owns the collection and the card — does not have to know that a third view
  * exists or what renders it.
  */
+export const metadata: Metadata = gateMetadata('kits')
+
 export default function KitsPage() {
   const catalog = kitCatalog()
 

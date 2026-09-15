@@ -32,7 +32,7 @@ import {
 } from '../stickers'
 import { PACKET, decadeOf } from '../prices'
 import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
-import { characterName } from '../characters'
+import { characterName, portraitFor } from '../characters'
 import { flagOn } from '../types'
 import type { CharacterId } from '../types'
 
@@ -277,7 +277,7 @@ export class DialogueRunner {
     const last = this.index === this.lines.length - 1
     this.bus.emit('dialogue', {
       lines: [line.closeUp ? { who: line.who, text: line.text, closeUp: line.closeUp } : { who: line.who, text: line.text }],
-      portrait: line.who ? (this.portraits[line.who] ?? null) : null,
+      portrait: line.who ? portraitFor(line.who, this.portraits) : null,
       choices: last && this.pendingChoices ? this.renderChoices(this.pendingChoices) : undefined,
     })
   }
@@ -286,7 +286,7 @@ export class DialogueRunner {
     const line = this.lines[this.lines.length - 1]
     this.bus.emit('dialogue', {
       lines: line ? [line] : [],
-      portrait: line?.who ? (this.portraits[line.who] ?? null) : null,
+      portrait: line?.who ? portraitFor(line.who, this.portraits) : null,
       choices: this.renderChoices(this.pendingChoices ?? []),
     })
   }

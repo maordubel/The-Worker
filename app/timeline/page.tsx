@@ -1,8 +1,11 @@
+import type { Metadata } from 'next'
+
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { dealTimelineRun, timelineAvailable } from '@/lib/game/timeline'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 import { TimelineBoard } from './TimelineBoard'
 
 /**
@@ -13,6 +16,8 @@ import { TimelineBoard } from './TimelineBoard'
  * dates from the seed on the server, so a card's date never reaches the client before
  * it has been played.
  */
+export const metadata: Metadata = gateMetadata('timeline')
+
 export default function TimelinePage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 1
   const available = timelineAvailable()

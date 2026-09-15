@@ -198,7 +198,7 @@
   --sheet: 240 232 212;      /* #F0E8D4 לוחית הכרזה — נייר בהיר */
   --paper: 233 223 199;      /* #E9DFC7 נייר מזדקן — רקע המסך */
   --ink: 21 18 14;           /* #15120E הרישום, השחור של הדפוס */
-  --red: 224 64 28;          /* #E0401C ורמיליון — המגש הראשון */
+  --red: 176 45 16;          /* #B02D10 ורמיליון — המגש הראשון */
   --concrete: 201 191 164;   /* #C9BFA4 שוליים, מטא, כיתוב משני על דיו */
   --sign: 30 44 90;          /* #1E2C5A נייבי — המגש השני */
   --muted: 90 82 66;         /* #5A5242 טקסט משני על נייר */
@@ -311,6 +311,12 @@
     rgb(var(--red)) 0deg 5deg,
     transparent 5deg 11deg
   );
+}
+
+/* פתח המנהרה — the tunnel mouth's glow. No rays here: a tunnel is roofed, so what
+   lights the wordmark is the mouth itself, not a sunburst behind it. */
+.tunnel-mouth {
+  background: radial-gradient(ellipse 120% 92% at 50% 104%, rgb(var(--red) / 0.36), transparent 62%);
 }
 
 /* רשת ההדפס — the shell's own halftone, in INK.
@@ -1038,4 +1044,52 @@ select {
 @keyframes film-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* ============================================================================
+   שער 11 — "דשא כבוי" — the hate wing's own night ground
+   ----------------------------------------------------------------------------
+   Approved 15.9.2026 (design canvas, turn 4 is the approved treatment; turn 3,
+   palette 3c, is the ground it is built on). The hate wing — `app/derby/**`,
+   `components/hate/**` — moves onto a dead-grass night palette so it reads as a
+   different wing of the ground: a different tray, not a re-tint of the poster.
+
+   Gate 11 is a SHELL route, not a press surface (it draws no pitch, no kit rack, no
+   share card), so it may not reach for the DUBID press layer's `--n-*`/`--p-*`
+   tokens above — `tests/brand.test.ts` polices exactly that boundary, and
+   `PRESS_SURFACES` does not list `app/derby` or `components/hate`. These seven are
+   the wing's OWN named tokens. Five of the six hexes in the approved swatch already
+   exist as the press layer's night/negative-grass values — cross-check by HEX, not
+   by reuse: field = `--n-grass-dark`, card = `--n-grass`, light red = `--n-red-light`,
+   ink = `--n-ink`, muted = `--n-ink-faint`. The deep red has no night equivalent yet
+   (`--p-red-deep` is a press token and stays scoped to the pitch), and the litho dot
+   is the press halftone's own green (`--p-grass`) at the wing's own opacity. The wing
+   gets its own declarations because it is not the pitch — it is the away end of the
+   shell, printed on a different tray. No yellow, at any opacity, anywhere in it (rule
+   8), and never a vermilion FIELD here: `--red` stays off this wing except as a small
+   accent inside `SignPlate`/`Screen`, which this wing does not use while playing.
+   ========================================================================== */
+:root {
+  --hate-field: 26 33 22;       /* #1A2116 dead grass, negative — the wing's ground */
+  --hate-card: 43 48 38;        /* #2B3026 a card raised off the field */
+  --hate-red-deep: 178 42 42;   /* #B22A2A the holder's plate, banners */
+  --hate-red-light: 224 87 79;  /* #E0574F accents, rules, the outlined charge */
+  --hate-ink: 237 228 206;      /* #EDE4CE ink text on dark */
+  --hate-muted: 138 128 105;    /* #8A8069 muted text on dark */
+  --hate-dot: 143 190 99;       /* #8FBE63 the litho dot grid over the field */
+}
+
+/* רשת הליטוגרפיה — a fine, physical dot grid over the dead-grass field: printed
+   texture, not a decorative gloss. Two offset radial layers, the same construction
+   as `.halftone` above, in the wing's own green at ~10% rather than the press
+   layer's `--p-dot`. Applied once behind a whole gate-11 screen, never per card —
+   an opaque card already covers it, which is what keeps the field readable as
+   ground and the cards readable as things sitting on it. */
+.hate-dots {
+  background-image:
+    radial-gradient(rgb(var(--hate-dot)) 0.9px, transparent 1px),
+    radial-gradient(rgb(var(--hate-dot)) 0.9px, transparent 1px);
+  background-size: 7px 7px, 7px 7px;
+  background-position: 0 0, 3.5px 3.5px;
+  opacity: 0.1;
 }

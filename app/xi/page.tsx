@@ -1,7 +1,10 @@
+import type { Metadata } from 'next'
+
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { formationList, rosterIndex } from '@/lib/game/allTimeXI'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 import { XIBuilder } from './XIBuilder'
 
 /**
@@ -11,6 +14,8 @@ import { XIBuilder } from './XIBuilder'
  * `/lineup`. This one has no right answer at all, which is the point: it is the
  * argument, not the exam.
  */
+export const metadata: Metadata = gateMetadata('xi')
+
 export default function XIPage() {
   return (
     <Screen title={t('screen.xi.title')} sub={t('screen.xi.sub')}>

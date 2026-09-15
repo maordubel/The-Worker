@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import { embedUrl, type CutsceneCard, type CutsceneOutcome, type HistoricalCutscene as Def } from '@/lib/life/cutscenes'
 
@@ -228,14 +229,12 @@ export function HistoricalCutscene({
     }
   }, [finish])
 
-  // --- Escape skips, like every other card in this game -----------------------------
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') finish('skipped')
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [finish])
+  // --- Escape skips, like every other card in this game ------------------------------
+  // Folded onto `useDialog` (rule 33's shared contract) rather than kept as this
+  // component's own `window` listener: the hook is also what moves focus into the frame
+  // on open, traps Tab inside it, and gives focus back to whatever opened the cutscene
+  // when it ends — none of which the old listener did.
+  const dialogRef = useDialog<HTMLDivElement>(() => finish('skipped'))
 
   const start = () => {
     try {
@@ -249,11 +248,13 @@ export function HistoricalCutscene({
 
   return (
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       dir="rtl"
       role="dialog"
       data-life="cutscene"
       data-phase={phase}
-      className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink"
+      className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink outline-none"
       aria-modal="true"
       aria-label={scene.titleHe}
     >

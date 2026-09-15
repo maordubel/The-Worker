@@ -3,7 +3,7 @@ import Script from 'next/script'
 
 import { Analytics } from '@/components/ads/Analytics'
 import { ADSENSE_CLIENT } from '@/lib/ads'
-import { BRAND } from '@/lib/brand'
+import { BRAND, SITE_URL } from '@/lib/brand'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
 import './globals.css'
 
@@ -20,7 +20,14 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
+/**
+ * `metadataBase` resolves every relative URL a page's `openGraph`/`twitter` images use
+ * (`lib/seo.ts` builds them as `${SITE_URL}/og/<slug>.png`, already absolute, but this
+ * is what keeps a future relative path from resolving against whatever host actually
+ * served the request instead of the canonical address rule 23 requires).
+ */
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   // The product is called The Worker. Full stop — no suffix, no bilingual pair, no
   // brand-system tagline. A name with something appended to it is not a name.
   title: {
@@ -29,7 +36,34 @@ export const metadata: Metadata = {
   },
   description: t('app.description'),
   applicationName: 'The Worker',
-  icons: { icon: [{ url: '/brand/logo-192.png', type: 'image/png' }], apple: '/brand/logo-192.png' },
+  alternates: { canonical: SITE_URL },
+  // The base every route inherits unless it sets its own (`lib/seo.ts#gateMetadata`) —
+  // Next replaces this object key-for-key per route, so a route with no `openGraph` of
+  // its own still gets a real title, description and image instead of the blue-line
+  // link with no preview that this whole delta exists to fix.
+  openGraph: {
+    title: 'The Worker',
+    description: t('app.description'),
+    url: SITE_URL,
+    siteName: 'The Worker',
+    locale: 'he_IL',
+    type: 'website',
+    images: [{ url: '/og/default.png', width: 1200, height: 630, alt: 'The Worker' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The Worker',
+    description: t('app.description'),
+    images: ['/og/default.png'],
+  },
+  // The badge is the identity everywhere (rule 8), and `app/icon.svg` is a Next
+  // file-convention route that would otherwise compete with this field for the tab —
+  // see the comment in `app/icon.svg` itself for why its content now IS the badge
+  // rather than the two sources disagreeing about what a reader sees.
+  icons: {
+    icon: [{ url: '/brand/logo-192.png', type: 'image/png' }],
+    apple: '/brand/logo-192.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

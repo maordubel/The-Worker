@@ -6,6 +6,7 @@ import { PNG } from 'pngjs'
 
 import { isYellow, isYellowHex } from '@/lib/isYellow'
 import { YELLOW_EXEMPTIONS, yellowAllowed } from '@/lib/brand/yellowExemptions'
+import { PITCH } from '@/lib/game/goal-zones'
 import { qaAllowed } from '@/lib/qa'
 
 /**
@@ -60,6 +61,23 @@ const LAMP_FILES = ['LampGrid.tsx', 'TabBar.tsx', 'Floodlights.tsx']
  */
 const ARCADE_FILES = ['ControlDeck.tsx']
 
+/**
+ * המגרש — the third named exemption, and the only one that replaces the heuristic with a
+ * PROOF rather than with a promise.
+ *
+ * `GoalPitch.tsx` lays twenty real `<button>`s over the pitch at the coordinates
+ * `lib/game/goal-zones.ts` already defines, so a zone's size is its share of the pitch,
+ * not a class on the element. A `min-h-tap` there would not make the target bigger — it
+ * would make it the WRONG SIZE, stretching one zone over its neighbour and grading a tap
+ * against the square below the one the finger was on.
+ *
+ * So the file is exempt from the class check and subject to a stricter one instead: the
+ * test below computes what a zone actually measures at the narrowest screen this product
+ * supports and fails if it is under 48px. The heuristic asks whether somebody remembered
+ * to type a class; this asks the question the class exists to answer.
+ */
+const GEOMETRY_FILES = ['GoalPitch.tsx']
+
 describe('brand acceptance — colour', () => {
   it('has exactly the eight declared tokens, and no ninth', () => {
     const css = readFileSync(TOKENS_FILE, 'utf8')
@@ -97,7 +115,8 @@ describe('brand acceptance — colour', () => {
       expect(isYellowHex(hex), `${hex} should be yellow`).toBe(true)
     }
     for (const hex of [
-      '#E0401C', // vermilion ink
+      '#B02D10', // vermilion ink
+      '#E0401C', // the lighter vermilion it replaced on 15.9.2026 — still not yellow
       '#1E2C5A', // navy ink
       '#E9DFC7', // ageing paper — a yellow hue, but 15% saturation is paper
       '#8FBE63', // printed grass
@@ -134,6 +153,29 @@ describe('brand acceptance — colour', () => {
   it('uses no raw hex in components — tokens only', () => {
     for (const { path, text } of SOURCES) {
       expect(/#[0-9a-fA-F]{3,8}\b/.test(text), `${path} contains a raw hex`).toBe(false)
+    }
+  })
+
+  it('uses no raw COLOUR in components either — the rgb() spelling of the same defect', () => {
+    // The hex guard above ran for months while `rgb(224 64 28)` sat in ControlDeck.tsx
+    // twice: the old vermilion, written out by channel, in a component. Nothing caught
+    // it, so when the vermilion was darkened on 15.9.2026 the console would have kept
+    // the old red and nobody would have known until they looked at a phone.
+    //
+    // The test is SATURATION, not the presence of rgb(): `rgb(255 255 255 / .55)` and
+    // `rgb(0 0 0 / .45)` are a highlight and a shadow, they carry no hue, and they are
+    // not brand colours. Anything with a real hue in it is.
+    const RGB = /rgb\(\s*(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*(?:\/[^)]*)?\)/g
+    for (const { path, text } of SOURCES) {
+      for (const match of [...withoutComments(text).matchAll(RGB)]) {
+        const [r, g, b] = [Number(match[1]), Number(match[2]), Number(match[3])]
+        const max = Math.max(r, g, b)
+        const saturation = max === 0 ? 0 : (max - Math.min(r, g, b)) / max
+        expect(
+          saturation < 0.25,
+          `${path} writes ${match[0]} — a colour with a hue, spelled by channel instead of read from a token`,
+        ).toBe(true)
+      }
     }
   })
 
@@ -250,8 +292,25 @@ describe('brand acceptance — interaction', () => {
     for (const { path, text } of SOURCES) {
       if (!/<button|role="button"/.test(text)) continue
       if (ARCADE_FILES.some((file) => path.endsWith(file))) continue
+      if (GEOMETRY_FILES.some((file) => path.endsWith(file))) continue
       expect(text.includes('min-h-tap'), `${path} has a button without min-h-tap`).toBe(true)
     }
+  })
+
+  it('gives the goal pitch zones 48px of real estate on the narrowest phone', () => {
+    // The exemption above is only honest if this passes. 320px is the narrowest screen
+    // the product supports; `px-gutter` takes a side each, and the pitch fills what is
+    // left at the 300×400 viewBox's own ratio. A zone is 55×82 of that box.
+    const SCREEN = 320
+    const GUTTER = 12
+    const width = SCREEN - GUTTER * 2
+    const zoneWidth = (width * PITCH.cw) / PITCH.w
+    const zoneHeight = ((width * (PITCH.h / PITCH.w)) * PITCH.ch) / PITCH.h
+
+    expect(zoneWidth, `a goal zone is ${zoneWidth.toFixed(1)}px wide at ${SCREEN}px`)
+      .toBeGreaterThanOrEqual(48)
+    expect(zoneHeight, `a goal zone is ${zoneHeight.toFixed(1)}px tall at ${SCREEN}px`)
+      .toBeGreaterThanOrEqual(48)
   })
 
   it('keeps a red focus ring on everything focusable', () => {

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AnswerRow } from '@/components/ui/AnswerRow'
+import { AdSlot } from '@/components/ads/AdSlot'
 import { Burst } from '@/components/play/Burst'
 import { HUD } from '@/components/play/HUD'
 import { StageCard } from '@/components/play/StageCard'
@@ -58,6 +59,8 @@ export function TriviaRun({
   const [showStage, setShowStage] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(secondsFor(0))
   const [started, setStarted] = useState(false)
+  // The one sentence assistive tech hears per question — see the note above `settle`.
+  const [announcement, setAnnouncement] = useState('')
   const locked = useRef(false)
 
   const index = session.index
@@ -65,7 +68,18 @@ export function TriviaRun({
   const total = secondsFor(index)
   const multi = question?.kind === 'multi'
 
-  /** One place where a question ends, whatever ended it. */
+  /**
+   * One place where a question ends, whatever ended it — and the one place its outcome
+   * is spoken. `Burst`'s "+120" is `aria-hidden`, the ✓/✗ stamp is a symbol, and the HUD
+   * updates its lamps and its combo with no live region on any of them: none of that
+   * reaches a screen reader. Rather than wiring `aria-live` onto four components (four
+   * announcements competing for one utterance), this composes ONE sentence — right or
+   * wrong, points if any, the streak, the lamps left — and a single polite region below
+   * announces it. The numbers are computed here the same way `advance()` computes them,
+   * not read back from `session` after the fact, because `session` only updates once the
+   * 900ms/1900ms feedback delay ends: reading it now would announce last question's
+   * figures under this one's result (rule 11/15).
+   */
   const settle = useCallback(
     (result: Verdict | null, left: number) => {
       if (!question) return
@@ -73,6 +87,17 @@ export function TriviaRun({
       const points = correct
         ? pointsFor(result?.difficulty ?? question.difficulty, session.combo + 1, left, total)
         : 0
+      const comboAfter = correct ? session.combo + 1 : 0
+      const livesAfter = correct ? session.lives : session.lives - 1
+      setAnnouncement(
+        correct
+          ? t('trivia.announceCorrect', {
+              points: String(points),
+              combo: String(comboAfter),
+              lives: String(livesAfter),
+            })
+          : t('trivia.announceWrong', { lives: String(livesAfter) }),
+      )
       if (correct) setBurst({ points, combo: session.combo + 1 })
       window.setTimeout(
         () => {
@@ -92,7 +117,7 @@ export function TriviaRun({
         correct ? 900 : 1900,
       )
     },
-    [question, session.combo, total],
+    [question, session.combo, session.lives, total],
   )
 
   /** The clock. It runs only while a question is live and the run is going. */
@@ -167,6 +192,12 @@ export function TriviaRun({
       {showStage && <StageCard stage={stage} onDone={() => setShowStage(false)} />}
 
       <HUD session={session} secondsLeft={secondsLeft} total={total} />
+
+      {/* the one live region for the whole run — kept outside the per-question `key`
+          below so it is never remounted, only ever updated */}
+      <p aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
 
       <div
         key={index}
@@ -332,6 +363,9 @@ function Result({ session, seed }: { session: Session; seed: number }) {
       <p className="mt-2 text-center font-mono text-[11px] tabular-nums text-muted">
         <bdi dir="ltr">seed {seed}</bdi>
       </p>
+
+      {/* the run is over — this is the stopping point rule 28 means, never mid-round */}
+      <AdSlot placement="result" />
     </div>
   )
 }

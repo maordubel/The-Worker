@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { Chip, SheetHead } from '@/components/life/Plate'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import { characterName } from '@/lib/life/characters'
 import {
@@ -72,17 +73,11 @@ export function AlbumSheet({
   /**
    * Escape puts down whatever is in your hand: a held-up sticker first, the album after.
    * Two objects, one key, in the order somebody actually holds them — the same rule the
-   * booklet reader follows.
+   * booklet reader follows. `useDialog` is what actually listens for the key; this file
+   * only decides, on every render, which of the two objects Escape should put down —
+   * so the callback below is intentionally re-read on every close, not fixed at mount.
    */
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return
-      if (open) setOpen(null)
-      else onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  const dialogRef = useDialog<HTMLDivElement>(open ? () => setOpen(null) : onClose)
 
   /* nine pages do not fit across a phone, so the tab of the page you are on brings itself
      into view rather than leaving you to find it by dragging */
@@ -93,10 +88,15 @@ export function AlbumSheet({
 
   return (
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       dir="rtl"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('life.album.title')}
       data-life="album"
       data-page={page}
-      className="pointer-events-auto absolute inset-0 z-[60] flex flex-col bg-paper"
+      className="pointer-events-auto absolute inset-0 z-[60] flex flex-col bg-paper outline-none"
     >
       {/* the same header every sheet in this game has: a sign plate on its arm, ✕ at the end */}
       <SheetHead

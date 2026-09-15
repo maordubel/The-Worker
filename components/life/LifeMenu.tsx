@@ -1,6 +1,7 @@
 'use client'
 
 import { SheetHead } from '@/components/life/Plate'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 
 /**
@@ -66,6 +67,7 @@ export function LifeMenu({
 }) {
   const row =
     'flex min-h-tap w-full items-center justify-between gap-3 border-b-hair border-ink/30 px-3 text-start font-sign text-[15px] text-ink transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none'
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
   return (
     <div
       className="absolute inset-0 z-40 flex items-end justify-center bg-ink/70 p-2.5 pb-[max(10px,env(safe-area-inset-bottom))] sm:items-center"
@@ -73,7 +75,9 @@ export function LifeMenu({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[420px] border-rule border-ink bg-sheet"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative z-[60] w-full max-w-[420px] border-rule border-ink bg-sheet outline-none"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-label={t('life.menu.title')}

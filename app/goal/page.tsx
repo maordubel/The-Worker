@@ -1,8 +1,11 @@
+import type { Metadata } from 'next'
+
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { dealRun, hasGoals } from '@/lib/game/goal'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 import { GoalRun } from './GoalRun'
 
 /**
@@ -12,6 +15,8 @@ import { GoalRun } from './GoalRun'
  * truth and the narrative, and `submitGoal` re-reads the record from the seed to grade.
  * The player never receives an answer they have not earned.
  */
+export const metadata: Metadata = gateMetadata('goal')
+
 export default function GoalPage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 1
   const goals = hasGoals() ? dealRun(seed) : []

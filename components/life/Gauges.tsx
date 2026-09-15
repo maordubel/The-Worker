@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { SheetHead } from '@/components/life/Plate'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import { allGauges, changeTone, GATE_HE, hapoelLove, LACES_HE, SINAI_HE, type GaugeChange, type GaugeGroup } from '@/lib/life/gauges'
 import type { LifeState } from '@/lib/life/types'
@@ -207,6 +208,7 @@ export function GaugesSheet({ state, onClose }: { state: LifeState; onClose: () 
   if (state.year >= 1993) groups.push('decade')
   const love = hapoelLove(state)
   let delay = 0
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
   return (
     <div
       className="absolute inset-0 z-40 flex items-end justify-center bg-ink/70 p-2.5 pb-[max(10px,env(safe-area-inset-bottom))] sm:items-center"
@@ -214,7 +216,9 @@ export function GaugesSheet({ state, onClose }: { state: LifeState; onClose: () 
       onClick={onClose}
     >
       <div
-        className="flex max-h-full w-full max-w-[420px] animate-sheet-in flex-col border-rule border-ink bg-sheet"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative z-[60] flex max-h-full w-full max-w-[420px] animate-sheet-in flex-col border-rule border-ink bg-sheet outline-none"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-label={t('life.gauge.title')}

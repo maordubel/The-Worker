@@ -1,5 +1,6 @@
 'use client'
 
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import { adDirector, adsEnabled, adsTestMode } from '@/lib/life/monetization'
 import type { LifeRuntime, LifeSnapshot } from '@/lib/life/runtime/game'
@@ -64,8 +65,17 @@ export function DebugPanel({
   const historyOf = (chapter: string) =>
     chapter === '1990' ? HISTORY_DAYS['1990-05-12'] : chapter === '1998-laces' ? HISTORY_DAYS['1998-05-02'] : null
 
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
+
   return (
-    <div role="dialog" className="pointer-events-auto absolute inset-0 z-[60] flex items-stretch justify-center bg-ink/95 p-gutter" aria-modal="true">
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      role="dialog"
+      className="pointer-events-auto absolute inset-0 z-[60] flex items-stretch justify-center bg-ink/95 p-gutter outline-none"
+      aria-modal="true"
+      aria-label={t('life.debug.title')}
+    >
       <div className="max-h-full w-full max-w-lg overflow-y-auto border-rule border-red bg-ink p-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-mono text-[12px] uppercase tracking-[0.2em] text-red">

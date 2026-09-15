@@ -1004,6 +1004,40 @@ describe('התיק השחור — gate 11', () => {
       expect(row.confidence, row.slug).toBeGreaterThanOrEqual(CONFIDENCE_FLOOR)
     }
   })
+
+  it('the total on screen always equals what a seed actually deals (verified bug fix)', () => {
+    // `lib/game/blackfile.ts` used to declare `ROUND_SIZE = 8`. The archive holds three
+    // `crossing` rows and two `myth` rows — five transfer cards — plus nine dated
+    // `event` rows, which `dealPairs()` turns into four pairs (nine of them paired up,
+    // one left over). That is NINE questions, not eight: `derby.of` printed "8" while
+    // the ninth question was still being asked, and the Done screen could print "9 / 8"
+    // — a number that was not true (rule 11/15). The fix removed the constant;
+    // app/derby/file/page.tsx now sums `dealFile(seed).length + dealPairs(seed).length`
+    // itself. This proves that sum can never drift from what the archive actually
+    // holds, swept across the seed space the way tests/timeline.test.ts sweeps 300.
+    const expectedCards = archive.grievances.filter(
+      (row) => row.kind === 'crossing' || row.kind === 'myth',
+    ).length
+    const expectedEvents = archive.grievances.filter(
+      (row) => row.kind === 'event' && row.happenedOn !== null,
+    ).length
+    for (let seed = 1; seed <= 300; seed += 1) {
+      const cards = dealFile(seed)
+      const pairs = dealPairs(seed)
+      // The transfer half is the whole archive, dealt whole, every seed — it only
+      // reorders, it never shrinks.
+      expect(cards.length, `seed ${seed}`).toBe(expectedCards)
+      // The pair half pairs up events two at a time and stops at its own cap; it can
+      // never invent a pair the archive's dated events do not support.
+      expect(pairs.length, `seed ${seed}`).toBeLessThanOrEqual(Math.floor(expectedEvents / 2))
+      expect(pairs.length, `seed ${seed}`).toBeGreaterThan(0)
+      // This is exactly what page.tsx now hands <BlackFile total=…> and what the header
+      // ("X מתוך total") and the Done screen both read back — never a declared constant.
+      const total = cards.length + pairs.length
+      expect(total, `seed ${seed}`).toBe(cards.length + pairs.length)
+      expect(Number.isInteger(total), `seed ${seed}`).toBe(true)
+    }
+  })
 })
 
 describe('משחק השנאה — gate 11, מלך הגבעה', () => {

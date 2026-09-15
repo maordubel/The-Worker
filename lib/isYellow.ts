@@ -16,7 +16,7 @@
  *
  *   gold        #D8B25C → 42°, S 0.72  → yellow
  *   mark yellow #F5C518 → 47°, S 0.90  → yellow
- *   vermilion   #E0401C → 11°, S 0.88  → red
+ *   vermilion   #B02D10 → 11°, S 0.91  → red
  *   cream       #E9DFC7 → 42°, S 0.15  → paper
  *   grass       #8FBE63 → 91°, S 0.48  → green
  *   badge skin  ~#C09B71 → 32°, S 0.41 → skin

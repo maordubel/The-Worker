@@ -1,7 +1,10 @@
+import type { Metadata } from 'next'
+
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { ROUND_LENGTH, topicCounts } from '@/lib/game/trivia'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 import { TopicWall } from './TopicWall'
 
 /**
@@ -15,6 +18,8 @@ import { TopicWall } from './TopicWall'
  * that grows because new data landed shows a bigger number without anyone editing this
  * file, and a topic that is too thin to fill a round says so instead of dealing short.
  */
+export const metadata: Metadata = gateMetadata('trivia')
+
 export default function TriviaWingPage() {
   return (
     <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')}>

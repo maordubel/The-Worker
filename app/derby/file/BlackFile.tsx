@@ -2,8 +2,11 @@
 
 import { useState, useTransition } from 'react'
 
+import { AdSlot } from '@/components/ads/AdSlot'
 import { Num } from '@/components/ui/Num'
-import { t } from '@/lib/i18n'
+import { ShareRow } from '@/components/share/ShareRow'
+import { artFor } from '@/lib/share/story'
+import { t, type MessageKey } from '@/lib/i18n'
 import type { CardVerdict, FileCard, PairCard, PairVerdict } from '@/lib/game/blackfile'
 import { submitCard, submitPair } from './actions'
 
@@ -17,11 +20,17 @@ import { submitCard, submitPair } from './actions'
  *      earlier one.
  *
  * Navy only. No vermilion anywhere on this screen — the gate 11 rule holds inside the
- * gate, not just on its plate.
+ * gate, not just on its plate. It sits on the SAME dead-grass field as the duel
+ * (`bg-hate-*` tokens, the marked block at the foot of `app/globals.css`), because it
+ * is the same ground — but it is a different act, and it must read colder: no red
+ * plate, no streak tag, no stamp. `--sign` (the shell's own navy) carries every accent
+ * here, never a new blue — the wing's approved swatch names six colours and a blue is
+ * not one of them.
  */
 export function BlackFile({
   cards,
   pairs,
+  seed,
   total,
   fileSize,
 }: {
@@ -64,34 +73,38 @@ export function BlackFile({
   const asked = Math.min(step, total)
 
   return (
-    <div className="mt-stack">
+    // Same field as the duel, colder: no dot-grid warmth is added here beyond the
+    // field itself, no red anywhere, no stamp. See the file header for why.
+    <div className="relative -mx-gutter mt-stack overflow-hidden bg-hate-field px-gutter pb-6 pt-3">
+      <div aria-hidden="true" className="hate-dots pointer-events-none absolute inset-0" />
+      <div className="relative">
       {/* the away end's own header — navy, cold, nothing of ours in it */}
       <div className="flex items-end justify-between border-b-rule border-sign pb-2">
         <div>
           <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-sign" dir="ltr">
             GATE · AWAY END
           </p>
-          <p className="font-display text-step-1 leading-tight text-ink">{t('derby.file')}</p>
+          <p className="font-display text-step-1 leading-tight text-hate-ink">{t('derby.file')}</p>
         </div>
         <div className="text-end">
           <p className="font-poster text-[34px] leading-none text-sign">
             <Num>{hits}</Num>
           </p>
-          <p className="font-body text-[10px] tracking-widest text-muted">
+          <p className="font-body text-[10px] tracking-widest text-hate-muted">
             <Num>{asked}</Num> {t('derby.of')} <Num>{total}</Num>
           </p>
         </div>
       </div>
 
       {done ? (
-        <Done hits={hits} total={total} fileSize={fileSize} />
+        <Done hits={hits} total={total} fileSize={fileSize} seed={seed} />
       ) : inCards && card ? (
         <>
-          <p className="mt-stack font-body text-[11px] tracking-widest text-muted">
+          <p className="mt-stack font-body text-[11px] tracking-widest text-hate-muted">
             {t('derby.crossQ')}
           </p>
-          <div className="mt-2 border-rule border-sign bg-sign/[.06] p-5 text-center">
-            <p className="font-display text-step-3 leading-tight text-ink">{card.subjectHe}</p>
+          <div className="mt-2 border-rule border-sign bg-hate-card p-5 text-center">
+            <p className="font-display text-step-3 leading-tight text-hate-ink">{card.subjectHe}</p>
           </div>
 
           {!answered ? (
@@ -100,7 +113,7 @@ export function BlackFile({
                 type="button"
                 disabled={pending}
                 onClick={() => answerCard('crossed')}
-                className="min-h-tap border-rule border-sign bg-sign px-3 font-body text-step-0 font-extrabold text-paper transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-50 motion-reduce:transition-none"
+                className="min-h-tap border-rule border-sign bg-sign px-3 font-body text-step-0 font-extrabold text-hate-ink transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-50 motion-reduce:transition-none"
               >
                 {t('derby.crossed')}
               </button>
@@ -108,7 +121,7 @@ export function BlackFile({
                 type="button"
                 disabled={pending}
                 onClick={() => answerCard('did_not')}
-                className="min-h-tap border-rule border-sign px-3 font-body text-step-0 font-extrabold text-sign transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-50 motion-reduce:transition-none"
+                className="min-h-tap border-rule border-sign bg-hate-ink/10 px-3 font-body text-step-0 font-extrabold text-sign transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-50 motion-reduce:transition-none"
               >
                 {t('derby.didNot')}
               </button>
@@ -119,7 +132,7 @@ export function BlackFile({
         </>
       ) : pair ? (
         <>
-          <p className="mt-stack font-body text-[11px] tracking-widest text-muted">
+          <p className="mt-stack font-body text-[11px] tracking-widest text-hate-muted">
             {t('derby.firstQ')}
           </p>
           <div className="mt-2 grid gap-2">
@@ -134,8 +147,8 @@ export function BlackFile({
                 onClick={() => answerPair(side.slug)}
                 className={`min-h-tap w-full border-rule px-4 py-3 text-start font-display text-step-1 leading-tight transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
                   pairVerdict && pairVerdict.firstSlug === side.slug
-                    ? 'border-sign bg-sign text-paper'
-                    : 'border-sign text-ink'
+                    ? 'border-sign bg-sign text-hate-ink'
+                    : 'border-sign bg-hate-card text-hate-ink'
                 }`}
               >
                 {side.title}
@@ -143,17 +156,17 @@ export function BlackFile({
             ))}
           </div>
           {pairVerdict && (
-            <div className="mt-3 border-rule border-sign bg-sign/[.06] p-3">
-              <p className="font-body text-step-0 font-extrabold text-ink">
+            <div className="mt-3 border-rule border-sign bg-hate-card p-3">
+              <p className="font-body text-step-0 font-extrabold text-hate-ink">
                 {pairVerdict.correct ? t('derby.right') : t('derby.wrong')}
               </p>
-              <p className="mt-1 font-mono text-[11px] tabular-nums text-muted">
+              <p className="mt-1 font-mono text-[11px] tabular-nums text-hate-muted">
                 <bdi dir="ltr">{pairVerdict.aDate}</bdi> · <bdi dir="ltr">{pairVerdict.bDate}</bdi>
               </p>
               <button
                 type="button"
                 onClick={next}
-                className="mt-3 flex min-h-tap w-full items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper"
+                className="mt-3 flex min-h-tap w-full items-center justify-center bg-sign px-4 font-body text-step-0 font-extrabold text-hate-ink"
               >
                 {t('derby.next')}
               </button>
@@ -161,6 +174,7 @@ export function BlackFile({
           )}
         </>
       ) : null}
+      </div>
     </div>
   )
 }
@@ -168,23 +182,23 @@ export function BlackFile({
 /** The reveal is the game. Being wrong here should teach you something true. */
 function Reveal({ verdict, onNext }: { verdict: CardVerdict; onNext: () => void }) {
   return (
-    <div className="mt-3 border-rule border-sign bg-sign/[.06] p-4">
-      <p className="font-body text-step-0 font-extrabold text-ink">
+    <div className="mt-3 border-rule border-sign bg-hate-card p-4">
+      <p className="font-body text-step-0 font-extrabold text-hate-ink">
         {verdict.correct ? t('derby.right') : t('derby.wrong')}
       </p>
-      <p className="mt-2 font-display text-step-1 leading-tight text-ink">{verdict.titleHe}</p>
-      <p className="mt-1 font-body text-step--1 leading-relaxed text-muted">{verdict.bodyHe}</p>
+      <p className="mt-2 font-display text-step-1 leading-tight text-hate-ink">{verdict.titleHe}</p>
+      <p className="mt-1 font-body text-step--1 leading-relaxed text-hate-muted">{verdict.bodyHe}</p>
 
       <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
         {verdict.toClubHe && (
           <div>
-            <dt className="font-body text-[10px] tracking-widest text-muted">{t('derby.to')}</dt>
-            <dd className="font-display text-step-0 text-ink">{verdict.toClubHe}</dd>
+            <dt className="font-body text-[10px] tracking-widest text-hate-muted">{t('derby.to')}</dt>
+            <dd className="font-display text-step-0 text-hate-ink">{verdict.toClubHe}</dd>
           </div>
         )}
         {verdict.feeEur !== null && (
           <div>
-            <dt className="font-body text-[10px] tracking-widest text-muted">{t('derby.fee')}</dt>
+            <dt className="font-body text-[10px] tracking-widest text-hate-muted">{t('derby.fee')}</dt>
             <dd className="font-poster text-[22px] leading-none text-sign">
               <Num>{`€${verdict.feeEur.toLocaleString('en-US')}`}</Num>
             </dd>
@@ -192,8 +206,8 @@ function Reveal({ verdict, onNext }: { verdict: CardVerdict; onNext: () => void 
         )}
         {verdict.happenedOn && (
           <div>
-            <dt className="font-body text-[10px] tracking-widest text-muted">{t('derby.when')}</dt>
-            <dd className="font-mono text-step-0 tabular-nums text-ink">
+            <dt className="font-body text-[10px] tracking-widest text-hate-muted">{t('derby.when')}</dt>
+            <dd className="font-mono text-step-0 tabular-nums text-hate-ink">
               <bdi dir="ltr">{verdict.happenedOn}</bdi>
             </dd>
           </div>
@@ -203,7 +217,7 @@ function Reveal({ verdict, onNext }: { verdict: CardVerdict; onNext: () => void 
       <button
         type="button"
         onClick={onNext}
-        className="mt-4 flex min-h-tap w-full items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper transition-transform duration-press ease-stamp active:scale-[.97] motion-reduce:transition-none"
+        className="mt-4 flex min-h-tap w-full items-center justify-center bg-sign px-4 font-body text-step-0 font-extrabold text-hate-ink transition-transform duration-press ease-stamp active:scale-[.97] motion-reduce:transition-none"
       >
         {t('derby.next')}
       </button>
@@ -211,24 +225,63 @@ function Reveal({ verdict, onNext }: { verdict: CardVerdict; onNext: () => void 
   )
 }
 
-function Done({ hits, total, fileSize }: { hits: number; total: number; fileSize: number }) {
+/**
+ * The done screen — and, like every other graded gate, a way out through `ShareRow`.
+ * `pct` is a real computation off `hits`/`total`, never a separate guess, which is what
+ * rule 11/15 asks of a number printed on a card.
+ */
+function Done({
+  hits,
+  total,
+  fileSize,
+  seed,
+}: {
+  hits: number
+  total: number
+  fileSize: number
+  seed: number
+}) {
+  const pct = total > 0 ? Math.round((hits / total) * 100) : 0
   return (
-    <div className="mt-stack border-rule border-sign bg-sign/[.06] p-5 text-center">
+    <div className="mt-stack border-rule border-sign bg-hate-card p-5 text-center">
       <p className="font-poster text-[74px] leading-none text-sign">
         <Num>{hits}</Num>
       </p>
-      <p className="font-body text-step-0 text-muted">
+      <p className="font-body text-step-0 text-hate-muted">
         {t('derby.of')} <Num>{total}</Num>
       </p>
-      <p className="mt-3 font-body text-step--1 leading-relaxed text-muted">
+      <p className="mt-3 font-body text-step--1 leading-relaxed text-hate-muted">
         {t('derby.fileNote', { count: String(fileSize) })}
       </p>
       <a
         href="/derby/file?seed=12"
-        className="mt-4 flex min-h-tap w-full items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper"
+        className="mt-4 flex min-h-tap w-full items-center justify-center bg-sign px-4 font-body text-step-0 font-extrabold text-hate-ink"
       >
         {t('derby.again')}
       </a>
+
+      <ShareRow
+        kind="file"
+        params={{ s: String(seed), total: String(total) }}
+        headline={String(hits)}
+        card={{
+          template: 'ink' as const,
+          art: artFor('file', total > 0 ? hits / total : 0),
+          kicker: 'GATE 11 · THE BLACK FILE',
+          label: t('screen.derby.title'),
+          eyebrow: t('derby.file'),
+          hero: `${hits}/${total}`,
+          bigStat: { v: `${pct}%`, k: t('derby.accuracy') },
+          stats: [
+            { k: t('run.right'), v: `${hits}/${total}` },
+            { k: t('derby.fileStat'), v: String(fileSize) },
+          ],
+          cta: t('derby.fileCta'),
+          challenge: t('share.sameRound'),
+        }}
+      />
+
+      <AdSlot placement="result" />
     </div>
   )
 }

@@ -1,5 +1,7 @@
 'use client'
 
+import { t } from '@/lib/i18n'
+
 /**
  * שורת תשובה. Picking marks the row with red at 9% — never green/red on the answer.
  * The feedback is the stamp.
@@ -8,6 +10,11 @@
  * optional politeness: three of six were right and the player has to be able to see
  * WHICH three, or the question taught them nothing. The mark is a rule and a tick, not
  * a colour, so it survives a colour-blind reader and a monochrome screenshot.
+ *
+ * The ✓/✗ itself is `aria-hidden` — a glyph, not a word — and used to have no echo at
+ * all, so a graded row read as just its own text with no verdict attached. The `sr-only`
+ * span beside it says the same thing `aria-pressed` cannot: `aria-pressed` reports
+ * whether THIS row was picked, not whether picking it was right.
  */
 export function AnswerRow({
   letter,
@@ -42,6 +49,11 @@ export function AnswerRow({
       >
         {graded ? (correct ? '✓' : picked ? '✗' : '') : picked ? '✗' : ''}
       </span>
+      {graded && (
+        <span className="sr-only">
+          {correct ? t('trivia.rowCorrect') : picked ? t('trivia.rowWrong') : ''}
+        </span>
+      )}
       <span className="w-4 font-body text-[11px] text-muted">{letter}</span>
       {/* Answers are Hebrew prose, not figures. They were set in the mono face at
           step-1 — a typewriter face at heading size, which is why they read badly and

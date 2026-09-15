@@ -37,9 +37,23 @@ export interface BallotStore {
   save(questionId: string, pick: string): Promise<void>
   clear(): Promise<void>
   tally(questionId: string): Promise<Tally | null>
+  /** true once the slip has been sealed on this device — see `seal()` */
+  sealed(): Promise<boolean>
+  /**
+   * Locks the slip. Sealing is a separate call from `save`, on purpose: a save happens
+   * on every tap and has to be cheap and silent, while a seal is the one deliberate
+   * action the whole document leads up to — the moment that prints the stamp and opens
+   * the count board's door. Nothing here re-validates 8/8; the screen already refuses
+   * to call it below that, the same way it already refuses to render the button as
+   * pressable.
+   */
+  seal(): Promise<void>
 }
 
 const KEY = 'worker.ballot.v1'
+/** a second, separate key — sealing is a different fact from the picks themselves,
+ *  and keeping it apart means `read()` never has to change shape to carry it. */
+const SEAL_KEY = 'worker.ballot.sealed.v1'
 
 /**
  * The local store. One device, one ballot, kept across visits.
@@ -82,7 +96,7 @@ export class LocalBallotStore implements BallotStore {
 
   async clear(): Promise<void> {
     try {
-      window.localStorage.removeItem(KEY)
+      for (const key of [KEY, SEAL_KEY]) window.localStorage.removeItem(key)
     } catch {
       // nothing to do and nothing worth throwing over
     }
@@ -90,6 +104,24 @@ export class LocalBallotStore implements BallotStore {
 
   async tally(): Promise<Tally | null> {
     return null
+  }
+
+  async sealed(): Promise<boolean> {
+    try {
+      return window.localStorage.getItem(SEAL_KEY) === '1'
+    } catch {
+      return false
+    }
+  }
+
+  async seal(): Promise<void> {
+    try {
+      window.localStorage.setItem(SEAL_KEY, '1')
+    } catch {
+      // an unsealed slip locally is still a sealed slip for this session — the stamp
+      // already printed on screen, and losing the flag on reload is a smaller failure
+      // than throwing during the one action the whole document leads up to
+    }
   }
 }
 

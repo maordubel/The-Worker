@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { Screen } from '@/components/ui/Screen'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 import { resolveChapterAnchor, resolvePrologueAnchor, resolveStageBAnchor, resolveUssishkinAnchor, resolveStageBAnchors } from '@/lib/life/anchor-server'
 
 import { LifeStage } from './LifeStage'
@@ -17,10 +18,7 @@ import { LifeStage } from './LifeStage'
  *
  * `chrome={false}` because a game screen belongs to the game (rule 21).
  */
-export const metadata: Metadata = {
-  title: 'THE WORKER LIFE',
-  description: t('life.sub'),
-}
+export const metadata: Metadata = gateMetadata('life')
 
 export default function LifePage() {
   const anchor = resolveChapterAnchor()

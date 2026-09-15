@@ -772,12 +772,17 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
       may set it, no effect may add to it, and `percent` is null and stays null for
       decades — a number here would immediately become the thing players optimise.
       `tests/life-systems.test.ts` asserts nothing else writes it.
-    - **The profile screen has no bars and no numbers.** The Red Heart is SET, not
+    - **The PROFILE CARD has no bars and no numbers.** The Red Heart is SET, not
       plotted: each pull is a word printed at a size that says how much. A relationship is
       a distance on a rule with a slash for friction. `lib/life/profile.ts` is the only
-      translator, so no screen can accidentally render a value. The debug panel — the one
-      screen that shows the truth — is behind `NODE_ENV`, not behind a flag somebody can
-      flip.
+      translator, so `ProfileCard` cannot accidentally render a value, and
+      `tests/life-systems.test.ts` holds it to that. The debug panel — the one screen that
+      shows the engine's own truth — is behind `NODE_ENV`.
+      **This sentence used to say "the profile screen", and that was no longer true.**
+      `components/life/Gauges.tsx` prints `{value}%` with a `<Bar>` and is mounted in
+      `app/life/LifeStage.tsx` with no `NODE_ENV` gate at all — so a numeric screen has
+      been shipping to players while this file said none existed. Found on 15.9.2026 while
+      checking the life spec against the repo. See rule 63 for which one Maor kept.
     - **`tests/life-systems.test.ts` is the second suite, and it fails for design
       reasons.** A broken door is an art problem and belongs in `life.test.ts`; a chapter
       with only one solution, or two saves that come out the same, is a design problem and
@@ -1269,3 +1274,52 @@ Phaser. יום חדש הוא תצורה (`presets.ts`), לא מנוע חדש. נ
 המסירה עצמה על ה-445 שנותרו במקום לחכות לחצי השני של ההעלאה — המקור היה על הדיסק, אז ההמרה
 הייתה אחת ולא שתיים. שלושה מקומות שהמסירה פספסה ולא היו מתגלים עד שמישהו יפתח מסך:
 `CoinCard.tsx`, `lib/life/city/pano.ts` ו-`lib/life/city/slab.ts`.
+
+## 62 · הוורמיליון הוכהה, והסיבה היא קריאוּת ולא טעם (15.9.2026)
+
+`--red` היה `#E0401C` ועכשיו הוא **`#B02D10`**. זו החלטה של מאור, בשתי מילים —
+"#B02D10 · אפשרות א׳" — אחרי שהוצגו לו שתי הדרכים זו לצד זו.
+
+**המספר שהוליד אותה:** `#E0401C` על `--paper` נותן **3.22:1**. WCAG AA דורש 4.5:1 לטקסט
+קטן ו-3:1 לטקסט גדול — כלומר הוורמיליון עבר בכותרות ונפל בכל טקסט קטן, ובקוד היו 50
+שימושי `text-red` במידות 10–14px מול 38 במידות כותרת. `#B02D10` נותן **4.91:1** על נייר
+ו-5.33:1 על לוחית, וכל 117 השימושים עוברים בלי לגעת באף קומפוננטה.
+
+**האפשרות השנייה נדחתה, וכדאי לדעת מה היא הייתה:** לשמור את הצבע ולהגביל אותו לכותרות,
+ולהעביר את הטקסט הקטן ל-`--ink`/`--muted`. היא שמרה על הוורמיליון המקורי אבל דרשה ~50
+שינויים ידניים ושומר חדש, והיא מוותרת על הנגיעה האדומה בתוויות הקטנות. מאור בחר להכהות.
+
+**האדום גר בחמישה מקומות ואין שישי:**
+`app/globals.css` (הטוקן — מקור האמת) · `lib/brand.ts` (המראה בהקס, למי שלא יכול לקרוא
+CSS custom property: כרטיסי השיתוף על קנבס ו-`theme-color`) · `scripts/brand/og-cards.mjs`
+(מחולל כרטיסי ה-OG) · `lib/life/runtime/palette.ts` (`red` תחת `--- the club ---`, כלומר
+החולצה במשחק הכדורגל של LIFE) · והדוגמאות המחושבות ב-`lib/isYellow.ts`.
+`tests/brand.test.ts` מפרסר את הגיליון ונופל אם `lib/brand.ts` נסחף ממנו.
+
+**ומה שהשינוי הזה חשף:** `ControlDeck.tsx` כתב `rgb(224 64 28)` פעמיים — הוורמיליון
+הישן, מאוית לפי ערוצים, בתוך קומפוננטה. השומר של "בלי הקס גולמי" בדק `#` בלבד, אז זה
+עבר חודשים, והקונסולה של LIFE הייתה נשארת באדום הישן בלי שאיש ידע. יש עכשיו שומר שני
+שבודק **רוויה** ולא את עצם השימוש ב-`rgb()`: `rgb(255 255 255 / .55)` הוא הדגשה
+ו-`rgb(0 0 0 / .45)` הוא צל — אין להם גוון והם לא צבעי מותג. לכל דבר שיש לו גוון אמיתי
+יש טוקן, והקומפוננטה קוראת אותו.
+
+## 63 · שתי הכרעות על מדידה, ומה שהן פותחות (15.9.2026)
+
+מפרט החיים 1983–2026 ביקש לשנות שתי החלטות ותיקות. מאור הכריע בשתיהן, ושתיהן
+נרשמות כאן עם התאריך — כי החלטה שלא כתובה נדונה מחדש בעוד חצי שנה.
+
+**א · מספרים לשחקן — נשארים.** `GaugesSheet` מדפיס אחוזים וברים, והוא ימשיך.
+זה גם מתאר את המציאות: הוא כבר בייצור בלי `NODE_ENV`, בזמן שכלל 46 טען שאין מסך
+כזה. הכלל תוקן לתאר את הקוד. **`ProfileCard` נשאר בלי מספרים** — שני מסכים בשתי
+שפות, בכוונה: הגיליון עונה "כמה", הכרטיס עונה "מי אתה". `tests/life-systems.test.ts`
+ממשיך לשמור על הכרטיס.
+
+**ב · הישגים — מותרים.** האיסור הגורף בוטל. אבל שני שומרים קיימים נוגעים בזה
+ו**אסור למחוק אותם כשהם יאדימו**:
+· `tests/life-story.test.ts` נופל על 'הישג','ניקוד','תג ','רצף','%' בתוכן.
+· `tests/life-share.test.ts` אוסר score/percentage/badge על כרטיס שיתוף.
+כשהישגים ייבנו, השומר הראשון **מצטמצם** לכדי איסור על **ציון יחיד** — שהמפרט עצמו
+דורש ("אין ציון יחיד שמגדיר מי אוהד ראוי"). השני **נשאר כפי שהוא**: הוא על פרטיות
+בכרטיס משותף, לא על הישגים, ואין לו קשר להכרעה הזאת.
+**עד שהישגים נבנים, הבדיקות לא זזות.** לרופף שומר לפני שיש מה להראות בתמורה זה
+בדיוק "תמחק, הבדיקה אדומה" שכלל 47 קיים נגדו.

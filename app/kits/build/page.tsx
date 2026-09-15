@@ -1,9 +1,12 @@
+import type { Metadata } from 'next'
+
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { dealKitRound, kitPuzzleCount } from '@/lib/game/kitBuild'
 import { KIT_ROUND } from '@/lib/game/kit-build-run'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 
 import { KitGameRun } from './KitGameRun'
 
@@ -15,6 +18,8 @@ import { KitGameRun } from './KitGameRun'
  * from the seed (rule 4). What the client gets is a blank shirt, a year, and fifteen
  * parts with hashed ids — none of which says which one is right.
  */
+export const metadata: Metadata = gateMetadata('kits-build')
+
 export default function KitGamePage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 1
   const puzzles = dealKitRound(seed)

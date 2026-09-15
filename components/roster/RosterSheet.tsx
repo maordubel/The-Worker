@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 
 import { searchRoster, type Searchable } from '@/lib/game/roster-search'
 import type { RosterIndex } from '@/lib/game/allTimeXI'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 
 /**
@@ -49,9 +50,17 @@ export function RosterSheet({
     () => (query.trim() === '' ? roster.letters : null),
     [query, roster.letters],
   )
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-ink/70" role="dialog" aria-modal="true">
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[60] flex flex-col bg-ink/70 outline-none"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
       <button type="button" aria-label={t('xi.close')} className="flex-1" onClick={onClose} />
       <div className="max-h-[76vh] animate-slam overflow-y-auto border-t-rule border-ink bg-sheet">
         <div className="sticky top-0 z-10 border-b-hair border-ink bg-sheet px-4 pb-2 pt-3">

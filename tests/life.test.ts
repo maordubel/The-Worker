@@ -1287,7 +1287,10 @@ describe('הפתיח — the opening, and the one line in it that is a fact', ()
     expect(openingMs()).toBeGreaterThan(12000)
     const overlay = readFileSync(join(ROOT, 'components/life/OpeningSequence.tsx'), 'utf8')
     expect(overlay).toContain("data-life=\"opening-skip\"")
-    expect(overlay).toContain("event.key === 'Escape'")
+    // Escape moved onto the shared dialog hook — the behaviour is followed to its new
+    // owner rather than asserted where it used to live (`useDialog`, delta 15.9.2026).
+    expect(overlay).toContain('useDialog')
+    expect(readFileSync(join(ROOT, 'components/ui/useDialog.ts'), 'utf8')).toContain("'Escape'")
     // Muted, inline and autoplaying is the one combination every mobile browser allows
     // without a gesture. A sequence that needs a tap to start is a sequence nobody sees.
     expect(overlay).toContain('muted')

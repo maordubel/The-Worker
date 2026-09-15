@@ -231,11 +231,26 @@ const REGISTRY: CharacterDefinition[] = [
     tags: ['songs', 'darbuka'],
     provenance: 'composite',
   },
+  /**
+   * מישל בר־כליפא — אדם אמיתי, ותפקידו במשחק הוא תפקידו במציאות.
+   *
+   * הוא היה האיש שאחראי בפועל על הסעות האוהדים של הפועל בשנות השמונים והתשעים, ואוהד
+   * ידוע ומוכר של המועדון. המקור הוא מאור הראל, ידע אישי, 15.9.2026 — וכלל 18 אומר
+   * שזה מקור, לא טענה שצריך לאמת מול עיתון.
+   *
+   * השורה הזאת נשאה `tags: ['transport', …]` מהיום שנכתבה, ובכל זאת **כל עבודת ההסעות
+   * בקוד הייתה כתובה על לימור**: היא הכירה את הנהג ב-1993-cup, היא החזיקה מקום בתור,
+   * ובגליל היא עמדה ליד ההסעה עם הפנקס וגבתה תשעים שקל. למישל היו שבע שורות דיבור
+   * ואמנות מוזמנת על הדיסק שאיש לא חיבר. מאור הצביע על זה ב-15.9.2026, והתפקיד הוחזר.
+   *
+   * `activeEras` הוא העשור, לא השנה: הוא נמצא ב-1990, ב-1991, בשני פרקי 1993 ובהמשך,
+   * כי הסעה היא לא אירוע חד־פעמי אלא מה שהאיש הזה עשה במשך עשרים שנה.
+   */
   {
     id: 'michel',
     displayNameHe: 'מישל בר־כליפא',
     category: 'supporter',
-    activeEras: ['1990'],
+    activeEras: ['1990s'],
     tags: ['transport', 'network', 'memorial'],
     provenance: 'real',
   },
@@ -268,12 +283,23 @@ const REGISTRY: CharacterDefinition[] = [
     activeEras: ['1990'],
     tags: ['away', 'bus', 'noise'],
   },
+  /**
+   * לימור — הדרך פנימה, ולא ההסעה.
+   *
+   * עד 15.9.2026 היא עשתה את עבודתו של מישל: נהג, פנקס, תור, תשעים שקל. זה הוחזר אליו,
+   * ומה שנשאר לה הוא מה שתמיד היה הכי טוב בה ואין לאיש אחר — **הכניסה מהצד ולא
+   * מהחזית**, התור שלוקח שעה, הסדרן שמכיר את כולם, ומי שאמר לה ב-1991 שהוא לא יודע
+   * כלום וזכרה אותו שנתיים. `tags` כבר אמרו את זה; התוכן פשוט לא הלך אחריהם.
+   *
+   * היא עדיין `crowd-` בזיהוי ובתוך `CROWD_POOL`, וזה לא מדויק לדמות עם שלושים ושלוש
+   * שורות. שינוי מזהה נוגע בשמירות ובזיכרונות ולכן הוא החלטה בפני עצמה, לא תיקון אגב.
+   */
   {
     id: 'crowd-limor',
     displayNameHe: 'לימור',
     category: 'supporter',
-    activeEras: ['1990'],
-    tags: ['ussishkin', 'queues', 'routes'],
+    activeEras: ['1990s'],
+    tags: ['ussishkin', 'queues', 'side-entrance'],
   },
   /**
    * ...and the people whose chapters do not exist yet.
@@ -380,4 +406,44 @@ export function castFor(era: string): readonly CharacterDefinition[] {
 export function isRealPerson(id: CharacterId): boolean {
   const p = CHARACTERS[id]?.provenance
   return p === 'real' || p === 'open-history'
+}
+
+/**
+ * מי מדבר — one speaker, one face, whichever way the line spells him.
+ *
+ * `Say.who` is free text by design: a writer types `who: 'קובי'` in one scene and
+ * `who: 'kobi'` in the next, and both are obviously the same man. The portrait maps
+ * (`PORTRAIT`, `PORTRAIT_1990`, …) are keyed by the HEBREW name only, and the dialogue
+ * box looked the speaker up with a plain `portraits[who]` — so every line that spelled
+ * him by id resolved to `undefined` and the box drew a nameplate with no face.
+ *
+ * Measured on 15.9.2026 across every content file: **363 of 953 lines — 38% of the
+ * dialogue in the game — had no portrait**, and 109 of them were Kobi, which is more
+ * than half of everything the boy's father says.
+ *
+ * Nothing was broken and nothing threw. A missing portrait is a `?? null`, and `null` is
+ * a legal value that the box renders as a narration line. That is why it survived: the
+ * defect had the same shape as a deliberate choice.
+ *
+ * The registry already holds both spellings of every person, so it is the place that can
+ * answer. `speakerKeys()` returns every name one character answers to, and the box tries
+ * them in order against whichever era's plates are loaded.
+ */
+export function speakerKeys(who: string): string[] {
+  const entry = ALL_CHARACTERS.find(
+    (character) => character.id === who || character.displayNameHe === who,
+  )
+  if (!entry) return [who]
+  // The raw spelling first: an era map is allowed to override one person's plate for one
+  // chapter, and that override must win over the registry's general answer.
+  return [who, entry.displayNameHe, entry.id]
+}
+
+/** The plate for a speaker, out of the plates this chapter loaded. */
+export function portraitFor(who: string, plates: Record<string, string>): string | null {
+  for (const key of speakerKeys(who)) {
+    const plate = plates[key]
+    if (plate) return plate
+  }
+  return null
 }

@@ -1,6 +1,9 @@
+import type { Metadata } from 'next'
+
 import { Screen } from '@/components/ui/Screen'
 import { ReportLink } from '@/components/ui/ReportLink'
-import { ROUND_SIZE, dealFile, dealPairs, fileSize } from '@/lib/game/blackfile'
+import { dealFile, dealPairs, fileSize } from '@/lib/game/blackfile'
+import { gateMetadata } from '@/lib/seo'
 import { t } from '@/lib/i18n'
 import { BlackFile } from './BlackFile'
 
@@ -13,19 +16,24 @@ import { BlackFile } from './BlackFile'
  * only worth playing BECAUSE the first one got you angry.
  *
  * Navy only. No vermilion on this screen: whoever walks in is standing in somebody
- * else's end.
+ * else's end. It is a GAME, not a form (rule 21) — `chrome={false}`, same as the duel
+ * — so the away end's own header and the dead-grass field it sits on (drawn inside
+ * `BlackFile.tsx`) are the whole screen, and the result screen carries its own
+ * `AdSlot` rather than relying on the masthead's reading slot.
  */
+export const metadata: Metadata = gateMetadata('derby-file')
+
 export default function BlackFilePage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 11
+  const cards = dealFile(seed)
+  const pairs = dealPairs(seed)
+  // The total is counted from what this seed actually deals, never a declared
+  // constant — see the note above `dealFile` in lib/game/blackfile.ts for the bug that
+  // taught us this (rule 11/15: never print a number that is not true).
+  const total = cards.length + pairs.length
   return (
-    <Screen title={t('screen.file.title')} sub={t('screen.file.sub')}>
-      <BlackFile
-        cards={dealFile(seed)}
-        pairs={dealPairs(seed)}
-        seed={seed}
-        total={ROUND_SIZE}
-        fileSize={fileSize()}
-      />
+    <Screen title={t('screen.file.title')} sub={t('screen.file.sub')} chrome={false}>
+      <BlackFile cards={cards} pairs={pairs} seed={seed} total={total} fileSize={fileSize()} />
       <ReportLink />
     </Screen>
   )

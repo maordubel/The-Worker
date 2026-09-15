@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Grain, Letterbox } from '@/components/life/FilmFx'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
 import { OPENING, openingLines } from '@/lib/life/opening'
@@ -76,23 +77,22 @@ export function OpeningSequence({
     }
   }, [beat, finish])
 
-  // --- Escape skips, like every other card in this game -----------------------------
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') finish()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [finish])
+  // --- Escape skips, like every other card in this game ------------------------------
+  // Folded onto `useDialog` (rule 33's shared contract): it was this component's own
+  // `window` listener before, and now it is the one place every dialog in the app wires
+  // Escape, focus-on-open, Tab-trapping and focus-restore together.
+  const dialogRef = useDialog<HTMLDivElement>(finish)
 
   if (!beat) return null
   const lines = openingLines(beat, anchor)
 
   return (
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       dir="rtl"
       role="dialog"
-      className="absolute inset-0 z-[60] overflow-hidden bg-ink"
+      className="absolute inset-0 z-[60] overflow-hidden bg-ink outline-none"
       aria-modal="true"
       aria-label={lines.captionHe}
     >

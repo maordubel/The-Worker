@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+
 import { Num } from '@/components/ui/Num'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
@@ -9,6 +11,7 @@ import {
   hasVerifiedLineup,
 } from '@/lib/game/lineup'
 import { t } from '@/lib/i18n'
+import { gateMetadata } from '@/lib/seo'
 import { LineupBoard } from './LineupBoard'
 
 /**
@@ -18,6 +21,8 @@ import { LineupBoard } from './LineupBoard'
  * Without one it is still a working board: the empty state says why, and no invented
  * lineup is ever shown as history.
  */
+export const metadata: Metadata = gateMetadata('lineup')
+
 export default function LineupPage({ searchParams }: { searchParams: { seed?: string } }) {
   const seed = Number(searchParams.seed) || 2
   const challenge = dealChallenge(seed)

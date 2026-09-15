@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import type { BookDef } from '@/lib/life/books'
 
@@ -50,10 +51,11 @@ export function BookSheet({
     onPage(next)
   }
 
-  // the keyboard reads the same way the screen does: right is forward, in Hebrew
+  // the page-turn keys stay their own listener — ArrowLeft/ArrowRight are not something
+  // `useDialog` knows about. Escape is folded onto the hook below instead of kept here,
+  // so this sheet gets the same focus-in/Tab-trap/focus-restore every other dialog has.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
       if (event.key === 'ArrowLeft') turn(1)
       if (event.key === 'ArrowRight') turn(-1)
     }
@@ -62,10 +64,17 @@ export function BookSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [at, last])
 
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
+
   return (
     <div
+      ref={dialogRef}
+      tabIndex={-1}
       dir="rtl"
-      className="pointer-events-auto absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink/95"
+      role="dialog"
+      aria-modal="true"
+      aria-label={book.titleHe}
+      className="pointer-events-auto absolute inset-0 z-[60] flex flex-col items-center justify-center bg-ink/95 outline-none"
       data-life="book"
       data-book={book.id}
       data-page={String(at + 1)}

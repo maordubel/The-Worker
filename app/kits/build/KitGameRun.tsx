@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 
+import { AdSlot } from '@/components/ads/AdSlot'
 import { KitPlate } from '@/components/kit/KitPlate'
 import { ShareRow } from '@/components/share/ShareRow'
 import { Num } from '@/components/ui/Num'
@@ -10,6 +11,7 @@ import type { KitPart, KitPuzzle, KitVerdict, PartKind } from '@/lib/game/kitBui
 import { KIT_ROUND, PART_ORDER, PART_POINTS } from '@/lib/game/kit-build-run'
 import { activeCollection } from '@/lib/kit/collection'
 import type { KitSpec } from '@/lib/kit/spec'
+import { useDialog } from '@/components/ui/useDialog'
 import { t, type MessageKey } from '@/lib/i18n'
 
 import { submitKit } from './actions'
@@ -381,8 +383,16 @@ function Reveal({
   last: boolean
   onNext: () => void
 }) {
+  const dialogRef = useDialog<HTMLDivElement>(onNext)
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col justify-end bg-ink/70" role="dialog" aria-modal="true">
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[60] flex flex-col justify-end bg-ink/70 outline-none"
+      role="dialog"
+      aria-modal="true"
+      aria-label={verdict.perfect ? t('kitgame.perfect') : t('kitgame.partial', { n: String(verdict.right) })}
+    >
       <div className="max-h-[88vh] animate-slam overflow-y-auto border-t-rule border-ink bg-sheet">
         <div
           className={`px-4 py-3 ${verdict.perfect ? 'bg-red text-paper' : 'bg-ink text-paper'}`}
@@ -578,6 +588,9 @@ function RoundSummary({
           {t('nav.gates')}
         </a>
       </div>
+
+      {/* the round is over — this is the stopping point rule 28 means, never mid-round */}
+      <AdSlot placement="result" />
     </div>
   )
 }

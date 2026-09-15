@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { Cloth, SheetHead } from '@/components/life/Plate'
+import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import type { ChecklistItem } from '@/lib/life/checklist'
 import { HELP_DISCLAIMER_HE, HELP_RULES_HE, HELP_STORY_HE } from '@/lib/life/help'
@@ -31,6 +32,7 @@ export function HelpSheet({
   onClose: () => void
 }) {
   const [more, setMore] = useState(false)
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
   return (
     <div
       className="absolute inset-0 z-40 flex items-end justify-center bg-ink/70 p-2.5 pb-[max(10px,env(safe-area-inset-bottom))] sm:items-center"
@@ -38,7 +40,9 @@ export function HelpSheet({
       onClick={onClose}
     >
       <div
-        className="flex max-h-full w-full max-w-[420px] animate-sheet-in flex-col border-rule border-ink bg-sheet"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative z-[60] flex max-h-full w-full max-w-[420px] animate-sheet-in flex-col border-rule border-ink bg-sheet outline-none"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-label={t('life.help.title')}

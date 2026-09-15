@@ -8,12 +8,19 @@ import type { LocationId } from '../types'
  * historical anchor it hangs on — so that the chapters can be built one at a time without
  * anybody having to remember what A4 was supposed to be.
  *
- * Two of these are already built and playing (`a8` is the championship this game shipped
- * with, and it is the same Saturday `ERA_1986` runs today). The other six are declared
- * and marked `built: false`, which is the honest state of them: rule 43 of this repo says
- * data may land before its scene, and it also says nothing may pretend to be playable when
- * it is not. `stageADayId` in the save is written by `day.entered`, and until a day is
- * built nothing writes it.
+ * ALL EIGHT are built and playing. `a1` is the 1983 prologue, `a8` is the championship
+ * this game shipped with (the same Saturday `ERA_1986` runs today), and a2–a7 each have a
+ * full era in `era.ts` — `ERA_A2`…`ERA_A7`, with endings, objective, beats and goal — over
+ * 1,395 lines of content in `chapterStageA.ts`, and `chapters.ts` declares every one of
+ * them `playable: true`.
+ *
+ * **This comment used to say six of them were unbuilt, and `built` said so too, long after
+ * they had shipped.** Found on 15.9.2026 while checking the life spec against the repo.
+ * The flag is the kind that makes a status report lie: a test reads it, a delta quotes it,
+ * and everyone downstream believes a finished chapter is still a plan. `built` is now what
+ * it always claimed to be — the honest state of the day — and the way to keep it honest is
+ * that it changes in the same commit as the scene it describes. `stageADayId` in the save
+ * is written by `day.entered`.
  *
  * **No line here states a historical fact.** `anchorKey` is an id the anchor resolver
  * answers for; the dates in `dateHe` are the days the brief locked, and the archive is what
@@ -72,7 +79,7 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
     wantHe: 'להספיק למשחק בסמטה לפני שהקבוצות מלאות',
     teachesHe: 'חברים, שליחויות, וזמן שנגמר',
     anchorKey: null,
-    built: false,
+    built: true,
   },
   {
     id: 'a3',
@@ -85,7 +92,7 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
     wantHe: 'ללכת עם אפי לאולם',
     teachesHe: 'ענף שני, וקהילה שמכירה אותך בשם',
     anchorKey: null,
-    built: false,
+    built: true,
   },
   {
     id: 'a4',
@@ -98,7 +105,7 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
     wantHe: 'החולצה',
     teachesHe: 'לחסוך, לעבוד, ולוותר על משהו',
     anchorKey: null,
-    built: false,
+    built: true,
   },
   {
     id: 'a5',
@@ -111,7 +118,7 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
     wantHe: 'ללכת למשחק בחולצה שלך',
     teachesHe: 'להתכונן בעצמך למשחק',
     anchorKey: '1985',
-    built: false,
+    built: true,
   },
   {
     id: 'a6',
@@ -124,7 +131,7 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
     wantHe: 'לשמוע את המשחק',
     teachesHe: 'רדיו, קליטה, ואכזבה רגילה',
     anchorKey: null,
-    built: false,
+    built: true,
   },
   {
     id: 'a7',
@@ -137,7 +144,7 @@ export const STAGE_A_DAYS: readonly StageADay[] = [
     wantHe: 'להבין מה קורה בשבת הבאה',
     teachesHe: 'הבטחות, לחץ, וסירוב',
     anchorKey: null,
-    built: false,
+    built: true,
   },
   {
     id: 'a8',

@@ -4,6 +4,7 @@ import { AdSlot } from '@/components/ads/AdSlot'
 import { BuiltByDubel } from '@/components/ui/BuiltByDubel'
 import { adsAllowed } from '@/lib/ads'
 import { Floodlights } from '@/components/ui/Floodlights'
+import { HelpChip } from '@/components/ui/HelpChip'
 import { SignPlate } from '@/components/ui/SignPlate'
 import { TabBar } from '@/components/ui/TabBar'
 import { SITE_LABEL } from '@/lib/brand'
@@ -58,7 +59,14 @@ export function Screen({
               already up and there is nothing to switch on. */}
           {night && <Floodlights />}
           {chrome ? (
-            <SignPlate title={title} sub={sub} />
+            <>
+              <SignPlate title={title} sub={sub} />
+              {/* The "?" — one per gate, described in lib/help.ts. It renders only
+                  here, so it only ever appears where `chrome` is on; see the long
+                  comment in HelpChip.tsx for why that split is deliberate rather than
+                  an oversight (rule 21/28: the glass belongs to the run). */}
+              <HelpChip />
+            </>
           ) : (
             <h1 className="sr-only">{title}</h1>
           )}
@@ -100,8 +108,15 @@ export function Screen({
                 {SITE_LABEL.toUpperCase()}
               </p>
             </div>
-            <div className="flex items-center gap-3 border-t-hair border-concrete/30 pt-3 md:border-t-0 md:pt-0">
+            <div className="flex flex-col items-start gap-2 border-t-hair border-concrete/30 pt-3 md:items-end md:border-t-0 md:pt-0">
               <BuiltByDubel />
+              {/* כל הזכויות שמורות — the orphaned key, printed under the credit rather
+                  than beside it: a copyright line and a build credit are two different
+                  claims, and stacking them keeps BuiltByDubel's own row exactly as it
+                  was rather than crowding a second line into it. */}
+              <p className="font-body text-[10px] tracking-wide text-concrete/70">
+                <bdi>{t('footer.rights')}</bdi>
+              </p>
             </div>
           </div>
         </footer>

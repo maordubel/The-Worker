@@ -68,7 +68,7 @@ export function GatePlate({ gate }: { gate: Gate }) {
 
         {/* the ranks marching away — they recede upward and shrink, which is
             perspective and not decoration */}
-        <Ranks away={away} />
+        <Ranks tone={away ? 'away' : 'home'} />
 
         <span
           aria-hidden="true"
@@ -113,37 +113,63 @@ export function GatePlate({ gate }: { gate: Gate }) {
   )
 }
 
+/** which ink the silhouette prints in — the away end's navy, the home plates' ink,
+ *  or paper for a crowd walking away from the camera into a lit, roofed well */
+export type RanksTone = 'home' | 'away' | 'paper'
+
+type RankRow = { bottom: number; height: number; size: string; opacity: number; shift: string }
+
+const RANKS_RGB: Record<RanksTone, string> = {
+  home: '21,18,14', // --ink
+  away: '30,44,90', // --sign
+  paper: '240,232,212', // --sheet
+}
+
+/** the gate plates' own row geometry — each rank further back is shorter, tighter,
+ *  fainter, and offset by half a figure, so the rows read as a crowd rather than a
+ *  picket fence. A tunnel plate brings its own rows (TunnelPlate.tsx) rather than
+ *  reusing these, because its well is a different height and its crowd is lit from
+ *  the mouth rather than standing on a gate's own poster ground. */
+const GATE_ROWS: Record<'home' | 'away', RankRow[]> = {
+  home: [
+    { bottom: 0, height: 44, size: '30px 46px', opacity: 0.3, shift: '0' },
+    { bottom: 30, height: 30, size: '21px 32px', opacity: 0.19, shift: '10px' },
+    { bottom: 52, height: 20, size: '15px 22px', opacity: 0.12, shift: '4px' },
+  ],
+  away: [
+    { bottom: 0, height: 44, size: '30px 46px', opacity: 0.42, shift: '0' },
+    { bottom: 30, height: 30, size: '21px 32px', opacity: 0.26, shift: '10px' },
+    { bottom: 52, height: 20, size: '15px 22px', opacity: 0.17, shift: '4px' },
+  ],
+}
+
 /**
  * שורות הצועדים — ranks of marchers, drawn as a repeating silhouette.
  *
  * A row further back is shorter, tighter and fainter. That is the only reason the
  * rows exist: they put the crowd behind the number without a photograph.
+ *
+ * Exported so the tunnel plate can draw the same figure, recoloured to paper and
+ * walking into a different well, rather than a second silhouette being hand-drawn.
  */
-function Ranks({ away = false }: { away?: boolean }) {
-  const ink = away ? 'var(--sign)' : 'var(--ink)'
+export function Ranks({ tone = 'home', rows }: { tone?: RanksTone; rows?: readonly RankRow[] }) {
   // One marcher: head, shoulders, body. Repeated along the row by background-repeat.
   const figure = `url("data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns='http://www.w3.org/2000/svg' width='30' height='46' viewBox='0 0 30 46'>
-       <g fill='rgb(${ink.replace('var(--sign)', '30,44,90').replace('var(--ink)', '21,18,14')})'>
+       <g fill='rgb(${RANKS_RGB[tone]})'>
          <circle cx='15' cy='9' r='6'/>
          <path d='M6 46 V22 q0-6 9-6 t9 6 v24 z'/>
        </g>
      </svg>`.replace(/\s+/g, ' '),
   )}")`
 
-  // Each rank further back is shorter, tighter, fainter — and offset by half a
-  // figure, so the rows read as a crowd rather than as a picket fence.
-  const rows = [
-    { bottom: 0, height: 44, size: '30px 46px', opacity: away ? 0.42 : 0.3, shift: '0' },
-    { bottom: 30, height: 30, size: '21px 32px', opacity: away ? 0.26 : 0.19, shift: '10px' },
-    { bottom: 52, height: 20, size: '15px 22px', opacity: away ? 0.17 : 0.12, shift: '4px' },
-  ]
+  const activeRows = rows ?? GATE_ROWS[tone === 'away' ? 'away' : 'home']
 
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0">
-      {rows.map((row) => (
+      {activeRows.map((row, index) => (
         <div
-          key={row.bottom}
+          key={index}
           className="absolute inset-x-0"
           style={{
             bottom: row.bottom,
