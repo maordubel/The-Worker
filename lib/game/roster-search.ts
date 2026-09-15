@@ -64,9 +64,9 @@ export type Searchable = {
    * as its own bucket rather than hidden. Built in `lib/game/roster-facets.ts`.
    */
   position?: 'GK' | 'DF' | 'MF' | 'FW' | null
-  positionFrom?: 'squad' | 'lineup' | 'name' | null
+  positionFrom?: 'squad' | 'lineup' | 'database' | 'name' | null
   origin?: 'israeli' | 'foreign' | null
-  originFrom?: 'squad' | 'lineup' | 'name' | null
+  originFrom?: 'squad' | 'lineup' | 'database' | 'name' | null
   fromYear?: number | null
   toYear?: number | null
 }

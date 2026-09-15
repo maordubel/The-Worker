@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import { rosterIndex } from '@/lib/game/allTimeXI'
@@ -141,14 +144,17 @@ describe('המעמד — nothing on the card is bought', () => {
 describe('סינון השחקנים — no position is ever guessed', () => {
   const roster = rosterIndex()
 
-  it('reaches every name, and places only some of them', () => {
+  it('places a real share of the roster, and still admits the gap', () => {
     expect(roster.total).toBeGreaterThan(600)
-    expect(roster.withPosition).toBeGreaterThan(0)
-    // This is the assertion that matters, and it is meant to look wrong: the archive
-    // holds 637 names and a position for a few dozen. Rule 24 already recorded why a
-    // guessed shortlist is worse than no shortlist. The day somebody "fills in" the
-    // rest from a shirt number or a name, this fails.
-    expect(roster.withPosition).toBeLessThan(roster.total / 2)
+    // The research pass of 15.9.2026 took this from 66 to well over three hundred by
+    // reading 73 season squads and bridging them to the Hebrew roster. The floor is a
+    // regression guard: if a future change silently drops `player-facts.json`, the
+    // filters quietly become decorative again and this is what says so.
+    expect(roster.withPosition).toBeGreaterThan(300)
+    expect(roster.withOrigin).toBeGreaterThan(300)
+    // And the gap is still real. A day when every one of 645 names has a position is a
+    // day somebody guessed, unless the same commit also brought the source that knows.
+    expect(roster.withPosition).toBeLessThan(roster.total)
   })
 
   it('carries a source for every facet it states', () => {
@@ -202,5 +208,78 @@ describe('סינון השחקנים — no position is ever guessed', () => {
     const untouched: Searchable[] = filterRoster(roster.all, NO_FILTER)
     expect(untouched).toBe(roster.all)
     expect(isFiltered(NO_FILTER)).toBe(false)
+  })
+})
+
+describe('player-facts — the research pass, and what it is not allowed to do', () => {
+  const file = JSON.parse(
+    readFileSync(join(__dirname, '..', 'content', 'manual', 'player-facts.json'), 'utf8'),
+  ) as {
+    records: Array<{
+      personNameHe: string
+      personNameLatin: string
+      position: string
+      origin: string
+      fromYear: number
+      toYear: number
+      matchedBy: string
+      confidence: number
+      alsoSpelled?: string[]
+    }>
+    unknown: string[]
+    ambiguous: Record<string, string[]>
+  }
+
+  it('states all three fields on every row it states anything on', () => {
+    for (const row of file.records) {
+      expect(['GK', 'DF', 'MF', 'FW'], row.personNameHe).toContain(row.position)
+      expect(['israeli', 'foreign'], row.personNameHe).toContain(row.origin)
+      expect(row.fromYear, row.personNameHe).toBeGreaterThan(1900)
+      expect(row.toYear, row.personNameHe).toBeGreaterThanOrEqual(row.fromYear)
+    }
+  })
+
+  it('says how every row was arrived at', () => {
+    // `matchedBy` is the audit trail. `alias` means our own Latin spelling agreed with
+    // the source; `transliteration` means the two were aligned consonant by consonant
+    // and the result was unique. A row with neither is a row nobody can check.
+    for (const row of file.records) {
+      expect(['alias', 'transliteration'], row.personNameHe).toContain(row.matchedBy)
+    }
+  })
+
+  it('claims one man once, and declares it when the roster spells him twice', () => {
+    const he = file.records.map((row) => row.personNameHe)
+    expect(new Set(he).size).toBe(he.length)
+
+    // Four men are in the roster under two Hebrew spellings (אישטוואן/אישטוון פישונט
+    // and friends). Both rows stay, because somebody searching either spelling should
+    // find him — but each one has to SAY so, or a row count reads as a player count.
+    const byLatin = new Map<string, string[]>()
+    for (const row of file.records) {
+      byLatin.set(row.personNameLatin, [...(byLatin.get(row.personNameLatin) ?? []), row.personNameHe])
+    }
+    for (const [latin, names] of byLatin) {
+      if (names.length === 1) continue
+      for (const name of names) {
+        const row = file.records.find((candidate) => candidate.personNameHe === name)
+        expect(row?.alsoSpelled, `${latin} is claimed by ${names.join(' / ')} undeclared`).toEqual(
+          names.filter((other) => other !== name).sort(),
+        )
+      }
+    }
+  })
+
+  it('keeps the gap on the page instead of filling it in', () => {
+    // The 328 the source does not cover, and the handful it contradicts itself about,
+    // are LISTED. That is the difference between a record and a decoration: deleting
+    // these two arrays would make the file look complete and be less true.
+    expect(file.unknown.length).toBeGreaterThan(0)
+    for (const name of file.unknown) {
+      expect(file.records.find((row) => row.personNameHe === name)).toBeUndefined()
+    }
+    for (const name of Object.keys(file.ambiguous)) {
+      expect(file.records.find((row) => row.personNameHe === name)).toBeUndefined()
+    }
   })
 })

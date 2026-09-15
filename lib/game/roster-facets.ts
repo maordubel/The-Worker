@@ -1,6 +1,7 @@
 import 'server-only'
 
 import lineupsFile from '@/content/manual/lineups.json'
+import playerFactsFile from '@/content/manual/player-facts.json'
 import squadsFile from '@/content/manual/squads.json'
 import { CONFIDENCE_FLOOR, archive } from './archive'
 import { fold } from './roster-search'
@@ -23,10 +24,17 @@ import { fold } from './roster-search'
  *
  *   · **`squad`** — `squads.json` carries `position` and `nationalityHe` per player.
  *     That is the strongest evidence there is, and it covers the current squad.
+ *   · **`database`** — `player-facts.json`, the research pass of 15.9.2026 that made
+ *     this index worth having. 73 season squads on worldfootball.net, 1933/34 → 2025/26,
+ *     read out into 465 Latin names, each one bridged to our Hebrew roster either by an
+ *     alias we already held or by a consonant-for-consonant alignment that had to be the
+ *     ONLY candidate among all 465. 329 rows came out; nothing was guessed, and the
+ *     8 names whose match was not unique are refused by name in `ambiguous`.
+ *     See `docs/09-player-facts.md` and `scripts/players/match.py`.
  *   · **`lineup`** — `lineups.json` places eleven named men in `GK`/`D`/`M`/`F` slots.
  *     Those files carry `positionsInferred: true`, which the source itself is telling
  *     us: the slot is where he played THAT night, not a career position. It is recorded
- *     as an inference and labelled as one on screen.
+ *     as an inference, labelled as one on screen, and a `database` row overrides it.
  *   · **`name`** — `shirt-numbers.json` marks `hebrewIsTransliteration` and sometimes
  *     carries `personNameLatin`. That is a documented fact about the SPELLING, so it
  *     supports "the source wrote this man's name in Latin" and nothing stronger. It is
@@ -36,14 +44,16 @@ import { fold } from './roster-search'
  * real count, not a silent omission. That bucket is also the shopping list: it is the
  * exact set of players the archive would gain most from.
  *
- * The one facet that needs no source is the one that was missing and costs nothing:
- * **when he wore the shirt**, derived from the seasons his shirt numbers are recorded
- * in. 134 players have that today.
+ * **Measured over the 647 people the archive knows, before and after that pass:**
+ * position 64 → 342, Israeli-or-foreign 103 → 345, years-worn 137 → 361, and all three
+ * together 32 → **332**. The 315 still bare are not in the Latin source at all; filling
+ * them needs either Maor (rule 18) or a ויקיפועל export a human browser has to fetch
+ * (rule 11), which is what `players-to-fill.xlsx` is for.
  */
 
 export type Position = 'GK' | 'DF' | 'MF' | 'FW'
 export type Origin = 'israeli' | 'foreign'
-export type FacetSource = 'squad' | 'lineup' | 'name'
+export type FacetSource = 'squad' | 'lineup' | 'database' | 'name'
 
 export type PlayerFacets = {
   position: Position | null
@@ -53,6 +63,17 @@ export type PlayerFacets = {
   /** first and last season the archive can place him in, as four-digit years */
   fromYear: number | null
   toYear: number | null
+}
+
+type PlayerFactRow = {
+  personNameHe: string
+  personNameLatin: string
+  position?: string | null
+  origin?: string | null
+  fromYear?: number | null
+  toYear?: number | null
+  matchedBy?: string | null
+  confidence?: number
 }
 
 type SquadRow = {
@@ -141,6 +162,35 @@ export function facetIndex(): Map<string, PlayerFacets> {
         facets.position = position
         facets.positionFrom = 'lineup'
       }
+    }
+  }
+
+  // `player-facts.json` — the research pass of 15.9.2026, and the reason this index
+  // stopped being a handful of men. 329 rows read out of 73 season squads on
+  // worldfootball.net and bridged to the Hebrew roster: position, Israeli or foreign,
+  // and the years he wore the shirt. It outranks a single recorded XI (which says
+  // where a man stood on ONE night) and is outranked by our own squad sheet.
+  const facts = (playerFactsFile as { records: PlayerFactRow[] }).records
+  for (const row of facts) {
+    if ((row.confidence ?? 0) < CONFIDENCE_FLOOR) continue
+    const entry_ = entry(row.personNameHe)
+    const position = normalisePosition(row.position)
+    if (position !== null) {
+      entry_.position = position
+      entry_.positionFrom = 'database'
+    }
+    if (row.origin === 'israeli' || row.origin === 'foreign') {
+      entry_.origin = row.origin
+      entry_.originFrom = 'database'
+    }
+    // The source knows which SEASONS he was in the squad, which is a better answer
+    // than the seasons we happen to hold a shirt number for — so it widens the span
+    // rather than replacing it. A man can be in a squad without a number on file.
+    if (typeof row.fromYear === 'number') {
+      entry_.fromYear = entry_.fromYear === null ? row.fromYear : Math.min(entry_.fromYear, row.fromYear)
+    }
+    if (typeof row.toYear === 'number') {
+      entry_.toYear = entry_.toYear === null ? row.toYear : Math.max(entry_.toYear, row.toYear)
     }
   }
 
