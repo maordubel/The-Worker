@@ -112,9 +112,14 @@ export function OpeningSequence({
               aria-hidden="true"
               className="opening-bed absolute inset-0"
               style={{
-                backgroundImage: `url(/life/${
-                  entry.kind === 'clip' ? `opening/${entry.art}-poster` : `${entry.from === 'art' ? 'art' : 'opening'}/${entry.art}`
-                }.png)`,
+                // תיקיית הגרפיקה עברה ל-WebP ב-13.9.2026; תיקיית הפתיחה נשארה PNG.
+                backgroundImage: `url(${
+                  entry.kind === 'clip'
+                    ? `/life/opening/${entry.art}-poster.png`
+                    : entry.from === 'art'
+                      ? `/life/art/${entry.art}.webp`
+                      : `/life/opening/${entry.art}.png`
+                })`,
               }}
             />
             {/* המסגרת — on a phone the photograph is a framed plate in the upper half of
@@ -138,7 +143,7 @@ export function OpeningSequence({
             ) : (
               <div
                 className="opening-frame relative h-full w-full bg-center bg-no-repeat motion-safe:animate-[openingDrift_7s_ease-out_forwards]"
-                style={{ backgroundImage: `url(/life/${entry.from === 'art' ? 'art' : 'opening'}/${entry.art}.png)` }}
+                style={{ backgroundImage: `url(${entry.from === 'art' ? `/life/art/${entry.art}.webp` : `/life/opening/${entry.art}.png`})` }}
               />
             )}
             </div>

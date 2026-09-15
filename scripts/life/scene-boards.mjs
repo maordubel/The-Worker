@@ -43,10 +43,10 @@ def in_era(x, fallback='1986'):
     e=x.get('era', fallback); return e=='*' or e==ERA
 for sc in d['scenes']:
     art=(sc.get('artByEra') or {}).get(ERA, sc['art'])
-    im=Image.open(f"{ART}/{art}.png").convert('RGBA'); W,H=im.size
+    im=Image.open(f"{ART}/{art}.webp").convert('RGBA'); W,H=im.size
     for L in sc.get('layers') or []:
         if not in_era(L): continue
-        try: la=Image.open(f"{ART}/{L['art']}.png").convert('RGBA')
+        try: la=Image.open(f"{ART}/{L['art']}.webp").convert('RGBA')
         except Exception: continue
         if L.get('foot'):
             lw=max(1,int(L['w']*W)); lh=max(1,int(lw*la.height/la.width)); la=la.resize((lw,lh))
@@ -64,7 +64,7 @@ for sc in d['scenes']:
         pr=hs.get('prop')
         if pr:
             try:
-                pa=Image.open(f"{ART}/{pr['key']}.png").convert('RGBA'); at=pr.get('at') or hs
+                pa=Image.open(f"{ART}/{pr['key']}.webp").convert('RGBA'); at=pr.get('at') or hs
                 ph=max(1,int(pr['size']*H2)); pw=max(1,int(ph*pa.width/pa.height)); pa=pa.resize((pw,ph))
                 im.paste(pa,(int(at['x']*W2)-pw//2,int(at['y']*H2)-ph),pa)
             except Exception as ex: print('missing prop',pr['key'],ex)
@@ -72,7 +72,7 @@ for sc in d['scenes']:
     for a in sc['actors']:
         if not in_era(a): continue
         try:
-            fa=Image.open(f"{ART}/{a['figure']}.png").convert('RGBA')
+            fa=Image.open(f"{ART}/{a['figure']}.webp").convert('RGBA')
             hh=max(1,int(a['size']*H2)); ww=max(1,int(hh*fa.width/fa.height)); fa=fa.resize((ww,hh))
             if a.get('flip'): fa=fa.transpose(Image.FLIP_LEFT_RIGHT)
             im.paste(fa,(int(a['x']*W2)-ww//2,int(a['y']*H2)-hh),fa)
@@ -85,7 +85,7 @@ for sc in d['scenes']:
     # the boy himself, at both ends of the band, at this year's height
     try:
         hero='hero80' if ERA=='1990' else 'pogi'; k=1.12 if ERA=='1990' else 1
-        ha=Image.open(f"{ART}/{hero}.png").convert('RGBA')
+        ha=Image.open(f"{ART}/{hero}.webp").convert('RGBA')
         for yy,sz in ((sc['band']['far'],sc['size']['far']),(sc['band']['near'],sc['size']['near'])):
             hh=max(1,int(sz*k*H2)); ww=max(1,int(hh*ha.width/ha.height)); h2=ha.resize((ww,hh))
             im.paste(h2,(int(0.5*W2)-ww//2,int(yy*H2)-hh),h2)

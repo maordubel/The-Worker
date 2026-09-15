@@ -129,8 +129,9 @@ def make_grain_tile(manifest):
     alpha = tile.point(lambda v: abs(v - 128) * 2)
     out = Image.new('RGBA', (size, size), (255, 255, 255, 0))
     out.putalpha(alpha.point(lambda v: min(255, int(v * 0.55))))
-    path = os.path.join(ART, 'fxGrain.png')
-    out.save(path, optimize=True)
+    path = os.path.join(ART, 'fxGrain.webp')
+    # WebP חסר אובדן: רעש הוא הדבר שקידוד מאבד הכי גרוע, והקובץ הזה שוקל כמה עשרות KB
+    out.save(path, lossless=True)
     manifest.setdefault('plates', {})['fxGrain'] = {'w': size, 'h': size, 'bytes': os.path.getsize(path), 'source': 'plates', 'yellowLeft': 0}
     print(f'fxGrain          {size}x{size} {os.path.getsize(path)/1024:.1f}KB')
 

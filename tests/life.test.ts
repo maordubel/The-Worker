@@ -82,7 +82,7 @@ describe('חוק הצהוב — neither the palette nor the artwork has yellow i
   it('has a real file behind every asset the manifest claims', () => {
     for (const group of Object.values(artManifest)) {
       for (const key of Object.keys(group)) {
-        expect(existsSync(join(ART, `${key}.png`)), `${key}.png is missing`).toBe(true)
+        expect(existsSync(join(ART, `${key}.webp`)), `${key}.webp is missing`).toBe(true)
       }
     }
   })
@@ -96,7 +96,7 @@ describe('חוק הצהוב — neither the palette nor the artwork has yellow i
       for (const name of [ext.sky, ext.ground]) {
         const row = artManifest.extensions?.[name]
         expect(row, `${name} has no manifest row — run finish-backdrops.py`).toBeDefined()
-        expect(existsSync(join(ART, `${name}.png`)), `${name}.png is missing`).toBe(true)
+        expect(existsSync(join(ART, `${name}.webp`)), `${name}.webp is missing`).toBe(true)
         expect(row!.w, `${name} is not as wide as ${key}`).toBe(artManifest.backdrops?.[key]?.w)
       }
     }
@@ -688,7 +688,7 @@ describe('העולם — every door leads somewhere that exists', () => {
 
   it('has a painting and living marks behind every panorama', () => {
     for (const key of PANORAMA) {
-      expect(existsSync(join(ART, `${key}.png`)), `${key}.png`).toBe(true)
+      expect(existsSync(join(ART, `${key}.webp`)), `${key}.webp`).toBe(true)
       const look = PANO_SPOTS[key]
       expect(look, `${key} has no marks`).toBeDefined()
       for (const mark of look?.spots ?? []) {
@@ -958,7 +958,7 @@ describe('שני עשורים — the cast is on disk at both ages', () => {
     expect(nineties.length).toBeGreaterThanOrEqual(24)
     for (const key of nineties) {
       expect(sheets[key]?.yellowLeft, `${key} has yellow`).toBe(0)
-      expect(existsSync(join(ART, `${key}.png`)), `${key}.png missing`).toBe(true)
+      expect(existsSync(join(ART, `${key}.webp`)), `${key}.webp missing`).toBe(true)
     }
   })
 
@@ -969,8 +969,8 @@ describe('שני עשורים — the cast is on disk at both ages', () => {
       ['ofir', 'ofir90-smoke'],
       ['amit', 'amit90'],
     ]) {
-      expect(existsSync(join(ART, `${then}.png`)), `${then} missing`).toBe(true)
-      expect(existsSync(join(ART, `${now}.png`)), `${now} missing`).toBe(true)
+      expect(existsSync(join(ART, `${then}.webp`)), `${then} missing`).toBe(true)
+      expect(existsSync(join(ART, `${now}.webp`)), `${now} missing`).toBe(true)
     }
   })
 
@@ -979,7 +979,7 @@ describe('שני עשורים — the cast is on disk at both ages', () => {
       if (!ending.after) continue
       for (const art of [ending.after.fromArt, ending.after.toArt]) {
         expect(FIGURE as readonly string[], `${art} is not a figure`).toContain(art)
-        expect(existsSync(join(ART, `${art}.png`)), `${art}.png missing`).toBe(true)
+        expect(existsSync(join(ART, `${art}.webp`)), `${art}.webp missing`).toBe(true)
       }
       expect(ending.after.lineHe.length).toBeGreaterThan(20)
     }
@@ -1227,7 +1227,9 @@ describe('הפתיח — the opening, and the one line in it that is a fact', ()
     for (const beat of OPENING) {
       const base = join(ROOT, beat.from === 'art' ? 'public/life/art' : 'public/life/opening', beat.art)
       if (beat.kind === 'still') {
-        expect(existsSync(`${base}.png`), `${beat.id} → ${beat.art}.png`).toBe(true)
+        // תיקיית הגרפיקה עברה ל-WebP ב-13.9.2026; תיקיית הפתיחה נשארה PNG
+        const ext = beat.from === 'art' ? 'webp' : 'png'
+        expect(existsSync(`${base}.${ext}`), `${beat.id} → ${beat.art}.${ext}`).toBe(true)
       } else {
         expect(existsSync(`${base}.mp4`), `${beat.id} → ${beat.art}.mp4`).toBe(true)
         // The poster is not optional: a crossfade INTO a video that has not buffered is a
@@ -1303,8 +1305,11 @@ describe('הפתיח — the opening, and the one line in it that is a fact', ()
     expect(script).toContain('clean_palette(')
     for (const beat of OPENING) {
       if (beat.kind !== 'still') continue
-      const png = readFileSync(join(ROOT, beat.from === 'art' ? 'public/life/art' : 'public/life/opening', `${beat.art}.png`))
-      expect(png.length).toBeGreaterThan(1000)
+      // תיקיית הגרפיקה עברה ל-WebP ב-13.9.2026; תיקיית הפתיחה נשארה PNG.
+      const ext = beat.from === 'art' ? 'webp' : 'png'
+      const dir = beat.from === 'art' ? 'public/life/art' : 'public/life/opening'
+      const bytes = readFileSync(join(ROOT, dir, `${beat.art}.${ext}`))
+      expect(bytes.length).toBeGreaterThan(1000)
     }
   })
 })

@@ -84,7 +84,7 @@ export function CoinCard({
 
       <div className="relative my-5 aspect-square w-[min(46vw,220px)]">
         <Image
-          src={`/life/art/${face === 'tree' ? 'coinTree' : 'coinPali'}.png`}
+          src={`/life/art/${face === 'tree' ? 'coinTree' : 'coinPali'}.webp`}
           alt={face === 'tree' ? t('life.coin.tree') : t('life.coin.pali')}
           fill
           sizes="(max-width: 640px) 46vw, 220px"

@@ -490,7 +490,7 @@ export type Pano = {
 export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = new THREE.Vector3()): Pano {
   const group = new THREE.Group()
   const hFov = (spec.hFovDeg * Math.PI) / 180
-  const map = loader.load(`${ART}/${spec.key}.png`)
+  const map = loader.load(`${ART}/${spec.key}.webp`)
   map.colorSpace = THREE.SRGBColorSpace
   map.minFilter = THREE.LinearMipmapLinearFilter
   map.magFilter = THREE.LinearFilter
@@ -587,7 +587,7 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   // נדחסת מאוד לאורך הקרן, בוחר את רמת המיפמאפ הקטנה ביותר — ממוצע כל הפנורמה — וצובע את
   // הכביש בחום־שחור אחיד עם פסים. זה בדיוק מה שנראה בצילום השני. הדיסקה מכסה רק שבעה מטר,
   // כלומר תמיד קרובה, ולכן אין לה שום צורך במיפמאפים מלכתחילה.
-  const groundMap = loader.load(`${ART}/${spec.key}.png`)
+  const groundMap = loader.load(`${ART}/${spec.key}.webp`)
   // `NoColorSpace`, ולא sRGB, וזה השורש של הכביש השחור בשלושת הצילומים הראשונים: כשטקסטורה
   // מסומנת sRGB היא נטענת לחומרה בפורמט SRGB8, והדגימה **מפענחת** אותה ל-linear. חומר רגיל
   // של three מקודד חזרה בסוף ה-shader; ShaderMaterial גולמי לא מקודד כלום, ולכן 86 יצא 24.
@@ -598,7 +598,7 @@ export function buildPano(spec: PanoSpec, loader: THREE.TextureLoader, origin = 
   groundMap.magFilter = THREE.LinearFilter
 
   const edge = nearEdge(spec)
-  const tileMap = spec.tile ? loader.load(`${ART}/${spec.tile.key}.png`) : null
+  const tileMap = spec.tile ? loader.load(`${ART}/${spec.tile.key}.webp`) : null
   if (tileMap) {
     tileMap.colorSpace = THREE.NoColorSpace
     // מראה־ריצוף ולא ריצוף רגיל: קצוות המרצף לא תואמים זה לזה, והמראה מבטלת את התפר בלי

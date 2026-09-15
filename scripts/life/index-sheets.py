@@ -62,9 +62,9 @@ def main() -> int:
     sheets = {}
     dirty = []
     for name in sorted(os.listdir(ART)):
-        if not name.endswith('.png'):
+        if not name.endswith('.webp'):
             continue
-        key = name[:-4]
+        key = name[:-5]
         if key in claimed:
             continue
         path = os.path.join(ART, name)

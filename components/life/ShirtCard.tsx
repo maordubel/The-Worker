@@ -51,7 +51,7 @@ export function ShirtCard({ shirt, onClose }: { shirt: NonNullable<LifeBusEvents
         ) : (
           <div className="relative h-full w-full">
             <Image
-              src={`/life/art/${shirt.art}.png`}
+              src={`/life/art/${shirt.art}.webp`}
               alt={shirt.nameHe}
               fill
               sizes="(max-width: 640px) 62vw, 320px"

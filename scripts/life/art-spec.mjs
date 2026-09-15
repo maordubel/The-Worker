@@ -59,13 +59,13 @@ for (const scene of data.scenes) {
   const arts = [scene.art, ...Object.values(scene.artByEra ?? {})].filter((v, i, a) => a.indexOf(v) === i)
   lines.push(`## ${scene.titleHe} · \`${scene.id}\``)
   lines.push('')
-  lines.push(`- ציור: ${arts.map((a) => `\`${a}.png\``).join(' · ')}${scene.artByEra ? ` (לפי עידן: ${Object.entries(scene.artByEra).map(([era, art]) => `${era}→${art}`).join(', ')})` : ''}`)
+  lines.push(`- ציור: ${arts.map((a) => `\`${a}.webp\``).join(' · ')}${scene.artByEra ? ` (לפי עידן: ${Object.entries(scene.artByEra).map(([era, art]) => `${era}→${art}`).join(', ')})` : ''}`)
   lines.push(`- רצפה (walk band): **${f(scene.band.far)}–${f(scene.band.near)}** של גובה הציור`)
   lines.push(`- גובה הילד: ${f(scene.size.far)} בקו הרחוק, ${f(scene.size.near)} בקו הקרוב (שבר מגובה הציור)`)
-  if (scene.arrival) lines.push(`- כרטיס כניסה: \`${scene.arrival.art}.png\`, ${scene.arrival.ms}ms`)
+  if (scene.arrival) lines.push(`- כרטיס כניסה: \`${scene.arrival.art}.webp\`, ${scene.arrival.ms}ms`)
   if (scene.arrivalByEra) {
     for (const [era, card] of Object.entries(scene.arrivalByEra)) {
-      lines.push(`- כרטיס כניסה ב-${era}: ${card ? `\`${card.art}.png\`` : 'אין'}`)
+      lines.push(`- כרטיס כניסה ב-${era}: ${card ? `\`${card.art}.webp\`` : 'אין'}`)
     }
   }
   lines.push('')

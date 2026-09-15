@@ -43,7 +43,7 @@ export function Leak({ index = 1, ms = 1400, delay = 200 }: { index?: 1 | 2 | 3;
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 z-[3] bg-cover bg-center mix-blend-screen motion-reduce:hidden"
       style={{
-        backgroundImage: `url(/life/art/fxLeak${index}.png)`,
+        backgroundImage: `url(/life/art/fxLeak${index}.webp)`,
         animation: `leak-sweep ${ms}ms ease-in-out ${delay}ms both`,
         opacity: 0,
       }}

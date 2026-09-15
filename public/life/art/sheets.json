@@ -2,3109 +2,3109 @@
  "adultA1": {
   "w": 144,
   "h": 430,
-  "bytes": 74904,
+  "bytes": 20754,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultA2": {
   "w": 138,
   "h": 430,
-  "bytes": 81288,
+  "bytes": 20780,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultA3": {
   "w": 143,
   "h": 430,
-  "bytes": 78225,
+  "bytes": 23580,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultA4": {
   "w": 137,
   "h": 430,
-  "bytes": 76863,
+  "bytes": 22246,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultA5": {
   "w": 148,
   "h": 430,
-  "bytes": 73046,
+  "bytes": 58616,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultA6": {
   "w": 150,
   "h": 430,
-  "bytes": 81448,
+  "bytes": 23754,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultA7": {
   "w": 153,
   "h": 430,
-  "bytes": 79371,
+  "bytes": 22870,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultB1": {
   "w": 164,
   "h": 430,
-  "bytes": 68329,
+  "bytes": 19480,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultB2": {
   "w": 138,
   "h": 430,
-  "bytes": 72500,
+  "bytes": 20946,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultB3": {
   "w": 142,
   "h": 430,
-  "bytes": 73626,
+  "bytes": 20386,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultB4": {
   "w": 179,
   "h": 430,
-  "bytes": 85405,
+  "bytes": 24134,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultB5": {
   "w": 144,
   "h": 430,
-  "bytes": 71768,
+  "bytes": 19674,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultB6": {
   "w": 147,
   "h": 430,
-  "bytes": 83408,
+  "bytes": 23282,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "adultB7": {
   "w": 202,
   "h": 430,
-  "bytes": 65330,
+  "bytes": 20912,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "amit-3q": {
   "w": 214,
   "h": 603,
-  "bytes": 59983,
+  "bytes": 32368,
   "yellowLeft": 0
  },
  "amit-arms": {
   "w": 218,
   "h": 603,
-  "bytes": 68935,
+  "bytes": 37976,
   "yellowLeft": 0
  },
  "amit-back": {
   "w": 218,
   "h": 603,
-  "bytes": 59829,
+  "bytes": 30766,
   "yellowLeft": 0
  },
  "amit-cross": {
   "w": 276,
   "h": 397,
-  "bytes": 55565,
+  "bytes": 29604,
   "yellowLeft": 0
  },
  "amit-hold": {
   "w": 306,
   "h": 451,
-  "bytes": 70786,
+  "bytes": 38080,
   "yellowLeft": 0
  },
  "amit-scarf": {
   "w": 215,
   "h": 599,
-  "bytes": 65056,
+  "bytes": 36474,
   "yellowLeft": 0
  },
  "amit-scarfstand": {
   "w": 201,
   "h": 603,
-  "bytes": 67878,
+  "bytes": 37350,
   "yellowLeft": 0
  },
  "amit-side": {
   "w": 286,
   "h": 588,
-  "bytes": 61930,
+  "bytes": 86202,
   "yellowLeft": 0
  },
  "amit-sitA": {
   "w": 251,
   "h": 435,
-  "bytes": 57121,
+  "bytes": 31650,
   "yellowLeft": 0
  },
  "amit-sitB": {
   "w": 276,
   "h": 421,
-  "bytes": 60442,
+  "bytes": 32672,
   "yellowLeft": 0
  },
  "amit-sitC": {
   "w": 250,
   "h": 387,
-  "bytes": 48807,
+  "bytes": 25886,
   "yellowLeft": 0
  },
  "amit-sitD": {
   "w": 255,
   "h": 434,
-  "bytes": 60469,
+  "bytes": 33156,
   "yellowLeft": 0
  },
  "amit-walk": {
   "w": 198,
   "h": 603,
-  "bytes": 64457,
+  "bytes": 36914,
   "yellowLeft": 0
  },
  "amit": {
   "w": 239,
   "h": 599,
-  "bytes": 66436,
+  "bytes": 36318,
   "yellowLeft": 0
  },
  "amit90-3q": {
   "w": 214,
   "h": 607,
-  "bytes": 69609,
+  "bytes": 36748,
   "yellowLeft": 0
  },
  "amit90-back": {
   "w": 203,
   "h": 606,
-  "bytes": 68467,
+  "bytes": 35518,
   "yellowLeft": 0
  },
  "amit90-cheer": {
   "w": 225,
   "h": 596,
-  "bytes": 77251,
+  "bytes": 43778,
   "yellowLeft": 0
  },
  "amit90-cross": {
   "w": 273,
   "h": 401,
-  "bytes": 64657,
+  "bytes": 33270,
   "yellowLeft": 0
  },
  "amit90-drum": {
   "w": 341,
   "h": 444,
-  "bytes": 81442,
+  "bytes": 135308,
   "yellowLeft": 0
  },
  "amit90-point": {
   "w": 420,
   "h": 443,
-  "bytes": 89688,
+  "bytes": 45868,
   "yellowLeft": 0
  },
  "amit90-scarf": {
   "w": 191,
   "h": 578,
-  "bytes": 64237,
+  "bytes": 35770,
   "yellowLeft": 0
  },
  "amit90-side": {
   "w": 152,
   "h": 606,
-  "bytes": 54913,
+  "bytes": 28480,
   "yellowLeft": 0
  },
  "amit90-sitA": {
   "w": 299,
   "h": 443,
-  "bytes": 71062,
+  "bytes": 39312,
   "yellowLeft": 0
  },
  "amit90-sitB": {
   "w": 284,
   "h": 424,
-  "bytes": 67031,
+  "bytes": 36044,
   "yellowLeft": 0
  },
  "amit90-turn": {
   "w": 217,
   "h": 607,
-  "bytes": 75134,
+  "bytes": 37402,
   "yellowLeft": 0
  },
  "amit90-walk": {
   "w": 161,
   "h": 570,
-  "bytes": 53374,
+  "bytes": 26826,
   "yellowLeft": 0
  },
  "amit90": {
   "w": 204,
   "h": 609,
-  "bytes": 70334,
+  "bytes": 37674,
   "yellowLeft": 0
  },
  "docTicket": {
   "w": 776,
   "h": 474,
-  "bytes": 126583,
+  "bytes": 65242,
   "yellowLeft": 0
  },
  "efi": {
   "w": 143,
   "h": 430,
-  "bytes": 61164,
+  "bytes": 20140,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "elimelech-back": {
   "w": 161,
   "h": 441,
-  "bytes": 58741,
+  "bytes": 17710,
   "yellowLeft": 0
  },
  "elimelech-catch": {
   "w": 356,
   "h": 406,
-  "bytes": 53504,
+  "bytes": 27744,
   "yellowLeft": 0
  },
  "elimelech-civA": {
   "w": 220,
   "h": 320,
-  "bytes": 77376,
+  "bytes": 19682,
   "yellowLeft": 0
  },
  "elimelech-civB": {
   "w": 213,
   "h": 320,
-  "bytes": 59973,
+  "bytes": 15534,
   "yellowLeft": 0
  },
  "elimelech-civC": {
   "w": 223,
   "h": 320,
-  "bytes": 65423,
+  "bytes": 16398,
   "yellowLeft": 0
  },
  "elimelech-civD": {
   "w": 207,
   "h": 320,
-  "bytes": 53127,
+  "bytes": 13834,
   "yellowLeft": 0
  },
  "elimelech-civE": {
   "w": 206,
   "h": 320,
-  "bytes": 77070,
+  "bytes": 18974,
   "yellowLeft": 0
  },
  "elimelech-civF": {
   "w": 212,
   "h": 320,
-  "bytes": 56094,
+  "bytes": 15262,
   "yellowLeft": 0
  },
  "elimelech-civG": {
   "w": 203,
   "h": 320,
-  "bytes": 50611,
+  "bytes": 13632,
   "yellowLeft": 0
  },
  "elimelech-claim": {
   "w": 226,
   "h": 442,
-  "bytes": 73760,
+  "bytes": 21802,
   "yellowLeft": 0
  },
  "elimelech-point": {
   "w": 234,
   "h": 444,
-  "bytes": 101730,
+  "bytes": 82830,
   "yellowLeft": 0
  },
  "elimelech-ready": {
   "w": 274,
   "h": 442,
-  "bytes": 92734,
+  "bytes": 78356,
   "yellowLeft": 0
  },
  "elimelech-shout": {
   "w": 263,
   "h": 440,
-  "bytes": 98643,
+  "bytes": 27014,
   "yellowLeft": 0
  },
  "faceElimelech-ball": {
   "w": 257,
   "h": 249,
-  "bytes": 73504,
+  "bytes": 17308,
   "yellowLeft": 0
  },
  "faceElimelech-calm": {
   "w": 194,
   "h": 249,
-  "bytes": 50178,
+  "bytes": 13522,
   "yellowLeft": 0
  },
  "faceElimelech-look": {
   "w": 198,
   "h": 249,
-  "bytes": 50993,
+  "bytes": 12944,
   "yellowLeft": 0
  },
  "faceElimelech-shout": {
   "w": 202,
   "h": 249,
-  "bytes": 54168,
+  "bytes": 14054,
   "yellowLeft": 0
  },
  "faceElimelech-side": {
   "w": 178,
   "h": 249,
-  "bytes": 52128,
+  "bytes": 42198,
   "yellowLeft": 0
  },
  "faceElimelech-smile": {
   "w": 242,
   "h": 249,
-  "bytes": 59544,
+  "bytes": 14988,
   "yellowLeft": 0
  },
  "faceElimelech": {
   "w": 238,
   "h": 249,
-  "bytes": 60704,
+  "bytes": 14860,
   "yellowLeft": 0
  },
  "faceHero80-3q": {
   "w": 134,
   "h": 173,
-  "bytes": 31680,
+  "bytes": 10158,
   "yellowLeft": 0
  },
  "faceHero80-back": {
   "w": 115,
   "h": 160,
-  "bytes": 23780,
+  "bytes": 8332,
   "yellowLeft": 0
  },
  "faceHero80-profile": {
   "w": 127,
   "h": 172,
-  "bytes": 29982,
+  "bytes": 9346,
   "yellowLeft": 0
  },
  "faceHero80-shout": {
   "w": 113,
   "h": 174,
-  "bytes": 31181,
+  "bytes": 9590,
   "yellowLeft": 0
  },
  "faceHero80-side": {
   "w": 123,
   "h": 173,
-  "bytes": 31102,
+  "bytes": 9588,
   "yellowLeft": 0
  },
  "faceHero80-smile": {
   "w": 118,
   "h": 173,
-  "bytes": 30735,
+  "bytes": 9962,
   "yellowLeft": 0
  },
  "faceHero80": {
   "w": 117,
   "h": 174,
-  "bytes": 30688,
+  "bytes": 9802,
   "yellowLeft": 0
  },
  "faceHero90-3q": {
   "w": 124,
   "h": 169,
-  "bytes": 33334,
+  "bytes": 10614,
   "yellowLeft": 0
  },
  "faceHero90-back": {
   "w": 116,
   "h": 167,
-  "bytes": 27437,
+  "bytes": 9354,
   "yellowLeft": 0
  },
  "faceHero90-grin": {
   "w": 139,
   "h": 171,
-  "bytes": 34553,
+  "bytes": 10492,
   "yellowLeft": 0
  },
  "faceHero90-look": {
   "w": 119,
   "h": 169,
-  "bytes": 30674,
+  "bytes": 10042,
   "yellowLeft": 0
  },
  "faceHero90-shades": {
   "w": 113,
   "h": 172,
-  "bytes": 30451,
+  "bytes": 9642,
   "yellowLeft": 0
  },
  "faceHero90-shout": {
   "w": 125,
   "h": 172,
-  "bytes": 32823,
+  "bytes": 10276,
   "yellowLeft": 0
  },
  "faceHero90-smile": {
   "w": 135,
   "h": 168,
-  "bytes": 34183,
+  "bytes": 10414,
   "yellowLeft": 0
  },
  "faceHero90": {
   "w": 124,
   "h": 169,
-  "bytes": 31448,
+  "bytes": 9876,
   "yellowLeft": 0
  },
  "faceKeren90-b": {
   "w": 324,
   "h": 318,
-  "bytes": 62484,
+  "bytes": 92278,
   "yellowLeft": 0
  },
  "faceKeren90-profile": {
   "w": 272,
   "h": 315,
-  "bytes": 50755,
+  "bytes": 22640,
   "yellowLeft": 0
  },
  "faceKeren90-side": {
   "w": 279,
   "h": 318,
-  "bytes": 59470,
+  "bytes": 89034,
   "yellowLeft": 0
  },
  "faceKeren90-smile": {
   "w": 309,
   "h": 311,
-  "bytes": 53664,
+  "bytes": 76006,
   "yellowLeft": 0
  },
  "faceKeren90": {
   "w": 308,
   "h": 317,
-  "bytes": 58186,
+  "bytes": 88630,
   "yellowLeft": 0
  },
  "faceSinai-b": {
   "w": 215,
   "h": 212,
-  "bytes": 46800,
+  "bytes": 9740,
   "yellowLeft": 0
  },
  "faceSinai-kit": {
   "w": 208,
   "h": 219,
-  "bytes": 50629,
+  "bytes": 11512,
   "yellowLeft": 0
  },
  "faceSinai-look": {
   "w": 178,
   "h": 210,
-  "bytes": 39000,
+  "bytes": 31996,
   "yellowLeft": 0
  },
  "faceSinai-point": {
   "w": 275,
   "h": 210,
-  "bytes": 57721,
+  "bytes": 14514,
   "yellowLeft": 0
  },
  "faceSinai-shout": {
   "w": 212,
   "h": 217,
-  "bytes": 51565,
+  "bytes": 11892,
   "yellowLeft": 0
  },
  "faceSinai-side": {
   "w": 188,
   "h": 209,
-  "bytes": 42707,
+  "bytes": 9692,
   "yellowLeft": 0
  },
  "faceSinai": {
   "w": 213,
   "h": 214,
-  "bytes": 49297,
+  "bytes": 10610,
   "yellowLeft": 0
  },
  "faceSoldier-3q": {
   "w": 117,
   "h": 148,
-  "bytes": 26696,
+  "bytes": 8210,
   "yellowLeft": 0
  },
  "faceSoldier-back": {
   "w": 131,
   "h": 152,
-  "bytes": 29994,
+  "bytes": 9432,
   "yellowLeft": 0
  },
  "faceSoldier-beret": {
   "w": 106,
   "h": 141,
-  "bytes": 20730,
+  "bytes": 6964,
   "yellowLeft": 0
  },
  "faceSoldier-look": {
   "w": 115,
   "h": 149,
-  "bytes": 26833,
+  "bytes": 8430,
   "yellowLeft": 0
  },
  "faceSoldier-shades": {
   "w": 117,
   "h": 148,
-  "bytes": 27243,
+  "bytes": 8112,
   "yellowLeft": 0
  },
  "faceSoldier-shout": {
   "w": 117,
   "h": 148,
-  "bytes": 27225,
+  "bytes": 8310,
   "yellowLeft": 0
  },
  "faceSoldier-side": {
   "w": 112,
   "h": 148,
-  "bytes": 25996,
+  "bytes": 7948,
   "yellowLeft": 0
  },
  "faceSoldier-smile": {
   "w": 116,
   "h": 149,
-  "bytes": 28182,
+  "bytes": 8696,
   "yellowLeft": 0
  },
  "faceSoldier": {
   "w": 105,
   "h": 148,
-  "bytes": 25537,
+  "bytes": 7786,
   "yellowLeft": 0
  },
  "fanA": {
   "w": 129,
   "h": 390,
-  "bytes": 60764,
+  "bytes": 16938,
   "yellowLeft": 0
  },
  "fanB": {
   "w": 124,
   "h": 390,
-  "bytes": 61466,
+  "bytes": 17242,
   "yellowLeft": 0
  },
  "fanC": {
   "w": 132,
   "h": 390,
-  "bytes": 59134,
+  "bytes": 15692,
   "yellowLeft": 0
  },
  "fanD": {
   "w": 132,
   "h": 390,
-  "bytes": 62614,
+  "bytes": 16214,
   "yellowLeft": 0
  },
  "fanE": {
   "w": 136,
   "h": 390,
-  "bytes": 73545,
+  "bytes": 19398,
   "yellowLeft": 0
  },
  "fanF": {
   "w": 144,
   "h": 390,
-  "bytes": 73613,
+  "bytes": 18742,
   "yellowLeft": 0
  },
  "fanG": {
   "w": 143,
   "h": 390,
-  "bytes": 67030,
+  "bytes": 17754,
   "yellowLeft": 0
  },
  "gershon-back": {
   "w": 309,
   "h": 443,
-  "bytes": 71915,
+  "bytes": 121460,
   "yellowLeft": 0
  },
  "gershon-bust": {
   "w": 301,
   "h": 438,
-  "bytes": 65174,
+  "bytes": 33812,
   "yellowLeft": 0
  },
  "gershon-civA": {
   "w": 239,
   "h": 215,
-  "bytes": 44175,
+  "bytes": 34384,
   "yellowLeft": 0
  },
  "gershon-civB": {
   "w": 259,
   "h": 223,
-  "bytes": 47811,
+  "bytes": 11820,
   "yellowLeft": 0
  },
  "gershon-civC": {
   "w": 266,
   "h": 224,
-  "bytes": 49282,
+  "bytes": 36992,
   "yellowLeft": 0
  },
  "gershon-civD": {
   "w": 252,
   "h": 224,
-  "bytes": 55732,
+  "bytes": 12260,
   "yellowLeft": 0
  },
  "gershon-civE": {
   "w": 264,
   "h": 224,
-  "bytes": 60517,
+  "bytes": 13336,
   "yellowLeft": 0
  },
  "gershon-head": {
   "w": 184,
   "h": 417,
-  "bytes": 98785,
+  "bytes": 24216,
   "yellowLeft": 0
  },
  "gershon-rival-back": {
   "w": 293,
   "h": 350,
-  "bytes": 94448,
+  "bytes": 91394,
   "yellowLeft": 0
  },
  "gershon-rival-captain": {
   "w": 325,
   "h": 350,
-  "bytes": 58319,
+  "bytes": 98926,
   "yellowLeft": 0
  },
  "gershon-rival-look": {
   "w": 294,
   "h": 350,
-  "bytes": 53813,
+  "bytes": 92216,
   "yellowLeft": 0
  },
  "gershon-rival-shout": {
   "w": 314,
   "h": 350,
-  "bytes": 59105,
+  "bytes": 94710,
   "yellowLeft": 0
  },
  "gershon-rival": {
   "w": 258,
   "h": 350,
-  "bytes": 96019,
+  "bytes": 87404,
   "yellowLeft": 0
  },
  "gershon-run": {
   "w": 193,
   "h": 442,
-  "bytes": 94865,
+  "bytes": 82086,
   "yellowLeft": 0
  },
  "gershon-side": {
   "w": 246,
   "h": 440,
-  "bytes": 59795,
+  "bytes": 94888,
   "yellowLeft": 0
  },
  "gershon": {
   "w": 301,
   "h": 443,
-  "bytes": 73436,
+  "bytes": 34876,
   "yellowLeft": 0
  },
  "hero80-3q": {
   "w": 182,
   "h": 476,
-  "bytes": 58333,
+  "bytes": 32236,
   "yellowLeft": 0
  },
  "hero80-away": {
   "w": 143,
   "h": 352,
-  "bytes": 60821,
+  "bytes": 18028,
   "yellowLeft": 0
  },
  "hero80-back": {
   "w": 169,
   "h": 471,
-  "bytes": 89046,
+  "bytes": 27648,
   "yellowLeft": 0
  },
  "hero80-ball": {
   "w": 226,
   "h": 432,
-  "bytes": 57804,
+  "bytes": 30242,
   "yellowLeft": 0
  },
  "hero80-cheer": {
   "w": 247,
   "h": 352,
-  "bytes": 89001,
+  "bytes": 27416,
   "yellowLeft": 0
  },
  "hero80-crouch": {
   "w": 165,
   "h": 340,
-  "bytes": 63910,
+  "bytes": 19238,
   "yellowLeft": 0
  },
  "hero80-kick": {
   "w": 187,
   "h": 394,
-  "bytes": 89524,
+  "bytes": 25700,
   "yellowLeft": 0
  },
  "hero80-leave": {
   "w": 129,
   "h": 352,
-  "bytes": 61429,
+  "bytes": 19604,
   "yellowLeft": 0
  },
  "hero80-pack": {
   "w": 182,
   "h": 462,
-  "bytes": 96961,
+  "bytes": 28644,
   "yellowLeft": 0
  },
  "hero80-point": {
   "w": 150,
   "h": 341,
-  "bytes": 69900,
+  "bytes": 22338,
   "yellowLeft": 0
  },
  "hero80-scarf": {
   "w": 214,
   "h": 352,
-  "bytes": 86882,
+  "bytes": 28362,
   "yellowLeft": 0
  },
  "hero80-side": {
   "w": 179,
   "h": 472,
-  "bytes": 89645,
+  "bytes": 25182,
   "yellowLeft": 0
  },
  "hero80-sit": {
   "w": 192,
   "h": 295,
-  "bytes": 83916,
+  "bytes": 23674,
   "yellowLeft": 0
  },
  "hero80-tie": {
   "w": 141,
   "h": 229,
-  "bytes": 53286,
+  "bytes": 15700,
   "yellowLeft": 0
  },
  "hero80-walk": {
   "w": 212,
   "h": 452,
-  "bytes": 97608,
+  "bytes": 27782,
   "yellowLeft": 0
  },
  "hero80": {
   "w": 170,
   "h": 484,
-  "bytes": 57375,
+  "bytes": 32296,
   "yellowLeft": 0
  },
  "hero90-3q": {
   "w": 171,
   "h": 480,
-  "bytes": 101052,
+  "bytes": 30816,
   "yellowLeft": 0
  },
  "hero90-away": {
   "w": 130,
   "h": 344,
-  "bytes": 60223,
+  "bytes": 19276,
   "yellowLeft": 0
  },
  "hero90-back": {
   "w": 179,
   "h": 480,
-  "bytes": 100644,
+  "bytes": 31288,
   "yellowLeft": 0
  },
  "hero90-ball": {
   "w": 212,
   "h": 478,
-  "bytes": 67372,
+  "bytes": 36516,
   "yellowLeft": 0
  },
  "hero90-cheer": {
   "w": 198,
   "h": 352,
-  "bytes": 83695,
+  "bytes": 24758,
   "yellowLeft": 0
  },
  "hero90-crouch": {
   "w": 157,
   "h": 277,
-  "bytes": 66323,
+  "bytes": 19682,
   "yellowLeft": 0
  },
  "hero90-kick": {
   "w": 243,
   "h": 452,
-  "bytes": 63700,
+  "bytes": 33658,
   "yellowLeft": 0
  },
  "hero90-leave": {
   "w": 155,
   "h": 352,
-  "bytes": 64710,
+  "bytes": 19796,
   "yellowLeft": 0
  },
  "hero90-pack": {
   "w": 179,
   "h": 462,
-  "bytes": 91738,
+  "bytes": 27744,
   "yellowLeft": 0
  },
  "hero90-scarf": {
   "w": 249,
   "h": 352,
-  "bytes": 100654,
+  "bytes": 32892,
   "yellowLeft": 0
  },
  "hero90-side": {
   "w": 142,
   "h": 471,
-  "bytes": 79476,
+  "bytes": 23622,
   "yellowLeft": 0
  },
  "hero90-sit": {
   "w": 203,
   "h": 312,
-  "bytes": 87063,
+  "bytes": 24134,
   "yellowLeft": 0
  },
  "hero90-think": {
   "w": 173,
   "h": 350,
-  "bytes": 80325,
+  "bytes": 24464,
   "yellowLeft": 0
  },
  "hero90-tie": {
   "w": 171,
   "h": 246,
-  "bytes": 58339,
+  "bytes": 16864,
   "yellowLeft": 0
  },
  "hero90-walk": {
   "w": 195,
   "h": 467,
-  "bytes": 96448,
+  "bytes": 27422,
   "yellowLeft": 0
  },
  "hero90": {
   "w": 171,
   "h": 482,
-  "bytes": 57828,
+  "bytes": 32668,
   "yellowLeft": 0
  },
  "keren": {
   "w": 139,
   "h": 430,
-  "bytes": 76279,
+  "bytes": 24570,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren90-arms": {
   "w": 202,
   "h": 434,
-  "bytes": 94344,
+  "bytes": 71460,
   "yellowLeft": 0
  },
  "keren90-band": {
   "w": 265,
   "h": 250,
-  "bytes": 91483,
+  "bytes": 19090,
   "yellowLeft": 0
  },
  "keren90-look": {
   "w": 260,
   "h": 250,
-  "bytes": 81014,
+  "bytes": 18854,
   "yellowLeft": 0
  },
  "keren90-scarf": {
   "w": 535,
   "h": 251,
-  "bytes": 79235,
+  "bytes": 116858,
   "yellowLeft": 0
  },
  "keren90-shout": {
   "w": 323,
   "h": 250,
-  "bytes": 50978,
+  "bytes": 77276,
   "yellowLeft": 0
  },
  "keren90-side": {
   "w": 189,
   "h": 443,
-  "bytes": 53194,
+  "bytes": 24270,
   "yellowLeft": 0
  },
  "keren90-sit": {
   "w": 280,
   "h": 432,
-  "bytes": 72568,
+  "bytes": 32504,
   "yellowLeft": 0
  },
  "keren90-smile": {
   "w": 287,
   "h": 441,
-  "bytes": 79223,
+  "bytes": 116064,
   "yellowLeft": 0
  },
  "keren90": {
   "w": 270,
   "h": 444,
-  "bytes": 77320,
+  "bytes": 33834,
   "yellowLeft": 0
  },
  "kid-3q": {
   "w": 164,
   "h": 592,
-  "bytes": 60873,
+  "bytes": 36896,
   "yellowLeft": 0
  },
  "kid-back-b": {
   "w": 158,
   "h": 569,
-  "bytes": 57404,
+  "bytes": 33236,
   "yellowLeft": 0
  },
  "kid-back": {
   "w": 156,
   "h": 576,
-  "bytes": 59038,
+  "bytes": 33266,
   "yellowLeft": 0
  },
  "kid-side-b": {
   "w": 152,
   "h": 574,
-  "bytes": 85528,
+  "bytes": 25064,
   "yellowLeft": 0
  },
  "kid-side": {
   "w": 158,
   "h": 576,
-  "bytes": 93043,
+  "bytes": 28944,
   "yellowLeft": 0
  },
  "kid-walk1": {
   "w": 100,
   "h": 384,
-  "bytes": 53695,
+  "bytes": 17690,
   "yellowLeft": 0
  },
  "kid-walk2": {
   "w": 208,
   "h": 369,
-  "bytes": 67031,
+  "bytes": 20446,
   "yellowLeft": 0
  },
  "kid-walk3": {
   "w": 193,
   "h": 368,
-  "bytes": 65692,
+  "bytes": 20926,
   "yellowLeft": 0
  },
  "kid-walk4": {
   "w": 180,
   "h": 372,
-  "bytes": 65111,
+  "bytes": 21444,
   "yellowLeft": 0
  },
  "kid-walk5": {
   "w": 200,
   "h": 369,
-  "bytes": 67163,
+  "bytes": 20860,
   "yellowLeft": 0
  },
  "kid-walk6": {
   "w": 198,
   "h": 369,
-  "bytes": 66733,
+  "bytes": 21772,
   "yellowLeft": 0
  },
  "kid-walk7": {
   "w": 208,
   "h": 368,
-  "bytes": 67364,
+  "bytes": 21610,
   "yellowLeft": 0
  },
  "kid-walk8": {
   "w": 209,
   "h": 374,
-  "bytes": 68119,
+  "bytes": 21776,
   "yellowLeft": 0
  },
  "kid": {
   "w": 166,
   "h": 593,
-  "bytes": 61442,
+  "bytes": 39630,
   "yellowLeft": 0
  },
  "kobi-arms": {
   "w": 150,
   "h": 510,
-  "bytes": 85557,
+  "bytes": 23566,
   "yellowLeft": 0
  },
  "kobi-back": {
   "w": 141,
   "h": 522,
-  "bytes": 85015,
+  "bytes": 26198,
   "yellowLeft": 0
  },
  "kobi-bag": {
   "w": 189,
   "h": 459,
-  "bytes": 63831,
+  "bytes": 32494,
   "yellowLeft": 0
  },
  "kobi-chair": {
   "w": 341,
   "h": 444,
-  "bytes": 108250,
+  "bytes": 55016,
   "yellowLeft": 0
  },
  "kobi-cheer": {
   "w": 288,
   "h": 464,
-  "bytes": 103245,
+  "bytes": 52438,
   "yellowLeft": 0
  },
  "kobi-point": {
   "w": 200,
   "h": 510,
-  "bytes": 78941,
+  "bytes": 39332,
   "yellowLeft": 0
  },
  "kobi-rail": {
   "w": 299,
   "h": 462,
-  "bytes": 112950,
+  "bytes": 55790,
   "yellowLeft": 0
  },
  "kobi-scarf": {
   "w": 154,
   "h": 527,
-  "bytes": 63694,
+  "bytes": 31932,
   "yellowLeft": 0
  },
  "kobi-side": {
   "w": 106,
   "h": 527,
-  "bytes": 81393,
+  "bytes": 23782,
   "yellowLeft": 0
  },
  "kobi-walk": {
   "w": 166,
   "h": 485,
-  "bytes": 61553,
+  "bytes": 30162,
   "yellowLeft": 0
  },
  "kobi": {
   "w": 117,
   "h": 523,
-  "bytes": 95323,
+  "bytes": 28644,
   "yellowLeft": 0
  },
  "kobi90-arms": {
   "w": 212,
   "h": 625,
-  "bytes": 68288,
+  "bytes": 36144,
   "yellowLeft": 0
  },
  "kobi90-back": {
   "w": 225,
   "h": 638,
-  "bytes": 67089,
+  "bytes": 36032,
   "yellowLeft": 0
  },
  "kobi90-bag": {
   "w": 265,
   "h": 638,
-  "bytes": 87895,
+  "bytes": 44258,
   "yellowLeft": 0
  },
  "kobi90-cheer": {
   "w": 249,
   "h": 638,
-  "bytes": 85417,
+  "bytes": 47184,
   "yellowLeft": 0
  },
  "kobi90-lean": {
   "w": 376,
   "h": 381,
-  "bytes": 78276,
+  "bytes": 39886,
   "yellowLeft": 0
  },
  "kobi90-paper": {
   "w": 302,
   "h": 441,
-  "bytes": 80424,
+  "bytes": 126980,
   "yellowLeft": 0
  },
  "kobi90-point": {
   "w": 240,
   "h": 436,
-  "bytes": 62837,
+  "bytes": 33186,
   "yellowLeft": 0
  },
  "kobi90-side": {
   "w": 225,
   "h": 638,
-  "bytes": 60784,
+  "bytes": 31616,
   "yellowLeft": 0
  },
  "kobi90-sitA": {
   "w": 228,
   "h": 436,
-  "bytes": 59734,
+  "bytes": 32840,
   "yellowLeft": 0
  },
  "kobi90-sitB": {
   "w": 309,
   "h": 451,
-  "bytes": 72983,
+  "bytes": 37524,
   "yellowLeft": 0
  },
  "kobi90-stand": {
   "w": 249,
   "h": 638,
-  "bytes": 72508,
+  "bytes": 37182,
   "yellowLeft": 0
  },
  "kobi90": {
   "w": 212,
   "h": 625,
-  "bytes": 71594,
+  "bytes": 37370,
   "yellowLeft": 0
  },
  "ofir-3q": {
   "w": 194,
   "h": 605,
-  "bytes": 59759,
+  "bytes": 31550,
   "yellowLeft": 0
  },
  "ofir-arms": {
   "w": 206,
   "h": 597,
-  "bytes": 61235,
+  "bytes": 34652,
   "yellowLeft": 0
  },
  "ofir-back": {
   "w": 193,
   "h": 598,
-  "bytes": 56897,
+  "bytes": 30634,
   "yellowLeft": 0
  },
  "ofir-cross": {
   "w": 326,
   "h": 412,
-  "bytes": 64430,
+  "bytes": 34686,
   "yellowLeft": 0
  },
  "ofir-crouch": {
   "w": 331,
   "h": 430,
-  "bytes": 74147,
+  "bytes": 39098,
   "yellowLeft": 0
  },
  "ofir-scarf": {
   "w": 226,
   "h": 609,
-  "bytes": 69265,
+  "bytes": 39416,
   "yellowLeft": 0
  },
  "ofir-side": {
   "w": 107,
   "h": 601,
-  "bytes": 88328,
+  "bytes": 23802,
   "yellowLeft": 0
  },
  "ofir-sitA": {
   "w": 261,
   "h": 410,
-  "bytes": 60759,
+  "bytes": 33832,
   "yellowLeft": 0
  },
  "ofir-sitB": {
   "w": 255,
   "h": 378,
-  "bytes": 56669,
+  "bytes": 31256,
   "yellowLeft": 0
  },
  "ofir-sitC": {
   "w": 300,
   "h": 435,
-  "bytes": 68228,
+  "bytes": 39540,
   "yellowLeft": 0
  },
  "ofir-walk": {
   "w": 264,
   "h": 597,
-  "bytes": 71501,
+  "bytes": 36474,
   "yellowLeft": 0
  },
  "ofir": {
   "w": 205,
   "h": 599,
-  "bytes": 65712,
+  "bytes": 36020,
   "yellowLeft": 0
  },
  "ofir90-3q": {
   "w": 124,
   "h": 406,
-  "bytes": 50782,
+  "bytes": 13726,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "ofir90-arms": {
   "w": 126,
   "h": 406,
-  "bytes": 52580,
+  "bytes": 14090,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "ofir90-back": {
   "w": 128,
   "h": 405,
-  "bytes": 51202,
+  "bytes": 13960,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "ofir90-crouch": {
   "w": 265,
   "h": 397,
-  "bytes": 56055,
+  "bytes": 30214,
   "yellowLeft": 0
  },
  "ofir90-point": {
   "w": 315,
   "h": 442,
-  "bytes": 70275,
+  "bytes": 38796,
   "yellowLeft": 0
  },
  "ofir90-scarf": {
   "w": 338,
   "h": 441,
-  "bytes": 78900,
+  "bytes": 45634,
   "yellowLeft": 0
  },
  "ofir90-side": {
   "w": 78,
   "h": 406,
-  "bytes": 36166,
+  "bytes": 10148,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "ofir90-sitA": {
   "w": 155,
   "h": 344,
-  "bytes": 51154,
+  "bytes": 13844,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "ofir90-sitB": {
   "w": 298,
   "h": 443,
-  "bytes": 65566,
+  "bytes": 35344,
   "yellowLeft": 0
  },
  "ofir90-smoke": {
   "w": 207,
   "h": 636,
-  "bytes": 69747,
+  "bytes": 38744,
   "yellowLeft": 0
  },
  "ofir90-walk": {
   "w": 125,
   "h": 402,
-  "bytes": 44376,
+  "bytes": 12076,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan": {
   "w": 185,
   "h": 430,
-  "bytes": 70966,
+  "bytes": 64480,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "paperAdumim": {
   "w": 430,
   "h": 599,
-  "bytes": 81028,
+  "bytes": 102058,
   "yellowLeft": 0
  },
  "paperBefore": {
   "w": 1500,
   "h": 1307,
-  "bytes": 450593,
+  "bytes": 680942,
   "yellowLeft": 0
  },
  "paperCollector": {
   "w": 421,
   "h": 599,
-  "bytes": 78302,
+  "bytes": 102660,
   "yellowLeft": 0
  },
  "paperFive": {
   "w": 427,
   "h": 600,
-  "bytes": 84642,
+  "bytes": 113190,
   "yellowLeft": 0
  },
  "pogi-3q": {
   "w": 148,
   "h": 430,
-  "bytes": 57048,
+  "bytes": 19876,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-arms": {
   "w": 144,
   "h": 430,
-  "bytes": 57382,
+  "bytes": 18270,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-back": {
   "w": 135,
   "h": 430,
-  "bytes": 54476,
+  "bytes": 19220,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-cheer": {
   "w": 299,
   "h": 409,
-  "bytes": 67410,
+  "bytes": 28064,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-cross": {
   "w": 249,
   "h": 350,
-  "bytes": 49507,
+  "bytes": 23494,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-hold": {
   "w": 353,
   "h": 430,
-  "bytes": 62060,
+  "bytes": 37992,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-kneel": {
   "w": 260,
   "h": 367,
-  "bytes": 56225,
+  "bytes": 24978,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-scarf": {
   "w": 153,
   "h": 430,
-  "bytes": 68834,
+  "bytes": 23558,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-side": {
   "w": 186,
   "h": 430,
-  "bytes": 54057,
+  "bytes": 18564,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-sit": {
   "w": 219,
   "h": 430,
-  "bytes": 84745,
+  "bytes": 73228,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-walk": {
   "w": 201,
   "h": 430,
-  "bytes": 37338,
+  "bytes": 22882,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi": {
   "w": 153,
   "h": 430,
-  "bytes": 65422,
+  "bytes": 21186,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-1": {
   "w": 170,
   "h": 430,
-  "bytes": 87063,
+  "bytes": 28890,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-2": {
   "w": 169,
   "h": 430,
-  "bytes": 86528,
+  "bytes": 27732,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-3": {
   "w": 138,
   "h": 430,
-  "bytes": 68809,
+  "bytes": 21258,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-4": {
   "w": 179,
   "h": 430,
-  "bytes": 87273,
+  "bytes": 28410,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-5": {
   "w": 179,
   "h": 424,
-  "bytes": 81201,
+  "bytes": 25214,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-6": {
   "w": 195,
   "h": 427,
-  "bytes": 84824,
+  "bytes": 25144,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-7": {
   "w": 212,
   "h": 430,
-  "bytes": 58597,
+  "bytes": 35712,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-8": {
   "w": 237,
   "h": 406,
-  "bytes": 55428,
+  "bytes": 32332,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-b1": {
   "w": 254,
   "h": 350,
-  "bytes": 99078,
+  "bytes": 34466,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-b2": {
   "w": 201,
   "h": 350,
-  "bytes": 79860,
+  "bytes": 25638,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-b3": {
   "w": 170,
   "h": 350,
-  "bytes": 78587,
+  "bytes": 26026,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-b4": {
   "w": 154,
   "h": 350,
-  "bytes": 65203,
+  "bytes": 19728,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-b5": {
   "w": 163,
   "h": 350,
-  "bytes": 59833,
+  "bytes": 18046,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-b6": {
   "w": 188,
   "h": 274,
-  "bytes": 72718,
+  "bytes": 22554,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-b7": {
   "w": 130,
   "h": 350,
-  "bytes": 58399,
+  "bytes": 19344,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi90-b8": {
   "w": 158,
   "h": 350,
-  "bytes": 60979,
+  "bytes": 19958,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-1": {
   "w": 175,
   "h": 410,
-  "bytes": 86834,
+  "bytes": 24930,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-2": {
   "w": 190,
   "h": 408,
-  "bytes": 99536,
+  "bytes": 26668,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-3": {
   "w": 176,
   "h": 407,
-  "bytes": 82196,
+  "bytes": 22052,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-4": {
   "w": 180,
   "h": 410,
-  "bytes": 91713,
+  "bytes": 26618,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-5": {
   "w": 204,
   "h": 399,
-  "bytes": 93212,
+  "bytes": 24192,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-6": {
   "w": 190,
   "h": 410,
-  "bytes": 96524,
+  "bytes": 26944,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-7": {
   "w": 330,
   "h": 313,
-  "bytes": 61601,
+  "bytes": 77840,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-b1": {
   "w": 185,
   "h": 370,
-  "bytes": 91453,
+  "bytes": 25608,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-b2": {
   "w": 103,
   "h": 370,
-  "bytes": 34350,
+  "bytes": 9414,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-b3": {
   "w": 162,
   "h": 370,
-  "bytes": 81265,
+  "bytes": 21828,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-b4": {
   "w": 224,
   "h": 370,
-  "bytes": 99666,
+  "bytes": 27248,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-b5": {
   "w": 207,
   "h": 370,
-  "bytes": 80697,
+  "bytes": 20268,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-b6": {
   "w": 217,
   "h": 370,
-  "bytes": 95383,
+  "bytes": 24416,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-b7": {
   "w": 201,
   "h": 370,
-  "bytes": 69444,
+  "bytes": 15310,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogiIDF-b8": {
   "w": 166,
   "h": 370,
-  "bytes": 80587,
+  "bytes": 22662,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel-smoke": {
   "w": 294,
   "h": 654,
-  "bytes": 82324,
+  "bytes": 24234,
   "yellowLeft": 0
  },
  "rachel-tray": {
   "w": 396,
   "h": 654,
-  "bytes": 55237,
+  "bytes": 30250,
   "yellowLeft": 0
  },
  "rachel": {
   "w": 246,
   "h": 498,
-  "bytes": 55237,
+  "bytes": 30250,
   "yellowLeft": 0
  },
  "youngA1": {
   "w": 194,
   "h": 422,
-  "bytes": 82750,
+  "bytes": 60400,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngA2": {
   "w": 143,
   "h": 430,
-  "bytes": 66439,
+  "bytes": 50398,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngA3": {
   "w": 178,
   "h": 430,
-  "bytes": 76646,
+  "bytes": 62054,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngA4": {
   "w": 125,
   "h": 427,
-  "bytes": 72703,
+  "bytes": 18622,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngA5": {
   "w": 134,
   "h": 423,
-  "bytes": 75771,
+  "bytes": 54884,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngA6": {
   "w": 144,
   "h": 430,
-  "bytes": 73923,
+  "bytes": 55160,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngA7": {
   "w": 166,
   "h": 430,
-  "bytes": 61307,
+  "bytes": 48780,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngB1": {
   "w": 210,
   "h": 430,
-  "bytes": 77006,
+  "bytes": 22306,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngB2": {
   "w": 127,
   "h": 430,
-  "bytes": 75614,
+  "bytes": 55296,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngB3": {
   "w": 145,
   "h": 430,
-  "bytes": 64445,
+  "bytes": 53510,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngB4": {
   "w": 164,
   "h": 430,
-  "bytes": 88082,
+  "bytes": 68522,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngB5": {
   "w": 153,
   "h": 430,
-  "bytes": 77723,
+  "bytes": 24254,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngB6": {
   "w": 187,
   "h": 430,
-  "bytes": 81056,
+  "bytes": 58882,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "youngB7": {
   "w": 144,
   "h": 419,
-  "bytes": 73499,
+  "bytes": 51268,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w1": {
   "w": 159,
   "h": 430,
-  "bytes": 207337,
+  "bytes": 104556,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w2": {
   "w": 115,
   "h": 430,
-  "bytes": 218923,
+  "bytes": 111990,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w3": {
   "w": 125,
   "h": 430,
-  "bytes": 167211,
+  "bytes": 85624,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w4": {
   "w": 238,
   "h": 430,
-  "bytes": 195175,
+  "bytes": 98404,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w5": {
   "w": 118,
   "h": 430,
-  "bytes": 170270,
+  "bytes": 79638,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w6": {
   "w": 149,
   "h": 430,
-  "bytes": 198537,
+  "bytes": 98244,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w7": {
   "w": 143,
   "h": 430,
-  "bytes": 193132,
+  "bytes": 98314,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w8": {
   "w": 198,
   "h": 430,
-  "bytes": 204120,
+  "bytes": 101242,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-sit": {
   "w": 176,
   "h": 340,
-  "bytes": 46239,
+  "bytes": 12030,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-lean": {
   "w": 162,
   "h": 406,
-  "bytes": 44112,
+  "bytes": 11126,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-crouch": {
   "w": 159,
   "h": 259,
-  "bytes": 44157,
+  "bytes": 10568,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-cheer": {
   "w": 209,
   "h": 417,
-  "bytes": 55669,
+  "bytes": 45266,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-scarf": {
   "w": 255,
   "h": 402,
-  "bytes": 62959,
+  "bytes": 16818,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-look": {
   "w": 142,
   "h": 393,
-  "bytes": 45490,
+  "bytes": 12398,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-away": {
   "w": 125,
   "h": 381,
-  "bytes": 40258,
+  "bytes": 10948,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-civA": {
   "w": 133,
   "h": 403,
-  "bytes": 48582,
+  "bytes": 42314,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-civB": {
   "w": 161,
   "h": 406,
-  "bytes": 53231,
+  "bytes": 14364,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-civC": {
   "w": 195,
   "h": 395,
-  "bytes": 43286,
+  "bytes": 34118,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-civD": {
   "w": 144,
   "h": 399,
-  "bytes": 44297,
+  "bytes": 10944,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-point": {
   "w": 220,
   "h": 406,
-  "bytes": 53561,
+  "bytes": 13930,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-civE": {
   "w": 201,
   "h": 342,
-  "bytes": 48553,
+  "bytes": 12446,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-civF": {
   "w": 138,
   "h": 399,
-  "bytes": 45348,
+  "bytes": 12470,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-away": {
   "w": 124,
   "h": 386,
-  "bytes": 39565,
+  "bytes": 11718,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-away-smile": {
   "w": 143,
   "h": 387,
-  "bytes": 40261,
+  "bytes": 11968,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-away-side": {
   "w": 174,
   "h": 383,
-  "bytes": 34776,
+  "bytes": 29696,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-away-back": {
   "w": 119,
   "h": 385,
-  "bytes": 34226,
+  "bytes": 32728,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-away-ball": {
   "w": 250,
   "h": 372,
-  "bytes": 49034,
+  "bytes": 12876,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-point": {
   "w": 213,
   "h": 387,
-  "bytes": 41939,
+  "bytes": 36744,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-captain": {
   "w": 155,
   "h": 387,
-  "bytes": 42203,
+  "bytes": 12304,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen": {
   "w": 129,
   "h": 430,
-  "bytes": 58940,
+  "bytes": 18976,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-3q": {
   "w": 127,
   "h": 430,
-  "bytes": 56852,
+  "bytes": 18206,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-side": {
   "w": 80,
   "h": 430,
-  "bytes": 38934,
+  "bytes": 10696,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-back": {
   "w": 128,
   "h": 430,
-  "bytes": 57202,
+  "bytes": 17944,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-walk": {
   "w": 236,
   "h": 426,
-  "bytes": 60120,
+  "bytes": 14358,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-pockets": {
   "w": 129,
   "h": 430,
-  "bytes": 60437,
+  "bytes": 18344,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teen-cross": {
   "w": 106,
   "h": 422,
-  "bytes": 47229,
+  "bytes": 12696,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai": {
   "w": 127,
   "h": 405,
-  "bytes": 48669,
+  "bytes": 13692,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-3q": {
   "w": 120,
   "h": 406,
-  "bytes": 46007,
+  "bytes": 12186,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-side": {
   "w": 74,
   "h": 407,
-  "bytes": 33168,
+  "bytes": 9866,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-back": {
   "w": 131,
   "h": 403,
-  "bytes": 44984,
+  "bytes": 12720,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-ball": {
   "w": 254,
   "h": 390,
-  "bytes": 56645,
+  "bytes": 14814,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-kick": {
   "w": 336,
   "h": 368,
-  "bytes": 48524,
+  "bytes": 38998,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "sinai-cheer": {
   "w": 220,
   "h": 407,
-  "bytes": 50801,
+  "bytes": 13762,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva": {
   "w": 125,
   "h": 388,
-  "bytes": 41338,
+  "bytes": 39790,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-3q": {
   "w": 111,
   "h": 389,
-  "bytes": 37842,
+  "bytes": 36482,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-side": {
   "w": 70,
   "h": 389,
-  "bytes": 26765,
+  "bytes": 7954,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-back": {
   "w": 118,
   "h": 387,
-  "bytes": 35540,
+  "bytes": 10818,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-ball": {
   "w": 250,
   "h": 362,
-  "bytes": 47987,
+  "bytes": 12784,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-kick": {
   "w": 323,
   "h": 356,
-  "bytes": 45594,
+  "bytes": 12122,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "tikva-cheer": {
   "w": 225,
   "h": 393,
-  "bytes": 44829,
+  "bytes": 39122,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier": {
   "w": 132,
   "h": 430,
-  "bytes": 65243,
+  "bytes": 19684,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-stand": {
   "w": 120,
   "h": 430,
-  "bytes": 60885,
+  "bytes": 17108,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-side": {
   "w": 76,
   "h": 430,
-  "bytes": 42940,
+  "bytes": 12468,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-back": {
   "w": 129,
   "h": 430,
-  "bytes": 60020,
+  "bytes": 18598,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-march": {
   "w": 239,
   "h": 423,
-  "bytes": 64399,
+  "bytes": 14990,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-pack": {
   "w": 173,
   "h": 430,
-  "bytes": 76787,
+  "bytes": 66464,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-crate": {
   "w": 213,
   "h": 360,
-  "bytes": 55821,
+  "bytes": 12854,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-tired": {
   "w": 226,
   "h": 338,
-  "bytes": 50175,
+  "bytes": 11542,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-shout": {
   "w": 144,
   "h": 418,
-  "bytes": 54628,
+  "bytes": 13508,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-tie": {
   "w": 159,
   "h": 267,
-  "bytes": 44900,
+  "bytes": 10954,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-away": {
   "w": 159,
   "h": 399,
-  "bytes": 53687,
+  "bytes": 12968,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-lean": {
   "w": 146,
   "h": 417,
-  "bytes": 51818,
+  "bytes": 44460,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-look": {
   "w": 135,
   "h": 418,
-  "bytes": 51437,
+  "bytes": 12820,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "soldier-beret": {
   "w": 133,
   "h": 418,
-  "bytes": 55999,
+  "bytes": 14760,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "ofir90": {
   "w": 125,
   "h": 405,
-  "bytes": 52407,
+  "bytes": 14730,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi": {
   "w": 211,
   "h": 260,
-  "bytes": 53861,
+  "bytes": 7990,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi-smile": {
   "w": 213,
   "h": 260,
-  "bytes": 54591,
+  "bytes": 8234,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi-wide": {
   "w": 216,
   "h": 260,
-  "bytes": 55008,
+  "bytes": 8078,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi-shout": {
   "w": 214,
   "h": 260,
-  "bytes": 55958,
+  "bytes": 8524,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi-down": {
   "w": 210,
   "h": 260,
-  "bytes": 53702,
+  "bytes": 8290,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hero80-w1": {
   "w": 201,
   "h": 430,
-  "bytes": 76581,
+  "bytes": 23018,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hero80-w2": {
   "w": 158,
   "h": 430,
-  "bytes": 64015,
+  "bytes": 19690,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hero80-w3": {
   "w": 208,
   "h": 430,
-  "bytes": 77328,
+  "bytes": 23614,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hero80-w4": {
   "w": 194,
   "h": 430,
-  "bytes": 70210,
+  "bytes": 21518,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hero80-w5": {
   "w": 149,
   "h": 430,
-  "bytes": 66370,
+  "bytes": 20930,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hero80-w6": {
   "w": 157,
   "h": 430,
-  "bytes": 68433,
+  "bytes": 21366,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hero80-w7": {
   "w": 222,
   "h": 430,
-  "bytes": 72473,
+  "bytes": 22666,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hero80-w8": {
   "w": 114,
   "h": 430,
-  "bytes": 61624,
+  "bytes": 19422,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pupil-back1": {
   "w": 190,
   "h": 430,
-  "bytes": 71748,
+  "bytes": 23810,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pupil-back2": {
   "w": 194,
   "h": 430,
-  "bytes": 77877,
+  "bytes": 23528,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pupil-back3": {
   "w": 176,
   "h": 430,
-  "bytes": 79192,
+  "bytes": 23822,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pupil-back4": {
   "w": 185,
   "h": 430,
-  "bytes": 79614,
+  "bytes": 22510,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pupil-sideA": {
   "w": 247,
   "h": 421,
-  "bytes": 80252,
+  "bytes": 22030,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pupil-sideB": {
   "w": 212,
   "h": 430,
-  "bytes": 83276,
+  "bytes": 23656,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pupil-turn": {
   "w": 232,
   "h": 423,
-  "bytes": 75440,
+  "bytes": 20348,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pupil-pass": {
   "w": 224,
   "h": 418,
-  "bytes": 69401,
+  "bytes": 17732,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hooperRed-ball": {
   "w": 171,
   "h": 430,
-  "bytes": 63337,
+  "bytes": 22134,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hooperRed-dribble": {
   "w": 227,
   "h": 430,
-  "bytes": 83484,
+  "bytes": 25952,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hooperRed-shoot": {
   "w": 83,
   "h": 430,
-  "bytes": 45572,
+  "bytes": 16926,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hooperRed-stretch": {
   "w": 179,
   "h": 430,
-  "bytes": 70024,
+  "bytes": 21170,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hooperRed-away": {
   "w": 147,
   "h": 430,
-  "bytes": 57598,
+  "bytes": 20238,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hooperRed-bent": {
   "w": 208,
   "h": 430,
-  "bytes": 81588,
+  "bytes": 23830,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "usher": {
   "w": 135,
   "h": 346,
-  "bytes": 33492,
+  "bytes": 10006,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "usher-block": {
   "w": 231,
   "h": 346,
-  "bytes": 37754,
+  "bytes": 10340,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "usher-up": {
   "w": 184,
   "h": 346,
-  "bytes": 36841,
+  "bytes": 10734,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "usher-wave": {
   "w": 229,
   "h": 341,
-  "bytes": 38224,
+  "bytes": 10626,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hallVendor": {
   "w": 128,
   "h": 355,
-  "bytes": 40297,
+  "bytes": 11166,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hallVendor-hand": {
   "w": 226,
   "h": 351,
-  "bytes": 47316,
+  "bytes": 13078,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hallVendor-change": {
   "w": 129,
   "h": 351,
-  "bytes": 41014,
+  "bytes": 11498,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "hallVendor-shout": {
   "w": 218,
   "h": 356,
-  "bytes": 44516,
+  "bytes": 12548,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90": {
   "w": 102,
   "h": 260,
-  "bytes": 47157,
+  "bytes": 8592,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-smile": {
   "w": 145,
   "h": 260,
-  "bytes": 67621,
+  "bytes": 12424,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-worried": {
   "w": 168,
   "h": 260,
-  "bytes": 77784,
+  "bytes": 13284,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-nu": {
   "w": 143,
   "h": 260,
-  "bytes": 65240,
+  "bytes": 11448,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-angry": {
   "w": 178,
   "h": 260,
-  "bytes": 82391,
+  "bytes": 14748,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-side": {
   "w": 202,
   "h": 260,
-  "bytes": 91896,
+  "bytes": 15696,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher": {
   "w": 172,
   "h": 260,
-  "bytes": 68412,
+  "bytes": 9300,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-glasses": {
   "w": 159,
   "h": 260,
-  "bytes": 63476,
+  "bytes": 8522,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-share": {
   "w": 131,
   "h": 260,
-  "bytes": 54041,
+  "bytes": 7678,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-tired": {
   "w": 173,
   "h": 260,
-  "bytes": 68993,
+  "bytes": 9146,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-smile": {
   "w": 186,
   "h": 260,
-  "bytes": 73204,
+  "bytes": 9868,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-angry": {
   "w": 117,
   "h": 260,
-  "bytes": 49718,
+  "bytes": 7332,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan": {
   "w": 190,
   "h": 260,
-  "bytes": 80276,
+  "bytes": 42478,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-smile": {
   "w": 200,
   "h": 260,
-  "bytes": 83829,
+  "bytes": 43724,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-what": {
   "w": 227,
   "h": 260,
-  "bytes": 93418,
+  "bytes": 48918,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-story": {
   "w": 200,
   "h": 260,
-  "bytes": 86323,
+  "bytes": 46420,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-over": {
   "w": 216,
   "h": 260,
-  "bytes": 89574,
+  "bytes": 45762,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-laugh": {
   "w": 171,
   "h": 260,
-  "bytes": 74669,
+  "bytes": 9834,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-3q": {
   "w": 135,
   "h": 430,
-  "bytes": 71970,
+  "bytes": 22010,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-side": {
   "w": 105,
   "h": 430,
-  "bytes": 58383,
+  "bytes": 17316,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-back": {
   "w": 132,
   "h": 430,
-  "bytes": 70527,
+  "bytes": 22906,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-sit": {
   "w": 250,
   "h": 412,
-  "bytes": 77957,
+  "bytes": 20000,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-cross": {
   "w": 138,
   "h": 430,
-  "bytes": 70283,
+  "bytes": 21390,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-point": {
   "w": 230,
   "h": 430,
-  "bytes": 80994,
+  "bytes": 24676,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-w1": {
   "w": 234,
   "h": 422,
-  "bytes": 66500,
+  "bytes": 16566,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-w2": {
   "w": 235,
   "h": 419,
-  "bytes": 67565,
+  "bytes": 17358,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-w3": {
   "w": 219,
   "h": 418,
-  "bytes": 63391,
+  "bytes": 16514,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-w4": {
   "w": 230,
   "h": 415,
-  "bytes": 62297,
+  "bytes": 47780,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-laugh": {
   "w": 146,
   "h": 430,
-  "bytes": 67165,
+  "bytes": 17216,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-shout": {
   "w": 172,
   "h": 430,
-  "bytes": 76825,
+  "bytes": 22784,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "keren-hips": {
   "w": 172,
   "h": 430,
-  "bytes": 77136,
+  "bytes": 23846,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-3q": {
   "w": 136,
   "h": 430,
-  "bytes": 57795,
+  "bytes": 18024,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-side": {
   "w": 99,
   "h": 430,
-  "bytes": 46294,
+  "bytes": 14026,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-back": {
   "w": 141,
   "h": 430,
-  "bytes": 56255,
+  "bytes": 18358,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-crouch": {
   "w": 181,
   "h": 299,
-  "bytes": 56117,
+  "bytes": 47454,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-kick": {
   "w": 328,
   "h": 430,
-  "bytes": 73961,
+  "bytes": 58494,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-arms": {
   "w": 338,
   "h": 408,
-  "bytes": 54926,
+  "bytes": 14764,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-w1": {
   "w": 247,
   "h": 409,
-  "bytes": 52249,
+  "bytes": 43874,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-w2": {
   "w": 245,
   "h": 408,
-  "bytes": 54722,
+  "bytes": 45338,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-w3": {
   "w": 240,
   "h": 408,
-  "bytes": 53082,
+  "bytes": 43494,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-w4": {
   "w": 206,
   "h": 414,
-  "bytes": 49811,
+  "bytes": 41452,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-dribble": {
   "w": 246,
   "h": 403,
-  "bytes": 60426,
+  "bytes": 15872,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-cheer": {
   "w": 226,
   "h": 407,
-  "bytes": 52737,
+  "bytes": 14376,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "efi-sulk": {
   "w": 140,
   "h": 401,
-  "bytes": 46639,
+  "bytes": 12848,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-3q": {
   "w": 159,
   "h": 430,
-  "bytes": 61737,
+  "bytes": 56896,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-side": {
   "w": 121,
   "h": 430,
-  "bytes": 52069,
+  "bytes": 14932,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-back": {
   "w": 183,
   "h": 430,
-  "bytes": 61500,
+  "bytes": 20400,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-lean": {
   "w": 186,
   "h": 222,
-  "bytes": 44111,
+  "bytes": 36736,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-hand": {
   "w": 187,
   "h": 430,
-  "bytes": 70153,
+  "bytes": 61652,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-paper": {
   "w": 218,
   "h": 430,
-  "bytes": 66830,
+  "bytes": 62250,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-point": {
   "w": 253,
   "h": 429,
-  "bytes": 61516,
+  "bytes": 54876,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-arms": {
   "w": 156,
   "h": 429,
-  "bytes": 54700,
+  "bytes": 50496,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-laugh": {
   "w": 185,
   "h": 430,
-  "bytes": 63731,
+  "bytes": 60030,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-shrug": {
   "w": 297,
   "h": 430,
-  "bytes": 76481,
+  "bytes": 66086,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-coins": {
   "w": 187,
   "h": 430,
-  "bytes": 69511,
+  "bytes": 62576,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-wipe": {
   "w": 188,
   "h": 277,
-  "bytes": 53431,
+  "bytes": 44270,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "oldMan-stool": {
   "w": 213,
   "h": 374,
-  "bytes": 64042,
+  "bytes": 57104,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90": {
   "w": 143,
   "h": 430,
-  "bytes": 55237,
+  "bytes": 30250,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-3q": {
   "w": 137,
   "h": 430,
-  "bytes": 52798,
+  "bytes": 29674,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-side": {
   "w": 102,
   "h": 430,
-  "bytes": 82324,
+  "bytes": 24234,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-back": {
   "w": 137,
   "h": 430,
-  "bytes": 82287,
+  "bytes": 26662,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-arms": {
   "w": 133,
   "h": 430,
-  "bytes": 54831,
+  "bytes": 29936,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-hips": {
   "w": 207,
   "h": 430,
-  "bytes": 54831,
+  "bytes": 29936,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-note": {
   "w": 138,
   "h": 430,
-  "bytes": 60660,
+  "bytes": 30980,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-apron": {
   "w": 141,
   "h": 430,
-  "bytes": 55237,
+  "bytes": 30250,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-point": {
   "w": 219,
   "h": 430,
-  "bytes": 56589,
+  "bytes": 30726,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-watch": {
   "w": 158,
   "h": 430,
-  "bytes": 83308,
+  "bytes": 22760,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-hug": {
   "w": 308,
   "h": 430,
-  "bytes": 57860,
+  "bytes": 31972,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-sit": {
   "w": 159,
   "h": 411,
-  "bytes": 83323,
+  "bytes": 65922,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-door": {
   "w": 169,
   "h": 430,
-  "bytes": 56589,
+  "bytes": 30726,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-call": {
   "w": 202,
   "h": 430,
-  "bytes": 54831,
+  "bytes": 29936,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher": {
   "w": 131,
   "h": 430,
-  "bytes": 45662,
+  "bytes": 14880,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-3q": {
   "w": 119,
   "h": 430,
-  "bytes": 44976,
+  "bytes": 13366,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-side": {
   "w": 92,
   "h": 430,
-  "bytes": 34665,
+  "bytes": 11052,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-back": {
   "w": 202,
   "h": 430,
-  "bytes": 42312,
+  "bytes": 13936,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-arms": {
   "w": 123,
   "h": 430,
-  "bytes": 42532,
+  "bytes": 13032,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-note": {
   "w": 128,
   "h": 430,
-  "bytes": 44489,
+  "bytes": 12928,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-look": {
   "w": 150,
   "h": 430,
-  "bytes": 50130,
+  "bytes": 15770,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-point": {
   "w": 235,
   "h": 430,
-  "bytes": 50879,
+  "bytes": 14600,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-hand": {
   "w": 212,
   "h": 430,
-  "bytes": 50762,
+  "bytes": 15326,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-sit": {
   "w": 166,
   "h": 398,
-  "bytes": 47894,
+  "bytes": 12018,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-lean": {
   "w": 417,
   "h": 429,
-  "bytes": 74378,
+  "bytes": 19634,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-walk": {
   "w": 203,
   "h": 413,
-  "bytes": 38061,
+  "bytes": 10126,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-watch": {
   "w": 139,
   "h": 426,
-  "bytes": 36079,
+  "bytes": 9460,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "teacher-turn": {
   "w": 175,
   "h": 413,
-  "bytes": 31288,
+  "bytes": 8698,
   "yellowLeft": 0,
   "source": "2026-09"
  }

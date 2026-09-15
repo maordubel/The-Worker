@@ -36,7 +36,7 @@ export function CastCard({ cast, onClose }: { cast: NonNullable<LifeBusEvents['c
 
       <div className="relative my-3 min-h-0 w-[min(52vw,260px)] flex-1">
         <Image
-          src={`/life/art/${cast.art}.png`}
+          src={`/life/art/${cast.art}.webp`}
           alt={cast.nameHe}
           fill
           sizes="(max-width: 640px) 52vw, 260px"

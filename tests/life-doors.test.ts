@@ -161,10 +161,10 @@ describe('כל עבודה בחדר שלה — the audit that would have caught t
     for (const scene of ALL_SCENES) {
       const arts = [scene.art, ...Object.values(scene.artByEra ?? {})]
       for (const art of arts) {
-        expect(existsSync(`public/life/art/${art}.png`), `${scene.id} wants ${art}.png`).toBe(true)
+        expect(existsSync(`public/life/art/${art}.webp`), `${scene.id} wants ${art}.webp`).toBe(true)
       }
       for (const layer of scene.layers ?? []) {
-        expect(existsSync(`public/life/art/${layer.art}.png`), `${scene.id} draws ${layer.art}.png`).toBe(true)
+        expect(existsSync(`public/life/art/${layer.art}.webp`), `${scene.id} draws ${layer.art}.webp`).toBe(true)
       }
     }
   })

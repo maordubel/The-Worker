@@ -65,7 +65,7 @@ export function ShopCard({
       <header
         className="relative flex items-end justify-between gap-3 overflow-hidden border-b-rule border-red px-4 pb-3 pt-5"
         style={{
-          backgroundImage: 'linear-gradient(to bottom, rgba(17,17,17,0.62), rgba(17,17,17,0.88)), url(/life/art/shopHanger.png)',
+          backgroundImage: 'linear-gradient(to bottom, rgba(17,17,17,0.62), rgba(17,17,17,0.88)), url(/life/art/shopHanger.webp)',
           backgroundSize: 'cover',
           backgroundPosition: 'center 38%',
         }}
@@ -273,7 +273,7 @@ function Draw({ shirt }: { shirt: Shirt }) {
   if (shirt.spec) return <KitShirt spec={shirt.spec} className="h-full w-full" title={shirt.nameHe} />
   return (
     <div className="relative h-full w-full">
-      <Image src={`/life/art/${shirt.art}.png`} alt={shirt.nameHe} fill sizes="180px" className="object-contain" />
+      <Image src={`/life/art/${shirt.art}.webp`} alt={shirt.nameHe} fill sizes="180px" className="object-contain" />
     </div>
   )
 }

@@ -133,7 +133,7 @@ export function buildSlab(spec: SlabSpec, loader: THREE.TextureLoader): Slab {
     const height = heightAtRef * scale
     const centerY = centerAtRef * scale
 
-    const art = quad(loader.load(`${ART}/${plane.key}.png`), width, height, Boolean(plane.opaque))
+    const art = quad(loader.load(`${ART}/${plane.key}.webp`), width, height, Boolean(plane.opaque))
     art.position.set(0, centerY, plane.z)
     art.renderOrder = Math.round(-plane.z)
     group.add(art)
@@ -141,7 +141,7 @@ export function buildSlab(spec: SlabSpec, loader: THREE.TextureLoader): Slab {
 
     // ההמשך כלפי מטה — רק לרקע האטום ולמישור הקרוב; האמצע היה מכפיל את אותו אספלט
     if (spec.ground && (plane.opaque || plane === spec.planes[spec.planes.length - 1])) {
-      const strip = quad(loader.load(`${ART}/${spec.ground.key}.png`), width, groundHeightAtRef * scale, Boolean(plane.opaque))
+      const strip = quad(loader.load(`${ART}/${spec.ground.key}.webp`), width, groundHeightAtRef * scale, Boolean(plane.opaque))
       strip.position.set(0, centerY - (height + groundHeightAtRef * scale) / 2, plane.z)
       strip.renderOrder = Math.round(-plane.z)
       group.add(strip)
@@ -154,7 +154,7 @@ export function buildSlab(spec: SlabSpec, loader: THREE.TextureLoader): Slab {
   const floorTo = bottomSlope > 0 ? spec.eye / bottomSlope : reference
 
   if (spec.ground) {
-    const map = prepare(loader.load(`${ART}/${spec.ground.key}.png`))
+    const map = prepare(loader.load(`${ART}/${spec.ground.key}.webp`))
     map.wrapS = map.wrapT = THREE.RepeatWrapping
     map.repeat.set(3, 2)
     const depth = floorTo + 5

@@ -60,7 +60,7 @@ export function HoopsCard({
       new THREE.PlaneGeometry(30, 30),
       // his schoolyard: cracked asphalt with the faded lines still on it, tiled six ways
       new THREE.MeshStandardMaterial({
-        map: imageTexture('/life/art/hoop-court.png', (texture) => {
+        map: imageTexture('/life/art/hoop-court.webp', (texture) => {
           texture.wrapS = THREE.RepeatWrapping
           texture.wrapT = THREE.RepeatWrapping
           texture.repeat.set(6, 6)
@@ -102,7 +102,7 @@ export function HoopsCard({
      */
     const board = new THREE.Mesh(
       new THREE.BoxGeometry(1.4, 0.9, 0.05),
-      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/hoop-board.png'), roughness: 0.6, transparent: true }),
+      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/hoop-board.webp'), roughness: 0.6, transparent: true }),
     )
     board.position.set(0, RIM_HEIGHT + 0.45, RIM_Z - 0.2)
     scene.add(board)
@@ -117,7 +117,7 @@ export function HoopsCard({
     const net = new THREE.Mesh(
       new THREE.ConeGeometry(RIM_RADIUS * 0.95, 0.38, 10, 1, true),
       new THREE.MeshBasicMaterial({
-        map: imageTexture('/life/art/hoop-ring--net.png'),
+        map: imageTexture('/life/art/hoop-ring--net.webp'),
         transparent: true,
         alphaTest: 0.25,
         side: THREE.DoubleSide,
@@ -128,7 +128,7 @@ export function HoopsCard({
 
     const ball = new THREE.Mesh(
       new THREE.SphereGeometry(BALL_R, 20, 16),
-      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/hoop-ball.png'), roughness: 0.6 }),
+      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/hoop-ball.webp'), roughness: 0.6 }),
     )
     ball.position.set(0, 1.1, 0)
     scene.add(ball)

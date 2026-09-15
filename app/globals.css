@@ -793,7 +793,7 @@ select {
   80% { transform: translate(3px, -2px) }
 }
 .film-grain {
-  background-image: url('/life/art/fxGrain.png');
+  background-image: url('/life/art/fxGrain.webp');
   background-size: 256px 256px;
   mix-blend-mode: overlay;
   animation: grain-jitter .42s steps(1, end) infinite;

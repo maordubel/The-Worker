@@ -44,7 +44,7 @@ export const BACKDROP = [
    *
    * Eight of the keys above were REPLACED rather than added, and nothing in this list
    * records that, which is correct: a scene asks for `kitchen` and gets whatever
-   * `kitchen.png` currently is. What changed is that `kitchen`, `living`, `kiosk`,
+   * `kitchen` currently is. What changed is that `kitchen`, `living`, `kiosk`,
    * `pitch`, `stand`, `ussExt` and `ussHall` stopped being rectangles of a concept board
    * — the kitchen was a 4.3× upscale of a panel and the terrace was an ILLUSTRATED AERIAL
    * of the whole bowl, which is a map and not a place to stand — and `corridor` stopped
@@ -507,7 +507,7 @@ export const FIGURE = [
  *
  * **It is empty, and that was always the plan.**
  *
- * `FIGURE` is a promise: every key in it resolves to a real PNG in `public/life/art`, and
+ * `FIGURE` is a promise: every key in it resolves to a real file in `public/life/art`, and
  * `tests/life.test.ts` holds the runtime to it. Forty-six names were failing that promise
  * — the whole soldier set, Sinai, Tikva and one Ofir plate — because the sheets were
  * sliced locally and the delta that carried them never reached GitHub. Deleting the names
@@ -614,7 +614,7 @@ export const PROP = [
    * in `ITEM_ART`. The ticket went further and became the real thing — `docTicket`, the
    * scan of the ticket a person kept for forty years.
    *
-   * Their PNGs are still in `public/life/art` and are now referenced by nothing. They can
+   * Their files are still in `public/life/art` and are now referenced by nothing. They can
    * be deleted; leaving them costs 90KB and loses nothing.
    */
   /**
@@ -845,7 +845,7 @@ export function parallaxKeys(art: string): { far: string; mid: string; near: str
 }
 
 export function artUrl(key: string): string {
-  return `${ART_ROOT}/${key}.png`
+  return `${ART_ROOT}/${key}.webp`
 }
 
 /**

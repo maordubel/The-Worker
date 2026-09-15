@@ -48,7 +48,7 @@ export function actorPose(lateral: number, moved: number, moving: boolean): Acto
 export function loadActor(loader: THREE.TextureLoader): Record<string, THREE.Texture> {
   const out: Record<string, THREE.Texture> = {}
   for (const key of [ACTOR_BACK, ...ACTOR_WALK]) {
-    const map = loader.load(`/life/art/${key}.png`)
+    const map = loader.load(`/life/art/${key}.webp`)
     map.colorSpace = THREE.SRGBColorSpace
     map.minFilter = THREE.LinearMipmapLinearFilter
     map.magFilter = THREE.LinearFilter

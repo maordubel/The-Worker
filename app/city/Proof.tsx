@@ -209,7 +209,7 @@ export function Proof({ shot }: { shot: Shot }) {
     // והמנוע גוזר ממנו את הגודל על המסך לפי המרחק. ככה כל אדם עומד ברחוב ולא מודבק עליו.
     const member = CITY_CAST[shot.cast]
     if (member) {
-      const map = loader.load(`/life/art/${shot.cast}.png`)
+      const map = loader.load(`/life/art/${shot.cast}.webp`)
       const figure = actorBillboard(map, member.metres)
       figure.position.set(-0.9, -eye + member.metres / 2, -shot.castAt)
       figure.renderOrder = 8
@@ -228,7 +228,7 @@ export function Proof({ shot }: { shot: Shot }) {
       for (const beat of mission.beats) {
         const m = CITY_CAST[beat.cast]
         if (!m) continue
-        const map = loader.load(`/life/art/${beat.cast}.png`)
+        const map = loader.load(`/life/art/${beat.cast}.webp`)
         const figure = actorBillboard(map, m.metres)
         figure.position.set(beat.side, -eye + m.metres / 2, -beat.at)
         // רחוק נצבע לפני קרוב, כדי שמי שקרוב יכסה את מי שמאחוריו

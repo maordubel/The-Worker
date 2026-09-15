@@ -63,7 +63,7 @@ let declared = 0
 let missing = 0
 for (const [label, keys] of GROUPS) {
   const live = [...new Set(keys)].filter((key) => !shelved.has(key))
-  const gone = live.filter((key) => !existsSync(join(ART, `${key}.png`)))
+  const gone = live.filter((key) => !existsSync(join(ART, `${key}.webp`)))
   declared += live.length
   missing += gone.length
   rows.push([label, live.length, gone])

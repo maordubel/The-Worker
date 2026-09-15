@@ -80,7 +80,7 @@ export function PenaltyCard({
        * the size of grain rather than turning into a pattern.
        */
       new THREE.MeshStandardMaterial({
-        map: imageTexture('/life/art/pen-ground.png', (texture) => {
+        map: imageTexture('/life/art/pen-ground.webp', (texture) => {
           texture.wrapS = THREE.RepeatWrapping
           texture.wrapT = THREE.RepeatWrapping
           texture.repeat.set(4, 4)
@@ -132,11 +132,11 @@ export function PenaltyCard({
      */
     const keeper = new THREE.Group()
     const poses: Record<KeeperPose, THREE.Mesh> = {
-      ready: billboard('/life/art/pen-keeper-ready.png', 1.62),
-      left: billboard('/life/art/pen-keeper-left.png', 1.15),
-      right: billboard('/life/art/pen-keeper-right.png', 1.15),
-      caught: billboard('/life/art/pen-keeper-caught.png', 1.0),
-      beaten: billboard('/life/art/pen-keeper-beaten.png', 1.6),
+      ready: billboard('/life/art/pen-keeper-ready.webp', 1.62),
+      left: billboard('/life/art/pen-keeper-left.webp', 1.15),
+      right: billboard('/life/art/pen-keeper-right.webp', 1.15),
+      caught: billboard('/life/art/pen-keeper-caught.webp', 1.0),
+      beaten: billboard('/life/art/pen-keeper-beaten.webp', 1.6),
     }
     for (const [name, mesh] of Object.entries(poses)) {
       mesh.position.y = name === 'ready' || name === 'beaten' ? 0.81 : 0.62
@@ -152,7 +152,7 @@ export function PenaltyCard({
     const ball = new THREE.Mesh(
       new THREE.SphereGeometry(BALL_R, 20, 16),
       // his own scuffed leather ball, with the drawn one still there if the file is missing
-      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/pen-ball.png'), roughness: 0.55 }),
+      new THREE.MeshStandardMaterial({ map: imageTexture('/life/art/pen-ball.webp'), roughness: 0.55 }),
     )
     ball.position.set(0, BALL_R, 0)
     scene.add(ball)
