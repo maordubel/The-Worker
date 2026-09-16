@@ -57,6 +57,14 @@ export type DialogueHooks = {
   onOpen(open: boolean): void
   /** how this beat is framed; the scene owns the camera, the content owns the shot */
   shot?(shot: ConversationShot | null): void
+  /**
+   * Where this speaker is standing, as a fraction of the camera's view, or null.
+   *
+   * A runner cannot know: it holds words and effects and has never heard of a camera.
+   * The scene can, and it is the only thing that can, so this is a hook like every other
+   * question about the world (`travel`, `shot`) rather than a field on a line.
+   */
+  anchorFor?(who: string | null): number | null
 }
 
 /** the people a boy does not "meet": his parents, the friends from the alley, the neighbour, the kiosk */
@@ -278,6 +286,7 @@ export class DialogueRunner {
     this.bus.emit('dialogue', {
       lines: [line.closeUp ? { who: line.who, text: line.text, closeUp: line.closeUp } : { who: line.who, text: line.text }],
       portrait: line.who ? portraitFor(line.who, this.portraits) : null,
+      anchor: this.hooks.anchorFor?.(line.who) ?? null,
       choices: last && this.pendingChoices ? this.renderChoices(this.pendingChoices) : undefined,
     })
   }
@@ -287,6 +296,7 @@ export class DialogueRunner {
     this.bus.emit('dialogue', {
       lines: line ? [line] : [],
       portrait: line?.who ? portraitFor(line.who, this.portraits) : null,
+      anchor: this.hooks.anchorFor?.(line?.who ?? null) ?? null,
       choices: this.renderChoices(this.pendingChoices ?? []),
     })
   }

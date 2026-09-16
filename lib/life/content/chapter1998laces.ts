@@ -35,10 +35,18 @@ export const PORTRAIT_LACES: Record<string, string> = {
   'סוקו': 'faceSoko',
   'אסף': 'faceAsaf',
   'שחור': 'faceShachor',
-  'המורה': 'faceTeacher',
+  // faceTeacher is cut across a sheet gutter and draws two half-teachers — see
+  // `scripts/life/face-plates-2026-09-16.py`. `-glasses` is the whole one.
+  'המורה': 'faceTeacher-glasses',
   'אוהד': 'faceSupporter',
   'אוהד ותיק': 'faceOldMan',
   'קול מהרדיו': 'faceSupporterB',
+  'סדרן': 'faceUsher',
+  'אוהד עם רדיו': 'faceSupporter',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export function objectiveLaces(state: LifeState, sceneId: string): string | null {

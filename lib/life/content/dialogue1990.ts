@@ -466,7 +466,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
     branches: [
       {
         when: { flag: 'knows:pillar' },
-        lines: [{ who: 'בארי', text: 'ליד העמוד, כמו שאמרתי. ותגיד לו שיוסי שאל עליו.' }],
+        lines: [{ who: 'בארי', text: 'ליד העמוד, כמו שאמרתי. ותגיד לו שמישל שאל עליו.' }],
       },
       {
         lines: [

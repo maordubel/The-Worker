@@ -100,7 +100,9 @@ export const PORTRAIT_1991: Record<string, string> = {
   'פוגי': 'faceHero80',
   'קובי': 'faceKobi',
   'רחל': 'faceRachel90',
-  'המורה': 'faceTeacher',
+  // faceTeacher is cut across a sheet gutter and draws two half-teachers — see
+  // `scripts/life/face-plates-2026-09-16.py`. `-glasses` is the whole one.
+  'המורה': 'faceTeacher-glasses',
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
   'קרן': 'faceKeren90',
@@ -117,6 +119,10 @@ export const PORTRAIT_1991: Record<string, string> = {
   'אפי': 'faceEfi',
   'לימור': 'faceLimor',
   'שחור': 'faceShachor',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 /**

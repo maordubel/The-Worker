@@ -23,6 +23,7 @@
     "life:play": "node scripts/life/playthrough.mjs",
     "life:pitch": "node scripts/life/pitch-probe.mjs",
     "life:deadends": "tsx scripts/life/deadend-audit.ts",
+    "life:budget": "tsx scripts/life/budget-audit.ts",
     "life:flow": "tsx scripts/life/flow-probe.ts",
     "life:finish": "node scripts/life/finish-audit.mjs",
     "life:boards": "node scripts/life/scene-boards.mjs",

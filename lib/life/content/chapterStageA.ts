@@ -45,6 +45,11 @@ export const PORTRAIT_STAGE_A: Record<string, string> = {
   'לירון': 'faceLiron',
   'עליזה': 'faceAliza',
   'בארי': 'faceBarry',
+  'אוהד ותיק': 'faceOldMan',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 // ------------------------------------------------------------------- A2 · the alley ---
@@ -198,7 +203,16 @@ export const goalA4 = (state: LifeState): LocationId | null => {
   if (state.flags['own:shirt85'] || state.flags['a4:gave']) return null
   // with the thirty in hand the day has one destination; before that it has a job, not a
   // place, and pointing at a door would be the game inventing an errand
-  return state.savings + state.agorot >= SHIRT_PRICE ? 'kiosk' : null
+  if (state.savings + state.agorot < SHIRT_PRICE) return null
+  /**
+   * הכסף בפחית הוא לא כסף ביד — the arrow has to know the difference.
+   *
+   * `minAgorot`, which is what Rafi's counter asks, reads the POCKET. `savings` is a
+   * second pocket no condition in the vocabulary can see. So a boy with twelve in the
+   * tin and eighteen in his hand was sent to the kiosk by this arrow and told "אין לך
+   * 30" when he got there — the game pointing at a door it had already locked.
+   */
+  return state.agorot >= SHIRT_PRICE ? 'kiosk' : 'bedroom'
 }
 
 export const goalA5 = (state: LifeState): LocationId | null => {
@@ -868,7 +882,9 @@ export const SHIRT_PRICE = shirtAgorot('a4-shirt')
 export function objectiveA4(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags['own:shirt85']) return null
-  if (state.savings + state.agorot >= SHIRT_PRICE) return 'יש את ה־30. לרפי, לפני שבע.'
+  if (state.agorot >= SHIRT_PRICE) return 'יש את ה־30. לרפי, לפני שבע.'
+  // the thirty exists, but part of it is still under the bed — and Rafi counts hands
+  if (state.savings + state.agorot >= SHIRT_PRICE) return 'יש את ה־30, אבל חלק בפחית. לרוקן, ואז לרפי.'
   if (sceneId === 'bedroom') return 'ספטמבר. החולצה בחלון של רפי, 30 שקל. הפחית מתחת למיטה.'
   return 'צריך 30. בקבוקים, שליחויות, ומה שאבא נותן — עד שבע.'
 }
@@ -1089,7 +1105,7 @@ export const BEATS_A5: Beat[] = [
     do: [
       { a: 'flag', flag: 'a5:there' },
       { a: 'sfx', key: 'crowd-swell', level: 0.6 },
-      { a: 'lines', lines: [{ who: null, text: 'שער 7. ברזל, ריח של גרעינים, וגברים שעומדים בדיוק איפה שהם עומדים כל שבת.' }, { who: 'בארי', text: 'הנה עוד אחד.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'שער 7. ברזל, ריח של גרעינים, וגברים שעומדים בדיוק איפה שהם עומדים כל שבת.' }, { who: 'אוהד ותיק', text: 'הנה עוד אחד.' }] },
       { a: 'derive', events: (state) => [{ t: 'flag.raised', flag: state.minute > at(15, 40) ? 'a5:late' : 'a5:ontime' }] },
       /**
        * …ולא לסגור את הפרק כאן.
@@ -1316,6 +1332,25 @@ export const CONVERSATIONS_A6: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { flag: 'a6:radio-dead' }, lines: [{ who: null, text: 'מת. מנערים — כלום. הסוללות חמות ומריחות.' }] },
+      /**
+       * החולצה, בחורף — A4 was a whole day about thirty shekels and the shirt was never
+       * spoken of again outside the September it was bought for.
+       *
+       * This is where it comes back, and it comes back in the least useful possible way:
+       * at home, in the rain, with his father gone and nobody in the flat to see it. That
+       * is the whole point — a thing you bought for a ground you are not at is what owning
+       * it actually feels like at eight. It grants nothing, costs nothing and opens
+       * nothing; `a6:shirt` exists only so it is said once rather than on every look.
+       *
+       * `own:shirt85` is the flag the purchase writes (`{ e: 'own', item: 'shirt85' }`),
+       * and it survives a year change, so a boy who put the tin on his mother's table or
+       * ran out of summer hears the ordinary line below and is told nothing he did not do.
+       */
+      {
+        when: { flag: 'own:shirt85', all: [{ flag: 'a6:on' }], none: [{ flag: 'a6:shirt' }] },
+        lines: [{ who: null, text: 'אתה מחזיק את הטרנזיסטור בשתי ידיים. לבשת בשבילו את החולצה, בבית, ואין פה אף אחד שיראה.' }],
+        then: [{ e: 'flag', flag: 'a6:shirt' }],
+      },
       { when: { flag: 'a6:on' }, lines: [{ who: null, text: 'השדר צועק לפני שקורה משהו, וזה בכל פעם עובד עליך. אתה מחזיק את הטרנזיסטור בשתי ידיים.' }] },
       {
         lines: [{ who: null, text: 'הטרנזיסטור. האנטנה עקומה, מישהו הדביק אותה בסלוטייפ, ובגשם צריך להחזיק אותה לכיוון החלון.' }],

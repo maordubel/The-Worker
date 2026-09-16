@@ -29,6 +29,10 @@ export const PORTRAIT_HALL: Record<string, string> = {
   'סוקו': 'faceSoko',
   'סדרן': 'faceUsher',
   'אוהד': 'faceSupporter',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export function objectiveHall(state: LifeState): string | null {

@@ -62,6 +62,11 @@ export const PORTRAIT_1993: Record<string, string> = {
   'אוהד': 'faceSupporter',
   'אוהדת': 'faceWoman',
   'אוהד ותיק': 'faceOldMan',
+  'סדרן': 'faceUsher',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export const OBJECTIVES_1993 = {
@@ -844,7 +849,7 @@ export const CONVERSATIONS_1993: Conversation[] = [
       {
         lines: [
           { who: null, text: 'הצפירה.' },
-          { who: null, text: 'אתה לא זוכר מה עשית בשנייה שאחריה. אתה זוכר את השנייה שאחרי זה: אפי על הגב שלך, שחור בוכה עם הבד על הכתפיים, לימור רושמת משהו בפנקס קטן כאילו גם את זה צריך לתעד.' },
+          { who: null, text: 'אתה לא זוכר מה עשית בשנייה שאחריה. אתה זוכר את השנייה שאחרי זה: אפי על הגב שלך, שחור בוכה עם הבד על הכתפיים, סוקו רושם משהו בפנקס קטן כאילו גם את זה צריך לתעד.' },
           { who: null, text: 'הגביע. אדום.' },
         ],
         then: [{ e: 'flag', flag: 'final:over' }, { e: 'redheart', key: 'basketballLove', delta: 6 }, { e: 'wellbeing', key: 'happiness', delta: 12 }, { e: 'wellbeing', key: 'belonging', delta: 8 }, { e: 'goto', node: 'after-1993' }],

@@ -33,9 +33,29 @@ export type PassageObject = {
 
 export const PASSAGE_1990: PassageObject[] = [
   {
+    /**
+     * הקופסה האדומה — the one object in this room that came out of the last chapter.
+     *
+     * The four things the boy looked at used to be four pieces of dressing: a clipping, a
+     * notebook, a scarf, a photograph. None of them was anything the player had earned,
+     * which made the bridge a mood rather than a memory — and the bridge is the mechanism
+     * this game built for exactly the opposite job.
+     *
+     * So the first of them is now the tin box, because every one of 1986's three endings
+     * closes on the same sentence: you put it in the red box, THE FIRST THING IN IT. That
+     * sentence is guaranteed — the chapter cannot end without one of those three cards —
+     * so this line is true of every save that can reach this room, which is what lets it
+     * be said at all. `PassageObject` carries no `Condition` and `PassageScene` evaluates
+     * none, so anything written here is shown to everybody; the scrap of cloth and the
+     * 1983 stub are both OPTIONAL, and naming either one here would be the game telling a
+     * player about an afternoon he did not have. They are echoed where a branch can read
+     * them instead (`d-box` and `d-go` in `chapter2000double.ts`).
+     *
+     * It does nothing. He does not take it out. It is still there, and the room says so.
+     */
     id: 'clipping',
-    labelHe: 'הגזיר מהעיתון',
-    lookHe: 'עמוד ספורט מקופל, מצהיב בקצוות. הכותרת כבר נמחקה מרוב שפשוף, אבל אתה יודע מה כתוב בה.',
+    labelHe: 'הקופסה האדומה',
+    lookHe: 'קופסת פח מתחת למיטה. הדבר הראשון שנכנס אליה עוד למעלה, ומעליו כבר יש שכבה. אתה לא מוציא אותו. אתה רק בודק שהוא שם.',
     afterHe: 'הפוסטר מעל המיטה החליף ידיים. הכדור בפינה נעלם. מישהו גדל שתי מידות של נעליים.',
   },
   {
@@ -96,6 +116,10 @@ export const PORTRAIT_1990: Record<string, string> = {
   'הקופאי': 'faceVendor',
   'מוכר': 'faceVendor',
   'ילד': 'faceKid',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export const OBJECTIVES_1990 = {

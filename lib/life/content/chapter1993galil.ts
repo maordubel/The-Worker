@@ -68,6 +68,11 @@ export const PORTRAIT_GALIL: Record<string, string> = {
   'סוקו': 'faceSoko',
   'אוהד': 'faceSupporter',
   'אוהד ותיק': 'faceOldMan',
+  'סדרן': 'faceUsher',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export function objectiveGalil(state: LifeState, sceneId: string): string | null {
@@ -470,7 +475,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
           { who: 'לימור', text: 'אפי. שלוש שעות נסיעה. תשעים שקל. אמצע שבוע.' },
         ],
         choices: [
-          { id: 'promise', text: '"אני בא. מה שלא יהיה."', then: [{ e: 'flag', flag: 'life:promise:g4' }, { e: 'personality', key: 'impulsiveness', delta: 3 }, { e: 'rel', who: 'efi', axis: 'bond', delta: 4 }, { e: 'toast', text: 'לימור רשמה משהו בפנקס. אולי את זה.', tone: 'plain' }] },
+          { id: 'promise', text: '"אני בא. מה שלא יהיה."', then: [{ e: 'flag', flag: 'life:promise:g4' }, { e: 'personality', key: 'impulsiveness', delta: 3 }, { e: 'rel', who: 'efi', axis: 'bond', delta: 4 }, { e: 'toast', text: 'מישל רשם משהו בפנקס. אולי את זה.', tone: 'plain' }] },
           { id: 'signup', text: '"תרשמי אותי לאוטובוס." (לימור)', then: [{ e: 'flag', flag: 'life:signed:bus' }, { e: 'personality', key: 'responsibility', delta: 2 }, { e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 3 }, { e: 'toast', text: 'שם, שעה, "ארבע בפינה". רשום.', tone: 'plain' }] },
           { id: 'quiet', text: 'לשתוק. לחגוג את הערב הזה.', then: [{ e: 'personality', key: 'reliability', delta: 1 }, { e: 'wellbeing', key: 'happiness', delta: 6 }] },
         ],
@@ -647,12 +652,12 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
       {
         lines: [
           { who: null, text: 'הפינה. שחור סוחב כיסאות מהאולם לרחוב ובחזרה, בלי סיבה, כי הידיים צריכות משהו.' },
-          { who: null, text: 'לימור עם הפנקס, משחזרת: מי נסע, מי איחר, כמה עלה. כאילו אם הלוגיסטיקה תסתדר, גם התוצאה.' },
+          { who: null, text: 'מישל עם הפנקס, משחזר: מי נסע, מי איחר, כמה עלה. כאילו אם הלוגיסטיקה תסתדר, גם התוצאה.' },
           { who: null, text: 'אפי עומד בצד. לא מדבר.' },
         ],
         choices: [
           { id: 'shachor', text: 'לעזור לשחור עם הכיסאות.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 5 }, { e: 'remember', who: 'shachor', eventId: 'stacked-chairs-1993', significance: 'notable' }, { e: 'institution', key: 'ussishkinWound', delta: 3 }, { e: 'goto', node: 'after-efi' }] },
-          { id: 'limor', text: 'לשבת עם לימור והפנקס.', then: [{ e: 'rel', who: 'crowd-limor', axis: 'bond', delta: 4 }, { e: 'personality', key: 'curiosity', delta: 1 }, { e: 'goto', node: 'after-efi' }] },
+          { id: 'michel', text: 'לשבת עם מישל והפנקס.', then: [{ e: 'rel', who: 'michel', axis: 'bond', delta: 4 }, { e: 'personality', key: 'curiosity', delta: 1 }, { e: 'goto', node: 'after-efi' }] },
           { id: 'efi', text: 'ללכת לאפי.', then: [{ e: 'goto', node: 'after-efi' }] },
         ],
       },
@@ -673,7 +678,19 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
       {
         when: { flag: 'life:galil:there' },
         lines: [{ who: 'אפי', text: 'היית שם.' }, { who: 'פוגי', text: 'הייתי שם.' }, { who: 'אפי', text: 'טוב.' }, { who: null, text: 'זה כל מה שהוא היה מסוגל. זה היה הרבה.' }],
-        then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 6 }, { e: 'goto', node: 'after-soko' }],
+        /**
+         * הצד השני של ההבטחה. Breaking it costs four trust, or six with an excuse —
+         * both written, both reachable. Keeping it paid `sharedHistory` and NOTHING on
+         * the axis the promise was made on, so Efi's trust was a currency the game
+         * could only take. Three chapters later it is read at 45 and this line is the
+         * only door to it: showing up is what trust means here, and it is the whole
+         * difference between "אפי בא פחות" in 1997 and "אני בא איתך" in 2000.
+         */
+        then: [
+          { e: 'rel', who: 'efi', axis: 'trust', delta: 8 },
+          { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 6 },
+          { e: 'goto', node: 'after-soko' },
+        ],
       },
       {
         lines: [{ who: 'אפי', text: 'שמעת ברדיו?' }, { who: 'פוגי', text: 'שמעתי.' }, { who: 'אפי', text: 'אז אתה יודע.' }, { who: null, text: 'הוא לא הסתכל עליך כשאמר את זה.' }],

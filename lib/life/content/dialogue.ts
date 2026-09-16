@@ -1171,6 +1171,51 @@ const CONVERSATIONS: Conversation[] = [
     ],
   },
   {
+    /**
+     * אחרי המשחק — הסיום שהיה כתוב ולא היה לו איך לקרות.
+     *
+     * `ENDINGS.late` in `chapter1986.ts` has a title, a body, a memory item and its own
+     * `after` pair (`kobi-cheer` → `kobi90-cheer`) — a complete ending, written for the
+     * boy who did not get in and found his father in the crowd coming out. **Nothing in
+     * the game emitted it.** `kobi-found` is `kobi-crowd` standing on the terrace inside,
+     * which needs `entry:granted`, and all five of its branches end on `home`. So a
+     * Saturday spent outside the turnstile had exactly two outcomes — you got in, or you
+     * went to bed — and the third, which the chapter had already written down, could not
+     * happen to anybody.
+     *
+     * This is that third one, and it is deliberately NOT a consolation. The `home` card
+     * is a ticket stub kept in the boy's own pocket; this one is a scrap picked up off
+     * the floor, and the line that matters is that nobody gave it to him. Seven years
+     * later `chapter2000double.ts` reads that scrap back.
+     */
+    id: 'kobi-out-late',
+    nameHe: 'קובי',
+    branches: [
+      {
+        shot: { focus: 'kobi', framing: 'medium', ambienceDuck: 0.6 },
+        lines: [
+          { who: null, text: 'השער נפתח והם יוצאים כולם ביחד, צרודים, מדברים בקול רם מדי. אתה עומד בצד ונותן להם לעבור.' },
+          { who: null, text: 'הוא רואה אותך לפני שאתה רואה אותו.' },
+          { who: 'קובי', text: 'מה אתה עושה פה.' },
+          { who: null, text: 'זאת לא שאלה. הוא לא מחכה לתשובה — הוא מוריד את הידיים מהראש ומשאיר אותן באוויר רגע, ואז לוקח אותך.' },
+          { who: 'קובי', text: 'היינו אלופים ואתה היית בחוץ.' },
+          { who: null, text: 'הוא אומר את זה לתוך הצוואר שלך, לא אליך.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'found:kobi' },
+          { e: 'bond', who: 'kobi', delta: 10 },
+          { e: 'rel', who: 'kobi', axis: 'tension', delta: 6 },
+          { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 8 },
+          { e: 'trait', trait: 'independence', delta: 8 },
+          { e: 'remember', who: 'kobi', eventId: 'came-anyway', significance: 'major' },
+          { e: 'presence', mode: 'late' },
+          { e: 'keep' },
+          { e: 'ending', id: 'late' },
+        ],
+      },
+    ],
+  },
+  {
     id: 'kobi-found',
     nameHe: 'קובי',
     /**

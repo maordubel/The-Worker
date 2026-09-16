@@ -212,7 +212,11 @@ describe('שמונה ימים — the day is data, and a day transition is not a
     engine.dispatch({ t: 'day.entered', dayId: 'a8', year: 1986, weekday: 6, minute: 12 * 60 + 35 })
     const after = engine.state
     // the day resets
-    expect(after.agorot).toBe(0)
+    // ARNAK, 16.9.2026 — Maor: "הארנק לא מתאפס בסיום משימה אלא ממשיך איתך."
+    // This line asserted the opposite until that decision, and it is changed rather than
+    // deleted: the pocket surviving a transition IS the design, and a guard on a design
+    // decision is what stops it drifting back in a refactor. See `lib/life/events.ts`.
+    expect(after.agorot).toBe(400)
     expect(after.inventory).toEqual({})
     expect(after.minute).toBe(12 * 60 + 35)
     expect(after.energy).toBe(100)

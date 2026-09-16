@@ -32,6 +32,11 @@ export const PORTRAIT_SINAI: Record<string, string> = {
   'פרדי': 'faceFreddy',
   'אוהד צעיר': 'faceYoung',
   'אוהד': 'faceSupporter',
+  'סדרן': 'faceUsher',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export function objectiveSinai(state: LifeState): string | null {

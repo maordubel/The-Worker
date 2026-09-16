@@ -500,6 +500,19 @@ export const FIGURE = [
   'yosef', 'yosef-back', 'hermesh', 'hermesh-back',
   'melamed', 'melamed-play', 'melamed-lean', 'melamed-listen',
   'freddy', 'freddy-glass', 'freddy-drink',
+  /**
+   * שני האנשים בחזית בלומפילד — מחבילת 8.9.2026, ורק השם כאן היה חסר.
+   *
+   * `bfSteward` (הסדרן) ו-`bfVendor` (מוכר הגרעינים) נחתכו עם החבילה: יש להם קובץ ב-
+   * `public/life/art`, שורה ב-`manifest.json` תחת `figures`, וגובה ב-`heights.ts` —
+   * 1.78 ו-1.70. הם פשוט מעולם לא נרשמו כאן.
+   *
+   * לא הרגישו בזה כי הרחוב היחיד שבו הם עומדים היום הוא זה של `city/mission.ts`, שקורא
+   * את הגובה מ-`CITY_CAST` ואינו עובר דרך `FIGURE` בכלל. הרגע שבו זה היה נשבר הוא הרגע
+   * שבו סצנה ב-`scenes.ts` הייתה קוראת להם בשם — ואז `artUrl` היה מחזיר 404 מול שחקן.
+   * שם שיש לו קובץ צריך להיות רשום לפני שמישהו ינסה להשתמש בו, לא אחרי.
+   */
+  'bfSteward', 'bfVendor',
 ] as const
 
 /**
@@ -815,15 +828,34 @@ export const CLOSE_UP = [
 ] as const
 /** the plates that have actually been painted and ingested — the rest show the portrait */
 export const CLOSE_UP_PAINTED: readonly string[] = []
+/**
+ * הפלייט שעומד במקום הקלוז-אפ — and on 16.9.2026 five of the eight named the wrong person.
+ *
+ * The fallback is not a placeholder colour; it is the face a player actually sees on the
+ * game's eight most dramatic lines until the painted plates land. Three were plainly
+ * miscast — `cuOfir90` showed the 1986 child for a line Ofir says at fourteen, `cuUsherNight`
+ * showed `faceFan` (a man in Hapoel red, cut from the Bloomfield crowd) for the usher at
+ * Ussishkin while `faceUsher` sat on disk, and `cuKobiWhere` showed Kobi for a line פוגי
+ * SHOUTS AT HIM. Two more (`cuTeacherShare`) had a plate cut for that exact beat and
+ * pointed past it.
+ *
+ * And the Rachel pair stays on the neutral `faceRachel90` ON PURPOSE. `faceRachel90-nu`
+ * is named for this very line — but it is 143×260 and holds two half-Rachels, cut across
+ * the gutter of an expression sheet, so wiring the better-named plate would put two
+ * mothers on the glass. Six of her family and three of the teacher's are the same; they
+ * are listed in `docs/life/CLOSE-UP-BRIEF.md` for a re-cut from the delivery, which this
+ * repository does not hold.
+ */
 export const CLOSE_UP_FALLBACK: Record<(typeof CLOSE_UP)[number], string> = {
-  cuKobiWhere: 'faceKobi',
+  // פוגי shouts this one at his father; the face on the glass is the boy's
+  cuKobiWhere: 'facePogi-shout',
   cuKobiTable: 'faceKobi',
   cuRachelNu: 'faceRachel90',
   cuRachelWatch: 'faceRachel90',
   cuPogiReveal: 'tunnelReveal',
-  cuOfir90: 'faceOfir',
-  cuTeacherShare: 'faceTeacher-glasses',
-  cuUsherNight: 'faceFan',
+  cuOfir90: 'faceOfir90',
+  cuTeacherShare: 'faceTeacher-share',
+  cuUsherNight: 'faceUsher',
 }
 
 /**

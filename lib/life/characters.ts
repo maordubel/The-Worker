@@ -32,6 +32,15 @@ export type CharacterDefinition = {
   category: CharacterCategory
   /** chapter keys, e.g. '1983' | '1986' | '1990'. '*' means every era. */
   activeEras: string[]
+  /**
+   * Other names this person answers to on screen.
+   *
+   * A scene calls him `מישל`; the registry knows him as `מישל בר־כליפא`. Both are the same
+   * man, and until 15.9.2026 nothing connected them — so the short form resolved to no
+   * portrait and no row, and a guard asking "is this speaker a real person" would have
+   * said no about a real person. Same for `עומר` / `עומר חרמש`.
+   */
+  aliases?: readonly string[]
   /** the art key prefix the runtime uses for this person's plates */
   portraitSet?: string
   tags?: string[]
@@ -55,6 +64,30 @@ export const FORBIDDEN_CHARACTER_IDS: readonly string[] = [
 ]
 
 const REGISTRY: CharacterDefinition[] = [
+  /**
+   * פוגי — the protagonist, and until 15.9.2026 the one person in this game with no row.
+   *
+   * He speaks in ten content files. He had no entry, no portrait key of his own in the
+   * registry, and no way for anything to ask a question about him — which is how the cast
+   * guard, the first time it ran, reported the hero of the game as a stranger.
+   *
+   * It survived because nothing needs the registry to draw HIM: the player's body comes
+   * from `PlayerFigure` on the era and his face from the `PORTRAIT` maps, both of which
+   * name `facePogi` directly. The row was only missing where somebody asks "who is this",
+   * and nobody had asked until there was a test that does.
+   *
+   * Three ages ship on disk (rule 48): `pogi`, `hero80`, `hero90`. `heights.ts` anchors the
+   * child at 1.30m and `PlayerFigure.scale` carries the growth — see rule 55 and
+   * `tests/life-bodies.test.ts`.
+   */
+  {
+    id: 'pogi',
+    displayNameHe: 'פוגי',
+    category: 'family',
+    activeEras: ['*'],
+    portraitSet: 'facePogi',
+    tags: ['protagonist'],
+  },
   {
     id: 'kobi',
     displayNameHe: 'קובי',
@@ -117,7 +150,7 @@ const REGISTRY: CharacterDefinition[] = [
     displayNameHe: 'המורה',
     category: 'other',
     activeEras: ['1991', '1998-laces'],
-    portraitSet: 'faceTeacher',
+    portraitSet: 'faceTeacher-glasses',
     tags: ['school'],
   },
   {
@@ -249,6 +282,7 @@ const REGISTRY: CharacterDefinition[] = [
   {
     id: 'michel',
     displayNameHe: 'מישל בר־כליפא',
+    aliases: ['מישל'],
     category: 'supporter',
     activeEras: ['1990s'],
     tags: ['transport', 'network', 'memorial'],
@@ -312,7 +346,7 @@ const REGISTRY: CharacterDefinition[] = [
    */
   { id: 'yaron', displayNameHe: 'ירון', category: 'friend', activeEras: ['1996+'], tags: ['army', 'peer'] },
   { id: 'asaf', displayNameHe: 'אסף', category: 'supporter', activeEras: ['1996+'], provenance: 'composite', tags: ['gate5', 'organiser'] },
-  { id: 'omer-hermesh', displayNameHe: 'עומר חרמש', category: 'friend', activeEras: ['1997+'], provenance: 'real', tags: ['records', 'travel', 'memorial'] },
+  { id: 'omer-hermesh', displayNameHe: 'עומר חרמש', aliases: ['עומר'], category: 'friend', activeEras: ['1997+'], provenance: 'real', tags: ['records', 'travel', 'memorial'] },
   { id: 'uli', displayNameHe: 'אולי', category: 'friend', activeEras: ['2000', '2010'], tags: ['away', 'risk'] },
   { id: 'batya', displayNameHe: 'בתיה', category: 'supporter', activeEras: ['2000', '2010', '2020'], tags: ['neighbourhood', 'comedy', 'memory'] },
   { id: 'yonatan', displayNameHe: 'יונתן', category: 'friend', activeEras: ['2010', '2020'], tags: ['music', 'rival-friend'] },
@@ -431,12 +465,15 @@ export function isRealPerson(id: CharacterId): boolean {
  */
 export function speakerKeys(who: string): string[] {
   const entry = ALL_CHARACTERS.find(
-    (character) => character.id === who || character.displayNameHe === who,
+    (character) =>
+      character.id === who ||
+      character.displayNameHe === who ||
+      (character.aliases ?? []).includes(who),
   )
   if (!entry) return [who]
   // The raw spelling first: an era map is allowed to override one person's plate for one
   // chapter, and that override must win over the registry's general answer.
-  return [who, entry.displayNameHe, entry.id]
+  return [who, entry.displayNameHe, entry.id, ...(entry.aliases ?? [])]
 }
 
 /** The plate for a speaker, out of the plates this chapter loaded. */

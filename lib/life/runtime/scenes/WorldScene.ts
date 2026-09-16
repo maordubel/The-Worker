@@ -20,7 +20,7 @@ import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type Histo
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
 import type { Condition } from '../../world/types'
 import { cutFor, eraOfYear, filmFlag } from '../../world/transitions'
-import { bodySize } from '../../world/heights'
+import { bodySize, heightOf } from '../../world/heights'
 import { LivingWorld } from '../living'
 import { GIGS, isPaid, offerFlag, offeredIn } from '../../gigs'
 
@@ -223,6 +223,8 @@ export class WorldScene extends Phaser.Scene {
   private stride = 0
 
   private actors: Actor[] = []
+  /** the conversation the room currently has open — see `anchorFor` */
+  private speaking: string | null = null
   private ambient: Ambient[] = []
   /** birds, a cat, dust off his own shoes, light that breathes — `runtime/living.ts` */
   private living: LivingWorld | null = null
@@ -543,8 +545,10 @@ export class WorldScene extends Phaser.Scene {
       minigame: (id: string) => this.startMinigame(id),
       ending: (id) => this.finishChapter(id),
       shot: (shot) => this.frameShot(shot),
+      anchorFor: (who) => this.anchorFor(who),
       onOpen: (open) => {
         this.paused = open
+        if (!open) this.speaking = null
         if (open) {
           this.vx = 0
           this.vy = 0
@@ -804,10 +808,35 @@ export class WorldScene extends Phaser.Scene {
     this.applyScale(this.player, this.shadow, y, this.playerSize())
   }
 
-  /** the band's child size, grown for the year — see `PlayerFigure.scale` */
+  /**
+   * כמה גבוה הילד — and it is the same height in every room, which it was not.
+   *
+   * Delta 30 moved every BODY off the hand-typed `def.size` and onto `heights.ts`, and
+   * the comment under `bodySizeAt` says so: *"Not `def.size` any more."* The boy was never
+   * moved with them. He kept reading the room's own `size` band — a number typed per room,
+   * for framing — so he arrived at a different height in each one while everybody around
+   * him was measured in metres.
+   *
+   * Measured on 15.9.2026 with `scripts/life/actor-sizes.ts` once that script was fixed to
+   * report what the engine draws: in 1986 the eight-year-old is **1.20m on the dirt pitch
+   * and 1.41m at gate five** — he grows twenty-one centimetres by walking, and `heights.ts`
+   * says `pogi` is 1.30m. Ten rooms disagreed with the registry by more than five.
+   *
+   * Now he is sized the way the people beside him are: the room says what a metre is,
+   * `heights.ts` says how tall he is, and `player.scale` carries the only thing the room
+   * cannot know — how old he is this chapter (1.0 at eight, 1.26 at twenty-two). The
+   * room's `size` band survives as the PERSPECTIVE taper, which is what it is good at and
+   * the one thing `heights.ts` cannot supply.
+   */
   private playerSize(): { far: number; near: number } {
     const k = this.era.player.scale ?? 1
-    return { far: this.def.size.far * k, near: this.def.size.near * k }
+    const taper = this.def.size.far / Math.max(1e-6, this.def.size.near)
+    // `pogi` is the anchor by the type's own words: `PlayerFigure.scale` is documented as
+    // "how tall this year's boy stands against the room's band, which was measured for the
+    // eight-year-old". So the child height is the base and `scale` carries the ageing —
+    // reading the era's own walk figure here would count the growth twice.
+    const near = this.def.metre * heightOf('pogi') * k
+    return { far: near * taper, near }
   }
 
   private applyScale(
@@ -1420,6 +1449,69 @@ export class WorldScene extends Phaser.Scene {
     const gap = Math.max(this.player.displayWidth * 0.75 + theirs * 0.5, this.W * 0.03)
     const side = this.player.x <= target.x ? -1 : 1
     return clampToBand({ x: target.x + side * gap, y }, bounds)
+  }
+
+  /**
+   * איפה הדובר עומד — the fraction of the camera's view the balloon's tail points at.
+   *
+   * Maor's references on 16.9.2026 all had the same thing in common and it is not a
+   * layout: the words are attached to the PERSON. Ours had the tail pinned 36 pixels from
+   * the balloon's edge, which points at the speaker's side of the screen and not at the
+   * speaker — so with two people three metres apart it was right by accident and wrong
+   * the rest of the time.
+   *
+   * `null` means "do not draw a tail at this position": narration, a voice on a radio, a
+   * name nobody in the room answers to. The box falls back to its old fixed corner, which
+   * is exactly what it should do when the scene genuinely does not know.
+   *
+   * The player is matched by the name the box prints for him rather than by an actor —
+   * he is not in `this.actors`, he is `this.player`, and his own lines are a third of any
+   * conversation.
+   */
+  /** the probe's way in — the same answer the balloon's tail is given, by name */
+  anchorDebug(who: string | null): { anchor: number | null; speaking: string | null; view: number; names: string[] } {
+    return {
+      anchor: this.anchorFor(who),
+      speaking: this.speaking,
+      view: this.cameras.main?.worldView?.width ?? -1,
+      names: this.actors.filter((a) => a.image.visible).map((a) => `${a.def.id}|${a.def.nameHe ?? ''}|${a.def.talk ?? ''}`),
+    }
+  }
+
+  private anchorFor(who: string | null): number | null {
+    if (!who) return null
+    const view = this.cameras.main?.worldView
+    if (!view || view.width <= 0) return null
+    const at = (worldX: number): number | null => {
+      const fraction = (worldX - view.x) / view.width
+      // a speaker who has walked off the edge of the shot gets no tail rather than a tail
+      // clamped to the corner, which would be a lie about where he is
+      return fraction < -0.05 || fraction > 1.05 ? null : Math.max(0, Math.min(1, fraction))
+    }
+    if (this.player && who === this.ctx.engine.state.identity.name) return at(this.player.x)
+    /**
+     * The CONVERSATION first, the name second — and the order is the whole fix.
+     *
+     * The first cut matched `def.nameHe === who` and a browser probe found it answering
+     * null for a neighbour who was standing four metres away with his box open. A line's
+     * `who` is free text the writer types (rule: `Say.who` is a display name, and the same
+     * person is `קובי` in one scene and `אבא` in the next), so matching a person by the
+     * string above their own words was only ever going to work for the people whose
+     * writer happened to type their `nameHe`.
+     *
+     * `this.speaking` is the conversation the room opened, and `def.talk` is the actor it
+     * belongs to — the same lookup `actorWidth` has used since the shot system landed.
+     * That resolves the person for every line of theirs, whatever the writer calls them,
+     * and the name match stays as the second try for a conversation somebody else joins.
+     */
+    const byTalk = this.speaking
+      ? this.actors.find((entry) => entry.def.talk === this.speaking && entry.image.visible)
+      : undefined
+    if (byTalk && (byTalk.def.nameHe === who || !this.actors.some((e) => e.def.nameHe === who))) {
+      return at(byTalk.image.x)
+    }
+    const byName = this.actors.find((entry) => entry.def.nameHe === who && entry.image.visible)
+    return byName ? at(byName.image.x) : null
   }
 
   /** How wide the person behind this conversation is drawn, or 0 if it is not a person. */
@@ -2649,6 +2741,9 @@ export class WorldScene extends Phaser.Scene {
       if (look) this.openPano(key, look.titleHe, look.spots, undefined, look.startYaw ?? 0)
       return
     }
+    // the room remembers which conversation it opened, so the balloon's tail can find
+    // the person it belongs to (`anchorFor`)
+    this.speaking = target.act
     if (!this.ctx.dialogue.start(target.act)) this.ctx.bus.emit('prompt', null)
   }
 
@@ -3466,7 +3561,10 @@ export class WorldScene extends Phaser.Scene {
         emit: (name, value) => this.ctx.bus.emit(name, value),
         dispatch: (...events) => this.ctx.engine.dispatch(...events),
         minute: () => this.ctx.engine.state.minute,
-        talk: (conversation, then) => this.ctx.dialogue.start(conversation, then),
+        talk: (conversation, then) => {
+          this.speaking = conversation
+          return this.ctx.dialogue.start(conversation, then)
+        },
         after: (ms, fn) => {
           // the probes run the minute at a quarter of its length; a person gets the whole minute
           const event = this.time.delayedCall(Math.round(ms * (this.ctx.probing ? 0.25 : 1)), fn)
@@ -4182,6 +4280,7 @@ export class WorldScene extends Phaser.Scene {
       this.net.talk(id)
       return
     }
+    this.speaking = id
     this.ctx.dialogue.start(id)
   }
 
@@ -4579,6 +4678,7 @@ export class WorldScene extends Phaser.Scene {
         this.ctx.dialogue.startLines(next.lines, then)
         return
       case 'talk':
+        this.speaking = next.conversation
         if (!this.ctx.dialogue.start(next.conversation, then)) then()
         return
       case 'card': {

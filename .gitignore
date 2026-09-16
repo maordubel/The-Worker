@@ -10,3 +10,5 @@ tsconfig.tsbuildinfo
 scripts/life/.art-spec-dump.ts
 data/maor-shots/
 delta/
+scripts/life/.scene-dump.ts
+docs/life-shots/

@@ -4,6 +4,8 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { ALL_CHARACTERS, portraitFor, speakerKeys } from '@/lib/life/characters'
+import { DIALOGUE } from '@/lib/life/content/dialogue'
+import { eraFor, ERA_KEYS } from '@/lib/life/content/era'
 
 /**
  * לכל דמות הפנים שלה — every speaker resolves to a plate, or is named here as one that
@@ -13,16 +15,28 @@ import { ALL_CHARACTERS, portraitFor, speakerKeys } from '@/lib/life/characters'
  * `who: 'kobi'` in the next. What was NOT fine is that the portrait maps are keyed by the
  * Hebrew name only and the dialogue box looked the speaker up with a plain
  * `portraits[who]`. Every line spelled by id resolved to `undefined`, and the box drew a
- * nameplate with no face.
+ * nameplate with no face. `portraitFor()` resolves through the registry, so both
+ * spellings find the same face; this suite holds that.
  *
- * Measured on 15.9.2026: **363 of 953 lines — 38% of the dialogue in the game** — had no
- * portrait, 109 of them Kobi. Nothing threw, because a missing plate is a `?? null` and
- * `null` is what a narration line legitimately passes. The defect had exactly the shape
- * of a deliberate choice, which is why it lasted.
+ * **המדידה עצמה הייתה שבורה, ו-16.9.2026 היא זו שתוקנה ראשונה.**
  *
- * `portraitFor()` resolves through the registry, so both spellings find the same face.
- * This suite holds that, and makes the remaining gaps a list somebody chose rather than
- * a silence nobody noticed.
+ * This file used to count speakers by running `/who:\s*'([^']+)'/g` over the text of
+ * `lib/life/content/*.ts`, and reported "363 of 953 lines — 38% of the dialogue in the
+ * game — had no portrait, 109 of them Kobi". That number was an artefact of the regex.
+ * `who` is not only a speaker: it is also the TARGET of an effect — `{ e: 'rel', who:
+ * 'kobi', axis: 'bond' }`, `{ e: 'remember', who: 'asaf' }` — and there are **345 of
+ * those** in the content files against 610 real spoken lines. Every one was counted as a
+ * faceless line, under its id spelling, which is why the id spellings dominated the
+ * report and why `asaf` appeared to have seventeen lines with no face. He has nine, and
+ * every chapter that speaks them has mapped him since the September ingest.
+ *
+ * So the count is no longer read off the text. It walks the live objects — `DIALOGUE`
+ * plus each era's own beats, windows, encounters and ambient — and counts a node only
+ * when it carries BOTH a speaker and something said (`text`, or `lineHe` for an
+ * encounter). A relationship write has no line in it and can no longer be mistaken for
+ * one. The cost of the old approach was not a wrong percentage; it was that the three
+ * loudest names in `NO_PLATE_YET` were people who already had faces, and listing them
+ * there had quietly switched the guard off for them.
  */
 
 const CONTENT = join(process.cwd(), 'lib/life/content')
@@ -42,15 +56,37 @@ const PLATE_KEYS: ReadonlySet<string> = (() => {
   return keys
 })()
 
+/**
+ * כל מי שבאמת אומר משהו — walked off the live objects, never off the text.
+ *
+ * A node counts when it names a speaker AND carries the words: `Say` is `{ who, text }`
+ * and an encounter is `{ who, lineHe }`. An effect is `{ e, who, … }` with nothing said
+ * in it, so it is structurally invisible here rather than filtered by name. Narration
+ * (`who: null`) is not a speaker and never was.
+ *
+ * Objects are visited once — several eras share one ambient pool, and counting it per
+ * chapter would weight those lines by how many chapters borrow them.
+ */
 function speakers(): Map<string, number> {
   const found = new Map<string, number>()
-  for (const name of readdirSync(CONTENT)) {
-    if (!name.endsWith('.ts')) continue
-    const text = readFileSync(join(CONTENT, name), 'utf8')
-    for (const match of text.matchAll(/who:\s*'([^']+)'/g)) {
-      const who = match[1] as string
-      found.set(who, (found.get(who) ?? 0) + 1)
+  const seen = new Set<object>()
+  const walk = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      for (const item of value) walk(item)
+      return
     }
+    if (!value || typeof value !== 'object') return
+    if (seen.has(value)) return
+    seen.add(value)
+    const node = value as Record<string, unknown>
+    const said = typeof node.text === 'string' || typeof node.lineHe === 'string'
+    if (said && typeof node.who === 'string') found.set(node.who, (found.get(node.who) ?? 0) + 1)
+    for (const child of Object.values(node)) walk(child)
+  }
+  walk(DIALOGUE)
+  for (const chapter of [...ERA_KEYS, 'prologue']) {
+    const era = eraFor(chapter)
+    walk([era.beats, era.opportunities, era.encounters, era.ambient, era.endings])
   }
   return found
 }
@@ -60,27 +96,32 @@ function resolves(who: string): boolean {
 }
 
 /**
- * Speakers with no plate anywhere, as of 15.9.2026. Each is a real gap, not a licence:
+ * Speakers with no plate anywhere, as of 16.9.2026 — three, and none of them is a
+ * person the player looks at.
  *
- *  · `asaf` — 17 lines across 1998-laces, 1996-army and 1999-cup and NO plate in any era.
- *    The largest hole in the cast; he carries a chapter and speaks without a face.
- *  · `michel` — מישל בר־כליפא has commissioned artwork on disk (`michel99`, `michel96-*`)
- *    and no portrait entry, so the one line that names him by id draws nothing.
- *  · the rest are one-scene extras (a vendor, a cashier, a man in a queue). An extra with
- *    no face is a legitimate choice; an extra that grows lines is not, which is what the
- *    line-count ceiling below is for.
+ *  · `@crowd` is not a name, it is a SENTINEL. `WorldScene` swaps it for a real
+ *    supporter's `displayNameHe` off the save's own seed before the line ever reaches
+ *    the box (rule 58), so the string itself is never rendered. It is listed rather than
+ *    special-cased, because a filter that knows about it here is a second place that has
+ *    to learn the day it is renamed.
+ *  · `הסדרן` and `מוכר הגרעינים` are the two people of the Bloomfield street mission in
+ *    `lib/life/city/mission.ts`. That street is the `/city` route, which renders no
+ *    portraits at all — no era map governs it. They get plates the day an era scene
+ *    points at `bf-steward-bag` or `bf-vendor-seeds`, and not before.
+ *
+ * **ומה שיצא מהרשימה ב-16.9.2026, וחשוב לדעת למה.** `asaf`, `michel` and `yaron` were
+ * here as the three biggest holes in the cast. All three were the ID spelling of a
+ * person who never speaks under it — every one of their "lines" was an `{ e: 'rel' }`
+ * effect miscounted by the old regex. Their Hebrew spellings resolve in every era that
+ * plays them (`אסף` in all three, `מישל` in all five, `ירון` in the one). `המוכר`,
+ * `הגבר`, `אבא עם ילד` and `קופאית` left for the opposite reason: they were real
+ * faceless extras and they were cast to plates that already existed on disk.
+ * An entry here is a guard switched OFF for that name, so the list stays short.
  */
 const NO_PLATE_YET: ReadonlySet<string> = new Set([
-  'asaf',
-  'michel',
-  'yaron',
   '@crowd',
   'הסדרן',
   'מוכר הגרעינים',
-  'המוכר',
-  'אבא עם ילד',
-  'הגבר',
-  'קופאית',
 ])
 
 describe('לכל דמות הפנים שלה', () => {
@@ -115,7 +156,10 @@ describe('לכל דמות הפנים שלה', () => {
   })
 
   it('פחות מ-6% מהשורות במשחק בלי פנים', () => {
-    // It was 38.1%. This ceiling is what keeps it from drifting back.
+    // 12 of 610 — the two city-mission extras and the crowd sentinel, and nothing else.
+    // The 38.1% this ceiling was written against was the broken measurement; the real
+    // figure on the day it was written is unknown and not worth reconstructing. The
+    // ceiling stays where it is, because what it guards is drift, not that old number.
     let withFace = 0
     let faceless = 0
     for (const [who, lines] of speakers()) {
@@ -128,7 +172,9 @@ describe('לכל דמות הפנים שלה', () => {
 
   it('דמות שאין לה פלייט לא צוברת תפקיד בשקט', () => {
     // An extra with no face is fine. An extra with thirty lines is a character somebody
-    // forgot to commission art for — which is exactly how `asaf` got to seventeen.
+    // forgot to commission art for, and this is the guard that notices before a player
+    // does. (It used to cite `asaf` and his seventeen lines as the case in point. He
+    // never had seventeen and never lacked a face — see the note at the top of the file.)
     const loud: string[] = []
     for (const [who, lines] of speakers()) {
       if (resolves(who)) continue

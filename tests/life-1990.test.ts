@@ -55,7 +55,11 @@ describe('ארבע שנים — year.entered is one biography, four years on', (
     expect(after.weekday).toBe(6)
     // the day resets
     expect(after.inventory).toEqual({})
-    expect(after.agorot).toBe(0)
+    // ARNAK, 16.9.2026 — Maor: "הארנק לא מתאפס בסיום משימה אלא ממשיך איתך."
+    // This line asserted the opposite until that decision, and it is changed rather than
+    // deleted: the pocket surviving a transition IS the design, and a guard on a design
+    // decision is what stops it drifting back in a refactor. See `lib/life/events.ts`.
+    expect(after.agorot).toBe(200)
     expect(after.energy).toBe(100)
     expect(after.flags['found:kobi']).toBeUndefined()
     // the person stays

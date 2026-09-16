@@ -11,8 +11,8 @@
  *   ERA=1990 node scripts/life/scene-boards.mjs → the same rooms as 1990 dresses them
  *                                                 (docs/life-shots/board-1990-<scene>.png)
  *
- * People are drawn at the size the runtime draws them — `size` is absolute, not banded —
- * so a father "at the table" who is really sitting on the floor at full size shows up
+ * People are drawn at the size the runtime draws them — from `bodySize()`, never from the
+ * deprecated `size` field — so a father "at the table" drawn at a front-of-room size shows up
  * here first.
  */
 import { execFileSync } from 'node:child_process'
@@ -24,10 +24,35 @@ const dump = join(ROOT, 'scripts/life/.scene-dump.ts')
 writeFileSync(
   dump,
   `import { ALL_SCENES } from '../../lib/life/world/scenes'
+import { bodySize, heightOf } from '../../lib/life/world/heights'
+import { eraFor } from '../../lib/life/content/era'
 import { SCHEDULE_1986 } from '../../lib/life/content/schedules1986'
 import { SCHEDULE_1990 } from '../../lib/life/content/schedules1990'
 const era = process.env.ERA ?? '1986'
-process.stdout.write(JSON.stringify({ era, scenes: ALL_SCENES, schedule: era === '1990' ? SCHEDULE_1990 : SCHEDULE_1986 }, (_k, v) => (typeof v === 'function' ? undefined : v)))
+const k = eraFor(era).player.scale ?? 1
+
+/**
+ * The size the engine actually draws.
+ *
+ * This board used to draw every actor at ActorDef.size — a field marked deprecated since
+ * delta 30, which scenes.ts says in as many words the runtime "never reads". So rule 55's
+ * instruction that a placement is not done until its board has been looked at was being
+ * satisfied by looking at a picture of something else.
+ *
+ * Every actor now carries "drawn", computed exactly as WorldScene.bodySizeAt does, and
+ * every scene carries "boy" — the two numbers this board exists for.
+ */
+const scenes = ALL_SCENES.map((scene) => {
+  const taper = scene.size.far / Math.max(1e-6, scene.size.near)
+  const depth = (y) => Math.max(0, Math.min(1, (y - scene.band.far) / (scene.band.near - scene.band.far)))
+  const boyNear = scene.metre * heightOf('pogi') * k
+  return {
+    ...scene,
+    boy: { far: boyNear * taper, near: boyNear },
+    actors: scene.actors.map((a) => ({ ...a, drawn: bodySize(a.figure, scene.metre, depth(a.y), taper) })),
+  }
+})
+process.stdout.write(JSON.stringify({ era, scenes, schedule: era === '1990' ? SCHEDULE_1990 : SCHEDULE_1986 }, (_k, v) => (typeof v === 'function' ? undefined : v)))
 `,
 )
 const json = execFileSync('npx', ['tsx', dump], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, env: { ...process.env } })
@@ -73,7 +98,7 @@ for sc in d['scenes']:
         if not in_era(a): continue
         try:
             fa=Image.open(f"{ART}/{a['figure']}.webp").convert('RGBA')
-            hh=max(1,int(a['size']*H2)); ww=max(1,int(hh*fa.width/fa.height)); fa=fa.resize((ww,hh))
+            hh=max(1,int(a.get('drawn', a.get('size') or 0.26)*H2)); ww=max(1,int(hh*fa.width/fa.height)); fa=fa.resize((ww,hh))
             if a.get('flip'): fa=fa.transpose(Image.FLIP_LEFT_RIGHT)
             im.paste(fa,(int(a['x']*W2)-ww//2,int(a['y']*H2)-hh),fa)
         except Exception as ex: print('missing figure',a['figure'],ex)
@@ -86,8 +111,8 @@ for sc in d['scenes']:
     try:
         hero='hero80' if ERA=='1990' else 'pogi'; k=1.12 if ERA=='1990' else 1
         ha=Image.open(f"{ART}/{hero}.webp").convert('RGBA')
-        for yy,sz in ((sc['band']['far'],sc['size']['far']),(sc['band']['near'],sc['size']['near'])):
-            hh=max(1,int(sz*k*H2)); ww=max(1,int(hh*ha.width/ha.height)); h2=ha.resize((ww,hh))
+        for yy,sz in ((sc['band']['far'],sc['boy']['far']),(sc['band']['near'],sc['boy']['near'])):
+            hh=max(1,int(sz*H2)); ww=max(1,int(hh*ha.width/ha.height)); h2=ha.resize((ww,hh))
             im.paste(h2,(int(0.5*W2)-ww//2,int(yy*H2)-hh),h2)
     except Exception as ex: print('missing hero',ex)
     im.save(f"{OUT}/{PREFIX}{sc['id']}.png")

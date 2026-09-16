@@ -45,6 +45,12 @@ export const PORTRAIT_ARMY: Record<string, string> = {
   'המפקד': 'faceCommander',
   'נהג': 'faceDriver',
   'אוהד': 'faceSupporter',
+  'סדרן': 'faceUsher',
+  'קופאית': 'faceWoman',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export function objectiveArmy(state: LifeState, sceneId: string): string | null {

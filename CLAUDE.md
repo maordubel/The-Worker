@@ -563,7 +563,6 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     never move again; and letting the keyboard and the thumb pad write the same axis meant
     releasing an arrow key left the child walking forever — they are separate channels now.
 
-
 40. **THE WORKER LIFE is drawn with Maor's concept boards, not around them.**
     On 2.9.2026 the approved Stage A boards arrived — the cast, the 1980 home, the Jaffa
     street, the stones pitch, the whole Bloomfield approach, Ussishkin — and the game
@@ -696,7 +695,6 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     and the canonical scanner in `lib/isYellow.ts` (hue 38–70, S ≥ 0.35), so a legal pixel
     keeps margin against a browser's resampling without being counted as a fault. This
     rule exists because the first pass shipped an IDF uniform in brown.
-
 
 45. **THE WORKER LIFE — the master timeline, and the one place it is written down.**
     The protagonist is born in **1978**. He is five in 1983 (the prologue), eight in 1986
@@ -1039,6 +1037,10 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     three painted men. `npm run life:boards` draws every scene with its exits, lights, band,
     actors, hotspots and spawns onto the painting (`docs/life-shots/board-*.png`), and that
     picture is the definition of "placed".
+    **The boards are NOT committed** (16.9.2026). Ninety-three of them had been, and they
+    are ninety-three megabytes — a generated diagnostic, rebuilt by one command, sitting in
+    every delta and pushing it past the size limits rule 51 exists to keep. `npm run
+    life:boards` makes them; `.gitignore` keeps them out. What travels is the tool.
 
 53. **THE WORKER LIFE — the map is a list, the day restarts from the log, the HUD says the date (3.9.2026).**
     Maor asked for two things on top of the full-bleed pass: the day's date in the top bar,
@@ -1384,3 +1386,86 @@ CSS custom property: כרטיסי השיתוף על קנבס ו-`theme-color`) �
 
 זה כלל 47 בכיוון ההפוך: כשבדיקה נופלת אחרי שינוי נתונים, השאלה הראשונה היא לא "איך
 מרפים אותה" אלא "מה היא ידעה שהקוד לא".
+
+## 66 · סף שאי אפשר להגיע אליו הוא תוכן מת, ויש לזה עכשיו מכשיר (16.9.2026)
+
+`deadend-audit` שואל אם דגל מורם אי-פעם. אף אחד לא שאל אם **מספר** ניתן להשגה, ולכן
+מחלקה שלמה של באגים הייתה בלתי-נראית: שער, בחירה או ענף שמבקש ערך שהמשחק לא יכול
+לייצר. הענפים האלה לא שבורים — הם פשוט אף פעם לא נלקחים, והם נראים בריאים במקור.
+
+`npm run life:budget` (`scripts/life/budget-audit.ts`, ו-`tests/life-reachable.test.ts`
+הוא החלק שאסור לו לסגת) עובר על הפרקים לפי הסדר ומחבר כל דלתא חיובית שפרק יכול
+להצהיר, כאילו השחקן לקח את כולן, בחיים אחד, בלי שעון ובלי בלעדיות. זו הערכת-יתר
+פרועה בכוונה: **סף מעל התקרה הזו הוא בלתי-אפשרי בהוכחה.** אין חיוביות שווא; יש שפע
+של שליליות שווא, וזה בסדר.
+
+**הטיוטה הראשונה דיווחה על עשרה ליקויים וששה מהם היו האשמה שלה**, וזה מתועד בראש
+הקובץ כי כל אחד היה דרך אחרת למדוד שדה שהמנוע לא קורא:
+
+1. התחילה כל מונה מאפס. `emptyState` לא: קובי ורחל על 50, `commanderTrust` על 50,
+   `impulsiveness` על 30. שער על 60 נראה כמו חור של 46 והוא טיפוס של 10.
+2. ספרה `bond.X` ו-`rel.X.bond` כשני מספרים. הם אחד — `withRelationship` כותב
+   `bonds[who] = next.bond` בכל שינוי.
+3. התעלמה מ-`{ e: 'trait' }`. `TRAIT_ROUTE` שולח אותו לאישיות או ללב האדום.
+4. לא ידעה על הפחית. `savings` הוא כיס שני שאף תנאי לא רואה, ורק `withdraw` מעביר.
+5. קראה רק שיחות. `entry` של פרק ו-`a: 'events'` של ביט משלמים גם הם.
+6. התעלמה מה-clamp. שום דבר בחיים לא עולה מעל 100.
+
+הכלל שמשותף לששתם הוא הכלל שהקובץ רץ עליו: **לקרוא מונה כמו שהרדיוסר קורא אותו,
+מאותן טבלאות, או לא לדווח עליו.**
+
+מה שנשאר אחרי התיקון היה אמיתי, ושתי הצורות שלו שוות זכירה. **אפי** נבדק על ציר
+האמון בשלושה פרקים (1997 `max: 45`, 1999 `max: 44`, 2000 `min: 45`) ובכל המשחק יש
+שורה אחת שמעלה אותו, בשלוש — כי הוא מעולם לא נזרע ב-`emptyState` בזמן שאופיר כן.
+מספרים כמו 44 ו-45 הם הראיה: אף אחד לא מכייל סף מול סולם שהתקרה שלו שלוש. ו**הפחית**:
+`goalA4` חיברה `savings + agorot`, אמרה "יש את ה־30, לרפי", ושלחה ילד לדלפק שקורא
+`minAgorot` ויסרב לו.
+
+## 67 · פורטרט נחתך מהאדם עצמו, וסיום כתוב חייב פולט (16.9.2026)
+
+מאור שלח שתי תמונות של מישל בר־כליפא ומשפט אחד: לשים לב שמשתמשים בדמויות הנכונות.
+`faceMichel` היה `cut from adultA6` בזמן ש-`michel99.webp` — האיש עצמו מהמסך הירוק —
+היה על הדיסק. אותה צורה בדיוק נמצאה אצל **בארי**, **פרדי** ו**מלמד**.
+
+- **פלייט של דמות בעלת שם נחתך מהפיגורה של אותה דמות.** `stageA2` הוא לוח הקאסט
+  המאושר ולכן חוקי; `adultA7` הוא ניצב. `scripts/life/cut-faces-2026-09-16.py`.
+- **וחיתוך שיצא מכוער מבוטל ומדווח.** פרדי ומלמד מצוירים ב-331 פיקסלים; ההגדלה
+  פי 2.2 מפסטרת וה-de-yellow מוציא מהעור החם את הרוויה. **פנים שגויות שנראות כמו
+  אדם הן טעות ליהוק שמישהו יתקן; פנים נכונות שנראות שבורות הן דוח באג על המנוע.**
+  הם נשארים גנריים והפער כתוב בסקריפט.
+- **de-yellow רץ אחרי ההגדלה** — כלל 44, ו-`freddy` הוכיח אותו שוב: חיתוך נקי לגמרי
+  ייצר 303 פיקסלים צהובים ב-LANCZOS בלבד.
+- **סיום שמוגדר ב-`endings` חייב שמשהו יפלוט אותו.** `ENDINGS.late` של 1986 —
+  כותרת, גוף, פריט זיכרון וזוג `after` — לא היה נגיש לאיש, כי ה-`kobi-found` היחיד
+  עומד ביציע בפנים ודורש `entry:granted`. הסופים נספרים עכשיו מול מה שהתוכן באמת
+  פולט, ולא מול מה שהוא מצהיר.
+- **וזנב הבלון מצביע על הדובר, לא על הצד שלו.** `anchor` הוא מרחב-מצלמה; הבלון חי
+  ב-RTL ומוצב ב-`inset-inline-start`. ההיפוך הוא כל הסיכון, והוא נבדק
+  (`tests/life-tail.test.ts`): היפוך חסר נראה סביר לחלוטין ומצביע על האדם השני.
+
+## 68 · הארנק ממשיך עם הדמות (16.9.2026)
+
+מאור, כשנשאל מה לעשות עם החולצה ב-a4:
+
+> "כל הקטע בארנק זה שהכסף צריך להישמר ולהמשיך עם הדמות. והוא מחליט מתי ואיפה ועל מה
+> להוציא. **הארנק לא מתאפס בסיום משימה אלא ממשיך איתך.**"
+
+עד המשפט הזה גם `day.entered` וגם `year.entered` כתבו `agorot: 0`, וההערה מעל הראשון
+אמרה שהמעבר "שומר את הקופה" — נכון לגבי `savings`, הפחית מתחת למיטה, ושקר לגבי הכיס
+שלידה באותו אובייקט בדיוק. שתי מילים זו מזו.
+
+**ומה זה עלה, במספרים:** `a4-shirt` קרוי על שם חולצה ב-30 ₪, וכל אחר הצהריים שלו —
+הפחית, דמי הכיס, הבקבוקים, הארגזים אצל רפי — מייצר **27 ₪**. עם כיס שמתאפס בכל מעבר
+יום זה היה כל התקציב, ולכן `own:heart:shirt85` לא היה ניתן להרמה בידי אף אחד, אי-פעם.
+איתו מתו גם ההד ב-A6 שקורא את הדגל, החולצה `tveria85` בארון, וכרטיס הסיום `shirt` של
+הפרק עצמו. זו לא הייתה הידוק — זו הייתה חולצה שאי אפשר לקנות בפרק ששמו החולצה.
+
+- **`agorot` שורד `day.entered` ו-`year.entered`.** `tests/life-wallet.test.ts`.
+- **`inventory` עדיין מתאפס, בכוונה.** בקבוקי פיקדון וכיכר לחם הם אביזרים של אחר
+  צהריים, לא רכוש. מה שהוא **מחזיק** שורד ממילא בדרך משלו — דגלי `own:` ו-`clothing`
+  (כלל 58) — ולכן חולצה שנקנתה ב-1985 עדיין בארון ב-2000.
+- **שלוש בדיקות קיימות טענו את ההפך, והן שונו ולא נמחקו.** ההבחנה של כלל 47: "תמחק,
+  הבדיקה אדומה" אסור; "ההחלטה השתנתה, בעל הבית אמר, השומר משנה צד" — זה מה ששומר על
+  החלטה מלהיסחף חזרה בריפקטור חצי שנה מהיום.
+- **ובדיקה בסוויטת חיים לא כותבת שנה** (כלל 45). `tests/life.test.ts` תפס את
+  `year: 1985` שכתבתי, בדיוק כמו שהוא אמור.

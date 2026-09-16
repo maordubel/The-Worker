@@ -76,6 +76,12 @@ export const PORTRAIT: Record<string, string> = {
   // night — but the plate exists so the day he does speak, it is one line of content.
   'משה סיני': 'faceSinai',
   'אילן השכן': 'faceOldMan',
+  'ילד': 'faceKid',
+  'אבא עם ילד': 'faceSupporter',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export type EndingCard = {
@@ -113,6 +119,22 @@ export type EndingCard = {
  * got in, or got in too late, still ends the day with something — because that is what
  * the biography is made of, and because a screen that says you failed is a screen that
  * says the last twenty minutes did not count.
+ *
+ * מה שנשאר בכיס שלו — every one of the three cards below already says that what the day
+ * left him is THE FIRST THING IN THE BOX. That sentence is the natural place for the
+ * other end of `lib/life/tickets.ts`: in 1983 the tickets were in somebody else's hand
+ * and the half he came home with was HANDED to him; this is the first one that stayed in
+ * his own pocket because of something he did. One clause each, nothing added and nothing
+ * rewarded.
+ *
+ * It is NOT gated, and that is a deliberate limitation rather than an oversight.
+ * `EndingCard` is a static record read by `WorldScene`/`components/life/EndingCard.tsx`;
+ * a card has no `Condition` anywhere on it, so a line here is shown to every save or to
+ * none. The clauses are therefore written to be true of the LIFE rather than of the
+ * prologue's scene — they claim nothing about two stubs or about 1983, only that until
+ * today his father held the tickets, which is true of a save that never played `a1-stub`
+ * as well. The version that names 1983 out loud lives in `chapter2000double.ts`, where a
+ * conversation branch can read `own:tickets-1983` and say nothing when it is absent.
  */
 export const ENDINGS: Record<string, EndingCard> = {
   home: {
@@ -120,7 +142,7 @@ export const ENDINGS: Record<string, EndingCard> = {
     titleHe: 'הביתה',
     bodyHe:
       'חזרתם ברגל, שניכם, בלי לדבר הרבה. הוא החזיק לך את היד בכביש כמו תמיד, אבל קצת פחות חזק — כאילו הבין שזה כבר לא בשביל שלא תלך לאיבוד.',
-    memoryHe: 'שמת את זה בקופסה האדומה. הדבר הראשון שיש בה.',
+    memoryHe: 'שמת את זה בקופסה האדומה. הדבר הראשון שיש בה, והכרטיס הראשון שנשאר בכיס שלך ולא ביד שלו.',
     memoryItem: 'ticket-stub',
     after: {
       fromArt: 'kobi-chair',
@@ -133,7 +155,7 @@ export const ENDINGS: Record<string, EndingCard> = {
     titleHe: 'אחרי המשחק',
     bodyHe:
       'הגעת כשכבר יצאו. עמדת בצד ונתת לאנשים לעבור, ומצאת אותו בין כולם. הוא ראה אותך לפני שראית אותו.',
-    memoryHe: 'הרמת מהרצפה פיסה של משהו שמישהו זרק. שמת את זה בקופסה האדומה.',
+    memoryHe: 'הרמת מהרצפה פיסה של משהו שמישהו זרק. שמת את זה בקופסה האדומה. הדבר הראשון שיש בה, ואף אחד לא נתן לך אותו.',
     memoryItem: 'folded-paper',
     after: {
       fromArt: 'kobi-cheer',
@@ -146,7 +168,7 @@ export const ENDINGS: Record<string, EndingCard> = {
     titleHe: 'שבת רגילה',
     bodyHe:
       'נשארת ברחוב עד שהחשיך. הוא חזר מאוחר, צרוד, ולא סיפר כלום — ואתה לא שאלת, כי ידעת שלא היית שם.',
-    memoryHe: 'שמת בקופסה האדומה משהו קטן מהיום הזה. יום שהיה, גם אם לא היית בו.',
+    memoryHe: 'שמת בקופסה האדומה משהו קטן מהיום הזה. יום שהיה, גם אם לא היית בו. הדבר הראשון שיש בה, ואת זה לקחת לבד.',
     memoryItem: 'football-card',
     after: {
       fromArt: 'ofir',

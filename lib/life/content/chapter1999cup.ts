@@ -34,6 +34,11 @@ export const PORTRAIT_CUP99: Record<string, string> = {
   'המפקד': 'faceCommander',
   'הבוס': 'faceBoss',
   'אוהד': 'faceSupporter',
+  'סדרן': 'faceUsher',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export function objectiveCup99(state: LifeState, sceneId: string): string | null {

@@ -190,7 +190,11 @@ describe('Stage A → Stage B (regression only)', () => {
     const replayed = fold(identity, 1986, engine.log())
     expect(replayed.chapter).toBe('1990')
     expect(replayed.year).toBe(1990)
-    expect(replayed.agorot).toBe(0)
+    // ARNAK, 16.9.2026 — Maor: "הארנק לא מתאפס בסיום משימה אלא ממשיך איתך."
+    // This line asserted the opposite until that decision, and it is changed rather than
+    // deleted: the pocket surviving a transition IS the design, and a guard on a design
+    // decision is what stops it drifting back in a refactor. See `lib/life/events.ts`.
+    expect(replayed.agorot).toBe(500)
     expect(replayed.flags['life:met:kobi']).toBe(true)
     expect(replayed.flags['prologue:done']).toBe(true)
   })

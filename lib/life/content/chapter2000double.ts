@@ -37,6 +37,11 @@ export const PORTRAIT_2000: Record<string, string> = {
   'לימור': 'faceLimor',
   'הבוס': 'faceBoss',
   'אוהד': 'faceSupporter',
+  'סדרן': 'faceUsher',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 // ------------------------------------------------------------------ Part I ------
@@ -398,9 +403,46 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
         choices: [
           { id: 'uss', text: 'ערב באוסישקין. שחור צריך עזרה, גם השבוע.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'energy', delta: -10 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
           { id: 'ticket', text: 'לסדר כרטיס — שישים שקל — והסעה. ברור.', then: [{ e: 'give', item: 'ticket-stub' }, { e: 'flag', flag: 'd:ticket' }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
-          { id: 'box', text: 'לפתוח את הקופסה האדומה. לעבור על הכל.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'wellbeing', key: 'happiness', delta: 4 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
+          { id: 'box', text: 'לפתוח את הקופסה האדומה. לעבור על הכל.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'wellbeing', key: 'happiness', delta: 4 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-box' }] },
           { id: 'army', text: 'לסגור חוב עם מישהו שכיסה עליך פעם.', when: { armyAbove: { key: 'coveredForOthers', min: 0 } }, noteHe: 'אף אחד לא כיסה עליך בצבא. אין חוב.', then: [{ e: 'army', key: 'leaveDebt', delta: -2 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
         ],
+      },
+    ],
+  },
+  {
+    /**
+     * הקופסה האדומה, בגיל עשרים ושתיים — the choice that spent an evening and said nothing.
+     *
+     * "לפתוח את הקופסה האדומה. לעבור על הכל." is one of the seven things four days have
+     * room for, it costs the player one of his two picks, and until now it printed not a
+     * single line about what is in there. The oldest thing in this life is a scrap of red
+     * cloth a five-year-old took off the concrete under a terrace (`own:red-scrap`, the
+     * `a1-red` node) — read exactly once, in a bedroom in 1984, and never again.
+     *
+     * It does nothing here either. No effect, no reward, no route: the choice's own
+     * effects stay on the choice, this node only speaks. The scrap is simply still there,
+     * and the two lines it gets are the two lines it got at six, word for word, because
+     * that is what the object is — a thing he cannot place and has never thrown away.
+     *
+     * `own:` is why it can be read at all: `personFlags()` erases a flag at every chapter
+     * cut unless it carries one of the surviving prefixes, and this one has crossed
+     * fifteen of them to get here. A save that never picked it up gets the plain branch
+     * and hears nothing about cloth.
+     */
+    id: 'd-box',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'own:red-scrap' },
+        lines: [
+          { who: null, text: 'הכל על השולחן. ספחים, פתקים, גזירים. לא הרבה נייר, בשביל כל זה.' },
+          { who: null, text: 'ומתחת לכולם פיסת בד אדומה, קטנה משהייתה. אתה לא זוכר מאיפה. אתה זוכר שהיה רועש, ושהיית גבוה.' },
+        ],
+        then: [{ e: 'goto', node: 'd-go' }],
+      },
+      {
+        lines: [{ who: null, text: 'הכל על השולחן. ספחים, פתקים, גזירים. לא הרבה נייר, בשביל כל זה.' }],
+        then: [{ e: 'goto', node: 'd-go' }],
       },
     ],
   },
@@ -408,6 +450,31 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
     id: 'd-go',
     nameHe: null,
     branches: [
+      /**
+       * ההיפוך, בשורה אחת — the fact `lib/life/tickets.ts` exists for, read rather than
+       * asserted.
+       *
+       * 1983: somebody got the tickets and carried a five-year-old in. The prologue wrote
+       * `own:tickets-1983` as a VALUE precisely so that a later chapter could ask WHO held
+       * them instead of being told. This is the first afternoon in the whole life where
+       * the answer changes hands: he is twenty-two, he took the double shift, he paid the
+       * sixty and he booked the seat on the minibus himself. Everything else about this
+       * chapter is somebody else arranging his transport — the branch below still is.
+       *
+       * Both conditions matter. `d:ticket` is what he did; `own:tickets-1983` is what he
+       * is answering. A save with no prologue on file answers `null`, falls through to the
+       * plain ticket branch and says nothing at all, which is the rule this project
+       * applies to its own saves as much as to the archive: absence of evidence is not
+       * evidence of absence.
+       */
+      {
+        when: { all: [{ flag: 'd:ticket' }, { flagIs: { flag: 'own:tickets-1983', value: 'kobi' } }] },
+        lines: [
+          { who: null, text: 'יום רביעי. הכרטיס בכיס. ההסעה בשש. רמת גן.' },
+          { who: null, text: 'בפעם הראשונה היו שניים, והם היו בכיס שלו. את זה סידרת לבד.' },
+        ],
+        then: [{ e: 'time', minutes: 120 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }],
+      },
       { when: { flag: 'd:ticket' }, lines: [{ who: null, text: 'יום רביעי. הכרטיס בכיס. ההסעה בשש. רמת גן.' }], then: [{ e: 'time', minutes: 120 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
       { lines: [{ who: null, text: 'יום רביעי. אין כרטיס מסודר. יש דרך — אם מישהו ידאג לך. מישל אמר שיש. אבא אמר שיש. מישהו ידאג.' }], then: [{ e: 'flag', flag: 'arrived:late' }, { e: 'time', minutes: 150 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
     ],

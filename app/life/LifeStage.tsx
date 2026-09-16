@@ -361,6 +361,7 @@ export function LifeStage({
           <DialogueBox
             lines={dialogue.lines}
             portrait={dialogue.portrait ?? null}
+            anchor={dialogue.anchor ?? null}
             {...(!fullBleed ? { offsetTop: frame + 8 } : {})}
             {...(dialogue.choices ? { choices: dialogue.choices } : {})}
             onAdvance={() => runtime.current?.advance()}

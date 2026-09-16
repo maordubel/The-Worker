@@ -40,6 +40,26 @@ import { t } from '@/lib/i18n'
  * two people talking face each other across the screen (`useSides`). Narration is still
  * the room talking — full width, on ink, no tail.
  *
+ * **16.9.2026 — the head is the size of a head.** Maor sent five reference shots of other
+ * games' dialogue and what they share is not a layout: it is that the speaker is BIG and
+ * the words are attached to them. Ours had an 84px plate floating two pixels clear of the
+ * balloon with a name chip hovering beside it — three separate objects, the face the
+ * smallest of them. The plate is 116px now and it OVERLAPS the sheet rather than resting
+ * on it, and the name is a tab welded to the balloon's top edge on the same side. One
+ * object, and the person is the loudest part of it.
+ *
+ * `object-top` matters more than it looks: a portrait is a head near the top of a square,
+ * so a taller crop scaled with `object-cover` and no origin centres on the chest. Michel's
+ * plate would have shown a gold chain and a chin.
+ *
+ * **And the tail points at the person.** Three of the five references do, and ours did not:
+ * it was pinned 36px from the balloon's edge, which points at the speaker's SIDE and is
+ * right by accident whenever two people happen to stand far apart. `WorldScene.anchorFor`
+ * resolves name → actor → camera and publishes a fraction of the picture on the bus;
+ * `tailOffset` below turns that into a position on the sheet. A speaker the scene cannot
+ * locate — narration, a radio, a name nobody in the room answers to — still gets the old
+ * fixed corner, because that is the honest thing to draw when you do not know.
+ *
  * No rounded corners, no shadows, tokens only.
  */
 
@@ -74,6 +94,44 @@ function useSides(who: string | null, serial: number): Side {
   const side: Side = others % 2 === 0 ? 'end' : 'start'
   sides.current.set(who, side)
   return side
+}
+
+/**
+ * הזנב מצביע על מי שמדבר (16.9.2026).
+ *
+ * `anchor` arrives in CAMERA SPACE: a fraction of the picture that grows the way the
+ * camera's own x grows, because that is what a camera is and it has never heard of an
+ * inline axis. The balloon lives in an RTL flow and is placed with logical properties
+ * (rule 9), so the conversion happens here, once, out loud — and `useRtl` is the only
+ * thing in this component that knows a physical direction exists at all.
+ *
+ * The result is clamped to the middle of the sheet: a tail in the corner collides with
+ * the ✕ on one edge and the red tab on the other, and a balloon whose tail has slid off
+ * its own sheet is worse than one that is a few degrees out.
+ */
+const TAIL_MIN = 0.1
+const TAIL_MAX = 0.9
+/** the balloon is 92% of the glass, pushed against its speaker's side */
+const BALLOON = 0.92
+
+export function tailOffset(anchor: number, atEnd: boolean, rtl: boolean): string {
+  // where the anchor falls inside the balloon, still in camera space
+  const left = atEnd ? anchor / BALLOON : (anchor - (1 - BALLOON)) / BALLOON
+  const clamped = Math.max(TAIL_MIN, Math.min(TAIL_MAX, left))
+  // inset-inline-start counts from the right when the flow is RTL
+  return `${((rtl ? 1 - clamped : clamped) * 100).toFixed(1)}%`
+}
+
+function useRtl(): boolean {
+  const [rtl, setRtl] = useState(true)
+  useEffect(() => {
+    try {
+      setRtl(document.documentElement.dir !== 'ltr')
+    } catch {
+      /* a document is not guaranteed; the game is RTL either way */
+    }
+  }, [])
+  return rtl
 }
 
 /** the probes read whole lines; a browser under `the-worker:life:probe` prints at once */
@@ -113,6 +171,7 @@ export function DialogueBox({
   lines,
   choices,
   portrait,
+  anchor,
   offsetTop,
   onAdvance,
   onChoose,
@@ -121,6 +180,11 @@ export function DialogueBox({
   lines: DialogueLine[]
   choices?: DialogueChoice[]
   portrait?: string | null
+  /**
+   * Where the speaker is standing, as a fraction of the picture in camera space, or null
+   * when the scene does not know (narration, a radio, a name nobody answers to).
+   */
+  anchor?: number | null
   /** where the painting ends — the box sits directly under it, never on top of it */
   offsetTop?: number
   onAdvance: () => void
@@ -140,6 +204,7 @@ export function DialogueBox({
   const text = line?.text ?? ''
   const { shown, done, finish } = useTypewriter(text, `${serial.current}`)
   const side = useSides(line?.who ?? null, serial.current)
+  const rtl = useRtl()
 
   if (!line) return null
   const spoken = Boolean(line.who)
@@ -165,7 +230,7 @@ export function DialogueBox({
         {/* ---- the speaker, standing over the top edge, on their side ------------------- */}
         {spoken && (
           <div
-            className={`pointer-events-none relative z-10 flex items-end gap-2 ${atEnd ? 'me-auto ms-3 flex-row' : 'me-3 ms-auto flex-row-reverse'}`}
+            className={`pointer-events-none relative z-10 flex items-end gap-0 ${atEnd ? 'me-auto ms-2 flex-row' : 'me-2 ms-auto flex-row-reverse'}`}
             data-life="speaker"
           >
             {portrait && (
@@ -175,10 +240,17 @@ export function DialogueBox({
                 src={artUrl(portrait)}
                 alt=""
                 aria-hidden="true"
-                className={`-mb-2 h-[84px] w-[84px] animate-face-in border-rule border-ink bg-sheet object-cover ${atEnd ? 'origin-bottom-left' : 'origin-bottom-right'}`}
+                className={`-mb-[10px] h-[116px] w-[116px] animate-face-in border-rule border-ink bg-sheet object-cover object-top ${atEnd ? 'origin-bottom-left' : 'origin-bottom-right'}`}
               />
             )}
-            <span className="mb-2 bg-ink px-2.5 py-1.5 font-sign text-[13px] font-bold leading-none text-sheet">
+            {/* the name is a TAB on the balloon's top edge, not a chip floating beside it:
+                it sits flush against the plate and against the sheet below, so the three
+                read as one object the way a printed panel does */}
+            <span
+              className={`mb-0 self-end border-rule border-b-0 border-ink bg-ink px-3 py-[7px] font-sign text-[13px] font-bold leading-none text-sheet ${
+                atEnd ? 'border-s-0' : 'border-e-0'
+              }`}
+            >
               <bdi>{line.who}</bdi>
             </span>
           </div>
@@ -202,7 +274,11 @@ export function DialogueBox({
           {spoken && (
             <span
               aria-hidden="true"
-              className={`pointer-events-none absolute -top-[9px] z-10 h-4 w-4 rotate-45 border-s-rule border-t-rule border-ink bg-sheet ${atEnd ? 'start-9' : 'end-9'}`}
+              // the fixed corner is the FALLBACK, for a speaker the scene cannot locate
+              className={`pointer-events-none absolute -top-[9px] z-10 h-4 w-4 rotate-45 border-s-rule border-t-rule border-ink bg-sheet ${
+                typeof anchor === 'number' ? '' : atEnd ? 'start-9' : 'end-9'
+              }`}
+              style={typeof anchor === 'number' ? { insetInlineStart: tailOffset(anchor, atEnd, rtl) } : undefined}
             />
           )}
           {/* the red tab on the speaker's edge: this is a page of the same book, every time */}

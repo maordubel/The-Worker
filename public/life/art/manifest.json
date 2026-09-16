@@ -2479,9 +2479,15 @@
   "faceMichel": {
    "w": 320,
    "h": 320,
-   "bytes": 59296,
+   "bytes": 17804,
    "yellowLeft": 0,
-   "source": "cut from adultA6"
+   "source": "cut from michel99",
+   "box": [
+    18,
+    0,
+    306,
+    289
+   ]
   },
   "faceLimor": {
    "w": 320,
@@ -2500,9 +2506,15 @@
   "faceBarry": {
    "w": 320,
    "h": 320,
-   "bytes": 8260,
+   "bytes": 16726,
    "yellowLeft": 0,
-   "source": "cut from adultA7"
+   "source": "cut from barry96",
+   "box": [
+    12,
+    0,
+    242,
+    230
+   ]
   },
   "faceAliza": {
    "w": 320,
@@ -2580,6 +2592,461 @@
    "bytes": 14418,
    "yellowLeft": 0,
    "source": "cut from amit90"
+  },
+  "faceElimelech-ball": {
+   "w": 257,
+   "h": 249,
+   "bytes": 58060,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceElimelech-calm": {
+   "w": 194,
+   "h": 249,
+   "bytes": 44792,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceElimelech-look": {
+   "w": 198,
+   "h": 249,
+   "bytes": 44000,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceElimelech-shout": {
+   "w": 202,
+   "h": 249,
+   "bytes": 48014,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceElimelech-side": {
+   "w": 178,
+   "h": 249,
+   "bytes": 43986,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceElimelech-smile": {
+   "w": 242,
+   "h": 249,
+   "bytes": 51322,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceElimelech": {
+   "w": 238,
+   "h": 249,
+   "bytes": 50782,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero80-3q": {
+   "w": 134,
+   "h": 173,
+   "bytes": 10158,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero80-back": {
+   "w": 115,
+   "h": 160,
+   "bytes": 8332,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero80-profile": {
+   "w": 127,
+   "h": 172,
+   "bytes": 9346,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero80-shout": {
+   "w": 113,
+   "h": 174,
+   "bytes": 9590,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero80-side": {
+   "w": 123,
+   "h": 173,
+   "bytes": 9588,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero80-smile": {
+   "w": 118,
+   "h": 173,
+   "bytes": 9962,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero80": {
+   "w": 117,
+   "h": 174,
+   "bytes": 9802,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero90-3q": {
+   "w": 124,
+   "h": 169,
+   "bytes": 10614,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero90-back": {
+   "w": 116,
+   "h": 167,
+   "bytes": 9354,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero90-grin": {
+   "w": 139,
+   "h": 171,
+   "bytes": 10492,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero90-look": {
+   "w": 119,
+   "h": 169,
+   "bytes": 10042,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero90-shades": {
+   "w": 113,
+   "h": 172,
+   "bytes": 9642,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero90-shout": {
+   "w": 125,
+   "h": 172,
+   "bytes": 10276,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero90-smile": {
+   "w": 135,
+   "h": 168,
+   "bytes": 10414,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceHero90": {
+   "w": 124,
+   "h": 169,
+   "bytes": 9876,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceKeren90-b": {
+   "w": 324,
+   "h": 318,
+   "bytes": 97424,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceKeren90-profile": {
+   "w": 272,
+   "h": 315,
+   "bytes": 83400,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceKeren90-side": {
+   "w": 279,
+   "h": 318,
+   "bytes": 93758,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceKeren90-smile": {
+   "w": 309,
+   "h": 311,
+   "bytes": 80786,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceKeren90": {
+   "w": 308,
+   "h": 317,
+   "bytes": 93128,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceOldMan-laugh": {
+   "w": 171,
+   "h": 260,
+   "bytes": 38768,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceOldMan-over": {
+   "w": 216,
+   "h": 260,
+   "bytes": 46184,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceOldMan-smile": {
+   "w": 200,
+   "h": 260,
+   "bytes": 44150,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceOldMan-story": {
+   "w": 200,
+   "h": 260,
+   "bytes": 46812,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceOldMan-what": {
+   "w": 227,
+   "h": 260,
+   "bytes": 49112,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "facePogi-down": {
+   "w": 210,
+   "h": 260,
+   "bytes": 38872,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "facePogi-shout": {
+   "w": 214,
+   "h": 260,
+   "bytes": 40438,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "facePogi-smile": {
+   "w": 213,
+   "h": 260,
+   "bytes": 39366,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "facePogi-wide": {
+   "w": 216,
+   "h": 260,
+   "bytes": 40712,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "facePogi": {
+   "w": 211,
+   "h": 260,
+   "bytes": 38886,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceRachel90-angry": {
+   "w": 178,
+   "h": 260,
+   "bytes": 49146,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceRachel90-nu": {
+   "w": 143,
+   "h": 260,
+   "bytes": 38938,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceRachel90-side": {
+   "w": 202,
+   "h": 260,
+   "bytes": 52950,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceRachel90-smile": {
+   "w": 145,
+   "h": 260,
+   "bytes": 41048,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceRachel90-worried": {
+   "w": 168,
+   "h": 260,
+   "bytes": 45412,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceRachel90": {
+   "w": 102,
+   "h": 260,
+   "bytes": 28680,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSinai-b": {
+   "w": 215,
+   "h": 212,
+   "bytes": 36554,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSinai-kit": {
+   "w": 208,
+   "h": 219,
+   "bytes": 42704,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSinai-look": {
+   "w": 178,
+   "h": 210,
+   "bytes": 33914,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSinai-point": {
+   "w": 275,
+   "h": 210,
+   "bytes": 48918,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSinai-shout": {
+   "w": 212,
+   "h": 217,
+   "bytes": 43500,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSinai-side": {
+   "w": 188,
+   "h": 209,
+   "bytes": 35736,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSinai": {
+   "w": 213,
+   "h": 214,
+   "bytes": 37632,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier-3q": {
+   "w": 117,
+   "h": 148,
+   "bytes": 21616,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier-back": {
+   "w": 131,
+   "h": 152,
+   "bytes": 24180,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier-beret": {
+   "w": 106,
+   "h": 141,
+   "bytes": 18052,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier-look": {
+   "w": 115,
+   "h": 149,
+   "bytes": 22182,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier-shades": {
+   "w": 117,
+   "h": 148,
+   "bytes": 21682,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier-shout": {
+   "w": 117,
+   "h": 148,
+   "bytes": 22156,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier-side": {
+   "w": 112,
+   "h": 148,
+   "bytes": 21502,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier-smile": {
+   "w": 116,
+   "h": 149,
+   "bytes": 22690,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceSoldier": {
+   "w": 105,
+   "h": 148,
+   "bytes": 20924,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceTeacher-angry": {
+   "w": 117,
+   "h": 260,
+   "bytes": 27382,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceTeacher-glasses": {
+   "w": 159,
+   "h": 260,
+   "bytes": 33230,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceTeacher-share": {
+   "w": 131,
+   "h": 260,
+   "bytes": 29588,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceTeacher-smile": {
+   "w": 186,
+   "h": 260,
+   "bytes": 38370,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceTeacher-tired": {
+   "w": 173,
+   "h": 260,
+   "bytes": 36442,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
+  },
+  "faceTeacher": {
+   "w": 172,
+   "h": 260,
+   "bytes": 36226,
+   "source": "ingested before the registry covered face plates",
+   "yellowLeft": 0
   }
  },
  "layers": {

@@ -71,7 +71,15 @@ export type HudState = {
 
 export type LifeBusEvents = {
   hud: HudState
-  dialogue: { lines: DialogueLine[]; choices?: DialogueChoice[]; portrait?: string | null } | null
+  /**
+   * `anchor` is WHERE the speaker is standing, as a fraction of the camera's view
+   * (0 = the left edge of the picture, 1 = the right), or null when nobody is speaking
+   * from a place — narration, or a voice the scene cannot locate. The balloon's tail
+   * points at it. Sampled when the line is shown, not tracked: the world is paused for
+   * the length of a conversation, so the only thing that can move under it is a shot
+   * tween, and a tail that chases a tween is worse than one that is a few pixels off.
+   */
+  dialogue: { lines: DialogueLine[]; choices?: DialogueChoice[]; portrait?: string | null; anchor?: number | null } | null
   /**
    * What the button will do, and to what.
    *

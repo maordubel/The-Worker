@@ -91,23 +91,23 @@ export type LifeEvent =
    * ארבע שנים עוברות — the calendar moves, and the life does not start again.
    *
    * Everything that is HIM stays: personality, the Red Heart, every relationship and every
-   * memory, the Red Box, the seed. Everything that is the DAY resets: the clock, the
-   * weekday, the pockets, the energy, the flags of an afternoon that ended. Age is
-   * arithmetic off the identity, as it always was. A save that folds this event is one
-   * biography four years on, not two biographies stapled together (brief §52).
+   * memory, the Red Box, the seed — and, since 16.9.2026, THE WALLET (see `ARNAK` at
+   * `savings.changed`). Everything that is the DAY resets: the clock, the weekday, the
+   * energy, the afternoon's props, the flags of an afternoon that ended. Age is arithmetic
+   * off the identity, as it always was. A save that folds this event is one biography four
+   * years on, not two biographies stapled together (brief §52).
    */
   | { t: 'year.entered'; year: number; weekday: number; minute: number }
   /**
    * יום — a day inside a chapter (Stage A §5).
    *
-   * `year.entered` is a four-year jump: it empties the pockets, clears the afternoon and
-   * starts a life again in a new age. Stage A needs something an order of magnitude
-   * smaller — eight days across three years, each of which resets a clock and an energy
-   * level and keeps everything that makes the boy who he is by the eighth. So this event
-   * resets the DAY and preserves the biography: bonds, memories, personality, the Red
-   * Heart, the Red Box, the savings tin, the clothes he owns, and every flag that
-   * describes the person rather than the afternoon (`life:`, `onboard:`, `own:`,
-   * `promise:`, `cutscene:`, `prologue:`).
+   * `year.entered` is a four-year jump: it clears the afternoon and starts a life again in
+   * a new age. Stage A needs something an order of magnitude smaller — eight days across
+   * three years, each of which resets a clock and an energy level and keeps everything that
+   * makes the boy who he is by the eighth. So this event resets the DAY and preserves the
+   * biography: bonds, memories, personality, the Red Heart, the Red Box, the savings tin,
+   * **the wallet**, the clothes he owns, and every flag that describes the person rather
+   * than the afternoon (`life:`, `onboard:`, `own:`, `promise:`, `cutscene:`, `prologue:`).
    */
   | {
       t: 'day.entered'
@@ -200,6 +200,29 @@ export function emptyState(identity: PlayerIdentity, year: number): LifeState {
       kobi: { ...blankRelationship(50), sharedHistory: 60, familiarity: 90, trust: 55 },
       rachel: { ...blankRelationship(50), sharedHistory: 60, familiarity: 90, trust: 60 },
       ofir: { ...blankRelationship(0), familiarity: 45, distance: 20 },
+      /**
+       * אפי — the friend whose whole arc was written against a baseline he never had.
+       *
+       * Efi is `activeEras: ['1986+']`. He is on the schedule in 1986, in the alley in
+       * 1984, and the hall opportunity remembers him as `came-to-the-hall`. He is a
+       * childhood friend exactly the way Ofir is — and Ofir is seeded here and Efi was
+       * not, so every read of him started from `blankRelationship(0)`: a stranger, trust
+       * zero, distance forty.
+       *
+       * That omission was invisible until `budget-audit` counted what the content can
+       * actually pay. Three separate chapters gate on his TRUST — 1997 `max: 45`, 1999
+       * `max: 44`, 2000 `min: 45` — and the whole game contains exactly one line that
+       * raises it, by three. So all three gates were permanently on the cold side: Efi
+       * drifted away in every life ever played, including the one that did everything
+       * right by him, and the warm halves of those three scenes — "אני זוכר אותך על הגב
+       * שלי אחרי הגביע", "אני בא איתך. אל תגיד לשחור", the embrace at the title and the
+       * `life:title:efi` milestone — could not be reached by anyone.
+       *
+       * Numbers written as 44 and 45 are the evidence: nobody calibrates a threshold
+       * against a scale whose ceiling is three. They were written for a friend sitting
+       * near fifty, and this is that friend.
+       */
+      efi: { ...blankRelationship(0), trust: 40, familiarity: 50, distance: 15 },
     },
     relationshipMemory: [],
     traits: {
@@ -442,7 +465,7 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
         minute: event.minute,
         energy: 100,
         resources: { ...state.resources, energy: 100, availableTime: 0 },
-        agorot: 0,
+        // הארנק ממשיך איתו — see ARNAK below. The pocket is NOT emptied by a new day.
         inventory: {},
         flags: personFlags(state.flags),
         opportunities: [],
@@ -450,6 +473,30 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
         wellbeing: { ...state.wellbeing, exhaustion: 0 },
       }
 
+    /**
+     * הארנק — ARNAK. Maor, 16.9.2026, when asked what to do about the shirt in A4:
+     *
+     *   "כל הקטע בארנק זה שהכסף צריך להישמר ולהמשיך עם הדמות. והוא מחליט מתי ואיפה ועל
+     *    מה להוציא. הארנק לא מתאפס בסיום משימה אלא ממשיך איתך."
+     *
+     * Until that sentence both `day.entered` and `year.entered` wrote `agorot: 0`, so
+     * every pocket in the game was emptied at the end of every mission — and the comment
+     * above `day.entered` said it "keeps the till", which was true of `savings` (the tin
+     * under the bed) and false of the pocket right beside it. The two were one word apart
+     * in the same object.
+     *
+     * What that cost, concretely: the boy in A4 needs thirty shekels for the shirt and
+     * his whole afternoon yields about twenty-two, so the chapter was only winnable at
+     * all by a player who took every single agora in it and bought nothing. One Supergoal
+     * packet — which the game offers on the line directly under the shirt — locked the
+     * chapter's title item forever, with nothing on screen to say so. Saving across a day
+     * is what turns that from a trap into the decision the chapter is named after.
+     *
+     * `inventory` is still cleared, and deliberately: bottles for deposit and a loaf of
+     * bread are an afternoon's props, not possessions. What he OWNS survives already, by
+     * its own route — `own:` flags and `clothing` (rule 58), which is why a shirt bought
+     * in 1985 is still in the wardrobe in 2000.
+     */
     case 'savings.changed':
       return { ...state, savings: Math.max(0, state.savings + Math.round(event.agorot)) }
 
@@ -469,7 +516,7 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
         dateHe: null,
         energy: 100,
         resources: { ...state.resources, energy: 100, availableTime: 0 },
-        agorot: 0,
+        // הארנק ממשיך איתו — see ARNAK below. Years pass; the pocket is still his.
         inventory: {},
         flags: kept,
         opportunities: [],

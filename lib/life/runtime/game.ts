@@ -176,6 +176,8 @@ export type LifeRuntime = {
     hint(): string | null
     /** every beat of this chapter, whether it fired, and what it is still waiting for */
     pending(): Array<{ id: string; ends: boolean; fired: boolean; needs: string[]; waitingHe: string | null }>
+    /** what the balloon's tail is told about a speaker, and the state behind that answer */
+    anchor(who: string | null): { anchor: number | null; speaking: string | null; view: number; names: string[] } | null
     where(): unknown
   }
   destroy(): void
@@ -378,6 +380,9 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       hint: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.debugHint() ?? null : null),
       /** every beat of this chapter, whether it fired, and what it is still waiting for */
       pending: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.pending() ?? [] : []),
+      /** what the balloon's tail is told about a speaker, and why — see `anchorFor` */
+      anchor: (who: string | null) =>
+        game.scene.isActive(WorldScene.KEY) ? worldScene()?.anchorDebug(who) ?? null : null,
       where: () => {
         const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
         if (passage && game.scene.isActive(PassageScene.KEY)) return passage.where()

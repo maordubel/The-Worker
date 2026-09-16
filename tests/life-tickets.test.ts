@@ -1,8 +1,12 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { CONVERSATIONS_A1 } from '@/lib/life/content/chapterStageA'
 import { fold } from '@/lib/life/events'
+import { meets } from '@/lib/life/world/types'
 import type { LifeEvent } from '@/lib/life/events'
 import {
   keptStub,
@@ -123,5 +127,36 @@ describe('הכרטיסים — מה ששורד ארבעים ושלוש שנה', 
     expect(ticketsIn1983(state)).toBeNull()
     expect(keptStub(state)).toBe(false)
     expect(reversalComplete(state)).toBe(false)
+  })
+})
+
+describe('הכרטיסים — ההיפוך נקרא, לא נטען', () => {
+  it('ב-2000 יש ענף שקורא מי החזיק בכרטיסים ב-1983', () => {
+    // The whole reason `own:tickets-1983` is a VALUE and not a boolean: a later chapter
+    // has to be able to ask WHO held them. Until 15.9.2026 no chapter between 1986 and
+    // 2000 read the flag at all — the spine was planted and never picked up.
+    const doubleChapter = readFileSync(
+      join(process.cwd(), 'lib/life/content/chapter2000double.ts'),
+      'utf8',
+    )
+    expect(doubleChapter, 'no chapter reads the 1983 tickets').toContain(TICKETS_1983)
+    expect(doubleChapter).toContain('flagIs')
+  })
+
+  it('הענף נגיש: מי שסידר כרטיס בעצמו ונשא את 1983 מגיע אליו', () => {
+    // Proven by folding, not by reading. `flagIs` compares with `!==`, so the stored value
+    // must be exactly the string the prologue writes.
+    const state = fold(DEFAULT_IDENTITY, 2000, [
+      { t: 'flag.set', flag: TICKETS_1983, value: 'kobi' } as LifeEvent,
+      { t: 'flag.raised', flag: 'd:ticket' } as LifeEvent,
+    ])
+    expect(meets(state, { all: [{ flag: 'd:ticket' }, { flagIs: { flag: TICKETS_1983, value: 'kobi' } }] })).toBe(true)
+  })
+
+  it('שמירה בלי פרולוג נופלת לענף הרגיל ולא אומרת דבר על 1983', () => {
+    // Absence of evidence is not evidence of absence — the same rule the archive gets.
+    const state = fold(DEFAULT_IDENTITY, 2000, [{ t: 'flag.raised', flag: 'd:ticket' } as LifeEvent])
+    expect(meets(state, { all: [{ flag: 'd:ticket' }, { flagIs: { flag: TICKETS_1983, value: 'kobi' } }] })).toBe(false)
+    expect(meets(state, { flag: 'd:ticket' }), 'the plain ticket branch must still catch him').toBe(true)
   })
 })

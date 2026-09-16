@@ -964,14 +964,20 @@ const SCENES: SceneDef[] = [
     actors: [
       // ---- שלב א׳, הימים שלפני השבת ----
       { id: 'efi-a3', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'אפי', talk: 'efi-a3', sway: 0.006 },
-      { id: 'kobi-a5', era: 'a5-first', figure: 'kobi-side', x: 0.78, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-a5', flip: true, when: { none: [{ flag: 'a5:kobi-left' }] } },
+      { id: 'kobi-a5', era: 'a5-first', figure: 'kobi-side', x: 0.66, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-a5', flip: true, when: { none: [{ flag: 'a5:kobi-left' }] } },
       { id: 'liron-a6', era: 'a6-radio', figure: 'adultB2', x: 0.56, y: 0.8, size: 0.29, nameHe: 'לירון', talk: 'liron-a6' },
       { id: 'amit-a7', era: 'a7-week', figure: 'amit', x: 0.36, y: 0.79, size: 0.26, nameHe: 'עמית', talk: 'amit-a7' },
       { id: 'ofir-a7', era: 'a7-week', figure: 'ofir', x: 0.56, y: 0.79, size: 0.26, nameHe: 'אופיר', talk: 'ofir-a7', flip: true, sway: 0.006 },
       {
         id: 'ofir',
         figure: 'ofir',
-        x: 0.185,
+        // Beside the kiosk door, not in it. A person standing inside an exit zone wins the
+        // prompt over the door (`aim()` gives an actor priority 4 and a door 2), so the way
+        // in disappears behind a conversation — the same defect the comment above
+        // `usher-night` was written for. A schedule row usually moves him anyway; a
+        // placement that is only correct because something else overrides it is not a
+        // placement.
+        x: 0.13,
         y: 0.775,
         size: 0.26,
         nameHe: 'אופיר',
@@ -997,7 +1003,7 @@ const SCENES: SceneDef[] = [
         // visible from the shoulders up — which is exactly the failure mode a person you
         // are supposed to talk to should never have.
         figure: 'adultB1',
-        x: 0.468,
+        x: 0.41,
         y: 0.735,
         size: 0.22,
         nameHe: 'אילן השכן',
@@ -1099,17 +1105,17 @@ const SCENES: SceneDef[] = [
       { id: 'amit-laces', era: '1998-laces', figure: 'amit90-point', x: 0.63, y: 0.8, size: 0.283, nameHe: 'עמית', talk: 'ofir-laces', flip: true },
       { id: 'soko-laces', era: '1998-laces', figure: 'soko', x: 0.3, y: 0.8, size: 0.283, nameHe: 'סוקו', talk: 'soko-laces' },
       { id: 'liron-cup99', era: '1999-cup', figure: 'adultB2', x: 0.3, y: 0.8, size: 0.283, nameHe: 'לירון', talk: 'liron-cup99' },
-      { id: 'michel-cup99', era: '1999-cup', figure: 'michel96-walk1', x: 0.44, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-cup99' },
+      { id: 'michel-cup99', era: '1999-cup', figure: 'michel96-walk1', x: 0.35, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-cup99' },
       { id: 'ofir-cup99', era: '1999-cup', figure: 'ofir90-arms', x: 0.58, y: 0.79, size: 0.275, nameHe: 'אופיר', talk: 'ofir-cup99' },
       { id: 'efi-cup99', era: '1999-cup', figure: 'efi96-3q', x: 0.72, y: 0.8, size: 0.262, nameHe: 'אפי', talk: 'efi-cup99', flip: true },
-      { id: 'michel-title', era: '2000-title', figure: 'michel96-walk3', x: 0.44, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-title' },
+      { id: 'michel-title', era: '2000-title', figure: 'michel96-walk3', x: 0.35, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-title' },
       { id: 'efi-title', era: '2000-title', figure: 'efi96-speak', x: 0.72, y: 0.8, size: 0.262, nameHe: 'אפי', talk: 'efi-title', flip: true },
       // ---- 1990: the same street, older children ----
       {
         id: 'ofir-street',
         era: '1990',
         figure: 'ofir90',
-        x: 0.2,
+        x: 0.13,
         y: 0.78,
         size: 0.28,
         nameHe: 'אופיר',
@@ -1126,7 +1132,21 @@ const SCENES: SceneDef[] = [
         nameHe: 'עמית',
         talk: 'amit-1990',
       },
-      { id: 'kobi-walk', era: '1990', figure: 'kobi90-side', x: 0.15, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-found-1990', flip: true, when: { flag: 'found:kobi' } },
+      /**
+       * קובי, אחרי שמצאת אותו — moved from 0.15 to 0.90 on 16.9.2026, for two reasons
+       * that only show up once the board draws people at the size the engine draws them.
+       *
+       * At 0.15 he stood INSIDE Ofir (0.111–0.149 against his own 0.127–0.173) and on
+       * top of the `fromHome` spawn at 0.175 — so a boy who had found his father came out
+       * of his own front door onto him. Both were invisible while the board drew the
+       * deprecated `size` field, and invisible on the default board besides, because he
+       * only appears behind `found:kobi`.
+       *
+       * 0.90 is the one clear slot on this street: no exit, no hotspot, no other body, no
+       * spawn. It is also the better beat — the route door is at 0.945, so stepping back
+       * off the road puts the father a few metres ahead of you, facing home (`flip`).
+       */
+      { id: 'kobi-walk', era: '1990', figure: 'kobi90-side', x: 0.9, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-found-1990', flip: true, when: { flag: 'found:kobi' } },
       {
         // בארי — the same Gate 7 fixture from 1986, older, remembering Kobi's son (Stage A
         // Director's Cut §43: Barry's long-term seeds must pay off across decades).
@@ -2058,8 +2078,23 @@ const SCENES: SceneDef[] = [
        * line (nobody is renaming assets over a name change), but the label above his head
        * and in his dialogue box reads generic, matching `chapterStageA.ts`'s demotion.
        */
-      { id: 'kobi-a5', era: 'a5-first', figure: 'kobi', x: 0.42, y: 0.9, size: 0.26, nameHe: 'קובי', talk: 'kobi-a5-gate', sway: 0.003 },
-      { id: 'barry-a5', era: 'a5-first', figure: 'adultB2', x: 0.63, y: 0.88, size: 0.255, nameHe: 'אוהד ותיק', talk: 'barry-a5', flip: true },
+      /**
+       * שני קובי ושני ותיקים עמדו כאן, ואחד מהזוגות היה עודף (16.9.2026).
+       *
+       * The fix above was applied twice, in two passes, and the second pass did not see
+       * the first: the scene carried `kobi-a5` (x 0.42) AND `kobi-a5-gate` (x 0.36) with
+       * the SAME conversation, and **two actors both called `barry-a5`** at 0.44 and 0.63.
+       * So the first time a child stood at gate seven with his father there were two of
+       * his father four hundredths apart and two identical strangers, and one of the
+       * strangers was standing inside one of the fathers.
+       *
+       * A duplicate id is worse than a duplicate body: `aim()` and every lookup that
+       * follows resolve by id, so which of the two answers is an accident of array order.
+       *
+       * The pair kept is the one at 0.36 / 0.44, because those are `kobi-gate7` and
+       * `barry-gate7`'s own coordinates eleven years later — the same two men at the same
+       * gate in 1985 and in 1996 is a rhyme somebody wrote on purpose.
+       */
       { id: 'barry-a5', era: 'a5-first', figure: 'adultA6', x: 0.44, y: 0.91, size: 0.3, nameHe: 'אוהד ותיק', talk: 'barry-a5', sway: 0.003 },
       { id: 'kobi-a5-gate', era: 'a5-first', figure: 'kobi', x: 0.36, y: 0.9, size: 0.3, nameHe: 'קובי', talk: 'kobi-a5-gate', sway: 0.002 },
       // 16.11.1996 — the two gates. Kobi and Barry at seven; Barry has no figure yet.
@@ -2077,7 +2112,20 @@ const SCENES: SceneDef[] = [
       {
         id: 'barry-gate7',
         era: '1996-army',
-        figure: 'adultA6',
+        /**
+         * בארי, ולא אדם כלשהו בשער.
+         *
+         * `barry96` ושבע פוזות נוספות נחתכו, נקלטו ויושבות ב-`FIGURE` וב-`heights.ts`
+         * (1.81 מ׳) — ולא הוצבו באף מקום. בארי, שיש לו שם, פנים ותפקיד, צויר בדמות
+         * ניצב גנרית בגובה 1.74.
+         *
+         * זה הפריט היחיד מתוך שישה שהסריקה מצאה שבאמת צריך לזוז. שלושת שחקני אפי
+         * ב-1991 וב-1993 משתמשים ב-`youngA2` **בצדק** — `efi96` הוא אפי המבוגר בגובה
+         * 1.80, ובשנים האלה הוא בן שלוש־עשרה; הוא כבר מוצב נכון ב-1999 וב-2000. ושני
+         * שחקני `barry-a5` הם "אוהד ותיק" ב-1985, בכוונה בלי שם, שנה לפני הכניסה
+         * הקנונית של בארי ב-1986 — לתת להם את הפלייט שלו זה להסגיר אותו מוקדם.
+         */
+        figure: 'barry96-3q',
         x: 0.44,
         y: 0.91,
         size: 0.302,
@@ -2115,9 +2163,34 @@ const SCENES: SceneDef[] = [
       // anything. What it costs is the nerve to ask a stranger.
       { id: 'family', figure: 'adultA3', x: 0.8, y: 0.92, size: 0.27, nameHe: 'אבא עם ילד', talk: 'gate-family' },
       { id: 'crowd-a', figure: 'youngB4', x: 0.9, y: 0.94, size: 0.28, nameHe: 'אוהד', talk: 'route-fan', flip: true },
+      /**
+       * קובי בין היוצאים — the one person who makes `ENDINGS.late` possible.
+       *
+       * That card has been written since Stage A and nothing could reach it: the only
+       * `kobi-found` in the game stands on the terrace INSIDE, so a boy who never got
+       * through the turnstile had two endings where the chapter had written three.
+       *
+       * He is up at the far line of the band on purpose, the same staging note as
+       * `kobi-crowd`: small, among the people coming out, and the walk over to him is
+       * the ending. `notFlag: 'entry:granted'` keeps him off the screen for the boy who
+       * was inside — that Saturday already has its own meeting and its own card.
+       */
+      {
+        id: 'kobi-out-late',
+        figure: 'kobi-cheer',
+        x: 0.66,
+        // on the band's far line: further up the forecourt than the steward at 0.86, so
+        // he is behind him rather than beside him, and small among the people coming out
+        y: 0.8,
+        size: 0.2,
+        nameHe: 'קובי',
+        talk: 'kobi-out-late',
+        flip: true,
+        when: { all: [{ flag: 'match:over' }, { notFlag: 'entry:granted' }] },
+      },
       // ---- 1990: gate seven is home ----
       { id: 'kobi-gate', era: '1990', figure: 'kobi90-stand', x: 0.62, y: 0.9, size: 0.33, nameHe: 'קובי', talk: 'kobi-gate-1990', flip: true },
-      { id: 'steward-1990', era: '1990', figure: 'adultA4', x: 0.5, y: 0.86, size: 0.3, nameHe: 'סדרן', talk: 'steward-1990' },
+      { id: 'steward-1990', era: '1990', figure: 'adultA4', x: 0.4, y: 0.86, size: 0.3, nameHe: 'סדרן', talk: 'steward-1990' },
       { id: 'ticket-1990', era: '1990', figure: 'adultA2', x: 0.7, y: 0.9, size: 0.32, nameHe: 'הקופאי', talk: 'ticket-window-1990', flip: true },
       { id: 'ofir-ground', era: '1990', figure: 'ofir90', x: 0.33, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'ofir-ground-1990' },
       { id: 'vendor-1990', era: '1990', figure: 'adultA6', x: 0.88, y: 0.93, size: 0.34, nameHe: 'מוכר', talk: 'vendor-1990', flip: true },
@@ -2411,8 +2484,23 @@ const SCENES: SceneDef[] = [
        * the night he was supposedly initiated. `when` keeps them outside only until he is
        * in: once `uss:arrived` is up the forecourt empties, because they went in too.
        */
-      { id: 'efi-1991', era: '1991', figure: 'youngA2', x: 0.58, y: 0.9, size: 0.262, nameHe: 'אפי', talk: 'efi-1991', flip: true, sway: 0.006, when: { none: [{ flag: 'derby:over' }] } },
-      { id: 'limor-1991', era: '1991', figure: 'youngB3', x: 0.44, y: 0.9, size: 0.258, nameHe: 'לימור', talk: 'limor-1991', sway: 0.003, when: { none: [{ flag: 'uss:arrived' }] } },
+      /**
+       * שלושה אנשים עמדו על אותה נקודה בחצר של אוסישקין (16.9.2026).
+       *
+       * `usher-wave` is nearly twice as wide as a standing body — the arm is out, waving
+       * people toward the doors — and he stood at 0.55 between Limor at 0.52 and Efi at
+       * 0.58. Each of them had **86% of their body behind his**, which on the board is a
+       * three-person pile-up with an arm through the middle of it, and in the game is
+       * three people trading one prompt as the boy shuffles a centimetre.
+       *
+       * The usher moves to 0.50 — beside the door and not in it, which the comment above
+       * `usher-night` has asked for since the night he was placed, and his arm now reaches
+       * toward the entrance at 0.45 instead of through Limor. Limor takes the space he
+       * left; Efi goes to the far end of the forecourt, past Shachor, which is where the
+       * only other clear stretch of this band is.
+       */
+      { id: 'efi-1991', era: '1991', figure: 'youngA2', x: 0.9, y: 0.9, size: 0.262, nameHe: 'אפי', talk: 'efi-1991', flip: true, sway: 0.006, when: { none: [{ flag: 'derby:over' }] } },
+      { id: 'limor-1991', era: '1991', figure: 'youngB3', x: 0.6, y: 0.9, size: 0.258, nameHe: 'לימור', talk: 'limor-1991', sway: 0.003, when: { none: [{ flag: 'uss:arrived' }] } },
       { id: 'shachor-1991', era: '1991', figure: 'shachor', x: 0.82, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'shachor-1991', flip: true, when: { none: [{ flag: 'uss:arrived' }] } },
       // ---- 11.3.1991, an hour before the doors ----
       // The usher stands BESIDE the door and not in it: a person in a doorway wins the
@@ -2421,7 +2509,9 @@ const SCENES: SceneDef[] = [
         id: 'usher-night',
         era: '1991',
         figure: 'usher-wave',
-        x: 0.55,
+        // 0.55 → 0.50: beside the door (which ends at 0.45), with the waving arm reaching
+        // toward it rather than through Limor. See the note above `efi-1991`.
+        x: 0.5,
         y: 0.9,
         size: 0.278,
         nameHe: 'סדרן',

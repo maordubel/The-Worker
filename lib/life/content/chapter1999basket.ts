@@ -29,6 +29,11 @@ export const PORTRAIT_SEED: Record<string, string> = {
   'עומר': 'faceHermesh',
   'רפי מהקיוסק': 'faceOldMan',
   'אוהד': 'faceSupporter',
+  'סדרן': 'faceUsher',
+  // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
+  // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
+  'המוכר': 'faceVendor',
+  'הגבר': 'faceSupporterB',
 }
 
 export function objectiveSeed(state: LifeState, sceneId: string): string | null {
