@@ -18,6 +18,14 @@ import { placeLabel } from '@/lib/life/world/labels'
  * what it means; a red rule draws. The whole thing is four seconds and one tap. Used for
  * the places that are a feeling — the first sight of Bloomfield, the second home — and
  * never for a kiosk.
+ *
+ * The push-in is a real camera move as of 16.9.2026. It always read as a hard cut before,
+ * and the reason was one line: the old `CityMap` swapped its `viewBox` under a
+ * `transition: all`, and no browser has ever animated an SVG `viewBox` from CSS. The
+ * camera the same pass gave the map for dragging is what makes this shot work — the map
+ * is handed a `focus` and flies to it, so the four beats below are now four beats of one
+ * movement instead of two stills. `interactive` stays off: this is a shot, not a sheet,
+ * and a thumb on it must not be able to steer away from the place being revealed.
  */
 export function MapReveal({
   place,

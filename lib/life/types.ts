@@ -74,6 +74,15 @@ export type LocationId =
   // --- the decade (Stage B) ---
   /** under the stand at Bloomfield, where the younger crowd gathers from 1996 */
   | 'gate5'
+  /**
+   * משרד הכרטיסים — the concourse under the stand where a season ticket is renewed.
+   *
+   * A member of this union is a PERSISTED identifier (rule 35): it lands inside `moved`
+   * rows in saved logs, so it is added and never renamed. Added 16.9.2026 with the
+   * subscription system, which is the first thing in the game you have to go somewhere
+   * and buy again every year.
+   */
+  | 'ticket-office'
   /** the new central bus station — a platform at dawn; a stand-in painting until its own */
   | 'bus-station'
   /** the national stadium, for the two cup finals — a stand-in painting until its own */

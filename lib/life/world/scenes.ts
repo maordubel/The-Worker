@@ -20,6 +20,19 @@ import type { Condition } from './types'
  * painting must move no door and no person.
  */
 
+/**
+ * משרד הכרטיסים — a new room, and a `LocationId` this file cannot declare.
+ *
+ * `LocationId` is a union in `lib/life/types.ts`, and that file is not this pass's to
+ * edit. The cast is the seam and it is exactly one line: every other reference — the
+ * scene's `id`, the door's `to`, the runtime's room check — goes through this constant,
+ * so the day the union gains `| 'ticket-office'` the cast comes off and nothing else
+ * moves. The patch is one line and it is stated in the delivery note rather than done
+ * quietly here, because a union member is a persisted identifier (rule 35) and adding one
+ * is somebody's decision, not a side effect of adding a door.
+ */
+export const TICKET_OFFICE = 'ticket-office'
+
 export const KICKOFF = at(16, 0)
 export const KOBI_LEAVES = at(15, 10)
 export const FULL_TIME = at(17, 45)
@@ -2063,7 +2076,10 @@ const SCENES: SceneDef[] = [
       { art: 'propPosters', x: 0.688, y: 0.748, w: 0.084, depth: 0.6, foot: true },
       { art: 'propSign', x: 0.622, y: 0.63, w: 0.048, depth: 0.6, foot: true },
     ],
-    spawns: { fromRoute: { x: 0.06, y: 0.87, facing: 'right' }, fromTunnel: { x: 0.66, y: 0.93, facing: 'left' }, fromGate5: { x: 0.9, y: 0.88, facing: 'left' }, start: { x: 0.22, y: 0.9, facing: 'right' } },
+    // `fromOffice` stands clear of all four doors (0–0.04, 0.45–0.58, 0.715–0.785,
+    // 0.93–1.0): a spawn inside the zone you just came through is an infinite bounce,
+    // and it existed in three scenes before it was a failing test (rule 41).
+    spawns: { fromRoute: { x: 0.06, y: 0.87, facing: 'right' }, fromTunnel: { x: 0.66, y: 0.93, facing: 'left' }, fromGate5: { x: 0.9, y: 0.88, facing: 'left' }, fromOffice: { x: 0.66, y: 0.88, facing: 'right' }, start: { x: 0.22, y: 0.9, facing: 'right' } },
     actors: [
       /**
        * שני האנשים של 1985 — and the reason they were not here until 5.9.2026.
@@ -2226,6 +2242,48 @@ const SCENES: SceneDef[] = [
         labelHe: 'מתחת ליציע, לשער 5',
         light: { x: 0.92, y: 0.55, w: 0.08, h: 0.4, tone: 'inside' },
         dwellMs: 500,
+        priority: 2,
+      },
+
+      {
+        /**
+         * משרד הכרטיסים — the red door in the gate-seven frame, and the only new door
+         * this pass adds (Maor, 16.9.2026: *"בוא נוסיף 'משרד כרטיסים' גם במקום שצריך
+         * ללכת אליו. 'דלת' חדשה במשחק"*).
+         *
+         * It is the painted double door at 0.725–0.90 of `gate7.webp`, which nothing in
+         * the scene used: the frame already carried a service door under the stand and
+         * the game walked past it for a year. The reach zone is its LEFT half so that
+         * `הקופאי` at x 0.70 and `אבא עם ילד` at x 0.80 stay outside it — a talkable
+         * person inside an exit wins the prompt and the door disappears behind a
+         * conversation (`tests/life-doorways.test.ts`).
+         *
+         * And the hatch beside it is not this. `ticket-window` at 0.70 is the MATCHDAY
+         * window: one game, today, cash. This is the club's subscription office, open in
+         * the summer, and the two being a metre apart is how a ground is actually laid
+         * out rather than a duplication.
+         *
+         * `tone: 'inside'` because it goes UNDER the stand and not out of the ground
+         * (rule 41 reserves daylight for the way out of a building); the way back is
+         * daylight, from the office's own side.
+         *
+         * From 1990 only. The office is there in 1985 too, but the first season ticket in
+         * the archive is 90/91 — a door into a room with nothing to do in it is dead
+         * content (rule 66), and `subscription.ts` decides which years have a card.
+         */
+        id: 'office',
+        era: ['1990s', '2000s'],
+        x: 0.715,
+        y: 0.82,
+        w: 0.07,
+        h: 0.13,
+        to: TICKET_OFFICE,
+        spawn: 'fromGate',
+        labelHe: 'משרד הכרטיסים',
+        light: { x: 0.722, y: 0.40, w: 0.086, h: 0.5, tone: 'inside' },
+        // a counter is somewhere you stop, not somewhere you pass — the fan shop's own
+        // dwell, for the same reason (rule 41)
+        dwellMs: 900,
         priority: 2,
       },
 
@@ -3103,6 +3161,63 @@ const SCENES: SceneDef[] = [
       },
     ],
     spawns: { start: { x: 0.2, y: 0.88 } },
+  },
+
+  // ------------------------------------------------- משרד הכרטיסים (1990 ואילך) ----
+  //
+  // מתחת ליציע — the concourse under the stand, entered through the red door at gate
+  // seven, with the subscription windows shuttered into the far wall and the plaza open
+  // at the other end.
+  //
+  // The painting is `undercroft`, and it has been on disk with NO SCENE since the
+  // September delivery: `art.ts` says of it and `ussHallPre` that "neither has a scene
+  // yet, and that is on purpose (rule 43): the art lands first so the 1983–2000 plan can
+  // name a place instead of describing one." This is that plan naming it. Nothing was
+  // commissioned for this room; the one unused backdrop that is a place a supporter
+  // queues in was already painted.
+  //
+  // There are no actors and no hotspots, and that is the design rather than a gap: the
+  // window IS the card. `WorldScene.announceSeasonTicket` fires `season: 'counter'` on
+  // arrival while a season is open and unheld, so walking in is the whole interaction —
+  // the same call the fan shop's door makes (Maor, 6.9.2026, on the shop: buying is "a
+  // rail and a pocket, not a room to walk about in"). What is a room here is the WALK,
+  // which is the half of it he asked for: "גם במקום שצריך ללכת אליו".
+  {
+    id: TICKET_OFFICE,
+    titleHe: 'משרד הכרטיסים',
+    art: 'undercroft',
+    // The open pavement in front of the windows. The band stops at 0.78 because above it
+    // the painting is the crush barriers, and a boy walking through a steel barrier is
+    // the same defect as a car parked across a doorway (rule 48).
+    band: { far: 0.78, near: 0.96 },
+    // Measured off the painting: the man walking at y 0.81 is 0.25 of the frame tall, and
+    // a man is 1.75 m (`heights.ts`), which gives 0.182 at the near line. The 1.35× ramp
+    // is a room's, not a corridor's — the camera is standing on the same pavement.
+    size: { far: 0.175, near: 0.237 },
+    metre: 0.182,
+    ambience: 'park',
+    stuckHe: 'החלון של המנויים. אם יצא מנוי לעונה — הוא נמכר כאן, ורק כאן.',
+    actors: [],
+    hotspots: [],
+    exits: [
+      {
+        id: 'back',
+        x: 0.92,
+        y: 0.78,
+        w: 0.08,
+        h: 0.18,
+        to: 'bloomfield-outside',
+        spawn: 'fromOffice',
+        labelHe: 'חזרה לשער 7',
+        // the way OUT of a building is the one tone reserved for it (rule 41)
+        light: { x: 0.93, y: 0.45, w: 0.07, h: 0.45, tone: 'daylight' },
+        dwellMs: 500,
+      },
+    ],
+    spawns: {
+      fromGate: { x: 0.82, y: 0.88, facing: 'left' },
+      start: { x: 0.82, y: 0.88, facing: 'left' },
+    },
   },
 
   // -------------------------------------------------------- התחנה המרכזית (1996) ----

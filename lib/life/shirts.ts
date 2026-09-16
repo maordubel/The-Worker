@@ -1,4 +1,5 @@
 import { ARCHIVE_SHIRTS } from './generated/kitShirts'
+import { chapterFor, playableChapters } from './content/chapters'
 import { SHIRT as SHIRT_BY_DECADE, decadeOf, decadeOfYear, SHIRT as SHIRT_TABLE } from './prices'
 import type { KitSpec } from '../kit/spec'
 import type { Conversation } from './content/script'
@@ -54,12 +55,41 @@ export type Shirt = {
   sourceHe?: string
 }
 
-/** chapters in the order the life plays them, so `from` can mean "this year or later" */
-const ORDER = [
-  'a2-alley', 'a3-hall', 'a4-shirt', 'a5-first', 'a6-radio', 'a7-week', '1986',
-  '1990', '1991', '1993-cup', '1993-galil', '1995-sinai', '1996-army',
-  '1997-basket', '1998-laces', '1999-basket', '1999-cup', '2000-title', '2000-double',
-]
+/**
+ * לוח השנה של החנות — the chapters in the order the life plays them, READ off the
+ * registry instead of typed beside it.
+ *
+ * This list used to be nineteen ids written out here, and a second hand-typed table of
+ * their years underneath. Both were copies of `content/chapters.ts`, and they had already
+ * drifted: the table said `a6-radio` was 1985 and `1995-sinai` was 1995, while the
+ * registry — the file the game actually plays from — says 1986 and 1994. Nothing on a
+ * rail happened to depend on the two rows that differed, which is the only reason it was
+ * invisible. Rule 59's sentence about two copies of a runtime file is the same sentence
+ * about two copies of a runtime table.
+ *
+ * It is exported because the album needs the same spine: an album is stock in the same
+ * shop, and `stickers.ts` places a page on the counter by exactly this ordering.
+ */
+export const CHAPTER_ORDER: readonly string[] = playableChapters().map((chapter) => chapter.id)
+
+/** kept as the old private name so every `from` comparison below still reads the same */
+const ORDER = CHAPTER_ORDER
+
+/** where a chapter sits in the life, or -1 for something that is not a chapter */
+export const chapterIndex = (chapter: string) => ORDER.indexOf(chapter)
+
+/**
+ * The chapter before this one, the way the runtime counts it.
+ *
+ * `WorldScene.announceNewShirts` walks `playableChapters()` to find what the rail looked
+ * like last time, and the album's arrival card has to agree with it to the letter — two
+ * definitions of "previous" would announce two different sets of new stock in the same
+ * room. `CHAPTER_ORDER` is that same list, so this is that same walk with a name on it.
+ */
+export function previousChapter(chapter: string): string | null {
+  const at = chapterIndex(chapter)
+  return at > 0 ? (ORDER[at - 1] as string) : null
+}
 
 const SHIRT_ROWS: readonly Omit<Shirt, 'price'>[] = [
   {
@@ -166,14 +196,8 @@ const SHIRT_ROWS: readonly Omit<Shirt, 'price'>[] = [
  * it is seven separate opinions. The table is 30 in the eighties, 60 in the nineties, 110
  * in the two-thousands, and the shirt in the window costs what a shirt cost that year.
  */
-/** the year a chapter happens in, for placing a season against the life */
-const CHAPTER_YEAR: Record<string, number> = {
-  'a2-alley': 1984, 'a3-hall': 1984, 'a4-shirt': 1985, 'a5-first': 1985, 'a6-radio': 1985,
-  'a7-week': 1986, '1986': 1986, '1990': 1990, '1991': 1991, '1993-cup': 1993,
-  '1993-galil': 1993, '1995-sinai': 1995, '1996-army': 1996, '1997-basket': 1997,
-  '1998-laces': 1998, '1999-basket': 1999, '1999-cup': 1999, '2000-title': 2000,
-  '2000-double': 2000,
-}
+/** the year a chapter happens in — the registry's own number, never a second copy of it */
+export const chapterYear = (chapter: string): number | null => chapterFor(chapter)?.year ?? null
 
 /**
  * The first chapter a shirt from this season could hang in — or `LATER`, for a season
@@ -187,11 +211,24 @@ const CHAPTER_YEAR: Record<string, number> = {
  */
 export const LATER = 'later'
 
-function chapterForSeason(seasonLabel: string): string {
-  const year = Number(seasonLabel.slice(0, 4))
-  const found = ORDER.find((chapter) => (CHAPTER_YEAR[chapter] ?? 1984) >= year)
+/**
+ * המדף שאליו זה מגיע — the first chapter of the life that is on or after this year.
+ *
+ * A chapter the registry does not know is SKIPPED rather than defaulted. The old version
+ * read `CHAPTER_YEAR[chapter] ?? 1984`, which quietly turned an unknown id into 1984 —
+ * i.e. into the front of the rail — so a typo in a chapter id would have hung every kit
+ * in the game on a counter in Jaffa in 1984 and nothing would have said a word.
+ */
+export function chapterOnOrAfter(year: number): string {
+  const found = ORDER.find((chapter) => {
+    const at = chapterYear(chapter)
+    return at !== null && at >= year
+  })
   return found ?? LATER
 }
+
+/** `'1984/85'` → the chapter its kit first hangs in */
+const chapterForSeason = (seasonLabel: string) => chapterOnOrAfter(Number(seasonLabel.slice(0, 4)))
 
 /**
  * הארון של המועדון — the archive's thirty-three season kits, as shirts on a rail.
@@ -242,10 +279,10 @@ export function ownedShirts(state: LifeState): Shirt[] {
 
 /** Everything a rail can hold in this chapter — earlier kits stay on sale, later ones do not exist. */
 export function onSale(chapter: string): Shirt[] {
-  const now = ORDER.indexOf(chapter)
+  const now = chapterIndex(chapter)
   if (now < 0) return []
   return SHIRTS.filter((shirt) => {
-    const at = ORDER.indexOf(shirt.from)
+    const at = chapterIndex(shirt.from)
     return at >= 0 && at <= now
   })
 }
@@ -259,8 +296,16 @@ export function knownBy(chapter: string): Shirt[] {
   return onSale(chapter)
 }
 
-/** what the shop says when it has nothing new for you */
-export const SHOP_EMPTY_HE = 'הכול כבר אצלך. תחזור כשיצא דגם חדש.'
+/*
+ * `SHOP_EMPTY_HE` used to sit here — 'הכול כבר אצלך. תחזור כשיצא דגם חדש.' — exported,
+ * imported by nobody, and saying something different from the line the screen actually
+ * prints (`life.shop.empty`: 'עוד לא נפתחה. תחזור בשנות התשעים.'). Two empty-shop
+ * sentences, one of them dead, is a small version of rule 59: the copy nothing runs is
+ * the one that is free to be wrong. The live sentence is in `messages/he.json`, where
+ * rule 10 says every user-facing string lives, so the dead one is gone rather than
+ * "kept in case". (Rule 26's tombstone is for a FILE somebody might still import; a
+ * string with no importer is rule 32's dead key, and dead keys are deleted.)
+ */
 
 /**
  * A shirt costs what it costs, and the game already refuses a purchase you cannot afford
@@ -324,13 +369,62 @@ export function arrivedBetween(previous: string | null, chapter: string): Shirt[
   return now.filter((shirt) => !had.has(shirt.id))
 }
 
+// ------------------------------------------------------------------- המדפים בחנות ---
+
+/**
+ * A shelf of the rail. `id` is a key, never a sentence: the words are `t()`'s job
+ * (rule 10) and this file is not allowed to decide what a screen says.
+ *
+ *  · `new`      — what arrived since the last chapter. The front of the rail.
+ *  · `rail`     — everything else the shop has that is not already yours.
+ *  · `wardrobe` — the back of the rail: what is already folded in the drawer.
+ */
+export type ShelfId = 'new' | 'rail' | 'wardrobe'
+export type Shelf = { id: ShelfId; shirts: Shirt[] }
+
+/**
+ * הקולב, לפי הסדר שאדם מסתכל בו — newest first, and never your own wardrobe first.
+ *
+ * The shop drew two flat grids for a year: everything for sale, then everything owned,
+ * both in the order the rows happen to be declared in — which is the order the archive
+ * generator emitted them, i.e. oldest season first. So the kit the club is wearing THIS
+ * season, the one thing a supporter walks in for, was at the bottom of the second screen.
+ *
+ * Three shelves, and the ordering inside each is the same one: the most recent season at
+ * the front. `arrivedBetween` already knows what is new — this is the same answer, given
+ * a place to stand on the screen instead of only a card that flashes once.
+ *
+ * Pure, and exported, because a shelf is a decision about stock and not about pixels:
+ * `tests/life-shop.test.ts` can then ask what is on the rail in 1993 without rendering
+ * anything.
+ */
+export function shopShelves(state: LifeState, chapter: string, kind?: Shirt['kind']): Shelf[] {
+  const rail = onSale(chapter).filter((shirt) => !kind || shirt.kind === kind)
+  const fresh = new Set(arrivedBetween(previousChapter(chapter), chapter).map((shirt) => shirt.id))
+  // newest season at the front; ties by id so two kits of one season never swap places
+  // between renders (the archive ships home and away for the same year)
+  const byNewest = (a: Shirt, b: Shirt) =>
+    chapterIndex(b.from) - chapterIndex(a.from) || a.id.localeCompare(b.id)
+  const shelf = (id: ShelfId, rows: Shirt[]): Shelf => ({ id, shirts: [...rows].sort(byNewest) })
+  return [
+    shelf('new', rail.filter((shirt) => fresh.has(shirt.id) && !owns(state, shirt.id))),
+    shelf('rail', rail.filter((shirt) => !fresh.has(shirt.id) && !owns(state, shirt.id))),
+    shelf('wardrobe', rail.filter((shirt) => owns(state, shirt.id))),
+  ].filter((row) => row.shirts.length > 0)
+}
+
+/** is this one of the kits that reached the rail in this chapter? */
+export function isNewThisChapter(shirt: Shirt, chapter: string): boolean {
+  return arrivedBetween(previousChapter(chapter), chapter).some((row) => row.id === shirt.id)
+}
+
 // --------------------------------------------------------------- הזיכרון של החולצה ---
 
 /**
  * מה לבשת ומתי — the flag that turns a wardrobe into a biography.
  *
  * A collection of forty shirts is a list. A shirt that says "you wore this one on
- * 26.5.1999" is a life. The flag carries the `own:` prefix, so like the shirt itself it
+ * 19.5.1999" is a life. The flag carries the `own:` prefix, so like the shirt itself it
  * survives a new day, a new year and a new decade — a thing you wore to a cup final is not
  * cleared at midnight.
  */

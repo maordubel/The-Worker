@@ -55,8 +55,21 @@ import type { LifeState } from '@/lib/life/types'
 const EMPTY_HUD: HudState = { clock: '', date: '', agorot: 0, showMoney: false, place: '', objective: null, year: 1986, scene: 'bedroom', hint: '', waitingHe: null }
 /** the decade the glass is dressed for — type and texture follow it (`app/globals.css`) */
 export const decadeOf = (year: number) => (year >= 2000 ? '00s' : year >= 1990 ? '90s' : '80s')
-/** a preference about the glass, not about the life — so it is not in the save */
+/**
+ * a preference about the glass, not about the life — so it is not in the save.
+ *
+ * It is written as `on`/`off` since 16.9.2026, and `0`/`1` are still READ because that is
+ * what is on the devices of everyone who ever opened the menu: `0` meant shown and `1`
+ * meant hidden, which is the inversion that made flipping the DEFAULT dangerous rather
+ * than a one-character edit. Anything else — absent, corrupt, a value from a build that
+ * does not exist yet — falls to the default, and the default is now SHOWN.
+ */
 const DECK_PREF = 'the-worker:life:deck'
+const deckFromPref = (raw: string | null): boolean => {
+  if (raw === 'off' || raw === '1') return false
+  if (raw === 'on' || raw === '0') return true
+  return true
+}
 
 export function useLifeRuntime({
   holder,
@@ -110,6 +123,18 @@ export function useLifeRuntime({
   /** המגרש — the 3D football reconstruction, opened from a beat and closed by its own card */
   const [pitch, setPitch] = useState<LifeBusEvents['pitch']>(null)
   const [shop, setShop] = useState<LifeBusEvents['shop']>(null)
+  /**
+   * המנוי — the season ticket, announced between chapters and sold at one window.
+   *
+   * It carries the season ID and nothing else: everything on the card is read out of
+   * `lib/life/subscription.ts` by the card itself, so the bus never carries a price
+   * (rule 59 — one runtime concept, one canonical file). The world stops behind it for
+   * the same reason the shop does: a decision about a whole year is not something to take
+   * while a clock is running at you.
+   */
+  const [season, setSeason] = useState<LifeBusEvents['season']>(null)
+  /** the state the season card is drawn against, re-read after a renewal */
+  const [seasonState, setSeasonState] = useState<LifeState | null>(null)
   /** האלבום — open over a stopped world, drawn from a snapshot like the profile is */
   const [album, setAlbum] = useState<LifeBusEvents['album']>(null)
   const [albumState, setAlbumState] = useState<LifeState | null>(null)
@@ -145,11 +170,20 @@ export function useLifeRuntime({
   const [mapState, setMapState] = useState<LifeState | null>(null)
   const [reveal, setReveal] = useState<LifeBusEvents['reveal']>(null)
   /**
-   * the arcade deck on a phone — OFF by default. The picture is the controller: you touch
-   * a place and the boy walks, touch a person and he goes and talks. The stick is there in
-   * the menu for whoever wants it, and the choice is remembered on the device.
+   * הגוייסטיק על המסך — ON by default, because Maor said so in those words (16.9.2026):
+   * *"הגוייסטיק והמקשים מחויביים להיות על המסך."*
+   *
+   * The full-bleed pass turned this off on the reasoning that the picture is the
+   * controller — touch a place and the boy walks — and that reasoning is still true and is
+   * still how the game plays. What it got wrong is that a control nobody can SEE is not a
+   * control, which is the same sentence rule 41 is built out of and the same one that put
+   * housekeeping into ☰. A player who has never met this game cannot discover a tap-to-walk
+   * world from a blank picture, and the console was three taps deep in a menu.
+   *
+   * So the hardware is on the glass and the toggle stays for whoever wants the painting
+   * clean — the opposite way round from where it was, which is the only part that changed.
    */
-  const [deck, setDeck] = useState(false)
+  const [deck, setDeck] = useState(true)
   /**
    * הפתיח — five pictures before the game, once per sitting.
    *
@@ -186,7 +220,7 @@ export function useLifeRuntime({
         (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window),
     )
     try {
-      setDeck(window.localStorage.getItem(DECK_PREF) === '0')
+      setDeck(deckFromPref(window.localStorage.getItem(DECK_PREF)))
     } catch {
       /* the deck simply shows */
     }
@@ -337,6 +371,11 @@ export function useLifeRuntime({
       bus.on('shop', (value) => {
         setShop(value)
         setShopState(value ? engineRef.current?.state ?? null : null)
+        runtime.current?.pause(Boolean(value))
+      }),
+      bus.on('season', (value) => {
+        setSeason(value)
+        setSeasonState(value ? engineRef.current?.state ?? null : null)
         runtime.current?.pause(Boolean(value))
       }),
       bus.on('album', (value) => {
@@ -490,7 +529,7 @@ export function useLifeRuntime({
   const toggleDeck = useCallback((on: boolean) => {
     setDeck(on)
     try {
-      window.localStorage.setItem(DECK_PREF, on ? '0' : '1')
+      window.localStorage.setItem(DECK_PREF, on ? 'on' : 'off')
     } catch {
       /* it simply does not persist */
     }
@@ -539,6 +578,10 @@ export function useLifeRuntime({
     setShop,
     shopState,
     setShopState,
+    season,
+    setSeason,
+    seasonState,
+    setSeasonState,
     album,
     setAlbum,
     albumState,

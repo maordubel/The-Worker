@@ -175,7 +175,7 @@ const LACES_98: MatchScript = {
 
 // -------------------------------------------------------------------------- 1999 ---
 /**
- * The cup final, 26.5.1999, Ramat Gan. The archive: 1:1 after extra time, the shootout
+ * The cup final, 19.5.1999, Ramat Gan. The archive: 1:1 after extra time, the shootout
  * won. The order the goals came in is what the chapter has said since it was written —
  * theirs first, the equaliser after. No minute is claimed for either. The shootout is
  * the player's hands (`c99-pens`), and the rest of the night follows from it.

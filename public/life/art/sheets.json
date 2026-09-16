@@ -353,43 +353,43 @@
  "faceElimelech-ball": {
   "w": 257,
   "h": 249,
-  "bytes": 17308,
+  "bytes": 58060,
   "yellowLeft": 0
  },
  "faceElimelech-calm": {
   "w": 194,
   "h": 249,
-  "bytes": 13522,
+  "bytes": 44792,
   "yellowLeft": 0
  },
  "faceElimelech-look": {
   "w": 198,
   "h": 249,
-  "bytes": 12944,
+  "bytes": 44000,
   "yellowLeft": 0
  },
  "faceElimelech-shout": {
   "w": 202,
   "h": 249,
-  "bytes": 14054,
+  "bytes": 48014,
   "yellowLeft": 0
  },
  "faceElimelech-side": {
   "w": 178,
   "h": 249,
-  "bytes": 42198,
+  "bytes": 43986,
   "yellowLeft": 0
  },
  "faceElimelech-smile": {
   "w": 242,
   "h": 249,
-  "bytes": 14988,
+  "bytes": 51322,
   "yellowLeft": 0
  },
  "faceElimelech": {
   "w": 238,
   "h": 249,
-  "bytes": 14860,
+  "bytes": 50782,
   "yellowLeft": 0
  },
  "faceHero80-3q": {
@@ -485,127 +485,127 @@
  "faceKeren90-b": {
   "w": 324,
   "h": 318,
-  "bytes": 92278,
+  "bytes": 97424,
   "yellowLeft": 0
  },
  "faceKeren90-profile": {
   "w": 272,
   "h": 315,
-  "bytes": 22640,
+  "bytes": 83400,
   "yellowLeft": 0
  },
  "faceKeren90-side": {
   "w": 279,
   "h": 318,
-  "bytes": 89034,
+  "bytes": 93758,
   "yellowLeft": 0
  },
  "faceKeren90-smile": {
   "w": 309,
   "h": 311,
-  "bytes": 76006,
+  "bytes": 80786,
   "yellowLeft": 0
  },
  "faceKeren90": {
   "w": 308,
   "h": 317,
-  "bytes": 88630,
+  "bytes": 93128,
   "yellowLeft": 0
  },
  "faceSinai-b": {
   "w": 215,
   "h": 212,
-  "bytes": 9740,
+  "bytes": 36554,
   "yellowLeft": 0
  },
  "faceSinai-kit": {
   "w": 208,
   "h": 219,
-  "bytes": 11512,
+  "bytes": 42704,
   "yellowLeft": 0
  },
  "faceSinai-look": {
   "w": 178,
   "h": 210,
-  "bytes": 31996,
+  "bytes": 33914,
   "yellowLeft": 0
  },
  "faceSinai-point": {
   "w": 275,
   "h": 210,
-  "bytes": 14514,
+  "bytes": 48918,
   "yellowLeft": 0
  },
  "faceSinai-shout": {
   "w": 212,
   "h": 217,
-  "bytes": 11892,
+  "bytes": 43500,
   "yellowLeft": 0
  },
  "faceSinai-side": {
   "w": 188,
   "h": 209,
-  "bytes": 9692,
+  "bytes": 35736,
   "yellowLeft": 0
  },
  "faceSinai": {
   "w": 213,
   "h": 214,
-  "bytes": 10610,
+  "bytes": 37632,
   "yellowLeft": 0
  },
  "faceSoldier-3q": {
   "w": 117,
   "h": 148,
-  "bytes": 8210,
+  "bytes": 21616,
   "yellowLeft": 0
  },
  "faceSoldier-back": {
   "w": 131,
   "h": 152,
-  "bytes": 9432,
+  "bytes": 24180,
   "yellowLeft": 0
  },
  "faceSoldier-beret": {
   "w": 106,
   "h": 141,
-  "bytes": 6964,
+  "bytes": 18052,
   "yellowLeft": 0
  },
  "faceSoldier-look": {
   "w": 115,
   "h": 149,
-  "bytes": 8430,
+  "bytes": 22182,
   "yellowLeft": 0
  },
  "faceSoldier-shades": {
   "w": 117,
   "h": 148,
-  "bytes": 8112,
+  "bytes": 21682,
   "yellowLeft": 0
  },
  "faceSoldier-shout": {
   "w": 117,
   "h": 148,
-  "bytes": 8310,
+  "bytes": 22156,
   "yellowLeft": 0
  },
  "faceSoldier-side": {
   "w": 112,
   "h": 148,
-  "bytes": 7948,
+  "bytes": 21502,
   "yellowLeft": 0
  },
  "faceSoldier-smile": {
   "w": 116,
   "h": 149,
-  "bytes": 8696,
+  "bytes": 22690,
   "yellowLeft": 0
  },
  "faceSoldier": {
   "w": 105,
   "h": 148,
-  "bytes": 7786,
+  "bytes": 20924,
   "yellowLeft": 0
  },
  "fanA": {
@@ -2271,35 +2271,35 @@
  "facePogi": {
   "w": 211,
   "h": 260,
-  "bytes": 7990,
+  "bytes": 38886,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi-smile": {
   "w": 213,
   "h": 260,
-  "bytes": 8234,
+  "bytes": 39366,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi-wide": {
   "w": 216,
   "h": 260,
-  "bytes": 8078,
+  "bytes": 40712,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi-shout": {
   "w": 214,
   "h": 260,
-  "bytes": 8524,
+  "bytes": 40438,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "facePogi-down": {
   "w": 210,
   "h": 260,
-  "bytes": 8290,
+  "bytes": 38872,
   "yellowLeft": 0,
   "source": "2026-09"
  },
@@ -2516,84 +2516,84 @@
  "faceRachel90": {
   "w": 102,
   "h": 260,
-  "bytes": 8592,
+  "bytes": 28680,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-smile": {
   "w": 145,
   "h": 260,
-  "bytes": 12424,
+  "bytes": 43978,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-worried": {
   "w": 168,
   "h": 260,
-  "bytes": 13284,
+  "bytes": 43906,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-nu": {
   "w": 143,
   "h": 260,
-  "bytes": 11448,
+  "bytes": 44056,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-angry": {
   "w": 178,
   "h": 260,
-  "bytes": 14748,
+  "bytes": 43594,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-side": {
   "w": 202,
   "h": 260,
-  "bytes": 15696,
+  "bytes": 43638,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher": {
   "w": 172,
   "h": 260,
-  "bytes": 9300,
+  "bytes": 37380,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-glasses": {
   "w": 159,
   "h": 260,
-  "bytes": 8522,
+  "bytes": 33230,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-share": {
   "w": 131,
   "h": 260,
-  "bytes": 7678,
+  "bytes": 29588,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-tired": {
   "w": 173,
   "h": 260,
-  "bytes": 9146,
+  "bytes": 36442,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-smile": {
   "w": 186,
   "h": 260,
-  "bytes": 9868,
+  "bytes": 37190,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher-angry": {
   "w": 117,
   "h": 260,
-  "bytes": 7332,
+  "bytes": 27382,
   "yellowLeft": 0,
   "source": "2026-09"
  },
@@ -2607,35 +2607,35 @@
  "faceOldMan-smile": {
   "w": 200,
   "h": 260,
-  "bytes": 43724,
+  "bytes": 44150,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-what": {
   "w": 227,
   "h": 260,
-  "bytes": 48918,
+  "bytes": 49112,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-story": {
   "w": 200,
   "h": 260,
-  "bytes": 46420,
+  "bytes": 46812,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-over": {
   "w": 216,
   "h": 260,
-  "bytes": 45762,
+  "bytes": 46184,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceOldMan-laugh": {
   "w": 171,
   "h": 260,
-  "bytes": 9834,
+  "bytes": 38768,
   "yellowLeft": 0,
   "source": "2026-09"
  },

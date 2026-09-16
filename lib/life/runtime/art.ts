@@ -709,7 +709,29 @@ export type PropKey = (typeof PROP)[number]
  * way to end Stage A is not to describe what winning felt like. It is to hand the player
  * the front page and let 1986 say it: אדומים.
  */
-export const DOC = ['docTicket', 'paperBefore', 'paperAdumim', 'paperFive', 'paperCollector'] as const
+export const DOC = [
+  // 1986 — the ticket somebody kept for forty years, and the four pages either side of it
+  'docTicket', 'paperBefore', 'paperAdumim', 'paperFive', 'paperCollector',
+  /**
+   * 1999 ו-2000 — nine more, scanned by Maor on 16.9.2026, and every one of them says
+   * what it is ON ITSELF.
+   *
+   * That was the test for getting in. Sixteen scans arrived and seven are not here,
+   * including three photographs that are better pictures than some of these: a squad
+   * lifting a cup, a man in a scarf lifting a cup, a tackle in front of a yellow terrace.
+   * None of the three carries a masthead, a date or a printed caption, so putting one on
+   * a chapter's card would make the card assert a year that nothing on the paper states.
+   * A document is allowed on this screen when the document itself is the citation.
+   *
+   * `days.ts` holds each one's transcription — the plaque, the ticket's own fixtures and
+   * price, the two front pages' lead paragraphs — and the card prints that rather than a
+   * caption in the game's voice, because rule 49 forbids writing on one of these and a
+   * gloss beside one is most of the way to writing on it.
+   */
+  'docCup99', 'docPage99', 'docTikva99', 'docSeason9899',
+  'docSeason9900',
+  'docTicket2000', 'docProgramme2000', 'docRedBall2000', 'docDouble2000',
+] as const
 export type DocKey = (typeof DOC)[number]
 
 /** Printed portrait plates for the dialogue box — cream ground kept, not cut out. */
@@ -826,8 +848,26 @@ export const CLOSE_UP = [
   'cuKobiWhere', 'cuKobiTable', 'cuRachelNu', 'cuRachelWatch',
   'cuPogiReveal', 'cuOfir90', 'cuTeacherShare', 'cuUsherNight',
 ] as const
-/** the plates that have actually been painted and ingested — the rest show the portrait */
-export const CLOSE_UP_PAINTED: readonly string[] = []
+/**
+ * הפלייטים שכבר צוירו — the close-ups that exist as their own 788×1400 painting.
+ *
+ * Seven of the eight landed on 16.9.2026, from the brief in
+ * `docs/life/ART-PROMPTS-2026-09-16.md`, and were ingested by
+ * `scripts/life/ingest-art-2026-09-16.py`: de-yellowed after sizing (rule 44), written
+ * as lossless WebP, and counted back off the decoded bytes with alpha respected (rule
+ * 61) — 454, 1748 and 991 yellow pixels in three of them before the treatment, zero in
+ * all seven after it.
+ *
+ * `cuPogiReveal` is deliberately NOT here. The delivery's own README says that file is a
+ * PNG export of `tunnelReveal.webp` with the same decoded pixels, so ingesting it would
+ * put one picture on disk under two names and let the copies drift. Its fallback already
+ * points at `tunnelReveal`, which is the same image — so the player sees the intended
+ * art either way, and the registry does not claim a painting that is really a pointer.
+ */
+export const CLOSE_UP_PAINTED: readonly string[] = [
+  'cuKobiWhere', 'cuKobiTable', 'cuRachelNu', 'cuRachelWatch',
+  'cuOfir90', 'cuTeacherShare', 'cuUsherNight',
+]
 /**
  * הפלייט שעומד במקום הקלוז-אפ — and on 16.9.2026 five of the eight named the wrong person.
  *
@@ -839,12 +879,17 @@ export const CLOSE_UP_PAINTED: readonly string[] = []
  * SHOUTS AT HIM. Two more (`cuTeacherShare`) had a plate cut for that exact beat and
  * pointed past it.
  *
- * And the Rachel pair stays on the neutral `faceRachel90` ON PURPOSE. `faceRachel90-nu`
- * is named for this very line — but it is 143×260 and holds two half-Rachels, cut across
- * the gutter of an expression sheet, so wiring the better-named plate would put two
- * mothers on the glass. Six of her family and three of the teacher's are the same; they
- * are listed in `docs/life/CLOSE-UP-BRIEF.md` for a re-cut from the delivery, which this
- * repository does not hold.
+ * And the Rachel pair stayed on the neutral `faceRachel90` ON PURPOSE while the named
+ * plates were two half-Rachels cut across the gutter of an expression sheet. That was
+ * fixed at source on 16.9.2026: the five Rachel plates and the two teacher plates were
+ * re-cut one whole column at a time and all seven now arrive at a uniform 130×260, which
+ * is what a cut that respects the gutter looks like — the widths they replaced ran from
+ * 102 to 202 and that spread WAS the bug.
+ *
+ * Since the same delivery brought seven real close-up paintings, every entry below is now
+ * a second line of defence rather than what a player sees: `CLOSE_UP_PAINTED` wins, and
+ * the fallback is only reached for `cuPogiReveal` (which points at the identical picture)
+ * or if a `.webp` goes missing from disk.
  */
 export const CLOSE_UP_FALLBACK: Record<(typeof CLOSE_UP)[number], string> = {
   // פוגי shouts this one at his father; the face on the glass is the boy's
@@ -874,6 +919,67 @@ export const TUNNEL_TEXTURE = [
 ] as const
 export function parallaxKeys(art: string): { far: string; mid: string; near: string } {
   return { far: `${art}--far`, mid: `${art}--mid`, near: `${art}--near` }
+}
+
+/** how much nearer NEAR is than the wall — its size AND its scroll factor, one number */
+export const NEAR_PLANE = 1.16
+/**
+ * …and how far left it is pulled, so the object painted at the left edge sits mostly off
+ * the glass when the boy starts by the front door: a foreground that covers the first
+ * door of the game is a wall, not depth.
+ */
+export const NEAR_PLANE_SHIFT = 0.075
+
+export type ParallaxPlane = 'far' | 'mid' | 'near'
+
+/** where a plane stands in the world, in the world's own numbers */
+export interface PlaneBox {
+  /** world x of the left edge, before the plane's own scroll factor is applied */
+  x: number
+  /** world y of the top edge */
+  y: number
+  width: number
+  height: number
+  /** how fast it tracks the camera on X. Vertical never parallaxes. */
+  scroll: number
+}
+
+/**
+ * מישור — a plane is sized from the WORLD and never from its own file (16.9.2026).
+ *
+ * This is arithmetic, so it lives here, out of Phaser's reach, for the same reason
+ * `walk.ts` does: the bug it exists because of is a sizing bug, and a sizing bug is
+ * cheaper to hold to `tests/life-parallax.test.ts` than to a screenshot.
+ *
+ * `add.image` draws a texture at its own pixel size, and the planes are NOT delivered at
+ * their backdrop's size: `gate7.webp` is 2728×1536 and all three of its planes are
+ * 1600×900 — the same picture at 0.586. So MID, the wall every door and every actor in
+ * `scenes.ts` is measured against, covered the top-left 58% of gate seven (41% of the
+ * street, 35% of the route) and the rest of the world was the camera's background
+ * colour. On a phone that is the painting in the top half of the glass and the whole
+ * cast standing below it on black — `bloomfield-outside`, the terrace, reported twice.
+ * The street hid it for two weeks because `streetGround` and `streetFore` are full-world
+ * layers that paint the bottom back in, which is why only gate seven was ever reported.
+ *
+ * Nothing here distorts the art: every plane is its backdrop's aspect to within a tenth
+ * of a per cent, and that RELATIONSHIP is what the test asserts rather than either
+ * number — so the day a plane is redelivered at 2728×1536, nothing changes.
+ */
+export function parallaxPlane(plane: ParallaxPlane, W: number, H: number): PlaneBox {
+  if (plane === 'near') {
+    return {
+      x: -NEAR_PLANE_SHIFT * W,
+      // anchored by its FOOT on the painting's bottom edge, the way it was drawn: a
+      // foreground that grows upward out of the floor, not downward out of the sky
+      y: H - NEAR_PLANE * H,
+      width: NEAR_PLANE * W,
+      height: NEAR_PLANE * H,
+      scroll: NEAR_PLANE,
+    }
+  }
+  // FAR slides slower than the wall; MID is the wall, pixel-aligned with the flat
+  // painting, so nothing the player touches has moved.
+  return { x: 0, y: 0, width: W, height: H, scroll: plane === 'far' ? 0.86 : 1 }
 }
 
 export function artUrl(key: string): string {

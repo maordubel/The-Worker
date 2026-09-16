@@ -2,6 +2,7 @@
 
 import { LifeLine, ageReached } from '@/components/life/LifeLine'
 import { artUrl } from '@/lib/life/runtime/art'
+import { keepsakeFor } from '@/lib/life/finale'
 import { t } from '@/lib/i18n'
 
 /**
@@ -18,6 +19,7 @@ export function EndingCard({
   memoryHe,
   after,
   chapter = '1986',
+  presence = null,
   onClose,
 }: {
   titleHe: string
@@ -27,10 +29,25 @@ export function EndingCard({
   after?: { fromArt: string; toArt: string; lineHe: string } | null
   /** which Saturday this card closes — it decides which slot of the life lights up */
   chapter?: string
+  /** where he was for the thing that happened — only somebody who was there kept a stub */
+  presence?: string | null
   onClose: () => void
 }) {
   // 1986's second plate is the man fifteen years on; 1990's is the same man tomorrow.
   const nowKey = chapter === '1990' ? 'life.after.next' : 'life.after.now'
+  /**
+   * מה שיש לו ביד — the real object from the night this card is closing, or nothing.
+   *
+   * The memory line above it has always said what stayed in his pocket; from 16.9.2026 the
+   * days the archive holds paper for can SHOW it. It is a scan of a thing that exists,
+   * shown whole, with the document's own printed words under it — never a caption in the
+   * game's voice, because rule 49 does not allow this game to write on one of these.
+   *
+   * `keepsakeFor` refuses it to anybody whose night was spent somewhere else. That gate is
+   * the point of the feature, not a safety rail around it: a stub shown to the man who
+   * listened on a base would be the game telling him he was there.
+   */
+  const keepsake = keepsakeFor(chapter, presence)
   return (
     <div className="pointer-events-auto absolute inset-0 z-50 flex items-center justify-center bg-ink/85 p-gutter" data-life="ending">
       <div className="max-h-full w-full max-w-md animate-paste-in overflow-y-auto border-rule border-sheet bg-ink">
@@ -45,6 +62,19 @@ export function EndingCard({
           <p className="mt-4 border-t-hair border-concrete/30 pt-3 font-body text-[13px] leading-relaxed text-sheet">
             <bdi>{memoryHe}</bdi>
           </p>
+
+          {keepsake && (
+            <figure className="mt-4 border-t-hair border-concrete/30 pt-4" data-life="ending-keepsake">
+              <div className="border-hair border-concrete/40 bg-ink/60 p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={artUrl(keepsake.art)} alt={keepsake.titleHe} className="mx-auto max-h-[30vh] w-full object-contain" />
+              </div>
+              <figcaption className="mt-2 font-body text-[11px] leading-relaxed text-concrete">
+                <span className="text-sheet">{t('life.report.prints')} </span>
+                <bdi>{keepsake.printsHe}</bdi>
+              </figcaption>
+            </figure>
+          )}
 
           {/* כעבור חמש־עשרה שנה. Two plates, one caption, and no claim about what happened
               in between — the picture does the work a paragraph would do worse. */}

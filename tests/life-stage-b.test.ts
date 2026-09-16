@@ -96,7 +96,10 @@ describe('שלב ב׳ — the decade as a whole', () => {
   it('dates the Double on 17.5.2000 and the title four days before it', () => {
     expect(CHAPTER['2000-double']!.dateHe).toContain('17 במאי 2000')
     expect(CHAPTER['2000-title']!.dateHe).toContain('13 במאי 2000')
-    expect(CHAPTER['1999-cup']!.dateHe).toContain('26 במאי 1999')
+    // 19 ולא 26. הבדיקה נעלה שנתיים את התאריך שהריפו טעה בו: ערך ויקיפדיה האנגלי שצוטט
+    // לו אינו נוקב בתאריך הגמר בכלל, וויקיפועל נוקבת ב-19.5.1999 בדף המשחק ובמפתח
+    // התאריכים. מפתח 26 במאי ריק מ-1999. תוקן 16.9.2026.
+    expect(CHAPTER['1999-cup']!.dateHe).toContain('19 במאי 1999')
     expect(CHAPTER['1998-laces']!.dateHe).toContain('2 במאי 1998')
   })
 })

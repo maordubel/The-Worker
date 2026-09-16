@@ -94,6 +94,8 @@ export type LifeRuntime = {
   choose(id: string): void
   /** walk away mid-conversation: nothing is applied, the box just closes */
   leave(): void
+  /** buy one Supergoal packet at the fan shop's counter — the same transaction Rafi runs */
+  buyPacket(): void
   dismissEnding(): void
   /** the end-of-stage celebration's own button — the ending card no longer goes home */
   dismissFinale(): void
@@ -329,6 +331,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     advance: () => dialogue.advance(),
     choose: (id: string) => dialogue.choose(id),
     leave: () => dialogue.leave(),
+    buyPacket: () => dialogue.buyPacket(),
     dismissEnding: () => worldScene()?.goHome(),
     dismissFinale: () => worldScene()?.dismissFinale(),
     markOpening: () => {

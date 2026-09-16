@@ -100,9 +100,10 @@ export const PORTRAIT_1991: Record<string, string> = {
   'פוגי': 'faceHero80',
   'קובי': 'faceKobi',
   'רחל': 'faceRachel90',
-  // faceTeacher is cut across a sheet gutter and draws two half-teachers — see
-  // `scripts/life/face-plates-2026-09-16.py`. `-glasses` is the whole one.
-  'המורה': 'faceTeacher-glasses',
+  // Re-cut one whole column at a time in the 16.9.2026 delivery and verified by eye:
+  // `faceTeacher` is 130×260 and holds one teacher. It was `-glasses` for the fortnight
+  // the old cut drew two half-faces.
+  'המורה': 'faceTeacher',
   'אופיר': 'faceOfir',
   'עמית': 'faceAmit',
   'קרן': 'faceKeren90',

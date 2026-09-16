@@ -351,6 +351,25 @@ export type LifeBusEvents = {
    */
   pass: { beatId: string; minute: number; waitingHe?: string } | null
 
+  /**
+   * המנוי יצא למכירה — the one card in this game that STOPS a chapter on its way in.
+   *
+   * Maor, 16.9.2026: *"תכניס ממש עצירה בין לבין עם פופ אפ של 'המנוי יצא למכירה'"*. Two
+   * different moments arrive on one channel because they are the same object seen twice,
+   * and keeping them apart is what stops the announcement and the counter drifting:
+   *
+   * · `onSale` — the interruption. Fired once per season by `WorldScene` on the first
+   *   room of the chapter that opens it, beside `announceNewShirts`/`announceNewAlbums`.
+   *   It sells nothing; it says a summer has arrived and where the window is.
+   * · `counter` — the window itself, fired when the boy walks into the ticket office.
+   *   This is the one with a button on it.
+   *
+   * Only the season ID crosses the bus. Everything printed — the price, the category, the
+   * gate, the source line — is read from `lib/life/subscription.ts` by the card, because
+   * a scene that carried a price would be a second copy of an archive row (rule 59).
+   */
+  season: { kind: 'onSale' | 'counter'; season: string } | null
+
   shirt: {
     /**
      * למה הכרטיס הזה פתוח — a purchase, or a new kit arriving on the rail.
@@ -429,6 +448,17 @@ export type LifeBusEvents = {
     memoryHe: string
     after?: { fromArt: string; toArt: string; lineHe: string }
     chapter?: string
+    /**
+     * איפה הוא היה — the ending's own `presence`, carried through because the card needs
+     * it and can get it nowhere else.
+     *
+     * The card may hold up the real ticket from the night it is closing, and a ticket is
+     * only true for somebody who was in the ground. Deriving it from flags in the shell
+     * would be a second copy of a decision the chapter already made in its `EndingCard`
+     * record, and two copies of that decision is how a man who listened on a radio ends
+     * up being shown a stub.
+     */
+    presence?: import('../types').PresenceMode
   } | null
   /** touch controls only matter on a touch device; the runtime says when they help */
   controls: { visible: boolean }

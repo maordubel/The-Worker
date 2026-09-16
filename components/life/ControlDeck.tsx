@@ -9,30 +9,101 @@ import { t, type MessageKey } from '@/lib/i18n'
  *
  * The directive is specific about this and it is right: the mobile control is a MAJOR
  * GRAPHICAL OBJECT, in the language of the hardware these people actually held — an
- * arcade cabinet, an 80s ball-top stick, two moulded buttons, a brushed deck plate with
- * some wear on it. A translucent grey disc floating over the art is what every browser
- * game does, and it reads as a debug overlay rather than as part of the world. So this
- * is built as a physical object: a ball-top with a real highlight and a shaft that
- * shortens as you push, a dust washer under it, buttons with a rim, a bezel and a press
- * that actually travels.
+ * arcade cabinet, an 80s ball-top stick, moulded buttons, a brushed deck plate with some
+ * wear on it. A translucent grey disc floating over the art is what every browser game
+ * does, and it reads as a debug overlay rather than as part of the world. So this is
+ * built as a physical object: an octagonal restrictor gate, a dust washer, a SHAFT that
+ * swings out from under the ball, a ball-top with a real highlight, and buttons with a
+ * rim, a bezel and a press that travels.
  *
  * The mental model is one arcade controller everywhere, so the scheme never changes:
- *  · **stick** — walk. On the deck, or anywhere on the start half of the picture.
+ *  · **stick** — walk. Push it to the outer ring and he runs.
  *  · **A** — do the thing the label names: talk, take, buy, enter, go. `E` on a keyboard.
- *  · **B** — the opposite: run while you walk, and leave a conversation without finishing
- *    it. `Shift` / `Esc` on a keyboard.
- * No mechanic gets a third button. Complexity belongs in the world and in the decisions,
- * not in the number of things a thumb has to learn.
+ *  · **B** — only where a mechanic pays for it. See `DeckSecondary`.
+ * Complexity belongs in the world and in the decisions, not in the number of things a
+ * thumb has to learn.
  *
- * Everything sizes off the band left under the painting, so a 360×640 Android gets a
+ * Everything sizes off the room it is given — the band left under a framed picture, or
+ * the width of the glass when the painting is full-bleed — so a 360×640 Android gets a
  * smaller but complete console rather than a clipped one, and it pads for the home
- * indicator. Desktop gets a different object entirely — a keycap legend, lit exactly
- * when the game is listening — because a keyboard player's problem was never where to
- * put a thumb, it was which key does anything.
+ * indicator. Desktop gets a different object entirely — a keycap legend, lit exactly when
+ * the game is listening — because a keyboard player's problem was never where to put a
+ * thumb, it was which key does anything.
  */
 
-const PAD = { min: 92, max: 128 }
-const BTN = { min: 62, max: 84 }
+/**
+ * הכפתור השני — where it is earned, and nowhere else (16.9.2026).
+ *
+ * Maor: *"לא בטוח שיש סיבה ל2 כפתורים בכלל מלבד במיני משחקים מסויימים."* He is right, and
+ * the sweep says how right. B had two jobs and neither justified a permanent second
+ * button on the world deck.
+ *
+ * · **"Leave a conversation" it never actually performed.** The shell hides the whole
+ *   console while somebody is talking (`covered` in `LifeStage` includes `dialogue`), so
+ *   that caption was written for a state the button is never on screen in. The X on every
+ *   line and Escape are what leave a conversation, and they always were.
+ * · **"Run" it did perform**, and run is a real mechanic — it burns energy in
+ *   `WorldScene.update`. So run is not deleted. It moves onto the STICK, where pushing
+ *   the ball into the outer ring has meant exactly this on every analogue controller ever
+ *   made, and where it costs no screen and no second thumb.
+ *
+ * What is left needing two buttons is the football match and only the football match:
+ * `lib/life/football/sim.ts` reads held-B as a sprint and tapped-B as switch-man, and
+ * `lib/life/football/types.ts` calls A/B that game's permanent contract.
+ */
+export type DeckSecondary =
+  /** the world, the city, anywhere a thumb only walks and acts — one button */
+  | 'none'
+  /** the football match: hold to sprint, tap to switch man. The stick keeps out of it. */
+  | 'run'
+  /** a console drawn OVER a conversation: B is the X. Nothing renders this yet — see the
+   *  note on `secondary` — but the caption exists so the day one does, it says "לצאת". */
+  | 'leave'
+
+/** below this the stick is a thumb at rest, not a step */
+const DEAD = 0.14
+/** push into the outer ring and he runs; let it fall back past this and he walks again */
+const RUN_IN = 0.85
+const RUN_OUT = 0.68
+/** how far the ball's centre travels, as a fraction of the plate */
+const TRAVEL = 0.3
+
+/**
+ * מה שהאגודל אמר — the whole stick, as arithmetic.
+ *
+ * It is a pure function for the same reason `lib/life/runtime/walk.ts` is one: a control
+ * that lives only inside a pointer handler can be checked by a screenshot and by nothing
+ * else, and this one now carries three decisions that are easy to get quietly wrong. So
+ * `tests/life-deck.test.ts` holds it to numbers.
+ *
+ *  · **The magnitude is clamped.** `InputState.normalise` caps the pair it is given, but
+ *    `PitchCard` and the city proof write it straight into their own pad — so a thumb
+ *    dragged past the plate used to be a footballer over top speed.
+ *  · **The dead zone is rescaled, not subtracted.** A resting thumb is not a step; but a
+ *    thumb that has just started to push must get the SLOWEST walk, not a jump to a fifth
+ *    of full speed.
+ *  · **Run has hysteresis.** A thumb sitting on the line would otherwise flicker run on and
+ *    off every frame — and on the pitch that same channel is the B button, where a flicker
+ *    is a substitution.
+ */
+export function stickReading(
+  dx: number,
+  dy: number,
+  radius: number,
+  wasRunning: boolean,
+): { nub: { x: number; y: number }; axis: { x: number; y: number }; running: boolean } {
+  const r = Math.max(1, radius)
+  const len = Math.hypot(dx, dy)
+  const ux = len > 0 ? dx / len : 0
+  const uy = len > 0 ? dy / len : 0
+  const pull = Math.min(1, len / r)
+  const drive = pull <= DEAD ? 0 : (pull - DEAD) / (1 - DEAD)
+  return {
+    nub: { x: ux * pull * r, y: uy * pull * r },
+    axis: { x: ux * drive, y: uy * drive },
+    running: wasRunning ? pull > RUN_OUT : pull >= RUN_IN,
+  }
+}
 
 function clamp(value: number, low: number, high: number) {
   return Math.max(low, Math.min(high, value))
@@ -51,6 +122,63 @@ function Cap({ children, live }: { children: React.ReactNode; live?: boolean }) 
   )
 }
 
+/**
+ * הלוחית — the apron the hardware is bolted to.
+ *
+ * Before this the touch console was a gradient and a grey square floating on the
+ * painting, which is the "debug overlay" the directive exists to forbid. A console is a
+ * PLATE: brushed steel, a milled top edge catching the light, and the picture standing
+ * above it. It is drawn as its own layer so it cannot push the controls around, and it is
+ * pure value — no hue anywhere in it, so rule 62's saturation guard has nothing to catch.
+ */
+function DeckPlate({ floating }: { floating: boolean }) {
+  return (
+    <span aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <span
+        className="absolute inset-0"
+        style={{
+          background: floating
+            ? 'linear-gradient(to top, rgb(14 13 13 / 0.94) 0%, rgb(14 13 13 / 0.86) 46%, rgb(14 13 13 / 0) 100%)'
+            : 'linear-gradient(to bottom, rgb(38 36 35) 0%, rgb(22 21 20) 100%)',
+        }}
+      />
+      {/*
+        Brushed metal: one repeating highlight, no hue, 3% — it reads as a surface and not
+        as a texture, which is the difference between a plate and a pattern.
+
+        It is MASKED by the same fall-off as the apron, because without that the milling
+        carried on over the painting: faint horizontal lines across the boy's legs on a
+        full-bleed phone, which is the plate claiming ground it does not own.
+      */}
+      <span
+        className="absolute inset-0 opacity-60"
+        style={{
+          background:
+            'repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.03) 0px, rgb(255 255 255 / 0.03) 1px, rgb(0 0 0 / 0.03) 1px, rgb(0 0 0 / 0.03) 3px)',
+          ...(floating
+            ? {
+                maskImage: 'linear-gradient(to top, rgb(0 0 0) 30%, rgb(0 0 0 / 0) 92%)',
+                WebkitMaskImage: 'linear-gradient(to top, rgb(0 0 0) 30%, rgb(0 0 0 / 0) 92%)',
+              }
+            : {}),
+        }}
+      />
+      {/*
+        The milled top edge belongs to a PLATE, so it is drawn only when there is one. On a
+        full-bleed phone the painting runs to the floor of the glass and rule 52 tells the
+        shell `frame: 0` — no frame — so a bright hairline across it would draw a frame the
+        picture does not have, which is the same defect as letterboxing a full-bleed room.
+      */}
+      {!floating && (
+        <span
+          className="absolute inset-x-0 top-0 h-px"
+          style={{ background: 'rgb(255 255 255 / 0.18)' }}
+        />
+      )}
+    </span>
+  )
+}
+
 /** One moulded button: a bezel, a rim, and a top that travels when you press it. */
 function ArcadeButton({
   size,
@@ -58,14 +186,18 @@ function ArcadeButton({
   caption,
   live,
   warn,
+  mark,
   onDown,
   onUp,
 }: {
-  size: number
+  /** a CSS length, because on a full-bleed phone the console sizes off the glass, not off
+   *  a band that is zero pixels tall */
+  size: string
   letter: string
   caption: string
   live: boolean
   warn?: boolean
+  mark: string
   onDown: () => void
   onUp: () => void
 }) {
@@ -81,6 +213,7 @@ function ArcadeButton({
   return (
     <button
       type="button"
+      data-deck={mark}
       aria-label={caption}
       style={{ width: size, height: size }}
       onPointerDown={(event) => {
@@ -92,6 +225,19 @@ function ArcadeButton({
       onPointerLeave={() => held && release()}
       className="pointer-events-auto relative shrink-0 touch-none rounded-full"
     >
+      {/*
+        המסגרת שנדלקת. A button that can do something and a button that cannot used to
+        differ by the colour of the plastic alone, which on a sunlit phone is nothing. The
+        armed state now has a RIM around the bezel — the ring of light round a live button
+        on a real cabinet — so the thing the strip just named has something pointing at it.
+      */}
+      <span
+        className={`absolute rounded-full border-hair transition-colors duration-plate motion-reduce:transition-none ${
+          live ? 'border-red' : 'border-transparent'
+        }`}
+        style={{ inset: -4 }}
+        aria-hidden="true"
+      />
       {/* the bezel the button is seated in */}
       <span
         className="absolute inset-0 rounded-full border-hair border-ink/80"
@@ -117,8 +263,8 @@ function ArcadeButton({
         }}
         aria-hidden="true"
       />
-      <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-        <span className="font-display text-[15px] leading-none text-sheet drop-shadow">
+      <span className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-1">
+        <span className="max-w-full truncate font-display text-[15px] leading-none text-sheet drop-shadow">
           <bdi>{caption}</bdi>
         </span>
         <span className="font-mono text-[9px] leading-none tabular-nums text-sheet/70" dir="ltr">
@@ -136,6 +282,7 @@ export function ControlDeck({
   verb,
   label,
   locked,
+  secondary,
   onAxis,
   onAction,
   onCancel,
@@ -149,43 +296,97 @@ export function ControlDeck({
   verb?: string | null
   label?: string | null
   locked?: boolean
+  /**
+   * What the second button is for — and `'none'`, the default, means there is not one.
+   *
+   * Only the football match earns it. `PitchCard` does not pass this yet (it is not a file
+   * this change owns), so until it does the deck finds out where it is standing by looking
+   * for the pitch card's own `data-life="pitch-card"` root. That lookup is a BRIDGE and it
+   * says so: the day `PitchCard` passes `secondary="run"` the lookup is deleted, and until
+   * then a football match cannot silently lose its sprint because of a prop nobody passed.
+   */
+  secondary?: DeckSecondary
   onAxis: (x: number, y: number) => void
   onAction: (down: boolean) => void
-  /** B — run while walking, leave while talking */
+  /** B, and the stick's outer ring: run while walking, leave while talking */
   onCancel: (down: boolean) => void
 }) {
-  const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null)
   const [nub, setNub] = useState({ x: 0, y: 0 })
+  const [dragging, setDragging] = useState(false)
+  const [running, setRunning] = useState(false)
   const pointer = useRef<number | null>(null)
+  /** the stick's own geometry, read off the element the thumb landed on */
+  const gate = useRef({ cx: 0, cy: 0, r: 1 })
+  const runNow = useRef(false)
+
+  const [bridged, setBridged] = useState<DeckSecondary | null>(null)
+  const findDeck = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return
+    setBridged(node.closest('[data-life="pitch-card"]') ? 'run' : 'none')
+  }, [])
+  const second: DeckSecondary = secondary ?? bridged ?? 'none'
+  /** when B is not the run button, the stick's outer ring is */
+  const stickRuns = second === 'none'
 
   const band = Math.max(0, height)
-  const floating = touch ? band < PAD.min + 20 : band < 56
-  const pad = clamp(band - 22, PAD.min, PAD.max)
-  const btn = clamp((band - 34) / 1.6, BTN.min, BTN.max)
-  const radius = Math.round(pad * 0.42)
-  const ball = Math.round(pad * 0.36)
+  const floating = touch ? band < 112 : band < 56
 
+  /**
+   * המידות באו מהזכוכית, לא מהפס.
+   *
+   * Since the full-bleed pass the painting fills the glass and the deck is handed
+   * `height: 0` — so every `clamp` off the band answered with its own minimum and a phone
+   * got the smallest console this file can draw, on the largest screen it ever draws on.
+   * A floating console therefore sizes off the WIDTH of the glass instead, in CSS, which
+   * also means it is right on the frame the orientation changes and not one resize event
+   * later.
+   */
+  // 34px of slack under a framed picture, not 20: the run caption hangs above the stick,
+  // and a caption that pokes over the hairline is the plate claiming the painting again
+  const padSize = floating ? 'clamp(96px, 30vw, 134px)' : `${clamp(band - 34, 88, 134)}px`
+  const btnSize = floating ? 'clamp(70px, 21vw, 94px)' : `${clamp((band - 30) / 1.5, 64, 94)}px`
+  const bSize = `calc(${btnSize} * 0.78)`
+
+  /**
+   * The thumb writes an axis, and once in a while it writes a decision.
+   *
+   * Two things this must not do, both of which it used to. It must not send a magnitude
+   * over 1 — `InputState` normalises, but `PitchCard` and the city proof write the pair
+   * straight into their own pad, so a thumb dragged past the plate was a footballer over
+   * top speed. And it must not report a resting thumb as a step: the dead zone is rescaled
+   * rather than subtracted, so the first real millimetre of travel is still the slowest
+   * walk instead of a jump to a quarter speed.
+   */
   const move = useCallback(
-    (clientX: number, clientY: number, from: { x: number; y: number }) => {
-      const dx = clientX - from.x
-      const dy = clientY - from.y
-      const length = Math.hypot(dx, dy)
-      const scale = length > radius ? radius / length : 1
-      setNub({ x: dx * scale, y: dy * scale })
-      onAxis(dx / radius, dy / radius)
+    (clientX: number, clientY: number) => {
+      const { cx, cy, r } = gate.current
+      const read = stickReading(clientX - cx, clientY - cy, r, runNow.current)
+      setNub(read.nub)
+      onAxis(read.axis.x, read.axis.y)
+      // הטבעת החיצונית היא ריצה
+      if (read.running !== runNow.current) {
+        runNow.current = read.running
+        setRunning(read.running)
+        if (stickRuns) onCancel(read.running)
+      }
     },
-    [onAxis, radius],
+    [onAxis, onCancel, stickRuns],
   )
 
   const release = useCallback(() => {
     pointer.current = null
-    setOrigin(null)
+    setDragging(false)
     setNub({ x: 0, y: 0 })
     onAxis(0, 0)
-  }, [onAxis])
+    if (runNow.current) {
+      runNow.current = false
+      setRunning(false)
+      if (stickRuns) onCancel(false)
+    }
+  }, [onAxis, onCancel, stickRuns])
 
   const shell = floating
-    ? 'pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-center justify-between gap-2 bg-gradient-to-t from-ink/85 to-transparent px-3 pb-[max(8px,env(safe-area-inset-bottom))] pt-6'
+    ? 'pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-end justify-between gap-2 px-3 pb-[max(10px,env(safe-area-inset-bottom))] pt-8'
     : 'pointer-events-none absolute inset-x-0 z-30 flex items-center justify-between gap-2 px-3 pb-[max(4px,env(safe-area-inset-bottom))]'
   const shellStyle = floating ? undefined : { top, bottom: 0 }
 
@@ -196,7 +397,7 @@ export function ControlDeck({
    * saying nothing: the one job of that chip is to name what the red button will do.
    */
   const stripStyle = floating
-    ? { bottom: `calc(${Math.round(btn)}px + max(20px, env(safe-area-inset-bottom)))` }
+    ? { bottom: `calc(${btnSize} + max(26px, env(safe-area-inset-bottom)))` }
     : { top: Math.max(0, top + 4) }
 
   const centre = (
@@ -227,8 +428,9 @@ export function ControlDeck({
   if (!touch) {
     const muted = floating ? 'text-sheet/80' : 'text-muted'
     return (
-      <div className={shell} style={shellStyle} dir="ltr" data-life="deck">
-        <div className="pointer-events-none flex shrink-0 items-center gap-2">
+      <div className={shell} style={shellStyle} dir="ltr" data-life="deck" ref={findDeck}>
+        <DeckPlate floating={floating} />
+        <div className="pointer-events-none relative flex shrink-0 items-center gap-2">
           <span className="flex items-center gap-1">
             <Cap>↑</Cap>
             <Cap>←</Cap>
@@ -240,11 +442,13 @@ export function ControlDeck({
           </span>
         </div>
 
-        {centre}
+        <div className="relative flex min-w-0 flex-1">{centre}</div>
 
-        <div className="pointer-events-none flex shrink-0 items-center gap-2">
+        <div className="pointer-events-none relative flex shrink-0 items-center gap-2">
+          {/* Shift is still run on a keyboard. Losing the second BUTTON on a phone does not
+              cost a key on a desk, where a modifier is free. */}
           <span className={`font-body text-[11px] leading-none ${muted}`} dir="rtl">
-            <bdi>{t('life.deck.bRun')}</bdi>
+            <bdi>{t('life.deck.run')}</bdi>
           </span>
           <Cap>Shift</Cap>
           <span className={`font-body text-[11px] leading-none ${muted}`} dir="rtl">
@@ -278,86 +482,144 @@ export function ControlDeck({
         {centre}
       </div>
 
-      <div className={shell} style={shellStyle} dir="ltr" data-life="deck">
-        {/* ---- the stick: deck plate, dust washer, shaft, ball top ---- */}
-        <div
-          role="application"
-          aria-label={t('life.deck.stick')}
-          className="pointer-events-auto relative shrink-0 touch-none rounded-[10px] border-hair border-ink/70"
-          style={{
-            width: pad,
-            height: pad,
-            background:
-              'linear-gradient(155deg, rgb(72 70 68) 0%, rgb(44 42 41) 42%, rgb(28 27 26) 100%)',
-            boxShadow: 'inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 -3px 8px rgb(0 0 0 / 0.5)',
-          }}
-          onPointerDown={(event) => {
-            if (pointer.current !== null) return
-            pointer.current = event.pointerId
-            event.currentTarget.setPointerCapture(event.pointerId)
-            const box = event.currentTarget.getBoundingClientRect()
-            const from = { x: box.left + box.width / 2, y: box.top + box.height / 2 }
-            setOrigin(from)
-            move(event.clientX, event.clientY, from)
-          }}
-          onPointerMove={(event) => {
-            if (pointer.current !== event.pointerId || !origin) return
-            move(event.clientX, event.clientY, origin)
-          }}
-          onPointerUp={release}
-          onPointerCancel={release}
-        >
-          {/* the dust washer the shaft comes through */}
+      <div className={shell} style={shellStyle} dir="ltr" data-life="deck" ref={findDeck}>
+        <DeckPlate floating={floating} />
+
+        {/* ---- the stick: gate plate, run ring, dust washer, shaft, ball top ---- */}
+        <div className="pointer-events-none relative shrink-0" style={{ width: padSize }}>
+          {/* what the ring means, said once, only while it is engaged — a permanent caption
+              on a 360px phone is clutter; a word that appears the first time a thumb
+              reaches the ring is a lesson */}
           <span
-            className="absolute rounded-full"
-            style={{
-              left: '50%',
-              top: '50%',
-              width: pad * 0.62,
-              height: pad * 0.62,
-              transform: 'translate(-50%, -50%)',
-              background:
-                'radial-gradient(circle at 50% 45%, rgb(14 13 13) 0%, rgb(30 29 28) 62%, rgb(58 56 54) 100%)',
-              boxShadow: 'inset 0 2px 6px rgb(0 0 0 / 0.7)',
-            }}
+            className={`pointer-events-none absolute inset-x-0 bottom-full mb-2 flex justify-center transition-opacity duration-press motion-reduce:transition-none ${
+              running ? 'opacity-100' : 'opacity-0'
+            }`}
             aria-hidden="true"
-          />
-          {/* the ball top, riding the shaft */}
-          <span
-            className="absolute rounded-full"
+          >
+            <span className="border-hair border-red bg-ink px-1.5 py-1 font-sign text-[11px] leading-none text-red">
+              <bdi>{t('life.deck.run')}</bdi>
+            </span>
+          </span>
+
+          <div
+            role="application"
+            data-deck="stick"
+            // both jobs in the accessible name, built from keys the catalogue already
+            // carries — a console is not worth a new string nobody can add here
+            aria-label={`${t('life.deck.stick')} · ${t('life.deck.run')}`}
+            className="pointer-events-auto relative touch-none border-hair border-ink/70"
             style={{
-              left: '50%',
-              top: '50%',
-              width: ball,
-              height: ball,
-              transform: `translate(-50%, -50%) translate3d(${nub.x}px, ${nub.y}px, 0)`,
+              width: padSize,
+              height: padSize,
+              // an octagonal restrictor gate, which is the shape the hardware actually is
+              clipPath:
+                'polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%)',
               background:
-                'radial-gradient(circle at 34% 26%, rgb(255 255 255 / 0.75) 0%, rgb(var(--red)) 34%, color-mix(in srgb, rgb(var(--red)) 58%, rgb(var(--ink))) 100%)',
-              boxShadow: '0 4px 8px rgb(0 0 0 / 0.55), inset 0 -3px 6px rgb(0 0 0 / 0.35)',
-              transition: origin ? 'none' : 'transform 120ms var(--ease-stamp)',
+                'linear-gradient(155deg, rgb(72 70 68) 0%, rgb(44 42 41) 42%, rgb(28 27 26) 100%)',
+              boxShadow: 'inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 -3px 8px rgb(0 0 0 / 0.5)',
             }}
-            aria-hidden="true"
-          />
+            onPointerDown={(event) => {
+              if (pointer.current !== null) return
+              pointer.current = event.pointerId
+              event.currentTarget.setPointerCapture(event.pointerId)
+              const box = event.currentTarget.getBoundingClientRect()
+              gate.current = {
+                cx: box.x + box.width / 2,
+                cy: box.y + box.height / 2,
+                r: Math.max(1, box.width * TRAVEL),
+              }
+              setDragging(true)
+              move(event.clientX, event.clientY)
+            }}
+            onPointerMove={(event) => {
+              if (pointer.current !== event.pointerId) return
+              move(event.clientX, event.clientY)
+            }}
+            onPointerUp={release}
+            onPointerCancel={release}
+            // a capture lost to a scroll, a gesture or a dead finger is a released stick —
+            // without this the child kept walking after the thumb was gone
+            onLostPointerCapture={release}
+          >
+            {/* the run ring: where the ball's edge lands when he starts running */}
+            <span
+              className="absolute rounded-full border-hair transition-colors duration-press motion-reduce:transition-none"
+              style={{
+                inset: '7.5%',
+                borderStyle: 'dashed',
+                borderColor: running ? 'rgb(var(--red))' : 'rgb(255 255 255 / 0.16)',
+              }}
+              aria-hidden="true"
+            />
+            {/* the dust washer the shaft comes through */}
+            <span
+              className="absolute rounded-full"
+              style={{
+                inset: '21%',
+                background:
+                  'radial-gradient(circle at 50% 45%, rgb(14 13 13) 0%, rgb(30 29 28) 62%, rgb(58 56 54) 100%)',
+                boxShadow: 'inset 0 2px 6px rgb(0 0 0 / 0.7)',
+              }}
+              aria-hidden="true"
+            />
+            <span className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
+              {/* the shaft, swinging out from under the ball — the comment above this file
+                  has promised one since the console was built and there was never one */}
+              <span
+                className="absolute origin-[0_50%] rounded-full"
+                style={{
+                  width: Math.max(0, Math.hypot(nub.x, nub.y)),
+                  height: 9,
+                  transform: `rotate(${(Math.atan2(nub.y, nub.x) * 180) / Math.PI}deg)`,
+                  background:
+                    'linear-gradient(to bottom, rgb(150 148 145), rgb(96 94 92) 45%, rgb(38 37 36))',
+                  opacity: dragging ? 1 : 0,
+                }}
+              />
+              {/* the ball top, riding the shaft */}
+              <span
+                className="absolute rounded-full"
+                style={{
+                  width: '34%',
+                  height: '34%',
+                  transform: `translate3d(${nub.x}px, ${nub.y}px, 0)`,
+                  background: running
+                    ? 'radial-gradient(circle at 34% 26%, rgb(255 255 255 / 0.9) 0%, rgb(var(--red)) 26%, color-mix(in srgb, rgb(var(--red)) 74%, rgb(var(--sheet))) 100%)'
+                    : 'radial-gradient(circle at 34% 26%, rgb(255 255 255 / 0.75) 0%, rgb(var(--red)) 34%, color-mix(in srgb, rgb(var(--red)) 58%, rgb(var(--ink))) 100%)',
+                  boxShadow: '0 4px 8px rgb(0 0 0 / 0.55), inset 0 -3px 6px rgb(0 0 0 / 0.35)',
+                  transition: dragging ? 'none' : 'transform 120ms var(--ease-stamp)',
+                }}
+              />
+            </span>
+          </div>
         </div>
 
         <div className="flex-1" aria-hidden="true" />
 
-        {/* ---- A and B ---- */}
-        <div className="pointer-events-none flex shrink-0 items-end gap-2">
+        {/* ---- A, and B only where a mechanic pays for it ---- */}
+        <div className="pointer-events-none relative flex shrink-0 items-end gap-2.5">
+          {second !== 'none' && (
+            <ArcadeButton
+              size={bSize}
+              mark="b"
+              letter="B"
+              caption={second === 'leave' ? t('life.deck.bLeave') : t('life.deck.bRun')}
+              live={false}
+              warn
+              onDown={() => onCancel(true)}
+              onUp={() => onCancel(false)}
+            />
+          )}
           <ArcadeButton
-            size={Math.round(btn * 0.86)}
-            letter="B"
-            caption={t('life.deck.b')}
-            live={false}
-            warn
-            onDown={() => onCancel(true)}
-            onUp={() => onCancel(false)}
-          />
-          <ArcadeButton
-            size={btn}
+            size={btnSize}
+            mark="a"
             letter="A"
             caption={verb ? t(`life.verb.short.${verb}` as MessageKey) : t('life.deck.act')}
-            live={Boolean(verb) && !locked}
+            // In a football match A is ALWAYS the ball — tackle, shot, pass — and there is
+            // no prompt system to name it, so it drew itself grey for ninety minutes and
+            // said the game was not listening. A console that lies about being live is the
+            // defect rule 42 exists about, one mini-game along.
+            live={second === 'run' || (Boolean(verb) && !locked)}
             onDown={() => onAction(true)}
             onUp={() => onAction(false)}
           />
@@ -370,13 +632,13 @@ export function ControlDeck({
 /**
  * הצ׳יפ — the deck folded down to the one thing a tap-first player still needs.
  *
- * On a phone the default is now no stick and no buttons: you touch the world and the boy
- * goes (Very Little Nightmares, which Maor named as the bar, has no controls at all). But
- * the deck did two jobs the picture cannot do on its own — it NAMED what the red button
- * would do, and it gave a big forgiving target for doing it. This is those two jobs and
- * nothing else: one strip at the foot of the glass, the verb and the name, and the strip
- * itself is the button. It only exists while something is in reach, so most of the time
- * the glass is just the painting.
+ * The phone default is the CONSOLE again (16.9.2026): Maor asked for the stick and the
+ * buttons to be on the screen, in those words, and a preference hidden in ☰ is not on the
+ * screen. What this is for is the player who then turns the console off — the picture is
+ * still a controller, you touch the world and the boy goes, and the two jobs the picture
+ * cannot do on its own remain: NAMING what the red button would do, and giving a big
+ * forgiving target for doing it. That is all this is. It only exists while something is
+ * in reach, so most of the time the glass is just the painting.
  */
 export function TapChip({
   verb,
@@ -399,6 +661,7 @@ export function TapChip({
       <button
         type="button"
         data-life="prompt"
+        data-deck="chip"
         aria-label={label}
         onPointerDown={(event) => {
           event.preventDefault()

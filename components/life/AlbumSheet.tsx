@@ -17,6 +17,7 @@ import {
   isAce,
   isTorn,
   missingOn,
+  newSetsIn,
   stickersIn,
   type StickerDef,
   type StickerSet,
@@ -69,6 +70,9 @@ export function AlbumSheet({
    */
   const wanted = missingOn(state, page)
   const holder = spare.length > 0 && wanted ? holderOf(state, wanted.id) : null
+  /* which pages landed on a counter this chapter — read from the save's own chapter, so
+     the album answers the same question the shop's counter does and cannot disagree */
+  const fresh = new Set(newSetsIn(state.chapter).map((one) => one.id))
 
   /**
    * Escape puts down whatever is in your hand: a held-up sticker first, the album after.
@@ -121,12 +125,33 @@ export function AlbumSheet({
               }}
               data-life="album-tab"
               data-on={on ? '1' : '0'}
+              data-new={fresh.has(id) ? '1' : '0'}
               className="shrink-0"
             >
               <span dir="ltr">{SETS[id].shortHe}</span>
               <span className="font-mono text-[10px] tabular-nums opacity-75">
                 {t('life.album.page', { have: String(held), total: String(stickersIn(id).length) })}
               </span>
+              {/*
+               * עונה חדשה — the page that reached a counter in THIS chapter, marked where
+               * a collector would actually look for it.
+               *
+               * `StickerSet` had no arrival date until 16.9.2026, so this tab could never
+               * have been drawn: every eighties page was equally "current" in every
+               * eighties chapter. `newSetsIn` is the twin of the shirts' `arrivedBetween`,
+               * and the mark is on the TAB rather than in a card because a card is seen
+               * once and a boy who was somewhere else that minute still has to be able to
+               * find out which album is the new one.
+               */}
+              {fresh.has(id) && (
+                <span
+                  className={`border-hair px-1 font-sign text-[9px] leading-tight ${
+                    on ? 'border-sheet/60 text-sheet' : 'border-red text-red'
+                  }`}
+                >
+                  {t('life.album.new')}
+                </span>
+              )}
             </Chip>
           )
         })}

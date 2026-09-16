@@ -27,6 +27,9 @@ import {
   stickerFor,
   ALBUM_SEEN,
   PACKET_WHY_HE,
+  PACKET_NONE_HE,
+  PACKET_SHORT_HE,
+  PACKET_EMPTY_HE,
   SETS,
   closesPage,
 } from '../stickers'
@@ -315,6 +318,22 @@ export class DialogueRunner {
   }
 
   /** Apply, then either chain into another node or shut the box. */
+  /**
+   * דוכן הסופרגול בחנות — one packet, bought at the fan shop's counter.
+   *
+   * It goes through `finish` and deliberately NOT through `applyEffects`: `finishOutcome`
+   * carries a reduced vocabulary with no `packet` case in it at all, so the obvious call
+   * would have been a silent no-op — the same class of bug as the three `break`s above.
+   * Routed here, the counter in the shop and Rafi at the kiosk run the identical
+   * transaction, down to the seeded roll, so a packet cannot be worth more in one of them.
+   *
+   * Safe with no conversation open: `finish` guards its heard-flag on `this.conversation`,
+   * sets no `goto`, and `close()` is a no-op when nothing is up.
+   */
+  buyPacket() {
+    this.finish([{ e: 'packet' }])
+  }
+
   private finish(effects: readonly Effect[]) {
     const events: LifeEvent[] = []
     // Captured before any `goto` below replaces `this.conversation` — this branch, of this
@@ -505,11 +524,31 @@ export class DialogueRunner {
         case 'packet': {
           const state = this.engine.state
           const set = setSoldIn(state)
-          if (!set) break
+          /**
+           * סירוב הוא תשובה — three `break`s that used to end the effect in silence.
+           *
+           * No money moved, no card opened, no sentence said: a boy tapped "מעטפה" and
+           * the game did nothing at all. From `2000-title` on that is EVERY packet choice
+           * in the game, because no album was printed for the decade and `setSoldIn`
+           * correctly returns null — so the most common outcome of the button was the one
+           * outcome that looked like a broken button. Rule 11 says the honest answer is
+           * the answer; it is never nothing.
+           */
+          if (!set) {
+            after.push(() => this.bus.emit('toast', { text: PACKET_NONE_HE, tone: 'plain' }))
+            break
+          }
           const price = (PACKET[decadeOf(state.chapter)] ?? 1) * 100
-          if (state.agorot < price) break
+          if (state.agorot < price) {
+            const short = Math.ceil((price - state.agorot) / 100)
+            after.push(() => this.bus.emit('toast', { text: `${PACKET_SHORT_HE} ${short} ₪.`, tone: 'plain' }))
+            break
+          }
           const ids = openPacket(state, set, state.minute)
-          if (ids.length === 0) break
+          if (ids.length === 0) {
+            after.push(() => this.bus.emit('toast', { text: PACKET_EMPTY_HE, tone: 'plain' }))
+            break
+          }
           const before: Record<string, number> = {}
           for (const id of ids) before[id] = haveOf(state, id)
           events.push({ t: 'money.changed', agorot: -price, why: PACKET_WHY_HE })

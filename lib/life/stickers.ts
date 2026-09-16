@@ -32,7 +32,8 @@
 import type { CharacterId, LifeState } from './types'
 import { relationshipOf } from './types'
 import { Roller } from './rng'
-import { decadeOf, type Decade } from './prices'
+import { PACKET, decadeOf, type Decade } from './prices'
+import { CHAPTER_ORDER, chapterIndex, chapterOnOrAfter, previousChapter } from './shirts'
 
 export type StickerSetId =
   | '8081'
@@ -59,6 +60,22 @@ export type StickerSet = {
   frame: '80' | '86' | '93' | '96' | '98'
   /** the decade a kiosk sells this packet in; `null` means it was never sold, only kept */
   soldIn: Decade | null
+  /**
+   * הפרק שבו הדף מגיע לדלפק — the chapter this album first exists in, and NOT typed here.
+   *
+   * This is `Shirt.from` for an album, and until 16.9.2026 there was no such field. A set
+   * carried a `Decade` and nothing else, so every eighties page was simultaneously the
+   * current one in 1984, in 1985 and in 1986 — the 1985/86 album was on Rafi's counter a
+   * year and a half before that season was played, and no chapter boundary could ever say
+   * "a new one is in". Maor asked for exactly the announcement that field was missing:
+   * *"תעשה התראות על עונת סופרגול חדשה שנכנסה לחנות."* You cannot announce an arrival
+   * without a date of arrival.
+   *
+   * It is DERIVED (`fromOf`), for the same reason `Shirt.price` is derived: a page whose
+   * season is written on its own face should not also carry a hand-typed chapter that can
+   * disagree with it.
+   */
+  from: string
   /** the poster that opens the page, when the archive has one */
   posterArt?: string
   posterSourceHe?: string
@@ -99,7 +116,7 @@ export type StickerDef = {
   neverInPacket?: boolean
 }
 
-export const SETS: Record<StickerSetId, StickerSet> = {
+const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
   '8081': {
     id: '8081',
     titleHe: 'סופרגול · 1980/81',
@@ -183,6 +200,41 @@ export const SETS: Record<StickerSetId, StickerSet> = {
     soldIn: null,
   },
 }
+
+/**
+ * מאיזה פרק הדף קיים — read off the page's own face, in two steps and never a third.
+ *
+ * 1. **The season, when the page prints one.** `עונת 1985/86` is a four-digit year on the
+ *    album's own cover, so the page reaches a counter the first chapter of the life that
+ *    is on or after it — the identical rule `Shirt.from` follows, through the identical
+ *    function (`chapterOnOrAfter`), so a shirt and an album of the same season can never
+ *    disagree about which year they belong to.
+ * 2. **The decade, when it prints only that.** Four of the ten pages say `שנות השמונים`
+ *    or `שנות התשעים` and no season: they are squad sheets, not a year's album. The
+ *    honest reading of "the eighties" is the first chapter of the eighties — the page
+ *    claims a decade, so it gets the decade, and nothing here invents a finer date than
+ *    the paper carries (rule 11).
+ *
+ * A page nobody ever sold (`soldIn: null` — 1980/81, 1996, the red box) has no arrival to
+ * announce and sits at the front of the life, because it was in somebody's drawer before
+ * the boy was born.
+ */
+function fromOf(row: Omit<StickerSet, 'from'>): string {
+  const season = /(\d{4})/.exec(row.seasonHe)
+  if (season) return chapterOnOrAfter(Number(season[1]))
+  if (row.soldIn) {
+    const first = CHAPTER_ORDER.find((chapter) => decadeOf(chapter) === row.soldIn)
+    if (first) return first
+  }
+  return CHAPTER_ORDER[0] as string
+}
+
+export const SETS: Record<StickerSetId, StickerSet> = Object.fromEntries(
+  (Object.keys(SET_ROWS) as StickerSetId[]).map((id) => [
+    id,
+    { ...(SET_ROWS[id] as Omit<StickerSet, 'from'>), from: fromOf(SET_ROWS[id] as Omit<StickerSet, 'from'>) },
+  ]),
+) as Record<StickerSetId, StickerSet>
 
 /** the line that goes under every scan on this page, and says only where it came from */
 const FROM_ALBUM = 'מדבקת סופרגול מהאלבום של מאור הראל.'
@@ -662,10 +714,75 @@ function hash(text: string): number {
 /** what the money line says when a packet is paid for */
 export const PACKET_WHY_HE = 'מעטפת סופרגול'
 
+/**
+ * שלוש התשובות שהמעטפה לא ידעה לתת — the three ways buying one can fail.
+ *
+ * They are here rather than in the runtime because they are facts about the PRODUCT:
+ * which decade printed an album, what a packet costs, and what is left in the box. The
+ * runtime only chooses which one to say. Before 16.9.2026 it said none of them and the
+ * effect ended on a bare `break` — so from `2000-title` on, where no album exists, the
+ * kiosk's most-offered choice did nothing at all and looked exactly like a dead button.
+ */
+export const PACKET_NONE_HE = 'אין פה מעטפות סופרגול בשנים האלה. האלבומים נגמרו עם העשור.'
+export const PACKET_SHORT_HE = 'אין לך מספיק. חסר'
+export const PACKET_EMPTY_HE = 'הקופסה ריקה. מה שהיה בה כבר אצלך.'
+
 /** how many stickers come out of one — three, the way they did */
 export const PACKET_SIZE = 3
 
-/** which page a kiosk is selling in this chapter, or null where nobody sells any */
+/** what one packet costs where this chapter is standing, in whole shekels of its decade */
+export const packetShekels = (chapter: string) => PACKET[decadeOf(chapter)]
+
+/**
+ * מה שהגיע לדלפק עד עכשיו — every album a counter could be selling by this chapter.
+ *
+ * The twin of `onSale` for shirts: cumulative, in `SET_ORDER`, and gated on `from` so an
+ * album cannot be on a counter before the season printed on it happened. Pages that were
+ * never sold at all are not stock and are not here.
+ */
+export function setsBy(chapter: string): StickerSet[] {
+  const now = chapterIndex(chapter)
+  if (now < 0) return []
+  return SET_ORDER.map((id) => SETS[id]).filter((set) => {
+    if (set.soldIn === null) return false
+    const at = chapterIndex(set.from)
+    return at >= 0 && at <= now
+  })
+}
+
+/**
+ * עונה חדשה של סופרגול נכנסה לחנות — the twin of `arrivedBetween`, and the thing this
+ * file had no way of answering until now.
+ *
+ * Maor asked for it in one sentence: *"תעשה התראות על עונת סופרגול חדשה שנכנסה לחנות."*
+ * A shirt has had this since 5.9.2026 — `Shirt.from`, `arrivedBetween`, `SHIRT_NEW_HE`
+ * and a once-per-chapter `own:shopnews:` flag — and an album, which is the thing a child
+ * of that age actually waited for, had nothing: no arrival date, so no arrival.
+ *
+ * Same shape, deliberately, so the runtime announces both through one habit: what is on
+ * the counter now, minus what was on it last chapter. `null` previous means the first
+ * chapter of the life, where everything is new and therefore nothing is news.
+ */
+export function setsArrivedBetween(previous: string | null, chapter: string): StickerSet[] {
+  if (!previous) return []
+  const had = new Set(setsBy(previous).map((set) => set.id))
+  return setsBy(chapter).filter((set) => !had.has(set.id))
+}
+
+/** the albums that reached the counter in this chapter, asked the way a room asks it */
+export const newSetsIn = (chapter: string) => setsArrivedBetween(previousChapter(chapter), chapter)
+
+/**
+ * The card is held up ONCE per chapter, and the flag says so. `own:` is one of the six
+ * prefixes that survive a new day and a new decade (rule 68), so the announcement cannot
+ * come back tomorrow for the same album — exactly what `own:shopnews:` does for a kit.
+ * It is spelled here rather than in the scene so the shop and the scene read one key.
+ */
+export const albumNewsFlag = (chapter: string) => `own:albumnews:${chapter}`
+
+/** what the arrival card calls itself — the twin of `SHIRT_NEW_HE` */
+export const SET_NEW_HE = 'עונה חדשה של סופרגול בחנות'
+
 /**
  * מה מוכרים בקיוסק עכשיו — the album the kiosk still has packets for.
  *
@@ -674,12 +791,33 @@ export const PACKET_SIZE = 3
  * of that decade the boy has not completed, and only when every page of the decade is
  * full does it fall back to the last of them — a kiosk with nothing left to sell you is
  * a kiosk that stops the feature dead, and a duplicate is still worth trading.
+ *
+ * **It now asks `setsBy` rather than the whole decade**, which is the `from` field doing
+ * its job: in 1984 the counter sold the 1985/86 album, a season that had not been played.
+ * It sells the squad sheet instead, and the 1985/86 album ARRIVES in `a4-shirt` — which
+ * is the moment there is now something to announce.
+ *
+ * **On the hole at the other end, and why it stays a hole.** Every chapter from
+ * `2000-title` is in the `00s`, no page in this album was sold in the 2000s, so this
+ * answers `null` and `{ e: 'packet' }` in `runtime/dialogue.ts` breaks out doing nothing —
+ * money unspent, no card, no sentence. The fix is NOT to invent a 2000s album: Maor's
+ * folder holds 1980/81, 1985/86, three eighties sheets, 1992/93, a nineties sheet,
+ * 1997/98 and 1996, and a page of names for a season nobody photographed would be the
+ * exact fabrication rule 11 forbids. Nor is it to keep selling the 1997/98 album in 2000
+ * at four shekels a packet to a man of twenty-two — that is a fiction about the character
+ * as much as about the archive.
+ * So `null` is the right ANSWER and the defect is that it is silent: a refusal is an
+ * answer and has to be said out loud (rule 11). The shop says it — `ShopCard` prints the
+ * counter as shut with a reason instead of hiding the section — and the one thing this
+ * file cannot fix from here is the dialogue effect, which needs a `toast` on the empty
+ * case. That is written down as a patch request rather than done in somebody else's file.
  */
 export function setSoldIn(state: LifeState): StickerSetId | null {
   const decade = decadeOf(state.chapter)
-  const inDecade = SET_ORDER.filter((id) => SETS[id].soldIn === decade)
+  const inDecade = setsBy(state.chapter).filter((set) => set.soldIn === decade)
   if (inDecade.length === 0) return null
-  return inDecade.find((id) => !pageDone(state, id)) ?? (inDecade[inDecade.length - 1] as StickerSetId)
+  const open = inDecade.find((set) => !pageDone(state, set.id))
+  return (open ?? (inDecade[inDecade.length - 1] as StickerSet)).id
 }
 
 /**

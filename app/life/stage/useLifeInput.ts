@@ -67,7 +67,10 @@ export function useLifeInput({
       if (held.has('arrowdown') || held.has('s')) y += 1
       input.setKeys(x, y)
       input.setKeyAction(held.has('e') || held.has(' ') || held.has('enter'))
-      input.setRun(held.has('shift'))
+      // Shift has its OWN run channel. It shared one with the pad until 16.9.2026, and a
+      // shared boolean between two sources is the bug rule 39 already records for the axis:
+      // whichever hand let go first stopped the child running for both.
+      input.setKeyRun(held.has('shift'))
     }
     const onDown = (event: KeyboardEvent) => {
       held.add(event.key.toLowerCase())
@@ -144,11 +147,17 @@ export function useLifeInput({
   }, [runtime])
 
   /**
-   * B — the other half of the arcade pair, and it does what B has always done.
+   * "לא זה" — one idea, and after 16.9.2026 usually not a button at all.
    *
-   * While you are walking it is RUN. While somebody is talking it is LEAVE, which is the
-   * same thing the X in the corner does and the same thing Escape does on a keyboard. One
-   * button, one idea — "not this" — rather than a third button for a third mechanic.
+   * Maor: *"לא בטוח שיש סיבה ל2 כפתורים בכלל מלבד במיני משחקים מסויימים."* So on the world
+   * deck this channel is no longer wired to a second moulded button; it is wired to the
+   * STICK'S OUTER RING, which is what an analogue stick has always meant by the same push.
+   * The football match keeps a real B — `lib/life/football/sim.ts` reads held-B as a sprint
+   * and tapped-B as switch-man — and that is the one mechanic in the game that pays for it.
+   *
+   * What the channel MEANS did not change, and that is the point of keeping one callback:
+   * while you are walking it is RUN, while somebody is talking it is LEAVE, which is the
+   * same thing the X in the corner does and the same thing Escape does on a keyboard.
    */
   const onCancel = useCallback(
     (down: boolean) => {

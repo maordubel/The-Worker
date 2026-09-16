@@ -102,7 +102,7 @@ Verified against `/root/worker/lib/life/**` on 2026-09-06. Inventory file was **
 ## B10 — "שש־עשרה שנה" (`1999-cup`)
 
 ```
-323 | B10/§6 | B10 = 26.5.1999, Cup final vs Beitar | DONE | chapters.ts '1999-cup' dateHe '26 במאי 1999', anchorKey '1999-cup'
+323 | B10/§6 | B10 = 19.5.1999, Cup final vs Beitar | DONE | chapters.ts '1999-cup' dateHe '26 במאי 1999', anchorKey '1999-cup'
 324 | B10/§6 | Q: can the divided group celebrate together | DONE | c99-after: together / divided endings
 325 | B10/§7 | Title "שש־עשרה שנה" | DONE | chapters.ts titleHe
 326 | B10/§7 | Anchor: State Cup final vs Beitar | DONE | anchor-server '1999-cup' + matches.json 1999-05-26 (opponent בית"ר ירושלים)

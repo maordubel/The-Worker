@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { emptyState, apply } from '@/lib/life/events'
-import { PACKET } from '@/lib/life/prices'
+import { PACKET, decadeOf } from '@/lib/life/prices'
 import {
   PACKET_SIZE,
   SETS,
@@ -115,6 +115,19 @@ describe('סופרגול — המעטפה', () => {
       const ids = openPacket(state(), '8586', seed)
       expect(ids).toHaveLength(PACKET_SIZE)
       for (const id of ids) expect(blocked.has(id), id).toBe(false)
+    }
+  })
+
+  it('arrives in a chapter of the decade it is sold in', () => {
+    // `soldIn` and `from` are two statements about the same page — the decade a kiosk
+    // stocked it and the chapter it first appears in — and they are derived from
+    // different things (`soldIn` is typed on the row, `from` is read off the season
+    // printed on the page). A page sold in the nineties that arrives in 1984 would mean
+    // one of the two is wrong, and nothing else in the suite would say so.
+    for (const id of SET_ORDER) {
+      const set = SETS[id]
+      if (set.soldIn === null) continue
+      expect(decadeOf(set.from), `${id} — ${set.seasonHe}`).toBe(set.soldIn)
     }
   })
 

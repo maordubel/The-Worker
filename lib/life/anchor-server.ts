@@ -476,11 +476,11 @@ const ANCHOR_SPECS: Record<string, AnchorSpec> = {
     sport: 'football',
     seasonLabel: '1998/99',
     competitionSlug: 'גביע-המדינה',
-    playedOn: '1999-05-26',
+    playedOn: '1999-05-19',
     year: 1999,
     headlineHe: 'גמר גביע המדינה, 1998/99',
     countTitles: true,
-    placeholderHe: 'גמר גביע המדינה של 26.5.1999 ברמת גן',
+    placeholderHe: 'גמר גביע המדינה של 19.5.1999 ברמת גן',
   },
   '2000-title': {
     sport: 'football',

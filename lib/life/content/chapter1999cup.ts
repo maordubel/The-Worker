@@ -6,7 +6,7 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 
 /**
- * B10 · "שש־עשרה שנה" · 26.5.1999 — the first convergence after the fractures.
+ * B10 · "שש־עשרה שנה" · 19.5.1999 — the first convergence after the fractures.
  *
  * Getting there is the play: army or work, money, transport, and who will still ride
  * with you. Gate 7 and Gate 5 arrive separately. The basketball-first friends have
@@ -15,7 +15,7 @@ import type { Conversation } from './script'
  * reunite, remain divided, or share one temporary embrace. A trophy does not force
  * reconciliation.
  *
- * **No score, no scorer, no opponent's name in a line.** The archive holds 26.5.1999.
+ * **No score, no scorer, no opponent's name in a line.** The archive holds 19.5.1999.
  */
 
 export const KICKOFF_99 = at(20, 0)

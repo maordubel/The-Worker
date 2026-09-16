@@ -1,7 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-
 import { CityMap } from '@/components/life/CityMap'
 import type { MapPlace } from '@/lib/life/runtime/game'
 import type { LifeState, LocationId } from '@/lib/life/types'
@@ -10,15 +8,26 @@ import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 
 /**
- * המפה — the rooms the doors lead to, as a list you can walk from.
+ * המפה — the city you can move, and the same doors written out underneath it.
  *
- * Not a drawn map. A drawn neighbourhood invites the player to read the world off a
- * diagram instead of off the street, and "going somewhere is the choice" is a rule of
- * this game. What Maor asked for is the ability to get BETWEEN screens without pushing a
- * thumb down a corridor for the fifth time, and a list does that: every place the doors
- * connect to from here, what the walk costs, and — for a place behind a shut door — the
- * name of the door, so the map tells the truth about why. Choosing a place charges the
- * minutes and plays the same fade every door plays.
+ * This comment used to open "Not a drawn map. A drawn neighbourhood invites the player to
+ * read the world off a diagram…", which was true of the list this sheet started life as
+ * and has been the opposite of the truth since `CityMap` landed (rule 59: a comment that
+ * describes the opposite of its file is worse than no comment). What actually settled the
+ * question is Maor asking for the drawing twice — 5.9.2026 "מפה שנראית כמו תל אביב", and
+ * 16.9.2026 "אשמח למפה אינטרקטיבית, שאפשר להזיז אותה". The rationale that survived is in
+ * `lib/life/map.ts:4–21`: a place is not on the map until this life has reached it, so the
+ * drawing is a record of where the boy has been rather than a diagram to plan off.
+ *
+ * The sheet is two halves and both are the same doors:
+ *
+ *  · **the city** — `CityMap`, pannable, with the pins this life has revealed. A tap on an
+ *    open pin walks there through the door graph and is charged the door graph's minutes.
+ *  · **the list** — every place those doors reach, what the walk costs, and for a place
+ *    behind a shut door the name of the door so the map says why. It is not a caption: it
+ *    is the whole sheet for a keyboard and for a screen reader, which cannot tap a pin
+ *    inside an `role="img"` drawing, and it is also the faster way for a thumb that just
+ *    wants a row. Deleting it would take the map away from the people who need it most.
  */
 export function LifeMap({
   places,
@@ -33,7 +42,6 @@ export function LifeMap({
   onGo: (id: string) => void
   onClose: () => void
 }) {
-  const [wide, setWide] = useState(false)
   const dialogRef = useDialog<HTMLDivElement>(onClose)
   return (
     <div
@@ -50,21 +58,16 @@ export function LifeMap({
         aria-label={t('life.map.title')}
       >
         <SheetHead title={t('life.map.title')} onClose={onClose} closeLabel={t('life.map.close')} />
-        {/* the city, printed — the drawn map Maor asked for; the list under it is the same
-            doors as text, for a screen reader and for a thumb that wants a row */}
-        <div className="relative aspect-square w-full shrink-0 overflow-hidden border-b-rule border-ink bg-sheet">
-          <CityMap state={state} places={places} here={here} onGo={onGo} wide={wide} className="h-full w-full" />
-          <button
-            type="button"
-            onClick={() => setWide((w) => !w)}
-            data-life="map-wide"
-            className="absolute bottom-2 flex min-h-[36px] items-center border-hair border-ink bg-sheet/95 px-2.5 font-body text-[11px] text-ink active:bg-red active:text-sheet"
-            style={{ insetInlineStart: 8 }}
-          >
-            {wide ? t('life.map.near') : t('life.map.city')}
-          </button>
-        </div>
-        <div className="overflow-y-auto">
+        <CityMap
+          state={state}
+          places={places}
+          here={here}
+          onGo={onGo}
+          interactive
+          className="aspect-square w-full shrink-0 border-b-rule border-ink"
+        />
+        <nav className="overflow-y-auto" aria-label={t('life.map.list')}>
+          <p className="border-b-hair border-ink/30 px-3 py-1.5 font-body text-[10px] uppercase text-muted">{t('life.map.list')}</p>
           {places.length === 0 && (
             <p className="px-3 py-4 font-body text-[13px] text-muted">
               <bdi>{t('life.map.empty')}</bdi>
@@ -107,7 +110,7 @@ export function LifeMap({
               </button>
             )
           })}
-        </div>
+        </nav>
       </div>
     </div>
   )

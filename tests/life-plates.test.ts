@@ -53,9 +53,17 @@ describe('פלייטים של פנים', () => {
    * drawing that was never needed, or miss the one that is wired.
    */
   const TWO_FACED: ReadonlySet<string> = new Set([
-    'faceRachel90-nu', 'faceRachel90-angry', 'faceRachel90-worried',
-    'faceRachel90-smile', 'faceRachel90-side',
-    'faceTeacher', 'faceTeacher-smile',
+    // Seven names left this list on 16.9.2026 — the five Rachels and the two teachers —
+    // because the delivery re-cut them one whole column at a time and they now arrive at
+    // a uniform 130×260. The uniform width is the tell: a set of cuts that respects the
+    // gutter has one width, and the widths these replaced ran 102 to 202.
+    //
+    // `faceTeacher-angry` REPLACES them. It was never suspected, because the detector
+    // narrows by runs of figure and it does not fail on this one — but with `faceTeacher`
+    // beside it as a known-good 130-wide cut, its 117 is narrow in the same family, and
+    // the right-hand edge strip shows a second woman's hair, earring and cardigan. Found
+    // by eye, the same way the other seven were.
+    'faceTeacher-angry',
   ])
 
   it('שום קלוז־אפ לא נופל על פלייט עם שני אנשים', () => {

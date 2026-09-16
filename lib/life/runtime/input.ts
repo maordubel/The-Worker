@@ -13,6 +13,12 @@
  * `actionPressed` is edge-triggered on purpose. A held key that re-fires an interaction
  * every frame is how a dialogue skips itself — invisible on a desktop and constant on a
  * touchscreen.
+ *
+ * RUN has the same two sources and had the same defect, six months after the axis was
+ * fixed: `setRun` was written by the arcade B button AND by the Shift key, into one field.
+ * So a thumb holding the stick in its run ring and a hand that then touched Shift were one
+ * boolean, and whichever let go first stopped the child running for both. Separate
+ * channels here too — `run` is the OR of them, and neither can strand the other.
  */
 export type LifeInput = {
   readonly x: number
@@ -29,6 +35,7 @@ export class InputState implements LifeInput {
   private keyY = 0
   private padAction = false
   private keyAction = false
+  private padRun = false
   private keyRun = false
 
   private wasAction = false
@@ -65,7 +72,7 @@ export class InputState implements LifeInput {
   }
 
   get run(): boolean {
-    return this.keyRun
+    return this.padRun || this.keyRun
   }
 
   /** touch: the joystick writes a raw vector; this normalises it */
@@ -92,7 +99,13 @@ export class InputState implements LifeInput {
     if (down) this.latched = true
   }
 
+  /** touch: the stick's outer ring, or the B button where a mini-game still has one */
   setRun(down: boolean) {
+    this.padRun = down
+  }
+
+  /** keyboard: Shift, called every frame with what the document says is held */
+  setKeyRun(down: boolean) {
     this.keyRun = down
   }
 
@@ -133,6 +146,7 @@ export class InputState implements LifeInput {
     this.keyY = 0
     this.padAction = false
     this.keyAction = false
+    this.padRun = false
     this.keyRun = false
     this.wasAction = false
     this.consumed = true

@@ -9,6 +9,8 @@ import { CLASSROOM_1991, closing1991, CURFEW, HOME_NIGHT_1991, SCHOOL_STARTS, TI
 import { anchorFor, ERA_1991, eraFor, type Era } from '../../content/era'
 import { chapterFor, nextPlayable, playableChapters, type ChapterDef } from '../../content/chapters'
 import { arrivedBetween, onSale, ownedShirts, wearingAt, wornFlag, SHIRT_NEW_HE } from '../../shirts'
+import { albumNewsFlag, setsArrivedBetween, SET_NEW_HE } from '../../stickers'
+import { holdsSeason, seasonOnSaleIn, subNewsFlag } from '../../subscription'
 import { beatFlag, beatsAt, type Beat, type BeatAction } from '../../content/beats'
 import type { ConversationShot } from '../../content/script'
 import { crowdSpeaker } from '../../crowd'
@@ -30,7 +32,7 @@ import { GIGS, isPaid, offerFlag, offeredIn } from '../../gigs'
  */
 const HALL_NIGHTS: readonly string[] = ['1991', '1993-cup', '1997-basket', '1999-basket']
 
-import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, whenFor } from '../../world/scenes'
+import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, TICKET_OFFICE, whenFor } from '../../world/scenes'
 import { compose as composeHint, holds as hintHolds } from '../../world/hints'
 import { unmet } from '../../world/why'
 import { forcedEnding, isStalled, LAST_RESORT_MINUTES, waitingForTheClock } from '../../world/lastResort'
@@ -52,7 +54,7 @@ import { matchScriptFor, type MatchScript } from '../../content/matchScripts'
 import { DerbyFromAfar, DerbyNight, derbyMarginHe, type DerbyMood } from '../derby1991'
 import { PassageScene } from './PassageScene'
 import { meets } from '../../world/types'
-import { artUrl, extensionKeys, PARALLAX, parallaxKeys } from '../art'
+import { artUrl, extensionKeys, PARALLAX, parallaxKeys, parallaxPlane, type ParallaxPlane } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import type { MapPlace } from '../game'
 import { LIFE_PALETTE } from '../palette'
@@ -622,6 +624,8 @@ export class WorldScene extends Phaser.Scene {
 
     // …and if a season turned on the way into this room, the rail has something new on it
     this.announceNewShirts()
+    this.announceNewAlbums()
+    this.announceSeasonTicket()
 
     this.openChapterBeat(state)
 
@@ -659,17 +663,26 @@ export class WorldScene extends Phaser.Scene {
     const keys = parallaxKeys(this.art)
     if (!this.textures.exists(`art-${keys.far}`) || !this.textures.exists(`art-${keys.mid}`)) return
     flat.setVisible(false)
-    const far = this.add.image(0, 0, `art-${keys.far}`).setOrigin(0, 0).setDepth(-999)
-    far.setScrollFactor(0.86, 1)
-    const mid = this.add.image(0, 0, `art-${keys.mid}`).setOrigin(0, 0).setDepth(-998)
-    mid.setScrollFactor(1, 1)
+    /**
+     * A PLANE IS SIZED TO THE WORLD, NEVER TO ITS OWN FILE (16.9.2026).
+     *
+     * `add.image` draws a texture at its own pixel size and every plane on disk is smaller
+     * than the backdrop it stands in for, so MID — this comment's own "pixel-aligned with
+     * the flat painting" — covered the top-left 58% of gate seven and the world was black
+     * under it. `parallaxPlane` holds the geometry and `tests/life-parallax.test.ts` holds
+     * `parallaxPlane`; the full story is written where the arithmetic is.
+     */
+    const place = (plane: ParallaxPlane, key: string, depth: number) => {
+      const box = parallaxPlane(plane, this.W, this.H)
+      const image = this.add.image(box.x, box.y, `art-${key}`).setOrigin(0, 0).setDepth(depth)
+      image.setDisplaySize(box.width, box.height)
+      image.setScrollFactor(box.scroll, 1)
+      return image
+    }
+    place('far', keys.far, -999)
+    place('mid', keys.mid, -998)
     if (this.textures.exists(`art-${keys.near}`)) {
-      // Pulled a twelfth of the room to the left, so the object painted at the left edge
-      // sits mostly off the glass when the boy starts by the front door — a foreground
-      // that covers the first door of the game is a wall, not depth.
-      const near = this.add.image(-0.075 * this.W, this.H, `art-${keys.near}`).setOrigin(0, 1).setDepth(7000)
-      near.setScale(1.16)
-      near.setScrollFactor(1.16, 1)
+      const near = place('near', keys.near, 7000)
       // No blur: a post-FX pass on a full-screen plane halved the frame rate on the
       // software renderer and would do the same on a 2019 phone. The scale and the
       // speed are the depth; the alpha is the air between.
@@ -1158,9 +1171,15 @@ export class WorldScene extends Phaser.Scene {
   /** how much dark margin may show above and below the painting, as a fraction of its height */
   private static readonly MARGIN = 0.06
 
+  /** the viewport `frameWorld` last ran against — `keepFramed` re-runs it when it moves */
+  private framedW = 0
+  private framedH = 0
+
   private frameWorld() {
     const cam = this.cameras.main
     const view = this.scale.gameSize
+    this.framedW = view.width
+    this.framedH = view.height
     /**
      * 5.9.2026 — the painting owns the glass.
      *
@@ -1235,10 +1254,41 @@ export class WorldScene extends Phaser.Scene {
     this.followPlayer()
   }
 
+  /**
+   * החדר ממוסגר מחדש כשהזכוכית משנה גודל, ולא רק כשהוא נבנה.
+   *
+   * The camera is framed once, in `create`, off `this.scale.gameSize`, and after that only
+   * `this.scale.on('resize')` can correct it. That is one event, from one emitter, in a
+   * scale mode (`Scale.NONE` plus a manual `setZoom`) that the shell drives by hand — and
+   * a number measured once and then trusted forever is the shape of rule 50. A phone
+   * rotating, a keyboard opening, the browser's chrome bar sliding away and a first paint
+   * that arrived before layout settled are four different bugs if the event is the only
+   * correction and the same non-event if the scene simply checks.
+   *
+   * So it checks: one comparison per tick against the size it actually framed against.
+   *
+   * **Written after a wrong diagnosis, and kept on its own merits.** It was added because
+   * a phone screenshot showed the street two fifths tall with the child standing below the
+   * painting on the camera's background — and that screenshot turned out to be the
+   * PROLOGUE, which is a dark drifting shot by design and has its own framing entirely.
+   * The probe reported `location: 'prologue'` when finally asked. Nothing in `frameWorld`
+   * was broken. This stays because re-framing on a size change is correct anyway, and the
+   * note stays because the next person to read a screenshot should ask which scene it is
+   * before they measure it.
+   */
+  private keepFramed() {
+    const view = this.scale.gameSize
+    if (view.width === this.framedW && view.height === this.framedH) return
+    if (view.width <= 0 || view.height <= 0) return
+    this.frameWorld()
+    this.followPlayer()
+  }
+
   // --------------------------------------------------------------------- update ---
 
   override update(_time: number, delta: number) {
     this.ctx.input.beginFrame()
+    this.keepFramed()
     this.breathe += delta / 1000
     this.pulseLights()
     // BEFORE the pause check. A crowd that freezes the moment a dialogue box opens is a
@@ -4129,6 +4179,9 @@ export class WorldScene extends Phaser.Scene {
       memoryHe: card.memoryHe,
       chapter: this.chapter,
       ...(card.after ? { after: card.after } : {}),
+      // Where he was, straight off the card the chapter chose. The shell holds up the
+      // night's real ticket only for `inside` and `late`; see `keepsakeFor`.
+      ...(card.presence ? { presence: card.presence } : {}),
     })
   }
 
@@ -4809,6 +4862,82 @@ export class WorldScene extends Phaser.Scene {
         sourceHe: shirt.sourceHe ?? null,
       })
     })
+  }
+
+  /**
+   * ועונת סופרגול חדשה הגיעה לדלפק — the album's half of the same announcement.
+   *
+   * Maor, 16.9.2026: *"תעשה התראות על עונת סופרגול חדשה שנכנסה לחנות"*. Until that
+   * sentence the shirts had the whole apparatus — `Shirt.from`, `arrivedBetween`,
+   * `SHIRT_NEW_HE`, a once-per-chapter `own:shopnews:` flag — and the albums had none of
+   * it: `StickerSet.soldIn` was a DECADE, so every eighties page was equally "current" in
+   * every eighties chapter and no moment existed for one to arrive in.
+   *
+   * It fires in exactly four chapters — `a4-shirt`, `1990`, `1993-cup`, `1997-basket` —
+   * and `tests/life-shop.test.ts` asserts those four by name, because an announcement
+   * nothing can trigger is dead content (rule 66).
+   *
+   * Staggered 2200ms against the shirt's 1400ms so a chapter that turns over both does
+   * not put two cards on the glass at once.
+   */
+  private announceNewAlbums() {
+    const state = this.ctx.engine.state
+    const flag = albumNewsFlag(this.chapter)
+    if (state.flags[flag]) return
+    const chapters = playableChapters()
+    const at = chapters.findIndex((row) => row.id === this.chapter)
+    const previous = at > 0 ? chapters[at - 1]?.id ?? null : null
+    const fresh = setsArrivedBetween(previous, this.chapter)
+    this.ctx.engine.dispatch({ t: 'flag.raised', flag })
+    const set = fresh[0]
+    if (!set) return
+    this.time.delayedCall(2200, () => {
+      this.ctx.bus.emit('toast', { text: `${SET_NEW_HE} — ${set.titleHe}`, tone: 'red' })
+    })
+  }
+
+  /**
+   * "המנוי יצא למכירה" — the third of these, and the only one that stops the chapter.
+   *
+   * Maor, 16.9.2026: *"תכניס ממש עצירה בין לבין עם פופ אפ של 'המנוי יצא למכירה'"*. The
+   * shape is `announceNewShirts`'s to the letter, for the reason that made that one work:
+   * the first room of a chapter is the only moment in this engine that is reliably
+   * BETWEEN two stories, and a card shown there is read instead of dismissed.
+   *
+   * Two emissions, one channel, and the difference matters:
+   * · the ANNOUNCEMENT fires once per season, wherever the chapter opens, and sells
+   *   nothing. `own:subnews:<season>` carries the surviving prefix so a reload, a new day
+   *   or a second run of the same room cannot show it twice — the same trick and the same
+   *   reason as `own:shopnews:`.
+   * · the COUNTER fires every time he walks into the office while the season is open and
+   *   unheld, because that room has no other content: the window is the card (see the
+   *   scene's own note). Once the card is in his pocket the room says nothing, which is
+   *   how a shut window behaves.
+   *
+   * 1400ms and 2200ms are already taken by the shirt and the album; this waits 2800 so a
+   * chapter that turns over all three does not stack them on one glass.
+   */
+  private announceSeasonTicket() {
+    const state = this.ctx.engine.state
+    const season = seasonOnSaleIn(this.chapter)
+    if (!season) return
+    if (holdsSeason(state, season.id)) return
+
+    const flag = subNewsFlag(season.id)
+    const told = Boolean(state.flags[flag])
+
+    if (this.def.id === TICKET_OFFICE) {
+      // Standing at the window IS being told. Without this, a player who walked straight
+      // to the office would be announced the season on his way back out — a poster for a
+      // thing he has just been offered over the counter.
+      if (!told) this.ctx.engine.dispatch({ t: 'flag.raised', flag })
+      this.time.delayedCall(600, () => this.ctx.bus.emit('season', { kind: 'counter', season: season.id }))
+      return
+    }
+
+    if (told) return
+    this.ctx.engine.dispatch({ t: 'flag.raised', flag })
+    this.time.delayedCall(2800, () => this.ctx.bus.emit('season', { kind: 'onSale', season: season.id }))
   }
 
   enterChapter(next: ChapterDef) {

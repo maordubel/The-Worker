@@ -397,11 +397,11 @@ Source: `/root/worker/docs/life/STAGE-B-1990-2000-CONTENT-IMPLEMENTATION.md`
 
 ---
 
-## B10 — "שש־עשרה שנה" · 26.5.1999
+## B10 — "שש־עשרה שנה" · 19.5.1999
 
 | # | Unit | Section | Requirement | Type |
 |---|---|---|---|---|
-| 323 | B10 | §6 | B10 = 26.5.1999, anchor: Cup final vs Beitar | ANCHOR |
+| 323 | B10 | §6 | B10 = 19.5.1999, anchor: Cup final vs Beitar | ANCHOR |
 | 324 | B10 | §6 | Primary dramatic question: "Can the divided group celebrate together again?" | RULE |
 | 325 | B10 | §7-B10 | Chapter title "שש־עשרה שנה" | SCENE |
 | 326 | B10 | §7-B10 | Historical anchor: football State Cup final against Beitar Jerusalem | ANCHOR |

@@ -735,7 +735,7 @@ Constants: `KICKOFF_98 17:00`, `HALF_98 17:47`, `FULL_98 18:50`. Two days.
 
 # 17. `1999-cup` (B10 · שש־עשרה שנה)
 
-**Date/start:** 26.5.1999, `home`/`start`, minute 840, next `2000-title`. `KICKOFF_99 = 20:00`.
+**Date/start:** 19.5.1999, `home`/`start`, minute 840, next `2000-title`. `KICKOFF_99 = 20:00`.
 
 ### Beats (4)
 | id | at | trigger | `when` | do |

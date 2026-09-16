@@ -41,18 +41,21 @@ import type { HistoryDay, HistoricalMatchEvent, HistorySource } from './types'
 
 const WALLA: HistorySource = {
   id: 'walla-3356277',
+  shortHe: 'וואלה ספורט, 12.5.2020',
   titleHe: 'וואלה ספורט — 30 שנה לסערת העלייה של הפועל תל אביב (12.5.2020)',
   url: 'https://sports.walla.co.il/item/3356277',
   kind: 'archive',
 }
 const SPORT5: HistorySource = {
   id: 'sport5-400958',
+  shortHe: 'ערוץ הספורט',
   titleHe: 'ערוץ הספורט — 24 שנה למשחק השרוכים (פישונט 93׳)',
   url: 'https://www.sport5.co.il/articles.aspx?FolderID=64&docID=400958',
   kind: 'archive',
 }
 const WIKI_98: HistorySource = {
   id: 'wiki-liga-9798',
+  shortHe: 'ויקיפדיה האנגלית — ליגה לאומית 1997/98',
   titleHe: '1997–98 Liga Leumit — Wikipedia (טבלה סופית: בית"ר 69, הפועל ת"א 68)',
   url: 'https://en.wikipedia.org/wiki/1997%E2%80%9398_Liga_Leumit',
   kind: 'archive',
@@ -66,24 +69,28 @@ const WIKI_98: HistorySource = {
  */
 const AUDIT: HistorySource = {
   id: 'maor-audit-2026-09-07',
+  shortHe: 'מסמך ביקורת פנימי, 7.9.2026',
   titleHe: 'מאור הראל — מסמך ביקורת פנימי, 7.9.2026 (טענה פנימית, לא מקור היסטורי)',
   url: null,
   kind: 'brief',
 }
 const WIKI_ARTZIT: HistorySource = {
   id: 'wiki-artzit-8990',
+  shortHe: 'ויקיפדיה האנגלית — ליגה ארצית 1989/90',
   titleHe: '1989–90 Liga Artzit — Wikipedia (טבלה סופית: הפועל ת"א 55 והפרש 25+, מכבי יבנה 55 והפרש 23+; עלו צפרירים חולון והפועל ת"א)',
   url: 'https://en.wikipedia.org/wiki/1989%E2%80%9390_Liga_Artzit',
   kind: 'archive',
 }
 const BALLERZ: HistorySource = {
   id: 'ballerz-laces-26',
+  shortHe: 'Ballerz — 26 שנה למשחק השרוכים',
   titleHe: 'Ballerz — 26 שנה למשחק השרוכים ("שני מחזורים לסיום העונה"; אבוקסיס 61, חזן 86, פישונט 93)',
   url: 'https://ballerz.co.il/26-%D7%A9%D7%A0%D7%94-%D7%9C%D7%9E%D7%A9%D7%97%D7%A7-%D7%94%D7%A9%D7%A8%D7%95%D7%9B%D7%99%D7%9D/',
   kind: 'archive',
 }
 const MISSION01: HistorySource = {
   id: 'maor-brief-mission01',
+  shortHe: 'תסריט משימה 01 (מסמך פנימי)',
   titleHe: 'מאור הראל — תסריט משימה 01, רשת הטרנזיסטורים',
   url: null,
   kind: 'brief',
@@ -552,13 +559,20 @@ export const conflictsOf = (day: HistoryDay) =>
       .map((e) => ({ id: e.id, venueId: venue.venueId, noteHe: e.conflictNote as string, sourceIds: e.sourceIds })),
   )
 
-// ------------------------------------------------------- 26.5.1999 · הגמר ---
+// ------------------------------------------------------- 19.5.1999 · הגמר ---
 /**
  * גמר גביע המדינה, רמת גן. 1:1 אחרי הארכה, והגביע בפנדלים 3:1.
  *
- * מה שמאומת: התוצאה, ההארכה, הפנדלים, 33,000 צופים והשופט קורן — הכול מוויקיפדיה.
- * מה שלא: מי כבש, באיזו דקה, ובאיזה סדר. הפרק אומר "שלהם קודם, השוויון אחרי" מאז שנכתב,
- * וזה טענה של הפרק ולא של מקור — לכן `disputed`, ולכן איש לא נוקב בשם.
+ * **התאריך היה שגוי, והמקור שצוטט מעולם לא אמר אותו.** הקובץ הזה, `anchor-server.ts`,
+ * `share.ts`, `chapters.ts` ועוד חמישה קבצים כתבו 26.5.1999 וציטטו לכך את ערך ויקיפדיה
+ * האנגלי של הגביע — שלא נוקב בתאריך הגמר בכלל. ויקיפועל נוקבת, בשני דפים בלתי־תלויים:
+ * דף המשחק אומר "תאריך 19.5.1999", ומפתח התאריכים של 19 במאי מחזיק את השורה. מפתח 26
+ * במאי לא מחזיק שום דבר מ-1999. הכתובות עצמן בשורת המשחק בארכיון. 16.9.2026.
+ *
+ * ואותו מקור סוגר את השתיקה שהקובץ הזה הצהיר עליה. מי כבש, מתי ובאיזה סדר היה "טענה של
+ * הפרק ולא של מקור" ולכן `disputed` ולכן אילם. עכשיו: ניר סביליה לבית"ר בדקה 6 אחרי
+ * ריבאונד מבעיטה של עופר שטרית, ושלום תקווה לשוויון בדקה 13 — פס מדויק מחוץ לרחבה אחרי
+ * שקורנפיין יצא. שניהם `verified`, שניהם `speakable`, ושניהם בדקה שמקור נוקב בה.
  *
  * הגמר הזה הוא הסיבה שהבמאי צריך שלב `extra` ושלב `penalties`: משחק גביע לא נגמר בתשעים,
  * ותוצאה של פנדלים היא הדבר היחיד ביום מבוים שהוא לא שעון אלא הכרעה.
@@ -567,23 +581,196 @@ const CUP99 = 'ramat-gan-99'
 const M99 = '1998/99|גביע-המדינה|בית"ר-ירושלים|הפועל-תל-אביב|גמר'
 const WIKI_99: HistorySource = {
   id: 'wiki-cup-9899',
+  shortHe: 'ויקיפדיה האנגלית — גביע המדינה 1998/99',
   titleHe: '1998–99 Israel State Cup — Wikipedia (1–1, 3–1 בפנדלים; 33,000; שופט קורן)',
   url: 'https://en.wikipedia.org/wiki/1998%E2%80%9399_Israel_State_Cup',
   kind: 'archive',
 }
-const CHAPTER99: HistorySource = {
-  id: 'chapter-1999-cup',
-  titleHe: 'הפרק עצמו — סדר השערים כפי שנכתב, בלי מקור חיצוני',
+/**
+ * `url` הוא null בכוונה, וזה הגבול ולא עצלנות.
+ *
+ * `tests/life.test.ts` אוסר על כל קובץ תחת `lib/life` להכיל את המחרוזת שמזהה את
+ * האנציקלופדיה של האוהדים — "שכבת החיים קוראת היסטוריה רק דרך הארכיון". הכתובת עצמה
+ * יושבת בשורת המשחק ב-`content/manual/matches.json`, שהוא הארכיון, ומגיעה לכאן דרך
+ * `anchor-server.ts` כמו כל עובדה אחרת. השם נשאר, הקישור לא — וזה בדיוק מה שהכלל מבקש.
+ */
+const VIKIPOEL_99: HistorySource = {
+  id: 'vikipoel-cup-9899',
+  shortHe: 'ויקיפועל — גמר גביע 1998/99',
+  titleHe: 'ויקיפועל — עונת 1998/99 (כדורגל) גביע המדינה גמר (19.5.1999; סביליה 6׳, תקווה 13׳; 40,000)',
   url: null,
-  kind: 'brief',
+  kind: 'archive',
+}
+/**
+ * העמוד שמאור סרק — a printed page about this final, and the reason it is worth more than
+ * a second encyclopaedia entry: it prints the line-ups, the referee, the bookings and the
+ * shootout KICK BY KICK, under the headline "שלום ובטחון".
+ *
+ * **What it does not print, or what the scan does not show, is stated rather than filled
+ * in.** The masthead is cut off the top of the scan and the date line with it, so the
+ * paper is not named here and no date is claimed for it — rule 11, in the shape it takes
+ * when the unreadable field is the one that would identify the document. The attendance
+ * figure in its own footer is likewise below the resolution of this scan: the digits
+ * `?3,000` are there and they are not readable, so the crowd conflict below is recorded
+ * from the two sources that ARE legible and this page is not counted as a third.
+ */
+const PAGE_99: HistorySource = {
+  id: 'scan-page-1999',
+  shortHe: 'עמוד ספורט מודפס, 1999 (סריקה)',
+  titleHe: 'עמוד ספורט מודפס, סריקה מהאוסף של מאור הראל (16.9.2026) — "שלום ובטחון": הרכבים, שופט, כרטיסים ודו־קרב הפנדלים. שם העיתון והתאריך נחתכו מהסריקה ואינם נקבעים כאן.',
+  url: null,
+  kind: 'archive',
+}
+/**
+ * שלושת החפצים — a trophy on its plinth, a clipping and two season books.
+ *
+ * Each one is its own source because each one is a different object, and lumping four
+ * scans under one id would make the card cite a thing that does not exist. Each is also
+ * SELF-IDENTIFYING: the plaque names the season, the clipping carries its own printed
+ * caption, the books print the season, the ground and the price. That is the whole reason
+ * these four were used and three other scans in the same delivery were not — a photograph
+ * with nothing printed on it cannot be captioned without a claim, and this game does not
+ * make claims (rule 11).
+ */
+const PHOTO_CUP99: HistorySource = {
+  id: 'scan-cup-1999',
+  shortHe: 'תצלום הגביע עם הלוחית (סריקה)',
+  titleHe: 'תצלום הגביע, סריקה מהאוסף של מאור הראל (16.9.2026) — הלוחית מודפסת על הכן.',
+  url: null,
+  kind: 'archive',
+}
+const CLIP_TIKVA: HistorySource = {
+  id: 'scan-clip-tikva',
+  shortHe: 'גזיר עיתון עם כיתוב מודפס (סריקה)',
+  titleHe: 'גזיר עיתון עם כיתוב מודפס (צילום: יוסי רוט), סריקה מהאוסף של מאור הראל (16.9.2026). שם העיתון והתאריך אינם בסריקה.',
+  url: null,
+  kind: 'archive',
+}
+const SEASON_TICKET_99: HistorySource = {
+  id: 'scan-season-9899',
+  shortHe: 'מנוי עונת 1998/99 (סריקה)',
+  titleHe: 'מנוי עונת 1998/99, סריקה מהאוסף של מאור הראל (16.9.2026).',
+  url: null,
+  kind: 'archive',
+}
+const SEASON_TICKET_00: HistorySource = {
+  id: 'scan-season-9900',
+  shortHe: 'מנוי עונת 99/00 (סריקה)',
+  titleHe: 'מנוי עונת 99/00, סריקה מהאוסף של מאור הראל (16.9.2026).',
+  url: null,
+  kind: 'archive',
+}
+const TICKET_00: HistorySource = {
+  id: 'scan-ticket-2000-05-17',
+  shortHe: 'כרטיס הגמר, 17.5.2000 (סריקה)',
+  titleHe: 'כרטיס גמר גביע המדינה, 17.5.2000, אצטדיון רמת גן — סריקה מהאוסף של מאור הראל (16.9.2026).',
+  url: null,
+  kind: 'archive',
 }
 
 export const DAY_1999: HistoryDay = {
-  id: '1999-05-26',
-  dateHe: '26 במאי 1999',
+  id: '1999-05-19',
+  dateHe: '19 במאי 1999',
   primaryVenueId: CUP99,
-  sources: [WIKI_99, CHAPTER99],
-  silenceHe: 'התוצאה, ההארכה והפנדלים מאומתים. מי כבש, מתי ובאיזה סדר — לא.',
+  sources: [WIKI_99, VIKIPOEL_99, PAGE_99, PHOTO_CUP99, CLIP_TIKVA, SEASON_TICKET_99],
+  silenceHe:
+    'התוצאה, ההארכה, הפנדלים, שני השערים עם הדקות והכובשים, וכל שמונה הבעיטות — מאומתים. מספר הצופים נחלק: ויקיפדיה אומרת 33,000, ויקיפועל 40,000, והמספר בעמוד המודפס אינו קריא בסריקה.',
+  facts: [
+    {
+      id: '1999-referee',
+      labelHe: 'שופט',
+      valueHe: 'דני קורן',
+      sourceIds: [PAGE_99.id, WIKI_99.id],
+      confidence: 'verified',
+    },
+    {
+      id: '1999-crowd',
+      labelHe: 'צופים',
+      valueHe: '33,000 או 40,000',
+      sourceIds: [WIKI_99.id, VIKIPOEL_99.id],
+      confidence: 'high',
+      conflictNote:
+        'ויקיפדיה האנגלית אומרת 33,000; ויקיפועל אומרת 40,000. שני המספרים נשמרים כפי שהם — אין כאן ממוצע ואין הכרעה (כלל 60.3). העמוד המודפס נושא מספר משלו שאינו קריא בסריקה, ולכן אינו נספר כמקור שלישי.',
+    },
+    {
+      id: '1999-booked',
+      labelHe: 'כרטיסים צהובים',
+      valueHe: 'אורד כחילה (הפועל); אמיר שלח, אילן בכר ותמאש שאנדור (בית"ר)',
+      sourceIds: [PAGE_99.id],
+      confidence: 'verified',
+    },
+    {
+      id: '1999-gap',
+      labelHe: 'הגביע הקודם',
+      valueHe: 'שש־עשרה שנה לפני כן — 1982/83',
+      sourceIds: [PAGE_99.id],
+      confidence: 'verified',
+    },
+    /**
+     * הספירה, ושתי הספירות — the one number on this card that two sources disagree about
+     * without either of them being wrong.
+     *
+     * ויקיפועל calls 19.5.1999 the club's NINTH State Cup. `trophies.json` holds ten cup
+     * rows at or before 1998/99, because it files the 1928, 1934, 1937, 1938, 1939 and
+     * 1944 wins under the same competition — those were played before there was a state to
+     * name the cup after. So the two counts differ by exactly one and the disagreement is
+     * about what the competition IS, not about what the club won.
+     *
+     * The card shows both: the header prints the archive's count, which is COUNTED and not
+     * typed (`countTitles`), and this row prints ויקיפועל's and says why they differ. Rule
+     * 60.3 — a conflict is kept, and an average of nine and ten would be a number nobody
+     * ever wrote down.
+     */
+    {
+      id: '1999-cup-count',
+      labelHe: 'גביע המדינה',
+      valueHe: 'התשיעי לפי ויקיפועל; העשירי לפי ספירת הארכיון',
+      sourceIds: [VIKIPOEL_99.id],
+      confidence: 'high',
+      conflictNote:
+        'ויקיפועל סופרת את 1998/99 כגביע התשיעי. content/manual/trophies.json מחזיק עשר שורות גביע עד 1998/99 ועד בכלל, כי הזכיות של 1928–1944 רשומות באותה תחרות. ההפרש הוא הגדרה של התחרות, לא של הזכיות, והוא נשמר.',
+    },
+    {
+      id: '1999-first-since',
+      labelHe: 'התואר הקודם',
+      valueHe: 'אליפות 1987/88 — התואר הראשון מאז',
+      sourceIds: [VIKIPOEL_99.id],
+      confidence: 'verified',
+    },
+  ],
+  documents: [
+    {
+      art: 'docPage99',
+      titleHe: '"שלום ובטחון"',
+      printsHe:
+        'אחרי 16 שנה זכתה הפועל ת"א בגביע המדינה, עם נצחון דרמטי 3:1 בפנדלים על בית"ר ירושלים (1:1 בהארכה). שלום תקוה סוף־סוף עשה זאת',
+      sourceIds: [PAGE_99.id],
+      lead: true,
+    },
+    {
+      art: 'docCup99',
+      titleHe: 'הגביע, עם הלוחית שלו',
+      printsHe: 'ההתאחדות לכדורגל בישראל · הפועל תל-אביב · מחזיקת גביע המדינה 1998/99',
+      sourceIds: [PHOTO_CUP99.id],
+    },
+    {
+      art: 'docTikva99',
+      titleHe: 'על הכתפיים, עם הגביע',
+      printsHe: 'בחזרה לאושר. תקוה עם הגביע בשנה שעברה. העונה הפועל ת"א שואפת לדאבל (צילום: יוסי רוט)',
+      sourceIds: [CLIP_TIKVA.id],
+    },
+    {
+      art: 'docSeason9899',
+      titleHe: 'המנוי של אותה עונה',
+      printsHe: 'מנוי לעונת 1998/99 · הפועל "כתר" ת"א · איצטדיון בלומפילד ביפו · ילד · שורה 22, כסא 44 · שער 2 · 500 ש"ח',
+      sourceIds: [SEASON_TICKET_99.id],
+      keepsake: true,
+    },
+  ],
+  films: [
+    { id: 'film-99-goal', titleHe: 'השער של שלום תקווה', url: 'https://www.youtube.com/watch?v=HIycf4LjzKY', sourceIds: [VIKIPOEL_99.id] },
+    { id: 'film-99-full', titleHe: 'התקציר המלא של הגמר', url: 'https://www.youtube.com/watch?v=0z6DE0LL-2g', sourceIds: [VIKIPOEL_99.id] },
+  ],
   venues: [
     {
       venueId: CUP99,
@@ -592,35 +779,56 @@ export const DAY_1999: HistoryDay = {
       kickoffOffset: 0,
       finalHe: '1–1 (3–1 בפנדלים)',
       stakeHe: 'הגביע הראשון מאז הכתפיים.',
+      shootout: {
+        firstHe: 'בית"ר בעטה ראשונה בכל סיבוב.',
+        resultHe: '3–1',
+        sourceIds: [PAGE_99.id, VIKIPOEL_99.id],
+        conflictNote:
+          'ויקיפועל סופרת שלוש הצלות לאלימלך; דו־קרב הפנדלים המודפס מראה שתי הצלות שלו ובעיטה שלישית שפגעה במשקוף. שתי הספירות נשמרות, ואין כאן מספר אחד של הצלות.',
+        kicks: [
+          { order: 1, ours: false, takerHe: 'תמאש שאנדור', outcome: 'saved', keeperHe: 'שביט אלימלך', detailHe: 'בעט ימינה. אלימלך הדף.', afterHe: '0–0', sourceIds: [PAGE_99.id] },
+          { order: 2, ours: true, takerHe: 'עידן טל', outcome: 'scored', detailHe: 'מתחת למשקוף ובפנים.', afterHe: '1–0', sourceIds: [PAGE_99.id] },
+          { order: 3, ours: false, takerHe: 'אסי דומב', outcome: 'missed', detailHe: 'למשקוף והחוצה.', afterHe: '1–0', sourceIds: [PAGE_99.id] },
+          { order: 4, ours: true, takerHe: 'סבסטיאן סימרוטיץ׳', outcome: 'scored', detailHe: 'לפינה הימנית הגבוהה.', afterHe: '2–0', sourceIds: [PAGE_99.id] },
+          { order: 5, ours: false, takerHe: 'סטפן שאלוי', outcome: 'scored', detailHe: 'שטוח לפינה השמאלית.', afterHe: '2–1', sourceIds: [PAGE_99.id] },
+          { order: 6, ours: true, takerHe: 'סלים טועמה', outcome: 'saved', keeperHe: 'איציק קורנפיין', detailHe: 'בעט למרכז השער. קורנפיין הדף.', afterHe: '2–1', sourceIds: [PAGE_99.id] },
+          { order: 7, ours: false, takerHe: 'ניר סביליה', outcome: 'saved', keeperHe: 'שביט אלימלך', detailHe: 'בעט חלש שמאלה. אלימלך קלט.', afterHe: '2–1', sourceIds: [PAGE_99.id] },
+          { order: 8, ours: true, takerHe: 'שמעון גרשון', outcome: 'scored', detailHe: 'כדור גבוה ובפנים — והגביע לאדומים.', afterHe: '3–1', sourceIds: [PAGE_99.id] },
+        ],
+      },
       events: [
         ev({
           id: '1999-goal-theirs',
           matchId: M99,
           venueId: CUP99,
-          minute: null,
+          minute: 6,
           sequence: 1,
           type: 'goal',
           teamSlug: 'בית"ר-ירושלים',
+          personHe: 'ניר סביליה',
           scoreAfter: '1–0',
-          sourceIds: [CHAPTER99.id],
-          confidence: 'disputed',
-          conflictNote: 'הסדר — שלהם קודם — הוא של הפרק. ויקיפדיה מאמתת 1:1 ולא את הסדר, ואין דקה לאף שער.',
-          pacingMinute: 31,
-          lineHe: 'הצד השני של הקערה עולה באוויר.',
+          sourceIds: [VIKIPOEL_99.id, PAGE_99.id],
+          confidence: 'verified',
+          speakable: true,
+          pacingMinute: 6,
+          detailHe: 'ריבאונד. עופר שטרית בעט, שביט אלימלך הדף החוצה, וסביליה היה ראשון על הכדור.',
+          lineHe: 'הצד השני של הקערה עולה באוויר. עוד לא התיישבנו.',
         }),
         ev({
           id: '1999-goal-ours',
           matchId: M99,
           venueId: CUP99,
-          minute: null,
+          minute: 13,
           sequence: 2,
           type: 'goal',
           teamSlug: 'הפועל-תל-אביב',
+          personHe: 'שלום תקווה',
           scoreAfter: '1–1',
-          sourceIds: [CHAPTER99.id],
-          confidence: 'disputed',
-          conflictNote: 'כנ"ל — סדר מהפרק, תוצאה מוויקיפדיה, דקה משום מקום.',
-          pacingMinute: 74,
+          sourceIds: [VIKIPOEL_99.id, PAGE_99.id],
+          confidence: 'verified',
+          speakable: true,
+          pacingMinute: 13,
+          detailHe: 'פס נמוך ומדויק מחוץ לרחבה, אחרי שקורנפיין יצא מקו השער.',
           lineHe: 'השוויון. האצטדיון עולה באוויר ונשאר שם.',
         }),
         ev({
@@ -631,7 +839,7 @@ export const DAY_1999: HistoryDay = {
           sequence: 3,
           type: 'full_time',
           scoreAfter: '1–1',
-          sourceIds: [WIKI_99.id],
+          sourceIds: [WIKI_99.id, PAGE_99.id],
           confidence: 'verified',
           speakable: true,
           pacingMinute: 90,
@@ -645,7 +853,7 @@ export const DAY_1999: HistoryDay = {
           sequence: 4,
           type: 'full_time',
           scoreAfter: '1–1',
-          sourceIds: [WIKI_99.id],
+          sourceIds: [WIKI_99.id, PAGE_99.id],
           confidence: 'verified',
           speakable: true,
           pacingMinute: 120,
@@ -668,8 +876,24 @@ const HATIKVA = 'hatikva-2000'
 const M00T = '1999/00|ליגת-העל|בני-יהודה|הפועל-תל-אביב|מחזור 33 — האליפות הוכרעה'
 const WIKI_00L: HistorySource = {
   id: 'wiki-league-9900',
+  shortHe: 'ויקיפדיה האנגלית — ליגת העל 1999/00',
   titleHe: '1999–2000 Israeli Premier League — Wikipedia (בני יהודה 1–1 הפועל ת"א; טבלה סופית: הפועל 85)',
   url: 'https://en.wikipedia.org/wiki/1999%E2%80%932000_Israeli_Premier_League',
+  kind: 'archive',
+}
+/**
+ * ושער אחד מהשניים יצא מהשתיקה — 16.9.2026.
+ *
+ * עד היום הזה שני השערים של 13.5.2000 היו `disputed` בלי כובש ובלי דקה. ויקיפועל נוקבת
+ * באחד מהם: עומרי אפק, דקה 58. השני נשאר בדיוק כפי שהיה — בלי שם, בלי דקה — ו**הסדר בין
+ * השניים עדיין אינו ממקור**, ולכן אין `scoreAfter` על אף אחד מהם. התוצאה 1:1 יושבת על
+ * שריקת הסיום, שם היא מאומתת, ולא על שער שהייתה הופכת לטענה על סדר.
+ */
+const VIKIPOEL_00L: HistorySource = {
+  id: 'vikipoel-league-9900',
+  shortHe: 'ויקיפועל — 13.5.2000',
+  titleHe: 'ויקיפועל — עונת 1999/00 (כדורגל), 13.5.2000 בשכונת התקווה: 1:1, עומרי אפק בדקה 58',
+  url: null,
   kind: 'archive',
 }
 
@@ -677,8 +901,35 @@ export const DAY_2000_TITLE: HistoryDay = {
   id: '2000-05-13',
   dateHe: '13 במאי 2000',
   primaryVenueId: HATIKVA,
-  sources: [WIKI_00L],
-  silenceHe: 'התוצאה והטבלה מאומתות. הכובשים והדקות אינם, ואין מגרש מקביל שהארכיון מחזיק ליום הזה.',
+  sources: [WIKI_00L, VIKIPOEL_00L, SEASON_TICKET_00],
+  silenceHe:
+    'התוצאה, הטבלה ושער אחד — עומרי אפק בדקה 58 — מאומתים. מי כבש את השער השני ומתי אינו ידוע, וגם לא הסדר בין השניים. אין מגרש מקביל שהארכיון מחזיק ליום הזה.',
+  facts: [
+    {
+      id: '2000-title-enough-fact',
+      labelHe: 'מה הספיק',
+      valueHe: 'נקודה אחת',
+      sourceIds: [WIKI_00L.id],
+      confidence: 'verified',
+    },
+    {
+      id: '2000-title-table',
+      labelHe: 'הטבלה בסוף',
+      valueHe: 'הפועל תל אביב, 85 נקודות',
+      sourceIds: [WIKI_00L.id],
+      confidence: 'verified',
+    },
+  ],
+  documents: [
+    {
+      art: 'docSeason9900',
+      titleHe: 'המנוי של אותה עונה',
+      printsHe: 'מנוי אכי"א · הפועל "כתר" תל-אביב · עונת 99/00 · איצטדיון בלומפילד ביפו · שערים 4-5 · המחיר 410 ש"ח · סיבוב שלישי · מס׳ 905',
+      sourceIds: [SEASON_TICKET_00.id],
+      lead: true,
+      keepsake: true,
+    },
+  ],
   venues: [
     {
       venueId: HATIKVA,
@@ -709,25 +960,25 @@ export const DAY_2000_TITLE: HistoryDay = {
           minute: null,
           sequence: 1,
           type: 'goal',
-          scoreAfter: '1–0',
           sourceIds: [WIKI_00L.id],
           confidence: 'disputed',
-          conflictNote: 'התוצאה 1:1 מאומתת; מי כבש, מתי ובאיזה סדר — אין מקור. הסדר כאן הוא בימוי.',
+          conflictNote: 'התוצאה 1:1 מאומתת; מי כבש את השער הזה ומתי — אין מקור. מקומו ברצף הוא בימוי.',
           pacingMinute: 38,
         }),
         ev({
           id: '2000-title-goal-2',
           matchId: M00T,
           venueId: HATIKVA,
-          minute: null,
+          minute: 58,
           sequence: 2,
           type: 'goal',
           teamSlug: 'הפועל-תל-אביב',
-          scoreAfter: '1–1',
-          sourceIds: [WIKI_00L.id],
-          confidence: 'disputed',
-          conflictNote: 'כנ"ל.',
-          pacingMinute: 67,
+          personHe: 'עומרי אפק',
+          sourceIds: [VIKIPOEL_00L.id],
+          confidence: 'high',
+          conflictNote: 'הכובש והדקה מאומתים; הסדר מול השער השני אינו, ולכן אין כאן תוצאה רצה.',
+          speakable: true,
+          pacingMinute: 58,
         }),
         ev({
           id: '2000-title-full',
@@ -751,14 +1002,57 @@ export const DAY_2000_TITLE: HistoryDay = {
 // --------------------------------------------------- 17.5.2000 · הדאבל ---
 /**
  * גמר הגביע, ארבעה ימים אחרי האליפות. 2:2 אחרי הארכה, 4:2 בפנדלים — הדאבל.
- * אותה צורה כמו 1999, ואותה שתיקה: התוצאה מאומתת, הכובשים לא.
+ *
+ * **וכאן השתיקה נסגרה, ב-16.9.2026.** הקובץ הזה כתב ארבעה שערים `disputed` בלי כובש, בלי
+ * דקה ובלי קבוצה, והערה שאומרת "הסדר כאן הוא בימוי". ויקיפועל נוקבת בארבעתם, ושני עמודים
+ * ראשונים שמאור סרק — "הכדור הוא אדום" ו"דאבל טיים", שניהם מ-18.5.2000 — מאשרים את הצורה
+ * באופן בלתי־תלוי: *"גמר דרמטי בו היא הובילה פעמיים רק כדי לראות את בית"ר חוזרת פעמיים
+ * למשחק"*. זאת בדיוק סדרת השערים: שלנו, שלהם, שלנו, שלהם.
+ *
+ * מה שלא נסגר הוא שתי דקות. שני השערים הראשונים נמסרים כ-86/87 וכ-92/93, כלומר שני מקורות
+ * שחלוקים בדקה אחת — אותה צורה בדיוק של פישונט ב-93׳/94׳ ב-2.5.1998. אז `minute` נשאר
+ * `null` בשניהם, `displayMinute` נושא את שתי האפשרויות, וההפרש יושב ב-`conflictNote`.
+ * שני השערים של ההארכה — 115 ו-119 — נמסרים בדקה אחת, ולכן הם `verified` עם דקה.
  */
 const RG00 = 'ramat-gan-2000'
 const M00C = '1999/00|גביע-המדינה|בית"ר-ירושלים|הפועל-תל-אביב|גמר'
 const WIKI_00C: HistorySource = {
   id: 'wiki-cup-9900',
+  shortHe: 'ויקיפדיה האנגלית — גביע המדינה 1999/00',
   titleHe: '1999–2000 Israel State Cup — Wikipedia (2–2, 4–2 בפנדלים; 40,000; שופט לוי)',
   url: 'https://en.wikipedia.org/wiki/1999%E2%80%932000_Israel_State_Cup',
+  kind: 'archive',
+}
+const VIKIPOEL_00: HistorySource = {
+  id: 'vikipoel-cup-9900',
+  shortHe: 'ויקיפועל — גמר גביע 1999/00',
+  titleHe:
+    'ויקיפועל — עונת 1999/00 (כדורגל) גביע המדינה גמר (17.5.2000; רצ׳וניצה, פאצ׳ו, טועמה, פאצ׳ו; 4:2 בפנדלים; 40,000)',
+  url: null,
+  kind: 'archive',
+}
+/** העמוד הראשון של ידיעות אחרונות ספורט, 18.5.2000 — הכותרת והתאריך מודפסים על הסריקה עצמה. */
+const YEDIOT_00: HistorySource = {
+  id: 'scan-yediot-2000-05-18',
+  shortHe: 'ידיעות אחרונות ספורט, 18.5.2000',
+  titleHe: 'ידיעות אחרונות ספורט, 18.5.2000 — "הכדור הוא אדום" (צילום: יוסי רוט). סריקה מהאוסף של מאור הראל.',
+  url: null,
+  kind: 'archive',
+}
+/** והעמוד הראשון של מעריב ספורט מאותו בוקר, עם המספרים בגוף הידיעה. */
+const MAARIV_00: HistorySource = {
+  id: 'scan-maariv-2000-05-18',
+  shortHe: 'מעריב ספורט, 18.5.2000',
+  titleHe: 'מעריב ספורט, יום ה׳ י״ג באייר תש״ס, 18.5.2000 — "דאבל טיים" (צילומים: עדי אביש). סריקה מהאוסף של מאור הראל.',
+  url: null,
+  kind: 'archive',
+}
+/** התוכנייה הרשמית של הערב, שמדפיסה את המגרש, השעה ושני המשחקים. */
+const PROGRAMME_00: HistorySource = {
+  id: 'scan-programme-2000',
+  shortHe: 'תוכניית הגמר, 17.5.2000 (סריקה)',
+  titleHe: 'תוכנייה למזכרת, ההתאחדות לכדורגל בישראל — גמר גביע המדינה, 17.5.2000, אצטדיון רמת-גן. סריקה מהאוסף של מאור הראל.',
+  url: null,
   kind: 'archive',
 }
 
@@ -766,8 +1060,88 @@ export const DAY_2000_DOUBLE: HistoryDay = {
   id: '2000-05-17',
   dateHe: '17 במאי 2000',
   primaryVenueId: RG00,
-  sources: [WIKI_00C],
-  silenceHe: 'התוצאה, ההארכה והפנדלים מאומתים. הכובשים והדקות אינם.',
+  sources: [WIKI_00C, VIKIPOEL_00, YEDIOT_00, MAARIV_00, PROGRAMME_00, TICKET_00],
+  silenceHe:
+    'התוצאה, ההארכה, הפנדלים, ארבעת הכובשים וסדרם — מאומתים. שתי דקות אינן: השער הראשון נמסר כ-86 או 87, והשוויון הראשון כ-92 או 93. שתיהן נשמרות כפי שנמסרו.',
+  facts: [
+    { id: '2000-kickoff', labelHe: 'שעת פתיחה', valueHe: '20:15', sourceIds: [PROGRAMME_00.id], confidence: 'verified' },
+    { id: '2000-referee', labelHe: 'שופט', valueHe: 'מאיר לוי', sourceIds: [VIKIPOEL_00.id, WIKI_00C.id], confidence: 'verified' },
+    {
+      id: '2000-crowd',
+      labelHe: 'צופים',
+      valueHe: 'למעלה מ-40 אלף',
+      sourceIds: [MAARIV_00.id, WIKI_00C.id, VIKIPOEL_00.id],
+      confidence: 'verified',
+    },
+    {
+      id: '2000-sent-off',
+      labelHe: 'הורחקו',
+      valueHe: 'רענן דרעי (בית"ר), אייל בן עמי (הפועל), והמאמן אלי אוחנה (בית"ר)',
+      sourceIds: [VIKIPOEL_00.id],
+      confidence: 'verified',
+    },
+    {
+      id: '2000-double',
+      labelHe: 'הדאבל',
+      valueHe: 'הראשון של הפועל תל אביב; השני של דרור קשטן',
+      sourceIds: [YEDIOT_00.id],
+      confidence: 'verified',
+    },
+    {
+      id: '2000-cup-count',
+      labelHe: 'גביע המדינה',
+      valueHe: 'העשירי לפי ויקיפועל; האחד־עשר לפי ספירת הארכיון',
+      sourceIds: [VIKIPOEL_00.id],
+      confidence: 'high',
+      conflictNote:
+        'אותו הפרש של אחד כמו ב-1999, ומאותה סיבה: ויקיפועל אינה סופרת את הזכיות שלפני קום המדינה בתוך גביע המדינה, ו-trophies.json כן. שתי הספירות נשמרות.',
+    },
+    {
+      id: '2000-lift',
+      labelHe: 'מי הרים',
+      valueHe: 'שמעון גרשון הזמין את שלום תקווה להרים איתו',
+      sourceIds: [VIKIPOEL_00.id],
+      confidence: 'verified',
+    },
+  ],
+  documents: [
+    {
+      art: 'docTicket2000',
+      titleHe: 'הכרטיס',
+      printsHe: 'אצטדיון רמת גן · 17.5.2000 · אס"א ת"א – מכבי חיפה · הפועל "כתר" ת"א – בית"ר ירושלים · גמר גביע המדינה · מבוגר · יציע 5, שורה 54, כסא 18 · 70 ש"ח · שער 2',
+      sourceIds: [TICKET_00.id],
+      lead: true,
+      keepsake: true,
+    },
+    {
+      art: 'docRedBall2000',
+      titleHe: '"הכדור הוא אדום"',
+      printsHe:
+        'העונה הנפלאה של הפועל ת"א הוכתרה אתמול עם גביע המדינה, לאחר גמר דרמטי בו היא הובילה פעמיים רק כדי לראות את בית"ר חוזרת פעמיים למשחק. זה נגמר בפנדלים, עם דאבל ראשון של הפועל ת"א ושני של דרור קשטן',
+      sourceIds: [YEDIOT_00.id],
+    },
+    {
+      art: 'docDouble2000',
+      titleHe: '"דאבל טיים"',
+      printsHe:
+        'בסיומו של אחד ממשחקי הגמר הדרמטיים ביותר שראה הכדורגל הישראלי, השלימה אתמול הפועל ת"א את הזכייה בדאבל, עם ניצחון 4-2 על בית"ר ירושלים בבעיטות עונשין מ-11 מטרים, אחרי 2-2 בתום 120 דקות. למעלה מ-40 אלף צופים היו שותפים לחוויה בלתי נשכחת, שלא היו בה מפסידים, אבל היתה בה מנצחת אחת',
+      sourceIds: [MAARIV_00.id],
+    },
+    {
+      art: 'docProgramme2000',
+      titleHe: 'התוכנייה',
+      printsHe:
+        'גמר גביע המדינה · תוכניה למזכרת · יום רביעי 17.5.2000 · איצטדיון רמת-גן · משחק נשים בשעה 17:00: אס"א תל אביב – מכבי חיפה · משחק גברים בשעה 20:15: בית"ר "סלקום" ירושלים – הפועל "כתר" תל אביב',
+      sourceIds: [PROGRAMME_00.id],
+    },
+  ],
+  films: [
+    { id: 'film-00-full', titleHe: 'תקציר המשחק', url: 'https://www.youtube.com/watch?v=RO14bGFcD-Q', sourceIds: [VIKIPOEL_00.id] },
+    { id: 'film-00-first', titleHe: 'השער הראשון', url: 'https://www.youtube.com/watch?v=36smQxcDzmQ', sourceIds: [VIKIPOEL_00.id] },
+    { id: 'film-00-theirs', titleHe: 'שני השערים של בית"ר', url: 'https://www.youtube.com/watch?v=JXknFCs6nrg', sourceIds: [VIKIPOEL_00.id] },
+    { id: 'film-00-pens', titleHe: 'הפנדלים', url: 'https://www.youtube.com/watch?v=RvyReKDwCC0', sourceIds: [VIKIPOEL_00.id] },
+    { id: 'film-00-fans', titleHe: 'ראיון אוהדים אחרי המשחק', url: 'https://www.youtube.com/watch?v=3jT_ULOU09U', sourceIds: [VIKIPOEL_00.id] },
+  ],
   venues: [
     {
       venueId: RG00,
@@ -776,73 +1150,106 @@ export const DAY_2000_DOUBLE: HistoryDay = {
       kickoffOffset: 0,
       finalHe: '2–2 (4–2 בפנדלים)',
       stakeHe: 'ארבעה ימים אחרי האליפות. דאבל.',
+      shootout: {
+        firstHe: 'הפועל בעטה ראשונה.',
+        resultHe: '4–2',
+        sourceIds: [VIKIPOEL_00.id, MAARIV_00.id],
+        kicks: [
+          { order: 1, ours: true, takerHe: 'שמעון גרשון', outcome: 'scored', afterHe: '1–0', sourceIds: [VIKIPOEL_00.id] },
+          { order: 2, ours: false, takerHe: 'יוסי אבוקסיס', outcome: 'scored', afterHe: '1–1', sourceIds: [VIKIPOEL_00.id] },
+          { order: 3, ours: true, takerHe: 'דניס אונישנקו', outcome: 'scored', afterHe: '2–1', sourceIds: [VIKIPOEL_00.id] },
+          { order: 4, ours: false, takerHe: 'גולן דרעי', outcome: 'saved', keeperHe: 'שביט אלימלך', afterHe: '2–1', sourceIds: [VIKIPOEL_00.id] },
+          { order: 5, ours: true, takerHe: 'אילן בכר', outcome: 'scored', afterHe: '3–1', sourceIds: [VIKIPOEL_00.id] },
+          { order: 6, ours: false, takerHe: 'תמאש שאנדור', outcome: 'scored', afterHe: '3–2', sourceIds: [VIKIPOEL_00.id] },
+          { order: 7, ours: true, takerHe: 'דיאן רצ׳וניצה', outcome: 'scored', detailHe: 'והדאבל.', afterHe: '4–2', sourceIds: [VIKIPOEL_00.id] },
+        ],
+      },
       events: [
         ev({
           id: '2000-double-goal-1',
           matchId: M00C,
           venueId: RG00,
           minute: null,
+          displayMinute: '86׳ או 87׳',
           sequence: 1,
           type: 'goal',
-          scoreAfter: '1–0',
-          sourceIds: [WIKI_00C.id],
-          confidence: 'disputed',
-          conflictNote: 'התוצאה 2:2 מאומתת; הכובשים, הדקות והסדר אינם. הסדר כאן הוא בימוי.',
-          pacingMinute: 22,
+          teamSlug: 'הפועל-תל-אביב',
+          personHe: 'דיאן רצ׳וניצה',
+          assistHe: 'פיני בלילי',
+          scoreAfter: '0–1',
+          sourceIds: [VIKIPOEL_00.id, YEDIOT_00.id],
+          confidence: 'high',
+          conflictNote: 'הכובש והסדר מאומתים; הדקה נמסרת כ-86 בעמוד אחד וכ-87 באחר, ושתיהן נשמרות. אין כאן דקה אחת.',
+          speakable: true,
+          pacingMinute: 86,
+          detailHe: 'כדור אלכסוני של דניס אונישנקו, בלילי שחרר קדימה, ורצ׳וניצה נכנס.',
         }),
         ev({
           id: '2000-double-goal-2',
           matchId: M00C,
           venueId: RG00,
           minute: null,
+          displayMinute: '92׳ או 93׳',
           sequence: 2,
           type: 'goal',
+          teamSlug: 'בית"ר-ירושלים',
+          personHe: 'ויקטור פאצ׳ו',
+          assistHe: 'אישטוון האמר',
           scoreAfter: '1–1',
-          sourceIds: [WIKI_00C.id],
-          confidence: 'disputed',
-          conflictNote: 'כנ"ל.',
-          pacingMinute: 51,
-        }),
-        ev({
-          id: '2000-double-goal-3',
-          matchId: M00C,
-          venueId: RG00,
-          minute: null,
-          sequence: 3,
-          type: 'goal',
-          scoreAfter: '2–1',
-          sourceIds: [WIKI_00C.id],
-          confidence: 'disputed',
-          conflictNote: 'כנ"ל.',
-          pacingMinute: 78,
-        }),
-        ev({
-          id: '2000-double-goal-4',
-          matchId: M00C,
-          venueId: RG00,
-          minute: null,
-          sequence: 4,
-          type: 'goal',
-          scoreAfter: '2–2',
-          sourceIds: [WIKI_00C.id],
-          confidence: 'disputed',
-          conflictNote: 'כנ"ל.',
-          pacingMinute: 88,
-          lineHe: 'שוויון. ברגע האחרון.',
+          sourceIds: [VIKIPOEL_00.id, YEDIOT_00.id],
+          confidence: 'high',
+          conflictNote: 'הכובש והסדר מאומתים; הדקה נמסרת כ-92 בעמוד אחד וכ-93 באחר, ושתיהן נשמרות.',
+          speakable: true,
+          pacingMinute: 92,
+          detailHe: 'נגיחה משלושה מטרים, ממסירה רוחבית של האמר, בתוספת הזמן של המחצית השנייה.',
         }),
         ev({
           id: '2000-double-full',
           matchId: M00C,
           venueId: RG00,
           minute: 90,
-          sequence: 5,
+          sequence: 3,
           type: 'full_time',
-          scoreAfter: '2–2',
-          sourceIds: [WIKI_00C.id],
+          scoreAfter: '1–1',
+          sourceIds: [WIKI_00C.id, MAARIV_00.id],
           confidence: 'verified',
           speakable: true,
-          pacingMinute: 90,
+          pacingMinute: 94,
           lineHe: 'הארכה. שוב.',
+        }),
+        ev({
+          id: '2000-double-goal-3',
+          matchId: M00C,
+          venueId: RG00,
+          minute: 115,
+          sequence: 4,
+          type: 'goal',
+          teamSlug: 'הפועל-תל-אביב',
+          personHe: 'סלים טועמה',
+          assistHe: 'שלום תקווה',
+          scoreAfter: '1–2',
+          sourceIds: [VIKIPOEL_00.id, YEDIOT_00.id],
+          confidence: 'verified',
+          speakable: true,
+          pacingMinute: 115,
+          detailHe: 'כחילה החליק, תקווה שחרר את טועמה — המסירה האחרונה של תקווה לפני שפרש.',
+        }),
+        ev({
+          id: '2000-double-goal-4',
+          matchId: M00C,
+          venueId: RG00,
+          minute: 119,
+          sequence: 5,
+          type: 'goal',
+          teamSlug: 'בית"ר-ירושלים',
+          personHe: 'ויקטור פאצ׳ו',
+          scoreAfter: '2–2',
+          sourceIds: [VIKIPOEL_00.id, YEDIOT_00.id],
+          confidence: 'verified',
+          speakable: true,
+          pacingMinute: 119,
+          detailHe: 'נגיחה מתלייה, מהקרן האחרונה של ההארכה.',
+          lineHe: 'שוויון. ברגע האחרון.',
         }),
         ev({
           id: '2000-double-extra-end',
@@ -852,7 +1259,7 @@ export const DAY_2000_DOUBLE: HistoryDay = {
           sequence: 6,
           type: 'full_time',
           scoreAfter: '2–2',
-          sourceIds: [WIKI_00C.id],
+          sourceIds: [WIKI_00C.id, MAARIV_00.id],
           confidence: 'verified',
           speakable: true,
           pacingMinute: 120,
@@ -866,7 +1273,7 @@ export const DAY_2000_DOUBLE: HistoryDay = {
 export const HISTORY_DAYS: Record<string, HistoryDay> = {
   '1990-05-12': DAY_1990,
   '1998-05-02': DAY_1998,
-  '1999-05-26': DAY_1999,
+  '1999-05-19': DAY_1999,
   '2000-05-13': DAY_2000_TITLE,
   '2000-05-17': DAY_2000_DOUBLE,
 }

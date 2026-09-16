@@ -150,7 +150,7 @@ const REGISTRY: CharacterDefinition[] = [
     displayNameHe: 'המורה',
     category: 'other',
     activeEras: ['1991', '1998-laces'],
-    portraitSet: 'faceTeacher-glasses',
+    portraitSet: 'faceTeacher',
     tags: ['school'],
   },
   {

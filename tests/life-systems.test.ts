@@ -18,7 +18,7 @@ import { rollEncounter } from '@/lib/life/encounters'
 import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
 import { acceptEvents, isAvailable, statusOf, tickOpportunities } from '@/lib/life/opportunities'
-import { buildProfile } from '@/lib/life/profile'
+import { buildProfile, carriedReading, purseReading } from '@/lib/life/profile'
 import { resolvePureLove } from '@/lib/life/pure-love'
 import { CANDIDATES_1986, pickRedBoxItem } from '@/lib/life/redbox'
 import { rollAt, Roller } from '@/lib/life/rng'
@@ -621,6 +621,52 @@ describe('הפרופיל — a person, described, never a bar', () => {
     const card = readFileSync(join(ROOT, 'components/life/ProfileCard.tsx'), 'utf8')
     expect(/%\s*<\/|toFixed|Math\.round\(.*100/.test(card), 'the profile is printing a value').toBe(false)
     expect(card).not.toContain('role="progressbar"')
+  })
+
+  /**
+   * ...ולכל מה שהכרטיס מצייר איתו.
+   *
+   * The guard above names one path. On 16.9.2026 the bag pass split the card's own drawing
+   * primitives into a second component, and at that moment a guard that names one file
+   * became a guard you get around by adding a file — which is the failure mode rule 47 is
+   * about, arriving from the other direction. This walks ProfileCard's OWN imports out of
+   * `components/life/` and holds each of them to the same sentence, so the list cannot
+   * drift from what the screen actually draws with.
+   */
+  it('holds everything the profile draws with to the same rule', () => {
+    const card = readFileSync(join(ROOT, 'components/life/ProfileCard.tsx'), 'utf8')
+    const imported = [...card.matchAll(/from '@\/components\/life\/([A-Za-z]+)'/g)].map((match) => match[1])
+    expect(imported.length, 'the profile draws with nothing of its own').toBeGreaterThan(0)
+    for (const name of imported) {
+      const text = readFileSync(join(ROOT, `components/life/${name}.tsx`), 'utf8')
+      expect(/%\s*<\/|toFixed|Math\.round\(.*100/.test(text), `${name} is printing a value`).toBe(false)
+      expect(text, name).not.toContain('role="progressbar"')
+    }
+  })
+
+  /**
+   * התיק — the six fields that were authored, folded, tested and invisible.
+   *
+   * `inventory`, `savings`, `clothing`, `presence`, `memories` and `RedBoxItem.rarity` all
+   * carried real content and reached no screen at all before this pass. The translator is
+   * asserted here rather than only in `tests/life-bag.test.ts` because this is the suite
+   * that owns the sentence it has to obey: everything it hands the card is a word, or a
+   * count that exists to be DRAWN.
+   */
+  it('translates the bag without handing over a figure to print', () => {
+    const state = fold(DEFAULT_IDENTITY, 1986, [
+      { t: 'money.changed', agorot: 900, why: 'test' },
+      { t: 'savings.changed', agorot: 2000, why: 'test' },
+      { t: 'item.gained', item: 'bottle', count: 3 },
+    ])
+    for (const purse of purseReading(state)) {
+      expect(/\d/.test(purse.readingHe), `${purse.purse} printed a figure`).toBe(false)
+    }
+    const carried = carriedReading(state)
+    expect(carried.length).toBeGreaterThan(0)
+    // The count is handed over to be drawn as that many objects, never printed — which is
+    // why it is a number here and a row of bottles on the screen.
+    expect(carried[0]?.copies).toBe(3)
   })
 
   it('is developer-only where it shows the truth', () => {

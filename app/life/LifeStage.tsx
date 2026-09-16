@@ -25,6 +25,8 @@ import { PassTime } from '@/components/life/PassTime'
 import { landingMinute } from '@/lib/life/world/flow'
 import { timeLabel } from '@/lib/life/clock'
 import { PacketCard } from '@/components/life/PacketCard'
+import { SeasonTicket } from '@/components/life/SeasonTicket'
+import { renewal, renewalWhyHe, seasonFor, subFlag, subscriptionReading } from '@/lib/life/subscription'
 import { ShopCard } from '@/components/life/ShopCard'
 import { StageFinale } from '@/components/life/StageFinale'
 import { TotoCard } from '@/components/life/TotoCard'
@@ -165,6 +167,10 @@ export function LifeStage({
     setShop,
     shopState,
     setShopState,
+    season,
+    setSeason,
+    seasonState,
+    setSeasonState,
     album,
     setAlbum,
     albumState,
@@ -433,8 +439,67 @@ export function LifeStage({
               // the card that stops the world — the same one a shirt has always got
               busRef.current?.emit('shirt', paid.card)
             }}
+            /**
+             * הדוכן קונה דרך המנוע, לא דרך המסך.
+             *
+             * `ShopCard` holds no engine and dispatches nothing — a guard in
+             * `tests/life-shop.test.ts` reads the file and fails on `dispatch(` or `{ t: '`.
+             * So the counter calls the runtime, and the runtime runs the SAME transaction
+             * Rafi's kiosk runs, seeded roll and all. A second copy of "what a packet does"
+             * is a second place for it to be worth more.
+             */
+            onPacket={() => {
+              runtime.current?.buyPacket()
+              setShopState(engineRef.current?.state ?? null)
+            }}
+            onAlbum={() => {
+              setAlbumState(engineRef.current?.state ?? null)
+              setAlbum({ open: true })
+            }}
             onClose={() => {
               setShop(null)
+              runtime.current?.pause(false)
+            }}
+          />
+        )}
+
+        {/*
+          המנוי — the stop between chapters, and the one window that sells a season.
+
+          It is mounted beside the shop for the reason they are the same kind of screen:
+          a counter, a price with its source on it, and one button that moves money. The
+          till is HERE and not in the card — `SeasonTicket` holds no engine and dispatches
+          nothing, the same contract `ShopCard` is held to — so there is exactly one place
+          that knows what renewing costs, and it reads that from `subscription.ts`.
+
+          `renewal()` is what stops this being unbuyable content: every printed price in
+          the archive is above the money this game can produce by the chapter that sells
+          it (the numbers are in that function's own comment, from `npm run life:budget`),
+          so the boy pays what he has and the card says who covered the rest. A gate at
+          the full price would have been seven of eight branches nobody could ever take
+          (1999/00 is the single exception) — rule 66, and the exact defect that cost the
+          shirt in A4 its whole chapter.
+        */}
+        {season && seasonState && (
+          <SeasonTicket
+            card={season}
+            state={seasonState}
+            onRenew={() => {
+              const engine = engineRef.current
+              const row = seasonFor(season.season)
+              if (!engine || !row) return
+              const paid = renewal(row, engine.state)
+              engine.dispatch(
+                { t: 'money.changed', agorot: -paid.fromPocket, why: renewalWhyHe(row) },
+                { t: 'flag.raised', flag: subFlag(row.id) },
+              )
+              void engine.save()
+              // the card stays open and redraws as the one in his pocket — the run is
+              // the point of the screen, and it is a mark longer than it was a second ago
+              setSeasonState(engine.state)
+            }}
+            onClose={() => {
+              setSeason(null)
               runtime.current?.pause(false)
             }}
           />
@@ -656,7 +721,16 @@ export function LifeStage({
           />
         )}
 
-        {snapshot && !debug && <ProfileCard snapshot={snapshot} onClose={closeProfile} />}
+        {/*
+          המנוי על הכרטיס — `ProfileCard` has carried a named, empty shelf for this since
+          the card was rebuilt, and renders nothing at all while the prop is absent. This
+          is the one line that fills it. The reading is built in `subscription.ts` from
+          the `own:sub:` flags, because the card is not allowed to know where a run comes
+          from and the engine is not allowed to store one (see `streakOf`).
+        */}
+        {snapshot && !debug && (
+          <ProfileCard snapshot={snapshot} subscription={subscriptionReading(snapshot.state)} onClose={closeProfile} />
+        )}
         {snapshot && debug && (
           <DebugPanel snapshot={snapshot} runtime={runtime.current} onClose={closeProfile} />
         )}
@@ -681,6 +755,7 @@ export function LifeStage({
             memoryHe={ending.memoryHe}
             after={ending.after ?? null}
             chapter={ending.chapter ?? '1986'}
+            presence={ending.presence ?? null}
             onClose={() => {
               setEnding(null)
               runtime.current?.dismissEnding()

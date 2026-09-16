@@ -130,7 +130,7 @@ export const goalSeed = (state: LifeState): LocationId | null => {
   return 'ussishkin-hall'
 }
 
-/** 26.5.1999 — Ramat Gan at eight, and who you go with. */
+/** 19.5.1999 — Ramat Gan at eight, and who you go with. */
 export const goalCup99 = (state: LifeState): LocationId | null => {
   if (flag(state, 'c99:over')) return null
   return flag(state, 'c99:route') ? 'ramat-gan' : null

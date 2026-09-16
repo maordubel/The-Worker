@@ -6,11 +6,14 @@ import { isPlaceholder } from '@/lib/life/anchors'
 import { artUrl } from '@/lib/life/runtime/art'
 import { chapterFor, nextPlayable } from '@/lib/life/content/chapters'
 import { Grain, Letterbox } from '@/components/life/FilmFx'
+import { MatchReport } from '@/components/life/MatchReport'
+import { CUP_SLUG, buildMatchReport } from '@/lib/life/finale'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 
 type Finale = NonNullable<LifeBusEvents['finale']>
+
 
 /**
  * סוף שלב א' — the one screen in this game a player is meant to sit with.
@@ -67,6 +70,18 @@ export function StageFinale({
   // named by its registry row — the unit, the date, the title.
   const chapter = chapterFor(finale.chapter)
   const later = stageB && finale.chapter !== '1990'
+  /**
+   * מה שקרה שם, במלואו — the documented day behind this chapter, or null.
+   *
+   * Maor: *"נא לעשות כל משחק חוויה!"* — and the honest reading of that is not "put a
+   * section on every card", it is "put the paper into every day and let the card show
+   * it". So the report is DERIVED: a chapter whose day is in `history/days.ts` gets the
+   * goals, the shootout, the referee and the crowd, the scans and the film links, each
+   * with its source; a chapter whose day is not gets exactly the card it had before, with
+   * no empty headings and no dash where a fact would be. A section that says "מבקיעים: —"
+   * tells the player the archive failed rather than that it was never asked.
+   */
+  const report = buildMatchReport(finale.chapter)
   /** the same headline the card itself prints — reused as the dialog's accessible name */
   const titleHe = later && chapter ? chapter.titleHe : stageB ? t('life.finale.promoted') : t('life.finale.champions')
   /**
@@ -141,13 +156,46 @@ export function StageFinale({
             <p className="mt-2 font-poster text-[46px] leading-[0.92] text-sheet sm:text-[68px]">
               <bdi>{titleHe}</bdi>
             </p>
-            <p className="mt-2 font-mono text-[13px] leading-none tabular-nums text-sheet/90" dir="ltr">
-              {later && chapter ? chapter.dateHe : finale.anchor.seasonLabel}
+            {/*
+              הכיוון הולך אחרי מה שכתוב בשורה, ולא אחרי מה שהיה כתוב בה פעם.
+
+              `dir="ltr"` היה נכון כל עוד השורה הזאת הכילה דבר אחד: תווית עונה
+              (`1985/86`), שהיא ספרות ולוכסן ורוצה לרוץ שמאל לימין. שלב ב׳ מדפיס כאן
+              `chapter.dateHe` — "19 במאי 1999" — וכפיית LTR על משפט עברי עם מספר בראשו
+              מזיזה את המספר לסוף: המסך הראה "במאי 1999 19". אותה מחלקה בדיוק של הבאג
+              שהזיז את "86׳ או 87׳" בשבב הדקה.
+
+              עונה נשארת LTR, תאריך עברי מקבל את הכיוון של הדף, ושניהם ב-`<bdi>` כדי
+              שהספרות שבתוכם לא יזלגו על מה שסביבן (כלל 9).
+            */}
+            <p
+              className="mt-2 font-mono text-[13px] leading-none tabular-nums text-sheet/90"
+              dir={later && chapter ? undefined : 'ltr'}
+            >
+              <bdi>{later && chapter ? chapter.dateHe : finale.anchor.seasonLabel}</bdi>
             </p>
-            {/* Counted out of `trophies.json`, never typed in — see `countTitles`. */}
+            {/*
+              Counted out of `trophies.json`, never typed in — see `countTitles`.
+
+              **And named for the competition it counted.** The line said "האליפות ה-N
+              בתולדותיה" on every card that carried a number, including two CUP finals,
+              where the number is a count of cups and the word is the wrong trophy. It was
+              invisible while 1986 was the only chapter that reached this screen.
+
+              The number itself is a row count and it disagrees with ויקיפועל by one on
+              both cup cards: this archive files the 1928–1944 wins under the same
+              competition, and ויקיפועל's own page calls 19.5.1999 the ninth. That is a
+              real conflict between two sources, so it is KEPT rather than settled — the
+              count stays counted, and the match report underneath carries the fact row
+              that says who counts it differently and why (rule 60.3).
+            */}
             {finale.anchor.titlesSoFar !== null && (
               <p className="mt-3 border-t-hair border-sheet/40 pt-3 font-display text-[14px] leading-none text-sheet">
-                <bdi>{t('life.finale.titleCount', { n: String(finale.anchor.titlesSoFar) })}</bdi>
+                <bdi>
+                  {finale.anchor.competitionSlug === CUP_SLUG
+                    ? t('life.finale.cupCount', { n: String(finale.anchor.titlesSoFar) })
+                    : t('life.finale.titleCount', { n: String(finale.anchor.titlesSoFar) })}
+                </bdi>
               </p>
             )}
           </div>
@@ -201,6 +249,8 @@ export function StageFinale({
               </p>
             </section>
           )}
+
+          {report && <MatchReport report={report} onZoom={setZoom} />}
 
           {/* ---------------------------------------------------------- the album -- */}
           {/*
