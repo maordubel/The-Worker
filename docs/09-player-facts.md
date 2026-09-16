@@ -1,121 +1,182 @@
-# עמדה, מוצא ושנים — מחקר השחקנים, 15.9.2026
+# עמדה, מוצא ושנים — מחקר השחקנים
 
 Maor: *"חייב לשפר את המידע והסינון והגדרות של השחקנים, נא לאמת ולהצליב עם הארכיון שלנו
 או לבצע מחקר מקיף ולתת לכל שחקן עמדה, אם ישראלי או זר ושנים ששיחק בהם. חובה."*
 
-This is the document that says how far that got, by what method, and exactly where it
-stopped — because the stopping point is the part a future pass needs.
+ואחרי הסבב הראשון: *"מעל 300 שחקנים ללא עמדה?? תעשה עבודה יסודית ונכונה ומושלמת."*
+
+ואז, באמצע הסבב השני: *"חמודי, יש לך https://wiki.red-fans.com/ כמקור מידע מושלם למה
+אתה עובד קשה?"* — והוא צדק. ויקיפועל סגרה את מה שארבעה מקורות אחרים השאירו פתוח.
+
+זה המסמך שאומר כמה רחוק זה הגיע, באיזו שיטה, ואיפה בדיוק זה נעצר — כי נקודת העצירה
+היא מה שהסבב הבא צריך.
 
 ---
 
-## Where it started
+## המספרים
 
-The archive knows **647 people**. Measured before this pass, with the same code that
-now measures it after:
+הארכיון מכיר **653 אנשים** (637 לפני הסבב הזה; 16 נוספו ממקור, ראה למטה). נמדד באותו
+קוד שמודד אותם היום:
 
-| | had a position | had Israeli/foreign | had years worn | **had all three** |
+| | עמדה | ישראלי/זר | שנים | **שלושתם** |
 |---|---|---|---|---|
-| before | 64 | 103 | 137 | **32** |
-| after | **342** | **345** | **361** | **332** |
+| לפני הכול | 64 | 103 | 137 | **32** |
+| אחרי סבב א׳ (15.9) | 342 | 345 | 361 | **332** |
+| אחרי סבב ב׳ (16.9) | 564 | 561 | 534 | 532 |
+| **אחרי ויקיפועל** | **633** | **654** | **648** | **629** |
 
-`players-roster.json` has four fields and three of them are the name. That is why the
-filters could not exist before this: rule 24 already recorded the consequence for the
-polls wing — *"a 'goalkeepers' shortlist would have to be guessed, and one striker in it
-would make the wing untrustworthy."* Guessing a position from a shirt number, from an
-era, or from a name is the same mistake wearing a better hat.
+**לכל אחד מ-653 השחקנים ברשימה יש עכשיו שורה. `unknown` ריק.** מה שנשאר פתוח הוא 23
+שחקנים שגם בוויקיפועל עצמה שדה `תפקיד` שלהם ריק — הם אומרים `לא מתועד`, כי זו האמת.
 
-## The source
+`players-roster.json` נולד עם ארבעה שדות ושלושה מהם הם השם. זו הסיבה שהסינון לא יכול
+היה להתקיים קודם: כלל 24 כבר רשם את המסקנה לאגף הסקרים — *"רשימת 'שוערים' הייתה חייבת
+להיות מנוחשת, ומספיק חלוץ אחד בתוכה כדי להפוך את האגף ללא אמין."*
 
-`https://www.worldfootball.net/teams/te956/hapoel-tel-aviv/vsYYYY-YYYY/squad/` —
-one page per season, back to **1933/34**, each listing the squad with **position** and
-**nationality**. **73 seasons were read**, 1933/34 → 2025/26, yielding **465 distinct
-Latin-spelled players** with position, nationality and the seasons they appear in.
+---
 
-### What could not be reached, and was not worked around
+## חמישה מקורות, בסדר החוזק
 
-- **he.wikipedia.org and en.wikipedia.org** are cache-only through `WebFetch` in this
-  environment, and a direct request is refused by the agent proxy (`connect_rejected`).
-- **ויקיפועל / wiki.red-fans.com** is still closed to automated access — it has been
-  since the first research pass (`docs/04-verified-research.md`).
+| מפתח | מה זה | כמה נקרא | מה הוא טוב בו |
+|---|---|---|---|
+| `squad` | `squads.json` — הגיליון שלנו | 27 | הסגל הנוכחי; עמדה ולאום מוצהרים |
+| **`vikipoel`** | **ויקיפועל**, קטגוריה "שחקני הפועל תל אביב (כדורגל)" | **638** | **הכול**: עמדה מתיבת המידע, "זר/ישראלי" מהקטגוריה של המועדון עצמו, ושנים מקטגוריות הסגל עונה-עונה |
+| `wiki-he` | ויקיפדיה העברית, קטגוריה "כדורגלני הפועל תל אביב" | 433 ערכים | עמדת הקריירה בערך של האיש עצמו, והשנים שבהן הוא רשום במועדון |
+| `wiki-en` | English Wikipedia, `Category:Hapoel Tel Aviv F.C. players` | 418 ערכים, **58 בלי ערך עברי** | הזרים שלא כתבו עליהם בעברית |
+| `wf-all` | טבלת כל-הזמנים של worldfootball | 552 שחקנים | עמדה ולאום לכל מי ששיחק אי-פעם |
+| `wf-season` | 73 סגלי עונה, 1933/34 → 2025/26 | 465 שמות | **באילו עונות בדיוק** הוא היה בסגל |
 
-Rule 11: a blocked source is documented, not circumvented. Neither was used, and no row
-below leans on one.
+הצינור כולו: `scripts/players/pipeline.sh`. הוא רץ בלי רשת ובלי `/tmp` — שלוש הטבלאות
+הגולמיות שמורות בריפו ב-`content/manual/player-facts-wiki.json` בדיוק כפי שנקראו, ו-73
+עמודי העונה ב-`player-facts-seasons.json`. מי שירצה לבדוק שורה יכול להריץ מחדש ולקבל
+בדיוק את אותו קובץ.
 
-## The method — and why it is narrow on purpose
+### ויקיפועל — ואיך היא נקראה
 
-The source is Latin. Our roster is Hebrew. The whole pass is that bridge, and every
-shortcut across it produces a wrong player wearing a real name.
+**ויקיפועל חסומה ב-Cloudflare בפני גישה אוטומטית.** הדפדפן הפנימי נתקע על מסך
+"Performing security verification", וזו בדיקת-בוטים שאסור לעקוף. מאור התקין את תוסף
+Claude ל-Chrome שלו, ומשם — דפדפן של אדם, מאומת — נקרא כל האתר דרך ה-API של MediaWiki.
 
-Two passes, in `scripts/players/match.py`:
+מה נקרא מכל אחד מ-638 הערכים:
 
-1. **`alias`** — we already held the Latin spelling (from `shirt-numbers.json`'s
-   `personNameLatin`) and the source agreed. **90 rows.**
-2. **`transliteration`** — Hebrew and Latin were reduced to consonant skeletons and
-   aligned by dynamic programming that lets the matres lectionis (א ה ו ע י) be silent,
-   folds digraphs, and skips a Latin `h`. A row is emitted **only if the Hebrew name
-   aligns with exactly one of the 465**. **239 rows.**
+- `|תפקיד=` מתיבת המידע → עמדה. **604 מתוך 638.**
+- חברות בקטגוריה **"שחקנים זרים (כדורגל)"** → זר. **162 שחקנים.** זו ההגדרה של המועדון
+  עצמו למי שתפס מקום של זר — לא ניחוש מארץ לידה, ולא מאזרחות כפולה.
+- קטגוריות **`סגל הפועל ת"א (כדורגל) YYYY/YY`**, אחת לכל עונה שהוא היה בסגל → שנים.
+  **627 מתוך 638**, עונה-עונה.
 
-Both passes enforce one claim per player, in both directions: a Latin name can be taken
-once, a Hebrew name can take once.
+**637 מתוך 638 מתאימים לארכיון בשם מדויק** — כי הרשימה שלנו נולדה מהקטגוריה הזאת.
+האחד שלא: `יאניק ללינדאל` מול `יאניק לליינדל`, אותו אדם, ורשום ב-`confirmedSpelling`.
 
-### The surname-only pass was written, measured, and deleted
+כל 638 השורות אומתו מול הדפדפן בטביעת **SHA-256 `46e106131821c699`** — כלומר מה ששמור
+בריפו זהה בייט-לבייט למה שהאתר נתן, ולא לסיכום שלו.
 
-A third pass matching on surname alone was built and then **measured at roughly 50%
-false positives** — אבי אדרי → Kfir Edri, גליל בן סנן → Moshe Sinai, ברונו סוארס →
-Yaakov Schwartz. It was removed entirely rather than tuned, and the script carries a
-comment saying so, because the next person to have this idea should find the answer
-already there.
+---
 
-### Four bugs the measurements caught
+## השיטה — ולמה היא צרה בכוונה
 
-| symptom | cause | fix |
+### הגשר העברי-עברי (`wiki_match.py`)
+
+433 כותרות ויקיפדיה מול 653 שמות בארכיון. **שני הצדדים עבריים**, ולכן השאלה אינה "האם
+זה אותו אדם" אלא "איזה איות". שישה מעברים, **כל אחד חייב להיות יחיד בשני הכיוונים**:
+
+| מעבר | מה הוא חוצה | כמה |
 |---|---|---|
-| אבוקסיס ≠ Abukasis, בלילי ≠ Balili | doubled letters were collapsed *after* vowel removal | collapse before |
-| וינסנט ≠ Vincent | blanket `c → k` | `c` stays, and is accepted by כ/ק/ס/צ/ש |
-| **עלי כנאנה matched Eli Cohen** | de-duplication reached across a skipped letter | only literally adjacent letters collapse |
-| יעקב כהן took Yuval Cohen, רמי כהן took Raz Cohen | first-come-first-served by iteration order | one-claim-per-player, both directions |
+| `confirmed` | ארבעה זוגות שנקראו אחד-אחד וכתובים בשמם בסקריפט | 4 |
+| `qualifier` | הארכיון מבדיל בין שני אנשים בעמדה ("עומר פרץ (חלוץ)"), והמקור מסכים | 7 |
+| `variant` | שוויון אחרי ניקוי סימנים, כולל כינוי בסוגריים ובמרכאות | 374 |
+| `matres` | כתיב מלא מול חסר — "עומרי"/"עמרי", "אמידו באלדה"/"אמידו בלדה" | 36 |
+| `skeleton` | קיפול עיצורים שנשמעים זהה — "מיכאי"/"מיחאי", "שיקו"/"צ'יקו" | 8 |
+| `surname+1` | שם משפחה מקופל זהה ויחיד, שם פרטי במרחק עריכה אחד — "בוהדן"/"בוגדן" | 3 |
 
-## What came out
+**433 מתוך 433 הותאמו. אפס נשארו מסופקים.**
 
-`content/manual/player-facts.json` — **329 rows**, `confidence: 2`, `sport: "football"`,
-each carrying `personNameHe`, `personNameLatin`, `position`, `nationalityEn`, `origin`,
-`fromYear`, `toYear`, `seasons[]` and **`matchedBy`**, so any row can be re-checked
-against the season page it came from.
+### הגשר הלועזי-עברי (`en_bridge.py`, `wf_all.py`)
 
-- positions: MF 102 · DF 100 · FW 97 · GK 30
-- origin: ישראלי 264 · זר 65
-- span: 1933 → 2026
-- **four men appear twice on purpose** — פישונט, שוויצר/שוייצר, בנבנישתי, אפק — because
-  the roster holds two Hebrew spellings of each. Both rows carry `alsoSpelled`.
+לשחקנים שאין להם ערך עברי צריך לתעתק, וזה בדיוק המקום שבו הסבב הקודם נכשל. אותה הגנה:
+שלד עיצורים, והתאמה נכנסת רק אם היא יחידה — ובנוסף **39 זוגות שנקראו אחד-אחד**, כל אחד
+עם הראיה שלו בהערה בסקריפט:
 
-A **30-row random sample was checked by hand against the season pages: 30/30 correct.**
+- `אומיט גונזלס` ← `Umut Güzelses`, כי הערך האנגלי עצמו כותב *"Omit Gonzales"* בציטוט מ-ONE.
+- `גל הרשליקוביץ` ← `G. Herslikovich`, כי המקור מקצר את השם הפרטי.
+- `איזואגבו אבונימה` ← `Abonime Izogbu`, סדר הפוך.
+- `ציקי קוטלר` ← `Zvi Kotler`, כי ציקי הוא צבי.
+- `רועי דיין (יליד 1997)` ← ה-`Roy Dayan` שהוא קשר, כי ויקיפדיה אומרת שה"רועי דיין"
+  בלי הסוגריים הוא חלוץ 2007–08.
 
-## What it refuses to answer
+---
 
-- **`ambiguous` — 8 names.** Each aligned with more than one Latin candidate, or wanted
-  a Latin name another Hebrew name had a better claim to. They are printed by name with
-  their candidates: איאד חוט'בא, יחזקאל חזום, מאור פרץ, עומרי לוי, תומר לוי, יובל כהן,
-  רז כהן, רמי כהן. A refusal with the candidates attached is a question a human can
-  answer in five seconds; a guess is a wrong fact that never gets found.
-- **`unknown` — 325 names.** Not in the Latin source at all. Mostly pre-1990 players and
-  youth-team names the source never listed.
+## ההצלבה — וארבעה דברים שהיא תפסה
 
-Neither list is hidden. `לא מתועד` is a real bucket in the filters, with a real count.
+### ויקיפועל מול ארבעת האחרים
 
-## The route to 100%
+על 547 השחקנים שגם ויקיפועל וגם אחד מהאחרים מכסים:
 
-The remaining 315 (325 unknown + 8 ambiguous, less overlap with rows already filled from
-`squads.json`) cannot be filled by more of the same work — there is no further automated
-source this environment can reach. Two routes, both needing a human:
+- **מוצא: 542 מתוך 547 (99.1%).** חמש אי-ההסכמות הן כולן אותו סוג: אזרחות כפולה.
+  `אנג'י קואמה`, `גבריאל סגל`, `מאט פרנק`, `גיא מיכאלי`, `מאוויס צ'יבוטה` — ויקיפועל
+  יודעת מי תפס מקום של זר, ולזה מאור התכוון.
+- **עמדה: 489 מתוך 547 (89.4%).** 58 אי-הסכמות, רובן חלוץ מול קשר.
 
-1. **Maor fills them.** `players-to-fill.xlsx` is built for exactly that: RTL, Arial,
-   one row per missing player, dropdown validation (שוער/הגנה/קישור/התקפה ·
-   ישראלי/זר), a hint column showing which seasons we already hold a shirt number for,
-   the 8 ambiguous names in their own section with their candidates, and a second sheet
-   listing all 329 rows already filled with their `matchedBy` so the work can be audited.
-   Rule 18: Maor is a source, not a claim to check.
-2. **A ויקיפועל Cargo export**, fetched by a human browser and dropped into
-   `scripts/ingest/` — the route `wiki:cargo` already exists for.
+### worldfootball מול ויקיפדיה העברית
 
-Until then the honest state is on screen and in this file: 332 of 647 complete, every one
-of them sourced, and 315 that say `לא מתועד` rather than something that sounds better.
+על 257 השחקנים שגם worldfootball וגם ויקיפדיה העברית מכסים:
+
+- **מוצא: 256 מתוך 257 מסכימים (99.6%).**
+- **עמדה: 220 מתוך 257 (85.6%).** רוב אי-ההסכמות הן חלוץ מול קשר — הבדל סיווג אמיתי
+  בין "קיצוני" ל"קשר כנף", לא טעות.
+
+וארבע מציאות שראויות לשמן:
+
+1. **"יעקב כהן" היה שורה שגויה שנשלחה.** סבב א׳ נתן לו את `Yuval Cohen` ומשם עמדה
+   ושנים 2022–2025. ויקיפדיה העברית: יעקב כהן נולד ב-1956, מגן שמאלי, שיחק בהפועל
+   1985–86 ואת עיקר הקריירה עשה בהפועל באר שבע. **לא אותו אדם.** השורה הלועזית שוחררה
+   ו"יובל כהן" קיבל אותה. זה בדיוק מה שהצלבה נועדה לתפוס.
+2. **"דוד קופרמן" אינו סתירה אלא דיוק.** worldfootball: קולומביה. ויקיפדיה: ישראלי.
+   הערך: *"דוד קופרמן-קויפמן... ישראלי–קולומביאני"*. לשאלה "זר או ישראלי בסגל" —
+   ישראלי, ושתי האזרחויות ב-`conflicts`.
+3. **"רז כהן" שוחרר.** בסבב א׳ הוא נדחה כמסופק כי "רמי כהן" תבע את `Raz Cohen`.
+   ויקיפדיה מאשרת שרז כהן הוא קשר, יליד 1994 — והשורה שלו נכנסה.
+4. **"לירון דיאמנט" סותר את הארכיון.** הערך שלו מפרט שבע קבוצות ואין בהן הפועל תל
+   אביב; רשימת ויקיפועל אומרת שכן. העמדה והמוצא נלקחו, השנים לא, והסתירה רשומה.
+
+**98 אי-הסכמות סה"כ ב-`conflicts`** — עם מה שכל מקור אמר ומה נלקח. שום דבר לא נמחק.
+
+---
+
+## מה שסורב, בכוונה
+
+- **`refusedMatches` — ארבעה שמות**, כל אחד עם הסיבה:
+  - `אבדג'י` — `Abedi` הוא Robson Vicente Gonçalves, ברזילאי 2007–08. "אבדג'י" אינו
+    תעתיק שלו, ואין מקור שקושר ביניהם.
+  - `רובן סולצ'אגה` — `Pablo Solchaga`: שם המשפחה מתאים, השם הפרטי לא.
+  - `פיליפ מנה` — ייתכן `Philipe Abu-Maneh` בלי "אבו", וייתכן שלא.
+  - `עומר פרץ (קשר)` — שני `Omer Peretz` במקור, שניהם חלוצים; ההבחנה בארכיון בעמדה,
+    והמקור אינו תומך בה.
+- **`unknown` — ריק.** ויקיפועל סגרה את כל 91.
+- **23 שחקנים בלי עמדה.** לא כי לא חיפשנו: שדה `תפקיד` שלהם ריק בוויקיפועל עצמה,
+  ואף מקור אחר לא מכיר אותם. הם מוצגים `לא מתועד`.
+- **מעבר שם-משפחה בלבד** נכתב בסבב א׳, **נמדד ב-~50% טעויות** (אבי אדרי → Kfir Edri;
+  ברונו סוארס → Yaakov Schwartz) ונמחק כולו, עם הערה בסקריפט שאומרת למה.
+
+---
+
+## 16 שמות נוספו לארכיון
+
+ויקיפדיה העברית מכירה 16 שחקני הפועל תל אביב שרשימת ויקיפועל לא כללה: איליי טמם,
+אלפה קונטה, אמרה יעקבי, אסיה דרקסן, בן ביטון, ג'ורג' בורבה, גיא חדידה, דרור ניר,
+יאניק לליינדל, יוחנן סוקניק, יוסי קרמר, יניב מזרחי (שוער), מוטי פליטר, רונן גבאי,
+רונן פייגנבוים, שמעון כהן. הם נוספו בשם שהערך כותב, בלי לשנות שם קיים.
+
+---
+
+## מה שנשאר
+
+1. **23 עמדות.** השדה ריק בוויקיפועל. הדרך היחידה שנותרה היא מאור עצמו (כלל 18) או
+   עריכה בוויקיפועל.
+2. **98 אי-הסכמות.** הן הוכרעו לפי סדר החוזק, לא נמחקו. אם מאור יודע מי צודק בשורה
+   מסוימת — זו הכרעה של מקור, לא של קוד.
+
+`players-to-fill.xlsx` בנוי לשתיהן: לשונית אחת עם 23 העמדות החסרות ורשימות נפתחות,
+לשונית שנייה עם 98 אי-ההסכמות ומה אמר כל מקור, ולשונית שלישית עם כל 653 השורות
+והמקור שהכריע בכל אחת.
+
+**653 מתוך 653 מכוסים, כל אחד עם מקור.**

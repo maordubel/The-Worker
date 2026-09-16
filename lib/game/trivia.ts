@@ -1492,9 +1492,16 @@ const TEMPLATES: Template[] = [
         }),
   },
   {
-    // Not capped: the answer is Erez Zeitshik, not the founder. Rule 16 caps questions
-    // whose ANSWER is Maor Harel — this one is about the seat, not the man.
+    // Capped with the founder's questions, and NOT because rule 17 demands it — its
+    // answer is Erez Zeitchik, not Maor Harel, so the letter of the rule leaves it free.
+    // `tests/game.test.ts` has always asserted the wider thing ("the whole Ussishkin
+    // family, one per round"), and the wider thing is the right one: a twelve-question
+    // round that spends two of them on the 2007–2013 association is out of proportion to
+    // a hundred years. For a long time the deal happened not to produce both; a data
+    // change on 16.9.2026 made it, and the guard caught it. The guard was right, so the
+    // code moved to it rather than the other way round (rule 47).
     slug: 'ussishkin-replacement',
+    cappedGroup: 'founder',
     build: (random) =>
       archive.associationRoles
         .filter((row) => row.replacedByNameHe)

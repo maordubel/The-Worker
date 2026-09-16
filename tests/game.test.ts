@@ -32,6 +32,7 @@ import {
   compareSpecs,
 } from '@/lib/kit/spec'
 import {
+  MULTI_OPTION_COUNT,
   OPTION_COUNT,
   ROUND_LENGTH,
   auditRound,
@@ -150,12 +151,23 @@ describe('trivia — question quality', () => {
     expect(deal(9, 4)).toEqual(deal(9, 4))
   })
 
-  it('offers four distinct options every time', () => {
-    for (let index = 0; index < ROUND_LENGTH; index += 1) {
-      const question = deal(11, index)
-      if (!question) continue
-      expect(new Set(question.options).size, question.prompt).toBe(question.options.length)
-      expect(question.options.length).toBe(OPTION_COUNT)
+  it('offers the right number of distinct options every time — both kinds', () => {
+    // This used to check `=== OPTION_COUNT` on one seed, which quietly meant the
+    // six-option `multi` questions were never checked at all: it passed only while seed
+    // 11 happened to deal none. Now every kind is checked, on twenty seeds, and the
+    // count is read off the kind rather than assumed.
+    for (let seed = 1; seed <= 20; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (!question) continue
+        expect(new Set(question.options).size, question.prompt).toBe(question.options.length)
+        expect(question.options.length, question.prompt).toBe(
+          question.kind === 'multi' ? MULTI_OPTION_COUNT : OPTION_COUNT,
+        )
+        // `deal` deliberately does not hand the answers to the client, so the most
+        // this can check is that the two counts agree with the kind.
+        expect(question.pickCount, question.prompt).toBe(question.kind === 'multi' ? 3 : 1)
+      }
     }
   })
 

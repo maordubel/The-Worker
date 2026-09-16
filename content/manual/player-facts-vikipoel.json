@@ -1,0 +1,5120 @@
+{
+ "note": "ויקיפועל — האנציקלופדיה של הפועל תל אביב (wiki.red-fans.com), קטגוריה \"שחקני הפועל תל אביב (כדורגל)\": 638 שחקנים. זה המקור שרשימת 637 השמות בארכיון נולדה ממנו, ולכן השמות מתאימים אחד-לאחד. שלושה שדות נקראו מכל ערך: `תפקיד` מתיבת המידע, החברות בקטגוריה \"שחקנים זרים (כדורגל)\" — שהיא ההגדרה של המועדון עצמו למי שתפס מקום של זר — וקטגוריות \"סגל הפועל ת'א (כדורגל) YYYY/YY\", עונה-עונה, שמהן נגזרות השנים. האתר חסום ל-Cloudflare בפני גישה אוטומטית; הוא נקרא בדפדפן של מאור, ואומת מול הדפדפן בטביעת SHA-256 (46e106131821c699) על כל 638 השורות.",
+ "sport": "football",
+ "confidence": 2,
+ "source": {
+  "title": "ויקיפועל — קטגוריה:שחקני הפועל תל אביב (כדורגל)",
+  "url": "https://wiki.red-fans.com/index.php?title=%D7%A7%D7%98%D7%92%D7%95%D7%A8%D7%99%D7%94:%D7%A9%D7%97%D7%A7%D7%A0%D7%99_%D7%94%D7%A4%D7%95%D7%A2%D7%9C_%D7%AA%D7%9C_%D7%90%D7%91%D7%99%D7%91_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+  "read": 638,
+  "readOn": "2026-09-16"
+ },
+ "confirmedSpelling": {
+  "יאניק ללינדאל": "יאניק לליינדל"
+ },
+ "table": [
+  {
+   "personNameHe": "אומיט גונזלס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אבדג'י",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אביב וולנרמן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 2001,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אבי כנפו",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2001,
+   "toYear": 2006,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "אדוארדו מראקש",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "איבזיטו אוגבונה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2003,
+   "toYear": 2007,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "אולוביו אדפמי",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2005,
+   "toYear": 2006,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אבי תקווה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2000,
+   "toYear": 2001,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אהוד כחילה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 1999,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אורי קרגולה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2004,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אדי אלקיים",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 2001,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אוגנין לאקיץ'",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2005,
+   "toYear": 2006,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אבי סופר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אביב אלחדד",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2002,
+   "toYear": 2003,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אבי אזולאי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1992,
+   "toYear": 1999,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "אביחי ידין",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2018,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "אברהם בית הלוי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1931,
+   "toYear": 1937,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "אחמד מוסא",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1986,
+   "toYear": 1993,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "אבי אדרי",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אדמונד שמילוביץ'",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1951,
+   "toYear": 1952,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אברהם פלמן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "אברהם נודלמן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1927,
+   "toYear": 1938,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "אברהם פרידריך",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1961,
+   "toYear": 1966,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "אדוארדו לובוס",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 2011,
+   "toYear": 2012,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אברהם (אבי) בנימין",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1968,
+   "toYear": 1971,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "איאד חוט'בא",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2011,
+   "toYear": 2013,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אוראל דגני",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2020,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "אברהם צ'קול",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2015,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אורי כהן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2014,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אביב דדו",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אדי גוטליב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2023,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "איאד אבו עביד",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2021,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אורי קויאטק",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1956,
+   "toYear": 1961,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "אזקיאל נדואסל",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אור אוסטוינד",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2018,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אופיר טקיאר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אופק בלס",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2021,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אדבינאס גירדבאיניס",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2018,
+   "toYear": 2019,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אחמד עאבד",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2018,
+   "toYear": 2025,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אושר דוידה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2023,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "אור אינברום",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אופק ביטון",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2022,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אור ישראלוב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2027,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "אבו דוסו",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אביב סלם",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אור בלוריאן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אבי תורג'מן",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2025,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אוהד חזוט",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אופק עובדיה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2021,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אולריש מלקה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2018,
+   "toYear": 2019,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלין טופוזאקוב",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2007,
+   "toYear": 2009,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "איוון יוליץ'",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2006,
+   "toYear": 2007,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אילונגו אנגסניה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלון חלפון",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2002,
+   "toYear": 2004,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אייל בן עמי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 2004,
+   "squadSeasons": 9
+  },
+  {
+   "personNameHe": "איליה יבוריאן",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2005,
+   "toYear": 2006,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אישטוואן פישונט",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1999,
+   "toYear": 2002,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אליניב ברדה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2005,
+   "toYear": 2007,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אילן בכר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1999,
+   "toYear": 2002,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "איתי אלקסלסי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלון חזן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1996,
+   "toYear": 1997,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלון מזרחי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1990,
+   "toYear": 1991,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלי \"קוקוס\" כהן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1979,
+   "toYear": 1993,
+   "squadSeasons": 14
+  },
+  {
+   "personNameHe": "איגור שקווירין",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 1992,
+   "toYear": 1994,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אייל אחואן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2000,
+   "toYear": 2002,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אלון אופיר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1992,
+   "toYear": 1997,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "אמנון חרל\"פ",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1927,
+   "toYear": 1935,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "אלי יאני",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1984,
+   "toYear": 1986,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אייל אברמוב",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1988,
+   "toYear": 1994,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "אייל אקשטיין",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1978,
+   "toYear": 1982,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "איתי שכטר",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2009,
+   "toYear": 2014,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אלי אוזן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1984,
+   "toYear": 1985,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אמיר ליברמן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1975,
+   "toYear": 1981,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "איתמר ניצן",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2011,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלרואי כהן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2013,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אלכס באסוק",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2012,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אלירן דנין",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלמוג כהן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אמידו בלדה",
+   "position": null,
+   "origin": "foreign",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "איזואגבו אבונימה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "איסומעילה לינגאנה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אליהו נשלסקי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1957,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אלון תורג'מן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אייל משומר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "איציק שולמייסטר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2023,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אמיר עגייב",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2019,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אילן שוקרון",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1985,
+   "toYear": 1990,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "אל-ים קנצפולסקי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2027,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "אלון אזוגי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אלן אוז'בולט",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אמיליוס זובאס",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אלכסנדר בולייביץ'",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אליאן רוחנא",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "איהאב גנאים",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלי שכטר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1985,
+   "toYear": 1986,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אליאור ברנס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1985,
+   "toYear": 1991,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "איתמר שבירו",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "איברהים ספורי",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אלי בכר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1967,
+   "toYear": 1972,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "איתי שביט",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2026,
+   "toYear": 2027,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ביברס נאתכו",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2010,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "ברוך דגו",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2005,
+   "toYear": 2008,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אשר בלוט",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1949,
+   "toYear": 1959,
+   "squadSeasons": 9
+  },
+  {
+   "personNameHe": "אסי דומב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1997,
+   "toYear": 2006,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "ארז מסיקה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2000,
+   "toYear": 2001,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ביסקוט אמבלה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בן לוז",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2001,
+   "toYear": 2009,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אמציה לבקוביץ",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1966,
+   "squadSeasons": 11
+  },
+  {
+   "personNameHe": "אסי טובי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 1999,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ברק בדש",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בני חדד",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2001,
+   "toYear": 2005,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אריה בז'רנו",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1968,
+   "toYear": 1985,
+   "squadSeasons": 17
+  },
+  {
+   "personNameHe": "ארתור אטצזיאנוב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2014,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "אריק ינקו",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2020,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "בויאן ורוצ'ינה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2009,
+   "toYear": 2010,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ביוואן פרנסמן",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2010,
+   "toYear": 2012,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "בן שהר",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2005,
+   "toYear": 2025,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אפואלה אדל",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 2011,
+   "toYear": 2015,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "בוריס קליימן",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2009,
+   "toYear": 2014,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "בן ציון ריידר",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1956,
+   "toYear": 1957,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בן ציון צין (צינוביץ')",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1957,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אריה אלטר",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1985,
+   "toYear": 1994,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "בני גולדשטיין",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1956,
+   "toYear": 1959,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אריק דג'מבה דג'מבה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ברונו קוטיניו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בראיין גרזיצ'יץ'",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2013,
+   "toYear": 2014,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ברנקו איליץ'",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2013,
+   "toYear": 2014,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בסארט עבדורחימי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2013,
+   "toYear": 2014,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בנג'מין פראנסיס",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בן רייכרט",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2017,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "אריאל הרוש",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2017,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "בן אלגרבלי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אנאס מחאמיד",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2027,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "ארון שוינפלד",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2017,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "בני כהן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1982,
+   "toYear": 1983,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ברונו סוארס",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ארנסטס שטקוס",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 2020,
+   "toYear": 2022,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "ארמנדו קופר",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בנימין טרידובסקי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2022,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "בוגדן סרנבסקי",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אנז'-פרדי פלומה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אנטואן קונטה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אריאל כהן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2026,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "בראיין פאסי",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "בובאקר טאמבדו",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אריה אריאל",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1980,
+   "toYear": 1981,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אנריקה ג'וקו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אנג'י קואמה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "אסף צור",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "אנדריאן קרייב",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דוד שוייצר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1951,
+   "toYear": 1954,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "גאבור הלמאי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2000,
+   "toYear": 2003,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "גיורגי דרסיליה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 1997,
+   "toYear": 1998,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דאגלס דה סילבה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2008,
+   "toYear": 2011,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "גבור מרטון",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1998,
+   "toYear": 1999,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גבריאל דוס סנטוס",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גיא צרפתי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גיל ורמוט",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2005,
+   "toYear": 2015,
+   "squadSeasons": 8
+  },
+  {
+   "personNameHe": "גילי לנדאו",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1974,
+   "toYear": 1990,
+   "squadSeasons": 16
+  },
+  {
+   "personNameHe": "דוד פרימו",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1963,
+   "toYear": 1974,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "ג'ון פיינטסיל",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2004,
+   "toYear": 2013,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "גדעון טיש",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1969,
+   "squadSeasons": 11
+  },
+  {
+   "personNameHe": "גליל בן סנן",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2002,
+   "toYear": 2011,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "דאבור רופניק",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1998,
+   "toYear": 2000,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דוד אמסלם",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1994,
+   "toYear": 1995,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גל שיש",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2017,
+   "squadSeasons": 8
+  },
+  {
+   "personNameHe": "גיא קואז",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2004,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ג'ובאני ואלדיירו",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גיא שרעבי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1994,
+   "toYear": 1997,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "גיורא אנטמן",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1986,
+   "toYear": 1987,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גבי לסרי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1975,
+   "toYear": 1987,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "גד מכנס",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1983,
+   "toYear": 1984,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דוד פיזנטי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1986,
+   "toYear": 1987,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דב רמלר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1981,
+   "toYear": 1984,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "דדי בן דיין",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2009,
+   "toYear": 2012,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "גל מאיו",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2012,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דוד מיץ",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1944,
+   "toYear": 1947,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "דוד רוצ'לה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גל מלכה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גאל אטוק",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גיא גומברג",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דוד בליס",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1957,
+   "toYear": 1961,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "גל הרשליקוביץ",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1987,
+   "toYear": 1994,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "גיא אסולין",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דאמיר שובשיץ'",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ג'ון צ'יבויקה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ג'וזף גנדה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2019,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "גיא בדש",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ג'ורג' דיבה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דוד קלטינס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "גיל יצחק",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גבריאל סגל",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גיא מיכאלי",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2025,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דוד ונטורה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1995,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "גוני נאור",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "גוראן אנטוניץ'",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דוד הרשליקוביץ",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1983,
+   "toYear": 1990,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "דוד קרמו",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1968,
+   "toYear": 1973,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "גד עמוס",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2025,
+   "toYear": 2026,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דגלאס אווסו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2026,
+   "toYear": 2027,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דני בונדר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2011,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "וינסנט אניימה",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 2007,
+   "toYear": 2011,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "וואליד באדיר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2005,
+   "toYear": 2013,
+   "squadSeasons": 8
+  },
+  {
+   "personNameHe": "דניס אונישנקו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1999,
+   "toYear": 2003,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "וולינגטון דה אוליברה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2006,
+   "toYear": 2007,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "וולטון סילבה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2002,
+   "toYear": 2003,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דימיטאר טלקיסקי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2007,
+   "toYear": 2009,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דיאן רצ'וניצה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1999,
+   "toYear": 2000,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דודו דהאן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2000,
+   "toYear": 2002,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דמיטרי מיכאלנקו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2000,
+   "toYear": 2001,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דמיאן לוקאשיק",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 1993,
+   "toYear": 1996,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "דמיאן גייזר",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1997,
+   "toYear": 1998,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דנוץ מויססקו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "וילי ברגר",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1927,
+   "toYear": 1937,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "ויקטור מרעי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2013,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "הרברט מייטנר",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "הרצל פריצנר",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "דניאל דניאלי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1961,
+   "toYear": 1966,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "דני בורסוק",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1961,
+   "toYear": 1969,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "דניאל דה רידר",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2009,
+   "toYear": 2010,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "וויליאם אוואסו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2010,
+   "toYear": 2011,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דניאל גולדשטיין",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1961,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "דני ילובסקי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1951,
+   "toYear": 1952,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דני עמוס",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2015,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דור חמו",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "הרמוני איקינדה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דודו ביטון",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2017,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "דני אלקיים",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1957,
+   "toYear": 1966,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "דוד שטיינוורצל",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1952,
+   "toYear": 1954,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דודי אלון",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2018,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "דולי מנגה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "וויאם עמאשה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דניאל גרץ",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דנילו לופז",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דור חוגי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דמבה קמארה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דני גרופר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2022,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "דורון ליידנר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2027,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "דן איינבינדר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2024,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "הישאם לאיוס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דור אלו",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "הרוויה איליץ'",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דן עזריה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דניאל צדיק",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דויד קופרמן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2025,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "דודו סמפאיו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דור בנימיני",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2027,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "דסליי טגניה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "דניאל דאפה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יגאל אנטבי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1999,
+   "toYear": 2014,
+   "squadSeasons": 13
+  },
+  {
+   "personNameHe": "טל חן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2008,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "יוסי אבוקסיס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1987,
+   "toYear": 2007,
+   "squadSeasons": 12
+  },
+  {
+   "personNameHe": "חאבייר פאאס",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2006,
+   "toYear": 2007,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "חיים רביבו",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יוסי ביטון",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2007,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "זיו כבדה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1997,
+   "toYear": 2000,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יהודה חוטה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2012,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "יאיר כהן צדק",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2004,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "חנן אלקיים",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2006,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "חיים איצרין",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "חזי שירזי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1991,
+   "toYear": 1994,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יהודה עמר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1985,
+   "toYear": 1994,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "חסן בדג'ייב",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "זוראב מנטשאשווילי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2009,
+   "toYear": 2010,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "חיים נוריאלי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1961,
+   "toYear": 1969,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "חיים גלזר",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1949,
+   "toYear": 1959,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "טוטו תמוז",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2017,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "טל איילה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2009,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "טל אוסובסקי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1992,
+   "toYear": 1994,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יהושע זילברשטיין",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1956,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "זאב סגל",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1961,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "חיים חוזבקו",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1958,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יונה פוקס",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "זאב חיימוביץ'",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2014,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "חנן ממן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "טל בן חיים",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "טיאגו קוסטה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "זלמן פרידמן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1931,
+   "toYear": 1945,
+   "squadSeasons": 13
+  },
+  {
+   "personNameHe": "חמזה בארי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "חן עזרא",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "חסן אבו זייד",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "טל בנש",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יונתן רודיונוב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יהונתן לוי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2018,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יואב ג'ראפי",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "טום אחי מרדכי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2022,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יגאל בקר",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2022,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יואב תומר",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2023,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "חוטפריט רומראטו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יואב הופמייסטר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יהב גורפינקל",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "טל ארצ'ל",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2027,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "יובל כהן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2025,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "חוסה רודריגס",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "זיו מורגן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2026,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יואל שוהם",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1963,
+   "toYear": 1965,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יובל פילוס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1989,
+   "toYear": 1992,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יונתן פרבר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2026,
+   "toYear": 2027,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יאניק ללינדאל",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2026,
+   "toYear": 2027,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יעקב חודורוב",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1946,
+   "toYear": 1962,
+   "squadSeasons": 15
+  },
+  {
+   "personNameHe": "לוסיאנו דה ברונו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2006,
+   "toYear": 2007,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יחזקאל חזום",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1964,
+   "toYear": 1977,
+   "squadSeasons": 11
+  },
+  {
+   "personNameHe": "יעקב הלל",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1997,
+   "toYear": 2003,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "ירוסלב באקו",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 1993,
+   "toYear": 1996,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "כפיר אדרי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2005,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יוסי רוזן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2005,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יעקב אקהויז",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1974,
+   "toYear": 1992,
+   "squadSeasons": 18
+  },
+  {
+   "personNameHe": "יקיר לוסקי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2008,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "כפיר אודי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1996,
+   "toYear": 2007,
+   "squadSeasons": 8
+  },
+  {
+   "personNameHe": "יניב ירון",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1995,
+   "toYear": 1999,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "ישראל כהן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1997,
+   "toYear": 2000,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יניב בן ניסן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יוסף אובה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2000,
+   "toYear": 2001,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יוסי זאנה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1979,
+   "toYear": 1989,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "ישראל מאיה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1989,
+   "toYear": 1992,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יוסי מדר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1997,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יוסי בלאס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1994,
+   "toYear": 1997,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יעקב שוורץ",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1994,
+   "toYear": 1996,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יעקב כהן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1984,
+   "toYear": 1986,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יעקב רחמינוביץ'",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1968,
+   "toYear": 1980,
+   "squadSeasons": 12
+  },
+  {
+   "personNameHe": "ירמיהו לוף",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1958,
+   "toYear": 1960,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "ליאונרדו בוארב",
+   "position": null,
+   "origin": "foreign",
+   "fromYear": 1996,
+   "toYear": 1997,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יוסי שבחון",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2012,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "כפיר אייזנשטיין",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2014,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יצחק מנחם",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1956,
+   "toYear": 1962,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "ישראל וייס",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1951,
+   "toYear": 1956,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יעקב בוזגלו",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1979,
+   "toYear": 1982,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "יצחק צ'צ'יק",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1949,
+   "toYear": 1952,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "ירון בן דב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ישראל בריקר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1927,
+   "toYear": 1934,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "יצחק ביבאס",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1945,
+   "toYear": 1956,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "יורגן קולין",
+   "position": null,
+   "origin": "foreign",
+   "fromYear": 2013,
+   "toYear": 2015,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "ישראל זגורי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2017,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "לוקאס סאשה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2013,
+   "toYear": 2015,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "לוקאס וינטרה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לוטם זינו",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ישראל ראש",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ירין פרץ",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לבאן קוטליה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לוסיו מרינאו",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ליאו בנבנישתי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "ליאו בנבינשתי",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יזן נסאר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2026,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "יעקב בריהון",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ישי ברוש",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לוקאס פלקאו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "לי און מזרחי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "יעקב רודיק",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1972,
+   "toYear": 1973,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לויזוס לויזו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2025,
+   "toYear": 2026,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מזואה אנסומבו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מהראן לאלה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2012,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "מנואל ניירה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2006,
+   "toYear": 2007,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מאור פרץ",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2009,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מילאן אוסטרץ",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2000,
+   "toYear": 2002,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מסאיי דגו",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2008,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "ליאור אסולין",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ליאור בקשי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2009,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לירן שטראובר",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1992,
+   "toYear": 1993,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לריאה קינגסטון",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2003,
+   "toYear": 2004,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מוטי אוחיון",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 2000,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מוריס ז'אנו",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1981,
+   "toYear": 1991,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "מיכאל זנדברג",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2009,
+   "toYear": 2010,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מאיר אהרן מליקה",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "מאיר מליקה (חלוץ)",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1994,
+   "toYear": 1995,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מיגל אנחלס הויוס",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "מור שושן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2009,
+   "toYear": 2013,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "מאיר נחמיאס",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1980,
+   "toYear": 1985,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "מאיר בן שטרית",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1986,
+   "toYear": 1988,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מוניה גושן",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "מחמוד עבאס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2011,
+   "toYear": 2012,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לירון דיאמנט",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2011,
+   "toYear": 2012,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מירקו אורמוש",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2011,
+   "toYear": 2012,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מיכאל מיכאלוב",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1956,
+   "toYear": 1959,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "מיכאל לפרדון",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1973,
+   "toYear": 1976,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "מאיר אריה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1982,
+   "toYear": 1983,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ליאור לוי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2015,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מוחמד אבו אל היג'א",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2016,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מיכאל כהן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1956,
+   "toYear": 1961,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "מיחאי פינטילי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ליביו אנטל",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לירון ליכטרמן",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1994,
+   "toYear": 1996,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מיקי דהאן",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מייקל סיטון",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מוטי ברשצקי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2020,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "מייקל אולהה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מאור בוזגלו",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מור נעמן (כדורגלן)",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מוחמד טראורה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ליעד רמות",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2025,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "מאיר ברנר",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1968,
+   "toYear": 1972,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "לידור כהן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מאוויס צ'יבוטה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מאט פרנק",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מנחם רוזנשטרייך",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1963,
+   "toYear": 1970,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "מילאן מקאריץ'",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מקס צ'ליץ'",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "לירן רוטמן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2026,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מור בוסקילה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מנחם מור",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1974,
+   "toYear": 1977,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "משה מלמד",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1939,
+   "toYear": 1950,
+   "squadSeasons": 11
+  },
+  {
+   "personNameHe": "ניל אברבנל",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2010,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "ניר רחמין",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 2006,
+   "squadSeasons": 8
+  },
+  {
+   "personNameHe": "סבסטיאן סימרוטיץ'",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 1997,
+   "toYear": 2000,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "משה סיני",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1979,
+   "toYear": 1993,
+   "squadSeasons": 13
+  },
+  {
+   "personNameHe": "נמרוד דרייפוס",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1972,
+   "toYear": 1982,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "מריו מסטרוביץ",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1997,
+   "toYear": 1998,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "נלסון מנסה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ניר חדד",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2000,
+   "toYear": 2002,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "משה אייזנברג",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1991,
+   "toYear": 1992,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ניסים אביטן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1995,
+   "toYear": 1997,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מריוס ניביידומסקי",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 1991,
+   "toYear": 1992,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "משה דננבאום",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2009,
+   "toYear": 2011,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "נמניה ווצ'יצ'ביץ'",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2009,
+   "toYear": 2010,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "משה סקל",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1958,
+   "toYear": 1961,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "נחמן קסטרו",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1968,
+   "toYear": 1978,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "משה פוליאקוב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1927,
+   "toYear": 1943,
+   "squadSeasons": 16
+  },
+  {
+   "personNameHe": "משה פיזנטי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1982,
+   "toYear": 1984,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מריו פצ'אלקה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2010,
+   "toYear": 2012,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מרדכי מאיר",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1927,
+   "toYear": 1937,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "נוסא איגייבור",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2011,
+   "toYear": 2013,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "מרקו שולר",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2011,
+   "toYear": 2012,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ניר לקס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2011,
+   "toYear": 2020,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "משה רסקין",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1951,
+   "toYear": 1952,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "משה פיימן",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1956,
+   "toYear": 1958,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "נסים חלפון",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1982,
+   "toYear": 1983,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ניקולה פטקוביץ'",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ניר נחום",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "סאבו פאביצ'ביץ'",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מתן אריאל לזמי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "משה אוחיון",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2016,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "סארי פלאח",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מתן אוחיון",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ניר מנחם",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "נמניה ניקוליץ'",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2015,
+   "toYear": 2017,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "ניקולאס גורובסוב",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מרקו סימיץ'",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "משה מוסטרל",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1983,
+   "toYear": 1992,
+   "squadSeasons": 9
+  },
+  {
+   "personNameHe": "מרווין פירסמן",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2017,
+   "toYear": 2020,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "נריוס ואלסקיס",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2018,
+   "toYear": 2019,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ניב סרדל",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מרקו ינקוביץ'",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ניב זריהן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "סבסטיאן הרננדז",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "נועם בונה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "משה מורדכוביץ׳",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1967,
+   "toYear": 1976,
+   "squadSeasons": 9
+  },
+  {
+   "personNameHe": "סאמי אדם",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "משה מרקוביץ'",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1975,
+   "toYear": 1986,
+   "squadSeasons": 9
+  },
+  {
+   "personNameHe": "נפתלי שוואלב",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1949,
+   "toYear": 1950,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "מרקוס קוקו",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עומרי קנדה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2012,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "עידן סרור",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2002,
+   "toYear": 2010,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "סלים טועמה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 2014,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "עומר פרץ (חלוץ)",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2005,
+   "toYear": 2006,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עמאר מנצור",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2004,
+   "toYear": 2008,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "סמואל יבואה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2008,
+   "toYear": 2010,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "סרגיי קלשנקו",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2001,
+   "toYear": 2003,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עדי סבג",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עומרי אפק",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1997,
+   "toYear": 2003,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "עידן טל",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 1999,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עופר שטרית",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1997,
+   "toYear": 1998,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עידן סקורצ'רו",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2000,
+   "toYear": 2002,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עזרי בבאייב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2001,
+   "toYear": 2003,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "סרגיי פוגודין",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1995,
+   "toYear": 1997,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עדן בן בסט",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2009,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עומאר גאריבה",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "עדן שרם",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2015,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "עומר דמארי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2011,
+   "toYear": 2020,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "עומר פדידה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2015,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עומר פרץ (קשר)",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "עוביידה חטאב",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עומרי אלטמן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2027,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "עופר ורטה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2017,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עומרי שקל",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "סיראז' נסאר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "סער בנבנישתי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עידן כהן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2020,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "עידו אקסברד",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עדן הרשקוביץ",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2021,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "עלי אלעוברה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עבדי פרחאת",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2018,
+   "toYear": 2020,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עדי טבצ'ניק",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עלי כנאנה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "סטפן ספירובסקי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עידו שרון",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2025,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "עומאר בראון",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "סיאנדה קולו",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2020,
+   "toYear": 2022,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עידן ורד",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2023,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "סתיו למקין",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2023,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "עומר סניור",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2024,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "סינטיהו סלליך",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "סטפן מרינוביץ'",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עזיז קאיונדו",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "סתיו טוריאל",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2027,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "עידו אלמישלי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עופר גלברד",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2027,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "עידו וייר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עמי אדמוני",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1968,
+   "toYear": 1979,
+   "squadSeasons": 11
+  },
+  {
+   "personNameHe": "עידן ברנס",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2025,
+   "toYear": 2026,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עומרי לוי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "פאביו ג'וניור פריירה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ראובן עובד",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2009,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "פבריציו קארבליו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2003,
+   "toYear": 2004,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "פליקס אובוקה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2005,
+   "toYear": 2006,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "פליקס חלפון",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1988,
+   "toYear": 1999,
+   "squadSeasons": 9
+  },
+  {
+   "personNameHe": "קלמי סבן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2001,
+   "toYear": 2004,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "פיני בלילי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1997,
+   "toYear": 2003,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "קובי שאלו",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1996,
+   "toYear": 1999,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "ערן זהבי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2011,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "ציקי קוטלר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1999,
+   "toYear": 2003,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "פאביו רוסה",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עמנואל איילה",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "קז'ימיש מוסקאל",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1994,
+   "toYear": 1998,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "פיטר קרמנס",
+   "position": "GK",
+   "origin": "foreign",
+   "fromYear": 1991,
+   "toYear": 1992,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "קונסטנטין מרקו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1993,
+   "toYear": 1994,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רואי חדד",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1992,
+   "toYear": 1994,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "קרזימיר קואב",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 1990,
+   "toYear": 1991,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "צבי ארליך",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "קובי סגל",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1980,
+   "toYear": 1991,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "עמרי עטיה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2011,
+   "toYear": 2012,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "ראובן אללוף",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1949,
+   "toYear": 1954,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "פנחס יהודיוף",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1955,
+   "toYear": 1961,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "פטר אורלנדיץ'",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2013,
+   "toYear": 2014,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "פיליפ מנה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2008,
+   "toYear": 2015,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "קוסטל לזר",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1992,
+   "toYear": 1993,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "צליל חתוכה",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2017,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "קלאודיו בומבה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2015,
+   "toYear": 2017,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "קובי הדדי",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1967,
+   "toYear": 1997,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "צחי זנטי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1995,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "קאווה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עמית ביטון",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "פדרו גלבאן",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2017,
+   "toYear": 2018,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "פייסל מוליץ'",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2017,
+   "toYear": 2019,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עמית מלכה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2017,
+   "toYear": 2019,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "רובי לבקוביץ'",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2018,
+   "toYear": 2025,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עמירן שקלים",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2018,
+   "toYear": 2019,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "קאיו אלבס",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2018,
+   "toYear": 2019,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עמנואל בואטנג (קשר)",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2018,
+   "toYear": 2021,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "קלאודמיר פריירה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2018,
+   "toYear": 2020,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "פרנסיס קיירמה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "פליפה רודריגס",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "פארלי רוסה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2021,
+   "toYear": 2022,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "קייס גאנם",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "פבלו גונזאלס",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2022,
+   "toYear": 2024,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עמית מאיר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "עמית למקין",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2027,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "קובי זיתוני",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1978,
+   "toYear": 1981,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "פרנאן מאיימבו",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "צ'יקו",
+   "position": "DF",
+   "origin": "foreign",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "עמנואל בואטנג (חלוץ)",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "רמי דואני",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2011,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "רחביה רוזנבוים",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1950,
+   "toYear": 1964,
+   "squadSeasons": 13
+  },
+  {
+   "personNameHe": "רומן וסילוק",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2004,
+   "toYear": 2005,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רועי דיין",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רמי חליס",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2001,
+   "toYear": 2006,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "שביט אלימלך",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1996,
+   "toYear": 2007,
+   "squadSeasons": 11
+  },
+  {
+   "personNameHe": "שבי בן ברוך",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1962,
+   "toYear": 1972,
+   "squadSeasons": 8
+  },
+  {
+   "personNameHe": "רונן חרזי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1999,
+   "toYear": 2000,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רמי אבו לאבן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2003,
+   "toYear": 2004,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רובן סולצ'אגה",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2003,
+   "toYear": 2004,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רוני קלדרון",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1968,
+   "toYear": 1972,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "ריפעת טורק",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1971,
+   "toYear": 1985,
+   "squadSeasons": 12
+  },
+  {
+   "personNameHe": "שבתאי לוי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1977,
+   "toYear": 1989,
+   "squadSeasons": 12
+  },
+  {
+   "personNameHe": "רוברט טזצקי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 1998,
+   "toYear": 1999,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שגיא זינגר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 2000,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "רון נחמן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1998,
+   "toYear": 1999,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רפי שמואל",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1982,
+   "toYear": 1992,
+   "squadSeasons": 8
+  },
+  {
+   "personNameHe": "רונן הילל",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1990,
+   "toYear": 1991,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רועי גורדנה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2014,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "רמי ארמה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1982,
+   "toYear": 1992,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "רומאן רוקי",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2010,
+   "toYear": 2011,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שבתאי יחבס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1977,
+   "toYear": 1985,
+   "squadSeasons": 8
+  },
+  {
+   "personNameHe": "רן יצחק",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2014,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רמזי ספורי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2019,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "ריף מסיקה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2014,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רוי רונן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רז נחמיאס",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2018,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "רם שטראוס",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2016,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רז שלמה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2021,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "רז כהן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2018,
+   "toYear": 2020,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "רוג'ר ברנרדו",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2018,
+   "toYear": 2019,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רועי זיקרי",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2018,
+   "toYear": 2021,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "רז טוויזר",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2023,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "שגיא גניס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2025,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "רן בנימין",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2026,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "שביט מזל",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2023,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "רווה אסייג",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2023,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רועי אלקוקין",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2022,
+   "toYear": 2027,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "רז שטיין",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2020,
+   "toYear": 2021,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רוי ברנס",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2024,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "רז מאיר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2023,
+   "toYear": 2024,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רועי הרמן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רוי קורין",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2027,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "רועי לוי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רותם חטואל",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רועי דיין (יליד 1997)",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2017,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "רון תלמי",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2025,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שאנדה סילבה",
+   "position": "MF",
+   "origin": "foreign",
+   "fromYear": 2025,
+   "toYear": 2027,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "רונאלדו ואסקס",
+   "position": "FW",
+   "origin": "foreign",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שלומי ארבייטמן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2007,
+   "toYear": 2008,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שי אבוטבול",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2002,
+   "toYear": 2015,
+   "squadSeasons": 13
+  },
+  {
+   "personNameHe": "שייע פייגנבוים",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1964,
+   "toYear": 1979,
+   "squadSeasons": 13
+  },
+  {
+   "personNameHe": "שמעון גרשון",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1996,
+   "toYear": 2006,
+   "squadSeasons": 10
+  },
+  {
+   "personNameHe": "שלום תקווה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1995,
+   "toYear": 2000,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "שמעון בן יהונתן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1960,
+   "toYear": 1975,
+   "squadSeasons": 13
+  },
+  {
+   "personNameHe": "תומר חליבה",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2006,
+   "toYear": 2007,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שולי גילארדי",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1990,
+   "toYear": 1991,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שמעון צימרמן",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": null,
+   "toYear": null,
+   "squadSeasons": 0
+  },
+  {
+   "personNameHe": "תומר אליהו",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1993,
+   "toYear": 1998,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "שרון מימר",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1994,
+   "toYear": 1997,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "תמיר לינהרט",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1985,
+   "toYear": 1995,
+   "squadSeasons": 7
+  },
+  {
+   "personNameHe": "שלום אביטן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1985,
+   "toYear": 1986,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שי רביבו",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2010,
+   "toYear": 2011,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שמואל כהן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 1958,
+   "toYear": 1964,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "שגיב אליהו",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1992,
+   "toYear": 1997,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "שחר כהן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 1994,
+   "toYear": 1999,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "תומר בן יוסף",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2013,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שמעון הרוש",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2012,
+   "toYear": 2014,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "שון מלכה",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2015,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "שמחה חינקיס",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1928,
+   "toYear": 1929,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שלמה פוליאקוב",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1927,
+   "toYear": 1941,
+   "squadSeasons": 14
+  },
+  {
+   "personNameHe": "שגיב יחזקאל",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2013,
+   "toYear": 2017,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "תום אלמדון",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שובל גוזלן",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שלומי אזולאי (חלוץ)",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2022,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "שמואל שיימן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2015,
+   "toYear": 2017,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "שון גולדברג",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2014,
+   "toYear": 2015,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שלמה ספוז'ניקוב",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1957,
+   "toYear": 1961,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "שוקה ברשדסקי",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 1936,
+   "toYear": 1937,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שחר הירש",
+   "position": "FW",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2021,
+   "squadSeasons": 5
+  },
+  {
+   "personNameHe": "שי אליאס",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2016,
+   "toYear": 2022,
+   "squadSeasons": 6
+  },
+  {
+   "personNameHe": "שי אייזן",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2018,
+   "toYear": 2022,
+   "squadSeasons": 4
+  },
+  {
+   "personNameHe": "שמעון ברנס",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 1960,
+   "toYear": 1961,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שלומי אזולאי (קשר)",
+   "position": "MF",
+   "origin": "israeli",
+   "fromYear": 2021,
+   "toYear": 2023,
+   "squadSeasons": 2
+  },
+  {
+   "personNameHe": "שמעון בנודיס",
+   "position": null,
+   "origin": "israeli",
+   "fromYear": 1949,
+   "toYear": 1950,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שחר פיבן",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2024,
+   "toYear": 2027,
+   "squadSeasons": 3
+  },
+  {
+   "personNameHe": "שגיא פנחס",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2025,
+   "toYear": 2026,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "שון בן נשר",
+   "position": "GK",
+   "origin": "israeli",
+   "fromYear": 2026,
+   "toYear": 2027,
+   "squadSeasons": 1
+  },
+  {
+   "personNameHe": "תומר לוי",
+   "position": "DF",
+   "origin": "israeli",
+   "fromYear": 2019,
+   "toYear": 2020,
+   "squadSeasons": 1
+  }
+ ]
+}

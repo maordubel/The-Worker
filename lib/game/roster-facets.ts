@@ -24,17 +24,41 @@ import { fold } from './roster-search'
  *
  *   · **`squad`** — `squads.json` carries `position` and `nationalityHe` per player.
  *     That is the strongest evidence there is, and it covers the current squad.
- *   · **`database`** — `player-facts.json`, the research pass of 15.9.2026 that made
- *     this index worth having. 73 season squads on worldfootball.net, 1933/34 → 2025/26,
- *     read out into 465 Latin names, each one bridged to our Hebrew roster either by an
- *     alias we already held or by a consonant-for-consonant alignment that had to be the
- *     ONLY candidate among all 465. 329 rows came out; nothing was guessed, and the
- *     8 names whose match was not unique are refused by name in `ambiguous`.
- *     See `docs/09-player-facts.md` and `scripts/players/match.py`.
+ *   · **`database`** — `player-facts.json`, the merged research file. It is built from
+ *     five sources by `scripts/players/pipeline.sh`, and every row says which one
+ *     decided it:
+ *
+ *       vikipoel  · **ויקיפועל**, the club's own encyclopedia (`wiki.red-fans.com`) —
+ *                   638 players, and the list our own roster was born from. It is the
+ *                   strongest source for two of the three questions: "foreign or
+ *                   Israeli", because its `שחקנים זרים (כדורגל)` category is the CLUB's
+ *                   own record of who took a foreign slot rather than a guess from
+ *                   citizenship; and the years, because every page carries a
+ *                   `סגל הפועל ת"א (כדורגל) YYYY/YY` category for each season he was in
+ *                   the squad. Cloudflare blocks it to automated access, so it was read
+ *                   through Maor's own browser and checked against it by SHA-256.
+ *       wiki-he   · ויקיפדיה העברית, קטגוריה "כדורגלני הפועל תל אביב" — 433 articles.
+ *                   The position is the man's career position in his own article, and
+ *                   the years are the years he is listed at the club.
+ *       wiki-en   · English Wikipedia, Category:Hapoel Tel Aviv F.C. players — 418
+ *                   articles, of which 58 have no Hebrew article at all.
+ *       wf-all    · worldfootball's all-time table — 552 players, position and
+ *                   nationality each.
+ *       wf-season · worldfootball's 73 season squads, 1933/34 → 2025/26 — the weakest
+ *                   for position (one season's squad slot) and the strongest for the
+ *                   question of WHICH seasons he was actually in the squad.
+ *       archive-qualifier · the archive itself, where it distinguishes two men of the
+ *                   same name by naming the position ("עומר פרץ (חלוץ)").
+ *
+ *     Nothing is guessed. A Hebrew name enters only through a match that was unique in
+ *     both directions, and the ones that were not are printed by name — see
+ *     `docs/09-player-facts.md` and the `refusedMatches` array in the file. Where the
+ *     sources disagree, the strongest wins and the others are kept in `conflicts`
+ *     rather than deleted.
  *   · **`lineup`** — `lineups.json` places eleven named men in `GK`/`D`/`M`/`F` slots.
  *     Those files carry `positionsInferred: true`, which the source itself is telling
  *     us: the slot is where he played THAT night, not a career position. It is recorded
- *     as an inference, labelled as one on screen, and a `database` row overrides it.
+ *     as an inference, labelled as one on screen, and any `database` row overrides it.
  *   · **`name`** — `shirt-numbers.json` marks `hebrewIsTransliteration` and sometimes
  *     carries `personNameLatin`. That is a documented fact about the SPELLING, so it
  *     supports "the source wrote this man's name in Latin" and nothing stronger. It is
@@ -44,11 +68,11 @@ import { fold } from './roster-search'
  * real count, not a silent omission. That bucket is also the shopping list: it is the
  * exact set of players the archive would gain most from.
  *
- * **Measured over the 647 people the archive knows, before and after that pass:**
- * position 64 → 342, Israeli-or-foreign 103 → 345, years-worn 137 → 361, and all three
- * together 32 → **332**. The 315 still bare are not in the Latin source at all; filling
- * them needs either Maor (rule 18) or a ויקיפועל export a human browser has to fetch
- * (rule 11), which is what `players-to-fill.xlsx` is for.
+ * **Measured over the 663 people the archive knows, before this research and after:**
+ * position 64 → **633**, Israeli-or-foreign 103 → **654**, years-worn 137 → **648**, and
+ * all three together 32 → **629**. Every one of the 653 players in the roster now has a
+ * row. The 23 still without a position are the ones whose `תפקיד` field is empty on
+ * ויקיפועל itself — they read `לא מתועד`, because that is what is true.
  */
 
 export type Position = 'GK' | 'DF' | 'MF' | 'FW'
@@ -165,11 +189,13 @@ export function facetIndex(): Map<string, PlayerFacets> {
     }
   }
 
-  // `player-facts.json` — the research pass of 15.9.2026, and the reason this index
-  // stopped being a handful of men. 329 rows read out of 73 season squads on
-  // worldfootball.net and bridged to the Hebrew roster: position, Israeli or foreign,
-  // and the years he wore the shirt. It outranks a single recorded XI (which says
-  // where a man stood on ONE night) and is outranked by our own squad sheet.
+  // `player-facts.json` — the merged research file, and the reason this index stopped
+  // being a handful of men. 653 rows across six sources: position, Israeli or foreign,
+  // and the years he wore the shirt. It outranks a single recorded XI (which says where
+  // a man stood on ONE night) and is outranked by our own squad sheet. The precedence
+  // BETWEEN the five sources is already settled inside the file — `positionFrom` and
+  // `originFrom` there name the one that decided, and `conflicts` keeps what the others
+  // said rather than throwing it away.
   const facts = (playerFactsFile as { records: PlayerFactRow[] }).records
   for (const row of facts) {
     if ((row.confidence ?? 0) < CONFIDENCE_FLOOR) continue

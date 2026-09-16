@@ -146,13 +146,15 @@ describe('סינון השחקנים — no position is ever guessed', () => {
 
   it('places a real share of the roster, and still admits the gap', () => {
     expect(roster.total).toBeGreaterThan(600)
-    // The research pass of 15.9.2026 took this from 66 to well over three hundred by
-    // reading 73 season squads and bridging them to the Hebrew roster. The floor is a
-    // regression guard: if a future change silently drops `player-facts.json`, the
-    // filters quietly become decorative again and this is what says so.
-    expect(roster.withPosition).toBeGreaterThan(300)
-    expect(roster.withOrigin).toBeGreaterThan(300)
-    // And the gap is still real. A day when every one of 645 names has a position is a
+    // Three research passes. 15.9.2026 took this from 64 to 342 off worldfootball's
+    // season squads; 16.9.2026 took it to 564 with the two Wikipedia categories and
+    // worldfootball's all-time table; then Maor pointed at ויקיפועל, the club's own
+    // encyclopedia, which took origin to every single name. The floor is a regression
+    // guard: if a future change silently drops `player-facts.json`, the filters quietly
+    // become decorative again and this is what says so.
+    expect(roster.withPosition).toBeGreaterThan(600)
+    expect(roster.withOrigin).toBeGreaterThan(640)
+    // And the gap is still real. A day when every one of 653 names has a position is a
     // day somebody guessed, unless the same commit also brought the source that knows.
     expect(roster.withPosition).toBeLessThan(roster.total)
   })
@@ -211,75 +213,138 @@ describe('סינון השחקנים — no position is ever guessed', () => {
   })
 })
 
-describe('player-facts — the research pass, and what it is not allowed to do', () => {
-  const file = JSON.parse(
-    readFileSync(join(__dirname, '..', 'content', 'manual', 'player-facts.json'), 'utf8'),
-  ) as {
+describe('player-facts — the merged research file, and what it is not allowed to do', () => {
+  const read = (name: string) =>
+    JSON.parse(readFileSync(join(__dirname, '..', 'content', 'manual', name), 'utf8'))
+
+  const file = read('player-facts.json') as {
     records: Array<{
       personNameHe: string
-      personNameLatin: string
-      position: string
-      origin: string
-      fromYear: number
-      toYear: number
-      matchedBy: string
+      personNameLatin?: string
+      position: string | null
+      positionFrom: string | null
+      origin: string | null
+      originFrom: string | null
+      fromYear: number | null
+      toYear: number | null
+      sources: string[]
       confidence: number
-      alsoSpelled?: string[]
     }>
+    conflicts: Array<{ personNameHe: string; field: string }>
     unknown: string[]
-    ambiguous: Record<string, string[]>
+    refusedMatches: Array<{ personNameHe: string; source: string; reason: string }>
+    sources: Array<{ key: string }>
   }
 
-  it('states all three fields on every row it states anything on', () => {
+  const SOURCES = new Set([
+    'squad',
+    'vikipoel',
+    'wiki-he',
+    'wiki-en',
+    'wf-all',
+    'wf-season',
+    'archive-qualifier',
+  ])
+
+  it('states nothing without saying who said it', () => {
+    // The whole file rests on this. A position with no `positionFrom` is a position
+    // somebody typed, and there is no way to tell it apart from one somebody read.
     for (const row of file.records) {
-      expect(['GK', 'DF', 'MF', 'FW'], row.personNameHe).toContain(row.position)
-      expect(['israeli', 'foreign'], row.personNameHe).toContain(row.origin)
-      expect(row.fromYear, row.personNameHe).toBeGreaterThan(1900)
-      expect(row.toYear, row.personNameHe).toBeGreaterThanOrEqual(row.fromYear)
+      expect(row.sources.length, row.personNameHe).toBeGreaterThan(0)
+      for (const key of row.sources) expect(SOURCES.has(key), `${row.personNameHe}: ${key}`).toBe(true)
+      if (row.position !== null) {
+        expect(['GK', 'DF', 'MF', 'FW'], row.personNameHe).toContain(row.position)
+        expect(SOURCES.has(row.positionFrom ?? ''), row.personNameHe).toBe(true)
+      }
+      if (row.origin !== null) {
+        expect(['israeli', 'foreign'], row.personNameHe).toContain(row.origin)
+        expect(SOURCES.has(row.originFrom ?? ''), row.personNameHe).toBe(true)
+      }
+      if (row.fromYear !== null) {
+        expect(row.fromYear, row.personNameHe).toBeGreaterThan(1900)
+        expect(row.toYear ?? 0, row.personNameHe).toBeGreaterThanOrEqual(row.fromYear)
+      }
+      expect(row.confidence, row.personNameHe).toBeGreaterThanOrEqual(2)
     }
   })
 
-  it('says how every row was arrived at', () => {
-    // `matchedBy` is the audit trail. `alias` means our own Latin spelling agreed with
-    // the source; `transliteration` means the two were aligned consonant by consonant
-    // and the result was unique. A row with neither is a row nobody can check.
-    for (const row of file.records) {
-      expect(['alias', 'transliteration'], row.personNameHe).toContain(row.matchedBy)
-    }
-  })
-
-  it('claims one man once, and declares it when the roster spells him twice', () => {
+  it('claims one man once', () => {
     const he = file.records.map((row) => row.personNameHe)
     expect(new Set(he).size).toBe(he.length)
+  })
 
-    // Four men are in the roster under two Hebrew spellings (אישטוואן/אישטוון פישונט
-    // and friends). Both rows stay, because somebody searching either spelling should
-    // find him — but each one has to SAY so, or a row count reads as a player count.
-    const byLatin = new Map<string, string[]>()
-    for (const row of file.records) {
-      byLatin.set(row.personNameLatin, [...(byLatin.get(row.personNameLatin) ?? []), row.personNameHe])
-    }
-    for (const [latin, names] of byLatin) {
-      if (names.length === 1) continue
-      for (const name of names) {
-        const row = file.records.find((candidate) => candidate.personNameHe === name)
-        expect(row?.alsoSpelled, `${latin} is claimed by ${names.join(' / ')} undeclared`).toEqual(
-          names.filter((other) => other !== name).sort(),
-        )
-      }
+  it('keeps what the losing source said instead of deleting it', () => {
+    // Five sources will not agree about every winger, and the merge is not allowed to
+    // make the disagreement disappear. `conflicts` is where it goes — each entry names
+    // the man, the field, what each source said, and which one was taken.
+    expect(file.conflicts.length).toBeGreaterThan(0)
+    for (const clash of file.conflicts) {
+      expect(clash.personNameHe).toBeTruthy()
+      expect(['position', 'origin', 'years', 'club']).toContain(clash.field)
+      expect(file.records.find((row) => row.personNameHe === clash.personNameHe)).toBeTruthy()
     }
   })
 
   it('keeps the gap on the page instead of filling it in', () => {
-    // The 328 the source does not cover, and the handful it contradicts itself about,
-    // are LISTED. That is the difference between a record and a decoration: deleting
-    // these two arrays would make the file look complete and be less true.
-    expect(file.unknown.length).toBeGreaterThan(0)
+    // ויקיפועל closed `unknown` entirely — every man in the roster now has a row. The
+    // gap did not disappear, it MOVED: it is now the rows whose `position` is null
+    // because ויקיפועל's own `תפקיד` field is empty on those pages. A null is the
+    // honest shape for that, and the day none of them is null is the day somebody
+    // guessed.
+    const bare = file.records.filter((row) => row.position === null)
+    expect(bare.length).toBeGreaterThan(0)
+    expect(bare.every((row) => row.positionFrom === null)).toBe(true)
     for (const name of file.unknown) {
       expect(file.records.find((row) => row.personNameHe === name)).toBeUndefined()
     }
-    for (const name of Object.keys(file.ambiguous)) {
-      expect(file.records.find((row) => row.personNameHe === name)).toBeUndefined()
+    // A refusal is about a SOURCE, not about a man: "worldfootball did not link to him"
+    // leaves him free to be covered by another source, or by the archive's own
+    // qualifier. What it must never do is quietly become a fact from the source that
+    // refused.
+    expect(file.refusedMatches.length).toBeGreaterThan(0)
+    for (const refusal of file.refusedMatches) {
+      expect(refusal.reason.length).toBeGreaterThan(20)
+      const row = file.records.find((candidate) => candidate.personNameHe === refusal.personNameHe)
+      if (!row) continue
+      expect(row.sources, refusal.personNameHe).not.toContain(refusal.source)
+      expect(row.positionFrom, refusal.personNameHe).not.toBe(refusal.source)
+      expect(row.originFrom, refusal.personNameHe).not.toBe(refusal.source)
     }
+  })
+
+  it('covers most of the roster and still admits what it does not', () => {
+    const roster = read('players-roster.json') as { records: Array<{ fullNameHe: string }> }
+    const total = roster.records.length
+    expect(file.records.length + file.unknown.length).toBe(total)
+    const three = file.records.filter(
+      (row) => row.position && row.origin && row.fromYear !== null,
+    ).length
+    expect(three).toBeGreaterThan(600)
+    expect(three).toBeLessThan(total) // the day this is equal, somebody guessed
+  })
+
+  it('carries its two raw sources beside it, so the merge can be re-run', () => {
+    // rule 11: the merge is reproducible from the repo, with no network and no /tmp.
+    const seasons = read('player-facts-seasons.json') as {
+      records: Array<{ personNameHe: string; matchedBy: string }>
+    }
+    for (const row of seasons.records) {
+      expect(['alias', 'transliteration'], row.personNameHe).toContain(row.matchedBy)
+    }
+    const vp = read('player-facts-vikipoel.json') as {
+      table: Array<{ personNameHe: string; origin: string }>
+      source: { url: string; read: number }
+    }
+    expect(vp.table.length).toBeGreaterThan(600)
+    expect(vp.source.url).toContain('wiki.red-fans.com')
+    expect(vp.table.every((row) => row.origin === 'israeli' || row.origin === 'foreign')).toBe(true)
+    const wiki = read('player-facts-wiki.json') as {
+      wikiHe: { table: unknown[]; matched: unknown[] }
+      wikiEn: { table: unknown[]; matched: unknown[] }
+      wfAllPlayers: { table: unknown[]; matched: unknown[] }
+    }
+    expect(wiki.wikiHe.table.length).toBeGreaterThan(400)
+    expect(wiki.wikiEn.table.length).toBeGreaterThan(40)
+    expect(wiki.wfAllPlayers.table.length).toBeGreaterThan(500)
   })
 })
