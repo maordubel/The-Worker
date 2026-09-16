@@ -28,6 +28,7 @@ export type GateSeoSlug =
   | 'lineup'
   | 'kits'
   | 'kits-build'
+  | 'kits-archive'
   | 'memory'
   | 'polls'
   | 'goal'
@@ -73,6 +74,15 @@ const GATE_SEO: Record<GateSeoSlug, GateSeoEntry> = {
     path: '/kits',
     titleKey: 'screen.kits.title',
     descriptionKey: 'seo.kits.desc',
+    image: 'kits',
+  },
+  // The photograph archive shares gate 5's card rather than getting one of its own: it
+  // is the same wing, and an OG card that said something different would be inventing a
+  // gate. The route is separate because it is swept and because it is linkable.
+  'kits-archive': {
+    path: '/kits/archive',
+    titleKey: 'screen.kitarchive.title',
+    descriptionKey: 'screen.kitarchive.sub',
     image: 'kits',
   },
   'kits-build': {

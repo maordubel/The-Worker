@@ -1,10 +1,16 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
 import { dealKitRound, gradeKitPuzzle, kitPuzzleCount } from '@/lib/game/kitBuild'
 import { KIT_ROUND, PART_ORDER, PART_POINTS, PERFECT_BONUS } from '@/lib/game/kit-build-run'
+import {
+  archiveDecades,
+  archiveShirts,
+  archiveSources,
+  archiveVariants,
+} from '@/lib/kit/archive'
 import { facetCounts, kitCatalog } from '@/lib/kit/catalog'
 import { CREST_FILES, CREST_MARKS, crestArt, crestMark } from '@/lib/kit/crestMarks'
 import { seasonKits } from '@/lib/kit/seasons'
@@ -235,5 +241,125 @@ describe('שער 5 — האוסף', () => {
     expect(wing).not.toContain('localStorage')
     expect(store).toContain('localStorage')
     expect(store).toContain('readonly remote = false')
+  })
+})
+
+/**
+ * ארכיון החולצות — 168 photographs, and the two things that can rot.
+ *
+ * A photograph archive has exactly two failure modes worth a test, and neither of them
+ * is "does the grid render". The first is a file on disk that no row describes, or a
+ * row that describes a file that is not there — an archive that lists a shirt it cannot
+ * show is worse than one that admits it has 168. The second is a date the archive was
+ * never told: 114 of these are dated by a single year in the source, and the day
+ * somebody "tidies" that into a season is the day the archive starts lying quietly.
+ */
+describe('ארכיון החולצות — התצלומים, והתאריכים שלא ידועים', () => {
+  const shirts = archiveShirts()
+  const messages = JSON.parse(readFileSync(join(ROOT, 'messages/he.json'), 'utf8')) as Record<
+    string,
+    string
+  >
+
+  it('shows every file it has, and has every file it shows', () => {
+    const onDisk = new Set(
+      readdirSync(join(ROOT, 'public/kits')).filter((name) => name.endsWith('.webp')),
+    )
+    for (const shirt of shirts) {
+      const file = shirt.src.replace('/kits/', '')
+      expect(onDisk.has(file), `${shirt.slug} is in the archive but not on disk`).toBe(true)
+      onDisk.delete(file)
+    }
+    // A file with no row is a photograph nobody can say anything about — and it would
+    // ship, because it is in `public/`. The provenance audit fails on it too.
+    expect([...onDisk], 'files in public/kits that no archive row covers').toEqual([])
+  })
+
+  it('carries the size of the file that is actually there', () => {
+    // The yellow count cannot be re-derived in a test — nothing here decodes WebP — so
+    // the byte length stands in for it. A shirt re-exported, re-cropped or re-encoded
+    // without re-running `scripts/kits/build-archive.py` changes its size, and the
+    // measurement the third yellow exemption rests on would be describing a file that
+    // no longer exists. This is the cheap check that catches that.
+    for (const shirt of shirts) {
+      const size = statSync(join(ROOT, 'public', shirt.src)).size
+      expect(size, `${shirt.slug}: re-measure with scripts/kits/build-archive.py`).toBe(
+        shirt.bytes,
+      )
+    }
+  })
+
+  it('never turns a year into a season', () => {
+    for (const shirt of shirts) {
+      if (shirt.seasonAmbiguous) {
+        expect(shirt.seasonLabel, shirt.slug).toBeNull()
+        expect(shirt.yearRaw, shirt.slug).toBeGreaterThan(1900)
+      } else {
+        expect(shirt.seasonLabel, shirt.slug).toMatch(/^\d{4}\/\d{2}$/)
+      }
+    }
+  })
+
+  it('says "בערך" on screen rather than inventing a season', () => {
+    // The uncertainty has to reach the reader, in the same type as a certain date — the
+    // read-model can only refuse to guess, and refusing silently would look identical.
+    const wing = readFileSync(join(ROOT, 'app/kits/archive/ArchiveWing.tsx'), 'utf8')
+    expect(wing).toContain('seasonAmbiguous')
+    expect(wing).toContain('kits.archive.approx')
+    expect(messages['kits.archive.approx']).toBe('בערך')
+    expect(messages['kits.archive.approxOf']).toContain('בערך')
+    // and the note that explains WHY is on the card of every such shirt
+    expect(wing).toContain('kits.archive.approxNote')
+  })
+
+  it('joins the maker only where the season is certain', () => {
+    // "The 2016 shirt" straddles two supply spells often enough to matter, so an
+    // ambiguous row gets no maker rather than the likelier of two.
+    for (const shirt of shirts) {
+      if (shirt.seasonAmbiguous) expect(shirt.makerHe, shirt.slug).toBeNull()
+    }
+    // and the join actually resolves for the seasons the supply timeline covers
+    expect(shirts.filter((shirt) => shirt.makerHe !== null).length).toBeGreaterThan(30)
+  })
+
+  it('reads newest first, and every shirt carries a source', () => {
+    const years = shirts.map((shirt) => shirt.year)
+    expect([...years].sort((a, b) => b - a)).toEqual(years)
+    for (const shirt of shirts) {
+      expect(shirt.sourceTitle, shirt.slug).toMatch(/\S/)
+      expect(shirt.sourceUrl, shirt.slug).toMatch(/^https:\/\//)
+      expect(['vikipoel', 'fka']).toContain(shirt.source)
+    }
+  })
+
+  it('counts its facets against the archive itself', () => {
+    const decades = archiveDecades(shirts)
+    const variants = archiveVariants(shirts)
+    expect(decades.reduce((sum, row) => sum + row.count, 0)).toBe(shirts.length)
+    expect(variants.reduce((sum, row) => sum + row.count, 0)).toBe(shirts.length)
+    // an empty decade is not a filter — every rail entry has something behind it
+    for (const row of decades) expect(row.count, String(row.decade)).toBeGreaterThan(0)
+    for (const row of variants) expect(row.count, row.variant).toBeGreaterThan(0)
+    expect(archiveSources(shirts).reduce((sum, row) => sum + row.count, 0)).toBe(shirts.length)
+  })
+
+  it('credits the photographer, because a photographer is a source with a name', () => {
+    const vikipoel = archiveSources(shirts).find((row) => row.key === 'vikipoel')
+    expect(vikipoel?.creditHe).toContain('ישי צבי')
+    const wing = readFileSync(join(ROOT, 'app/kits/archive/ArchiveWing.tsx'), 'utf8')
+    expect(wing).toContain('creditHe')
+  })
+
+  it('serves the bytes it measured', () => {
+    // Next's optimiser re-encodes, and a re-encode invents chroma (rules 27, 61) — which
+    // would make the yellow number printed on the card untrue. The archive uses a plain
+    // <img>, and the marker the sweep hides is on every one of them.
+    const wing = readFileSync(join(ROOT, 'app/kits/archive/ArchiveWing.tsx'), 'utf8')
+    expect(wing).not.toContain('next/image')
+    // `<img` followed by a newline — the elements, not the `<img>` in the doc comment
+    const photos = wing.match(/<img\n/g) ?? []
+    const marks = wing.match(/data-archive-photo/g) ?? []
+    expect(photos.length).toBeGreaterThan(0)
+    expect(marks.length).toBe(photos.length)
   })
 })

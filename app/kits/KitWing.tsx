@@ -36,10 +36,13 @@ const FACETS: { id: Facet; key: MessageKey }[] = [
 export function KitWing({
   catalog,
   counts,
+  archiveCount,
   designer,
 }: {
   catalog: CatalogKit[]
   counts: Record<Facet, number>
+  /** how many photographs the archive holds — counted on the server, never guessed */
+  archiveCount: number
   /** the free designer, rendered by the server and passed through as a slot */
   designer: React.ReactNode
 }) {
@@ -154,6 +157,28 @@ export function KitWing({
               {t('kits.facet.locked')} · <Num>{String(catalog.length - owned)}</Num>
             </button>
           </div>
+
+          {/* The way out to the photographs.
+              A drawn shirt and a photograph of that shirt are two different claims, and
+              the collection is about the first. Rather than mixing 168 photographs into
+              a grid whose whole point is what you can rebuild from memory, the archive
+              gets its own door — and the door says what is behind it. */}
+          <a
+            href="/kits/archive"
+            className="mt-3 flex items-center justify-between gap-3 border-rule border-ink bg-ink px-4 py-3 text-paper"
+          >
+            <span className="min-w-0">
+              <span className="block font-display text-step-0 leading-tight">
+                <Num>{t('kits.archive.enter', { n: String(archiveCount) })}</Num>
+              </span>
+              <span className="mt-1 block font-body text-[11.5px] leading-snug text-concrete">
+                {t('kits.archive.enterBody')}
+              </span>
+            </span>
+            <span aria-hidden="true" className="shrink-0 font-poster text-[22px] leading-none text-red">
+              ←
+            </span>
+          </a>
 
           <ul className="mt-3 grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
             {shown.map((kit) => (

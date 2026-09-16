@@ -15,6 +15,15 @@
  * rather than allowing yellow on the wall: the exemption covers one file, not one route,
  * and a scanner that looked away from a whole screen would hide the next real defect.
  *
+ * The kit archive is the same principle applied to the THIRD exemption. `public/kits/`
+ * holds 168 photographs of real shirts, 71 of which carry yellow that belongs to the
+ * garment — a Europa League badge, Visa's gold band, an orange keeper's jersey — and
+ * the exemption is the folder, not the screen. So the sweep hides every element marked
+ * `data-archive-photo` and measures what is left: the chrome, the type, the filter rail
+ * and the background of `/kits/archive` are held to rule 8 exactly like every other
+ * screen. Hiding the photographs rather than skipping the route is the whole point —
+ * the next defect on that page is still caught.
+ *
  *   node scripts/brand/qa-sweep.mjs [http://127.0.0.1:3000]
  */
 import { chromium } from 'playwright'
@@ -34,6 +43,8 @@ const VAL_MIN = 0.35
 const ROUTES = [
   '/', '/xi', '/trivia', '/trivia/general', '/lineup', '/kits', '/kits/build',
   '/memory', '/polls', '/goal', '/tik', '/derby', '/timeline', '/ussishkin',
+  // the photograph archive — swept with the photographs hidden, see the header
+  '/kits/archive',
   // THE WORKER LIFE is swept like any other screen — its canvas is pixels on the wall
   // and rule 8 does not care that they were drawn by a Graphics call. What this sweep
   // cannot do is PLAY it; `scripts/life/playthrough.mjs` does that.
@@ -73,6 +84,8 @@ for (const width of WIDTHS) {
     const page = await context.newPage()
     const errors = []
     const blocked = []
+    /** RSC prefetches this sweep's own reload cancelled — counted, never a fault */
+    const cancelled = []
 
     /**
      * Two different things arrive as "console error", and conflating them is how a
@@ -87,8 +100,31 @@ for (const width of WIDTHS) {
      */
     const origin = new URL(BASE).origin
     page.on('requestfailed', (request) => {
-      if (request.url().startsWith(origin)) errors.push(`request failed: ${request.url()}`)
-      else blocked.push(new URL(request.url()).host)
+      if (!request.url().startsWith(origin)) {
+        blocked.push(new URL(request.url()).host)
+        return
+      }
+      /**
+       * A third case, and it is this scanner's own doing.
+       *
+       * Next prefetches every `<Link>` on screen as an RSC fetch. Two lines below, the
+       * sweep RELOADS the page to dismiss the opening animation — and the reload
+       * cancels whichever prefetches are still in flight, which arrive here as
+       * `net::ERR_ABORTED` on a `_rsc=` url. That is the checker measuring itself: the
+       * wall, the trivia wing and the member book "failed" on 10 of 56 screens for
+       * weeks, always on a prefetch, never on anything a reader could see.
+       *
+       * The exemption is as narrow as the evidence: ABORTED, and an RSC prefetch. A
+       * same-origin request that fails for any other reason, or an aborted anything
+       * else, is still a fault — and the count is printed, so a page that suddenly
+       * cancels forty prefetches is visible rather than silent.
+       */
+      const aborted = request.failure()?.errorText === 'net::ERR_ABORTED'
+      if (aborted && request.url().includes('_rsc=')) {
+        cancelled.push(request.url())
+        return
+      }
+      errors.push(`request failed: ${request.url()} — ${request.failure()?.errorText ?? 'unknown'}`)
     })
     page.on('console', (message) => {
       if (message.type() !== 'error') return
@@ -107,6 +143,22 @@ for (const width of WIDTHS) {
     await page.reload({ waitUntil: 'networkidle' })
     await page.waitForTimeout(500)
 
+    /**
+     * The archive photographs come out before the screenshot, and the count of what was
+     * removed is reported — a selector that silently matched nothing would turn this
+     * into a route the sweep pretends to check. `visibility: hidden` rather than
+     * `display: none` so the layout, and therefore the overflow measurement, is the
+     * layout a reader actually gets.
+     */
+    const hidden = await page.evaluate(() => {
+      const photos = [...document.querySelectorAll('[data-archive-photo]')]
+      for (const photo of photos) photo.style.visibility = 'hidden'
+      return photos.length
+    })
+    if (route === '/kits/archive' && hidden === 0) {
+      errors.push('no [data-archive-photo] found on the archive — the sweep would be measuring a page that is not there')
+    }
+
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     )
@@ -123,6 +175,8 @@ for (const width of WIDTHS) {
     const line =
       `${String(width).padStart(4)}  ${route.padEnd(18)} overflow ${String(overflow).padStart(3)}` +
       `  errors ${String(errors.length).padStart(2)}  yellow ${String(yellow).padStart(6)}` +
+      (hidden > 0 ? `  (${hidden} archive photo(s) hidden before the count)` : '') +
+      (cancelled.length > 0 ? `  (${cancelled.length} prefetch(es) cancelled by the reload)` : '') +
       (ext.length > 0 ? `  (blocked by this environment: ${ext.join(', ')})` : '')
     console.log(bad ? `${line}   ← FAULT` : line)
     for (const error of errors.slice(0, 3)) console.log(`        ${error}`)

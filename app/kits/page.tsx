@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
+import { archiveShirts } from '@/lib/kit/archive'
 import { facetCounts, kitCatalog } from '@/lib/kit/catalog'
 import { homeKits } from '@/lib/kit/seasons'
 import { t } from '@/lib/i18n'
@@ -33,6 +34,7 @@ export default function KitsPage() {
         <KitWing
           catalog={catalog}
           counts={facetCounts(catalog)}
+          archiveCount={archiveShirts().length}
           designer={<KitDesigner rack={homeKits()} />}
         />
       ) : (

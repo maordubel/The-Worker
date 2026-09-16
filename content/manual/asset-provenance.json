@@ -1,5 +1,5 @@
 {
- "note": "מאיפה הגיע כל נכס מתועד ששולח למשחק — 1,218 קבצים תחת public/life, מקובצים ל־44 שורות. השדה origin עונה על שאלה אחת בלבד: איך הקובץ הזה נכנס לריפו. הוא אינו טוען לדעת מי צייר, צילם או מחזיק בזכויות על מה שרואים בתמונה. כל שורה מצטטת את הסקריפט או המניפסט בריפו שממנו הידיעה נלקחה; שום כתובת אינטרנט לא הומצאה, ובכל מקום שבו המקור אינו רשום בשום מקום כתוב origin: \"unknown\" ו־confidence: 0 — ארבע שורות כאלה, והן מחכות לאישור של מאור. סולם הביטחון: 2 = הריפו מתעד את המקור במפורש; 1 = מתועד, אבל היוצר או הרישיון של החומר המקורי אינם ידועים; 0 = לא מתועד כלל. origin: maor-upload | archive-scan | original-artwork | procedural | unknown. kind: backdrop | figure | prop | photo-scan | card | document | audio | video | ui | generated. treatment הוא רשימת הפעולות שהקובץ עבר, ו־de-yellow בתוכה הוא חוק 8 (אין צהוב בשום מקום) שנאכף על הנכס עצמו ולא רק על הקוד. הבדיקה: scripts/life/asset-provenance.mjs — נכשלת אם קובץ חדש נחת ואף שורה לא מכסה אותו, או אם שורה כאן כבר לא מכסה כלום. ההסבר לבעלים: docs/life/ASSET-PROVENANCE.md.",
+ "note": "מאיפה הגיע כל נכס מתועד ששולח למשחק — 1,437 קבצים תחת public/life ו-public/kits, מקובצים ל־49 שורות. public/kits נוסף ב-16.9.2026 ואינו חלק מ-THE WORKER LIFE: אלה 168 תצלומי חולצות אמיתיות, ותצלום תיעודי בלי שורה שאומרת מאיפה הוא בא הוא בדיוק הכישלון שהמניפסט הזה נכתב כדי למנוע. השדה origin עונה על שאלה אחת בלבד: איך הקובץ הזה נכנס לריפו. הוא אינו טוען לדעת מי צייר, צילם או מחזיק בזכויות על מה שרואים בתמונה. כל שורה מצטטת את הסקריפט או המניפסט בריפו שממנו הידיעה נלקחה; שום כתובת אינטרנט לא הומצאה, ובכל מקום שבו המקור אינו רשום בשום מקום כתוב origin: \"unknown\" ו־confidence: 0 — ארבע שורות כאלה, והן מחכות לאישור של מאור. סולם הביטחון: 2 = הריפו מתעד את המקור במפורש; 1 = מתועד, אבל היוצר או הרישיון של החומר המקורי אינם ידועים; 0 = לא מתועד כלל. origin: maor-upload | archive-scan | original-artwork | procedural | unknown. kind: backdrop | figure | prop | photo-scan | card | document | audio | video | ui | generated. treatment הוא רשימת הפעולות שהקובץ עבר, ו־de-yellow בתוכה הוא חוק 8 (אין צהוב בשום מקום) שנאכף על הנכס עצמו ולא רק על הקוד. הבדיקה: scripts/life/asset-provenance.mjs — נכשלת אם קובץ חדש נחת ואף שורה לא מכסה אותו, או אם שורה כאן כבר לא מכסה כלום. ההסבר לבעלים: docs/life/ASSET-PROVENANCE.md.",
  "confidence": 1,
  "source": {
   "kind": "manual",
@@ -1689,6 +1689,42 @@
    ],
    "confidence": 2,
    "noteHe": "שני שלטים מחזית בלומפילד — קופה ושער. הגיעו באותה מסירה ובאותו מסך ירוק כמו הדמויות."
+  },
+  {
+   "key": "kit-photo-vikipoel",
+   "kind": "photo-scan",
+   "origin": "archive-scan",
+   "folder": "public/kits",
+   "match": [
+    "vp-*.webp"
+   ],
+   "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%97%D7%95%D7%9C%D7%A6%D7%95%D7%AA_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+   "sourceTitle": "ויקיפועל — \"חולצות (כדורגל)\", התצלומים באדיבות ישי צבי · scripts/kits/build-archive.py · content/manual/kit-photos.json",
+   "treatment": [
+    "cut-out",
+    "centre",
+    "encode-webp"
+   ],
+   "confidence": 2,
+   "noteHe": "114 חזיתות של חולצות אמיתיות, מתוך 199 תצלומים בדף החולצות של ויקיפועל. 85 גבים נופו ביד לבקשת מאור — רק קדימה. שם הקובץ במקור אינו אמין: ב-23 מקרים דווקא הקובץ עם \" b\" הוא החזית, ובשני מקרים שני הקבצים הם חזיתות של שתי חולצות שוער שונות, ולכן כל זוג נבדק בעין ולא לפי השם. כל קובץ נחתך מהרקע (u2net), מרוכז על בד שקוף 760×760 וקודד פעם אחת ל-WebP; הצהוב שבו נספר על פענוח הבייטים שנשמרו ונרשם ב-kit-photos.json."
+  },
+  {
+   "key": "kit-photo-fka",
+   "kind": "photo-scan",
+   "origin": "archive-scan",
+   "folder": "public/kits",
+   "match": [
+    "fka-*.webp"
+   ],
+   "sourceUrl": "https://www.footballkitarchive.com/hapoel-tel-aviv-kits-t785/",
+   "sourceTitle": "footballkitarchive.com — Hapoel Tel Aviv Kit History · scripts/kits/build-archive.py · content/manual/kit-photos.json",
+   "treatment": [
+    "cut-out",
+    "centre",
+    "encode-webp"
+   ],
+   "confidence": 2,
+   "noteHe": "54 תצלומי מוצר על רקע לבן נקי, והם המקור היחיד שמכסה את 1949 עד 1984. 74 התמונות האחרות באותו דף נפסלו: הן צילומי משחק, ובהן שחקני יריבה ורקע מגרש — כלומר בדיוק מה שכלל 8 קיים בגללו. המקור הזה מתארך בעונה מפורשת ולכן seasonLabel שלו ודאי, בשונה מוויקיפועל. אותו עיבוד בדיוק: חיתוך מהרקע, מרכוז על 760×760 שקוף, קידוד יחיד ומדידה על הפענוח."
   }
  ]
 }

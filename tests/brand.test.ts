@@ -5,7 +5,12 @@ import { describe, expect, it } from 'vitest'
 import { PNG } from 'pngjs'
 
 import { isYellow, isYellowHex } from '@/lib/isYellow'
-import { YELLOW_EXEMPTIONS, yellowAllowed } from '@/lib/brand/yellowExemptions'
+import {
+  YELLOW_EXEMPTIONS,
+  YELLOW_PHOTO_FOLDERS,
+  yellowAllowed,
+  yellowPhotoAllowed,
+} from '@/lib/brand/yellowExemptions'
 import { PITCH } from '@/lib/game/goal-zones'
 import { qaAllowed } from '@/lib/qa'
 
@@ -559,6 +564,80 @@ describe('חוק הצהוב — the one exemption, and the fence around it', () 
   it('keeps the exempt asset out of every screen but the opening', () => {
     const sources = SOURCES.filter(({ text }) => text.includes('/video/intro.mp4'))
     expect(sources.map(({ path }) => path.split('/').pop())).toEqual(['Intro.tsx'])
+  })
+})
+
+/**
+ * החריג השלישי — the folder of photographs, and the numbers that keep it honest.
+ *
+ * This exemption is the only prefix match in the codebase, which makes it the one that
+ * could quietly grow. So it is fenced on three sides: exactly one folder, an approver
+ * and a date like the other two, and — the part that matters — the measurement is
+ * RE-DERIVED here from `content/manual/kit-photos.json` rather than trusted. A grant
+ * that says "71 of 168" and a folder that holds something else is a grant for a thing
+ * nobody approved.
+ */
+describe('חוק הצהוב — התצלומים התיעודיים, והמדידה שמאחורי האישור', () => {
+  const photos = JSON.parse(
+    readFileSync(join(ROOT, 'content/manual/kit-photos.json'), 'utf8'),
+  ) as { records: Array<{ slug: string; yellowPx: number; yellowPct: number }> }
+
+  it('names exactly one folder, with an approver and a date', () => {
+    expect(YELLOW_PHOTO_FOLDERS).toHaveLength(1)
+    expect(YELLOW_PHOTO_FOLDERS[0]?.folder).toBe('public/kits/')
+    for (const entry of YELLOW_PHOTO_FOLDERS) {
+      expect(entry.approvedBy, entry.folder).toMatch(/\S/)
+      expect(entry.approvedOn, entry.folder).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+      expect(entry.measuredOn, entry.folder).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+      expect(entry.why.length, entry.folder).toBeGreaterThan(20)
+      // a folder exemption that ends in no slash would match `public/kitsomething`
+      expect(entry.folder.endsWith('/'), entry.folder).toBe(true)
+    }
+  })
+
+  it('carries the measurement it was granted on, re-counted from the data', () => {
+    const entry = YELLOW_PHOTO_FOLDERS[0]
+    const withYellow = photos.records.filter((row) => row.yellowPx > 0)
+    // Counted on PIXELS. Four shirts carry a single yellow pixel and round to 0.000%;
+    // rule 8 has no rounding mode, and the grant must describe the same set.
+    expect(entry?.filesTotal).toBe(photos.records.length)
+    expect(entry?.filesWithYellow).toBe(withYellow.length)
+    expect(entry?.maxPercent).toBe(
+      Math.max(...photos.records.map((row) => row.yellowPct)),
+    )
+  })
+
+  it('is a folder, and only that folder', () => {
+    expect(yellowPhotoAllowed('public/kits/vp-1985-away.webp')).toBe(true)
+    expect(yellowPhotoAllowed('public/art/celebration.png')).toBe(false)
+    expect(yellowPhotoAllowed('public/life/art/pitch.webp')).toBe(false)
+    // the near-miss the trailing slash exists to stop
+    expect(yellowPhotoAllowed('public/kitsplash.png')).toBe(false)
+    // and it never leaks into the file list, which stays an exact match
+    expect(yellowAllowed('public/kits/vp-1985-away.webp')).toBe(false)
+  })
+
+  it('is swept, with the photographs hidden rather than the route skipped', () => {
+    const sweep = readFileSync(join(ROOT, 'scripts/brand/qa-sweep.mjs'), 'utf8')
+    expect(sweep).toContain("'/kits/archive'")
+    expect(sweep).toContain('[data-archive-photo]')
+    // and it fails loudly if the selector ever stops matching — a sweep that silently
+    // measures nothing is the failure mode this whole file exists to prevent
+    expect(sweep).toContain('hidden === 0')
+  })
+
+  it('is covered by the provenance audit, like every other shipped photograph', () => {
+    const audit = readFileSync(join(ROOT, 'scripts/life/asset-provenance.mjs'), 'utf8')
+    expect(audit).toContain("'public/kits'")
+    const manifest = JSON.parse(
+      readFileSync(join(ROOT, 'content/manual/asset-provenance.json'), 'utf8'),
+    ) as { records: Array<{ folder: string; origin: string; confidence: number }> }
+    const rows = manifest.records.filter((row) => row.folder === 'public/kits')
+    expect(rows.length).toBeGreaterThan(0)
+    for (const row of rows) {
+      expect(row.origin).toBe('archive-scan')
+      expect(row.confidence).toBe(2)
+    }
   })
 })
 

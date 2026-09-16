@@ -105,3 +105,69 @@ export function runtimeYellow(surface: string): string {
   if (!entry) throw new Error(`runtimeYellow: "${surface}" is not an approved yellow surface`)
   return entry.colour
 }
+
+
+/**
+ * החריג השלישי — צהוב שהוא עובדה על החפץ, לא בחירה של מעצב.
+ *
+ * The first two entries are about something we DREW: a frame of an animation, a kit in a
+ * 3D scene. Both are choices, and both were granted as a single named thing. Archive
+ * photographs are a third kind, and the difference is not a matter of degree:
+ *
+ *   **nobody chose this yellow.** It is the Europa League badge stitched on the sleeve,
+ *   the gold band Visa printed across the 1985 away shirt, an orange goalkeeper jersey.
+ *   The shirt is what it is. Editing the yellow out of a photograph of a real garment
+ *   does not enforce rule 8 — it falsifies the archive, which is the worse failure of
+ *   the two.
+ *
+ * On 16.9.2026 the measurement was put to Maor before the ask, and it was remeasured on
+ * the finished folder: **71 of 168 photographs carry pixels in `lib/isYellow.ts`'s band,
+ * the largest 5.214% on the 1985 away shirt with Visa's gold band across it, most under
+ * 0.3% and all of them a badge, a trim or an orange keeper's jersey.** He chose this over
+ * removing it and over dropping the photographs.
+ *
+ * The shape of the grant is deliberately NOT "photographs may be yellow":
+ *
+ *  · **It is a folder, and the folder has exactly one kind of thing in it.** Only
+ *    `public/kits/` — cut-out archive shirts, one garment per file, nothing drawn.
+ *    Anything we design still fails, including in the same page.
+ *  · **Every file carries its own measurement.** `content/manual/kit-photos.json` stores
+ *    `yellowPx` and `yellowPct` per shirt, counted on the DECODED bytes (rule 61). The
+ *    exemption is not a place yellow goes unmeasured; it is a place it goes RECORDED.
+ *  · **The page is still scanned.** `qa:sweep` visits `/kits/archive` like any other
+ *    route and counts yellow with the photographs hidden, so the chrome, the type and
+ *    the background are held to rule 8 exactly as before.
+ */
+export type YellowPhotoFolder = {
+  /** repo-relative folder, matched as a prefix — the ONLY prefix match in this file */
+  folder: string
+  approvedBy: string
+  approvedOn: string
+  why: string
+  /** what was measured when it was granted, so the next reader is not asked to trust */
+  measuredOn: string
+  filesWithYellow: number
+  filesTotal: number
+  maxPercent: number
+}
+
+export const YELLOW_PHOTO_FOLDERS: readonly YellowPhotoFolder[] = [
+  {
+    folder: 'public/kits/',
+    approvedBy: 'מאור הראל — בחר "חריג שלישי — תצלומים תיעודיים" כשהמדידה הוצגה לו',
+    approvedOn: '2026-09-16',
+    why: 'תצלומי ארכיון של חולצות אמיתיות — סמל היורופה ליג על השרוול, פס הזהב של ויזה 1985, וחולצות שוער כתומות. הצהוב הוא תכונה של החפץ, וניקוי שלו מזייף את הארכיון',
+    measuredOn: '2026-09-16',
+    // Counted on pixels, not on the rounded percentage — four of the 71 carry a single
+    // yellow pixel and round to 0.000%. Both numbers are re-derived from
+    // content/manual/kit-photos.json by tests/brand.test.ts, so they cannot drift.
+    filesWithYellow: 71,
+    filesTotal: 168,
+    maxPercent: 5.214,
+  },
+] as const
+
+/** Is this file inside a folder where photographed yellow is allowed? */
+export function yellowPhotoAllowed(path: string): boolean {
+  return YELLOW_PHOTO_FOLDERS.some((entry) => path.startsWith(entry.folder))
+}

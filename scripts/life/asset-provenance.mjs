@@ -73,6 +73,12 @@ const SHIPPED = [
   'public/life/sfx',
   // 7.9.2026 — תבניות השיתוף, שני קבצים שמאור צייר לפי הבריף
   'public/life/share',
+  // 16.9.2026 — ארכיון החולצות. The only folder in this list that is NOT part of THE
+  // WORKER LIFE, and it is here for exactly the reason the list exists: 168 photographs
+  // of real garments, taken by somebody, published somewhere, and shown to a reader as
+  // evidence. A documentary photograph with no row saying where it came from is the
+  // failure this audit was written to prevent — the wing it hangs in is beside the point.
+  'public/kits',
 ]
 
 const KIND = new Set([
@@ -82,6 +88,11 @@ const ORIGIN = new Set(['maor-upload', 'archive-scan', 'original-artwork', 'proc
 /** every physical thing done to a file between his hard drive and a player's browser */
 const TREATMENT = new Set([
   'none',
+  // 16.9.2026 — the kit archive. `cut-out` is a matte lifted off a photographed garment
+  // (u2net), which is not `key-flat` or `key-checker`: those name a known background
+  // being removed, and a shirt photographed on a wiki page has no known background.
+  // `encode-webp` is the single encode every archive file gets, measured on the decode.
+  'cut-out', 'centre', 'encode-webp',
   'de-yellow', 'quantise', 'palette-png', 'grade', 'halo',
   'crop', 'deskew', 'cut-from-sheet', 'upscale', 'trim-alpha', 'extend-strip',
   'key-green', 'key-flat', 'key-checker', 'fade',
