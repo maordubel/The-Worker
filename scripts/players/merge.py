@@ -21,6 +21,13 @@
               מבין הארבעה לעמדה (עמדה בסגל של עונה אחת), והחזק ביותר לשאלה
               **באילו עונות בדיוק** הוא היה בסגל.
 
+**ועמדה היא רשימה, מ-17.9.2026.** `תפקיד` בוויקיפועל נושא כל תפקיד שהאיש מילא
+(`מגן שמאלי, חלוץ, מאמן` — שייע פייגנבוים), ומשפט הפתיחה של הדף אומר מה הוא שיחק
+**בהפועל**. `scripts/ingest/players-cli.ts` קורא את שניהם מהוויקיטקסט הגולמי וכותב
+`positions`, `positionFrom` (`vikipoel` או `vikipoel-body`) ו-`positionSays`; כאן הם
+נקראים כמות שהם. `vikipoel-body` הוא מקור שביעי בסולם והוא **החזק ביותר לעמדה**,
+כי הוא הטענה היחידה שמדברת על העמדה במועדון הזה ולא על הקריירה.
+
 שלוש החלטות שראוי לדעת עליהן:
 
 1. **שנים מתאחדות, לא מכריעות.** "היה בסגל 2013/14" ו"רשום במועדון 2013–2020"
@@ -186,7 +193,13 @@ def main():
         if v:
             sources.append('vikipoel')
             if v.get('position'):
-                pos, pos_from = v['position'], 'vikipoel'
+                # `positionFrom` says which half of the page decided: the infobox field
+                # (`vikipoel`) or the page's own lead sentence (`vikipoel-body`). Both
+                # are ויקיפועל and they are not the same claim, so they are not the same
+                # source key.
+                pos, pos_from = v['position'], v.get('positionFrom') or 'vikipoel'
+                if pos_from == 'vikipoel-body':
+                    sources.append('vikipoel-body')
             if v.get('origin'):
                 org, org_from = v['origin'], 'vikipoel'
             if v.get('fromYear'):
@@ -201,11 +214,16 @@ def main():
                 org, org_from = ('israeli' if sq['nationalityHe'] == 'ישראל' else 'foreign'), 'squad'
 
         # --- disagreements worth printing, decided by the precedence above ---
+        # הדף של ויקיפועל יכול להיות חלוק עם עצמו — התיבה אומרת קריירה, הפתיחה אומרת
+        # מה הוא שיחק בהפועל. `positionSays` מחזיק את שני הצדדים, ושניהם נכנסים
+        # לסתירות בשמם: סתירה נשמרת, לא מוכרעת (כלל 60 §3).
+        says = (v or {}).get('positionSays') or {}
         poss = {k: val for k, val in (('wf-season', s and s.get('position')),
                                   ('wf-all', w and w.get('position')),
                                   ('wiki-en', e and e.get('position')),
                                   ('wiki-he', h and h.get('position')),
-                                  ('vikipoel', v and v.get('position')),
+                                  ('vikipoel', says.get('vikipoel') or (v and v.get('position'))),
+                                  ('vikipoel-body', says.get('vikipoel-body')),
                                   ('squad', sq and sq.get('position'))) if val}
         if len(set(poss.values())) > 1:
             conflicts.append({'personNameHe': name, 'field': 'position', 'says': poss, 'took': pos})
@@ -248,6 +266,10 @@ def main():
                'origin': org, 'originFrom': org_from,
                'fromYear': from_year, 'toYear': to_year,
                'sources': sorted(set(sources)), 'sport': 'football', 'confidence': CONFIDENCE}
+        # שחקן ששיחק ביותר מעמדה אחת נושא את כולן. `position` נשאר ערך התצוגה היחיד,
+        # ו-`positions` הוא מה שלא נזרק: מגן שמאלי שהפך לחלוץ הוא שניהם.
+        if v and len(v.get('positions') or []) > 1 and pos_from in ('vikipoel', 'vikipoel-body'):
+            row['positions'] = v['positions']
         if s and s.get('personNameLatin'):
             row['personNameLatin'] = s['personNameLatin']
         elif w and w.get('personNameLatin'):
@@ -277,6 +299,10 @@ def main():
              'url': 'https://www.worldfootball.net/teams/te956/hapoel-tel-aviv/squad/', 'read': 465},
             {'key': 'vikipoel', 'title': vraw['source']['title'],
              'url': vraw['source']['url'], 'read': vraw['source']['read']},
+            {'key': 'vikipoel-body',
+             'title': 'ויקיפועל — פסקת הפתיחה בדף השחקן (Special:Export), נקרא 17.9.2026',
+             'url': 'https://wiki.red-fans.com/index.php?title=Special:Export',
+             'read': sum(1 for r in vraw['table'] if r.get('positionFrom') == 'vikipoel-body')},
             {'key': 'squad', 'title': 'content/manual/squads.json — גיליון הסגל שלנו'},
         ],
         'records': sorted(records, key=lambda r: r['personNameHe']),

@@ -433,12 +433,20 @@ export const CONVERSATIONS_1993: Conversation[] = [
           {
             id: 'with-efi',
             text: 'בא איתך. שש וחצי.',
-            then: [{ e: 'flag', flag: 'route:efi' }, { e: 'rel', who: 'efi', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'basketballLove', delta: 2 }, { e: 'toast', text: 'הוא חייך כמו מישהו שהחזירו לו חוב.', tone: 'plain' }],
+            /**
+             * `guided:efi` — 17.9.2026, ולא תוספת אלא שם לדבר שהבחירה כבר אומרת.
+             *
+             * "בא איתך. שש וחצי" זו נסיעה מודרכת במילים של ילד: אפי לוקח אותו. עד היום
+             * הדגל היחיד שעלה כאן היה `route:efi`, והדלת לאוסישקין לא יודעת לקרוא אותו —
+             * אז מי שלא היה באולם ב-1984 ולא הגיע אליו ב-1991 עמד בשדרה עם מסלול שנבחר
+             * ובלי דלת. אותו חור בדיוק של 1991, שנתיים אחריו.
+             */
+            then: [{ e: 'flag', flag: 'route:efi' }, { e: 'flag', flag: 'guided:efi' }, { e: 'rel', who: 'efi', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'basketballLove', delta: 2 }, { e: 'toast', text: 'הוא חייך כמו מישהו שהחזירו לו חוב.', tone: 'plain' }],
           },
           {
             id: 'with-ofir',
             text: 'אופיר אמר שיש דרך אחרת.',
-            then: [{ e: 'flag', flag: 'route:ofir' }, { e: 'rel', who: 'efi', axis: 'tension', delta: 3 }, { e: 'toast', text: '"דרך אחרת." הוא הסתכל לכיוון הקיוסק ולא אמר עוד מילה.', tone: 'plain' }],
+            then: [{ e: 'flag', flag: 'route:ofir' }, { e: 'flag', flag: 'guided:ofir' }, { e: 'rel', who: 'efi', axis: 'tension', delta: 3 }, { e: 'toast', text: '"דרך אחרת." הוא הסתכל לכיוון הקיוסק ולא אמר עוד מילה.', tone: 'plain' }],
           },
           {
             id: 'later',

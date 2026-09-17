@@ -4,6 +4,15 @@ import { GIGS } from '@/lib/life/gigs'
 import { MAP_PLACES } from '@/lib/life/map'
 import { ALL_SCENES, SCENE, sceneFor } from '@/lib/life/world/scenes'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
+import { emptyState } from '@/lib/life/events'
+import { meets } from '@/lib/life/world/types'
+import type { LifeState } from '@/lib/life/types'
+
+const IDENTITY = { name: 'פוגי', sex: 'boy', birthYear: 1978 } as const
+const life = (flags: Record<string, boolean> = {}): LifeState => {
+  const base = emptyState(IDENTITY, 1986)
+  return { ...base, flags: { ...base.flags, ...flags } as LifeState['flags'] }
+}
 
 /**
  * הדלתות — 6.9.2026, and the three photographs behind them.
@@ -82,8 +91,24 @@ describe('אלנבי — the junction the map turns on', () => {
     expect(ids).toContain('street')
   })
 
-  it('keeps the hall a discovery — the flag moved with the turning', () => {
-    expect(JSON.stringify(exitOf(allenby, 'ussishkin')!.when)).toContain('life:knows:hall')
+  /**
+   * האולם נשאר תגלית — והשאלה עברה מדגל לאזור (17.9.2026).
+   *
+   * הבדיקה ביקשה את המחרוזת `life:knows:hall` בתוך ה-`when` של הדלת, וזו הייתה הטענה
+   * הנכונה כל עוד הדלת שאלה על דגל. עכשיו היא שואלת `{ area: 'ussishkin' }`, שזה "הוא
+   * יודע את הדרך **או** שמישהו לוקח אותו" — כי הדגל לבדו סגר את האולם בפני מי שאפי או
+   * אופיר לוקחים אותו, וזה מה שהשאיר את 11.3.1991 בלי דלת.
+   *
+   * מה ששמור הוא מה שהבדיקה באמת הגנה עליו: הדלת **מותנית**, ולא פתוחה לכל ילד שעובר
+   * באלנבי. `canEnterArea` הוא התנאי, ו-`tests/life-worldline.test.ts` הוא מי שמוודא
+   * שיש דרך לעמוד בו בכל פרק.
+   */
+  it('keeps the hall a discovery — the question moved from a flag to an area', () => {
+    const when = exitOf(allenby, 'ussishkin')!.when
+    expect(when).toEqual({ area: 'ussishkin' })
+    expect(meets(life(), when)).toBe(false)
+    expect(meets(life({ 'life:knows:hall': true }), when)).toBe(true)
+    expect(meets(life({ 'guided:ofir': true }), when)).toBe(true)
   })
 
   it('is reachable from both sides of town', () => {

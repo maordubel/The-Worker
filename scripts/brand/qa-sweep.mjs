@@ -43,6 +43,9 @@ const VAL_MIN = 0.35
 const ROUTES = [
   '/', '/xi', '/trivia', '/trivia/general', '/lineup', '/kits', '/kits/build',
   '/memory', '/polls', '/goal', '/tik', '/derby', '/timeline', '/ussishkin',
+  // שער 12 — the archive wing. A screen that is not swept is a screen nobody is
+  // measuring (rule 69 §3), and this one prints press copy at four widths.
+  '/archive',
   // the photograph archive — swept with the photographs hidden, see the header
   '/kits/archive',
   // THE WORKER LIFE is swept like any other screen — its canvas is pixels on the wall

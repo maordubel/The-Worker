@@ -1,3 +1,4 @@
+import { learnedOnArrival } from './world/areas'
 import {
   blankArmy,
   blankGate,
@@ -428,10 +429,26 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
       }
     }
 
-    case 'moved':
+    case 'moved': {
       // The one place the retired prologue id is folded forward. A save recorded before
       // the timeline was rebased still opens, and opens in the right room.
-      return { ...state, location: event.to === 'prologue-1972' ? 'prologue' : event.to }
+      const to = event.to === 'prologue-1972' ? 'prologue' : event.to
+      /**
+       * מי שהיה שם פעם אחת יודע את הדרך — 17.9.2026.
+       *
+       * `learnedOnArrival` נכתב ב-7.9.2026 יחד עם כל מנגנון הנסיעה המודרכת, ואיש לא קרא
+       * לו: הרעיון היה ש"אחרי שאפי לקח אותו פעם אחת, פוגי יודע את הדרך", והחצי שהופך את
+       * זה מרעיון לכלל הוא השורה הזאת. בלעדיה הידע נשאר תלוי בשיחה אחת בפרק אופציונלי
+       * אחד, ו-1991 ו-1993 שולחים לאולם שאין אליו דלת.
+       *
+       * זה גם עונה על פרק שפשוט **מתחיל** באוסישקין (1993-galil, 1997-basket,
+       * 1999-basket): להתעורר במקום זו הדרך הישירה ביותר ללמוד שהוא קיים. וזה נכון בלי
+       * להיות נדיב — החדרים שנספרים כאזור הם שלושה, ואף אחד מהם אינו הרחוב של הילד.
+       */
+      const learned = learnedOnArrival(to)
+      const flags = learned && !state.flags[learned] ? { ...state.flags, [learned]: true } : state.flags
+      return { ...state, location: to, flags }
+    }
 
     case 'money.changed': {
       // Money floors at zero. A child does not carry a debt, and a scene that tries to

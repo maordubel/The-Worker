@@ -23,6 +23,8 @@
 
 const LIFE_KEY = 'the-worker:life'
 const KIT_KEY = 'worker.kits.v1'
+/** the two team sheets gate 1 keeps — `lib/xi/store.ts` */
+const XI_KEY = 'worker.xi.v1'
 const BALLOT_KEY = 'worker.ballot.v1'
 /**
  * The ballot is TWO keys, and forgetting one of them is worse than forgetting neither:
@@ -34,6 +36,14 @@ const BALLOT_SEAL_KEY = 'worker.ballot.sealed.v1'
 export type DeviceSummary = {
   /** shirts assembled in gate 4 */
   kits: number
+  /**
+   * team sheets saved in gate 1 — the all-time eleven and the worst eleven.
+   *
+   * A sheet counts once it has a man on it. Counting only a full eleven would report
+   * nothing for the person who has spent a fortnight arguing with himself about the
+   * second centre back, which is the state this gate is actually played in.
+   */
+  xi: number
   /** poll questions answered */
   ballot: number
   /** the LIFE save, if there is one */
@@ -58,8 +68,18 @@ function countKeys(value: unknown): number {
 
 export function readDevice(): DeviceSummary {
   const life = readJson(LIFE_KEY) as { year?: unknown; events?: unknown } | null
+  const xi = readJson(XI_KEY)
   return {
     kits: countKeys(readJson(KIT_KEY)),
+    xi:
+      typeof xi === 'object' && xi !== null
+        ? Object.values(xi as Record<string, unknown>).filter(
+            (sheet) =>
+              typeof sheet === 'object' &&
+              sheet !== null &&
+              countKeys((sheet as { picks?: unknown }).picks) > 0,
+          ).length
+        : 0,
     ballot: countKeys(readJson(BALLOT_KEY)),
     life:
       life === null
@@ -77,6 +97,7 @@ export function forgetDevice(): void {
   for (const key of [
     'worker.profile.v1',
     KIT_KEY,
+    XI_KEY,
     BALLOT_KEY,
     'worker.member.v1',
     BALLOT_SEAL_KEY,

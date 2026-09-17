@@ -56,6 +56,9 @@ export function rosterIndex(): RosterIndex {
         nameHe: row.fullNameHe,
         ...splitName(row.fullNameHe),
         position: found?.position ?? null,
+        // Only where there is more than one: 653 single-element arrays in the payload
+        // would be a second copy of `position` on every row (rule 59), sent to a phone.
+        ...(found?.positions ? { positions: found.positions } : {}),
         positionFrom: found?.positionFrom ?? null,
         origin: found?.origin ?? null,
         originFrom: found?.originFrom ?? null,

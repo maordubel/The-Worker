@@ -22,9 +22,10 @@ import type { MessageKey } from '@/lib/i18n'
  *
  * **This is keyed by gate NUMBER, not by route**, because `lib/gates.ts` already
  * carries the number-to-route map (`gateFor`) and a second map would drift from it the
- * first time a href changed. A gate with no entry here (9, 12 — no route exists yet)
- * or a route with no gate at all (the ground, Ussishkin, the black file) simply gets no
- * chip: `helpForRoute` returns `undefined` and `HelpChip` renders nothing.
+ * first time a href changed. A gate with no ROUTE (9, under refurbishment) can never
+ * reach this — `helpForRoute` is asked by a pathname and gate 9 has none — and a route
+ * with no gate at all (the ground, Ussishkin, the black file) simply gets no chip:
+ * `helpForRoute` returns `undefined` and `HelpChip` renders nothing.
  */
 export type GateHelp = {
   gateNumber: number
@@ -84,6 +85,12 @@ const GATE_HELP: readonly GateHelp[] = [
     whatKey: 'help.goal.what',
     scoreKey: 'help.goal.score',
     timeKey: 'help.goal.time',
+  },
+  {
+    gateNumber: 12, // /archive — אגף הארכיון
+    whatKey: 'help.archive.what',
+    scoreKey: 'help.archive.score',
+    timeKey: 'help.archive.time',
   },
   {
     gateNumber: 10, // /tik — כרטיס פועל

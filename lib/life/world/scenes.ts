@@ -2216,7 +2216,17 @@ const SCENES: SceneDef[] = [
          * Shallow, at the far line: you go UP to it. Walking the pavement never falls in.
          */
         id: 'ussishkin',
-        when: { flag: 'life:knows:hall' },
+        /**
+         * `{ area }` ולא `{ flag: 'life:knows:hall' }` — 17.9.2026, ומאור מצא את זה
+         * בכיסא הנכון: *"אני אמור ללכת לאוסישקין ואין בכלל דלת לאוסישקין."*
+         *
+         * הדגל אומר "הוא היה שם פעם". מה שהדלת שואלת הוא "הוא יכול להיכנס עכשיו", וזה
+         * נכון גם כשמישהו לוקח אותו. ההבדל אינו תיאורטי: את הדגל מרימים רק ב-`a3-hall`,
+         * ו-`a3-hall` בכלל לא קורה למי שלא התיידד עם אפי ב-`a2-alley` — כלומר חצי ממי
+         * שמתחיל חיים הגיע ל-1991, פרק שכל תוכנו ערב אחד באולם הזה, בלי שהמקום קיים על
+         * המפה שלו. ושוב ב-1993.
+         */
+        when: { area: 'ussishkin' },
         x: 0.566,
         y: 0.725,
         w: 0.058,
@@ -2481,9 +2491,22 @@ const SCENES: SceneDef[] = [
         spawn: 'start',
         labelHe: 'פנימה, בשער 7',
         when: { flag: 'entry:granted' },
-        // An adult with a ticket walks in. The 1996 chapter keeps him outside on purpose
-        // (the gates are the scene); every later evening the turnstile is just a door.
-        whenByEra: { '1998-laces': null, '1999-cup': null, '2000-title': null, '2000-double': null },
+        /**
+         * An adult with a ticket walks in. The 1996 chapter keeps him outside on purpose
+         * (the gates are the scene); every later evening the turnstile is just a door.
+         *
+         * **ו-`a5-first` הצטרף לרשימה ב-17.9.2026, אחרי שהוא נמצא סגור מאז שנכתב.**
+         * `entry:granted` הוא הפאזל של 24.5.1986 — כרטיס, הוותיק, משפחה בסבסוב — ו-28.9.1985
+         * לא כתב לעצמו אף אחד משלושתם: זה היום שאבא לוקח אותו, וכל הפרק בנוי סביב זה. המנעול
+         * פשוט **עבר בירושה** מ-1986 לחדר משותף, וזו המחלקה בדיוק שבגללה `needsByEra`
+         * ו-`whenByEra` קיימים (כלל 54: "מנעול המפתח של 1986 הוחל על 1990 במשך שבוע").
+         *
+         * מה שזה עלה, ואיש לא ראה: הביט `a5-in` יורה ב-`bloomfield-tunnel`, ולכן לא ירה
+         * מעולם. הדרך היחידה ל-`a5-close` נשארה הביט של השעון, שמרים `a5:late` **לפני**
+         * שהוא פותח את השיחה — אז כל משחק של הפרק נגמר ב"התחיל בלעדיך", וארבעת הסופים
+         * האחרים, שהם מה ש-a4 קונה, לא נראו בעיני איש.
+         */
+        whenByEra: { 'a5-first': null, '1998-laces': null, '1999-cup': null, '2000-title': null, '2000-double': null },
         light: { x: 0.455, y: 0.55, w: 0.125, h: 0.28, tone: 'inside' },
         dwellMs: 260,
         priority: 3,

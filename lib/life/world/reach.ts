@@ -31,63 +31,35 @@
  * מה בדיוק חוסם, והמסלול עצמו.
  */
 import type { LifeState, LocationId } from '../types'
+import { AREA_OF, TEACHES, areaOfKnowledgeFlag, guidedBy, guidedFlag, knowsRoute } from './areas'
 import { ALL_SCENES, exitInEra, needsFor, whenFor } from './scenes'
 import { meets, type Condition } from './types'
 import { unmet } from './why'
 
 // ------------------------------------------------------------------ ידע ומדריכים ---
 
-export const ROUTE_PREFIX = 'route:'
-
 /**
- * הדגל שכבר קיים מנצח — כלל 59, במקרה קטן ומאלף.
+ * הטבלאות עצמן עברו ל-`world/areas.ts` — עלה שמייבא `../types` ותו לא.
  *
- * כשכתבתי את הקובץ הזה הנחתי שאצטרך דגל חדש, `route:ussishkin`. הרצתי probe ומצאתי
- * שהמשחק כבר מחזיק אחד: הדלת מאלנבי לאוסישקין דורשת `life:knows:hall` מאז שהפרק נכתב.
- * המושג היה שם; מה שחסר היה מי שיודע לקרוא לו בשם ולהציע התאוששות במקום להגיד "נעול".
- *
- * אז אזור עם דגל קיים משתמש בו, ואזור בלי דגל מקבל `route:<אזור>`. שני שמות לאותו מושג
- * זה בדיוק מה שהכלל אוסר.
+ * הן נכתבו כאן ב-7.9.2026, ושם הן היו נכונות ובלתי שמישות: הקובץ הזה מייבא את `scenes.ts`,
+ * ולכן לא הרדיוסר הטהור ולא מנגנון התנאים יכלו לקרוא להן בלי לגרור את כל העולם המצויר. הן
+ * מיוצאות מכאן הלאה כדי ששום ייבוא קיים — ואף בדיקה — לא יישבר.
  */
-export const AREA_KNOWLEDGE: Record<string, string> = {
-  ussishkin: 'life:knows:hall',
-}
-
-/** הדגל הקנוני שאומר שפוגי יודע להגיע לאזור */
-export const routeFlag = (area: string) => AREA_KNOWLEDGE[area] ?? `${ROUTE_PREFIX}${area}`
-export const knowsRoute = (state: LifeState, area: string) => Boolean(state.flags[routeFlag(area)])
-/** הדגל הזה הוא ידע־דרך של אזור כלשהו? */
-export const areaOfKnowledgeFlag = (flag: string): string | null => {
-  const named = Object.entries(AREA_KNOWLEDGE).find(([, value]) => value === flag)
-  if (named) return named[0]
-  return flag.startsWith(ROUTE_PREFIX) ? flag.slice(ROUTE_PREFIX.length) : null
-}
-
-export const GUIDED_PREFIX = 'guided:'
-/** מישהו לוקח אותו עכשיו — בזמן הזה מותר לו לעבור גם במה שהוא לא יודע */
-export const guidedFlag = (who: string) => `${GUIDED_PREFIX}${who}`
-export const guidedBy = (state: LifeState): string | null => {
-  const key = Object.keys(state.flags).find((flag) => flag.startsWith(GUIDED_PREFIX) && state.flags[flag])
-  return key ? key.slice(GUIDED_PREFIX.length) : null
-}
-
-/**
- * איזה אזור כל חדר שייך לו, מבחינת ידע.
- *
- * רק חדרים שילד לא אמור לדעת להגיע אליהם לבד מופיעים כאן. הרחוב, המטבח והמגרש של השכונה
- * אינם אזורים — הם הבית. אוסישקין הוא בדרום תל אביב, ובלומפילד ביפו, ואת שניהם לומדים
- * מאיזשהו מבוגר.
- */
-export const AREA_OF: Partial<Record<LocationId, string>> = {
-  'ussishkin-outside': 'ussishkin',
-  'ussishkin-hall': 'ussishkin',
-  'ussishkin-end': 'ussishkin',
-}
-
-/** מי יכול ללמד איזה אזור — הבסיס ל"אפי מלמד את הדרך לאוסישקין" */
-export const TEACHES: Record<string, string> = {
-  efi: 'ussishkin',
-}
+export {
+  AREA_KNOWLEDGE,
+  AREA_OF,
+  GUIDED_PREFIX,
+  ROUTE_PREFIX,
+  TEACHES,
+  areaOfKnowledgeFlag,
+  canEnterArea,
+  guideTo,
+  guidedBy,
+  guidedFlag,
+  knowsRoute,
+  learnedOnArrival,
+  routeFlag,
+} from './areas'
 
 // ------------------------------------------------------------------- התשובה ---
 
@@ -127,6 +99,21 @@ function flagsOf(condition: Condition | undefined, out: string[] = []): string[]
   if (condition.flag) out.push(condition.flag)
   for (const part of condition.all ?? []) flagsOf(part, out)
   for (const part of condition.any ?? []) flagsOf(part, out)
+  return out
+}
+
+/**
+ * כל אזור שתנאי דורש להיכנס אליו — הצד השני של אותה שאלה.
+ *
+ * מאז ש-`{ area }` קיים כפרדיקט (17.9.2026) דלת אזור לא מבקשת דגל, ולכן `flagsOf` מחזירה
+ * עליה רשימה ריקה והבדיקה למטה הייתה מכריזה "נעולה" על דלת שכל בעייתה היא שאיש לא לקח
+ * אותו לשם. זו בדיוק ההבחנה שהקובץ הזה קיים בשבילה, ולכן היא נשאלת בשתי האיותים.
+ */
+function areasOf(condition: Condition | undefined, out: string[] = []): string[] {
+  if (!condition) return out
+  if (condition.area) out.push(condition.area)
+  for (const part of condition.all ?? []) areasOf(part, out)
+  for (const part of condition.any ?? []) areasOf(part, out)
   return out
 }
 
@@ -190,9 +177,11 @@ export function canPlayerReach(
      * שמכריזים על הדלת כסגורה.
      */
     const clauses = flagsOf(shut.shut)
+    const named = areasOf(shut.shut)
     const areas = clauses.map(areaOfKnowledgeFlag)
-    if (clauses.length > 0 && areas.every((area): area is string => area !== null)) {
-      const area = areas[0] as string
+    const onlyKnowledge = clauses.length > 0 && areas.every((area): area is string => area !== null)
+    if (named.length > 0 || onlyKnowledge) {
+      const area = (named[0] ?? areas[0]) as string
       const guide = options.guide ?? guidedBy(state)
       if (guide) {
         return { reachable: true, reason: 'GUIDED_ONLY', recovery: 'GUIDED_TRAVEL', blockingRequirement: area, path, whyHe: null }
@@ -333,13 +322,58 @@ export function evaluateMissionReachability(
   return { ok: true, failedAt: null, reach, watchdog: null, whyHe: null }
 }
 
+// ------------------------------------------------------------ לאן להצביע באמת ---
+
+export type GoalAim = {
+  /** החדר שהחץ והרמז צריכים להצביע עליו עכשיו — היעד, או מי שייקח אותך אליו */
+  to: LocationId
+  /** מה `canPlayerReach` אומר על היעד המקורי */
+  reach: Reachability
+  /** מי המדריך שאליו הופנינו, אם הופנינו */
+  guide: string | null
+}
+
 /**
- * מה שנלמד בסוף הדרך — הצד השני של הנסיעה המודרכת.
+ * `aimForGoal` — החצי שהיה חסר, ובלעדיו כל הקובץ הזה היה נכון ולא מחובר.
  *
- * אחרי שאפי לקח אותו פעם אחת, פוגי יודע את הדרך. זה מוחזר כדגל ולא מופעל כאן, כי המנוע הוא
- * היחיד שכותב ליומן — וזה גם מה שמאפשר לבדיקה לשאול "מה היה נלמד" בלי לרוץ משחק.
+ * מאור, 17.9.2026: *"אני אמור ללכת לאוסישקין ואין בכלל דלת לאוסישקין ואין לי אפשרות
+ * להתקדם במשימה."* הפרק החזיר `ussishkin-hall` כיעד, `route.ts` מצא את הדלת שבדרך והחזיר
+ * אותה `locked: true`, וה-HUD כתב *"הדרך: לאולם אוסישקין — עדיין סגורה"* — משפט על דלת
+ * שלא מצוירת, שאין מפתח אליה, ושהשחקן לא יכול למצוא גם אם יחפש כל הערב.
+ *
+ * מה שחסר לא היה אבחון. `canPlayerReach` ידעה לענות `AREA_NOT_KNOWN · GUIDED_TRAVEL`
+ * מ-7.9.2026, ו-`TEACHES` ידע להגיד מי יכול לקחת אותו. **אף אחד לא שאל.** אז הפונקציה
+ * הזאת שואלת, ואז עושה את הדבר ההגיוני: אם אי אפשר להגיע ליעד מפני שהוא לא יודע את
+ * הדרך — היעד הזמני הוא **האדם**. החץ מצביע על הדלת שבדרך לאופיר, והרמז אומר שמישהו
+ * צריך לקחת אותך. זאת משימה שאפשר להתקדם בה.
+ *
+ * שלושה סייגים, וכל אחד מהם הוא מקום שבו "עזרה" נהיית שקר:
+ *
+ *  · מדריך שאי אפשר להגיע אליו בעצמו אינו תשובה — נבדק, ולא מוצע.
+ *  · `whereIsGuide` מוזרק ולא מיובא, כי לוח הזמנים הוא של הפרק והקובץ הזה הוא גאוגרפיה.
+ *    זה גם מה שמאפשר לבדוק את הפונקציה בלי פרק אמיתי.
+ *  · כשאין מדריך בהישג יד מחזירים את היעד המקורי **עם** ה-`Reachability` שלו, ולא null:
+ *    מי שקורא צריך להגיד "אתה לא יודע איך מגיעים לשם" ולא לשתוק. שתיקה היא בדיוק מה
+ *    שהשאיר את מאור עומד באלנבי.
  */
-export function learnedOnArrival(where: LocationId): string | null {
-  const area = AREA_OF[where]
-  return area ? routeFlag(area) : null
+export function aimForGoal(
+  state: LifeState,
+  chapter: string,
+  from: LocationId,
+  want: LocationId,
+  whereIsGuide: (who: string) => LocationId | null,
+): GoalAim {
+  const reach = canPlayerReach(state, chapter, from, want)
+  if (reach.reachable || reach.reason !== 'AREA_NOT_KNOWN') return { to: want, reach, guide: null }
+
+  const area = reach.blockingRequirement
+  if (!area) return { to: want, reach, guide: null }
+  for (const [who, taught] of Object.entries(TEACHES)) {
+    if (taught !== area) continue
+    const where = whereIsGuide(who)
+    if (!where || where === from) continue
+    if (!canPlayerReach(state, chapter, from, where).reachable) continue
+    return { to: where, reach, guide: who }
+  }
+  return { to: want, reach, guide: null }
 }

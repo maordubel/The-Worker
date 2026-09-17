@@ -24,6 +24,7 @@ import { t, type MessageKey } from '@/lib/i18n'
 
 export type GateSeoSlug =
   | 'xi'
+  | 'archive'
   | 'trivia'
   | 'lineup'
   | 'kits'
@@ -58,6 +59,16 @@ const GATE_SEO: Record<GateSeoSlug, GateSeoEntry> = {
     image: 'default',
   },
   xi: { path: '/xi', titleKey: 'screen.xi.title', descriptionKey: 'xi.lede', image: 'xi' },
+  // שער 12 — the archive wing. It takes the default card rather than one of its own:
+  // there is no OG artwork for it yet, and a card that pictured a gate we have not
+  // drawn would be a second kind of invention (rule 11). One line changes when the
+  // artwork lands.
+  archive: {
+    path: '/archive',
+    titleKey: 'screen.archive.title',
+    descriptionKey: 'archive.lede',
+    image: 'default',
+  },
   trivia: {
     path: '/trivia',
     titleKey: 'screen.trivia.title',

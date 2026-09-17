@@ -10,6 +10,7 @@ import {
   filterRoster,
   isFiltered,
   NO_FILTER,
+  positionsOf,
   type RosterFilter,
   type Searchable,
 } from '@/lib/game/roster-search'
@@ -177,19 +178,35 @@ describe('סינון השחקנים — no position is ever guessed', () => {
   })
 
   it('counts the undocumented as their own bucket rather than hiding them', () => {
+    // THE DECISION CHANGED (17.9.2026, rule 65): `תפקיד` is a LIST, so a man may be
+    // filed under two positions and the buckets no longer partition the roster. This
+    // guard knew "every name lands in exactly one bucket" and that is no longer what is
+    // true; what it was protecting — nobody vanishes between the buckets — is asserted
+    // directly instead, and the sum is asserted to be AT LEAST the total so a bucket
+    // can still never lose a man.
     const counts = facetCounts(roster.all)
     expect(counts.position.unknown).toBeGreaterThan(0)
     const placed = ['GK', 'DF', 'MF', 'FW'].reduce(
       (sum, key) => sum + (counts.position[key] ?? 0),
       0,
     )
-    expect(placed + (counts.position.unknown ?? 0)).toBe(roster.total)
+    expect(placed + (counts.position.unknown ?? 0)).toBeGreaterThanOrEqual(roster.total)
+    const named = roster.all.filter((entry) => positionsOf(entry).length > 0).length
+    expect(named + (counts.position.unknown ?? 0)).toBe(roster.total)
+    // and the double-counting is real rather than a rounding artefact
+    expect(placed).toBe(
+      roster.all.reduce((sum, entry) => sum + positionsOf(entry).length, 0),
+    )
   })
 
   it('narrows to exactly what was asked for', () => {
     const keepers = filterRoster(roster.all, { ...NO_FILTER, position: 'GK' })
     expect(keepers.length).toBeGreaterThan(0)
-    expect(keepers.every((entry) => entry.position === 'GK')).toBe(true)
+    // THE DECISION CHANGED (17.9.2026, rule 65): asking for defenders has to find a man
+    // whose page says he played there, even where the value on screen is the other role
+    // he is better known for. So the promise is about the positions he is filed under,
+    // not about the one the row prints.
+    expect(keepers.every((entry) => positionsOf(entry).includes('GK'))).toBe(true)
 
     const unplaced = filterRoster(roster.all, { ...NO_FILTER, position: 'unknown' })
     expect(unplaced.every((entry) => !entry.position)).toBe(true)
@@ -239,6 +256,11 @@ describe('player-facts — the merged research file, and what it is not allowed 
   const SOURCES = new Set([
     'squad',
     'vikipoel',
+    // THE DECISION CHANGED (17.9.2026, rule 65): the ויקיפועל player page makes TWO
+    // claims about a position — the infobox states a career, the lead sentence states
+    // what he played at Hapoel — and they are not the same source. The set grew because
+    // a seventh source exists, not because a row needed to be let through.
+    'vikipoel-body',
     'wiki-he',
     'wiki-en',
     'wf-all',

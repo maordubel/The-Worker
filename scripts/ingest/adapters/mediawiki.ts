@@ -652,6 +652,62 @@ export function extractTemplate(
   return fields
 }
 
+/**
+ * The name of the first template on a page — `{{שחקן כדורגל|…}}` → `שחקן כדורגל`.
+ *
+ * A player page's infobox is not one template but five: ויקיפועל writes
+ * `שחקן כדורגל`, `שחקן עבר`, `איש כדורגל`, `שחקן` and `כדורגלן` across the corpus, and
+ * a reader that hunts for a fixed list finds nothing on the pages whose template it did
+ * not think of. שייע פייגנבוים is on `איש כדורגל`, which was not in the list.
+ */
+export function firstTemplateName(wikitext: string): string | null {
+  const start = wikitext.indexOf('{{')
+  if (start === -1) return null
+  const head = wikitext.slice(start + 2, start + 120)
+  const name = head.split(/[|}\n]/)[0]?.trim() ?? ''
+  return name === '' ? null : name
+}
+
+/**
+ * הפסקה הפותחת — the lead section: everything after the opening templates and before
+ * the first heading.
+ *
+ * This is where a ויקיפועל player page states what he played **at Hapoel**, in a
+ * sentence: *"חלוץ, שיחק בהפועל בשנים 1979-1965"*. The infobox above it states his
+ * whole career — every role he ever held, at every club, in any order — so the two are
+ * different claims and the lead is the one this app is about.
+ *
+ * It stops at the first heading on purpose. Below the first `==` a page is talking
+ * about the man's childhood, his other clubs and its own external links, and the words
+ * "שוער" and "קישור" appear in all three: a scan that ran past the heading read
+ * `קישורים חיצוניים` as a midfielder and a striker's boyhood in goal as a goalkeeper.
+ */
+export function leadSection(wikitext: string): string {
+  let index = 0
+  for (;;) {
+    while (index < wikitext.length && /\s/.test(wikitext[index] as string)) index += 1
+    if (!wikitext.startsWith('{{', index)) break
+    let depth = 0
+    let cursor = index
+    for (; cursor < wikitext.length - 1; cursor += 1) {
+      const pair = wikitext.slice(cursor, cursor + 2)
+      if (pair === '{{') depth += 1
+      else if (pair === '}}') {
+        depth -= 1
+        if (depth === 0) {
+          cursor += 2
+          break
+        }
+      }
+    }
+    if (cursor <= index) break
+    index = cursor
+  }
+  const rest = wikitext.slice(index)
+  const heading = rest.search(/\n\s*==/u)
+  return (heading === -1 ? rest : rest.slice(0, heading)).trim()
+}
+
 /** Category names declared on a page. */
 export function extractCategories(wikitext: string): string[] {
   const out: string[] = []

@@ -64,6 +64,15 @@ export type Searchable = {
    * as its own bucket rather than hidden. Built in `lib/game/roster-facets.ts`.
    */
   position?: 'GK' | 'DF' | 'MF' | 'FW' | null
+  /**
+   * Every playing position a source states for him, display value first.
+   *
+   * Present only where there is more than one, because a one-element array beside a
+   * scalar holding the same value is a second copy of a fact. שייע פייגנבוים is
+   * `['FW', 'DF']` — a left back who became the club's greatest striker — and asking the
+   * sheet for defenders has to find him, or the filter is a claim that he never was one.
+   */
+  positions?: ReadonlyArray<'GK' | 'DF' | 'MF' | 'FW'>
   positionFrom?: 'squad' | 'lineup' | 'database' | 'name' | null
   origin?: 'israeli' | 'foreign' | null
   originFrom?: 'squad' | 'lineup' | 'database' | 'name' | null
@@ -103,6 +112,15 @@ export function isFiltered(filter: RosterFilter): boolean {
   )
 }
 
+/**
+ * Every position this man is filed under. One where a source states one, several where
+ * it states several, none where it states none.
+ */
+export function positionsOf(entry: Searchable): ReadonlyArray<'GK' | 'DF' | 'MF' | 'FW'> {
+  if (entry.positions && entry.positions.length > 0) return entry.positions
+  return entry.position ? [entry.position] : []
+}
+
 /** Did this man wear the shirt inside that decade, as far as the archive can tell? */
 function inDecade(entry: Searchable, decade: number): boolean {
   const from = entry.fromYear
@@ -121,7 +139,9 @@ export function filterRoster(entries: Searchable[], filter: RosterFilter): Searc
     if (filter.letter !== 'any' && entry.initial !== filter.letter) return false
     if (filter.position === 'unknown') {
       if (entry.position) return false
-    } else if (filter.position !== 'any' && entry.position !== filter.position) return false
+    } else if (filter.position !== 'any' && !positionsOf(entry).includes(filter.position)) {
+      return false
+    }
     if (filter.origin === 'unknown') {
       if (entry.origin) return false
     } else if (filter.origin !== 'any' && entry.origin !== filter.origin) return false
@@ -140,7 +160,12 @@ export function facetCounts(entries: Searchable[]): {
   const origin: Record<string, number> = { israeli: 0, foreign: 0, unknown: 0 }
   const decade: Record<number, number> = {}
   for (const entry of entries) {
-    position[entry.position ?? 'unknown'] = (position[entry.position ?? 'unknown'] ?? 0) + 1
+    // A man with two positions is counted under both, because the filter returns him
+    // under both. A chip that promises 201 defenders and hands back 202 is a chip that
+    // lies about the sheet it opens.
+    const codes = positionsOf(entry)
+    if (codes.length === 0) position.unknown = (position.unknown ?? 0) + 1
+    for (const code of codes) position[code] = (position[code] ?? 0) + 1
     origin[entry.origin ?? 'unknown'] = (origin[entry.origin ?? 'unknown'] ?? 0) + 1
     const from = entry.fromYear
     if (from !== null && from !== undefined) {

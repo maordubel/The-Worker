@@ -136,15 +136,101 @@ export type PositionCode = 'GK' | 'DF' | 'MF' | 'FW' | 'UNK'
 const POSITION_TERMS: ReadonlyArray<readonly [PositionCode, readonly string[]]> = [
   ['GK', ['שוער', 'goalkeeper', 'gk']],
   ['DF', ['מגן', 'בלם', 'הגנה', 'defender', 'df']],
-  ['MF', ['קשר', 'קישור', 'midfielder', 'mf']],
-  ['FW', ['חלוץ', 'כנף', 'התקפה', 'forward', 'striker', 'fw']],
+  ['MF', ['קשר', 'קישור', 'ווינגר', 'midfielder', 'mf']],
+  ['FW', ['חלוץ', 'כנף', 'קיצוני', 'התקפה', 'forward', 'striker', 'fw']],
 ]
 
 /**
- * Position from a source string. Unknown stays UNK — a guessed position silently
- * corrupts every lineup query, so it is never inferred from anything else.
+ * Roles a source states in the position field that are NOT positions.
+ *
+ * ויקיפועל writes a man's whole relationship with the club in `תפקיד`: שייע פייגנבוים
+ * reads `מגן שמאלי, חלוץ, מאמן` and יוסי אבוקסיס reads
+ * `קשר אחורי, סקאוט, עוזר מאמן, מאמן`. A coach is a fact about the man and it is not a
+ * position, so it is recognised, kept by the caller, and never allowed to become one.
  */
-export function parsePosition(raw: string | null | undefined): PositionCode {
+const STAFF_TERMS: readonly string[] = [
+  'מאמן',
+  'מנהל',
+  'סקאוט',
+  'ע. מאמן',
+  'שופט',
+  'נשיא',
+  'יו"ר',
+  'coach',
+  'manager',
+  'scout',
+]
+
+/** True when this single role is a job at the club rather than a place on the pitch. */
+export function isStaffRole(raw: string): boolean {
+  const needle = normalizeName(raw)
+  return needle !== '' && STAFF_TERMS.some((term) => needle.includes(normalizeName(term)))
+}
+
+/**
+ * **`תפקיד` IS A LIST, and reading it as a scalar is what filed the club's greatest
+ * striker as a defender.**
+ *
+ * ויקיפועל's player infobox carries every role a man held, separated by a comma or a
+ * slash — `חלוץ, בלם` · `קשר/חלוץ` · `מגן שמאלי, חלוץ, מאמן`. 43 of the 635 player
+ * pages write more than one. Handed whole to a lexicon scan, the string resolves to
+ * whichever CODE the lexicon happens to test first, which is not even the first role
+ * the source wrote: `parsePosition('חלוץ, בלם')` answered `DF`, because `DF` is tested
+ * before `FW`. That is how שייע פייגנבוים — 131 goals, the club's all-time top scorer —
+ * was filed `DF` and offered as a defender in gate 1.
+ *
+ * So the field is split first and each value is read on its own, in the order the
+ * source wrote them. A parenthetical aside is NOT a value — `קשר/חלוץ (קיצוני ימני)`
+ * refines the role it follows and `בלם, מגן ימני, קשר הגנתי (תופקד גם כשוער, חלוץ…)`
+ * lists where a centre-back was once pressed into service. Both are dropped here and
+ * reported by the caller rather than promoted to positions, because a defender who once
+ * went in goal is not a goalkeeper.
+ */
+export function splitRoleValues(raw: string | null | undefined): string[] {
+  if (!raw) return []
+  return raw
+    .replace(/\([^)]*\)/gu, ' ')
+    .split(/[,\/]|\sו-/u)
+    .map((part) => part.trim())
+    .filter((part) => part !== '' && !/^[-?]+$/.test(part))
+}
+
+/**
+ * Every playing position the field states, in the order the source stated them.
+ *
+ * Staff roles are dropped (they are not positions), a value no lexicon term covers is
+ * dropped (rule 11 — unreadable is not a guess), and duplicates collapse so
+ * `בלם, מגן ימני` is one DF rather than two.
+ */
+export function parsePositions(raw: string | null | undefined): Exclude<PositionCode, 'UNK'>[] {
+  const out: Exclude<PositionCode, 'UNK'>[] = []
+  for (const value of splitRoleValues(raw)) {
+    if (isStaffRole(value)) continue
+    const needle = normalizeName(value)
+    if (!needle) continue
+    const found = POSITION_TERMS.find(([, terms]) =>
+      terms.some((term) => needle.includes(normalizeName(term))),
+    )
+    if (!found) continue
+    const code = found[0] as Exclude<PositionCode, 'UNK'>
+    if (!out.includes(code)) out.push(code)
+  }
+  return out
+}
+
+/**
+ * **The read this replaced, kept so the change can be MEASURED rather than claimed.**
+ *
+ * Until 17.9.2026 the whole field went to one scan that answered with the first CODE in
+ * `POSITION_TERMS` order appearing anywhere in the string. That is not even "the first
+ * role the source wrote": `חלוץ, בלם` answered `DF`, because `DF` is tested before `FW`.
+ *
+ * It lives here, beside the lexicon it reads, so it cannot drift from the thing it is a
+ * record of, and it is called by exactly two callers: the report that prints the
+ * before/after table, and the test that fails if any displayed position still agrees
+ * with it on a multi-value field.
+ */
+export function retiredScalarPosition(raw: string | null | undefined): PositionCode {
   if (!raw) return 'UNK'
   const needle = normalizeName(raw)
   if (!needle) return 'UNK'
@@ -152,6 +238,21 @@ export function parsePosition(raw: string | null | undefined): PositionCode {
     if (terms.some((term) => needle.includes(normalizeName(term)))) return code
   }
   return 'UNK'
+}
+
+/**
+ * The one position a screen prints. Unknown stays UNK — a guessed position silently
+ * corrupts every lineup query, so it is never inferred from anything else.
+ *
+ * It is now the FIRST playing role the source wrote, which is a different answer from
+ * the one this function used to give for a multi-value field (see
+ * {@link parsePositions}). Where a stronger claim exists — the player page's own lead
+ * sentence, which states the role he played AT HAPOEL — it outranks this one; that
+ * decision lives in `scripts/ingest/sources/vikipoel-players.ts`, not here, because
+ * this function is handed a field and knows nothing about the page it came off.
+ */
+export function parsePosition(raw: string | null | undefined): PositionCode {
+  return parsePositions(raw)[0] ?? 'UNK'
 }
 
 /* -------------------------------------------------------------------- score */

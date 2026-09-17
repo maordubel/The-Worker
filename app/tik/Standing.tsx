@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 
 import { SignUpPlate } from './SignUpPlate'
 import { Num } from '@/components/ui/Num'
-import { GATES } from '@/lib/gates'
+import { GATES, isOpen } from '@/lib/gates'
 import { cardFigures, gateId, rankOf, standingScore, stillToDo } from '@/lib/profile/standing'
 import { readDevice, type DeviceSummary } from '@/lib/profile/summary'
 import {
@@ -45,7 +45,7 @@ import { t, type MessageKey } from '@/lib/i18n'
 
 export function Standing() {
   const [profile, setProfile] = useState<Profile>(emptyProfile)
-  const [device, setDevice] = useState<DeviceSummary>({ kits: 0, ballot: 0, life: null })
+  const [device, setDevice] = useState<DeviceSummary>({ kits: 0, xi: 0, ballot: 0, life: null })
   const [ready, setReady] = useState(false)
   /**
    * The wall's links, worked out ONCE after mount.
@@ -72,6 +72,11 @@ export function Standing() {
   const grid = historyGrid(profile)
   const todo = stillToDo(profile)
   const ussCards = collected(profile, 'ussishkin').length
+  // Gate 12's cards are a collection with no ceiling: the archive holds 1,385 columns,
+  // every trophy season and every curated moment, and it grows. `of={null}` is what the
+  // Collection component already does for a set nobody can finish — printing a
+  // denominator here would invent one.
+  const archiveCards = collected(profile, 'archive').length
 
   return (
     <div className="mt-stack">
@@ -161,7 +166,7 @@ export function Standing() {
         </p>
 
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-          {GATES.map((gate) => {
+          {GATES.filter(isOpen).map((gate) => {
             const id = gateId(gate.href)
             const stat = profile.gates[id]
             const played = (stat?.plays ?? 0) > 0
@@ -220,6 +225,10 @@ export function Standing() {
         </h2>
         <ul className="mt-2 grid gap-2 sm:grid-cols-2">
           <Collection href="/kits" label={t('screen.kits.title')} have={device.kits} of={33} />
+          {/* Gate 1 keeps two sheets — the eleven and the worst eleven — and until
+              17.9.2026 it kept neither, so the personal area had nothing to print for
+              the gate people open first. */}
+          <Collection href="/xi" label={t('screen.xi.title')} have={device.xi} of={2} />
           <Collection
             href="/ussishkin"
             label={t('screen.ussishkin.title')}
@@ -227,6 +236,14 @@ export function Standing() {
             of={45}
           />
           <Collection href="/polls" label={t('screen.polls.title')} have={device.ballot} of={8} />
+          {archiveCards > 0 && (
+            <Collection
+              href="/archive"
+              label={t('member.archiveCards')}
+              have={archiveCards}
+              of={null}
+            />
+          )}
           {device.life && (
             <Collection
               href="/life"
@@ -269,7 +286,7 @@ export function Standing() {
         </section>
       )}
 
-      <SignUpPlate figures={figures} collections={device.kits + ussCards + device.ballot} />
+      <SignUpPlate figures={figures} collections={device.kits + ussCards + device.ballot + device.xi + archiveCards} />
     </div>
   )
 }
@@ -287,7 +304,7 @@ export function Standing() {
  */
 function wallLinks(): Record<string, string> {
   const out: Record<string, string> = {}
-  for (const gate of GATES) {
+  for (const gate of GATES.filter(isOpen)) {
     if (!gate.seeded) {
       out[gate.href] = gate.href
       continue

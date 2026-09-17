@@ -32,6 +32,7 @@ import {
  */
 import { routeAtLeast, type RouteId, type RouteStage } from '../routes'
 import { trackAtLeast, type TrackId, type TrackStageId } from '../tracks'
+import { canEnterArea } from './areas'
 
 /**
  * העולם כנתונים — a location is data, not code, and so is a rule.
@@ -152,6 +153,26 @@ export type Condition = {
   track?: { id: TrackId; minStage?: TrackStageId }
   notTrack?: { id: TrackId; minStage?: TrackStageId }
 
+  // --- גאוגרפיה (17.9.2026) -----------------------------------------------------------
+  /**
+   * *"אני אמור ללכת לאוסישקין ואין בכלל דלת לאוסישקין."* (מאור, 17.9.2026)
+   *
+   * הדלת מאלנבי לאולם ביקשה `{ flag: 'life:knows:hall' }`, וזה היה **כמעט** נכון. הדגל
+   * אומר "הוא יודע את הדרך"; מה שדלת באמת שואלת הוא "הוא יכול להיכנס לאזור הזה עכשיו" —
+   * וזה נכון בשתי דרכים, לא באחת: הוא יודע, **או** שמישהו לוקח אותו. כל המנגנון של
+   * הנסיעה המודרכת (`guided:<מי>`, `TEACHES`) נכתב ב-7.9.2026 ונשאר בלתי-נגיש בדיוק כאן,
+   * כי הדלת לא ידעה לשאול עליו.
+   *
+   * הכתיב החלופי — לפרט על כל דלת `any: [{ flag: 'life:knows:hall' }, { flag: 'guided:efi' },
+   * { flag: 'guided:ofir' }]` — מחייב **כל דלת עתידית למנות את רשימת המדריכים**, וזה שני
+   * שמות לאותו מושג, מה שכלל 59 אוסר. פרדיקט אחד, `world/areas.ts` יודע את התשובה, ודלת
+   * חדשה לאזור קיים לא צריכה לדעת מי מלמד אותו.
+   *
+   * זה **לא** מחליף את `flag`: מי שרוצה לשאול על הידע עצמו ("הוא כבר היה שם פעם") שואל
+   * על הדגל, וזאת שאלה אחרת.
+   */
+  area?: string
+
   // --- composition ------------------------------------------------------------------
   /** every one of these must hold */
   all?: Condition[]
@@ -269,6 +290,8 @@ export function meets(state: LifeState, condition?: Condition): boolean {
   if (condition.notRoute && routeAtLeast(state, condition.notRoute.id, condition.notRoute.minStage)) return false
   if (condition.track && !trackAtLeast(state, condition.track.id, condition.track.minStage)) return false
   if (condition.notTrack && trackAtLeast(state, condition.notTrack.id, condition.notTrack.minStage)) return false
+
+  if (condition.area && !canEnterArea(state, condition.area)) return false
 
   if (condition.all && !condition.all.every((child) => meets(state, child))) return false
   if (condition.any && condition.any.length > 0 && !condition.any.some((child) => meets(state, child))) return false

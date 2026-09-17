@@ -35,6 +35,12 @@
    "read": 638
   },
   {
+   "key": "vikipoel-body",
+   "title": "ויקיפועל — פסקת הפתיחה בדף השחקן (Special:Export), נקרא 17.9.2026",
+   "url": "https://wiki.red-fans.com/index.php?title=Special:Export",
+   "read": 425
+  },
+  {
    "key": "squad",
    "title": "content/manual/squads.json — גיליון הסגל שלנו"
   }
@@ -57,13 +63,14 @@
   {
    "personNameHe": "אבו דוסו",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -100,6 +107,10 @@
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ],
    "personNameLatin": "Avi Azoulay",
    "seasons": [
     "1995/96",
@@ -200,13 +211,14 @@
   {
    "personNameHe": "אביב דדו",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -238,13 +250,14 @@
   {
    "personNameHe": "אביב סלם",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -255,13 +268,14 @@
   {
    "personNameHe": "אביחי ידין",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -298,13 +312,14 @@
   {
    "personNameHe": "אברהם בית הלוי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1931,
    "toYear": 1937,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -313,13 +328,14 @@
   {
    "personNameHe": "אברהם נודלמן",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1927,
    "toYear": 1938,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -346,6 +362,10 @@
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "FW",
+    "DF"
+   ],
    "personNameLatin": "Avraham Palman"
   },
   {
@@ -365,13 +385,14 @@
   {
    "personNameHe": "אברהם צ'קול",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -381,13 +402,14 @@
   {
    "personNameHe": "אדבינאס גירדבאיניס",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2019,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -398,13 +420,14 @@
   {
    "personNameHe": "אדוארדו לובוס",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2012,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -412,13 +435,14 @@
   {
    "personNameHe": "אדוארדו מראקש",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2004,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -448,13 +472,14 @@
   {
    "personNameHe": "אדי גוטליב",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -475,13 +500,14 @@
   {
    "personNameHe": "אדמונד שמילוביץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1951,
    "toYear": 1952,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -505,13 +531,14 @@
   {
    "personNameHe": "אוגנין לאקיץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2005,
    "toYear": 2006,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -521,13 +548,14 @@
   {
    "personNameHe": "אוהד חזוט",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -562,7 +590,11 @@
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ]
   },
   {
    "personNameHe": "אומיט גונזלס",
@@ -578,18 +610,23 @@
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ],
    "personNameLatin": "Umut Güzelses"
   },
   {
    "personNameHe": "אופיר טקיאר",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -603,13 +640,14 @@
   {
    "personNameHe": "אופק ביטון",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -624,13 +662,14 @@
   {
    "personNameHe": "אופק בלס",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -646,13 +685,14 @@
   {
    "personNameHe": "אופק עובדיה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -666,13 +706,14 @@
   {
    "personNameHe": "אור אוסטוינד",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -687,19 +728,24 @@
   },
   {
    "personNameHe": "אור אינברום",
-   "position": "DF",
-   "positionFrom": "vikipoel",
+   "position": "MF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "DF"
+   ],
    "personNameLatin": "Or Inbrum"
   },
   {
@@ -726,13 +772,14 @@
   {
    "personNameHe": "אור ישראלוב",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2027,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -750,13 +797,14 @@
   {
    "personNameHe": "אוראל דגני",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -775,13 +823,14 @@
   {
    "personNameHe": "אורי כהן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -829,20 +878,25 @@
   },
   {
    "personNameHe": "אושר דוידה",
-   "position": "MF",
-   "positionFrom": "vikipoel",
+   "position": "FW",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "FW",
+    "MF"
+   ],
    "personNameLatin": "Osher Davida",
    "seasons": [
     "2018/19",
@@ -854,13 +908,14 @@
   {
    "personNameHe": "אזקיאל נדואסל",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -901,13 +956,14 @@
   {
    "personNameHe": "אחמד עאבד",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -923,13 +979,14 @@
   {
    "personNameHe": "איאד אבו עביד",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -946,13 +1003,14 @@
   {
    "personNameHe": "איאד חוט'בא",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -985,13 +1043,14 @@
   {
    "personNameHe": "איברהים ספורי",
    "position": "MF",
-   "positionFrom": "wf-all",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -1041,13 +1100,14 @@
   {
    "personNameHe": "איוון יוליץ'",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2007,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -1056,13 +1116,14 @@
   {
    "personNameHe": "איזואגבו אבונימה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -1086,13 +1147,14 @@
   {
    "personNameHe": "אייל אחואן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2000,
    "toYear": 2002,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -1143,13 +1205,14 @@
   {
    "personNameHe": "אייל משומר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1164,13 +1227,14 @@
   {
    "personNameHe": "אילונגו אנגסניה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2004,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -1180,13 +1244,14 @@
   {
    "personNameHe": "איליה יבוריאן",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2005,
    "toYear": 2006,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -1213,13 +1278,14 @@
   {
    "personNameHe": "אילן בכר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1999,
    "toYear": 2002,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1236,13 +1302,14 @@
   {
    "personNameHe": "אילן שוקרון",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1985,
    "toYear": 1990,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -1251,13 +1318,14 @@
   {
    "personNameHe": "איסומעילה לינגאנה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -1268,13 +1336,14 @@
   {
    "personNameHe": "איציק שולמייסטר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1289,13 +1358,14 @@
   {
    "personNameHe": "אישטוואן פישונט",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1999,
    "toYear": 2002,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1341,6 +1411,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -1350,13 +1421,14 @@
   {
    "personNameHe": "איתי שכטר",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2009,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1372,13 +1444,14 @@
   {
    "personNameHe": "איתמר ניצן",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1393,13 +1466,14 @@
   {
    "personNameHe": "איתמר שבירו",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1422,6 +1496,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -1453,13 +1528,14 @@
   {
    "personNameHe": "אלון אזוגי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1474,13 +1550,14 @@
   {
    "personNameHe": "אלון חזן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1996,
    "toYear": 1997,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1495,13 +1572,14 @@
   {
    "personNameHe": "אלון חלפון",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2002,
    "toYear": 2004,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1517,13 +1595,14 @@
   {
    "personNameHe": "אלון מזרחי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1990,
    "toYear": 1991,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -1537,13 +1616,14 @@
   {
    "personNameHe": "אלון תורג'מן",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1592,13 +1672,14 @@
   {
    "personNameHe": "אלי אוזן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1984,
    "toYear": 1985,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1620,13 +1701,14 @@
   {
    "personNameHe": "אלי בכר",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1967,
    "toYear": 1972,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -1679,13 +1761,14 @@
   {
    "personNameHe": "אליאן רוחנא",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -1713,13 +1796,14 @@
   {
    "personNameHe": "אלין טופוזאקוב",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2009,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1756,13 +1840,14 @@
   {
    "personNameHe": "אלירן דנין",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1793,13 +1878,14 @@
   {
    "personNameHe": "אלכסנדר בולייביץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -1808,13 +1894,14 @@
   {
    "personNameHe": "אלמוג כהן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1829,13 +1916,14 @@
   {
    "personNameHe": "אלן אוז'בולט",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1865,19 +1953,24 @@
   {
    "personNameHe": "אלרואי כהן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ],
    "personNameLatin": "Elroy Cohen",
    "seasons": [
     "2011/12",
@@ -1887,13 +1980,14 @@
   {
    "personNameHe": "אמידו בלדה",
    "position": "FW",
-   "positionFrom": "wiki-he",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1908,13 +2002,14 @@
   {
    "personNameHe": "אמיליוס זובאס",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -1943,13 +2038,14 @@
   {
    "personNameHe": "אמיר עגייב",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2019,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -1985,13 +2081,14 @@
   {
    "personNameHe": "אמציה לבקוביץ",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1955,
    "toYear": 1966,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2022,6 +2119,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2036,13 +2134,14 @@
   {
    "personNameHe": "אנג'י קואמה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -2064,6 +2163,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2078,13 +2178,14 @@
   {
    "personNameHe": "אנז'-פרדי פלומה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2093,13 +2194,14 @@
   {
    "personNameHe": "אנטואן קונטה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2114,13 +2216,14 @@
   {
    "personNameHe": "אנריקה ג'וקו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -2156,13 +2259,14 @@
   {
    "personNameHe": "אסי טובי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1998,
    "toYear": 1999,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2199,6 +2303,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2213,13 +2318,14 @@
   {
    "personNameHe": "אפואלה אדל",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2236,13 +2342,14 @@
   {
    "personNameHe": "ארון שוינפלד",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2257,13 +2364,14 @@
   {
    "personNameHe": "ארז מסיקה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2000,
    "toYear": 2001,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2272,13 +2380,14 @@
   {
    "personNameHe": "אריאל הרוש",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2294,13 +2403,14 @@
   {
    "personNameHe": "אריאל כהן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2026,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -2344,13 +2454,14 @@
   {
    "personNameHe": "אריה בז'רנו",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1968,
    "toYear": 1985,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2359,13 +2470,14 @@
   {
    "personNameHe": "אריק דג'מבה דג'מבה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2374,13 +2486,14 @@
   {
    "personNameHe": "אריק ינקו",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2401,13 +2514,14 @@
   {
    "personNameHe": "ארמנדו קופר",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -2418,13 +2532,14 @@
   {
    "personNameHe": "ארנסטס שטקוס",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -2439,29 +2554,35 @@
   {
    "personNameHe": "ארתור אטצזיאנוב",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ],
    "personNameLatin": "Arthur Atzianov"
   },
   {
    "personNameHe": "אשר בלוט",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1949,
    "toYear": 1959,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2491,13 +2612,14 @@
   {
    "personNameHe": "בוגדן סרנבסקי",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2527,13 +2649,14 @@
   {
    "personNameHe": "בוריס קליימן",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2009,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2550,13 +2673,14 @@
   {
    "personNameHe": "ביברס נאתכו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2010,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2573,19 +2697,24 @@
   {
    "personNameHe": "ביוואן פרנסמן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ],
    "personNameLatin": "Bevan Fransman",
    "seasons": [
     "2010/11",
@@ -2595,13 +2724,14 @@
   {
    "personNameHe": "ביסקוט אמבלה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2004,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2610,13 +2740,14 @@
   {
    "personNameHe": "בן אלגרבלי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-en"
    ],
@@ -2643,13 +2774,14 @@
   {
    "personNameHe": "בן לוז",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2001,
    "toYear": 2009,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2666,13 +2798,14 @@
   {
    "personNameHe": "בן ציון צין (צינוביץ')",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1955,
    "toYear": 1957,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -2694,13 +2827,14 @@
   {
    "personNameHe": "בן רייכרט",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2717,13 +2851,14 @@
   {
    "personNameHe": "בן שהר",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2005,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2739,13 +2874,14 @@
   {
    "personNameHe": "בנג'מין פראנסיס",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2768,13 +2904,14 @@
   {
    "personNameHe": "בני חדד",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2001,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2797,13 +2934,14 @@
   {
    "personNameHe": "בנימין טרידובסקי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -2813,13 +2951,14 @@
   {
    "personNameHe": "בסארט עבדורחימי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -2830,13 +2969,14 @@
   {
    "personNameHe": "בראיין גרזיצ'יץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2851,13 +2991,14 @@
   {
    "personNameHe": "בראיין פאסי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2894,31 +3035,37 @@
   },
   {
    "personNameHe": "ברונו סוארס",
-   "position": "FW",
-   "positionFrom": "vikipoel",
+   "position": "DF",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-en"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "DF",
+    "FW"
+   ],
    "personNameLatin": "Bruno Soares"
   },
   {
    "personNameHe": "ברונו קוטיניו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-en"
    ],
@@ -2929,13 +3076,14 @@
   {
    "personNameHe": "ברנקו איליץ'",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -2950,13 +3098,14 @@
   {
    "personNameHe": "ברק בדש",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2004,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -2989,18 +3138,23 @@
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ]
   },
   {
    "personNameHe": "ג'ון פיינטסיל",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2004,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -3009,13 +3163,14 @@
   {
    "personNameHe": "ג'ון צ'יבויקה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -3040,13 +3195,14 @@
   {
    "personNameHe": "ג'ורג' דיבה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -3057,13 +3213,14 @@
   {
    "personNameHe": "גאבור הלמאי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2000,
    "toYear": 2003,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3080,13 +3237,14 @@
   {
    "personNameHe": "גאל אטוק",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -3096,13 +3254,14 @@
   {
    "personNameHe": "גבור מרטון",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1998,
    "toYear": 1999,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3148,13 +3307,14 @@
   {
    "personNameHe": "גבריאל סגל",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-en"
    ],
@@ -3186,13 +3346,14 @@
   {
    "personNameHe": "גד עמוס",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2025,
    "toYear": 2026,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -3206,13 +3367,14 @@
   {
    "personNameHe": "גדעון טיש",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1955,
    "toYear": 1969,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3235,13 +3397,14 @@
   {
    "personNameHe": "גוני נאור",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3277,13 +3440,14 @@
   {
    "personNameHe": "גיא אסולין",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3310,18 +3474,23 @@
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ],
    "personNameLatin": "Guy Badash"
   },
   {
    "personNameHe": "גיא גומברג",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -3371,13 +3540,14 @@
   {
    "personNameHe": "גיא צרפתי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2004,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3392,13 +3562,14 @@
   {
    "personNameHe": "גיא קואז",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2003,
    "toYear": 2004,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -3412,13 +3583,14 @@
   {
    "personNameHe": "גיא שרעבי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1994,
    "toYear": 1997,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3435,13 +3607,14 @@
   {
    "personNameHe": "גיורא אנטמן",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1986,
    "toYear": 1987,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -3471,13 +3644,14 @@
   {
    "personNameHe": "גיל ורמוט",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2005,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3498,13 +3672,14 @@
   {
    "personNameHe": "גיל יצחק",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3554,17 +3729,22 @@
   {
    "personNameHe": "גל הרשליקוביץ",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1987,
    "toYear": 1994,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ],
    "personNameLatin": "G. Herslikovich"
   },
   {
@@ -3590,13 +3770,14 @@
   {
    "personNameHe": "גל מלכה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -3610,13 +3791,14 @@
   {
    "personNameHe": "גל שיש",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3638,13 +3820,14 @@
   {
    "personNameHe": "גליל בן סנן",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2002,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3664,13 +3847,14 @@
   {
    "personNameHe": "דאבור רופניק",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1998,
    "toYear": 2000,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3686,18 +3870,23 @@
   {
    "personNameHe": "דאגלס דה סילבה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ],
    "personNameLatin": "Douglas Silva",
    "seasons": [
     "2008/09",
@@ -3707,13 +3896,14 @@
   {
    "personNameHe": "דאמיר שובשיץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -3734,7 +3924,11 @@
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ]
   },
   {
    "personNameHe": "דגלאס אווסו",
@@ -3747,6 +3941,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -3757,13 +3952,14 @@
   {
    "personNameHe": "דדי בן דיין",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2009,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -3799,13 +3995,14 @@
   {
    "personNameHe": "דוד בליס",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1957,
    "toYear": 1961,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -3813,13 +4010,14 @@
   {
    "personNameHe": "דוד הרשליקוביץ",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1983,
    "toYear": 1990,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -3827,13 +4025,14 @@
   {
    "personNameHe": "דוד ונטורה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1993,
    "toYear": 1995,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -3855,13 +4054,14 @@
   {
    "personNameHe": "דוד פיזנטי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1986,
    "toYear": 1987,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3906,28 +4106,34 @@
   {
    "personNameHe": "דוד קלטינס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "MF",
+    "DF"
+   ]
   },
   {
    "personNameHe": "דוד קרמו",
-   "position": null,
-   "positionFrom": null,
+   "position": "FW",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1968,
    "toYear": 1973,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -3935,13 +4141,14 @@
   {
    "personNameHe": "דוד רוצ'לה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -3951,13 +4158,14 @@
   {
    "personNameHe": "דוד שוייצר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1951,
    "toYear": 1954,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -3971,14 +4179,15 @@
   },
   {
    "personNameHe": "דוד שטיינוורצל",
-   "position": null,
-   "positionFrom": null,
+   "position": "DF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1952,
    "toYear": 1954,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -3986,13 +4195,14 @@
   {
    "personNameHe": "דודו ביטון",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4008,13 +4218,14 @@
   {
    "personNameHe": "דודו דהאן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2000,
    "toYear": 2002,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4050,13 +4261,14 @@
   {
    "personNameHe": "דודי אלון",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -4073,13 +4285,14 @@
   {
    "personNameHe": "דויד קופרמן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4095,13 +4308,14 @@
   {
    "personNameHe": "דולי מנגה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -4112,13 +4326,14 @@
   {
    "personNameHe": "דור אלו",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4156,13 +4371,14 @@
   {
    "personNameHe": "דור חוגי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4177,13 +4393,14 @@
   {
    "personNameHe": "דור חמו",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -4201,6 +4418,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4218,13 +4436,14 @@
   {
    "personNameHe": "דיאן רצ'וניצה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1999,
    "toYear": 2000,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4239,13 +4458,14 @@
   {
    "personNameHe": "דימיטאר טלקיסקי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2009,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -4254,13 +4474,14 @@
   {
    "personNameHe": "דמבה קמארה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -4341,13 +4562,14 @@
   {
    "personNameHe": "דן עזריה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4378,13 +4600,14 @@
   {
    "personNameHe": "דני אלקיים",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1957,
    "toYear": 1966,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -4392,13 +4615,14 @@
   {
    "personNameHe": "דני בונדר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -4407,34 +4631,44 @@
   {
    "personNameHe": "דני בורסוק",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1961,
    "toYear": 1969,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ]
   },
   {
    "personNameHe": "דני גרופר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ],
    "personNameLatin": "Denny Gropper",
    "seasons": [
     "2019/20",
@@ -4458,13 +4692,14 @@
   {
    "personNameHe": "דני עמוס",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4479,13 +4714,14 @@
   {
    "personNameHe": "דניאל גולדשטיין",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1955,
    "toYear": 1961,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -4493,13 +4729,14 @@
   {
    "personNameHe": "דניאל גרץ",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -4521,6 +4758,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4556,13 +4794,14 @@
   {
    "personNameHe": "דניאל דניאלי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1961,
    "toYear": 1966,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -4570,30 +4809,36 @@
   },
   {
    "personNameHe": "דניאל צדיק",
-   "position": "GK",
-   "positionFrom": "vikipoel",
+   "position": "MF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "GK"
+   ],
    "personNameLatin": "Daniel Tzadik"
   },
   {
    "personNameHe": "דנילו לופז",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -4603,13 +4848,14 @@
   {
    "personNameHe": "דניס אונישנקו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1999,
    "toYear": 2003,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4627,13 +4873,14 @@
   {
    "personNameHe": "דסליי טגניה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -4661,19 +4908,24 @@
   {
    "personNameHe": "הישאם לאיוס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ],
    "personNameLatin": "Hisham Layous",
    "seasons": [
     "2022/23",
@@ -4699,13 +4951,14 @@
   {
    "personNameHe": "הרוויה איליץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -4714,20 +4967,25 @@
   },
   {
    "personNameHe": "הרמוני איקינדה",
-   "position": "DF",
-   "positionFrom": "vikipoel",
+   "position": "MF",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "DF"
+   ],
    "personNameLatin": "Harmony Ikande",
    "seasons": [
     "2014/15"
@@ -4736,13 +4994,14 @@
   {
    "personNameHe": "הרצל פריצנר",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1948,
    "toYear": 1954,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -4764,6 +5023,10 @@
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "DF"
+   ],
    "personNameLatin": "Walid Badir",
    "seasons": [
     "2006/07",
@@ -4778,13 +5041,14 @@
   {
    "personNameHe": "וויאם עמאשה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -4811,13 +5075,14 @@
   {
    "personNameHe": "וולטון סילבה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2002,
    "toYear": 2003,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -4827,13 +5092,14 @@
   {
    "personNameHe": "וולינגטון דה אוליברה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2007,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -4864,13 +5130,14 @@
   {
    "personNameHe": "וינסנט אניימה",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4888,13 +5155,14 @@
   {
    "personNameHe": "ויקטור מרעי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4912,13 +5180,14 @@
   {
    "personNameHe": "זאב חיימוביץ'",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -4927,13 +5196,14 @@
   {
    "personNameHe": "זאב סגל",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1955,
    "toYear": 1961,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -4962,13 +5232,14 @@
   {
    "personNameHe": "זיו כבדה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1997,
    "toYear": 2000,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -4985,13 +5256,14 @@
   {
    "personNameHe": "זיו מורגן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2026,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5008,13 +5280,14 @@
   {
    "personNameHe": "זלמן פרידמן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1931,
    "toYear": 1945,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -5030,13 +5303,14 @@
   {
    "personNameHe": "חאבייר פאאס",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2007,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -5045,13 +5319,14 @@
   {
    "personNameHe": "חוטפריט רומראטו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -5060,13 +5335,14 @@
   {
    "personNameHe": "חוסה רודריגס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -5075,13 +5351,14 @@
   {
    "personNameHe": "חזי שירזי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1991,
    "toYear": 1994,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5190,13 +5467,14 @@
   {
    "personNameHe": "חמזה בארי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5211,13 +5489,14 @@
   {
    "personNameHe": "חן עזרא",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -5242,13 +5521,14 @@
   {
    "personNameHe": "חנן ממן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -5257,13 +5537,14 @@
   {
    "personNameHe": "חסן אבו זייד",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5278,13 +5559,14 @@
   {
    "personNameHe": "חסן בדג'ייב",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1993,
    "toYear": 1994,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -5293,13 +5575,14 @@
   {
    "personNameHe": "טוטו תמוז",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5317,13 +5600,14 @@
   {
    "personNameHe": "טום אחי מרדכי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -5338,13 +5622,14 @@
   {
    "personNameHe": "טיאגו קוסטה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -5358,13 +5643,14 @@
   {
    "personNameHe": "טל אוסובסקי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1992,
    "toYear": 1994,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -5372,13 +5658,14 @@
   {
    "personNameHe": "טל איילה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2009,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -5397,6 +5684,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-season"
    ],
    "sport": "football",
@@ -5411,20 +5699,25 @@
   },
   {
    "personNameHe": "טל בן חיים",
-   "position": "MF",
-   "positionFrom": "vikipoel",
+   "position": "FW",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "FW",
+    "MF"
+   ],
    "personNameLatin": "Tal Ben Haim",
    "seasons": [
     "2012/13"
@@ -5433,13 +5726,14 @@
   {
    "personNameHe": "טל בנש",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5454,13 +5748,14 @@
   {
    "personNameHe": "טל חן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2003,
    "toYear": 2008,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5479,13 +5774,14 @@
   {
    "personNameHe": "יאיר כהן צדק",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2003,
    "toYear": 2004,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -5509,7 +5805,12 @@
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "DF",
+    "MF",
+    "FW"
+   ]
   },
   {
    "personNameHe": "יגאל אנטבי",
@@ -5548,13 +5849,14 @@
   {
    "personNameHe": "יגאל בקר",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -5569,13 +5871,14 @@
   {
    "personNameHe": "יהב גורפינקל",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5590,13 +5893,14 @@
   {
    "personNameHe": "יהודה חוטה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -5627,13 +5931,14 @@
   {
    "personNameHe": "יהונתן לוי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -5662,13 +5967,14 @@
   {
    "personNameHe": "יואב ג'ראפי",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5683,13 +5989,14 @@
   {
    "personNameHe": "יואב הופמייסטר",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -5700,13 +6007,14 @@
   {
    "personNameHe": "יואב תומר",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5736,13 +6044,14 @@
   {
    "personNameHe": "יובל כהן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -5804,6 +6113,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -5814,13 +6124,14 @@
   {
    "personNameHe": "יונתן רודיונוב",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -5828,13 +6139,14 @@
   {
    "personNameHe": "יוסי אבוקסיס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1987,
    "toYear": 2007,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5860,13 +6172,14 @@
   {
    "personNameHe": "יוסי ביטון",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2007,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -5955,13 +6268,14 @@
   {
    "personNameHe": "יוסי רוזן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2003,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -5977,13 +6291,14 @@
   {
    "personNameHe": "יוסי שבחון",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6012,13 +6327,14 @@
   {
    "personNameHe": "יורגן קולין",
    "position": "DF",
-   "positionFrom": "wiki-he",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -6048,13 +6364,14 @@
   {
    "personNameHe": "יחזקאל חזום",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1964,
    "toYear": 1977,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -6063,13 +6380,14 @@
   {
    "personNameHe": "יניב בן ניסן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2004,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -6079,13 +6397,14 @@
   {
    "personNameHe": "יניב ירון",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1995,
    "toYear": 1999,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -6119,13 +6438,14 @@
   {
    "personNameHe": "יעקב אקהויז",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1974,
    "toYear": 1992,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6156,18 +6476,23 @@
   {
    "personNameHe": "יעקב בוזגלו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1979,
    "toYear": 1982,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ],
    "personNameLatin": "Yaacov Buzaglo",
    "seasons": [
     "1979/80",
@@ -6177,13 +6502,14 @@
   {
    "personNameHe": "יעקב בריהון",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -6199,13 +6525,14 @@
   {
    "personNameHe": "יעקב הלל",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1997,
    "toYear": 2003,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -6278,13 +6605,14 @@
   {
    "personNameHe": "יעקב רחמינוביץ'",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1968,
    "toYear": 1980,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -6375,13 +6703,14 @@
   {
    "personNameHe": "ירון בן דב",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1993,
    "toYear": 1994,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -6392,13 +6721,14 @@
   {
    "personNameHe": "ירוסלב באקו",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1993,
    "toYear": 1996,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -6407,13 +6737,14 @@
   {
    "personNameHe": "ירין פרץ",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6478,13 +6809,14 @@
   {
    "personNameHe": "ישראל וייס",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1951,
    "toYear": 1956,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -6492,13 +6824,14 @@
   {
    "personNameHe": "ישראל זגורי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -6509,13 +6842,14 @@
   {
    "personNameHe": "ישראל כהן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1997,
    "toYear": 2000,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6531,13 +6865,14 @@
   {
    "personNameHe": "ישראל מאיה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1989,
    "toYear": 1992,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -6546,13 +6881,14 @@
   {
    "personNameHe": "ישראל ראש",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -6609,13 +6945,14 @@
   {
    "personNameHe": "כפיר אייזנשטיין",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -6629,13 +6966,14 @@
   {
    "personNameHe": "לבאן קוטליה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -6646,13 +6984,14 @@
   {
    "personNameHe": "לוטם זינו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6667,13 +7006,14 @@
   {
    "personNameHe": "לויזוס לויזו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2025,
    "toYear": 2026,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6709,13 +7049,14 @@
   {
    "personNameHe": "לוסיו מרינאו",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -6726,13 +7067,14 @@
   {
    "personNameHe": "לוקאס וינטרה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6747,13 +7089,14 @@
   {
    "personNameHe": "לוקאס סאשה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6777,6 +7120,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -6790,13 +7134,14 @@
   {
    "personNameHe": "לי און מזרחי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -6831,13 +7176,14 @@
   {
    "personNameHe": "ליאו בנבנישתי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season"
    ],
    "sport": "football",
@@ -6882,13 +7228,14 @@
   {
    "personNameHe": "ליאור בקשי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2009,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -6903,13 +7250,14 @@
   {
    "personNameHe": "ליאור לוי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -6925,13 +7273,14 @@
   {
    "personNameHe": "ליביו אנטל",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -6963,13 +7312,14 @@
   {
    "personNameHe": "ליעד רמות",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -6985,29 +7335,35 @@
   },
   {
    "personNameHe": "לירון דיאמנט",
-   "position": "MF",
-   "positionFrom": "vikipoel",
+   "position": "FW",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "FW",
+    "MF"
+   ]
   },
   {
    "personNameHe": "לירון ליכטרמן",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1994,
    "toYear": 1996,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -7015,13 +7371,14 @@
   {
    "personNameHe": "לירן רוטמן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2026,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7072,13 +7429,14 @@
   {
    "personNameHe": "מאוויס צ'יבוטה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -7087,13 +7445,14 @@
   {
    "personNameHe": "מאור בוזגלו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7140,13 +7499,14 @@
   {
    "personNameHe": "מאיר אהרן מליקה",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1994,
    "toYear": 1995,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season"
    ],
    "sport": "football",
@@ -7173,13 +7533,14 @@
   {
    "personNameHe": "מאיר בן שטרית",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1986,
    "toYear": 1988,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -7202,7 +7563,7 @@
   {
    "personNameHe": "מאיר מליקה (חלוץ)",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1994,
@@ -7210,6 +7571,7 @@
    "sources": [
     "archive-qualifier",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -7234,13 +7596,14 @@
   {
    "personNameHe": "מהראן לאלה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7258,13 +7621,14 @@
   {
    "personNameHe": "מוחמד אבו אל היג'א",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -7274,13 +7638,14 @@
   {
    "personNameHe": "מוחמד טראורה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -7316,13 +7681,14 @@
   {
    "personNameHe": "מוטי ברשצקי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7390,13 +7756,14 @@
   {
    "personNameHe": "מור נעמן (כדורגלן)",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -7406,13 +7773,14 @@
   {
    "personNameHe": "מור שושן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2009,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -7428,13 +7796,14 @@
   {
    "personNameHe": "מוריס ז'אנו",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1981,
    "toYear": 1991,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -7443,13 +7812,14 @@
   {
    "personNameHe": "מזואה אנסומבו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2008,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -7458,13 +7828,14 @@
   {
    "personNameHe": "מחמוד עבאס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7495,13 +7866,14 @@
   {
    "personNameHe": "מיחאי פינטילי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -7512,13 +7884,14 @@
   {
    "personNameHe": "מייקל אולהה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7533,13 +7906,14 @@
   {
    "personNameHe": "מייקל סיטון",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7554,13 +7928,14 @@
   {
    "personNameHe": "מיכאל זנדברג",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2009,
    "toYear": 2010,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7588,14 +7963,15 @@
   },
   {
    "personNameHe": "מיכאל לפרדון",
-   "position": null,
-   "positionFrom": null,
+   "position": "DF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1973,
    "toYear": 1976,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -7604,13 +7980,14 @@
   {
    "personNameHe": "מיכאל מיכאלוב",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1956,
    "toYear": 1959,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -7676,19 +8053,24 @@
   {
    "personNameHe": "מירקו אורמוש",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "DF"
+   ],
    "personNameLatin": "Mirko Oremuš",
    "seasons": [
     "2011/12"
@@ -7697,13 +8079,14 @@
   {
    "personNameHe": "מנואל ניירה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2007,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -7793,13 +8176,14 @@
   {
    "personNameHe": "מרווין פירסמן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7816,13 +8200,14 @@
   {
    "personNameHe": "מריו מסטרוביץ",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1997,
    "toYear": 1998,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -7836,13 +8221,14 @@
   {
    "personNameHe": "מריו פצ'אלקה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7873,13 +8259,14 @@
   {
    "personNameHe": "מרקו ינקוביץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -7888,13 +8275,14 @@
   {
    "personNameHe": "מרקו סימיץ'",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -7905,13 +8293,14 @@
   {
    "personNameHe": "מרקו שולר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7934,6 +8323,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7948,13 +8338,14 @@
   {
    "personNameHe": "משה אוחיון",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -7984,13 +8375,14 @@
   {
    "personNameHe": "משה דננבאום",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2009,
    "toYear": 2011,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -8011,17 +8403,22 @@
   },
   {
    "personNameHe": "משה מורדכוביץ׳",
-   "position": "FW",
-   "positionFrom": "vikipoel",
+   "position": "MF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1967,
    "toYear": 1976,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ]
   },
   {
    "personNameHe": "משה מלמד",
@@ -8057,13 +8454,14 @@
   {
    "personNameHe": "משה סיני",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1979,
    "toYear": 1993,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8088,13 +8486,14 @@
   {
    "personNameHe": "משה סקל",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1958,
    "toYear": 1961,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -8160,13 +8559,14 @@
   {
    "personNameHe": "מתן אוחיון",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8181,13 +8581,14 @@
   {
    "personNameHe": "מתן אריאל לזמי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -8196,13 +8597,14 @@
   {
    "personNameHe": "נוסא איגייבור",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8217,13 +8619,14 @@
   {
    "personNameHe": "נועם בונה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -8254,13 +8657,14 @@
   {
    "personNameHe": "ניב זריהן",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8275,13 +8679,14 @@
   {
    "personNameHe": "ניב סרדל",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -8331,13 +8736,14 @@
   {
    "personNameHe": "ניקולאס גורובסוב",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -8379,13 +8785,14 @@
   {
    "personNameHe": "ניר לקס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8419,29 +8826,35 @@
   },
   {
    "personNameHe": "ניר נחום",
-   "position": "MF",
-   "positionFrom": "vikipoel",
+   "position": "DF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ]
   },
   {
    "personNameHe": "ניר רחמין",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1998,
    "toYear": 2006,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8481,13 +8894,14 @@
   {
    "personNameHe": "נמניה ווצ'יצ'ביץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2009,
    "toYear": 2010,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -8496,13 +8910,14 @@
   {
    "personNameHe": "נמניה ניקוליץ'",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -8559,13 +8974,14 @@
   {
    "personNameHe": "נריוס ואלסקיס",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2019,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -8574,13 +8990,14 @@
   {
    "personNameHe": "סאבו פאביצ'ביץ'",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8615,13 +9032,14 @@
   {
    "personNameHe": "סארי פלאח",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8636,13 +9054,14 @@
   {
    "personNameHe": "סבסטיאן הרננדז",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -8667,13 +9086,14 @@
   {
    "personNameHe": "סטפן מרינוביץ'",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -8684,13 +9104,14 @@
   {
    "personNameHe": "סטפן ספירובסקי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -8701,13 +9122,14 @@
   {
    "personNameHe": "סיאנדה קולו",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -8716,13 +9138,14 @@
   {
    "personNameHe": "סינטיהו סלליך",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -8731,13 +9154,14 @@
   {
    "personNameHe": "סיראז' נסאר",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -8798,13 +9222,14 @@
   {
    "personNameHe": "סער בנבנישתי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8819,13 +9244,14 @@
   {
    "personNameHe": "סרגיי פוגודין",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1995,
    "toYear": 1997,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8865,6 +9291,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8881,13 +9308,14 @@
   {
    "personNameHe": "סתיו למקין",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8904,13 +9332,14 @@
   {
    "personNameHe": "עבדי פרחאת",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -8928,13 +9357,14 @@
   {
    "personNameHe": "עדי טבצ'ניק",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -8944,13 +9374,14 @@
   {
    "personNameHe": "עדי סבג",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2008,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -8964,13 +9395,14 @@
   {
    "personNameHe": "עדן בן בסט",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2009,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -8985,13 +9417,14 @@
   {
    "personNameHe": "עדן הרשקוביץ",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -9006,13 +9439,14 @@
   {
    "personNameHe": "עדן שרם",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9029,13 +9463,14 @@
   {
    "personNameHe": "עוביידה חטאב",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -9044,13 +9479,14 @@
   {
    "personNameHe": "עומאר בראון",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -9100,13 +9536,14 @@
   {
    "personNameHe": "עומר סניור",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9124,19 +9561,24 @@
   {
    "personNameHe": "עומר פדידה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ],
    "personNameLatin": "Omer Fadida",
    "seasons": [
     "2013/14",
@@ -9162,14 +9604,15 @@
   {
    "personNameHe": "עומר פרץ (קשר)",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": null,
    "toYear": null,
    "sources": [
     "archive-qualifier",
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -9185,6 +9628,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9228,13 +9672,14 @@
   {
    "personNameHe": "עומרי לוי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2025,
    "toYear": 2027,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -9244,13 +9689,14 @@
   {
    "personNameHe": "עומרי קנדה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9268,13 +9714,14 @@
   {
    "personNameHe": "עומרי שקל",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -9296,6 +9743,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -9311,13 +9759,14 @@
   {
    "personNameHe": "עופר ורטה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9333,13 +9782,14 @@
   {
    "personNameHe": "עופר שטרית",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1997,
    "toYear": 1998,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9354,13 +9804,14 @@
   {
    "personNameHe": "עזיז קאיונדו",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2023,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -9401,13 +9852,14 @@
   {
    "personNameHe": "עידו אקסברד",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -9418,13 +9870,14 @@
   {
    "personNameHe": "עידו וייר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9439,13 +9892,14 @@
   {
    "personNameHe": "עידו שרון",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -9462,13 +9916,14 @@
   {
    "personNameHe": "עידן ברנס",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2025,
    "toYear": 2026,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -9520,13 +9975,14 @@
   {
    "personNameHe": "עידן כהן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9558,13 +10014,14 @@
   {
    "personNameHe": "עידן סרור",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2002,
    "toYear": 2010,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9580,13 +10037,14 @@
   {
    "personNameHe": "עלי אלעוברה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -9596,13 +10054,14 @@
   {
    "personNameHe": "עלי כנאנה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -9650,13 +10109,14 @@
   {
    "personNameHe": "עמירן שקלים",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2019,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9671,13 +10131,14 @@
   {
    "personNameHe": "עמית ביטון",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9736,13 +10197,14 @@
   {
    "personNameHe": "עמית מלכה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2019,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -9773,6 +10235,7 @@
     "archive-qualifier",
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -9781,7 +10244,7 @@
   {
    "personNameHe": "עמנואל בואטנג (קשר)",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2018,
@@ -9789,6 +10252,7 @@
    "sources": [
     "archive-qualifier",
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -9797,13 +10261,14 @@
   {
    "personNameHe": "עמרי עטיה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2011,
    "toYear": 2012,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -9816,20 +10281,25 @@
   },
   {
    "personNameHe": "ערן זהבי",
-   "position": "FW",
-   "positionFrom": "vikipoel",
+   "position": "MF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "FW"
+   ],
    "personNameLatin": "Eran Zahavi",
    "seasons": [
     "2008/09",
@@ -9891,13 +10361,14 @@
   {
    "personNameHe": "פבלו גונזאלס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -9906,13 +10377,14 @@
   {
    "personNameHe": "פבריציו קארבליו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2003,
    "toYear": 2004,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -9922,13 +10394,14 @@
   {
    "personNameHe": "פדרו גלבאן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -9937,13 +10410,14 @@
   {
    "personNameHe": "פטר אורלנדיץ'",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -9973,13 +10447,14 @@
   {
    "personNameHe": "פייסל מוליץ'",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2017,
    "toYear": 2019,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -9994,13 +10469,14 @@
   {
    "personNameHe": "פיליפ מנה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2008,
    "toYear": 2015,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -10008,13 +10484,14 @@
   {
    "personNameHe": "פיני בלילי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1997,
    "toYear": 2003,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10033,13 +10510,14 @@
   {
    "personNameHe": "פליפה רודריגס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -10048,13 +10526,14 @@
   {
    "personNameHe": "פליקס אובוקה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2005,
    "toYear": 2006,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-en"
    ],
    "sport": "football",
@@ -10113,6 +10592,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -10121,13 +10601,14 @@
   {
    "personNameHe": "פרנסיס קיירמה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -10146,6 +10627,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -10204,13 +10686,14 @@
   {
    "personNameHe": "צליל חתוכה",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -10225,13 +10708,14 @@
   {
    "personNameHe": "קאווה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -10242,13 +10726,14 @@
   {
    "personNameHe": "קאיו אלבס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2019,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -10257,13 +10742,14 @@
   {
    "personNameHe": "קובי הדדי",
    "position": "DF",
-   "positionFrom": "wf-all",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1967,
    "toYear": 1997,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -10296,13 +10782,14 @@
   {
    "personNameHe": "קובי סגל",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1980,
    "toYear": 1991,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -10365,13 +10852,14 @@
   {
    "personNameHe": "קז'ימיש מוסקאל",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 1994,
    "toYear": 1998,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -10380,13 +10868,14 @@
   {
    "personNameHe": "קייס גאנם",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2024,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10401,13 +10890,14 @@
   {
    "personNameHe": "קלאודיו בומבה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10422,13 +10912,14 @@
   {
    "personNameHe": "קלאודמיר פריירה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -10437,13 +10928,14 @@
   {
    "personNameHe": "קלמי סבן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2001,
    "toYear": 2004,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10488,13 +10980,14 @@
   {
    "personNameHe": "ראובן עובד",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2009,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10524,13 +11017,14 @@
   {
    "personNameHe": "רובי לבקוביץ'",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -10545,13 +11039,14 @@
   {
    "personNameHe": "רובן סולצ'אגה",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2003,
    "toYear": 2004,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -10590,13 +11085,14 @@
   {
    "personNameHe": "רווה אסייג",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -10642,6 +11138,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10656,19 +11153,24 @@
   },
   {
    "personNameHe": "רוי רונן",
-   "position": "FW",
-   "positionFrom": "vikipoel",
+   "position": "GK",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2016,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "GK",
+    "FW"
+   ],
    "personNameLatin": "Roy Ronen",
    "seasons": [
     "2017/18"
@@ -10677,13 +11179,14 @@
   {
    "personNameHe": "רומאן רוקי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -10694,13 +11197,14 @@
   {
    "personNameHe": "רומן וסילוק",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "foreign",
    "originFrom": "vikipoel",
    "fromYear": 2004,
    "toYear": 2005,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -10760,13 +11264,14 @@
   {
    "personNameHe": "רוני קלדרון",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1968,
    "toYear": 1972,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -10806,13 +11311,14 @@
   {
    "personNameHe": "רונן חרזי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1999,
    "toYear": 2000,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10849,6 +11355,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10865,13 +11372,14 @@
   {
    "personNameHe": "רועי גורדנה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10889,13 +11397,14 @@
   {
    "personNameHe": "רועי דיין",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2008,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -10909,14 +11418,15 @@
   },
   {
    "personNameHe": "רועי דיין (יליד 1997)",
-   "position": "MF",
-   "positionFrom": "wf-all",
+   "position": "FW",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -10926,13 +11436,14 @@
   {
    "personNameHe": "רועי הרמן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -10947,13 +11458,14 @@
   {
    "personNameHe": "רועי זיקרי",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -10985,13 +11497,14 @@
   {
    "personNameHe": "רותם חטואל",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2024,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11006,13 +11519,14 @@
   {
    "personNameHe": "רז טוויזר",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11028,13 +11542,14 @@
   {
    "personNameHe": "רז כהן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2020,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -11065,20 +11580,25 @@
   },
   {
    "personNameHe": "רז נחמיאס",
-   "position": "DF",
-   "positionFrom": "vikipoel",
+   "position": "MF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2018,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "DF"
+   ],
    "personNameLatin": "Raz Nahmias",
    "seasons": [
     "2017/18",
@@ -11088,13 +11608,14 @@
   {
    "personNameHe": "רז שטיין",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2020,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11108,20 +11629,25 @@
   },
   {
    "personNameHe": "רז שלמה",
-   "position": "DF",
-   "positionFrom": "vikipoel",
+   "position": "MF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
    ],
    "sport": "football",
    "confidence": 2,
+   "positions": [
+    "MF",
+    "DF"
+   ],
    "personNameLatin": "Raz Shlomo",
    "seasons": [
     "2016/17",
@@ -11163,13 +11689,14 @@
   {
    "personNameHe": "ריף מסיקה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -11180,13 +11707,14 @@
   {
    "personNameHe": "ריפעת טורק",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1971,
    "toYear": 1985,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -11228,13 +11756,14 @@
   {
    "personNameHe": "רמזי ספורי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2019,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11252,13 +11781,14 @@
   {
    "personNameHe": "רמי אבו לאבן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2003,
    "toYear": 2004,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -11268,28 +11798,34 @@
   },
   {
    "personNameHe": "רמי ארמה",
-   "position": "MF",
-   "positionFrom": "vikipoel",
+   "position": "DF",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1982,
    "toYear": 1992,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "DF",
+    "MF"
+   ]
   },
   {
    "personNameHe": "רמי דואני",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11305,13 +11841,14 @@
   {
    "personNameHe": "רמי חליס",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2001,
    "toYear": 2006,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -11320,13 +11857,14 @@
   {
    "personNameHe": "רן בנימין",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2022,
    "toYear": 2026,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11343,13 +11881,14 @@
   {
    "personNameHe": "רן יצחק",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11386,6 +11925,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -11399,13 +11939,14 @@
   {
    "personNameHe": "שבי בן ברוך",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1962,
    "toYear": 1972,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -11414,13 +11955,14 @@
   {
    "personNameHe": "שביט אלימלך",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1996,
    "toYear": 2007,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11445,13 +11987,14 @@
   {
    "personNameHe": "שביט מזל",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2023,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11508,13 +12051,14 @@
   {
    "personNameHe": "שגיא גניס",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2021,
    "toYear": 2025,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season"
    ],
@@ -11580,13 +12124,14 @@
   {
    "personNameHe": "שגיב יחזקאל",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11603,13 +12148,14 @@
   {
    "personNameHe": "שובל גוזלן",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wiki-he"
    ],
@@ -11620,13 +12166,14 @@
   {
    "personNameHe": "שולי גילארדי",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1990,
    "toYear": 1991,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11642,13 +12189,14 @@
   {
    "personNameHe": "שון בן נשר",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2026,
    "toYear": 2027,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all"
    ],
    "sport": "football",
@@ -11658,13 +12206,14 @@
   {
    "personNameHe": "שון גולדברג",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11679,13 +12228,14 @@
   {
    "personNameHe": "שון מלכה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2013,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11702,13 +12252,14 @@
   {
    "personNameHe": "שוקה ברשדסקי",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1936,
    "toYear": 1937,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -11716,13 +12267,14 @@
   {
    "personNameHe": "שחר הירש",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2016,
    "toYear": 2021,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11771,6 +12323,7 @@
    "sources": [
     "squad",
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11786,13 +12339,14 @@
   {
    "personNameHe": "שי אבוטבול",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2002,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11817,13 +12371,14 @@
   {
    "personNameHe": "שי אייזן",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2018,
    "toYear": 2022,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11866,13 +12421,14 @@
   {
    "personNameHe": "שי רביבו",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2010,
    "toYear": 2011,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11886,18 +12442,23 @@
   },
   {
    "personNameHe": "שייע פייגנבוים",
-   "position": "DF",
-   "positionFrom": "vikipoel",
+   "position": "FW",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1964,
    "toYear": 1979,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
-   "confidence": 2
+   "confidence": 2,
+   "positions": [
+    "FW",
+    "DF"
+   ]
   },
   {
    "personNameHe": "שלום אביטן",
@@ -11917,13 +12478,14 @@
   {
    "personNameHe": "שלום תקווה",
    "position": "MF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1995,
    "toYear": 2000,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -11941,7 +12503,7 @@
   {
    "personNameHe": "שלומי אזולאי (חלוץ)",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
@@ -11949,6 +12511,7 @@
    "sources": [
     "archive-qualifier",
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -11973,13 +12536,14 @@
   {
    "personNameHe": "שלומי ארבייטמן",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2007,
    "toYear": 2008,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -11988,13 +12552,14 @@
   {
    "personNameHe": "שלמה ספוז'ניקוב",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1957,
    "toYear": 1961,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -12002,13 +12567,14 @@
   {
    "personNameHe": "שלמה פוליאקוב",
    "position": "FW",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1927,
    "toYear": 1941,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -12031,13 +12597,14 @@
   {
    "personNameHe": "שמואל שיימן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2015,
    "toYear": 2017,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -12066,13 +12633,14 @@
   {
    "personNameHe": "שמעון בן יהונתן",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1960,
    "toYear": 1975,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wiki-he"
    ],
    "sport": "football",
@@ -12095,13 +12663,14 @@
   {
    "personNameHe": "שמעון ברנס",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1960,
    "toYear": 1961,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -12109,13 +12678,14 @@
   {
    "personNameHe": "שמעון גרשון",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1996,
    "toYear": 2006,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -12140,13 +12710,14 @@
   {
    "personNameHe": "שמעון הרוש",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2014,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -12190,13 +12761,14 @@
   {
    "personNameHe": "שרון מימר",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 1994,
    "toYear": 1997,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -12214,13 +12786,14 @@
   {
    "personNameHe": "תום אלמדון",
    "position": "GK",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2014,
    "toYear": 2015,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -12259,13 +12832,14 @@
   {
    "personNameHe": "תומר בן יוסף",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2012,
    "toYear": 2013,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-all",
     "wf-season",
     "wiki-he"
@@ -12280,13 +12854,14 @@
   {
    "personNameHe": "תומר חליבה",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2006,
    "toYear": 2007,
    "sources": [
     "vikipoel",
+    "vikipoel-body",
     "wf-season",
     "wiki-he"
    ],
@@ -12300,13 +12875,14 @@
   {
    "personNameHe": "תומר לוי",
    "position": "DF",
-   "positionFrom": "vikipoel",
+   "positionFrom": "vikipoel-body",
    "origin": "israeli",
    "originFrom": "vikipoel",
    "fromYear": 2019,
    "toYear": 2020,
    "sources": [
-    "vikipoel"
+    "vikipoel",
+    "vikipoel-body"
    ],
    "sport": "football",
    "confidence": 2
@@ -12411,9 +12987,10 @@
    "says": {
     "wf-all": "MF",
     "wiki-he": "MF",
-    "vikipoel": "DF"
+    "vikipoel": "DF",
+    "vikipoel-body": "MF"
    },
-   "took": "DF"
+   "took": "MF"
   },
   {
    "personNameHe": "אושר דוידה",
@@ -12422,9 +12999,10 @@
     "wf-season": "FW",
     "wf-all": "FW",
     "wiki-he": "MF",
-    "vikipoel": "MF"
+    "vikipoel": "MF",
+    "vikipoel-body": "FW"
    },
-   "took": "MF"
+   "took": "FW"
   },
   {
    "personNameHe": "אחמד עאבד",
@@ -12531,9 +13109,10 @@
    "says": {
     "wf-all": "DF",
     "wiki-en": "DF",
-    "vikipoel": "FW"
+    "vikipoel": "FW",
+    "vikipoel-body": "DF"
    },
-   "took": "FW"
+   "took": "DF"
   },
   {
    "personNameHe": "ג'ורג' בורבה",
@@ -12685,9 +13264,10 @@
    "field": "position",
    "says": {
     "wf-all": "MF",
-    "vikipoel": "GK"
+    "vikipoel": "GK",
+    "vikipoel-body": "MF"
    },
-   "took": "GK"
+   "took": "MF"
   },
   {
    "personNameHe": "הישאם לאיוס",
@@ -12707,9 +13287,10 @@
     "wf-season": "MF",
     "wf-all": "MF",
     "wiki-he": "MF",
-    "vikipoel": "DF"
+    "vikipoel": "DF",
+    "vikipoel-body": "MF"
    },
-   "took": "DF"
+   "took": "MF"
   },
   {
    "personNameHe": "הרצל פריצנר",
@@ -12789,9 +13370,10 @@
     "wf-season": "FW",
     "wf-all": "FW",
     "wiki-he": "MF",
-    "vikipoel": "MF"
+    "vikipoel": "MF",
+    "vikipoel-body": "FW"
    },
-   "took": "MF"
+   "took": "FW"
   },
   {
    "personNameHe": "יאיר כהן צדק",
@@ -12905,6 +13487,15 @@
    "took": "archive"
   },
   {
+   "personNameHe": "לירון דיאמנט",
+   "field": "position",
+   "says": {
+    "vikipoel": "MF",
+    "vikipoel-body": "FW"
+   },
+   "took": "FW"
+  },
+  {
    "personNameHe": "לירן רוטמן",
    "field": "position",
    "says": {
@@ -13006,6 +13597,15 @@
    "took": "DF"
   },
   {
+   "personNameHe": "משה מורדכוביץ׳",
+   "field": "position",
+   "says": {
+    "vikipoel": "FW",
+    "vikipoel-body": "MF"
+   },
+   "took": "MF"
+  },
+  {
    "personNameHe": "משה מלמד",
    "field": "position",
    "says": {
@@ -13027,6 +13627,16 @@
    "took": "DF"
   },
   {
+   "personNameHe": "ניר נחום",
+   "field": "position",
+   "says": {
+    "wiki-he": "MF",
+    "vikipoel": "MF",
+    "vikipoel-body": "DF"
+   },
+   "took": "DF"
+  },
+  {
    "personNameHe": "סבסטיאן הרננדז",
    "field": "position",
    "says": {
@@ -13043,6 +13653,7 @@
     "wf-all": "FW",
     "wiki-he": "FW",
     "vikipoel": "FW",
+    "vikipoel-body": "MF",
     "squad": "MF"
    },
    "took": "MF"
@@ -13119,9 +13730,10 @@
     "wf-season": "FW",
     "wf-all": "FW",
     "wiki-he": "MF",
-    "vikipoel": "FW"
+    "vikipoel": "FW",
+    "vikipoel-body": "MF"
    },
-   "took": "FW"
+   "took": "MF"
   },
   {
    "personNameHe": "פאביו רוסה",
@@ -13184,6 +13796,26 @@
    "took": "FW"
   },
   {
+   "personNameHe": "רוי רונן",
+   "field": "position",
+   "says": {
+    "wf-season": "FW",
+    "wf-all": "FW",
+    "vikipoel": "FW",
+    "vikipoel-body": "GK"
+   },
+   "took": "GK"
+  },
+  {
+   "personNameHe": "רועי דיין (יליד 1997)",
+   "field": "position",
+   "says": {
+    "wf-all": "MF",
+    "vikipoel": "FW"
+   },
+   "took": "FW"
+  },
+  {
    "personNameHe": "רועי זיקרי",
    "field": "position",
    "says": {
@@ -13201,6 +13833,30 @@
     "wf-all": "FW",
     "wiki-he": "FW",
     "vikipoel": "MF"
+   },
+   "took": "MF"
+  },
+  {
+   "personNameHe": "רז נחמיאס",
+   "field": "position",
+   "says": {
+    "wf-season": "DF",
+    "wf-all": "DF",
+    "wiki-he": "DF",
+    "vikipoel": "DF",
+    "vikipoel-body": "MF"
+   },
+   "took": "MF"
+  },
+  {
+   "personNameHe": "רז שלמה",
+   "field": "position",
+   "says": {
+    "wf-season": "DF",
+    "wf-all": "DF",
+    "wiki-he": "DF",
+    "vikipoel": "DF",
+    "vikipoel-body": "MF"
    },
    "took": "MF"
   },
@@ -13225,6 +13881,15 @@
     "vikipoel": "FW"
    },
    "took": "FW"
+  },
+  {
+   "personNameHe": "רמי ארמה",
+   "field": "position",
+   "says": {
+    "vikipoel": "MF",
+    "vikipoel-body": "DF"
+   },
+   "took": "DF"
   },
   {
    "personNameHe": "רמי דואני",
@@ -13295,9 +13960,10 @@
    "field": "position",
    "says": {
     "wiki-he": "FW",
-    "vikipoel": "DF"
+    "vikipoel": "DF",
+    "vikipoel-body": "FW"
    },
-   "took": "DF"
+   "took": "FW"
   },
   {
    "personNameHe": "שלום תקווה",

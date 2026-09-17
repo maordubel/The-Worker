@@ -6,7 +6,7 @@ import { PlayerFinder } from './PlayerFinder'
 import { Num } from '@/components/ui/Num'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { GATES } from '@/lib/gates'
+import { GATES, isOpen } from '@/lib/gates'
 import { clubCounts, crestStages, honours, players, songbook } from '@/lib/club/wing'
 import { t, type MessageKey } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
@@ -48,7 +48,9 @@ export default function HapoelPage() {
   const songs = songbook()
   const roster = players()
   const counts = clubCounts()
-  const gates = GATES.filter((gate) => PLAYABLE.includes(gate.href.split('?')[0] ?? ''))
+  // A gate with no route is not in this row at all: this is a list of places to go,
+  // and gate 9 is on the wall precisely because it is not one yet.
+  const gates = GATES.filter(isOpen).filter((gate) => PLAYABLE.includes(gate.href.split('?')[0] ?? ''))
 
   return (
     <Screen title={t('screen.hapoel.title')} sub={t('screen.hapoel.sub')}>

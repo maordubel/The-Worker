@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 import { SITE_URL } from '@/lib/brand'
-import { GATES } from '@/lib/gates'
+import { GATES, isOpen } from '@/lib/gates'
 
 /**
  * מפת האתר — every public gate, derived from `lib/gates.ts` so it can never drift from
@@ -18,7 +18,9 @@ import { GATES } from '@/lib/gates'
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()
 
-  const gateEntries: MetadataRoute.Sitemap = GATES.map((gate) => ({
+  // A gate under refurbishment has no URL to list. Putting one in the sitemap would be
+  // asking a search engine to index a page that does not exist.
+  const gateEntries: MetadataRoute.Sitemap = GATES.filter(isOpen).map((gate) => ({
     url: `${SITE_URL}${gate.href.split('?')[0]}`,
     lastModified: now,
   }))

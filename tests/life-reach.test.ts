@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   AREA_KNOWLEDGE,
   AREA_OF,
+  aimForGoal,
   canPlayerReach,
   evaluateMissionReachability,
   guidedFlag,
@@ -91,12 +92,33 @@ describe('ארבעת המצבים שאסור לבלבל', () => {
 })
 
 describe('CanStart → CanReach → CanPerform → CanComplete → CanExit', () => {
+  /**
+   * היעד הוא **מחוץ** לאולם, ולא בתוכו — וזה תוקן ב-17.9.2026 אחרי שהבדיקה נפלה.
+   *
+   * ההזמנה של אפי ב-1984 היא "בוא, אני לוקח אותך לשם". מה שהוא יכול לעשות מסתיים על
+   * המדרכה: הדלת הפנימית נושאת `needsByEra: { 'a3-hall': { flag: 'entry:granted' } }`,
+   * כלומר **הסדרן** — וזה בדיוק מה שהפרק אומר בקול ("הסדרן בדלת. אפי מכיר אותו — תדבר").
+   *
+   * הבדיקה ביקשה `ussishkin-hall` והייתה ירוקה, ורק **מפני שהיא מעולם לא עברה את הדלת
+   * הראשונה**: עד היום הדלת מאלנבי הייתה סגורה לגמרי, `canPlayerReach` זיהתה אותה
+   * כידע-חסר וקיצרה ל-`GUIDED_ONLY` לפני שהגיעה למנעול האמיתי חדר אחד פנימה. מרגע
+   * שהמדריך באמת פותח את הדלת הראשונה, ההליכה ממשיכה ונתקלת בסדרן — וזאת התשובה הנכונה.
+   * שומר שנפל אחרי שינוי הוא שומר שידע משהו (כלל 65): הוא ידע שהיעד היה חדר אחד עמוק מדי.
+   */
   const invitation: MissionSpec = {
     id: 'a3-follow-efi',
     classification: 'CRITICAL',
-    destination: 'ussishkin-hall',
+    destination: 'ussishkin-outside',
     guideBy: 'efi',
   }
+
+  it('ועד לדלת בלבד — הסדרן הוא מנעול אחר, ואפי לא פותח אותו', () => {
+    const inside: MissionSpec = { ...invitation, destination: 'ussishkin-hall' }
+    const verdict = evaluateMissionReachability(inside, life({ [guidedFlag('efi')]: true }), ctx('street'))
+    expect(verdict.ok).toBe(false)
+    expect(verdict.failedAt).toBe('CanReach')
+    expect(verdict.reach.reason).toBe('DOOR_LOCKED')
+  })
 
   it('does not become a blocking objective when the route is not his yet', () => {
     const verdict = evaluateMissionReachability(invitation, life(), ctx('street'))
@@ -129,7 +151,7 @@ describe('CanStart → CanReach → CanPerform → CanComplete → CanExit', () 
   })
 
   it('does not softlock when the player is already standing in the destination', () => {
-    const verdict = evaluateMissionReachability(invitation, life(), ctx('ussishkin-hall'))
+    const verdict = evaluateMissionReachability(invitation, life(), ctx('ussishkin-outside'))
     expect(verdict.ok).toBe(true)
     expect(verdict.reach.reason).toBe('AT_DESTINATION')
   })
@@ -189,5 +211,54 @@ describe('שומר הנגישות', () => {
     for (const area of Object.values(AREA_OF)) {
       expect(typeof routeFlag(area)).toBe('string')
     }
+  })
+})
+
+/**
+ * `aimForGoal` — החצי שהיה חסר, ובלעדיו כל הקובץ הזה היה נכון ולא מחובר.
+ *
+ * מאור, 17.9.2026, עומד ב-11.3.1991: *"אני אמור ללכת לאוסישקין ואין בכלל דלת לאוסישקין
+ * ואין לי אפשרות להתקדם במשימה."* האבחון היה קיים כאן מ-7.9.2026 — `AREA_NOT_KNOWN`,
+ * `GUIDED_TRAVEL`, `TEACHES` — ואף אחד לא שאל אותו. הבדיקות האלה הן על השאלה.
+ */
+describe('לאן להצביע כשאי אפשר להגיע ליעד', () => {
+  const NOBODY = () => null
+
+  it('יעד בהישג יד — מצביעים עליו, בלי מתווכים', () => {
+    const aim = aimForGoal(life({ 'life:knows:hall': true }), '1991', 'street', 'ussishkin-outside', NOBODY)
+    expect(aim.to).toBe('ussishkin-outside')
+    expect(aim.guide).toBeNull()
+    expect(aim.reach.reachable).toBe(true)
+  })
+
+  it('לא יודע את הדרך ואיש לא בסביבה — היעד נשאר, והתשובה נושאת את הסיבה', () => {
+    const aim = aimForGoal(life(), '1991', 'street', 'ussishkin-outside', NOBODY)
+    expect(aim.to).toBe('ussishkin-outside')
+    expect(aim.guide).toBeNull()
+    expect(aim.reach.reason).toBe('AREA_NOT_KNOWN')
+    // שתיקה היא מה שהשאיר אותו עומד באלנבי; מי שקורא חייב לקבל משפט
+    expect(aim.reach.whyHe).toBeTruthy()
+  })
+
+  it('לא יודע את הדרך, ואופיר ברחוב — מצביעים על אופיר', () => {
+    const aim = aimForGoal(life(), '1991', 'classroom', 'ussishkin-outside', (who) =>
+      who === 'ofir' ? 'street' : null,
+    )
+    expect(aim.guide).toBe('ofir')
+    expect(aim.to).toBe('street')
+  })
+
+  it('מדריך שאי אפשר להגיע אליו בעצמו אינו תשובה', () => {
+    // ramat-gan אינו בהישג יד מ-`classroom` ב-1991, ולכן אופיר שעומד שם אינו הצעה
+    const aim = aimForGoal(life(), '1991', 'classroom', 'ussishkin-outside', (who) =>
+      who === 'ofir' ? 'ramat-gan' : null,
+    )
+    expect(aim.guide).toBeNull()
+    expect(aim.to).toBe('ussishkin-outside')
+  })
+
+  it('ומי שכבר עומד עם המדריך לא נשלח אל עצמו', () => {
+    const aim = aimForGoal(life(), '1991', 'street', 'ussishkin-outside', () => 'street')
+    expect(aim.guide).toBeNull()
   })
 })

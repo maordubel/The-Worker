@@ -70,9 +70,17 @@ import { fold } from './roster-search'
  *
  * **Measured over the 663 people the archive knows, before this research and after:**
  * position 64 → **633**, Israeli-or-foreign 103 → **654**, years-worn 137 → **648**, and
- * all three together 32 → **629**. Every one of the 653 players in the roster now has a
- * row. The 23 still without a position are the ones whose `תפקיד` field is empty on
- * ויקיפועל itself — they read `לא מתועד`, because that is what is true.
+ * all three together 32 → **632**. Every one of the 653 players in the roster now has a
+ * row. The **20** still without a position are the ones whose `תפקיד` field is empty on
+ * ויקיפועל AND whose opening sentence states no role either — they read `לא מתועד`,
+ * because that is what is true. (It was 23 until 17.9.2026, when the lead sentence
+ * started being read as its own source; see `docs/12-player-roles.md`.)
+ *
+ * **`positions` is the same fact in its honest shape.** `תפקיד` is a LIST — 48 pages
+ * write more than one role in it — so a man who played two positions carries both, with
+ * `position` staying the single display value. Asking the sheet for defenders finds
+ * שייע פייגנבוים, who was one before he was the club's greatest striker; asking for
+ * strikers finds him too, and neither answer throws the other away.
  */
 
 export type Position = 'GK' | 'DF' | 'MF' | 'FW'
@@ -81,6 +89,13 @@ export type FacetSource = 'squad' | 'lineup' | 'database' | 'name'
 
 export type PlayerFacets = {
   position: Position | null
+  /**
+   * Every playing position a source states, display value first — only where there is
+   * more than one. `player-facts.json` carries it for the men whose ויקיפועל page lists
+   * several roles (`מגן שמאלי, חלוץ` — שייע פייגנבוים, a left back who became the club's
+   * greatest striker). The display value stays one; the others are not thrown away.
+   */
+  positions: Position[] | null
   positionFrom: FacetSource | null
   origin: Origin | null
   originFrom: FacetSource | null
@@ -93,6 +108,7 @@ type PlayerFactRow = {
   personNameHe: string
   personNameLatin: string
   position?: string | null
+  positions?: string[] | null
   origin?: string | null
   fromYear?: number | null
   toYear?: number | null
@@ -147,6 +163,7 @@ export function facetIndex(): Map<string, PlayerFacets> {
     if (found) return found
     const fresh: PlayerFacets = {
       position: null,
+      positions: null,
       positionFrom: null,
       origin: null,
       originFrom: null,
@@ -184,6 +201,7 @@ export function facetIndex(): Map<string, PlayerFacets> {
       const facets = entry(nameHe)
       if (facets.positionFrom === null || facets.positionFrom === 'lineup') {
         facets.position = position
+        facets.positions = null
         facets.positionFrom = 'lineup'
       }
     }
@@ -203,6 +221,10 @@ export function facetIndex(): Map<string, PlayerFacets> {
     const position = normalisePosition(row.position)
     if (position !== null) {
       entry_.position = position
+      const every = (row.positions ?? [])
+        .map((code) => normalisePosition(code))
+        .filter((code): code is Position => code !== null)
+      entry_.positions = every.length > 1 ? every : null
       entry_.positionFrom = 'database'
     }
     if (row.origin === 'israeli' || row.origin === 'foreign') {
@@ -228,6 +250,9 @@ export function facetIndex(): Map<string, PlayerFacets> {
     const position = normalisePosition(row.position)
     if (position !== null) {
       facets.position = position
+      // The squad sheet states one position per season and wins outright, so it also
+      // replaces the list rather than being merged into somebody else's.
+      facets.positions = null
       facets.positionFrom = 'squad'
     }
     if (typeof row.nationalityHe === 'string' && row.nationalityHe !== '') {

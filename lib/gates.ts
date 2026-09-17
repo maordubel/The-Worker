@@ -7,9 +7,20 @@ import type { MessageKey } from '@/lib/i18n'
  * player picks a mode by walking through a gate. That is the whole idea in Maor's
  * design: "אתה לא בוחר מצב משחק מרשימה. אתה נכנס בשער."
  *
- * The gate numbers are the ground's real ones, which is why they are not 1..9 —
- * there is no gate 3, 9 or 12 in the plan, and inventing one to tidy the grid would
- * be exactly the kind of small lie this project does not tell.
+ * The gate numbers are the ground's real ones, which is why they do not run 1..13.
+ * Inventing one to tidy the grid would be exactly the kind of small lie this project
+ * does not tell — and so is hanging a plate over a route that does not exist.
+ *
+ * **Gate 12 opened on 17.9.2026** as `/archive`, the archive wing, once the corpus
+ * behind it existed: 1,385 press columns, every one with a full ISO date, beside the
+ * 3,068 dated matches the archive already held.
+ *
+ * **Gate 9 is on the wall and is not a door.** Maor: *"תפתח גם את שער 9 ותרשום
+ * 'בשיפוצים' ונחליט בהמשך למה הוא יהיה."* So it is a plate with no `href` at all —
+ * `href: null` rather than a route that 404s, which is the case this file has always
+ * argued about gate 7: a gate that points at nothing is worse than a gap. The type
+ * forces every consumer to decide what to do with a gate that goes nowhere, which is
+ * the point of writing it as `null` instead of an empty string.
  *
  * Gate 7 is the polls wing, which is what Maor replaced the crest game with. It stood
  * empty on the wall for one delta rather than pointing at a route that did not exist —
@@ -28,7 +39,14 @@ import type { MessageKey } from '@/lib/i18n'
 export type Gate = {
   /** the ground's own number — not an index */
   number: number
-  href: string
+  /**
+   * Where the plate goes — or `null` for a gate the ground has and the app does not.
+   *
+   * A null href is NOT a link: `GatePlate` draws it as a closed plate that says what it
+   * is, and every list that walks the gates (the sitemap, the personal area, the help
+   * sheet) has to answer for it rather than quietly linking to a 404.
+   */
+  href: string | null
   /** Hebrew name, Suez One, on the ink foot */
   title: MessageKey
   /** the Latin line under it, Archivo, letterspaced */
@@ -167,6 +185,22 @@ export const GATES: readonly Gate[] = [
     playable: true,
   },
   {
+    /**
+     * חדר ההלבשה — on the wall, under refurbishment, and deliberately not a door.
+     * Maor, 17.9.2026: *"תפתח גם את שער 9 ותרשום 'בשיפוצים' ונחליט בהמשך למה הוא יהיה."*
+     * Not `playable` (so it is never in "how many gates have you been through" and never
+     * in `stillToDo`), not `seeded`, and no route — see the note on `href` above.
+     */
+    number: 9,
+    href: null,
+    title: 'gate.9',
+    latin: 'THE DRESSING ROOM · UNDER REFURBISHMENT',
+    plate: 'plain',
+    stain: 'b',
+    seeded: false,
+    playable: false,
+  },
+  {
     number: 10,
     href: '/tik',
     title: 'gate.10',
@@ -187,6 +221,19 @@ export const GATES: readonly Gate[] = [
     playable: true,
   },
   {
+    /** שער 12 — אגף הארכיון: היום לפני, הידעת, ומה שהארכיון באמת מחזיק. */
+    number: 12,
+    href: '/archive',
+    title: 'gate.12',
+    latin: 'THE ARCHIVE WING · NORTH-WEST',
+    plate: 'plain',
+    stain: 'a',
+    // It reads `?seed=` and `?r=`: the deal rotates, so the wing hands out something
+    // different on every entry and the same two numbers reproduce it (rule 24).
+    seeded: true,
+    playable: true,
+  },
+  {
     number: 13,
     href: '/timeline',
     title: 'gate.13',
@@ -200,11 +247,18 @@ export const GATES: readonly Gate[] = [
 
 /** The gate a route belongs to, so a screen can show which gate you came in by. */
 export function gateFor(pathname: string): Gate | undefined {
-  return GATES.find((gate) => gate.href.split('?')[0] === pathname)
+  return GATES.find((gate) => gate.href !== null && gate.href.split('?')[0] === pathname)
+}
+
+/** The gates that actually lead somewhere — everything but a plate under refurbishment. */
+export function isOpen(gate: Gate): gate is Gate & { href: string } {
+  return gate.href !== null
 }
 
 /** The gates a supporter can actually finish a round of — everything but the personal area. */
-export const PLAYABLE_GATES: readonly Gate[] = GATES.filter((gate) => gate.playable)
+export const PLAYABLE_GATES: ReadonlyArray<Gate & { href: string }> = GATES.filter(
+  (gate): gate is Gate & { href: string } => gate.playable && isOpen(gate),
+)
 
 /** True when this route reads `?seed=`, so nothing staples one onto a route that does not. */
 export function gateSeeded(href: string): boolean {

@@ -972,7 +972,26 @@ function drawXiCard(
   ctx.letterSpacing = '0px'
   ctx.direction = 'rtl'
 
-  ctx.font = '400 76px "Suez One", serif'
+  /*
+   * The formation is measured FIRST, and the title is fitted into what is left beside
+   * it.
+   *
+   * This head printed at a fixed 76px until 17.9.2026, which worked because it had one
+   * title in it: `הרכב כל הזמנים`, fourteen characters. The worst eleven's title is
+   * twenty-two, and twenty-two characters of Suez One at 76px is wider than the plate —
+   * so it would have run straight under the formation. Rule 19: nothing on a card is
+   * positioned by a guessed multiple of the point size, and a card whose layout only
+   * works for the one string it was drawn with has not been laid out.
+   */
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'left'
+  ctx.font = '700 84px Karantina, sans-serif'
+  const eyebrowWidth = ctx.measureText(card.eyebrow).width
+
+  ctx.direction = 'rtl'
+  ctx.textAlign = 'right'
+  const titleSize = fit(ctx, card.hero, 76, width - eyebrowWidth - 40, '"Suez One", serif', '400')
+  ctx.font = `400 ${titleSize}px "Suez One", serif`
   const titleBox = textBox(ctx, card.hero)
   const titleBase = SAFE + 30 + titleBox.ascent
   plateText(ctx, card.hero, right, titleBase, {
@@ -982,11 +1001,17 @@ function drawXiCard(
     skew: -6,
   })
 
+  // The head reports its ink, so `npm run story:overlap` can intersect the title with
+  // the formation. This card drew both and recorded neither, which is why a title that
+  // did not fit could only have been caught by looking at a picture of it.
+  recordInk(ctx, 'xi.title', card.hero, right, titleBase)
+
   ctx.direction = 'ltr'
   ctx.textAlign = 'left'
   ctx.font = '700 84px Karantina, sans-serif'
   ctx.fillStyle = BRAND.red
   ctx.fillText(card.eyebrow, pad, titleBase)
+  recordInk(ctx, 'xi.formation', card.eyebrow, pad + eyebrowWidth, titleBase)
   ctx.textAlign = 'right'
   ctx.direction = 'rtl'
 
@@ -1243,16 +1268,36 @@ function drawXiChip(
   ctx.textAlign = 'center'
   ctx.fillStyle = BRAND.red
   ctx.font = '400 20px Heebo, sans-serif'
-  ctx.fillText(role, cx, y + 26)
+  const roleBase = y + 26
+  const roleBox = textBox(ctx, role)
+  ctx.fillText(role, cx, roleBase)
   // Centred text: the recorded box is anchored on its right edge, so half the measured
   // width is added back to put the box where the glyphs actually are.
-  recordInk(ctx, `xi.role.${index}`, role, cx + ctx.measureText(role).width / 2, y + 26)
+  recordInk(ctx, `xi.role.${index}`, role, cx + ctx.measureText(role).width / 2, roleBase)
 
-  const size = fit(ctx, name, 34, chipW - 18, '"Suez One", serif', '400')
+  /*
+   * **The name is fitted to the room the role LEAVES, in both directions.**
+   *
+   * It was fitted by width only and placed at a fixed 16px off the chip's foot, and the
+   * height was a guess that held for short names: `npm run story:overlap` reports
+   * `xi.role.3 × xi.name.3` overlapping by 6px on the harness's own card — a defect that
+   * predates the second tab and that no screenshot of a four-letter name would ever
+   * show. Rule 19: nothing on a card is positioned by a guessed multiple of the point
+   * size. So the vertical room is measured off the role's own box and the name shrinks
+   * into it, exactly as it already shrank into the chip's width.
+   */
+  const roomTop = roleBase + roleBox.descent + 6
+  const roomBottom = y + chipH - 14
+  let size = fit(ctx, name, 34, chipW - 18, '"Suez One", serif', '400')
   ctx.font = `400 ${size}px "Suez One", serif`
+  let box = textBox(ctx, name)
+  while (box.height > roomBottom - roomTop && size > 18) {
+    size -= 2
+    ctx.font = `400 ${size}px "Suez One", serif`
+    box = textBox(ctx, name)
+  }
   ctx.fillStyle = BRAND.ink
-  const box = textBox(ctx, name)
-  const nameBase = y + chipH - 16 - box.descent
+  const nameBase = roomBottom - box.descent
   ctx.fillText(name, cx, nameBase)
   recordInk(ctx, `xi.name.${index}`, name, cx + ctx.measureText(name).width / 2, nameBase)
   ctx.textAlign = 'right'

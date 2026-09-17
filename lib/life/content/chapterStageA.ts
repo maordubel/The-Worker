@@ -1136,14 +1136,21 @@ export const BEATS_A5: Beat[] = [
     trigger: 'enter',
     when: { flag: 'a5:there' },
     delayMs: 400,
-    do: [{ a: 'talk', conversation: 'a5-close' }],
+    do: [{ a: 'flag', flag: 'a5:in' }, { a: 'talk', conversation: 'a5-close' }],
   },
   {
-    /** …ואם הוא נשאר בחוץ עד השריקה, הפרק נסגר בלעדיו */
+    /**
+     * …ואם הוא נשאר בחוץ עד השריקה, הפרק נסגר בלעדיו.
+     *
+     * `none: [{ flag: 'a5:in' }]` נוסף ב-17.9.2026 יחד עם פתיחת המנהרה. כל עוד `a5-in`
+     * לא היה נגיש, הביט הזה היה הדרך היחידה ל-`a5-close` ולכן לא היה לו במי להתנגש;
+     * מרגע שיש שתי דרכים, ביט שעון שמרים `a5:late` ומדבר שוב על ילד שכבר בפנים הוא
+     * בדיוק הצורה של "הפרק נסגר פעמיים", ועם הסוף הלא נכון בפעם השנייה.
+     */
     id: 'a5-outside',
     trigger: 'clock',
     waitingHe: 'ממתין: השריקה הראשונה',
-    when: { flag: 'a5:there', afterMinute: at(16, 5) },
+    when: { flag: 'a5:there', afterMinute: at(16, 5), none: [{ flag: 'a5:in' }] },
     do: [{ a: 'flag', flag: 'a5:late' }, { a: 'talk', conversation: 'a5-close' }],
   },
   {

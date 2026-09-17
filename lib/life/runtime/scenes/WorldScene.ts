@@ -41,6 +41,8 @@ import { QUIET_MINUTES, flowMove, nextTimeGate, type TimeGate } from '../../worl
 import { adDirector } from '../../monetization'
 import { reconcile } from '../../world/milestones'
 import { nextStep } from '../../world/route'
+import { aimForGoal, type GoalAim } from '../../world/reach'
+import { whereIs } from '../../schedules'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, SceneDef, Verb } from '../../world/scenes'
 import type { PanoSpot } from '../bus'
 import { PANO_SPOTS } from '../../content/panoramas'
@@ -2638,11 +2640,26 @@ export class WorldScene extends Phaser.Scene {
      * thing a thumb can act on, and «אחרי הקיר, ימינה» taught us which of the two a
      * player standing still actually needs.
      */
-    const step = this.stepToGoal()
+    const aim = this.aim2goal()
+    const step = aim ? nextStep(state, this.chapter, this.def.id as LocationId, aim.to) : null
     if (step) {
-      const way = step.locked ? `הדרך: ${step.labelHe} — עדיין סגורה.` : `בדרך: ${step.labelHe}.`
+      /**
+       * שלוש אמירות שונות, כי שלוש בעיות שונות.
+       *
+       *  · הדרך פתוחה — «בדרך: <שם הדלת>».
+       *  · הדרך נעולה — «הדרך: <שם הדלת> — עדיין סגורה», וזה נכון כשיש מה לפתוח.
+       *  · **הוא לא יודע את הדרך** — וזאת אמירה שלישית לגמרי, שעד 17.9.2026 נאמרה
+       *    בטעות במילים של השנייה. "עדיין סגורה" שולח לחפש מפתח שאינו קיים; "מישהו
+       *    צריך לקחת אותך" שולח לחפש בן אדם, והמשחק כבר מציב אותו ברחוב.
+       */
+      const way = aim?.guide
+        ? `בדרך: ${step.labelHe}.`
+        : step.locked
+          ? `הדרך: ${step.labelHe} — עדיין סגורה.`
+          : `בדרך: ${step.labelHe}.`
       const objective = this.objective(state)
-      return [objective, way].filter(Boolean).join(' ')
+      const why = aim && !aim.reach.reachable ? aim.reach.whyHe : null
+      return [objective, why, way].filter(Boolean).join(' ')
     }
     const authored = stuckFor(this.def, this.chapter)
     if (authored && hintHolds(authored, people)) return authored
@@ -2668,9 +2685,27 @@ export class WorldScene extends Phaser.Scene {
    * the chapter has no opinion or he is already there. `world/route.ts` does the walking.
    */
   private stepToGoal() {
-    const goal = this.era.goal?.(this.ctx.engine.state) ?? null
-    if (!goal || goal === this.def.id) return null
-    return nextStep(this.ctx.engine.state, this.chapter, this.def.id as LocationId, goal)
+    const aim = this.aim2goal()
+    if (!aim) return null
+    return nextStep(this.ctx.engine.state, this.chapter, this.def.id as LocationId, aim.to)
+  }
+
+  /**
+   * לאן היום רוצה אותו — ואם אי אפשר לשם, אל מי.
+   *
+   * זה `stepToGoal` שלב אחד קודם, והשלב הזה הוא כל ההבדל בין משימה שאפשר להתקדם בה
+   * לבין מה שמאור פגש ב-11.3.1991: חץ שמצביע על דלת שאיננה מצוירת, ומשפט שאומר
+   * "עדיין סגורה" על משהו שאין לו מפתח. `aimForGoal` שואל את `canPlayerReach` — שידעה
+   * את התשובה כל הזמן הזה — ומחזיר את **המדריך** כיעד זמני כשהחסם הוא ידע ולא מנעול.
+   */
+  private aim2goal(): GoalAim | null {
+    const state = this.ctx.engine.state
+    const want = this.era.goal?.(state) ?? null
+    if (!want || want === this.def.id) return null
+    const aim = aimForGoal(state, this.chapter, this.def.id as LocationId, want, (who) =>
+      whereIs(state, this.era.schedule, who),
+    )
+    return aim.to === this.def.id ? null : aim
   }
 
   private bestExit(): ExitDef | null {

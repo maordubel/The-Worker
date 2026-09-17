@@ -92,6 +92,38 @@ const CASES: Array<{ name: string; card: StoryCard }> = [
     },
   },
   {
+    /*
+     * The worst eleven — the same template with the longest title the app can hand it.
+     * `story:overlap` measures the longest strings in the archive (rule 19), and this
+     * head is where the length lives: `ההרכב הגרוע בכל הזמנים` is half again as long as
+     * `הרכב כל הזמנים` and has to fit beside the formation.
+     */
+    name: 'xi-worst',
+    card: {
+      template: 'xi',
+      kicker: 'GATE 1 · WORST XI · ONE FAN’S OPINION',
+      label: 'ההרכב הגרוע בכל הזמנים',
+      eyebrow: '4-2-3-1',
+      hero: 'ההרכב הגרוע בכל הזמנים',
+      stats: [],
+      xi: [
+        { roleHe: 'שוער', nameHe: LONG_NAME, x: 50, y: 94 },
+        { roleHe: 'מגן', nameHe: LONG_NAME, x: 16, y: 72 },
+        { roleHe: 'בלם', nameHe: LONG_NAME, x: 39, y: 72 },
+        { roleHe: 'בלם', nameHe: 'אנטביקה', x: 61, y: 72 },
+        { roleHe: 'מגן', nameHe: 'בן דיין', x: 84, y: 72 },
+        { roleHe: 'כנף', nameHe: LONG_NAME, x: 16, y: 48 },
+        { roleHe: 'קשר', nameHe: 'בוזגלו', x: 39, y: 48 },
+        { roleHe: 'קשר', nameHe: 'ניסים', x: 61, y: 48 },
+        { roleHe: 'כנף', nameHe: 'זהבי', x: 84, y: 48 },
+        { roleHe: 'חלוץ', nameHe: LONG_NAME, x: 39, y: 22 },
+        { roleHe: 'חלוץ', nameHe: 'דמיאנוביץ', x: 61, y: 22 },
+      ],
+      cta: 'תרכיב את הגרוע שלך',
+      challenge: 'דעה של אוהד אחד. האפליקציה לא דירגה אף אחד.',
+    },
+  },
+  {
     name: 'ballot',
     card: {
       template: 'ballot',

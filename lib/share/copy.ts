@@ -17,6 +17,7 @@ export type ShareKind =
   | 'trivia'
   | 'kit'
   | 'xi'
+  | 'worst'
   | 'member'
   | 'lineup'
   | 'memory'
@@ -30,6 +31,9 @@ const ROUTE: Record<ShareKind, string> = {
   trivia: '/trivia',
   kit: '/kits/build',
   xi: '/xi',
+  // ההרכב הגרוע — the same gate, the other sheet. The tab is a parameter `/xi` READS
+  // (see `app/xi/page.tsx`), so the link opens on the eleven it is talking about.
+  worst: '/xi?tab=worst',
   member: '/tik',
   lineup: '/lineup',
   memory: '/memory',
@@ -47,7 +51,7 @@ const ROUTE: Record<ShareKind, string> = {
  * stapled to it would be a parameter the page ignores, which is the kind of small lie
  * that makes a URL untrustworthy to read.
  */
-const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'member'])
+const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'worst', 'member'])
 
 /*
  * Two more joined `polls` on 17.9.2026, and both were live defects rather than tidying.
@@ -88,7 +92,11 @@ export function challengeUrl(
   route?: string,
 ): string {
   const path = route ?? ROUTE[kind]
-  if (SEEDLESS.has(kind)) return `${SITE_URL}${path}?from=share`
+  // A route may already carry the parameter that decides WHICH screen it is — `/xi`'s
+  // two sheets are one route — so the marker joins with `&` rather than minting a
+  // second `?` and producing a URL no browser reads the way it looks.
+  const join = path.includes('?') ? '&' : '?'
+  if (SEEDLESS.has(kind)) return `${SITE_URL}${path}${join}from=share`
   const r = Number(cursor) > 0 ? `&r=${cursor}` : ''
   return `${SITE_URL}${path}?seed=${seed}${r}&from=share`
 }

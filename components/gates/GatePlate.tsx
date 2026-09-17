@@ -122,17 +122,43 @@ export function GatePlate({ gate }: { gate: Gate }) {
     </>
   )
 
+  /**
+   * **בשיפוצים — a plate that is not a link.**
+   *
+   * Gate 9 is on the ground and has nothing behind it yet (Maor, 17.9.2026). A `<Link>`
+   * to a route that does not exist is a 404 with a nice plate on it, and this file has
+   * argued since gate 7 that a gate pointing at nothing is worse than a gap. So a gate
+   * with no `href` renders as a `<div>` — no tap target, no hover, no cursor — with the
+   * refurbishment stamped across the number well, so the wall says what the ground says.
+   */
+  if (gate.href === null) {
+    return (
+      <div
+        className={`${className} cursor-default opacity-90`}
+        aria-label={t('gate.closed.aria', { number: String(gate.number), title: t(gate.title) })}
+      >
+        {inner}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2" aria-hidden="true">
+          <p className="mx-2 border-y-rule border-ink bg-sheet py-1 text-center font-poster text-[18px] tracking-[0.2em] text-ink sm:text-[22px]">
+            {t('gate.closed')}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const href = gate.href
   return gate.seeded ? (
     <PlayLink
-      gate={gate.href.split('?')[0] ?? gate.href}
-      href={gate.href}
+      gate={href.split('?')[0] ?? href}
+      href={href}
       ariaLabel={ariaLabel}
       className={className}
     >
       {inner}
     </PlayLink>
   ) : (
-    <Link href={gate.href} aria-label={ariaLabel} className={className}>
+    <Link href={href} aria-label={ariaLabel} className={className}>
       {inner}
     </Link>
   )

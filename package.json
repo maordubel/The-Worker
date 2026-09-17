@@ -25,6 +25,8 @@
     "life:deadends": "tsx scripts/life/deadend-audit.ts",
     "life:budget": "tsx scripts/life/budget-audit.ts",
     "life:flow": "tsx scripts/life/flow-probe.ts",
+    "life:worldlines": "tsx scripts/life/worldline-audit.ts",
+    "life:1991": "tsx scripts/life/probe-1991.ts",
     "life:finish": "node scripts/life/finish-audit.mjs",
     "life:boards": "node scripts/life/scene-boards.mjs",
     "art:finish": "python3 scripts/life/finish-backdrops.py",
@@ -32,7 +34,9 @@
     "wiki:import": "tsx scripts/ingest/export-cli.ts",
     "wiki:cargo": "tsx scripts/ingest/cargo-cli.ts",
     "wiki:squads": "tsx scripts/ingest/squads-cli.ts",
-    "ingest:vikipoel": "tsx scripts/ingest/vikipoel-cli.ts"
+    "ingest:vikipoel": "tsx scripts/ingest/vikipoel-cli.ts",
+    "ingest:players": "tsx scripts/ingest/players-cli.ts",
+    "ingest:turim": "tsx scripts/ingest/turim-cli.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

@@ -1,6 +1,8 @@
 # Every source path this project has shipped. APPEND-ONLY — never remove a
 # line. If a file here no longer exists, tests/guards.test.ts fails and the fix
 # is a tombstone at that path, not a shorter list.
+app/archive/ArchiveWing.tsx
+app/archive/page.tsx
 app/crest/CrestRun.tsx
 app/crest/actions.ts
 app/crest/page.tsx
@@ -104,6 +106,7 @@ components/ui/Stamp.tsx
 components/ui/TabBar.tsx
 components/ui/TabMark.tsx
 lib/ads.ts
+lib/archive/wing.ts
 lib/brand.ts
 lib/brand/yellowExemptions.ts
 lib/canon/matchId.ts
@@ -139,6 +142,7 @@ lib/isYellow.ts
 lib/kit/catalog.ts
 lib/kit/collection.ts
 lib/kit/crestMarks.ts
+lib/kit/playerKit.ts
 lib/kit/seasons.ts
 lib/kit/spec.ts
 lib/polls/ballot.ts
@@ -154,3 +158,5 @@ lib/supabase/admin.ts
 lib/supabase/client.ts
 lib/supabase/server.ts
 lib/ussishkin/hall.ts
+lib/xi/board.ts
+lib/xi/store.ts

@@ -1,6 +1,7 @@
 import { characterName } from '../characters'
 import { timeLabel } from '../clock'
 import type { LifeState } from '../types'
+import { canEnterArea } from './areas'
 import { meets, type Condition } from './types'
 
 /**
@@ -49,6 +50,9 @@ const ITEM_HE: Record<string, string> = {
 }
 
 const flagHe = (flag: string) => FLAG_HE[flag] ?? flag
+
+/** אזורים שיש להם שם שאפשר לומר בקול; כל השאר מודפס כמזהה */
+const AREA_HE: Record<string, string> = { ussishkin: 'אולם אוסישקין' }
 const itemHe = (item: string) => ITEM_HE[item] ?? item
 
 /**
@@ -79,6 +83,14 @@ export function unmet(state: LifeState, condition?: Condition, depth = 0): strin
     say(`צריך: ${flagHe(condition.flagIs.flag)}`)
   }
   if (condition.at && condition.at !== state.location) say(`להיות ב-${condition.at}`)
+  /**
+   * אזור שהוא לא יודע להגיע אליו — המשפט הזה הוא כל ההבדל בין מנעול לבין ידע.
+   *
+   * "הדלת סגורה" שולח שחקן לחפש מפתח שאינה קיימת. "אתה לא יודע איך מגיעים לשם" שולח אותו
+   * לחפש **בן אדם**, וזאת התשובה הנכונה: `TEACHES` אומר מי, והמשחק כבר מציב את אותו אדם
+   * ברחוב באותו אחר צהריים.
+   */
+  if (condition.area && !canEnterArea(state, condition.area)) say('אתה לא יודע איך מגיעים לשם — מישהו צריך לקחת אותך')
   if (condition.gateIs && state.gate.identity !== condition.gateIs) say(`לעמוד ב-${condition.gateIs}`)
 
   // composition — recursed, and only the failing side is reported
@@ -106,5 +118,6 @@ function describe(condition: Condition): string | null {
   if (condition.flag) return flagHe(condition.flag)
   if (condition.hasItem) return itemHe(condition.hasItem)
   if (condition.flagIs) return flagHe(condition.flagIs.flag)
+  if (condition.area) return AREA_HE[condition.area] ?? condition.area
   return null
 }
