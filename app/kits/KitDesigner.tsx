@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { KitShirt } from '@/components/kit/KitShirt'
 import { KitStrip } from '@/components/kit/KitStrip'
@@ -16,6 +16,7 @@ import {
   type KitColour,
   type KitSpec,
 } from '@/lib/kit/spec'
+import { recordDeed } from '@/lib/profile/store'
 import { t, type MessageKey } from '@/lib/i18n'
 
 /**
@@ -59,6 +60,23 @@ export function KitDesigner({
   const [spec, setSpec] = useState<KitSpec>(rack[0]?.spec ?? DEFAULT_SPEC)
   const [tab, setTab] = useState<(typeof TABS)[number]['key']>('rack')
   const [flash, setFlash] = useState(0)
+
+/*
+ * מעשה — a wing has no round, and until 17.9.2026 that meant its plate could never light
+ * and `stillToDo` nagged about it for ever. `recordDeed` is the wing's equivalent of a
+ * finished round: something was MADE. It carries no score, so a wing can never climb the
+ * correct/asked figures that belong to the quizzes. The ref is React's double-invoke
+ * guard, the same one `RecordRun` keeps.
+ */
+  const deeded = useRef(false)
+  useEffect(() => {
+    // The deed is a CHANGE, never the screen opening: `flash` counts the edits this
+    // session, so looking at the rack and leaving is not "you designed a shirt".
+    if (deeded.current || flash === 0) return
+    deeded.current = true
+    recordDeed('/kits')
+  }, [flash])
+
 
   function set<K extends keyof KitSpec>(key: K, value: KitSpec[K]) {
     setSpec((current) => ({ ...current, [key]: value }))
@@ -241,8 +259,14 @@ export function KitDesigner({
         </div>
 
         <ShareRow
+          // The free designer is gate 5. `kind="kit"` resolves to `/kits/build` — the
+          // GRADED quiz — so a shared design walked its reader into a different game, and
+          // `seed` defaults to 1 here because the page never passes one, which handed out
+          // kit-quiz round #1 to the whole world. The route is the wing itself now, and
+          // the wing reads no seed (17.9.2026).
           kind="kit"
-          params={{ s: String(seed), total: '8' }}
+          route="/kits"
+          params={{ total: '8' }}
           headline={t('kit.designer')}
           card={{
             template: 'kit' as const,

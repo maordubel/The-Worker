@@ -16,7 +16,8 @@ export type ShareKind =
   | 'file'
   | 'trivia'
   | 'kit'
-  | 'crest'
+  | 'xi'
+  | 'member'
   | 'lineup'
   | 'memory'
   | 'goal'
@@ -28,7 +29,8 @@ const ROUTE: Record<ShareKind, string> = {
   file: '/derby/file',
   trivia: '/trivia',
   kit: '/kits/build',
-  crest: '/crest',
+  xi: '/xi',
+  member: '/tik',
   lineup: '/lineup',
   memory: '/memory',
   goal: '/goal',
@@ -45,7 +47,22 @@ const ROUTE: Record<ShareKind, string> = {
  * stapled to it would be a parameter the page ignores, which is the kind of small lie
  * that makes a URL untrustworthy to read.
  */
-const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls'])
+const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'member'])
+
+/*
+ * Two more joined `polls` on 17.9.2026, and both were live defects rather than tidying.
+ *
+ * · **`xi`** did not exist. The all-time XI shared as `kind="lineup"` with a hand-written
+ *   `params={{ s: '1' }}`, so every card in the world handed its reader
+ *   `/xi?seed=1&from=share` — a parameter `/xi` does not read, on a screen that deals no
+ *   round. The recipient got an empty pitch and a promise of a round that was never there.
+ * · **`member`** replaces `crest`, which pointed at `/crest` — a TOMBSTONE that
+ *   `redirect('/')`s. The member card is the one artefact in this app that is purely
+ *   somebody's own, and its share button sent every reader to the front door.
+ *
+ * Neither route reads a seed, so neither gets one. That is the same sentence the polls
+ * wing earned: a parameter the page ignores is a small lie in a URL people read.
+ */
 
 /**
  * Two things a challenge link has to carry that it did not.

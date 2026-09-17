@@ -250,7 +250,14 @@ function Done({
   const pct = total > 0 ? Math.round((hits / total) * 100) : 0
   return (
     <div className="mt-stack border-rule border-sign bg-hate-card p-5 text-center">
-      <RecordRun gate="/derby/file" score={hits} correct={hits} asked={total} />
+      {/*
+        The black file is the second room of GATE 11, not a gate of its own. Reporting
+        under `/derby/file` wrote a key the wall has no plate for: `stillToDo` could never
+        clear it, `cardFigures` counted it, and a device could print "8 מתוך 11" with seven
+        plates lit. Its deck stays its own (`PlayLink gate="/derby/file"` — the two rooms
+        deal different things); only the STATISTIC belongs to the gate. 17.9.2026.
+      */}
+      <RecordRun gate="/derby" score={hits} correct={hits} asked={total} />
       <p className="font-poster text-[74px] leading-none text-sign">
         <Num>{hits}</Num>
       </p>

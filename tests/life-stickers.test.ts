@@ -30,6 +30,7 @@ import {
   setSoldIn,
   stickerFlag,
   stickersIn,
+  type StickerSetId,
 } from '@/lib/life/stickers'
 import { blankRelationship, type LifeState } from '@/lib/life/types'
 import { meets } from '@/lib/life/world/types'
@@ -368,18 +369,30 @@ describe('סופרגול — האלבום שורד את השנה', () => {
 })
 
 describe('סופרגול — הדף שנסגר', () => {
+  /*
+   * This used to run on '9293' and name `abuksis` and `halfon` by hand. On 17.9.2026 the
+   * album stopped showing a slot with no photograph, `abuksis` has none, and the page
+   * became one card — so a test about the difference between one-short and two-short had
+   * no room left to stand in. It is not deleted (rule 47): it reads the page out of the
+   * album instead of hard-coding two ids, so it now holds for every page that HAS a
+   * penultimate card, and it names the page it chose when it fails.
+   */
   it('says the page is full only on the sticker that actually closed it', () => {
-    const page = stickersIn('9293')
+    const set = SET_ORDER.find((id) => stickersIn(id).length >= 3)
+    expect(set, 'no album page has three cards').toBeTruthy()
+    const page = stickersIn(set as StickerSetId)
+    const closing = page[page.length - 1] as { id: string }
+    const other = page[page.length - 2] as { id: string }
     const all = Object.fromEntries(page.map((sticker) => [stickerFlag(sticker.id), 1]))
     // one short: the arriving sticker closes it
     const short = { ...all }
-    delete short[stickerFlag('abuksis')]
-    expect(closesPage(state({ flags: short }), '9293', ['abuksis'])).toBe(true)
+    delete short[stickerFlag(closing.id)]
+    expect(closesPage(state({ flags: short }), set as StickerSetId, [closing.id]), set).toBe(true)
     // two short: it does not
     const shorter = { ...short }
-    delete shorter[stickerFlag('halfon')]
-    expect(closesPage(state({ flags: shorter }), '9293', ['abuksis'])).toBe(false)
+    delete shorter[stickerFlag(other.id)]
+    expect(closesPage(state({ flags: shorter }), set as StickerSetId, [closing.id]), set).toBe(false)
     // already full: a duplicate does not re-close a page that was closed an hour ago
-    expect(closesPage(state({ flags: all }), '9293', ['abuksis'])).toBe(false)
+    expect(closesPage(state({ flags: all }), set as StickerSetId, [closing.id]), set).toBe(false)
   })
 })

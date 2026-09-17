@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Num } from '@/components/ui/Num'
 import { RosterSheet } from '@/components/roster/RosterSheet'
@@ -8,6 +8,7 @@ import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
 import type { Formation, PitchSlot } from '@/lib/game/lineup'
 import type { RosterEntry, RosterIndex } from '@/lib/game/allTimeXI'
+import { recordDeed } from '@/lib/profile/store'
 import { t } from '@/lib/i18n'
 
 /**
@@ -39,6 +40,21 @@ export function XIBuilder({
   const [openSlot, setOpenSlot] = useState<PitchSlot | null>(null)
 
   const chosen = Object.keys(picked).length
+
+/*
+ * מעשה — a wing has no round, and until 17.9.2026 that meant its plate could never light
+ * and `stillToDo` nagged about it for ever. `recordDeed` is the wing's equivalent of a
+ * finished round: something was MADE. It carries no score, so a wing can never climb the
+ * correct/asked figures that belong to the quizzes. The ref is React's double-invoke
+ * guard, the same one `RecordRun` keeps.
+ */
+  const deeded = useRef(false)
+  useEffect(() => {
+    if (deeded.current || chosen < 11) return
+    deeded.current = true
+    recordDeed('/xi')
+  }, [chosen])
+
   const takenSlugs = useMemo(
     () => new Set(Object.values(picked).map((entry) => entry.slug)),
     [picked],
@@ -152,11 +168,13 @@ export function XIBuilder({
       <ShareRow
         // `kind="lineup"` with no route sent everyone who opened an all-time XI to
         // `/lineup?seed=1` — the GRADED match quiz, a different game with a different
-        // gate number. The message template is still the line-up one, because that is
-        // what an XI card says; only the destination was wrong.
-        kind="lineup"
-        route="/xi"
-        params={{ s: '1' }}
+        // gate number. Overriding the route fixed the destination and left the lie in
+        // the query string: `params={{ s: '1' }}` handed every reader `?seed=1` on a
+        // screen that reads no seed. Gate 1 has its own `kind` now (17.9.2026), it is
+        // in `SEEDLESS`, and the message template that always described an all-time XI
+        // moved with it — `share.msg.lineup` is gate 3's own sentence again.
+        kind="xi"
+        params={{ total: '11' }}
         headline={`${chosen}/11`}
         card={{
           // The team sheet draws itself. Three names as "facts" threw eight of the

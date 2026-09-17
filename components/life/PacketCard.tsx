@@ -112,19 +112,8 @@ export function PacketCard({
                   /* a card held up on its own is held straight; a packet fans */
                   style={{ ['--tilt' as string]: big ? '0deg' : `${(index - 1) * 1.6}deg` }}
                 >
-                  {sticker.scan ? (
-                    // eslint-disable-next-line @next/next/no-img-element
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={sticker.scan} alt={sticker.nameHe} className="h-full w-full object-contain" />
-                  ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center bg-paper p-1">
-                      <span className="font-poster text-[22px] leading-none text-concrete" aria-hidden>
-                        {sticker.printedN ?? sticker.slot}
-                      </span>
-                      <span className="pt-1 text-center font-sign text-[11px] leading-tight text-ink">
-                        <bdi>{sticker.nameHe}</bdi>
-                      </span>
-                    </div>
-                  )}
                 </div>
               )
             })}

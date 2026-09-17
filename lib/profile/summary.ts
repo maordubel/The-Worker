@@ -24,6 +24,12 @@
 const LIFE_KEY = 'the-worker:life'
 const KIT_KEY = 'worker.kits.v1'
 const BALLOT_KEY = 'worker.ballot.v1'
+/**
+ * The ballot is TWO keys, and forgetting one of them is worse than forgetting neither:
+ * clearing the picks while leaving the seal meant the polls wing reloaded as a sealed,
+ * empty slip — a screen with no way forward and nothing on it. Found 17.9.2026.
+ */
+const BALLOT_SEAL_KEY = 'worker.ballot.sealed.v1'
 
 export type DeviceSummary = {
   /** shirts assembled in gate 4 */
@@ -73,6 +79,7 @@ export function forgetDevice(): void {
     KIT_KEY,
     BALLOT_KEY,
     'worker.member.v1',
+    BALLOT_SEAL_KEY,
     LIFE_KEY,
   ]) {
     try {

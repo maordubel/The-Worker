@@ -160,6 +160,24 @@ export function recordRun(result: RunResult): Profile {
 }
 
 /**
+ * מעשה — a wing has no round to finish, and it still has to be able to light its plate.
+ *
+ * `recordRun` exists because the only moment the app can honestly say you PLAYED
+ * something is the moment a round ended. Four gates have no rounds: gate 1 is free play
+ * over the whole roster, gate 5 is a collection, gate 7 is a ballot, and until 17.9.2026
+ * none of the three could ever be recorded — so `stillToDo()` nagged about gates that
+ * could not be cleared and the wall printed 7 of 11 for a device that had done everything.
+ *
+ * A deed is the wing's equivalent of a finished round, and it is deliberately the same
+ * shape: something was MADE — an eleven saved, a shirt designed, a slip sealed. It
+ * carries no score and no denominator, so a wing can never climb the correct/asked
+ * figures that belong to the quizzes.
+ */
+export function recordDeed(gate: string): Profile {
+  return recordRun({ gate })
+}
+
+/**
  * Add to a collection. Idempotent — the same card twice is still one card, which is
  * what makes "45 מתוך 45" a sentence about the archive rather than about tapping.
  */

@@ -211,8 +211,12 @@ export function MemberBook({ shirt }: { shirt: KitSpec }) {
       </section>
 
       <ShareRow
-        kind="crest"
-        params={{ s: '10', total: String(QUARTER_SLOTS) }}
+        // `kind="crest"` resolved to `/crest`, which is a tombstone that redirects to the
+        // gate wall — so the card that is most purely somebody's own sent every reader it
+        // ever reached to the front door. Gate 10 has its own kind now, and no seed: the
+        // personal area deals no round (17.9.2026).
+        kind="member"
+        params={{ total: String(QUARTER_SLOTS) }}
         headline={String(approved)}
         card={{
           template: 'kit',

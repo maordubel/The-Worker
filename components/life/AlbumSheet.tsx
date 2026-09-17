@@ -36,8 +36,12 @@ import type { LifeState } from '@/lib/life/types'
  * flattening that into a grey grid of question marks would be drawing a different object.
  *
  * Three things this sheet will not do:
- * · **It never draws a face.** A slot is a scan or it is a printed frame with a name.
- *   There is no illustrated stand-in for a real footballer (rule 11).
+ * · **It never draws a face, and since 17.9.2026 it never prints a nameplate instead of
+ *   one either.** A slot is a photograph or it is not on the page. Thirteen printed
+ *   frames on the 1985/86 page read as thirteen images that had failed to load, and
+ *   the owner's call was to take them off. `withScans` in `lib/life/stickers.ts` is
+ *   where that happens; nothing in this file can show a sticker without a scan,
+ *   because `StickerDef.scan` is required (rule 11 still holds: no drawn footballer).
  * · **It never captions a scan with a meaning.** `sourceHe` says where the paper came
  *   from and stops. The one exception is `handHe`, which is Maor's OWN sentence off his
  *   OWN album, drawn as what it is — tape stuck under the sticker with a line on it.
@@ -209,18 +213,12 @@ export function AlbumSheet({
           {isAce(open) && (
             <span aria-hidden className="ace-burst pointer-events-none absolute inset-0" />
           )}
-          {open.scan ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={open.scan}
-              alt={open.nameHe}
-              className={`sticker sticker-held max-h-[62vh] max-w-full object-contain ${isAce(open) ? 'sticker-ace' : ''}`}
-            />
-          ) : (
-            <span className={`sticker sticker-held block ${isAce(open) ? 'sticker-ace' : ''}`}>
-              <Printed sticker={open} frame={SETS[open.set].frame} big />
-            </span>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={open.scan}
+            alt={open.nameHe}
+            className={`sticker sticker-held max-h-[62vh] max-w-full object-contain ${isAce(open) ? 'sticker-ace' : ''}`}
+          />
           {isAce(open) && (
             <span className="mt-2 bg-red px-3 py-1 font-poster text-[13px] uppercase tracking-[0.2em] text-sheet">
               {t('life.album.ace')}
@@ -363,18 +361,14 @@ function Slot({
         style={{ ['--tilt' as string]: tiltOf(sticker.id) }}
       >
         <span className="relative block h-full w-full overflow-hidden bg-sheet/0">
-          {sticker.scan ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={sticker.scan}
-              alt={sticker.nameHe}
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-contain"
-            />
-          ) : (
-            <Printed sticker={sticker} frame={frame} />
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={sticker.scan}
+            alt={sticker.nameHe}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-contain"
+          />
         </span>
       </span>
       {have > 1 && (
@@ -386,59 +380,3 @@ function Slot({
   )
 }
 
-/**
- * מדבקה בלי סריקה — the frame the year printed, with a name in it and nothing else.
- *
- * This is the honest half of the album. The archive holds six photographs; the other
- * sixteen men in it were on the page too, and the game knows their names from a source it
- * can cite. So the slot is filled the way a slot with no picture is filled: the border
- * the year used, the name, the role if the source gave one. Nobody's face is guessed.
- */
-function Printed({
-  sticker,
-  frame,
-  big = false,
-}: {
-  sticker: StickerDef
-  frame: StickerSet['frame']
-  big?: boolean
-}) {
-  /*
-   * A sticker with no photograph must read as a CARD and still lose to one that has a
-   * photograph. The first pass made it a solid vermilion block, which won every page it
-   * was on — sixteen red rectangles shouting over the two real scans. So the ground is
-   * paper and the year is carried by the RULE around it: a black rule in 1980, a
-   * vermilion one after. Same information, a quarter of the volume.
-   */
-  const rule = frame === '80' || frame === '98' ? 'border-ink' : 'border-red'
-  return (
-    <div
-      data-life="album-printed"
-      data-frame={frame}
-      className={`flex h-full w-full flex-col border-rule ${rule} bg-sheet p-[5%] ${big ? 'aspect-[3/4] h-[52vh] w-auto max-w-full' : ''}`}
-    >
-      <div className="relative flex flex-1 flex-col items-center justify-center bg-paper/70">
-        {/* the wordmark, small, where the printer put it — this is a card, not a gap */}
-        <span
-          aria-hidden
-          className="absolute start-1 top-1 font-poster text-[8px] leading-none tracking-[0.06em] text-red/80"
-        >
-          {t('life.packet.name')}
-        </span>
-        <span className="font-poster text-[26px] leading-none text-red/45" aria-hidden>
-          {sticker.printedN ?? sticker.slot}
-        </span>
-        <span className="px-1 pt-1 text-center font-body text-[9px] leading-tight text-muted">
-          <bdi>{sticker.roleHe ?? t('life.album.club')}</bdi>
-        </span>
-      </div>
-      <span
-        className={`mt-[4%] block px-1 text-center font-sign text-[11px] leading-tight ${
-          frame === '80' || frame === '98' ? 'bg-ink text-sheet' : 'bg-red text-sheet'
-        }`}
-      >
-        <bdi>{sticker.nameHe}</bdi>
-      </span>
-    </div>
-  )
-}

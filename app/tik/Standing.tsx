@@ -47,10 +47,23 @@ export function Standing() {
   const [profile, setProfile] = useState<Profile>(emptyProfile)
   const [device, setDevice] = useState<DeviceSummary>({ kits: 0, ballot: 0, life: null })
   const [ready, setReady] = useState(false)
+  /**
+   * The wall's links, worked out ONCE after mount.
+   *
+   * `nextRoundHref` used to be called from inside the JSX map. It reads the device's
+   * place in a deck, and `rotationFor` MINTS AND WRITES a seed for a gate that has none —
+   * so drawing this screen silently created a deck for every gate the device had never
+   * played, on every render, during the render. React may call a render twice and may
+   * throw one away; storage writes in that phase are exactly the bug the LIFE intro's
+   * seen-flag was (rule 30). It also returned `cursor + 1` without committing the step,
+   * so the next `PlayLink` re-served the round this card had just handed out.
+   */
+  const [links, setLinks] = useState<Record<string, string>>({})
 
   useEffect(() => {
     setProfile(readProfile())
     setDevice(readDevice())
+    setLinks(wallLinks())
     setReady(true)
   }, [])
 
@@ -155,7 +168,7 @@ export function Standing() {
             return (
               <li key={gate.number}>
                 <Link
-                  href={ready ? nextRoundHref(gate.href, id) : gate.href}
+                  href={(ready && links[gate.href]) || gate.href}
                   className={`flex min-h-tap items-stretch gap-3 border-rule transition-transform duration-press ease-stamp active:scale-[.985] motion-reduce:transition-none ${
                     played ? 'border-ink bg-sheet' : 'border-ink/35 bg-paper'
                   }`}
@@ -262,13 +275,27 @@ export function Standing() {
 }
 
 /**
- * The link a gate gets from this screen: the device's own place in that gate's deck,
- * moved one slice on. Computed at render on the client — `rotationFor` touches storage,
- * which is why the server render emits the bare route and this replaces it after mount.
+ * The link every gate on this wall gets, built once in an effect.
+ *
+ * A gate that READS a seed gets the device's own place in its deck. A gate that does not
+ * — `/xi`, `/kits`, `/polls`, `/tik`, and the trivia PICKER — gets its bare route, because
+ * a `?seed=` on a page that never looks at one is a parameter that lies (rule 19), and
+ * asking `rotationFor` for it would mint a deck nothing ever deals from.
+ *
+ * The cursor is NOT stepped here. Stepping belongs to the click (`PlayLink`), and doing it
+ * on render burned a round for anybody who merely opened their own card.
  */
-function nextRoundHref(href: string, id: string): string {
-  const rotation = rotationFor(id, mintSeed)
-  return withRound(href, rotation.seed, rotation.cursor + 1)
+function wallLinks(): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const gate of GATES) {
+    if (!gate.seeded) {
+      out[gate.href] = gate.href
+      continue
+    }
+    const rotation = rotationFor(gateId(gate.href), mintSeed)
+    out[gate.href] = withRound(gate.href, rotation.seed, rotation.cursor)
+  }
+  return out
 }
 
 function Collection({

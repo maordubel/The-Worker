@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import { PlayLink } from '@/components/play/PlayLink'
 import { Num } from '@/components/ui/Num'
 import { t } from '@/lib/i18n'
@@ -20,19 +22,24 @@ import type { Gate } from '@/lib/gates'
 export function GatePlate({ gate }: { gate: Gate }) {
   const away = gate.plate === 'away'
   const curva = gate.plate === 'curva'
+  const className = `group relative block overflow-hidden border-hair border-ink transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
+    away ? 'bg-sign/[.07]' : 'bg-sheet'
+  }`
+  const ariaLabel = `${t('gate.aria')} ${gate.number} — ${t(gate.title)}`
 
-  return (
-    // The plate is the way IN, so it carries this device's place in that gate's deck:
-    // walk through gate 2 twice in an afternoon and the second round is not the first
-    // one again. Before this, every plate on the wall pointed at a hardcoded `?seed=1`.
-    <PlayLink
-      gate={gate.href.split('?')[0] ?? gate.href}
-      href={gate.href}
-      ariaLabel={`${t('gate.aria')} ${gate.number} — ${t(gate.title)}`}
-      className={`group relative block overflow-hidden border-hair border-ink transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
-        away ? 'bg-sign/[.07]' : 'bg-sheet'
-      }`}
-    >
+  /*
+   * The plate is the way IN, so a gate that deals a round carries this device's place in
+   * its deck: walk through gate 3 twice in an afternoon and the second round is not the
+   * first one again. Before that, every plate pointed at a hardcoded `?seed=1`.
+   *
+   * **But five of the eleven deal no round**, and until 17.9.2026 they went through the
+   * same component — so the wall minted a deck for `/xi`, `/kits`, `/polls`, `/tik` and
+   * the trivia PICKER, advanced its cursor on every click, and stapled the result onto a
+   * URL none of those pages reads. The worst of the five was `/trivia`: the real decks
+   * are per topic (`/trivia/europe`), so the one the wall was walking belonged to nothing.
+   */
+  const inner = (
+    <>
       <div className={`pointer-events-none absolute inset-0 stain-${gate.stain}`} aria-hidden="true" />
 
       {/* 1 · the bilingual plate. It sits on solid paper so the sunburst behind the
@@ -112,7 +119,22 @@ export function GatePlate({ gate }: { gate: Gate }) {
           {gate.latin}
         </div>
       </div>
+    </>
+  )
+
+  return gate.seeded ? (
+    <PlayLink
+      gate={gate.href.split('?')[0] ?? gate.href}
+      href={gate.href}
+      ariaLabel={ariaLabel}
+      className={className}
+    >
+      {inner}
     </PlayLink>
+  ) : (
+    <Link href={gate.href} aria-label={ariaLabel} className={className}>
+      {inner}
+    </Link>
   )
 }
 

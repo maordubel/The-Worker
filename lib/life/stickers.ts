@@ -12,10 +12,16 @@
  * Three rules hold this file together, and all three are the archive's rather than the
  * game's:
  *
- * · **A sticker with a face is a scan or it does not exist.** Nothing here draws a
- *   player. The six scans are shown as scans, with `sourceHe` under them, and every other
- *   slot in the album is what an album slot actually is — a printed rectangle with a name
- *   under it and nothing stuck on top.
+ * · **A sticker IS a scan.** Nothing here draws a player, and since 17.9.2026 nothing
+ *   here prints a nameplate in place of one either. Maor, looking at the 1985/86 page:
+ *   *"לא להציג קלפי סופרגול שאין עליהם תמונה."* Until then the page carried seventeen
+ *   slots and four photographs, and the thirteen printed frames read on screen exactly
+ *   like thirteen images that had failed to load — which is how the defect was reported.
+ *   `scan` is therefore REQUIRED on `StickerDef`, and `withScans()` is the one door a
+ *   page passes through: a drafted slot with no photograph never becomes a sticker, so
+ *   no counter, no packet, no page total and no album percentage can ever see it.
+ *   The names are not lost — they are in `content/manual/people.json` with their sources,
+ *   and the slot comes back the day the photograph does, by adding one `scan:` line.
  * · **Every name is sourced.** The 1985/86 page is the squad `content/manual/people.json`
  *   carries against the ynet piece on Landau's 86th minute; the 1992/93 page is the three
  *   men whose names are printed large enough on the scans to be certain of. Names that
@@ -91,8 +97,8 @@ export type StickerDef = {
   roleHe?: string
   /** the number printed on the sticker itself, where a scan makes it legible */
   printedN?: number
-  /** the scan, when the archive holds this one */
-  scan?: string
+  /** the photograph. REQUIRED — a slot with no scan is not a sticker (17.9.2026) */
+  scan: string
   /** where the NAME came from — a source, never a meaning */
   sourceHe: string
   /** what Maor wrote under it in his own album, in his own hand */
@@ -288,7 +294,7 @@ const NAMES_86: ReadonlyArray<[string, string, string?]> = [
   ['sharf', 'שלמה שרף', 'מאמן'],
 ]
 
-const S8586: StickerDef[] = NAMES_86.map(([id, nameHe, roleHe], index) => ({
+const S8586: StickerDraft[] = NAMES_86.map(([id, nameHe, roleHe], index) => ({
   id,
   set: '8586' as const,
   slot: index + 1,
@@ -323,8 +329,10 @@ S8586[10] = {
   scan: '/life/docs/hand-zano.jpg',
   sourceHe: FROM_ALBUM,
 }
-// שלמה שרף closes the page, and no packet has ever had him in it
-S8586[S8586.length - 1] = { ...(S8586[S8586.length - 1] as StickerDef), rarity: 'rare', neverInPacket: true }
+// The page's closing card used to be named here (שלמה שרף) and he has no photograph, so
+// after 17.9.2026 he is not on the page at all. `withScans` closes whichever card SURVIVES
+// instead — a page still needs one slot a packet will never hand you (`neverInPacket`), or
+// the whole trading half of the feature has nothing to hang on.
 
 /**
  * שלושה גיליונות שלמים — every card below is a cut from a printed sheet.
@@ -476,7 +484,7 @@ const SG90: StickerDef[] = page('sg90', 'e', FROM_SHEET_90, [
   ['sg90-04', 'סמל הקבוצה'],
 ])
 
-const S9293: StickerDef[] = [
+const S9293: StickerDraft[] = [
   {
     id: 'halfon',
     set: '9293',
@@ -553,13 +561,45 @@ const SBOX: StickerDef[] = BOX_ROWS.map(([file, nameHe, roleHe], index) => ({
   neverInPacket: true,
 }))
 
+/**
+ * טיוטת דף — a page as it is AUTHORED, before it is a page.
+ *
+ * Authoring a slot without a photograph is still allowed and still useful: the name, the
+ * source and the role are real research and they stay in the file. What changed on
+ * 17.9.2026 is that such a slot no longer reaches a screen.
+ */
+type StickerDraft = Omit<StickerDef, 'scan'> & { scan?: string }
+
+/**
+ * הדלת — the only way a drafted page becomes stickers.
+ *
+ * Three things happen here and each one is a bug that would otherwise ship:
+ * · a slot with no `scan` is DROPPED, which is the decision itself;
+ * · `slot` is renumbered 1..n, because a page that kept its authored numbers would show
+ *   1, 3, 6, 11 and read as four missing stickers rather than a page of four;
+ * · the surviving last card inherits `neverInPacket`, because the card you have to ask
+ *   somebody for is a property of the PAGE, not of whoever happened to be authored last.
+ *
+ * Pages that are photographs end to end pass through unchanged, and `page()` already
+ * closes them, so `withScans` leaves an existing `neverInPacket` alone.
+ */
+function withScans(rows: readonly StickerDraft[]): StickerDef[] {
+  const kept = rows.filter((row): row is StickerDraft & { scan: string } => Boolean(row.scan))
+  const out = kept.map((row, index) => ({ ...row, slot: index + 1 }))
+  const last = out[out.length - 1]
+  if (last && !out.some((row) => row.neverInPacket)) {
+    out[out.length - 1] = { ...last, rarity: 'rare', neverInPacket: true }
+  }
+  return out
+}
+
 export const STICKERS: readonly StickerDef[] = [
   ...S8081,
-  ...S8586,
+  ...withScans(S8586),
   ...SG80A,
   ...SGCUP,
   ...SG80B,
-  ...S9293,
+  ...withScans(S9293),
   ...SG90,
   ...SG978,
   ...S96,

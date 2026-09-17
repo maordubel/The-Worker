@@ -1,4 +1,4 @@
-import { GATES } from '@/lib/gates'
+import { GATES, PLAYABLE_GATES } from '@/lib/gates'
 import {
   gatesTouched,
   streak,
@@ -68,8 +68,13 @@ export function cardFigures(profile: Profile) {
     plays: totalPlays(profile),
     days: profile.days.length,
     streak: streak(profile),
-    gates: gatesTouched(profile),
-    ofGates: GATES.length,
+    // Counted over the PLAYABLE gates only, and both halves of the fraction come from
+    // the same list. `gatesTouched` used to count every key in `profile.gates` — which
+    // included `/derby/file`, a screen that is not on the wall — so a device could print
+    // "8 מתוך 11" with seven plates lit. Both numbers now answer the same question.
+    gates: PLAYABLE_GATES.filter((gate) => (profile.gates[gateId(gate.href)]?.plays ?? 0) > 0)
+      .length,
+    ofGates: PLAYABLE_GATES.length,
   }
 }
 
@@ -82,10 +87,9 @@ export function cardFigures(profile: Profile) {
  * is left without asking anybody to come back at six o'clock.
  */
 export function stillToDo(profile: Profile, limit = 3) {
-  return GATES.filter((gate) => (profile.gates[gateId(gate.href)]?.plays ?? 0) === 0).slice(
-    0,
-    limit,
-  )
+  return PLAYABLE_GATES.filter(
+    (gate) => (profile.gates[gateId(gate.href)]?.plays ?? 0) === 0,
+  ).slice(0, limit)
 }
 
 /**

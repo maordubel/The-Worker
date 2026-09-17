@@ -37,6 +37,29 @@ export type Gate = {
   plate: 'plain' | 'rays' | 'curva' | 'away'
   /** which ink blotch, so no two plates print identically */
   stain: 'a' | 'b' | 'c'
+  /**
+   * האם השער מחלק סבב — does the route behind this plate READ `?seed=`?
+   *
+   * Six of them do. The other five are wings and a personal area: `/xi` is free play
+   * over the whole roster, `/kits` is a collection, `/polls` is a ballot, `/tik` is
+   * your own card, and `/trivia` is the TOPIC PICKER — the seeded route is
+   * `/trivia/<topic>`, one deck each, which is why the picker itself must not carry one.
+   *
+   * Until 17.9.2026 the wall and the personal area stapled `?seed=…&r=…` onto all
+   * eleven. Four of those parameters were read by nobody, and the fifth — `/trivia` —
+   * pointed at a phantom deck that the plate advanced on every click and no round ever
+   * consulted. A parameter a page ignores is a small lie in a URL people read
+   * (rule 19), and a deck nothing deals from is a counter that only ever lies.
+   */
+  seeded: boolean
+  /**
+   * האם משחקים בו — gate 10 is the personal area, and you cannot finish a round of it.
+   *
+   * It is on the wall because it is a place in the ground, not because it is a game. It
+   * is excluded from "how many gates have you been through", which otherwise printed a
+   * denominator nobody could ever reach.
+   */
+  playable: boolean
   /** gate 5 only — the line on the flag */
   callHe?: MessageKey
 }
@@ -69,6 +92,8 @@ export const GATES: readonly Gate[] = [
     latin: 'ALL-TIME XI · NORTH STAND',
     plate: 'plain',
     stain: 'a',
+    seeded: false,
+    playable: true,
   },
   {
     number: 2,
@@ -77,6 +102,8 @@ export const GATES: readonly Gate[] = [
     latin: 'TRIVIA WING · NORTH-EAST',
     plate: 'rays',
     stain: 'b',
+    seeded: false,
+    playable: true,
   },
   {
     number: 3,
@@ -85,6 +112,8 @@ export const GATES: readonly Gate[] = [
     latin: 'THE LINE-UP · NORTH',
     plate: 'plain',
     stain: 'c',
+    seeded: true,
+    playable: true,
   },
   {
     number: 4,
@@ -93,6 +122,8 @@ export const GATES: readonly Gate[] = [
     latin: 'GUESS THE KIT · EAST',
     plate: 'plain',
     stain: 'c',
+    seeded: true,
+    playable: true,
   },
   {
     number: 5,
@@ -101,6 +132,8 @@ export const GATES: readonly Gate[] = [
     latin: 'KIT DESIGNER · SOUTH-EAST · ULTRAS',
     plate: 'curva',
     stain: 'a',
+    seeded: false,
+    playable: true,
     callHe: 'gate.5.call',
   },
   {
@@ -110,6 +143,8 @@ export const GATES: readonly Gate[] = [
     latin: 'MEMORY · SOUTH-EAST',
     plate: 'plain',
     stain: 'b',
+    seeded: true,
+    playable: true,
   },
   {
     number: 7,
@@ -118,6 +153,8 @@ export const GATES: readonly Gate[] = [
     latin: 'THE BALLOT · SOUTH',
     plate: 'plain',
     stain: 'a',
+    seeded: false,
+    playable: true,
   },
   {
     number: 8,
@@ -126,6 +163,8 @@ export const GATES: readonly Gate[] = [
     latin: 'REBUILD THE GOAL · SOUTH-WEST',
     plate: 'rays',
     stain: 'a',
+    seeded: true,
+    playable: true,
   },
   {
     number: 10,
@@ -134,6 +173,8 @@ export const GATES: readonly Gate[] = [
     latin: 'MEMBER BOOK · WEST',
     plate: 'plain',
     stain: 'b',
+    seeded: false,
+    playable: false,
   },
   {
     number: 11,
@@ -142,6 +183,8 @@ export const GATES: readonly Gate[] = [
     latin: 'THE HATRED GAME · AWAY END',
     plate: 'away',
     stain: 'b',
+    seeded: true,
+    playable: true,
   },
   {
     number: 13,
@@ -150,10 +193,21 @@ export const GATES: readonly Gate[] = [
     latin: 'TIMELINE · NORTH-WEST',
     plate: 'plain',
     stain: 'c',
+    seeded: true,
+    playable: true,
   },
 ] as const
 
 /** The gate a route belongs to, so a screen can show which gate you came in by. */
 export function gateFor(pathname: string): Gate | undefined {
   return GATES.find((gate) => gate.href.split('?')[0] === pathname)
+}
+
+/** The gates a supporter can actually finish a round of — everything but the personal area. */
+export const PLAYABLE_GATES: readonly Gate[] = GATES.filter((gate) => gate.playable)
+
+/** True when this route reads `?seed=`, so nothing staples one onto a route that does not. */
+export function gateSeeded(href: string): boolean {
+  const path = href.split('?')[0] ?? href
+  return GATES.find((gate) => gate.href === path)?.seeded ?? false
 }

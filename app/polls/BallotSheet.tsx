@@ -17,6 +17,7 @@ import {
 } from '@/lib/polls/ballot'
 import { activeStore } from '@/lib/polls/store'
 import { useDialog } from '@/components/ui/useDialog'
+import { recordDeed } from '@/lib/profile/store'
 import { t } from '@/lib/i18n'
 
 /**
@@ -70,6 +71,9 @@ export function BallotSheet({ roster }: { roster: RosterIndex }) {
     if (!ballotComplete(ballot)) return
     setSealed(true)
     void store.seal()
+    // Sealing is the wing's finished round: eight picks, one artefact, and the moment
+    // gate 7 can honestly say this device did something here (17.9.2026).
+    recordDeed('/polls')
   }
 
   function fresh() {
