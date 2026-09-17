@@ -46,7 +46,7 @@ import { HistoricalCutscene } from '@/components/life/HistoricalCutscene'
 import { LifeHud } from '@/components/life/LifeHud'
 import { LifeMap } from '@/components/life/LifeMap'
 import { LifeMenu } from '@/components/life/LifeMenu'
-import { OpeningSequence } from '@/components/life/OpeningSequence'
+import { Opening } from '@/components/life/Opening'
 import { CodaCard } from '@/components/life/CodaCard'
 import { MapReveal } from '@/components/life/MapReveal'
 import { ChapterCard } from '@/components/life/ChapterCard'
@@ -448,7 +448,7 @@ export function LifeStage({
             loading plate: the game boots underneath it while the player watches a cot,
             a bus and a man lifting a five-year-old over a crowd. */}
         {opening && (
-          <OpeningSequence anchor={prologueAnchor} onDone={closeOpening} />
+          <Opening anchor={prologueAnchor} onDone={closeOpening} />
         )}
 
         {cutscene && (

@@ -101,6 +101,10 @@ const TREATMENT = new Set([
   'crop', 'deskew', 'cut-from-sheet', 'upscale', 'trim-alpha', 'extend-strip',
   'key-green', 'key-flat', 'key-checker', 'fade',
   'cut', 'loop-crossfade', 'normalise', 'encode-ogg-m4a', 'encode-mp4',
+  // 17.9.2026 — סרט הפתיחה. `encode-webm` הוא הקידוד השני שכלל 30 דורש, ו-`poster-frame`
+  // הוא פריים שנשלף מהסרט והפך לתמונה — שניהם פעולות פיזיות על קובץ, ולכן הם טוקנים
+  // ולא טקסט חופשי. `encode-mp4` כבר היה כאן ומשמש את אותו סרט.
+  'encode-webm', 'poster-frame',
 ])
 
 /** `*` only, and it never crosses a `/` — these folders are flat, and a cleverer glob would hide a nested file */

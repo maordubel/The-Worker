@@ -381,6 +381,9 @@
   "life.cutscene.continue": "המשך",
   "life.cutscene.play": "הפעל את רגע האליפות",
   "life.cutscene.skip": "דלג",
+  "life.opening.film": "פתיח — הסרט",
+  "life.opening.sound.on": "קול ✓",
+  "life.opening.sound.off": "קול",
   "life.debug": "פיתוח",
   "life.debug.clock": "שעון",
   "life.debug.close": "לסגור",
@@ -1284,5 +1287,13 @@
   "gate.9": "חדר ההלבשה",
   "gate.closed": "בשיפוצים",
   "gate.closed.aria": "שער {number} — {title}, בשיפוצים. עדיין אין מה לפתוח.",
-  "member.archiveCards": "כרטיסי ארכיון"
+  "member.archiveCards": "כרטיסי ארכיון",
+  "account.title": "החשבון",
+  "account.lede": "התחברות מוציאה את הכרטיס מהדפדפן הזה: אותם סבבים, אותו רצף, אותם אוספים — גם בטלפון וגם במחשב. שום משחק לא ננעל מאחורי ההתחברות, ואין דירוג ואין תחרות. מה שמשתנה זה שהכרטיס מפסיק לחיות במקום אחד בלבד.",
+  "account.signIn": "להתחבר עם גוגל",
+  "account.signOut": "להתנתק",
+  "account.signedInAs": "מחובר בתור {who}.",
+  "account.syncing": "מסנכרן את הכרטיס…",
+  "account.synced": "הכרטיס מסונכרן. מה ששמור כאן שמור גם בחשבון.",
+  "account.failed": "הסנכרון לא עבר עכשיו. הכרטיס במכשיר הזה לא נגע — אפשר לנסות שוב אחר כך."
 }

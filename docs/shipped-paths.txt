@@ -3,6 +3,7 @@
 # is a tombstone at that path, not a shorter list.
 app/archive/ArchiveWing.tsx
 app/archive/page.tsx
+app/auth/callback/route.ts
 app/crest/CrestRun.tsx
 app/crest/actions.ts
 app/crest/page.tsx
@@ -44,6 +45,7 @@ app/polls/page.tsx
 app/qa/marks/page.tsx
 app/qa/story/StoryProof.tsx
 app/qa/story/page.tsx
+app/tik/AccountPlate.tsx
 app/tik/MemberBook.tsx
 app/tik/SignUpPlate.tsx
 app/tik/Standing.tsx
@@ -147,6 +149,11 @@ lib/kit/seasons.ts
 lib/kit/spec.ts
 lib/polls/ballot.ts
 lib/polls/store.ts
+lib/portal/db.ts
+lib/portal/device.ts
+lib/portal/env.ts
+lib/portal/merge.ts
+lib/portal/sync.ts
 lib/profile/standing.ts
 lib/profile/store.ts
 lib/profile/summary.ts

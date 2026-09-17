@@ -1606,6 +1606,27 @@
    "noteHe": "שלושה ציורים שמתנגנים לפני שהילד בכלל נשלט: הלידה, הציור, והכתפיים. הם לא סצנה ולכן הם לא במניפסט הגרפי."
   },
   {
+   "key": "opening-film-2026-09-17",
+   "kind": "video",
+   "origin": "maor-upload",
+   "folder": "public/life/opening",
+   "match": [
+    "opening-film.webm",
+    "opening-film.mp4",
+    "opening-film-poster.png"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "מאור הראל — opening-2026-09-17.mov, מסירה ישירה",
+   "treatment": [
+    "encode-webm",
+    "encode-mp4",
+    "poster-frame",
+    "quantise"
+   ],
+   "confidence": 2,
+   "noteHe": "סרט הפתיחה של משחק החיים — 21.4 שניות בשחקנים חיים, הכתוביות צרובות בתמונה. לא עבר de-yellow, בכוונה: זו יצירה של מאור ולא נכס שהצינור מייצר, וניקוי הצהוב היה צובע מחדש את שעת הזהב בסצנת העריסה. שלושת הקבצים נושאים חריג צהוב מאושר ב-lib/brand/yellowExemptions.ts, עם המדידה המלאה ב-docs/life/OPENING-FILM-2026-09-17.md."
+  },
+  {
    "key": "opening-clips",
    "kind": "video",
    "origin": "maor-upload",

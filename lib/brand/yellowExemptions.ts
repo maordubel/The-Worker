@@ -1,5 +1,5 @@
 /**
- * החריג היחיד לחוק הצהוב.
+ * החריג הראשון לחוק הצהוב — ומה שקובע אם מותר להוסיף שני.
  *
  * Rule 8 forbids yellow absolutely, and the reason is not aesthetic: yellow is the
  * other club's colour, and a Hapoel product that prints it has said something. That is
@@ -19,7 +19,9 @@
  *    scanner's output will ask, and "somebody decided this once" is not an answer.
  *  · **The list is asserted to be exactly this long.** `tests/brand.test.ts` fails if
  *    an entry is added, so widening it is a decision somebody has to make out loud
- *    rather than a line that slips into a delta.
+ *    rather than a line that slips into a delta. It grew from one to four on 17.9.2026,
+ *    and that is what "out loud" looks like: a failing test, a measurement in the entry,
+ *    and the owner's own sentence beside it.
  *
  * Owner-granted, asset-scoped, and never a precedent.
  */
@@ -32,12 +34,58 @@ export type YellowExemption = {
   why: string
 }
 
+/**
+ * ...ושלושה קבצים שנוספו ב-17.9.2026, אחרי שהמדידה הוצגה והתשובה חזרה במשפט אחד.
+ *
+ * `opening-2026-09-17.mov` הוא סרט הפתיחה של משחק החיים — 21.4 שניות בשחקנים חיים, עם
+ * הכתוביות צרובות בתמונה. הוא **נמדד ב-16.9 ולא נשלח**, וזה כתוב במלואו
+ * ב-`docs/life/OPENING-FILM-2026-09-17.md`: הפס הקנוני של `lib/isYellow.ts`, נמדד על
+ * הפענוח (כלל 61), על **כל** 642 הפריימים.
+ *
+ * הסיבה שהוא לא נשלח אז הייתה נכונה, והיא נכונה גם היום: **אין קידוד שפותר את זה.** הצהוב
+ * הוא שעת הזהב בסצנת העריסה — אור שמש חם על וילון, על טיח ועל שמיכה — ו-4.53% מפריים הם
+ * שטח ולא שוליים. לנקות אותו פירושו לצבוע מחדש את התאורה של הסרט, כלומר לשלוח גרסה אחרת
+ * שלו. ושני הקידודים נושאים אותו ב**יותר** פריימים מהמקור, שזה כלל 27 בדיוק.
+ *
+ * מה שהשתנה הוא לא המספר אלא מי הכריע. כלל 8: *"Only the owner grants one, in his own
+ * words, about a specific asset."* מאור ראה את המדידה, ואז כתב, על הקובץ הזה:
+ *
+ *   **"הסרטון מאושר כפי שהוא."**
+ *
+ * זה הסדר שכלל 69 דורש — מודדים, מראים, מבקשים — והוא רץ במלואו לפני שנכתבה כאן שורה.
+ * שלושה נתיבים ולא תיקייה: שני הקידודים שכלל 30 דורש, והפוסטר. הפוסטר נמדד **0** ובכל
+ * זאת רשום, כי הוא פריים של אותו סרט ואי אפשר להסתמך על כך שהחיתוך לא יזוז.
+ */
 export const YELLOW_EXEMPTIONS: readonly YellowExemption[] = [
   {
     path: 'public/video/intro.mp4',
     approvedBy: 'מאור הראל — "הצהוב הזה מאושר"',
     approvedOn: '2026-09-01',
     why: 'חולצת היריבה באנימציית הפתיחה — הצהוב הוא על הקבוצה השנייה, והיא מפסידה',
+  },
+  {
+    path: 'public/life/opening/opening-film.webm',
+    approvedBy: 'מאור הראל — "הסרטון מאושר כפי שהוא."',
+    approvedOn: '2026-09-17',
+    why:
+      'סרט הפתיחה של משחק החיים, VP9. שעת הזהב בסצנת העריסה — 367 מתוך 642 פריימים, ' +
+      'הגרוע 4.4756%. אין קידוד שמוריד את זה; ניקוי פירושו לצבוע מחדש את התאורה של הסרט',
+  },
+  {
+    path: 'public/life/opening/opening-film.mp4',
+    approvedBy: 'מאור הראל — "הסרטון מאושר כפי שהוא."',
+    approvedOn: '2026-09-17',
+    why:
+      'אותו סרט, h.264 — הקידוד השני שכלל 30 דורש. 378 מתוך 642 פריימים, הגרוע 4.5682% — ' +
+      'יותר פריימים מהמקור (352), וזה בדיוק מה שכלל 27 מתאר: הפענוח ממציא צהוב',
+  },
+  {
+    path: 'public/life/opening/opening-film-poster.png',
+    approvedBy: 'מאור הראל — "הסרטון מאושר כפי שהוא."',
+    approvedOn: '2026-09-17',
+    why:
+      'הפריים הראשון של אותו סרט — כרטיס הכותרת "1978" על שחור. נמדד אפס פיקסלים צהובים, ' +
+      'ורשום בכל זאת: הוא פריים של הסרט, ואסור שהחלטה תישען על כך שהחיתוך לא יזוז',
   },
 ] as const
 

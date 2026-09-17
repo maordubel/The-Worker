@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { AccountPlate } from './AccountPlate'
 import { SignUpPlate } from './SignUpPlate'
 import { Num } from '@/components/ui/Num'
 import { GATES, isOpen } from '@/lib/gates'
@@ -286,6 +287,10 @@ export function Standing() {
         </section>
       )}
 
+      {/* The account comes BEFORE the waiting list, because one of them is a door that
+          is open and the other is a promise. A person who can sign in should not have to
+          read past an invitation to be told about it later. */}
+      <AccountPlate />
       <SignUpPlate figures={figures} collections={device.kits + ussCards + device.ballot + device.xi + archiveCards} />
     </div>
   )

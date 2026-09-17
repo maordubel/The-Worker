@@ -529,13 +529,34 @@ describe('מתקן הבדיקה — the QA harness is exempt only because it can
   })
 })
 
-describe('חוק הצהוב — the one exemption, and the fence around it', () => {
-  it('names exactly one exempt asset', () => {
-    // Widening this list is a decision somebody has to make out loud. If this test
-    // fails, an exemption was added — go and read who approved it and why, and if the
-    // answer is not an owner quoting themselves, take it back out.
-    expect(YELLOW_EXEMPTIONS).toHaveLength(1)
-    expect(YELLOW_EXEMPTIONS[0]?.path).toBe('public/video/intro.mp4')
+describe('חוק הצהוב — the named exemptions, and the fence around them', () => {
+  /**
+   * הרשימה נבדקת בשמות, ולא באורך — וזו הייתה השאלה הנכונה מלכתחילה.
+   *
+   * עד 17.9.2026 השורה כאן הייתה `toHaveLength(1)`, והיא עשתה בדיוק את עבודתה: היא
+   * נפלה ברגע שסרט הפתיחה נרשם, וזה מה ש"החלטה שמישהו מקבל בקול" נראית כמו. מה שהיא
+   * **לא** יכלה לעשות הוא להגיד איזה נכס נוסף — אז עכשיו היא מונה אותם בשם. להוסיף
+   * חריג פירושו לכתוב את הנתיב שלו כאן, ליד האחרים, ולהסביר בכניסה עצמה מי אישר ומה
+   * נמדד. אותה דרישה בדיוק, עם מסר טוב יותר כשהיא נשברת.
+   *
+   * שלושת הנתיבים החדשים הם נכס אחד בשלושה קבצים: שני הקידודים שכלל 30 דורש, והפוסטר.
+   */
+  it('names exactly the approved assets, by path', () => {
+    expect(YELLOW_EXEMPTIONS.map((entry) => entry.path)).toEqual([
+      'public/video/intro.mp4',
+      'public/life/opening/opening-film.webm',
+      'public/life/opening/opening-film.mp4',
+      'public/life/opening/opening-film-poster.png',
+    ])
+  })
+
+  it('quotes the owner for every one of them', () => {
+    // An exemption whose approver is not an owner quoting themselves is not an
+    // exemption — rule 8, and the one line of it that cannot be automated away.
+    for (const entry of YELLOW_EXEMPTIONS) {
+      expect(entry.approvedBy, entry.path).toMatch(/מאור הראל/)
+      expect(entry.approvedBy, entry.path).toMatch(/"[^"]+"/)
+    }
   })
 
   it('records who approved it and when, for every entry', () => {
@@ -559,6 +580,11 @@ describe('חוק הצהוב — the one exemption, and the fence around it', () 
     expect(yellowAllowed('public/video')).toBe(false)
     expect(yellowAllowed('public/video/intro.mp4.bak')).toBe(false)
     expect(yellowAllowed('public/video/other.mp4')).toBe(false)
+    // ...and the film's own folder is NOT exempt — three files are, and the five
+    // photographs beside them are still held to rule 8.
+    expect(yellowAllowed('public/life/opening/')).toBe(false)
+    expect(yellowAllowed('public/life/opening/born.png')).toBe(false)
+    expect(yellowAllowed('public/life/opening/clip-family.mp4')).toBe(false)
   })
 
   it('keeps the exempt asset out of every screen but the opening', () => {

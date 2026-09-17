@@ -62,17 +62,43 @@ export function emptyBook(): MemberBook {
   }
 }
 
-export function readBook(): MemberBook {
-  if (typeof window === 'undefined') return emptyBook()
+/**
+ * The book as it is actually stored, or `null` when this device has never had one.
+ *
+ * `readBook()` answers "what does the card look like", and for that an unsaved book is
+ * the right answer. The sync seam (`lib/portal/sync.ts`) is asking something else —
+ * *does this device already hold a file number?* — and a freshly minted one is the wrong
+ * answer to that question, because a number nobody has seen yet must never be carried up
+ * into an account that already has one.
+ */
+export function storedBook(): MemberBook | null {
+  if (typeof window === 'undefined') return null
   try {
     const raw = window.localStorage.getItem(KEY)
-    if (!raw) return emptyBook()
+    if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<MemberBook>
     return { ...emptyBook(), ...parsed, punches: parsed.punches ?? [], corrections: parsed.corrections ?? [] }
   } catch {
-    // a book that cannot be read is a new book, never a crash
-    return emptyBook()
+    return null
   }
+}
+
+/**
+ * **A file number is issued once.** Until 17.9.2026 this function minted a fresh `TIK-…`
+ * on every call for a device that had never saved anything — so the card printed a
+ * different number on every visit, and the one field on it the product describes as
+ * unearnable was the one field that changed most. The first read now WRITES the book it
+ * mints, which is the only way the number can mean what the card says it means, and it
+ * is what makes `app_profile.member_no` a real key rather than a snapshot of whatever
+ * the last page load happened to roll.
+ */
+export function readBook(): MemberBook {
+  if (typeof window === 'undefined') return emptyBook()
+  const saved = storedBook()
+  if (saved !== null) return saved
+  const fresh = emptyBook()
+  writeBook(fresh)
+  return fresh
 }
 
 export function writeBook(book: MemberBook): void {

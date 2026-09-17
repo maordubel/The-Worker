@@ -86,28 +86,43 @@ export type OpeningBeat = {
  */
 /**
  * ------------------------------------------------------------------------------------
- * **וסרט שנמדד ולא נכנס (17.9.2026).**
+ * **הסרט נכנס, ואלה חמש התמונות שמנגנות כשהוא לא יכול (17.9.2026).**
  *
- * Maor delivered `opening-2026-09-17.mov` — 21.4 seconds of live action, the same beats
- * as the five below, with the note *"זה הסרטון פתיחה שאני רוצה לצרף לתחילת המשחק החיים
- * המלא במקום המצגת שיש כעת"*. It is not here, and the reason is a number rather than a
- * taste: measured on the DECODE the way rule 61 requires, **352 of its 642 frames carry
- * yellow, the worst of them 4.53% of the frame** — the golden-hour window in the cot
- * scene. Both formats rule 30 would ship carry it too, and the h.264 decode carries it in
- * MORE frames than the source (62.5% against 54.8% at the same sampling), which is rule
- * 27's whole point restated.
+ * מאור מסר `opening-2026-09-17.mov` — 21.4 שניות בשחקנים חיים, אותם ביטים כמו החמישה
+ * למטה, עם הכתוביות **צרובות בתמונה** — ואמר *"במקום המצגת שיש כעת"*.
  *
- * Nothing was de-yellowed and no exemption was written. The grant of the same day —
- * *"בתמונות מקור ושל דברים אותנטים הצהוב מאושר להישאר"* — was given about photographed
- * OBJECTS and was spent on `public/life/artefacts/`; a film whose lighting somebody chose
- * is not that, and stretching one grant to cover a second thing is exactly what
- * `lib/brand/yellowExemptions.ts` exists to stop.
+ * הוא נמדד ולא נשלח באותו בוקר, וזה היה נכון: הפס הקנוני של `lib/isYellow.ts`, על
+ * הפענוח (כלל 61), על כל 642 הפריימים — **352 נושאים צהוב, הגרוע 4.5303%**, והוא שעת
+ * הזהב בסצנת העריסה ולא רעש קידוד. כלל 8 מתיר חריג רק מפי הבעלים, על נכס מסוים, במילים
+ * שלו. אז הוצגה לו המדידה, והתשובה הייתה **"הסרטון מאושר כפי שהוא."** — וזה בדיוק הסדר
+ * שכלל 69 דורש. שלושת הקבצים רשומים ב-`lib/brand/yellowExemptions.ts` עם המספרים שלהם.
  *
- * `docs/life/OPENING-FILM-2026-09-17.md` holds the full measurement, the two encodes'
- * numbers, and what the file would have to be for this decision to flip. Until then the
- * five beats below are the opening.
+ * **ולמה חמש התמונות נשארות.** לא כשריד: הן הפתיח שמנגן כשהסרט לא יכול — `prefers-
+ * reduced-motion`, אוטופליי שנדחה, קודק חסר, רשת שנתקעה. `components/life/Opening.tsx`
+ * היא ההחלטה. הן גם החצי ה**נגיש**: הטקסט שלהן הוא DOM, קורא מסך קורא אותו, והכתוביות
+ * של הסרט הן פיקסלים.
+ *
+ * ולכן `archiveLine` עדיין כאן. בסרט אין שורת ארכיון — הכתוביות שלו נרטיביות בלבד ולא
+ * אומרות תאריך, יריבה או תוצאה, וזה מה שמתיר אותו תחת כלל 11 — ובמצגת הביט השלישי עדיין
+ * קורא את גמר 1983 מהעוגן. אם השורה הזאת תיעלם, הפתיח הנגיש יאבד את הדבר היחיד בו
+ * שהארכיון אומר בעצמו.
  * ------------------------------------------------------------------------------------
  */
+/**
+ * הסרט — שני קידודים ופוסטר, ולא קובץ אחד.
+ *
+ * כלל 30: *"the video ships as **both** VP9/WebM and h.264/mp4"*, כי דפדפן ה-QA הוא
+ * Chromium פתוח בלי מפענח h.264 — כלומר בלי ה-WebM הפתיח אינו ניתן לאימות כאן, והוא היה
+ * "מן הסתם עובד" במקום נבדק. ה-WebM ראשון גם משום שהוא הקטן והנקי מבין השניים.
+ */
+export const FILM = {
+  webm: '/life/opening/opening-film.webm',
+  mp4: '/life/opening/opening-film.mp4',
+  poster: '/life/opening/opening-film-poster.png',
+  /** 21.405 שניות — מה ש-`ffprobe` אמר על המקור, לא הערכה */
+  ms: 21_405,
+} as const
+
 export const OPENING: OpeningBeat[] = [
   {
     id: 'born',
