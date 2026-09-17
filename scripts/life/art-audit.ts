@@ -20,6 +20,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 import {
+  ARTEFACT,
   BACKDROP,
   CLOSE_UP,
   DOC,
@@ -39,6 +40,16 @@ import {
 } from '../../lib/life/runtime/art'
 
 const ART = join(process.cwd(), 'public/life/art')
+/**
+ * ...ותיקייה שנייה, מ-17.9.2026.
+ *
+ * עשרת החפצים הסרוקים הם `DOC` לכל דבר — `{ e: 'doc' }` מקבל אותם ורק אותם — אבל הם
+ * יושבים ב-`public/life/artefacts`, כי הם נושאים את הצהוב שמודפס עליהם ו-`public/life/art`
+ * מוכיחה אפס. ביקורת שהייתה מחפשת אותם ב-ART הייתה מדווחת על עשרה קבצים חסרים שקיימים.
+ */
+const ARTEFACTS = join(process.cwd(), 'public/life/artefacts')
+const artefactKeys = new Set<string>(ARTEFACT)
+const rootFor = (key: string) => (artefactKeys.has(key) ? ARTEFACTS : ART)
 
 const parallax: string[] = []
 for (const base of PARALLAX) for (const suffix of ['--far', '--mid', '--near']) parallax.push(`${base}${suffix}`)
@@ -52,7 +63,8 @@ const GROUPS: ReadonlyArray<[string, readonly string[]]> = [
   ['פוגי — הליכה מהצד', KID_WALK],
   ['פוגי — הליכה אל תוך התמונה', KID_WALK_AWAY],
   ['חפצים', PROP],
-  ['מסמכים', DOC],
+  ['מסמכים', DOC.filter((key) => !artefactKeys.has(key))],
+  ['חפצים סרוקים', ARTEFACT],
   ['פורטרטים', PORTRAIT_ART],
   ['קלוז־אפים', CLOSE_UP],
   ['פנורמות', PANORAMA],
@@ -67,7 +79,7 @@ let declared = 0
 let missing = 0
 for (const [label, keys] of GROUPS) {
   const live = [...new Set(keys)].filter((key) => !shelved.has(key))
-  const gone = live.filter((key) => !existsSync(join(ART, `${key}.webp`)))
+  const gone = live.filter((key) => !existsSync(join(rootFor(key), `${key}.webp`)))
   declared += live.length
   missing += gone.length
   rows.push([label, live.length, gone])

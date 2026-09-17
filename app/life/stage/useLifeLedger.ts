@@ -140,16 +140,26 @@ export function useLifeLedger({
     },
 
     /**
-     * The two contests are gigs like any other, and their price is read off `GIGS` rather
-     * than typed here: the minutes, the energy and the trait a boy picks up for standing in
-     * a queue to take penalties all belong to the same table every other job in this life
-     * is priced from. The fallbacks are the numbers that table shipped with.
+     * The two contests are rows in `GIGS` like any other, and their price is read off that
+     * table rather than typed here: the minutes, the energy and the trait a boy picks up
+     * for standing in a queue to take penalties all belong to the same table every job in
+     * this life is priced from. The fallbacks are the numbers that table shipped with.
+     *
+     * **והשורה הכספית נכתבת רק אם עבר כסף** (17.9.2026). `earned` is zero by construction —
+     * the conversation passes `perGoal: 0`, because *"זריקה לסל ובעיטת פנדלים לא צריכים
+     * להיות רווח כספי"* — and a `money.changed` of nought is a no-op in the reducer and a
+     * ROW in the append-only log, which is the save. A row that says "פנדלים" under a
+     * ledger of wages is the game telling a player's own history that he was paid for
+     * playing. The guard costs one comparison and the name stays here, so the day somebody
+     * decides a contest pays, the line it would be written under is already the right one.
      */
     settlePenalty({ played, earned }: { played: boolean; earned: number }) {
       if (!played) return
       const gig = GIGS.find((row) => row.id === 'penalty-contest')
+      if (earned > 0) {
+        engineRef.current?.dispatch({ t: 'money.changed', agorot: earned * 100, why: PENALTY_WHY_HE })
+      }
       engineRef.current?.dispatch(
-        { t: 'money.changed', agorot: earned * 100, why: PENALTY_WHY_HE },
         { t: 'clock.advanced', minutes: gig?.minutes ?? 25 },
         { t: 'energy.changed', delta: -(gig?.energy ?? 10) },
         { t: 'flag.raised', flag: 'gig:penalty-contest' },
@@ -166,6 +176,14 @@ export function useLifeLedger({
      * and only for winning, on purpose — `אהבה להפועל` measures a life, and a kickabout that
      * paid what Bloomfield pays would cheapen both. Losing costs nothing at all; this game
      * does not fine a boy for losing a game.
+     *
+     * **ומה שלא נכתב כאן, בשום ענף: כסף, ו-`work:paid:<chapter>`.** מאור, 17.9.2026:
+     * *"זוהי לא עבודה. זה משחק העברת זמן."* The four events below are thirty minutes,
+     * twelve energy, a courage point and — only on a win — one point of football love.
+     * Nothing here is a wage: the first two are what an afternoon costs, and the last two
+     * are what it does to the boy who spent it. The chapter's one paid job is untouched, so
+     * he can carry crates for Rafi this morning and still say "אני הפועל" this afternoon,
+     * in either order, on the same Saturday.
      */
     settlePitch({ played, score }: { played: boolean; score: { home: number; away: number } }) {
       if (!played) return
@@ -185,11 +203,14 @@ export function useLifeLedger({
       void engineRef.current?.save()
     },
 
+    /** the same guard, for the same reason — see `settlePenalty` above */
     settleHoops({ played, earned }: { played: boolean; earned: number }) {
       if (!played) return
       const gig = GIGS.find((row) => row.id === 'hoops-contest')
+      if (earned > 0) {
+        engineRef.current?.dispatch({ t: 'money.changed', agorot: earned * 100, why: HOOPS_WHY_HE })
+      }
       engineRef.current?.dispatch(
-        { t: 'money.changed', agorot: earned * 100, why: HOOPS_WHY_HE },
         { t: 'clock.advanced', minutes: gig?.minutes ?? 20 },
         { t: 'energy.changed', delta: -(gig?.energy ?? 8) },
         { t: 'flag.raised', flag: 'gig:hoops-contest' },

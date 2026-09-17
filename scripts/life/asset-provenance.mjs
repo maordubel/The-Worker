@@ -67,6 +67,10 @@ const MANIFEST = join(ROOT, 'content/manual/asset-provenance.json')
  */
 const SHIPPED = [
   'public/life/art',
+  // 17.9.2026 — עשרה חפצים סרוקים. התיקייה נפרדת מ-`art` כי היא התיקייה היחידה תחת
+  // `public/life` שנושאת צהוב בכוונה (כלל 69, החריג השני), ולכן היא בדיוק תיקייה שאסור
+  // שתישאר מחוץ לביקורת הזאת: נכס תיעודי בלי שורת מקור הוא מה שהמניפסט קיים בשבילו.
+  'public/life/artefacts',
   'public/life/docs',
   'public/life/film',
   'public/life/opening',

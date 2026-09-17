@@ -4,6 +4,7 @@ import { t } from '@/lib/i18n'
 import {
   ROUTE_STAGES,
   routeById,
+  tierOf,
   type RouteGap,
   type RouteId,
   type RouteInvitation,
@@ -153,6 +154,17 @@ export function RouteCard({
   const titleHe = invitation?.titleHe ?? route?.stageTitlesHe[stage] ?? ''
   const rewardHe = invitation?.rewardHe ?? route?.rewardsHe[index] ?? ''
   const offering = invitation !== null
+  /**
+   * הדרגה — where this life sits in Maor's own ordering, and the blank that stays blank.
+   *
+   * `tierOf` answers `null` for a route he has not placed, which today is `CREATOR` and
+   * exactly `CREATOR`. The card says so (`life.route.tier.unplaced`) instead of hiding the
+   * line or picking a rung: a difficulty ordering with a made-up entry in it is worse than
+   * one with a gap, because the gap asks him a question and the invention answers it for
+   * him. Printed as his WORD for the rung and never as a position — "one of six" is a
+   * ranking, and a ranking on this card is the single score the whole screen refuses.
+   */
+  const tier = tierOf(routeId)
 
   return (
     // z-[60], because rule 33 is not a z-index preference: the tab bar is z-50 and a card
@@ -182,6 +194,15 @@ export function RouteCard({
               <bdi>{route.titleHe}</bdi>
             </p>
           )}
+
+          <div className="mt-4 border-t-hair border-concrete/30 pt-3">
+            <p className="font-body text-[11px] text-concrete">
+              <bdi>{t('life.route.tier')}</bdi>
+            </p>
+            <p className="mt-1 font-body text-[14px] leading-relaxed text-sheet">
+              <bdi>{tier ? tier.nameHe : t('life.route.tier.unplaced')}</bdi>
+            </p>
+          </div>
 
           {rewardHe && (
             <div className="mt-4 border-t-hair border-concrete/30 pt-3">

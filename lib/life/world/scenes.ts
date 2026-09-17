@@ -2030,6 +2030,9 @@ const SCENES: SceneDef[] = [
       fromNorth: { x: 0.62, y: 0.782, facing: 'left' },
       // back from the ground
       fromGround: { x: 0.925, y: 0.79, facing: 'left' },
+      // back out of the ticket office — on the pavement beside its door, never inside the
+      // door zone itself (0.398–0.470), which is rule 41's infinite bounce
+      fromTickets: { x: 0.500, y: 0.785, facing: 'right' },
       start: { x: 0.085, y: 0.79, facing: 'right' },
     },
     actors: [
@@ -2149,6 +2152,55 @@ const SCENES: SceneDef[] = [
         dwellMs: 900,
         needs: { flag: 'saw:road' },
         blockedHe: 'משם ממשיכים לאצטדיון. אתה עוד לא יודע את הדרך — לך פעם אחת מהשכונה.',
+      },
+      {
+        /**
+         * קופת הכרטיסים — the green shopfront door, and the reason it is on this corner.
+         *
+         * Maor, 17.9.2026: *"אני רוצה לייצר משרד כרטיסים בפני עצמו ולא כחלק ממקום קיים,
+         * אלא לפתוח מקום חדש."* Before that sentence the subscription office was a door on
+         * the gate seven forecourt into the concourse under the stand. The painting he sent
+         * with it is an interior with a street through its left-hand doorway and a sign
+         * reading **קופת כרטיסים - תל אביב**, so the place it opens onto is town — and town,
+         * on this map, is this junction (rule 24's geography, and the whole reason `allenby`
+         * exists: "a boy from this neighbourhood does not walk to the Yarkon; he goes into
+         * town first, like everybody else").
+         *
+         * Placed at the green double door under the number 96, which is the one doorway on
+         * this elevation that is not already the record shop, the archway or the café. The
+         * painted opening runs 0.383–0.470 between its jambs.
+         *
+         * **והתחום נעצר ב-0.428, כי שם עומד ארגז.** `propCrate` stands at 0.452 with a
+         * width of 0.048 — it has been on that pavement since 6.9.2026, placed on a board,
+         * outside a door that did not exist yet. `tests/life.test.ts` caught the overlap
+         * the first time this door was written full-width, and it was right to: a crate
+         * across a doorway is a door the player cannot use (rule 48). So the REACH zone is
+         * the door's left half and the crate keeps its corner — the same answer the gate
+         * seven office door gave when the cashier stood in it, and the right way round:
+         * dressing that was placed by looking does not move for a door placed by typing.
+         *
+         * `1990s`/`2000s` only, carried over from the door it replaces: the first season
+         * ticket in the archive is 90/91, and a door into a room with nothing to do in it
+         * is dead content (rule 66).
+         */
+        id: 'tickets',
+        era: ['1990s', '2000s'],
+        x: 0.383,
+        y: 0.725,
+        w: 0.045,
+        h: 0.095,
+        to: TICKET_OFFICE,
+        spawn: 'fromStreet',
+        labelHe: 'קופת הכרטיסים',
+        // inside, not daylight: this goes INTO a building, and rule 41 keeps daylight for
+        // the way out of one. The office's own door back is the daylight half. The GLOW is
+        // the whole opening even though the reach zone is half of it — a light says where
+        // the door is, and the door is the door.
+        light: { x: 0.383, y: 0.40, w: 0.087, h: 0.32, tone: 'inside' },
+        // a counter is somewhere you stop, not somewhere you pass — the fan shop's own
+        // dwell, for the same reason (rule 41)
+        dwellMs: 900,
+        priority: 2,
       },
       {
         /**
@@ -2379,47 +2431,34 @@ const SCENES: SceneDef[] = [
         priority: 2,
       },
 
-      {
-        /**
-         * משרד הכרטיסים — the red door in the gate-seven frame, and the only new door
-         * this pass adds (Maor, 16.9.2026: *"בוא נוסיף 'משרד כרטיסים' גם במקום שצריך
-         * ללכת אליו. 'דלת' חדשה במשחק"*).
-         *
-         * It is the painted double door at 0.725–0.90 of `gate7.webp`, which nothing in
-         * the scene used: the frame already carried a service door under the stand and
-         * the game walked past it for a year. The reach zone is its LEFT half so that
-         * `הקופאי` at x 0.70 and `אבא עם ילד` at x 0.80 stay outside it — a talkable
-         * person inside an exit wins the prompt and the door disappears behind a
-         * conversation (`tests/life-doorways.test.ts`).
-         *
-         * And the hatch beside it is not this. `ticket-window` at 0.70 is the MATCHDAY
-         * window: one game, today, cash. This is the club's subscription office, open in
-         * the summer, and the two being a metre apart is how a ground is actually laid
-         * out rather than a duplication.
-         *
-         * `tone: 'inside'` because it goes UNDER the stand and not out of the ground
-         * (rule 41 reserves daylight for the way out of a building); the way back is
-         * daylight, from the office's own side.
-         *
-         * From 1990 only. The office is there in 1985 too, but the first season ticket in
-         * the archive is 90/91 — a door into a room with nothing to do in it is dead
-         * content (rule 66), and `subscription.ts` decides which years have a card.
-         */
-        id: 'office',
-        era: ['1990s', '2000s'],
-        x: 0.715,
-        y: 0.82,
-        w: 0.07,
-        h: 0.13,
-        to: TICKET_OFFICE,
-        spawn: 'fromGate',
-        labelHe: 'משרד הכרטיסים',
-        light: { x: 0.722, y: 0.40, w: 0.086, h: 0.5, tone: 'inside' },
-        // a counter is somewhere you stop, not somewhere you pass — the fan shop's own
-        // dwell, for the same reason (rule 41)
-        dwellMs: 900,
-        priority: 2,
-      },
+      /**
+       * ------------------------------------------------------------------------------
+       * משרד הכרטיסים כבר לא כאן, ו**זו הכרעה ולא ניקיון** (17.9.2026).
+       *
+       * A door stood at 0.715 of this frame from 16.9.2026 — the painted double door
+       * under the stand — and it went to `ticket-office`, which was then the concourse
+       * behind it. Maor asked for the opposite of that arrangement:
+       *
+       *   *"אני רוצה לייצר משרד כרטיסים בפני עצמו ולא כחלק ממקום קיים, אלא לפתוח מקום
+       *   חדש."*
+       *
+       * So the room moved into town and this door went with it — `allenby` → `tickets`,
+       * on the green shopfront under the number 96. Keeping this one as well would have
+       * been the softer change and the dishonest one: two doorways a kilometre apart
+       * opening into one painting whose own left-hand door shows a street.
+       *
+       * **Nothing dangles and nothing dead-locks.** The room keeps exactly one way in and
+       * one way out, `street → centre → allenby → tickets` reaches it in every chapter that
+       * sells a card, and `npm run life:deadends` walks that graph per chapter. What the
+       * ground keeps is the thing it always had and that this door was never the same as:
+       * `ticket-window` at 0.70, the matchday hatch — one game, today, cash.
+       *
+       * `fromOffice` stays in this scene's spawn table and is now reached by nothing. It
+       * is left because a spawn is a measured point on a painting, this frame has not
+       * moved, and the day a chapter wants the concourse back it is the coordinate that
+       * was checked against all four doors. Deleting it would cost that and save nothing.
+       * ------------------------------------------------------------------------------
+       */
 
       {
         id: 'back',
@@ -3338,60 +3377,101 @@ const SCENES: SceneDef[] = [
     spawns: { start: { x: 0.2, y: 0.88 } },
   },
 
-  // ------------------------------------------------- משרד הכרטיסים (1990 ואילך) ----
+  // ------------------------------------------- קופת כרטיסים — תל אביב (1990 ואילך) ----
   //
-  // מתחת ליציע — the concourse under the stand, entered through the red door at gate
-  // seven, with the subscription windows shuttered into the far wall and the plaza open
-  // at the other end.
+  // **המקום הזה עבר, ולא שופץ.** Until 17.9.2026 this room was `undercroft` — the
+  // concourse under Bloomfield's stand, reached through a red door at gate seven — and
+  // the paragraph that used to stand here explained, at length, why re-using an unplaced
+  // painting was the right call. Maor's answer to it was one sentence:
   //
-  // The painting is `undercroft`, and it has been on disk with NO SCENE since the
-  // September delivery: `art.ts` says of it and `ussHallPre` that "neither has a scene
-  // yet, and that is on purpose (rule 43): the art lands first so the 1983–2000 plan can
-  // name a place instead of describing one." This is that plan naming it. Nothing was
-  // commissioned for this room; the one unused backdrop that is a place a supporter
-  // queues in was already painted.
+  //   *"אני רוצה לייצר משרד כרטיסים בפני עצמו ולא כחלק ממקום קיים, אלא לפתוח מקום חדש."*
   //
-  // There are no actors and no hotspots, and that is the design rather than a gap: the
-  // window IS the card. `WorldScene.announceSeasonTicket` fires `season: 'counter'` on
-  // arrival while a season is open and unheld, so walking in is the whole interaction —
-  // the same call the fan shop's door makes (Maor, 6.9.2026, on the shop: buying is "a
-  // rail and a pocket, not a room to walk about in"). What is a room here is the WALK,
-  // which is the half of it he asked for: "גם במקום שצריך ללכת אליו".
+  // So it is a place now. `ticketOffice` (17.9.2026) is an interior whose sign reads
+  // **קופת כרטיסים - תל אביב**: a counter with a brass till in a framed window, theatre
+  // bills papering both walls, a newspaper rack, and a doorway to the street on the left.
+  // It is a shop in town, not a corridor under a terrace — which is why the door into it
+  // moved with it, off the gate seven forecourt and onto Allenby. The office is open in
+  // the summer; the matchday hatch (`ticket-window`, x 0.70 at the ground) is a metre from
+  // the turnstiles and sells one game, today, cash. They were never the same counter, and
+  // now they are not the same building either.
+  //
+  // **What did NOT change, and it is most of the room.** There are still no actors and no
+  // hotspots, and that is still the design rather than a gap: the window IS the card.
+  // `WorldScene.announceSeasonTicket` fires `season: 'counter'` on arrival while a season
+  // is open and unheld, so walking in is the whole interaction — the same call the fan
+  // shop's door makes (Maor, 6.9.2026, on the shop: buying is "a rail and a pocket, not a
+  // room to walk about in"). What is a room here is the WALK, which is the half of it he
+  // asked for: *"גם במקום שצריך ללכת אליו"*. A hotspot on the bills or the rack would need
+  // a conversation to open, and a hotspot whose `act` names no conversation is a hole
+  // `npm run life:deadends` reports — so the paper on those walls stays paint until
+  // somebody writes what it says.
+  //
+  // From 1990 only. The office is there in 1985 too, but the first season ticket in the
+  // archive is 90/91 — a door into a room with nothing to do in it is dead content
+  // (rule 66), and `subscription.ts` decides which years have a card.
   {
     id: TICKET_OFFICE,
-    titleHe: 'משרד הכרטיסים',
-    art: 'undercroft',
-    // The open pavement in front of the windows. The band stops at 0.78 because above it
-    // the painting is the crush barriers, and a boy walking through a steel barrier is
-    // the same defect as a car parked across a doorway (rule 48).
-    band: { far: 0.78, near: 0.96 },
-    // Measured off the painting: the man walking at y 0.81 is 0.25 of the frame tall, and
-    // a man is 1.75 m (`heights.ts`), which gives 0.182 at the near line. The 1.35× ramp
-    // is a room's, not a corridor's — the camera is standing on the same pavement.
-    size: { far: 0.175, near: 0.237 },
-    metre: 0.182,
-    ambience: 'park',
+    titleHe: 'קופת כרטיסים — תל אביב',
+    art: 'ticketOffice',
+    /**
+     * הרצפה, ואיפה היא נגמרת — measured off the painting and off its own floor tiles.
+     *
+     * The back wall meets the tiles at y 0.805 and the picture ends at 1.0, so the whole
+     * walkable world in this room is the last fifth of the frame. The band starts a step
+     * in front of the skirting (0.830) and stops before the bottom edge (0.940), which is
+     * also where the newspaper rack and the lectern have their feet: a boy who could walk
+     * past those would be walking through them.
+     *
+     * **הקצב נמדד מהאריחים ולא הוערך.** The hex floor gives a horizontal tile period of
+     * 0.0378 of the width at y 0.835 and 0.0486 at y 0.895 and below — 1.29×, which is a
+     * room's foreshortening and not a corridor's (rule 50: about 1.3 for a room, up to 1.8
+     * down a corridor). Across 0.830 → 0.940 that is 1.32.
+     *
+     * **המטר** is read off two objects that stand on the floor rather than off the wall,
+     * because the wall is behind the counter and the counter is what makes this shop look
+     * shallower than it is: the newspaper rack is 1.05 m and is drawn from 0.530 to 0.905,
+     * and the lectern is 1.20 m and is drawn from 0.500 to 0.920 — 0.357 and 0.350 of the
+     * frame per metre, at the same depth. 0.352 at the near line, and the player therefore
+     * comes back out of it at 1.412 m, which is `gate5`'s and `ramat-gan`'s register and
+     * the right one: this is a room of the nineties and the two-thousands, never 1986.
+     */
+    band: { far: 0.830, near: 0.940 },
+    size: { far: 0.377, near: 0.497 },
+    metre: 0.352,
+    ambience: 'interior',
     stuckHe: 'החלון של המנויים. אם יצא מנוי לעונה — הוא נמכר כאן, ורק כאן.',
     actors: [],
     hotspots: [],
     exits: [
       {
+        /**
+         * הדלת לרחוב — on the LEFT of the painting, and it is the only way out.
+         *
+         * The street shows through it from y 0.33 down to the threshold at 0.79, with the
+         * kerb and a striped awning in it. The zone sits on the band rather than on the
+         * threshold, because the threshold is behind the far line and a door you cannot
+         * reach is not a door (rule 41). `daylight` is the tone reserved for the way OUT
+         * of a building, and this room has exactly one.
+         */
         id: 'back',
-        x: 0.92,
-        y: 0.78,
-        w: 0.08,
-        h: 0.18,
-        to: 'bloomfield-outside',
-        spawn: 'fromOffice',
-        labelHe: 'חזרה לשער 7',
-        // the way OUT of a building is the one tone reserved for it (rule 41)
-        light: { x: 0.93, y: 0.45, w: 0.07, h: 0.45, tone: 'daylight' },
+        x: 0.0,
+        y: 0.820,
+        w: 0.10,
+        h: 0.16,
+        to: 'allenby',
+        spawn: 'fromTickets',
+        labelHe: 'החוצה, לאלנבי',
+        light: { x: 0.0, y: 0.30, w: 0.095, h: 0.50, tone: 'daylight' },
         dwellMs: 500,
       },
     ],
+    /**
+     * Standing at the window, facing it, a step clear of the door zone (which ends at
+     * x 0.10) — rule 41: no spawn may sit inside an exit.
+     */
     spawns: {
-      fromGate: { x: 0.82, y: 0.88, facing: 'left' },
-      start: { x: 0.82, y: 0.88, facing: 'left' },
+      fromStreet: { x: 0.46, y: 0.905, facing: 'right' },
+      start: { x: 0.46, y: 0.905, facing: 'right' },
     },
   },
 
@@ -3430,8 +3510,8 @@ const SCENES: SceneDef[] = [
   },
 
   // ------------------------------------------------------- אצטדיון רמת גן (1999, 2000) ----
-  // Stand-in: the terrace painting under a card that names the ground. The national
-  // stadium's own painting is in GRAPHICS-REQUESTS; the two finals are played here.
+  // `ramatGan` is the lower terrace on a final night, painted 5.9.2026. From 17.9.2026 it
+  // also has an OUTSIDE — see the arrival card below.
   {
     id: 'ramat-gan',
     titleHe: 'אצטדיון רמת גן',
@@ -3440,6 +3520,21 @@ const SCENES: SceneDef[] = [
     size: { far: 0.2, near: 0.27 },
     metre: 0.1911,
     ambience: 'stadium',
+    /**
+     * השערים של רמת גן — the arrival, and it is an arrival rather than a room.
+     *
+     * `ramatGanGates` (17.9.2026) is the forecourt: the turnstiles under **אצטדיון לאומי -
+     * רמת גן**, fans in shirts waiting on the tarmac, the floodlight pylon over the roof,
+     * nineties cars at the kerb. It is the same relationship `ground` has with
+     * `bloomfield-outside` and `streetEast` with `route` — the picture you get before you
+     * are inside, which is not a place you stand (rule 52).
+     *
+     * Once, not twice: `saw:ramatGan` is a person-flag, so the second final does not
+     * re-announce a ground he has already walked into. Both chapters that come here are
+     * cup finals and both are worth the beat the first time — this is a boy who has never
+     * been to the national stadium, and forty thousand people are the point.
+     */
+    arrival: { art: 'ramatGanGates', ms: 3400, flag: 'saw:ramatGan' },
     stuckHe: 'ארבעים אלף. אתה אחד מהם.',
     layers: [
       { art: 'overlayHaze', x: 0.5, y: 0.5, w: 1.0, depth: 0.1, era: '*' },

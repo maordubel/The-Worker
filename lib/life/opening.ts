@@ -84,6 +84,30 @@ export type OpeningBeat = {
  * right. The coda at the end of the built life still returns to that ground, which is
  * where the sentence belongs — at the end of a life rather than in front of one.
  */
+/**
+ * ------------------------------------------------------------------------------------
+ * **וסרט שנמדד ולא נכנס (17.9.2026).**
+ *
+ * Maor delivered `opening-2026-09-17.mov` — 21.4 seconds of live action, the same beats
+ * as the five below, with the note *"זה הסרטון פתיחה שאני רוצה לצרף לתחילת המשחק החיים
+ * המלא במקום המצגת שיש כעת"*. It is not here, and the reason is a number rather than a
+ * taste: measured on the DECODE the way rule 61 requires, **352 of its 642 frames carry
+ * yellow, the worst of them 4.53% of the frame** — the golden-hour window in the cot
+ * scene. Both formats rule 30 would ship carry it too, and the h.264 decode carries it in
+ * MORE frames than the source (62.5% against 54.8% at the same sampling), which is rule
+ * 27's whole point restated.
+ *
+ * Nothing was de-yellowed and no exemption was written. The grant of the same day —
+ * *"בתמונות מקור ושל דברים אותנטים הצהוב מאושר להישאר"* — was given about photographed
+ * OBJECTS and was spent on `public/life/artefacts/`; a film whose lighting somebody chose
+ * is not that, and stretching one grant to cover a second thing is exactly what
+ * `lib/brand/yellowExemptions.ts` exists to stop.
+ *
+ * `docs/life/OPENING-FILM-2026-09-17.md` holds the full measurement, the two encodes'
+ * numbers, and what the file would have to be for this decision to flip. Until then the
+ * five beats below are the opening.
+ * ------------------------------------------------------------------------------------
+ */
 export const OPENING: OpeningBeat[] = [
   {
     id: 'born',

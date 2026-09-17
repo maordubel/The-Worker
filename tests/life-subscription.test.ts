@@ -162,25 +162,53 @@ describe('איפה ומתי — כל עונה שנמכרת נמכרת בפרק �
 
 // ---------------------------------------------------------------------------- הדלת ---
 
-describe('משרד הכרטיסים — דלת אחת, חדר אחד, וציור שלא היה בשימוש', () => {
+/**
+ * ------------------------------------------------------------------------------------
+ * **ההחלטה השתנתה ב-17.9.2026, ולכן ארבעה שומרים כאן מחליפים צד ולא נמחקים.**
+ *
+ * This block used to be called *"דלת אחת, חדר אחד, וציור שלא היה בשימוש"* and it asserted,
+ * in four places, that the ticket office IS `undercroft` — the concourse under Bloomfield's
+ * stand — and that its one door hangs off the gate seven forecourt. Every one of those was
+ * true and every one of them was right to be asserted.
+ *
+ * Maor changed the decision, in his own words:
+ *
+ *   *"אני רוצה לייצר משרד כרטיסים בפני עצמו ולא כחלק ממקום קיים, אלא לפתוח מקום חדש."*
+ *
+ * — with a painting to go with it: an interior signed **קופת כרטיסים - תל אביב**, with a
+ * street through its left-hand doorway. So the room is a shop in town, its painting is
+ * `ticketOffice`, and its one door is on Allenby.
+ *
+ * This is rule 47's distinction and rule 68's precedent: *"תמחק, הבדיקה אדומה" אסור;
+ * "ההחלטה השתנתה, בעל הבית אמר, השומר משנה צד" — זה מה ששומר על החלטה מלהיסחף חזרה
+ * בריפקטור חצי שנה מהיום.* What the four guards protect is UNCHANGED and is the whole
+ * point of keeping them: one room, one painting nobody else uses, exactly one way in,
+ * exactly the years that have a card to sell, and a route to the door that exists in
+ * every one of them. Only the names in them moved.
+ * ------------------------------------------------------------------------------------
+ */
+describe('קופת כרטיסים — דלת אחת, חדר אחד, וציור משלו', () => {
   const office = SCENE[TICKET_OFFICE as keyof typeof SCENE]
 
   it('החדר קיים, ויש ממנו דרך החוצה', () => {
     expect(office).toBeDefined()
     expect(office.exits.length).toBeGreaterThan(0)
-    expect(office.exits.every((exit) => exit.to === 'bloomfield-outside')).toBe(true)
+    expect(office.exits.every((exit) => exit.to === 'allenby')).toBe(true)
   })
 
-  it('הוא משתמש ב-`undercroft` — הציור שהיה על הדיסק בלי אף סצנה', () => {
-    expect(office.art).toBe('undercroft')
+  it('הוא משתמש ב-`ticketOffice` — הציור שנמסר בשבילו, ובשום חדר אחר', () => {
+    expect(office.art).toBe('ticketOffice')
     const others = ALL_SCENES.filter((scene) => scene.id !== office.id)
     // one room, one painting: if a second scene ever takes it, this says so out loud
-    expect(others.some((scene) => scene.art === 'undercroft')).toBe(false)
+    expect(others.some((scene) => scene.art === 'ticketOffice')).toBe(false)
+    // and `undercroft` goes back to being a painting with no scene on it (rule 43),
+    // which is what it was before 16.9.2026 — not a room this game quietly kept two of
+    expect(ALL_SCENES.some((scene) => scene.art === 'undercroft')).toBe(false)
   })
 
-  it('הדלת יוצאת משער 7 ורק משם', () => {
+  it('הדלת יוצאת מאלנבי ורק משם', () => {
     const ways = ALL_SCENES.filter((scene) => scene.exits.some((exit) => exit.to === TICKET_OFFICE))
-    expect(ways.map((scene) => scene.id)).toEqual(['bloomfield-outside'])
+    expect(ways.map((scene) => scene.id)).toEqual(['allenby'])
   })
 
   /**
@@ -190,7 +218,7 @@ describe('משרד הכרטיסים — דלת אחת, חדר אחד, וציור
    * two statements have to agree or one of them is wrong.
    */
   it('הדלת פתוחה בדיוק בפרקים שיש בהם מנוי למכור', () => {
-    const gate = SCENE['bloomfield-outside'].exits.find((exit) => exit.id === 'office')
+    const gate = SCENE['allenby'].exits.find((exit) => exit.id === 'tickets')
     expect(gate).toBeDefined()
     for (const chapter of PLAYABLE) {
       const sells = OFFERED.some((season) => season.onSaleIn === chapter.id)
@@ -200,12 +228,13 @@ describe('משרד הכרטיסים — דלת אחת, חדר אחד, וציור
     expect(exitInEra(gate!, 'a4-shirt')).toBe(false)
   })
 
-  it('השער שאפשר להגיע דרכו אליו קיים בכל שנה', () => {
-    // The office hangs off the forecourt, so the forecourt has to be reachable from the
-    // road in every year — the door in and the door on are one route or neither works.
-    const road = SCENE['route'].exits.find((exit) => exit.to === 'bloomfield-outside')
-    expect(road).toBeDefined()
-    expect(road!.era).toBeUndefined()
+  it('הפינה שאפשר להגיע דרכה אליו קיימת בכל שנה', () => {
+    // The office hangs off Allenby, so Allenby has to be reachable from the neighbourhood
+    // in every year — the door in and the door on are one route or neither works.
+    const town = SCENE['street'].exits.find((exit) => exit.to === 'allenby')
+    expect(town).toBeDefined()
+    expect(town!.era).toBeUndefined()
+    expect(town!.when, 'the way into town may not be gated — the office hangs off it').toBeUndefined()
   })
 })
 

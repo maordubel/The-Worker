@@ -18,6 +18,20 @@ import {
   type RelationshipAxis,
   type WellbeingId,
 } from '../types'
+/**
+ * שני היבואים היחידים כאן שאינם `type` — ולמה אין בהם מעגל.
+ *
+ * The sticker block below duplicates one string literal rather than importing
+ * `stickers.ts`, because that file reaches the chapter registry and the loop would close
+ * through this one. These two do not: `routes.ts` imports `content/chapters.ts`, `events`
+ * and `types`, and not one of the three imports this file — so the graph stays a tree and
+ * the evaluator can ask the model its own question instead of re-deriving a flag name.
+ * That matters more here than it did for a sticker: a route stage is a LADDER, and a
+ * condition that spelled `own:route:ULTRAS:practice` by hand would be asking about one rung
+ * when the author meant "that rung or above".
+ */
+import { routeAtLeast, type RouteId, type RouteStage } from '../routes'
+import { trackAtLeast, type TrackId, type TrackStageId } from '../tracks'
 
 /**
  * העולם כנתונים — a location is data, not code, and so is a rule.
@@ -98,6 +112,45 @@ export type Condition = {
   lacksSticker?: string
   /** at least this many spare copies are in hand — what a trade can actually be paid with */
   duplicatesAtLeast?: number
+
+  // --- מסלולים ומסלולי חיים (17.9.2026) ----------------------------------------------
+  /**
+   * *"אני רוצה שיהיו משימות שיופיעו רק במסלולים מסויימים, משימות שלא יופיעו כלל בגלל
+   * מסלולים מסויימים."* (מאור, 17.9.2026)
+   *
+   * `Condition` is the vocabulary every placeable thing in this game speaks — hotspots,
+   * actors, exits, layers, opportunity windows, dialogue branches — and until today it had
+   * thirty-odd predicates and not one about a route. Seven life routes, eighteen offer
+   * conversations, six proof missions and every number behind them, and **nothing in the
+   * world could ask whether a man was on one**. That is the same defect as a conversation
+   * nothing opens (rule 71), one layer further out: the system was reachable and it was
+   * not CONSULTABLE, so a task could never appear because of a route and could never be
+   * hidden by one.
+   *
+   * Two predicates and no more, because the question has two directions and a third
+   * spelling would be a second vocabulary. `minStage` is optional and defaults to the
+   * first rung, so `{ route: { id: 'ULTRAS' } }` reads as "he is on this route at all".
+   *
+   * **The reading is ACTIVE, not historical.** `routeAtLeast` returns false for a man who
+   * stood down (`own:route:<ID>:left`), because a task that only exists for whoever holds
+   * the terrace should not follow a man who handed it over. The history question already
+   * has an answer and does not get a second predicate: `{ flag: 'own:route:ULTRAS:apex' }`
+   * is exactly what `heldStage` reads, and it is never erased.
+   */
+  route?: { id: RouteId; minStage?: RouteStage }
+  notRoute?: { id: RouteId; minStage?: RouteStage }
+  /**
+   * The same two questions for the second axis — *"מסלולי חיים נפרדים שמשפיעים גם כן:
+   * זוגיות, עבודה, הורות"*. The shape allowed it without a second vocabulary, which is why
+   * these are here and not in a `TrackCondition` of their own: a scene that wants to ask
+   * about a partner and a scene that wants to ask about a terrace are asking the same kind
+   * of question, and the day one of them needs its own object both will drift.
+   *
+   * `minStage` is typed against the registry's own stage ids, so a condition naming a stage
+   * no track declares does not compile.
+   */
+  track?: { id: TrackId; minStage?: TrackStageId }
+  notTrack?: { id: TrackId; minStage?: TrackStageId }
 
   // --- composition ------------------------------------------------------------------
   /** every one of these must hold */
@@ -211,6 +264,11 @@ export function meets(state: LifeState, condition?: Condition): boolean {
   if (condition.attendedAnchor && !state.attendedAnchors.includes(condition.attendedAnchor)) return false
   if (condition.missedAnchor && !state.missedAnchors.includes(condition.missedAnchor)) return false
   if (condition.at && state.location !== condition.at) return false
+
+  if (condition.route && !routeAtLeast(state, condition.route.id, condition.route.minStage)) return false
+  if (condition.notRoute && routeAtLeast(state, condition.notRoute.id, condition.notRoute.minStage)) return false
+  if (condition.track && !trackAtLeast(state, condition.track.id, condition.track.minStage)) return false
+  if (condition.notTrack && trackAtLeast(state, condition.notTrack.id, condition.notTrack.minStage)) return false
 
   if (condition.all && !condition.all.every((child) => meets(state, child))) return false
   if (condition.any && condition.any.length > 0 && !condition.any.some((child) => meets(state, child))) return false

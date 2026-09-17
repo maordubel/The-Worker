@@ -578,13 +578,41 @@ describe('חוק הצהוב — the one exemption, and the fence around it', () 
  * nobody approved.
  */
 describe('חוק הצהוב — התצלומים התיעודיים, והמדידה שמאחורי האישור', () => {
-  const photos = JSON.parse(
-    readFileSync(join(ROOT, 'content/manual/kit-photos.json'), 'utf8'),
-  ) as { records: Array<{ slug: string; yellowPx: number; yellowPct: number }> }
+  /**
+   * כל תיקייה והמדידה שלה, ושתיהן נגזרות מחדש מהדיסק.
+   *
+   * **ההחלטה השתנתה ב-17.9.2026, ולכן השומר משנה צד ולא נמחק** (כלל 65, וההבחנה של
+   * כלל 47). עד כאן הבדיקה טענה `toHaveLength(1)` ונעלה את הרשימה על תיקיית החולצות.
+   * מאור הרחיב את האישור במפורש — *"בתמונות מקור ושל דברים אותנטים הצהוב מאושר להישאר"* —
+   * לעשרה חפצים סרוקים ב-`public/life/artefacts/`, ולכן הרשימה באורך שתיים.
+   *
+   * מה שלא השתנה הוא כל השאר, וזה העיקר: כל תיקייה חייבת להצביע על קובץ מדידה משלה,
+   * המספרים בהצהרה נספרים מחדש ממנו, ואורך הרשימה עדיין נעול — שלישית תפיל את הבדיקה
+   * הזאת בדיוק כמו שהשנייה הפילה אותה.
+   */
+  const LEDGERS: ReadonlyArray<{ folder: string; path: string }> = [
+    { folder: 'public/kits/', path: 'content/manual/kit-photos.json' },
+    { folder: 'public/life/artefacts/', path: 'content/manual/life-artefacts.json' },
+  ]
 
-  it('names exactly one folder, with an approver and a date', () => {
-    expect(YELLOW_PHOTO_FOLDERS).toHaveLength(1)
-    expect(YELLOW_PHOTO_FOLDERS[0]?.folder).toBe('public/kits/')
+  const measured = new Map(
+    LEDGERS.map(({ folder, path }) => [
+      folder,
+      (
+        JSON.parse(readFileSync(join(ROOT, path), 'utf8')) as {
+          records: Array<{ yellowPx: number; yellowPct: number }>
+        }
+      ).records,
+    ]),
+  )
+
+  const photos = { records: measured.get('public/kits/')! }
+
+  it('names exactly the folders that were granted, each with an approver and a date', () => {
+    expect(YELLOW_PHOTO_FOLDERS).toHaveLength(2)
+    expect(YELLOW_PHOTO_FOLDERS.map((entry) => entry.folder)).toEqual(
+      LEDGERS.map((ledger) => ledger.folder),
+    )
     for (const entry of YELLOW_PHOTO_FOLDERS) {
       expect(entry.approvedBy, entry.folder).toMatch(/\S/)
       expect(entry.approvedOn, entry.folder).toMatch(/^\d{4}-\d{2}-\d{2}$/)
@@ -596,25 +624,50 @@ describe('חוק הצהוב — התצלומים התיעודיים, והמדי�
   })
 
   it('carries the measurement it was granted on, re-counted from the data', () => {
-    const entry = YELLOW_PHOTO_FOLDERS[0]
-    const withYellow = photos.records.filter((row) => row.yellowPx > 0)
     // Counted on PIXELS. Four shirts carry a single yellow pixel and round to 0.000%;
     // rule 8 has no rounding mode, and the grant must describe the same set.
-    expect(entry?.filesTotal).toBe(photos.records.length)
-    expect(entry?.filesWithYellow).toBe(withYellow.length)
-    expect(entry?.maxPercent).toBe(
-      Math.max(...photos.records.map((row) => row.yellowPct)),
-    )
+    for (const entry of YELLOW_PHOTO_FOLDERS) {
+      const records = measured.get(entry.folder)
+      expect(records, `${entry.folder} has no measurement file`).toBeDefined()
+      const withYellow = records!.filter((row) => row.yellowPx > 0)
+      expect(entry.filesTotal, entry.folder).toBe(records!.length)
+      expect(entry.filesWithYellow, entry.folder).toBe(withYellow.length)
+      expect(entry.maxPercent, entry.folder).toBe(
+        Math.max(...records!.map((row) => row.yellowPct)),
+      )
+    }
   })
 
-  it('is a folder, and only that folder', () => {
+  it('is a folder, and only those folders', () => {
     expect(yellowPhotoAllowed('public/kits/vp-1985-away.webp')).toBe(true)
+    expect(yellowPhotoAllowed('public/life/artefacts/docPendel34.webp')).toBe(true)
     expect(yellowPhotoAllowed('public/art/celebration.png')).toBe(false)
+    // the drawn folder next door is NOT exempt, and that is the whole split of 17.9.2026:
+    // the paintings in the same delivery went through the normal de-yellow.
     expect(yellowPhotoAllowed('public/life/art/pitch.webp')).toBe(false)
+    expect(yellowPhotoAllowed('public/life/art/ticketOffice.webp')).toBe(false)
     // the near-miss the trailing slash exists to stop
     expect(yellowPhotoAllowed('public/kitsplash.png')).toBe(false)
+    expect(yellowPhotoAllowed('public/life/artefactsplash.png')).toBe(false)
     // and it never leaks into the file list, which stays an exact match
     expect(yellowAllowed('public/kits/vp-1985-away.webp')).toBe(false)
+    expect(yellowAllowed('public/life/artefacts/docPendel34.webp')).toBe(false)
+  })
+
+  /**
+   * ...וכל קובץ בתיקייה נמדד, לא רק אלה שמישהו זכר לרשום.
+   *
+   * זו הדליפה היחידה שהתאמה-לפי-קידומת מאפשרת: להוסיף קובץ לתיקייה בלי שורה בקובץ
+   * המדידה, ולקבל חסינות בלי מספר. הבדיקה סופרת את הקבצים שעל הדיסק מול השורות.
+   */
+  it('has a measured row for every file actually in the folder', () => {
+    const files = readdirSync(join(ROOT, 'public/life/artefacts')).filter((name) =>
+      name.endsWith('.webp'),
+    )
+    const ledger = JSON.parse(
+      readFileSync(join(ROOT, 'content/manual/life-artefacts.json'), 'utf8'),
+    ) as { records: Array<{ file: string }> }
+    expect(files.sort()).toEqual(ledger.records.map((row) => row.file).sort())
   })
 
   it('is swept, with the photographs hidden rather than the route skipped', () => {

@@ -122,6 +122,39 @@ export const BACKDROP = [
    * in, and when its geography arrives that is the picture it will move across.
    */
   'promenade', 'promenadeDusk', 'allenbyShops', 'allenbyShopsLate',
+  /**
+   * 17.9.2026 — שני ציורים, ושניהם עונים על חור שהיה כתוב בקוד לפניהם.
+   *
+   * `ticketOffice` הוא חדר. עד היום `ticket-office` עמד על `undercroft` — המסדרון מתחת
+   * ליציע — ומאור ביקש במפורש את ההפך: *"אני רוצה לייצר משרד כרטיסים בפני עצמו ולא כחלק
+   * ממקום קיים, אלא לפתוח מקום חדש."* השלט על הציור אומר **קופת כרטיסים - תל אביב** ויש בו
+   * דלת לרחוב, ולכן זה משרד בעיר ולא חלל מתחת לבלומפילד.
+   *
+   * `ramatGanGates` הוא החוץ של אצטדיון לאומי רמת גן — הקרוסלות, האוהדים על הרחבה,
+   * המכוניות של שנות התשעים. הוא **אינו** מחליף את `ramatGan`, שהוא היציע שבו נצפים שני
+   * הגמרים: הוא כרטיס ההגעה אליו, בדיוק היחס שיש ל-`ground` מול `bloomfield-outside`.
+   */
+  'ticketOffice',
+  'ramatGanGates',
+  /**
+   * ...ושלושה ציורים שעדיין אין להם חדר, וזה נאמר כאן ולא מוסתר.
+   *
+   * `busStopDan` — סככת "דן" של שנות השמונים: עיתונים על מעמד, טלפון ציבורי אדום, אוטובוס
+   * ירוק בקצה. `jaffaBoulevard` — שדרה ריקה ביפו לפנות בוקר, קיוסקים וחנויות בתריסים.
+   * `jaffaAlleyCafe` — סמטה מרוצפת, בית קפה ג'אפנא, שורשי פיקוס ועגלת יד.
+   *
+   * Landing a painting before its scene is this file's own practice and it is written
+   * down twice already — `undercroft` and `ussHallPre` ("neither has a scene yet, and that
+   * is on purpose (rule 43): the art lands first so the 1983–2000 plan can name a place
+   * instead of describing one"), and `promenade`/`promenadeDusk`, held for a journey whose
+   * geography has not been built. The cost is honest and it is zero at runtime: a scene
+   * loads its own backdrop, so a key nothing names is a key nothing downloads.
+   *
+   * What each one still needs is in `docs/life/ART-REQUIRED.md` — a walk band measured on
+   * the painting, a door, and something to do there, because a room with nothing in it is
+   * dead content (rule 66) and that is the part a painting cannot supply.
+   */
+  'busStopDan', 'jaffaBoulevard', 'jaffaAlleyCafe',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -759,6 +792,50 @@ export type PropKey = (typeof PROP)[number]
  * way to end Stage A is not to describe what winning felt like. It is to hand the player
  * the front page and let 1986 say it: אדומים.
  */
+/**
+ * חפצים שצולמו — the ten scans of 17.9.2026, and the only keys in this file that do NOT
+ * live in `public/life/art`.
+ *
+ * They are documents in the sense `DOC` means it and they are spliced into that list
+ * below, so `{ e: 'doc' }` can name one and cannot name anything else (rule 49). What
+ * makes them their own list is the FOLDER, and the folder is the point:
+ *
+ *   `public/life/art` is proved to hold not one yellow pixel. These carry 21.185% at the
+ *   worst — the masthead of פנדל, a gold X somebody punched through a bus card, forty
+ *   years of paper ageing. Nobody chose that yellow; cleaning it falsifies the scan.
+ *   Maor granted it on 17.9.2026 in the general form — *"בתמונות מקור ושל דברים אותנטים
+ *   הצהוב מאושר להישאר"* — and `lib/brand/yellowExemptions.ts` records it as a folder
+ *   with a per-file measurement `tests/brand.test.ts` re-derives.
+ *
+ * Mixing them into the art folder would have made that proof impossible to state, which
+ * is why `artUrl` asks the KEY which folder it belongs to rather than asking the caller.
+ *
+ * **They are declared before they are placed, and that is the same call `undercroft` and
+ * `ussHallPre` got** (rule 43): the paper lands first so the chapter that holds one up
+ * can name it instead of describing it. Nothing in the game reaches them yet.
+ */
+export const ARTEFACT = [
+  // ארבעה שערים של פנדל — השבועון לספורטאי הצעיר. כל אחד נושא את מספר הגיליון ואת מחירו.
+  'docPendel26', 'docPendel34', 'docPendel38', 'docPendel180',
+  // טוטו — טופס מלא של מחזור 40/85 (8.6.85) וחבילת טפסים ריקים
+  'docToto4085', 'docTotoForms',
+  // כרטיס קולנוע "אלנבי" תל אביב, 40 מיל
+  'docCinemaAllenby',
+  // שלושה דורות של נסיעה: לירות, שקלים, וכרטיסייה מנוקבת
+  'docEggedLira', 'docNoarCard', 'docPunchCards',
+] as const
+export type ArtefactKey = (typeof ARTEFACT)[number]
+
+/** where a scanned object lives — never `ART_ROOT`, because that folder proves zero yellow */
+export const ARTEFACT_ROOT = '/life/artefacts'
+
+const ARTEFACT_KEYS: ReadonlySet<string> = new Set<string>(ARTEFACT)
+
+/** Is this key one of the scanned objects rather than something drawn for the game? */
+export function isArtefact(key: string): boolean {
+  return ARTEFACT_KEYS.has(key)
+}
+
 export const DOC = [
   // 1986 — the ticket somebody kept for forty years, and the four pages either side of it
   'docTicket', 'paperBefore', 'paperAdumim', 'paperFive', 'paperCollector',
@@ -781,6 +858,9 @@ export const DOC = [
   'docCup99', 'docPage99', 'docTikva99', 'docSeason9899',
   'docSeason9900',
   'docTicket2000', 'docProgramme2000', 'docRedBall2000', 'docDouble2000',
+  // 17.9.2026 — the scanned objects. Spread rather than re-typed, so the two lists cannot
+  // disagree about which keys a `{ e: 'doc' }` effect accepts.
+  ...ARTEFACT,
 ] as const
 export type DocKey = (typeof DOC)[number]
 
@@ -1032,8 +1112,19 @@ export function parallaxPlane(plane: ParallaxPlane, W: number, H: number): Plane
   return { x: 0, y: 0, width: W, height: H, scroll: plane === 'far' ? 0.86 : 1 }
 }
 
+/**
+ * **התיקייה נגזרת מהמפתח, לא מהקורא.**
+ *
+ * `OpeningSequence` had to learn the same lesson on 13.9.2026 and chose its extension by
+ * the FOLDER a beat names rather than by the file (rule 61). This is the same shape one
+ * step further along: everything this game draws lives in `public/life/art`, which proves
+ * zero yellow, and the ten scanned objects live in `public/life/artefacts`, which is
+ * allowed to carry the yellow that is printed on them. A caller that had to remember
+ * which was which would get it wrong exactly once, silently, as a 404 in front of a
+ * player.
+ */
 export function artUrl(key: string): string {
-  return `${ART_ROOT}/${key}.webp`
+  return isArtefact(key) ? `${ARTEFACT_ROOT}/${key}.webp` : `${ART_ROOT}/${key}.webp`
 }
 
 /**

@@ -55,7 +55,27 @@ export const PITCH_GIG = {
   trait: { key: 'courage' as const, delta: 1 },
   at: { x: 0.42, y: 0.86, w: 0.09 },
   opens: 'pitch' as const,
-  /** play, not work — so it is outside the one-paid-job-a-chapter rule, like the two contests */
+  /**
+   * **זה לא עבודה. זה משחק העברת זמן.** (מאור, 17.9.2026)
+   *
+   * *"במשחק עצמו, ניתן לשחק בחיובים / פנדלים — ללא קשר ללקיחת עבודה… אפשר לקחת גם עבודה
+   * וגם לשחק פנדלים באותו יום."*
+   *
+   * `paid: false` is what `gigs.ts` reads as `kind: 'play'`, and four things follow from
+   * it, all of them in `gigs.ts` and all of them checked:
+   *
+   *   · it never enters the week's rotation (`offeredIn` deals only paid rows), so the
+   *     ball is on this pitch in every life and every seed;
+   *   · its hotspot carries no `offerFlag`, so it is drawn whatever the week dealt;
+   *   · its conversation gets no `work:paid:<chapter>` refusal branch, so a boy who carried
+   *     crates this morning is still asked who he is this afternoon;
+   *   · and nothing in the settlement raises `work:paid:<chapter>` either, so playing does
+   *     not spend a job he has not taken yet.
+   *
+   * What it DOES cost is the afternoon: thirty minutes and twelve energy, once a day
+   * (`gig:street-match`). A free-time activity that cost nothing would not be a decision,
+   * and the whole reason the door is on the pitch is that going to it is one.
+   */
   paid: false,
 }
 
@@ -102,7 +122,19 @@ export function eraForChapter(chapter: string): string {
   return 'mid-1980s'
 }
 
-/** What the afternoon costs when the match closes. The ledger reads these; nothing is typed twice. */
+/**
+ * What the afternoon costs when the match closes. The ledger reads these; nothing is typed
+ * twice.
+ *
+ * **ומה שאין כאן הוא סכום.** There is no money field and there is not going to be one. The
+ * match charges thirty minutes, twelve energy and one point of courage, and hands back one
+ * point of `footballLove` for winning as them — and none of those four is a wage. A wage is
+ * a number a player can plan an afternoon around, which is exactly what turns a pitch into
+ * an economy (rule 72, and the penalty contest that had to have its shekel-a-goal taken
+ * back out). Courage is what an afternoon does to a person; the one love point is the
+ * smallest thing the meter can notice and it is conditional on winning, so it cannot be
+ * farmed. `gig:street-match` makes it once a day. `work:paid:<chapter>` is never written.
+ */
 export const PITCH_SETTLEMENT = {
   gigId: PITCH_GIG_ID,
   flag: `gig:${PITCH_GIG_ID}`,

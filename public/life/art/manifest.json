@@ -861,6 +861,76 @@
     1600,
     900
    ]
+  },
+  "ticketOffice": {
+   "source": "maor-2026-09-17",
+   "w": 2730,
+   "h": 1536,
+   "bytes": 679934,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    2730,
+    1536
+   ]
+  },
+  "ramatGanGates": {
+   "source": "maor-2026-09-17",
+   "w": 2730,
+   "h": 1536,
+   "bytes": 2978616,
+   "deyellowed": 36748,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    2730,
+    1536
+   ]
+  },
+  "busStopDan": {
+   "source": "maor-2026-09-17",
+   "w": 2730,
+   "h": 1536,
+   "bytes": 3761994,
+   "deyellowed": 157485,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    2730,
+    1536
+   ]
+  },
+  "jaffaBoulevard": {
+   "source": "maor-2026-09-17",
+   "w": 2816,
+   "h": 1536,
+   "bytes": 4905856,
+   "deyellowed": 429038,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    2816,
+    1536
+   ]
+  },
+  "jaffaAlleyCafe": {
+   "source": "maor-2026-09-17",
+   "w": 2816,
+   "h": 1536,
+   "bytes": 1280094,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    2816,
+    1536
+   ]
   }
  },
  "figures": {
@@ -4864,6 +4934,146 @@
     0,
     1600,
     315
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ticketOffice--sky": {
+   "w": 2730,
+   "h": 537,
+   "bytes": 12726,
+   "source": "ticketOffice",
+   "box": [
+    0,
+    0,
+    2730,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ticketOffice--ground": {
+   "w": 2730,
+   "h": 537,
+   "bytes": 19024,
+   "source": "ticketOffice",
+   "box": [
+    0,
+    0,
+    2730,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ramatGanGates--sky": {
+   "w": 2730,
+   "h": 537,
+   "bytes": 12740,
+   "source": "ramatGanGates",
+   "box": [
+    0,
+    0,
+    2730,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ramatGanGates--ground": {
+   "w": 2730,
+   "h": 537,
+   "bytes": 15774,
+   "source": "ramatGanGates",
+   "box": [
+    0,
+    0,
+    2730,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "busStopDan--sky": {
+   "w": 2730,
+   "h": 537,
+   "bytes": 11594,
+   "source": "busStopDan",
+   "box": [
+    0,
+    0,
+    2730,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "busStopDan--ground": {
+   "w": 2730,
+   "h": 537,
+   "bytes": 28868,
+   "source": "busStopDan",
+   "box": [
+    0,
+    0,
+    2730,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "jaffaBoulevard--sky": {
+   "w": 2816,
+   "h": 537,
+   "bytes": 16834,
+   "source": "jaffaBoulevard",
+   "box": [
+    0,
+    0,
+    2816,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "jaffaBoulevard--ground": {
+   "w": 2816,
+   "h": 537,
+   "bytes": 17584,
+   "source": "jaffaBoulevard",
+   "box": [
+    0,
+    0,
+    2816,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "jaffaAlleyCafe--sky": {
+   "w": 2816,
+   "h": 537,
+   "bytes": 22368,
+   "source": "jaffaAlleyCafe",
+   "box": [
+    0,
+    0,
+    2816,
+    537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "jaffaAlleyCafe--ground": {
+   "w": 2816,
+   "h": 537,
+   "bytes": 23776,
+   "source": "jaffaAlleyCafe",
+   "box": [
+    0,
+    0,
+    2816,
+    537
    ],
    "deyellowed": 0,
    "yellowLeft": 0

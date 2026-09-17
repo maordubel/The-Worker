@@ -46,6 +46,20 @@ import {
  * working, not a bug, and `content/routes.ts` has a mission whose whole point is it.
  *
  * ------------------------------------------------------------------------------------
+ * **ושלוש תוספות מ-17.9.2026, ושלושתן נתונים ולא לוגיקה.**
+ *
+ * `ROUTE_TIERS` is the difficulty ORDER Maor stated, hardest first, in his own six lines —
+ * and `CREATOR` is not in them, so it has no tier and the card says so. `ROUTE_COMBINATIONS`
+ * is every unordered pair of the seven with an explicit relation, because *"יהיה מצבים
+ * שיהיה ניתן להיות כמה מסלולים יחד"* is a lattice and this file previously held one pair of
+ * it. `routeAtLeast` is the reading a `Condition` does, which is what finally lets the world
+ * ask about any of this: seven routes and eighteen offers had been reachable and not
+ * CONSULTABLE — a task could never appear because of a route and never be hidden by one.
+ * None of the three moves a threshold, and none of them is read by `gapsFor` or
+ * `eligibleFor`; the second is read by `acceptEvents` in exactly one direction, and only for
+ * a relation no pair carries yet.
+ *
+ * ------------------------------------------------------------------------------------
  * **שם שמתנגש, ולמה הוא נשאר.** `lib/life/world/reach.ts` has a `routeFlag` and the
  * story layer has `ROUTES` — walking routes, waypoints, a child following Efi down a
  * street. A life route and a walking route are different concepts with the same English
@@ -429,6 +443,276 @@ export const LIFE_ROUTES: readonly RouteDef[] = [
 export const routeById = (id: RouteId): RouteDef | null => LIFE_ROUTES.find((route) => route.id === id) ?? null
 
 // ---------------------------------------------------------------------------------
+// הדרגות — הסדר של מאור, מהקשה לקל (17.9.2026)
+// ---------------------------------------------------------------------------------
+
+/**
+ * כל מזהה מסלול, פעם אחת, ובאופן שהקומפיילר סופר.
+ *
+ * `RouteId` is a union and a union is not a list, so every question of the form "for
+ * every route…" has until now been asked of `LIFE_ROUTES`, which is six of the seven —
+ * `DISTANCE_RETURN` is deliberately not in it (see its own block below). A `Record` keyed
+ * on the union is the cheap way to get the seventh without giving it a `StageDef`: add a
+ * member to `RouteId` and this object stops compiling until somebody places it.
+ */
+const EVERY_ROUTE: Record<RouteId, true> = {
+  ULTRAS: true,
+  JOURNALIST: true,
+  OWNER: true,
+  CREATOR: true,
+  USSISHKIN_FOUNDER: true,
+  TRAVELLER: true,
+  DISTANCE_RETURN: true,
+}
+
+export const ROUTE_IDS = Object.keys(EVERY_ROUTE) as readonly RouteId[]
+
+/**
+ * הסולם של מאור — שש שורות, מהקשה לקל, במילים שלו (17.9.2026).
+ *
+ *   1  בעלי הקבוצה                                  → OWNER
+ *   2  מייסד כדורסל                                 → USSISHKIN_FOUNDER
+ *   3  מנהיג אוהדים                                 → ULTRAS
+ *   4  עיתונאי · קשרים בינלאומיים · מעבר לגור בחו״ל  → JOURNALIST + TRAVELLER
+ *   5  אוהד רגיל                                    → (אין מסלול)
+ *   6  אוהד כורסא · אוהד שנעלם וחוזר                 → DISTANCE_RETURN
+ *
+ * **שלושה דברים שהטבלה הזאת עושה, ושלושתם סירובים.**
+ *
+ * **1 · `CREATOR` אינו ברשימה, ולכן אין לו דרגה.** It is still in the registry, it still
+ * has its ladder and its apex, and `tierOf` answers `null` for it — which the card prints
+ * out loud (`life.route.tier.unplaced`). A tier the owner did not give a route is a number
+ * we made up, and a made-up number in a difficulty ordering is worse than a blank one:
+ * blank asks a question, invented answers it wrongly and quietly.
+ *
+ * **2 · דרגה 5 היא היעדר מסלול, ולא סולם שביעי.** *"אוהד רגיל"* is the boy who took
+ * nothing, and the engine already models him exactly: no `own:route:*` flag was ever
+ * raised. So tier five carries an EMPTY `routes` array — no `RouteId` is invented for it,
+ * no `StageDef` exists, nothing can be accepted and no flag can be raised. The row is
+ * here so that Maor's six lines read as six lines in the source; `plainSupporter()` is the
+ * runtime form of it, and it is a question about the absence of rows rather than about a
+ * row. (The alternative — a seventh `RouteId` called `REGULAR` — would have to be
+ * accepted, stored, offered and combined with the other six, which is a ladder for the one
+ * rung whose whole content is that there is no ladder. That is the same mistake
+ * `DISTANCE_RETURN` is kept out of `LIFE_ROUTES` to avoid, one floor down.)
+ *
+ * **3 · דרגה 4 מחזיקה שניים, ולא שני חצאים.** *"עיתונאי · קשרים בינלאומיים · מעבר לגור
+ * בחו״ל"* is one line in Maor's list and two routes in this engine, so the row holds both
+ * and neither is ranked above the other. Splitting it into 4a and 4b would be the same
+ * invention as giving `CREATOR` a tier.
+ *
+ * The tier decides NOTHING at runtime: no threshold reads it, no offer is gated on it, and
+ * `gapsFor` has never heard of it. It is the difficulty ordering the owner stated, carried
+ * as data so a card and a delivery note can say the same thing, and so the day he places
+ * `CREATOR` it is one row and no logic.
+ */
+export type RouteTier = {
+  /** 1 is the hardest life to reach, 6 the shallowest — Maor's own order */
+  tier: 1 | 2 | 3 | 4 | 5 | 6
+  /** his own line for this rung, verbatim */
+  nameHe: string
+  /** the routes that sit on it — empty on tier 5, and that emptiness IS the model */
+  routes: readonly RouteId[]
+}
+
+export const ROUTE_TIERS: readonly RouteTier[] = [
+  { tier: 1, nameHe: 'בעלי הקבוצה', routes: ['OWNER'] },
+  { tier: 2, nameHe: 'מייסד כדורסל', routes: ['USSISHKIN_FOUNDER'] },
+  { tier: 3, nameHe: 'מנהיג אוהדים', routes: ['ULTRAS'] },
+  { tier: 4, nameHe: 'עיתונאי · קשרים בינלאומיים · מעבר לגור בחו״ל', routes: ['JOURNALIST', 'TRAVELLER'] },
+  // *"אוהד רגיל"* — מי שלא לקח כלום. אין כאן מסלול, ואסור שיהיה.
+  { tier: 5, nameHe: 'אוהד רגיל', routes: [] },
+  { tier: 6, nameHe: 'אוהד כורסא · אוהד שנעלם וחוזר', routes: ['DISTANCE_RETURN'] },
+]
+
+export const tierOf = (id: RouteId): RouteTier | null =>
+  ROUTE_TIERS.find((row) => row.routes.includes(id)) ?? null
+
+/**
+ * מסלול בלי דרגה — היום זה `CREATOR` בלבד, ומחר זה כל מה שייכתב לפני שמאור יסדר אותו.
+ *
+ * Computed, never typed: a route added to the registry without a line in Maor's list turns
+ * up here by itself, and the card says so rather than inventing a rung for it.
+ */
+export const UNPLACED_ROUTES: readonly RouteId[] = ROUTE_IDS.filter((id) => tierOf(id) === null)
+
+/**
+ * דרגה 5, כפי שהמנוע מחזיק אותה — שאלה על היעדר שורות.
+ *
+ * *"אוהד רגיל"* is not a state anybody enters; it is what is true while nothing else is.
+ * So it is asked, not stored: no title on any of the six ladders and no distance taken.
+ */
+export const plainSupporter = (state: LifeState): boolean =>
+  routesEverHeld(state).length === 0 && heldStage(state, 'DISTANCE_RETURN') === null
+
+// ---------------------------------------------------------------------------------
+// השילובים — מי יכול להיות שני דברים בבת אחת (17.9.2026)
+// ---------------------------------------------------------------------------------
+
+/**
+ * *"יהיה מצבים שיהיה ניתן להיות כמה מסלולים יחד למשל — מייסד כדורסל + מנהיג אוהדים.
+ * מנהיג אוהדים + אוהד שנעלם וחוזר."* (מאור, 17.9.2026)
+ *
+ * Until this table the engine had a conflict mechanism for exactly ONE pair — journalist
+ * and owner, `CONFLICT_CHOICES` — and silence about the other twenty. Silence reads as
+ * "everything combines", which is a decision nobody made, taken twenty times.
+ *
+ * So every unordered pair of the seven routes has a row here, and the vocabulary is four
+ * words rather than a boolean, because Maor described three different things and a boolean
+ * can hold at most two of them:
+ *
+ *  · **`free`** — both can be true of the same person and nothing is charged for it.
+ *  · **`cost`** — both can be true and it costs something, in a scene, by name. The
+ *    journalist/owner pair is the one that exists, and `conversationId` is where the price
+ *    is paid. A `cost` pair is NEVER a locked door: *"שלוש דלתות, ואף אחת מהן היא לא
+ *    'אסור לך'"*.
+ *  · **`exclusive`** — the two cannot both be held, and `acceptEvents` refuses the second.
+ *    **No pair carries this today.** Maor said such pairs exist; he has not named one, so
+ *    the kind exists with no members, and inventing a member to fill it would be exactly
+ *    the tier-for-`CREATOR` mistake in a more damaging place: an exclusion silently
+ *    deletes half a life a player was walking towards.
+ *  · **`undecided`** — nobody has said. This is the DEFAULT and it is the safe reading:
+ *    the pair is not claimed to combine, `undecidedCombinations()` lists it for the
+ *    delivery note, and no scene may treat it as settled. It deliberately does not BLOCK,
+ *    because blocking is itself a decision and would silently remove branches the game
+ *    can reach today. Not silently allowed, and not silently forbidden either: listed.
+ *
+ * `sourceHe` on every row names who decided, so a relation can never be quietly upgraded
+ * from "nobody asked" to "Maor said" by a later edit.
+ */
+export type CombinationRelation = 'free' | 'cost' | 'exclusive' | 'undecided'
+
+export type CombinationDef = {
+  /** the two routes, written in registry order so the table reads as a triangle */
+  pair: readonly [RouteId, RouteId]
+  relation: CombinationRelation
+  /** who decided this, in one line — an `undecided` row says that nobody has */
+  sourceHe: string
+  /** where the price of a `cost` pair is paid. Only a `cost` row may carry one. */
+  conversationId?: string
+}
+
+/** the source line every pair that nobody has ruled on carries, so the reason is readable */
+const NOBODY_SAID = 'איש לא הכריע על הצירוף הזה'
+
+export const ROUTE_COMBINATIONS: readonly CombinationDef[] = [
+  // --- OWNER ------------------------------------------------------------------------
+  {
+    pair: ['ULTRAS', 'OWNER'],
+    relation: 'undecided',
+    sourceHe: NOBODY_SAID,
+  },
+  {
+    /**
+     * הזוג היחיד שהיה קיים לפני הטבלה, ומשמעותו לא זזה.
+     *
+     * `conflictOfInterest` still asks the same question, the OWNER acceptance scene still
+     * opens the same conversation, and the three doors are still three doors. What changed
+     * is that it is now one row in a table of twenty-one instead of the only statement in
+     * the file about two routes meeting.
+     */
+    pair: ['JOURNALIST', 'OWNER'],
+    relation: 'cost',
+    sourceHe: 'המפרט: בעלים שמסקר את קבוצתו — שלוש דלתות, ואף אחת מהן אינה איסור',
+    conversationId: 'route-conflict-of-interest',
+  },
+  { pair: ['OWNER', 'CREATOR'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  { pair: ['OWNER', 'USSISHKIN_FOUNDER'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  { pair: ['OWNER', 'TRAVELLER'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  {
+    pair: ['OWNER', 'DISTANCE_RETURN'],
+    relation: 'free',
+    sourceHe: 'המפרט: ארבעת אלה יכולים להיות נכונים על אותו אדם בו-זמנית',
+  },
+  // --- JOURNALIST -------------------------------------------------------------------
+  { pair: ['ULTRAS', 'JOURNALIST'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  { pair: ['JOURNALIST', 'CREATOR'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  { pair: ['JOURNALIST', 'USSISHKIN_FOUNDER'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  { pair: ['JOURNALIST', 'TRAVELLER'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  {
+    pair: ['JOURNALIST', 'DISTANCE_RETURN'],
+    relation: 'free',
+    sourceHe: 'המפרט: ארבעת אלה יכולים להיות נכונים על אותו אדם בו-זמנית',
+  },
+  // --- ULTRAS -----------------------------------------------------------------------
+  { pair: ['ULTRAS', 'CREATOR'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  {
+    /** *"מייסד כדורסל + מנהיג אוהדים"* — מאור, 17.9.2026 */
+    pair: ['ULTRAS', 'USSISHKIN_FOUNDER'],
+    relation: 'free',
+    sourceHe: 'מאור, 17.9.2026: "מייסד כדורסל + מנהיג אוהדים"',
+  },
+  { pair: ['ULTRAS', 'TRAVELLER'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  {
+    /** *"מנהיג אוהדים + אוהד שנעלם וחוזר"* — מאור, 17.9.2026 */
+    pair: ['ULTRAS', 'DISTANCE_RETURN'],
+    relation: 'free',
+    sourceHe: 'מאור, 17.9.2026: "מנהיג אוהדים + אוהד שנעלם וחוזר"',
+  },
+  // --- CREATOR ----------------------------------------------------------------------
+  { pair: ['CREATOR', 'USSISHKIN_FOUNDER'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  { pair: ['CREATOR', 'TRAVELLER'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  {
+    pair: ['CREATOR', 'DISTANCE_RETURN'],
+    relation: 'free',
+    sourceHe: 'המפרט: ארבעת אלה יכולים להיות נכונים על אותו אדם בו-זמנית',
+  },
+  // --- USSISHKIN_FOUNDER ------------------------------------------------------------
+  { pair: ['USSISHKIN_FOUNDER', 'TRAVELLER'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  { pair: ['USSISHKIN_FOUNDER', 'DISTANCE_RETURN'], relation: 'undecided', sourceHe: NOBODY_SAID },
+  // --- TRAVELLER --------------------------------------------------------------------
+  {
+    pair: ['TRAVELLER', 'DISTANCE_RETURN'],
+    relation: 'free',
+    sourceHe: 'המפרט: ארבעת אלה יכולים להיות נכונים על אותו אדם בו-זמנית',
+  },
+]
+
+const samePair = (row: CombinationDef, a: RouteId, b: RouteId): boolean =>
+  (row.pair[0] === a && row.pair[1] === b) || (row.pair[0] === b && row.pair[1] === a)
+
+/** the row for two routes, whichever way round they are asked */
+export const combinationFor = (a: RouteId, b: RouteId): CombinationDef | null =>
+  ROUTE_COMBINATIONS.find((row) => samePair(row, a, b)) ?? null
+
+/**
+ * מה היחס בין שני מסלולים — ו`undecided` היא התשובה כשאין שורה.
+ *
+ * A pair nobody wrote down answers `undecided` rather than throwing, because the safe
+ * reading of silence is silence. `tests/life-tiers.test.ts` asserts every one of the
+ * twenty-one pairs has a row, so the fallback is a definition and not a hiding place. A
+ * route asked against itself answers `free`: a man is always compatible with himself.
+ */
+export function combinationOf(a: RouteId, b: RouteId): CombinationRelation {
+  if (a === b) return 'free'
+  return combinationFor(a, b)?.relation ?? 'undecided'
+}
+
+/**
+ * האם השני נחסם על ידי הראשון — ורק `exclusive` חוסם.
+ *
+ * `undecided` does not block, on purpose, and the reason is worth keeping: blocking an
+ * undecided pair would delete branches the game can walk today on the strength of nobody
+ * having spoken, which is a decision made by silence — the exact thing this table exists
+ * to stop. An undecided pair is reported, not enforced.
+ */
+export const blocksCombination = (a: RouteId, b: RouteId): boolean => combinationOf(a, b) === 'exclusive'
+
+/** the conversation that charges for holding both, when the pair costs something */
+export const combinationCostConversation = (a: RouteId, b: RouteId): string | null => {
+  const row = combinationFor(a, b)
+  return row?.relation === 'cost' ? (row.conversationId ?? null) : null
+}
+
+/** every pair nobody has ruled on — the list that belongs in a delivery note, not in a gate */
+export const undecidedCombinations = (): readonly CombinationDef[] =>
+  ROUTE_COMBINATIONS.filter((row) => row.relation === 'undecided')
+
+/** the routes this one may be held alongside for free — derived, so the table is the source */
+export const freePartnersOf = (id: RouteId): readonly RouteId[] =>
+  ROUTE_IDS.filter((other) => other !== id && combinationOf(id, other) === 'free')
+
+// ---------------------------------------------------------------------------------
 // התרחקות וחזרה — a different SHAPE, and it is kept different on purpose
 // ---------------------------------------------------------------------------------
 
@@ -451,8 +735,18 @@ export const DISTANCE_RETURN = {
   sceneOffsets: [2, 5, 8, 10] as const,
   /** a start later than this cannot complete the ten-year arc inside the life as written */
   latestStartForFullArc: 2016,
-  /** these four can be true of the same person at the same time */
-  coexistsWith: ['OWNER', 'JOURNALIST', 'CREATOR', 'TRAVELLER'] as readonly RouteId[],
+  /**
+   * אלה יכולים להיות נכונים על אותו אדם בו-זמנית — וזה חמישה מ-17.9.2026, לא ארבעה.
+   *
+   * The spec's own four (`OWNER`, `JOURNALIST`, `CREATOR`, `TRAVELLER`) plus `ULTRAS`,
+   * which Maor added by name: *"מנהיג אוהדים + אוהד שנעלם וחוזר"*. It is written out here
+   * rather than computed so the route's own record still reads as a record, and
+   * `tests/life-routes.test.ts` holds it against `ROUTE_COMBINATIONS` in both directions —
+   * the same kind of deliberate second copy the spec tables get, for the same reason.
+   * `USSISHKIN_FOUNDER` is absent because nobody has ruled on it, not because somebody
+   * ruled against it; `undecidedCombinations()` is where that shows up.
+   */
+  coexistsWith: ['ULTRAS', 'JOURNALIST', 'OWNER', 'CREATOR', 'TRAVELLER'] as readonly RouteId[],
   rewardsHe: [
     'חדר וחיים שהתפתחו גם בלי יציע',
     'אלבום כפול: מה חיית ומה ראית מרחוק',
@@ -595,6 +889,27 @@ export const isActive = (state: LifeState, id: RouteId): boolean =>
 /** every route he has ever held a title on, in the registry's order */
 export const routesEverHeld = (state: LifeState): readonly RouteId[] =>
   LIFE_ROUTES.filter((route) => heldStage(state, route.id) !== null).map((route) => route.id)
+
+/**
+ * האם הוא עומד במסלול הזה, בשלב הזה או מעליו — השאלה שתנאי שואל.
+ *
+ * This is the ACTIVE reading, and the distinction is the same one `heldStage` and
+ * `isActive` have always drawn: a task that only exists for somebody who leads the
+ * terrace should not appear for a man who stood down from it last year. The HISTORY
+ * question has an answer already and it does not need a second predicate —
+ * `{ flag: 'own:route:JOURNALIST:practice' }` asks it, because the stage flag is what
+ * `heldStage` reads and it is never erased. Two predicates for one question is how a
+ * content file ends up asking the wrong one.
+ *
+ * `minStage` defaults to `entry`, so `{ route: { id: 'ULTRAS' } }` means "he is on this
+ * route at all", which is what an author writing that line means.
+ */
+export function routeAtLeast(state: LifeState, id: RouteId, minStage: RouteStage = 'entry'): boolean {
+  if (flagOn(state, leftFlag(id))) return false
+  const held = heldStage(state, id)
+  if (!held) return false
+  return ROUTE_STAGES.indexOf(held) >= ROUTE_STAGES.indexOf(minStage)
+}
 
 // ---------------------------------------------------------------------------------
 // קריאת המצב — every counter read the way the reducer keeps it
@@ -915,6 +1230,22 @@ export function eligibleFor(state: LifeState): readonly RouteInvitation[] {
 export function acceptEvents(state: LifeState, id: RouteId, stage: RouteStage): readonly LifeEvent[] {
   if (hasStage(state, id, stage)) return []
   /**
+   * צירוף שנפסל — הבדיקה היחידה שהמטריצה אוכפת, ואין לה חברים היום.
+   *
+   * *"יהיה מצבים שיהיה ניתן להיות כמה מסלולים יחד"* also implies the other end: some pairs
+   * exclude each other. `ROUTE_COMBINATIONS` holds `exclusive` as a word and **no pair
+   * carries it**, because Maor named none — so this loop refuses nothing today and changes
+   * no behaviour at all. It is here rather than in a scene for the same reason
+   * `meetsStage` is: the day a pair is declared exclusive, the refusal has to be in the one
+   * function both doors call, or the card and the conversation will disagree about whether
+   * a man may take a title. A `cost` pair is deliberately NOT refused here — its price is a
+   * conversation (`combinationCostConversation`), and *"אף אחת מהן היא לא 'אסור לך'"*.
+   */
+  const excluded = ROUTE_IDS.find(
+    (other) => other !== id && heldStage(state, other) !== null && blocksCombination(id, other),
+  )
+  if (excluded) return []
+  /**
    * התרחקות היא בחירה, ולכן היא נבדקת אחרת.
    *
    * It is not in `LIFE_ROUTES` and `meetsStage` would therefore refuse it forever, which
@@ -1003,6 +1334,11 @@ export function leaveEvents(state: LifeState, id: RouteId): readonly LifeEvent[]
  *
  * The moment is the moment ownership is TAKEN, so this is asked by the OWNER acceptance
  * scene and by nothing else.
+ *
+ * **מ-17.9.2026 זהו זוג אחד בטבלה של עשרים ואחד**, `relation: 'cost'` ב-`ROUTE_COMBINATIONS`,
+ * ומשמעותו לא זזה במילימטר. What changed is the surroundings: this used to be the only
+ * statement in the file about two routes meeting, so its silence about the other twenty
+ * read as "everything else combines" — a decision nobody made, taken twenty times.
  */
 export const CONFLICT_CHOICES = ['stop_covering', 'personal_column', 'disclose_and_pay'] as const
 export type ConflictChoice = (typeof CONFLICT_CHOICES)[number]

@@ -37,6 +37,7 @@ import {
   foundingCommitmentFlag,
   founderTitleAvailable,
   foundingWindowOpen,
+  freePartnersOf,
   gapsFor,
   hasStage,
   heldStage,
@@ -574,7 +575,19 @@ describe('התרחקות וחזרה', () => {
   it('is not a ladder and is not in the registry', () => {
     expect(LIFE_ROUTES.some((route) => (route.id as string) === 'DISTANCE_RETURN')).toBe(false)
     expect(DISTANCE_RETURN.sceneOffsets).toEqual([2, 5, 8, 10])
-    expect(DISTANCE_RETURN.coexistsWith).toEqual(['OWNER', 'JOURNALIST', 'CREATOR', 'TRAVELLER'])
+    /**
+     * **הבדיקה הזאת שונתה כי ההחלטה השתנתה, ולא כי היא הפריעה (17.9.2026).**
+     *
+     * It asserted the spec's four — `OWNER`, `JOURNALIST`, `CREATOR`, `TRAVELLER` — and it
+     * was right about them. Maor then added a fifth by name: *"מנהיג אוהדים + אוהד שנעלם
+     * וחוזר."* `ULTRAS` is in the list because he put it there, and the list is now held
+     * against `ROUTE_COMBINATIONS` rather than against a literal, so the two copies of this
+     * fact cannot drift apart the way a literal and a table always eventually do.
+     * `USSISHKIN_FOUNDER` is still absent, and the reason matters: nobody has ruled on it,
+     * which is `undecided` and not `no` — `undecidedCombinations()` is where it is listed.
+     */
+    expect([...DISTANCE_RETURN.coexistsWith].sort()).toEqual([...freePartnersOf('DISTANCE_RETURN')].sort())
+    expect(DISTANCE_RETURN.coexistsWith).toContain('ULTRAS')
     expect(DISTANCE_RETURN.minAge).toBe(18)
   })
 

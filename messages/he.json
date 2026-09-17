@@ -751,6 +751,8 @@
   "life.route.stage.apex": "פסגה",
   "life.route.stage.entry": "התחלה",
   "life.route.stage.practice": "עשייה",
+  "life.route.tier": "הדרגה",
+  "life.route.tier.unplaced": "הדרגה של זה עוד לא נקבעה",
   "life.route.gap.age": "אתה עוד צעיר מדי בשביל זה",
   "life.route.gap.alsoCapability": "צריך גם {what}",
   "life.route.gap.audience": "{who} עוד לא שמעו עליך מספיק",

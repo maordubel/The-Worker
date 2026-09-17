@@ -58,12 +58,16 @@ export type Gig = {
    * `toto` is the slip: five questions from the site's own trivia bank, two shekels a
    * right answer. `coin` is עץ או פלי in the alley: a shekel in, five out. Both were
    * Maor's, on 5.9.2026, and both are here rather than in their own system because they
-   * are jobs — they sit in a room, they cost the afternoon, and they are once a day.
+   * behave like a row in this table — they sit in a room, they cost the afternoon, and
+   * they are once a day. **They are not jobs**, and rule 72 is the price of having once
+   * counted one as the cheapest job in the pool: a boy offered a coin toss was not offered
+   * work. `kindOf` returns `wager` for exactly these two, off exactly this field.
    *
    * `penalty` and `hoops` are the two skill contests Maor asked for on 6.9.2026, played
    * in three dimensions rather than painted: five penalty kicks against a keeper on the
-   * neighbourhood pitch, five free throws at the schoolyard hoop. Same reasoning as the
-   * two above — a real thing to be good or bad at is worth more than a number.
+   * neighbourhood pitch, five free throws at the schoolyard hoop. `pitch` is the street
+   * match, which is the same thing at full size. Those three are `play`: a real thing to
+   * be good or bad at is worth more than a number, and none of them is work.
    */
   opens?: 'toto' | 'coin' | 'penalty' | 'hoops' | 'pitch'
   /**
@@ -79,9 +83,55 @@ export type Gig = {
    * Unpaid work is also outside the one-job-per-chapter rule below, because a rule that
    * stops a boy kicking a ball because he already carried crates is a rule about a
    * spreadsheet, not about a childhood.
+   *
+   * `paid: false` is the STORED form of `kind: 'play'` — see `kindOf` below for why the
+   * third category has a name now and why this field is still the one on the row.
    */
   paid?: boolean
 }
+
+/**
+ * שלושה סוגים, ולא שניים — עבודה, הימור, משחק (17.9.2026).
+ *
+ * מאור: *"במשחק עצמו, ניתן לשחק בחיובים / פנדלים — ללא קשר ללקיחת עבודה. זוהי לא עבודה.
+ * זה משחק העברת זמן. אפשר לקחת גם עבודה וגם לשחק פנדלים באותו יום."*
+ *
+ * This table has held three kinds of row since the day the coin was added and has had
+ * names for two of them. Rule 72 found the third the expensive way — *"ילד שהוצע לו הטלת
+ * מטבע לא הוצעה לו עבודה. `opens: 'coin'` ו-`opens: 'toto'` הם הסימן"* — and then left the
+ * distinction living in two unrelated fields, so every question about it had to be asked
+ * as `isPaid(gig) && gig.opens !== 'coin'` by whoever remembered. `kindOf` is that sentence
+ * written once:
+ *
+ *  · **`work`** — somebody needed this doing and paid for it. Once a DAY (`gig:<id>`) and
+ *    once a CHAPTER (`work:paid:<chapter>`), and in the week's rotation (`offeredIn`).
+ *  · **`wager`** — the slip and the coin. Money changes hands, so it is in the rotation and
+ *    it does spend the chapter's money act, but it is not work and nobody should read it as
+ *    "the cheapest job in the pool" ever again.
+ *  · **`play`** — the street match, the penalties, the free throws. **Costs the afternoon
+ *    and never the job.** Once a day, never in the rotation (so the ball is always there),
+ *    never raises `work:paid:<chapter>`, and therefore takeable on the same day as a job in
+ *    either order. That last sentence is the whole of what Maor asked for and
+ *    `tests/life-tiers.test.ts` holds all four halves of it.
+ *
+ * Derived rather than stored, because `paid` already IS the discriminator for play and two
+ * fields that mean one thing are a drift waiting for its first delta. Adding a stored
+ * `kind` would also have meant writing `paid: false, kind: 'play'` on three rows, which is
+ * the same fact twice on the same object.
+ */
+export type GigKind = 'work' | 'wager' | 'play'
+
+export function kindOf(gig: Gig): GigKind {
+  if (gig.paid === false) return 'play'
+  if (gig.opens === 'coin' || gig.opens === 'toto') return 'wager'
+  return 'work'
+}
+
+/** משחק העברת זמן — costs the afternoon, never the job */
+export const isPlay = (gig: Gig) => kindOf(gig) === 'play'
+
+/** work in the sense the chapter's one-paid-job rule means it — not a bet, not a ball */
+export const isWork = (gig: Gig) => kindOf(gig) === 'work'
 
 /**
  * שבעה ג׳ובים — and every one of them is a thing somebody in south Tel Aviv did for money
@@ -318,9 +368,13 @@ export const GIGS: readonly Gig[] = [
   /**
    * שני קרבות — 6.9.2026, בתלת מימד. "משחק פנדלים, בעיטות לשער במגרש השכונתי" ו"תחרות
    * חיובים, זריקה לסל בחצר הבית ספר": the two contests Maor asked for by name, each its
-   * own real ball flying through a real depth rather than a painted one. The wage is the
-   * same table as every other job — `hours` here is what a determined afternoon of it is
-   * worth, split five ways, one shekel amount per kick or throw that actually goes in.
+   * own real ball flying through a real depth rather than a painted one.
+   *
+   * **They pay nothing** — `paid: false`, `perGoal: 0`, `perBasket: 0` — and the `hours`
+   * on both rows is dead weight that `gigPay` returns before it ever reads (it is kept
+   * only because `Gig.hours` is required and the field is read by a guard elsewhere). This
+   * comment used to describe the wage they paid when they were first written; that wage was
+   * removed the same week, and the sentence outlived it by ten days.
    */
   {
     id: 'penalty-contest',
@@ -484,8 +538,16 @@ export const GIGS: readonly Gig[] = [
 export const gigId = (gig: Gig, chapter: string) => `gig-${gig.id}-${chapter}`
 export const gigFlag = (gig: Gig) => `gig:${gig.id}`
 
-/** whether this is work at all — everything is, except the two contests */
-export const isPaid = (gig: Gig) => gig.paid !== false
+/**
+ * האם כסף עובר כאן בכלל — כלומר: כל מה שאינו `play`.
+ *
+ * Kept under its original name and its original meaning, because `offeredIn`, the hotspot
+ * builder in `world/scenes.ts` and three test files all ask it and all mean "does this row
+ * take part in the week's money". `isWork` is the narrower question (`wager` answers no to
+ * that one and yes to this one), and the two are not interchangeable — which is exactly
+ * why both exist instead of one of them being asked twice with a mental asterisk.
+ */
+export const isPaid = (gig: Gig) => !isPlay(gig)
 
 /** whole shekels for one turn of this gig, in the money of the chapter's decade */
 export function gigPay(gig: Gig, chapter: string): number {
@@ -503,6 +565,13 @@ export function gigPay(gig: Gig, chapter: string): number {
  * buy the shirt on the first Saturday. One paid job per chapter puts the shirt back where
  * §13 of the Stage A bible wants it — several memory days away — and makes WHICH job you
  * took a decision rather than a queue.
+ *
+ * **ומה שהדגל הזה לא נוגע בו הוא `play`** (מאור, 17.9.2026: *"אפשר לקחת גם עבודה וגם לשחק
+ * פנדלים באותו יום"*). Nothing with `kindOf === 'play'` raises it, nothing with
+ * `kindOf === 'play'` is refused by it, and neither order matters: work then ball, ball
+ * then work, both on the same Saturday. A boy who carried crates all morning has still not
+ * kicked anything, and a chapter-scoped money rule that stopped him would be a rule about
+ * an economy applied to a childhood.
  */
 export const workDoneFlag = (chapter: string) => `work:paid:${chapter}`
 
@@ -522,7 +591,11 @@ export const offerFlag = (gig: Gig) => `work:offer:${gig.id}`
  *   · at least one paid job is always reachable somewhere in the chapter, because a
  *     chapter that offers no way to earn is a chapter that cannot be played by a boy who
  *     needs money;
- *   · the unpaid contests are never rotated out — the ball is always there.
+ *   · **`play` is never rotated at all** — the ball is always there. A week that could deal
+ *     away the street match would make "אני הפועל" a thing the seed decides, and a boy who
+ *     wants to kick a ball in his own street is not making an economic decision. This is
+ *     the same sentence as *"אפשר לקחת גם עבודה וגם לשחק פנדלים באותו יום"*, read from the
+ *     rotation's end instead of the work slot's.
  */
 export function offeredIn(chapter: string, seed: string): Set<string> {
   const eligible = GIGS.filter((gig) => isPaid(gig) && gigChapters(gig).includes(chapter))

@@ -883,6 +883,11 @@ export const ROUTE_WORDS: Readonly<Record<string, string>> = {
   'life.route.stage.entry': 'התחלה',
   'life.route.stage.practice': 'עשייה',
   'life.route.stage.apex': 'פסגה',
+  // הדרגה — the rung in Maor's own ordering, and the honest blank for a route he has not
+  // placed. The rung's WORD comes from `ROUTE_TIERS` (his line, verbatim); these two are
+  // only the label over it and the sentence for when there is no line.
+  'life.route.tier': 'הדרגה',
+  'life.route.tier.unplaced': 'הדרגה של זה עוד לא נקבעה',
   // What is missing, said the way a person would say it — never as a distance to a number.
   'life.route.gap.ladder': 'קודם השלב שלפני זה',
   'life.route.gap.age': 'אתה עוד צעיר מדי בשביל זה',

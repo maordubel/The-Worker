@@ -151,6 +151,21 @@ export type YellowPhotoFolder = {
   maxPercent: number
 }
 
+/**
+ * ...ושתי תיקיות, מ-17.9.2026, כי ההכרעה הורחבה במפורש ולא בדרך אגב.
+ *
+ * The kit folder was granted for one sentence's worth of reasoning — a photograph of a
+ * real garment is not a thing anybody designed. On 17.9.2026 Maor was shown the same
+ * measurement for a folder of scanned PAPER and answered with the general form of it:
+ *
+ *   **"בתמונות מקור ושל דברים אותנטים הצהוב מאושר להישאר."**
+ *
+ * That is wider than the first grant and it is still not "photographs may be yellow": it
+ * names ORIGINALS and AUTHENTIC OBJECTS, which is a property of the subject rather than of
+ * the file. So the shape is unchanged — a folder that holds exactly one kind of thing, a
+ * per-file measurement, and a test that re-derives the declaration — and the list is two
+ * entries long instead of one, which is a thing somebody has to notice.
+ */
 export const YELLOW_PHOTO_FOLDERS: readonly YellowPhotoFolder[] = [
   {
     folder: 'public/kits/',
@@ -164,6 +179,30 @@ export const YELLOW_PHOTO_FOLDERS: readonly YellowPhotoFolder[] = [
     filesWithYellow: 71,
     filesTotal: 168,
     maxPercent: 5.214,
+  },
+  {
+    folder: 'public/life/artefacts/',
+    approvedBy: 'מאור הראל — "בתמונות מקור ושל דברים אותנטים הצהוב מאושר להישאר."',
+    approvedOn: '2026-09-17',
+    why:
+      'עשרה חפצים אמיתיים שנסרקו מהארכיון שלו — המסכה של פנדל, ה-X של הזהב שמישהו ניקב בכרטיסיית ' +
+      'נוער, נייר שהצהיב בארבעים שנה. אף אחד לא בחר בצהוב הזה, וניקוי שלו מזייף את הסריקה. ' +
+      'הציורים באותה מסירה עברו de-yellow רגיל — סביבה מצוירת אינה מסמך',
+    measuredOn: '2026-09-17',
+    /**
+     * **וזה מספר גדול בהרבה מהראשון, וזו הנקודה ולא תופעת לוואי.**
+     *
+     * 5.214% בתיקיית החולצות הוא פס זהב על שרוול. 21.185% כאן הוא **המסכה של פנדל**: לוחית
+     * צהובה ברוחב השער, מעל נייר שהצהיב, מעל רצועת יציע מודפסת. אין דרך להוריד את המספר
+     * הזה בלי לצייר מחדש את השער — כלומר בלי לזייף את החפץ — ולכן הוא נמדד, מוצג ונרשם.
+     * העשרה כולם נושאים צהוב; חמישה מהם מתחת ל-0.05%, וארבעה מהם הם ארבעת שערי פנדל.
+     *
+     * שני המספרים נגזרים מחדש ב-`tests/brand.test.ts` מתוך `content/manual/life-artefacts.json`,
+     * כמו בתיקייה הראשונה: אישור שמצטט מדידה שכבר אינה נכונה הוא אישור למשהו אחר.
+     */
+    filesWithYellow: 10,
+    filesTotal: 10,
+    maxPercent: 21.185,
   },
 ] as const
 

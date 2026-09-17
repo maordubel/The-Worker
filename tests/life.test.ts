@@ -18,10 +18,10 @@ import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
-import { SHIRT, BACKDROP, extensionKeys, FIGURE, HERO80_WALK, KID_POSE, KID_WALK, KID_WALK_AWAY, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
+import { SHIRT, ARTEFACT, artUrl, BACKDROP, DOC, extensionKeys, FIGURE, HERO80_WALK, isArtefact, KID_POSE, KID_WALK, KID_WALK_AWAY, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
 import { PANO_SPOTS } from '@/lib/life/content/panoramas'
 import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
-import { exitInEra, inEra } from '@/lib/life/world/scenes'
+import { arrivalFor, exitInEra, inEra } from '@/lib/life/world/scenes'
 import { CHAPTERS } from '@/lib/life/content/chapters'
 import { meets } from '@/lib/life/world/types'
 
@@ -79,6 +79,42 @@ describe('חוק הצהוב — neither the palette nor the artwork has yellow i
     expect(assets).toBeGreaterThan(20)
   })
 
+  /**
+   * החפצים הסרוקים — התיקייה השנייה, והבדיקה שמחזיקה אותה נפרדת.
+   *
+   * `public/life/art` proves zero yellow on every row of its manifest, two tests up. The
+   * ten scanned objects of 17.9.2026 cannot live there and cannot be measured that way:
+   * they carry the yellow that is printed on them, granted as a folder in
+   * `lib/brand/yellowExemptions.ts` and counted per file in
+   * `content/manual/life-artefacts.json` (`tests/brand.test.ts` re-derives both numbers).
+   *
+   * What this guard protects is the seam between the two folders, which is the part that
+   * could break silently and in front of a player: an artefact is a `DOC` key like any
+   * other, so a dialogue may hold one up (rule 49), and `artUrl` is the ONLY thing that
+   * knows it resolves somewhere else. A key that drifts out of `ARTEFACT` keeps working in
+   * the type system and starts 404-ing on the glass.
+   */
+  it('resolves every scanned object out of its own folder, and not out of the art one', () => {
+    const ARTEFACTS = join(ROOT, 'public/life/artefacts')
+    expect(ARTEFACT.length).toBeGreaterThan(0)
+    for (const key of ARTEFACT) {
+      // a scanned object is a document: `{ e: 'doc' }` accepts it, and nothing else may
+      expect(DOC as readonly string[], `${key} is not a declared DOC key`).toContain(key)
+      expect(isArtefact(key), `${key} is not routed as an artefact`).toBe(true)
+      expect(artUrl(key), `${key} resolves to the wrong folder`).toBe(`/life/artefacts/${key}.webp`)
+      expect(existsSync(join(ARTEFACTS, `${key}.webp`)), `${key}.webp is missing`).toBe(true)
+      // and it is NOT in the folder that proves zero — one file, one home
+      expect(existsSync(join(ART, `${key}.webp`)), `${key}.webp is in both folders`).toBe(false)
+      // nor in either manifest, which is what the zero-yellow scan reads
+      for (const group of Object.values(artManifest)) {
+        expect(Object.keys(group), `${key} is in the art manifest`).not.toContain(key)
+      }
+    }
+    // and everything else still comes out of the art folder
+    expect(artUrl('ticketOffice')).toBe('/life/art/ticketOffice.webp')
+    expect(isArtefact('docTicket')).toBe(false)
+  })
+
   it('has a real file behind every asset the manifest claims', () => {
     for (const group of Object.values(artManifest)) {
       for (const key of Object.keys(group)) {
@@ -132,6 +168,29 @@ describe('חוק הצהוב — neither the palette nor the artwork has yellow i
         const ext = extensionKeys(scene.art)
         keys.add(ext.sky)
         keys.add(ext.ground)
+        /**
+         * ...וכרטיס ההגעה, מ-17.9.2026, כי הוא נטען עם החדר ולא נספר כאן מעולם.
+         *
+         * `arrivalFor` is a full backdrop that plays over the room for three or four
+         * seconds on the way in — `ground`, `streetEast`, `tunnelReveal`, `ussLow`. Every
+         * one of them is a file the player downloads to enter that room, and this guard
+         * walked straight past all of them: the heaviest room in the game measured 4.32 MB
+         * and actually costs 5.17.
+         *
+         * It surfaced when `ramat-gan` was given `ramatGanGates` and the card came out at
+         * 2.9 MB — bigger than the room it announces, because the converter could not get
+         * that painting to zero yellow at q90 and fell back to lossless (rule 61's designed
+         * behaviour, and the right trade: rule 8 is not a budget). The number is inside
+         * the ceiling either way, and now it is inside the MEASUREMENT, which is the part
+         * that matters — a budget that cannot see a file cannot fail on it.
+         */
+        const card = arrivalFor(scene, era.chapter)
+        if (card) {
+          keys.add(card.art)
+          const cardExt = extensionKeys(card.art)
+          keys.add(cardExt.sky)
+          keys.add(cardExt.ground)
+        }
         for (const layer of scene.layers ?? []) if (inEra(layer, era.chapter)) keys.add(layer.art)
         for (const actor of scene.actors) if (inEra(actor, era.chapter)) keys.add(actor.figure)
         for (const spot of scene.hotspots) if (inEra(spot, era.chapter) && spot.prop) keys.add(spot.prop.key)
