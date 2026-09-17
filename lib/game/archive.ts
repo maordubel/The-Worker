@@ -439,7 +439,35 @@ export const archive = {
 
 /* ------------------------------------------------------------------ lookups */
 
-const clubName = new Map(archive.clubs.map((club) => [club.slug, club.nameHe]))
+/**
+ * What a club is CALLED, as opposed to what the archive claims about it.
+ *
+ * The confidence floor above is right and stays: `archive.clubs` is what a game may
+ * reason with — who we are, who the derby is, which city, whether a club may be a
+ * distractor — and a club row read off one unreviewed table does not get to answer any
+ * of those (rule 2). But a NAME is not one of those claims. It is how the row identifies
+ * itself, and `nameOf.club` falling through to the slug does not withhold the name — it
+ * prints the same name with hyphens in it. The 17.9.2026 ויקיפועל ingest made that
+ * visible at scale: it minted 176 opponent clubs at confidence 1, and the trivia bank
+ * started asking "כמה שערים הבקיעה הפועל תל אביב בחוץ מול מכבי-פ&quot;ת". A slug on a
+ * screen is a defect in every direction — it is ugly, it is not how anyone writes the
+ * club's name, and next to four properly-set names it tells the player which option is
+ * the odd one out.
+ *
+ * So the display map is built from the FILE and the reasoning list stays filtered.
+ * Two constraints hold it honest:
+ *  · **Football only.** A club slug is unique only within a sport (rule 35 — the index
+ *    is `club (slug, sport)`), so a map keyed on the slug alone must be scoped to one
+ *    sport or it will answer a basketball question with a football club's name.
+ *  · **The floor still wins.** `archive.clubs` is laid down second, so nothing that
+ *    resolves today changes; this only adds names that used to come out as slugs.
+ */
+const clubName = new Map([
+  ...(clubsFile as RawFile).records
+    .filter((row) => row.sport === 'football')
+    .map((row) => [row.slug as string, row.nameHe as string] as const),
+  ...archive.clubs.map((club) => [club.slug, club.nameHe] as const),
+])
 const competitionName = new Map(archive.competitions.map((row) => [row.slug, row.nameHe]))
 const personName = new Map(archive.people.map((person) => [person.slug, person.fullNameHe]))
 const manufacturerName = new Map(archive.manufacturers.map((row) => [row.slug, row.nameHe]))

@@ -55,6 +55,26 @@ export function runPipeline(input: StagedBundle, report: IngestReport): Pipeline
   }
 
   collect('eras', (record) => record.slug)
+  /**
+   * **Known, and deliberately NOT changed here.** A club slug is unique only within a
+   * sport (rule 35: the schema's own index is `club_slug_sport_idx on club (slug,
+   * sport)`), and this key does not carry the sport — so the two clubs `clubs.json`
+   * lists as `הפועל-תל-אביב` (football and basketball) merge into one row here, and
+   * their `aliases` are unioned across the sports rule 14 says must never share one.
+   *
+   * Keying on `${slug}|${sport}` fixes it and was tried on 17.9.2026. It works, and it
+   * immediately surfaces two things underneath it that are data decisions rather than
+   * code: `הפועל-תל-אביב` and `הפועל-תל-אביב-כדורסל` are two rows for one basketball
+   * club and both claim the alias `הפועל תל אביב`, and `מכבי-תל-אביב` carries
+   * `isDerbyRival` in both sports. Which slug is the basketball club's is a curation
+   * call somebody has to make out loud (rule 7: "resolve by hand, never fuzzily"), and
+   * making it inside a football ingest would be the wrong delta deciding it.
+   *
+   * So it is written down instead of half-done. What the 17.9.2026 ingest DID do is stop
+   * adding to the problem: a football club whose slug is already a basketball club's is
+   * minted sport-suffixed (`sources/vikipoel-cargo.ts`), so no new cross-sport collision
+   * reaches this merge.
+   */
   collect('clubs', (record) => record.slug, ['aliases'])
   collect('venues', (record) => record.slug, ['aliases'])
   collect('competitions', (record) => record.slug, ['aliases'])

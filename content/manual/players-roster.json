@@ -2671,6 +2671,16 @@
   {
    "slug": "תמיר-לינהרט",
    "fullNameHe": "תמיר לינהרט"
+  },
+  {
+   "slug": "יאניק-ללינדאל",
+   "fullNameHe": "יאניק ללינדאל",
+   "aliases": [
+    "יאניק ללינדאל"
+   ],
+   "confidence": 1,
+   "sourceUrl": "https://wiki.red-fans.com/api.php?action=query&prop=categories",
+   "sourceTitle": "ויקיפועל — קטגוריות דפי השחקנים (api.php), נקרא 17.9.2026"
   }
  ]
 }

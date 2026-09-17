@@ -253,6 +253,237 @@
       "sourceAUrl": "https://sports.walla.co.il/item/3356277",
       "sourceBUrl": null,
       "noteHe": "עד שיימצא מקור שני, המשחק בחיים של פוגי לא מייחס שער לשם — רק הסך: הפועל תל אביב 6 — רמת עמידר 0."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1962-10-13 הפועל-תל-אביב — שמשון-תל-אביב",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "הפועל-תל-אביב מול שמשון-תל-אביב — Bloomfield Stadium — Wikipedia (StadiumDB agrees; golden-lotus.co.il says 0-0 — see fact-conflicts)",
+      "claimB": "הפועל ת\"א מול שמשון ת\"א — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1962-10-13 הפועל-תל-אביב — שמשון-תל-אביב",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "score",
+      "claimA": "1:1 — Bloomfield Stadium — Wikipedia (StadiumDB agrees; golden-lotus.co.il says 0-0 — see fact-conflicts)",
+      "claimB": "0:0 — ויקיפועל",
+      "noteHe": "1962-10-13 · הפועל-תל-אביב מול שמשון-תל-אביב. שתי התוצאות נשמרות; אין הכרעה."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1962-10-13 הפועל-תל-אביב — שמשון-תל-אביב",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Bloomfield_Stadium",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "competition",
+      "claimA": "ליגת-העל — Bloomfield Stadium — Wikipedia (StadiumDB agrees; golden-lotus.co.il says 0-0 — see fact-conflicts)",
+      "claimB": "ליגה לאומית — ויקיפועל",
+      "noteHe": "שני המקורות מתעדים את אותו משחק תחת מפעל אחר. ליגה לאומית וליגת העל אינן אותה תחרות ואינן מקופלות זו לזו — הסתירה נרשמת."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1986-05-24 הפועל-תל-אביב — מכבי-חיפה",
+      "sourceAUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "competition",
+      "claimA": "ליגת-העל — ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86",
+      "claimB": "ליגה לאומית — ויקיפועל",
+      "noteHe": "שני המקורות מתעדים את אותו משחק תחת מפעל אחר. ליגה לאומית וליגת העל אינן אותה תחרות ואינן מקופלות זו לזו — הסתירה נרשמת."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1995-08-08 הפועל-תל-אביב — זימברו-קישינב",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_F.C._in_international_football",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "home_away",
+      "claimA": "בית: הפועל-תל-אביב — Hapoel Tel Aviv F.C. in international football — Wikipedia (0–0, 0–2, agg 0–2)",
+      "claimB": "בית: זימברו קישינב — ויקיפועל",
+      "noteHe": "שני המקורות מסכימים על הזוג ועל התאריך וחלוקים על מי אירח. שניהם נשמרים."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1995-08-08 הפועל-תל-אביב — זימברו-קישינב",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_F.C._in_international_football",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "score",
+      "claimA": "0:0 — Hapoel Tel Aviv F.C. in international football — Wikipedia (0–0, 0–2, agg 0–2)",
+      "claimB": "0:2 — ויקיפועל",
+      "noteHe": "1995-08-08 · הפועל-תל-אביב מול זימברו-קישינב. שתי התוצאות נשמרות; אין הכרעה."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1995-08-22 זימברו-קישינב — הפועל-תל-אביב",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_F.C._in_international_football",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "home_away",
+      "claimA": "בית: זימברו-קישינב — Hapoel Tel Aviv F.C. in international football — Wikipedia (0–0, 0–2, agg 0–2)",
+      "claimB": "בית: הפועל ת\"א — ויקיפועל",
+      "noteHe": "שני המקורות מסכימים על הזוג ועל התאריך וחלוקים על מי אירח. שניהם נשמרים."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1995-08-22 זימברו-קישינב — הפועל-תל-אביב",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_F.C._in_international_football",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "score",
+      "claimA": "2:0 — Hapoel Tel Aviv F.C. in international football — Wikipedia (0–0, 0–2, agg 0–2)",
+      "claimB": "0:0 — ויקיפועל",
+      "noteHe": "1995-08-22 · זימברו-קישינב מול הפועל-תל-אביב. שתי התוצאות נשמרות; אין הכרעה."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1998-05-02 הפועל-תל-אביב — הפועל-פתח-תקווה",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/1997%E2%80%9398_Liga_Leumit",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "הפועל-תל-אביב מול הפועל-פתח-תקווה — 1997–98 Liga Leumit — Wikipedia (final table: בית\"ר 69, הפועל ת\"א 68)",
+      "claimB": "הפועל ת\"א מול הפועל פ\"ת — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1998-05-02 הפועל-תל-אביב — הפועל-פתח-תקווה",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/1997%E2%80%9398_Liga_Leumit",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "competition",
+      "claimA": "ליגת-העל — 1997–98 Liga Leumit — Wikipedia (final table: בית\"ר 69, הפועל ת\"א 68)",
+      "claimB": "ליגה לאומית — ויקיפועל",
+      "noteHe": "שני המקורות מתעדים את אותו משחק תחת מפעל אחר. ליגה לאומית וליגת העל אינן אותה תחרות ואינן מקופלות זו לזו — הסתירה נרשמת."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "1999-05-19 בית\"ר-ירושלים — הפועל-תל-אביב",
+      "sourceAUrl": "https://wiki.red-fans.com/index.php/%D7%A2%D7%95%D7%A0%D7%AA_1998/99_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)_%D7%92%D7%91%D7%99%D7%A2_%D7%94%D7%9E%D7%93%D7%99%D7%A0%D7%94_%D7%92%D7%9E%D7%A8",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "בית\"ר-ירושלים מול הפועל-תל-אביב — ויקיפועל — עונת 1998/99 (כדורגל) גביע המדינה גמר (19.5.1999; סביליה 6׳, תקווה 13׳; 40,000)",
+      "claimB": "הפועל ת\"א מול בית\"ר י-ם — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2000-05-17 בית\"ר-ירושלים — הפועל-תל-אביב",
+      "sourceAUrl": "https://en.wikipedia.org/wiki/1999%E2%80%932000_Israel_State_Cup",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "בית\"ר-ירושלים מול הפועל-תל-אביב — 1999–2000 Israel State Cup — Wikipedia (2–2, 4–2 בפנדלים; 40,000; שופט לוי)",
+      "claimB": "הפועל ת\"א מול בית\"ר י-ם — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2001-08-23 הפועל-תל-אביב — ארארט-ירוואן",
+      "sourceAUrl": "https://wiki.red-fans.com/",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "הפועל-תל-אביב מול ארארט-ירוואן — ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+      "claimB": "הפועל ת\"א מול אררט ירבאן — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2002-08-29 פרטיזני-טירנה — הפועל-תל-אביב",
+      "sourceAUrl": "https://wiki.red-fans.com/",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "פרטיזני-טירנה מול הפועל-תל-אביב — ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+      "claimB": "פרטיזני טיראנה מול הפועל ת\"א — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2002-09-19 קרנטן — הפועל-תל-אביב",
+      "sourceAUrl": "https://wiki.red-fans.com/",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "קרנטן מול הפועל-תל-אביב — ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+      "claimB": "קארנטן מול הפועל ת\"א — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2002-11-14 הפועל-תל-אביב — לידס",
+      "sourceAUrl": "https://wiki.red-fans.com/",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "score",
+      "claimA": "4:1 — ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+      "claimB": "1:4 — ויקיפועל",
+      "noteHe": "2002-11-14 · הפועל-תל-אביב מול לידס. שתי התוצאות נשמרות; אין הכרעה."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2002-08-15 הפועל-תל-אביב — פרטיזני-טירנה",
+      "sourceAUrl": "https://wiki.red-fans.com/",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "הפועל-תל-אביב מול פרטיזני-טירנה — ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+      "claimB": "הפועל ת\"א מול פרטיזני טיראנה — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2002-08-15 הפועל-תל-אביב — פרטיזני-טירנה",
+      "sourceAUrl": "https://wiki.red-fans.com/",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "score",
+      "claimA": "0:1 — ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+      "claimB": "1:0 — ויקיפועל",
+      "noteHe": "2002-08-15 · הפועל-תל-אביב מול פרטיזני-טירנה. שתי התוצאות נשמרות; אין הכרעה."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2002-10-03 הפועל-תל-אביב — קרנטן",
+      "sourceAUrl": "https://wiki.red-fans.com/",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "הפועל-תל-אביב מול קרנטן — ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+      "claimB": "הפועל ת\"א מול קארנטן — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2002-10-03 הפועל-תל-אביב — קרנטן",
+      "sourceAUrl": "https://wiki.red-fans.com/",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "score",
+      "claimA": "1:0 — ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+      "claimB": "0:1 — ויקיפועל",
+      "noteHe": "2002-10-03 · הפועל-תל-אביב מול קרנטן. שתי התוצאות נשמרות; אין הכרעה."
+    },
+    {
+      "entityTable": "match",
+      "entityKey": "2010-11-24 הפועל-תל-אביב — בנפיקה",
+      "sourceAUrl": "https://www.skysports.com/football/hap-tel-aviv-vs-benfica/report/227534",
+      "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+      "resolution": null,
+      "field": "opponent_club",
+      "claimA": "הפועל-תל-אביב מול בנפיקה — Sky Sports match report",
+      "claimB": "הפועל ת\"א מול בנפיקה ליסבון — ויקיפועל",
+      "noteHe": "אותו תאריך, אותו מועדון, שם יריבה שונה בין שני המקורות. לא אוחד: איחוד כינויים הוא החלטה על קובץ המועדונים, לא התאמה מקורבת בשכבת הקליטה (כלל 7)."
     }
   ]
 }

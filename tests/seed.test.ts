@@ -79,7 +79,38 @@ describe('derby — Maccabi Tel Aviv only', () => {
 describe('football and basketball never mix', () => {
   it('gives every match a competition and two clubs of one sport', () => {
     const { bundle } = seed()
-    const sportOfClub = new Map(bundle.clubs.map((club) => [club.slug, club.sport]))
+    // WIDENED, not weakened — the claim is the same one, the mechanism is not.
+    //
+    // This used to map slug → sport, which can only work while a slug names one club.
+    // It does not: rule 35 says a club slug is unique only WITHIN a sport, and
+    // `clubs.json` has listed `הפועל-תל-אביב` as both a football and a basketball club
+    // since 2.9.2026. The old map answered with whichever row came last, and it only
+    // ever gave the right answer because `pipeline.ts` merges clubs on the slug alone —
+    // so there was one row left to ask. That merge is a bug (see the note at
+    // `collect('clubs', …)`) and it is NOT fixed here, because fixing it surfaces two
+    // basketball curation decisions that a football ingest has no business making.
+    //
+    // So the guard is written so it does not depend on the merge: for a match in
+    // competition C of sport S, BOTH clubs must have a row in sport S. It passes today
+    // either way, and the day the merge is keyed by sport it keeps meaning what it says
+    // instead of quietly starting to read the wrong row.
+    const sportsOfClub = new Map<string, Set<string>>()
+    for (const club of bundle.clubs) {
+      const seen = sportsOfClub.get(club.slug) ?? new Set<string>()
+      seen.add(club.sport)
+      sportsOfClub.set(club.slug, seen)
+    }
+    // A competition slug that named two sports would make the map below ambiguous in
+    // exactly the way the club map was. It does not today, and this says so out loud
+    // rather than leaving the next collision to be discovered by a wrong answer.
+    const competitionSports = new Map<string, Set<string>>()
+    for (const competition of bundle.competitions) {
+      const seen = competitionSports.get(competition.slug) ?? new Set<string>()
+      seen.add(competition.sport)
+      competitionSports.set(competition.slug, seen)
+    }
+    for (const [slug, sports] of competitionSports) expect(sports.size, slug).toBe(1)
+
     const sportOfCompetition = new Map(
       bundle.competitions.map((competition) => [competition.slug, competition.sport]),
     )
@@ -87,8 +118,13 @@ describe('football and basketball never mix', () => {
     expect(bundle.matches.length).toBeGreaterThan(0)
     for (const match of bundle.matches) {
       const sport = sportOfCompetition.get(match.competitionSlug)
-      expect(sportOfClub.get(match.homeClubSlug)).toBe(sport)
-      expect(sportOfClub.get(match.awayClubSlug)).toBe(sport)
+      expect(sport, match.competitionSlug).toBeDefined()
+      for (const slug of [match.homeClubSlug, match.awayClubSlug]) {
+        expect(
+          sportsOfClub.get(slug)?.has(sport as string),
+          `${match.naturalKey}: ${slug} has no ${String(sport)} row`,
+        ).toBe(true)
+      }
     }
   })
 

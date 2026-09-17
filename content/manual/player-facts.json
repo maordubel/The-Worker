@@ -13331,7 +13331,9 @@
    "took": "DF"
   }
  ],
- "unknown": [],
+ "unknown": [
+  "יאניק ללינדאל"
+ ],
  "refusedMatches": [
   {
    "personNameHe": "אבדג'י",

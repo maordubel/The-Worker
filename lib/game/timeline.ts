@@ -78,7 +78,28 @@ function safeHint(raw: string): string {
     .trim()
 }
 
+/**
+ * The pool is built ONCE.
+ *
+ * It is a pure function of the archive, which is a set of static JSON imports that
+ * cannot change while the process is alive — so every call after the first was
+ * rebuilding an identical array. That was invisible while the archive held 33 matches
+ * and became the whole cost of the mode when the ויקיפועל ingest took it past three
+ * thousand: `boardAfter`/`gradeInsert` call `runCards`, which calls `pool()`, and
+ * `tests/timeline.test.ts` walks three hundred seeds × eleven placements, so one run of
+ * that file rebuilt the pool ten thousand times.
+ *
+ * The guard was right and the code moved to it (rule 65): the test did not get slower
+ * because it was asking too much, it got slower because the mode recomputes a constant.
+ * Nothing about what the pool CONTAINS changes here.
+ */
+let cachedPool: DatedCard[] | null = null
+
 function pool(): DatedCard[] {
+  return (cachedPool ??= buildPool())
+}
+
+function buildPool(): DatedCard[] {
   const out: DatedCard[] = []
 
   for (const moment of archive.moments) {

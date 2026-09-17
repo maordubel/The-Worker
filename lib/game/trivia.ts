@@ -1657,7 +1657,44 @@ function normalise(question: Unrated): Omit<Built, 'difficulty'> {
  * narrow topic draws on the handful of templates that ask about it; `general` draws on
  * all of them, which is why general is the widest bank rather than a leftovers bin.
  */
+/**
+ * One round is built ONCE per (seed, topic, cursor).
+ *
+ * `buildRound` is deterministic in its three arguments — that is the property grading
+ * relies on — and `deal`, `grade`, `auditRound` and `roundDifficulties` all call it with
+ * the SAME arguments, twelve times over, to hand out twelve questions from one array.
+ * Every one of those calls rebuilt the entire bank: every template, over the whole
+ * archive, with the ambiguity pass on top.
+ *
+ * That was cheap while the archive held 33 matches and stopped being cheap when the
+ * ויקיפועל ingest took it past three thousand — a round costs about forty milliseconds
+ * to build now, and dealing one cost twelve of them. Caching the last few rounds is not
+ * a change to what a round IS: the same seed still produces the same twelve questions,
+ * and a seed that has not been asked for is still built from scratch.
+ *
+ * The cache is bounded because a round is a large object (the bank behind it is bigger),
+ * and a server that has dealt ten thousand seeds must not be holding ten thousand banks.
+ * Rounds are dealt question by question, so a handful of entries is all a deal needs.
+ */
+const ROUND_CACHE_LIMIT = 8
+const roundCache = new Map<string, Built[]>()
+
 function buildRound(seed: number, topic: Topic = DEFAULT_TOPIC, cursor = 0): Built[] {
+  const key = `${seed}|${topic}|${cursor}`
+  const cached = roundCache.get(key)
+  if (cached) return cached
+  const built = computeRound(seed, topic, cursor)
+  roundCache.set(key, built)
+  // Oldest out first — `Map` iterates in insertion order, so the first key is the one
+  // least recently BUILT, which for a round dealt question by question is the right one.
+  if (roundCache.size > ROUND_CACHE_LIMIT) {
+    const oldest = roundCache.keys().next()
+    if (!oldest.done) roundCache.delete(oldest.value)
+  }
+  return built
+}
+
+function computeRound(seed: number, topic: Topic = DEFAULT_TOPIC, cursor = 0): Built[] {
   const random = rng(seed)
   const pool: Built[] = []
   const byGroup = new Map<string, Built[]>()
