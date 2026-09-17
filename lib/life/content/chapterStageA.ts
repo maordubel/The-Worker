@@ -962,9 +962,9 @@ export const CONVERSATIONS_A4: Conversation[] = [
     branches: [
       { when: { flag: 'a4:bottles' }, lines: [{ who: null, text: 'הסמטה נקייה. אספת הכל, ועוד אף אחד לא שתה מאז.' }] },
       {
-        lines: [{ who: null, text: 'שלושה בקבוקי פיקדון ליד הפח. מישהו לא רצה ללכת לרפי.' }],
+        lines: [{ who: null, text: 'חמישה בקבוקי פיקדון ליד הפח. מישהו לא רצה ללכת לרפי.' }],
         choices: [
-          { id: 'collect', text: 'לאסוף.', then: [{ e: 'flag', flag: 'a4:bottles' }, { e: 'give', item: 'bottle', count: 3 }, { e: 'time', minutes: 8 }, { e: 'toast', text: 'שלושה בקבוקים. מלוכלכים. שווים.', tone: 'plain' }] },
+          { id: 'collect', text: 'לאסוף.', then: [{ e: 'flag', flag: 'a4:bottles' }, { e: 'give', item: 'bottle', count: 5 }, { e: 'time', minutes: 8 }, { e: 'toast', text: 'חמישה בקבוקים. מלוכלכים. שווים.', tone: 'plain' }] },
         ],
       },
     ],
@@ -977,20 +977,20 @@ export const CONVERSATIONS_A4: Conversation[] = [
       {
         when: { hasItem: 'bottle' },
         lines: [{ who: 'רפי מהקיוסק', text: 'בקבוקים? תביא. שקל לבקבוק. ואל תביא לי את המלוכלכים של הסמטה — טוב, תביא.' }],
-        then: [{ e: 'take', item: 'bottle', count: 3 }, { e: 'money', agorot: 300, why: 'פיקדון' }, { e: 'sfx', key: 'coins', level: 0.6 }, { e: 'toast', text: '3 ₪. הכיס מצלצל.', tone: 'plain' }],
+        then: [{ e: 'take', item: 'bottle', count: 5 }, { e: 'money', agorot: 500, why: 'פיקדון' }, { e: 'sfx', key: 'coins', level: 0.6 }, { e: 'toast', text: '5 ₪. הכיס מצלצל.', tone: 'plain' }],
       },
       {
         when: { minAgorot: SHIRT_PRICE },
         lines: [{ who: 'רפי מהקיוסק', text: 'החולצה? 30 שקל. יש לך? תספור על הדלפק, לא בכיס.' }],
         choices: [
-          { id: 'buy', text: 'לספור על הדלפק. הכל.', then: [{ e: 'money', agorot: -SHIRT_PRICE, why: 'החולצה' }, { e: 'own', item: 'shirt85' }, { e: 'shirt', id: 'tveria85' }, { e: 'redheart', key: 'footballLove', delta: 5 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'remember', who: 'shopkeeper', eventId: 'bought-shirt-1985', significance: 'major' }, { e: 'sfx', key: 'coins', level: 0.7 }, { e: 'toast', text: 'הוא קיפל אותה פעמיים והכניס לשקית של לחם.', tone: 'red' }, { e: 'goto', node: 'rafi-a4-bought' }] },
+          { id: 'buy', text: 'לספור על הדלפק. הכל.', then: [{ e: 'money', agorot: -SHIRT_PRICE, why: 'החולצה' }, { e: 'own', item: 'shirt85' }, { e: 'shirt', id: 'tveria85' }, { e: 'proof', kind: 'first_shirt_bought', proofId: 'first_shirt_bought:{chapter}', subjectHe: 'החולצה מהחלון של רפי', noteHe: 'נספרה על הדלפק, מטבע־מטבע' }, { e: 'redheart', key: 'footballLove', delta: 5 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'remember', who: 'shopkeeper', eventId: 'bought-shirt-1985', significance: 'major' }, { e: 'sfx', key: 'coins', level: 0.7 }, { e: 'toast', text: 'הוא קיפל אותה פעמיים והכניס לשקית של לחם.', tone: 'red' }, { e: 'goto', node: 'rafi-a4-bought' }] },
           { id: 'wait', text: '"עוד לא. בשבוע הבא."', then: [{ e: 'toast', text: '"בשבוע הבא היא עוד פה." הוא לא היה בטוח.', tone: 'plain' }] },
         ],
       },
       {
         lines: [{ who: 'רפי מהקיוסק', text: 'החולצה? 30 שקל. אין לך 30. יש לך פנים של ילד שסופר בראש.' }],
         choices: [
-          { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'time', minutes: 50 }, { e: 'energy', delta: -15 }, { e: 'money', agorot: 500, why: 'ארגזים' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'toast', text: 'שעה של ארגזים, אחד־אחד. 5 ₪ ובקבוק קולה שלא ביקשת.', tone: 'plain' }] },
+          { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'time', minutes: 50 }, { e: 'energy', delta: -15 }, { e: 'money', agorot: 500, why: 'ארגזים' }, { e: 'proof', kind: 'paid_shift', proofId: 'paid_shift:{chapter}', subjectHe: 'הארגזים של רפי', noteHe: 'שעה של ארגזים, ושכר שנספר ביד' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'toast', text: 'שעה של ארגזים, אחד־אחד. 5 ₪ ובקבוק קולה שלא ביקשת.', tone: 'plain' }] },
           /**
            * המעטפה מול החולצה — the whole economy of this chapter in one row of choices.
            *
@@ -1023,6 +1023,18 @@ export const CONVERSATIONS_A4: Conversation[] = [
     branches: [{ lines: [{ who: null, text: 'השקית ביד. הביתה, לא בריצה. בריצה היא יכולה ליפול.' }], then: [{ e: 'ending', id: 'shirt' }] }],
   },
   {
+    /**
+     * שני דגלים, לא אחד — ולמה זה לא קוסמטיקה.
+     *
+     * `a4:kobi` היה מורם בשני הענפים: זה שלוקח את החמישה שקל וזה שמסרב להם. הוא נכון
+     * לשאלה שהוא נשאל עליה ("דיברנו על זה"), והוא חסר־ערך לכל שאלה על מימון — ולכן
+     * `ACH_SHIRT_GIFT` לא היה ניתן להשגה בידי אף אחד: התנאי שלו הצביע על דגל שעלה גם
+     * כשלא הייתה מתנה, אז הוא נכתב מלכתחילה מול `a4:kobi-gave`, דגל שלא קיים.
+     *
+     * `a4:kobi-gave` עולה עכשיו רק בענף שלוקח, לצד `gift_received` בפנקס. הענף שמסרב
+     * לא רושם כלום — וזאת בדיוק הראיה השלילית ש-`ACH_SHIRT_SELF` דורש: הוא לא נשען על
+     * "לא ראינו מתנה", הוא נשען על פנקס שרושם מתנה בכל פעם שיש אחת.
+     */
     id: 'kobi-a4',
     nameHe: 'קובי',
     branches: [
@@ -1030,7 +1042,7 @@ export const CONVERSATIONS_A4: Conversation[] = [
       {
         lines: [{ who: 'קובי', text: 'החולצה מהחלון של רפי? יפה. כמה חסר לך?' }],
         choices: [
-          { id: 'ask', text: '"הרבה."', then: [{ e: 'flag', flag: 'a4:kobi' }, { e: 'money', agorot: 500, why: 'מאבא' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'toast', text: 'הוא הוציא 5 שקל מהכיס בלי לספור. "השאר שלך."', tone: 'plain' }] },
+          { id: 'ask', text: '"הרבה."', then: [{ e: 'flag', flag: 'a4:kobi' }, { e: 'flag', flag: 'a4:kobi-gave' }, { e: 'money', agorot: 500, why: 'מאבא' }, { e: 'proof', kind: 'gift_received', proofId: 'gift_received:{chapter}', subjectHe: 'קובי', noteHe: 'חמישה שקל מהכיס שלו, בלי לספור' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'toast', text: 'הוא הוציא 5 שקל מהכיס בלי לספור. "השאר שלך."', tone: 'plain' }] },
           { id: 'alone', text: '"אני אסתדר לבד."', then: [{ e: 'flag', flag: 'a4:kobi' }, { e: 'personality', key: 'stubbornness', delta: 2 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 }, { e: 'toast', text: 'הוא הנהן. אצלו זה מחמאה.', tone: 'plain' }] },
         ],
       },

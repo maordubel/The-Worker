@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 
+import { eligibleFor, offerConversationFor, offeredFlag } from '../../routes'
 import { hintFor } from '../../help'
 import type { EndingCard } from '../../content/chapter1986'
 import { clockLabel } from '../../clock'
@@ -54,7 +55,7 @@ import { matchScriptFor, type MatchScript } from '../../content/matchScripts'
 import { DerbyFromAfar, DerbyNight, derbyMarginHe, type DerbyMood } from '../derby1991'
 import { PassageScene } from './PassageScene'
 import { meets } from '../../world/types'
-import { artUrl, extensionKeys, PARALLAX, parallaxKeys, parallaxPlane, type ParallaxPlane } from '../art'
+import { artUrl, extensionKeys, PARALLAX, parallaxKeys, parallaxPlane, WALK_AWAY, type ParallaxPlane } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import type { MapPlace } from '../game'
 import { LIFE_PALETTE } from '../palette'
@@ -626,6 +627,7 @@ export class WorldScene extends Phaser.Scene {
     this.announceNewShirts()
     this.announceNewAlbums()
     this.announceSeasonTicket()
+    this.offerRoute()
 
     this.openChapterBeat(state)
 
@@ -1783,6 +1785,29 @@ export class WorldScene extends Phaser.Scene {
       } else {
         this.lastDir = ay < 0 ? 'up' : 'down'
       }
+    }
+
+    /**
+     * איזה מחזור שייך לכיוון הזה — and it is decided here, above everything that uses it,
+     * because `strideAdvance` divides by the number of frames in the cycle it is feeding.
+     *
+     * This used to be one branch — `moving && lastDir === 'side'` — over one list, with a
+     * comment saying the child's cycle "only exists side-on". On 16.9.2026 the eight files
+     * that list held were looked at: `pogi-w1…w8` have no face and no badge on the shirt.
+     * They are BACK views. So side-on had been playing a boy walking away from the camera
+     * while sliding along the street, and the heading those frames belong to — into the
+     * picture — had no animation at all. Both halves of that are fixed by asking the art
+     * registry which cycle each heading owns and accepting that a heading may own none:
+     * `down` never has, and an era with no away sheet keeps the standing pose and the bob.
+     */
+    const cycle =
+      this.lastDir === 'side'
+        ? this.era.player.walk
+        : this.lastDir === 'up'
+          ? WALK_AWAY[this.era.player.pose.up] ?? null
+          : null
+
+    if (moving) {
       /**
        * הרגליים לא מחליקות יותר.
        *
@@ -1796,24 +1821,24 @@ export class WorldScene extends Phaser.Scene {
       this.stride += strideAdvance(
         Math.hypot(movedX, movedY / DEPTH),
         this.player.displayHeight,
-        this.era.player.walk.length,
+        (cycle ?? this.era.player.walk).length,
       )
       this.idleFor = 0
     }
 
-    // The child is the one character with a real walk cycle — eight frames from the
-    // green-screen sheet — and it only exists side-on, which is where the walking mostly
-    // happens. Facing the camera or away, a bob does the work.
-    if (moving && this.lastDir === 'side') {
-      const walk = this.era.player.walk
-      const index = Math.floor(this.stride) % walk.length
-      const frame = walk[index] ?? walk[0]
+    // The child is the one character with a real walk cycle, and he now has two: a
+    // side-on pair in profile and eight frames of his back, each on the heading it was
+    // drawn for. Facing the camera — the one heading nobody drew a cycle for — a bob
+    // does the work, as it did for all three before.
+    if (moving && cycle) {
+      const index = Math.floor(this.stride) % cycle.length
+      const frame = cycle[index] ?? cycle[0]
       this.player.setTexture(`art-${frame}`)
       // A foot lands on the contact frames (the first of each half of the cycle) — and
       // on a two-frame stand-in, on every frame change.
       if (index !== this.lastFrame) {
         this.lastFrame = index
-        if (walk.length < 6 || index % Math.floor(walk.length / 2) === 0) {
+        if (cycle.length < 6 || index % Math.floor(cycle.length / 2) === 0) {
           const surface = this.def.ambience === 'stadium' ? 'terrace' : this.def.ambience === 'day' || this.def.ambience === 'dusk' ? 'street' : 'floor'
           this.ctx.bus.emit('sound', { kind: 'step', surface })
         }
@@ -1830,11 +1855,13 @@ export class WorldScene extends Phaser.Scene {
       // The bob runs on EVERY heading now, side-on included.
       //
       // It used to be the substitute for an animation and was therefore suppressed
-      // exactly where the animation existed. Pogi's sheet holds two strides rather than
-      // eight, so the bob is no longer a substitute — it is half the walk, and the two
-      // frames read as steps because the body rises between them. It is smaller
-      // side-on, because there a real leg is already moving.
-      const lift = this.lastDir === 'side' ? 0.0032 : 0.005
+      // exactly where the animation existed. Pogi's side-on pair holds two strides rather
+      // than eight, so the bob is no longer a substitute — it is half the walk, and the
+      // two frames read as steps because the body rises between them. The amount is
+      // decided by whether a cycle is playing rather than by the heading's name: where a
+      // real leg is already moving it is small, and where nothing is drawn it is the
+      // whole animation and has to be seen.
+      const lift = cycle ? 0.0032 : 0.005
       this.player.y = ny - Math.abs(Math.sin(this.stride)) * this.H * lift
     }
 
@@ -4938,6 +4965,41 @@ export class WorldScene extends Phaser.Scene {
     if (told) return
     this.ctx.engine.dispatch({ t: 'flag.raised', flag })
     this.time.delayedCall(2800, () => this.ctx.bus.emit('season', { kind: 'onSale', season: season.id }))
+  }
+
+  /**
+   * ההזמנה — מה שאתה כבר עושה יש לו שם.
+   *
+   * *"בדיקה נעשית בסיום פעולה רלוונטית ובכניסה לפרק, לא בכל תנועה"* — so this runs where
+   * the other three announcers run, on the room a chapter opens in, and nowhere on the
+   * tick. `eligibleFor` is pure and writes nothing, which is the line the whole routes
+   * design is drawn on: reaching a threshold *"יוצרת הזמנה שניתן לדחות; אינה מבצעת
+   * החלטה"*, so the state does not change until a person presses something.
+   *
+   * **One offer, and the first one.** The model hands back at most one stage per route,
+   * but a man can cross two routes' thresholds in the same chapter, and two conversations
+   * queued behind each other is a promotion ceremony. The rest keep their eligibility and
+   * are offered by the next chapter that opens.
+   *
+   * 4200ms, after the shirt (1400), the album (2200) and the season (2800), for the same
+   * reason those three are staggered: a chapter that turns over all four must not stack
+   * them on one glass. And it refuses to open over a conversation or a paused world — an
+   * offer that interrupts the scene it was earned in reads as a bug, not as a beat.
+   */
+  private offerRoute() {
+    const offers = eligibleFor(this.ctx.engine.state)
+    for (const offer of offers) {
+      const flag = offeredFlag(offer.route.id, offer.stage)
+      if (this.ctx.engine.state.flags[flag]) continue
+      const conversation = offerConversationFor(offer.route.id, offer.stage)
+      if (!conversation) continue
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag })
+      this.time.delayedCall(4200, () => {
+        if (this.paused || this.ctx.dialogue.open) return
+        this.ctx.dialogue.start(conversation)
+      })
+      return
+    }
   }
 
   enterChapter(next: ChapterDef) {

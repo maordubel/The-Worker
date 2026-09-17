@@ -15,7 +15,9 @@ import type {
   RedHeartId,
   RelationshipAxis,
   RelationshipMemory,
+  ReputationAudience,
   SinaiStance,
+  SkillId,
   TraitId,
   WellbeingId,
 } from '../types'
@@ -197,6 +199,62 @@ export type Effect =
   | { e: 'institution'; key: InstitutionGauge; delta: number }
   | { e: 'presence'; mode: PresenceMode }
   | { e: 'laces'; response: LacesResponse }
+  /**
+   * שבעת המסלולים — seven verbs, and the shape of the set is the design (16.9.2026).
+   *
+   * The life spec's routes gate on two kinds of number that behave nothing like each
+   * other, and the vocabulary below is built so that a content file CANNOT confuse them
+   * however carelessly it is written:
+   *
+   *  · `skill` moves a capability, immediately, with nobody watching. That is the whole
+   *    point of a skill — *"הכישור עצמו יכול להשתפר מיד"*.
+   *  · `proof` records evidence AND queues the standing it earns. It does not move a
+   *    standing. Nothing here does.
+   *  · `heard` is what pays a queued claim out, and it exists as a separate verb because
+   *    the moment the audience finds out is a moment in the fiction — a supplier saying
+   *    your name at a counter, a song coming back at you from people you never met.
+   *
+   * **There is deliberately no verb that raises a reputation.** Not one. The only way up
+   * is `proof` then `heard`, which is the spec's rule (*"REP_* עולה רק כשהקהל המוגדר
+   * ראה/קיבל דיווח מאומת על הפעולה"*) expressed as a missing word rather than as a
+   * comment somebody has to remember. `repLoss` goes the other way and only the other
+   * way — its delta is forced negative in the runtime — because a breach that came out is
+   * known by definition and has nobody to wait for.
+   */
+  | { e: 'skill'; skill: SkillId; delta: number; why: string }
+  /**
+   * ראיה — evidence, and the claim it earns.
+   *
+   * `proofId` may carry `{chapter}`, which the runtime substitutes. That is what lets one
+   * authored mission be earned once per chapter and never twice in the same one, which is
+   * exactly the shape *"ארבע משימות הוכחה בארבעה פרקים שונים"* describes. `audience` and
+   * `delta` are optional: an action can leave evidence and earn nobody's opinion.
+   */
+  | {
+      e: 'proof'
+      kind: string
+      proofId: string
+      subjectHe?: string
+      noteHe?: string
+      audience?: ReputationAudience
+      delta?: number
+    }
+  /** אירוע ידיעה — the audience found out; whatever was queued under this id is paid */
+  | { e: 'heard'; proofId: string }
+  /** the one direction a standing moves with no witness, because the harm is the witness */
+  | { e: 'repLoss'; audience: ReputationAudience; delta: number; why: string }
+  /** חוב — a supplier put off, a fare somebody covered. Not negative money. */
+  | { e: 'debt'; agorot: number; why: string }
+  /**
+   * לקבל, לדחות או לעזוב שלב במסלול.
+   *
+   * `accept` is checked against the same eligibility the invitation was offered on, so a
+   * branch cannot hand out a title by being reached; `decline` writes nothing at all, so
+   * a refused offer can come back; `leave` keeps the history and stops the practice.
+   */
+  | { e: 'route'; route: string; stage: 'entry' | 'practice' | 'apex'; act: 'accept' | 'decline' | 'leave' }
+  /** בעלים שהוא גם עיתונאי — which of the three doors he took, at the moment ownership lands */
+  | { e: 'conflict'; choice: 'stop_covering' | 'personal_column' | 'disclose_and_pay' }
 
 export type ChoiceDef = {
   id: string

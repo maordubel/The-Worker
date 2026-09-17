@@ -460,6 +460,33 @@ export type LifeBusEvents = {
      */
     presence?: import('../types').PresenceMode
   } | null
+  /**
+   * הזמנה למסלול — מה שאפשר להיות, ומי החליט על זה.
+   *
+   * A channel rather than a toast, and the difference is the whole design. The life spec
+   * is explicit that reaching a threshold *"יוצרת הזמנה שניתן לדחות; אינה מבצעת החלטה"*
+   * — so what crosses this channel is an OFFER, the shell draws it with a way to say no,
+   * and nothing in the life changes until the player presses something. A toast would
+   * announce a promotion that already happened, which is the one thing this may not be.
+   *
+   * It carries `gaps` as well as the offer because the same card does both jobs: opened
+   * on a route he qualifies for, it asks; opened on one he does not, it says what is
+   * still missing, in words. A door you can see you cannot open is information; the
+   * absence of a door is a dead end (the same reason a greyed choice is drawn).
+   *
+   * `null` closes it. One at a time, always — the model hands back at most one stage per
+   * route, so a man meeting every condition of all three is offered the first of them.
+   */
+  route: {
+    invitation: import('../routes').RouteInvitation | null
+    /** what is still missing, when this card is an explanation rather than an offer */
+    gaps: readonly import('../routes').RouteGap[]
+    /** the route being shown, for the case where there is no invitation to carry it */
+    routeId: import('../routes').RouteId
+    stage: import('../routes').RouteStage
+    /** true when the stage's minimum age is above the last chapter that exists (rule 66) */
+    outOfReach: boolean
+  } | null
   /** touch controls only matter on a touch device; the runtime says when they help */
   controls: { visible: boolean }
   saved: number

@@ -160,8 +160,18 @@ def convert(path: str):
     return key, before, len(data), mode, left, dirty
 
 
-def write_index(size: dict, measured: dict) -> None:
-    """המספר שנרשם הוא מה שנמדד על הבייטים ששמורים בתיקייה, לא מה שמישהו זכר."""
+def write_index(size: dict, measured: dict, shape: dict) -> list[str]:
+    """
+    המספר שנרשם הוא מה שנמדד על הבייטים ששמורים בתיקייה, לא מה שמישהו זכר.
+
+    **וזה כולל `w`/`h`, מ-16.9.2026.** עד כאן הפונקציה עדכנה `bytes` ו-`yellowLeft`
+    בלבד, ולכן כל מסירה שהחליפה קובץ בגודל אחר השאירה מניפסט שמדבר על הקובץ הקודם:
+    `docs/life/GRAPHICS-AUDIT-2026-09-16.md` §9 מצא 38 שורות כאלה. שמונה מהן היו
+    `pogi-w1…w8` — הגיליון אמר `159×430`, בתיקייה ישב `835×1264`, ו-`tests/life.test.ts`
+    קורא את הגיליון. **מניפסט ששומר מידה ישנה אינו רק לא מדויק: הוא מסתיר מהבדיקה בדיוק
+    את סוג התקלה שהבדיקה קיימת בשבילה.**
+    """
+    corrected = []
     for name in ('manifest.json', 'sheets.json'):
         p = os.path.join(ART, name)
         m = json.loads(open(p, encoding='utf-8').read())
@@ -169,6 +179,10 @@ def write_index(size: dict, measured: dict) -> None:
         def fix(k, row):
             if isinstance(row, dict) and 'bytes' in row and k in size:
                 row['bytes'] = size[k]
+                if 'w' in row and 'h' in row:
+                    if (row['w'], row['h']) != shape[k]:
+                        corrected.append(f"{k} {row['w']}×{row['h']}→{shape[k][0]}×{shape[k][1]}")
+                    row['w'], row['h'] = shape[k]
                 if 'yellowLeft' in row:
                     row['yellowLeft'] = measured[k]
 
@@ -181,6 +195,7 @@ def write_index(size: dict, measured: dict) -> None:
                     for k, row in group.items():
                         fix(k, row)
         open(p, 'w', encoding='utf-8').write(json.dumps(m, ensure_ascii=False, indent=1) + '\n')
+    return corrected
 
 
 def measure(path: str):
@@ -188,8 +203,9 @@ def measure(path: str):
     key = os.path.basename(path)[:-5]
     with Image.open(path) as im:
         alpha = im.mode in ('RGBA', 'LA')
+        shape = im.size
         arr = np.asarray(im.convert('RGBA'))
-    return key, os.path.getsize(path), int(visible_yellow(arr, alpha).sum())
+    return key, os.path.getsize(path), int(visible_yellow(arr, alpha).sum()), shape
 
 
 def index() -> int:
@@ -207,9 +223,11 @@ def index() -> int:
     if dirty:
         print('✗ נשאר צהוב ב: ' + ', '.join(f'{r[0]} ({r[2]})' for r in dirty))
         return 1
-    write_index({r[0]: r[1] for r in rows}, {r[0]: r[2] for r in rows})
+    corrected = write_index({r[0]: r[1] for r in rows}, {r[0]: r[2] for r in rows}, {r[0]: r[3] for r in rows})
     total = sum(r[1] for r in rows)
     print(f'{len(rows)} קבצים · {total/1024/1024:.1f} MB · מניפסטים עודכנו · אפס צהוב')
+    if corrected:
+        print(f'{len(corrected)} שורות שמידותיהן תוקנו: ' + ', '.join(corrected))
     return 0
 
 

@@ -18,7 +18,7 @@ import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
-import { SHIRT, BACKDROP, extensionKeys, FIGURE, KID_POSE, KID_WALK, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
+import { SHIRT, BACKDROP, extensionKeys, FIGURE, HERO80_WALK, KID_POSE, KID_WALK, KID_WALK_AWAY, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
 import { PANO_SPOTS } from '@/lib/life/content/panoramas'
 import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
 import { exitInEra, inEra } from '@/lib/life/world/scenes'
@@ -205,6 +205,52 @@ describe('הקאנון החזותי — the boards decide who these people are',
     const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
     expect(world, 'the walk has no bob, so the child slides').toContain('Math.abs(Math.sin(this.stride))')
     for (const pose of Object.values(KID_POSE)) expect(cut[pose], `${pose} missing`).toBeDefined()
+  })
+
+  it('trims every walk frame to the figure, because the engine sizes by the texture', () => {
+    /**
+     * הפריים נמדד מול העמידה, כי זה מה שהמנוע עושה איתו.
+     *
+     * `WorldScene.fit()` gives a sprite its size from the TEXTURE height and
+     * `setOrigin(0.5, 1)` stands the CANVAS bottom on the floor, so empty canvas above a
+     * figure's head is not neutral — it is a shorter boy hovering over the ground, and
+     * `applyScale` hands the same canvas width to `shadow.setSize`. `pogi-w1…w8` shipped
+     * on 835×1264 canvases where every other figure in the folder is content-tight: the
+     * feet sat between 89.40% and 99.68% of the canvas, so the child floated up to 10.6%
+     * of his own height and his shadow was 86% wider the instant he walked.
+     *
+     * **This guard could not see any of it, and the reason is worth keeping.** It reads
+     * `sheets.json`, `sheets.json` still said `159×430`, and `write_index()` in
+     * `to-webp-2026-09-13.py` had never once updated `w`/`h` — so the manifest quietly
+     * described the file that used to be there. Truthful dimensions are what make the
+     * check below possible at all.
+     *
+     * What it checks is the coupling the engine actually has: a walk frame is drawn at
+     * the same height as the standing pose it interleaves with, so its SHAPE has to be
+     * the same person's shape. The band is the observed spread with margin — the widest
+     * real frame is `hero80-w7` at 1.47× and the narrowest is `hero80-w8` at 0.76×, and a
+     * letterboxed 835×1264 frame lands at 1.86×. It is a proportion and not a proof:
+     * a frame padded evenly on all four sides would keep its aspect and pass, and only a
+     * measured alpha-coverage column in the manifest would catch that one.
+     */
+    const CYCLES: ReadonlyArray<readonly [string, readonly string[]]> = [
+      ['pogi', KID_WALK],
+      ['pogi-back', KID_WALK_AWAY],
+      ['hero80', HERO80_WALK],
+    ]
+    for (const [standing, frames] of CYCLES) {
+      const pose = cut[standing]
+      expect(pose, `${standing} is not cut from any board`).toBeDefined()
+      const shape = pose!.w / pose!.h
+      for (const key of frames) {
+        const row = cut[key]
+        expect(row, `${key} was never cut`).toBeDefined()
+        const ratio = row!.w / row!.h / shape
+        const said = `${key} is ${row!.w}×${row!.h}, ${ratio.toFixed(2)}× the shape of ${standing}`
+        expect(ratio, `${said} — it carries empty canvas the engine reads as height`).toBeLessThan(1.6)
+        expect(ratio, `${said} — it is cropped tighter than the figure`).toBeGreaterThan(0.6)
+      }
+    }
   })
 
   it('cuts the children full-length and never crops one at the knee', () => {

@@ -458,3 +458,28 @@ export function wornIn(state: LifeState, id: string): string[] {
     .filter((flag) => flag.startsWith(prefix) && state.flags[flag])
     .map((flag) => flag.slice(prefix.length))
 }
+
+/**
+ * מתי היא כבר הייתה שלו — the earliest chapter this shirt is RECORDED as having been worn.
+ *
+ * There is no acquisition year on `state.clothing` and there does not need to be one. A
+ * wardrobe is a list of ids, but the LOG is not: `own:worn:<id>:<chapter>` is written the
+ * evening the shirt is put on, it carries the `own:` prefix so a year does not erase it,
+ * and a flag that exists is a fact that happened. So "how long has he had this" is a
+ * question the append-only log already answers — the earliest chapter it was on his back —
+ * and that is a stronger claim than a stored purchase year would be: it is evidence that
+ * he HAD it then, not a number somebody wrote down.
+ *
+ * Deriving rather than storing is rule 39/46 in its smallest possible form: the same rows,
+ * read by a richer reducer. `Object.keys` has no order worth trusting, so the earliest is
+ * taken along the chapter spine (`ORDER`) and never off the iteration.
+ */
+export function firstWornChapter(state: LifeState, id: string): string | null {
+  let first: string | null = null
+  for (const chapter of wornIn(state, id)) {
+    const at = chapterIndex(chapter)
+    if (at < 0) continue
+    if (first === null || at < chapterIndex(first)) first = chapter
+  }
+  return first
+}

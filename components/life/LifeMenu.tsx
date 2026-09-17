@@ -37,6 +37,8 @@ export function LifeMenu({
   onMap,
   onAlbum,
   hasAlbum,
+  onRoutes,
+  hasRoutes,
 }: {
   touch: boolean
   deck: boolean
@@ -64,6 +66,16 @@ export function LifeMenu({
    */
   onAlbum: () => void
   hasAlbum: boolean
+  /**
+   * המסלולים — the deliberate door to a card the world otherwise opens by itself.
+   *
+   * Same rule as the album above it: the row exists when there is something behind it.
+   * Every route stage is eighteen or over, so on a Saturday in 1986 this would open a
+   * card that says nothing but "not yet" — `routesWorthShowing` is what decides, and it
+   * is decided in the engine rather than here.
+   */
+  onRoutes: () => void
+  hasRoutes: boolean
 }) {
   const row =
     'flex min-h-tap w-full items-center justify-between gap-3 border-b-hair border-ink/30 px-3 text-start font-sign text-[15px] text-ink transition-colors duration-press active:bg-red active:text-sheet motion-reduce:transition-none'
@@ -96,6 +108,11 @@ export function LifeMenu({
         {hasAlbum && (
           <button type="button" className={row} onClick={onAlbum} data-life="menu-album">
             <span>{t('life.album.menu')}</span>
+          </button>
+        )}
+        {hasRoutes && (
+          <button type="button" className={row} onClick={onRoutes} data-life="menu-routes">
+            <span>{t('life.route.menu')}</span>
           </button>
         )}
         <button type="button" className={row} onClick={() => onSound(!sound)} data-life="menu-sound">

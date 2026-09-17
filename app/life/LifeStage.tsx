@@ -35,6 +35,8 @@ import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { RetryCard } from '@/components/life/RetryCard'
 import { EndingCard } from '@/components/life/EndingCard'
+import { AchievementQueue } from '@/components/life/AchievementCard'
+import { RouteCard } from '@/components/life/RouteCard'
 import { PlaceCard, Stamp, TitleCard } from '@/components/life/Stamp'
 import { CloseUp } from '@/components/life/CloseUp'
 import { Panorama } from '@/components/life/Panorama'
@@ -57,6 +59,7 @@ import { Teach } from '@/components/life/Teach'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
 import { loadLife } from '@/lib/life/engine'
+import { acceptEvents, eligibleFor, gapsFor, nearestRoute, routesWorthShowing, stageOutOfReachFor } from '@/lib/life/routes'
 import type { LifeBus } from '@/lib/life/runtime/bus'
 import type { LifeRuntime } from '@/lib/life/runtime/game'
 import { bookFor } from '@/lib/life/books'
@@ -201,6 +204,10 @@ export function LifeStage({
     setMapState,
     reveal,
     setReveal,
+    route,
+    setRoute,
+    earned,
+    dismissEarned,
     deck,
     toggleDeck,
     opening,
@@ -350,6 +357,41 @@ export function LifeStage({
         {ready && teach && !covered && <Teach id={teach.id} touch={touch} />}
 
         {toast && !cutscene && <Stamp toast={toast} />}
+
+        {/*
+          שני דברים שנפתחים מעל הכל, ולכל אחד יש בדיוק תפקיד אחד.
+
+          **ההישג מודיע. המסלול שואל.** The queue is a notice — the row is already true,
+          the flag is already in the log, and dismissing it changes nothing; so it draws
+          over a conversation without stopping it. The route card is an OFFER and the
+          spec is explicit that it *"יוצרת הזמנה שניתן לדחות; אינה מבצעת החלטה"*, so it
+          is a `role="dialog"` at z-[60] with a refusal the same size as the acceptance,
+          and nothing in the life moves until a thumb lands on one of them.
+
+          Neither is drawn over a cutscene: a film cut owns the glass, and a card on top
+          of it is the only thing in this shell that could make a player miss a scene
+          they cannot replay.
+        */}
+        {!cutscene && <AchievementQueue queue={earned} onDismiss={dismissEarned} />}
+        {route && !cutscene && (
+          <RouteCard
+            routeId={route.routeId}
+            stage={route.stage}
+            invitation={route.invitation}
+            gaps={route.gaps}
+            outOfReach={route.outOfReach}
+            onAccept={() => {
+              const engine = engineRef.current
+              if (engine) {
+                engine.dispatch(...acceptEvents(engine.state, route.routeId, route.stage))
+                void engine.save()
+              }
+              setRoute(null)
+            }}
+            onDecline={() => setRoute(null)}
+            onClose={() => setRoute(null)}
+          />
+        )}
         {placeCard && !cutscene && !titleCard && !toast && <PlaceCard titleHe={placeCard.titleHe} subHe={placeCard.subHe} />}
 
         {tunnel && !cutscene && (
@@ -691,6 +733,26 @@ export function LifeStage({
             confirmReset={confirmReset}
             onRestartDay={() => (confirmDay ? restartDay() : setConfirmDay(true))}
             confirmDay={confirmDay}
+            hasRoutes={engineRef.current ? routesWorthShowing(engineRef.current.state) : false}
+            onRoutes={() => {
+              const engine = engineRef.current
+              if (!engine) return
+              const near = nearestRoute(engine.state)
+              if (!near) return
+              setMenu(false)
+              // The card does both jobs from one payload: an `invitation` makes it an
+              // offer, its absence makes it an explanation. `eligibleFor` is the same
+              // function the world asks, so the two doors can never disagree about
+              // whether a man qualifies.
+              const offer = eligibleFor(engine.state).find((row) => row.route.id === near.id) ?? null
+              setRoute({
+                routeId: near.id,
+                stage: near.stage,
+                invitation: offer,
+                gaps: offer ? [] : gapsFor(engine.state, near.id, near.stage),
+                outOfReach: stageOutOfReachFor(engine.state, near.id, near.stage),
+              })
+            }}
             hasAlbum={engineRef.current ? albumTotals(engineRef.current.state).have > 0 : false}
             onAlbum={() => {
               setMenu(false)

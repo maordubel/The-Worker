@@ -116,8 +116,77 @@ export const CONVERSATIONS_SEED: Conversation[] = [
         choices: [
           { id: 'work', text: 'לעשות את התור.', then: [{ e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 5 }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 3 }, { e: 'personality', key: 'responsibility', delta: 3 }, { e: 'energy', delta: -8 }, { e: 'flag', flag: 'seed:worked' }] },
           { id: 'owner', text: '"הוא באמת הורג את המועדון."', then: [{ e: 'institution', key: 'basketballOwnershipTrust', delta: -10 }, { e: 'institution', key: 'protestEscalation', delta: 4 }, { e: 'rel', who: 'shachor', axis: 'tension', delta: 3 }, { e: 'toast', text: '"אחרי," שחור חזר. לא הסתכל עליך.', tone: 'plain' }] },
+          /**
+           * שני חובות שהמשחק לקח ולא נתן להחזיר, עד עכשיו.
+           *
+           * `owe:shachor` נרשם כששחור השלים את ההפרש לאוטובוס לצפון, ו-`owe:group` נרשם
+           * כשמטבעות עברו מעל הראשים כדי שתעלה לאוטובוס להיכל. שניהם שורדים החלפת שנה
+           * בכוונה (`personFlags`), ו-`hasOverdueDebt` ב-`routes.ts` קורא כל `owe:` כחוב
+           * פתוח — כלומר טובה שקיבלת בגיל חמש־עשרה נעלה את שיא מסלול הבעלים לתמיד.
+           * **חוב שאי-אפשר לפרוע הוא לא חוב, הוא עונש**, וזו בדיוק התוכנית המתה של כלל 66.
+           *
+           * הם נפרעים כאן ולא קודם משתי סיבות שהן אותה סיבה: זה הפרק הראשון שבו הכסף
+           * בכיס הוא שכר שלו ("חמישים שקל שנשארו ממשכורת ראשונה"), ושני הנושים עומדים
+           * באותה פינה — שחור עם הארגזים, לימור עם הפנקס שספרה בו אז. **מי שנתן הוא מי
+           * שמקבל**, ולכן אין כאן מסך "סגירת חשבונות": יש אדם אחד ותור אחד.
+           */
+          { id: 'debt-shachor', text: '"שחור. ההפרש מהצפון."', when: { flag: 'owe:shachor' }, noteHe: 'אתה לא חייב לשחור הפרש.', then: [{ e: 'goto', node: 'seed-owed-shachor' }] },
+          { id: 'debt-group', text: 'להחזיר לתור את מה שהתור שם עליך פעם.', when: { flag: 'owe:group' }, noteHe: 'התור מעולם לא שם עליך כלום.', then: [{ e: 'goto', node: 'seed-owed-queue' }] },
         ],
       },
+    ],
+  },
+  {
+    id: 'seed-owed-shachor',
+    nameHe: 'שחור',
+    branches: [
+      {
+        when: { minAgorot: 3000 },
+        lines: [
+          { who: null, text: 'הוצאת מהכיס את מה שנשאר מהמשכורת והחזקת מולו. הוא הסתכל על היד, לא על הכסף.' },
+          { who: 'שחור', text: 'לא ספרתי אז. לא אספור עכשיו. תן מה שאתה רוצה לתת ותפסיק לחשוב על זה.' },
+        ],
+        then: [
+          { e: 'money', agorot: -3000, why: 'ההפרש לשחור' },
+          { e: 'flagValue', flag: 'owe:shachor', value: false },
+          { e: 'rel', who: 'shachor', axis: 'trust', delta: 5 },
+          { e: 'rel', who: 'shachor', axis: 'sharedHistory', delta: 4 },
+          { e: 'personality', key: 'reliability', delta: 3 },
+          { e: 'time', minutes: 10 },
+          { e: 'toast', text: 'הוא קיפל את השטרות פעם אחת והכניס לכיס. לא אמר תודה. אצלו זה בסדר.', tone: 'plain' },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'ספרת בכיס בלי להוציא את היד, והגעת לאותו מספר פעמיים.' },
+          { who: 'שחור', text: 'מה? אמרת משהו?' },
+          { who: null, text: 'לא. עוד לא.' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'seed-owed-queue',
+    nameHe: null,
+    branches: [
+      {
+        when: { minAgorot: 2000 },
+        lines: [
+          { who: null, text: 'ילד בתור, לבד, סופר בכיס פעמיים ומגיע לאותו מספר. לימור כבר ראתה אותו וכבר החליטה לא לראות.' },
+          { who: null, text: '"כמה חסר לו?" — את המשפט הזה אמרו פעם מעל הראש שלך, בדלת של אוטובוס, ולא ראית מי אמר אותו.' },
+          { who: 'לימור', text: 'עשרים. (היא לא שאלה למה. היא רשמה, כמו שרשמה אז.)' },
+        ],
+        then: [
+          { e: 'money', agorot: -2000, why: 'מי שחסר לו בתור' },
+          { e: 'flagValue', flag: 'owe:group', value: false },
+          { e: 'redheart', key: 'community', delta: 5 },
+          { e: 'wellbeing', key: 'belonging', delta: 3 },
+          { e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 4 },
+          { e: 'time', minutes: 10 },
+          { e: 'toast', text: 'הוא נכנס לפניך ולא הסתכל אחורה. ככה זה עובד.', tone: 'plain' },
+        ],
+      },
+      { lines: [{ who: null, text: 'ילד בתור סופר בכיס. אתה סופר בכיס שלך, ואין לך הערב מה לשים על הדלפק בשבילו.' }] },
     ],
   },
   {
@@ -154,9 +223,39 @@ export const CONVERSATIONS_SEED: Conversation[] = [
         choices: [
           { id: 'list', text: 'לקחת דף. "אז נכתוב: אנשים. מה יש. מה לא מוותרים עליו."', then: [{ e: 'flag', flag: 'seed:list' }, { e: 'flag', flag: 'life:seed:list' }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 14 }, { e: 'redheart', key: 'community', delta: 6 }, { e: 'rel', who: 'asaf', axis: 'trust', delta: 5 }, { e: 'rel', who: 'freddy', axis: 'trust', delta: 4 }, { e: 'personality', key: 'responsibility', delta: 3 }, { e: 'goto', node: 'seed-close' }] },
           { id: 'anger', text: '"מה שצריך זה שהבעלים ילך."', then: [{ e: 'flag', flag: 'seed:list' }, { e: 'institution', key: 'protestEscalation', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 2 }, { e: 'rel', who: 'freddy', axis: 'tension', delta: 4 }, { e: 'goto', node: 'seed-close' }] },
+          /**
+           * `owe:stand` — הכסף שנאסף בשתי דקות למונית, כדי שתגיע. אותם אנשים, אותו ארגז
+           * הפוך, ואף אחד מהם לא ביקש אותו בחזרה. זו הסיבה שהחזרה כאן היא בחירה ולא
+           * תנאי: חוב של יציע נפרע כי מי שחייב רוצה, ולא כי המערכת סוגרת חשבון.
+           */
+          { id: 'debt-taxi', text: 'לשים על הארגז את מה שעלתה המונית ההיא.', when: { flag: 'owe:stand' }, noteHe: 'אף אחד לא אסף עליך כסף למונית.', then: [{ e: 'goto', node: 'seed-owed-taxi' }] },
           { id: 'rhythm', text: 'לענות למלמד. אותו קצב.', when: { flag: 'life:melamed:rhythm' }, noteHe: 'לא למדת את הקצב שלו ב־96. אין לך מה לענות.', then: [{ e: 'sfx', key: 'darbuka-three-two', level: 0.8 }, { e: 'sfx', key: 'crowd-claps', level: 0.5, delayMs: 1700 }, { e: 'rel', who: 'melamed', axis: 'bond', delta: 6 }, { e: 'remember', who: 'melamed', eventId: 'rhythm-returned-1999', significance: 'major' }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'toast', text: 'שלוש, הפסקה, שתיים. כל הקיוסק הצטרף. ככה מתחיל שיר.', tone: 'plain' }] },
         ],
       },
+    ],
+  },
+  {
+    id: 'seed-owed-taxi',
+    nameHe: null,
+    branches: [
+      {
+        when: { minAgorot: 3000 },
+        lines: [
+          { who: null, text: 'הארגז ההפוך שאסף יושב עליו. שמת עליו שטרות ולא הסברת על מה.' },
+          { who: 'אסף', text: 'מה זה?' },
+          { who: null, text: '"המונית. מישהו הוציא עשרים, מישהו אחר עשר, ואחד נתן חמישה ואמר שזה מה שיש."' },
+          { who: 'אסף', text: '(לוקח. לא סופר.) זה לא היה חוב. אבל אם אתה מחזיר — סימן שהבנת איך זה עובד.' },
+        ],
+        then: [
+          { e: 'money', agorot: -3000, why: 'המונית של שער 5' },
+          { e: 'flagValue', flag: 'owe:stand', value: false },
+          { e: 'rel', who: 'asaf', axis: 'trust', delta: 5 },
+          { e: 'redheart', key: 'terraceCulture', delta: 4 },
+          { e: 'institution', key: 'supporterOwnershipSeed', delta: 3 },
+          { e: 'time', minutes: 10 },
+        ],
+      },
+      { lines: [{ who: null, text: 'הארגז ההפוך, ואין לך הערב מה לשים עליו.' }] },
     ],
   },
   {

@@ -38,6 +38,20 @@ import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
 import { characterName, portraitFor } from '../characters'
 import { flagOn } from '../types'
 import type { CharacterId } from '../types'
+import {
+  acceptEvents as acceptRouteStage,
+  conflictEvents,
+  leaveEvents as leaveRoute,
+  type RouteId,
+} from '../routes'
+
+/**
+ * *"תקרת אירוע מוניטין חיובי +5 ושלילי −8."* Both live here rather than in the content,
+ * because a cap a content file is trusted to respect is a cap that is one delta away
+ * from being widened by somebody who never read the sentence it came from.
+ */
+const POSITIVE_REPUTATION_CAP = 5
+const NEGATIVE_REPUTATION_CAP = 8
 
 /**
  * מנהל השיחה — reads the content, writes to the life, and stops there.
@@ -753,6 +767,17 @@ export class DialogueRunner {
           events.push({ t: 'laces.marked', response: effect.response })
           break
 
+        // --- שבעת המסלולים ---------------------------------------------------------
+        case 'skill':
+        case 'proof':
+        case 'heard':
+        case 'repLoss':
+        case 'debt':
+        case 'route':
+        case 'conflict':
+          events.push(...this.routeEvents(effect))
+          break
+
         /**
          * לקחת הזדמנות — a conversation may CLOSE a window, and only that.
          *
@@ -920,10 +945,127 @@ export class DialogueRunner {
         case 'laces':
           events.push({ t: 'laces.marked', response: effect.response })
           break
+        /**
+         * An encounter or an opportunity outcome may leave evidence and may cost a
+         * standing. It may NOT hand over a route stage or settle a conflict of interest:
+         * those are decisions a person takes in a scene, out loud, and a random encounter
+         * that promoted somebody would be the exact "no jumping through titles" breach
+         * the model is shaped to prevent. `route` and `conflict` are therefore absent
+         * here on purpose, and fall to `default`.
+         */
+        case 'skill':
+        case 'proof':
+        case 'heard':
+        case 'repLoss':
+        case 'debt':
+          events.push(...this.routeEvents(effect))
+          break
         default:
           break
       }
     }
     if (events.length > 0) this.engine.dispatch(...events)
+  }
+
+  // -------------------------------------------------------------------------------
+  // שבעת המסלולים — the route verbs, in one place, called from both effect walks
+  // -------------------------------------------------------------------------------
+
+  /**
+   * `{chapter}` בתוך מזהה ראיה — resolved here and nowhere else.
+   *
+   * A proof is idempotent on its id, and a route's apex asks for four of them *"בפרקים
+   * שונים"*. Both hold at once only when the id carries the chapter: one authored mission
+   * then cannot be farmed twice in one year and CAN be earned again in the next, which is
+   * what the requirement actually describes. The content writes the placeholder and never
+   * a chapter id, so re-ordering the chapter registry moves nothing.
+   */
+  private proofId(raw: string): string {
+    return raw.replace('{chapter}', this.engine.state.chapter)
+  }
+
+  private routeEvents(effect: Effect): LifeEvent[] {
+    const events: LifeEvent[] = []
+    const state = this.engine.state
+    switch (effect.e) {
+      case 'skill':
+        // A capability moves the moment the thing is done, with nobody watching. That is
+        // the difference between a skill and a standing, and it is the whole system.
+        events.push({ t: 'skill.changed', skill: effect.skill, delta: effect.delta, why: effect.why })
+        break
+
+      case 'proof': {
+        const proofId = this.proofId(effect.proofId)
+        events.push({
+          t: 'proof.recorded',
+          proof: {
+            kind: effect.kind,
+            proofId,
+            chapter: state.chapter,
+            year: state.year,
+            ...(effect.subjectHe ? { subjectHe: effect.subjectHe } : {}),
+            ...(effect.noteHe ? { noteHe: effect.noteHe } : {}),
+          },
+        })
+        if (effect.audience && effect.delta) {
+          /**
+           * *"תקרת אירוע מוניטין חיובי +5"* — capped in the RUNTIME rather than trusted to
+           * the content, because a cap that lives in a comment is a cap somebody widens in
+           * a delta. Note what this does NOT do: it queues the claim and moves no
+           * standing. Only a `heard` moves a standing upward, ever.
+           */
+          const delta = Math.min(POSITIVE_REPUTATION_CAP, Math.max(0, Math.round(effect.delta)))
+          if (delta > 0) {
+            events.push({ t: 'reputation.earned', proofId, audience: effect.audience, delta, why: effect.kind })
+          }
+        }
+        break
+      }
+
+      case 'heard':
+        // The audience found out. `apply` pays the claim once and drops it from `pending`,
+        // so a conversation replayed in the same chapter cannot pay the same deed twice.
+        events.push({ t: 'reputation.heard', proofId: this.proofId(effect.proofId) })
+        break
+
+      case 'repLoss':
+        /**
+         * הכיוון היחיד שאינו ממתין לעד.
+         *
+         * `reputation.changed` is reachable from content through this verb and only this
+         * verb, and the sign is forced here: whatever a content file writes, this cannot
+         * raise a standing. A breach that came out is known by definition and has nobody
+         * to wait for; a good deed always does. *"תקרת אירוע … שלילי −8."*
+         */
+        events.push({
+          t: 'reputation.changed',
+          audience: effect.audience,
+          delta: -Math.min(NEGATIVE_REPUTATION_CAP, Math.abs(Math.round(effect.delta))),
+          why: effect.why,
+        })
+        break
+
+      case 'debt':
+        events.push({ t: 'debt.changed', agorot: effect.agorot, why: effect.why })
+        break
+
+      case 'route': {
+        const id = effect.route as RouteId
+        // `accept` is checked against the same eligibility the offer was made on, so a
+        // branch cannot hand out a title merely by being reached. `decline` writes
+        // nothing at all — a refused invitation did not happen and can be made again.
+        if (effect.act === 'accept') events.push(...acceptRouteStage(state, id, effect.stage))
+        if (effect.act === 'leave') events.push(...leaveRoute(state, id))
+        break
+      }
+
+      case 'conflict':
+        events.push(...conflictEvents(effect.choice))
+        break
+
+      default:
+        break
+    }
+    return events
   }
 }

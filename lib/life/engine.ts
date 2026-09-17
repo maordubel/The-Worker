@@ -1,3 +1,4 @@
+import { achievementEvents, earnedNow, type Achievement } from './achievements'
 import { apply, emptyState, type LifeEvent } from './events'
 import { freshSeed } from './rng'
 import { lifeStore, SAVE_VERSION, type SaveFile } from './save'
@@ -51,6 +52,13 @@ const IMMEDIATE: ReadonlySet<LifeEvent['t']> = new Set([
   'opportunity.missed',
   'relationship.memory_added',
   'rng.seeded',
+  // The routes pass. A proof is the evidence a route's apex is argued from and a heard
+  // reputation is a thing the world now knows; neither may be lost to a tab closing on
+  // the trailing edge of an autosave.
+  'proof.recorded',
+  // Recognition must not be lost to a tab closing on the trailing edge of an autosave.
+  'achievement.earned',
+  'reputation.heard',
 ])
 
 export class LifeEngine {
@@ -109,17 +117,57 @@ export class LifeEngine {
    */
   flagVersion = 0
 
+  /**
+   * ההכרה נרשמת ברגע שהיא נהיית נכונה, ולא כשמסך נפתח — וזה נבדק כאן ולא בכל פריים.
+   *
+   * Every achievement predicate reads flags, proofs, presence, the Red Box, clothing, the
+   * chapter or the debt, and **not one of them reads the clock.** So the check is gated on
+   * the events that can actually change an answer. Without the gate it would run thirty
+   * predicates on every `clock.advanced`, which on a match day is every frame's worth of
+   * minutes — the same class of mistake as the 26× time-lapse that did per-minute work
+   * inside a stadium (rule 49).
+   */
+  private static readonly MAY_EARN: ReadonlySet<LifeEvent['t']> = new Set([
+    'flag.raised', 'flag.set', 'proof.recorded', 'presence.recorded', 'redbox.item_added',
+    'clothing.gained', 'anchor.attended', 'debt.changed', 'memory.kept',
+    'chapter.entered', 'chapter.completed', 'day.entered', 'year.entered',
+  ])
+
+  /** what the shell has not shown yet — drained one card at a time, never as a list */
+  earned: Achievement[] = []
+
   dispatch(...events: LifeEvent[]): LifeState {
     let immediate = false
+    let mayEarn = false
+    const before = this.state
     for (const event of events) {
       this.events.push(event)
       this.state = apply(this.state, event)
       if (IMMEDIATE.has(event.t)) immediate = true
+      if (LifeEngine.MAY_EARN.has(event.t)) mayEarn = true
       if (event.t === 'flag.raised' || event.t === 'flag.set') this.flagVersion += 1
+    }
+    if (mayEarn) {
+      // `earnedNow` is pure and excludes anything already recorded, so this cannot recurse
+      // and cannot announce a life twice — including when a whole log is re-folded on load.
+      const gained = earnedNow(before, this.state)
+      if (gained.length > 0) {
+        for (const event of achievementEvents(gained, this.state)) {
+          this.events.push(event)
+          this.state = apply(this.state, event)
+        }
+        immediate = true
+        this.earned = [...this.earned, ...gained]
+      }
     }
     for (const listener of this.listeners) listener(this.state)
     this.markDirty(immediate)
     return this.state
+  }
+
+  /** the shell has shown this one — take it off the queue */
+  drainEarned(id: string): void {
+    this.earned = this.earned.filter((row) => row.id !== id)
   }
 
   subscribe(listener: LifeListener): () => void {

@@ -21,17 +21,23 @@ import type { Condition } from './types'
  */
 
 /**
- * משרד הכרטיסים — a new room, and a `LocationId` this file cannot declare.
+ * משרד הכרטיסים — ואיך נראית שורה שהתיישנה בלי שאיש הבחין.
  *
- * `LocationId` is a union in `lib/life/types.ts`, and that file is not this pass's to
- * edit. The cast is the seam and it is exactly one line: every other reference — the
- * scene's `id`, the door's `to`, the runtime's room check — goes through this constant,
- * so the day the union gains `| 'ticket-office'` the cast comes off and nothing else
- * moves. The patch is one line and it is stated in the delivery note rather than done
- * quietly here, because a union member is a persisted identifier (rule 35) and adding one
- * is somebody's decision, not a side effect of adding a door.
+ * This constant was introduced as a CAST, with a paragraph here explaining that
+ * `LocationId` is a union in `lib/life/types.ts` which that pass was not allowed to edit,
+ * that the cast was the one-line seam, and that *"the day the union gains
+ * `| 'ticket-office'` the cast comes off and nothing else moves"*.
+ *
+ * That day was the same day. `types.ts` carries the member, with its own comment. So the
+ * cast is gone and the constant stays for the reason it was always worth having: the
+ * scene's `id`, the door's `to` and the runtime's room check all go through one name, and
+ * a room identifier that is persisted in a save (rule 35) should be written down once.
+ *
+ * Worth keeping the shape of the mistake: nothing failed, nothing was red, and the
+ * paragraph read perfectly — it described a constraint that had been lifted underneath it.
+ * A comment is a claim about the code and goes stale exactly like a manifest does.
  */
-export const TICKET_OFFICE = 'ticket-office'
+export const TICKET_OFFICE: LocationId = 'ticket-office'
 
 export const KICKOFF = at(16, 0)
 export const KOBI_LEAVES = at(15, 10)
@@ -457,6 +463,34 @@ function gigSpots(where: string) {
   )
 }
 
+/**
+ * משימות ההוכחה — where the seven routes are actually entered, and why each is a list of
+ * chapters rather than a decade.
+ *
+ * `lib/life/content/routes.ts` has held six authored `PROOF_*` missions since the routes
+ * pass, and until now **nothing in the world started one**: no `talk` and no `act` anywhere
+ * in this file reached `route-proof-*`, so the seven routes, their conversations and all the
+ * arithmetic behind them were content a player could not walk into — the dead branch rule 66
+ * exists against, in its largest form so far. Five of the six now have one row each, in the
+ * room the work happens in; the sixth (`route-proof-found`) is deliberately not here, and
+ * the reason is written where the gate5 row is.
+ *
+ * `ADULT_CHAPTERS` is spelled out chapter by chapter instead of `'B'` or `'1990s'` because
+ * every stage of every route in `lib/life/routes.ts` asks for `minAge: 18` and the boy is
+ * born in 1978 (rule 45). Tagged `'B'` these rows would offer a twelve-year-old a month of
+ * wages to close and a group to lead to an away game, and a proof earned at twelve buys
+ * nothing any route can hand over — the same dead threshold from the other end.
+ */
+const ADULT_CHAPTERS = [
+  '1996-army',
+  '1997-basket',
+  '1998-laces',
+  '1999-basket',
+  '1999-cup',
+  '2000-title',
+  '2000-double',
+] as const
+
 const SCENES: SceneDef[] = [
   {
     id: 'bedroom',
@@ -506,6 +540,32 @@ const SCENES: SceneDef[] = [
         prop: { key: 'propNote', size: 0.05, at: { x: 0.19, y: 0.7 } },
       },
       { id: 'bed-1991', era: '1991', x: 0.45, y: 0.92, w: 0.14, act: 'bed-1990', verb: 'look', labelHe: 'המיטה' },
+      /**
+       * CREATOR · `PROOF_CREATE` — הדבר שהכנת, גמור, על אותה שידה.
+       *
+       * The chest at 0.17 is the one surface this room has ever put a made thing on: the key
+       * in 1986, the scarf in 1990, the exercise book in 1991. At eighteen what is on it is
+       * finished work, and `route-proof-create` is the minute you decide whether to hand it
+       * to somebody who will use it or keep it in the box. It is an OBJECT and not a person
+       * on purpose — nobody has it yet; that is the whole decision — and the note is drawn on
+       * the chest top at the 1991 notebook's own coordinates, so no number here was guessed.
+       *
+       * It is the only route row in a room with nothing else in it after 1991, which is why
+       * it can take the whole run of adult chapters: `CREATOR.practice` wants two proofs in
+       * two different chapters and a proof id carries the chapter, so a room that is only in
+       * one year could never pay for the stage it belongs to.
+       */
+      {
+        id: 'proof-create',
+        era: ADULT_CHAPTERS,
+        x: 0.17,
+        y: 0.9,
+        w: 0.16,
+        act: 'route-proof-create',
+        verb: 'look',
+        labelHe: 'מה שהכנת',
+        prop: { key: 'propNote', size: 0.05, at: { x: 0.19, y: 0.7 } },
+      },
       // Wider than a drawer needs to be: it is the one thing in this room the chapter
       // cannot start without, so a child crossing the room at any speed is offered it.
       // It is NOT given priority — the door beside it must still win in the doorway, or
@@ -1573,7 +1633,55 @@ const SCENES: SceneDef[] = [
        * to be a kiosk. So `a4-shirt` keeps its single shirt, above, and everything from
        * 1990 is in `fan-shop` — a room, with a door, and a man who works there.
        */
-      { id: 'bottles-a4', era: 'a4-shirt', x: 0.82, y: 0.88, w: 0.1, act: 'bottles-a4', verb: 'look', labelHe: 'הבקבוקים ליד הפח', when: { none: [{ flag: 'a4:bottles' }] } },{ id: 'counter', era: '*', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' }],
+      { id: 'bottles-a4', era: 'a4-shirt', x: 0.82, y: 0.88, w: 0.1, act: 'bottles-a4', verb: 'look', labelHe: 'הבקבוקים ליד הפח', when: { none: [{ flag: 'a4:bottles' }] } },{ id: 'counter', era: '*', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' },
+      /**
+       * JOURNALIST · `PROOF_REPORT` — הסטנד, ומה מחליטים לידו.
+       *
+       * The newspaper stand against the left wall is dressing this room has carried since the
+       * nineties, and it is the only object in the game that is a published page. That is the
+       * right place for `route-proof-report`, whose whole subject is what you do with a story
+       * half of which came from somebody who heard it from somebody: the rack is what it will
+       * look like tomorrow either way, and the witness the mission names is *"מי שקרא את זה"*.
+       *
+       * Two chapters are left out and neither for taste. `1996-army` stands ירון at 0.14 and
+       * `1999-basket` stands עומר there — a person is `priority: 4` and swallows a hotspot
+       * inside his own body, so in those two years the prompt would be his and this rack
+       * would be unreachable while looking perfectly placed in the source.
+       */
+      {
+        id: 'proof-report',
+        era: ['1997-basket', '1998-laces', '1999-cup', '2000-title', '2000-double'],
+        x: 0.11,
+        y: 0.86,
+        w: 0.1,
+        act: 'route-proof-report',
+        verb: 'look',
+        labelHe: 'הסטנד של העיתונים',
+      },
+      /**
+       * OWNER · `PROOF_BUSINESS` — סוף חודש על הדלפק.
+       *
+       * Rafi's counter is the one business this life ever stands behind — `crates-kiosk` is
+       * the work, `רפי` is the man, and the trust axis between them is already a number. So
+       * the month somebody has to close is closed here, at the left end of the counter, clear
+       * of the till (0.52), the crates (0.62) and the counter's own look (0.55).
+       *
+       * `1996-army` is left out: that chapter's winter already owns this stretch of counter
+       * with three signs of its own (`sign-shelf` 0.24, `sign-till` 0.36, `sign-paper` 0.47),
+       * and a seventh thing to reach between them is where a prompt starts flickering. It
+       * costs the route nothing — `OWNER.practice` is `minAge: 21` and 1996 is his eighteenth
+       * year, so the two proofs it wants could never have come from there anyway.
+       */
+      {
+        id: 'proof-business',
+        era: ['1997-basket', '1998-laces', '1999-basket', '1999-cup', '2000-title', '2000-double'],
+        x: 0.38,
+        y: 0.92,
+        w: 0.09,
+        act: 'route-proof-business',
+        verb: 'look',
+        labelHe: 'הגיליון על הדלפק',
+      }],
     exits: [
       {
         id: 'out',
@@ -1756,6 +1864,32 @@ const SCENES: SceneDef[] = [
         priority: 2,
       },
       { id: 'shelter', x: 0.7, y: 0.71, w: 0.08, act: 'route-shelter', verb: 'look', labelHe: 'תחנת האוטובוס' },
+      /**
+       * TRAVELLER · `PROOF_TRAVEL` — אותה תחנה, כשאתה זה שאמר לכולם לבוא.
+       *
+       * The same painted shelter the eight-year-old looks at in `shelter` above, at the age
+       * where a shelter is where you count people. `route-proof-travel` opens on a coach that
+       * stopped with two passengers who have no fare home and one who cannot manage the steps
+       * — an organiser's problem, and this is the only painted place in the world a group
+       * waits in. The platform at התחנה המרכזית would have been the better picture and it is
+       * one chapter wide (`street/busStation` is `era: '1996-army'`, and in the later years
+       * that same door slot is Ramat Gan and שכונת התקווה), so `TRAVELLER.practice` — two
+       * proofs in two chapters — could never have been reached from there.
+       *
+       * The road is empty of people after 1991 (`fan1..3` are 1986, the radio walker is 1990)
+       * and its only other reach here is `banner` at 0.2, so 0.7 is clear in every one of
+       * these years.
+       */
+      {
+        id: 'proof-travel',
+        era: ADULT_CHAPTERS,
+        x: 0.7,
+        y: 0.72,
+        w: 0.09,
+        act: 'route-proof-travel',
+        verb: 'look',
+        labelHe: 'התחנה, לפני הנסיעה',
+      },
     ],
     exits: [
       {
@@ -3145,7 +3279,48 @@ const SCENES: SceneDef[] = [
         flip: true,
       },
     ],
-    hotspots: [...gigSpots('gate5')],
+    hotspots: [...gigSpots('gate5'),
+      /**
+       * ULTRAS · `PROOF_LEAD` — הערב שצריך לסדר, ומי נשאר עד שהכול יורד.
+       *
+       * `banner-gate5` at 0.36 is the job אסף gives you — "תרים", and you hold the other end
+       * of the cloth. `route-proof-lead` is the step after it: nobody asks, there is simply
+       * nobody else who will do it, and the mission is only closed by staying until the flags
+       * come down. So it stands in the same room, past the turnstiles at 0.62 where the gig's
+       * reach ends, and it is `verb: 'talk'` on a group rather than a drawn actor for the
+       * reason `sign-two-jobs` is: a person who exists for one sentence is a prompt, not a
+       * body to place in a band.
+       *
+       * The two chapters are the ones this room can be entered in and is empty in. The door
+       * (`bloomfield-outside/gate5`) is open in `1996-army` too, and that evening already has
+       * אסף and מלמד standing at 0.5 and 0.68 — this hotspot would be inside מלמד. Two is what
+       * `ULTRAS.practice` asks for anyway: two proofs, in two different chapters.
+       *
+       * -----------------------------------------------------------------------------------
+       * **ולמה `route-proof-found` איננו כאן, ולא באוסישקין.**
+       *
+       * The sixth mission is the founding one, and it is the only one with no honest room in
+       * the game as written. `FOUNDING_YEAR` is 2007 and the last chapter is 2000 —
+       * `tests/life-routes.test.ts` asserts `FOUNDING_YEAR > LAST_YEAR` precisely so the
+       * window is never quietly moved to fit the chapters that exist — and the mission's own
+       * effects raise the apex's three window-scoped commitments (`own:founding:*`). Standing
+       * it in 1997 or 1999 would let a 2007 apex be satisfied by work taken a decade before
+       * the association existed, and `chapter1999basket.ts` says in its own header that that
+       * evening is *"the prehistory of something this stage does not found"*. Rule 17 covers
+       * the rest. It belongs in `ussishkin-outside`/`ussishkin-hall` on the day the three
+       * 2007 chapters are written, and it is one row when they are.
+       */
+      {
+        id: 'proof-lead',
+        era: ['1998-laces', '1999-basket'],
+        x: 0.62,
+        y: 0.9,
+        w: 0.1,
+        act: 'route-proof-lead',
+        verb: 'talk',
+        labelHe: 'החבורה ליד הקרוסלות',
+      },
+    ],
     exits: [
       {
         id: 'back',

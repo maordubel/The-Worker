@@ -3,9 +3,14 @@ import {
   blankGate,
   blankInstitution,
   blankRelationship,
+  blankReputation,
+  blankSkills,
   clamp,
   RELATIONSHIP_AXES,
   TRAIT_ROUTE,
+  type ProofRecord,
+  type ReputationAudience,
+  type SkillId,
   type BondId,
   type CharacterId,
   type FlagId,
@@ -122,6 +127,52 @@ export type LifeEvent =
     }
   /** the tin under the bed — never the pocket */
   | { t: 'savings.changed'; agorot: number; why: string }
+  // --- version 5, the routes pass (16.9.2026) -----------------------------------------
+  /** מה שהוא לומד לעשות — a skill improves the moment the thing is done */
+  | { t: 'skill.changed'; skill: SkillId; delta: number; why: string }
+  /**
+   * מוניטין שהורווח ועדיין לא נשמע.
+   *
+   * Two events, on purpose. A deed puts a CLAIM in `reputation.pending` against one
+   * named audience, and nothing in the world changes yet: the spec's rule is that
+   * `rep_*` may not move before the audience has seen or been told. `reputation.heard`
+   * is what pays it. A night of work nobody witnessed makes him better at the work and
+   * changes nothing about how the gate speaks to him — until somebody tells them.
+   */
+  | { t: 'reputation.earned'; proofId: string; audience: ReputationAudience; delta: number; why: string }
+  /** somebody told them — the pending claim with this `proofId` is paid out, once */
+  | { t: 'reputation.heard'; proofId: string }
+  /**
+   * A DIRECT move, and it exists for losses.
+   *
+   * A breach that came out is already known by definition — that is what "came out"
+   * means — so it needs no second event to witness it. Using this for a GAIN would be
+   * the way round the rule above, and `tests/life-routes.test.ts` asserts no content
+   * file does.
+   */
+  | { t: 'reputation.changed'; audience: ReputationAudience; delta: number; why: string }
+  /** חוב — what he owes. Floors at zero; never negative money */
+  | { t: 'debt.changed'; agorot: number; why: string }
+  /** ראיה — recorded once per `proofId` in a run, so a route's apex can be checked */
+  | { t: 'proof.recorded'; proof: ProofRecord }
+  /**
+   * הישג — זיהוי של משהו שקרה, ברגע שהוא קרה.
+   *
+   * It is an event and not a screen's discovery, for two reasons: the card has to appear
+   * at the second the thing became true, and a life replayed from its log has to produce
+   * the same cards in the same order.
+   *
+   * It carries NO reward payload and NO number. The reward is a row in
+   * `lib/life/achievements.ts`, and the deed itself already paid — the life spec is
+   * explicit: *"אין תשלום כפול בנקודות על פעולה ואז על ההישג של אותה פעולה."*
+   *
+   * The reducer writes it into `own:ach:<id>`, which is why nothing on `LifeState` had to
+   * grow: recognition survives `day.entered` and `year.entered` on the `own:` prefix for
+   * free (rule 68), and **an achievement may never un-happen.** A predicate that becomes
+   * false again — a debt taken out after `ACH_BALANCE` — must not withdraw it, and a flag
+   * that is only ever written once is the cheapest way to make that structurally true.
+   */
+  | { t: 'achievement.earned'; id: string; chapter: string; year: number }
   /** something he owns and keeps owning: `shirt:1985` */
   | { t: 'clothing.gained'; item: string }
   // --- version 4, the decade (Stage B brief §4) ---------------------------------------
@@ -182,6 +233,15 @@ export function emptyState(identity: PlayerIdentity, year: number): LifeState {
       stubbornness: 25,
       sociability: 30,
       riskTolerance: 15,
+      /**
+       * כנות פותחת גבוה, ולא באמצע.
+       *
+       * Every other axis opens where a child of five plausibly sits and grows from
+       * there. Honesty is the one that starts near the top and is SPENT: a five-year-old
+       * has not learned that a story can be shaded, and every `TELL_LIE` in fifteen
+       * years is a withdrawal. Opening it at 50 would have made the first lie free.
+       */
+      honesty: 80,
     },
     redHeart: {
       footballLove: 20,
@@ -238,6 +298,24 @@ export function emptyState(identity: PlayerIdentity, year: number): LifeState {
     inventory: {},
     flags: {},
     savings: 0,
+    debt: 0,
+    /**
+     * הכישורים פותחים באפס, ולא כמו האישיות.
+     *
+     * A personality axis opens where a child of five plausibly sits, because he already
+     * HAS a disposition. A skill is what he can do, and at five he can do none of these
+     * things — he cannot organise a meeting, write an account anybody would print, close
+     * a business cycle or make a thing somebody else uses. They are filled by the
+     * fifteen years the game plays, which is also what makes the routes' thresholds mean
+     * something: `organization >= 70` is a life, not a starting condition.
+     *
+     * `knowledge` is the exception in practice rather than in the seed: it opens at zero
+     * here like the rest, and `TRAIT_ROUTE` then feeds it from every `trait: 'knowledge'`
+     * line already written into Stage A and Stage B.
+     */
+    skills: blankSkills(),
+    reputation: blankReputation(),
+    proofs: [],
     clothing: [],
     memories: [],
     redBox: [],
@@ -414,7 +492,88 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
       const redHeart = route.redHeart
         ? { ...state.redHeart, [route.redHeart]: clamp(state.redHeart[route.redHeart] + event.delta) }
         : state.redHeart
-      return { ...state, traits, personality, redHeart }
+      // The third leg, added with the routes pass: `knowledge` is the one trait that is
+      // also a skill, so fifteen years of asking questions arrive in the field
+      // JOURNALIST's apex reads instead of finding it at zero.
+      const skills = route.skill
+        ? { ...state.skills, [route.skill]: clamp(state.skills[route.skill] + event.delta) }
+        : state.skills
+      return { ...state, traits, personality, redHeart, skills }
+    }
+
+    case 'skill.changed':
+      return {
+        ...state,
+        skills: { ...state.skills, [event.skill]: clamp(state.skills[event.skill] + event.delta) },
+      }
+
+    /**
+     * הורווח, ועוד לא נשמע.
+     *
+     * Idempotent on `proofId` in BOTH directions: a claim already pending is not queued
+     * twice, and a claim already paid is not re-queued. The same deed pays one audience
+     * once, which is the whole reason a proof carries an id at all.
+     */
+    case 'reputation.earned': {
+      if (state.reputation.pending.some((row) => row.proofId === event.proofId)) return state
+      if (state.proofs.some((row) => row.proofId === event.proofId && row.kind === 'paid')) return state
+      return {
+        ...state,
+        reputation: {
+          ...state.reputation,
+          pending: [
+            ...state.reputation.pending,
+            { proofId: event.proofId, audience: event.audience, delta: event.delta, chapter: state.chapter },
+          ],
+        },
+      }
+    }
+
+    case 'reputation.heard': {
+      const claim = state.reputation.pending.find((row) => row.proofId === event.proofId)
+      if (!claim) return state
+      return {
+        ...state,
+        reputation: {
+          standing: {
+            ...state.reputation.standing,
+            [claim.audience]: clamp(state.reputation.standing[claim.audience] + claim.delta),
+          },
+          pending: state.reputation.pending.filter((row) => row.proofId !== event.proofId),
+        },
+      }
+    }
+
+    case 'reputation.changed':
+      return {
+        ...state,
+        reputation: {
+          ...state.reputation,
+          standing: {
+            ...state.reputation.standing,
+            [event.audience]: clamp(state.reputation.standing[event.audience] + event.delta),
+          },
+        },
+      }
+
+    case 'debt.changed':
+      // Floors at zero like money. A scene that forgives more than is owed has a bug the
+      // clamp makes visible in a test rather than a boy the game owes money to.
+      return { ...state, debt: Math.max(0, state.debt + Math.round(event.agorot)) }
+
+    case 'proof.recorded':
+      // Once per run, by id. A replay for practice does not write to the same history.
+      if (state.proofs.some((row) => row.proofId === event.proof.proofId)) return state
+      return { ...state, proofs: [...state.proofs, event.proof] }
+
+    case 'achievement.earned': {
+      // Idempotent by id, like `proof.recorded` above. The prefix is spelled out here
+      // rather than imported because `events.ts` may not depend on the achievements
+      // layer; `tests/life-achievements.test.ts` pins `ACH_FLAG_PREFIX === 'own:ach:'`
+      // so the two literals cannot drift apart.
+      const flag = `own:ach:${event.id}`
+      if (state.flags[flag] !== undefined) return state
+      return { ...state, flags: { ...state.flags, [flag]: event.year } }
     }
 
     case 'flag.raised':

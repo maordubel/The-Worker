@@ -10,8 +10,11 @@
  * `public/life/art` are what exists, and the difference is the brief. It imports the real
  * module rather than reading it as text, so a key renamed in code cannot go unnoticed.
  *
- * Shelved names (`RETIRED_FIGURE`, `KID_WALK_SHELVED`, `PLANNED_FIGURE`) are excluded:
- * the game cannot reach them, so nobody has to draw them.
+ * Shelved names (`RETIRED_FIGURE`, `PLANNED_FIGURE`) are excluded: the game cannot reach
+ * them, so nobody has to draw them. `KID_WALK_SHELVED` used to be a third such list and
+ * is gone — on 16.9.2026 the pair it held went back to being the side-on walk and the
+ * eight frames that had displaced it became `KID_WALK_AWAY`, the cycle for walking into
+ * the picture. Both are live, so both are audited.
  */
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
@@ -23,7 +26,7 @@ import {
   FIGURE,
   KID_POSE,
   KID_WALK,
-  KID_WALK_SHELVED,
+  KID_WALK_AWAY,
   LAYER,
   PANORAMA,
   PARALLAX,
@@ -46,7 +49,8 @@ const GROUPS: ReadonlyArray<[string, readonly string[]]> = [
   ['שכבות', LAYER],
   ['דמויות', FIGURE],
   ['פוגי — פוזות', Object.values(KID_POSE)],
-  ['פוגי — הליכה', KID_WALK],
+  ['פוגי — הליכה מהצד', KID_WALK],
+  ['פוגי — הליכה אל תוך התמונה', KID_WALK_AWAY],
   ['חפצים', PROP],
   ['מסמכים', DOC],
   ['פורטרטים', PORTRAIT_ART],
@@ -56,7 +60,7 @@ const GROUPS: ReadonlyArray<[string, readonly string[]]> = [
   ['פרלקסה', parallax],
 ]
 
-const shelved = new Set<string>([...RETIRED_FIGURE, ...KID_WALK_SHELVED, ...PLANNED_FIGURE])
+const shelved = new Set<string>([...RETIRED_FIGURE, ...PLANNED_FIGURE])
 
 const rows: Array<[string, number, string[]]> = []
 let declared = 0

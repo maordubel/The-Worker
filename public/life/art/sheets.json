@@ -1698,20 +1698,20 @@
   "source": "2026-09"
  },
  "rachel-smoke": {
-  "w": 294,
-  "h": 654,
+  "w": 167,
+  "h": 622,
   "bytes": 24234,
   "yellowLeft": 0
  },
  "rachel-tray": {
-  "w": 396,
-  "h": 654,
+  "w": 201,
+  "h": 628,
   "bytes": 30250,
   "yellowLeft": 0
  },
  "rachel": {
-  "w": 246,
-  "h": 498,
+  "w": 201,
+  "h": 628,
   "bytes": 30250,
   "yellowLeft": 0
  },
@@ -1814,58 +1814,58 @@
   "source": "2026-09"
  },
  "pogi-w1": {
-  "w": 159,
+  "w": 142,
   "h": 430,
-  "bytes": 104556,
+  "bytes": 22364,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w2": {
-  "w": 115,
+  "w": 130,
   "h": 430,
-  "bytes": 111990,
+  "bytes": 21566,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w3": {
-  "w": 125,
+  "w": 139,
   "h": 430,
-  "bytes": 85624,
+  "bytes": 20350,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w4": {
-  "w": 238,
+  "w": 139,
   "h": 430,
-  "bytes": 98404,
+  "bytes": 20480,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w5": {
-  "w": 118,
+  "w": 139,
   "h": 430,
-  "bytes": 79638,
+  "bytes": 18426,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w6": {
-  "w": 149,
+  "w": 139,
   "h": 430,
-  "bytes": 98244,
+  "bytes": 20492,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w7": {
-  "w": 143,
+  "w": 161,
   "h": 430,
-  "bytes": 98314,
+  "bytes": 23126,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "pogi-w8": {
-  "w": 198,
+  "w": 137,
   "h": 430,
-  "bytes": 101242,
+  "bytes": 19924,
   "yellowLeft": 0,
   "source": "2026-09"
  },
@@ -2521,42 +2521,42 @@
   "source": "2026-09"
  },
  "faceRachel90-smile": {
-  "w": 145,
+  "w": 130,
   "h": 260,
   "bytes": 43978,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-worried": {
-  "w": 168,
+  "w": 130,
   "h": 260,
   "bytes": 43906,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-nu": {
-  "w": 143,
+  "w": 130,
   "h": 260,
   "bytes": 44056,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-angry": {
-  "w": 178,
+  "w": 130,
   "h": 260,
   "bytes": 43594,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceRachel90-side": {
-  "w": 202,
+  "w": 130,
   "h": 260,
   "bytes": 43638,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "faceTeacher": {
-  "w": 172,
+  "w": 130,
   "h": 260,
   "bytes": 37380,
   "yellowLeft": 0,
@@ -2584,7 +2584,7 @@
   "source": "2026-09"
  },
  "faceTeacher-smile": {
-  "w": 186,
+  "w": 130,
   "h": 260,
   "bytes": 37190,
   "yellowLeft": 0,
@@ -2913,64 +2913,64 @@
   "source": "2026-09"
  },
  "rachel90": {
-  "w": 143,
-  "h": 430,
+  "w": 201,
+  "h": 628,
   "bytes": 30250,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-3q": {
-  "w": 137,
-  "h": 430,
+  "w": 205,
+  "h": 626,
   "bytes": 29674,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-side": {
-  "w": 102,
-  "h": 430,
+  "w": 167,
+  "h": 622,
   "bytes": 24234,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-back": {
-  "w": 137,
-  "h": 430,
+  "w": 207,
+  "h": 618,
   "bytes": 26662,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-arms": {
-  "w": 133,
-  "h": 430,
+  "w": 220,
+  "h": 619,
   "bytes": 29936,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-hips": {
-  "w": 207,
-  "h": 430,
+  "w": 220,
+  "h": 619,
   "bytes": 29936,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-note": {
-  "w": 138,
-  "h": 430,
+  "w": 256,
+  "h": 618,
   "bytes": 30980,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-apron": {
-  "w": 141,
-  "h": 430,
+  "w": 201,
+  "h": 628,
   "bytes": 30250,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-point": {
-  "w": 219,
-  "h": 430,
+  "w": 236,
+  "h": 618,
   "bytes": 30726,
   "yellowLeft": 0,
   "source": "2026-09"
@@ -2983,8 +2983,8 @@
   "source": "2026-09"
  },
  "rachel90-hug": {
-  "w": 308,
-  "h": 430,
+  "w": 225,
+  "h": 618,
   "bytes": 31972,
   "yellowLeft": 0,
   "source": "2026-09"
@@ -2997,15 +2997,15 @@
   "source": "2026-09"
  },
  "rachel90-door": {
-  "w": 169,
-  "h": 430,
+  "w": 236,
+  "h": 618,
   "bytes": 30726,
   "yellowLeft": 0,
   "source": "2026-09"
  },
  "rachel90-call": {
-  "w": 202,
-  "h": 430,
+  "w": 220,
+  "h": 619,
   "bytes": 29936,
   "yellowLeft": 0,
   "source": "2026-09"

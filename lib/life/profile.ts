@@ -86,6 +86,7 @@ const PERSONALITY_WORDS: Record<PersonalityId, string> = {
   stubbornness: 'לא מוותר',
   sociability: 'מדבר עם כולם',
   riskTolerance: 'לוקח סיכון',
+  honesty: 'אומר את האמת',
 }
 
 export function personalityReading(state: LifeState): string[] {

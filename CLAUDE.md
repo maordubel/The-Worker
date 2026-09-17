@@ -530,7 +530,10 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
       event from a newer build folds to a no-op; `tests/life.test.ts` asserts it.
     - **`lib/life/runtime/` — Phaser.** Scenes, placeholder art, physics, camera. Imported
       **dynamically, client-side only** — Phaser touches `window` at module scope. One
-      `WorldScene` reads a `MapDef`; there are nine locations and one scene class, which
+      `WorldScene` reads a `MapDef`; there is ONE scene class, which is what makes a 1990
+      version of the same street a second layer list rather than a second scene. This
+      sentence used to begin "there are nine locations" — there are twenty-one
+      `LocationId` members today, and the half that mattered is the half still true.
       is what makes a 1990 version of the same street a second layer list rather than a
       second scene.
     - **`lib/life/content/` — the authored fiction.** A family, a friend, a kiosk. It
@@ -716,7 +719,11 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
     - A version-1 file is DROPPED rather than migrated. A v1 save describes somebody six
       years older than the game now believes, in a year that no longer exists. Silently
       reinterpreting an impossible age is worse than starting again. (`SAVE_VERSION` is
-      now **3** — see rule 46; version 2 is READ, because nothing in it needed converting.)
+      now **4** — Stage B added fields and the routes pass added five more. Every file
+      from version 2 up is READ rather than migrated, because the append-only log always
+      recorded what HAPPENED. This line said **3** across two format bumps: a number in
+      prose is a claim about `lib/life/save.ts` and goes stale exactly like a manifest
+      row does — 16.9.2026.)
     - `tests/life.test.ts` allows exactly the years **1978 / 1983 / 1986** in authored
       content. Adding a year to that list is a decision, not a fix.
 
@@ -732,7 +739,7 @@ npm run qa:sweep                             # 14 routes × 4 widths: overflow, 
       and a save written before any of it existed folds straight into the new shape. That
       is not luck, it is the append-only log paying for itself: the events always recorded
       what HAPPENED, so a richer reducer reads the same rows and produces a richer life.
-      `SAVE_VERSION` is 3 and a version-2 file is READ, not dropped.
+      `SAVE_VERSION` is **4** (see rule 45) and every file from version 2 up is READ, not dropped.
     - **The old vocabulary routes into the new model.** A hundred lines of authored
       dialogue say `trait: 'footballAffinity'`; `TRAIT_ROUTE` sends it to the Red Heart.
       Rewriting the content to reach the new systems would have been a hundred chances to
@@ -1542,3 +1549,76 @@ gate7 נגמרים ב-900, כלומר ב-57.7% מהזכוכית, והשחקני�
 סיבה ש-`walk.ts` שם. `tests/life-parallax.test.ts` בודק את **היחס** (יחס המישור שווה
 ליחס הציור, מתוך `manifest.json`) ואת **החיווט** (לכל `this.add.image(` ב-`buildParallax`
 יש `setDisplaySize(`, אין `.setScale(`), לעולם לא את המספרים.
+
+## 71 · מסלולים והישגים — ההזמנה היא שיחה, והכרטיס הוא הדלת השנייה (16.9.2026)
+
+מפרט החיים ביקש שבעה מסלולים, שלושים הישגים ושלושה עשר מדדים חדשים. שלושתם נבנו, ואז
+התברר שהם לא נגישים לאיש. שלושה כללים יצאו מזה, ושלושתם על אותו הפער: **בין "נכתב" ל"אפשר
+להגיע לזה".**
+
+- **מזהה שנוצר בתבנית צריך מקום אחד שקורא לו בשמו המלא.** `lib/life/content/routes.ts`
+  מייצר שמונה־עשרה שיחות הזמנה מתוך הרישום, עם `` id: `route-offer-${route.id}-${stage.stage}` ``.
+  זה נכון לתוכן — שמונה־עשרה העתקות של אותו ביט הן שמונה־עשרה הזדמנויות שהסירוב יפסיק
+  בשקט להיות מוצע — וזה בדיוק מה שהסתיר אותן מהשומר היחיד שקיים בשביל זה:
+  `tests/life-keys.test.ts` סופר שיחה כנגישה אם המזהה שלה מופיע כמחרוזת מצוטטת במקור,
+  ומחרוזת תבנית אינה כזאת. `OFFER_CONVERSATIONS` ב-`lib/life/routes.ts` היא הטבלה שסוגרת
+  את זה, והיא מכוונת לא-חכמה: כל מזהה כתוב במלואו, ה-`Record` מקליד אותה מול הרישום, ובדיקה
+  מוודאת שהטבלה ו-`DIALOGUE` מסכימות **בשני הכיוונים**. מפתח שנוצר ואי אפשר לקרוא לו בשמו
+  הוא אותה תקלה בדיוק כמו פיגורה שאף אחד לא ממקם (כלל 48) — רק שהיא נכשלת בשקט במקום ב-404.
+- **שתי דלתות, ולכל אחת תפקיד אחד.** ההזמנה מגיעה כ**שיחה** (`WorldScene.offerRoute`,
+  ליד שלושת המכריזים האחרים, בחדר שבו פרק נפתח, ב-4200ms אחרי החולצה/האלבום/המנוי); הכרטיס
+  (`RouteCard`, מ-☰ → המסלולים) הוא הדלת ה**מכוונת**, ועונה על שאלה שההזמנה לא צריכה לענות
+  עליה — מבין שבעה, על מה הוא רוצה לקרוא עכשיו. `nearestRoute` היא התשובה. שתיהן שואלות את
+  `eligibleFor`, ולכן הן לא יכולות לחלוק על השאלה אם הוא זכאי.
+- **`route:offered:<ID>:<stage>` הוא דגל בלי תחילית ששורדת, בכוונה.** `personFlags` מוחק
+  אותו במעבר פרק, כך שסירוב נשכח עד הפרק הבא וההצעה חוזרת. *"סירוב אינו מוריד אהבה"*,
+  ו-`declineEvents` לא כותב כלום — הצעה שאפשר להציע רק פעם אחת הופכת את "לא עכשיו" ל"אף
+  פעם", וזה ההפך ממה שהסירוב קיים בשבילו.
+- **חמישה משישה אפקסים אינם ניתנים להשגה היום, וזה כתוב על הכרטיס.** הפרק האחרון הוא 2000
+  והוא נולד ב-1978, כלומר תקרת הגיל היא 22; ארבעה אפקסים נעולים ב-25 ואחד ב-30.
+  `stageOutOfReachFor` מחשב את זה מ-`CHAPTERS` ולא ממספר מוקלד, `life.route.outOfReach`
+  אומר את זה בקול, ובניית פרק 2007 תזיז את כולם בלי לגעת בשורה. **והאפקס של המייסד אינו
+  אחד מהם** — הוא `minAge: 18`, ומה שעוצר אותו הוא חלון 2007, שהוא `gap` מסוג `window`
+  ומשפט אחר. לדווח על חלון כעל גיל זה כרטיס שאומר אמת-למראית-עין על ה**למה**.
+
+## 72 · רוטציה היא שבוע, לא מאגר — והימור אינו עבודה (16.9.2026)
+
+`ACH_SHIRT_SELF` מבקש חולצה ב-30 ₪ שנקנתה **בלי** חמשת השקלים של קובי. הבדיקה הראשונה
+שאלה אם **העבודה הכי טובה בפרק** סוגרת את הפער, קיבלה "כן", ורשמה בהערה ששבוע שמציע רק
+את סבב הבקבוקים משאיר את הילד **שקל אחד** קצר — ותייקה את זה כ"הרוטציה עובדת כמתוכנן".
+זה לא היה כך. רוטציה היא שבוע שמשוחק אחרת; הישג שנקרא על שם הפרק שהוא יושב בו, שנעשה
+בלתי-ניתן-להשגה לפי אילו עבודות הזרע חילק, הוא כלל 66 בצורתו הטהורה — סף מעל התקרה, על
+חלק מהתקרות ולא על כולן, שזו הגרסה שאף אחד לא מבחין בה לעולם.
+
+ושני המדדים הקלים שניסיתי לפני הנכון שווים זכירה, כי כל אחד מהם נראה סביר לחלוטין:
+
+· **"העבודה הזולה במאגר"** בוחרת את `alley-coin` — ש"שקל להיכנס, חמישה אם קלעת", כלומר
+  **הימור**. ילד שהוצע לו הטלת מטבע לא הוצעה לו עבודה. `opens: 'coin'` ו-`opens: 'toto'`
+  הם הסימן.
+· **"העבודה הטובה במאגר"** שגויה בכיוון השני, כי אף שבוע לא מציע את כל המאגר —
+  `offeredIn` מחלק חמש מעשר מהזרע של השמירה עצמה.
+
+המספר הכן הוא **ההצעה הטובה ביותר בשבוע הדל ביותר**, על פני 400 זרעים — הצורה של כלל 31:
+לסרוק את הזרעים, לא לבחור ארבעה ביד. התיקון עלה לבדיה שני בקבוקים (`bottles-a4` עלה
+משלושה לחמישה, ורפי סופר חמישה). שום דבר אחר לא זז — לא שכר, לא מחיר, לא רוטציה.
+לפני התיקון: 2900. אחריו: 3100. הבדיקה מדפיסה את הזרע שמחלק את השבוע הדל.
+
+## 73 · פריים לא-חתוך משקר על הגובה של עצמו (16.9.2026)
+
+שמונת פריימי ההליכה של פוגי היו קנבסים 835×1264 בתיקייה שכל פיגורה אחרת בה חתוכה
+לאלפא (~150×430). עם `setOrigin(0.5,1)` הרגליים נחתו בין **89.40% ל-99.68%** מהקנבס,
+כלומר הילד ריחף מעל `groundY` ורעד 10.3 נקודות לאורך המחזור; `displayWidth` קפץ מ-0.356×H
+ל-0.661×H, אז `shadow.setSize(displayWidth * 0.6)` הרחיב את הצל ב-**86%** ברגע שהתחיל ללכת.
+שלוש תקלות, מקור אחד.
+
+- **המניפסט הסתיר את זה.** `write_index()` ב-`to-webp-2026-09-13.py` עדכן `bytes` ו-`yellowLeft`
+  ולא נגע ב-`w`/`h` מעולם, אז `sheets.json` עוד קרא לפריימים האלה 159×430 — והשומר קורא
+  את המניפסט, לא את התיקייה (כלל 61, שוב, בצורה אחרת). 46 שורות תוקנו.
+- **השומר החדש הוא יחס, ולא הוכחה, וזה כתוב.** כל פריים הליכה חייב לשבת בין 0.6× ל-1.6×
+  מצורת העמידה שהוא משתלב איתה. פריים שרופד **באופן שווה מארבעת הצדדים** שומר על היחס
+  ויעבור; לסגור את זה דורש עמודת כיסוי-אלפא במניפסט, וזה נרשם ולא נעשה.
+- **והם היו מלכתחילה תצוגות גב** שנוגנו רק כש-`lastDir === 'side'` — כלומר ברחוב הילד
+  הפנה את הגב והחליק הצידה. `KID_WALK` הוא עכשיו הזוג הפרופיל, `KID_WALK_AWAY` הוא הגב,
+  והכיוון בוחר. **בדיקת פנים שלא בדקה כלום מאז 13.9**: `facing-check.py` חיפש `*.png`
+  בתיקייה שהיא 100% WebP והדפיס `0 · 0 · 0` ויצא 0. כלי שמדווח הצלחה על אפס קבצים הוא
+  אותה משפחה כמו הקרס שכתב `version: 1` (כלל 48) — **הוא לא יכול להיכשל, ולכן הוא לא כלי.**

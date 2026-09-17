@@ -217,6 +217,19 @@ export type PersonalityState = {
   stubbornness: number
   sociability: number
   riskTolerance: number
+  /**
+   * כנות — the twelfth axis, and the one the life spec asked for by name.
+   *
+   * It is NOT `reliability`. Reliability is whether you do what you said you would;
+   * honesty is whether what you said was true, and the two come apart constantly — a
+   * boy who always shows up and always shades the story is high on one and low on the
+   * other, and 1990 is a chapter about exactly that difference. The spec's own action
+   * table separates them the same way: `KEEP_PROMISE` pays responsibility, `TELL_LIE`
+   * costs honesty, and `LIE_DISCOVERED` costs the other person's trust and nothing of
+   * yours — because a lie nobody caught did not change what anyone thinks of you, it
+   * changed what you are.
+   */
+  honesty: number
 }
 
 export type PersonalityId = keyof PersonalityState
@@ -233,7 +246,110 @@ export const PERSONALITY_IDS: readonly PersonalityId[] = [
   'stubbornness',
   'sociability',
   'riskTolerance',
+  'honesty',
 ]
+
+// ---------------------------------------------------------------------------------
+// SKILLS — the difference between knowing and wanting, and it has a price.
+//
+// The spec (16.9.2026) names five, and they are deliberately NOT personality: an axis
+// of personality says how you tend to act, a skill says what you are actually able to
+// do. A boy can be endlessly curious and unable to write a paragraph anybody would
+// print; those are `curiosity` 80 and `communication` 6, and a model with one number
+// for both cannot tell the story the nineties chapters are about.
+//
+// They are what the seven routes gate on. `routes.ts` reads `skills.organization` for
+// ULTRAS, `skills.communication` for JOURNALIST, `skills.business` for OWNER,
+// `skills.creativity` for CREATOR, and nothing anywhere gates on a personality axis —
+// because the spec is explicit that character does not decide who is allowed to live a
+// particular life: *"אין סף אופי שמחליט מי רשאי לחיות חיים מסוימים"*. Courage 20 leads
+// through preparation and a partner; courage 80 walks up and asks. Both arrive.
+// ---------------------------------------------------------------------------------
+
+export type SkillState = {
+  knowledge: number
+  communication: number
+  organization: number
+  business: number
+  creativity: number
+}
+
+export type SkillId = keyof SkillState
+
+export const SKILL_IDS: readonly SkillId[] = [
+  'knowledge',
+  'communication',
+  'organization',
+  'business',
+  'creativity',
+]
+
+// ---------------------------------------------------------------------------------
+// REPUTATION — five audiences, and a number that cannot move until somebody KNOWS.
+//
+// This is the one system in the game whose whole design is a refusal. A skill improves
+// the moment you do the thing; a reputation does not, because reputation is not a
+// property of you — it is a property of what a particular group of people has heard.
+// The spec states it as a rule: *"REP_* עולה רק כשהקהל המוגדר ראה/קיבל דיווח מאומת על
+// הפעולה. אם אין עדים, העלייה ממתינה באירוע ידיעה; הכישור עצמו יכול להשתפר מיד."*
+//
+// So earning and hearing are two events. `reputation.earned` puts a claim in `pending`
+// with the audience it is owed to; `reputation.heard` is what pays it out. A night of
+// work nobody saw makes you better at the work and changes nothing about how the gate
+// speaks to you — until the morning somebody tells them.
+//
+// **Five audiences, not one number, and that is the whole point.** The spec is explicit
+// that `rep_public` may not serve both terrace fame and a supplier's trust: *"אלה
+// קהלים שונים."* A man the whole of gate 5 would follow can be a stranger at
+// Ussishkin, and a journalist the city reads can be nobody in the away end.
+// ---------------------------------------------------------------------------------
+
+export type ReputationAudience = 'gate7' | 'gate5' | 'ussishkin' | 'public' | 'work'
+
+export const REPUTATION_AUDIENCES: readonly ReputationAudience[] = [
+  'gate7',
+  'gate5',
+  'ussishkin',
+  'public',
+  'work',
+]
+
+/** מה שממתין שמישהו ידע — an earned claim that has not been witnessed yet. */
+export type PendingReputation = {
+  /** the action that earned it, so the same deed can never be paid twice */
+  proofId: string
+  audience: ReputationAudience
+  delta: number
+  /** the chapter it was earned in — a claim does not expire, but it is dated */
+  chapter: string
+}
+
+export type ReputationState = {
+  standing: Record<ReputationAudience, number>
+  pending: PendingReputation[]
+}
+
+// ---------------------------------------------------------------------------------
+// PROOF — evidence, recorded once, never twice.
+//
+// `proof_id` in the spec is an idempotency key with a story attached: the same deed is
+// counted once in a run, a replay for practice does not write to the same history, and
+// a route's "two proof missions in two different chapters" can be CHECKED rather than
+// trusted. A proof is what makes a route's apex an argument instead of a claim.
+// ---------------------------------------------------------------------------------
+
+export type ProofRecord = {
+  /** e.g. `leadership_proof`, `verified_report`, `paid_shift` — the spec's own vocabulary */
+  kind: string
+  /** unique per run; the same id never lands twice */
+  proofId: string
+  chapter: string
+  year: number
+  /** the subject, where one exists: a person, a work, a journey */
+  subjectHe?: string
+  /** where it happened, for the page that prints it */
+  noteHe?: string
+}
 
 // ---------------------------------------------------------------------------------
 // RED HEART — the permanent identity system. Not a fan level.
@@ -492,14 +608,45 @@ export type LifeState = {
   /**
    * הכסף של הילד — savings, which are not pocket money (Stage A §5).
    *
-   * `agorot` is what is in a pocket today and it is emptied by every year and every day,
-   * because a child does not carry last summer's coins around. This is the tin under the
-   * bed: it survives a day transition, it is what the first shirt is bought with, and it
-   * is the only number in this state that a chapter may not reset.
+   * The tin under the bed. It survives a day transition and it is what the first shirt
+   * is bought with.
+   *
+   * **This doc block used to say `agorot` "is emptied by every year and every day".**
+   * That stopped being true on 16.9.2026 (rule 68, and Maor's own sentence: *"הארנק לא
+   * מתאפס בסיום משימה אלא ממשיך איתך"*). Both pockets now carry. The difference between
+   * them survives the change and is the point: `agorot` is what is in a hand and every
+   * `minAgorot` condition in the game can see it; `savings` is a second pocket no
+   * condition can see at all, which is exactly why `goalA4` could once send a boy to a
+   * counter that would refuse him.
    */
   savings: number
+  /**
+   * חוב — what he owes, in agorot, and it is not negative money.
+   *
+   * It is its own field because it behaves nothing like a pocket: a wallet at zero is a
+   * boy with no money, a debt at zero is a boy who owes nobody, and folding the second
+   * into the first as a negative would make "broke" and "in the clear" the same state.
+   * The spec gates OWNER's apex on *"ללא חוב שהגיע זמנו ולא הוסדר"* — a question about
+   * this number and about nothing else.
+   *
+   * Floors at zero, like money. A chapter that tries to forgive more than is owed has a
+   * bug the clamp makes visible in a test.
+   */
+  debt: number
   /** what he OWNS — `shirt:1985` and whatever a later summer adds. Survives every day. */
   clothing: string[]
+  /**
+   * כישורים — what he can actually do. See `SkillState`.
+   *
+   * Additive: a save written before 16.9.2026 has no `skills` key at all, and folds into
+   * the blank set the same way `redHeart` folded into a save from before the systems
+   * pass. The log always recorded what happened; a richer reducer reads the same rows.
+   */
+  skills: SkillState
+  /** מוניטין — five audiences, and a claim that waits until somebody knows. */
+  reputation: ReputationState
+  /** ראיות — every `proof_id` this run has recorded, once each */
+  proofs: ProofRecord[]
   /** which of Stage A's eight days is being played, when one of them is */
   stageADay?: string
 
@@ -542,16 +689,51 @@ export const TRAIT_IDS: readonly TraitId[] = [
  */
 export const TRAIT_ROUTE: Record<
   TraitId,
-  { personality?: PersonalityId; redHeart?: RedHeartId }
+  { personality?: PersonalityId; redHeart?: RedHeartId; skill?: SkillId }
 > = {
   independence: { personality: 'independence' },
   courage: { personality: 'courage' },
   responsibility: { personality: 'responsibility' },
   streetSmarts: { personality: 'streetSmarts' },
-  knowledge: { personality: 'curiosity' },
+  /**
+   * `knowledge` הוא הכניסה היחידה שמזינה שני מודלים, וזה מכוון.
+   *
+   * It has routed to `personality.curiosity` since the systems pass, and a hundred lines
+   * of authored dialogue say `trait: 'knowledge'` meaning "he wanted to find out". That
+   * is still what those lines mean, so the personality leg does not move — an old save
+   * folds to the identical curiosity it always folded to.
+   *
+   * What it gains is the second leg. The spec's `skills.knowledge` is what JOURNALIST's
+   * apex reads (`knowledge>=55`), and a boy who spent fifteen years asking questions HAS
+   * accumulated that; making him start the nineties at zero because the field is new
+   * would be the `efi` bug again — a threshold calibrated against a scale nothing fills.
+   * Routing both is what lets the existing content pay into the new system without one
+   * line of dialogue being rewritten.
+   *
+   * No other trait routes to a skill. The other four are dispositions.
+   */
+  knowledge: { personality: 'curiosity', skill: 'knowledge' },
   footballAffinity: { redHeart: 'footballLove' },
   basketballAffinity: { redHeart: 'basketballLove' },
   cultureAffinity: { redHeart: 'terraceCulture' },
+}
+
+/** אפס בכל הכישורים — a life that has not learned to do anything yet. */
+export function blankSkills(): SkillState {
+  return { knowledge: 0, communication: 0, organization: 0, business: 0, creativity: 0 }
+}
+
+/**
+ * מוניטין ריק — nobody has heard of him, and nothing is owed to him.
+ *
+ * Every audience opens at zero, unlike a relationship, which opens at a baseline for
+ * people he was born knowing. There is no audience anybody is born known to.
+ */
+export function blankReputation(): ReputationState {
+  return {
+    standing: { gate7: 0, gate5: 0, ussishkin: 0, public: 0, work: 0 },
+    pending: [],
+  }
 }
 
 /** Bonds and traits are 0..100 and clamp rather than throw. A life does not overflow. */

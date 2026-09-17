@@ -78,6 +78,7 @@ const PERSON_HE: Record<PersonalityId, string> = {
   stubbornness: 'עקשנות',
   sociability: 'חברותיות',
   riskTolerance: 'סיכון',
+  honesty: 'כנות',
 }
 
 const WELL_HE: Record<WellbeingId, { he: string; good: GaugeDef['good'] }> = {

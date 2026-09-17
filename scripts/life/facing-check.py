@@ -13,6 +13,12 @@ is mirrored on ingest rather than at runtime.
 
 It is a heuristic and it says so: three-quarter poses and backs of heads are reported as
 UNSURE rather than as failures, because there the measurement has nothing to measure.
+
+**ומ-13.9.2026 ועד 16.9.2026 הוא בדק אפס קבצים.** כלל 61 העביר את `public/life/art` כולה
+ל-WebP; הסקריפט המשיך לחפש `*.png` בתיקייה שאין בה אף PNG, מצא כלום, הדפיס
+`0 face right · 0 unsure · 0 face LEFT` ויצא באפס — ירוק, שלושה ימים, על שום דבר. כלל 48
+כבר ניסח את זה: *"A harness that cannot fail is not a harness"*. שלוש שורות היו שגויות
+(הגלוב, הסיומת ברג"א, ו-`[:-4]` שחתך `.web` במקום `.webp`) והתיקון מחזיר 77 קבצי פרופיל.
 """
 import glob
 import os
@@ -24,7 +30,7 @@ from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 ART = os.path.join(ROOT, 'public/life/art')
-PROFILE = re.compile(r'-(side|walk\d*|march|w\d)\.png$')
+PROFILE = re.compile(r'-(side|walk\d*|march|w\d)\.webp$')
 
 
 def facing(path):
@@ -62,22 +68,32 @@ def facing(path):
 # they face left, and mirroring dead art only makes the next audit longer.
 DEAD = {f'kid-walk{i}' for i in range(1, 9)}
 
-# `ofir90-walk` is a BACK view that was named like a side one — the delivery drew Ofir
-# walking away. Nothing turns it, so it is not wrong on disk; it is only wrong in the
-# name, and a rename would break the manifest for no gain. Noted here so an audit does not
-# find it again.
-BACKS = {'ofir90-walk'}
+# **מבטי גב ששמם נשמע צדדי.** ההיוריסטיקה מודדת עור מול שיער בפרופיל; לגב של ראש אין
+# חזית, ולכן כל תשובה שהיא נותנת עליו היא רעש. שני המקרים כאן אינם שגויים על הדיסק:
+#
+#   * `ofir90-walk` — the delivery drew Ofir walking away and named the file like a side
+#     pose. Nothing turns it, and a rename would break the manifest for no gain.
+#   * `pogi-w1…w8` — the eight-frame cycle. Looked at on 16.9.2026: no face, no badge,
+#     the shirt plain across the shoulders, `pogi-back` matching them pose for pose. They
+#     are the child walking INTO the picture, and since 16.9.2026 that is the heading
+#     `WorldScene` plays them on (`KID_WALK_AWAY` / `WALK_AWAY` in `runtime/art.ts`).
+#     Before that they were mis-registered as the side-on walk, which is what put `pogi-w6`
+#     in this script's WRONG column and `pogi-w8` in its UNSURE one — **the script was
+#     agreeing that something was out of place without being able to say what.** It is not
+#     the instrument that diagnoses a back view; it is the instrument that protects a
+#     profile, so a back view belongs on this list rather than in its verdict.
+BACKS = {'ofir90-walk', *(f'pogi-w{i}' for i in range(1, 9))}
 
 
 def main():
     wrong, unsure, ok = [], [], 0
-    for path in sorted(glob.glob(os.path.join(ART, '*.png'))):
+    for path in sorted(glob.glob(os.path.join(ART, '*.webp'))):
         if not PROFILE.search(os.path.basename(path)):
             continue
-        who = facing(path)
-        name = os.path.basename(path)[:-4]
+        name = os.path.basename(path)[:-5]
         if name in DEAD or name in BACKS:
             continue
+        who = facing(path)
         if who is None:
             unsure.append(name)
         elif who == 'right':

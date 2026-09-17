@@ -595,13 +595,50 @@ export const KID_POSE = {
  * stand-in retires. The sheet was drawn walking left and was mirrored on ingest, so
  * every side-on frame in the folder faces right and `setFlipX` does the rest.
  */
-export const KID_WALK = [
+/**
+ * …and on 16.9.2026 somebody LOOKED at the eight frames, which is the whole of this note.
+ *
+ * They are the right boy — same curls, same jeans, same shoes as `pogi-back` — and they
+ * are a real eight-frame cycle. They are also, every one of them, a **back view**: no
+ * face, no badge, the shirt plain across the shoulders. `WorldScene` played them on
+ * `lastDir === 'side'` and nothing else, so walking along the street — the commonest
+ * movement in the game — turned the child's back to the camera and slid him sideways.
+ * The comment above the branch said "it only exists side-on", and the files said no.
+ *
+ * So the two lists below are what the frames actually show, and the direction each one
+ * is for is now in its own name:
+ *
+ *   - **`KID_WALK` — side-on**, the pair that IS in profile. `pogi-side` is mid-step and
+ *     `pogi-walk` is the opposite stride; both wear the badge, both face right, and the
+ *     scene's bob (rule 50) carries the rest. This is what the list held for the week
+ *     before the eight frames were mis-promoted into it, and the walk did not fake it.
+ *   - **`KID_WALK_AWAY` — walking INTO the picture**, which is the one heading a back
+ *     view is right for, and the heading that had no animation at all.
+ *
+ * `KID_WALK_SHELVED` is gone rather than renamed: it held exactly this pair, and two
+ * exported names for one pair is how the next pass picks the wrong one (rule 59).
+ */
+export const KID_WALK = ['pogi-side', 'pogi-walk'] as const
+
+export const KID_WALK_AWAY = [
   'pogi-w1', 'pogi-w2', 'pogi-w3', 'pogi-w4',
   'pogi-w5', 'pogi-w6', 'pogi-w7', 'pogi-w8',
 ] as const
 
-/** the two frames the game walked on for a week — still a valid pose pair */
-export const KID_WALK_SHELVED = ['pogi-side', 'pogi-walk'] as const
+/**
+ * מי הולך אל תוך התמונה — the away cycle, found by the era's OWN `up` pose.
+ *
+ * An `Era` names its player's four poses and one walk (`content/era.ts`), and it is the
+ * chapter's file rather than the runtime's, so the away sheet cannot be a sixth field
+ * without every era record learning about it. The key is therefore the thing the era
+ * already declares: the standing back pose. An era whose back pose is not in this table
+ * has no away sheet drawn yet and keeps what it has always had — the standing pose plus
+ * the bob. Only 1986 has one; `hero80` walks side-on and faces the camera, and until a
+ * back cycle is drawn for the twelve-year-old that is the honest state.
+ */
+export const WALK_AWAY: Readonly<Record<string, readonly string[]>> = {
+  'pogi-back': KID_WALK_AWAY,
+}
 
 export const HERO80_WALK = [
   'hero80-w1', 'hero80-w2', 'hero80-w3', 'hero80-w4',
@@ -627,8 +664,21 @@ export const PROP = [
    * in `ITEM_ART`. The ticket went further and became the real thing — `docTicket`, the
    * scan of the ticket a person kept for forty years.
    *
-   * Their files are still in `public/life/art` and are now referenced by nothing. They can
-   * be deleted; leaving them costs 90KB and loses nothing.
+   * **And on 16.9.2026 five of them were, at last, actually deleted.** This paragraph said
+   * for eleven days that the files "can be deleted" and the files stayed — which is the
+   * shape rule 48 warns about: the comment was written, the bytes were not removed, and an
+   * audit found them again as orphans. Gone from the folder now, with their `manifest.json`
+   * rows and their `asset-provenance.json` patterns in the same move, because a row without
+   * a file fails `tests/life.test.ts` and a provenance pattern that matches nothing fails
+   * `npm run assets:provenance`:
+   *
+   *   propNewspaper.webp · propScarf.webp · propHat.webp · propCoffee.webp · propTicket.webp
+   *
+   * `propRadio` is NOT among them and never was — it is registered below and placed on the
+   * table in four eras. `propBall` is still on disk: it is the same mis-cut and the same
+   * case, and it is left as a stated recommendation rather than a sixth deletion, because
+   * every removal here is a manual step somebody performs by hand in a browser (rules
+   * 26/51) and a list he did not ask for is a list he pays for.
    */
   /**
    * הדברים עצמם — supporter goods and street furniture, cut from the September sheets.
@@ -1000,5 +1050,14 @@ export function extensionKeys(art: string): { sky: string; ground: string } {
   return { sky: `${art}--sky`, ground: `${art}--ground` }
 }
 
-/** Loading is per scene. Boot warms only what the child is made of. */
-export const BOOT_FIGURES: string[] = [...Object.values(KID_POSE), ...KID_WALK]
+/**
+ * Loading is per scene. Boot warms only what the child is made of.
+ *
+ * The away cycle is in here too, and it has to be: it is played the first time the child
+ * walks towards the back of a room, and a texture that arrives during a walk is a frame
+ * of nothing under a moving sprite. Deduplicated because `pogi-side` is both a pose and
+ * half the side-on walk, and asking Phaser to load one key twice logs a warning per room.
+ */
+export const BOOT_FIGURES: string[] = [
+  ...new Set<string>([...Object.values(KID_POSE), ...KID_WALK, ...KID_WALK_AWAY]),
+]

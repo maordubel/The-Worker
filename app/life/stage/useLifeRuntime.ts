@@ -12,6 +12,7 @@ import { LifeAudio, type AmbienceKey } from '@/lib/life/runtime/audio'
 import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/bus'
 import type { LifeRuntime } from '@/lib/life/runtime/game'
 import { lifeStore } from '@/lib/life/save'
+import type { Achievement } from '@/lib/life/achievements'
 import type { LifeState } from '@/lib/life/types'
 
 /**
@@ -148,6 +149,17 @@ export function useLifeRuntime({
   /** the state the shop screen is drawn against, re-read after every purchase */
   const [shopState, setShopState] = useState<LifeState | null>(null)
   const [pano, setPano] = useState<LifeBusEvents['pano']>(null)
+  const [route, setRoute] = useState<LifeBusEvents['route']>(null)
+  /**
+   * התור של ההישגים — a queue that lives on the engine, mirrored into React.
+   *
+   * `LifeEngine` gains rows on `earned` inside `dispatch` and hands them back one at a
+   * time; the shell is the only thing that can draw one, so it subscribes to the engine
+   * rather than to the bus. One purchase can make two rows true at once and two cards at
+   * once is a list, so `AchievementQueue` shows the head and the rest wait — which is why
+   * the whole array is mirrored and not just its first element.
+   */
+  const [earned, setEarned] = useState<readonly Achievement[]>([])
   const [tunnel, setTunnel] = useState<LifeBusEvents['tunnel']>(null)
   /** the plate that names a room as you step into it — not on the first room of a session */
   const [placeCard, setPlaceCard] = useState<{ titleHe: string; subHe: string | null } | null>(null)
@@ -405,6 +417,7 @@ export function useLifeRuntime({
       }),
     )
     unsubscribe.push(bus.on('pano', setPano))
+    unsubscribe.push(bus.on('route', setRoute))
     unsubscribe.push(
       bus.on('tunnel', (value) => {
         setTunnel(value)
@@ -436,6 +449,9 @@ export function useLifeRuntime({
       // any room entered, any chapter — opens where it was, with no film in front of it.
       setOpening(!lifeHasBegun(engine.log(), engine.state.flags))
       engineRef.current = engine
+      // The engine notifies on every dispatch; `earned` is a new array whenever it changes,
+      // so React re-renders exactly when a row is gained or drained and never in between.
+      unsubscribe.push(engine.subscribe(() => setEarned(engine.earned)))
       runtime.current = module.createLifeGame({
         parent: holder.current,
         engine,
@@ -502,6 +518,20 @@ export function useLifeRuntime({
    * its own unmount, so a callback that changed identity would end the cutscene every
    * time this shell re-rendered — which it does on every line of dialogue.
    */
+  /**
+   * נקרא, נסגר. The card is dismissed by the player, so the row leaves the ENGINE's queue
+   * and the mirror follows — draining React alone would put it back on the next dispatch.
+   */
+  const dismissEarned = useCallback(
+    (id: string) => {
+      const engine = engineRef.current
+      if (!engine) return
+      engine.drainEarned(id)
+      setEarned(engine.earned)
+    },
+    [engineRef],
+  )
+
   const endCutscene = useCallback((outcome: CutsceneOutcome) => {
     setCutscene(null)
     runtime.current?.endCutscene(outcome)
@@ -597,6 +627,10 @@ export function useLifeRuntime({
     film,
     setFilm,
     pano,
+    route,
+    setRoute,
+    earned,
+    dismissEarned,
     tunnel,
     finishTunnel,
     tunnelProgress,

@@ -36,6 +36,7 @@ import {
   goal1986, goal1990, goal1991, goal1993Cup, goalGalil, goalSinai, goalArmy,
   goalHall, goalLaces, goalSeed, goalCup99, goalTitle, goalDouble,
 } from './goals'
+import { HEARD_BEATS, HEARD_CHAPTERS } from './routes'
 import { SCHEDULE_1986 } from './schedules1986'
 import { SCHEDULE_1990 } from './schedules1990'
 import { SCHEDULE_1991 } from './schedules1991'
@@ -461,6 +462,26 @@ const ERAS: Record<string, Era> = {
   '1999-cup': ERA_1999_CUP,
   '2000-title': ERA_2000_TITLE,
   '2000-double': ERA_2000_DOUBLE,
+}
+
+/**
+ * אירועי הידיעה של המסלולים — beats that belong to a SYSTEM, not to a Saturday.
+ *
+ * Two of the six proof missions have no witness on purpose (`content/routes.ts`), so
+ * their standing waits in `reputation.pending` for somebody to find out. The two
+ * conversations that do the finding out existed and nothing in the game opened them.
+ * They are attached here, once, to every chapter old enough for a route to pay for
+ * anything — rather than pasted into eight `BEATS_*` arrays, where the ninth chapter
+ * would be written without them and nobody would notice for a month.
+ *
+ * A chapter's own beats stay FIRST. `WorldScene` runs the first row that is due, and a
+ * chapter's opening line, its clock and its ending are its own business; a supplier
+ * saying your name waits its turn behind them.
+ */
+for (const chapter of HEARD_CHAPTERS) {
+  const era = ERAS[chapter]
+  if (!era) continue
+  ERAS[chapter] = { ...era, beats: [...(era.beats ?? []), ...HEARD_BEATS] }
 }
 
 /**

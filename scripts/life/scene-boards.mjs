@@ -52,7 +52,7 @@ const scenes = ALL_SCENES.map((scene) => {
     actors: scene.actors.map((a) => ({ ...a, drawn: bodySize(a.figure, scene.metre, depth(a.y), taper) })),
   }
 })
-process.stdout.write(JSON.stringify({ era, scenes, schedule: era === '1990' ? SCHEDULE_1990 : SCHEDULE_1986 }, (_k, v) => (typeof v === 'function' ? undefined : v)))
+process.stdout.write(JSON.stringify({ era, hero: eraFor(era).player.pose.down, scenes, schedule: era === '1990' ? SCHEDULE_1990 : SCHEDULE_1986 }, (_k, v) => (typeof v === 'function' ? undefined : v)))
 `,
 )
 const json = execFileSync('npx', ['tsx', dump], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, env: { ...process.env } })
@@ -64,10 +64,27 @@ from PIL import Image, ImageDraw, ImageFont
 d=json.load(open('/tmp/.scene-dump.json')); ART='${ROOT}public/life/art'; OUT='${ROOT}docs/life-shots'
 font=ImageFont.load_default()
 ERA=d['era']; PREFIX='board-' if ERA=='1986' else f'board-{ERA}-'
+# Mirrors inEra()/decadeOf()/stageOf() in lib/life/world/scenes.ts. Without the list and
+# the decade/stage tags this board drew a row tagged ['1998-laces','1999-basket'] — or
+# '1990s' — nowhere at all, so the picture rule 55 calls the definition of "placed" was
+# quietly leaving out exactly the rows that are shared between chapters.
+def _decade(ch):
+    try: y=int(ch[:4])
+    except Exception: return '1980s'
+    return '2000s' if y>=2000 else ('1990s' if y>=1990 else '1980s')
+def _stage(ch):
+    return 'A' if ch in ('1986','prologue') or (len(ch)>1 and ch[0]=='a' and ch[1].isdigit()) else 'B'
+DEC=_decade(ERA); STG=_stage(ERA)
+def _one(e): return e=='*' or e==ERA or e==DEC or e==STG
 def in_era(x, fallback='1986'):
-    e=x.get('era', fallback); return e=='*' or e==ERA
+    e=x.get('era', fallback)
+    return any(_one(i) for i in e) if isinstance(e,list) else _one(e)
 for sc in d['scenes']:
-    art=(sc.get('artByEra') or {}).get(ERA, sc['art'])
+    art=None
+    for key in (ERA, DEC, STG):
+        art=(sc.get('artByEra') or {}).get(key)
+        if art: break
+    art=art or sc['art']
     im=Image.open(f"{ART}/{art}.webp").convert('RGBA'); W,H=im.size
     for L in sc.get('layers') or []:
         if not in_era(L): continue
@@ -109,7 +126,8 @@ for sc in d['scenes']:
         if row['location']==sc['id'] and 'x' in row: dr.text((row['x']*W2-10,row.get('y',0.9)*H2+12),'SCHED '+row['actorId'],fill=(0,200,255),font=font)
     # the boy himself, at both ends of the band, at this year's height
     try:
-        hero='hero80' if ERA=='1990' else 'pogi'; k=1.12 if ERA=='1990' else 1
+        # the boy this chapter actually draws, not the eight-year-old sheet under an adult's size
+        hero=d.get('hero') or 'pogi'
         ha=Image.open(f"{ART}/{hero}.webp").convert('RGBA')
         for yy,sz in ((sc['band']['far'],sc['boy']['far']),(sc['band']['near'],sc['boy']['near'])):
             hh=max(1,int(sz*H2)); ww=max(1,int(hh*ha.width/ha.height)); h2=ha.resize((ww,hh))

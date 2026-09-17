@@ -16,6 +16,7 @@ import {
   routeFor,
   withLeadHe,
 } from '@/lib/life/story'
+import { ACHIEVEMENTS } from '@/lib/life/achievements'
 import { emptyState } from '@/lib/life/events'
 import { ALL_SCENES, exitInEra } from '@/lib/life/world/scenes'
 import { routeFlag } from '@/lib/life/world/reach'
@@ -219,11 +220,39 @@ describe('נרשם בזיכרון — ולא "משימה הושלמה"', () => {
     expect(justCompleted(seen, seen, 'a3-hall')).toBeNull()
   })
 
-  it('carries no achievement language anywhere in the layer', () => {
-    const text = JSON.stringify(ALL_INTENTS)
-    for (const banned of ['הישג', 'ניקוד', 'תג ', 'רצף', '%']) {
-      expect(text.includes(banned), `the story layer says "${banned}"`).toBe(false)
+  /**
+   * **16.9.2026 — השומר הזה הצטמצם, לפי כלל 63ב, ורק הוא.**
+   *
+   * מאור הכריע ב-15.9.2026, והכלל מצטט את ההכרעה במילים שלה:
+   *
+   *   > ב · הישגים — מותרים. האיסור הגורף בוטל. […] כשהישגים ייבנו, השומר הראשון
+   *   > **מצטמצם** לכדי איסור על **ציון יחיד** — שהמפרט עצמו דורש ("אין ציון יחיד שמגדיר
+   *   > מי אוהד ראוי"). השני **נשאר כפי שהוא**: הוא על פרטיות בכרטיס משותף, לא על הישגים,
+   *   > ואין לו קשר להכרעה הזאת.
+   *
+   * ההישגים נבנו היום (`lib/life/achievements.ts` — שלושים שורות, כל אחת עם פרס שהוא חפץ,
+   * גישה, הכרה, יצירה נראית או רגע אישי). זה התנאי שהכלל תלה בו את הצמצום, ולכן הוא קורה
+   * עכשיו ולא קודם: *"עד שהישגים נבנים, הבדיקות לא זזות."*
+   *
+   * **מה יצא מאוצר המילים.** `'הישג'` — כי הישג שקורא לעצמו בשמו הוא בדיוק מה שהותר.
+   * `'תג '` ו-`'רצף'` — כי תג ורצף אינם ציון יחיד; הם נאסרו מלכתחילה על כרטיס שיתוף,
+   * ושם הם נשארים אסורים. `tests/life-share.test.ts` לא נגעו בו באף תו.
+   *
+   * **מה נשאר, ובשלוש הצורות שהוא לובש:** מילה (`ניקוד`, `דירוג`), אחוז, וקידמה בצורת
+   * "N מתוך M" או "N/M" — שהיא אותה טענה בדיוק, רק בלי המילה.
+   *
+   * **ומה התרחב.** זה הצד השני של כלל 65: שומר שאיבד חצי מאוצר המילים שלו ולא הרוויח שטח
+   * הוא שומר שנחלש. אז הוא סורק עכשיו גם את שכבת ההישגים עצמה — הכותרות, הפרסים וההסברים
+   * למה פרס ממתין לפרק — כי זאת השכבה שבה ציון יחיד היה מופיע אילו מישהו החליק אותו פנימה.
+   * `JSON.stringify` משמיט את הפרדיקטים, וזה בסדר: הוא בודק את מה שהשחקן קורא.
+   */
+  it('carries no single score — not in the story layer and not in the achievements', () => {
+    const text = JSON.stringify([ALL_INTENTS, ACHIEVEMENTS])
+    for (const banned of ['ניקוד', 'נקודות', 'דירוג', '%']) {
+      expect(text.includes(banned), `the layer says "${banned}"`).toBe(false)
     }
+    expect(/\d+\s*מתוך\s*\d+/.test(text), 'a progress count, spelled out').toBe(false)
+    expect(/(?<!\d)\d{1,3}\s*\/\s*\d{1,3}(?!\d)/.test(text), 'a progress count, as a fraction').toBe(false)
   })
 })
 

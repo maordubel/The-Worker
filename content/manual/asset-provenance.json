@@ -329,12 +329,7 @@
       "match": [
         "livingTable.webp",
         "propBall.webp",
-        "propCoffee.webp",
-        "propHat.webp",
-        "propNewspaper.webp",
-        "propRadio.webp",
-        "propScarf.webp",
-        "propTicket.webp"
+        "propRadio.webp"
       ],
       "sourceUrl": null,
       "sourceTitle": "לוחות הקונספט המקוריים של מאור הראל — scripts/life/build-art.py + scripts/life/art-manifest.json",
