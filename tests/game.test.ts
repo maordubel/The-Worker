@@ -19,7 +19,7 @@ import {
   stageOf,
 } from '@/lib/game/session'
 import { buildBoard } from '@/lib/game/memory'
-import { dealFile, dealPairs, judge, judgePair } from '@/lib/game/blackfile'
+import { dealFile, dealPairs, judge, judgePair, cardId } from '@/lib/game/blackfile'
 import { dealQueue } from '@/lib/game/hate'
 import { DUEL_COUNT, duelAt, judgeRun } from '@/lib/game/hate-run'
 import {
@@ -971,12 +971,12 @@ describe('the research-master corpus', () => {
 describe('התיק השחור — gate 11', () => {
   it('grades a crossing as crossed and a myth as not', () => {
     // The two myth rows exist because the belief is widespread and the record is not.
-    expect(judge('vermouth-2015', 'crossed')?.correct).toBe(true)
-    expect(judge('vermouth-2015', 'did_not')?.correct).toBe(false)
-    expect(judge('gershon-beitar', 'did_not')?.correct).toBe(true)
-    expect(judge('zahavi-palermo', 'did_not')?.correct).toBe(true)
+    expect(judge(cardId('vermouth-2015'), 'crossed')?.correct).toBe(true)
+    expect(judge(cardId('vermouth-2015'), 'did_not')?.correct).toBe(false)
+    expect(judge(cardId('gershon-beitar'), 'did_not')?.correct).toBe(true)
+    expect(judge(cardId('zahavi-palermo'), 'did_not')?.correct).toBe(true)
     // Gershon went to Beitar, not Maccabi — the card says so.
-    expect(judge('gershon-beitar', 'did_not')?.toClubHe).toBe('בית"ר ירושלים')
+    expect(judge(cardId('gershon-beitar'), 'did_not')?.toClubHe).toBe('בית"ר ירושלים')
   })
 
   it('never puts the answer in the dealt payload', () => {
@@ -984,19 +984,33 @@ describe('התיק השחור — gate 11', () => {
     expect(dealt.length).toBeGreaterThan(3)
     expect(JSON.stringify(dealt)).not.toContain('crossed')
     expect(JSON.stringify(dealt)).not.toContain('did_not')
+    // …and neither does the thing the verdict is DERIVED from. `kind` shipped on every
+    // card until 17.9.2026 and `judge()` reads it as the answer, so the payload carried
+    // the verdict in a field the screen never used.
+    expect(JSON.stringify(dealt)).not.toContain('"kind"')
+    expect(JSON.stringify(dealt)).not.toContain('myth')
+    // Nor does any slug: the file's own slugs carry years, and the second half of the
+    // round asks which came first.
+    for (const card of dealt) {
+      expect(card.id, card.id).toMatch(/^[0-9a-f]{12}$/)
+      expect(JSON.stringify(card)).not.toMatch(/\b(19|20)\d{2}\b/)
+    }
   })
 
   it('orders two dated events by their real dates', () => {
     const pairs = dealPairs(11)
     expect(pairs.length).toBeGreaterThan(2)
     for (const pair of pairs) {
-      const verdict = judgePair(pair.id, pair.aSlug)
+      // The pair used to be graded on its slugs. They carried the years
+      // (`liquidation-2017`), which is the answer to "which came first", so the cards
+      // now travel as opaque ids and the grader takes both of them (17.9.2026).
+      const verdict = judgePair(pair.aId, pair.bId, pair.aId)
       expect(verdict).not.toBeNull()
-      const first = verdict?.firstSlug
-      expect([pair.aSlug, pair.bSlug]).toContain(first)
+      const first = verdict?.firstId
+      expect([pair.aId, pair.bId]).toContain(first)
       // The earlier date really is earlier.
       const [a, b] = [verdict?.aDate as string, verdict?.bDate as string]
-      expect(first === pair.aSlug ? a <= b : b <= a).toBe(true)
+      expect(first === pair.aId ? a <= b : b <= a).toBe(true)
     }
   })
 

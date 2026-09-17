@@ -208,11 +208,44 @@ describe('שערים עם צורה משלהם', () => {
     expect(dealFile(11, 3).length + dealPairs(11, undefined, 3).length).toBe(9)
   })
 
+  it('the memory deck is addressed over the pool it can actually field', () => {
+    /*
+     * `buildBoard` passed `positionOf` the RAW candidate count (65) while the
+     * de-duplication that follows collapses every competition to one row and leaves 29
+     * usable pairs. A lap was therefore ELEVEN boards long over a pool that fills five —
+     * `takeFrom` wrapped, and more than half of every lap was a pair the same lap had
+     * already dealt. That is the one guarantee `lib/rotation/deck.ts` exists to make.
+     * 17.9.2026.
+     *
+     * FRESH_BOARDS is a FLOOR, not a description: 29 pairs fill four boards of six with
+     * five pairs to spare, so the fifth board of a lap is allowed to wrap and the sixth
+     * begins a new lap. Grow the archive and this number can be raised; it must never be
+     * lowered to make the suite green (rule 47).
+     */
+    const FRESH_BOARDS = 4
+    for (const seed of [11, 42, 7, 1234, 99]) {
+      const seen = new Map<string, number>()
+      for (let cursor = 0; cursor < FRESH_BOARDS; cursor += 1) {
+        for (const card of buildBoard(seed, 6, cursor)) {
+          seen.set(card.pair, (seen.get(card.pair) ?? 0) + 1)
+        }
+      }
+      // Every card is dealt exactly twice — it is a pair — so a pair that turns up on two
+      // boards of the same lap shows as four.
+      const repeated = [...seen.values()].filter((count) => count > 2).length
+      expect(
+        repeated,
+        `seed ${seed}: ${repeated} pairs repeated inside the first ${FRESH_BOARDS} boards`,
+      ).toBe(0)
+      expect(seen.size).toBe(FRESH_BOARDS * 6)
+    }
+  })
+
   it('the black file reorders the file rather than hiding half of it', () => {
     // Five transfer cards, and all five are the round: the cursor may change the order
     // they arrive in and may not drop one, because this half IS the whole file.
-    const first = dealFile(11, 0).map((card) => card.slug)
-    const second = dealFile(11, 1).map((card) => card.slug)
+    const first = dealFile(11, 0).map((card) => card.id)
+    const second = dealFile(11, 1).map((card) => card.id)
     expect([...second].sort()).toEqual([...first].sort())
     expect(second).not.toEqual(first)
   })

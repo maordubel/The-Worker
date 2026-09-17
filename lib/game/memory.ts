@@ -51,6 +51,22 @@ function kitCandidates(): Candidate[] {
     .filter((candidate) => candidate.b !== '')
 }
 
+/**
+ * How many pairs this pool can really field — one per distinct face, counted the way the
+ * de-duplication in `buildBoard` counts, in file order so the answer never moves.
+ */
+function distinctCount(candidates: readonly { a: string; b: string }[]): number {
+  const seen = new Set<string>()
+  let count = 0
+  for (const candidate of candidates) {
+    if (seen.has(candidate.a) || seen.has(candidate.b)) continue
+    seen.add(candidate.a)
+    seen.add(candidate.b)
+    count += 1
+  }
+  return count
+}
+
 export function buildBoard(seed: number, pairs = 6, cursor = 0): MemoryCard[] {
   // The board used to be one board: the gate linked `?seed=7`, the route defaulted to
   // 7, and there was no replay link at all, so every player on every visit turned over
@@ -87,7 +103,14 @@ export function buildBoard(seed: number, pairs = 6, cursor = 0): MemoryCard[] {
   // size: `positionOf` decides which lap of the pool this is, and a lap of an unknown
   // pool is one slice long — which would re-seed the shuffle on every single visit and
   // let a pair from the previous board come back on the next one.
-  const at = positionOf(seed, cursor, candidates.length, pairs)
+  //
+  // And the size it needs is the size of the pool it can actually FIELD, not the raw
+  // candidate count: the de-duplication below collapses every competition to one row, so
+  // 65 candidates yield 29 usable pairs. Addressed over 65 the lap ran eleven boards long
+  // over a pool that fills four, `takeFrom` wrapped, and every board from the fifth on
+  // re-dealt a pair the same lap had already dealt — the one guarantee
+  // `lib/rotation/deck.ts` exists to make. 17.9.2026.
+  const at = positionOf(seed, cursor, distinctCount(candidates), pairs)
   const random = rng(at.seed)
 
   // One pair per distinct face value, so two cards can never read identically — and

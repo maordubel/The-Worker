@@ -59,12 +59,12 @@ export function BlackFile({
 
   function answerCard(value: 'crossed' | 'did_not') {
     if (answered || !card) return
-    startTransition(async () => setCardVerdict(await submitCard(card.slug, value)))
+    startTransition(async () => setCardVerdict(await submitCard(card.id, value)))
   }
 
-  function answerPair(slug: string) {
+  function answerPair(id: string) {
     if (answered || !pair) return
-    startTransition(async () => setPairVerdict(await submitPair(pair.id, slug)))
+    startTransition(async () => setPairVerdict(await submitPair(pair.aId, pair.bId, id)))
   }
 
   function next() {
@@ -141,16 +141,16 @@ export function BlackFile({
           </p>
           <div className="mt-2 grid gap-2">
             {[
-              { slug: pair.aSlug, title: pair.aTitleHe },
-              { slug: pair.bSlug, title: pair.bTitleHe },
+              { id: pair.aId, title: pair.aTitleHe },
+              { id: pair.bId, title: pair.bTitleHe },
             ].map((side) => (
               <button
-                key={side.slug}
+                key={side.id}
                 type="button"
                 disabled={pending || answered}
-                onClick={() => answerPair(side.slug)}
+                onClick={() => answerPair(side.id)}
                 className={`min-h-tap w-full border-rule px-4 py-3 text-start font-display text-step-1 leading-tight transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
-                  pairVerdict && pairVerdict.firstSlug === side.slug
+                  pairVerdict && pairVerdict.firstId === side.id
                     ? 'border-sign bg-sign text-hate-ink'
                     : 'border-sign bg-hate-card text-hate-ink'
                 }`}

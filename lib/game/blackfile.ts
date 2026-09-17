@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { createHash } from 'node:crypto'
+
 import { cycleSeed, rotate } from '@/lib/rotation/deck'
 import { archive, rng, shuffle } from './archive'
 
@@ -31,17 +33,50 @@ import { archive, rng, shuffle } from './archive'
 
 export type Verdict = 'crossed' | 'did_not'
 
+/**
+ * מזהה ציבורי — the same device `lib/game/timeline.ts` uses, and gate 11 needed it more.
+ *
+ * Until 17.9.2026 this file shipped TWO answers to the client and neither was earned:
+ *
+ * · **`kind` WAS the answer.** `judge()` derives truth as `kind === 'crossing'`, and
+ *   `kind` travelled on every card. Anybody reading the payload knew every verdict
+ *   before answering. Nothing in `BlackFile.tsx` ever used the field.
+ * · **The slugs carry their years.** `liquidation-2017`, `safra-2024`, `benhaim-2013` —
+ *   and the second half of the round is "which came first". The dates were in the DOM.
+ *
+ * Rule 4 is absolute about this and `timeline.ts` had already solved it: a sha256 of the
+ * row's own key is unique, stable across a deal and a grade, and says nothing. The slug
+ * never leaves the server now; `byId()` is the one place it comes back.
+ */
+function publicId(slug: string): string {
+  return createHash('sha256').update(`grievance:${slug}`).digest('hex').slice(0, 12)
+}
+
+/**
+ * The id of a known row, for the archive side of the wall — the suite names the two myth
+ * rows by slug because that is what the ARCHIVE calls them, and it should not have to
+ * hash them by hand to say so. It is exported from a `server-only` module, so nothing a
+ * browser loads can reach it.
+ */
+export function cardId(slug: string): string {
+  return publicId(slug)
+}
+
+function byId(id: string) {
+  return archive.grievances.find((row) => publicId(row.slug) === id) ?? null
+}
+
 export type FileCard = {
-  slug: string
+  /** opaque — see `publicId`. The slug and the kind stay on the server. */
+  id: string
   /** the name on the card, or the headline for a dated event */
   subjectHe: string
   /** what the player is being asked to judge */
   promptHe: string
-  kind: 'crossing' | 'myth' | 'event'
 }
 
 export type CardVerdict = {
-  slug: string
+  id: string
   correct: boolean
   answer: Verdict
   titleHe: string
@@ -82,20 +117,19 @@ export function dealFile(seed: number, cursor = 0): FileCard[] {
   // round is the whole file, not a sample of it.
   const random = rng(cursor === 0 ? seed : cycleSeed(seed, cursor))
   return shuffle([...transferCards()], random).map((row) => ({
-    slug: row.slug,
+    id: publicId(row.slug),
     subjectHe: row.personNameHe ?? row.titleHe,
     promptHe: row.titleHe,
-    kind: row.kind,
   }))
 }
 
 /** Graded on the server. A `myth` row is the card whose true answer is "did not". */
-export function judge(slug: string, answer: Verdict): CardVerdict | null {
-  const row = archive.grievances.find((item) => item.slug === slug)
+export function judge(id: string, answer: Verdict): CardVerdict | null {
+  const row = byId(id)
   if (!row) return null
   const truth: Verdict = row.kind === 'crossing' ? 'crossed' : 'did_not'
   return {
-    slug: row.slug,
+    id,
     correct: answer === truth,
     answer: truth,
     titleHe: row.titleHe,
@@ -111,9 +145,10 @@ export function judge(slug: string, answer: Verdict): CardVerdict | null {
 /* ------------------------------------------------------------- what came first */
 
 export type PairCard = {
+  /** opaque, and derived from both halves so a pair cannot be re-identified from one */
   id: string
-  aSlug: string
-  bSlug: string
+  aId: string
+  bId: string
   aTitleHe: string
   bTitleHe: string
 }
@@ -135,9 +170,9 @@ export function dealPairs(seed: number, count = 4, cursor = 0): PairCard[] {
     const b = events[index + 1]
     if (!a || !b) continue
     pairs.push({
-      id: `${a.slug}|${b.slug}`,
-      aSlug: a.slug,
-      bSlug: b.slug,
+      id: publicId(`${a.slug}|${b.slug}`),
+      aId: publicId(a.slug),
+      bId: publicId(b.slug),
       aTitleHe: a.titleHe,
       bTitleHe: b.titleHe,
     })
@@ -147,22 +182,28 @@ export function dealPairs(seed: number, count = 4, cursor = 0): PairCard[] {
 
 export type PairVerdict = {
   correct: boolean
-  firstSlug: string
+  firstId: string
   aDate: string | null
   bDate: string | null
   aBodyHe: string
   bBodyHe: string
 }
 
-export function judgePair(id: string, pickedSlug: string): PairVerdict | null {
-  const [aSlug, bSlug] = id.split('|')
-  const a = archive.grievances.find((row) => row.slug === aSlug)
-  const b = archive.grievances.find((row) => row.slug === bSlug)
+/**
+ * The pair used to be identified by `aSlug|bSlug` and graded on the slug the player
+ * picked — so both halves of the question travelled as readable text with the years in
+ * them. It takes the two opaque card ids instead; the composite `PairCard.id` is for
+ * React keys and is never parsed.
+ */
+export function judgePair(aId: string, bId: string, pickedId: string): PairVerdict | null {
+  const a = byId(aId)
+  const b = byId(bId)
   if (!a || !b || !a.happenedOn || !b.happenedOn) return null
   const first = a.happenedOn <= b.happenedOn ? a : b
+  const firstId = first === a ? aId : bId
   return {
-    correct: pickedSlug === first.slug,
-    firstSlug: first.slug,
+    correct: pickedId === firstId,
+    firstId,
     aDate: a.happenedOn,
     bDate: b.happenedOn,
     aBodyHe: a.bodyHe,
