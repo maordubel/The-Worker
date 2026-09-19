@@ -1,0 +1,60 @@
+export type RoyalRumbleMessageKey = keyof typeof COPY
+
+const COPY = {
+  title: 'רויאל ראמבל',
+  description: 'בנה חמישיית הפועל בתקציב מוגבל, חשוף את היריבה וצא לקרב 5 על 5.',
+  sub: '5 נגד 5 · תקציב 15 מיליון · הציון האמיתי נשאר סודי',
+  goalkeeper: 'שוער',
+  defence: 'הגנה',
+  midfield: 'קישור',
+  attack: 'התקפה',
+  activeYears: 'שנות הפעילות בארכיון',
+  priceEntry: 'מחיר כניסה',
+  hapoelYears: 'בהפועל',
+  lineupWall: 'החמישייה על הקיר',
+  lineupEdit: 'לחץ על מקום כדי לחזור ולשנות',
+  vacant: 'פנוי',
+  kickoff: 'השריקה. רויאל ראמבל יוצא לדרך.',
+  opponentTitle: 'חמש דלתות. חמישה יריבים.',
+  opponentBody: 'החמישייה שמולך כבר נקבעה לפני הבחירה הראשונה שלך. אין התאמות, אין רחמים.',
+  won: 'נשארת אחרון בזירה.',
+  draw: 'אף חמישייה לא נפלה.',
+  lost: 'הפעם זרקו אותך מהזירה.',
+  resultSecret: 'המספרים האמיתיים נשארים בחדר הסגור. המחיר מספר רק באיזה אזור איכות השחקן נמצא — לא כמה הוא באמת חזק.',
+  yourFive: 'החמישייה שלך',
+  theirFive: 'החמישייה שנכנסה מולך',
+  again: 'עוד רויאל ראמבל',
+  heroBody: 'שלושה שמות נכנסים בכל סיבוב. אחד נשאר. בנה חמישייה ב־15 מיליון — בלי לראות לעולם את הציון האמיתי של אף שחקן.',
+  budgetOf: 'מתוך {budget}',
+  lockedCount: '{count}/5 נעולים',
+  archiveCount: '{count} במאגר',
+  draftQuestion: 'שלושה נכנסים. מי נשאר?',
+  draftPosition: 'עמדה: {position} · המחיר גלוי, האיכות המדויקת לא.',
+  ratingNever: 'לעולם לא נחשף',
+  fadedNote: 'כרטיס דהוי = הבחירה הזאת לא משאירה מספיק כסף להשלים חמישייה חוקית.',
+  invalidFive: 'החמישייה לא עברה אימות. בחר חמישה שחקנים מתוך ההגרלה ובתקציב.',
+  locking: 'נועל את הזירה…',
+  lockReady: 'נעל חמישייה · פתח את דלתות היריבה',
+  missingPlayers: 'חסרים עוד {count} שחקנים',
+  rulePrice: '€1M–€5M הוא מחיר, לא Rating.',
+  ruleRange: 'שני שחקני €5M יכולים להיות רחוקים מאוד בכוח.',
+  ruleOpponent: 'היריבה נקבעת מראש — אין התאמה לבחירות שלך.',
+  challengeTitle: 'תן לחבר בדיוק את אותו ראמבל.',
+  challengeBody: 'אותם 15 מועמדים, אותה יריבה, אותו תקציב. רק ההחלטות משתנות. עכשיו אפשר להתווכח על החמישייה — לא על ההגרלה.',
+  challengeShare: 'שלח את הראמבל',
+  challengeCopied: 'הלינק הועתק',
+  challengeShared: 'נשלח. עכשיו שיבנה.',
+  challengeText: 'רויאל ראמבל #{code} — אותם שחקנים, אותה יריבה. בוא נראה איזו חמישיית הפועל אתה בונה ב־€15M.',
+  matchWon: 'נגמר. החמישייה שלך לוקחת את הקרב.',
+  matchLost: 'נגמר. הפעם היריבה נשארה עומדת.',
+  matchDraw: 'נגמר. תיקו בזירה.',
+} as const
+
+export function t(key: RoyalRumbleMessageKey, vars?: Record<string, string>): string {
+  const raw = COPY[key]
+  if (!vars) return raw
+  return Object.entries(vars).reduce(
+    (out, [name, value]) => out.replaceAll(`{${name}}`, value),
+    raw,
+  )
+}
