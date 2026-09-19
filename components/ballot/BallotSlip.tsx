@@ -3,8 +3,12 @@
 import Link from 'next/link'
 
 import { ShareRow } from '@/components/share/ShareRow'
+import { SupporterId } from '@/components/ballot/SupporterId'
 import { Num } from '@/components/ui/Num'
 import { BALLOT, type Ballot, type PollQuestion } from '@/lib/polls/ballot'
+import type { PickFact } from '@/lib/polls/pickFact'
+import type { SupporterId as Id } from '@/lib/polls/supporter'
+import type { KitSpec } from '@/lib/kit/spec'
 import { t } from '@/lib/i18n'
 
 /**
@@ -31,6 +35,18 @@ import { t } from '@/lib/i18n'
  *    of them this one — so the ring is a square here, the same stamp motif the rest of
  *    the sheet already uses.
  *
+ * ## השם על החולצה, and where it is actually kept (19.9.2026)
+ *
+ * The reference asks for the name on the intro screen and keeps it in its own variable.
+ * A printed slip has a name line at the head, so that is where this one is — but the
+ * field it writes is NOT a new one. `lib/game/member.ts` has held `nameHe` and `number`
+ * since gate 10 was built, `lib/portal/sync.ts` already carries `nameHe` up to
+ * `app_profile.display_name`, and the brief is explicit: *"do not duplicate these fields
+ * separately if the profile already stores them."* So typing a name here changes the
+ * name on the shirt in gate 10, and signing in carries one name rather than two that
+ * disagree (rule 59). The note under the field says so out loud, because a field that
+ * quietly edits another screen is worse than one that does not.
+ *
  * The honesty plate is the one element every one of the four states shares. It is
  * printed OUTSIDE both the seal-button branch and the sealed branch, not duplicated
  * into each — the same sentence, in the same place, whether the slip is empty, half
@@ -41,7 +57,12 @@ export function BallotSlip({
   filled,
   complete,
   sealed,
+  nameHe,
+  supporter,
+  shirt,
+  favourite,
   onRowTap,
+  onName,
   onSeal,
   onNewSlip,
 }: {
@@ -49,7 +70,16 @@ export function BallotSlip({
   filled: number
   complete: boolean
   sealed: boolean
+  /** the name on the shirt — the member book's, not a second copy of it */
+  nameHe: string
+  /** the slip read back as a person; drawn once the slip is sealed */
+  supporter: Id
+  /** the club's own home kit, for the supporter's shirt */
+  shirt: KitSpec
+  /** what the archive holds on the favourite, or null */
+  favourite: PickFact | null
   onRowTap: (question: PollQuestion) => void
+  onName: (value: string) => void
   onSeal: () => void
   onNewSlip: () => void
 }) {
@@ -67,6 +97,33 @@ export function BallotSlip({
             <Num>{`${filled}/${BALLOT.length}`}</Num>
           </span>
         </div>
+      </div>
+
+      {/* the name line — a slip has one at the head, and it is the member book's own */}
+      <div className="border-b-hair border-ink/30 px-3.5 py-2">
+        <label className="block">
+          <span className="font-body text-[8.5px] font-extrabold tracking-[0.18em] text-muted">
+            {t('poll.name.label')}
+          </span>
+          {sealed ? (
+            <span className="mt-0.5 block truncate font-sign text-[18px] font-bold text-red">
+              {nameHe === '' ? t('poll.id.noName') : nameHe}
+            </span>
+          ) : (
+            <input
+              value={nameHe}
+              onChange={(event) => onName(event.target.value)}
+              maxLength={18}
+              placeholder={t('poll.name.placeholder')}
+              className="mt-0.5 block h-tap w-full border-hair border-ink/35 bg-sheet px-2 font-sign text-[18px] font-bold text-ink placeholder:font-body placeholder:text-[14px] placeholder:font-normal placeholder:text-muted"
+            />
+          )}
+        </label>
+        {!sealed && (
+          <p className="mt-1 font-body text-[10.5px] leading-snug text-muted">
+            {t('poll.name.note')}
+          </p>
+        )}
       </div>
 
       {/* eight numbered rows, one document */}
@@ -157,6 +214,10 @@ export function BallotSlip({
           </span>
 
           <div className="mt-8">
+            <SupporterId id={supporter} shirt={shirt} favourite={favourite} />
+          </div>
+
+          <div className="mt-2.5">
             <ShareRow
               kind="polls"
               params={{ n: String(filled) }}
@@ -168,11 +229,20 @@ export function BallotSlip({
                 eyebrow: t('poll.slip'),
                 hero: t('poll.slip'),
                 stats: [],
-                ballot: BALLOT.filter((question) => (ballot[question.id] ?? '') !== '').map((question) => ({
-                  ask: t(question.ask),
-                  latin: question.latin,
-                  pick: ballot[question.id] as string,
-                })),
+                // The name goes on as a ROW rather than into the hero line. The ballot
+                // template sizes its rows by how many there are and measures every
+                // baseline (rule 19), so a ninth row is a row; an eighteen-character
+                // name swapped into an 84px hero is a collision nobody measured.
+                ballot: [
+                  ...(nameHe === ''
+                    ? []
+                    : [{ ask: t('poll.name.label'), latin: 'NAME ON THE SHIRT', pick: nameHe }]),
+                  ...BALLOT.filter((question) => (ballot[question.id] ?? '') !== '').map((question) => ({
+                    ask: t(question.ask),
+                    latin: question.latin,
+                    pick: ballot[question.id] as string,
+                  })),
+                ],
                 cta: t('poll.cta'),
                 challenge: t('poll.challenge'),
               }}

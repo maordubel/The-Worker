@@ -1,5 +1,5 @@
 {
- "note": "Historic XIs as the Vikipoel match pages record them. `positionsInferred` is true everywhere: the sources list the eleven in the conventional order but do not state each player's position, so grading falls back to the LINE. A record with `playable: false` is one the source itself marks unverified — it is kept for the archive and withheld from the game.",
+ "note": "Historic XIs as the Vikipoel match pages record them. `positionsInferred` is true everywhere: the sources list the eleven in the conventional order but do not state each player's position, so grading falls back to the LINE. A record with `playable: false` is one the source itself marks unverified — it is kept for the archive and withheld from the game. `benchHe` names the substitutes the record's own source already states in `noteHe`; it is a restatement, never a new claim, and `tests/lineup.test.ts` fails if a bench name cannot be quoted from the record it sits in. The Stamford Bridge record is left without one on purpose: its note writes חילופים שנרשמו as three names, one of whom is also in its own XI, so who came on and who went off cannot be read out of it.",
  "confidence": 3,
  "source": {
   "kind": "manual",
@@ -90,6 +90,10 @@
     "עומרי אפק",
     "דמיטרי מיכאלנקו"
    ],
+   "benchHe": [
+    "סלים טועמה",
+    "פיני בלילי"
+   ],
    "noteHe": "חילופים: סלים טועמה במקום אישטוון פישונט בדקה 69, פיני בלילי במקום סרגיי קלשצ'נקו בדקה 81. כרטיסים צהובים: דניס אונישנקו, יגאל אנטבי.",
    "confidence": 3,
    "sourceUrl": "https://wiki.red-fans.com/",
@@ -117,6 +121,11 @@
    "distractors": [
     "איתי שכטר",
     "יוסי שבחון",
+    "שי אבוטבול",
+    "ביוואן פרנסמן",
+    "גל שיש"
+   ],
+   "benchHe": [
     "שי אבוטבול",
     "ביוואן פרנסמן",
     "גל שיש"
@@ -151,6 +160,11 @@
     "ויקטור מרעי",
     "שי אבוטבול",
     "גל שיש"
+   ],
+   "benchHe": [
+    "ביוואן פרנסמן",
+    "רומאן רוקי",
+    "ויקטור מרעי"
    ],
    "noteHe": "חילופים: ביוואן פרנסמן בדקה 90, רומאן רוקי בדקה 72, ויקטור מרעי בדקה 79.",
    "confidence": 3,

@@ -155,7 +155,7 @@ export function RoyalRumbleMatchFX() {
       if (commentary && commentary !== lastCommentary.current) {
         lastCommentary.current = commentary
         const now = Date.now()
-        const building = /מסירה|מתקדם|מצב|בעיטה|נפתח|לוחץ|היציע כבר עומד/.test(commentary)
+        const building = /\u05de\u05e1\u05d9\u05e8\u05d4|\u05de\u05ea\u05e7\u05d3\u05dd|\u05de\u05e6\u05d1|\u05d1\u05e2\u05d9\u05d8\u05d4|\u05e0\u05e4\u05ea\u05d7|\u05dc\u05d5\u05d7\u05e5|\u05d4\u05d9\u05e6\u05d9\u05e2 \u05db\u05d1\u05e8 \u05e2\u05d5\u05de\u05d3/.test(commentary)
         if (building && unlocked.current && now > buildCooldown.current) {
           buildCooldown.current = now + 1500
           playOneShot(SFX.build, 0.24)

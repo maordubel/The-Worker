@@ -1,11 +1,12 @@
 {
  "confidence": 3,
- "note": "אזורי המגרש הם פרשנות של המילים במקור, לא קואורדינטות שמקור מסר. כל רשומה מצהירה approximateCoords, וכל מגע שומר את ניסוח המקור ב-positionHe.",
+ "note": "אזורי המגרש הם פרשנות של המילים במקור, לא קואורדינטות שמקור מסר. כל רשומה מצהירה approximateCoords, וכל מגע שומר את ניסוח המקור ב-positionHe — וממנו, ורק ממנו, נגזרת מעטפת אי-הוודאות (lib/game/replay/truth.ts). הפעולה של מגע נקראת מהמילה של הכתב עצמו ב-noteHe: \"נגח\" היא נגיחה, \"הדיפה\" של שוער היא הדיפה, \"עומק\" היא מסירת עומק. playedOn הוא התאריך שה-subtitleHe כבר אומר, בכתיב ISO, וממנו נגזרת העונה שממנה נבנה מאגר השמות.",
  "records": [
   {
    "goalId": "chelsea-2001-gershon-88",
    "titleHe": "הפנדל של גרשון מול צ'לסי",
    "subtitleHe": "18.10.2001 · בלומפילד · דקה 88",
+   "playedOn": "2001-10-18",
    "competitionHe": "גביע אופ\"א · סיבוב 2, משחק ראשון",
    "opponentHe": "צ'לסי",
    "scoreHe": "0:2 להפועל",
@@ -44,6 +45,7 @@
    "goalId": "chelsea-2001-kleschenko-90-4",
    "titleHe": "הנגיחה של קלשצ'נקו בדקה 90+4",
    "subtitleHe": "18.10.2001 · בלומפילד · דקה 90+4",
+   "playedOn": "2001-10-18",
    "competitionHe": "גביע אופ\"א · סיבוב 2, משחק ראשון",
    "opponentHe": "צ'לסי",
    "scoreHe": "0:2 להפועל",
@@ -68,7 +70,7 @@
     {
      "step": 3,
      "actorHe": "סרגיי קלשצ'נקו",
-     "action": "shot",
+     "action": "header",
      "zone": "C1",
      "positionHe": "בתוך הרחבה",
      "noteHe": "התרומם באוויר ונגח פנימה"
@@ -82,6 +84,7 @@
    "goalId": "chelsea-away-2001-osterc-36",
    "titleHe": "אוסטרץ' משתיק את סטמפורד ברידג'",
    "subtitleHe": "01.11.2001 · סטמפורד ברידג' · דקה 36",
+   "playedOn": "2001-11-01",
    "competitionHe": "גביע אופ\"א · סיבוב 2, משחק שני",
    "opponentHe": "צ'לסי",
    "scoreHe": "1:1",
@@ -120,6 +123,7 @@
    "goalId": "lokomotiv-2001-osterc-48",
    "titleHe": "הפריצה של אוסטרץ' במוסקבה",
    "subtitleHe": "04.12.2001 · רמנסקויה, מוסקבה · דקה 48",
+   "playedOn": "2001-12-04",
    "competitionHe": "גביע אופ\"א · סיבוב 3, משחק שני",
    "opponentHe": "לוקומוטיב מוסקבה",
    "scoreHe": "1:0 להפועל",
@@ -136,7 +140,7 @@
     {
      "step": 2,
      "actorHe": "סלים טועמה",
-     "action": "pass",
+     "action": "throughBall",
      "zone": "C2",
      "positionHe": "מרכז המגרש קדימה",
      "noteHe": "מסירת עומק חכמה"
@@ -166,6 +170,7 @@
    "goalId": "parma-2002-osterc-32",
    "titleHe": "הפצצה של אוסטרץ' בטרדיני",
    "subtitleHe": "28.02.2002 · אצטדיון טרדיני, פארמה · דקה 32",
+   "playedOn": "2002-02-28",
    "competitionHe": "גביע אופ\"א · שמינית גמר, משחק שני",
    "opponentHe": "פארמה",
    "scoreHe": "2:1 להפועל",
@@ -204,6 +209,7 @@
    "goalId": "parma-2002-pisont-55",
    "titleHe": "הטיל של פישונט מול פארמה",
    "subtitleHe": "28.02.2002 · אצטדיון טרדיני, פארמה · דקה 55",
+   "playedOn": "2002-02-28",
    "competitionHe": "גביע אופ\"א · שמינית גמר, משחק שני",
    "opponentHe": "פארמה",
    "scoreHe": "2:1 להפועל",
@@ -212,7 +218,7 @@
     {
      "step": 1,
      "actorHe": "פיני בלילי",
-     "action": "pass",
+     "action": "throughBall",
      "zone": "C3",
      "positionHe": "מרכז המגרש",
      "noteHe": "מסירת עומק נהדרת"
@@ -242,6 +248,7 @@
    "goalId": "milan-2002-kleschenko-31",
    "titleHe": "הוולה של קלשצ'נקו מול מילאן",
    "subtitleHe": "14.03.2002 · אצטדיון GSP, ניקוסיה · דקה 31",
+   "playedOn": "2002-03-14",
    "competitionHe": "גביע אופ\"א · רבע גמר, משחק ראשון",
    "opponentHe": "מילאן",
    "scoreHe": "0:1 להפועל",
@@ -280,6 +287,7 @@
    "goalId": "salzburg-2010-bensahar-44",
    "titleHe": "הנגיחה של בן סהר בזלצבורג",
    "subtitleHe": "18.08.2010 · זלצבורג · דקה 44",
+   "playedOn": "2010-08-18",
    "competitionHe": "פלייאוף ליגת האלופות · משחק ראשון",
    "opponentHe": "רד בול זלצבורג",
    "scoreHe": "2:3 להפועל",
@@ -312,7 +320,7 @@
     {
      "step": 4,
      "actorHe": "בן סהר",
-     "action": "shot",
+     "action": "header",
      "zone": "C1",
      "positionHe": "בתוך הרחבה",
      "noteHe": "נגיחה פנימה"
@@ -326,6 +334,7 @@
    "goalId": "salzburg-2010-shechter-53",
    "titleHe": "שכטר שובר את מלכודת הנבדל",
    "subtitleHe": "18.08.2010 · זלצבורג · דקה 53",
+   "playedOn": "2010-08-18",
    "competitionHe": "פלייאוף ליגת האלופות · משחק ראשון",
    "opponentHe": "רד בול זלצבורג",
    "scoreHe": "2:3 להפועל",
@@ -334,7 +343,7 @@
     {
      "step": 1,
      "actorHe": "אביחי ידין",
-     "action": "pass",
+     "action": "throughBall",
      "zone": "C3",
      "positionHe": "מרכז המגרש",
      "noteHe": "כדור עומק נהדר"
@@ -364,6 +373,7 @@
    "goalId": "benfica-2010-zahavi-24",
    "titleHe": "הנגיחה של זהבי מול בנפיקה",
    "subtitleHe": "24.11.2010 · בלומפילד · דקה 24",
+   "playedOn": "2010-11-24",
    "competitionHe": "ליגת האלופות · שלב הבתים",
    "opponentHe": "בנפיקה",
    "scoreHe": "0:3 להפועל",
@@ -388,7 +398,7 @@
     {
      "step": 3,
      "actorHe": "ערן זהבי",
-     "action": "shot",
+     "action": "header",
      "zone": "B1",
      "positionHe": "בתוך הרחבה",
      "noteHe": "נגיחה לפינה השמאלית"
@@ -402,6 +412,7 @@
    "goalId": "benfica-2010-zahavi-90-2",
    "titleHe": "זהבי סוגר ערב חלומי",
    "subtitleHe": "24.11.2010 · בלומפילד · דקה 90+2",
+   "playedOn": "2010-11-24",
    "competitionHe": "ליגת האלופות · שלב הבתים",
    "opponentHe": "בנפיקה",
    "scoreHe": "0:3 להפועל",
@@ -440,6 +451,7 @@
    "goalId": "schalke-2010-shechter-90-4",
    "titleHe": "שכטר כובש מול נויר",
    "subtitleHe": "20.10.2010 · גלזנקירכן · דקה 90+4",
+   "playedOn": "2010-10-20",
    "competitionHe": "ליגת האלופות · שלב הבתים",
    "opponentHe": "שאלקה 04",
    "scoreHe": "1:3 לשאלקה",
@@ -478,6 +490,7 @@
    "goalId": "championship-2010-zahavi-92",
    "titleHe": "שער האליפות של זהבי",
    "subtitleHe": "15.05.2010 · טדי, ירושלים · דקה 92",
+   "playedOn": "2010-05-15",
    "competitionHe": "ליגת העל · מחזור אחרון",
    "opponentHe": "בית\"ר ירושלים",
    "scoreHe": "1:2 להפועל",
@@ -494,7 +507,7 @@
     {
      "step": 2,
      "actorHe": "השוער הרוש",
-     "action": "pass",
+     "action": "save",
      "zone": "C1",
      "positionHe": "קו השער",
      "noteHe": "הדיפה של השוער"
@@ -524,6 +537,7 @@
    "goalId": "cupfinal-2010-vermouth-25",
    "titleHe": "ורמוט בחלק החיצוני של הנעל",
    "subtitleHe": "11.05.2010 · אצטדיון רמת גן · דקה 25",
+   "playedOn": "2010-05-11",
    "competitionHe": "גמר גביע המדינה",
    "opponentHe": "בית\"ר ירושלים",
    "scoreHe": "1:3 להפועל",
@@ -540,7 +554,7 @@
     {
      "step": 2,
      "actorHe": "השוער",
-     "action": "pass",
+     "action": "save",
      "zone": "C1",
      "positionHe": "קו השער",
      "noteHe": "הדיפה בקושי"
@@ -570,6 +584,7 @@
    "goalId": "cupfinal-2010-vermouth-73",
    "titleHe": "בעיטת היעף של ורמוט",
    "subtitleHe": "11.05.2010 · אצטדיון רמת גן · דקה 73",
+   "playedOn": "2010-05-11",
    "competitionHe": "גמר גביע המדינה",
    "opponentHe": "בית\"ר ירושלים",
    "scoreHe": "1:3 להפועל",
@@ -608,6 +623,7 @@
    "goalId": "cupfinal-2011-toama-2",
    "titleHe": "טועמה בנגיעה אחת בדקה השנייה",
    "subtitleHe": "25.05.2011 · אצטדיון רמת גן · דקה 2",
+   "playedOn": "2011-05-25",
    "competitionHe": "גמר גביע המדינה",
    "opponentHe": "מכבי חיפה",
    "scoreHe": "0:1 להפועל",
@@ -624,7 +640,7 @@
     {
      "step": 2,
      "actorHe": "ערן זהבי",
-     "action": "pass",
+     "action": "header",
      "zone": "C1",
      "positionHe": "בתוך הרחבה",
      "noteHe": "הארכה בראש"
@@ -646,6 +662,7 @@
    "goalId": "cupfinal-2012-igiebor-90-2",
    "titleHe": "איגייבור בדקה 92",
    "subtitleHe": "15.05.2012 · אצטדיון רמת גן · דקה 90+2",
+   "playedOn": "2012-05-15",
    "competitionHe": "גמר גביע המדינה",
    "opponentHe": "הפועל באר שבע",
    "scoreHe": "שער הניצחון",
@@ -654,7 +671,7 @@
     {
      "step": 1,
      "actorHe": "סלים טועמה",
-     "action": "pass",
+     "action": "throughBall",
      "zone": "C3",
      "positionHe": "מרכז המגרש",
      "noteHe": "כדור עומק"
@@ -684,6 +701,7 @@
    "goalId": "derby-2010-shechter-21",
    "titleHe": "שכטר פותח את הדרבי",
    "subtitleHe": "22.02.2010 · דרבי תל אביב · דקה 21",
+   "playedOn": "2010-02-22",
    "competitionHe": "ליגת העל · דרבי תל אביב",
    "opponentHe": "מכבי תל אביב",
    "scoreHe": "2:4 להפועל",
@@ -692,7 +710,7 @@
     {
      "step": 1,
      "actorHe": "ערן זהבי",
-     "action": "pass",
+     "action": "throughBall",
      "zone": "C3",
      "positionHe": "מרכז המגרש",
      "noteHe": "כדור עומק אלכסוני מצד לצד"
@@ -722,6 +740,7 @@
    "goalId": "derby-2010-shechter-65",
    "titleHe": "המתפרצת של ורמוט בדרבי",
    "subtitleHe": "22.02.2010 · דרבי תל אביב · דקה 65",
+   "playedOn": "2010-02-22",
    "competitionHe": "ליגת העל · דרבי תל אביב",
    "opponentHe": "מכבי תל אביב",
    "scoreHe": "2:4 להפועל",
@@ -768,6 +787,7 @@
    "goalId": "derby-2026-altman-90-2",
    "titleHe": "אלטמן הופך את הדרבי",
    "subtitleHe": "25.01.2026 · בלומפילד · דקה 90+2",
+   "playedOn": "2026-01-25",
    "competitionHe": "ליגת העל · דרבי תל אביב",
    "opponentHe": "מכבי תל אביב",
    "scoreHe": "1:2 להפועל",
@@ -792,7 +812,7 @@
     {
      "step": 3,
      "actorHe": "אלטמן",
-     "action": "shot",
+     "action": "header",
      "zone": "C1",
      "positionHe": "כ-12 מטרים",
      "noteHe": "נגיחה אל החיבורים"
@@ -806,6 +826,7 @@
    "goalId": "haifa-1986-landau-86",
    "titleHe": "השער של לנדאו בדקה ה-86",
    "subtitleHe": "24.5.1986 · בלומפילד · דקה 86",
+   "playedOn": "1986-05-24",
    "competitionHe": "הליגה הלאומית · המחזור האחרון",
    "opponentHe": "מכבי חיפה",
    "scoreHe": "0:1 להפועל",
@@ -814,7 +835,7 @@
     {
      "step": 1,
      "actorHe": "משה סיני",
-     "action": "pass",
+     "action": "throughBall",
      "zone": "C2",
      "positionHe": "מרכז המגרש, קדימה",
      "noteHe": "צ'יפ קטן מעל ההגנה"

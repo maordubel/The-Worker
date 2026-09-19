@@ -2,86 +2,72 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { Burst } from '@/components/play/Burst'
-import { Confetti } from '@/components/play/Confetti'
-import { GoalPitch } from '@/components/press/GoalPitch'
-import { Num } from '@/components/ui/Num'
-import { Punch } from '@/components/play/Punch'
 import { AdSlot } from '@/components/ads/AdSlot'
+import { Burst } from '@/components/play/Burst'
+import { Confetti, NO_RED_TONES } from '@/components/play/Confetti'
 import { PlayLink } from '@/components/play/PlayLink'
+import { Punch } from '@/components/play/Punch'
 import { RecordRun } from '@/components/play/RecordRun'
+import { GoalPitch } from '@/components/press/GoalPitch'
+import { ACTION_SHORT, ReplayBuilder, type Draft } from '@/components/replay/ReplayBuilder'
+import { ReplayVerdict } from '@/components/replay/ReplayVerdict'
 import { ShareRow } from '@/components/share/ShareRow'
-import { artFor } from '@/lib/share/story'
-import { GOAL_SECONDS, GOALS_PER_RUN, type Grade, type ZoneId } from '@/lib/game/goal-zones'
-import { LIVES, MAX_MULTIPLIER, rankFor } from '@/lib/game/session'
+import { Num } from '@/components/ui/Num'
+import { GOAL_SECONDS, GOALS_PER_RUN, MAX_TOUCHES, MIN_TOUCHES } from '@/lib/game/goal-zones'
+import type { ReplayPoint, UserTouch } from '@/lib/game/replay/envelope'
+import type { ReplayAction } from '@/lib/game/replay/vocab'
+import { LIVES, rankFor } from '@/lib/game/session'
 import { t, type MessageKey } from '@/lib/i18n'
+import { artFor } from '@/lib/share/story'
 import type { GoalChallenge, GoalVerdict } from '@/lib/game/goal'
-import { submitGoal } from './actions'
+import { askGoalHint, submitGoal } from './actions'
 
 /**
- * שחזור השער — three goals, one screen, no navigation and no submit button.
+ * שחזור השער — three moves, one screen, and the count is part of the question.
  *
- * What was wrong with the old version was not the idea, it was the shape. It dealt ONE
- * goal, asked for pixel-perfect taps, and finished with a "שלח לאימות" button — which
- * is the "next" button rule 21 exists to forbid, wearing a different hat. The whistle
- * now blows ITSELF the moment the last touch lands: the navy path draws, the verdict
- * prints, and the next goal is already on the way.
+ * What the gate asked until now was where. It handed over the cast, the verbs and the
+ * order, drew twenty squares, and graded the taps. That is a quiz about a diagram, and
+ * the diagram was the lie: a zone is a claim about a position no match report ever made.
  *
- * The run is the same loop as every other gate — three stages, three lives, a combo, a
- * clock that tightens — with one thing borrowed from the pitch itself: a stage is a
- * whole GOAL, not four loose questions. You rebuild a move, you are told what you got
- * wrong about it, you rebuild the next one.
+ * Three things changed and they are one change. The move is BUILT — who, what, from
+ * where, to where, as many touches as you think there were. The archive's own move is an
+ * ELLIPSE per touch rather than a point, sized from the reporter's own words, so a player
+ * who puts the ball anywhere the sentence admits is right and can see that he is right.
+ * And the two moves are compared by ALIGNMENT rather than by position, so one touch too
+ * many costs one touch's worth of credit instead of everything after it.
  *
- * A near miss is a real outcome here. One zone out is not knowing the move and it is not
- * ignorance either, so it scores half, keeps the combo and costs no life, and the
- * verdict says which half you had — the depth or the side.
+ * **There is a submit button now, and it is not the one rule 21 forbids.** That rule bans
+ * a "next" — a button whose only job is to let the game continue, charged to the player
+ * for nothing. `סיום המהלך` is the opposite: it is the answer to the hardest part of the
+ * question, because nobody told you how long the move was. The whistle still blows itself
+ * when the clock runs out, on whatever is on the pitch.
+ *
+ * The clock is a whole MOVE's clock and it is generous, because the thing being rushed is
+ * no longer one tap. A round of reconstruction that punishes deliberation is a round that
+ * punishes the only skill it is testing.
  */
 
-const ACTION_LABEL: Record<string, MessageKey> = {
-  pass: 'goal.action.pass',
-  cross: 'goal.action.cross',
-  dribble: 'goal.action.dribble',
-  shot: 'goal.action.shot',
-}
-
-const SHORT_ACT: Record<string, MessageKey> = {
-  pass: 'goal.act.pass',
-  cross: 'goal.act.cross',
-  dribble: 'goal.act.dribble',
-  shot: 'goal.act.shot',
-}
+type Played = { overall: number; continuity: number; touches: number; matched: number }
 
 type Run = {
   goal: number
   lives: number
   score: number
-  combo: number
-  bestCombo: number
-  hits: number
-  nears: number
-  touches: number
+  hints: number
+  played: Played[]
   over: boolean
 }
 
-const NEW_RUN: Run = {
-  goal: 0,
-  lives: LIVES,
-  score: 0,
-  combo: 0,
-  bestCombo: 0,
-  hits: 0,
-  nears: 0,
-  touches: 0,
-  over: false,
+const NEW_RUN: Run = { goal: 0, lives: LIVES, score: 0, hints: 0, played: [], over: false }
+
+/** What a rebuilt move is worth. Three perfect moves reach the top rank and no further. */
+const HINT_COST = 120
+
+function pointsFor(overall: number, continuity: number): number {
+  return Math.round(overall * 12 + continuity * 2)
 }
 
-function pointsFor(grade: Grade, combo: number, secondsLeft: number, total: number): number {
-  if (grade === 'miss') return 0
-  const speed = total > 0 ? Math.max(0, Math.min(1, secondsLeft / total)) : 0
-  const base = grade === 'hit' ? 140 : 60
-  const multiplier = Math.min(MAX_MULTIPLIER, Math.max(1, combo))
-  return Math.round((base + 90 * speed) * multiplier)
-}
+const EMPTY_DRAFT: Draft = { actorHe: null, action: null, origin: null, target: null }
 
 export function GoalRun({
   goals,
@@ -93,63 +79,120 @@ export function GoalRun({
   cursor?: number
 }) {
   const [run, setRun] = useState<Run>(NEW_RUN)
-  const [picks, setPicks] = useState<ZoneId[]>([])
+  const [touches, setTouches] = useState<UserTouch[]>([])
+  const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT)
+  const [editing, setEditing] = useState<number | null>(null)
   const [verdict, setVerdict] = useState<GoalVerdict | null>(null)
   const [burst, setBurst] = useState<{ points: number; combo: number } | null>(null)
   const [celebrate, setCelebrate] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(GOAL_SECONDS[0] as number)
+  const [hintStart, setHintStart] = useState<string | null>(null)
+  const [hintCount, setHintCount] = useState<string | null>(null)
   const settled = useRef(false)
+  const live = useRef<UserTouch[]>([])
 
   const challenge = goals[run.goal]
-  const total = GOAL_SECONDS[Math.min(run.goal, GOAL_SECONDS.length - 1)] ?? 21
-  const step = challenge?.steps[picks.length] ?? null
+  const total = GOAL_SECONDS[Math.min(run.goal, GOAL_SECONDS.length - 1)] ?? 60
   const stageLabel = `run.stage.${run.goal + 1}` as MessageKey
+
+  live.current = touches
 
   /** the whistle: grade the whole move at once, then move on by itself */
   const whistle = useCallback(
-    async (placed: ZoneId[]) => {
+    async (placed: UserTouch[], spent: number) => {
       if (settled.current || !challenge) return
       settled.current = true
       const result = await submitGoal(seed, run.goal, placed, cursor)
       if (!result) return
       setVerdict(result)
 
-      let combo = run.combo
-      let lives = run.lives
-      let gained = 0
-      for (const line of result.steps) {
-        if (line.grade === 'miss') {
-          combo = 0
-          lives -= 1
-        } else {
-          combo += 1
-          gained += pointsFor(line.grade, combo, secondsLeft, total)
-        }
-      }
-      if (gained > 0) setBurst({ points: gained, combo })
-      if (result.hits === result.total) setCelebrate(true)
+      const gained = Math.max(0, pointsFor(result.metrics.overall, result.metrics.continuity) - spent * HINT_COST)
+      /**
+       * A life is lost for a touch you PLACED and got wrong — never for one you did not
+       * place at all.
+       *
+       * The first version charged for a missing touch too, and that is the gate billing
+       * the player for the one thing it deliberately refuses to tell them: a four-touch
+       * move rebuilt as two took four lives before the second goal was dealt. A hidden
+       * count already costs the alignment, the touch-count penalty and the sequence
+       * share; charging a life on top of that is charging twice for a secret.
+       */
+      const lost = result.touches.filter(
+        (line) => line.kind === 'matched' && line.grade === 'bad',
+      ).length
+      const matched = result.touches.filter((line) => line.kind === 'matched' && line.grade !== 'bad').length
+
+      if (gained > 0) setBurst({ points: gained, combo: Math.max(1, matched) })
+      if (result.metrics.overall >= 90) setCelebrate(true)
 
       setRun((previous) => ({
         goal: previous.goal,
-        lives: Math.max(0, lives),
+        lives: Math.max(0, previous.lives - lost),
         score: previous.score + gained,
-        combo,
-        bestCombo: Math.max(previous.bestCombo, combo),
-        hits: previous.hits + result.hits,
-        nears: previous.nears + result.nears,
-        touches: previous.touches + result.total,
+        hints: previous.hints,
+        played: [
+          ...previous.played,
+          {
+            overall: result.metrics.overall,
+            continuity: result.metrics.continuity,
+            touches: result.truth.length,
+            matched,
+          },
+        ],
         over: previous.over,
       }))
     },
-    [challenge, run.combo, run.goal, run.lives, secondsLeft, seed, cursor, total],
+    [challenge, cursor, run.goal, seed],
   )
 
-  function place(zone: ZoneId) {
-    if (verdict || !challenge || settled.current) return
-    const next = [...picks, zone]
-    setPicks(next)
-    if (next.length >= challenge.steps.length) void whistle(next)
+  /**
+   * A touch is who, what, from where, to where. The moment the fourth is answered there
+   * is nothing left to decide, so the second pitch tap COMMITS it — gate 4's rule, in
+   * gate 8's shape (rule 24: a tap places; a second tap that carries no decision is a
+   * dexterity step charged for nothing, and on a phone it doubles every action).
+   */
+  const place = useCallback(
+    (point: ReplayPoint) => {
+      if (!draft.actorHe || !draft.action) return
+      if (!draft.origin) {
+        setDraft({ ...draft, origin: point })
+        return
+      }
+      const touch: UserTouch = {
+        actorHe: draft.actorHe,
+        action: draft.action,
+        origin: draft.origin,
+        target: point,
+      }
+      setTouches((current) => {
+        if (editing !== null) {
+          return current.map((item, index) => (index === editing ? touch : item))
+        }
+        return current.length >= MAX_TOUCHES ? current : [...current, touch]
+      })
+      setDraft(EMPTY_DRAFT)
+      setEditing(null)
+    },
+    [draft, editing],
+  )
+
+  function edit(index: number) {
+    const touch = touches[index]
+    if (!touch || verdict) return
+    setEditing(index)
+    setDraft({ ...touch })
   }
+
+  async function ask(which: 'start' | 'count') {
+    if (verdict) return
+    const answer = await askGoalHint(seed, run.goal, which, cursor)
+    if (answer === null) return
+    if (which === 'start') setHintStart(answer)
+    else setHintCount(answer)
+    setRun((previous) => ({ ...previous, hints: previous.hints + 1 }))
+  }
+
+  const spent = (hintStart ? 1 : 0) + (hintCount ? 1 : 0)
 
   /** the clock — running out whistles on whatever is on the pitch */
   useEffect(() => {
@@ -162,7 +205,7 @@ export function GoalRun({
       setSecondsLeft(Math.max(0, left))
       if (left <= 0) {
         window.clearInterval(tick)
-        void whistle(picks)
+        void whistle(live.current, spent)
       }
     }, 250)
     return () => window.clearInterval(tick)
@@ -177,32 +220,41 @@ export function GoalRun({
       setBurst(null)
       setCelebrate(false)
       setVerdict(null)
-      setPicks([])
+      setTouches([])
+      setDraft(EMPTY_DRAFT)
+      setEditing(null)
+      setHintStart(null)
+      setHintCount(null)
       settled.current = false
       setRun((previous) => {
         const goal = previous.goal + 1
         return { ...previous, goal, over: previous.lives <= 0 || goal >= GOALS_PER_RUN }
       })
-    }, 4200)
+    }, 9000)
     return () => window.clearTimeout(wait)
   }, [verdict])
 
   if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} />
 
-  const labels = picks.map((_, index) => {
-    const line = challenge.steps[index]
-    return {
-      nameHe: line?.actorHe ?? '',
-      actHe: line ? t(SHORT_ACT[line.action] as MessageKey) : '',
-      num: String(index + 1),
-    }
-  })
+  const labels = touches.map((touch, index) => ({
+    nameHe: touch.actorHe,
+    actHe: t(ACTION_SHORT[touch.action]),
+    num: String(index + 1),
+  }))
 
   const fraction = total > 0 ? Math.max(0, secondsLeft / total) : 0
+  const grades = verdict
+    ? touches.map((_, index) => {
+        const line = verdict.touches.find((item) => item.userIndex === index)
+        return line?.kind === 'matched' ? line.grade : line ? ('bad' as const) : undefined
+      })
+    : undefined
 
   return (
     <div className="relative">
-      {celebrate && <Confetti />}
+      {/* the one gate whose glass is printed GRASS, so the paper it celebrates with
+          carries no vermilion — see NO_RED_TONES. */}
+      {celebrate && <Confetti tones={NO_RED_TONES} />}
       {burst && <Burst points={burst.points} combo={burst.combo} />}
 
       {/* the bar — lives, score, which goal, and a clock you read without looking */}
@@ -248,7 +300,7 @@ export function GoalRun({
         <p className="mt-2 font-display text-step-2 leading-[0.95] text-paper">
           {challenge.titleHe}
         </p>
-        <p className="mt-1 font-mono text-[11px] text-ink">
+        <p className="mt-1 font-mono text-[11px] tabular-nums text-ink">
           <Num>{challenge.subtitleHe}</Num>
         </p>
         <p className="mt-0.5 font-body text-[11px] leading-snug text-ink">
@@ -257,80 +309,124 @@ export function GoalRun({
         </p>
       </div>
 
-      {/* the ask — who has the ball and what he is about to do */}
-      <div className="mt-2 flex items-center justify-between gap-2 border-x-rule border-t-rule border-ink bg-ink px-3 py-2">
-        {step ? (
-          <p className="min-w-0 font-display text-step-0 leading-tight text-paper">
-            <span className="text-red">
-              <Num>{picks.length + 1}</Num>
-            </span>{' '}
-            {step.actorHe} — {t(ACTION_LABEL[step.action] as MessageKey)}
-          </p>
-        ) : (
-          <p className="font-display text-step-0 text-paper">{t('goal.whistled')}</p>
-        )}
-        <span className="shrink-0 font-latin text-[10px] font-extrabold tracking-[0.12em] text-concrete" dir="ltr">
-          {picks.length} / {challenge.steps.length}
-        </span>
-      </div>
-
-      <GoalPitch
-        picks={picks}
-        truth={verdict?.truthZones}
-        grades={verdict?.steps.map((line) => line.grade)}
-        labels={labels}
-        onPick={place}
-        disabled={verdict !== null}
-      />
-
-      {!verdict && step && (
-        <p className="mt-2 font-body text-[11.5px] leading-snug text-muted">
-          {t('goal.hintPosition')} <bdi className="font-extrabold text-ink">{step.positionHe}</bdi>
-        </p>
-      )}
-
-      {verdict && (
-        <div className="mt-2.5 border-rule border-ink bg-sheet p-3">
-          <p className="font-display text-step-1 leading-tight text-ink">
-            {t('goal.verdictLine', {
-              hits: String(verdict.hits),
-              total: String(verdict.total),
-            })}
-          </p>
-          <p className="mt-1 font-body text-step--1 leading-relaxed text-ink">
-            {verdict.narrativeHe}
-          </p>
-          <ol className="mt-2.5 border-t-hair border-ink/25">
-            {verdict.steps.map((line) => (
-              <li key={line.step} className="flex items-baseline gap-2 border-b-hair border-ink/25 py-1.5">
-                <span
-                  className={`w-4 shrink-0 font-poster text-[16px] leading-none ${
-                    line.grade === 'hit'
-                      ? 'text-red'
-                      : line.grade === 'near'
-                        ? 'text-sign'
-                        : 'text-muted'
-                  }`}
-                >
-                  {line.grade === 'hit' ? '✓' : line.grade === 'near' ? '≈' : '✕'}
-                </span>
-                <span className="min-w-0 flex-1 font-body text-[12px] leading-snug text-ink">
-                  {line.noteHe}
-                  <span className="block font-mono text-[10.5px] text-muted" dir="ltr">
-                    {line.picked ?? '—'} → {line.truth}
-                  </span>
-                </span>
-                <span className="shrink-0 font-body text-[10.5px] text-muted">
-                  {t(line.reasonKey as MessageKey)}
-                </span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-2 font-mono text-[10.5px] text-muted">
-            <bdi>{verdict.sourceTitle}</bdi>
-          </p>
+      {/*
+        One compact working screen.
+        The board is a 300×440 picture, so `w-full` on a 950px desktop column drew a pitch
+        fourteen hundred pixels tall and put every control below the fold — the exact
+        opposite of what a wide screen is for. It is capped at 430 and centred everywhere,
+        and from `lg` up it takes a 400px column with the builder beside it. On a phone the
+        cap never binds, so the zone still measures its proven 48px at 320 (tests/brand).
+      */}
+      <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-4">
+        {/* The board is sticky only where it has its OWN COLUMN.
+            Making it sticky on a phone as well looked obviously right — keep the primary
+            object visible while the racks scroll — and it is a softlock: a sticky element
+            is still in flow, so the builder underneath scrolls UP AND UNDER it, and the
+            pinned pitch's twenty-one invisible tap targets swallow every tap meant for a
+            player's name. `npm run goal:probe` failed on the first chip with `E4 …
+            intercepts pointer events`, which is the same family as the kit game's reveal
+            landing inside the tab bar (rule 33) and was found the same way: by playing it.
+            From `lg` up the board sits in a column of its own and cannot cover anything. */}
+        <div className="mx-auto w-full max-w-[430px] lg:sticky lg:top-16">
+          <GoalPitch
+            touches={touches}
+            draftOrigin={draft.origin && !draft.target ? draft.origin : null}
+            labels={labels}
+            truth={verdict?.truth}
+            grades={grades}
+            onPlace={place}
+            disabled={verdict !== null}
+          />
         </div>
+
+        <div className="min-w-0">
+      {verdict ? (
+        <>
+          <ul className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[10.5px] text-muted">
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-2 w-4 bg-red" aria-hidden="true" />
+              {t('goal.legend.mine')}
+            </li>
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-2 w-4 bg-sign" aria-hidden="true" />
+              {t('goal.legend.truth')}
+            </li>
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-2 w-4 border-hair border-dashed border-sign" aria-hidden="true" />
+              {t('goal.legend.envelope')}
+            </li>
+          </ul>
+          <ReplayVerdict
+            metrics={verdict.metrics}
+            touches={verdict.touches}
+            narrativeHe={verdict.narrativeHe}
+            sourceTitle={verdict.sourceTitle}
+          />
+        </>
+      ) : (
+        <>
+          <ReplayBuilder
+            pool={challenge.pool}
+            draft={draft}
+            touches={touches}
+            editing={editing}
+            full={touches.length >= MAX_TOUCHES}
+            canFinish={touches.length >= MIN_TOUCHES}
+            onPickPlayer={(name) => setDraft((current) => ({ ...current, actorHe: name }))}
+            onPickAction={(action: ReplayAction) =>
+              setDraft((current) => ({ ...current, action }))
+            }
+            onClear={() => {
+              setDraft(EMPTY_DRAFT)
+              setEditing(null)
+            }}
+            onUndo={() => {
+              setTouches((current) => current.slice(0, -1))
+              setEditing(null)
+              setDraft(EMPTY_DRAFT)
+            }}
+            onEdit={edit}
+            onFinish={() => void whistle(touches, spent)}
+          />
+
+          {/* the two hints, each a piece of the answer and each paid for */}
+          <div className="mt-2 border-rule border-ink bg-sheet p-3">
+            <p className="font-body text-[10px] font-extrabold tracking-widest text-muted">
+              {t('goal.hints')} · {t('goal.hint.cost', { n: String(HINT_COST) })}
+            </p>
+            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => void ask('start')}
+                disabled={hintStart !== null}
+                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-2 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+              >
+                {t('goal.hint.start')}
+              </button>
+              <button
+                type="button"
+                onClick={() => void ask('count')}
+                disabled={hintCount !== null}
+                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-2 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+              >
+                {t('goal.hint.count')}
+              </button>
+            </div>
+            {hintStart && (
+              <p className="mt-1.5 font-body text-[11.5px] leading-snug text-ink">
+                {t('goal.sourceWords')} <bdi className="font-extrabold">{hintStart}</bdi>
+              </p>
+            )}
+            {hintCount && (
+              <p className="mt-1 font-body text-[11.5px] leading-snug text-ink">
+                <Num>{t('goal.hint.countAnswer', { n: hintCount })}</Num>
+              </p>
+            )}
+          </div>
+        </>
       )}
+        </div>
+      </div>
 
       <p className="mt-2 font-body text-[11px] leading-snug text-muted">{t('goal.approximate')}</p>
     </div>
@@ -340,12 +436,23 @@ export function GoalRun({
 /** הפסק — what the run came to, and the link that hands over the identical three goals. */
 function Result({ run, seed, cursor }: { run: Run; seed: number; cursor: number }) {
   const rank = rankFor(run.score) as MessageKey
-  const accuracy = run.touches > 0 ? Math.round((run.hits / run.touches) * 100) : 0
+  const played = run.played
+  const average =
+    played.length > 0
+      ? Math.round(played.reduce((sum, item) => sum + item.overall, 0) / played.length)
+      : 0
+  const best = played.reduce((top, item) => Math.max(top, item.overall), 0)
+  const continuity =
+    played.length > 0
+      ? Math.round(played.reduce((sum, item) => sum + item.continuity, 0) / played.length)
+      : 0
+  const matched = played.reduce((sum, item) => sum + item.matched, 0)
+  const asked = played.reduce((sum, item) => sum + item.touches, 0)
 
   return (
     <div className="mt-stack">
       <Punch />
-      <RecordRun gate="/goal" score={run.score} correct={run.hits} asked={run.touches} />
+      <RecordRun gate="/goal" score={run.score} correct={matched} asked={asked} />
       <div className="border-b-rule border-ink pb-2">
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           FULL TIME
@@ -367,35 +474,40 @@ function Result({ run, seed, cursor }: { run: Run; seed: number; cursor: number 
         </div>
         <div className="border-rule border-ink bg-sheet p-4">
           <p className="font-poster text-[34px] leading-none text-ink">
-            <Num>{`${run.hits}/${run.touches}`}</Num>
+            <Num>{`${average}%`}</Num>
           </p>
-          <p className="mt-1 font-body text-[10px] tracking-widest text-muted">{t('goal.hits')}</p>
+          <p className="mt-1 font-body text-[10px] tracking-widest text-muted">
+            {t('goal.runAverage')}
+          </p>
           <p className="mt-2 font-body text-[11.5px] leading-snug text-muted">
-            {t('goal.nears', { n: String(run.nears) })}
+            {t('goal.bestMove')}: <Num>{`${best}%`}</Num>
           </p>
           <p className="mt-1 font-body text-[11.5px] leading-snug text-muted">
-            {t('run.best')}: <Num>{run.bestCombo}</Num>
+            {t('goal.continuityAvg')}: <Num>{`${continuity}%`}</Num>
           </p>
+          {run.hints > 0 && (
+            <p className="mt-1 font-body text-[11.5px] leading-snug text-muted">
+              <Num>{t('goal.hint.used', { n: String(run.hints) })}</Num>
+            </p>
+          )}
         </div>
       </div>
 
-      {/* the whistle has gone — a stopping point, not a run */}
-
       <ShareRow
         kind="goal"
-        params={{ h: String(run.hits), s: String(seed), r: String(cursor) }}
-        headline={t('goal.shareHead', { hits: String(run.hits), total: String(run.touches) })}
+        params={{ h: String(average), s: String(seed), r: String(cursor) }}
+        headline={t('goal.shareHeadMove', { pct: String(average) })}
         card={{
           template: 'grass' as const,
-              art: artFor('goal', run.touches > 0 ? run.hits / run.touches : 0),
+          art: artFor('goal', average / 100),
           kicker: 'GATE 8 · REBUILD THE GOAL',
           label: t('screen.goal.title'),
-          eyebrow: t('goal.hits'),
-          hero: `${run.hits}/${run.touches}`,
-          bigStat: { v: `${accuracy}%`, k: t('goal.accuracy') },
+          eyebrow: t('goal.overall'),
+          hero: `${average}%`,
+          bigStat: { v: `${best}%`, k: t('goal.bestMove') },
           stats: [
             { k: t('run.score'), v: String(run.score) },
-            { k: t('run.best'), v: String(run.bestCombo) },
+            { k: t('goal.continuityAvg'), v: `${continuity}%` },
           ],
           cta: t('goal.cta'),
           challenge: t('share.sameRound'),

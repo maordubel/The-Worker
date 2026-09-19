@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { BannerCloth } from '@/components/ui/BannerCloth'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Screen } from '@/components/ui/Screen'
-import { buildBoard } from '@/lib/game/memory'
+import { buildRound } from '@/lib/game/memory'
 import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
@@ -18,13 +18,13 @@ export default function MemoryPage({
   searchParams: { seed?: string; r?: string }
 }) {
   const round = roundFrom(searchParams)
-  const cards = buildBoard(round.seed, 6, round.cursor)
+  const board = buildRound(round.seed, 6, round.cursor)
 
   return (
     <Screen title={t('screen.memory.title')} sub={t('screen.memory.sub')} night>
-      {cards.length >= 4 ? (
+      {board.cards.length >= 4 ? (
         <>
-          <MemoryBoard cards={cards} seed={round.seed} cursor={round.cursor} />
+          <MemoryBoard round={board} seed={round.seed} cursor={round.cursor} />
           <div className="mt-stack">
             <BannerCloth>{t('slogan.collective')}</BannerCloth>
           </div>

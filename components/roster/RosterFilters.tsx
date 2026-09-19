@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 import { Num } from '@/components/ui/Num'
 import {
   facetCounts,
@@ -24,6 +26,12 @@ import { t, type MessageKey } from '@/lib/i18n'
  *   · **תקופה** — by decade, from the seasons his shirt numbers are recorded in.
  *   · **אות** — the family-name initial, which the rail already did and now composes
  *     with the rest instead of replacing them.
+ *
+ * And a fifth, **opt-in**: **עונה**, one four-digit year. Gate 1's scouting drawer turns
+ * it on (`showYear`) because "who was here in 2010" is the question a supporter building
+ * an all-time eleven asks constantly; gate 7 never does, and gets the four rows it
+ * always had. It is the same `fromYear`/`toYear` the decade chips read, at a finer
+ * grain — not a new fact, and never a guess about a man the archive cannot date.
  *
  * **Every chip prints its own count, and לא מתועד is a chip like any other.** That is
  * the part that makes this honest rather than decorative: the archive states a position
@@ -55,11 +63,31 @@ export function RosterFilters({
   all,
   filter,
   onChange,
+  showYear = false,
 }: {
   all: Searchable[]
   filter: RosterFilter
   onChange: (next: RosterFilter) => void
+  /**
+   * A single season, as a four-digit year. Gate 1's scouting drawer asks for it — "who
+   * was here in 2010" is the question a supporter building an all-time eleven asks over
+   * and over — and gate 7 does not, so it stays off unless a caller turns it on.
+   *
+   * The decade chips stay either way. They are how you browse; this is how you aim.
+   */
+  showYear?: boolean
 }) {
+  // The box holds the TEXT, the filter holds the year. They are not the same thing:
+  // "201" is a person halfway through typing 2010, and treating it as the year 201
+  // would empty the sheet under their fingers. Only a complete four-digit year filters.
+  const [yearText, setYearText] = useState(filter.year === null ? '' : String(filter.year))
+
+  function setYear(raw: string) {
+    const digits = raw.replace(/\D/g, '').slice(0, 4)
+    setYearText(digits)
+    onChange({ ...filter, year: digits.length === 4 ? Number(digits) : null })
+  }
+
   const counts = facetCounts(all)
   const decades = Object.keys(counts.decade)
     .map(Number)
@@ -132,6 +160,23 @@ export function RosterFilters({
         </Row>
       )}
 
+      {showYear && (
+        <Row label={t('roster.year')}>
+          <input
+            value={yearText}
+            onChange={(event) => setYear(event.target.value)}
+            inputMode="numeric"
+            placeholder={t('roster.yearHint')}
+            aria-label={t('roster.year')}
+            dir="ltr"
+            className="min-h-[38px] w-[104px] shrink-0 border-hair border-ink/40 bg-paper px-2 text-center font-mono text-[12px] tabular-nums text-ink outline-none placeholder:text-muted"
+          />
+          {yearText !== '' && (
+            <Chip live={false} onClick={() => setYear('')} label={t('roster.yearClear')} />
+          )}
+        </Row>
+      )}
+
       {/*
         The gap, printed. Filtering 645 names down to the fifty-odd the archive can
         place would read as a complete list of Hapoel's goalkeepers and be wrong by an
@@ -148,7 +193,10 @@ export function RosterFilters({
       {isFiltered(filter) && (
         <button
           type="button"
-          onClick={() => onChange(NO_FILTER)}
+          onClick={() => {
+            setYearText('')
+            onChange(NO_FILTER)
+          }}
           className="mt-1.5 min-h-tap border-hair border-red px-2.5 py-1 font-body text-[11.5px] font-extrabold text-red"
         >
           {t('roster.clear')}

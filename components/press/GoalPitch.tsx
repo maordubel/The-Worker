@@ -1,74 +1,158 @@
 'use client'
 
-import { COLS, PITCH, ROWS, zoneCenter, zoneRect, type Grade, type ZoneId } from '@/lib/game/goal-zones'
+import { useCallback, useRef } from 'react'
+
+import {
+  COLS,
+  LANDMARKS,
+  PITCH,
+  ROWS,
+  zoneCenter,
+  zoneRect,
+  type ZoneId,
+} from '@/lib/game/goal-zones'
+import { normalise, type Envelope, type ReplayPoint, type TruthTouch, type UserTouch } from '@/lib/game/replay/envelope'
+import type { TouchGrade } from '@/lib/game/replay/judge'
 import { t } from '@/lib/i18n'
 
 /**
  * הדשא — the pitch שחזור השער is played on, off the Goal Rebuild handoff.
  *
- * The old board was a cream sheet with four thin strokes on it: correct as a diagram,
- * dead as a game. This one is the press layer doing what the press layer is for —
- * mown stripes, a halftone screen over the green, chalk that is cream rather than white,
- * and every mark closed with an ink line.
+ * The drawing is unchanged from the version that shipped: mown stripes, a halftone screen
+ * over the green, chalk that is cream rather than white, drawn players printed twice — ink
+ * under at a constant 3px offset and colour over, which is the second plate and not a drop
+ * shadow. What changed is what a touch IS.
  *
- * The figures are the part that matters. A placement used to be a circle with a number
- * in it; here it is a drawn player in one of three postures — running, striking, on the
- * volley — so the board reads as a move rather than as a set of pins. Each figure prints
- * twice, ink under at a constant 3px offset and colour over: that is the second plate,
- * not a drop shadow, and this brand has no shadows.
+ * A touch used to be a zone. It is now an ORIGIN and a DESTINATION: a drawn player where
+ * he stood and a ball where he sent it, with the route between them. That is the whole of
+ * why continuity can be measured at all — the question "does your touch N join your touch
+ * N+1" has no meaning until the ball has somewhere to be.
  *
- * The opposition is already on the grass in chalk. They are scenery, not targets: a
- * pitch with nobody else on it is a diagram, and the move you are rebuilding happened
- * against eleven men.
+ * **And after the whistle the board admits what it does not know.** The archive's route
+ * prints in navy, its anchors as small crosses, and around each anchor a DASHED ELLIPSE —
+ * the uncertainty envelope, sized from the reporter's own words. A player who put the ball
+ * inside that ellipse was right, and can see that he was right, and can see how much room
+ * the sentence left him. A single point on this board was always a claim nobody could
+ * support; the ellipse is the same knowledge, honestly drawn.
  *
- * The twenty zones are real controls, not SVG rectangles with an `onClick`. `role`
- * `"application"` on the `<svg>` told assistive tech to hand over ALL keyboard handling
- * to an app that supplied none, and an `onClick` alone has no `tabIndex`, so the board
- * was 100% unreachable without a mouse or a finger. `<rect>` cannot take real focus, so
- * the twenty targets are drawn twice: once inside the SVG, as the exact same
- * fill/stroke/ring the design has always used, now purely decorative; and once as
- * ordinary HTML `<button>`s, invisible, laid over the pitch at the same coordinates and
- * percentages — the pattern `KitGameRun.tsx` already uses to put real buttons over an
- * SVG plate. The picture never moves; only who can reach it changed.
+ * Two boards were drawn side by side in the prototype, one for the player and one for the
+ * archive. At 390px that is two illegible boards, so both routes print on the ONE board
+ * the player just worked on — which is also the board that can answer "why" (rule 59: the
+ * pitch is one concept and it has one file).
+ *
+ * **Reachability, and the one place the finger may be more precise than the archive.**
+ * A pointer places the exact point it touched; the keyboard places the CENTRE of a zone,
+ * and that is not a lesser path — a zone centre is exactly the precision this archive
+ * holds, so a keyboard player is placing the anchor itself. Twenty zone buttons plus the
+ * goal make twenty-one real, focusable, labelled controls over the drawing; the picture
+ * never moves, only who can reach it. `touch-action: none` on the overlay is what stops a
+ * placement dragging the page out from under the thumb.
  */
 
-const POSES = ['#figRun', '#figRun', '#figKick', '#figVolley'] as const
+const POSES = ['#figRun', '#figRun', '#figKick', '#figVolley', '#figRun'] as const
+
+/**
+ * קו מפתח — the ink line under every coloured figure, and the reason rule 8 needs it here.
+ *
+ * Vermilion over printed grass is the one blend in this product that CANNOT be made safe
+ * by choosing a better red. Red and green sit on opposite sides of the wheel, so every
+ * partial-coverage pixel between them — every antialiased glyph edge, every fading
+ * overlay — passes through the yellow hues on its way across. A drawn figure at
+ * `--p-red` on `--p-grass` measured 210 yellow pixels on a phone and 538 on a desktop,
+ * and it had been doing that since the board was drawn: `npm run qa:sweep` only ever
+ * loads `/goal` with nothing placed on it, so there was never a figure on the grass when
+ * anybody measured. Rule 29's script, found by rule 33's playthrough.
+ *
+ * The fix is the press's own answer and it was already written in this file's header:
+ * every mark is closed with an ink line. The figure prints three times — the offset ink
+ * shadow that is the second plate, then a WIDER ink keyline at the colour's own position,
+ * then the colour. The vermilion's edge now dissolves into ink instead of into grass, and
+ * the keyline's own edge is ink into grass, which is a blue-green and safe.
+ */
+const KEYLINE = 8
+
+function toBoard(point: ReplayPoint): { x: number; y: number } {
+  return { x: point.x * PITCH.w, y: point.y * PITCH.h }
+}
+
+function colourFor(grade: TouchGrade | undefined): string {
+  if (grade === 'good') return 'rgb(var(--p-red))'
+  if (grade === 'near') return 'rgb(var(--p-red-deep))'
+  if (grade === 'bad') return 'rgb(var(--p-ink))'
+  return 'rgb(var(--p-red))'
+}
 
 export function GoalPitch({
-  picks,
+  touches,
+  draftOrigin = null,
+  labels,
   truth,
   grades,
-  labels,
-  onPick,
+  onPlace,
   disabled = false,
 }: {
-  picks: ZoneId[]
-  /** the real path, drawn in navy only once the player has committed */
-  truth?: ZoneId[]
-  grades?: Grade[]
+  /** every finished touch: where he stood, where he sent it */
+  touches: UserTouch[]
+  /** the touch being built — his position is down, the ball is not */
+  draftOrigin?: ReplayPoint | null
   /** name · number · act under each placed figure */
   labels: Array<{ nameHe: string; actHe: string; num: string }>
-  onPick: (zone: ZoneId) => void
+  /** the archive's own move, drawn in navy with its envelopes — only after the whistle */
+  truth?: TruthTouch[]
+  grades?: Array<TouchGrade | undefined>
+  onPlace: (point: ReplayPoint) => void
   disabled?: boolean
 }) {
-  const points = picks.map((zone) => zoneCenter(zone)).filter((p): p is { x: number; y: number } => p !== null)
-  const truthPoints = (truth ?? [])
-    .map((zone) => zoneCenter(zone))
-    .filter((p): p is { x: number; y: number } => p !== null)
+  const board = useRef<HTMLDivElement>(null)
+  const byPointer = useRef(false)
 
-  const path = (pts: { x: number; y: number }[]) =>
-    pts.length > 1 ? `M${pts.map((p) => `${p.x} ${p.y}`).join(' L')}` : ''
+  /**
+   * A pointer answers with the exact place it landed; the click that follows it is the
+   * same placement arriving twice, so it is swallowed. A click with no pointer before it
+   * is a keyboard, and that one places the zone's own centre.
+   */
+  const fromPointer = useCallback(
+    (event: React.PointerEvent) => {
+      if (disabled) return
+      const rect = board.current?.getBoundingClientRect()
+      if (!rect || rect.width === 0 || rect.height === 0) return
+      byPointer.current = true
+      const across = (event.clientX - rect.left) / rect.width
+      const down = (event.clientY - rect.top) / rect.height
+      const boardY = PITCH.top + down * (PITCH.h - PITCH.top)
+      onPlace({ x: Math.max(0, Math.min(1, across)), y: boardY / PITCH.h })
+    },
+    [disabled, onPlace],
+  )
+
+  const fromKeyboard = useCallback(
+    (point: { x: number; y: number }) => {
+      if (byPointer.current) {
+        byPointer.current = false
+        return
+      }
+      if (disabled) return
+      onPlace(normalise(point))
+    },
+    [disabled, onPlace],
+  )
+
+  const route = (from: ReplayPoint, to: ReplayPoint) => {
+    const a = toBoard(from)
+    const b = toBoard(to)
+    return `M${a.x} ${a.y} L${b.x} ${b.y}`
+  }
 
   return (
-    <div className="relative border-plate border-ink">
+    <div ref={board} className="relative border-plate border-ink">
       <svg
-        viewBox={`0 0 ${PITCH.w} ${PITCH.h}`}
+        viewBox={`0 ${PITCH.top} ${PITCH.w} ${PITCH.h - PITCH.top}`}
         className="block w-full touch-manipulation"
         aria-hidden="true"
       >
         <defs>
           <symbol id="figRun" viewBox="0 0 70 80">
-            <g fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="36" cy="12" r="8" />
               <path d="M31 20 L42 21 L45 42 L29 41 Z" />
               <path d="M43 25 L56 20" />
@@ -80,7 +164,7 @@ export function GoalPitch({
             </g>
           </symbol>
           <symbol id="figKick" viewBox="0 0 70 80">
-            <g fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="28" cy="12" r="8" />
               <path d="M23 20 L34 20 L37 41 L22 40 Z" />
               <path d="M35 24 L50 17" />
@@ -92,7 +176,7 @@ export function GoalPitch({
             </g>
           </symbol>
           <symbol id="figVolley" viewBox="0 0 70 80">
-            <g fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="44" cy="24" r="8" />
               <path d="M38 32 L49 30 L53 48 L38 50 Z" />
               <path d="M49 32 L61 22" />
@@ -104,7 +188,7 @@ export function GoalPitch({
             </g>
           </symbol>
           <symbol id="figGuard" viewBox="0 0 70 80">
-            <g fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="34" cy="12" r="8" />
               <path d="M28 20 L40 20 L42 42 L26 42 Z" />
               <path d="M41 24 L54 30" />
@@ -118,7 +202,18 @@ export function GoalPitch({
           <pattern id="pitchDots" width="5" height="5" patternUnits="userSpaceOnUse">
             <circle cx="1.4" cy="1.4" r="1" fill="rgb(var(--p-dot))" opacity=".5" />
           </pattern>
+          <marker id="ballHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0 1 L9 5 L0 9 z" fill="rgb(var(--p-line))" />
+          </marker>
+          <marker id="truthHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0 1 L9 5 L0 9 z" fill="rgb(var(--p-tekhelet))" />
+          </marker>
         </defs>
+
+        {/* behind the goal — the air a shot ends in, and the one place a ball may land
+            that is not grass. Ink, so the net reads against it. */}
+        <rect x="0" y={PITCH.top} width={PITCH.w} height={-PITCH.top} fill="rgb(var(--p-ink))" />
+        <rect x="0" y={PITCH.top} width={PITCH.w} height={-PITCH.top} fill="url(#pitchDots)" opacity=".2" />
 
         <rect width={PITCH.w} height={PITCH.h} fill="rgb(var(--p-grass))" />
         <g fill="rgb(var(--p-grass-dark))">
@@ -141,13 +236,13 @@ export function GoalPitch({
           <path d="M280 12 A 8 8 0 0 0 288 20" />
         </g>
         <g fill="rgb(var(--p-line))">
-          <circle cx="150" cy="57" r="2.6" />
+          <circle cx={LANDMARKS.penaltySpot.x} cy={LANDMARKS.penaltySpot.y} r="2.6" />
           <circle cx="150" cy="388" r="2.6" />
         </g>
         <g>
-          <rect x="129" y="0" width="42" height="12" fill="rgb(var(--p-net))" opacity=".72" stroke="rgb(var(--p-line))" strokeWidth="2.4" />
+          <rect x="129" y="-24" width="42" height="36" fill="rgb(var(--p-net))" opacity=".72" stroke="rgb(var(--p-line))" strokeWidth="2.4" />
           <path
-            d="M136 0 V12 M143 0 V12 M150 0 V12 M157 0 V12 M164 0 V12 M129 4 H171 M129 8 H171"
+            d="M136 -24 V12 M143 -24 V12 M150 -24 V12 M157 -24 V12 M164 -24 V12 M129 -16 H171 M129 -8 H171 M129 0 H171 M129 6 H171"
             stroke="rgb(var(--p-net-line))"
             strokeWidth=".7"
             fill="none"
@@ -175,54 +270,119 @@ export function GoalPitch({
                 y={guard.y + 3}
                 width="44"
                 height="50"
+                strokeWidth={3}
                 style={{ color: 'rgb(var(--p-ink))' }}
                 opacity=".28"
               />
-              <use href={guard.href} x={guard.x} y={guard.y} width="44" height="50" style={{ color: 'rgb(var(--p-line))' }} />
+              <use
+                href={guard.href}
+                x={guard.x}
+                y={guard.y}
+                width="44"
+                height="50"
+                strokeWidth={3}
+                style={{ color: 'rgb(var(--p-line))' }}
+              />
             </g>
           ))}
-          <use href="#figGuard" x="128" y="-6" width="46" height="52" style={{ color: 'rgb(var(--p-tekhelet))' }} />
+          <use
+            href="#figGuard"
+            x="128"
+            y="14"
+            width="46"
+            height="52"
+            strokeWidth={3}
+            style={{ color: 'rgb(var(--p-tekhelet))' }}
+          />
         </g>
 
-        {/* your path — dashed cream, rolling */}
-        {points.length > 1 && (
-          <>
-            <path d={path(points)} fill="none" stroke="rgb(var(--p-ink))" strokeWidth="5" strokeLinecap="round" opacity=".35" transform="translate(2,3)" />
-            <path d={path(points)} fill="none" stroke="rgb(var(--p-line))" strokeWidth="3.4" strokeLinecap="round" strokeDasharray="9 6" className="ball-roll" />
-          </>
+        {/* the archive's own move — navy, and only after the whistle. Anchors as crosses,
+            envelopes as dashed ellipses: the anchor is the best reading, the ellipse is
+            how much room the sentence left. */}
+        {truth && truth.length > 0 && (
+          <g pointerEvents="none">
+            {truth.map((touch, index) => (
+              <g key={`env-${index}`}>
+                <TruthEllipse envelope={touch.origin} />
+                {index === truth.length - 1 && <TruthEllipse envelope={touch.target} />}
+              </g>
+            ))}
+            {truth.map((touch, index) => {
+              const a = toBoard(touch.origin)
+              const b = toBoard(touch.target)
+              return (
+                <g key={`route-${index}`}>
+                  <path
+                    d={`M${a.x} ${a.y} L${b.x} ${b.y}`}
+                    fill="none"
+                    stroke="rgb(var(--p-tekhelet))"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    markerEnd="url(#truthHead)"
+                  />
+                  <path
+                    d={`M${a.x - 5} ${a.y} H${a.x + 5} M${a.x} ${a.y - 5} V${a.y + 5}`}
+                    stroke="rgb(var(--p-tekhelet))"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                  />
+                </g>
+              )
+            })}
+          </g>
         )}
 
-        {/* the real path — navy, and only after the whistle */}
-        {truthPoints.length > 1 && (
-          <>
-            <path d={path(truthPoints)} fill="none" stroke="rgb(var(--p-ink))" strokeWidth="5" strokeLinecap="round" opacity=".4" transform="translate(2,3)" />
-            <path d={path(truthPoints)} fill="none" stroke="rgb(var(--p-tekhelet))" strokeWidth="4" strokeLinecap="round" />
-          </>
-        )}
-
-        {/* the ring on a chosen zone — decorative only now. The real target is the
-            HTML button laid over this same rect, below the SVG. */}
-        {ROWS.flatMap((row) =>
-          COLS.map((col) => {
-            const id = `${col}${row}`
-            const rect = zoneRect(id)
-            if (!rect) return null
-            const chosen = picks.includes(id)
+        {/* the ball rolling between one touch and the next — your own reconstruction */}
+        <g pointerEvents="none">
+          {touches.map((touch, index) => {
+            const a = toBoard(touch.origin)
+            const b = toBoard(touch.target)
             return (
-              <rect
-                key={id}
-                x={rect.x}
-                y={rect.y}
-                width={rect.w}
-                height={rect.h}
-                fill={chosen ? 'rgb(var(--p-line) / 0.2)' : 'transparent'}
-                stroke={chosen ? 'rgb(var(--p-line))' : 'transparent'}
-                strokeWidth={chosen ? 2 : 0}
-              />
+              <g key={`mine-${index}`}>
+                <path
+                  d={route(touch.origin, touch.target)}
+                  fill="none"
+                  stroke="rgb(var(--p-ink))"
+                  strokeWidth="5"
+                  strokeLinecap="round"
+                  opacity=".3"
+                  transform="translate(2,3)"
+                />
+                <path
+                  d={route(touch.origin, touch.target)}
+                  fill="none"
+                  stroke="rgb(var(--p-line))"
+                  strokeWidth="3.4"
+                  strokeLinecap="round"
+                  strokeDasharray="9 6"
+                  markerEnd="url(#ballHead)"
+                  className="ball-roll"
+                />
+                <circle cx={b.x + 2} cy={b.y + 3} r="5" fill="rgb(var(--p-ink))" opacity=".3" />
+                <circle cx={b.x} cy={b.y} r="5" fill="rgb(var(--p-line))" stroke="rgb(var(--p-ink))" strokeWidth="1.6" />
+                <circle cx={a.x} cy={a.y} r="2.2" fill="rgb(var(--p-ink))" opacity=".55" />
+              </g>
             )
-          }),
+          })}
+        </g>
+
+        {/* the touch being built: he is standing there, the ball has not gone yet */}
+        {draftOrigin && (
+          <g pointerEvents="none" className="fig-pop">
+            <circle
+              cx={toBoard(draftOrigin).x}
+              cy={toBoard(draftOrigin).y}
+              r="11"
+              fill="none"
+              stroke="rgb(var(--p-line))"
+              strokeWidth="2.4"
+              strokeDasharray="4 4"
+            />
+          </g>
         )}
 
+        {/* the zone rings — decorative only. The real target is the HTML button laid over
+            the same rect, below the SVG. */}
         <g fill="rgb(var(--p-line))" opacity=".42" pointerEvents="none" className="font-latin text-[8px] font-extrabold">
           {ROWS.flatMap((row) =>
             COLS.map((col) => {
@@ -240,57 +400,99 @@ export function GoalPitch({
 
         {/* your touches, drawn as people */}
         <g pointerEvents="none">
-          {points.map((point, index) => {
+          {touches.map((touch, index) => {
+            const point = toBoard(touch.origin)
             const href = POSES[Math.min(index, POSES.length - 1)] ?? '#figRun'
-            const grade = grades?.[index]
-            const colour =
-              grade === 'hit'
-                ? 'rgb(var(--p-red))'
-                : grade === 'near'
-                  ? 'rgb(var(--p-tekhelet))'
-                  : grade === 'miss'
-                    ? 'rgb(var(--p-ink))'
-                    : 'rgb(var(--p-red))'
+            const colour = colourFor(grades?.[index])
             return (
               <g key={index} className="fig-pop">
-                <use href={href} x={point.x - 20} y={point.y - 39} width="46" height="52" style={{ color: 'rgb(var(--p-ink))' }} opacity=".3" />
-                <use href={href} x={point.x - 23} y={point.y - 42} width="46" height="52" style={{ color: colour }} />
+                <use
+                  href={href}
+                  x={point.x - 20}
+                  y={point.y - 39}
+                  width="46"
+                  height="52"
+                  strokeWidth={3}
+                  style={{ color: 'rgb(var(--p-ink))' }}
+                  opacity=".3"
+                />
+                {/* the keyline, and it is not decoration — see KEYLINE below */}
+                <use
+                  href={href}
+                  x={point.x - 23}
+                  y={point.y - 42}
+                  width="46"
+                  height="52"
+                  strokeWidth={KEYLINE}
+                  style={{ color: 'rgb(var(--p-ink))' }}
+                />
+                <use
+                  href={href}
+                  x={point.x - 23}
+                  y={point.y - 42}
+                  width="46"
+                  height="52"
+                  strokeWidth={3}
+                  style={{ color: colour }}
+                />
               </g>
             )
           })}
         </g>
       </svg>
 
-      {/* the real tap targets — twenty focusable, labelled buttons over the same rects
-          the SVG draws above. `dir="ltr"` because these coordinates are the pitch's own
-          fixed geometry, not a reading order — the same reason the name cards below are
-          positioned this way. Each carries a Hebrew label naming where in the goal it
-          is, built from the grid the pitch already uses rather than a guessed spot the
-          source never gave (rule 11 — the zones exist so nobody has to invent a pixel). */}
+      {/* the real tap targets — twenty-one focusable, labelled controls over the drawing.
+          `dir="ltr"` because these coordinates are the pitch's own fixed geometry, not a
+          reading order. A pointer places where it landed; a keyboard places the centre of
+          the place it chose, which is the precision the archive itself holds. */}
       <div
         dir="ltr"
         role="group"
         aria-label={t('goal.pitchAria')}
         className="pointer-events-none absolute inset-0"
+        style={{ touchAction: 'none' }}
       >
+        <button
+          type="button"
+          disabled={disabled}
+          onPointerDown={fromPointer}
+          onClick={() => fromKeyboard(LANDMARKS.goalMouth)}
+          aria-label={t('goal.goalAria')}
+          data-goal="mouth"
+          className="pointer-events-auto absolute disabled:cursor-default"
+          style={{
+            insetInlineStart: `${(100 / PITCH.w) * 100}%`,
+            top: 0,
+            width: `${(100 / PITCH.w) * 100}%`,
+            // down to the goal line, not just to the top of the picture: at 320px — the
+            // narrowest screen this product supports — the air alone measures 39px and
+            // the air plus the mouth measures 51. The drawn net is 42 units wide; the
+            // TARGET is a hundred, because a button is not a drawing.
+            height: `${((PITCH.goalY - PITCH.top) / (PITCH.h - PITCH.top)) * 100}%`,
+          }}
+        />
         {ROWS.flatMap((row) =>
           COLS.map((col) => {
-            const id = `${col}${row}`
+            const id: ZoneId = `${col}${row}`
             const rect = zoneRect(id)
-            if (!rect) return null
+            const centre = zoneCenter(id)
+            if (!rect || !centre) return null
             return (
               <button
                 key={id}
                 type="button"
                 disabled={disabled}
-                onClick={() => onPick(id)}
+                onPointerDown={fromPointer}
+                onClick={() => fromKeyboard(centre)}
                 aria-label={t('goal.zoneAria', { zone: id, col, row: String(row) })}
+                data-goal="zone"
+                data-zone={id}
                 className="pointer-events-auto absolute disabled:cursor-default"
                 style={{
                   insetInlineStart: `${(rect.x / PITCH.w) * 100}%`,
-                  top: `${(rect.y / PITCH.h) * 100}%`,
+                  top: `${((rect.y - PITCH.top) / (PITCH.h - PITCH.top)) * 100}%`,
                   width: `${(rect.w / PITCH.w) * 100}%`,
-                  height: `${(rect.h / PITCH.h) * 100}%`,
+                  height: `${(rect.h / (PITCH.h - PITCH.top)) * 100}%`,
                 }}
               />
             )
@@ -299,36 +501,66 @@ export function GoalPitch({
       </div>
 
       {/* the name cards — cream tickets with an ink shadow, exactly as the handoff draws them */}
-      {points.map((point, index) => {
+      {touches.map((touch, index) => {
         const label = labels[index]
         if (!label) return null
+        const point = toBoard(touch.origin)
         return (
           <div
             key={index}
-            /* The pitch is GEOMETRY, not text: its x axis is fixed whatever the
-               document direction. Positioning these with a logical property put every
-               name card on the opposite touchline. The wrapper is therefore ltr and the
-               ticket inside it is rtl — the one place in this app where that is right. */
+            /* The pitch is GEOMETRY, not text: its x axis is fixed whatever the document
+               direction. Positioning these with a logical property put every name card on
+               the opposite touchline. The wrapper is therefore ltr and the ticket inside
+               it is rtl — the one place in this app where that is right. */
             dir="ltr"
             className="fig-pop pointer-events-none absolute"
             style={{
               insetInlineStart: `${(point.x / PITCH.w) * 100}%`,
-              top: `${((point.y + 12) / PITCH.h) * 100}%`,
+              top: `${((point.y + 12 - PITCH.top) / (PITCH.h - PITCH.top)) * 100}%`,
               transform: 'translateX(-50%)',
             }}
           >
             <div dir="rtl" className="whitespace-nowrap border-rule border-ink bg-sheet px-2 py-0.5 plate-card">
               <span className="font-body text-[11px] font-extrabold leading-tight text-ink">{label.nameHe}</span>
             </div>
-            <div dir="rtl" className="mt-0.5 flex justify-center gap-[3px]">
-              <span className="bg-ink px-1.5 py-[1px] font-latin text-[9px] font-extrabold text-paper" dir="ltr">
-                {label.num}
+            {/* The KEYLINE again, in HTML, and it took three goes to get right: a
+                vermilion chip whose edge antialiases straight into printed grass prints
+                yellow at about a third coverage, and rule 8 has no allowance for an edge.
+                A hairline let eighteen pixels through down one side; two pixels let a
+                single ROW through under the bottom, because the ticket is placed at a
+                percentage and lands on a fractional pixel in both axes. So the vermilion
+                is not bordered, it is INSET — the whole strip is an ink plate and the
+                chips sit inside its padding, which is four solid pixels of ink on every
+                side of the red and cannot be rounded away. */}
+            <div dir="rtl" className="mt-0.5 flex justify-center">
+              <span className="flex gap-[3px] border-rule border-ink bg-ink p-[2px]">
+                <span className="px-1 font-latin text-[9px] font-extrabold leading-[1.4] text-paper" dir="ltr">
+                  {label.num}
+                </span>
+                <span className="bg-red px-1.5 font-body text-[9px] font-extrabold leading-[1.4] text-paper">
+                  {label.actHe}
+                </span>
               </span>
-              <span className="bg-red px-1.5 py-[1px] font-body text-[9px] font-extrabold text-paper">{label.actHe}</span>
             </div>
           </div>
         )
       })}
     </div>
+  )
+}
+
+/** What the source does not pin down, drawn as the shape it actually is. */
+function TruthEllipse({ envelope }: { envelope: Envelope }) {
+  return (
+    <ellipse
+      cx={envelope.x * PITCH.w}
+      cy={envelope.y * PITCH.h}
+      rx={envelope.rx * PITCH.w}
+      ry={envelope.ry * PITCH.h}
+      fill="rgb(var(--p-tekhelet) / 0.12)"
+      stroke="rgb(var(--p-tekhelet))"
+      strokeWidth="1.6"
+      strokeDasharray="5 5"
+    />
   )
 }

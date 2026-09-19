@@ -5,6 +5,16 @@ import { describe, expect, it } from 'vitest'
 
 import { BALLOT, NUMBERS, POSITIONS, ballotComplete, ballotFilled, type Tally } from '@/lib/polls/ballot'
 import { boardDisplay, histogramBars, positionBars, rankRows, MIN_BALLOTS_FOR_PERCENT } from '@/lib/polls/board'
+import {
+  REASONS,
+  cleanReasons,
+  isReasonOf,
+  reasonCount,
+  reasonsFor,
+  type Reasons,
+} from '@/lib/polls/reasons'
+import { factIsEmpty, pickFact, spanOf } from '@/lib/polls/pickFact'
+import { shirtName, shirtNumber, supporterId } from '@/lib/polls/supporter'
 import messages from '@/messages/he.json'
 
 const ROOT = join(__dirname, '..')
@@ -122,6 +132,11 @@ describe('הפתק לא ממציא קולות', () => {
       'components/ballot/BallotSlip.tsx',
       'app/polls/board/page.tsx',
       'app/polls/board/CountBoard.tsx',
+      'lib/polls/reasons.ts',
+      'lib/polls/supporter.ts',
+      'lib/polls/pickFact.ts',
+      'components/ballot/VoteReaction.tsx',
+      'components/ballot/SupporterId.tsx',
     ]) {
       const text = readFileSync(join(ROOT, path), 'utf8')
       // A tally that arrives from anywhere other than a store is a fabricated one. The
@@ -252,5 +267,307 @@ describe('לוח הספירה — כלל המאה, על נתוני בדיקה ב
     expect(rows).toHaveLength(POSITIONS.length)
     expect(rows.find((row) => row.pick === catalogue['pos.cb'])?.votes).toBe(0)
     expect(rows.find((row) => row.pick === catalogue['pos.gk'])?.votes).toBe(4)
+  })
+})
+
+
+/**
+ * שבבי ה"למה" — the reason chips, and the two properties that keep them safe.
+ *
+ * A reason is a KEY, so nothing typed ever enters storage and no sentence can attach
+ * itself to a named footballer; and a reason is never counted, so no screen can print a
+ * proportion of something nobody has a hundred ballots of.
+ */
+describe('למה דווקא זה — the reason chips', () => {
+  it('offers reasons for every question on the slip, and only for them', () => {
+    for (const question of BALLOT) {
+      expect(reasonsFor(question.id).length, question.id).toBeGreaterThanOrEqual(3)
+    }
+    for (const id of Object.keys(REASONS)) {
+      expect(BALLOT.some((question) => question.id === id), `${id} is not a question`).toBe(true)
+    }
+  })
+
+  it('has every chip in the catalogue, and no two questions sharing a key', () => {
+    const seen = new Map<string, string>()
+    for (const question of BALLOT) {
+      for (const reason of reasonsFor(question.id)) {
+        expect(catalogue[reason], reason).toBeTruthy()
+        // A key shared by two questions would let one question's saved reason validate
+        // against the other, which is exactly what `isReasonOf` exists to refuse.
+        expect(seen.has(reason), `${reason} is offered by two questions`).toBe(false)
+        seen.set(reason, question.id)
+      }
+    }
+  })
+
+  it('refuses a reason the question does not offer', () => {
+    const mine = reasonsFor('striker')[0]!
+    expect(isReasonOf('striker', mine)).toBe(true)
+    expect(isReasonOf('keeper', mine)).toBe(false)
+    expect(isReasonOf('striker', 'poll.why.nothing.like.this')).toBe(false)
+  })
+
+  it('drops a retired question and a foreign reason when reading storage back', () => {
+    // A slip kept by an older build can carry a question this build no longer asks, or
+    // a chip it no longer offers. Printing either would put a sentence on the supporter
+    // card that nothing on screen ever offered them.
+    const raw = {
+      striker: reasonsFor('striker')[0]!,
+      keeper: reasonsFor('striker')[1]!, // right shape, wrong question
+      retired: reasonsFor('striker')[0]!,
+      number: 7,
+    }
+    const clean = cleanReasons(raw as Record<string, unknown>)
+    expect(Object.keys(clean)).toEqual(['striker'])
+    expect(reasonCount(clean)).toBe(1)
+  })
+
+  it('never leaves the device — no reason is sent to the vote or read from the tally', () => {
+    const store = readFileSync(join(ROOT, 'lib/polls/store.ts'), 'utf8')
+    // `rpc_poll_vote` takes exactly three parameters and none of them is a reason. A
+    // fourth would need a column on `poll_vote`, and the migration's §3 argues at length
+    // that every column on that table is one more thing eight rows sharing a device id
+    // can be joined on.
+    const cast = store.slice(store.indexOf("rpc('rpc_poll_vote'"), store.indexOf('/** Clears this device'))
+    expect(cast).toContain('p_device_id')
+    expect(cast).toContain('p_question_id')
+    expect(cast).toContain('p_pick')
+    expect(cast).not.toContain('reason')
+    // and the board — the only thing that prints a proportion — never sees one
+    expect(readFileSync(join(ROOT, 'lib/polls/board.ts'), 'utf8')).not.toContain('reason')
+    expect(readFileSync(join(ROOT, 'app/polls/board/CountBoard.tsx'), 'utf8')).not.toContain('reason')
+  })
+
+  it('clears the reasons along with the picks and the seal', () => {
+    const store = readFileSync(join(ROOT, 'lib/polls/store.ts'), 'utf8')
+    const clearBody = store.slice(store.indexOf('async clear'), store.indexOf('async tally'))
+    expect(clearBody).toContain('REASON_KEY')
+  })
+})
+
+/**
+ * תעודת אוהד — the slip read back as a person. Every field is derived; nothing is stored.
+ */
+describe('תעודת אוהד — the supporter ID', () => {
+  const full = Object.fromEntries(
+    BALLOT.map((question) => [question.id, question.id === 'number' ? '17' : 'שם'] as const),
+  )
+
+  it('reads the number off the ballot, and refuses anything that is not a shirt number', () => {
+    expect(shirtNumber({ number: '17' })).toBe(17)
+    expect(shirtNumber({ number: '1' })).toBe(1)
+    expect(shirtNumber({ number: '99' })).toBe(99)
+    expect(shirtNumber({})).toBeNull()
+    expect(shirtNumber({ number: '0' })).toBeNull()
+    expect(shirtNumber({ number: '100' })).toBeNull()
+    expect(shirtNumber({ number: 'שבע' })).toBeNull()
+    expect(shirtNumber({ number: '7; drop' })).toBeNull()
+  })
+
+  it('trims a name to what a shirt can carry, and calls an empty one null', () => {
+    expect(shirtName('  מאור   הראל ')).toBe('מאור הראל')
+    expect(shirtName('')).toBeNull()
+    expect(shirtName('   ')).toBeNull()
+    expect(shirtName(null)).toBeNull()
+    expect(shirtName('א'.repeat(40))!.length).toBe(18)
+  })
+
+  it('takes the name and the number from the member book, never from a second record', () => {
+    // The brief: "do not duplicate these fields separately if the profile already stores
+    // them." The book is `lib/game/member.ts`, which gate 10 prints and `lib/portal/sync`
+    // already carries up as `app_profile.display_name`.
+    const source = readFileSync(join(ROOT, 'app/polls/BallotSheet.tsx'), 'utf8')
+    expect(source).toContain("from '@/lib/game/member'")
+    expect(source).not.toContain('localStorage')
+    const supporter = readFileSync(join(ROOT, 'lib/polls/supporter.ts'), 'utf8')
+    // the derivation itself must stay pure — no storage, no browser
+    expect(supporter).not.toContain('localStorage')
+    expect(supporter).not.toContain("from '@/lib/game/member'")
+  })
+
+  it('prefers the ballot answer over the book, so the card describes one afternoon', () => {
+    const id = supporterId(full, {}, { nameHe: 'מאור', number: 9 })
+    expect(id.number).toBe(17)
+    expect(id.nameHe).toBe('מאור')
+    // and falls back to the book when the question has not been answered
+    const blank = supporterId({}, {}, { nameHe: null, number: 9 })
+    expect(blank.number).toBe(9)
+    expect(blank.nameHe).toBeNull()
+  })
+
+  it('lists a reason only where there is both a pick and a reason', () => {
+    const reasons: Reasons = {
+      striker: reasonsFor('striker')[0]!,
+      keeper: reasonsFor('keeper')[0]!,
+    }
+    const partial = { striker: 'שייע פייגנבוים' }
+    const id = supporterId(partial, reasons, {})
+    expect(id.reasons.map((row) => row.questionId)).toEqual(['striker'])
+    expect(id.reasons[0]!.pick).toBe('שייע פייגנבוים')
+    // `reasoned` counts what was marked; the LIST prints what can be printed
+    expect(id.reasoned).toBe(2)
+    expect(id.filled).toBe(1)
+  })
+
+  it('says nothing rather than something when the slip is empty', () => {
+    const id = supporterId({}, {}, {})
+    expect(id.favourite).toBeNull()
+    expect(id.positionHe).toBeNull()
+    expect(id.number).toBeNull()
+    expect(id.reasons).toEqual([])
+    expect(catalogue['poll.id.noReasons']).toBeTruthy()
+    expect(catalogue['poll.id.noName']).toBeTruthy()
+  })
+})
+
+/**
+ * מה שהארכיון מחזיק עליו — the panel that replaced the reference's crowd quotes.
+ */
+describe('אחרי הבחירה — sourced rows, never a terrace that was never counted', () => {
+  const roster = [
+    {
+      slug: 'a',
+      nameHe: 'משה סיני',
+      givenHe: 'משה',
+      familyHe: 'סיני',
+      initial: 'ס',
+      position: 'MF' as const,
+      positionFrom: 'squad' as const,
+      origin: 'israeli' as const,
+      originFrom: 'squad' as const,
+      fromYear: 1979,
+      toYear: 1992,
+    },
+    {
+      slug: 'b',
+      nameHe: 'מי שאין עליו כלום',
+      givenHe: 'מי',
+      familyHe: 'כלום',
+      initial: 'כ',
+      position: null,
+      positionFrom: null,
+      origin: null,
+      originFrom: null,
+      fromYear: null,
+      toYear: null,
+    },
+  ]
+  const shirts = {
+    bySlug: { a: { seasonLabel: '1985/86', why: 'trophy' as const } },
+    seasons: {
+      '1985/86': {
+        seasonLabel: '1985/86',
+        spec: { seasonLabel: '1985/86' },
+        noteHe: '',
+        sourceTitle: 'ארכיון החולצות',
+        wonHe: ['אליפות'],
+      },
+    },
+    versions: {},
+    defaultVersion: {},
+    withShirt: 1,
+    withoutShirt: 1,
+    withVersions: 0,
+  }
+
+  it('joins a picked name to the shirt and the facets the archive already holds', () => {
+    const fact = pickFact('משה סיני', roster as never, shirts as never)!
+    expect(fact.position).toBe('MF')
+    expect(fact.seasonLabel).toBe('1985/86')
+    expect(fact.sourceTitle).toBe('ארכיון החולצות')
+    expect(spanOf(fact)).toBe('1979–1992')
+    expect(factIsEmpty(fact)).toBe(false)
+  })
+
+  it('stays silent for a man the archive cannot place, and for a name it cannot resolve', () => {
+    const blank = pickFact('מי שאין עליו כלום', roster as never, shirts as never)!
+    expect(blank.position).toBeNull()
+    expect(blank.spec).toBeNull()
+    expect(spanOf(blank)).toBeNull()
+    expect(factIsEmpty(blank)).toBe(true)
+    expect(catalogue['poll.fact.silent']).toBeTruthy()
+
+    // no fuzzy matching: a name that does not resolve exactly answers null (rule 7)
+    expect(pickFact('סיני', roster as never, shirts as never)).toBeNull()
+    expect(pickFact('', roster as never, shirts as never)).toBeNull()
+    expect(pickFact(null, roster as never, shirts as never)).toBeNull()
+  })
+
+  it('keeps one span for a single season rather than a range from itself to itself', () => {
+    const one = pickFact('משה סיני', [{ ...roster[0]!, toYear: 1979 }] as never, null)!
+    expect(spanOf(one)).toBe('1979')
+  })
+
+  it('prints no invented crowd line anywhere in the reaction', () => {
+    // The reference fills this beat with quoted terrace opinions. A line in quotation
+    // marks about what supporters think, with no count behind it, is the fabricated
+    // participation figure with the digits taken out (rules 11 and 18).
+    const reaction = readFileSync(join(ROOT, 'components/ballot/VoteReaction.tsx'), 'utf8')
+    for (const quote of ['“', '”', '„']) {
+      expect(reaction.includes(quote), `a quoted line in ${quote}`).toBe(false)
+    }
+    // and nothing in the wing's own strings puts words in a supporter's mouth either
+    const pollKeys = Object.keys(catalogue).filter((key) => key.startsWith('poll.'))
+    expect(pollKeys.length).toBeGreaterThan(40)
+    for (const key of pollKeys) expect(catalogue[key], key).not.toMatch(/[“”„]/)
+  })
+
+  it('reuses one player source and one kit renderer rather than forking either', () => {
+    const fact = readFileSync(join(ROOT, 'lib/polls/pickFact.ts'), 'utf8')
+    expect(fact).toContain("from '@/lib/game/allTimeXI'")
+    expect(fact).toContain("from '@/lib/xi/board'")
+    // no second roster, no second shirt table
+    expect(fact).not.toMatch(/const\s+(ROSTER|PLAYERS|KITS)\s*=/)
+    for (const path of ['components/ballot/VoteReaction.tsx', 'components/ballot/SupporterId.tsx']) {
+      expect(readFileSync(join(ROOT, path), 'utf8'), path).toContain("from '@/components/kit/")
+    }
+  })
+})
+
+/**
+ * הקצב — the beat between a pick and the next question, and the three ways out of it.
+ */
+describe('הקצב — auto-advance that can always be left', () => {
+  const reveal = readFileSync(join(ROOT, 'components/play/Reveal.tsx'), 'utf8')
+
+  it('is one file, shared by both gates that have a beat', () => {
+    for (const path of ['components/ballot/VoteReaction.tsx', 'components/memory/FusionPlate.tsx']) {
+      expect(readFileSync(join(ROOT, path), 'utf8'), path).toContain(
+        "from '@/components/play/Reveal'",
+      )
+    }
+  })
+
+  it('ends by itself, ends on a tap, and can be cancelled without firing', () => {
+    expect(reveal).toContain('skip')
+    expect(reveal).toContain('cancel')
+    // `cancel` must not call the callback: that is the whole of "שיניתי את דעתי"
+    const stop = reveal.slice(reveal.indexOf('const stop ='), reveal.indexOf('useEffect'))
+    expect(stop).not.toContain('done.current()')
+  })
+
+  it('draws no moving bar for a reader who asked for stillness', () => {
+    expect(reveal).toContain('prefers-reduced-motion')
+    expect(reveal).toContain('motion-reduce:hidden')
+  })
+
+  it('gives the reaction a way back to the picker it came from', () => {
+    const reaction = readFileSync(join(ROOT, 'components/ballot/VoteReaction.tsx'), 'utf8')
+    expect(reaction).toContain('onRethink')
+    expect(catalogue['poll.reaction.rethink']).toBeTruthy()
+    // and the dialog sits above the tab bar, like every other one (rule 33)
+    expect(reaction).toContain('z-[60]')
+  })
+
+  it('lets Escape dismiss without answering the next question', () => {
+    // `useDialog` wires Escape. Handing it `skip` would make the key that means "get me
+    // out of here" also advance the ballot, which is the one thing a dismissal must not
+    // do — so the handler cancels the beat and closes.
+    const reaction = readFileSync(join(ROOT, 'components/ballot/VoteReaction.tsx'), 'utf8')
+    const wiring = reaction.slice(reaction.indexOf('useDialog<'), reaction.indexOf('const chips'))
+    expect(wiring).toContain('cancel()')
+    expect(wiring).toContain('onClose()')
+    expect(wiring).not.toContain('skip')
   })
 })

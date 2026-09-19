@@ -48,6 +48,28 @@ export const GK_KIT: FigureKit = {
   ink: CHALK,
 }
 
+/**
+ * The club's own outfield kit, in the press layer's colours — the counterpart of
+ * `GK_KIT` and, like it, the drawn figure's default rather than any one season's shirt.
+ *
+ * It sat as a private `const OUTFIELD` inside `app/lineup/LineupBoard.tsx` until gate 3
+ * grew a locker room that hangs the same shirt on the wall, at which point there would
+ * have been two of them one import apart. A season's actual shirt is a different claim
+ * and a different object: `lib/kit/spec.ts` and `components/kit/KitPlate.tsx` own that,
+ * and this is only ever "a player in red".
+ */
+export const OUTFIELD_KIT: FigureKit = {
+  primary: 'rgb(var(--p-red))',
+  secondary: 'rgb(var(--p-line))',
+  trim: 'rgb(var(--p-line))',
+  pattern: 'solid',
+  collar: 'crew',
+  longSleeve: false,
+  shorts: 'rgb(var(--p-line))',
+  socks: 'rgb(var(--p-red))',
+  ink: 'rgb(var(--p-line))',
+}
+
 
 /** Relative luminance, so the number and the name are legible on any shirt colour. */
 export function inkOn(hex: string): string {
@@ -217,8 +239,20 @@ export function PlayerFigure({
           <rect x="-6.6" y="6" width="5.6" height="15" rx="2" />
           <rect x="1" y="6" width="5.6" height="15" rx="2" />
         </g>
-        {/* socks, over the shins */}
-        <g fill={kit.socks} stroke="none">
+        {/*
+          Socks, over the shins — and OUTLINED, like everything else on this figure.
+          They were the one shape drawn `stroke="none"`, which put the club's red
+          directly against whatever was behind the figure. On `PressPitch` that is
+          printed grass, and a red edge antialiased against green averages to olive:
+          hue 57°, saturation 0.49 — inside `lib/isYellow.ts`'s band, on a browser's
+          own subpixel geometry rather than in any file. One pixel per figure, at the
+          corner where the sock, the ink line and the grass meet; ten on a full pitch,
+          and `npm run qa:sweep` could never see them because it has no way to place a
+          player. Red may not touch grass in this system — an ink keyline goes between
+          them — and the figure's own opening comment already said as much: flat fill
+          and ONE ink outline.
+        */}
+        <g fill={kit.socks}>
           <rect x="-6.6" y="14" width="5.6" height="7" />
           <rect x="1" y="14" width="5.6" height="7" />
         </g>
@@ -340,14 +374,32 @@ export function PlayerFigure({
 }
 
 /** The name plate that sits under a figure on the grass. */
-export function NamePlate({ name, sub }: { name: string; sub?: string | null }) {
+export function NamePlate({
+  name,
+  sub,
+  /**
+   * `red` prints the name in the club's colour on the same cream plate.
+   *
+   * It exists because a selected chip ON THE GRASS cannot be marked with a red ring:
+   * the keyline's outer edge is then red against green, and red antialiased against
+   * green averages to olive inside the yellow band (see the socks, above). The plate
+   * is cream with an ink keyline, so the red sits on paper and never meets the pitch —
+   * the same reason the brand prints a name on a plate rather than straight onto a
+   * photograph.
+   */
+  tone = 'ink',
+}: {
+  name: string
+  sub?: string | null
+  tone?: 'ink' | 'red'
+}) {
   return (
     <span className="flex flex-col items-center gap-[2px]">
       <span
         className="max-w-full truncate px-1.5 py-[1px] text-center font-body text-[10px] leading-tight"
         style={{
           background: 'rgb(var(--p-paper))',
-          color: 'rgb(var(--p-ink))',
+          color: tone === 'red' ? 'rgb(var(--p-red))' : 'rgb(var(--p-ink))',
           boxShadow: '0 0 0 1.4px rgb(var(--p-ink))',
           borderRadius: 2,
         }}

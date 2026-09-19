@@ -586,11 +586,17 @@ select {
 /* תנועה — the run's own motion. Everything here is short, hard-edged and
    interruptible: a phone game reacts inside 300ms or it reads as lag. All of it is
    disabled under prefers-reduced-motion by the utilities that use it. */
+/* הפיצוץ — and the one property it may not animate.
+   The burst floats over whatever the gate is, and gate 8's gate is printed GRASS. An
+   opacity fade composites vermilion into green frame by frame, and every partial mix of
+   red and green passes through the yellow hues — 1,868 yellow pixels in one measured
+   frame. Rule 8 is absolute, so the burst MOVES and never dissolves; it also prints on an
+   opaque ink plate so its glyph edges meet ink instead of grass. See components/play/Burst.tsx. */
 @keyframes burst {
-  0%   { transform: translateY(14px) scale(.7); opacity: 0 }
-  22%  { transform: translateY(-6px) scale(1.12); opacity: 1 }
-  60%  { transform: translateY(-26px) scale(1); opacity: 1 }
-  100% { transform: translateY(-64px) scale(.95); opacity: 0 }
+  0%   { transform: translateY(14px) scale(.7) }
+  22%  { transform: translateY(-6px) scale(1.12) }
+  60%  { transform: translateY(-26px) scale(1) }
+  100% { transform: translateY(-64px) scale(.95) }
 }
 .animate-burst { animation: burst 900ms cubic-bezier(.2,.9,.3,1) forwards }
 
@@ -621,10 +627,14 @@ select {
 
 /* חגיגה — the confetti fall. One keyframe, no library. The pieces start above the
    viewport so nothing pops into existence mid-screen, and they drift sideways as they
-   fall because paper does not fall straight. */
+   fall because paper does not fall straight.
+   The fade-in finishes at 2%, not 12%: a piece is at -9.5vh at 2% and already at 2.9vh
+   at 12%, so the old ramp was translucent paper ON the glass for a tenth of a second.
+   Over cream that is a warm red and nothing; over gate 8's printed grass every frame of
+   it is vermilion mixing into green, which is the yellow band (rule 8). */
 @keyframes confetti-fall {
   0%   { transform: translate3d(0, -12vh, 0) rotate(0deg); opacity: 0 }
-  12%  { opacity: 1 }
+  2%   { opacity: 1 }
   100% { transform: translate3d(var(--drift, 0), 112vh, 0) rotate(var(--spin, 360deg)); opacity: 1 }
 }
 .confetti {

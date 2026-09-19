@@ -18,7 +18,25 @@ import { useEffect, useState } from 'react'
  */
 const TONES = ['bg-red', 'bg-sign', 'bg-paper', 'bg-red', 'bg-ink']
 
-export function Confetti({ pieces = 34 }: { pieces?: number }) {
+/**
+ * והארגז שאין בו ורמיליון — the set gate 8 celebrates with, and why it exists.
+ *
+ * Vermilion over printed GRASS cannot be made safe: red and green are opposite sides of
+ * the wheel, so every partially-covered pixel between them — the tumbling rectangle's own
+ * antialiased edge — passes through the yellow hues, and rule 8 has no allowance for an
+ * edge. Navy, ink and paper over grass all stay under the scanner's saturation floor or
+ * well outside its hue band, so the celebration survives and the pitch stays legal. The
+ * same argument gate 11 makes about a whole wing, made about one surface.
+ */
+export const NO_RED_TONES = ['bg-sign', 'bg-ink', 'bg-paper', 'bg-sign', 'bg-ink']
+
+export function Confetti({
+  pieces = 34,
+  tones = TONES,
+}: {
+  pieces?: number
+  tones?: readonly string[]
+}) {
   const [alive, setAlive] = useState(true)
   const [motionOk, setMotionOk] = useState(false)
 
@@ -42,7 +60,7 @@ export function Confetti({ pieces = 34 }: { pieces?: number }) {
         return (
           <i
             key={index}
-            className={`confetti absolute block ${TONES[index % TONES.length]}`}
+            className={`confetti absolute block ${tones[index % tones.length]}`}
             style={{
               insetInlineStart: `${(index * 100) / pieces}%`,
               width: index % 3 === 0 ? 10 : 6,
