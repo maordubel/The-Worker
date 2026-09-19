@@ -48,6 +48,14 @@ const COPY = {
   matchWon: 'נגמר. החמישייה שלך לוקחת את הקרב.',
   matchLost: 'נגמר. הפעם היריבה נשארה עומדת.',
   matchDraw: 'נגמר. תיקו בזירה.',
+  shuffleTitle: 'שאפל אחד. לא יותר.',
+  shuffleBody: 'לא אוהב את הלוח? פעם אחת בכל ראמבל אפשר לזרוק את כל 15 המועמדים ולקבל הגרלה חדשה. כל בחירה שכבר עשית מתאפסת.',
+  shuffleAction: 'עשה שאפל לכל הקבוצה',
+  shuffleUsed: 'השאפל נוצל',
+  shuffleFresh: '15 שמות חדשים נכנסו לזירה.',
+  kitSeason: 'חולצת {season}',
+  kitArchive: 'חולצת משחק מהארכיון',
+  kitNearest: 'החולצה הקרובה ביותר לתקופת השחקן מתוך המאגר הקיים.',
 } as const
 
 export function t(key: RoyalRumbleMessageKey, vars?: Record<string, string>): string {
