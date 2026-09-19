@@ -5,8 +5,9 @@ import type { MessageKey } from '@/lib/i18n'
  * the routes are not sequential. A gate with href:null is a visible closed plate, never
  * a link to a route that does not exist.
  *
- * Gate 9 was reserved as "under refurbishment" on 17.9.2026. It opened as Royal
- * Rumble on 19.9.2026: a seeded, playable historical 5v5 draft.
+ * Gate 9 is being built as Royal Rumble on a direct preview route. Until the feature is
+ * ready to ship, the public wall keeps the plate closed; the preview itself remains at
+ * /royal-rumble for product review.
  */
 export type Gate = {
   number: number
@@ -15,9 +16,9 @@ export type Gate = {
   latin: string
   plate: 'plain' | 'rays' | 'curva' | 'away'
   stain: 'a' | 'b' | 'c'
-  /** True only when the route actually reads ?seed=. */
+  /** True only when the public gate route actually reads ?seed=. */
   seeded: boolean
-  /** True only for gates that can record a completed play run. */
+  /** True only for gates that can record a completed public play run. */
   playable: boolean
   callHe?: MessageKey
 }
@@ -112,15 +113,13 @@ export const GATES: readonly Gate[] = [
   },
   {
     number: 9,
-    href: '/royal-rumble',
-    // Keep the existing translation key so older clients remain compatible; the Royal
-    // Rumble route carries its own explicit title until the next message-catalog pass.
+    href: null,
     title: 'gate.9',
-    latin: 'ROYAL RUMBLE · HISTORICAL 5V5',
+    latin: 'ROYAL RUMBLE · PRIVATE PREVIEW',
     plate: 'rays',
     stain: 'b',
-    seeded: true,
-    playable: true,
+    seeded: false,
+    playable: false,
   },
   {
     number: 10,
@@ -179,7 +178,7 @@ export const PLAYABLE_GATES: ReadonlyArray<Gate & { href: string }> = GATES.filt
   (gate): gate is Gate & { href: string } => gate.playable && isOpen(gate),
 )
 
-/** True when this route reads ?seed=. */
+/** True when this public route reads ?seed=. */
 export function gateSeeded(href: string): boolean {
   const path = href.split('?')[0] ?? href
   return GATES.find((gate) => gate.href === path)?.seeded ?? false
