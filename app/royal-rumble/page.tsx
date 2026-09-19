@@ -10,6 +10,7 @@ import { homeKits } from '@/lib/kit/seasons'
 import { t } from '@/lib/royal-rumble/i18n'
 import { roundFrom } from '@/lib/rotation/round'
 import { RoyalRumbleChallenge } from './RoyalRumbleChallenge'
+import { RoyalRumbleMatchFX } from './RoyalRumbleMatchFX'
 import { RoyalRumbleRun } from './RoyalRumbleRun'
 
 export const metadata: Metadata = {
@@ -50,6 +51,7 @@ export default function RoyalRumblePage({
 
   return (
     <Screen title={t('title')} sub={t('sub')} chrome={false}>
+      <RoyalRumbleMatchFX />
       <RoyalRumbleRun
         draft={draft}
         shuffleDraft={shuffleDraft}
