@@ -37,6 +37,7 @@ function scoreInsideMatch(): { score: string; forUs: number; against: number } |
   const parts = score.split(/[–-]/).map(Number)
   const forUs = parts[0]
   const against = parts[1]
+  if (forUs === undefined || against === undefined) return null
   if (!Number.isFinite(forUs) || !Number.isFinite(against)) return null
   return { score, forUs, against }
 }
