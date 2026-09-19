@@ -191,7 +191,7 @@ describe('שער 12 — היום לפני, והידעת', () => {
   })
 })
 
-describe('הקיר — שער 12 נפתח, ושער 9 בשיפוצים', () => {
+describe('הקיר — שער 12 ושער 9 פתוחים', () => {
   const gate = (number: number) => GATES.find((row) => row.number === number)
 
   it('hangs gate 12 on a route that exists', () => {
@@ -204,21 +204,16 @@ describe('הקיר — שער 12 נפתח, ושער 9 בשיפוצים', () => {
     expect(helpForRoute('/archive')?.help.whatKey).toBe('help.archive.what')
   })
 
-  /**
-   * **A gate that points at a 404 is worse than a gap**, which is what `lib/gates.ts`
-   * has said about gate 7 since it was empty. Gate 9 is on the wall because Maor asked
-   * for it to be — *"תפתח גם את שער 9 ותרשום 'בשיפוצים'"* — and it has no route, so it
-   * is not a link, is not counted, and is never offered as something still to do.
-   */
-  it('hangs gate 9 with no door behind it, and counts it nowhere', () => {
-    expect(gate(9)?.href).toBeNull()
-    expect(gate(9)?.playable).toBe(false)
-    expect(gate(9)?.seeded).toBe(false)
-    expect(PLAYABLE_GATES.map((row) => row.number)).not.toContain(9)
+  /** Gate 9 is now the seeded, playable Royal Rumble route. */
+  it('opens gate 9 as Royal Rumble and counts it as playable', () => {
+    expect(gate(9)?.href).toBe('/royal-rumble')
+    expect(gate(9)?.playable).toBe(true)
+    expect(gate(9)?.seeded).toBe(true)
+    expect(PLAYABLE_GATES.map((row) => row.number)).toContain(9)
     expect(allGates().map((row) => row.number)).toContain(9)
-    // nothing may resolve a route to it, so no screen can print its help chip
-    expect(GATES.filter((row) => !isOpen(row)).map((row) => row.number)).toEqual([9])
-    expect(helpForRoute('')).toBeUndefined()
+    expect(gateFor('/royal-rumble')?.number).toBe(9)
+    expect(gateSeeded('/royal-rumble')).toBe(true)
+    expect(GATES.filter((row) => !isOpen(row)).map((row) => row.number)).not.toContain(9)
   })
 
   it('keeps the wall a grid — the curva first, everything else in order', () => {

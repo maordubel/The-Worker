@@ -185,20 +185,14 @@ export const GATES: readonly Gate[] = [
     playable: true,
   },
   {
-    /**
-     * חדר ההלבשה — on the wall, under refurbishment, and deliberately not a door.
-     * Maor, 17.9.2026: *"תפתח גם את שער 9 ותרשום 'בשיפוצים' ונחליט בהמשך למה הוא יהיה."*
-     * Not `playable` (so it is never in "how many gates have you been through" and never
-     * in `stillToDo`), not `seeded`, and no route — see the note on `href` above.
-     */
     number: 9,
-    href: null,
+    href: '/royal-rumble',
     title: 'gate.9',
-    latin: 'THE DRESSING ROOM · UNDER REFURBISHMENT',
-    plate: 'plain',
+    latin: 'ROYAL RUMBLE · HISTORICAL 5V5',
+    plate: 'rays',
     stain: 'b',
-    seeded: false,
-    playable: false,
+    seeded: true,
+    playable: true,
   },
   {
     number: 10,
