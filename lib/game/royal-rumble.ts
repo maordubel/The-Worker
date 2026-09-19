@@ -157,9 +157,6 @@ function historicalRating(slug: string, nameHe: string, position: Position): num
   const songs = countSongs(nameHe)
   const bigMoments = countRecordedBigMoments(slug, nameHe)
 
-  // Longevity carries the archive-wide model; the other signals reward peak impact and
-  // documented supporter memory. GK/DF receive a small evidence-balancing correction
-  // because the archive naturally records more attacking actions than saves/tackles.
   const longevity = Math.min(42, seasons * 3)
   const honours = Math.min(24, titles * 4)
   const continuity = Math.min(10, shirtSeasons * 2)
@@ -343,14 +340,17 @@ function scorer(team: RatedPlayer[], random: () => number): RatedPlayer {
   return weighted[Math.floor(random() * weighted.length)] ?? team[team.length - 1]!
 }
 
+function partner(team: RatedPlayer[], scorerPlayer: RatedPlayer, random: () => number): RatedPlayer {
+  const candidates = team.filter((player) => player.slug !== scorerPlayer.slug && player.position !== 'GK')
+  return candidates[Math.floor(random() * candidates.length)] ?? scorerPlayer
+}
+
 function simulate(seed: number, us: RatedPlayer[], them: RatedPlayer[]): RoyalRumbleResult {
   const random = mulberry32((seed ^ 0x9e3779b9) >>> 0)
   const usPower = us.reduce((sum, player) => sum + player.rating, 0)
   const themPower = them.reduce((sum, player) => sum + player.rating, 0)
   const delta = usPower - themPower
 
-  // Strength tilts chance creation; it does not directly print a score. That preserves
-  // football variance while still making the stronger five more likely to win.
   const usChance = Math.max(0.18, Math.min(0.72, 0.45 + delta / 850))
   const totalGoals = 1 + Math.floor(random() * 5)
   let scoreFor = 0
@@ -372,14 +372,43 @@ function simulate(seed: number, us: RatedPlayer[], them: RatedPlayer[]): RoyalRu
 
   for (let goal = 0; goal < totalGoals; goal += 1) {
     const ours = random() < usChance
+    const attack = ours ? us : them
+    const player = scorer(attack, random)
+    const helper = partner(attack, player, random)
+    const baseMinute = 6 + goal * 9
+
     usShape = moveShape(usShape, random, ours ? 1 : -1)
     themShape = moveShape(themShape, random, ours ? -1 : 1)
-    const player = scorer(ours ? us : them, random)
+
+    frames.push({
+      at: baseMinute,
+      scoreFor,
+      scoreAgainst,
+      commentaryHe: ours
+        ? `${helper.nameHe} מרוויח מטר, מרים את הראש ומוצא את ${player.nameHe}.`
+        : `${helper.nameHe} מושך את הלחץ ומשחרר את ${player.nameHe} קדימה.`,
+      ball: { x: ours ? 68 + random() * 10 : 32 - random() * 10, y: 30 + random() * 40 },
+      us: usShape,
+      them: themShape,
+    })
+
+    frames.push({
+      at: baseMinute + 1,
+      scoreFor,
+      scoreAgainst,
+      commentaryHe: ours
+        ? `${player.nameHe} נכנס למצב. היציע כבר עומד.`
+        : `${player.nameHe} מול השער. החמישייה שלך נסוגה עד הקו.`,
+      ball: { x: ours ? 84 + random() * 5 : 16 - random() * 5, y: 38 + random() * 24 },
+      us: usShape,
+      them: themShape,
+    })
+
     if (ours) scoreFor += 1
     else scoreAgainst += 1
 
     frames.push({
-      at: 8 + goal * 9,
+      at: baseMinute + 2,
       scoreFor,
       scoreAgainst,
       commentaryHe: ours ? `שער! ${player.nameHe} שם את זה בפנים.` : `היריבה כובשת. ${player.nameHe}.`,
@@ -387,6 +416,23 @@ function simulate(seed: number, us: RatedPlayer[], them: RatedPlayer[]): RoyalRu
       us: usShape,
       them: themShape,
     })
+
+    if (goal < totalGoals - 1) {
+      const recovering = random() < 0.5
+      frames.push({
+        at: baseMinute + 4,
+        scoreFor,
+        scoreAgainst,
+        commentaryHe: recovering
+          ? 'הקצב לא יורד. תיקול באמצע, הכדור שוב חופשי והזירה נפתחת.'
+          : 'החמישיות מסתדרות מחדש. אין זמן לנשום במשחק של דקה.',
+        ball: { x: 45 + random() * 10, y: 35 + random() * 30 },
+        us: baseShape('us', us),
+        them: baseShape('them', them),
+      })
+      usShape = baseShape('us', us)
+      themShape = baseShape('them', them)
+    }
   }
 
   frames.push({
