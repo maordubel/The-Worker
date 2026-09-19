@@ -93,6 +93,80 @@ jobs:
                   raise SystemExit('gate.8 anchor not found in messages/he.json')
               text = text.replace(anchor, anchor + '  "gate.9": "רויאל ראמבל",\n', 1)
               p.write_text(text)
+
+          # Match goal-flash copy follows Gate 9's own catalogue, not hard-coded JSX.
+          p = Path('lib/royal-rumble/i18n.ts')
+          text = p.read_text()
+          anchor = "  matchDraw: 'נגמר. תיקו בזירה.',\n"
+          if "goalFlashOurs:" not in text:
+              if anchor not in text:
+                  raise SystemExit('Royal Rumble i18n anchor not found')
+              text = text.replace(
+                  anchor,
+                  anchor
+                  + "  goalFlashOurs: 'גול!',\n"
+                  + "  goalFlashTheirs: 'ספגנו.',\n"
+                  + "  goalFlashOursBody: 'הכדור בפנים. היציע מתפוצץ.',\n"
+                  + "  goalFlashTheirsBody: 'זה בפנים בצד שלנו. חוזרים מיד למרכז.',\n",
+                  1,
+              )
+              p.write_text(text)
+
+          p = Path('app/royal-rumble/RoyalRumbleMatchFX.tsx')
+          text = p.read_text()
+          if "from '@/lib/royal-rumble/i18n'" not in text:
+              text = text.replace(
+                  "import { useEffect, useRef, useState } from 'react'\n",
+                  "import { useEffect, useRef, useState } from 'react'\n\nimport { t } from '@/lib/royal-rumble/i18n'\n",
+                  1,
+              )
+          text = text.replace("{flash.ours ? 'גול!' : 'ספגנו.'}", "{t(flash.ours ? 'goalFlashOurs' : 'goalFlashTheirs')}")
+          text = text.replace(
+              "{flash.ours ? 'הכדור בפנים. היציע מתפוצץ.' : 'זה בפנים בצד שלנו. חוזרים מיד למרכז.'}",
+              "{t(flash.ours ? 'goalFlashOursBody' : 'goalFlashTheirsBody')}",
+          )
+          p.write_text(text)
+
+          # The old archive test encoded the previous product decision that Gate 9 was closed.
+          # Update that contract to the now-approved public Royal Rumble route.
+          p = Path('tests/archive.test.ts')
+          text = p.read_text()
+          text = text.replace(
+              "describe('הקיר — שער 12 נפתח, ושער 9 בשיפוצים', () => {",
+              "describe('הקיר — שער 12 ושער 9 פתוחים', () => {",
+          )
+          old = '''  /**
+   * **A gate that points at a 404 is worse than a gap**, which is what `lib/gates.ts`
+   * has said about gate 7 since it was empty. Gate 9 is on the wall because Maor asked
+   * for it to be — *"תפתח גם את שער 9 ותרשום 'בשיפוצים'"* — and it has no route, so it
+   * is not a link, is not counted, and is never offered as something still to do.
+   */
+  it('hangs gate 9 with no door behind it, and counts it nowhere', () => {
+    expect(gate(9)?.href).toBeNull()
+    expect(gate(9)?.playable).toBe(false)
+    expect(gate(9)?.seeded).toBe(false)
+    expect(PLAYABLE_GATES.map((row) => row.number)).not.toContain(9)
+    expect(allGates().map((row) => row.number)).toContain(9)
+    // nothing may resolve a route to it, so no screen can print its help chip
+    expect(GATES.filter((row) => !isOpen(row)).map((row) => row.number)).toEqual([9])
+    expect(helpForRoute('')).toBeUndefined()
+  })
+'''
+          new = '''  /** Gate 9 is now the seeded, playable Royal Rumble route. */
+  it('opens gate 9 as Royal Rumble and counts it as playable', () => {
+    expect(gate(9)?.href).toBe('/royal-rumble')
+    expect(gate(9)?.playable).toBe(true)
+    expect(gate(9)?.seeded).toBe(true)
+    expect(PLAYABLE_GATES.map((row) => row.number)).toContain(9)
+    expect(allGates().map((row) => row.number)).toContain(9)
+    expect(gateFor('/royal-rumble')?.number).toBe(9)
+    expect(gateSeeded('/royal-rumble')).toBe(true)
+    expect(GATES.filter((row) => !isOpen(row)).map((row) => row.number)).not.toContain(9)
+  })
+'''
+          if old not in text:
+              raise SystemExit('Old Gate 9 archive test contract not found')
+          p.write_text(text.replace(old, new, 1))
           PY
 
       - name: Install
