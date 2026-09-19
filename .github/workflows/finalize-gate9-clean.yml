@@ -1,0 +1,131 @@
+name: Finalize Gate 9 Clean
+
+on:
+  push:
+    branches:
+      - feature/gate-9-royal-rumble-clean
+    paths:
+      - .gate9-finalize
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/gate-9-royal-rumble-clean
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Copy proven Gate 9 implementation only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin feature/gate-9-royal-rumble:refs/remotes/origin/feature/gate-9-royal-rumble
+
+          files=(
+            app/royal-rumble/RoyalRumbleChallenge.tsx
+            app/royal-rumble/RoyalRumbleMatchFX.tsx
+            app/royal-rumble/RoyalRumbleRun.tsx
+            app/royal-rumble/actions.ts
+            app/royal-rumble/page.tsx
+            lib/game/royal-rumble.ts
+            lib/royal-rumble/i18n.ts
+            tests/royal-rumble.test.ts
+          )
+
+          for file in "${files[@]}"; do
+            mkdir -p "$(dirname "$file")"
+            git show "origin/feature/gate-9-royal-rumble:$file" > "$file"
+          done
+
+          python - <<'PY'
+          from pathlib import Path
+
+          # Open Gate 9 on the public wall, without importing unrelated Delta 76 gate changes.
+          p = Path('lib/gates.ts')
+          lines = p.read_text().splitlines()
+          number_idx = next(i for i, line in enumerate(lines) if line.strip() == 'number: 9,')
+          start = number_idx
+          while start >= 0 and lines[start] != '  {':
+              start -= 1
+          if start < 0:
+              raise SystemExit('Gate 9 block start not found')
+          end = number_idx
+          while end < len(lines) and lines[end] != '  },':
+              end += 1
+          if end >= len(lines):
+              raise SystemExit('Gate 9 block end not found')
+          block = [
+              '  {',
+              '    number: 9,',
+              "    href: '/royal-rumble',",
+              "    title: 'gate.9',",
+              "    latin: 'ROYAL RUMBLE · HISTORICAL 5V5',",
+              "    plate: 'rays',",
+              "    stain: 'b',",
+              '    seeded: true,',
+              '    playable: true,',
+              '  },',
+          ]
+          lines[start:end + 1] = block
+          text = '\n'.join(lines) + '\n'
+          text = text.replace(
+              '**Gate 9 is on the wall and is not a door.** Maor: *"תפתח גם את שער 9 ותרשום\n * \'בשיפוצים\' ונחליט בהמשך למה הוא יהיה."* So it is a plate with no `href` at all —\n * `href: null` rather than a route that 404s, which is the case this file has always\n * argued about gate 7: a gate that points at nothing is worse than a gap. The type\n * forces every consumer to decide what to do with a gate that goes nowhere, which is\n * the point of writing it as `null` instead of an empty string.\n *',
+              '**Gate 9 is Royal Rumble.** It is a public seeded 5v5 historical draft route at\n * `/royal-rumble`, records completed runs, and is part of the playable gate count.\n *',
+          )
+          p.write_text(text)
+
+          # Ensure the wall has the public Hebrew label.
+          p = Path('messages/he.json')
+          text = p.read_text()
+          if '"gate.9"' not in text:
+              anchor = '  "gate.8": "שחזור שער",\n'
+              if anchor not in text:
+                  raise SystemExit('gate.8 anchor not found in messages/he.json')
+              text = text.replace(anchor, anchor + '  "gate.9": "רויאל ראמבל",\n', 1)
+              p.write_text(text)
+          PY
+
+      - name: Install
+        run: npm ci
+
+      - name: Repository hygiene
+        run: npm run repo:hygiene
+
+      - name: Asset provenance
+        run: npm run assets:provenance
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Dead ends — THE WORKER LIFE
+        run: npm run life:deadends
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit clean Gate 9
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .gate9-finalize .github/workflows/finalize-gate9-clean.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: open Gate 9 Royal Rumble"
+          git push origin HEAD:feature/gate-9-royal-rumble-clean
