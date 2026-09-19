@@ -51,10 +51,10 @@ const COPY = {
 } as const
 
 export function t(key: RoyalRumbleMessageKey, vars?: Record<string, string>): string {
-  const raw = COPY[key]
-  if (!vars) return raw
-  return Object.entries(vars).reduce(
-    (out, [name, value]) => out.replaceAll(`{${name}}`, value),
-    raw,
-  )
+  let out: string = COPY[key]
+  if (!vars) return out
+  for (const [name, value] of Object.entries(vars)) {
+    out = out.replaceAll(`{${name}}`, value)
+  }
+  return out
 }
