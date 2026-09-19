@@ -2,10 +2,8 @@ name: Finalize Gate 9 Clean
 
 on:
   push:
-    branches:
-      - feature/gate-9-royal-rumble-clean
-    paths:
-      - .gate9-finalize
+    branches: [feature/gate-9-royal-rumble-clean]
+    paths: [.gate9-finalize]
 
 permissions:
   contents: write
@@ -25,12 +23,11 @@ jobs:
           node-version: '20'
           cache: npm
 
-      - name: Copy proven Gate 9 implementation only
+      - name: Assemble clean Gate 9
         shell: bash
         run: |
           set -euo pipefail
           git fetch origin feature/gate-9-royal-rumble:refs/remotes/origin/feature/gate-9-royal-rumble
-
           files=(
             app/royal-rumble/RoyalRumbleChallenge.tsx
             app/royal-rumble/RoyalRumbleMatchFX.tsx
@@ -41,7 +38,6 @@ jobs:
             lib/royal-rumble/i18n.ts
             tests/royal-rumble.test.ts
           )
-
           for file in "${files[@]}"; do
             mkdir -p "$(dirname "$file")"
             git show "origin/feature/gate-9-royal-rumble:$file" > "$file"
@@ -50,21 +46,16 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          # Open Gate 9 on the public wall, without importing unrelated Delta 76 gate changes.
           p = Path('lib/gates.ts')
           lines = p.read_text().splitlines()
           number_idx = next(i for i, line in enumerate(lines) if line.strip() == 'number: 9,')
           start = number_idx
           while start >= 0 and lines[start] != '  {':
               start -= 1
-          if start < 0:
-              raise SystemExit('Gate 9 block start not found')
           end = number_idx
           while end < len(lines) and lines[end] != '  },':
               end += 1
-          if end >= len(lines):
-              raise SystemExit('Gate 9 block end not found')
-          block = [
+          lines[start:end + 1] = [
               '  {',
               '    number: 9,',
               "    href: '/royal-rumble',",
@@ -76,120 +67,93 @@ jobs:
               '    playable: true,',
               '  },',
           ]
-          lines[start:end + 1] = block
-          text = '\n'.join(lines) + '\n'
-          text = text.replace(
-              '**Gate 9 is on the wall and is not a door.** Maor: *"תפתח גם את שער 9 ותרשום\n * \'בשיפוצים\' ונחליט בהמשך למה הוא יהיה."* So it is a plate with no `href` at all —\n * `href: null` rather than a route that 404s, which is the case this file has always\n * argued about gate 7: a gate that points at nothing is worse than a gap. The type\n * forces every consumer to decide what to do with a gate that goes nowhere, which is\n * the point of writing it as `null` instead of an empty string.\n *',
-              '**Gate 9 is Royal Rumble.** It is a public seeded 5v5 historical draft route at\n * `/royal-rumble`, records completed runs, and is part of the playable gate count.\n *',
-          )
-          p.write_text(text)
+          p.write_text('\n'.join(lines) + '\n')
 
-          # Ensure the wall has the public Hebrew label.
           p = Path('messages/he.json')
           text = p.read_text()
           if '"gate.9"' not in text:
               anchor = '  "gate.8": "שחזור שער",\n'
               if anchor not in text:
-                  raise SystemExit('gate.8 anchor not found in messages/he.json')
+                  raise SystemExit('gate.8 anchor not found')
               text = text.replace(anchor, anchor + '  "gate.9": "רויאל ראמבל",\n', 1)
               p.write_text(text)
 
-          # Match goal-flash copy follows Gate 9's own catalogue, not hard-coded JSX.
           p = Path('lib/royal-rumble/i18n.ts')
           text = p.read_text()
-          anchor = "  matchDraw: 'נגמר. תיקו בזירה.',\n"
-          if "goalFlashOurs:" not in text:
+          if 'goalFlashOurs:' not in text:
+              anchor = "  matchDraw: 'נגמר. תיקו בזירה.',\n"
               if anchor not in text:
-                  raise SystemExit('Royal Rumble i18n anchor not found')
-              text = text.replace(
-                  anchor,
-                  anchor
-                  + "  goalFlashOurs: 'גול!',\n"
-                  + "  goalFlashTheirs: 'ספגנו.',\n"
-                  + "  goalFlashOursBody: 'הכדור בפנים. היציע מתפוצץ.',\n"
-                  + "  goalFlashTheirsBody: 'זה בפנים בצד שלנו. חוזרים מיד למרכז.',\n",
-                  1,
+                  raise SystemExit('matchDraw i18n anchor not found')
+              additions = (
+                  "  goalFlashOurs: 'גול!',\n"
+                  "  goalFlashTheirs: 'ספגנו.',\n"
+                  "  goalFlashOursBody: 'הכדור בפנים. היציע מתפוצץ.',\n"
+                  "  goalFlashTheirsBody: 'זה בפנים בצד שלנו. חוזרים מיד למרכז.',\n"
               )
-              p.write_text(text)
+              p.write_text(text.replace(anchor, anchor + additions, 1))
 
           p = Path('app/royal-rumble/RoyalRumbleMatchFX.tsx')
           text = p.read_text()
-          if "from '@/lib/royal-rumble/i18n'" not in text:
+          if "import { t } from '@/lib/royal-rumble/i18n'" not in text:
               text = text.replace(
                   "import { useEffect, useRef, useState } from 'react'\n",
                   "import { useEffect, useRef, useState } from 'react'\n\nimport { t } from '@/lib/royal-rumble/i18n'\n",
                   1,
               )
-          text = text.replace("{flash.ours ? 'גול!' : 'ספגנו.'}", "{t(flash.ours ? 'goalFlashOurs' : 'goalFlashTheirs')}")
+          text = text.replace(
+              "{flash.ours ? 'גול!' : 'ספגנו.'}",
+              "{t(flash.ours ? 'goalFlashOurs' : 'goalFlashTheirs')}",
+          )
           text = text.replace(
               "{flash.ours ? 'הכדור בפנים. היציע מתפוצץ.' : 'זה בפנים בצד שלנו. חוזרים מיד למרכז.'}",
               "{t(flash.ours ? 'goalFlashOursBody' : 'goalFlashTheirsBody')}",
           )
           p.write_text(text)
 
-          # The old archive test encoded the previous product decision that Gate 9 was closed.
-          # Update that contract to the now-approved public Royal Rumble route.
           p = Path('tests/archive.test.ts')
-          text = p.read_text()
-          text = text.replace(
-              "describe('הקיר — שער 12 נפתח, ושער 9 בשיפוצים', () => {",
-              "describe('הקיר — שער 12 ושער 9 פתוחים', () => {",
-          )
-          old = '''  /**
-   * **A gate that points at a 404 is worse than a gap**, which is what `lib/gates.ts`
-   * has said about gate 7 since it was empty. Gate 9 is on the wall because Maor asked
-   * for it to be — *"תפתח גם את שער 9 ותרשום 'בשיפוצים'"* — and it has no route, so it
-   * is not a link, is not counted, and is never offered as something still to do.
-   */
-  it('hangs gate 9 with no door behind it, and counts it nowhere', () => {
-    expect(gate(9)?.href).toBeNull()
-    expect(gate(9)?.playable).toBe(false)
-    expect(gate(9)?.seeded).toBe(false)
-    expect(PLAYABLE_GATES.map((row) => row.number)).not.toContain(9)
-    expect(allGates().map((row) => row.number)).toContain(9)
-    // nothing may resolve a route to it, so no screen can print its help chip
-    expect(GATES.filter((row) => !isOpen(row)).map((row) => row.number)).toEqual([9])
-    expect(helpForRoute('')).toBeUndefined()
-  })
-'''
-          new = '''  /** Gate 9 is now the seeded, playable Royal Rumble route. */
-  it('opens gate 9 as Royal Rumble and counts it as playable', () => {
-    expect(gate(9)?.href).toBe('/royal-rumble')
-    expect(gate(9)?.playable).toBe(true)
-    expect(gate(9)?.seeded).toBe(true)
-    expect(PLAYABLE_GATES.map((row) => row.number)).toContain(9)
-    expect(allGates().map((row) => row.number)).toContain(9)
-    expect(gateFor('/royal-rumble')?.number).toBe(9)
-    expect(gateSeeded('/royal-rumble')).toBe(true)
-    expect(GATES.filter((row) => !isOpen(row)).map((row) => row.number)).not.toContain(9)
-  })
-'''
-          if old not in text:
-              raise SystemExit('Old Gate 9 archive test contract not found')
-          p.write_text(text.replace(old, new, 1))
+          lines = p.read_text().splitlines()
+          for i, line in enumerate(lines):
+              if "describe('הקיר — שער 12 נפתח, ושער 9 בשיפוצים'" in line:
+                  lines[i] = "describe('הקיר — שער 12 ושער 9 פתוחים', () => {"
+                  break
+          test_idx = next(i for i, line in enumerate(lines) if "it('hangs gate 9 with no door behind it" in line)
+          block_start = test_idx
+          while block_start > 0 and lines[block_start].strip() != '/**':
+              block_start -= 1
+          block_end = test_idx
+          while block_end < len(lines) and lines[block_end] != '  })':
+              block_end += 1
+          replacement = [
+              '  /** Gate 9 is now the seeded, playable Royal Rumble route. */',
+              "  it('opens gate 9 as Royal Rumble and counts it as playable', () => {",
+              "    expect(gate(9)?.href).toBe('/royal-rumble')",
+              '    expect(gate(9)?.playable).toBe(true)',
+              '    expect(gate(9)?.seeded).toBe(true)',
+              '    expect(PLAYABLE_GATES.map((row) => row.number)).toContain(9)',
+              '    expect(allGates().map((row) => row.number)).toContain(9)',
+              "    expect(gateFor('/royal-rumble')?.number).toBe(9)",
+              "    expect(gateSeeded('/royal-rumble')).toBe(true)",
+              '    expect(GATES.filter((row) => !isOpen(row)).map((row) => row.number)).not.toContain(9)',
+              '  })',
+          ]
+          lines[block_start:block_end + 1] = replacement
+          p.write_text('\n'.join(lines) + '\n')
           PY
 
       - name: Install
         run: npm ci
-
       - name: Repository hygiene
         run: npm run repo:hygiene
-
       - name: Asset provenance
         run: npm run assets:provenance
-
       - name: Lint
         run: npm run lint
-
       - name: Typecheck
         run: npm run typecheck
-
       - name: Dead ends — THE WORKER LIFE
         run: npm run life:deadends
-
       - name: Tests
         run: npm test
-
       - name: Build
         run: npm run build
 
