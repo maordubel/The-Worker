@@ -7,6 +7,7 @@ import {
   type RoyalRumbleDraft,
 } from '@/lib/game/royal-rumble'
 import { roundFrom } from '@/lib/rotation/round'
+import { RoyalRumbleChallenge } from './RoyalRumbleChallenge'
 import { RoyalRumbleRun } from './RoyalRumbleRun'
 
 export const metadata: Metadata = {
@@ -56,6 +57,7 @@ export default function RoyalRumblePage({
   return (
     <Screen title="רויאל ראמבל" sub="5 נגד 5 · תקציב 15 מיליון · הציון האמיתי נשאר סודי" chrome={false}>
       <RoyalRumbleRun draft={draft} cursor={round.cursor} playerCount={count} />
+      <RoyalRumbleChallenge seed={draft.seed} />
     </Screen>
   )
 }
