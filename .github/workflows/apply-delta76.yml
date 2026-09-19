@@ -31,6 +31,13 @@ jobs:
           cat .patch-reconcile/delta76.* > /tmp/delta76.patch.gz.b64
           test "$(wc -c < /tmp/delta76.patch.gz.b64)" -eq 226840
           base64 -d /tmp/delta76.patch.gz.b64 | gunzip > /tmp/delta76.patch
+
+          # These three legacy source files are byte-identical to the patch base except
+          # for CRLF line endings. Normalize them before applying the LF git patch.
+          sed -i 's/\r$//' components/play/Burst.tsx
+          sed -i 's/\r$//' components/play/Confetti.tsx
+          sed -i 's/\r$//' components/press/PlayerFigure.tsx
+
           git apply --check /tmp/delta76.patch
           git apply /tmp/delta76.patch
 
