@@ -5,11 +5,11 @@ import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { dealKitRound, kitPuzzleCount } from '@/lib/game/kitBuild'
 import { KIT_ROUND } from '@/lib/game/kit-build-run'
-import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
+import { roundFrom } from '@/lib/rotation/round'
 import { gateMetadata } from '@/lib/seo'
 
-import { KitGameRunV3 } from './KitGameRunV3'
+import { KitGameRunV5 } from './KitGameRunV5'
 
 export const metadata: Metadata = gateMetadata('kits-build')
 
@@ -18,7 +18,7 @@ export default function KitGamePage({ searchParams }: { searchParams: { seed?: s
   const puzzles = dealKitRound(round.seed, round.cursor)
   return (
     <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false}>
-      {kitPuzzleCount() >= KIT_ROUND ? <><KitGameRunV3 puzzles={puzzles} seed={round.seed} cursor={round.cursor} /><ReportLink /></> : <EmptyState title={t('empty.kits')} body={t('empty.kits.body')} />}
+      {kitPuzzleCount() >= KIT_ROUND ? <><KitGameRunV5 puzzles={puzzles} seed={round.seed} cursor={round.cursor} /><ReportLink /></> : <EmptyState title={t('empty.kits')} body={t('empty.kits.body')} />}
     </Screen>
   )
 }

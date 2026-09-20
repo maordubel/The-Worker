@@ -20,32 +20,33 @@ import {
   type SleeveId,
 } from '@/lib/kit/spec'
 import {
+  DIFFICULTY_OPTIONS,
   KIT_HINT_PENALTY,
   KIT_ROUND,
   PART_ORDER,
   PART_POINTS,
+  PART_WEIGHT,
   PERFECT_BONUS,
+  type KitDifficulty,
   type PartKind,
 } from './kit-build-run'
 
 export {
+  DIFFICULTY_OPTIONS,
   KIT_HINT_PENALTY,
   KIT_ROUND,
   PART_ORDER,
   PART_POINTS,
+  PART_WEIGHT,
   PERFECT_BONUS,
   type PartKind,
 } from './kit-build-run'
 
-const OPTIONS = 3
-
 export type KitPart = {
-  /** Stable, opaque and season-free. It is also the key for the archive reference proxy. */
   id: string
   kind: PartKind
   labelHe: string
   patch: Partial<KitSpec>
-  /** true only when at least one exactly dated real shirt demonstrates this part */
   hasReference: boolean
 }
 
@@ -54,6 +55,8 @@ export type KitPuzzle = {
   seasonLabel: string
   variant: 'home' | 'away' | 'third'
   blank: KitSpec
+  difficulty: KitDifficulty
+  optionCount: number
   drawers: { kind: PartKind; parts: KitPart[] }[]
 }
 
@@ -62,6 +65,7 @@ export type PartVerdict = {
   correct: boolean
   chosen: string | null
   truth: string
+  points: number
 }
 
 export type KitVerdict = {
@@ -78,6 +82,7 @@ export type KitVerdict = {
   realSrc: string | null
   sourceTitle: string
   sourceUrl: string | null
+  difficulty: KitDifficulty
 }
 
 export type KitHintKind = 'whisper' | 'detail' | 'front'
@@ -128,10 +133,26 @@ function eligible(): SeasonKit[] {
   )
 }
 
+function seasonYear(label: string): number {
+  const year = Number(label.slice(0, 4))
+  return Number.isFinite(year) ? year : 9999
+}
+
 /**
- * Real-photo evidence by opaque part id. Only exact-season archive rows qualify. The URL
- * sent to the browser is `/api/kits/reference/<hash>` — never `1989`, never a source slug.
+ * Distractors are memory challenges, not random trivia:
+ * prefer the same variant and neighboring seasons so every wrong answer is plausible.
  */
+function neighborKits(target: SeasonKit, all: SeasonKit[]): SeasonKit[] {
+  const year = seasonYear(target.seasonLabel)
+  return all
+    .filter((row) => row !== target)
+    .sort((a, b) => {
+      const variantA = a.variant === target.variant ? 0 : 10
+      const variantB = b.variant === target.variant ? 0 : 10
+      return (Math.abs(seasonYear(a.seasonLabel) - year) + variantA) - (Math.abs(seasonYear(b.seasonLabel) - year) + variantB)
+    })
+}
+
 function referenceMap(): Map<string, string> {
   const map = new Map<string, string>()
   for (const kit of eligible()) {
@@ -174,38 +195,64 @@ function blankOf(spec: KitSpec): KitSpec {
 
 export function kitPuzzleCount(): number { return eligible().length }
 
+function difficultyFor(index: number): KitDifficulty {
+  if (index === 0) return 'warmup'
+  if (index === KIT_ROUND - 1) return 'expert'
+  return 'memory'
+}
+
+function optionSet(
+  target: SeasonKit,
+  kind: PartKind,
+  right: KitPart,
+  all: SeasonKit[],
+  refs: Map<string, string>,
+  count: number,
+  random: () => number,
+): KitPart[] {
+  const seen = new Set([right.id])
+  const plausible: KitPart[] = []
+  for (const kit of neighborKits(target, all)) {
+    const part = partsOf(kit, refs)[kind]
+    if (!part || seen.has(part.id)) continue
+    seen.add(part.id)
+    plausible.push(part)
+    if (plausible.length >= count - 1) break
+  }
+
+  if (plausible.length < count - 1) {
+    const fallback: KitPart[] = []
+    for (const kit of all) {
+      const part = partsOf(kit, refs)[kind]
+      if (!part || seen.has(part.id)) continue
+      seen.add(part.id)
+      fallback.push(part)
+    }
+    plausible.push(...shuffle(fallback, random).slice(0, count - 1 - plausible.length))
+  }
+  return shuffle([right, ...plausible.slice(0, count - 1)], random)
+}
+
 function puzzles(seed: number, cursor: number): { puzzle: KitPuzzle; truth: Record<PartKind, string>; kit: SeasonKit }[] {
   const all = eligible()
   const at = positionOf(seed, cursor, all.length, KIT_ROUND)
   const random = rng(at.seed)
   const refs = referenceMap()
-  const pool = new Map<PartKind, Map<string, KitPart>>()
-  for (const kind of PART_ORDER) pool.set(kind, new Map())
+  const round = takeFrom(shuffle([...all], random), at.slot * KIT_ROUND, KIT_ROUND)
 
-  // Prefer a version backed by a real photograph when the same part occurs many times.
-  for (const kit of all) {
-    const parts = partsOf(kit, refs)
-    for (const kind of PART_ORDER) {
-      const part = parts[kind]
-      if (!part) continue
-      const current = pool.get(kind)?.get(part.id)
-      if (!current || (!current.hasReference && part.hasReference)) pool.get(kind)?.set(part.id, part)
-    }
-  }
-
-  return takeFrom(shuffle([...all], random), at.slot * KIT_ROUND, KIT_ROUND).map((kit) => {
+  return round.map((kit, index) => {
     const parts = partsOf(kit, refs)
     const truth = {} as Record<PartKind, string>
     const drawers: KitPuzzle['drawers'] = []
+    const difficulty = difficultyFor(index)
+    const optionCount = DIFFICULTY_OPTIONS[difficulty]
+
     for (const kind of PART_ORDER) {
       const right = parts[kind] as KitPart
       truth[kind] = right.id
-      const others = shuffle(
-        [...(pool.get(kind)?.values() ?? [])].filter((part) => part.id !== right.id),
-        random,
-      ).slice(0, OPTIONS - 1)
-      drawers.push({ kind, parts: shuffle([right, ...others], random) })
+      drawers.push({ kind, parts: optionSet(kit, kind, right, all, refs, optionCount, random) })
     }
+
     return {
       kit,
       truth,
@@ -214,6 +261,8 @@ function puzzles(seed: number, cursor: number): { puzzle: KitPuzzle; truth: Reco
         seasonLabel: kit.seasonLabel,
         variant: kit.variant,
         blank: blankOf(kit.spec),
+        difficulty,
+        optionCount,
         drawers,
       },
     }
@@ -253,10 +302,11 @@ export function gradeKitPuzzle(
     correct: placed[kind] === row.truth[kind],
     chosen: placed[kind] ?? null,
     truth: row.truth[kind],
+    points: placed[kind] === row.truth[kind] ? PART_WEIGHT[kind] : 0,
   }))
   const right = parts.filter((part) => part.correct).length
   const perfect = right === PART_ORDER.length
-  const baseScore = right * PART_POINTS + (perfect ? PERFECT_BONUS : 0)
+  const baseScore = parts.reduce((sum, part) => sum + part.points, 0) + (perfect ? PERFECT_BONUS : 0)
   const used = Math.max(0, Math.min(3, Math.floor(hintsUsed)))
   return {
     parts,
@@ -269,6 +319,7 @@ export function gradeKitPuzzle(
     seasonLabel: row.kit.seasonLabel,
     variant: row.kit.variant,
     noteHe: row.kit.noteHe,
+    difficulty: row.puzzle.difficulty,
     ...realEvidence(row.kit),
   }
 }
@@ -276,23 +327,23 @@ export function gradeKitPuzzle(
 export function kitHint(seed: number, index: number, kind: KitHintKind, cursor = 0): KitHintAnswer | null {
   const row = puzzles(seed, cursor)[index]
   if (!row) return null
-  if (kind === 'whisper') return { kind, textHe: 'תחשוב קודם על הזהות. את העונה מזהים בפרטים הקטנים.', penalty: KIT_HINT_PENALTY }
+  if (kind === 'whisper') return { kind, textHe: 'אל תחפש את השנה. חפש את התקופה: גזרה, צווארון, מלבישה ואז החזית.', penalty: KIT_HINT_PENALTY }
   if (kind === 'detail') {
     const chooseCollar = (seed + cursor + index) % 2 === 0
     return {
       kind,
       textHe: chooseCollar
         ? `הצווארון היה ${labelFrom(COLLARS, row.kit.spec.collar)}.`
-        : `העיצוב היה ${labelFrom(PATTERNS, row.kit.spec.pattern)}.`,
+        : `מבנה החולצה היה ${labelFrom(PATTERNS, row.kit.spec.pattern)}.`,
       penalty: KIT_HINT_PENALTY,
     }
   }
   const showCrest = (seed + cursor + index) % 3 === 2
-  if (showCrest) return { kind, textHe: `הסמל: ${crestMark(row.kit.spec.crestKey)?.tellHe ?? 'סמל התקופה'}.`, penalty: KIT_HINT_PENALTY }
+  if (showCrest) return { kind, textHe: `שים לב לגרסת הסמל: ${crestMark(row.kit.spec.crestKey)?.tellHe ?? 'סמל התקופה'}.`, penalty: KIT_HINT_PENALTY }
   return {
     kind,
     textHe: (seed + cursor + index) % 2 === 0
-      ? `היצרן: ${row.kit.spec.makerHe ?? 'לא מתועד'}.`
+      ? `המלבישה: ${row.kit.spec.makerHe ?? 'לא מתועד'}.`
       : `הספונסר בחזית: ${row.kit.spec.sponsorHe ?? 'ללא ספונסר'}.`,
     penalty: KIT_HINT_PENALTY,
   }
