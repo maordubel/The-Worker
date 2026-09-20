@@ -1,6 +1,6 @@
 name: Finalize sync
 
-# final validation pass 4
+# final validation pass 5
 on:
   push:
     branches: [sync/life-player-master-20260920]
@@ -40,6 +40,6 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A app lib tests package.json scripts docs content/generated
+          git add -A app components lib tests package.json scripts docs content/generated
           git commit -m 'feat: synchronize LIFE, Kit V3 and central player master [validated]' || true
           git push origin HEAD:sync/life-player-master-20260920
