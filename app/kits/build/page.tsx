@@ -9,36 +9,16 @@ import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
 
-import { KitGameRun } from './KitGameRun'
+import { KitGameRunV3 } from './KitGameRunV3'
 
-/**
- * שער 4 — משחק המדים.
- *
- * The season is the question and the kit is the answer, so the shirt leaves the server
- * already stripped of all five graded parts and the grading happens in a server action
- * from the seed (rule 4). What the client gets is a blank shirt, a year, and fifteen
- * parts with hashed ids — none of which says which one is right.
- */
 export const metadata: Metadata = gateMetadata('kits-build')
 
-export default function KitGamePage({
-  searchParams,
-}: {
-  searchParams: { seed?: string; r?: string }
-}) {
+export default function KitGamePage({ searchParams }: { searchParams: { seed?: string; r?: string } }) {
   const round = roundFrom(searchParams)
   const puzzles = dealKitRound(round.seed, round.cursor)
-
   return (
     <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false}>
-      {kitPuzzleCount() >= KIT_ROUND ? (
-        <>
-          <KitGameRun puzzles={puzzles} seed={round.seed} cursor={round.cursor} />
-          <ReportLink />
-        </>
-      ) : (
-        <EmptyState title={t('empty.kits')} body={t('empty.kits.body')} />
-      )}
+      {kitPuzzleCount() >= KIT_ROUND ? <><KitGameRunV3 puzzles={puzzles} seed={round.seed} cursor={round.cursor} /><ReportLink /></> : <EmptyState title={t('empty.kits')} body={t('empty.kits.body')} />}
     </Screen>
   )
 }

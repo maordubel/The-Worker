@@ -1,6 +1,3 @@
-/**
- * Gate 4 client constants. Keep archive/server code out of the browser bundle.
- */
 export type PartKind =
   | 'base'
   | 'secondary'
@@ -9,6 +6,7 @@ export type PartKind =
   | 'sleeve'
   | 'maker'
   | 'sponsor'
+  | 'crest'
 
 export const PART_ORDER: readonly PartKind[] = [
   'base',
@@ -18,9 +16,21 @@ export const PART_ORDER: readonly PartKind[] = [
   'sleeve',
   'maker',
   'sponsor',
-] as const
+  'crest',
+]
 
-export const PART_POINTS = 40
-export const PERFECT_BONUS = 100
-export const KIT_ROUND = 5
-export const KIT_HINT_PENALTY = 20
+export const PART_LABEL: Record<PartKind, string> = {
+  base: 'צבע בסיס',
+  secondary: 'צבע משני',
+  pattern: 'עיצוב',
+  collar: 'צווארון',
+  sleeve: 'שרוולים',
+  maker: 'לוגו מלבישה',
+  sponsor: 'ספונסר',
+  crest: 'סמל',
+}
+
+export const KIT_ROUND = 3
+export const PART_POINTS = 25
+export const PERFECT_BONUS = 75
+export const KIT_HINT_PENALTY = 25
