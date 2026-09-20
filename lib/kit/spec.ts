@@ -117,9 +117,11 @@ export const NAMESETS: { id: NamesetId; he: string }[] = [
   { id: 'condensed', he: 'קונדנסד' },
 ]
 
+export type KitVariant = 'home' | 'away' | 'third'
+
 export type KitSpec = {
   seasonLabel: string
-  variant: 'home' | 'away'
+  variant: KitVariant
   base: KitColour
   pattern: PatternId
   /** the second ink the pattern is drawn in */
