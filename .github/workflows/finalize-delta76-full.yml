@@ -30,8 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           python .delta76-fix/reconcile_store.py
-          git apply --check .delta76-fix/messages.patch
-          git apply .delta76-fix/messages.patch
+          git apply --3way .delta76-fix/messages.patch
 
       - name: Merge current main and keep production Gate 9
         shell: bash
