@@ -28,6 +28,19 @@ jobs:
       - name: Apply polish
         run: |
           node tools/royal-rumble-polish/apply.mjs
+          node <<'NODE'
+          const fs = require('fs')
+          for (const file of ['app/royal-rumble/RoyalRumbleRun.tsx', 'app/royal-rumble/RoyalRumbleLiveRun.tsx']) {
+            let text = fs.readFileSync(file, 'utf8')
+            text = text.replace(/\sdrop-shadow-\[[^\s"]+\]/g, '')
+            fs.writeFileSync(file, text)
+          }
+          for (const file of ['app/royal-rumble/RoyalRumbleMode.tsx', 'app/royal-rumble/RoyalRumbleChallenge.tsx']) {
+            let text = fs.readFileSync(file, 'utf8')
+            text = text.replaceAll('min-h-[44px]', 'min-h-tap')
+            fs.writeFileSync(file, text)
+          }
+          NODE
           rm -rf tools/royal-rumble-polish .github/workflows/royal-rumble-polish.yml
 
       - name: Install
