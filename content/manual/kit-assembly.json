@@ -1,0 +1,35 @@
+{
+  "note": "Masters and reusable shirt parts for Gate 4/5 assembly.",
+  "seasons": [
+    {
+      "seasonLabel": "1985/86",
+      "variant": "home",
+      "master": "/kits/assembly/1985-86/home-master.svg",
+      "sheet": "/kits/assembly/1985-86/parts-sheet.svg",
+      "parts": {
+        "collar": "/kits/assembly/1985-86/parts/collar.svg",
+        "maker": "/kits/assembly/1985-86/parts/maker-adidas.svg",
+        "crest": "/kits/assembly/1985-86/parts/crest-hapoel.svg",
+        "sponsor": "/kits/assembly/1985-86/parts/sponsor-visa.svg",
+        "shoulderStripes": "/kits/assembly/1985-86/parts/shoulder-stripes.svg",
+        "cuffs": "/kits/assembly/1985-86/parts/cuffs.svg"
+      }
+    },
+    {
+      "seasonLabel": "2009/10",
+      "variant": "home",
+      "master": "/kits/assembly/2009-10/home-master-a.svg",
+      "alternateMaster": "/kits/assembly/2009-10/home-master-b.svg",
+      "sheet": "/kits/assembly/2009-10/parts-sheet.svg",
+      "parts": {
+        "collar": "/kits/assembly/2009-10/parts/collar.svg",
+        "maker": "/kits/assembly/2009-10/parts/maker-umbro.svg",
+        "crest": "/kits/assembly/2009-10/parts/crest-hapoel.svg",
+        "badge": "/kits/assembly/2009-10/parts/badge.svg",
+        "sponsor": "/kits/assembly/2009-10/parts/sponsor-subaru.svg",
+        "sidePanels": "/kits/assembly/2009-10/parts/side-panels.svg",
+        "sleeves": "/kits/assembly/2009-10/parts/sleeves.svg"
+      }
+    }
+  ]
+}

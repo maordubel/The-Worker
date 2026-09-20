@@ -4,6 +4,7 @@ import { createHmac } from 'node:crypto'
 
 import { archive } from './archive'
 import { facetsFor, type Position } from './roster-facets'
+import { royalRumbleMatchSeed } from './royal-rumble-seeds'
 
 export const ROYAL_RUMBLE_BUDGET = 15
 export const ROYAL_RUMBLE_LINEUP_SIZE = 5
@@ -455,11 +456,47 @@ function simulate(seed: number, us: RatedPlayer[], them: RatedPlayer[]): RoyalRu
   }
 }
 
-/** The only function a server action needs. Ratings never cross this boundary. */
+function mirrorPitchPlayer(player: RoyalRumblePitchPlayer): RoyalRumblePitchPlayer {
+  return { ...player, x: 100 - player.x }
+}
+
+function awayPerspective(result: RoyalRumbleResult, home: RatedPlayer[]): RoyalRumbleResult {
+  return {
+    opponent: home.map(publicPlayer),
+    scoreFor: result.scoreAgainst,
+    scoreAgainst: result.scoreFor,
+    winner: result.winner === 'draw' ? 'draw' : result.winner === 'us' ? 'them' : 'us',
+    frames: result.frames.map((frame) => ({
+      ...frame,
+      scoreFor: frame.scoreAgainst,
+      scoreAgainst: frame.scoreFor,
+      ball: { x: 100 - frame.ball.x, y: frame.ball.y },
+      us: frame.them.map(mirrorPitchPlayer),
+      them: frame.us.map(mirrorPitchPlayer),
+    })),
+  }
+}
+
+export function playRoyalRumbleHeadToHead(
+  matchSeed: number,
+  homeOfferSeed: number,
+  homeSlugs: readonly string[],
+  guestOfferSeed: number,
+  guestSlugs: readonly string[],
+): { home: RoyalRumbleResult; away: RoyalRumbleResult } | null {
+  const home = validateSelection(homeOfferSeed, homeSlugs)
+  const away = validateSelection(guestOfferSeed, guestSlugs)
+  if (!home || !away) return null
+  const resolved = simulate(matchSeed >>> 0, home, away)
+  return { home: resolved, away: awayPerspective(resolved, home) }
+}
+
+/** The only solo function a server action needs. Ratings never cross this boundary. */
 export function playRoyalRumble(seed: number, slugs: readonly string[]): RoyalRumbleResult | null {
   const selected = validateSelection(seed, slugs)
   if (!selected) return null
-  const opponent = dealOpponent(seed)
+  const matchSeed = royalRumbleMatchSeed(seed)
+  const opponent = dealOpponent(matchSeed)
   if (opponent.length !== ROYAL_RUMBLE_LINEUP_SIZE) return null
-  return simulate(seed, selected, opponent)
+  return simulate(matchSeed, selected, opponent)
 }

@@ -34,6 +34,22 @@ function kitForPlayer(player: RoyalRumblePublicPlayer, kits: EraKit[]): EraKit |
   return [...(inside.length ? inside : dated)].sort((a, b) => Math.abs(a.year - mid) - Math.abs(b.year - mid))[0]?.kit ?? null
 }
 function Shirt({ player, kits }: { player: RoyalRumblePublicPlayer; kits: EraKit[] }) {
+  const specialSeason = (() => {
+    const start = player.fromYear ?? player.toYear
+    const end = player.toYear ?? player.fromYear
+    if (start === null || start === undefined || end === null || end === undefined) return null
+    if (start <= 1985 && end >= 1985) return { season: '1985/86', src: '/kits/assembly/1985-86/home-master.svg' }
+    if (start <= 2009 && end >= 2009) return { season: '2009/10', src: '/kits/assembly/2009-10/home-master-a.svg' }
+    return null
+  })()
+  if (specialSeason) {
+    return (
+      <div className="relative">
+        <img src={specialSeason.src} alt={t('kitSeason', { season: specialSeason.season })} className="h-[106px] w-[96px]" />
+        <p className="mt-1 text-center font-mono tabular-nums tabular-nums text-[7px] font-black tracking-[0.12em] text-concrete" dir="ltr">{specialSeason.season}</p>
+      </div>
+    )
+  }
   const kit = kitForPlayer(player, kits)
   return kit ? <KitShirt spec={kit.spec} className="h-[106px] w-[96px]" title={t('kitSeason', { season: kit.seasonLabel })} /> : <div className="h-[106px]" />
 }
@@ -171,7 +187,7 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
   if (account === undefined) return <div className="border-rule border-ink bg-ink p-6 font-display text-[28px] text-paper">LIVE…</div>
   if (!account) return (
     <section className="border-rule border-ink bg-ink p-5 text-paper">
-      <p className="font-mono text-[9px] font-black tracking-[.22em] text-red" dir="ltr">ROYAL RUMBLE · LIVE</p>
+      <p className="font-mono tabular-nums text-[9px] font-black tracking-[.22em] text-red" dir="ltr">ROYAL RUMBLE · LIVE</p>
       <h2 className="mt-2 font-display text-[36px] leading-none">{t('liveTitle')}</h2>
       <p className="mt-3 max-w-xl font-body text-[11px] text-paper/55">{t('liveSignInBody')}</p>
       <button type="button" onClick={() => void signInWithGoogle(`${window.location.pathname}${window.location.search}`)} className="mt-5 min-h-tap border-rule border-red bg-red px-5 font-display text-[24px] text-paper">{t('liveSignIn')}</button>
@@ -181,15 +197,15 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
   if (!room) return (
     <section className="grid gap-3 border-rule border-ink bg-paper p-4 sm:grid-cols-2">
       <div className="border-rule border-ink bg-ink p-4 text-paper">
-        <p className="font-mono text-[8px] font-black tracking-[.2em] text-red" dir="ltr">HOST</p>
+        <p className="font-mono tabular-nums text-[8px] font-black tracking-[.2em] text-red" dir="ltr">HOST</p>
         <h2 className="mt-1 font-display text-[30px]">{t('liveCreateTitle')}</h2>
         <p className="mt-2 font-body text-[10px] text-paper/50">{t('liveCreateBody')}</p>
         <button type="button" disabled={busy} onClick={() => void create()} className="mt-4 min-h-tap w-full border-rule border-red bg-red px-4 font-display text-[24px] text-paper disabled:opacity-40">{t('liveCreate')}</button>
       </div>
       <div className="border-rule border-ink bg-paper p-4 text-ink">
-        <p className="font-mono text-[8px] font-black tracking-[.2em] text-red" dir="ltr">JOIN</p>
+        <p className="font-mono tabular-nums text-[8px] font-black tracking-[.2em] text-red" dir="ltr">JOIN</p>
         <h2 className="mt-1 font-display text-[30px]">{t('liveJoinTitle')}</h2>
-        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder={t('liveCodePlaceholder')} className="mt-3 min-h-tap w-full border-rule border-ink bg-paper px-3 font-mono text-[18px] font-black uppercase tracking-[.18em]" dir="ltr" />
+        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder={t('liveCodePlaceholder')} className="mt-3 min-h-tap w-full border-rule border-ink bg-paper px-3 font-mono tabular-nums text-[18px] font-black uppercase tracking-[.18em]" dir="ltr" />
         <button type="button" disabled={busy || !code.trim()} onClick={() => void join(code)} className="mt-3 min-h-tap w-full border-rule border-ink bg-ink px-4 font-display text-[24px] text-paper disabled:opacity-40">{t('liveJoin')}</button>
       </div>
       {error && <p className="sm:col-span-2 border-rule border-red bg-red/10 p-3 font-body text-[10px] font-black text-red">{t('liveError')}</p>}
@@ -199,18 +215,18 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
   if (phase === 'result' && result) {
     const won = result.winner === 'us'; const draw = result.winner === 'draw'
     return <div><RecordRun gate="royal-rumble-live" score={won ? 3 : draw ? 1 : 0} correct={won ? 1 : 0} asked={1} />
-      <section className="border-rule border-ink bg-ink p-6 text-center text-paper"><p className="font-mono text-[9px] font-black tracking-[.24em] text-red" dir="ltr">LIVE · FULL TIME</p><p className="mt-3 font-display text-[104px] leading-none" dir="ltr">{result.scoreFor}–{result.scoreAgainst}</p><h2 className="mt-3 font-display text-[36px]">{won ? t('liveWon') : draw ? t('liveDraw') : t('liveLost')}</h2></section></div>
+      <section className="border-rule border-ink bg-ink p-6 text-center text-paper"><p className="font-mono tabular-nums text-[9px] font-black tracking-[.24em] text-red" dir="ltr">LIVE · FULL TIME</p><p className="mt-3 font-display text-[104px] leading-none" dir="ltr">{result.scoreFor}–{result.scoreAgainst}</p><h2 className="mt-3 font-display text-[36px]">{won ? t('liveWon') : draw ? t('liveDraw') : t('liveLost')}</h2></section></div>
   }
-  if (phase === 'countdown') return <section className="border-rule border-ink bg-ink p-7 text-center text-paper"><p className="font-mono text-[9px] font-black tracking-[.26em] text-red" dir="ltr">SYNCED START</p><p className="mt-2 font-body text-[11px] text-paper/50">{t('liveCountdown')}</p><p className="mt-4 font-display text-[140px] leading-none text-red" dir="ltr">{countdown || 'GO'}</p>{busy && <p className="font-body text-[10px] text-paper/45">{t('liveResolving')}</p>}</section>
-  if (phase === 'waiting') return <section className="border-rule border-ink bg-ink p-5 text-paper"><div className="flex items-center justify-between gap-3"><div><p className="font-mono text-[8px] font-black tracking-[.2em] text-red" dir="ltr">ROOM {room.code}</p><h2 className="mt-1 font-display text-[32px]">{t('liveLocked')}</h2></div><div className="flex gap-4 font-body text-[9px]"><span className="flex items-center gap-2"><Lamp on />{t('liveYouReady')}</span><span className="flex items-center gap-2"><Lamp on={Boolean(state?.opponentReady)} />{t('liveOpponentReady')}</span></div></div><p className="mt-4 border-t border-paper/15 pt-4 font-body text-[11px] text-paper/50">{t('liveWaiting')}</p></section>
+  if (phase === 'countdown') return <section className="border-rule border-ink bg-ink p-7 text-center text-paper"><p className="font-mono tabular-nums text-[9px] font-black tracking-[.26em] text-red" dir="ltr">SYNCED START</p><p className="mt-2 font-body text-[11px] text-paper/50">{t('liveCountdown')}</p><p className="mt-4 font-display text-[140px] leading-none text-red" dir="ltr">{countdown || 'GO'}</p>{busy && <p className="font-body text-[10px] text-paper/45">{t('liveResolving')}</p>}</section>
+  if (phase === 'waiting') return <section className="border-rule border-ink bg-ink p-5 text-paper"><div className="flex items-center justify-between gap-3"><div><p className="font-mono tabular-nums text-[8px] font-black tracking-[.2em] text-red" dir="ltr">ROOM {room.code}</p><h2 className="mt-1 font-display text-[32px]">{t('liveLocked')}</h2></div><div className="flex gap-4 font-body text-[9px]"><span className="flex items-center gap-2"><Lamp on />{t('liveYouReady')}</span><span className="flex items-center gap-2"><Lamp on={Boolean(state?.opponentReady)} />{t('liveOpponentReady')}</span></div></div><p className="mt-4 border-t border-paper/15 pt-4 font-body text-[11px] text-paper/50">{t('liveWaiting')}</p></section>
   if (!currentSlot) return null
 
   return <div className="space-y-3">
-    <section className="border-rule border-ink bg-ink p-4 text-paper"><div className="flex items-center justify-between gap-3"><div><p className="font-mono text-[8px] font-black tracking-[.2em] text-red" dir="ltr">LIVE ROOM · {room.code}</p><h2 className="mt-1 font-display text-[31px]">{t('liveDraftTitle')}</h2></div><button type="button" onClick={() => void copyRoom()} className="min-h-tap border border-paper/25 px-3 font-body text-[10px] font-black">{copied ? t('liveCopied') : t('liveCopy')}</button></div><div className="mt-3 grid grid-cols-2 gap-2 border-t border-paper/15 pt-3 font-body text-[9px]"><span className="flex items-center gap-2"><Lamp on />{t('liveYou')}</span><span className="flex items-center gap-2"><Lamp on={Boolean(state?.opponentJoined)} />{state?.opponentJoined ? t('liveOpponentJoined') : t('liveOpponentMissing')}</span></div></section>
-    <section className="border-rule border-ink bg-paper p-3 text-ink sm:p-5"><div className="flex items-end justify-between gap-3"><div><p className="font-mono text-[8px] font-black tracking-[.18em] text-red" dir="ltr">PICK {slot + 1}/5</p><h3 className="font-display text-[28px]">{t('draftQuestion')}</h3></div><p className="font-display text-[34px] text-red" dir="ltr">{money(remaining)}</p></div>
-      <div className="relative mt-4"><RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${slot}`} /><div className="grid grid-cols-3 gap-2 sm:gap-3">{currentSlot.offers.map((player) => { const active = picks[slot]?.slug === player.slug; const disabled = !canPick(slot, player); return <button key={player.slug} type="button" disabled={disabled} onClick={() => pick(player)} className={`min-h-[245px] border-rule p-2 text-start ${active ? 'border-red bg-red text-paper' : 'border-ink bg-paper text-ink'} ${disabled ? 'opacity-25 grayscale' : ''}`}><div className="flex items-start justify-between"><span className="font-mono text-[8px] font-black text-red" dir="ltr">{player.position}</span><span className={`font-display text-[28px] ${active ? 'text-paper' : 'text-red'}`} dir="ltr">{money(player.price)}</span></div><div className="mt-2 flex h-[112px] items-center justify-center"><Shirt player={player} kits={kits} /></div><p className="mt-3 font-display text-[22px] leading-[.9]">{player.nameHe}</p></button> })}</div></div>
+    <section className="border-rule border-ink bg-ink p-4 text-paper"><div className="flex items-center justify-between gap-3"><div><p className="font-mono tabular-nums text-[8px] font-black tracking-[.2em] text-red" dir="ltr">LIVE ROOM · {room.code}</p><h2 className="mt-1 font-display text-[31px]">{t('liveDraftTitle')}</h2></div><button type="button" onClick={() => void copyRoom()} className="min-h-tap border border-paper/25 px-3 font-body text-[10px] font-black">{copied ? t('liveCopied') : t('liveCopy')}</button></div><div className="mt-3 grid grid-cols-2 gap-2 border-t border-paper/15 pt-3 font-body text-[9px]"><span className="flex items-center gap-2"><Lamp on />{t('liveYou')}</span><span className="flex items-center gap-2"><Lamp on={Boolean(state?.opponentJoined)} />{state?.opponentJoined ? t('liveOpponentJoined') : t('liveOpponentMissing')}</span></div></section>
+    <section className="border-rule border-ink bg-paper p-3 text-ink sm:p-5"><div className="flex items-end justify-between gap-3"><div><p className="font-mono tabular-nums text-[8px] font-black tracking-[.18em] text-red" dir="ltr">PICK {slot + 1}/5</p><h3 className="font-display text-[28px]">{t('draftQuestion')}</h3></div><p className="font-display text-[34px] text-red" dir="ltr">{money(remaining)}</p></div>
+      <div className="relative mt-4"><RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${slot}`} /><div className="grid grid-cols-3 gap-2 sm:gap-3">{currentSlot.offers.map((player) => { const active = picks[slot]?.slug === player.slug; const disabled = !canPick(slot, player); return <button key={player.slug} type="button" disabled={disabled} onClick={() => pick(player)} className={`min-h-[245px] border-rule p-2 text-start ${active ? 'border-red bg-red text-paper' : 'border-ink bg-paper text-ink'} ${disabled ? 'opacity-25 grayscale' : ''}`}><div className="flex items-start justify-between"><span className="font-mono tabular-nums text-[8px] font-black text-red" dir="ltr">{player.position}</span><span className={`font-display text-[28px] ${active ? 'text-paper' : 'text-red'}`} dir="ltr">{money(player.price)}</span></div><div className="mt-2 flex h-[112px] items-center justify-center"><Shirt player={player} kits={kits} /></div><p className="mt-3 font-display text-[22px] leading-[.9]">{player.nameHe}</p></button> })}</div></div>
     </section>
-    <section className="grid grid-cols-5 gap-1 border-rule border-ink bg-ink p-2 text-paper">{activeDraft.slots.map((s, i) => <button key={`${s.position}-${i}`} type="button" onClick={() => setSlot(i)} className={`min-h-tap border p-1 text-center ${slot === i ? 'border-red bg-red' : 'border-paper/15'}`}><span className="font-mono text-[7px] font-black" dir="ltr">{s.position}</span><span className="mt-1 block truncate font-body text-[8px] font-black">{picks[i]?.nameHe ?? '—'}</span></button>)}</section>
+    <section className="grid grid-cols-5 gap-1 border-rule border-ink bg-ink p-2 text-paper">{activeDraft.slots.map((s, i) => <button key={`${s.position}-${i}`} type="button" onClick={() => setSlot(i)} className={`min-h-tap border p-1 text-center ${slot === i ? 'border-red bg-red' : 'border-paper/15'}`}><span className="font-mono tabular-nums text-[7px] font-black" dir="ltr">{s.position}</span><span className="mt-1 block truncate font-body text-[8px] font-black">{picks[i]?.nameHe ?? '—'}</span></button>)}</section>
     <div className="grid gap-2 sm:grid-cols-2"><button type="button" disabled={shuffleUsed || busy} onClick={shuffle} className="min-h-tap border-rule border-ink bg-paper px-4 text-start font-display text-[22px] text-ink disabled:opacity-35">{shuffleUsed ? t('shuffleUsed') : t('shuffleAction')}</button><button type="button" disabled={!complete || remaining < 0 || busy || !state?.opponentJoined} onClick={() => void lock()} className="min-h-tap border-rule border-red bg-red px-4 text-start font-display text-[24px] text-paper disabled:opacity-35">{busy ? t('locking') : t('liveLock')}</button></div>
     {error && <p className="border-rule border-red bg-red/10 p-3 font-body text-[10px] font-black text-red">{t('liveError')}</p>}
   </div>

@@ -13,6 +13,7 @@ import type {
 import type { KitSpec } from '@/lib/kit/spec'
 import { t } from '@/lib/royal-rumble/i18n'
 import { submitRoyalRumble } from './actions'
+import { RoyalRumbleSlotReveal } from './RoyalRumbleSlotReveal'
 
 type Phase = 'draft' | 'reveal' | 'match' | 'result'
 type EraKit = { seasonLabel: string; spec: KitSpec }
@@ -95,6 +96,22 @@ function Shirt({
   kits: EraKit[]
   className: string
 }) {
+  const specialSeason = (() => {
+    const start = player.fromYear ?? player.toYear
+    const end = player.toYear ?? player.fromYear
+    if (start === null || start === undefined || end === null || end === undefined) return null
+    if (start <= 1985 && end >= 1985) return { season: '1985/86', src: '/kits/assembly/1985-86/home-master.svg' }
+    if (start <= 2009 && end >= 2009) return { season: '2009/10', src: '/kits/assembly/2009-10/home-master-a.svg' }
+    return null
+  })()
+  if (specialSeason) {
+    return (
+      <div className="relative">
+        <img src={specialSeason.src} alt={t('kitSeason', { season: specialSeason.season })} className={className} />
+        <p className="mt-1 text-center font-mono tabular-nums text-[7px] font-black tracking-[0.12em] text-concrete" dir="ltr">{specialSeason.season}</p>
+      </div>
+    )
+  }
   const kit = kitForPlayer(player, kits)
   if (!kit) return <div className={className} />
   return (
@@ -161,7 +178,7 @@ function DraftCard({
           </div>
         </div>
 
-        <div className={`mx-auto mt-2 flex w-full justify-center border-y-hair py-2 ${selected ? 'border-paper/15 bg-paper/95' : 'border-ink/10 bg-sheet'}`}>
+        <div className={`mx-auto mt-2 flex w-full justify-center border-y-hair py-2 ${selected ? 'border-paper/15 bg-transparent' : 'border-ink/10 bg-transparent'}`}>
           <Shirt player={player} kits={kits} className="h-[92px] w-[82px] sm:h-[118px] sm:w-[104px]" />
         </div>
 
@@ -231,7 +248,7 @@ function LineupRail({
               </span>
               {player ? (
                 <>
-                  <div className="mx-auto mt-1 hidden h-12 items-center justify-center bg-paper sm:flex">
+                  <div className="mx-auto mt-1 hidden h-12 items-center justify-center bg-transparent sm:flex">
                     <Shirt player={player} kits={kits} className="h-10 w-9" />
                   </div>
                   <p className="mt-1 truncate font-display text-[13px] leading-none sm:text-[16px]">{player.nameHe}</p>
@@ -269,7 +286,7 @@ function FighterToken({
       style={{ insetInlineStart: `${player.x}%`, top: `${player.y}%` }}
       title={player.nameHe}
     >
-      <div className={`mx-auto flex h-12 w-12 items-center justify-center border-2 sm:h-14 sm:w-14 ${ours ? 'border-red bg-paper' : 'border-ink bg-paper'}`}>
+      <div className={`mx-auto flex h-12 w-12 items-center justify-center border-2 sm:h-14 sm:w-14 ${ours ? 'border-red bg-transparent' : 'border-ink bg-transparent'}`}>
         {publicPlayer ? (
           <Shirt player={publicPlayer} kits={kits} className="h-10 w-9 sm:h-12 sm:w-11" />
         ) : (
@@ -362,7 +379,7 @@ function MatchPitch({
 function CompactPlayer({ player, dark = false, kits }: { player: RoyalRumblePublicPlayer; dark?: boolean; kits: EraKit[] }) {
   return (
     <div className={`grid grid-cols-[42px_1fr_auto] items-center gap-2 border-b-hair py-2 ${dark ? 'border-paper/15' : 'border-ink/15'}`}>
-      <div className="flex h-10 items-center justify-center bg-paper">
+      <div className="flex h-10 items-center justify-center bg-transparent">
         <Shirt player={player} kits={kits} className="h-9 w-8" />
       </div>
       <div className="min-w-0">
@@ -516,7 +533,7 @@ export function RoyalRumbleRun({
                       <span className="font-mono tabular-nums text-[7px] font-black tracking-[0.14em] text-red sm:text-[9px]" dir="ltr">ENTRY {index + 1}</span>
                       <span className="font-display text-[22px] text-red sm:text-[30px]" dir="ltr">{money(player.price)}</span>
                     </div>
-                    <div className="mx-auto mt-2 flex w-full justify-center border-y-hair border-ink/10 bg-sheet py-2">
+                    <div className="mx-auto mt-2 flex w-full justify-center border-y-hair border-ink/10 bg-transparent py-2">
                       <Shirt player={player} kits={kits} className="h-[86px] w-[76px] sm:h-[120px] sm:w-[106px]" />
                     </div>
                     <div className="mt-auto pt-2">
@@ -659,7 +676,9 @@ export function RoyalRumbleRun({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="relative">
+          <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {currentSlot.offers.map((player, index) => (
             <DraftCard
               key={player.slug}
@@ -671,6 +690,7 @@ export function RoyalRumbleRun({
               kits={kits}
             />
           ))}
+          </div>
         </div>
         <p className="mt-3 text-center font-body text-[9px] text-concrete">{t('fadedNote')}</p>
       </section>
