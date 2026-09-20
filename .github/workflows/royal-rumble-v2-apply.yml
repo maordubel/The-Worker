@@ -1,0 +1,61 @@
+name: Apply Royal Rumble V2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/royal-rumble-v2/**'
+      - '.github/workflows/royal-rumble-v2-apply.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Apply Royal Rumble V2 and shirt assembly assets
+        run: |
+          node tools/royal-rumble-v2/apply-v2.mjs .
+          node tools/royal-rumble-v2/finalize-kits.mjs
+          rm -rf tools/royal-rumble-v2 .github/workflows/royal-rumble-v2-apply.yml
+
+      - name: Install
+        run: npm ci
+
+      - name: Repository hygiene
+        run: npm run repo:hygiene
+
+      - name: Asset provenance
+        run: npm run assets:provenance
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit directly to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Royal Rumble V2: live H2H and historical shirt assembly"
+          git push origin HEAD:main
