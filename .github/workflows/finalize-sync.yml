@@ -1,5 +1,6 @@
 name: Finalize sync
 
+# final validation pass 4
 on:
   push:
     branches: [sync/life-player-master-20260920]
