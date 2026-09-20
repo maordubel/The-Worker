@@ -16,7 +16,7 @@ export const metadata: Metadata = gateMetadata('kits')
 
 export default function KitsPage() {
   const catalog = kitCatalog()
-  const rack = kitDnaRack()
+  const rack = kitDnaRack().map((row) => ({ ...row, noteHe: '' }))
   return (
     <Screen title={t('screen.kits.title')} sub={t('screen.kits.sub')}>
       {catalog.length > 0 ? <KitWing catalog={catalog} counts={facetCounts(catalog)} archiveCount={archiveShirts().length} designer={<KitDesignerV5 rack={rack} />} /> : <EmptyState title={t('empty.kits')} body={t('empty.kits.body')} />}
