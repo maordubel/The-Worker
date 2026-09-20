@@ -1,408 +1,67 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-
 import { KitAssemblyShirt } from '@/components/kit/KitAssemblyShirt'
-import { KitShirt } from '@/components/kit/KitShirt'
 import { ShareRow } from '@/components/share/ShareRow'
-import { makerAssetFor, sponsorAssetFor } from '@/lib/kit/assembly'
-import {
-  COLLARS,
-  COLOUR_NAME,
-  COLOUR_VAR,
-  DEFAULT_SPEC,
-  NAMESETS,
-  PATTERNS,
-  SLEEVES,
-  type KitColour,
-  type KitSpec,
-} from '@/lib/kit/spec'
+import { COLLARS,COLOUR_NAME,COLOUR_VAR,DEFAULT_SPEC,NAMESETS,PATTERNS,SLEEVES,type KitColour,type KitSpec } from '@/lib/kit/spec'
+import { activeCollection,kitKey } from '@/lib/kit/collection'
+import { CREST_MARKS } from '@/lib/kit/crestMarks'
 import { recordDeed } from '@/lib/profile/store'
-import { t, type MessageKey } from '@/lib/i18n'
+import { activeStudioStore,type SavedKitDesign } from '@/lib/kit/studio-store'
+import { KIT_BRIEFS,scoreStudioDesign,supporterFeedback,type KitBriefId,type StudioMetrics } from '@/lib/kit/studio'
+import { t } from '@/lib/i18n'
 
-const TABS = [
-  { key: 'rack', he: 'kit.tab.rack' },
-  { key: 'base', he: 'kit.tab.base' },
-  { key: 'pattern', he: 'kit.tab.pattern' },
-  { key: 'sleeves', he: 'kit.tab.sleeves' },
-  { key: 'collar', he: 'kit.tab.collar' },
-  { key: 'marks', he: 'kits.spec' },
-  { key: 'nameset', he: 'kit.tab.nameset' },
-] as const
+const TABS=[['rack','DNA'],['base','גוף'],['pattern','דגם'],['sleeves','שרוול'],['collar','צווארון'],['marks','חזית'],['nameset','מספרים']] as const
+const COLOURS:KitColour[]=['red','cream','ink','paper','navy','deep','concrete']
+const CREATIVE_SPONSORS:Array<string|null>=[null,'THE WORKER','HAPOEL','1923']
+const NUMBERS=[7,9,10,11,12,14]
+const pulse=()=>{if(typeof navigator!=='undefined'&&'vibrate'in navigator)navigator.vibrate(8)}
+const randomOf=<T,>(items:readonly T[]):T=>items[Math.floor(Math.random()*items.length)] as T
+type RackKit={seasonLabel:string;noteHe:string;spec:KitSpec}
 
-const COLOURS: KitColour[] = ['red', 'cream', 'ink', 'paper', 'navy', 'deep']
-
-function randomOf<T>(items: readonly T[]): T {
-  return items[Math.floor(Math.random() * items.length)] as T
-}
-
-export function KitDesigner({
-  rack,
-}: {
-  rack: { seasonLabel: string; noteHe: string; spec: KitSpec }[]
-  seed?: number
-}) {
-  const first = rack[0]?.spec ?? DEFAULT_SPEC
-  const [spec, setSpec] = useState<KitSpec>(first)
-  const [historicalPreset, setHistoricalPreset] = useState(first.seasonLabel)
-  const [tab, setTab] = useState<(typeof TABS)[number]['key']>('rack')
-  const [flash, setFlash] = useState(0)
-  const deeded = useRef(false)
-
-  const sponsors = useMemo(
-    () => [...new Set(rack.map((kit) => kit.spec.sponsorHe).filter((value): value is string => Boolean(value)))],
-    [rack],
-  )
-  const makers = useMemo(
-    () => [...new Set(rack.map((kit) => kit.spec.makerHe).filter((value): value is string => Boolean(value)))],
-    [rack],
-  )
-  const crests = useMemo(
-    () => [...new Set(rack.map((kit) => kit.spec.crestKey).filter((value): value is string => Boolean(value)))],
-    [rack],
-  )
-
-  useEffect(() => {
-    if (deeded.current || flash === 0) return
-    deeded.current = true
-    recordDeed('/kits')
-  }, [flash])
-
-  function touch(next: KitSpec) {
-    setSpec(next)
-    setHistoricalPreset('')
-    setFlash((n) => n + 1)
-  }
-
-  function set<K extends keyof KitSpec>(key: K, value: KitSpec[K]) {
-    touch({ ...spec, [key]: value })
-  }
-
-  function applyPreset(kit: { seasonLabel: string; spec: KitSpec }) {
-    setSpec(kit.spec)
-    setHistoricalPreset(kit.seasonLabel)
-    setFlash((n) => n + 1)
-  }
-
-  function roll() {
-    touch({
-      ...spec,
-      base: randomOf(COLOURS),
-      pattern: randomOf(PATTERNS).id,
-      patternInk: randomOf(COLOURS),
-      sleeves: randomOf(SLEEVES).id,
-      sleeveInk: randomOf(COLOURS),
-      collar: randomOf(COLLARS).id,
-      collarInk: randomOf(COLOURS),
-      nameset: randomOf(NAMESETS).id,
-      shorts: randomOf(COLOURS),
-      socks: randomOf(COLOURS),
-      number: randomOf([7, 9, 10, 11, 12, 14]),
-      sponsorHe: randomOf([null, ...sponsors]),
-      makerHe: randomOf([null, ...makers]),
-      crestKey: randomOf([null, ...crests]),
-    })
-  }
-
-  return (
-    <section className="mt-stack border-rule border-ink bg-sheet">
-      <div className="flex items-baseline justify-between gap-3 border-b-rule border-ink bg-ink px-4 py-2.5">
-        <p className="font-display text-step-1 leading-none text-paper">{t('kit.designer')}</p>
-        <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">8 LAYERS</p>
-      </div>
-
-      <div className="border-b-hair border-ink/30 bg-paper p-4">
-        <div key={flash} className="mx-auto flex min-h-[250px] max-w-[260px] items-center justify-center animate-slam">
-          {historicalPreset === spec.seasonLabel ? (
-            <KitAssemblyShirt
-              spec={spec}
-              historical
-              className="block max-h-[250px] w-full"
-              title={spec.seasonLabel}
-            />
-          ) : (
-            <KitAssemblyShirt
-              spec={spec}
-              className="block max-h-[250px] w-full"
-              title={spec.seasonLabel}
-            />
-          )}
-        </div>
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <p className="min-w-0 flex-1 font-mono text-[11px] tabular-nums text-muted">
-            <bdi dir="ltr">{spec.seasonLabel}</bdi>
-          </p>
-          <button
-            type="button"
-            onClick={roll}
-            className="min-h-tap border-hair border-ink px-3 font-body text-step--1 font-extrabold text-ink transition-transform duration-press ease-stamp active:scale-[.95] motion-reduce:transition-none"
-          >
-            {t('kit.roll')}
-          </button>
-        </div>
-      </div>
-
-      <div className="p-4">
-        <div
-          role="tablist"
-          aria-label={t('kit.designer')}
-          className="-mx-1 flex gap-1 overflow-x-auto border-b-hair border-ink/40 px-1 pb-2"
-        >
-          {TABS.map((item) => (
-            <button
-              key={item.key}
-              role="tab"
-              type="button"
-              aria-selected={tab === item.key}
-              onClick={() => setTab(item.key)}
-              className={`min-h-tap shrink-0 px-3 font-body text-step--1 font-extrabold transition-colors duration-press ${
-                tab === item.key ? 'bg-red text-paper' : 'text-ink'
-              }`}
-            >
-              {t(item.he as MessageKey)}
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-3">
-          {tab === 'rack' && (
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {rack.map((kit) => (
-                <button
-                  key={kit.seasonLabel}
-                  type="button"
-                  onClick={() => applyPreset(kit)}
-                  className={`min-h-tap border-hair bg-paper p-1.5 transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
-                    historicalPreset === kit.seasonLabel ? 'border-red bg-red/[.08]' : 'border-ink/40'
-                  }`}
-                >
-                  <KitAssemblyShirt
-                    spec={{ ...kit.spec, number: null }}
-                    historical
-                    className="mx-auto block h-[86px] w-full max-w-[72px]"
-                    title={kit.seasonLabel}
-                  />
-                  <span className="mt-1 block font-mono text-[10px] tabular-nums leading-tight text-ink">
-                    <bdi dir="ltr">{kit.seasonLabel}</bdi>
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {tab === 'base' && (
-            <>
-              <Label>{t('kit.tab.base')}</Label>
-              <Swatches value={spec.base} onPick={(colour) => set('base', colour)} />
-              <Label>{t('kit.secondInk')}</Label>
-              <Swatches value={spec.patternInk} onPick={(colour) => set('patternInk', colour)} />
-              <Label>{t('kit.shorts')}</Label>
-              <Swatches value={spec.shorts} onPick={(colour) => set('shorts', colour)} />
-              <Label>{t('kit.socks')}</Label>
-              <Swatches value={spec.socks} onPick={(colour) => set('socks', colour)} />
-            </>
-          )}
-
-          {tab === 'pattern' && (
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {PATTERNS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => set('pattern', item.id)}
-                  aria-pressed={spec.pattern === item.id}
-                  className={`min-h-tap border-hair p-1.5 transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
-                    spec.pattern === item.id ? 'border-red bg-red/[.1]' : 'border-ink/40'
-                  }`}
-                >
-                  <KitShirt
-                    spec={{ ...spec, pattern: item.id, sponsorHe: null, makerHe: null, number: null }}
-                    className="mx-auto block w-full max-w-[54px]"
-                    title={item.he}
-                  />
-                  <span className="mt-1 block font-body text-[10px] leading-tight text-ink">{item.he}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {tab === 'sleeves' && (
-            <>
-              <Chips items={SLEEVES} value={spec.sleeves} onPick={(value) => set('sleeves', value)} />
-              <Label>{t('kit.sleeveInk')}</Label>
-              <Swatches value={spec.sleeveInk} onPick={(colour) => set('sleeveInk', colour)} />
-            </>
-          )}
-
-          {tab === 'collar' && (
-            <>
-              <Chips items={COLLARS} value={spec.collar} onPick={(value) => set('collar', value)} />
-              <Label>{t('kit.collarInk')}</Label>
-              <Swatches value={spec.collarInk} onPick={(colour) => set('collarInk', colour)} />
-            </>
-          )}
-
-          {tab === 'marks' && (
-            <>
-              <Label>{t('kits.spec.sponsor')}</Label>
-              <MarkGrid
-                kind="sponsor"
-                items={sponsors}
-                value={spec.sponsorHe}
-                onPick={(value) => set('sponsorHe', value)}
-              />
-              <Label>{t('kits.spec.maker')}</Label>
-              <MarkGrid
-                kind="maker"
-                items={makers}
-                value={spec.makerHe}
-                onPick={(value) => set('makerHe', value)}
-              />
-              <Label>{t('kits.spec.crest')}</Label>
-              <MarkGrid
-                kind="crest"
-                items={crests}
-                value={spec.crestKey}
-                onPick={(value) => set('crestKey', value)}
-              />
-            </>
-          )}
-
-          {tab === 'nameset' && (
-            <>
-              <Chips items={NAMESETS} value={spec.nameset} onPick={(value) => set('nameset', value)} />
-              <Label>{t('kit.number')}</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {[7, 9, 10, 11, 12, 14].map((number) => (
-                  <button
-                    key={number}
-                    type="button"
-                    onClick={() => set('number', number)}
-                    aria-pressed={spec.number === number}
-                    className={`min-h-tap w-12 border-hair font-poster text-[22px] transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none ${
-                      spec.number === number ? 'border-red bg-red text-paper' : 'border-ink/40 text-ink'
-                    }`}
-                  >
-                    {number}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        <ShareRow
-          kind="kit"
-          route="/kits"
-          params={{ total: '8' }}
-          headline={t('kit.designer')}
-          card={{
-            template: 'kit' as const,
-            kicker: 'GATE 5 · KIT DESIGNER',
-            label: t('screen.kits.title'),
-            eyebrow: t('kit.designer'),
-            hero: spec.seasonLabel,
-            stats: [
-              { k: t('kit.tab.pattern'), v: PATTERNS.find((p) => p.id === spec.pattern)?.he ?? '' },
-              { k: t('kits.spec.sponsor'), v: spec.sponsorHe ?? t('kits.spec.none') },
-            ],
-            cta: t('kit.cta'),
-            challenge: t('share.sameRound'),
-            kit: spec,
-          }}
-        />
-      </div>
-    </section>
-  )
-}
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <p className="mb-1.5 mt-3 font-body text-[10px] tracking-widest text-muted first:mt-0">{children}</p>
-}
-
-function Swatches({ value, onPick }: { value: KitColour; onPick: (colour: KitColour) => void }) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {COLOURS.map((colour) => (
-        <button
-          key={colour}
-          type="button"
-          onClick={() => onPick(colour)}
-          aria-label={COLOUR_NAME[colour]}
-          aria-pressed={value === colour}
-          className={`min-h-tap w-12 border-rule transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none ${
-            value === colour ? 'border-red' : 'border-ink/50'
-          }`}
-          style={{ background: COLOUR_VAR[colour] }}
-        />
-      ))}
+export function KitDesigner({rack}:{rack:RackKit[];seed?:number}){
+ const collection=useMemo(()=>activeCollection(),[]),studioStore=useMemo(()=>activeStudioStore(),[])
+ const [ownedKeys,setOwnedKeys]=useState<Set<string>>(new Set()),[saved,setSaved]=useState<SavedKitDesign[]>([]),[editingId,setEditingId]=useState<string|null>(null),[spec,setSpec]=useState<KitSpec>({...DEFAULT_SPEC,seasonLabel:'STUDIO'}),[tab,setTab]=useState<(typeof TABS)[number][0]>('rack'),[briefId,setBriefId]=useState<KitBriefId>('free'),[dnaKeys,setDnaKeys]=useState<string[]>([]),[result,setResult]=useState<{metrics:StudioMetrics;feedback:string}|null>(null),[flash,setFlash]=useState(0)
+ const deeded=useRef(false)
+ useEffect(()=>{void collection.read().then((rows)=>setOwnedKeys(new Set(Object.keys(rows))));void studioStore.read().then(setSaved)},[collection,studioStore])
+ useEffect(()=>{if(deeded.current||flash===0)return;deeded.current=true;recordDeed('/kits')},[flash])
+ const unlocked=useMemo(()=>rack.filter((row)=>ownedKeys.has(kitKey(row.seasonLabel,row.spec.variant))),[rack,ownedKeys])
+ const dnaSpecs=useMemo(()=>dnaKeys.map((key)=>unlocked.find((row)=>kitKey(row.seasonLabel,row.spec.variant)===key)?.spec).filter((row):row is KitSpec=>Boolean(row)),[dnaKeys,unlocked])
+ const sponsorOptions=useMemo(()=>[...CREATIVE_SPONSORS,...unlocked.map((row)=>row.spec.sponsorHe)].filter((value,index,all)=>all.indexOf(value)===index),[unlocked])
+ const makerOptions=useMemo(()=>unlocked.map((row)=>row.spec.makerHe).filter((value):value is string=>Boolean(value)).filter((value,index,all)=>all.indexOf(value)===index),[unlocked])
+ const crestOptions=useMemo(()=>unlocked.map((row)=>row.spec.crestKey).filter((value):value is string=>Boolean(value)).filter((value,index,all)=>all.indexOf(value)===index),[unlocked])
+ function mutate(patch:Partial<KitSpec>){setSpec((current)=>({...current,...patch,seasonLabel:'STUDIO'}));setResult(null);setFlash((value)=>value+1);pulse()}
+ function useDNA(row:RackKit){const key=kitKey(row.seasonLabel,row.spec.variant);setSpec(row.spec);setDnaKeys((keys)=>keys.includes(key)?keys:[...keys,key].slice(-3));setResult(null);setFlash((value)=>value+1);pulse()}
+ function toggleDNA(row:RackKit){const key=kitKey(row.seasonLabel,row.spec.variant);setDnaKeys((keys)=>keys.includes(key)?keys.filter((item)=>item!==key):[...keys,key].slice(-3));pulse()}
+ function roll(){mutate({base:randomOf(COLOURS),pattern:randomOf(PATTERNS).id,patternInk:randomOf(COLOURS),sleeves:randomOf(SLEEVES).id,sleeveInk:randomOf(COLOURS),collar:randomOf(COLLARS).id,collarInk:randomOf(COLOURS),nameset:randomOf(NAMESETS).id,shorts:randomOf(COLOURS),socks:randomOf(COLOURS),number:randomOf(NUMBERS),sponsorHe:randomOf(sponsorOptions),makerHe:makerOptions.length?randomOf(makerOptions):null,crestKey:crestOptions.length?randomOf(crestOptions):spec.crestKey})}
+ function judge(){const metrics=scoreStudioDesign(spec,briefId,dnaSpecs);setResult({metrics,feedback:supporterFeedback(metrics)});pulse()}
+ async function save(){const metrics=result?.metrics??scoreStudioDesign(spec,briefId,dnaSpecs);const row=await studioStore.save({id:editingId??undefined,briefId,spec,dnaKeys,metrics,stamp:metrics.overall>=75});setEditingId(row.id);setResult({metrics,feedback:supporterFeedback(metrics)});setSaved(await studioStore.read());pulse()}
+ function reopen(row:SavedKitDesign){setEditingId(row.id);setBriefId(row.briefId);setSpec(row.spec);setDnaKeys(row.dnaKeys);setResult({metrics:row.metrics,feedback:supporterFeedback(row.metrics)});setFlash((value)=>value+1)}
+ const brief=KIT_BRIEFS.find((row)=>row.id===briefId)??KIT_BRIEFS[0]!,memoryUnlocked=unlocked.some((row)=>row.seasonLabel.startsWith('2009')||row.seasonLabel.startsWith('2010'))
+ return <section className="border-rule border-ink bg-sheet">
+  <div className="border-b-rule border-ink bg-ink px-3 py-2 text-paper"><div className="flex items-end justify-between gap-3"><div><p className="font-mono text-[8px] font-black tracking-[.2em] text-red" dir="ltr">GATE 05 · KIT DNA STUDIO</p><h2 className="font-display text-[22px] leading-none">בנה משהו חדש מההיסטוריה שלך</h2></div><button type="button" onClick={roll} className="min-h-tap border-hair border-paper/35 px-3 font-body text-[11px] font-extrabold">הגרל</button></div></div>
+  <div className="grid gap-2 p-2 lg:grid-cols-[minmax(300px,390px)_minmax(0,1fr)] lg:items-start"><div className="border-rule border-ink bg-paper lg:sticky lg:top-16"><div className="mx-auto flex min-h-[300px] max-w-[350px] items-center justify-center p-3"><KitAssemblyShirt spec={spec} className="block max-h-[350px] w-full animate-slam"/></div><div className="border-t-hair border-ink/25 p-2"><p className="font-display text-[18px] leading-none text-ink">{brief.titleHe}</p><p className="mt-1 font-body text-[11px] leading-snug text-muted">{brief.bodyHe}</p><div className="mt-2 flex flex-wrap gap-1">{brief.requirementsHe.map((text)=><span key={text} className="border-hair border-ink/25 px-2 py-1 font-body text-[9px] text-ink">{text}</span>)}</div></div></div>
+   <div className="min-w-0"><div className="flex gap-1 overflow-x-auto border-rule border-ink bg-paper p-1.5">{KIT_BRIEFS.map((row)=>{const locked=row.id==='memory2010'&&!memoryUnlocked;return <button key={row.id} type="button" disabled={locked} onClick={()=>{setBriefId(row.id);setResult(null)}} className={`min-h-tap shrink-0 border-hair px-3 font-body text-[10px] font-extrabold ${briefId===row.id?'border-red bg-red text-paper':'border-ink/30 text-ink'} disabled:opacity-35`}>{locked?'נעול · ':''}{row.titleHe}</button>})}</div>
+    <div className="mt-2 flex gap-1 overflow-x-auto border-b-rule border-ink pb-2">{TABS.map(([id,label])=><button key={id} type="button" onClick={()=>setTab(id)} aria-pressed={tab===id} className={`min-h-tap shrink-0 px-3 font-body text-[11px] font-extrabold ${tab===id?'bg-ink text-paper':'border-hair border-ink/35 bg-paper text-ink'}`}>{label}</button>)}</div>
+    <div className="mt-2 border-rule border-ink bg-paper p-3">
+     {tab==='rack'&&<><div className="mb-2 flex items-end justify-between gap-2"><div><p className="font-display text-[20px] leading-none">ה־DNA שפתחת</p><p className="mt-1 font-body text-[10px] text-muted">שער 4 פותח כאן חולצות. נעולות לא חושפות תשובות.</p></div><span className="font-mono text-[10px] text-red">{unlocked.length}/{rack.length}</span></div>{unlocked.length?<div className="grid grid-cols-3 gap-2 sm:grid-cols-4">{unlocked.map((row)=>{const key=kitKey(row.seasonLabel,row.spec.variant),used=dnaKeys.includes(key);return <div key={key} className={`border-rule p-1.5 ${used?'border-red bg-red/5':'border-ink/30'}`}><button type="button" onClick={()=>useDNA(row)} className="w-full"><KitAssemblyShirt spec={row.spec} historical className="mx-auto block h-[95px] w-full" title={row.seasonLabel}/><span className="mt-1 block font-mono text-[9px] font-black">{row.seasonLabel}</span></button><button type="button" onClick={()=>toggleDNA(row)} className={`mt-1 min-h-[36px] w-full border-hair px-1 font-body text-[9px] font-bold ${used?'border-red bg-red text-paper':'border-ink/30 text-ink'}`}>{used?'DNA בשימוש ✓':'הוסף DNA'}</button></div>})}</div>:<a href="/kits/build" className="flex min-h-tap items-center justify-center bg-red px-3 font-body text-[12px] font-extrabold text-paper">פתח חולצה ראשונה בשער 4</a>}</>}
+     {tab==='base'&&<div className="space-y-3"><ChoiceTitle>צבע בסיס</ChoiceTitle><ColourRow value={spec.base} onPick={(value)=>mutate({base:value})}/><ChoiceTitle>צבע משני</ChoiceTitle><ColourRow value={spec.patternInk} onPick={(value)=>mutate({patternInk:value})}/><ChoiceTitle>מכנסיים</ChoiceTitle><ColourRow value={spec.shorts} onPick={(value)=>mutate({shorts:value})}/><ChoiceTitle>גרביים</ChoiceTitle><ColourRow value={spec.socks} onPick={(value)=>mutate({socks:value})}/></div>}
+     {tab==='pattern'&&<VisualGrid items={PATTERNS.map((row)=>({id:row.id,label:row.he}))} selected={spec.pattern} render={(id)=><KitAssemblyShirt spec={{...spec,pattern:id as KitSpec['pattern']}} className="block h-[74px] w-full"/>} onPick={(id)=>mutate({pattern:id as KitSpec['pattern']})}/>} 
+     {tab==='sleeves'&&<><VisualGrid items={SLEEVES.map((row)=>({id:row.id,label:row.he}))} selected={spec.sleeves} render={(id)=><KitAssemblyShirt spec={{...spec,sleeves:id as KitSpec['sleeves']}} className="block h-[74px] w-full"/>} onPick={(id)=>mutate({sleeves:id as KitSpec['sleeves']})}/><ChoiceTitle>צבע שרוול</ChoiceTitle><ColourRow value={spec.sleeveInk} onPick={(value)=>mutate({sleeveInk:value})}/></>}
+     {tab==='collar'&&<><VisualGrid items={COLLARS.map((row)=>({id:row.id,label:row.he}))} selected={spec.collar} render={(id)=><KitAssemblyShirt spec={{...spec,collar:id as KitSpec['collar']}} className="block h-[74px] w-full"/>} onPick={(id)=>mutate({collar:id as KitSpec['collar']})}/><ChoiceTitle>צבע צווארון</ChoiceTitle><ColourRow value={spec.collarInk} onPick={(value)=>mutate({collarInk:value})}/></>}
+     {tab==='marks'&&<div className="space-y-4"><div><ChoiceTitle>ספונסר / טיפול חזית</ChoiceTitle><div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">{sponsorOptions.map((value)=><ChoiceButton key={value??'none'} selected={spec.sponsorHe===value} onClick={()=>mutate({sponsorHe:value})}>{value??'ללא ספונסר'}</ChoiceButton>)}</div></div><div><ChoiceTitle>יצרן — רק מ־DNA שנפתח</ChoiceTitle><div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">{makerOptions.length?makerOptions.map((value)=><ChoiceButton key={value} selected={spec.makerHe===value} onClick={()=>mutate({makerHe:value})}>{value}</ChoiceButton>):<p className="font-body text-[11px] text-muted">פתח חולצות בשער 4 כדי להוסיף יצרנים.</p>}</div></div><div><ChoiceTitle>סמל — רק מתקופות שנפתחו</ChoiceTitle><div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">{crestOptions.length?crestOptions.map((value)=>{const mark=CREST_MARKS.find((row)=>row.key===value);return <ChoiceButton key={value} selected={spec.crestKey===value} onClick={()=>mutate({crestKey:value})}>{mark?.nameHe??'סמל'}</ChoiceButton>}):<p className="col-span-3 font-body text-[11px] text-muted">הסמלים נפתחים דרך החולצות שאספת.</p>}</div></div></div>}
+     {tab==='nameset'&&<><div className="flex flex-wrap gap-1.5">{NAMESETS.map((row)=><ChoiceButton key={row.id} selected={spec.nameset===row.id} onClick={()=>mutate({nameset:row.id})}>{row.he}</ChoiceButton>)}</div><ChoiceTitle>מספר</ChoiceTitle><div className="grid grid-cols-6 gap-1.5">{NUMBERS.map((number)=><button key={number} type="button" onClick={()=>mutate({number})} className={`min-h-tap border-rule font-poster text-[20px] ${spec.number===number?'border-red bg-red text-paper':'border-ink/30 text-ink'}`}>{number}</button>)}</div></>}
     </div>
-  )
+    <div className="sticky bottom-0 mt-2 grid grid-cols-2 gap-2 border-rule border-ink bg-sheet p-2 pb-[calc(.5rem+env(safe-area-inset-bottom))]"><button type="button" onClick={judge} className="min-h-tap border-rule border-ink bg-paper font-body text-[12px] font-extrabold text-ink">בדוק את הבריף</button><button type="button" onClick={()=>void save()} className="min-h-tap bg-red px-3 font-body text-[12px] font-extrabold text-paper">שמור עיצוב</button></div>
+   </div>
+  </div>
+  {result&&<div className="border-t-rule border-ink bg-ink p-3 text-paper"><div className="mx-auto max-w-4xl"><div className="flex items-end justify-between gap-3"><div><p className="font-mono text-[8px] font-black tracking-[.2em] text-red" dir="ltr">TERRACE REPORT</p><p className="font-display text-[22px] leading-none">{result.feedback}</p></div>{result.metrics.overall>=75&&<span className="border-rule border-red px-2 py-1 font-mono text-[9px] font-black text-red" dir="ltr">STUDIO STAMP</span>}</div><div className="mt-3 grid grid-cols-5 gap-1">{[['זהות',result.metrics.identity],['בריף',result.metrics.briefFit],['מקוריות',result.metrics.originality],['איזון',result.metrics.coherence],['DNA',result.metrics.dnaUse]].map(([label,value])=><div key={String(label)} className="border-hair border-paper/20 p-1.5 text-center"><p className="font-poster text-[17px] text-red">{value}</p><p className="font-body text-[8px] text-paper/60">{label}</p></div>)}</div></div></div>}
+  {saved.length>0&&<div className="border-t-rule border-ink p-3"><p className="font-display text-[19px] text-ink">העיצובים ששמרת</p><div className="mt-2 flex gap-2 overflow-x-auto">{saved.map((row)=><button key={row.id} type="button" onClick={()=>reopen(row)} className="w-28 shrink-0 border-rule border-ink bg-paper p-1.5"><KitAssemblyShirt spec={row.spec} className="mx-auto block h-[86px] w-full"/><span className="mt-1 block font-body text-[9px] font-bold text-ink">{KIT_BRIEFS.find((briefRow)=>briefRow.id===row.briefId)?.titleHe??'עיצוב'}</span><span className="font-mono text-[9px] text-red">{row.metrics.overall}</span></button>)}</div></div>}
+  <div className="p-3"><ShareRow kind="kit" route="/kits" params={{total:String(saved.length)}} headline="Kit DNA Studio" card={{template:'kit' as const,kicker:'GATE 5 · KIT DNA STUDIO',label:t('screen.kits.title'),eyebrow:brief.titleHe,hero:result?`${result.metrics.overall}`:'DNA',stats:result?[{k:'זהות',v:String(result.metrics.identity)},{k:'בריף',v:String(result.metrics.briefFit)}]:[],cta:t('kit.cta'),challenge:'תבנה אחת משלך',kit:spec}}/></div>
+ </section>
 }
 
-function Chips<T extends string>({
-  items,
-  value,
-  onPick,
-}: {
-  items: readonly { id: T; he: string }[]
-  value: T
-  onPick: (value: T) => void
-}) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {items.map((item) => (
-        <button
-          key={item.id}
-          type="button"
-          onClick={() => onPick(item.id)}
-          aria-pressed={value === item.id}
-          className={`min-h-tap border-hair px-3 font-body text-step--1 transition-transform duration-press ease-stamp active:scale-[.95] motion-reduce:transition-none ${
-            value === item.id ? 'border-red bg-red text-paper' : 'border-ink/40 text-ink'
-          }`}
-        >
-          {item.he}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-function MarkGrid({
-  kind,
-  items,
-  value,
-  onPick,
-}: {
-  kind: 'sponsor' | 'maker' | 'crest'
-  items: string[]
-  value: string | null
-  onPick: (value: string | null) => void
-}) {
-  const choices: Array<string | null> = [null, ...items]
-  return (
-    <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
-      {choices.map((item) => {
-        const asset = kind === 'sponsor' ? sponsorAssetFor(item) : kind === 'maker' ? makerAssetFor(item) : null
-        const src = asset?.src ?? (kind === 'crest' && item ? `/brand/crests/${item}.png` : null)
-        const selected = value === item
-        return (
-          <button
-            key={item ?? 'none'}
-            type="button"
-            onClick={() => onPick(item)}
-            aria-pressed={selected}
-            className={`flex min-h-[70px] flex-col items-center justify-center gap-1 border-hair bg-paper p-2 transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
-              selected ? 'border-red bg-red/[.08]' : 'border-ink/40'
-            }`}
-          >
-            {src ? <img src={src} alt="" aria-hidden="true" className="h-8 max-w-full object-contain" /> : null}
-            <span className="block max-w-full truncate font-body text-[10px] font-bold text-ink">
-              {item ?? t('kits.spec.none')}
-            </span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
+function ChoiceTitle({children}:{children:React.ReactNode}){return <p className="mb-1.5 mt-2 font-body text-[9px] font-bold tracking-widest text-muted first:mt-0">{children}</p>}
+function ColourRow({value,onPick}:{value:KitColour;onPick:(value:KitColour)=>void}){return <div className="flex flex-wrap gap-1.5">{COLOURS.map((colour)=><button key={colour} type="button" onClick={()=>onPick(colour)} aria-label={COLOUR_NAME[colour]} aria-pressed={value===colour} className={`min-h-tap w-12 border-rule ${value===colour?'border-red':'border-ink/35'}`} style={{background:COLOUR_VAR[colour]}}/>)}</div>}
+function ChoiceButton({children,selected,onClick}:{children:React.ReactNode;selected:boolean;onClick:()=>void}){return <button type="button" onClick={onClick} aria-pressed={selected} className={`min-h-tap border-hair px-2 font-body text-[10px] font-extrabold ${selected?'border-red bg-red text-paper':'border-ink/35 bg-paper text-ink'}`}>{children}</button>}
+function VisualGrid({items,selected,render,onPick}:{items:{id:string;label:string}[];selected:string;render:(id:string)=>React.ReactNode;onPick:(id:string)=>void}){return <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">{items.map((row)=><button key={row.id} type="button" onClick={()=>onPick(row.id)} aria-pressed={selected===row.id} className={`border-rule p-1.5 ${selected===row.id?'border-red bg-red/5':'border-ink/30'}`}><span className="flex h-[76px] items-center justify-center">{render(row.id)}</span><span className="mt-1 block font-body text-[9px] font-bold text-ink">{row.label}</span></button>)}</div>}
