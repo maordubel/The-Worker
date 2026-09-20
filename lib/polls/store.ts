@@ -1,6 +1,7 @@
 'use client'
 
 import { BALLOT, type Ballot, type Tally, type TallyRow } from './ballot'
+import { cleanReasons, isReasonOf, type Reasons } from './reasons'
 import { deviceId } from '@/lib/portal/device'
 import { portalConfigured } from '@/lib/portal/env'
 import { portalDb } from '@/lib/portal/db'
@@ -60,12 +61,15 @@ export interface BallotStore {
    * pressable.
    */
   seal(): Promise<void>
+  reasons(): Promise<Reasons>
+  saveReason(questionId: string, reason: string): Promise<void>
 }
 
 const KEY = 'worker.ballot.v1'
 /** a second, separate key — sealing is a different fact from the picks themselves,
  *  and keeping it apart means `read()` never has to change shape to carry it. */
 const SEAL_KEY = 'worker.ballot.sealed.v1'
+const REASON_KEY = 'worker.ballot.reasons.v1'
 
 /**
  * The local store. One device, one ballot, kept across visits.
@@ -108,7 +112,7 @@ export class LocalBallotStore implements BallotStore {
 
   async clear(): Promise<void> {
     try {
-      for (const key of [KEY, SEAL_KEY]) window.localStorage.removeItem(key)
+      for (const key of [KEY, SEAL_KEY, REASON_KEY]) window.localStorage.removeItem(key)
     } catch {
       // nothing to do and nothing worth throwing over
     }
@@ -133,6 +137,32 @@ export class LocalBallotStore implements BallotStore {
       // an unsealed slip locally is still a sealed slip for this session — the stamp
       // already printed on screen, and losing the flag on reload is a smaller failure
       // than throwing during the one action the whole document leads up to
+    }
+  }
+
+
+  async reasons(): Promise<Reasons> {
+    try {
+      const raw = window.localStorage.getItem(REASON_KEY)
+      if (!raw) return {}
+      const parsed: unknown = JSON.parse(raw)
+      if (typeof parsed !== 'object' || parsed === null) return {}
+      return cleanReasons(parsed as Record<string, unknown>)
+    } catch {
+      return {}
+    }
+  }
+
+  async saveReason(questionId: string, reason: string): Promise<void> {
+    if (!isReasonOf(questionId, reason)) return
+    try {
+      const current = await this.reasons()
+      const next: Reasons = { ...current }
+      if (next[questionId] === reason) delete next[questionId]
+      else next[questionId] = reason
+      window.localStorage.setItem(REASON_KEY, JSON.stringify(next))
+    } catch {
+      // reasons are optional and must never break the ballot
     }
   }
 }
@@ -227,6 +257,15 @@ export class SupabaseBallotStore implements BallotStore {
 
   seal(): Promise<void> {
     return this.slip.seal()
+  }
+
+
+  reasons(): Promise<Reasons> {
+    return this.slip.reasons()
+  }
+
+  saveReason(questionId: string, reason: string): Promise<void> {
+    return this.slip.saveReason(questionId, reason)
   }
 }
 

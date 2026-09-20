@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { t } from '@/lib/royal-rumble/i18n'
+
 type GoalFlash = {
   ours: boolean
   score: string
@@ -190,14 +192,14 @@ export function RoyalRumbleMatchFX() {
           ROYAL RUMBLE · MATCH EVENT
         </p>
         <p className="mt-3 font-display text-[86px] leading-[0.78] sm:text-[142px]">
-          {flash.ours ? 'גול!' : 'ספגנו.'}
+          {t(flash.ours ? 'goalFlashOurs' : 'goalFlashTheirs')}
         </p>
         <div className={`mx-auto mt-5 h-2 w-28 ${flash.ours ? 'bg-paper' : 'bg-red'}`} />
         <p className="mt-5 font-display text-[62px] leading-none sm:text-[88px]" dir="ltr">
           {flash.score}
         </p>
         <p className="mt-3 font-body text-[12px] font-black sm:text-[14px]">
-          {flash.ours ? 'הכדור בפנים. היציע מתפוצץ.' : 'זה בפנים בצד שלנו. חוזרים מיד למרכז.'}
+          {t(flash.ours ? 'goalFlashOursBody' : 'goalFlashTheirsBody')}
         </p>
       </div>
     </div>
