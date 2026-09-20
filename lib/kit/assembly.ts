@@ -1,6 +1,6 @@
 import assemblyFile from '@/content/manual/kit-assembly.json'
 
-import type { KitSpec } from './spec'
+import type { KitSpec, KitVariant } from './spec'
 
 export type KitPlacement = { x: number; y: number; w: number; h: number }
 export type KitMarkAsset = {
@@ -12,7 +12,7 @@ export type KitMarkAsset = {
 
 export type KitAssemblySeason = {
   seasonLabel: string
-  variant: 'home' | 'away' | 'third'
+  variant: KitVariant
   master: string
   alternateMaster?: string
   sheet: string
@@ -53,14 +53,14 @@ export function kitAssemblySeasons(): KitAssemblySeason[] {
 
 export function kitAssemblyForSeason(
   seasonLabel: string,
-  variant: 'home' | 'away' | 'third' = 'home',
+  variant: KitVariant = 'home',
 ): KitAssemblySeason | null {
   return seasons.find((row) => row.seasonLabel === seasonLabel && row.variant === variant) ?? null
 }
 
 export function historicalMasterFor(
   seasonLabel: string,
-  variant: 'home' | 'away' | 'third' = 'home',
+  variant: KitVariant = 'home',
 ): string | null {
   return kitAssemblyForSeason(seasonLabel, variant)?.master ?? null
 }
@@ -92,6 +92,5 @@ export function placementFor(
   kind: 'sponsor' | 'maker' | 'crest',
   fallback: KitPlacement,
 ): KitPlacement {
-  const variant = spec.variant === 'away' ? 'away' : 'home'
-  return kitAssemblyForSeason(spec.seasonLabel, variant)?.placements[kind] ?? fallback
+  return kitAssemblyForSeason(spec.seasonLabel, spec.variant)?.placements[kind] ?? fallback
 }
