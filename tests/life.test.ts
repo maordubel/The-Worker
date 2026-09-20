@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 import { archive } from '@/lib/game/archive'
 
 import { isYellow } from '@/lib/isYellow'
+import { MESSAGES } from '@/lib/i18n'
 import { resolveChapterAnchor, resolvePrologueAnchor } from '@/lib/life/anchor-server'
 import { CUTSCENES, cutsceneCard, cutsceneFor, embedUrl, longDateHe } from '@/lib/life/cutscenes'
 import { OPENING, openingLines, openingMs } from '@/lib/life/opening'
@@ -923,7 +924,7 @@ describe('בהירות — a first-time player is never asked to guess', () => {
     const world = readFileSync(join(ROOT, 'lib/life/runtime/scenes/WorldScene.ts'), 'utf8')
     expect(world).toContain("flag: 'onboard:moved'")
     expect(world).toContain("flag: 'onboard:acted'")
-    const catalogue = JSON.parse(readFileSync(join(ROOT, 'messages/he.json'), 'utf8')) as Record<string, string>
+    const catalogue = MESSAGES
     for (const key of [
       'life.teach.move.desktop',
       'life.teach.move.touch',
@@ -935,7 +936,7 @@ describe('בהירות — a first-time player is never asked to guess', () => {
   })
 
   it('has a Hebrew phrase for every verb the world uses', () => {
-    const catalogue = JSON.parse(readFileSync(join(ROOT, 'messages/he.json'), 'utf8')) as Record<string, string>
+    const catalogue = MESSAGES
     const verbs = new Set<string>(['exit'])
     for (const scene of scenes) {
       for (const spot of scene.hotspots) verbs.add(spot.verb)
@@ -995,10 +996,7 @@ describe('לוח ההפעלה — the controls are a place on the screen, on eve
   })
 
   it('every string the deck says is in the catalogue', () => {
-    const catalogue = JSON.parse(readFileSync(join(ROOT, 'messages/he.json'), 'utf8')) as Record<
-      string,
-      string
-    >
+    const catalogue = MESSAGES
     for (const key of ['life.deck.move', 'life.deck.act', 'life.deck.run', 'life.deck.locked', 'life.deck.nothing']) {
       expect(catalogue[key], `${key} missing`).toBeTruthy()
     }

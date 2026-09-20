@@ -149,6 +149,14 @@ export const CONVERSATIONS_SEED: Conversation[] = [
         then: [
           { e: 'money', agorot: -3000, why: 'ההפרש לשחור' },
           { e: 'flagValue', flag: 'owe:shachor', value: false },
+          /**
+           * הדגל אומר שזה נסגר; שתי השורות האלה אומרות **כמה** ו**מתי**.
+           *
+           * `debt` יורד באותו סכום שהוא עלה ב-1993, ו-`debt_settled` היא הראיה שההישג
+           * "לא נשאר חייב" מבקש: שני פרעונות, בשני מועדים, וארנק שלא נושא חוב פתוח.
+           */
+          { e: 'debt', agorot: -3000, why: 'ההפרש לשחור, נסגר' },
+          { e: 'proof', kind: 'debt_settled', proofId: 'debt_settled:{chapter}:shachor', subjectHe: 'ההפרש לאוטובוס לצפון', noteHe: 'שש שנים אחרי. הוא לא ספר.' },
           { e: 'rel', who: 'shachor', axis: 'trust', delta: 5 },
           { e: 'rel', who: 'shachor', axis: 'sharedHistory', delta: 4 },
           { e: 'personality', key: 'reliability', delta: 3 },
@@ -179,6 +187,8 @@ export const CONVERSATIONS_SEED: Conversation[] = [
         then: [
           { e: 'money', agorot: -2000, why: 'מי שחסר לו בתור' },
           { e: 'flagValue', flag: 'owe:group', value: false },
+          { e: 'debt', agorot: -2000, why: 'מה שהתור השלים עליך, הלאה' },
+          { e: 'proof', kind: 'debt_settled', proofId: 'debt_settled:{chapter}:queue', subjectHe: 'המטבעות שעברו מעל הראש שלך', noteHe: 'לא לאותו אדם. לאותו מקום בתור.' },
           { e: 'redheart', key: 'community', delta: 5 },
           { e: 'wellbeing', key: 'belonging', delta: 3 },
           { e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 4 },
@@ -249,6 +259,8 @@ export const CONVERSATIONS_SEED: Conversation[] = [
         then: [
           { e: 'money', agorot: -3000, why: 'המונית של שער 5' },
           { e: 'flagValue', flag: 'owe:stand', value: false },
+          { e: 'debt', agorot: -3000, why: 'המונית של שער 5, נסגרה' },
+          { e: 'proof', kind: 'debt_settled', proofId: 'debt_settled:{chapter}:taxi', subjectHe: 'המונית ששער 5 שילם עליה', noteHe: 'אסף לקח ולא ספר.' },
           { e: 'rel', who: 'asaf', axis: 'trust', delta: 5 },
           { e: 'redheart', key: 'terraceCulture', delta: 4 },
           { e: 'institution', key: 'supporterOwnershipSeed', delta: 3 },

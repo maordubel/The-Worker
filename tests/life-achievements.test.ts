@@ -28,7 +28,7 @@ import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { shirtFlag, wornFlag } from '@/lib/life/shirts'
 import { LIFE_ROUTES, hasStage, stageFlag, type RouteId } from '@/lib/life/routes'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
-import messages from '@/messages/he.json'
+import { MESSAGES } from '@/lib/i18n'
 import type { LifeState, ProofRecord, RedBoxItem } from '@/lib/life/types'
 
 /**
@@ -564,12 +564,12 @@ describe('מה אפשר להשיג היום, ומה ממתין לפרק', () => 
  * guard that is bypassed has to be replaced, not dropped. This reads the two components,
  * extracts every key they can ask for, and resolves it.
  *
- * **It is RED until the delivered key map is merged into `messages/he.json`**, which this
- * agent does not own. That is the intended state and it names exactly which keys are
- * missing when it fails, which is the whole reason it exists.
+ * **It is RED until the delivered key map is merged into `messages/he.life.json`**, which
+ * is where every `life.*` string lives since the catalogue was split. It names exactly
+ * which keys are missing when it fails, which is the whole reason it exists.
  */
 describe('כל מפתח שהמסכים מבקשים — קיים', () => {
-  const catalogue = messages as Record<string, string>
+  const catalogue = MESSAGES
   const read = (path: string) => readFileSync(join(__dirname, '..', 'components', 'life', path), 'utf8')
 
   function keysIn(source: string, call: string, prefix: string): string[] {
@@ -591,6 +591,6 @@ describe('כל מפתח שהמסכים מבקשים — קיים', () => {
       ...keysIn(read('LifeShow.tsx'), 'show', 'life.show'),
     ]
     const missing = wanted.filter((key) => !(key in catalogue))
-    expect(missing, `missing from messages/he.json:\n${missing.join('\n')}`).toEqual([])
+    expect(missing, `missing from messages/he.life.json:\n${missing.join('\n')}`).toEqual([])
   })
 })

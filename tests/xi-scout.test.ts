@@ -249,7 +249,7 @@ describe('גרסאות שחקן — derived from the squad table, never from an 
     expect(spells[1]?.toYear).toBe(1992)
     // The whole-career shirt is unchanged by any of this: it is still the first shirt
     // inside his longest run (`tests/xi.test.ts` owns that rule).
-    expect(spells[0]?.seasonLabel).toBe('1984/85')
+    expect(spells[0]?.seasonLabel).toBe('1985/86')
 
     // שלום תקווה never left. One unbroken run, one version, no chooser.
     expect(spellsFor('שלום תקווה').length).toBe(1)

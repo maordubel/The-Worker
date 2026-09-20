@@ -4,9 +4,9 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { CHAPTERS } from '@/lib/life/content/chapters'
+import { MESSAGES } from '@/lib/i18n'
 import {
   PROOF_MISSIONS,
-  ROUTE_WORDS,
   SMALL_ACTIONS,
   CONVERSATIONS_ROUTES,
 } from '@/lib/life/content/routes'
@@ -820,6 +820,9 @@ describe('כלל 66 — מה שאי אפשר להגיע אליו נאמר, לא 
 // ---------------------------------------------------------------------------------
 
 describe('התוכן — מה שאסור לו להגיד', () => {
+  const ROUTE_WORDS: Record<string, string> = Object.fromEntries(
+    Object.entries(MESSAGES).filter(([key]) => key.startsWith('life.route.')),
+  )
   const contentText = JSON.stringify(CONVERSATIONS_ROUTES) + JSON.stringify(LIFE_ROUTES) + JSON.stringify(ROUTE_WORDS)
 
   it('carries no achievement language and no single score', () => {
@@ -861,8 +864,15 @@ describe('התוכן — מה שאסור לו להגיד', () => {
     }
   })
 
-  it('keys every staged word by the key it will live under', () => {
-    // The follow-up patch is mechanical: paste the map, swap `routeWord(` for `t(`.
+  it('keeps every word of the card in the catalogue, under its own namespace', () => {
+    /**
+     * These words were staged inside `lib/life/content/routes.ts` while the catalogue was
+     * owned by another pass, with a shim called `routeWord` standing in for `t()`. Both
+     * are gone (20.9.2026): every key is in `messages/he.life.json` with the same value it
+     * was staged under, `RouteCard` reads it through `t()` like every other screen, and
+     * what this test guards is no longer "the map is ready to paste" but the rule that
+     * survived it — the card's chrome is in the catalogue, in its own namespace, finished.
+     */
     for (const key of Object.keys(ROUTE_WORDS)) {
       expect(key.startsWith('life.route.'), `${key} is not in the life.route namespace`).toBe(true)
       expect(ROUTE_WORDS[key]?.trim().length, key).toBeGreaterThan(0)

@@ -8,6 +8,14 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 
 /**
+ * עשרים שקל, ומי אמר אותם.
+ *
+ * הסכום שהתור השלים עליך בדלת של האוטובוס — נכתב כאן, ונפרע באותו סכום בדיוק ב-1999.
+ * הדגל `owe:group` אומר למי; זה אומר כמה, ובלעדיו שדה החוב במנוע נשאר אפס לנצח.
+ */
+const QUEUE_AGOROT = 2000
+
+/**
  * B3 · "הגביע אדום" · 19.4.1993 — the first joy that feels complete, and the first
  * time the joy belongs to a group he chose rather than a father he followed.
  *
@@ -778,7 +786,7 @@ export const CONVERSATIONS_1993: Conversation[] = [
           { who: null, text: 'שקט של שנייה. ואז שחור, מאחור, בלי להסתובב: "כמה חסר לו?"' },
           { who: null, text: 'מטבעות עברו מיד ליד מעל הראשים. לימור ספרה בקול. הנהג צפר. עלית.' },
         ],
-        then: [{ e: 'give', item: 'hall-ticket' }, { e: 'flag', flag: 'on:bus' }, { e: 'flag', flag: 'owe:group' }, { e: 'redheart', key: 'community', delta: 4 }, { e: 'wellbeing', key: 'belonging', delta: 4 }, { e: 'time', minutes: 35 }, { e: 'goto', node: 'ride-1993' }],
+        then: [{ e: 'give', item: 'hall-ticket' }, { e: 'flag', flag: 'on:bus' }, { e: 'flag', flag: 'owe:group' }, { e: 'debt', agorot: QUEUE_AGOROT, why: 'מה שהתור השלים עליך בדלת' }, { e: 'redheart', key: 'community', delta: 4 }, { e: 'wellbeing', key: 'belonging', delta: 4 }, { e: 'time', minutes: 35 }, { e: 'goto', node: 'ride-1993' }],
       },
     ],
   },

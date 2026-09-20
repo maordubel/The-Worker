@@ -1,7 +1,7 @@
 import type { KitPlacement } from './assembly'
 
 export type MarkKind = 'maker' | 'sponsor'
-export type MarkAsset = { src: string; label: string; defaultPlacement: KitPlacement; monochrome?: boolean }
+export type MarkAsset = { src: string; label: string; defaultPlacement: KitPlacement; monochrome?: boolean; atlas?: { col: number; row: number; cols: number; rows: number } }
 
 /**
  * Cut artwork that already lives in the repository. The broader archive still supplies

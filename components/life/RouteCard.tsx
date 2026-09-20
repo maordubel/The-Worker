@@ -37,8 +37,8 @@ import {
  * otherwise if it tried, which is where that rule belongs.
  *
  * Every word it prints comes from the content layer or from the model. The chrome reads
- * through `routeWord`, which is a staging shim for `t()` — see the note over `ROUTE_WORDS`
- * in `lib/life/content/routes.ts` and the delivered key map.
+ * through `t()` like every other screen — the `life.route.*` keys live in
+ * `messages/he.life.json`, and the staging shim they were written against is gone.
  */
 
 /** how far off, in five words — never in a figure */

@@ -6,6 +6,7 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { MESSAGES } from '@/lib/i18n'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { ERA_KEYS, eraFor } from '@/lib/life/content/era'
 import { describeMoneyChange, formatMoney } from '@/lib/life/money'
@@ -62,7 +63,7 @@ describe('the economy is in whole shekels', () => {
       }
     }
     for (const text of texts) expect(text).not.toMatch(/אגור/)
-    const messages = JSON.parse(readFileSync(join(process.cwd(), 'messages/he.json'), 'utf8')) as Record<string, string>
+    const messages = MESSAGES
     for (const [key, value] of Object.entries(messages)) if (key.startsWith('life.')) expect(value, key).not.toMatch(/אגור/)
     for (const file of ['components/life/LifeHud.tsx', 'components/life/DebugPanel.tsx', 'components/life/Stamp.tsx']) {
       expect(readFileSync(join(process.cwd(), file), 'utf8'), file).not.toMatch(/אגור/)

@@ -9,17 +9,17 @@ import { MarkArtwork } from '@/components/kit/MarkArtwork'
 import { activeCollection } from '@/lib/kit/collection'
 import { crestArt } from '@/lib/kit/crestMarks'
 import { makerAssetForName, sponsorAssetForName } from '@/lib/kit/mark-library'
-import type { KitSpec } from '@/lib/kit/spec'
+import { COLOUR_VAR, type KitColour, type KitSpec } from '@/lib/kit/spec'
 import {
   KIT_HINT_PENALTY,
+  PART_LABEL,
   PART_ORDER,
   type KitHintAnswer,
   type KitPart,
   type KitPuzzle,
   type KitVerdict,
   type PartKind,
-} from '@/lib/game/kitBuild'
-import { PART_LABEL } from '@/lib/game/kit-build-run'
+} from '@/lib/game/kit-build-run'
 import { askKitHint, submitKit } from './actions'
 
 type Placed = Partial<Record<PartKind, string>>
@@ -54,7 +54,7 @@ export function KitGameRunV3({ puzzles, seed, cursor = 0 }: { puzzles: KitPuzzle
 
   const spec = specFrom(puzzle, placed)
   const complete = PART_ORDER.every((kind) => Boolean(placed[kind]))
-  const drawer = puzzle.drawers.find((row) => row.kind === active) ?? puzzle.drawers[0]
+  const drawer = (puzzle.drawers.find((row) => row.kind === active) ?? puzzle.drawers[0])!
   const step = PART_ORDER.indexOf(active)
 
   function pick(part: KitPart) {
@@ -121,7 +121,7 @@ export function KitGameRunV3({ puzzles, seed, cursor = 0 }: { puzzles: KitPuzzle
           <p className="font-body text-[10px] font-black tracking-[.16em] text-red">שער 4 · זיכרון חולצה</p>
           <h2 className="font-display text-[clamp(26px,7vw,48px)] leading-none text-ink">{puzzle.seasonLabel}</h2>
         </div>
-        <p className="font-mono text-[10px] text-muted">{index + 1}/{puzzles.length} · {Object.keys(placed).length}/{PART_ORDER.length}</p>
+        <p className="font-mono tabular-nums text-[10px] text-muted">{index + 1}/{puzzles.length} · {Object.keys(placed).length}/{PART_ORDER.length}</p>
       </header>
 
       <div className="grid gap-2 lg:grid-cols-[minmax(260px,390px)_1fr] lg:items-start lg:gap-4">
@@ -145,7 +145,7 @@ export function KitGameRunV3({ puzzles, seed, cursor = 0 }: { puzzles: KitPuzzle
                   onClick={() => setActive(kind)}
                   className={`min-h-[42px] border-hair px-2.5 text-start ${active === kind ? 'border-red bg-red text-paper' : placed[kind] ? 'border-ink bg-ink text-paper' : 'border-ink/35 bg-paper text-ink'}`}
                 >
-                  <span className="block font-mono text-[8px] opacity-70">0{number + 1}</span>
+                  <span className="block font-mono tabular-nums text-[8px] opacity-70">0{number + 1}</span>
                   <span className="block font-body text-[11px] font-black">{PART_LABEL[kind]}</span>
                 </button>
               ))}
@@ -172,7 +172,7 @@ export function KitGameRunV3({ puzzles, seed, cursor = 0 }: { puzzles: KitPuzzle
           {hints.length > 0 && (
             <div className="mt-1.5 border-hair border-ink/35 bg-sheet px-3 py-2 font-body text-[11px] leading-snug text-ink">
               {hints.map((hint) => <p key={hint.kind}>{hint.textHe}</p>)}
-              <p className="mt-1 font-mono text-[9px] text-red">−{hints.length * KIT_HINT_PENALTY} נק׳</p>
+              <p className="mt-1 font-mono tabular-nums text-[9px] text-red">−{hints.length * KIT_HINT_PENALTY} נק׳</p>
             </div>
           )}
 
@@ -202,7 +202,7 @@ function PartCard({ part, selected, onPick }: { part: KitPart; selected: boolean
         {maker ? <MarkArtwork asset={maker} className="h-[46px] w-[78%]" />
           : sponsor ? <MarkArtwork asset={sponsor} className="h-[50px] w-[84%]" />
           : crest ? <img src={crest} alt="" className="max-h-[58px] max-w-[65%] object-contain" />
-          : fallbackMaker ? <svg viewBox="0 0 24 28" className="h-12 w-12"><MakerMark id={fallbackMaker} ink="#171717" /></svg>
+          : fallbackMaker ? <svg viewBox="0 0 24 28" className="h-12 w-12"><MakerMark id={fallbackMaker} ink="rgb(var(--ink))" /></svg>
           : part.hasReference ? <KitPhotoPart src={`/api/kits/reference/${part.id}`} kind={KIND_TO_PHOTO[part.kind]} label={part.labelHe} className="h-full w-full" />
           : <MiniPatch part={part} />}
       </span>
@@ -214,8 +214,8 @@ function PartCard({ part, selected, onPick }: { part: KitPart; selected: boolean
 function MiniPatch({ part }: { part: KitPart }) {
   if (part.kind === 'base' || part.kind === 'secondary') {
     const colour = part.patch.base ?? part.patch.patternInk
-    const css: Record<string, string> = { red: '#d52b1e', deep: '#b81c14', cream: '#f2eadb', paper: '#fff', ink: '#171717', navy: '#183153', concrete: '#aaa' }
-    return <span className="h-12 w-12 rounded-full border-hair border-ink" style={{ background: css[String(colour)] ?? '#ddd' }} />
+    const token = colour && Object.prototype.hasOwnProperty.call(COLOUR_VAR, colour) ? COLOUR_VAR[colour as KitColour] : 'rgb(var(--concrete))'
+    return <span className="h-12 w-12 border-hair border-ink" style={{ background: token }} />
   }
   return <span className="font-display text-[28px] text-ink">{part.kind === 'pattern' ? '▥' : part.kind === 'collar' ? '⌄' : '⌁'}</span>
 }

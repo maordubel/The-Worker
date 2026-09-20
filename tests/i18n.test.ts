@@ -3,7 +3,9 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import messages from '@/messages/he.json'
+import he from '@/messages/he.json'
+import heLife from '@/messages/he.life.json'
+import { MESSAGES } from '@/lib/i18n'
 
 /**
  * מפתחות התרגום — every key a screen asks for must exist, and the catalogue must not rot.
@@ -19,7 +21,7 @@ import messages from '@/messages/he.json'
  * orphans predate this and are recorded below rather than deleted blind: the list may
  * shrink, never grow.
  */
-const catalogue = messages as Record<string, string>
+const catalogue = MESSAGES
 const ROOT = join(__dirname, '..')
 const SOURCE_ROOTS = ['app', 'components', 'lib']
 
@@ -48,6 +50,28 @@ describe('כל מפתח שנקרא — exists', () => {
       }
     }
     expect(missing, missing.join('\n')).toEqual([])
+  })
+
+  /**
+   * שני קבצים, קטלוג אחד — and the ownership line between them has to be a test.
+   *
+   * `messages/he.json` holds the gates; `messages/he.life.json` holds THE WORKER LIFE.
+   * The split exists so two people writing in parallel never edit the same file, and it
+   * only works while the rule is mechanical: every `life.*` key in the LIFE file, no
+   * `life.*` key in the gates file, and **no key in both** — a duplicate would resolve by
+   * spread order, which is a silent winner deciding a sentence on a screen.
+   */
+  it('keeps the two catalogue files disjoint, and every life.* key in the LIFE file', () => {
+    const shared = Object.keys(he).filter((key) => key in heLife)
+    expect(shared, `in both files:\n${shared.join('\n')}`).toEqual([])
+
+    const strayInGates = Object.keys(he).filter((key) => key.startsWith('life.'))
+    expect(strayInGates, `life.* keys still in messages/he.json:\n${strayInGates.join('\n')}`).toEqual([])
+
+    const strayInLife = Object.keys(heLife).filter((key) => !key.startsWith('life.'))
+    expect(strayInLife, `non-life keys in messages/he.life.json:\n${strayInLife.join('\n')}`).toEqual([])
+
+    expect(Object.keys(catalogue).length).toBe(Object.keys(he).length + Object.keys(heLife).length)
   })
 
   it('has no empty message', () => {

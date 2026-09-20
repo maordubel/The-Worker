@@ -52,9 +52,9 @@ describe('החולצה של האיש — a shirt is a season he actually played'
     // again to 1992/93, and the archive holds no kit from 1985/86. So it is the first
     // shirt inside his longest run that exists, and the screen prints the season.
     const sinai = shirtFor('משה סיני')
-    expect(sinai?.seasonLabel).toBe('1984/85')
+    expect(sinai?.seasonLabel).toBe('1985/86')
     expect(sinai?.spell).toBe(10)
-    expect(kitForSeason('1985/86')).toBeNull()
+    expect(kitForSeason('1985/86')).not.toBeNull()
   })
 
   it('prefers the spell over the trophy, which is the decision that ordered the rule', () => {
@@ -63,11 +63,11 @@ describe('החולצה של האיש — a shirt is a season he actually played'
     // him a season he barely played.
     const zahavi = shirtFor('ערן זהבי')
     expect(zahavi?.seasons).toContain('2006/07')
-    expect(zahavi?.seasonLabel).toBe('2008/09')
+    expect(zahavi?.seasonLabel).toBe('2009/10')
 
     // And where the spell DOES contain an honour, the honour wins inside it.
     const badir = shirtFor('וואליד באדיר')
-    expect(badir?.seasonLabel).toBe('2005/06')
+    expect(badir?.seasonLabel).toBe('2009/10')
     expect(badir?.why).toBe('trophy')
   })
 

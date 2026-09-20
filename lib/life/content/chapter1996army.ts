@@ -6,6 +6,17 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 
 /**
+ * שלושת המספרים של החורף הזה — במקום אחד, כי שלושתם נקראים גם במקום אחר.
+ *
+ * `TAXI_AGOROT` ו-`FUEL_AGOROT` הם שני חובות שהפרק לוקח, ושניהם נפרעים בפרקים אחרים
+ * (1999 · האולם, 1999 · הגמר). הסכום נכתב כאן פעם אחת כדי ששתי הקצוות של אותו חוב לא
+ * יוכלו להיפרד — חוב שנלקח בשלושים ונפרע בעשרים הוא פנקס שמשקר בשקט.
+ */
+export const TAXI_AGOROT = 3000
+export const FUEL_AGOROT = 3000
+const ARMY_PROMISE_DONE = 'promise:army:kept'
+
+/**
  * B6 · "אין מקום אחד לעמוד בו" · 1996 – אביב 1997 — the centre of the decade.
  *
  * Four days across a winter: the eve of conscription; a Saturday at the ground where the
@@ -213,6 +224,41 @@ export const BEATS_ARMY: Beat[] = [
       { a: 'lines', lines: [
         { who: null, text: 'אחרי הצבא ולפני האוטובוס. שעתיים בכיס, ארבעים שקל, ושתי שיחות שקורות באותו רגע ליד הדלפק.' },
       ] },
+    ],
+  },
+  /**
+   * *"לא אעשה שטויות."* — ומה שקורה אם באמת לא.
+   *
+   * ההבטחה נאמרה בערב האחרון בבית ונבדקת לאורך כל החורף, ולכן היא לא יכולה להיסגר בענף
+   * אחד: היא נסגרת כשהחורף נגמר. הביט הזה רץ אחרי שהיום האחרון נסגר, ורק אם שני הדברים
+   * שהיא הייתה עליהם לא קרו — לא נסיעה בלי חופשה (`life:awol`), ולא שקר למפקד
+   * (`life:lied:army`). אין לו שורה ואין לו טוסט: פנקס אינו הודעה.
+   */
+  {
+    id: 'a5-promise-kept',
+    trigger: 'clock',
+    when: {
+      all: [{ flag: 'a5:done' }, { flag: 'promise:rachel-army' }],
+      none: [{ flag: 'life:awol' }, { flag: 'life:lied:army' }, { flag: ARMY_PROMISE_DONE }],
+    },
+    do: [
+      { a: 'flag', flag: ARMY_PROMISE_DONE },
+      {
+        a: 'derive',
+        events: (state) => [
+          {
+            t: 'proof.recorded',
+            proof: {
+              kind: 'promise_kept',
+              proofId: `promise_kept:${state.chapter}:army`,
+              chapter: state.chapter,
+              year: state.year,
+              subjectHe: 'ההבטחה לאמא לפני הגיוס',
+              noteHe: 'חורף שלם. בלי נסיעה בלי חופשה, ובלי לשקר למפקד.',
+            },
+          },
+        ],
+      },
     ],
   },
   {
@@ -695,7 +741,15 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
         choices: [
           { id: 'fuel', text: 'לשלם חצי דלק. שלושים שקל.', when: { minAgorot: 3000 }, noteHe: 'אין.', then: [{ e: 'money', agorot: -3000, why: 'דלק, חצי' }, { e: 'rel', who: 'liron', axis: 'trust', delta: 4 }, { e: 'goto', node: 'road-2' }] },
           { id: 'food', text: 'לקנות אוכל לשניכם בתחנה. חמישה־עשר.', when: { minAgorot: 1500 }, noteHe: 'אין.', then: [{ e: 'money', agorot: -1500, why: 'אוכל בתחנה' }, { e: 'rel', who: 'liron', axis: 'bond', delta: 3 }, { e: 'goto', node: 'road-2' }] },
-          { id: 'nothing', text: 'לשתוק. הוא הציע, לא אתה.', then: [{ e: 'rel', who: 'liron', axis: 'trust', delta: -2 }, { e: 'goto', node: 'road-2' }] },
+          /**
+           * ומי ששותק — לירון משלם, והמחוג מתמלא.
+           *
+           * הענף הזה עלה שתי נקודות אמון ותו לא, כאילו לא קרה בו כלום. קרה בו משהו: מישהו
+           * שילם עליך שלושים שקל מהמשכורת שלו. זה חוב, והוא נרשם כחוב — לא כדי להעניש, אלא
+           * כדי שיהיה מה להחזיר. הפרעון עומד ב-1999, באותו אוטו, והוא הענף היחיד שסוגר
+           * התחייבות כספית **מחוץ** לפינה של אוסישקין (`ACH_BALANCE` מבקש שניים בשני פרקים).
+           */
+          { id: 'nothing', text: 'לשתוק. הוא הציע, לא אתה.', then: [{ e: 'rel', who: 'liron', axis: 'trust', delta: -2 }, { e: 'flag', flag: 'owe:liron' }, { e: 'debt', agorot: FUEL_AGOROT, why: 'חצי הדלק שלירון שילם' }, { e: 'goto', node: 'road-2' }] },
         ],
       },
     ],
@@ -886,6 +940,14 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
           { e: 'presence', mode: 'inside' },
           { e: 'flag', flag: 'life:carried:taxi' },
           { e: 'flag', flag: 'owe:stand' },
+          /**
+           * החוב נרשם גם בכיס ולא רק בדגל.
+           *
+           * `owe:stand` הוא מי שחייב למי; `debt` הוא כמה. עד עכשיו רק הראשון נכתב, ושדה
+           * החוב במנוע נשאר אפס לנצח — בדיוק הפער שסעיף 8 של התסריט מצביע עליו בשם.
+           * שלושים שקל הם מה שהערב הזה באמת עלה, ומה שהפרעון ב-1999 באמת גובה.
+           */
+          { e: 'debt', agorot: TAXI_AGOROT, why: 'המונית ששער 5 שילם עליה' },
           { e: 'redheart', key: 'community', delta: 7 },
           { e: 'wellbeing', key: 'belonging', delta: 5 },
           { e: 'personality', key: 'empathy', delta: 3 },

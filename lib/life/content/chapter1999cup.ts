@@ -154,6 +154,37 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
     id: 'liron-cup99',
     nameHe: 'לירון',
     branches: [
+      /**
+       * שלושים שקל משנת תשעים ושש, באותו אוטו.
+       *
+       * בחורף ההוא, בדרך למשחק חוץ, מחוג הדלק היה נמוך ומי ששתק — לירון שילם עליו. זה
+       * נרשם כ-`owe:liron` וכחוב בכיס, והמקום היחיד ההגיוני לסגור אותו הוא כאן: אותו
+       * אדם, אותו רכב, שלוש שנים אחרי, כשיש משכורת.
+       *
+       * הענף עומד **לפני** שאר הענפים כי הוא לא מציע נסיעה — הוא סוגר חשבון, ואחריו
+       * השיחה ממשיכה כרגיל. וזה גם הפרעון היחיד שקורה מחוץ לפינה של אוסישקין, כלומר
+       * הפרק השני ש-`ACH_BALANCE` מבקש ("שני פרעונות בשני מועדים").
+       */
+      {
+        when: { all: [{ flag: 'owe:liron' }], minAgorot: 3000 },
+        lines: [
+          { who: null, text: 'הוצאת שלושים שקל והנחת על לוח המחוונים, ליד המברג.' },
+          { who: 'פוגי', text: 'חצי דלק. מתשעים ושש.' },
+          { who: 'לירון', text: '(מסתכל על השטרות, לא עליך.) אני לא זוכר.' },
+          { who: 'פוגי', text: 'אני זוכר.' },
+          { who: null, text: 'הוא לקח, קיפל, ושם בכיס החולצה. ואז הדליק את הרדיו, כאילו לא קרה כלום.' },
+        ],
+        then: [
+          { e: 'money', agorot: -3000, why: 'חצי דלק, מתשעים ושש' },
+          { e: 'flagValue', flag: 'owe:liron', value: false },
+          { e: 'debt', agorot: -3000, why: 'חצי הדלק של לירון, נסגר' },
+          { e: 'proof', kind: 'debt_settled', proofId: 'debt_settled:{chapter}:liron', subjectHe: 'חצי הדלק שלירון שילם', noteHe: 'שלוש שנים אחרי, באותו אוטו.' },
+          { e: 'rel', who: 'liron', axis: 'trust', delta: 5 },
+          { e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 3 },
+          { e: 'personality', key: 'reliability', delta: 2 },
+          { e: 'time', minutes: 5 },
+        ],
+      },
       { when: { flag: 'c99:route' }, lines: [{ who: 'לירון', text: 'החלטת. יופי. תדליק רדיו בדרך, שלא תפספס כלום.' }] },
       {
         when: { relationship: { who: 'liron', axis: 'sharedHistory', min: 4 } },
