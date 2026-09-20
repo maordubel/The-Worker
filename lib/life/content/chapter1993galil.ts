@@ -6,6 +6,13 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 
 /**
+ * ההפרש ששחור השלים, כמספר.
+ *
+ * *"הילד של הבד נוסע. את ההפרש אני משלים."* — שלושים שקל, ואותם שלושים נפרעים ב-1999.
+ */
+const SHACHOR_AGOROT = 3000
+
+/**
  * B4 · "הבית נשבר" · 9–19.5.1993 — the championship that was supposed to follow the cup.
  *
  * One escalating arc over four evenings, not four matches: the first game in their own
@@ -534,7 +541,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
       {
         when: { relationship: { who: 'shachor', axis: 'bond', min: 5 } },
         lines: [{ who: null, text: 'שחור, מאחור, בלי להרים את הראש: "הילד של הבד נוסע. את ההפרש אני משלים." לימור לא התווכחה, רק רשמה.' }],
-        then: [{ e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'went:galil-bus' }, { e: 'flag', flag: 'owe:shachor' }, { e: 'redheart', key: 'community', delta: 4 }, { e: 'time', minutes: 200 }, { e: 'goto', node: 'g4-north' }],
+        then: [{ e: 'flag', flag: 'g4:decided' }, { e: 'flag', flag: 'went:galil-bus' }, { e: 'flag', flag: 'owe:shachor' }, { e: 'debt', agorot: SHACHOR_AGOROT, why: 'ההפרש ששחור השלים לאוטובוס' }, { e: 'redheart', key: 'community', delta: 4 }, { e: 'time', minutes: 200 }, { e: 'goto', node: 'g4-north' }],
       },
       {
         lines: [{ who: null, text: 'לימור הנהנה. "אז רדיו. אין בושה ברדיו." יש קצת.' }],
@@ -673,6 +680,24 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
         choices: [
           { id: 'sorry', text: 'לא הצלחתי. סליחה.', then: [{ e: 'rel', who: 'efi', axis: 'trust', delta: -4 }, { e: 'rel', who: 'efi', axis: 'bond', delta: 1 }, { e: 'remember', who: 'efi', eventId: 'broke-promise-1993', significance: 'major' }, { e: 'goto', node: 'after-soko' }] },
           { id: 'excuse', text: 'לא היה כסף. לא היה איך.', then: [{ e: 'rel', who: 'efi', axis: 'trust', delta: -6 }, { e: 'rel', who: 'efi', axis: 'distance', delta: 5 }, { e: 'remember', who: 'efi', eventId: 'broke-promise-1993', significance: 'major' }, { e: 'goto', node: 'after-soko' }] },
+        ],
+      },
+      /**
+       * מי שאמר "אני בא, מה שלא יהיה" — ובא.
+       *
+       * אותו ערב בדיוק, ושורה אחת נוספת: אפי מזכיר את המשפט. זה הצד שלא היה רשום בשום
+       * מקום — ההפרה נרשמה כזיכרון של אדם (`broke-promise-1993`) והקיום לא נרשם בכלל,
+       * ולכן `ACH_RELIABLE` ("ארבע הבטחות") לא יכול היה לספור אותו. עכשיו הוא ראיה בפנקס,
+       * עם הנושא שהיא נאמרה עליו, בלי להוסיף אף מספר למה שהענף הזה כבר משלם.
+       */
+      {
+        when: { all: [{ flag: 'life:promise:g4' }, { flag: 'life:galil:there' }] },
+        lines: [{ who: 'אפי', text: 'היית שם.' }, { who: 'פוגי', text: 'הייתי שם.' }, { who: 'אפי', text: '"מה שלא יהיה," אמרת. אז זהו.' }, { who: null, text: 'זה כל מה שהוא היה מסוגל. זה היה הרבה.' }],
+        then: [
+          { e: 'rel', who: 'efi', axis: 'trust', delta: 8 },
+          { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 6 },
+          { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:galil', subjectHe: 'ההבטחה לאפי על המשחק בצפון', noteHe: 'אמר "מה שלא יהיה", ועלה על האוטובוס.' },
+          { e: 'goto', node: 'after-soko' },
         ],
       },
       {

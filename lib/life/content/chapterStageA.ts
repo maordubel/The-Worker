@@ -6,6 +6,15 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 
 /**
+ * ההבטחה של A2, והשעה שהיא נמדדת בה — שתי שורות שהבחירה, הראיה והבדיקה חולקות.
+ *
+ * `BREAD_PROMISE` הוא ה-`subjectHe` שגם הסיכום מראש וגם הקיום נושאים, כי `sameSubject`
+ * בהישגים מצליב נושא ולא מפתח. `BREAD_BY` היא חמש — השעה שהילד עצמו נוקב בה מול אמו.
+ */
+export const BREAD_PROMISE = 'הלחם של אמא'
+export const BREAD_BY = at(17, 0)
+
+/**
  * שלב א׳ — ששת הימים שלפני השבת (A2–A7).
  *
  * The Stage A brief turned one Saturday into eight days: the first memory on a father's
@@ -517,8 +526,25 @@ export const CONVERSATIONS_A2: Conversation[] = [
       { when: { flag: 'a2:bread' }, lines: [{ who: 'רחל', text: 'תודה. תשים על השיש. עכשיו לך, לפני שאני מוצאת לך עוד משהו.' }] },
       {
         lines: [{ who: 'רחל', text: 'לחם. רפי. על החשבון. ואל תרוץ בכביש.' }],
+        /**
+         * שלוש תשובות לאותה בקשה, ושתיים מהן אומרות "כן" — ההבדל ביניהן הוא מה שקורה
+         * לשעה.
+         *
+         * *"טוב"* מקבל את הבקשה כמו שהיא. *"אחרי המשחק, טוב?"* דוחה אותה בלי לנקוב בשום
+         * דבר, והיא עונה לגב שלך. השלישית היא הבחירה שלא הייתה כאן: **לנקוב בשעה מראש.**
+         * לא לבקש רשות לאחר — להציע מועד אחר ולעמוד בו.
+         *
+         * זה מה ש-`ACH_NEW_PLAN` ("שיניתי בלי להיעלם") ביקש מאז שנכתב, והסיבה שהוא חיכה
+         * כתובה בשורת ההמתנה שלו: *"אין עדיין מנגנון של סיכום מחדש לפני המועד."* עכשיו יש,
+         * והוא בן שש: הילד הראשון שמבין שאפשר לא לוותר על המגרש **ולא** להפר — צריך רק
+         * להגיד את זה לפני, ואז להגיע.
+         *
+         * `promise_renegotiated` ו-`promise_kept` נושאים את אותו `subjectHe` בדיוק, כי
+         * ההישג מצליב נושא ולא מפתח (`sameSubject`), וההבטחה הזאת היא דבר אחד: הלחם.
+         */
         choices: [
           { id: 'ok', text: '"טוב."', then: [{ e: 'flag', flag: 'a2:errand' }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 2 }, { e: 'personality', key: 'reliability', delta: 2 }] },
+          { id: 'five', text: '"אני קודם יורד למגרש. הלחם יהיה פה לפני חמש."', then: [{ e: 'flag', flag: 'a2:errand' }, { e: 'flag', flag: 'a2:agreed' }, { e: 'proof', kind: 'promise_renegotiated', proofId: 'promise_renegotiated:{chapter}:bread', subjectHe: BREAD_PROMISE, noteHe: 'לא ביקש לאחר. נקב בשעה, מראש.' }, { e: 'personality', key: 'honesty', delta: 3 }, { e: 'rel', who: 'rachel', axis: 'trust', delta: 2 }, { e: 'toast', text: '"לפני חמש," היא חזרה אחריך. ככה היא סוגרת דברים.', tone: 'plain' }] },
           { id: 'after', text: '"אחרי המשחק, טוב?"', then: [{ e: 'flag', flag: 'a2:errand' }, { e: 'flag', flag: 'a2:after' }, { e: 'rel', who: 'rachel', axis: 'tension', delta: 2 }, { e: 'toast', text: '"אחרי המשחק אין לחם." היא אמרה את זה לגב שלך.', tone: 'plain' }] },
         ],
       },
@@ -529,10 +555,24 @@ export const CONVERSATIONS_A2: Conversation[] = [
     nameHe: 'רפי מהקיוסק',
     branches: [
       { when: { flag: 'a2:bread' }, lines: [{ who: 'רפי מהקיוסק', text: 'עוד לחם? מה אתם עושים איתו, בונים?' }] },
+      /**
+         * אותו לחם, ושתי שורות בפנקס — לפי השעה שעל הקיר מאחורי רפי.
+         *
+         * מי שהגיע לפני חמש קיים את מה שאמר, ולכן נרשמת `promise_kept` על **אותו נושא**
+         * שהסיכום מראש נרשם עליו. מי שהגיע אחרי — הלחם עדיין נכנס לשקית, הפרק לא נעצר,
+         * ושום דבר לא מודיע לו שהוא איחר: הפנקס פשוט לא רושם ראיה שלא קרתה (כלל 11).
+         *
+         * חמש היא השעה שהילד עצמו נקב בה בענף `five`, והיא נכתבת פעם אחת (`BREAD_BY`).
+         */
+      {
+        when: { flag: 'a2:errand', beforeMinute: BREAD_BY },
+        lines: [{ who: 'רפי מהקיוסק', text: 'לחם לרחל. על החשבון — תשאיר את המטבעות בכיס. ותגיד לה שהחשבון כבר לא זוכר את עצמו.' }],
+        then: [{ e: 'flag', flag: 'a2:bread' }, { e: 'time', minutes: 6 }, { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:bread', subjectHe: BREAD_PROMISE, noteHe: 'הלחם היה על השיש לפני חמש.' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'sfx', key: 'bell-shop', level: 0.5 }, { e: 'toast', text: 'לחם חם. הנייר נרטב מהחום.', tone: 'plain' }],
+      },
       {
         when: { flag: 'a2:errand' },
-        lines: [{ who: 'רפי מהקיוסק', text: 'לחם לרחל. על החשבון — תשאיר את המטבעות בכיס. ותגיד לה שהחשבון כבר לא זוכר את עצמו.' }],
-        then: [{ e: 'flag', flag: 'a2:bread' }, { e: 'time', minutes: 6 }, { e: 'sfx', key: 'bell-shop', level: 0.5 }, { e: 'toast', text: 'לחם חם. הנייר נרטב מהחום.', tone: 'plain' }],
+        lines: [{ who: 'רפי מהקיוסק', text: 'לחם לרחל. האחרון. על החשבון, כמו תמיד — ותגיד לה שהגעת עכשיו.' }],
+        then: [{ e: 'flag', flag: 'a2:bread' }, { e: 'time', minutes: 6 }, { e: 'sfx', key: 'bell-shop', level: 0.5 }, { e: 'toast', text: 'לחם, כבר לא חם. הוא הוציא אותו מתחת לדלפק.', tone: 'plain' }],
       },
       {
         lines: [{ who: 'רפי מהקיוסק', text: 'ילד. אתה קונה, או שאתה עומד לי בשמש?' }],
@@ -634,6 +674,14 @@ export const CONVERSATIONS_A2: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { flag: 'a2:after' }, lines: [{ who: null, text: 'חושך כמעט. התריס של רפי כבר למטה. הלחם יחכה למחר, והיא לא תגיד כלום.' }], then: [{ e: 'time', minutes: 30 }, { e: 'ending', id: 'played' }] },
+      /**
+       * ומי שנקב בשעה ולא עמד בה — הערב נגמר אותו דבר, והיא אומרת משפט אחד.
+       *
+       * בלי דגל, בלי קנס ובלי הודעה: הראיה פשוט לא נרשמה. מה שכן — הילד שמע את עצמו
+       * מבטיח שעה, ולכן הוא שומע גם מה קרה לשעה הזאת. הבטחה שאיש לא מזכיר היא הבטחה
+       * שלא הייתה.
+       */
+      { when: { all: [{ flag: 'a2:agreed' }], none: [{ flag: 'a2:bread' }] }, lines: [{ who: null, text: 'חושך כמעט. התריס של רפי למטה, ובמטבח אמא מסדרת את השולחן לארוחה בלי לחם.' }, { who: 'רחל', text: 'אמרת לפני חמש.' }, { who: null, text: 'היא לא אמרה את זה בכעס. היא אמרה את זה כמו מישהי שרשמה.' }], then: [{ e: 'rel', who: 'rachel', axis: 'trust', delta: -3 }, { e: 'time', minutes: 30 }, { e: 'ending', id: 'played' }] },
       { lines: [{ who: null, text: 'חושך כמעט. הלחם בבית, הרגליים כואבות, וזה הרגיש כמו משהו שתרצה שוב מחר.' }], then: [{ e: 'time', minutes: 30 }, { e: 'ending', id: 'played' }] },
     ],
   },

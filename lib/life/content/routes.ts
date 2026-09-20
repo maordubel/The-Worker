@@ -213,6 +213,13 @@ const proof = (kind: string, extra: Partial<Extract<Effect, { e: 'proof' }>> = {
   ...extra,
 })
 
+/**
+ * הספק שנדחה — סכום אחד, ודגל אחד, כי שני הצדדים של אותו חוב חייבים להסכים.
+ * `owe:` שורד מעבר פרק (`personFlags`), וזה מה שמאפשר לשלם אותו בחודש אחר.
+ */
+const SUPPLIER_AGOROT = 4000
+const SUPPLIER_DEBT_FLAG = 'owe:supplier'
+
 export const SMALL_ACTIONS: readonly SmallActionDef[] = [
   {
     id: 'VERIFY_REPORT',
@@ -517,6 +524,40 @@ const CONVERSATIONS: Conversation[] = [
     id: 'route-proof-business',
     nameHe: null,
     branches: [
+      /**
+       * ספק שנדחה הוא חוב, ועד עכשיו הוא היה חוב בלי דלת.
+       *
+       * הענף "לדחות את הספקים לשבוע הבא" רשם `debt` ארבעים שקל — הדבר היחיד בכל המשחק
+       * שכתב לשדה הזה — ושום ענף בשום פרק לא יכול היה להחזיר אותם. זה **נועל** את פסגת
+       * הבעלים לתמיד (`ללא חוב שהגיע זמנו ולא הוסדר`) ופוסל גם את "לא נשאר חייב", שדורש
+       * ארנק נקי. *"חוב שאי אפשר לפרוע הוא לא חוב, הוא עונש."*
+       *
+       * השבוע הבא הוא הסצנה הזאת עצמה, בפרק אחר — אותו דלפק, אותו סוף חודש. הענף עומד
+       * ראשון כי מי שיש לו חוב פתוח לא ניגש לשולחן הזה בשביל משהו אחר.
+       */
+      {
+        when: { all: [{ flag: SUPPLIER_DEBT_FLAG }], minAgorot: SUPPLIER_AGOROT },
+        lines: [
+          { who: null, text: 'סוף חודש, והשורה הראשונה בגיליון היא מהחודש שעבר: הספק שדחית.' },
+          { who: null, text: 'הוא לא התקשר ולא הזכיר. הוא רק רשם, ומי שרושם זוכר.' },
+        ],
+        choices: [
+          {
+            id: 'settle',
+            text: 'לשלם לו את מה שנדחה, ראשון',
+            then: [
+              { e: 'money', agorot: -SUPPLIER_AGOROT, why: 'הספק מהחודש שעבר' },
+              { e: 'flagValue', flag: SUPPLIER_DEBT_FLAG, value: false },
+              { e: 'debt', agorot: -SUPPLIER_AGOROT, why: 'הספק שנדחה, נסגר' },
+              { e: 'proof', kind: 'debt_settled', proofId: 'debt_settled:{chapter}:supplier', subjectHe: 'הספק שנדחה לשבוע הבא', noteHe: 'חודש אחרי, ראשון בשורה.' },
+              { e: 'skill', skill: 'business', delta: 2, why: 'סגר מול ספק' },
+              { e: 'time', minutes: 10 },
+              { e: 'toast', text: 'הוא מחק את השורה בעיפרון ולא אמר כלום. בפעם הבאה הוא יספק בלי לשאול.' },
+            ],
+          },
+          { id: 'not-yet', text: 'לא הערב', then: [] },
+        ],
+      },
       {
         lines: [
           { who: null, text: 'סוף חודש. שכר לשניים, שני ספקים שמחכים, וגיליון שצריך להיסגר הערב.' },
@@ -541,8 +582,10 @@ const CONVERSATIONS: Conversation[] = [
             then: [
               { e: 'time', minutes: 15 },
               // A deferred supplier is a debt, and OWNER's apex is the one condition in
-              // the game entitled to remember it.
-              { e: 'debt', agorot: 4000, why: 'ספק שנדחה' },
+              // the game entitled to remember it. The flag is what gives it a door: the
+              // branch above pays it back at the same counter, one chapter later.
+              { e: 'flag', flag: SUPPLIER_DEBT_FLAG },
+              { e: 'debt', agorot: SUPPLIER_AGOROT, why: 'ספק שנדחה' },
               { e: 'toast', text: 'הם הסכימו. הם גם רשמו.' },
             ],
           },
@@ -843,94 +886,3 @@ export const CONVERSATIONS_ROUTES: readonly Conversation[] = [
   conflict,
   distance,
 ]
-
-// ---------------------------------------------------------------------------------
-// מילות הכרטיס — staged here, keyed by the i18n key they are going to live under
-// ---------------------------------------------------------------------------------
-
-/**
- * הצ'ומה של `RouteCard`, ולמה היא כאן ולא ב-`messages/he.json`.
- *
- * Rule 10 sends every user-facing string through `t()`, and `t`'s key type is
- * `keyof typeof he` — so a key that is not yet in the catalogue is a TYPE error, not a
- * soft failure. `messages/he.json` is owned elsewhere in this pass, which leaves exactly
- * two options: ship a red typecheck and a red `tests/i18n.test.ts` against a key nobody
- * has merged yet, or stage the words and make the merge mechanical. Staging wins, because
- * a suite that is red by design is a suite people learn to ignore (rule 63 says the same
- * thing about loosening a guard before there is anything to show for it).
- *
- * So every entry below is keyed by the EXACT key it will live under, the delivered
- * `keys-routes.json` is generated from this object rather than typed twice, and the
- * follow-up patch is two steps with no judgement in either: paste the map into
- * `messages/he.json`, then replace `routeWord(` with `t(` in `RouteCard.tsx` and delete
- * this block. Nothing about the words changes.
- *
- * The route names, stage titles and rewards are NOT here. They are authored fiction and
- * they live in `LIFE_ROUTES` with the rest of the content layer, exactly like a chapter
- * title or an ending's body — the same place `EndingCard` gets `titleHe` from.
- */
-export const ROUTE_WORDS: Readonly<Record<string, string>> = {
-  'life.route.offer': 'מציעים לך',
-  'life.route.held': 'זה כבר שלך',
-  'life.route.left': 'עזבת את זה. זה נשאר בהיסטוריה שלך.',
-  'life.route.reward': 'מה שזה נותן',
-  'life.route.missing': 'מה עוד חסר',
-  'life.route.accept': 'לקחת את זה',
-  'life.route.decline': 'לא עכשיו',
-  'life.route.close': 'לסגור',
-  'life.route.choice': 'ומשהו שצריך להגיד בקול',
-  // A stage is a name somebody calls you. These three words are the category, not a rank.
-  'life.route.stage.entry': 'התחלה',
-  'life.route.stage.practice': 'עשייה',
-  'life.route.stage.apex': 'פסגה',
-  // הדרגה — the rung in Maor's own ordering, and the honest blank for a route he has not
-  // placed. The rung's WORD comes from `ROUTE_TIERS` (his line, verbatim); these two are
-  // only the label over it and the sentence for when there is no line.
-  'life.route.tier': 'הדרגה',
-  'life.route.tier.unplaced': 'הדרגה של זה עוד לא נקבעה',
-  // What is missing, said the way a person would say it — never as a distance to a number.
-  'life.route.gap.ladder': 'קודם השלב שלפני זה',
-  'life.route.gap.age': 'אתה עוד צעיר מדי בשביל זה',
-  'life.route.gap.capability': 'עוד לא מספיק {what}',
-  'life.route.gap.alsoCapability': 'צריך גם {what}',
-  'life.route.gap.audience': '{who} עוד לא שמעו עליך מספיק',
-  'life.route.gap.proofs': 'משימות שסגרת: {have} מתוך {want}',
-  'life.route.gap.chapters': 'הכול קרה באותה תקופה. צריך שזה יקרה לאורך זמן.',
-  'life.route.gap.evidence': 'חסר דבר אחד שעשית פעם אחת, וזה עוד לא קרה',
-  'life.route.gap.people': 'אנשים שיעמדו לצידך בזה: {have} מתוך {want}',
-  'life.route.gap.subjects': 'הכול על אותו נושא. צריך לכתוב גם על משהו אחר.',
-  'life.route.gap.debt': 'יש חוב פתוח שלא הוסדר',
-  'life.route.gap.works': 'יצירות מקוריות: {have} מתוך {want}',
-  'life.route.gap.journeys': 'חסרה נסיעה מהסוג שעוד לא עשית',
-  'life.route.gap.founding': 'התחייבויות הקמה: {have} מתוך {want}',
-  'life.route.gap.window': 'החלון לזה עוד לא נפתח',
-  // How far from a threshold, in five words instead of a number. A capability printed as
-  // a figure becomes the thing players optimise; the Red Heart learned that first.
-  'life.route.near.touching': 'ממש קרוב',
-  'life.route.near.close': 'קרוב',
-  'life.route.near.someWay': 'יש עוד דרך',
-  'life.route.near.far': 'רחוק',
-  'life.route.near.veryFar': 'רחוק מאוד',
-  // The audiences, by name. Five different groups, and what one knows is not what
-  // another knows — the reason there is no single `reputation` number anywhere.
-  'life.route.audience.gate5': 'שער 5',
-  'life.route.audience.gate7': 'שער 7',
-  'life.route.audience.ussishkin': 'אוסישקין',
-  'life.route.audience.public': 'מי שקורא',
-  'life.route.audience.work': 'מי שעובד איתך',
-  'life.route.capability.organization': 'ארגון',
-  'life.route.capability.communication': 'תקשורת',
-  'life.route.capability.business': 'עסקים',
-  'life.route.capability.creativity': 'יצירה',
-  'life.route.capability.knowledge': 'ידע',
-  'life.route.capability.streetSmarts': 'תושייה',
-  // The honest sentence for a stage whose chapter is not written yet (rule 66).
-  'life.route.outOfReach': 'הפרק שבו זה אפשרי עוד לא נכתב',
-}
-
-/** the staged reader. The follow-up patch replaces every call to this with `t`. */
-export function routeWord(key: string, vars?: Record<string, string>): string {
-  const raw = ROUTE_WORDS[key] ?? key
-  if (!vars) return raw
-  return Object.entries(vars).reduce((out, [name, value]) => out.replaceAll(`{${name}}`, value), raw)
-}

@@ -491,9 +491,19 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: 'רחל', text: 'טוב.' },
           { who: null, text: 'זה כואב קצת. שניכם יודעים את זה.' },
         ],
+        /**
+         * הראיה נרשמת כאן, בדלת, ולא באולם — כי היא על מה שהוא עשה ולא על מה שהוא הרגיש.
+         *
+         * רחל נקבה בשעה, והשעה הגיעה בזמן שהמשחק עוד חי: זו התבנית של הבטחה במשחק הזה
+         * (§B2), ומי שיצא קיים אותה. `promise_kept` היא ראיה בפנקס ולא ציון — היא לא
+         * משנה שום מדד בשורה הזאת, והמספרים שמסביבה הם אותם מספרים שהיו כאן קודם.
+         * הנושא נקוב במפורש כדי ש-`ACH_RELIABLE` יספור ארבע הבטחות **שונות** ולא ארבע
+         * פעמים את אותה אחת.
+         */
         then: [
           { e: 'flag', flag: 'walked:home' },
           { e: 'rel', who: 'rachel', axis: 'trust', delta: 10 },
+          { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:curfew', subjectHe: 'השעה שאמא אמרה', noteHe: 'יצא מהאולם בשעה שהיא אמרה, והמשחק עוד היה חי.' },
           { e: 'remember', who: 'rachel', eventId: 'came-home-on-time-1991', significance: 'major' },
           { e: 'keep' },
           { e: 'ending', id: 'wall' },
