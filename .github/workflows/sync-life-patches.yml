@@ -52,6 +52,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add .sync/typecheck.log .sync/test.log .sync/validation-status.txt
+          git add -f .sync/typecheck.log .sync/test.log .sync/validation-status.txt
           git commit -m "chore: capture LIFE validation diagnostics [life-diagnostics]"
           git push origin HEAD:${GITHUB_REF_NAME}
