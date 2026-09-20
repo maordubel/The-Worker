@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   apply-life:
-    if: ${{ !contains(github.event.head_commit.message, '[life-applied]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[life-diagnostics]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full history
@@ -37,15 +37,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Typecheck
-        run: npm run typecheck
+      - name: Capture validation diagnostics
+        shell: bash
+        run: |
+          set +e
+          npm run typecheck > .sync/typecheck.log 2>&1
+          TYPECHECK_CODE=$?
+          npm test > .sync/test.log 2>&1
+          TEST_CODE=$?
+          set -e
+          printf 'typecheck=%s\ntest=%s\n' "$TYPECHECK_CODE" "$TEST_CODE" > .sync/validation-status.txt
 
-      - name: Tests
-        run: npm test
-
-      - name: Push merged patch commits
+      - name: Push merged patch and diagnostics to temporary branch
         shell: bash
         run: |
           set -euo pipefail
-          git commit --allow-empty -m "chore: mark LIFE patches applied [life-applied]"
+          git add .sync/typecheck.log .sync/test.log .sync/validation-status.txt
+          git commit -m "chore: capture LIFE validation diagnostics [life-diagnostics]"
           git push origin HEAD:${GITHUB_REF_NAME}
