@@ -1,5 +1,5 @@
 import { kitAssemblyForSeason, type KitPlacement } from './assembly'
-import { bodyTemplateForSeason, type KitBodyTemplate, type KitBodyTemplateId } from './body-templates'
+import { BODY_TEMPLATES, bodyTemplateForSeason, type KitBodyTemplate, type KitBodyTemplateId } from './body-templates'
 import { makerAssetForName, sponsorAssetForName } from './mark-library'
 import type { KitSpec } from './spec'
 
@@ -11,8 +11,14 @@ export type KitConstruction = {
   referenceLevel: 'mastered' | 'modeled'
 }
 
+function bodyOverride(spec: KitSpec): KitBodyTemplateId | null {
+  const value = (spec as KitSpec & { bodyTemplateId?: KitBodyTemplateId }).bodyTemplateId
+  return value && BODY_TEMPLATES[value] ? value : null
+}
+
 export function resolveKitConstruction(spec: KitSpec): KitConstruction {
-  const template = bodyTemplateForSeason(spec.seasonLabel)
+  const override = bodyOverride(spec)
+  const template = override ? BODY_TEMPLATES[override] : bodyTemplateForSeason(spec.seasonLabel)
   const assembly = kitAssemblyForSeason(spec.seasonLabel, spec.variant)
   return {
     bodyTemplateId: template.id,
