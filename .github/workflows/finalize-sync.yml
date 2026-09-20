@@ -1,0 +1,42 @@
+name: Finalize sync
+
+on:
+  push:
+    branches: [sync/life-player-master-20260920]
+    paths:
+      - '.github/workflows/finalize-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply final integration
+        run: python3 .sync/finalize.py
+      - name: Install
+        run: npm ci
+      - name: Build Player Master
+        run: npm run players:master
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: Commit validated result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/api/kits/reference/'[token]'/route.ts app/kits/build/KitGameRun.tsx app/kits/build/KitGameRunV3.tsx lib/kit/mark-library.ts package.json scripts/players/build-master.ts lib/archive/player-master.ts tests/player-master.test.ts docs/13-player-master.md content/generated/player-master.json
+          git commit -m 'feat: synchronize LIFE and centralize player master [validated]' || true
+          git push origin HEAD:sync/life-player-master-20260920
