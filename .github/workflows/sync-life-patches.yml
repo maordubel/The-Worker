@@ -1,57 +1,14 @@
 name: Sync LIFE patches
 
 on:
-  push:
-    branches:
-      - sync/life-player-master-20260920
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   apply-life:
-    if: ${{ !contains(github.event.head_commit.message, '[life-diagnostics]') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout full history
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Reconstruct and verify patch
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat .sync/life-delta.part00 .sync/life-delta.part01 .sync/life-delta.part02 .sync/life-delta.part03 \
-            | base64 --decode | gzip --decompress > /tmp/the-worker-life-delta-78.patch
-          echo "7e3818992ad6cc2fd009f219671aa6fa8c5f75fa8a5d3a0a5b92c3393d89b8d7  /tmp/the-worker-life-delta-78.patch" | sha256sum --check --strict
-
-      - name: Apply both logical LIFE patches once
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "The Worker Sync Bot"
-          git config user.email "actions@users.noreply.github.com"
-          git am -3 /tmp/the-worker-life-delta-78.patch
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Capture validation diagnostics
-        shell: bash
-        run: |
-          set +e
-          npm run typecheck > .sync/typecheck.log 2>&1
-          TYPECHECK_CODE=$?
-          npm test > .sync/test.log 2>&1
-          TEST_CODE=$?
-          set -e
-          printf 'typecheck=%s\ntest=%s\n' "$TYPECHECK_CODE" "$TEST_CODE" > .sync/validation-status.txt
-
-      - name: Push merged patch and diagnostics to temporary branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          git add -f .sync/typecheck.log .sync/test.log .sync/validation-status.txt
-          git commit -m "chore: capture LIFE validation diagnostics [life-diagnostics]"
-          git push origin HEAD:${GITHUB_REF_NAME}
+      - name: Already applied
+        run: echo "LIFE patches were already applied on this sync branch."
