@@ -1,0 +1,90 @@
+'use server'
+
+import { playRoyalRumbleHeadToHead, type RoyalRumbleResult } from '@/lib/game/royal-rumble'
+import { createClient } from '@/lib/supabase/server'
+
+export type RoyalRumbleLiveRoom = { id: string; code: string; matchSeed: number }
+export type RoyalRumbleLiveState = RoyalRumbleLiveRoom & {
+  status: 'waiting' | 'drafting' | 'countdown' | 'playing' | 'finished' | 'expired'
+  isHost: boolean
+  opponentJoined: boolean
+  youReady: boolean
+  opponentReady: boolean
+  startsAt: string | null
+  expiresAt: string
+}
+
+function one<T>(rows: T[] | null): T | null { return rows?.[0] ?? null }
+function seed(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null
+  const out = Math.trunc(value)
+  return out >= 0 && out <= 0xffffffff ? out >>> 0 : null
+}
+function picks(value: unknown): string[] | null {
+  if (!Array.isArray(value) || value.length !== 5) return null
+  const out = value.filter((item): item is string => typeof item === 'string' && item.length > 0)
+  return out.length === 5 && new Set(out).size === 5 ? out : null
+}
+function liveStatus(value: unknown): RoyalRumbleLiveState['status'] {
+  return value === 'waiting' || value === 'drafting' || value === 'countdown' || value === 'playing' || value === 'finished' || value === 'expired' ? value : 'expired'
+}
+
+export async function createRoyalRumbleRoom(matchSeed: number, offerSeed: number): Promise<RoyalRumbleLiveRoom | null> {
+  const supabase = createClient() as any
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return null
+  const { data, error } = await supabase.rpc('rpc_rr_create_room', { p_match_seed: matchSeed >>> 0, p_offer_seed: offerSeed >>> 0 })
+  if (error) return null
+  const row = one<any>(data)
+  return row ? { id: row.room_id, code: row.code, matchSeed: Number(row.match_seed) >>> 0 } : null
+}
+
+export async function joinRoyalRumbleRoom(code: string, matchSeed: number, offerSeed: number): Promise<RoyalRumbleLiveRoom | null> {
+  const supabase = createClient() as any
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return null
+  const { data, error } = await supabase.rpc('rpc_rr_join_room', { p_code: code.trim().toUpperCase(), p_match_seed: matchSeed >>> 0, p_offer_seed: offerSeed >>> 0 })
+  if (error) return null
+  const row = one<any>(data)
+  return row ? { id: row.room_id, code: row.code, matchSeed: Number(row.match_seed) >>> 0 } : null
+}
+
+export async function getRoyalRumbleLiveState(roomId: string): Promise<RoyalRumbleLiveState | null> {
+  const supabase = createClient() as any
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return null
+  const { data, error } = await supabase.rpc('rpc_rr_state', { p_room_id: roomId })
+  if (error) return null
+  const row = one<any>(data)
+  if (!row) return null
+  return { id: row.room_id, code: row.code, matchSeed: Number(row.match_seed) >>> 0, status: liveStatus(row.status), isHost: Boolean(row.is_host), opponentJoined: Boolean(row.opponent_joined), youReady: Boolean(row.you_ready), opponentReady: Boolean(row.opponent_ready), startsAt: row.starts_at, expiresAt: row.expires_at }
+}
+
+export async function lockRoyalRumbleLive(roomId: string, offerSeed: number, slugs: string[]): Promise<RoyalRumbleLiveState | null> {
+  if (slugs.length !== 5 || new Set(slugs).size !== 5) return null
+  const supabase = createClient() as any
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return null
+  const { error } = await supabase.rpc('rpc_rr_lock', { p_room_id: roomId, p_offer_seed: offerSeed >>> 0, p_picks: slugs })
+  if (error) return null
+  return getRoyalRumbleLiveState(roomId)
+}
+
+export async function resolveRoyalRumbleLive(roomId: string): Promise<RoyalRumbleResult | null> {
+  const supabase = createClient() as any
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return null
+  const { data, error } = await supabase.rpc('rpc_rr_claim', { p_room_id: roomId })
+  if (error) return null
+  const row = one<any>(data)
+  if (!row) return null
+  const matchSeed = seed(Number(row.match_seed))
+  const hostOfferSeed = seed(Number(row.host_offer_seed))
+  const guestOfferSeed = seed(Number(row.guest_offer_seed))
+  const hostPicks = picks(row.host_picks)
+  const guestPicks = picks(row.guest_picks)
+  if (matchSeed === null || hostOfferSeed === null || guestOfferSeed === null || !hostPicks || !guestPicks) return null
+  const resolved = playRoyalRumbleHeadToHead(matchSeed, hostOfferSeed, hostPicks, guestOfferSeed, guestPicks)
+  if (!resolved) return null
+  return auth.user.id === row.host_user_id ? resolved.home : resolved.away
+}
