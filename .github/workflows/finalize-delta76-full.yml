@@ -25,13 +25,6 @@ jobs:
           node-version: '20'
           cache: npm
 
-      - name: Restore omitted Delta76 contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          python .delta76-fix/reconcile_store.py
-          git apply --3way .delta76-fix/messages.patch
-
       - name: Merge current main and keep production Gate 9
         shell: bash
         run: |
@@ -67,7 +60,19 @@ jobs:
             git diff --name-only --diff-filter=U
             exit 1
           fi
-          sed -i 's/"gate.9": "חדר ההלבשה"/"gate.9": "רויאל ראמבל"/' messages/he.json
+
+      - name: Restore omitted Delta76 contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .delta76-fix/reconcile_store.py
+          rm -rf /tmp/delta76
+          mkdir -p /tmp/delta76/messages
+          git cat-file -p 61892fe > /tmp/delta76/messages/he.json
+          cd /tmp/delta76
+          git apply "$GITHUB_WORKSPACE/.delta76-fix/messages.patch"
+          cd "$GITHUB_WORKSPACE"
+          python .delta76-fix/reconcile_messages.py
           git add messages/he.json lib/polls/store.ts
           git diff --check
 
