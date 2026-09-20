@@ -39,6 +39,6 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add app/api/kits/reference/'[token]'/route.ts app/kits/build/KitGameRun.tsx app/kits/build/KitGameRunV3.tsx lib/kit/mark-library.ts package.json scripts/players/build-master.ts lib/archive/player-master.ts tests/player-master.test.ts docs/13-player-master.md content/generated/player-master.json
-          git commit -m 'feat: synchronize LIFE and centralize player master [validated]' || true
+          git add -A app lib tests package.json scripts docs content/generated
+          git commit -m 'feat: synchronize LIFE, Kit V3 and central player master [validated]' || true
           git push origin HEAD:sync/life-player-master-20260920
