@@ -37,7 +37,8 @@
     "ingest:vikipoel": "tsx scripts/ingest/vikipoel-cli.ts",
     "ingest:players": "tsx scripts/ingest/players-cli.ts",
     "ingest:turim": "tsx scripts/ingest/turim-cli.ts",
-    "ingest:scorers": "tsx scripts/ingest/scorers-cli.ts"
+    "ingest:scorers": "tsx scripts/ingest/scorers-cli.ts",
+    "players:master": "tsx scripts/players/build-master.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

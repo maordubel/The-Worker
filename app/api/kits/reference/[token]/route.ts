@@ -10,7 +10,7 @@ export async function GET(_request: Request, { params }: { params: { token: stri
   if (!src) return new NextResponse(null, { status: 404 })
   const body = archivePhotoBytes(src)
   if (!body) return new NextResponse(null, { status: 404 })
-  return new NextResponse(body, {
+  return new NextResponse(new Uint8Array(body), {
     headers: {
       'Content-Type': 'image/webp',
       'Cache-Control': 'public, max-age=31536000, immutable',
