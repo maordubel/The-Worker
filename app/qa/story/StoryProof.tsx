@@ -66,6 +66,32 @@ const CASES: Array<{ name: string; card: StoryCard }> = [
     },
   },
   {
+    /**
+     * דשא — gate 8's ground, and until 19.9.2026 the one template nobody measured.
+     *
+     * The harness drew `score`, `ink`, `year`, `xi` and `ballot`; `grass` shipped on every
+     * שחזור השער result and was never in it. That was survivable while the hero was
+     * "2/6"; the rebuilt gate prints a percentage and a second one beside it, and a
+     * template that has never been intersected is a template whose next long string is
+     * found by a player (rule 19).
+     */
+    name: 'grass',
+    card: {
+      template: 'grass',
+      kicker: 'GATE 8 · REBUILD THE GOAL',
+      label: 'שחזור השער',
+      eyebrow: 'ציון המהלך',
+      hero: '100%',
+      bigStat: { v: '100%', k: 'המהלך הטוב ביותר' },
+      stats: [
+        { k: 'ניקוד', v: '4200' },
+        { k: 'המשכיות', v: '100%' },
+      ],
+      cta: 'תשחזר את השער בעצמך',
+      challenge: 'אותו סבב בדיוק',
+    },
+  },
+  {
     name: 'xi',
     card: {
       template: 'xi',
@@ -135,6 +161,39 @@ const CASES: Array<{ name: string; card: StoryCard }> = [
       ballot: [
         { ask: 'השחקן האהוב עליך בכל הזמנים', latin: 'ALL-TIME FAVOURITE', pick: LONG_NAME },
         { ask: 'השוער של כל הזמנים', latin: 'GOALKEEPER', pick: 'בונימוביץ' },
+        { ask: 'הבלם של כל הזמנים', latin: 'CENTRE BACK', pick: LONG_NAME },
+        { ask: 'הקשר של כל הזמנים', latin: 'MIDFIELD', pick: 'אבוקסיס' },
+        { ask: 'החלוץ של כל הזמנים', latin: 'STRIKER', pick: LONG_NAME },
+        { ask: 'הזר הכי טוב שלבש אדום', latin: 'BEST FOREIGNER', pick: 'דאגלס דה סילבה' },
+        { ask: 'איזה מספר היית לובש', latin: 'YOUR NUMBER', pick: '10' },
+        { ask: 'באיזו עמדה היית משחק', latin: 'YOUR POSITION', pick: 'קשר התקפי' },
+      ],
+      cta: 'תמלא פתק משלך',
+      challenge: 'הפתק שלך מחכה',
+    },
+  },
+  {
+    /**
+     * The same slip with a NAME on it — nine rows, not eight.
+     *
+     * Gate 7 prints the supporter's name on the shirt and puts it on the card as its own
+     * row rather than into the hero line, because the ballot template sizes its rows by
+     * how many there are and measures every baseline, while an eighteen-character name
+     * swapped into an 84px hero is a collision nobody measured (rule 19). Nine rows is
+     * therefore a shape this template really ships, and a shape the harness has to prove.
+     */
+    name: 'ballot-named',
+    card: {
+      template: 'ballot',
+      kicker: 'GATE 7 · THE BALLOT',
+      label: 'אגף הסקרים',
+      eyebrow: 'פתק ההצבעה',
+      hero: 'פתק ההצבעה',
+      stats: [],
+      ballot: [
+        { ask: 'השם על החולצה', latin: 'NAME ON THE SHIRT', pick: 'מאוראבישידלובסקי' },
+        { ask: 'השחקן האהוב עליך בכל הזמנים', latin: 'ALL-TIME FAVOURITE', pick: LONG_NAME },
+        { ask: 'השוער של כל הזמנים', latin: 'GOALKEEPER', pick: LONG_NAME },
         { ask: 'הבלם של כל הזמנים', latin: 'CENTRE BACK', pick: LONG_NAME },
         { ask: 'הקשר של כל הזמנים', latin: 'MIDFIELD', pick: 'אבוקסיס' },
         { ask: 'החלוץ של כל הזמנים', latin: 'STRIKER', pick: LONG_NAME },

@@ -33,8 +33,65 @@ export function zoneParts(id: ZoneId): { col: number; row: number } | null {
   return { col, row }
 }
 
-/** Geometry of the handoff pitch: viewBox 0 0 300 400, zones 55×82 from (13,12). */
-export const PITCH = { w: 300, h: 400, x0: 13, y0: 12, cw: 55, ch: 82 } as const
+/**
+ * Geometry of the handoff pitch: a 300×400 box holding ONE HALF of a football pitch,
+ * zones 55×82 from (13,12). `top` is the viewBox's own min-y — the board carries forty
+ * units of air above the goal line so the net, and the tap target over it, are a place a
+ * finger and a keyboard can both reach. Nothing below y=0 moved when that was added:
+ * every coordinate in this file and in `GoalPitch.tsx` still means what it meant.
+ */
+export const PITCH = {
+  w: 300,
+  h: 400,
+  x0: 13,
+  y0: 12,
+  cw: 55,
+  ch: 82,
+  /** viewBox min-y — the air behind the goal */
+  top: -40,
+  /** the chalk: touchlines, the goal line, and the halfway line at the foot of the board */
+  left: 12,
+  right: 288,
+  goalY: 12,
+  halfY: 388,
+} as const
+
+/**
+ * What the drawing is a drawing OF — the Laws' recommended pitch, in metres.
+ *
+ * This is the only place a metre becomes a pixel, and it exists because an uncertainty
+ * envelope is a claim in METRES ("the source pins him to the penalty area, which is
+ * 40.3m by 16.5m") and the board is a diagram with two different scales on its two axes:
+ * 276 units carry 68 metres across, 376 units carry 52.5 metres of depth. An envelope
+ * written in normalised units would silently mean something different on each axis.
+ */
+export const PITCH_METRES = { wide: 68, deep: 52.5 } as const
+
+/** Units per metre, per axis. Derived, never typed: move a chalk line and this follows. */
+export const UNITS_PER_METRE = {
+  x: (PITCH.right - PITCH.left) / PITCH_METRES.wide,
+  y: (PITCH.halfY - PITCH.goalY) / PITCH_METRES.deep,
+} as const
+
+/**
+ * The three places on this board that the LAWS define rather than a reporter does.
+ *
+ * A zone centre is the best anchor for a touch described in words. It is the WRONG
+ * anchor for a touch described by a place the laws draw on every pitch on earth: "נקודת
+ * הפנדל" is not "somewhere in zone C1", it is a painted spot, and quantising it to a
+ * 55×82 cell would throw away precision the source actually has — the opposite of the
+ * mistake this gate's envelopes exist to stop.
+ */
+export const LANDMARKS = {
+  /** eleven metres out, dead centre — drawn on the board at (150, 57) */
+  penaltySpot: { x: 150, y: PITCH.goalY + 11 * UNITS_PER_METRE.y },
+  /** a keeper parrying stands on his line */
+  goalLine: { x: 150, y: PITCH.goalY },
+  /** inside the net: where a ball that scored ended up */
+  goalMouth: { x: 150, y: 4 },
+} as const
+
+export type LandmarkId = keyof typeof LANDMARKS
 
 export function zoneRect(id: ZoneId): { x: number; y: number; w: number; h: number } | null {
   const parts = zoneParts(id)
@@ -85,5 +142,29 @@ export function reasonKey(picked: ZoneId | undefined, truth: ZoneId): string {
 
 /** Three goals to a run, so a run is three whole moves and not twelve loose taps. */
 export const GOALS_PER_RUN = 3
-/** Seconds for a whole goal, tightening per stage. */
-export const GOAL_SECONDS = [34, 27, 21] as const
+
+/**
+ * How long a rebuilt move may be.
+ *
+ * Two, because continuity is a relation BETWEEN touches and a one-touch move has none to
+ * measure. Five, because the longest move the archive describes is four and a ceiling
+ * that is never reached is not a ceiling — one over the longest record leaves room to be
+ * wrong in the direction a supporter is actually wrong in.
+ *
+ * They live beside the pitch rather than in `lib/game/goal.ts` because the builder is a
+ * client component and that module is `server-only`: the touch COUNT is not a secret,
+ * only which count is right is.
+ */
+export const MIN_TOUCHES = 2
+export const MAX_TOUCHES = 5
+/**
+ * Seconds for a whole MOVE, tightening per stage.
+ *
+ * These were 34/27/21 when a touch was one tap on a zone. A touch is now four decisions
+ * — who, what, from where, to where — and a move is up to five of them, so the old clock
+ * would have been a dexterity test wearing a history game's clothes. The clock still
+ * exists, and it still whistles on whatever is on the pitch, because rule 21 is right
+ * that a round with no clock stops being a round; it is simply long enough to let the
+ * player think about the only thing this gate is testing.
+ */
+export const GOAL_SECONDS = [100, 85, 70] as const

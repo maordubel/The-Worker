@@ -3,9 +3,12 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { BallotSlip } from '@/components/ballot/BallotSlip'
+import { VoteReaction } from '@/components/ballot/VoteReaction'
 import { RosterSheet } from '@/components/roster/RosterSheet'
 import { Num } from '@/components/ui/Num'
 import type { RosterIndex } from '@/lib/game/allTimeXI'
+import type { ShirtBoard } from '@/lib/xi/board'
+import type { KitSpec } from '@/lib/kit/spec'
 import {
   BALLOT,
   NUMBERS,
@@ -15,10 +18,14 @@ import {
   type Ballot,
   type PollQuestion,
 } from '@/lib/polls/ballot'
+import { pickFact } from '@/lib/polls/pickFact'
+import type { Reasons } from '@/lib/polls/reasons'
+import { shirtNumber, supporterId } from '@/lib/polls/supporter'
 import { activeStore } from '@/lib/polls/store'
 import { useDialog } from '@/components/ui/useDialog'
+import { readBook, writeBook, type MemberBook } from '@/lib/game/member'
 import { recordDeed } from '@/lib/profile/store'
-import { t } from '@/lib/i18n'
+import { t, type MessageKey } from '@/lib/i18n'
 
 /**
  * פתק ההצבעה — the polls wing, as a committee sheet.
@@ -36,13 +43,54 @@ import { t } from '@/lib/i18n'
  * every row turns from a button into plain text — there is nothing left to tap, because
  * a sealed document is read, not edited. "פתק חדש" is the only way back, and it clears
  * both the picks and the seal in one call.
+ *
+ * ## הקצב — what happens between a pick and the next question (19.9.2026)
+ *
+ * The document was silent between taps: you chose a name, the sheet closed, and nothing
+ * said the vote had landed or asked you anything about it. Three things fill that now,
+ * and all three are the same beat (`VoteReaction`):
+ *
+ *  · **the pick is confirmed** — stamped, with the row count;
+ *  · **the archive says what it holds on him** — seasons, position, the shirt he is
+ *    identified with, each with its source, and one honest sentence where it holds
+ *    nothing (`lib/polls/pickFact.ts`). Never a terrace quote: a line about what
+ *    supporters think, with no count behind it, is the fabricated number with the
+ *    digits removed (rules 11 and 18);
+ *  · **"למה דווקא זה"** — one optional chip, kept on this device and never counted
+ *    (`lib/polls/reasons.ts`).
+ *
+ * Then it advances to the next EMPTY row by itself, and stops at the slip when there is
+ * none. Every part of that is escapable: a tap goes now, "שיניתי את דעתי" cancels the
+ * advance and reopens the picker on the same question, and any row on the slip is still
+ * one tap away for as long as the slip is unsealed.
+ *
+ * ## הזהות — and the one place it is kept
+ *
+ * The name on the shirt and the number on the back are the member book's fields
+ * (`lib/game/member.ts`), not new ones: this screen reads and writes the same record
+ * gate 10 prints, which is why answering "איזה מספר" here changes the shirt there, and
+ * why signing in carries one name rather than two (rule 59, and the brief's own
+ * instruction not to duplicate a field the profile already stores).
  */
-export function BallotSheet({ roster }: { roster: RosterIndex }) {
+export function BallotSheet({
+  roster,
+  shirts,
+  shirt,
+}: {
+  roster: RosterIndex
+  /** the shirt join gate 1 already receives — used here for the men on the slip */
+  shirts: ShirtBoard
+  /** the club's own home kit, for the supporter's own shirt */
+  shirt: KitSpec
+}) {
   const store = useMemo(() => activeStore(), [])
   const [ballot, setBallot] = useState<Ballot>({})
+  const [reasons, setReasons] = useState<Reasons>({})
   const [sealed, setSealed] = useState(false)
   const [ready, setReady] = useState(false)
+  const [book, setBook] = useState<MemberBook | null>(null)
   const [open, setOpen] = useState<PollQuestion | null>(null)
+  const [reacting, setReacting] = useState<{ question: PollQuestion; pick: string } | null>(null)
 
   // The saved slip is read AFTER mount, never during render: the server has no browser
   // storage, and reading it in a render is how a hydration mismatch is born. Which side
@@ -50,21 +98,79 @@ export function BallotSheet({ roster }: { roster: RosterIndex }) {
   // screen's.
   useEffect(() => {
     let live = true
-    void Promise.all([store.read(), store.sealed()]).then(([saved, isSealed]) => {
-      if (!live) return
-      setBallot(saved)
-      setSealed(isSealed)
-      setReady(true)
-    })
+    void Promise.all([store.read(), store.sealed(), store.reasons()]).then(
+      ([saved, isSealed, savedReasons]) => {
+        if (!live) return
+        setBallot(saved)
+        setSealed(isSealed)
+        setReasons(savedReasons)
+        setBook(readBook())
+        setReady(true)
+      },
+    )
     return () => {
       live = false
     }
   }, [store])
 
   function cast(question: PollQuestion, pick: string) {
-    setBallot((current) => ({ ...current, [question.id]: pick }))
+    const next: Ballot = { ...ballot, [question.id]: pick }
+    setBallot(next)
     void store.save(question.id, pick)
+
+    // The shirt number is the member book's own field, so answering it here answers it
+    // there. Everything else on the slip is an opinion and belongs to the slip.
+    if (question.kind === 'number') {
+      const value = shirtNumber(next)
+      if (value !== null && book !== null && book.number !== value) {
+        const updated = { ...book, number: value }
+        setBook(updated)
+        writeBook(updated)
+      }
+    }
+
     setOpen(null)
+    setReacting({ question, pick })
+  }
+
+  function markReason(questionId: string, reason: MessageKey) {
+    setReasons((current) => {
+      const draft = { ...current }
+      if (draft[questionId] === reason) delete draft[questionId]
+      else draft[questionId] = reason
+      return draft
+    })
+    void store.saveReason(questionId, reason)
+  }
+
+  function saveName(value: string) {
+    if (book === null) return
+    const updated = { ...book, nameHe: value.slice(0, 18) }
+    setBook(updated)
+    writeBook(updated)
+  }
+
+  /**
+   * The next row with nothing in it, starting after the one just answered and wrapping.
+   *
+   * Wrapping is what makes the rhythm survive editing: a supporter who comes back to fix
+   * row two should be carried on to whatever is still empty, which may well be row
+   * seven. `null` means the slip is full and the beat returns to the document.
+   */
+  function nextEmpty(after: PollQuestion, filled: Ballot): PollQuestion | null {
+    const from = BALLOT.findIndex((question) => question.id === after.id)
+    for (let step = 1; step <= BALLOT.length; step += 1) {
+      const candidate = BALLOT[(from + step) % BALLOT.length]
+      if (candidate && (filled[candidate.id] ?? '') === '') return candidate
+    }
+    return null
+  }
+
+  function advance() {
+    if (reacting === null) return
+    const next = nextEmpty(reacting.question, ballot)
+    setReacting(null)
+    setOpen(next)
   }
 
   function seal() {
@@ -78,12 +184,28 @@ export function BallotSheet({ roster }: { roster: RosterIndex }) {
 
   function fresh() {
     setBallot({})
+    setReasons({})
     setSealed(false)
     void store.clear()
   }
 
   const filled = ballotFilled(ballot)
   const complete = ballotComplete(ballot)
+  const supporter = useMemo(
+    () => supporterId(ballot, reasons, book ?? {}),
+    [ballot, reasons, book],
+  )
+  const favourite = useMemo(
+    () => pickFact(supporter.favourite, roster.all, shirts),
+    [supporter.favourite, roster.all, shirts],
+  )
+  const reactingFact = useMemo(
+    () =>
+      reacting === null || reacting.question.kind !== 'roster'
+        ? null
+        : pickFact(reacting.pick, roster.all, shirts),
+    [reacting, roster.all, shirts],
+  )
 
   return (
     <div className="mt-stack">
@@ -93,7 +215,12 @@ export function BallotSheet({ roster }: { roster: RosterIndex }) {
           filled={filled}
           complete={complete}
           sealed={sealed}
+          nameHe={book?.nameHe ?? ''}
+          supporter={supporter}
+          shirt={shirt}
+          favourite={favourite}
           onRowTap={(question) => setOpen(question)}
+          onName={saveName}
           onSeal={seal}
           onNewSlip={fresh}
         />
@@ -145,6 +272,25 @@ export function BallotSheet({ roster }: { roster: RosterIndex }) {
             ))}
           </ol>
         </PickSheet>
+      )}
+
+      {reacting !== null && (
+        <VoteReaction
+          question={reacting.question}
+          pick={reacting.pick}
+          fact={reactingFact}
+          chosen={reasons[reacting.question.id]}
+          filled={filled}
+          last={nextEmpty(reacting.question, ballot) === null}
+          onReason={(reason) => markReason(reacting.question.id, reason)}
+          onRethink={() => {
+            const question = reacting.question
+            setReacting(null)
+            setOpen(question)
+          }}
+          onClose={() => setReacting(null)}
+          onDone={advance}
+        />
       )}
     </div>
   )

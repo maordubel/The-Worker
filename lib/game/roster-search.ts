@@ -92,6 +92,15 @@ export type RosterFilter = {
   origin: 'any' | 'israeli' | 'foreign' | 'unknown'
   /** a decade's opening year — 1970, 1980 … — or 'any' */
   decade: number | 'any'
+  /**
+   * One season, as its opening year — "who was here in 2010". `null` is no filter.
+   *
+   * A decade answers "roughly when"; a supporter building an all-time eleven asks the
+   * narrower question constantly, and it is the same fact read at a finer grain. A man
+   * the archive cannot date never matches a year: absence of a record is not a record of
+   * absence, so he is missing from this answer rather than assumed into it.
+   */
+  year: number | null
   /** family-name initial, or 'any' */
   letter: string | 'any'
 }
@@ -100,6 +109,7 @@ export const NO_FILTER: RosterFilter = {
   position: 'any',
   origin: 'any',
   decade: 'any',
+  year: null,
   letter: 'any',
 }
 
@@ -108,6 +118,7 @@ export function isFiltered(filter: RosterFilter): boolean {
     filter.position !== 'any' ||
     filter.origin !== 'any' ||
     filter.decade !== 'any' ||
+    filter.year !== null ||
     filter.letter !== 'any'
   )
 }
@@ -129,6 +140,13 @@ function inDecade(entry: Searchable, decade: number): boolean {
   return from <= decade + 9 && (to ?? from) >= decade
 }
 
+/** Was he at the club in that season, as far as the archive can tell? */
+function inYear(entry: Searchable, year: number): boolean {
+  const from = entry.fromYear
+  if (from === null || from === undefined) return false
+  return from <= year && (entry.toYear ?? from) >= year
+}
+
 /**
  * Narrow a list. Pure, synchronous and cheap enough to run on every keystroke — the
  * whole roster is 637 objects and this is four comparisons each.
@@ -146,6 +164,7 @@ export function filterRoster(entries: Searchable[], filter: RosterFilter): Searc
       if (entry.origin) return false
     } else if (filter.origin !== 'any' && entry.origin !== filter.origin) return false
     if (filter.decade !== 'any' && !inDecade(entry, filter.decade)) return false
+    if (filter.year !== null && !inYear(entry, filter.year)) return false
     return true
   })
 }

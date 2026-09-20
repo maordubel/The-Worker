@@ -17,6 +17,12 @@
  * is the roster row; storing his name would freeze a spelling the archive is still
  * correcting, and storing anything richer would make this a second copy of the roster.
  * A slug that no longer exists is dropped on read — a retired row is not a crash.
+ *
+ * **Everything after `picks` is optional, and that is the upgrade path** (19.9.2026).
+ * The sheet grew a version per slot, an armband, a twelfth man, a last man cut and a
+ * shortlist; a sheet written before any of them existed reads back as a sheet without
+ * them rather than as a sheet that fails to parse. Nothing is versioned and nothing is
+ * migrated, because an absent field already means the only thing it could mean.
  */
 
 import type { Formation } from '@/lib/game/lineup'
@@ -39,22 +45,52 @@ export type SavedXI = {
   formation: string
   /** slot id → roster slug */
   picks: Record<string, string>
+  /**
+   * slot id → the version of that man the sheet was built around, as `lib/xi/board.ts`
+   * spells the id (`1979-1988`). Absent for the men who have only one, which is most of
+   * them — an entry here would be a stored fact the archive never stated.
+   */
+  versions?: Record<string, string>
+  /** the slot wearing the armband, or absent */
+  captain?: string
+  /** roster slugs — the twelfth man and the last man cut, each one a real decision */
+  twelfth?: string
+  cut?: string
+  /** roster slugs the supporter is still arguing with himself about */
+  shortlist?: string[]
   /** ISO date it was last saved */
   savedOn: string
 }
 
 export type XIBook = Partial<Record<XITab, SavedXI>>
 
+/** Everything a sheet holds except the date the device stamps on it. */
+export type XISheet = Omit<SavedXI, 'savedOn'>
+
 export interface XIStore {
   /** true when this store can see other people's sheets. Local cannot. */
   readonly remote: boolean
   read(): Promise<XIBook>
-  save(tab: XITab, sheet: { formation: string; picks: Record<string, string> }): Promise<void>
+  save(tab: XITab, sheet: XISheet): Promise<void>
   clear(): Promise<void>
 }
 
 function isTab(value: string): value is XITab {
   return value === 'best' || value === 'worst'
+}
+
+/** A stored map of string→string, with anything that is not one dropped. */
+function stringMap(value: unknown): Record<string, string> {
+  const out: Record<string, string> = {}
+  if (typeof value !== 'object' || value === null) return out
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof entry === 'string' && entry !== '') out[key] = entry
+  }
+  return out
+}
+
+function stringOrUndefined(value: unknown): string | undefined {
+  return typeof value === 'string' && value !== '' ? value : undefined
 }
 
 export class LocalXIStore implements XIStore {
@@ -71,11 +107,21 @@ export class LocalXIStore implements XIStore {
         if (!isTab(tab) || typeof value !== 'object' || value === null) continue
         const sheet = value as Partial<SavedXI>
         if (typeof sheet.formation !== 'string' || typeof sheet.picks !== 'object') continue
-        const picks: Record<string, string> = {}
-        for (const [slot, slug] of Object.entries(sheet.picks ?? {})) {
-          if (typeof slug === 'string' && slug !== '') picks[slot] = slug
+        // A sheet written before the versions, the armband and the bench existed reads
+        // back as a sheet with none of them, not as a sheet that fails to read. That is
+        // the whole reason every field after `picks` is optional.
+        out[tab] = {
+          formation: sheet.formation,
+          picks: stringMap(sheet.picks),
+          versions: stringMap(sheet.versions),
+          captain: stringOrUndefined(sheet.captain),
+          twelfth: stringOrUndefined(sheet.twelfth),
+          cut: stringOrUndefined(sheet.cut),
+          shortlist: Array.isArray(sheet.shortlist)
+            ? sheet.shortlist.filter((slug): slug is string => typeof slug === 'string')
+            : [],
+          savedOn: sheet.savedOn ?? '',
         }
-        out[tab] = { formation: sheet.formation, picks, savedOn: sheet.savedOn ?? '' }
       }
       return out
     } catch {
@@ -93,10 +139,7 @@ export class LocalXIStore implements XIStore {
    * a sheet that is usually lost. An empty pitch saves as an empty pitch — clearing a
    * slot is a decision too.
    */
-  async save(
-    tab: XITab,
-    sheet: { formation: string; picks: Record<string, string> },
-  ): Promise<void> {
+  async save(tab: XITab, sheet: XISheet): Promise<void> {
     try {
       const current = await this.read()
       const next: XIBook = {
@@ -133,12 +176,40 @@ export function activeXI(): XIStore {
 export function restore(
   sheet: SavedXI | undefined,
   formations: readonly Formation[],
-): { formation: Formation; picks: Record<string, string> } | null {
+): {
+  formation: Formation
+  picks: Record<string, string>
+  versions: Record<string, string>
+  captain: string | null
+  twelfth: string | null
+  cut: string | null
+  shortlist: string[]
+} | null {
   if (!sheet) return null
   const formation = formations.find((option) => option.name === sheet.formation)
   if (!formation) return null
   const slots = new Set(formation.slots.map((slot) => slot.slotId))
   const picks: Record<string, string> = {}
   for (const [slot, slug] of Object.entries(sheet.picks)) if (slots.has(slot)) picks[slot] = slug
-  return { formation, picks }
+  // A version is a fact about a SLOT's occupant, so it goes when the occupant does: a
+  // stored `1990-1992` hanging on an empty slot would dress the next man picked there in
+  // a spell that belongs to somebody else.
+  const versions: Record<string, string> = {}
+  for (const [slot, id] of Object.entries(sheet.versions ?? {})) {
+    if (picks[slot] !== undefined) versions[slot] = id
+  }
+  // The armband belongs to a slot that still has a man in it. A captain of an empty
+  // shirt is a C drawn on nothing.
+  const captain = sheet.captain !== undefined && picks[sheet.captain] !== undefined
+    ? sheet.captain
+    : null
+  return {
+    formation,
+    picks,
+    versions,
+    captain,
+    twelfth: sheet.twelfth ?? null,
+    cut: sheet.cut ?? null,
+    shortlist: sheet.shortlist ?? [],
+  }
 }

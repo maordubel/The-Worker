@@ -1,0 +1,291 @@
+'use client'
+
+import { Num } from '@/components/ui/Num'
+import { REPLAY_ACTIONS, type ReplayAction } from '@/lib/game/replay/vocab'
+import type { ReplayPoint, UserTouch } from '@/lib/game/replay/envelope'
+import { t, type MessageKey } from '@/lib/i18n'
+
+/**
+ * בניית המהלך — the panel under the pitch, and the four decisions a touch is made of.
+ *
+ * Gate 8 used to TELL you the cast, the verbs and the order and ask only where. That is a
+ * quiz about a diagram. Here the move is built: who touched it, what he did, where he
+ * stood, where he sent it — and then you decide, yourself, that the move is finished.
+ * Nothing on this screen says how many touches the archive holds, because how many is
+ * part of the question.
+ *
+ * **And there is no "add touch" button.** The prototype has one, and gate 4 already
+ * settled this argument: *"a part has exactly one home so the second tap carries no
+ * decision — it is a dexterity step charged for nothing, and on a phone it doubles every
+ * action in the game"* (rule 24). A touch is who, what, from where, to where; the moment
+ * the fourth is answered there is nothing left to decide, so the second pitch tap commits
+ * it and the panel is ready for the next one. Reopening a finished touch and tapping twice
+ * saves it the same way. Four taps a touch on a phone instead of five, and the rack is
+ * reachable without scrolling back for a button that agreed with you.
+ *
+ * Four things this panel is deliberately NOT:
+ *   · **not a set of dropdowns.** Every option is a visible, pressable thing; the rack
+ *     scrolls sideways on a phone rather than collapsing into a select.
+ *   · **not a place you can get stuck.** Every state has a next action and a way back:
+ *     clear the touch being built, undo the last one, or tap a finished touch to reopen
+ *     it. Rule 42's "leaving is always allowed", in a builder.
+ *   · **not a hidden gesture.** The verbs carry a drawn mark AND their name, because "do
+ *     not rely on colour alone" is also true of a glyph alone.
+ *   · **not a shrunken desktop.** Every control clears the 48px tap height on the
+ *     narrowest phone this product supports.
+ */
+
+const ACTION_LABEL: Record<ReplayAction, MessageKey> = {
+  pass: 'goal.action.pass',
+  throughBall: 'goal.action.throughBall',
+  cross: 'goal.action.cross',
+  dribble: 'goal.action.dribble',
+  shot: 'goal.action.shot',
+  header: 'goal.action.header',
+  save: 'goal.action.save',
+}
+
+export const ACTION_SHORT: Record<ReplayAction, MessageKey> = {
+  pass: 'goal.act.pass',
+  throughBall: 'goal.act.throughBall',
+  cross: 'goal.act.cross',
+  dribble: 'goal.act.dribble',
+  shot: 'goal.act.shot',
+  header: 'goal.act.header',
+  save: 'goal.act.save',
+}
+
+/**
+ * The verbs, drawn.
+ *
+ * Seven marks in one idiom — a stroke and, where the verb needs it, one more. They are
+ * not emoji and they are not a licensed icon set: a pass is a straight arrow, a ball in
+ * behind is the same arrow dashed, a cross is an arc, carrying it is a zigzag, an attempt
+ * is a spoked burst, a header is that burst under a head, and a parry is a flat palm.
+ */
+export function ActionGlyph({ action }: { action: ReplayAction }) {
+  const paths: Record<ReplayAction, React.ReactNode> = {
+    pass: <path d="M3 12 H19 M14 7 L19 12 L14 17" />,
+    throughBall: (
+      <>
+        <path d="M3 12 H19 M14 7 L19 12 L14 17" strokeDasharray="3 3" />
+      </>
+    ),
+    cross: <path d="M3 17 Q 11 2 19 14 M15 11 L19 14 L18 9" />,
+    dribble: <path d="M3 12 L7 7 L11 15 L15 8 L19 12" />,
+    shot: (
+      <>
+        <circle cx="8" cy="12" r="4" />
+        <path d="M13 12 H20 M13 8 L20 6 M13 16 L20 18" />
+      </>
+    ),
+    header: (
+      <>
+        <circle cx="8" cy="8" r="3.4" />
+        <path d="M11 11 L19 17 M11 6 L19 4" />
+        <path d="M6 13 L7 20" />
+      </>
+    ),
+    save: (
+      <>
+        <path d="M5 19 V10 a2 2 0 0 1 4 0 V6 a2 2 0 0 1 4 0 v5" />
+        <path d="M13 11 a2 2 0 0 1 4 0 v6 a4 4 0 0 1 -4 4 H8" />
+      </>
+    ),
+  }
+  return (
+    <svg viewBox="0 0 22 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {paths[action]}
+    </svg>
+  )
+}
+
+export type Draft = {
+  actorHe: string | null
+  action: ReplayAction | null
+  origin: ReplayPoint | null
+  target: ReplayPoint | null
+}
+
+export function askKey(draft: Draft): MessageKey {
+  if (!draft.actorHe) return 'goal.ask.player'
+  if (!draft.action) return 'goal.ask.action'
+  if (!draft.origin) return 'goal.ask.origin'
+  return 'goal.ask.target'
+}
+
+export function ReplayBuilder({
+  pool,
+  draft,
+  touches,
+  editing,
+  full,
+  canFinish,
+  onPickPlayer,
+  onPickAction,
+  onClear,
+  onUndo,
+  onEdit,
+  onFinish,
+}: {
+  pool: string[]
+  draft: Draft
+  touches: UserTouch[]
+  /** the index being re-opened, or null when the draft is a new touch */
+  editing: number | null
+  /** true at the five-touch ceiling — the racks stay live for editing, the add does not */
+  full: boolean
+  canFinish: boolean
+  onPickPlayer: (name: string) => void
+  onPickAction: (action: ReplayAction) => void
+  onClear: () => void
+  onUndo: () => void
+  onEdit: (index: number) => void
+  onFinish: () => void
+}) {
+  const shut = full && editing === null
+
+  return (
+    <div className="mt-2.5">
+      {/* the ask — one sentence, and it changes as the touch fills in */}
+      <div className="flex items-center justify-between gap-2 border-rule border-ink bg-ink px-3 py-2">
+        <p className="min-w-0 font-display text-step-0 leading-tight text-paper">
+          {editing !== null ? t('goal.editing', { n: String(editing + 1) }) : t(askKey(draft))}
+        </p>
+        <span className="shrink-0 font-latin text-[10px] font-extrabold tracking-[0.12em] text-concrete" dir="ltr">
+          {touches.length}/5
+        </span>
+      </div>
+
+      {/* who */}
+      <div className="mt-1.5 -mx-gutter overflow-x-auto px-gutter">
+        <ul className="flex w-max gap-1.5">
+          {pool.map((name) => {
+            const chosen = draft.actorHe === name
+            return (
+              <li key={name}>
+                <button
+                  type="button"
+                  onClick={() => onPickPlayer(name)}
+                  aria-pressed={chosen}
+                  disabled={shut}
+                  data-goal="player"
+                  className={`flex min-h-tap items-center whitespace-nowrap border-rule border-ink px-3 font-body text-[13px] font-extrabold transition-colors duration-press disabled:opacity-40 ${
+                    chosen ? 'bg-red text-paper' : 'bg-sheet text-ink'
+                  }`}
+                >
+                  {name}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+      <p className="mt-1 font-body text-[10.5px] leading-snug text-muted">{t('goal.poolNote')}</p>
+
+      {/* what */}
+      <ul className="mt-1.5 grid grid-cols-4 gap-1.5">
+        {REPLAY_ACTIONS.map((action) => {
+          const chosen = draft.action === action
+          return (
+            <li key={action}>
+              <button
+                type="button"
+                onClick={() => onPickAction(action)}
+                aria-pressed={chosen}
+                disabled={shut}
+                data-goal="action"
+                className={`flex min-h-tap w-full flex-col items-center justify-center gap-0.5 border-rule border-ink px-1 py-1 transition-colors duration-press disabled:opacity-40 ${
+                  chosen ? 'bg-red text-paper' : 'bg-sheet text-ink'
+                }`}
+              >
+                <ActionGlyph action={action} />
+                <span className="font-body text-[9.5px] font-extrabold leading-none">
+                  {t(ACTION_LABEL[action])}
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+
+      {/* the three buttons that move the move along. There is no fourth — see the header. */}
+      <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+        <button
+          type="button"
+          onClick={onClear}
+          disabled={draft.actorHe === null && editing === null}
+          data-goal="clear"
+          className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-2 font-body text-[12px] font-extrabold text-muted disabled:opacity-40"
+        >
+          {t('goal.clearTouch')}
+        </button>
+        <button
+          type="button"
+          onClick={onUndo}
+          disabled={touches.length === 0}
+          data-goal="undo"
+          className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-2 font-body text-[12px] font-extrabold text-ink disabled:opacity-40"
+        >
+          {t('goal.undo')}
+        </button>
+        <button
+          type="button"
+          onClick={onFinish}
+          disabled={!canFinish}
+          data-goal="finish"
+          className="flex min-h-tap items-center justify-center border-rule border-ink bg-red px-2 font-body text-[12px] font-extrabold text-paper disabled:opacity-40"
+        >
+          {t('goal.finish')}
+        </button>
+      </div>
+      {!canFinish && (
+        <p className="mt-1 font-body text-[10.5px] leading-snug text-muted">{t('goal.needTwo')}</p>
+      )}
+      {full && editing === null && (
+        <p className="mt-1 font-body text-[10.5px] leading-snug text-muted">{t('goal.tooMany')}</p>
+      )}
+
+      {/* the move so far — tap a line to reopen it */}
+      <div className="mt-2 border-rule border-ink bg-sheet">
+        <p className="border-b-hair border-ink/25 px-3 py-1.5 font-body text-[10px] font-extrabold tracking-widest text-muted">
+          {t('goal.touchList')}
+        </p>
+        {touches.length === 0 ? (
+          <p className="px-3 py-3 font-body text-[11.5px] leading-snug text-muted">
+            {t('goal.noTouches')}
+          </p>
+        ) : (
+          <ol>
+            {touches.map((touch, index) => (
+              <li key={index} className="border-b-hair border-ink/20 last:border-b-0">
+                <button
+                  type="button"
+                  onClick={() => onEdit(index)}
+                  aria-label={t('goal.editTouch', { n: String(index + 1) })}
+                  data-goal="touch"
+                  className={`flex min-h-tap w-full items-center gap-2 px-3 text-start transition-colors duration-press ${
+                    editing === index ? 'bg-red/10' : ''
+                  }`}
+                >
+                  <span className="w-5 shrink-0 font-poster text-[17px] leading-none text-red">
+                    <Num>{index + 1}</Num>
+                  </span>
+                  <span className="shrink-0 text-ink">
+                    <ActionGlyph action={touch.action} />
+                  </span>
+                  <span className="min-w-0 flex-1 font-body text-[12.5px] font-extrabold leading-snug text-ink">
+                    <bdi>{touch.actorHe}</bdi>
+                  </span>
+                  <span className="shrink-0 font-body text-[10.5px] text-muted">
+                    {t(ACTION_SHORT[touch.action])}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    </div>
+  )
+}

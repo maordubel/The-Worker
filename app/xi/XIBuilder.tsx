@@ -1,14 +1,17 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { KitPlate } from '@/components/kit/KitPlate'
 import { Num } from '@/components/ui/Num'
 import { RosterSheet } from '@/components/roster/RosterSheet'
 import { ShareRow } from '@/components/share/ShareRow'
+import { useDialog } from '@/components/ui/useDialog'
 import type { Formation, PitchSlot } from '@/lib/game/lineup'
 import type { RosterEntry, RosterIndex } from '@/lib/game/allTimeXI'
 import type { ShirtBoard } from '@/lib/xi/board'
+import { xiDna } from '@/lib/xi/dna'
+import type { ScoutOrder } from '@/lib/xi/scout'
 import { activeXI, restore, XI_TABS, type XITab } from '@/lib/xi/store'
 import { recordDeed } from '@/lib/profile/store'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -24,11 +27,22 @@ import { t, type MessageKey } from '@/lib/i18n'
  * Free play. No clock, no lives, no score — the reward is the picture and the argument
  * it starts, which is the reward the game has always had in real life.
  *
- * The design problem is 637 names. A dropdown of 637 is a wall, so: tap a slot on the
- * pitch, and the roster opens as a sheet with a search that matches ANY part of the name
- * (a supporter types "בוזגלו", not "מאור"), plus an alphabet rail keyed on the family
- * name. Picking closes the sheet and puts the chip on the grass. Nothing is graded and
- * nothing is required — an eleven with three empty slots still shares.
+ * ## שולחן המאמן — the position first, the man second (19.9.2026)
+ *
+ * The one interaction change that everything else hangs off. Until now the pitch was
+ * eleven identical holes and the sheet was 661 names: a drawer could not help, because
+ * it had no idea what you were trying to fill. Now a slot carries a detailed role
+ * (`lib/game/lineup.ts`), tapping it SELECTS that position, and the drawer opens already
+ * knowing it — so "who could play here" becomes a question the screen can answer instead
+ * of a list you scroll.
+ *
+ * **What the drawer may and may not claim.** Our positions are the four the sources
+ * state — `GK / DF / MF / FW` — and the slot's role is mapped DOWN to the ones it
+ * accepts. `lib/xi/roles.ts` holds that reasoning and it is the integrity question of
+ * this gate: saying "this slot wants a defender" is a fact about a formation we invented;
+ * saying "this man was a right back" would be a fact about a person that no source here
+ * states. The fit answer is therefore coarse on purpose, and a man the archive cannot
+ * place is shown as unplaced rather than filtered away.
  *
  * ## The shirt (17.9.2026)
  *
@@ -41,6 +55,11 @@ import { t, type MessageKey } from '@/lib/i18n'
  * his name, exactly as before** — 272 of the 661, and inventing a shirt for them would
  * be inventing a fact about a man (rule 11).
  *
+ * **And a man with two spells can be picked as either of them** (19.9.2026). The
+ * versions are derived from the squad table's own runs of consecutive seasons, never
+ * from an era typed beside a name; 109 of the roster have more than one, and everybody
+ * else gets no chooser at all rather than a manufactured second self.
+ *
  * ## The second tab (17.9.2026)
  *
  * Maor: *"אני רוצה שיהיה גם אופציה בהרכב כל הזמנים ל'ההרכב הגרוע בכל הזמנים' בלשונית
@@ -51,13 +70,50 @@ import { t, type MessageKey } from '@/lib/i18n'
  * built on a documented transfer with a source. An app-GENERATED "worst players" list is
  * a different object: a factual claim about named men that no source supports, printed
  * by us. So the worst XI is a supporter's opinion from end to end — he picks all eleven
- * out of the same roster, nothing is suggested, nothing is scored, and the share card
+ * out of the same roster, nothing is offered, nothing is scored, and the share card
  * says in its own words that it is one man's opinion.
+ *
+ * **The formations and the drawer serve both tabs, and no scoring leaks in with them.**
+ * Grouping by documented position is not a judgement of a player — a bad right back is
+ * still a right back — but the drawer says so in its own words on the worst sheet
+ * (`xi.worst.drawer`) rather than leaving the reader to work out that "fit" is about
+ * where a man played and never about how well.
  *
  * The two tabs share ONE roster sheet and one pitch (rule 24 — one ranking, no second
  * copy); the only thing that differs between them is which sheet is being saved and
  * what the card says.
  */
+
+/** One tab's whole state. Everything the store keeps, plus the rows themselves. */
+type Sheet = {
+  formation: Formation
+  /** slot id → the man standing there */
+  picks: Record<string, RosterEntry>
+  /** slot id → which of his spells was chosen. Absent where he has only one. */
+  versions: Record<string, string>
+  /** the slot wearing the armband */
+  captain: string | null
+  twelfth: RosterEntry | null
+  cut: RosterEntry | null
+  /** roster slugs still being argued over */
+  shortlist: RosterEntry[]
+}
+
+/** What a removal has to remember in order to be undoable. */
+type Undo = { slotId: string; entry: RosterEntry; versionId: string | undefined }
+
+function emptySheet(formation: Formation): Sheet {
+  return {
+    formation,
+    picks: {},
+    versions: {},
+    captain: null,
+    twelfth: null,
+    cut: null,
+    shortlist: [],
+  }
+}
+
 export function XIBuilder({
   formations,
   roster,
@@ -71,15 +127,18 @@ export function XIBuilder({
   tab?: XITab
 }) {
   const [tab, setTab] = useState<XITab>(initialTab)
-  const [formation, setFormation] = useState<Record<XITab, Formation>>({
-    best: formations[0] as Formation,
-    worst: formations[0] as Formation,
+  const [sheets, setSheets] = useState<Record<XITab, Sheet>>({
+    best: emptySheet(formations[0] as Formation),
+    worst: emptySheet(formations[0] as Formation),
   })
-  const [picked, setPicked] = useState<Record<XITab, Record<string, RosterEntry>>>({
-    best: {},
-    worst: {},
-  })
-  const [openSlot, setOpenSlot] = useState<PitchSlot | null>(null)
+  /** the slot the drawer is aimed at — the whole "position first" mechanic */
+  const [selected, setSelected] = useState<string | null>(null)
+  const [drawer, setDrawer] = useState<'slot' | 'twelfth' | 'cut' | null>(null)
+  const [swapFrom, setSwapFrom] = useState<string | null>(null)
+  const [order, setOrder] = useState<ScoutOrder>('fit')
+  const [fitOnly, setFitOnly] = useState(true)
+  const [undo, setUndo] = useState<Undo | null>(null)
+  const [poster, setPoster] = useState(false)
   const [ready, setReady] = useState(false)
 
   const store = useMemo(() => activeXI(), [])
@@ -99,20 +158,36 @@ export function XIBuilder({
     let alive = true
     void store.read().then((book) => {
       if (!alive) return
-      const next = { ...picked }
-      const nextFormation = { ...formation }
-      for (const key of XI_TABS) {
-        const sheet = restore(book[key], formations)
-        if (!sheet) continue
-        nextFormation[key] = sheet.formation
-        next[key] = Object.fromEntries(
-          Object.entries(sheet.picks)
-            .map(([slot, slug]) => [slot, bySlug.get(slug)] as const)
-            .filter((pair): pair is [string, RosterEntry] => pair[1] !== undefined),
-        )
-      }
-      setFormation(nextFormation)
-      setPicked(next)
+      setSheets((current) => {
+        const next = { ...current }
+        for (const key of XI_TABS) {
+          const saved = restore(book[key], formations)
+          if (!saved) continue
+          const picks: Record<string, RosterEntry> = {}
+          for (const [slot, slug] of Object.entries(saved.picks)) {
+            const entry = bySlug.get(slug)
+            if (entry) picks[slot] = entry
+          }
+          // A version whose man was dropped on read goes with him, and so does an
+          // armband on a slot that no longer holds anybody.
+          const versions: Record<string, string> = {}
+          for (const [slot, id] of Object.entries(saved.versions)) {
+            if (picks[slot]) versions[slot] = id
+          }
+          next[key] = {
+            formation: saved.formation,
+            picks,
+            versions,
+            captain: saved.captain !== null && picks[saved.captain] ? saved.captain : null,
+            twelfth: saved.twelfth ? (bySlug.get(saved.twelfth) ?? null) : null,
+            cut: saved.cut ? (bySlug.get(saved.cut) ?? null) : null,
+            shortlist: saved.shortlist
+              .map((slug) => bySlug.get(slug))
+              .filter((entry): entry is RosterEntry => entry !== undefined),
+          }
+        }
+        return next
+      })
       setReady(true)
     })
     return () => {
@@ -121,19 +196,24 @@ export function XIBuilder({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- read once, on mount
   }, [])
 
+  const sheet = sheets[tab]
+
   useEffect(() => {
     if (!ready) return
     void store.save(tab, {
-      formation: formation[tab].name,
+      formation: sheet.formation.name,
       picks: Object.fromEntries(
-        Object.entries(picked[tab]).map(([slot, entry]) => [slot, entry.slug]),
+        Object.entries(sheet.picks).map(([slot, entry]) => [slot, entry.slug]),
       ),
+      versions: sheet.versions,
+      ...(sheet.captain !== null ? { captain: sheet.captain } : {}),
+      ...(sheet.twelfth ? { twelfth: sheet.twelfth.slug } : {}),
+      ...(sheet.cut ? { cut: sheet.cut.slug } : {}),
+      shortlist: sheet.shortlist.map((entry) => entry.slug),
     })
-  }, [ready, tab, formation, picked, store])
+  }, [ready, tab, sheet, store])
 
-  const current = picked[tab]
-  const currentFormation = formation[tab]
-  const chosen = Object.keys(current).length
+  const chosen = Object.keys(sheet.picks).length
 
   /*
    * מעשה — a wing has no round, and until 17.9.2026 that meant its plate could never light
@@ -154,26 +234,180 @@ export function XIBuilder({
   }, [chosen])
 
   const takenSlugs = useMemo(
-    () => new Set(Object.values(current).map((entry) => entry.slug)),
-    [current],
+    () => new Set(Object.values(sheet.picks).map((entry) => entry.slug)),
+    [sheet.picks],
+  )
+  const shortlisted = useMemo(
+    () => new Set(sheet.shortlist.map((entry) => entry.slug)),
+    [sheet.shortlist],
   )
 
-  function choose(entry: RosterEntry) {
-    if (!openSlot) return
-    const slotId = openSlot.slotId
-    setPicked((all) => ({ ...all, [tab]: { ...all[tab], [slotId]: entry } }))
-    setOpenSlot(null)
+  const patch = useCallback(
+    (change: (current: Sheet) => Sheet) => {
+      setSheets((all) => ({ ...all, [tab]: change(all[tab]) }))
+    },
+    [tab],
+  )
+
+  /* ------------------------------------------------------------- the mechanics */
+
+  const slotById = useMemo(
+    () => new Map(sheet.formation.slots.map((slot) => [slot.slotId, slot])),
+    [sheet.formation],
+  )
+  const openSlot = selected === null ? null : (slotById.get(selected) ?? null)
+
+  function tapSlot(slot: PitchSlot) {
+    // A swap in progress owns the next tap: the second slot is the destination, and
+    // tapping the same one again is how you change your mind.
+    if (swapFrom !== null) {
+      const from = swapFrom
+      setSwapFrom(null)
+      setSelected(slot.slotId)
+      if (from === slot.slotId) return
+      patch((current) => {
+        const picks = { ...current.picks }
+        const versions = { ...current.versions }
+        const there = picks[slot.slotId]
+        const here = picks[from]
+        if (here) picks[slot.slotId] = here
+        else delete picks[slot.slotId]
+        if (there) picks[from] = there
+        else delete picks[from]
+        const versionHere = versions[from]
+        const versionThere = versions[slot.slotId]
+        if (versionHere) versions[slot.slotId] = versionHere
+        else delete versions[slot.slotId]
+        if (versionThere) versions[from] = versionThere
+        else delete versions[from]
+        const captain =
+          current.captain === from
+            ? slot.slotId
+            : current.captain === slot.slotId
+              ? from
+              : current.captain
+        return { ...current, picks, versions, captain }
+      })
+      return
+    }
+    setSelected(slot.slotId)
+    // One tap gets you to the drawer when the shirt is empty, because two taps to reach
+    // a list on a phone is the difference between a tool and a chore. A shirt that is
+    // already filled opens the slot's own strip instead — tapping a man you placed used
+    // to delete him, which is a destructive default nobody asked for.
+    if (!sheet.picks[slot.slotId]) setDrawer('slot')
   }
 
-  function clear(slotId: string) {
-    setPicked((all) => {
-      const next = { ...all[tab] }
-      delete next[slotId]
-      return { ...all, [tab]: next }
+  function place(entry: RosterEntry) {
+    if (drawer === 'twelfth') {
+      patch((current) => ({ ...current, twelfth: entry }))
+      setDrawer(null)
+      return
+    }
+    if (drawer === 'cut') {
+      patch((current) => ({ ...current, cut: entry }))
+      setDrawer(null)
+      return
+    }
+    if (selected === null) return
+    const slotId = selected
+    patch((current) => {
+      const versions = { ...current.versions }
+      const fallback = shirts.defaultVersion[entry.slug]
+      if (fallback) versions[slotId] = fallback
+      else delete versions[slotId]
+      return { ...current, picks: { ...current.picks, [slotId]: entry }, versions }
+    })
+    setDrawer(null)
+  }
+
+  function remove(slotId: string) {
+    const entry = sheet.picks[slotId]
+    if (!entry) return
+    setUndo({ slotId, entry, versionId: sheet.versions[slotId] })
+    patch((current) => {
+      const picks = { ...current.picks }
+      const versions = { ...current.versions }
+      delete picks[slotId]
+      delete versions[slotId]
+      return {
+        ...current,
+        picks,
+        versions,
+        captain: current.captain === slotId ? null : current.captain,
+      }
     })
   }
 
+  function undoRemoval() {
+    if (!undo) return
+    const { slotId, entry, versionId } = undo
+    patch((current) => {
+      const versions = { ...current.versions }
+      if (versionId) versions[slotId] = versionId
+      return { ...current, picks: { ...current.picks, [slotId]: entry }, versions }
+    })
+    setUndo(null)
+  }
+
+  function toggleShortlist(slug: string) {
+    const entry = bySlug.get(slug)
+    if (!entry) return
+    patch((current) => ({
+      ...current,
+      shortlist: current.shortlist.some((row) => row.slug === slug)
+        ? current.shortlist.filter((row) => row.slug !== slug)
+        : [...current.shortlist, entry],
+    }))
+  }
+
+  /* --------------------------------------------------------------- the shirts */
+
+  /** Which season's shirt this slot's man wears — his chosen spell's, or his own. */
+  const seasonOf = useCallback(
+    (slotId: string): string | null => {
+      const entry = sheet.picks[slotId]
+      if (!entry) return null
+      const list = shirts.versions[entry.slug]
+      const chosenId = sheet.versions[slotId]
+      if (list && chosenId) {
+        const found = list.find((version) => version.id === chosenId)
+        if (found) return found.seasonLabel
+      }
+      return shirts.bySlug[entry.slug]?.seasonLabel ?? null
+    },
+    [sheet.picks, sheet.versions, shirts],
+  )
+
+  /** The first year of the spell this pick stands for — the DNA's decade comes from it. */
+  const fromYearOf = useCallback(
+    (slotId: string, entry: RosterEntry): number | null => {
+      const list = shirts.versions[entry.slug]
+      const chosenId = sheet.versions[slotId]
+      if (list && chosenId) {
+        const found = list.find((version) => version.id === chosenId)
+        if (found) return found.fromYear
+      }
+      return entry.fromYear ?? null
+    },
+    [sheet.versions, shirts.versions],
+  )
+
+  const dna = useMemo(
+    () =>
+      xiDna(
+        Object.entries(sheet.picks).map(([slotId, entry]) => ({
+          fromYear: fromYearOf(slotId, entry),
+          origin: entry.origin ?? null,
+        })),
+        sheet.formation.name,
+      ),
+    [sheet.picks, sheet.formation.name, fromYearOf],
+  )
+
   const worst = tab === 'worst'
+  const occupant = selected === null ? undefined : sheet.picks[selected]
+  const slotVersions = occupant ? (shirts.versions[occupant.slug] ?? []) : []
 
   return (
     <div className="mt-stack">
@@ -185,7 +419,12 @@ export function XIBuilder({
             type="button"
             role="tab"
             aria-selected={tab === option}
-            onClick={() => setTab(option)}
+            onClick={() => {
+              setTab(option)
+              setSelected(null)
+              setSwapFrom(null)
+              setUndo(null)
+            }}
             className={`min-h-tap flex-1 border-hair px-3 font-sign text-step--1 transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
               tab === option ? 'border-ink bg-ink text-paper' : 'border-ink/40 text-ink'
             }`}
@@ -212,10 +451,38 @@ export function XIBuilder({
             <button
               key={option.name}
               type="button"
-              onClick={() => setFormation((all) => ({ ...all, [tab]: option }))}
-              aria-pressed={currentFormation.name === option.name}
+              onClick={() => {
+                setSelected(null)
+                setSwapFrom(null)
+                // The picks move with the shape where the slot ids agree and are
+                // dropped where they do not — the same promise `restore` makes, for the
+                // same reason: a defender who wakes up on the wing because the shape
+                // changed is worse than an empty slot.
+                patch((current) => {
+                  const slots = new Set(option.slots.map((slot) => slot.slotId))
+                  const picks: Record<string, RosterEntry> = {}
+                  const versions: Record<string, string> = {}
+                  for (const [slotId, entry] of Object.entries(current.picks)) {
+                    if (!slots.has(slotId)) continue
+                    picks[slotId] = entry
+                    const version = current.versions[slotId]
+                    if (version) versions[slotId] = version
+                  }
+                  return {
+                    ...current,
+                    formation: option,
+                    picks,
+                    versions,
+                    captain:
+                      current.captain !== null && picks[current.captain]
+                        ? current.captain
+                        : null,
+                  }
+                })
+              }}
+              aria-pressed={sheet.formation.name === option.name}
               className={`min-h-tap border-hair px-3 font-mono text-step--1 tabular-nums transition-transform duration-press ease-stamp active:scale-[.95] motion-reduce:transition-none ${
-                currentFormation.name === option.name
+                sheet.formation.name === option.name
                   ? 'border-red bg-red text-paper'
                   : 'border-ink/40 text-ink'
               }`}
@@ -263,15 +530,18 @@ export function XIBuilder({
           </g>
         </svg>
 
-        {currentFormation.slots.map((slot) => {
-          const entry = current[slot.slotId]
-          const shirt = entry ? shirts.bySlug[entry.slug] : undefined
-          const season = shirt ? shirts.seasons[shirt.seasonLabel] : undefined
+        {sheet.formation.slots.map((slot) => {
+          const entry = sheet.picks[slot.slotId]
+          const seasonLabel = seasonOf(slot.slotId)
+          const season = seasonLabel ? shirts.seasons[seasonLabel] : undefined
+          const live = selected === slot.slotId
           return (
             <button
               key={slot.slotId}
               type="button"
-              onClick={() => (entry ? clear(slot.slotId) : setOpenSlot(slot))}
+              onClick={() => tapSlot(slot)}
+              aria-pressed={live}
+              aria-label={entry ? `${slot.roleHe} — ${entry.nameHe}` : slot.roleHe}
               style={{ insetInlineStart: `${slot.x}%`, top: `${slot.y}%` }}
               className="absolute min-h-tap -translate-x-1/2 -translate-y-1/2 transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none rtl:translate-x-1/2"
             >
@@ -291,7 +561,16 @@ export function XIBuilder({
                       title={t('xi.shirt.alt', { season: season.seasonLabel })}
                     />
                   )}
-                  <span className="block max-w-[104px] border-hair border-ink bg-sheet px-2 py-1 font-body text-[11px] font-extrabold leading-tight text-ink">
+                  <span
+                    className={`block max-w-[104px] border-hair bg-sheet px-2 py-1 font-body text-[11px] font-extrabold leading-tight text-ink ${
+                      live ? 'border-rule border-red' : 'border-ink'
+                    }`}
+                  >
+                    {sheet.captain === slot.slotId && (
+                      <span className="me-1 border-hair border-ink px-1 font-mono text-[8px] leading-none">
+                        <bdi dir="ltr">C</bdi>
+                      </span>
+                    )}
                     {entry.nameHe}
                   </span>
                   {season && (
@@ -301,13 +580,217 @@ export function XIBuilder({
                   )}
                 </span>
               ) : (
-                <span className="block border-hair border-dashed border-sheet/80 bg-ink/25 px-2 py-1 font-body text-[10px] leading-tight text-sheet">
+                <span
+                  className={`block border-hair border-dashed bg-ink/25 px-2 py-1 font-body text-[10px] leading-tight text-sheet ${
+                    live ? 'border-rule border-red' : 'border-sheet/80'
+                  }`}
+                >
                   {slot.roleHe}
                 </span>
               )}
             </button>
           )
         })}
+      </div>
+
+      {/* the tip line — what the pitch is asking for right now, never a blank screen */}
+      <p className="mt-2 border-hair border-ink/30 bg-sheet px-3 py-2 font-body text-[12px] leading-snug text-ink">
+        {swapFrom !== null
+          ? t('xi.tip.swap')
+          : openSlot
+            ? t('xi.tip.selected', { role: openSlot.roleHe })
+            : t('xi.tip.pick')}
+      </p>
+
+      {/* ---------------------------------------------------- the selected slot */}
+      {openSlot && (
+        <div className="mt-2 border-hair border-ink bg-sheet p-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="font-sign text-step-0 text-ink">{openSlot.roleHe}</p>
+            <p className="font-mono text-[10.5px] text-muted">
+              <bdi dir="ltr">{openSlot.role}</bdi>
+            </p>
+          </div>
+
+          {occupant ? (
+            <>
+              <p className="mt-1 font-body text-step--1 text-ink">{occupant.nameHe}</p>
+
+              {/*
+                The versions. Only a man the squad table gives more than one spell has
+                anything here — a chooser with one button would be teaching the reader a
+                fact nobody stated (rule 11). The years are the run's own; the shirt
+                follows, and a spell the archive cannot dress says so instead of
+                borrowing a shirt from the other one.
+              */}
+              {slotVersions.length > 1 && (
+                <div className="mt-2">
+                  <p className="font-body text-[10.5px] font-extrabold text-muted">
+                    {t('xi.version.title')}
+                  </p>
+                  <div className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
+                    {slotVersions.map((version) => {
+                      const live = sheet.versions[openSlot.slotId] === version.id
+                      return (
+                        <button
+                          key={version.id}
+                          type="button"
+                          aria-pressed={live}
+                          onClick={() =>
+                            patch((current) => ({
+                              ...current,
+                              versions: {
+                                ...current.versions,
+                                [openSlot.slotId]: version.id,
+                              },
+                            }))
+                          }
+                          className={`flex min-h-tap shrink-0 flex-col items-center justify-center border-hair px-2.5 py-1 leading-tight transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                            live ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                          }`}
+                        >
+                          <span className="font-mono text-[11px] tabular-nums">
+                            <bdi dir="ltr">{`${version.fromYear}–${version.toYear}`}</bdi>
+                          </span>
+                          <span
+                            className={`font-body text-[9px] ${live ? 'text-concrete' : 'text-muted'}`}
+                          >
+                            {version.seasonLabel
+                              ? t('xi.version.shirt', { season: version.seasonLabel })
+                              : t('xi.version.noShirt')}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <SlotButton
+                  label={
+                    sheet.captain === openSlot.slotId ? t('xi.slot.captainOff') : t('xi.slot.captain')
+                  }
+                  live={sheet.captain === openSlot.slotId}
+                  onClick={() =>
+                    patch((current) => ({
+                      ...current,
+                      captain: current.captain === openSlot.slotId ? null : openSlot.slotId,
+                    }))
+                  }
+                />
+                <SlotButton label={t('xi.slot.replace')} onClick={() => setDrawer('slot')} />
+                <SlotButton
+                  label={swapFrom === openSlot.slotId ? t('xi.slot.swapping') : t('xi.slot.swap')}
+                  live={swapFrom === openSlot.slotId}
+                  onClick={() =>
+                    setSwapFrom(swapFrom === openSlot.slotId ? null : openSlot.slotId)
+                  }
+                />
+                <SlotButton label={t('xi.slot.remove')} onClick={() => remove(openSlot.slotId)} />
+              </div>
+            </>
+          ) : (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <SlotButton label={t('xi.slot.open')} onClick={() => setDrawer('slot')} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/*
+        Undo, where the mechanic needs it. Removing a man is one tap and putting him back
+        used to mean finding him again in 661 names — so the removal carries its own way
+        back, with the version he was wearing, until the next one replaces it.
+      */}
+      {undo && (
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-hair border-ink/40 bg-paper px-3 py-2">
+          <p className="font-body text-[11.5px] text-ink">
+            {t('xi.slot.removed', { name: undo.entry.nameHe })}
+          </p>
+          <div className="flex gap-1.5">
+            <SlotButton label={t('xi.slot.undo')} onClick={undoRemoval} />
+            <SlotButton label={t('xi.slot.undoDismiss')} onClick={() => setUndo(null)} />
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------- the shortlist */}
+      <section className="mt-3 border-hair border-ink/40 bg-sheet p-3">
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="font-sign text-step--1 text-ink">{t('xi.shortlist.title')}</h3>
+          <span className="font-mono text-[10.5px] text-muted">
+            <Num>{sheet.shortlist.length}</Num>
+          </span>
+        </div>
+        {sheet.shortlist.length === 0 ? (
+          <p className="mt-1 font-body text-[11px] leading-snug text-muted">
+            {t('xi.shortlist.empty')}
+          </p>
+        ) : (
+          <ul className="-mx-0.5 mt-2 flex gap-1.5 overflow-x-auto px-0.5 pb-1">
+            {sheet.shortlist.map((entry) => (
+              <li key={entry.slug} className="flex shrink-0 items-stretch">
+                <button
+                  type="button"
+                  disabled={selected === null || takenSlugs.has(entry.slug)}
+                  onClick={() => place(entry)}
+                  className="flex min-h-tap items-center border-hair border-ink/40 bg-paper px-2.5 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+                >
+                  <span aria-hidden="true" className="me-1">
+                    ★
+                  </span>
+                  {entry.familyHe}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleShortlist(entry.slug)}
+                  aria-label={t('xi.shortlist.drop', { name: entry.nameHe })}
+                  className="min-h-tap border-hair border-s-0 border-ink/40 bg-paper px-2 font-body text-[13px] leading-none text-muted"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* ------------------------------------------------- the twelfth and the cut */}
+      <section className="mt-2 grid gap-2 sm:grid-cols-2">
+        <BenchCard
+          title={t('xi.bench.twelfth')}
+          note={t('xi.bench.twelfth.note')}
+          entry={sheet.twelfth}
+          onOpen={() => setDrawer('twelfth')}
+          onClear={() => patch((current) => ({ ...current, twelfth: null }))}
+        />
+        <BenchCard
+          title={t('xi.bench.cut')}
+          note={t('xi.bench.cut.note')}
+          entry={sheet.cut}
+          onOpen={() => setDrawer('cut')}
+          onClear={() => patch((current) => ({ ...current, cut: null }))}
+        />
+      </section>
+
+      {/* ------------------------------------------------------------ the poster */}
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setPoster(true)}
+          disabled={chosen === 0}
+          className="min-h-tap border-rule border-ink bg-ink px-3 font-sign text-step--1 text-paper transition-transform duration-press ease-stamp active:scale-[.97] disabled:opacity-40 motion-reduce:transition-none"
+        >
+          {t('xi.poster.open')}
+        </button>
+        <p className="font-body text-[11px] text-muted">
+          {t('xi.dna.line', {
+            spread: String(dna.spread),
+            israeli: String(dna.origin.israeli),
+            foreign: String(dna.origin.foreign),
+          })}
+        </p>
       </div>
 
       <p className="mt-2 font-body text-[11px] text-muted">
@@ -323,6 +806,9 @@ export function XIBuilder({
           dressed: String(shirts.withShirt),
           total: String(roster.total),
         })}
+      </p>
+      <p className="mt-1 font-body text-[11px] text-muted">
+        {t('xi.version.coverage', { n: String(shirts.withVersions) })}
       </p>
 
       <ShareRow
@@ -347,11 +833,11 @@ export function XIBuilder({
           template: 'xi' as const,
           kicker: worst ? 'GATE 1 · WORST XI · ONE FAN’S OPINION' : 'GATE 1 · ALL-TIME XI',
           label: worst ? t('xi.tab.worst') : t('screen.xi.title'),
-          eyebrow: currentFormation.name,
+          eyebrow: sheet.formation.name,
           hero: worst ? t('xi.tab.worst') : t('screen.xi.title'),
-          xi: currentFormation.slots
+          xi: sheet.formation.slots
             .map((slot) => {
-              const entry = current[slot.slotId]
+              const entry = sheet.picks[slot.slotId]
               return entry
                 ? { roleHe: slot.roleHe, nameHe: entry.familyHe, x: slot.x, y: slot.y }
                 : null
@@ -366,15 +852,206 @@ export function XIBuilder({
       />
 
       {/* the roster sheet — shared with the polls wing, see components/roster */}
-      {openSlot && (
+      {drawer && (
         <RosterSheet
-          title={openSlot.roleHe}
+          title={
+            drawer === 'twelfth'
+              ? t('xi.bench.twelfth')
+              : drawer === 'cut'
+                ? t('xi.bench.cut')
+                : (openSlot?.roleHe ?? t('xi.tip.pick'))
+          }
           roster={roster}
           taken={takenSlugs}
-          onPick={(entry) => choose(entry)}
-          onClose={() => setOpenSlot(null)}
+          onPick={place}
+          onClose={() => setDrawer(null)}
+          scout={
+            drawer === 'slot' && openSlot
+              ? {
+                  role: openSlot.role,
+                  roleHe: openSlot.roleHe,
+                  order,
+                  onOrder: setOrder,
+                  fitOnly,
+                  onFitOnly: setFitOnly,
+                  shortlist: shortlisted,
+                  onShortlist: toggleShortlist,
+                }
+              : undefined
+          }
+          footer={
+            drawer === 'slot' && worst ? (
+              <p className="mt-2 border-hair border-ink/40 bg-paper px-3 py-2 font-body text-[11px] leading-snug text-ink">
+                {t('xi.worst.drawer')}
+              </p>
+            ) : undefined
+          }
         />
       )}
+
+      {poster && (
+        <Poster
+          dna={dna}
+          captainHe={sheet.captain ? (sheet.picks[sheet.captain]?.nameHe ?? null) : null}
+          twelfthHe={sheet.twelfth?.nameHe ?? null}
+          cutHe={sheet.cut?.nameHe ?? null}
+          worst={worst}
+          onClose={() => setPoster(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ the parts */
+
+function SlotButton({
+  label,
+  onClick,
+  live = false,
+}: {
+  label: string
+  onClick: () => void
+  live?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={live}
+      className={`min-h-tap border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+        live ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+      }`}
+    >
+      {label}
+    </button>
+  )
+}
+
+/**
+ * שחקן 12 והאחרון שנחתך — the two decisions that are not on the pitch.
+ *
+ * They come out of the same roster sheet as everybody else and carry no grade. The
+ * twelfth man is an affectionate promotion; the last man cut is the argument you keep
+ * having with yourself, and naming him is the most honest thing an all-time eleven can
+ * do about the ten men it left out.
+ */
+function BenchCard({
+  title,
+  note,
+  entry,
+  onOpen,
+  onClear,
+}: {
+  title: string
+  note: string
+  entry: RosterEntry | null
+  onOpen: () => void
+  onClear: () => void
+}) {
+  return (
+    <div className="border-hair border-ink/40 bg-sheet p-3">
+      <h3 className="font-sign text-step--1 text-ink">{title}</h3>
+      <p className="mt-0.5 font-body text-[10.5px] leading-snug text-muted">{note}</p>
+      <p className="mt-1.5 font-body text-step--1 text-ink">
+        {entry ? entry.nameHe : t('xi.bench.none')}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <SlotButton label={entry ? t('xi.bench.change') : t('xi.bench.choose')} onClick={onOpen} />
+        {entry && <SlotButton label={t('xi.bench.clear')} onClick={onClear} />}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * הפוסטר — what the eleven is made of, and nothing about how good it is.
+ *
+ * A dialog rather than a screen of its own, because a gate that navigates away from the
+ * thing you just made has taken it off the table (rule 21 — a run is a run-on sentence).
+ * It closes on Escape, on the plate and on its own button; nothing here waits for
+ * anything, and nothing plays before it appears.
+ *
+ * `z-[60]`, because the tab bar is `z-50` (rule 33).
+ */
+function Poster({
+  dna,
+  captainHe,
+  twelfthHe,
+  cutHe,
+  worst,
+  onClose,
+}: {
+  dna: ReturnType<typeof xiDna>
+  captainHe: string | null
+  twelfthHe: string | null
+  cutHe: string | null
+  worst: boolean
+  onClose: () => void
+}) {
+  const dialogRef = useDialog<HTMLDivElement>(onClose)
+  return (
+    <div
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[60] flex flex-col justify-end bg-ink/70 outline-none"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('xi.poster.title')}
+    >
+      <button type="button" aria-label={t('xi.close')} className="flex-1" onClick={onClose} />
+      <div className="max-h-[86vh] animate-slam overflow-y-auto border-t-rule border-ink bg-sheet px-4 pb-[calc(var(--tap)+2rem+env(safe-area-inset-bottom))] pt-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="font-display text-step-1 text-ink">{t('xi.poster.title')}</p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="min-h-tap px-2 font-body text-[12px] font-extrabold text-red"
+          >
+            {t('xi.close')}
+          </button>
+        </div>
+
+        <p className="mt-1 font-body text-[11.5px] leading-snug text-muted">
+          {worst ? t('xi.poster.note.worst') : t('xi.poster.note')}
+        </p>
+
+        <dl className="mt-3 border-hair border-ink/40">
+          <DnaRow label={t('xi.dna.formation')} value={dna.formation} latin />
+          <DnaRow label={t('xi.dna.picked')} value={`${dna.picked}/11`} latin />
+          {dna.decades.map((row) => (
+            <DnaRow
+              key={row.decade}
+              label={t('xi.dna.decade', { n: String(row.decade) })}
+              value={String(row.count)}
+              latin
+            />
+          ))}
+          {dna.undated > 0 && (
+            <DnaRow label={t('xi.dna.undated')} value={String(dna.undated)} latin />
+          )}
+          <DnaRow label={t('xi.dna.spread')} value={String(dna.spread)} latin />
+          <DnaRow label={t('roster.origin.israeli')} value={String(dna.origin.israeli)} latin />
+          <DnaRow label={t('roster.origin.foreign')} value={String(dna.origin.foreign)} latin />
+          {dna.origin.unknown > 0 && (
+            <DnaRow label={t('xi.dna.unknownOrigin')} value={String(dna.origin.unknown)} latin />
+          )}
+          <DnaRow label={t('xi.dna.captain')} value={captainHe ?? t('xi.bench.none')} />
+          <DnaRow label={t('xi.bench.twelfth')} value={twelfthHe ?? t('xi.bench.none')} />
+          <DnaRow label={t('xi.bench.cut')} value={cutHe ?? t('xi.bench.none')} />
+        </dl>
+
+        <p className="mt-2 font-body text-[10.5px] leading-snug text-muted">{t('xi.dna.note')}</p>
+      </div>
+    </div>
+  )
+}
+
+function DnaRow({ label, value, latin = false }: { label: string; value: string; latin?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 border-b-hair border-ink/20 px-3 py-2 last:border-b-0">
+      <dt className="font-body text-[12px] text-muted">{label}</dt>
+      <dd className="font-sign text-step--1 text-ink">{latin ? <Num>{value}</Num> : value}</dd>
     </div>
   )
 }
