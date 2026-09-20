@@ -1,0 +1,106 @@
+name: Release Gate 4-5 + LIFE 80
+
+on:
+  push:
+    branches:
+      - release/gate45-life80-stage
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Reconstruct verified release payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .release/core/00.bin .release/core/01.bin .release/core/02.bin .release/core/03.bin .release/core/04.bin | head -c 810132 > /tmp/release-bundle.tar.xz
+          echo '370216cdfcac0a39b8a55a049fe63b3c619e8e256199c91b62758981e6c21892  /tmp/release-bundle.tar.xz' | sha256sum -c -
+          mkdir -p /tmp/the-worker-release
+          tar -xJf /tmp/release-bundle.tar.xz -C /tmp/the-worker-release
+          test -s /tmp/the-worker-release/life-delta80.patch
+          test -s /tmp/the-worker-release/gate/supporting-fixes.patch
+          test -s /tmp/the-worker-release/gate/KitGameRunV5.tsx
+          test -s /tmp/the-worker-release/gate/KitDesignerV5.tsx
+
+      - name: Apply LIFE Delta 80 runtime release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check /tmp/the-worker-release/life-delta80.patch
+          git apply /tmp/the-worker-release/life-delta80.patch
+          # Transport helper is not part of the user's ZIP and must not ship.
+          rm -f scripts/life/delta-zips.py
+
+      - name: Apply Gate 4 + Gate 5 main-ready pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply --check /tmp/the-worker-release/gate/supporting-fixes.patch
+          git apply /tmp/the-worker-release/gate/supporting-fixes.patch
+          cp /tmp/the-worker-release/gate/KitGameRunV5.tsx app/kits/build/KitGameRunV5.tsx
+          cp /tmp/the-worker-release/gate/KitDesignerV5.tsx app/kits/KitDesignerV5.tsx
+
+      - name: Remove release transport from final tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .release
+          rm -f .github/workflows/release-gate45-life80.yml
+
+      - name: Install
+        run: npm ci
+
+      - name: Repository hygiene
+        run: npm run repo:hygiene
+
+      - name: Asset provenance
+        run: npm run assets:provenance
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: LIFE dead ends
+        run: npm run life:deadends
+
+      - name: Tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+      - name: Build clean release commit directly on current main parent
+        shell: bash
+        env:
+          EXPECTED_MAIN: 5e2a0e331366cb15026953529fb810e16641eefb
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN"
+          git config user.name 'OpenAI Release'
+          git config user.email 'noreply@openai.com'
+          git add -A
+          TREE="$(git write-tree)"
+          FINAL="$(printf '%s\n' 'feat: ship Gates 4-5 and LIFE delta 80' | git commit-tree "$TREE" -p "$EXPECTED_MAIN")"
+          git push origin "$FINAL:refs/heads/release/gate45-life80-built"
+          echo "FINAL_SHA=$FINAL" >> "$GITHUB_ENV"
+
+      - name: Release summary
+        shell: bash
+        run: |
+          echo "Validated release commit: $FINAL_SHA"
