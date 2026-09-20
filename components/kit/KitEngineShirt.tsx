@@ -1,6 +1,7 @@
 import { useId } from 'react'
 
 import { MarkArtwork } from '@/components/kit/MarkArtwork'
+import { kitAssemblyForSeason } from '@/lib/kit/assembly'
 import { crestArt } from '@/lib/kit/crestMarks'
 import { resolveKitConstruction } from '@/lib/kit/engine'
 import { makerAssetForName, sponsorAssetForName } from '@/lib/kit/mark-library'
@@ -22,7 +23,9 @@ export function KitEngineShirt({ spec, className = '', title }: { spec: KitSpec;
   const dark = !['paper', 'cream'].includes(spec.base)
   const maker = makerAssetForName(spec.makerHe, spec.seasonLabel)
   const sponsor = sponsorAssetForName(spec.sponsorHe)
-  const crest = crestArt(spec.crestKey, dark)
+  const assembly = kitAssemblyForSeason(spec.seasonLabel, spec.variant)
+  const exactCrest = assembly && assembly.spec.crestKey === spec.crestKey ? assembly.parts.crest : null
+  const crest = exactCrest ?? crestArt(spec.crestKey, dark)
   const clipBody = `body-${uid}`
   const clipAll = `all-${uid}`
 
@@ -62,6 +65,7 @@ export function KitEngineShirt({ spec, className = '', title }: { spec: KitSpec;
 
         <CollarLayer id={spec.collar} cx={t.neck.cx} cy={t.neck.cy} width={t.neck.width} depth={t.neck.depth} ink={collar} base={base} />
         <CuffLayer id={spec.sleeves} left={t.cuffLeftPath} right={t.cuffRightPath} ink={collar} />
+        {spec.number !== null && <FrontNumber value={spec.number} nameset={spec.nameset} dark={dark} />}
 
         <g fill="none" stroke="rgb(var(--ink))" strokeOpacity=".26" strokeWidth="1.1" strokeDasharray="3 3">
           <path d={t.leftSleeveSeam} /><path d={t.rightSleeveSeam} /><path d={t.hemPath} />
@@ -81,6 +85,15 @@ function placementStyle(p: { x: number; y: number; w: number; h: number }) {
 
 function TextMark({ text, dark, style }: { text: string; dark: boolean; style: React.CSSProperties }) {
   return <span aria-hidden="true" className="pointer-events-none absolute flex items-center justify-center overflow-hidden whitespace-nowrap font-body text-[clamp(7px,2.2cqw,15px)] font-extrabold" style={{ ...style, color: dark ? 'rgb(var(--sheet))' : 'rgb(var(--ink))' }}>{text}</span>
+}
+
+function FrontNumber({ value, nameset, dark }: { value: number; nameset: KitSpec['nameset']; dark: boolean }) {
+  const ink = dark ? 'rgb(var(--sheet))' : 'rgb(var(--ink))'
+  const common = { x: 180, y: 330, textAnchor: 'middle' as const, className: 'font-poster' }
+  if (nameset === 'block-hollow') {
+    return <text {...common} fill="none" stroke={ink} strokeWidth="2.4" style={{ fontSize: 54 }}>{value}</text>
+  }
+  return <text {...common} fill={ink} style={{ fontSize: nameset === 'condensed' ? 48 : 54 }}>{value}</text>
 }
 
 function SleeveConstruction({ id, template, base, ink }: { id: SleeveId; template: ReturnType<typeof resolveKitConstruction>['template']; base: string; ink: string }) {
