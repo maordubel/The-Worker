@@ -51,8 +51,8 @@ export const KIT_HINT_PENALTY = 8
 export type KitDifficulty = 'warmup' | 'memory' | 'expert'
 export const DIFFICULTY_OPTIONS: Record<KitDifficulty, number> = {
   warmup: 3,
-  memory: 3,
-  expert: 3,
+  memory: 4,
+  expert: 5,
 }
 
 export type KitPart = {
