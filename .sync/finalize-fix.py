@@ -29,6 +29,28 @@ p.write_text(s)
 
 p=Path('app/kits/build/KitGameRunV3.tsx');s=p.read_text()
 s=s.replace("import type { KitSpec } from '@/lib/kit/spec'", "import { COLOUR_VAR, type KitColour, type KitSpec } from '@/lib/kit/spec'")
+server_import="""import {
+  KIT_HINT_PENALTY,
+  PART_ORDER,
+  type KitHintAnswer,
+  type KitPart,
+  type KitPuzzle,
+  type KitVerdict,
+  type PartKind,
+} from '@/lib/game/kitBuild'
+import { PART_LABEL } from '@/lib/game/kit-build-run'"""
+client_import="""import {
+  KIT_HINT_PENALTY,
+  PART_LABEL,
+  PART_ORDER,
+  type KitHintAnswer,
+  type KitPart,
+  type KitPuzzle,
+  type KitVerdict,
+  type PartKind,
+} from '@/lib/game/kit-build-run'"""
+if server_import not in s: raise SystemExit('KitGameRunV3 server-only contract import not found')
+s=s.replace(server_import, client_import)
 s=s.replace('font-mono ', 'font-mono tabular-nums ')
 s=s.replace('rounded-full', '')
 s=s.replace('ink="#171717"', 'ink="rgb(var(--ink))"')
@@ -44,7 +66,56 @@ s=s.replace("color: dark ? '#fff' : '#171717',", "color: dark ? 'rgb(var(--paper
 p.write_text(s)
 
 p=Path('lib/kit/collection.ts');s=p.read_text().replace('readonly remote=false','readonly remote = false');p.write_text(s)
-p=Path('lib/game/kit-build-run.ts');s=p.read_text().replace('export const KIT_ROUND = 3','export const KIT_ROUND = 5');p.write_text(s)
+p=Path('lib/game/kit-build-run.ts');s=p.read_text().replace('export const KIT_ROUND = 3','export const KIT_ROUND = 5')
+if not s.startswith("import type { KitSpec }"):
+    s="import type { KitSpec } from '@/lib/kit/spec'\n\n"+s
+shared_types="""
+
+export type KitPart = {
+  id: string
+  kind: PartKind
+  labelHe: string
+  patch: Partial<KitSpec>
+  hasReference: boolean
+}
+
+export type KitPuzzle = {
+  id: string
+  seasonLabel: string
+  variant: 'home' | 'away' | 'third'
+  blank: KitSpec
+  drawers: { kind: PartKind; parts: KitPart[] }[]
+}
+
+export type PartVerdict = {
+  kind: PartKind
+  correct: boolean
+  chosen: string | null
+  truth: string
+}
+
+export type KitVerdict = {
+  parts: PartVerdict[]
+  right: number
+  perfect: boolean
+  score: number
+  baseScore: number
+  hintsUsed: number
+  answer: KitSpec
+  seasonLabel: string
+  variant: 'home' | 'away' | 'third'
+  noteHe: string
+  realSrc: string | null
+  sourceTitle: string
+  sourceUrl: string | null
+}
+
+export type KitHintKind = 'whisper' | 'detail' | 'front'
+export type KitHintAnswer = { kind: KitHintKind; textHe: string; penalty: number }
+"""
+if 'export type KitPart =' not in s:
+    s+=shared_types
+p.write_text(s)
 
 # These Kit screens predate the catalogue migration and contain approved Hebrew UI.
 # Keep the i18n guard strict for all other app/components while preserving these screens unchanged.
@@ -70,4 +141,4 @@ s=s.replace("expect(badir?.seasonLabel).toBe('2005/06')", "expect(badir?.seasonL
 p.write_text(s)
 p=Path('tests/xi-scout.test.ts');s=p.read_text().replace("expect(spells[0]?.seasonLabel).toBe('1984/85')", "expect(spells[0]?.seasonLabel).toBe('1985/86')");p.write_text(s)
 
-print('strict/current-squad + all Kit V3 regressions applied')
+print('strict/current-squad + all Kit V3 regressions + client-safe contract split applied')
