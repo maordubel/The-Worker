@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { KitAssemblyShirt } from '@/components/kit/KitAssemblyShirt'
 import { KitShirt } from '@/components/kit/KitShirt'
-import { KitStrip } from '@/components/kit/KitStrip'
 import { ShareRow } from '@/components/share/ShareRow'
+import { makerAssetFor, sponsorAssetFor } from '@/lib/kit/assembly'
 import {
   COLLARS,
   COLOUR_NAME,
@@ -19,27 +20,13 @@ import {
 import { recordDeed } from '@/lib/profile/store'
 import { t, type MessageKey } from '@/lib/i18n'
 
-/**
- * בית החולצות — the rack first, the controls second.
- *
- * The previous version opened on a blank red shirt and five tabs of vocabulary, and
- * Maor's verdict was the right one: not fun, doesn't flow. A designer that opens empty
- * makes you do the work of imagining before you get to play. This one opens on a rack
- * of eight real Hapoel kits from the references he sent — one tap puts אתא 1978 on the
- * screen, white sleeves and all, and from there every control is a nudge on something
- * that already looks like something.
- *
- * Two other things do most of the "flow": the strip redraws on every single tap with no
- * commit step, and הגרל pulls a whole random kit out of the stack, which is the button
- * people actually press first.
- */
-
 const TABS = [
   { key: 'rack', he: 'kit.tab.rack' },
   { key: 'base', he: 'kit.tab.base' },
   { key: 'pattern', he: 'kit.tab.pattern' },
   { key: 'sleeves', he: 'kit.tab.sleeves' },
   { key: 'collar', he: 'kit.tab.collar' },
+  { key: 'marks', he: 'kits.spec' },
   { key: 'nameset', he: 'kit.tab.nameset' },
 ] as const
 
@@ -51,45 +38,55 @@ function randomOf<T>(items: readonly T[]): T {
 
 export function KitDesigner({
   rack,
-  seed = 1,
 }: {
-  /** the club's real kits, newest first — the rack the screen opens on */
   rack: { seasonLabel: string; noteHe: string; spec: KitSpec }[]
   seed?: number
 }) {
-  const [spec, setSpec] = useState<KitSpec>(rack[0]?.spec ?? DEFAULT_SPEC)
+  const first = rack[0]?.spec ?? DEFAULT_SPEC
+  const [spec, setSpec] = useState<KitSpec>(first)
+  const [historicalPreset, setHistoricalPreset] = useState(first.seasonLabel)
   const [tab, setTab] = useState<(typeof TABS)[number]['key']>('rack')
   const [flash, setFlash] = useState(0)
-
-/*
- * מעשה — a wing has no round, and until 17.9.2026 that meant its plate could never light
- * and `stillToDo` nagged about it for ever. `recordDeed` is the wing's equivalent of a
- * finished round: something was MADE. It carries no score, so a wing can never climb the
- * correct/asked figures that belong to the quizzes. The ref is React's double-invoke
- * guard, the same one `RecordRun` keeps.
- */
   const deeded = useRef(false)
+
+  const sponsors = useMemo(
+    () => [...new Set(rack.map((kit) => kit.spec.sponsorHe).filter((value): value is string => Boolean(value)))],
+    [rack],
+  )
+  const makers = useMemo(
+    () => [...new Set(rack.map((kit) => kit.spec.makerHe).filter((value): value is string => Boolean(value)))],
+    [rack],
+  )
+  const crests = useMemo(
+    () => [...new Set(rack.map((kit) => kit.spec.crestKey).filter((value): value is string => Boolean(value)))],
+    [rack],
+  )
+
   useEffect(() => {
-    // The deed is a CHANGE, never the screen opening: `flash` counts the edits this
-    // session, so looking at the rack and leaving is not "you designed a shirt".
     if (deeded.current || flash === 0) return
     deeded.current = true
     recordDeed('/kits')
   }, [flash])
 
-
-  function set<K extends keyof KitSpec>(key: K, value: KitSpec[K]) {
-    setSpec((current) => ({ ...current, [key]: value }))
+  function touch(next: KitSpec) {
+    setSpec(next)
+    setHistoricalPreset('')
     setFlash((n) => n + 1)
   }
 
-  function apply(patch: Partial<KitSpec>) {
-    setSpec((current) => ({ ...current, ...patch }))
+  function set<K extends keyof KitSpec>(key: K, value: KitSpec[K]) {
+    touch({ ...spec, [key]: value })
+  }
+
+  function applyPreset(kit: { seasonLabel: string; spec: KitSpec }) {
+    setSpec(kit.spec)
+    setHistoricalPreset(kit.seasonLabel)
     setFlash((n) => n + 1)
   }
 
   function roll() {
-    apply({
+    touch({
+      ...spec,
       base: randomOf(COLOURS),
       pattern: randomOf(PATTERNS).id,
       patternInk: randomOf(COLOURS),
@@ -101,6 +98,9 @@ export function KitDesigner({
       shorts: randomOf(COLOURS),
       socks: randomOf(COLOURS),
       number: randomOf([7, 9, 10, 11, 12, 14]),
+      sponsorHe: randomOf([null, ...sponsors]),
+      makerHe: randomOf([null, ...makers]),
+      crestKey: randomOf([null, ...crests]),
     })
   }
 
@@ -108,15 +108,25 @@ export function KitDesigner({
     <section className="mt-stack border-rule border-ink bg-sheet">
       <div className="flex items-baseline justify-between gap-3 border-b-rule border-ink bg-ink px-4 py-2.5">
         <p className="font-display text-step-1 leading-none text-paper">{t('kit.designer')}</p>
-        <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
-          8 LAYERS
-        </p>
+        <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">8 LAYERS</p>
       </div>
 
-      {/* the strip, on its own sheet, redrawing on every tap */}
       <div className="border-b-hair border-ink/30 bg-paper p-4">
-        <div key={flash} className="mx-auto max-w-[230px] animate-slam">
-          <KitStrip spec={spec} />
+        <div key={flash} className="mx-auto flex min-h-[250px] max-w-[260px] items-center justify-center animate-slam">
+          {historicalPreset === spec.seasonLabel ? (
+            <KitAssemblyShirt
+              spec={spec}
+              historical
+              className="block max-h-[250px] w-full"
+              title={spec.seasonLabel}
+            />
+          ) : (
+            <KitAssemblyShirt
+              spec={spec}
+              className="block max-h-[250px] w-full"
+              title={spec.seasonLabel}
+            />
+          )}
         </div>
         <div className="mt-2 flex items-center justify-between gap-2">
           <p className="min-w-0 flex-1 font-mono text-[11px] tabular-nums text-muted">
@@ -161,14 +171,15 @@ export function KitDesigner({
                 <button
                   key={kit.seasonLabel}
                   type="button"
-                  onClick={() => apply(kit.spec)}
+                  onClick={() => applyPreset(kit)}
                   className={`min-h-tap border-hair bg-paper p-1.5 transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
-                    spec.seasonLabel === kit.seasonLabel ? 'border-red bg-red/[.08]' : 'border-ink/40'
+                    historicalPreset === kit.seasonLabel ? 'border-red bg-red/[.08]' : 'border-ink/40'
                   }`}
                 >
-                  <KitShirt
+                  <KitAssemblyShirt
                     spec={{ ...kit.spec, number: null }}
-                    className="mx-auto block w-full max-w-[62px]"
+                    historical
+                    className="mx-auto block h-[86px] w-full max-w-[72px]"
                     title={kit.seasonLabel}
                   />
                   <span className="mt-1 block font-mono text-[10px] tabular-nums leading-tight text-ink">
@@ -209,9 +220,7 @@ export function KitDesigner({
                     className="mx-auto block w-full max-w-[54px]"
                     title={item.he}
                   />
-                  <span className="mt-1 block font-body text-[10px] leading-tight text-ink">
-                    {item.he}
-                  </span>
+                  <span className="mt-1 block font-body text-[10px] leading-tight text-ink">{item.he}</span>
                 </button>
               ))}
             </div>
@@ -233,6 +242,32 @@ export function KitDesigner({
             </>
           )}
 
+          {tab === 'marks' && (
+            <>
+              <Label>{t('kits.spec.sponsor')}</Label>
+              <MarkGrid
+                kind="sponsor"
+                items={sponsors}
+                value={spec.sponsorHe}
+                onPick={(value) => set('sponsorHe', value)}
+              />
+              <Label>{t('kits.spec.maker')}</Label>
+              <MarkGrid
+                kind="maker"
+                items={makers}
+                value={spec.makerHe}
+                onPick={(value) => set('makerHe', value)}
+              />
+              <Label>{t('kits.spec.crest')}</Label>
+              <MarkGrid
+                kind="crest"
+                items={crests}
+                value={spec.crestKey}
+                onPick={(value) => set('crestKey', value)}
+              />
+            </>
+          )}
+
           {tab === 'nameset' && (
             <>
               <Chips items={NAMESETS} value={spec.nameset} onPick={(value) => set('nameset', value)} />
@@ -245,9 +280,7 @@ export function KitDesigner({
                     onClick={() => set('number', number)}
                     aria-pressed={spec.number === number}
                     className={`min-h-tap w-12 border-hair font-poster text-[22px] transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none ${
-                      spec.number === number
-                        ? 'border-red bg-red text-paper'
-                        : 'border-ink/40 text-ink'
+                      spec.number === number ? 'border-red bg-red text-paper' : 'border-ink/40 text-ink'
                     }`}
                   >
                     {number}
@@ -259,11 +292,6 @@ export function KitDesigner({
         </div>
 
         <ShareRow
-          // The free designer is gate 5. `kind="kit"` resolves to `/kits/build` — the
-          // GRADED quiz — so a shared design walked its reader into a different game, and
-          // `seed` defaults to 1 here because the page never passes one, which handed out
-          // kit-quiz round #1 to the whole world. The route is the wing itself now, and
-          // the wing reads no seed (17.9.2026).
           kind="kit"
           route="/kits"
           params={{ total: '8' }}
@@ -276,7 +304,7 @@ export function KitDesigner({
             hero: spec.seasonLabel,
             stats: [
               { k: t('kit.tab.pattern'), v: PATTERNS.find((p) => p.id === spec.pattern)?.he ?? '' },
-              { k: t('kit.tab.collar'), v: COLLARS.find((c) => c.id === spec.collar)?.he ?? '' },
+              { k: t('kits.spec.sponsor'), v: spec.sponsorHe ?? t('kits.spec.none') },
             ],
             cta: t('kit.cta'),
             challenge: t('share.sameRound'),
@@ -289,11 +317,7 @@ export function KitDesigner({
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="mb-1.5 mt-3 font-body text-[10px] tracking-widest text-muted first:mt-0">
-      {children}
-    </p>
-  )
+  return <p className="mb-1.5 mt-3 font-body text-[10px] tracking-widest text-muted first:mt-0">{children}</p>
 }
 
 function Swatches({ value, onPick }: { value: KitColour; onPick: (colour: KitColour) => void }) {
@@ -340,6 +364,45 @@ function Chips<T extends string>({
           {item.he}
         </button>
       ))}
+    </div>
+  )
+}
+
+function MarkGrid({
+  kind,
+  items,
+  value,
+  onPick,
+}: {
+  kind: 'sponsor' | 'maker' | 'crest'
+  items: string[]
+  value: string | null
+  onPick: (value: string | null) => void
+}) {
+  const choices: Array<string | null> = [null, ...items]
+  return (
+    <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
+      {choices.map((item) => {
+        const asset = kind === 'sponsor' ? sponsorAssetFor(item) : kind === 'maker' ? makerAssetFor(item) : null
+        const src = asset?.src ?? (kind === 'crest' && item ? `/brand/crests/${item}.png` : null)
+        const selected = value === item
+        return (
+          <button
+            key={item ?? 'none'}
+            type="button"
+            onClick={() => onPick(item)}
+            aria-pressed={selected}
+            className={`flex min-h-[70px] flex-col items-center justify-center gap-1 border-hair bg-paper p-2 transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+              selected ? 'border-red bg-red/[.08]' : 'border-ink/40'
+            }`}
+          >
+            {src ? <img src={src} alt="" aria-hidden="true" className="h-8 max-w-full object-contain" /> : null}
+            <span className="block max-w-full truncate font-body text-[10px] font-bold text-ink">
+              {item ?? t('kits.spec.none')}
+            </span>
+          </button>
+        )
+      })}
     </div>
   )
 }
