@@ -1,0 +1,6 @@
+import 'server-only'
+import { archiveShirts,type ArchiveShirt } from './archive'
+import { assetId,kitId,type VerificationStatus } from './identity'
+import { verificationFor } from './verification'
+export type IndexedArchiveShirt=ArchiveShirt&{assetId:string;kitId:string|null;canonicalTags:string[];verification:VerificationStatus;verificationNoteHe:string|null;checkedOn:string|null}
+export function archiveIndex():IndexedArchiveShirt[]{return archiveShirts().map((shirt)=>{const gameVariant=shirt.variant==='home'||shirt.variant==='away'||shirt.variant==='third'?shirt.variant:null;const audit=shirt.seasonLabel&&gameVariant?verificationFor(shirt.seasonLabel,gameVariant):null;const verification:VerificationStatus=shirt.seasonAmbiguous?'ambiguous':audit?.status??'supported';return{...shirt,assetId:`photo:${assetId(shirt.slug)}`,kitId:shirt.seasonLabel&&gameVariant?kitId(shirt.seasonLabel,gameVariant):null,canonicalTags:[shirt.source,shirt.variant,String(shirt.decade),shirt.competitionHe??'',shirt.specialHe??'',shirt.makerHe??''].filter(Boolean),verification,verificationNoteHe:shirt.seasonAmbiguous?'המקור מתאר שנה בלבד; אין המרת עונה אוטומטית.':audit?.noteHe??null,checkedOn:audit?.checkedOn??null}})}

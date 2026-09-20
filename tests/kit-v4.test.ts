@@ -1,0 +1,6 @@
+import { describe,expect,it } from 'vitest'
+import { assetId,kitId,seasonId } from '@/lib/kit/identity'
+import { compareSpecs,DEFAULT_SPEC,type KitSpec } from '@/lib/kit/spec'
+import { verificationFor } from '@/lib/kit/verification'
+describe('kit system v4 identity',()=>{it('keeps stable season and kit ids',()=>{expect(seasonId('2009/10')).toBe('2009-10');expect(kitId('2020/21','third')).toBe('football:2020-21:third');expect(assetId('Sponsor','VISA')).toBe('sponsor:visa')});it('never treats a different crest as correct',()=>{const a:KitSpec={...DEFAULT_SPEC,crestKey:'worker-hapoel'},b:KitSpec={...DEFAULT_SPEC,crestKey:'circle-1923'};expect(compareSpecs(a,b).crest).toBe(false)});it('preserves third as a first-class variant',()=>{const third:KitSpec={...DEFAULT_SPEC,variant:'third'};expect(third.variant).toBe('third')})})
+describe('historical audit overlay',()=>{it('keeps disputed seasons explicit instead of silently correcting them',()=>{expect(verificationFor('1984/85','home')?.status).toBe('conflict');expect(verificationFor('1988/89','home')?.status).toBe('conflict');expect(verificationFor('2008/09','home')?.status).toBe('conflict');expect(verificationFor('2016/17','home')?.status).toBe('conflict')});it('records externally supported third-kit identity',()=>{expect(verificationFor('2020/21','third')?.status).toBe('supported')})})
