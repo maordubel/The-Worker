@@ -26,7 +26,31 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .release/core/00.bin .release/core/01.bin .release/core/02.bin .release/core/03.bin .release/core/04.bin | head -c 810132 > /tmp/release-bundle.tar.xz
+          python3 - <<'PY'
+          from pathlib import Path
+          from itertools import permutations
+          from hashlib import sha256
+
+          parts = sorted(Path('.release/core').glob('*.bin'))
+          target = '370216cdfcac0a39b8a55a049fe63b3c619e8e256199c91b62758981e6c21892'
+          wanted = 810132
+          payload = None
+          order = None
+          for perm in permutations(parts):
+              data = b''.join(p.read_bytes() for p in perm)[:wanted]
+              if len(data) == wanted and sha256(data).hexdigest() == target:
+                  payload = data
+                  order = [p.name for p in perm]
+                  break
+          if payload is None:
+              print('Part diagnostics:')
+              for p in parts:
+                  data = p.read_bytes()
+                  print(p.name, len(data), sha256(data).hexdigest())
+              raise SystemExit('No permutation reconstructed the verified release payload')
+          Path('/tmp/release-bundle.tar.xz').write_bytes(payload)
+          print('Verified payload order:', ' -> '.join(order))
+          PY
           echo '370216cdfcac0a39b8a55a049fe63b3c619e8e256199c91b62758981e6c21892  /tmp/release-bundle.tar.xz' | sha256sum -c -
           mkdir -p /tmp/the-worker-release
           tar -xJf /tmp/release-bundle.tar.xz -C /tmp/the-worker-release
@@ -41,7 +65,6 @@ jobs:
           set -euo pipefail
           git apply --check /tmp/the-worker-release/life-delta80.patch
           git apply /tmp/the-worker-release/life-delta80.patch
-          # Transport helper is not part of the user's ZIP and must not ship.
           rm -f scripts/life/delta-zips.py
 
       - name: Apply Gate 4 + Gate 5 main-ready pass
