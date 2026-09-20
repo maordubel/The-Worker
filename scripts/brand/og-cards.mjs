@@ -56,7 +56,12 @@ const BRAND = {
   muted: '#5A5242',
 }
 
-const he = JSON.parse(readFileSync(join(ROOT, 'messages', 'he.json'), 'utf8'))
+// The catalogue ships as two files — the gates and LIFE — and this script reads both,
+// exactly like `lib/i18n.ts` merges them. See the note there for why they are separate.
+const he = {
+  ...JSON.parse(readFileSync(join(ROOT, 'messages', 'he.json'), 'utf8')),
+  ...JSON.parse(readFileSync(join(ROOT, 'messages', 'he.life.json'), 'utf8')),
+}
 const t = (key) => {
   const value = he[key]
   if (value === undefined) throw new Error(`missing message key: ${key}`)
