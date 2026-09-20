@@ -29,6 +29,7 @@ jobs:
         run: |
           node tools/royal-rumble-v2/apply-v2.mjs .
           node tools/royal-rumble-v2/finalize-kits.mjs
+          sed -i "s/as KitAssemblySeason\[\]/as unknown as KitAssemblySeason[]/" lib/kit/assembly.ts
           rm -rf tools/royal-rumble-v2 .github/workflows/royal-rumble-v2-apply.yml
 
       - name: Install
