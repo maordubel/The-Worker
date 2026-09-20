@@ -33,8 +33,6 @@ jobs:
           node <<'NODE'
           const fs = require('fs')
 
-          // Keep 1985/86 and 2009/10 as dedicated Royal Rumble/Gate 4–5 masters,
-          // without changing the canonical XI shirt-selection rules.
           const designsPath = 'content/manual/kit-designs.json'
           const designs = JSON.parse(fs.readFileSync(designsPath, 'utf8'))
           designs.records = (designs.records || []).filter((row) => !['1985/86','2009/10'].includes(row.seasonLabel))
@@ -53,7 +51,10 @@ jobs:
             const anchor = '  const kit = kitForPlayer(player, kits)\n'
             if (!text.includes(anchor)) throw new Error(`shirt anchor missing in ${file}`)
             text = text.replace(anchor, specialBlock + anchor)
-            if (file.endsWith('RoyalRumbleLiveRun.tsx')) text = text.replaceAll('font-mono ', 'font-mono tabular-nums ')
+            if (file.endsWith('RoyalRumbleLiveRun.tsx')) {
+              text = text.replace('className={className}', 'className="h-[106px] w-[96px]"')
+              text = text.replaceAll('font-mono ', 'font-mono tabular-nums ')
+            }
             fs.writeFileSync(file, text)
           }
           NODE
