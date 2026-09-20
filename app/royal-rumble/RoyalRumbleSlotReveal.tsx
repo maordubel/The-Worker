@@ -23,7 +23,7 @@ export function RoyalRumbleSlotReveal({
     const stop = window.setTimeout(() => {
       window.clearInterval(spin)
       setOpen(false)
-    }, 1120)
+    }, 820)
     return () => {
       window.clearInterval(spin)
       window.clearTimeout(stop)
@@ -35,7 +35,7 @@ export function RoyalRumbleSlotReveal({
   return (
     <div className="absolute inset-0 z-30 grid grid-cols-3 gap-2 bg-paper sm:gap-3" aria-live="polite">
       {offers.map((player, index) => {
-        const lockAt = 7 + index * 3
+        const lockAt = 5 + index * 2
         const locked = tick >= lockAt
         const current = locked
           ? player.nameHe
@@ -43,7 +43,7 @@ export function RoyalRumbleSlotReveal({
         return (
           <div
             key={`${signature}-${index}`}
-            className={`relative flex min-h-[250px] flex-col items-center justify-center overflow-hidden border-rule px-2 text-center sm:min-h-[330px] ${
+            className={`relative flex min-h-[232px] flex-col items-center justify-center overflow-hidden border-rule px-2 text-center sm:min-h-[300px] ${
               locked ? 'border-red bg-paper text-ink' : 'border-ink bg-ink text-paper'
             }`}
           >
@@ -51,16 +51,16 @@ export function RoyalRumbleSlotReveal({
             <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.22em] text-red" dir="ltr">
               {locked ? 'LOCKED' : 'SPINNING'}
             </p>
-            <div className="mt-5 h-[78px] w-full overflow-hidden border-y-hair border-current/15">
+            <div className="mt-3 h-[64px] w-full overflow-hidden border-y-hair border-current/15">
               <div
-                className={`flex h-full items-center justify-center px-2 font-display text-[24px] leading-[0.9] sm:text-[31px] ${
+                className={`flex h-full items-center justify-center px-2 font-display text-[21px] leading-[0.9] sm:text-[30px] ${
                   locked ? 'animate-[rrSlotLock_.22s_ease-out]' : 'animate-[rrSlotPulse_.14s_linear_infinite]'
                 }`}
               >
                 {current}
               </div>
             </div>
-            <p className="mt-4 font-body text-[9px] opacity-55">
+            <p className="mt-2 font-body text-[8px] sm:text-[9px] opacity-55">
               {locked ? t('slotLocked') : t('slotSpinning')}
             </p>
           </div>

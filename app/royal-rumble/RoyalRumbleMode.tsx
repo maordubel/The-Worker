@@ -31,24 +31,24 @@ export function RoyalRumbleMode({
 
   return (
     <div>
-      <nav className="mx-auto mb-3 grid max-w-5xl grid-cols-2 border-rule border-ink bg-paper" aria-label={t('modeTitle')}>
+      <nav className="mx-auto mb-2 grid max-w-5xl grid-cols-2 border-rule border-ink bg-paper" aria-label={t('modeTitle')}>
         <button
           type="button"
           onClick={() => setMode('solo')}
           aria-pressed={mode === 'solo'}
-          className={`min-h-tap border-e-hair border-ink px-3 text-start transition ${mode === 'solo' ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-sheet'}`}
+          className={`min-h-tap border-e-hair border-ink px-3 py-1 text-start transition ${mode === 'solo' ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-sheet'}`}
         >
           <span className="block font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-red" dir="ltr">SOLO</span>
-          <span className="font-display text-[23px]">{t('soloMode')}</span>
+          <span className="font-display text-[18px] sm:text-[23px]">{t('soloMode')}</span>
         </button>
         <button
           type="button"
           onClick={() => setMode('live')}
           aria-pressed={mode === 'live'}
-          className={`min-h-tap px-3 text-start transition ${mode === 'live' ? 'bg-red text-paper' : 'bg-paper text-ink hover:bg-sheet'}`}
+          className={`min-h-tap px-3 py-1 text-start transition ${mode === 'live' ? 'bg-red text-paper' : 'bg-paper text-ink hover:bg-sheet'}`}
         >
           <span className={`block font-mono tabular-nums text-[8px] font-black tracking-[0.18em] ${mode === 'live' ? 'text-paper/65' : 'text-red'}`} dir="ltr">LIVE H2H</span>
-          <span className="font-display text-[23px]">{t('liveMode')}</span>
+          <span className="font-display text-[18px] sm:text-[23px]">{t('liveMode')}</span>
         </button>
       </nav>
 

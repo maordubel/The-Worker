@@ -106,24 +106,30 @@ function Shirt({
   })()
   if (specialSeason) {
     return (
-      <div className="relative">
-        <img src={specialSeason.src} alt={t('kitSeason', { season: specialSeason.season })} className={className} />
-        <p className="mt-1 text-center font-mono tabular-nums text-[7px] font-black tracking-[0.12em] text-concrete" dir="ltr">{specialSeason.season}</p>
+      <div className="relative flex items-center justify-center overflow-visible">
+        <img
+          src={specialSeason.src}
+          alt={t('kitSeason', { season: specialSeason.season })}
+          className={`${className} scale-[1.08] object-contain`}
+        />
+        <span className="absolute bottom-0 end-0 border border-paper/20 bg-ink px-1.5 py-0.5 font-mono tabular-nums text-[6px] font-black tracking-[0.12em] text-paper" dir="ltr">
+          {specialSeason.season}
+        </span>
       </div>
     )
   }
   const kit = kitForPlayer(player, kits)
   if (!kit) return <div className={className} />
   return (
-    <div className="relative">
+    <div className="relative flex items-center justify-center overflow-visible">
       <KitShirt
         spec={kit.spec}
-        className={className}
+        className={`${className} scale-[1.04]`}
         title={t('kitSeason', { season: kit.seasonLabel })}
       />
-      <p className="mt-1 text-center font-mono tabular-nums text-[7px] font-black tracking-[0.12em] text-concrete" dir="ltr">
+      <span className="absolute bottom-0 end-0 border border-ink/15 bg-paper px-1.5 py-0.5 font-mono tabular-nums text-[6px] font-black tracking-[0.12em] text-ink" dir="ltr">
         {kit.seasonLabel}
-      </p>
+      </span>
     </div>
   )
 }
@@ -149,51 +155,51 @@ function DraftCard({
       disabled={disabled}
       onClick={onPick}
       aria-pressed={selected}
-      className={`group relative min-h-tap overflow-hidden border-rule p-0 text-start transition duration-200 active:translate-y-1 sm:min-h-[330px] ${
+      className={`group relative min-h-[232px] overflow-hidden border-rule p-0 text-start transition duration-200 active:translate-y-1 sm:min-h-[280px] ${
         selected
           ? 'translate-y-1 border-red bg-red text-paper'
           : 'border-ink bg-paper text-ink hover:-translate-y-1'
       } ${disabled ? 'cursor-not-allowed opacity-30 grayscale' : ''}`}
     >
-      <div className={`absolute inset-x-0 top-0 h-2 ${selected ? 'bg-paper' : 'bg-red'}`} />
-      <div className="absolute -start-4 -top-5 font-display text-[112px] leading-none text-ink/5 sm:text-[150px]" dir="ltr">
+      <div className={`absolute inset-x-0 top-0 h-1.5 ${selected ? 'bg-paper' : 'bg-red'}`} />
+      <div className="absolute -start-3 -top-4 font-display text-[82px] leading-none text-ink/5 sm:text-[132px]" dir="ltr">
         {index + 1}
       </div>
 
-      <div className="relative flex min-h-[295px] flex-col p-3 sm:min-h-[330px] sm:p-4">
+      <div className="relative flex min-h-[232px] flex-col p-2.5 sm:min-h-[280px] sm:p-4">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className={`font-mono tabular-nums text-[9px] font-black tracking-[0.22em] ${selected ? 'text-paper/70' : 'text-red'}`} dir="ltr">
+            <p className={`font-mono tabular-nums text-[7px] font-black tracking-[0.18em] sm:text-[9px] ${selected ? 'text-paper/70' : 'text-red'}`} dir="ltr">
               ENTRY {String(index + 1).padStart(2, '0')}
             </p>
-            <p className="mt-1 font-mono tabular-nums text-[10px] font-black tracking-[0.12em]" dir="ltr">
+            <p className="mt-0.5 font-mono tabular-nums text-[8px] sm:text-[10px] font-black tracking-[0.12em]" dir="ltr">
               {POSITION_SHORT[player.position]}
             </p>
           </div>
           <div className="text-end">
-            <p className={`font-display text-[34px] leading-none sm:text-[42px] ${selected ? 'text-paper' : 'text-red'}`} dir="ltr">
+            <p className={`font-display text-[29px] leading-none sm:text-[40px] ${selected ? 'text-paper' : 'text-red'}`} dir="ltr">
               {money(player.price)}
             </p>
-            <p className={`mt-1 font-body text-[8px] ${selected ? 'text-paper/55' : 'text-concrete'}`}>{t('priceEntry')}</p>
+            <p className={`mt-1 hidden font-body text-[8px] sm:block ${selected ? 'text-paper/55' : 'text-concrete'}`}>{t('priceEntry')}</p>
           </div>
         </div>
 
-        <div className={`mx-auto mt-2 flex w-full justify-center border-y-hair py-2 ${selected ? 'border-paper/15 bg-transparent' : 'border-ink/10 bg-transparent'}`}>
-          <Shirt player={player} kits={kits} className="h-[92px] w-[82px] sm:h-[118px] sm:w-[104px]" />
+        <div className={`mx-auto mt-1.5 flex w-full justify-center overflow-visible border-y-hair py-1.5 ${selected ? 'border-paper/15 bg-transparent' : 'border-ink/10 bg-transparent'}`}>
+          <Shirt player={player} kits={kits} className="h-[108px] w-[94px] sm:h-[132px] sm:w-[116px]" />
         </div>
 
-        <div className="mt-auto pt-3">
-          <p className="font-display text-[24px] leading-[0.92] sm:text-[31px]">{player.nameHe}</p>
-          <div className="mt-3 flex items-end justify-between gap-2">
+        <div className="mt-auto pt-2">
+          <p className="font-display text-[21px] leading-[0.92] sm:text-[29px]">{player.nameHe}</p>
+          <div className="mt-2 flex items-end justify-between gap-2">
             <div>
               <p className={`font-body text-[8px] ${selected ? 'text-paper/55' : 'text-concrete'}`}>{t('hapoelYears')}</p>
               <p className="font-mono tabular-nums text-[9px] font-black" dir="ltr">{yearRange(player)}</p>
             </div>
-            <span className={`border-hair px-2 py-1 font-body text-[8px] font-black ${selected ? 'border-paper/35' : 'border-ink/25'}`}>
+            <span className={`hidden border-hair px-2 py-1 font-body text-[8px] font-black sm:inline-block ${selected ? 'border-paper/35' : 'border-ink/25'}`}>
               {positionHe(player.position)}
             </span>
           </div>
-          <div className="mt-3"><PriceBars price={player.price} inverted={selected} /></div>
+          <div className="mt-2"><PriceBars price={player.price} inverted={selected} /></div>
         </div>
       </div>
 
@@ -220,12 +226,12 @@ function LineupRail({
   kits: EraKit[]
 }) {
   return (
-    <section className="relative overflow-hidden border-rule border-ink bg-ink p-3 text-paper sm:p-4">
+    <section className="relative overflow-hidden border-rule border-ink bg-ink p-2 text-paper sm:p-4">
       <div className="absolute inset-y-0 start-0 w-2 bg-red" />
-      <div className="relative mb-3 flex items-end justify-between gap-3 ps-2">
+      <div className="relative mb-1.5 flex items-end justify-between gap-3 ps-2">
         <div>
           <p className="font-mono tabular-nums text-[9px] font-black tracking-[0.2em] text-red" dir="ltr">YOUR FIVE</p>
-          <h3 className="font-display text-[24px] leading-none">{t('lineupWall')}</h3>
+          <h3 className="hidden font-display text-[24px] leading-none sm:block">{t('lineupWall')}</h3>
         </div>
         <p className="hidden font-body text-[9px] text-paper/45 sm:block">{t('lineupEdit')}</p>
       </div>
@@ -239,7 +245,7 @@ function LineupRail({
               type="button"
               onClick={() => onEdit(index)}
               key={`${slot.position}-${index}`}
-              className={`min-h-tap min-w-0 border-hair p-1.5 text-center transition ${
+              className={`min-h-[44px] min-w-0 border-hair p-1 text-center transition ${
                 active ? 'border-red bg-red text-paper' : player ? 'border-paper/25 bg-paper/5' : 'border-paper/10 bg-ink'
               }`}
             >
@@ -506,19 +512,19 @@ export function RoyalRumbleRun({
 
   if (phase === 'reveal' && result) {
     return (
-      <div className="relative mx-auto max-w-5xl overflow-hidden border-rule border-ink bg-ink px-3 py-6 text-paper sm:px-6 sm:py-10">
+      <div className="relative mx-auto max-w-5xl overflow-hidden border-rule border-ink bg-ink px-3 py-4 text-paper sm:px-6 sm:py-8">
         <div className="absolute inset-y-0 start-0 w-2 bg-red" />
         <div className="relative text-center">
           <p className="font-mono tabular-nums text-[9px] font-black tracking-[0.32em] text-red" dir="ltr">OPPONENT ENTRANCE</p>
-          <h2 className="mt-2 font-display text-[48px] leading-[0.85] sm:text-[70px]">{t('opponentTitle')}</h2>
-          <p className="mx-auto mt-4 max-w-lg font-body text-[11px] text-paper/50">{t('opponentBody')}</p>
+          <h2 className="mt-2 font-display text-[38px] leading-[0.85] sm:text-[66px]">{t('opponentTitle')}</h2>
+          <p className="mx-auto mt-4 hidden max-w-lg font-body text-[11px] text-paper/50 sm:block">{t('opponentBody')}</p>
         </div>
 
-        <div className="relative mt-7 grid grid-cols-5 gap-1 sm:mt-10 sm:gap-2">
+        <div className="relative mt-4 grid grid-cols-5 gap-1 sm:mt-8 sm:gap-2">
           {result.opponent.map((player, index) => {
             const open = index < revealCount
             return (
-              <div key={player.slug} className={`relative min-h-[210px] overflow-hidden border-rule sm:min-h-[300px] ${open ? 'border-red bg-paper text-ink' : 'border-paper/15 bg-ink text-paper'}`}>
+              <div key={player.slug} className={`relative min-h-[176px] overflow-hidden border-rule sm:min-h-[280px] ${open ? 'border-red bg-paper text-ink' : 'border-paper/15 bg-ink text-paper'}`}>
                 {!open ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-ink">
                     <span className="font-display text-[54px] leading-none text-paper/10 sm:text-[80px]">?</span>
@@ -527,14 +533,14 @@ export function RoyalRumbleRun({
                     </span>
                   </div>
                 ) : (
-                  <div className="relative flex h-full min-h-[210px] animate-[rrDrop_.32s_ease-out] flex-col p-2 sm:min-h-[300px] sm:p-3">
+                  <div className="relative flex h-full min-h-[176px] animate-[rrDrop_.32s_ease-out] flex-col p-2 sm:min-h-[280px] sm:p-3">
                     <div className="absolute inset-x-0 top-0 h-2 bg-red" />
                     <div className="flex items-start justify-between gap-1">
                       <span className="font-mono tabular-nums text-[7px] font-black tracking-[0.14em] text-red sm:text-[9px]" dir="ltr">ENTRY {index + 1}</span>
                       <span className="font-display text-[22px] text-red sm:text-[30px]" dir="ltr">{money(player.price)}</span>
                     </div>
                     <div className="mx-auto mt-2 flex w-full justify-center border-y-hair border-ink/10 bg-transparent py-2">
-                      <Shirt player={player} kits={kits} className="h-[86px] w-[76px] sm:h-[120px] sm:w-[106px]" />
+                      <Shirt player={player} kits={kits} className="h-[96px] w-[84px] sm:h-[126px] sm:w-[112px]" />
                     </div>
                     <div className="mt-auto pt-2">
                       <p className="font-display text-[17px] leading-[0.9] sm:text-[25px]">{player.nameHe}</p>
@@ -548,7 +554,7 @@ export function RoyalRumbleRun({
           })}
         </div>
 
-        <div className="relative mt-6 text-center">
+        <div className="relative mt-4 text-center sm:mt-6">
           <span className="inline-block border-x-rule border-red px-5 py-2 font-display text-[30px] text-red sm:text-[42px]" dir="ltr">VS</span>
           <p className="mt-2 font-mono tabular-nums text-[8px] font-black tracking-[0.24em] text-paper/40" dir="ltr">ROYAL RUMBLE · GATE 09</p>
         </div>
@@ -569,9 +575,9 @@ export function RoyalRumbleRun({
     const won = result.winner === 'us'
     const draw = result.winner === 'draw'
     return (
-      <div className="mx-auto max-w-5xl pb-8 pt-2">
+      <div className="mx-auto max-w-5xl pb-3 pt-1">
         <RecordRun gate="royal-rumble" score={won ? 3 : draw ? 1 : 0} correct={won ? 1 : 0} asked={1} />
-        <section className="relative overflow-hidden border-rule border-ink bg-ink px-4 py-7 text-center text-paper sm:px-8 sm:py-10">
+        <section className="relative overflow-hidden border-rule border-ink bg-ink px-4 py-5 text-center text-paper sm:px-8 sm:py-8">
           <div className="pointer-events-none absolute -start-8 top-1/2 -translate-y-1/2 font-display text-[190px] leading-none text-paper/5" dir="ltr">09</div>
           <p className="relative font-mono tabular-nums text-[9px] font-black tracking-[0.3em] text-red" dir="ltr">FULL TIME · ROYAL RUMBLE</p>
           <p className="relative mt-3 font-display text-[92px] leading-[0.8] sm:text-[132px]" dir="ltr">{result.scoreFor}–{result.scoreAgainst}</p>
@@ -610,30 +616,30 @@ export function RoyalRumbleRun({
   const progress = (pickedCount / activeDraft.slots.length) * 100
 
   return (
-    <div className="mx-auto max-w-5xl pb-8 pt-1">
+    <div className="mx-auto max-w-5xl pb-3 pt-0">
       <header className="relative overflow-hidden border-rule border-ink bg-ink text-paper">
         <div className="pointer-events-none absolute -start-5 -top-10 font-display text-[220px] leading-none text-paper/5 sm:text-[300px]" dir="ltr">09</div>
         <div className="absolute inset-y-0 end-0 w-2 bg-red" />
 
-        <div className="relative grid gap-5 px-4 py-5 sm:grid-cols-[1fr_auto] sm:px-6 sm:py-7">
+        <div className="relative grid grid-cols-[1fr_auto] items-end gap-3 px-3 py-3 sm:gap-5 sm:px-6 sm:py-6">
           <div>
             <div className="flex items-center gap-3">
               <span className="border-hair border-red px-2 py-1 font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">GATE 09</span>
-              <span className="font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/35" dir="ltr">5V5 · HAPOEL ALL-TIME</span>
+              <span className="hidden font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/35 sm:inline" dir="ltr">5V5 · HAPOEL ALL-TIME</span>
             </div>
-            <h1 className="mt-3 font-display text-[54px] leading-[0.82] sm:text-[78px]">{t('title')}</h1>
-            <div className="mt-3 h-2 w-24 bg-red" />
-            <p className="mt-4 max-w-md font-body text-[11px] leading-relaxed text-paper/55 sm:text-[12px]">{t('heroBody')}</p>
+            <h1 className="mt-2 font-display text-[40px] leading-[0.82] sm:mt-3 sm:text-[76px]">{t('title')}</h1>
+            <div className="mt-2 h-1.5 w-16 bg-red sm:mt-3 sm:h-2 sm:w-24" />
+            <p className="mt-4 hidden max-w-md font-body text-[11px] leading-relaxed text-paper/55 sm:block sm:text-[12px]">{t('heroBody')}</p>
           </div>
 
-          <div className="flex min-w-[180px] flex-col justify-end border-t-hair border-paper/15 pt-3 sm:border-s-hair sm:border-t-0 sm:ps-5 sm:pt-0">
-            <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/35" dir="ltr">MONEY LEFT</p>
+          <div className="flex min-w-[112px] flex-col justify-end border-s-hair border-paper/15 ps-3 sm:min-w-[180px] sm:ps-5">
+            <p className="font-mono tabular-nums text-[7px] font-black tracking-[0.15em] text-paper/35 sm:text-[8px]" dir="ltr">MONEY LEFT</p>
             <div className="mt-1 flex items-end gap-2">
-              <p className={`font-display text-[52px] leading-none ${remaining < 0 ? 'text-red' : 'text-paper'}`} dir="ltr">{money(remaining)}</p>
-              <span className="mb-1 font-body text-[9px] text-paper/35">{t('budgetOf', { budget: money(activeDraft.budget) })}</span>
+              <p className={`font-display text-[36px] leading-none sm:text-[52px] ${remaining < 0 ? 'text-red' : 'text-paper'}`} dir="ltr">{money(remaining)}</p>
+              <span className="mb-1 hidden font-body text-[9px] text-paper/35 sm:inline">{t('budgetOf', { budget: money(activeDraft.budget) })}</span>
             </div>
-            <div className="mt-3 h-2 bg-paper/10"><div className="h-full bg-red transition-all duration-300" style={{ width: `${Math.min(100, progress)}%` }} /></div>
-            <div className="mt-2 flex justify-between font-body text-[8px] text-paper/35">
+            <div className="mt-2 h-1.5 bg-paper/10 sm:mt-3 sm:h-2"><div className="h-full bg-red transition-all duration-300" style={{ width: `${Math.min(100, progress)}%` }} /></div>
+            <div className="mt-1 flex justify-between font-body text-[7px] text-paper/35 sm:mt-2 sm:text-[8px]">
               <span>{t('lockedCount', { count: String(pickedCount) })}</span>
               <span>{t('archiveCount', { count: String(playerCount) })}</span>
             </div>
@@ -641,32 +647,31 @@ export function RoyalRumbleRun({
         </div>
       </header>
 
-      <div className="mt-3"><LineupRail draft={activeDraft} picks={picks} activeSlot={activeSlot} onEdit={setActiveSlot} kits={kits} /></div>
+      <div className="mt-2"><LineupRail draft={activeDraft} picks={picks} activeSlot={activeSlot} onEdit={setActiveSlot} kits={kits} /></div>
 
-      <section className="mt-3 grid border-rule border-ink bg-paper sm:grid-cols-[1fr_auto]">
-        <div className="p-3 sm:p-4">
-          <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-red" dir="ltr">ONE SHUFFLE · ONE CHANCE</p>
-          <h2 className="mt-1 font-display text-[25px] leading-none">{t('shuffleTitle')}</h2>
-          <p className="mt-2 max-w-xl font-body text-[9px] leading-relaxed text-concrete">{t('shuffleBody')}</p>
-          {shuffleNotice && <p className="mt-2 border-s-rule border-red ps-2 font-body text-[9px] font-black text-red">{t('shuffleFresh')}</p>}
+      <section className="mt-2 flex min-h-tap items-center justify-between gap-2 border-rule border-ink bg-paper px-3 py-1.5">
+        <div className="min-w-0">
+          <p className="font-mono tabular-nums text-[7px] font-black tracking-[0.18em] text-red" dir="ltr">SHUFFLE ×1</p>
+          <p className={`truncate font-display text-[19px] leading-none ${shuffleNotice ? 'text-red' : 'text-ink'}`}>
+            {shuffleNotice ? t('shuffleFresh') : t('shuffleTitle')}
+          </p>
         </div>
         <button
           type="button"
           disabled={shuffleUsed || busy}
           onClick={shuffleOnce}
-          className="group min-h-tap border-t-rule border-ink bg-ink px-5 py-3 text-start text-paper transition hover:bg-red disabled:cursor-not-allowed disabled:bg-concrete disabled:text-ink/60 sm:min-w-[220px] sm:border-s-rule sm:border-t-0"
+          className="min-h-[40px] shrink-0 border-s-rule border-ink bg-ink px-3 font-display text-[18px] text-paper transition hover:bg-red disabled:cursor-not-allowed disabled:bg-concrete disabled:text-ink/60 sm:px-5 sm:text-[24px]"
         >
-          <span className="block font-display text-[28px] leading-none">{shuffleUsed ? t('shuffleUsed') : t('shuffleAction')}</span>
-          <span className="mt-2 block font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-red" dir="ltr">SHUFFLE ×1</span>
+          {shuffleUsed ? t('shuffleUsed') : t('shuffleAction')}
         </button>
       </section>
 
-      <section className="mt-3 border-rule border-ink bg-paper p-3 sm:p-5">
-        <div className="mb-4 grid grid-cols-[auto_1fr_auto] items-end gap-3">
-          <div className="font-display text-[54px] leading-none text-red sm:text-[68px]" dir="ltr">{String(activeSlot + 1).padStart(2, '0')}</div>
+      <section className="mt-2 border-rule border-ink bg-paper p-2 sm:p-4">
+        <div className="mb-2 grid grid-cols-[auto_1fr_auto] items-end gap-2 sm:gap-3">
+          <div className="font-display text-[38px] leading-none text-red sm:text-[62px]" dir="ltr">{String(activeSlot + 1).padStart(2, '0')}</div>
           <div className="border-s-rule border-ink ps-3">
             <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">ENTRY DRAW · PICK {activeSlot + 1}/5</p>
-            <h2 className="font-display text-[28px] leading-none sm:text-[36px]">{t('draftQuestion')}</h2>
+            <h2 className="font-display text-[23px] leading-none sm:text-[34px]">{t('draftQuestion')}</h2>
             <p className="mt-1 font-body text-[9px] text-concrete">{t('draftPosition', { position: positionHe(currentSlot.position) })}</p>
           </div>
           <div className="hidden text-end sm:block">
@@ -678,7 +683,7 @@ export function RoyalRumbleRun({
 
         <div className="relative">
           <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
           {currentSlot.offers.map((player, index) => (
             <DraftCard
               key={player.slug}
@@ -692,32 +697,32 @@ export function RoyalRumbleRun({
           ))}
           </div>
         </div>
-        <p className="mt-3 text-center font-body text-[9px] text-concrete">{t('fadedNote')}</p>
+        <p className="mt-2 hidden text-center font-body text-[9px] text-concrete sm:block">{t('fadedNote')}</p>
       </section>
 
-      {error && <p className="mt-3 border-rule border-red bg-red/10 p-3 font-body text-[11px] font-black text-red">{error}</p>}
+      {error && <p className="mt-2 border-rule border-red bg-red/10 p-3 font-body text-[11px] font-black text-red">{error}</p>}
 
       <button
         type="button"
         disabled={!complete || remaining < 0 || busy}
         onClick={() => void lockFive()}
-        className="group mt-3 grid min-h-tap w-full grid-cols-[1fr_auto] items-center border-rule border-red bg-red px-5 text-start text-paper transition hover:bg-ink disabled:cursor-not-allowed disabled:border-concrete disabled:bg-concrete disabled:text-ink/55"
+        className="group sticky bottom-2 z-40 mt-2 grid min-h-tap w-full grid-cols-[1fr_auto] items-center border-rule border-red bg-red px-5 text-start text-paper transition hover:bg-ink disabled:cursor-not-allowed disabled:border-concrete disabled:bg-concrete disabled:text-ink/55"
       >
         <span>
           <span className="block font-mono tabular-nums text-[8px] font-black tracking-[0.2em] opacity-60" dir="ltr">LOCK THE FIVE</span>
-          <span className="font-display text-[27px] sm:text-[31px]">
+          <span className="font-display text-[23px] sm:text-[31px]">
             {busy ? t('locking') : complete ? t('lockReady') : t('missingPlayers', { count: String(5 - pickedCount) })}
           </span>
         </span>
-        <span className="font-display text-[42px] transition group-hover:-translate-x-1">←</span>
+        <span className="font-display text-[34px] transition sm:text-[42px] group-hover:-translate-x-1">←</span>
       </button>
 
-      <div className="mt-3 grid gap-2 border-y-hair border-ink/15 py-3 text-center font-body text-[9px] leading-relaxed text-concrete sm:grid-cols-3">
+      <div className="mt-3 hidden gap-2 border-y-hair border-ink/15 py-3 text-center font-body text-[9px] leading-relaxed text-concrete sm:grid-cols-3">
         <span>{t('rulePrice')}</span>
         <span>{t('ruleRange')}</span>
         <span>{t('ruleOpponent')}</span>
       </div>
-      <p className="mt-2 text-center font-body text-[8px] text-concrete">{t('kitNearest')}</p>
+      <p className="mt-2 hidden text-center font-body text-[8px] text-concrete sm:block">{t('kitNearest')}</p>
       <span className="sr-only">{cursor + 1}</span>
     </div>
   )

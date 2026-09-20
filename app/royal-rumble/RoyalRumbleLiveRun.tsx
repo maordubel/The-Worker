@@ -44,14 +44,14 @@ function Shirt({ player, kits }: { player: RoyalRumblePublicPlayer; kits: EraKit
   })()
   if (specialSeason) {
     return (
-      <div className="relative">
-        <img src={specialSeason.src} alt={t('kitSeason', { season: specialSeason.season })} className="h-[106px] w-[96px]" />
-        <p className="mt-1 text-center font-mono tabular-nums tabular-nums text-[7px] font-black tracking-[0.12em] text-concrete" dir="ltr">{specialSeason.season}</p>
+      <div className="relative flex items-center justify-center overflow-visible">
+        <img src={specialSeason.src} alt={t('kitSeason', { season: specialSeason.season })} className="h-[116px] w-[102px] scale-[1.07] object-contain" />
+        <span className="absolute bottom-0 end-0 bg-ink px-1.5 py-0.5 font-mono tabular-nums text-[6px] font-black tracking-[0.12em] text-paper" dir="ltr">{specialSeason.season}</span>
       </div>
     )
   }
   const kit = kitForPlayer(player, kits)
-  return kit ? <KitShirt spec={kit.spec} className="h-[106px] w-[96px]" title={t('kitSeason', { season: kit.seasonLabel })} /> : <div className="h-[106px]" />
+  return kit ? <KitShirt spec={kit.spec} className="h-[116px] w-[102px] scale-[1.04]" title={t('kitSeason', { season: kit.seasonLabel })} /> : <div className="h-[106px]" />
 }
 function Lamp({ on }: { on: boolean }) { return <span className={`inline-block h-2.5 w-2.5 ${on ? 'bg-red' : 'border border-paper/40'}`} /> }
 
