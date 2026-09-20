@@ -38,6 +38,11 @@ if old_map not in s: raise SystemExit('KitGameRunV3 colour map block not found')
 s=s.replace(old_map,new_map)
 p.write_text(s)
 
+p=Path('components/kit/KitAssemblyShirt.tsx');s=p.read_text()
+s=s.replace("ink={dark ? '#fff' : '#171717'}", "ink={dark ? 'rgb(var(--paper))' : 'rgb(var(--ink))'}")
+s=s.replace("color: dark ? '#fff' : '#171717',", "color: dark ? 'rgb(var(--paper))' : 'rgb(var(--ink))',")
+p.write_text(s)
+
 p=Path('lib/kit/collection.ts');s=p.read_text().replace('readonly remote=false','readonly remote = false');p.write_text(s)
 p=Path('lib/game/kit-build-run.ts');s=p.read_text().replace('export const KIT_ROUND = 3','export const KIT_ROUND = 5');p.write_text(s)
 
@@ -65,4 +70,4 @@ s=s.replace("expect(badir?.seasonLabel).toBe('2005/06')", "expect(badir?.seasonL
 p.write_text(s)
 p=Path('tests/xi-scout.test.ts');s=p.read_text().replace("expect(spells[0]?.seasonLabel).toBe('1984/85')", "expect(spells[0]?.seasonLabel).toBe('1985/86')");p.write_text(s)
 
-print('strict/current-squad + final Kit V3 regression fixes applied')
+print('strict/current-squad + all Kit V3 regressions applied')
