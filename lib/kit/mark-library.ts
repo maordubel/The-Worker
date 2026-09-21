@@ -17,7 +17,11 @@ function normalized(value: string): string { return value.normalize('NFKD').toLo
 export function makerAssetForName(maker: string | null, seasonLabel?: string): MarkAsset | null {
   if (!maker) return null
   const key = normalized(maker)
-  if (key === 'adidas' && seasonLabel && Number(seasonLabel.slice(0, 4)) < 1992) return ADIDAS_CLASSIC
+  // At the moment the supplied adidas artwork is the classic trefoil-era cut. Keep it
+  // available in Gate 5 even though Studio deliberately replaces the historical season
+  // label with "STUDIO". Historical seasons still use the same supplied artwork until a
+  // second, later adidas mark is added to the repository.
+  if (key === 'adidas') return ADIDAS_CLASSIC
   if (key === 'umbro') return UMBRO
   return null
 }

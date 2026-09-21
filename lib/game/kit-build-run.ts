@@ -33,10 +33,27 @@ export const PART_LABEL: Record<PartKind, string> = {
 }
 
 export const KIT_ROUND = 5
-export const PART_POINTS = 25
-export const PERFECT_BONUS = 75
-export const KIT_HINT_PENALTY = 25
+/** Kept for compatibility with old callers. V5 grading uses PART_WEIGHT. */
+export const PART_POINTS = 12.5
+export const PART_WEIGHT: Record<PartKind, number> = {
+  base: 10,
+  secondary: 7,
+  pattern: 15,
+  collar: 10,
+  sleeve: 10,
+  maker: 13,
+  sponsor: 18,
+  crest: 17,
+}
+export const PERFECT_BONUS = 15
+export const KIT_HINT_PENALTY = 8
 
+export type KitDifficulty = 'warmup' | 'memory' | 'expert'
+export const DIFFICULTY_OPTIONS: Record<KitDifficulty, number> = {
+  warmup: 3,
+  memory: 4,
+  expert: 5,
+}
 
 export type KitPart = {
   id: string
@@ -51,6 +68,8 @@ export type KitPuzzle = {
   seasonLabel: string
   variant: 'home' | 'away' | 'third'
   blank: KitSpec
+  difficulty: KitDifficulty
+  optionCount: number
   drawers: { kind: PartKind; parts: KitPart[] }[]
 }
 
@@ -59,6 +78,7 @@ export type PartVerdict = {
   correct: boolean
   chosen: string | null
   truth: string
+  points: number
 }
 
 export type KitVerdict = {
@@ -75,6 +95,7 @@ export type KitVerdict = {
   realSrc: string | null
   sourceTitle: string
   sourceUrl: string | null
+  difficulty: KitDifficulty
 }
 
 export type KitHintKind = 'whisper' | 'detail' | 'front'

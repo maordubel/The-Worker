@@ -7,6 +7,7 @@ import {
   type CollarId,
   type KitColour,
   type KitSpec,
+  type KitVariant,
   type NamesetId,
   type PatternId,
   type SleeveId,
@@ -14,7 +15,7 @@ import {
 
 export type SeasonKit = {
   seasonLabel: string
-  variant: 'home' | 'away' | 'third'
+  variant: KitVariant
   noteHe: string
   spec: KitSpec
   sourceTitle: string
@@ -47,7 +48,7 @@ function archiveSeasonKits(): SeasonKit[] {
     spec: {
       ...DEFAULT_SPEC,
       seasonLabel: row.seasonLabel,
-      variant: row.variant === 'third' ? 'away' : row.variant,
+      variant: row.variant,
       base: row.base as KitColour,
       pattern: row.pattern as PatternId,
       patternInk: row.patternInk as KitColour,
@@ -83,7 +84,7 @@ function assemblySeasonKits(): SeasonKit[] {
       ...DEFAULT_SPEC,
       ...row.spec,
       seasonLabel: row.seasonLabel,
-      variant: row.variant === 'third' ? 'away' : row.variant,
+      variant: row.variant,
       crestKey: row.spec.crestKey ?? crestForSeason(row.seasonLabel),
       number: null,
     },
