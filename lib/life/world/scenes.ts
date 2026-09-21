@@ -491,6 +491,44 @@ const ADULT_CHAPTERS = [
   '2000-double',
 ] as const
 
+/**
+ * הפעולות הקטנות — השלב שלפני המשימה, ולמה הוא היה חסר.
+ *
+ * `SMALL_ACTIONS` בקובץ התוכן מחזיק שמונה אחר־צהריים רגילים, וכל אחד מהם נקרא **בשם**
+ * בתנאי הכניסה של מסלול: `JOURNALIST.entry` מבקש `verified_report` וגם `written_account`,
+ * `OWNER.entry` מבקש `balanced_budget` וגם `adult_shift`, `CREATOR.entry` מבקש
+ * `creative_work`. שמונה שיחות נכתבו, שמונה קיימות ב-`CONVERSATIONS_ROUTES` — ואף חדר
+ * בקובץ הזה לא פתח אחת מהן. זו בדיוק התקלה שדלתא 71 תיקנה עבור שש משימות ההוכחה, שלב
+ * אחד מוקדם יותר: **שלב הכניסה של שלושה מסלולים היה בלתי-אפשרי**, ולא מפני שהוא קשה.
+ *
+ * למה חדר ולא תפריט: כל אחת מהשמונה היא חפץ במקום שבו העבודה הזאת באמת נעשית — שני
+ * עיתונים על מדף הקיוסק, החשבונות על שולחן המטבח, לוח היציאות בקופה. הן אינן מופיעות
+ * ברשימה בשום מסך, אי-אפשר לעשות את כולן באותו אחר-צהריים (השעון והאנרגיה הם התקרה),
+ * והשיחה עצמה תמיד מציעה "לא עכשיו".
+ *
+ * `ADULT_CHAPTERS` מאותה סיבה בדיוק שכתובה מעליו: כל שלב של כל מסלול מבקש `minAge: 18`,
+ * וראיה שנאספה בגיל שתים-עשרה אינה קונה דבר.
+ */
+const smallAction = (
+  id: string,
+  act: string,
+  /** on the room's own band — a thing standing off the floor is a thing you cannot reach (rule 41) */
+  at: { x: number; y: number; w: number },
+  verb: Verb,
+  labelHe: string,
+): HotspotDef => ({
+  id: `small-${id.toLowerCase().replace(/_/g, '-')}`,
+  era: ADULT_CHAPTERS,
+  x: at.x,
+  y: at.y,
+  w: at.w,
+  act,
+  verb,
+  labelHe,
+  // הדבר נשאר בחדר גם אחרי שעשית אותו — הענף השני של השיחה הוא מה שהוא אומר אז.
+  // חפץ שנעלם ברגע שנגעת בו הוא עולם שמוחק את עצמו מול העיניים.
+})
+
 const SCENES: SceneDef[] = [
   {
     id: 'bedroom',
@@ -565,6 +603,42 @@ const SCENES: SceneDef[] = [
         verb: 'look',
         labelHe: 'מה שהכנת',
         prop: { key: 'propNote', size: 0.05, at: { x: 0.19, y: 0.7 } },
+      },
+      /**
+       * JOURNALIST · `WRITE_ACCOUNT`, ו-CREATOR · `MAKE_WORK` — אותו חדר, שני מקומות.
+       *
+       * אחרי 1991 החדר הזה ריק בכל הפרקים הבוגרים חוץ מהשידה: `bed`, `poster` ו-`desk`
+       * כולם 1986. זה החדר שהילד למד לקרוא בו ושהגבר חוזר אליו כדי לעבוד — המחברת על
+       * המיטה היא המקום היחיד בעולם שבו הוא כותב על עצמו, והפינה היא המקום היחיד שבו
+       * דבר לא-גמור מותר להישאר מונח בין פרק לפרק.
+       *
+       * שתיהן על 0.45 ו-0.89, כלומר על המיטה ועל הפינה שהקופסה האדומה עומדת בה בשלב א׳,
+       * ולא על 0.17: השידה כבר תפוסה על ידי `route-proof-create`, והמשימה היא ההחלטה מה
+       * לעשות עם היצירה — לא ההכנה שלה.
+       */
+      smallAction('WRITE_ACCOUNT', 'route-write-account', { x: 0.45, y: 0.92, w: 0.14 }, 'look', 'המחברת הפתוחה על המיטה'),
+      smallAction('MAKE_WORK', 'route-make-work', { x: 0.89, y: 0.95, w: 0.1 }, 'take', 'מה שהתחלת בפינה'),
+      /**
+       * DISTANCE_RETURN — ההצעה היחידה בכל המשחק שאסור לשום דבר להציע.
+       *
+       * `NEVER_TRIGGERS_DISTANCE` אוסר על שלושה אותות שהמנוע כבר מחזיק — משחק שהוחמץ,
+       * אהבה נמוכה, ימים בלי כניסה — להתחיל את המסלול הזה, כי כל אחד מהם הוא המשחק כותב
+       * חיים שהשחקן לא חי. מכאן נובע שהנקודה החמה הזאת **חייבת להיות בלי תנאי**: כל `when`
+       * שאפשר היה לכתוב עליה הוא אות התנהגות בתחפושת, וזה בדיוק האיסור.
+       *
+       * לכן היא תריס. לא אדם שמעלה את זה, לא כרטיס ולא רמז — חלון בחדר שלו, שקיים כל
+       * השנים (`look-morning-shutter` מצייר אותו כבר ב-1990), והמחשבה שמאחוריו היא שלו
+       * ורק שלו. `route-distance-offer` היא הסיבה שהיא כתובה ב-`who: null` מההתחלה.
+       */
+      {
+        id: 'distance-window',
+        era: ADULT_CHAPTERS,
+        x: 0.63,
+        y: 0.92,
+        w: 0.08,
+        act: 'route-distance-offer',
+        verb: 'gaze',
+        labelHe: 'מהתריס החוצה',
       },
       // Wider than a drawer needs to be: it is the one thing in this room the chapter
       // cannot start without, so a child crossing the room at any speed is offered it.
@@ -940,6 +1014,14 @@ const SCENES: SceneDef[] = [
       // 1991: the pad and the pencil Rachel writes her lists with — and the only way out
       // of a "no" that is not a lie (§32).
       { id: 'pad-1991', era: '1991', x: 0.86, y: 0.82, w: 0.08, act: 'kitchen-note-1991', verb: 'look', labelHe: 'הפנקס' },
+      /**
+       * OWNER · `CHECK_BUDGET` — על אותו שולחן שהפנקס של 1991 מונח עליו.
+       *
+       * זה לא במקרה אותו 0.86. הפתק תחת הזכוכית היה האופן שבו אמא ניהלה ערב אחד, והתקציב
+       * הוא אותו רהיט עשר שנים אחר כך, כשהמספרים הם שלו. שולחן המטבח הוא המקום היחיד בבית
+       * שכסף מדובר בו בקול, ולכן הוא המקום היחיד שראוי לשאת ראיה ששמה `balanced_budget`.
+       */
+      smallAction('CHECK_BUDGET', 'route-check-budget', { x: 0.86, y: 0.9, w: 0.12 }, 'look', 'החשבונות על השולחן'),
     ],
     exits: [
       {
@@ -1249,6 +1331,33 @@ const SCENES: SceneDef[] = [
        */
       ...gigSpots('street'),
       { id: 'wall', era: '*', x: 0.6, y: 0.745, w: 0.09, act: 'wall-writing', verb: 'look', labelHe: 'הכתובת על הקיר' },
+      /**
+       * שלושה מבטים שהיו כתובים ושום דבר לא פתח (כלל 78).
+       *
+       * `alley-look`, `kiosk-look` ו-`street-night-1991` ישבו ב-`DIALOGUE` בלי `act`, בלי
+       * `talk` ובלי `goto` שמצביע עליהן — כלומר שלוש יצירות כתיבה שאיש לא יכול היה לקרוא.
+       * שתי הראשונות הן הרחוב מסתכל על עצמו ולכן הן `'*'`: הסמטה והקיוסק נמצאים שם בכל שנה.
+       * השלישית היא ליל 11.3.1991 בלבד, אחרי שריקת הפתיחה — הרחוב בלילה קצר יותר מהרחוב
+       * ביום, וזה נכון רק בלילה.
+       *
+       * `gaze` ולא `look`: אלה אינם חפצים שנוגעים בהם אלא כיוונים שמביטים בהם, וזה ההבדל
+       * שהפועל עושה בשורת הבקשה.
+       */
+      { id: 'alley-view', era: '*', x: 0.52, y: 0.79, w: 0.06, act: 'alley-look', verb: 'gaze', labelHe: 'לעבר הסמטה' },
+      { id: 'kiosk-view', era: '*', x: 0.25, y: 0.79, w: 0.06, act: 'kiosk-look', verb: 'gaze', labelHe: 'לעבר הקיוסק' },
+      {
+        id: 'street-night-1991',
+        era: '1991',
+        x: 0.7,
+        y: 0.8,
+        w: 0.07,
+        act: 'street-night-1991',
+        verb: 'gaze',
+        labelHe: 'ברחוב, בלילה',
+        // TIP_OFF ב-`content/chapter1991.ts` הוא 20:00. המספר כתוב כאן ולא מיובא כדי
+        // שקובץ העולם לא יתלה את עצמו בפרק אחד — וזו הסיבה היחידה.
+        when: { afterMinute: 20 * 60 },
+      },
       { id: 'poster-1990', era: '1990', x: 0.82, y: 0.82, w: 0.05, act: 'poster-1990', verb: 'look', labelHe: 'המודעה על העמוד' },
       // The pole the whole near side of the street hangs off — stickers, a scrap of a
       // torn notice, and the one place a child would stop and read something.
@@ -1681,7 +1790,16 @@ const SCENES: SceneDef[] = [
         act: 'route-proof-business',
         verb: 'look',
         labelHe: 'הגיליון על הדלפק',
-      }],
+      },
+      /**
+       * JOURNALIST · `VERIFY_REPORT` — המדף, ולא הדלפק.
+       *
+       * `route-proof-report` יושב על 0.11 ושואל מה עושים עם סיפור; זה יושב על 0.24 ושואל
+       * שאלה קודמת ופשוטה בהרבה — **האם זה בכלל נכון**. שני עיתונים על מדף אחד הם כל
+       * המנגנון: שני מקורות שלא מסכימים, ורבע שעה כדי להחליט מי מהם צדק. הקיוסק הוא המקום
+       * היחיד בעולם הזה שיש בו יותר מעיתון אחד באותו רגע.
+       */
+      smallAction('VERIFY_REPORT', 'route-verify-report', { x: 0.24, y: 0.88, w: 0.09 }, 'look', 'שני העיתונים על המדף')],
     exits: [
       {
         id: 'out',
@@ -2083,6 +2201,17 @@ const SCENES: SceneDef[] = [
       // The tables under the awning, which are where the city sits and talks about it.
       { id: 'cafe', era: '*', x: 0.795, y: 0.745, w: 0.12, act: 'allenby-cafe', verb: 'look', labelHe: 'בית הקפה' },
       /**
+       * OWNER · `WORK_COMMITMENT` — המשמרת, וכמה צעדים מהחלון של החנות.
+       *
+       * `shop-<chapter>` על 0.263 הוא העבודה המזדמנת (`gigs.ts`): שעתיים, תשלום, ואף אחד
+       * לא רשם כלום. זה אחר: **משמרת שהובטחה**, שעות שנרשמות על לוח, ושם שנשאר עליו.
+       * ההבדל הזה הוא כל מה ש-`adult_shift` אומר, ולכן הוא צריך דלת משלו על אותה מדרכה.
+       *
+       * y על 0.78 ולא על 0.9 כמו ברוב החדרים: הרצועה כאן היא המדרכה (0.725–0.82), והכביש
+       * מתחתיה אינו רצפה.
+       */
+      smallAction('WORK_COMMITMENT', 'route-work-commitment', { x: 0.48, y: 0.78, w: 0.1 }, 'enter', 'לחנות, למשמרת שהבטחת'),
+      /**
        * חנות האוהדים — the doorway on the corner, and the only one in the game.
        *
        * Maor, 6.9.2026: "הדלת ל'חנות אוהדים' צריכה להיות במסך אלנבי." It settles two
@@ -2424,6 +2553,14 @@ const SCENES: SceneDef[] = [
       { id: 'look-gate', era: '1990', x: 0.25, y: 0.9, w: 0.07, act: 'pano:panoGate7', verb: 'gaze', labelHe: 'סביב' },
       { id: 'fence', era: '*', x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
       { id: 'turnstile', era: '*', x: 0.36, y: 0.85, w: 0.09, act: 'gate-turnstile', verb: 'look', labelHe: 'הקרוסלה' },
+      /**
+       * ULTRAS · `ORGANIZE_GROUP` — הכיכר שלפני השער, במקום שאנשים עומדים בו וממתינים.
+       *
+       * `group_delivered` הוא ראיה עם קהל (`audience: 'gate5'`), וזה המקום היחיד בעולם
+       * שקהל באמת עומד בו לפני משחק. לא בתוך היציע — שם כבר מאוחר מדי לארגן — ולא בשער 5
+       * עצמו, שאינו נגיש בארבעה מהפרקים הבוגרים ולכן לא יכול לשאת שלב שדורש שני פרקים.
+       */
+      smallAction('ORGANIZE_GROUP', 'route-organize-group', { x: 0.78, y: 0.88, w: 0.1 }, 'take', 'המפגש על עצמך'),
     ],
     exits: [
       {
@@ -3119,6 +3256,15 @@ const SCENES: SceneDef[] = [
       ...gigSpots('ussishkin-end'),
       { id: 'basket', era: '*', x: 0.5, y: 0.9, w: 0.12, act: 'uss-basket', verb: 'look', labelHe: 'הסל' },
       { id: 'board', era: '*', x: 0.28, y: 0.86, w: 0.1, act: 'uss-board', verb: 'look', labelHe: 'לוח התוצאות' },
+      /**
+       * USSISHKIN_FOUNDER · `HELP_TEAM` — הקצה של האולם, ששם מה שלא נעשה עדיין נשאר מונח.
+       *
+       * `community_help` נושא `audience: 'ussishkin'`, והמועדון הזה הוא מקום אמיתי עם
+       * כיסאות שצריך להזיז וכדורים שצריך לאסוף. האולם עצמו (`ussishkin-hall`) צפוף
+       * בשמונה דברים; קיר הקצה מחזיק שניים, ולכן הוא זה שיכול לשאת עוד אחד בלי להפוך
+       * חדר לרשימה.
+       */
+      smallAction('HELP_TEAM', 'route-help-team', { x: 0.14, y: 0.9, w: 0.1 }, 'take', 'המשימה שאף אחד לא לקח'),
     ],
     exits: [
       {
@@ -3464,7 +3610,19 @@ const SCENES: SceneDef[] = [
     ambience: 'interior',
     stuckHe: 'החלון של המנויים. אם יצא מנוי לעונה — הוא נמכר כאן, ורק כאן.',
     actors: [],
-    hotspots: [],
+    hotspots: [
+      /**
+       * TRAVELLER · `PLAN_JOURNEY` — החלון, כי כאן כתובים השעות והמחיר.
+       *
+       * *"לתכנן דרך מאושרת עם מידע בדוק"* — וההבדל בין זה לבין לשלוח מישהו לדרך על סמך
+       * מה ששמעת הוא בדיוק החלון הזה: מאחוריו יש לוח, ובלוח יש מספרים שמישהו אחראי להם.
+       * זה גם החדר היחיד בעולם שבו הם קיימים, ולכן הוא לא נבחר מתוך כמה אפשרויות.
+       *
+       * x 0.58 הוא הכיוון שהשחקן נולד לתוכו (`spawns.start` על 0.46, פונה ימינה), ו-y על
+       * הרצועה עצמה (0.830–0.940) ולא על מפתן הדלפק שמאחוריה.
+       */
+      smallAction('PLAN_JOURNEY', 'route-plan-journey', { x: 0.58, y: 0.9, w: 0.12 }, 'look', 'החלון — השעות והמחירים'),
+    ],
     exits: [
       {
         /**

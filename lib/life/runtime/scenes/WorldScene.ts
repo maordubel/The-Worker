@@ -2457,7 +2457,7 @@ export class WorldScene extends Phaser.Scene {
     if (!def) return null
     if (def.hudDateHe) return def.hudDateHe
     // 1986, 1990 and 1991 hang on one match and its date is the day; every other chapter names its own
-    return def.stage === 'B' && !['1990', '1991'].includes(def.id) ? def.dateHe : null
+    return def.stage !== 'A' && !['1990', '1991'].includes(def.id) ? def.dateHe : null
   }
 
   private pushHud() {
@@ -2467,6 +2467,9 @@ export class WorldScene extends Phaser.Scene {
       date: state.dateHe ?? this.chapterDate() ?? longDateHe(this.anchor.match?.playedOn) ?? String(state.year),
       agorot: state.agorot,
       showMoney: state.agorot > 0,
+      energy: Math.round(state.energy),
+      // מופיע כשהיום כבר עלה במשהו — מד שתמיד על המסך נקרא כמו קישוט
+      showEnergy: state.energy < 92,
       place: this.def.titleHe,
       objective: this.objective(state),
       year: state.year,

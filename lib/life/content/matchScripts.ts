@@ -236,7 +236,9 @@ const DOUBLE_00: MatchScript = {
     { wait: 0, id: 'kickoff', phaseHe: 'המשחק', board: { for: 0, against: 0 }, crowd: 'CHANT', whistle: 1, text: 'רמת גן. שוב. אותה קערה, אותו יריב, שנה אחרי. וכולם כאן כבר יודעים שזה יכול להיגמר בפנדלים, ומקללים את הידיעה.' },
     { wait: 3600, id: 'memory', talk: 'm00-memory' },
     { wait: 900, id: 'level', board: { for: 1, against: 1 }, crowd: 'NEAR_MISS', sfx: 'crowd-swell', level: 0.9, text: 'שער, ושער. תשעים דקות ואף אחד לא מוותר.' },
-    { wait: 6400, id: 'extra', phaseHe: 'הארכה', crowd: 'BUILDING_TENSION', whistle: 2, text: 'הארכה. הרגליים של השחקנים נגמרות. הקולות ביציע לא.' },
+    // מה שהיציע עושה עם מה שהבאת לו — רגע אחד, בין תשעים לבין ההארכה
+    { wait: 2600, id: 'stand', talk: 'd-stand' },
+    { wait: 3800, id: 'extra', phaseHe: 'הארכה', crowd: 'BUILDING_TENSION', whistle: 2, text: 'הארכה. הרגליים של השחקנים נגמרות. הקולות ביציע לא.' },
     { wait: 4800, id: 'ours', goal: 'for', crowd: 'GOAL_BURST', text: 'שלנו. הבמה זזה. כל הצד הזה בבת אחת.', tone: 'red' },
     { wait: 5400, id: 'theirs', goal: 'against', crowd: 'AFTERMATH', sfx: 'crowd-groan', level: 0.9, text: 'ואז שלהם. הקערה נחתכת לשניים: צד שצועק וצד ששותק.' },
     { wait: 6000, id: 'clock', crowd: 'BUILDING_TENSION', text: 'ואף אחד לא מוותר. ואז השופט מסתכל בשעון.' },

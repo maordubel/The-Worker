@@ -4,6 +4,11 @@ import type { LifeState } from '../types'
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
+import { PAGE_SUBJECT } from './chapter1999basket'
+import { RHYTHM_SUBJECT } from './chapter1996army'
+
+/** הבד — נעשה בלילה אחד, ונפרש ביציע ארבעה ימים אחר כך. אותו נושא לשתי הראיות. */
+const BANNER_SUBJECT = 'הבד שהכנו בלילה'
 
 /**
  * B11 · "ארבעה ימים" · 13–17.5.2000 — the two-part final exam, and the walk after it.
@@ -389,7 +394,69 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
           { id: 'sleep', text: 'לישון. יום שלם.', then: [{ e: 'energy', delta: 40 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
           { id: 'work', text: 'משמרת כפולה. תשעים שקל, וכרטיס לגמר עולה שישים.', then: [{ e: 'money', agorot: 9000, why: 'משמרת כפולה' }, { e: 'energy', delta: -15 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
           { id: 'family', text: 'ערב עם אבא ואמא. לתקן משהו.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 6 }, { e: 'energy', delta: 10 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
-          { id: 'gate5', text: 'להכין בד עם שער 5. לילה שלם.', when: { gateEver: 'gate5' }, noteHe: 'אף פעם לא עמדת בשער 5. הבד לא שלך.', then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'energy', delta: -20 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
+          { id: 'gate5', text: 'להכין בד עם שער 5. לילה שלם.', when: { gateEver: 'gate5' }, noteHe: 'אף פעם לא עמדת בשער 5. הבד לא שלך.', then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'energy', delta: -20 }, { e: 'flag', flag: 'd:pick1' }, { e: 'flag', flag: 'life:banner:2000' }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'לילה שלם על הרצפה של מחסן, עם צבע שמתייבש לאט.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'הכין בד' }, { e: 'goto', node: 'd-days-2' }] },
+          /**
+           * הדף עוד בחלון, שנה אחרי — ויש בו שם אחד לא נכון.
+           *
+           * הבחירה מוסתרת למי שלא תלה דף שם; אין על מה לחזור. מה שהיא עולה הוא אחד משני
+           * הדברים שיש זמן אליהם בארבעה הימים האלה, וזה המחיר הנכון: תיקון שלא עולה כלום
+           * הוא הודעה, לא תיקון.
+           */
+          { id: 'page', text: 'הדף בחלון של רפי. יש בו שם לא נכון, ואתה יודע את זה מאז.', when: { flag: 'life:page:pinned' }, hidden: true, then: [{ e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-page' }] },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * *"השם שלי גם על התיקון"* — והצורה של התיקון היא כל ההישג.
+     *
+     * הטעות **נשארת קריאה**. הדף לא יורד, לא נמחק ולא נכתב מחדש; ליד הפסקה עם השם
+     * הלא-נכון נתלה פתק שני, קטן יותר, בכתב היד של אותו אדם. ככה עושים את זה כשאין
+     * מערכת, אין עורך ואין מקום לתלות בו חוץ מחלון של קיוסק — ומי שמוחק במקום להוסיף
+     * מוחק גם את העדות שהוא טעה.
+     *
+     * `public_correction` נרשם על אותו נושא כמו `written_account` מ-1999, כי זו אותה
+     * טענה — רק שנה אחר כך ועם שם אחד שתוקן.
+     */
+    id: 'd-page',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הדף עוד שם. הסלוטייפ הצהיב, הנייר התגלגל בפינות, ומישהו סימן שורה בעיפרון — לא אתה.' },
+          { who: null, text: 'שני בחורים עומדים מולו. אחד מהם מצטט משפט ממנו בקול, כאילו זה דבר ידוע, ולא יודע שאתה כתבת אותו.' },
+          { who: null, text: 'ובפסקה השלישית יש שם של מישהו שלא היה שם באותו ערב. ידעת את זה כבר אז, וזה נשאר תלוי שנה.' },
+        ],
+        choices: [
+          {
+            id: 'beside',
+            text: 'לכתוב פתק תיקון ולתלות אותו **ליד** הדף.',
+            then: [
+              { e: 'proof', kind: 'public_correction', proofId: 'public_correction:{chapter}:page', subjectHe: PAGE_SUBJECT, audience: 'public', delta: 2, noteHe: 'פתק קטן ליד הפסקה השלישית: מי באמת היה שם, ומי כתב את הטעות.' },
+              { e: 'heard', proofId: 'public_correction:{chapter}:page' },
+              { e: 'personality', key: 'honesty', delta: 4 },
+              { e: 'skill', skill: 'communication', delta: 2, why: 'תיקן בפומבי' },
+              { e: 'redheart', key: 'historyMemory', delta: 4 },
+              { e: 'toast', text: 'הטעות נשארה קריאה. זה כל העניין.', tone: 'plain' },
+              { e: 'goto', node: 'd-days-2' },
+            ],
+          },
+          {
+            id: 'replace',
+            text: 'להוריד את הדף ולכתוב אותו מחדש, נכון.',
+            then: [
+              { e: 'personality', key: 'stubbornness', delta: 2 },
+              { e: 'redheart', key: 'historyMemory', delta: 2 },
+              { e: 'toast', text: 'הדף החדש נקי, ואף אחד לא יֵדע שהיה שם שם אחר. גם אתה תשכח, בסוף.', tone: 'plain' },
+              { e: 'goto', node: 'd-days-2' },
+            ],
+          },
+          {
+            id: 'leave',
+            text: 'להשאיר. זה ישן.',
+            then: [{ e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'goto', node: 'd-days-2' }],
+          },
         ],
       },
     ],
@@ -477,6 +544,56 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
       },
       { when: { flag: 'd:ticket' }, lines: [{ who: null, text: 'יום רביעי. הכרטיס בכיס. ההסעה בשש. רמת גן.' }], then: [{ e: 'time', minutes: 120 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
       { lines: [{ who: null, text: 'יום רביעי. אין כרטיס מסודר. יש דרך — אם מישהו ידאג לך. מישל אמר שיש. אבא אמר שיש. מישהו ידאג.' }], then: [{ e: 'flag', flag: 'arrived:late' }, { e: 'time', minutes: 150 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
+    ],
+  },
+  {
+    /**
+     * מה שהיציע עושה עם מה שעשית — והוא לא מבקש רשות.
+     *
+     * זו הראיה השנייה של "שרים את זה", והיא נרשמת **רק כאן**: יצירה היא דבר שאדם עושה,
+     * שימוש של קהל הוא דבר שקורה לו. הבד נפרש בידיים של אנשים שלא הכינו אותו, והקצב
+     * חוזר מהצד השני של הקערה בלי שאיש אמר מאיפה הוא בא — *"אתה שומע את זה מאחורה"*,
+     * בדיוק כפי שהפרס רשום.
+     *
+     * שתי הראיות בלתי-תלויות: מי שהכין בד שומע אותו, מי שנתן קצב שומע אותו, ומי שעשה
+     * את שניהם שומע את שניהם. מי שלא עשה כלום עובר דרך הסצנה הזאת בלי שורה אחת, כי אין
+     * לו מה לשמוע.
+     */
+    id: 'd-stand',
+    nameHe: null,
+    branches: [
+      {
+        when: { all: [{ flag: 'life:banner:2000' }, { flag: 'life:melamed:rhythm' }] },
+        lines: [
+          { who: null, text: 'הבד נפתח שתי שורות מתחתיך, בידיים של ארבעה אנשים שלא היו במחסן. הצבע עוד מריח.' },
+          { who: null, text: 'ואז, מהצד השני של הקערה, שלוש-הפסקה-שתיים. לא מלמד — אלף איש. אף אחד מהם לא יודע ממי זה בא.' },
+        ],
+        then: [
+          { e: 'proof', kind: 'crowd_use_proof', proofId: 'crowd_use_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'ארבעה אנשים שלא היו במחסן פרשו אותו.' },
+          { e: 'proof', kind: 'crowd_use_proof', proofId: 'crowd_use_proof:{chapter}:rhythm', subjectHe: RHYTHM_SUBJECT, noteHe: 'אלף איש, מהצד השני, בלי לדעת ממי זה בא.' },
+          { e: 'redheart', key: 'terraceCulture', delta: 6 },
+          { e: 'wellbeing', key: 'belonging', delta: 6 },
+        ],
+      },
+      {
+        when: { flag: 'life:banner:2000' },
+        lines: [{ who: null, text: 'הבד נפתח שתי שורות מתחתיך, בידיים של ארבעה אנשים שלא היו במחסן. הצבע עוד מריח, ואף אחד לא מסתכל עליך.' }],
+        then: [
+          { e: 'proof', kind: 'crowd_use_proof', proofId: 'crowd_use_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'ארבעה אנשים שלא היו במחסן פרשו אותו.' },
+          { e: 'redheart', key: 'terraceCulture', delta: 4 },
+          { e: 'wellbeing', key: 'belonging', delta: 4 },
+        ],
+      },
+      {
+        when: { flag: 'life:melamed:rhythm' },
+        lines: [{ who: null, text: 'מהצד השני של הקערה עולה קצב: שלוש, הפסקה, שתיים. לא מלמד — אלף איש. אף אחד מהם לא יודע ממי זה בא.' }],
+        then: [
+          { e: 'proof', kind: 'crowd_use_proof', proofId: 'crowd_use_proof:{chapter}:rhythm', subjectHe: RHYTHM_SUBJECT, noteHe: 'אלף איש, מהצד השני, בלי לדעת ממי זה בא.' },
+          { e: 'redheart', key: 'terraceCulture', delta: 4 },
+          { e: 'wellbeing', key: 'belonging', delta: 4 },
+        ],
+      },
+      { lines: [] },
     ],
   },
   {

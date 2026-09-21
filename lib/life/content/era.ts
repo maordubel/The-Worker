@@ -25,6 +25,7 @@ import { BEATS_LACES, ENDINGS_LACES, objectiveLaces, PORTRAIT_LACES } from './ch
 import { BEATS_SEED, ENDINGS_SEED, objectiveSeed, PORTRAIT_SEED } from './chapter1999basket'
 import { BEATS_CUP99, ENDINGS_CUP99, objectiveCup99, PORTRAIT_CUP99 } from './chapter1999cup'
 import { BEATS_DOUBLE, BEATS_TITLE, ENDINGS_DOUBLE, ENDINGS_TITLE, objectiveDouble, objectiveTitle, PORTRAIT_2000 } from './chapter2000double'
+import { BEATS_BRIDGE, ENDINGS_BRIDGE, objectiveBridge, PORTRAIT_BRIDGE } from './chapter2000bridge'
 import { HERO80_WALK, KID_WALK } from '../runtime/art'
 import { ENCOUNTERS_1986 } from './encounters1986'
 import { ENCOUNTERS_1990 } from './encounters1990'
@@ -34,7 +35,7 @@ import { OPPORTUNITIES_1990 } from './opportunities1990'
 import { OPPORTUNITIES_1991 } from './opportunities1991'
 import {
   goal1986, goal1990, goal1991, goal1993Cup, goalGalil, goalSinai, goalArmy,
-  goalHall, goalLaces, goalSeed, goalCup99, goalTitle, goalDouble,
+  goalHall, goalLaces, goalSeed, goalCup99, goalTitle, goalDouble, goalBridge,
 } from './goals'
 import { HEARD_BEATS, HEARD_CHAPTERS } from './routes'
 import { SCHEDULE_1986 } from './schedules1986'
@@ -416,6 +417,22 @@ export const ERA_2000_DOUBLE = stageB('2000-double', 2000, '2000-cup', {
   player: YOUNG_MAN,
 })
 
+/**
+ * ...והפרק שאחריו, שהוא הראשון של תסריט ההמשך.
+ *
+ * `stageB` עדיין מתאים לו כצורה — אותם חדרים, אותה דמות, אותו עוגן — אבל הוא **לא**
+ * שלב ב׳: `stage: 'C'` ב-`chapters.ts` אומר שהמקור שלו הוא תסריט 2000–2026 ולא
+ * הבריף המקורי. העוגן נשאר `2000-cup`, כי הגמר הוא מה שקרה **אתמול** בחיים האלה.
+ */
+export const ERA_2000_BRIDGE = stageB('2000-bridge', 2000, '2000-cup', {
+  endings: ENDINGS_BRIDGE,
+  objective: (state, sceneId) => objectiveBridge(state, sceneId),
+  goal: goalBridge,
+  portraits: PORTRAIT_BRIDGE,
+  beats: BEATS_BRIDGE,
+  player: YOUNG_MAN,
+})
+
 /** the six days before the Saturday — the same boy, the same rooms, a beat each */
 function stageA(chapter: string, year: number, extra: Pick<Era, 'endings' | 'objective' | 'beats' | 'goal'>): Era {
   return {
@@ -462,6 +479,7 @@ const ERAS: Record<string, Era> = {
   '1999-cup': ERA_1999_CUP,
   '2000-title': ERA_2000_TITLE,
   '2000-double': ERA_2000_DOUBLE,
+  '2000-bridge': ERA_2000_BRIDGE,
 }
 
 /**

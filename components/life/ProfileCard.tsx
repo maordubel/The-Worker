@@ -7,13 +7,15 @@ import { Num } from '@/components/ui/Num'
 import { KitShirt } from '@/components/kit/KitShirt'
 import { Marks, Shelf, Tag, Thing } from '@/components/life/BagShelf'
 import { t } from '@/lib/i18n'
-import { artUrl } from '@/lib/life/runtime/art'
+import { artUrl, EMBLEM_OF_SKILL, EMBLEM_OF_TRACK } from '@/lib/life/runtime/art'
 import type { LifeSnapshot } from '@/lib/life/runtime/game'
 import {
   carriedReading,
   presenceReading,
   purseReading,
   redBoxReading,
+  skillsReading,
+  tracksReading,
   wardrobeReading,
   type Band,
   type PurseId,
@@ -140,6 +142,35 @@ function Bond({
   )
 }
 
+/**
+ * שורה של סמל ומילה — וזו כל הצורה שיש לכישור ולמסלול על הכרטיס הזה.
+ *
+ * בלי בר, בלי אחוז, בלי מתוך-שלוש: הסמל אומר **מה זה**, המילה אומרת **איפה אתה**.
+ * זה כלל 46 כפי שמאור חידד אותו ב-63א — הגיליון עונה "כמה", הכרטיס עונה "מי אתה" —
+ * והוא גם למה ה-`band` לא מודפס אף פעם, רק נקרא כדי לבחור מילה.
+ *
+ * הסמל עומד **ליד** המילה ולא במקומה: תמונה שלא נטענה משאירה שורה שלמה, וקורא מסך
+ * שומע את שתי המילים בלי לשמוע "תמונה".
+ */
+function MarkRow({ art, nameHe, valueHe }: { art?: string; nameHe: string; valueHe: string }) {
+  return (
+    <div className="flex items-center gap-2.5 py-1.5">
+      {art ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={artUrl(art)} alt="" aria-hidden="true" className="h-[22px] w-[22px] shrink-0 object-contain" />
+      ) : (
+        <span aria-hidden="true" className="h-[22px] w-[22px] shrink-0" />
+      )}
+      <p className="min-w-0 flex-1 font-display text-[14px] leading-none text-sheet">
+        <bdi>{nameHe}</bdi>
+      </p>
+      <p className="font-body text-[11px] leading-none text-concrete">
+        <bdi>{valueHe}</bdi>
+      </p>
+    </div>
+  )
+}
+
 /** one leaf of the bag, as a plate you press */
 function LeafTab({ live, onClick, children }: { live: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -192,6 +223,8 @@ export function ProfileCard({
   const wardrobe = wardrobeReading(state)
   const keepsakes = redBoxReading(state)
   const days = presenceReading(state)
+  const skills = skillsReading(state)
+  const tracks = tracksReading(state)
 
   return (
     <div
@@ -496,6 +529,45 @@ export function ProfileCard({
                   {profile.personality.length > 0 ? profile.personality.join(' · ') : t('life.profile.whoNone')}
                 </bdi>
               </p>
+            </Section>
+
+            {/* מה אתה יודע לעשות — חמישה כישורים שעד היום היו גלויים רק בפאנל הדיבאג */}
+            <Section titleHe={t('life.profile.skills')}>
+              {skills.length === 0 ? (
+                <p className="font-body text-[13px] leading-relaxed text-concrete">
+                  <bdi>{t('life.profile.skillsNone')}</bdi>
+                </p>
+              ) : (
+                <div className="divide-y divide-concrete/15" data-life="profile-skills">
+                  {skills.map((skill) => (
+                    <MarkRow
+                      key={skill.id}
+                      art={EMBLEM_OF_SKILL[skill.id]}
+                      nameHe={skill.nameHe}
+                      valueHe={skill.readingHe}
+                    />
+                  ))}
+                </div>
+              )}
+            </Section>
+
+            {/*
+              לאן החיים הלכו — שלושת מסלולי החיים, שעד 21.9.2026 לא הוזכרו באף קומפוננטה.
+              `LIFE_TRACKS`, תשעת השלבים, דגלי `own:track:` ששורדים כל מעבר שנה ו-`trackAtLeast`
+              שתנאים קוראים לו — כל זה היה קיים ובלתי-נראה לשחקן.
+            */}
+            <Section titleHe={t('life.profile.tracks')}>
+              {tracks.length === 0 ? (
+                <p className="font-body text-[13px] leading-relaxed text-concrete">
+                  <bdi>{t('life.profile.tracksNone')}</bdi>
+                </p>
+              ) : (
+                <div className="divide-y divide-concrete/15" data-life="profile-tracks">
+                  {tracks.map((track) => (
+                    <MarkRow key={track.id} art={EMBLEM_OF_TRACK[track.id]} nameHe={track.titleHe} valueHe={track.stageHe} />
+                  ))}
+                </div>
+              )}
             </Section>
 
             {/* אנשים — a distance, not a percentage. */}

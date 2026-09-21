@@ -118,6 +118,18 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'final', textHe: 'רמת גן. הגמר.', revealWhen: F('d:final'), doneWhen: F('d:over') },
     { id: 'walk', textHe: 'החוצה. מי לידך.', revealWhen: F('d:over'), doneWhen: F('d:walked') },
   ],
+  /**
+   * הגשר — ולכן שלושה שלבים בלבד, אחד לכל סצנה בתסריט (B00, B01, B02).
+   *
+   * `revealWhen` שומר על הסדר שהתסריט כותב: הקופסה נפתחת אחרי שהלילה נסגר,
+   * וההתחייבות נלקחת אחרי הקופסה. בלי זה הרשימה מציגה שלוש משימות בבת אחת בלילה
+   * שכל כולו "עם מי אתה מסיים אותו".
+   */
+  '2000-bridge': [
+    { id: 'night', textHe: 'הלילה נגמר. עם מי אתה מסיים אותו.', doneWhen: F('b:night') },
+    { id: 'box', textHe: 'הקופסה על המדף.', revealWhen: F('b:night'), doneWhen: F('b:box') },
+    { id: 'commit', textHe: 'רפי פותח בשש. יש מחר.', revealWhen: F('b:box'), doneWhen: F('b:commit') },
+  ],
   'a2-alley': [
     { id: 'mom', textHe: 'אמא רוצה משהו.', doneWhen: F('a2:errand') },
     { id: 'bread', textHe: 'לחם מהקיוסק.', revealWhen: F('a2:errand'), doneWhen: F('a2:bread') },

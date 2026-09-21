@@ -6,6 +6,15 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 
 /**
+ * נושא אחד לשני הצדדים של אותה הבטחה.
+ *
+ * מי שאמר "מה שלא יהיה" ובא — `promise_kept`. מי שאמר ולא בא — `breach_discovered`.
+ * שתיהן נושאות את המחרוזת הזאת בדיוק, כי ההישגים מצליבים **נושא** ולא מפתח: התיקון
+ * ב-1999 חייב למצוא את ההפרה של 1993, ומחרוזת שנכתבה פעמיים היא מחרוזת שתיפרד.
+ */
+export const GALIL_PROMISE = 'ההבטחה לאפי על המשחק בצפון'
+
+/**
  * ההפרש ששחור השלים, כמספר.
  *
  * *"הילד של הבד נוסע. את ההפרש אני משלים."* — שלושים שקל, ואותם שלושים נפרעים ב-1999.
@@ -678,8 +687,8 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
         when: { flag: 'life:promise:g4', none: [{ flag: 'life:galil:there' }] },
         lines: [{ who: 'אפי', text: '"מה שלא יהיה," אמרת. ולא היית.' }, { who: null, text: 'הוא לא צעק. זה היה יותר גרוע.' }],
         choices: [
-          { id: 'sorry', text: 'לא הצלחתי. סליחה.', then: [{ e: 'rel', who: 'efi', axis: 'trust', delta: -4 }, { e: 'rel', who: 'efi', axis: 'bond', delta: 1 }, { e: 'remember', who: 'efi', eventId: 'broke-promise-1993', significance: 'major' }, { e: 'goto', node: 'after-soko' }] },
-          { id: 'excuse', text: 'לא היה כסף. לא היה איך.', then: [{ e: 'rel', who: 'efi', axis: 'trust', delta: -6 }, { e: 'rel', who: 'efi', axis: 'distance', delta: 5 }, { e: 'remember', who: 'efi', eventId: 'broke-promise-1993', significance: 'major' }, { e: 'goto', node: 'after-soko' }] },
+          { id: 'sorry', text: 'לא הצלחתי. סליחה.', then: [{ e: 'rel', who: 'efi', axis: 'trust', delta: -4 }, { e: 'rel', who: 'efi', axis: 'bond', delta: 1 }, { e: 'proof', kind: 'breach_discovered', proofId: 'breach_discovered:{chapter}:galil', subjectHe: GALIL_PROMISE, noteHe: '"מה שלא יהיה," אמרת. ולא היית.' }, { e: 'remember', who: 'efi', eventId: 'broke-promise-1993', significance: 'major' }, { e: 'goto', node: 'after-soko' }] },
+          { id: 'excuse', text: 'לא היה כסף. לא היה איך.', then: [{ e: 'rel', who: 'efi', axis: 'trust', delta: -6 }, { e: 'rel', who: 'efi', axis: 'distance', delta: 5 }, { e: 'proof', kind: 'breach_discovered', proofId: 'breach_discovered:{chapter}:galil', subjectHe: GALIL_PROMISE, noteHe: 'תירוץ, ושניכם ידעתם שהוא נכון ושהוא לא משנה כלום.' }, { e: 'remember', who: 'efi', eventId: 'broke-promise-1993', significance: 'major' }, { e: 'goto', node: 'after-soko' }] },
         ],
       },
       /**
@@ -696,7 +705,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
         then: [
           { e: 'rel', who: 'efi', axis: 'trust', delta: 8 },
           { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 6 },
-          { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:galil', subjectHe: 'ההבטחה לאפי על המשחק בצפון', noteHe: 'אמר "מה שלא יהיה", ועלה על האוטובוס.' },
+          { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:galil', subjectHe: GALIL_PROMISE, noteHe: 'אמר "מה שלא יהיה", ועלה על האוטובוס.' },
           { e: 'goto', node: 'after-soko' },
         ],
       },

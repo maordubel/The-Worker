@@ -5,8 +5,10 @@ import { CHAPTERS } from '@/lib/life/content/chapters'
 import { BEATS_ARMY } from '@/lib/life/content/chapter1996army'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { eraFor } from '@/lib/life/content/era'
+import { MATCH_SCRIPTS, SCRIPT_CHAPTER } from '@/lib/life/content/matchScripts'
 import { emptyState } from '@/lib/life/events'
 import type { LifeState } from '@/lib/life/types'
+import { stageOutOfReachFor, type RouteId } from '@/lib/life/routes'
 import { ALL_SCENES, inEra } from '@/lib/life/world/scenes'
 
 /**
@@ -64,6 +66,19 @@ const conversationsIn = (chapter: string): Set<string> => {
     for (const child of Object.values(node)) scan(child, depth + 1)
   }
   for (const key of ['beats', 'opportunities', 'encounters', 'ambient']) scan(era[key])
+
+  /**
+   * ומה שמדובר בתוך משחק — a match script is a room too.
+   *
+   * `double-00` opens `d-stand` on a `talk` step between ninety minutes and extra time,
+   * and nothing in the scene graph points at it: the director does. A walk that reads
+   * only scenes and beats would call that content unreachable and be wrong in the one
+   * direction that matters — it would let real evidence look like dead content.
+   */
+  for (const [id, script] of Object.entries(MATCH_SCRIPTS)) {
+    if (SCRIPT_CHAPTER[id] !== chapter) continue
+    for (const step of script.steps) if (step.talk) roots.push(step.talk)
+  }
 
   const seen = new Set<string>()
   const queue = [...roots]
@@ -161,6 +176,122 @@ describe('הפנקס — ראיה שאפשר להגיע אליה', () => {
   })
 })
 
+describe('הפנקס — צמדים, וכל אחד בשני מקומות', () => {
+  /**
+   * שלוש הראיות של הגל הזה הן כולן **צמד**, וכל צמד קיים כדי שההבדל בין שני חצאיו יהיה
+   * אמיתי: מקום שנמסר אינו מקום שמישהו ישב בו, שמות שנרשמו אינם אנשים שהגיעו, והתנצלות
+   * אינה הפרה שנמחקה. לכן הבדיקה כאן אינה "האם הראיה קיימת" אלא **האם שני החצאים
+   * נגישים, על אותו נושא** — וב-`ticket_used` גם: האם הוא נרשם במקום אחר מזה שבו נמסר.
+   */
+  it('shares a seat in one room and sees it used in another', () => {
+    const shared = subjectsOf('ticket_shared')
+    const used = subjectsOf('ticket_used')
+    expect(shared.size, 'nothing in the game hands over a place').toBeGreaterThan(0)
+    const both = [...shared].filter((subject) => used.has(subject))
+    expect(both, `shared: ${[...shared].join(', ')} · used: ${[...used].join(', ')}`).not.toEqual([])
+
+    // and the two halves are not the same beat: a place is given where people talk, and
+    // it is answered where the match is
+    const sharedIds = idsOf('ticket_shared')
+    const usedIds = idsOf('ticket_used')
+    for (const id of sharedIds) expect(usedIds.has(id), `${id} records both halves at once`).toBe(false)
+  })
+
+  it('lets a group be delivered — and lets it fail on the same subject', () => {
+    // ACH_TEAM reads BOTH: `group_delivered` grants it, `group_unresolved` on the same
+    // subject takes it away. A promise about people that cannot be broken is not a promise.
+    const delivered = subjectsOf('group_delivered')
+    const unresolved = subjectsOf('group_unresolved')
+    expect(delivered.size).toBeGreaterThan(0)
+    const both = [...delivered].filter((subject) => unresolved.has(subject))
+    expect(both, `delivered: ${[...delivered].join(', ')} · unresolved: ${[...unresolved].join(', ')}`).not.toEqual([])
+  })
+
+  it('records a breach where it happens and a repair where it is spoken about', () => {
+    const breaches = subjectsOf('breach_discovered')
+    const repairs = subjectsOf('repair_completed')
+    expect(breaches.size, 'no breach is ever written down').toBeGreaterThan(0)
+    const both = [...breaches].filter((subject) => repairs.has(subject))
+    expect(both.length, `breaches: ${[...breaches].join(', ')} · repairs: ${[...repairs].join(', ')}`).toBeGreaterThanOrEqual(2)
+
+    // a repair is always a later chapter than the breach it answers — going back to
+    // something takes time, and an apology in the same scene is not a repair
+    for (const subject of both) {
+      const breachAt = of('breach_discovered').filter((row) => (row.subject ?? row.proofId) === subject)
+      const repairAt = of('repair_completed').filter((row) => (row.subject ?? row.proofId) === subject)
+      const order = PLAYABLE.map((chapter) => chapter.id)
+      const earliestBreach = Math.min(...breachAt.map((row) => order.indexOf(row.chapter)))
+      const latestRepair = Math.max(...repairAt.map((row) => order.indexOf(row.chapter)))
+      expect(latestRepair, `${subject} is repaired in the chapter it was broken in`).toBeGreaterThan(earliestBreach)
+    }
+  })
+})
+
+describe('העיתונות — שני מקורות, דף בחלון, ותיקון שלא מוחק', () => {
+  /**
+   * שלוש השורות של שדרת העיתונות קוראות אותה שרשרת: לבדוק, לכתוב, לפרסם, לתקן. כל חוליה
+   * בה היא ראיה נפרדת **בכוונה**, כי הצורה המלאה היא מה שההישגים בודקים — שמועה שנכתבה
+   * בלי לבדוק היא עדיין כתיבה, ודף שתוקן במחיקה הוא דף בלי היסטוריה.
+   */
+  it('checks one subject against two different sources, and writes that subject down', () => {
+    // ACH_VERIFY: `subjectWithSources(…, 2)` counts DISTINCT proof ids on one subject.
+    const bySubject = new Map<string, Set<string>>()
+    for (const row of of('verified_report')) {
+      const subject = row.subject ?? row.proofId
+      const ids = bySubject.get(subject) ?? new Set<string>()
+      ids.add(row.proofId)
+      bySubject.set(subject, ids)
+    }
+    const twoSourced = [...bySubject.entries()].filter(([, ids]) => ids.size >= 2).map(([subject]) => subject)
+    expect(twoSourced, [...bySubject.keys()].join(', ')).not.toEqual([])
+    const written = subjectsOf('written_account')
+    expect(twoSourced.filter((subject) => written.has(subject)), 'nothing writes down what it checked').not.toEqual([])
+  })
+
+  it('publishes a written account somewhere other than where it was written', () => {
+    const written = subjectsOf('written_account')
+    const published = subjectsOf('publication_proof')
+    const both = [...published].filter((subject) => written.has(subject))
+    expect(both, `written: ${[...written].join(', ')} · published: ${[...published].join(', ')}`).not.toEqual([])
+    for (const id of idsOf('publication_proof')) expect(idsOf('written_account').has(id)).toBe(false)
+  })
+
+  it('can correct what it published — in a later chapter, on the same subject', () => {
+    const corrections = of('public_correction')
+    expect(corrections.length, 'nothing in the world can be corrected').toBeGreaterThan(0)
+    const written = subjectsOf('written_account')
+    const order = PLAYABLE.map((chapter) => chapter.id)
+    for (const row of corrections) {
+      const subject = row.subject ?? row.proofId
+      expect(written.has(subject), `${subject} is corrected but never written`).toBe(true)
+      const writtenAt = of('written_account').filter((other) => (other.subject ?? other.proofId) === subject)
+      const earliest = Math.min(...writtenAt.map((other) => order.indexOf(other.chapter)))
+      expect(order.indexOf(row.chapter), `${subject} is corrected in the chapter it was written in`).toBeGreaterThan(earliest)
+    }
+  })
+})
+
+describe('יצירה — ומה שקהל עושה איתה', () => {
+  it('makes something in one chapter and hears it used in another', () => {
+    // ACH_CREATE crosses subject: the thing you made and the thing they used are one
+    // thing. The two halves are never the same room — that is the achievement.
+    const made = subjectsOf('creation_proof')
+    const used = subjectsOf('crowd_use_proof')
+    expect(made.size, 'nothing in the game is made').toBeGreaterThan(0)
+    const both = [...made].filter((subject) => used.has(subject))
+    expect(both, `made: ${[...made].join(', ')} · used: ${[...used].join(', ')}`).not.toEqual([])
+
+    const order = PLAYABLE.map((chapter) => chapter.id)
+    for (const subject of both) {
+      const madeAt = of('creation_proof').filter((row) => (row.subject ?? row.proofId) === subject)
+      const usedAt = of('crowd_use_proof').filter((row) => (row.subject ?? row.proofId) === subject)
+      const earliest = Math.min(...madeAt.map((row) => order.indexOf(row.chapter)))
+      const latest = Math.max(...usedAt.map((row) => order.indexOf(row.chapter)))
+      expect(latest, `${subject} is used in the same chapter it was made in`).toBeGreaterThanOrEqual(earliest)
+    }
+  })
+})
+
 describe('חוב — נלקח בכסף, ונסגר באותו כסף', () => {
   /**
    * *"חוב שאי אפשר לפרוע הוא לא חוב, הוא עונש."*
@@ -242,9 +373,20 @@ describe('ההבטחה של החורף — beat, ולא ענף', () => {
 })
 
 describe('מה שעוד ממתין — והשורה שאומרת למה', () => {
-  it('has taken the three the ledger just opened off the waiting list', () => {
+  it('has taken the ten the ledger just opened off the waiting list', () => {
     const waitingIds = new Set(waiting().map((row) => row.id))
-    for (const id of ['ACH_NEW_PLAN', 'ACH_RELIABLE', 'ACH_BALANCE']) {
+    for (const id of [
+      'ACH_NEW_PLAN',
+      'ACH_RELIABLE',
+      'ACH_BALANCE',
+      'ACH_GAVE',
+      'ACH_TEAM',
+      'ACH_REPAIR',
+      'ACH_VERIFY',
+      'ACH_WRITE',
+      'ACH_CORRECT',
+      'ACH_CREATE',
+    ]) {
       expect(waitingIds.has(id), `${id} is still reported as waiting`).toBe(false)
     }
   })
@@ -254,5 +396,37 @@ describe('מה שעוד ממתין — והשורה שאומרת למה', () => 
       if (row.waitingHe === null) continue
       expect(row.waitingHe.trim().length, row.id).toBeGreaterThan(20)
     }
+  })
+
+  /**
+   * ושורת המתנה שמצביעה על הסיבה הלא-נכונה היא שקר קטן במקום שקיים כדי להיות כן.
+   *
+   * ארבע שורות אמרו עד היום *"שום סצנה לא מרימה עדיין את דגל השיא"*. `acceptEvents`
+   * מרים אותו, וההזמנה הגיעה לחדר בדלתא 71 — מה שעוצר הוא הגיל, ורק הוא. השורות תוקנו,
+   * וזה מה ששומר עליהן: כל שיא שמופיע כאן נבדק מול `stageOutOfReachFor`, כך שהיום שבו
+   * ייכתב פרק אחרי 2000 יפיל את הבדיקה ויכריח לכתוב מחדש את הסיבה, במקום להשאיר משפט
+   * שנהיה שגוי בשקט.
+   */
+  it('names the real blocker for every apex still out of reach', () => {
+    const state: LifeState = emptyState({ birthYear: 1978, nameHe: 'פוגי' } as never, 2000)
+    const apexes: Array<[string, RouteId]> = [
+      ['ACH_LEAD', 'ULTRAS'],
+      ['ACH_JOURNALIST', 'JOURNALIST'],
+      ['ACH_ARTIST', 'CREATOR'],
+      ['ACH_ROADS', 'TRAVELLER'],
+      ['ACH_OWNER', 'OWNER'],
+    ]
+    for (const [id, route] of apexes) {
+      const row = ACHIEVEMENTS.find((entry) => entry.id === id)
+      expect(row?.waitingHe, id).toBeTruthy()
+      expect(stageOutOfReachFor(state, route, 'apex'), `${id} claims an age wall that is gone`).toBe(true)
+      expect(row?.waitingHe?.includes('גיל'), `${id} does not say the age is what stops it`).toBe(true)
+      expect(row?.waitingHe?.includes('שום סצנה'), `${id} still blames a scene that exists`).toBe(false)
+    }
+
+    // and the founder is the one whose age is fine — a window is a different sentence
+    const founder = ACHIEVEMENTS.find((entry) => entry.id === 'ACH_FOUNDER')
+    expect(stageOutOfReachFor(state, 'USSISHKIN_FOUNDER', 'apex')).toBe(false)
+    expect(founder?.waitingHe?.includes('חלון')).toBe(true)
   })
 })

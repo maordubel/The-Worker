@@ -6,6 +6,7 @@ import { SheetHead } from '@/components/life/Plate'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import { allGauges, changeTone, GATE_HE, hapoelLove, LACES_HE, SINAI_HE, type GaugeChange, type GaugeGroup } from '@/lib/life/gauges'
+import { artUrl, EMBLEM_OF_GAUGE_GROUP } from '@/lib/life/runtime/art'
 import type { LifeState } from '@/lib/life/types'
 
 /**
@@ -201,6 +202,21 @@ function Stamp({ labelHe, valueHe }: { labelHe: string; valueHe: string }) {
   )
 }
 
+/**
+ * הסמל של הקבוצה — שלוש מתוך חמש, ובכוונה.
+ *
+ * `heart` מקבל את המגן עם הצעיף, `wellbeing` את הלב עם הצלב, `people` את לחיצת היד.
+ * ל-`person` ול-`decade` **אין סמל**, ולא מפני שלא הגיע אחד: מסכה על "מי אתה נהיה"
+ * הייתה קוראת כ"משחק תפקיד" בזמן שהמסכה היא **יצירתיות**, ודיסקית גנרית על מדדי עשור
+ * אומרת פחות מהכותרת. `EMBLEM_OF_GAUGE_GROUP` חלקית, והכותרת לבדה היא תשובה שלמה.
+ */
+function GroupMark({ group }: { group: GaugeGroup }) {
+  const key = EMBLEM_OF_GAUGE_GROUP[group]
+  if (!key) return null
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={artUrl(key)} alt="" aria-hidden="true" className="h-[16px] w-[16px] shrink-0 object-contain" />
+}
+
 export function GaugesSheet({ state, onClose }: { state: LifeState; onClose: () => void }) {
   const gauges = allGauges(state)
   const groups: GaugeGroup[] = ['heart', 'person', 'wellbeing', 'people']
@@ -245,7 +261,8 @@ export function GaugesSheet({ state, onClose }: { state: LifeState; onClose: () 
             if (rows.length === 0) return null
             return (
               <section key={group} className="pt-3" data-life={`gauges-${group}`}>
-                <p className="border-b-hair border-ink pb-1 font-display text-[11px] uppercase tracking-[0.18em] text-red">
+                <p className="flex items-center gap-1.5 border-b-hair border-ink pb-1 font-display text-[11px] uppercase tracking-[0.18em] text-red">
+                  <GroupMark group={group} />
                   {t(GROUP_HE[group] as Parameters<typeof t>[0])}
                 </p>
                 {group === 'decade' && (

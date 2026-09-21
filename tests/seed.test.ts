@@ -182,10 +182,55 @@ describe('what the research pass could not verify stays out', () => {
     expect(milestone?.happenedOn).toBeNull()
   })
 
-  it('leaves the association founding date unconfirmed', () => {
+  /**
+   * הבדיקה הזאת דרשה `dateConfirmed: false` עד 20.9.2026, והיא צדקה — עד שהראיה השתנתה.
+   *
+   * ב-31.8.2026 סבב המחקר לא הצליח למצוא מקור לתאריך 25.6.2007, וההערה בקובץ אמרה את
+   * זה במפורש. ב-20.9.2026 התאריך נבדק שוב מול שני מקורות: **האתר הרשמי של מועדון
+   * הכדורסל** ("הסיפור שלנו") נוקב ביום במילים האלה — *"הקבוצה החדשה נרשמה למחוז דן של
+   * ליגה ב׳ ב-25 ביוני 2007"* — ו-ONE, בסקירה מ-2012, מציבה את הרישום ביוני 2007
+   * ונוקבת בשם. שני מקורות על החודש, אחד מהם על היום.
+   *
+   * זה כלל 65 בכיוון שלו: שומר שנפל אחרי שינוי נתונים הוא שומר ששאל את השאלה הנכונה.
+   * ההבדל מ"תמחק, הבדיקה אדומה" (כלל 47) הוא שהבדיקה **מתרחבת** ולא מצטמצמת: במקום
+   * לדרוש שהשדה יישאר ריק, היא דורשת עכשיו את הדבר שהיא באמת הגנה עליו — **שתאריך
+   * מאושר נושא מקור, ושמה שעדיין אין לו מקור עדיין איננו.**
+   */
+  it('confirms the association founding date only because a source now gives the day', () => {
     const { bundle } = seed()
     const founding = bundle.associationEvents.find((event) => event.kind === 'founding')
-    expect(founding?.dateConfirmed).toBe(false)
+    expect(founding?.dateConfirmed).toBe(true)
+    expect(founding?.happenedOn).toBe('2007-06-25')
+    // the day has to be QUOTED in the record, so a later edit cannot keep the flag while
+    // swapping in a citation that never mentions it
+    expect(founding?.bodyHe?.includes('25 ביוני 2007')).toBe(true)
+
+    /**
+     * ...והמקור נבדק על הקובץ ולא על החבילה, בכוונה.
+     *
+     * `loadManualBundle` מרכיב צורת ביניים שאינה נושאת את `sourceUrl` של אירוע עמותה,
+     * ולכן בדיקה עליה הייתה עוברת גם על שורה בלי מקור בכלל. **מה שנבדק הוא הארכיון
+     * עצמו** — כלל 2 הוא על הקובץ, לא על מה שהצינור החליט לשאת הלאה.
+     */
+    const row = (
+      JSON.parse(readFileSync(join(MANUAL, 'association-events.json'), 'utf8')) as {
+        records: Array<{ kind: string; sourceUrl?: string | null; sourceTitle?: string | null }>
+      }
+    ).records.find((record) => record.kind === 'founding')
+    expect(row?.sourceUrl, 'a confirmed date with no source').toBeTruthy()
+    expect(row?.sourceTitle, 'a confirmed date with no source title').toBeTruthy()
+  })
+
+  /**
+   * ...ומה שעדיין לא נמצא לו מקור עדיין איננו. ההערה בקובץ מונה ארבעה פריטים בשמם,
+   * והבדיקה קוראת אותה במקום להקליד את הרשימה — כדי שמחיקת שורה מההערה תפיל אותה.
+   */
+  it('keeps naming what the research pass still could not source', () => {
+    const note = (JSON.parse(readFileSync(join(MANUAL, 'association-events.json'), 'utf8')) as { note: string }).note
+    expect(note).toContain('still unsourced and absent')
+    for (const item of ['14 November 2007', '2008 election vote', '413/10/18', '2015']) {
+      expect(note, `${item} dropped out of the unsourced list`).toContain(item)
+    }
   })
 
   it('keeps disagreements as open conflicts unless a named person settled them', () => {

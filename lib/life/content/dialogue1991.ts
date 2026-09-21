@@ -473,10 +473,19 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: null, text: 'היא לא מרימה את הקול. היא אף פעם לא צריכה.' },
           { who: 'רחל', text: 'לך לישון. מחר בית ספר, ואתה קם ראשון.' },
         ],
+        /**
+         * ההפרה נרשמת כראיה, ולא רק כזיכרון של אדם.
+         *
+         * `came-home-late-1991` הוא מה ש**רחל** זוכרת; `breach_discovered` הוא מה
+         * ש**הפנקס** מחזיק, ובלעדיו אין למה לחזור: `ACH_REPAIR` מצליב תיקון מול הפרה
+         * **על אותו נושא**, ותיקון בלי הפרה רשומה הוא התנצלות על שום דבר. שתי השורות
+         * יושבות זו ליד זו לנצח — התיקון לא מוחק את הערב הזה, וזה כל העניין.
+         */
         then: [
           { e: 'flag', flag: 'walked:home' },
           { e: 'rel', who: 'rachel', axis: 'trust', delta: -8 },
           { e: 'rel', who: 'rachel', axis: 'tension', delta: 6 },
+          { e: 'proof', kind: 'breach_discovered', proofId: 'breach_discovered:{chapter}:curfew', subjectHe: 'השעה שאמא אמרה', noteHe: 'המשחק עוד היה חי, והוא נשאר.' },
           { e: 'remember', who: 'rachel', eventId: 'came-home-late-1991', significance: 'major' },
           { e: 'keep' },
           { e: 'ending', id: 'hall' },
@@ -1128,6 +1137,15 @@ export const CONVERSATIONS_1991: Conversation[] = [
   },
 
   // ================================================================ the way home =====
+  /**
+   * הרחוב בלילה — ומה שהוסר ממנו כשהוא קיבל סוף סוף דלת.
+   *
+   * השיחה הזאת נכתבה לפני `wallBeat` ב-`WorldScene` ועמדה בלי שאיש יפתח אותה. עכשיו יש
+   * לה נקודה חמה ברחוב אחרי שריקת הפתיחה — ו-`then` הוסר משני הענפים, בכוונה: הרגע של
+   * לשמוע את הקיר כבר שולם במלואו (`basketballLove +8`, `loyaltyReturn +6`) ברגע
+   * ש-`heard:wall` הורם, וכפילות של `loyaltyReturn` הייתה משלמת פעמיים על אותו ערב.
+   * **מבט שאפשר לחזור עליו אינו משלם.** מה שנשאר הוא מה שהיה שווה להציל כאן — הכתיבה.
+   */
   {
     id: 'street-night-1991',
     branches: [
@@ -1137,7 +1155,6 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: null, text: 'רחוב ריק, ורוח קרה מהירקון. מאחוריך, מבעד לקיר, גל של קול עולה ונשבר ועולה שוב.' },
           { who: null, text: 'אתה עומד. אתה לא חוזר. אתה גם לא ממשיך ללכת.' },
         ],
-        then: [{ e: 'wellbeing', key: 'regret', delta: 6 }, { e: 'redheart', key: 'loyaltyReturn', delta: 6 }],
       },
       {
         lines: [

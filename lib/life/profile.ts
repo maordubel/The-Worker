@@ -5,9 +5,11 @@ import { ITEMS, ITEM_ART } from './content/chapter1986'
 import { SHIRT, TICKET, decadeOf } from './prices'
 import { RARITY_LABEL } from './redbox'
 import { ownedShirts, wornIn, type Shirt } from './shirts'
+import { LIFE_TRACKS, trackStageOf, type TrackId } from './tracks'
 import type { LifeEvent } from './events'
 import {
   RED_HEART_IDS,
+  SKILL_IDS,
   relationshipOf,
   type CharacterId,
   type ItemId,
@@ -16,6 +18,7 @@ import {
   type PresenceMode,
   type RedBoxItem,
   type RedHeartId,
+  type SkillId,
   type WellbeingId,
 } from './types'
 
@@ -533,4 +536,70 @@ export type SubscriptionReading = {
   currentHe: string | null
   /** consecutive seasons held — DRAWN as marks, never printed as a figure */
   streak: number
+}
+
+// --- מה אני יודע לעשות, ולאן החיים הלכו --------------------------------------------
+
+/**
+ * שני קריאות שנוספו ב-21.9.2026, ושתיהן על אותו חוסר: **מערכת שנבנתה ואיש לא רואה**.
+ *
+ * `skills` נכתב, מקופל, נבדק, ונקרא על ידי כל שער כניסה של מסלול — ולא הודפס בשום מקום
+ * חוץ מפאנל הדיבאג. `LIFE_TRACKS` גרוע מזה: שלושה מסלולי חיים עם תשעה שלבים, דגלי
+ * `own:track:` ששורדים כל מעבר שנה, `trackAtLeast` שתנאים קוראים לו — ו**אפס קומפוננטות**
+ * שמזכירות אותו. זו בדיוק המשפחה של כלל 71 ושל `reach.ts` בכלל 75: מודול שלם בלי קורא.
+ *
+ * שתיהן מחזירות **מילים**, כי הן נועדו לכרטיס. כלל 46 כפי שמאור חידד אותו ב-63א:
+ * *"הגיליון עונה 'כמה', הכרטיס עונה 'מי אתה'."* כישור על 42 הוא "יודע קצת"; מסלול הוא
+ * שם השלב שנלקח, ולא שלוש נקודות מתוך שלוש.
+ */
+export type SkillReading = { id: SkillId; band: Band; nameHe: string; readingHe: string }
+
+/**
+ * השם של הכישור נוסע **עם הקריאה**, ולא בטבלה שנייה בקומפוננטה.
+ *
+ * הניסיון הראשון היה `SKILL_NAME_HE` בתוך `ProfileCard.tsx`, ו-`tests/brand.test.ts`
+ * הפיל אותו מיד — כלל 10, אין מחרוזת שפונה למשתמש בקוד של קומפוננטה. זה היה גם
+ * העתק שני של הטבלה שכבר יושבת כאן (כלל 59). הפתרון הוא לא לפצל: הקריאה מחזירה גם
+ * את השם, בדיוק כמו ש-`purseReading` מחזירה `readingHe`.
+ */
+const SKILL_HE: Record<SkillId, string> = {
+  knowledge: 'ידע',
+  communication: 'לדבר עם אנשים',
+  organization: 'לארגן',
+  business: 'עסקים',
+  creativity: 'יצירה',
+}
+
+/**
+ * ארבע מדרגות, והספים הם היכן שהמשחק עצמו נעצר.
+ *
+ * שערי הכניסה של המסלולים ב-`lib/life/routes.ts` מבקשים כישורים בסדר גודל של 20–45,
+ * ולכן המילה משתנה בערך היכן שמשתנה מה שנפתח. `0` אינו "גרוע" אלא **לא התחיל**, וזו
+ * הסיבה שהוא מסונן החוצה ולא מודפס כ"אפס": רשימה של חמישה אפסים היא ציון, וזה בדיוק
+ * מה שהכרטיס הזה לא עושה.
+ */
+const SKILL_WORDS: readonly string[] = ['נגעת בזה', 'יודע קצת', 'יודע', 'זה כבר המקצוע שלך']
+
+export function skillsReading(state: LifeState): SkillReading[] {
+  const out: SkillReading[] = []
+  for (const id of SKILL_IDS) {
+    const value = state.skills[id] ?? 0
+    if (value <= 0) continue
+    const band: Band = value >= 60 ? 3 : value >= 35 ? 2 : value >= 15 ? 1 : 0
+    out.push({ id, band, nameHe: SKILL_HE[id], readingHe: SKILL_WORDS[band]! })
+  }
+  return out
+}
+
+export type TrackReading = { id: TrackId; titleHe: string; stageHe: string }
+
+/** רק מסלולים שהוא **עליהם**. מסלול שלא התחיל אינו שורה ריקה — הוא פשוט לא שם. */
+export function tracksReading(state: LifeState): TrackReading[] {
+  const out: TrackReading[] = []
+  for (const track of LIFE_TRACKS) {
+    const stage = trackStageOf(state, track.id)
+    if (!stage) continue
+    out.push({ id: track.id, titleHe: track.titleHe, stageHe: stage.titleHe })
+  }
+  return out
 }

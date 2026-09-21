@@ -200,20 +200,57 @@ const REGISTRY: CharacterDefinition[] = [
     tags: ['ussishkin', 'ultras', 'neighbourhood', 'katamin', 'voice'],
     provenance: 'composite',
   },
+  /**
+   * אילן השכן — שורה אחת, ארבעה עשורים, והכרעה של בעל הבית.
+   *
+   * התסריט של 2000–2026 כותב `אילן` בסצנה `A03` ("השבת שלי"), ובמרשם ישבה מאז
+   * 5.9.2026 שורה בשם `neighbour` בשם **אילן השכן** עם `activeEras: ['1986']` בלבד.
+   * שם קרוב אינו ראיה (כלל 64 §5), ולכן זה נשאל ולא הוכרע לבד.
+   *
+   * **מאור, 20.9.2026: "אילן השכן זה אילן כן."** — אדם אחד, עשרים שנה אחר כך.
+   *
+   * לכן שני שינויים, ושניהם נובעים מהתשובה הזאת ולא ממנה והלאה: `aliases` כדי
+   * ש`אילן` בתוכן ייפתר לשורה הזאת (אותו פגם של `רפי` מול `רפי מהקיוסק`), ו
+   * `activeEras` שנפתח לעשורים — ב-`A03` הוא עומד ליד **בתיה**, שכנה עם
+   * `['2000','2010','2020']`, ומחזיק סולם מול קיר ותיק. שכן שנמצא בסצנה אחת
+   * ב-1986 ובסצנה אחת בעשור הרביעי הוא שכן, לא ניצב.
+   */
   {
     id: 'neighbour',
     displayNameHe: 'אילן השכן',
+    aliases: ['אילן', 'ilan'],
     category: 'other',
-    activeEras: ['1986'],
+    activeEras: ['1986', '2000', '2010', '2020'],
     portraitSet: 'faceOldMan',
+    tags: ['neighbourhood'],
   },
+  /**
+   * רפי מהקיוסק — הדמות הכי מתמשכת במשחק, ושורה שתיארה אותה כניצב ליום אחד (20.9.2026).
+   *
+   * שתי תקלות באותה שורה, ושתיהן נמדדו ולא שוערו:
+   *
+   * **הוא ענה רק ל"רפי מהקיוסק".** התוכן קורא לו `רפי` — כך הוא מדבר בכל 33 השיחות
+   * שלו — ו-`speakerKeys` לא ידע לקשר בין השניים. זה בדיוק הפגם של `מישל` מול
+   * `מישל בר־כליפא` (15.9.2026): הפלייט נפתר לכלום, ושומר ששואל "האם הדובר הזה אדם"
+   * ענה "לא" על אדם.
+   *
+   * **ו-`activeEras: ['1986']` תיאר יום אחד מתוך חמש-עשרה שנה.** `gig-errands-rafi`
+   * ו-`gig-crates-kiosk` רצים מ-`a4-shirt` (1985) עד `2000-double`, והוא מדבר בשתיהן
+   * בכל פרק — כלומר הוא הדמות הלא-משפחתית שפוגי פוגש הכי הרבה פעמים בחיים האלה,
+   * והמרשם קרא לו ניצב של שבת אחת. הרשימה כאן נקראה מהתוכן.
+   *
+   * **ומה שלא תוקן, כי אי-אפשר לתקן אותו בלי ציור:** `faceOldMan` הוא גם הפלייט של
+   * `neighbour`. שני אנשים חולקים פנים אחת, וזה לא ייפתר בשורה — זה ייפתר כשייחתך
+   * פלייט לרפי מהפיגורה שלו עצמו (כלל 67).
+   */
   {
     id: 'shopkeeper',
     displayNameHe: 'רפי מהקיוסק',
+    aliases: ['רפי', 'rafi'],
     category: 'other',
-    activeEras: ['1986'],
+    activeEras: ['a4-shirt', 'a5-first', 'a6-radio', 'a7-week', '1986', '1990s', '2000s'],
     portraitSet: 'faceOldMan',
-    tags: ['kiosk'],
+    tags: ['kiosk', 'work'],
   },
   /**
    * ---------------------------------------------------------------------------------
@@ -360,6 +397,52 @@ const REGISTRY: CharacterDefinition[] = [
   { id: 'crowd-maya', displayNameHe: 'מאיה', category: 'supporter', activeEras: ['2020'], tags: ['mutual-aid'] },
   /**
    * ---------------------------------------------------------------------------------
+   * שבע שורות מתסריט ההמשך 2000–2026 (20.9.2026) — דמות היא שורה לפני שהיא פנים.
+   *
+   * התסריט מזיז יחסים עם עשרים וארבעה אנשים; חמישה־עשר כבר היו כאן, שלושה הם **תפקיד
+   * ולא אדם** (`partner`, `child`, `target` — נפתרים ממסלולי החיים בזמן ריצה, ושורה
+   * שהייתה קובעת להם שם היא המשחק בוחר בת זוג בשבילך), ואלה השבעה שנשארו.
+   *
+   * כל אחד נקרא מהסצנה שמציגה אותו ולא מהשם: `I01` פותחת ב-*"זאת לינה, זה ניקו. הם
+   * מארגנים מפגש נגד גזענות"*, ולכן הם `supporter` בעידן 2010 עם `international`
+   * ולא "חברים". **אף אחד מהשבעה אינו נושא `portraitSet`** — אין להם פלייט, ובדיקה
+   * נופלת על מי שמצביע על פנים שלא צוירו (כלל 58).
+   *
+   * `provenance` נשאר ריק לכולם: אלה דמויות בדיוניות של התסריט, ולא אנשים מהארכיון.
+   * התסריט עצמו אומר את זה על תמר במילים שלו — *"דמות אקדמאית בדיונית מוצעת"*.
+   * ---------------------------------------------------------------------------------
+   */
+  // מתוקי — מי שתמיד מארגן ותמיד נשאר בחוץ ברשימה; מופיע בשבעה פרקים, מ-2002 עד 2023
+  { id: 'metuki', displayNameHe: 'מתוקי', category: 'friend', activeEras: ['2000', '2010', '2020'], tags: ['roster', 'travel', 'volunteer'] },
+  // רומא — מי שמסדר את האוטובוס, את הספה ואת הקשר לחוץ לארץ
+  { id: 'roma', displayNameHe: 'רומא', category: 'friend', activeEras: ['2000', '2010', '2020'], tags: ['away', 'hosting', 'international'] },
+  // לינה וניקו — מארגני המפגש נגד גזענות, במילים של `I01` עצמה
+  { id: 'lina', displayNameHe: 'לינה', category: 'supporter', activeEras: ['2010', '2020'], tags: ['international', 'antiracism', 'organiser'] },
+  { id: 'nico', displayNameHe: 'ניקו', category: 'supporter', activeEras: ['2010'], tags: ['international', 'antiracism'] },
+  // תמר — מחוץ לכדורגל לגמרי, וזו כל הסצנה שלה: "שאלתי מה אתה אוהב לעשות"
+  { id: 'tamar', displayNameHe: 'תמר', category: 'other', activeEras: ['2010'], tags: ['relationship', 'outside-football'] },
+  // אלכס — החבר שאצלו יש לפוגי מפתח בחו״ל: *"גם פה יש לך מפתח"*
+  { id: 'alex', displayNameHe: 'אלכס', category: 'friend', activeEras: ['2010', '2020'], tags: ['abroad', 'work'] },
+  /**
+   * מיכל ואדם — ענף הבעלות, שהתסריט עצמו מסמן **היסטוריה חלופית**.
+   *
+   * הם צוות עבודה בסצנות O02–O05, ולא אנשים מהארכיון. `provenance` נשאר `fiction`
+   * והקטגוריה `other`, כי מה שהם עושים הוא עבודה ולא אוהדות — וזה גם מה שמונע מהם
+   * להופיע בכובע הקהל (`CROWD_POOL`) בטעות.
+   */
+  { id: 'michal', displayNameHe: 'מיכל', category: 'other', activeEras: ['2020'], tags: ['owner-branch', 'work'] },
+  { id: 'adam', displayNameHe: 'אדם', category: 'other', activeEras: ['2020'], tags: ['owner-branch', 'work'] },
+  /**
+   * **ו-`ilan` אינו שורה חדשה** — כי `neighbour` הוא הוא.
+   *
+   * התסריט כותב `ilan` בסצנה `A03`, ובמרשם כבר ישב **אילן השכן** מ-1986. שתי
+   * האפשרויות היו סבירות — אותו שכן עשרים שנה אחר כך, או אדם אחר באותו שם — ולכן
+   * `life:screenplay-map` דיווח את ההתנגשות במקום להכריע בה. **מאור הכריע ב-20.9.2026:
+   * "אילן השכן זה אילן כן."** השורה של `neighbour` למעלה נפתחה בהתאם, והמיפוי יושב
+   * ב-`CHARACTER_OF` עם התאריך והמשפט.
+   */
+ /**
+   * ---------------------------------------------------------------------------------
    * The bible of 5.9.2026 — forty-five locked ids.
    *
    * Eleven rows were missing from this registry. They divide into three kinds and the
@@ -386,10 +469,10 @@ const REGISTRY: CharacterDefinition[] = [
   { id: 'ofer-yannay', displayNameHe: 'עופר ינאי', category: 'historical', activeEras: ['2020'], tags: ['owner', 'basketball', 'yad-eliyahu', 'public-only', 'open-history'], provenance: 'open-history' },
   { id: 'fan-azoulay', displayNameHe: 'אזולאי', category: 'rival', activeEras: ['2000', '2010'], tags: ['maccabi-haifa', 'kiryat-eliezer', 'warm'] },
   { id: 'fan-erez-haifa', displayNameHe: 'ארז מחיפה', category: 'rival', activeEras: ['2000', '2010'], tags: ['maccabi-haifa', 'kiryat-eliezer', 'dry'] },
-  { id: 'shlomi-tattoo', displayNameHe: 'שלומי קעקוע', category: 'rival', activeEras: ['2000'], tags: ['beitar', 'confrontation', 'off-screen-death'] },
+  { id: 'shlomi-tattoo', displayNameHe: 'שלומי קעקוע', aliases: ['שלומי'], category: 'rival', activeEras: ['2000'], tags: ['beitar', 'confrontation', 'off-screen-death'] },
   { id: 'yevgeny', displayNameHe: 'יבגני', category: 'supporter', activeEras: ['2000', '2010'], tags: ['ultras', 'leader'], provenance: 'composite' },
-  { id: 'neta-katamin', displayNameHe: 'נטע גופן', category: 'friend', activeEras: ['2010', '2020'], tags: ['katamin', 'bass', 'producer'], provenance: 'composite' },
-  { id: 'gur-katamin', displayNameHe: 'גור שפיגל', category: 'friend', activeEras: ['2010', '2020'], tags: ['katamin', 'drums'], provenance: 'composite' },
+  { id: 'neta-katamin', displayNameHe: 'נטע גופן', aliases: ['נטע'], category: 'friend', activeEras: ['2010', '2020'], tags: ['katamin', 'bass', 'producer'], provenance: 'composite' },
+  { id: 'gur-katamin', displayNameHe: 'גור שפיגל', aliases: ['גור'], category: 'friend', activeEras: ['2010', '2020'], tags: ['katamin', 'drums'], provenance: 'composite' },
   {
     id: 'veteran',
     displayNameHe: 'אוהד ותיק',
@@ -463,6 +546,76 @@ export function isRealPerson(id: CharacterId): boolean {
  * answer. `speakerKeys()` returns every name one character answers to, and the box tries
  * them in order against whichever era's plates are loaded.
  */
+/**
+ * מי שמדבר ואינו אדם — וההבדל בין תפקיד לבין שורה חסרה (20.9.2026).
+ *
+ * עד היום שתי התשובות נראו זהות. `אוהד` מדבר ברחוב ו-`רפי` מדבר בקיוסק; לשניהם לא
+ * הייתה שורה במרשם, ולכן שומר ששואל "מי זה" ענה עליהם אותה תשובה. אבל הם שני דברים
+ * שונים לגמרי: **רפי הוא אדם שחסרה לו שורה — באג. `אוהד` הוא תפקיד — בכוונה.**
+ *
+ * `usher`, `vendor` ו-`teacher` כבר הראו את הדרך (כלל 58): ילד בן שתים-עשרה לא יודע
+ * את השם הפרטי של הסדרן ומעולם לא שאל. מה שהוא יודע הוא מה שהם עושים. אבל להמציא
+ * שורת מרשם מלאה לכל *"אבא עם ילד"* היה מעמיד ניצב בעל גיל, עידנים ותיק פלייטים ליד
+ * קובי — ושיחה אחת אינה קריירה.
+ *
+ * לכן תפקיד הוא **רשומה בשם עצמה** ולא דמות: אין לו גיל, אין לו עידן, אין לו פלייט,
+ * ואי-אפשר להצביע עליו מלוח זמנים. מה שיש לו הוא הסיבה שהוא תפקיד, כתובה — כדי
+ * שהוספה של שם לרשימה תהיה הכרעה ולא בריחה מבדיקה אדומה.
+ */
+export const SPEAKING_ROLES: Readonly<Record<string, string>> = {
+  אוהד: 'אחד מהיציע, שיחה אחת ואין לו שם',
+  'אוהד עם רדיו': 'מי שמחזיק את הטרנזיסטור ב-1990 — הוא המידע, לא האדם',
+  'אוהד צעיר': 'מישהו צעיר יותר ביציע, בלי שם',
+  הסדרן: 'מי שעומד בשער. אותו תפקיד כמו `usher`, בשיחה שאינה בחדר שלו',
+  הקופאי: 'מי שמוכר את הכרטיס, ולא מי שהוא',
+  קופאית: 'אותו דלפק בדיוק, אישה',
+  המוכר: 'מי שעומד מאחורי הדוכן, בשיחה אחת',
+  'מוכר הגרעינים': 'בדרך ליציע',
+  המפקד: 'הצבא, 1996 — דרגה ולא שם',
+  הבוס: 'מי שמשלם על המשמרת',
+  הגבר: 'מישהו שעובר ברחוב, בשיחה אחת',
+  ילד: 'ילד אחר במגרש, בשיחה אחת',
+  'ילד מהשכונה': 'ילד אחר, מאותן מדרגות, בשיחה אחת',
+  'אבא עם ילד': 'מה שפוגי רואה ולא מי שהוא',
+  'קול מהרדיו': 'שדר. לא דמות, מקור מידע',
+  מראיינת: 'מי ששואלת בראיון מקצועי — התפקיד הוא השאלה',
+  אדם: 'נפתר בענף הבעלות; ראו את השורה שלו במרשם',
+}
+
+/**
+ * ...ומי שהוא תפקיד שהמשחק **ממלא בזמן ריצה** מתוך מה שהשחקן בחר.
+ *
+ * `PARTNER` ו-`הילד` הם `PARTNERSHIP` ו-`PARENTHOOD` ב-`lib/life/tracks.ts`: מי הם
+ * תלוי בחיים שנחיו, ושורה שהייתה קובעת שם היא המשחק בוחר בת זוג בשבילך.
+ * `PARTNER_OR_KEREN` הוא המקרה המפורש של אותו דבר — בת הזוג אם יש, וקרן אם אין.
+ * `TARGET` הוא "מי שהסצנה הזאת מדברת איתו" ומשתנה בין הסתעפויות.
+ *
+ * **וסצנה לא תדפיס אף אחד מהם על המסך.** תפקיד שלא נפתר הוא מקום ריק, לא שם —
+ * ומי שמגיע לסצנה בלי שלקח את המסלול רואה את החלופה שהתסריט כותב לו (`חלופה`),
+ * לא את המילה `PARTNER`.
+ */
+export const RUNTIME_ROLES: Readonly<Record<string, string>> = {
+  PARTNER: 'בת הזוג מ-PARTNERSHIP — אם המסלול נלקח',
+  PARTNER_OR_KEREN: 'בת הזוג אם יש, וקרן אם אין',
+  הילד: 'הילד מ-PARENTHOOD — אם המסלול נלקח',
+  TARGET: 'מי שהסצנה הזאת מדברת איתו, לפי ההסתעפות',
+}
+
+/** a chorus is not a speaker — nobody in particular says it, and everybody does */
+export const CHORUS: readonly string[] = ['כולם']
+
+/**
+ * האם יש למילה הזאת תשובה — אדם, תפקיד, תפקיד-ריצה או מקהלה.
+ *
+ * זו השאלה שאפשר לשאול מכנית, ותשובה שלילית עליה היא **תמיד** באג: או שמישהו נכנס
+ * לתוכן בלי שורה, או שמישהו כתב תפקיד בלי להצהיר עליו. `tests/life-cast.test.ts`
+ * שואל אותה על כל דובר בכל שיחה ועל כל דובר בתסריט ההמשך.
+ */
+export function speakerHasAnAnswer(who: string): boolean {
+  if (SPEAKING_ROLES[who] || RUNTIME_ROLES[who] || CHORUS.includes(who)) return true
+  return speakerKeys(who).some((key) => ALL_CHARACTERS.some((row) => row.id === key))
+}
+
 export function speakerKeys(who: string): string[] {
   const entry = ALL_CHARACTERS.find(
     (character) =>

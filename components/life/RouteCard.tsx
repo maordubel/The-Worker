@@ -1,6 +1,8 @@
 'use client'
 
 import { t } from '@/lib/i18n'
+import { evidenceTitleHe } from '@/lib/life/content/routes'
+import { artUrl, EMBLEM_OF_ROUTE } from '@/lib/life/runtime/art'
 import {
   ROUTE_STAGES,
   routeById,
@@ -85,6 +87,7 @@ const AUDIENCE_KEY = {
   ussishkin: 'life.route.audience.ussishkin',
   public: 'life.route.audience.public',
   work: 'life.route.audience.work',
+  international: 'life.route.audience.international',
 } as const
 
   switch (gap.kind) {
@@ -107,8 +110,25 @@ const AUDIENCE_KEY = {
       return t('life.route.gap.proofs', { have: String(gap.have), want: String(gap.want) })
     case 'chapters':
       return t('life.route.gap.chapters')
-    case 'evidence':
-      return t('life.route.gap.evidence')
+    /**
+     * הראיה החסרה, בשמה.
+     *
+     * `missingKinds` היה על האובייקט מההתחלה והכרטיס זרק אותו: אדם ששני אחר־צהריים
+     * מכניסת העיתונאי קיבל בדיוק את אותה שורה כמו אדם שחמישה, ובאותן מילים. השם נלקח
+     * מהתוכן שמייצר את הראיה (`evidenceTitleHe`) ולא מטבלת תרגום שנייה, ולכן ראיה
+     * שתיכתב מחר תקבל את שמה כאן בלי שורה נוספת.
+     *
+     * זה עדיין אינו מספר ואינו מפה: **מה** ולא **איפה**. המדף בקיוסק והמחברת על המיטה
+     * נמצאים בעולם ומוצאים אותם בהליכה, וכרטיס שהיה מציין את החדר היה הופך את המסלולים
+     * לרשימת משימות — בדיוק מה שהם נכתבו לא להיות.
+     */
+    case 'evidence': {
+      const named = (gap.missingKinds ?? [])
+        .map((kind) => evidenceTitleHe(kind))
+        .filter((title): title is string => title !== null)
+      if (named.length === 0) return t('life.route.gap.evidence')
+      return t('life.route.gap.evidenceNamed', { what: named.join(' · ') })
+    }
     case 'people':
       return t('life.route.gap.people', { have: String(gap.have), want: String(gap.want) })
     case 'subjects':
@@ -151,6 +171,7 @@ export function RouteCard({
 }) {
   const route = routeById(routeId)
   const index = ROUTE_STAGES.indexOf(stage)
+  const routeArt = route ? EMBLEM_OF_ROUTE[route.id] : undefined
   const titleHe = invitation?.titleHe ?? route?.stageTitlesHe[stage] ?? ''
   const rewardHe = invitation?.rewardHe ?? route?.rewardsHe[index] ?? ''
   const offering = invitation !== null
@@ -186,14 +207,32 @@ export function RouteCard({
             </bdi>
           </p>
 
-          <h2 className="mt-1 font-display text-step-3 leading-tight text-sheet">
-            <bdi>{titleHe}</bdi>
-          </h2>
-          {route && (
-            <p className="mt-1 font-sign text-[13px] leading-snug text-concrete">
-              <bdi>{route.titleHe}</bdi>
-            </p>
-          )}
+          <div className="mt-1 flex items-start gap-3">
+            {/*
+              סמל המסלול — ליד הכותרת, לא במקומה.
+              `EMBLEM_OF_ROUTE` חלקית בכוונה, וכרטיס בלי סמל נראה בדיוק כמו קודם.
+            */}
+            {routeArt && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={artUrl(routeArt)}
+                alt=""
+                aria-hidden="true"
+                data-life="route-emblem"
+                className="mt-0.5 h-[38px] w-[38px] shrink-0 object-contain"
+              />
+            )}
+            <div className="min-w-0">
+              <h2 className="font-display text-step-3 leading-tight text-sheet">
+                <bdi>{titleHe}</bdi>
+              </h2>
+              {route && (
+                <p className="mt-1 font-sign text-[13px] leading-snug text-concrete">
+                  <bdi>{route.titleHe}</bdi>
+                </p>
+              )}
+            </div>
+          </div>
 
           <div className="mt-4 border-t-hair border-concrete/30 pt-3">
             <p className="font-body text-[11px] text-concrete">

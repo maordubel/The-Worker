@@ -9,7 +9,10 @@ import {
   PROOF_MISSIONS,
   SMALL_ACTIONS,
   CONVERSATIONS_ROUTES,
+  smallActionFlag,
+  evidenceTitleHe,
 } from '@/lib/life/content/routes'
+import { ALL_SCENES, exitInEra, inEra } from '@/lib/life/world/scenes'
 import { apply, emptyState, type LifeEvent } from '@/lib/life/events'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import {
@@ -276,7 +279,7 @@ describe('אין סף אופי שמחליט מי רשאי לחיות חיים מ
      */
     const common = {
       skills: { knowledge: 0, communication: 0, organization: 40, business: 0, creativity: 0 },
-      reputation: { standing: { gate5: 30, gate7: 0, ussishkin: 0, public: 0, work: 0 }, pending: [] },
+      reputation: { standing: { gate5: 30, gate7: 0, ussishkin: 0, public: 0, work: 0, international: 0 }, pending: [] },
       proofs: [
         { kind: 'leadership_proof', proofId: 'a', chapter: 'x', year: BIRTH_YEAR + 18 },
         { kind: 'leadership_proof', proofId: 'b', chapter: 'y', year: BIRTH_YEAR + 19 },
@@ -303,7 +306,7 @@ describe('זכאות היא הזמנה, לא קידום', () => {
   const ready = (over: Partial<LifeState> = {}) =>
     lifeAged(19, {
       skills: { knowledge: 0, communication: 0, organization: 40, business: 0, creativity: 0 },
-      reputation: { standing: { gate5: 30, gate7: 0, ussishkin: 0, public: 0, work: 0 }, pending: [] },
+      reputation: { standing: { gate5: 30, gate7: 0, ussishkin: 0, public: 0, work: 0, international: 0 }, pending: [] },
       ...over,
     } as Partial<LifeState>)
 
@@ -322,7 +325,7 @@ describe('זכאות היא הזמנה, לא קידום', () => {
     const state = lifeAged(40, {
       skills: { knowledge: 99, communication: 99, organization: 99, business: 99, creativity: 99 },
       reputation: {
-        standing: { gate5: 99, gate7: 99, ussishkin: 99, public: 99, work: 99 },
+        standing: { gate5: 99, gate7: 99, ussishkin: 99, public: 99, work: 99, international: 0 },
         pending: [],
       },
     } as Partial<LifeState>)
@@ -346,7 +349,7 @@ describe('זכאות היא הזמנה, לא קידום', () => {
   it('refuses to hand over a stage he is not eligible for', () => {
     const young = lifeAged(12, {
       skills: { knowledge: 99, communication: 99, organization: 99, business: 99, creativity: 99 },
-      reputation: { standing: { gate5: 99, gate7: 99, ussishkin: 99, public: 99, work: 99 }, pending: [] },
+      reputation: { standing: { gate5: 99, gate7: 99, ussishkin: 99, public: 99, work: 99, international: 0 }, pending: [] },
     } as Partial<LifeState>)
     expect(acceptEvents(young, 'ULTRAS', 'entry')).toEqual([])
     expect(gapsFor(young, 'ULTRAS', 'entry').some((gap) => gap.kind === 'age')).toBe(true)
@@ -561,7 +564,7 @@ describe('הראיות', () => {
         { kind: 'leadership_proof', proofId: 'b', chapter: 'one', year: BIRTH_YEAR + 19 },
       ],
       skills: { knowledge: 0, communication: 0, organization: 40, business: 0, creativity: 0 },
-      reputation: { standing: { gate5: 30, gate7: 0, ussishkin: 0, public: 0, work: 0 }, pending: [] },
+      reputation: { standing: { gate5: 30, gate7: 0, ussishkin: 0, public: 0, work: 0, international: 0 }, pending: [] },
       flags: { [stageFlag('ULTRAS', 'entry')]: true },
     } as Partial<LifeState>)
     // the count is met and the SPAN is not — two nights in one year is not two years
@@ -643,7 +646,7 @@ describe('התרחקות וחזרה', () => {
   it('is never offered by eligibility, because nothing about it is a threshold', () => {
     const grown = lifeAged(40, {
       skills: { knowledge: 99, communication: 99, organization: 99, business: 99, creativity: 99 },
-      reputation: { standing: { gate5: 99, gate7: 99, ussishkin: 99, public: 99, work: 99 }, pending: [] },
+      reputation: { standing: { gate5: 99, gate7: 99, ussishkin: 99, public: 99, work: 99, international: 0 }, pending: [] },
     } as Partial<LifeState>)
     expect(eligibleFor(grown).some((offer) => (offer.route.id as string) === 'DISTANCE_RETURN')).toBe(false)
   })
@@ -694,7 +697,7 @@ describe('חלון ההקמה', () => {
   it('will not give the apex outside the window, however much work was done', () => {
     const outside = lifeAged(30, {
       skills: { knowledge: 0, communication: 0, organization: 99, business: 0, creativity: 0 },
-      reputation: { standing: { gate5: 0, gate7: 0, ussishkin: 99, public: 0, work: 0 }, pending: [] },
+      reputation: { standing: { gate5: 0, gate7: 0, ussishkin: 99, public: 0, work: 0, international: 0 }, pending: [] },
       proofs: ['a', 'b', 'c'].map((id, index) => ({
         kind: 'founding_proof',
         proofId: id,
@@ -989,5 +992,314 @@ describe('ההזמנות — הדלת של העולם והדלת של השחקן
      */
     expect(stageOutOfReachFor(lifeAged(22), 'USSISHKIN_FOUNDER', 'apex')).toBe(false)
     expect(gapsFor(lifeAged(22), 'USSISHKIN_FOUNDER', 'apex').some((gap) => gap.kind === 'window')).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------------
+
+/**
+ * הפעולות הקטנות — ומה שהן היו עד היום.
+ *
+ * `SMALL_ACTIONS` מחזיק שמונה ראיות שתנאי הכניסה של שלושה מסלולים קוראים להן **בשם**:
+ * `JOURNALIST.entry` מבקש `verified_report` וגם `written_account`, `OWNER.entry` מבקש
+ * `balanced_budget` וגם `adult_shift`, ו-`CREATOR.entry` מבקש `creative_work`. שמונה
+ * שיחות נכתבו, שמונה נכנסו ל-`CONVERSATIONS_ROUTES` — ואף חדר, שחקן, פעימה או תסריט
+ * משחק לא פתח אחת מהן. כלומר שלושה שלבי כניסה לא היו קשים, הם היו **בלתי-אפשריים**.
+ *
+ * הבדיקות כאן קוראות את `ALL_SCENES` כמו שהריצה קוראת אותו, ולא מחפשות מחרוזת בקובץ:
+ * מה שנספר הוא נקודת חמה שקיימת בפרק אמיתי, בחדר שאפשר להגיע אליו מנקודת הפתיחה של
+ * אותו פרק. הן קיימות כדי שהמקרה הזה לא יחזור בשקט — לא עבור השמונה האלה ולא עבור
+ * ראיה שתיכתב מחר.
+ */
+describe('הפעולות הקטנות — מה שנכתב ואפשר לעשות', () => {
+  const ADULT = ['1996-army', '1997-basket', '1998-laces', '1999-basket', '1999-cup', '2000-title', '2000-double']
+
+  /** every room reachable from where this chapter opens, doors only — the same walk a player takes */
+  const roomsIn = (chapter: string): Set<string> => {
+    const start = CHAPTERS.find((row) => row.id === chapter)?.start.location
+    const seen = new Set<string>(start ? [start] : [])
+    const queue = [...seen]
+    while (queue.length) {
+      // `queue.shift()` INSIDE the find callback drains the queue once per row examined —
+      // the walk then ends after one room and every hotspot beyond it looks unreachable.
+      const here = queue.shift()
+      const scene = ALL_SCENES.find((row) => row.id === here)
+      if (!scene) continue
+      for (const exit of scene.exits) {
+        if (!exitInEra(exit, chapter) || seen.has(exit.to)) continue
+        seen.add(exit.to)
+        queue.push(exit.to)
+      }
+    }
+    return seen
+  }
+
+  /** which chapters can actually open this conversation from a hotspot in a room they can reach */
+  const chaptersOffering = (conversationId: string): string[] =>
+    ADULT.filter((chapter) => {
+      const rooms = roomsIn(chapter)
+      return ALL_SCENES.some(
+        (scene) => rooms.has(scene.id) && scene.hotspots.some((spot) => spot.act === conversationId && inEra(spot, chapter)),
+      )
+    })
+
+  it('puts every one of the eight in a room a chapter can walk into', () => {
+    for (const action of SMALL_ACTIONS) {
+      const chapters = chaptersOffering(action.conversationId)
+      expect(chapters.length, `${action.id} is written and nothing in the world opens it`).toBeGreaterThan(0)
+    }
+  })
+
+  /**
+   * שני פרקים, ולא אחד — וזו אינה החמרה שרירותית.
+   *
+   * `JOURNALIST.practice` מבקש שתי הוכחות בשני פרקים שונים, ומזהה ההוכחה נושא את הפרק
+   * (`kind:{chapter}`). ראיה שאפשר לאסוף רק בשנה אחת יכולה לשלם על שלב הכניסה ולעולם לא
+   * על זה שאחריו — וזאת בדיוק הצורה של תקרה שנראית בריאה בקוד.
+   */
+  it('leaves each of them collectable in more than one chapter, because a proof id carries the year', () => {
+    for (const action of SMALL_ACTIONS) {
+      expect(chaptersOffering(action.conversationId).length, `${action.id} exists in one year only`).toBeGreaterThan(1)
+    }
+  })
+
+  it('names each entry stage evidence a room can actually produce', () => {
+    const reachableKinds = new Set(
+      SMALL_ACTIONS.filter((action) => chaptersOffering(action.conversationId).length > 0).map((action) => action.kind),
+    )
+    for (const route of LIFE_ROUTES) {
+      const entry = route.stages.find((stage) => stage.stage === 'entry')
+      for (const kind of entry?.needsProofKinds ?? []) {
+        expect(reachableKinds.has(kind), `${route.id} entry asks for ${kind} and no room produces it`).toBe(true)
+      }
+    }
+  })
+
+  /**
+   * פעם אחת בפרק — ההבדל בין אחר-צהריים לבין טחנה.
+   *
+   * `proof.recorded` אדיש לחזרה על אותו `proofId`, אבל המיומנויות, הכסף והמוניטין אינם:
+   * בלי הדגל, אותה נקודה חמה הייתה משלמת שוב ושוב באותו יום. הענף השני של השיחה הוא מה
+   * שהחדר אומר אחר כך, וקיומו הוא מה שמאפשר לחפץ להישאר בעולם במקום להיעלם.
+   */
+  it('pays each of them once a chapter, and keeps saying something afterwards', () => {
+    for (const action of SMALL_ACTIONS) {
+      const conversation = CONVERSATIONS_ROUTES.find((row) => row.id === action.conversationId)
+      expect(conversation, action.id).toBeTruthy()
+      expect(conversation?.branches.length, `${action.id} has nothing to say once it is done`).toBe(2)
+
+      const offer = conversation?.branches[0]
+      expect(offer?.when, `${action.id} can be repeated all afternoon`).toEqual({
+        notFlag: smallActionFlag(action.id),
+      })
+      const doIt = offer?.choices?.find((choice) => choice.id === 'do')
+      expect(
+        doIt?.then?.some((effect) => effect.e === 'flag' && effect.flag === smallActionFlag(action.id)),
+        `${action.id} never closes its own window`,
+      ).toBe(true)
+      expect(offer?.choices?.some((choice) => choice.id === 'skip'), `${action.id} cannot be refused`).toBe(true)
+
+      const after = conversation?.branches[1]
+      expect(after?.when, `${action.id} guards the line that has to always answer`).toBeUndefined()
+      expect(after?.lines[0]?.text.length ?? 0, `${action.id} says nothing afterwards`).toBeGreaterThan(10)
+    }
+  })
+
+  /**
+   * הדגל נמחק במעבר פרק, וזה לא פרט מימוש.
+   *
+   * `personFlags` שומר רק את הקידומות המנויות בו (`life:`, `own:`, `owe:`, `promise:`…).
+   * דגל של פעולה קטנה מכוון להימחק: הראיה נשארת לתמיד, והאחר-צהריים לא. דגל ששרד היה
+   * הופך את השמונה לפעם-אחת-בחיים והורג את שלב ה-practice של שלושה מסלולים.
+   */
+  it('uses a flag the chapter cut is meant to erase', () => {
+    for (const action of SMALL_ACTIONS) {
+      const flag = smallActionFlag(action.id)
+      expect(flag.startsWith('small:'), action.id).toBe(true)
+      for (const prefix of ['life:', 'own:', 'onboard:', 'cutscene:', 'prologue:', 'went:', 'owe:', 'promise:', 'album:']) {
+        expect(flag.startsWith(prefix), `${action.id} would survive the chapter cut`).toBe(false)
+      }
+    }
+  })
+
+  it('stands every one of them on its own room floor', () => {
+    for (const action of SMALL_ACTIONS) {
+      for (const scene of ALL_SCENES) {
+        for (const spot of scene.hotspots) {
+          if (spot.act !== action.conversationId) continue
+          const band = scene.band
+          expect(spot.y, `${action.id} floats above ${scene.id}`).toBeGreaterThanOrEqual(band.far)
+          expect(spot.y, `${action.id} stands below the floor of ${scene.id}`).toBeLessThanOrEqual(band.near)
+        }
+      }
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------------
+
+/**
+ * התקרה של מה שנבנה — הבדיקה שהופכת "אפשרי" ממילה להערכה.
+ *
+ * `npm run life:budget` שואל את השאלה הזאת על כסף: האם יש בכלל דרך להגיע לסכום שסצנה
+ * מבקשת. אותה שאלה בדיוק לא נשאלה מעולם על שלבי המסלולים, ולכן שלושה שלבי כניסה יכלו
+ * להיות בלתי-אפשריים במשך חודש בלי ששום דבר האדים: כל החוקים היו נכונים, והראיה
+ * שהחוק מבקש פשוט לא נוצרה בשום מקום.
+ *
+ * התקרה נספרת רק ממה שהעולם באמת פותח — נקודות חמות בחדרים שאפשר ללכת אליהם, בפרקים
+ * שקיימים. תוכן של פרק (מדבקה, שיחה, סוף) לא נספר, וזאת החמרה מכוונת: מה שנמדד כאן הוא
+ * הרצפה, ואם הרצפה מספיקה אין צורך לסמוך על אף שורת עלילה.
+ */
+describe('תקרת המסלולים — מה שאפשר להגיע אליו בפרקים שנבנו', () => {
+  const ADULT = ['1996-army', '1997-basket', '1998-laces', '1999-basket', '1999-cup', '2000-title', '2000-double']
+
+  const roomsIn = (chapter: string): Set<string> => {
+    const start = CHAPTERS.find((row) => row.id === chapter)?.start.location
+    const seen = new Set<string>(start ? [start] : [])
+    const queue = [...seen]
+    while (queue.length) {
+      const here = queue.shift()
+      const scene = ALL_SCENES.find((row) => row.id === here)
+      if (!scene) continue
+      for (const exit of scene.exits) {
+        if (!exitInEra(exit, chapter) || seen.has(exit.to)) continue
+        seen.add(exit.to)
+        queue.push(exit.to)
+      }
+    }
+    return seen
+  }
+
+  const opens = (conversationId: string, chapter: string): boolean => {
+    const rooms = roomsIn(chapter)
+    return ALL_SCENES.some(
+      (scene) => rooms.has(scene.id) && scene.hotspots.some((spot) => spot.act === conversationId && inEra(spot, chapter)),
+    )
+  }
+
+  /** everything the placed rooms can add up to across the chapters that exist */
+  const ceiling = () => {
+    const capability: Record<string, number> = {}
+    const audience: Record<string, number> = {}
+    const kinds = new Set<string>()
+    for (const chapter of ADULT) {
+      for (const action of SMALL_ACTIONS) {
+        if (!opens(action.conversationId, chapter)) continue
+        kinds.add(action.kind)
+        for (const effect of action.effects) {
+          if (effect.e === 'skill') capability[effect.skill] = (capability[effect.skill] ?? 0) + effect.delta
+          if (effect.e === 'personality') capability[effect.key] = (capability[effect.key] ?? 0) + effect.delta
+          if (effect.e === 'proof' && effect.audience && effect.delta) {
+            audience[effect.audience] = (audience[effect.audience] ?? 0) + effect.delta
+          }
+        }
+      }
+      for (const mission of PROOF_MISSIONS) {
+        if (!opens(mission.conversationId, chapter)) continue
+        kinds.add(mission.kind)
+        const key = mission.capability === PERSONALITY_BACKED_CAPABILITY ? 'streetSmarts' : mission.capability
+        capability[key] = (capability[key] ?? 0) + mission.capabilityGain
+        audience[mission.audience] = (audience[mission.audience] ?? 0) + mission.audienceGain
+      }
+    }
+    return { capability, audience, kinds }
+  }
+
+  const CEILING = ceiling()
+  const capKey = (capability: string) => (capability === PERSONALITY_BACKED_CAPABILITY ? 'streetSmarts' : capability)
+
+  it('reaches every entry stage without borrowing a single line of chapter fiction', () => {
+    for (const route of LIFE_ROUTES) {
+      const entry = route.stages.find((stage) => stage.stage === 'entry')
+      if (!entry) continue
+      const have = CEILING.capability[capKey(entry.capability)] ?? 0
+      const standing = CEILING.audience[entry.audience] ?? 0
+      expect(have, `${route.id} entry wants ${entry.capability} ${entry.capabilityMin}`).toBeGreaterThanOrEqual(entry.capabilityMin)
+      expect(standing, `${route.id} entry wants ${entry.audience} ${entry.audienceMin}`).toBeGreaterThanOrEqual(entry.audienceMin)
+      for (const kind of entry.needsProofKinds ?? []) {
+        expect(CEILING.kinds.has(kind), `${route.id} entry wants ${kind} and nothing produces it`).toBe(true)
+      }
+    }
+  })
+
+  /**
+   * ושלב האימון — חוץ מאחד, ושמו כתוב.
+   *
+   * `USSISHKIN_FOUNDER.practice` מבקש `founding_proof`, ו-`PROOF_FOUND` היא המשימה היחידה
+   * מתוך השש שבכוונה אינה מונחת בשום חדר: חלון ההקמה הוא 2007, אחרי הפרק האחרון. זאת אינה
+   * אותה חוסר-נגישות כמו של הפסגות (גיל) והיא נמדדת אחרת — ולכן היא רשומה כאן בשמה ולא
+   * מוסתרת מאחורי הכללה. היום שייכתב פרק 2007 יפיל את השורה האחרונה בבדיקה הזאת.
+   */
+  it('reaches every practice stage too — except the founder, whose window is 2007', () => {
+    const blocked: string[] = []
+    for (const route of LIFE_ROUTES) {
+      const practice = route.stages.find((stage) => stage.stage === 'practice')
+      if (!practice) continue
+      const have = CEILING.capability[capKey(practice.capability)] ?? 0
+      const standing = CEILING.audience[practice.audience] ?? 0
+      const proofReachable = practice.proofs === 0 || CEILING.kinds.has(route.proofKind)
+      if (have < practice.capabilityMin || standing < practice.audienceMin || !proofReachable) blocked.push(route.id)
+    }
+    expect(blocked).toEqual(['USSISHKIN_FOUNDER'])
+    expect(foundingWindowOpen(2000), 'the founding window is not open in the last chapter built').toBe(false)
+  })
+
+  /**
+   * הפסגות עוצרות על הגיל, ולא על התוכן — וזה מה שמבדיל בין "עוד לא נבנה" ל"נבנה לא נכון".
+   */
+  it('leaves every apex short of its own numbers, which is what the age ceiling means', () => {
+    for (const route of LIFE_ROUTES) {
+      const apex = route.stages.find((stage) => stage.stage === 'apex')
+      if (!apex) continue
+      const have = CEILING.capability[capKey(apex.capability)] ?? 0
+      const standing = CEILING.audience[apex.audience] ?? 0
+      expect(
+        have < apex.capabilityMin || standing < apex.audienceMin,
+        `${route.id} apex is numerically reachable but gated by an age no chapter reaches — one of the two is wrong`,
+      ).toBe(true)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------------
+
+/**
+ * הראיה החסרה, בשמה — ולמה זה היה חסר בכרטיס דווקא.
+ *
+ * `gapsFor` החזיר `missingKinds` מהיום שנכתב, ו-`RouteCard` זרק אותו והדפיס משפט אחד
+ * גנרי. אדם ששני אחר־צהריים מכניסת העיתונאי קיבל בדיוק את אותה שורה כמו אדם שחמישה,
+ * ובאותן מילים. הטבלה נגזרת מהתוכן שמייצר את הראיה ולא נכתבת שוב (כלל 59), וזה מה
+ * ששומר עליה: ראיה ששלב מבקש בשם ואין לה משפט אנושי מפילה את הבדיקה.
+ */
+describe('שם הראיה', () => {
+  it('has a sentence for every kind a stage asks for by name', () => {
+    for (const route of LIFE_ROUTES) {
+      for (const stage of route.stages) {
+        for (const kind of stage.needsProofKinds ?? []) {
+          expect(evidenceTitleHe(kind), `${route.id}.${stage.stage} asks for ${kind} and it has no name`).toBeTruthy()
+        }
+      }
+    }
+  })
+
+  it('takes the sentence from the content that produces it, never from a second table', () => {
+    for (const action of SMALL_ACTIONS) expect(evidenceTitleHe(action.kind)).toBe(action.titleHe)
+    for (const mission of PROOF_MISSIONS) expect(evidenceTitleHe(mission.kind)).toBe(mission.titleHe)
+  })
+
+  it('says nothing about a kind the game does not produce', () => {
+    expect(evidenceTitleHe('a_kind_no_scene_records')).toBeNull()
+  })
+
+  /**
+   * ומה שהכרטיס עדיין לא אומר, במכוון: **איפה**. המדף בקיוסק והמחברת על המיטה נמצאים
+   * בעולם ומוצאים אותם בהליכה — כרטיס שמציין חדר הופך מסלול לרשימת משימות.
+   */
+  it('names the act and not the room', () => {
+    const rooms = ALL_SCENES.map((scene) => scene.titleHe)
+    for (const action of SMALL_ACTIONS) {
+      const title = evidenceTitleHe(action.kind) ?? ''
+      for (const room of rooms) expect(title.includes(room), `${action.id} names a room`).toBe(false)
+    }
   })
 })

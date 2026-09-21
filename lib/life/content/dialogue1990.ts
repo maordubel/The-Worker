@@ -1,6 +1,17 @@
 import type { Conversation } from './script'
 
 /**
+ * מה שאומרים על יבנה — הנושא שכל הראיות של היום הזה נושאות.
+ *
+ * לא "מה קרה ביבנה". **המשחק לא יודע מה קרה ביבנה** — השורה בארכיון נושאת תוצאה `null`
+ * בוודאות 1, וזו כל הנקודה של הפרק. מה שכן קיים הוא מה ש**אנשים אומרים**, ולכן הראיות
+ * כאן הן על הדיבור ועל מי אמר אותו: עמית ששמע ממישהו ששמע, רפי שיש לו סברה, והרדיו
+ * שמקריא רשימת מגרשים ומאחר. ילד שבודק שמועה בשני מקורות ואז כותב **מי אמר מה** עשה
+ * בדיוק את מה שעיתונאי עושה, בגיל שתים־עשרה, בלי מילה אחת שהארכיון לא מחזיק.
+ */
+const YAVNE_TALK = 'מה שאומרים על יבנה'
+
+/**
  * 1990 — what people say, and what they will not.
  *
  * The rule of `dialogue.ts` — no date, no opponent, no score, no scorer, no attendance in
@@ -26,6 +37,47 @@ export const CONVERSATIONS_1990: Conversation[] = [
         lines: [
           { who: null, text: 'העיתון עדיין פתוח על הטבלה. החשבון כבר נעשה — שלך, או שלו.' },
           { who: null, text: 'מה שנשאר זה משחק אחד פה, ומשחק אחד שאף אחד בשולחן הזה לא יראה.' },
+        ],
+        /**
+         * השוליים של העיתון, והדבר היחיד שילד בן שתים־עשרה באמת יכול להחזיק על יבנה.
+         *
+         * לא תוצאה — **מי אמר מה, ומתי**. שתי הבחירות כאן הן אותה פעולה בשתי רמות של
+         * יושר: לכתוב את השמועה כמו שהיא, או לכתוב אותה עם המקורות לידה. שתיהן רושמות
+         * `written_account` על אותו נושא, כי שתיהן כתיבה; מה שמבדיל ביניהן הוא שתי
+         * הראיות ש-`ACH_VERIFY` סופר, ושהן לא ניתנות להשגה במקרה.
+         *
+         * ואבא קורא את זה. זה מה שהופך את הפתק לדבר שנכתב ולא לדבר שנחשב.
+         */
+        choices: [
+          {
+            id: 'write-checked',
+            text: 'לכתוב בשוליים: מי אמר, מה אמר, ומאיפה.',
+            when: { all: [{ flag: 'net:checked-amit' }, { flag: 'knows:radio' }], none: [{ flag: 'net:wrote' }] },
+            hidden: true,
+            then: [
+              { e: 'flag', flag: 'net:wrote' },
+              { e: 'time', minutes: 10 },
+              { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:yavne', subjectHe: YAVNE_TALK, noteHe: 'שלוש שורות בשוליים: עמית, רפי, הרדיו — ומה כל אחד מהם באמת אמר.' },
+              { e: 'skill', skill: 'communication', delta: 3, why: 'כתב מה שנאמר, עם מי שאמר' },
+              { e: 'personality', key: 'honesty', delta: 2 },
+              { e: 'rel', who: 'kobi', axis: 'trust', delta: 4 },
+              { e: 'toast', text: 'אבא קרא את זה מהצד, הפוך, ולא אמר כלום. אחר כך ראית שהוא לא מחק.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'write-heard',
+            text: 'לכתוב בשוליים את מה ששמעת.',
+            when: { none: [{ flag: 'net:wrote' }] },
+            hidden: true,
+            then: [
+              { e: 'flag', flag: 'net:wrote' },
+              { e: 'time', minutes: 5 },
+              { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:yavne', subjectHe: YAVNE_TALK, noteHe: 'שורה אחת: "יבנה מובילים". בלי מי אמר.' },
+              { e: 'skill', skill: 'communication', delta: 1, why: 'כתב מה ששמע' },
+              { e: 'toast', text: 'כתבת את זה כאילו זה נכון. ככה זה נראה בשוליים של עיתון.', tone: 'plain' },
+            ],
+          },
+          { id: 'leave', text: 'להשאיר את הטבלה בשקט.', then: [] },
         ],
       },
       {
@@ -169,6 +221,14 @@ export const CONVERSATIONS_1990: Conversation[] = [
         then: [
           { e: 'flag', flag: 'knows:radio' },
           { e: 'personality', key: 'curiosity', delta: 3 },
+          /**
+           * המקור השני, והוא לא אומר יותר — הוא אומר **פחות, ובידיעה**.
+           *
+           * הרשימה מקריאה מגרשים ולא תוצאות, וזה בדיוק מה שנרשם: לא "מה קורה ביבנה",
+           * אלא "מה השמיע הרדיו בשעה הזאת". שתי הראיות על אותו נושא הן ההבדל בין ילד
+           * שמעביר שמועה לילד שיודע מאיפה היא הגיעה.
+           */
+          { e: 'proof', kind: 'verified_report', proofId: 'verified_report:{chapter}:radio', subjectHe: YAVNE_TALK, noteHe: 'הרדיו הקריא מגרשים ולא תוצאות. בשעה הזאת הוא לא יודע יותר מזה.' },
         ],
       },
     ],
@@ -383,6 +443,30 @@ export const CONVERSATIONS_1990: Conversation[] = [
         then: [
           { e: 'wellbeing', key: 'happiness', delta: 4 },
           { e: 'bond', who: 'amit', delta: 2 },
+        ],
+        /**
+         * *"שמעת ממי?"* — אופיר שואל את זה, ואף אחד לא עונה. הבחירה הזאת היא מי שכן.
+         *
+         * היא לא מפריכה ולא מאשרת: היא **מתעדת מקור**. עמית נשאר בטוח, והילד יודע עכשיו
+         * דבר אחד יותר ממה שידע — לא על יבנה, על המשפט. זו הראיה הראשונה מתוך שתיים
+         * ש-`ACH_VERIFY` מבקש, והשנייה יושבת על הטרנזיסטור במטבח.
+         */
+        choices: [
+          {
+            id: 'source',
+            text: '"ממי בדיוק? מי שמע, ומתי?"',
+            when: { none: [{ flag: 'net:checked-amit' }] },
+            noteHe: 'כבר שאלת אותו.',
+            then: [
+              { e: 'flag', flag: 'net:checked-amit' },
+              { e: 'time', minutes: 5 },
+              { e: 'proof', kind: 'verified_report', proofId: 'verified_report:{chapter}:amit', subjectHe: YAVNE_TALK, noteHe: 'עמית: "ממישהו ששמע." בלי שם, בלי שעה.' },
+              { e: 'skill', skill: 'knowledge', delta: 2, why: 'ביקש מקור' },
+              { e: 'personality', key: 'curiosity', delta: 2 },
+              { e: 'toast', text: '"ממישהו." הוא אמר את זה באותו ביטחון. עכשיו אתה יודע כמה שווה הביטחון הזה.', tone: 'plain' },
+            ],
+          },
+          { id: 'let', text: 'לתת לו לספור.', then: [] },
         ],
       },
     ],

@@ -298,13 +298,28 @@ export const SKILL_IDS: readonly SkillId[] = [
 // work nobody saw makes you better at the work and changes nothing about how the gate
 // speaks to you — until the morning somebody tells them.
 //
-// **Five audiences, not one number, and that is the whole point.** The spec is explicit
+// **Six audiences, not one number, and that is the whole point.** The spec is explicit
 // that `rep_public` may not serve both terrace fame and a supplier's trust: *"אלה
 // קהלים שונים."* A man the whole of gate 5 would follow can be a stranger at
 // Ussishkin, and a journalist the city reads can be nobody in the away end.
+//
+// ---------------------------------------------------------------------------------
+// **`international` הוא השישי, והוא נוסף ב-20.9.2026 בגלל שאלה שנשאלה ותשובה שניתנה.**
+//
+// תסריט ההמשך 2000–2026 כותב `אמון קהילה: {"international": 4}`, ושלושת הקהלים האחרים
+// שבו התמפו לקיימים (`terrace→gate5`, `basketball→ussishkin`, `media→public`). הרביעי
+// לא, והוא הושאר בחוץ ודווח במקום להיות מקופל לתוך `public` — כי לקפל קהל לתוך
+// "הציבור" היא טענה על מי שמע, ולא תרגום.
+//
+// מאור ענה (20.9.2026): *"המטרה היא קהלים בינלאומיים שמזוהים עם ארגון ANTIFA, כמו
+// סט פאולי."* זו תשובה שמחייבת קהל משלו ולא קיפול: יציע בהמבורג שמכיר אותך אינו
+// "הציבור" הישראלי בשום מובן, והוא גם אינו שער 7 — **שער 7 הוא האוהדים שלנו בחוץ;
+// זה אוהדים של מישהו אחר שעומדים אִתנו.** אלה שני דברים שהמשחק הזה מקפיד להפריד.
+//
+// כלל 18: מאור הוא מקור על מה שהיציע מרגיש וזוכר, וזה בדיוק סוג האמירה הזאת.
 // ---------------------------------------------------------------------------------
 
-export type ReputationAudience = 'gate7' | 'gate5' | 'ussishkin' | 'public' | 'work'
+export type ReputationAudience = 'gate7' | 'gate5' | 'ussishkin' | 'public' | 'work' | 'international'
 
 export const REPUTATION_AUDIENCES: readonly ReputationAudience[] = [
   'gate7',
@@ -312,6 +327,7 @@ export const REPUTATION_AUDIENCES: readonly ReputationAudience[] = [
   'ussishkin',
   'public',
   'work',
+  'international',
 ]
 
 /** מה שממתין שמישהו ידע — an earned claim that has not been witnessed yet. */
@@ -731,7 +747,7 @@ export function blankSkills(): SkillState {
  */
 export function blankReputation(): ReputationState {
   return {
-    standing: { gate7: 0, gate5: 0, ussishkin: 0, public: 0, work: 0 },
+    standing: { gate7: 0, gate5: 0, ussishkin: 0, public: 0, work: 0, international: 0 },
     pending: [],
   }
 }

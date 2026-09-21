@@ -320,6 +320,8 @@ export class FootballScene extends Phaser.Scene {
       date: longDateHe(this.ctx.anchor.match?.playedOn) ?? String(this.ctx.engine.state.year),
       agorot: left,
       showMoney: false,
+      energy: 100,
+      showEnergy: false,
       place: 'שניים על שניים',
       objective: null,
       year: this.ctx.engine.state.year,

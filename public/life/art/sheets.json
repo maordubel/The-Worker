@@ -3107,5 +3107,173 @@
   "bytes": 8698,
   "yellowLeft": 0,
   "source": "2026-09"
+ },
+ "iconTalk": {
+  "w": 256,
+  "h": 256,
+  "bytes": 15042,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconLook": {
+  "w": 256,
+  "h": 256,
+  "bytes": 15300,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconTake": {
+  "w": 256,
+  "h": 256,
+  "bytes": 15498,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconWalk": {
+  "w": 256,
+  "h": 256,
+  "bytes": 14986,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconMap": {
+  "w": 256,
+  "h": 256,
+  "bytes": 14694,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconTasks": {
+  "w": 256,
+  "h": 256,
+  "bytes": 13860,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconBag": {
+  "w": 256,
+  "h": 256,
+  "bytes": 15354,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconPhone": {
+  "w": 256,
+  "h": 256,
+  "bytes": 14774,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconTime": {
+  "w": 256,
+  "h": 256,
+  "bytes": 14158,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconCheckpoint": {
+  "w": 256,
+  "h": 256,
+  "bytes": 14618,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconSaved": {
+  "w": 256,
+  "h": 256,
+  "bytes": 14200,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "iconSettings": {
+  "w": 256,
+  "h": 256,
+  "bytes": 14640,
+  "yellowLeft": 0,
+  "source": "life-icons-2026-09-20"
+ },
+ "emWallet": {
+  "w": 256,
+  "h": 256,
+  "bytes": 32016,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emEnergy": {
+  "w": 256,
+  "h": 256,
+  "bytes": 20012,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emMask": {
+  "w": 256,
+  "h": 256,
+  "bytes": 26332,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emHealth": {
+  "w": 256,
+  "h": 256,
+  "bytes": 25288,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emScarf": {
+  "w": 256,
+  "h": 256,
+  "bytes": 32954,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emHands": {
+  "w": 256,
+  "h": 256,
+  "bytes": 21168,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emHearts": {
+  "w": 256,
+  "h": 256,
+  "bytes": 27836,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emChild": {
+  "w": 256,
+  "h": 256,
+  "bytes": 35638,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emBook": {
+  "w": 256,
+  "h": 256,
+  "bytes": 80514,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emMegaphone": {
+  "w": 256,
+  "h": 256,
+  "bytes": 28034,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emGlobe": {
+  "w": 256,
+  "h": 256,
+  "bytes": 29290,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
+ },
+ "emCase": {
+  "w": 256,
+  "h": 256,
+  "bytes": 28112,
+  "yellowLeft": 0,
+  "source": "life-emblems-2026-09-21"
  }
 }

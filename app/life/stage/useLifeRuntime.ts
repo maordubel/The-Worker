@@ -53,7 +53,7 @@ import type { LifeState } from '@/lib/life/types'
  * handle each, owned by `LifeStage`, borrowed by whoever needs it.
  */
 
-const EMPTY_HUD: HudState = { clock: '', date: '', agorot: 0, showMoney: false, place: '', objective: null, year: 1986, scene: 'bedroom', hint: '', waitingHe: null }
+const EMPTY_HUD: HudState = { clock: '', date: '', agorot: 0, showMoney: false, energy: 100, showEnergy: false, place: '', objective: null, year: 1986, scene: 'bedroom', hint: '', waitingHe: null }
 /** the decade the glass is dressed for — type and texture follow it (`app/globals.css`) */
 export const decadeOf = (year: number) => (year >= 2000 ? '00s' : year >= 1990 ? '90s' : '80s')
 /**

@@ -44,6 +44,21 @@ export type HudState = {
   agorot: number
   /** shown for a moment when it changes, then it goes away again (brief §15) */
   showMoney: boolean
+  /**
+   * הכוח — and the fact that it was never on the glass until 21.9.2026.
+   *
+   * `energy` is a cost on almost every choice in the game: a conversation charges it, a
+   * shift charges it, running charges it, and `Condition` gates read it. The player could
+   * see the money it cost them and not the tiring. It was visible in exactly one place —
+   * `DebugPanel`, behind `NODE_ENV` — which is the same shape as the `Gauges` finding of
+   * rule 46: a number the engine lives by that the person playing cannot see.
+   *
+   * `showEnergy` is deliberately NOT `energy > 0`, the way `showMoney` is `agorot > 0`:
+   * a full tank is not news, and a bar that is always there stops being read. It appears
+   * once the afternoon has actually cost something.
+   */
+  energy: number
+  showEnergy: boolean
   place: string
   objective: string | null
   /** the year the life is in — the shell keys its type and texture off the decade */

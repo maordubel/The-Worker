@@ -203,8 +203,25 @@ export type SmallActionDef = {
   minutes: number
   energy: number
   titleHe: string
+  /** what is in front of him when he walks up to it — the room talking, never a quest board */
+  openingHe: string
+  /** the same thing, afterwards. A room that forgets what you did in it this afternoon is a menu. */
+  doneHe: string
   effects: readonly Effect[]
 }
+
+/**
+ * פעם אחת בפרק, ולא פעם אחת בחיים.
+ *
+ * `proof.recorded` is idempotent on `proofId` (`events.ts`) and the id carries the chapter,
+ * so a second run of the same action in the same afternoon would pay no proof — but it WOULD
+ * pay the skills, the money and the reputation again, which is a mill. A flag closes it.
+ *
+ * Deliberately with no prefix from the surviving list (`life:`, `own:`, `owe:`, …): `personFlags`
+ * erases it at the chapter cut, which is exactly right. The evidence is permanent and the
+ * afternoon is not — next year the papers on the shelf are a different pair of papers.
+ */
+export const smallActionFlag = (id: string): string => `small:${id}`
 
 const proof = (kind: string, extra: Partial<Extract<Effect, { e: 'proof' }>> = {}): Effect => ({
   e: 'proof',
@@ -228,6 +245,9 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     minutes: 15,
     energy: 2,
     titleHe: 'לבדוק דיווח בשני מקורות',
+    openingHe:
+      'שני העיתונים על המדף לא כותבים אותו דבר. אחד אומר שהוא נמכר, השני אומר שהוא נשאר.',
+    doneHe: 'שני העיתונים נשארו על המדף. אתה כבר יודע מי מהם צדק.',
     effects: [
       { e: 'skill', skill: 'knowledge', delta: 2, why: 'בדק מול שני מקורות' },
       { e: 'skill', skill: 'communication', delta: 1, why: 'ניסח את מה שיצא' },
@@ -242,6 +262,9 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     minutes: 20,
     energy: 2,
     titleHe: 'לכתוב תיאור אישי שמישהו יקרא',
+    openingHe:
+      'המחברת פתוחה מאתמול בלילה, באמצע משפט. אתה זוכר בדיוק מה רצית לכתוב שם.',
+    doneHe: 'הדף מלא. מישהו כבר לקח אותו לקרוא.',
     effects: [
       { e: 'skill', skill: 'communication', delta: 2, why: 'כתב וזה נקרא' },
       { e: 'skill', skill: 'knowledge', delta: 1, why: 'כתב וזה נקרא' },
@@ -257,6 +280,9 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     minutes: 15,
     energy: 0,
     titleHe: 'להכין תקציב שהסכומים בו מתאימים ליתרה',
+    openingHe:
+      'החשבונות על השולחן, והכסף שיש בבית. שני המספרים האלה לא דיברו זה עם זה כבר חודש.',
+    doneHe: 'המספרים על השולחן מסתדרים. זה לקח רבע שעה ושום דבר בבית לא ישתנה מזה היום.',
     effects: [
       { e: 'skill', skill: 'business', delta: 2, why: 'סגר תקציב' },
       { e: 'skill', skill: 'organization', delta: 1, why: 'סגר תקציב' },
@@ -270,8 +296,27 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     minutes: 45,
     energy: 10,
     titleHe: 'להשלים משמרת בוגרת שהובטחה',
+    openingHe:
+      'הבטחת משמרת. הדלת האחורית פתוחה, והשעות נרשמות על לוח שתלוי מאחוריה.',
+    doneHe: 'השעות רשומות על הלוח, בכתב יד של מישהו אחר, ולידן השם שלך.',
+    /**
+     * ולמה המשמרת הזאת **אינה משלמת** — שכר שנכתב ביד הוא שכר שסוטה מהעשור.
+     *
+     * עד שהפעולה הזאת קיבלה חדר היא נשאה `{ e: 'money', agorot: 800 }`, ושני דברים נשברו
+     * ברגע שאפשר היה באמת לקחת אותה:
+     *
+     * 1. **המספר לא ידע באיזה עשור הוא.** `WAGE` ב-`prices.ts` הוא 10 ₪ לשעה בשנות
+     *    התשעים ו-18 בשנות האלפיים, ו-`gigPay` גוזר ממנו כל שכר במשחק בדיוק כדי שלא
+     *    יוקלד פעמיים (*"a wage that is typed in nineteen places is nineteen chances to be
+     *    wrong about a decade"*). 800 אגורות זה שכר של 1997 שמשולם גם ב-2000.
+     * 2. **היא עקפה את הכלל של מאור** (6.9.2026): *"צריך להגביל את האפשרות להרוויח כסף,
+     *    פעם אחת בכל משימה."* `workDoneFlag` אוכף עבודה בתשלום אחת לפרק על כל הג׳ובים —
+     *    ומשמרת שמשלמת בלי להרים אותו היא ברז שני באותו אחר־צהריים.
+     *
+     * מי שרוצה כסף לוקח ג׳וב; מי שרוצה את מסלול הבעלים משלים משמרת שהבטיח. מה שהיא
+     * משאירה אחריה הוא מה שהיא באמת עושה: שעות רשומות על לוח, ושם לידן.
+     */
     effects: [
-      { e: 'money', agorot: 800, why: 'משמרת' },
       { e: 'skill', skill: 'business', delta: 2, why: 'משמרת בוגרת' },
       // rep_work +3, and the man who signs the hours is standing right there
       proof('adult_shift', { audience: 'work', delta: 3 }),
@@ -285,6 +330,9 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     minutes: 25,
     energy: 4,
     titleHe: 'להכין יצירה בתחום שכבר ניסית',
+    openingHe:
+      'מה שהתחלת מונח בפינה מאז הפעם הקודמת. זה לא ייגמר לבד.',
+    doneHe: 'זה גמור ומונח בפינה. עכשיו זה כבר דבר, ולא כוונה.',
     effects: [
       { e: 'skill', skill: 'creativity', delta: 3, why: 'הכין משהו' },
       proof('creative_work'),
@@ -297,6 +345,9 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     minutes: 30,
     energy: 8,
     titleHe: 'לתכנן מפגש ולהביא את האנשים בזמן',
+    openingHe:
+      'אנשים אמרו שיבואו. אף אחד מהם לא יודע מתי, ואף אחד מהם לא ישאל.',
+    doneHe: 'כולם כאן, ובזמן. אף אחד לא יגיד לך תודה על זה, וזה בסדר.',
     effects: [
       { e: 'skill', skill: 'organization', delta: 3, why: 'הביא אנשים בזמן' },
       { e: 'skill', skill: 'communication', delta: 1, why: 'הביא אנשים בזמן' },
@@ -311,6 +362,9 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     minutes: 15,
     energy: 2,
     titleHe: 'לתכנן דרך מאושרת עם מידע בדוק',
+    openingHe:
+      'לוח היציאות, והמחירים לידו. אפשר להגיד למישהו איך מגיעים — או להגיד לו משהו שנשמע נכון.',
+    doneHe: 'הדרך כתובה, עם שעות שבדקת ומחיר שראית בעיניים.',
     effects: [
       { e: 'personality', key: PERSONALITY_BACKED_CAPABILITY, delta: 2 },
       { e: 'skill', skill: 'organization', delta: 1, why: 'תכנן דרך' },
@@ -324,6 +378,9 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     minutes: 20,
     energy: 5,
     titleHe: 'לקחת משימת עזרה ולסיים אותה',
+    openingHe:
+      'יש משימה שאף אחד לא לקח, והיא תישאר כאן עד שמישהו ייקח אותה.',
+    doneHe: 'לקחת אותה וגמרת אותה. זה ההבדל היחיד בין לקחת משימה לבין להתנדב.',
     effects: [
       { e: 'skill', skill: 'organization', delta: 2, why: 'עזר וסיים' },
       { e: 'personality', key: 'empathy', delta: 1 },
@@ -332,6 +389,25 @@ export const SMALL_ACTIONS: readonly SmallActionDef[] = [
     ],
   },
 ]
+
+/**
+ * שם הראיה, במילים של מי שעשה אותה.
+ *
+ * `gapsFor` מחזיר `missingKinds` — `['verified_report', 'written_account']` — וכרטיס
+ * המסלול הדפיס עליהם משפט אחד גנרי: *"חסר דבר אחד שעשית פעם אחת, וזה עוד לא קרה"*. זה
+ * נכון ואינו אומר דבר. אדם שנמצא שני אחר־צהריים מכניסת העיתונאי קיבל את אותה שורה כמו
+ * אדם שנמצא חמישה, ובאותן מילים.
+ *
+ * הטבלה **נגזרת** משתי הטבלאות שכבר מחזיקות את המשפט האנושי — `titleHe` של פעולה קטנה
+ * ושל משימת הוכחה — ולא נכתבת שוב (כלל 59: שני שמות לאותו מושג הם שתי הזדמנויות לסטות).
+ * ראיה שתיכתב מחר מקבלת את שמה בכרטיס באותו רגע, בלי שורה נוספת בשום מקום.
+ */
+const EVIDENCE_TITLES: Record<string, string> = {}
+for (const action of SMALL_ACTIONS) EVIDENCE_TITLES[action.kind] = action.titleHe
+for (const mission of PROOF_MISSIONS) EVIDENCE_TITLES[mission.kind] = mission.titleHe
+
+/** the sentence for a proof kind, or null for one nothing in the game produces */
+export const evidenceTitleHe = (kind: string): string | null => EVIDENCE_TITLES[kind] ?? null
 
 // ---------------------------------------------------------------------------------
 // השיחות
@@ -864,18 +940,41 @@ const distance: Conversation = {
   ],
 }
 
-/** the small actions, each as a room you walk into and a thing you decide to do */
+/**
+ * הפעולות הקטנות — a thing in a room, and an afternoon you decide to spend on it.
+ *
+ * Two branches, in this order, and the order is the whole behaviour: the offer is first
+ * and asks whether it has been done this chapter; the second has no `when` and is what the
+ * room says afterwards. A hotspot that vanished once you used it would be the world
+ * deleting a thing you can see — so the shelf stays on the wall and the papers on it have
+ * been read.
+ *
+ * `nameHe: null` because none of the eight is a person. The player is looking at an object
+ * and deciding something about his own afternoon, which is the difference between this and
+ * the six `PROOF_*` missions, where somebody is standing there watching.
+ */
 const smallActions: Conversation[] = SMALL_ACTIONS.map((action) => ({
   id: action.conversationId,
   nameHe: null,
   branches: [
     {
-      lines: [{ who: null, text: `${action.titleHe}. אפשר, אם יש לך את הזמן.` }],
+      when: { notFlag: smallActionFlag(action.id) },
+      lines: [{ who: null, text: action.openingHe }],
       choices: [
-        { id: 'do', text: action.titleHe, then: [{ e: 'time', minutes: action.minutes }, { e: 'energy', delta: -action.energy }, ...action.effects] },
+        {
+          id: 'do',
+          text: action.titleHe,
+          then: [
+            { e: 'time', minutes: action.minutes },
+            { e: 'energy', delta: -action.energy },
+            ...action.effects,
+            { e: 'flag', flag: smallActionFlag(action.id) },
+          ],
+        },
         { id: 'skip', text: 'לא עכשיו', then: [] },
       ],
     },
+    { lines: [{ who: null, text: action.doneHe }] },
   ],
 }))
 

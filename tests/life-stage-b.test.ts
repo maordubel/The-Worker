@@ -78,8 +78,19 @@ describe('שלב ב׳ — the decade as a whole', () => {
     expect(stageB.map((c) => c.unit)).toEqual(['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11a', 'B11b'])
     for (const c of stageB) expect(c.playable, c.id).toBe(true)
     for (let i = 0; i < stageB.length - 1; i += 1) expect(stageB[i]!.next, stageB[i]!.id).toBe(stageB[i + 1]!.id)
-    expect(lastPlayable().id).toBe('2000-double')
-    expect(CHAPTER['2000-double']!.next).toBeNull()
+    /**
+     * ...ושלב ב׳ עדיין נגמר בדאבל — אבל **החיים כבר לא** (21.9.2026).
+     *
+     * שתי השורות האלה בדקו `lastPlayable().id === '2000-double'` ו-`next === null`,
+     * והן היו נכונות כל עוד 2000 היה סוף מה שנבנה. מאור מסר תסריט שנפתח בדיוק שם,
+     * ולכן הן נופלות — וזה בדיוק המקרה של כלל 68: ההחלטה השתנתה, בעל הבית אמר,
+     * השומר **משנה צד ולא נמחק**. מה שהוא שומר עכשיו צר יותר ונכון יותר: `B11b` הוא
+     * הפרק האחרון **של שלב ב׳**, והפרק שאחריו חייב להיות שלב ג׳ — כך ששרשור שגוי
+     * בתוך העשור עדיין מפיל את הבדיקה.
+     */
+    expect(stageB[stageB.length - 1]!.id).toBe('2000-double')
+    expect(CHAPTER['2000-double']!.next).toBe('2000-bridge')
+    expect(CHAPTER['2000-bridge']!.stage).toBe('C')
     expect(nextPlayable('2000-title')?.id).toBe('2000-double')
     expect(playableChapters().length).toBe(CHAPTERS.length)
   })
@@ -284,7 +295,18 @@ describe('B11 — seven families, read off the decade', () => {
     }
   })
 
-  it('has no chapter after the Double', () => {
-    expect(nextPlayable('2000-double')).toBeNull()
+  /**
+   * ...ומה שאחרי הדאבל הוא **הגשר**, לא כלום.
+   *
+   * הבדיקה הזאת נקראה "אין פרק אחרי הדאבל" והייתה נכונה עד 21.9.2026. היא לא נמחקה:
+   * היא שואלת עכשיו את השאלה שבאמת חשובה — שהחיים ממשיכים, ושהם ממשיכים **לשלב
+   * אחר**, כלומר למקור אחר (`SCREENPLAY-2000-2026.md`). חיים שנגמרים בגמר גביע הם
+   * הבאג שהיא נבנתה מחדש כדי לתפוס.
+   */
+  it('continues into the bridge, which is where the 2000–2026 screenplay opens', () => {
+    const after = nextPlayable('2000-double')
+    expect(after?.id).toBe('2000-bridge')
+    expect(after?.stage).toBe('C')
+    expect(after?.unit).toBe('B00–B02')
   })
 })

@@ -5,6 +5,7 @@ import { Num } from '@/components/ui/Num'
 import type { HudState } from '@/lib/life/runtime/bus'
 import { t } from '@/lib/i18n'
 import { formatMoney } from '@/lib/life/money'
+import { artUrl, EMBLEM_OF_RESOURCE } from '@/lib/life/runtime/art'
 
 /**
  * הממשק — a sign plate, a cloth, and nothing else (brief §15).
@@ -16,6 +17,32 @@ import { formatMoney } from '@/lib/life/money'
  * appears only when there is any. Nothing here is a bar and nothing here is a score:
  * the numbers live on the love meter and behind it.
  */
+/**
+ * הסמל של המשאב — 15 פיקסלים, ומחליף כלום.
+ *
+ * הסמל עומד **ליד** המילה ולא במקומה, בדיוק כמו `ActionMark` על צ'יפ הפעולה: תמונה
+ * שנכשלה בטעינה משאירה שורה שעדיין אפשר לקרוא, וקורא מסך שומע את המילה בלי הדיסקית.
+ */
+function Emblem({ resource }: { resource: 'money' | 'energy' }) {
+  const key = EMBLEM_OF_RESOURCE[resource]
+  if (!key) return null
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={artUrl(key)} alt="" aria-hidden="true" className="h-[15px] w-[15px] shrink-0 object-contain" />
+}
+
+/**
+ * ארבע מילים, לא אחוז — והגבולות הם היכן שהמשחק עצמו נעצר.
+ *
+ * `Condition.minEnergy` ועלויות הפעולות נעות בעשרות, אז המילה משתנה בערך כשמשתנה מה
+ * שאפשר לעשות: מעל 70 אפשר הכול, מתחת ל-25 כמעט כל דבר בוקר יקר.
+ */
+export function energyWordHe(energy: number): string {
+  if (energy >= 70) return t('life.energyWord.full')
+  if (energy >= 45) return t('life.energyWord.fine')
+  if (energy >= 25) return t('life.energyWord.tired')
+  return t('life.energyWord.spent')
+}
+
 export function LifeHud({ hud }: { hud: HudState }) {
   /*
    * The root spans the whole glass, not only the top strip. It was `top-0` with no height,
@@ -49,8 +76,22 @@ export function LifeHud({ hud }: { hud: HudState }) {
         {hud.showMoney && (
           <Plate className="mt-1">
             <span className="flex items-center gap-1.5 px-2 py-1">
+              <Emblem resource="money" />
               <span className="font-sign text-[10px] leading-none text-muted">{t('life.money')}</span>
               <Num className="font-mono text-[13px] font-bold leading-none text-ink" data-life="money">{formatMoney(hud.agorot)}</Num>
+            </span>
+          </Plate>
+        )}
+        {hud.showEnergy && (
+          <Plate>
+            <span className="flex items-center gap-1.5 px-2 py-1">
+              <Emblem resource="energy" />
+              <span className="font-sign text-[10px] leading-none text-muted">{t('life.energy')}</span>
+              {/* הכוח נקרא כ**מילה**, לא כאחוז: `GaugesSheet` הוא המקום שעונה "כמה"
+                  (כלל 63א), והזכוכית היא המקום שעונה "האם כדאי לי עוד סיבוב". */}
+              <span className="font-mono text-[13px] font-bold leading-none text-ink" data-life="energy">
+                <bdi>{energyWordHe(hud.energy)}</bdi>
+              </span>
             </span>
           </Plate>
         )}

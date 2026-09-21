@@ -6,6 +6,16 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 
 /**
+ * הדף על הלילה שירדנו — נושא אחד שעובר שלושה מעשים ושני פרקים.
+ *
+ * כתיבה (`journalism_proof` + `written_account`) באולם, פרסום (`publication_proof`)
+ * בחלון של רפי באותו לילה, ותיקון (`public_correction`) ארבעה ימים לפני גמר הגביע של
+ * 2000. שלושתם נושאים את המחרוזת הזאת, כי ההישגים מצליבים נושא ולא מפתח — ומי שכתב
+ * ולא פרסם, או פרסם ולא תיקן, מחזיק בדיוק את מה שהוא עשה.
+ */
+export const PAGE_SUBJECT = 'הדף על הלילה שירדנו'
+
+/**
  * B9 · "זה לא נגמר כשעולים" · 1998/99 — the second relegation, and the seed.
  *
  * One long evening at Ussishkin and the kiosk after it: the hall goes down again, a
@@ -211,7 +221,15 @@ export const CONVERSATIONS_SEED: Conversation[] = [
         ],
         choices: [
           { id: 'why', text: '"למה אתה עוד רושם?"', then: [{ e: 'rel', who: 'soko', axis: 'bond', delta: 3 }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'toast', text: '"כי יום אחד מישהו ישאל מה היה. ואני לא רוצה שהתשובה תהיה \'לא זוכר\'."', tone: 'plain' }] },
-          { id: 'help', text: '"תן, אני אכתוב את הערב."', then: [{ e: 'rel', who: 'soko', axis: 'trust', delta: 5 }, { e: 'remember', who: 'soko', eventId: 'wrote-the-night-1999', significance: 'notable' }, { e: 'redheart', key: 'historyMemory', delta: 5 }, { e: 'flag', flag: 'seed:wrote' }] },
+          /**
+           * *"תן, אני אכתוב את הערב."* — והפעם זה גם נרשם.
+           *
+           * הבחירה הזאת קיימת מאז שהפרק נכתב, והיא הייתה מחווה: אמון, זיכרון, ודגל.
+           * מה שנוסף הוא הפנקס — **שתי** ראיות על אותו דף, כי דף כזה הוא שני דברים
+           * בבת אחת: תיעוד (`journalism_proof`) וטקסט שמישהו יקרא (`written_account`).
+           * ההפרדה הזאת היא מה שמאפשר גם לתקן אותו אחר כך, בלי למחוק אותו.
+           */
+          { id: 'help', text: '"תן, אני אכתוב את הערב."', then: [{ e: 'rel', who: 'soko', axis: 'trust', delta: 5 }, { e: 'remember', who: 'soko', eventId: 'wrote-the-night-1999', significance: 'notable' }, { e: 'redheart', key: 'historyMemory', delta: 5 }, { e: 'flag', flag: 'seed:wrote' }, { e: 'flag', flag: 'life:page:1999' }, { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:page', subjectHe: PAGE_SUBJECT, noteHe: 'מה שהיה באולם, בשעה שהיה, בכתב יד של מישהו שהיה שם.' }, { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:page', subjectHe: PAGE_SUBJECT, noteHe: 'שני עמודים במחברת של סוקו. הוא לא תיקן לך מילה.' }, { e: 'skill', skill: 'communication', delta: 3, why: 'כתב את הערב' }] },
         ],
       },
     ],
@@ -239,6 +257,14 @@ export const CONVERSATIONS_SEED: Conversation[] = [
            * תנאי: חוב של יציע נפרע כי מי שחייב רוצה, ולא כי המערכת סוגרת חשבון.
            */
           { id: 'debt-taxi', text: 'לשים על הארגז את מה שעלתה המונית ההיא.', when: { flag: 'owe:stand' }, noteHe: 'אף אחד לא אסף עליך כסף למונית.', then: [{ e: 'goto', node: 'seed-owed-taxi' }] },
+          /**
+           * ומה שהופך כתיבה לפרסום: מישהו אחר קורא אותה, במקום שהוא לא שלך.
+           *
+           * החלון של רפי הוא הלוח היחיד שיש לרחוב הזה. סוקו מעתיק, רפי מדביק, וזה כבר לא
+           * מחברת — זה דף שאנשים עוצרים מולו. `publication_proof` נרשם כאן ולא באולם,
+           * כי בין השניים עומד ההבדל שההישג "המילים שלי בחוץ" קיים בשבילו.
+           */
+          { id: 'pin', text: 'לתת לסוקו להעתיק את הדף, ולתלות אותו בחלון של רפי.', when: { flag: 'seed:wrote' }, hidden: true, then: [{ e: 'flag', flag: 'life:page:pinned' }, { e: 'time', minutes: 20 }, { e: 'proof', kind: 'publication_proof', proofId: 'publication_proof:{chapter}:page', subjectHe: PAGE_SUBJECT, audience: 'public', delta: 3, noteHe: 'סוקו העתיק בכתב ידו, רפי הדביק מבפנים בסלוטייפ. בגובה העיניים.' }, { e: 'heard', proofId: 'publication_proof:{chapter}:page' }, { e: 'rel', who: 'soko', axis: 'bond', delta: 4 }, { e: 'toast', text: 'שני אנשים עצרו מול החלון לפני שהלכת הביתה. אחד מהם קרא את זה עד הסוף.', tone: 'plain' }] },
           { id: 'rhythm', text: 'לענות למלמד. אותו קצב.', when: { flag: 'life:melamed:rhythm' }, noteHe: 'לא למדת את הקצב שלו ב־96. אין לך מה לענות.', then: [{ e: 'sfx', key: 'darbuka-three-two', level: 0.8 }, { e: 'sfx', key: 'crowd-claps', level: 0.5, delayMs: 1700 }, { e: 'rel', who: 'melamed', axis: 'bond', delta: 6 }, { e: 'remember', who: 'melamed', eventId: 'rhythm-returned-1999', significance: 'major' }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'toast', text: 'שלוש, הפסקה, שתיים. כל הקיוסק הצטרף. ככה מתחיל שיר.', tone: 'plain' }] },
         ],
       },

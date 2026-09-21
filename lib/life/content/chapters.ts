@@ -21,7 +21,15 @@ import type { LifeState, LocationId } from '../types'
  *    and the last playable chapter ends on a coda instead of a "coming soon" card — so
  *    the game is always complete up to where it is complete, and never past it.
  */
-export type ChapterStage = 'A' | 'B'
+/**
+ * שלב ג׳ נוסף ב-21.9.2026, והוא **מקור** ולא גודל.
+ *
+ * `A` ו-`B` הם הבריף המקורי — 1983–2000. `C` הוא תסריט ההמשך שמאור מסר ב-20.9.2026
+ * (`docs/life/SCREENPLAY-2000-2026.md`), והאות אומרת מאיפה הפרק נקרא. זה לא קישוט:
+ * `WorldScene.chapterDate` מחליט לפי השלב אם להדפיס תאריך, ושלב ג׳ מתנהג כמו ב׳ —
+ * אבל מי שיבוא לתקן סצנה של 2007 צריך לדעת באיזה מסמך לחפש אותה.
+ */
+export type ChapterStage = 'A' | 'B' | 'C'
 
 export type Bridge = {
   /** the big word on the card — a month, a year, a place */
@@ -379,8 +387,34 @@ export const CHAPTERS: readonly ChapterDef[] = [
     weekday: 3,
     minute: MIN(15, 0),
     start: { location: 'home', spawn: 'start' },
-    next: null,
+    next: '2000-bridge',
     bridge: { titleHe: 'ארבעה ימים אחר כך', subHe: 'רמת גן', ms: 3000 },
+    anchorKey: '2000-cup',
+    playable: true,
+  },
+  /**
+   * שלב ג׳ — תסריט ההמשך, 2000–2026. הפרק הראשון הוא **הגשר**, וזה שמו.
+   *
+   * `2000-double` נשא `next: null` עד היום, וזה היה נכון כל עוד 2000 היה סוף מה
+   * שנבנה. מרגע שמאור מסר תסריט שנפתח בדיוק שם, זה הפך לחיים שנגמרים בגמר גביע:
+   * השחקן מסיים את הדאבל, מקבל כרטיס, ואין מחר. הפרק הזה הוא שלוש הסצנות שהתסריט
+   * עצמו פותח בהן — B00 הסלון, B01 הקופסה, B02 הקיוסק.
+   *
+   * **השעה היא לילה.** 22:40 של יום רביעי, אחרי גמר גביע המדינה ברמת גן. זה הפרק
+   * היחיד במשחק שמתחיל אחרי חשכה, ולכן גם היחיד שהמטרה שלו אינה מגרש (`goalBridge`).
+   */
+  {
+    id: '2000-bridge',
+    stage: 'C',
+    unit: 'B00–B02',
+    titleHe: 'מה שאחרי',
+    dateHe: '17 במאי 2000',
+    year: 2000,
+    weekday: 3,
+    minute: MIN(22, 40),
+    start: { location: 'home', spawn: 'start' },
+    next: null,
+    bridge: { titleHe: 'אחרי הדאבל', subHe: 'שכונת התקווה', ms: 3000 },
     anchorKey: '2000-cup',
     playable: true,
   },

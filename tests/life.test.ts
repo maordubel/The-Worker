@@ -19,12 +19,15 @@ import { LifeEngine } from '@/lib/life/engine'
 import { apply, emptyState, fold, type LifeEvent } from '@/lib/life/events'
 import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
-import { SHIRT, ARTEFACT, artUrl, BACKDROP, DOC, extensionKeys, FIGURE, HERO80_WALK, isArtefact, KID_POSE, KID_WALK, KID_WALK_AWAY, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
+import { SHIRT, ARTEFACT, artUrl, BACKDROP, DOC, EMBLEM, EMBLEM_OF_GAUGE_GROUP, EMBLEM_OF_RESOURCE, EMBLEM_OF_ROUTE, EMBLEM_OF_SKILL, EMBLEM_OF_TRACK, extensionKeys, FIGURE, HERO80_WALK, ICON, ICON_OF_VERB, isArtefact, KID_POSE, KID_WALK, KID_WALK_AWAY, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
 import { PANO_SPOTS } from '@/lib/life/content/panoramas'
 import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
 import { arrivalFor, exitInEra, inEra } from '@/lib/life/world/scenes'
 import { CHAPTERS } from '@/lib/life/content/chapters'
 import { meets } from '@/lib/life/world/types'
+import { LIFE_TRACKS } from '@/lib/life/tracks'
+import { LIFE_ROUTES } from '@/lib/life/routes'
+import { SKILL_IDS } from '@/lib/life/types'
 
 /**
  * THE WORKER LIFE — the guards.
@@ -1434,3 +1437,139 @@ function walk(dir: string): string[] {
 function code(roots: readonly string[]): string[] {
   return roots.flatMap((root) => walk(join(ROOT, root)))
 }
+
+// ---------------------------------------------------------------------------------
+
+/**
+ * שנים־עשר סמלי האינטראקציה — ומה שהם אינם רשאים לעשות (20.9.2026).
+ *
+ * מאור מסר גיליון אחד על ירוק ומשפט אחד: *"כדאי להצמיד לכל סמל תווית עברית קצרה, כדי
+ * שהפעולה תהיה ברורה מיד."* שלוש בדיקות מחזיקות בדיוק את המשפט הזה: לכל סמל יש קובץ,
+ * לכל סמל יש מילה, ו**הסמל לעולם אינו מחליף את הפועל** — `ICON_OF_VERB` היא התאמה
+ * חלקית בכוונה, ופועל בלי סמל ממשיך להראות את שם הכפתור. סמל שגוי גרוע מאין סמל.
+ */
+describe('סמלי האינטראקציה', () => {
+  it('ships a file for every declared icon, and measures zero yellow on it', () => {
+    const index = JSON.parse(readFileSync(join(process.cwd(), 'public/life/art/sheets.json'), 'utf8')) as Record<
+      string,
+      { w: number; h: number; bytes: number; yellowLeft: number; source?: string }
+    >
+    for (const key of ICON) {
+      const row = index[key]
+      expect(row, `${key} is declared and not indexed`).toBeTruthy()
+      expect(existsSync(join(process.cwd(), `public/life/art/${key}.webp`)), `${key} has no file`).toBe(true)
+      expect(row!.yellowLeft, `${key} carries yellow`).toBe(0)
+      expect(row!.source, `${key} arrived without a provenance line`).toBeTruthy()
+    }
+  })
+
+  it('gives every icon a short Hebrew word, because a disc alone is not an action', () => {
+    for (const key of ICON) {
+      const word = MESSAGES[`life.icon.${key}`]
+      expect(word, `${key} has no label`).toBeTruthy()
+      expect(word!.trim().length, `${key}'s label is empty`).toBeGreaterThan(1)
+      expect(word!.length, `${key}'s label is a sentence, not a label`).toBeLessThan(12)
+    }
+  })
+
+  /**
+   * וההתאמה נשארת חלקית: `buy`, `play` ו-`sit` אין להם דיסקית בחבילה, והשורה שלהם
+   * ממשיכה להיות מילה בלבד. הבדיקה שומרת על החלקיות — כדי שמישהו לא ימלא אותה בסמל
+   * שכמעט מתאים.
+   */
+  it('points every mapped verb at an icon that exists, and leaves the rest unmapped', () => {
+    for (const [verb, icon] of Object.entries(ICON_OF_VERB)) {
+      expect(ICON as readonly string[], `${verb} points at an icon that is not declared`).toContain(icon)
+    }
+    for (const verb of ['buy', 'play', 'sit']) {
+      expect(ICON_OF_VERB[verb], `${verb} was given an icon that was not drawn for it`).toBeUndefined()
+    }
+  })
+})
+
+/**
+ * שנים־עשר סמלי המצב — ומה שמפריד אותם מהפעולות (21.9.2026).
+ *
+ * הגיליון השני של מאור אינו הרחבה של הראשון. הראשון הוא **פעולות** על כפתור; זה
+ * **מה שהמשחק סופר** — ארנק, ברק, מסכה, לב עם צלב, מגן עם צעיף, לחיצת יד, שני לבבות,
+ * הורה וילד, ספר, מגפון, גלובוס, תיק. הבדיקות כאן מחזיקות שלושה דברים, וכל אחד הוא
+ * כלל שכבר נכשל פעם אחת במשחק הזה:
+ *
+ * 1. **לכל סמל יש קובץ, ואפס צהוב** — כלל 8, כלל 61.
+ * 2. **כל מפתח בכל טבלת חיבור מצביע על סמל שהוכרז** — אחרת 404 מול שחקן (כלל 48).
+ * 3. **לכל סמל יש בית**, כלומר טבלה אחת לפחות שמצביעה עליו. זה הכיוון שכלל 78 נבנה
+ *    עליו: תוכן נגיש אינו תוכן שהגיעו אליו, ונכס שאיש לא ממקם הוא נכס מת — רק שכאן
+ *    אפשר לשאול את זה מכנית, ולכן שואלים.
+ */
+describe('סמלי המצב', () => {
+  const TABLES = {
+    skill: EMBLEM_OF_SKILL,
+    resource: EMBLEM_OF_RESOURCE,
+    gaugeGroup: EMBLEM_OF_GAUGE_GROUP,
+    track: EMBLEM_OF_TRACK,
+    route: EMBLEM_OF_ROUTE,
+  } as const
+
+  it('ships a file for every declared emblem, and measures zero yellow on it', () => {
+    const index = JSON.parse(readFileSync(join(process.cwd(), 'public/life/art/sheets.json'), 'utf8')) as Record<
+      string,
+      { w: number; h: number; bytes: number; yellowLeft: number; source?: string }
+    >
+    for (const key of EMBLEM) {
+      const row = index[key]
+      expect(row, `${key} is declared and not indexed`).toBeTruthy()
+      expect(existsSync(join(process.cwd(), `public/life/art/${key}.webp`)), `${key} has no file`).toBe(true)
+      expect(row!.yellowLeft, `${key} carries yellow`).toBe(0)
+      expect(row!.source, `${key} arrived without a provenance line`).toBeTruthy()
+    }
+  })
+
+  it('points every table entry at an emblem that was actually drawn', () => {
+    for (const [name, table] of Object.entries(TABLES)) {
+      for (const [key, emblem] of Object.entries(table)) {
+        expect(EMBLEM as readonly string[], `${name}.${key} points at an undeclared emblem`).toContain(emblem)
+      }
+    }
+  })
+
+  /**
+   * ...וכל סמל **מוצב**. זה מה שהפריד בין כלל 43 (ציור נוחת לפני החדר שלו — מותר,
+   * ונאמר בקול) לבין כלל 48 (*"אל תשלח אמנות שאף אחד לא ממקם"*): שם היה מדובר בשלושה
+   * פרופים שנחתכו יפה ונמחקו. הגיליון הזה נקלט **אחרי** שנמצא לכל אחד מהשנים־עשר מדד
+   * אמיתי, והבדיקה היא מה שמונע מהשלושה־עשר להיכנס בשקט.
+   */
+  it('gives every emblem a home in at least one table', () => {
+    const placed = new Set(Object.values(TABLES).flatMap((table) => Object.values(table)))
+    expect([...EMBLEM].filter((key) => !placed.has(key))).toEqual([])
+  })
+
+  /**
+   * ...ושלוש החלקיות נשמרות **בשמן**, כמו `buy`/`play`/`sit` אצל האייקונים. מי שימלא
+   * אותן בסמל שכמעט מתאים ילמד את השחקן הבדל שאינו קיים — ארגון אינו עסקים, אישיות
+   * אינה יצירתיות.
+   */
+  it('leaves organization, person and decade unmarked, on purpose', () => {
+    expect(EMBLEM_OF_SKILL['organization'], 'organization was given an emblem drawn for something else').toBeUndefined()
+    expect(EMBLEM_OF_GAUGE_GROUP['person']).toBeUndefined()
+    expect(EMBLEM_OF_GAUGE_GROUP['decade']).toBeUndefined()
+  })
+
+  /**
+   * ...וכל מפתח בכל טבלה הוא **מזהה אמיתי**. `runtime/art.ts` מקליד את הטבלאות
+   * כ-`Record<string, …>` בכוונה — כדי שלא ייווצר מעגל ייבוא בין הציור למנוע — ולכן
+   * השומר הוא כאן ולא בקומפיילר: `emBlue: 'emScarf'` היה מתקמפל ולא היה מוצג לעולם.
+   */
+  it('keys every table on an id the engine actually has', () => {
+    for (const key of Object.keys(EMBLEM_OF_SKILL)) expect(SKILL_IDS as readonly string[], `${key} is not a skill`).toContain(key)
+    for (const key of Object.keys(EMBLEM_OF_TRACK)) {
+      expect(LIFE_TRACKS.map((track) => track.id) as readonly string[], `${key} is not a track`).toContain(key)
+    }
+    for (const key of Object.keys(EMBLEM_OF_ROUTE)) {
+      expect(LIFE_ROUTES.map((route) => route.id) as readonly string[], `${key} is not a route`).toContain(key)
+    }
+    for (const key of Object.keys(EMBLEM_OF_GAUGE_GROUP)) {
+      expect(['heart', 'person', 'wellbeing', 'people', 'decade'], `${key} is not a gauge group`).toContain(key)
+    }
+    for (const key of Object.keys(EMBLEM_OF_RESOURCE)) expect(['money', 'energy'], `${key} is not a resource`).toContain(key)
+  })
+})

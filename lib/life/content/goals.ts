@@ -147,3 +147,18 @@ export const goalDouble = (state: LifeState): LocationId | null => {
   if (flag(state, 'd:over')) return null
   return flag(state, 'd:final') ? 'ramat-gan' : null
 }
+
+/**
+ * 2000, הלילה שאחרי — והמטרה היא **חדר**, לא אצטדיון.
+ *
+ * כל שאר פרקי שלב ב׳ מכוונים למגרש, וזה הפרק הראשון שלא: התסריט של 2000–2026 נפתח
+ * בשלוש סצנות ביתיות, ומה שהיום מחכה לו הוא הקופסה על המדף ואז הקיוסק של רפי. חץ
+ * שמצביע על רמת גן בלילה שאחרי הגמר הוא חץ שמשקר.
+ */
+export const goalBridge = (state: LifeState): LocationId | null => {
+  if (flag(state, 'b:done')) return null
+  if (!flag(state, 'b:night')) return null
+  if (!flag(state, 'b:box')) return 'bedroom'
+  if (!flag(state, 'b:commit')) return 'kiosk'
+  return null
+}

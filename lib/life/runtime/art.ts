@@ -1043,6 +1043,143 @@ export const PANORAMA = [
   'panoKitchen90', 'panoBedroomMorning90', 'panoGate7', 'panoClassroom',
 ] as const
 
+/**
+ * סמלי האינטראקציה — שנים־עשר, ומחלקה משלהם מאותה סיבה ש-`DOC` היא מחלקה משלה.
+ *
+ * מאור מסר אותם ב-20.9.2026 כגיליון אחד על ירוק, עם שורה אחת שהיא כל ההנחיה: *"כדאי
+ * להצמיד לכל סמל תווית עברית קצרה, כדי שהפעולה תהיה ברורה מיד."* שתי מסקנות מהמשפט
+ * הזה, ושתיהן כללים ולא סגנון:
+ *
+ * · **סמל לעולם אינו לבדו.** הוא תמיד עם המילה, כי דיסקית עם זכוכית מגדלת יכולה להיות
+ *   "תסתכל", "תחפש" או "תגדיל", והמשחק הזה אומר *"תסתכל על הכתובת על הקיר"*. הסמל הוא
+ *   מה שעוזר לזהות את השורה במבט; הוא אינו השורה.
+ * · **הוא לא מחליף את הפועל.** `life.verb.*` נשאר מקור האמת למה הלחיצה תעשה (כלל 41),
+ *   והסמל נבחר ממנו — `ICON_OF_VERB` למטה — כך שפועל חדש בלי סמל לא מקבל תמונה שגויה,
+ *   הוא פשוט מקבל מילה בלבד.
+ *
+ * ארבעת הראשונים הם פעולות בעולם; ארבעת האמצעיים הם מה שפותחים מ-☰; ארבעת האחרונים
+ * הם המערכת עצמה. `scripts/life/ingest-icons-2026-09-20.py` חותך אותם, מודד את הרשת
+ * במקום להקליד אותה, ומאמת אפס צהוב על הבייטים ששמורים.
+ */
+export const ICON = [
+  'iconTalk', 'iconLook', 'iconTake', 'iconWalk',
+  'iconMap', 'iconTasks', 'iconBag', 'iconPhone',
+  'iconTime', 'iconCheckpoint', 'iconSaved', 'iconSettings',
+] as const
+
+export type IconKey = (typeof ICON)[number]
+
+/**
+ * הפועל בוחר את הסמל, ולא להפך.
+ *
+ * `Verb` ב-`world/scenes.ts` הוא מה שהמשחק כבר מבטיח שהלחיצה תעשה. חמישה מהעשרה
+ * מצביעים על אותה דיסקית בכוונה: `look`, `watch` ו-`gaze` הם כולם להסתכל, ו-`enter`
+ * ו-`exit` הם כולם לעבור דלת — להמציא שלושה סמלים לשלוש מילים שמתארות פעולה אחת היה
+ * מלמד את השחקן הבדל שאינו קיים.
+ *
+ * `buy`, `play` ו-`sit` אינם כאן **בכוונה**: אין להם דיסקית בחבילה, והשורה שלהם תמשיך
+ * להיות מילה בלבד. סמל שאינו קיים עדיף על סמל שאומר משהו אחר.
+ */
+export const ICON_OF_VERB: Readonly<Partial<Record<string, IconKey>>> = {
+  talk: 'iconTalk',
+  look: 'iconLook',
+  watch: 'iconLook',
+  gaze: 'iconLook',
+  take: 'iconTake',
+  enter: 'iconWalk',
+  exit: 'iconWalk',
+}
+
+/**
+ * שנים־עשר סמלי **מצב** — ומה שההפרדה מ-`ICON` שומרת עליה (21.9.2026).
+ *
+ * מאור מסר גיליון שני. הראשון (20.9) הוא פעולות — דבר, הסתכל, קח — והוא יושב על כפתור:
+ * `ICON_OF_VERB` עונה על *"מה יקרה אם אלחץ"*. השני הוא **מה שהמשחק סופר**: ארנק, ברק,
+ * מסכה, לב עם צלב, מגן עם צעיף, לחיצת יד, שני לבבות, הורה וילד, ספר, מגפון, גלובוס,
+ * תיק עבודה. אלה לא נלחצים.
+ *
+ * שתי מחלקות ולא אחת מורחבת, כי שם אחד לשני מושגים הוא פגם (כלל 59, בכיוון ההפוך):
+ * מפתח שעונה גם על "אפשר ללחוץ" וגם על "יש לי" ייקרא מחר בשתי המשמעויות, ומישהו ישים
+ * מגפון על כפתור.
+ *
+ * **השם הוא מה שהסמל מצייר, לא מה שהוא מודד.** `emBook` ולא `emKnowledge` — ביום שבו
+ * הספר יעמוד גם ליד ההיסטוריה של המועדון, שם שנקרא על שם המדד יתחיל לשקר (כלל 45,
+ * בצורתו לנכסים). החיבור בין ציור למדד יושב בטבלאות למטה, והוא מה שמותר לשנות.
+ */
+export const EMBLEM = [
+  'emWallet', 'emEnergy', 'emMask', 'emHealth',
+  'emScarf', 'emHands', 'emHearts', 'emChild',
+  'emBook', 'emMegaphone', 'emGlobe', 'emCase',
+] as const
+
+export type EmblemKey = (typeof EMBLEM)[number]
+
+/**
+ * חמש הטבלאות שמחברות ציור למדד, וכל אחת **חלקית בכוונה**.
+ *
+ * `Partial` כאן אינו רישול — הוא אותה הכרעה של `ICON_OF_VERB`: *"סמל שאינו קיים עדיף
+ * על סמל שאומר משהו אחר"*. ארבעה מקומות נשארים ריקים ושווה לדעת מי הם:
+ *
+ * · **`organization`** — אין בחבילה סמל לארגון. לא לוח, לא שעון, לא רשימה. הוא יישאר
+ *   מילה עד שיצויר, ולשים עליו את התיק (שהוא `business`) היה מלמד שהם אותו כישור.
+ * · **`person`** ו-**`decade`** בגיליון המדדים — אישיות ומדדי עשור אינם דבר אחד שאפשר
+ *   לצייר; המסכה היא **יצירתיות**, לא "מי אתה".
+ * · **חמישה מתוך שישה קהלים** — הגלובוס הוא `international` ודי. לשער 7 ולשער 5 יש
+ *   מספרים ושמות שהמשחק כבר מכיר, ודיסקית גנרית עליהם אומרת פחות מהמילה.
+ *
+ * המפתחות הם מחרוזות ולא טיפוסי-איחוד, כדי ש-`runtime/art.ts` יישאר בלי תלות בשאר
+ * המנוע (בדיוק כמו `ICON_OF_VERB`). `tests/life.test.ts` מוודא שכל מפתח בכל טבלה הוא
+ * מזהה אמיתי — שומר במקום טיפוס, בלי מעגל ייבוא.
+ */
+export const EMBLEM_OF_SKILL: Readonly<Partial<Record<string, EmblemKey>>> = {
+  knowledge: 'emBook',
+  communication: 'emMegaphone',
+  business: 'emCase',
+  creativity: 'emMask',
+  // organization — אין לו סמל, ראה למעלה
+}
+
+/** משאב שהשחקן מוציא: הכיס והכוח. שניהם עלויות בכל בחירה, ורק אחד מהם היה על הזכוכית. */
+export const EMBLEM_OF_RESOURCE: Readonly<Partial<Record<string, EmblemKey>>> = {
+  money: 'emWallet',
+  energy: 'emEnergy',
+}
+
+/** קבוצות בגיליון המדדים. `person` ו-`decade` בחוץ בכוונה. */
+export const EMBLEM_OF_GAUGE_GROUP: Readonly<Partial<Record<string, EmblemKey>>> = {
+  heart: 'emScarf',
+  wellbeing: 'emHealth',
+  people: 'emHands',
+}
+
+/** מסלולי חיים. `WORK` חולק את התיק עם הכישור העסקי, וזה נכון: זו אותה עבודה. */
+export const EMBLEM_OF_TRACK: Readonly<Partial<Record<string, EmblemKey>>> = {
+  PARTNERSHIP: 'emHearts',
+  PARENTHOOD: 'emChild',
+  WORK: 'emCase',
+}
+
+/**
+ * ששת המסלולים — וזה השימוש שהגלובוס נולד בשבילו.
+ *
+ * הניסיון הראשון היה `EMBLEM_OF_AUDIENCE`, וגלובוס על הקהל הבינלאומי הוא נכון וכמעט
+ * חסר תועלת: הקהל מופיע **בתוך משפט** על כרטיס המסלול, ודיסקית באמצע שורה אינה נקראת.
+ * המסלול עצמו הוא שורה עם כותרת, ושם סמל עובד — ולכן הטבלה היא לפי מסלול.
+ *
+ * ההתאמות נקראו מהמסלול ולא מהכישור שלו: `ULTRAS` הוא `organization` שאין לו סמל, אבל
+ * מוביל יציע **הוא** המגפון; `USSISHKIN_FOUNDER` הוא אותו כישור בדיוק, והוא המגן עם
+ * הצעיף, כי מה שהוא מקים הוא מועדון. שני מסלולים, אותו כישור, שני סמלים — וזה בדיוק
+ * למה הטבלה היא לפי מסלול ולא נגזרת מ-`EMBLEM_OF_SKILL`.
+ */
+export const EMBLEM_OF_ROUTE: Readonly<Partial<Record<string, EmblemKey>>> = {
+  ULTRAS: 'emMegaphone',
+  JOURNALIST: 'emBook',
+  OWNER: 'emCase',
+  CREATOR: 'emMask',
+  USSISHKIN_FOUNDER: 'emScarf',
+  TRAVELLER: 'emGlobe',
+}
+
 /** the tunnel, first person: six tiling textures and two sprites */
 export const TUNNEL_TEXTURE = [
   'texTunnelWall', 'texTunnelWallPoster', 'texTunnelFloor', 'texTunnelCeiling', 'texTunnelSteps', 'texTunnelDoor',

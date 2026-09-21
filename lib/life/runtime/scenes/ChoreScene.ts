@@ -305,6 +305,8 @@ export class ChoreScene extends Phaser.Scene {
       date: String(this.ctx.engine.state.year),
       agorot: left,
       showMoney: false,
+      energy: 100,
+      showEnergy: false,
       place: this.gig.labelHe,
       objective: null,
       year: this.ctx.engine.state.year,

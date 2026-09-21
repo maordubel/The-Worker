@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from 'react'
 
 import { t, type MessageKey } from '@/lib/i18n'
+import { ICON_OF_VERB, artUrl } from '@/lib/life/runtime/art'
 
 /**
  * לוח ההפעלה — a controller, not a circle.
@@ -640,6 +641,35 @@ export function ControlDeck({
  * forgiving target for doing it. That is all this is. It only exists while something is
  * in reach, so most of the time the glass is just the painting.
  */
+/**
+ * הדיסקית של הפעולה — הסמל, וכשאין כזה, האות שעל הכפתור.
+ *
+ * מאור מסר שנים־עשר סמלים ב-20.9.2026 עם משפט אחד: *"כדאי להצמיד לכל סמל תווית עברית
+ * קצרה, כדי שהפעולה תהיה ברורה מיד."* המילה כבר שם — `life.verb.*` הייתה בשורת הבקשה
+ * מאז כלל 41 — ולכן הסמל נכנס לצידה ולא במקומה: דיסקית עם זכוכית מגדלת יכולה להיות
+ * "תסתכל", "תחפש" או "תגדיל", והמשפט שמסביר איזו מהן הוא הטקסט.
+ *
+ * `ICON_OF_VERB` היא ההתאמה, והיא **חלקית בכוונה**: פועל בלי סמל ממשיך להראות את `A`,
+ * שזה שם הכפתור ולא שם הפעולה — אבל הוא לפחות נכון. סמל שגוי גרוע מאין סמל.
+ *
+ * `<img>` רגיל ולא `next/image`: הבייטים שנמדדו הם הבייטים שנשלחים (כלל 69 §5), וקידוד
+ * חוזר ממציא כרומה — וזה קובץ שהוכח עליו אפס צהוב על הבייטים ששמורים.
+ */
+function ActionMark({ verb, dim }: { verb: string | null; dim: boolean }) {
+  const icon = verb ? ICON_OF_VERB[verb] : undefined
+  if (!icon) return <>A</>
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={artUrl(icon)}
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      className={`h-full w-full select-none object-contain ${dim ? 'opacity-40' : ''}`}
+    />
+  )
+}
+
 export function TapChip({
   verb,
   label,
@@ -688,12 +718,12 @@ export function TapChip({
         <span aria-hidden="true" className={`pointer-events-none absolute inset-[2px] border-hair ${held || locked ? 'border-sheet/40' : 'border-ink/40'}`} />
         <span
           aria-hidden="true"
-          className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[9px] font-bold tabular-nums ${
-            locked ? 'bg-red/30 text-red' : held ? 'bg-sheet text-red' : 'bg-red text-sheet'
+          className={`relative flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full font-mono text-[9px] font-bold tabular-nums ${
+            ICON_OF_VERB[verb] ? '' : locked ? 'bg-red/30 text-red' : held ? 'bg-sheet text-red' : 'bg-red text-sheet'
           }`}
           dir="ltr"
         >
-          A
+          <ActionMark verb={verb} dim={locked} />
         </span>
         <span className="relative truncate">
           <bdi>{label}</bdi>

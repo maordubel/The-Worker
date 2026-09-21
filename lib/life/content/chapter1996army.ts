@@ -6,6 +6,11 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 
 /**
+ * הקצב — נושא אחד שעובר שלושה פרקים: נוצר כאן, חוזר בקיוסק ב-1999, ונשמע מהיציע ב-2000.
+ */
+export const RHYTHM_SUBJECT = 'הקצב שנתתי למלמד'
+
+/**
  * שלושת המספרים של החורף הזה — במקום אחד, כי שלושתם נקראים גם במקום אחר.
  *
  * `TAXI_AGOROT` ו-`FUEL_AGOROT` הם שני חובות שהפרק לוקח, ושניהם נפרעים בפרקים אחרים
@@ -462,6 +467,48 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
           { who: 'רחל', text: 'שמתי לך גרביים. שמתי לך עוד גרביים. אמרו לי שאף פעם אין מספיק גרביים.' },
           { who: 'רחל', text: 'ותשמע. שם, בבסיס, כשיהיה משחק בשבת — לא לעשות שטויות. שומע? הצבא זה לא שער 7.' },
         ],
+        /**
+         * הערב האחרון בבית, וחמש שנים אחרי הערב ההוא באוסישקין.
+         *
+         * הבחירה השלישית קיימת רק למי שרחל **זוכרת** שחזר אחרי השעה (`relationshipMemory`,
+         * ולא דגל — זה דבר שאדם זוכר עליך). זה מה ש-`ACH_REPAIR` חיכה לו: הפרה נרשמה
+         * ב-1991 כראיה, וכאן אפשר לחזור אליה. **התיקון לא מוחק את התקרית** — שתי הראיות
+         * נושאות את אותו נושא ויושבות בפנקס זו ליד זו, וזה בדיוק מה שהפרס של ההישג מתאר.
+         */
+        choices: [
+          { id: 'repair', text: '"אמא. הערב ההוא באוסישקין, כשחזרתי אחרי השעה."', when: { relationshipMemory: { who: 'rachel', eventId: 'came-home-late-1991' } }, hidden: true, then: [{ e: 'goto', node: 'rachel-army-curfew' }] },
+          { id: 'promise', text: '"לא אעשה שטויות."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'flag', flag: 'promise:rachel-army' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: 3 }] },
+          { id: 'honest', text: '"אני לא מבטיח."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: -1 }, { e: 'personality', key: 'independence', delta: 2 }, { e: 'toast', text: 'היא לא כעסה. היא ידעה.', tone: 'plain' }] },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * *"ראיתי מה השעה."* — חמש שנים, ומשפט אחד שלא נאמר מאז.
+     *
+     * היא לא מוחלת ולא מרימה את הקול: היא אומרת שזכרה, ושהיא שמחה ששאלת. הענף משלם
+     * אמון ומוריד מתח — ולא מאפס אותו — ואז חוזר לאותן שתי תשובות על ערב המחר, כי הפרק
+     * לא זז מהמקום שבו הוא עומד: תיק על הרצפה וטרמפ בשש בבוקר.
+     */
+    id: 'rachel-army-curfew',
+    nameHe: 'רחל',
+    branches: [
+      {
+        lines: [
+          { who: 'רחל', text: '(לא מרימה את הראש מהגרביים.) אה. זה.' },
+          { who: 'פוגי', text: 'ידעתי מה השעה. נשארתי בכל זאת.' },
+          { who: 'רחל', text: 'ידעתי שידעת. זה מה שהיה קשה, לא השעה.' },
+          { who: null, text: 'היא קיפלה את הזוג האחרון והניחה אותו על התיק.' },
+          { who: 'רחל', text: 'טוב שאמרת את זה עכשיו ולא אז. אז לא היית מתכוון.' },
+        ],
+        then: [
+          { e: 'rel', who: 'rachel', axis: 'trust', delta: 6 },
+          { e: 'rel', who: 'rachel', axis: 'tension', delta: -5 },
+          { e: 'proof', kind: 'repair_completed', proofId: 'repair_completed:{chapter}:curfew', subjectHe: 'השעה שאמא אמרה', noteHe: 'חמש שנים אחרי, בערב האחרון בבית.' },
+          { e: 'remember', who: 'rachel', eventId: 'came-back-to-1991', significance: 'major' },
+          { e: 'personality', key: 'honesty', delta: 2 },
+        ],
         choices: [
           { id: 'promise', text: '"לא אעשה שטויות."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'flag', flag: 'promise:rachel-army' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: 3 }] },
           { id: 'honest', text: '"אני לא מבטיח."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: -1 }, { e: 'personality', key: 'independence', delta: 2 }, { e: 'toast', text: 'היא לא כעסה. היא ידעה.', tone: 'plain' }] },
@@ -550,7 +597,16 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
         ],
         choices: [
           { id: 'join', text: '"אני איתכם."', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate5', reason: 'friends' }, { e: 'rel', who: 'asaf', axis: 'trust', delta: 3 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 5 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'remember', who: 'asaf', eventId: 'joined-gate5-1996', significance: 'major' }, { e: 'goto', node: 'a2-after' }] },
-          { id: 'rhythm', text: 'לענות למלמד: "ככה." (הראשון)', then: [{ e: 'sfx', key: 'darbuka-three-two', level: 0.8 }, { e: 'flag', flag: 'life:melamed:rhythm' }, { e: 'rel', who: 'melamed', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'toast', text: 'מלמד ניגן את זה שוב. ושוב. אתה לא יודע עוד מה עשית.', tone: 'plain' }] },
+          /**
+           * *"אתה לא יודע עוד מה עשית."* — והשורה הזאת הייתה נכונה גם על הפנקס.
+           *
+           * חייל בן שמונה־עשרה עונה למלמד שלוש-הפסקה-שתיים, מלמד מנגן את זה שוב, וזהו:
+           * דבר קטן שנעשה מתחת ליציע ואי אפשר לדעת מה יהיה איתו. זו **יצירה**, וזה בדיוק
+           * מה ש-`creation_proof` אמור לסמן — לא הרגע שבו מישהו שר אותה, אלא הרגע שבו
+           * היא נוצרה. מה שקורה לה אחר כך הוא שאלה אחרת, והיא נשאלת בקיוסק ב-1999
+           * וברמת גן ב-2000.
+           */
+          { id: 'rhythm', text: 'לענות למלמד: "ככה." (הראשון)', then: [{ e: 'sfx', key: 'darbuka-three-two', level: 0.8 }, { e: 'flag', flag: 'life:melamed:rhythm' }, { e: 'rel', who: 'melamed', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:rhythm', subjectHe: RHYTHM_SUBJECT, noteHe: 'שלוש, הפסקה, שתיים. מתחת ליציע, על דרבוקה של מישהו אחר.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'נתן למלמד קצב' }, { e: 'toast', text: 'מלמד ניגן את זה שוב. ושוב. אתה לא יודע עוד מה עשית.', tone: 'plain' }] },
           { id: 'back', text: '"אני חוזר לאבא."', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate7', reason: 'family' }, { e: 'rel', who: 'asaf', axis: 'distance', delta: 3 }, { e: 'goto', node: 'a2-after' }] },
           { id: 'neither', text: 'ללכת. לא לפה ולא לשם.', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'outside', reason: 'conflict' }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'goto', node: 'a2-after' }] },
         ],
