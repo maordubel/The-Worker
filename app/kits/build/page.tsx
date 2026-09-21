@@ -1,24 +1,19 @@
 import type { Metadata } from 'next'
 
-import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { dealKitRound, kitPuzzleCount } from '@/lib/game/kitBuild'
-import { KIT_ROUND } from '@/lib/game/kit-build-run'
 import { t } from '@/lib/i18n'
-import { roundFrom } from '@/lib/rotation/round'
 import { gateMetadata } from '@/lib/seo'
 
-import { KitGameRunV5 } from './KitGameRunV5'
+import { KitGameRunV13 } from './KitGameRunV13'
 
 export const metadata: Metadata = gateMetadata('kits-build')
 
-export default function KitGamePage({ searchParams }: { searchParams: { seed?: string; r?: string } }) {
-  const round = roundFrom(searchParams)
-  const puzzles = dealKitRound(round.seed, round.cursor)
+export default function KitGamePage() {
   return (
     <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false}>
-      {kitPuzzleCount() >= KIT_ROUND ? <><KitGameRunV5 puzzles={puzzles} seed={round.seed} cursor={round.cursor} /><ReportLink /></> : <EmptyState title={t('empty.kits')} body={t('empty.kits.body')} />}
+      <KitGameRunV13 />
+      <ReportLink />
     </Screen>
   )
 }
