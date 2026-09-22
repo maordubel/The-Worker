@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { CHECKLIST_CHAPTERS } from '@/lib/life/checklist'
+import { CHECKLISTS, CHECKLIST_CHAPTERS } from '@/lib/life/checklist'
 import { playableChapters } from '@/lib/life/content/chapters'
 
 /**
@@ -15,5 +15,14 @@ describe('LIFE action contract', () => {
     const known = new Set(CHECKLIST_CHAPTERS)
     const missing = playableChapters().map((chapter) => chapter.id).filter((id) => !known.has(id))
     expect(missing).toEqual([])
+  })
+
+  it('gives every playable chapter a first move the player can know immediately', () => {
+    const hiddenAtEntry: string[] = []
+    for (const chapter of playableChapters()) {
+      const steps = CHECKLISTS[chapter.id] ?? []
+      if (steps.length === 0 || steps[0]?.revealWhen) hiddenAtEntry.push(chapter.id)
+    }
+    expect(hiddenAtEntry).toEqual([])
   })
 })
