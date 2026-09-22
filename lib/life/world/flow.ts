@@ -56,7 +56,7 @@ export type FlowInput = {
   objectiveHe: string | null
   quietFor: number
   busy: boolean
-  /** physical targets/exits; zero means a dead-end check owns the problem */
+  /** physical targets/exits; zero with no time gate is a dead-end check, not a hint */
   reachable: number
 }
 
@@ -76,18 +76,21 @@ export type FlowMove = { kind: 'pass'; gate: TimeGate } | { kind: 'nudge' }
  * - the chapter objective says WHETHER the authored day still wants an action;
  * - `actionsNow` says WHAT already-revealed story/route/opportunity actions explain it.
  *
- * Keeping the objective authoritative is important: a stale checklist row may be useful
- * for diagnostics, but it may never resurrect a chapter the author has already closed.
+ * A pure time gate is checked BEFORE physical reachability. That ordering is the promise
+ * "never wait for the clock": a room whose last hotspot disappeared is exactly the room
+ * that must be allowed to cut forward when time is the only remaining condition. With no
+ * time gate, `reachable === 0` still belongs to the dead-end watchdog.
  */
 export function flowMove(input: FlowInput): FlowMove | null {
   if (input.busy) return null
   if (input.quietFor < QUIET_MINUTES) return null
-  if (input.reachable === 0) return null
 
   const gate = nextTimeGate(input.state, input.era)
   if (gate) return { kind: 'pass', gate }
 
+  if (input.reachable === 0) return null
   if (!input.objectiveHe) return null
+
   // Resolve now even though the visual nudge is still composed by WorldScene. This makes
   // the flow decision depend on semantic actions, not on raw hotspot count, and gives QA
   // one canonical snapshot to inspect when an objective has no visible action behind it.
