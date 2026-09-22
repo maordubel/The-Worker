@@ -4,14 +4,17 @@ import { Grain, Leak, Letterbox, YearRoll } from '@/components/life/FilmFx'
 import { artUrl } from '@/lib/life/runtime/art'
 
 /**
- * כרטיס פרק — a film naming its time over a picture.
+ * כרטיס פרק — a documentary cut naming the years that just passed over a real place.
  *
- * The graded key painting of the chapter about to start pushes in slowly under two
- * black bars and a jitter of grain; a light leak sweeps once; the year rolls from the one
- * the player just left to the one they are entering, digit by digit; a red rule draws
- * itself; the chapter's name arrives a beat later in the sign face. Two and a half
- * seconds, and then the room. It replaces the word-over-black `TitleCard` for chapter
- * cuts only — a room's name plate stays a plate.
+ * The graded key painting of the chapter about to start pushes in slowly under two black
+ * bars and film grain; the year rolls from the life the player just left to the one they
+ * are entering. The cut now says the GAP too. That small line matters in a forty-year life:
+ * 2002 → 2006 should feel like four years happened, not like the next mission loaded.
+ *
+ * This remains intentionally state-light. Personal consequences are already carried by
+ * the life and surface in the room/dialogue that follows; the chapter card's job is the
+ * documentary seam — time, place, chapter — without inventing history or a second story
+ * system inside a transition component.
  */
 export function ChapterCard({
   titleHe,
@@ -27,6 +30,10 @@ export function ChapterCard({
   fromYear?: number | null
 }) {
   const year = /^\d{4}$/.test(titleHe) ? Number(titleHe) : null
+  const elapsed = year !== null && fromYear !== null && fromYear !== undefined ? Math.max(0, year - fromYear) : 0
+  const elapsedHe =
+    elapsed <= 0 ? null : elapsed === 1 ? 'שנה עברה' : elapsed === 2 ? 'שנתיים עברו' : `${elapsed} שנים עברו`
+
   return (
     <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden bg-ink" data-life="chapter-card">
       <div
@@ -44,6 +51,11 @@ export function ChapterCard({
       <Letterbox />
 
       <div className="absolute inset-x-0 bottom-[22%] flex flex-col items-center px-gutter text-center">
+        {elapsedHe && (
+          <p className="mb-2 animate-title-sub font-body text-[12px] leading-none text-sheet/65" data-life="chapter-elapsed">
+            <bdi>{elapsedHe}</bdi>
+          </p>
+        )}
         <p className="animate-title-rise font-poster text-[72px] leading-none text-sheet sm:text-[96px]" style={{ textShadow: '0 2px 24px rgb(var(--ink) / .9)' }}>
           {year !== null ? <YearRoll from={fromYear ?? null} to={year} /> : <bdi>{titleHe}</bdi>}
         </p>
