@@ -31,8 +31,11 @@ export function ChapterCard({
 }) {
   const year = /^\d{4}$/.test(titleHe) ? Number(titleHe) : null
   const elapsed = year !== null && fromYear !== null && fromYear !== undefined ? Math.max(0, year - fromYear) : 0
-  const elapsedHe =
-    elapsed <= 0 ? null : elapsed === 1 ? 'שנה עברה' : elapsed === 2 ? 'שנתיים עברו' : `${elapsed} שנים עברו`
+  // The locale owns the unit words. Keeping this as a number + unit also lets the year roll
+  // do the emotional work without adding a second authored sentence to the transition.
+  const elapsedHe = elapsed <= 0
+    ? null
+    : new Intl.NumberFormat('he', { style: 'unit', unit: 'year', unitDisplay: 'long' }).format(elapsed)
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden bg-ink" data-life="chapter-card">
