@@ -14,7 +14,7 @@ import type { LifeState } from '../types'
  * predates `tracks.ts` and already stores durable facts such as `life:partner` and
  * `life:child`. Rewriting every old choice would fork the truth and break old saves. So the
  * existing story remains authoritative and this layer translates facts that have ALREADY
- * happened into `own:track:*` milestones.
+ * happened into persistent milestones.
  */
 
 const flag = (state: LifeState, name: string) => Boolean(state.flags[name])
@@ -35,8 +35,6 @@ export const MILESTONES: readonly Milestone[] = [
     meaningHe: 'פוגי היה בפעם הראשונה באולם אוסישקין, ואפי הראה לו אותו',
     when: (state) =>
       flag(state, 'a3:inside') &&
-      // the two hotspots, or the scene itself: Efi at the rail is the introduction the
-      // chapter is actually about, and it cannot be missed by looking the wrong way
       ((flag(state, 'saw:parquet') && flag(state, 'saw:stand')) || flag(state, 'a3:shown')),
   },
 
@@ -60,6 +58,17 @@ export const MILESTONES: readonly Milestone[] = [
     id: trackStageFlag('WORK', 'first-job'),
     meaningHe: 'פוגי לקח על עצמו עבודה ראשונה כחלק מחיי המבוגר',
     when: (state) => value(state, 'b:commitKind') === 'work',
+  },
+
+  // L04 is also the first explicit adult household decision. `hh:home` is a chapter flag,
+  // so persist the fact before the next year clears it. This is intentionally NOT the
+  // PARTNERSHIP `home` stage: "בית משותף" needs explicit shared-home fiction, while this
+  // milestone only says the adult is no longer economically modelled as living with his
+  // parents.
+  {
+    id: 'own:home:independent',
+    meaningHe: 'פוגי מנהל משק בית עצמאי ולא חי עוד כילד אצל ההורים',
+    when: (state) => typeof value(state, 'hh:home') === 'string' && String(value(state, 'hh:home')).length > 0,
   },
 
   // Parenthood is deliberately NOT inferred from intent. The screenplay explicitly says
