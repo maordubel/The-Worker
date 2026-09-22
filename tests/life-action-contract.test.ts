@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { CHECKLISTS, CHECKLIST_CHAPTERS } from '@/lib/life/checklist'
+import { CHECKLIST_CHAPTERS, checklistFor } from '@/lib/life/checklist'
 import { playableChapters } from '@/lib/life/content/chapters'
+import { emptyState } from '@/lib/life/events'
+
+const IDENTITY = { name: 'פוגי', sex: 'boy' as const, birthYear: 1978 }
 
 /**
  * A playable chapter may be quiet, optional or branch-specific. It may not be illegible.
@@ -18,11 +21,22 @@ describe('LIFE action contract', () => {
   })
 
   it('gives every playable chapter a first move the player can know immediately', () => {
-    const hiddenAtEntry: string[] = []
+    const illegible: string[] = []
     for (const chapter of playableChapters()) {
-      const steps = CHECKLISTS[chapter.id] ?? []
-      if (steps.length === 0 || steps[0]?.revealWhen) hiddenAtEntry.push(chapter.id)
+      const state = {
+        ...emptyState(IDENTITY, chapter.year),
+        chapter: chapter.id,
+        year: chapter.year,
+        age: chapter.year - IDENTITY.birthYear,
+        weekday: chapter.weekday,
+        minute: chapter.minute,
+        location: chapter.start.location,
+      }
+      // Test what the player can actually see, not the first structural row. A branch may
+      // deliberately put a hidden parent-only step before a universal step (2021-promises);
+      // revealing that row to a childless life would be the real bug.
+      if (!checklistFor(state).some((item) => !item.done)) illegible.push(chapter.id)
     }
-    expect(hiddenAtEntry).toEqual([])
+    expect(illegible).toEqual([])
   })
 })
