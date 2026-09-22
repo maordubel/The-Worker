@@ -23,7 +23,7 @@ import { BALLOT } from './ballot'
  *    have to be enforced by moderation rather than by construction.
  *  · **A reason is OPTIONAL and singular.** One chip per question, tapped again to clear
  *    it. A slip with no reasons is a finished slip and says so on the card.
- *  · **A reason is never counted.** It is not sent to `poll_vote`, it is not tallied, and
+ *  · **A reason is never counted.** It is not sent to `worker_poll_vote`, it is not tallied, and
  *    no screen prints a proportion of it. See the note in `lib/polls/store.ts` — the
  *    table holds `(device_id, question_id, pick)` and the count board would need a
  *    hundred ballots per reason before it could honestly print anything, which is a

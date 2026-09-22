@@ -189,7 +189,7 @@ export function recordRun(result: RunResult): Profile {
 /**
  * The pure half of `recordRun`. The id is normalised on the way in (`canonicalGate`), so
  * `royal-rumble` is filed as `/royal-rumble` and a round can never be recorded under a
- * name `gate_run` refuses. Negative or fractional figures are clamped rather than
+ * name `worker_gate_run` refuses. Negative or fractional figures are clamped rather than
  * trusted, and `correct` can never exceed `asked` — the same check the table carries.
  */
 export function applyRun(profile: Profile, result: RunResult, date: string): Profile {

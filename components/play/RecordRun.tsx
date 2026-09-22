@@ -29,7 +29,7 @@ import { duelArrival, emit } from '@/lib/profile/events'
  * ballot's device id, and not a value derived from the gate and the score. Two reasons,
  * and the first is the one that decided it:
  *
- *  · **The ballot's device id must never travel with a user id.** `poll_vote` is
+ *  · **The ballot's device id must never travel with a user id.** `worker_poll_vote` is
  *    anonymous precisely because no row in it names a person; putting that same id into
  *    a row that carries `user_id` would let the two tables be joined, and the whole
  *    privacy argument for gate 7 would be undone by an idempotency key.
@@ -56,7 +56,7 @@ export function RecordRun({
    * (`lib/profile/gate-id.ts wallGate`), and gate 10 reads per-topic strengths from it.
    */
   variant?: string | null
-  /** the deck seed this round was dealt from, when the gate has one — `gate_run.seed` */
+  /** the deck seed this round was dealt from, when the gate has one — `worker_gate_run.seed` */
   seed?: number | null
 }) {
   const done = useRef(false)

@@ -12,11 +12,11 @@ import { portalConfigured } from './env'
  * Same three promises as `lib/portal/sync.ts`: the device never waits for the network
  * (a round writes `lib/profile/marks.ts` first and always), every failure is silent and
  * local, and nothing is invented on the way up — the remote side is the account's own
- * `question_mark` rows. Without Supabase keys, or with nobody signed in, every function
+ * `worker_question_mark` rows. Without Supabase keys, or with nobody signed in, every function
  * here is a no-op and Revenge runs on the device alone.
  *
- * The table is written through `rpc_mark_questions` (migration
- * `20260921140000_question_mark.sql`), which applies the same merge the device does —
+ * The table is written through `worker_mark_questions` (migration
+ * `20260922090000_worker_shared_project.sql`), which applies the same merge the device does —
  * newer outcome wins, counters take the max — so two devices pushing in either order
  * land on the same row. `types/database.ts` does not know the table yet (it is generated
  * from the linked project, which does not have it until the migration is pasted), so the
@@ -79,7 +79,7 @@ export async function pullMarks(): Promise<Marks | null> {
     const user = await userId(client)
     if (!user) return null
     const { data, error } = await client
-      .from('question_mark')
+      .from('worker_question_mark')
       .select('question_id, wrong, right, last_outcome, last_at')
       .eq('user_id', user)
     if (error) return null
@@ -97,7 +97,7 @@ export async function pushMarks(marks: Marks, topicOf?: (id: string) => string |
   try {
     const client = db()
     if (!(await userId(client))) return false
-    const { error } = await client.rpc('rpc_mark_questions', { p_marks: payload })
+    const { error } = await client.rpc('worker_mark_questions', { p_marks: payload })
     return !error
   } catch {
     return false

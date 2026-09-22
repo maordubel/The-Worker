@@ -151,23 +151,28 @@ describe('פנקס הנקמות — anonymous, and without storage', () => {
   })
 })
 
-describe('הסכימה — question_mark', () => {
-  const sql = readFileSync('supabase/migrations/20260921140000_question_mark.sql', 'utf8')
+describe('הסכימה — worker_question_mark', () => {
+  const sql = readFileSync('supabase/migrations/20260922090000_worker_shared_project.sql', 'utf8')
+  const table = sql.slice(
+    sql.indexOf('create table if not exists public.worker_question_mark'),
+    sql.indexOf('create index if not exists worker_question_mark_pending_idx'),
+  )
 
   it('is additive, keyed on (user, question), with RLS on own rows only', () => {
-    expect(sql).toContain('create table if not exists question_mark')
-    expect(sql).toContain('primary key (user_id, question_id)')
-    expect(sql).toMatch(/alter table question_mark enable row level security/)
-    expect(sql).toMatch(/create policy question_mark_read on question_mark\s+for select using \(user_id = auth\.uid\(\)\)/)
-    expect(sql).not.toMatch(/alter table (?!question_mark)\w+/)
+    expect(table).toContain('primary key (user_id, question_id)')
+    expect(sql).toMatch(/alter table public\.worker_question_mark\s+enable row level security/)
+    expect(sql).toMatch(
+      /create policy worker_question_mark_read on public\.worker_question_mark\s+for select to authenticated using \(user_id = auth\.uid\(\)\)/,
+    )
+    expect(sql).not.toMatch(/create policy \w+ on public\.worker_question_mark\s+for (insert|update|delete|all)/)
     expect(sql).not.toMatch(/drop table/i)
-    expect(sql).toContain('comment on table question_mark is')
+    expect(sql).toContain('comment on table public.worker_question_mark is')
   })
 
   it('merges on the server with the device rule — newer outcome, max counters', () => {
     expect(sql).toContain('security definer set search_path = public')
-    expect(sql).toContain('greatest(question_mark.wrong, excluded.wrong)')
-    expect(sql).toContain('case when excluded.last_at > question_mark.last_at')
-    expect(sql).toContain('grant execute on function rpc_mark_questions(jsonb) to authenticated')
+    expect(sql).toContain('greatest(worker_question_mark.wrong, excluded.wrong)')
+    expect(sql).toContain('case when excluded.last_at > worker_question_mark.last_at')
+    expect(sql).toMatch(/grant execute on function public\.worker_mark_questions\(jsonb\)\s+to authenticated/)
   })
 })

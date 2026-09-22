@@ -189,7 +189,7 @@ export function applyEvent(
                   key,
                   gate,
                   score,
-                  // `gate_run` refuses a row that is more right than it was long
+                  // `worker_gate_run` refuses a row that is more right than it was long
                   correct: Math.min(correct, asked),
                   asked,
                   seed: seedOf(event.seed),

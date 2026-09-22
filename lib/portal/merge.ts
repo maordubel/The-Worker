@@ -26,7 +26,7 @@
  *     this many", which is a true sentence after any number of syncs in any order.
  *     What `max()` does instead is UNDERCOUNT: forty rounds on the phone and thirty on
  *     the laptop merge to forty, not seventy. That is the honest failure of the two, and
- *     it is why `gate_run` stores a ROW per round with an idempotency key — the exact
+ *     it is why `worker_gate_run` stores a ROW per round with an idempotency key — the exact
  *     total is recoverable by counting rows, and no arithmetic here has to guess at it.
  *
  *  2. **Sets take a union.** `days` and `collections` are sets of ids, not counts, so
@@ -53,7 +53,7 @@
  *       the day this person started, and a new laptop signing in today carries today's
  *       date. Taking the later of the two would quietly reset a card that began a year
  *       ago every time somebody opened the app somewhere new. The database enforces the
- *       same rule in a trigger (`app_profile_keep_identity`) rather than trusting this
+ *       same rule in a trigger (`worker_profile_keep_identity`) rather than trusting this
  *       file, because the next person to write a sync path will not have read it.
  */
 
@@ -69,7 +69,7 @@ import {
 } from '@/lib/profile/store'
 
 /**
- * The two fields that live on `app_profile` rather than in the device's `Profile`.
+ * The two fields that live on `worker_profile` rather than in the device's `Profile`.
  * Kept beside it here, and not folded into it, because they are the fields with the
  * different merge rule — putting them in the same record as the counters is how somebody
  * ends up running `Math.max` over a date.
@@ -82,7 +82,7 @@ export type PortalIdentity = {
   since: string
   /**
    * When the name was last edited THROUGH THE APP — `book.card.editedAt` on a device,
-   * `app_profile.card_edited_at` on the account. '' means never: on the account side that
+   * `worker_profile.card_edited_at` on the account. '' means never: on the account side that
    * is a `display_name` Google seeded at sign-up, which is a person's legal name and not
    * the nickname they chose for the terrace. See `editWinner`.
    */
@@ -166,7 +166,7 @@ export function editWinner(
 
 /**
  * The name, the number and the declared card, as they travel between a device's book
- * and `app_profile` (`display_name`, `shirt_number`, `card`, `card_edited_at`).
+ * and `worker_profile` (`display_name`, `shirt_number`, `card`, `card_edited_at`).
  */
 export type CardUnit = {
   nameHe: string
@@ -380,7 +380,7 @@ export function remoteProfile(partial: Partial<Profile>): Profile {
 }
 
 /**
- * `profile_item` rows, folded into the device's `collections` shape — the fourth read
+ * `worker_profile_item` rows, folded into the device's `collections` shape — the fourth read
  * model on the account side, and the reason collections are exact across devices now:
  * once both sides hold the same sets, the union above is the whole answer.
  */

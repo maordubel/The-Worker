@@ -6,7 +6,7 @@ import type { GateStat, Profile } from './store'
  * מזהה שער — what a round is filed under, and which plate on the wall it lights.
  *
  * An id is a gate's route (`gateId(href)`), optionally followed by ONE variant segment:
- * `/trivia/europe`, `/royal-rumble/live`. That shape is what `gate_run.gate` already
+ * `/trivia/europe`, `/royal-rumble/live`. That shape is what `worker_gate_run.gate` already
  * promises in its own column comment (`/trivia/general`) and what its check constraint
  * accepts (`gate like '/%'`), so per-topic strengths need no migration at all.
  *
@@ -18,7 +18,7 @@ import type { GateStat, Profile } from './store'
  * trivia round in Europe is never also a round in "players".
  *
  * **The Royal Rumble aliases.** Until 21.9.2026 gate 9 reported under `royal-rumble` and
- * `royal-rumble-live` — no leading slash — so `gate_run`'s check refused every row
+ * `royal-rumble-live` — no leading slash — so `worker_gate_run`'s check refused every row
  * silently and `/tik`, which reads `/royal-rumble`, never lit plate 9. The wall topped out
  * at 11 of 12 and "what's next" suggested gate 9 for ever. The fix is two-sided: new
  * rounds are normalised on the way IN (`canonicalGate`), and devices that already hold

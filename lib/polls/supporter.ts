@@ -24,7 +24,7 @@ import { reasonCount, type Reasons } from './reasons'
  *  · the reasons are `lib/polls/reasons.ts`, kept beside them;
  *  · the NAME and the NUMBER are the member book's (`lib/game/member.ts`) —
  *    `nameHe` and `number`, the two fields gate 10 has printed on a shirt since it was
- *    built and `lib/portal/sync.ts` already carries up to `app_profile.display_name`.
+ *    built and `lib/portal/sync.ts` already carries up to `worker_profile.display_name`.
  *
  * That last one is the decision worth writing down. The obvious build is a `supporter`
  * record of its own, and it would have been a second place the app keeps somebody's name

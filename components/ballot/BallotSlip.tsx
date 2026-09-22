@@ -36,7 +36,7 @@ import { t } from '@/lib/i18n'
  * A printed slip has a name line at the head, so that is where this one is — but the
  * field it writes is NOT a new one. `lib/game/member.ts` has held `nameHe` and `number`
  * since gate 10 was built, `lib/portal/sync.ts` already carries `nameHe` up to
- * `app_profile.display_name`, and the brief is explicit: *"do not duplicate these fields
+ * `worker_profile.display_name`, and the brief is explicit: *"do not duplicate these fields
  * separately if the profile already stores them."* So typing a name here changes the
  * name on the shirt in gate 10, and signing in carries one name rather than two that
  * disagree (rule 59). The note under the field says so out loud, because a field that

@@ -33,7 +33,7 @@ export async function createRoyalRumbleRoom(matchSeed: number, offerSeed: number
   const supabase = createClient() as any
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return null
-  const { data, error } = await supabase.rpc('rpc_rr_create_room', { p_match_seed: matchSeed >>> 0, p_offer_seed: offerSeed >>> 0 })
+  const { data, error } = await supabase.rpc('worker_rr_create_room', { p_match_seed: matchSeed >>> 0, p_offer_seed: offerSeed >>> 0 })
   if (error) return null
   const row = one<any>(data)
   return row ? { id: row.room_id, code: row.code, matchSeed: Number(row.match_seed) >>> 0 } : null
@@ -43,7 +43,7 @@ export async function joinRoyalRumbleRoom(code: string, matchSeed: number, offer
   const supabase = createClient() as any
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return null
-  const { data, error } = await supabase.rpc('rpc_rr_join_room', { p_code: code.trim().toUpperCase(), p_match_seed: matchSeed >>> 0, p_offer_seed: offerSeed >>> 0 })
+  const { data, error } = await supabase.rpc('worker_rr_join_room', { p_code: code.trim().toUpperCase(), p_match_seed: matchSeed >>> 0, p_offer_seed: offerSeed >>> 0 })
   if (error) return null
   const row = one<any>(data)
   return row ? { id: row.room_id, code: row.code, matchSeed: Number(row.match_seed) >>> 0 } : null
@@ -53,7 +53,7 @@ export async function getRoyalRumbleLiveState(roomId: string): Promise<RoyalRumb
   const supabase = createClient() as any
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return null
-  const { data, error } = await supabase.rpc('rpc_rr_state', { p_room_id: roomId })
+  const { data, error } = await supabase.rpc('worker_rr_state', { p_room_id: roomId })
   if (error) return null
   const row = one<any>(data)
   if (!row) return null
@@ -65,7 +65,7 @@ export async function lockRoyalRumbleLive(roomId: string, offerSeed: number, slu
   const supabase = createClient() as any
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return null
-  const { error } = await supabase.rpc('rpc_rr_lock', { p_room_id: roomId, p_offer_seed: offerSeed >>> 0, p_picks: slugs })
+  const { error } = await supabase.rpc('worker_rr_lock', { p_room_id: roomId, p_offer_seed: offerSeed >>> 0, p_picks: slugs })
   if (error) return null
   return getRoyalRumbleLiveState(roomId)
 }
@@ -74,7 +74,7 @@ export async function resolveRoyalRumbleLive(roomId: string): Promise<RoyalRumbl
   const supabase = createClient() as any
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return null
-  const { data, error } = await supabase.rpc('rpc_rr_claim', { p_room_id: roomId })
+  const { data, error } = await supabase.rpc('worker_rr_claim', { p_room_id: roomId })
   if (error) return null
   const row = one<any>(data)
   if (!row) return null

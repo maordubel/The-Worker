@@ -21,7 +21,7 @@ Accepted — owner decisions 21.9.2026 (recorded in D2, D3, D4 and D8).
 
 | Field | Value |
 |---|---|
-| **Depends On** | None. It builds on rule 35 (`lib/canon/matchId.ts`) and `20260917090000_portal_identity.sql`. |
+| **Depends On** | None. It builds on rule 35 (`lib/canon/matchId.ts`) and the player side of the database (`20260922090000_worker_shared_project.sql`, which superseded `20260917090000_portal_identity.sql` on 22.9.2026). |
 | **Enables** | Server-graded trivia (`rpc_submit_answer`), a lineup ingest, and generated Red Thread levels. |
 | **Blocks** | Waves 2 and 3 cannot start until masters-core and progress are merged. |
 | **Ordering Note** | Minting is one-way. The Salzburg merge runs before the first `--write-ids`. |
@@ -33,7 +33,7 @@ Accepted — owner decisions 21.9.2026 (recorded in D2, D3, D4 and D8).
 Each prototype carries its own truth (`PLAYERS`, `BANK`, `NODES`/`EDGES`, `ITEMS`, kit options). The repo, as measured, has five problems:
 - **Keys.** A player is keyed four ways and a match six ways, and there is no `match-ids.json`. Player Master (719 people, 61 of them phantoms) feeds only tests.
 - **Leaks.** 20% of dealt trivia ids contain the answer. V13 put the Gate 4 truth in the bundle. `/kits` serialises every Gate 4 answer.
-- **Progress.** Deeds stay local. The Royal Rumble ids are rejected by `gate_run`. Gates 4 and 5 record nothing. The union merge cannot remove.
+- **Progress.** Deeds stay local. The Royal Rumble ids are rejected by `worker_gate_run`. Gates 4 and 5 record nothing. The union merge cannot remove.
 - **Graphs.** The Gate 12 and 13 prototypes carry two unrelated graphs, and production has none.
 - **Renderers.** Gates 4 and 5 use two renderers, and V14 adds a third.
 
@@ -107,7 +107,7 @@ A master is a **generated, deterministic, provenance-keeping index of archive tr
 - A gate id is `gateId(href)[/variant]`.
 - `wallGate()` resolves an id by its longest prefix.
 - `royal-rumble` and `royal-rumble-live` become aliases.
-- A deed counts once per gate per day and goes to `gate_run` as `deed:<gate>:<day>`.
+- A deed counts once per gate per day and goes to `worker_gate_run` as `deed:<gate>:<day>`.
 
 **Collections**
 - Collections only grow.
@@ -115,11 +115,11 @@ A master is a **generated, deterministic, provenance-keeping index of archive tr
 - `PREFERENCE_SETS` never count.
 
 **One SQL file (owner decision).** `supabase/migrations/2026092…_gates_sync.sql` adds:
-- `profile_item` + `rpc_collect`;
-- `question_mark` + `rpc_mark_questions`;
-- on `app_profile`: `card`, `card_edited_at`, `supporter` and `shirt_number`.
+- `worker_profile_item` + `worker_collect`;
+- `worker_question_mark` + `worker_mark_questions`;
+- on `worker_profile`: `card`, `card_edited_at`, `supporter` and `shirt_number`.
 
-Every table has owner-only RLS, and `poll_vote` stays unlinkable (rule 76).
+Every table has owner-only RLS, and `worker_poll_vote` stays unlinkable (rule 76).
 
 **Merge rules**
 - Counters take `max`.
@@ -181,7 +181,7 @@ content/generated/*.json ──import 'server-only'──▶ lib readers
         │ emit(GateEvent)  (RecordRun)
         ▼
 lib/profile/events.ts → store.update(applyEvent)   ── the only local write
-   ├─▶ lib/portal/sync: gate_run · profile_item · question_mark · app_profile.card/supporter
+   ├─▶ lib/portal/sync: worker_gate_run · worker_profile_item · worker_question_mark · worker_profile.card/supporter
    └─▶ lib/ads.track (ids + integers)
 lib/profile/card.ts (CARD_SOURCES) ◀ profile + MemberBook + describe()  → Gate 10, cardStory
 ```
@@ -268,7 +268,7 @@ type GateEvent = { type: 'gate_completed'; gate: string; variant?: string; score
 | Gate | Met by | Real-data limit |
 |---|---|---|
 | 1 | Player Master picker; foreign-slot filter; version follows the filter; poster with mini kits; challenges as constraints, not scores | — |
-| 2 | Question Master; Quick Pick with 7 modes; 12 questions in 6 types; Revenge from `question_mark`; Match Report | songs 18 |
+| 2 | Question Master; Quick Pick with 7 modes; 12 questions in 6 types; Revenge from `worker_question_mark`; Match Report | songs 18 |
 | 3 | Match Master lineups; line-band zones; ≤3 locks; skippable reveal | 5 playable (2000/01 withheld) |
 | 4/5 | D4, D6; 5 steps over 8 fields; evidence reveal; token → DNA; "Brief Fit", not a fan meter | 23 of 35 without an exact photo; no crest art for 1997–2000 |
 | 6 | Master fact pairs; no shirt↔season pairs; shelf ids resolve in the graph | — |
@@ -283,14 +283,14 @@ type GateEvent = { type: 'gate_completed'; gate: string; variant?: string; score
 - **CPU.** Builders run offline. Masters are memoised once per process. The trivia lobby's five bank rebuilds per visit become precomputed counts.
 - **Memory.** The server holds Player Master (≈0.9 MB) and the graph (a few MB). The client receives projections only.
 - **Load.** Gate 4 drops from 22.4 MB (V14) to about 0.7 MB of WebP maps per template. Heavy gates are lazy-loaded, with no base64.
-- **Network.** One small action per answer or link. Sync is fire-and-forget, and `rpc_collect` is batched.
+- **Network.** One small action per answer or link. Sync is fire-and-forget, and `worker_collect` is batched.
 
 ## Migration Plan (saved device data)
 
 | Data | What changes |
 |---|---|
 | Player slugs (`worker.xi.v1`, `xi_pick`) | Mapped to `p_` at read time; written back on the next save. |
-| Gate 7 ballots | `nameHe` and position labels migrate in `read()`. `board.ts` merges legacy `poll_vote.pick` values through `resolvePlayer`. No SQL. |
+| Gate 7 ballots | `nameHe` and position labels migrate in `read()`. `board.ts` merges legacy `worker_poll_vote.pick` values through `resolvePlayer`. No SQL. |
 | Gate ids | The Royal Rumble aliases are applied at read time. `/trivia/<topic>` rolls up to `/trivia`, and old topic routes stay as aliases. |
 | Collections | Existing members count as saved; parity applies from now on. `kit:<maker>:<from>` becomes an alias of `maker:<slug>`. `lineup.reveal` becomes a preference. |
 | Kits | `worker.kits.v1` keys are accepted once; `legacyKey` resolves to `kit-…`. |

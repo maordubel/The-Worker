@@ -28,7 +28,7 @@ import {
  * `lib/portal/sync.ts` used to read both sides and merge them inline, which put every
  * decision worth testing inside a function that needs a network to run. Now it reads,
  * hands both sides here, and EXECUTES the answer: what the device keeps, what the book
- * adopts, what `app_profile` is updated with, which collection items and which deeds the
+ * adopts, what `worker_profile` is updated with, which collection items and which deeds the
  * account has not heard of yet. Everything in this file is pure, and
  * `tests/portal-sync.test.ts` plays the first sign-in, the second device and the Google
  * name through it without a Supabase project.
@@ -40,7 +40,7 @@ import {
  * deeds as ROWS, its nickname as the account's `display_name`.
  */
 
-/** A `gate_run` row as the sync reads it. The key is read so deeds are not re-sent. */
+/** A `worker_gate_run` row as the sync reads it. The key is read so deeds are not re-sent. */
 export type RunRow = {
   gate: string
   score: number
@@ -50,7 +50,7 @@ export type RunRow = {
   idempotency_key?: string | null
 }
 
-/** `app_profile`, with the card columns optional: before the SQL runs they do not exist. */
+/** `worker_profile`, with the card columns optional: before the SQL runs they do not exist. */
 export type AppProfileRow = {
   display_name: string | null
   member_no: string | null
@@ -67,9 +67,9 @@ export type RemoteSide = {
   /** null: the account has no card row yet */
   row: AppProfileRow | null
   runs: readonly RunRow[]
-  /** null: `profile_item` is not there (the SQL has not been run) or could not be read */
+  /** null: `worker_profile_item` is not there (the SQL has not been run) or could not be read */
   items: readonly ItemRow[] | null
-  /** false: `app_profile.card` and friends are not there yet */
+  /** false: `worker_profile.card` and friends are not there yet */
   cardColumns: boolean
   /** the name Google put on the session — used only to print "signed in as" */
   accountName: string | null
@@ -94,7 +94,7 @@ export type SyncPlan = {
   /** the name/number/card the book should hold after the sync, or null to leave it */
   unit: CardUnit | null
   supporter: SupporterRecord | null
-  /** what `app_profile` is updated with */
+  /** what `worker_profile` is updated with */
   update: AppProfileUpdate
   /** collection items the account does not hold yet, by set, in chunks */
   items: Array<{ set: string; ids: string[] }>
@@ -102,11 +102,11 @@ export type SyncPlan = {
   deeds: Array<{ key: string; gate: string; day: string }>
 }
 
-/** How many ids one `rpc_collect` call carries. The function refuses more than 500. */
+/** How many ids one `worker_collect` call carries. The function refuses more than 500. */
 export const ITEM_CHUNK = 200
 
 /**
- * The account's `gate_run` rows, folded into the device's shape — and the deeds they
+ * The account's `worker_gate_run` rows, folded into the device's shape — and the deeds they
  * carry, recovered from their keys (`deed:<gate>:<day>`), so a deed made on the laptop
  * today is not made again on the phone today.
  */
@@ -176,7 +176,7 @@ export function unitOfRow(row: AppProfileRow | null, cardColumns: boolean): Card
   }
 }
 
-/** The declared card as it is stored in `app_profile.card` — no edit stamp, no free text limits lost. */
+/** The declared card as it is stored in `worker_profile.card` — no edit stamp, no free text limits lost. */
 export function cardJson(card: WorkerCardFields | null): Json | null {
   if (card === null) return null
   return {
@@ -267,7 +267,7 @@ export function planSync(local: LocalSide, remote: RemoteSide): SyncPlan {
   const named = unit !== null && unit.editedAt !== ''
   const update: AppProfileUpdate = {
     // Sending the merged number is safe by construction: the merge prefers the server's
-    // whenever it has one. `app_profile_keep_identity` refuses anything else.
+    // whenever it has one. `worker_profile_keep_identity` refuses anything else.
     member_no: identity.memberNo,
     ...(identity.since === '' ? {} : { since: identity.since }),
     ...(named ? { display_name: unit.nameHe === '' ? null : unit.nameHe } : {}),

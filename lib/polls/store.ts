@@ -28,20 +28,20 @@ import { portalDb } from '@/lib/portal/db'
  *    of a sample of one. Nothing in this app invents a number (rule 11), and a poll
  *    with fabricated baseline votes would be the worst possible place to start.
  *
- * **The table exists as of 17.9.2026, and so does the store.** `SupabaseBallotStore`
- * below implements this same interface against `poll_vote (device_id, question_id, pick,
+ * **The table exists as of 17.9.2026 (as `worker_poll_vote` from 22.9), and so does the store.** `SupabaseBallotStore`
+ * below implements this same interface against `worker_poll_vote (device_id, question_id, pick,
  * voted_at)` with a unique key on `(device_id, question_id)` — exactly the shape this
  * paragraph promised before the migration was written — so a changed mind updates rather
  * than stuffs the box. `activeStore()` returns it when the keys are present.
  *
- * What it is NOT is a store that reads a table: `poll_vote` has RLS on and no policy at
+ * What it is NOT is a store that reads a table: `worker_poll_vote` has RLS on and no policy at
  * all, so nothing can select a row from it, signed in or not. A vote goes in through
- * `rpc_poll_vote` and comes back only as a count, through `rpc_poll_tally`. That is rule
+ * `worker_poll_cast` and comes back only as a count, through `worker_poll_tally`. That is rule
  * 4's construction — the one that keeps trivia answers off the client — applied to the
  * opposite-looking problem: eight rows sharing one device id are one supporter's whole
  * ballot, and a public `select` on this table would hand that to anybody who asked. The
- * count is everybody's; the slip is nobody's. See §3 of the migration for the whole
- * argument.
+ * count is everybody's; the slip is nobody's. See §3 of
+ * `supabase/migrations/20260922090000_worker_shared_project.sql`.
  */
 export interface BallotStore {
   /** true when this store can report what OTHER people voted */
@@ -184,7 +184,7 @@ export class LocalBallotStore implements BallotStore {
 /**
  * הקלפי האמיתית — one device, one ballot, and a count the whole terrace shares.
  *
- * The device's own slip is still kept locally, and that is not laziness: `poll_vote` has
+ * The device's own slip is still kept locally, and that is not laziness: `worker_poll_vote` has
  * no read policy, so there is no way to fetch your own picks back and no reason to want
  * one. The server holds the COUNT; the browser holds the SLIP. Every call that is about
  * your own paper — `read`, `clear`, `sealed`, `seal` — is the local store's, unchanged
@@ -219,7 +219,7 @@ export class SupabaseBallotStore implements BallotStore {
    * box by accident (`lib/portal/device.ts`).
    *
    * What is cast is the pick as stored — a `p_…` id, a position code or the digits — so
-   * `poll_vote.pick` carries the id from 21.9.2026 on; `lib/polls/board.ts` folds the rows
+   * `worker_poll_vote.pick` carries the id from 21.9.2026 on; `lib/polls/board.ts` folds the rows
    * cast before that (display names, Hebrew labels) into the same keys. No SQL change.
    */
   async save(questionId: string, pick: string): Promise<void> {
@@ -227,7 +227,7 @@ export class SupabaseBallotStore implements BallotStore {
     const device = deviceId()
     if (device === null) return
     try {
-      await portalDb().rpc('rpc_poll_vote', {
+      await portalDb().rpc('worker_poll_cast', {
         p_device_id: device,
         p_question_id: questionId,
         p_pick: pick,
@@ -251,7 +251,7 @@ export class SupabaseBallotStore implements BallotStore {
    */
   async tally(questionId: string): Promise<Tally | null> {
     try {
-      const { data, error } = await portalDb().rpc('rpc_poll_tally', {
+      const { data, error } = await portalDb().rpc('worker_poll_tally', {
         p_question_id: questionId,
       })
       if (error || !Array.isArray(data)) return null

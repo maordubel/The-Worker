@@ -132,7 +132,7 @@ describe('שער 9 נדלק — the Royal Rumble aliases', () => {
     expect(cardFigures(profile).gates).toBe(1)
   })
 
-  it('files NEW rounds under ids gate_run accepts (`gate like \'/%\'`)', () => {
+  it('files NEW rounds under ids worker_gate_run accepts (`gate like \'/%\'`)', () => {
     const solo = run(fresh(), { type: 'gate_completed', gate: 'royal-rumble', score: 3, correct: 1, asked: 1 }, DAY, 'k1')
     const live = run(fresh(), { type: 'gate_completed', gate: 'royal-rumble-live', score: 3, correct: 1, asked: 1 }, DAY, 'k2')
     expect(Object.keys(solo.profile.gates)).toEqual(['/royal-rumble'])

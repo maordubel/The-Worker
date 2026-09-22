@@ -326,11 +326,11 @@ describe('למה דווקא זה — the reason chips', () => {
 
   it('never leaves the device — no reason is sent to the vote or read from the tally', () => {
     const store = readFileSync(join(ROOT, 'lib/polls/store.ts'), 'utf8')
-    // `rpc_poll_vote` takes exactly three parameters and none of them is a reason. A
-    // fourth would need a column on `poll_vote`, and the migration's §3 argues at length
+    // `worker_poll_cast` takes exactly three parameters and none of them is a reason. A
+    // fourth would need a column on `worker_poll_vote`, and the migration's §3 argues at length
     // that every column on that table is one more thing eight rows sharing a device id
     // can be joined on.
-    const cast = store.slice(store.indexOf("rpc('rpc_poll_vote'"), store.indexOf('/** Clears this device'))
+    const cast = store.slice(store.indexOf("rpc('worker_poll_cast'"), store.indexOf('/** Clears this device'))
     expect(cast).toContain('p_device_id')
     expect(cast).toContain('p_question_id')
     expect(cast).toContain('p_pick')
@@ -377,7 +377,7 @@ describe('תעודת אוהד — the supporter ID', () => {
   it('takes the name and the number from the member book, never from a second record', () => {
     // The brief: "do not duplicate these fields separately if the profile already stores
     // them." The book is `lib/game/member.ts`, which gate 10 prints and `lib/portal/sync`
-    // already carries up as `app_profile.display_name`.
+    // already carries up as `worker_profile.display_name`.
     const source = readFileSync(join(ROOT, 'app/polls/BallotSheet.tsx'), 'utf8')
     expect(source).toContain("from '@/lib/game/member'")
     expect(source).not.toContain('localStorage')

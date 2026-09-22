@@ -191,7 +191,7 @@ export function normaliseBook(parsed: Partial<MemberBook>): MemberBook {
  * different number on every visit, and the one field on it the product describes as
  * unearnable was the one field that changed most. The first read now WRITES the book it
  * mints, which is the only way the number can mean what the card says it means, and it
- * is what makes `app_profile.member_no` a real key rather than a snapshot of whatever
+ * is what makes `worker_profile.member_no` a real key rather than a snapshot of whatever
  * the last page load happened to roll.
  */
 export function readBook(): MemberBook {

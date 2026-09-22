@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -250,7 +250,7 @@ describe('התחברות ראשונה — nothing is destroyed', () => {
   })
 })
 
-describe('gate_run — the rows are the count, the counters are derived', () => {
+describe('worker_gate_run — the rows are the count, the counters are derived', () => {
   it('folds rows into exactly the shape the device keeps', () => {
     const folded = foldRuns([
       { gate: '/memory', score: 40, asked: 8, correct: 6, played_on: '2026-03-01' },
@@ -293,7 +293,7 @@ describe('הקלפי — which store this build votes into', () => {
   })
 
   it('decides on the keys alone — a session is not part of the question', () => {
-    // The ballot is keyed to a DEVICE and never to a person (`poll_vote` carries no
+    // The ballot is keyed to a DEVICE and never to a person (`worker_poll_vote` carries no
     // user_id at all), so requiring a sign-in to vote would be the quietest possible way
     // of turning an anonymous ballot into an identified one. Asserted on the source,
     // because the decision is the thing worth protecting, not the branch.
@@ -304,13 +304,13 @@ describe('הקלפי — which store this build votes into', () => {
   })
 
   it('never reads the vote table, only the two functions', () => {
-    // `poll_vote` has RLS on and no policy of any kind. A `from('poll_vote')` anywhere in
+    // `worker_poll_vote` has RLS on and no policy of any kind. A `from('worker_poll_vote')` anywhere in
     // the client would be a query that silently returns nothing — and a sign that
     // somebody had added the read policy to make it work.
     const source = readFileSync(join(ROOT, 'lib/polls/store.ts'), 'utf8')
-    expect(source).not.toContain("from('poll_vote')")
-    expect(source).toContain('rpc_poll_vote')
-    expect(source).toContain('rpc_poll_tally')
+    expect(source).not.toContain("from('worker_poll_vote')")
+    expect(source).toContain('worker_poll_cast')
+    expect(source).toContain('worker_poll_tally')
   })
 })
 
@@ -324,63 +324,64 @@ describe('הפרדת המזהים — the ballot id never travels with a user id
   })
 
   it('keeps the ballot id out of the run report', () => {
-    // `gate_run` rows carry `user_id`. If the ballot's device id were used as an
+    // `worker_gate_run` rows carry `user_id`. If the ballot's device id were used as an
     // idempotency key there, the two tables could be joined and every anonymous vote
     // would have a name on it.
     expect(record).not.toContain('deviceId')
   })
 })
 
+const WORKER_SQL = 'supabase/migrations/20260922090000_worker_shared_project.sql'
+
 describe('הסכימה — what the migration promises the code', () => {
-  const sql = readFileSync(join(ROOT, 'supabase/migrations/20260917090000_portal_identity.sql'), 'utf8')
+  const sql = readFileSync(join(ROOT, WORKER_SQL), 'utf8')
 
   it('keeps the exact ballot shape `lib/polls/store.ts` committed to', () => {
-    expect(sql).toContain('create table if not exists poll_vote')
+    expect(sql).toContain('create table if not exists public.worker_poll_vote')
     for (const column of ['device_id', 'question_id', 'pick', 'voted_at']) {
       expect(sql, column).toContain(column)
     }
     expect(sql).toContain('unique (device_id, question_id)')
   })
 
-  it('gives poll_vote no policy at all, so a row can never be read out of it', () => {
-    expect(sql).toContain('alter table poll_vote       enable row level security')
-    expect(sql).not.toMatch(/create policy \w*poll_vote\w* on poll_vote/)
+  it('gives worker_poll_vote no policy and no grant, so a row can never be read out of it', () => {
+    expect(sql).toMatch(/alter table public\.worker_poll_vote\s+enable row level security/)
+    expect(sql).not.toMatch(/create policy \w+ on public\.worker_poll_vote/)
+    expect(sql).not.toMatch(/grant [^;]* on public\.worker_poll_vote/)
   })
 
   it('puts no user id on a vote — the privacy guarantee is structural, not a promise', () => {
     const table = sql.slice(
-      sql.indexOf('create table if not exists poll_vote'),
-      sql.indexOf('create index if not exists poll_vote_question_idx'),
+      sql.indexOf('create table if not exists public.worker_poll_vote'),
+      sql.indexOf('create index if not exists worker_poll_vote_question_idx'),
     )
     expect(table).not.toContain('user_id')
   })
 
   it('enables row level security on every table it creates', () => {
-    const created = [...sql.matchAll(/create table if not exists (\w+)/g)].map((m) => m[1] as string)
-    expect(created.length).toBeGreaterThan(5)
+    const created = [...sql.matchAll(/create table if not exists public\.(\w+)/g)].map((m) => m[1] as string)
+    expect(created).toHaveLength(7)
     for (const table of created) {
-      expect(sql, `${table} has no RLS`).toContain(`alter table ${table}`)
-      expect(sql, `${table} has no RLS`).toMatch(
-        new RegExp(`alter table ${table}\\s+enable row level security`),
-      )
+      expect(sql, `${table} has no RLS`).toMatch(new RegExp(`alter table public\\.${table}\\s+enable row level security`))
     }
   })
 
   it('says what every table is for, in Hebrew, like every other migration here', () => {
-    const created = [...sql.matchAll(/create table if not exists (\w+)/g)].map((m) => m[1] as string)
+    const created = [...sql.matchAll(/create table if not exists public\.(\w+)/g)].map((m) => m[1] as string)
     for (const table of created) {
-      expect(sql, `${table} has no comment`).toContain(`comment on table ${table} is`)
+      expect(sql, `${table} has no comment`).toMatch(new RegExp(`comment on table public\\.${table} is\\s*\\n\\s*'[^']*[֐-׿]`))
     }
-    expect(sql).toMatch(/comment on table app_profile is\s*\n\s*'[^']*[֐-׿]/)
   })
 
-  it('keeps the life log append-only, the way rule 39 asks for', () => {
-    expect(sql).toContain('life_save is append-only')
-    expect(sql).toContain('create trigger life_save_no_update')
-    expect(sql).toContain('create trigger life_save_no_delete')
+  it('creates no server table that no code reads — the life log stays on the device', () => {
+    // 17.9 declared life_save, life_checkpoint, kit_built and xi_pick. Nothing in `app`,
+    // `components` or `lib` ever read or wrote them, so the shared project does not get them.
+    for (const table of ['life_save', 'life_checkpoint', 'kit_built', 'xi_pick']) {
+      expect(sql, table).not.toContain(table)
+    }
   })
 
-  it('grades and records on the server, with an idempotency key', () => {
+  it('records on the server, with an idempotency key', () => {
     expect(sql).toContain('security definer set search_path = public')
     expect(sql).toContain('on conflict (user_id, idempotency_key) do nothing')
   })
@@ -390,9 +391,92 @@ describe('הסכימה — what the migration promises the code', () => {
     expect(sql).toContain('new.since := least(old.since, new.since)')
   })
 
+  it('bounds the card and the seal, and keeps the newest edit', () => {
+    expect(sql).toContain('octet_length(card::text) <= 2048')
+    expect(sql).toContain('octet_length(supporter::text) <= 2048')
+    expect(sql).toContain('shirt_number between 1 and 99')
+    expect(sql).toContain('new.card_edited_at < old.card_edited_at')
+  })
+
+  it('writes collections idempotently, for signed-in callers only', () => {
+    expect(sql).toMatch(/create or replace function public\.worker_collect\(p_set text, p_ids text\[\]\)/)
+    expect(sql).toContain('on conflict (user_id, set_id, item_id) do nothing')
+    expect(sql).toContain('grant execute on function public.worker_collect(text, text[])                                     to authenticated')
+    expect(sql).not.toMatch(/grant execute on function public\.worker_collect[^;]*anon/)
+  })
+
+  it('opens exactly the ballot to anon, and nothing else', () => {
+    const toAnon = [...sql.matchAll(/grant execute on function public\.(\w+)\([^)]*\)\s+to anon/g)].map((m) => m[1])
+    expect(toAnon.sort()).toEqual(['worker_poll_cast', 'worker_poll_tally'])
+    expect(sql).not.toMatch(/grant (all|insert|update|delete)[^;]* to anon/)
+  })
+
   it('ships no seeded vote, no baseline and no invented row', () => {
-    expect(sql).not.toMatch(/insert into poll_vote\s*\(device_id[^)]*\)\s*values\s*\(\s*'/)
+    expect(sql).not.toMatch(/insert into public\.worker_poll_vote\s*\(device_id[^)]*\)\s*values\s*\(\s*'/)
     expect(sql).not.toMatch(/votes:\s*\d/)
+  })
+})
+
+/*
+ * The Supabase project is SHARED with DUBID (22.9.2026). Every rule below is a way the
+ * 17.9 file would have reached into the other app: a trigger on every sign-up in the
+ * project, a card row for every DUBID user, and table names DUBID could just as well own.
+ */
+describe('פרויקט משותף עם DUBID — THE WORKER touches only what it created', () => {
+  const sql = readFileSync(join(ROOT, WORKER_SQL), 'utf8')
+  const code = sql
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('--'))
+    .join('\n')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+
+  it('puts no trigger on auth and copies nobody out of auth.users', () => {
+    expect(code).not.toMatch(/create trigger[^;]*\bon auth\./i)
+    expect(code).not.toMatch(/from auth\.users/i)
+    expect(code).not.toMatch(/handle_new_user|on_auth_user_created/)
+  })
+
+  it('names every table, function, trigger, policy and index it creates worker_…', () => {
+    const created = [
+      ...code.matchAll(/create (?:table if not exists|or replace function|trigger|policy|index if not exists|unique index if not exists)\s+(?:public\.)?(\w+)/gi),
+    ].map((m) => m[1] as string)
+    expect(created.length).toBeGreaterThan(30)
+    for (const name of created) expect(name, name).toMatch(/^worker_/)
+  })
+
+  it('alters, drops and revokes only its own objects', () => {
+    for (const m of code.matchAll(/\b(?:alter table|drop trigger if exists \w+ on|drop policy if exists \w+ on)\s+(?:public\.)?(\w+)/gi)) {
+      expect(m[1], m[0]).toMatch(/^worker_/)
+    }
+    expect(code).not.toMatch(/drop\s+(table|function|schema|column)/i)
+    expect(code).not.toMatch(/\b(delete\s+from|truncate)\b/i)
+    expect(code).not.toMatch(/alter default privileges/i)
+  })
+
+  it('creates the card when the person first opens THE WORKER, not when they sign up anywhere', () => {
+    expect(code).toContain('create or replace function public.worker_profile_ensure()')
+    expect(readFileSync(join(ROOT, 'lib/portal/sync.ts'), 'utf8')).toContain("rpc('worker_profile_ensure')")
+  })
+
+  it('reports its own check: 7 tables, 15 functions, no trigger on auth', () => {
+    const tables = [...code.matchAll(/create table if not exists public\.(\w+)/g)].length
+    const functions = new Set([...code.matchAll(/create or replace function public\.(\w+)/g)].map((m) => m[1])).size
+    expect(tables).toBe(7)
+    expect(functions).toBe(15)
+    expect(sql).toContain('worker_tables 7 · worker_functions 15 · auth_triggers 0')
+  })
+
+  it('leaves every older migration an empty file that says which one to run', () => {
+    const dir = join(ROOT, 'supabase/migrations')
+    for (const name of readdirSync(dir)) {
+      if (name === '20260922090000_worker_shared_project.sql') continue
+      const body = readFileSync(join(dir, name), 'utf8')
+      const statements = body
+        .split('\n')
+        .filter((line) => !line.trim().startsWith('--') && line.trim() !== '')
+        .join('\n')
+      expect(statements, name).toMatch(/^select '[^']*20260922090000_worker_shared_project\.sql[^']*' as note;$/)
+    }
   })
 })
 
@@ -425,7 +509,8 @@ function book(over: Partial<MemberBook> = {}): MemberBook {
 }
 
 function account(over: Partial<AppProfileRow> = {}): AppProfileRow {
-  // What `handle_new_user` writes for a Google sign-in: the person's legal name, no card.
+  // An account row that carries the Google name and no card — the case the merge must not
+  // let overwrite what the fan typed (worker_profile_ensure itself writes no name at all).
   return { display_name: 'Maor Dubel', member_no: null, since: '2026-09-21', ...over }
 }
 
@@ -433,7 +518,7 @@ function remoteSide(over: Partial<RemoteSide> = {}): RemoteSide {
   return { row: account(), runs: [], items: [], cardColumns: true, accountName: 'Maor Dubel', ...over }
 }
 
-describe('profile_item — the account\'s collections, folded like the device keeps them', () => {
+describe('worker_profile_item — the account\'s collections, folded like the device keeps them', () => {
   it('groups by set, keeps first-seen order, and counts an id once', () => {
     expect(
       foldItems([
@@ -631,55 +716,6 @@ describe('נקודת החיבור — a gate\'s own ledger syncs without editing
     }
     const out = await runSyncHandlers({ db: {} as never, userId: 'u' }, [broken, ok])
     expect(out).toEqual({ broken: false, ok: true })
-  })
-})
-
-describe('הסכימה של 21.9 — additive, idempotent, owner-only', () => {
-  const sql = readFileSync(join(ROOT, 'supabase/migrations/20260921130000_gates_progress.sql'), 'utf8')
-  const code = sql
-    .split('\n')
-    .filter((line) => !line.trim().startsWith('--'))
-    .join('\n')
-
-  it('only adds — no table, column or row is ever dropped or deleted', () => {
-    expect(code).not.toMatch(/drop\s+table/i)
-    expect(code).not.toMatch(/drop\s+column/i)
-    expect(code).not.toMatch(/\bdelete\s+from\b/i)
-    expect(code).not.toMatch(/\btruncate\b/i)
-    expect(code).toContain('create table if not exists profile_item')
-    for (const column of ['card', 'card_edited_at', 'shirt_number', 'supporter']) {
-      expect(code).toMatch(new RegExp(`add column if not exists ${column}\\s`))
-    }
-  })
-
-  it('makes profile_item readable by its owner and writable only through the function', () => {
-    expect(code).toMatch(/alter table profile_item enable row level security/)
-    expect(code).toMatch(/create policy profile_item_read on profile_item\s+for select using \(user_id = auth\.uid\(\)\)/)
-    expect(code).not.toMatch(/create policy \w+ on profile_item\s+for (insert|update|delete|all)/)
-    expect(code).toContain('revoke insert, update, delete on profile_item from anon, authenticated')
-  })
-
-  it('writes items idempotently, as the caller, with the search path pinned', () => {
-    expect(code).toMatch(/create or replace function rpc_collect\(p_set text, p_ids text\[\]\)/)
-    expect(code).toContain('security definer set search_path = public')
-    expect(code).toContain('on conflict (user_id, set_id, item_id) do nothing')
-    expect(code).toContain('grant execute on function rpc_collect(text, text[]) to authenticated')
-    expect(code).not.toMatch(/grant execute on function rpc_collect[^;]*anon/)
-  })
-
-  it('bounds the card and the seal, and keeps the newest edit', () => {
-    expect(code).toContain('octet_length(card::text) <= 2048')
-    expect(code).toContain('octet_length(supporter::text) <= 2048')
-    expect(code).toContain('shirt_number between 1 and 99')
-    expect(code).toContain('new.card_edited_at < old.card_edited_at')
-  })
-
-  it('says what it adds, in Hebrew', () => {
-    expect(sql).toMatch(/comment on table profile_item is\s*\n\s*'[^']*[֐-׿]/)
-  })
-
-  it('stops with a readable sentence if the 17.9 file was never run', () => {
-    expect(code).toContain("to_regclass('public.app_profile') is null")
   })
 })
 

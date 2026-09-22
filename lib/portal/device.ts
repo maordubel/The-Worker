@@ -3,10 +3,10 @@
 /**
  * מזהה המכשיר — one random id per browser, and the only file that mints one.
  *
- * `poll_vote` is keyed on `(device_id, question_id)`, which is a decision about privacy
+ * `worker_poll_vote` is keyed on `(device_id, question_id)`, which is a decision about privacy
  * before it is a decision about storage: a ballot row carries no user id, so the table
  * structurally cannot say who voted for whom (see §3 of
- * `supabase/migrations/20260917090000_portal_identity.sql`). What it needs instead is
+ * `supabase/migrations/20260922090000_worker_shared_project.sql`). What it needs instead is
  * something that is stable enough to stop one browser voting eight times on one question
  * and meaningless enough that it names nobody. A random uuid in `localStorage` is both.
  *

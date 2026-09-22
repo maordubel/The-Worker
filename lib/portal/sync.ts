@@ -21,7 +21,7 @@
  *    at a screen, because losing a sync is much smaller than losing the page a person is
  *    on — the same reasoning every `localStorage` call in this codebase is wrapped with.
  *  · **Nothing is invented on the way up.** The remote side of a merge is assembled from
- *    REAL rows in `gate_run`, counted, not estimated. A person who has played nothing has
+ *    REAL rows in `worker_gate_run`, counted, not estimated. A person who has played nothing has
  *    an empty remote profile and merges to exactly what their device already held.
  */
 
@@ -70,8 +70,8 @@ export type SyncResult = {
   /**
    * What the account could and could not take this time, so a screen can say "saved, but
    * the collections are waiting for the SQL" rather than a flat "synced".
-   *   · `cardColumns` — `app_profile.card` exists (the 21.9.2026 SQL has been run)
-   *   · `items` — `profile_item` exists and was read
+   *   · `cardColumns` — `worker_profile.card` exists (the 22.9.2026 SQL has been run)
+   *   · `items` — `worker_profile_item` exists and was read
    *   · `extras` — each handler in `lib/portal/handlers.ts`, by id
    */
   reach?: { cardColumns: boolean; items: boolean; extras: Record<string, boolean> }
@@ -131,10 +131,10 @@ export async function signOut(): Promise<void> {
  * The device is written first and unconditionally, so a push that fails halfway still
  * leaves the person holding the better of the two cards rather than the older one.
  *
- * **It works before and after Maor runs the 21.9.2026 SQL.** The card columns and
- * `profile_item` are read optimistically; when they are not there the read falls back
- * to exactly what the 17.9.2026 migration offers, and the plan leaves them out of the
- * push. Nothing here can fail because a migration has not been applied yet.
+ * **Before Maor runs the SQL, nothing breaks.** The tables are simply not there: the
+ * reads fail, the result is `failed`, and the device keeps everything it already had.
+ * The card columns are still read optimistically, with the three-column read as the
+ * fallback, so a card never fails to load over a column list.
  */
 export async function syncProfile(): Promise<SyncResult> {
   if (!portalConfigured()) return { state: 'off', account: null, merged: null }
@@ -145,12 +145,18 @@ export async function syncProfile(): Promise<SyncResult> {
   try {
     const supabase = portalDb()
 
+    // The card row is created here, the first time this person opens THE WORKER — not by
+    // a trigger on auth.users. The Supabase project is shared with DUBID, and a trigger
+    // there would run on every DUBID sign-up too (supabase/migrations/20260922090000_…).
+    // Idempotent: every later call returns the row that is already there.
+    await supabase.rpc('worker_profile_ensure')
+
     const card = await readCardRow(account.id)
     if (card.failed) return { state: 'failed', account, merged: null }
 
     const runs = await readAll<RunRow>((from, to) =>
       supabase
-        .from('gate_run')
+        .from('worker_gate_run')
         .select('gate, score, asked, correct, played_on, idempotency_key')
         .eq('user_id', account.id)
         .order('played_at', { ascending: true })
@@ -160,7 +166,7 @@ export async function syncProfile(): Promise<SyncResult> {
 
     const items = await readAll<ItemRow>((from, to) =>
       supabase
-        .from('profile_item')
+        .from('worker_profile_item')
         .select('set_id, item_id')
         .eq('user_id', account.id)
         .order('added_on', { ascending: true })
@@ -191,7 +197,7 @@ export async function syncProfile(): Promise<SyncResult> {
       return { state: 'synced', account, merged, reach: { cardColumns: card.cardColumns, items: items !== null, extras: {} } }
     }
 
-    const push = await supabase.from('app_profile').update(plan.update).eq('id', account.id)
+    const push = await supabase.from('worker_profile').update(plan.update).eq('id', account.id)
     let failed = !!push.error
 
     for (const chunk of plan.items) {
@@ -218,17 +224,14 @@ export async function syncProfile(): Promise<SyncResult> {
 const CARD_COLUMNS = 'display_name, member_no, since, card, card_edited_at, shirt_number, supporter'
 const BASE_COLUMNS = 'display_name, member_no, since'
 
-/**
- * The account's card row. The full column list first; if Postgres refuses it — the card
- * columns are not there because the 21.9.2026 SQL has not been run — the 17.9.2026 list.
- */
+/** The account's card row: the full column list first, the three identity columns if refused. */
 async function readCardRow(
   userId: string,
 ): Promise<{ failed: boolean; row: AppProfileRow | null; cardColumns: boolean }> {
   const supabase = portalDb()
-  const full = await supabase.from('app_profile').select(CARD_COLUMNS).eq('id', userId).maybeSingle()
+  const full = await supabase.from('worker_profile').select(CARD_COLUMNS).eq('id', userId).maybeSingle()
   if (!full.error) return { failed: false, row: (full.data as AppProfileRow | null) ?? null, cardColumns: true }
-  const base = await supabase.from('app_profile').select(BASE_COLUMNS).eq('id', userId).maybeSingle()
+  const base = await supabase.from('worker_profile').select(BASE_COLUMNS).eq('id', userId).maybeSingle()
   if (base.error) return { failed: true, row: null, cardColumns: false }
   return { failed: false, row: (base.data as AppProfileRow | null) ?? null, cardColumns: false }
 }
@@ -291,7 +294,7 @@ export async function recordRunRemote(run: {
   try {
     if ((await sessionUserId()) === null) return false
     const asked = Math.max(0, Math.round(run.asked ?? 0))
-    const { error } = await portalDb().rpc('rpc_record_run', {
+    const { error } = await portalDb().rpc('worker_record_run', {
       p_key: run.key,
       p_gate: run.gate,
       p_score: Math.max(0, Math.round(run.score ?? 0)),
@@ -307,7 +310,7 @@ export async function recordRunRemote(run: {
 }
 
 /**
- * אוסף — ids into one of the account's sets, grow-only and idempotent (`rpc_collect`).
+ * אוסף — ids into one of the account's sets, grow-only and idempotent (`worker_collect`).
  * Preference sets never leave the device (`isSyncedSet`), and before the SQL is run the
  * function does not exist and this answers false — which is the whole failure mode.
  */
@@ -315,7 +318,7 @@ export async function collectRemote(set: string, ids: readonly string[]): Promis
   if (!portalConfigured() || ids.length === 0) return false
   try {
     if ((await sessionUserId()) === null) return false
-    const { error } = await portalDb().rpc('rpc_collect', { p_set: set, p_ids: [...ids] })
+    const { error } = await portalDb().rpc('worker_collect', { p_set: set, p_ids: [...ids] })
     return !error
   } catch {
     return false
@@ -336,7 +339,7 @@ export async function pushCardRemote(): Promise<boolean> {
     const name = book.nameHe.replace(/\s+/g, ' ').trim()
     const supabase = portalDb()
     const full = await supabase
-      .from('app_profile')
+      .from('worker_profile')
       .update({
         display_name: name === '' ? null : name,
         shirt_number: book.number,
@@ -346,7 +349,7 @@ export async function pushCardRemote(): Promise<boolean> {
       .eq('id', userId)
     if (!full.error) return true
     const base = await supabase
-      .from('app_profile')
+      .from('worker_profile')
       .update({ display_name: name === '' ? null : name })
       .eq('id', userId)
     return !base.error
@@ -362,7 +365,7 @@ export async function pushSupporterRemote(record: SupporterRecord): Promise<bool
     const userId = await sessionUserId()
     if (userId === null) return false
     const { error } = await portalDb()
-      .from('app_profile')
+      .from('worker_profile')
       .update({ supporter: record as unknown as Json })
       .eq('id', userId)
     return !error

@@ -115,7 +115,7 @@ export function positionBars(
 /**
  * One key per answer, whatever build cast it.
  *
- * `poll_vote.pick` held display names and Hebrew labels until 21.9.2026 and holds ids and
+ * `worker_poll_vote.pick` held display names and Hebrew labels until 21.9.2026 and holds ids and
  * codes after it. `canonical` maps a legacy pick to its id/code (`null` = leave it as it
  * is); rows that land on the same key are ADDED, because they are two ballots for one
  * answer — never de-duplicated, and never dropped when nothing resolves them. The total
