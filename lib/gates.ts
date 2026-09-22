@@ -228,10 +228,15 @@ export const GATES: readonly Gate[] = [
     playable: true,
   },
   {
+    /**
+     * שער 13 — החוט האדום (owner decision, 21.9.2026): a route between two moments of the
+     * club's history, every stop a real edge of the Entity Graph. The chronology game that
+     * stood here is the gate's second mode, `/timeline/order`, one tab away.
+     */
     number: 13,
     href: '/timeline',
-    title: 'gate.13',
-    latin: 'TIMELINE · NORTH-WEST',
+    title: 'gate.13.thread',
+    latin: 'THE RED THREAD · NORTH-WEST',
     plate: 'plain',
     stain: 'c',
     seeded: true,

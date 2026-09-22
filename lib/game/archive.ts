@@ -32,6 +32,7 @@ import sponsorDealsFile from '@/content/manual/sponsor-deals.json'
 import sponsorsFile from '@/content/manual/sponsors.json'
 import trophiesFile from '@/content/manual/trophies.json'
 import venuesFile from '@/content/manual/venues.json'
+import type { ReplayAction } from './replay/vocab'
 
 /**
  * The archive the games read.
@@ -88,6 +89,17 @@ function plain<T>(file: unknown): T[] {
 }
 
 export const archive = {
+  /**
+   * **שם תצוגה בלבד, בלי סינון ביטחון** (21.9.2026).
+   *
+   * `clubs` למטה עובר דרך `load`, ששומט כל שורה מתחת ל-`CONFIDENCE_FLOOR` — וכך
+   * כלל 2 מחזיק מועדון שנקרא מתבנית ולא נבדק מחוץ למחולל הטריוויה. זה נכון, וזה
+   * השאיר חור אחד: כשגשר LIFE מחפש את **שם היריבה** של משחק שהוא עצמו בביטחון 2,
+   * ושורת המועדון היא בביטחון 1, הוא לא מצא כלום ונפל לסלאג — ו-`בית"ר-י-ם` הפך
+   * על המסך ל-`בית"ר י ם`. שם של מועדון שהמקור כתב אינו עובדה שנשאלת עליה; הוא
+   * האופן שבו המשחק מאוית. הרשימה הזאת נקראת רק לתצוגה, ולא מזינה שום שאלה.
+   */
+  clubNames: plain<{ slug: string; nameHe: string; sport?: string }>(clubsFile),
   clubs: load<{
     slug: string
     nameHe: string
@@ -175,6 +187,10 @@ export const archive = {
     happenedOn: string | null
     bodyHe: string
     category?: string | null
+    seasonLabel?: string | null
+    /** the row's own source — read by `anchor-server.ts` so a LIFE anchor never re-types it */
+    sourceTitle?: string | null
+    sourceUrl?: string | null
   }>(momentsFile),
   manufacturers: plain<{ slug: string; nameHe: string }>(manufacturersFile),
   kitSupply: load<{
@@ -403,7 +419,8 @@ export const archive = {
     sequence: Array<{
       step: number
       actorHe: string
-      action: 'pass' | 'dribble' | 'cross' | 'shot'
+      /** the seven verbs of `lib/game/replay/vocab.ts` — a header and a parry included */
+      action: ReplayAction
       zone: string
       positionHe: string
       noteHe: string

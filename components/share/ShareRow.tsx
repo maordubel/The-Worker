@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+import { emit, type ShareChannel } from '@/lib/profile/events'
 import { challengeUrl, whatsappHref, telegramHref, type ShareKind } from '@/lib/share/copy'
 import { renderStory, type StoryCard } from '@/lib/share/story'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -47,6 +48,9 @@ export function ShareRow({
   const seed = params.s ?? '1'
   const cursor = params.r ?? '0'
   const vars = { ...params, headline }
+  // Every way out is a share on the card (`profile.shares`), counted when it actually
+  // happened — a sheet opened, a link copied — never on a failed attempt.
+  const shared = (channel: ShareChannel) => emit({ type: 'shared', kind, channel })
 
   async function story() {
     if (!card || busy) return
@@ -62,6 +66,7 @@ export function ShareRow({
         navigator.canShare({ files: [file] })
       if (shareable) {
         await navigator.share({ files: [file], text: challengeUrl(kind, seed, cursor, route) })
+        shared('story')
       } else {
         const url = URL.createObjectURL(blob)
         const anchor = document.createElement('a')
@@ -69,6 +74,7 @@ export function ShareRow({
         anchor.download = 'the-worker.png'
         anchor.click()
         URL.revokeObjectURL(url)
+        shared('story')
         setNote('share.downloaded')
       }
     } catch {
@@ -81,6 +87,7 @@ export function ShareRow({
   async function copy() {
     try {
       await navigator.clipboard.writeText(challengeUrl(kind, seed, cursor, route))
+      shared('copy')
       setNote('share.copied')
     } catch {
       setNote('share.failed')
@@ -125,6 +132,7 @@ export function ShareRow({
         )}
         <a
           href={whatsappHref(kind, vars, seed, cursor, route)}
+          onClick={() => shared('whatsapp')}
           target="_blank"
           rel="noopener noreferrer"
           className="flex min-h-tap items-center justify-center border-hair border-concrete/50 px-3 font-body text-step-0 font-extrabold text-paper"
@@ -133,6 +141,7 @@ export function ShareRow({
         </a>
         <a
           href={telegramHref(kind, vars, seed, cursor, route)}
+          onClick={() => shared('telegram')}
           target="_blank"
           rel="noopener noreferrer"
           className="flex min-h-tap items-center justify-center border-hair border-concrete/50 px-3 font-body text-step-0 font-extrabold text-paper"

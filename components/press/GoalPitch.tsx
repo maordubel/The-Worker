@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   COLS,
@@ -47,6 +47,20 @@ import { t } from '@/lib/i18n'
  * goal make twenty-one real, focusable, labelled controls over the drawing; the picture
  * never moves, only who can reach it. `touch-action: none` on the overlay is what stops a
  * placement dragging the page out from under the thumb.
+ *
+ * **What the board says after the whistle, and why it is not vermilion (21.9.2026).**
+ * The prototype defined a `.userTruthBridge` and never drew it; it is the missing "why
+ * this score". For every touch the judge PAIRED, a dashed line now runs from where the
+ * player stood to the archive's anchor for that touch — ink under, chalk over, the same
+ * keyline idiom as the figures, because vermilion over printed grass is the one blend in
+ * this product that passes through yellow (rule 8). A touch the player invented gets a
+ * `+` beside his figure; a touch he missed gets a ring around the archive's anchor. The
+ * verdict list prints the same two marks, so the board and the list speak one language.
+ *
+ * **And the board carries its own caption.** On a phone the builder is below the pitch
+ * while the thumb is on it, so the question being asked ("tap where he stood") was off
+ * screen at the exact moment it mattered. A strip along the foot of the board repeats it;
+ * it is `pointer-events: none`, so it can never swallow a placement.
  */
 
 const POSES = ['#figRun', '#figRun', '#figKick', '#figVolley', '#figRun'] as const
@@ -82,6 +96,25 @@ function colourFor(grade: TouchGrade | undefined): string {
   return 'rgb(var(--p-red))'
 }
 
+/**
+ * Whether the player asked the operating system for less motion. Read once on mount —
+ * SVG animation elements do not listen to CSS media queries, so the rolling ball has to
+ * be left out rather than paused.
+ */
+function usePrefersStill(): boolean {
+  const [still, setStill] = useState(true)
+  useEffect(() => {
+    const query = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)')
+      : null
+    setStill(query?.matches ?? false)
+  }, [])
+  return still
+}
+
+/** How long the rolling ball spends on each leg of the player's move, in seconds. */
+const ROLL_LEG = 0.42
+
 export function GoalPitch({
   touches,
   draftOrigin = null,
@@ -90,6 +123,10 @@ export function GoalPitch({
   grades,
   onPlace,
   disabled = false,
+  caption = null,
+  hintEnvelope = null,
+  rolling = false,
+  pairs,
 }: {
   /** every finished touch: where he stood, where he sent it */
   touches: UserTouch[]
@@ -102,9 +139,18 @@ export function GoalPitch({
   grades?: Array<TouchGrade | undefined>
   onPlace: (point: ReplayPoint) => void
   disabled?: boolean
+  /** the builder's current step, printed on the board itself */
+  caption?: { lead: string; text: string } | null
+  /** the one envelope the reception hint bought — chalk, dashed, before the whistle only */
+  hintEnvelope?: Envelope | null
+  /** the move is with the server: a ball runs the player's own route while it is graded */
+  rolling?: boolean
+  /** after the whistle: which of the player's touches the judge paired with which */
+  pairs?: Array<{ user: number | null; truth: number | null }>
 }) {
   const board = useRef<HTMLDivElement>(null)
   const byPointer = useRef(false)
+  const still = usePrefersStill()
 
   /**
    * A pointer answers with the exact place it landed; the click that follows it is the
@@ -144,7 +190,7 @@ export function GoalPitch({
   }
 
   return (
-    <div ref={board} className="relative border-plate border-ink">
+    <div ref={board} className="relative border-plate border-ink" data-goal="board">
       <svg
         viewBox={`0 ${PITCH.top} ${PITCH.w} ${PITCH.h - PITCH.top}`}
         className="block w-full touch-manipulation"
@@ -332,6 +378,56 @@ export function GoalPitch({
           </g>
         )}
 
+        {/* the reception hint — ONE envelope, bought, for the touch being built. Chalk on
+            an ink keyline and never filled: it says where the source admits, not where. */}
+        {hintEnvelope && !truth && (
+          <g pointerEvents="none" data-goal="reception">
+            <ellipse
+              cx={hintEnvelope.x * PITCH.w}
+              cy={hintEnvelope.y * PITCH.h}
+              rx={Math.max(4, hintEnvelope.rx * PITCH.w)}
+              ry={Math.max(4, hintEnvelope.ry * PITCH.h)}
+              fill="none"
+              stroke="rgb(var(--p-ink))"
+              strokeWidth="4"
+              opacity=".55"
+            />
+            <ellipse
+              cx={hintEnvelope.x * PITCH.w}
+              cy={hintEnvelope.y * PITCH.h}
+              rx={Math.max(4, hintEnvelope.rx * PITCH.w)}
+              ry={Math.max(4, hintEnvelope.ry * PITCH.h)}
+              fill="none"
+              stroke="rgb(var(--p-line))"
+              strokeWidth="2.2"
+              strokeDasharray="6 5"
+            />
+          </g>
+        )}
+
+        {/* the bridges — for every PAIRED touch, from where you stood to where the archive
+            puts him. Ink under, chalk over: never vermilion on grass. */}
+        {truth && pairs && (
+          <g pointerEvents="none" data-goal="bridges">
+            {pairs.map((pair, index) => {
+              if (pair.user === null || pair.truth === null) return null
+              const mine = touches[pair.user]
+              const theirs = truth[pair.truth]
+              if (!mine || !theirs) return null
+              const a = toBoard(mine.origin)
+              const b = toBoard(theirs.origin)
+              if (Math.hypot(a.x - b.x, a.y - b.y) < 4) return null
+              const d = `M${a.x} ${a.y} L${b.x} ${b.y}`
+              return (
+                <g key={`bridge-${index}`} data-goal="bridge">
+                  <path d={d} fill="none" stroke="rgb(var(--p-ink))" strokeWidth="4.4" strokeLinecap="round" opacity=".85" />
+                  <path d={d} fill="none" stroke="rgb(var(--p-line))" strokeWidth="2" strokeLinecap="round" strokeDasharray="4 5" />
+                </g>
+              )
+            })}
+          </g>
+        )}
+
         {/* the ball rolling between one touch and the next — your own reconstruction */}
         <g pointerEvents="none">
           {touches.map((touch, index) => {
@@ -378,6 +474,27 @@ export function GoalPitch({
               strokeWidth="2.4"
               strokeDasharray="4 4"
             />
+          </g>
+        )}
+
+        {/* while the server grades: one ball runs the player's whole move, leg by leg, and
+            round again until the verdict lands — no fixed wait, and none at all under
+            reduced motion, where it is simply not drawn. */}
+        {rolling && !still && touches.length > 0 && (
+          <g pointerEvents="none" data-goal="rolling">
+            <circle r="6" cx="0" cy="0" fill="rgb(var(--p-line))" stroke="rgb(var(--p-ink))" strokeWidth="2">
+              <animateMotion
+                dur={`${touches.length * ROLL_LEG * 2}s`}
+                repeatCount="indefinite"
+                path={touches
+                  .map((touch, index) => {
+                    const a = toBoard(touch.origin)
+                    const b = toBoard(touch.target)
+                    return `${index === 0 ? 'M' : 'L'}${a.x} ${a.y} L${b.x} ${b.y}`
+                  })
+                  .join(' ')}
+              />
+            </circle>
           </g>
         )}
 
@@ -439,6 +556,45 @@ export function GoalPitch({
             )
           })}
         </g>
+
+        {/* after the whistle: `+` beside a touch the archive does not have, and a ring
+            around an archive touch nobody placed */}
+        {truth && pairs && (
+          <g pointerEvents="none">
+            {pairs.map((pair, index) => {
+              if (pair.user !== null && pair.truth === null) {
+                const touch = touches[pair.user]
+                if (!touch) return null
+                const p = toBoard(touch.origin)
+                const x = Math.min(PITCH.w - 9, p.x + 13)
+                const y = p.y - 44
+                return (
+                  <g key={`extra-${index}`} data-goal="extra">
+                    <rect x={x - 7} y={y - 7} width="14" height="14" fill="rgb(var(--p-ink))" />
+                    <path
+                      d={`M${x - 4} ${y} H${x + 4} M${x} ${y - 4} V${y + 4}`}
+                      stroke="rgb(var(--p-line))"
+                      strokeWidth="2.2"
+                      strokeLinecap="square"
+                    />
+                  </g>
+                )
+              }
+              if (pair.user === null && pair.truth !== null) {
+                const touch = truth[pair.truth]
+                if (!touch) return null
+                const p = toBoard(touch.origin)
+                return (
+                  <g key={`missing-${index}`} data-goal="missing">
+                    <circle cx={p.x} cy={p.y} r="12" fill="none" stroke="rgb(var(--p-ink))" strokeWidth="5" />
+                    <circle cx={p.x} cy={p.y} r="12" fill="none" stroke="rgb(var(--p-line))" strokeWidth="2.2" />
+                  </g>
+                )
+              }
+              return null
+            })}
+          </g>
+        )}
       </svg>
 
       {/* the real tap targets — twenty-one focusable, labelled controls over the drawing.
@@ -545,6 +701,23 @@ export function GoalPitch({
           </div>
         )
       })}
+
+      {/* the caption — the builder's question, on the board where the thumb is. Never a
+          tap target: `pointer-events-none`, so a placement under it lands on the zone. */}
+      {caption && (
+        <div
+          data-goal="caption"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center gap-2 bg-ink/85 px-2 py-1"
+        >
+          <span className="shrink-0 bg-paper px-1.5 font-body text-[11px] font-extrabold leading-[1.5] text-ink">
+            {caption.lead}
+          </span>
+          <span className="min-w-0 truncate font-body text-[12px] font-extrabold leading-snug text-paper">
+            {caption.text}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

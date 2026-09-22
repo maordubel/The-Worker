@@ -100,15 +100,33 @@ export function histogramBars(
  * The eight positions, in the pitch's own order rather than sorted by vote count, so a
  * position with zero picks still holds its place instead of vanishing from the domain —
  * `rankRows` sorts it afterwards for display, but the domain itself is fixed here.
+ *
+ * Keyed by CODE since 21.9.2026 (a ballot stores `CB`, not `בלם`); run the tally through
+ * `mergeLegacyRows` first so a row cast as a Hebrew label lands on its code.
  */
 export function positionBars(
   tally: Tally | null,
   positions: readonly { id: string; he: MessageKey }[],
-  labelOf: (he: MessageKey) => string,
 ): TallyRow[] {
-  const byLabel = new Map((tally?.rows ?? []).map((row) => [row.pick, row.votes] as const))
-  return positions.map((position) => ({
-    pick: labelOf(position.he),
-    votes: byLabel.get(labelOf(position.he)) ?? 0,
-  }))
+  const byCode = new Map((tally?.rows ?? []).map((row) => [row.pick, row.votes] as const))
+  return positions.map((position) => ({ pick: position.id, votes: byCode.get(position.id) ?? 0 }))
+}
+
+/**
+ * One key per answer, whatever build cast it.
+ *
+ * `poll_vote.pick` held display names and Hebrew labels until 21.9.2026 and holds ids and
+ * codes after it. `canonical` maps a legacy pick to its id/code (`null` = leave it as it
+ * is); rows that land on the same key are ADDED, because they are two ballots for one
+ * answer — never de-duplicated, and never dropped when nothing resolves them. The total
+ * does not change.
+ */
+export function mergeLegacyRows(tally: Tally | null, canonical: (pick: string) => string | null): Tally | null {
+  if (tally === null) return null
+  const merged = new Map<string, number>()
+  for (const row of tally.rows) {
+    const key = canonical(row.pick) ?? row.pick
+    merged.set(key, (merged.get(key) ?? 0) + row.votes)
+  }
+  return { total: tally.total, rows: [...merged.entries()].map(([pick, votes]) => ({ pick, votes })) }
 }

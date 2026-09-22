@@ -1,8 +1,17 @@
 'use client'
 
 import { Num } from '@/components/ui/Num'
+import {
+  PHASES,
+  lengthBucket,
+  phaseOf,
+  stepsDone,
+  type Draft,
+  type DraftPhase,
+  type LengthBucket,
+} from '@/lib/game/replay/draft'
 import { REPLAY_ACTIONS, type ReplayAction } from '@/lib/game/replay/vocab'
-import type { ReplayPoint, UserTouch } from '@/lib/game/replay/envelope'
+import type { UserTouch } from '@/lib/game/replay/envelope'
 import { t, type MessageKey } from '@/lib/i18n'
 
 /**
@@ -24,13 +33,17 @@ import { t, type MessageKey } from '@/lib/i18n'
  * reachable without scrolling back for a button that agreed with you.
  *
  * Four things this panel is deliberately NOT:
- *   · **not a set of dropdowns.** Every option is a visible, pressable thing; the rack
- *     scrolls sideways on a phone rather than collapsing into a select.
+ *   · **not a set of dropdowns.** Every option is a visible, pressable thing. The names
+ *     WRAP rather than scroll sideways: a sideways rack hid three of seven names at 320px,
+ *     and a name you cannot see is not an option (rule 41).
  *   · **not a place you can get stuck.** Every state has a next action and a way back:
- *     clear the touch being built, undo the last one, or tap a finished touch to reopen
- *     it. Rule 42's "leaving is always allowed", in a builder.
+ *     clear the touch being built, undo one STEP (and, from an empty draft, reopen the
+ *     last touch with its ball un-sent — `lib/game/replay/draft.ts`), or tap a finished
+ *     touch to reopen it. Rule 42's "leaving is always allowed", in a builder.
  *   · **not a hidden gesture.** The verbs carry a drawn mark AND their name, because "do
- *     not rely on colour alone" is also true of a glyph alone.
+ *     not rely on colour alone" is also true of a glyph alone. The step bar says which of
+ *     the four decisions is done with a ✓ and which is next with an inverted box, and
+ *     an opponent's chip is dashed AND says "יריב" — never a tint alone.
  *   · **not a shrunken desktop.** Every control clears the 48px tap height on the
  *     narrowest phone this product supports.
  */
@@ -100,27 +113,83 @@ export function ActionGlyph({ action }: { action: ReplayAction }) {
   )
 }
 
-export type Draft = {
-  actorHe: string | null
-  action: ReplayAction | null
-  origin: ReplayPoint | null
-  target: ReplayPoint | null
+export type { Draft } from '@/lib/game/replay/draft'
+
+const PHASE_ASK: Record<DraftPhase, MessageKey> = {
+  player: 'goal.ask.player',
+  action: 'goal.ask.action',
+  origin: 'goal.ask.origin',
+  target: 'goal.ask.target',
+}
+
+const PHASE_STEP: Record<DraftPhase, MessageKey> = {
+  player: 'goal.step.player',
+  action: 'goal.step.action',
+  origin: 'goal.step.origin',
+  target: 'goal.step.target',
+}
+
+export const LENGTH_LABEL: Record<LengthBucket, MessageKey> = {
+  short: 'goal.len.short',
+  medium: 'goal.len.medium',
+  long: 'goal.len.long',
 }
 
 export function askKey(draft: Draft): MessageKey {
-  if (!draft.actorHe) return 'goal.ask.player'
-  if (!draft.action) return 'goal.ask.action'
-  if (!draft.origin) return 'goal.ask.origin'
-  return 'goal.ask.target'
+  return PHASE_ASK[phaseOf(draft)]
+}
+
+/**
+ * ארבע ההחלטות — the step bar.
+ *
+ * A number while a decision is open, a ✓ once it is made, and the current one printed
+ * inverted with `aria-current="step"`. Three cues, and the colour is the least of them.
+ */
+function StepBar({ draft }: { draft: Draft }) {
+  const done = stepsDone(draft)
+  const now = phaseOf(draft)
+  return (
+    <ol aria-label={t('goal.step.aria')} className="mt-1.5 grid grid-cols-4 gap-1" data-goal="steps">
+      {PHASES.map((phase, index) => {
+        const current = phase === now && !done[phase]
+        const made = done[phase]
+        return (
+          <li
+            key={phase}
+            aria-current={current ? 'step' : undefined}
+            className={`flex items-center justify-center gap-1.5 border-rule px-1 py-1 ${
+              current ? 'border-ink bg-ink text-paper' : made ? 'border-ink bg-sheet text-ink' : 'border-ink/30 bg-sheet text-muted'
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`flex h-5 w-5 shrink-0 items-center justify-center border-hair font-latin text-[11px] font-extrabold leading-none ${
+                current ? 'border-paper' : 'border-current'
+              }`}
+            >
+              {made ? '✓' : <Num>{index + 1}</Num>}
+            </span>
+            <span className="min-w-0 truncate font-body text-[11px] font-extrabold leading-none">
+              {t(PHASE_STEP[phase])}
+            </span>
+            <span className="sr-only">{made ? t('goal.step.done') : current ? t('goal.step.now') : ''}</span>
+          </li>
+        )
+      })}
+    </ol>
+  )
 }
 
 export function ReplayBuilder({
   pool,
+  opponents = [],
   draft,
   touches,
   editing,
   full,
   canFinish,
+  canUndo,
+  busy = false,
   onPickPlayer,
   onPickAction,
   onClear,
@@ -129,6 +198,8 @@ export function ReplayBuilder({
   onFinish,
 }: {
   pool: string[]
+  /** the names in the pool who played for the other side */
+  opponents?: string[]
   draft: Draft
   touches: UserTouch[]
   /** the index being re-opened, or null when the draft is a new touch */
@@ -136,6 +207,9 @@ export function ReplayBuilder({
   /** true at the five-touch ceiling — the racks stay live for editing, the add does not */
   full: boolean
   canFinish: boolean
+  canUndo: boolean
+  /** the move is on its way to the server — nothing on this panel may change it now */
+  busy?: boolean
   onPickPlayer: (name: string) => void
   onPickAction: (action: ReplayAction) => void
   onClear: () => void
@@ -143,45 +217,59 @@ export function ReplayBuilder({
   onEdit: (index: number) => void
   onFinish: () => void
 }) {
-  const shut = full && editing === null
+  const shut = (full && editing === null) || busy
+  const draftStarted = draft.actorHe !== null || draft.action !== null || draft.origin !== null
 
   return (
-    <div className="mt-2.5">
+    <div className="mt-2.5" data-goal="builder">
       {/* the ask — one sentence, and it changes as the touch fills in */}
       <div className="flex items-center justify-between gap-2 border-rule border-ink bg-ink px-3 py-2">
         <p className="min-w-0 font-display text-step-0 leading-tight text-paper">
           {editing !== null ? t('goal.editing', { n: String(editing + 1) }) : t(askKey(draft))}
         </p>
-        <span className="shrink-0 font-latin text-[10px] font-extrabold tracking-[0.12em] text-concrete" dir="ltr">
+        <span className="shrink-0 font-latin text-[11px] font-extrabold tracking-[0.12em] text-concrete" dir="ltr">
           {touches.length}/5
         </span>
       </div>
 
-      {/* who */}
-      <div className="mt-1.5 -mx-gutter overflow-x-auto px-gutter">
-        <ul className="flex w-max gap-1.5">
-          {pool.map((name) => {
-            const chosen = draft.actorHe === name
-            return (
-              <li key={name}>
-                <button
-                  type="button"
-                  onClick={() => onPickPlayer(name)}
-                  aria-pressed={chosen}
-                  disabled={shut}
-                  data-goal="player"
-                  className={`flex min-h-tap items-center whitespace-nowrap border-rule border-ink px-3 font-body text-[13px] font-extrabold transition-colors duration-press disabled:opacity-40 ${
-                    chosen ? 'bg-red text-paper' : 'bg-sheet text-ink'
-                  }`}
-                >
-                  {name}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-      <p className="mt-1 font-body text-[10.5px] leading-snug text-muted">{t('goal.poolNote')}</p>
+      <StepBar draft={draft} />
+
+      {/* who — wrapped, so every name is on screen at 320px */}
+      <ul className="mt-1.5 flex flex-wrap gap-1.5" data-goal="pool">
+        {pool.map((name) => {
+          const chosen = draft.actorHe === name
+          const opponent = opponents.includes(name)
+          return (
+            <li key={name}>
+              <button
+                type="button"
+                onClick={() => onPickPlayer(name)}
+                aria-pressed={chosen}
+                aria-label={opponent ? t('goal.pool.opponentAria', { name }) : undefined}
+                disabled={shut}
+                data-goal="player"
+                data-opponent={opponent ? 'true' : undefined}
+                className={`flex min-h-tap items-center gap-1.5 whitespace-nowrap border-rule px-2.5 font-body text-[13px] font-extrabold transition-colors duration-press disabled:opacity-40 ${
+                  opponent ? 'border-dashed' : ''
+                } ${chosen ? 'border-ink bg-red text-paper' : 'border-ink bg-sheet text-ink'}`}
+              >
+                <bdi>{name}</bdi>
+                {opponent && (
+                  <span
+                    aria-hidden="true"
+                    className={`border-hair px-1 font-body text-[10px] font-extrabold leading-[1.5] ${
+                      chosen ? 'border-paper text-paper' : 'border-ink text-ink'
+                    }`}
+                  >
+                    {t('goal.pool.opponent')}
+                  </span>
+                )}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+      <p className="mt-1 font-body text-[11px] leading-snug text-muted">{t('goal.pool.note')}</p>
 
       {/* what */}
       <ul className="mt-1.5 grid grid-cols-4 gap-1.5">
@@ -200,7 +288,7 @@ export function ReplayBuilder({
                 }`}
               >
                 <ActionGlyph action={action} />
-                <span className="font-body text-[9.5px] font-extrabold leading-none">
+                <span className="font-body text-[10.5px] font-extrabold leading-none">
                   {t(ACTION_LABEL[action])}
                 </span>
               </button>
@@ -214,7 +302,7 @@ export function ReplayBuilder({
         <button
           type="button"
           onClick={onClear}
-          disabled={draft.actorHe === null && editing === null}
+          disabled={busy || (!draftStarted && editing === null)}
           data-goal="clear"
           className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-2 font-body text-[12px] font-extrabold text-muted disabled:opacity-40"
         >
@@ -223,16 +311,16 @@ export function ReplayBuilder({
         <button
           type="button"
           onClick={onUndo}
-          disabled={touches.length === 0}
+          disabled={busy || !canUndo}
           data-goal="undo"
           className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-2 font-body text-[12px] font-extrabold text-ink disabled:opacity-40"
         >
-          {t('goal.undo')}
+          {t('goal.undoStep')}
         </button>
         <button
           type="button"
           onClick={onFinish}
-          disabled={!canFinish}
+          disabled={busy || !canFinish}
           data-goal="finish"
           className="flex min-h-tap items-center justify-center border-rule border-ink bg-red px-2 font-body text-[12px] font-extrabold text-paper disabled:opacity-40"
         >
@@ -240,19 +328,19 @@ export function ReplayBuilder({
         </button>
       </div>
       {!canFinish && (
-        <p className="mt-1 font-body text-[10.5px] leading-snug text-muted">{t('goal.needTwo')}</p>
+        <p className="mt-1 font-body text-[11px] leading-snug text-muted">{t('goal.needTwo')}</p>
       )}
       {full && editing === null && (
-        <p className="mt-1 font-body text-[10.5px] leading-snug text-muted">{t('goal.tooMany')}</p>
+        <p className="mt-1 font-body text-[11px] leading-snug text-muted">{t('goal.tooMany')}</p>
       )}
 
       {/* the move so far — tap a line to reopen it */}
       <div className="mt-2 border-rule border-ink bg-sheet">
-        <p className="border-b-hair border-ink/25 px-3 py-1.5 font-body text-[10px] font-extrabold tracking-widest text-muted">
+        <p className="border-b-hair border-ink/25 px-3 py-1.5 font-body text-[11px] font-extrabold tracking-widest text-muted">
           {t('goal.touchList')}
         </p>
         {touches.length === 0 ? (
-          <p className="px-3 py-3 font-body text-[11.5px] leading-snug text-muted">
+          <p className="px-3 py-3 font-body text-[12px] leading-snug text-muted">
             {t('goal.noTouches')}
           </p>
         ) : (
@@ -262,7 +350,9 @@ export function ReplayBuilder({
                 <button
                   type="button"
                   onClick={() => onEdit(index)}
+                  disabled={busy}
                   aria-label={t('goal.editTouch', { n: String(index + 1) })}
+                  aria-current={editing === index ? 'true' : undefined}
                   data-goal="touch"
                   className={`flex min-h-tap w-full items-center gap-2 px-3 text-start transition-colors duration-press ${
                     editing === index ? 'bg-red/10' : ''
@@ -277,9 +367,15 @@ export function ReplayBuilder({
                   <span className="min-w-0 flex-1 font-body text-[12.5px] font-extrabold leading-snug text-ink">
                     <bdi>{touch.actorHe}</bdi>
                   </span>
-                  <span className="shrink-0 font-body text-[10.5px] text-muted">
+                  <span className="shrink-0 text-end font-body text-[11px] leading-tight text-muted">
                     {t(ACTION_SHORT[touch.action])}
+                    <span className="block">{t(LENGTH_LABEL[lengthBucket(touch.origin, touch.target)])}</span>
                   </span>
+                  {editing === index && (
+                    <span aria-hidden="true" className="shrink-0 font-body text-[11px] font-extrabold text-ink">
+                      ✎
+                    </span>
+                  )}
                 </button>
               </li>
             ))}

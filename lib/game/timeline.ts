@@ -280,7 +280,9 @@ export function gradeInsert(
     correct: slot === position,
     card,
     position,
-    board: boardAfter(seed, placed + 1),
+    // with the cursor: grading a rotated deal against the cursor-0 board handed back a
+    // board of cards the player had never been dealt (every seed, cursors 1–3, 21.9.2026)
+    board: boardAfter(seed, placed + 1, cursor),
     done: placed + 1 >= TIMELINE_LENGTH,
   }
 }

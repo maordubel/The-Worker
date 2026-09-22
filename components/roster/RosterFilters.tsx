@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Num } from '@/components/ui/Num'
 import {
@@ -22,7 +22,10 @@ import { t, type MessageKey } from '@/lib/i18n'
  * Four rows, in the order a supporter actually narrows:
  *
  *   · **עמדה** — goalkeeper, defence, midfield, attack, and **לא מתועד**.
- *   · **מוצא** — Israeli, foreign, and לא מתועד.
+ *   · **מכסת זרים** — Israeli, foreign, and לא מתועד — read off the CLUB's foreign-slot
+ *     record (ויקיפועל's category), never nationality; the footnote under the row says so
+ *     (players.md §3.1, 21.9.2026). It was headed "מוצא" until then, and 42 of its rows
+ *     were a nationality somebody else declared.
  *   · **תקופה** — by decade, from the seasons his shirt numbers are recorded in.
  *   · **אות** — the family-name initial, which the rail already did and now composes
  *     with the rest instead of replacing them.
@@ -81,6 +84,12 @@ export function RosterFilters({
   // "201" is a person halfway through typing 2010, and treating it as the year 201
   // would empty the sheet under their fingers. Only a complete four-digit year filters.
   const [yearText, setYearText] = useState(filter.year === null ? '' : String(filter.year))
+  // A chip removed above the facets (or "clear all") resets the year from outside; the
+  // box has to follow, or it would keep printing a year the list no longer filters by.
+  useEffect(() => {
+    if (filter.year === null) setYearText((text) => (text.length === 4 ? '' : text))
+    else setYearText(String(filter.year))
+  }, [filter.year])
 
   function setYear(raw: string) {
     const digits = raw.replace(/\D/g, '').slice(0, 4)
@@ -122,7 +131,7 @@ export function RosterFilters({
       )}
 
       {originsUseful && (
-        <Row label={t('roster.origin')}>
+        <Row label={t('roster.foreignSlot')}>
           <Chip
             live={filter.origin === 'any'}
             onClick={() => onChange({ ...filter, origin: 'any' })}
@@ -175,6 +184,10 @@ export function RosterFilters({
             <Chip live={false} onClick={() => setYear('')} label={t('roster.yearClear')} />
           )}
         </Row>
+      )}
+
+      {originsUseful && (
+        <p className="mt-0.5 font-body text-[10.5px] leading-snug text-muted">{t('roster.foreignSlot.note')}</p>
       )}
 
       {/*

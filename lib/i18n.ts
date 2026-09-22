@@ -1,5 +1,12 @@
 import he from '@/messages/he.json'
 import heLife from '@/messages/he.life.json'
+import heArchive from '@/messages/he.gates.archive.json'
+import heCard from '@/messages/he.gates.card.json'
+import heChallenge from '@/messages/he.gates.challenge.json'
+import heCore from '@/messages/he.gates.core.json'
+import heKits from '@/messages/he.gates.kits.json'
+import hePlayers from '@/messages/he.gates.players.json'
+import heReplay from '@/messages/he.gates.replay.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -21,7 +28,36 @@ import heLife from '@/messages/he.life.json'
  * exactly the kind of quiet rule that decides a sentence on a screen months later.
  */
 
-const catalogue = { ...he, ...heLife }
+/**
+ * **ושבעה קבצי שערים — אותה סיבה, בקנה מידה של סבב אחד (21.9.2026).** שדרוג השערים של
+ * 21.9 נכתב בכמה ידיים במקביל — אשכול שחקנים, חולצות, אתגרים, שחזור, ארכיון, כרטיס,
+ * והשכבה המשותפת — וכל אחד מהם היה מוסיף שורות לאותו זנב של `he.json`. מפתח חדש של
+ * שער שודרג נכתב בקובץ של האשכול שלו; מפתח ישן נשאר איפה שהוא (כלל 32 — לא מזיזים,
+ * לא ממיינים). הכפילות עדיין שגיאת בנייה, בכל זוג קבצים.
+ */
+export const CATALOGUE_FILES = {
+  he,
+  heLife,
+  heCore,
+  hePlayers,
+  heKits,
+  heChallenge,
+  heReplay,
+  heArchive,
+  heCard,
+} as const
+
+const catalogue = {
+  ...he,
+  ...heLife,
+  ...heCore,
+  ...hePlayers,
+  ...heKits,
+  ...heChallenge,
+  ...heReplay,
+  ...heArchive,
+  ...heCard,
+}
 
 export type MessageKey = keyof typeof catalogue
 

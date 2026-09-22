@@ -1,19 +1,19 @@
 import 'server-only'
 
 import { crestMark } from './crestMarks'
-import { seasonKits, type SeasonKit } from './seasons'
+import { kitRecords, specOf } from './kit-master'
 import { COLOUR_NAME, PATTERNS, type KitSpec } from './spec'
 
 /**
  * הקטלוג — every shirt the archive can draw, as the collection reads it.
  *
- * The mockup's collection screen shows 24 shirts. The archive holds **33**, each read
- * off a photograph Maor supplied, each with its own source and confidence. There was no
- * reason to ship the smaller number: the mockup was drawn before the data existed.
+ * A read-model over the Kit Master (rule 1): it copies nothing and sorts the way a wardrobe is
+ * read, newest first. Two projections, and the difference between them is the point:
  *
- * This is a read-model (rule 1). It copies nothing — it projects the same
- * `content/manual/kit-designs.json` rows the kit game deals from, adds the labels a card
- * needs, and sorts them the way a wardrobe is read: newest first.
+ *  · `kitCatalog()` — the full row, spec included. SERVER-ONLY: the spec is the answer to the
+ *    shirt's Gate 4 puzzle.
+ *  · `lockedCatalog()` — what the /kits page ships: a season, a variant, a decade and whether
+ *    Gate 4 can deal it. A locked shirt shows nothing more (rule 24, brief §15).
  */
 
 export type CatalogKit = {
@@ -22,9 +22,7 @@ export type CatalogKit = {
   seasonLabel: string
   variant: 'home' | 'away' | 'third'
   spec: KitSpec
-  /** the season's decade, for the filter rail */
   decade: number
-  /** what the card prints under the shirt */
   makerHe: string | null
   sponsorHe: string | null
   patternHe: string
@@ -34,45 +32,48 @@ export type CatalogKit = {
   sourceTitle: string
   sourceUrl: string | null
   confidence: number
-  /** true when the archive knows all five graded parts — i.e. gate 4 can deal it */
+  /** true when Gate 4 can deal it — the Kit Master's own verdict */
   playable: boolean
 }
 
+export type LockedKit = Pick<CatalogKit, 'key' | 'seasonLabel' | 'variant' | 'decade' | 'playable'>
+
 export type Facet = 'all' | 'home' | 'away' | 'third'
 
-function label(kit: SeasonKit): Pick<CatalogKit, 'patternHe' | 'baseHe' | 'crestHe'> {
-  return {
-    patternHe: PATTERNS.find((row) => row.id === kit.spec.pattern)?.he ?? 'חלק',
-    baseHe: COLOUR_NAME[kit.spec.base],
-    crestHe: crestMark(kit.spec.crestKey)?.nameHe ?? null,
-  }
-}
-
 export function kitCatalog(): CatalogKit[] {
-  return seasonKits()
-    .map((kit) => {
-      return {
-        key: `${kit.seasonLabel}|${kit.variant}`,
-        seasonLabel: kit.seasonLabel,
-        variant: kit.variant,
-        spec: kit.spec,
-        decade: Math.floor(Number(kit.seasonLabel.slice(0, 4)) / 10) * 10,
-        makerHe: kit.spec.makerHe,
-        sponsorHe: kit.spec.sponsorHe,
-        ...label(kit),
-        noteHe: kit.noteHe,
-        sourceTitle: kit.sourceTitle,
-        sourceUrl: kit.sourceUrl,
-        confidence: kit.confidence,
-        playable:
-          kit.spec.sponsorHe !== null && kit.spec.makerHe !== null && kit.spec.crestKey !== null,
-      }
-    })
-    // Newest first — a wardrobe is read from the shirt you wore last.
-    .sort((a, b) => b.seasonLabel.localeCompare(a.seasonLabel) || a.variant.localeCompare(b.variant))
+  return kitRecords().map((kit) => {
+    const spec = specOf(kit)
+    return {
+      key: kit.legacyKey,
+      seasonLabel: kit.seasonLabel,
+      variant: kit.variant,
+      spec,
+      decade: kit.decade,
+      makerHe: spec.makerHe,
+      sponsorHe: spec.sponsorHe,
+      patternHe: PATTERNS.find((row) => row.id === spec.pattern)?.he ?? 'חלק',
+      baseHe: COLOUR_NAME[spec.base],
+      crestHe: crestMark(spec.crestKey)?.nameHe ?? null,
+      noteHe: kit.noteHe,
+      sourceTitle: kit.sourceTitle,
+      sourceUrl: kit.sourceUrl,
+      confidence: kit.confidence,
+      playable: kit.gate4.playable,
+    }
+  })
 }
 
-export function facetCounts(kits: CatalogKit[]): Record<Facet, number> {
+export function lockedCatalog(): LockedKit[] {
+  return kitRecords().map((kit) => ({
+    key: kit.legacyKey,
+    seasonLabel: kit.seasonLabel,
+    variant: kit.variant,
+    decade: kit.decade,
+    playable: kit.gate4.playable,
+  }))
+}
+
+export function facetCounts(kits: readonly Pick<CatalogKit, 'variant'>[]): Record<Facet, number> {
   return {
     all: kits.length,
     home: kits.filter((kit) => kit.variant === 'home').length,

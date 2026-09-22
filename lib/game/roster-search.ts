@@ -53,6 +53,12 @@ export function splitName(name: string): NameParts {
 }
 
 export type Searchable = {
+  /**
+   * The Player Master's `p_…` id (21.9.2026) — the key a saved pick should hold from now
+   * on. Optional so a list built from anything else still type-checks; `rosterIndex()`
+   * always sets it.
+   */
+  id?: string
   slug: string
   nameHe: string
   givenHe: string
@@ -76,8 +82,29 @@ export type Searchable = {
   positionFrom?: 'squad' | 'lineup' | 'database' | 'name' | null
   origin?: 'israeli' | 'foreign' | null
   originFrom?: 'squad' | 'lineup' | 'database' | 'name' | null
+  /**
+   * מכסת זרים — the CLUB's own record of whether he took a foreign slot (ויקיפועל's
+   * `שחקנים זרים (כדורגל)` category), read off the Player Master's `foreignSlot`.
+   *
+   * It is not nationality and the screens never call it that: 42 of the old `origin`
+   * rows were a squad sheet's or Wikipedia's NATIONALITY, which is a different claim about
+   * a man. Where it is present the "ישראלי / זר" filter, the badge and the challenges read
+   * it; `origin` stays for any caller that builds a row without it.
+   */
+  foreignSlot?: 'israeli' | 'foreign' | 'unknown'
+  /** his other Hebrew spellings (Player Master aliases), so a search for `עמרי אפק` finds עומרי */
+  aliasesHe?: readonly string[]
   fromYear?: number | null
   toYear?: number | null
+}
+
+/**
+ * The foreign-slot answer a filter, a badge and a challenge read — the club's record where
+ * the row carries it, the legacy facet otherwise, and `'unknown'` where neither speaks.
+ */
+export function slotStatusOf(entry: Searchable): 'israeli' | 'foreign' | 'unknown' {
+  if (entry.foreignSlot) return entry.foreignSlot
+  return entry.origin ?? 'unknown'
 }
 
 /**
@@ -160,9 +187,7 @@ export function filterRoster(entries: Searchable[], filter: RosterFilter): Searc
     } else if (filter.position !== 'any' && !positionsOf(entry).includes(filter.position)) {
       return false
     }
-    if (filter.origin === 'unknown') {
-      if (entry.origin) return false
-    } else if (filter.origin !== 'any' && entry.origin !== filter.origin) return false
+    if (filter.origin !== 'any' && slotStatusOf(entry) !== filter.origin) return false
     if (filter.decade !== 'any' && !inDecade(entry, filter.decade)) return false
     if (filter.year !== null && !inYear(entry, filter.year)) return false
     return true
@@ -185,7 +210,8 @@ export function facetCounts(entries: Searchable[]): {
     const codes = positionsOf(entry)
     if (codes.length === 0) position.unknown = (position.unknown ?? 0) + 1
     for (const code of codes) position[code] = (position[code] ?? 0) + 1
-    origin[entry.origin ?? 'unknown'] = (origin[entry.origin ?? 'unknown'] ?? 0) + 1
+    const slot = slotStatusOf(entry)
+    origin[slot] = (origin[slot] ?? 0) + 1
     const from = entry.fromYear
     if (from !== null && from !== undefined) {
       const to = entry.toYear ?? from
@@ -200,9 +226,22 @@ export function facetCounts(entries: Searchable[]): {
 /** 0 = no match. Higher is better: family prefix > given prefix > anywhere. */
 export function score(entry: Searchable, folded: string): number {
   if (folded === '') return 1
-  const family = fold(entry.familyHe)
-  const given = fold(entry.givenHe)
-  const whole = fold(entry.nameHe)
+  const own = scoreName(entry.nameHe, entry.familyHe, entry.givenHe, folded)
+  if (own > 0 || !entry.aliasesHe || entry.aliasesHe.length === 0) return own
+  // Another spelling the archive attached to HIM (a reviewed alias, never a guess) — one
+  // step below the same hit on his own name, so the canonical spelling still leads.
+  let best = 0
+  for (const alias of entry.aliasesHe) {
+    const parts = splitName(alias)
+    best = Math.max(best, scoreName(alias, parts.familyHe, parts.givenHe, folded))
+  }
+  return best > 0 ? best - 5 : 0
+}
+
+function scoreName(nameHe: string, familyHe: string, givenHe: string, folded: string): number {
+  const family = fold(familyHe)
+  const given = fold(givenHe)
+  const whole = fold(nameHe)
   if (family === folded) return 100
   if (family.startsWith(folded)) return 90
   if (given.startsWith(folded)) return 70

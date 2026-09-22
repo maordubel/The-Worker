@@ -57,7 +57,16 @@
  *       file, because the next person to write a sync path will not have read it.
  */
 
-import { emptyProfile, emptyStat, type GateStat, type Profile, type Rotation } from '@/lib/profile/store'
+import type { MemberBook, SupporterRecord, WorkerCardFields } from '@/lib/game/member'
+import {
+  emptyProfile,
+  emptyStat,
+  type Deed,
+  type GateStat,
+  type Latest,
+  type Profile,
+  type Rotation,
+} from '@/lib/profile/store'
 
 /**
  * The two fields that live on `app_profile` rather than in the device's `Profile`.
@@ -71,7 +80,21 @@ export type PortalIdentity = {
   displayName: string | null
   /** ISO date, `YYYY-MM-DD` */
   since: string
+  /**
+   * When the name was last edited THROUGH THE APP — `book.card.editedAt` on a device,
+   * `app_profile.card_edited_at` on the account. '' means never: on the account side that
+   * is a `display_name` Google seeded at sign-up, which is a person's legal name and not
+   * the nickname they chose for the terrace. See `editWinner`.
+   */
+  editedAt?: string
 }
+
+/**
+ * A device name that predates edit stamps. It is an edit — somebody typed it — made at a
+ * time nobody recorded, so it is dated to the earliest instant there is: it beats a name
+ * nobody chose (Google's) and loses to any edit that carries a real date.
+ */
+export const LEGACY_EDIT = '1970-01-01T00:00:00.000Z'
 
 export type PortalProfile = {
   identity: PortalIdentity
@@ -100,16 +123,99 @@ export function mergeProfiles(local: PortalProfile, remote: PortalProfile | null
 }
 
 export function mergeIdentity(local: PortalIdentity, remote: PortalIdentity): PortalIdentity {
+  const winner = editWinner(
+    { editedAt: local.editedAt ?? '', has: (local.displayName ?? '').trim() !== '' },
+    { editedAt: remote.editedAt ?? '' },
+  )
+  const named = winner === 'local' ? local : remote
   return {
     // The server's number wins whenever it has one — see the header. A device number is
     // only ever ADOPTED upward, into an account that has none.
     memberNo: firstOf(remote.memberNo, local.memberNo),
-    // A name is the one identity field a person edits on purpose, and the account's copy
-    // is the one their other devices have already seen. A device name fills a blank.
-    displayName: firstOf(remote.displayName, local.displayName),
+    // THE NAME IS THE NICKNAME (21.9.2026). This line used to prefer the account's copy
+    // outright — and the account's copy is whatever Google handed `handle_new_user`, a
+    // person's full legal name. So the nickname typed on the card never reached the
+    // account, and signing in on a second phone printed "Maor Dubel" where "פוגי" was.
+    // Now the newest EDIT wins, and Google's seed is not an edit (`editWinner`).
+    displayName: firstOf(named.displayName, null),
     // Earliest, always. The single most important line in this file.
     since: earlier(local.since, remote.since),
+    editedAt: named.editedAt ?? '',
   }
+}
+
+/**
+ * Whose edit wins — the one rule for the name, the number and the declared card fields,
+ * which merge as ONE unit so a card can never print one device's name over the other
+ * device's number.
+ *
+ *  · The account side was never edited through the app (`''`): anything the device holds
+ *    wins, because the account's only name is Google's seed.
+ *  · The device was never edited and holds nothing: the account wins.
+ *  · Both edited: the later timestamp. A tie goes to the account, which is the copy the
+ *    person's other devices have already seen.
+ */
+export function editWinner(
+  local: { editedAt: string; has: boolean },
+  remote: { editedAt: string },
+): 'local' | 'remote' {
+  if (remote.editedAt === '') return local.editedAt !== '' || local.has ? 'local' : 'remote'
+  if (local.editedAt === '') return 'remote'
+  return local.editedAt > remote.editedAt ? 'local' : 'remote'
+}
+
+/**
+ * The name, the number and the declared card, as they travel between a device's book
+ * and `app_profile` (`display_name`, `shirt_number`, `card`, `card_edited_at`).
+ */
+export type CardUnit = {
+  nameHe: string
+  number: number | null
+  card: WorkerCardFields | null
+  /** ISO timestamp, '' = never edited through the app */
+  editedAt: string
+}
+
+/** The device's unit, read off its book. A name with no stamp is a `LEGACY_EDIT`. */
+export function unitOfBook(book: MemberBook | null): CardUnit | null {
+  if (book === null) return null
+  const stamped = book.card?.editedAt ?? ''
+  const name = book.nameHe.replace(/\s+/g, ' ').trim()
+  return {
+    nameHe: name,
+    number: book.number,
+    card: book.card ?? null,
+    editedAt: stamped !== '' ? stamped : name !== '' ? LEGACY_EDIT : '',
+  }
+}
+
+/**
+ * Newest edit wins, as a whole — except `issuedOn`, which is the day the card was first
+ * issued on ANY device and so takes the earlier, exactly like `since`.
+ */
+export function mergeCardUnit(local: CardUnit | null, remote: CardUnit | null): CardUnit | null {
+  if (local === null) return remote
+  if (remote === null) return local
+  const winner = editWinner(
+    { editedAt: local.editedAt, has: local.nameHe !== '' || local.card !== null },
+    { editedAt: remote.editedAt },
+  )
+  const chosen = winner === 'local' ? local : remote
+  const issuedOn = earlier(local.card?.issuedOn ?? '', remote.card?.issuedOn ?? '')
+  return {
+    ...chosen,
+    card: chosen.card === null ? null : { ...chosen.card, issuedOn },
+  }
+}
+
+/** Gate 7's seal: the NEWER seal wins; a side with none never erases the other's. */
+export function mergeSupporter(
+  local: SupporterRecord | null | undefined,
+  remote: SupporterRecord | null | undefined,
+): SupporterRecord | null {
+  if (!local) return remote ?? null
+  if (!remote) return local
+  return local.sealedOn > remote.sealedOn ? local : remote
 }
 
 export function mergeDeviceProfiles(local: Profile, remote: Profile): Profile {
@@ -129,6 +235,22 @@ export function mergeDeviceProfiles(local: Profile, remote: Profile): Profile {
     collections[key] = union(local.collections[key] ?? [], remote.collections[key] ?? [])
   }
 
+  const deeds: Record<string, Deed> = {}
+  for (const key of keysOf(local.deeds ?? {}, remote.deeds ?? {})) {
+    const a = local.deeds?.[key]
+    const b = remote.deeds?.[key]
+    // The later day is the deed that counts; on a tie the local one keeps its mark,
+    // because the device is the one that knows what it last made.
+    deeds[key] = !a ? (b as Deed) : !b ? a : b.on > a.on ? b : a
+  }
+
+  const latest: Record<string, Latest> = {}
+  for (const key of keysOf(local.latest ?? {}, remote.latest ?? {})) {
+    const a = local.latest?.[key]
+    const b = remote.latest?.[key]
+    latest[key] = !a ? (b as Latest) : !b ? a : b.on > a.on ? b : a
+  }
+
   return {
     v: 1,
     // `since` on the device profile is the same claim as `identity.since` and takes the
@@ -141,6 +263,10 @@ export function mergeDeviceProfiles(local: Profile, remote: Profile): Profile {
     collections,
     shares: Math.max(local.shares, remote.shares),
     duelsTaken: Math.max(local.duelsTaken, remote.duelsTaken),
+    deeds,
+    // Preferences are the DEVICE's and never leave it, so the local side is the answer.
+    prefs: { ...(local.prefs ?? {}) },
+    latest,
   }
 }
 
@@ -247,5 +373,29 @@ export function remoteProfile(partial: Partial<Profile>): Profile {
     gates: partial.gates ?? {},
     rotation: partial.rotation ?? {},
     collections: partial.collections ?? {},
+    deeds: partial.deeds ?? {},
+    prefs: {},
+    latest: partial.latest ?? {},
   }
+}
+
+/**
+ * `profile_item` rows, folded into the device's `collections` shape — the fourth read
+ * model on the account side, and the reason collections are exact across devices now:
+ * once both sides hold the same sets, the union above is the whole answer.
+ */
+export type ItemRow = { set_id: string; item_id: string }
+
+export function foldItems(rows: readonly ItemRow[]): Record<string, string[]> {
+  const out: Record<string, string[]> = {}
+  const seen: Record<string, Set<string>> = {}
+  for (const row of rows) {
+    if (typeof row?.set_id !== 'string' || typeof row.item_id !== 'string') continue
+    if (row.set_id === '' || row.item_id === '') continue
+    const have = (seen[row.set_id] ??= new Set())
+    if (have.has(row.item_id)) continue
+    have.add(row.item_id)
+    ;(out[row.set_id] ??= []).push(row.item_id)
+  }
+  return out
 }

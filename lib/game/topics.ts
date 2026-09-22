@@ -1,30 +1,53 @@
+import { Q_TOPICS, type QTopic } from './questions/types'
+
 /**
- * נושאי הטריוויה — the five ways in.
+ * נושאי הטריוויה — Quick Pick's seven ways in, plus הכול מהכול.
  *
- * One bank behind five doors. Maor asked for a general round that mixes everything
- * INCLUDING basketball, and four narrow rounds: terrace songs, European nights, shirt
- * numbers, player chants. A supporter who only wants to argue about Europe should not
- * have to sit through kit questions to get there.
+ * Maor's wing had five doors (general, terrace songs, Europe, numbers, player songs);
+ * the Quick Pick prototype has seven topics. The seven are TAGS on the master's
+ * questions, not seven datasets (rule 1), and the old doors stay open as aliases so no
+ * link anybody ever shared stops working:
  *
- * **On rule 14.** The house rule is that football and basketball never mix, and this
- * does not break it — it makes explicit what the rule was always protecting. The danger
- * was never that the two sports appear in one SESSION; it was that a football question
- * gets a basketball distractor, or that "how many championships" silently answers with
- * the wrong sport's count. So every question carries a `sport`, every question is
- * internally single-sport, and a TOPIC decides which sports are in scope. `general`
- * admits both because the owner of the club's basketball wing asked for it; every other
- * topic is football, and `mixed` never means mixed WITHIN a question.
+ *   /trivia/general        → הכול מהכול (both sports, as Maor asked)
+ *   /trivia/terrace-songs  → songs
+ *   /trivia/player-songs   → songs
  *
- * Pure and client-safe — the picker screen imports this, and `lib/game/trivia.ts` is
- * server-only.
+ * **On rule 14.** Every question carries a `sport` and is single-sport inside itself; a
+ * TOPIC decides which sports are in scope. Only הכול מהכול admits the basketball wing,
+ * and `derby` means Maccabi Tel Aviv and nothing else (rule 13).
+ *
+ * Pure and client-safe: the lobby imports it. The bank itself is server-only.
  */
 
-export const TOPICS = ['general', 'terrace-songs', 'europe', 'numbers', 'player-songs'] as const
+export { Q_TOPICS, type QTopic }
+
+/** the route segments a run can live under — canonical first, then the aliases */
+export const TOPICS = ['general', ...Q_TOPICS] as const
 export type Topic = (typeof TOPICS)[number]
 export const DEFAULT_TOPIC: Topic = 'general'
 
+const ALIASES: Record<string, Topic> = {
+  'terrace-songs': 'songs',
+  'player-songs': 'songs',
+}
+
+/** every segment a link may carry, the old doors included */
+export const ROUTE_SEGMENTS: readonly string[] = [...TOPICS, ...Object.keys(ALIASES)]
+
 export function isTopic(value: string | undefined): value is Topic {
   return value !== undefined && (TOPICS as readonly string[]).includes(value)
+}
+
+/** a route segment → the topic it plays, or null for a segment nobody ever issued */
+export function resolveTopic(value: string | undefined): Topic | null {
+  if (value === undefined) return null
+  if (isTopic(value)) return value
+  return ALIASES[value] ?? null
+}
+
+/** `general` plays everything — the master has no `general` tag */
+export function questionTopic(topic: Topic): QTopic | null {
+  return topic === 'general' ? null : topic
 }
 
 export type TopicSpec = {
@@ -32,81 +55,21 @@ export type TopicSpec = {
   /** message keys — no user-facing string lives in code (rule 10) */
   titleKey: string
   bladeKey: string
+  /** a one-glyph mark for the Quick Pick tile, drawn as type, never as an image */
+  mark: string
   /** which sports may appear in the round. Never mixed inside one question. */
   sports: Array<'football' | 'basketball'>
-  /**
-   * Which templates feed this topic. `null` means "everything" — only `general` gets
-   * that, and it is why general is the widest bank rather than a leftovers bin.
-   */
-  templates: string[] | null
 }
 
-/**
- * The templates each narrow topic draws on.
- *
- * A narrow topic that cannot fill a round is worse than no topic at all, so the picker
- * reads the real count per topic and says so — see `topicCounts()` in `trivia.ts`. Where
- * a bank is thin the screen prints the number rather than pretending.
- */
 export const TOPIC_SPECS: Record<Topic, TopicSpec> = {
-  general: {
-    slug: 'general',
-    titleKey: 'topic.general',
-    bladeKey: 'topic.general.blade',
-    sports: ['football', 'basketball'],
-    templates: null,
-  },
-  'terrace-songs': {
-    slug: 'terrace-songs',
-    titleKey: 'topic.terraceSongs',
-    bladeKey: 'topic.terraceSongs.blade',
-    sports: ['football'],
-    templates: ['song-origin', 'song-tune', 'song-era', 'song-about', 'fan-culture'],
-  },
-  europe: {
-    slug: 'europe',
-    titleKey: 'topic.europe',
-    bladeKey: 'topic.europe.blade',
-    sports: ['football'],
-    templates: [
-      'euro-opponent',
-      'euro-round',
-      'euro-season',
-      'euro-aggregate',
-      'euro-venue',
-      'euro-milestone',
-      'goal-opponent',
-      'goal-competition',
-      'goal-scorer',
-      'goal-assist',
-      'goal-title',
-      'opponent',
-      'score',
-      'venue',
-      'travelling',
-    ],
-  },
-  numbers: {
-    slug: 'numbers',
-    titleKey: 'topic.numbers',
-    bladeKey: 'topic.numbers.blade',
-    sports: ['football'],
-    templates: ['shirt-number', 'which-number', 'shirt-multi', 'number-season', 'number-era'],
-  },
-  'player-songs': {
-    slug: 'player-songs',
-    titleKey: 'topic.playerSongs',
-    bladeKey: 'topic.playerSongs.blade',
-    sports: ['football'],
-    /*
-     * `song-tune-player` and `song-artist` were never built. Naming a template that
-     * does not exist does not throw — the round builder skips what it cannot find —
-     * so the topic quietly ran on one template, eight questions, four short of a
-     * round, and has therefore been greyed out on the wall since the day it shipped.
-     * Listing only what exists is what makes the count on the plate true.
-     */
-    templates: ['player-song'],
-  },
+  general: { slug: 'general', titleKey: 'topic.general', bladeKey: 'topic.general.blade', mark: '∞', sports: ['football', 'basketball'] },
+  europe: { slug: 'europe', titleKey: 'topic.europe', bladeKey: 'topic.europe.blade', mark: '✈', sports: ['football'] },
+  players: { slug: 'players', titleKey: 'topic.players', bladeKey: 'topic.players.blade', mark: '11', sports: ['football'] },
+  history: { slug: 'history', titleKey: 'topic.history', bladeKey: 'topic.history.blade', mark: '★', sports: ['football'] },
+  numbers: { slug: 'numbers', titleKey: 'topic.numbers', bladeKey: 'topic.numbers.blade', mark: '#', sports: ['football'] },
+  songs: { slug: 'songs', titleKey: 'topic.songs', bladeKey: 'topic.songs.blade', mark: '♫', sports: ['football'] },
+  kits: { slug: 'kits', titleKey: 'topic.kits', bladeKey: 'topic.kits.blade', mark: '◫', sports: ['football'] },
+  derby: { slug: 'derby', titleKey: 'topic.derby', bladeKey: 'topic.derby.blade', mark: '×', sports: ['football'] },
 }
 
 export function topicSpec(topic: Topic): TopicSpec {

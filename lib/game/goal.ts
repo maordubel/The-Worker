@@ -10,8 +10,10 @@ import {
   judgeReplay,
   type ReplayJudgement,
 } from './replay/judge'
+import { actorKindOf } from './replay/actors'
+import { REPLAY_HOLDS, replayHeld } from './replay/holds'
 import { readTruth, type GoalSourceRecord, type TruthRejection } from './replay/truth'
-import type { TruthTouch, UserTouch } from './replay/envelope'
+import type { Envelope, TruthTouch, UserTouch } from './replay/envelope'
 import { isReplayAction } from './replay/vocab'
 
 /**
@@ -36,13 +38,23 @@ type SquadFile = { records: Array<{ personName: string; seasonLabel: string }> }
 
 const FLOOR = 2
 
-/** Everything in the archive that is sourced well enough AND that the model can read. */
+/**
+ * Everything in the archive that is sourced well enough, that the model can read, and
+ * whose fixture is not in open conflict with the match archive (`./replay/holds.ts`).
+ */
 function records(): GoalSourceRecord[] {
   const file = goalsFile as unknown as GoalFile
   return file.records.filter(
     (record) =>
-      (record.confidence ?? file.confidence) >= FLOOR && readTruth(record).rejections.length === 0,
+      (record.confidence ?? file.confidence) >= FLOOR &&
+      !replayHeld(record.goalId) &&
+      readTruth(record).rejections.length === 0,
   )
+}
+
+/** The records held out of play, each with the conflict that holds it. */
+export function goalHolds(): Array<{ goalId: string; fields: readonly string[] }> {
+  return Object.entries(REPLAY_HOLDS).map(([goalId, hold]) => ({ goalId, fields: hold.fields }))
 }
 
 /** Every record this gate refuses, with the step and the raw text that refused it. */
@@ -53,6 +65,17 @@ export function goalRejections(): TruthRejection[] {
 
 export function goalCount(): number {
   return records().length
+}
+
+/**
+ * Every playable goal as an id and the year it was scored — what THE WORKER LIFE may pin
+ * (`/goal?g=` already carries the same id in a URL), and nothing of the move. The life
+ * picks one from before its own year and the deal re-derives it with the existing pin.
+ */
+export function goalYears(): Array<{ id: string; year: number }> {
+  return records()
+    .map((record) => ({ id: record.goalId, year: Number(String(record.playedOn ?? '').slice(0, 4)) }))
+    .filter((row) => Number.isFinite(row.year) && row.year > 0)
 }
 
 export function hasGoals(): boolean {
@@ -82,10 +105,25 @@ export function seasonOfDate(iso: string): string {
  * over-suppression costs one distractor, an under-suppression puts the same footballer in
  * the pool twice and makes the whole list look made up.
  */
-function poolFor(record: GoalSourceRecord, seed: number, size = 7): string[] {
+/**
+ * **And only NAMED men, with the other side marked as the other side.** An unnamed actor
+ * (`הכדור`) is not a person to pick, so it never enters the pool — the judge gives that
+ * touch no player component instead. An opponent (a keeper's parry) is a real, named
+ * touch, so he IS offered, and flagged in `opponents` so the chip can say so rather than
+ * sitting among the season's squad as if he had played in it (`./replay/actors.ts`).
+ */
+function poolFor(
+  record: GoalSourceRecord,
+  seed: number,
+  size = 7,
+): { pool: string[]; opponents: string[] } {
   const actors: string[] = []
+  const opponents: string[] = []
   for (const step of record.sequence) {
+    const kind = actorKindOf(record.goalId, step)
+    if (kind === 'unnamed') continue
     if (!actors.includes(step.actorHe)) actors.push(step.actorHe)
+    if (kind === 'opponent' && !opponents.includes(step.actorHe)) opponents.push(step.actorHe)
   }
 
   const season = seasonOfDate(record.playedOn)
@@ -100,7 +138,16 @@ function poolFor(record: GoalSourceRecord, seed: number, size = 7): string[] {
   const fill = shuffle(unique, rng(seed + record.goalId.length * 31 + record.sequence.length))
   const pool = [...actors, ...fill.slice(0, Math.max(0, size - actors.length))]
   // shuffled once more so the answer is never the head of the list
-  return shuffle(pool, rng(seed * 7 + record.playedOn.length))
+  return { pool: shuffle(pool, rng(seed * 7 + record.playedOn.length)), opponents }
+}
+
+/** A pin as the URL may carry it: a goal id and nothing else. */
+const PIN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+/** The playable goal a pin names, or null — an unknown or held pin is simply ignored. */
+export function pinnedGoal(pin: string | null | undefined): string | null {
+  if (typeof pin !== 'string' || pin.length > 64 || !PIN.test(pin)) return null
+  return records().some((record) => record.goalId === pin) ? pin : null
 }
 
 /**
@@ -108,13 +155,26 @@ function poolFor(record: GoalSourceRecord, seed: number, size = 7): string[] {
  *
  * "Shortest" is still the difficulty ramp, and it is no longer a leak: the player is not
  * told the count, so a shorter move is simply a shorter move to find.
+ *
+ * **A pin deals one named goal as goal 1 of an otherwise normal run** (`/goal?g=<goalId>`,
+ * which is how the archive's "rebuild this goal" hands a supporter in). The other two are
+ * the seeded slice's, shortest first; if the pinned goal was already in the slice it is
+ * moved to the front, otherwise the slice's longest move makes room. Every server action
+ * re-derives the deal with the same pin, or it would grade a different goal from the one
+ * on screen.
  */
-function drawn(seed: number, cursor: number): GoalSourceRecord[] {
+function drawn(seed: number, cursor: number, pin?: string | null): GoalSourceRecord[] {
   const all = records()
   const at = positionOf(seed, cursor, all.length, GOALS_PER_RUN)
   const deck = shuffle(all, rng(at.seed))
-  const picked = takeFrom(deck, at.slot * GOALS_PER_RUN, GOALS_PER_RUN)
-  return picked.sort((a, b) => a.sequence.length - b.sequence.length)
+  const picked = takeFrom(deck, at.slot * GOALS_PER_RUN, GOALS_PER_RUN).sort(
+    (a, b) => a.sequence.length - b.sequence.length,
+  )
+  const id = pinnedGoal(pin)
+  const pinned = id ? all.find((record) => record.goalId === id) : undefined
+  if (!pinned) return picked
+  const rest = picked.filter((record) => record.goalId !== pinned.goalId)
+  return [pinned, ...rest.slice(0, GOALS_PER_RUN - 1)]
 }
 
 /**
@@ -131,10 +191,12 @@ export type GoalChallenge = {
   seasonLabel: string
   approximateCoords: true
   pool: string[]
+  /** the names in `pool` that played for the OTHER side — a keeper's parry, say */
+  opponents: string[]
 }
 
-export function dealRun(seed: number, cursor = 0): GoalChallenge[] {
-  return drawn(seed, cursor).map((record) => ({
+export function dealRun(seed: number, cursor = 0, pin?: string | null): GoalChallenge[] {
+  return drawn(seed, cursor, pin).map((record) => ({
     goalId: record.goalId,
     titleHe: record.titleHe,
     subtitleHe: record.subtitleHe,
@@ -143,7 +205,7 @@ export function dealRun(seed: number, cursor = 0): GoalChallenge[] {
     scoreHe: record.scoreHe,
     seasonLabel: seasonOfDate(record.playedOn),
     approximateCoords: true as const,
-    pool: poolFor(record, seed + cursor),
+    ...poolFor(record, seed + cursor),
   }))
 }
 
@@ -162,11 +224,48 @@ export function goalHint(
   goalIndex: number,
   which: GoalHint,
   cursor = 0,
+  pin?: string | null,
 ): string | null {
-  const record = drawn(seed, cursor)[goalIndex]
+  const record = drawn(seed, cursor, pin)[goalIndex]
   if (!record) return null
   if (which === 'count') return String(record.sequence.length)
-  return record.sequence[0]?.positionHe ?? null
+  if (which === 'start') return record.sequence[0]?.positionHe ?? null
+  return null
+}
+
+/** Three decimals is a tenth of a unit on a 300-unit board: the shape, and not a digit more. */
+function rounded(value: number): number {
+  return Math.round(value * 1000) / 1000
+}
+
+/**
+ * איפה הוא קיבל — the third hint, and the only one drawn on the pitch.
+ *
+ * It answers "where did touch k begin?" for the touch the player is building now, and it
+ * answers with the ENVELOPE — the anchor AND the radii the reporter's words allow — never
+ * with a bare point, because a point would claim a precision the archive does not hold
+ * and would hand over the one coordinate the envelope exists to keep honest. Past the
+ * archive's own last touch it answers for the last touch rather than refusing, so asking
+ * for touch five of a three-touch move does not leak the count either.
+ *
+ * Nothing else crosses: not the man, not the verb, not the words. One per goal, paid,
+ * and it never updates itself — the client draws exactly what it bought.
+ */
+export function receptionHint(
+  seed: number,
+  goalIndex: number,
+  touchIndex: number,
+  cursor = 0,
+  pin?: string | null,
+): Envelope | null {
+  if (!Number.isInteger(touchIndex) || touchIndex < 0) return null
+  const record = drawn(seed, cursor, pin)[goalIndex]
+  if (!record) return null
+  const { touches } = readTruth(record)
+  const touch = touches[Math.min(touchIndex, touches.length - 1)]
+  if (!touch) return null
+  const { x, y, rx, ry } = touch.origin
+  return { x: rounded(x), y: rounded(y), rx: rounded(rx), ry: rounded(ry) }
 }
 
 export type GoalVerdict = ReplayJudgement & {
@@ -189,17 +288,19 @@ export function gradeGoal(
   goalIndex: number,
   touches: UserTouch[],
   cursor = 0,
+  pin?: string | null,
 ): GoalVerdict | null {
-  const record = drawn(seed, cursor)[goalIndex]
+  const record = drawn(seed, cursor, pin)[goalIndex]
   if (!record) return null
   const reading = readTruth(record)
   if (reading.rejections.length > 0) return null
 
   // Never trust the shape that came back over the wire: a name that was not offered, an
   // action that is not a verb, a coordinate that is not a number, or a sixth touch.
-  const pool = new Set(poolFor(record, seed + cursor))
+  const pool = new Set(poolFor(record, seed + cursor).pool)
   const safe: UserTouch[] = []
-  for (const touch of touches.slice(0, MAX_TOUCHES)) {
+  const sent = Array.isArray(touches) ? touches : []
+  for (const touch of sent.slice(0, MAX_TOUCHES)) {
     if (!touch || !pool.has(touch.actorHe) || !isReplayAction(touch.action)) continue
     const origin = clean(touch.origin)
     const target = clean(touch.target)

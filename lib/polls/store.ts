@@ -63,6 +63,12 @@ export interface BallotStore {
   seal(): Promise<void>
   reasons(): Promise<Reasons>
   saveReason(questionId: string, reason: string): Promise<void>
+  /**
+   * Put a migrated slip back on this device's paper WITHOUT casting it (21.9.2026): moving
+   * a saved name to its id is not a vote, and a read that stuffed the box would be the
+   * quietest possible way to double-count. The next real vote on a question casts the id.
+   */
+  rewrite(ballot: Ballot): Promise<void>
 }
 
 const KEY = 'worker.ballot.v1'
@@ -107,6 +113,14 @@ export class LocalBallotStore implements BallotStore {
       window.localStorage.setItem(KEY, JSON.stringify(next))
     } catch {
       // an unsaved vote is still a cast vote for this session
+    }
+  }
+
+  async rewrite(ballot: Ballot): Promise<void> {
+    try {
+      window.localStorage.setItem(KEY, JSON.stringify(ballot))
+    } catch {
+      // the migrated slip is still the one on screen; it migrates again on the next read
     }
   }
 
@@ -203,6 +217,10 @@ export class SupabaseBallotStore implements BallotStore {
    * mode, blocked storage — votes on paper only and the count never hears from it, which
    * is correct: an id minted fresh on every page load would be one browser stuffing the
    * box by accident (`lib/portal/device.ts`).
+   *
+   * What is cast is the pick as stored — a `p_…` id, a position code or the digits — so
+   * `poll_vote.pick` carries the id from 21.9.2026 on; `lib/polls/board.ts` folds the rows
+   * cast before that (display names, Hebrew labels) into the same keys. No SQL change.
    */
   async save(questionId: string, pick: string): Promise<void> {
     await this.slip.save(questionId, pick)
@@ -266,6 +284,11 @@ export class SupabaseBallotStore implements BallotStore {
 
   saveReason(questionId: string, reason: string): Promise<void> {
     return this.slip.saveReason(questionId, reason)
+  }
+
+  /** Paper only — never cast. See the interface. */
+  rewrite(ballot: Ballot): Promise<void> {
+    return this.slip.rewrite(ballot)
   }
 }
 

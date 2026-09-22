@@ -1,15 +1,20 @@
 import type { KitSpec } from './spec'
 
 export type KitBriefId = 'free' | 'derby' | 'europe' | 'memory2010' | 'supporters'
-export type KitBrief = { id: KitBriefId; titleHe: string; bodyHe: string; requirementsHe: string[] }
-export const KIT_BRIEFS: KitBrief[] = [
-  { id: 'free', titleHe: 'חופשי', bodyHe: 'בלי בריף. רק חולצה שאתה באמת רוצה לראות על הפועל.', requirementsHe: ['זהות ברורה', 'עיצוב שלא נלחם בעצמו'] },
-  { id: 'derby', titleHe: 'דרבי בלילה', bodyHe: 'חולצה שקוראים ממנה הפועל גם מהיציע השני.', requirementsHe: ['אדום דומיננטי', 'ניגוד ברור', 'לא חלקה לגמרי'] },
-  { id: 'europe', titleHe: 'אירופה בחוץ', bodyHe: 'לילה קר בחוץ, בסיס לא אדום — ועדיין הפועל.', requirementsHe: ['בסיס לא אדום', 'פרט אדום מזוהה', 'עד שלושה צבעים'] },
-  { id: 'memory2010', titleHe: 'זיכרון 2010', bodyHe: 'לקחת DNA מ-2010 ולבנות ממנו משהו חדש, לא העתק.', requirementsHe: ['לפחות פרט אחד מה-DNA', 'לפחות פרט אחד חדש'] },
-  { id: 'supporters', titleHe: 'חולצת אוהדים', bodyHe: 'משהו שאוהד באמת יקנה, ילבש ויישאר איתו.', requirementsHe: ['זהות חזקה', 'מעט צבעים', 'חזית מאוזנת'] },
-]
 
+/**
+ * The studio's briefs. Their words live in the catalogue (`kits.brief.<id>.title|body`, rule 10);
+ * this list is only the order and the ids the scoring below knows how to read.
+ */
+export type KitBrief = { id: KitBriefId }
+export const KIT_BRIEFS: KitBrief[] = [{ id: 'free' }, { id: 'derby' }, { id: 'europe' }, { id: 'memory2010' }, { id: 'supporters' }]
+
+/**
+ * What the studio measures is the BRIEF, not taste (brief §16). "Brief Fit" and "DNA Fit" are
+ * the two numbers it prints; the invented supporter lines that used to sit under them ("הייתי
+ * קונה") are gone — nobody said them, and a screen may only say a supporter thinks something when
+ * a supporter did.
+ */
 export type StudioMetrics = { identity: number; briefFit: number; originality: number; coherence: number; dnaUse: number; overall: number }
 const TRAITS: Array<keyof KitSpec> = ['base','patternInk','pattern','collar','collarInk','sleeves','sleeveInk','makerHe','sponsorHe','crestKey','nameset']
 const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)))
@@ -59,13 +64,4 @@ export function scoreStudioDesign(spec: KitSpec, briefId: KitBriefId, dna: KitSp
 
   const overall = clamp(identity * .27 + briefFit * .28 + originality * .18 + coherence * .22 + dnaUse * .05)
   return { identity: clamp(identity), briefFit: clamp(briefFit), originality, coherence: clamp(coherence), dnaUse, overall }
-}
-
-export function supporterFeedback(metrics: StudioMetrics): string {
-  if (metrics.overall >= 88 && metrics.identity >= 85) return 'רואים הפועל לפני שקוראים את הסמל. הייתי קונה.'
-  if (metrics.briefFit >= 88) return 'הבריף יושב טוב. יש פה חולצה שאפשר לדמיין על הדשא.'
-  if (metrics.coherence < 65) return 'יש פה רעיון טוב, אבל כרגע שתי תקופות נלחמות על אותה חולצה.'
-  if (metrics.identity < 65) return 'יפה, אבל צריך עוד פרט אחד שיצעק הפועל גם מרחוק.'
-  if (metrics.originality < 55) return 'הזיכרון חזק מדי. תזיז עוד פרט אחד כדי שזה יהיה שלך.'
-  return 'זה עובד. עוד ליטוש קטן בחזית וזה מרגיש כמו חולצה אמיתית.'
 }

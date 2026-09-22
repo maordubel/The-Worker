@@ -1,31 +1,48 @@
 import 'server-only'
 
 import lineupsFile from '@/content/manual/lineups.json'
+import squadsFile from '@/content/manual/squads.json'
+import { matchById, sourceOf } from '@/lib/archive/match-master'
+import { playerById, pickablePlayers, resolvePlayerId } from '@/lib/archive/player-master'
+import { kitForSeason } from '@/lib/kit/seasons'
+import type { KitSpec } from '@/lib/kit/spec'
 import { positionOf, takeFrom } from '@/lib/rotation/deck'
 import type { SlotRole } from '@/lib/xi/roles'
-import { footballPeople, nameOf, rng, shuffle } from './archive'
+import { nameOf, rng, shuffle } from './archive'
 import { nameCore } from './roster-search'
 import {
   COACH_NOTES,
+  LINES,
+  XI_SIZE,
+  isLine,
   lineOf,
   type CoachNote,
   type CoachNoteKind,
+  type Decoy,
+  type DecoyKind,
+  type Line,
   type LineupVerdict,
-  type SlotId,
-  type SlotVerdict,
+  type LockerName,
+  type Placement,
+  type PlacementVerdict,
+  type SheetMan,
 } from './lineup-sheet'
 
 /**
- * Match XI — place eleven players on the pitch and have the placement graded per slot.
+ * Gate 3 — חדר ההלבשה: put the men who started a real match into the four bands, and have
+ * the sheet graded by LINE on the server.
  *
- * Follows the schema Maor supplied: percentage coordinates, a formation, a player bank
- * of the eleven plus distractors, and three-state per-slot feedback.
+ * ## What a record must carry to be dealt (21.9.2026, players.md §3.2)
  *
- * Two deliberate departures from that schema, both required by the brand spec:
- *   1. The states are NOT green / yellow / red. Yellow is forbidden outright, and no
- *      state may be carried by colour alone — each one has a mark and a word as well.
- *   2. The pitch is a paper diagram in ink on sheet, not a green field. "FIFA
- *      aesthetics: neon cards, grass" is on the explicitly-rejected list.
+ *  · confidence ≥ 2 and not marked unverified by its source (`playable: false`);
+ *  · **a canonical match id** (`matchRef`, m_…) — brief §14 asks for a match ID, and a
+ *    "documented XI of a season" names no match, so it is withheld with a note;
+ *  · **eleven player ids** (`xiIds`), pinned to the Player Master — the names stay as the
+ *    source wrote them and `tests/lineup.test.ts` fails if a name and its id part;
+ *  · at least five decoys, each with its sourced kind (`decoys`).
+ *
+ * No formation is dealt: every record is `formationStated: false`, so the board is four
+ * bands (`lib/game/lineup-sheet.ts`). The formations below serve gate 1 only.
  */
 
 export type PitchSlot = {
@@ -33,15 +50,9 @@ export type PitchSlot = {
   /** GK · CB · LB · RB · CM · LW · ST … shown under the slot */
   roleHe: string
   /**
-   * The slot's detailed role, as a code.
-   *
-   * It says what the FORMATION asks of this position and nothing about any player: gate
-   * 1's scouting drawer maps it DOWN to the four canonical positions the archive
-   * actually states, and never back. `lib/xi/roles.ts` is where that reasoning lives and
-   * is worth reading before anybody adds a role here.
-   *
-   * Gate 3 ignores it — it grades by line, from `slotId` — so this is additive to the
-   * quiz and load-bearing only for gate 1.
+   * The slot's detailed role, as a code — what the FORMATION asks of this position and
+   * nothing about any player. Gate 1's scouting drawer maps it DOWN to the four canonical
+   * positions (`lib/xi/roles.ts`).
    */
   role: SlotRole
   /** percentages, origin at the defensive end */
@@ -49,23 +60,19 @@ export type PitchSlot = {
   y: number
 }
 
+type SlotId = string
+
 export type Formation = { name: string; slots: PitchSlot[] }
 
 const gk = (y = 94): PitchSlot => ({ slotId: 'GK', roleHe: 'שוער', role: 'GK', x: 50, y })
 
 /**
  * Spread a row around the centre with a fixed gap, narrowing only when a wide row
- * would push a chip past the touchline. Two forwards then sit like two forwards
- * instead of hugging the flanks, and a five-man midfield still fits on a 320px screen.
+ * would push a chip past the touchline.
  */
 const MAX_GAP = 19
 const USABLE = 70
 
-/**
- * One position in a row: the Hebrew label the pitch prints, and the role code the
- * scouting drawer reads. They are written as a pair so that adding a position without
- * deciding what it accepts is a type error rather than a silent `undefined`.
- */
 type RowSlot = [roleHe: string, role: SlotRole]
 
 function row(prefix: string, roles: RowSlot[], y: number): PitchSlot[] {
@@ -84,8 +91,7 @@ function row(prefix: string, roles: RowSlot[], y: number): PitchSlot[] {
 /*
  * The row order is the pitch's own: index 0 sits at the lowest inline-start, which in
  * an RTL layout is the RIGHT of the screen — so `מגן ימני` leads a back four and the
- * codes follow the same order. Changing one without the other would put a right back on
- * the left wing of every formation at once.
+ * codes follow the same order.
  */
 export const FORMATIONS: Record<string, Formation> = {
   '4-4-2': {
@@ -136,35 +142,28 @@ export const DEFAULT_FORMATION = '4-4-2'
 /* ------------------------------------------------------------------ content */
 
 type LineupRecord = {
+  /** the record's own key (`2001-02-uefa-qf-milan`) — the `lineup` dialect of the match registry */
   matchId: string
+  /** the canonical match id, m_… — absent means the record names no match and is not dealt */
+  matchRef?: string
   titleHe: string
   subtitleHe?: string
   formation: string
-  /** slotId -> player display name */
+  /** no source here states a formation; the board is four bands */
+  formationStated?: boolean
+  /** slotId -> player name, as the source wrote it */
   xi: Record<string, string>
-  /** extra names offered alongside the eleven */
+  /** slotId -> the Player Master id of that name */
+  xiIds?: Record<string, string>
+  /** extra names offered alongside the eleven, as the source wrote them */
   distractors?: string[]
-  /**
-   * True when the source lists the XI in the conventional order but does not state
-   * each player's position. Grading then falls back to the LINE (keeper / defence /
-   * midfield / attack) rather than the exact slot — inferring a right-back from list
-   * order would be a claim the source does not make.
-   */
+  /** each decoy's id and its sourced kind */
+  decoys?: Array<{ id: string; kind: DecoyKind }>
+  /** who came on, when, and for whom — a restatement of `noteHe`/`benchHe` */
+  subsOn?: Array<{ id: string; minute: number | null; for: string | null }>
   positionsInferred?: boolean
-  /**
-   * False when the SOURCE itself marks the XI unverified. The Chelsea away eleven has
-   * one slot the wiki stamps VERIFY, so the record is kept for the archive and withheld
-   * from the game: an XI with a guessed slot grades a player wrong for being right.
-   */
   playable?: boolean
-  /**
-   * The bench and the manager, where the source names them.
-   *
-   * Held in the archive and not offered in the bank: a substitute is not in the XI, and
-   * putting one in the pool of names to place would grade a player wrong for knowing
-   * that he came on. They belong in the record because the source says them, and the
-   * moment a screen wants to print "who came on, and who sent him" they are there.
-   */
+  withheldHe?: string
   benchHe?: string[]
   coachHe?: string
   noteHe?: string
@@ -181,113 +180,199 @@ type LineupFile = {
 
 const CONFIDENCE_FLOOR = 2
 
-/**
- * An XI with no spare names is not a puzzle, it is a sorting exercise.
- *
- * Eleven correct names for eleven slots can be finished by elimination without knowing
- * a single one of them, so a record like that grades everybody as an expert. Every
- * curated record in the file carries five to seven extra names; the 1985/86 decider
- * arrived with none and was dealt anyway, which is the defect this floor exists to make
- * impossible. A record that cannot field five real spare names is kept in the archive
- * and withheld from the game, exactly like one the source marks unverified.
- *
- * Five, not "some": it is what the corpus already does, so the number is the house's
- * own practice rather than a threshold somebody picked today.
- */
+/** Five spare names, not "some" — what the corpus already does (an XI with none is a sorting exercise). */
 const DISTRACTOR_FLOOR = 5
 
+const file = lineupsFile as unknown as LineupFile
+
 function verified(): LineupRecord[] {
-  const file = lineupsFile as unknown as LineupFile
   return file.records.filter(
     (record) =>
       (record.confidence ?? file.confidence) >= CONFIDENCE_FLOOR &&
       record.playable !== false &&
-      (record.distractors?.length ?? 0) >= DISTRACTOR_FLOOR,
+      typeof record.matchRef === 'string' &&
+      record.matchRef.startsWith('m_') &&
+      Object.keys(record.xiIds ?? {}).length === XI_SIZE &&
+      (record.decoys?.length ?? 0) >= DISTRACTOR_FLOOR,
   )
 }
 
+/** Every playable record, for the tests and the research report — never sent to a screen. */
+export function playableLineups(): readonly LineupRecord[] {
+  return verified()
+}
+
+/** The display name of an id: the Player Master's canonical spelling (never a second roster). */
+function displayName(id: string): string {
+  return playerById(id)?.displayName ?? id
+}
+
+/** The line a starter started in, by id. */
+function startersOf(record: LineupRecord): Map<string, Line> {
+  const out = new Map<string, Line>()
+  for (const [slot, id] of Object.entries(record.xiIds ?? {})) {
+    const line = lineOf(slot)
+    if (isLine(line)) out.set(id, line)
+  }
+  return out
+}
+
+/** Who the source names coming on — ids, with the minute where stated. */
+function subsOf(record: LineupRecord): Map<string, number | null> {
+  const out = new Map<string, number | null>()
+  for (const sub of record.subsOn ?? []) out.set(sub.id, sub.minute)
+  // `benchHe` is the older restatement; any name there that `subsOn` does not carry still counts
+  for (const raw of record.benchHe ?? []) {
+    const id = resolvePlayerId(nameCore(raw))
+    if (id && !out.has(id)) out.set(id, null)
+  }
+  return out
+}
+
+/* ---------------------------------------------------------- the season squad */
+
+type SquadRow = { personName: string; personSlug?: string; seasonLabel: string; sourceTitle?: string | null }
+
+let squadIndex: Map<string, Map<string, string | null>> | null = null
+
+/** season → (player id → the squad row's source title). Built once, server-side. */
+function squadsBySeason(): Map<string, Map<string, string | null>> {
+  if (squadIndex) return squadIndex
+  const index = new Map<string, Map<string, string | null>>()
+  for (const row of (squadsFile as unknown as { records: SquadRow[] }).records) {
+    const id = resolvePlayerId(row.personSlug ?? row.personName)
+    if (!id) continue
+    const season = index.get(row.seasonLabel) ?? new Map<string, string | null>()
+    if (!season.has(id)) season.set(id, row.sourceTitle ?? null)
+    index.set(row.seasonLabel, season)
+  }
+  squadIndex = index
+  return index
+}
+
 /**
- * מי ישב על הספסל — the substitutes the source names for THIS match, as plain names.
- *
- * `benchHe` is the record's own field and it is written the way a match report writes a
- * bench: `גילי לנדאו (נכנס בדקה 48)`. The minute belongs on the archive row and gets in
- * the way of a comparison, so the parenthetical is stripped with `nameCore` — the
- * archive's existing convention for a qualified name (rule 59), not a second one
- * invented here.
- *
- * Where the record names no bench this is empty, and `benchKnown` is what tells the
- * screen the difference between "nobody" and "the source does not say". Nothing is
- * inferred from a squad list, an era or a shirt number: a substitute is a claim about
- * one evening.
+ * The sourced "didn't start" kind of a decoy. The stored kind is re-derived and has to
+ * agree (`tests/lineup.test.ts`); the source travels with it.
  */
-function benchNames(record: LineupRecord): string[] {
-  return (record.benchHe ?? []).map((entry) => nameCore(entry)).filter((name) => name !== '')
+function decoyOf(record: LineupRecord, id: string): Decoy {
+  const subs = subsOf(record)
+  if (subs.has(id)) {
+    return {
+      kind: 'sub-on',
+      minute: subs.get(id) ?? null,
+      sourceTitle: record.sourceTitle ?? file.source.title,
+    }
+  }
+  const season = record.matchRef ? matchById(record.matchRef)?.season : null
+  const squad = season ? squadsBySeason().get(season) : undefined
+  if (squad?.has(id)) return { kind: 'season-squad', minute: null, sourceTitle: squad.get(id) ?? null }
+  return { kind: 'other', minute: null, sourceTitle: null }
+}
+
+/** The kind a decoy SHOULD carry, derived from the sources — exported for the test. */
+export function derivedDecoyKind(record: LineupRecord, id: string): DecoyKind {
+  return decoyOf(record, id).kind
+}
+
+/* ---------------------------------------------------------------- the deal */
+
+/** What the intro card may say about the match — from the Match Master, disputes kept. */
+export type MatchIntro = {
+  /** the canonical match id */
+  matchId: string
+  season: string
+  /** ISO day where the sources agree on it; null where they do not (or never said) */
+  playedOn: string | null
+  dateDisputed: boolean
+  /** Hapoel's goals and the opponent's, where the sources agree */
+  result: { hapoel: number; opponent: number } | null
+  /** where the match record comes from, named on screen */
+  matchSourceTitle: string | null
+  matchSourceUrl: string | null
 }
 
 export type Challenge = {
+  /** the canonical match id (m_…) */
   matchId: string
   titleHe: string
   subtitleHe: string | null
-  formation: Formation
-  bank: string[]
-  positionsInferred: boolean
+  intro: MatchIntro
+  /** the lockers: the eleven and the decoys, shuffled; an id and a name each — no line, no kind */
+  bank: LockerName[]
+  /** the season's real kit, the same on every locker and with no number — null where the archive has none */
+  kit: KitSpec | null
+  kitSeason: string | null
   sourceTitle: string
   sourceUrl: string | null
 }
 
-/*
- * The verdict's vocabulary now lives in `lib/game/lineup-sheet.ts`, which the board can
- * import at runtime — this file cannot, because it reads the answer. Re-exported here so
- * that every existing importer of `@/lib/game/lineup` keeps working and there is still
- * exactly one declaration of each (rule 59).
- */
-export { lineOf, COACH_NOTES, MAX_LOCKS } from './lineup-sheet'
-export type {
-  SlotId,
-  SlotStatus,
-  SlotVerdict,
-  LineupVerdict,
-  CoachNote,
-  CoachNoteKind,
-} from './lineup-sheet'
-
 /**
- * The match this round asks about.
- *
- * It used to be `records[Math.floor(rng(seed)() * records.length)]`, and that is worse
- * than it looks. `rng()`'s FIRST output is very nearly linear in the seed — for small
- * seeds the three xorshifts carry no bits between the shifted copies, so `rng(s)()`
- * works out to `(270369 × s mod 100000) / 100000`, a fixed −0.29631 ramp. With six
- * playable records, "play again with seed + 1" therefore walked a short fixed cycle
- * instead of drawing: seeds 1..10 give records 4, 2, 0, 4, 3, 1, 5, 3, 1, 0.
- *
- * A deck fixes both problems at once. Shuffling consumes the stream past its first
- * output, and the cursor walks the deck one match at a time, so six rounds use all six
- * records before any of them comes back.
+ * The match this round asks about. A deck, not `records[floor(rng(seed)() * n)]` —
+ * `rng()`'s first output is nearly linear in the seed, and the cursor walks the deck one
+ * match at a time, so five rounds use all five records before any comes back.
  */
-function chosen(seed: number, cursor: number) {
-  const records = verified()
+function chosen(seed: number, cursor: number, window?: LineupWindow): LineupRecord | undefined {
+  const records = window ? verified().filter((record) => yearOfRecord(record) < window.before) : verified()
+  if (window?.pin) return records.find((record) => record.matchRef === window.pin)
   const at = positionOf(seed, cursor, records.length, 1)
   return takeFrom(shuffle(records, rng(at.seed)), at.slot, 1)[0]
 }
 
-/** Null when no verified XI exists — the screen then says exactly that. */
-export function dealChallenge(seed: number, cursor = 0): Challenge | null {
-  const record = chosen(seed, cursor)
-  if (!record) return null
+/**
+ * חלון של חיים (21.9.2026, `lib/mechanics/types.ts`) — THE WORKER LIFE asks for a lineup a
+ * boy could have known: only matches played before `before`, and `pin` names the one match
+ * the life chose, so the deal and every grade re-derive the same round. Absent, the gate's
+ * deck is untouched.
+ */
+export type LineupWindow = { before: number; pin?: string | null }
 
-  const file = lineupsFile as unknown as LineupFile
-  const formation = FORMATIONS[record.formation] ?? FORMATIONS[DEFAULT_FORMATION]
-  const eleven = Object.values(record.xi)
-  const extras = record.distractors ?? []
+/** the year a verified record was played in — the day where the sources agree, else the season's start */
+function yearOfRecord(record: LineupRecord): number {
+  const match = matchById(record.matchRef as string)
+  const day = match?.playedOn.precision === 'day' ? match.playedOn.value : null
+  const year = Number((day ?? match?.season ?? '').slice(0, 4))
+  return Number.isFinite(year) && year > 0 ? year : Number.POSITIVE_INFINITY
+}
 
+/** every playable match, as an id and a year — what the life may ask about, and nothing of the answer */
+export function lineupYears(): Array<{ id: string; year: number }> {
+  return verified()
+    .map((record) => ({ id: record.matchRef as string, year: yearOfRecord(record) }))
+    .filter((row) => Number.isFinite(row.year))
+}
+
+function introOf(record: LineupRecord): MatchIntro {
+  const match = matchById(record.matchRef as string)
+  const source = match?.sourceIds[0] ? sourceOf(match.sourceIds[0]) : null
   return {
-    matchId: record.matchId,
+    matchId: record.matchRef as string,
+    season: match?.season ?? '',
+    playedOn: match?.playedOn.precision === 'day' ? match.playedOn.value : null,
+    dateDisputed: match?.playedOn.precision === 'disputed',
+    result: match?.result ?? null,
+    matchSourceTitle: source?.title ?? null,
+    matchSourceUrl: source?.url ?? null,
+  }
+}
+
+/** Null when no verified XI exists — the screen then says exactly that. */
+export function dealChallenge(seed: number, cursor = 0, window?: LineupWindow): Challenge | null {
+  const record = chosen(seed, cursor, window)
+  if (!record) return null
+  const ids = [...new Set([...Object.values(record.xiIds ?? {}), ...(record.decoys ?? []).map((decoy) => decoy.id)])]
+  const intro = introOf(record)
+  const kit = intro.season ? kitForSeason(intro.season) : null
+  return {
+    matchId: intro.matchId,
     titleHe: record.titleHe,
     subtitleHe: record.subtitleHe ?? null,
-    formation: formation as Formation,
-    bank: shuffle([...new Set([...eleven, ...extras])], rng(seed * 3 + 7)),
-    positionsInferred: record.positionsInferred ?? false,
+    intro,
+    bank: shuffle(ids, rng(seed * 3 + 7)).map((id) => ({ id, nameHe: displayName(id) })),
+    // The same shirt on every locker, and no number on it: a number would be a clue
+    // (`shirt-numbers.json` is season-bound), and a shirt per man would be a claim about
+    // which of them wore which cut that night.
+    kit: kit ? { ...kit.spec, number: null } : null,
+    kitSeason: kit ? kit.seasonLabel : null,
     sourceTitle: record.sourceTitle ?? file.source.title,
     sourceUrl: record.sourceUrl ?? file.source.url ?? null,
   }
@@ -295,62 +380,67 @@ export function dealChallenge(seed: number, cursor = 0): Challenge | null {
 
 /* ------------------------------------------------------------------ grading */
 
-/** Graded on the server against the verified XI. The answer is never in the payload. */
+/**
+ * The placements a client may send: ids from THIS deal's bank, one band each, at most
+ * eleven. Anything else is dropped, so a forged request cannot grade a name that was
+ * never in the room.
+ */
+function cleanPlacements(record: LineupRecord, placements: readonly Placement[]): Placement[] {
+  const bank = new Set([...Object.values(record.xiIds ?? {}), ...(record.decoys ?? []).map((decoy) => decoy.id)])
+  const seen = new Set<string>()
+  const out: Placement[] = []
+  for (const row of placements) {
+    if (!row || typeof row.playerId !== 'string' || !isLine(row.line)) continue
+    if (!bank.has(row.playerId) || seen.has(row.playerId)) continue
+    seen.add(row.playerId)
+    out.push({ playerId: row.playerId, line: row.line, order: Number.isFinite(row.order) ? row.order : out.length })
+    if (out.length >= XI_SIZE) break
+  }
+  return out
+}
+
+/** Graded on the server against the verified XI, by LINE. The answer is never in the payload. */
 export function gradeLineup(
   seed: number,
-  picks: Record<SlotId, string | null>,
+  placements: readonly Placement[],
   cursor = 0,
+  window?: LineupWindow,
 ): LineupVerdict | null {
-  const record = chosen(seed, cursor)
+  const record = chosen(seed, cursor, window)
   if (!record) return null
+  const starters = startersOf(record)
+  const board = cleanPlacements(record, placements)
 
-  const file = lineupsFile as unknown as LineupFile
-  const formation = (FORMATIONS[record.formation] ?? FORMATIONS[DEFAULT_FORMATION]) as Formation
-  const slotOfName = new Map(Object.entries(record.xi).map(([slot, name]) => [name, slot]))
-  const bench = new Set(benchNames(record))
-
-  const slots: SlotVerdict[] = formation.slots.map((slot) => {
-    const name = picks[slot.slotId] ?? null
-    if (name === null) {
-      return {
-        slotId: slot.slotId,
-        name: null,
-        status: 'empty',
-        belongsToSlotId: null,
-        bench: false,
-      }
-    }
-    const belongsTo = slotOfName.get(name) ?? null
-    if (belongsTo === null) {
-      return {
-        slotId: slot.slotId,
-        name,
-        status: 'not_in_xi',
-        belongsToSlotId: null,
-        bench: bench.has(name),
-      }
-    }
-    // Exact means the exact slot, unless the source only supports the line.
-    const matched = record.positionsInferred
-      ? lineOf(belongsTo) === lineOf(slot.slotId)
-      : belongsTo === slot.slotId
+  const rows: PlacementVerdict[] = board.map((row) => {
+    const started = starters.get(row.playerId) ?? null
+    const status = started === null ? 'not_in_xi' : started === row.line ? 'exact' : 'wrong_line'
     return {
-      slotId: slot.slotId,
-      name,
-      status: matched ? 'exact' : 'wrong_slot',
-      belongsToSlotId: belongsTo,
-      // A man who started cannot be a bench trap, whatever any other record says about
-      // him. The flag is about THIS sheet.
-      bench: false,
+      playerId: row.playerId,
+      nameHe: displayName(row.playerId),
+      line: row.line,
+      order: row.order,
+      status,
+      belongsToLine: started,
+      decoy: started === null ? decoyOf(record, row.playerId) : null,
     }
   })
 
+  const placed = new Set(board.map((row) => row.playerId))
+  const solution: SheetMan[] = []
+  for (const line of LINES) {
+    for (const [slot, id] of Object.entries(record.xiIds ?? {})) {
+      if (lineOf(slot) === line) solution.push({ playerId: id, nameHe: displayName(id), line })
+    }
+  }
+
   return {
-    exact: slots.filter((slot) => slot.status === 'exact').length,
-    total: formation.slots.length,
-    slots,
-    solution: Object.entries(record.xi).map(([slotId, name]) => ({ slotId, name })),
-    benchKnown: bench.size > 0,
+    exact: rows.filter((row) => row.status === 'exact').length,
+    starters: rows.filter((row) => row.status !== 'not_in_xi').length,
+    total: XI_SIZE,
+    rows,
+    solution,
+    missing: solution.filter((man) => !placed.has(man.playerId)),
+    benchKnown: subsOf(record).size > 0,
     sourceTitle: record.sourceTitle ?? file.source.title,
     sourceUrl: record.sourceUrl ?? file.source.url ?? null,
   }
@@ -359,79 +449,51 @@ export function gradeLineup(
 /* ------------------------------------------------------------------ the coach */
 
 /**
- * אילו פתקים יש למאמן הזה — which notes this match can honestly hand out.
- *
- * Three kinds exist and only two of them are always available. `benchOn` counts the
- * substitutes a player has walked into, and four of the six playable records name a
- * bench while two do not — so for those two the note is not "0", it is a note that
- * cannot be written. Offering it anyway would print a zero that reads as a fact about
- * the match instead of a gap in the source (rule 11).
- *
- * The order is fixed, not drawn. The prototype picks a clue at random, which makes the
- * same board give different help on two runs of the same seed and makes the whole thing
- * untestable; a fixed ladder gives the cheap note first — how many starters are still
- * hanging up — and the sharper one second.
+ * Which notes this match can honestly hand out. `benchOn` only where the record names a
+ * bench: for a record that does not, "0" would read as a fact about the match instead of
+ * a gap in the source (rule 11). The order is fixed, never drawn.
  */
 function coachKindsFor(record: LineupRecord): CoachNoteKind[] {
   const kinds: CoachNoteKind[] = ['stillOut']
-  if (benchNames(record).length > 0) kinds.push('benchOn')
+  if (subsOf(record).size > 0) kinds.push('benchOn')
   kinds.push('lineRight')
   return kinds
 }
 
-/**
- * פתק מהמאמן — computed against the verified XI, on the server, and only a NUMBER
- * crosses back.
- *
- * This is the same contract the grade has and it exists for the same reason: the note is
- * derived from the answer, so deriving it in the browser would put the answer in the
- * browser. A player asking for help twice gets notes 0 and 1 of `coachKindsFor`; asking
- * a third time gets nothing, and the screen says the notes are gone rather than dealing
- * a fourth one quietly.
- */
+/** פתק מהמאמן — computed against the verified XI, on the server; only a NUMBER crosses. */
 export function coachNote(
   seed: number,
-  picks: Record<SlotId, string | null>,
+  placements: readonly Placement[],
   cursor = 0,
   index = 0,
+  window?: LineupWindow,
 ): CoachNote | null {
-  const record = chosen(seed, cursor)
+  const record = chosen(seed, cursor, window)
   if (!record) return null
   if (index < 0 || index >= COACH_NOTES) return null
-
   const kinds = coachKindsFor(record)
   const kind = kinds[index % kinds.length] as CoachNoteKind
-
-  const xi = new Set(Object.values(record.xi))
-  const slotOfName = new Map(Object.entries(record.xi).map(([slot, name]) => [name, slot]))
-  const bench = new Set(benchNames(record))
-  const placed = Object.entries(picks).filter(
-    (entry): entry is [string, string] => typeof entry[1] === 'string' && entry[1] !== '',
-  )
+  const starters = startersOf(record)
+  const subs = subsOf(record)
+  const board = cleanPlacements(record, placements)
 
   if (kind === 'stillOut') {
-    const found = placed.filter(([, name]) => xi.has(name)).length
-    return { kind, n: Object.keys(record.xi).length - found, of: Object.keys(record.xi).length }
+    const found = board.filter((row) => starters.has(row.playerId)).length
+    return { kind, n: starters.size - found, of: starters.size }
   }
   if (kind === 'benchOn') {
-    return { kind, n: placed.filter(([, name]) => bench.has(name)).length, of: placed.length }
+    return { kind, n: board.filter((row) => subs.has(row.playerId)).length, of: board.length }
   }
-  const right = placed.filter(([slotId, name]) => {
-    const belongsTo = slotOfName.get(name)
-    if (belongsTo === undefined) return false
-    return record.positionsInferred ? lineOf(belongsTo) === lineOf(slotId) : belongsTo === slotId
-  }).length
-  return { kind, n: right, of: placed.length }
+  const right = board.filter((row) => starters.get(row.playerId) === row.line).length
+  return { kind, n: right, of: board.length }
 }
 
 /**
- * With no verified XI, the pitch still runs as a free build using the people the
- * archive does hold — so the screen is never a dead end.
+ * With no verified XI, the lockers still hold real footballers — pickable players of the
+ * Player Master (`kind === 'player'`, football only), never an invented bench.
  */
-export function freeBuildBank(): string[] {
-  // Football only. The Ussishkin names are basketball and must never appear on a
-  // football pitch (CLAUDE.md rules 14 and 16).
-  return footballPeople.map((person) => person.fullNameHe)
+export function freeBuildBank(): LockerName[] {
+  return pickablePlayers().map((player) => ({ id: player.id, nameHe: player.displayName }))
 }
 
 export function hasVerifiedLineup(): boolean {

@@ -1,350 +1,494 @@
 import 'server-only'
 
-import { createHash } from 'node:crypto'
-
+import manufacturersFile from '@/content/manual/manufacturers.json'
+import sponsorsFile from '@/content/manual/sponsors.json'
+import { t, type MessageKey } from '@/lib/i18n'
+import { accepted, kitRecords, playableKits, specOf, type KitMasterRecord } from '@/lib/kit/kit-master'
+import { photoMissing } from '@/lib/kit/photo'
+import { COLLARS, COLOUR_NAME, DEFAULT_SPEC, PATTERNS, SLEEVES, type KitSpec } from '@/lib/kit/spec'
+import { hintReceipt, signKitUnlock, verifyHintReceipt } from '@/lib/kit/unlock'
 import { positionOf, takeFrom } from '@/lib/rotation/deck'
+
 import { rng, shuffle } from './archive'
-import { exactArchivePhoto } from '@/lib/kit/archive-dna'
-import { historicalMasterFor } from '@/lib/kit/assembly'
-import { crestMark } from '@/lib/kit/crestMarks'
-import { seasonKits, type SeasonKit } from '@/lib/kit/seasons'
 import {
-  COLLARS,
-  COLOUR_NAME,
-  PATTERNS,
-  SLEEVES,
-  type CollarId,
-  type KitColour,
-  type KitSpec,
-  type PatternId,
-  type SleeveId,
-} from '@/lib/kit/spec'
-import {
-  DIFFICULTY_OPTIONS,
+  DNA_THRESHOLD,
+  FIELD_WEIGHT,
+  HINT_KINDS,
+  KIT_HINT_LIMIT,
   KIT_HINT_PENALTY,
   KIT_ROUND,
-  PART_ORDER,
-  PART_POINTS,
-  PART_WEIGHT,
+  OPTION_RAMP,
   PERFECT_BONUS,
-  type KitDifficulty,
-  type PartKind,
+  STEP_FIELDS,
+  STEP_ORDER,
+  STEP_WEIGHT,
+  type FieldVerdict,
+  type KitGradeField,
+  type KitHintAnswer,
+  type KitHintKind,
+  type KitOption,
+  type KitPuzzle,
+  type KitStep,
+  type KitVerdict,
+  type StepVerdict,
 } from './kit-build-run'
+import { publicId } from './publicId'
 
-export {
-  DIFFICULTY_OPTIONS,
-  KIT_HINT_PENALTY,
-  KIT_ROUND,
-  PART_ORDER,
-  PART_POINTS,
-  PART_WEIGHT,
-  PERFECT_BONUS,
-  type PartKind,
-} from './kit-build-run'
-
-export type KitPart = {
-  id: string
-  kind: PartKind
-  labelHe: string
-  patch: Partial<KitSpec>
-  hasReference: boolean
-}
-
-export type KitPuzzle = {
-  id: string
-  seasonLabel: string
-  variant: 'home' | 'away' | 'third'
-  blank: KitSpec
-  difficulty: KitDifficulty
-  optionCount: number
-  drawers: { kind: PartKind; parts: KitPart[] }[]
-}
-
-export type PartVerdict = {
-  kind: PartKind
-  correct: boolean
-  chosen: string | null
-  truth: string
-  points: number
-}
-
-export type KitVerdict = {
-  parts: PartVerdict[]
-  right: number
-  perfect: boolean
-  score: number
-  baseScore: number
-  hintsUsed: number
-  answer: KitSpec
-  seasonLabel: string
-  variant: 'home' | 'away' | 'third'
-  noteHe: string
-  realSrc: string | null
-  sourceTitle: string
-  sourceUrl: string | null
-  difficulty: KitDifficulty
-}
-
-export type KitHintKind = 'whisper' | 'detail' | 'front'
-export type KitHintAnswer = { kind: KitHintKind; textHe: string; penalty: number }
-
-function partId(kind: string, signature: string): string {
-  return `${kind}-${createHash('sha256').update(`${kind}:${signature}`).digest('hex').slice(0, 10)}`
-}
-
-function labelFrom<T extends string>(rows: readonly { id: T; he: string }[], id: T): string {
-  return rows.find((row) => row.id === id)?.he ?? id
-}
-
-function rawParts(spec: KitSpec): Partial<Record<PartKind, Omit<KitPart, 'hasReference'>>> {
-  const base: Omit<KitPart, 'hasReference'> = {
-    id: partId('base', spec.base), kind: 'base', labelHe: COLOUR_NAME[spec.base], patch: { base: spec.base },
-  }
-  const secondary: Omit<KitPart, 'hasReference'> = {
-    id: partId('secondary', spec.patternInk), kind: 'secondary', labelHe: COLOUR_NAME[spec.patternInk], patch: { patternInk: spec.patternInk },
-  }
-  const pattern: Omit<KitPart, 'hasReference'> = {
-    id: partId('pattern', spec.pattern), kind: 'pattern', labelHe: labelFrom(PATTERNS, spec.pattern), patch: { pattern: spec.pattern },
-  }
-  const collarSignature = `${spec.collar}|${spec.collarInk}`
-  const collar: Omit<KitPart, 'hasReference'> = {
-    id: partId('collar', collarSignature), kind: 'collar', labelHe: `${labelFrom(COLLARS, spec.collar)} · ${COLOUR_NAME[spec.collarInk]}`, patch: { collar: spec.collar, collarInk: spec.collarInk },
-  }
-  const sleeveSignature = `${spec.sleeves}|${spec.sleeveInk}`
-  const sleeve: Omit<KitPart, 'hasReference'> = {
-    id: partId('sleeve', sleeveSignature), kind: 'sleeve', labelHe: `${labelFrom(SLEEVES, spec.sleeves)} · ${COLOUR_NAME[spec.sleeveInk]}`, patch: { sleeves: spec.sleeves, sleeveInk: spec.sleeveInk },
-  }
-  const maker = spec.makerHe ? {
-    id: partId('maker', spec.makerHe), kind: 'maker' as const, labelHe: spec.makerHe, patch: { makerHe: spec.makerHe },
-  } : undefined
-  const sponsor = spec.sponsorHe ? {
-    id: partId('sponsor', spec.sponsorHe), kind: 'sponsor' as const, labelHe: spec.sponsorHe, patch: { sponsorHe: spec.sponsorHe },
-  } : undefined
-  const mark = crestMark(spec.crestKey)
-  const crest = spec.crestKey ? {
-    id: partId('crest', spec.crestKey), kind: 'crest' as const, labelHe: mark ? `${mark.nameHe} · ${mark.tellHe}` : 'סמל המועדון', patch: { crestKey: spec.crestKey },
-  } : undefined
-  return { base, secondary, pattern, collar, sleeve, maker, sponsor, crest }
-}
-
-function eligible(): SeasonKit[] {
-  return seasonKits().filter(
-    (kit) => kit.spec.sponsorHe !== null && kit.spec.makerHe !== null && kit.spec.crestKey !== null,
-  )
-}
-
-function seasonYear(label: string): number {
-  const year = Number(label.slice(0, 4))
-  return Number.isFinite(year) ? year : 9999
-}
+export * from './kit-build-run'
 
 /**
- * Distractors are memory challenges, not random trivia:
- * prefer the same variant and neighboring seasons so every wrong answer is plausible.
+ * שער 4 — משחק המדים, on the server. The deal and the grade (rule 4).
+ *
+ * WHAT A ROUND IS. Five shirts from the Kit Master's playable kits, seeded (`?seed=` hands a friend
+ * the identical round) and walked by the rotation cursor so nothing repeats until the deck is
+ * used. Each shirt is five steps; each step offers a ramp of 3·4·4·4·5 options, and every option is
+ * a bundle of REAL values read off a real shirt — neighbouring seasons first, the same variant
+ * first — so a wrong answer is always plausible and never invented.
+ *
+ * WHAT THE CLIENT GETS. The season (that is the question), a neutral garment in the season's cut,
+ * and the options — opaque ids, labels, a descriptive info line with no year in it, and the patch
+ * each one lays on the shirt. Not which option is right, not the sponsor, not the archive photo.
+ *
+ * THE PHOTO INVARIANT. A puzzle is dealt in the photo look only if every option it offers can be
+ * drawn on the template's photographed garment. Otherwise distractors are filtered to the ones
+ * that can, and only if that leaves too few does the puzzle fall back to the drawn look. A round
+ * may mix looks; one shirt never does, so the look can never tell you which option is the real one.
+ *
+ * TOLERANCE. A field the master records with alternates (the 2009/10 crest, the 2019/20 sponsor)
+ * accepts any of them, and an accepted alternate is never offered as a distractor.
  */
-function neighborKits(target: SeasonKit, all: SeasonKit[]): SeasonKit[] {
-  const year = seasonYear(target.seasonLabel)
-  return all
-    .filter((row) => row !== target)
-    .sort((a, b) => {
-      const variantA = a.variant === target.variant ? 0 : 10
-      const variantB = b.variant === target.variant ? 0 : 10
-      return (Math.abs(seasonYear(a.seasonLabel) - year) + variantA) - (Math.abs(seasonYear(b.seasonLabel) - year) + variantB)
-    })
+
+type Bundle = { signature: string; labelHe: string; infoHe: string; patch: Partial<KitSpec> }
+
+const MAKERS = (manufacturersFile as unknown as { records: { slug: string; nameHe: string; nameEn: string }[] }).records
+const SPONSORS = (sponsorsFile as unknown as { records: { slug: string; nameHe: string; nameEn: string; industry?: string }[] }).records
+
+function norm(value: string): string {
+  return value.normalize('NFKD').toLowerCase().replace(/[׳״'"’`\-_.()\s]/g, '')
 }
 
-function referenceMap(): Map<string, string> {
-  const map = new Map<string, string>()
-  for (const kit of eligible()) {
-    const photo = exactArchivePhoto(kit.seasonLabel, kit.variant)
-    if (!photo) continue
-    const parts = rawParts(kit.spec)
-    for (const kind of PART_ORDER) {
-      const part = parts[kind]
-      if (part && !map.has(part.id)) map.set(part.id, photo.src)
+const labelOf = <T extends string>(rows: readonly { id: T; he: string }[], id: T): string => rows.find((row) => row.id === id)?.he ?? id
+const colour = (c: KitSpec['base']) => COLOUR_NAME[c]
+
+export function crestLabel(key: string): string {
+  return t(`kitgame.crest.${key}` as MessageKey)
+}
+
+/* ------------------------------------------------------------------ one kit → one bundle per step */
+function bundle(kit: KitMasterRecord, step: KitStep): Bundle | null {
+  const f = kit.fields
+  if (step === 'body') {
+    const base = f.base.value
+    const pattern = f.pattern.value
+    const ink = f.secondary.value
+    if (!base || !pattern || !ink) return null
+    // a solid shirt has no visible second ink — two solid reds are the same button
+    if (pattern === 'solid') {
+      return {
+        signature: `${base}|solid`,
+        labelHe: t('kitgame.opt.bodySolid', { base: colour(base) }),
+        infoHe: t('kitgame.info.bodySolid', { base: colour(base) }),
+        patch: { base, pattern, patternInk: base },
+      }
+    }
+    return {
+      signature: `${base}|${pattern}|${ink}`,
+      labelHe: t('kitgame.opt.body', { base: colour(base), pattern: labelOf(PATTERNS, pattern) }),
+      infoHe: t('kitgame.info.body', { base: colour(base), pattern: labelOf(PATTERNS, pattern), ink: colour(ink) }),
+      patch: { base, pattern, patternInk: ink },
     }
   }
-  return map
+  if (step === 'construction') {
+    const collar = f.collar.value
+    const sleeves = f.sleeves.value
+    if (!collar || !sleeves) return null
+    return {
+      signature: `${collar.id}|${collar.ink}|${sleeves.id}|${sleeves.ink}`,
+      // the inks are in the label: four crew-and-plain options differ only by colour, and four
+      // identical captions under four different shirts read as a bug
+      labelHe: t('kitgame.opt.construction', {
+        collar: labelOf(COLLARS, collar.id),
+        collarInk: colour(collar.ink),
+        sleeves: labelOf(SLEEVES, sleeves.id),
+        sleeveInk: colour(sleeves.ink),
+      }),
+      infoHe: t('kitgame.info.construction', {
+        collar: labelOf(COLLARS, collar.id),
+        collarInk: colour(collar.ink),
+        sleeves: labelOf(SLEEVES, sleeves.id),
+        sleeveInk: colour(sleeves.ink),
+      }),
+      patch: { collar: collar.id, collarInk: collar.ink, sleeves: sleeves.id, sleeveInk: sleeves.ink },
+    }
+  }
+  if (step === 'crest') {
+    const crest = f.crest.value
+    if (!crest) return null
+    return crestBundle(crest.key)
+  }
+  if (step === 'maker') {
+    const maker = f.maker.value
+    if (!maker) return null
+    return makerBundle(maker.name)
+  }
+  const sponsor = f.sponsor.value
+  if (!sponsor) return null
+  return sponsorBundle(sponsor.name)
 }
 
-function partsOf(kit: SeasonKit, refs = referenceMap()): Partial<Record<PartKind, KitPart>> {
-  const raw = rawParts(kit.spec)
-  return Object.fromEntries(
-    PART_ORDER.flatMap((kind) => {
-      const part = raw[kind]
-      return part ? [[kind, { ...part, hasReference: refs.has(part.id) }]] : []
-    }),
-  ) as Partial<Record<PartKind, KitPart>>
-}
-
-function blankOf(spec: KitSpec): KitSpec {
+function crestBundle(key: string): Bundle {
   return {
-    ...spec,
-    base: 'paper' as KitColour,
-    pattern: 'solid' as PatternId,
-    patternInk: 'ink' as KitColour,
-    sleeves: 'plain' as SleeveId,
-    sleeveInk: 'paper' as KitColour,
-    collar: 'crew' as CollarId,
-    collarInk: 'paper' as KitColour,
+    signature: key,
+    labelHe: crestLabel(key),
+    infoHe: t('kitgame.info.crest', { crest: crestLabel(key) }),
+    patch: { crestKey: key },
+  }
+}
+
+function makerBundle(name: string): Bundle {
+  const row = MAKERS.find((maker) => norm(maker.slug) === norm(name) || norm(maker.nameEn) === norm(name))
+  return {
+    signature: norm(name),
+    labelHe: name,
+    infoHe: row ? t('kitgame.info.maker', { en: row.nameEn, he: row.nameHe }) : t('kitgame.info.makerPlain', { name }),
+    patch: { makerHe: name },
+  }
+}
+
+function sponsorBundle(name: string): Bundle {
+  const key = norm(name)
+  const row = SPONSORS.find((sponsor) => norm(sponsor.slug) === key || norm(sponsor.nameEn.split(' ')[0] ?? '') === key || norm(sponsor.nameHe).startsWith(key))
+  return {
+    signature: key,
+    labelHe: name,
+    infoHe: row?.industry
+      ? t('kitgame.info.sponsor', { name: row.nameHe, industry: row.industry })
+      : t('kitgame.info.sponsorPlain', { name }),
+    patch: { sponsorHe: name },
+  }
+}
+
+/** the signatures a kit's step ACCEPTS — its value and every alternate */
+function acceptedSignatures(kit: KitMasterRecord, step: KitStep): Set<string> {
+  const own = bundle(kit, step)
+  const out = new Set<string>(own ? [own.signature] : [])
+  if (step === 'crest') for (const alt of kit.fields.crest.alternates) out.add(alt.key)
+  if (step === 'maker') for (const alt of kit.fields.maker.alternates) out.add(norm(alt.name))
+  if (step === 'sponsor') for (const alt of kit.fields.sponsor.alternates) out.add(norm(alt.name))
+  return out
+}
+
+function drawable(kit: KitMasterRecord, step: KitStep, candidate: Bundle): boolean {
+  if (step !== 'body' && step !== 'construction') return true
+  return photoMissing(kit.bodyTemplateId, candidate.patch).length === 0
+}
+
+function year(kit: KitMasterRecord): number {
+  return Number(kit.seasonLabel.slice(0, 4))
+}
+
+/** plausible first: the same variant, the nearest season; the id breaks a tie so the order is stable */
+function neighbours(target: KitMasterRecord, all: readonly KitMasterRecord[]): KitMasterRecord[] {
+  return all
+    .filter((kit) => kit.id !== target.id)
+    .map((kit) => ({ kit, d: Math.abs(year(kit) - year(target)) + (kit.variant === target.variant ? 0 : 10) }))
+    .sort((a, b) => a.d - b.d || a.kit.id.localeCompare(b.kit.id))
+    .map((row) => row.kit)
+}
+
+function candidates(target: KitMasterRecord, step: KitStep, all: readonly KitMasterRecord[], photo: boolean): Bundle[] {
+  const taken = acceptedSignatures(target, step)
+  const out: Bundle[] = []
+  for (const kit of neighbours(target, all)) {
+    const b = bundle(kit, step)
+    if (!b || taken.has(b.signature)) continue
+    if (photo && !drawable(target, step, b)) continue
+    taken.add(b.signature)
+    out.push(b)
+  }
+  return out
+}
+
+function optionOf(step: KitStep, b: Bundle): KitOption {
+  return { id: publicId(`${step}:${b.signature}`, 'kit4-option'), labelHe: b.labelHe, infoHe: b.infoHe, patch: b.patch }
+}
+
+function blankOf(kit: KitMasterRecord): KitSpec {
+  return {
+    ...DEFAULT_SPEC,
+    seasonLabel: kit.seasonLabel,
+    variant: kit.variant,
+    base: 'paper',
+    pattern: 'solid',
+    patternInk: 'paper',
+    collar: 'crew',
+    collarInk: 'paper',
+    sleeves: 'plain',
+    sleeveInk: 'paper',
     sponsorHe: null,
     makerHe: null,
     crestKey: null,
+    number: null,
+    shorts: 'paper',
+    socks: 'paper',
   }
 }
 
-export function kitPuzzleCount(): number { return eligible().length }
+type Dealt = { puzzle: KitPuzzle; kit: KitMasterRecord; truth: Record<KitStep, string> }
 
-function difficultyFor(index: number): KitDifficulty {
-  if (index === 0) return 'warmup'
-  if (index === KIT_ROUND - 1) return 'expert'
-  return 'memory'
+/**
+ * A deal is a pure function of (seed, cursor), and grading or a hint re-deals it — so the last few
+ * are kept. Bounded, so a crawler walking seeds cannot grow it.
+ */
+const DEALT = new Map<string, Dealt[]>()
+
+/**
+ * חלון של חיים (21.9.2026, `lib/mechanics/types.ts`) — THE WORKER LIFE's shop order: ONE
+ * shirt, of a season that started before `before`, the one the life pinned, with `options`
+ * choices a step (three for a boy, five for a man). The same bundles, the same grade; only
+ * the round is one shirt instead of five. Absent, the gate's round is untouched.
+ */
+export type KitWindow = { before: number; pin?: string | null; options?: number }
+
+const seasonStart = (kit: KitMasterRecord) => Number(kit.seasonLabel.slice(0, 4))
+
+/** every playable shirt as an id and the year its season began — what the life may order, and nothing of the shirt */
+export function kitYears(): Array<{ id: string; year: number }> {
+  return playableKits()
+    .map((kit) => ({ id: kit.id, year: seasonStart(kit) }))
+    .filter((row) => Number.isFinite(row.year) && row.year > 0)
 }
 
-function optionSet(
-  target: SeasonKit,
-  kind: PartKind,
-  right: KitPart,
-  all: SeasonKit[],
-  refs: Map<string, string>,
-  count: number,
-  random: () => number,
-): KitPart[] {
-  const seen = new Set([right.id])
-  const plausible: KitPart[] = []
-  for (const kit of neighborKits(target, all)) {
-    const part = partsOf(kit, refs)[kind]
-    if (!part || seen.has(part.id)) continue
-    seen.add(part.id)
-    plausible.push(part)
-    if (plausible.length >= count - 1) break
-  }
-
-  if (plausible.length < count - 1) {
-    const fallback: KitPart[] = []
-    for (const kit of all) {
-      const part = partsOf(kit, refs)[kind]
-      if (!part || seen.has(part.id)) continue
-      seen.add(part.id)
-      fallback.push(part)
-    }
-    plausible.push(...shuffle(fallback, random).slice(0, count - 1 - plausible.length))
-  }
-  return shuffle([right, ...plausible.slice(0, count - 1)], random)
+function deal(seed: number, cursor: number, window?: KitWindow): Dealt[] {
+  const key = `${seed}|${cursor}|${window ? `${window.before}:${window.pin ?? ''}:${window.options ?? ''}` : ''}`
+  const hit = DEALT.get(key)
+  if (hit) return hit
+  const out = dealFresh(seed, cursor, window)
+  DEALT.set(key, out)
+  if (DEALT.size > 64) DEALT.delete(DEALT.keys().next().value as string)
+  return out
 }
 
-function puzzles(seed: number, cursor: number): { puzzle: KitPuzzle; truth: Record<PartKind, string>; kit: SeasonKit }[] {
-  const all = eligible()
-  const at = positionOf(seed, cursor, all.length, KIT_ROUND)
+function dealFresh(seed: number, cursor: number, window?: KitWindow): Dealt[] {
+  const all = kitRecords()
+  const pool = playableKits()
+  const at = positionOf(seed, cursor, pool.length, KIT_ROUND)
   const random = rng(at.seed)
-  const refs = referenceMap()
-  const round = takeFrom(shuffle([...all], random), at.slot * KIT_ROUND, KIT_ROUND)
+  let round: KitMasterRecord[]
+  if (window) {
+    const eligible = pool.filter((kit) => seasonStart(kit) < window.before)
+    const pinned = window.pin ? eligible.find((kit) => kit.id === window.pin) : undefined
+    round = pinned ? [pinned] : shuffle([...eligible], random).slice(0, 1)
+  } else {
+    // the gate's own round, exactly as it was: the same stream shuffles the pool, then the options
+    round = takeFrom(shuffle([...pool], random), at.slot * KIT_ROUND, KIT_ROUND)
+  }
 
   return round.map((kit, index) => {
-    const parts = partsOf(kit, refs)
-    const truth = {} as Record<PartKind, string>
-    const drawers: KitPuzzle['drawers'] = []
-    const difficulty = difficultyFor(index)
-    const optionCount = DIFFICULTY_OPTIONS[difficulty]
-
-    for (const kind of PART_ORDER) {
-      const right = parts[kind] as KitPart
-      truth[kind] = right.id
-      drawers.push({ kind, parts: optionSet(kit, kind, right, all, refs, optionCount, random) })
+    const count = window?.options ?? OPTION_RAMP[index] ?? 4
+    const wantPhoto = kit.render.photo.available && kit.render.photo.complete
+    const pick = (photo: boolean) =>
+      STEP_ORDER.map((step) => ({ step, rest: candidates(kit, step, all, photo).slice(0, count - 1) }))
+    let look: 'photo' | 'vector' = wantPhoto ? 'photo' : 'vector'
+    let picked = pick(look === 'photo')
+    // photo only if every step still offers at least three honest options
+    if (look === 'photo' && picked.some((row) => row.rest.length < 2)) {
+      look = 'vector'
+      picked = pick(false)
     }
-
+    const truth = {} as Record<KitStep, string>
+    const steps = picked.map(({ step, rest }) => {
+      const own = bundle(kit, step) as Bundle
+      const right = optionOf(step, own)
+      truth[step] = right.id
+      return { step, options: shuffle([right, ...rest.map((b) => optionOf(step, b))], random) }
+    })
     return {
       kit,
       truth,
       puzzle: {
-        id: partId('kit', `${kit.seasonLabel}:${kit.variant}`),
+        id: publicId(`${kit.id}|${seed}|${cursor}|${index}`, 'kit4'),
+        index,
         seasonLabel: kit.seasonLabel,
         variant: kit.variant,
-        blank: blankOf(kit.spec),
-        difficulty,
-        optionCount,
-        drawers,
+        look,
+        blank: blankOf(kit),
+        steps,
       },
     }
   })
 }
 
-export function dealKitRound(seed: number, cursor = 0): KitPuzzle[] {
-  return puzzles(seed, cursor).map((row) => row.puzzle)
+export function kitPuzzleCount(): number {
+  return playableKits().length
 }
 
-export function kitPartReference(token: string): string | null {
-  if (!/^[a-z]+-[a-f0-9]{10}$/.test(token)) return null
-  return referenceMap().get(token) ?? null
+export function dealKitRound(seed: number, cursor = 0, window?: KitWindow): KitPuzzle[] {
+  return deal(seed, cursor, window).map((row) => row.puzzle)
 }
 
-function realEvidence(kit: SeasonKit): { realSrc: string | null; sourceTitle: string; sourceUrl: string | null } {
-  const exact = exactArchivePhoto(kit.seasonLabel, kit.variant)
-  if (exact) return { realSrc: exact.src, sourceTitle: exact.sourceTitle, sourceUrl: exact.sourceUrl }
-  return {
-    realSrc: historicalMasterFor(kit.seasonLabel, kit.variant) ?? historicalMasterFor(kit.seasonLabel, kit.variant === 'third' ? 'away' : kit.variant),
-    sourceTitle: kit.sourceTitle,
-    sourceUrl: kit.sourceUrl,
+/* ------------------------------------------------------------------ grading */
+function fieldValue(kit: KitMasterRecord, patch: Partial<KitSpec>, field: KitGradeField): { ok: boolean; tolerant: boolean } {
+  const f = kit.fields
+  const truthPattern = f.pattern.value
+  switch (field) {
+    case 'base':
+      return { ok: patch.base === f.base.value, tolerant: false }
+    case 'pattern':
+      return { ok: patch.pattern === truthPattern, tolerant: false }
+    case 'secondary':
+      // a solid shirt's second ink is not on the cloth: a solid answer to a solid shirt is right
+      if (truthPattern === 'solid') return { ok: patch.pattern === 'solid', tolerant: false }
+      return { ok: patch.patternInk === f.secondary.value, tolerant: false }
+    case 'collar':
+      return { ok: patch.collar === f.collar.value?.id, tolerant: false }
+    case 'collarInk':
+      return { ok: patch.collarInk === f.collar.value?.ink, tolerant: false }
+    case 'sleeves':
+      return { ok: patch.sleeves === f.sleeves.value?.id, tolerant: false }
+    case 'sleeveInk':
+      return { ok: patch.sleeveInk === f.sleeves.value?.ink, tolerant: false }
+    case 'crest': {
+      const own = f.crest.value?.key
+      if (patch.crestKey === own) return { ok: true, tolerant: false }
+      return { ok: accepted(f.crest).some((c) => c.key === patch.crestKey), tolerant: true }
+    }
+    case 'maker': {
+      const chosen = norm(patch.makerHe ?? '')
+      if (chosen === norm(f.maker.value?.name ?? '-')) return { ok: true, tolerant: false }
+      return { ok: accepted(f.maker).some((m) => norm(m.name) === chosen), tolerant: true }
+    }
+    case 'sponsor': {
+      const chosen = norm(patch.sponsorHe ?? '')
+      if (chosen === norm(f.sponsor.value?.name ?? '-')) return { ok: true, tolerant: false }
+      return { ok: accepted(f.sponsor).some((s) => norm(s.name) === chosen), tolerant: true }
+    }
   }
+}
+
+function fieldLabel(field: KitGradeField, patch: Partial<KitSpec>): string | null {
+  switch (field) {
+    case 'base':
+      return patch.base ? colour(patch.base) : null
+    case 'pattern':
+      return patch.pattern ? labelOf(PATTERNS, patch.pattern) : null
+    case 'secondary':
+      return patch.pattern === 'solid' ? labelOf(PATTERNS, 'solid') : patch.patternInk ? colour(patch.patternInk) : null
+    case 'collar':
+      return patch.collar ? labelOf(COLLARS, patch.collar) : null
+    case 'collarInk':
+      return patch.collarInk ? colour(patch.collarInk) : null
+    case 'sleeves':
+      return patch.sleeves ? labelOf(SLEEVES, patch.sleeves) : null
+    case 'sleeveInk':
+      return patch.sleeveInk ? colour(patch.sleeveInk) : null
+    case 'crest':
+      return patch.crestKey ? crestLabel(patch.crestKey) : null
+    case 'maker':
+      return patch.makerHe ?? null
+    case 'sponsor':
+      return patch.sponsorHe ?? null
+  }
+}
+
+function evidenceOf(kit: KitMasterRecord): KitVerdict['evidence'] {
+  const e = kit.evidence
+  const map = (p: NonNullable<typeof e.exactPhoto>) => ({ src: p.src, sourceTitle: p.sourceTitle, sourceUrl: p.sourceUrl, creditHe: p.creditHe, yearRaw: p.yearRaw })
+  if (e.exactPhoto) return { kind: 'exact', photos: [map(e.exactPhoto)] }
+  if (e.candidatePhotos.length > 0) return { kind: 'candidate', photos: e.candidatePhotos.slice(0, 3).map(map) }
+  return { kind: 'reconstruction', photos: [] }
+}
+
+function countHints(seed: number, cursor: number, index: number, receipts: readonly string[], claimed: number): number {
+  const proven = HINT_KINDS.filter((kind) => receipts.some((receipt) => verifyHintReceipt(seed, cursor, index, kind, receipt))).length
+  const claim = Number.isFinite(claimed) ? Math.max(0, Math.min(KIT_HINT_LIMIT, Math.floor(claimed))) : 0
+  return Math.max(proven, claim)
 }
 
 export function gradeKitPuzzle(
   seed: number,
   index: number,
-  placed: Partial<Record<PartKind, string>>,
+  placed: Partial<Record<KitStep, string>>,
   cursor = 0,
-  hintsUsed = 0,
+  receipts: readonly string[] = [],
+  claimedHints = 0,
+  window?: KitWindow,
 ): KitVerdict | null {
-  const row = puzzles(seed, cursor)[index]
+  const row = deal(seed, cursor, window)[index]
   if (!row) return null
-  const parts: PartVerdict[] = PART_ORDER.map((kind) => ({
-    kind,
-    correct: placed[kind] === row.truth[kind],
-    chosen: placed[kind] ?? null,
-    truth: row.truth[kind],
-    points: placed[kind] === row.truth[kind] ? PART_WEIGHT[kind] : 0,
-  }))
-  const right = parts.filter((part) => part.correct).length
-  const perfect = right === PART_ORDER.length
-  const baseScore = parts.reduce((sum, part) => sum + part.points, 0) + (perfect ? PERFECT_BONUS : 0)
-  const used = Math.max(0, Math.min(3, Math.floor(hintsUsed)))
+  const { kit, puzzle } = row
+  const truthSpec = specOf(kit)
+
+  const steps: StepVerdict[] = puzzle.steps.map(({ step, options }) => {
+    const chosen = options.find((option) => option.id === placed[step]) ?? null
+    const patch = chosen?.patch ?? {}
+    const truthPatch = (bundle(kit, step) as Bundle).patch
+    let tolerant = false
+    const fields: FieldVerdict[] = STEP_FIELDS[step].map((field) => {
+      const verdict = chosen ? fieldValue(kit, patch, field) : { ok: false, tolerant: false }
+      if (verdict.ok && verdict.tolerant) tolerant = true
+      return {
+        field,
+        ok: verdict.ok,
+        points: verdict.ok ? FIELD_WEIGHT[field] : 0,
+        truthHe: fieldLabel(field, truthPatch) ?? '',
+        chosenHe: chosen ? fieldLabel(field, patch) : null,
+      }
+    })
+    const points = fields.reduce((sum, f) => sum + f.points, 0)
+    return { step, points, max: STEP_WEIGHT[step], correct: fields.every((f) => f.ok), tolerant, fields }
+  })
+
+  const right = steps.filter((s) => s.correct).length
+  const perfect = right === STEP_ORDER.length
+  const fieldPoints = steps.reduce((sum, s) => sum + s.points, 0)
+  const baseScore = fieldPoints + (perfect ? PERFECT_BONUS : 0)
+  const hintsUsed = countHints(seed, cursor, index, receipts, claimedHints)
+  const dna = fieldPoints >= DNA_THRESHOLD
+
   return {
-    parts,
+    puzzleId: puzzle.id,
+    index,
+    seasonLabel: kit.seasonLabel,
+    variant: kit.variant,
+    look: puzzle.look,
+    steps,
     right,
     perfect,
     baseScore,
-    hintsUsed: used,
-    score: Math.max(0, baseScore - used * KIT_HINT_PENALTY),
-    answer: row.kit.spec,
-    seasonLabel: row.kit.seasonLabel,
-    variant: row.kit.variant,
-    noteHe: row.kit.noteHe,
-    difficulty: row.puzzle.difficulty,
-    ...realEvidence(row.kit),
+    hintsUsed,
+    score: Math.max(0, baseScore - hintsUsed * KIT_HINT_PENALTY),
+    answer: truthSpec,
+    evidence: evidenceOf(kit),
+    sourceTitle: kit.sourceTitle,
+    sourceUrl: kit.sourceUrl,
+    noteHe: kit.noteHe,
+    unlock: { key: kit.legacyKey, token: signKitUnlock(kit.id, dna), dna },
   }
 }
 
-export function kitHint(seed: number, index: number, kind: KitHintKind, cursor = 0): KitHintAnswer | null {
-  const row = puzzles(seed, cursor)[index]
+/* ------------------------------------------------------------------ hints */
+export function kitHint(seed: number, index: number, kind: KitHintKind, cursor = 0, window?: KitWindow): KitHintAnswer | null {
+  if (!HINT_KINDS.includes(kind)) return null
+  const row = deal(seed, cursor, window)[index]
   if (!row) return null
-  if (kind === 'whisper') return { kind, textHe: 'אל תחפש את השנה. חפש את התקופה: גזרה, צווארון, מלבישה ואז החזית.', penalty: KIT_HINT_PENALTY }
-  if (kind === 'detail') {
-    const chooseCollar = (seed + cursor + index) % 2 === 0
-    return {
-      kind,
-      textHe: chooseCollar
-        ? `הצווארון היה ${labelFrom(COLLARS, row.kit.spec.collar)}.`
-        : `מבנה החולצה היה ${labelFrom(PATTERNS, row.kit.spec.pattern)}.`,
-      penalty: KIT_HINT_PENALTY,
-    }
+  const f = row.kit.fields
+  const flip = (seed + cursor + index) % 2 === 0
+  let textHe: string
+  if (kind === 'whisper') {
+    // broad: the colour and whether it carried a pattern — never which pattern
+    const base = colour(f.base.value ?? 'red')
+    textHe = f.pattern.value === 'solid' ? t('kitgame.hint.whisperSolid', { base }) : t('kitgame.hint.whisperPattern', { base })
+  } else if (kind === 'detail') {
+    // one factual category: the collar, or the crest
+    textHe = flip && f.collar.value
+      ? t('kitgame.hint.collarText', { collar: labelOf(COLLARS, f.collar.value.id), ink: colour(f.collar.value.ink) })
+      : t('kitgame.hint.crestText', { crest: crestLabel(f.crest.value?.key ?? '') })
+  } else {
+    // the front: the maker OR the sponsor, never both
+    textHe = flip
+      ? t('kitgame.hint.makerText', { maker: f.maker.value?.name ?? '' })
+      : t('kitgame.hint.sponsorText', { sponsor: f.sponsor.value?.name ?? '' })
   }
-  const showCrest = (seed + cursor + index) % 3 === 2
-  if (showCrest) return { kind, textHe: `שים לב לגרסת הסמל: ${crestMark(row.kit.spec.crestKey)?.tellHe ?? 'סמל התקופה'}.`, penalty: KIT_HINT_PENALTY }
-  return {
-    kind,
-    textHe: (seed + cursor + index) % 2 === 0
-      ? `המלבישה: ${row.kit.spec.makerHe ?? 'לא מתועד'}.`
-      : `הספונסר בחזית: ${row.kit.spec.sponsorHe ?? 'ללא ספונסר'}.`,
-    penalty: KIT_HINT_PENALTY,
-  }
+  return { kind, textHe, penalty: KIT_HINT_PENALTY, receipt: hintReceipt(seed, cursor, index, kind) }
 }

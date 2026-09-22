@@ -2,65 +2,101 @@
  * דף ההרכב — the half of gate 3 that both sides of the wire are allowed to hold.
  *
  * `lib/game/lineup.ts` is `server-only` because it reads the verified XI, and the XI is
- * the answer: rule 4's shape applied to a lineup quiz. But the locker room, the LOCK,
- * the tunnel and the per-position reveal are all SCREEN work, and a screen cannot import
- * a `server-only` module for anything but a type. Before this file, the only thing the
- * board could do with a verdict was print it.
+ * the answer: rule 4's shape applied to a lineup quiz. The locker room, the LOCK, the
+ * tunnel and the per-player reveal are SCREEN work, so the verdict's vocabulary lives
+ * here and `lineup.ts` imports it rather than declaring a second copy (rule 59). Nothing
+ * in this file can reach the archive.
  *
- * So the verdict's vocabulary lives here — the statuses, the rows, the tallies, the
- * coach's note, and the line a slot belongs to — and `lineup.ts` imports it rather than
- * declaring a second copy (rule 59). Nothing in this file can reach the archive; it
- * takes a verdict that has already been graded on the server and turns it into the
- * sequence a player walks through.
+ * ## Four bands, not eleven slots (21.9.2026, players.md §2 Gate 3 V3)
+ *
+ * Every record says `formationStated: false`: the sources list the eleven in the
+ * conventional order and state no formation. The board used to draw a 4-4-2 anyway —
+ * eleven slots that imply a shape no source claims. It is now FOUR LINE BANDS — keeper,
+ * defence, midfield, attack — and any number of men per band. A placement is stored as
+ * `{playerId, line, order}`; any x/y on screen is display only. Grading was already by
+ * line on the server and stays exactly that.
  */
+
+/** The four bands, keeper first — the order the reveal walks them. */
+export type Line = 'GK' | 'D' | 'M' | 'F'
+
+export const LINES: readonly Line[] = ['GK', 'D', 'M', 'F']
+
+export function isLine(value: unknown): value is Line {
+  return typeof value === 'string' && (LINES as readonly string[]).includes(value)
+}
 
 export type SlotId = string
 
 /**
- * GK · D · M · F — the band a slot belongs to.
- *
- * Every record in `lineups.json` carries `positionsInferred: true`, because the sources
- * list the eleven in the conventional order without stating positions. Grading therefore
- * falls back to this, and so does everything the room shows: the counters over the pitch
- * count LINES, because a line is the strongest claim the archive supports.
+ * GK · D · M · F — the band a record's slot id belongs to (`D3` → `D`). The records keep
+ * their slot ids because that is how the source listed the eleven; the game reads only
+ * the band.
  */
 export function lineOf(slotId: SlotId): string {
   return slotId.replace(/\d+$/, '')
 }
 
-export type SlotStatus = 'exact' | 'wrong_slot' | 'not_in_xi' | 'empty'
+/** How many men walk out of the tunnel. */
+export const XI_SIZE = 11
 
-export type SlotVerdict = {
-  slotId: SlotId
-  name: string | null
-  status: SlotStatus
-  /** where the player actually belonged, revealed after grading */
-  belongsToSlotId: SlotId | null
-  /**
-   * מלכודת ספסל — the source names this man among the substitutes for THIS match.
-   *
-   * It is a strictly different mistake from picking somebody who was not on the sheet at
-   * all: he was in the room, he wore the kit, he came on. The prototype called it the
-   * Bench Trap and it is the one piece of its scoring that says something about the
-   * player's memory rather than about his luck. It is `false` wherever the source does
-   * not name a bench, which is not the same as "there were no substitutes" — see
-   * `benchKnown` below.
-   */
-  bench: boolean
+/** One man on the board: who, in which band, and his place in it. x/y are display only. */
+export type Placement = { playerId: string; line: Line; order: number }
+
+/** One name hanging in the locker room: an id and the name to print. Nothing else crosses. */
+export type LockerName = { id: string; nameHe: string }
+
+/**
+ * לא פתח — three sourced ways of not starting, and the third makes no claim.
+ *
+ *  · `sub-on` — the source names him coming on that night (`subsOn` / `benchHe`);
+ *  · `season-squad` — `squads.json` has him in that season's squad. Those rows are
+ *    confidence 1, so the screen prints the source's name beside the label;
+ *  · `other` — nothing beyond "he did not start".
+ */
+export type DecoyKind = 'sub-on' | 'season-squad' | 'other'
+
+export const DECOY_KINDS: readonly DecoyKind[] = ['sub-on', 'season-squad', 'other']
+
+export type Decoy = {
+  kind: DecoyKind
+  /** the minute he came on, where the source states it */
+  minute: number | null
+  /** who stated it — the lineup record for `sub-on`, the squad row for `season-squad` */
+  sourceTitle: string | null
 }
 
+export type PlacementStatus = 'exact' | 'wrong_line' | 'not_in_xi'
+
+export type PlacementVerdict = {
+  playerId: string
+  nameHe: string
+  line: Line
+  order: number
+  status: PlacementStatus
+  /** the band he really started in, revealed after grading; null if he did not start */
+  belongsToLine: Line | null
+  /** why a non-starter is on the sheet at all — only for `not_in_xi` */
+  decoy: Decoy | null
+}
+
+export type SheetMan = { playerId: string; nameHe: string; line: Line }
+
 export type LineupVerdict = {
+  /** starters placed in the band they started in */
   exact: number
+  /** starters placed at all, whatever the band */
+  starters: number
   total: number
-  slots: SlotVerdict[]
-  /** the real XI, revealed only after a submission */
-  solution: Array<{ slotId: SlotId; name: string }>
+  rows: PlacementVerdict[]
+  /** the real XI, revealed only after a submission, keeper first */
+  solution: SheetMan[]
+  /** the starters left in the locker room — drawn as ghosts in their band */
+  missing: SheetMan[]
   /**
-   * Whether the source names who came on in this match.
-   *
-   * Four of the six playable records do; two do not. A report that printed "0 מלכודות"
-   * for a record with no bench on file would be stating something the archive never
-   * said, so the screen says the count is not available instead (rule 11).
+   * Whether the source names who came on in this match. A report that printed "0 bench
+   * traps" for a record with no bench on file would state something the archive never
+   * said (rule 11).
    */
   benchKnown: boolean
   sourceTitle: string
@@ -70,15 +106,8 @@ export type LineupVerdict = {
 /* ------------------------------------------------------------------ the coach */
 
 /**
- * פתק מהמאמן — a hint that counts, and never names anybody.
- *
- * Each note is a COUNT over the board as it stands. That is the whole design constraint:
- * a hint that named a player would hand over one eleventh of the answer for free, and a
- * hint that said nothing would not be worth a cost. Counting is the middle — it tells
- * you that you are three men short without telling you which three.
- *
- * The count is computed on the server against the verified XI, exactly like the grade,
- * and only the number crosses.
+ * פתק מהמאמן — a hint that counts, and never names anybody. Computed on the server
+ * against the verified XI, exactly like the grade; only the number crosses.
  */
 export type CoachNoteKind = 'stillOut' | 'benchOn' | 'lineRight'
 
@@ -95,54 +124,100 @@ export const COACH_NOTES = 2
 /** How many names a player may stake a LOCK on. */
 export const MAX_LOCKS = 3
 
+/* ------------------------------------------------------------------ the board */
+
+/**
+ * The board after a man is put in a band: he leaves wherever he stood, joins the END of
+ * the new band, and the orders of both bands are closed up. Refused (unchanged board)
+ * when the band move would put a twelfth man on the pitch.
+ */
+export function placeOn(board: readonly Placement[], playerId: string, line: Line): Placement[] {
+  const without = board.filter((row) => row.playerId !== playerId)
+  if (without.length >= XI_SIZE) return [...board]
+  const inLine = without.filter((row) => row.line === line).length
+  return normalise([...without, { playerId, line, order: inLine }])
+}
+
+/** The board without him; the rest of his band closes up. */
+export function takeOff(board: readonly Placement[], playerId: string): Placement[] {
+  return normalise(board.filter((row) => row.playerId !== playerId))
+}
+
+/** Orders renumbered 0.. within each band, bands in pitch order. */
+export function normalise(board: readonly Placement[]): Placement[] {
+  const out: Placement[] = []
+  for (const line of LINES) {
+    board
+      .filter((row) => row.line === line)
+      .map((row, index) => ({ row, index }))
+      .sort((a, b) => a.row.order - b.row.order || a.index - b.index)
+      .forEach(({ row }, order) => out.push({ playerId: row.playerId, line, order }))
+  }
+  return out
+}
+
+/** How many men stand in each band — the zone counters. No denominator: no formation is stated. */
+export function lineCounts(board: readonly Placement[]): Record<Line, number> {
+  const counts: Record<Line, number> = { GK: 0, D: 0, M: 0, F: 0 }
+  for (const row of board) counts[row.line] += 1
+  return counts
+}
+
+/**
+ * Where a band's men stand on the drawn pitch — DISPLAY ONLY, never stored or graded.
+ * Percentages, the defensive end at the bottom.
+ */
+export const LINE_Y: Record<Line, number> = { F: 16, M: 41, D: 66, GK: 88 }
+
+export function displaySpot(order: number, of: number, line: Line): { x: number; y: number } {
+  const gap = of <= 1 ? 0 : Math.min(19, 72 / (of - 1))
+  const start = 50 - (gap * (of - 1)) / 2
+  return { x: Math.round(start + gap * order), y: LINE_Y[line] }
+}
+
 /* ------------------------------------------------------------------ the reveal */
 
-export type RevealStatus = 'exact' | 'wrong_slot' | 'not_in_xi'
-
 export type RevealRow = {
-  slotId: SlotId
-  roleHe: string
-  name: string
-  status: RevealStatus
-  bench: boolean
+  playerId: string
+  nameHe: string
+  line: Line
+  order: number
+  status: PlacementStatus
+  decoy: Decoy | null
   locked: boolean
 }
 
 /**
- * The eleven, in the order the reveal walks them: keeper, defence, midfield, attack.
- *
- * It walks the FORMATION's own slot order rather than sorting, because that order is
- * already the order the pitch draws — so the marker moving down the list and the marker
- * moving up the pitch are the same movement. Empty slots are left out: there is nothing
- * to reveal about a slot nobody filled, and the men who were missed are named together
- * at the end by `missingStarters`.
+ * The placed men, in the order the reveal walks them: keeper, defence, midfield, attack,
+ * and inside a band in the order they stand. Empty bands contribute nothing; the starters
+ * who were missed are drawn as ghosts in their band, not walked.
  */
-export function buildReveal(
-  verdict: LineupVerdict,
-  slots: ReadonlyArray<{ slotId: SlotId; roleHe: string }>,
-  locks: readonly string[],
-): RevealRow[] {
-  const byId = new Map(verdict.slots.map((slot) => [slot.slotId, slot]))
+export function buildReveal(verdict: LineupVerdict, locks: readonly string[]): RevealRow[] {
   const locked = new Set(locks)
   const rows: RevealRow[] = []
-  for (const slot of slots) {
-    const graded = byId.get(slot.slotId)
-    if (!graded || graded.name === null || graded.status === 'empty') continue
-    rows.push({
-      slotId: slot.slotId,
-      roleHe: slot.roleHe,
-      name: graded.name,
-      status: graded.status,
-      bench: graded.bench,
-      locked: locked.has(graded.name),
-    })
+  for (const line of LINES) {
+    verdict.rows
+      .filter((row) => row.line === line)
+      .sort((a, b) => a.order - b.order)
+      .forEach((row) =>
+        rows.push({
+          playerId: row.playerId,
+          nameHe: row.nameHe,
+          line: row.line,
+          order: row.order,
+          status: row.status,
+          decoy: row.decoy,
+          locked: locked.has(row.playerId),
+        }),
+      )
   }
   return rows
 }
 
 export type RevealTally = {
   exact: number
-  wrongSlot: number
+  wrongLine: number
+  /** placed men the source names coming on that night */
   bench: number
   /** locks that landed on a man who really started */
   locksRight: number
@@ -151,49 +226,58 @@ export type RevealTally = {
 }
 
 /**
- * The running score, up to and including `index`.
- *
- * `index` of −1 is the state before the first card is turned, which is what the reveal
- * opens on; `rows.length - 1` is the final figure. **Both ends are the same function**,
- * and that is what makes the skip cheap rather than a second code path: pressing
- * "הצג הכול" is `tallyUpTo(rows, rows.length - 1)`, which is exactly what stepping
- * through every card would have arrived at. A skip that computed its own totals is a
- * skip that can disagree with the walk.
+ * The running score, up to and including `index`. −1 is before the first card; the last
+ * index is the final figure. **Both ends are the same function** — "הצג הכול" is
+ * `tallyUpTo(rows, rows.length - 1)`, so a skip can never disagree with the walk.
  */
 export function tallyUpTo(rows: readonly RevealRow[], index: number): RevealTally {
   const seen = rows.slice(0, Math.max(0, Math.min(index + 1, rows.length)))
   return {
     exact: seen.filter((row) => row.status === 'exact').length,
-    wrongSlot: seen.filter((row) => row.status === 'wrong_slot').length,
-    bench: seen.filter((row) => row.bench).length,
+    wrongLine: seen.filter((row) => row.status === 'wrong_line').length,
+    bench: seen.filter((row) => row.decoy?.kind === 'sub-on').length,
     locksRight: seen.filter((row) => row.locked && row.status !== 'not_in_xi').length,
     locksUsed: seen.filter((row) => row.locked).length,
   }
 }
 
 /** The starters left hanging in the locker room — named only after the sheet is in. */
-export function missingStarters(verdict: LineupVerdict): string[] {
-  const picked = new Set(
-    verdict.slots.map((slot) => slot.name).filter((name): name is string => name !== null),
-  )
-  return verdict.solution.map((row) => row.name).filter((name) => !picked.has(name))
+export function missingStarters(verdict: LineupVerdict): SheetMan[] {
+  return verdict.missing
 }
+
+/**
+ * Which ghosts are visible at step `index`: a band's missed starters appear once the walk
+ * has passed that band's last placed man (or at once, for a band nobody placed in before
+ * the walk reached it) — the line is complete when it is revealed, not before.
+ */
+export function ghostsUpTo(verdict: LineupVerdict, rows: readonly RevealRow[], index: number): SheetMan[] {
+  if (index >= rows.length - 1) return verdict.missing
+  const out: SheetMan[] = []
+  for (const line of LINES) {
+    const last = rows.map((row) => row.line).lastIndexOf(line)
+    const firstAfter = rows.findIndex((row) => LINES.indexOf(row.line) > LINES.indexOf(line))
+    const passed = last >= 0 ? index >= last : firstAfter >= 0 && index >= firstAfter
+    if (passed) out.push(...verdict.missing.filter((man) => man.line === line))
+  }
+  return out
+}
+
+/* ------------------------------------------------------------------ the fast walk */
+
+/**
+ * הריצה המהירה — the optional accelerated walk. **Opt-in only** (a button), at most 250ms
+ * a row (the brief's own ceiling on a beat that is not gameplay), cancellable by any tap.
+ * The walk itself never runs on a timer by default (brief §14 — "waiting 850ms × 11").
+ */
+export const FAST_ROW_MS = 220
 
 /* ------------------------------------------------------------------ the memory */
 
 /**
- * "אפשר לדלג" is not a button, it is a promise that has to hold on the second run.
- *
- * The brief is explicit that eleven automatic scans is the wrong shape — *"waiting
- * 850ms × 11 players just to see Gate 3 results"* is on its list of what not to build.
- * The reveal here therefore runs on taps and holds no timer at all, so every step is
- * already skippable by construction.
- *
- * This is the second half of it, and the half a button cannot give: **a device that has
- * chosen to skip once opens on the report from then on**, with the walk offered rather
- * than imposed. It is one id in `lib/profile/store.ts`'s collections — the same store
- * every other gate writes to, never a private `localStorage` key — because "I have seen
- * this" is a thing the profile already knows how to remember.
+ * A device that has chosen to skip once opens on the report from then on, with the walk
+ * offered rather than imposed. One id in `lib/profile/store.ts`'s collections, never a
+ * private `localStorage` key.
  */
 export const REVEAL_SET = 'lineup.reveal'
 export const REVEAL_SKIPPED = 'skipped'

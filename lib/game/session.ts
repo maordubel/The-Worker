@@ -72,10 +72,24 @@ export function secondsFor(index: number): number {
   return STAGE_SECONDS[stageOf(index)] ?? 12
 }
 
-/** The live multiplier: 1× until two in a row, then up to 4×. */
-export function multiplierFor(combo: number): number {
-  return Math.min(MAX_MULTIPLIER, Math.max(1, combo))
+/** The live multiplier: 1× until two in a row, then up to 4× (or the stage's own cap). */
+export function multiplierFor(combo: number, cap: number = MAX_MULTIPLIER): number {
+  return Math.min(cap, MAX_MULTIPLIER, Math.max(1, combo))
 }
+
+/**
+ * Quick Pick's per-stage caps — ×2 in the warm-up, ×3 in the middle, ×4 at the end — so
+ * a hot start cannot run away with the score before the questions get hard. Optional:
+ * the gates that do not pass a cap keep the flat ×4.
+ */
+export const STAGE_CAPS = [2, 3, 4] as const
+
+export function stageCap(index: number): number {
+  return STAGE_CAPS[stageOf(index)] ?? MAX_MULTIPLIER
+}
+
+/** what a paid hint costs, off the points of the answer it helped (brief §13) */
+export const HINT_COST = 40
 
 /**
  * What one answer is worth.
@@ -85,21 +99,41 @@ export function multiplierFor(combo: number): number {
  * threshold, so hesitating costs a little instead of costing nothing until it suddenly
  * costs everything.
  */
-export function pointsFor(difficulty: number, combo: number, secondsLeft: number, total: number) {
+export function pointsFor(
+  difficulty: number,
+  combo: number,
+  secondsLeft: number,
+  total: number,
+  cap: number = MAX_MULTIPLIER,
+) {
   const speed = total > 0 ? Math.max(0, Math.min(1, secondsLeft / total)) : 0
-  return Math.round((100 * difficulty + 100 * speed) * multiplierFor(combo))
+  return Math.round((100 * difficulty + 100 * speed) * multiplierFor(combo, cap))
+}
+
+/**
+ * What one outcome is worth, the one place it is computed — the run's announcement, its
+ * burst and `advance` all read it, so the three can never disagree.
+ *
+ * A HINTED right answer gains no combo (the streak holds, it does not climb) and costs
+ * `HINT_COST` off its points, never below zero. A miss is a miss either way.
+ */
+export function outcomeOf(
+  session: Pick<Session, 'combo'>,
+  outcome: { correct: boolean; difficulty: number; secondsLeft: number; total: number; hinted?: boolean; cap?: number },
+): { gained: number; combo: number } {
+  if (!outcome.correct) return { gained: 0, combo: 0 }
+  const combo = outcome.hinted ? session.combo : session.combo + 1
+  const points = pointsFor(outcome.difficulty, Math.max(1, combo), outcome.secondsLeft, outcome.total, outcome.cap)
+  return { gained: outcome.hinted ? Math.max(0, points - HINT_COST) : points, combo }
 }
 
 /** Advance the run by one answer. `secondsLeft` of 0 means the clock ran out. */
 export function advance(
   session: Session,
-  outcome: { correct: boolean; difficulty: number; secondsLeft: number; total: number },
+  outcome: { correct: boolean; difficulty: number; secondsLeft: number; total: number; hinted?: boolean; cap?: number },
 ): Session {
-  const combo = outcome.correct ? session.combo + 1 : 0
+  const { gained, combo } = outcomeOf(session, outcome)
   const lives = outcome.correct ? session.lives : session.lives - 1
-  const gained = outcome.correct
-    ? pointsFor(outcome.difficulty, session.combo + 1, outcome.secondsLeft, outcome.total)
-    : 0
   const index = session.index + 1
   return {
     index,

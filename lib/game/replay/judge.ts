@@ -6,6 +6,7 @@ import {
   type TruthTouch,
   type UserTouch,
 } from './envelope'
+import type { ActorKind } from './actors'
 import { actionSimilarity, type ReplayAction } from './vocab'
 
 /**
@@ -41,7 +42,8 @@ export type TouchVerdict = {
   truthIndex: number | null
   score: number
   grade: TouchGrade
-  playerRight: boolean
+  /** null where the source names nobody for this touch — see `./actors.ts` */
+  playerRight: boolean | null
   actionRight: boolean
   actionScore: number
   originScore: number
@@ -51,6 +53,8 @@ export type TouchVerdict = {
   userActorHe: string | null
   userAction: ReplayAction | null
   truthActorHe: string | null
+  /** whose touch the archive says it was; null on a touch the player invented */
+  truthActorKind: ActorKind | null
   truthAction: ReplayAction | null
   positionHe: string | null
   noteHe: string | null
@@ -60,7 +64,8 @@ export type ReplayMetrics = {
   /** 0–100, the number the reveal leads with */
   overall: number
   sequence: number
-  players: number
+  /** null when no touch in the move has an actor the source names */
+  players: number | null
   actions: number
   /** null when no touch in the move has a direction the source states */
   routes: number | null
@@ -82,6 +87,13 @@ const WEIGHT = {
   originAnchor: 0.05,
   targetAnchor: 0.07,
 } as const
+
+/**
+ * The line between "good" and "near", and the line a move has to clear to be COLLECTED.
+ * One number, because a touch the reveal calls good and a move the collection keeps are
+ * the same claim about the player's memory at two sizes.
+ */
+export const GOOD_SCORE = 78
 
 /** How far apart two normalised points may be before continuity is worth nothing. */
 const CONTINUITY_REACH = 0.25
@@ -122,20 +134,38 @@ export function routeShape(user: UserTouch, truth: TruthTouch): number | null {
   return 100 * (angle * 0.74 + length * 0.26)
 }
 
-/** What one matched touch is worth, 0–100. */
+/**
+ * Whether the player's pick can be marked right or wrong at all.
+ *
+ * `null` for a touch the report writes with no actor ("הכדור עבר את ההגנה"): there is no
+ * man to have remembered, so there is no man to be marked wrong about — and a zero there
+ * would charge the player for a gap in the SOURCE. Same pattern as `routeShape`.
+ */
+export function playerMatch(user: UserTouch, truth: TruthTouch): boolean | null {
+  if (truth.actorKind === 'unnamed') return null
+  return user.actorHe === truth.actorHe
+}
+
+/**
+ * What one matched touch is worth, 0–100.
+ *
+ * Where the player component is null its 24% is not handed to any ONE other part — the
+ * remaining five are scaled up together, so a perfect rebuild of an unnamed touch is still
+ * a hundred and every other ratio in the pair stays what it was.
+ */
 export function pairScore(user: UserTouch, truth: TruthTouch): number {
-  const player = user.actorHe === truth.actorHe ? 100 : 0
+  const player = playerMatch(user, truth)
   const action = actionSimilarity(user.action, truth.action)
   const origin = envelopeScore(user.origin, truth.origin)
   const target = envelopeScore(user.target, truth.target)
-  return (
-    player * WEIGHT.player +
+  const rest =
     action * WEIGHT.action +
     origin * WEIGHT.origin +
     target * WEIGHT.target +
     anchorScore(user.origin, truth.origin) * WEIGHT.originAnchor +
     anchorScore(user.target, truth.target) * WEIGHT.targetAnchor
-  )
+  if (player === null) return rest / (1 - WEIGHT.player)
+  return (player ? 100 : 0) * WEIGHT.player + rest
 }
 
 /**
@@ -163,7 +193,7 @@ export function continuityOf(touches: readonly UserTouch[]): number {
 }
 
 function gradeOf(score: number): TouchGrade {
-  if (score >= 78) return 'good'
+  if (score >= GOOD_SCORE) return 'good'
   if (score >= 50) return 'near'
   return 'bad'
 }
@@ -192,8 +222,9 @@ export function judgeReplay(
       const route = routeShape(u, t)
       if (route !== null) routes.push(route)
       const score = pair.score
+      const who = playerMatch(u, t)
       matchedScore += score
-      if (u.actorHe === t.actorHe) players += 1
+      if (who === true) players += 1
       if (u.action === t.action) actions += 1
       verdicts.push({
         kind: 'matched',
@@ -201,7 +232,7 @@ export function judgeReplay(
         truthIndex: pair.right,
         score,
         grade: gradeOf(score),
-        playerRight: u.actorHe === t.actorHe,
+        playerRight: who,
         actionRight: u.action === t.action,
         actionScore: actionSimilarity(u.action, t.action),
         originScore: envelopeScore(u.origin, t.origin),
@@ -210,6 +241,7 @@ export function judgeReplay(
         userActorHe: u.actorHe,
         userAction: u.action,
         truthActorHe: t.actorHe,
+        truthActorKind: t.actorKind ?? 'player',
         truthAction: t.action,
         positionHe: t.positionHe,
         noteHe: t.noteHe,
@@ -234,6 +266,7 @@ export function judgeReplay(
         userActorHe: u.actorHe,
         userAction: u.action,
         truthActorHe: null,
+        truthActorKind: null,
         truthAction: null,
         positionHe: null,
         noteHe: null,
@@ -257,6 +290,7 @@ export function judgeReplay(
       userActorHe: null,
       userAction: null,
       truthActorHe: t.actorHe,
+      truthActorKind: t.actorKind ?? 'player',
       truthAction: t.action,
       positionHe: t.positionHe,
       noteHe: t.noteHe,
@@ -265,7 +299,9 @@ export function judgeReplay(
 
   const denominator = Math.max(1, Math.max(user.length, truth.length))
   const sequence = Math.max(0, Math.min(100, matchedScore / denominator))
-  const playerPct = truth.length > 0 ? (players / truth.length) * 100 : 0
+  // only the touches the source puts a name to can be counted for or against the player
+  const named = truth.filter((touch) => touch.actorKind !== 'unnamed').length
+  const playerPct = named > 0 ? (players / named) * 100 : null
   const actionPct = truth.length > 0 ? (actions / truth.length) * 100 : 0
   const routePct = routes.length > 0 ? routes.reduce((a, b) => a + b, 0) / routes.length : null
   const continuity = continuityOf(user)
@@ -273,8 +309,10 @@ export function judgeReplay(
   // Where no touch in the move has a stated direction, the route share is not redistributed
   // to some other component — it goes back to the alignment, which is the only part of the
   // grade that is unambiguously about the whole move.
+  // The same goes for the player share of a move in which the source names nobody.
   const routeWeight = routePct === null ? 0 : 0.16
-  const sequenceWeight = 0.46 + (routePct === null ? 0.16 : 0)
+  const playerWeight = playerPct === null ? 0 : 0.12
+  const sequenceWeight = 0.46 + (routePct === null ? 0.16 : 0) + (playerPct === null ? 0.12 : 0)
 
   const overall = Math.max(
     0,
@@ -283,7 +321,7 @@ export function judgeReplay(
       sequence * sequenceWeight +
         (routePct ?? 0) * routeWeight +
         continuity * 0.14 +
-        playerPct * 0.12 +
+        (playerPct ?? 0) * playerWeight +
         actionPct * 0.12 -
         (extra + missing) * COUNT_PENALTY,
     ),
@@ -293,7 +331,7 @@ export function judgeReplay(
     metrics: {
       overall: Math.round(overall),
       sequence: Math.round(sequence),
-      players: Math.round(playerPct),
+      players: playerPct === null ? null : Math.round(playerPct),
       actions: Math.round(actionPct),
       routes: routePct === null ? null : Math.round(routePct),
       continuity: Math.round(continuity),

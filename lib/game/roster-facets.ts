@@ -1,9 +1,6 @@
 import 'server-only'
 
-import lineupsFile from '@/content/manual/lineups.json'
-import playerFactsFile from '@/content/manual/player-facts.json'
-import squadsFile from '@/content/manual/squads.json'
-import { CONFIDENCE_FLOOR, archive } from './archive'
+import { allPlayers, namesOf, type PlayerMasterRecord } from '@/lib/archive/player-master'
 import { fold } from './roster-search'
 
 /**
@@ -104,163 +101,49 @@ export type PlayerFacets = {
   toYear: number | null
 }
 
-type PlayerFactRow = {
-  personNameHe: string
-  personNameLatin: string
-  position?: string | null
-  positions?: string[] | null
-  origin?: string | null
-  fromYear?: number | null
-  toYear?: number | null
-  matchedBy?: string | null
-  confidence?: number
-}
+/**
+ * ## Through the Player Master (21.9.2026)
+ *
+ * The precedence above is unchanged and still decided in ONE place — but that place is
+ * now `scripts/players/build-master.ts`, which applies it per PERSON rather than per
+ * spelling. The index below is a view: every spelling the master knows for a man points
+ * at the same facets, so `facetsFor('עמרי אפק')` and `facetsFor('עומרי אפק')` are one
+ * answer, and a shirt-number row filed under `גילי ורמוט` now widens גיל ורמוט's years
+ * instead of describing a man who never existed.
+ */
 
-type SquadRow = {
-  personName: string
-  position?: string | null
-  nationalityHe?: string | null
-  confidence?: number
-}
-
-type LineupRow = {
-  xi: Record<string, string>
-  benchHe?: string[] | null
-  positionsInferred?: boolean
-  confidence?: number
-}
-
-/** `D1` → DF, `M3` → MF, `F2` → FW, `GK` → GK. Anything else is not a position. */
-function slotToPosition(slot: string): Position | null {
-  if (slot.startsWith('GK') || slot.startsWith('G')) return 'GK'
-  if (slot.startsWith('D')) return 'DF'
-  if (slot.startsWith('M')) return 'MF'
-  if (slot.startsWith('F')) return 'FW'
-  return null
-}
-
-function normalisePosition(raw: string | null | undefined): Position | null {
-  if (raw === 'GK' || raw === 'DF' || raw === 'MF' || raw === 'FW') return raw
-  return null
-}
-
-/** The season label's opening year. "1980/81" → 1980; a bare "1980" → 1980. */
-function seasonYear(label: string): number | null {
-  const match = label.match(/(\d{4})/)
-  return match ? Number(match[1]) : null
+/** One person's facets, read off his master record — the view `rosterIndex()` also uses. */
+export function facetsOfPlayer(player: PlayerMasterRecord): PlayerFacets {
+  const codes = player.positions.codes
+  return {
+    position: codes[0] ?? null,
+    positions: codes.length > 1 ? [...codes] : null,
+    positionFrom: player.positions.from,
+    origin: player.origin.value,
+    originFrom: player.origin.from,
+    fromYear: player.years.from,
+    toYear: player.years.to,
+  }
 }
 
 let cache: Map<string, PlayerFacets> | null = null
 
-/** Keyed on the FOLDED name, because the same man is spelled three ways across files. */
+/** Keyed on the FOLDED name — every spelling of a person maps to his one facets object. */
 export function facetIndex(): Map<string, PlayerFacets> {
   if (cache) return cache
   const index = new Map<string, PlayerFacets>()
-
-  function entry(nameHe: string): PlayerFacets {
-    const key = fold(nameHe)
-    const found = index.get(key)
-    if (found) return found
-    const fresh: PlayerFacets = {
-      position: null,
-      positions: null,
-      positionFrom: null,
-      origin: null,
-      originFrom: null,
-      fromYear: null,
-      toYear: null,
-    }
-    index.set(key, fresh)
-    return fresh
-  }
-
-  // --- weakest first, so a stronger source simply overwrites it ------------------
-  // The Latin spelling. A documented fact about how the source wrote the name, which is
-  // evidence of a foreign player and is never treated as more than that.
-  for (const row of archive.shirtNumbers) {
-    const facets = entry(row.personNameHe)
-    const year = seasonYear(row.seasonLabel)
-    if (year !== null) {
-      facets.fromYear = facets.fromYear === null ? year : Math.min(facets.fromYear, year)
-      facets.toYear = facets.toYear === null ? year : Math.max(facets.toYear, year)
-    }
-    if (row.hebrewIsTransliteration === true && facets.originFrom === null) {
-      facets.origin = 'foreign'
-      facets.originFrom = 'name'
+  const shared = new Set<string>()
+  for (const player of allPlayers()) {
+    const facets = facetsOfPlayer(player)
+    for (const name of namesOf(player)) {
+      const key = fold(name)
+      const found = index.get(key)
+      if (found && found !== facets) shared.add(key)
+      else index.set(key, facets)
     }
   }
-
-  // The XIs. `positionsInferred` is the file telling us this is where he played that
-  // night — so it is recorded, and labelled, as an inference.
-  const lineups = (lineupsFile as { records: LineupRow[]; confidence: number }).records
-  for (const lineup of lineups) {
-    if ((lineup.confidence ?? 0) < CONFIDENCE_FLOOR) continue
-    for (const [slot, nameHe] of Object.entries(lineup.xi)) {
-      const position = slotToPosition(slot)
-      if (position === null) continue
-      const facets = entry(nameHe)
-      if (facets.positionFrom === null || facets.positionFrom === 'lineup') {
-        facets.position = position
-        facets.positions = null
-        facets.positionFrom = 'lineup'
-      }
-    }
-  }
-
-  // `player-facts.json` — the merged research file, and the reason this index stopped
-  // being a handful of men. 653 rows across six sources: position, Israeli or foreign,
-  // and the years he wore the shirt. It outranks a single recorded XI (which says where
-  // a man stood on ONE night) and is outranked by our own squad sheet. The precedence
-  // BETWEEN the five sources is already settled inside the file — `positionFrom` and
-  // `originFrom` there name the one that decided, and `conflicts` keeps what the others
-  // said rather than throwing it away.
-  const facts = (playerFactsFile as { records: PlayerFactRow[] }).records
-  for (const row of facts) {
-    if ((row.confidence ?? 0) < CONFIDENCE_FLOOR) continue
-    const entry_ = entry(row.personNameHe)
-    const position = normalisePosition(row.position)
-    if (position !== null) {
-      entry_.position = position
-      const every = (row.positions ?? [])
-        .map((code) => normalisePosition(code))
-        .filter((code): code is Position => code !== null)
-      entry_.positions = every.length > 1 ? every : null
-      entry_.positionFrom = 'database'
-    }
-    if (row.origin === 'israeli' || row.origin === 'foreign') {
-      entry_.origin = row.origin
-      entry_.originFrom = 'database'
-    }
-    // The source knows which SEASONS he was in the squad, which is a better answer
-    // than the seasons we happen to hold a shirt number for — so it widens the span
-    // rather than replacing it. A man can be in a squad without a number on file.
-    if (typeof row.fromYear === 'number') {
-      entry_.fromYear = entry_.fromYear === null ? row.fromYear : Math.min(entry_.fromYear, row.fromYear)
-    }
-    if (typeof row.toYear === 'number') {
-      entry_.toYear = entry_.toYear === null ? row.toYear : Math.max(entry_.toYear, row.toYear)
-    }
-  }
-
-  // The squad sheet. Position and nationality, stated, per player. It wins outright.
-  const squads = (squadsFile as { records: SquadRow[]; confidence: number }).records
-  for (const row of squads) {
-    if ((row.confidence ?? 0) < CONFIDENCE_FLOOR) continue
-    const facets = entry(row.personName)
-    const position = normalisePosition(row.position)
-    if (position !== null) {
-      facets.position = position
-      // The squad sheet states one position per season and wins outright, so it also
-      // replaces the list rather than being merged into somebody else's.
-      facets.positions = null
-      facets.positionFrom = 'squad'
-    }
-    if (typeof row.nationalityHe === 'string' && row.nationalityHe !== '') {
-      facets.origin = row.nationalityHe === 'ישראל' ? 'israeli' : 'foreign'
-      facets.originFrom = 'squad'
-    }
-  }
-
+  // A spelling two people share names nobody (rule 7) — never the first one to arrive.
+  for (const key of shared) index.delete(key)
   cache = index
   return index
 }

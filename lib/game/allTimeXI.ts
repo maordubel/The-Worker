@@ -1,8 +1,8 @@
 import 'server-only'
 
-import { footballPeople } from './archive'
+import { pickablePlayers } from '@/lib/archive/player-master'
 import { FORMATIONS, DEFAULT_FORMATION, type Formation } from './lineup'
-import { facetIndex } from './roster-facets'
+import { facetsOfPlayer } from './roster-facets'
 import { byInitial, fold, splitName, type Searchable } from './roster-search'
 
 /**
@@ -34,10 +34,21 @@ export type RosterIndex = {
   withOrigin: number
 }
 
-export function rosterIndex(): RosterIndex {
-  // `footballPeople` is the merged set — the curated records plus the all-time roster,
-  // sport-scoped. Reading the roster file directly would drop the twenty players the
-  // archive actually knows something about.
+/**
+ * חלון של חיים (21.9.2026, `lib/mechanics/types.ts`) — the XI a boy builds with his father
+ * in THE WORKER LIFE, and the poll the ticket office asks him, are drawn from the men who
+ * had worn the shirt before `before`. A man the archive cannot date is left out rather than
+ * guessed in. Absent, the roster is the gate's.
+ */
+export type RosterWindow = { before: number }
+
+export function rosterIndex(window?: RosterWindow): RosterIndex {
+  // THE PLAYER MASTER, since 21.9.2026 — one row per PERSON, `kind === 'player'` only.
+  // It is still the merged set (curated records plus the all-time roster, sport-scoped),
+  // but the six men the archive had filed under two spellings are one row each now, and
+  // a referee, a singer and two men a match report names without a role are no longer
+  // offered as footballers. The row carries the master's canonical slug and name, and its
+  // `id` (`p_…`) — the key a saved pick should hold from here on.
   //
   // The split happens HERE, once, at build time. Doing it in the component meant 637
   // regex splits on every keystroke, which is most of why the sheet felt heavy.
@@ -47,25 +58,30 @@ export function rosterIndex(): RosterIndex {
   // and most of them are `null`, deliberately. See `lib/game/roster-facets.ts`: the
   // archive states a position for a few dozen men and for nobody else, and a guessed
   // position in a roster of 637 would make every one of them untrustworthy.
-  const facets = facetIndex()
-  const all: RosterEntry[] = footballPeople
-    .map((row) => {
-      const found = facets.get(fold(row.fullNameHe))
+  const all: RosterEntry[] = pickablePlayers()
+    .map((player) => {
+      const found = facetsOfPlayer(player)
       return {
-        slug: row.slug,
-        nameHe: row.fullNameHe,
-        ...splitName(row.fullNameHe),
-        position: found?.position ?? null,
+        id: player.id,
+        slug: player.slug,
+        nameHe: player.displayName,
+        ...splitName(player.displayName),
+        position: found.position,
         // Only where there is more than one: 653 single-element arrays in the payload
         // would be a second copy of `position` on every row (rule 59), sent to a phone.
-        ...(found?.positions ? { positions: found.positions } : {}),
-        positionFrom: found?.positionFrom ?? null,
-        origin: found?.origin ?? null,
-        originFrom: found?.originFrom ?? null,
-        fromYear: found?.fromYear ?? null,
-        toYear: found?.toYear ?? null,
+        ...(found.positions ? { positions: found.positions } : {}),
+        positionFrom: found.positionFrom,
+        origin: found.origin,
+        originFrom: found.originFrom,
+        // The club's foreign-slot record, kept apart from nationality (players.md §3.1):
+        // the filter, the row badge and gate 1's challenges read THIS.
+        foreignSlot: player.foreignSlot.status,
+        ...(player.aliases.he.length > 0 ? { aliasesHe: player.aliases.he } : {}),
+        fromYear: found.fromYear,
+        toYear: found.toYear,
       }
     })
+    .filter((entry) => !window || (entry.fromYear !== null && entry.fromYear !== undefined && entry.fromYear < window.before))
     .sort((a, b) => fold(a.familyHe).localeCompare(fold(b.familyHe), 'he'))
 
   return {

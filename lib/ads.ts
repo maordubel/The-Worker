@@ -60,3 +60,37 @@ export function track(event: string, params: Record<string, string | number> = {
     // measurement is never load-bearing
   }
 }
+
+/**
+ * מדידה בלי טקסט חופשי — the only shape a GATE event may reach GA in (21.9.2026).
+ *
+ * Brief §28: "avoid logging sensitive free-text". The rule here is stricter than the
+ * brief, because the cheapest way to keep a nickname, a typed memory or a ballot pick
+ * out of an analytics property is to make it impossible to send one: a string survives
+ * only if it looks like an ID — ASCII, no spaces, at most 64 characters — and a number
+ * only if it is finite, and it is rounded to an integer on the way. Everything else is
+ * dropped silently. Hebrew never passes, so no name can, whatever field it hides in.
+ *
+ * `track()` above is left exactly as it was for the LIFE monetisation director, which
+ * owns its own parameters.
+ */
+const ID_PARAM = /^[A-Za-z0-9_./:#|-]{1,64}$/
+
+export function safeParams(
+  params: Record<string, unknown>,
+): Record<string, string | number> {
+  const out: Record<string, string | number> = {}
+  for (const [key, value] of Object.entries(params)) {
+    if (!/^[a-z][a-z0-9_]{0,39}$/.test(key)) continue
+    if (typeof value === 'number' && Number.isFinite(value)) out[key] = Math.round(value)
+    else if (typeof value === 'boolean') out[key] = value ? 1 : 0
+    else if (typeof value === 'string' && ID_PARAM.test(value)) out[key] = value
+  }
+  return out
+}
+
+/** `track()`, through `safeParams`. Every gate event goes this way. */
+export function trackIds(event: string, params: Record<string, unknown> = {}): void {
+  if (!/^[a-z][a-z0-9_]{0,39}$/.test(event)) return
+  track(event, safeParams(params))
+}

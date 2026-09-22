@@ -1,20 +1,25 @@
 /**
- * משחק השנאה — king of the hill.
+ * הקיר השחור — gate 11, v3.
  *
- * The first version was a knockout bracket in three rounds. Maor asked for something
- * simpler and better: **always head to head, and whoever you pick stays for the next
- * one.** That single change fixes the thing a bracket gets wrong — in a bracket your
- * champion beats three people and you never learn whether he'd beat the other four. A
- * king of the hill runs your pick against ten challengers in a row, so the name left
- * standing at the end actually earned it against the field.
+ * Two names on the wall; you keep the one you cannot tear off, the other is torn down
+ * and the next one is pasted up. Eight rounds. What was a king of the hill is now a
+ * WALL: the brief (§21) bans the heroic vocabulary — no king, no "enemy number one", no
+ * titles for the player — and asks for a wall, a case file, a survivor.
  *
- * Ten duels, ten different challengers, no stages and no clock. There is no right
- * answer to any of it; what comes back is who survived and how far your run tracked
- * the terrace's own ranking.
+ * What v3 adds, as rules (this file is pure and client-safe; `hate.ts` deals):
  *
- * This half runs on the CLIENT — `lib/game/hate.ts` reads the archive and is
- * `server-only`. Nothing here is secret, which is why a swipe can resolve in the same
- * frame instead of waiting on a round trip.
+ *  · **Wall damage** — the survivor's poster carries its streak as damage, 0–5, and one
+ *    numbered mark per round survived.
+ *  · **One revenge** — once a run you may bring back one of the last six torn down. The
+ *    challenger he displaces is NOT lost (the prototype dropped him): he goes back to
+ *    the head of the queue.
+ *  · **בלי רחמים** — rounds 4 and 7 are dealt from the top twelve of Maor's ranking and
+ *    flagged; the screen says so in a banner that blocks nothing.
+ *  · **Wall DNA** — still here · first torn down · the revenge pick · the no-mercy pick,
+ *    and a code `WALL-<seed36>-<hash5>` that names the wall and fingerprints the picks.
+ *
+ * Nothing is graded: a feeling cannot be wrong. The only comparison with the terrace is
+ * one line — "היציע היה משאיר: X" — the highest-ranked name the wall showed.
  */
 
 export type Enemy = {
@@ -25,99 +30,218 @@ export type Enemy = {
   sport: 'football' | 'basketball'
   eraHe: string
   chargeHe: string
+  /** the sourced record — EMPTY where the row has no real citation (rule 18 §1) */
   detailHe: string
+  /** the sourced one-liner — EMPTY where the row has no real citation (rule 18 §1) */
   keyFactHe: string
   terraceRank: number
+  /** the row's own source title, printed with its record */
+  sourceTitle: string
+  /** 'cited' — a real source; 'maor' — Maor's own knowledge, labelled as his; 'none' */
+  record: 'cited' | 'maor' | 'none'
 }
 
-/** Ten challengers, so eleven names appear in a run. */
-export const DUEL_COUNT = 10
+/** eight rounds on the wall */
+export const DUEL_COUNT = 8
+/** 1 on the wall + 8 challengers + 1 spare */
+export const QUEUE_LENGTH = DUEL_COUNT + 2
+/** the rounds (1-based, as the screen counts) that are dealt without mercy */
+export const NO_MERCY_ROUNDS = [4, 7] as const
+/** how far back the one revenge can reach */
+export const REVENGE_WINDOW = 6
+/** the survivor's damage caps here */
+export const MAX_DAMAGE = 5
+/** the stamp between rounds — a tap ends it */
+export const STAMP_MS = 520
 
-export type Duel = {
-  id: string
-  /** the one still standing */
-  holderSlug: string
-  /** the one coming for him */
-  challengerSlug: string
+export type Pick = {
+  round: number
+  winner: string
+  loser: string
+  /** this round's challenger was dealt without mercy */
+  noMercy: boolean
+  /** this round's challenger was the revenge pick */
+  revenge: boolean
 }
 
-/**
- * The queue for a run: the opening holder, then ten challengers in order.
- *
- * The duels themselves cannot be precomputed, because who holds the hill at duel 7
- * depends on what you did at duel 6. The QUEUE can, and that is what the server deals.
- */
-export function duelAt(order: string[], picks: string[], index: number): Duel | null {
-  const challenger = order[index + 1]
-  if (challenger === undefined) return null
-  const holder = picks[index - 1] ?? order[0]
-  if (holder === undefined) return null
-  return { id: `d${index}`, holderSlug: holder, challengerSlug: challenger }
+export type Wall = {
+  holder: string
+  /** upcoming challengers — the head is the one on the wall now */
+  queue: string[]
+  picks: Pick[]
+  /** everyone torn down, oldest first */
+  out: string[]
+  revengeUsed: boolean
+  revengePick: string | null
+  /** slugs dealt into a no-mercy slot */
+  noMercy: string[]
 }
 
-export type Verdict = {
-  /** the name left standing */
-  champion: Enemy
-  /** how many challengers he saw off in a row at the end of the run */
-  streak: number
-  /** everyone who held the hill, longest reign first */
-  standings: { enemy: Enemy; held: number }[]
-  /** how often the pick matched the terrace ranking, 0..100 */
-  agreement: number
-  duelsJudged: number
-  terraceChampion: Enemy
-}
-
-export function judgeRun(enemies: Enemy[], order: string[], picks: string[]): Verdict | null {
-  if (picks.length === 0) return null
-  const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
-  const champion = bySlug.get(picks[picks.length - 1] as string)
-  if (!champion) return null
-
-  const held = new Map<string, number>()
-  let matched = 0
-  let streak = 0
-
-  picks.forEach((winner, index) => {
-    const duel = duelAt(order, picks, index)
-    if (!duel) return
-    held.set(winner, (held.get(winner) ?? 0) + 1)
-    const holder = bySlug.get(duel.holderSlug)
-    const challenger = bySlug.get(duel.challengerSlug)
-    if (holder && challenger) {
-      const terraceWinner =
-        holder.terraceRank < challenger.terraceRank ? holder.slug : challenger.slug
-      if (terraceWinner === winner) matched += 1
-    }
-    streak = winner === champion.slug ? streak + 1 : 0
-  })
-
-  const seen = new Set<string>([order[0] as string, ...picks, ...order.slice(1)])
-  const standings = [...held.entries()]
-    .map(([slug, count]) => ({ enemy: bySlug.get(slug), held: count }))
-    .filter((row): row is { enemy: Enemy; held: number } => row.enemy !== undefined)
-    .sort((a, b) => b.held - a.held || a.enemy.terraceRank - b.enemy.terraceRank)
-
-  const terraceChampion = [...seen]
-    .map((slug) => bySlug.get(slug))
-    .filter((enemy): enemy is Enemy => enemy !== undefined)
-    .sort((a, b) => a.terraceRank - b.terraceRank)[0]
-  if (!terraceChampion) return null
-
+export function startWall(order: readonly string[], noMercy: readonly string[] = []): Wall {
   return {
-    champion,
-    streak,
-    standings,
-    agreement: Math.round((matched / picks.length) * 100),
-    duelsJudged: picks.length,
-    terraceChampion,
+    holder: order[0] ?? '',
+    queue: order.slice(1),
+    picks: [],
+    out: [],
+    revengeUsed: false,
+    revengePick: null,
+    noMercy: [...noMercy],
   }
 }
 
-/** What the terrace calls you, by how closely your run tracked its own ranking. */
-export function standingKey(agreement: number): string {
-  if (agreement >= 100) return 'hate.standing.capo'
-  if (agreement >= 72) return 'hate.standing.north'
-  if (agreement >= 45) return 'hate.standing.member'
-  return 'hate.standing.own'
+export function over(wall: Wall): boolean {
+  return wall.picks.length >= DUEL_COUNT || wall.queue.length === 0
+}
+
+/** the duel on the wall now, or null when the run is over */
+export function duelOf(wall: Wall): { round: number; holder: string; challenger: string; noMercy: boolean } | null {
+  if (over(wall)) return null
+  const challenger = wall.queue[0] as string
+  return {
+    round: wall.picks.length + 1,
+    holder: wall.holder,
+    challenger,
+    noMercy: wall.noMercy.includes(challenger),
+  }
+}
+
+/** keep `winner` on the wall; the other is torn down and the next one goes up */
+export function choose(wall: Wall, winner: string): Wall {
+  const duel = duelOf(wall)
+  if (!duel || (winner !== duel.holder && winner !== duel.challenger)) return wall
+  const loser = winner === duel.holder ? duel.challenger : duel.holder
+  return {
+    ...wall,
+    holder: winner,
+    queue: wall.queue.slice(1),
+    out: [...wall.out, loser],
+    picks: [
+      ...wall.picks,
+      { round: duel.round, winner, loser, noMercy: duel.noMercy, revenge: wall.revengePick === duel.challenger && wall.picks.every((pick) => !pick.revenge) },
+    ],
+  }
+}
+
+/** who the one revenge can bring back — the last six torn down, newest first */
+export function revengeChoices(wall: Wall): string[] {
+  if (wall.revengeUsed || over(wall)) return []
+  return [...wall.out].reverse().filter((slug) => slug !== wall.holder).slice(0, REVENGE_WINDOW)
+}
+
+/**
+ * Bring one back. He becomes the challenger NOW; the challenger he displaces goes back to
+ * the head of the queue and gets his round next — nobody silently leaves the wall.
+ */
+export function revenge(wall: Wall, slug: string): Wall {
+  if (!revengeChoices(wall).includes(slug)) return wall
+  return {
+    ...wall,
+    queue: [slug, ...wall.queue],
+    out: wall.out.filter((name) => name !== slug),
+    revengeUsed: true,
+    revengePick: slug,
+  }
+}
+
+/** how long the survivor has held: consecutive rounds won at the end of the log */
+export function streakOf(wall: Wall): number {
+  let run = 0
+  for (let at = wall.picks.length - 1; at >= 0 && wall.picks[at]?.winner === wall.holder; at -= 1) run += 1
+  return run
+}
+
+/** 0..5 — how torn the survivor's poster is */
+export function damageOf(streak: number): number {
+  return Math.max(0, Math.min(MAX_DAMAGE, streak))
+}
+
+/* ------------------------------------------------------------------- the DNA */
+
+/** FNV-1a, 32-bit — deterministic, dependency-free, the same on server and phone */
+function fnv(text: string): number {
+  let hash = 0x811c9dc5
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index)
+    hash = Math.imul(hash, 0x01000193) >>> 0
+  }
+  return hash >>> 0
+}
+
+/** the wall's address — seed, and the cursor when there is one */
+export function wallAddress(seed: number, cursor = 0): string {
+  const base = Math.max(1, Math.floor(seed)).toString(36).toUpperCase()
+  return cursor > 0 ? `${base}.${Math.floor(cursor).toString(36).toUpperCase()}` : base
+}
+
+/**
+ * `WALL-<seed36>-<hash5>` — the first half is the wall (anyone can play it), the second
+ * fingerprints the picks, so two people on the same wall compare codes and know at once
+ * whether they kept the same names.
+ */
+export function wallCode(seed: number, cursor: number, picks: readonly Pick[], revengePick: string | null): string {
+  const trail = picks.map((pick) => `${pick.winner}>${pick.loser}${pick.revenge ? '!' : ''}`).join('|')
+  const print = (fnv(`${wallAddress(seed, cursor)}#${trail}#${revengePick ?? ''}`) % 36 ** 5).toString(36).toUpperCase()
+  return `WALL-${wallAddress(seed, cursor)}-${print.padStart(5, '0')}`
+}
+
+/** a typed code → the wall it names, or null. Only the address half is needed to play. */
+export function readWallCode(code: string): { seed: number; cursor: number } | null {
+  const match = /^WALL-([0-9A-Z]+)(?:\.([0-9A-Z]+))?(?:-[0-9A-Z]{5})?$/.exec(code.trim().toUpperCase())
+  if (!match) return null
+  const seed = parseInt(match[1] as string, 36)
+  const cursor = match[2] ? parseInt(match[2], 36) : 0
+  if (!Number.isFinite(seed) || seed <= 0 || !Number.isFinite(cursor) || cursor < 0) return null
+  return { seed, cursor }
+}
+
+export type WallVerdict = {
+  survivor: Enemy
+  streak: number
+  firstOut: Enemy | null
+  revengePick: Enemy | null
+  noMercyPick: { winner: Enemy; loser: Enemy } | null
+  /** the highest-ranked name the wall showed — "היציע היה משאיר: X" */
+  terracePick: Enemy
+  /** everyone torn down, in order */
+  out: Enemy[]
+  code: string
+}
+
+export function judgeWall(enemies: readonly Enemy[], wall: Wall, seed: number, cursor = 0): WallVerdict | null {
+  const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
+  const survivor = bySlug.get(wall.holder)
+  if (!survivor || wall.picks.length === 0) return null
+  const seen = [...new Set(wall.picks.flatMap((pick) => [pick.winner, pick.loser]))]
+    .map((slug) => bySlug.get(slug))
+    .filter((enemy): enemy is Enemy => enemy !== undefined)
+  const terracePick = [...seen].sort((a, b) => a.terraceRank - b.terraceRank)[0] ?? survivor
+  const mercy = wall.picks.find((pick) => pick.noMercy)
+  const mercyWinner = mercy ? bySlug.get(mercy.winner) : undefined
+  const mercyLoser = mercy ? bySlug.get(mercy.loser) : undefined
+  return {
+    survivor,
+    streak: streakOf(wall),
+    firstOut: bySlug.get(wall.picks[0]?.loser ?? '') ?? null,
+    revengePick: wall.revengePick ? (bySlug.get(wall.revengePick) ?? null) : null,
+    noMercyPick: mercyWinner && mercyLoser ? { winner: mercyWinner, loser: mercyLoser } : null,
+    terracePick,
+    out: wall.out.map((slug) => bySlug.get(slug)).filter((enemy): enemy is Enemy => enemy !== undefined),
+    code: wallCode(seed, cursor, wall.picks, wall.revengePick),
+  }
+}
+
+/* ------------------------------------------------------ rule 18, as a function */
+
+const NO_CITATION = /לא אומת|לא נטען/
+
+/**
+ * Where a row's record comes from. A row whose "source" says it could not be verified
+ * (`williams`, `vujcic`) has NO citation, so it prints the charge and the era and
+ * nothing that reads as a fact. Maor's own knowledge (`gola`) is a source — cited as
+ * his, never dressed as a press line (rule 18).
+ */
+export function recordKind(sourceTitle: string): Enemy['record'] {
+  if (sourceTitle.startsWith('מאור הראל')) return 'maor'
+  if (sourceTitle.trim() === '' || NO_CITATION.test(sourceTitle)) return 'none'
+  return 'cited'
 }

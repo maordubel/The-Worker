@@ -1,10 +1,7 @@
 import 'server-only'
 
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-
 import { archiveShirts, type ArchiveShirt } from './archive'
-import { seasonKits } from './seasons'
+import { kitRecords, specOf } from './kit-master'
 import type { KitSpec } from './spec'
 
 export type DnaRackItem = {
@@ -23,29 +20,18 @@ export function exactArchivePhoto(seasonLabel: string, variant: string): Archive
   ) ?? null
 }
 
+/**
+ * The whole rack — every kit's spec and its exact photograph. SERVER-ONLY and never handed to a
+ * client wholesale: it is the answer sheet to Gate 4. Gate 5 serves a row of it only for a shirt
+ * whose unlock token verifies (`app/kits/actions.ts`).
+ */
 export function kitDnaRack(): DnaRackItem[] {
-  return seasonKits()
-    .map((kit) => {
-      const photo = exactArchivePhoto(kit.seasonLabel, kit.variant)
-      return {
-        key: `${kit.seasonLabel}|${kit.variant}`,
-        seasonLabel: kit.seasonLabel,
-        variant: kit.variant,
-        spec: kit.spec,
-        photoSrc: photo?.src ?? null,
-        photoSourceTitle: photo?.sourceTitle ?? null,
-      }
-    })
-    .sort((a, b) => b.seasonLabel.localeCompare(a.seasonLabel) || a.variant.localeCompare(b.variant))
-}
-
-/** Reads only paths that came out of archiveShirts(), never a caller-provided path. */
-export function archivePhotoBytes(src: string): Buffer | null {
-  const known = archiveShirts().some((shirt) => shirt.src === src)
-  if (!known || !src.startsWith('/kits/')) return null
-  try {
-    return readFileSync(join(process.cwd(), 'public', src))
-  } catch {
-    return null
-  }
+  return kitRecords().map((kit) => ({
+    key: kit.legacyKey,
+    seasonLabel: kit.seasonLabel,
+    variant: kit.variant,
+    spec: specOf(kit),
+    photoSrc: kit.evidence.exactPhoto?.src ?? null,
+    photoSourceTitle: kit.evidence.exactPhoto?.sourceTitle ?? null,
+  }))
 }

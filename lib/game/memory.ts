@@ -37,7 +37,7 @@ import { currentSeasonStartYear, seasonsInSpell } from './seasons'
  * also what lets the closed board be read at a glance — six things and six dates,
  * rather than twelve shapes with nothing to say.
  */
-export type MemoryObject = 'trophy' | 'shirt' | 'clipping' | 'ballot' | 'season' | 'count'
+export type MemoryObject = 'trophy' | 'shirt' | 'clipping' | 'ballot' | 'season' | 'count' | 'goal' | 'ticket'
 
 /** which face of the pair a card is: the thing, or what dates it */
 export type MemorySide = 'memory' | 'answer'
@@ -87,6 +87,12 @@ type Candidate = {
   object: MemoryObject
   /** the object the answer face draws */
   answer: MemoryObject
+  /**
+   * the last year the fact touches — a span's end, a season's second year. THE WORKER LIFE's
+   * window keeps a pair only when the whole of it had happened (`MemoryWindow`); null for a
+   * row the archive does not date, which a window never deals.
+   */
+  year?: number | null
 }
 
 function kitCandidates(): Candidate[] {
@@ -106,6 +112,7 @@ function kitCandidates(): Candidate[] {
         kind: 'יצרן ותקופה',
         object: 'shirt' as const,
         answer: 'season' as const,
+        year: seasonEnd(last ?? ''),
       }
     })
     .filter((candidate) => candidate.b !== '')
@@ -136,7 +143,27 @@ function distinctCount(candidates: readonly { a: string; b: string }[]): number 
  * `positionOf` with the same arguments, and the day one of them drifted the shelf would
  * be describing a different board from the one on screen.
  */
-export function buildRound(seed: number, pairs = 6, cursor = 0): MemoryRound {
+/**
+ * חלון של חיים (21.9.2026, `lib/mechanics/types.ts`) — the old fan at the bus stop in THE
+ * WORKER LIFE deals from what had happened by then: only pairs whose last year is before
+ * `before` (and not before `from`). Elections carry no date and are never in a window.
+ * Absent, the board is dealt exactly as it was.
+ */
+export type MemoryWindow = { before: number; from?: number }
+
+/** the year a season label ends in — `1985/86` → 1986, `1999/00` → 2000 */
+function seasonEnd(label: string): number | null {
+  const match = /^(\d{4})\/(\d{2})/.exec(label)
+  if (!match) {
+    const year = Number(label.slice(0, 4))
+    return Number.isFinite(year) && year > 0 ? year : null
+  }
+  const start = Number(match[1])
+  const end = Number(match[2])
+  return Math.floor(start / 100) * 100 + end + (end < start % 100 ? 100 : 0)
+}
+
+export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryWindow): MemoryRound {
   // The board used to be one board: the gate linked `?seed=7`, the route defaulted to
   // 7, and there was no replay link at all, so every player on every visit turned over
   // the same twelve cards.
@@ -151,6 +178,7 @@ export function buildRound(seed: number, pairs = 6, cursor = 0): MemoryRound {
         kind: 'תואר ועונה',
         object: 'trophy' as const,
         answer: 'season' as const,
+        year: seasonEnd(row.seasonLabel),
       })),
     ...archive.moments
       .filter((row) => row.happenedOn !== null)
@@ -161,6 +189,45 @@ export function buildRound(seed: number, pairs = 6, cursor = 0): MemoryRound {
         kind: 'רגע ושנה',
         object: 'clipping' as const,
         answer: 'season' as const,
+        year: Number((row.happenedOn as string).slice(0, 4)),
+      })),
+    // v3 (21.9.2026): three more pairings, each one a row that dates itself. A shirt and
+    // its season is deliberately NOT one of them — it would be gate 4's answer sheet
+    // (rule 24); the maker and its span above is a fact about a supplier, not a shirt.
+    ...archive.goals
+      .map((goal) => ({ goal, year: ((goal as { playedOn?: string }).playedOn ?? '').slice(0, 4) }))
+      // title ↔ year only: the 2010/2012 cup-final OPPONENTS are contested, the day is not
+      .filter(({ year }) => /^\d{4}$/.test(year))
+      .map(({ goal, year }) => ({
+        pair: `goal:${goal.goalId}`,
+        a: goal.titleHe,
+        b: year,
+        kind: 'שער ושנה',
+        object: 'goal' as const,
+        answer: 'season' as const,
+        year: Number(year),
+      })),
+    ...archive.euroTies
+      .filter((tie) => !tie.opponentHe.includes(' · '))
+      .map((tie) => ({
+        pair: `euro:${tie.slug}`,
+        a: tie.opponentHe,
+        b: tie.seasonLabel,
+        kind: 'לילה אירופי ועונה',
+        object: 'ticket' as const,
+        answer: 'season' as const,
+        year: seasonEnd(tie.seasonLabel),
+      })),
+    ...archive.crests
+      .filter((row) => row.toYear !== null && row.toYear !== row.fromYear)
+      .map((row) => ({
+        pair: `crest:${row.fromYear}`,
+        a: row.nameHe,
+        b: `${row.fromYear}–${row.toYear}`,
+        kind: 'סמל ושנים',
+        object: 'clipping' as const,
+        answer: 'season' as const,
+        year: row.toYear,
       })),
     ...archive.electionCandidates
       .filter((row) => row.votes !== null && row.rank !== null && row.rank <= 6)
@@ -185,6 +252,14 @@ export function buildRound(seed: number, pairs = 6, cursor = 0): MemoryRound {
   // over a pool that fills four, `takeFrom` wrapped, and every board from the fifth on
   // re-dealt a pair the same lap had already dealt — the one guarantee
   // `lib/rotation/deck.ts` exists to make. 17.9.2026.
+  if (window) {
+    const kept = candidates.filter((candidate) => {
+      const year = candidate.year
+      return typeof year === 'number' && Number.isFinite(year) && year < window.before && (window.from === undefined || year >= window.from)
+    })
+    candidates.length = 0
+    candidates.push(...kept)
+  }
   const at = positionOf(seed, cursor, distinctCount(candidates), pairs)
   const random = rng(at.seed)
 
@@ -198,9 +273,23 @@ export function buildRound(seed: number, pairs = 6, cursor = 0): MemoryRound {
     seen.add(candidate.b)
     return true
   })
+  // Dealt round-robin across KINDS (v3, 21.9.2026): fifty European ties would otherwise
+  // be two or three pairs of every board, and a wall of three "לילה אירופי" tabs is one
+  // question asked three times. The order is still one fixed permutation of the pool, so
+  // consecutive windows stay disjoint — the rotation promise is unchanged.
+  const byKind = new Map<string, Candidate[]>()
+  for (const candidate of distinct) byKind.set(candidate.kind, [...(byKind.get(candidate.kind) ?? []), candidate])
+  const spread: Candidate[] = []
+  for (let depth = 0; spread.length < distinct.length; depth += 1) {
+    for (const list of byKind.values()) {
+      const next = list[depth]
+      if (next) spread.push(next)
+    }
+  }
+
   // The window slides AFTER the de-duplication, so a later board is still six distinct
   // faces rather than six rows that happen to sit next to each other in the raw pool.
-  const chosen = takeFrom(distinct, at.slot * pairs, pairs)
+  const chosen = takeFrom(spread, at.slot * pairs, pairs)
 
   const cards = shuffle(
     chosen.flatMap((candidate): MemoryCard[] => [

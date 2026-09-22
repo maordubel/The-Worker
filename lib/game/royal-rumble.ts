@@ -4,7 +4,7 @@ import { createHmac } from 'node:crypto'
 
 import { archive } from './archive'
 import { facetsFor, type Position } from './roster-facets'
-import { royalRumbleMatchSeed } from './royal-rumble-seeds'
+import { alternateRoyalRumbleOfferSeed, royalRumbleMatchSeed } from './royal-rumble-seeds'
 
 export const ROYAL_RUMBLE_BUDGET = 15
 export const ROYAL_RUMBLE_LINEUP_SIZE = 5
@@ -228,8 +228,24 @@ function shuffle<T>(items: readonly T[], seed: number): T[] {
   return out
 }
 
-function poolFor(position: Position): RatedPlayer[] {
-  return ratedPlayers().filter((player) => player.positions.includes(position))
+/**
+ * חלון של חיים (21.9.2026, `lib/mechanics/types.ts`) — the pack of cards Ofir deals on the
+ * pitch in THE WORKER LIFE holds only men who had played for the club before `before`,
+ * on both sides of the dare. Absent, the pools are the gate's.
+ */
+export type RumbleWindow = { before: number }
+
+function poolFor(position: Position, window?: RumbleWindow): RatedPlayer[] {
+  return ratedPlayers().filter(
+    (player) =>
+      player.positions.includes(position) &&
+      (!window || (player.fromYear !== null && player.fromYear < window.before)),
+  )
+}
+
+/** how many cards a window holds at the thinnest position — the life asks before it deals */
+export function rumbleDepth(window: RumbleWindow): number {
+  return Math.min(...ROYAL_RUMBLE_FORMATION.map((position) => poolFor(position, window).length))
 }
 
 export function royalRumblePlayerCount(): number {
@@ -241,10 +257,10 @@ export function royalRumblePlayerCount(): number {
  * so the server can later validate that every submitted player really was on their
  * screen. A player cannot appear in two slots in the same draft.
  */
-export function dealRoyalRumbleDraft(seed: number): RoyalRumbleDraft {
+export function dealRoyalRumbleDraft(seed: number, window?: RumbleWindow): RoyalRumbleDraft {
   const used = new Set<string>()
   const slots = ROYAL_RUMBLE_FORMATION.map((position, index) => {
-    const candidates = shuffle(poolFor(position), seed + index * 104729).filter(
+    const candidates = shuffle(poolFor(position, window), seed + index * 104729).filter(
       (player) => !used.has(player.slug),
     )
     const offers = candidates.slice(0, ROYAL_RUMBLE_OFFERS_PER_SLOT)
@@ -255,10 +271,33 @@ export function dealRoyalRumbleDraft(seed: number): RoyalRumbleDraft {
   return { seed, budget: ROYAL_RUMBLE_BUDGET, formation: ROYAL_RUMBLE_FORMATION, slots }
 }
 
-function validateSelection(seed: number, slugs: readonly string[]): RatedPlayer[] | null {
+/**
+ * Two usable drafts for one visit — the dealt one and the one the single shuffle swaps in.
+ * A draft is usable when every slot has an offer and the cheapest five fit the budget.
+ * It lived in `app/royal-rumble/page.tsx` until THE WORKER LIFE needed the same pair over
+ * a window (21.9.2026); one helper, both callers (rule 59).
+ */
+export function pairedRoyalRumbleDrafts(
+  seed: number,
+  window?: RumbleWindow,
+): { draft: RoyalRumbleDraft; shuffleDraft: RoyalRumbleDraft } {
+  const cheapest = (draft: RoyalRumbleDraft) =>
+    draft.slots.reduce((sum, slot) => sum + Math.min(...slot.offers.map((player) => player.price)), 0)
+  const usable = (draft: RoyalRumbleDraft) => draft.slots.every((slot) => slot.offers.length > 0) && cheapest(draft) <= draft.budget
+  for (let attempt = 0; attempt < 128; attempt += 1) {
+    const offerSeed = (seed + attempt * 7919) >>> 0
+    const draft = dealRoyalRumbleDraft(offerSeed, window)
+    const shuffleDraft = dealRoyalRumbleDraft(alternateRoyalRumbleOfferSeed(offerSeed), window)
+    if (usable(draft) && usable(shuffleDraft)) return { draft, shuffleDraft }
+  }
+  const draft = dealRoyalRumbleDraft(seed >>> 0, window)
+  return { draft, shuffleDraft: dealRoyalRumbleDraft(alternateRoyalRumbleOfferSeed(draft.seed), window) }
+}
+
+function validateSelection(seed: number, slugs: readonly string[], window?: RumbleWindow): RatedPlayer[] | null {
   if (slugs.length !== ROYAL_RUMBLE_LINEUP_SIZE || new Set(slugs).size !== slugs.length) return null
 
-  const draft = dealRoyalRumbleDraft(seed)
+  const draft = dealRoyalRumbleDraft(seed, window)
   const bySlug = new Map(ratedPlayers().map((player) => [player.slug, player]))
   const selected: RatedPlayer[] = []
 
@@ -280,7 +319,7 @@ function validateSelection(seed: number, slugs: readonly string[]): RatedPlayer[
  * picks. It obeys the same €15m cap, so the game cannot secretly counter-pick a strong
  * lineup after seeing it.
  */
-function dealOpponent(seed: number): RatedPlayer[] {
+function dealOpponent(seed: number, window?: RumbleWindow): RatedPlayer[] {
   const random = mulberry32((seed ^ 0x51f15e) >>> 0)
   const used = new Set<string>()
   const team: RatedPlayer[] = []
@@ -290,10 +329,10 @@ function dealOpponent(seed: number): RatedPlayer[] {
     const position = ROYAL_RUMBLE_FORMATION[index] as Position
     const remainingSlots = ROYAL_RUMBLE_FORMATION.length - index - 1
     const maxPrice = ROYAL_RUMBLE_BUDGET - spent - remainingSlots
-    const legal = poolFor(position).filter(
+    const legal = poolFor(position, window).filter(
       (player) => !used.has(player.slug) && player.price <= maxPrice,
     )
-    const candidates = legal.length > 0 ? legal : poolFor(position).filter((player) => !used.has(player.slug))
+    const candidates = legal.length > 0 ? legal : poolFor(position, window).filter((player) => !used.has(player.slug))
     const player = candidates[Math.floor(random() * candidates.length)]
     if (!player) continue
     used.add(player.slug)
@@ -492,11 +531,11 @@ export function playRoyalRumbleHeadToHead(
 }
 
 /** The only solo function a server action needs. Ratings never cross this boundary. */
-export function playRoyalRumble(seed: number, slugs: readonly string[]): RoyalRumbleResult | null {
-  const selected = validateSelection(seed, slugs)
+export function playRoyalRumble(seed: number, slugs: readonly string[], window?: RumbleWindow): RoyalRumbleResult | null {
+  const selected = validateSelection(seed, slugs, window)
   if (!selected) return null
   const matchSeed = royalRumbleMatchSeed(seed)
-  const opponent = dealOpponent(matchSeed)
+  const opponent = dealOpponent(matchSeed, window)
   if (opponent.length !== ROYAL_RUMBLE_LINEUP_SIZE) return null
   return simulate(matchSeed, selected, opponent)
 }

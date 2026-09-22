@@ -43,6 +43,27 @@ export type MatchNaturalKey = string & { readonly __brand: 'MatchNaturalKey' }
 
 export const MATCH_ID_PREFIX = 'm_'
 
+/**
+ * The other spellings of "this match" that files in the archive already use (21.9.2026).
+ *
+ * A natural key is the ingestion's dialect. Six more grew up around it before any id was
+ * minted, and every one of them is persisted somewhere or joined on by something:
+ *
+ *   · `events`    — `match-events.json` / `moments.json` key without the leading sport
+ *   · `scorers`   — `match-scorers.json` builds its key from DISPLAY names (`הפועל-ת"א`)
+ *   · `lineup`    — `lineups.json` hand-made slugs (`2001-02-uefa-r2-chelsea`)
+ *   · `conflict`  — `fact-conflicts.json` `entityKey` ("1995-08-08 הפועל-תל-אביב — …")
+ *   · `timeline`  — gate 13's internal `match:<season>:<home>:<away>:<date>`
+ *   · `euro-leg`  — gate 13's `euro:<tie slug>:<date>` for a leg of a European tie
+ *
+ * They are aliases in exactly the sense `aliases` is — another string that means the
+ * same match — but they are NOT natural keys, so they live in their own list and
+ * `idForNaturalKey` never looks at them. `idForAnyKey` does.
+ */
+export type MatchKeyDialect = 'events' | 'scorers' | 'lineup' | 'conflict' | 'timeline' | 'euro-leg'
+
+export type MatchDialectKey = { dialect: MatchKeyDialect; key: string }
+
 /** Shape of one registry row. Append-only; `aliases` grows, `id` never changes. */
 export type MatchIdEntry = {
   id: CanonicalMatchId
@@ -53,6 +74,13 @@ export type MatchIdEntry = {
   aliases: MatchNaturalKey[]
   /** when the id was minted — a correction never updates this */
   mintedOn: string
+  /** other key dialects that name this match; append-only like `aliases` */
+  dialects?: MatchDialectKey[]
+  /**
+   * Why two natural keys share this id, where they do — an owner decision, never the
+   * pipeline's. The facts the two rows disagree on stay in `fact-conflicts.json`.
+   */
+  mergeNote?: string
 }
 
 /**
@@ -106,4 +134,34 @@ export function entryForId(
   id: CanonicalMatchId,
 ): MatchIdEntry | null {
   return registry.find((entry) => entry.id === id) ?? null
+}
+
+/**
+ * Resolve ANY key a file in the archive uses for a match — a natural key (current or
+ * superseded), one of the dialects above, or the id itself.
+ *
+ * Built for readers holding many keys: pass the registry once and reuse the returned
+ * function, which indexes it on first use.
+ */
+export function matchKeyResolver(
+  registry: readonly MatchIdEntry[],
+): (key: string) => CanonicalMatchId | null {
+  const index = new Map<string, CanonicalMatchId>()
+  for (const entry of registry) {
+    index.set(entry.id, entry.id)
+    index.set(entry.naturalKey, entry.id)
+    for (const alias of entry.aliases) index.set(alias, entry.id)
+    for (const dialect of entry.dialects ?? []) {
+      if (!index.has(dialect.key)) index.set(dialect.key, entry.id)
+    }
+  }
+  return (key: string) => index.get(key) ?? null
+}
+
+/** One-off lookup over every key dialect. Use `matchKeyResolver` in a loop. */
+export function idForAnyKey(
+  registry: readonly MatchIdEntry[],
+  key: string,
+): CanonicalMatchId | null {
+  return matchKeyResolver(registry)(key)
 }

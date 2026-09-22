@@ -1,17 +1,28 @@
 import 'server-only'
 
-import { archive } from '@/lib/game/archive'
-import { kitAssemblySeasons } from './assembly'
-import {
-  DEFAULT_SPEC,
-  type CollarId,
-  type KitColour,
-  type KitSpec,
-  type KitVariant,
-  type NamesetId,
-  type PatternId,
-  type SleeveId,
-} from './spec'
+import crestFile from '../../content/manual/crest-versions.json'
+
+import { kitRecords, specOf } from './kit-master'
+import type { KitSpec, KitVariant } from './spec'
+
+/**
+ * עונות החולצה — every kit the archive knows, as the engine draws it.
+ *
+ * Since 21.9.2026 this is a projection of the Kit Master (`lib/kit/kit-master.ts`), not a second
+ * resolver. It used to read `kit-designs.json` and `kit-assembly.json` itself and resolve the
+ * crest from the timeline with a fallback to the era BEFORE — which quietly printed the 1992 crest
+ * on the 1999/00 shirt, an era the archive has no artwork for. The master resolves each field once,
+ * with its source, and in gates 4 and 5 a shirt whose era has no printed crest wears none
+ * (rule 25) and is not dealt.
+ *
+ * **One exception, and it is a debt, not a design.** The minis outside gates 4–5 (the XI, the
+ * Rumble, the member card) read THIS projection, and the XI draws the 1999/00 shirt Maor asked
+ * for by name (*"לשלום תקוה להצמיד חולצה 99-00"*). The archive has no artwork for the
+ * 1997–2000 crest, so for those surfaces the old resolver's answer — the last era before it that
+ * has artwork — is kept, exactly as it was before the Kit Master, and marked here. Two year-only
+ * archive photographs of 1999 show a KETER crest rather than that one, which is why this is
+ * written down as a sourcing request (art need 3 in the kits report) and not as a fact.
+ */
 
 export type SeasonKit = {
   seasonLabel: string
@@ -23,80 +34,25 @@ export type SeasonKit = {
   confidence: number
 }
 
-function crestForSeason(seasonLabel: string): string | null {
+type CrestRow = { fromYear: number; imageKey: string | null }
+const CRESTS = (crestFile as unknown as { records: CrestRow[] }).records
+
+/** the pre-Kit-Master answer for an era with no artwork: the last earlier era that has one */
+function legacyCrest(seasonLabel: string): string | null {
   const year = Number(seasonLabel.slice(0, 4))
-  if (!Number.isFinite(year)) return null
-  const containing = archive.crests
-    .filter((row) => year >= row.fromYear && (row.toYear === null || year <= row.toYear))
-    .sort((a, b) => b.fromYear - a.fromYear)
-  const withImage = containing.find((row) => row.imageKey !== null)
-  if (withImage) return withImage.imageKey
-  const earlier = archive.crests
-    .filter((row) => row.fromYear <= year && row.imageKey !== null)
-    .sort((a, b) => b.fromYear - a.fromYear)[0]
-  return earlier?.imageKey ?? null
-}
-
-function archiveSeasonKits(): SeasonKit[] {
-  return archive.kitDesigns.map((row) => ({
-    seasonLabel: row.seasonLabel,
-    variant: row.variant,
-    noteHe: row.noteHe,
-    sourceTitle: row.sourceTitle,
-    sourceUrl: row.sourceUrl,
-    confidence: row.confidence,
-    spec: {
-      ...DEFAULT_SPEC,
-      seasonLabel: row.seasonLabel,
-      variant: row.variant,
-      base: row.base as KitColour,
-      pattern: row.pattern as PatternId,
-      patternInk: row.patternInk as KitColour,
-      sleeves: row.sleeves as SleeveId,
-      sleeveInk: row.sleeveInk as KitColour,
-      collar: row.collar as CollarId,
-      collarInk: row.collarInk as KitColour,
-      sponsorHe: row.sponsorHe,
-      makerHe: row.makerHe,
-      nameset: DEFAULT_SPEC.nameset as NamesetId,
-      number: null,
-      shorts: row.shorts as KitColour,
-      socks: row.socks as KitColour,
-      crestKey: crestForSeason(row.seasonLabel),
-    },
-  }))
-}
-
-/**
- * High-fidelity masters supplied later than the original archive are first-class season
- * records, not Royal-Rumble-only exceptions. Gate 4, Gate 5 and every future kit surface
- * therefore receive the same 1985/86 and 2009/10 facts automatically.
- */
-function assemblySeasonKits(): SeasonKit[] {
-  return kitAssemblySeasons().map((row) => ({
-    seasonLabel: row.seasonLabel,
-    variant: row.variant,
-    noteHe: row.noteHe,
-    sourceTitle: row.sourceTitle,
-    sourceUrl: row.sourceUrl,
-    confidence: row.confidence,
-    spec: {
-      ...DEFAULT_SPEC,
-      ...row.spec,
-      seasonLabel: row.seasonLabel,
-      variant: row.variant,
-      crestKey: row.spec.crestKey ?? crestForSeason(row.seasonLabel),
-      number: null,
-    },
-  }))
+  return CRESTS.filter((row) => row.fromYear <= year && row.imageKey !== null).sort((a, b) => b.fromYear - a.fromYear)[0]?.imageKey ?? null
 }
 
 export function seasonKits(): SeasonKit[] {
-  const merged = new Map<string, SeasonKit>()
-  for (const kit of archiveSeasonKits()) merged.set(`${kit.seasonLabel}:${kit.variant}`, kit)
-  // A later supplied master wins over an older generic reconstruction of the same kit.
-  for (const kit of assemblySeasonKits()) merged.set(`${kit.seasonLabel}:${kit.variant}`, kit)
-  return [...merged.values()]
+  return kitRecords().map((kit) => ({
+    seasonLabel: kit.seasonLabel,
+    variant: kit.variant,
+    noteHe: kit.noteHe,
+    spec: { ...specOf(kit), crestKey: kit.fields.crest.value?.key ?? legacyCrest(kit.seasonLabel) },
+    sourceTitle: kit.sourceTitle,
+    sourceUrl: kit.sourceUrl,
+    confidence: kit.confidence,
+  }))
 }
 
 export function homeKits(): SeasonKit[] {

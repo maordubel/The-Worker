@@ -1,6 +1,34 @@
 import 'server-only'
 
 import pressFile from '@/content/manual/press-columns.json'
+import {
+  beforeAfter,
+  boxPool,
+  cardOf,
+  countsOf,
+  describe,
+  entity,
+  graph,
+  inSeason,
+  matchRecordOf,
+  neighbors,
+  personRecordOf,
+  pressQuote,
+  rabbitStep,
+  related,
+  search,
+  sourceOf,
+  today,
+} from '@/lib/archive/graph'
+import {
+  walkable,
+  type ArchiveCard,
+  type EntityDetail,
+  type EntityType,
+  type GraphEntity,
+  type SourceLine,
+  type WhatBlock,
+} from '@/lib/archive/graph-types'
 import { archive, rng, shuffle } from '@/lib/game/archive'
 import { positionOf, takeFrom } from '@/lib/rotation/deck'
 
@@ -290,5 +318,273 @@ export function archiveFigures(): {
     trophies: archive.trophies.filter((row) => row.result === 'won').length,
     earliest: dates[0] ?? null,
     latest: dates[dates.length - 1] ?? null,
+  }
+}
+
+/* ================================================================ שער 12 v10 — the graph wing */
+
+/**
+ * **21.9.2026 — the wing walks the Entity Graph.** The two corners above stay (their
+ * tests are the contract for the day and the deal), and five Today chips, the dig box,
+ * the drawer, the rabbit hole and the search are read-models over `lib/archive/graph.ts`.
+ * Every card is an `ArchiveCard` projection; every chip is dealt through
+ * `lib/rotation/deck.ts` like every other gate (rule 24 — never `Math.random`).
+ */
+
+export type TodayChip = 'today' | 'know' | 'shelf' | 'forgotten' | 'discover'
+export const TODAY_CHIPS: readonly TodayChip[] = ['today', 'know', 'shelf', 'forgotten', 'discover']
+export const CHIP_SIZE = 8
+
+/** A seeded slice of a pool: the seed picks the shuffle, the cursor walks it (lib/rotation/deck.ts). */
+function rotateDeal<T>(pool: readonly T[], seed: number, cursor: number, size: number, salt: number): T[] {
+  if (pool.length === 0) return []
+  const at = positionOf(seed ^ salt, cursor, pool.length, Math.min(size, pool.length))
+  return takeFrom(shuffle(pool, rng(at.seed)), at.slot * Math.min(size, pool.length), Math.min(size, pool.length))
+}
+
+let shelfCache: GraphEntity[] | null = null
+/** מהמדף — a shirt, a crest, a maker's mark, a song, the terrace, a column that carries a quote. */
+export function shelfPool(): GraphEntity[] {
+  return (shelfCache ??= graph.entities.filter(
+    (e) =>
+      e.sport === 'football' &&
+      (e.type === 'kit' ||
+        e.type === 'object' ||
+        e.type === 'song' ||
+        e.type === 'fans' ||
+        (e.type === 'press' && (pressQuote(e)?.quote ?? null) !== null)),
+  ))
+}
+
+let forgottenCache: GraphEntity[] | null = null
+/**
+ * שם ששכחת — a player with one or two seasons the archive confirms (confidence ≥2), who
+ * also scored a documented goal or wore a documented number, and is not in today's squad.
+ */
+export function forgottenPool(): GraphEntity[] {
+  return (forgottenCache ??= graph.entities.filter((e) => {
+    if (e.type !== 'person' || e.kind !== 'player' || e.attrs.currentSquad === true) return false
+    const edges = neighbors(e.id)
+    const seasons = edges.filter(({ edge }) => edge.type === 'played_in')
+    if (seasons.length < 1 || seasons.length > 2) return false
+    return edges.some(({ edge }) => edge.type === 'scored' || (edge.type === 'played_in' && edge.params?.n !== undefined))
+  }))
+}
+
+let discoverCache: GraphEntity[] | null = null
+/** גלה לי משהו — anything with three or more real connections (a match needs five: its season, opponent and ground are three). */
+export function discoverPool(): GraphEntity[] {
+  return (discoverCache ??= graph.entities.filter(
+    (e) =>
+      e.sport === 'football' &&
+      e.type !== 'press' &&
+      e.type !== 'season' &&
+      e.type !== 'team' &&
+      e.degree >= (e.type === 'match' ? 5 : 3),
+  ))
+}
+
+/** The five Today decks, dealt for one visit (`seed`, `cursor`) on one date. */
+export function todayDecks(isoDate: string, seed: number, cursor: number): Record<TodayChip, ArchiveCard[]> {
+  const day = today(isoDate)
+  const dayCards = day.length > 12 ? rotateDeal(day, seed, cursor, 12, 0x1d).sort((a, b) => (b.year ?? 0) - (a.year ?? 0)) : day
+  const know = describe(dealFacts(seed, cursor, CHIP_SIZE).cards.map((card) => card.id)).cards
+  return {
+    today: dayCards.map(cardOf),
+    know,
+    shelf: rotateDeal(shelfPool(), seed, cursor, CHIP_SIZE, 0x5e).map(cardOf),
+    forgotten: rotateDeal(forgottenPool(), seed, cursor, CHIP_SIZE, 0xf0).map(cardOf),
+    discover: rotateDeal(discoverPool(), seed, cursor, CHIP_SIZE, 0xd1).map(cardOf),
+  }
+}
+
+/** The dig box: eight things off the table, seeded by visit and shuffle count, optionally one decade. */
+export function boxDeal(seed: number, decade: number | null, round: number): ArchiveCard[] {
+  return rotateDeal(boxPool(decade), seed + round * 7919, 0, 8, 0xb0).map(cardOf)
+}
+
+/**
+ * הערימה על השיש (21.9.2026) — THE WORKER LIFE's kitchen: the same box, cut to what a boy
+ * could have found in a pile of old papers at home — a match, a moment, a column, a trophy,
+ * a song — dated before `before`. A row the archive does not date is not in the pile.
+ */
+export function lifeBox(seed: number, before: number, round = 0): ArchiveCard[] {
+  const pile = boxPool(null).filter(
+    (e) => e.year !== null && e.year < before && ['match', 'moment', 'press', 'trophy', 'song', 'fans'].includes(e.type),
+  )
+  return rotateDeal(pile, seed + round * 7919, 0, 6, 0x11fe).map(cardOf)
+}
+
+/** one card's "what happened", for the kitchen — its own text only, never a list that reaches past `before` */
+export function lifeWhat(anyId: string, before: number): { card: ArchiveCard; what: WhatBlock | null } | null {
+  const detail = detailOf(anyId)
+  if (!detail || detail.card.year === null || detail.card.year >= before) return null
+  const what = detail.what.kind === 'text' || detail.what.kind === 'quote' || detail.what.kind === 'match' ? detail.what : null
+  return { card: detail.card, what }
+}
+
+/** A season's hub — the time machine's answer, trophies and moments first. */
+export function seasonCards(label: string): ArchiveCard[] {
+  return inSeason(label).slice(0, 40).map(cardOf)
+}
+
+export function searchCards(query: string, type: EntityType | null): ArchiveCard[] {
+  return search(query, { types: type ? [type] : undefined, limit: 24 }).map(cardOf)
+}
+
+/* ------------------------------------------------------------------ the drawer */
+
+function sourceLines(ids: readonly string[], confidence: SourceLine['confidence']): SourceLine[] {
+  const lines: SourceLine[] = []
+  for (const id of ids) {
+    const src = sourceOf(id)
+    if (src) lines.push({ id, title: src.title, url: src.url, kind: src.kind, readOn: src.readOn, confidence })
+  }
+  return lines
+}
+
+function whatOf(e: GraphEntity): WhatBlock {
+  const a = e.attrs
+  const text = (value: unknown, summary = false): WhatBlock | null =>
+    typeof value === 'string' && value.trim() ? { kind: 'text', text: value, summary } : null
+  switch (e.type) {
+    case 'match': {
+      const record = matchRecordOf(e)
+      const venue = neighbors(e.id, { types: ['place'] })[0]?.other.titleHe ?? null
+      return {
+        kind: 'match',
+        competitionHe: String(a.competitionHe ?? ''),
+        stage: typeof a.stage === 'string' ? a.stage : null,
+        day: e.date?.precision === 'day' ? e.date.value : null,
+        venueHe: venue,
+        // the scorers as the archive records them; a disputed list is flagged, not hidden
+        scorers: (record?.scorers ?? [])
+          .filter((s) => s.confidence >= 2 && s.nameHe)
+          .map((s) => ({ nameHe: s.nameHe as string, minute: s.minute, penalty: s.penalty, ownGoal: s.ownGoal })),
+        disputed: a.disputed === true || record?.scorersDisputed === true,
+      }
+    }
+    case 'press': {
+      const q = pressQuote(e)
+      return q ? { kind: 'quote', quote: q.quote, byline: q.byline, words: q.words } : { kind: 'none' }
+    }
+    case 'person': {
+      const record = personRecordOf(e)
+      return {
+        kind: 'person',
+        from: typeof a.from === 'number' ? a.from : null,
+        to: typeof a.to === 'number' ? a.to : null,
+        seasons: neighbors(e.id).filter(({ edge }) => edge.type === 'played_in').length,
+        numbers: [...((a.numbers as readonly string[] | undefined) ?? [])],
+        goals: typeof a.documentedGoals === 'number' ? a.documentedGoals : 0,
+        positions: record?.positions.fine?.terms ?? [...((a.positionTerms as readonly string[] | undefined) ?? [])],
+      }
+    }
+    case 'season': {
+      const matches = neighbors(e.id, { types: ['match'] }).length
+      const trophies = neighbors(e.id, { types: ['trophy'] }).map(({ other }) => other.titleHe)
+      return { kind: 'season', matches, trophies }
+    }
+    case 'kit':
+      return { kind: 'kit', seasonLabel: e.seasonLabel ?? '', variant: String(a.variant ?? e.kind ?? 'home'), playable: a.playable === true }
+    case 'object':
+      if (e.kind === 'crest')
+        return { kind: 'crest', text: typeof a.text === 'string' ? a.text : null, note: typeof a.note === 'string' ? a.note : null, imageKey: typeof a.imageKey === 'string' ? a.imageKey : null }
+      return { kind: 'spells', spells: [...((a.spells as readonly string[] | undefined) ?? [])], nameEn: typeof a.nameEn === 'string' ? a.nameEn : null }
+    case 'song':
+      return {
+        kind: 'song',
+        originalTitle: typeof a.originalTitle === 'string' ? a.originalTitle : null,
+        originalArtist: typeof a.originalArtist === 'string' ? a.originalArtist : null,
+        lyricsBy: typeof a.lyricsBy === 'string' ? a.lyricsBy : null,
+      }
+    default:
+      return text(a.text, a.textKind === 'summary') ?? { kind: 'none' }
+  }
+}
+
+/**
+ * Everything the drawer shows for one entity — and ONLY what the archive holds: its own
+ * text, its figures, graph counts, the item before and after it, at most two related
+ * items per type (each with the label of the edge that brought it), and its sources
+ * with a confidence word. The prototype's `spicy`/`secret`/`why` prose is not here and
+ * cannot be (brief §25): there is no field for it.
+ */
+export function detailOf(anyId: string): EntityDetail | null {
+  const e = entity(anyId)
+  if (!e) return null
+  const around = beforeAfter(e.id)
+  const confidence = e.confidence >= 3 ? 'high' : e.confidence >= 2 ? 'medium' : 'low'
+  return {
+    card: cardOf(e),
+    what: whatOf(e),
+    counts: countsOf(e.id),
+    before: around.before ? cardOf(around.before) : null,
+    after: around.after ? cardOf(around.after) : null,
+    related: related(e.id, 2).map((group) => ({
+      type: group.type,
+      total: group.total,
+      items: group.items.map((pick) => ({
+        card: cardOf(pick.entity),
+        labelKey: pick.labelKey,
+        params: pick.edge.params ?? null,
+        confidence: pick.edge.confidence,
+      })),
+    })),
+    sources: sourceLines(e.sourceIds, confidence),
+  }
+}
+
+/** One step down the rabbit hole from `fromId` — deterministic on (seed, depth, trail). */
+export function rabbitDetail(fromId: string, seed: number, depth: number, trail: readonly string[]): EntityDetail | null {
+  const types = trail
+    .slice(-2)
+    .map((id) => entity(id)?.type)
+    .filter((type): type is EntityType => type !== undefined)
+  const next = rabbitStep(fromId, { seed, depth, visited: trail, lastTypes: types })
+  return next ? detailOf(next.id) : null
+}
+
+/** How many walkable links an entity has — the drawer's "you can go on" test. */
+export function hasWay(anyId: string): boolean {
+  return neighbors(anyId).some(({ edge }) => walkable(edge.confidence))
+}
+
+/* ------------------------------------------------------------------ for gate 10 */
+
+export type ArchiveIdentity = {
+  /** the saved items, newest-saved last as the device holds them — at most `limit` */
+  saved: ArchiveCard[]
+  /** the decade most saved items belong to, and how many — null under three dated saves */
+  favouriteDecade: { decade: number; count: number } | null
+  /** how much of the archive this person has opened (the `archive` collection) */
+  seen: number
+  /** matches marked "הייתי שם" (`archive.react` tokens `there:<id>`) */
+  beenThere: ArchiveCard[]
+  /** ids nothing in the graph answers to — reported, never guessed */
+  unknown: string[]
+}
+
+/**
+ * What gate 10's Worker Card reads from gate 12 (spec §4 "What Gate 10 needs"): the
+ * saved items described (legacy ids resolved), a favourite era from the DECADES of the
+ * saves — computed, never declared — the discovery count, and the matches marked
+ * "הייתי שם". The inputs are the device's own sets; nothing here is stored.
+ */
+export function archiveIdentity(input: { saved: readonly string[]; seen: readonly string[]; reactions: readonly string[] }, limit = 12): ArchiveIdentity {
+  const saved = describe(input.saved)
+  const tally = new Map<number, number>()
+  for (const card of saved.cards) if (card.decade !== null) tally.set(card.decade, (tally.get(card.decade) ?? 0) + 1)
+  const dated = [...tally.values()].reduce((sum, n) => sum + n, 0)
+  const best = [...tally.entries()].sort((a, b) => b[1] - a[1] || b[0] - a[0])[0]
+  const there = describe(
+    input.reactions.filter((token) => token.startsWith('there:')).map((token) => token.slice('there:'.length)),
+  ).cards.filter((card) => card.type === 'match')
+  return {
+    saved: saved.cards.slice(-limit),
+    favouriteDecade: best && dated >= 3 ? { decade: best[0], count: best[1] } : null,
+    seen: new Set(input.seen).size,
+    beenThere: there,
+    unknown: saved.unknown,
   }
 }

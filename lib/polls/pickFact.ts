@@ -28,6 +28,8 @@ import type { KitSpec } from '@/lib/kit/spec'
  * player source (rule 1 — `lib/game/roster-facets.ts` remains the only one).
  */
 export type PickFact = {
+  /** the Player Master id, where the roster row carries one */
+  id: string | null
   nameHe: string
   slug: string
   position: RosterEntry['position']
@@ -45,28 +47,27 @@ export type PickFact = {
 }
 
 /**
- * The picked name, resolved against the roster the screen already holds.
+ * The pick, resolved against the roster the screen already holds.
  *
- * Matching is by the EXACT stored name, because that is the string the picker wrote:
- * `RosterSheet` passes the entry it was showing, and the ballot keeps `entry.nameHe`
- * verbatim. No folding and no fuzzy match — rule 7 is that Hebrew names are matched
- * through `entity_alias`, never fuzzily, and a two-way-unique join is rule 64 §2. A name
- * that no longer resolves (a slip saved before a roster correction) answers `null`, and
- * the screen stays quiet, which is the honest failure.
+ * A ballot stores the Player Master's `p_…` id since 21.9.2026, so the join is by id. A
+ * slip that has not been migrated yet still holds the name `RosterSheet` wrote, and that
+ * is matched EXACTLY — no folding and no fuzzy match (rule 7, rule 64 §2). Anything that
+ * does not resolve answers `null` and the screen stays quiet, which is the honest failure.
  */
 export function pickFact(
-  nameHe: string | null | undefined,
+  pick: string | null | undefined,
   roster: readonly RosterEntry[],
   shirts: ShirtBoard | null,
 ): PickFact | null {
-  if (nameHe === null || nameHe === undefined || nameHe === '') return null
-  const entry = roster.find((row) => row.nameHe === nameHe)
+  if (pick === null || pick === undefined || pick === '') return null
+  const entry = roster.find((row) => row.id === pick) ?? roster.find((row) => row.nameHe === pick)
   if (!entry) return null
 
   const given = shirts?.bySlug[entry.slug] ?? null
   const season = given ? (shirts?.seasons[given.seasonLabel] ?? null) : null
 
   return {
+    id: entry.id ?? null,
     nameHe: entry.nameHe,
     slug: entry.slug,
     position: entry.position ?? null,

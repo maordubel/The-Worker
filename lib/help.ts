@@ -87,16 +87,16 @@ const GATE_HELP: readonly GateHelp[] = [
     timeKey: 'help.goal.time',
   },
   {
-    gateNumber: 12, // /archive — אגף הארכיון
-    whatKey: 'help.archive.what',
-    scoreKey: 'help.archive.score',
-    timeKey: 'help.archive.time',
+    gateNumber: 12, // /archive — הארכיון החי (v10, 21.9.2026)
+    whatKey: 'help.archive.dock.what',
+    scoreKey: 'help.archive.dock.score',
+    timeKey: 'help.archive.dock.time',
   },
   {
     gateNumber: 10, // /tik — כרטיס פועל
-    whatKey: 'help.tik.what',
-    scoreKey: 'help.tik.score',
-    timeKey: 'help.tik.time',
+    whatKey: 'help.tik.card.what',
+    scoreKey: 'help.tik.card.score',
+    timeKey: 'help.tik.card.time',
   },
   {
     gateNumber: 11, // /derby — משחק השנאה
@@ -105,10 +105,10 @@ const GATE_HELP: readonly GateHelp[] = [
     timeKey: 'help.derby.time',
   },
   {
-    gateNumber: 13, // /timeline — ציר הזמן
-    whatKey: 'help.timeline.what',
-    scoreKey: 'help.timeline.score',
-    timeKey: 'help.timeline.time',
+    gateNumber: 13, // /timeline — החוט האדום (the chronology is /timeline/order)
+    whatKey: 'help.thread.what',
+    scoreKey: 'help.thread.score',
+    timeKey: 'help.thread.time',
   },
 ]
 

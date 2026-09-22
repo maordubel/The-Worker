@@ -5,6 +5,7 @@ import {
   type PrecisionId,
   type TruthTouch,
 } from './envelope'
+import { actorKindOf, type ActorKind } from './actors'
 import { isReplayAction, type ReplayAction } from './vocab'
 
 /**
@@ -43,6 +44,9 @@ export type GoalStepRecord = {
   zone: ZoneId
   positionHe: string
   noteHe: string
+  /** optional, from the Match Master: whose touch it was. `./actors.ts` curates it until then. */
+  actorKind?: ActorKind
+  actorPlayerId?: string | null
 }
 
 export type GoalSourceRecord = {
@@ -197,6 +201,7 @@ export function readTruth(record: GoalSourceRecord): TruthReading {
     return {
       step: step.step,
       actorHe: step.actorHe,
+      actorKind: actorKindOf(record.goalId, step),
       action: step.action as ReplayAction,
       origin,
       target: final ? goalEnvelope : (origins[index + 1] as Envelope),

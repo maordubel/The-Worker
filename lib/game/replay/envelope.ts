@@ -6,6 +6,7 @@ import {
   type LandmarkId,
   type ZoneId,
 } from '@/lib/game/goal-zones'
+import type { ActorKind } from './actors'
 import type { ReplayAction } from './vocab'
 
 /**
@@ -42,6 +43,11 @@ export type Envelope = ReplayPoint & { rx: number; ry: number }
 export type TruthTouch = {
   step: number
   actorHe: string
+  /**
+   * Whose touch it was: a Hapoel player, the other side (a keeper's parry), or nobody the
+   * report names ("הכדור עבר את ההגנה"). Absent means `player` — see `./actors.ts`.
+   */
+  actorKind?: ActorKind
   action: ReplayAction
   origin: Envelope
   /** where the ball went. For every touch but the last, this IS the next touch's origin. */
