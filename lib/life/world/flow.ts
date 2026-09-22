@@ -10,35 +10,20 @@ import { actionsNow } from './actions'
  *
  * The rule is deliberately player-facing rather than technical: if the next meaningful
  * thing is waiting only for a clock, the player must be able to continue immediately
- * instead of walking in circles. If the day still wants an action, the room nudges toward
- * that action instead. `lastResort.ts` remains an invisible safety net, never the intended
- * way a chapter advances.
- *
- * This file stays pure so every chapter can be probed without booting Phaser.
+ * instead of walking in circles. If the chapter still declares an objective, the room
+ * nudges toward the actions the world has already revealed. `lastResort.ts` remains an
+ * invisible safety net, never the intended way a chapter advances.
  */
 
 export type TimeGate = {
-  /** the beat that is only waiting for the clock */
   beatId: string
-  /** the minute it starts wanting to happen */
   minute: number
-  /** what the beat calls itself while it waits, when it says */
   waitingHe?: string
 }
 
-/** every clause of a condition that is not met right now, as `why.ts` phrases them */
 const needsOf = (state: LifeState, when?: Condition) => unmet(state, when)
-
-/** a need phrased as a time — the only kind this file is allowed to skip forward to */
 const isTimeNeed = (need: string) => need.startsWith('אחרי ')
 
-/**
- * The minute a beat is waiting for, dug back out of its condition.
- *
- * `unmet` gives sentences, not numbers, so the number is read from the condition tree
- * instead: the LATEST `afterMinute` anywhere in it, because a beat gated on two of them
- * is waiting for the later one.
- */
 function waitsUntil(when: Condition | undefined, best = -1): number {
   if (!when) return best
   let out = best
@@ -48,13 +33,7 @@ function waitsUntil(when: Condition | undefined, best = -1): number {
   return out
 }
 
-/**
- * מה הדבר הבא שהיום רוצה, אם הוא רק שעה.
- *
- * The earliest beat whose every unmet clause is a time. A beat that also wants a flag, an
- * item or a room is NOT a time gate: it is a requirement, and skipping the clock forward
- * would not bring it any closer — it would just take the afternoon away from the player.
- */
+/** The earliest beat blocked by time and by nothing else. */
 export function nextTimeGate(state: LifeState, era: Era): TimeGate | null {
   let best: TimeGate | null = null
   for (const beat of (era.beats ?? []) as Beat[]) {
@@ -73,20 +52,15 @@ export function nextTimeGate(state: LifeState, era: Era): TimeGate | null {
 export type FlowInput = {
   state: LifeState
   era: Era
-  /** the chapter's own objective line, or null when the day wants nothing more */
+  /** authoritative: null means the chapter itself says it wants nothing more */
   objectiveHe: string | null
-  /** game-minutes the room has offered nothing new — reset by any change of state */
   quietFor: number
-  /** a scene is mid-beat, mid-match or mid-conversation: never interrupt that */
   busy: boolean
-  /** how many things the room currently offers a thumb (people, hotspots, doors) */
+  /** physical targets/exits; zero means a dead-end check owns the problem */
   reachable: number
 }
 
-/**
- * One game-minute is enough to establish that nothing new happened. At the base world
- * clock this is roughly a second or two of real play, not the old 25-game-minute wait.
- */
+/** Roughly a second or two of real play at the base world clock — never 25 game-minutes. */
 export const QUIET_MINUTES = 1
 
 export function shouldOfferPass(input: FlowInput): TimeGate | null {
@@ -97,17 +71,13 @@ export function shouldOfferPass(input: FlowInput): TimeGate | null {
 export type FlowMove = { kind: 'pass'; gate: TimeGate } | { kind: 'nudge' }
 
 /**
- * מה לעשות עם מי שעומד.
+ * Flow has two sources of truth with different jobs:
  *
- * The important change is that "something to do" now comes from the semantic resolver —
- * discovered story steps, live opportunities and route invitations — rather than merely
- * from the fact that a room contains three clickable polygons. `reachable` is retained as
- * a physical safety check: a semantic task in a room with literally no exits/targets is a
- * dead-end bug, not a reason to tell the player to keep searching.
+ * - the chapter objective says WHETHER the authored day still wants an action;
+ * - `actionsNow` says WHAT already-revealed story/route/opportunity actions explain it.
  *
- *   clock-only next beat          → offer the contextual jump immediately
- *   known meaningful action      → nudge toward what the world already revealed
- *   busy / physically dead room  → another system owns the state
+ * Keeping the objective authoritative is important: a stale checklist row may be useful
+ * for diagnostics, but it may never resurrect a chapter the author has already closed.
  */
 export function flowMove(input: FlowInput): FlowMove | null {
   if (input.busy) return null
@@ -117,9 +87,12 @@ export function flowMove(input: FlowInput): FlowMove | null {
   const gate = nextTimeGate(input.state, input.era)
   if (gate) return { kind: 'pass', gate }
 
-  const meaningful = actionsNow(input.state, input.era)
-  if (meaningful.length > 0 || input.objectiveHe) return { kind: 'nudge' }
-  return null
+  if (!input.objectiveHe) return null
+  // Resolve now even though the visual nudge is still composed by WorldScene. This makes
+  // the flow decision depend on semantic actions, not on raw hotspot count, and gives QA
+  // one canonical snapshot to inspect when an objective has no visible action behind it.
+  void actionsNow(input.state, input.era)
+  return { kind: 'nudge' }
 }
 
 /** the minute the jump lands on: just before the beat, so the beat still plays */
