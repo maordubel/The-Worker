@@ -100,11 +100,17 @@ const TREATMENT = new Set([
   'de-yellow', 'quantise', 'palette-png', 'grade', 'halo',
   'crop', 'deskew', 'cut-from-sheet', 'upscale', 'trim-alpha', 'extend-strip',
   'key-green', 'key-flat', 'key-checker', 'fade',
+  // 21.9.2026 — כלל 61: WebP מאבד-מידע שהאיכות שלו נבחרה במדידה — הצהוב נספר על הפענוח
+  // של הבייטים שנשמרו, לא על המקור. שונה מ-`encode-webp` של הארכיון, שהוא קידוד אחד קבוע.
+  'lossy-webp-measured',
   'cut', 'loop-crossfade', 'normalise', 'encode-ogg-m4a', 'encode-mp4',
   // 17.9.2026 — סרט הפתיחה. `encode-webm` הוא הקידוד השני שכלל 30 דורש, ו-`poster-frame`
   // הוא פריים שנשלף מהסרט והפך לתמונה — שניהם פעולות פיזיות על קובץ, ולכן הם טוקנים
   // ולא טקסט חופשי. `encode-mp4` כבר היה כאן ומשמש את אותו סרט.
   'encode-webm', 'poster-frame',
+  // 21.9.2026 — מנוע החולצות. `shading-map` הוא בגד מצולם שהפך למפה אפורה (קפלים/אור) שעליה
+  // המנוע מדפיס את הצבעים של המפרט — פעולה פיזית על קובץ, ולכן טוקן ולא משפט.
+  'shading-map',
 ])
 
 /** `*` only, and it never crosses a `/` — these folders are flat, and a cleverer glob would hide a nested file */

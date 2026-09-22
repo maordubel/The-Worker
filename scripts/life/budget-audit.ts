@@ -47,6 +47,7 @@
  * The rule those four have in common is the one rule this file runs on: **read the
  * counter the way the reducer reads it, from the same tables, or do not report on it.**
  */
+import { ACTIVITIES, activityCeiling, activityChapters } from '../../lib/life/activities'
 import { CHAPTERS } from '../../lib/life/content/chapters'
 import { DIALOGUE } from '../../lib/life/content/dialogue'
 import { eraFor } from '../../lib/life/content/era'
@@ -268,6 +269,25 @@ const addBeats = (into: Ceiling, chapter: string): void => {
   }
 }
 
+/**
+ * The fourth door (21.9.2026): the gate games played inside the life (`lib/life/activities.ts`).
+ * Their money is settled at RUNTIME — a board reports a score, `settleActivity` prices it —
+ * so no conversation declares it and a reader of effects would never see it. What the file
+ * does declare is the most a chapter can pay: `activityCeiling` is the best paid job (or
+ * bet) plus the best paid favour, the two slots a chapter has, in the chapter's own decade.
+ * And every activity open in the chapter moves its person, its Red Heart pull and its trait
+ * once a chapter on completion, which is also read here from the same table.
+ */
+const addActivities = (into: Ceiling, chapter: string): void => {
+  bump(into, 'agorot', activityCeiling(chapter))
+  for (const def of ACTIVITIES) {
+    if (!activityChapters(def).includes(chapter)) continue
+    if (def.rel) bump(into, `rel.${def.rel.who}.${def.rel.axis}`, def.rel.delta)
+    if (def.redHeart) bump(into, `redHeart.${def.redHeart.key}`, def.redHeart.delta)
+    if (def.personality) bump(into, `personality.${def.personality.key}`, def.personality.delta)
+  }
+}
+
 // ------------------------------------------------------------------------- what is asked for
 type Ask = { chapter: string; where: string; counter: string; min: number }
 const asks: Ask[] = []
@@ -306,6 +326,7 @@ const rows: Array<{ chapter: string; snapshot: Ceiling }> = []
 for (const chapter of ORDER) {
   addEntry(running, chapter)
   addBeats(running, chapter)
+  addActivities(running, chapter)
   for (const id of conversationsIn(chapter)) {
     for (const effect of effectsOf(id)) addEffect(running, effect)
     for (const branch of DIALOGUE[id]?.branches ?? []) {

@@ -216,6 +216,36 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
   await page.goto(`${BASE}/life`, { waitUntil: 'domcontentloaded' })
   await page.waitForSelector('canvas', { timeout: 20000 })
   await page.waitForTimeout(2600)
+
+  /**
+   * הכרטיס שנפתח עם הפרק — **וששת הליקויים שהוא ייצר במשך חודש** (21.9.2026).
+   *
+   * פרק נפתח בחדר עם כרטיס על כל הזכוכית: חולצה, אלבום או מנוי. הוא `<button>` שממלא
+   * `inset-0` ב-`z-[95]`, ונסגר בנגיעה — מה ששחקן עושה בלי לחשוב. **המסלול הזה לחץ
+   * רק מקשים**, ולכן הוא עמד מול הכרטיס ודיווח שאין קונסולה, אין דלת, אין את מי לדבר
+   * איתו ואין שורת לימוד — ששה ליקויים בארבעה מסכים, כולם על משחק שעובד.
+   *
+   * זה בדיוק כלל 73 מהכיוון השני: כלי שלא יכול להיכשל אינו כלי, וכלי שנכשל על משחק
+   * תקין גרוע ממנו — כי מודדים אותו ומאמינים לו. אומת מול `5e2a0e3`: אותם ליקויים
+   * בדיוק, מילה במילה, כלומר הם מעולם לא היו על התוכן שנוסף אחרי.
+   *
+   * הסגירה היא בשם, ולא "ללחוץ במרכז המסך": כרטיס שיפסיק להיסגר כך יחזיר את הליקויים
+   * במקום להיעלם בשקט.
+   */
+  const OPENING_CARDS = ['[data-life="shirt-card"]', '[data-life="album-card"]', '[data-life="ticket-card"]']
+  for (let round = 0; round < 3; round += 1) {
+    let closed = false
+    for (const selector of OPENING_CARDS) {
+      const card = page.locator(selector)
+      if ((await card.count()) > 0 && (await card.first().isVisible())) {
+        await card.first().click({ timeout: 2000 }).catch(() => {})
+        await page.waitForTimeout(500)
+        closed = true
+      }
+    }
+    if (!closed) break
+  }
+  await page.waitForTimeout(600)
   await shot('02-bedroom')
 
   const clockNow = () =>
@@ -636,7 +666,10 @@ const TOUR = [
   ['kitchen', 'המטבח', [], 'kitchen'],
   ['kiosk', 'הקיוסק', [], 'kiosk'],
   ['pitch', 'המגרש', [], 'pitch'],
-  ['route', 'בדרך לבלומפילד', ['kobi:left'], 'route'],
+  // החדר נקרא "דרום תל אביב" ב-`scenes.ts`, והטבלה הזאת עוד נשאה את השם הקודם — כלומר
+  // הסיור דיווח שהוא "הלך לאיבוד" בחדר הנכון. אותו פגם של כלל 48: כלי שמסכים עם עצמו
+  // על שם שהעולם כבר שינה. (אומת מול 5e2a0e3 ב-21.9.2026 — אותו LOST בדיוק.)
+  ['route', 'דרום תל אביב', ['kobi:left'], 'route'],
   ['bloomfield-outside', 'בלומפילד — מבחוץ', ['kobi:left', 'entry:granted'], 'bloomfield-outside'],
   ['bloomfield-tunnel', 'המנהרה', ['kobi:left', 'entry:granted'], 'bloomfield-tunnel'],
   [
@@ -737,7 +770,15 @@ const TOUR = [
         return document.querySelector('[data-life="scoreboard"]') ? '__scoreboard__' : null
       })
     const wanted = place === 'bloomfield-inside' ? '__scoreboard__' : titleHe
-    for (let i = 0; i < 12; i += 1) {
+    /**
+     * לוח התוצאות מחליף את ה-HUD רק **אחרי** ש-`beginMatch` רץ, וזה קורה כמה שניות אחרי
+     * ההגעה. שש שניות הספיקו במחשב; במכולה הזאת, שמציירת בשני פריימים לשנייה (כלל 49),
+     * הלוח הגיע אחרי שהסיור כבר עזב — והתחנה דווחה כ-LOST בזמן שהמשחק התחיל כסדרו.
+     * זו לא הרפיה: הסיור ממשיך לדרוש את הלוח, הוא פשוט מחכה לו כמו שמחכים למשהו
+     * שבאמת בדרך. עשרים וחמש שניות, ורק בתחנה שבה מחכים ללוח.
+     */
+    const patience = wanted === '__scoreboard__' ? 50 : 12
+    for (let i = 0; i < patience; i += 1) {
       if ((await arrived()) === wanted) break
       await page.waitForTimeout(500)
     }

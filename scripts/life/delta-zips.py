@@ -16,7 +16,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'delta'
-BASE = sys.argv[1] if len(sys.argv) > 1 else 'origin/main'
+ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
+BASE = ARGS[0] if ARGS else 'origin/main'
+# --one: חבילה אחת, כשהכול נכנס בה.
+#
+# הפיצול לפי משמעות קיים בשביל משלוח גדול — 900 קבצים של גרפיקה אינם אותו דבר כמו
+# ארבעים קבצי קוד, ומי שמעלה אותם רוצה לדעת מה הוא גורר. אבל כשכל הדלתא נכנסת מתחת
+# לשני התקרות (99 קבצים ו-45MB), פיצול ל-4 קבצים הוא ארבע הורדות וארבע גרירות במקום
+# אחת. **הדרישה של מאור מפורשת: הזיפ הוא *הקובץ*, לא ערימה.**
+ONE = '--one' in sys.argv
 
 changed = subprocess.run(
     ['git', 'diff', '--name-only', '--diff-filter=d', BASE, 'HEAD'],
@@ -39,7 +47,7 @@ def take(pred):
 
 
 # Order matters: each group takes what is left, so the last one is the remainder.
-GROUPS = [
+GROUPS_SPLIT = [
     ('code-game', 'הקוד — המנוע, המסכים והתוכן', lambda f: f.split('/')[0] in
         {'app', 'components', 'lib', 'messages', 'content'}),
     ('code-tools', 'הכלים, הבדיקות והתיעוד', lambda f: f.split('/')[0] in
@@ -49,6 +57,8 @@ GROUPS = [
     ('brand-source', 'הלוחות המקוריים — ארכיון, לא נטען באתר', lambda f: f.startswith('brand/')),
     ('rest', 'שאר הקבצים', lambda f: True),
 ]
+
+GROUPS = [('delta', 'הדלתא המלאה', lambda f: True)] if ONE else GROUPS_SPLIT
 
 LIMIT = 99
 # A browser upload takes 100 files; a chat attachment does not want 140 megabytes. Both

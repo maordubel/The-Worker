@@ -23,8 +23,9 @@ const ROOT = new URL('../../', import.meta.url).pathname
 const dump = join(ROOT, 'scripts/life/.scene-dump.ts')
 writeFileSync(
   dump,
-  `import { ALL_SCENES } from '../../lib/life/world/scenes'
+  `import { ALL_SCENES, sceneIn } from '../../lib/life/world/scenes'
 import { bodySize, heightOf } from '../../lib/life/world/heights'
+import { yearOfChapter } from '../../lib/life/world/homes'
 import { eraFor } from '../../lib/life/content/era'
 import { SCHEDULE_1986 } from '../../lib/life/content/schedules1986'
 import { SCHEDULE_1990 } from '../../lib/life/content/schedules1990'
@@ -42,14 +43,15 @@ const k = eraFor(era).player.scale ?? 1
  * Every actor now carries "drawn", computed exactly as WorldScene.bodySizeAt does, and
  * every scene carries "boy" — the two numbers this board exists for.
  */
-const scenes = ALL_SCENES.map((scene) => {
+// a rebuilt room is drawn on its own painting with its own floor (Repaint, 21.9.2026)
+const scenes = ALL_SCENES.map((room) => sceneIn(room, era)).map((scene) => {
   const taper = scene.size.far / Math.max(1e-6, scene.size.near)
   const depth = (y) => Math.max(0, Math.min(1, (y - scene.band.far) / (scene.band.near - scene.band.far)))
   const boyNear = scene.metre * heightOf('pogi') * k
   return {
     ...scene,
     boy: { far: boyNear * taper, near: boyNear },
-    actors: scene.actors.map((a) => ({ ...a, drawn: bodySize(a.figure, scene.metre, depth(a.y), taper) })),
+    actors: scene.actors.map((a) => ({ ...a, drawn: bodySize(a.figure, scene.metre, depth(a.y), taper, yearOfChapter(era)) })),
   }
 })
 process.stdout.write(JSON.stringify({ era, hero: eraFor(era).player.pose.down, scenes, schedule: era === '1990' ? SCHEDULE_1990 : SCHEDULE_1986 }, (_k, v) => (typeof v === 'function' ? undefined : v)))

@@ -31,15 +31,19 @@ import { OFFER_CONVERSATIONS } from '../../lib/life/routes'
 import { ALL_SCENES, exitInEra, inEra } from '../../lib/life/world/scenes'
 
 /**
- * `route-proof-found` — משימת ההקמה, והיתום היחיד שהוא החלטה.
+ * **הרשימה ריקה, והיא נשארת** — 21.9.2026.
  *
- * חלון ההקמה של הפועל אוסישקין הוא 2007 (`FOUNDING_YEAR`), אחרי הפרק האחרון שנבנה.
- * להניח אותה בחדר היה אומר שאפשר לייסד מועדון בשנת 2000, וזאת טענה על העולם האמיתי.
- * היום שייכתב פרק 2007 מוריד את השורה הזאת.
+ * `route-proof-found` ישב כאן בשמו: חלון ההקמה של הפועל אוסישקין הוא 2007
+ * (`FOUNDING_YEAR`), והפרק האחרון שנבנה היה 2000, כך שלהניח אותה בחדר היה אומר
+ * שאפשר לייסד מועדון בשנת 2000 — טענה על העולם האמיתי. ההערה שעמדה כאן אמרה
+ * *"היום שייכתב פרק 2007 מוריד את השורה הזאת"*, ושלושת פרקי 2007 נכתבו: המשימה
+ * מונחת עכשיו פעם אחת בכל אחד מהם, והסריקה מאשרת זאת בעצמה.
+ *
+ * הרשימה עצמה אינה נמחקת (כלל 73): זה המקום שבו החלטה כזאת תירשם בפעם הבאה, בשם
+ * ועם הסיבה. מפה ריקה שאפשר לקרוא בה אומרת "אין היום אף יתום מותר"; מפה שנמחקה
+ * אומרת שהכלי לא יכול להיכשל.
  */
-const ALLOWED = new Map<string, string>([
-  ['route-proof-found', 'חלון ההקמה הוא 2007, אחרי הפרק האחרון שנבנה'],
-])
+const ALLOWED = new Map<string, string>([])
 
 const ids = new Set(Object.keys(DIALOGUE))
 const named = new Set<string>()
@@ -106,9 +110,23 @@ for (const id of ids) if (!named.has(id) && text.includes(`'${id}'`)) named.add(
  * ואותה שאלה על חפץ במקום על שיחה — נקודה חמה שנראית עובדת ועומדת בחדר שהפרק שלה אינו
  * נכנס אליו. `gigChapters` בלי `until` הוא הדרך הקלה להגיע לכאן.
  */
+/** `travel` הוא דלת — אותה הכרעה של `world/worldline.ts` ושל `tests/life-orphans` */
+const travelsIn = (chapter: string): string[] => {
+  const out: string[] = []
+  const visit = (value: unknown): void => {
+    if (Array.isArray(value)) return value.forEach(visit)
+    if (!value || typeof value !== 'object') return
+    const node = value as Record<string, unknown>
+    if (node.a === 'travel' && typeof node.to === 'string') out.push(node.to)
+    for (const child of Object.values(node)) visit(child)
+  }
+  visit(eraFor(chapter).beats ?? [])
+  return out
+}
+
 const roomsIn = (chapter: string): Set<string> => {
   const start = CHAPTERS.find((row) => row.id === chapter)?.start.location
-  const seen = new Set<string>(start ? [start] : [])
+  const seen = new Set<string>([...(start ? [start] : []), ...travelsIn(chapter)])
   const queue = [...seen]
   while (queue.length) {
     const here = queue.shift()

@@ -10,6 +10,7 @@
 import scenes from '../../lib/life/content/screenplay/scenes.json'
 import {
   AUDIENCE_OF,
+  ACHIEVEMENT_OF,
   CHARACTER_OF,
   NAME_COLLISION,
   NEEDS_A_HOME,
@@ -39,6 +40,7 @@ const DIRECT: Readonly<Record<string, string>> = {
   נוכחות: 'presence.recorded',
   אנרגיה: "{ e: 'energy' }",
   'אמון קהילה': "{ e: 'proof', audience } — ארבעה קהלים",
+  הישג: "שורה ב-`achievements.ts` — `ACHIEVEMENT_OF`",
 }
 
 for (const scene of scenes) {
@@ -85,6 +87,22 @@ for (const scene of scenes) {
               detail: clash ? `התנגשות שם — ${name}: ${clash}` : `${known ? 'חסרה שורה ברישום' : 'שם שלא נצפה'}: ${name}`,
             })
           }
+        }
+        continue
+      }
+
+      /**
+       * הישג — ממופה ל-`ACHIEVEMENT_OF`, ושם שאין לו שורה **מדווח בשמו**.
+       *
+       * זה נשאר ב-`ממתין` עד 21.9.2026 כ"שבעה הישגים חדשים", ועכשיו יש שש שורות
+       * ב-`achievements.ts`. השביעי לא נעלם — הוא `keys_in_hand` שמופיע פעמיים,
+       * וזו הסיבה שהמיפוי הוא טבלה ולא ספירה.
+       */
+      if (key === 'הישג') {
+        if (typeof value === 'string' && ACHIEVEMENT_OF[value]) bump(mapped, 'הישג')
+        else {
+          bump(waiting, 'הישג')
+          rows.push({ where: choice.id, key, detail: `הישג בלי שורה ב-achievements.ts: ${String(value)}` })
         }
         continue
       }

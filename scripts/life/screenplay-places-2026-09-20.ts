@@ -76,8 +76,10 @@ const A_SYSTEM = /הקופסה האדומה|אלבום/
  */
 type Repaint = { backdrop: string; whyHe: string }
 const REPAINT: ReadonlyArray<readonly [string, (year: number | null) => boolean, Repaint]> = [
-  ['bloomfield-outside', (y) => y !== null && y >= 2017, { backdrop: 'bloomNewPlaza', whyHe: 'בלומפילד המחודש — `bloomNew*` במאגר; הקיים הוא 1986' }],
-  ['bloomfield-outside', (y) => y !== null && y >= 2000 && y < 2017, { backdrop: 'bloomOldGates', whyHe: 'בלומפילד שבין 2000 ל-2016 — `bloomOld*` במאגר; הקיים הוא 1986' }],
+  // 21.9.2026 — חובר: `repaints` על `bloomfield-outside` (לוח בלומפילד ב-`world/scenes.ts`)
+  ['bloomfield-outside', (y) => y !== null && y >= 2017, { backdrop: 'bloomNewPlaza', whyHe: 'בלומפילד המחודש — ✓ מחובר (`repaints`, רצפה נמדדה); 2016–2018 הדלת נעולה' }],
+  // `bloomOldGates` הוא שער 5 (חובר ל-`gate5` בשנות ה-2000); לשער 7 של שנות ה-2000 ולטריבונה אין ציור (§17)
+  ['bloomfield-outside', (y) => y !== null && y >= 2000 && y < 2017, { backdrop: 'bloomOldTerrace', whyHe: 'בלומפילד 2000–2016 — שער 5 ✓ (`bloomOldGates`); היציע מבפנים מבוקש (ART-PROMPTS §17א)' }],
   ['pitch', (y) => y === null || y >= 2000, { backdrop: 'pitchSmall', whyHe: 'מגרש של מבוגרים — `pitch` הוא חצר האבנים של 1986 (ציור מבוקש)' }],
   ['home', (y) => y === null || y >= 2000, { backdrop: 'homeAdult', whyHe: 'הבית של פוגי המבוגר — `living`/`kitchen` הם הדירה של קובי ב-1986 (ציור מבוקש)' }],
   ['kitchen', (y) => y === null || y >= 2000, { backdrop: 'homeAdult', whyHe: 'אותה דירה — פינת המטבח של `homeAdult` (ציור מבוקש)' }],

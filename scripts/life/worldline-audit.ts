@@ -53,6 +53,11 @@ import {
   conditionFlags,
   crossesChapter,
   engineOnly,
+  staleDayReads,
+  STALE_BY_DESIGN,
+  trappedRooms,
+  TRAP_BY_DESIGN,
+  neverRaised,
   sceneFor,
   seedFor,
   type Closure,
@@ -61,9 +66,11 @@ import {
 
 import { LIFE_ROUTES, stageFlag } from '../../lib/life/routes'
 
+import { raisedInSource } from './engine-flags'
+
 const ORDER = CHAPTERS.filter((chapter) => chapter.playable !== false).map((chapter) => chapter.id)
 
-type Code = 'GOAL_UNREACHABLE' | 'NO_ENDING' | 'ROOM_ORPHANED' | 'FLAG_UNRAISABLE' | 'AREA_UNREACHABLE' | 'ENTRY_UNREACHABLE'
+type Code = 'GOAL_UNREACHABLE' | 'NO_ENDING' | 'ROOM_ORPHANED' | 'FLAG_UNRAISABLE' | 'AREA_UNREACHABLE' | 'ENTRY_UNREACHABLE' | 'STALE_READ' | 'ROOM_TRAP' | 'NEVER_RAISED'
 type Finding = {
   level: 'HOLE' | 'WARN'
   code: Code
@@ -95,50 +102,7 @@ const report = (finding: Finding): void => {
  * הוא בדיוק מה שהמנוע מרים לבדו (`engineOnly`), והסגור מתייחס לזה כמסופק. בלי זה
  * 1986, 1990 ו-1991 מדווחים כפרקים בלי אף סיום, כי הסיום שלהם תלוי ב-`match:over`.
  */
-const SOURCE_DIRS = [
-  'lib/life',
-  'lib/life/content',
-  'lib/life/runtime',
-  'lib/life/runtime/scenes',
-  'lib/life/world',
-  'components/life',
-  'app/life',
-]
-
-const RAISED_IN_SOURCE = new Set<string>()
-{
-  const named = new Map<string, string>()
-  const sources: string[] = []
-  for (const dir of SOURCE_DIRS) {
-    let files: string[] = []
-    try {
-      files = readdirSync(dir).filter((file) => /\.tsx?$/.test(file))
-    } catch {
-      continue
-    }
-    for (const file of files) sources.push(readFileSync(`${dir}/${file}`, 'utf8'))
-  }
-  for (const source of sources) {
-    for (const m of source.matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*'([a-z][\w-]*:[\w:-]+)'/g)) {
-      if (m[1] && m[2]) named.set(m[1], m[2])
-    }
-  }
-  for (const source of sources) {
-    for (const m of source.matchAll(/flag\.raised',\s*flag:\s*'([^']+)'/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])
-    for (const m of source.matchAll(/t:\s*'flag\.raised',\s*flag:\s*`([^`$]+)`/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])
-    for (const m of source.matchAll(/raise\('([^']+)'\)/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])
-    for (const m of source.matchAll(/e:\s*'flag',\s*flag:\s*'([^']+)'/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])
-    for (const m of source.matchAll(/flag:\s*([A-Za-z_$][\w$]*)\s*[,}]/g)) {
-      const value = m[1] ? named.get(m[1]) : undefined
-      if (value) RAISED_IN_SOURCE.add(value)
-    }
-  }
-}
-
-/**
- * ומה מזה נשאר אחרי שמורידים כל דגל שקובץ תוכן מרים — זה מה שהמנוע כותב בעצמו, וזה מה
- * שהסגור רשאי להתייחס אליו כמסופק. ההפרש הוא מה ששומר על `life:knows:hall` בחוץ.
- */
+const RAISED_IN_SOURCE = raisedInSource()
 const ENGINE_FLAGS = engineOnly(RAISED_IN_SOURCE)
 
 // ----------------------------------------------------------------------- הקווים ---
@@ -178,15 +142,25 @@ const BRANCH_CUT = BRANCH.length - BRANCH_USED.length
  * קו לכל מסלול, בדרגה הראשונה, **בנוסף** ל-`minimal` שהוא מי שלא בחר באף אחד. `minimal`
  * הוא הצד השני של אותו כלל ולכן הוא הקו הראשון ברשימה: מי שלא במסלול חייב לסיים כל פרק.
  */
+/**
+ * **עד השיא, ולא רק הדרגה הראשונה** (21.9.2026). חלונות CAREER ו-OWNER נפתחים ב-`practice`
+ * וב-`apex` (`2024-terrace`, `2025-interview`, `2025-owner`), וקו שמחזיק רק `entry` לא פתח
+ * אותם אף פעם — גם `maximal` לא, כי דגלי המסלול נכתבים במנוע ולא בתוכן, ולכן אינם
+ * ב-`EVERYTHING`. שישה פרקים עברו את המכשיר הזה בלי שאף קו נכנס אליהם.
+ */
+const ROUTE_STAGE_FLAGS = (id: (typeof LIFE_ROUTES)[number]['id']): Record<string, true> =>
+  Object.fromEntries((['entry', 'practice', 'apex'] as const).map((stage) => [stageFlag(id, stage), true]))
+
 const ROUTE_LINES: Worldline[] = LIFE_ROUTES.map((route) => ({
   id: `route:${route.id}`,
-  labelHe: `במסלול ${route.id} בלבד`,
-  flags: { [stageFlag(route.id, 'entry')]: true },
+  labelHe: `במסלול ${route.id}, עד השיא`,
+  flags: ROUTE_STAGE_FLAGS(route.id),
 }))
+const EVERY_ROUTE_STAGE: Record<string, true> = Object.assign({}, ...LIFE_ROUTES.map((route) => ROUTE_STAGE_FLAGS(route.id)))
 
 const WORLDLINES: Worldline[] = [
   { id: 'minimal', labelHe: 'שום דבר אופציונלי', flags: {} },
-  { id: 'maximal', labelHe: 'הכול', flags: { ...EVERYTHING } },
+  { id: 'maximal', labelHe: 'הכול', flags: { ...EVERYTHING, ...EVERY_ROUTE_STAGE } },
   ...ROUTE_LINES,
   ...BRANCH_USED.flatMap((flag): Worldline[] => {
     const without = { ...EVERYTHING }
@@ -322,8 +296,16 @@ const checkOrphans = (chapter: string, worldline: Worldline, closure: Closure): 
    * יעד של `goal` נבדק ב-`GOAL_UNREACHABLE` ולא כאן, בכוונה. אותו פגם בשני קודים הוא
    * רעש: הקוד הראשון נושא גם את הפסק של `canPlayerReach` ואת הרמז, וזה הדיווח השימושי.
    */
-  for (const where of beatRooms(chapter)) {
-    orphan(where, 'HOLE', 'ביט של הפרק יורה שם', 'ביט בחדר שאי אפשר להגיע אליו לא ירוץ לעולם — או שהחדר חסום או שה-`at` שגוי')
+  for (const beat of beatRooms(chapter)) {
+    if (beat.rooms.some((where) => closure.rooms.has(where))) continue
+    report({
+      level: 'HOLE',
+      code: 'ROOM_ORPHANED',
+      chapter,
+      worldline: worldline.id,
+      what: `«${beat.rooms.join(', ')}» — הביט «${beat.id}» יורה רק שם`,
+      hintHe: 'ביט בחדר שאי אפשר להגיע אליו לא ירוץ לעולם — או שהחדר חסום או שה-`at` שגוי',
+    })
   }
   /**
    * שורת לוח־זמנים היא אזהרה ולא חור, וזה הבדל אמיתי: דמות שעומדת איפה שהשחקן לא הולך
@@ -430,6 +412,53 @@ const checkEntry = (chapter: string, worldline: Worldline): void => {
   }
 }
 
+/**
+ * **דגל יום שנקרא אחרי שנמחק** (21.9.2026) — `staleDayReads`, על הקו המקסימלי בלבד:
+ * זה הקו שבו כל מה שיכול לעבור חצות עבר, ולכן מה שחסר בו חסר בכל חיים. `STALE_BY_DESIGN`
+ * נוקב בשמם בדגלים שהקריאה שלהם בפרק אחר היא ההחלטה ("הדלת הזאת לא קיימת השנה").
+ */
+function checkStale(chapter: string, worldline: Worldline, closure: Closure): void {
+  for (const stale of staleDayReads(chapter, closure)) {
+    if (stale.flag in STALE_BY_DESIGN) continue
+    report({
+      level: 'HOLE',
+      code: 'STALE_READ',
+      chapter,
+      worldline: worldline.id,
+      what: `«${stale.where}» קורא את \`${stale.flag}\` — דגל יום שהפרק הזה לא מרים, ושנמחק במעבר הפרק`,
+      hintHe: 'לכתוב אותו בקידומת שחוצה פרק (`life:`/`own:`/`owe:`/`promise:`), או לקרוא משהו שהפרק הזה כן יודע',
+    })
+  }
+}
+
+/** תנאי על דגל ששום דבר במקור לא כותב — `neverRaised` */
+function checkNeverRaised(chapter: string, worldline: Worldline, closure: Closure): void {
+  for (const read of neverRaised(chapter, closure, RAISED_IN_SOURCE)) {
+    report({
+      level: 'HOLE',
+      code: 'NEVER_RAISED',
+      chapter,
+      worldline: worldline.id,
+      what: `«${read.where}» קורא את \`${read.flag}\` — ושום דבר במשחק לא כותב אותו`,
+    })
+  }
+}
+
+/** חדר שנכנסים אליו ואין ממנו אף דלת פתוחה — `trappedRooms` */
+function checkTraps(chapter: string, worldline: Worldline, closure: Closure): void {
+  for (const room of trappedRooms(chapter, closure, ENGINE_FLAGS)) {
+    if (TRAP_BY_DESIGN[chapter]?.[room]) continue
+    report({
+      level: 'HOLE',
+      code: 'ROOM_TRAP',
+      chapter,
+      worldline: worldline.id,
+      what: `«${room}» — אפשר להיכנס, ואין אף יציאה פתוחה גם בסוף היום`,
+      hintHe: 'דלת יציאה שנושאת תנאי של שנה אחרת — `whenByEra`/`needsByEra` לפרק הזה',
+    })
+  }
+}
+
 // -------------------------------------------------------------------- הסריקה ---
 
 type Cell = { holes: number; warns: number }
@@ -446,6 +475,9 @@ for (const chapter of ORDER) {
     checkEnding(chapter, worldline, closure)
     checkOrphans(chapter, worldline, closure)
     checkFlags(chapter, worldline, closure)
+    if (worldline.id === 'maximal') checkStale(chapter, worldline, closure)
+    if (worldline.id === 'maximal') checkNeverRaised(chapter, worldline, closure)
+    checkTraps(chapter, worldline, closure)
     const fresh = findings.slice(before)
     grid.set(cellKey(chapter, worldline.id), {
       holes: fresh.filter((f) => f.level === 'HOLE').length,

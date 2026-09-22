@@ -1,10 +1,10 @@
-import { CHAPTERS, CHAPTER, chapterOpen, type ChapterDef } from '../content/chapters'
+import { CHAPTERS, CHAPTER, chapterOpen, isWindow, windowFlagsOf, type ChapterDef } from '../content/chapters'
 import { DIALOGUE } from '../content/dialogue'
 import { eraFor } from '../content/era'
 import type { Effect } from '../content/script'
 import type { LocationId } from '../types'
 import { TEACHES, guidedFlag, learnedOnArrival, routeFlag } from './areas'
-import { ALL_SCENES, arrivalFor, exitInEra, inEra, needsFor, whenFor, type SceneDef } from './scenes'
+import { ALL_SCENES, arrivalFor, exitInEra, inEra, needsFor, sceneIn, whenFor, type SceneDef } from './scenes'
 import type { Condition } from './types'
 
 /**
@@ -72,6 +72,7 @@ export const CARRIED_PREFIXES = [
   'owe:',
   'promise:',
   'album:',
+  'scarf:',
 ] as const
 
 /** האם הדגל הזה שורד את חצות — כלומר האם פרק מוקדם יכול להוריש אותו */
@@ -194,6 +195,24 @@ export function sceneFor(id: string): SceneDef | undefined {
   return sceneById.get(id)
 }
 
+/**
+ * החדר **כפי שהוא עומד בפרק** (21.9.2026) — עם הצביעה מחדש שלו, הדלתות שעל הציור הזה,
+ * הנקודות והאנשים שעברו אליו. עד היום הסגור קרא את החדר הבסיסי, כלומר ראה ב-2019 דלת
+ * ליציע של 1986 שאין לה מקום על הרחבה החדשה; ברגע שחדרים שלמים עוברים לציור אחר
+ * (הבית של פוגי, החדר של 2000, המגרש הסינתטי), קריאה כזו הייתה מדווחת על עולם שלא קיים.
+ */
+const ROOM_IN = new Map<string, SceneDef>()
+export function roomIn(id: string, chapter: string): SceneDef | undefined {
+  const key = `${id}@${chapter}`
+  const cached = ROOM_IN.get(key)
+  if (cached) return cached
+  const base = sceneById.get(id)
+  if (!base) return undefined
+  const room = sceneIn(base, chapter)
+  ROOM_IN.set(key, room)
+  return room
+}
+
 type GatedEffect = { effect: Effect; gated: boolean }
 
 /**
@@ -245,7 +264,9 @@ function walkConversations(
 
 /** the beats a chapter runs by itself, as raw rows — `beats.ts` shapes, read defensively */
 type BeatRow = {
+  id?: string
   at?: LocationId | readonly LocationId[]
+  when?: Condition
   do?: unknown
 }
 
@@ -254,12 +275,17 @@ function beatsOf(chapter: string): readonly BeatRow[] {
 }
 
 /** every room a beat says it fires in */
-export function beatRooms(chapter: string): Set<LocationId> {
-  const out = new Set<LocationId>()
+/**
+ * החדרים של כל ביט, **ביט-ביט** (21.9.2026). עד היום זו הייתה קבוצה אחת שטוחה, והמכשיר
+ * דיווח חור על כל חדר בה שאינו בסגור — כלומר ביט שיורה *"ברחוב או מחוץ לבלומפילד"*
+ * נספר כיתום בשנים שבלומפילד סגור, אף שברחוב הוא יורה כרגיל. ביט הוא יתום רק כשאף אחד
+ * מהחדרים שלו אינו בהישג יד — אותו כלל שהמפגשים כבר נבדקים בו (`encounter.locations.every`).
+ */
+export function beatRooms(chapter: string): Array<{ id: string; rooms: readonly LocationId[] }> {
+  const out: Array<{ id: string; rooms: readonly LocationId[] }> = []
   for (const beat of beatsOf(chapter)) {
     if (!beat.at) continue
-    if (Array.isArray(beat.at)) for (const where of beat.at as readonly LocationId[]) out.add(where)
-    else out.add(beat.at as LocationId)
+    out.push({ id: beat.id ?? '?', rooms: Array.isArray(beat.at) ? (beat.at as readonly LocationId[]) : [beat.at as LocationId] })
   }
   return out
 }
@@ -315,7 +341,8 @@ export function chapterFlags(chapter: string): Set<string> {
 
   const out = new Set<string>()
   const roots: string[] = []
-  for (const scene of ALL_SCENES) {
+  for (const base of ALL_SCENES) {
+    const scene = sceneIn(base, chapter)
     for (const actor of scene.actors) if (inEra(actor, chapter) && actor.talk) roots.push(actor.talk)
     for (const spot of scene.hotspots) if (inEra(spot, chapter) && spot.act) roots.push(spot.act)
     const arrival = arrivalFor(scene, chapter)
@@ -371,6 +398,150 @@ export function engineOnly(raisedInSource: Iterable<string>): Set<string> {
   const out = new Set<string>()
   for (const flag of raisedInSource) if (!content.has(flag)) out.add(flag)
   return out
+}
+
+// ------------------------------------------------------- דגל יום שנקרא בפרק אחר ---
+
+/**
+ * **דגלי יום שקריאתם בפרק אחר היא ההחלטה** — כל אחד עם הסיבה. דלת שקיומה תלוי בדגל
+ * שהפרק לא מרים היא דלת שלא קיימת השנה, וזה מותר כשזה נאמר; זה אסור כשזה קורה בשקט.
+ */
+export const STALE_BY_DESIGN: Readonly<Record<string, string>> = {
+  'entry:granted': 'שער 7 פנימה נראה רק בפרקים שמשחק בפנים הוא חלק מהם (`whenByEra` של המנהרה); בשאר השנים המנהרה פשוט אינה דלת',
+  'found:kobi': 'ב-a5-first הכניסה למנהרה סוגרת את הפרק (`a5-close`), ולכן הדרך החוצה מהיציע לא נדרשת; בכל פרק אחר שהמנהרה פתוחה בו — היא פתוחה (`whenByEra`)',
+  'proof:business': '`HEARD_GATE` — דגל יום בכוונה, כדי שהשמועה לא תירה בפרק שבו המשימה לא נעשתה (`content/routes.ts`)',
+  'proof:create': '`HEARD_GATE` — אותה סיבה',
+  'knows:match': 'שלב A: לפני 1986 הילד לא הולך מזרחה בלי לדעת שיש משחק; הדלת נעולה ואומרת למה',
+  'saw:road': 'שלב A בלבד: הקיצור לבלומפילד נפתח אחרי ההליכה הראשונה בדרך; משלב B הוא פתוח (`needsByEra: { B: null }`)',
+  'r:reopen': 'בלומפילד בבנייה 2016–2018; הדלת נעולה ואומרת למה (כלל 82)',
+}
+
+export type StaleRead = { flag: string; where: string }
+
+/**
+ * `staleDayReads` — **תנאי שקורא דגל יום שהפרק הזה לא מרים** (21.9.2026).
+ *
+ * `p:tillKind` נכתב ב-P02 (`2016-crisis`) ונקרא ב-P05 (`2017-after`). בין שניהם רץ
+ * `year.entered`, ו-`personFlags` מחק אותו — כלומר הענף שבו עמית שואל על הכסף שנלקח
+ * **לא נפתח מעולם**, וההחזר שהתסריט בנה עליו את P05 היה תוכן מת. `deadend-audit` שאל
+ * אם הדגל מורם במשחק (כן, בפרק הקודם); `life:worldlines` שאל אם אפשר לסיים את הפרק
+ * (כן, בענף האחר). שניהם צדקו ושניהם לא ראו.
+ *
+ * השאלה כאן צרה ומכנית: לכל תנאי **חיובי** (`flag`, `flagIs`, בתוך `all`/`any` — לא
+ * `none` ולא `notFlag`, שקריאה שלילית של דגל מת היא פשוט "תמיד נכון") של כל מה שהסגור
+ * של הפרק פותח — ביטים, שיחות, ואנשים, נקודות חמות ודלתות בחדרים שלו — האם הדגל **שורד
+ * חצות** (`crossesChapter`), או שהסגור **עצמו** מרים אותו? אם לא — והוא כן מורם במקום
+ * אחר בתוכן, כלומר הוא לא דגל של המנוע — הוא נכתב בפרק אחר ונמחק בדרך.
+ *
+ * **הסגור, ולא `chapterFlags`.** הטיוטה הראשונה שאלה אם הפרק מרים את הדגל *איפשהו*,
+ * ולא ראתה את P05: ה-`repay` של עמית כותב `p:tillKind = repaid` — בתוך הענף שנעול על
+ * אותו דגל. הסגור (על `maximal`) מרים רק מה שאפשר להגיע אליו, ולכן ענף שננעל על עצמו
+ * לא פותח את עצמו.
+ *
+ * שיחה משותפת לכמה פרקים (דמות שעומדת באותו חדר בכמה עשורים) יכולה לשאת ענף שנכון רק
+ * לאחד מהם; זה מדווח גם כן, כי ענף שלא יכול להיפתח בפרק שבו השיחה רצה הוא בדיוק מה
+ * שהמכשיר מחפש — והחריגים נקובים בשמם בבדיקה.
+ */
+export function staleDayReads(chapter: string, closure: Closure): StaleRead[] {
+  const content = contentFlags()
+  return chapterReads(chapter, closure).filter(
+    ({ flag }) => !crossesChapter(flag) && !opaqueFlag(flag) && !closure.flags.has(flag) && content.has(flag),
+  )
+}
+
+/**
+ * כל קריאה **חיובית** של דגל בכל מה שהסגור של הפרק פותח — ביטים, שיחות (כל ענף וכל
+ * בחירה, גם נעולים), ואנשים, נקודות חמות ודלתות בחדרים שלו. בלי כפילויות.
+ */
+export function chapterReads(chapter: string, closure: Closure): StaleRead[] {
+  const out: StaleRead[] = []
+  const seen = new Set<string>()
+  const check = (condition: Condition | undefined, where: string): void => {
+    for (const flag of conditionFlags(condition)) {
+      const key = `${flag}@${where}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push({ flag, where })
+    }
+  }
+  for (const room of closure.rooms) {
+    const scene = roomIn(room, chapter)
+    if (!scene) continue
+    for (const actor of scene.actors) if (inEra(actor, chapter)) check(actor.when, `${scene.id}/${actor.id}`)
+    for (const spot of scene.hotspots) if (inEra(spot, chapter)) check(spot.when, `${scene.id}/${spot.id}`)
+    for (const exit of scene.exits) {
+      if (!exitInEra(exit, chapter)) continue
+      check(needsFor(exit, chapter), `${scene.id}→${exit.to}`)
+      check(whenFor(exit, chapter), `${scene.id}→${exit.to}`)
+    }
+  }
+  for (const beat of beatsOf(chapter)) check(beat.when, `beat:${beat.id ?? '?'}`)
+  for (const id of closure.conversations) {
+    const conversation = DIALOGUE[id]
+    if (!conversation) continue
+    conversation.branches.forEach((branch, index) => {
+      check(branch.when, `${id}#${index}`)
+      for (const choice of branch.choices ?? []) check(choice.when, `${id}/${choice.id}`)
+    })
+  }
+  return out
+}
+
+/**
+ * **דגלים שנכתבים בזמן ריצה בשם מחושב** — `gig:<id>` מ-`gigConversations`, `life:family:<…>`
+ * מ-`derive` של 2000, `a6:end-<…>`, `spot:held|lost` בבמאי של 1991, `book:<id>` מאפקט
+ * הספר, `life:seen:<…>` מאבני הדרך, `pitch:result` מההסדר של המגרש. הסורק של המקור
+ * מחפש מחרוזות מילוליות ולא יכול לראות אותם; כל שורה כאן היא שם מחושב שנבדק ביד.
+ *
+ * ומ-21.9.2026 גם הפעילויות (`lib/life/activities.ts`): `act:<id>:tier|done|era` ו-`act:<id>:…`
+ * נכתבים ב-`settleActivity` ובתיאום של `WorldScene.rollWorkOffers`, `favour:paid:<chapter>`
+ * הוא משבצת הטובה של הפרק, ו-`chore:order` הוא התשובה על סדר העבודה באוסישקין
+ * (`CHORE_ORDER_FLAG` ב-`gigs.ts`, נכתב ב-`flagValue` מתוך השיחה של הג׳וב).
+ */
+export const COMPUTED_FLAG = /^(gig:|life:family:|a6:end-|spot:|book:|life:seen:|pitch:result$|act:|favour:paid:|chore:order$)/
+
+/**
+ * `neverRaised` — תנאי שמבקש דגל ש**שום דבר** במקור לא כותב: לא תוכן, לא מנוע, לא שם
+ * מחושב. `d:stadium` היה כזה: הביט של הצעיף ב-2000 חיכה לו מאז שנכתב.
+ */
+export function neverRaised(chapter: string, closure: Closure, raisedAnywhere: ReadonlySet<string>): StaleRead[] {
+  const content = contentFlags()
+  return chapterReads(chapter, closure).filter(
+    ({ flag }) =>
+      !raisedAnywhere.has(flag) && !content.has(flag) && !opaqueFlag(flag) && !COMPUTED_FLAG.test(flag) && !closure.flags.has(flag),
+  )
+}
+
+// ----------------------------------------------------------- חדר בלי דרך החוצה ---
+
+/**
+ * `trappedRooms` — חדר שהסגור נכנס אליו ושאין בו אף יציאה פתוחה (21.9.2026).
+ *
+ * הסגור מונוטוני: הוא שואל *לאן אפשר להגיע*, אף פעם לא *מאיפה אפשר לחזור*. לכן
+ * `2010-anthem` עבר אותו נקי בזמן שמי שנכנס ליציע לבנפיקה (C06) לא יכול היה לצאת ממנו
+ * לליון (C07) בבית — הדלת החוצה נשאה את `found:kobi` של 1986. הבדיקה כאן שמרנית בכיוון
+ * הנכון: היא משתמשת בדגלים הסופיים של הסגור (הכי הרבה שאפשר), ולכן חדר שהיא מדווחת
+ * עליו סגור גם בסוף היום.
+ */
+export function trappedRooms(chapter: string, closure: Closure, engineFlags: EngineFlags = NO_ENGINE_FLAGS): LocationId[] {
+  const out: LocationId[] = []
+  for (const room of closure.rooms) {
+    const scene = roomIn(room, chapter)
+    if (!scene) continue
+    const open = scene.exits.some(
+      (exit) =>
+        exitInEra(exit, chapter) &&
+        couldHold(whenFor(exit, chapter), closure.flags, engineFlags) &&
+        couldHold(needsFor(exit, chapter), closure.flags, engineFlags),
+    )
+    if (!open) out.push(room)
+  }
+  return out
+}
+
+/** חדרים שהפרק נגמר בהם, ולכן אין צורך לצאת מהם — כל אחד עם הסיבה */
+export const TRAP_BY_DESIGN: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  'a5-first': { 'bloomfield-inside': 'הכניסה למנהרה מריצה את `a5-close`, שסוגר את הפרק — היציע הוא סוף היום' },
 }
 
 // ------------------------------------------------------------------ קווי חיים ---
@@ -431,12 +602,56 @@ export function carryableBefore(chapter: string, worldline: Worldline): Set<stri
  * החיתוך הוא מה שהופך קו חיים מרשימת משאלות לטענה: קו שמכריז על דגל שרק 1998 מרים אינו
  * מזכה את 1991 בדבר.
  */
+/**
+ * דגל שפרק קודם מרים **בלי תנאי** — ומה שהמודל פספס עד 21.9.2026.
+ *
+ * `seedFor` חותך את קו החיים במה שפרק מוקדם יכול היה להוריש, וזה נכון. אבל הוא גם
+ * הניח שכל דגל שפרק מוריש הוא **אופציונלי**, כלומר שהקו הריק לא מקבל אף אחד מהם —
+ * וזה לא נכון לדגל שביט בלי `when` מרים בפרק שרץ תמיד. `2006-home` מתחיל בתוך אולם
+ * אוסישקין, והביט הראשון שלו מרים `life:knows:hall` ברגע שנכנסים; אין חיים שבהם
+ * הוא לא מורם, ובכל זאת `2007-registered` דווח כבלתי-אפשרי בתשעה קווים.
+ *
+ * ההבחנה היא בין "אפשר להרים" ל"בהכרח מורם", ושתי הדרישות נבדקות:
+ * · הפרק שמרים אותו אינו מותנה (`when` ריק), ולכן הוא על **כל** קו חיים; ו
+ * · הביט עצמו אינו מותנה, ולכן אין בתוכו הסתעפות.
+ *
+ * זו הידוק של המודל ולא ריכוך שלו: הוא מפסיק לדווח על חור שאינו קיים, והקו הריק
+ * נשאר פסימי בכל מקום אחר — דגל שביט מותנה מרים עדיין לא נכנס לכאן (כלל 77).
+ */
+export function alwaysRaisedBefore(chapter: string, worldline: Worldline): Set<string> {
+  const out = new Set<string>()
+  for (const def of chaptersOn(worldline)) {
+    if (def.id === chapter) break
+    if (isWindow(def)) continue
+    const own = chapterFlags(def.id)
+    for (const beat of beatsOf(def.id)) {
+      /**
+       * `when` שמדבר רק על הדגלים של הפרק עצמו אינו הסתעפות — הוא **שומר-פעם-אחת**.
+       *
+       * הניסיון הראשון פסל כל ביט שיש לו `when`, וקיבל רשימה ריקה: כמעט כל ביט
+       * במשחק נושא `none: [{ flag: '<own>' }]` כדי לא לירות פעמיים. ההבחנה הנכונה
+       * היא מאיפה הדגל בא — דגל של הפרק עצמו הוא התקדמות בתוכו, ודגל מבחוץ הוא
+       * התלות שבגללה השורה הזאת קיימת.
+       */
+      const gate = (beat as { when?: Condition }).when
+      if (gate && [...conditionFlags(gate)].some((flag) => !own.has(flag))) continue
+      const actions = (beat as { do?: unknown }).do
+      for (const action of Array.isArray(actions) ? (actions as BeatAction[]) : []) {
+        if (action.a === 'flag' && action.flag && crossesChapter(action.flag)) out.add(action.flag)
+      }
+    }
+  }
+  return out
+}
+
 export function seedFor(chapter: string, worldline: Worldline): Record<string, boolean> {
   const carryable = carryableBefore(chapter, worldline)
   const seed: Record<string, boolean> = {}
   for (const [flag, on] of Object.entries(worldline.flags)) {
     if (on && carryable.has(flag)) seed[flag] = true
   }
+  // ...ומה שאין חיים בלעדיו, גם על הקו הריק
+  for (const flag of alwaysRaisedBefore(chapter, worldline)) seed[flag] = true
   return seed
 }
 
@@ -448,10 +663,10 @@ export function seedFor(chapter: string, worldline: Worldline): Record<string, b
  */
 export function branchFlags(): Set<string> {
   const out = new Set<string>()
-  for (const def of CHAPTERS) for (const flag of def.when ?? []) out.add(flag)
-  for (const scene of ALL_SCENES) {
-    for (const exit of scene.exits) {
-      for (const chapter of CHAPTERS) {
+  for (const def of CHAPTERS) for (const flag of windowFlagsOf(def)) out.add(flag)
+  for (const base of ALL_SCENES) {
+    for (const chapter of CHAPTERS) {
+      for (const exit of sceneIn(base, chapter.id).exits) {
         if (!exitInEra(exit, chapter.id)) continue
         for (const flag of conditionFlags(whenFor(exit, chapter.id))) out.add(flag)
         for (const flag of conditionFlags(needsFor(exit, chapter.id))) out.add(flag)
@@ -535,7 +750,7 @@ export function closureFor(
     // --- rooms: every door that exists in this chapter and is not asking for a flag we
     //     do not have. `whenFor` decides whether it is DRAWN, `needsFor` whether it opens.
     for (const room of [...rooms]) {
-      const scene = sceneById.get(room)
+      const scene = roomIn(room, chapter)
       if (!scene) continue
       for (const exit of scene.exits) {
         if (!exitInEra(exit, chapter)) continue
@@ -561,7 +776,7 @@ export function closureFor(
     // --- flags: everything content standing in those rooms can raise
     const roots = [...beatRoots]
     for (const room of rooms) {
-      const scene = sceneById.get(room)
+      const scene = roomIn(room, chapter)
       if (!scene) continue
       for (const actor of scene.actors) {
         if (!inEra(actor, chapter) || !actor.talk) continue
