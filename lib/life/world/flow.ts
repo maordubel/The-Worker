@@ -3,6 +3,7 @@ import type { Era } from '../content/era'
 import type { Condition } from './types'
 import type { LifeState } from '../types'
 import { unmet } from './why'
+import { actionsNow } from './actions'
 
 /**
  * שהמשחק לא יחכה לשעון במקום השחקן — the flow layer.
@@ -85,21 +86,9 @@ export type FlowInput = {
 /**
  * One game-minute is enough to establish that nothing new happened. At the base world
  * clock this is roughly a second or two of real play, not the old 25-game-minute wait.
- * The player still gets a choice to stay when optional content is around; this only makes
- * the choice visible before waiting itself becomes gameplay.
  */
 export const QUIET_MINUTES = 1
 
-/**
- * האם להציע לדלג — the whole rule, in one place.
- *
- * Four things have to be true at once:
- *   - a time gate exists, otherwise there is nothing honest to skip TO;
- *   - the room has been still for one game-minute, enough to avoid flashing during entry;
- *   - nothing is busy — dialogue, a match or a beat already IS the day happening;
- *   - the room still has a way to act/leave. Literally nothing is a dead end and belongs
- *     to `lastResort`, not to a time jump.
- */
 export function shouldOfferPass(input: FlowInput): TimeGate | null {
   const move = flowMove(input)
   return move?.kind === 'pass' ? move.gate : null
@@ -110,22 +99,27 @@ export type FlowMove = { kind: 'pass'; gate: TimeGate } | { kind: 'nudge' }
 /**
  * מה לעשות עם מי שעומד.
  *
- *   quiet + a clock to skip to  → offer the jump now
- *   quiet + something to do     → say what is here
- *   busy, or nothing at all     → say nothing; another system owns that state
+ * The important change is that "something to do" now comes from the semantic resolver —
+ * discovered story steps, live opportunities and route invitations — rather than merely
+ * from the fact that a room contains three clickable polygons. `reachable` is retained as
+ * a physical safety check: a semantic task in a room with literally no exits/targets is a
+ * dead-end bug, not a reason to tell the player to keep searching.
  *
- * Difficulty must come from choosing between meaningful things, never from discovering
- * that the game secretly wanted the player to wait for a number.
+ *   clock-only next beat          → offer the contextual jump immediately
+ *   known meaningful action      → nudge toward what the world already revealed
+ *   busy / physically dead room  → another system owns the state
  */
 export function flowMove(input: FlowInput): FlowMove | null {
   if (input.busy) return null
   if (input.quietFor < QUIET_MINUTES) return null
   if (input.reachable === 0) return null
+
   const gate = nextTimeGate(input.state, input.era)
   if (gate) return { kind: 'pass', gate }
-  // a day that still has an objective is a day with something to do in it
-  if (!input.objectiveHe) return null
-  return { kind: 'nudge' }
+
+  const meaningful = actionsNow(input.state, input.era)
+  if (meaningful.length > 0 || input.objectiveHe) return { kind: 'nudge' }
+  return null
 }
 
 /** the minute the jump lands on: just before the beat, so the beat still plays */
