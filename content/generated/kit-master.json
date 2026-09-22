@@ -2,11 +2,11 @@
  "schemaVersion": 1,
  "counts": {
   "kits": 35,
-  "playable": 31,
+  "playable": 32,
   "exactPhoto": 12,
   "candidateOnly": 20,
   "noPhoto": 3,
-  "conflicts": 3,
+  "conflicts": 4,
   "photoComplete": 11
  },
  "kits": [
@@ -182,7 +182,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "לבן עם עיטורים אדומים בשרוול ובצווארון."
@@ -350,7 +350,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "אדום עם מכנס לבן וגרב אדום."
@@ -536,7 +536,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "שחור מלא עם שלושת הפסים בשרוולים."
@@ -713,7 +713,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "אדום חלק עם שלושת הפסים בשרוולים."
@@ -881,7 +881,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "לבן עם כתפיים מודפסות."
@@ -1030,7 +1030,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "כתפיים מודפסות בהיר על אדום."
@@ -1186,7 +1186,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "אדום חלק לאורך כל המדים, ללא גזרה נוספת."
@@ -1354,7 +1354,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "שחור עם חישוקים אפורים כהים, מכנס וגרב שחורים."
@@ -1531,7 +1531,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "חישוקים טונליים באדום כהה."
@@ -1680,7 +1680,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "פסים אדום־לבן עם פאנל חזה לבן."
@@ -1873,7 +1873,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "אדום חלק, מכנס לבן."
@@ -2021,7 +2021,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "פסים אנכיים אדום־לבן."
@@ -2193,7 +2193,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "גוף אדום ושרוולים לבנים, מכנס לבן."
@@ -2369,7 +2369,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "שחור מלא, שרוולים שחורים וצווארון עגול לבן."
@@ -2535,7 +2535,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "סאש לבן אלכסוני על אדום."
@@ -2707,7 +2707,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "לבן כמעט נקי, עם סימני קאפה טונליים בכתפיים ובמכנס."
@@ -2870,7 +2870,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "חישוקים לבנים על אדום, מכנס וגרב לבנים."
@@ -3046,7 +3046,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "לבן עם עיטורים אדומים."
@@ -3224,7 +3224,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "כתפיים ושרוולים לבנים."
@@ -3396,7 +3396,7 @@
     ]
    },
    "source": "kit-assembly",
-   "sourceTitle": "מסירת חולצות 2009/10 של מאור הראל, 20.9.2026",
+   "sourceTitle": "מסירת חולצות 2009/10 של צוות The Worker, 20.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "חולצת הבית של עונת הדאבל: Umbro, סמל עם שני כוכבים, SUBARU ופאנלים לבנים בצדדים."
@@ -3572,7 +3572,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "לבן עם יהלום אמברו שחור."
@@ -3748,7 +3748,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "אדום חלק עם יהלום אמברו על החזה."
@@ -3926,7 +3926,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "לבן עם הבזקים אדומים בכתפיים."
@@ -4103,7 +4103,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "כתפיים לבנות וחפתים לבנים."
@@ -4263,7 +4263,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "אדום חלק, סימני קאפה על השרוולים."
@@ -4441,7 +4441,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "לבן עם כתפיים אדומות ופס הספונסר."
@@ -4610,7 +4610,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "פס לבן רחב על החזה עם הספונסר בתוכו."
@@ -4665,11 +4665,14 @@
      "conflict": null
     },
     "crest": {
-     "value": null,
-     "source": null,
-     "confidence": 0,
+     "value": {
+      "key": "keter-color",
+      "yearOnBadge": null
+     },
+     "source": "crest-versions",
+     "confidence": 2,
      "alternates": [],
-     "conflict": "era-without-artwork: עיצוב מחדש"
+     "conflict": null
     },
     "maker": {
      "value": {
@@ -4770,14 +4773,14 @@
      ]
     },
     "marks": {
-     "crest": "none",
+     "crest": "print",
      "maker": "alt-set",
      "sponsor": "lettered"
     }
    },
    "gate4": {
-    "playable": false,
-    "reason": "crest-art-missing"
+    "playable": true,
+    "reason": null
    },
    "gate5": {
     "dnaFields": [
@@ -4786,6 +4789,7 @@
      "pattern",
      "collar",
      "sleeves",
+     "crest",
      "maker",
      "sponsor",
      "shorts",
@@ -4793,7 +4797,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "שני פסים שחורים לאורך החזית, חפתים בשחור־לבן. עונת אליפות."
@@ -4849,13 +4853,18 @@
     },
     "crest": {
      "value": {
-      "key": "ball-waves",
+      "key": "keter-color",
       "yearOnBadge": null
      },
      "source": "crest-versions",
      "confidence": 2,
-     "alternates": [],
-     "conflict": "era-boundary: עיצוב מחדש (1997–2000) — אין לו איור בארכיון"
+     "alternates": [
+      {
+       "key": "ball-waves",
+       "yearOnBadge": null
+      }
+     ],
+     "conflict": "era-boundary: keter-color (1997–2000) and ball-waves (1992–1997) both cover this season"
     },
     "maker": {
      "value": {
@@ -4971,7 +4980,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "פסים אנכיים אדום־שחור עם מרקם ריסוס לבן, צווארון פולו אדום."
@@ -5131,7 +5140,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "רבעים אדומים על לבן, צווארון פולו לבן, כיתוב הספונסר בשחור."
@@ -5451,7 +5460,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "פסי שיער לבנים על אדום. בלוק הספונסר המקורי כלל צבע אסור במערכת, ולכן הספונסר נכתב כאן כטקסט בלבד."
@@ -5602,7 +5611,7 @@
     ]
    },
    "source": "kit-assembly",
-   "sourceTitle": "מסירת חולצת 1985/86 של מאור הראל, 20.9.2026",
+   "sourceTitle": "מסירת חולצת 1985/86 של צוות The Worker, 20.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "חולצת בית אדומה ארוכת שרוול: צווארון לבן, שלושת פסי adidas בכתפיים, סמל התקופה, אתא ובלוק VISA של העונה."
@@ -5743,7 +5752,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "אלכסונים דקים לבנים וכחולים על אדום, צווארון וי לבן."
@@ -5879,7 +5888,7 @@
     ]
    },
    "source": "kit-designs",
-   "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+   "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
    "sourceUrl": null,
    "confidence": 3,
    "noteHe": "גוף אדום, שרוולים לבנים, צווארון עגול לבן. הספונסר בלבן על החזה."

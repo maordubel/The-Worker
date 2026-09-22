@@ -24,6 +24,11 @@ export type ShareKind =
   | 'goal'
   | 'timeline'
   | 'polls'
+  // הארון (מפרט §45–§49) — no round, no seed: each hands over a closet, a shirt or the market
+  | 'closet'
+  | 'wanted'
+  | 'gaps'
+  | 'match'
 
 const ROUTE: Record<ShareKind, string> = {
   hate: '/derby',
@@ -40,6 +45,12 @@ const ROUTE: Record<ShareKind, string> = {
   goal: '/goal',
   timeline: '/timeline',
   polls: '/polls',
+  // the closet cards always pass `route` (the collector's own closet, the archive item); these
+  // are where a card lands when it has nothing more specific to hand over
+  closet: '/kits/closet',
+  wanted: '/kits/archive',
+  gaps: '/kits/closet',
+  match: '/kits/market',
 }
 
 /** The link a share sends people to — the same round, not the front door. */
@@ -51,7 +62,23 @@ const ROUTE: Record<ShareKind, string> = {
  * stapled to it would be a parameter the page ignores, which is the kind of small lie
  * that makes a URL untrustworthy to read.
  */
-const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'worst', 'member'])
+const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'worst', 'member', 'closet', 'wanted', 'gaps', 'match'])
+
+/**
+ * The line under the share row says what the LINK does (see `ShareRow`), so a kind that hands
+ * over something other than a round says so in its own words. Written out in full (rule 32).
+ */
+const DARE: Partial<Record<ShareKind, MessageKey>> = {
+  polls: 'share.dare.polls',
+  closet: 'collector.share.dare.closet',
+  wanted: 'collector.share.dare.wanted',
+  gaps: 'collector.share.dare.gaps',
+  match: 'collector.share.dare.match',
+}
+
+export function dareKey(kind: ShareKind): MessageKey {
+  return DARE[kind] ?? 'share.dare'
+}
 
 /*
  * Two more joined `polls` on 17.9.2026, and both were live defects rather than tidying.

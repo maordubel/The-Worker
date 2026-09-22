@@ -87,7 +87,29 @@ export const YELLOW_EXEMPTIONS: readonly YellowExemption[] = [
       'הפריים הראשון של אותו סרט — כרטיס הכותרת "1978" על שחור. נמדד אפס פיקסלים צהובים, ' +
       'ורשום בכל זאת: הוא פריים של הסרט, ואסור שהחלטה תישען על כך שהחיתוך לא יזוז',
   },
+  /*
+   * הסמל של 1997–2000 (22.9.2026). ב-1.9.2026 הקובץ הזה לא נכתב בכלל — `scripts/brand/crests.py`
+   * דילג עליו בכוונה, כי כלל 8 לא מכיר חריג לאמנות. מאור שלח אותו שוב עם המשפט שלמטה, על
+   * הסמל הזה בלבד. נמדד על הקובץ ששולח (`scripts/brand/crests-2026-09-22.py`): 11,747 פיקסלים
+   * בפס הקנוני, 545×560, PNG פלטה — כלומר אין קידוד שיכול להוסיף עליהם.
+   */
+  {
+    path: 'public/brand/crests/keter-color.png',
+    approvedBy: 'מאור הראל — "שהיה עם צהוב. וזה מאושר! זה ההיסטוריה"',
+    approvedOn: '2026-09-22',
+    why:
+      'סמל המועדון של 1997–2000: "כתר KETER" בצהוב ובכתום על רצועה כחולה. הצהוב הוא הסמל ' +
+      'עצמו באותן שנים, לא בחירה עיצובית שלנו; 11,747 פיקסלים בפס הקנוני בקובץ ששולח',
+  },
 ] as const
+
+/**
+ * The exempt FILES as the browser asks for them (`/brand/crests/keter-color.png`) — what the QA
+ * sweeps hide before they count, so an approved asset is not reported and nothing else is hidden.
+ */
+export function exemptWebPaths(): string[] {
+  return YELLOW_EXEMPTIONS.filter((e) => e.path.startsWith('public/')).map((e) => e.path.slice('public'.length))
+}
 
 /** Is this file allowed to contain yellow? Exact path match only — no prefixes. */
 export function yellowAllowed(path: string): boolean {

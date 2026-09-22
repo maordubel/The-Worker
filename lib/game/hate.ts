@@ -1,7 +1,6 @@
 import 'server-only'
 
 import { positionOf, takeFrom } from '@/lib/rotation/deck'
-import enemiesFile from '@/content/manual/enemies.json'
 
 import { archive, rng, shuffle } from './archive'
 import { NO_MERCY_ROUNDS, QUEUE_LENGTH, recordKind, type Enemy } from './hate-run'
@@ -31,15 +30,12 @@ import { NO_MERCY_ROUNDS, QUEUE_LENGTH, recordKind, type Enemy } from './hate-ru
 
 export type { Enemy } from './hate-run'
 
-const enemiesSource = (enemiesFile as { source: { title: string } }).source.title
-
-/**
- * The charge is Maor's voice: it is credited to the enemies file's own source, which is
- * his ranking of 1.9.2026 (rule 18 §3) — read from the file, not re-typed here.
+/*
+ * The charge is the terrace's voice, and its credit — the enemies file's own source, the
+ * ranking of 1.9.2026 under the owner-knowledge label (rule 18 §3, spec §0.2) — is printed
+ * on /credits, read from the file by `lib/credits`. `chargeCredit()` retired on 22.9.2026
+ * with the credit line it fed (spec §0.3).
  */
-export function chargeCredit(): string {
-  return enemiesSource
-}
 
 function roster(): Enemy[] {
   return archive.enemies.map((row) => {

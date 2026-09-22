@@ -1,3 +1,4 @@
+import { ownerSpelling } from '@/lib/canon/spelling'
 import { fold } from '@/lib/game/roster-search'
 
 /**
@@ -29,9 +30,14 @@ export function isPlayerId(value: string): boolean {
   return /^p_[0-9a-f]{10}$/.test(value)
 }
 
-/** The comparison form of a name or a slug. `fold` + lower case; slugs fold like names. */
+/**
+ * The comparison form of a name or a slug. `fold` + lower case; slugs fold like names.
+ * `ownerSpelling` is the one explicit correction on top (spec §0.1, 22.9.2026): a source
+ * that writes שלום תקוה with two vavs still reaches him, without that spelling ever being
+ * stored as an alias (`lib/canon/spelling.ts`).
+ */
 export function identityKey(value: string): string {
-  return fold(value).toLowerCase()
+  return ownerSpelling(fold(value)).toLowerCase()
 }
 
 /** One row of `content/manual/player-ids.json`. Append-only: `id` never changes. */

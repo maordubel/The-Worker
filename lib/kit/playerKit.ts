@@ -48,7 +48,7 @@ import { kitForSeason, type SeasonKit } from './seasons'
  * three years he is actually identified with. Tested by name in `tests/kit.test.ts`,
  * because it is the case that decided the order.
  *
- * Checked against the two Maor named: שלום תקווה → **1999/00**, the double, inside his
+ * Checked against the two Maor named: שלום תקוה → **1999/00**, the double, inside his
  * five-year spell. משה סיני → **1984/85**, the first shirt the archive holds inside his
  * ten-year run; he asked for "a shirt from 86" and 1985/86 is a season with no kit on
  * file, so the honest answer is the nearest season HE PLAYED that the archive can draw,

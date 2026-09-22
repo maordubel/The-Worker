@@ -30,6 +30,9 @@ export type GateSeoSlug =
   | 'kits'
   | 'kits-build'
   | 'kits-archive'
+  | 'kits-closet'
+  | 'kits-market'
+  | 'kits-auction'
   | 'memory'
   | 'polls'
   | 'goal'
@@ -41,6 +44,7 @@ export type GateSeoSlug =
   | 'ussishkin'
   | 'hapoel'
   | 'life'
+  | 'credits'
 
 type GateSeoEntry = {
   path: string
@@ -95,6 +99,30 @@ const GATE_SEO: Record<GateSeoSlug, GateSeoEntry> = {
     path: '/kits/archive',
     titleKey: 'screen.kitarchive.title',
     descriptionKey: 'screen.kitarchive.sub',
+    image: 'kits',
+  },
+  // הארון — the collector's own closet, grown out of the archive (spec §10, §71). The archive's
+  // card: it is the same wing, and a card of its own would be inventing a gate.
+  'kits-closet': {
+    path: '/kits/closet',
+    titleKey: 'collector.closet.title',
+    descriptionKey: 'collector.closet.seo',
+    image: 'kits',
+  },
+  // שוק האדומים — the archive's shirts with the copies fans hold hung under them (spec §12). The
+  // gate-5 card, for the same reason as the archive: it is the same wing, not a new gate.
+  'kits-market': {
+    path: '/kits/market',
+    titleKey: 'market.title',
+    descriptionKey: 'market.seo.desc',
+    image: 'kits',
+  },
+  // המכירה הפומבית — the lots are events on the same wing (spec §71), so it takes gate 5's
+  // card too. `/kits/admin` is deliberately NOT here: it is noindex and in no menu (§65).
+  'kits-auction': {
+    path: '/kits/auction',
+    titleKey: 'screen.auction.title',
+    descriptionKey: 'auction.lede',
     image: 'kits',
   },
   'kits-build': {
@@ -161,6 +189,14 @@ const GATE_SEO: Record<GateSeoSlug, GateSeoEntry> = {
     titleKey: 'life.title',
     descriptionKey: 'life.sub',
     image: 'life',
+  },
+  // המקורות — not a gate: the one page every source and credit lives on (spec §0.3,
+  // 22.9.2026). The default card, for the same reason as the archive wing.
+  credits: {
+    path: '/credits',
+    titleKey: 'screen.credits.title',
+    descriptionKey: 'seo.credits.desc',
+    image: 'default',
   },
 }
 

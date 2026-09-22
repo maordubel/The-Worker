@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import { closetCard, gapsCard, matchCard, wantedCard } from '@/lib/collector/cards'
+import { handleLabel } from '@/lib/collector/labels'
 import { DEFAULT_SPEC } from '@/lib/kit/spec'
 import { drawStory, lastInkBoxes, type InkBox, type StoryCard } from '@/lib/share/story'
 
@@ -229,6 +231,25 @@ const CASES: Array<{ name: string; card: StoryCard }> = [
       kit: { ...DEFAULT_SPEC, number: 99 },
     },
   },
+  /*
+   * הארון (22.9.2026) — the four collector cards, built by the SAME builders the closet calls
+   * (`lib/collector/cards.ts`), with the longest strings they can be handed: an 18-character
+   * nickname (`NAME_MAX`), a full 600-shirt closet, a year-only season with the longest variant,
+   * and a decade of ten missing seasons — which is the most rows the archive holds for any decade.
+   * These cards also keep every block inside the 260px safe zones; `story:overlap` checks that too.
+   */
+  { name: 'closet', card: closetCard({ name: 'מאוראבישידלובסקי', copies: 600, span: { from: 1949, to: 2026 }, keeper: '2016 בערך · שלישית' }) },
+  { name: 'closet-bare', card: closetCard({ name: handleLabel({ handle: 184211, nickname: null }), copies: 1, span: { from: 1994, to: 1994 }, keeper: null }) },
+  { name: 'wanted', card: wantedCard('1994 בערך', 'חולצת שוער') },
+  { name: 'wanted-season', card: wantedCard('1994/95') },
+  {
+    name: 'gaps',
+    card: gapsCard('שנות ה-2010', '0/10', ['2010 בערך', '2011 בערך', '2012 בערך', '2013 בערך', '2014 בערך', '2015 בערך', '2016/17', '2017/18', '2018/19', '2019/20']),
+  },
+  { name: 'gaps-five', card: gapsCard('שנות ה-90', '2/7', ['1991 בערך', '1992 בערך', '1994 בערך', '1997 בערך', '1999 בערך']) },
+  { name: 'gaps-complete', card: gapsCard('שנות ה-50', '5/5', []) },
+  { name: 'match', card: matchCard('1994 בערך', '2016 בערך') },
+  { name: 'match-buy', card: matchCard('2016/17', null) },
 ]
 
 type Report = Record<string, InkBox[]>

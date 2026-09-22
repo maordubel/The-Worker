@@ -23,7 +23,57 @@ export const STORY_H = 1920
 /** Instagram's own furniture lives here. Nothing important may enter it. */
 export const SAFE = 260
 
-export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art' | 'xi' | 'ballot'
+// one line: `tests/brand.test.ts` reads the declared templates off it
+export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art' | 'xi' | 'ballot' | 'closet' | 'wanted' | 'gaps' | 'match'
+
+/**
+ * הארון — the collector's four cards (spec §45–§49), each a whole card with its own layout,
+ * like `xi` and `ballot`. `gaps` is a LIST and draws every row it is given (rule 19): a card
+ * that printed three of seven missing seasons would be announcing a number, not the holes.
+ * Every string arrives already worded — the card draws, it does not translate (rule 10).
+ */
+export type CollectorStory =
+  | {
+      kind: 'closet'
+      /** "הארון של אספן #1842" */
+      title: string
+      /** "24" and "חולצות" */
+      count: string
+      countLabel: string
+      /** "1989" and "2026" — the years the closet reaches, or null for an empty one */
+      span: { from: string; to: string } | null
+      /** "החולצה שאני בחיים לא מוכר:" and "1999/00 · בית", when one was chosen */
+      keeper: { label: string; shirt: string } | null
+    }
+  | {
+      kind: 'wanted'
+      /** "מחפש את זאת." */
+      lead: string
+      /** "הפועל תל אביב" and "1994/95" (or "1994 בערך") */
+      club: string
+      shirt: string
+      /** "אם היא אצל מישהו בארון — תעבירו לו אותי." */
+      plea: string
+    }
+  | {
+      kind: 'gaps'
+      /** "שנות ה-90" and "3/7" */
+      decade: string
+      score: string
+      /** "חסרות לי:" — or, when nothing is missing, the line that says so */
+      label: string
+      rows: string[]
+    }
+  | {
+      kind: 'match'
+      /** "MATCH COMPLETED" */
+      head: string
+      /** a trade prints from ⇄ to; a purchase prints one shirt and `to` is null */
+      from: string
+      to: string | null
+      /** "דרך The Worker" */
+      via: string
+    }
 
 /**
  * הציורים — Maor's own artwork, and the only images this card system carries.
@@ -88,6 +138,8 @@ export type StoryCard = {
    * stand on type alone and is drawn harder for exactly that reason.
    */
   art?: ArtKey
+  /** the collector's cards — present means the card is drawn by `drawCollectorCard` */
+  collector?: CollectorStory
 }
 
 /**
@@ -604,6 +656,13 @@ export function drawStory(
   // BALLOT · the polls wing's slip. Also a whole card, for the same reason.
   if (template === 'ballot' && card.ballot && card.ballot.length > 0) {
     drawBallotCard(ctx, card, badge)
+    ctx.restore()
+    return
+  }
+
+  // THE CLOSET · four whole cards of their own (spec §45–§49).
+  if (card.collector && template === card.collector.kind) {
+    drawCollectorCard(ctx, card, card.collector, badge)
     ctx.restore()
     return
   }
@@ -1238,6 +1297,471 @@ function drawBallotCard(
   recordInk(ctx, 'challenge', card.challenge, right, challengeY)
 
   foot(ctx, card, { name: BRAND.red, text: BRAND.ink, rule: BRAND.red }, badge)
+}
+
+/* ------------------------------------------------------------------ the closet */
+
+/**
+ * שורות — a sentence broken at word boundaries into lines that fit, measured on the face that is
+ * currently set. A plea that runs off the plate is not a plea.
+ */
+function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(/\s+/).filter((word) => word !== '')
+  const lines: string[] = []
+  let line = ''
+  for (const word of words) {
+    const next = line === '' ? word : `${line} ${word}`
+    if (line !== '' && ctx.measureText(next).width > maxWidth) {
+      lines.push(line)
+      line = word
+    } else line = next
+  }
+  if (line !== '') lines.push(line)
+  return lines
+}
+
+/** The kicker, its TOP on the safe line — never inside Instagram's furniture. Returns its foot. */
+function collectorKicker(ctx: CanvasRenderingContext2D, kicker: string, colour: string): number {
+  const right = STORY_W - 76
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'right'
+  ctx.font = '800 30px Archivo, sans-serif'
+  ctx.letterSpacing = '6px'
+  const box = textBox(ctx, kicker)
+  const base = SAFE + box.ascent
+  ctx.fillStyle = colour
+  ctx.fillText(kicker, right, base)
+  recordInk(ctx, 'kicker', kicker, right, base)
+  ctx.letterSpacing = '0px'
+  ctx.direction = 'rtl'
+  return base + box.descent
+}
+
+/** The challenge line and the credit strip, the same foot every template ends on. */
+function collectorFoot(ctx: CanvasRenderingContext2D, card: StoryCard, dark: boolean, badge: CanvasImageSource | null): number {
+  const right = STORY_W - 76
+  const challengeY = STORY_H - SAFE - 236
+  ctx.direction = 'rtl'
+  ctx.textAlign = 'right'
+  const size = fit(ctx, card.challenge, 28, STORY_W - 152, 'Heebo, sans-serif', '400')
+  ctx.font = `400 ${size}px Heebo, sans-serif`
+  ctx.fillStyle = dark ? BRAND.concrete : BRAND.sign
+  ctx.fillText(card.challenge, right, challengeY)
+  recordInk(ctx, 'challenge', card.challenge, right, challengeY)
+  const top = challengeY - textBox(ctx, card.challenge).ascent
+  foot(ctx, card, dark ? { name: BRAND.red, text: BRAND.sheet, rule: BRAND.red } : { name: BRAND.red, text: BRAND.ink, rule: BRAND.red }, badge)
+  return top
+}
+
+/**
+ * כרטיסי הארון — the closet, the wanted shirt, the holes and the match (spec §46–§49).
+ *
+ * Laid out the way `ballot` is: the head from the safe line DOWN, the foot from the credit
+ * strip UP, and the graphic fitted into what is measured to be left between them — never a
+ * multiple of a point size (rule 19). Every block reports its ink, and every one of them sits
+ * inside the 260px safe zones (rule 22); `npm run story:overlap` checks both.
+ */
+function drawCollectorCard(
+  ctx: CanvasRenderingContext2D,
+  card: StoryCard,
+  body: CollectorStory,
+  badge: CanvasImageSource | null,
+): void {
+  const pad = 76
+  const right = STORY_W - pad
+  const width = STORY_W - pad * 2
+  const SUEZ = '"Suez One", serif'
+  const POSTER = 'Karantina, sans-serif'
+
+  // ── the ground ──────────────────────────────────────────────────────────
+  const dark = body.kind === 'match'
+  if (body.kind === 'wanted') {
+    ctx.fillStyle = BRAND.red
+    ctx.fillRect(0, 0, STORY_W, STORY_H)
+    dots(ctx, BRAND.ink, 0.14)
+  } else if (dark) {
+    ctx.fillStyle = BRAND.ink
+    ctx.fillRect(0, 0, STORY_W, STORY_H)
+    ctx.fillStyle = BRAND.red
+    ctx.fillRect(0, 0, STORY_W, 96)
+    ctx.fillRect(0, STORY_H - 96, STORY_W, 96)
+  } else {
+    ctx.fillStyle = BRAND.sheet
+    ctx.fillRect(0, 0, STORY_W, STORY_H)
+    dots(ctx, BRAND.ink, 0.09)
+  }
+
+  const headFoot = collectorKicker(ctx, card.kicker, body.kind === 'wanted' ? BRAND.ink : dark ? BRAND.red : BRAND.sign)
+  const floor = collectorFoot(ctx, card, dark, badge) - 48
+  ctx.direction = 'rtl'
+  ctx.textAlign = 'right'
+
+  if (body.kind === 'closet') {
+    // the title
+    const titleSize = fit(ctx, body.title, 96, width, SUEZ, '400')
+    ctx.font = `400 ${titleSize}px ${SUEZ}`
+    const title = textBox(ctx, body.title)
+    const titleBase = headFoot + 40 + title.ascent
+    plateText(ctx, body.title, right, titleBase, { under: BRAND.red, over: BRAND.ink, offset: 8, skew: -6 })
+    recordInk(ctx, 'closet.title', body.title, right, titleBase, 8)
+    const ruleTop = titleBase + title.descent + 8 + 30
+    ctx.fillStyle = BRAND.ink
+    ctx.fillRect(pad, ruleTop, width, 10)
+
+    // the keeper, anchored to the foot
+    let panelTop = floor
+    if (body.keeper) {
+      ctx.font = `400 32px Heebo, sans-serif`
+      const label = textBox(ctx, body.keeper.label)
+      const shirtSize = fit(ctx, body.keeper.shirt, 72, width - 64, SUEZ, '400')
+      ctx.font = `400 ${shirtSize}px ${SUEZ}`
+      const shirt = textBox(ctx, body.keeper.shirt)
+      const panelH = 34 + label.height + 20 + shirt.height + 38
+      panelTop = floor - panelH
+      ctx.fillStyle = BRAND.ink
+      ctx.fillRect(pad, panelTop, width, panelH)
+      ctx.strokeStyle = BRAND.red
+      ctx.lineWidth = 6
+      ctx.strokeRect(pad + 3, panelTop + 3, width - 6, panelH - 6)
+      const labelBase = panelTop + 34 + label.ascent
+      ctx.font = `400 32px Heebo, sans-serif`
+      ctx.fillStyle = BRAND.red
+      ctx.fillText(body.keeper.label, right - 32, labelBase)
+      recordInk(ctx, 'closet.keeper.label', body.keeper.label, right - 32, labelBase)
+      const shirtBase = labelBase + label.descent + 20 + shirt.ascent
+      ctx.font = `400 ${shirtSize}px ${SUEZ}`
+      ctx.fillStyle = BRAND.sheet
+      ctx.fillText(body.keeper.shirt, right - 32, shirtBase)
+      recordInk(ctx, 'closet.keeper.shirt', body.keeper.shirt, right - 32, shirtBase)
+    }
+
+    // the count and the span, as big as the room between the rule and the panel allows
+    const roomTop = ruleTop + 10 + 44
+    const roomBottom = panelTop - 44
+    const spanText = body.span ? [body.span.from, body.span.to] : null
+    let size = 380
+    let countBox = { ascent: 0, descent: 0, height: 0 }
+    let spanBox = { ascent: 0, descent: 0, height: 0 }
+    let spanSize = 0
+    let blockH = 0
+    for (;;) {
+      ctx.font = `700 ${size}px ${POSTER}`
+      countBox = textBox(ctx, body.count)
+      const countW = ctx.measureText(body.count).width
+      const labelRoom = width - countW - 36
+      spanSize = Math.max(64, Math.min(150, Math.round(size / 2.6)))
+      ctx.font = `700 ${spanSize}px ${POSTER}`
+      spanBox = spanText ? textBox(ctx, `${spanText[0]}${spanText[1]}`) : { ascent: 0, descent: 0, height: 0 }
+      blockH = countBox.height + 12 + (spanText ? 40 + spanBox.height : 0)
+      if ((blockH <= roomBottom - roomTop && labelRoom > 220) || size <= 150) break
+      size -= 10
+    }
+    const blockTop = roomTop + Math.max(0, (roomBottom - roomTop - blockH) / 2)
+    const countBase = blockTop + countBox.ascent
+    ctx.font = `700 ${size}px ${POSTER}`
+    ctx.direction = 'ltr'
+    const countW = ctx.measureText(body.count).width
+    plateText(ctx, body.count, right, countBase, { under: BRAND.sign, over: BRAND.red, offset: 12, skew: 0 })
+    recordInk(ctx, 'closet.count', body.count, right, countBase, 12)
+    ctx.direction = 'rtl'
+    const labelRight = right - countW - 36
+    const labelSize = fit(ctx, body.countLabel, 88, labelRight - pad, SUEZ, '400')
+    ctx.font = `400 ${labelSize}px ${SUEZ}`
+    ctx.fillStyle = BRAND.ink
+    ctx.fillText(body.countLabel, labelRight, countBase)
+    recordInk(ctx, 'closet.countLabel', body.countLabel, labelRight, countBase)
+
+    if (spanText && spanText[0] === spanText[1]) {
+      // one year is one figure — "1994 → 1994" would be a range of nothing
+      const year = spanText[0] as string
+      ctx.font = `700 ${spanSize}px ${POSTER}`
+      ctx.direction = 'ltr'
+      const spanBase = countBase + countBox.descent + 12 + 40 + spanBox.ascent
+      plateText(ctx, year, right, spanBase, { under: BRAND.red, over: BRAND.ink, offset: 6, skew: 0 })
+      recordInk(ctx, 'closet.span.from', year, right, spanBase, 6)
+      ctx.direction = 'rtl'
+    } else if (spanText) {
+      // "1989 → 2026" reads oldest to newest, left to right, as the spec writes it
+      const [from, to] = spanText as [string, string]
+      ctx.font = `700 ${spanSize}px ${POSTER}`
+      ctx.direction = 'ltr'
+      ctx.textAlign = 'left'
+      const fromW = ctx.measureText(from).width
+      const toW = ctx.measureText(to).width
+      const arrowW = Math.round(spanSize * 0.9)
+      const gap = 28
+      const start = right - (fromW + gap + arrowW + gap + toW)
+      const spanBase = countBase + countBox.descent + 12 + 40 + spanBox.ascent
+      plateText(ctx, from, start, spanBase, { under: BRAND.red, over: BRAND.ink, offset: 6, skew: 0 })
+      recordInk(ctx, 'closet.span.from', from, start + fromW, spanBase, 6)
+      const mid = spanBase - spanBox.ascent / 2
+      const ax = start + fromW + gap
+      ctx.strokeStyle = BRAND.red
+      ctx.fillStyle = BRAND.red
+      ctx.lineWidth = 10
+      ctx.beginPath()
+      ctx.moveTo(ax, mid)
+      ctx.lineTo(ax + arrowW - 24, mid)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(ax + arrowW, mid)
+      ctx.lineTo(ax + arrowW - 30, mid - 20)
+      ctx.lineTo(ax + arrowW - 30, mid + 20)
+      ctx.closePath()
+      ctx.fill()
+      const toX = ax + arrowW + gap
+      plateText(ctx, to, toX, spanBase, { under: BRAND.red, over: BRAND.ink, offset: 6, skew: 0 })
+      recordInk(ctx, 'closet.span.to', to, toX + toW, spanBase, 6)
+      ctx.textAlign = 'right'
+      ctx.direction = 'rtl'
+    }
+    return
+  }
+
+  if (body.kind === 'wanted') {
+    const leadSize = fit(ctx, body.lead, 124, width, SUEZ, '400')
+    ctx.font = `400 ${leadSize}px ${SUEZ}`
+    const lead = textBox(ctx, body.lead)
+    const leadBase = headFoot + 44 + lead.ascent
+    plateText(ctx, body.lead, right, leadBase, { under: BRAND.ink, over: BRAND.sheet, offset: 9, skew: -6 })
+    recordInk(ctx, 'wanted.lead', body.lead, right, leadBase, 9)
+
+    // the plea, in an ink panel anchored to the foot
+    ctx.font = `400 50px ${SUEZ}`
+    const lines = wrapLines(ctx, body.plea, width - 72)
+    const boxes = lines.map((line) => textBox(ctx, line))
+    const lineGap = 22
+    const linesH = boxes.reduce((sum, box) => sum + box.height, 0) + lineGap * Math.max(0, lines.length - 1)
+    const panelH = 44 + linesH + 44
+    const panelTop = floor - panelH
+    ctx.fillStyle = BRAND.ink
+    ctx.fillRect(pad, panelTop, width, panelH)
+    let lineTop = panelTop + 44
+    lines.forEach((line, index) => {
+      const box = boxes[index] as { ascent: number; descent: number; height: number }
+      const base = lineTop + box.ascent
+      ctx.font = `400 50px ${SUEZ}`
+      ctx.fillStyle = BRAND.sheet
+      ctx.fillText(line, right - 36, base)
+      recordInk(ctx, `wanted.plea.${index}`, line, right - 36, base)
+      lineTop = base + box.descent + lineGap
+    })
+
+    // the club, then the shirt as big as what is left allows
+    const clubSize = fit(ctx, body.club, 70, width, SUEZ, '400')
+    ctx.font = `400 ${clubSize}px ${SUEZ}`
+    const club = textBox(ctx, body.club)
+    const clubBase = leadBase + lead.descent + 9 + 64 + club.ascent
+    ctx.fillStyle = BRAND.ink
+    ctx.fillText(body.club, right, clubBase)
+    recordInk(ctx, 'wanted.club', body.club, right, clubBase)
+
+    const roomTop = clubBase + club.descent + 36
+    const roomBottom = panelTop - 44
+    let size = fit(ctx, body.shirt, 300, width, POSTER, '700')
+    ctx.font = `700 ${size}px ${POSTER}`
+    let shirt = textBox(ctx, body.shirt)
+    while (shirt.height + 12 > roomBottom - roomTop && size > 96) {
+      size -= 8
+      ctx.font = `700 ${size}px ${POSTER}`
+      shirt = textBox(ctx, body.shirt)
+    }
+    const shirtBase = roomTop + Math.max(0, (roomBottom - roomTop - shirt.height - 12) / 2) + shirt.ascent
+    ctx.direction = isLatinRun(body.shirt) ? 'ltr' : 'rtl'
+    plateText(ctx, body.shirt, right, shirtBase, { under: BRAND.ink, over: BRAND.sheet, offset: 12, skew: 0 })
+    recordInk(ctx, 'wanted.shirt', body.shirt, right, shirtBase, 12)
+    ctx.direction = 'rtl'
+    return
+  }
+
+  if (body.kind === 'gaps') {
+    // the score is measured first and the decade is fitted into what it leaves (like `xi`)
+    ctx.direction = 'ltr'
+    ctx.textAlign = 'left'
+    ctx.font = `700 150px ${POSTER}`
+    const scoreW = ctx.measureText(body.score).width
+    const score = textBox(ctx, body.score)
+    ctx.direction = 'rtl'
+    ctx.textAlign = 'right'
+    const titleSize = fit(ctx, body.decade, 104, width - scoreW - 48, SUEZ, '400')
+    ctx.font = `400 ${titleSize}px ${SUEZ}`
+    const title = textBox(ctx, body.decade)
+    const headBase = headFoot + 40 + Math.max(title.ascent, score.ascent)
+    plateText(ctx, body.decade, right, headBase, { under: BRAND.red, over: BRAND.ink, offset: 8, skew: -6 })
+    recordInk(ctx, 'gaps.decade', body.decade, right, headBase, 8)
+    ctx.direction = 'ltr'
+    ctx.textAlign = 'left'
+    ctx.font = `700 150px ${POSTER}`
+    plateText(ctx, body.score, pad, headBase, { under: BRAND.sign, over: BRAND.red, offset: 8, skew: 0 })
+    recordInk(ctx, 'gaps.score', body.score, pad + scoreW, headBase, 8)
+    ctx.direction = 'rtl'
+    ctx.textAlign = 'right'
+
+    ctx.font = `400 38px Heebo, sans-serif`
+    const label = textBox(ctx, body.label)
+    const labelBase = headBase + Math.max(title.descent, score.descent) + 8 + 48 + label.ascent
+    ctx.fillStyle = BRAND.sign
+    ctx.fillText(body.label, right, labelBase)
+    recordInk(ctx, 'gaps.label', body.label, right, labelBase)
+
+    // the slip: every missing season, one ruled row each
+    const top = labelBase + label.descent + 30
+    const bottom = floor
+    ctx.fillStyle = BRAND.paper
+    ctx.fillRect(pad, top, width, bottom - top)
+    ctx.strokeStyle = BRAND.ink
+    ctx.lineWidth = 8
+    ctx.strokeRect(pad, top, width, bottom - top)
+    const rows = body.rows
+    if (rows.length === 0) {
+      // nothing missing: the slip carries one drawn tick, as big as the slip allows — no glyph,
+      // because no face on this card has one and a fallback font would draw a different mark
+      // a mark, not type: its geometry is its own proportions, centred in the measured slip
+      const mark = Math.min(width * 0.42, (bottom - top) * 0.62)
+      const arm = mark / 2
+      const rise = mark * 0.36
+      const knee = mark * 0.14
+      const midX = STORY_W / 2
+      const midY = (top + bottom) / 2
+      ctx.strokeStyle = BRAND.red
+      ctx.lineWidth = Math.max(18, mark * 0.14)
+      ctx.lineCap = 'square'
+      ctx.lineJoin = 'miter'
+      ctx.beginPath()
+      ctx.moveTo(midX - arm, midY)
+      ctx.lineTo(midX - knee, midY + rise)
+      ctx.lineTo(midX + arm, midY - rise)
+      ctx.stroke()
+      ctx.lineCap = 'butt'
+      return
+    }
+    const cols = rows.length > 5 ? 2 : 1
+    const perCol = Math.ceil(rows.length / cols)
+    const rowH = (bottom - top) / perCol
+    const colW = width / cols
+    const textSize = Math.max(34, Math.min(72, rowH * 0.46))
+    rows.forEach((row, index) => {
+      const col = Math.floor(index / perCol)
+      const line = index % perCol
+      const cellRight = right - col * colW
+      const cellLeft = cellRight - colW
+      const rowTop = top + line * rowH
+      if (line > 0) {
+        ctx.strokeStyle = BRAND.ink
+        ctx.globalAlpha = 0.22
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(cellLeft + 20, rowTop)
+        ctx.lineTo(cellRight - 20, rowTop)
+        ctx.stroke()
+        ctx.globalAlpha = 1
+      }
+      if (col > 0 && line === 0) {
+        ctx.fillStyle = BRAND.ink
+        ctx.fillRect(cellRight - 2, top + 20, 4, bottom - top - 40)
+      }
+      // an EMPTY box: this is the season the closet does not have
+      const boxSize = Math.min(38, rowH * 0.3)
+      ctx.strokeStyle = BRAND.red
+      ctx.lineWidth = 5
+      ctx.strokeRect(cellLeft + 24, rowTop + rowH / 2 - boxSize / 2, boxSize, boxSize)
+      const room = colW - 48 - boxSize - 30
+      let size = textSize
+      ctx.direction = isLatinRun(row) ? 'ltr' : 'rtl'
+      ctx.font = `400 ${size}px ${SUEZ}`
+      while (ctx.measureText(row).width > room && size > 24) {
+        size -= 2
+        ctx.font = `400 ${size}px ${SUEZ}`
+      }
+      const box = textBox(ctx, row)
+      const base = rowTop + (rowH - box.height) / 2 + box.ascent
+      ctx.fillStyle = BRAND.ink
+      ctx.fillText(row, cellRight - 24, base)
+      recordInk(ctx, `gaps.row.${index}`, row, cellRight - 24, base)
+      ctx.direction = 'rtl'
+    })
+    return
+  }
+
+  // MATCH COMPLETED
+  const cx = STORY_W / 2
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'center'
+  const headSize = fit(ctx, body.head, 190, width, POSTER, '700')
+  ctx.font = `700 ${headSize}px ${POSTER}`
+  const head = textBox(ctx, body.head)
+  const headW = ctx.measureText(body.head).width
+  const headBase = headFoot + 44 + head.ascent
+  plateText(ctx, body.head, cx, headBase, { under: BRAND.red, over: BRAND.sheet, offset: 10, skew: 0 })
+  recordInk(ctx, 'match.head', body.head, cx + headW / 2, headBase, 10)
+  const ruleTop = headBase + head.descent + 10 + 30
+  ctx.fillStyle = BRAND.red
+  ctx.fillRect(pad, ruleTop, width, 10)
+
+  ctx.direction = 'rtl'
+  const viaSize = fit(ctx, body.via, 60, width, SUEZ, '400')
+  ctx.font = `400 ${viaSize}px ${SUEZ}`
+  const via = textBox(ctx, body.via)
+  const viaW = ctx.measureText(body.via).width
+  const viaBase = floor - via.descent
+  ctx.fillStyle = BRAND.concrete
+  ctx.fillText(body.via, cx, viaBase)
+  recordInk(ctx, 'match.via', body.via, cx + viaW / 2, viaBase)
+
+  const roomTop = ruleTop + 10 + 48
+  const roomBottom = viaBase - via.ascent - 48
+  const shirts = body.to === null ? [body.from] : [body.from, body.to]
+  const ARROWS = body.to === null ? 0 : 120
+  let size = 240
+  let boxes = shirts.map(() => ({ ascent: 0, descent: 0, height: 0 }))
+  for (;;) {
+    ctx.font = `700 ${size}px ${POSTER}`
+    const widest = Math.max(...shirts.map((text) => ctx.measureText(text).width))
+    boxes = shirts.map((text) => textBox(ctx, text))
+    const blockH = boxes.reduce((sum, box) => sum + box.height + 12, 0) + (ARROWS ? ARROWS + 2 * 40 : 0)
+    if ((blockH <= roomBottom - roomTop && widest <= width) || size <= 96) {
+      let y = roomTop + Math.max(0, (roomBottom - roomTop - blockH) / 2)
+      shirts.forEach((text, index) => {
+        const box = boxes[index] as { ascent: number; descent: number; height: number }
+        ctx.font = `700 ${size}px ${POSTER}`
+        ctx.direction = isLatinRun(text) ? 'ltr' : 'rtl'
+        const w = ctx.measureText(text).width
+        const base = y + box.ascent
+        plateText(ctx, text, cx, base, { under: BRAND.red, over: BRAND.sheet, offset: 12, skew: 0 })
+        recordInk(ctx, `match.shirt.${index}`, text, cx + w / 2, base, 12)
+        y = base + box.descent + 12
+        if (index === 0 && ARROWS) {
+          // ⇄ drawn, not typed: no face on this card carries the glyph, and a fallback font
+          // would print a different arrow on every phone
+          const top = y + 40
+          const lane = ARROWS / 2
+          ctx.strokeStyle = BRAND.red
+          ctx.fillStyle = BRAND.red
+          ctx.lineWidth = 12
+          for (const [row, towardEnd] of [[top + lane * 0.5, true], [top + lane * 1.5, false]] as const) {
+            const from = towardEnd ? cx - 150 : cx + 150
+            const to = towardEnd ? cx + 150 : cx - 150
+            const tip = towardEnd ? -1 : 1
+            ctx.beginPath()
+            ctx.moveTo(from, row)
+            ctx.lineTo(to + tip * 28, row)
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.moveTo(to, row)
+            ctx.lineTo(to + tip * 36, row - 22)
+            ctx.lineTo(to + tip * 36, row + 22)
+            ctx.closePath()
+            ctx.fill()
+          }
+          y = top + ARROWS + 40
+        }
+      })
+      break
+    }
+    size -= 8
+  }
+  ctx.direction = 'rtl'
+  ctx.textAlign = 'right'
 }
 
 const PITCH_GREEN = '#3D8B41'

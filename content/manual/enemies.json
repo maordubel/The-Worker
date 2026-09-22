@@ -1,9 +1,9 @@
 {
-  "note": "משחק השנאה — the terrace's cast, ranked by Maor Harel: founder of Hapoel Ussishkin, former capo of Ultras Hapoel. `terraceRank` IS his ranking, 1—56, not an editorial guess; the first fifty are the list he supplied on 1.9.2026 in his own order, and the last six are the names he added with it. The file is deliberately CROSS-SPORT — the enemies of הפועל תל אביב are enemies of the club as an idea — and rule 14 is held by the `sport` field on every row rather than by leaving anyone out. `chargeHe` is the terrace's charge in the terrace's voice: it is opinion, and it is his. `detailHe` is what a source actually states, with the source on the row; where a dedicated research pass on 1.9.2026 could not source a claim, `detailHe` is empty and the plate prints the charge alone rather than inventing a record. Nothing here reaches a football question — the hate game reads this file and only this file.",
+  "note": "משחק השנאה — the terrace's cast, ranked from the owner's own terrace knowledge (cited under the neutral label `ידע אישי — צוות The Worker`, spec §0.2, 22.9.2026). `terraceRank` IS that ranking, 1—56, not an editorial guess; the first fifty are the list he supplied on 1.9.2026 in his own order, and the last six are the names he added with it. The file is deliberately CROSS-SPORT — the enemies of הפועל תל אביב are enemies of the club as an idea — and rule 14 is held by the `sport` field on every row rather than by leaving anyone out. `chargeHe` is the terrace's charge in the terrace's voice: it is opinion, and it is his. `detailHe` is what a source actually states, with the source on the row; where a dedicated research pass on 1.9.2026 could not source a claim, `detailHe` is empty and the plate prints the charge alone rather than inventing a record. Nothing here reaches a football question — the hate game reads this file and only this file.",
   "confidence": 3,
   "source": {
     "kind": "interview",
-    "title": "מאור הראל — דירוג היציע, 1.9.2026",
+    "title": "ידע אישי — צוות The Worker, דירוג היציע, 1.9.2026",
     "url": null
   },
   "records": [
@@ -895,13 +895,13 @@
       "sport": "football",
       "eraHe": "—",
       "terraceRank": 56,
-      "chargeHe": "פצע את שלום תקווה. יש דברים שלא נרשמים בשום עיתון אבל היציע זוכר.",
+      "chargeHe": "פצע את שלום תקוה. יש דברים שלא נרשמים בשום עיתון אבל היציע זוכר.",
       "detailHe": "",
-      "keyFactHe": "פציעת שלום תקווה",
+      "keyFactHe": "פציעת שלום תקוה",
       "happenedOn": null,
       "confidence": 2,
       "sourceUrl": null,
-      "sourceTitle": "מאור הראל — ידע אישי, 1.9.2026"
+      "sourceTitle": "ידע אישי — צוות The Worker, 1.9.2026"
     }
   ]
 }

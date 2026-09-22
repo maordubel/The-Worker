@@ -25,7 +25,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "גוף אדום, שרוולים לבנים, צווארון עגול לבן. הספונסר בלבן על החזה.",
     "sponsorHe": "אתא",
-    "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "1978/79",
       "variant": "home",
@@ -51,7 +51,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "אלכסונים דקים לבנים וכחולים על אדום, צווארון וי לבן.",
     "sponsorHe": "גלאב הוטל טבריה",
-    "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "1984/85",
       "variant": "home",
@@ -77,7 +77,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "פסי שיער לבנים על אדום. בלוק הספונסר המקורי כלל צבע אסור במערכת, ולכן הספונסר נכתב כאן כטקסט בלבד.",
     "sponsorHe": "VISA",
-    "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "1988/89",
       "variant": "home",
@@ -129,7 +129,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "רבעים אדומים על לבן, צווארון פולו לבן, כיתוב הספונסר בשחור.",
     "sponsorHe": "מ.שקוביץ",
-    "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "1993/94",
       "variant": "home",
@@ -155,7 +155,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "פסים אנכיים אדום־שחור עם מרקם ריסוס לבן, צווארון פולו אדום.",
     "sponsorHe": "KING",
-    "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "1997/98",
       "variant": "home",
@@ -181,7 +181,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "שני פסים שחורים לאורך החזית, חפתים בשחור־לבן. עונת אליפות.",
     "sponsorHe": "CAL",
-    "sourceTitle": "צילומי חולצות מקוריות שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "צילומי חולצות מקוריות שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "1999/00",
       "variant": "home",
@@ -207,7 +207,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "פס לבן רחב על החזה עם הספונסר בתוכו.",
     "sponsorHe": "KETER",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2002/03",
       "variant": "home",
@@ -233,7 +233,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "לבן עם כתפיים אדומות ופס הספונסר.",
     "sponsorHe": "KETER",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2002/03",
       "variant": "away",
@@ -259,7 +259,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "אדום חלק, סימני קאפה על השרוולים.",
     "sponsorHe": "SUBARU",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2005/06",
       "variant": "home",
@@ -285,7 +285,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "כתפיים לבנות וחפתים לבנים.",
     "sponsorHe": "SUBARU",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2006/07",
       "variant": "home",
@@ -311,7 +311,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "לבן עם הבזקים אדומים בכתפיים.",
     "sponsorHe": "SUBARU",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2006/07",
       "variant": "away",
@@ -337,7 +337,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "אדום חלק עם יהלום אמברו על החזה.",
     "sponsorHe": "UMBRO",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2008/09",
       "variant": "home",
@@ -363,7 +363,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "לבן עם יהלום אמברו שחור.",
     "sponsorHe": "UMBRO",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2008/09",
       "variant": "away",
@@ -389,7 +389,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "כתפיים ושרוולים לבנים.",
     "sponsorHe": "במחיר",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2011/12",
       "variant": "home",
@@ -415,7 +415,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "לבן עם עיטורים אדומים.",
     "sponsorHe": "במחיר",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2011/12",
       "variant": "away",
@@ -441,7 +441,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "חישוקים לבנים על אדום, מכנס וגרב לבנים.",
     "sponsorHe": null,
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2012/13",
       "variant": "home",
@@ -467,7 +467,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "לבן כמעט נקי, עם סימני קאפה טונליים בכתפיים ובמכנס.",
     "sponsorHe": null,
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2012/13",
       "variant": "away",
@@ -493,7 +493,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "סאש לבן אלכסוני על אדום.",
     "sponsorHe": "FUJICOM",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2014/15",
       "variant": "home",
@@ -519,7 +519,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "שחור מלא, שרוולים שחורים וצווארון עגול לבן.",
     "sponsorHe": "FUJICOM",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2014/15",
       "variant": "away",
@@ -545,7 +545,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "גוף אדום ושרוולים לבנים, מכנס לבן.",
     "sponsorHe": "FUJITSU",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2015/16",
       "variant": "home",
@@ -571,7 +571,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "אדום חלק, מכנס לבן.",
     "sponsorHe": "FUJICOM",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2016/17",
       "variant": "home",
@@ -597,7 +597,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "שלישית",
     "noteHe": "פסים אנכיים אדום־לבן.",
     "sponsorHe": "FUJICOM",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2016/17",
       "variant": "away",
@@ -623,7 +623,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "חישוקים טונליים באדום כהה.",
     "sponsorHe": "ARKIA",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2018/19",
       "variant": "home",
@@ -649,7 +649,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "שחור עם חישוקים אפורים כהים, מכנס וגרב שחורים.",
     "sponsorHe": "ARKIA",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2018/19",
       "variant": "away",
@@ -675,7 +675,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "שלישית",
     "noteHe": "פסים אדום־לבן עם פאנל חזה לבן.",
     "sponsorHe": "ARKIA",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2018/19",
       "variant": "away",
@@ -701,7 +701,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "אדום חלק לאורך כל המדים, ללא גזרה נוספת.",
     "sponsorHe": "ARKIA",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2019/20",
       "variant": "home",
@@ -727,7 +727,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "כתפיים מודפסות בהיר על אדום.",
     "sponsorHe": "הכשרה",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2020/21",
       "variant": "home",
@@ -753,7 +753,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "לבן עם כתפיים מודפסות.",
     "sponsorHe": "הכשרה",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2020/21",
       "variant": "away",
@@ -779,7 +779,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "אדום חלק עם שלושת הפסים בשרוולים.",
     "sponsorHe": "הכשרה",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2022/23",
       "variant": "home",
@@ -805,7 +805,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "שחור מלא עם שלושת הפסים בשרוולים.",
     "sponsorHe": "הכשרה",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2022/23",
       "variant": "away",
@@ -831,7 +831,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "בית",
     "noteHe": "אדום עם מכנס לבן וגרב אדום.",
     "sponsorHe": "IBI",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2025/26",
       "variant": "home",
@@ -857,7 +857,7 @@ export const ARCHIVE_SHIRTS: readonly ArchiveShirt[] = [
     "variantHe": "חוץ",
     "noteHe": "לבן עם עיטורים אדומים בשרוול ובצווארון.",
     "sponsorHe": "IBI",
-    "sourceTitle": "colours-of-football — צילומי מסך שסיפק מאור הראל, 1.9.2026",
+    "sourceTitle": "colours-of-football — צילומי מסך שסיפק צוות The Worker, 1.9.2026",
     "spec": {
       "seasonLabel": "2025/26",
       "variant": "away",

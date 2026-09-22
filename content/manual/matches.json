@@ -1,5 +1,5 @@
 {
- "note": "Every match here was verified against a named source this session. The 2001/02 UEFA Cup run is complete from the second round onwards; the first-round opponent could not be resolved and is therefore absent rather than guessed. Kickoff times are never asserted — only dates. Attendance and travelling-supporter counts come from the Vikipoel match pages via Maor's research master. Where the source disagrees with itself the value is flagged, not chosen. משחק האליפות של 24.5.1986 נוסף ב-3.9.2026 עם כרטיס מקורי וסריקות מעריב ספורט מלפני המשחק ואחריו. גמר גביע המדינה של 1.6.1983 נוסף ב-3.9.2026 ממסמך החזון של מאור הראל, עם ynet וויקיפועל כמקורות.",
+ "note": "Every match here was verified against a named source this session. The 2001/02 UEFA Cup run is complete from the second round onwards; the first-round opponent could not be resolved and is therefore absent rather than guessed. Kickoff times are never asserted — only dates. Attendance and travelling-supporter counts come from the Vikipoel match pages via the team's research master. Where the source disagrees with itself the value is flagged, not chosen. משחק האליפות של 24.5.1986 נוסף ב-3.9.2026 עם כרטיס מקורי וסריקות מעריב ספורט מלפני המשחק ואחריו. גמר גביע המדינה של 1.6.1983 נוסף ב-3.9.2026 ממסמך החזון של צוות The Worker, עם ynet וויקיפועל כמקורות.",
  "confidence": 2,
  "source": {
   "kind": "other",
@@ -210,7 +210,7 @@
    "confidence": 2,
    "attendance": 8000,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "2002/03",
@@ -225,7 +225,7 @@
    "status": "played",
    "confidence": 2,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "2002/03",
@@ -240,7 +240,7 @@
    "status": "played",
    "confidence": 2,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "2002/03",
@@ -255,7 +255,7 @@
    "status": "played",
    "confidence": 2,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "2002/03",
@@ -270,7 +270,7 @@
    "status": "played",
    "confidence": 2,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "2002/03",
@@ -285,7 +285,7 @@
    "status": "played",
    "confidence": 2,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "2002/03",
@@ -300,7 +300,7 @@
    "status": "played",
    "confidence": 2,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "2010/11",
@@ -316,7 +316,7 @@
    "confidence": 2,
    "noteHe": "המקור אינו נוקב באצטדיון של משחק ההלוך.",
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "2010/11",
@@ -332,7 +332,7 @@
    "confidence": 2,
    "noteHe": "זלצבורג הובילה בשער בדקה 42; ערן זהבי השווה בדקה 92 והעלייה לשלב הבתים נחתמה בדקה 94. הפעם הראשונה של הפועל בשלב הבתים של ליגת האלופות.",
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026"
   },
   {
    "seasonLabel": "1985/86",
@@ -348,7 +348,7 @@
    "confidence": 2,
    "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html",
    "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86",
-   "noteHe": "משחק ההכרעה על אליפות 1985/86 — האליפות העשירית של הפועל תל אביב. כרטיס משחק 15 של העונה מארכיון מאור דובל נושא את שמות שתי הקבוצות ואת אצטדיון בלומפילד. משחק הליגה הישראלי הראשון ששודר בשידור חי בטלוויזיה."
+   "noteHe": "משחק ההכרעה על אליפות 1985/86 — האליפות העשירית של הפועל תל אביב. כרטיס משחק 15 של העונה מארכיון צוות The Worker נושא את שמות שתי הקבוצות ואת אצטדיון בלומפילד. משחק הליגה הישראלי הראשון ששודר בשידור חי בטלוויזיה."
   },
   {
    "seasonLabel": "1982/83",
@@ -490,7 +490,7 @@
    "status": "played",
    "confidence": 2,
    "sourceUrl": "https://wiki.red-fans.com/index.php/%D7%A2%D7%95%D7%A0%D7%AA_1998/99_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)_%D7%92%D7%91%D7%99%D7%A2_%D7%94%D7%9E%D7%93%D7%99%D7%A0%D7%94_%D7%92%D7%9E%D7%A8",
-   "sourceTitle": "ויקיפועל — עונת 1998/99 (כדורגל) גביע המדינה גמר (19.5.1999; סביליה 6׳, תקווה 13׳; 40,000)",
+   "sourceTitle": "ויקיפועל — עונת 1998/99 (כדורגל) גביע המדינה גמר (19.5.1999; סביליה 6׳, תקוה 13׳; 40,000)",
    "noteHe": "1:1 אחרי הארכה; הפועל תל אביב זכתה 3:1 בפנדלים. סדר הקבוצות ניטרלי (גמר במגרש ניטרלי). התאריך תוקן מ-26.5.1999 ל-19.5.1999 ב-16.9.2026: ויקיפדיה האנגלית, שצוטטה כאן, אינה נוקבת בתאריך הגמר כלל, וויקיפועל נוקבת בו בשני דפים בלתי־תלויים. מספר הצופים נחלק — 33,000 בוויקיפדיה, 40,000 בוויקיפועל."
   },
   {

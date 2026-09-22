@@ -32,7 +32,7 @@ export const BOOKS: Record<string, BookDef> = {
   '8081': {
     id: '8081',
     titleHe: 'אליפות הפועל תל אביב 1980/81',
-    sourceHe: 'חוברת האליפות של הפועל תל אביב, עונת 1980/81 — הסריקה של מאור הראל מהעותק של אביו.',
+    sourceHe: 'חוברת האליפות של הפועל תל אביב, עונת 1980/81 — סריקה מעותק פרטי, צוות The Worker.',
     pages: 24,
     root: '/life/docs',
     file: (page: number) => `book8081-${String(page + 1).padStart(2, '0')}.jpg`,

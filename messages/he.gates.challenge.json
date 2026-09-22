@@ -174,7 +174,6 @@
   "hate.wall.replaced": "הקודם נקרע. נגיעה — הבא",
   "hate.wall.log": "יומן הקיר",
   "hate.wall.logLine": "{stay} נשאר · {out} נקרע",
-  "hate.wall.credit": "כתבי האישום: {credit}",
   "hate.wall.rosterNote": "{count} שמות בתיק, עשרה על כל קיר.",
   "hate.wall.friend": "הקיר הזה הגיע מאתגר של אוהד אחר — אותם שמות, באותו סדר.",
   "hate.wall.cta": "את מי אתה לא מצליח להעיף?",
@@ -203,7 +202,5 @@
   "hate.code.explain": "החצי הראשון הוא הקיר — כל אחד יכול לשחק אותו. החצי השני הוא הבחירות שלך.",
   "hate.code.label": "יש לך קוד של קיר? הקלד אותו",
   "hate.code.go": "לקיר הזה",
-  "hate.code.bad": "זה לא קוד של קיר. הוא נראה ככה: WALL-ABC12-XY9Z0",
-  "hate.record.source": "מקור: {source}",
-  "hate.record.maor": "{source} — הידע של מאור, רשום כשלו"
+  "hate.code.bad": "זה לא קוד של קיר. הוא נראה ככה: WALL-ABC12-XY9Z0"
 }

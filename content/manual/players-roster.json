@@ -1,9 +1,9 @@
 {
- "note": "The all-time Hapoel Tel Aviv football roster as the Red Fans wiki category lists it, supplied by Maor Harel. Names only — no season, position, shirt number or appearance count, because the list carries none and inventing them would be a claim no source makes. These records exist so that every player question draws its distractors from people who actually wore the shirt. A bracketed qualifier (חלוץ / קשר / כדורגלן) is disambiguation between two people of the same name and is kept out of the display alias. Where two players reduce to the same bare name, neither record claims the bare name as an alias — an ambiguous alias is refused by the importer rather than assigned by guesswork. 16 שמות נוספו ב-16.9.2026 מקטגוריית \"כדורגלני הפועל תל אביב\" בוויקיפדיה העברית — ערכים עם מקור שלא היו ברשימת ויקיפועל. הם נוספו בשמם כפי שהערך כותב אותו, בלי לשנות שם קיים.",
+ "note": "The all-time Hapoel Tel Aviv football roster as the Red Fans wiki category lists it, supplied by The Worker team. Names only — no season, position, shirt number or appearance count, because the list carries none and inventing them would be a claim no source makes. These records exist so that every player question draws its distractors from people who actually wore the shirt. A bracketed qualifier (חלוץ / קשר / כדורגלן) is disambiguation between two people of the same name and is kept out of the display alias. Where two players reduce to the same bare name, neither record claims the bare name as an alias — an ambiguous alias is refused by the importer rather than assigned by guesswork. 16 שמות נוספו ב-16.9.2026 מקטגוריית \"כדורגלני הפועל תל אביב\" בוויקיפדיה העברית — ערכים עם מקור שלא היו ברשימת ויקיפועל. הם נוספו בשמם כפי שהערך כותב אותו, בלי לשנות שם קיים.",
  "confidence": 2,
  "source": {
   "kind": "wiki",
-  "title": "ויקיפועל — קטגוריה: שחקני הפועל תל אביב (כדורגל), נמסר ע\"י מאור הראל",
+  "title": "ויקיפועל — קטגוריה: שחקני הפועל תל אביב (כדורגל), נמסר ע\"י צוות The Worker",
   "url": "https://wiki.red-fans.com/index.php?title=%D7%A7%D7%98%D7%92%D7%95%D7%A8%D7%99%D7%94:%D7%94%D7%A4%D7%95%D7%A2%D7%9C_%D7%AA%D7%9C_%D7%90%D7%91%D7%99%D7%91_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)"
  },
  "records": [
@@ -2568,8 +2568,8 @@
    "fullNameHe": "שלום אביטן"
   },
   {
-   "slug": "שלום-תקווה",
-   "fullNameHe": "שלום תקווה"
+   "slug": "שלום-תקוה",
+   "fullNameHe": "שלום תקוה"
   },
   {
    "slug": "שלומי-אזולאי-חלוץ",

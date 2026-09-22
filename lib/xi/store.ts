@@ -28,6 +28,7 @@
  * migrated, because an absent field already means the only thing it could mean.
  */
 
+import { ownerSpelling } from '@/lib/canon/spelling'
 import type { Formation } from '@/lib/game/lineup'
 import { isChallenge, type ChallengeId } from './challenge'
 
@@ -232,6 +233,9 @@ export type RefResolver = (ref: string) => string | null
  * One resolver for everything a sheet has ever stored: an id (kept), a current roster
  * slug, or a slug a reviewed merge retired (`pickerRoster().slugAliases`). Nothing is
  * matched fuzzily (rule 7) — a string that is none of the three resolves to nobody.
+ * The one exception is explicit: a slug saved before the owner's spelling ruling
+ * (spec §0.1, 22.9.2026 — שלום תקוה, one vav) is read in his spelling
+ * (`lib/canon/spelling.ts`), so the retired spelling never has to be stored as an alias.
  */
 export function refResolver(input: {
   roster: ReadonlyArray<{ id?: string; slug: string }>
@@ -246,7 +250,7 @@ export function refResolver(input: {
   }
   return (ref) => {
     if (ids.has(ref)) return ref
-    return bySlug.get(ref) ?? input.slugAliases[ref] ?? null
+    return bySlug.get(ref) ?? input.slugAliases[ref] ?? bySlug.get(ownerSpelling(ref)) ?? null
   }
 }
 

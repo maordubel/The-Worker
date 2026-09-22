@@ -1,6 +1,6 @@
 {
  "schemaVersion": 2,
- "inputsSha": "24bf1f77a2c747744a9346c6c4d02f50a32e5b10c18e581d25c2e4231162a1e2",
+ "inputsSha": "184c999d42e2d8512ab1de4be806c1081eb6bc9ba3522a9354a4a881e8e69459",
  "inputs": [
   "content/manual/player-ids.json",
   "content/manual/player-aliases.json",
@@ -1550,7 +1550,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -2976,7 +2976,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -2997,7 +2997,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -4432,7 +4432,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -4486,7 +4486,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -5870,7 +5870,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -5903,7 +5903,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -7151,7 +7151,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -7635,7 +7635,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -8034,7 +8034,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -9228,7 +9228,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -9563,7 +9563,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -9800,7 +9800,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -10724,7 +10724,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -10734,7 +10734,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -10767,7 +10767,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -11369,7 +11369,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -11379,7 +11379,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -11412,7 +11412,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -12635,7 +12635,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -13174,7 +13174,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -13184,7 +13184,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -13217,7 +13217,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -14289,7 +14289,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -14310,7 +14310,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -15416,7 +15416,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -15516,7 +15516,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -15549,7 +15549,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -16159,7 +16159,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -16169,7 +16169,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -16202,7 +16202,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -16382,7 +16382,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -17901,7 +17901,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -17911,7 +17911,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -17921,7 +17921,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -17955,7 +17955,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -18478,7 +18478,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -18817,7 +18817,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -18827,7 +18827,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -18837,7 +18837,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -18870,7 +18870,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -20717,7 +20717,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -20989,7 +20989,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -21113,7 +21113,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -21144,7 +21144,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -21534,7 +21534,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -21994,7 +21994,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -22214,7 +22214,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -22248,7 +22248,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -22550,7 +22550,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -22916,7 +22916,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -23717,7 +23717,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -25372,7 +25372,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -25405,7 +25405,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -25703,7 +25703,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -25825,7 +25825,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -25835,7 +25835,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -25845,7 +25845,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -25855,7 +25855,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -25888,7 +25888,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -26345,7 +26345,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -26381,7 +26381,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -27729,7 +27729,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -27739,7 +27739,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -27749,7 +27749,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -27759,7 +27759,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -27793,7 +27793,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -27813,7 +27813,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -28601,7 +28601,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -29262,7 +29262,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -29415,7 +29415,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -29425,7 +29425,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -29461,7 +29461,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -29478,7 +29478,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -30586,7 +30586,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -30620,7 +30620,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -32664,7 +32664,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -32698,7 +32698,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -33328,7 +33328,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -33883,7 +33883,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -34827,7 +34827,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -35252,7 +35252,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -35306,7 +35306,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -35326,7 +35326,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -35666,7 +35666,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -36104,7 +36104,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -36952,7 +36952,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -37595,7 +37595,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -39205,7 +39205,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -39240,7 +39240,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -42381,7 +42381,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -42414,7 +42414,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -44437,7 +44437,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -44902,7 +44902,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -44923,7 +44923,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -45556,7 +45556,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -45661,7 +45661,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -45694,7 +45694,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -48426,7 +48426,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -50340,7 +50340,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -50405,7 +50405,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -51958,7 +51958,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -51992,7 +51992,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -52730,7 +52730,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -52963,7 +52963,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -52984,7 +52984,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -53213,7 +53213,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -53349,7 +53349,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -53359,7 +53359,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -53416,7 +53416,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -55460,7 +55460,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -55713,7 +55713,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -58360,7 +58360,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -58370,7 +58370,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -58391,7 +58391,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -58890,7 +58890,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -58911,7 +58911,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -59102,7 +59102,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -59691,7 +59691,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -59724,7 +59724,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -60332,7 +60332,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -60684,7 +60684,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -60694,7 +60694,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -60728,7 +60728,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -61103,7 +61103,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -61136,7 +61136,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -62458,7 +62458,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -62491,7 +62491,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -62800,7 +62800,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -62833,7 +62833,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -63447,7 +63447,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -63457,7 +63457,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -63490,7 +63490,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -64569,7 +64569,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -65121,7 +65121,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -65155,7 +65155,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -66185,7 +66185,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -66220,7 +66220,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -67705,7 +67705,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -67715,7 +67715,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -67752,7 +67752,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -68504,7 +68504,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -68537,7 +68537,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -68666,7 +68666,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -68699,7 +68699,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -69179,7 +69179,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -69618,7 +69618,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69628,7 +69628,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69638,7 +69638,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69648,7 +69648,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69658,7 +69658,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69668,7 +69668,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69678,7 +69678,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69688,7 +69688,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69698,7 +69698,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69708,7 +69708,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69718,7 +69718,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -69728,7 +69728,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -69756,7 +69756,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון מאור דובל)",
+     "sourceTitle": "ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86 · מעריב ספורט, 23.5.1986 ו-25.5.1986 (סריקות מארכיון צוות The Worker)",
      "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-3717109,00.html"
     },
     {
@@ -69776,7 +69776,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -70189,7 +70189,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -70222,7 +70222,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -71551,7 +71551,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+     "sourceTitle": "ויקיפועל — מסמך המחקר של צוות The Worker, 1.9.2026",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -71820,7 +71820,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -71850,7 +71850,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -71860,7 +71860,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -71905,7 +71905,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -72284,9 +72284,9 @@
   },
   {
    "id": "p_b5d64bece3",
-   "slug": "שלום-תקווה",
+   "slug": "שלום-תקוה",
    "slugAliases": [],
-   "displayName": "שלום תקווה",
+   "displayName": "שלום תקוה",
    "aliases": {
     "he": [],
     "latin": [
@@ -72412,7 +72412,7 @@
     }
    ],
    "legacyIds": [
-    "player-4ec57a177fb5"
+    "player-fe7d09c0e840"
    ]
   },
   {
@@ -73784,7 +73784,7 @@
    "provenance": [
     {
      "file": "lineups.json",
-     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
+     "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י צוות The Worker)",
      "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99"
     },
     {
@@ -74352,7 +74352,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -74362,7 +74362,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     },
@@ -74372,7 +74372,7 @@
      "historical": true,
      "source": {
       "file": "shirt-numbers.json",
-      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+      "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
       "sourceUrl": "https://wiki.red-fans.com/"
      }
     }
@@ -74406,7 +74406,7 @@
     },
     {
      "file": "shirt-numbers.json",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {
@@ -75330,7 +75330,7 @@
     {
      "number": 12,
      "seasonLabel": "1991/92",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     }
    ]
@@ -75688,7 +75688,7 @@
     {
      "number": 9,
      "seasonLabel": "2025/26",
-     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל",
+     "sourceTitle": "ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker",
      "sourceUrl": "https://wiki.red-fans.com/"
     },
     {

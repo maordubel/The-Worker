@@ -63,7 +63,6 @@
   "kitgame.reveal.truthWas": "במקור: {truth}",
   "kitgame.reveal.collected": "החולצה נכנסה לאוסף שלך.",
   "kitgame.reveal.dna": "ה-DNA שלה נפתח בסטודיו.",
-  "kitgame.reveal.source": "מקור הנתונים: {title}",
   "kitgame.evidence.exact": "צילום מהארכיון",
   "kitgame.evidence.candidate": "צילום מהארכיון · {year} בערך",
   "kitgame.evidence.candidateNote": "הארכיון מתארך את הצילום בשנה בלבד — זו אולי החולצה, אולי העונה הסמוכה.",

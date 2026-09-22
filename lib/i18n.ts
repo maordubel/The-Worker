@@ -7,6 +7,10 @@ import heCore from '@/messages/he.gates.core.json'
 import heKits from '@/messages/he.gates.kits.json'
 import hePlayers from '@/messages/he.gates.players.json'
 import heReplay from '@/messages/he.gates.replay.json'
+import heCollector from '@/messages/he.collector.json'
+import heMarket from '@/messages/he.market.json'
+import heAuction from '@/messages/he.auction.json'
+import heCredits from '@/messages/he.credits.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -35,6 +39,12 @@ import heReplay from '@/messages/he.gates.replay.json'
  * שער שודרג נכתב בקובץ של האשכול שלו; מפתח ישן נשאר איפה שהוא (כלל 32 — לא מזיזים,
  * לא ממיינים). הכפילות עדיין שגיאת בנייה, בכל זוג קבצים.
  */
+/**
+ * **וארבעה קבצים של הארון והשוק (22.9.2026)** — אותה סיבה שוב: מפרט האספנות נבנה בכמה
+ * ידיים במקביל. `he.collector.json` הוא הארון ו"יש לי / מחפש", `he.market.json` הוא שוק
+ * האדומים והשיחות, `he.auction.json` הוא המכירה הפומבית והניהול, `he.credits.json` הוא
+ * עמוד המקורות והקרדיטים — המקום היחיד שבו מקורות מודפסים (מפרט §0.3).
+ */
 export const CATALOGUE_FILES = {
   he,
   heLife,
@@ -45,6 +55,10 @@ export const CATALOGUE_FILES = {
   heReplay,
   heArchive,
   heCard,
+  heCollector,
+  heMarket,
+  heAuction,
+  heCredits,
 } as const
 
 const catalogue = {
@@ -57,6 +71,10 @@ const catalogue = {
   ...heReplay,
   ...heArchive,
   ...heCard,
+  ...heCollector,
+  ...heMarket,
+  ...heAuction,
+  ...heCredits,
 }
 
 export type MessageKey = keyof typeof catalogue

@@ -50,6 +50,14 @@ export const CREST_MARKS: readonly CrestMark[] = [
     tellHe: 'כדור וגלים',
   },
   {
+    // 1997–2000, supplied 22.9.2026. The only crest file that carries yellow, and the owner's
+    // approval for it is in `lib/brand/yellowExemptions.ts` — as this exact path.
+    key: 'keter-color',
+    nameHe: 'עיצוב מחדש',
+    file: 'keter-color',
+    tellHe: 'כתר בצבעים',
+  },
+  {
     key: 'keter-ball',
     nameHe: 'תקופת כתר',
     file: 'keter-ball',

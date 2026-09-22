@@ -1,7 +1,7 @@
 {
   "note": "ספר המדידה של כל קובץ תחת public/kits שאינו תצלום ארכיון (kit-photos.json): תבניות הצילום של מנוע החולצות, הסימנים שמאור אישר לשערים 4–5 (21.9.2026), וחלקי ההרכבה של 20.9.2026. כל שורה נמדדה על הקובץ המפוענח (WebP) או על טבלת הצבעים שלו (SVG), והצהוב נספר בפס של lib/isYellow.ts. tests/kit-assets.test.ts דורש שורה לכל קובץ, ו-yellowPx 0 בכולן — התיקייה פטורה מכלל 8 רק לתצלומים (כלל 69), לא לשום דבר אחר בה.",
   "confidence": 2,
-  "source": "scripts/kits/build-photo-templates.py · brand/source/kits/ (מקורות מנוקים מחבילת V14 של מאור, 21.9.2026)",
+  "source": "scripts/kits/build-photo-templates.py · brand/source/kits/ (מקורות מנוקים מחבילת V14 של צוות The Worker, 21.9.2026)",
   "records": [
     {
       "file": "assembly/1985-86/home-master.svg",

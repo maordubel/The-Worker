@@ -181,12 +181,12 @@ const REGISTRY: CharacterDefinition[] = [
   /**
    * יוסף — the neighbour, and the reason he has a name at all.
    *
-   * He was written as "שלום", which collides head-on with שלום תקווה, a real Hapoel
+   * He was written as "שלום", which collides head-on with שלום תקוה, a real Hapoel
    * footballer who appears in the canonical archive and in the kit and squad data. One
    * of the two had to move, and it is never the historical person: a fictional character
    * borrowing a real player's name is exactly the class of confusion rule 11 exists to
    * prevent, and it would eventually put an invented sentence in a real man's mouth.
-   * Maor renamed the fiction on 2.9.2026. שלום תקווה stays שלום תקווה, in the archive,
+   * Maor renamed the fiction on 2.9.2026. שלום תקוה stays שלום תקוה, in the archive,
    * where he belongs.
    */
   {

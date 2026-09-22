@@ -81,7 +81,7 @@
     "ussMain.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מסירות הגרפיקה של מאור הראל, ספטמבר 2026 — scripts/life/ingest-2026-09.py · ingest-2026-09b.py · ingest-2026-09c.py · ingest-2026-09-05-art.py · ingest-allenby-2026-09-06.py · ingest-panoramas-2026-09-07.py · ingest-gate7-2026-09-05.py · מסירת ההגדלה של מאור הראל, 11.9.2026 — THE-WORKER-2D-BACKGROUNDS-PASS-01..08, image-to-image מהציור הקיים · scripts/life/finish-backdrops.py · מסירת 17.9.2026 — scripts/life/ingest-2026-09-17.py",
+   "sourceTitle": "מסירות הגרפיקה של צוות The Worker, ספטמבר 2026 — scripts/life/ingest-2026-09.py · ingest-2026-09b.py · ingest-2026-09c.py · ingest-2026-09-05-art.py · ingest-allenby-2026-09-06.py · ingest-panoramas-2026-09-07.py · ingest-gate7-2026-09-05.py · מסירת ההגדלה של צוות The Worker, 11.9.2026 — THE-WORKER-2D-BACKGROUNDS-PASS-01..08, image-to-image מהציור הקיים · scripts/life/finish-backdrops.py · מסירת 17.9.2026 — scripts/life/ingest-2026-09-17.py",
    "treatment": [
     "de-yellow",
     "quantise",
@@ -315,7 +315,7 @@
     "oldMan.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "לוחות הקונספט המקוריים של מאור הראל — scripts/life/build-art.py + scripts/life/art-manifest.json",
+   "sourceTitle": "לוחות הקונספט המקוריים של צוות The Worker — scripts/life/build-art.py + scripts/life/art-manifest.json",
    "treatment": [
     "cut-from-sheet",
     "upscale",
@@ -337,7 +337,7 @@
     "propRadio.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "לוחות הקונספט המקוריים של מאור הראל — scripts/life/build-art.py + scripts/life/art-manifest.json",
+   "sourceTitle": "לוחות הקונספט המקוריים של צוות The Worker — scripts/life/build-art.py + scripts/life/art-manifest.json",
    "treatment": [
     "cut-from-sheet",
     "upscale",
@@ -365,7 +365,7 @@
     "faceRachel.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "לוחות הקונספט המקוריים של מאור הראל — scripts/life/build-art.py + scripts/life/art-manifest.json",
+   "sourceTitle": "לוחות הקונספט המקוריים של צוות The Worker — scripts/life/build-art.py + scripts/life/art-manifest.json",
    "treatment": [
     "cut-from-sheet",
     "upscale",
@@ -826,7 +826,7 @@
     "youngB7.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "גיליונות הדמויות של מאור הראל — scripts/life/slice-sheets.py · scripts/life/ingest-2026-09.py · ingest-2026-09b.py · ingest-2026-09c.py · ingest-approved-2026-09-05.py · ingest-2026-09e.py",
+   "sourceTitle": "גיליונות הדמויות של צוות The Worker — scripts/life/slice-sheets.py · scripts/life/ingest-2026-09.py · ingest-2026-09b.py · ingest-2026-09c.py · ingest-approved-2026-09-05.py · ingest-2026-09e.py",
    "treatment": [
     "cut-from-sheet",
     "key-green",
@@ -911,7 +911,7 @@
     "faceTeacher.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "גיליונות הדמויות של מאור הראל — scripts/life/slice-sheets.py · scripts/life/ingest-2026-09.py · ingest-2026-09b.py · ingest-2026-09c.py",
+   "sourceTitle": "גיליונות הדמויות של צוות The Worker — scripts/life/slice-sheets.py · scripts/life/ingest-2026-09.py · ingest-2026-09b.py · ingest-2026-09c.py",
    "treatment": [
     "cut-from-sheet",
     "key-green",
@@ -1061,7 +1061,7 @@
     "propRedBox.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "גיליון החפצים daily של מאור הראל, 20.9.2026 — קופסת הפח האדומה עם הציר · brand/source/life-objects-2026-09-20/daily.png · scripts/life/ingest-objects-2026-09-21.py",
+   "sourceTitle": "גיליון החפצים daily של צוות The Worker, 20.9.2026 — קופסת הפח האדומה עם הציר · brand/source/life-objects-2026-09-20/daily.png · scripts/life/ingest-objects-2026-09-21.py",
    "treatment": [
     "key-flat",
     "cut-from-sheet",
@@ -1081,7 +1081,7 @@
     "hoop-*.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "גיליונות המשחקונים של מאור הראל, 6.9.2026",
+   "sourceTitle": "גיליונות המשחקונים של צוות The Worker, 6.9.2026",
    "treatment": [
     "cut-from-sheet",
     "key-green",
@@ -1109,7 +1109,7 @@
     "shirtVisa86.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "צילומי החולצות של מאור הראל, 5.9.2026 — scripts/life/cut-shirts-2026-09-05.py + fit-shirts-2026-09-06.py",
+   "sourceTitle": "צילומי החולצות של צוות The Worker, 5.9.2026 — scripts/life/cut-shirts-2026-09-05.py + fit-shirts-2026-09-06.py",
    "treatment": [
     "crop",
     "key-flat",
@@ -1268,7 +1268,7 @@
     "book8081-*.jpg"
    ],
    "sourceUrl": null,
-   "sourceTitle": "חוברת האליפות של הפועל תל אביב, עונת 1980/81 — הסריקה של מאור הראל מהעותק של אביו (lib/life/books.ts)",
+   "sourceTitle": "חוברת האליפות של הפועל תל אביב, עונת 1980/81 — סריקה מעותק פרטי, צוות The Worker (lib/life/books.ts)",
    "treatment": [
     "de-yellow"
    ],
@@ -1290,7 +1290,7 @@
     "sg978-*.jpg"
    ],
    "sourceUrl": null,
-   "sourceTitle": "חמישה גיליונות קלפי סופרגול מהחומרים של מאור הראל, 7.9.2026 — scripts/life/cut-cards.py",
+   "sourceTitle": "חמישה גיליונות קלפי סופרגול מהחומרים של צוות The Worker, 7.9.2026 — scripts/life/cut-cards.py",
    "treatment": [
     "crop",
     "de-yellow"
@@ -1309,7 +1309,7 @@
     "hand-*.jpg"
    ],
    "sourceUrl": null,
-   "sourceTitle": "קלפים בודדים מהחומרים של מאור הראל, 7.9.2026 — scripts/life/cut-cards.py",
+   "sourceTitle": "קלפים בודדים מהחומרים של צוות The Worker, 7.9.2026 — scripts/life/cut-cards.py",
    "treatment": [
     "crop",
     "de-yellow"
@@ -1331,7 +1331,7 @@
     "sg-tikva-96.jpg"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מדבקות סופרגול מהאלבום של מאור הראל — scripts/life/build-stickers.py",
+   "sourceTitle": "מדבקות סופרגול מהאלבום של צוות The Worker — scripts/life/build-stickers.py",
    "treatment": [
     "crop",
     "de-yellow",
@@ -1350,7 +1350,7 @@
     "park-wave.*"
    ],
    "sourceUrl": null,
-   "sourceTitle": "ההקלטה של מאור הראל, 5.9.2026 — 144 שניות רחוב, נחתכו ב־scripts/life/ingest-audio-2026-09-05.py",
+   "sourceTitle": "ההקלטה של צוות The Worker, 5.9.2026 — 144 שניות רחוב, נחתכו ב־scripts/life/ingest-audio-2026-09-05.py",
    "treatment": [
     "cut",
     "loop-crossfade",
@@ -1376,7 +1376,7 @@
     "chant-derby.*"
    ],
    "sourceUrl": null,
-   "sourceTitle": "הקלטות המגרש של מאור הראל, 5.9 ו־6.9.2026 — ingest-audio-2026-09-05.py",
+   "sourceTitle": "הקלטות המגרש של צוות The Worker, 5.9 ו־6.9.2026 — ingest-audio-2026-09-05.py",
    "treatment": [
     "cut",
     "loop-crossfade",
@@ -1414,7 +1414,7 @@
     "radio-open.*"
    ],
    "sourceUrl": null,
-   "sourceTitle": "פתיח \"שירים ושערים\" — נשלח על ידי מאור הראל, 6.9.2026",
+   "sourceTitle": "פתיח \"שירים ושערים\" — נשלח על ידי צוות The Worker, 6.9.2026",
    "treatment": [
     "cut",
     "normalise",
@@ -1579,7 +1579,7 @@
     "street-cars-95.jpg"
    ],
    "sourceUrl": null,
-   "sourceTitle": "המקור כפי שהוא רשום ב־public/life/film/manifest.json: \"תל אביב, 5.4.1995 — וידאו ביתי\". הסרט הגיע ממאור הראל ב־7.9.2026",
+   "sourceTitle": "המקור כפי שהוא רשום ב־public/life/film/manifest.json: \"תל אביב, 5.4.1995 — וידאו ביתי\". הסרט נמסר לצוות The Worker ב־7.9.2026",
    "treatment": [
     "crop",
     "grade",
@@ -1616,7 +1616,7 @@
     "shoulders.png"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מסירת הפתיח של מאור הראל — scripts/life/ingest-opening.py",
+   "sourceTitle": "מסירת הפתיח של צוות The Worker — scripts/life/ingest-opening.py",
    "treatment": [
     "de-yellow",
     "quantise"
@@ -1635,7 +1635,7 @@
     "opening-film-poster.png"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מאור הראל — opening-2026-09-17.mov, מסירה ישירה",
+   "sourceTitle": "צוות The Worker — opening-2026-09-17.mov, מסירה ישירה",
    "treatment": [
     "encode-webm",
     "encode-mp4",
@@ -1657,7 +1657,7 @@
     "clip-memory-poster.png"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מסירת הפתיח של מאור הראל — scripts/life/ingest-opening.py",
+   "sourceTitle": "מסירת הפתיח של צוות The Worker — scripts/life/ingest-opening.py",
    "treatment": [
     "de-yellow",
     "encode-mp4"
@@ -1674,7 +1674,7 @@
    "kind": "backdrop",
    "origin": "maor-upload",
    "sourceUrl": null,
-   "sourceTitle": "מאור הראל — תבנית השיתוף, 7.9.2026, לפי docs/life/SHARE-TEMPLATES-BRIEF.md",
+   "sourceTitle": "צוות The Worker — תבנית השיתוף, 7.9.2026, לפי docs/life/SHARE-TEMPLATES-BRIEF.md",
    "treatment": [
     "de-yellow",
     "quantise"
@@ -1702,7 +1702,7 @@
     "pogi-3q-r.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מסירות הגרפיקה של מאור הראל, 8–9.9.2026 — THE-WORKER-BLOOMFIELD-PACK ושתי תמונות בארי עם המקלט · scripts/life/ingest-bloomfield-pack-2026-09-08.py",
+   "sourceTitle": "מסירות הגרפיקה של צוות The Worker, 8–9.9.2026 — THE-WORKER-BLOOMFIELD-PACK ושתי תמונות בארי עם המקלט · scripts/life/ingest-bloomfield-pack-2026-09-08.py",
    "treatment": [
     "de-yellow",
     "quantise",
@@ -1721,7 +1721,7 @@
     "bfSignGate.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מסירות הגרפיקה של מאור הראל, 8.9.2026 — THE-WORKER-BLOOMFIELD-PACK · scripts/life/ingest-bloomfield-pack-2026-09-08.py",
+   "sourceTitle": "מסירות הגרפיקה של צוות The Worker, 8.9.2026 — THE-WORKER-BLOOMFIELD-PACK · scripts/life/ingest-bloomfield-pack-2026-09-08.py",
    "treatment": [
     "de-yellow",
     "quantise",
@@ -1747,7 +1747,7 @@
     "docDouble2000.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "סריקות מהאוסף של מאור הראל, 16.9.2026 — גמרי הגביע של 1999 ו-2000 · scripts/life/ingest-docs-2026-09-16.py",
+   "sourceTitle": "סריקות מהאוסף של צוות The Worker, 16.9.2026 — גמרי הגביע של 1999 ו-2000 · scripts/life/ingest-docs-2026-09-16.py",
    "treatment": [
     "de-yellow"
    ],
@@ -1769,7 +1769,7 @@
     "cuUsherNight.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מסירת ארט של מאור הראל, 16.9.2026 — THE-WORKER-ART-2026-09-16.zip · scripts/life/ingest-art-2026-09-16.py",
+   "sourceTitle": "מסירת ארט של צוות The Worker, 16.9.2026 — THE-WORKER-ART-2026-09-16.zip · scripts/life/ingest-art-2026-09-16.py",
    "treatment": [
     "de-yellow"
    ],
@@ -1821,7 +1821,7 @@
     "doc*.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "הארכיון הפרטי של מאור הראל — סריקות שנמסרו ב-17.9.2026 · scripts/life/ingest-2026-09-17.py",
+   "sourceTitle": "הארכיון של צוות The Worker — סריקות שנמסרו ב-17.9.2026 · scripts/life/ingest-2026-09-17.py",
    "treatment": [
     "encode-webp"
    ],
@@ -1843,7 +1843,7 @@
     "assembly/2009-10/parts/*"
    ],
    "sourceUrl": null,
-   "sourceTitle": "מסירת חולצות מאור הראל, 20.9.2026 — 1985/86 ו-2009/10",
+   "sourceTitle": "מסירת חולצות צוות The Worker, 20.9.2026 — 1985/86 ו-2009/10",
    "treatment": [
     "crop",
     "trim-alpha"
@@ -1876,7 +1876,7 @@
     "bloomNewTerrace.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "THE-WORKER-BACKGROUNDS-2000-2026-17 — חבילת הרקעים של מאור הראל, 21.9.2026 · scripts/life/ingest-backgrounds-2026-09-21.py",
+   "sourceTitle": "THE-WORKER-BACKGROUNDS-2000-2026-17 — חבילת הרקעים של צוות The Worker, 21.9.2026 · scripts/life/ingest-backgrounds-2026-09-21.py",
    "treatment": [
     "quantise",
     "de-yellow",
@@ -1895,7 +1895,7 @@
     "em*.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "גיליונות הסמלים של מאור הראל — פעולות (20.9.2026) ומצבים (21.9.2026) · brand/source/life-icons-2026-09-20.png · brand/source/life-emblems-2026-09-21.png · scripts/life/ingest-icons-2026-09-20.py · scripts/life/ingest-emblems-2026-09-21.py",
+   "sourceTitle": "גיליונות הסמלים של צוות The Worker — פעולות (20.9.2026) ומצבים (21.9.2026) · brand/source/life-icons-2026-09-20.png · brand/source/life-emblems-2026-09-21.png · scripts/life/ingest-icons-2026-09-20.py · scripts/life/ingest-emblems-2026-09-21.py",
    "treatment": [
     "key-flat",
     "cut-from-sheet",
@@ -1937,7 +1937,7 @@
     "propTicketsPair.webp"
    ],
    "sourceUrl": null,
-   "sourceTitle": "ארבעת גיליונות החפצים של מאור הראל, 20.9.2026 (keepsakes · daily · terrace · devices) · brand/source/life-objects-2026-09-20/ · scripts/life/ingest-objects-2026-09-21.py",
+   "sourceTitle": "ארבעת גיליונות החפצים של צוות The Worker, 20.9.2026 (keepsakes · daily · terrace · devices) · brand/source/life-objects-2026-09-20/ · scripts/life/ingest-objects-2026-09-21.py",
    "treatment": [
     "key-flat",
     "cut-from-sheet",
@@ -1977,7 +1977,7 @@
     "templates/2010s-fitted/*"
    ],
    "sourceUrl": null,
-   "sourceTitle": "חבילת שער 4 V14 של מאור הראל, 21.9.2026 → brand/source/kits/2010s-fitted → scripts/kits/build-photo-templates.py · content/manual/kit-templates.json",
+   "sourceTitle": "חבילת שער 4 V14 של צוות The Worker, 21.9.2026 → brand/source/kits/2010s-fitted → scripts/kits/build-photo-templates.py · content/manual/kit-templates.json",
    "treatment": [
     "shading-map",
     "lossy-webp-measured"
@@ -1994,7 +1994,7 @@
     "marks/*"
    ],
    "sourceUrl": null,
-   "sourceTitle": "חבילת שער 4 V14 של מאור הראל, 21.9.2026 — הלוגואים שאושרו לשערים 4–5 (CLAUDE.md, כלל 25) · scripts/kits/build-photo-templates.py",
+   "sourceTitle": "חבילת שער 4 V14 של צוות The Worker, 21.9.2026 — הלוגואים שאושרו לשערים 4–5 (CLAUDE.md, כלל 25) · scripts/kits/build-photo-templates.py",
    "treatment": [
     "cut-from-sheet",
     "trim-alpha",

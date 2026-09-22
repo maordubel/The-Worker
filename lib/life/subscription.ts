@@ -112,8 +112,8 @@ export type Season = {
  * and they carry HIS name as the source rather than a photograph's (rule 18: he is a
  * source, cited as one, not dressed up as something else).
  */
-const CARD_HE = 'מנוי עונה מהארכיון הפרטי של מאור הראל — צילום הכרטיס, 16.9.2026'
-const TOLD_HE = 'מאור הראל — הכרטיס שברשותו, נמסר ב-16.9.2026'
+const CARD_HE = 'מנוי עונה מהארכיון של צוות The Worker — צילום הכרטיס, 16.9.2026'
+const TOLD_HE = 'ידע אישי — צוות The Worker, הכרטיס נמסר ב-16.9.2026'
 
 export const SEASONS: readonly Season[] = [
   {

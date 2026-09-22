@@ -70,7 +70,7 @@ const WIKI_98: HistorySource = {
 const AUDIT: HistorySource = {
   id: 'maor-audit-2026-09-07',
   shortHe: 'מסמך ביקורת פנימי, 7.9.2026',
-  titleHe: 'מאור הראל — מסמך ביקורת פנימי, 7.9.2026 (טענה פנימית, לא מקור היסטורי)',
+  titleHe: 'צוות The Worker — מסמך ביקורת פנימי, 7.9.2026 (טענה פנימית, לא מקור היסטורי)',
   url: null,
   kind: 'brief',
 }
@@ -91,7 +91,7 @@ const BALLERZ: HistorySource = {
 const MISSION01: HistorySource = {
   id: 'maor-brief-mission01',
   shortHe: 'תסריט משימה 01 (מסמך פנימי)',
-  titleHe: 'מאור הראל — תסריט משימה 01, רשת הטרנזיסטורים',
+  titleHe: 'צוות The Worker — תסריט משימה 01, רשת הטרנזיסטורים',
   url: null,
   kind: 'brief',
 }
@@ -571,7 +571,7 @@ export const conflictsOf = (day: HistoryDay) =>
  *
  * ואותו מקור סוגר את השתיקה שהקובץ הזה הצהיר עליה. מי כבש, מתי ובאיזה סדר היה "טענה של
  * הפרק ולא של מקור" ולכן `disputed` ולכן אילם. עכשיו: ניר סביליה לבית"ר בדקה 6 אחרי
- * ריבאונד מבעיטה של עופר שטרית, ושלום תקווה לשוויון בדקה 13 — פס מדויק מחוץ לרחבה אחרי
+ * ריבאונד מבעיטה של עופר שטרית, ושלום תקוה לשוויון בדקה 13 — פס מדויק מחוץ לרחבה אחרי
  * שקורנפיין יצא. שניהם `verified`, שניהם `speakable`, ושניהם בדקה שמקור נוקב בה.
  *
  * הגמר הזה הוא הסיבה שהבמאי צריך שלב `extra` ושלב `penalties`: משחק גביע לא נגמר בתשעים,
@@ -597,7 +597,7 @@ const WIKI_99: HistorySource = {
 const VIKIPOEL_99: HistorySource = {
   id: 'vikipoel-cup-9899',
   shortHe: 'ויקיפועל — גמר גביע 1998/99',
-  titleHe: 'ויקיפועל — עונת 1998/99 (כדורגל) גביע המדינה גמר (19.5.1999; סביליה 6׳, תקווה 13׳; 40,000)',
+  titleHe: 'ויקיפועל — עונת 1998/99 (כדורגל) גביע המדינה גמר (19.5.1999; סביליה 6׳, תקוה 13׳; 40,000)',
   url: null,
   kind: 'archive',
 }
@@ -617,7 +617,7 @@ const VIKIPOEL_99: HistorySource = {
 const PAGE_99: HistorySource = {
   id: 'scan-page-1999',
   shortHe: 'עמוד ספורט מודפס, 1999 (סריקה)',
-  titleHe: 'עמוד ספורט מודפס, סריקה מהאוסף של מאור הראל (16.9.2026) — "שלום ובטחון": הרכבים, שופט, כרטיסים ודו־קרב הפנדלים. שם העיתון והתאריך נחתכו מהסריקה ואינם נקבעים כאן.',
+  titleHe: 'עמוד ספורט מודפס, סריקה מהאוסף של צוות The Worker (16.9.2026) — "שלום ובטחון": הרכבים, שופט, כרטיסים ודו־קרב הפנדלים. שם העיתון והתאריך נחתכו מהסריקה ואינם נקבעים כאן.',
   url: null,
   kind: 'archive',
 }
@@ -635,35 +635,35 @@ const PAGE_99: HistorySource = {
 const PHOTO_CUP99: HistorySource = {
   id: 'scan-cup-1999',
   shortHe: 'תצלום הגביע עם הלוחית (סריקה)',
-  titleHe: 'תצלום הגביע, סריקה מהאוסף של מאור הראל (16.9.2026) — הלוחית מודפסת על הכן.',
+  titleHe: 'תצלום הגביע, סריקה מהאוסף של צוות The Worker (16.9.2026) — הלוחית מודפסת על הכן.',
   url: null,
   kind: 'archive',
 }
 const CLIP_TIKVA: HistorySource = {
   id: 'scan-clip-tikva',
   shortHe: 'גזיר עיתון עם כיתוב מודפס (סריקה)',
-  titleHe: 'גזיר עיתון עם כיתוב מודפס (צילום: יוסי רוט), סריקה מהאוסף של מאור הראל (16.9.2026). שם העיתון והתאריך אינם בסריקה.',
+  titleHe: 'גזיר עיתון עם כיתוב מודפס (צילום: יוסי רוט), סריקה מהאוסף של צוות The Worker (16.9.2026). שם העיתון והתאריך אינם בסריקה.',
   url: null,
   kind: 'archive',
 }
 const SEASON_TICKET_99: HistorySource = {
   id: 'scan-season-9899',
   shortHe: 'מנוי עונת 1998/99 (סריקה)',
-  titleHe: 'מנוי עונת 1998/99, סריקה מהאוסף של מאור הראל (16.9.2026).',
+  titleHe: 'מנוי עונת 1998/99, סריקה מהאוסף של צוות The Worker (16.9.2026).',
   url: null,
   kind: 'archive',
 }
 const SEASON_TICKET_00: HistorySource = {
   id: 'scan-season-9900',
   shortHe: 'מנוי עונת 99/00 (סריקה)',
-  titleHe: 'מנוי עונת 99/00, סריקה מהאוסף של מאור הראל (16.9.2026).',
+  titleHe: 'מנוי עונת 99/00, סריקה מהאוסף של צוות The Worker (16.9.2026).',
   url: null,
   kind: 'archive',
 }
 const TICKET_00: HistorySource = {
   id: 'scan-ticket-2000-05-17',
   shortHe: 'כרטיס הגמר, 17.5.2000 (סריקה)',
-  titleHe: 'כרטיס גמר גביע המדינה, 17.5.2000, אצטדיון רמת גן — סריקה מהאוסף של מאור הראל (16.9.2026).',
+  titleHe: 'כרטיס גמר גביע המדינה, 17.5.2000, אצטדיון רמת גן — סריקה מהאוסף של צוות The Worker (16.9.2026).',
   url: null,
   kind: 'archive',
 }
@@ -768,7 +768,7 @@ export const DAY_1999: HistoryDay = {
     },
   ],
   films: [
-    { id: 'film-99-goal', titleHe: 'השער של שלום תקווה', url: 'https://www.youtube.com/watch?v=HIycf4LjzKY', sourceIds: [VIKIPOEL_99.id] },
+    { id: 'film-99-goal', titleHe: 'השער של שלום תקוה', url: 'https://www.youtube.com/watch?v=HIycf4LjzKY', sourceIds: [VIKIPOEL_99.id] },
     { id: 'film-99-full', titleHe: 'התקציר המלא של הגמר', url: 'https://www.youtube.com/watch?v=0z6DE0LL-2g', sourceIds: [VIKIPOEL_99.id] },
   ],
   venues: [
@@ -822,7 +822,7 @@ export const DAY_1999: HistoryDay = {
           sequence: 2,
           type: 'goal',
           teamSlug: 'הפועל-תל-אביב',
-          personHe: 'שלום תקווה',
+          personHe: 'שלום תקוה',
           scoreAfter: '1–1',
           sourceIds: [VIKIPOEL_99.id, PAGE_99.id],
           confidence: 'verified',
@@ -1035,7 +1035,7 @@ const VIKIPOEL_00: HistorySource = {
 const YEDIOT_00: HistorySource = {
   id: 'scan-yediot-2000-05-18',
   shortHe: 'ידיעות אחרונות ספורט, 18.5.2000',
-  titleHe: 'ידיעות אחרונות ספורט, 18.5.2000 — "הכדור הוא אדום" (צילום: יוסי רוט). סריקה מהאוסף של מאור הראל.',
+  titleHe: 'ידיעות אחרונות ספורט, 18.5.2000 — "הכדור הוא אדום" (צילום: יוסי רוט). סריקה מהאוסף של צוות The Worker.',
   url: null,
   kind: 'archive',
 }
@@ -1043,7 +1043,7 @@ const YEDIOT_00: HistorySource = {
 const MAARIV_00: HistorySource = {
   id: 'scan-maariv-2000-05-18',
   shortHe: 'מעריב ספורט, 18.5.2000',
-  titleHe: 'מעריב ספורט, יום ה׳ י״ג באייר תש״ס, 18.5.2000 — "דאבל טיים" (צילומים: עדי אביש). סריקה מהאוסף של מאור הראל.',
+  titleHe: 'מעריב ספורט, יום ה׳ י״ג באייר תש״ס, 18.5.2000 — "דאבל טיים" (צילומים: עדי אביש). סריקה מהאוסף של צוות The Worker.',
   url: null,
   kind: 'archive',
 }
@@ -1051,7 +1051,7 @@ const MAARIV_00: HistorySource = {
 const PROGRAMME_00: HistorySource = {
   id: 'scan-programme-2000',
   shortHe: 'תוכניית הגמר, 17.5.2000 (סריקה)',
-  titleHe: 'תוכנייה למזכרת, ההתאחדות לכדורגל בישראל — גמר גביע המדינה, 17.5.2000, אצטדיון רמת-גן. סריקה מהאוסף של מאור הראל.',
+  titleHe: 'תוכנייה למזכרת, ההתאחדות לכדורגל בישראל — גמר גביע המדינה, 17.5.2000, אצטדיון רמת-גן. סריקה מהאוסף של צוות The Worker.',
   url: null,
   kind: 'archive',
 }
@@ -1099,7 +1099,7 @@ export const DAY_2000_DOUBLE: HistoryDay = {
     {
       id: '2000-lift',
       labelHe: 'מי הרים',
-      valueHe: 'שמעון גרשון הזמין את שלום תקווה להרים איתו',
+      valueHe: 'שמעון גרשון הזמין את שלום תקוה להרים איתו',
       sourceIds: [VIKIPOEL_00.id],
       confidence: 'verified',
     },
@@ -1226,13 +1226,13 @@ export const DAY_2000_DOUBLE: HistoryDay = {
           type: 'goal',
           teamSlug: 'הפועל-תל-אביב',
           personHe: 'סלים טועמה',
-          assistHe: 'שלום תקווה',
+          assistHe: 'שלום תקוה',
           scoreAfter: '1–2',
           sourceIds: [VIKIPOEL_00.id, YEDIOT_00.id],
           confidence: 'verified',
           speakable: true,
           pacingMinute: 115,
-          detailHe: 'כחילה החליק, תקווה שחרר את טועמה — המסירה האחרונה של תקווה לפני שפרש.',
+          detailHe: 'כחילה החליק, תקוה שחרר את טועמה — המסירה האחרונה של תקוה לפני שפרש.',
         }),
         ev({
           id: '2000-double-goal-4',

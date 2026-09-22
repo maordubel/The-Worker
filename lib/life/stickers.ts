@@ -171,7 +171,7 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     frame: '93',
     soldIn: '90s',
     posterArt: '/life/docs/sg-squad-93.jpg',
-    posterSourceHe: 'תצלום הסגל, עונת 1992/93 — מהחומרים של מאור הראל.',
+    posterSourceHe: 'תצלום הסגל, עונת 1992/93 — מהחומרים של צוות The Worker.',
   },
   sg90: {
     id: 'sg90',
@@ -243,14 +243,14 @@ export const SETS: Record<StickerSetId, StickerSet> = Object.fromEntries(
 ) as Record<StickerSetId, StickerSet>
 
 /** the line that goes under every scan on this page, and says only where it came from */
-const FROM_ALBUM = 'מדבקת סופרגול מהאלבום של מאור הראל.'
+const FROM_ALBUM = 'מדבקת סופרגול מהאלבום של צוות The Worker.'
 const FROM_YNET = 'ynet — הדרמה של 1986, גילי לנדאו בדקה ה-86.'
 /** the four printed sheets that arrived on 7.9.2026, each named by what it prints */
-const FROM_SHEET_A = 'גיליון קלפים — הסגל, שנות השמונים; מהחומרים של מאור הראל.'
-const FROM_SHEET_CUP = 'גיליון קלפים — "הגביע הוא שלנו"; מהחומרים של מאור הראל.'
-const FROM_SHEET_B = 'גיליון קלפים ממוספר, שנות השמונים; מהחומרים של מאור הראל.'
-const FROM_SHEET_98 = 'גיליון קלפים — 1997/8; מהחומרים של מאור הראל.'
-const FROM_SHEET_90 = 'גיליון קלפים, שנות התשעים; מהחומרים של מאור הראל.'
+const FROM_SHEET_A = 'גיליון קלפים — הסגל, שנות השמונים; מהחומרים של צוות The Worker.'
+const FROM_SHEET_CUP = 'גיליון קלפים — "הגביע הוא שלנו"; מהחומרים של צוות The Worker.'
+const FROM_SHEET_B = 'גיליון קלפים ממוספר, שנות השמונים; מהחומרים של צוות The Worker.'
+const FROM_SHEET_98 = 'גיליון קלפים — 1997/8; מהחומרים של צוות The Worker.'
+const FROM_SHEET_90 = 'גיליון קלפים, שנות התשעים; מהחומרים של צוות The Worker.'
 
 /**
  * הדף של אבא — one sticker, and the rest of the album gone.
@@ -491,7 +491,7 @@ const S9293: StickerDraft[] = [
     slot: 1,
     nameHe: 'פליקס חלפון',
     scan: '/life/docs/sg-halfon-93.jpg',
-    sourceHe: 'כרטיס סופרגול, עונת 1992/93 — מהחומרים של מאור הראל.',
+    sourceHe: 'כרטיס סופרגול, עונת 1992/93 — מהחומרים של צוות The Worker.',
     rarity: 'rare',
   },
   {
@@ -500,7 +500,7 @@ const S9293: StickerDraft[] = [
     slot: 2,
     nameHe: 'משה סיני',
     roleHe: 'מנהל',
-    sourceHe: 'תצלום הסגל, עונת 1992/93 — מהחומרים של מאור הראל.',
+    sourceHe: 'תצלום הסגל, עונת 1992/93 — מהחומרים של צוות The Worker.',
     rarity: 'uncommon',
   },
   {
@@ -508,7 +508,7 @@ const S9293: StickerDraft[] = [
     set: '9293',
     slot: 3,
     nameHe: 'יוסי אבוקסיס',
-    sourceHe: 'תצלום הסגל, עונת 1992/93 — מהחומרים של מאור הראל.',
+    sourceHe: 'תצלום הסגל, עונת 1992/93 — מהחומרים של צוות The Worker.',
     rarity: 'common',
     neverInPacket: true,
   },
@@ -555,7 +555,7 @@ const SBOX: StickerDef[] = BOX_ROWS.map(([file, nameHe, roleHe], index) => ({
   ...(roleHe ? { roleHe } : {}),
   scan: `/life/docs/${file.includes('.') ? file : `${file}.jpg`}`,
   sourceHe: file.startsWith('ace-')
-    ? 'קלף אס — מהחומרים של מאור הראל.'
+    ? 'קלף אס — מהחומרים של צוות The Worker.'
     : FROM_ALBUM,
   rarity: 'kept' as StickerRarity,
   neverInPacket: true,

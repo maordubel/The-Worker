@@ -532,7 +532,7 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'העיתון של אבא פתוח על השעוונית בדיוק באמצע. את העמוד הזה הוא קרא הבוקר שלוש פעמים.' },
         ],
         then: [
-          { e: 'doc', art: 'paperBefore', captionHe: 'מעריב ספורט, 23.5.1986 — מארכיון מאור דובל' },
+          { e: 'doc', art: 'paperBefore', captionHe: 'מעריב ספורט, 23.5.1986 — מארכיון צוות The Worker' },
           { e: 'flag', flag: 'knows:match' },
           { e: 'redheart', key: 'footballLove', delta: 4 },
           { e: 'toast', text: 'היום. בבלומפילד.', tone: 'red' },
@@ -540,7 +540,7 @@ const CONVERSATIONS: Conversation[] = [
       },
       {
         lines: [{ who: null, text: 'שעוונית פרחונית, פירורי לחם, סכין, והעיתון של אבא מקופל בצד.' }],
-        then: [{ e: 'doc', art: 'paperBefore', captionHe: 'מעריב ספורט, 23.5.1986 — מארכיון מאור דובל' }],
+        then: [{ e: 'doc', art: 'paperBefore', captionHe: 'מעריב ספורט, 23.5.1986 — מארכיון צוות The Worker' }],
       },
     ],
   },

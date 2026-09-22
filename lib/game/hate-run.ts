@@ -22,6 +22,8 @@
  * one line — "היציע היה משאיר: X" — the highest-ranked name the wall showed.
  */
 
+import { OWNER_KNOWLEDGE_LABEL } from '@/lib/credits/groups'
+
 export type Enemy = {
   slug: string
   nameHe: string
@@ -37,7 +39,7 @@ export type Enemy = {
   terraceRank: number
   /** the row's own source title, printed with its record */
   sourceTitle: string
-  /** 'cited' — a real source; 'maor' — Maor's own knowledge, labelled as his; 'none' */
+  /** 'cited' — a real source; 'maor' — the owner's own knowledge, under the neutral label; 'none' */
   record: 'cited' | 'maor' | 'none'
 }
 
@@ -235,13 +237,21 @@ export function judgeWall(enemies: readonly Enemy[], wall: Wall, seed: number, c
 const NO_CITATION = /לא אומת|לא נטען/
 
 /**
+ * The neutral label the owner's own knowledge is cited under (spec §0.2, 22.9.2026): it is
+ * a source, and it is labelled as one, but his name is not presented as an archive source.
+ * Defined once, beside the `/credits` groups that shelve it.
+ */
+export { OWNER_KNOWLEDGE_LABEL }
+
+/**
  * Where a row's record comes from. A row whose "source" says it could not be verified
  * (`williams`, `vujcic`) has NO citation, so it prints the charge and the era and
- * nothing that reads as a fact. Maor's own knowledge (`gola`) is a source — cited as
- * his, never dressed as a press line (rule 18).
+ * nothing that reads as a fact. The owner's own knowledge (`gola`) is a source — cited
+ * under `OWNER_KNOWLEDGE_LABEL`, never dressed as a press line (rule 18). The kind is
+ * still called `'maor'` in code, which is not a credit anybody reads.
  */
 export function recordKind(sourceTitle: string): Enemy['record'] {
-  if (sourceTitle.startsWith('מאור הראל')) return 'maor'
+  if (sourceTitle.startsWith(OWNER_KNOWLEDGE_LABEL)) return 'maor'
   if (sourceTitle.trim() === '' || NO_CITATION.test(sourceTitle)) return 'none'
   return 'cited'
 }
