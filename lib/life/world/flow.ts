@@ -7,23 +7,13 @@ import { unmet } from './why'
 /**
  * שהמשחק לא יחכה לשעון במקום השחקן — the flow layer.
  *
- * Maor, 7.9.2026: *"אפשר שפעם אחת תוודא שאין שום תקלה? שהמשחק פעיל זורם ועובד?"* The two
- * documents he sent name the same failure twice: a day where the player has done
- * everything reachable and the next thing is a clock, so the only move left is to walk in
- * circles until a number arrives. `lastResort.ts` already knows this shape — it refuses to
- * call it a stall, correctly, because the chapter is early rather than broken. What it did
- * not do is DO anything about it.
+ * The rule is deliberately player-facing rather than technical: if the next meaningful
+ * thing is waiting only for a clock, the player must be able to continue immediately
+ * instead of walking in circles. If the day still wants an action, the room nudges toward
+ * that action instead. `lastResort.ts` remains an invisible safety net, never the intended
+ * way a chapter advances.
  *
- * This file is the missing half. It answers one question with a number attached:
- *
- *   > Is the next thing this day wants blocked by nothing but the clock, and if so, when?
- *
- * The runtime uses that to offer the player a short contextual jump — sitting on a wall,
- * a bus going past — instead of eighty virtual minutes of pacing. The offer is never
- * forced: optional content stays reachable, and the card has a "stay" on it.
- *
- * It is a pure function of the state and the era, so `tests/life-flow.test.ts` can put
- * every chapter through it without a canvas.
+ * This file stays pure so every chapter can be probed without booting Phaser.
  */
 
 export type TimeGate = {
@@ -92,21 +82,23 @@ export type FlowInput = {
   reachable: number
 }
 
-/** game-minutes of nothing happening before the game offers to move the clock itself */
-export const QUIET_MINUTES = 25
+/**
+ * One game-minute is enough to establish that nothing new happened. At the base world
+ * clock this is roughly a second or two of real play, not the old 25-game-minute wait.
+ * The player still gets a choice to stay when optional content is around; this only makes
+ * the choice visible before waiting itself becomes gameplay.
+ */
+export const QUIET_MINUTES = 1
 
 /**
  * האם להציע לדלג — the whole rule, in one place.
  *
- * Four things have to be true at once, and each one is there to stop a different way of
- * being wrong:
- *
- *   - a time gate exists — otherwise there is nothing to skip TO, and a jump would be the
- *     game skipping its own content;
- *   - the room is quiet — a player mid-errand is not waiting, he is playing;
- *   - nothing is busy — a beat, a match or an open dialogue is the day happening;
- *   - the room still has doors — if it offers literally nothing at all the problem is not
- *     the clock, it is a dead end, and `lastResort` is the thing that answers that.
+ * Four things have to be true at once:
+ *   - a time gate exists, otherwise there is nothing honest to skip TO;
+ *   - the room has been still for one game-minute, enough to avoid flashing during entry;
+ *   - nothing is busy — dialogue, a match or a beat already IS the day happening;
+ *   - the room still has a way to act/leave. Literally nothing is a dead end and belongs
+ *     to `lastResort`, not to a time jump.
  */
 export function shouldOfferPass(input: FlowInput): TimeGate | null {
   const move = flowMove(input)
@@ -116,24 +108,14 @@ export function shouldOfferPass(input: FlowInput): TimeGate | null {
 export type FlowMove = { kind: 'pass'; gate: TimeGate } | { kind: 'nudge' }
 
 /**
- * מה לעשות עם מי שעומד — and the distinction the first version of this file was missing.
+ * מה לעשות עם מי שעומד.
  *
- * `scripts/life/flow-probe.ts`, 7.9.2026: of the nineteen chapters, exactly three have a
- * beat that is waiting for nothing but a clock. Everywhere else — a2-alley and a3-hall
- * included, which are the two the robot kept closing through the safety net — the next
- * thing the day wants is a REQUIREMENT: somebody to talk to, something to pick up. Time
- * gates are simply not what is blocking those rooms.
- *
- * That is why the pass card never fired there, and offering it would have been the wrong
- * help anyway: skipping the clock forward does not bring a conversation any closer, it
- * just takes the afternoon away. So a quiet room with no time gate gets a NUDGE instead —
- * the room's own composed hint, which is generated from who is standing in it and which
- * doors are open, and therefore cannot say anything untrue.
- *
- *   quiet + a clock to skip to  → offer the jump
+ *   quiet + a clock to skip to  → offer the jump now
  *   quiet + something to do     → say what is here
- *   busy, or nothing at all     → say nothing; a match, a beat and a dead end are all
- *                                 somebody else's job
+ *   busy, or nothing at all     → say nothing; another system owns that state
+ *
+ * Difficulty must come from choosing between meaningful things, never from discovering
+ * that the game secretly wanted the player to wait for a number.
  */
 export function flowMove(input: FlowInput): FlowMove | null {
   if (input.busy) return null
