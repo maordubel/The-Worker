@@ -612,9 +612,16 @@ comment on function public.worker_profile_ensure() is
 -- =====================================================================
 -- 10. בדיקה — התוצאה הנכונה: worker_tables 7 · worker_functions 15 · auth_triggers 0
 -- =====================================================================
+-- נספר לפי שם, כדי שהשורה תישאר נכונה גם אחרי שקובץ הארון (20260922120000) רץ לצידו.
 select
-  (select count(*) from pg_tables where schemaname = 'public' and tablename like 'worker\_%') as worker_tables,
+  (select count(*) from pg_tables where schemaname = 'public'
+     and tablename in ('worker_profile', 'worker_gate_run', 'worker_poll_vote', 'worker_profile_item',
+                       'worker_question_mark', 'worker_rr_room', 'worker_rr_entry')) as worker_tables,
   (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-     where n.nspname = 'public' and p.proname like 'worker\_%') as worker_functions,
+     where n.nspname = 'public'
+       and p.proname in ('worker_profile_keep_identity', 'worker_profile_keep_newest_card', 'worker_profile_ensure',
+                         'worker_touch_profile', 'worker_record_run', 'worker_poll_cast', 'worker_poll_tally',
+                         'worker_collect', 'worker_mark_questions', 'worker_rr_code', 'worker_rr_create_room',
+                         'worker_rr_join_room', 'worker_rr_lock', 'worker_rr_state', 'worker_rr_claim')) as worker_functions,
   (select count(*) from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_namespace n on n.oid = c.relnamespace
      where n.nspname = 'auth' and not t.tgisinternal) as auth_triggers;

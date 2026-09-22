@@ -45,8 +45,23 @@ await page.waitForSelector('[data-story-proof="ready"]', { timeout: 20000 })
 const report = await page.evaluate(() => window.__storyInk)
 await browser.close()
 
+/**
+ * The safe zone, measured and not promised (rule 22): Instagram's furniture covers the top and the
+ * bottom 260px. The collector cards (22.9.2026) are held to it box by box; the older templates put
+ * their kicker a few pixels into the top zone by design and are not held to it here.
+ */
+const SAFE = 260
+const STORY_H = 1920
+const SAFE_STRICT = ['closet', 'wanted', 'gaps', 'match']
+
 let faults = 0
 for (const [template, boxes] of Object.entries(report ?? {})) {
+  const strict = SAFE_STRICT.some((name) => template === name || template.startsWith(`${name}-`))
+  const outside = boxes.filter((box) => box.y < SAFE - 1 || box.y + box.h > STORY_H - SAFE + 1)
+  if (strict && outside.length > 0) {
+    faults += outside.length
+    for (const box of outside) console.log(`         ${template}: ${box.label} leaves the safe zone (${Math.round(box.y)}–${Math.round(box.y + box.h)})`)
+  }
   const hits = []
   for (let i = 0; i < boxes.length; i += 1) {
     for (let j = i + 1; j < boxes.length; j += 1) {

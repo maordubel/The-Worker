@@ -57,12 +57,18 @@ describe('Kit Master', () => {
     expect(row?.resolution).toBeNull()
   })
 
-  it('prints no crest for an era the archive has no artwork for — and so cannot deal that shirt', () => {
+  it('prints the era\'s own crest once the artwork exists — and none before it does', () => {
+    // 1999/00 could not be dealt until 22.9.2026: its era had no artwork, so the shirt printed
+    // no crest and gate 4 refused it ('crest-art-missing'). The 1997–2000 crest arrived that day,
+    // and the same shirt now prints it and plays. The refusal itself is still the rule for any
+    // era without artwork — asserted over every kit, so the next gap fails here too.
     const kit = kitRecord('kit-1999-00-home')!
-    expect(kit.fields.crest.value).toBeNull()
-    expect(kit.render.marks.crest).toBe('none')
-    expect(kit.gate4.playable).toBe(false)
-    expect(kit.gate4.reason).toContain('crest-art-missing')
+    expect(kit.fields.crest.value?.key).toBe('keter-color')
+    expect(kit.render.marks.crest).toBe('print')
+    expect(kit.gate4.playable).toBe(true)
+    for (const row of master.kits) {
+      if (row.fields.crest.value === null) expect(row.gate4.reason, row.id).toContain('crest-art-missing')
+    }
     expect(kitRecord('kit-1978-79-home')!.gate4.reason).toContain('maker-unknown')
     for (const row of master.kits) {
       if (row.fields.crest.value) expect(crestMark(row.fields.crest.value.key), row.id).not.toBeNull()

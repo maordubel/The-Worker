@@ -468,8 +468,9 @@ describe('פרויקט משותף עם DUBID — THE WORKER touches only what it
 
   it('leaves every older migration an empty file that says which one to run', () => {
     const dir = join(ROOT, 'supabase/migrations')
+    const live = ['20260922090000_worker_shared_project.sql', '20260922120000_worker_collector_market.sql']
     for (const name of readdirSync(dir)) {
-      if (name === '20260922090000_worker_shared_project.sql') continue
+      if (live.includes(name)) continue
       const body = readFileSync(join(dir, name), 'utf8')
       const statements = body
         .split('\n')

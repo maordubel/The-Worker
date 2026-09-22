@@ -4,10 +4,12 @@ import { describe, expect, it } from 'vitest'
 
 import { PNG } from 'pngjs'
 
+import { crestArt } from '@/lib/kit/crestMarks'
 import { isYellow, isYellowHex } from '@/lib/isYellow'
 import {
   YELLOW_EXEMPTIONS,
   YELLOW_PHOTO_FOLDERS,
+  exemptWebPaths,
   yellowAllowed,
   yellowPhotoAllowed,
 } from '@/lib/brand/yellowExemptions'
@@ -549,7 +551,17 @@ describe('חוק הצהוב — the named exemptions, and the fence around them'
       'public/life/opening/opening-film.webm',
       'public/life/opening/opening-film.mp4',
       'public/life/opening/opening-film-poster.png',
+      'public/brand/crests/keter-color.png',
     ])
+  })
+
+  it('keeps the 1997–2000 crest a crest: printed only through the crest table', () => {
+    // The file is exempt; the colour is not. Nothing may reach for it by path — every screen
+    // gets it from `crestArt()`, which is to say only a shirt or a stage of that era prints it.
+    const direct = SOURCES.filter(({ text }) => text.includes('keter-color.png'))
+    expect(direct.map(({ path }) => path)).toEqual([])
+    expect(crestArt('keter-color', false)).toBe('/brand/crests/keter-color.png')
+    expect(exemptWebPaths()).toContain('/brand/crests/keter-color.png')
   })
 
   it('quotes the owner for every one of them', () => {

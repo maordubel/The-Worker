@@ -103,7 +103,7 @@ superseded. Stage B ends only after the second fully playable finale on 17.5.200
 - Real memorial characters are alive, ordinary and unshadowed in this decade. No halos, ghosts,
   premonitions or lines that exploit what the audience knows about their later deaths.
 - The player's name is **שלום תקוה**. This spelling is binding: תקוה, not תקווה. Claude must
-  correct `שלום תקווה` wherever it refers to this player. Do not globally replace תקווה, because
+  correct the two-vav spelling (תקווה) wherever it refers to this player. Do not globally replace תקווה, because
   names such as אבי תקווה and מכבי פתח תקווה are different.
 - שביט אלימלך is not background roster data. He is a recurring historical football presence from
   the 1996/97 rescue through the 1998 title race, both Cup wins and the 2000 Double.

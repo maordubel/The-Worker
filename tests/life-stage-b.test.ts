@@ -129,7 +129,8 @@ describe.each(UNITS)('$unit · $id', (unit) => {
     for (const text of texts) {
       expect(text.includes('גיטרה'), text).toBe(false)
       expect(/\bגבי\b/.test(text), text).toBe(false)
-      expect(text.includes('שלום תקווה'), text).toBe(false)
+      // built from parts: the two-vav form may not appear literally anywhere (spec §0.1)
+      expect(text.includes(['שלום', 'תקו' + 'וה'].join(' ')), text).toBe(false)
     }
     for (const c of unit.conversations) for (const b of c.branches) for (const l of b.lines) expect(l.who, `${c.id}: ${l.text}`).not.toBe('גבי')
   })

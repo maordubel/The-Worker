@@ -1326,12 +1326,19 @@ describe('הקיר השחור — gate 11 v3', () => {
     }
   })
 
-  it('rule 18 §3 — Maor\'s knowledge is labelled as his', () => {
-    expect(recordKind('מאור הראל — ידע אישי, 1.9.2026')).toBe('maor')
-    expect(archive.enemies.find((row) => row.slug === 'gola')?.sourceTitle).toMatch(/^מאור הראל/)
+  it('rule 18 §3 — the owner\'s knowledge is labelled as a source, under the neutral label (spec §0.2)', () => {
+    expect(recordKind('ידע אישי — צוות The Worker, 1.9.2026')).toBe('maor')
+    expect(archive.enemies.find((row) => row.slug === 'gola')?.sourceTitle).toMatch(/^ידע אישי — צוות The Worker, /)
+    // his name is not an archive source any more: nothing may classify on it
+    expect(recordKind('מאור הראל — ידע אישי, 1.9.2026')).not.toBe('maor')
+    for (const row of archive.enemies) expect(row.sourceTitle, row.slug).not.toContain('מאור הראל')
+    // and the plate says only that the record has a source; whose, under the neutral
+    // label, is on /credits (spec §0.3, 22.9.2026) — the credit lines are flipped, not gone
     const wall = readFileSync(join(process.cwd(), 'app/derby/HateWall.tsx'), 'utf8')
-    expect(wall).toContain("t('hate.record.maor'")
-    expect(wall).toContain("t('hate.wall.credit'")
+    expect(wall).not.toContain("t('hate.record.maor'")
+    expect(wall).not.toContain("t('hate.wall.credit'")
+    expect(wall).toContain("group={enemy.record === 'maor' ? 'team' : null}")
+    expect(wall).toContain('<SourceNote newTab tone="dark" group="team" />')
   })
 
   it('drops the king vocabulary and the painting on the share card (§21)', () => {
@@ -1347,8 +1354,10 @@ describe('ציטוטים ובחירה מרובה — the new question shapes', (
     const call = archive.calls.find((row) => row.slug === 'berkovic-hine-lala')
     expect(call?.distractorsHe).toHaveLength(3)
     expect(call?.answerHe).toContain('2009/10')
-    // the source is Maor, and it says so rather than dressing up as a press citation
-    expect(call?.sourceTitle).toContain('מאור הראל')
+    // the source is the owner's knowledge, and it says so rather than dressing up as a
+    // press citation — under the neutral label, not his name (spec §0.2, 22.9.2026)
+    expect(call?.sourceTitle).toMatch(/^ידע אישי — צוות The Worker, /)
+    expect(call?.sourceTitle).not.toContain('מאור הראל')
   })
 
   it('gives a multi-select six options, exactly three of them right', () => {
@@ -1478,16 +1487,24 @@ describe('סמל המועדון — gate 7', () => {
     expect(after?.sourceUrl).toBeTruthy()
   })
 
-  it('puts the sponsor inside the crest for exactly one era', () => {
+  it('puts the sponsor inside the crest for exactly the eras whose artwork carries it', () => {
+    // Until 22.9.2026 this said ONE era, 2001–2007, from the club's history page. Then the
+    // 1997–2000 crest arrived and it carries "כתר KETER" too. The artwork is direct evidence and
+    // the page is a summary, so both eras carry the flag and the disagreement is RECORDED,
+    // not resolved (rule 60 §3) — a question about the year Keter entered the crest has an
+    // open conflict behind it and rule 15 keeps it out of the deal.
     const withKeter = archive.crests.filter((row) => row.hasKeter)
-    expect(withKeter).toHaveLength(1)
-    expect(withKeter[0]?.fromYear).toBe(2001)
-    expect(withKeter[0]?.toYear).toBe(2007)
+    expect(withKeter.map((row) => `${row.fromYear}–${row.toYear}`)).toEqual(['1997–2000', '2001–2007'])
+    const conflicts = JSON.parse(readFileSync(join(ROOT, 'content/manual/fact-conflicts.json'), 'utf8')) as {
+      records: { entityTable: string; entityKey: string; field: string }[]
+    }
+    expect(conflicts.records.some((row) => row.entityTable === 'crest_version' && row.field === 'has_keter')).toBe(true)
   })
 
   it('never points at a crest image the repo does not ship', () => {
-    // the yellow-KETER variant is DATA ONLY — rule 8 has no artwork exemption, so the
-    // fact lives in noteHe and no file is written for it
+    // there is still no `keter-yellow` file: the coloured Keter crest ships once, as
+    // `keter-color` — the 1997–2000 crest, approved by the owner as that exact path on
+    // 22.9.2026 (lib/brand/yellowExemptions.ts). Nothing else carries its yellow.
     const shipped = readdirSync(join(ROOT, 'public/brand/crests')).map((name) =>
       name.replace(/\.png$/, ''),
     )

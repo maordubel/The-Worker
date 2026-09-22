@@ -279,7 +279,7 @@ describe('שער 12 v10 — הארכיון החי, over the Entity Graph', () =>
   })
 
   it('digs the same way twice, never back onto the trail, and changes type when it can', () => {
-    const tikva = search('שלום תקווה')[0]!.id
+    const tikva = search('שלום תקוה')[0]!.id
     const walk = (seed: number) => {
       const trail = [tikva]
       for (let depth = 0; depth < 8; depth += 1) {

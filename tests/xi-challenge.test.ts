@@ -161,7 +161,7 @@ describe('הגרסה הולכת אחרי הסינון — the version follows th
   })
 
   it('gives a single-spell man one spell with no id to store', () => {
-    const tikva = byName('שלום תקווה')
+    const tikva = byName('שלום תקוה')
     expect(board.versions[tikva.slug]).toBeUndefined()
     const list = spells(tikva)
     expect(list).toHaveLength(1)
@@ -198,7 +198,7 @@ describe('מזהים במקום סלאגים — a saved sheet moves to p_ ids a
       captain: slots[0],
       twelfth: 'משה-סיני',
       cut: absorbed[0],
-      shortlist: [...absorbed, 'שלום-תקווה'],
+      shortlist: [...absorbed, 'שלום-תקוה'],
       savedOn: '2026-09-01',
     }
     const { sheet, unresolved } = migrateSheet(legacy, resolve)

@@ -656,7 +656,6 @@ describe('מפתחות שנבנים בזמן ריצה — every one of them exis
       'lineup.decoy.subOn',
       'lineup.decoy.subOn.minute',
       'lineup.decoy.squad',
-      'lineup.decoy.squad.source',
       'lineup.decoy.other',
       'lineup.zone.wrongLine',
       'lineup.zone.full',
@@ -667,7 +666,11 @@ describe('מפתחות שנבנים בזמן ריצה — every one of them exis
       expect(catalogue[key], key).toBeTruthy()
     }
     expect(catalogue['lineup.decoy.subOn.minute']).toContain('{n}')
-    expect(catalogue['lineup.decoy.squad.source']).toContain('{source}')
+    // spec §0.3 (22.9.2026): the squad's source moved to /credits — the sentence no longer
+    // names it, and the sheet shows the one indicator instead
+    expect(catalogue['lineup.decoy.squad.source']).toBeUndefined()
+    expect(catalogue['lineup.decoy.squad']).not.toContain('{source}')
+    expect(readFileSync(join(ROOT, 'app/lineup/TeamSheet.tsx'), 'utf8')).toContain('<SourceNote')
   })
 
   it('has a line label for each of the four bands', () => {

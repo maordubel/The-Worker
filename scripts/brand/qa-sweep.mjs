@@ -30,6 +30,12 @@ import { chromium } from 'playwright'
 // A missing canvas must fail the run, not silently skip the yellow count: a scanner
 // that reports nothing and exits 0 is worse than no scanner, because it is believed.
 import { createCanvas, loadImage } from 'canvas'
+import { readFileSync } from 'node:fs'
+
+// The exempt files, read out of lib/brand/yellowExemptions.ts rather than copied (a script
+// cannot import TypeScript, and a copied list is how two lists drift).
+const EXEMPT_PATHS = [...readFileSync(new URL('../../lib/brand/yellowExemptions.ts', import.meta.url), 'utf8')
+  .matchAll(/path: '(public\/[^']+)'/g)].map((m) => m[1].slice('public'.length))
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3000'
 const EXECUTABLE = process.env.PW_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
@@ -48,6 +54,16 @@ const ROUTES = [
   '/archive',
   // the photograph archive — swept with the photographs hidden, see the header
   '/kits/archive',
+  // המקורות — the one page that prints every source and credit (spec §0.3, 22.9.2026).
+  // Three hundred titles in two scripts at four widths is exactly where a line overflows.
+  '/credits',
+  // הארון, שוק האדומים והמכירה הפומבית (rule 90). The live routes are swept as a build without
+  // keys draws them (the invitation, the empty table), and the /qa harnesses draw the states a
+  // database would — a listing, a thread, a lot with bids, the admin console — from fixtures.
+  '/kits/closet', '/kits/market', '/kits/auction',
+  '/qa/collector', '/qa/collector?view=public', '/qa/collector?view=editor',
+  '/qa/market?show=board', '/qa/market?show=listing', '/qa/market?show=thread',
+  '/qa/auction?view=board', '/qa/auction?view=lot-live', '/qa/auction?view=lot-won', '/qa/auction?view=admin',
   // THE WORKER LIFE is swept like any other screen — its canvas is pixels on the wall
   // and rule 8 does not care that they were drawn by a Graphics call. What this sweep
   // cannot do is PLAY it; `scripts/life/playthrough.mjs` does that.
@@ -153,11 +169,22 @@ for (const width of WIDTHS) {
      * `display: none` so the layout, and therefore the overflow measurement, is the
      * layout a reader actually gets.
      */
-    const hidden = await page.evaluate(() => {
+    const hidden = await page.evaluate((exempt) => {
       const photos = [...document.querySelectorAll('[data-archive-photo]')]
       for (const photo of photos) photo.style.visibility = 'hidden'
-      return photos.length
-    })
+      // photographs collectors uploaded of their own shirts: the colour is the object's (rule 90)
+      for (const photo of document.querySelectorAll('[data-user-photo]')) photo.style.visibility = 'hidden'
+      // ...and every owner-approved FILE, by its exact path (lib/brand/yellowExemptions.ts) —
+      // the 1997–2000 crest prints on shirts of that era, wherever a shirt is drawn.
+      const files = [...document.querySelectorAll('img, image, video, source')].filter((node) => {
+        const src = node.getAttribute('src') || node.getAttribute('href') || node.getAttribute('xlink:href') || ''
+        const path = src.split('?')[0].replace(/^https?:\/\/[^/]+/, '')
+        return exempt.includes(path)
+      })
+      for (const node of files) (node.style ? node.style : node).visibility = 'hidden'
+      for (const node of files) node.setAttribute('visibility', 'hidden')
+      return photos.length + files.length
+    }, EXEMPT_PATHS)
     if (route === '/kits/archive' && hidden === 0) {
       errors.push('no [data-archive-photo] found on the archive — the sweep would be measuring a page that is not there')
     }

@@ -65,7 +65,7 @@ Source: `/root/worker/docs/life/STAGE-B-1990-2000-CONTENT-IMPLEMENTATION.md`
 | 54 | ALL | §2.4 | `neighbour` is אילן השכן | CHARACTER |
 | 55 | ALL | §2.4 | Real memorial characters are alive, ordinary and unshadowed in this decade — no halos, ghosts, premonitions or lines that exploit what the audience knows about their later deaths | RULE |
 | 56 | ALL | §2.4 | The player's name is שלום תקוה; this spelling is binding — תקוה, not תקווה | RULE |
-| 57 | ALL | §2.4 | Correct `שלום תקווה` wherever it refers to this player | RULE |
+| 57 | ALL | §2.4 | Correct the two-vav spelling (תקווה) wherever it refers to this player | RULE |
 | 58 | ALL | §2.4 | Do not globally replace תקווה — names such as אבי תקווה and מכבי פתח תקווה are different | RULE |
 | 59 | ALL | §2.4 | שביט אלימלך is a recurring historical football presence from the 1996/97 rescue through the 1998 title race, both Cup wins and the 2000 Double — not background roster data | CHARACTER |
 | 60 | ALL | §3 | Stage A asked "Will you get there?"; the 1990 opening asks "Will you know in time?" | RULE |

@@ -52,8 +52,10 @@ Read `docs/00-architecture.md` before changing anything structural.
    **This line said "exactly one entry long" until 17.9.2026, and the test it described
    said `toHaveLength(1)`** — which did its job: it went red the moment the opening film
    was registered, which is what a decision made out loud looks like. The assertion now
-   NAMES the four approved paths instead of counting them, so the next widening says
-   which asset it added rather than that the number moved. A count in prose is a claim
+   NAMES the approved paths instead of counting them, so the next widening says
+   which asset it added rather than that the number moved (the fifth, 22.9.2026, is the
+   1997–2000 crest `public/brand/crests/keter-color.png` — *"שהיה עם צהוב. וזה מאושר! זה
+   ההיסטוריה"* — rule 90 §4). A count in prose is a claim
    about the code and goes stale exactly like a manifest row does (rules 45, 73). Widening it is a decision somebody has to make out
    loud, not a line that slips into a delta. **Only the owner grants one, in his own
    words, about a specific asset.** The definition lives in `lib/isYellow.ts` — a HUE
@@ -143,9 +145,12 @@ Read `docs/00-architecture.md` before changing anything structural.
 
 18. **Maor is a SOURCE, not a claim to be checked.** He founded Hapoel Ussishkin, he
     stood as a capo of Ultras Hapoel, and on what the terrace feels and remembers he is
-    the primary source in this project — cite him as one (`sourceTitle: "מאור הראל —
-    ידע אישי, <date>"`) rather than dressing his knowledge up as a press citation or
-    quietly leaving it out because a search did not surface it. Research EXPANDS what he
+    the primary source in this project — cite him as one (`sourceTitle: "ידע אישי —
+    צוות The Worker, <date>"`) rather than dressing his knowledge up as a press citation or
+    quietly leaving it out because a search did not surface it. The label is neutral
+    because the owner ruled that his name is not presented as one of the archive's
+    sources (spec §0.2, 22.9.2026) — his knowledge stays a source, his name stops being a
+    credit, and `tests/owner-source.test.ts` fails on any source-like field that carries it. Research EXPANDS what he
     gives; it does not overrule it. The rules that stay absolute are the ones about
     fabrication: never publish a factual claim about a named person that no source
     supports, and never invent a date, a fee or a fixture. Those are compatible — when
@@ -1531,6 +1536,13 @@ CSS custom property: כרטיסי השיתוף על קנבס ו-`theme-color`) �
    שוליים (כלל 16). `content/manual/asset-provenance.json` מחזיק שתי שורות לתיקייה
    הזאת — זו התיקייה הראשונה שם שאינה חלק מ-THE WORKER LIFE, כי תצלום תיעודי בלי שורת
    מקור הוא בדיוק מה שהמניפסט נועד למנוע.
+   **22.9.2026 — "על המסך" פירושו עכשיו `/credits`** (מפרט §0.3: קרדיטים ומקורות במקום
+   אחד). ישי צבי עדיין בשמו, על כל אחד מ-114 התצלומים — כשורה הראשונה במדף התצלומים של
+   `/credits`, שנספרת מ-`kit-photos.json` ולא מוקלדת (`lib/credits`). האגף, וכל מסך אחר
+   שהדפיס שורת מקור, נושא רק `מקור מתועד` (`components/ui/SourceNote.tsx`) עם קישור למדף.
+   הבדיקה ב-`tests/kit.test.ts` **התהפכה** ולא נמחקה (כללים 65, 80): היא דורשת את השם
+   ואת הספירה ב-`/credits`, ואוסרת `creditHe` באגף; `tests/credits.test.ts` אוסר על כל
+   מסך להדפיס `sourceTitle`/`sourceHe`/`creditHe` בעצמו.
 7. **`<Num>` מבודד ספרה, לא משפט.** `<Num>{'168 מתוך 168'}</Num>` הדפיס "מתוך 168 168":
    כפיית LTR על משפט עברי מזיזה את מה שבתוכו. הבידוד הולך סביב הספרה בלבד —
    `1994/95` כן, `1994 בערך` לא.
@@ -2211,8 +2223,10 @@ xi.name.3`, 6px), כי השם הותאם ברוחב בלבד והמקום האנ
    את THE WORKER לא מקבל שורה.
 3. **ה-Site URL שייך ל-DUBID.** THE WORKER מוסיף רק Redirect URLs. אם הכתובת שלו חסרה ברשימה,
    Supabase שולח את האוהד ל-Site URL — כלומר ל-DUBID.
-4. **קובץ אחד מריצים.** `20260922090000_worker_shared_project.sql`, והוא מסתיים בשורת בדיקה
-   (`worker_tables 7 · worker_functions 15 · auth_triggers 0`). כל שאר הקבצים ב-`migrations`
+4. **קובץ אחד מריצים לכל שכבה, לפי הסדר.** `20260922090000_worker_shared_project.sql`, והוא
+   מסתיים בשורת בדיקה (`worker_tables 7 · worker_functions 15 · auth_triggers 0`); אחריו —
+   ורק אחריו, הוא בודק את זה בשורה הראשונה — `20260922120000_worker_collector_market.sql`
+   (כלל 90). כל שאר הקבצים ב-`migrations`
    ריקים ואומרים את זה אם מריצים אותם; סכמת הארכיון עברה ל-`supabase/archive-schema/` כי היא
    יוצרת ב-`public` שמות כלליים (`source`, `club`, `match`) ואין לה מקום בפרויקט משותף.
 5. **נבדק כמו שתוקפים.** Postgres 16 מקומי עם `auth` מדומה, ההרשאות ש-Supabase נותן כברירת
@@ -2223,4 +2237,37 @@ xi.name.3`, 6px), כי השם הותאם ברוחב בלבד והמקום האנ
    שקוראת את הקובץ לא יכלה לראות את זה; רק הרצה.
    `tests/portal-sync.test.ts` שומר את 1–4 על המקור: שום `create` בלי `worker_`, שום `on auth.`,
    שום `from auth.users`, ושום `alter`/`drop` על אובייקט שאינו של THE WORKER.
+
+## 90 · הארון, שוק האדומים והמכירה הפומבית — הארכיון הוא הזהות, האנשים הם ההמשך (22.9.2026)
+
+מפרט: `docs/specs/SHIRT-COLLECTOR-MARKET-AUCTION-SPEC-2026-09-22.md` · מפה: `docs/17-collector-market.md`.
+מאור ביקש את כל שש השכבות: יש לי/מחפש, ארון, שוק, התאמות, שיחה, הצעות, השלמה, כרטיסי שיתוף,
+אות ביקוש, התראות, חנויות, מכירה פומבית ותרומה אחרי השלמה. בלי עמלה ובלי תשלום דרכנו.
+
+1. **החולצה היא שורה בארכיון, לא שורה במסד.** פריט מחזיק `archive_slug` (שם התצלום) ו-`kit_id`
+   רק כשה-Kit Master מחזיק את התצלום המדויק. עונה, יצרן, ספונסר ותמונה לא מועתקים — ככה
+   תיקון בארכיון מתקן גם את השוק. `/marketplace` לא קיים: הכול תחת `/kits` (מפרט §71).
+2. **המסד הוא השרת** (הסקיל supabase-server-authority): אין grant לאף טבלה, כל כתיבה היא
+   פונקציית `security definer` שמחזירה `{ ok }`/`{ ok:false, error }` כערך — כדי שמונה הניסיונות
+   ישרוד — וכל `worker_admin_*` בודקת בשורה הראשונה. יומן ביקורת בטריגר על הטבלה, לא בפונקציות.
+   **בפרויקט המשותף התחברות אנונימית של DUBID פעילה**, ומשתמש אנונימי הוא `authenticated`:
+   `worker_market_uid()` מחזירה null לטוקן אנונימי, וכל כתיבה בשוק עוברת דרכה.
+3. **אין מזהה משתמש, מייל או טלפון בשום תשובה.** אספן הוא `אספן #1842` (וכינוי אם בחר). חסימה
+   ודיווח לפי המספר. השיחה היא הערוץ — כולל בין זוכה למוכר: הסגירה העצלה של לוט פותחת להם
+   חיבור 'agreed', וההשלמה עוברת דרך הלוט גם כשלוחצים בשיחה (ביטול — רק מנהל).
+4. **צבע של חפץ אמיתי אינו צבע של ממשק.** תמונות שאספנים מעלים מסומנות `[data-user-photo]`
+   והסורק מסתיר אותן כמו תצלומי הארכיון — חולצה של 1997 היא צהובה כי היא הייתה. הסמל של
+   1997–2000 הוא הנתיב החמישי ב-`lib/brand/yellowExemptions.ts`, באישור מאור במילים שלו. שום
+   כפתור, תג או רקע בשוק לא צהוב/זהב/ענבר/כתום (מפרט §0).
+5. **רפליקה נקראת רפליקה.** check במסד: `replica` לא טוען `original`; חנות רשמית רק
+   `club_store` ורק `official`; אין פרמטרים של שותפים ב-URL. הזרע (`content/manual/merchant-offers.json`)
+   נבדק ב-`tests/merchant-seed.test.ts`, ושורה נכנסת ב-`on conflict do nothing`.
+6. **נבדק על Postgres.** `scripts/db/verify.sh`: שני הקבצים פעמיים, 85 טענות תקיפה וזרימה
+   (`supabase/tests/20-collector.sql`). שורת הבדיקה בסוף הקובץ:
+   `collector_tables 18 · collector_functions 72 · anon_can_write 0 · auth_triggers 0`.
+7. **Vercel בונה רק כשמשהו שהאתר מריץ השתנה.** `vercel.json` → `ignoreCommand`
+   (`scripts/vercel/should-build.mjs`): קומיט שנוגע רק ב-`docs/`, `tests/`, `scripts/`,
+   `supabase/`, `brand/source/`, `data/reports|staging`, `content/raw` או `*.md` בשורש — לא בונה.
+   כל העלאה ב-GitHub היא קומיט, וכל בנייה היא עוד ~300MB ב-Deployment Storage; לכן דלתא
+   מסדרת את קבצי הריצה בכמה שפחות ZIP-ים.
 

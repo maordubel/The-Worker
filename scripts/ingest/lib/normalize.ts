@@ -4,7 +4,13 @@
  * House rule (football-data): normalise for MATCHING, keep the original for DISPLAY.
  * Nothing here ever guesses a character it cannot verify — an unmappable input is
  * rejected with a reason, never coerced into a "similar" value.
+ *
+ * The one correction both matching forms apply is `ownerSpelling` — the names whose
+ * spelling the owner ruled on (spec §0.1, 22.9.2026: שלום תקוה, one vav). A source that
+ * spells them otherwise matches the same alias and mints the same slug, so the ruled-out
+ * spelling is never stored (rule 7). See `lib/canon/spelling.ts`.
  */
+import { ownerSpelling } from '@/lib/canon/spelling'
 
 /** Hebrew niqqud, teamim and the Hebrew punctuation we strip for matching. */
 const HEBREW_DIACRITICS = /[֑-ׇ]/g
@@ -20,7 +26,7 @@ const NON_WORD = /[^\p{L}\p{N} ]/gu
  * a form that throws them away.
  */
 export function normalizeLoose(raw: string): string {
-  return raw
+  return ownerSpelling(raw)
     .normalize('NFKD')
     .replace(HEBREW_DIACRITICS, '')
     .replace(HEBREW_MARKS, '')
@@ -36,7 +42,7 @@ export function normalizeLoose(raw: string): string {
  * The raw string must always be stored alongside it.
  */
 export function normalizeName(raw: string): string {
-  return raw
+  return ownerSpelling(raw)
     .normalize('NFKD')
     .replace(HEBREW_DIACRITICS, '')
     .replace(HEBREW_MARKS, '')

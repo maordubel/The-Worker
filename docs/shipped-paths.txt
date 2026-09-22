@@ -6,6 +6,7 @@ app/archive/ArchiveWing.tsx
 app/archive/actions.ts
 app/archive/page.tsx
 app/auth/callback/route.ts
+app/credits/page.tsx
 app/crest/CrestRun.tsx
 app/crest/actions.ts
 app/crest/page.tsx
@@ -30,8 +31,12 @@ app/kits/KitDesignerV5.tsx
 app/kits/KitGallery.tsx
 app/kits/KitWing.tsx
 app/kits/actions.ts
+app/kits/admin/page.tsx
 app/kits/archive/ArchiveWing.tsx
 app/kits/archive/page.tsx
+app/kits/auction/[id]/page.tsx
+app/kits/auction/page.tsx
+app/kits/auction/submit/[itemId]/page.tsx
 app/kits/build/KitBuildRun.tsx
 app/kits/build/KitChallengeBoard.tsx
 app/kits/build/KitGameRun.tsx
@@ -41,6 +46,11 @@ app/kits/build/KitGameRunV5.tsx
 app/kits/build/KitRun.tsx
 app/kits/build/actions.ts
 app/kits/build/page.tsx
+app/kits/closet/[handle]/page.tsx
+app/kits/closet/page.tsx
+app/kits/market/c/[id]/page.tsx
+app/kits/market/item/[id]/page.tsx
+app/kits/market/page.tsx
 app/kits/page.tsx
 app/layout.tsx
 app/lineup/LineupBoard.tsx
@@ -147,6 +157,8 @@ lib/brand.ts
 lib/brand/yellowExemptions.ts
 lib/canon/matchId.ts
 lib/club/wing.ts
+lib/collector/api.ts
+lib/collector/types.ts
 lib/game/allTimeXI.ts
 lib/game/archive.ts
 lib/game/blackfile.ts

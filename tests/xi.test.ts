@@ -43,7 +43,7 @@ describe('החולצה של האיש — a shirt is a season he actually played'
   it('gives Maor the two shirts he named', () => {
     // *"למשל לשלום תקוה להצמיד חולצה 99-00"* — his five-year spell contains the double,
     // and the double is the season the archive can draw.
-    const tikva = shirtFor('שלום תקווה')
+    const tikva = shirtFor('שלום תקוה')
     expect(tikva?.seasonLabel).toBe('1999/00')
     expect(tikva?.why).toBe('trophy')
     expect(tikva?.wonHe.length).toBeGreaterThan(1)

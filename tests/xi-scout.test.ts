@@ -251,8 +251,8 @@ describe('גרסאות שחקן — derived from the squad table, never from an 
     // inside his longest run (`tests/xi.test.ts` owns that rule).
     expect(spells[0]?.seasonLabel).toBe('1985/86')
 
-    // שלום תקווה never left. One unbroken run, one version, no chooser.
-    expect(spellsFor('שלום תקווה').length).toBe(1)
+    // שלום תקוה never left. One unbroken run, one version, no chooser.
+    expect(spellsFor('שלום תקוה').length).toBe(1)
   })
 
   it('is a run of consecutive seasons with a real gap between the runs', () => {
@@ -322,7 +322,7 @@ describe('גרסאות שחקן — derived from the squad table, never from an 
       expect(versions.map((version) => version.id), slug).toContain(start)
     }
     // a single-spell man is absent from both maps
-    const tikva = roster.all.find((entry) => entry.nameHe === 'שלום תקווה')
+    const tikva = roster.all.find((entry) => entry.nameHe === 'שלום תקוה')
     expect(tikva).toBeTruthy()
     expect(board.versions[(tikva as Searchable).slug]).toBeUndefined()
     expect(board.defaultVersion[(tikva as Searchable).slug]).toBeUndefined()

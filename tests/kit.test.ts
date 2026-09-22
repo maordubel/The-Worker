@@ -3,6 +3,7 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { creditsIndex } from '@/lib/credits'
 import { dealKitRound, gradeKitPuzzle, kitPuzzleCount } from '@/lib/game/kitBuild'
 import { KIT_ROUND, OPTION_RAMP, PERFECT_BONUS, SHIRT_POINTS, STEP_ORDER } from '@/lib/game/kit-build-run'
 import {
@@ -348,11 +349,23 @@ describe('ארכיון החולצות — התצלומים, והתאריכים �
     expect(archiveSources(shirts).reduce((sum, row) => sum + row.count, 0)).toBe(shirts.length)
   })
 
-  it('credits the photographer, because a photographer is a source with a name', () => {
+  /**
+   * Flipped on 22.9.2026, not softened (rules 65, 80). Rule 69 §6 said the credit is on the
+   * screen; the owner's spec §0.3 moved every credit to ONE page. So the photographer is still
+   * credited by name, for every photograph he took — on /credits, counted from the data — and
+   * the wing carries the one indicator that points there, and no credit line of its own.
+   */
+  it('credits the photographer on /credits, by name and by count, and the wing points there', () => {
     const vikipoel = archiveSources(shirts).find((row) => row.key === 'vikipoel')
     expect(vikipoel?.creditHe).toContain('ישי צבי')
+    const photo = creditsIndex().groups.find((group) => group.key === 'photo')
+    const credit = photo?.entries.find((entry) => entry.title.includes('ישי צבי'))
+    expect(credit, 'the photographer is missing from /credits').toBeDefined()
+    expect(credit?.count).toBe(vikipoel?.count)
+    expect(credit?.url).toBe(vikipoel?.url)
     const wing = readFileSync(join(ROOT, 'app/kits/archive/ArchiveWing.tsx'), 'utf8')
-    expect(wing).toContain('creditHe')
+    expect(wing).not.toContain('creditHe')
+    expect(wing).toContain('<SourceNote group="photo"')
   })
 
   it('serves the bytes it measured', () => {

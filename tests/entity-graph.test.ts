@@ -81,7 +81,7 @@ describe('ids — reused, never minted', () => {
     expect(resolveId('euro:2001-uefa-r2-chelsea')).toBe('tie:2001-uefa-r2-chelsea')
     // the Kit Master's legacy key, and a Player Master v1 id
     expect(resolveId('2009/10|home')).toBe('kit-2009-10-home')
-    const tikva = playerMaster.players.find((p) => p.displayName === 'שלום תקווה')!
+    const tikva = playerMaster.players.find((p) => p.displayName === 'שלום תקוה')!
     for (const legacy of tikva.legacyIds) expect(resolveId(legacy)).toBe(tikva.id)
     expect(resolveId(tikva.slug)).toBe(tikva.id)
     // describe() drops what it cannot name, and says so
@@ -208,7 +208,7 @@ describe('time', () => {
 
 describe('the reader', () => {
   it('finds a player by name, and a type by its word', () => {
-    const tikva = search('שלום תקווה')
+    const tikva = search('שלום תקוה')
     expect(tikva[0]?.type).toBe('person')
     const kits = search('חולצה 2009')
     expect(kits.length).toBeGreaterThan(0)
@@ -218,7 +218,7 @@ describe('the reader', () => {
   })
 
   it('keeps related to two per type, labelled', () => {
-    const tikva = search('שלום תקווה')[0]!
+    const tikva = search('שלום תקוה')[0]!
     for (const group of related(tikva.id)) {
       expect(group.items.length).toBeLessThanOrEqual(2)
       expect(group.total).toBeGreaterThanOrEqual(group.items.length)

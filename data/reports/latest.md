@@ -277,7 +277,7 @@ _none_
 | manual:competitions.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:eras.json | manual | Proposed era taxonomy (awaiting confirmation) | — | — | — |
 | manual:people.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
-| manual:players-roster.json | wiki | ויקיפועל — קטגוריה: שחקני הפועל תל אביב (כדורגל), נמסר ע"י מאור הראל | https://wiki.red-fans.com/index.php?title=%D7%A7%D7%98%D7%92%D7%95%D7%A8%D7%99%D7%94:%D7%94%D7%A4%D7%95%D7%A2%D7%9C_%D7%AA%D7%9C_%D7%90%D7%91%D7%99%D7%91_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C) | — | — |
+| manual:players-roster.json | wiki | ויקיפועל — קטגוריה: שחקני הפועל תל אביב (כדורגל), נמסר ע"י צוות The Worker | https://wiki.red-fans.com/index.php?title=%D7%A7%D7%98%D7%92%D7%95%D7%A8%D7%99%D7%94:%D7%94%D7%A4%D7%95%D7%A2%D7%9C_%D7%AA%D7%9C_%D7%90%D7%91%D7%99%D7%91_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C) | — | — |
 | manual:squads.json | other | ספריית הפרויקט — נתוני עונת 2026/27 (נתוני עבודה, לא היסטוריה) | — | — | — |
 | manual:matches.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:match-events.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
@@ -289,7 +289,7 @@ _none_
 | manual:kit-supply.json | other | Football Kit Archive — Hapoel Tel Aviv kit history | https://www.footballkitarchive.com/hapoel-tel-aviv-kits/ | — | — |
 | manual:crest-versions.json | club | אתר המועדון — היסטוריה והישגים · Ynet 2008 · Sport1 2015 | https://www.htafc.co.il/היסטוריה-והישגים/ | — | — |
 | manual:fan-groups.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
-| manual:songs.json | wiki | ויקיפועל — קטגוריות השירים, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
+| manual:songs.json | wiki | ויקיפועל — קטגוריות השירים, דרך מסמך המחקר של צוות The Worker | https://wiki.red-fans.com/ | — | — |
 | manual:quotes.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:associations.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:association-events.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
@@ -298,12 +298,12 @@ _none_
 | manual:election-candidates.json | official | אתר עמותת הפועל אוסישקין — מצעי המועמדים ותוצאות הבחירות | http://www.hapoeluta.com/ | — | — |
 | manual:membership-milestones.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:grievances.json | newspaper | מעבר מחקר ייעודי, 1.9.2026 — Ynet · Walla · Globes · Calcalist · ONE | — | — | — |
-| manual:kit-designs.json | photograph | חומרי עזר של מאור הראל, 1.9.2026 | — | — | — |
-| manual:calls.json | interview | מאור הראל · ומחקר ייעודי 1.9.2026 — Walla · Sport1 | — | — | — |
-| manual:enemies.json | interview | מאור הראל — דירוג היציע, 1.9.2026 | — | — | — |
-| manual:shirt-numbers.json | wiki | ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
-| manual:sponsor-years.json | wiki | ויקיפועל — עמוד "ספונסר", דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
-| manual:fan-culture.json | wiki | ויקיפועל — מילון בלומפילד ופגישות גדר, דרך מסמך המחקר של מאור הראל | https://wiki.red-fans.com/ | — | — |
+| manual:kit-designs.json | photograph | חומרי עזר של צוות The Worker, 1.9.2026 | — | — | — |
+| manual:calls.json | interview | ידע אישי — צוות The Worker · ומחקר ייעודי 1.9.2026 — Walla · Sport1 | — | — | — |
+| manual:enemies.json | interview | ידע אישי — צוות The Worker, דירוג היציע, 1.9.2026 | — | — | — |
+| manual:shirt-numbers.json | wiki | ויקיפועל — עמודי מספרי חולצה, דרך מסמך המחקר של צוות The Worker | https://wiki.red-fans.com/ | — | — |
+| manual:sponsor-years.json | wiki | ויקיפועל — עמוד "ספונסר", דרך מסמך המחקר של צוות The Worker | https://wiki.red-fans.com/ | — | — |
+| manual:fan-culture.json | wiki | ויקיפועל — מילון בלומפילד ופגישות גדר, דרך מסמך המחקר של צוות The Worker | https://wiki.red-fans.com/ | — | — |
 | manual:fact-conflicts.json | other | Verified research pass, 31 Aug 2026 | — | — | — |
 | manual:seasons.json | manual | Season calendar scaffold | — | — | — |
 
