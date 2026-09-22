@@ -22,34 +22,11 @@
  * it; what is replaced is only the artwork, which is the part that was never ours.
  */
 
-export type MakerMarkId = 'strike' | 'adio' | 'classic' | 'blackdog' | 'rombus' | 'micron' | 'twin' | 'dia'
+import type { MakerMarkId } from '@/lib/kit/maker-marks'
 
-/**
- * Real maker → its mark in the alternative set.
- *
- * adidas takes CLASSIC for the trefoil era and ADIO for the modern one, which is the
- * distinction the club's own shirts make: the 1980s adidas shirts carry the trefoil and
- * the 2021 ones carry the bars. `markFor` resolves the era.
- */
-const BY_MAKER: Record<string, MakerMarkId> = {
-  NIKE: 'strike',
-  adidas: 'adio',
-  PUMA: 'blackdog',
-  umbro: 'rombus',
-  MACRON: 'micron',
-  KAPPA: 'twin',
-  diadora: 'dia',
-}
-
-export function markFor(maker: string | null, seasonLabel?: string): MakerMarkId | null {
-  if (!maker) return null
-  const mark = BY_MAKER[maker]
-  if (!mark) return null
-  // The trefoil belonged to the eighties. An adidas shirt from before the nineties gets
-  // CLASSIC; everything later gets ADIO.
-  if (mark === 'adio' && seasonLabel && Number(seasonLabel.slice(0, 4)) < 1992) return 'classic'
-  return mark
-}
+// The table and the era rule live in `lib/kit/maker-marks.ts` so the Kit Master builder (plain
+// node, no JSX) resolves a maker's mark with the same code the drawing uses.
+export { markFor, type MakerMarkId } from '@/lib/kit/maker-marks'
 
 /**
  * One mark, drawn on a 24×28 board so every one of them occupies the same slot.

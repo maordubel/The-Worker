@@ -72,6 +72,20 @@ export function ObjectMark({
           <path d="M7 15h4" />
         </>
       )}
+      {object === 'goal' && (
+        <>
+          <path d="M3 20V6h18v14" />
+          <path d="M3 10h18M3 14h18M8 6v14M13 6v14M18 6v14" opacity=".55" />
+          <circle cx="12" cy="17" r="2.6" />
+        </>
+      )}
+      {object === 'ticket' && (
+        <>
+          <path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4Z" />
+          <path d="M9 7v10" strokeDasharray="1.5 1.5" />
+          <path d="M12 11h6M12 14h4" />
+        </>
+      )}
       {object === 'count' && (
         <>
           <path d="M4 20V9M9.5 20V5M15 20v-8M20.5 20V3" />

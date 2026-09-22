@@ -1,16 +1,22 @@
 'use client'
 
-import { KitPlate } from '@/components/kit/KitPlate'
+import { KitShirt } from '@/components/kit/KitShirt'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
 import { Num } from '@/components/ui/Num'
 import { useDialog } from '@/components/ui/useDialog'
 import { BALLOT, type PollQuestion } from '@/lib/polls/ballot'
 import { factIsEmpty, spanOf, type PickFact } from '@/lib/polls/pickFact'
 import { reasonsFor } from '@/lib/polls/reasons'
+import { WORN_SHOWN, type NumberBoard, type WornRow } from '@/lib/polls/wore'
 import { t, type MessageKey } from '@/lib/i18n'
 
-/** how long the slip holds after a pick before it moves on. Skippable and cancellable. */
-const ADVANCE_MS = 2600
+/**
+ * How long the beat holds before it moves on — skippable and cancellable either way.
+ * 2600ms when there is an archive row to READ (a man's facts, the men who wore a number),
+ * about 1500ms when there is only the stamp (players.md §2, Gate 7 "advance timing").
+ */
+export const ADVANCE_MS = 2600
+export const ADVANCE_MS_BARE = 1500
 
 /**
  * מה שקורה אחרי שבחרת — the beat the reference calls the vote reaction.
@@ -34,14 +40,16 @@ const ADVANCE_MS = 2600
  * nothing. Nothing here is a wait you cannot leave, and no way out of it answers a
  * question for you.
  *
- * `2600ms` is longer than the reference's 1450 because this panel has something to read
- * in it — the reference's had a quote and a stamp. The cancel button is what makes the
- * length safe.
+ * `2600ms` when the panel has something to READ (the archive's rows on the man, or the
+ * men who wore the number), `1500ms` when it holds only the stamp — close to the
+ * reference's 1450. The cancel button is what makes either length safe.
  */
 export function VoteReaction({
   question,
   pick,
   fact,
+  worn = [],
+  wornSources = [],
   chosen,
   filled,
   last,
@@ -51,9 +59,13 @@ export function VoteReaction({
   onDone,
 }: {
   question: PollQuestion
+  /** the pick as it is printed — a name, a number, a position's label */
   pick: string
   /** what the archive holds on this pick — null for a number, a position, or an unknown name */
   fact: PickFact | null
+  /** for the number: who wore it, season-bound, each row pointing at its source */
+  worn?: readonly WornRow[]
+  wornSources?: NumberBoard['sources']
   chosen: MessageKey | undefined
   filled: number
   /** true when this was the last empty row: the beat returns to the slip, not to a question */
@@ -64,7 +76,8 @@ export function VoteReaction({
   onClose: () => void
   onDone: () => void
 }) {
-  const { progress, skip, cancel } = useReveal({ ms: ADVANCE_MS, onDone, active: true })
+  const hasArchive = (fact !== null && !factIsEmpty(fact)) || worn.length > 0
+  const { progress, skip, cancel } = useReveal({ ms: hasArchive ? ADVANCE_MS : ADVANCE_MS_BARE, onDone, active: true })
   // Escape is the dialog contract — it DISMISSES. It does not advance, because a key
   // that means "get me out of here" should not also answer the next question.
   const dialogRef = useDialog<HTMLDivElement>(() => {
@@ -125,11 +138,10 @@ export function VoteReaction({
             ) : (
               <div className="mt-1.5 flex items-start gap-3">
                 {fact.spec && (
-                  <KitPlate
+                  <KitShirt
                     spec={fact.spec}
-                    texture={false}
-                    viewBox="60 40 220 200"
-                    className="h-14 w-14 shrink-0"
+                    density="mini"
+                    className="h-14 w-12 shrink-0"
                     title={t('poll.fact.shirt', { season: fact.seasonLabel ?? '' })}
                   />
                 )}
@@ -166,6 +178,46 @@ export function VoteReaction({
                   )}
                 </dl>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* מי לבש את המספר — the archive's season-bound holders, each with its source */}
+        {question.kind === 'number' && (
+          <div className="mx-4 mt-3 border-hair border-ink/30 bg-paper p-2.5">
+            <p className="font-body text-[8.5px] font-extrabold tracking-[0.18em] text-red">
+              {t('poll.number.worn.title', { n: pick })}
+            </p>
+            {worn.length === 0 ? (
+              <p className="mt-1 font-body text-[11.5px] leading-snug text-muted">{t('poll.number.worn.none')}</p>
+            ) : (
+              <>
+                <ol className="mt-1">
+                  {worn.slice(0, WORN_SHOWN).map((row) => (
+                    <li key={`${row.nameHe}-${row.seasonLabel}`} className="flex items-baseline gap-2 py-[2px]">
+                      <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted">
+                        <Num>{row.seasonLabel}</Num>
+                      </span>
+                      <span className="min-w-0 truncate font-sign text-[13px] font-bold text-ink">{row.nameHe}</span>
+                      {row.current && (
+                        <span className="shrink-0 font-body text-[9.5px] text-muted">{t('poll.number.worn.current')}</span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+                {worn.length > WORN_SHOWN && (
+                  <p className="mt-0.5 font-body text-[10.5px] text-muted">
+                    {t('poll.number.worn.more', { n: String(worn.length - WORN_SHOWN) })}
+                  </p>
+                )}
+                <p className="mt-1 font-mono text-[9px] leading-snug text-muted">
+                  {t('poll.fact.source', {
+                    source: [...new Set(worn.slice(0, WORN_SHOWN).map((row) => wornSources[row.source]?.title ?? ''))]
+                      .filter(Boolean)
+                      .join(' · '),
+                  })}
+                </p>
+              </>
             )}
           </div>
         )}

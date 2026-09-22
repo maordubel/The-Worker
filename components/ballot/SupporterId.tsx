@@ -1,6 +1,5 @@
 'use client'
 
-import { KitPlate } from '@/components/kit/KitPlate'
 import { KitShirt } from '@/components/kit/KitShirt'
 import { Num } from '@/components/ui/Num'
 import { BALLOT } from '@/lib/polls/ballot'
@@ -23,12 +22,9 @@ import { t } from '@/lib/i18n'
  * squad table actually puts him in (rule 74), and absent for the 265 men the archive
  * cannot dress. Mixing them up would put a supporter's name on a footballer's shirt.
  *
- * **Why two renderers and not a fork.** Both take the same `KitSpec` (rule 20 — one
- * contract, eight layers). `KitPlate` is the 340×320 board gates 1, 4 and 5 draw, and it
- * has no nameset layer: it renders the garment, not the back of it. `KitShirt` is the
- * one that letters a chest and prints a number, which is exactly what gate 10 already
- * uses for the member's own shirt — so this card calls the same renderer for the same
- * job rather than teaching a third one to do it (rule 59).
+ * **One renderer, two densities.** Both shirts are the kit engine (`KitShirt`, rule 20):
+ * the voter's at full density, lettered and numbered; the favourite's at `mini` density
+ * beside his name (21.9.2026 — the same mini gate 1 draws).
  */
 export function SupporterId({
   id,
@@ -81,11 +77,10 @@ export function SupporterId({
             </dt>
             <dd className="mt-0.5 flex items-center gap-2">
               {favourite?.spec && (
-                <KitPlate
+                <KitShirt
                   spec={favourite.spec}
-                  texture={false}
-                  viewBox="60 40 220 200"
-                  className="h-9 w-9 shrink-0"
+                  density="mini"
+                  className="h-10 w-9 shrink-0"
                   title={t('poll.fact.shirt', { season: favourite.seasonLabel ?? '' })}
                 />
               )}

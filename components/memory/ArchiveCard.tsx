@@ -46,7 +46,7 @@ export function ArchiveCard({
       onClick={() => onFlip(card.id)}
       disabled={done || flashing}
       aria-pressed={face}
-      aria-label={face ? `${card.face} — ${card.kind}` : t('memory.closed')}
+      aria-label={face ? `${card.face} — ${card.kind}` : `${t('memory.closed')} — ${card.kind}`}
       className={`relative flex min-h-tap w-full flex-col items-center justify-center gap-1 overflow-hidden border-hair p-1 text-center transition-transform duration-press ease-stamp active:scale-[.95] disabled:active:scale-100 motion-reduce:transition-none ${
         wrong ? 'animate-shake' : ''
       } ${echo ? 'animate-flash' : ''} ${
@@ -73,7 +73,15 @@ export function ArchiveCard({
           </span>
         </span>
       ) : (
-        <ObjectMark object={card.object} className="h-7 w-7" />
+        <>
+          <ObjectMark object={card.object} className="h-7 w-7" />
+          {/* v3: the category TAB on the closed card — which four cards can possibly go
+              together is what makes this a memory game, and it has to be readable before
+              anything is turned over, not only after */}
+          <span className="absolute inset-x-0 bottom-0 truncate bg-sheet/[.14] px-0.5 py-[1px] font-body text-[8px] leading-tight text-sheet/80">
+            {card.kind}
+          </span>
+        </>
       )}
 
       {done && (

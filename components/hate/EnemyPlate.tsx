@@ -120,13 +120,17 @@ export function EnemyPlate({
           </p>
         )}
 
-        <div
-          className={`inline-block border-hair px-2 py-1 font-body font-extrabold ${
-            dense ? 'mt-1.5 text-[10px]' : 'mt-2.5 text-[10.5px]'
-          } ${chargeTone}`}
-        >
-          {enemy.keyFactHe}
-        </div>
+        {/* rule 18 §1: a row with no real citation arrives with no key fact — the plate
+            then prints the charge and the era, and nothing that reads as a record */}
+        {enemy.keyFactHe !== '' && (
+          <div
+            className={`inline-block border-hair px-2 py-1 font-body font-extrabold ${
+              dense ? 'mt-1.5 text-[10px]' : 'mt-2.5 text-[10.5px]'
+            } ${chargeTone}`}
+          >
+            {enemy.keyFactHe}
+          </div>
+        )}
       </div>
 
       {out && (

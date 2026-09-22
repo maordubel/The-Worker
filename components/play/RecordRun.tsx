@@ -2,8 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-import { recordRunRemote } from '@/lib/portal/sync'
-import { recordRun } from '@/lib/profile/store'
+import { duelArrival, emit } from '@/lib/profile/events'
 
 /**
  * הדיווח — the one line that makes a gate part of the personal area.
@@ -44,21 +43,37 @@ export function RecordRun({
   score,
   correct,
   asked,
+  variant,
+  seed,
 }: {
   gate: string
   score?: number
   correct?: number
   asked?: number
+  /**
+   * One slug segment under the gate — a trivia topic, `live` for the Royal Rumble room.
+   * The round is filed as `/trivia/europe`; the wall still lights ONE plate
+   * (`lib/profile/gate-id.ts wallGate`), and gate 10 reads per-topic strengths from it.
+   */
+  variant?: string | null
+  /** the deck seed this round was dealt from, when the gate has one — `gate_run.seed` */
+  seed?: number | null
 }) {
   const done = useRef(false)
 
   useEffect(() => {
     if (done.current) return
     done.current = true
-    recordRun({ gate, score, correct, asked })
+    // Everything — the device, the account, the measurement — goes through the one
+    // progress layer (`lib/profile/events.ts`). The key is still minted HERE, once per
+    // mount, for the reasons above.
     const key = globalThis.crypto?.randomUUID?.()
-    if (key !== undefined) void recordRunRemote({ key, gate, score, correct, asked })
-  }, [gate, score, correct, asked])
+    emit({ type: 'gate_completed', gate, variant, score, correct, asked, seed, key })
+    // A round that arrived by somebody's challenge link (`?from=share&seed=N`) is a duel
+    // taken — counted once per plate and seed, so reloading this screen is not a second.
+    const dared = duelArrival(window.location.search)
+    if (dared !== null) emit({ type: 'duel_taken', gate, seed: dared })
+  }, [gate, score, correct, asked, variant, seed])
 
   return null
 }
