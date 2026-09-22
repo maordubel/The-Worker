@@ -51,6 +51,20 @@ describe('gameplay pass — the player always has a legible next move', () => {
     })
     expect(move?.kind).toBe('pass')
   })
+
+  it('still advances a pure time gate when the room has no targets left', () => {
+    const s = state('a3-hall', 1984, { 'a3:inside': true })
+    s.minute = 18 * 60
+    const move = flowMove({
+      state: s,
+      era: eraFor('a3-hall'),
+      objectiveHe: null,
+      quietFor: QUIET_MINUTES,
+      busy: false,
+      reachable: 0,
+    })
+    expect(move?.kind).toBe('pass')
+  })
 })
 
 describe('gameplay pass — the written life drives the formal life tracks', () => {
