@@ -87,8 +87,9 @@ export function useLifeSheets({
    *
    * `checklistFor` remains the authored spine. `actionsNow` contributes only non-story
    * actions the world has ALREADY made available: a timed opportunity or a route
-   * invitation. They are appended as "אפשר גם" rather than mixed into the required
-   * sequence, so freedom is visible and obligation stays honest.
+   * invitation. They stay visually secondary through a neutral continuation marker rather
+   * than a second hard-coded UI sentence, so the choice is visible and the catalogue rule
+   * remains intact.
    */
   const openHelp = useCallback(() => {
     const current = runtime.current
@@ -100,7 +101,7 @@ export function useLifeSheets({
         .filter((action) => action.kind !== 'story')
         .map((action) => ({
           id: `optional:${action.id}`,
-          textHe: `אפשר גם — ${action.titleHe}`,
+          textHe: `↳ ${action.titleHe}`,
           done: false,
         }))
       setChecklist([...story, ...optional])
