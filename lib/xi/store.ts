@@ -13,10 +13,13 @@
  * exists this is one line and not a rewrite of the screen. The screen never names a
  * storage API.
  *
- * **Slugs are stored, never names.** A saved sheet is a list of eleven men, and the man
- * is the roster row; storing his name would freeze a spelling the archive is still
- * correcting, and storing anything richer would make this a second copy of the roster.
- * A slug that no longer exists is dropped on read — a retired row is not a crash.
+ * **Ids are stored, never names** (21.9.2026). A saved sheet is a list of eleven men, and
+ * the man is the Player Master's `p_…` id — minted once and never re-derived (rule 35),
+ * so a spelling fix or a reviewed merge can never orphan a sheet again. Sheets written
+ * before that hold roster SLUGS; `migrateSheet` maps them on read — the current slug, and
+ * the six slugs merged away on 21.9 through `pickerRoster().slugAliases` — and the next
+ * save writes ids. **Nothing is dropped silently:** a reference nothing resolves is
+ * returned in `unresolved` and the screen says so.
  *
  * **Everything after `picks` is optional, and that is the upgrade path** (19.9.2026).
  * The sheet grew a version per slot, an armband, a twelfth man, a last man cut and a
@@ -26,6 +29,7 @@
  */
 
 import type { Formation } from '@/lib/game/lineup'
+import { isChallenge, type ChallengeId } from './challenge'
 
 const KEY = 'worker.xi.v1'
 
@@ -43,7 +47,7 @@ export const XI_TABS: readonly XITab[] = ['best', 'worst']
 export type SavedXI = {
   /** the formation's name, as `lib/game/lineup.ts` writes it */
   formation: string
-  /** slot id → roster slug */
+  /** slot id → the man's `p_…` id (a legacy sheet holds a roster slug — see `migrateSheet`) */
   picks: Record<string, string>
   /**
    * slot id → the version of that man the sheet was built around, as `lib/xi/board.ts`
@@ -53,11 +57,13 @@ export type SavedXI = {
   versions?: Record<string, string>
   /** the slot wearing the armband, or absent */
   captain?: string
-  /** roster slugs — the twelfth man and the last man cut, each one a real decision */
+  /** ids — the twelfth man and the last man cut, each one a real decision */
   twelfth?: string
   cut?: string
-  /** roster slugs the supporter is still arguing with himself about */
+  /** ids the supporter is still arguing with himself about */
   shortlist?: string[]
+  /** the rule the sheet is being built under (`lib/xi/challenge.ts`); absent = free */
+  challenge?: ChallengeId
   /** ISO date it was last saved */
   savedOn: string
 }
@@ -120,6 +126,7 @@ export class LocalXIStore implements XIStore {
           shortlist: Array.isArray(sheet.shortlist)
             ? sheet.shortlist.filter((slug): slug is string => typeof slug === 'string')
             : [],
+          ...(isChallenge(sheet.challenge) ? { challenge: sheet.challenge } : {}),
           savedOn: sheet.savedOn ?? '',
         }
       }
@@ -184,6 +191,7 @@ export function restore(
   twelfth: string | null
   cut: string | null
   shortlist: string[]
+  challenge: ChallengeId
 } | null {
   if (!sheet) return null
   const formation = formations.find((option) => option.name === sheet.formation)
@@ -211,5 +219,86 @@ export function restore(
     twelfth: sheet.twelfth ?? null,
     cut: sheet.cut ?? null,
     shortlist: sheet.shortlist ?? [],
+    challenge: sheet.challenge ?? 'free',
+  }
+}
+
+/* ------------------------------------------------------------ the id migration */
+
+/** A saved reference → the `p_…` id it names, or null when nothing in the archive does. */
+export type RefResolver = (ref: string) => string | null
+
+/**
+ * One resolver for everything a sheet has ever stored: an id (kept), a current roster
+ * slug, or a slug a reviewed merge retired (`pickerRoster().slugAliases`). Nothing is
+ * matched fuzzily (rule 7) — a string that is none of the three resolves to nobody.
+ */
+export function refResolver(input: {
+  roster: ReadonlyArray<{ id?: string; slug: string }>
+  slugAliases: Readonly<Record<string, string>>
+}): RefResolver {
+  const ids = new Set<string>()
+  const bySlug = new Map<string, string>()
+  for (const entry of input.roster) {
+    if (!entry.id) continue
+    ids.add(entry.id)
+    bySlug.set(entry.slug, entry.id)
+  }
+  return (ref) => {
+    if (ids.has(ref)) return ref
+    return bySlug.get(ref) ?? input.slugAliases[ref] ?? null
+  }
+}
+
+/**
+ * A saved sheet with every reference moved to an id.
+ *
+ * `unresolved` lists what could not be mapped, so the screen can SAY that a pick was
+ * lost rather than quietly drawing a shorter eleven. A duplicate that appears only
+ * because two retired slugs now name one man keeps its first slot and reports the rest.
+ */
+export function migrateSheet(sheet: SavedXI, resolve: RefResolver): { sheet: SavedXI; unresolved: string[] } {
+  const unresolved: string[] = []
+  const one = (ref: string | undefined): string | undefined => {
+    if (ref === undefined) return undefined
+    const id = resolve(ref)
+    if (id === null) unresolved.push(ref)
+    return id ?? undefined
+  }
+  const picks: Record<string, string> = {}
+  const versions: Record<string, string> = {}
+  const placed = new Set<string>()
+  for (const [slot, ref] of Object.entries(sheet.picks)) {
+    const id = one(ref)
+    if (id === undefined) continue
+    if (placed.has(id)) {
+      unresolved.push(ref)
+      continue
+    }
+    placed.add(id)
+    picks[slot] = id
+    const version = sheet.versions?.[slot]
+    if (version) versions[slot] = version
+  }
+  const shortlist: string[] = []
+  for (const ref of sheet.shortlist ?? []) {
+    const id = one(ref)
+    if (id !== undefined && !shortlist.includes(id)) shortlist.push(id)
+  }
+  const twelfth = one(sheet.twelfth)
+  const cut = one(sheet.cut)
+  return {
+    sheet: {
+      formation: sheet.formation,
+      picks,
+      versions,
+      ...(sheet.captain !== undefined && picks[sheet.captain] !== undefined ? { captain: sheet.captain } : {}),
+      ...(twelfth !== undefined ? { twelfth } : {}),
+      ...(cut !== undefined ? { cut } : {}),
+      shortlist,
+      ...(sheet.challenge !== undefined ? { challenge: sheet.challenge } : {}),
+      savedOn: sheet.savedOn,
+    },
+    unresolved,
   }
 }

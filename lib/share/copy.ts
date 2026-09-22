@@ -98,7 +98,9 @@ export function challengeUrl(
   const join = path.includes('?') ? '&' : '?'
   if (SEEDLESS.has(kind)) return `${SITE_URL}${path}${join}from=share`
   const r = Number(cursor) > 0 ? `&r=${cursor}` : ''
-  return `${SITE_URL}${path}?seed=${seed}${r}&from=share`
+  // A seeded route may carry its own query too — gate 2's era, Hard, and a personal
+  // run's `?q=` ids — so the seed joins it rather than opening a second `?`.
+  return `${SITE_URL}${path}${join}seed=${seed}${r}&from=share`
 }
 
 /**

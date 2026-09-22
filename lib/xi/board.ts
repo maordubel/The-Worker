@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { namesOf, resolvePlayer } from '@/lib/archive/player-master'
 import type { RosterIndex } from '@/lib/game/allTimeXI'
 import { fold } from '@/lib/game/roster-search'
 import {
@@ -121,7 +122,16 @@ export function shirtBoard(roster: RosterIndex): ShirtBoard {
   }
 
   for (const entry of roster.all) {
-    const found = bySlugKey.get(entry.slug) ?? index.get(fold(entry.nameHe))
+    // Identity through the Player Master (21.9.2026): the squad table files a man under
+    // the slug and spelling ויקיפועל gave him, and a row can carry a different one (a
+    // curated spelling, a slug merged away). Every slug and every spelling the master
+    // holds for him is tried, canonical first — never a guess (rule 7).
+    const person = resolvePlayer(entry.id ?? entry.slug)
+    const slugs = [entry.slug, ...(person?.slugAliases ?? [])]
+    const keys = [...new Set([entry.nameHe, ...(person ? namesOf(person) : [])].map((name) => fold(name)))]
+    const found =
+      slugs.map((slug) => bySlugKey.get(slug)).find(Boolean) ??
+      keys.map((key) => index.get(key)).find(Boolean)
     if (found) {
       bySlug[entry.slug] = { seasonLabel: found.seasonLabel, why: found.why }
       keepSeason(found.seasonLabel, found.wonHe)
@@ -130,7 +140,9 @@ export function shirtBoard(roster: RosterIndex): ShirtBoard {
     // The spells. Only a man with more than one has anything to choose between, and a
     // chooser with one button in it is a control that teaches the reader a fact the
     // archive did not state.
-    const spellsOf = spells.get(spellKeyOf.get(entry.slug) ?? fold(entry.nameHe)) ?? []
+    const spellKey =
+      slugs.map((slug) => spellKeyOf.get(slug)).find(Boolean) ?? keys.find((key) => spells.has(key)) ?? fold(entry.nameHe)
+    const spellsOf = spells.get(spellKey) ?? []
     if (spellsOf.length < 2) continue
     versions[entry.slug] = spellsOf.map((spell) => ({
       id: versionId(spell),

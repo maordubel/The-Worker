@@ -21,6 +21,8 @@
  *     blocked storage and corrupted JSON all resolve to an empty profile.
  */
 
+import { canonicalGate, wallGate } from './gate-id'
+
 const KEY = 'worker.profile.v1'
 
 /** How many days of history the streak grid prints. Matches the member card's quarter. */
@@ -44,6 +46,19 @@ export type GateStat = {
 /** Where this device is in a gate's deck. See `lib/rotation/deck.ts`. */
 export type Rotation = { seed: number; cursor: number }
 
+/**
+ * The last deed a wing reported: the DAY it was counted, and — for a wing whose deed is
+ * a thing that can be unchanged, like gate 1's team sheet — the mark of what was made.
+ * See `applyDeed`.
+ */
+export type Deed = { on: string; mark?: string }
+
+/** A device-only preference. Never synced, never counted, never sent to analytics. */
+export type Pref = string | number | boolean
+
+/** The most recent value of something, with the day it was set — gate 11's last wall. */
+export type Latest = { v: string; on: string }
+
 export type Profile = {
   v: 1
   /** ISO date the device first played anything */
@@ -62,6 +77,16 @@ export type Profile = {
   shares: number
   /** how many rounds were opened from somebody else's challenge link */
   duelsTaken: number
+  /** gate id → the last deed that wing counted (once per gate per day). */
+  deeds: Record<string, Deed>
+  /**
+   * העדפות — how this DEVICE likes a lobby set up (gate 2's last mode, a skipped reveal).
+   * Kept here so no gate reaches for raw `localStorage`, and kept OUT of every count and
+   * every sync: a preference is not something you did.
+   */
+  prefs: Record<string, Pref>
+  /** key → the latest value and its day. Merged by the later day. */
+  latest: Record<string, Latest>
 }
 
 export function emptyProfile(): Profile {
@@ -74,6 +99,9 @@ export function emptyProfile(): Profile {
     collections: {},
     shares: 0,
     duelsTaken: 0,
+    deeds: {},
+    prefs: {},
+    latest: {},
   }
 }
 
@@ -96,12 +124,25 @@ export function readProfile(): Profile {
       ...parsed,
       days: Array.isArray(parsed.days) ? parsed.days : [],
       gates: parsed.gates ?? {},
-      rotation: parsed.rotation ?? {},
-      collections: parsed.collections ?? {},
+      rotation: record(parsed.rotation),
+      collections: record(parsed.collections),
+      deeds: record(parsed.deeds),
+      prefs: record(parsed.prefs),
+      latest: record(parsed.latest),
+      shares: count(parsed.shares),
+      duelsTaken: count(parsed.duelsTaken),
     }
   } catch {
     return emptyProfile()
   }
+}
+
+function record<T>(value: Record<string, T> | undefined | null): Record<string, T> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) ? value : {}
+}
+
+function count(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0
 }
 
 export function writeProfile(profile: Profile): void {
@@ -113,12 +154,18 @@ export function writeProfile(profile: Profile): void {
   }
 }
 
-/** Read, change, write. Every mutation below goes through here so nothing half-writes. */
-function update(change: (profile: Profile) => Profile): Profile {
+/**
+ * Read, change, write. Every mutation below goes through here so nothing half-writes —
+ * and so does `lib/profile/events.ts`, whose reducer is the only other thing that may
+ * change a profile. Exported for that one caller; a gate never calls it directly.
+ */
+export function updateProfile(change: (profile: Profile) => Profile): Profile {
   const next = change(readProfile())
   writeProfile(next)
   return next
 }
+
+const update = updateProfile
 
 export type RunResult = {
   gate: string
@@ -136,27 +183,40 @@ export type RunResult = {
  */
 export function recordRun(result: RunResult): Profile {
   const date = today()
-  return update((profile) => {
-    const prior = profile.gates[result.gate] ?? emptyStat()
-    const asked = result.asked ?? 0
-    const correct = result.correct ?? 0
-    const rate = asked > 0 ? correct / asked : 0
-    return {
-      ...profile,
-      days: profile.days.includes(date) ? profile.days : [...profile.days, date],
-      gates: {
-        ...profile.gates,
-        [result.gate]: {
-          plays: prior.plays + 1,
-          best: Math.max(prior.best, result.score ?? 0),
-          bestRate: Math.max(prior.bestRate, rate),
-          lastOn: date,
-          correct: prior.correct + correct,
-          asked: prior.asked + asked,
-        },
+  return update((profile) => applyRun(profile, result, date))
+}
+
+/**
+ * The pure half of `recordRun`. The id is normalised on the way in (`canonicalGate`), so
+ * `royal-rumble` is filed as `/royal-rumble` and a round can never be recorded under a
+ * name `gate_run` refuses. Negative or fractional figures are clamped rather than
+ * trusted, and `correct` can never exceed `asked` — the same check the table carries.
+ */
+export function applyRun(profile: Profile, result: RunResult, date: string): Profile {
+  const gate = canonicalGate(result.gate)
+  const prior = profile.gates[gate] ?? emptyStat()
+  const asked = whole(result.asked)
+  const correct = Math.min(whole(result.correct), asked > 0 ? asked : whole(result.correct))
+  const rate = asked > 0 ? correct / asked : 0
+  return {
+    ...profile,
+    days: profile.days.includes(date) ? profile.days : [...profile.days, date],
+    gates: {
+      ...profile.gates,
+      [gate]: {
+        plays: prior.plays + 1,
+        best: Math.max(prior.best, whole(result.score)),
+        bestRate: Math.max(prior.bestRate, rate),
+        lastOn: date > prior.lastOn ? date : prior.lastOn,
+        correct: prior.correct + correct,
+        asked: prior.asked + asked,
       },
-    }
-  })
+    },
+  }
+}
+
+function whole(value: number | undefined): number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.round(value) : 0
 }
 
 /**
@@ -173,8 +233,45 @@ export function recordRun(result: RunResult): Profile {
  * carries no score and no denominator, so a wing can never climb the correct/asked
  * figures that belong to the quizzes.
  */
-export function recordDeed(gate: string): Profile {
-  return recordRun({ gate })
+export function recordDeed(gate: string, mark?: string): Profile {
+  const date = today()
+  return update((profile) => applyDeed(profile, gate, date, mark).profile)
+}
+
+/**
+ * **Once per gate per day, and only when something new was made** (21.9.2026).
+ *
+ * Until now a deed was a `recordRun` with no score, and gate 1 reported one on every
+ * VISIT with a full eleven — so opening your own team sheet ten times was ten "rounds",
+ * and the wing out-played every quiz on the card. Two rules now:
+ *
+ *  · **A day.** A wing lights its plate once a day however often it is used. That is the
+ *    same unit `days` already counts in, and it is what `deed:<gate>:<day>` keys the
+ *    remote row on, so the phone and the laptop count the same thing.
+ *  · **A mark.** A wing whose deed can be UNCHANGED passes a mark of what was made
+ *    (`markOf(sheet)` in `lib/profile/events.ts`). The same mark again — the same eleven
+ *    reopened tomorrow — is not a deed at all.
+ *
+ * `counted` says whether the plate moved, so the caller knows whether there is anything
+ * to send upstream.
+ */
+export function applyDeed(
+  profile: Profile,
+  gate: string,
+  date: string,
+  mark?: string,
+): { profile: Profile; counted: boolean } {
+  const id = canonicalGate(gate)
+  const prior = profile.deeds[id]
+  const sameDay = prior?.on === date
+  const sameMark = mark !== undefined && prior?.mark !== undefined && prior.mark === mark
+  const counted = !sameDay && !sameMark
+  const nextDeed: Deed = {
+    on: counted ? date : prior?.on ?? date,
+    ...(mark !== undefined ? { mark } : prior?.mark !== undefined ? { mark: prior.mark } : {}),
+  }
+  const withDeed = { ...profile, deeds: { ...profile.deeds, [id]: nextDeed } }
+  return { profile: counted ? applyRun(withDeed, { gate: id }, date) : withDeed, counted }
 }
 
 /**
@@ -182,23 +279,202 @@ export function recordDeed(gate: string): Profile {
  * what makes "45 מתוך 45" a sentence about the archive rather than about tapping.
  */
 export function collect(set: string, ids: readonly string[]): Profile {
-  return update((profile) => {
-    const have = new Set(profile.collections[set] ?? [])
-    for (const id of ids) have.add(id)
-    return { ...profile, collections: { ...profile.collections, [set]: [...have] } }
-  })
+  return update((profile) => addToSet(profile, set, ids).profile)
+}
+
+/** The pure half of `collect`, reporting which ids were actually new. */
+export function addToSet(
+  profile: Profile,
+  set: string,
+  ids: readonly string[],
+): { profile: Profile; added: string[] } {
+  const current = profile.collections[set] ?? []
+  const have = new Set(current)
+  const added: string[] = []
+  for (const id of ids) {
+    if (typeof id !== 'string' || id === '' || have.has(id)) continue
+    have.add(id)
+    added.push(id)
+  }
+  if (added.length === 0) return { profile, added }
+  return {
+    profile: { ...profile, collections: { ...profile.collections, [set]: [...current, ...added] } },
+    added,
+  }
 }
 
 export function collected(profile: Profile, set: string): string[] {
   return profile.collections[set] ?? []
 }
 
+/* ------------------------------------------------------------------------------------
+ * שלושה סוגי קבוצות — and why a union merge decides all three.
+ *
+ * `lib/portal/merge.ts` merges collections as a UNION, and a union can only grow. That is
+ * exactly right for a set you complete (the Ussishkin cards) and exactly wrong for a set
+ * you curate ("Mine" in the archive), because an un-save on the laptop comes back from
+ * the phone on the next sync. The answer is never "make the merge cleverer" — a union is
+ * the one merge that is exact after any number of syncs in any order — it is to make the
+ * DATA grow-only even when the meaning is not:
+ *
+ *  · **grow-only** — `collect()`. A card turned is turned.
+ *  · **tombstone** — `retire()` writes the id into a second set, `<set>~`. Live =
+ *    set − tombstones. A retirement is permanent, which is what "cleared" means for a
+ *    revenge question or a withdrawn item.
+ *  · **parity toggle** — `toggleIn()` appends `id#k` with the next k; the item is ON
+ *    when its highest k is odd. Both devices saving writes `#1` twice (one token); an
+ *    un-save anywhere writes `#2`, and the union's highest k is the truth everywhere.
+ *    Two devices that toggle the same number of times agree without talking.
+ * ---------------------------------------------------------------------------------- */
+
+/** Sets that record how a device likes things, not what a person did. Never counted, never synced. */
+export const PREFERENCE_SETS: ReadonlySet<string> = new Set(['lineup.reveal'])
+
+/** Sets that are bookkeeping for another figure. Synced, never shown as a collection. */
+export const LEDGER_SETS: ReadonlySet<string> = new Set(['duel.seeds'])
+
+export function tombstoneOf(set: string): string {
+  return `${set}~`
+}
+
+export function isTombstoneSet(set: string): boolean {
+  return set.endsWith('~')
+}
+
+/** Does this set count as something collected? Preferences, ledgers and tombstones do not. */
+export function isCountedSet(set: string): boolean {
+  return !PREFERENCE_SETS.has(set) && !LEDGER_SETS.has(set) && !isTombstoneSet(set)
+}
+
+/** Should this set leave the device at all? Preferences stay home. */
+export function isSyncedSet(set: string): boolean {
+  return !PREFERENCE_SETS.has(set) && /^[a-z0-9][a-z0-9._~-]{0,47}$/.test(set)
+}
+
+/** Grow-only removal: the ids go into `<set>~` and stop being live. */
+export function retire(set: string, ids: readonly string[]): Profile {
+  return update((profile) => addToSet(profile, tombstoneOf(set), ids).profile)
+}
+
+/** The live ids of a tombstoned set. */
+export function activeIn(profile: Profile, set: string): string[] {
+  const gone = new Set(collected(profile, tombstoneOf(set)))
+  return collected(profile, set).filter((id) => !gone.has(id))
+}
+
+const PARITY = /^(.*)#(\d{1,6})$/
+
+/** The highest toggle count an id carries in a parity set, 0 when never toggled. */
+export function toggleCount(profile: Profile, set: string, id: string): number {
+  let top = 0
+  for (const token of collected(profile, set)) {
+    const match = PARITY.exec(token)
+    if (match && match[1] === id) top = Math.max(top, Number(match[2]))
+  }
+  return top
+}
+
+/** Is `id` switched on in a parity set? Reads the device's profile unless one is handed in. */
+export function isOn(set: string, id: string, profile: Profile = readProfile()): boolean {
+  return toggleCount(profile, set, id) % 2 === 1
+}
+
+/** Every id currently ON in a parity set, in first-seen order. */
+export function onIds(set: string, profile: Profile = readProfile()): string[] {
+  const top = new Map<string, number>()
+  for (const token of collected(profile, set)) {
+    const match = PARITY.exec(token)
+    if (!match) continue
+    const id = match[1] as string
+    top.set(id, Math.max(top.get(id) ?? 0, Number(match[2])))
+  }
+  return [...top.entries()].filter(([, k]) => k % 2 === 1).map(([id]) => id)
+}
+
+/** The pure half of a toggle: the next token, and the profile holding it. */
+export function toggleToken(
+  profile: Profile,
+  set: string,
+  id: string,
+): { profile: Profile; token: string; on: boolean } {
+  const k = toggleCount(profile, set, id) + 1
+  const token = `${id}#${k}`
+  return { profile: addToSet(profile, set, [token]).profile, token, on: k % 2 === 1 }
+}
+
+/** Flip `id` in a parity set. Returns the new state. */
+export function toggleIn(set: string, id: string): boolean {
+  let on = false
+  update((profile) => {
+    const next = toggleToken(profile, set, id)
+    on = next.on
+    return next.profile
+  })
+  return on
+}
+
+/** Set `id` to a state; a no-op when it is already there, so a double tap cannot flip it back. */
+export function setIn(set: string, id: string, on: boolean): boolean {
+  update((profile) =>
+    isOn(set, id, profile) === on ? profile : toggleToken(profile, set, id).profile,
+  )
+  return on
+}
+
+/** How many live things a counted set holds, whatever kind of set it is. */
+export function collectionSize(profile: Profile, set: string): number {
+  const tokens = collected(profile, set)
+  if (tokens.length > 0 && tokens.every((token) => PARITY.test(token))) return onIds(set, profile).length
+  return activeIn(profile, set).length
+}
+
 export function recordShare(): void {
   update((profile) => ({ ...profile, shares: profile.shares + 1 }))
 }
 
-export function recordDuelTaken(): void {
-  update((profile) => ({ ...profile, duelsTaken: profile.duelsTaken + 1 }))
+/**
+ * A round opened from somebody else's challenge link. With a gate and a seed the duel is
+ * counted ONCE per (plate, seed) — a reload of the result screen is not a second duel —
+ * through the `duel.seeds` ledger, which syncs like any set. Without them it counts, as
+ * it always did.
+ */
+export function recordDuelTaken(gate?: string, seed?: number | null): boolean {
+  let counted = false
+  update((profile) => {
+    const next = applyDuel(profile, gate, seed)
+    counted = next.counted
+    return next.profile
+  })
+  return counted
+}
+
+export function applyDuel(
+  profile: Profile,
+  gate?: string,
+  seed?: number | null,
+): { profile: Profile; counted: boolean; token: string | null } {
+  if (gate === undefined || typeof seed !== 'number' || !Number.isFinite(seed)) {
+    return { profile: { ...profile, duelsTaken: profile.duelsTaken + 1 }, counted: true, token: null }
+  }
+  const token = `${wallGate(gate) ?? canonicalGate(gate)}:${Math.round(seed)}`
+  const next = addToSet(profile, 'duel.seeds', [token])
+  if (next.added.length === 0) return { profile, counted: false, token }
+  return { profile: { ...next.profile, duelsTaken: next.profile.duelsTaken + 1 }, counted: true, token }
+}
+
+/** A device-only preference, or `fallback`. */
+export function prefOf<T extends Pref>(key: string, fallback: T, profile: Profile = readProfile()): T {
+  const value = profile.prefs[key]
+  return typeof value === typeof fallback ? (value as T) : fallback
+}
+
+export function setPref(key: string, value: Pref): void {
+  update((profile) => ({ ...profile, prefs: { ...profile.prefs, [key]: value } }))
+}
+
+/** Record the latest value of something — the last wall, the last topic — with today's date. */
+export function applyLatest(profile: Profile, key: string, value: string, date: string): Profile {
+  return { ...profile, latest: { ...profile.latest, [key]: { v: value, on: date } } }
 }
 
 /** Where the device is in a gate's deck, or the start of a brand-new deck. */
@@ -258,6 +534,17 @@ export function totalCorrect(profile: Profile): number {
   return Object.values(profile.gates).reduce((sum, stat) => sum + stat.correct, 0)
 }
 
+/**
+ * How many PLATES have been lit — not how many ids. `/trivia/europe` and `/trivia/songs`
+ * are one gate; `royal-rumble` (the old id) and `/royal-rumble/live` are gate 9. An id
+ * no plate owns lights nothing.
+ */
 export function gatesTouched(profile: Profile): number {
-  return Object.values(profile.gates).filter((stat) => stat.plays > 0).length
+  const plates = new Set<string>()
+  for (const [id, stat] of Object.entries(profile.gates)) {
+    if ((stat?.plays ?? 0) <= 0) continue
+    const plate = wallGate(id)
+    if (plate !== null) plates.add(plate)
+  }
+  return plates.size
 }

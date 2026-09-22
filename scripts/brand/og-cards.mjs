@@ -61,6 +61,14 @@ const BRAND = {
 const he = {
   ...JSON.parse(readFileSync(join(ROOT, 'messages', 'he.json'), 'utf8')),
   ...JSON.parse(readFileSync(join(ROOT, 'messages', 'he.life.json'), 'utf8')),
+  // the gate cluster catalogues of 21.9.2026 — same merge as `lib/i18n.ts`
+  ...Object.assign(
+    {},
+    ...readdirSync(join(ROOT, 'messages'))
+      .filter((name) => /^he\.gates\.[a-z]+\.json$/.test(name))
+      .sort()
+      .map((name) => JSON.parse(readFileSync(join(ROOT, 'messages', name), 'utf8'))),
+  ),
 }
 const t = (key) => {
   const value = he[key]
@@ -116,7 +124,7 @@ const GATES_OG = [
   { slug: 'tik', number: 10, titleKey: 'screen.tik.title', latin: 'MEMBER BOOK · WEST', rays: false, away: false },
   { slug: 'derby', number: 11, titleKey: 'screen.derby.title', latin: 'THE HATRED GAME · AWAY END', rays: false, away: true },
   { slug: 'derby-file', number: 11, titleKey: 'screen.file.title', latin: 'THE BLACK FILE · AWAY END', rays: false, away: true },
-  { slug: 'timeline', number: 13, titleKey: 'screen.timeline.title', latin: 'TIMELINE · NORTH-WEST', rays: false, away: false },
+  { slug: 'timeline', number: 13, titleKey: 'screen.thread.title', latin: 'THE RED THREAD · NORTH-WEST', rays: false, away: false },
 ]
 
 /** Un-numbered plates: a memorial wing, a vertical slice, and the ground itself. */

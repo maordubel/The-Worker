@@ -32,6 +32,8 @@ const BALLOT_KEY = 'worker.ballot.v1'
  * empty slip — a screen with no way forward and nothing on it. Found 17.9.2026.
  */
 const BALLOT_SEAL_KEY = 'worker.ballot.sealed.v1'
+/** gate 5's saved designs — `lib/kit/studio-store.ts` */
+const STUDIO_KEY = 'worker.kitStudio.v1'
 
 export type DeviceSummary = {
   /** shirts assembled in gate 4 */
@@ -46,6 +48,10 @@ export type DeviceSummary = {
   xi: number
   /** poll questions answered */
   ballot: number
+  /** designs saved in gate 5's studio */
+  designs: number
+  /** the gate 4 collection's keys (`1984/85|home`), for a card that unions them with `kits` */
+  kitKeys: string[]
   /** the LIFE save, if there is one */
   life: { year: number | null; events: number } | null
 }
@@ -69,8 +75,12 @@ function countKeys(value: unknown): number {
 export function readDevice(): DeviceSummary {
   const life = readJson(LIFE_KEY) as { year?: unknown; events?: unknown } | null
   const xi = readJson(XI_KEY)
+  const kits = readJson(KIT_KEY)
+  const studio = readJson(STUDIO_KEY)
   return {
-    kits: countKeys(readJson(KIT_KEY)),
+    kits: countKeys(kits),
+    kitKeys: typeof kits === 'object' && kits !== null && !Array.isArray(kits) ? Object.keys(kits) : [],
+    designs: Array.isArray(studio) ? studio.length : 0,
     xi:
       typeof xi === 'object' && xi !== null
         ? Object.values(xi as Record<string, unknown>).filter(
@@ -91,18 +101,50 @@ export function readDevice(): DeviceSummary {
   }
 }
 
-/** Wipe everything this device holds. Only ever called behind an explicit confirm. */
-export function forgetDevice(): void {
-  if (typeof window === 'undefined') return
-  for (const key of [
+/**
+ * Every key `forgetDevice` removes, out of everything the browser holds.
+ *
+ * It used to be a hand-written list of seven, and it had already fallen behind by three
+ * (`worker.kitStudio.v1`, `worker.replayProgress.v1`, `worker.ballot.reasons.v1`) — so
+ * "forget this device" left gate 5's designs, gate 8's ledger and the ballot's reasons
+ * sitting in storage. A list somebody has to remember to extend is the bug (rule 59), so
+ * it is now a PREFIX: every `worker.*` key, whoever wrote it and whenever — including the
+ * device id, because a person who wipes their browser has asked to be a new voter
+ * (`lib/portal/device.ts`). The LIFE save keeps its own name and is listed.
+ */
+export const FORGET_PREFIX = 'worker.'
+const FORGET_ALSO = [LIFE_KEY] as const
+
+export function keysToForget(present: readonly string[]): string[] {
+  const known = [
     'worker.profile.v1',
     KIT_KEY,
     XI_KEY,
     BALLOT_KEY,
     'worker.member.v1',
     BALLOT_SEAL_KEY,
-    LIFE_KEY,
-  ]) {
+    STUDIO_KEY,
+    'worker.replayProgress.v1',
+    'worker.ballot.reasons.v1',
+  ]
+  const out = new Set<string>([...known, ...FORGET_ALSO])
+  for (const key of present) if (key.startsWith(FORGET_PREFIX)) out.add(key)
+  return [...out]
+}
+
+/** Wipe everything this device holds. Only ever called behind an explicit confirm. */
+export function forgetDevice(): void {
+  if (typeof window === 'undefined') return
+  const present: string[] = []
+  try {
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i)
+      if (key !== null) present.push(key)
+    }
+  } catch {
+    // storage that cannot be listed can still be cleared by name, below
+  }
+  for (const key of keysToForget(present)) {
     try {
       window.localStorage.removeItem(key)
     } catch {

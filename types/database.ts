@@ -23,11 +23,20 @@ export type Database = {
   public: {
     Tables: {
       app_profile: {
+        /**
+         * `card`, `card_edited_at`, `shirt_number` and `supporter` arrive with
+         * `20260921130000_gates_progress.sql`. Until that SQL runs they do not exist, and
+         * `lib/portal/sync.ts` reads and writes without them.
+         */
         Row: {
           id: string
           display_name: string | null
           member_no: string | null
           since: string
+          card: Json | null
+          card_edited_at: string | null
+          shirt_number: number | null
+          supporter: Json | null
           created_at: string
           updated_at: string
         }
@@ -36,6 +45,10 @@ export type Database = {
           display_name?: string | null
           member_no?: string | null
           since?: string
+          card?: Json | null
+          card_edited_at?: string | null
+          shirt_number?: number | null
+          supporter?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -44,8 +57,37 @@ export type Database = {
           display_name?: string | null
           member_no?: string | null
           since?: string
+          card?: Json | null
+          card_edited_at?: string | null
+          shirt_number?: number | null
+          supporter?: Json | null
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      /**
+       * Grow-only: RLS lets the owner READ their rows and nobody write them directly —
+       * every write goes through `rpc_collect`, which never deletes.
+       */
+      profile_item: {
+        Row: {
+          user_id: string
+          set_id: string
+          item_id: string
+          added_on: string
+        }
+        Insert: {
+          user_id: string
+          set_id: string
+          item_id: string
+          added_on?: string
+        }
+        Update: {
+          user_id?: string
+          set_id?: string
+          item_id?: string
+          added_on?: string
         }
         Relationships: []
       }
@@ -238,6 +280,10 @@ export type Database = {
           p_played_on?: string | null
         }
         Returns: { run_id: string; first_time: boolean }[]
+      }
+      rpc_collect: {
+        Args: { p_set: string; p_ids: string[] }
+        Returns: number
       }
       rpc_poll_vote: {
         Args: { p_device_id: string; p_question_id: string; p_pick: string }

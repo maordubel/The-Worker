@@ -90,7 +90,7 @@ for (const [label, width, height] of [['phone', 390, 844], ['desk', 1280, 900]])
    * and it is rule 50's `serve.sh` lesson in a second place. So the probe presses one
    * slot and refuses to continue unless the board answers.
    */
-  const first = page.locator('[data-slot]').first()
+  const first = page.locator('[data-locker]:not([disabled])').first()
   await first.click()
   if ((await first.getAttribute('aria-pressed')) !== 'true') {
     throw new Error('the board did not react — a stale server is serving chunks that are gone')
@@ -101,9 +101,9 @@ for (const [label, width, height] of [['phone', 390, 844], ['desk', 1280, 900]])
 
   // a shirt taken off its peg and not yet placed — the one selected state that is drawn
   // in red, and the reason it is safe: a locker stands on paper, never on grass.
-  await page.locator('button[aria-label^="ארונית"]').first().click()
+  await page.locator('[data-locker]').first().click()
   await shot('01b-held')
-  await page.locator('button[aria-label^="ארונית"]').first().click()
+  await page.locator('[data-locker]').first().click()
 
   // tap counts / smallest control measurement
   const small = await page.evaluate(() => {
@@ -117,10 +117,11 @@ for (const [label, width, height] of [['phone', 390, 844], ['desk', 1280, 900]])
   })
   if (small.length) { console.log(`  note ${label} controls under 40px:`, small.slice(0, 6)) }
 
-  // fill the eleven: tap a slot, then a locker, eleven times
-  for (let i = 0; i < 11; i += 1) {
-    await page.locator('[data-slot]').nth(i).click()
-    await page.locator('button[aria-label^="ארונית"]:not([disabled])').first().click()
+  // fill the eleven (Gate 3 V3, four bands): a shirt, then a band, eleven times. The band
+  // is tapped at its corner — the men standing in it are buttons of their own.
+  for (const line of ['GK', 'D', 'D', 'D', 'D', 'M', 'M', 'M', 'M', 'F', 'F']) {
+    await page.locator('[data-locker]:not([disabled])').first().click()
+    await page.locator(`[data-band="${line}"]`).click({ position: { x: 4, y: 4 } })
   }
   await shot('02-filled')
 
@@ -129,9 +130,8 @@ for (const [label, width, height] of [['phone', 390, 844], ['desk', 1280, 900]])
   await page.waitForTimeout(600)
   await shot('03-coach')
 
-  // a LOCK on the keeper
-  const gk = page.locator('[data-slot="GK"]')
-  if ((await gk.getAttribute('aria-pressed')) !== 'true') await gk.click()
+  // a LOCK on the first man on the pitch
+  await page.locator('[data-man]').first().click()
   await page.getByRole('button', { name: /LOCK/ }).first().click()
   await shot('04-lock')
 
@@ -161,9 +161,9 @@ for (const [label, width, height] of [['phone', 390, 844], ['desk', 1280, 900]])
 
   // second run on the same device: the reveal must open on the sheet
   await page.goto(`${BASE}/lineup?seed=2`, { waitUntil: 'networkidle' })
-  for (let i = 0; i < 11; i += 1) {
-    await page.locator('[data-slot]').nth(i).click()
-    await page.locator('button[aria-label^="ארונית"]:not([disabled])').first().click()
+  for (const line of ['GK', 'D', 'D', 'D', 'D', 'M', 'M', 'M', 'M', 'F', 'F']) {
+    await page.locator('[data-locker]:not([disabled])').first().click()
+    await page.locator(`[data-band="${line}"]`).click({ position: { x: 4, y: 4 } })
   }
   await page.getByRole('button', { name: 'למנהרה' }).click()
   await page.waitForTimeout(200)

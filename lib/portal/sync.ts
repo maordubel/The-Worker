@@ -25,18 +25,28 @@
  *    an empty remote profile and merges to exactly what their device already held.
  */
 
-import { storedBook, writeBook } from '@/lib/game/member'
-import { readProfile, writeProfile, emptyStat, type GateStat, type Profile } from '@/lib/profile/store'
+import { storedBook, writeBook, type SupporterRecord } from '@/lib/game/member'
+import { readProfile, updateProfile } from '@/lib/profile/store'
 import { createClient } from '@/lib/supabase/client'
+import type { Json } from '@/types/database'
 import { portalDb } from './db'
 import { portalConfigured } from './env'
+import { runSyncHandlers } from './handlers'
+import { mergeDeviceProfiles, type ItemRow, type PortalProfile } from './merge'
 import {
-  emptyIdentity,
-  mergeProfiles,
-  remoteProfile,
-  type PortalIdentity,
-  type PortalProfile,
-} from './merge'
+  bookAfter,
+  cardJson,
+  planSync,
+  type AppProfileRow,
+  type RemoteSide,
+  type RunRow,
+} from './plan'
+
+/**
+ * `foldRuns` moved to `lib/portal/plan.ts` with the rest of the pure sync decisions; it
+ * is re-exported so every existing import keeps working.
+ */
+export { foldRuns } from './plan'
 
 export type Account = {
   id: string
@@ -57,6 +67,14 @@ export type SyncResult = {
   account: Account | null
   /** the merged card, for a screen that wants to print it without re-reading storage */
   merged: PortalProfile | null
+  /**
+   * What the account could and could not take this time, so a screen can say "saved, but
+   * the collections are waiting for the SQL" rather than a flat "synced".
+   *   · `cardColumns` — `app_profile.card` exists (the 21.9.2026 SQL has been run)
+   *   · `items` — `profile_item` exists and was read
+   *   · `extras` — each handler in `lib/portal/handlers.ts`, by id
+   */
+  reach?: { cardColumns: boolean; items: boolean; extras: Record<string, boolean> }
 }
 
 /** Who is signed in on this device, or null. Never throws. */
@@ -112,6 +130,11 @@ export async function signOut(): Promise<void> {
  *
  * The device is written first and unconditionally, so a push that fails halfway still
  * leaves the person holding the better of the two cards rather than the older one.
+ *
+ * **It works before and after Maor runs the 21.9.2026 SQL.** The card columns and
+ * `profile_item` are read optimistically; when they are not there the read falls back
+ * to exactly what the 17.9.2026 migration offers, and the plan leaves them out of the
+ * push. Nothing here can fail because a migration has not been applied yet.
  */
 export async function syncProfile(): Promise<SyncResult> {
   if (!portalConfigured()) return { state: 'off', account: null, merged: null }
@@ -119,57 +142,127 @@ export async function syncProfile(): Promise<SyncResult> {
   const account = await currentAccount()
   if (account === null) return { state: 'signed-out', account: null, merged: null }
 
-  const local = localSide()
-
   try {
     const supabase = portalDb()
 
-    const card = await supabase
-      .from('app_profile')
-      .select('display_name, member_no, since')
-      .eq('id', account.id)
-      .maybeSingle()
-    if (card.error) return { state: 'failed', account, merged: null }
+    const card = await readCardRow(account.id)
+    if (card.failed) return { state: 'failed', account, merged: null }
 
-    const runs = await supabase
-      .from('gate_run')
-      .select('gate, score, asked, correct, played_on')
-      .eq('user_id', account.id)
-    if (runs.error) return { state: 'failed', account, merged: null }
+    const runs = await readAll<RunRow>((from, to) =>
+      supabase
+        .from('gate_run')
+        .select('gate, score, asked, correct, played_on, idempotency_key')
+        .eq('user_id', account.id)
+        .order('played_at', { ascending: true })
+        .range(from, to),
+    )
+    if (runs === null) return { state: 'failed', account, merged: null }
 
-    const remote: PortalProfile | null =
-      card.data === null
-        ? null
-        : {
-            identity: {
-              memberNo: text(card.data.member_no),
-              displayName: text(card.data.display_name) ?? account.displayName,
-              since: text(card.data.since) ?? '',
-            },
-            profile: remoteProfile(foldRuns(runs.data ?? [])),
-          }
+    const items = await readAll<ItemRow>((from, to) =>
+      supabase
+        .from('profile_item')
+        .select('set_id, item_id')
+        .eq('user_id', account.id)
+        .order('added_on', { ascending: true })
+        .range(from, to),
+    )
 
-    const merged = mergeProfiles(local, remote)
+    const remote: RemoteSide = {
+      row: card.row,
+      runs,
+      items,
+      cardColumns: card.cardColumns,
+      accountName: account.displayName,
+    }
+    const plan = planSync({ profile: readProfile(), book: storedBook() }, remote)
 
-    writeProfile(merged.profile)
-    adoptMemberNo(merged.identity.memberNo)
+    // The device first — merged into what the device holds NOW, not into the snapshot
+    // read before the network calls, so a round finished while the sync was in flight is
+    // not overwritten by the older copy.
+    if (plan.remote !== null) {
+      const remoteSide = plan.remote
+      updateProfile((current) => mergeDeviceProfiles(current, remoteSide))
+    }
+    const book = storedBook()
+    if (book !== null) writeBook(bookAfter(book, plan), { stamp: false })
 
-    const push = await supabase
-      .from('app_profile')
-      .update({
-        display_name: merged.identity.displayName,
-        // Sending the merged number is safe by construction: the merge prefers the
-        // server's whenever it has one, so this is either the same value or the first
-        // one this card has ever had. `app_profile_keep_identity` refuses anything else.
-        member_no: merged.identity.memberNo,
-        ...(merged.identity.since === '' ? {} : { since: merged.identity.since }),
-      })
-      .eq('id', account.id)
-    if (push.error) return { state: 'failed', account, merged }
+    const merged: PortalProfile = { identity: plan.identity, profile: plan.profile }
+    if (card.row === null) {
+      return { state: 'synced', account, merged, reach: { cardColumns: card.cardColumns, items: items !== null, extras: {} } }
+    }
 
-    return { state: 'synced', account, merged }
+    const push = await supabase.from('app_profile').update(plan.update).eq('id', account.id)
+    let failed = !!push.error
+
+    for (const chunk of plan.items) {
+      if (!(await collectRemote(chunk.set, chunk.ids))) failed = true
+    }
+    for (const deed of plan.deeds) {
+      const ok = await recordRunRemote({ key: deed.key, gate: deed.gate, playedOn: deed.day })
+      if (!ok) failed = true
+    }
+
+    const extras = await runSyncHandlers({ db: supabase, userId: account.id })
+
+    return {
+      state: failed ? 'failed' : 'synced',
+      account,
+      merged,
+      reach: { cardColumns: card.cardColumns, items: items !== null, extras },
+    }
   } catch {
     return { state: 'failed', account, merged: null }
+  }
+}
+
+const CARD_COLUMNS = 'display_name, member_no, since, card, card_edited_at, shirt_number, supporter'
+const BASE_COLUMNS = 'display_name, member_no, since'
+
+/**
+ * The account's card row. The full column list first; if Postgres refuses it — the card
+ * columns are not there because the 21.9.2026 SQL has not been run — the 17.9.2026 list.
+ */
+async function readCardRow(
+  userId: string,
+): Promise<{ failed: boolean; row: AppProfileRow | null; cardColumns: boolean }> {
+  const supabase = portalDb()
+  const full = await supabase.from('app_profile').select(CARD_COLUMNS).eq('id', userId).maybeSingle()
+  if (!full.error) return { failed: false, row: (full.data as AppProfileRow | null) ?? null, cardColumns: true }
+  const base = await supabase.from('app_profile').select(BASE_COLUMNS).eq('id', userId).maybeSingle()
+  if (base.error) return { failed: true, row: null, cardColumns: false }
+  return { failed: false, row: (base.data as AppProfileRow | null) ?? null, cardColumns: false }
+}
+
+/** PostgREST answers 1,000 rows by default. Page through, up to a ceiling. Null on error. */
+async function readAll<T>(
+  page: (from: number, to: number) => PromiseLike<{ data: unknown; error: unknown }>,
+  size = 1000,
+  ceiling = 20,
+): Promise<T[] | null> {
+  const out: T[] = []
+  for (let n = 0; n < ceiling; n += 1) {
+    const { data, error } = await page(n * size, n * size + size - 1)
+    if (error) return null
+    const rows = Array.isArray(data) ? (data as T[]) : []
+    out.push(...rows)
+    if (rows.length < size) break
+  }
+  return out
+}
+
+/**
+ * Who is signed in, from the session this browser already holds — no network round-trip.
+ * The fire-and-forget pushes below ask this rather than `getUser()`, which calls the auth
+ * server on every tap. Row level security decides what the push may touch either way.
+ * Exported for `lib/portal/handlers.ts` handlers that push on their own.
+ */
+export async function sessionUserId(): Promise<string | null> {
+  if (!portalConfigured()) return null
+  try {
+    const { data } = await createClient().auth.getSession()
+    return data.session?.user?.id ?? null
+  } catch {
+    return null
   }
 }
 
@@ -180,6 +273,10 @@ export async function syncProfile(): Promise<SyncResult> {
  * dropped response, a double-invoked effect and a reload all resolve to one row. The
  * whole call is best-effort: the device has already recorded the round by the time this
  * runs, and a failed push is a row that the next sync simply does not know about.
+ *
+ * A DEED is the same call with the key `deed:<gate>:<day>` and `playedOn` set to that
+ * day, so a wing counts once per gate per day on the account exactly as it does on the
+ * device (`lib/profile/store.ts applyDeed`).
  */
 export async function recordRunRemote(run: {
   key: string
@@ -188,19 +285,20 @@ export async function recordRunRemote(run: {
   correct?: number
   asked?: number
   seed?: number | null
+  playedOn?: string
 }): Promise<boolean> {
   if (!portalConfigured()) return false
   try {
-    const supabase = portalDb()
-    const { data } = await supabase.auth.getUser()
-    if (!data.user) return false
-    const { error } = await supabase.rpc('rpc_record_run', {
+    if ((await sessionUserId()) === null) return false
+    const asked = Math.max(0, Math.round(run.asked ?? 0))
+    const { error } = await portalDb().rpc('rpc_record_run', {
       p_key: run.key,
       p_gate: run.gate,
-      p_score: run.score ?? 0,
-      p_asked: run.asked ?? 0,
-      p_correct: run.correct ?? 0,
-      p_seed: run.seed ?? null,
+      p_score: Math.max(0, Math.round(run.score ?? 0)),
+      p_asked: asked,
+      p_correct: Math.min(asked, Math.max(0, Math.round(run.correct ?? 0))),
+      p_seed: typeof run.seed === 'number' && run.seed > 0 ? run.seed : null,
+      p_played_on: run.playedOn ?? null,
     })
     return !error
   } catch {
@@ -208,65 +306,69 @@ export async function recordRunRemote(run: {
   }
 }
 
-/** The device's own card, in the shape the merge expects. */
-function localSide(): PortalProfile {
-  const profile = readProfile()
-  const book = storedBook()
-  const identity: PortalIdentity = {
-    ...emptyIdentity(),
-    // `storedBook()` and not `readBook()`: a number this device minted a second ago and
-    // nobody has ever seen must not be carried into an account (see `lib/game/member.ts`).
-    memberNo: book === null ? null : text(book.tik),
-    displayName: book === null ? null : text(book.nameHe),
-    since: profile.since,
+/**
+ * אוסף — ids into one of the account's sets, grow-only and idempotent (`rpc_collect`).
+ * Preference sets never leave the device (`isSyncedSet`), and before the SQL is run the
+ * function does not exist and this answers false — which is the whole failure mode.
+ */
+export async function collectRemote(set: string, ids: readonly string[]): Promise<boolean> {
+  if (!portalConfigured() || ids.length === 0) return false
+  try {
+    if ((await sessionUserId()) === null) return false
+    const { error } = await portalDb().rpc('rpc_collect', { p_set: set, p_ids: [...ids] })
+    return !error
+  } catch {
+    return false
   }
-  return { identity, profile }
-}
-
-/** Write the merged file number back onto the device's book, if it had none. */
-function adoptMemberNo(memberNo: string | null): void {
-  if (memberNo === null) return
-  const book = storedBook()
-  if (book === null || book.tik === memberNo) return
-  writeBook({ ...book, tik: memberNo })
 }
 
 /**
- * The account's `gate_run` rows, folded into the same shape the device keeps.
- *
- * This is the read model rule 1 asks for: the rows are the canonical thing and the
- * counters are derived from them, rather than the counters being stored twice and
- * drifting. It is also why the merge can afford to be conservative — an exact total is
- * always recoverable here, from rows nobody had to trust.
+ * The card, right after it was edited on this device — which makes this edit the newest
+ * there is, so it can go up without a merge. The next full sync reconciles anything a
+ * clock skew got wrong. Falls back to the name alone before the card columns exist.
  */
-type RunRow = { gate: string; score: number; asked: number; correct: number; played_on: string }
-
-export function foldRuns(rows: readonly RunRow[]): Partial<Profile> {
-  const gates: Record<string, GateStat> = {}
-  const days = new Set<string>()
-  let since = ''
-
-  for (const row of rows) {
-    if (typeof row.gate !== 'string' || row.gate === '') continue
-    const day = typeof row.played_on === 'string' ? row.played_on : ''
-    if (day !== '') {
-      days.add(day)
-      since = since === '' || day < since ? day : since
-    }
-    const prior = gates[row.gate] ?? emptyStat()
-    const asked = row.asked ?? 0
-    const correct = row.correct ?? 0
-    gates[row.gate] = {
-      plays: prior.plays + 1,
-      best: Math.max(prior.best, row.score ?? 0),
-      bestRate: Math.max(prior.bestRate, asked > 0 ? correct / asked : 0),
-      lastOn: day > prior.lastOn ? day : prior.lastOn,
-      correct: prior.correct + correct,
-      asked: prior.asked + asked,
-    }
+export async function pushCardRemote(): Promise<boolean> {
+  if (!portalConfigured()) return false
+  try {
+    const userId = await sessionUserId()
+    const book = storedBook()
+    if (userId === null || book === null) return false
+    const name = book.nameHe.replace(/\s+/g, ' ').trim()
+    const supabase = portalDb()
+    const full = await supabase
+      .from('app_profile')
+      .update({
+        display_name: name === '' ? null : name,
+        shirt_number: book.number,
+        card: cardJson(book.card ?? null),
+        card_edited_at: book.card?.editedAt || null,
+      })
+      .eq('id', userId)
+    if (!full.error) return true
+    const base = await supabase
+      .from('app_profile')
+      .update({ display_name: name === '' ? null : name })
+      .eq('id', userId)
+    return !base.error
+  } catch {
+    return false
   }
+}
 
-  return { since, days: [...days].sort(), gates }
+/** Gate 7's seal, up to the account (owner-only row; votes stay unlinkable — rule 76). */
+export async function pushSupporterRemote(record: SupporterRecord): Promise<boolean> {
+  if (!portalConfigured()) return false
+  try {
+    const userId = await sessionUserId()
+    if (userId === null) return false
+    const { error } = await portalDb()
+      .from('app_profile')
+      .update({ supporter: record as unknown as Json })
+      .eq('id', userId)
+    return !error
+  } catch {
+    return false
+  }
 }
 
 function text(value: unknown): string | null {

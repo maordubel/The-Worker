@@ -53,11 +53,16 @@ export function loadRegistry(root: string): MatchIdEntry[] {
   }
 }
 
+/** The exact bytes `saveRegistry` writes — exported so a test can compare without writing. */
+export function serialiseRegistry(records: readonly MatchIdEntry[]): string {
+  const sorted = [...records].sort((a, b) => a.id.localeCompare(b.id))
+  return `${JSON.stringify({ note: NOTE, records: sorted }, null, 2)}\n`
+}
+
 export function saveRegistry(root: string, records: readonly MatchIdEntry[]): void {
   const path = join(root, MATCH_ID_REGISTRY)
   mkdirSync(dirname(path), { recursive: true })
-  const sorted = [...records].sort((a, b) => a.id.localeCompare(b.id))
-  writeFileSync(path, `${JSON.stringify({ note: NOTE, records: sorted }, null, 2)}\n`, 'utf8')
+  writeFileSync(path, serialiseRegistry(records), 'utf8')
 }
 
 function derive(key: MatchNaturalKey, salt: number): CanonicalMatchId {

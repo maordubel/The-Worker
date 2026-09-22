@@ -1,4 +1,5 @@
-import { GATES, PLAYABLE_GATES } from '@/lib/gates'
+import { PLAYABLE_GATES } from '@/lib/gates'
+import { wallStat } from '@/lib/profile/gate-id'
 import {
   gatesTouched,
   streak,
@@ -72,8 +73,11 @@ export function cardFigures(profile: Profile) {
     // the same list. `gatesTouched` used to count every key in `profile.gates` — which
     // included `/derby/file`, a screen that is not on the wall — so a device could print
     // "8 מתוך 11" with seven plates lit. Both numbers now answer the same question.
-    gates: PLAYABLE_GATES.filter((gate) => (profile.gates[gateId(gate.href)]?.plays ?? 0) > 0)
-      .length,
+    //
+    // And each plate is read through `wallStat`, which folds every id that rolls up to
+    // it: `/trivia/europe` lights gate 2, and the Royal Rumble's old slash-less ids light
+    // gate 9 — which until 21.9.2026 nothing did, so the wall topped out at 11 of 12.
+    gates: PLAYABLE_GATES.filter((gate) => wallStat(profile, gate.href).plays > 0).length,
     ofGates: PLAYABLE_GATES.length,
   }
 }
@@ -87,16 +91,12 @@ export function cardFigures(profile: Profile) {
  * is left without asking anybody to come back at six o'clock.
  */
 export function stillToDo(profile: Profile, limit = 3) {
-  return PLAYABLE_GATES.filter(
-    (gate) => (profile.gates[gateId(gate.href)]?.plays ?? 0) === 0,
-  ).slice(0, limit)
+  return PLAYABLE_GATES.filter((gate) => wallStat(profile, gate.href).plays === 0).slice(0, limit)
 }
 
 /**
- * The id a gate reports under. Derived from the route so a gate cannot be recorded
- * under two names — which is how `/trivia` and `/trivia/general` would have drifted.
+ * `gateId` lives in `lib/profile/gate-id.ts` now, beside `wallGate` and the aliases,
+ * because `lib/profile/store.ts` needs it too and this file imports the store.
+ * Re-exported so every existing import keeps working.
  */
-export function gateId(href: string): string {
-  const path = (href.split('?')[0] ?? href).replace(/\/$/, '')
-  return path === '' ? '/' : path
-}
+export { gateId } from '@/lib/profile/gate-id'

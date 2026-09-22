@@ -118,6 +118,8 @@ const config: Config = {
         'balloon-pop': 'balloon-pop 320ms var(--ease-stamp) both',
         'balloon-pop-end': 'balloon-pop-end 320ms var(--ease-stamp) both',
         'face-in': 'face-in 360ms var(--ease-stamp) both',
+        /* הקופסה האדומה — המכסה נפתח לפני שהחפצים נוחתים */
+        'box-lid': 'box-lid 820ms var(--ease-stamp) both',
       },
     },
   },

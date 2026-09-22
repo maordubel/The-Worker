@@ -37,6 +37,7 @@ export type GateSeoSlug =
   | 'derby'
   | 'derby-file'
   | 'timeline'
+  | 'timeline-order'
   | 'ussishkin'
   | 'hapoel'
   | 'life'
@@ -135,8 +136,16 @@ const GATE_SEO: Record<GateSeoSlug, GateSeoEntry> = {
     descriptionKey: 'seo.derbyFile.desc',
     image: 'derby-file',
   },
+  // שער 13 — החוט האדום is the gate's game (owner decision, 21.9.2026); the chronology
+  // game it replaced is the gate's second mode and keeps its own copy.
   timeline: {
     path: '/timeline',
+    titleKey: 'screen.thread.title',
+    descriptionKey: 'seo.thread.desc',
+    image: 'timeline',
+  },
+  'timeline-order': {
+    path: '/timeline/order',
     titleKey: 'screen.timeline.title',
     descriptionKey: 'seo.timeline.desc',
     image: 'timeline',
