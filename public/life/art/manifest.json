@@ -931,6 +931,266 @@
     2816,
     1536
    ]
+  },
+  "homeAdult": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "הבית של פוגי הבוגר — סלון ומטבח פתוח",
+   "w": 1672,
+   "h": 941,
+   "bytes": 284726,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "flatAway": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "דירה שכורה בחו״ל, ערב",
+   "w": 1672,
+   "h": 941,
+   "bytes": 176052,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "workshopFix": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "הסדנה של לירון, 2006",
+   "w": 1672,
+   "h": 941,
+   "bytes": 388034,
+   "deyellowed": 7819,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "communityRoom": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "חדר קהילה — שולחן ארוך, לוח שעם",
+   "w": 1672,
+   "h": 941,
+   "bytes": 293584,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "storeroom": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "מחסן ציוד קהילתי",
+   "w": 1672,
+   "h": 941,
+   "bytes": 285972,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "officeOwner": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "משרד ענף הבעלות, 2025",
+   "w": 1672,
+   "h": 941,
+   "bytes": 171360,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "deskNewsroom": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "מערכת קטנה",
+   "w": 1672,
+   "h": 941,
+   "bytes": 254970,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "rehearsal": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "חדר חזרות, 2013",
+   "w": 1672,
+   "h": 941,
+   "bytes": 233540,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "driveIn": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "הדרייב אין, 2015 — קונספט",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 223370,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "arenaEuroOut": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "רחבה מול אולם באירופה — חלל גנרי",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 363654,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "arenaEuroSeats": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "מהמושבים באותו אולם — חלל גנרי",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 250808,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "portEurope": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "טרמינל הגעה באירופה",
+   "w": 1672,
+   "h": 941,
+   "bytes": 318900,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "pitchSmall": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "מגרש קטן מודרני, דשא סינתטי",
+   "w": 1672,
+   "h": 941,
+   "bytes": 516360,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "bedroom00": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "החדר של פוגי בן 22, 2000",
+   "w": 1672,
+   "h": 941,
+   "bytes": 213944,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "hallNew": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "אולם אימון שכור, 2007",
+   "w": 1672,
+   "h": 941,
+   "bytes": 307050,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "bloomOldTerrace": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "היציע של בלומפילד 2000–2016 — טיוטת קונספט",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 1264326,
+   "deyellowed": 20046,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "bloomNewTerrace": {
+   "source": "maor-2026-09-21-backgrounds",
+   "whatHe": "היציע של בלומפילד המחודש — טיוטת קונספט",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 214978,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
   }
  },
  "figures": {
@@ -1126,7 +1386,7 @@
   "oldMan": {
    "w": 185,
    "h": 430,
-   "bytes": 64480,
+   "bytes": 20262,
    "source": "stageA2",
    "box": [
     1088,
@@ -1218,7 +1478,7 @@
   "melamed-play": {
    "w": 189,
    "h": 331,
-   "bytes": 78072,
+   "bytes": 31422,
    "yellowLeft": 0,
    "source": "2026-09e",
    "soft": true
@@ -1240,9 +1500,9 @@
    "soft": true
   },
   "freddy": {
-   "w": 199,
+   "w": 193,
    "h": 331,
-   "bytes": 21296,
+   "bytes": 19366,
    "yellowLeft": 0,
    "source": "2026-09e",
    "soft": true
@@ -1576,19 +1836,19 @@
    "whatHe": "נער על סקייטבורד"
   },
   "michel99": {
-   "w": 330,
-   "h": 934,
+   "w": 226,
+   "h": 640,
    "metres": 1.75,
-   "bytes": 44194,
+   "bytes": 31282,
    "whatHe": "מישל, עומד — 1999",
    "yellowLeft": 0,
    "source": "maor-2026-09-08-green-screen"
   },
   "michel99-3q": {
-   "w": 307,
-   "h": 914,
+   "w": 215,
+   "h": 640,
    "metres": 1.75,
-   "bytes": 41988,
+   "bytes": 30440,
    "whatHe": "מישל, שלושה־רבעים ימינה — 1999",
    "yellowLeft": 0,
    "source": "maor-2026-09-08-green-screen"
@@ -1612,9 +1872,9 @@
    "source": "maor-2026-09-08-green-screen"
   },
   "bfSteward": {
-   "w": 388,
-   "h": 1200,
-   "bytes": 109880,
+   "w": 207,
+   "h": 640,
+   "bytes": 40942,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1628,9 +1888,9 @@
    "metres": 1.78
   },
   "bfVendor": {
-   "w": 385,
-   "h": 1200,
-   "bytes": 79886,
+   "w": 205,
+   "h": 640,
+   "bytes": 31392,
    "source": "maor-2026-09-08-bloomfield-pack",
    "box": [
     0,
@@ -1872,18 +2132,12 @@
  },
  "props": {
   "propRadio": {
-   "w": 169,
-   "h": 160,
-   "bytes": 8942,
-   "source": "stageAenv",
-   "box": [
-    0,
-    0,
-    169,
-    160
-   ],
-   "deyellowed": 0,
-   "yellowLeft": 0
+   "w": 320,
+   "h": 280,
+   "bytes": 23706,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects",
+   "whatHe": "הטרנזיסטור"
   },
   "propBall": {
    "w": 126,
@@ -1902,14 +2156,14 @@
   "propScarfRed": {
    "w": 561,
    "h": 141,
-   "bytes": 24624,
+   "bytes": 21578,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propPennant": {
    "w": 146,
    "h": 276,
-   "bytes": 21802,
+   "bytes": 21338,
    "yellowLeft": 0,
    "source": "2026-09"
   },
@@ -1928,16 +2182,16 @@
    "source": "2026-09"
   },
   "propBadges": {
-   "w": 107,
+   "w": 106,
    "h": 78,
-   "bytes": 3982,
+   "bytes": 3708,
    "yellowLeft": 0,
    "source": "2026-09"
   },
   "propMatchbox": {
-   "w": 131,
+   "w": 122,
    "h": 91,
-   "bytes": 5854,
+   "bytes": 5178,
    "yellowLeft": 0,
    "source": "2026-09"
   },
@@ -2277,106 +2531,243 @@
    "bytes": 596234,
    "source": "maor-2026-09-06-minigames (cut from his sheets)",
    "yellowLeft": 0
+  },
+  "propRedBox": {
+   "w": 298,
+   "h": 220,
+   "bytes": 71846,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects",
+   "whatHe": "הקופסה האדומה — קופסת פח עם ציר"
+  },
+  "propBall90": {
+   "w": 89,
+   "h": 93,
+   "bytes": 4222,
+   "yellowLeft": 0,
+   "source": "2026-09",
+   "whatHe": "כדור — מגיליון הדמות של 1990 (slice-sheets.py), תמונה ולא תחריט"
+  },
+  "propScarfKnit": {
+   "w": 439,
+   "h": 314,
+   "bytes": 132284,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propAlbum": {
+   "w": 480,
+   "h": 287,
+   "bytes": 123708,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propPaperFolded": {
+   "w": 412,
+   "h": 315,
+   "bytes": 22336,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propSuitcase": {
+   "w": 196,
+   "h": 321,
+   "bytes": 58238,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propPassport": {
+   "w": 219,
+   "h": 276,
+   "bytes": 13688,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propTicketsPair": {
+   "w": 351,
+   "h": 221,
+   "bytes": 44572,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propKeys": {
+   "w": 295,
+   "h": 253,
+   "bytes": 50304,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propBackpack": {
+   "w": 254,
+   "h": 292,
+   "bytes": 82638,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propHeadphones": {
+   "w": 271,
+   "h": 281,
+   "bytes": 64436,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propMug": {
+   "w": 270,
+   "h": 231,
+   "bytes": 57112,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propPlanner": {
+   "w": 325,
+   "h": 246,
+   "bytes": 4802,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propCable": {
+   "w": 282,
+   "h": 288,
+   "bytes": 18228,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propDrum": {
+   "w": 355,
+   "h": 319,
+   "bytes": 114098,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propFootball": {
+   "w": 266,
+   "h": 259,
+   "bytes": 20324,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propSportsBag": {
+   "w": 450,
+   "h": 297,
+   "bytes": 34294,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propBannerBlank": {
+   "w": 480,
+   "h": 243,
+   "bytes": 25788,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propBib": {
+   "w": 338,
+   "h": 337,
+   "bytes": 143676,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propPhone2010": {
+   "w": 179,
+   "h": 299,
+   "bytes": 7954,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects",
+   "whatHe": "סמארטפון, שנות ה-2010"
+  },
+  "propPhone2020": {
+   "w": 181,
+   "h": 303,
+   "bytes": 7296,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects",
+   "whatHe": "טלפון, שנות ה-2020"
+  },
+  "propRemote": {
+   "w": 227,
+   "h": 294,
+   "bytes": 12800,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propLaptop": {
+   "w": 448,
+   "h": 342,
+   "bytes": 20458,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propRecorder": {
+   "w": 155,
+   "h": 327,
+   "bytes": 15832,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propNewspaper": {
+   "w": 395,
+   "h": 332,
+   "bytes": 114298,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
+  },
+  "propDarbuka": {
+   "w": 231,
+   "h": 312,
+   "bytes": 19852,
+   "yellowLeft": 0,
+   "source": "maor-2026-09-20-objects"
   }
  },
  "portraits": {
   "faceKid": {
-   "w": 216,
-   "h": 200,
-   "bytes": 8556,
-   "source": "stageA2",
-   "box": [
-    388,
-    62,
-    442,
-    112
-   ],
-   "deyellowed": 8586,
-   "yellowLeft": 0
+   "w": 320,
+   "h": 320,
+   "bytes": 13786,
+   "yellowLeft": 0,
+   "source": "cut from pupil-sideA"
   },
   "faceOfir": {
-   "w": 232,
-   "h": 200,
-   "bytes": 6138,
-   "source": "stageA2",
-   "box": [
-    658,
-    62,
-    716,
-    112
-   ],
-   "deyellowed": 7586,
-   "yellowLeft": 0
+   "w": 320,
+   "h": 320,
+   "bytes": 12836,
+   "yellowLeft": 0,
+   "source": "cut from ofir-arms"
   },
   "faceAmit": {
-   "w": 256,
-   "h": 200,
-   "bytes": 8688,
-   "source": "stageA2",
-   "box": [
-    760,
-    62,
-    824,
-    112
-   ],
-   "deyellowed": 5341,
-   "yellowLeft": 0
+   "w": 320,
+   "h": 320,
+   "bytes": 13840,
+   "yellowLeft": 0,
+   "source": "cut from amit-arms"
   },
   "faceEfi": {
-   "w": 264,
-   "h": 200,
-   "bytes": 8360,
-   "source": "stageA2",
-   "box": [
-    848,
-    62,
-    914,
-    112
-   ],
-   "deyellowed": 6654,
-   "yellowLeft": 0
+   "w": 320,
+   "h": 320,
+   "bytes": 9640,
+   "yellowLeft": 0,
+   "source": "cut from efi"
   },
   "faceKeren": {
-   "w": 264,
-   "h": 200,
-   "bytes": 7850,
-   "source": "stageA2",
-   "box": [
-    938,
-    62,
-    1004,
-    112
-   ],
-   "deyellowed": 4229,
-   "yellowLeft": 0
+   "w": 320,
+   "h": 320,
+   "bytes": 11476,
+   "yellowLeft": 0,
+   "source": "cut from keren"
   },
   "faceKobi": {
-   "w": 304,
-   "h": 264,
-   "bytes": 14156,
-   "source": "stageA2",
-   "box": [
-    476,
-    62,
-    552,
-    128
-   ],
-   "deyellowed": 12555,
-   "yellowLeft": 0
+   "w": 320,
+   "h": 320,
+   "bytes": 12058,
+   "yellowLeft": 0,
+   "source": "cut from kobi"
   },
   "faceRachel": {
-   "w": 328,
-   "h": 264,
-   "bytes": 16118,
-   "source": "stageA2",
-   "box": [
-    566,
-    62,
-    648,
-    128
-   ],
-   "deyellowed": 12938,
-   "yellowLeft": 0
+   "w": 320,
+   "h": 320,
+   "bytes": 15744,
+   "yellowLeft": 0,
+   "source": "cut from rachel"
   },
   "faceFan": {
    "w": 220,
@@ -2395,7 +2786,7 @@
   "faceOldMan": {
    "w": 190,
    "h": 260,
-   "bytes": 42478,
+   "bytes": 8836,
    "source": "stageA2",
    "box": [
     1088,
@@ -2785,35 +3176,35 @@
   "faceOldMan-laugh": {
    "w": 171,
    "h": 260,
-   "bytes": 38768,
+   "bytes": 8568,
    "source": "ingested before the registry covered face plates",
    "yellowLeft": 0
   },
   "faceOldMan-over": {
    "w": 216,
    "h": 260,
-   "bytes": 46184,
+   "bytes": 10248,
    "source": "ingested before the registry covered face plates",
    "yellowLeft": 0
   },
   "faceOldMan-smile": {
    "w": 200,
    "h": 260,
-   "bytes": 44150,
+   "bytes": 9648,
    "source": "ingested before the registry covered face plates",
    "yellowLeft": 0
   },
   "faceOldMan-story": {
    "w": 200,
    "h": 260,
-   "bytes": 46812,
+   "bytes": 10252,
    "source": "ingested before the registry covered face plates",
    "yellowLeft": 0
   },
   "faceOldMan-what": {
    "w": 227,
    "h": 260,
-   "bytes": 49112,
+   "bytes": 10392,
    "source": "ingested before the registry covered face plates",
    "yellowLeft": 0
   },
@@ -3047,6 +3438,97 @@
    "bytes": 37380,
    "yellowLeft": 0,
    "source": "art delivery 2026-09-16"
+  },
+  "faceStandA1": {
+   "w": 320,
+   "h": 320,
+   "bytes": 9000,
+   "yellowLeft": 0,
+   "source": "cut from adultA1"
+  },
+  "faceStandA2": {
+   "w": 320,
+   "h": 320,
+   "bytes": 55474,
+   "yellowLeft": 0,
+   "source": "cut from adultA2"
+  },
+  "faceStandA4": {
+   "w": 320,
+   "h": 320,
+   "bytes": 8866,
+   "yellowLeft": 0,
+   "source": "cut from adultA4"
+  },
+  "faceStandA6": {
+   "w": 320,
+   "h": 320,
+   "bytes": 9742,
+   "yellowLeft": 0,
+   "source": "cut from adultA6"
+  },
+  "faceStandB1": {
+   "w": 320,
+   "h": 320,
+   "bytes": 7890,
+   "yellowLeft": 0,
+   "source": "cut from adultB1"
+  },
+  "faceStandB2": {
+   "w": 320,
+   "h": 320,
+   "bytes": 8148,
+   "yellowLeft": 0,
+   "source": "cut from adultB2"
+  },
+  "faceStandB3": {
+   "w": 320,
+   "h": 320,
+   "bytes": 9250,
+   "yellowLeft": 0,
+   "source": "cut from adultB3"
+  },
+  "faceStandB4": {
+   "w": 320,
+   "h": 320,
+   "bytes": 8474,
+   "yellowLeft": 0,
+   "source": "cut from adultB4"
+  },
+  "faceStandB5": {
+   "w": 320,
+   "h": 320,
+   "bytes": 57010,
+   "yellowLeft": 0,
+   "source": "cut from adultB5"
+  },
+  "faceStandB6": {
+   "w": 320,
+   "h": 320,
+   "bytes": 8708,
+   "yellowLeft": 0,
+   "source": "cut from adultB6"
+  },
+  "faceStandB7": {
+   "w": 320,
+   "h": 320,
+   "bytes": 7338,
+   "yellowLeft": 0,
+   "source": "cut from adultB7"
+  },
+  "faceEfi96": {
+   "w": 320,
+   "h": 320,
+   "bytes": 13514,
+   "yellowLeft": 0,
+   "source": "cut from efi96"
+  },
+  "faceKobi90": {
+   "w": 320,
+   "h": 320,
+   "bytes": 13360,
+   "yellowLeft": 0,
+   "source": "cut from kobi90-stand"
   }
  },
  "layers": {
@@ -5074,6 +5556,482 @@
     0,
     2816,
     537
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "homeAdult--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8574,
+   "source": "homeAdult",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "homeAdult--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8436,
+   "source": "homeAdult",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "flatAway--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 5942,
+   "source": "flatAway",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "flatAway--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7422,
+   "source": "flatAway",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "workshopFix--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7340,
+   "source": "workshopFix",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "workshopFix--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8654,
+   "source": "workshopFix",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "communityRoom--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6634,
+   "source": "communityRoom",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "communityRoom--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 10764,
+   "source": "communityRoom",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "storeroom--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7092,
+   "source": "storeroom",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "storeroom--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8520,
+   "source": "storeroom",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "officeOwner--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8920,
+   "source": "officeOwner",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "officeOwner--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 9798,
+   "source": "officeOwner",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "deskNewsroom--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 9832,
+   "source": "deskNewsroom",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "deskNewsroom--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8948,
+   "source": "deskNewsroom",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "rehearsal--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 4778,
+   "source": "rehearsal",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "rehearsal--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7560,
+   "source": "rehearsal",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "driveIn--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7818,
+   "source": "driveIn",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "driveIn--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 12436,
+   "source": "driveIn",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "arenaEuroOut--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6664,
+   "source": "arenaEuroOut",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "arenaEuroOut--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6514,
+   "source": "arenaEuroOut",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "arenaEuroSeats--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8948,
+   "source": "arenaEuroSeats",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "arenaEuroSeats--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7402,
+   "source": "arenaEuroSeats",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "portEurope--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8620,
+   "source": "portEurope",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "portEurope--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 11178,
+   "source": "portEurope",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "pitchSmall--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 12560,
+   "source": "pitchSmall",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "pitchSmall--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6066,
+   "source": "pitchSmall",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bedroom00--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7206,
+   "source": "bedroom00",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bedroom00--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 9946,
+   "source": "bedroom00",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "hallNew--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 11180,
+   "source": "hallNew",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "hallNew--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 15282,
+   "source": "hallNew",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 20473,
+   "yellowLeft": 0
+  },
+  "bloomOldTerrace--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8586,
+   "source": "bloomOldTerrace",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomOldTerrace--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8812,
+   "source": "bloomOldTerrace",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewTerrace--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 10698,
+   "source": "bloomNewTerrace",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloomNewTerrace--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6782,
+   "source": "bloomNewTerrace",
+   "box": [
+    0,
+    0,
+    1672,
+    329
    ],
    "deyellowed": 0,
    "yellowLeft": 0
