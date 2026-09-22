@@ -124,15 +124,16 @@ describe('זרימה — יום שחוסם רק על השעון', () => {
     }
   })
 
-  it('never offers while the player is busy, quick, or in an empty room', () => {
+  it('never offers while the player is busy or before the quiet threshold, but never requires a hotspot to advance a pure time gate', () => {
     const era = eraFor('a3-hall')
     const waiting = state({ chapter: 'a3-hall', minute: 18 * 60, flags: { 'a3:inside': true } })
     const base = { state: waiting, era, objectiveHe: null, quietFor: QUIET_MINUTES, busy: false, reachable: 3 }
     expect(shouldOfferPass(base)).toBeTruthy()
     expect(shouldOfferPass({ ...base, busy: true })).toBeNull()
     expect(shouldOfferPass({ ...base, quietFor: QUIET_MINUTES - 1 })).toBeNull()
-    // a room with nothing at all in it is a dead end, and that is the backstop's job
-    expect(shouldOfferPass({ ...base, reachable: 0 })).toBeNull()
+    // If the only meaningful thing left is time, an empty room is exactly where the game
+    // must offer the cut. Requiring a hotspot here recreates the walk-in-circles bug.
+    expect(shouldOfferPass({ ...base, reachable: 0 })).toBeTruthy()
   })
 })
 
@@ -236,7 +237,7 @@ describe('כשאין שער־זמן — דוחפים, לא מדלגים', () => 
     expect(flowMove(quiet({ quietFor: QUIET_MINUTES - 1 }))).toBeNull()
   })
 
-  it('says nothing in a room with no way out — that is the dead-end net\'s job, not this one', () => {
+  it('says nothing in a room with no way out when there is no pure time gate — that is the dead-end net\'s job', () => {
     expect(flowMove(quiet({ reachable: 0 }))).toBeNull()
   })
 
