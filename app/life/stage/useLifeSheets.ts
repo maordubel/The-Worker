@@ -3,10 +3,12 @@
 import { useCallback, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react'
 
 import { checklistFor, type ChecklistItem } from '@/lib/life/checklist'
+import { eraFor } from '@/lib/life/content/era'
 import type { LifeAudio } from '@/lib/life/runtime/audio'
 import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/game'
 import { lifeStore } from '@/lib/life/save'
 import type { LifeState } from '@/lib/life/types'
+import { actionsNow } from '@/lib/life/world/actions'
 
 /**
  * הדפים שהשחקן פותח — every screen the PLAYER opens, as opposed to every screen the game
@@ -19,22 +21,11 @@ import type { LifeState } from '@/lib/life/types'
  * thumb on a chip in the corner, and the game learns about it afterwards. Nothing on the bus
  * ever raises one.
  *
- * They share one choreography, and it is the reason they belong in one file rather than five:
+ * They share one choreography:
  *
- *   · the world PAUSES. Reading about yourself may not cost you the afternoon — a clock that
- *     kept running under an open profile would make the help sheet a punishment.
+ *   · the world PAUSES. Reading about yourself may not cost you the afternoon.
  *   · what they draw is a SNAPSHOT, taken at the moment they open, never a subscription.
- *     React must not hold the life. A card that re-rendered on every clock tick is a card
- *     that animates while you are reading it.
- *   · they open with `ui-open` and close with `ui-close`. Paper sounds belong to paper (the
- *     booklet, the album, the red box); these are panels and they say so.
- *
- * Three rules, five screens, and every one of them was a separate closure two hundred lines
- * apart in the shell, which is how the map sheet ended up as the only one of the five that
- * forgot to unpause on one of its exits for a while.
- *
- * The `runtime` and `audio` boxes and the `setMapState` setter are all stable identities, so
- * naming them in the dependency arrays keeps every callback below as stable as it was inline.
+ *   · they open with `ui-open` and close with `ui-close`.
  *
  * `mapState` is the one thing here it does NOT own: the reveal moment raises the same map
  * from the bus, so the state that both draw from lives with the bus and the setter is handed
@@ -50,14 +41,7 @@ export function useLifeSheets({
   /** owned by `useLifeRuntime`, because `reveal` on the bus draws the same map */
   setMapState: Dispatch<SetStateAction<LifeState | null>>
 }) {
-  /**
-   * התיק — the profile, opened by the player and never by the game.
-   *
-   * It is a SNAPSHOT taken at the moment it opens, not a subscription: React must never
-   * hold the life, and a card that re-rendered on every clock tick would be a card that
-   * animates while you read it. The world is paused underneath — reading about yourself
-   * may not cost you the afternoon.
-   */
+  /** the profile — snapshot at open time, never a live React copy of the life */
   const [snapshot, setSnapshot] = useState<LifeSnapshot | null>(null)
   const [debug, setDebug] = useState(false)
 
@@ -96,13 +80,37 @@ export function useLifeSheets({
 
   const [help, setHelp] = useState(false)
   const [checklist, setChecklist] = useState<ChecklistItem[]>([])
+
+  /**
+   * מה עכשיו — the existing help sheet is also the one place where optional life can be
+   * explicit without turning the glass into a quest HUD.
+   *
+   * `checklistFor` remains the authored spine. `actionsNow` contributes only non-story
+   * actions the world has ALREADY made available: a timed opportunity or a route
+   * invitation. They are appended as "אפשר גם" rather than mixed into the required
+   * sequence, so freedom is visible and obligation stays honest.
+   */
   const openHelp = useCallback(() => {
-    runtime.current?.pause(true)
-    const state = runtime.current?.snapshot().state
-    setChecklist(state ? checklistFor(state) : [])
+    const current = runtime.current
+    current?.pause(true)
+    const state = current?.snapshot().state
+    if (state) {
+      const story = checklistFor(state)
+      const optional: ChecklistItem[] = actionsNow(state, eraFor(state.chapter))
+        .filter((action) => action.kind !== 'story')
+        .map((action) => ({
+          id: `optional:${action.id}`,
+          textHe: `אפשר גם — ${action.titleHe}`,
+          done: false,
+        }))
+      setChecklist([...story, ...optional])
+    } else {
+      setChecklist([])
+    }
     setHelp(true)
     audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
   }, [audio, runtime])
+
   const closeHelp = useCallback(() => {
     setHelp(false)
     runtime.current?.pause(false)
