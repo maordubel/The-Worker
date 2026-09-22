@@ -1,35 +1,43 @@
 'use server'
 
-import { coachNote, gradeLineup } from '@/lib/game/lineup'
-import type { CoachNote, LineupVerdict } from '@/lib/game/lineup-sheet'
+import { coachNote, gradeLineup, type LineupWindow } from '@/lib/game/lineup'
+import type { CoachNote, LineupVerdict, Placement } from '@/lib/game/lineup-sheet'
 
-/** The verified XI stays on the server; only the verdict crosses. */
+/**
+ * The verified XI stays on the server; only the verdict crosses.
+ *
+ * The board sends what it holds — `{playerId, line, order}` per man, the four bands and
+ * nothing else — and the grade is by LINE (players.md §2, Gate 3 V3). A round is
+ * addressed by seed AND cursor, so grading re-derives the same deal the screen shows.
+ */
 export async function submitLineup(
   seed: number,
-  picks: Record<string, string | null>,
+  placements: Placement[],
   cursor = 0,
+  window?: LineupWindow,
 ): Promise<LineupVerdict | null> {
-  // A round is addressed by seed AND cursor once rotation is on; grading has to
-  // re-derive with both or it grades a different deal than the one on screen.
-  return gradeLineup(seed, picks, cursor)
+  // `window` is THE WORKER LIFE's: the same grade, re-derived over the match the life dealt
+  return gradeLineup(seed, placements, cursor, cleanWindow(window))
+}
+
+/** what a client may send as a window: a year and an opaque match id, nothing else */
+function cleanWindow(window?: LineupWindow): LineupWindow | undefined {
+  if (!window || !Number.isFinite(window.before)) return undefined
+  const pin = typeof window.pin === 'string' && /^m_[0-9a-f]{6,}$/.test(window.pin) ? window.pin : null
+  return { before: Math.round(window.before), pin }
 }
 
 /**
- * פתק מהמאמן — the hint, and it crosses the wire for exactly the same reason the grade
- * does.
- *
- * A coach's note is a count over the verified XI: how many starters are still hanging
- * up, how many men on the board were on the bench that night, how many are sitting in
- * the right line. Every one of those is derived from the answer, so every one of them
- * has to be computed where the answer lives. What comes back is a kind and a number —
- * never a name, never a slot — and the screen turns it into a sentence out of
- * `messages/he.json`.
+ * פתק מהמאמן — a count over the verified XI (starters still hanging up, bench men on the
+ * board, men in the right band), so it is computed where the answer lives. A kind and a
+ * number cross; never a name, never a band.
  */
 export async function askCoach(
   seed: number,
-  picks: Record<string, string | null>,
+  placements: Placement[],
   cursor = 0,
   index = 0,
+  window?: LineupWindow,
 ): Promise<CoachNote | null> {
-  return coachNote(seed, picks, cursor, index)
+  return coachNote(seed, placements, cursor, index, cleanWindow(window))
 }

@@ -1,5 +1,5 @@
 {
- "note": "Historic XIs as the Vikipoel match pages record them. `positionsInferred` is true everywhere: the sources list the eleven in the conventional order but do not state each player's position, so grading falls back to the LINE. A record with `playable: false` is one the source itself marks unverified — it is kept for the archive and withheld from the game. `benchHe` names the substitutes the record's own source already states in `noteHe`; it is a restatement, never a new claim, and `tests/lineup.test.ts` fails if a bench name cannot be quoted from the record it sits in. The Stamford Bridge record is left without one on purpose: its note writes חילופים שנרשמו as three names, one of whom is also in its own XI, so who came on and who went off cannot be read out of it.",
+ "note": "Historic XIs as the Vikipoel match pages record them. `positionsInferred` is true everywhere: the sources list the eleven in the conventional order but do not state each player's position, so grading falls back to the LINE. A record with `playable: false` is one the source itself marks unverified — it is kept for the archive and withheld from the game. `benchHe` names the substitutes the record's own source already states in `noteHe`; it is a restatement, never a new claim, and `tests/lineup.test.ts` fails if a bench name cannot be quoted from the record it sits in. The Stamford Bridge record is left without one on purpose: its note writes חילופים שנרשמו as three names, one of whom is also in its own XI, so who came on and who went off cannot be read out of it. — 21.9.2026 (שער 3 V3): כל רשומה נושאת את מזהה המשחק הקנוני (`matchRef`, m_…) ואת מזהי השחקנים (`xiIds`, p_…) לצד השמות כפי שהמקור כתב אותם; `tests/lineup.test.ts` נופל אם שם ומזהה נפרדו. `formationStated: false` — אף מקור כאן אינו מצהיר על מערך, ולכן המשחק מציב לפי קווים ולא לפי משבצות. `subsOn` הוא ניסוח מחדש של `noteHe`/`benchHe` (מי נכנס, באיזו דקה, ובמקום מי — רק איפה שכתוב). `decoys` מסווג כל מסיח לאחד משלושה סוגים עם מקור: `sub-on` (נכנס כמחליף באותו ערב), `season-squad` (בסגל העונה לפי squads.json), `other` (אין טענה מעבר ל\"לא פתח\"). ההרכב המתועד של 2000/01 הוצא מהמשחק: הוא אינו נוקב במשחק.",
  "confidence": 3,
  "source": {
   "kind": "manual",
@@ -34,6 +34,7 @@
  "records": [
   {
    "matchId": "2001-02-uefa-r2-chelsea",
+   "matchRef": "m_67a2f41af253",
    "titleHe": "גביע אופ\"א · סיבוב 2 · מול צ'לסי",
    "subtitleHe": "18.10.2001 · בלומפילד · הפועל תל אביב 2 — צ'לסי 0",
    "formation": "4-4-2",
@@ -62,10 +63,55 @@
    ],
    "sourceTitle": "ויקיפועל · דיווח המשחק (אומת ע\"י מאור הראל)",
    "sourceUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
-   "confidence": 3
+   "confidence": 3,
+   "formationStated": false,
+   "xiIds": {
+    "GK": "p_9a7b6e96a1",
+    "D1": "p_34eb87490c",
+    "D2": "p_7664d34669",
+    "D3": "p_ed1610b21e",
+    "D4": "p_3c34db1727",
+    "M1": "p_d49e466873",
+    "M2": "p_46676d770e",
+    "M3": "p_fb2afa79d0",
+    "M4": "p_6c61f19a2c",
+    "F1": "p_eb6083c0af",
+    "F2": "p_6f1fd9dc54"
+   },
+   "decoys": [
+    {
+     "id": "p_92e5eca2c1",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_abe3ea1c69",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_9a2ca355d7",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_64938b42c8",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_59b1f192aa",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_b09152b9d6",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_6923a21427",
+     "kind": "season-squad"
+    }
+   ]
   },
   {
    "matchId": "2001-02-uefa-qf-milan",
+   "matchRef": "m_b88bc98d09db",
    "titleHe": "גביע אופ\"א · רבע גמר · מול מילאן",
    "subtitleHe": "14.03.2002 · אצטדיון GSP ניקוסיה · הפועל תל אביב 1 — מילאן 0",
    "formation": "4-4-2",
@@ -97,10 +143,59 @@
    "noteHe": "חילופים: סלים טועמה במקום אישטוון פישונט בדקה 69, פיני בלילי במקום סרגיי קלשצ'נקו בדקה 81. כרטיסים צהובים: דניס אונישנקו, יגאל אנטבי.",
    "confidence": 3,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+   "formationStated": false,
+   "xiIds": {
+    "GK": "p_9a7b6e96a1",
+    "D1": "p_34eb87490c",
+    "D2": "p_7664d34669",
+    "D3": "p_ed1610b21e",
+    "D4": "p_3c34db1727",
+    "M1": "p_d49e466873",
+    "M2": "p_fb2afa79d0",
+    "M3": "p_46676d770e",
+    "M4": "p_6c61f19a2c",
+    "F1": "p_6f1fd9dc54",
+    "F2": "p_eb6083c0af"
+   },
+   "subsOn": [
+    {
+     "id": "p_2cc60c0e20",
+     "minute": 69,
+     "for": "p_6c61f19a2c"
+    },
+    {
+     "id": "p_f76834937e",
+     "minute": 81,
+     "for": "p_6f1fd9dc54"
+    }
+   ],
+   "decoys": [
+    {
+     "id": "p_2cc60c0e20",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_f76834937e",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_59b1f192aa",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_b09152b9d6",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_66dbe0b7e5",
+     "kind": "other"
+    }
+   ]
   },
   {
    "matchId": "2010-11-ucl-po-salzburg-2",
+   "matchRef": "m_7b61fac81ad6",
    "titleHe": "ליגת האלופות · פלייאוף · מול זלצבורג",
    "subtitleHe": "בלומפילד · הפועל תל אביב 1 — זלצבורג 1 · העלייה לשלב הבתים",
    "formation": "4-4-2",
@@ -133,10 +228,64 @@
    "noteHe": "חילופים: שי אבוטבול בדקה 74, ביוואן פרנסמן בדקה 65, גל שיש בדקה 90.",
    "confidence": 3,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+   "formationStated": false,
+   "xiIds": {
+    "GK": "p_37bd946fc6",
+    "D1": "p_6d9974711f",
+    "D2": "p_dff7d98add",
+    "D3": "p_98a480c32b",
+    "D4": "p_b150788697",
+    "M1": "p_4a4c618031",
+    "M2": "p_b809bb0aca",
+    "M3": "p_4ede2d4c2f",
+    "M4": "p_c37eaf41cd",
+    "F1": "p_fbca06cc69",
+    "F2": "p_d20e3a28f6"
+   },
+   "subsOn": [
+    {
+     "id": "p_3efab145df",
+     "minute": 74,
+     "for": null
+    },
+    {
+     "id": "p_d027706b2f",
+     "minute": 65,
+     "for": null
+    },
+    {
+     "id": "p_dcf4113be8",
+     "minute": 90,
+     "for": null
+    }
+   ],
+   "decoys": [
+    {
+     "id": "p_0b04f3bfc5",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_be26644441",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_3efab145df",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_d027706b2f",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_dcf4113be8",
+     "kind": "sub-on"
+    }
+   ]
   },
   {
    "matchId": "2010-11-ucl-po-salzburg-1",
+   "matchRef": "m_9b658c3bbc9e",
    "titleHe": "ליגת האלופות · פלייאוף · הלוך מול זלצבורג",
    "subtitleHe": "הפועל תל אביב 3 — זלצבורג 2",
    "formation": "4-4-2",
@@ -169,7 +318,60 @@
    "noteHe": "חילופים: ביוואן פרנסמן בדקה 90, רומאן רוקי בדקה 72, ויקטור מרעי בדקה 79.",
    "confidence": 3,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+   "formationStated": false,
+   "xiIds": {
+    "GK": "p_37bd946fc6",
+    "D1": "p_6d9974711f",
+    "D2": "p_dff7d98add",
+    "D3": "p_98a480c32b",
+    "D4": "p_b150788697",
+    "M1": "p_4a4c618031",
+    "M2": "p_c37eaf41cd",
+    "M3": "p_4ede2d4c2f",
+    "M4": "p_be26644441",
+    "F1": "p_0b04f3bfc5",
+    "F2": "p_d20e3a28f6"
+   },
+   "subsOn": [
+    {
+     "id": "p_d027706b2f",
+     "minute": 90,
+     "for": null
+    },
+    {
+     "id": "p_b809bb0aca",
+     "minute": 72,
+     "for": null
+    },
+    {
+     "id": "p_fbca06cc69",
+     "minute": 79,
+     "for": null
+    }
+   ],
+   "decoys": [
+    {
+     "id": "p_d027706b2f",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_b809bb0aca",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_fbca06cc69",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_3efab145df",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_dcf4113be8",
+     "kind": "season-squad"
+    }
+   ]
   },
   {
    "matchId": "2000-01-documented-xi",
@@ -199,10 +401,27 @@
    ],
    "confidence": 2,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+   "playable": false,
+   "withheldHe": "נשמר בארכיון ואינו נכנס למשחק: הרשומה אינה נוקבת במשחק אחד מסוים (\"משחק מתועד בעונת 2000/01\"), ושער 3 שואל על ערב אחד — בלי מזהה משחק אין מה לשאול (בריף §14). כשיימצא המשחק, מוסיפים matchRef ומסירים את השדה הזה.",
+   "formationStated": false,
+   "xiIds": {
+    "GK": "p_9a7b6e96a1",
+    "D1": "p_3c34db1727",
+    "D2": "p_34eb87490c",
+    "D3": "p_ed1610b21e",
+    "D4": "p_7664d34669",
+    "M1": "p_2cc60c0e20",
+    "M2": "p_66dbe0b7e5",
+    "M3": "p_b09152b9d6",
+    "M4": "p_fb2afa79d0",
+    "F1": "p_6c61f19a2c",
+    "F2": "p_eb6083c0af"
+   }
   },
   {
    "matchId": "2001-02-uefa-r2-chelsea-away",
+   "matchRef": "m_73bc1426d0e3",
    "titleHe": "גביע אופ\"א · סיבוב 2 · בסטמפורד ברידג'",
    "subtitleHe": "01.11.2001 · סטמפורד ברידג' · צ'לסי 1 — הפועל תל אביב 1",
    "formation": "4-4-2",
@@ -224,10 +443,26 @@
    "noteHe": "המקור מסמן את המשבצת האחת-עשרה כלא מאומתת — אוסטרץ או קלשצ'נקו. ההרכב נשמר לתיעוד ואינו נכנס למשחק, כי משבצת אחת בו היא ניחוש. חילופים שנרשמו: סלים טועמה, אישטוון פישונט, יעקב הלל. קהל: 42,000.",
    "confidence": 1,
    "sourceUrl": "https://wiki.red-fans.com/",
-   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026"
+   "sourceTitle": "ויקיפועל — מסמך המחקר של מאור הראל, 1.9.2026",
+   "formationStated": false,
+   "xiIds": {
+    "GK": "p_9a7b6e96a1",
+    "D1": "p_34eb87490c",
+    "D2": "p_7664d34669",
+    "D3": "p_ed1610b21e",
+    "D4": "p_3c34db1727",
+    "M1": "p_d49e466873",
+    "M2": "p_46676d770e",
+    "M3": "p_6923a21427",
+    "M4": "p_fb2afa79d0",
+    "F1": "p_6c61f19a2c",
+    "F2": "p_eb6083c0af"
+   },
+   "decoys": []
   },
   {
    "matchId": "1985-86-league-final-haifa",
+   "matchRef": "m_ba6c1583a5ec",
    "titleHe": "משחק האליפות · מול מכבי חיפה",
    "subtitleHe": "24.5.1986 · בלומפילד · הפועל תל אביב 1 — מכבי חיפה 0",
    "formation": "4-4-2",
@@ -260,7 +495,55 @@
     "רפי שמואל",
     "דב רמלר"
    ],
-   "noteHe": "המסיחים אינם מומצאים: לנדאו ויאני נכנסו כמחליפים באותו משחק, גבי לסרי לבש 12 בעונת 1985/86, ורפי שמואל ודב רמלר תועדו בסגל בעונות הסמוכות."
+   "noteHe": "המסיחים אינם מומצאים: לנדאו ויאני נכנסו כמחליפים באותו משחק, גבי לסרי לבש 12 בעונת 1985/86, ורפי שמואל ודב רמלר תועדו בסגל בעונות הסמוכות.",
+   "formationStated": false,
+   "xiIds": {
+    "GK": "p_a82f4f89e9",
+    "D1": "p_d41b1a477b",
+    "D2": "p_c324982118",
+    "D3": "p_eabb2bc45d",
+    "D4": "p_a8459249bd",
+    "M1": "p_72e3940ed2",
+    "M2": "p_29ba0c2a95",
+    "M3": "p_af404e42dc",
+    "M4": "p_d5b6d6ee0a",
+    "F1": "p_75ef40e9c5",
+    "F2": "p_1108a4ea15"
+   },
+   "subsOn": [
+    {
+     "id": "p_25fbe5fc0d",
+     "minute": 48,
+     "for": null
+    },
+    {
+     "id": "p_ce50c6869c",
+     "minute": 65,
+     "for": null
+    }
+   ],
+   "decoys": [
+    {
+     "id": "p_25fbe5fc0d",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_ce50c6869c",
+     "kind": "sub-on"
+    },
+    {
+     "id": "p_4b46fbda65",
+     "kind": "season-squad"
+    },
+    {
+     "id": "p_d33d2b7eec",
+     "kind": "other"
+    },
+    {
+     "id": "p_d1c100a162",
+     "kind": "other"
+    }
+   ]
   }
  ]
 }

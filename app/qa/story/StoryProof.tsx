@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
+import { DEFAULT_SPEC } from '@/lib/kit/spec'
 import { drawStory, lastInkBoxes, type InkBox, type StoryCard } from '@/lib/share/story'
 
 /**
@@ -203,6 +204,29 @@ const CASES: Array<{ name: string; card: StoryCard }> = [
       ],
       cta: 'תמלא פתק משלך',
       challenge: 'הפתק שלך מחכה',
+    },
+  },
+  {
+    /**
+     * שער 10 — the Worker Card (`cardStory`, 21.9.2026): the nickname as the hero at its
+     * longest the roster holds (a nickname is capped at 18, `NAME_MAX`), the three stats at their
+     * longest values, and a two-digit number on the shirt's back.
+     */
+    name: 'worker-card',
+    card: {
+      template: 'kit',
+      kicker: 'GATE 10 · WORKER CARD',
+      label: 'התיק שלי',
+      eyebrow: 'כרטיס פועל',
+      hero: LONG_NAME,
+      stats: [
+        { k: 'שערים', v: '12/12' },
+        { k: 'אוהד מאז', v: 'רק התחלתי' },
+        { k: 'שער הבית', v: 'לא קבוע' },
+      ],
+      cta: 'תפתח פנקס משלך',
+      challenge: 'כל שורה בכרטיס הזה נעשתה. שום דבר לא נקנה.',
+      kit: { ...DEFAULT_SPEC, number: 99 },
     },
   },
 ]

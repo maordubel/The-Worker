@@ -11,6 +11,7 @@ import type {
   RoyalRumbleResult,
 } from '@/lib/game/royal-rumble'
 import type { KitSpec } from '@/lib/kit/spec'
+import type { Embedded } from '@/lib/mechanics/types'
 import { t } from '@/lib/royal-rumble/i18n'
 import { submitRoyalRumble } from './actions'
 import { RoyalRumbleSlotReveal } from './RoyalRumbleSlotReveal'
@@ -311,11 +312,14 @@ function MatchPitch({
   frameIndex,
   ours,
   kits,
+  bare = false,
 }: {
   result: RoyalRumbleResult
   frameIndex: number
   ours: RoyalRumblePublicPlayer[]
   kits: EraKit[]
+  /** inside the life: the pitch without the site's plate */
+  bare?: boolean
 }) {
   const frame = result.frames[Math.min(frameIndex, result.frames.length - 1)] ?? result.frames[0]
   if (!frame) return null
@@ -328,7 +332,7 @@ function MatchPitch({
         <div className="absolute inset-y-0 start-0 w-2 bg-red" />
         <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 ps-2">
           <div>
-            <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">THE WORKER · GATE 09</p>
+            {!bare && <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">THE WORKER · GATE 09</p>}
             <p className="font-display text-[20px] leading-none sm:text-[26px]">{t('title')}</p>
           </div>
           <div className="border-x-hair border-paper/20 px-4 text-center sm:px-8">
@@ -409,12 +413,20 @@ export function RoyalRumbleRun({
   cursor,
   playerCount,
   kits,
+  embedded,
 }: {
   draft: RoyalRumbleDraft
   shuffleDraft: RoyalRumbleDraft
   cursor: number
   playerCount: number
   kits: EraKit[]
+  /**
+   * Opened from inside THE WORKER LIFE — Ofir's cards on the asphalt. The same draft and the
+   * same match over the men who had worn the shirt before the life's year (the server plays
+   * it with that window); when the whistle goes the result goes back to the pitch, where the
+   * friends settle the bet. No record, no "again", no plate with a gate's number on it.
+   */
+  embedded?: Omit<Embedded<RoyalRumbleResult>, 'window'> & { window: { before: number } }
 }) {
   const [phase, setPhase] = useState<Phase>('draft')
   const [activeDraft, setActiveDraft] = useState(draft)
@@ -479,7 +491,7 @@ export function RoyalRumbleRun({
     if (!complete || remaining < 0 || busy) return
     setBusy(true)
     setError(null)
-    const resolved = await submitRoyalRumble(activeDraft.seed, selectedSlugs)
+    const resolved = await submitRoyalRumble(activeDraft.seed, selectedSlugs, embedded?.window)
     setBusy(false)
     if (!resolved) {
       setError(t('invalidFive'))
@@ -499,6 +511,12 @@ export function RoyalRumbleRun({
     const timer = window.setTimeout(() => setRevealCount((value) => value + 1), 820)
     return () => window.clearTimeout(timer)
   }, [phase, result, revealCount])
+
+  // inside the life the full-time whistle ends in the room, not on a result page
+  useEffect(() => {
+    if (!embedded || phase !== 'result' || !result) return
+    embedded.onResult(result)
+  }, [embedded, phase, result])
 
   useEffect(() => {
     if (phase !== 'match' || !result) return
@@ -556,7 +574,7 @@ export function RoyalRumbleRun({
 
         <div className="relative mt-4 text-center sm:mt-6">
           <span className="inline-block border-x-rule border-red px-5 py-2 font-display text-[30px] text-red sm:text-[42px]" dir="ltr">VS</span>
-          <p className="mt-2 font-mono tabular-nums text-[8px] font-black tracking-[0.24em] text-paper/40" dir="ltr">ROYAL RUMBLE · GATE 09</p>
+          {!embedded && <p className="mt-2 font-mono tabular-nums text-[8px] font-black tracking-[0.24em] text-paper/40" dir="ltr">ROYAL RUMBLE · GATE 09</p>}
         </div>
         <style>{`@keyframes rrDrop{0%{opacity:0;transform:translateY(-18px) scale(.96)}100%{opacity:1;transform:none}}`}</style>
       </div>
@@ -566,12 +584,13 @@ export function RoyalRumbleRun({
   if (phase === 'match' && result) {
     return (
       <div className="mx-auto max-w-5xl py-2">
-        <MatchPitch result={result} frameIndex={frameIndex} ours={selectedPlayers} kits={kits} />
+        <MatchPitch result={result} frameIndex={frameIndex} ours={selectedPlayers} kits={kits} bare={Boolean(embedded)} />
       </div>
     )
   }
 
   if (phase === 'result' && result) {
+    if (embedded) return null
     const won = result.winner === 'us'
     const draw = result.winner === 'draw'
     return (
@@ -618,13 +637,13 @@ export function RoyalRumbleRun({
   return (
     <div className="mx-auto max-w-5xl pb-3 pt-0">
       <header className="relative overflow-hidden border-rule border-ink bg-ink text-paper">
-        <div className="pointer-events-none absolute -start-5 -top-10 font-display text-[220px] leading-none text-paper/5 sm:text-[300px]" dir="ltr">09</div>
+        {!embedded && <div className="pointer-events-none absolute -start-5 -top-10 font-display text-[220px] leading-none text-paper/5 sm:text-[300px]" dir="ltr">09</div>}
         <div className="absolute inset-y-0 end-0 w-2 bg-red" />
 
         <div className="relative grid grid-cols-[1fr_auto] items-end gap-3 px-3 py-3 sm:gap-5 sm:px-6 sm:py-6">
           <div>
             <div className="flex items-center gap-3">
-              <span className="border-hair border-red px-2 py-1 font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">GATE 09</span>
+              {!embedded && <span className="border-hair border-red px-2 py-1 font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">GATE 09</span>}
               <span className="hidden font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/35 sm:inline" dir="ltr">5V5 · HAPOEL ALL-TIME</span>
             </div>
             <h1 className="mt-2 font-display text-[40px] leading-[0.82] sm:mt-3 sm:text-[76px]">{t('title')}</h1>

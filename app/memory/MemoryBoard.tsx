@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ArchiveCard } from '@/components/memory/ArchiveCard'
 import { FusionPlate } from '@/components/memory/FusionPlate'
+import { PairThreads } from '@/components/memory/PairThreads'
 import { SouvenirShelf } from '@/components/memory/SouvenirShelf'
 import { LampGrid, Mast } from '@/components/ui/LampGrid'
 import { Num } from '@/components/ui/Num'
@@ -14,12 +15,14 @@ import { artFor } from '@/lib/share/story'
 import { collect, collected, readProfile } from '@/lib/profile/store'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { MemoryPair, MemoryRound } from '@/lib/game/memory'
+import type { Embedded } from '@/lib/mechanics/types'
 import {
   ECHO_MS,
   ECHO_STREAK,
   FLASH_MS,
   RE_FLASH_MS,
   closeOpen,
+  countdownAt,
   echoMate,
   finished,
   flip,
@@ -35,6 +38,9 @@ import {
 
 /** the collection every closed pair is filed into, shared with the personal area */
 const SHELF = 'memory'
+
+/** the wall is four across — the grid below and the threads over it read the same number */
+const COLS = 4
 
 /**
  * The four closing lines, each written out in full.
@@ -86,10 +92,17 @@ export function MemoryBoard({
   round,
   seed,
   cursor = 0,
+  embedded,
 }: {
   round: MemoryRound
   seed: number
   cursor?: number
+  /**
+   * Opened from inside THE WORKER LIFE — the old fan at the bus stop remembers. The same wall
+   * and the same four verdicts; nothing is filed on the shelf, nothing is recorded or shared,
+   * and the verdict goes back to the room.
+   */
+  embedded?: Omit<Embedded<MemoryVerdict>, 'window'>
 }) {
   const { cards, pairs } = round
   const total = pairs.length
@@ -103,6 +116,10 @@ export function MemoryBoard({
   const [hint, setHint] = useState<MessageKey>('memory.hint.start')
   const [streakShown, setStreakShown] = useState(0)
   const [kept, setKept] = useState<number | null>(null)
+  /** the pair just locked — the v3 "MEMORY LOCKED" panel, folded into the hint line */
+  const [lockedPair, setLockedPair] = useState<MemoryPair | null>(null)
+  /** 3·2·1 on the flash strip; null when no flash is running */
+  const [count, setCount] = useState<number | null>(null)
 
   const byId = useMemo(() => new Map(pairs.map((pair) => [pair.id, pair] as const)), [pairs])
   const timers = useRef<number[]>([])
@@ -114,7 +131,10 @@ export function MemoryBoard({
 
   useEffect(
     () => () => {
-      for (const id of timers.current) window.clearTimeout(id)
+      for (const id of timers.current) {
+        window.clearTimeout(id)
+        window.clearInterval(id)
+      }
       timers.current = []
     },
     [],
@@ -123,27 +143,49 @@ export function MemoryBoard({
   // The shelf's across-runs count is read after mount, never during render: the server
   // has no browser storage and reading it in a render is how a hydration mismatch is born.
   useEffect(() => {
+    if (embedded) return
     setKept(collected(readProfile(), SHELF).length)
-  }, [])
+  }, [embedded])
 
   const done = finished(run, total)
   const lit = wallLit(run, total)
   const flashing = phase === 'flash'
 
+  /** the countdown ticks with the beat and stops with it, however the beat ends */
+  function countDown(ms: number) {
+    const opened = Date.now()
+    setCount(countdownAt(0, ms))
+    const tick = window.setInterval(() => {
+      const elapsed = Date.now() - opened
+      if (elapsed >= ms) {
+        window.clearInterval(tick)
+        return
+      }
+      setCount(countdownAt(elapsed, ms))
+    }, 200)
+    timers.current.push(tick)
+  }
+
   function lightTheWall() {
     setPhase('flash')
     setHint('memory.hint.photograph')
+    countDown(FLASH_MS)
     later(() => {
       setPhase('play')
+      setCount(null)
       setHint('memory.hint.find')
     }, FLASH_MS)
   }
 
   function endFlash() {
     if (phase !== 'flash') return
-    for (const id of timers.current) window.clearTimeout(id)
+    for (const id of timers.current) {
+      window.clearTimeout(id)
+      window.clearInterval(id)
+    }
     timers.current = []
     setPhase('play')
+    setCount(null)
     setHint('memory.hint.find')
   }
 
@@ -152,8 +194,10 @@ export function MemoryBoard({
     setRun(spendFlash)
     setPhase('flash')
     setHint('memory.hint.photograph')
+    countDown(RE_FLASH_MS)
     later(() => {
       setPhase('play')
+      setCount(null)
       setHint('memory.hint.find')
     }, RE_FLASH_MS)
   }
@@ -179,14 +223,18 @@ export function MemoryBoard({
     if (outcome.kind === 'pair') {
       const pair = byId.get(outcome.pair)
       if (pair) setFused({ pair, perfect: outcome.perfect })
+      setLockedPair(pair ?? null)
       setStreakShown(outcome.run.streak)
       setHint(outcome.run.streak >= 2 ? 'memory.hint.hot' : 'memory.hint.locked')
-      collect(SHELF, [outcome.pair])
-      setKept(collected(readProfile(), SHELF).length)
+      if (!embedded) {
+        collect(SHELF, [outcome.pair])
+        setKept(collected(readProfile(), SHELF).length)
+      }
       return
     }
 
     if (outcome.kind === 'miss') {
+      setLockedPair(null)
       setWrong(outcome.run.open)
       setHint('memory.hint.wrong')
       later(() => {
@@ -249,14 +297,41 @@ export function MemoryBoard({
         </div>
       </div>
 
+      {phase === 'idle' && (
+        <ul className="mt-2 grid gap-1.5 min-[480px]:grid-cols-3" aria-label={t('memory.intro.aria')}>
+          {(
+            [
+              ['MEMORY FLASH', 'memory.intro.flash'],
+              ['ARCHIVE OBJECTS', 'memory.intro.objects'],
+              ['MEMORY ECHO', 'memory.intro.echo'],
+            ] as const
+          ).map(([latin, key]) => (
+            <li key={key} className="border-hair border-sheet/35 bg-sheet/[.06] px-2.5 py-2">
+              <p className="font-latin text-[9px] font-bold tracking-[0.18em] text-red" dir="ltr">
+                {latin}
+              </p>
+              <p className="mt-0.5 font-body text-[12px] leading-snug text-concrete">{t(key)}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <p aria-live="polite" className="mt-2 font-body text-step--1 text-concrete">
         {hint === 'memory.hint.hot' ? t('memory.hint.hot', { n: String(streakShown) }) : t(hint)}
+        {lockedPair && (hint === 'memory.hint.locked' || hint === 'memory.hint.hot') && (
+          <span className="block font-sign text-[13px] font-bold text-sheet">
+            {t('memory.hint.lockedFact')}{' '}
+            {numericFace(lockedPair.a) ? <Num>{lockedPair.a}</Num> : lockedPair.a}
+            {' · '}
+            {numericFace(lockedPair.b) ? <Num>{lockedPair.b}</Num> : lockedPair.b}
+          </span>
+        )}
       </p>
 
       <div className="mt-2 flex justify-center">
         <div className="w-full max-w-[420px]">
           <div
-            className={`grid grid-cols-4 gap-1.5 border-plate p-1.5 transition-colors duration-plate motion-reduce:transition-none ${
+            className={`relative grid grid-cols-4 gap-1.5 border-plate p-1.5 transition-colors duration-plate motion-reduce:transition-none ${
               lit ? 'border-red bg-red/10' : 'border-sheet/50'
             }`}
             style={{ transform: 'rotate(-1.5deg)' }}
@@ -273,6 +348,7 @@ export function MemoryBoard({
                 onFlip={onFlip}
               />
             ))}
+            <PairThreads cards={cards} done={run.done} cols={COLS} />
           </div>
           <Mast height={56} night />
         </div>
@@ -321,7 +397,7 @@ export function MemoryBoard({
         </div>
       </div>
 
-      <SouvenirShelf pairs={pairs} done={run.done} kept={kept} />
+      {!embedded && <SouvenirShelf pairs={pairs} done={run.done} kept={kept} />}
 
       {fused && (
         <FusionPlate
@@ -339,6 +415,16 @@ export function MemoryBoard({
           <h2 className="mt-1 font-display text-step-2 leading-tight text-ink">
             {t(VERDICT[verdict(run, total)])}
           </h2>
+          {embedded && (
+            <button
+              type="button"
+              onClick={() => embedded.onResult(verdict(run, total))}
+              data-memory="back"
+              className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-0 font-extrabold text-paper"
+            >
+              {embedded.doneLabel}
+            </button>
+          )}
 
           <dl className="mt-3 flex items-end gap-5 border-y-hair border-ink/25 py-2">
             {(
@@ -364,7 +450,7 @@ export function MemoryBoard({
             {pairs.map((pair) => (
               <li
                 key={pair.id}
-                className="flex items-baseline gap-2 border-b-hair border-ink/20 py-1.5"
+                className="flex flex-wrap items-baseline gap-x-2 border-b-hair border-ink/20 py-1.5"
               >
                 <span className="min-w-0 flex-1 truncate font-sign text-[14px] font-bold text-ink">
                   {numericFace(pair.a) ? <Num>{pair.a}</Num> : pair.a}
@@ -376,10 +462,14 @@ export function MemoryBoard({
                 <span className="shrink-0 font-sign text-[13px] font-bold text-red">
                   {numericFace(pair.b) ? <Num>{pair.b}</Num> : pair.b}
                 </span>
+                {/* v3: the mural says what KIND of memory each one is */}
+                <span className="w-full basis-full font-body text-[11px] leading-tight text-muted">{pair.kind}</span>
               </li>
             ))}
           </ol>
 
+          {!embedded && (
+            <>
           <RecordRun gate="/memory" score={run.bestStreak} correct={total} asked={run.moves} />
           <ShareRow
             kind="memory"
@@ -407,6 +497,8 @@ export function MemoryBoard({
           >
             {t('run.again')}
           </PlayLink>
+            </>
+          )}
         </section>
       )}
 
@@ -427,6 +519,11 @@ export function MemoryBoard({
           <span className="min-w-0">
             <span className="block font-display text-step-1 leading-none text-sheet">
               {t('memory.flash.title')}
+              {count !== null && (
+                <span className="ms-2 font-poster text-[26px] leading-none text-red" aria-live="polite">
+                  {t('memory.flash.count', { n: String(count) })}
+                </span>
+              )}
             </span>
             <span className="mt-0.5 block font-body text-[11px] leading-snug text-concrete">
               {t('memory.flash.skip')}

@@ -304,6 +304,8 @@ function Result({
       <Punch />
       <RecordRun
         gate="/timeline"
+        variant="order"
+        seed={seed}
         score={run.score}
         correct={run.correct}
         asked={TIMELINE_LENGTH}
@@ -361,6 +363,7 @@ function Result({
 
       <ShareRow
         kind="timeline"
+        route="/timeline/order"
         params={{ c: String(run.correct), s: String(seed), r: String(cursor) }}
         headline={`${run.correct}/${TIMELINE_LENGTH}`}
         card={{
@@ -382,7 +385,7 @@ function Result({
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <PlayLink
-          gate="/timeline"
+          gate="/timeline/order"
           className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-4 font-body text-step-0 font-extrabold text-ink"
         >
           {t('run.again')}

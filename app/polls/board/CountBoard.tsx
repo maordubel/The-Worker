@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 
 import { Num } from '@/components/ui/Num'
@@ -8,11 +8,22 @@ import {
   BALLOT,
   NUMBERS,
   POSITIONS,
+  isPositionCode,
+  legacyPositionCode,
+  positionLabel,
   type Ballot,
   type PollQuestion,
   type Tally,
 } from '@/lib/polls/ballot'
-import { boardDisplay, histogramBars, positionBars, rankRows, type BoardRow } from '@/lib/polls/board'
+import { isPlayerId } from '@/lib/archive/player-identity'
+import {
+  boardDisplay,
+  histogramBars,
+  mergeLegacyRows,
+  positionBars,
+  rankRows,
+  type BoardRow,
+} from '@/lib/polls/board'
 import { activeStore } from '@/lib/polls/store'
 import { t } from '@/lib/i18n'
 
@@ -32,8 +43,29 @@ import { t } from '@/lib/i18n'
  * number, so it needs no warning label — the honesty plate IS the label, on every
  * question that has nothing behind it yet.
  */
-export function CountBoard() {
+export function CountBoard({
+  names,
+  legacy,
+}: {
+  /** id → the name to print */
+  names: Readonly<Record<string, string>>
+  /** a legacy display name (or alias) → the id it belongs to */
+  legacy: Readonly<Record<string, string>>
+}) {
   const store = useMemo(() => activeStore(), [])
+  /** One key per answer: an id or a code, whatever build cast it. */
+  const canonical = useCallback(
+    (pick: string): string | null => {
+      if (isPlayerId(pick) || isPositionCode(pick)) return pick
+      return legacy[pick] ?? legacyPositionCode(pick)
+    },
+    [legacy],
+  )
+  /** How a key is printed. */
+  const label = useCallback(
+    (pick: string): string => names[pick] ?? positionLabel(pick) ?? pick,
+    [names],
+  )
   const [ballot, setBallot] = useState<Ballot>({})
   const [tallies, setTallies] = useState<Record<string, Tally | null>>({})
   const [ready, setReady] = useState(false)
@@ -46,9 +78,12 @@ export function CountBoard() {
         if (!live) return
         const map: Record<string, Tally | null> = {}
         BALLOT.forEach((question, index) => {
-          map[question.id] = tallyList[index] ?? null
+          map[question.id] = mergeLegacyRows(tallyList[index] ?? null, canonical)
         })
-        setBallot(saved)
+        // an unmigrated slip still reads right: its picks go through the same keys
+        const mine: Ballot = {}
+        for (const [id, pick] of Object.entries(saved)) mine[id] = canonical(pick) ?? pick
+        setBallot(mine)
         setTallies(map)
         setReady(true)
       },
@@ -56,7 +91,7 @@ export function CountBoard() {
     return () => {
       live = false
     }
-  }, [store])
+  }, [store, canonical])
 
   if (!ready) return null
 
@@ -89,6 +124,7 @@ export function CountBoard() {
           question={currentQuestion}
           tally={tallies[currentQuestion.id] ?? null}
           myPick={ballot[currentQuestion.id] ?? null}
+          label={label}
         />
       </div>
 
@@ -116,6 +152,7 @@ export function CountBoard() {
             question={question}
             tally={tallies[question.id] ?? null}
             myPick={ballot[question.id] ?? null}
+            label={label}
           />
         ))}
       </div>
@@ -136,10 +173,13 @@ function QuestionCard({
   question,
   tally,
   myPick,
+  label,
 }: {
   question: PollQuestion
   tally: Tally | null
   myPick: string | null
+  /** how a stored key (an id, a code, a number) is printed */
+  label: (pick: string) => string
 }) {
   const display = boardDisplay(tally, myPick)
   return (
@@ -159,17 +199,17 @@ function QuestionCard({
       </div>
 
       <div className="mt-3">
-        {display.kind === 'honest' && <HonestCard myPick={display.myPick} />}
+        {display.kind === 'honest' && <HonestCard myPick={display.myPick === null ? null : label(display.myPick)} />}
         {display.kind === 'raw' && (
-          <CountedBody question={question} tally={tally} total={display.total} percent={false} remaining={display.remaining} />
+          <CountedBody question={question} tally={tally} total={display.total} percent={false} remaining={display.remaining} label={label} />
         )}
         {display.kind === 'percent' && (
-          <CountedBody question={question} tally={tally} total={display.total} percent={true} remaining={0} />
+          <CountedBody question={question} tally={tally} total={display.total} percent={true} remaining={0} label={label} />
         )}
       </div>
 
       {display.kind !== 'honest' && display.myPick !== null && (
-        <YourPick pick={display.myPick} majority={display.myMajority} />
+        <YourPick pick={label(display.myPick)} majority={display.myMajority} />
       )}
     </div>
   )
@@ -209,13 +249,16 @@ function CountedBody({
   total,
   percent,
   remaining,
+  label,
 }: {
   question: PollQuestion
   tally: Tally | null
   total: number
   percent: boolean
   remaining: number
+  label: (pick: string) => string
 }) {
+  const named = (rows: BoardRow[]): BoardRow[] => rows.map((row) => ({ ...row, pick: label(row.pick) }))
   if (question.kind === 'number') {
     if (percent) return <Histogram tally={tally} />
     // Under a hundred a histogram is still a shape claim, so the shirt-number question
@@ -228,12 +271,12 @@ function CountedBody({
   }
 
   if (question.kind === 'position') {
-    const rows = rankRows(positionBars(tally, POSITIONS, (he) => t(he)), total)
+    const rows = named(rankRows(positionBars(tally, POSITIONS), total))
     return percent ? <RankedRows rows={rows} /> : <RawList rows={rows} remaining={remaining} />
   }
 
-  // roster — only the names that actually received a vote
-  const rows = rankRows(tally?.rows ?? [], total)
+  // roster — only the men who actually received a vote, printed by name
+  const rows = named(rankRows(tally?.rows ?? [], total))
   return percent ? <RankedRows rows={rows} /> : <RawList rows={rows} remaining={remaining} />
 }
 

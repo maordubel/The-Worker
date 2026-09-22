@@ -125,6 +125,17 @@
    ]
   },
   {
+   "slug": "ליגת-העל-כדורסל",
+   "nameHe": "ליגת העל בכדורסל",
+   "type": "league",
+   "tier": 1,
+   "sport": "basketball",
+   "aliases": [
+    "ליגת העל כדורסל",
+    "ליגת העל בכדורסל"
+   ]
+  },
+  {
    "slug": "ליגה-ארצית",
    "nameHe": "ליגה ארצית",
    "type": "league",
@@ -135,6 +146,24 @@
     "הליגה הארצית",
     "Liga Artzit"
    ]
+  },
+  {
+   "slug": "יורוליג",
+   "nameHe": "יורוליג",
+   "type": "cup",
+   "sport": "basketball",
+   "confidence": 2,
+   "sourceUrl": "https://www.eurohoops.net/en/euroleague/1965449/real-madrid-beats-hapoel-and-advances-to-the-final-four/",
+   "sourceTitle": "Eurohoops"
+  },
+  {
+   "slug": "יורוקאפ",
+   "nameHe": "יורוקאפ",
+   "type": "cup",
+   "sport": "basketball",
+   "confidence": 2,
+   "sourceUrl": "https://www.euroleaguebasketball.net/en/eurocup/news/hapoel-sweeps-gran-canaria-for-first-eurocup-title-and-ticket-to-euroleague/",
+   "sourceTitle": "EuroCup — האתר הרשמי"
   },
   {
    "slug": "גביע-המדינה-כדורסל",

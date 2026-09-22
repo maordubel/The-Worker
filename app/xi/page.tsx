@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
+import { pickerRoster } from '@/lib/archive/player-master'
 import { formationList, rosterIndex } from '@/lib/game/allTimeXI'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
@@ -41,6 +42,9 @@ export default function XIPage({
         formations={formationList()}
         roster={roster}
         shirts={shirtBoard(roster)}
+        // the six slugs a reviewed merge retired (21.9.2026): a sheet saved under one of
+        // them still opens, on the id it now belongs to
+        slugAliases={pickerRoster().slugAliases}
         tab={tab}
       />
       <ReportLink />

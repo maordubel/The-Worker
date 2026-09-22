@@ -1,22 +1,32 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Num } from '@/components/ui/Num'
-import { GK_KIT, NamePlate, OUTFIELD_KIT, PlayerFigure } from '@/components/press/PlayerFigure'
-import { Pitch } from '@/components/ui/Pitch'
 import { t, type MessageKey } from '@/lib/i18n'
-import type { PitchSlot } from '@/lib/game/lineup'
 import {
   COACH_NOTES,
+  LINES,
   MAX_LOCKS,
-  lineOf,
+  XI_SIZE,
+  displaySpot,
+  lineCounts,
+  placeOn,
+  takeOff,
   type CoachNote,
+  type Line,
   type LineupVerdict,
+  type LockerName,
+  type Placement,
 } from '@/lib/game/lineup-sheet'
 import { splitName } from '@/lib/game/roster-search'
+import type { LineupWindow } from '@/lib/game/lineup'
+import type { KitSpec } from '@/lib/kit/spec'
+import type { Embedded } from '@/lib/mechanics/types'
+import { haptic } from '@/lib/play/haptics'
 import { askCoach, submitLineup } from './actions'
+import { BandPitch, LINE_LABEL } from './BandPitch'
 import { LockerRack } from './LockerRack'
 import { TeamSheet } from './TeamSheet'
 import { TunnelGate } from './TunnelGate'
@@ -27,44 +37,28 @@ import { ShareRow } from '@/components/share/ShareRow'
 /**
  * שער 3 — חדר ההלבשה.
  *
- * The board used to be a bank of name chips under a pitch: tap a slot, tap a name, press
- * שלח לאימות. Everything the prototype adds is about turning that into an evening — the
- * room the shirts hang in, the three names you are willing to stake something on, the
- * coach who will tell you a number but not a name, and the mouth of the tunnel where the
- * sheet stops being changeable. The data underneath is unchanged: the same six verified
- * records, the same server-side grade.
+ * The room the shirts hang in, the three names you are willing to stake something on,
+ * the coach who will tell you a number but not a name, and the mouth of the tunnel where
+ * the sheet stops being changeable. The data underneath is the verified records and the
+ * server-side grade.
  *
- * Four things worth knowing before changing anything here.
+ * **Four bands, not a formation (21.9.2026, players.md §2 Gate 3 V3).** No source in
+ * `lineups.json` states a formation, so the pitch no longer draws eleven slots that
+ * imply one: it is keeper, defence, midfield and attack, and any number of men in each.
+ * The board holds `{playerId, line, order}` and nothing else; the grade is by line, on
+ * the server, as it always was.
+ *
+ * **Placing works from either end.** Tap a band then a locker, or a locker then a band.
+ * A man on the pitch is tapped to select him — then LOCK, send him back to the lockers,
+ * or tap another band to move him.
  *
  * **The prototype's XI is not in this file and must never be.** Its 14.3.2002 eleven
- * contains a man called `קשר נוסף` — "another midfielder" — and another it calls
- * `אבי תקוה` in the slot the archive gives to גאבור הלמאי. `content/manual/lineups.json`
- * holds the verified reading of that same match, and that is the one that plays
- * (rule 11, and `docs/16-gates-upgrade.md` names this exact row).
- *
- * **Placing works from either end.** Tap a slot then a locker, or a locker then a slot.
- * Rule 24 says a tap PLACES — it was written about gate 4, where a part has exactly one
- * home so the second tap carries no decision. Here the second tap carries the whole
- * decision, which is why two taps are right and why neither of them may be the only
- * order that works.
- *
- * **A LOCK costs nothing and is worth something.** Up to three names carry "I am sure he
- * started". They change no score: the sheet reports how many held, which is a statement
- * about how well you know what you know, and that is a different measurement from the
- * eleven itself.
+ * contains a man called `קשר נוסף`; `content/manual/lineups.json` holds the verified
+ * reading of that same match, and that is the one that plays (rule 11).
  *
  * **Nothing here waits.** The tunnel is a decision, not a countdown, and the reveal
- * (`TeamSheet.tsx`) holds no timer at all.
+ * (`TeamSheet.tsx`) moves on taps, with an opt-in fast walk.
  */
-
-/** The four bands, in the order they stand on the pitch. */
-const LINES = ['GK', 'D', 'M', 'F'] as const
-const LINE_LABEL: Record<(typeof LINES)[number], MessageKey> = {
-  GK: 'lineup.line.GK',
-  D: 'lineup.line.D',
-  M: 'lineup.line.M',
-  F: 'lineup.line.F',
-}
 
 const COACH_LINE: Record<CoachNote['kind'], MessageKey> = {
   stillOut: 'lineup.coach.stillOut',
@@ -73,330 +67,290 @@ const COACH_LINE: Record<CoachNote['kind'], MessageKey> = {
 }
 
 function coachSentence(note: CoachNote): string {
-  // The one sentence that changes shape rather than number: "0 bench traps" reads as an
-  // accusation with a zero in it, and the room would rather say nothing happened.
+  // "0 bench traps" reads as an accusation with a zero in it; the room says nothing happened.
   if (note.kind === 'benchOn' && note.n === 0) return t('lineup.coach.benchOn.none')
   return t(COACH_LINE[note.kind], { n: String(note.n), of: String(note.of) })
 }
 
 export function LineupBoard({
-  slots,
   bank,
   seed,
   cursor = 0,
   graded,
-  formationName,
+  kit,
+  kitSeason,
+  embedded,
 }: {
-  slots: PitchSlot[]
-  bank: string[]
+  bank: LockerName[]
   seed: number
   cursor?: number
   /** false when no verified XI exists — the board is then a free build */
   graded: boolean
-  formationName: string
+  /** the season's real kit for the lockers — null where the archive has none */
+  kit: KitSpec | null
+  kitSeason: string | null
+  /**
+   * Opened from inside THE WORKER LIFE — the café's argument, the schoolyard's bet. The same
+   * lockers, coach and grade over the one match the life pinned (the server re-derives it
+   * from the window); the verdict goes back to the table, once — the gate's "last switch"
+   * after the reveal would make a second try free, and a bet is a bet.
+   */
+  embedded?: Omit<Embedded<LineupVerdict>, 'window'> & { window: LineupWindow }
 }) {
-  const [picks, setPicks] = useState<Record<string, string | null>>({})
-  const [active, setActive] = useState<string | null>(null)
+  const [board, setBoard] = useState<Placement[]>([])
+  /** a locker held, waiting for a band */
   const [held, setHeld] = useState<string | null>(null)
+  /** a band tapped first, waiting for a locker */
+  const [armedLine, setArmedLine] = useState<Line | null>(null)
+  /** a man on the pitch, selected */
+  const [active, setActive] = useState<string | null>(null)
   const [locks, setLocks] = useState<string[]>([])
   const [notes, setNotes] = useState<CoachNote[]>([])
-  const [lockNote, setLockNote] = useState<MessageKey | null>(null)
+  const [note, setNote] = useState<MessageKey | null>(null)
   const [tunnel, setTunnel] = useState(false)
   const [lastCall, setLastCall] = useState(false)
   const [verdict, setVerdict] = useState<LineupVerdict | null>(null)
   const [pending, startTransition] = useTransition()
 
-  const filled = Object.values(picks).filter(Boolean).length
-  const used = new Set(Object.values(picks).filter(Boolean) as string[])
-  const complete = filled === slots.length
-  const activeName = active === null ? null : (picks[active] ?? null)
+  const nameOf = useMemo(() => new Map(bank.map((locker) => [locker.id, locker.nameHe])), [bank])
+  const used = useMemo(() => new Set(board.map((row) => row.playerId)), [board])
+  const counts = lineCounts(board)
+  const complete = board.length === XI_SIZE
 
-  /**
-   * Put a name in a slot.
-   *
-   * A name can stand in exactly one place, so placing him somewhere else vacates the old
-   * slot; and whoever he displaces walks back to the locker room, which means his LOCK
-   * goes with him. A LOCK on a man who is no longer on the pitch would still be counted
-   * at the end — a stake on somebody you did not pick.
-   */
-  function place(slotId: string, name: string) {
-    setPicks((current) => {
-      const next: Record<string, string | null> = { ...current }
-      const displaced = next[slotId] ?? null
-      for (const [slot, value] of Object.entries(next)) if (value === name) next[slot] = null
-      next[slotId] = name
-      if (displaced !== null && displaced !== name) {
-        setLocks((held) => held.filter((locked) => locked !== displaced))
-      }
-      return next
-    })
-    setActive(slotId)
+  /** Put him in a band. A move keeps his LOCK; a twelfth man is refused and said. */
+  function put(playerId: string, line: Line) {
+    const next = placeOn(board, playerId, line)
+    if (!next.some((row) => row.playerId === playerId && row.line === line)) {
+      setNote('lineup.zone.full')
+      haptic('miss')
+      return
+    }
+    setBoard(next)
     setHeld(null)
-    setLockNote(null)
+    setArmedLine(null)
+    // nobody stays selected after a placement: the next band tap arms that band for the
+    // next shirt instead of quietly moving the man just placed
+    setActive(null)
+    setNote(null)
+    haptic('tap')
   }
 
-  function tapSlot(slotId: string) {
+  function tapBand(line: Line) {
     if (verdict) return
+    if (held !== null) return put(held, line)
+    if (active !== null) return put(active, line)
+    setArmedLine(armedLine === line ? null : line)
+    setNote(null)
+  }
+
+  function tapLocker(id: string) {
+    if (verdict) return
+    if (armedLine !== null) return put(id, armedLine)
+    setHeld(held === id ? null : id)
+    setActive(null)
+    setNote(null)
+  }
+
+  function tapMan(id: string) {
+    if (verdict) return
+    // A shirt in hand lands in the band of whoever was tapped — on a full band the men
+    // cover most of it, and a tap on one of them means "here".
     if (held !== null) {
-      place(slotId, held)
-      return
+      const line = board.find((row) => row.playerId === id)?.line
+      if (line) return put(held, line)
     }
-    setActive(active === slotId ? null : slotId)
-    setLockNote(null)
+    setActive(active === id ? null : id)
+    setHeld(null)
+    setArmedLine(null)
+    setNote(null)
   }
 
-  function tapLocker(name: string) {
-    if (verdict) return
-    if (active !== null) {
-      place(active, name)
-      return
-    }
-    setHeld(held === name ? null : name)
-    setLockNote(null)
+  function sendBack() {
+    if (active === null) return
+    setBoard(takeOff(board, active))
+    // a LOCK on a man who is no longer on the pitch would still be counted at the end
+    setLocks((current) => current.filter((id) => id !== active))
+    setActive(null)
+    haptic('miss')
   }
 
   function toggleLock() {
-    if (activeName === null) return
-    if (locks.includes(activeName)) {
-      setLocks(locks.filter((name) => name !== activeName))
-      setLockNote(null)
+    if (active === null) return
+    if (locks.includes(active)) {
+      setLocks(locks.filter((id) => id !== active))
+      setNote(null)
       return
     }
     if (locks.length >= MAX_LOCKS) {
-      setLockNote('lineup.lock.full')
+      setNote('lineup.lock.full')
+      haptic('miss')
       return
     }
-    setLocks([...locks, activeName])
-    setLockNote(null)
+    setLocks([...locks, active])
+    setNote(null)
+    haptic('lock')
   }
 
   function coach() {
     if (notes.length >= COACH_NOTES) return
     const index = notes.length
     startTransition(async () => {
-      const note = await askCoach(seed, picks, cursor, index)
-      if (note) setNotes((current) => [...current, note])
+      const got = await askCoach(seed, board, cursor, index, embedded?.window)
+      if (got) setNotes((current) => [...current, got])
     })
   }
 
   function send() {
     setTunnel(false)
-    startTransition(async () => setVerdict(await submitLineup(seed, picks, cursor)))
+    startTransition(async () => {
+      const result = await submitLineup(seed, board, cursor, embedded?.window)
+      setVerdict(result)
+      haptic(result && result.exact >= 8 ? 'lock' : 'tap')
+    })
   }
 
   const prompt: MessageKey = held
-    ? 'lineup.prompt.locker'
-    : active !== null
-      ? 'lineup.pickFor'
-      : complete
-        ? 'lineup.prompt.full'
-        : 'lineup.tapSlot'
+    ? 'lineup.zone.prompt.held'
+    : armedLine
+      ? 'lineup.zone.prompt.band'
+      : active
+        ? 'lineup.zone.prompt.man'
+        : complete
+          ? 'lineup.prompt.full'
+          : 'lineup.zone.prompt.start'
+
+  const men = board.map((row) => ({
+    ...row,
+    nameHe: nameOf.get(row.playerId) ?? row.playerId,
+    locked: locks.includes(row.playerId),
+  }))
 
   return (
     <>
-      {!graded && !verdict && (
-        <EmptyState title={t('empty.lineup')} body={t('empty.lineup.body')} />
-      )}
+      {!graded && !verdict && <EmptyState title={t('empty.lineup')} body={t('empty.lineup.body')} />}
 
       {!verdict && (
         <>
           <p className="mt-stack font-body text-[11px] font-extrabold tracking-widest text-muted">
             {t('lineup.room.eyebrow')}
           </p>
-          <p className="mt-1 font-body text-step--1 leading-snug text-muted">
-            {t('lineup.room.lede')}
-          </p>
-        </>
-      )}
+          <p className="mt-1 font-body text-step--1 leading-snug text-muted">{t('lineup.room.lede')}</p>
 
-      {/* the line counters — what the room can honestly tell you about your own board:
-          how many men are standing in each band, never who they are */}
-      {!verdict && (
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {LINES.map((line) => (
-            <li
-              key={line}
-              className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink"
-            >
-              <span className="font-mono text-step-0 tabular-nums">
-                <Num>
-                  {String(
-                    slots.filter(
-                      (slot) => lineOf(slot.slotId) === line && (picks[slot.slotId] ?? null) !== null,
-                    ).length,
-                  )}
-                  /
-                  {String(slots.filter((slot) => lineOf(slot.slotId) === line).length)}
-                </Num>
-              </span>
-              {t(LINE_LABEL[line])}
+          {/* the zone counters — how many men stand in each band, never who, never out of what */}
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {LINES.map((line) => (
+              <li
+                key={line}
+                className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink"
+              >
+                <span className="font-mono text-step-0 tabular-nums">
+                  <Num>{String(counts[line])}</Num>
+                </span>
+                {t(LINE_LABEL[line])}
+              </li>
+            ))}
+            <li className="ms-auto flex min-h-[34px] items-center font-mono text-step-1 tabular-nums text-ink">
+              <Num>{`${String(board.length).padStart(2, '0')}/${XI_SIZE}`}</Num>
             </li>
-          ))}
-        </ul>
-      )}
+          </ul>
 
-      {!verdict && (
-        <div className="mt-stack flex items-baseline justify-between">
-          <p className="font-mono text-step--1 tabular-nums text-muted">
-            <Num>{formationName}</Num>
-          </p>
-          <p className="font-mono text-step-1 tabular-nums text-ink">
-            <Num>
-              {String(filled).padStart(2, '0')}/{slots.length}
-            </Num>
-          </p>
-        </div>
-      )}
+          <div className="mt-3 grid gap-3 md:grid-cols-[1fr_20rem]">
+            <div>
+              <BandPitch
+                men={men}
+                kit={kit}
+                active={active}
+                armed={held !== null || active !== null}
+                armedLine={armedLine}
+                onBand={tapBand}
+                onMan={tapMan}
+              />
 
-      {!verdict && (
-        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_20rem]">
-          <div>
-            <Pitch
-              slots={slots}
-              renderSlot={(slot) => {
-                const name = picks[slot.slotId] ?? null
-                const isActive = active === slot.slotId
-                return (
-                  <button
-                    type="button"
-                    onClick={() => tapSlot(slot.slotId)}
-                    /* the acceptance probe addresses a slot by name; a harness that has
-                       to guess which button it found is a harness that agrees with
-                       itself (rule 73) */
-                    data-slot={slot.slotId}
-                    aria-pressed={isActive}
-                    aria-label={`${slot.roleHe}${name ? ` — ${name}` : ''}`}
-                    /*
-                      The selected chip is ringed in INK, not in red, and its name plate
-                      turns red instead. A red ring here is a red edge against printed
-                      grass, and that edge averages to olive inside the yellow band —
-                      seventy-four pixels of it on one phone screen, on a board the
-                      sweep can only ever photograph empty. See `NamePlate`'s `tone`.
-                    */
-                    className={`flex min-h-tap w-full flex-col items-center justify-end transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none ${
-                      isActive ? 'outline outline-[3px] outline-press-ink' : ''
-                    }`}
-                  >
-                    {/* A filled slot is a drawn player in the club's kit; an empty one is a
-                        dashed ghost. The pitch reads as a team sheet at a glance instead of
-                        as a grid of labelled boxes. */}
-                    <PlayerFigure
-                      kit={name ? (slot.slotId === 'GK' ? GK_KIT : OUTFIELD_KIT) : undefined}
-                      ghost={!name}
-                      number={null}
-                      size={54}
-                      title={slot.roleHe}
-                    />
-                    {name !== null && locks.includes(name) && (
-                      <span
-                        aria-hidden="true"
-                        className="-mt-1 border-rule border-press-ink bg-press-red px-1 font-mono text-[9px] tabular-nums leading-tight text-press-line"
-                      >
-                        LOCK
-                      </span>
-                    )}
-                    <NamePlate name={name ?? slot.roleHe} tone={isActive ? 'red' : 'ink'} />
-                  </button>
-                )
-              }}
-            />
+              <p className="mt-2 font-body text-step--1 leading-snug text-muted">{t(prompt)}</p>
+              {lastCall && (
+                <p className="mt-1 border-s-rule border-red ps-2 font-body text-step--1 leading-snug text-red">
+                  {t('lineup.lastCall')}
+                </p>
+              )}
 
-            <p className="mt-2 font-body text-step--1 leading-snug text-muted">{t(prompt)}</p>
-            {lastCall && (
-              <p className="mt-1 border-s-rule border-red ps-2 font-body text-step--1 leading-snug text-red">
-                {t('lineup.lastCall')}
-              </p>
-            )}
+              {/* the coach's table: the LOCK, back to the lockers, and the notes */}
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <button
+                  type="button"
+                  onClick={toggleLock}
+                  disabled={active === null}
+                  aria-pressed={active !== null && locks.includes(active)}
+                  className={`flex min-h-tap items-center justify-center border-rule px-3 font-body text-[13px] font-extrabold transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none ${
+                    active !== null && locks.includes(active) ? 'border-red bg-red text-sheet' : 'border-ink bg-sheet text-ink'
+                  }`}
+                >
+                  {active !== null && locks.includes(active) ? t('lineup.lock.drop') : t('lineup.lock')}
+                </button>
+                <button
+                  type="button"
+                  onClick={sendBack}
+                  disabled={active === null}
+                  className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none"
+                >
+                  {t('lineup.zone.sendBack')}
+                </button>
+                <button
+                  type="button"
+                  onClick={coach}
+                  disabled={notes.length >= COACH_NOTES || pending}
+                  className="col-span-2 flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none sm:col-span-1"
+                >
+                  {t('lineup.coach')}
+                </button>
+              </div>
 
-            {/* the coach's table: the LOCK, and the notes */}
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <ul className="mt-2 flex flex-wrap gap-2">
+                <li className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink">
+                  <span className="font-mono text-step-0 tabular-nums">
+                    <Num>{`${locks.length}/${MAX_LOCKS}`}</Num>
+                  </span>
+                  {t('lineup.lock.left')}
+                </li>
+                <li className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink">
+                  <span className="font-mono text-step-0 tabular-nums">
+                    <Num>{`${COACH_NOTES - notes.length}/${COACH_NOTES}`}</Num>
+                  </span>
+                  {t('lineup.coach.left')}
+                </li>
+              </ul>
+
+              {note !== null && <p className="mt-2 font-body text-step--1 leading-snug text-red">{t(note)}</p>}
+              {active === null && locks.length === 0 && (
+                <p className="mt-2 font-body text-step--1 leading-snug text-muted">{t('lineup.lock.hint')}</p>
+              )}
+
+              {notes.length > 0 && (
+                <ul className="mt-2 border-s-rule border-ink ps-2">
+                  {notes.map((row, index) => (
+                    <li key={`${row.kind}-${index}`} className="font-body text-step--1 leading-relaxed text-ink">
+                      {coachSentence(row)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {notes.length >= COACH_NOTES && (
+                <p className="mt-1 font-body text-step--1 leading-snug text-muted">{t('lineup.coach.spent')}</p>
+              )}
+
+              {/* the way out sits under the board, in the same column, on both viewports */}
               <button
                 type="button"
-                onClick={toggleLock}
-                disabled={activeName === null}
-                aria-pressed={activeName !== null && locks.includes(activeName)}
-                className={`flex min-h-tap items-center justify-center border-rule px-3 font-body text-[13px] font-extrabold transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none ${
-                  activeName !== null && locks.includes(activeName)
-                    ? 'border-red bg-red text-sheet'
-                    : 'border-ink bg-sheet text-ink'
-                }`}
+                onClick={() => setTunnel(true)}
+                disabled={!complete || pending}
+                className="mt-stack flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-sheet transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none"
               >
-                {activeName !== null && locks.includes(activeName)
-                  ? t('lineup.lock.drop')
-                  : t('lineup.lock')}
-              </button>
-              <button
-                type="button"
-                onClick={coach}
-                disabled={notes.length >= COACH_NOTES || pending}
-                className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none"
-              >
-                {t('lineup.coach')}
+                {pending ? t('state.loading') : t('lineup.tunnel')}
               </button>
             </div>
 
-            <ul className="mt-2 flex flex-wrap gap-2">
-              <li className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink">
-                <span className="font-mono text-step-0 tabular-nums">
-                  <Num>{`${locks.length}/${MAX_LOCKS}`}</Num>
-                </span>
-                {t('lineup.lock.left')}
-              </li>
-              <li className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink">
-                <span className="font-mono text-step-0 tabular-nums">
-                  <Num>{`${COACH_NOTES - notes.length}/${COACH_NOTES}`}</Num>
-                </span>
-                {t('lineup.coach.left')}
-              </li>
-            </ul>
-
-            {lockNote !== null && (
-              <p className="mt-2 font-body text-step--1 leading-snug text-red">{t(lockNote)}</p>
-            )}
-            {activeName === null && locks.length === 0 && (
-              <p className="mt-2 font-body text-step--1 leading-snug text-muted">
-                {t('lineup.lock.hint')}
-              </p>
-            )}
-
-            {notes.length > 0 && (
-              <ul className="mt-2 border-s-rule border-ink ps-2">
-                {notes.map((note, index) => (
-                  <li
-                    key={`${note.kind}-${index}`}
-                    className="font-body text-step--1 leading-relaxed text-ink"
-                  >
-                    {coachSentence(note)}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {notes.length >= COACH_NOTES && (
-              <p className="mt-1 font-body text-step--1 leading-snug text-muted">
-                {t('lineup.coach.spent')}
-              </p>
-            )}
-
-            {/*
-              The way out sits directly under the board, in the same column, on both
-              viewports. It used to be the last thing on the page — below sixteen
-              lockers, which on a 390px phone is another screen and a half of scrolling
-              between the eleven you just finished and the button that sends them out.
-              The brief asks for exactly this: no important control below an excessive
-              scroll.
-            */}
-            <button
-              type="button"
-              onClick={() => setTunnel(true)}
-              disabled={!complete || pending}
-              className="mt-stack flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-sheet transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none"
-            >
-              {pending ? t('state.loading') : t('lineup.tunnel')}
-            </button>
+            <LockerRack bank={bank} used={used} selected={held} onSelect={tapLocker} kit={kit} kitSeason={kitSeason} />
           </div>
-
-          <LockerRack bank={bank} used={used} selected={held} onSelect={tapLocker} />
-        </div>
+        </>
       )}
 
       {tunnel && (
@@ -413,27 +367,31 @@ export function LineupBoard({
       {verdict && (
         <TeamSheet
           verdict={verdict}
-          slots={slots}
           locks={locks}
           notesTaken={notes.length}
-          formationName={formationName}
+          kit={kit}
           onBack={() => {
+            if (embedded) return embedded.onResult(verdict)
             setVerdict(null)
             setLastCall(true)
           }}
         >
-          <RecordRun
-            gate="/lineup"
-            correct={verdict.exact}
-            asked={verdict.total}
-            score={verdict.exact}
-          />
+          {embedded ? (
+            <button
+              type="button"
+              onClick={() => embedded.onResult(verdict)}
+              data-lineup="back"
+              className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
+            >
+              {embedded.doneLabel}
+            </button>
+          ) : (
+            <>
+          <RecordRun gate="/lineup" correct={verdict.exact} asked={verdict.total} score={verdict.exact} />
           {/*
-            The card is the SHEET, not the score. Rule 19: a card whose content is a list
-            gets the list template — gate 3 was sharing eleven names as the single line
-            "7/11" on a grass ground, which is the same defect the all-time XI card was
-            fixed for. `xi` draws every row it is given, so what travels is the team the
-            player actually sent out, with the score beside the title.
+            The card is the SHEET, not the score (rule 19): what travels is the team the
+            player sent out, by band, with the score beside the title. The x/y are the
+            display spots of the bands — nothing about them was graded.
           */}
           <ShareRow
             kind="lineup"
@@ -445,32 +403,28 @@ export function LineupBoard({
               label: t('screen.lineup.title'),
               eyebrow: `${verdict.exact}/${verdict.total}`,
               hero: t('screen.lineup.title'),
-              xi: slots
-                .map((slot) => {
-                  const name = picks[slot.slotId] ?? null
-                  return name === null
-                    ? null
-                    : {
-                        roleHe: slot.roleHe,
-                        nameHe: splitName(name).familyHe,
-                        x: slot.x,
-                        y: slot.y,
-                      }
-                })
-                .filter((row): row is NonNullable<typeof row> => row !== null),
+              xi: board.map((row) => {
+                const spot = displaySpot(row.order, counts[row.line], row.line)
+                return {
+                  roleHe: t(LINE_LABEL[row.line]),
+                  nameHe: splitName(nameOf.get(row.playerId) ?? '').familyHe,
+                  x: spot.x,
+                  y: spot.y,
+                }
+              }),
               stats: [],
               cta: t('share.challenge'),
               challenge: t('share.sameRound'),
             }}
           />
-          {/* The mode had no replay link at all: the only way to a different match was
-              to edit the URL. Six recorded XIs, one to a round — this walks them. */}
           <PlayLink
             gate="/lineup"
             className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
           >
             {t('run.again')}
           </PlayLink>
+            </>
+          )}
         </TeamSheet>
       )}
     </>

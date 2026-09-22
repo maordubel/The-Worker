@@ -2,41 +2,36 @@ import type { Metadata } from 'next'
 
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { dealQueue, rosterSize } from '@/lib/game/hate'
+import { chargeCredit, dealQueue, rosterSize } from '@/lib/game/hate'
 import { gateMetadata } from '@/lib/seo'
 import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
-import { HateHill } from './HateHill'
+import { HateWall } from './HateWall'
 
 /**
- * שער 11 — משחק השנאה.
+ * שער 11 — הקיר השחור.
  *
- * Maor asked for a hatred game and this is a hatred game: king of the hill, ten head to
- * heads, whoever you pick stays on. No right answers and no score. What the app supplies
- * is not a judgement about people — it is the terrace's own charge sheet, every line of
- * it sourced, and a verdict that belongs to whoever played it.
- *
- * The server deals the QUEUE, not the duels: who holds the hill at duel seven depends on
- * what the player did at duel six, so only the order of arrival can be deterministic —
- * and it must be, for a `?seed=` link to hand over the identical run.
+ * The server deals the QUEUE — ten names and which of them come without mercy — never
+ * the duels: who holds the wall in round seven depends on round six. The queue must be
+ * deterministic for a `?seed=` link (or a typed WALL code) to hand over the same wall,
+ * and `round.pinned` is how the screen knows a wall came from somebody else.
  */
 export const metadata: Metadata = gateMetadata('derby')
 
-export default function HatePage({
-  searchParams,
-}: {
-  searchParams: { seed?: string; r?: string }
-}) {
+export default function HatePage({ searchParams }: { searchParams: { seed?: string; r?: string } }) {
   const round = roundFrom(searchParams)
-  const { enemies, order } = dealQueue(round.seed, round.cursor)
+  const { enemies, order, noMercy } = dealQueue(round.seed, round.cursor)
   return (
     <Screen title={t('screen.derby.title')} sub={t('screen.derby.sub')} chrome={false}>
-      <HateHill
+      <HateWall
         enemies={enemies}
         order={order}
+        noMercy={noMercy}
         seed={round.seed}
         cursor={round.cursor}
+        pinned={round.pinned}
         rosterSize={rosterSize()}
+        credit={chargeCredit()}
       />
       <ReportLink />
     </Screen>

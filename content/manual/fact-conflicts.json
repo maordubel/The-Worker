@@ -494,6 +494,111 @@
    "sourceAUrl": "https://www.ynet.co.il/articles/0,7340,L-3429531,00.html",
    "sourceBUrl": "https://www.one.co.il/Article/203222.html",
    "noteHe": "שני המקורות מסכימים על היום וחלוקים על השעה. הדיווח בזמן אמת נוקב במספר חריג (6:39), מה שבדרך כלל מצביע על שעה שנמדדה; הסקירה מ-2012 נוקבת בשעה עגולה. לא הוכרע — ושום סצנה במשחק לא נוקבת בשעה של ההריסה."
+  },
+  {
+   "entityTable": "match",
+   "entityKey": "2010/11 ליגת-האלופות · פלייאוף משחק 1 · הפועל-תל-אביב — זלצבורג",
+   "field": "played_on_and_home_away",
+   "claimA": "17.8.2010 · הפועל-תל-אביב בבית 3:2 · אצטדיון לא נקוב",
+   "claimB": "18.8.2010 · זלצבורג בבית 2:3 להפועל",
+   "sourceAUrl": "https://wiki.red-fans.com/",
+   "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+   "resolution": null,
+   "noteHe": "אותו מקור בשתי קריאות: מסמך המחקר של 1.9.2026 מול טבלת Games שנקראה 17.9.2026. הן מסכימות על התוצאה וחלוקות על היום ועל מי היה הבית. הקריאה הראשונה מציינת בעצמה שהמקור אינו נוקב באצטדיון — כלומר הבית שם הוא ברירת מחדל, וזה בדיוק מה שכלל 36 אוסר. שתי השורות קיימות היום ב-matches.json ולא אוחדו: איחוד משחק הוא הכרעה של בעל הבית (כלל 35), והפרק של 2010 קורא את משחק החזרה בלבד. · 21.9.2026: מאור הכריע שזה משחק אחד — מזהה m_9b658c3bbc9e לשתי השורות (content/manual/match-ids.json, השורה השנייה היא alias). היום ומי היה הבית נשארים כאן במחלוקת; המזהה אינו מכריע בהם."
+  },
+  {
+   "entityTable": "match",
+   "entityKey": "2010/11 ליגת-האלופות · פלייאוף משחק 2 · הפועל-תל-אביב — זלצבורג",
+   "field": "played_on",
+   "claimA": "25.8.2010 · בלומפילד · 1:1 · זהבי השווה בדקה 92",
+   "claimB": "24.8.2010 · 1:1 · אצטדיון לא נקוב",
+   "sourceAUrl": "https://wiki.red-fans.com/",
+   "sourceBUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+   "resolution": null,
+   "noteHe": "אותו תיק, אותה תוצאה, תאריך שנבדל ביום. העוגן `2010-salzburg` קורא את 25.8, השורה היחידה מבין השתיים שנושאת אצטדיון והערה מפורטת — בחירת קריאוּת של הפרק, לא פסיקה על הארכיון. · 21.9.2026: מאור הכריע שזה משחק אחד — מזהה m_7b61fac81ad6 לשתי השורות. שני התאריכים נשמרים כטענות (claims) ב-content/generated/match-master.json; המזהה אינו מכריע ביניהם."
+  },
+  {
+   "entityTable": "match",
+   "entityKey": "2010-05-11 הפועל-תל-אביב — בני-יהודה",
+   "field": "opponent_club",
+   "claimA": "בני יהודה · 3:1 להפועל · גילי ורמוט 25, 75 · וינסנט אניימה 45 (פנדל) · אצטדיון רמת גן — טבלת Games של ויקיפועל (matches.json ו-content/raw/vikipoel-games.json)",
+   "claimB": "בית\"ר ירושלים · 1:3 להפועל · אצטדיון רמת גן — goals.json (cupfinal-2010-vermouth-25, cupfinal-2010-vermouth-73)",
+   "sourceAUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+   "sourceBUrl": "https://www.ynet.co.il/articles/0,7340,L-3887864,00.html",
+   "resolution": null,
+   "resolvedBy": null,
+   "noteHe": "גמר גביע המדינה 2010. שתי הרשומות מסכימות על התאריך, על האצטדיון ועל התוצאה — שלושה שערים להפועל ואחד ליריבה — וחלוקות על היריבה. אם goals.json צודק, שני המהלכים שלו שייכים למשחק אחר; אם הארכיון צודק, היריבה ברשומות השער שגויה. לא הוכרע כאן: שער 8 והטריוויה לא משתמשים בשני השערים עד שמאור יקרא מחדש את ynet (match-master: usable.replay=false, usable.trivia=false)."
+  },
+  {
+   "entityTable": "match",
+   "entityKey": "2012-05-15 הפועל-תל-אביב — מכבי-חיפה",
+   "field": "opponent_club",
+   "claimA": "מכבי חיפה · 2:1 להפועל · מירקו אורמוש 58 · נוסא איגייבור 92 · אצטדיון רמת גן — טבלת Games של ויקיפועל (matches.json ו-content/raw/vikipoel-games.json)",
+   "claimB": "הפועל באר שבע · שער הניצחון של איגייבור בדקה 90+2 — goals.json (cupfinal-2012-igiebor-90-2)",
+   "sourceAUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+   "sourceBUrl": "https://www.one.co.il/Article/199799.html",
+   "resolution": null,
+   "resolvedBy": null,
+   "noteHe": "גמר גביע המדינה 2012. הדקה והכובש מסכימים (איגייבור, 92 = 90+2); היריבה לא. רשומת השער עצמה נוקבת בשוער 'דוידוביץ'' שמולו נכבש השער — פרט לבדיקה מול ONE, לא הכרעה. שער 8 והטריוויה לא משתמשים בשער עד שמאור יקרא מחדש את המקור."
+  },
+  {
+   "entityTable": "match",
+   "entityKey": "2026-01-26 מכבי-תל-אביב — הפועל-תל-אביב",
+   "field": "played_on",
+   "claimA": "26.1.2026 · ליגת העל מחזור 20 · מכבי ת\"א 1:2 הפועל · בלומפילד · עומרי אלטמן 90+2, צ'יקו 90+4 — טבלת Games של ויקיפועל",
+   "claimB": "25.1.2026 · בלומפילד · 1:2 להפועל · 'אלטמן' בדקה 90+2 — goals.json (derby-2026-altman-90-2)",
+   "sourceAUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+   "sourceBUrl": "https://sports.walla.co.il/item/3811685",
+   "resolution": null,
+   "resolvedBy": null,
+   "noteHe": "אותו דרבי — אותה תוצאה, אותו אצטדיון, אותה דקת שער — ותאריך שנבדל ביום. בגלל התאריך הצירוף לפי יום לא מצא את המשחק ('אין שורה'); ה-match-master מקשר את השער למשחק דרך היריבה והיום הסמוך ומסמן את הקישור כ-date±1. רשומת השער כותבת שם משפחה בלבד ('אלטמן') — הכובש לא מזוהה אוטומטית (כלל 64 §5), והמועמד מופיע ב-match-master כהצעה בלבד."
+  },
+  {
+   "entityTable": "goal",
+   "entityKey": "chelsea-2001-gershon-88",
+   "field": "minute",
+   "claimA": "89 (פנדל) — ויקיפועל: דף המשחק (match-events.json) וטבלת Games (match-scorers.json)",
+   "claimB": "88 — goals.json, ynet",
+   "sourceAUrl": "https://wiki.red-fans.com/index.php?title=%D7%A6%27%D7%9C%D7%A1%D7%99",
+   "sourceBUrl": "https://www.ynet.co.il/articles/0,7340,L-1216728,00.html",
+   "resolution": null,
+   "resolvedBy": null,
+   "noteHe": "דקה אחת בין שתי קריאות. המהלך עצמו אינו במחלוקת; הדקה אינה נשאלת בטריוויה עד שתוכרע (match-master: usable.trivia=false)."
+  },
+  {
+   "entityTable": "goal",
+   "entityKey": "cupfinal-2010-vermouth-73",
+   "field": "minute",
+   "claimA": "75 — טבלת Games של ויקיפועל ('גילי ורמוט (25 ,75)')",
+   "claimB": "73 — goals.json, ynet",
+   "sourceAUrl": "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
+   "sourceBUrl": "https://www.ynet.co.il/articles/0,7340,L-3887864,00.html",
+   "resolution": null,
+   "resolvedBy": null,
+   "noteHe": "נוסף על המחלוקת על היריבה באותו גמר (2010-05-11 … opponent_club). הדקה אינה נשאלת."
+  },
+  {
+   "entityTable": "goal",
+   "entityKey": "milan-2002-kleschenko-31",
+   "field": "minute",
+   "claimA": "32 — דיווח אופ\"א (match-events.json: 'Clescenko 32′, assist Abuksis')",
+   "claimB": "31 — goals.json (ynet) וטבלת Games של ויקיפועל (match-scorers.json)",
+   "sourceAUrl": "https://www.uefa.com/uefaeuropaleague/news/0183-0eaa43ba228a-d6fe8d77e124-1000--clescenko-stuns-milan/",
+   "sourceBUrl": "https://www.ynet.co.il/articles/0,7340,L-1765670,00.html",
+   "resolution": null,
+   "resolvedBy": null,
+   "noteHe": "דקה אחת בין אופ\"א לשני מקורות עבריים. המהלך אינו במחלוקת; הדקה אינה נשאלת."
+  },
+  {
+   "entityTable": "kit",
+   "entityKey": "kit-2009-10-home",
+   "field": "crest",
+   "claimA": "circle-1923 — מסירת חולצות 2009/10 של מאור הראל, 20.9.2026 (content/manual/kit-assembly.json)",
+   "claimB": "circle-1927 — ציר הסמלים: 'צבעי המועדון' 2008–2015 (content/manual/crest-versions.json)",
+   "sourceAUrl": null,
+   "sourceBUrl": null,
+   "resolution": null,
+   "noteHe": "שני המקורות בביטחון 3. ה-Kit Master שומר את שניהם: הערך הוא של המסירה (ספציפית לחולצה), והחלופה של ציר הזמן — ושער 4 מקבל את שתיהן בציון (ניקוד סובלני), ולא מציע את החלופה כמסיח."
   }
  ]
 }

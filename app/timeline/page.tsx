@@ -1,21 +1,23 @@
 import type { Metadata } from 'next'
 
+import { ThreadBoard } from '@/components/archive/ThreadBoard'
+import { ThreadTabs } from '@/components/archive/ThreadTabs'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { dealTimelineRun, timelineAvailable } from '@/lib/game/timeline'
+import { dealThreadRun, publicLevel } from '@/lib/game/thread'
+import type { PublicLevel } from '@/lib/game/thread-run'
 import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
-import { TimelineBoard } from './TimelineBoard'
 
 /**
- * שער 13 — ציר הזמן.
+ * שער 13 — החוט האדום (brief §23; prototype v7; owner decision 21.9.2026).
  *
- * The anchor is dealt WITH its date, because it is the board's first card and there is
- * nothing to place it against. Everything else arrives blind; `gradeInsert` derives the
- * dates from the seed on the server, so a card's date never reaches the client before
- * it has been played.
+ * Five routes to a run: the curated ones first, then routes generated from the graph.
+ * The board is dealt CARDS and RULES for each (`publicLevel`) — never an edge — and asks
+ * the server about every link it tries (`linkThread`, rule 4). The chronology game is the
+ * gate's second mode, one tab away at `/timeline/order`.
  */
 export const metadata: Metadata = gateMetadata('timeline')
 
@@ -25,27 +27,23 @@ export default function TimelinePage({
   searchParams: { seed?: string; r?: string }
 }) {
   const round = roundFrom(searchParams)
-  const available = timelineAvailable()
-  const deal = available ? dealTimelineRun(round.seed, round.cursor) : null
+  const refs = dealThreadRun(round.seed, round.cursor)
+  const levels = refs
+    .map((ref, index) => publicLevel(ref, index, refs.length))
+    .filter((level): level is PublicLevel => level !== null)
 
   return (
-    <Screen
-      title={t('screen.timeline.title')}
-      sub={t('screen.timeline.sub')}
-      chrome={!available}
-    >
-      {deal ? (
+    <Screen title={t('screen.thread.title')} sub={t('screen.thread.sub')} chrome={levels.length === 0}>
+      <div className="pt-1">
+        <ThreadTabs active="thread" />
+      </div>
+      {levels.length ? (
         <>
-          <TimelineBoard
-            anchor={deal.anchor}
-            queue={deal.queue}
-            seed={round.seed}
-            cursor={round.cursor}
-          />
+          <ThreadBoard levels={levels} seed={round.seed} cursor={round.cursor} />
           <ReportLink />
         </>
       ) : (
-        <EmptyState title={t('empty.timeline')} body={t('empty.timeline.body')} />
+        <EmptyState title={t('thread.empty')} body={t('help.thread.what')} />
       )}
     </Screen>
   )

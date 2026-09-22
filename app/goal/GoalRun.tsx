@@ -8,19 +8,33 @@ import { Confetti, NO_RED_TONES } from '@/components/play/Confetti'
 import { PlayLink } from '@/components/play/PlayLink'
 import { Punch } from '@/components/play/Punch'
 import { RecordRun } from '@/components/play/RecordRun'
+import { RevealBar, useReveal } from '@/components/play/Reveal'
 import { GoalPitch } from '@/components/press/GoalPitch'
-import { ACTION_SHORT, ReplayBuilder, type Draft } from '@/components/replay/ReplayBuilder'
+import { ACTION_SHORT, ReplayBuilder } from '@/components/replay/ReplayBuilder'
 import { ReplayVerdict } from '@/components/replay/ReplayVerdict'
 import { ShareRow } from '@/components/share/ShareRow'
 import { Num } from '@/components/ui/Num'
 import { GOAL_SECONDS, GOALS_PER_RUN, MAX_TOUCHES, MIN_TOUCHES } from '@/lib/game/goal-zones'
-import type { ReplayPoint, UserTouch } from '@/lib/game/replay/envelope'
+import {
+  EMPTY_BUILD,
+  EMPTY_DRAFT,
+  canUndo,
+  phaseOf,
+  undoStep,
+  type BuildState,
+  type DraftPhase,
+} from '@/lib/game/replay/draft'
+import type { Envelope, ReplayPoint, UserTouch } from '@/lib/game/replay/envelope'
+import { GOOD_SCORE } from '@/lib/game/replay/judge'
 import type { ReplayAction } from '@/lib/game/replay/vocab'
 import { LIVES, rankFor } from '@/lib/game/session'
 import { t, type MessageKey } from '@/lib/i18n'
+import { haptic } from '@/lib/play/haptics'
+import { collect } from '@/lib/profile/store'
 import { artFor } from '@/lib/share/story'
 import type { GoalChallenge, GoalVerdict } from '@/lib/game/goal'
-import { askGoalHint, submitGoal } from './actions'
+import type { Embedded } from '@/lib/mechanics/types'
+import { askGoalHint, askReceptionHint, submitGoal } from './actions'
 
 /**
  * שחזור השער — three moves, one screen, and the count is part of the question.
@@ -45,9 +59,28 @@ import { askGoalHint, submitGoal } from './actions'
  * The clock is a whole MOVE's clock and it is generous, because the thing being rushed is
  * no longer one tap. A round of reconstruction that punishes deliberation is a round that
  * punishes the only skill it is testing.
+ *
+ * **The reveal is a beat, not a hold (21.9.2026).** It used to sit for a fixed nine
+ * seconds and walk on whether or not the player had finished reading — brief §10's
+ * "passive waiting" exactly. It is now the shared `useReveal`: a bar drains, a real
+ * button walks on NOW, and the moment the player starts reading (a scroll, a touch on
+ * the verdict, a key) the beat is called off and the button waits for them.
+ *
+ * **Hints are paid on the whistle, whoever blows it.** The clock effect is set up once
+ * per goal, so the hint count it closed over was the count at kick-off — zero — and a
+ * move that ran out of time was graded as if every hint had been free. The count lives
+ * in a ref now, read at the moment of grading.
  */
 
-type Played = { overall: number; continuity: number; touches: number; matched: number }
+type Played = {
+  overall: number
+  continuity: number
+  touches: number
+  /** matched and not bad — what RecordRun counts as right */
+  matched: number
+  /** matched at GOOD_SCORE or better — the Result's "good touches" */
+  good: number
+}
 
 type Run = {
   goal: number
@@ -63,50 +96,87 @@ const NEW_RUN: Run = { goal: 0, lives: LIVES, score: 0, hints: 0, played: [], ov
 /** What a rebuilt move is worth. Three perfect moves reach the top rank and no further. */
 const HINT_COST = 120
 
+/** How long the verdict holds before the next goal walks on by itself — unless read. */
+const REVEAL_MS = 10000
+
 function pointsFor(overall: number, continuity: number): number {
   return Math.round(overall * 12 + continuity * 2)
 }
 
-const EMPTY_DRAFT: Draft = { actorHe: null, action: null, origin: null, target: null }
+const PHASE_CAPTION: Record<DraftPhase, MessageKey> = {
+  player: 'goal.phase.player',
+  action: 'goal.phase.action',
+  origin: 'goal.phase.origin',
+  target: 'goal.phase.target',
+}
 
 export function GoalRun({
   goals,
   seed,
   cursor = 0,
+  pin = null,
+  embedded,
 }: {
   goals: GoalChallenge[]
   seed: number
   cursor?: number
+  /** `/goal?g=<goalId>` — the goal dealt first; every server call re-derives with it */
+  pin?: string | null
+  /**
+   * Opened from inside THE WORKER LIFE (`lib/mechanics/types.ts`): one goal, the same judge,
+   * and the verdict handed back — no collection, no record, no share, no masthead number.
+   * Absent, the gate is exactly the gate.
+   */
+  embedded?: Omit<Embedded<GoalVerdict>, 'window'>
 }) {
   const [run, setRun] = useState<Run>(NEW_RUN)
-  const [touches, setTouches] = useState<UserTouch[]>([])
-  const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT)
-  const [editing, setEditing] = useState<number | null>(null)
+  const [build, setBuild] = useState<BuildState>(EMPTY_BUILD)
   const [verdict, setVerdict] = useState<GoalVerdict | null>(null)
+  const [grading, setGrading] = useState(false)
   const [burst, setBurst] = useState<{ points: number; combo: number } | null>(null)
   const [celebrate, setCelebrate] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(GOAL_SECONDS[0] as number)
   const [hintStart, setHintStart] = useState<string | null>(null)
   const [hintCount, setHintCount] = useState<string | null>(null)
+  const [reception, setReception] = useState<{ envelope: Envelope; touch: number } | null>(null)
+  const [asking, setAsking] = useState(false)
   const settled = useRef(false)
   const live = useRef<UserTouch[]>([])
+  /** hints bought for THIS goal — a ref, so a whistle from the clock reads today's count */
+  const spent = useRef(0)
 
+  const { touches, draft, editing } = build
   const challenge = goals[run.goal]
   const total = GOAL_SECONDS[Math.min(run.goal, GOAL_SECONDS.length - 1)] ?? 60
   const stageLabel = `run.stage.${run.goal + 1}` as MessageKey
 
   live.current = touches
 
-  /** the whistle: grade the whole move at once, then move on by itself */
+  /** the whistle: grade the whole move at once, and roll it on the pitch while we wait */
   const whistle = useCallback(
-    async (placed: UserTouch[], spent: number) => {
+    async (placed: UserTouch[]) => {
       if (settled.current || !challenge) return
       settled.current = true
-      const result = await submitGoal(seed, run.goal, placed, cursor)
-      if (!result) return
+      setGrading(true)
+      let result: GoalVerdict | null = null
+      try {
+        result = await submitGoal(seed, run.goal, placed, cursor, pin)
+      } catch {
+        result = null
+      }
+      setGrading(false)
+      if (!result) {
+        // The server did not answer. The move is still on the pitch and סיום works again:
+        // a failed round trip must never leave a run with no way forward (rule 42).
+        settled.current = false
+        return
+      }
       setVerdict(result)
 
-      const gained = Math.max(0, pointsFor(result.metrics.overall, result.metrics.continuity) - spent * HINT_COST)
+      const gained = Math.max(
+        0,
+        pointsFor(result.metrics.overall, result.metrics.continuity) - spent.current * HINT_COST,
+      )
       /**
        * A life is lost for a touch you PLACED and got wrong — never for one you did not
        * place at all.
@@ -121,9 +191,15 @@ export function GoalRun({
         (line) => line.kind === 'matched' && line.grade === 'bad',
       ).length
       const matched = result.touches.filter((line) => line.kind === 'matched' && line.grade !== 'bad').length
+      const good = result.touches.filter((line) => line.kind === 'matched' && line.grade === 'good').length
 
       if (gained > 0) setBurst({ points: gained, combo: Math.max(1, matched) })
       if (result.metrics.overall >= 90) setCelebrate(true)
+      // A move rebuilt well enough is KEPT — under its own goal id, in the one profile
+      // store, which is what the worker card (gate 10) reads. Never keyed by article:
+      // two goals from one report are two moves.
+      if (result.metrics.overall >= GOOD_SCORE && !embedded) collect('goal', [result.goalId])
+      haptic(lost > 0 ? 'miss' : result.metrics.overall >= GOOD_SCORE ? 'lock' : 'tap')
 
       setRun((previous) => ({
         goal: previous.goal,
@@ -137,12 +213,13 @@ export function GoalRun({
             continuity: result.metrics.continuity,
             touches: result.truth.length,
             matched,
+            good,
           },
         ],
         over: previous.over,
       }))
     },
-    [challenge, cursor, run.goal, seed],
+    [challenge, cursor, embedded, pin, run.goal, seed],
   )
 
   /**
@@ -155,7 +232,8 @@ export function GoalRun({
     (point: ReplayPoint) => {
       if (!draft.actorHe || !draft.action) return
       if (!draft.origin) {
-        setDraft({ ...draft, origin: point })
+        setBuild({ touches, editing, draft: { ...draft, origin: point } })
+        haptic('tap')
         return
       }
       const touch: UserTouch = {
@@ -164,35 +242,66 @@ export function GoalRun({
         origin: draft.origin,
         target: point,
       }
-      setTouches((current) => {
-        if (editing !== null) {
-          return current.map((item, index) => (index === editing ? touch : item))
-        }
-        return current.length >= MAX_TOUCHES ? current : [...current, touch]
-      })
-      setDraft(EMPTY_DRAFT)
-      setEditing(null)
+      if (editing !== null) {
+        setBuild({
+          touches: touches.map((item, index) => (index === editing ? touch : item)),
+          draft: EMPTY_DRAFT,
+          editing: null,
+        })
+      } else {
+        if (touches.length >= MAX_TOUCHES) return
+        setBuild({ touches: [...touches, touch], draft: EMPTY_DRAFT, editing: null })
+      }
+      haptic('lock')
     },
-    [draft, editing],
+    [draft, editing, touches],
   )
 
   function edit(index: number) {
     const touch = touches[index]
-    if (!touch || verdict) return
-    setEditing(index)
-    setDraft({ ...touch })
+    if (!touch || verdict || grading) return
+    setBuild({ touches, editing: index, draft: { ...touch } })
+    haptic('tap')
   }
 
+  /** A hint that lands after the whistle is dropped: it would be paid for a goal gone. */
   async function ask(which: 'start' | 'count') {
-    if (verdict) return
-    const answer = await askGoalHint(seed, run.goal, which, cursor)
-    if (answer === null) return
-    if (which === 'start') setHintStart(answer)
-    else setHintCount(answer)
-    setRun((previous) => ({ ...previous, hints: previous.hints + 1 }))
+    if (verdict || grading || asking) return
+    const goal = run.goal
+    setAsking(true)
+    try {
+      const answer = await askGoalHint(seed, goal, which, cursor, pin)
+      if (answer === null || settled.current) return
+      if (which === 'start') setHintStart(answer)
+      else setHintCount(answer)
+      spent.current += 1
+      setRun((previous) => ({ ...previous, hints: previous.hints + 1 }))
+      haptic('tap')
+    } catch {
+      // no answer, no charge
+    } finally {
+      setAsking(false)
+    }
   }
 
-  const spent = (hintStart ? 1 : 0) + (hintCount ? 1 : 0)
+  /** The reception hint: ONE envelope, for the touch being built now, fetched once. */
+  async function askReception() {
+    if (verdict || grading || asking || reception) return
+    const touch = editing ?? touches.length
+    setAsking(true)
+    try {
+      const envelope = await askReceptionHint(seed, run.goal, touch, cursor, pin)
+      if (envelope === null || settled.current) return
+      setReception({ envelope, touch })
+      spent.current += 1
+      setRun((previous) => ({ ...previous, hints: previous.hints + 1 }))
+      haptic('tap')
+    } catch {
+      // no answer, no charge
+    } finally {
+      setAsking(false)
+    }
+  }
 
   /** the clock — running out whistles on whatever is on the pitch */
   useEffect(() => {
@@ -201,11 +310,16 @@ export function GoalRun({
     settled.current = false
     const started = Date.now()
     const tick = window.setInterval(() => {
+      // once the whistle has gone the clock has nothing left to say
+      if (settled.current) {
+        window.clearInterval(tick)
+        return
+      }
       const left = total - Math.floor((Date.now() - started) / 1000)
       setSecondsLeft(Math.max(0, left))
       if (left <= 0) {
         window.clearInterval(tick)
-        void whistle(live.current, spent)
+        void whistle(live.current)
       }
     }, 250)
     return () => window.clearInterval(tick)
@@ -213,26 +327,40 @@ export function GoalRun({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.goal, challenge, run.over])
 
-  /** and after the verdict has been read, the next goal walks on by itself */
+  /** the next goal — from the button, or from the beat running out unread */
+  const advance = useCallback(() => {
+    setBurst(null)
+    setCelebrate(false)
+    setVerdict(null)
+    setBuild(EMPTY_BUILD)
+    setHintStart(null)
+    setHintCount(null)
+    setReception(null)
+    spent.current = 0
+    settled.current = false
+    setRun((previous) => {
+      const goal = previous.goal + 1
+      return { ...previous, goal, over: previous.lives <= 0 || goal >= GOALS_PER_RUN }
+    })
+  }, [])
+
+  // inside the life the verdict waits for the player: the room answers only when he walks back
+  const reveal = useReveal({ ms: REVEAL_MS, onDone: advance, active: verdict !== null && !embedded })
+  const { running: revealRunning, cancel: cancelReveal } = reveal
+
+  /** reading the verdict calls the beat off — the button is then the only way on */
   useEffect(() => {
-    if (!verdict) return
-    const wait = window.setTimeout(() => {
-      setBurst(null)
-      setCelebrate(false)
-      setVerdict(null)
-      setTouches([])
-      setDraft(EMPTY_DRAFT)
-      setEditing(null)
-      setHintStart(null)
-      setHintCount(null)
-      settled.current = false
-      setRun((previous) => {
-        const goal = previous.goal + 1
-        return { ...previous, goal, over: previous.lives <= 0 || goal >= GOALS_PER_RUN }
-      })
-    }, 9000)
-    return () => window.clearTimeout(wait)
-  }, [verdict])
+    if (!verdict || !revealRunning) return
+    const stop = () => cancelReveal()
+    window.addEventListener('wheel', stop, { passive: true })
+    window.addEventListener('touchmove', stop, { passive: true })
+    window.addEventListener('keydown', stop)
+    return () => {
+      window.removeEventListener('wheel', stop)
+      window.removeEventListener('touchmove', stop)
+      window.removeEventListener('keydown', stop)
+    }
+  }, [verdict, revealRunning, cancelReveal])
 
   if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} />
 
@@ -249,6 +377,19 @@ export function GoalRun({
         return line?.kind === 'matched' ? line.grade : line ? ('bad' as const) : undefined
       })
     : undefined
+  const pairs = verdict?.touches.map((line) => ({ user: line.userIndex, truth: line.truthIndex }))
+  const full = touches.length >= MAX_TOUCHES
+  const caption = verdict
+    ? null
+    : grading
+      ? { lead: t('goal.whistleWait'), text: t('goal.phase.rolling') }
+      : full && editing === null
+        ? { lead: `${MAX_TOUCHES}/${MAX_TOUCHES}`, text: t('goal.tooMany') }
+        : {
+            lead: t('goal.phase.touch', { n: String((editing ?? touches.length) + 1) }),
+            text: t(PHASE_CAPTION[phaseOf(draft)]),
+          }
+  const finalBeat = run.goal + 1 >= GOALS_PER_RUN || run.lives <= 0
 
   return (
     <div className="relative">
@@ -259,7 +400,7 @@ export function GoalRun({
 
       {/* the bar — lives, score, which goal, and a clock you read without looking */}
       <div className="sticky top-0 z-20 -mx-gutter bg-sheet/95 px-gutter pb-2 pt-2 backdrop-blur">
-        <div className="flex items-center justify-between gap-3">
+        <div className={embedded ? 'hidden' : 'flex items-center justify-between gap-3'}>
           <ol className="flex items-center gap-1.5" aria-label={t('run.lives')}>
             {Array.from({ length: LIVES }, (_, index) => (
               <li
@@ -291,11 +432,13 @@ export function GoalRun({
       <div className="mt-2.5 border-rule border-ink bg-red px-3 py-2.5">
         <div className="flex items-baseline justify-between gap-2 border-b-hair border-ink pb-1.5">
           <span className="font-body text-[10px] font-extrabold tracking-widest text-ink">
-            {t(stageLabel)}
+            {embedded ? challenge.seasonLabel : t(stageLabel)}
           </span>
-          <span className="font-latin text-[9px] font-bold tracking-[0.2em] text-paper" dir="ltr">
-            MATCHDAY SPECIAL · No. 08
-          </span>
+          {!embedded && (
+            <span className="font-latin text-[9px] font-bold tracking-[0.2em] text-paper" dir="ltr">
+              MATCHDAY SPECIAL · No. 08
+            </span>
+          )}
         </div>
         <p className="mt-2 font-display text-step-2 leading-[0.95] text-paper">
           {challenge.titleHe}
@@ -334,15 +477,32 @@ export function GoalRun({
             labels={labels}
             truth={verdict?.truth}
             grades={grades}
+            pairs={pairs}
             onPlace={place}
-            disabled={verdict !== null}
+            disabled={verdict !== null || grading}
+            caption={caption}
+            hintEnvelope={reception?.envelope ?? null}
+            rolling={grading}
           />
         </div>
 
         <div className="min-w-0">
       {verdict ? (
         <>
-          <ul className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[10.5px] text-muted">
+          {/* the way on — first thing under the board, and a real button */}
+          <div className="mt-2 border-rule border-ink bg-ink">
+            {revealRunning && <RevealBar progress={reveal.progress} tone="sheet" />}
+            <button
+              type="button"
+              onClick={embedded ? () => embedded.onResult(verdict) : reveal.skip}
+              data-goal="continue"
+              className="flex min-h-tap w-full items-center justify-center gap-2 px-4 font-body text-step-0 font-extrabold text-paper"
+            >
+              {embedded ? embedded.doneLabel : finalBeat ? t('goal.reveal.final') : t('goal.reveal.continue')}
+              <span aria-hidden="true">←</span>
+            </button>
+          </div>
+          <ul className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[11px] text-muted">
             <li className="flex items-center gap-1">
               <span className="inline-block h-2 w-4 bg-red" aria-hidden="true" />
               {t('goal.legend.mine')}
@@ -355,61 +515,90 @@ export function GoalRun({
               <span className="inline-block h-2 w-4 border-hair border-dashed border-sign" aria-hidden="true" />
               {t('goal.legend.envelope')}
             </li>
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-0 w-4 border-t-2 border-dashed border-ink" aria-hidden="true" />
+              {t('goal.legend.bridge')}
+            </li>
+            <li className="flex items-center gap-1">
+              <span className="font-latin text-[13px] font-extrabold leading-none text-ink" aria-hidden="true">+</span>
+              {t('goal.verdict.extra')}
+            </li>
+            <li className="flex items-center gap-1">
+              <span className="font-latin text-[13px] font-extrabold leading-none text-ink" aria-hidden="true">○</span>
+              {t('goal.verdict.missing')}
+            </li>
           </ul>
-          <ReplayVerdict
-            metrics={verdict.metrics}
-            touches={verdict.touches}
-            narrativeHe={verdict.narrativeHe}
-            sourceTitle={verdict.sourceTitle}
-          />
+          {/* touching the verdict is reading it — the beat stops and waits */}
+          <div onPointerDown={cancelReveal} onFocus={cancelReveal}>
+            <ReplayVerdict
+              metrics={verdict.metrics}
+              touches={verdict.touches}
+              narrativeHe={verdict.narrativeHe}
+              sourceTitle={verdict.sourceTitle}
+            />
+          </div>
         </>
       ) : (
         <>
           <ReplayBuilder
             pool={challenge.pool}
+            opponents={challenge.opponents}
             draft={draft}
             touches={touches}
             editing={editing}
-            full={touches.length >= MAX_TOUCHES}
+            full={full}
             canFinish={touches.length >= MIN_TOUCHES}
-            onPickPlayer={(name) => setDraft((current) => ({ ...current, actorHe: name }))}
-            onPickAction={(action: ReplayAction) =>
-              setDraft((current) => ({ ...current, action }))
-            }
-            onClear={() => {
-              setDraft(EMPTY_DRAFT)
-              setEditing(null)
+            canUndo={canUndo(build)}
+            busy={grading}
+            onPickPlayer={(name) => {
+              setBuild((current) => ({ ...current, draft: { ...current.draft, actorHe: name } }))
+              haptic('tap')
             }}
+            onPickAction={(action: ReplayAction) => {
+              setBuild((current) => ({ ...current, draft: { ...current.draft, action } }))
+              haptic('tap')
+            }}
+            onClear={() => setBuild((current) => ({ ...current, draft: EMPTY_DRAFT, editing: null }))}
             onUndo={() => {
-              setTouches((current) => current.slice(0, -1))
-              setEditing(null)
-              setDraft(EMPTY_DRAFT)
+              setBuild((current) => undoStep(current))
+              haptic('tap')
             }}
             onEdit={edit}
-            onFinish={() => void whistle(touches, spent)}
+            onFinish={() => void whistle(touches)}
           />
 
-          {/* the two hints, each a piece of the answer and each paid for */}
+          {/* the three hints, each a piece of the answer and each paid for */}
           <div className="mt-2 border-rule border-ink bg-sheet p-3">
-            <p className="font-body text-[10px] font-extrabold tracking-widest text-muted">
+            <p className="font-body text-[11px] font-extrabold tracking-widest text-muted">
               {t('goal.hints')} · {t('goal.hint.cost', { n: String(HINT_COST) })}
             </p>
-            <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+            <div className="mt-1.5 grid grid-cols-3 gap-1.5">
               <button
                 type="button"
                 onClick={() => void ask('start')}
-                disabled={hintStart !== null}
-                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-2 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+                disabled={hintStart !== null || asking || grading}
+                data-goal="hint-start"
+                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40"
               >
                 {t('goal.hint.start')}
               </button>
               <button
                 type="button"
                 onClick={() => void ask('count')}
-                disabled={hintCount !== null}
-                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-2 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+                disabled={hintCount !== null || asking || grading}
+                data-goal="hint-count"
+                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40"
               >
                 {t('goal.hint.count')}
+              </button>
+              <button
+                type="button"
+                onClick={() => void askReception()}
+                disabled={reception !== null || asking || grading}
+                data-goal="hint-reception"
+                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40"
+              >
+                {t('goal.hint.reception')}
               </button>
             </div>
             {hintStart && (
@@ -420,6 +609,11 @@ export function GoalRun({
             {hintCount && (
               <p className="mt-1 font-body text-[11.5px] leading-snug text-ink">
                 <Num>{t('goal.hint.countAnswer', { n: hintCount })}</Num>
+              </p>
+            )}
+            {reception && (
+              <p className="mt-1 font-body text-[11.5px] leading-snug text-ink">
+                {t('goal.hint.receptionFor', { n: String(reception.touch + 1) })}
               </p>
             )}
           </div>
@@ -447,7 +641,11 @@ function Result({ run, seed, cursor }: { run: Run; seed: number; cursor: number 
       ? Math.round(played.reduce((sum, item) => sum + item.continuity, 0) / played.length)
       : 0
   const matched = played.reduce((sum, item) => sum + item.matched, 0)
+  const good = played.reduce((sum, item) => sum + item.good, 0)
   const asked = played.reduce((sum, item) => sum + item.touches, 0)
+  // of every touch the archive described, how many the player rebuilt WELL — the
+  // prototype's full-time figure, counted on the judge's own "good" line
+  const goodPct = asked > 0 ? Math.round((good / asked) * 100) : 0
 
   return (
     <div className="mt-stack">
@@ -484,6 +682,9 @@ function Result({ run, seed, cursor }: { run: Run; seed: number; cursor: number 
           </p>
           <p className="mt-1 font-body text-[11.5px] leading-snug text-muted">
             {t('goal.continuityAvg')}: <Num>{`${continuity}%`}</Num>
+          </p>
+          <p className="mt-1 font-body text-[11.5px] leading-snug text-muted" data-goal="good-touches">
+            {t('goal.goodTouches')}: <Num>{`${goodPct}%`}</Num>
           </p>
           {run.hints > 0 && (
             <p className="mt-1 font-body text-[11.5px] leading-snug text-muted">

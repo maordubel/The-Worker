@@ -2,13 +2,8 @@
 
 import Link from 'next/link'
 
-import { ShareRow } from '@/components/share/ShareRow'
-import { SupporterId } from '@/components/ballot/SupporterId'
 import { Num } from '@/components/ui/Num'
 import { BALLOT, type Ballot, type PollQuestion } from '@/lib/polls/ballot'
-import type { PickFact } from '@/lib/polls/pickFact'
-import type { SupporterId as Id } from '@/lib/polls/supporter'
-import type { KitSpec } from '@/lib/kit/spec'
 import { t } from '@/lib/i18n'
 
 /**
@@ -47,6 +42,14 @@ import { t } from '@/lib/i18n'
  * disagree (rule 59). The note under the field says so out loud, because a field that
  * quietly edits another screen is worse than one that does not.
  *
+ * ## The progress rail (21.9.2026, players.md §2 Gate 7 V3)
+ *
+ * The questions are asked one at a time on the stage above (`QuestionStage`); this slip
+ * is the rail under it: the row on the stage is marked, a tap on any row puts that
+ * question on the stage, and a stamp goes down as each answer lands. The picks are ids
+ * and codes now, printed through `display`. The Supporter ID and the share card moved to
+ * the manifesto the seal opens (`Manifesto`).
+ *
  * The honesty plate is the one element every one of the four states shares. It is
  * printed OUTSIDE both the seal-button branch and the sealed branch, not duplicated
  * into each — the same sentence, in the same place, whether the slip is empty, half
@@ -58,9 +61,8 @@ export function BallotSlip({
   complete,
   sealed,
   nameHe,
-  supporter,
-  shirt,
-  favourite,
+  current = null,
+  display,
   onRowTap,
   onName,
   onSeal,
@@ -72,19 +74,17 @@ export function BallotSlip({
   sealed: boolean
   /** the name on the shirt — the member book's, not a second copy of it */
   nameHe: string
-  /** the slip read back as a person; drawn once the slip is sealed */
-  supporter: Id
-  /** the club's own home kit, for the supporter's shirt */
-  shirt: KitSpec
-  /** what the archive holds on the favourite, or null */
-  favourite: PickFact | null
+  /** the question on the stage — its row is marked */
+  current?: string | null
+  /** how a stored pick is printed (an id → a name, a code → a label) */
+  display: (question: PollQuestion, pick: string) => string
   onRowTap: (question: PollQuestion) => void
   onName: (value: string) => void
   onSeal: () => void
   onNewSlip: () => void
 }) {
   return (
-    <div className="paper mt-stack border-rule border-ink">
+    <div className="paper mt-stack border-rule border-ink lg:mt-0">
       {/* status bar — the one line of instruction, and the ratio */}
       <div className="flex items-stretch border-b-hair border-ink bg-ink">
         <div className="min-w-0 flex-1 px-3.5 py-2.5">
@@ -130,6 +130,7 @@ export function BallotSlip({
       <ol>
         {BALLOT.map((question, index) => {
           const pick = ballot[question.id] ?? ''
+          const onStage = !sealed && current === question.id
           const body = (
             <>
               <p dir="ltr" className="font-latin text-[8.5px] font-bold leading-none tracking-[0.16em] text-muted">
@@ -137,14 +138,24 @@ export function BallotSlip({
               </p>
               <p className="mt-[3px] font-sign text-[16px] leading-[1.25] text-ink">{t(question.ask)}</p>
               {pick !== '' && (
-                <p className="mt-1 truncate font-sign text-[18px] font-bold leading-tight text-red">{pick}</p>
+                <p className="mt-1 truncate font-sign text-[18px] font-bold leading-tight text-red">
+                  {display(question, pick)}
+                </p>
               )}
             </>
           )
           return (
-            <li key={question.id} className="flex items-stretch border-b-hair border-ink/30">
-              <div className="flex w-[38px] shrink-0 items-center justify-center border-e-hair border-ink/30 bg-ink/5">
-                <span className="font-poster text-[20px] leading-none text-muted">
+            <li
+              key={question.id}
+              aria-current={onStage ? 'step' : undefined}
+              className={`flex items-stretch border-b-hair border-ink/30 ${onStage ? 'bg-ink/[.06]' : ''}`}
+            >
+              <div
+                className={`flex w-[38px] shrink-0 items-center justify-center border-e-hair border-ink/30 ${
+                  onStage ? 'bg-ink' : 'bg-ink/5'
+                }`}
+              >
+                <span className={`font-poster text-[20px] leading-none ${onStage ? 'text-sheet' : 'text-muted'}`}>
                   <Num>{String(index + 1)}</Num>
                 </span>
               </div>
@@ -213,41 +224,7 @@ export function BallotSlip({
             {t('poll.sealed.stamp')}
           </span>
 
-          <div className="mt-8">
-            <SupporterId id={supporter} shirt={shirt} favourite={favourite} />
-          </div>
-
-          <div className="mt-2.5">
-            <ShareRow
-              kind="polls"
-              params={{ n: String(filled) }}
-              headline={t('poll.slip')}
-              card={{
-                template: 'ballot' as const,
-                kicker: 'GATE 7 · THE BALLOT',
-                label: t('screen.polls.title'),
-                eyebrow: t('poll.slip'),
-                hero: t('poll.slip'),
-                stats: [],
-                // The name goes on as a ROW rather than into the hero line. The ballot
-                // template sizes its rows by how many there are and measures every
-                // baseline (rule 19), so a ninth row is a row; an eighteen-character
-                // name swapped into an 84px hero is a collision nobody measured.
-                ballot: [
-                  ...(nameHe === ''
-                    ? []
-                    : [{ ask: t('poll.name.label'), latin: 'NAME ON THE SHIRT', pick: nameHe }]),
-                  ...BALLOT.filter((question) => (ballot[question.id] ?? '') !== '').map((question) => ({
-                    ask: t(question.ask),
-                    latin: question.latin,
-                    pick: ballot[question.id] as string,
-                  })),
-                ],
-                cta: t('poll.cta'),
-                challenge: t('poll.challenge'),
-              }}
-            />
-          </div>
+          <p className="mt-8 font-body text-[12px] leading-relaxed text-muted">{t('poll.manifesto.slipNote')}</p>
 
           <div className="mt-2.5 flex gap-2">
             <Link

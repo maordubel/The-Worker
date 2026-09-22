@@ -10,6 +10,7 @@ import {
   archiveSummary,
   archiveVariants,
 } from '@/lib/kit/archive'
+import { playableKits } from '@/lib/kit/kit-master'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
 
@@ -34,6 +35,20 @@ import { ArchiveWing } from './ArchiveWing'
  */
 export const metadata: Metadata = gateMetadata('kits-archive')
 
+/**
+ * The exact photographs of the shirts Gate 4 can deal — by file, to the kit's collection key. The
+ * archive is the club's record and stays whole; what it does not do is hand a player the answer to
+ * a puzzle they have not played, so those photographs arrive behind a shield (brief §15, rule 69).
+ */
+function spoilerMap(): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const kit of playableKits()) {
+    const photo = kit.evidence.exactPhoto
+    if (photo) out[photo.file.replace(/\.webp$/, '')] = kit.legacyKey
+  }
+  return out
+}
+
 export default function KitArchivePage() {
   const shirts = archiveShirts()
   const summary = archiveSummary(shirts)
@@ -55,6 +70,7 @@ export default function KitArchivePage() {
             variants={archiveVariants(shirts)}
             decades={archiveDecades(shirts)}
             sources={archiveSources(shirts)}
+            spoilers={spoilerMap()}
           />
         </>
       ) : (

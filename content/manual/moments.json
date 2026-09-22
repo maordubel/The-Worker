@@ -87,6 +87,66 @@
    "confidence": 2,
    "sourceUrl": "https://www.ynet.co.il/articles/0,7340,L-219628,00.html",
    "sourceTitle": "ynet — יד אלוהים תוצרת הארץ: שער היד של גילי לנדאו בגמר גביע 1983"
+  },
+  {
+   "slug": "הקפאת-הליכים-2016",
+   "titleHe": "צו הקפאת הליכים למועדון",
+   "happenedOn": "2016-12-12",
+   "seasonLabel": "2016/17",
+   "category": "club",
+   "matchNaturalKey": null,
+   "bodyHe": "ב-12 בדצמבר 2016 ניתן צו הקפאת הליכים לחברה שהפעילה את מועדון הכדורגל, בבית המשפט המחוזי בתל אביב, ומונו נאמנים לניהול הליך הבראה ולחיפוש רוכש. החוב הכולל שנמסר בבקשה עמד על כמאה מיליון שקלים.",
+   "confidence": 2,
+   "sourceUrl": "https://www.globes.co.il/news/article.aspx?did=1001166381",
+   "sourceTitle": "גלובס — צו הקפאת הליכים למועדון הכדורגל הפועל ת\"א, 12.12.2016"
+  },
+  {
+   "slug": "תשע-נקודות-2017",
+   "titleHe": "תשע נקודות הופחתו",
+   "happenedOn": "2017-01-10",
+   "seasonLabel": "2016/17",
+   "category": "league",
+   "matchNaturalKey": null,
+   "bodyHe": "ב-10 בינואר 2017 הודיעה ההתאחדות לכדורגל במכתב רשמי על הפחתת תשע נקודות ממאזן הפועל תל אביב, מטעמים כספיים. בתום העונה ירדה הקבוצה לליגה הלאומית. שני מקורות בלתי-תלויים אומרים את אותו הדבר: הדיווח בן הזמן נוקב בתשע נקודות, וטבלת הסיום בארכיון RSSSF נושאת את ההערה \"9 points deducted for financial reasons\" לצד הסימון Relegated.",
+   "confidence": 2,
+   "sourceUrl": "https://sports.walla.co.il/item/3030224",
+   "sourceTitle": "וואלה ספורט — הפחתת תשע נקודות, 10.1.2017 (מוצלב מול RSSSF, טבלת 2016/17)"
+  },
+  {
+   "slug": "עלייה-2018",
+   "titleHe": "אלופת הלאומית, וחזרה לליגת העל",
+   "happenedOn": null,
+   "seasonLabel": "2017/18",
+   "category": "league",
+   "matchNaturalKey": null,
+   "bodyHe": "בעונת 2017/18 סיימה הפועל תל אביב בראש הליגה הלאומית — בשלב הסדיר ובפלייאוף כאחד — ועלתה חזרה לליגת העל יחד עם הפועל חדרה. הארכיון אינו נוקב בערב שבו זה נחתם, ולכן לרגע הזה אין תאריך.",
+   "confidence": 2,
+   "sourceUrl": "https://www.rsssf.org/tablesi/isra2018.html",
+   "sourceTitle": "RSSSF — ישראל 2017/18, טבלת הליגה הלאומית"
+  },
+  {
+   "slug": "ירידה-2024",
+   "titleHe": "ירידה נוספת ללאומית",
+   "happenedOn": null,
+   "seasonLabel": "2023/24",
+   "category": "league",
+   "matchNaturalKey": null,
+   "bodyHe": "בתום עונת 2023/24 ירדה הפועל תל אביב מליגת העל בפעם השנייה בשבע שנים, אחרי שסיימה במקום השלושה־עשר בפלייאוף התחתון. טבלת הסיום נושאת גם הפחתה של נקודה אחת. הארכיון אינו נוקב בערב שבו זה נחתם.",
+   "confidence": 2,
+   "sourceUrl": "https://www.rsssf.org/tablesi/isra2024.html",
+   "sourceTitle": "RSSSF — ישראל 2023/24, פלייאוף הירידה"
+  },
+  {
+   "slug": "עלייה-2025",
+   "titleHe": "אלופת הלאומית, ועלייה שנייה",
+   "happenedOn": null,
+   "seasonLabel": "2024/25",
+   "category": "league",
+   "matchNaturalKey": null,
+   "bodyHe": "בעונת 2024/25 סיימה הפועל תל אביב בראש הליגה הלאומית ועלתה חזרה לליגת העל יחד עם הפועל פתח תקווה. הארכיון אינו נוקב בערב שבו זה נחתם.",
+   "confidence": 2,
+   "sourceUrl": "https://www.rsssf.org/tablesi/isra2025.html",
+   "sourceTitle": "RSSSF — ישראל 2024/25, טבלת הליגה הלאומית"
   }
  ]
 }

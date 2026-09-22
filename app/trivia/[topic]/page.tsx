@@ -5,63 +5,80 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { roundFrom } from '@/lib/rotation/round'
-import { isTopic, topicSpec } from '@/lib/game/topics'
-import { ROUND_LENGTH, deal } from '@/lib/game/trivia'
+import { resolveTopic, questionTopic, topicSpec } from '@/lib/game/topics'
+import { ROUND_LENGTH, dealSeededRun, publicQuestions } from '@/lib/game/trivia'
 import { t, type MessageKey } from '@/lib/i18n'
 import { gateMetadata, topicMetadata } from '@/lib/seo'
-import { TriviaRun } from '../TriviaRun'
+import { TriviaRun, type RunMode } from '../TriviaRun'
 
-/**
- * An unknown topic 404s in the page itself; metadata is generated before that check
- * runs, so a bad segment falls back to the wing's own metadata rather than crashing.
- */
 export function generateMetadata({ params }: { params: { topic: string } }): Metadata {
-  if (!isTopic(params.topic)) return gateMetadata('trivia')
-  const spec = topicSpec(params.topic)
-  return topicMetadata(spec.titleKey as MessageKey, spec.bladeKey as MessageKey, params.topic)
+  const topic = resolveTopic(params.topic)
+  if (!topic) return gateMetadata('trivia')
+  const spec = topicSpec(topic)
+  return topicMetadata(spec.titleKey as MessageKey, spec.bladeKey as MessageKey, topic)
 }
 
+const QID = /^q_[0-9a-f]{12}$/
+
 /**
- * שער 2 — one topic's round.
+ * שער 2 — one run.
  *
- * The topic is a route segment rather than a query string, because a topic is a place
- * in this app and not a setting: `/trivia/europe` is a thing to send someone, and it is
- * what the share link carries. An unknown segment 404s rather than quietly falling back
- * to the general bank — a link that silently plays a different game than it names is
- * worse than a link that does not work.
- *
- * The whole round is dealt here, server-side, WITHOUT its answers, exactly as the
- * general round is. `grade()` re-derives them from (seed, topic).
+ * The route is the run's address. A topic is a route segment (the old five stay as
+ * aliases — `/trivia/terrace-songs` plays the songs topic); an era is `?era=1990`, Hard is
+ * `?hard=1`, practice is `?practice=1`. A seeded run is dealt here from (spec, seed,
+ * cursor); a personal run (Revenge, Surprise, or a friend's link to one) arrives as its
+ * twelve ids in `?q=`. Either way the twelve are dealt on the server WITHOUT answers.
  */
 export default function TopicRoundPage({
   params,
   searchParams,
 }: {
   params: { topic: string }
-  searchParams: { seed?: string; r?: string }
+  searchParams: {
+    seed?: string
+    r?: string
+    era?: string
+    hard?: string
+    practice?: string
+    q?: string
+    mode?: string
+    rv?: string
+  }
 }) {
-  if (!isTopic(params.topic)) notFound()
-  const topic = params.topic
+  const topic = resolveTopic(params.topic)
+  if (!topic) notFound()
   const round = roundFrom(searchParams)
   const spec = topicSpec(topic)
+  const era = /^(19|20)\d0$/.test(searchParams.era ?? '') ? Number(searchParams.era) : null
+  const hard = searchParams.hard === '1'
+  const practice = searchParams.practice === '1'
+  const q = (searchParams.q ?? '')
+    .split('.')
+    .filter((id) => QID.test(id))
+    .slice(0, ROUND_LENGTH)
+  const personal = q.length > 0
+  const mode: RunMode = searchParams.mode === 'revenge' || searchParams.mode === 'surprise' ? searchParams.mode : 'mix'
+  const revengeCount = mode === 'revenge' && /^\d+$/.test(searchParams.rv ?? '') ? Number(searchParams.rv) : null
 
-  const questions = Array.from({ length: ROUND_LENGTH }, (_, index) =>
-    deal(round.seed, index, topic, round.cursor),
-  ).filter((question): question is NonNullable<typeof question> => question !== null)
+  const ids = personal ? q : dealSeededRun({ topic: questionTopic(topic), decade: era, hard }, round.seed, round.cursor).ids
+  const questions = publicQuestions(ids, round.seed)
+  const full = questions.length >= ROUND_LENGTH
 
   return (
-    <Screen
-      title={t(spec.titleKey as MessageKey)}
-      sub={t('screen.trivia.sub')}
-      chrome={questions.length < ROUND_LENGTH}
-    >
-      {questions.length >= ROUND_LENGTH ? (
+    <Screen title={t(spec.titleKey as MessageKey)} sub={t('screen.trivia.sub')} chrome={!full}>
+      {full ? (
         <>
           <TriviaRun
             questions={questions}
             seed={round.seed}
             cursor={round.cursor}
             topic={topic}
+            era={era}
+            hard={hard}
+            practice={practice}
+            mode={mode}
+            personal={personal}
+            revengeCount={revengeCount}
           />
           <ReportLink />
         </>

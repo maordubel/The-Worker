@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { Num } from '@/components/ui/Num'
+import { portalConfigured } from '@/lib/portal/env'
 import { forgetDevice } from '@/lib/profile/summary'
 import { t } from '@/lib/i18n'
 
@@ -32,6 +33,12 @@ import { t } from '@/lib/i18n'
  * The reset lives here too, under the sign-up rather than in a settings menu, because
  * this is the screen that explains what is stored — and a screen that explains what it
  * keeps should be the screen that lets you take it back.
+ *
+ * **Once accounts exist, the waiting list is gone (21.9.2026).** With Supabase keys set,
+ * `AccountPlate` above is the save — Google, one button, the only auth this product has —
+ * and a second plate collecting e-mail addresses for "when registration opens" would be
+ * a promise about a door that is already open (brief §20: no second auth stack, no e-mail
+ * issue). The plate then says only what lives on this device, and keeps the reset.
  */
 
 const FORM_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? ''
@@ -50,6 +57,7 @@ export function SignUpPlate({
   const [wiped, setWiped] = useState(false)
 
   const worthKeeping = figures.plays > 0 || collections > 0
+  const accounts = portalConfigured()
 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
@@ -81,7 +89,7 @@ export function SignUpPlate({
     <section className="mt-stack border-plate border-red bg-sheet" aria-labelledby="member-signup">
       <div className="bg-red px-4 py-2.5">
         <h2 id="member-signup" className="font-display text-step-2 leading-none text-paper">
-          {t('member.signup')}
+          {accounts ? t('tik.card.deviceTitle') : t('member.signup')}
         </h2>
       </div>
 
@@ -103,10 +111,10 @@ export function SignUpPlate({
           </p>
         )}
         <p className={`${worthKeeping ? 'mt-2' : ''} max-w-prose font-body text-step--1 leading-relaxed text-muted`}>
-          {t('member.signupLede')}
+          {accounts ? t('tik.card.deviceLede') : t('member.signupLede')}
         </p>
 
-        {FORM_KEY === '' ? (
+        {accounts ? null : FORM_KEY === '' ? (
           <p className="mt-3 border-s-rule border-red ps-3 font-body text-step--1 leading-relaxed text-ink">
             {t('member.signupSoon')}
           </p>

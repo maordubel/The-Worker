@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Num } from '@/components/ui/Num'
 import type { ArchiveShirt, ArchiveSource, DecadeFacet, VariantFacet } from '@/lib/kit/archive'
+import { activeCollection } from '@/lib/kit/collection'
 import { t } from '@/lib/i18n'
 
 /**
@@ -34,16 +35,38 @@ export function ArchiveWing({
   variants,
   decades,
   sources,
+  spoilers = {},
 }: {
   shirts: ArchiveShirt[]
   variants: VariantFacet[]
   decades: DecadeFacet[]
   sources: ArchiveSource[]
+  /** slug → Gate 4 collection key, for the exact photographs of shirts Gate 4 deals */
+  spoilers?: Record<string, string>
 }) {
   const [variant, setVariant] = useState<Variant>('all')
   const [decade, setDecade] = useState<Decade>('all')
   const [source, setSource] = useState<Source>('all')
   const [openSlug, setOpenSlug] = useState<string | null>(null)
+  // The spoiler shield: a Gate 4 shirt this device has not built stays covered until a tap
+  // uncovers it. Before the collection is read, every such shirt is covered — the safe default.
+  const store = useMemo(() => activeCollection(), [])
+  const [built, setBuilt] = useState<Set<string> | null>(null)
+  const [uncovered, setUncovered] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    let live = true
+    void store.read().then((rows) => {
+      if (live) setBuilt(new Set(Object.keys(rows)))
+    })
+    return () => {
+      live = false
+    }
+  }, [store])
+  const shielded = (shirt: ArchiveShirt) => {
+    const key = spoilers[shirt.slug]
+    return key !== undefined && !uncovered.has(shirt.slug) && !(built?.has(key) ?? false)
+  }
+  const uncover = (slug: string) => setUncovered((rows) => new Set(rows).add(slug))
 
   const shown = shirts
     .filter((shirt) => variant === 'all' || shirt.variant === variant)
@@ -123,7 +146,11 @@ export function ArchiveWing({
         <ul className="mt-3 grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
           {shown.map((shirt) => (
             <li key={shirt.slug}>
-              <ShirtCard shirt={shirt} onOpen={() => setOpenSlug(shirt.slug)} />
+              {shielded(shirt) ? (
+                <ShieldCard shirt={shirt} onUncover={() => uncover(shirt.slug)} />
+              ) : (
+                <ShirtCard shirt={shirt} onOpen={() => setOpenSlug(shirt.slug)} />
+              )}
             </li>
           ))}
         </ul>
@@ -251,6 +278,31 @@ function ShirtCard({ shirt, onOpen }: { shirt: ArchiveShirt; onOpen: () => void 
       <span className="mt-0.5 block truncate font-body text-[10.5px] text-muted">
         {shirt.specialHe ?? shirt.competitionHe ?? shirt.makerHe ?? ' '}
       </span>
+    </button>
+  )
+}
+
+/**
+ * מגן ספוילר — the card of a Gate 4 shirt the player has not built yet: the date and the variant,
+ * no photograph (not even a hidden one), and a tap to uncover it anyway. The archive does not
+ * refuse; it asks first.
+ */
+function ShieldCard({ shirt, onUncover }: { shirt: ArchiveShirt; onUncover: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onUncover}
+      aria-label={t('kits.shield.aria', { date: dateText(shirt) })}
+      className="flex min-h-tap w-full flex-col border-rule border-dashed border-ink/50 bg-paper p-2 text-start"
+    >
+      <span className="flex aspect-square w-full flex-col items-center justify-center gap-2 bg-sheet px-3 text-center">
+        <span className="font-display text-[18px] leading-tight text-ink">{t('kits.shield.title')}</span>
+        <span className="font-body text-[11px] leading-snug text-muted">{t('kits.shield.body')}</span>
+      </span>
+      <span className="mt-2 block font-poster text-[17px] leading-none text-ink">
+        <DateLabel shirt={shirt} />
+      </span>
+      <span className="mt-1 block truncate font-body text-[11px] font-extrabold text-red">{shirt.variantHe}</span>
     </button>
   )
 }

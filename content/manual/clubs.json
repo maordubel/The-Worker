@@ -408,6 +408,38 @@
    "sourceTitle": "Wikipedia / basket.co.il"
   },
   {
+   "slug": "מכבי-באר-יעקב",
+   "nameHe": "מכבי באר יעקב",
+   "sport": "basketball",
+   "confidence": 2,
+   "sourceUrl": "https://sports.walla.co.il/item/2533799",
+   "sourceTitle": "וואלה ספורט — גמר הפלייאוף של הליגה הלאומית, 16.5.2012"
+  },
+  {
+   "slug": "בני-הרצליה",
+   "nameHe": "בני הרצליה",
+   "sport": "basketball",
+   "confidence": 2,
+   "sourceUrl": "https://www.kan.org.il/content/kan-news/culture/262473/",
+   "sourceTitle": "כאן — גמר גביע המדינה בכדורסל 2022"
+  },
+  {
+   "slug": "גראן-קנאריה",
+   "nameHe": "גראן קנאריה",
+   "sport": "basketball",
+   "confidence": 2,
+   "sourceUrl": "https://www.euroleaguebasketball.net/en/eurocup/news/hapoel-sweeps-gran-canaria-for-first-eurocup-title-and-ticket-to-euroleague/",
+   "sourceTitle": "EuroCup — גמר 2024/25"
+  },
+  {
+   "slug": "ריאל-מדריד",
+   "nameHe": "ריאל מדריד",
+   "sport": "basketball",
+   "confidence": 2,
+   "sourceUrl": "https://www.eurohoops.net/en/euroleague/1965449/real-madrid-beats-hapoel-and-advances-to-the-final-four/",
+   "sourceTitle": "Eurohoops — רבע גמר היורוליג 2025/26"
+  },
+  {
    "slug": "מכבי-פ\"ת",
    "nameHe": "מכבי פ\"ת",
    "sport": "football",

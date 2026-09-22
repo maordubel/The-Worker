@@ -2,11 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-import { KitPlate } from '@/components/kit/KitPlate'
+import { KitMarkArt } from '@/components/kit/KitEngineShirt'
+import { KitShirt } from '@/components/kit/KitShirt'
 import { Num } from '@/components/ui/Num'
-import { activeCollection, kitKey, type Collection } from '@/lib/kit/collection'
-import type { CatalogKit, Facet } from '@/lib/kit/catalog'
+import { activeCollection, type Collection } from '@/lib/kit/collection'
+import type { Facet, LockedKit } from '@/lib/kit/catalog'
 import { t, type MessageKey } from '@/lib/i18n'
+
+import { kitDnaFor, type UnlockedKit } from './actions'
+import { KitDesignerV5 } from './KitDesignerV5'
 
 /**
  * שער 5 — אגף המדים.
@@ -24,6 +28,13 @@ import { t, type MessageKey } from '@/lib/i18n'
  * what makes gate 4 worth playing twice: a shirt you assembled is a shirt you keep, and
  * a locked card is not a tease — it is a shirt of the club's you cannot yet build from
  * memory, which is the whole subject of the mode.
+ *
+ * **The page does not know what a locked shirt looks like** (21.9.2026). It used to receive the
+ * whole catalogue — every sponsor, maker and crest — and hide the locked ones in the grid, which
+ * left the answer to every Gate 4 puzzle in the HTML. It now receives a season and a variant per
+ * kit; the shirts this device built are drawn from `kitDnaFor`, which answers only for the
+ * unlock tokens Gate 4 signed. The studio's DNA rack is the same rows, filtered to the ones whose
+ * DNA opened.
  */
 
 const FACETS: { id: Facet; key: MessageKey }[] = [
@@ -37,33 +48,45 @@ export function KitWing({
   catalog,
   counts,
   archiveCount,
-  designer,
 }: {
-  catalog: CatalogKit[]
+  catalog: LockedKit[]
   counts: Record<Facet, number>
   /** how many photographs the archive holds — counted on the server, never guessed */
   archiveCount: number
-  /** the free designer, rendered by the server and passed through as a slot */
-  designer: React.ReactNode
 }) {
   const store = useMemo(() => activeCollection(), [])
   const [built, setBuilt] = useState<Collection>({})
+  const [unlocked, setUnlocked] = useState<Record<string, UnlockedKit>>({})
   const [tab, setTab] = useState<'collection' | 'designer'>('collection')
   const [facet, setFacet] = useState<Facet>('all')
   const [lockedOnly, setLockedOnly] = useState(false)
   const [openKey, setOpenKey] = useState<string | null>(null)
 
-  // Read after mount, never during render: the server has no browser storage.
+  // Read after mount, never during render: the server has no browser storage. Then ask the
+  // server for the shirts this device can PROVE it built — a token each, or a legacy key once.
   useEffect(() => {
     let live = true
-    void store.read().then((rows) => {
-      if (live) setBuilt(rows)
+    void store.read().then(async (rows) => {
+      if (!live) return
+      setBuilt(rows)
+      const entries = Object.entries(rows)
+      const tokens = entries.flatMap(([, row]) => (row.token ? [row.token] : []))
+      const legacy = entries.filter(([, row]) => !row.token).map(([key, row]) => ({ key, dna: row.bestCategories >= 6 }))
+      if (tokens.length === 0 && legacy.length === 0) return
+      const answer = await kitDnaFor(tokens, legacy)
+      if (!live) return
+      setUnlocked(Object.fromEntries(answer.rows.map((row) => [row.key, row])))
+      if (Object.keys(answer.minted).length > 0) void store.adopt(answer.minted)
     })
     return () => {
       live = false
     }
   }, [store])
 
+  const rack = useMemo(
+    () => Object.values(unlocked).filter((row) => row.dna).map((row) => ({ seasonLabel: row.seasonLabel, noteHe: row.noteHe, spec: row.spec })),
+    [unlocked],
+  )
   const owned = Object.keys(built).length
   const shown = catalog
     .filter((kit) => facet === 'all' || kit.variant === facet)
@@ -71,8 +94,9 @@ export function KitWing({
 
   const open = openKey ? catalog.find((kit) => kit.key === openKey) : null
   const openBuilt = open ? built[open.key] : undefined
-  if (open && openBuilt) {
-    return <KitCard kit={open} built={openBuilt} onBack={() => setOpenKey(null)} />
+  const openRow = open ? unlocked[open.key] : undefined
+  if (open && openBuilt && openRow) {
+    return <KitCard kit={open} row={openRow} built={openBuilt} onBack={() => setOpenKey(null)} />
   }
   if (open) return <LockedCard kit={open} onBack={() => setOpenKey(null)} />
 
@@ -95,7 +119,7 @@ export function KitWing({
       </div>
 
       {tab === 'designer' ? (
-        <div className="mt-stack">{designer}</div>
+        <div className="mt-stack"><KitDesignerV5 rack={rack} /></div>
       ) : (
         <>
           {/* progress — the one number the wing is about */}
@@ -183,7 +207,7 @@ export function KitWing({
           <ul className="mt-3 grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
             {shown.map((kit) => (
               <li key={kit.key}>
-                <ShirtCard kit={kit} built={built[kit.key]} onOpen={() => setOpenKey(kit.key)} />
+                <ShirtCard kit={kit} built={built[kit.key]} row={unlocked[kit.key]} onOpen={() => setOpenKey(kit.key)} />
               </li>
             ))}
           </ul>
@@ -209,23 +233,26 @@ export function KitWing({
 function ShirtCard({
   kit,
   built,
+  row,
   onOpen,
 }: {
-  kit: CatalogKit
+  kit: LockedKit
   built?: { bestParts: number }
+  row?: UnlockedKit
   onOpen: () => void
 }) {
+  const drawn = Boolean(built && row)
   return (
     <button
       type="button"
       onClick={onOpen}
       className={`flex w-full flex-col border-rule p-2 text-start transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
-        built ? 'border-ink bg-sheet' : 'border-ink/40 bg-paper'
+        drawn ? 'border-ink bg-sheet' : 'border-ink/40 bg-paper'
       }`}
     >
-      <span className="block">
-        {built ? (
-          <KitPlate spec={kit.spec} texture={false} className="block h-auto w-full" />
+      <span className="block aspect-[6/7] w-full">
+        {built && row ? (
+          <KitShirt spec={row.spec} look={row.look} marks="granted" className="block h-full w-full" />
         ) : (
           <LockedShirt />
         )}
@@ -236,8 +263,8 @@ function ShirtCard({
         <Num>{kit.seasonLabel}</Num>
       </span>
       <span
-        className={`mt-1 block truncate font-body text-[10px] font-extrabold ${
-          built ? 'text-red' : 'text-muted/70'
+        className={`mt-1 block truncate font-body text-[11px] font-extrabold ${
+          built ? 'text-red' : 'text-muted'
         }`}
       >
         {built
@@ -247,11 +274,11 @@ function ShirtCard({
           : t('kits.locked')}
       </span>
       {/* The sponsor is one of the five answers gate 4 asks for. It appears on a shirt
-          you have assembled and on no other — the grid hid the drawing behind an
-          outline and was printing the answer underneath it. */}
+          you have assembled and on no other — and this page cannot print it for any other,
+          because it was never sent one (`built && row.sponsorHe`). */}
       <span className="mt-0.5 block truncate font-body text-[11px] text-muted">
         {t(`kits.facet.${kit.variant}` as MessageKey)}
-        {built && kit.sponsorHe ? ` · ${kit.sponsorHe}` : ''}
+        {built && row?.sponsorHe ? ` · ${row.sponsorHe}` : ''}
       </span>
     </button>
   )
@@ -272,26 +299,28 @@ function LockedShirt() {
 /**
  * כרטיס חולצה — one shirt, close up.
  *
- * The three detail crops are the same SVG at three different `viewBox` values. That is
- * the whole reason the renderer takes a viewBox: a crop of the real drawing is honest in
- * a way a second illustration of "the crest area" could never be, and it costs nothing.
+ * The shirt in the look its template supports (the photographed garment where there is one),
+ * and three details from the same engine: the shoulders and collar, the crest as printed, and
+ * the front as it read on the cloth.
  */
 function KitCard({
   kit,
+  row,
   built,
   onBack,
 }: {
-  kit: CatalogKit
+  kit: LockedKit
+  row: UnlockedKit
   built: { bestParts: number; times: number; firstBuiltOn: string }
   onBack: () => void
 }) {
   const rows: { k: MessageKey; v: string | null }[] = [
     { k: 'kits.spec.season', v: kit.seasonLabel },
     { k: 'kits.spec.variant', v: t(`kits.facet.${kit.variant}` as MessageKey) },
-    { k: 'kits.spec.pattern', v: `${kit.baseHe} · ${kit.patternHe}` },
-    { k: 'kits.spec.sponsor', v: kit.sponsorHe },
-    { k: 'kits.spec.maker', v: kit.makerHe },
-    { k: 'kits.spec.crest', v: kit.crestHe },
+    { k: 'kits.spec.pattern', v: `${row.baseHe} · ${row.patternHe}` },
+    { k: 'kits.spec.sponsor', v: row.sponsorHe },
+    { k: 'kits.spec.maker', v: row.makerHe },
+    { k: 'kits.spec.crest', v: row.crestHe },
   ]
 
   return (
@@ -305,68 +334,63 @@ function KitCard({
       </button>
 
       <div className="mt-3 bg-red px-4 py-3 text-paper">
-        <p className="font-body text-[10px] tracking-widest text-paper/85">{t('kits.card')}</p>
+        <p className="font-body text-[11px] tracking-widest text-paper/85">{t('kits.card')}</p>
         <p className="mt-1 font-display text-step-2 leading-tight">
           {t(`kits.facet.${kit.variant}` as MessageKey)} · <Num>{kit.seasonLabel}</Num>
         </p>
       </div>
 
       <div className="border-x-rule border-b-rule border-ink bg-paper p-4">
-        <KitPlate
-          spec={kit.spec}
-          title={kit.seasonLabel}
-          className="mx-auto block h-auto w-full max-w-[300px]"
-        />
+        <span className="mx-auto block aspect-[4/5] w-full max-w-[320px]">
+          <KitShirt spec={row.spec} look={row.look} marks="granted" title={kit.seasonLabel} className="block h-full w-full" />
+        </span>
       </div>
 
-      {/* the three crops */}
       <ul className="mt-2 grid grid-cols-3 gap-2">
-        {(
-          [
-            { k: 'kits.detail.body', vb: '80 60 170 200' },
-            { k: 'kits.detail.crest', vb: '176 78 58 62' },
-            { k: 'kits.detail.sponsor', vb: '92 148 136 58' },
-          ] as const
-        ).map((crop) => (
-          <li key={crop.k} className="border-rule border-ink bg-sheet">
-            <KitPlate spec={kit.spec} texture={false} viewBox={crop.vb} className="block h-24 w-full" />
-            <p className="border-t-hair border-ink/30 px-2 py-1.5 font-body text-[10.5px] font-bold leading-tight text-ink">
-              {t(crop.k)}
-            </p>
-          </li>
-        ))}
+        <li className="border-rule border-ink bg-sheet">
+          <span className="block h-24 p-1"><KitShirt spec={row.spec} look={row.look} marks="granted" crop="top" className="block h-full w-full" /></span>
+          <p className="border-t-hair border-ink/30 px-2 py-1.5 font-body text-[11px] font-bold leading-tight text-ink">{t('kits.detail.body')}</p>
+        </li>
+        <li className="border-rule border-ink bg-sheet">
+          <span className="flex h-24 items-center justify-center p-2"><KitMarkArt spec={row.spec} which="crest" className="h-full w-full" /></span>
+          <p className="border-t-hair border-ink/30 px-2 py-1.5 font-body text-[11px] font-bold leading-tight text-ink">{t('kits.detail.crest')}</p>
+        </li>
+        <li className="border-rule border-ink bg-sheet">
+          <span className="flex h-24 items-center justify-center p-2"><KitMarkArt spec={row.spec} which="sponsor" className="h-full w-full" /></span>
+          <p className="border-t-hair border-ink/30 px-2 py-1.5 font-body text-[11px] font-bold leading-tight text-ink">{t('kits.detail.sponsor')}</p>
+        </li>
       </ul>
 
       <dl className="mt-stack border-rule border-ink bg-sheet">
         <p className="border-b-hair border-ink/30 px-3 py-2 font-display text-step-0 text-ink">
           {t('kits.spec')}
         </p>
-        {rows.map((row) => (
+        {rows.map((line) => (
           <div
-            key={row.k}
+            key={line.k}
             className="flex items-baseline justify-between gap-3 border-b-hair border-ink/20 px-3 py-2.5"
           >
-            <dt className="font-body text-[11px] tracking-widest text-muted">{t(row.k)}</dt>
+            <dt className="font-body text-[11px] tracking-widest text-muted">{t(line.k)}</dt>
             <dd
               className={`min-w-0 truncate font-body text-[13px] font-bold ${
-                row.v ? 'text-ink' : 'text-muted/70'
+                line.v ? 'text-ink' : 'text-muted/70'
               }`}
             >
-              {row.v ?? t('kits.spec.none')}
+              {line.v ?? t('kits.spec.none')}
             </dd>
           </div>
         ))}
       </dl>
 
-      {kit.noteHe !== '' && (
-        <p className="mt-2 font-body text-step--1 leading-relaxed text-muted">{kit.noteHe}</p>
+      {row.noteHe !== '' && (
+        <p className="mt-2 font-body text-step--1 leading-relaxed text-muted">{row.noteHe}</p>
       )}
 
       {/* the source. Showing it is the product (rule 16) — a shirt drawn from a
           photograph says which photograph. */}
-      {kit.sourceTitle !== '' && (
+      {row.sourceTitle !== '' && (
         <p className="mt-2 font-body text-[11px] leading-snug text-sign">
-          {t('kits.source')}: {kit.sourceTitle}
+          {t('kits.source')}: {row.sourceTitle}
         </p>
       )}
 
@@ -377,13 +401,13 @@ function KitCard({
         <div className="grid grid-cols-3 divide-x-hair divide-ink/20" dir="ltr">
           <Stat label={t('kits.mine.parts')} value={`${built.bestParts}/5`} />
           <Stat label={t('kits.mine.times')} value={String(built.times)} />
-          <Stat label={t('kits.mine.first')} value={built.firstBuiltOn} />
+          <Stat label={t('kits.mine.first')} value={dayMonthYear(built.firstBuiltOn)} />
         </div>
       </div>
 
       {kit.playable && (
         <a
-          href="/kits/build?seed=1"
+          href="/kits/build"
           className="mt-3 flex min-h-tap items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper"
         >
           {t('kits.build')}
@@ -412,7 +436,7 @@ function Stat({ label, value }: { label: string; value: string }) {
  * hid it behind an outline in the grid and then handed it over one tap later. A shirt
  * you have not assembled shows its season, its outline and the way in. Nothing else.
  */
-function LockedCard({ kit, onBack }: { kit: CatalogKit; onBack: () => void }) {
+function LockedCard({ kit, onBack }: { kit: LockedKit; onBack: () => void }) {
   return (
     <div className="mt-stack">
       <button
@@ -442,7 +466,7 @@ function LockedCard({ kit, onBack }: { kit: CatalogKit; onBack: () => void }) {
 
       {kit.playable && (
         <a
-          href="/kits/build?seed=1"
+          href="/kits/build"
           className="mt-3 flex min-h-tap items-center justify-center bg-red px-4 font-body text-step-0 font-extrabold text-paper"
         >
           {t('kits.build')}

@@ -1053,6 +1053,25 @@
    "noteHe": "שלושים ואחד חפצים מהמסירות שלך: צעיפים, דגלים, כרזות, הארגז של אלנבי, וכל מה שמונח בחדר. הארגז הגיע בשישה מעברים של אותו פריים כדי שאפשר יהיה להוציא ממנו את החורים נכון."
   },
   {
+   "key": "art-prop-redbox-stand-in",
+   "kind": "prop",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "propRedBox.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "גיליון החפצים daily של מאור הראל, 20.9.2026 — קופסת הפח האדומה עם הציר · brand/source/life-objects-2026-09-20/daily.png · scripts/life/ingest-objects-2026-09-21.py",
+   "treatment": [
+    "key-flat",
+    "cut-from-sheet",
+    "de-yellow",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "הקופסה האדומה של התסריט — \"קופסת פח מתחת למיטה\", \"המכסה חרק\". עד 21.9.2026 עמד כאן ארגז כלים צבוע אדום כממלא-מקום; הוא נכתב מחדש באותו שם מתוך הגיליון של מאור, כך שכל חדר וכל סיום שכבר הצביעו עליו קיבלו את החפץ האמיתי."
+  },
+  {
    "key": "art-minigame",
    "kind": "prop",
    "origin": "maor-upload",
@@ -1831,6 +1850,158 @@
    ],
    "confidence": 2,
    "noteHe": "שתי עונות ששוחזרו מתוך התמונות שמאור סיפק: master מלא לרויאל ראמבל וחלקים נפרדים לשימוש עתידי בהרכבת חולצות בשערים 4–5."
+  },
+  {
+   "key": "art-backgrounds-2000-2026",
+   "kind": "backdrop",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "homeAdult.webp",
+    "flatAway.webp",
+    "workshopFix.webp",
+    "communityRoom.webp",
+    "storeroom.webp",
+    "officeOwner.webp",
+    "deskNewsroom.webp",
+    "rehearsal.webp",
+    "driveIn.webp",
+    "arenaEuroOut.webp",
+    "arenaEuroSeats.webp",
+    "portEurope.webp",
+    "pitchSmall.webp",
+    "bedroom00.webp",
+    "hallNew.webp",
+    "bloomOldTerrace.webp",
+    "bloomNewTerrace.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "THE-WORKER-BACKGROUNDS-2000-2026-17 — חבילת הרקעים של מאור הראל, 21.9.2026 · scripts/life/ingest-backgrounds-2026-09-21.py",
+   "treatment": [
+    "quantise",
+    "de-yellow",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "שבעה-עשר רקעים לפי הפרומטים של ART-PROMPTS-2000-2026. ה-README של החבילה אומר שהם נוצרו במחולל תמונות לפי הפרומטים, ושלושה מהם — יציעי בלומפילד הישן והחדש והדרייב אין — הם קונספט לפי תיאור ולא שחזור אדריכלי מאומת; גם האולם באירופה הוא חלל גנרי. זה נרשם כאן כדי שאף אחד לא יטעה בהם כתיעוד."
+  },
+  {
+   "key": "art-icons-emblems-2026-09-20",
+   "kind": "ui",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "icon*.webp",
+    "em*.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "גיליונות הסמלים של מאור הראל — פעולות (20.9.2026) ומצבים (21.9.2026) · brand/source/life-icons-2026-09-20.png · brand/source/life-emblems-2026-09-21.png · scripts/life/ingest-icons-2026-09-20.py · scripts/life/ingest-emblems-2026-09-21.py",
+   "treatment": [
+    "key-flat",
+    "cut-from-sheet",
+    "de-yellow",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "שנים-עשר סמלי פעולה (iconTalk, iconTake…) ושנים-עשר סמלי מצב (emWallet, emHealth…) של THE WORKER LIFE, נחתכו מרשת שנמדדה על המסך הירוק; הצהוב נמדד על הפענוח (כלל 61) ונשאר אפס."
+  },
+  {
+   "key": "art-objects-2026-09-20",
+   "kind": "prop",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "propAlbum.webp",
+    "propBackpack.webp",
+    "propBannerBlank.webp",
+    "propBib.webp",
+    "propCable.webp",
+    "propDarbuka.webp",
+    "propDrum.webp",
+    "propFootball.webp",
+    "propHeadphones.webp",
+    "propKeys.webp",
+    "propLaptop.webp",
+    "propMug.webp",
+    "propNewspaper.webp",
+    "propPaperFolded.webp",
+    "propPassport.webp",
+    "propPhone2010.webp",
+    "propPhone2020.webp",
+    "propPlanner.webp",
+    "propRecorder.webp",
+    "propRemote.webp",
+    "propScarfKnit.webp",
+    "propSportsBag.webp",
+    "propSuitcase.webp",
+    "propTicketsPair.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "ארבעת גיליונות החפצים של מאור הראל, 20.9.2026 (keepsakes · daily · terrace · devices) · brand/source/life-objects-2026-09-20/ · scripts/life/ingest-objects-2026-09-21.py",
+   "treatment": [
+    "key-flat",
+    "cut-from-sheet",
+    "de-yellow",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "עשרים וארבעה חפצים מצולמים לחדרי 2000–2026 — מזוודה, דרכון, מפתחות, תוף, דרבוקה, טלפונים, מחשב נייד. הקופסה האדומה והטרנזיסטור נכתבו באותו שם על הרשומות שלהם. שלושה גיליונות לא נקלטו בכוונה (מועדון בדיוני ומרצ'נדייז באנגלית) — מתועד בראש הסקריפט."
+  },
+  {
+   "key": "art-portrait-cut-2026-09-21",
+   "kind": "figure",
+   "origin": "procedural",
+   "folder": "public/life/art",
+   "match": [
+    "faceStand*.webp",
+    "faceEfi96.webp",
+    "faceKobi90.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "פנים שנחתכו מהגוף המצולם של אותה דמות — scripts/life/cast-faces-2026-09-21.py (כלל 85: הפנים בתיבה הן הפנים על הרצפה)",
+   "treatment": [
+    "cut",
+    "trim-alpha",
+    "de-yellow",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "לא ציור חדש: כל פנים כאן נחתכו מהדמות המצולמת שכבר עומדת בחדר (adultA1…B7, efi96, kobi90), כדי שתיבת הדיאלוג תראה את מי שמדבר ולא דיוקן מלוח קונספט."
+  },
+  {
+   "key": "kit-photo-templates-2026-09-21",
+   "kind": "generated",
+   "origin": "archive-scan",
+   "folder": "public/kits",
+   "match": [
+    "templates/2010s-fitted/*"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "חבילת שער 4 V14 של מאור הראל, 21.9.2026 → brand/source/kits/2010s-fitted → scripts/kits/build-photo-templates.py · content/manual/kit-templates.json",
+   "treatment": [
+    "shading-map",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "שתי מפות אפורות (קפלים ואור) מהבגד המצולם של V14, שעליהן המנוע מדפיס כל צבע מהמפרט. בלי גוון, ולכן בלי צהוב; הכתמים שהשאירו חפתים ושוליים שהוסרו מולאו מהבד שסביבם. המסכות עצמן אינן קבצים — הן נתיבים ב-content/generated/kit-photo-geometry.json."
+  },
+  {
+   "key": "kit-granted-marks-2026-09-21",
+   "kind": "ui",
+   "origin": "archive-scan",
+   "folder": "public/kits",
+   "match": [
+    "marks/*"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "חבילת שער 4 V14 של מאור הראל, 21.9.2026 — הלוגואים שאושרו לשערים 4–5 (CLAUDE.md, כלל 25) · scripts/kits/build-photo-templates.py",
+   "treatment": [
+    "cut-from-sheet",
+    "trim-alpha",
+    "de-yellow"
+   ],
+   "confidence": 2,
+   "noteHe": "PUMA, MACRON ו-FUJITSU נשמרו כצורה לבנה בלבד ומודפסים בדיו של הבד; פסי ARKIA נצבעו מחדש לגווני הפלטה (כלל 8), והמדידה על הקובץ המפוענח היא 0 פיקסלים צהובים. SUBARU, VISA, umbro ו-adidas הם קבצי ה-SVG שכבר בריפו (assembly/)."
   }
  ]
 }

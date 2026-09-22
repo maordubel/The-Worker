@@ -1,24 +1,52 @@
 'use server'
 
-import { DEFAULT_TOPIC, type Topic } from '@/lib/game/topics'
-import { grade, type Verdict } from '@/lib/game/trivia'
+import { dealPersonalRun, gradeAnswer, hintFor, type Hint, type RunPlan } from '@/lib/game/trivia'
+import type { AnswerValue, Verdict } from '@/lib/game/questions/types'
 
 /**
- * Server authority. The correct answer is derived here from the round seed and never
- * travels to the client before it is earned. A tampered answer simply grades false.
+ * Server authority for gate 2 (rule 4). The client holds question ids and options, never
+ * an answer; these three calls are the only way anything about the truth crosses over,
+ * and each crosses only AFTER the player has committed (or paid, for a hint).
  */
-export async function submitAnswer(
+
+const ID = /^q_[0-9a-f]{12}$/
+
+function clean(answer: unknown): AnswerValue | null {
+  if (typeof answer === 'string') return answer.slice(0, 200)
+  if (Array.isArray(answer) && answer.length <= 6 && answer.every((value) => typeof value === 'string')) {
+    return answer.map((value) => value.slice(0, 200))
+  }
+  return null
+}
+
+/** grade one answer, by question id — a personal run needs no seed rebuild */
+export async function submitAnswer(id: string, answer: AnswerValue): Promise<Verdict | null> {
+  const value = clean(answer)
+  if (typeof id !== 'string' || !ID.test(id) || value === null) return null
+  return gradeAnswer(id, value)
+}
+
+/** the paid hint — derived on the server from the same options the client was dealt */
+export async function requestHint(id: string, seed: number): Promise<Hint | null> {
+  if (typeof id !== 'string' || !ID.test(id) || !Number.isFinite(seed)) return null
+  return hintFor(id, Math.trunc(seed))
+}
+
+/**
+ * Revenge and Surprise are built from the DEVICE's ledger, which only the device has. It
+ * sends ids — never answers — and gets twelve ids back, which the lobby turns into a
+ * `?q=` link: the run is then as shareable as any seeded one.
+ */
+export async function planPersonal(
+  kind: 'revenge' | 'surprise',
+  ledger: { wrong: string[]; seen: string[] },
   seed: number,
-  index: number,
-  answer: string | string[],
-  topic: Topic = DEFAULT_TOPIC,
-  cursor = 0,
-): Promise<Verdict | null> {
-  // The topic travels with the answer. A round is (seed, topic) — grading a europe
-  // round against the general bank would mark every answer wrong, and the client is
-  // not trusted to send the answer, only to say which round it is playing.
-  // The cursor travels for the same reason the topic does: a round is addressed by
-  // (seed, topic, cursor), and grading the second round of a deck against the first
-  // would mark a correct answer wrong.
-  return grade(seed, index, answer, topic, cursor)
+): Promise<RunPlan> {
+  const ids = (list: unknown, cap: number) =>
+    Array.isArray(list) ? list.filter((id): id is string => typeof id === 'string' && ID.test(id)).slice(0, cap) : []
+  return dealPersonalRun(
+    kind === 'revenge' ? 'revenge' : 'surprise',
+    { wrong: ids(ledger?.wrong, 200), seen: ids(ledger?.seen, 2000) },
+    Number.isFinite(seed) ? Math.trunc(seed) : 1,
+  )
 }

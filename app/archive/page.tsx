@@ -1,55 +1,56 @@
 import type { Metadata } from 'next'
 
+import { ArchiveApp } from '@/components/archive/ArchiveApp'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { archiveFigures, dealFacts, longDateHe, onThisDay } from '@/lib/archive/wing'
+import { decades } from '@/lib/archive/graph'
+import { archiveFigures, detailOf, longDateHe, todayDecks } from '@/lib/archive/wing'
 import { t } from '@/lib/i18n'
 import { roundFrom } from '@/lib/rotation/round'
 import { gateMetadata } from '@/lib/seo'
-import { ArchiveWing } from './ArchiveWing'
 
 /**
- * שער 12 — אגף הארכיון.
+ * שער 12 — הארכיון החי (brief §22; prototype v10, 21.9.2026).
  *
- * Gate 12 stood empty on the wall until 17.9.2026, for the reason `lib/gates.ts` gives
- * about gate 7: a gate that points at a 404 is worse than a gap. What filled it is the
- * "בשער" corpus — 1,385 press columns, every one with a full ISO date — beside the
- * 3,068 dated matches the archive already held.
+ * The wing is one screen over the Entity Graph: five Today chips, a swipe deck, a dock
+ * (היום · זמן · חפירה · חיפוש · שלי), a box to dig in, one search, a drawer that prints
+ * only what the archive holds, a deterministic rabbit hole and a trail.
  *
- * Two corners, both read-models over the canon (rule 1):
- *   · **היום לפני** — what the archive holds for today's date, or, honestly, nothing.
- *   · **הידעת** — a fact with its source printed beside it (rule 16).
- *
- * The DATE is resolved here, in the route, and handed down — a read-model that reads the
- * clock cannot be tested, and the state this corner most has to get right is the empty
- * one. The deal is resolved here too, from `?seed=` and `?r=`, so the wing deals
- * something different on every entry (rule 24) and the same two numbers always produce
- * the same cards.
+ * Resolved HERE, on the server, and handed down as card projections: the date (a
+ * read-model that reads the clock cannot be tested), the five deals (from `?seed=` and
+ * `?r=`, rule 24), and `?at=<id>` — a deep link from `/hapoel`, gate 13 or gate 10 that
+ * opens one entity's drawer, legacy ids resolved (`euro:`, `kit:<maker>:<from>`, a
+ * roster slug). The graph itself never reaches the browser.
  */
 export const metadata: Metadata = gateMetadata('archive')
 
 export default function ArchivePage({
   searchParams,
 }: {
-  searchParams: { seed?: string; r?: string }
+  searchParams: { seed?: string; r?: string; at?: string }
 }) {
   const round = roundFrom(searchParams)
   const today = new Date().toISOString().slice(0, 10)
-  const deal = dealFacts(round.seed, round.cursor)
+  const at = typeof searchParams.at === 'string' ? searchParams.at.slice(0, 160) : null
+  const initial = at ? detailOf(at) : null
+  const figures = archiveFigures()
 
   return (
     <Screen title={t('screen.archive.title')} sub={t('screen.archive.sub')}>
-      <p className="mt-stack max-w-prose font-body text-step-0 leading-relaxed text-ink">
-        {t('archive.lede')}
-      </p>
-      <ArchiveWing
+      <ArchiveApp
+        decks={todayDecks(today, round.seed, round.cursor)}
         todayHe={longDateHe(today)}
-        day={onThisDay(today)}
-        cards={deal.cards}
-        cycle={deal.cycle}
-        figures={archiveFigures()}
+        decades={decades()}
         seed={round.seed}
         cursor={round.cursor}
+        initial={initial}
+        atMissing={at !== null && initial === null}
+        figures={t('archive.figures', {
+          columns: String(figures.columns),
+          matches: String(figures.datedMatches),
+          from: figures.earliest ? figures.earliest.slice(0, 4) : '—',
+          to: figures.latest ? figures.latest.slice(0, 4) : '—',
+        })}
       />
       <ReportLink />
     </Screen>

@@ -4,9 +4,10 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import { KitEngineShirt } from '@/components/kit/KitEngineShirt'
 import { MarkArtwork } from '@/components/kit/MarkArtwork'
-import { t } from '@/lib/i18n'
+import { t, type MessageKey } from '@/lib/i18n'
 import { BODY_TEMPLATES, bodyTemplateForSeason, type KitBodyTemplateId } from '@/lib/kit/body-templates'
-import { activeCollection, kitKey } from '@/lib/kit/collection'
+import { kitKey } from '@/lib/kit/collection'
+import { recordDeed } from '@/lib/profile/store'
 import { CREST_MARKS, crestArt } from '@/lib/kit/crestMarks'
 import { makerAssetForName, sponsorAssetForName } from '@/lib/kit/mark-library'
 import {
@@ -24,7 +25,6 @@ import { activeStudioStore, type SavedKitDesign } from '@/lib/kit/studio-store'
 import {
   KIT_BRIEFS,
   scoreStudioDesign,
-  supporterFeedback,
   type KitBriefId,
   type StudioMetrics,
 } from '@/lib/kit/studio'
@@ -47,9 +47,7 @@ function withBody(spec: KitSpec, bodyTemplateId: KitBodyTemplateId): KitSpec {
 }
 
 export function KitDesignerV5({ rack }: { rack: RackKit[]; seed?: number }) {
-  const collection = useMemo(() => activeCollection(), [])
   const studioStore = useMemo(() => activeStudioStore(), [])
-  const [owned, setOwned] = useState<Record<string, { bestCategories: number }>>({})
   const [saved, setSaved] = useState<SavedKitDesign[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [spec, setSpec] = useState<KitSpec>({ ...DEFAULT_SPEC, seasonLabel: 'STUDIO' })
@@ -57,7 +55,7 @@ export function KitDesignerV5({ rack }: { rack: RackKit[]; seed?: number }) {
   const [tab, setTab] = useState<TabId>('dna')
   const [briefId, setBriefId] = useState<KitBriefId>('free')
   const [dnaKeys, setDnaKeys] = useState<string[]>([])
-  const [result, setResult] = useState<{ metrics: StudioMetrics; feedback: string } | null>(null)
+  const [result, setResult] = useState<{ metrics: StudioMetrics } | null>(null)
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [future, setFuture] = useState<HistoryEntry[]>([])
   const didLoad = useRef(false)
@@ -65,14 +63,12 @@ export function KitDesignerV5({ rack }: { rack: RackKit[]; seed?: number }) {
   useEffect(() => {
     if (didLoad.current) return
     didLoad.current = true
-    void collection.read().then((rows) => setOwned(rows))
     void studioStore.read().then(setSaved)
-  }, [collection, studioStore])
+  }, [studioStore])
 
-  const unlocked = useMemo(
-    () => rack.filter((row) => (owned[kitKey(row.seasonLabel, row.spec.variant)]?.bestCategories ?? 0) >= 6),
-    [owned, rack],
-  )
+  // The rack arrives already proven: Gate 5's server answered only for the shirts whose DNA
+  // opened in Gate 4 (a signed token each), so there is nothing left to filter here.
+  const unlocked = rack
   const dnaSpecs = useMemo(
     () => dnaKeys
       .map((key) => unlocked.find((row) => kitKey(row.seasonLabel, row.spec.variant) === key)?.spec)
@@ -170,7 +166,7 @@ export function KitDesignerV5({ rack }: { rack: RackKit[]; seed?: number }) {
 
   function judge() {
     const metrics = scoreStudioDesign(spec, briefId, dnaSpecs)
-    setResult({ metrics, feedback: supporterFeedback(metrics) })
+    setResult({ metrics })
     pulse()
   }
 
@@ -187,7 +183,8 @@ export function KitDesignerV5({ rack }: { rack: RackKit[]; seed?: number }) {
     })
     setEditingId(row.id)
     setSaved(await studioStore.read())
-    setResult({ metrics, feedback: supporterFeedback(metrics) })
+    recordDeed('/kits')
+    setResult({ metrics })
     pulse()
   }
 
@@ -197,14 +194,14 @@ export function KitDesignerV5({ rack }: { rack: RackKit[]; seed?: number }) {
     setSpec(row.spec)
     setDnaKeys(row.dnaKeys)
     setBodyTemplateId(row.bodyTemplateId ?? 'modern-athletic')
-    setResult({ metrics: row.metrics, feedback: supporterFeedback(row.metrics) })
+    setResult({ metrics: row.metrics })
   }
 
   return (
     <section className="border-rule border-ink bg-sheet">
       <header className="flex items-end justify-between gap-3 border-b-rule border-ink bg-ink px-3 py-2 text-paper">
         <div>
-          <p className="font-mono tabular-nums text-[8px] font-bold tracking-[.18em] text-red" dir="ltr">GATE 05 · KIT DNA STUDIO V5</p>
+          <p className="font-mono tabular-nums text-[11px] font-bold tracking-[.18em] text-red" dir="ltr">GATE 05 · KIT DNA STUDIO V5</p>
           <h2 className="font-display text-[24px] leading-none">{t('kit.designer')}</h2>
         </div>
         <div className="flex gap-1">
@@ -214,27 +211,28 @@ export function KitDesignerV5({ rack }: { rack: RackKit[]; seed?: number }) {
         </div>
       </header>
 
-      <div className="grid min-h-[min(760px,calc(100dvh-155px))] grid-rows-[minmax(300px,54dvh)_minmax(0,1fr)] gap-2 p-2 lg:grid-cols-[minmax(310px,420px)_minmax(0,1fr)] lg:grid-rows-1">
-        <div className="flex min-h-0 flex-col border-rule border-ink bg-paper">
+      <div className="grid min-h-[min(760px,calc(100dvh-155px))] grid-cols-[minmax(0,1fr)] grid-rows-[minmax(300px,54dvh)_minmax(0,1fr)] gap-2 p-2 lg:grid-cols-[minmax(310px,420px)_minmax(0,1fr)] lg:grid-rows-1">
+        <div className="flex min-h-0 min-w-0 flex-col border-rule border-ink bg-paper">
           <div className="min-h-0 flex-1 p-2">
-            <KitEngineShirt spec={withBody(spec, bodyTemplateId)} className="mx-auto block h-full max-h-[510px] w-full" title={t('kit.preview')} />
+            <KitEngineShirt spec={withBody(spec, bodyTemplateId)} look="photo" marks="granted" className="mx-auto block h-full max-h-[510px] w-full" title={t('kit.preview')} />
           </div>
           <div className="grid grid-cols-2 border-t-hair border-ink">
             <button type="button" onClick={judge} className="min-h-tap border-e-hair border-ink font-body text-[11px] font-extrabold">{t('kitgame.check')}</button>
             <button type="button" onClick={() => void save()} className="min-h-tap bg-red font-body text-[11px] font-extrabold text-paper">{t('kitBuild.lock')}</button>
           </div>
           {result && (
-            <div className="border-t-hair border-ink px-3 py-2">
-              <p className="font-display text-[22px]">{result.metrics.overall}/100</p>
-              <p className="font-body text-[10px] text-muted">{result.feedback}</p>
+            <div className="grid grid-cols-2 border-t-hair border-ink">
+              <FitStat label={t('kits.fit.brief')} value={result.metrics.briefFit} />
+              <FitStat label={t('kits.fit.dna')} value={dnaSpecs.length > 0 ? result.metrics.dnaUse : null} />
+              <p className="col-span-2 border-t-hair border-ink/30 px-3 py-1.5 font-body text-[11px] leading-snug text-muted">{t('kits.fit.note')}</p>
             </div>
           )}
         </div>
 
-        <div className="flex min-h-0 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-col">
           <div className="flex shrink-0 gap-1 overflow-x-auto border-rule border-ink bg-paper p-1">
             {tabs.map((item) => (
-              <button key={item.id} type="button" onClick={() => setTab(item.id)} className={`min-h-tap shrink-0 border-hair px-3 font-body text-[10px] font-extrabold ${tab === item.id ? 'border-red bg-red text-paper' : 'border-ink bg-sheet text-ink'}`}>{item.label}</button>
+              <button key={item.id} type="button" onClick={() => setTab(item.id)} className={`min-h-tap shrink-0 border-hair px-3 font-body text-[11px] font-extrabold ${tab === item.id ? 'border-red bg-red text-paper' : 'border-ink bg-sheet text-ink'}`}>{item.label}</button>
             ))}
           </div>
 
@@ -253,19 +251,30 @@ export function KitDesignerV5({ rack }: { rack: RackKit[]; seed?: number }) {
 
           <div className="mt-2 flex shrink-0 gap-1 overflow-x-auto">
             {KIT_BRIEFS.map((row) => (
-              <button key={row.id} type="button" onClick={() => { setBriefId(row.id); setResult(null) }} className={`min-h-[42px] shrink-0 border-hair px-3 font-body text-[9px] font-bold ${briefId === row.id ? 'border-ink bg-ink text-paper' : 'border-ink bg-paper'}`}>{row.titleHe}</button>
+              <button key={row.id} type="button" onClick={() => { setBriefId(row.id); setResult(null) }} className={`min-h-tap shrink-0 border-hair px-3 font-body text-[11px] font-bold ${briefId === row.id ? 'border-ink bg-ink text-paper' : 'border-ink bg-paper'}`}>{t(`kits.brief.${row.id}.title` as MessageKey)}</button>
             ))}
           </div>
-          <p className="mt-1 shrink-0 font-body text-[9px] text-muted">{brief.bodyHe}</p>
-          {saved.length > 0 && <button type="button" onClick={() => reopen(saved[0]!)} className="mt-1 min-h-[38px] shrink-0 border-hair border-ink bg-paper px-2 font-body text-[9px] font-bold">{t('kits.tab.designer')}</button>}
+          <p className="mt-1 shrink-0 font-body text-[11px] leading-snug text-muted">{t(`kits.brief.${brief.id}.body` as MessageKey)}</p>
+          {saved.length > 0 && <button type="button" onClick={() => reopen(saved[0]!)} className="mt-1 min-h-tap shrink-0 border-hair border-ink bg-paper px-2 font-body text-[11px] font-bold">{t('kits.tab.designer')}</button>}
         </div>
       </div>
     </section>
   )
 }
 
+function FitStat({ label, value }: { label: string; value: number | null }) {
+  return (
+    <div className="px-3 py-2">
+      <p className="font-body text-[11px] font-bold text-muted">{label}</p>
+      <p className="font-display text-[22px] leading-none text-ink">
+        {value === null ? '—' : <span dir="ltr">{value}</span>}
+      </p>
+    </div>
+  )
+}
+
 function ToolButton({ children, onClick, disabled = false }: { children: ReactNode; onClick: () => void; disabled?: boolean }) {
-  return <button type="button" onClick={onClick} disabled={disabled} className="min-h-tap border-hair border-paper/40 px-2 font-body text-[10px] font-bold disabled:opacity-30">{children}</button>
+  return <button type="button" onClick={onClick} disabled={disabled} className="min-h-tap border-hair border-paper/40 px-2 font-body text-[11px] font-bold disabled:opacity-30">{children}</button>
 }
 
 function DnaPanel({ unlocked, dnaKeys, onApply, onToggle }: { unlocked: RackKit[]; dnaKeys: string[]; onApply: (row: RackKit) => void; onToggle: (row: RackKit) => void }) {
@@ -278,10 +287,10 @@ function DnaPanel({ unlocked, dnaKeys, onApply, onToggle }: { unlocked: RackKit[
         return (
           <div key={key} className={`border-rule p-1 ${used ? 'border-red' : 'border-ink/30'}`}>
             <button type="button" onClick={() => onApply(row)} className="w-full">
-              <KitEngineShirt spec={row.spec} className="mx-auto block h-[94px] w-full" />
-              <span className="block font-mono tabular-nums text-[9px] font-bold">{row.seasonLabel}</span>
+              <KitEngineShirt spec={row.spec} look="photo" marks="granted" className="mx-auto block h-[94px] w-full" />
+              <span className="block font-mono tabular-nums text-[11px] font-bold">{row.seasonLabel}</span>
             </button>
-            <button type="button" onClick={() => onToggle(row)} className={`mt-1 min-h-[34px] w-full border-hair px-1 font-body text-[8px] font-bold ${used ? 'border-red bg-red text-paper' : 'border-ink'}`}>{used ? t('kits.built') : t('kits.build')}</button>
+            <button type="button" onClick={() => onToggle(row)} className={`mt-1 min-h-tap w-full border-hair px-1 font-body text-[11px] font-bold ${used ? 'border-red bg-red text-paper' : 'border-ink'}`}>{used ? t('kits.dna.used') : t('kits.dna.use')}</button>
           </div>
         )
       })}
@@ -294,9 +303,9 @@ function BodyPanel({ selected, spec, onPick }: { selected: KitBodyTemplateId; sp
     <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
       {Object.values(BODY_TEMPLATES).map((row) => (
         <button key={row.id} type="button" onClick={() => onPick(row.id)} className={`border-rule p-1.5 ${selected === row.id ? 'border-red bg-red/5' : 'border-ink/30'}`}>
-          <KitEngineShirt spec={withBody(spec, row.id)} className="mx-auto block h-[118px] w-full" />
-          <span className="mt-1 block font-body text-[9px] font-extrabold">{row.labelHe}</span>
-          <span className="font-mono tabular-nums text-[8px] text-muted">{row.yearFrom}–{row.yearTo}</span>
+          <KitEngineShirt spec={withBody(spec, row.id)} look="photo" marks="granted" className="mx-auto block h-[118px] w-full" />
+          <span className="mt-1 block font-body text-[11px] font-extrabold">{row.labelHe}</span>
+          <span className="font-mono tabular-nums text-[11px] text-muted">{row.yearFrom}–{row.yearTo}</span>
         </button>
       ))}
     </div>
@@ -317,9 +326,9 @@ function ColourPanel({ spec, mutate }: { spec: KitSpec; mutate: (patch: Partial<
 function ColourRow({ title, value, onPick }: { title: string; value: KitColour; onPick: (value: KitColour) => void }) {
   return (
     <div>
-      <p className="mb-1 font-body text-[10px] font-extrabold">{title}</p>
+      <p className="mb-1 font-body text-[11px] font-extrabold">{title}</p>
       <div className="grid grid-cols-7 gap-1">
-        {COLOURS.map((colour) => <button key={colour} type="button" onClick={() => onPick(colour)} aria-label={COLOUR_NAME[colour]} className={`aspect-square min-h-[42px] border-rule ${value === colour ? 'border-red' : 'border-ink/30'}`} style={{ background: COLOUR_VAR[colour] }} />)}
+        {COLOURS.map((colour) => <button key={colour} type="button" onClick={() => onPick(colour)} aria-label={COLOUR_NAME[colour]} className={`aspect-square min-h-tap border-rule ${value === colour ? 'border-red' : 'border-ink/30'}`} style={{ background: COLOUR_VAR[colour] }} />)}
       </div>
     </div>
   )
@@ -330,8 +339,8 @@ function ShirtChoiceGrid({ items, selected, spec, patch, onPick }: { items: { id
     <div className="grid grid-cols-3 gap-1.5">
       {items.map((item) => (
         <button key={item.id} type="button" onClick={() => onPick(item.id)} className={`min-h-[128px] border-rule p-1 ${selected === item.id ? 'border-red bg-red/5' : 'border-ink/30'}`}>
-          <KitEngineShirt spec={{ ...spec, ...patch(item.id) }} className="mx-auto block h-[94px] w-full" />
-          <span className="block font-body text-[9px] font-bold">{item.label}</span>
+          <KitEngineShirt spec={{ ...spec, ...patch(item.id) }} look="photo" marks="granted" className="mx-auto block h-[94px] w-full" />
+          <span className="block font-body text-[11px] font-bold">{item.label}</span>
         </button>
       ))}
     </div>
@@ -346,7 +355,7 @@ function MarkPanel({ kind, values, selected, seasonLabel, onPick }: { kind: 'mak
         return (
           <button key={value ?? 'none'} type="button" onClick={() => onPick(value)} className={`flex min-h-[82px] flex-col items-center justify-center border-rule p-2 ${selected === value ? 'border-red bg-red/5' : 'border-ink/30'}`}>
             {asset ? <MarkArtwork asset={asset} className="h-10 w-[86%]" /> : <span className="font-body text-[11px] font-extrabold">{value ?? t('kits.spec.none')}</span>}
-            <span className="mt-1 font-body text-[8px] text-muted">{value ?? t('kits.spec.none')}</span>
+            <span className="mt-1 font-body text-[11px] text-muted">{value ?? t('kits.spec.none')}</span>
           </button>
         )
       })}
@@ -363,7 +372,7 @@ function CrestPanel({ values, selected, onPick }: { values: string[]; selected: 
         return (
           <button key={value} type="button" onClick={() => onPick(value)} className={`min-h-[100px] border-rule p-2 ${selected === value ? 'border-red bg-red/5' : 'border-ink/30'}`}>
             {src ? <img src={src} alt="" className="mx-auto h-14 w-14 object-contain" /> : null}
-            <span className="mt-1 block font-body text-[8px] font-bold">{mark?.nameHe ?? value}</span>
+            <span className="mt-1 block font-body text-[11px] font-bold">{mark?.nameHe ?? value}</span>
           </button>
         )
       })}
@@ -378,7 +387,7 @@ function NumberPanel({ spec, mutate }: { spec: KitSpec; mutate: (patch: Partial<
         {NUMBERS.map((number) => <button key={number} type="button" onClick={() => mutate({ number })} className={`min-h-tap border-rule font-poster text-[20px] ${spec.number === number ? 'border-red bg-red text-paper' : 'border-ink/30'}`}>{number}</button>)}
       </div>
       <div className="flex gap-1">
-        {NAMESETS.map((row) => <button key={row.id} type="button" onClick={() => mutate({ nameset: row.id })} className={`min-h-tap flex-1 border-hair px-2 font-body text-[9px] font-bold ${spec.nameset === row.id ? 'border-ink bg-ink text-paper' : 'border-ink'}`}>{row.he}</button>)}
+        {NAMESETS.map((row) => <button key={row.id} type="button" onClick={() => mutate({ nameset: row.id })} className={`min-h-tap flex-1 border-hair px-2 font-body text-[11px] font-bold ${spec.nameset === row.id ? 'border-ink bg-ink text-paper' : 'border-ink'}`}>{row.he}</button>)}
       </div>
     </div>
   )
