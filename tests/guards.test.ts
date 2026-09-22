@@ -73,6 +73,20 @@ describe('retired files are tombstones', () => {
     'app/crest/CrestRun.tsx', // → cut by Maor; the crest DATA still dresses the kits
     'app/crest/actions.ts',
     'components/life/LifeEntry.tsx', // → components/life/TunnelPlate.tsx, when LIFE moved into the wall
+    'app/kits/build/KitGameRunV13.tsx', // → KitGameRun.tsx, the one engine and the server deal (21.9.2026)
+    'components/kit/LayeredKitRenderer.tsx', // → KitEngineShirt photo mode
+    'lib/kit/layered-assets.ts', // → content/generated/kit-master.json
+    'app/kits/build/KitGameRunV3.tsx', // → KitGameRun.tsx (21.9.2026)
+    'app/kits/build/KitGameRunV5.tsx', // → KitGameRun.tsx, V5's server deal on V14's layout
+    'app/kits/KitDesignerV3.tsx', // → KitDesignerV5.tsx
+    'components/kit/KitPhotoPart.tsx', // → nothing: no cropped real shirt is ever a builder part (brief §15)
+    'components/kit/KitAssemblyShirt.tsx', // → components/kit/KitShirt.tsx, the one entry point
+    'app/api/kits/reference/[token]/route.ts', // → the photograph appears only in the Reveal (rule 4)
+    'lib/game/replay/progress.ts', // → collect('goal', [goalId]) + RecordRun; no second store in a gate
+    'app/trivia/TopicWall.tsx', // → QuickPick.tsx, gate 2 v5 (21.9.2026)
+    'app/trivia/TriviaRound.tsx', // → TriviaRun.tsx; dead since the run moved onto one screen
+    'app/derby/HateHill.tsx', // → HateWall.tsx, gate 11 v3 (21.9.2026)
+    'app/archive/ArchiveWing.tsx', // → components/archive/ArchiveApp.tsx, gate 12 v10 (21.9.2026)
   ]
 
   it('every retired path still exists and says it is retired', () => {

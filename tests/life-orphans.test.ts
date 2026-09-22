@@ -33,12 +33,17 @@ import { ALL_SCENES, exitInEra, inEra } from '@/lib/life/world/scenes'
  */
 
 /**
- * היתום היחיד שהוא החלטה. חלון ההקמה של הפועל אוסישקין הוא 2007 (`FOUNDING_YEAR`),
- * אחרי הפרק האחרון שנבנה; להניח את `route-proof-found` בחדר פירושו לטעון שאפשר לייסד
- * את המועדון בשנת 2000. היום שייכתב פרק 2007 מוריד את השורה הזאת — והבדיקה האחרונה
- * כאן היא שתזכיר.
+ * **הרשימה ריקה מ-21.9.2026, והיום שהיא דיברה עליו הגיע.**
+ *
+ * היא החזיקה יתום אחד — `route-proof-found` — עם הנימוק המדויק: *"חלון ההקמה הוא
+ * 2007, אחרי הפרק האחרון שנבנה; להניח אותו בחדר פירושו לטעון שאפשר לייסד את המועדון
+ * בשנת 2000. היום שייכתב פרק 2007 מוריד את השורה הזאת."*
+ *
+ * שלושת פרקי 2007 נכתבו, והשיחה מונחת עכשיו **פעם אחת בכל אחד מהם** — כי הפסגה
+ * מבקשת שלוש ראיות בשלושה פרקים. הרשימה נשארת כאן **ריקה ולא נמחקת**: היא המקום שבו
+ * ההחלטה הבאה תיאמר בקול, וכלי שמוחקים אותו כשהוא ירוק אינו כלי (כלל 73).
  */
-const ALLOWED = new Set(['route-proof-found'])
+const ALLOWED = new Set<string>([])
 
 const ids = new Set(Object.keys(DIALOGUE))
 const named = new Set<string>()
@@ -134,9 +139,27 @@ describe('יתומים — שיחה שנכתבה וששום דבר לא פותח
  */
 const PLAYABLE = CHAPTERS.filter((chapter) => chapter.playable !== false)
 
+/**
+ * `travel` הוא דלת (אותה הכרעה של `world/worldline.ts`, 21.9.2026): ביט שמעביר את השחקן
+ * לחדר — הקפיצה לחדר החזרות ב-2012, לטרמינל אחרי מילאן ב-2002 — הוא דרך פנימה בדיוק כמו
+ * פתח מצויר, והאנשים שמחכים שם אינם יתומים.
+ */
+const travelsIn = (chapter: string): string[] => {
+  const out: string[] = []
+  const visit = (value: unknown): void => {
+    if (Array.isArray(value)) return value.forEach(visit)
+    if (!value || typeof value !== 'object') return
+    const node = value as Record<string, unknown>
+    if (node.a === 'travel' && typeof node.to === 'string') out.push(node.to)
+    for (const child of Object.values(node)) visit(child)
+  }
+  visit(eraFor(chapter).beats ?? [])
+  return out
+}
+
 const roomsIn = (chapter: string): Set<string> => {
   const start = CHAPTERS.find((row) => row.id === chapter)?.start.location
-  const seen = new Set<string>(start ? [start] : [])
+  const seen = new Set<string>([...(start ? [start] : []), ...travelsIn(chapter)])
   const queue = [...seen]
   while (queue.length) {
     const here = queue.shift()

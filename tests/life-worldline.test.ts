@@ -7,13 +7,23 @@ import { apply, emptyState } from '@/lib/life/events'
 import type { LifeState, LocationId } from '@/lib/life/types'
 import {
   CARRIED_PREFIXES,
+  alwaysRaisedBefore,
   carryableBefore,
   chapterFlags,
   chaptersOn,
   closureFor,
   crossesChapter,
+  seedFor,
+  staleDayReads,
+  STALE_BY_DESIGN,
+  trappedRooms,
+  TRAP_BY_DESIGN,
+  neverRaised,
   type Worldline,
 } from '@/lib/life/world/worldline'
+import { TILL } from '@/lib/life/content/chapter2016collapse'
+
+import { engineFlagsFromSource, raisedInSource } from '../scripts/life/engine-flags'
 
 /**
  * המכשיר, לא הדוח.
@@ -235,12 +245,28 @@ describe('כל יעד שפרק מצביע עליו נמצא בתוך הסגור 
     ...LIFE_ROUTES.map((route): [string, Record<string, boolean>] => [route.id, { [stageFlag(route.id, 'entry')]: true }]),
   ]
 
+  /**
+   * ...ועל הקו הריק יש דבר אחד שהוא **לא** ריק: מה שפרק קודם מרים בלי תנאי.
+   *
+   * `alwaysRaisedBefore` נוסף ל-`worldline.ts` ב-21.9.2026, ובלעדיו הבדיקה הזאת טוענת
+   * שפוגי הגיע ל-2007 בלי לדעת איפה אוסישקין — אחרי ש-`2006-home` פתח **בתוך האולם**.
+   * זו אינה הרפיה של הקו הריק: הוא נשאר פסימי בכל מה שהוא באמת בחירה, והתוספת היא
+   * בדיוק מה שאין חיים בלעדיו. (כלל 77 — שומר שווה משהו כל עוד הוא מודד את הדבר הנכון.)
+   */
+  const seedOn = (chapter: string, seed: Record<string, boolean>): Record<string, boolean> => {
+    const out = { ...seed }
+    const line = { id: 'test', labelHe: 'test', flags: seed } as unknown as Parameters<typeof alwaysRaisedBefore>[1]
+    for (const flag of alwaysRaisedBefore(chapter, line)) out[flag] = true
+    return out
+  }
+
   it('שום פרק לא מצביע על חדר שאי אפשר להגיע אליו — בשום קו חיים', () => {
     const stranded: string[] = []
     for (const chapter of PLAYABLE) {
       const era = eraFor(chapter)
       if (!era.goal) continue
-      for (const [label, seed] of SEEDS) {
+      for (const [label, rawSeed] of SEEDS) {
+        const seed = seedOn(chapter, rawSeed)
         const closure = closureFor(chapter, seed)
         for (const flag of ['', ...closure.flags]) {
           const state = stateWith(chapter, [...Object.keys(seed), ...(flag ? [flag] : [])])
@@ -250,5 +276,71 @@ describe('כל יעד שפרק מצביע עליו נמצא בתוך הסגור 
       }
     }
     expect([...new Set(stranded)]).toEqual([])
+  })
+})
+
+/**
+ * **דגל יום שנקרא בפרק אחר, וחדר שאין ממנו יציאה** (21.9.2026) — שתי המחלקות שהסגור
+ * המונוטוני לא ראה: הוא שואל לאן אפשר להגיע, ולא מה נמחק בדרך ומאיפה אפשר לחזור.
+ *
+ * הן מצאו ביום אחד: P05 מתה (`p:tillKind` נמחק לפני שעמית שאל עליו), הצעיף שמאור ביקש
+ * עובר בשלושה רגעים עצר אחרי הראשון (`scarf:` לא הייתה קידומת נושאת), רחל של 1998 דיברה
+ * את הערב של 1993 עם שמונה שקלים מהארנק, הקיצור לבלומפילד היה נעול לגבר בן ארבעים עם
+ * *"אתה עוד לא יודע את הדרך"*, ומי שנכנס ליציע ב-2010 לא יכול היה לצאת.
+ */
+describe('מה שנמחק בחצות, ומה שאין ממנו דרך החוצה', () => {
+  const ENGINE = engineFlagsFromSource()
+  it('שום פרק לא קורא דגל יום שנכתב בפרק אחר — חוץ מאלה שנקובים בשמם', () => {
+    const stale: string[] = []
+    for (const chapter of PLAYABLE) {
+      const closure = closureFor(chapter, seedFor(chapter, MAXIMAL), ENGINE)
+      for (const read of staleDayReads(chapter, closure)) {
+        if (!(read.flag in STALE_BY_DESIGN)) stale.push(`${chapter}: ${read.where} ← ${read.flag}`)
+      }
+    }
+    expect(stale).toEqual([])
+  })
+
+  it('כל שורה ב-STALE_BY_DESIGN עדיין מסתירה משהו — שורה שהתיקון ייתר יורדת', () => {
+    const seen = new Set<string>()
+    for (const chapter of PLAYABLE) {
+      for (const read of staleDayReads(chapter, closureFor(chapter, seedFor(chapter, MAXIMAL), ENGINE))) seen.add(read.flag)
+    }
+    for (const flag of Object.keys(STALE_BY_DESIGN)) expect(seen.has(flag), flag).toBe(true)
+  })
+
+  it('אין חדר שנכנסים אליו ואין ממנו אף דלת פתוחה', () => {
+    const traps: string[] = []
+    for (const chapter of PLAYABLE) {
+      for (const line of [MINIMAL, MAXIMAL]) {
+        for (const room of trappedRooms(chapter, closureFor(chapter, seedFor(chapter, line), ENGINE), ENGINE)) {
+          if (!TRAP_BY_DESIGN[chapter]?.[room]) traps.push(`${chapter} [${line.id}]: ${room}`)
+        }
+      }
+    }
+    expect([...new Set(traps)]).toEqual([])
+  })
+
+  it('שום תנאי לא מחכה לדגל ששום דבר במשחק לא כותב', () => {
+    const raised = raisedInSource()
+    const dead: string[] = []
+    for (const chapter of PLAYABLE) {
+      for (const read of neverRaised(chapter, closureFor(chapter, seedFor(chapter, MAXIMAL), ENGINE), raised)) {
+        dead.push(`${chapter}: ${read.where} ← ${read.flag}`)
+      }
+    }
+    expect(dead).toEqual([])
+  })
+
+  it('P05 קוראת את מה ש-P02 כתב — והוא שורד את המעבר ל-2017', () => {
+    expect(crossesChapter(TILL)).toBe(true)
+  })
+
+  it('הצעיף עובר עשור: `scarf:` נושא חיים', () => {
+    expect(crossesChapter('scarf:given')).toBe(true)
+    let state: LifeState = emptyState(IDENTITY, 1986)
+    state = apply(state, { t: 'flag.raised', flag: 'scarf:given' })
+    state = apply(state, { t: 'year.entered', year: 1998, weekday: 6, minute: 9 * 60 })
+    expect(state.flags['scarf:given']).toBe(true)
   })
 })

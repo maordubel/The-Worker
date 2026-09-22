@@ -1,35 +1,35 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { dealKitRound, kitPartReference } from '@/lib/game/kitBuild'
-import { PART_ORDER } from '@/lib/game/kit-build-run'
-import { makerAssetForName, sponsorAssetForName } from '@/lib/kit/mark-library'
+import { dealKitRound } from '@/lib/game/kitBuild'
+import { STEP_ORDER } from '@/lib/game/kit-build-run'
 import { exactArchivePhoto } from '@/lib/kit/archive-dna'
+import { grantedFiles, grantedMaker, grantedSponsor } from '@/lib/kit/mark-library'
 
 const ROOT = join(__dirname, '..')
 
-describe('Kit System V3 — archive DNA', () => {
-  it('makes crest a real eighth Gate 4 decision', () => {
-    expect(PART_ORDER).toEqual(['base','secondary','pattern','collar','sleeve','maker','sponsor','crest'])
-    const puzzle = dealKitRound(17)[0]!
-    expect(puzzle.blank.crestKey).toBeNull()
-    expect(puzzle.drawers.map((row) => row.kind)).toEqual([...PART_ORDER])
+/**
+ * The archive photographs are EVIDENCE, shown after the answer — never a builder part and never a
+ * reference fetched before submit (brief §15, rule 4). V3's reference route served the archive
+ * photo for a part token mid-puzzle; it is a tombstone that answers 410.
+ */
+describe('Kit System — the archive is evidence, not a part', () => {
+  it('deals the five steps with no reference flag and no archive path', () => {
+    for (const puzzle of dealKitRound(23)) {
+      expect(puzzle.steps.map((row) => row.step)).toEqual([...STEP_ORDER])
+      const payload = JSON.stringify(puzzle)
+      expect(payload).not.toContain('/kits/')
+      expect(payload).not.toContain('hasReference')
+      expect(payload).not.toContain(puzzle.seasonLabel.replace('/', '-'))
+    }
   })
 
-  it('never sends a real archive filename or season in a visual reference', () => {
-    for (const puzzle of dealKitRound(23)) {
-      const payload = JSON.stringify(puzzle.drawers)
-      expect(payload).not.toContain('/kits/')
-      expect(payload).not.toContain(puzzle.seasonLabel)
-      for (const drawer of puzzle.drawers) {
-        for (const part of drawer.parts) {
-          if (!part.hasReference) continue
-          expect(part.id).toMatch(/^[a-z]+-[a-f0-9]{10}$/)
-          expect(kitPartReference(part.id)).toMatch(/^\/kits\/.+\.webp$/)
-        }
-      }
-    }
+  it('retired the reference route to an inert 410', () => {
+    const route = readFileSync(join(ROOT, 'app/api/kits/reference/[token]/route.ts'), 'utf8')
+    expect(route).toContain('TOMBSTONE')
+    expect(route).toContain('410')
+    expect(route).not.toMatch(/from\s+'/)
   })
 
   it('uses only exact-season photographs as reconstruction evidence', () => {
@@ -40,16 +40,15 @@ describe('Kit System V3 — archive DNA', () => {
     }
   })
 
-  it('ships the supplied maker and sponsor cuts used by the studio', () => {
-    const assets = [
-      makerAssetForName('adidas', '1985/86'),
-      makerAssetForName('umbro', '2009/10'),
-      sponsorAssetForName('VISA'),
-      sponsorAssetForName('SUBARU'),
-    ]
-    for (const asset of assets) {
-      expect(asset).not.toBeNull()
-      expect(existsSync(join(ROOT, 'public', asset!.src))).toBe(true)
-    }
+  it('ships every granted mark it can print', () => {
+    for (const src of grantedFiles()) expect(existsSync(join(ROOT, 'public', src)), src).toBe(true)
+    expect(grantedMaker('umbro', '2009/10')).not.toBeNull()
+    expect(grantedMaker('adidas', '1985/86')).not.toBeNull()
+    // the trefoil is the eighties' mark: a later adidas shirt takes the alternative mark instead
+    expect(grantedMaker('adidas', '2022/23')).toBeNull()
+    expect(grantedSponsor('SUBARU')).not.toBeNull()
+    expect(grantedSponsor('VISA')).not.toBeNull()
+    expect(grantedSponsor('ARKIA')?.print).toBe('colour')
+    expect(grantedMaker('PUMA', '2015/16')?.print).toBe('mono')
   })
 })

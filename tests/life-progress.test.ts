@@ -3,9 +3,9 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { CHAPTERS, chapterFor, lastPlayable, nextPlayable, playableChapters } from '@/lib/life/content/chapters'
+import { CHAPTERS, chapterFor, isWindow, lastPlayable, nextPlayable, playableChapters, windowFlagsOf } from '@/lib/life/content/chapters'
 import { PITCH_GIG_ID, eraForChapter } from '@/lib/life/football/door'
-import { GIGS, gigChapters, gigConversations, gigPay, gigsIn, isPaid, offeredIn, type Gig } from '@/lib/life/gigs'
+import { GIGS, gigActivity, gigChapters, gigConversations, gigPay, gigsIn, isPaid, offeredIn, type Gig } from '@/lib/life/gigs'
 import { SHIRT, TICKET, WAGE, decadeOf, decadeOfYear } from '@/lib/life/prices'
 import { SHIRTS } from '@/lib/life/shirts'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
@@ -42,26 +42,58 @@ describe('הרצף — every chapter leads somewhere', () => {
     const chapters = playableChapters()
     let at = chapters[0]!
     const walked = [at.id]
-    for (let i = 0; i < 60 && nextPlayable(at.id, flags); i += 1) {
+    for (let i = 0; i < 200 && nextPlayable(at.id, flags); i += 1) {
       at = nextPlayable(at.id, flags)!
       walked.push(at.id)
     }
     return walked
   }
 
-  it('walks from the first chapter to the last without a gap — the full life', () => {
-    const walked = walk({ 'life:a2:efi': true })
+  /**
+   * **"החיים המלאים" היו דגל אחד, ועכשיו הם כל הדגלים שפותחים חלון** (21.9.2026).
+   *
+   * הבדיקה הזאת הניחה שיש בדיוק פרק מותנה אחד (`a3-hall`), ולכן "החיים המלאים" היו
+   * `{ 'life:a2:efi': true }` ועברו בכל הפרקים. חלונות החיים של תסריט ההמשך שברו את
+   * ההנחה, ובצדק: `2017-distance` ו-`2019-armchair` נפתחים משתי בחירות **בלעדיות** של
+   * אותה סצנה (`P06`), כך שאף חיים אמיתיים לא עוברים בשניהם. זה העולם שגדל, לא באג
+   * (כלל 80) — והבדיקה מתהפכת לשאלה הנכונה במקום להתרכך:
+   *
+   * · עם **כל** דגל שחלון מבקש מורם, השרשרת עוברת בכל פרק שמשחקים — כלומר כל חלון
+   *   נגיש, וביחד הם לא שוברים את הרצף.
+   * · בלי אף אחד מהם, השרשרת עוברת בכל פרק **חוץ מהחלונות** — ומגיעה לאותו סוף.
+   *
+   * הדגלים נקראים **מהרישום**, לא מוקלדים: החלון הבא שייכתב לא יפיל את הבדיקה, הוא
+   * פשוט ייכנס אליה.
+   */
+  const windowFlags = [...new Set(playableChapters().flatMap(windowFlagsOf))]
+  const windowed = playableChapters().filter(isWindow)
+
+  it('walks from the first chapter to the last without a gap — with every window open', () => {
+    const walked = walk(Object.fromEntries(windowFlags.map((flag) => [flag, true])))
     expect(walked.length).toBe(playableChapters().length)
     expect(walked[walked.length - 1]).toBe(lastPlayable().id)
     expect(new Set(walked).size).toBe(walked.length)
   })
 
-  it('walks to the same end for a life that never answered Efi, one chapter shorter', () => {
+  it('walks to the same end with no window open, skipping exactly the windows', () => {
     const walked = walk({})
+    for (const chapter of windowed) expect(walked, chapter.id).not.toContain(chapter.id)
     expect(walked).not.toContain('a3-hall')
-    expect(walked.length).toBe(playableChapters().length - 1)
+    expect(walked.length).toBe(playableChapters().length - windowed.length)
     expect(walked[walked.length - 1]).toBe(lastPlayable().id)
     expect(new Set(walked).size).toBe(walked.length)
+  })
+
+  it('opens each window alone, and each one alone still arrives', () => {
+    for (const flag of windowFlags) {
+      const walked = walk({ [flag]: true })
+      // a `when` window whose every flag is this one, or a `whenAny` window this flag is a door to
+      const opened = windowed.filter((chapter) =>
+        (chapter.when ?? []).length > 0 ? (chapter.when ?? []).every((wanted) => wanted === flag) : (chapter.whenAny ?? []).includes(flag),
+      )
+      for (const chapter of opened) expect(walked, `${flag} → ${chapter.id}`).toContain(chapter.id)
+      expect(walked[walked.length - 1], flag).toBe(lastPlayable().id)
+    }
   })
 
   it('every playable chapter but the last has a playable chapter after it', () => {
@@ -221,8 +253,20 @@ describe('הג׳ובים — a boy with no money has somewhere to earn it', () =
         expect(json, conversation.id).toContain('"awayYellow":true')
       }
       else {
-        expect(json, conversation.id).toContain('"e":"minigame"')
-        expect(json, conversation.id).toContain('"id":"chore:')
+        /**
+         * פעילות (21.9.2026) — from its first chapter a job that became an activity opens
+         * the activity: a gate game over the paused room, or the chore scene with the
+         * activity's pay. Either way it opens something playable, which is this test's claim.
+         */
+        const chapter = gig ? conversation.id.replace(`gig-${gig.id}-`, '') : ''
+        const act = gig ? gigActivity(gig as Gig, chapter) : null
+        if (act && act.kind !== 'chore') {
+          expect(json, conversation.id).toContain('"e":"mechanic"')
+          expect(json, conversation.id).toContain(`"activity":"${act.id}"`)
+        } else {
+          expect(json, conversation.id).toContain('"e":"minigame"')
+          expect(json, conversation.id).toContain('"id":"chore:')
+        }
       }
     }
   })

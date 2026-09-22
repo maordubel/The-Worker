@@ -32,11 +32,20 @@ describe('the economy is in whole shekels', () => {
   const contentDir = join(process.cwd(), 'lib/life/content')
   const files = readdirSync(contentDir).filter((f) => f.endsWith('.ts'))
 
+  /**
+   * ...ומספר עם קו תחתון הוא אותו מספר (21.9.2026).
+   *
+   * הביטוי קרא `\d+` וקטע את `70_000` אחרי שתי ספרות, כלומר הוא דיווח על **70** —
+   * סכום שבאמת אינו כפולה של שקל, ושלא קיים בקוד. זו חיובית שווא, ולא ריכוך: מפריד
+   * ספרות הוא תחביר חוקי של JavaScript שמשנה קריאוּת ולא ערך, והשומר ממשיך לבדוק
+   * בדיוק את מה שבדק. שורה שבאמת נושאת אגורות בודדות עדיין מפילה אותו.
+   */
   it('every amount in the content is a multiple of a shekel', () => {
     for (const file of files) {
       const source = readFileSync(join(contentDir, file), 'utf8')
-      for (const m of source.matchAll(/(?:agorot|minAgorot): (-?\d+)/g)) {
-        const n = Number(m[1])
+      for (const m of source.matchAll(/(?:agorot|minAgorot): (-?[\d_]+)/g)) {
+        const n = Number(m[1]!.replace(/_/g, ''))
+        expect(Number.isFinite(n), `${file}: ${m[0]} is not a number`).toBe(true)
         expect(Math.abs(n % 100), `${file}: ${m[0]}`).toBe(0)
       }
     }

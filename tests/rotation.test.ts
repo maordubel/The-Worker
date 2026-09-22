@@ -152,7 +152,7 @@ const MODES: Array<{
   },
   {
     name: 'hate',
-    size: 11,
+    size: 10,
     ids: (seed, cursor) => dealQueue(seed, cursor).order,
   },
 ]
@@ -167,11 +167,30 @@ describe('כל שער מחלק משהו אחר בכניסה הבאה', () => {
       expect(second).not.toEqual(first)
     })
 
-    it(`${mode.name} — consecutive rounds share nothing`, () => {
-      const first = new Set(mode.ids(1234, 0))
-      const second = mode.ids(1234, 1)
-      const repeated = second.filter((id) => first.has(id))
-      expect(repeated, `${mode.name} repeated: ${repeated.join(', ')}`).toEqual([])
+    /**
+     * **הבדיקה הזאת הייתה על זרע אחד ועל מעבר אחד, והיא הייתה ירוקה במקרה** (21.9.2026).
+     *
+     * ברגע שבריכת הטריוויה זזה — שורת כדורסל אחת שנוספה לארכיון — היא נפלה על
+     * `trophy:גביע-הטוטו:2001/02`, ומה שהתברר מאחוריה היה תקלה אמיתית ולא רעש:
+     * `trophy-season` מייצרת מהארכיון **שאלה אחת בדיוק**, והרוטציה סובבה את הרשימה
+     * שלה במקום לחתוך אותה — כלומר אותה שאלה בדיוק הופיעה **בכל סיבוב, לתמיד**.
+     * זה כלל 65 בצורתו הטהורה: לא לרפות, לשאול מה השומר ידע שהקוד לא.
+     *
+     * ועכשיו הוא רחב יותר ולא צר יותר — ארבעה זרעים על ארבעה מעברים רצופים, כי
+     * מה שנפל על 1234→1 נפל גם על אחרים, והזרע הבודד הוא בדיוק מה שהסתיר את זה.
+     */
+    it(`${mode.name} — consecutive rounds share nothing, across seeds and cursors`, () => {
+      const bad: string[] = []
+      for (const seed of [7, 1234, 4242, 90210]) {
+        for (let cursor = 0; cursor < 4; cursor += 1) {
+          const first = new Set(mode.ids(seed, cursor))
+          const second = mode.ids(seed, cursor + 1)
+          const repeated = second.filter((id) => first.has(id))
+          if (repeated.length > 0) bad.push(`${seed}@${cursor}→${cursor + 1}: ${repeated.join(', ')}`)
+          if (second.length !== mode.size) bad.push(`${seed}@${cursor + 1}: short round (${second.length})`)
+        }
+      }
+      expect(bad, `${mode.name} repeated: ${bad.join(' · ')}`).toEqual([])
     })
 
     it(`${mode.name} — the same address is the same round, every time`, () => {
@@ -194,10 +213,12 @@ describe('שערים עם צורה משלהם', () => {
   it('lineup walks the recorded matches instead of a three-step cycle', () => {
     // `rng()`'s first output is nearly linear in the seed, so the old
     // `records[floor(rng(seed)() * n)]` gave seeds 1..6 only four distinct matches.
+    // Five playable records since 21.9.2026: the documented XI of 2000/01 names no match
+    // and is withheld (brief §14). Five rounds, five matches.
     const walked = new Set(
-      Array.from({ length: 6 }, (_, cursor) => dealChallenge(500, cursor)?.matchId),
+      Array.from({ length: 5 }, (_, cursor) => dealChallenge(500, cursor)?.matchId),
     )
-    expect(walked.size).toBeGreaterThanOrEqual(6)
+    expect(walked.size).toBeGreaterThanOrEqual(5)
   })
 
   it('the black file deals a round the counter can actually count', () => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { resolveStageBAnchors, STAGE_B_ANCHOR_KEYS } from '@/lib/life/anchor-server'
 import { CHAPTERS } from '@/lib/life/content/chapters'
+import clubsFile from '@/content/manual/clubs.json'
 
 /**
  * העוגנים של העשור — every Stage B chapter hangs on a row the archive holds, and the
@@ -71,6 +72,34 @@ describe('Stage B anchors — the archive answers, in the right orientation', ()
     for (const key of ['1993-cup', '1993-galil', '1994-cup', '1998', '1999-cup', '2000-title', '2000-cup']) {
       expect(anchors[key]!.placeholder, key).toBeNull()
       expect(anchors[key]!.confidence).toBeGreaterThanOrEqual(2)
+    }
+  })
+
+  /**
+   * **כל שלב ג׳, בלי יוצא מן הכלל** (21.9.2026). הבדיקה שמעל נוקבת בשבעה עוגנים
+   * בשמם, ועשרים ושמונה פרקים של תסריט ההמשך נכתבו אחריה. במקום להוסיף להם שמות
+   * אחד-אחד (רשימה שמתיישנת), היא הולכת על הרישום.
+   */
+  it('resolves every Stage C chapter to a row or a moment — never to a placeholder', () => {
+    for (const chapter of CHAPTERS.filter((row) => row.stage === 'C' && row.playable)) {
+      const anchor = anchors[chapter.anchorKey]
+      expect(anchor, `${chapter.id} → ${chapter.anchorKey}`).toBeDefined()
+      expect(anchor!.placeholder, `${chapter.id} → ${chapter.anchorKey}`).toBeNull()
+      expect(anchor!.match !== null || Boolean(anchor!.summaryHe), chapter.id).toBe(true)
+    }
+  })
+
+  /**
+   * **שם של יריבה הוא שם שהמקור כתב, לא סלאג שעבר ניקוי.** `load` שומט שורות מועדון
+   * בביטחון 1 (כלל 2), והגשר נפל לסלאג — ו-`בית"ר-י-ם` הופיע על כרטיס 15.5.2010 כ-
+   * `בית"ר י ם`. `archive.clubNames` הוא התיקון; הבדיקה הזאת היא מה שמונע ממנו לחזור.
+   */
+  it('names every opponent the way clubs.json spells it', () => {
+    const names = new Set((clubsFile as { records: Array<{ nameHe: string }> }).records.map((row) => row.nameHe))
+    for (const [key, anchor] of Object.entries(anchors)) {
+      if (!anchor.match) continue
+      if (anchor.sport === 'basketball') continue // basketball rows carry their own `homeClubHe`/`awayClubHe`
+      expect(names.has(anchor.match.opponentHe), `${key}: "${anchor.match.opponentHe}"`).toBe(true)
     }
   })
 })

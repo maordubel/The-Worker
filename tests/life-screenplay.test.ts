@@ -5,7 +5,9 @@ import { describe, expect, it } from 'vitest'
 import places from '@/lib/life/content/screenplay/places.json'
 import report from '@/lib/life/content/screenplay/report.json'
 import scenes from '@/lib/life/content/screenplay/scenes.json'
+import { ACHIEVEMENTS } from '@/lib/life/achievements'
 import {
+  ACHIEVEMENT_OF,
   AUDIENCE_OF,
   CHARACTER_OF,
   NEEDS_A_HOME,
@@ -115,6 +117,10 @@ const SEGMENTS_WITH_A_HOME = new Set([
   'נוכחות',
   'אנרגיה',
   'אמון קהילה',
+  // 21.9.2026 — `הישג` עבר מ"ממתין לעבודה" ל"יש לו בית": שש שורות ב-`achievements.ts`
+  // ו-`ACHIEVEMENT_OF` שמחבר ביניהן. שבעה מקטעים ושישה הישגים, כי `keys_in_hand`
+  // מופיע פעמיים באותה סצנה.
+  'הישג',
 ])
 
 describe('תסריט 2000–2026 — מה שיש לו בית', () => {
@@ -130,6 +136,29 @@ describe('תסריט 2000–2026 — מה שיש לו בית', () => {
       }
     }
     expect(homeless).toEqual([])
+  })
+
+  /**
+   * ...ו"בית" ל-`הישג` פירושו **שורה אמיתית ב-`achievements.ts`**, לא ערך בטבלה.
+   *
+   * הטבלה לבדה היא הבטחה; השורה היא מה שהמשחק סופר. בלי הבדיקה הזאת אפשר היה להצהיר
+   * על מיפוי ל-`ACH_WHATEVER` שאינו קיים, והדוח היה מדפיס 100% (כלל 32, באותה צורה:
+   * מפתח שמבקשים אותו חייב להתקיים).
+   */
+  it('maps every achievement the screenplay names to a row the engine really has', () => {
+    const ids = new Set(ACHIEVEMENTS.map((row) => row.id))
+    for (const [written, mappedTo] of Object.entries(ACHIEVEMENT_OF)) {
+      expect(ids.has(mappedTo), `${written} → ${mappedTo}, which is not in ACHIEVEMENTS`).toBe(true)
+    }
+    const named = new Set<string>()
+    for (const scene of scenes) {
+      for (const choice of scene.choices) {
+        for (const effect of choice.effects) if (effect.key === 'הישג') named.add(String(effect.value))
+      }
+    }
+    expect([...named].filter((id) => !ACHIEVEMENT_OF[id]), 'a screenplay achievement with no decision').toEqual([])
+    // שבעה מקטעים, שישה הישגים — `keys_in_hand` פעמיים ב-`O04`, והוא אחד
+    expect(named.size).toBe(6)
   })
 
   it('names a skill the engine actually counts, for every skill the screenplay writes', () => {

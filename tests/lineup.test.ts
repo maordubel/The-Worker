@@ -4,60 +4,97 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import lineupsFile from '@/content/manual/lineups.json'
-import messages from '@/messages/he.json'
-import { coachNote, dealChallenge, gradeLineup } from '@/lib/game/lineup'
+import { matchById } from '@/lib/archive/match-master'
+import { resolvePlayer } from '@/lib/archive/player-master'
+import {
+  coachNote,
+  dealChallenge,
+  derivedDecoyKind,
+  gradeLineup,
+  hasVerifiedLineup,
+  playableLineups,
+} from '@/lib/game/lineup'
 import {
   COACH_NOTES,
+  FAST_ROW_MS,
+  LINES,
   MAX_LOCKS,
   REVEAL_SKIPPED,
+  XI_SIZE,
   buildReveal,
+  displaySpot,
+  ghostsUpTo,
+  lineCounts,
   lineOf,
   missingStarters,
+  normalise,
   opensAtSummary,
+  placeOn,
+  takeOff,
   tallyUpTo,
   type CoachNoteKind,
+  type Line,
+  type Placement,
 } from '@/lib/game/lineup-sheet'
 import { splitName } from '@/lib/game/roster-search'
+import { MESSAGES } from '@/lib/i18n'
 
 /**
- * שער 3 — חדר ההלבשה.
+ * שער 3 — חדר ההלבשה (V3, 21.9.2026).
  *
- * Three things this file is here to keep true, in the order they would hurt if they
- * stopped being true:
+ * What this file keeps true, in the order it would hurt if it stopped being true:
  *
- *  1. **No placeholder ever reaches the room.** The supplied prototype's 14.3.2002 eleven
- *     contains a man called `קשר נוסף` — "another midfielder". A name like that on a
- *     screen that claims to print a historic team sheet is the worst single thing this
- *     gate could do (rule 11), and the guard is mechanical rather than a list of one.
- *  2. **The bench is a restatement, never a new claim.** `benchHe` says who came on, and
- *     every name in it has to be quotable from the record's own note.
- *  3. **The reveal can always be got past.** The skip is not a preference and not a
- *     state — it is arithmetic that reaches the same answer from any step, plus a button
- *     that is always rendered and never disabled.
+ *  1. **No placeholder ever reaches the room**, and every man is an id the Player Master
+ *     knows — a name and its id can never part.
+ *  2. **A record is dealt only with a match id** (brief §14); the documented XI of
+ *     2000/01 names no match and is withheld with its reason.
+ *  3. **The bench, the subs and the decoy kinds are restatements**, each quotable from
+ *     the record or derivable from `squads.json` — never a new claim.
+ *  4. **The board is four bands and the grade is by line, on the server.**
+ *  5. **The reveal can always be got past**, and its only timer is the opt-in fast walk.
  */
 
 const ROOT = join(__dirname, '..')
-const catalogue = messages as Record<string, string>
+const catalogue = MESSAGES
 
 type LineupRecord = {
   matchId: string
+  matchRef?: string
   titleHe: string
   xi: Record<string, string>
+  xiIds?: Record<string, string>
   distractors?: string[]
+  decoys?: Array<{ id: string; kind: string }>
+  subsOn?: Array<{ id: string; minute: number | null; for: string | null }>
   benchHe?: string[]
   noteHe?: string
   playable?: boolean
+  withheldHe?: string
+  formationStated?: boolean
   confidence?: number
 }
 
 const records = (lineupsFile as unknown as { records: LineupRecord[] }).records
 
-/** The seed that deals a given match, found the way the suite finds everything: by sweep. */
-function seedFor(matchId: string): number {
+/** The seed that deals a given match, found by sweep. */
+function seedFor(lineupKey: string): number {
+  const matchRef = records.find((record) => record.matchId === lineupKey)?.matchRef
   for (let seed = 1; seed < 400; seed += 1) {
-    if (dealChallenge(seed)?.matchId === matchId) return seed
+    if (dealChallenge(seed)?.matchId === matchRef) return seed
   }
-  throw new Error(`no seed deals ${matchId}`)
+  throw new Error(`no seed deals ${lineupKey}`)
+}
+
+const recordOf = (lineupKey: string) => records.find((record) => record.matchId === lineupKey) as LineupRecord
+
+/** The perfect board for a record: every starter in the band he started in. */
+function perfectBoard(record: LineupRecord): Placement[] {
+  const board: Placement[] = []
+  for (const [slot, id] of Object.entries(record.xiIds ?? {})) {
+    const line = lineOf(slot) as Line
+    board.push({ playerId: id, line, order: board.filter((row) => row.line === line).length })
+  }
+  return board
 }
 
 describe('אין מציין מקום בחדר — every name in a record is a person', () => {
@@ -153,191 +190,346 @@ describe('הספסל — a restatement of the record, never a new claim', () => 
   })
 })
 
-describe('מלכודת ספסל — graded on the server, and only where the source says so', () => {
-  const milan = seedFor('2001-02-uefa-qf-milan')
-  const chelsea = seedFor('2001-02-uefa-r2-chelsea')
-
-  it('marks a documented substitute as a trap, not merely as a miss', () => {
-    const verdict = gradeLineup(milan, { M1: 'סלים טועמה' })
-    const slot = verdict?.slots.find((row) => row.slotId === 'M1')
-    expect(slot?.status).toBe('not_in_xi')
-    expect(slot?.bench).toBe(true)
+describe('מזהים — every man an id, every record a match', () => {
+  it('pins every XI name, bench name and decoy to the Player Master id stored beside it', () => {
+    for (const record of records) {
+      for (const [slot, name] of Object.entries(record.xi)) {
+        expect(record.xiIds?.[slot], `${record.matchId} ${slot}`).toBe(resolvePlayer(name)?.id)
+      }
+      const decoyIds = (record.decoys ?? []).map((decoy) => decoy.id)
+      if (decoyIds.length > 0) {
+        expect(decoyIds, record.matchId).toEqual((record.distractors ?? []).map((name) => resolvePlayer(name)?.id))
+      }
+    }
   })
 
-  it('never calls a starter a trap', () => {
-    const solution = gradeLineup(milan, {})?.solution ?? []
-    const picks = Object.fromEntries(solution.map((row) => [row.slotId, row.name]))
-    const verdict = gradeLineup(milan, picks)
-    expect(verdict?.exact).toBe(11)
-    expect(verdict?.slots.every((row) => row.bench === false)).toBe(true)
+  it('links every dealt record to its canonical match, and the match back to the record', () => {
+    for (const record of playableLineups()) {
+      expect(record.matchRef, record.matchId).toMatch(/^m_[0-9a-f]{12}$/)
+      const match = matchById(record.matchRef as string)
+      expect(match, record.matchId).not.toBeNull()
+      expect(match?.lineupRef, record.matchId).toBe(record.matchId)
+      expect(record.formationStated, record.matchId).toBe(false)
+    }
+  })
+
+  it('withholds the documented XI of 2000/01, which names no match — with its reason', () => {
+    const season = recordOf('2000-01-documented-xi')
+    expect(season.matchRef).toBeUndefined()
+    expect(season.playable).toBe(false)
+    expect(season.withheldHe).toContain('§14')
+    expect(playableLineups().map((record) => record.matchId)).not.toContain('2000-01-documented-xi')
+    // five records are dealt: Chelsea at home, Milan, both Salzburg legs, Haifa 1986
+    expect(playableLineups()).toHaveLength(5)
+    expect(hasVerifiedLineup()).toBe(true)
+  })
+
+  it('keeps every scorer of a dealt match inside the XI or the men the source brought on', () => {
+    // The free cross-check players.md §3.2 names: a goal scored by somebody who neither
+    // started nor came on would mean the XI or the subs are wrong.
+    for (const record of playableLineups()) {
+      const onPitch = new Set([...Object.values(record.xiIds ?? {}), ...(record.subsOn ?? []).map((sub) => sub.id)])
+      for (const scorer of matchById(record.matchRef as string)?.scorers ?? []) {
+        if (scorer.playerId === null || scorer.ownGoal) continue
+        expect(onPitch.has(scorer.playerId), `${record.matchId}: ${scorer.nameHe}`).toBe(true)
+      }
+    }
+  })
+})
+
+describe('שלושה סוגים של "לא פתח" — each one sourced', () => {
+  it('stores for every decoy the kind the sources derive, and only the three kinds', () => {
+    for (const record of playableLineups()) {
+      for (const decoy of record.decoys ?? []) {
+        expect(['sub-on', 'season-squad', 'other'], record.matchId).toContain(decoy.kind)
+        expect(derivedDecoyKind(record, decoy.id), `${record.matchId} ${decoy.id}`).toBe(decoy.kind)
+      }
+    }
+  })
+
+  it("restates every sub from the record's own note or bench, minute included", () => {
+    for (const record of records) {
+      const said = `${record.noteHe ?? ''} ${(record.benchHe ?? []).join(' ')}`
+      for (const sub of record.subsOn ?? []) {
+        const name = resolvePlayer(sub.id)?.displayName as string
+        const spelled = [name, ...(resolvePlayer(sub.id)?.aliases.he ?? [])]
+        expect(spelled.some((spelling) => said.includes(splitName(spelling).familyHe)), `${record.matchId} ${name}`).toBe(true)
+        if (sub.minute !== null) expect(said, `${record.matchId} ${name}`).toContain(String(sub.minute))
+      }
+    }
+  })
+
+  it('offers each kind somewhere, so every sentence the reveal can print is reachable', () => {
+    const kinds = new Set(playableLineups().flatMap((record) => (record.decoys ?? []).map((decoy) => decoy.kind)))
+    expect([...kinds].sort()).toEqual(['other', 'season-squad', 'sub-on'])
+  })
+})
+
+describe('הקלף — what the deal hands the screen, and what it does not', () => {
+  it('deals the eleven and the decoys as an id and a name each — no line, no kind, no slot', () => {
+    for (let seed = 1; seed < 40; seed += 1) {
+      const challenge = dealChallenge(seed)
+      expect(challenge).not.toBeNull()
+      const ids = challenge!.bank.map((locker) => locker.id)
+      expect(new Set(ids).size, `seed ${seed}`).toBe(ids.length)
+      expect(ids.length).toBeGreaterThanOrEqual(XI_SIZE + 5)
+      for (const locker of challenge!.bank) expect(Object.keys(locker).sort()).toEqual(['id', 'nameHe'])
+      expect(JSON.stringify(challenge)).not.toContain('"line"')
+      expect(JSON.stringify(challenge)).not.toContain('sub-on')
+      expect(JSON.stringify(challenge)).not.toContain('xiIds')
+    }
+  })
+
+  it('hangs the season\'s real kit on the lockers, with no number — or none where the archive has none', () => {
+    const haifa = dealChallenge(seedFor('1985-86-league-final-haifa'))!
+    expect(haifa.kitSeason).toBe('1985/86')
+    expect(haifa.kit?.number).toBeNull()
+    const milan = dealChallenge(seedFor('2001-02-uefa-qf-milan'))!
+    expect(milan.kit).toBeNull()
+    expect(milan.kitSeason).toBeNull()
+  })
+
+  it('introduces the match from the Match Master, and keeps a disputed date disputed', () => {
+    const chelsea = dealChallenge(seedFor('2001-02-uefa-r2-chelsea'))!
+    expect(chelsea.intro.playedOn).toBe('2001-10-18')
+    expect(chelsea.intro.matchSourceTitle).toBeTruthy()
+    const salzburg = dealChallenge(seedFor('2010-11-ucl-po-salzburg-1'))!
+    expect(salzburg.intro.playedOn).toBeNull()
+    expect(salzburg.intro.dateDisputed).toBe(true)
+  })
+
+  it('walks all five matches before any comes back', () => {
+    const walked = new Set(Array.from({ length: 5 }, (_, cursor) => dealChallenge(500, cursor)?.matchId))
+    expect(walked.size).toBe(5)
+  })
+})
+
+describe('ארבעה קווים — the board holds {playerId, line, order} and nothing else', () => {
+  it('places, moves and takes off, closing up each band', () => {
+    let board = placeOn([], 'a', 'D')
+    board = placeOn(board, 'b', 'D')
+    board = placeOn(board, 'c', 'M')
+    expect(board).toEqual([
+      { playerId: 'a', line: 'D', order: 0 },
+      { playerId: 'b', line: 'D', order: 1 },
+      { playerId: 'c', line: 'M', order: 0 },
+    ])
+    board = placeOn(board, 'a', 'F')
+    expect(board).toEqual([
+      { playerId: 'b', line: 'D', order: 0 },
+      { playerId: 'c', line: 'M', order: 0 },
+      { playerId: 'a', line: 'F', order: 0 },
+    ])
+    expect(takeOff(board, 'c')).toEqual([
+      { playerId: 'b', line: 'D', order: 0 },
+      { playerId: 'a', line: 'F', order: 0 },
+    ])
+    expect(lineCounts(board)).toEqual({ GK: 0, D: 1, M: 1, F: 1 })
+  })
+
+  it('takes any number in a band, and refuses a twelfth man on the pitch', () => {
+    let board: Placement[] = []
+    for (let index = 0; index < XI_SIZE; index += 1) board = placeOn(board, `m${index}`, 'M')
+    expect(lineCounts(board).M).toBe(11)
+    expect(placeOn(board, 'extra', 'F')).toEqual(board)
+    // moving a man who is already on the pitch is not a twelfth
+    expect(lineCounts(placeOn(board, 'm3', 'F'))).toEqual({ GK: 0, D: 0, M: 10, F: 1 })
+    expect(normalise([...board].reverse())).toEqual(board)
+  })
+
+  it('keeps display spots inside the pitch and never lets them into the grade', () => {
+    for (const line of LINES) {
+      for (let of = 1; of <= 7; of += 1) {
+        for (let order = 0; order < of; order += 1) {
+          const spot = displaySpot(order, of, line)
+          expect(spot.x).toBeGreaterThanOrEqual(11)
+          expect(spot.x).toBeLessThanOrEqual(89)
+        }
+      }
+    }
+    const lib = readFileSync(join(ROOT, 'lib/game/lineup.ts'), 'utf8')
+    expect(lib).not.toContain('displaySpot')
+  })
+})
+
+describe('הבדיקה — graded by line, on the server', () => {
+  const milanKey = '2001-02-uefa-qf-milan'
+  const milan = seedFor(milanKey)
+  const record = recordOf(milanKey)
+  const perfect = perfectBoard(record)
+  const toama = resolvePlayer('סלים טועמה')!.id
+  const hillel = resolvePlayer('יעקב הלל')!.id
+  const keeper = record.xiIds?.GK as string
+
+  it('grades a perfect board as eleven in the right band', () => {
+    const verdict = gradeLineup(milan, perfect)!
+    expect(verdict.exact).toBe(11)
+    expect(verdict.starters).toBe(11)
+    expect(verdict.missing).toEqual([])
+    expect(verdict.rows.every((row) => row.decoy === null)).toBe(true)
+  })
+
+  it('marks a starter in the wrong band as the wrong line, not a miss', () => {
+    const board = placeOn(perfect, keeper, 'F')
+    const verdict = gradeLineup(milan, board)!
+    const row = verdict.rows.find((placed) => placed.playerId === keeper)
+    expect(row?.status).toBe('wrong_line')
+    expect(row?.belongsToLine).toBe('GK')
+    expect(verdict.exact).toBe(10)
+  })
+
+  it('says why a non-starter was in the room: came on at 69, or in the squad by name of the source', () => {
+    const board = placeOn(placeOn(takeOff(takeOff(perfect, keeper), record.xiIds?.D1 as string), toama, 'M'), hillel, 'D')
+    const verdict = gradeLineup(milan, board)!
+    const sub = verdict.rows.find((row) => row.playerId === toama)
+    expect(sub?.status).toBe('not_in_xi')
+    expect(sub?.decoy).toMatchObject({ kind: 'sub-on', minute: 69 })
+    const squad = verdict.rows.find((row) => row.playerId === hillel)
+    expect(squad?.decoy?.kind).toBe('season-squad')
+    expect(squad?.decoy?.sourceTitle).toBeTruthy()
+    // the two starters left behind are named, with the band they started in — the ghosts
+    expect(verdict.missing.map((man) => man.line).sort()).toEqual(['D', 'GK'])
   })
 
   it('says when the source does not name a bench at all, rather than printing zero', () => {
-    expect(gradeLineup(milan, {})?.benchKnown).toBe(true)
-    expect(gradeLineup(chelsea, {})?.benchKnown).toBe(false)
+    expect(gradeLineup(milan, [])?.benchKnown).toBe(true)
+    expect(gradeLineup(seedFor('2001-02-uefa-r2-chelsea'), [])?.benchKnown).toBe(false)
   })
 
-  it('leaves an empty slot with no verdict and no trap', () => {
-    const verdict = gradeLineup(milan, {})
-    expect(verdict?.slots.every((row) => row.status === 'empty' && row.bench === false)).toBe(true)
+  it('refuses what was never in the room — a stranger, a repeat, a twelfth man', () => {
+    const forged: Placement[] = [
+      ...perfect,
+      { playerId: 'p_0000000000', line: 'F', order: 9 },
+      { playerId: keeper, line: 'F', order: 9 },
+      { playerId: toama, line: 'M', order: 9 },
+    ]
+    const verdict = gradeLineup(milan, forged)!
+    expect(verdict.rows).toHaveLength(11)
+    expect(verdict.exact).toBe(11)
   })
 })
 
 describe('פתק מהמאמן — a number, never a name', () => {
   const milan = seedFor('2001-02-uefa-qf-milan')
   const chelsea = seedFor('2001-02-uefa-r2-chelsea')
+  const perfect = perfectBoard(recordOf('2001-02-uefa-qf-milan'))
+  const toama = resolvePlayer('סלים טועמה')!.id
+  const balili = resolvePlayer('פיני בלילי')!.id
 
   it('hands out exactly two, and nothing past them', () => {
     expect(COACH_NOTES).toBe(2)
     for (let index = 0; index < COACH_NOTES; index += 1) {
-      expect(coachNote(milan, {}, 0, index), `note ${index}`).not.toBeNull()
+      expect(coachNote(milan, [], 0, index), `note ${index}`).not.toBeNull()
     }
-    expect(coachNote(milan, {}, 0, COACH_NOTES)).toBeNull()
-    expect(coachNote(milan, {}, 0, -1)).toBeNull()
+    expect(coachNote(milan, [], 0, COACH_NOTES)).toBeNull()
+    expect(coachNote(milan, [], 0, -1)).toBeNull()
   })
 
   it('carries a kind and two numbers and nothing else', () => {
-    const note = coachNote(milan, {}, 0, 0)
+    const note = coachNote(milan, [], 0, 0)
     expect(note && Object.keys(note).sort()).toEqual(['kind', 'n', 'of'])
   })
 
   it('counts the starters still hanging up, and reaches zero on a perfect board', () => {
-    const empty = coachNote(milan, {}, 0, 0)
-    expect(empty?.kind).toBe('stillOut')
-    expect(empty?.n).toBe(11)
-
-    const solution = gradeLineup(milan, {})?.solution ?? []
-    const picks = Object.fromEntries(solution.map((row) => [row.slotId, row.name]))
-    expect(coachNote(milan, picks, 0, 0)?.n).toBe(0)
+    expect(coachNote(milan, [], 0, 0)).toEqual({ kind: 'stillOut', n: 11, of: 11 })
+    expect(coachNote(milan, perfect, 0, 0)?.n).toBe(0)
   })
 
   it('offers the bench note only where the record names a bench', () => {
-    const kinds = (seed: number): CoachNoteKind[] => {
-      const out: CoachNoteKind[] = []
-      for (let index = 0; index < COACH_NOTES; index += 1) {
-        const note = coachNote(seed, {}, 0, index)
-        if (note) out.push(note.kind)
-      }
-      return out
-    }
+    const kinds = (seed: number): CoachNoteKind[] =>
+      Array.from({ length: COACH_NOTES }, (_, index) => coachNote(seed, [], 0, index)?.kind).filter(
+        (kind): kind is CoachNoteKind => kind !== undefined,
+      )
     expect(kinds(milan)).toContain('benchOn')
     expect(kinds(chelsea)).not.toContain('benchOn')
   })
 
-  it('is deterministic — the same board twice gives the same help', () => {
-    // The prototype draws its clue at random, which makes the same seed give different
-    // help on two runs and makes the whole thing untestable.
-    for (let index = 0; index < COACH_NOTES; index += 1) {
-      expect(coachNote(milan, { GK: 'שביט אלימלך' }, 0, index)).toEqual(
-        coachNote(milan, { GK: 'שביט אלימלך' }, 0, index),
-      )
-    }
+  it('counts a trap the player has already walked into', () => {
+    const board = placeOn(placeOn([], toama, 'M'), balili, 'F')
+    expect(coachNote(milan, board, 0, 1)).toEqual({ kind: 'benchOn', n: 2, of: 2 })
   })
 
-  it('counts a trap the player has already walked into', () => {
-    const note = coachNote(milan, { M1: 'סלים טועמה', M2: 'פיני בלילי' }, 0, 1)
-    expect(note?.kind).toBe('benchOn')
-    expect(note?.n).toBe(2)
+  it('is deterministic — the same board twice gives the same help', () => {
+    const board = placeOn([], perfect[0]!.playerId, 'GK')
+    for (let index = 0; index < COACH_NOTES; index += 1) {
+      expect(coachNote(milan, board, 0, index)).toEqual(coachNote(milan, board, 0, index))
+    }
   })
 })
 
-describe('החשיפה — the walk, and the promise that it can be skipped', () => {
-  const milan = seedFor('2001-02-uefa-qf-milan')
-  const challenge = dealChallenge(milan)
-  const slots = challenge?.formation.slots ?? []
-  const solution = gradeLineup(milan, {})?.solution ?? []
-  const perfect = Object.fromEntries(solution.map((row) => [row.slotId, row.name]))
+describe('החשיפה — the walk, the ghosts, and the promise that it can be skipped', () => {
+  const milanKey = '2001-02-uefa-qf-milan'
+  const milan = seedFor(milanKey)
+  const record = recordOf(milanKey)
+  const perfect = perfectBoard(record)
+  const toama = resolvePlayer('סלים טועמה')!.id
+  const keeper = record.xiIds?.GK as string
 
-  /** A board with eight of the eleven right, one trap, one wrong line and one empty. */
-  function mixedPicks(): Record<string, string | null> {
-    const picks: Record<string, string | null> = { ...perfect }
-    picks.F2 = 'סלים טועמה' // a documented substitute — the trap
-    picks.M4 = null // left in the locker room
-    // A starter moved out of his line: the keeper, put up front.
-    picks.F1 = perfect.GK as string
-    picks.GK = null
-    return picks
+  /** Eight right, one trap, one starter in the wrong band, two starters left behind. */
+  function mixedBoard(): Placement[] {
+    let board = takeOff(perfect, record.xiIds?.M4 as string)
+    board = takeOff(board, record.xiIds?.F2 as string)
+    board = placeOn(board, toama, 'F')
+    board = placeOn(board, keeper, 'F')
+    return board
   }
 
-  it('walks only the slots the player filled, in the order the pitch draws', () => {
-    const verdict = gradeLineup(milan, mixedPicks())
-    expect(verdict).not.toBeNull()
-    const rows = buildReveal(verdict!, slots, [])
-    expect(rows.length).toBe(Object.values(mixedPicks()).filter(Boolean).length)
-    const order = rows.map((row) => row.slotId)
-    const expected = slots
-      .filter((slot) => (mixedPicks()[slot.slotId] ?? null) !== null)
-      .map((slot) => slot.slotId)
-    expect(order).toEqual(expected)
-    // keeper first, attack last — the same movement as the pitch under it
-    expect(lineOf(order[0] as string)).toBe('D')
+  it('walks the bands keeper first, and each band in the order it stands', () => {
+    const verdict = gradeLineup(milan, mixedBoard())!
+    const rows = buildReveal(verdict, [])
+    expect(rows.map((row) => row.line)).toEqual(
+      [...rows.map((row) => row.line)].sort((a, b) => LINES.indexOf(a) - LINES.indexOf(b)),
+    )
+    // the keeper was moved up front, so the walk opens on the defence
+    expect(rows[0]?.line).toBe('D')
+    expect(rows).toHaveLength(10)
   })
 
   it('starts at nothing and ends at the verdict', () => {
-    const verdict = gradeLineup(milan, mixedPicks())!
-    const rows = buildReveal(verdict, slots, [])
-    expect(tallyUpTo(rows, -1)).toEqual({
-      exact: 0,
-      wrongSlot: 0,
-      bench: 0,
-      locksRight: 0,
-      locksUsed: 0,
-    })
-    expect(tallyUpTo(rows, rows.length - 1).exact).toBe(verdict.exact)
-    expect(verdict.exact).toBe(7)
-    expect(tallyUpTo(rows, rows.length - 1).bench).toBe(1)
-    expect(tallyUpTo(rows, rows.length - 1).wrongSlot).toBe(1)
+    const verdict = gradeLineup(milan, mixedBoard())!
+    const rows = buildReveal(verdict, [])
+    expect(tallyUpTo(rows, -1)).toEqual({ exact: 0, wrongLine: 0, bench: 0, locksRight: 0, locksUsed: 0 })
+    const final = tallyUpTo(rows, rows.length - 1)
+    expect(final.exact).toBe(verdict.exact)
+    expect(verdict.exact).toBe(8)
+    expect(final.bench).toBe(1)
+    expect(final.wrongLine).toBe(1)
   })
 
-  /**
-   * The skip is the same arithmetic as the walk.
-   *
-   * This is the actual promise: whatever step a player is standing on when they press
-   * "הצג הכול", the sheet they land on is the sheet they would have reached by pressing
-   * "הבא" to the end. A skip that computed its own totals is a skip that can disagree
-   * with the walk, and the disagreement would only ever be seen by somebody who did both.
-   */
-  it('reaches the same sheet from every step', () => {
-    const verdict = gradeLineup(milan, mixedPicks())!
-    const rows = buildReveal(verdict, slots, [])
+  it('reaches the same sheet from every step, and past the end', () => {
+    const rows = buildReveal(gradeLineup(milan, mixedBoard())!, [])
     const final = tallyUpTo(rows, rows.length - 1)
     for (let from = -1; from < rows.length; from += 1) {
       expect(tallyUpTo(rows, rows.length - 1), `skipped from ${from}`).toEqual(final)
     }
-    // and past the end, which is what a double tap on the last card does
     expect(tallyUpTo(rows, rows.length + 5)).toEqual(final)
   })
 
-  it('never goes backwards as it walks', () => {
-    const verdict = gradeLineup(milan, mixedPicks())!
-    const rows = buildReveal(verdict, slots, [])
-    for (let index = 0; index < rows.length; index += 1) {
-      const before = tallyUpTo(rows, index - 1)
-      const after = tallyUpTo(rows, index)
-      expect(after.exact).toBeGreaterThanOrEqual(before.exact)
-      expect(after.bench).toBeGreaterThanOrEqual(before.bench)
-    }
+  it('draws a band\'s missed starters once the walk has passed that band', () => {
+    // keeper, one midfielder and one striker left in the locker room; a trap up front
+    let board = takeOff(perfect, keeper)
+    board = takeOff(board, record.xiIds?.M4 as string)
+    board = takeOff(board, record.xiIds?.F2 as string)
+    board = placeOn(board, toama, 'F')
+    const verdict = gradeLineup(milan, board)!
+    const rows = buildReveal(verdict, [])
+    expect(verdict.missing.map((man) => man.line).sort()).toEqual(['F', 'GK', 'M'])
+    // before the first card the keeper band is already passed — nobody was placed in it
+    expect(ghostsUpTo(verdict, rows, -1).map((man) => man.line)).toEqual([])
+    expect(ghostsUpTo(verdict, rows, 0).map((man) => man.line)).toEqual(['GK'])
+    const lastMidfield = rows.map((row) => row.line).lastIndexOf('M')
+    expect(ghostsUpTo(verdict, rows, lastMidfield).map((man) => man.line).sort()).toEqual(['GK', 'M'])
+    expect(ghostsUpTo(verdict, rows, rows.length - 1)).toEqual(verdict.missing)
+    expect(missingStarters(verdict)).toEqual(verdict.missing)
   })
 
   it('counts a LOCK only where the man really started', () => {
-    const verdict = gradeLineup(milan, mixedPicks())!
-    const trap = 'סלים טועמה'
-    const real = perfect.D1 as string
-    const rows = buildReveal(verdict, slots, [trap, real])
+    const verdict = gradeLineup(milan, mixedBoard())!
+    const rows = buildReveal(verdict, [toama, record.xiIds?.D1 as string])
     const tally = tallyUpTo(rows, rows.length - 1)
     expect(tally.locksUsed).toBe(2)
     expect(tally.locksRight).toBe(1)
     expect(MAX_LOCKS).toBe(3)
-  })
-
-  it('names who was left in the locker room', () => {
-    const verdict = gradeLineup(milan, mixedPicks())!
-    const missing = missingStarters(verdict)
-    expect(missing).toHaveLength(3)
-    for (const name of missing) {
-      expect(solution.map((row) => row.name)).toContain(name)
-    }
-    expect(missingStarters(gradeLineup(milan, perfect)!)).toEqual([])
   })
 
   it('remembers a skip, and only a skip', () => {
@@ -346,12 +538,12 @@ describe('החשיפה — the walk, and the promise that it can be skipped', ()
     expect(opensAtSummary([REVEAL_SKIPPED])).toBe(true)
   })
 
-  it('survives a board nobody filled', () => {
-    const verdict = gradeLineup(milan, {})!
-    const rows = buildReveal(verdict, slots, [])
+  it('survives a board nobody filled — every starter is a ghost', () => {
+    const verdict = gradeLineup(milan, [])!
+    const rows = buildReveal(verdict, [])
     expect(rows).toEqual([])
-    expect(tallyUpTo(rows, -1).exact).toBe(0)
-    expect(tallyUpTo(rows, 0).exact).toBe(0)
+    expect(verdict.missing).toHaveLength(11)
+    expect(ghostsUpTo(verdict, rows, -1)).toHaveLength(11)
   })
 })
 
@@ -376,11 +568,31 @@ describe('החדר — what the screens are held to', () => {
     expect(sheet).not.toContain('requestAnimationFrame')
   })
 
+  it('keeps its one timer in the opt-in fast walk: ≤250ms a row, started only by a press', () => {
+    expect(FAST_ROW_MS).toBeLessThanOrEqual(250)
+    const walk = withoutComments(readFileSync(join(ROOT, 'app/lineup/fastWalk.ts'), 'utf8'))
+    expect(walk).toContain('FAST_ROW_MS')
+    expect(walk).toContain('clearInterval')
+    // the walk is started from a click handler and from nowhere else
+    const starts = sheet.split('fast.start()').length - 1
+    expect(starts).toBe(1)
+    expect(sheet).toMatch(/onClick=\{\(event\) => \{[^}]*fast\.start\(\)/)
+    // and any tap on the reveal stops it
+    expect(sheet).toContain('onPointerDown={() => fast.running && fast.stop()}')
+  })
+
   it('never disables a control on the reveal or the sheet', () => {
     // The skip has to be pressable at every step, including the first and the last.
     // A blanket rule is stronger than checking one button: nothing on this screen may
     // be unavailable, so the skip cannot become unavailable either.
     expect(sheet).not.toContain('disabled')
+  })
+
+  it('hangs one shirt on every locker, with no number', () => {
+    expect(rack).toContain('density="mini"')
+    // the kit is dealt with `number: null`, and the rack never puts one back
+    expect(rack).not.toMatch(/<KitShirt[^>]*number/)
+    expect(rack).not.toContain('number:')
   })
 
   it('does not print a position on a locker', () => {
@@ -410,12 +622,15 @@ describe('החדר — what the screens are held to', () => {
     // hue 57° at saturation 0.49, which is inside `lib/isYellow.ts`'s band — seventy-four
     // pixels of it on one phone screen of a full board. Ink goes between them. The
     // affordance did not disappear; it moved to the name plate, which is cream.
+    const pitch = withoutComments(readFileSync(join(ROOT, 'app/lineup/BandPitch.tsx'), 'utf8'))
     for (const [name, text] of [
       ['LineupBoard', board],
       ['TeamSheet', sheet],
+      ['BandPitch', pitch],
     ] as const) {
       expect(text, name).not.toContain('outline-press-red')
       expect(text, name).not.toContain('outline-red')
+      expect(text, name).not.toContain('border-press-red bg-press')
     }
   })
 
@@ -436,6 +651,25 @@ describe('החדר — what the screens are held to', () => {
 })
 
 describe('מפתחות שנבנים בזמן ריצה — every one of them exists', () => {
+  it('has a sentence for every kind of not starting, and every zone word the board prints', () => {
+    for (const key of [
+      'lineup.decoy.subOn',
+      'lineup.decoy.subOn.minute',
+      'lineup.decoy.squad',
+      'lineup.decoy.squad.source',
+      'lineup.decoy.other',
+      'lineup.zone.wrongLine',
+      'lineup.zone.full',
+      'lineup.zone.fast',
+      'lineup.zone.fastStop',
+      'lineup.zone.intro',
+    ]) {
+      expect(catalogue[key], key).toBeTruthy()
+    }
+    expect(catalogue['lineup.decoy.subOn.minute']).toContain('{n}')
+    expect(catalogue['lineup.decoy.squad.source']).toContain('{source}')
+  })
+
   it('has a line label for each of the four bands', () => {
     for (const line of ['GK', 'D', 'M', 'F']) {
       expect(catalogue[`lineup.line.${line}`], line).toBeTruthy()

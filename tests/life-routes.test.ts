@@ -769,15 +769,22 @@ describe('כלל 66 — מה שאי אפשר להגיע אליו נאמר, לא 
     const outOfReach = LIFE_ROUTES.flatMap((route) =>
       route.stages.filter((stage) => stageOutOfReach(stage, BIRTH_YEAR)).map((stage) => `${route.id}/${stage.stage}`),
     )
-    expect(outOfReach.sort()).toEqual(
-      [
-        'ULTRAS/apex',
-        'JOURNALIST/apex',
-        'OWNER/apex',
-        'CREATOR/apex',
-        'TRAVELLER/apex',
-      ].sort(),
-    )
+    /**
+     * חמש הפסגות היו כאן עד 21.9.2026, ואחת נשארה.
+     *
+     * `2002-europe` ו-`2006-home` הזיזו את תקרת הגיל מ-22 ל-28, וארבע הפסגות שננעלו
+     * ב-25 נפתחו **בלי שנגענו ב-`routes.ts`** — `stageOutOfReach` קורא את רשימת
+     * הפרקים. `OWNER/apex` הוא 30 והוא עדיין סגור, וזה נכון לתסריט: ענף הבעלות הוא
+     * 2025. הרשימה נשארת מנויה בשמות ולא נספרת, כדי שהבאה תאמר מי היא (כלל 78).
+     */
+    /**
+     * ...ומ-21.9.2026 הרשימה **ריקה**, וזה לא כישלון של השומר אלא מה שהוא בא לומר.
+     *
+     * 2007 ו-2009 נבנו, כלומר התקרה היא גיל 31, וגם `OWNER/apex` (30) נכנס פנימה.
+     * השומר נשאר בדיוק כפי שהוא: ביום שמישהו יכתוב שלב עם `minAge` מעבר לפרק האחרון,
+     * הוא יאדים ויאמר מי (כלל 78), ובדיקה שמוחקים אותה כשהיא ירוקה אינה כלי (כלל 73).
+     */
+    expect(outOfReach.sort()).toEqual([])
   })
 
   it('leaves every entry and practice stage inside the ages the game plays', () => {
@@ -813,10 +820,57 @@ describe('כלל 66 — מה שאי אפשר להגיע אליו נאמר, לא 
     expect(apex?.chapters).toBe(3)
   })
 
-  it('puts the founding window beyond the last written chapter, and says so rather than moving it', () => {
-    // Moving 2007 to fit the chapters that exist would be the game inventing a founding
-    // date, which is the one thing rule 11 has never allowed.
-    expect(FOUNDING_YEAR).toBeGreaterThan(LAST_YEAR)
+  /**
+   * ...וחלון ההקמה **בתוך** הפרקים הכתובים מ-21.9.2026 — והשומר התהפך ונהיה חזק יותר.
+   *
+   * עד היום הוא אמר "2007 מעבר לפרק האחרון", כלומר שמרנו על עצמנו מלהזיז את תאריך
+   * ההקמה כדי שיתאים למה שנבנה (כלל 11). זה עדיין הכלל, והתאריך לא זז — **העולם זז
+   * אליו**: `2007-table`, `2007-registered` ו-`2007-key` נכתבו.
+   *
+   * ולכן השאלה עכשיו קשה יותר: הפסגה מבקשת שלוש ראיות ב**שלושה פרקים** בתוך החלון,
+   * אז חייבים להיות שלושה פרקים בשנה הזאת. שניים אינם תקלת תוכן — הם פסגה בלתי-אפשרית
+   * במבנה, וזה בדיוק מה שאיש לא היה מבחין בו.
+   */
+  /**
+   * ...וכל אחד מהם נושא **בדיוק נקודת הוכחה אחת**, וזה לא קישוט.
+   *
+   * `route-proof-found` היא השיחה היחידה שמנפיקה `founding_proof`, והיא גם זו שמרימה
+   * התחייבות. שלוש נקודות **באותו פרק** היו נראות כמו שלוש ראיות ונספרות כאחת, כי
+   * `proofId` הוא `founding_proof:{chapter}` וספר הראיות אדיש לחזרה על אותו מזהה
+   * (כלל 78) — כלומר השחקן היה עושה את העבודה ועומד מול פסגה נעולה.
+   *
+   * והנעילה על התחייבות שכבר נלקחה היא הצד השני של אותה שאלה: שלוש הזדמנויות ושלוש
+   * התחייבויות, ומי שלקח "אנשים" פעם אחת רואה שהאפשרות כבויה ואומרת למה.
+   */
+  it('puts exactly one founding proof in each of the three chapters, and locks a commitment once taken', () => {
+    const ids = ['2007-table', '2007-registered', '2007-key']
+    for (const chapter of ids) {
+      const spots = ALL_SCENES.flatMap((scene) =>
+        scene.hotspots.filter((spot) => inEra(spot, chapter) && (spot as { act?: string }).act === 'route-proof-found'),
+      )
+      expect(spots.length, `${chapter} should carry exactly one founding proof`).toBe(1)
+    }
+    // ...ואין אף אחת בפרק שאינו בחלון
+    for (const chapter of ['2006-home', '2009-up', '2000-double']) {
+      const spots = ALL_SCENES.flatMap((scene) =>
+        scene.hotspots.filter((spot) => inEra(spot, chapter) && (spot as { act?: string }).act === 'route-proof-found'),
+      )
+      expect(spots.length, `${chapter} is outside the window and must carry none`).toBe(0)
+    }
+    const choices = CONVERSATIONS_ROUTES.find((row) => row.id === 'route-proof-found')?.branches[0]?.choices ?? []
+    expect(choices.length).toBe(3)
+    for (const choice of choices) {
+      expect(choice.when, `${choice.id} can be taken twice`).toBeTruthy()
+      expect(choice.noteHe, `${choice.id} locks without saying why`).toBeTruthy()
+    }
+  })
+
+  it('has three chapters inside the founding window, because the apex asks for three', () => {
+    expect(FOUNDING_YEAR).toBe(2007)
+    const inWindow = CHAPTERS.filter((chapter) => chapter.year === FOUNDING_YEAR && chapter.playable)
+    expect(inWindow.map((chapter) => chapter.id)).toEqual(['2007-table', '2007-registered', '2007-key'])
+    const apex = LIFE_ROUTES.find((route) => route.id === 'USSISHKIN_FOUNDER')?.stages.find((s) => s.stage === 'apex')
+    expect(inWindow.length).toBeGreaterThanOrEqual(apex?.chapters ?? 3)
   })
 })
 
@@ -976,13 +1030,16 @@ describe('ההזמנות — הדלת של העולם והדלת של השחקן
 
   it('says out loud when a stage needs a chapter that does not exist yet (rule 66)', () => {
     /**
-     * The last playable chapter is 2000 and he is born in 1978, so the game's ceiling is
-     * twenty-two. Every apex gated at 25 or 30 is therefore unreachable TODAY — not
-     * broken, not hidden, and not slid down to fit: `life.route.outOfReach` names it on
-     * the card, and building the 2007 chapter moves all of these by itself.
+     * התקרה היא **גיל 28** — הפרק האחרון הוא 2006 והוא נולד ב-1978 — ולכן פסגה שננעלה
+     * ב-25 כבר אינה מעבר לה, ופסגה שננעלה ב-30 עדיין כן. **`stageOutOfReachFor` אינו
+     * שואל על הגיל שהועבר לו אלא על מה שהמשחק יכול להגיע אליו בכלל**, וזה מה שגרם
+     * לשורה הזאת ליפול כשנבנו שני פרקים: הסף לא זז, העולם גדל.
+     *
+     * `life.route.outOfReach` ממשיך לנקוב בזה על הכרטיס, ובניית 2025 תזיז גם את
+     * האחרונה — בלי לגעת בשורה כאן.
      */
-    expect(stageOutOfReachFor(lifeAged(22), 'ULTRAS', 'apex'), 'ULTRAS apex is 25').toBe(true)
-    expect(stageOutOfReachFor(lifeAged(22), 'OWNER', 'apex'), 'OWNER apex is 30').toBe(true)
+    expect(stageOutOfReachFor(lifeAged(22), 'ULTRAS', 'apex'), 'ULTRAS apex is 25, and 2006 exists').toBe(false)
+    expect(stageOutOfReachFor(lifeAged(22), 'OWNER', 'apex'), 'OWNER apex is 30, and 2009 exists').toBe(false)
     expect(stageOutOfReachFor(lifeAged(22), 'ULTRAS', 'entry')).toBe(false)
     expect(stageOutOfReachFor(lifeAged(22), 'OWNER', 'practice'), 'OWNER practice is 21').toBe(false)
     /**

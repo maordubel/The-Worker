@@ -17,6 +17,27 @@ import {
   type PortalProfile,
 } from '@/lib/portal/merge'
 import { foldRuns } from '@/lib/portal/sync'
+import { emptyBook, type MemberBook } from '@/lib/game/member'
+import {
+  editWinner,
+  foldItems,
+  LEGACY_EDIT,
+  mergeCardUnit,
+  mergeSupporter,
+  unitOfBook,
+} from '@/lib/portal/merge'
+import {
+  bookAfter,
+  deedsToPush,
+  itemsToPush,
+  parseDeedKey,
+  planSync,
+  unitOfRow,
+  type AppProfileRow,
+  type RemoteSide,
+} from '@/lib/portal/plan'
+import { runSyncHandlers, SYNC_HANDLERS, type SyncHandler } from '@/lib/portal/handlers'
+import { applyEvent } from '@/lib/profile/events'
 import { emptyProfile, emptyStat, type Profile } from '@/lib/profile/store'
 
 /**
@@ -391,6 +412,281 @@ describe('המפתח הציבורי אינו בקוד', () => {
       const text = readFileSync(join(ROOT, path), 'utf8')
       expect(text, path).not.toContain('sb_publishable_')
       expect(text, path).not.toMatch(/https:\/\/[a-z0-9]+\.supabase\.co/)
+    }
+  })
+})
+
+/* ==========================================================================================
+ * 21.9.2026 — the card, the collections and the deeds travel too
+ * ======================================================================================= */
+
+function book(over: Partial<MemberBook> = {}): MemberBook {
+  return { ...emptyBook(), tik: 'TIK-0417', nameHe: '', number: 17, punches: [], ...over }
+}
+
+function account(over: Partial<AppProfileRow> = {}): AppProfileRow {
+  // What `handle_new_user` writes for a Google sign-in: the person's legal name, no card.
+  return { display_name: 'Maor Dubel', member_no: null, since: '2026-09-21', ...over }
+}
+
+function remoteSide(over: Partial<RemoteSide> = {}): RemoteSide {
+  return { row: account(), runs: [], items: [], cardColumns: true, accountName: 'Maor Dubel', ...over }
+}
+
+describe('profile_item — the account\'s collections, folded like the device keeps them', () => {
+  it('groups by set, keeps first-seen order, and counts an id once', () => {
+    expect(
+      foldItems([
+        { set_id: 'ussishkin', item_id: 'a' },
+        { set_id: 'kits', item_id: '1984/85|home' },
+        { set_id: 'ussishkin', item_id: 'b' },
+        { set_id: 'ussishkin', item_id: 'a' },
+        { set_id: '', item_id: 'x' },
+        { set_id: 'kits', item_id: '' },
+      ]),
+    ).toEqual({ ussishkin: ['a', 'b'], kits: ['1984/85|home'] })
+  })
+
+  it('makes a union exact across devices — and pushes only what the account lacks', () => {
+    const local = card({ collections: { ussishkin: ['a', 'b', 'c'], 'lineup.reveal': ['skipped'] } })
+    const remote = foldItems([{ set_id: 'ussishkin', item_id: 'b' }, { set_id: 'ussishkin', item_id: 'z' }])
+    const merged = mergeDeviceProfiles(local, remoteProfile({ collections: remote }))
+    expect(merged.collections.ussishkin).toEqual(['a', 'b', 'c', 'z'])
+    // a preference never leaves the device
+    expect(itemsToPush(merged.collections, remote)).toEqual([{ set: 'ussishkin', ids: ['a', 'c'] }])
+  })
+
+  it('chunks a big push under the function\'s own ceiling', () => {
+    const ids = Array.from({ length: 450 }, (_, i) => `id-${i}`)
+    const chunks = itemsToPush({ archive: ids }, {})
+    expect(chunks.map((c) => c.ids.length)).toEqual([200, 200, 50])
+  })
+})
+
+describe('מעשים בחשבון — one row per gate per day', () => {
+  it('reads deeds back off the account\'s keys', () => {
+    expect(parseDeedKey('deed:/xi:2026-09-21')).toEqual({ gate: '/xi', day: '2026-09-21' })
+    expect(parseDeedKey('0d6f…uuid')).toBeNull()
+    const folded = foldRuns([
+      { gate: '/xi', score: 0, asked: 0, correct: 0, played_on: '2026-09-20', idempotency_key: 'deed:/xi:2026-09-20' },
+      { gate: '/xi', score: 0, asked: 0, correct: 0, played_on: '2026-09-21', idempotency_key: 'deed:/xi:2026-09-21' },
+    ])
+    expect(folded.deeds).toEqual({ '/xi': { on: '2026-09-21' } })
+    expect(folded.gates?.['/xi']?.plays).toBe(2)
+  })
+
+  it('pushes a deed only when its key is not already there', () => {
+    const deeds = { '/xi': { on: '2026-09-21' }, '/polls': { on: '2026-09-20' } }
+    expect(deedsToPush(deeds, new Set(['deed:/xi:2026-09-21']))).toEqual([
+      { key: 'deed:/polls:2026-09-20', gate: '/polls', day: '2026-09-20' },
+    ])
+  })
+})
+
+describe('הכינוי הוא השם — newest edit wins, and Google\'s seed is not an edit', () => {
+  it('decides by the edit clock', () => {
+    expect(editWinner({ editedAt: '', has: true }, { editedAt: '' })).toBe('local')
+    expect(editWinner({ editedAt: '', has: false }, { editedAt: '' })).toBe('remote')
+    expect(editWinner({ editedAt: '', has: true }, { editedAt: '2026-09-01T00:00:00.000Z' })).toBe('remote')
+    expect(editWinner({ editedAt: '2026-09-21T00:00:00.000Z', has: true }, { editedAt: '2026-09-01T00:00:00.000Z' })).toBe('local')
+    expect(editWinner({ editedAt: '2026-09-01T00:00:00.000Z', has: true }, { editedAt: '2026-09-01T00:00:00.000Z' })).toBe('remote')
+  })
+
+  it('sends the device nickname up over the Google name — the bug this fixes', () => {
+    const plan = planSync({ profile: card(), book: book({ nameHe: 'פוגי' }) }, remoteSide())
+    expect(plan.update.display_name).toBe('פוגי')
+    expect(plan.update.card_edited_at).toBe(LEGACY_EDIT)
+    expect(plan.identity.displayName).toBe('פוגי')
+    expect(bookAfter(book({ nameHe: 'פוגי' }), plan).nameHe).toBe('פוגי')
+  })
+
+  it('does it before the SQL is run too, with the name alone', () => {
+    const plan = planSync({ profile: card(), book: book({ nameHe: 'פוגי' }) }, remoteSide({ cardColumns: false }))
+    expect(plan.update.display_name).toBe('פוגי')
+    expect(plan.update).not.toHaveProperty('card')
+    expect(plan.update).not.toHaveProperty('card_edited_at')
+    expect(plan.update).not.toHaveProperty('supporter')
+  })
+
+  it('never writes a person\'s legal name into their nickname', () => {
+    const plan = planSync({ profile: card(), book: book() }, remoteSide())
+    expect(plan.update).not.toHaveProperty('display_name')
+    expect(bookAfter(book(), plan).nameHe).toBe('')
+    expect(unitOfRow(account(), true)).toEqual({ nameHe: '', number: null, card: null, editedAt: '' })
+  })
+
+  it('carries a nickname, a number and a card DOWN to a second device', () => {
+    const row = account({
+      display_name: 'פוגי',
+      member_no: 'TIK-0417',
+      card_edited_at: '2026-09-21T10:00:00+00:00',
+      shirt_number: 7,
+      card: { homeGate: 5, fanSince: 1983, began: 'father', first: { venueSlug: 'בלומפילד' }, values: ['moments'], issuedOn: '2026-09-21' },
+    })
+    const laptop = book({ tik: 'TIK-8123' })
+    const plan = planSync({ profile: card(), book: laptop }, remoteSide({ row }))
+    const after = bookAfter(laptop, plan)
+    expect(after.nameHe).toBe('פוגי')
+    expect(after.number).toBe(7)
+    expect(after.tik).toBe('TIK-0417')
+    expect(after.card).toMatchObject({ homeGate: 5, fanSince: 1983, began: 'father', issuedOn: '2026-09-21' })
+    expect(after.card?.editedAt).toBe('2026-09-21T10:00:00.000Z')
+  })
+
+  it('lets a newer device edit win, and keeps the earliest issue date', () => {
+    const local = unitOfBook(
+      book({ nameHe: 'פוגי', number: 9, card: { homeGate: 7, fanSince: null, began: null, first: null, values: [], issuedOn: '2026-09-25', editedAt: '2026-09-25T08:00:00.000Z' } }),
+    )
+    const remote = unitOfRow(
+      account({ display_name: 'ישן', card_edited_at: '2026-09-21T10:00:00Z', shirt_number: 5, card: { homeGate: 2, issuedOn: '2026-09-20' } }),
+      true,
+    )
+    const merged = mergeCardUnit(local, remote)
+    expect(merged?.nameHe).toBe('פוגי')
+    expect(merged?.number).toBe(9)
+    expect(merged?.card?.homeGate).toBe(7)
+    expect(merged?.card?.issuedOn).toBe('2026-09-20')
+  })
+
+  it('keeps the newer seal from gate 7, and never lets a missing one erase it', () => {
+    const older = { favouriteId: 'a', positionCode: 'ST', reasons: {}, sealedOn: '2026-09-01' }
+    const newer = { favouriteId: 'b', positionCode: 'GK', reasons: {}, sealedOn: '2026-09-21' }
+    expect(mergeSupporter(older, newer)).toBe(newer)
+    expect(mergeSupporter(newer, older)).toBe(newer)
+    expect(mergeSupporter(null, older)).toBe(older)
+    expect(mergeSupporter(older, undefined)).toBe(older)
+  })
+})
+
+describe('אנונימי ← מחובר — the first sign-in keeps everything and sends it up', () => {
+  const DAY = '2026-09-21'
+  let local = card({ since: '2026-09-01', days: ['2026-09-01', DAY] })
+  for (const event of [
+    { type: 'gate_completed', gate: '/trivia', variant: 'europe', score: 90, correct: 10, asked: 12 },
+    { type: 'deed', gate: '/xi' },
+    { type: 'collected', set: 'ussishkin', ids: ['a', 'b'] },
+    { type: 'archive_saved', entityId: 'moment-1' },
+    { type: 'collected', set: 'lineup.reveal', ids: ['skipped'] },
+  ] as const) {
+    local = applyEvent(local, event, { date: DAY }).profile
+  }
+  const device = book({ nameHe: 'פוגי', number: 7 })
+
+  it('keeps the device\'s card whole', () => {
+    const plan = planSync({ profile: local, book: device }, remoteSide({ items: [] }))
+    expect(plan.profile.gates['/trivia/europe']?.plays).toBe(1)
+    expect(plan.profile.gates['/xi']?.plays).toBe(1)
+    expect(plan.profile.collections.ussishkin).toEqual(['a', 'b'])
+    expect(plan.profile.since).toBe('2026-09-01')
+    expect(plan.identity.memberNo).toBe('TIK-0417')
+    expect(plan.update.member_no).toBe('TIK-0417')
+  })
+
+  it('sends up the collections and the deed as rows, and the preference not at all', () => {
+    const plan = planSync({ profile: local, book: device }, remoteSide({ items: [] }))
+    expect(plan.items).toEqual([
+      { set: 'ussishkin', ids: ['a', 'b'] },
+      { set: 'archive.mine', ids: ['moment-1#1'] },
+    ])
+    expect(plan.deeds).toEqual([{ key: `deed:/xi:${DAY}`, gate: '/xi', day: DAY }])
+    expect(plan.update.display_name).toBe('פוגי')
+    expect(plan.update.shirt_number).toBe(7)
+  })
+
+  it('pushes no collections before the SQL is run, and loses nothing locally', () => {
+    const plan = planSync({ profile: local, book: device }, remoteSide({ items: null, cardColumns: false }))
+    expect(plan.items).toEqual([])
+    expect(plan.profile.collections.ussishkin).toEqual(['a', 'b'])
+  })
+
+  it('does not re-send a deed the account already holds', () => {
+    const plan = planSync(
+      { profile: local, book: device },
+      remoteSide({
+        runs: [{ gate: '/xi', score: 0, asked: 0, correct: 0, played_on: DAY, idempotency_key: `deed:/xi:${DAY}` }],
+      }),
+    )
+    expect(plan.deeds).toEqual([])
+    expect(plan.profile.gates['/xi']?.plays).toBe(1)
+  })
+
+  it('with no account row, changes nothing and pushes nothing', () => {
+    const plan = planSync({ profile: local, book: device }, remoteSide({ row: null }))
+    expect(plan.remote).toBeNull()
+    expect(plan.update).toEqual({})
+    expect(plan.items).toEqual([])
+  })
+})
+
+describe('נקודת החיבור — a gate\'s own ledger syncs without editing sync.ts', () => {
+  it('keys every handler uniquely, runs each in isolation, and never throws', async () => {
+    // the list grows when a cluster registers its ledger (gate 2's marks-sync); ids stay unique
+    expect(new Set(SYNC_HANDLERS.map((h) => h.id)).size).toBe(SYNC_HANDLERS.length)
+    const ok: SyncHandler = { id: 'ok', sync: async () => true }
+    const broken: SyncHandler = {
+      id: 'broken',
+      sync: async () => {
+        throw new Error('no table')
+      },
+    }
+    const out = await runSyncHandlers({ db: {} as never, userId: 'u' }, [broken, ok])
+    expect(out).toEqual({ broken: false, ok: true })
+  })
+})
+
+describe('הסכימה של 21.9 — additive, idempotent, owner-only', () => {
+  const sql = readFileSync(join(ROOT, 'supabase/migrations/20260921130000_gates_progress.sql'), 'utf8')
+  const code = sql
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('--'))
+    .join('\n')
+
+  it('only adds — no table, column or row is ever dropped or deleted', () => {
+    expect(code).not.toMatch(/drop\s+table/i)
+    expect(code).not.toMatch(/drop\s+column/i)
+    expect(code).not.toMatch(/\bdelete\s+from\b/i)
+    expect(code).not.toMatch(/\btruncate\b/i)
+    expect(code).toContain('create table if not exists profile_item')
+    for (const column of ['card', 'card_edited_at', 'shirt_number', 'supporter']) {
+      expect(code).toMatch(new RegExp(`add column if not exists ${column}\\s`))
+    }
+  })
+
+  it('makes profile_item readable by its owner and writable only through the function', () => {
+    expect(code).toMatch(/alter table profile_item enable row level security/)
+    expect(code).toMatch(/create policy profile_item_read on profile_item\s+for select using \(user_id = auth\.uid\(\)\)/)
+    expect(code).not.toMatch(/create policy \w+ on profile_item\s+for (insert|update|delete|all)/)
+    expect(code).toContain('revoke insert, update, delete on profile_item from anon, authenticated')
+  })
+
+  it('writes items idempotently, as the caller, with the search path pinned', () => {
+    expect(code).toMatch(/create or replace function rpc_collect\(p_set text, p_ids text\[\]\)/)
+    expect(code).toContain('security definer set search_path = public')
+    expect(code).toContain('on conflict (user_id, set_id, item_id) do nothing')
+    expect(code).toContain('grant execute on function rpc_collect(text, text[]) to authenticated')
+    expect(code).not.toMatch(/grant execute on function rpc_collect[^;]*anon/)
+  })
+
+  it('bounds the card and the seal, and keeps the newest edit', () => {
+    expect(code).toContain('octet_length(card::text) <= 2048')
+    expect(code).toContain('octet_length(supporter::text) <= 2048')
+    expect(code).toContain('shirt_number between 1 and 99')
+    expect(code).toContain('new.card_edited_at < old.card_edited_at')
+  })
+
+  it('says what it adds, in Hebrew', () => {
+    expect(sql).toMatch(/comment on table profile_item is\s*\n\s*'[^']*[֐-׿]/)
+  })
+
+  it('stops with a readable sentence if the 17.9 file was never run', () => {
+    expect(code).toContain("to_regclass('public.app_profile') is null")
+  })
+})
+
+describe('הפרדת המזהים — the progress layer keeps the ballot id out too', () => {
+  it('never puts the device id into anything that carries a user', () => {
+    for (const path of ['lib/profile/events.ts', 'lib/portal/plan.ts', 'lib/portal/sync.ts']) {
+      expect(readFileSync(join(ROOT, path), 'utf8'), path).not.toContain('deviceId')
     }
   })
 })

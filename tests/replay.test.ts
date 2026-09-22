@@ -1,9 +1,33 @@
 import { describe, expect, it } from 'vitest'
 
 import goalsFile from '@/content/manual/goals.json'
-import messages from '@/messages/he.json'
-import { LANDMARKS, PITCH, UNITS_PER_METRE, zoneCenter } from '@/lib/game/goal-zones'
-import { dealRun, goalCount, goalRejections, gradeGoal, seasonOfDate } from '@/lib/game/goal'
+import matchesFile from '@/content/manual/matches.json'
+import { MESSAGES } from '@/lib/i18n'
+import { LANDMARKS, MAX_TOUCHES, PITCH, UNITS_PER_METRE, zoneCenter } from '@/lib/game/goal-zones'
+import {
+  dealRun,
+  goalCount,
+  goalHint,
+  goalHolds,
+  goalRejections,
+  gradeGoal,
+  pinnedGoal,
+  receptionHint,
+  seasonOfDate,
+} from '@/lib/game/goal'
+import { CURATED_ACTORS, actorKindOf } from '@/lib/game/replay/actors'
+import {
+  EMPTY_BUILD,
+  EMPTY_DRAFT,
+  canUndo,
+  lengthBucket,
+  lengthMetres,
+  phaseOf,
+  stepsDone,
+  undoStep,
+  type BuildState,
+} from '@/lib/game/replay/draft'
+import { REPLAY_HOLDS, replayHeld } from '@/lib/game/replay/holds'
 import { GAP, alignSequences } from '@/lib/game/replay/align'
 import {
   PRECISION,
@@ -19,7 +43,7 @@ import {
   type TruthTouch,
   type UserTouch,
 } from '@/lib/game/replay/envelope'
-import { continuityOf, judgeReplay, pairScore, routeShape } from '@/lib/game/replay/judge'
+import { GOOD_SCORE, continuityOf, judgeReplay, pairScore, routeShape } from '@/lib/game/replay/judge'
 import {
   POSITION_PRECISION,
   readTruth,
@@ -45,7 +69,8 @@ import { REPLAY_ACTIONS, actionSimilarity, isReplayAction } from '@/lib/game/rep
 
 type GoalFile = { confidence: number; note: string; records: GoalSourceRecord[] }
 const ARCHIVE = (goalsFile as unknown as GoalFile).records
-const CATALOGUE = messages as Record<string, string>
+const PLAYABLE = ARCHIVE.filter((record) => !replayHeld(record.goalId))
+const CATALOGUE = MESSAGES
 
 const CENTRE: Envelope = { x: 0.5, y: 0.5, rx: 0.1, ry: 0.08 }
 
@@ -240,7 +265,8 @@ describe('מהמילים אל הגאומטריה — the phrase table is the who
     // A refusal is not a failure of this test — it is the honest outcome for a record the
     // model cannot represent. It IS a failure that one exists and nobody was told.
     expect(goalRejections()).toEqual([])
-    expect(goalCount()).toBe(ARCHIVE.length)
+    // every record plays except the ones held BY NAME for an open conflict (holds.ts)
+    expect(goalCount()).toBe(ARCHIVE.length - Object.keys(REPLAY_HOLDS).length)
   })
 
   it('derives every target but the last from the next origin — continuity, not a guess', () => {
@@ -605,13 +631,14 @@ describe('שער 8 — the deal, the hold-back and the pool', () => {
     }
   })
 
-  it('offers every man who touched the ball, and fills the rest from that season’s squad', () => {
+  it('offers every NAMED man who touched the ball, and fills the rest from that season’s squad', () => {
     for (let seed = 1; seed <= 40; seed += 1) {
       for (let index = 0; index < 3; index += 1) {
         const challenge = dealRun(seed)[index]
         if (!challenge) continue
         const record = ARCHIVE.find((r) => r.goalId === challenge.goalId) as GoalSourceRecord
         for (const step of record.sequence) {
+          if (actorKindOf(record.goalId, step) === 'unnamed') continue
           expect(challenge.pool, `${challenge.goalId} ${step.actorHe}`).toContain(step.actorHe)
         }
       }
@@ -675,5 +702,415 @@ describe('שער 8 — the deal, the hold-back and the pool', () => {
 
   it('returns null for a goal index the run does not hold', () => {
     expect(gradeGoal(1, 99, [])).toBeNull()
+  })
+})
+
+/* ------------------------------------------------------ integrity: holds and actors */
+
+type MatchRow = {
+  playedOn: string
+  homeClubSlug: string
+  awayClubSlug: string
+  homeScore: number | null
+  awayScore: number | null
+}
+const MATCHES = (matchesFile as unknown as { records: MatchRow[] }).records
+const US = 'הפועל-תל-אביב'
+
+describe('עצירות — a goal whose fixture the archive contradicts is held out of play', () => {
+  it('holds only records that exist, and every hold names what it contradicts', () => {
+    for (const [goalId, hold] of Object.entries(REPLAY_HOLDS)) {
+      expect(ARCHIVE.some((record) => record.goalId === goalId), goalId).toBe(true)
+      expect(hold.fields.length, goalId).toBeGreaterThan(0)
+      expect(hold.claim.length, goalId).toBeGreaterThan(8)
+      expect(hold.against.length, goalId).toBeGreaterThan(8)
+    }
+    expect(goalHolds().map((hold) => hold.goalId).sort()).toEqual(Object.keys(REPLAY_HOLDS).sort())
+  })
+
+  it('holds exactly the three conflicted cup-final goals', () => {
+    expect(Object.keys(REPLAY_HOLDS).sort()).toEqual([
+      'cupfinal-2010-vermouth-25',
+      'cupfinal-2010-vermouth-73',
+      'cupfinal-2012-igiebor-90-2',
+    ])
+  })
+
+  it('holds a record only while the conflict is REAL — the archive names another opponent', () => {
+    // A hold is a reaction to evidence. If somebody corrects goals.json, this fails, and
+    // that is the signal to lift the hold rather than to keep a correct goal off the pitch
+    // (rule 65: a guard that falls after a data change is a guard that was right).
+    for (const [goalId, hold] of Object.entries(REPLAY_HOLDS)) {
+      if (!hold.fields.includes('opponentHe')) continue
+      const record = ARCHIVE.find((r) => r.goalId === goalId) as GoalSourceRecord
+      const row = MATCHES.find(
+        (match) =>
+          match.playedOn === record.playedOn &&
+          (match.homeClubSlug === US || match.awayClubSlug === US),
+      )
+      expect(row, `${goalId}: no match row on ${record.playedOn}`).toBeTruthy()
+      const opponent = (row?.homeClubSlug === US ? row?.awayClubSlug : row?.homeClubSlug) ?? ''
+      expect(record.opponentHe, goalId).not.toContain(opponent.replaceAll('-', ' '))
+    }
+  })
+
+  it('never deals a held goal, on any seed or cursor', () => {
+    for (let seed = 1; seed <= 150; seed += 1) {
+      for (let cursor = 0; cursor < 7; cursor += 1) {
+        for (const challenge of dealRun(seed, cursor)) {
+          expect(replayHeld(challenge.goalId), `${seed}/${cursor} ${challenge.goalId}`).toBe(false)
+        }
+      }
+    }
+  })
+
+  it('still reads the held records — they are held, not broken', () => {
+    for (const goalId of Object.keys(REPLAY_HOLDS)) {
+      const record = ARCHIVE.find((r) => r.goalId === goalId) as GoalSourceRecord
+      expect(readTruth(record).rejections, goalId).toEqual([])
+    }
+  })
+})
+
+describe('מי נגע — player, opponent, or nobody the report names', () => {
+  it('curates only touches that exist, under the actor they are written with', () => {
+    for (const [key, curated] of Object.entries(CURATED_ACTORS)) {
+      const [goalId, step] = key.split('#')
+      const record = ARCHIVE.find((r) => r.goalId === goalId)
+      expect(record, key).toBeTruthy()
+      const touch = record?.sequence.find((item) => item.step === Number(step))
+      expect(touch?.actorHe, key).toBe(curated.actorHe)
+    }
+  })
+
+  it('never reads the ball, or a keeper written as "השוער", as a Hapoel player', () => {
+    for (const record of ARCHIVE) {
+      for (const step of record.sequence) {
+        if (step.actorHe === 'הכדור' || step.actorHe.startsWith('השוער')) {
+          expect(actorKindOf(record.goalId, step), `${record.goalId} #${step.step}`).not.toBe('player')
+        }
+      }
+    }
+  })
+
+  it('lets a record that states its own actorKind win, and never disagree with the curation', () => {
+    for (const record of ARCHIVE) {
+      for (const step of record.sequence as Array<GoalSourceRecord['sequence'][number] & { actorKind?: string }>) {
+        if (step.actorKind === undefined) continue
+        const curated = CURATED_ACTORS[`${record.goalId}#${step.step}`]?.kind ?? 'player'
+        expect(step.actorKind, `${record.goalId} #${step.step}`).toBe(curated)
+      }
+    }
+    expect(actorKindOf('x', { step: 1, actorKind: 'opponent' })).toBe('opponent')
+    expect(actorKindOf('x', { step: 1, actorKind: 'nonsense' })).toBe('player')
+  })
+
+  it('carries the kind into the truth', () => {
+    const benfica = ARCHIVE.find((r) => r.goalId === 'benfica-2010-zahavi-90-2') as GoalSourceRecord
+    expect(readTruth(benfica).touches[0]?.actorKind).toBe('unnamed')
+    const title = ARCHIVE.find((r) => r.goalId === 'championship-2010-zahavi-92') as GoalSourceRecord
+    expect(readTruth(title).touches[1]?.actorKind).toBe('opponent')
+    expect(readTruth(title).touches[0]?.actorKind).toBe('player')
+  })
+
+  it('never offers the ball as a man, and marks the other side as the other side', () => {
+    for (let seed = 1; seed <= 120; seed += 1) {
+      for (const challenge of dealRun(seed, seed % 5)) {
+        expect(challenge.pool, challenge.goalId).not.toContain('הכדור')
+        const record = ARCHIVE.find((r) => r.goalId === challenge.goalId) as GoalSourceRecord
+        const opponents = [
+          ...new Set(
+            record.sequence
+              .filter((step) => actorKindOf(record.goalId, step) === 'opponent')
+              .map((step) => step.actorHe),
+          ),
+        ]
+        expect([...challenge.opponents].sort(), challenge.goalId).toEqual(opponents.sort())
+        for (const name of challenge.opponents) expect(challenge.pool).toContain(name)
+        // and every name that is NOT marked is a real member of that season's squad or a
+        // Hapoel actor of the move — never a keeper from the other end
+        for (const name of challenge.pool) {
+          if (challenge.opponents.includes(name)) continue
+          expect(name.startsWith('השוער'), `${challenge.goalId}: ${name}`).toBe(false)
+        }
+      }
+    }
+  })
+
+  it('deals the opponent keeper in the title goal, flagged', () => {
+    const pinned = dealRun(3, 0, 'championship-2010-zahavi-92')[0]
+    expect(pinned?.goalId).toBe('championship-2010-zahavi-92')
+    expect(pinned?.opponents).toEqual(['השוער הרוש'])
+    expect(pinned?.pool).toContain('השוער הרוש')
+  })
+})
+
+describe('השופט — a touch the report names nobody for', () => {
+  const benfica = ARCHIVE.find((r) => r.goalId === 'benfica-2010-zahavi-90-2') as GoalSourceRecord
+  const truth = readTruth(benfica).touches
+  const unnamed = truth[0] as TruthTouch
+
+  it('gives an unnamed actor NO player component — any pick scores the same', () => {
+    const a = pairScore({ ...asUser(unnamed), actorHe: 'ערן זהבי' }, unnamed)
+    const b = pairScore({ ...asUser(unnamed), actorHe: 'מישהו אחר לגמרי' }, unnamed)
+    expect(a).toBeCloseTo(b, 9)
+  })
+
+  it('still weighs a perfect unnamed touch to exactly one hundred', () => {
+    // the 24% has nowhere to go but the rest of the pair, together — the weights still sum
+    expect(pairScore({ ...asUser(unnamed), actorHe: 'ערן זהבי' }, unnamed)).toBeCloseTo(100, 6)
+    const judged = judgeReplay(
+      truth.map((touch) => ({ ...asUser(touch), actorHe: touch.actorKind === 'unnamed' ? 'ערן זהבי' : touch.actorHe })),
+      truth,
+    )
+    expect(judged.metrics.overall).toBe(100)
+    expect(judged.metrics.players).toBe(100)
+    expect(judged.touches[0]?.playerRight).toBeNull()
+    expect(judged.touches[0]?.truthActorKind).toBe('unnamed')
+  })
+
+  it('never lets the unnamed touch lower the players metric', () => {
+    const judged = judgeReplay(
+      truth.map((touch) => ({ ...asUser(touch), actorHe: touch.actorKind === 'unnamed' ? 'לא נכון' : touch.actorHe })),
+      truth,
+    )
+    expect(judged.metrics.players).toBe(100)
+  })
+
+  it('returns a null players metric for a move with nobody named, and still reaches 100', () => {
+    const nobody = truth.map((touch) => ({ ...touch, actorKind: 'unnamed' as const }))
+    const judged = judgeReplay(nobody.map(asUser), nobody)
+    expect(judged.metrics.players).toBeNull()
+    expect(judged.metrics.overall).toBe(100)
+  })
+
+  it('keeps the archive continuous by construction — which is why v6’s continuityQuality was cut', () => {
+    // v6 added `100 − |cont − truthCont|` at 8%. The truth's own continuity is 100 on
+    // every record, so that term was continuity counted twice (replay.md §2 #17).
+    for (const record of ARCHIVE) {
+      expect(continuityOf(readTruth(record).touches.map(asUser)), record.goalId).toBeCloseTo(100, 6)
+    }
+  })
+
+  it('draws the good line and the collect line at the same score', () => {
+    const touch = truthOf(ARCHIVE[0] as GoalSourceRecord)[0] as TruthTouch
+    const line = judgeReplay([asUser(touch)], [touch]).touches[0]
+    expect(line?.grade).toBe('good')
+    expect(GOOD_SCORE).toBe(78)
+  })
+})
+
+/* ---------------------------------------------------------------- the reception hint */
+
+describe('איפה קיבל — one envelope, never a point', () => {
+  it('returns exactly an anchor and two radii, and nothing else', () => {
+    for (let seed = 1; seed <= 25; seed += 1) {
+      for (let goal = 0; goal < 3; goal += 1) {
+        for (const touch of [0, 1, 2, 4]) {
+          const hint = receptionHint(seed, goal, touch)
+          expect(hint, `${seed}/${goal}/${touch}`).not.toBeNull()
+          expect(Object.keys(hint ?? {}).sort()).toEqual(['rx', 'ry', 'x', 'y'])
+          expect(hint?.rx).toBeGreaterThan(0)
+          expect(hint?.ry).toBeGreaterThan(0)
+        }
+      }
+    }
+  })
+
+  it('is the ORIGIN envelope of touch k, clamped to the last touch so it never leaks the count', () => {
+    for (let seed = 1; seed <= 12; seed += 1) {
+      for (let goal = 0; goal < 3; goal += 1) {
+        const truth = (gradeGoal(seed, goal, []) as { truth: TruthTouch[] }).truth
+        for (let k = 0; k < MAX_TOUCHES; k += 1) {
+          const expected = (truth[Math.min(k, truth.length - 1)] as TruthTouch).origin
+          const hint = receptionHint(seed, goal, k) as Envelope
+          for (const key of ['x', 'y', 'rx', 'ry'] as const) {
+            expect(Math.abs(hint[key] - expected[key]), `${seed}/${goal}/${k} ${key}`).toBeLessThanOrEqual(0.0005 + 1e-9)
+          }
+        }
+      }
+    }
+  })
+
+  it('carries no man, no verb and no words', () => {
+    const payload = JSON.stringify(receptionHint(1, 0, 0))
+    for (const secret of ['actorHe', 'action', 'positionHe', 'noteHe', 'step']) {
+      expect(payload, secret).not.toContain(secret)
+    }
+  })
+
+  it('refuses a touch index that is not a real index, and a goal the run does not hold', () => {
+    expect(receptionHint(1, 0, -1)).toBeNull()
+    expect(receptionHint(1, 0, Number.NaN)).toBeNull()
+    expect(receptionHint(1, 0, 1.5)).toBeNull()
+    expect(receptionHint(1, 9, 0)).toBeNull()
+  })
+
+  it('keeps the two word hints as they were', () => {
+    const truth = (gradeGoal(1, 0, []) as { truth: TruthTouch[] }).truth
+    expect(goalHint(1, 0, 'count')).toBe(String(truth.length))
+    expect(goalHint(1, 0, 'start')).toBe(truth[0]?.positionHe)
+  })
+})
+
+/* -------------------------------------------------------------------------- the pin */
+
+describe('/goal?g= — a pinned goal is goal 1 of a normal run', () => {
+  it('deals every playable goal first when pinned, and grades that goal', () => {
+    for (const record of PLAYABLE) {
+      const run = dealRun(5, 1, record.goalId)
+      expect(run[0]?.goalId, record.goalId).toBe(record.goalId)
+      expect(new Set(run.map((goal) => goal.goalId)).size).toBe(3)
+      const truth = (gradeGoal(5, 0, [], 1, record.goalId) as { truth: TruthTouch[] }).truth
+      expect(truth.length, record.goalId).toBe(record.sequence.length)
+    }
+  })
+
+  it('keeps the rest of the run the seeded slice, shortest first', () => {
+    const plain = dealRun(9, 2).map((goal) => goal.goalId)
+    const pin = PLAYABLE.find((record) => !plain.includes(record.goalId))?.goalId as string
+    const pinned = dealRun(9, 2, pin).map((goal) => goal.goalId)
+    expect(pinned[0]).toBe(pin)
+    expect(pinned.slice(1)).toEqual(plain.slice(0, 2))
+    // and a pin already in the slice is moved to the front, not duplicated
+    const inside = dealRun(9, 2, plain[2]).map((goal) => goal.goalId)
+    expect(inside).toEqual([plain[2], plain[0], plain[1]])
+  })
+
+  it('ignores a held, unknown or malformed pin', () => {
+    const plain = JSON.stringify(dealRun(4, 0))
+    for (const pin of ['cupfinal-2010-vermouth-25', 'no-such-goal', '../etc', 'A B', '', null, undefined]) {
+      expect(pinnedGoal(pin as string | null | undefined)).toBeNull()
+      expect(JSON.stringify(dealRun(4, 0, pin as string | null | undefined)), String(pin)).toBe(plain)
+    }
+  })
+
+  it('grades a pinned perfect rebuild at a hundred through the server path', () => {
+    const pin = 'salzburg-2010-bensahar-44'
+    const truth = (gradeGoal(2, 0, [], 0, pin) as { truth: TruthTouch[] }).truth
+    expect(gradeGoal(2, 0, truth.map(asUser), 0, pin)?.metrics.overall).toBe(100)
+    expect(gradeGoal(2, 0, truth.map(asUser), 0, pin)?.goalId).toBe(pin)
+  })
+})
+
+/* ------------------------------------------------------------------------ the draft */
+
+describe('הטיוטה — phase, step-wise undo, and length in metres', () => {
+  const touch: UserTouch = {
+    actorHe: 'גילי ורמוט',
+    action: 'pass',
+    origin: { x: 0.5, y: 0.6 },
+    target: { x: 0.2, y: 0.4 },
+  }
+
+  it('asks for the four decisions in order', () => {
+    expect(phaseOf(EMPTY_DRAFT)).toBe('player')
+    expect(phaseOf({ ...EMPTY_DRAFT, actorHe: 'x' })).toBe('action')
+    expect(phaseOf({ ...EMPTY_DRAFT, actorHe: 'x', action: 'pass' })).toBe('origin')
+    expect(phaseOf({ ...EMPTY_DRAFT, actorHe: 'x', action: 'pass', origin: at(0.1, 0.1) })).toBe('target')
+    // a verb picked before a man still asks for the man
+    expect(phaseOf({ ...EMPTY_DRAFT, action: 'pass' })).toBe('player')
+    expect(stepsDone({ ...EMPTY_DRAFT, action: 'pass' })).toEqual({
+      player: false,
+      action: true,
+      origin: false,
+      target: false,
+    })
+  })
+
+  it('walks back one decision at a time, newest first', () => {
+    let state: BuildState = {
+      touches: [],
+      draft: { actorHe: 'x', action: 'cross', origin: at(0.3, 0.3), target: at(0.4, 0.2) },
+      editing: null,
+    }
+    state = undoStep(state)
+    expect(state.draft.target).toBeNull()
+    expect(state.draft.origin).not.toBeNull()
+    state = undoStep(state)
+    expect(state.draft.origin).toBeNull()
+    expect(state.draft.action).toBe('cross')
+    state = undoStep(state)
+    expect(state.draft.action).toBeNull()
+    expect(state.draft.actorHe).toBe('x')
+    state = undoStep(state)
+    expect(state).toEqual({ touches: [], draft: EMPTY_DRAFT, editing: null })
+    expect(canUndo(state)).toBe(false)
+    expect(undoStep(state)).toEqual(state)
+  })
+
+  it('reopens the last committed touch with its ball un-sent, from an empty draft', () => {
+    const second: UserTouch = { ...touch, actorHe: 'ערן זהבי', action: 'shot', origin: at(0.2, 0.4), target: at(0.5, 0.01) }
+    const start: BuildState = { touches: [touch, second], draft: EMPTY_DRAFT, editing: null }
+    expect(canUndo(start)).toBe(true)
+    const reopened = undoStep(start)
+    expect(reopened.touches).toEqual([touch])
+    expect(reopened.editing).toBeNull()
+    expect(reopened.draft).toEqual({ actorHe: 'ערן זהבי', action: 'shot', origin: at(0.2, 0.4), target: null })
+    expect(phaseOf(reopened.draft)).toBe('target')
+    // and on through the origin, the verb, the man — then into the touch before it
+    const walked = undoStep(undoStep(undoStep(reopened)))
+    expect(walked.draft).toEqual(EMPTY_DRAFT)
+    expect(walked.touches).toEqual([touch])
+    const again = undoStep(walked)
+    expect(again.touches).toEqual([])
+    expect(again.draft.actorHe).toBe(touch.actorHe)
+    // the input is never mutated
+    expect(start.touches).toHaveLength(2)
+  })
+
+  it('walks out of an edit and leaves the edited touch exactly as it was', () => {
+    const editing: BuildState = { touches: [touch], draft: { ...touch }, editing: 0 }
+    let state = editing
+    for (let i = 0; i < 4; i += 1) state = undoStep(state)
+    expect(state.draft).toEqual(EMPTY_DRAFT)
+    expect(state.editing).toBe(0)
+    state = undoStep(state)
+    expect(state.editing).toBeNull()
+    expect(state.touches).toEqual([touch])
+    expect(EMPTY_BUILD.touches).toEqual([])
+  })
+
+  it('measures length in metres, on the board’s two scales', () => {
+    const across = (metres: number) => (metres * UNITS_PER_METRE.x) / PITCH.w
+    const deep = (metres: number) => (metres * UNITS_PER_METRE.y) / PITCH.h
+    expect(lengthMetres(at(0.5, 0.5), at(0.5 + across(12), 0.5))).toBeCloseTo(12, 6)
+    expect(lengthMetres(at(0.5, 0.5), at(0.5, 0.5 + deep(12)))).toBeCloseTo(12, 6)
+    expect(lengthBucket(at(0.5, 0.5), at(0.5 + across(6), 0.5))).toBe('short')
+    expect(lengthBucket(at(0.5, 0.5), at(0.5, 0.5 - deep(18)))).toBe('medium')
+    expect(lengthBucket(at(0.1, 0.9), at(0.9, 0.1))).toBe('long')
+    expect(lengthBucket(at(0.3, 0.3), at(0.3, 0.3))).toBe('short')
+  })
+})
+
+describe('שער 8 — the catalogue holds every new sentence', () => {
+  it('names every step, phase, length and reveal key the screen asks for', () => {
+    for (const key of [
+      'goal.anchorNote',
+      'goal.step.player',
+      'goal.step.action',
+      'goal.step.origin',
+      'goal.step.target',
+      'goal.phase.player',
+      'goal.phase.action',
+      'goal.phase.origin',
+      'goal.phase.target',
+      'goal.phase.rolling',
+      'goal.len.short',
+      'goal.len.medium',
+      'goal.len.long',
+      'goal.hint.reception',
+      'goal.hint.receptionFor',
+      'goal.verdict.yours',
+      'goal.verdict.unnamed',
+      'goal.pool.opponent',
+      'goal.pool.note',
+      'goal.reveal.continue',
+      'goal.goodTouches',
+    ]) {
+      expect(CATALOGUE[key], key).toBeTruthy()
+    }
+    expect(CATALOGUE['goal.verdict.yours']).toContain('{name}')
+    expect(CATALOGUE['goal.verdict.yours']).toContain('{act}')
   })
 })

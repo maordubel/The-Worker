@@ -15,6 +15,7 @@ import {
   type Searchable,
 } from '@/lib/game/roster-search'
 import { cardFigures, gateId, rankOf, standingScore, stillToDo } from '@/lib/profile/standing'
+import { keysToForget } from '@/lib/profile/summary'
 import {
   emptyProfile,
   emptyStat,
@@ -368,5 +369,47 @@ describe('player-facts — the merged research file, and what it is not allowed 
     expect(wiki.wikiHe.table.length).toBeGreaterThan(400)
     expect(wiki.wikiEn.table.length).toBeGreaterThan(40)
     expect(wiki.wfAllPlayers.table.length).toBeGreaterThan(500)
+  })
+})
+
+describe('לשכוח את המכשיר — every worker.* key, whoever wrote it', () => {
+  it('clears the three keys the hand-written list had fallen behind on', () => {
+    const keys = keysToForget([])
+    for (const key of ['worker.kitStudio.v1', 'worker.replayProgress.v1', 'worker.ballot.reasons.v1']) {
+      expect(keys, key).toContain(key)
+    }
+    expect(keys).toContain('the-worker:life')
+  })
+
+  it('sweeps by prefix, so a key added next month is forgotten too — and nothing else is', () => {
+    const keys = keysToForget([
+      'worker.profile.v1',
+      'worker.device.v1',
+      'worker.marks.v1',
+      'worker.intro.v1',
+      'unrelated.key',
+      'the-worker:life:sound',
+    ])
+    expect(keys).toEqual(expect.arrayContaining(['worker.device.v1', 'worker.marks.v1', 'worker.intro.v1']))
+    expect(keys).not.toContain('unrelated.key')
+    expect(keys).not.toContain('the-worker:life:sound')
+  })
+})
+
+describe('שערים שנדלקו — plates, not ids', () => {
+  it('counts a gate once however many topics it was played in', () => {
+    const profile: Profile = {
+      ...emptyProfile(),
+      gates: {
+        '/trivia/europe': { ...emptyStat(), plays: 2 },
+        '/trivia/numbers': { ...emptyStat(), plays: 1 },
+        '/derby/file': { ...emptyStat(), plays: 1 },
+        '/life': { ...emptyStat(), plays: 4 },
+      },
+    }
+    // trivia (one plate) + derby (the black file is gate 11); /life lights no plate
+    expect(gatesTouched(profile)).toBe(2)
+    expect(cardFigures(profile).gates).toBe(2)
+    expect(totalPlays(profile)).toBe(8)
   })
 })

@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -21,7 +21,23 @@ import {
 import { buildBoard } from '@/lib/game/memory'
 import { dealFile, dealPairs, judge, judgePair, cardId } from '@/lib/game/blackfile'
 import { dealQueue } from '@/lib/game/hate'
-import { DUEL_COUNT, duelAt, judgeRun } from '@/lib/game/hate-run'
+import {
+  DUEL_COUNT,
+  QUEUE_LENGTH,
+  REVENGE_WINDOW,
+  choose,
+  damageOf,
+  duelOf,
+  judgeWall,
+  over,
+  readWallCode,
+  recordKind,
+  revenge,
+  revengeChoices,
+  startWall,
+  streakOf,
+  wallCode,
+} from '@/lib/game/hate-run'
 import {
   COLLARS,
   COLOUR_VAR,
@@ -119,17 +135,69 @@ describe('trivia — the client never receives the answer', () => {
     expect(question?.options).toEqual(expect.arrayContaining(verdict?.correctAnswers ?? []))
   })
 
-  it('marks exactly one option correct', () => {
-    const question = deal(5, 2)
-    if (!question) return
-    const correct = question.options.filter(
-      (option) => grade(5, 2, option)?.correct === true,
-    )
-    expect(correct).toHaveLength(1)
+  /**
+   * **זו הייתה בדיקה על seed אחד, והיא הפסיקה להיות נכונה ברגע שהדיל זז** (21.9.2026).
+   *
+   * היא שאלה כמה אפשרויות מקבלות `correct === true` ודרשה אחת. אצל שאלת `multi`
+   * (בוחרים שלוש) אף אפשרות בודדת אינה `correct` — היא `hits: 1` — ולכן התשובה היא
+   * אפס, וזה לא באג: זו שאלה שלא מתאימה לצורה. `(5, 2)` פשוט חילק שאלת `single` עד
+   * שנוספה שורת כדורסל אחת לארכיון והדיל זז.
+   *
+   * אותה מחלקה בדיוק כמו השכנה שלה מ-16.9.2026 (כלל 65): **המספר נקרא מהצורה ולא
+   * מוקלד**, והבדיקה רצה על עשרים זרעים במקום על אחד. הגנה רחבה יותר, לא צרה יותר.
+   */
+  it('marks exactly as many options correct as the question asks for', () => {
+    let seen = 0
+    for (let seed = 1; seed <= 20; seed += 1) {
+      for (let index = 0; index < ROUND_LENGTH; index += 1) {
+        const question = deal(seed, index)
+        if (!question) continue
+        seen += 1
+        const hit = question.options.filter((option) => {
+          const verdict = grade(seed, index, option)
+          return question.kind === 'multi' ? (verdict?.hits ?? 0) > 0 : verdict?.correct === true
+        })
+        expect(hit, question.prompt).toHaveLength(question.pickCount)
+      }
+    }
+    expect(seen, 'no question was dealt at all').toBeGreaterThan(0)
   })
 
   it('rejects a fabricated answer', () => {
     expect(grade(1, 0, 'לא-קיים')?.correct).toBe(false)
+  })
+  /**
+   * **20% מהשאלות נשאו את התשובה בתוך ה-id** (21.9.2026). המפתח הטבעי נשלח לדפדפן:
+   * `crest:2023`, `moment:מילאן-2002`, `trophy:גביע-הטוטו:2001/02`, ו-`number-era:` מנה את
+   * שלושת השמות הנכונים. הבדיקה הקודמת חיפשה רק שדה בשם `"correct"`. זו סורקת 400 זרעים
+   * על כל נושא שממלא ריצה, ובודקת את הדבר עצמו: אף תשובה נכונה אינה מופיעה ב-id, וה-id
+   * הוא hash ולא מפתח.
+   */
+  it('never puts a right answer inside a dealt id — 400 seeds, every topic that fills a round', () => {
+    const leaks: string[] = []
+    let dealt = 0
+    for (const topic of ['general', 'europe', 'numbers'] as const) {
+      for (let seed = 1; seed <= 400; seed += 1) {
+        for (let index = 0; index < ROUND_LENGTH; index += 1) {
+          const question = deal(seed, index, topic)
+          if (!question) continue
+          dealt += 1
+          expect(question.id).toMatch(/^q_[0-9a-f]{12}$/)
+          const verdict = grade(seed, index, '__probe__', topic)
+          // A bare number ("7", "2001") can occur inside ANY hex string by chance, so it is
+          // covered by the shape check above: `q_` and twelve hex digits cannot spell a
+          // name, a season or a club. Everything else is checked literally.
+          for (const answer of verdict?.correctAnswers ?? []) {
+            if (/^[0-9a-f]+$/.test(answer)) continue
+            if (question.id.includes(answer)) leaks.push(`${topic}/${seed}/${index}: ${answer}`)
+          }
+          const natural = auditRound(seed, topic)[index]?.id ?? ''
+          if (natural.length > 0 && question.id === natural) leaks.push(`${topic}/${seed}/${index}: raw key`)
+        }
+      }
+    }
+    expect(dealt).toBeGreaterThan(400 * ROUND_LENGTH)
+    expect(leaks, leaks.slice(0, 10).join(' · ')).toEqual([])
   })
 })
 
@@ -499,10 +567,11 @@ describe('lineup', () => {
   })
 
   it('never offers a basketball name on a football pitch', () => {
-    expect(freeBuildBank()).not.toContain('מאור הראל')
-    expect(freeBuildBank()).not.toContain('אורי שלף')
-    // Small on purpose: only players a source actually names reach the bank.
-    expect(freeBuildBank().length).toBeGreaterThanOrEqual(4)
+    const names = freeBuildBank().map((locker) => locker.nameHe)
+    expect(names).not.toContain('מאור הראל')
+    expect(names).not.toContain('אורי שלף')
+    // only players a source actually names reach the bank
+    expect(names.length).toBeGreaterThanOrEqual(4)
   })
 
   it('never invents an XI — every record traces to a source', () => {
@@ -528,7 +597,7 @@ describe('רוחב מאגר השאלות', () => {
       const question = deal(seed, index)
       if (!question) continue
       ids.add(question.id)
-      templates.add(question.id.split(':')[0] as string)
+      templates.add(question.template)
     }
   }
 
@@ -563,7 +632,7 @@ describe('רוחב מאגר השאלות', () => {
     for (let seed = 1; seed < 120; seed += 1) {
       for (let index = 0; index < ROUND_LENGTH; index += 1) {
         const question = deal(seed, index)
-        if (!question?.id.startsWith('enemy-fact')) continue
+        if (question?.template !== 'enemy-fact') continue
         for (const option of question.options) {
           expect(basketballOnly.includes(option) && !football.has(option), option).toBe(false)
         }
@@ -576,7 +645,8 @@ describe('רוחב מאגר השאלות', () => {
     for (let seed = 1; seed < 200 && seen < 8; seed += 1) {
       for (let index = 0; index < ROUND_LENGTH; index += 1) {
         const question = deal(seed, index)
-        if (!question?.id.startsWith('goal-')) continue
+        // `goal-year` names the goal in its prompt and asks WHEN — it carries no report
+        if (!question?.template.startsWith('goal-') || question.template === 'goal-year') continue
         seen += 1
         // the clue is the reporter's own sentence; the ANSWER never travels with it
         expect(question.quoteHe?.length ?? 0).toBeGreaterThan(20)
@@ -758,34 +828,36 @@ describe('שחזור השער — gate 8', () => {
 })
 
 describe('the verified Chelsea XI', () => {
+  // Gate 3 V3 (21.9.2026): four bands, graded by line — see tests/lineup.test.ts for the rest.
+  let seed = 1
+  while (seed < 400 && dealChallenge(seed)?.matchId !== 'm_67a2f41af253') seed += 1
+
   it('turns the lineup game on', () => {
     expect(hasVerifiedLineup()).toBe(true)
-    const challenge = dealChallenge(2)
-    expect(challenge?.formation.slots).toHaveLength(11)
+    const challenge = dealChallenge(seed)
+    expect(challenge?.matchId).toBe('m_67a2f41af253')
     expect(challenge?.bank.length).toBeGreaterThanOrEqual(11)
   })
 
   it('grades a correct XI as eleven exact', () => {
-    const solution = gradeLineup(2, {})?.solution ?? []
+    const solution = gradeLineup(seed, [])?.solution ?? []
     expect(solution).toHaveLength(11)
-    const picks = Object.fromEntries(solution.map((row) => [row.slotId, row.name]))
-    expect(gradeLineup(2, picks)?.exact).toBe(11)
+    const board = solution.map((man, order) => ({ playerId: man.playerId, line: man.line, order }))
+    expect(gradeLineup(seed, board)?.exact).toBe(11)
   })
 
-  it('marks a bench player as not in the XI', () => {
-    const verdict = gradeLineup(2, { GK: 'ניר רחמין' })
-    expect(verdict?.slots.find((slot) => slot.slotId === 'GK')?.status).toBe('not_in_xi')
+  it('marks a squad man as not in the XI', () => {
+    const rahmin = (dealChallenge(seed)?.bank ?? []).find((locker) => locker.nameHe === 'ניר רחמין')
+    expect(rahmin).toBeTruthy()
+    const verdict = gradeLineup(seed, [{ playerId: rahmin!.id, line: 'GK', order: 0 }])
+    expect(verdict?.rows[0]?.status).toBe('not_in_xi')
   })
 
   it('marks a keeper played outfield as the wrong line', () => {
-    // Seed-agnostic: the archive now holds several XIs, so the test finds a round that
-    // actually contains this keeper rather than assuming which seed deals which match.
-    let seed = 1
-    while (seed < 200 && !(dealChallenge(seed)?.bank ?? []).includes('שביט אלימלך')) seed += 1
-    expect(seed, 'no dealt XI contains the keeper').toBeLessThan(200)
-
-    const verdict = gradeLineup(seed, { F1: 'שביט אלימלך' })
-    expect(verdict?.slots.find((slot) => slot.slotId === 'F1')?.status).toBe('wrong_slot')
+    const keeper = (dealChallenge(seed)?.bank ?? []).find((locker) => locker.nameHe === 'שביט אלימלך')
+    expect(keeper, 'no dealt XI contains the keeper').toBeTruthy()
+    const verdict = gradeLineup(seed, [{ playerId: keeper!.id, line: 'F', order: 0 }])
+    expect(verdict?.rows[0]?.status).toBe('wrong_line')
   })
 })
 
@@ -912,11 +984,14 @@ describe('the research-master corpus', () => {
   it('never asks about a shirt two players wore in one season', () => {
     // 1984/85 had both שבתאי לוי and דב רמלר in 11 — a real mid-season fact and a
     // broken question.
+    // The dealt id is opaque (rule 4), so the natural key is read from the server-side
+    // audit, which is what the question was built from.
     const asked = new Set<string>()
     for (let seed = 1; seed < 200; seed += 1) {
+      const audit = auditRound(seed)
       for (let index = 0; index < ROUND_LENGTH; index += 1) {
         const question = deal(seed, index)
-        if (question?.template === 'shirt-number') asked.add(question.id)
+        if (question?.template === 'shirt-number') asked.add(audit[index]?.id ?? '')
       }
     }
     expect(asked.has('shirt:11:1984/85')).toBe(false)
@@ -945,10 +1020,11 @@ describe('the research-master corpus', () => {
     const disputed = archive.matches.filter((row) => row.attendanceDisputed)
     expect(disputed.length).toBeGreaterThan(0)
     for (let seed = 1; seed < 150; seed += 1) {
+      const audit = auditRound(seed)
       for (let index = 0; index < ROUND_LENGTH; index += 1) {
         const question = deal(seed, index)
         if (question?.template !== 'attendance') continue
-        expect(question.id).not.toContain('שמינית גמר משחק 1')
+        expect(audit[index]?.id).not.toContain('שמינית גמר משחק 1')
       }
     }
   })
@@ -957,10 +1033,11 @@ describe('the research-master corpus', () => {
     expect(hasVerifiedLineup()).toBe(true)
     const ids = new Set<string>()
     for (let seed = 1; seed < 200; seed += 1) ids.add(dealChallenge(seed)?.matchId ?? '')
-    expect(ids).toContain('2001-02-uefa-qf-milan')
-    expect(ids).toContain('2010-11-ucl-po-salzburg-2')
+    // The deal speaks canonical match ids since 21.9.2026 (Gate 3 V3).
+    expect(ids).toContain('m_b88bc98d09db') // Milan, 14.3.2002
+    expect(ids).toContain('m_7b61fac81ad6') // Salzburg, leg 2
     // The source stamps VERIFY on one slot of the Stamford Bridge eleven.
-    expect(ids).not.toContain('2001-02-uefa-r2-chelsea-away')
+    expect(ids).not.toContain('m_73bc1426d0e3')
   })
 
   it('separates songs by type and keeps unverified terrace titles below the floor', () => {
@@ -1072,132 +1149,196 @@ describe('התיק השחור — gate 11', () => {
   })
 })
 
-describe('משחק השנאה — gate 11, מלך הגבעה', () => {
-  it('deals eleven names — one to open the hill and ten challengers', () => {
+describe('הקיר השחור — gate 11 v3', () => {
+  const rank = new Map(archive.enemies.map((row) => [row.slug, row.terraceRank]))
+
+  it('deals ten names — one on the wall, eight challengers and a spare', () => {
     const { enemies, order } = dealQueue(11)
-    expect(order).toHaveLength(DUEL_COUNT + 1)
-    expect(enemies).toHaveLength(DUEL_COUNT + 1)
-    expect(new Set(order).size).toBe(DUEL_COUNT + 1)
+    expect(DUEL_COUNT).toBe(8)
+    expect(order).toHaveLength(QUEUE_LENGTH)
+    expect(QUEUE_LENGTH).toBe(DUEL_COUNT + 2)
+    expect(enemies).toHaveLength(QUEUE_LENGTH)
+    expect(new Set(order).size).toBe(QUEUE_LENGTH)
   })
 
-  it('alternates the queue between the top half of the ranking and the bottom', () => {
-    const midpoint = Math.ceil(archive.enemies.length / 2)
-    const topHalf = new Set(
-      [...archive.enemies]
-        .sort((a, b) => a.terraceRank - b.terraceRank)
-        .slice(0, midpoint)
-        .map((row) => row.slug),
-    )
-    for (const seed of [1, 7, 11, 42, 99]) {
-      const { enemies, order } = dealQueue(seed)
-      const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
+  it('deals rounds 4 and 7 from the top twelve of Maor\'s ranking, and flags them', () => {
+    for (let seed = 1; seed <= 200; seed += 1) {
+      const { order, noMercy } = dealQueue(seed)
+      expect(noMercy, `seed ${seed}`).toEqual([order[4], order[7]])
+      for (const slug of noMercy) expect(rank.get(slug), `seed ${seed} ${slug}`).toBeLessThanOrEqual(12)
+      // and nobody from the top twelve takes an ordinary place
       order.forEach((slug, index) => {
-        expect(bySlug.get(slug), `seed ${seed}: ${slug}`).toBeDefined()
-        expect(topHalf.has(slug), `seed ${seed} position ${index}: ${slug}`).toBe(index % 2 === 0)
+        if (index !== 4 && index !== 7) expect(rank.get(slug), `seed ${seed} #${index}`).toBeGreaterThan(12)
       })
     }
   })
 
-  it('draws a different eleven for different seeds — fifty-six names is not one run', () => {
+  it('alternates the ordinary places between the upper and the lower half of the rest', () => {
+    const rest = [...archive.enemies].sort((a, b) => a.terraceRank - b.terraceRank).slice(12)
+    const upper = new Set(rest.slice(0, Math.ceil(rest.length / 2)).map((row) => row.slug))
+    for (const seed of [1, 7, 11, 42, 99]) {
+      const ordinary = dealQueue(seed).order.filter((_, index) => index !== 4 && index !== 7)
+      ordinary.forEach((slug, index) => expect(upper.has(slug), `seed ${seed} #${index} ${slug}`).toBe(index % 2 === 0))
+    }
+  })
+
+  it('draws a different wall for different seeds — fifty-six names is not one run', () => {
     const runs = [1, 2, 3, 4, 5].map((seed) => [...dealQueue(seed).order].sort().join(','))
     expect(new Set(runs).size).toBeGreaterThan(3)
   })
 
-  it('is a hill: the winner of a duel is the holder of the next one', () => {
-    const { order } = dealQueue(11)
-    const first = duelAt(order, [], 0)
-    expect(first).not.toBeNull()
-    expect(first?.holderSlug).toBe(order[0])
-    expect(first?.challengerSlug).toBe(order[1])
-    // the player keeps the challenger, so HE holds duel two
-    const kept = order[1] as string
-    const second = duelAt(order, [kept], 1)
-    expect(second?.holderSlug).toBe(kept)
-    expect(second?.challengerSlug).toBe(order[2])
-    // and if the player keeps the holder instead, the holder carries on
-    const stayed = order[0] as string
-    expect(duelAt(order, [stayed], 1)?.holderSlug).toBe(stayed)
+  it('is a wall: the one you keep stays up, the other is torn down, eight rounds and done', () => {
+    const { order, noMercy } = dealQueue(11)
+    let wall = startWall(order, noMercy)
+    expect(duelOf(wall)).toMatchObject({ round: 1, holder: order[0], challenger: order[1] })
+    wall = choose(wall, order[1] as string)
+    expect(duelOf(wall)).toMatchObject({ round: 2, holder: order[1], challenger: order[2] })
+    expect(wall.out).toEqual([order[0]])
+    for (let index = 1; index < DUEL_COUNT; index += 1) wall = choose(wall, duelOf(wall)?.holder as string)
+    expect(over(wall)).toBe(true)
+    expect(duelOf(wall)).toBeNull()
+    expect(wall.picks).toHaveLength(DUEL_COUNT)
+    // the challenger kept in round 1 held every round after it: all eight are his
+    expect(streakOf(wall)).toBe(DUEL_COUNT)
+    expect(damageOf(streakOf(wall))).toBe(5)
+    // a pick that is neither name on the wall changes nothing
+    expect(choose(startWall(order), 'nobody')).toEqual(startWall(order))
   })
 
-  it('runs exactly ten duels and then stops', () => {
-    const { order } = dealQueue(11)
-    const picks: string[] = []
+  it('flags the no-mercy round and puts its pick in the DNA', () => {
+    const { enemies, order, noMercy } = dealQueue(11)
+    let wall = startWall(order, noMercy)
     for (let index = 0; index < DUEL_COUNT; index += 1) {
-      const duel = duelAt(order, picks, index)
-      expect(duel, `duel ${index}`).not.toBeNull()
-      picks.push(duel?.challengerSlug as string)
+      const duel = duelOf(wall)!
+      expect(duel.noMercy, `round ${duel.round}`).toBe(duel.round === 4 || duel.round === 7)
+      wall = choose(wall, duel.challenger)
     }
-    expect(duelAt(order, picks, DUEL_COUNT)).toBeNull()
+    const verdict = judgeWall(enemies, wall, 11)!
+    expect(verdict.noMercyPick?.winner.slug).toBe(order[4])
+  })
+
+  it('allows one revenge, from the last six, and the displaced challenger comes straight back', () => {
+    const { order, noMercy } = dealQueue(21)
+    let wall = startWall(order, noMercy)
+    for (let index = 0; index < 3; index += 1) wall = choose(wall, duelOf(wall)!.holder)
+    const torn = wall.out[wall.out.length - 1] as string
+    const displaced = duelOf(wall)!.challenger
+    expect(revengeChoices(wall)).toContain(torn)
+    wall = revenge(wall, torn)
+    expect(duelOf(wall)?.challenger).toBe(torn)
+    expect(wall.revengeUsed).toBe(true)
+    // once only
+    expect(revengeChoices(wall)).toEqual([])
+    expect(revenge(wall, wall.out[0] as string)).toEqual(wall)
+    // the one he displaced is next, not lost
+    wall = choose(wall, duelOf(wall)!.holder)
+    expect(duelOf(wall)?.challenger).toBe(displaced)
+    expect(wall.picks.find((pick) => pick.revenge)?.loser).toBe(torn)
+  })
+
+  it('never reaches back further than six', () => {
+    const { order, noMercy } = dealQueue(5)
+    let wall = startWall(order, noMercy)
+    for (let index = 0; index < 7; index += 1) wall = choose(wall, duelOf(wall)!.holder)
+    expect(revengeChoices(wall)).toHaveLength(REVENGE_WINDOW)
+    expect(revengeChoices(wall)).not.toContain(wall.out[0])
+  })
+
+  it('prints the same DNA for the same wall and the same picks — and a different one otherwise', () => {
+    const play = (seed: number, keepHolder: boolean) => {
+      const { enemies, order, noMercy } = dealQueue(seed)
+      let wall = startWall(order, noMercy)
+      for (let index = 0; index < DUEL_COUNT; index += 1) {
+        const duel = duelOf(wall)!
+        wall = choose(wall, keepHolder ? duel.holder : duel.challenger)
+      }
+      return judgeWall(enemies, wall, seed)!
+    }
+    expect(play(33, true).code).toBe(play(33, true).code)
+    expect(play(33, true).code).not.toBe(play(33, false).code)
+    expect(play(33, true).code).toMatch(/^WALL-[0-9A-Z]+-[0-9A-Z]{5}$/)
+    // the address half plays the wall back
+    expect(readWallCode(play(33, true).code)).toEqual({ seed: 33, cursor: 0 })
+    expect(readWallCode(wallCode(4242, 3, [], null))).toEqual({ seed: 4242, cursor: 3 })
+    expect(readWallCode('wall-abc')).toEqual({ seed: parseInt('ABC', 36), cursor: 0 })
+    expect(readWallCode('not a code')).toBeNull()
+  })
+
+  it('names the terrace\'s pick as one line — the highest-ranked name the wall showed', () => {
+    const { enemies, order, noMercy } = dealQueue(8)
+    let wall = startWall(order, noMercy)
+    for (let index = 0; index < DUEL_COUNT; index += 1) wall = choose(wall, duelOf(wall)!.holder)
+    const verdict = judgeWall(enemies, wall, 8)!
+    const shown = wall.picks.flatMap((pick) => [pick.winner, pick.loser])
+    const best = Math.min(...shown.map((slug) => rank.get(slug) ?? 99))
+    expect(verdict.terracePick.terraceRank).toBe(best)
+    expect(verdict.firstOut?.slug).toBe(wall.picks[0]?.loser)
   })
 
   it("carries Maor's ranking verbatim, 1..56, across both sports", () => {
     const ranks = archive.enemies.map((row) => row.terraceRank).sort((a, b) => a - b)
     expect(ranks).toEqual(Array.from({ length: archive.enemies.length }, (_, i) => i + 1))
     const byRank = new Map(archive.enemies.map((row) => [row.terraceRank, row.nameHe]))
-    // his own order, spot-checked at the head, the middle and the tail
     expect(byRank.get(1)).toBe('שמעון מזרחי')
     expect(byRank.get(2)).toBe('ערן זהבי')
     expect(byRank.get(7)).toBe('אלי טביב')
     expect(byRank.get(31)).toBe('דייוויד בלאט')
     expect(byRank.get(50)).toBe('לירן ליאני')
-    // and the wall between the sports is a FIELD, not an omission
     expect(archive.enemies.find((row) => row.slug === 'blatt')?.sport).toBe('basketball')
     expect(archive.enemies.some((row) => row.sport === 'football')).toBe(true)
   })
 
-  it('gives every enemy a charge, a fact and a source', () => {
+  it('gives every enemy a charge and a source', () => {
     for (const row of archive.enemies) {
       expect(row.chargeHe.length, row.slug).toBeGreaterThan(20)
-      // detailHe may be empty: where research could not source a claim the plate prints
-      // the charge alone rather than inventing a record (rule 11)
       if (row.detailHe !== '') expect(row.detailHe.length, row.slug).toBeGreaterThan(60)
-      expect(row.keyFactHe.length, row.slug).toBeGreaterThan(2)
       expect(row.sourceTitle.length, row.slug).toBeGreaterThan(2)
       expect(row.terraceRank, row.slug).toBeGreaterThan(0)
     }
   })
 
-  it('scores a run that always follows the terrace at 100%, and one that never does at 0%', () => {
-    const { enemies, order } = dealQueue(11)
-    const bySlug = new Map(enemies.map((enemy) => [enemy.slug, enemy]))
-    const withTerrace: string[] = []
-    const against: string[] = []
-    for (let index = 0; index < DUEL_COUNT; index += 1) {
-      const hated = duelAt(order, withTerrace, index)
-      const loved = duelAt(order, against, index)
-      if (!hated || !loved) throw new Error('run too short')
-      const rank = (slug: string) => bySlug.get(slug)?.terraceRank ?? 999
-      withTerrace.push(
-        rank(hated.holderSlug) < rank(hated.challengerSlug)
-          ? hated.holderSlug
-          : hated.challengerSlug,
-      )
-      against.push(
-        rank(loved.holderSlug) < rank(loved.challengerSlug)
-          ? loved.challengerSlug
-          : loved.holderSlug,
-      )
+  /**
+   * כלל 18, כבדיקות. שלושת הכללים של המקורות בשער 11:
+   *  1. שורה בלי ציטוט אמיתי מדפיסה רק את כתב האישום ואת התקופה — `williams` ("לא אומת
+   *     במקור זמין") ו-`vujcic` ("Maccabipedia — לא נטען") הדפיסו שורה עובדתית.
+   *  2. כל מספר בכתב אישום מופיע גם ב-detailHe של אותה שורה, או שהשורה ממקור של מאור.
+   *  3. הידע של מאור מסומן כשלו.
+   */
+  it('rule 18 §1 — a row with no real citation is dealt with no fact on it', () => {
+    const uncited = archive.enemies.filter((row) => recordKind(row.sourceTitle) === 'none').map((row) => row.slug)
+    expect(uncited).toEqual(expect.arrayContaining(['williams', 'vujcic']))
+    for (let seed = 1; seed <= 200; seed += 1) {
+      for (const enemy of dealQueue(seed).enemies) {
+        if (enemy.record !== 'none') continue
+        expect(enemy.keyFactHe, enemy.slug).toBe('')
+        expect(enemy.detailHe, enemy.slug).toBe('')
+        expect(enemy.chargeHe.length).toBeGreaterThan(0)
+      }
     }
-    expect(judgeRun(enemies, order, withTerrace)?.agreement).toBe(100)
-    expect(judgeRun(enemies, order, against)?.agreement).toBe(0)
   })
 
-  it('ranks the standings by how long each enemy held the hill', () => {
-    const { enemies, order } = dealQueue(11)
-    const opener = order[0] as string
-    // keep the opening holder every single time: he holds all ten
-    const picks = Array.from({ length: DUEL_COUNT }, () => opener)
-    const verdict = judgeRun(enemies, order, picks)
-    expect(verdict?.champion.slug).toBe(opener)
-    expect(verdict?.streak).toBe(DUEL_COUNT)
-    expect(verdict?.standings[0]?.enemy.slug).toBe(opener)
-    expect(verdict?.standings[0]?.held).toBe(DUEL_COUNT)
-    expect(verdict?.standings).toHaveLength(1)
+  it('rule 18 §2 — every number in a charge is in the row\'s own record, or the row is Maor\'s', () => {
+    for (const row of archive.enemies) {
+      if (recordKind(row.sourceTitle) === 'maor') continue
+      for (const number of row.chargeHe.match(/\d+/g) ?? []) {
+        expect(row.detailHe, `${row.slug}: "${number}" in the charge`).toContain(number)
+      }
+    }
   })
 
-  it('never hands the run a name the roster does not carry', () => {
-    expect(judgeRun([], ['nobody'], ['nobody'])).toBeNull()
-    expect(judgeRun([], [], [])).toBeNull()
+  it('rule 18 §3 — Maor\'s knowledge is labelled as his', () => {
+    expect(recordKind('מאור הראל — ידע אישי, 1.9.2026')).toBe('maor')
+    expect(archive.enemies.find((row) => row.slug === 'gola')?.sourceTitle).toMatch(/^מאור הראל/)
+    const wall = readFileSync(join(process.cwd(), 'app/derby/HateWall.tsx'), 'utf8')
+    expect(wall).toContain("t('hate.record.maor'")
+    expect(wall).toContain("t('hate.wall.credit'")
+  })
+
+  it('drops the king vocabulary and the painting on the share card (§21)', () => {
+    const wall = readFileSync(join(process.cwd(), 'app/derby/HateWall.tsx'), 'utf8')
+    expect(wall).not.toMatch(/KING OF THE HILL|hate\.champion|hate\.standing/)
+    expect(wall).not.toContain('artFor(')
+    expect(wall).toContain("withRound('/derby', seed, cursor)")
   })
 })
 

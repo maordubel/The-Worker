@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 import he from '@/messages/he.json'
 import heLife from '@/messages/he.life.json'
-import { MESSAGES } from '@/lib/i18n'
+import { CATALOGUE_FILES, MESSAGES } from '@/lib/i18n'
 
 /**
  * מפתחות התרגום — every key a screen asks for must exist, and the catalogue must not rot.
@@ -71,7 +71,31 @@ describe('כל מפתח שנקרא — exists', () => {
     const strayInLife = Object.keys(heLife).filter((key) => !key.startsWith('life.'))
     expect(strayInLife, `non-life keys in messages/he.life.json:\n${strayInLife.join('\n')}`).toEqual([])
 
-    expect(Object.keys(catalogue).length).toBe(Object.keys(he).length + Object.keys(heLife).length)
+    const files = Object.entries(CATALOGUE_FILES) as [string, Record<string, string>][]
+    const total = files.reduce((sum, [, file]) => sum + Object.keys(file).length, 0)
+    expect(Object.keys(catalogue).length).toBe(total)
+  })
+
+  /**
+   * שבעת קבצי השערים (21.9.2026) — אותו חוזה, על כל זוג: שום מפתח בשני קבצים, ושום
+   * `life.*` מחוץ לקובץ של LIFE. הספירה למעלה כבר נופלת על כפילות; הבדיקה הזאת אומרת
+   * **איזה** מפתח ובאילו שני קבצים, כדי שהתיקון יהיה שורה ולא חיפוש.
+   */
+  it('keeps every gate cluster file disjoint from every other catalogue file', () => {
+    const files = Object.entries(CATALOGUE_FILES) as [string, Record<string, string>][]
+    const clashes: string[] = []
+    for (let i = 0; i < files.length; i++) {
+      for (let j = i + 1; j < files.length; j++) {
+        const [a, fa] = files[i]!
+        const [b, fb] = files[j]!
+        for (const key of Object.keys(fa)) if (key in fb) clashes.push(`${key}: ${a} + ${b}`)
+      }
+    }
+    expect(clashes, clashes.join('\n')).toEqual([])
+    const lifeOutside = files
+      .filter(([name]) => name !== 'heLife')
+      .flatMap(([name, file]) => Object.keys(file).filter((key) => key.startsWith('life.')).map((key) => `${name}: ${key}`))
+    expect(lifeOutside, lifeOutside.join('\n')).toEqual([])
   })
 
   it('has no empty message', () => {

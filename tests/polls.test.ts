@@ -262,11 +262,12 @@ describe('לוח הספירה — כלל המאה, על נתוני בדיקה ב
   })
 
   it('lists every position even when some of the eight never received a vote', () => {
-    const tally: Tally = { total: 4, rows: [{ pick: catalogue['pos.gk']!, votes: 4 }] }
-    const rows = positionBars(tally, POSITIONS, (he) => catalogue[he] ?? he)
+    // keyed by code since 21.9.2026 — a ballot stores `GK`, the board prints the label
+    const tally: Tally = { total: 4, rows: [{ pick: 'GK', votes: 4 }] }
+    const rows = positionBars(tally, POSITIONS)
     expect(rows).toHaveLength(POSITIONS.length)
-    expect(rows.find((row) => row.pick === catalogue['pos.cb'])?.votes).toBe(0)
-    expect(rows.find((row) => row.pick === catalogue['pos.gk'])?.votes).toBe(4)
+    expect(rows.find((row) => row.pick === 'CB')?.votes).toBe(0)
+    expect(rows.find((row) => row.pick === 'GK')?.votes).toBe(4)
   })
 })
 
@@ -381,9 +382,11 @@ describe('תעודת אוהד — the supporter ID', () => {
     expect(source).toContain("from '@/lib/game/member'")
     expect(source).not.toContain('localStorage')
     const supporter = readFileSync(join(ROOT, 'lib/polls/supporter.ts'), 'utf8')
-    // the derivation itself must stay pure — no storage, no browser
+    // the derivation itself must stay pure — no storage, no browser. It may name the
+    // book's record TYPE (the seal it derives), never import a function that touches it.
     expect(supporter).not.toContain('localStorage')
-    expect(supporter).not.toContain("from '@/lib/game/member'")
+    expect(supporter).not.toMatch(/import \{[^}]*\} from '@\/lib\/game\/member'/)
+    expect(supporter).toContain("import type { SupporterRecord } from '@/lib/game/member'")
   })
 
   it('prefers the ballot answer over the book, so the card describes one afternoon', () => {

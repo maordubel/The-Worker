@@ -151,7 +151,15 @@ describe('כל עבודה בחדר שלה — the audit that would have caught t
     for (const gig of GIGS) {
       const room = SCENE[gig.where as keyof typeof SCENE]
       expect(room, `${gig.id} names a room that does not exist: ${gig.where}`).toBeDefined()
-      const here = room.hotspots.some((spot) => spot.act.startsWith(`gig:${gig.id}:`) || spot.act.includes(gig.id))
+      // a job asked from inside another conversation (`spot: false` — the shop's order, asked
+      // at the counter) is offered by a hotspot in its room whose conversation jumps to it
+      const asked = (act: string) =>
+        (DIALOGUE[act]?.branches ?? []).some((branch) =>
+          (branch.choices ?? []).some((choice) => choice.then.some((e) => e.e === 'goto' && e.node.startsWith(`gig-${gig.id}-`))),
+        )
+      const here = room.hotspots.some(
+        (spot) => spot.act.startsWith(`gig:${gig.id}:`) || spot.act.includes(gig.id) || (gig.spot === false && asked(spot.act)),
+      )
       expect(here, `${gig.id} is offered nowhere in ${gig.where}`).toBe(true)
     }
   })

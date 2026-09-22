@@ -81,10 +81,10 @@ describe('כל מה שמחולק — ids are unique', () => {
     for (const seed of SEEDS) {
       const challenge = dealChallenge(seed)
       if (!challenge) continue
-      unique(challenge.formation.slots.map((slot) => slot.slotId), `lineup slots seed ${seed}`)
-      // The bank is the list of names to place. The same man twice means one copy can
-      // never be right, and the two are indistinguishable on screen.
-      unique(challenge.bank, `lineup bank seed ${seed}`)
+      // The bank is the list of men to place. The same man twice means one copy can
+      // never be right, and the two are indistinguishable on screen — by id AND by name.
+      unique(challenge.bank.map((locker) => locker.id), `lineup bank ids seed ${seed}`)
+      unique(challenge.bank.map((locker) => locker.nameHe), `lineup bank names seed ${seed}`)
     }
   })
 

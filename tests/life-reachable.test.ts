@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { ACTIVITIES, activityCeiling, activityChapters } from '@/lib/life/activities'
 import { CHAPTERS } from '@/lib/life/content/chapters'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { goalA4, objectiveA4, SHIRT_PRICE } from '@/lib/life/content/chapterStageA'
@@ -206,6 +207,14 @@ const sweep = (): { rows: Map<string, Ceiling>; asks: Ask[] } => {
         const a = action as { a?: string; events?: readonly unknown[] }
         if (a.a === 'events' && Array.isArray(a.events)) addRawEvents(running, a.events)
       }
+    }
+    // the gate games inside the life pay at runtime; the table says how much at most (budget-audit's fourth door)
+    bump(running, 'agorot', activityCeiling(chapter))
+    for (const act of ACTIVITIES) {
+      if (!activityChapters(act).includes(chapter)) continue
+      if (act.rel) bump(running, `rel.${act.rel.who}.${act.rel.axis}`, act.rel.delta)
+      if (act.redHeart) bump(running, `redHeart.${act.redHeart.key}`, act.redHeart.delta)
+      if (act.personality) bump(running, `personality.${act.personality.key}`, act.personality.delta)
     }
     for (const id of conversationsIn(chapter)) {
       for (const effect of effectsOf(id)) addEffect(running, effect)

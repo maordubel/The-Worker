@@ -65,7 +65,7 @@ const LAMP_FILES = ['LampGrid.tsx', 'TabBar.tsx', 'Floodlights.tsx']
  * and a test that still covers every other file in the codebase.
  */
 const ARCADE_FILES = ['ControlDeck.tsx']
-const I18N_LEGACY_FILES = ['KitDesigner.tsx', 'KitDesignerV3.tsx', 'KitGameRun.tsx', 'KitGameRunV3.tsx']
+const I18N_LEGACY_FILES = ['KitDesigner.tsx']
 
 /**
  * המגרש — the third named exemption, and the only one that replaces the heuristic with a
@@ -752,5 +752,21 @@ describe('סורק הפיקסלים — the sweep and the module agree on what y
     const sweep = readFileSync(join(ROOT, 'scripts/brand/qa-sweep.mjs'), 'utf8')
     expect(sweep).toContain('worker.intro.v1')
     expect(sweep).toMatch(/ROUTES = \[\s*'\/'/)
+  })
+})
+
+/**
+ * **שום דבר לא מתעמעם מעל הדשא (21.9.2026).** `animate-slam` נכנס עם `opacity: 0→1`, ובפריימי
+ * הביניים חולצה אדומה ועור מעל ירוק מודפס עוברים דרך צהוב — `gate3:probe` תפס 42 פיקסלים
+ * כאלה במקום שבו שחקן נוחת על פס. על המגרש נוחתים ב-`animate-slam-solid` (תנועה בלבד), כמו
+ * ה-burst, ורוח רפאים של פותח חסר היא נייר אטום עם קו מקווקו — לא שקיפות.
+ */
+describe('nothing dissolves over grass', () => {
+  const PITCH_FILES = ['app/lineup/BandPitch.tsx', 'app/xi/XIBuilder.tsx', 'components/press/GoalPitch.tsx', 'components/press/PressPitch.tsx', 'components/roster/RosterSheet.tsx']
+  it('lands figures on the pitch by motion only', () => {
+    for (const path of PITCH_FILES) {
+      const text = readFileSync(join(process.cwd(), path), 'utf8')
+      expect(/animate-slam(?!-solid)/.test(text), `${path} fades a figure in over grass`).toBe(false)
+    }
   })
 })

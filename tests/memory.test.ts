@@ -7,6 +7,7 @@ import { buildBoard, buildRound, type MemoryCard } from '@/lib/game/memory'
 import {
   ECHO_STREAK,
   closeOpen,
+  countdownAt,
   echoMate,
   finished,
   flip,
@@ -15,6 +16,7 @@ import {
   spendEcho,
   spendFlash,
   startRun,
+  threadGeometry,
   verdict,
   wallLit,
   type MemoryRun,
@@ -320,5 +322,74 @@ describe('שער 6 — המדף לא מדליף את התשובה', () => {
     const board = readFileSync(join(ROOT, 'app/memory/MemoryBoard.tsx'), 'utf8')
     expect(board).toContain("from '@/lib/profile/store'")
     expect(board).not.toContain('localStorage')
+  })
+})
+
+describe('שער 6 v3 — the threads, the countdown and the new pairs', () => {
+  it('draws a thread from grid INDEX, right-to-left, without measuring anything', () => {
+    const cards = [
+      { id: 'a1', pair: 'a' },
+      { id: 'b1', pair: 'b' },
+      { id: 'x', pair: 'x' },
+      { id: 'y', pair: 'y' },
+      { id: 'b2', pair: 'b' },
+      { id: 'a2', pair: 'a' },
+    ]
+    // four across: a1 is column 0 (the RIGHT edge), a2 is index 5 → row 1, column 1
+    expect(threadGeometry(cards, ['a'], 4)).toEqual([{ pair: 'a', x1: 3.5, y1: 0.5, x2: 2.5, y2: 1.5 }])
+    expect(threadGeometry(cards, ['a'], 4, false)[0]).toEqual({ pair: 'a', x1: 0.5, y1: 0.5, x2: 1.5, y2: 1.5 })
+    // only locked pairs get a thread, and a pair with one card on the board gets none
+    expect(threadGeometry(cards, [], 4)).toEqual([])
+    expect(threadGeometry(cards, ['x'], 4)).toEqual([])
+    expect(threadGeometry(cards, ['a', 'b'], 4)).toHaveLength(2)
+  })
+
+  it('reads the thread component from the geometry, never from the DOM', () => {
+    const source = readFileSync(join(ROOT, 'components/memory/PairThreads.tsx'), 'utf8')
+    expect(source).toContain('threadGeometry')
+    expect(source).not.toContain('getBoundingClientRect')
+    expect(source).not.toContain('resize')
+  })
+
+  it('counts the flash down 3·2·1 and never below 1', () => {
+    expect(countdownAt(0)).toBe(3)
+    expect(countdownAt(1100)).toBe(2)
+    expect(countdownAt(2100)).toBe(1)
+    expect(countdownAt(2999)).toBe(1)
+    expect(countdownAt(5000)).toBe(1)
+    expect(countdownAt(0, 1300)).toBe(2)
+  })
+
+  it('deals the three new pairings — a goal and its year, a European tie and its season, a crest and its years', () => {
+    const kinds = new Set<string>()
+    for (let seed = 1; seed <= 120; seed += 1) {
+      for (const pair of buildRound(seed).pairs) kinds.add(pair.id.split(':')[0] as string)
+    }
+    for (const kind of ['goal', 'euro', 'crest', 'trophy', 'kit', 'moment']) expect(kinds, kind).toContain(kind)
+  })
+
+  it('never pairs a shirt with its season — that would be gate 4’s answer sheet (rule 24)', () => {
+    for (let seed = 1; seed <= 120; seed += 1) {
+      for (const pair of buildRound(seed).pairs) {
+        // the only shirt-drawn memory is a MAKER and the span it supplied
+        if (pair.object === 'shirt') expect(pair.kind).toBe('יצרן ותקופה')
+        expect(pair.id).not.toMatch(/^(kit-look|kit-design|shirt)/)
+      }
+    }
+  })
+
+  it('prints a new pairing’s year as a figure, and its crest span as a span', () => {
+    for (let seed = 1; seed <= 60; seed += 1) {
+      for (const pair of buildRound(seed).pairs) {
+        if (pair.id.startsWith('goal:')) expect(pair.b).toMatch(/^\d{4}$/)
+        if (pair.id.startsWith('crest:')) expect(numericFace(pair.b), pair.b).toBe(true)
+        if (pair.id.startsWith('euro:')) expect(pair.b).toMatch(/^\d{4}\/\d{2}$/)
+      }
+    }
+  })
+
+  it('shows the category on a CLOSED card and names it to a screen reader', () => {
+    const card = readFileSync(join(ROOT, 'components/memory/ArchiveCard.tsx'), 'utf8')
+    expect(card).toContain("`${t('memory.closed')} — ${card.kind}`")
   })
 })

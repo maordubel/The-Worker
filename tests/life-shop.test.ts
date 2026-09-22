@@ -78,9 +78,22 @@ describe('החנות — לוח השנה של הקולב', () => {
   it('places a season on the first chapter that is on or after it, and refuses the rest', () => {
     expect(chapterOnOrAfter(1978)).toBe(CHAPTER_ORDER[0])
     expect(chapterYear(chapterOnOrAfter(1992))).toBeGreaterThanOrEqual(1992)
-    // a season this life never reaches is not placed at the front of the rail: the first
-    // version of this fell back to chapter one and hung a 2025 Macron shirt in 1984
-    expect(chapterOnOrAfter(2025)).toBe(LATER)
+    /**
+     * **"a season this life never reaches" is a moving line, and it moved** (21.9.2026).
+     *
+     * This asked for `2025` by name, because 2025 was past the end of the spine. Stage C
+     * reached it, and the assertion went red — describing a world that had grown, not a
+     * defect (rule 80). What it actually protects is the FALLBACK: the first version of
+     * `chapterOnOrAfter` returned chapter one, which hung a 2025 Macron shirt in 1984.
+     *
+     * So the year is read off the registry instead of typed. A season one year past the
+     * last chapter can never be placed, whatever the spine grows to — and the year that
+     * IS the last chapter's now resolves to a real chapter, which is the other half of
+     * the same claim and was never checked before.
+     */
+    const last = Math.max(...CHAPTERS.filter((row) => row.playable).map((row) => row.year))
+    expect(chapterOnOrAfter(last + 1)).toBe(LATER)
+    expect(chapterYear(chapterOnOrAfter(last))).toBe(last)
     expect(chapterIndex(LATER)).toBe(-1)
   })
 

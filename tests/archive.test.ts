@@ -5,12 +5,27 @@ import { describe, expect, it } from 'vitest'
 
 import {
   archiveFigures,
+  boxDeal,
   dealFacts,
+  detailOf,
+  discoverPool,
   factDeck,
+  forgottenPool,
   longDateHe,
   onThisDay,
   pressColumns,
+  archiveIdentity,
+  rabbitDetail,
+  searchCards,
+  seasonCards,
+  shelfPool,
+  todayDecks,
 } from '@/lib/archive/wing'
+import { entity, neighbors, related, search } from '@/lib/archive/graph'
+import { playerMaster } from '@/lib/archive/player-master'
+import { applyEvent } from '@/lib/profile/events'
+import { emptyProfile, isOn } from '@/lib/profile/store'
+import { mergeDeviceProfiles } from '@/lib/portal/merge'
 import { GATES, PLAYABLE_GATES, gateFor, gateSeeded, isOpen, wallOrder } from '@/lib/gates'
 import { allGates, helpForRoute } from '@/lib/help'
 import {
@@ -201,7 +216,7 @@ describe('הקיר — שער 12 ושער 9 פתוחים', () => {
     expect(gateFor('/archive')?.number).toBe(12)
     expect(gateSeeded('/archive')).toBe(true)
     // and it has a help sheet, because it now has a screen to describe
-    expect(helpForRoute('/archive')?.help.whatKey).toBe('help.archive.what')
+    expect(helpForRoute('/archive')?.help.whatKey).toBe('help.archive.dock.what')
   })
 
   /** Gate 9 is now the seeded, playable Royal Rumble route. */
@@ -230,5 +245,151 @@ describe('הקיר — שער 12 ושער 9 פתוחים', () => {
     for (const path of ['app/sitemap.ts', 'app/tik/Standing.tsx', 'app/hapoel/page.tsx']) {
       expect(readFileSync(join(ROOT, path), 'utf8'), path).toContain('isOpen')
     }
+  })
+})
+
+describe('שער 12 v10 — הארכיון החי, over the Entity Graph', () => {
+  const DAY = '2026-05-19'
+
+  it('deals five Today chips, each by its own rule, each seeded (rule 24)', () => {
+    const decks = todayDecks(DAY, 4242, 0)
+    for (const card of decks.today) expect(card.when, card.id).toMatch(/^19\.5\.\d{4}$/)
+    const facts = new Set(factDeck().map((card) => card.id))
+    for (const card of decks.know) expect(facts.has(card.id), card.id).toBe(true)
+    for (const card of decks.shelf) expect(['kit', 'object', 'song', 'fans', 'press']).toContain(card.type)
+    for (const card of decks.forgotten) {
+      expect(card.type).toBe('person')
+      const e = entity(card.id)!
+      expect(e.attrs.currentSquad).not.toBe(true)
+      const seasons = neighbors(card.id).filter(({ edge }) => edge.type === 'played_in')
+      expect(seasons.length).toBeGreaterThanOrEqual(1)
+      expect(seasons.length).toBeLessThanOrEqual(2)
+    }
+    for (const card of decks.discover) expect(card.degree).toBeGreaterThanOrEqual(3)
+    for (const chip of ['know', 'shelf', 'forgotten', 'discover'] as const) {
+      expect(decks[chip].length, chip).toBeGreaterThan(0)
+      expect(new Set(decks[chip].map((card) => card.id)).size).toBe(decks[chip].length)
+    }
+    // the same two numbers deal the same cards; the next visit deals others
+    expect(JSON.stringify(todayDecks(DAY, 4242, 0))).toBe(JSON.stringify(decks))
+    expect(todayDecks(DAY, 4242, 1).shelf.map((c) => c.id)).not.toEqual(decks.shelf.map((c) => c.id))
+    expect(shelfPool().length).toBeGreaterThan(20)
+    expect(forgottenPool().length).toBeGreaterThan(20)
+    expect(discoverPool().length).toBeGreaterThan(100)
+  })
+
+  it('digs the same way twice, never back onto the trail, and changes type when it can', () => {
+    const tikva = search('שלום תקווה')[0]!.id
+    const walk = (seed: number) => {
+      const trail = [tikva]
+      for (let depth = 0; depth < 8; depth += 1) {
+        const next = rabbitDetail(trail[trail.length - 1]!, seed, depth, trail)
+        if (!next) break
+        expect(trail, `seed ${seed} depth ${depth}`).not.toContain(next.card.id)
+        trail.push(next.card.id)
+      }
+      return trail
+    }
+    for (const seed of [1, 7, 99, 4242]) {
+      const a = walk(seed)
+      expect(a.length).toBeGreaterThan(3)
+      expect(walk(seed)).toEqual(a)
+      // never three of one type in a row when the graph offered something else
+      for (let i = 2; i < a.length; i += 1) {
+        const types = [a[i - 2], a[i - 1], a[i]].map((id) => entity(id!)!.type)
+        if (types[0] === types[1] && types[1] === types[2]) {
+          const others = neighbors(a[i - 1]!).filter(({ other }) => other.type !== types[1] && !a.slice(0, i).includes(other.id))
+          expect(others.length, `seed ${seed}: ${a.slice(i - 2, i + 1).join(' → ')}`).toBe(0)
+        }
+      }
+    }
+    expect(walk(1)).not.toEqual(walk(4242))
+  })
+
+  it('shows related items two per type, each with the label of its edge', () => {
+    for (const id of ['season:1999/00', 'goal:chelsea-2001-gershon-88', 'place:בלומפילד', search('ערן זהבי')[0]!.id]) {
+      const groups = related(id)
+      expect(groups.length).toBeGreaterThan(0)
+      for (const group of groups) {
+        expect(group.items.length).toBeLessThanOrEqual(2)
+        expect(new Set(group.items.map((item) => item.entity.type))).toEqual(new Set([group.type]))
+      }
+    }
+  })
+
+  it('finds a player by any spelling the Player Master holds — one search, no second index', () => {
+    const withAlias = playerMaster.players.find((p) => p.aliases.he.length > 0 && p.aliases.he[0] !== p.displayName)!
+    expect(withAlias).toBeDefined()
+    const found = searchCards(withAlias.aliases.he[0]!, null).map((card) => card.id)
+    expect(found).toContain(withAlias.id)
+    expect(searchCards('בלומפילד', 'place')[0]?.id).toBe('place:בלומפילד')
+    expect(searchCards('', null)).toEqual([])
+  })
+
+  it('deals the box by seed, shuffle and decade', () => {
+    const a = boxDeal(11, null, 0)
+    expect(a).toHaveLength(8)
+    expect(boxDeal(11, null, 0)).toEqual(a)
+    expect(boxDeal(11, null, 1).map((c) => c.id)).not.toEqual(a.map((c) => c.id))
+    for (const card of boxDeal(11, 1990, 0)) expect(card.decade).toBe(1990)
+  })
+
+  it('opens a season hub from the time machine, trophies first', () => {
+    const cards = seasonCards('1999/00')
+    expect(cards.length).toBeGreaterThan(10)
+    expect(cards[0]!.type).toBe('trophy')
+    expect(seasonCards('1850/51')).toEqual([])
+  })
+
+  it('prints only what the archive holds in the drawer, with confidence words and read dates', () => {
+    const column = detailOf(factDeck().find((card) => card.kind === 'column')!.id)!
+    expect(column.what.kind).toBe('quote')
+    expect(column.sources[0]!.readOn).toBe('2026-09-17')
+    expect(column.sources[0]!.confidence).toBe('low')
+    const match = detailOf(neighbors('trophy:גביע-המדינה:1998/99').find(({ other }) => other.type === 'match')!.other.id)!
+    expect(match.what.kind).toBe('match')
+    for (const src of match.sources) expect(src.readOn).toBeNull()
+    for (const group of match.related) for (const item of group.items) expect(item.labelKey).toMatch(/^graph\.rel\./)
+    expect(match.before?.type).toBe('match')
+    // the prototype's invented prose has no field to live in
+    expect(JSON.stringify(match)).not.toMatch(/spicy|secret/)
+    // `?at=` takes a legacy id
+    expect(detailOf('euro:2001-uefa-r2-chelsea')?.card.id).toBe('tie:2001-uefa-r2-chelsea')
+    expect(detailOf('no-such-id')).toBeNull()
+  })
+
+  it('never shows a kit’s maker, sponsor or crest — those are gate 4’s answers', () => {
+    const kit = detailOf('kit-2009-10-home')!
+    expect(kit.what.kind).toBe('kit')
+    const blob = JSON.stringify(kit)
+    for (const answer of ['umbro', 'סובארו', 'SUBARU', 'circle-1927', 'אמברו']) expect(blob).not.toContain(answer)
+  })
+
+  it('keeps Mine as a parity toggle, so an un-save survives the union merge', () => {
+    const id = 'goal:chelsea-2001-gershon-88'
+    const ctx = { date: '2026-09-21' }
+    const saved = applyEvent(emptyProfile(), { type: 'archive_saved', entityId: id, on: true }, ctx).profile
+    expect(isOn('archive.mine', id, saved)).toBe(true)
+    const unsaved = applyEvent(saved, { type: 'archive_saved', entityId: id, on: false }, ctx).profile
+    expect(isOn('archive.mine', id, unsaved)).toBe(false)
+    // another device still holds the old "saved" — the merge keeps the un-save
+    expect(isOn('archive.mine', id, mergeDeviceProfiles(unsaved, saved))).toBe(false)
+  })
+})
+
+describe('what gate 10 reads from gate 12', () => {
+  it('describes the saves, derives a favourite decade, and lists the matches marked "there"', () => {
+    const final99 = neighbors('trophy:גביע-המדינה:1998/99').find(({ other }) => other.type === 'match')!.other.id
+    const identity = archiveIdentity({
+      saved: ['season:1998/99', 'trophy:גביע-המדינה:1998/99', final99, 'euro:2001-uefa-r2-chelsea', 'nothing-here'],
+      seen: ['a', 'a', 'b'],
+      reactions: [`there:${final99}`, 'moved:season:1998/99'],
+    })
+    expect(identity.saved.map((card) => card.id)).toContain('tie:2001-uefa-r2-chelsea')
+    expect(identity.unknown).toEqual(['nothing-here'])
+    expect(identity.favouriteDecade).toEqual({ decade: 1990, count: 3 })
+    expect(identity.seen).toBe(2)
+    expect(identity.beenThere.map((card) => card.id)).toEqual([final99])
+    expect(archiveIdentity({ saved: ['season:1998/99'], seen: [], reactions: [] }).favouriteDecade).toBeNull()
   })
 })

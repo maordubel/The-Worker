@@ -87,10 +87,24 @@ const withProofs = (proofs: ProofRecord[], over: Partial<LifeState> = {}): LifeS
 // ---------------------------------------------------------------------------------
 
 describe('שלושים, ולכל אחד פרס', () => {
-  it('holds exactly the thirty the spec defines, each id once', () => {
-    expect(ACHIEVEMENTS).toHaveLength(30)
-    expect(new Set(ACHIEVEMENT_IDS).size).toBe(30)
+  /**
+   * שלושים של המפרט, ועוד שישה של תסריט ההמשך (21.9.2026).
+   *
+   * הבדיקה ספרה **30** כי זה מה שמפרט החיים 1983–2026 הגדיר. תסריט ההמשך הוסיף שישה
+   * בשמם — שלושה סיומים של `F04`, הראיון של `J03`, ושניים מענף הבעלות — ולכן המספר
+   * הוא 36. הוא לא הוחלף ב-`.length > 0`: מספר מוקלד הוא מה שמפיל את הבדיקה כשמישהו
+   * מוסיף שורה בלי לומר על מה (וזה בדיוק מה שקרה עכשיו, כמתוכנן).
+   *
+   * `keys_in_hand` מופיע פעמיים בתסריט — בשתי בחירות של `O04` — וזה **הישג אחד**.
+   * לכן שש ולא שבע, וה-`Set` למטה הוא מה ששומר על זה.
+   */
+  it('holds the thirty the spec defines plus the six the screenplay added, each id once', () => {
+    expect(ACHIEVEMENTS).toHaveLength(36)
+    expect(new Set(ACHIEVEMENT_IDS).size).toBe(36)
     for (const id of ACHIEVEMENT_IDS) expect(id, id).toMatch(/^ACH_[A-Z_]+$/)
+    for (const id of ['ACH_FORTY_YEARS', 'ACH_THREE_GENERATIONS', 'ACH_REUNION_EUROPE', 'ACH_ASKED', 'ACH_NOT_AT_ANY_PRICE', 'ACH_KEYS']) {
+      expect(ACHIEVEMENT_IDS, id).toContain(id)
+    }
   })
 
   it('gives every one a Hebrew name, a reward and a note a writer can build a scene from', () => {
@@ -533,9 +547,24 @@ describe('מה אפשר להשיג היום, ומה ממתין לפרק', () => 
     expect(waiting().length + reachable().length).toBe(ACHIEVEMENTS.length)
   })
 
-  it('leaves the six route achievements waiting, because routes.ts is not wired yet', () => {
-    for (const id of ['ACH_LEAD', 'ACH_JOURNALIST', 'ACH_OWNER', 'ACH_ARTIST', 'ACH_FOUNDER', 'ACH_ROADS']) {
+  /**
+   * ...וארבע מתוך השש **הפסיקו להמתין** ב-21.9.2026.
+   *
+   * הבדיקה נכתבה כששש פסגות המסלולים היו סגורות, וקראה לזה "routes.ts is not wired
+   * yet" — שכבר לא היה מדויק מאז שהמסלולים חוברו, ונהיה שגוי לגמרי כשנבנו
+   * `2002-europe` ו-`2006-home`: תקרת הגיל עלתה מ-22 ל-28 וארבעה קירות נפלו לבד.
+   *
+   * השומר לא נמחק ולא רוכך — הוא **התהפך ונהיה צר יותר**: שניים ממתינים ובשמם,
+   * `ACH_OWNER` (פסגה בגיל 30, וענף הבעלות הוא 2025 בתסריט) ו-`ACH_FOUNDER` (חלון
+   * 2007, שזה משפט אחר לגמרי — כלל 71), וארבעת האחרים **חייבים לשתוק**. משפט המתנה
+   * על הישג פתוח הוא שקר לשחקן.
+   */
+  it('leaves only the two route achievements that really are still shut, and by name', () => {
+    for (const id of ['ACH_OWNER', 'ACH_FOUNDER']) {
       expect(achievementFor(id)?.waitingHe, id).toBeTruthy()
+    }
+    for (const id of ['ACH_LEAD', 'ACH_JOURNALIST', 'ACH_ARTIST', 'ACH_ROADS']) {
+      expect(achievementFor(id)?.waitingHe, `${id} is reachable since 2006 and still claims it waits`).toBeNull()
     }
   })
 

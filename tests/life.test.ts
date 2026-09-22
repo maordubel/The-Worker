@@ -733,7 +733,9 @@ describe('העולם — every door leads somewhere that exists', () => {
     // transistor radio and the September sheet drew no radio. `propRadio` is the board's
     // boombox re-cut on 3.9.2026 at the first empty column past its body — looked at, not
     // typed. The day a drawn radio ships, this line goes.
-    const RECUT_OK = new Set(['propRadio'])
+    // (21.9.2026: the transistor arrived drawn, in Maor's device sheet, and `propRadio` is
+    // that drawing now — the exception is empty and stays, for the next one)
+    const RECUT_OK = new Set<string>()
     /**
      * …and the batch Maor sent on 5.9.2026, which is not a sheet and was never going to
      * be one: a glass bottle, a full one, a newspaper stand and a wooden cart, cut from
@@ -741,7 +743,9 @@ describe('העולם — every door leads somewhere that exists', () => {
      * their alpha (`scripts/life/ingest-street-2026-09-05.py`). The rule this line
      * enforces is "nobody typed a crop box", and that script types none.
      */
-    const HIS_OWN = new Set(['maor-2026-09-05-street', 'maor-2026-09-05-coin', 'maor-2026-09-06'])
+    // …and his four object sheets of 20.9.2026, keyed off flat green by a measured grid
+    // (`scripts/life/ingest-objects-2026-09-21.py`) — no crop box typed there either
+    const HIS_OWN = new Set(['maor-2026-09-05-street', 'maor-2026-09-05-coin', 'maor-2026-09-06', 'maor-2026-09-20-objects'])
     for (const key of used) {
       if (RECUT_OK.has(key)) continue
       // …and a shirt comes off a photograph of the real thing, which is the point of it
@@ -761,6 +765,8 @@ describe('העולם — every door leads somewhere that exists', () => {
           if (!actor.talk) continue
           // Only what is drawn NEARER than the actor can cover him.
           if (layer.depth <= actor.y) continue
+          // ...and only in a year both of them are in: a banner of 2010 cannot hide a boy of 1986
+          if (!CHAPTERS.some((c) => inEra(layer, c.id) && inEra(actor, c.id))) continue
           const clear =
             layer.x + layer.w / 2 <= actor.x - ACTOR_HALF || layer.x - layer.w / 2 >= actor.x + ACTOR_HALF
           expect(clear, `${scene.id}: ${layer.art} stands in front of ${actor.id}`).toBe(true)

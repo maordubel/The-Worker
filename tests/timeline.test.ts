@@ -87,4 +87,28 @@ describe('ציר הזמן — every seed, not a sample', () => {
       expect(new Set(dates).size, `seed ${seed}`).toBe(dates.length)
     }
   })
+
+  /**
+   * **The cursor bug (fixed 21.9.2026).** `PlayLink` raises the cursor on every visit, so
+   * almost every real round is dealt at cursor ≥ 1 — and `gradeInsert` returned the board
+   * of the cursor-0 deal. Across seeds 1–40 with cursors 1–3 all 120 boards were wrong;
+   * the suite only ever graded cursor 0.
+   */
+  it('grades a rotated deal against its own board — cursors 1 to 3', () => {
+    for (const seed of SEEDS.slice(0, 60)) {
+      for (const cursor of [1, 2, 3]) {
+        const deal = dealTimelineRun(seed, cursor)
+        const dealt = new Set([deal.anchor.id, ...deal.queue.map((card) => card.id)])
+        for (let placed = 0; placed < TIMELINE_LENGTH; placed += 1) {
+          const truth = gradeInsert(seed, placed, -1, cursor)!
+          expect(truth.card.id, `seed ${seed} cursor ${cursor}`).toBe(deal.queue[placed]!.id)
+          const played = gradeInsert(seed, placed, truth.position, cursor)!
+          expect(played.correct).toBe(true)
+          // the board that comes back is THIS deal's board, card for card
+          expect(played.board.map((card) => card.id)).toEqual(boardAfter(seed, placed + 1, cursor).map((card) => card.id))
+          for (const card of played.board) expect(dealt.has(card.id), `seed ${seed} cursor ${cursor}: a card from another deal`).toBe(true)
+        }
+      }
+    }
+  })
 })

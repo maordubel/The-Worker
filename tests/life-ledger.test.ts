@@ -407,7 +407,19 @@ describe('מה שעוד ממתין — והשורה שאומרת למה', () => 
    * ייכתב פרק אחרי 2000 יפיל את הבדיקה ויכריח לכתוב מחדש את הסיבה, במקום להשאיר משפט
    * שנהיה שגוי בשקט.
    */
-  it('names the real blocker for every apex still out of reach', () => {
+  /**
+   * ...ומי שכבר אפשר להגיע אליו **שותק** (21.9.2026).
+   *
+   * הבדיקה הזאת עברה על חמש פסגות ודרשה משורת ההמתנה של כל אחת לומר "גיל". היא
+   * נפלה ברגע ש-`2002-europe` ו-`2006-home` נבנו, כי התקרה עלתה מ-22 ל-28 וארבעה
+   * קירות גיל נפלו לבד — בדיוק מה שהשורה ההיא הבטיחה (*"פרק שאחרי 2000 יזיז אותו
+   * בלי לגעת בשורה"*).
+   *
+   * היא לא רוככה, היא **התהפכה**: היום היא דורשת ש-`waitingHe` יהיה `null` בדיוק
+   * אצל מי שאפשר להגיע אליו, ומשפט-גיל בדיוק אצל מי שלא. משפט המתנה על פסגה פתוחה
+   * הוא שקר לשחקן, ופסגה נעולה בלי משפט היא בדיוק הפגם שכלל 78 נכתב עליו.
+   */
+  it('names the real blocker for every apex still out of reach, and stays quiet about the rest', () => {
     const state: LifeState = emptyState({ birthYear: 1978, nameHe: 'פוגי' } as never, 2000)
     const apexes: Array<[string, RouteId]> = [
       ['ACH_LEAD', 'ULTRAS'],
@@ -418,10 +430,30 @@ describe('מה שעוד ממתין — והשורה שאומרת למה', () => 
     ]
     for (const [id, route] of apexes) {
       const row = ACHIEVEMENTS.find((entry) => entry.id === id)
-      expect(row?.waitingHe, id).toBeTruthy()
-      expect(stageOutOfReachFor(state, route, 'apex'), `${id} claims an age wall that is gone`).toBe(true)
-      expect(row?.waitingHe?.includes('גיל'), `${id} does not say the age is what stops it`).toBe(true)
-      expect(row?.waitingHe?.includes('שום סצנה'), `${id} still blames a scene that exists`).toBe(false)
+      expect(row, id).toBeTruthy()
+      const blocked = stageOutOfReachFor(state, route, 'apex')
+      if (blocked) {
+        expect(row?.waitingHe, `${id} is out of reach and says nothing`).toBeTruthy()
+        expect(row?.waitingHe?.includes('גיל'), `${id} does not say the age is what stops it`).toBe(true)
+        expect(row?.waitingHe?.includes('שום סצנה'), `${id} still blames a scene that exists`).toBe(false)
+      } else {
+        /**
+         * ...ומי שהגיל שלו כבר בסדר **אסור לו לטעון שהגיל עוצר אותו**.
+         *
+         * מותר לו עדיין להמתין — `ACH_OWNER` מחכה ל-`ownership_contract` שאף סצנה לא
+         * רושמת, וזו המתנה אמיתית שכלל 78 דורש שתיאמר. מה שאסור הוא לנקוב בחסם שנפל:
+         * שורה שאומרת "גיל" אחרי שנבנה 2009 היא אותו שקר-למראית-עין שכרטיס המסלול
+         * נבנה נגדו (כלל 71 — לדווח על חלון כעל גיל).
+         */
+        expect(row?.waitingHe?.includes('גיל'), `${id} is reachable by age and still blames age`).not.toBe(true)
+      }
+    }
+
+    // ...ו-OWNER הוא היחיד שעדיין נעול בגיל, כי הפסגה שלו היא 30 והתסריט מציב את
+    // ענף הבעלות ב-2025. זה נמנה בשמו ולא מאחורי הכללה (כלל 78).
+    // ...ומ-21.9.2026 **כל חמש** בתוך התקרה: 2009 נכתב, כלומר גיל 31, ו-30 כבר לא קיר.
+    for (const route of ['ULTRAS', 'JOURNALIST', 'CREATOR', 'TRAVELLER', 'OWNER'] as RouteId[]) {
+      expect(stageOutOfReachFor(state, route, 'apex'), `${route} apex should be inside the ceiling now`).toBe(false)
     }
 
     // and the founder is the one whose age is fine — a window is a different sentence

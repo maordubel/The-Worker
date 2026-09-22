@@ -4,14 +4,14 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { dealKitRound, gradeKitPuzzle, kitPuzzleCount } from '@/lib/game/kitBuild'
-import { KIT_ROUND, PART_ORDER, PART_POINTS, PERFECT_BONUS } from '@/lib/game/kit-build-run'
+import { KIT_ROUND, OPTION_RAMP, PERFECT_BONUS, SHIRT_POINTS, STEP_ORDER } from '@/lib/game/kit-build-run'
 import {
   archiveDecades,
   archiveShirts,
   archiveSources,
   archiveVariants,
 } from '@/lib/kit/archive'
-import { facetCounts, kitCatalog } from '@/lib/kit/catalog'
+import { facetCounts, kitCatalog, lockedCatalog } from '@/lib/kit/catalog'
 import { CREST_FILES, CREST_MARKS, crestArt, crestMark } from '@/lib/kit/crestMarks'
 import { seasonKits } from '@/lib/kit/seasons'
 import { markFor } from '@/components/kit/MakerMark'
@@ -24,21 +24,23 @@ describe('שער 4 — משחק המדים', () => {
     expect(kitPuzzleCount()).toBeGreaterThan(KIT_ROUND * 2)
   })
 
-  it('deals five shirts, five drawers each, three real options a drawer', () => {
+  // V5 ramped the drawers 3·4·5 by difficulty; since 21.9.2026 the ramp is by the shirt's place in
+  // the round (3·4·4·4·5) and a step may offer fewer, never fewer than three.
+  it('deals five shirts, five steps each, 3 to the ramp of real options a step', () => {
     for (const seed of SEEDS) {
       const round = dealKitRound(seed)
       expect(round, `seed ${seed}`).toHaveLength(KIT_ROUND)
-      for (const puzzle of round) {
-        expect(puzzle.drawers.map((drawer) => drawer.kind)).toEqual([...PART_ORDER])
-        for (const drawer of puzzle.drawers) {
-          expect(drawer.parts.length, `seed ${seed} ${drawer.kind}`).toBe(3)
-          // A drawer with the same part twice is two identical buttons, one of which
-          // scores as wrong — the class of bug the timeline shipped with (rule 31).
-          const ids = drawer.parts.map((part) => part.id)
-          expect(new Set(ids).size, `seed ${seed} ${drawer.kind} duplicates`).toBe(ids.length)
-          for (const part of drawer.parts) expect(part.kind).toBe(drawer.kind)
+      round.forEach((puzzle, index) => {
+        expect(puzzle.steps.map((row) => row.step)).toEqual([...STEP_ORDER])
+        for (const row of puzzle.steps) {
+          expect(row.options.length, `seed ${seed} ${row.step}`).toBeGreaterThanOrEqual(3)
+          expect(row.options.length, `seed ${seed} ${row.step}`).toBeLessThanOrEqual(OPTION_RAMP[index]!)
+          // A step with the same option twice is two identical buttons, one of which scores as
+          // wrong — the class of bug the timeline shipped with (rule 31).
+          const ids = row.options.map((option) => option.id)
+          expect(new Set(ids).size, `seed ${seed} ${row.step} duplicates`).toBe(ids.length)
         }
-      }
+      })
     }
   })
 
@@ -56,24 +58,20 @@ describe('שער 4 — משחק המדים', () => {
         expect(puzzle.blank.makerHe, `seed ${seed}`).toBeNull()
         expect(puzzle.blank.crestKey, `seed ${seed}`).toBeNull()
         expect(puzzle.blank.pattern, `seed ${seed}`).toBe('solid')
+        expect(puzzle.blank.base, `seed ${seed}`).toBe('paper')
       }
     }
   })
 
-  it('leaks no season through a part id or label', () => {
-    // Every id and label travels to the browser. A key like `body:2004/05` in the DOM
-    // would hand the answer to anyone who opened the inspector — which is exactly the
-    // leak the timeline shipped with (rule 31), so it is checked here from the start.
-    //
-    // The founding year INSIDE a crest key (`circle-1927`) is deliberately not a leak:
-    // that badge was worn for years and it identifies an era, not a season. The test is
-    // about the puzzle's own season, not about any four digits.
+  it('leaks no season through an option id, label or info line', () => {
+    // Every id and label travels to the browser. The founding year INSIDE a crest key
+    // (`circle-1927`) is deliberately not a leak: that badge was worn for years and it names an
+    // era, not a season — and the badge prints its year on itself.
     for (const seed of SEEDS.slice(0, 40)) {
       for (const puzzle of dealKitRound(seed)) {
-        const blob = JSON.stringify(puzzle.drawers)
+        const blob = JSON.stringify(puzzle.steps)
         expect(blob, `seed ${seed}`).not.toContain(puzzle.seasonLabel)
         expect(blob, `seed ${seed}`).not.toMatch(/\d{4}\/\d{2}/)
-        // and the year the season starts in, on its own
         expect(blob, `seed ${seed}`).not.toContain(puzzle.seasonLabel.slice(0, 4))
       }
     }
@@ -81,36 +79,32 @@ describe('שער 4 — משחק המדים', () => {
 
   it('can be assembled perfectly, and pays what the screen says it pays', () => {
     for (const seed of SEEDS) {
+      const round = dealKitRound(seed)
       for (let index = 0; index < KIT_ROUND; index += 1) {
         const blind = gradeKitPuzzle(seed, index, {})
         expect(blind, `seed ${seed} #${index}`).not.toBeNull()
         expect(blind!.right).toBe(0)
         expect(blind!.score).toBe(0)
-
-        // The truth is the id in `truth` on each part verdict — playing it back must be
-        // a perfect shirt, or some seed deals a puzzle that cannot be solved.
-        const perfect = Object.fromEntries(blind!.parts.map((part) => [part.kind, part.truth]))
+        // exactly one option per step grades as the whole step — play it back for a perfect shirt
+        const puzzle = round[index]!
+        const perfect: Record<string, string> = {}
+        for (const row of puzzle.steps) {
+          const hits = row.options.filter((option) => gradeKitPuzzle(seed, index, { [row.step]: option.id })!.steps.find((s) => s.step === row.step)!.correct)
+          expect(hits.length, `seed ${seed} #${index} ${row.step}: exactly one right option`).toBe(1)
+          perfect[row.step] = hits[0]!.id
+        }
         const graded = gradeKitPuzzle(seed, index, perfect)
         expect(graded!.perfect, `seed ${seed} #${index} is unsolvable`).toBe(true)
-        expect(graded!.right).toBe(PART_ORDER.length)
-        expect(graded!.score).toBe(PART_ORDER.length * PART_POINTS + PERFECT_BONUS)
-        // and the right answer is always in the drawer the player is shown
-        const puzzle = dealKitRound(seed)[index]!
-        for (const part of graded!.parts) {
-          const drawer = puzzle.drawers.find((row) => row.kind === part.kind)!
-          expect(
-            drawer.parts.some((option) => option.id === part.truth),
-            `seed ${seed} #${index}: the right ${part.kind} is not in its drawer`,
-          ).toBe(true)
-        }
+        expect(graded!.right).toBe(STEP_ORDER.length)
+        expect(graded!.score).toBe(SHIRT_POINTS + PERFECT_BONUS)
       }
       expect(gradeKitPuzzle(seed, KIT_ROUND, {}), `seed ${seed}`).toBeNull()
     }
-  })
+  }, 60_000)
 
-  it('only deals shirts the archive knows all five parts of', () => {
-    // A puzzle missing a sponsor would silently be worth 160 instead of 200, and the
-    // score on screen would stop meaning what the rule under it says.
+  it('only deals shirts the archive knows all five steps of', () => {
+    // A puzzle missing a sponsor would silently be worth less, and the score on screen would
+    // stop meaning what the rule under it says.
     for (const seed of SEEDS.slice(0, 40)) {
       for (const puzzle of dealKitRound(seed)) {
         const kit = seasonKits().find(
@@ -222,17 +216,28 @@ describe('שער 5 — האוסף', () => {
     expect(counts.home + counts.away + counts.third).toBe(catalog.length)
   })
 
-  it('never prints a locked shirt\'s answers', () => {
-    // The grid hid the drawing behind an outline and printed the sponsor underneath it,
-    // and the card of an unbuilt shirt drew the whole shirt plus its full spec — the
-    // complete answer sheet to that shirt\'s puzzle in gate 4, one tap from the grid.
+  it('never ships a locked shirt\'s answers', () => {
+    // The page used to send the whole catalogue and hide the locked shirts in the grid — the
+    // answer to every Gate 4 puzzle, one view-source away. It now sends a season and a variant.
+    const locked = lockedCatalog()
+    expect(locked).toHaveLength(catalog.length)
+    for (const kit of locked) {
+      expect(Object.keys(kit).sort()).toEqual(['decade', 'key', 'playable', 'seasonLabel', 'variant'])
+    }
+    const blob = JSON.stringify(locked)
+    for (const kit of catalog) {
+      if (kit.sponsorHe && kit.sponsorHe.length > 3) expect(blob, kit.key).not.toContain(kit.sponsorHe)
+    }
+    expect(blob).not.toMatch(/crestKey|makerHe|sponsorHe|circle-|worker-hapoel/)
+    const page = readFileSync(join(ROOT, 'app/kits/page.tsx'), 'utf8')
+    expect(page).toContain('lockedCatalog()')
+    expect(page).not.toContain('kitCatalog(')
+    expect(page).not.toContain('kitDnaRack(')
+    // and a locked card still draws nothing but an outline
     const wing = readFileSync(join(ROOT, 'app/kits/KitWing.tsx'), 'utf8')
-    // the sponsor on a grid card is gated on `built`
-    expect(wing).toContain('built && kit.sponsorHe')
-    // an unbuilt shirt routes to the locked card, which draws no KitPlate
     expect(wing).toContain('if (open) return <LockedCard')
-    const locked = wing.slice(wing.indexOf('function LockedCard'))
-    expect(locked).not.toContain('<KitPlate')
+    const lockedCard = wing.slice(wing.indexOf('function LockedCard'))
+    expect(lockedCard).not.toContain('<KitShirt')
   })
 
   it('keeps the collection store behind its interface', () => {
