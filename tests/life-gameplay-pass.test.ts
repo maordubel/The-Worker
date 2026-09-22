@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { eraFor } from '@/lib/life/content/era'
+import { LifeEngine } from '@/lib/life/engine'
 import { emptyState } from '@/lib/life/events'
 import { livingStage } from '@/lib/life/income'
 import { trackAtLeast, trackStageFlag } from '@/lib/life/tracks'
@@ -64,6 +65,24 @@ describe('gameplay pass — the player always has a legible next move', () => {
       reachable: 0,
     })
     expect(move?.kind).toBe('pass')
+  })
+
+  it('restarts the actual day inside a multi-day chapter, not the whole chapter', () => {
+    const engine = new LifeEngine(IDENTITY, 1996)
+    engine.dispatch(
+      { t: 'chapter.entered', chapter: '1996-army' },
+      { t: 'day.entered', dayId: 'army-d1', year: 1996, weekday: 0, minute: 8 * 60 },
+      { t: 'flag.raised', flag: 'life:kept-from-before' },
+      { t: 'day.entered', dayId: 'army-d2', year: 1996, weekday: 1, minute: 9 * 60 },
+      { t: 'flag.raised', flag: 'a2:temporary' },
+      { t: 'clock.advanced', minutes: 55 },
+    )
+
+    expect(engine.restartDay()).toBe(true)
+    expect(engine.state.minute).toBe(9 * 60)
+    expect(engine.state.flags['life:kept-from-before']).toBe(true)
+    expect(engine.state.flags['a2:temporary']).not.toBe(true)
+    expect(engine.log().at(-1)?.t).toBe('day.entered')
   })
 })
 
