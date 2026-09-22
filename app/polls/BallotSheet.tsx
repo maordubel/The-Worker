@@ -356,7 +356,6 @@ export function BallotSheet({
           pick={display(reacting.question, reacting.pick)}
           fact={reactingFact}
           worn={reacting.question.kind === 'number' ? wornBy(numbers, Number(reacting.pick)) : []}
-          wornSources={numbers.sources}
           chosen={reasons[reacting.question.id]}
           filled={filled}
           last={nextEmpty(reacting.question, ballot) === null}

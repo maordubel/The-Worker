@@ -25,7 +25,6 @@ export default function LifeWall({ request, onResult }: ActivityBoardProps) {
       seed={request.seed}
       pinned={false}
       rosterSize={wall.rosterSize}
-      credit={wall.credit}
       embedded={{
         doneLabel: '',
         onResult: ({ duels, of }) => onResult({ completed: true, score: wallScore(duels, of) }),

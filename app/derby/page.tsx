@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { chargeCredit, dealQueue, rosterSize } from '@/lib/game/hate'
+import { dealQueue, rosterSize } from '@/lib/game/hate'
 import { gateMetadata } from '@/lib/seo'
 import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
@@ -31,7 +31,6 @@ export default function HatePage({ searchParams }: { searchParams: { seed?: stri
         cursor={round.cursor}
         pinned={round.pinned}
         rosterSize={rosterSize()}
-        credit={chargeCredit()}
       />
       <ReportLink />
     </Screen>

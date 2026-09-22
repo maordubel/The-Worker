@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { KitMarkArt } from '@/components/kit/KitEngineShirt'
 import { KitShirt } from '@/components/kit/KitShirt'
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { activeCollection, type Collection } from '@/lib/kit/collection'
 import type { Facet, LockedKit } from '@/lib/kit/catalog'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -386,13 +387,9 @@ function KitCard({
         <p className="mt-2 font-body text-step--1 leading-relaxed text-muted">{row.noteHe}</p>
       )}
 
-      {/* the source. Showing it is the product (rule 16) — a shirt drawn from a
-          photograph says which photograph. */}
-      {row.sourceTitle !== '' && (
-        <p className="mt-2 font-body text-[11px] leading-snug text-sign">
-          {t('kits.source')}: {row.sourceTitle}
-        </p>
-      )}
+      {/* a shirt drawn from a photograph still says it has one (rule 16) — which one is
+          on /credits, the only page that prints sources (spec §0.3, 22.9.2026) */}
+      {row.sourceTitle !== '' && <SourceNote className="mt-2" />}
 
       <div className="mt-stack border-rule border-ink bg-sheet">
         <p className="border-b-hair border-ink/30 px-3 py-2 font-display text-step-0 text-ink">

@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react'
 
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { t, type MessageKey } from '@/lib/i18n'
 import {
   REVEAL_SET,
@@ -88,9 +89,8 @@ function decoyLine(row: RevealRow): string {
   if (decoy.kind === 'sub-on') {
     return decoy.minute !== null ? t('lineup.decoy.subOn.minute', { n: String(decoy.minute) }) : t('lineup.decoy.subOn')
   }
-  return decoy.sourceTitle
-    ? t('lineup.decoy.squad.source', { source: decoy.sourceTitle })
-    : t('lineup.decoy.squad')
+  // the squad's source is on /credits (spec §0.3, 22.9.2026), not in the sentence
+  return t('lineup.decoy.squad')
 }
 
 export function TeamSheet({
@@ -318,9 +318,7 @@ export function TeamSheet({
             </p>
           </div>
 
-          <p className="mt-3 font-mono text-[11px] tabular-nums leading-relaxed text-muted">
-            {t('lineup.source')} · {verdict.sourceTitle}
-          </p>
+          {verdict.sourceTitle !== '' && <SourceNote newTab className="mt-3" />}
 
           <div className="mt-stack grid gap-2 sm:grid-cols-2">
             <button

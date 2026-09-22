@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+import { RealShirtAsk, RealShirtPending } from '@/components/collector/RealShirtAsk'
 import { KitMarkArt } from '@/components/kit/KitEngineShirt'
 import { KitShirt } from '@/components/kit/KitShirt'
 import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import {
   HINT_KINDS,
@@ -101,11 +103,17 @@ export function KitGameRun({
   seed,
   cursor = 0,
   embedded,
+  exactKits,
 }: {
   puzzles: KitPuzzle[]
   seed: number
   cursor?: number
   embedded?: KitEmbedded
+  /**
+   * archive slug → Kit Master id for the shirts with an exact photograph, for the closet question on
+   * the reveal (spec §42). Real ownership only — it never writes, or reads, the game's collection.
+   */
+  exactKits?: Record<string, string>
 }) {
   const store = useMemo(() => activeCollection(), [])
   const marks: KitMarksRegime = embedded ? 'rule25' : 'granted'
@@ -385,10 +393,23 @@ export function KitGameRun({
           last={index + 1 >= puzzles.length}
           marks={marks}
           doneLabel={embedded?.doneLabel}
+          real={embedded ? null : realShirtOf(verdict, exactKits)}
         />
       )}
     </div>
   )
+}
+
+/**
+ * The archive shirt behind a checked verdict: its exact photograph's slug and the Kit Master id.
+ * Only an EXACT photograph — a candidate is a guess at a season, and a closet does not file guesses.
+ */
+function realShirtOf(verdict: KitVerdict, exactKits: Record<string, string> | undefined): { slug: string; kitId: string } | null {
+  if (verdict.evidence.kind !== 'exact' || !exactKits) return null
+  const file = verdict.evidence.photos[0]?.src.split('/').pop() ?? ''
+  const slug = file.replace(/\.webp$/, '')
+  const kitId = exactKits[slug]
+  return kitId ? { slug, kitId } : null
 }
 
 /* ------------------------------------------------------------------ one card */
@@ -618,6 +639,7 @@ function RevealSheet({
   last,
   marks,
   doneLabel,
+  real = null,
 }: {
   verdict: KitVerdict
   mine: KitSpec
@@ -626,6 +648,8 @@ function RevealSheet({
   marks: KitMarksRegime
   /** set inside the life: the way back into the room, and no photograph of the real marks */
   doneLabel?: string
+  /** the archive shirt behind this kit, when there is an exact photograph of it */
+  real?: { slug: string; kitId: string } | null
 }) {
   const ref = useDialog<HTMLDivElement>(onNext)
   const photo = doneLabel ? null : (verdict.evidence.photos[0] ?? null)
@@ -692,7 +716,9 @@ function RevealSheet({
         {verdict.evidence.kind === 'reconstruction' && (
           <p className="mt-1.5 font-body text-[11px] leading-snug text-muted">{t('kitgame.evidence.reconstructionNote')}</p>
         )}
-        {photo?.creditHe && <p className="mt-1 font-body text-[11px] leading-snug text-sign">{photo.creditHe}</p>}
+
+        {/* the closet's question — on the reveal, after the check, never in the way of the next shirt */}
+        {real && !doneLabel ? <RealShirtAsk key={real.slug} slug={real.slug} kitId={real.kitId} /> : null}
 
         <ul className="mt-2 border-t-rule border-ink">
           {verdict.steps.map((row) => (
@@ -706,7 +732,8 @@ function RevealSheet({
             <p><Num>{t('kitgame.reveal.hints', { n: String(verdict.hintsUsed), p: String(verdict.hintsUsed * KIT_HINT_PENALTY) })}</Num></p>
           )}
           {!doneLabel && <p>{t('kitgame.reveal.collected')}{verdict.unlock.dna ? ` ${t('kitgame.reveal.dna')}` : ''}</p>}
-          <p>{t('kitgame.reveal.source', { title: verdict.sourceTitle })}</p>
+          {/* which photograph, and whose, is on /credits (spec §0.3); a verdict opens it in a new tab */}
+          {verdict.sourceTitle !== '' && <SourceNote newTab />}
         </div>
       </div>
 
@@ -779,6 +806,7 @@ function RoundSummary({ log, seed, cursor }: { log: KitVerdict[]; seed: number; 
         ))}
       </ul>
       <RecordRun gate="/kits/build" score={score} correct={right} asked={asked} />
+      <RealShirtPending />
       <div className="mt-3">
         <ShareRow
           kind="kit"

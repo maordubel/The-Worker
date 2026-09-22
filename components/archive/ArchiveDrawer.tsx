@@ -3,9 +3,10 @@
 import Image from 'next/image'
 import { useEffect, useRef, type ReactNode } from 'react'
 
+import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import { MatchLine, Num } from '@/components/ui/Num'
-import { REACTIONS, reactionSetOf, type EntityDetail, type RelatedItem, type WhatBlock } from '@/lib/archive/graph-types'
+import { REACTIONS, reactionSetOf, type ConfidenceWord, type EntityDetail, type RelatedItem, type WhatBlock } from '@/lib/archive/graph-types'
 import { crestArt } from '@/lib/kit/crestMarks'
 import { t, type MessageKey } from '@/lib/i18n'
 import { ArtifactMark, CloseMark, EntityRow, Eyebrow, LATIN, cardTitle, typeLabel } from './EntityCard'
@@ -200,28 +201,14 @@ export function ArchiveDrawer({
             </Block>
           )}
 
-          <Block title={t('archive.drawer.sources')}>
-            <ul className="grid gap-1.5">
-              {detail.sources.map((source) => (
-                <li key={source.id} className="border-s-rule border-sign ps-2">
-                  {source.url ? (
-                    <a href={source.url} target="_blank" rel="noreferrer" className="font-body text-[13px] leading-snug text-sign underline decoration-sign/40 underline-offset-2">
-                      <bdi>{source.title}</bdi>
-                    </a>
-                  ) : (
-                    <p className="font-body text-[13px] leading-snug text-ink">
-                      <bdi>{source.title}</bdi>
-                    </p>
-                  )}
-                  <p className="font-body text-[11px] text-muted">
-                    {t(`graph.conf.${source.confidence}` as MessageKey)}
-                    {source.readOn && <> · {t('archive.drawer.readOn', { date: source.readOn.split('-').reverse().map((part) => String(Number(part))).join('.') })}</>}
-                    {!source.url && <> · {t('archive.drawer.noUrl')}</>}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </Block>
+          {/* how sure the archive is stays on the card; which sources, and where they were
+              read, is on /credits — the one page that prints them (spec §0.3, 22.9.2026) */}
+          {detail.sources.length > 0 && (
+            <p className="mt-3 flex flex-wrap items-center gap-x-2 border-s-rule border-sign ps-2 font-body text-[11px] text-muted">
+              <span>{t(`graph.conf.${strongest(detail.sources.map((source) => source.confidence))}` as MessageKey)}</span>
+              <SourceNote />
+            </p>
+          )}
         </div>
 
         {/* the foot: keep, go deeper, or look everywhere */}
@@ -408,3 +395,8 @@ function What({ what }: { what: WhatBlock }) {
   }
 }
 
+/** the surest word any of the card's sources earns — what the drawer still says about them */
+function strongest(words: readonly ConfidenceWord[]): ConfidenceWord {
+  if (words.includes('high')) return 'high'
+  return words.includes('medium') ? 'medium' : 'low'
+}

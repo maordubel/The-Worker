@@ -4,7 +4,7 @@ import { pickerRoster } from '@/lib/archive/player-master'
 import { lifeBox, lifeWhat } from '@/lib/archive/wing'
 import { formationList, rosterIndex } from '@/lib/game/allTimeXI'
 import { dealRun, type GoalChallenge } from '@/lib/game/goal'
-import { chargeCredit, dealQueue, rosterSize } from '@/lib/game/hate'
+import { dealQueue, rosterSize } from '@/lib/game/hate'
 import { dealKitRound, type KitPuzzle } from '@/lib/game/kitBuild'
 import { dealChallenge, type Challenge } from '@/lib/game/lineup'
 import { buildRound, type MemoryRound } from '@/lib/game/memory'
@@ -102,7 +102,7 @@ export async function dealLifeRumble(seed: number, window: MechanicWindow): Prom
   return { draft, shuffleDraft, playerCount: royalRumblePlayerCount(), kits }
 }
 
-export type LifeWall = ReturnType<typeof dealQueue> & { rosterSize: number; credit: string }
+export type LifeWall = ReturnType<typeof dealQueue> & { rosterSize: number }
 
 /** Shachor's wall: one sport, the names that were names before the year, no later record beside them */
 export async function dealLifeWall(seed: number, window: MechanicWindow): Promise<LifeWall | null> {
@@ -110,7 +110,7 @@ export async function dealLifeWall(seed: number, window: MechanicWindow): Promis
   if (!w) return null
   const queue = dealQueue(seedOf(seed), 0, { before: w.before, ...(w.sport ? { sport: w.sport } : {}) })
   if (queue.order.length < 3) return null
-  return { ...queue, rosterSize: rosterSize(), credit: chargeCredit() }
+  return { ...queue, rosterSize: rosterSize() }
 }
 
 /** the ticket office and the living room: the men who had worn the shirt before the year */

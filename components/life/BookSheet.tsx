@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import type { BookDef } from '@/lib/life/books'
+import { SourceNote } from '@/components/ui/SourceNote'
 
 /**
  * לדפדף בחוברת — twenty-four pages of a thing that exists, held the way it is held.
@@ -126,8 +127,9 @@ export function BookSheet({
         />
       </div>
 
-      <p className="max-w-prose px-5 pb-[max(14px,env(safe-area-inset-bottom))] pt-1 text-center font-body text-[11px] leading-snug text-concrete">
-        <bdi>{book.sourceHe}</bdi>
+      {/* whose copy was scanned is on /credits (spec §0.3, 22.9.2026) */}
+      <p className="px-5 pb-[max(14px,env(safe-area-inset-bottom))] pt-1 text-center">
+        <SourceNote newTab tone="dark" group="assets" />
       </p>
     </div>
   )

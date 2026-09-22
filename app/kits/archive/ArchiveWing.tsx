@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
+import { HaveWantBar } from '@/components/collector/HaveWantBar'
+import { MerchantOffers } from '@/components/collector/MerchantOffers'
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
+import { shirtSignals } from '@/lib/collector/api'
+import type { ShirtSignal } from '@/lib/collector/types'
 import type { ArchiveShirt, ArchiveSource, DecadeFacet, VariantFacet } from '@/lib/kit/archive'
 import { activeCollection } from '@/lib/kit/collection'
 import { t } from '@/lib/i18n'
@@ -36,6 +41,7 @@ export function ArchiveWing({
   decades,
   sources,
   spoilers = {},
+  kits = {},
 }: {
   shirts: ArchiveShirt[]
   variants: VariantFacet[]
@@ -43,6 +49,8 @@ export function ArchiveWing({
   sources: ArchiveSource[]
   /** slug → Gate 4 collection key, for the exact photographs of shirts Gate 4 deals */
   spoilers?: Record<string, string>
+  /** slug → Kit Master id, only where the Kit Master holds this exact photograph (the closet's join) */
+  kits?: Record<string, string>
 }) {
   const [variant, setVariant] = useState<Variant>('all')
   const [decade, setDecade] = useState<Decade>('all')
@@ -68,6 +76,26 @@ export function ArchiveWing({
   }
   const uncover = (slug: string) => setUncovered((rows) => new Set(rows).add(slug))
 
+  // הארון — who has it, who wants it, one read for the whole shelf (≤240 slugs). No answer, no
+  // numbers: without a database the map stays empty and no card prints a count it did not get.
+  const [signals, setSignals] = useState<Record<string, ShirtSignal>>({})
+  useEffect(() => {
+    let live = true
+    void shirtSignals(shirts.map((shirt) => shirt.slug)).then((rows) => {
+      if (live) setSignals(rows)
+    })
+    return () => {
+      live = false
+    }
+  }, [shirts])
+  const setSignal = (slug: string, next: ShirtSignal) => setSignals((rows) => ({ ...rows, [slug]: next }))
+
+  // `?shirt=<slug>` — the link a "מחפש את זאת" card hands over lands on the shirt itself
+  useEffect(() => {
+    const slug = new URLSearchParams(window.location.search).get('shirt')
+    if (slug && shirts.some((shirt) => shirt.slug === slug)) setOpenSlug(slug)
+  }, [shirts])
+
   const shown = shirts
     .filter((shirt) => variant === 'all' || shirt.variant === variant)
     .filter((shirt) => decade === 'all' || shirt.decade === decade)
@@ -80,6 +108,11 @@ export function ArchiveWing({
         shirt={open}
         source={sources.find((row) => row.key === open.source) ?? null}
         onBack={() => setOpenSlug(null)}
+        kitId={kits[open.slug] ?? null}
+        signal={signals[open.slug]}
+        onSignal={(next) => setSignal(open.slug, next)}
+        shielded={shielded(open)}
+        onUncover={() => uncover(open.slug)}
       />
     )
   }
@@ -149,7 +182,7 @@ export function ArchiveWing({
               {shielded(shirt) ? (
                 <ShieldCard shirt={shirt} onUncover={() => uncover(shirt.slug)} />
               ) : (
-                <ShirtCard shirt={shirt} onOpen={() => setOpenSlug(shirt.slug)} />
+                <ShirtCard shirt={shirt} signal={signals[shirt.slug]} onOpen={() => setOpenSlug(shirt.slug)} />
               )}
             </li>
           ))}
@@ -250,7 +283,7 @@ function dateText(shirt: ArchiveShirt): string {
  * optimiser that re-encodes on the way out would invalidate the number the card prints
  * two lines below the picture, which is the number the third yellow exemption rests on.
  */
-function ShirtCard({ shirt, onOpen }: { shirt: ArchiveShirt; onOpen: () => void }) {
+function ShirtCard({ shirt, signal, onOpen }: { shirt: ArchiveShirt; signal?: ShirtSignal; onOpen: () => void }) {
   return (
     <button
       type="button"
@@ -278,6 +311,16 @@ function ShirtCard({ shirt, onOpen }: { shirt: ArchiveShirt; onOpen: () => void 
       <span className="mt-0.5 block truncate font-body text-[10.5px] text-muted">
         {shirt.specialHe ?? shirt.competitionHe ?? shirt.makerHe ?? ' '}
       </span>
+      {/* the closet's count, only when the database counted something */}
+      {signal && (signal.want > 0 || signal.have > 0 || signal.youHave) ? (
+        <span
+          aria-label={t('collector.signal.aria', { want: String(signal.want), have: String(signal.have) })}
+          className="mt-1 flex items-center justify-between gap-1 border-t-hair border-ink/25 pt-1 font-body text-[10.5px] font-extrabold text-ink"
+        >
+          <span aria-hidden="true">{t('collector.signal.compact', { want: String(signal.want), have: String(signal.have) })}</span>
+          {signal.youHave ? <span className="bg-red px-1 text-paper">{t('collector.signal.yours')}</span> : null}
+        </span>
+      ) : null}
     </button>
   )
 }
@@ -318,10 +361,21 @@ function ShirtSheet({
   shirt,
   source,
   onBack,
+  kitId,
+  signal,
+  onSignal,
+  shielded,
+  onUncover,
 }: {
   shirt: ArchiveShirt
   source: ArchiveSource | null
   onBack: () => void
+  kitId: string | null
+  signal: ShirtSignal | undefined
+  onSignal: (next: ShirtSignal) => void
+  /** a Gate 4 shirt opened by link before it was built: the sheet says so and shows no photograph */
+  shielded: boolean
+  onUncover: () => void
 }) {
   const rows: Array<{ label: string; value: string | null; ltr?: boolean }> = [
     // `1994/95` carries a slash and must be isolated; `1994 בערך` must not be.
@@ -330,7 +384,6 @@ function ShirtSheet({
     { label: t('kits.archive.spec.competition'), value: shirt.competitionHe },
     { label: t('kits.archive.spec.special'), value: shirt.specialHe },
     { label: t('kits.archive.spec.maker'), value: shirt.makerHe },
-    { label: t('kits.archive.spec.source'), value: shirt.sourceTitle },
     {
       label: t('kits.archive.spec.yellow'),
       value:
@@ -363,16 +416,37 @@ function ShirtSheet({
       </div>
 
       <div className="border-x-rule border-b-rule border-ink bg-paper p-4">
-        {/* eslint-disable-next-line @next/next/no-img-element -- as above: the file that ships is the file that was measured */}
-        <img
-          src={shirt.src}
-          alt={`${shirt.variantHe} · ${dateText(shirt)}`}
-          width={760}
-          height={760}
-          data-archive-photo=""
-          className="mx-auto block h-auto w-full max-w-[420px]"
-        />
+        {shielded ? (
+          <button
+            type="button"
+            onClick={onUncover}
+            aria-label={t('kits.shield.aria', { date: dateText(shirt) })}
+            className="mx-auto flex aspect-square min-h-tap w-full max-w-[420px] flex-col items-center justify-center gap-2 border-rule border-dashed border-ink/50 bg-sheet px-6 text-center"
+          >
+            <span className="font-display text-step-2 leading-tight text-ink">{t('kits.shield.title')}</span>
+            <span className="max-w-[28ch] font-body text-step--1 leading-snug text-muted">{t('collector.shield.sheet')}</span>
+          </button>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element -- as above: the file that ships is the file that was measured
+          <img
+            src={shirt.src}
+            alt={`${shirt.variantHe} · ${dateText(shirt)}`}
+            width={760}
+            height={760}
+            data-archive-photo=""
+            className="mx-auto block h-auto w-full max-w-[420px]"
+          />
+        )}
       </div>
+
+      <HaveWantBar
+        slug={shirt.slug}
+        kitId={kitId}
+        dateLabel={dateText(shirt)}
+        variantHe={shirt.variant === 'home' ? null : shirt.variantHe}
+        signal={signal}
+        onSignal={onSignal}
+      />
 
       {shirt.seasonAmbiguous && (
         <p className="mt-2 border-rule border-sign/50 bg-sheet p-3 font-body text-[12px] leading-relaxed text-sign">
@@ -407,52 +481,30 @@ function ShirtSheet({
         ))}
       </dl>
 
-      {source && (
-        <p className="mt-2 font-body text-[11px] leading-snug text-sign">
-          {source.creditHe ?? source.title}
-          {' · '}
-          <a
-            href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2"
-          >
-            {t('kits.archive.link')}
-          </a>
-        </p>
-      )}
+      <MerchantOffers slug={shirt.slug} kitId={kitId} season={shirt.seasonLabel} />
+
+      {/* the source and the photographer live on /credits (spec §0.3, 22.9.2026) */}
+      {source && <SourceNote group="photo" className="mt-2" />}
     </div>
   )
 }
 
 /**
- * The credit, and it is not a footnote.
+ * The credit is on /credits, and it is still not a footnote.
  *
- * 114 of these photographs are ישי צבי's, published on ויקיפועל. Showing the source is
- * the product (rule 16), and a photographer is a source with a name.
+ * 114 of these photographs are ישי צבי's, published on ויקיפועל. Until 22.9.2026 his name
+ * and both sources were printed here; the owner's spec (§0.3) moved every credit to one
+ * page, where he is the first line of the photographs shelf (`/credits#photo`). What stays
+ * here is the note on how the files were cut — that is about the archive, not a credit.
  */
 function Credits({ sources }: { sources: ArchiveSource[] }) {
   return (
     <div className="mt-stack border-rule border-ink bg-sheet">
-      <p className="border-b-hair border-ink/30 px-3 py-2 font-display text-step-0 text-ink">
-        {t('kits.archive.sources')}
-      </p>
-      {sources.map((row) => (
-        <div key={row.key} className="border-b-hair border-ink/20 px-3 py-2.5">
-          <p className="font-body text-[12.5px] font-bold text-ink">
-            {row.title} · {t('kits.archive.shirts', { n: String(row.count) })}
-          </p>
-          {row.creditHe && <p className="mt-1 font-body text-[11.5px] text-red">{row.creditHe}</p>}
-          <a
-            href={row.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-block font-body text-[11px] text-sign underline underline-offset-2"
-          >
-            {t('kits.archive.link')}
-          </a>
-        </div>
-      ))}
+      {sources.length > 0 && (
+        <p className="border-b-hair border-ink/30 px-3 py-1.5">
+          <SourceNote group="photo" />
+        </p>
+      )}
       <p className="px-3 py-2.5 font-body text-[11.5px] leading-relaxed text-muted">
         {t('kits.archive.note')}
       </p>

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
+import { ClosetDoor } from '@/components/collector/ClosetDoor'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
@@ -10,6 +12,7 @@ import {
   archiveSummary,
   archiveVariants,
 } from '@/lib/kit/archive'
+import { collectorShirts } from '@/lib/collector/catalog'
 import { playableKits } from '@/lib/kit/kit-master'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
@@ -49,6 +52,13 @@ function spoilerMap(): Record<string, string> {
   return out
 }
 
+/** slug → Kit Master id, only for the exact photographs — the closet's join (`lib/collector/catalog.ts`) */
+function kitMap(): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const shirt of collectorShirts()) if (shirt.kitId) out[shirt.slug] = shirt.kitId
+  return out
+}
+
 export default function KitArchivePage() {
   const shirts = archiveShirts()
   const summary = archiveSummary(shirts)
@@ -65,12 +75,28 @@ export default function KitArchivePage() {
               approx: String(summary.approximate),
             })}
           </p>
+          <div className="mt-3">
+            <ClosetDoor compact />
+          </div>
+          {/* שוק האדומים — the copies fans hold of these shirts (spec §12). One shirt's copies are /kits/market?slug=<slug>. */}
+          <Link
+            href="/kits/market"
+            className="mt-2 inline-flex min-h-tap flex-wrap items-center gap-x-2 border-rule border-ink bg-sheet px-3 py-1.5 font-body text-step--1 font-extrabold text-ink"
+            data-archive-market=""
+          >
+            <span className="text-red">{t('market.title')}</span>
+            <span className="font-normal text-muted">{t('market.fromArchive')}</span>
+            <span aria-hidden="true" className="text-red">
+              ←
+            </span>
+          </Link>
           <ArchiveWing
             shirts={shirts}
             variants={archiveVariants(shirts)}
             decades={archiveDecades(shirts)}
             sources={archiveSources(shirts)}
             spoilers={spoilerMap()}
+            kits={kitMap()}
           />
         </>
       ) : (

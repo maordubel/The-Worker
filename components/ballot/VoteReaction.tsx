@@ -3,11 +3,12 @@
 import { KitShirt } from '@/components/kit/KitShirt'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import { BALLOT, type PollQuestion } from '@/lib/polls/ballot'
 import { factIsEmpty, spanOf, type PickFact } from '@/lib/polls/pickFact'
 import { reasonsFor } from '@/lib/polls/reasons'
-import { WORN_SHOWN, type NumberBoard, type WornRow } from '@/lib/polls/wore'
+import { WORN_SHOWN, type WornRow } from '@/lib/polls/wore'
 import { t, type MessageKey } from '@/lib/i18n'
 
 /**
@@ -49,7 +50,6 @@ export function VoteReaction({
   pick,
   fact,
   worn = [],
-  wornSources = [],
   chosen,
   filled,
   last,
@@ -65,7 +65,6 @@ export function VoteReaction({
   fact: PickFact | null
   /** for the number: who wore it, season-bound, each row pointing at its source */
   worn?: readonly WornRow[]
-  wornSources?: NumberBoard['sources']
   chosen: MessageKey | undefined
   filled: number
   /** true when this was the last empty row: the beat returns to the slip, not to a question */
@@ -171,18 +170,15 @@ export function VoteReaction({
                       {t('poll.fact.shirt', { season: fact.seasonLabel })}
                     </p>
                   )}
-                  {fact.sourceTitle !== null && (
-                    <p className="mt-0.5 truncate font-mono text-[9px] tabular-nums text-muted">
-                      {t('poll.fact.source', { source: fact.sourceTitle })}
-                    </p>
-                  )}
+                  {/* which source is on /credits (spec §0.3, 22.9.2026) */}
+                  {fact.sourceTitle !== null && <SourceNote newTab className="mt-0.5" />}
                 </dl>
               </div>
             )}
           </div>
         )}
 
-        {/* מי לבש את המספר — the archive's season-bound holders, each with its source */}
+        {/* מי לבש את המספר — the archive's season-bound holders; their sources are on /credits */}
         {question.kind === 'number' && (
           <div className="mx-4 mt-3 border-hair border-ink/30 bg-paper p-2.5">
             <p className="font-body text-[8.5px] font-extrabold tracking-[0.18em] text-red">
@@ -210,13 +206,7 @@ export function VoteReaction({
                     {t('poll.number.worn.more', { n: String(worn.length - WORN_SHOWN) })}
                   </p>
                 )}
-                <p className="mt-1 font-mono text-[9px] leading-snug text-muted">
-                  {t('poll.fact.source', {
-                    source: [...new Set(worn.slice(0, WORN_SHOWN).map((row) => wornSources[row.source]?.title ?? ''))]
-                      .filter(Boolean)
-                      .join(' · '),
-                  })}
-                </p>
+                <SourceNote newTab className="mt-1" />
               </>
             )}
           </div>

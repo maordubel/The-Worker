@@ -7,6 +7,7 @@ import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import { closeThread, linkThread } from '@/app/timeline/actions'
 import { ENTITY_TYPES, type ArchiveCard, type EntityType, type SourceLine } from '@/lib/archive/graph-types'
@@ -273,7 +274,7 @@ export function ThreadBoard({ levels, seed, cursor }: { levels: PublicLevel[]; s
             </li>
             {path.map((stop, i) => (
               <li key={stop.card.id} className="mt-1">
-                <EdgeTag text={label(stop.labelKey, stop.params)} source={stop.sources[0]?.title ?? null} />
+                <EdgeTag text={label(stop.labelKey, stop.params)} sourced={stop.sources.length > 0} />
                 <div className="mt-1 flex items-stretch gap-1.5">
                   <div className="min-w-0 flex-1">
                     <Anchor card={stop.card} compact />
@@ -495,16 +496,13 @@ function Anchor({ card, caption, end = false, compact = false }: { card: Archive
   )
 }
 
-function EdgeTag({ text, source }: { text: string; source: string | null }) {
+/** an edge's label, and — when the graph holds a source for it — the one indicator (spec §0.3) */
+function EdgeTag({ text, sourced }: { text: string; sourced: boolean }) {
   return (
     <p className="-ms-3 flex items-center gap-1.5">
       <span aria-hidden="true" className="h-[3px] w-3 bg-red" />
       <span className="border-hair border-red bg-sheet px-1.5 py-0.5 font-body text-[11.5px] font-bold leading-tight text-red">{text}</span>
-      {source && (
-        <span className="min-w-0 truncate font-body text-[10.5px] text-muted">
-          <bdi>{source}</bdi>
-        </span>
-      )}
+      {sourced && <SourceNote newTab />}
     </p>
   )
 }
@@ -558,9 +556,11 @@ function Success({
                   <bdi>{cardTitle(edge.to)}</bdi>
                 </Link>
               </p>
+              {/* how sure the graph is stays here; which source is on /credits (spec §0.3) */}
               {edge.sources[0] && (
-                <p className="font-body text-[11px] leading-snug text-muted">
-                  {t('thread.edge.source')}: <bdi>{edge.sources[0].title}</bdi> · {t(`graph.conf.${edge.sources[0].confidence}` as MessageKey)}
+                <p className="flex flex-wrap items-center gap-x-2 font-body text-[11px] leading-snug text-muted">
+                  <span>{t(`graph.conf.${edge.sources[0].confidence}` as MessageKey)}</span>
+                  <SourceNote newTab />
                 </p>
               )}
             </li>

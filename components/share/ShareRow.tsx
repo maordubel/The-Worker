@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 import { emit, type ShareChannel } from '@/lib/profile/events'
-import { challengeUrl, whatsappHref, telegramHref, type ShareKind } from '@/lib/share/copy'
+import { challengeUrl, dareKey, whatsappHref, telegramHref, type ShareKind } from '@/lib/share/copy'
 import { renderStory, type StoryCard } from '@/lib/share/story'
 import { t, type MessageKey } from '@/lib/i18n'
 
@@ -107,7 +107,7 @@ export function ShareRow({
           hands over a blank slip. Printing "אותן שאלות, אותו סדר, אותו שעון" under a
           ballot would be describing a round that does not exist. */}
       <p className="mt-1.5 font-body text-[11.5px] leading-relaxed text-concrete">
-        {t(kind === 'polls' ? 'share.dare.polls' : 'share.dare')}
+        {t(dareKey(kind))}
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-2">

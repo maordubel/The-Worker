@@ -6,6 +6,7 @@ import { KitShirt } from '@/components/kit/KitShirt'
 
 import { t } from '@/lib/i18n'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
+import { SourceNote } from '@/components/ui/SourceNote'
 
 /**
  * החולצה שקנית — the only purchase in this game that stops the world.
@@ -71,11 +72,8 @@ export function ShirtCard({ shirt, onClose }: { shirt: NonNullable<LifeBusEvents
 
       <p className="mt-3 max-w-[34ch] font-body text-[13px] leading-relaxed text-concrete">{shirt.noteHe}</p>
 
-      {shirt.sourceHe && (
-        <p className="mt-2 max-w-[34ch] font-body text-[11px] leading-snug text-concrete/70">
-          <bdi>{shirt.sourceHe}</bdi>
-        </p>
-      )}
+      {/* which photograph the shirt was drawn from is on /credits (spec §0.3) */}
+      {shirt.sourceHe && <SourceNote newTab tone="dark" className="mt-2" />}
 
       {/*
         A purchase counts; an ARRIVAL does not. "3 / 9" under a shirt you have just been

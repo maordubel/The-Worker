@@ -10,6 +10,7 @@ import { Grain, Letterbox } from '@/components/life/FilmFx'
 import { MatchReport } from '@/components/life/MatchReport'
 import { CUP_SLUG, buildMatchReport } from '@/lib/life/finale'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 
@@ -227,9 +228,10 @@ export function StageFinale({
                 {match.decidedBy?.assistHe && <Row label={t('life.finale.assist')} value={match.decidedBy.assistHe} />}
               </dl>
 
-              <p className="mt-3 border-t-hair border-ink/20 pt-3 font-body text-[11px] leading-snug text-muted">
-                <span className="text-ink">{t('life.anchor.source')}</span> <bdi>{match.sourceTitle}</bdi>
-                {!verified && <span className="ms-1 text-red"> · {t('life.anchor.unverified')}</span>}
+              {/* which source is on /credits (spec §0.3); whether it is verified stays here */}
+              <p className="mt-3 flex flex-wrap items-center gap-x-2 border-t-hair border-ink/20 pt-2 font-body text-[11px] leading-snug text-muted">
+                <SourceNote newTab />
+                {!verified && <span className="text-red">{t('life.anchor.unverified')}</span>}
               </p>
             </section>
           )}
@@ -243,10 +245,8 @@ export function StageFinale({
               <p className="mt-2 font-body text-[15px] leading-relaxed text-ink">
                 <bdi>{finale.anchor.summaryHe}</bdi>
               </p>
-              <p className="mt-3 border-t-hair border-ink/20 pt-2 font-body text-[11px] leading-snug text-muted">
-                <bdi>
-                  {t('life.finale.source')}: {finale.anchor.sourceTitle}
-                </bdi>
+              <p className="mt-3 border-t-hair border-ink/20 pt-2">
+                <SourceNote newTab />
               </p>
             </section>
           )}

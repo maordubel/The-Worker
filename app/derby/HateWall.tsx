@@ -10,6 +10,7 @@ import { RecordRun } from '@/components/play/RecordRun'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
 import { ShareRow } from '@/components/share/ShareRow'
 import { AdSlot } from '@/components/ads/AdSlot'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import {
   DUEL_COUNT,
@@ -62,7 +63,6 @@ export function HateWall({
   cursor = 0,
   pinned,
   rosterSize,
-  credit,
   embedded,
 }: {
   enemies: Enemy[]
@@ -73,8 +73,6 @@ export function HateWall({
   /** the wall came from a link — a friend's wall, or a typed code */
   pinned: boolean
   rosterSize: number
-  /** the charges are Maor's voice — his ranking, credited (rule 18 §3) */
-  credit: string
   /**
    * Opened from inside THE WORKER LIFE — Shachor's notebook outside the hall. The same wall
    * over the names that were names before the life's year; when the queue runs out the
@@ -161,7 +159,7 @@ export function HateWall({
   if (over(wall)) {
     if (embedded) return null
     const verdict = judgeWall(enemies, wall, seed, cursor)
-    if (verdict) return <StillHere verdict={verdict} seed={seed} cursor={cursor} pinned={pinned} rosterSize={rosterSize} credit={credit} />
+    if (verdict) return <StillHere verdict={verdict} seed={seed} cursor={cursor} pinned={pinned} rosterSize={rosterSize} />
     return null
   }
   if (!duel || !holder || !challenger) return null
@@ -315,8 +313,11 @@ export function HateWall({
         )}
 
         <p className="mt-3 font-body text-[11px] leading-snug text-hate-muted">{t('hate.swipeHint')}</p>
-        <p className="mt-1 font-body text-[11px] text-hate-muted">
-          {t('hate.wall.credit', { credit })} · {t('hate.wall.rosterNote', { count: String(rosterSize) })}
+        {/* the charges are the terrace's ranking, and whose it is is on /credits under the
+            owner-knowledge label (rule 18 §3, spec §0.2–0.3, 22.9.2026) */}
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 font-body text-[11px] text-hate-muted">
+          <span>{t('hate.wall.rosterNote', { count: String(rosterSize) })}</span>
+          <SourceNote newTab tone="dark" group="team" />
         </p>
       </div>
 
@@ -414,14 +415,12 @@ function StillHere({
   cursor,
   pinned,
   rosterSize,
-  credit,
 }: {
   verdict: WallVerdict
   seed: number
   cursor: number
   pinned: boolean
   rosterSize: number
-  credit: string
 }) {
   const router = useRouter()
   const [code, setCode] = useState('')
@@ -567,8 +566,9 @@ function StillHere({
         </form>
         {bad && <p className="mt-1 font-body text-[12px] text-hate-red-light">{t('hate.code.bad')}</p>}
 
-        <p className="mt-3 font-body text-[11px] text-hate-muted">
-          {t('hate.wall.credit', { credit })} · {t('hate.wall.rosterNote', { count: String(rosterSize) })}
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 font-body text-[11px] text-hate-muted">
+          <span>{t('hate.wall.rosterNote', { count: String(rosterSize) })}</span>
+          <SourceNote newTab tone="dark" group="team" />
         </p>
         <AdSlot placement="result" />
       </div>
@@ -576,7 +576,10 @@ function StillHere({
   )
 }
 
-/** the sourced record — cited with its own source, Maor's labelled as his, or nothing */
+/**
+ * the sourced record — or nothing. Which source, and the owner's knowledge under its neutral
+ * label, is on /credits (rule 18 §3, spec §0.2–0.3); the plate says only that it has one.
+ */
 function Record({ enemy }: { enemy: Enemy }) {
   if (enemy.record === 'none') return null
   const line = enemy.detailHe !== '' ? enemy.detailHe : enemy.keyFactHe
@@ -585,9 +588,7 @@ function Record({ enemy }: { enemy: Enemy }) {
     <div className="mt-2 border-rule border-hate-ink/40 bg-hate-card p-3">
       <p className="font-body text-[10px] tracking-widest text-hate-muted">{t('hate.record')}</p>
       <p className="mt-1 font-body text-step--1 leading-relaxed text-hate-ink">{line}</p>
-      <p className="mt-1 font-body text-[11px] text-hate-muted">
-        {enemy.record === 'maor' ? t('hate.record.maor', { source: enemy.sourceTitle }) : t('hate.record.source', { source: enemy.sourceTitle })}
-      </p>
+      <SourceNote newTab tone="dark" group={enemy.record === 'maor' ? 'team' : null} className="mt-1" />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { ACTION_SHORT, ActionGlyph } from './ReplayBuilder'
 import type { ReplayMetrics, TouchVerdict } from '@/lib/game/replay/judge'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -192,9 +193,8 @@ export function ReplayVerdict({
 
       <p className="mt-2 font-body text-step--1 leading-relaxed text-ink">{narrativeHe}</p>
       <p className="mt-1.5 font-body text-[11px] leading-snug text-muted">{t('goal.envelopeNote')}</p>
-      <p className="mt-1 font-mono text-[11px] tabular-nums text-muted">
-        <bdi>{sourceTitle}</bdi>
-      </p>
+      {/* which report the goal was rebuilt from is on /credits (spec §0.3, 22.9.2026) */}
+      {sourceTitle !== '' && <SourceNote newTab className="mt-1" />}
     </div>
   )
 }

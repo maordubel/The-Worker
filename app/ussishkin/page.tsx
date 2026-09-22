@@ -5,6 +5,7 @@ import { HallPlate } from './HallPlate'
 import { Reconstruction, type Look } from './Reconstruction'
 import { Num } from '@/components/ui/Num'
 import { ReportLink } from '@/components/ui/ReportLink'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { Screen } from '@/components/ui/Screen'
 import {
   blockedSources,
@@ -223,9 +224,7 @@ export default function UssishkinPage() {
                   <p className="font-body text-step-0 leading-relaxed text-ink">{fact.factHe}</p>
                   <p className="mt-1 flex flex-wrap items-baseline gap-x-2 font-mono text-[10.5px] text-muted">
                     {fact.periodHe !== '' && <Num>{fact.periodHe}</Num>}
-                    <a href={fact.sourceUrl} target="_blank" rel="noreferrer" className="underline">
-                      <bdi>{fact.sourceTitle}</bdi>
-                    </a>
+                    <SourceNote />
                   </p>
                 </li>
               ))}
@@ -258,14 +257,7 @@ export default function UssishkinPage() {
                     )}
                     {fact.factHe}
                   </p>
-                  <a
-                    href={fact.sourceUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-1 inline-block font-mono text-[10px] text-concrete/70 underline"
-                  >
-                    <bdi>{fact.sourceTitle}</bdi>
-                  </a>
+                  <SourceNote tone="dark" className="mt-1" />
                 </li>
               ))}
           </ul>
@@ -307,16 +299,7 @@ export default function UssishkinPage() {
                   })}
                 </p>
               )}
-              {event.sourceUrl && (
-                <a
-                  href={event.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 inline-block font-mono text-[10px] text-muted underline"
-                >
-                  <bdi>{event.sourceTitle}</bdi>
-                </a>
-              )}
+              {event.sourceUrl && <SourceNote className="mt-1" />}
             </li>
           ))}
         </ol>

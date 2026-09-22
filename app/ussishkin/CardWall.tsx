@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { collect, collected, readProfile } from '@/lib/profile/store'
 import { t, type MessageKey } from '@/lib/i18n'
 
@@ -159,10 +160,9 @@ export function CardWall({ facts }: { facts: Fact[] }) {
               )}
             </p>
             <p className="mt-1.5 font-body text-step-0 leading-relaxed text-ink">{card.factHe}</p>
-            <p className="mt-2 font-mono text-[10.5px] text-muted">
-              <a href={card.sourceUrl} target="_blank" rel="noreferrer" className="underline">
-                <bdi>{card.sourceTitle}</bdi>
-              </a>
+            {/* the source is on /credits (spec §0.3, 22.9.2026) */}
+            <p className="mt-2">
+              <SourceNote />
             </p>
           </>
         ) : (

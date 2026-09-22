@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { SourceNote } from '@/components/ui/SourceNote'
 import { artUrl } from '@/lib/life/runtime/art'
 import { sourceTitles, type MatchReport as Report } from '@/lib/life/finale'
 import { t } from '@/lib/i18n'
@@ -229,26 +230,9 @@ export function MatchReport({ report, onZoom }: { report: Report; onZoom: (art: 
         <h2 className="font-display text-step-1 leading-tight text-ink">
           <bdi>{t('life.report.sources')}</bdi>
         </h2>
-        <ul className="mt-2 flex flex-col gap-1.5">
-          {report.sources.map((source) => (
-            <li key={source.id} className="font-body text-[12px] leading-snug text-ink">
-              <bdi>{source.titleHe}</bdi>
-              {source.url && (
-                <>
-                  {' '}
-                  <a
-                    href={source.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-body text-[11px] text-red underline"
-                  >
-                    <bdi>{t('life.report.open')}</bdi>
-                  </a>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+        {/* the bibliography is on /credits, the one page that prints sources (spec §0.3,
+            22.9.2026); what the sources DON'T say stays here, because that is the report */}
+        {report.sources.length > 0 && <SourceNote newTab className="mt-2" />}
         <p className="mt-3 border-t-hair border-ink/20 pt-2 font-body text-[11px] leading-relaxed text-muted">
           <span className="text-ink">{t('life.report.silence')} </span>
           <bdi>{report.silenceHe}</bdi>
@@ -396,13 +380,15 @@ function Mark({ outcome, ours }: { outcome: 'scored' | 'saved' | 'missed'; ours:
   )
 }
 
-/** the line rule 16 is about: who says so, under the thing they say */
+/**
+ * The line rule 16 is about — that there IS a source under the thing it says. Which one is on
+ * /credits (spec §0.3, 22.9.2026), opened in a new tab so the report is still here after.
+ */
 function Cite({ titles, dark }: { titles: string[]; dark?: boolean }) {
   if (titles.length === 0) return null
   return (
-    <p className={`mt-1 font-body text-[10px] leading-snug ${dark ? 'text-concrete' : 'text-muted'}`}>
-      <span className={dark ? 'text-sheet' : 'text-ink'}>{t('life.anchor.source')} </span>
-      <bdi>{titles.join(' · ')}</bdi>
+    <p className="mt-1">
+      <SourceNote newTab tone={dark ? 'dark' : 'paper'} />
     </p>
   )
 }

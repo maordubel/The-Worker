@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { AdSlot } from '@/components/ads/AdSlot'
@@ -8,6 +9,7 @@ import { HelpChip } from '@/components/ui/HelpChip'
 import { SignPlate } from '@/components/ui/SignPlate'
 import { TabBar } from '@/components/ui/TabBar'
 import { SITE_LABEL } from '@/lib/brand'
+import { CREDITS_PATH } from '@/lib/credits/groups'
 import { t } from '@/lib/i18n'
 
 /**
@@ -107,6 +109,17 @@ export function Screen({
               <p className="mt-0.5 font-latin text-[10px] font-bold tracking-[0.16em] text-red" dir="ltr">
                 {SITE_LABEL.toUpperCase()}
               </p>
+              {/* המקורות — the one place every source and credit is printed (spec §0.3,
+                  22.9.2026). It sits with the colophon, not with the build credit:
+                  whose facts these are and who built the page are two different claims. */}
+              <Link
+                href={CREDITS_PATH}
+                prefetch={false}
+                className="mt-2 inline-flex min-h-tap items-center font-body text-[12px] font-bold text-paper underline decoration-red decoration-2 underline-offset-4"
+                data-footer-credits=""
+              >
+                {t('footer.credits')}
+              </Link>
             </div>
             <div className="flex flex-col items-start gap-2 border-t-hair border-concrete/30 pt-3 md:items-end md:border-t-0 md:pt-0">
               <BuiltByDubel />

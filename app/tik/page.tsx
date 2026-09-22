@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { ClosetDoor } from '@/components/collector/ClosetDoor'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { kitCatalog } from '@/lib/kit/catalog'
@@ -32,6 +33,8 @@ export default function TikPage() {
     <Screen title={t('screen.tik.title')} sub={t('screen.tik.sub')}>
       <p className="mt-stack max-w-prose font-body text-step-0 leading-relaxed text-ink">{t('tik.card.lede')}</p>
       <CardTabs shirt={shirt} kitsTotal={kitsTotal} />
+      {/* the closet is the account's other half: the card is who you are, the closet is what hangs at home */}
+      <ClosetDoor />
       <ReportLink />
     </Screen>
   )

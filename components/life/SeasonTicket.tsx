@@ -8,6 +8,7 @@ import { shekels } from '@/lib/life/prices'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { holdsSeason, renewal, seasonFor, streakOf } from '@/lib/life/subscription'
 import type { LifeState } from '@/lib/life/types'
+import { SourceNote } from '@/components/ui/SourceNote'
 
 /**
  * "המנוי יצא למכירה" — the card that stops a chapter, and the window that sells one.
@@ -148,12 +149,11 @@ export function SeasonTicket({
           <bdi>{season.noteHe}</bdi>
         </p>
 
-        {/* Rule 16 — the row's own source, on the card, where the player reads it. */}
+        {/* Rule 16 — the card still says the row has a source; which one is on /credits,
+            the only page that prints sources (spec §0.3, 22.9.2026). */}
         {season.sourceHe && (
-          <p className="border-b-hair border-ink/30 px-4 py-2 font-mono text-[9px] leading-relaxed text-ink/50">
-            <bdi>
-              {t('life.sub.source')} · {season.sourceHe}
-            </bdi>
+          <p className="border-b-hair border-ink/30 px-4 py-1">
+            <SourceNote newTab />
           </p>
         )}
 

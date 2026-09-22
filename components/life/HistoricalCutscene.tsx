@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import { embedUrl, type CutsceneCard, type CutsceneOutcome, type HistoricalCutscene as Def } from '@/lib/life/cutscenes'
+import { SourceNote } from '@/components/ui/SourceNote'
 
 /**
  * הסרט — real footage, inside the game, on a television that is not there.
@@ -345,10 +346,12 @@ export function HistoricalCutscene({
             />
           </div>
 
-          {/* ---------- attribution, always ---------- */}
-          <p className="mt-3 px-gutter text-center font-body text-[10px] text-concrete/45">
-            {scene.sourceTitle}
-          </p>
+          {/* ---------- attribution, always — which film, whose, is on /credits (spec §0.3) ---------- */}
+          {scene.sourceTitle !== '' && (
+            <p className="mt-3 px-gutter text-center">
+              <SourceNote newTab tone="dark" />
+            </p>
+          )}
 
           {/* ---------- the gate ---------- */}
           {phase === 'gate' ? (

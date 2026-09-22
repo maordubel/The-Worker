@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Num } from '@/components/ui/Num'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { dealChallenge, hasVerifiedLineup, type MatchIntro } from '@/lib/game/lineup'
 import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
@@ -65,14 +66,8 @@ function Intro({ titleHe, subtitleHe, intro, sourceTitle }: {
           ) : null}
         </p>
         <p className="mt-1 font-body text-[11px] leading-snug text-muted">{t('lineup.zone.intro')}</p>
-        <p className="mt-1.5 font-mono text-[10.5px] leading-snug text-muted">
-          {t('lineup.intro.sourceXi', { source: sourceTitle })}
-        </p>
-        {intro.matchSourceTitle && (
-          <p className="font-mono text-[10.5px] leading-snug text-muted">
-            {t('lineup.intro.sourceMatch', { source: intro.matchSourceTitle })}
-          </p>
-        )}
+        {/* the eleven's source and the match's are on /credits (spec §0.3, 22.9.2026) */}
+        {(sourceTitle !== '' || intro.matchSourceTitle) && <SourceNote newTab className="mt-1.5" />}
       </div>
     </section>
   )

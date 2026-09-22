@@ -24,6 +24,7 @@ import {
   type StickerSetId,
 } from '@/lib/life/stickers'
 import type { LifeState } from '@/lib/life/types'
+import { SourceNote } from '@/components/ui/SourceNote'
 
 /**
  * האלבום — twenty-two rectangles, six of which are photographs.
@@ -229,9 +230,12 @@ export function AlbumSheet({
               <bdi>{open.handHe}</bdi>
             </span>
           )}
-          <p className="max-w-prose pt-2 text-center font-body text-[11px] leading-snug text-concrete">
-            <bdi>{open.sourceHe}</bdi>
-          </p>
+          {/* where the paper came from is on /credits (spec §0.3, 22.9.2026) */}
+          {open.sourceHe !== '' && (
+            <p className="pt-2 text-center">
+              <SourceNote newTab tone="dark" group="assets" />
+            </p>
+          )}
           {open.defector && hasSticker(state, open.id) && (
             <span className="flex flex-col items-center gap-1.5 pt-3">
               <span className="max-w-[24rem] text-center font-body text-[12px] leading-snug text-sheet">

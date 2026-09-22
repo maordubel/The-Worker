@@ -33,6 +33,7 @@ import {
 } from '@/lib/life/stickers'
 import type { LifeState } from '@/lib/life/types'
 import { meets } from '@/lib/life/world/types'
+import { SourceNote } from '@/components/ui/SourceNote'
 
 /**
  * חנות האוהדים — the rail, the counter, and the two things you leave a shop holding.
@@ -472,11 +473,10 @@ function Held({
           {shirt.noteHe}
         </p>
 
+        {/* the shirt's source is on /credits (spec §0.3, 22.9.2026); the card says it has one */}
         {shirt.sourceHe && (
-          <p className="mx-auto mt-2 max-w-[34ch] border-t-hair border-ink/20 pt-2 font-mono text-[10px] leading-snug tabular-nums text-ink/55">
-            {t('life.shop.source')}
-            <span className="px-1.5">·</span>
-            <bdi>{shirt.sourceHe}</bdi>
+          <p className="mx-auto mt-2 max-w-[34ch] border-t-hair border-ink/20 pt-1">
+            <SourceNote newTab />
           </p>
         )}
 

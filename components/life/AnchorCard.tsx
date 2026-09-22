@@ -1,5 +1,6 @@
 'use client'
 
+import { SourceNote } from '@/components/ui/SourceNote'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
 import { isPlaceholder } from '@/lib/life/anchors'
 import { t } from '@/lib/i18n'
@@ -74,9 +75,9 @@ export function AnchorCard({ anchor, onClose }: { anchor: HistoricalAnchor; onCl
             </div>
           )}
 
-          <p className="mt-4 border-t-hair border-ink/25 pt-3 font-body text-[11px] leading-snug text-muted">
-            <span className="text-ink">{t('life.anchor.source')}</span>{' '}
-            <bdi>{anchor.sourceTitle}</bdi>
+          {/* the card still shows that it has a source; which one is on /credits (spec §0.3) */}
+          <p className="mt-4 border-t-hair border-ink/25 pt-2">
+            <SourceNote newTab />
           </p>
 
           {anchor.placeholder && (
