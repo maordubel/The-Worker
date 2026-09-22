@@ -92,6 +92,17 @@ export const CHARACTER_OF: Readonly<Record<string, string>> = {
   yaron: 'yaron',
   batya: 'batya',
   yonatan: 'yonatan',
+  /**
+   * נטע וגור — **שורות קיימות, לא אנשים חדשים** (21.9.2026).
+   *
+   * `N04` אומרת *"נטע וגור פועלים במוזיקה"*, וכתבתי להם שתי שורות חדשות במרשם. הן
+   * היו כפילות: `neta-katamin` (נטע גופן) ו-`gur-katamin` (גור שפיגל) יושבים שם מאז
+   * 20.9.2026 עם `aliases: ['נטע']` ו-`['גור']` בדיוק בשביל זה. `tests/life-cast.ts`
+   * תפס את זה באותה ריצה — זו אותה תקלה שכלל 79 נכתב עליה (`ilan`), רק שהפעם היא
+   * נתפסה על ידי שומר ולא על ידי שאלה.
+   */
+  neta: 'neta-katamin',
+  gur: 'gur-katamin',
   melanie: 'melanie',
   dor: 'dor',
   shani: 'crowd-shani',
@@ -140,6 +151,26 @@ export const PEOPLE_WITHOUT_A_ROW: readonly string[] = []
  */
 export const NAME_COLLISION: Readonly<Record<string, string>> = {}
 
+// -------------------------------------------------------------------- the achievements
+/**
+ * שבעה מקטעי `הישג` בתסריט → **שישה** הישגים במנוע (21.9.2026).
+ *
+ * `keys_in_hand` מופיע פעמיים ב-`O04`, בשתי בחירות שונות, והוא אותו הישג — ולכן
+ * הטבלה הזאת היא גם מה שמונע מהמנוע לספור שבעה. שאר החמישה הם אחד-לאחד.
+ *
+ * כל השישה נושאים `waitingHe` ב-`achievements.ts`, כי הפרקים שלהם (F04, J03, O03,
+ * O04) עדיין לא נבנו. זו אינה סתירה: השורה קיימת כדי **שהסצנה תיכתב מולה**, והשורה
+ * שאומרת מה חסר היא בדיוק מה שכלל 78 דורש.
+ */
+export const ACHIEVEMENT_OF: Readonly<Record<string, string>> = {
+  forty_years_together: 'ACH_FORTY_YEARS',
+  three_generations: 'ACH_THREE_GENERATIONS',
+  reunion_in_europe: 'ACH_REUNION_EUROPE',
+  asked_for_my_work: 'ACH_ASKED',
+  not_at_any_price: 'ACH_NOT_AT_ANY_PRICE',
+  keys_in_hand: 'ACH_KEYS',
+}
+
 // --------------------------------------------------------------------------- the costs
 /**
  * `עלויות` הוא שלושה שדות ושלושתם קיימים במנוע כמות שהם: `minutes` הוא שעון המשחק,
@@ -158,7 +189,6 @@ export const COST_FIELDS: readonly ['minutes', 'energy', 'cash'] = ['minutes', '
  */
 export const NEEDS_A_HOME: Readonly<Record<string, string>> = {
   'פתיחת יחידת תוכן': 'פותח יחידת תוכן בשם — צריך רישום של יחידות ודגל פתיחה',
-  הישג: 'שבעה הישגים חדשים — שורה ב-`achievements.ts` לכל אחד',
   'עניין פתוח': 'חוט פתוח שנשאר פתוח בין פרקים — אין לו מבנה במנוע',
   הבטחה: 'הבטחה עם `id`/`npc`/`due`/`kind` — יש `promise:` כדגל, אין מבנה עם מועד',
   'תקציב עסקי': 'חלוקת תקציב לחמישה סעיפים — ענף הבעלות, אין לו מודל',

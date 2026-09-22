@@ -149,4 +149,11 @@ export const PITCH_SETTLEMENT = {
    * both. Losing costs nothing: this game does not punish a boy for losing a game.
    */
   loveOnWin: 1,
+  /** `won` / `drew` / `lost` — read by a scene that has to know (`Y05`, `chapterTeam.ts`) */
+  resultFlag: 'pitch:result',
+}
+
+/** the result of a match as a word, from the home side */
+export function pitchResult(score: { home: number; away: number }): 'won' | 'drew' | 'lost' {
+  return score.home > score.away ? 'won' : score.home === score.away ? 'drew' : 'lost'
 }

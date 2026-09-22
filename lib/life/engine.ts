@@ -1,4 +1,5 @@
 import { achievementEvents, earnedNow, type Achievement } from './achievements'
+import { borrowedAnchorKey } from './content/chapters'
 import { apply, emptyState, type LifeEvent } from './events'
 import { freshSeed } from './rng'
 import { lifeStore, SAVE_VERSION, type SaveFile } from './save'
@@ -141,6 +142,8 @@ export class LifeEngine {
     let mayEarn = false
     const before = this.state
     for (const event of events) {
+      // a chapter that borrows its anchor does not get to say how he was at it (`anchorOwner`)
+      if (borrowsPresence(this.state.chapter, event)) continue
       this.events.push(event)
       this.state = apply(this.state, event)
       if (IMMEDIATE.has(event.t)) immediate = true
@@ -314,4 +317,15 @@ export async function loadLife(fallback: PlayerIdentity, year: number): Promise<
   const engine = new LifeEngine(file.identity, file.year, file.events)
   if (file.checkpoint) engine.mark(file.checkpoint)
   return engine
+}
+
+/**
+ * עדות על עוגן שאול — `presence.recorded`, `anchor.attended` ו-`anchor.missed` שנכתבים
+ * בפרק שהעוגן שלו שייך לפרק אחר. לא נכתבים ליומן בכלל: יומן הוא רק-הוספה (כלל 45),
+ * ושורה שאומרת "היה בפנים" על ערב שהפרק הזה לא היה בו היא עדות שקר שאי אפשר למחוק.
+ */
+export function borrowsPresence(chapter: string, event: LifeEvent): boolean {
+  if (event.t !== 'presence.recorded' && event.t !== 'anchor.attended' && event.t !== 'anchor.missed') return false
+  const key = borrowedAnchorKey(chapter)
+  return key !== null && (event.anchorId === key || event.anchorId.startsWith(`${key}:`))
 }

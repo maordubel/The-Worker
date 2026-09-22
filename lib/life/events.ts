@@ -128,6 +128,27 @@ export type LifeEvent =
     }
   /** the tin under the bed — never the pocket */
   | { t: 'savings.changed'; agorot: number; why: string }
+  /**
+   * פעילות — a gate game played inside the life, and how it went (21.9.2026).
+   *
+   * Everything it DID (money, time, a relationship) is its own row beside it, written by
+   * `lib/life/activities.ts settleActivity`; this row is the biography: which game, which
+   * archive row it was about, the score, the tier the person in the room reacted to, and an
+   * opinion kept (`answer`). An older build folds it to nothing, like any row it has not met.
+   */
+  | {
+      t: 'activity.completed'
+      id: string
+      mechanic: string
+      chapter: string
+      contentId: string | null
+      answer: string | null
+      /** 0..100 */
+      score: number
+      tier: string
+      /** agorot paid, for the log — the money itself is the `money.changed` beside it */
+      paid: number
+    }
   // --- version 5, the routes pass (16.9.2026) -----------------------------------------
   /** מה שהוא לומד לעשות — a skill improves the moment the thing is done */
   | { t: 'skill.changed'; skill: SkillId; delta: number; why: string }
@@ -333,6 +354,7 @@ export function emptyState(identity: PlayerIdentity, year: number): LifeState {
     institution: blankInstitution(),
     presence: {},
     laces: null,
+    activities: {},
   }
 }
 
@@ -401,7 +423,15 @@ function personFlags(flags: Record<string, boolean | string | number>): Record<s
        * explicitly ABOUT outliving the afternoon it was filled in. A page half-stuck in
        * 1986 has to still be half-stuck in 1996, or the object means nothing.
        */
-      flag.startsWith('album:')
+      flag.startsWith('album:') ||
+      /**
+       * `scarf:` — הצעיף שעובר (`content/threads.ts`), חוט של 1986 → 1998 → 2000. הקובץ ההוא
+       * כתב מ-7.9.2026 *"הכל דגלים תחת `scarf:`, כלומר הם שורדים החלפת שנה כמו `own:shirt:`"*
+       * — והקידומת לא הייתה כאן. כלומר שני הרגעים המאוחרים של החוט שמאור ביקש לא ירו מעולם:
+       * `scarf:given` נמחק ב-`year.entered` הראשון אחרי 1986. `life:worldlines` מצא את זה
+       * כ-`STALE_READ` ב-21.9.2026.
+       */
+      flag.startsWith('scarf:')
     )
       kept[flag] = value
   }
@@ -836,6 +866,31 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
       // A mark, once. The first answer he gave to 2.5.1998 is the one the decade keeps;
       // `unresolved` may be overwritten because it is the absence of an answer.
       return state.laces && state.laces !== 'unresolved' ? state : { ...state, laces: event.response }
+
+    case 'activity.completed': {
+      const before = state.activities[event.id] ?? { runs: 0, best: 0, lastChapter: '', lastTier: '', seen: [], answers: {} }
+      const seenRows =
+        event.contentId && event.paid > 0 && !before.seen.includes(event.contentId) ? [...before.seen, event.contentId] : before.seen
+      // an opinion is kept under the row it answers (a poll question) or the chapter it was built in (an XI)
+      const key = event.contentId ?? event.chapter
+      const answers = event.answer ? { ...before.answers, [key]: event.answer } : before.answers
+      // an answered question is answered, paid or not — the poll never asks it twice
+      const seenAll = event.answer && event.contentId && !seenRows.includes(event.contentId) ? [...seenRows, event.contentId] : seenRows
+      return {
+        ...state,
+        activities: {
+          ...state.activities,
+          [event.id]: {
+            runs: before.runs + 1,
+            best: Math.max(before.best, Math.round(event.score)),
+            lastChapter: event.chapter,
+            lastTier: event.tier,
+            seen: seenAll,
+            answers,
+          },
+        },
+      }
+    }
 
     case 'dialogue.choice_made':
       // Recorded so the log reads as a biography rather than a diff, and so telemetry

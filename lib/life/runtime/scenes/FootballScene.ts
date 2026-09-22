@@ -7,6 +7,8 @@ import { frameCamera } from '../camera'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import { LIFE_PALETTE } from '../palette'
 
+import { heightOf } from '../../world/heights'
+
 import { WorldScene } from './WorldScene'
 
 /**
@@ -14,8 +16,8 @@ import { WorldScene } from './WorldScene'
  *
  * Brief §19 asks for one small football minigame that proves the life simulation can hold
  * real play, and §13 of the polish pass asks that it feel like children treating two
- * stones as a cup final. So: the same painting the pitch location uses, four kids from the
- * concept boards on top of it, and one button.
+ * stones as a cup final. So: the same painting the pitch location uses, the four boys of
+ * the alley — the same photographed bodies that stand in the world — and one button.
  *
  *  · **One button, three meanings.** Near the ball without it, a lunge that takes it. With
  *    it near the goal, a shot. With it anywhere else, a pass. A second button on a
@@ -31,6 +33,15 @@ import { WorldScene } from './WorldScene'
 
 const TO_WIN = 3
 const LENGTH_MS = 100000
+
+/**
+ * פוגי במגרש הוא פוגי ברחוב (21.9.2026). The two-a-side put `kid` on the pitch — the
+ * cartoon child of the first concept board, big head and all — while the street outside
+ * walked the photographed boy of the 5.9 production (`pogi`). Maor: *"אתה מציג את פוגי
+ * כילד כציור — זו טעות."* It is the same body in both places now, and every child is
+ * drawn at his own height (`heights.ts`) rather than one height for four boys.
+ */
+const ME = 'pogi'
 
 type Kid = {
   image: Phaser.GameObjects.Image
@@ -82,7 +93,7 @@ export class FootballScene extends Phaser.Scene {
   }
 
   preload() {
-    for (const key of ['pitch', 'kid', 'efi', 'ofir', 'amit', 'propBallReal']) {
+    for (const key of ['pitch', ME, 'efi', 'ofir', 'amit', 'propFootball']) {
       if (!this.textures.exists(`art-${key}`)) this.load.image(`art-${key}`, artUrl(key))
     }
   }
@@ -95,10 +106,10 @@ export class FootballScene extends Phaser.Scene {
     this.H = backdrop.height
 
     this.ballShadow = this.add.ellipse(0, 0, 18, 7, LIFE_PALETTE.ink, 0.3)
-    this.ball = this.add.image(this.W * 0.5, this.H * 0.82, 'art-propBallReal').setOrigin(0.5, 1)
+    this.ball = this.add.image(this.W * 0.5, this.H * 0.82, 'art-propFootball').setOrigin(0.5, 1)
     this.fit(this.ball, this.H * 0.055)
 
-    this.me = this.spawn('kid', 0.26, 0.86, 'red', true, 1)
+    this.me = this.spawn(ME, 0.26, 0.86, 'red', true, 1)
     this.spawn('efi', 0.18, 0.72, 'red', false, 0)
     this.spawn('ofir', 0.72, 0.74, 'other', false, 0)
     this.spawn('amit', 0.8, 0.9, 'other', false, 1)
@@ -141,7 +152,8 @@ export class FootballScene extends Phaser.Scene {
 
   private scaleKid(kid: Kid) {
     const t = Phaser.Math.Clamp((kid.image.y / this.H - this.band.far) / (this.band.near - this.band.far), 0, 1)
-    this.fit(kid.image, Phaser.Math.Linear(0.2, 0.3, t) * this.H)
+    const tall = heightOf(kid.image.texture.key.replace(/^art-/, '')) / heightOf(ME)
+    this.fit(kid.image, Phaser.Math.Linear(0.2, 0.3, t) * tall * this.H)
     kid.shadow.setSize(kid.image.displayWidth * 0.6, kid.image.displayWidth * 0.2)
     kid.shadow.setPosition(kid.image.x, kid.image.y + 1)
     kid.shadow.setDepth(kid.image.y - 1)

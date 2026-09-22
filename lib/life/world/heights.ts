@@ -108,9 +108,10 @@ const HEIGHTS: ReadonlyArray<readonly [string, number]> = [
 /**
  * A seated person is not a shorter person: measured head to floor, sitting takes about
  * three-quarters of standing, and a figure drawn in a chair has to be sized that way or a
- * seated man reads as a tall child.
+ * seated man reads as a tall child. (`-stool` joined 21.9.2026: Rafi on his stool by the
+ * counter, from 1993 on.)
  */
-const SITTING = /-(sit|sitA|sitB|chair|kneel|crouch|bent)\b|-(sit|chair|kneel|crouch|bent)$/
+const SITTING = /-(sit|sitA|sitB|chair|stool|kneel|crouch|bent)\b|-(sit|chair|stool|kneel|crouch|bent)$/
 const SEATED_RATIO = 0.76
 
 /** how tall this figure is, in metres, drawn as the pose it is in */
@@ -135,7 +136,44 @@ export function heightOf(figure: string): number {
  * curve the player already walks on: bodies at the back of a room are smaller, and the
  * room's own `size.far / size.near` says by how much.
  */
-export function bodySize(figure: string, metre: number, depth: number, taper: number): number {
-  const near = metre * heightOf(figure)
+export function bodySize(figure: string, metre: number, depth: number, taper: number, year?: number): number {
+  const near = metre * heightAt(figure, year)
   return Number((near * (taper + (1 - taper) * depth)).toFixed(4))
+}
+
+/**
+ * גובה בשנה — the friends grow up on the same body (21.9.2026).
+ *
+ * `ofir90`, `amit90`, `keren90` and `efi96` are drawn once, as they look at sixteen or so,
+ * and they stand in the rooms from 1990 to 2026. Their heights in `HEIGHTS` are adult
+ * heights — and in 1990 Ofir and Amit are twelve, in Pogi's class (*"אותה כיתה"*), while
+ * Pogi is drawn at 1.50: a classmate a head taller than the boy beside him. So in the
+ * years they are still growing, the body is drawn at the height of that age.
+ *
+ * Birth years are the script's: the three friends are Pogi's age (1978); Efi is four years
+ * older (`castCards.ts`: *"גדול ממך בארבע שנים"*). The curve is a median growth curve,
+ * boys and girls, as a fraction of the height at eighteen.
+ */
+const BORN: ReadonlyArray<readonly [string, number, 'boy' | 'girl']> = [
+  ['ofir90', 1978, 'boy'],
+  ['amit90', 1978, 'boy'],
+  ['keren90', 1978, 'girl'],
+  ['efi96', 1974, 'boy'],
+]
+const GROWN: Record<'boy' | 'girl', Record<number, number>> = {
+  // median height by age over the height at eighteen
+  boy: { 11: 0.82, 12: 0.855, 13: 0.895, 14: 0.935, 15: 0.965, 16: 0.985, 17: 0.995 },
+  girl: { 11: 0.88, 12: 0.925, 13: 0.955, 14: 0.975, 15: 0.99, 16: 0.997, 17: 1 },
+}
+
+/** the height of this figure in this year — `heightOf`, unless the person is still growing */
+export function heightAt(figure: string, year?: number): number {
+  const adult = heightOf(figure)
+  if (year === undefined) return adult
+  const who = BORN.find(([prefix]) => figure.startsWith(prefix))
+  if (!who) return adult
+  const age = year - who[1]
+  if (age >= 18) return adult
+  const f = GROWN[who[2]][Math.max(11, age)] ?? 1
+  return Number((adult * f).toFixed(3))
 }

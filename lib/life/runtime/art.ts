@@ -155,6 +155,14 @@ export const BACKDROP = [
    * dead content (rule 66) and that is the part a painting cannot supply.
    */
   'busStopDan', 'jaffaBoulevard', 'jaffaAlleyCafe',
+  /**
+   * **2000–2026 — שבעה-עשר ציורים, 21.9.2026** (`scripts/life/ingest-backgrounds-2026-09-21.py`).
+   * מאור שלח אותם לפי `docs/life/ART-PROMPTS-2000-2026.md`. לכל אחד חדר או צבע-מחדש
+   * (`repaints`) ב-`world/scenes.ts`, והטבלה שם אומרת איזו סצנה של התסריט יושבת עליו.
+   */
+  'homeAdult', 'flatAway', 'workshopFix', 'communityRoom', 'storeroom', 'officeOwner',
+  'deskNewsroom', 'rehearsal', 'driveIn', 'arenaEuroOut', 'arenaEuroSeats', 'portEurope',
+  'pitchSmall', 'bedroom00', 'hallNew', 'bloomOldTerrace', 'bloomNewTerrace',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -196,7 +204,8 @@ export const LAYER = [
    * crowd itself (1672x453), so a width and a bottom edge are all the placement it needs.
    */
   'ussCrowd',
-  'livingTable',
+  // (`livingTable` left 21.9.2026: a table cut from the earlier living-room painting, floating
+  // in front of the kitchen door of this one — see the `home` scene)
   'streetFore',
   'streetGround',
   'overlayHaze',
@@ -223,6 +232,9 @@ export const FIGURE = [
   'efi96', 'efi96-3q', 'efi96-side', 'efi96-back',
   'efi96-speak', 'efi96-listen', 'efi96-concern', 'efi96-laugh',
   'michel96-walk1', 'michel96-walk3', 'michel96-walk5',
+  // 21.9.2026 — Michel in 1999, standing: the red tracksuit his plate was cut from. In the
+  // city's cast since 8.9; in the life from the adult chapters (`CAST_2000`)
+  'michel99', 'michel99-3q',
   'rachel-3q', 'rachel-speak', 'rachel-listen', 'rachel-concern', 'rachel-laugh',
   /**
    * פוגי — the protagonist, and the reason this list changed shape.
@@ -275,13 +287,14 @@ export const FIGURE = [
   'adultA1', 'adultA2', 'adultA3', 'adultA4', 'adultA5', 'adultA6', 'adultA7',
   'adultB1', 'adultB2', 'adultB3', 'adultB4', 'adultB5', 'adultB6', 'adultB7',
 
-  'kid',
   'ofir',
   'amit',
   'efi',
   'keren',
   'kobi',
   'kobi-chair',
+  // 21.9.2026 — Kobi on a match day in 1985, the scarf on: the first match of Stage A (`a5-first`)
+  'kobi-scarf',
   'kobi-cheer',
   'kobi-side',
   'kobi-bag',
@@ -578,7 +591,12 @@ export const PLANNED_FIGURE = [] as const
  * in delta 20; the files stay in `public/life/art` for the manifest's sake and nothing
  * loads them. A retired key is not a figure: naming one in a scene fails `tests/life.test.ts`.
  */
-export const RETIRED_FIGURE = ['fanA', 'fanB', 'fanC', 'fanD', 'fanE', 'fanF', 'fanG'] as const
+/**
+ * ...and `kid` (21.9.2026): the cartoon child of the first concept board — big head,
+ * drawn line — who kept playing the two-a-side as Pogi after the photographed boy took
+ * over the world. Maor: *"אתה מציג את פוגי כילד כציור — זו טעות."*
+ */
+export const RETIRED_FIGURE = ['fanA', 'fanB', 'fanC', 'fanD', 'fanE', 'fanF', 'fanG', 'kid'] as const
 
 export type FigureKey = (typeof FIGURE)[number]
 
@@ -734,7 +752,6 @@ export const PROP = [
   /** ארגז בקבוקים אדום — his, 6.9.2026: the deposit, the carry, the thing you sit on */
   'propCrate',
   /** the newspaper stand by the kiosk door, from the nineties on */
-  'propNewsRack',
   /** a wooden hand cart against the wall — the eighties, and only the eighties */
   'propCart',
   /**
@@ -744,14 +761,16 @@ export const PROP = [
    * began, and it now ends where the radio ends.
    */
   'propRadio',
+  /**
+   * הקופסה האדומה — 21.9.2026. *"שמת את זה בקופסה האדומה"* נאמר בסוף כל פרק, ובחדר עמד
+   * צעיף. תחליף עד שהציור יגיע: ארגז הפח של `props-ground`, בגוון פח אדום
+   * (`scripts/life/cut-objects-2026-09-21.py`).
+   */
+  'propRedBox',
   'propFlag',
   'propSticker',
   'propBadges',
   'propMatchbox',
-  'propColumn',
-  'propBallReal',
-  'propPapers',
-  'propCoins',
   /**
    * ריהוט הרחוב — the things a street holds rather than the things a hand holds.
    *
@@ -763,16 +782,33 @@ export const PROP = [
    * them are conditional — the street a player crosses at four o'clock is not the street
    * they crossed at noon, and it should not look like it either.
    */
-  'propCar',
-  'propBus',
-  'propBin',
-  'propPlanter',
-  'propBunting',
-  'propBarrier',
-  'propBarriers',
-  'propPosters',
   'propBanner',
   'propSign',
+  /**
+   * 21.9.2026 — twelve props left this list: `propColumn`, `propBallReal`, `propPapers`,
+   * `propCoins`, `propCar`, `propBus`, `propBin`, `propPlanter`, `propBunting`,
+   * `propBarrier`, `propBarriers`, `propPosters`. They are pen-and-ink ENGRAVINGS from the
+   * September props sheet — hatched, grey, drawn — standing in photographed rooms, and
+   * the ball the boys kicked was one of them. Maor: *"תסיר מה שלא עומד בסטנדרטים."* The
+   * ball is `propBall90`, the coins are the half-shekel photographed for the coin card
+   * (`coinPali`), the papers are the clipping and the note; the street furniture is gone
+   * rather than replaced, because the paintings already hold their own.
+   */
+  'coinPali',
+  'propBall90',
+  /**
+   * 21.9.2026 — the objects Maor drew on 20.9 (`ingest-objects-2026-09-21.py`), each one
+   * placed where the script names it: the suitcase of X01, the passport of E03, the remote
+   * of A01, the diary on the fridge of L04, the key of U04, the phone and the laptop of the
+   * flat abroad, the tickets of F01, the two bags of F02. `propRedBox` and `propRadio` were
+   * rewritten in place — the tin box and the transistor, where a tinted crate and a
+   * 78-pixel boombox had stood.
+   */
+  'propScarfKnit', 'propAlbum', 'propPaperFolded',
+  'propSuitcase', 'propPassport', 'propTicketsPair', 'propKeys', 'propBackpack',
+  'propHeadphones', 'propMug', 'propPlanner', 'propCable',
+  'propDrum', 'propDarbuka', 'propFootball', 'propSportsBag', 'propBannerBlank', 'propBib',
+  'propPhone2010', 'propPhone2020', 'propRemote', 'propLaptop', 'propRecorder', 'propNewspaper',
   // 4.9.2026 — the objects of the second movement, and two more for the box.
   'propNote', 'propNoteOpen', 'propBasketball', 'propTicket91', 'propScorePaper',
   'propWrapper', 'propClipping90', 'propCassette', 'propChalk', 'propBagStrap90',
@@ -832,6 +868,26 @@ export const ARTEFACT_ROOT = '/life/artefacts'
 const ARTEFACT_KEYS: ReadonlySet<string> = new Set<string>(ARTEFACT)
 
 /** Is this key one of the scanned objects rather than something drawn for the game? */
+/**
+ * הגופים שמסתכלים שמאלה (21.9.2026).
+ *
+ * המוסכמה של התיקייה היא שכל פרופיל מסתכל ימינה (`WorldScene.ART_FACES = 1`), והיא נכונה
+ * לכל מה שצויר בשבילנו. היא לא נכונה לגיליונות הקהל של ספטמבר: `adultA1` ו-`adultB1`
+ * הולכים שמאלה, ו-`adultB3`/`adultB5`/`adultB6` עומדים בשלושה-רבעים שמאלה. מ-2000 הם
+ * תחליפים לאנשים שמדברים — ומי שעמד מימין לפוגי ו"הסתובב אליו" הסתובב בדיוק ממנו.
+ * כל מי שמחליט לאן גוף מסתכל שואל כאן.
+ */
+export const FACES_LEFT: ReadonlySet<string> = new Set([
+  'adultA1', 'adultB1', 'adultB3', 'adultB5', 'adultB6',
+  // the boys of the same sheets: three walk left, two stand three-quarters left
+  'youngA1', 'youngA7', 'youngB1', 'youngA6', 'youngB4',
+])
+
+/** does this figure, unflipped, look to the left of the screen */
+export function facesLeft(figure: string): boolean {
+  return FACES_LEFT.has(figure)
+}
+
 export function isArtefact(key: string): boolean {
   return ARTEFACT_KEYS.has(key)
 }
@@ -952,6 +1008,15 @@ export const PORTRAIT_ART = [
   'faceYoung',
   'faceOfir90',
   'faceAmit90',
+  /**
+   * 21.9.2026 — one plate per stand-in BODY of the adult life, cut from that body by
+   * `scripts/life/cast-faces-2026-09-21.py`, so the face in the box is the person on the
+   * floor (`FACES_2000` in `world/castFigures.ts`, rule 67).
+   */
+  'faceStandA1', 'faceStandA2', 'faceStandA4', 'faceStandA6',
+  'faceStandB1', 'faceStandB2', 'faceStandB3', 'faceStandB4', 'faceStandB5', 'faceStandB6', 'faceStandB7',
+  // the grown Efi and Kobi, from their own 1996/1990 bodies
+  'faceEfi96', 'faceKobi90',
 ] as const
 
 /**

@@ -162,7 +162,7 @@ export const ENDINGS_1991: Record<string, EndingCard> = {
     memoryItem: 'score-paper',
     after: {
       fromArt: 'rachel90-watch',
-      toArt: 'rachel90-arms',
+      toArt: 'rachel90',
       lineHe: 'היא לא תשכח את השעה הזאת. גם בפעם הבאה שתבקש, היא תזכיר לך אותה — ובכל זאת תיתן.',
     },
   },
@@ -174,8 +174,8 @@ export const ENDINGS_1991: Record<string, EndingCard> = {
     memoryHe: 'הספח נשאר בכיס, קרוע בפינה. שמת אותו בקופסה. הערב הזה שלך גם ככה.',
     memoryItem: 'hall-ticket',
     after: {
-      fromArt: 'rachel90-door',
-      toArt: 'rachel90-smile',
+      fromArt: 'rachel90-3q',
+      toArt: 'rachel90',
       lineHe: 'היא פתחה לפני שהספקת לדפוק. לא אמרה כלום על השעה. לא היה מה להגיד.',
     },
   },

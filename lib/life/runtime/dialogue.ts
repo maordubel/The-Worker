@@ -1,4 +1,5 @@
-import { ITEM_ART } from '../content/chapter1986'
+import { resolveSpeaker } from '../partner'
+import { DEFAULT_IDENTITY, ITEM_ART } from '../content/chapter1986'
 import type { HistoricalAnchor } from '../anchors'
 import { bookFor, bookPageFlag } from '../books'
 import { DIALOGUE } from '../content/dialogue'
@@ -37,6 +38,8 @@ import { PACKET, decadeOf } from '../prices'
 import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
 import { characterName, portraitFor } from '../characters'
 import { flagOn } from '../types'
+import { ACTIVITY, CROWD_FLAG, isActivityId, isStageA, payShekels, pickContent, seedFor, windowFor, type MechanicRequest } from '../activities'
+import { EMPTY_CATALOG, type MechanicCatalog } from '../../mechanics/types'
 import type { CharacterId } from '../types'
 import {
   acceptEvents as acceptRouteStage,
@@ -72,6 +75,11 @@ export type DialogueHooks = {
   ending(id: string): void
   /** the scene stops the world while this is true */
   onOpen(open: boolean): void
+  /**
+   * מי שמדבר ואינו בחדר — ואינו בטלפון, ואין לשיחה מקום אחר (`Conversation.where`). הסצנה
+   * מכניסה אותו לצד פוגי לאורך השיחה, אם יש לו גוף בשנים האלה (`world/castFigures.ts`).
+   */
+  cast?(names: readonly string[]): void
   /** how this beat is framed; the scene owns the camera, the content owns the shot */
   shot?(shot: ConversationShot | null): void
   /**
@@ -82,6 +90,8 @@ export type DialogueHooks = {
    * question about the world (`travel`, `shot`) rather than a field on a line.
    */
   anchorFor?(who: string | null): number | null
+  /** turn the camera to this speaker if he is standing outside the shot (21.9.2026) */
+  meet?(who: string | null): void
 }
 
 /** the people a boy does not "meet": his parents, the friends from the alley, the neighbour, the kiosk */
@@ -106,7 +116,7 @@ const heardFlag = (id: string, branch: number) => `own:heard:${id}:${branch}`
 
 /** effects that open or move something the player must be free to redo in full every time */
 const KEEPS_SCENE_LIVE: ReadonlySet<Effect['e']> = new Set([
-  'shop', 'toto', 'coin', 'penalty', 'hoops', 'pitch', 'goto', 'travel', 'minigame', 'ending', 'doc',
+  'shop', 'toto', 'coin', 'penalty', 'hoops', 'pitch', 'goto', 'travel', 'minigame', 'ending', 'doc', 'mechanic',
 ])
 
 function opensSomething(effects: readonly Effect[] | undefined): boolean {
@@ -145,6 +155,8 @@ export class DialogueRunner {
     private hooks: DialogueHooks,
     private readonly fallbackAnchor: HistoricalAnchor,
     private readonly anchors: AnchorSet = {},
+    /** what the archive holds before each year, with no answer in it — resolved on the server (`app/life/mechanicCatalog.ts`) */
+    private readonly catalog: MechanicCatalog = EMPTY_CATALOG,
   ) {}
 
   /** the plates of the chapter being played — the boy's face is four years older in 1990 */
@@ -222,13 +234,26 @@ export class DialogueRunner {
     this.pendingThen = branch.then ?? []
     this.hooks.onOpen(true)
     this.hooks.shot?.(branch.shot ?? null)
+    if (!conversation.where) {
+      const names = new Set<string>()
+      for (const line of lines) {
+        if (!line.who || conversation.remote?.[line.who]) continue
+        const who = resolveSpeaker(line.who, this.engine.state.flags)
+        if (who && who !== DEFAULT_IDENTITY.name) names.add(who)
+      }
+      if (names.size) this.hooks.cast?.([...names])
+    }
     this.show()
     return true
   }
 
   /** The only substitution the content layer gets, and it is a canonical fact. */
   private fill(text: string): string {
-    return text.replaceAll('{anchor}', this.anchor.headlineHe)
+    const filled = text.replaceAll('{anchor}', this.anchor.headlineHe)
+    if (!filled.includes('{crowd')) return filled
+    // the parliament's names — this chapter's crowd, rolled once when the room was built
+    const names = String(this.engine.state.flags[CROWD_FLAG] ?? '').split('|').filter(Boolean)
+    return filled.replace(/\{crowd(\d)\}/g, (_, n: string) => names[Number(n) - 1] ?? names[0] ?? 'אחד מהם')
   }
 
   advance() {
@@ -300,22 +325,44 @@ export class DialogueRunner {
       return
     }
     const last = this.index === this.lines.length - 1
+    // `PARTNER` is resolved HERE and nowhere else, so the nameplate, the portrait and the
+    // tail anchor can never disagree about who is speaking (see `lib/life/partner.ts`).
+    const who = resolveSpeaker(line.who, this.engine.state.flags)
+    // מי שמדבר מהטלפון אינו בחדר: אין זנב שמחפש אותו בין האנשים, יש סמל ליד השם — אלא
+    // אם הוא דווקא עומד כאן, ואז הוא פשוט מדבר.
+    const { anchor, via } = this.placeSpeaker(line.who, who)
     this.bus.emit('dialogue', {
-      lines: [line.closeUp ? { who: line.who, text: line.text, closeUp: line.closeUp } : { who: line.who, text: line.text }],
-      portrait: line.who ? portraitFor(line.who, this.portraits) : null,
-      anchor: this.hooks.anchorFor?.(line.who) ?? null,
+      lines: [{ who, text: line.text, ...(line.closeUp ? { closeUp: line.closeUp } : {}), ...(via ? { via } : {}) }],
+      portrait: who ? portraitFor(who, this.portraits) : null,
+      anchor,
+      where: this.conversation?.where ?? null,
       choices: last && this.pendingChoices ? this.renderChoices(this.pendingChoices) : undefined,
     })
   }
 
   private showChoices() {
     const line = this.lines[this.lines.length - 1]
+    const who = resolveSpeaker(line?.who ?? null, this.engine.state.flags)
+    const { anchor, via } = this.placeSpeaker(line?.who ?? null, who)
     this.bus.emit('dialogue', {
-      lines: line ? [line] : [],
-      portrait: line?.who ? portraitFor(line.who, this.portraits) : null,
-      anchor: this.hooks.anchorFor?.(line?.who ?? null) ?? null,
+      lines: line ? [{ ...line, who, ...(via ? { via } : {}) }] : [],
+      portrait: who ? portraitFor(who, this.portraits) : null,
+      anchor,
+      where: this.conversation?.where ?? null,
       choices: this.renderChoices(this.pendingChoices ?? []),
     })
+  }
+
+  /**
+   * איפה הדובר — בחדר (זנב), בטלפון (סמל), או במקום אחר (`where`: אף אחד מהשניים).
+   * `written` הוא ה-`who` כפי שהוא כתוב בשורה, כי `remote` נכתב בשפת התוכן (`PARTNER`).
+   */
+  private placeSpeaker(written: string | null, who: string | null): { anchor: number | null; via?: 'phone' | 'video' } {
+    if (this.conversation?.where) return { anchor: null }
+    if (!(written && this.conversation?.remote?.[written])) this.hooks.meet?.(who)
+    const anchor = this.hooks.anchorFor?.(who) ?? null
+    const remote = written ? this.conversation?.remote?.[written] : undefined
+    return remote && anchor === null ? { anchor: null, via: remote } : { anchor }
   }
 
   private renderChoices(choices: readonly ChoiceDef[]): DialogueChoice[] {
@@ -463,6 +510,10 @@ export class DialogueRunner {
           }
           break
         }
+        case 'box':
+          after.push(() => this.bus.emit('box', true))
+          break
+
         case 'doc':
           // Only a key the art layer actually declares. A dialogue file may hold up a
           // document; it may not name an arbitrary URL and it may not name a sprite.
@@ -517,10 +568,55 @@ export class DialogueRunner {
          * and the minute, so the same afternoon does not deal the same five questions
          * twice and a save reloaded does not re-deal a round already answered.
          */
+        /**
+         * פעילות — the runtime decides WHAT the room deals (`pickContent`: a lineup, a goal,
+         * a shirt from before this year; a pooled round only once the archive holds one),
+         * and the shell opens the gate's own board over the paused room. With nothing to
+         * deal, the room offers the ordinary afternoon (`fallback`) or says why not.
+         */
+        case 'mechanic': {
+          if (!isActivityId(effect.activity)) break
+          const state = this.engine.state
+          const def = ACTIVITY[effect.activity]
+          if (def.kind === 'myBag') {
+            after.push(() => this.bus.emit('bag', true))
+            break
+          }
+          const pick = pickContent(state, def.id, this.catalog)
+          if (!pick) {
+            const fallback = def.fallback
+            if (fallback) after.push(() => this.hooks.minigame(fallback))
+            else if (def.emptyHe) {
+              const text = def.emptyHe
+              after.push(() => this.bus.emit('toast', { text, tone: 'plain' }))
+            }
+            break
+          }
+          const request: MechanicRequest = {
+            activity: def.id,
+            kind: def.kind,
+            chapter: state.chapter,
+            seed: seedFor(state, def.id),
+            window: pick.window,
+            contentId: pick.contentId,
+            titleHe: def.titleHe,
+            hostHe: def.hostHe,
+            runs: state.activities[def.id]?.runs ?? 0,
+            crowd: String(state.flags[CROWD_FLAG] ?? '').split('|').filter(Boolean),
+          }
+          after.push(() => this.bus.emit('mechanic', request))
+          break
+        }
         case 'toto': {
           const state = this.engine.state
           const seed = state.year * 100000 + state.weekday * 1440 + state.minute
-          after.push(() => this.bus.emit('toto', { seed, perAnswerHe: '2 ₪ לכל תשובה נכונה' }))
+          // 1984–86: the slip Maor priced, unchanged. From 1990: questions from before the
+          // year only, at the boy's age, paid as a share of that decade's hour (`activities.ts`)
+          const slip = ACTIVITY['kiosk-trivia']
+          const window = isStageA(state.chapter) ? null : windowFor(state, slip)
+          const perAnswerHe = window ? `עד ${payShekels(slip, state.chapter, 1)} ₪ לטופס מלא` : '2 ₪ לכל תשובה נכונה'
+          const top = window ? payShekels(slip, state.chapter, 1) : null
+          after.push(() => this.bus.emit('toto', { seed, perAnswerHe, window, top }))
           break
         }
         /**

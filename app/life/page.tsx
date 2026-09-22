@@ -6,6 +6,7 @@ import { gateMetadata } from '@/lib/seo'
 import { resolveChapterAnchor, resolvePrologueAnchor, resolveStageBAnchor, resolveUssishkinAnchor, resolveStageBAnchors } from '@/lib/life/anchor-server'
 
 import { LifeStage } from './LifeStage'
+import { resolveMechanicCatalog } from './mechanicCatalog'
 
 /**
  * THE WORKER LIFE — the vertical slice.
@@ -30,7 +31,7 @@ export default function LifePage() {
 
   return (
     <Screen title={t('life.title')} sub={t('life.sub')} chrome={false} fullBleed night>
-      <LifeStage anchor={anchor} prologueAnchor={prologueAnchor} anchors={anchors} />
+      <LifeStage anchor={anchor} prologueAnchor={prologueAnchor} anchors={anchors} catalog={resolveMechanicCatalog()} />
     </Screen>
   )
 }

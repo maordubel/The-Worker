@@ -14,6 +14,7 @@ import type { LifeRuntime } from '@/lib/life/runtime/game'
 import { lifeStore } from '@/lib/life/save'
 import type { Achievement } from '@/lib/life/achievements'
 import type { LifeState } from '@/lib/life/types'
+import type { MechanicCatalog } from '@/lib/mechanics/types'
 
 /**
  * הגשר, מצד המעטפת — the bus, the synthesiser, the Phaser instance, and every sentence the
@@ -81,6 +82,7 @@ export function useLifeRuntime({
   anchor,
   prologueAnchor,
   anchors,
+  catalog,
 }: {
   /** the box the canvas is parented into — the shell owns it, Phaser only fills it */
   holder: MutableRefObject<HTMLDivElement | null>
@@ -92,6 +94,8 @@ export function useLifeRuntime({
   prologueAnchor: HistoricalAnchor
   /** every chapter's anchor, by era key — resolved on the server like the two above */
   anchors: Record<string, HistoricalAnchor>
+  /** what the archive holds before each year, for the activities — resolved on the server too */
+  catalog: MechanicCatalog
 }) {
   const [ready, setReady] = useState(false)
   const [hud, setHud] = useState<HudState>(EMPTY_HUD)
@@ -106,6 +110,7 @@ export function useLifeRuntime({
   const [retry, setRetry] = useState<LifeBusEvents['retry']>(null)
   const [match, setMatch] = useState<LifeBusEvents['match']>(null)
   const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
+  const [box, setBox] = useState(false)
   const [book, setBook] = useState<LifeBusEvents['book']>(null)
   const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
   const [finale, setFinale] = useState<LifeBusEvents['finale']>(null)
@@ -118,6 +123,10 @@ export function useLifeRuntime({
   const [shirt, setShirt] = useState<LifeBusEvents['shirt']>(null)
   /** שני משחקי הכסף — the Toto slip and the coin in the alley (5.9.2026) */
   const [toto, setToto] = useState<LifeBusEvents['toto']>(null)
+  /** פעילות — a gate game opened from a room, over the paused world (`lib/life/activities.ts`) */
+  const [mechanic, setMechanic] = useState<LifeBusEvents['mechanic']>(null)
+  /** the bag asked for from the bedroom — the shell opens the same card ☰ does */
+  const [bagAsked, setBagAsked] = useState(0)
   const [coin, setCoin] = useState<LifeBusEvents['coin']>(null)
   const [penalty, setPenalty] = useState<LifeBusEvents['penalty']>(null)
   const [hoops, setHoops] = useState<LifeBusEvents['hoops']>(null)
@@ -315,6 +324,15 @@ export function useLifeRuntime({
       }),
     )
     unsubscribe.push(
+      bus.on('box', (value) => {
+        setBox(value)
+        // the lid — the same handled-object sound a kept thing gets, and the world waits
+        if (value) sfx.play('box-item', { bus: 'ui', level: 0.7 })
+        sfx.duck(value)
+        runtime.current?.pause(value)
+      }),
+    )
+    unsubscribe.push(
       bus.on('book', (value) => {
         setBook(value)
         // paper, not a UI panel: the same soft handling sound a kept object gets
@@ -361,6 +379,14 @@ export function useLifeRuntime({
       bus.on('toto', (value) => {
         setToto(value)
         runtime.current?.pause(Boolean(value))
+      }),
+      bus.on('mechanic', (value) => {
+        setMechanic(value)
+        runtime.current?.pause(Boolean(value))
+        if (value) sfx.play('box-item', { bus: 'ui', level: 0.5 })
+      }),
+      bus.on('bag', (value) => {
+        if (value) setBagAsked((n) => n + 1)
       }),
       bus.on('coin', (value) => {
         setCoin(value)
@@ -459,6 +485,7 @@ export function useLifeRuntime({
         anchor,
         prologueAnchor,
         anchors,
+        catalog,
       })
       const box = holder.current.getBoundingClientRect()
       runtime.current.resize(box.width, box.height)
@@ -473,7 +500,7 @@ export function useLifeRuntime({
       runtime.current?.destroy()
       runtime.current = null
     }
-  }, [anchor, prologueAnchor, anchors, audio, busRef, engineRef, holder, runtime])
+  }, [anchor, prologueAnchor, anchors, catalog, audio, busRef, engineRef, holder, runtime])
 
   // --- the shell owns the box -------------------------------------------------------
   useEffect(() => {
@@ -580,6 +607,8 @@ export function useLifeRuntime({
     match,
     doc,
     setDoc,
+    box,
+    setBox,
     book,
     setBook,
     cutscene,
@@ -596,6 +625,9 @@ export function useLifeRuntime({
     setShirt,
     toto,
     setToto,
+    mechanic,
+    setMechanic,
+    bagAsked,
     coin,
     setCoin,
     penalty,

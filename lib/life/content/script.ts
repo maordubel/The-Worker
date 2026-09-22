@@ -84,6 +84,16 @@ export type Effect =
   | { e: 'shop' }
   /** a Toto slip: five questions from the site's own bank, two shekels each */
   | { e: 'toto' }
+  /**
+   * פעילות — a gate game, opened from inside this room (21.9.2026, `lib/life/activities.ts`).
+   *
+   * The runtime chooses WHAT to deal (a lineup, a goal, a shirt dated before this year, off
+   * the save's own seed) and opens the gate's own board over the paused room; when it
+   * closes, the room plays `act-<id>-after` and the person in it reacts to how it went. If
+   * the archive holds nothing for this year the room offers the activity's ordinary
+   * afternoon instead, or says why not — never an empty board.
+   */
+  | { e: 'mechanic'; activity: string }
   /** עץ או פלי in the alley: a shekel in, five out */
   | { e: 'coin' }
   /** פנדלים במגרש השכונתי — five real penalty kicks against a keeper, in three dimensions */
@@ -133,6 +143,8 @@ export type Effect =
    * else, which is what stops this becoming a general-purpose image popup.
    */
   | { e: 'doc'; art: string; captionHe?: string }
+  /** הקופסה האדומה נפתחת — מה שיש בה נקרא מהמצב, לא מהתוכן (`lib/life/redboxView.ts`) */
+  | { e: 'box' }
   /**
    * לפתוח חוברת — a printed object with more than one page (`lib/life/books.ts`).
    *
@@ -306,4 +318,20 @@ export type Conversation = {
   nameHe?: string | null
   /** first matching branch wins, so order is the priority order */
   branches: Branch[]
+  /**
+   * מי **לא בחדר** — ובאיזה קו הוא מדבר (21.9.2026).
+   *
+   * שיחה עם קרן בטלפון ושיחה עם קרן במטבח נראו עד היום אותו דבר: שם, פרצוף, וזנב של בועה
+   * שמחפש בחדר את מי שקוראים לו קרן ולא מוצא. `life:sync` (כלל 85) דורש שכל מי שמדבר
+   * בשיחה שנפתחת בחדר יעמוד בו — **או** ייכתב כאן. המפתח הוא ה-`who` כפי שהוא כתוב בשורה
+   * (`PARTNER` כולל), והתיבה מציירת ליד השם את סמל הטלפון (`iconPhone`) ולא מושכת זנב.
+   */
+  remote?: Readonly<Record<string, 'phone' | 'video'>>
+  /**
+   * **איפה זה קורה, כשזה לא החדר** — *"ניקוסיה"*, *"טדי"*. יש ערבים שהסיפור קורה בהם
+   * במקום שאין לו ציור, והשיחה נפתחת מביט של שעון בכל חדר שבו פוגי עומד. בלי זה, החדר
+   * משקר: אנשים שמדברים על אצטדיון בקפריסין מופיעים לידו במטבח. עם זה, התיבה מציירת תג
+   * מקום מעל הבועה, ואף אחד לא נכנס לחדר בשביל השיחה (`WorldScene.summonSpeakers`).
+   */
+  where?: string
 }

@@ -28,7 +28,8 @@ export function TotoCard({
 }: {
   toto: NonNullable<LifeBusEvents['toto']>
   perAnswer: number
-  onDone: (shekels: number) => void
+  /** how the slip was handed in — the ledger decides what it is worth (`activities.ts`) */
+  onDone: (result: { hits: number; asked: number }) => void
 }) {
   const [questions, setQuestions] = useState<TriviaQuestion[] | null>(null)
   const [index, setIndex] = useState(0)
@@ -38,13 +39,13 @@ export function TotoCard({
 
   useEffect(() => {
     let live = true
-    void dealToto(toto.seed).then((rows) => {
+    void dealToto(toto.seed, toto.window ?? null).then((rows) => {
       if (live) setQuestions(rows)
     })
     return () => {
       live = false
     }
-  }, [toto.seed])
+  }, [toto.seed, toto.window])
 
   const question = questions?.[index] ?? null
   const need = question?.pickCount ?? 1
@@ -52,7 +53,7 @@ export function TotoCard({
 
   async function submit() {
     if (!question || !ready || verdict) return
-    const graded = await gradeToto(toto.seed, index, need === 1 ? (picked[0] as string) : picked)
+    const graded = await gradeToto(toto.seed, index, need === 1 ? (picked[0] as string) : picked, toto.window ?? null)
     if (!graded) return
     setVerdict({ right: graded.correct, answers: graded.correctAnswers })
     if (graded.correct) setHits((n) => n + 1)
@@ -62,7 +63,7 @@ export function TotoCard({
     setVerdict(null)
     setPicked([])
     if (questions && index + 1 < questions.length) setIndex(index + 1)
-    else onDone(hits * perAnswer)
+    else onDone({ hits, asked: TOTO_LENGTH })
   }
 
   function toggle(option: string) {
@@ -87,7 +88,7 @@ export function TotoCard({
       <p className="font-display text-[13px] uppercase tracking-[0.22em] text-red">{t('life.toto.kicker')}</p>
       <h2 className="mt-1 font-display text-[20px] leading-tight text-sheet">{t('life.toto.title')}</h2>
       <p className="mt-1 font-body text-[13px] text-concrete">
-        {t('life.toto.sub', { n: String(perAnswer) })}
+        {toto.top ? t('life.toto.subTop', { n: String(toto.top) }) : t('life.toto.sub', { n: String(perAnswer) })}
       </p>
 
       {!questions && <p className="mt-8 font-body text-[14px] text-concrete">{t('life.toto.loading')}</p>}
@@ -152,7 +153,7 @@ export function TotoCard({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onDone(hits * perAnswer)}
+                  onClick={() => onDone({ hits, asked: TOTO_LENGTH })}
                   className="min-h-tap px-4 py-3 font-body text-[13px] text-concrete underline underline-offset-4"
                 >
                   {t('life.toto.away')}
@@ -174,7 +175,7 @@ export function TotoCard({
       {questions && questions.length === 0 && (
         <button
           type="button"
-          onClick={() => onDone(0)}
+          onClick={() => onDone({ hits: 0, asked: TOTO_LENGTH })}
           className="min-h-tap mt-6 border-rule border-red bg-red px-4 py-3 font-display text-[15px] text-sheet"
         >
           {t('life.toto.away')}
@@ -182,7 +183,9 @@ export function TotoCard({
       )}
 
       <p className="mt-3 font-mono text-[12px] tabular-nums text-concrete">
-        {t('life.toto.total', { hits: String(hits), n: String(TOTO_LENGTH), sum: String(hits * perAnswer) })}
+        {toto.top
+          ? t('life.toto.totalTop', { hits: String(hits), n: String(TOTO_LENGTH) })
+          : t('life.toto.total', { hits: String(hits), n: String(TOTO_LENGTH), sum: String(hits * perAnswer) })}
       </p>
     </div>
   )

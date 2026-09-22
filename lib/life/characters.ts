@@ -128,11 +128,20 @@ const REGISTRY: CharacterDefinition[] = [
     portraitSet: 'faceEfi',
     tags: ['basketball', 'ussishkin'],
   },
+  /**
+   * קרן — אותה שכנה, עשרים וארבע שנה אחר כך.
+   *
+   * השורה אמרה `['1986','1990']` עד 21.9.2026, והתסריט מדבר בשמה ב-`D` וב-`C05`.
+   * ההכרעה כבר נלקחה במקום שבו לוקחים אותה: `CHARACTER_OF.keren = 'keren'` במפת
+   * התסריט — כלומר **קרן של 2010 היא קרן של 1986**, בדיוק כמו שאילן השכן הוא אילן
+   * (כלל 79). העידנים כאן הם ההמשך של אותה הכרעה ולא הכרעה שנייה; שורה שנייה בשם
+   * קרן הייתה ההפך המדויק ממה שהמרשם קיים בשבילו.
+   */
   {
     id: 'keren',
     displayNameHe: 'קרן',
     category: 'friend',
-    activeEras: ['1986', '1990'],
+    activeEras: ['1986', '1990', '2000', '2010'],
     portraitSet: 'faceKeren',
     tags: ['neighbourhood'],
   },
@@ -297,7 +306,7 @@ const REGISTRY: CharacterDefinition[] = [
     id: 'melamed',
     displayNameHe: 'מלמד',
     category: 'supporter',
-    activeEras: ['1990'],
+    activeEras: ['1990', '2000', '2010'],
     tags: ['songs', 'darbuka'],
     provenance: 'composite',
   },
@@ -332,11 +341,17 @@ const REGISTRY: CharacterDefinition[] = [
     activeEras: ['1990'],
     tags: ['archive', 'records'],
   },
+  /**
+   * שחור, פרדי ומלמד — `activeEras: ['1990']` עד 21.9.2026, והתסריט מדבר בשמם
+   * עשרים שנה אחר כך: שחור ב-`U01` וב-`N02`, פרדי ב-`N03`, מלמד ב-`N04`. התסריט הוא
+   * המקור (כלל 18), ולכן ההרחבה כאן היא **קריאה שלו** ולא הכרעה חדשה — בדיוק כמו
+   * קרן למעלה. שורה שנייה לאדם שכבר יש לו שורה היא ההפך ממה שהמרשם קיים בשבילו.
+   */
   {
     id: 'shachor',
     displayNameHe: 'שחור',
     category: 'supporter',
-    activeEras: ['1990'],
+    activeEras: ['1990', '2000', '2010'],
     tags: ['ussishkin', 'organiser'],
     provenance: 'real',
   },
@@ -344,7 +359,7 @@ const REGISTRY: CharacterDefinition[] = [
     id: 'freddy',
     displayNameHe: 'פרדי',
     category: 'supporter',
-    activeEras: ['1990'],
+    activeEras: ['1990', '2000', '2010'],
     tags: ['law', 'politics', 'argument'],
   },
   {
@@ -387,12 +402,14 @@ const REGISTRY: CharacterDefinition[] = [
   { id: 'uli', displayNameHe: 'אולי', category: 'friend', activeEras: ['2000', '2010'], tags: ['away', 'risk'] },
   { id: 'batya', displayNameHe: 'בתיה', category: 'supporter', activeEras: ['2000', '2010', '2020'], tags: ['neighbourhood', 'comedy', 'memory'] },
   { id: 'yonatan', displayNameHe: 'יונתן', category: 'friend', activeEras: ['2010', '2020'], tags: ['music', 'rival-friend'] },
+
   { id: 'melanie', displayNameHe: 'מלאני', category: 'other', activeEras: ['2010', '2020'], tags: ['relationship'] },
   { id: 'dor', displayNameHe: 'דור', category: 'other', activeEras: ['2010', '2020'], tags: ['relationship', 'protest'] },
   { id: 'crowd-erez', displayNameHe: 'ארז', category: 'supporter', activeEras: ['2000', '2010'], tags: ['tifo', 'work'] },
   { id: 'crowd-inbal', displayNameHe: 'ענבל', category: 'supporter', activeEras: ['2000', '2010'], tags: ['ussishkin', 'volunteer'] },
   { id: 'crowd-lior', displayNameHe: 'ליאור', category: 'supporter', activeEras: ['2010', '2020'], tags: ['protest', 'phones'] },
-  { id: 'crowd-shani', displayNameHe: 'שני', category: 'supporter', activeEras: ['2010', '2020'], tags: ['photography', 'away'] },
+  // `J01` (2002) היא הפעם הראשונה ששני מופיעה — הצלמת שהתמונה שלה, והתסריט הוא הסמכות
+  { id: 'crowd-shani', displayNameHe: 'שני', category: 'supporter', activeEras: ['2000', '2010', '2020'], tags: ['photography', 'away'] },
   { id: 'crowd-noam', displayNameHe: 'נועם', category: 'supporter', activeEras: ['2020'], tags: ['songs', 'archive'] },
   { id: 'crowd-maya', displayNameHe: 'מאיה', category: 'supporter', activeEras: ['2020'], tags: ['mutual-aid'] },
   /**
@@ -595,7 +612,7 @@ export const SPEAKING_ROLES: Readonly<Record<string, string>> = {
  * לא את המילה `PARTNER`.
  */
 export const RUNTIME_ROLES: Readonly<Record<string, string>> = {
-  PARTNER: 'בת הזוג מ-PARTNERSHIP — אם המסלול נלקח',
+  PARTNER: 'בן/בת הזוג שנבחר/ה ב-`2011-people` — `lib/life/partner.ts` מחליף בזמן ריצה',
   PARTNER_OR_KEREN: 'בת הזוג אם יש, וקרן אם אין',
   הילד: 'הילד מ-PARENTHOOD — אם המסלול נלקח',
   TARGET: 'מי שהסצנה הזאת מדברת איתו, לפי ההסתעפות',

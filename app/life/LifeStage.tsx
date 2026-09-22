@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { AnchorCard } from '@/components/life/AnchorCard'
 import { DocSheet } from '@/components/life/DocSheet'
@@ -30,6 +30,10 @@ import { renewal, renewalWhyHe, seasonFor, subFlag, subscriptionReading } from '
 import { ShopCard } from '@/components/life/ShopCard'
 import { StageFinale } from '@/components/life/StageFinale'
 import { TotoCard } from '@/components/life/TotoCard'
+import { MechanicSheet } from '@/components/life/MechanicSheet'
+import { afterConversation, type ActivityId, type Settlement } from '@/lib/life/activities'
+import { describeMoneyChange } from '@/lib/life/money'
+import type { MechanicCatalog } from '@/lib/mechanics/types'
 import { ControlDeck, TapChip } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
 import { DialogueBox } from '@/components/life/DialogueBox'
@@ -56,6 +60,7 @@ import { HelpSheet } from '@/components/life/HelpSheet'
 import { Chip } from '@/components/life/Plate'
 import { ProfileCard } from '@/components/life/ProfileCard'
 import { Teach } from '@/components/life/Teach'
+import { RedBoxSheet } from '@/components/life/RedBoxSheet'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
 import { loadLife } from '@/lib/life/engine'
@@ -65,6 +70,7 @@ import type { LifeRuntime } from '@/lib/life/runtime/game'
 import { bookFor } from '@/lib/life/books'
 import { SETS, SET_ORDER, albumTotals, hasSticker, stickersIn } from '@/lib/life/stickers'
 import { TOTO_PER_ANSWER } from '@/lib/life/toto'
+import { boxContents } from '@/lib/life/redboxView'
 
 
 import { useLifeInput } from './stage/useLifeInput'
@@ -109,11 +115,14 @@ export function LifeStage({
   anchor,
   prologueAnchor,
   anchors,
+  catalog,
 }: {
   anchor: HistoricalAnchor
   prologueAnchor: HistoricalAnchor
   /** every chapter's anchor, by era key — resolved on the server like the two above */
   anchors: Record<string, HistoricalAnchor>
+  /** what the archive holds before each year, for the activities (`app/life/mechanicCatalog.ts`) */
+  catalog: MechanicCatalog
 }) {
   const holder = useRef<HTMLDivElement | null>(null)
   const runtime = useRef<LifeRuntime | null>(null)
@@ -142,6 +151,8 @@ export function LifeStage({
     match,
     doc,
     setDoc,
+    box,
+    setBox,
     book,
     setBook,
     cutscene,
@@ -158,6 +169,9 @@ export function LifeStage({
     setShirt,
     toto,
     setToto,
+    mechanic,
+    setMechanic,
+    bagAsked,
     coin,
     setCoin,
     penalty,
@@ -212,7 +226,7 @@ export function LifeStage({
     toggleDeck,
     opening,
     closeOpening,
-  } = useLifeRuntime({ holder, runtime, engineRef, busRef, audio, anchor, prologueAnchor, anchors })
+  } = useLifeRuntime({ holder, runtime, engineRef, busRef, audio, anchor, prologueAnchor, anchors, catalog })
 
   const {
     snapshot,
@@ -246,6 +260,25 @@ export function LifeStage({
   const { onAxis, onAction, onCancel } = useLifeInput({ runtime, ready, dialogue })
 
   const ledger = useLifeLedger({ engineRef })
+
+  /**
+   * חזרה לחדר — the world starts again where it stopped, the money line is said once, and
+   * the person who asked says how it went (`act-<id>-after`, branched on the tier the
+   * settlement wrote). No result page: the room is the result.
+   */
+  const backToRoom = (activity: ActivityId, settled: Settlement | null) => {
+    runtime.current?.pause(false)
+    if (!settled) return
+    const money = describeMoneyChange(settled.paid)
+    if (money) busRef.current?.emit('toast', { text: money, tone: 'plain' })
+    const after = afterConversation(activity)
+    if (after) runtime.current?.talk(after)
+  }
+
+  // the bag, asked for from the bedroom desk: the same card ☰ opens, never a second one
+  useEffect(() => {
+    if (bagAsked > 0) openProfile(false)
+  }, [bagAsked, openProfile])
 
   /** the painting fills the glass; the shell floats over it */
   const fullBleed = frame <= 0
@@ -410,6 +443,7 @@ export function LifeStage({
             lines={dialogue.lines}
             portrait={dialogue.portrait ?? null}
             anchor={dialogue.anchor ?? null}
+            where={dialogue.where ?? null}
             {...(!fullBleed ? { offsetTop: frame + 8 } : {})}
             {...(dialogue.choices ? { choices: dialogue.choices } : {})}
             onAdvance={() => runtime.current?.advance()}
@@ -422,6 +456,18 @@ export function LifeStage({
         )}
 
         {doc && <DocSheet art={doc.art} captionHe={doc.captionHe} onClose={() => setDoc(null)} />}
+
+        {/* הקופסה האדומה — נקראת מהמצב ברגע שהיא נפתחת, כדי שמה שנכנס לפני רגע יהיה בה */}
+        {box && (
+          <RedBoxSheet
+            things={engineRef.current ? boxContents(engineRef.current.state) : []}
+            onClose={() => {
+              audio.current?.play('ui-close', { bus: 'ui', level: 0.5 })
+              busRef.current?.emit('box', false)
+              setBox(false)
+            }}
+          />
+        )}
 
         {/* החוברת — a real object with pages, remembered where it was put down */}
         {book && bookFor(book.id) && (
@@ -607,10 +653,22 @@ export function LifeStage({
           <TotoCard
             toto={toto}
             perAnswer={TOTO_PER_ANSWER}
-            onDone={(shekels) => {
-              ledger.settleToto(shekels)
+            onDone={(result) => {
+              const settled = ledger.settleToto(result)
               setToto(null)
-              runtime.current?.pause(false)
+              backToRoom('kiosk-trivia', settled)
+            }}
+          />
+        )}
+
+        {mechanic && (
+          <MechanicSheet
+            key={`${mechanic.activity}-${mechanic.seed}`}
+            request={mechanic}
+            onDone={(result) => {
+              const settled = ledger.settleActivity(mechanic, result)
+              setMechanic(null)
+              backToRoom(mechanic.activity, settled)
             }}
           />
         )}
@@ -815,6 +873,7 @@ export function LifeStage({
             titleHe={ending.titleHe}
             bodyHe={ending.bodyHe}
             memoryHe={ending.memoryHe}
+            memory={ending.memory ?? null}
             after={ending.after ?? null}
             chapter={ending.chapter ?? '1986'}
             presence={ending.presence ?? null}

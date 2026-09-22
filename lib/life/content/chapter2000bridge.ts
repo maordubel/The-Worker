@@ -1,4 +1,4 @@
-import { WAGE } from '../prices'
+import { shiftAgorot } from '../income'
 import { workDoneFlag } from '../gigs'
 import type { LifeState } from '../types'
 
@@ -42,8 +42,14 @@ export const PORTRAIT_BRIDGE: Record<string, string> = {
   'רפי': 'faceOldMan',
 }
 
-/** השכר של משמרת אחת בקיוסק, בשעה אחת, לפי הטבלה — לא לפי מספר שהוקלד בתסריט */
-const SHIFT_AGOROT = Math.round(WAGE['00s'] * 1) * 100
+/**
+ * משמרת בקיוסק — **עשר שעות**, ומכאן 180 ₪, שזה בדיוק מה שהתסריט כתב.
+ *
+ * הגרסה הראשונה כאן תמחרה שעה אחת (18 ₪) מפני ששישים דקות **בשעון המשחק** נראו כמו
+ * שעה. הן יום עבודה: רפי פותח בשש, והמשמרת נגמרת כשהוא סוגר. המספר נגזר מ-`WAGE`
+ * דרך `shiftAgorot`, ולכן הוא יודע באיזה עשור הוא נמצא (כלל 78).
+ */
+const SHIFT_AGOROT = shiftAgorot(2000, 10)
 
 export function objectiveBridge(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
@@ -107,7 +113,11 @@ export const BEATS_BRIDGE: Beat[] = [
     trigger: 'enter',
     when: { all: [{ flag: 'b:night' }], none: [{ flag: 'b:box' }] },
     delayMs: 600,
-    do: [{ a: 'talk', conversation: 'b-box' }],
+    /**
+     * *"פתח קופסה"* (B01) — **והיא נפתחת על המסך** (21.9.2026): הקופסה יורדת מהמדף,
+     * המכסה נפתח, ומה שבה מונח שם; כשהיא נסגרת קובי כבר בדלת, שואל על מה שראית.
+     */
+    do: [{ a: 'talk', conversation: 'b-box-lid' }, { a: 'talk', conversation: 'b-box' }],
   },
   /** B02 — הקיוסק, אחרי הקופסה */
   {
@@ -128,7 +138,8 @@ export const BEATS_BRIDGE: Beat[] = [
   {
     id: 'b-close',
     trigger: 'clock',
-    when: { all: [{ flag: 'b:commit' }], none: [{ flag: 'b:done' }] },
+    // ...and after Amit's question too (`Q01`, `chapterCombos.ts`)
+    when: { all: [{ flag: 'b:commit' }, { flag: 'q:role' }], none: [{ flag: 'b:done' }] },
     delayMs: 900,
     do: [
       { a: 'flag', flag: 'b:done' },
@@ -211,6 +222,16 @@ export const CONVERSATIONS_BRIDGE: Conversation[] = [
           { who: 'פוגי', text: 'זה סיפור קצת יותר ארוך.' },
         ],
         then: [{ e: 'remember', who: 'rachel', eventId: 'bridge-night', significance: 'major' }],
+      },
+    ],
+  },
+  {
+    id: 'b-box-lid',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הקופסה האדומה על המדף. הורדת אותה, והמכסה חרק כמו שהוא חורק מאז שהיית בן שמונה.' }],
+        then: [{ e: 'flag', flag: 'open:redbox' }, { e: 'box' }],
       },
     ],
   },
@@ -314,6 +335,14 @@ export const CONVERSATIONS_BRIDGE: Conversation[] = [
             then: [
               { e: 'flag', flag: 'b:commit' },
               { e: 'flagValue', flag: 'b:commitKind', value: 'people' },
+              /**
+               * חלון TOURNAMENT נפתח **מהחיים, לא מהזמנה** (מאור, 21.9.2026: *"לפי החיים
+               * בלבד"*). מי שבחר ערב עם החבר׳ה על פני משמרת ורשימה, מוצא את עצמו בקיץ
+               * בליגה של חמישה על חמישה — `2000-team` פשוט הפרק הבא. בלי טלפון ובלי כן/לא.
+               */
+              // `TEAM_FLAG` of `chapterTeam.ts`, spelled out: that file imports this one's
+              // portraits through `chapter2002europe`, and an import back would be a cycle
+              { e: 'flag', flag: 'life:team' },
               { e: 'time', minutes: 45 },
               { e: 'energy', delta: -5 },
               { e: 'rel', who: 'amit', axis: 'bond', delta: 3 },

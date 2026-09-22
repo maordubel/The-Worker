@@ -9,6 +9,7 @@ import {
   type RouteId,
 } from '../routes'
 import type { ReputationAudience } from '../types'
+import type { Condition } from '../world/types'
 import type { Beat } from './beats'
 import { CHAPTERS } from './chapters'
 import { DEFAULT_IDENTITY } from './chapter1986'
@@ -770,6 +771,17 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'יש מה לעשות ואין מספיק ידיים. אנשים, תפעול, כסף — שלושה דברים שונים לגמרי.' },
           { who: null, text: 'אף אחד לא מחלק תפקידים. פשוט שואלים מי לוקח.' },
         ],
+        /**
+         * ...והתחייבות שכבר נלקחה **נעולה, ואומרת למה** (21.9.2026).
+         *
+         * הפסגה מבקשת **שלוש התחייבויות שונות** בתוך החלון, והשיחה הזאת עומדת עכשיו
+         * פעם אחת בכל אחד משלושת פרקי 2007. בלי הנעילה, שחקן שבוחר "אנשים" שלוש
+         * פעמים מקבל שלוש ראיות — וזו הספירה שהמנוע באמת סופר — ועומד מול פסגה
+         * נעולה בלי לדעת למה, כי `foundingCommitments` נשאר 1.
+         *
+         * שלוש הזדמנויות, שלוש התחייבויות: הבחירה נשארת בחירה (באיזה סדר, ומה
+         * לקחת ראשון), ומה שאי-אפשר עוד אומר את זה בקול במקום להיכשל בשקט.
+         */
         choices: FOUNDING_COMMITMENTS.map((kind) => ({
           id: kind,
           text:
@@ -778,6 +790,8 @@ const CONVERSATIONS: Conversation[] = [
               : kind === 'operations'
                 ? 'לקחת את התפעול — אולם, ציוד, שעות'
                 : 'לקחת את התקציב — מה נכנס, מה יוצא, ומה אין',
+          when: { notFlag: foundingCommitmentFlag(kind) } as Condition,
+          noteHe: 'כבר לקחת את זה.',
           then: [
             ...missionEffects(mission('PROOF_FOUND')),
             { e: 'flag', flag: foundingCommitmentFlag(kind) },

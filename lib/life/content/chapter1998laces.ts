@@ -158,18 +158,30 @@ export const BEATS_LACES: Beat[] = [
       { a: 'sound', kind: 'radio', on: false },
     ],
   },
-  /** הרגע השני של הצעיף — אופיר על המדרגות, ואין לו כלום ביד */
+  /**
+   * הרגע השני של הצעיף — אופיר על המדרגות, ואין לו כלום ביד.
+   *
+   * **אחרי עשר הדקות, לא לפניהן** (21.9.2026). הביט חיכה ל-`l1:after` ונעצר ב-`l1:cut`,
+   * אבל שניהם נכתבים באותה שרשרת שיחה (`l1-whistle` → `l1-ten`), כלומר ביט שעון לא ראה
+   * אף פעם את הרווח ביניהם — ובנוסף `scarf:given` נמחק בחצות של 1986 (`scarf:` לא הייתה
+   * קידומת נושאת). הרגע לא ירה מעולם. עכשיו הוא בא אחרי הבחירה של עשר הדקות ולפני הכיתה,
+   * ורק למי שהיה בבלומפילד: מי ששמע ברדיו לא ראה את אופיר על המדרגות.
+   */
   {
     id: 'l1-scarf',
     trigger: 'clock',
-    when: { all: [{ flag: 'l1:after' }, { flag: 'scarf:given' }], none: [{ flag: 'scarf:asked:98' }, { flag: 'l1:cut' }] },
+    when: { all: [{ flag: 'l1:cut' }, { flag: 'scarf:given' }], none: [{ flag: 'scarf:asked:98' }, { flag: 'went:laces-radio' }, { flag: L2 }] },
     do: [{ a: 'flag', flag: 'scarf:asked:98' }, { a: 'talk', conversation: 'scarf-ofir-98' }],
   },
-  // the morning after: a lesson
+  // the morning after: a lesson — after the scarf, when there is a scarf moment to have
   {
     id: 'l1-to-class',
     trigger: 'clock',
-    when: { flag: 'l1:cut', none: [{ flag: L2 }] },
+    when: {
+      flag: 'l1:cut',
+      none: [{ flag: L2 }],
+      any: [{ flag: 'scarf:asked:98' }, { notFlag: 'scarf:given' }, { flag: 'went:laces-radio' }],
+    },
     do: [
       { a: 'card', titleHe: 'יום ראשון', subHe: 'שיעור ערבית', ms: 2600 },
       { a: 'events', events: DAY(L2, 1998, 0, at(9, 0), '3 במאי 1998') },
@@ -187,6 +199,32 @@ export const BEATS_LACES: Beat[] = [
 ]
 
 export const CONVERSATIONS_LACES: Conversation[] = [
+  /**
+   * **רחל של 1998 — שיחה משלה, מ-21.9.2026.** עד היום השחקנית `rachel-laces` דיברה את
+   * `rachel-1993`: *"גמר? של כדורסל? ביום שני?"*, האוטובוס של מישל ליד אליהו, ושמונה
+   * שקלים מהארנק שבמגירה — לחייל בן עשרים, בשבת של השרוכים. `life:worldlines` מצא את
+   * זה דרך `final:over`, דגל של 1993 שענף ראשון של השיחה קרא בפרק אחר (`STALE_READ`).
+   */
+  {
+    id: 'rachel-laces',
+    nameHe: 'רחל',
+    branches: [
+      {
+        when: { flag: 'l1:after' },
+        lines: [
+          { who: 'רחל', text: 'שב. אני לא שואלת.' },
+          { who: null, text: 'היא שמה צלחת מולך והלכה לסגור את התריס. זה כל מה שהיא אמרה על זה.' },
+        ],
+        then: [{ e: 'rel', who: 'rachel', axis: 'bond', delta: 1 }],
+      },
+      {
+        lines: [
+          { who: 'רחל', text: 'אבא שלך מסתובב עם הרדיו מהבוקר. אל תשאל אותו כלום, הוא לא יענה.' },
+          { who: 'רחל', text: 'ותאכל משהו לפני. מדים או לא מדים, בבית הזה אוכלים לפני משחק.' },
+        ],
+      },
+    ],
+  },
   {
     id: 'kobi-laces',
     nameHe: 'קובי',

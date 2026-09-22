@@ -1,10 +1,11 @@
 import Phaser from 'phaser'
 
 import { eraFor } from '../../content/era'
-import { GIGS, gigFlag, gigPay, workDoneFlag, type Gig } from '../../gigs'
+import { AFTER_FLAG, activityForGig, afterConversation, settleActivity } from '../../activities'
+import { CHORE_ORDER_FLAG, GIGS, gigFlag, gigPay, workDoneFlag, type Gig } from '../../gigs'
 import { shekels } from '../../prices'
 import type { LocationId } from '../../types'
-import { SCENE, artFor } from '../../world/scenes'
+import { SCENE, artFor, sceneIn } from '../../world/scenes'
 import { artUrl } from '../art'
 import { frameCamera } from '../camera'
 import { CONTEXT_KEY, type LifeContext } from '../context'
@@ -51,7 +52,12 @@ type Piece = {
 
 type Mode = 'collect' | 'carry' | 'serve' | 'sweep'
 
-type Shape = { mode: Mode; art?: string; target: number; seconds: number; hintHe: string }
+/**
+ * `capacity` — a bag that holds this many, and is only worth something once it has been
+ * emptied at the drop (the bottles after a match: keep collecting, or go and cash in before
+ * the cleaners come). Absent: every piece counts the moment it is picked up.
+ */
+type Shape = { mode: Mode; art?: string; target: number; seconds: number; hintHe: string; capacity?: number }
 
 /** which shape of work each gig is, and what it uses for a piece */
 /**
@@ -65,16 +71,19 @@ const SHAPE: Record<string, Shape> = {
   'bottles-round': { mode: 'collect', art: 'propBottle', target: 8, seconds: 45, hintHe: 'תאסוף את הבקבוקים לפני שמישהו אחר יגיע.' },
   'crates-kiosk': { mode: 'carry', art: 'propPack80', target: 6, seconds: 60, hintHe: 'ארגז אחד כל פעם. מהערימה לדלת.' },
   'sweep-hall': { mode: 'sweep', target: 10, seconds: 55, hintHe: 'מהשורה העליונה למטה. תעבור על הכל.' },
-  'papers-round': { mode: 'carry', art: 'propPapers', target: 7, seconds: 55, hintHe: 'עיתון לכל תיבה. אל תפספס בניין.' },
+  'papers-round': { mode: 'carry', art: 'propNewspaper', target: 7, seconds: 55, hintHe: 'עיתון לכל תיבה. אל תפספס בניין.' },
   'shopping-neighbour': { mode: 'carry', art: 'propBagStrap90', target: 4, seconds: 45, hintHe: 'שתי שקיות, שלוש קומות. תחזיק מלמטה.' },
   'drinks-hall': { mode: 'carry', art: 'propBottleFull', target: 6, seconds: 55, hintHe: 'לפני שפותחים את השערים.' },
   'wash-cars': { mode: 'sweep', target: 12, seconds: 60, hintHe: 'לעבור על כל הרכב. פינות גם.' },
   'errands-rafi': { mode: 'carry', art: 'propBagStrap90', target: 5, seconds: 55, hintHe: 'הזמנה לכל בניין. רפי סופר.' },
   'sell-scarves': { mode: 'serve', art: 'propScarfRed', target: 8, seconds: 55, hintHe: 'הם עוברים. תגיע אליהם ותלחץ.' },
-  'balls-hall': { mode: 'collect', art: 'propBallReal', target: 9, seconds: 45, hintHe: 'כל הכדורים לעגלה, לפני שהאימון מתחיל.' },
+  'balls-hall': { mode: 'collect', art: 'propBasketball', target: 9, seconds: 45, hintHe: 'כל הכדורים לעגלה, לפני שהאימון מתחיל.' },
   // אלנבי (6.9.2026): the market and the shopfront
   'crates-allenby': { mode: 'carry', art: 'propCrate', target: 7, seconds: 60, hintHe: 'ארגז אחד כל פעם, מהמדרכה פנימה.' },
   'sweep-allenby': { mode: 'sweep', target: 9, seconds: 45, hintHe: 'מהשולחנות עד אבן השפה. הכל.' },
+  // 21.9.2026 — the two jobs that became activities and are still played with the hands
+  'chairs-end': { mode: 'carry', art: 'propCrate', target: 7, seconds: 50, hintHe: 'אחד־אחד, לפי הסדר ששחור ביקש.' },
+  'bottles-ground': { mode: 'collect', art: 'propBottle', target: 10, seconds: 50, capacity: 4, hintHe: 'ארבעה בשקית. לפדות ליד הארגז, ולחזור — לפני שהמנקים מגיעים.' },
 }
 
 /** what a gig with no shape declared plays as — never reached, but never undefined either */
@@ -100,6 +109,8 @@ export class ChoreScene extends Phaser.Scene {
   private carried: Phaser.GameObjects.Image | null = null
   private drop = { x: 0.88, y: 0.9 }
   private done = 0
+  /** what is in the bag and not yet cashed in (capacity shapes only) */
+  private bag = 0
   private endsAt = 0
   private finished = false
   private lockUntil = 0
@@ -117,6 +128,7 @@ export class ChoreScene extends Phaser.Scene {
     this.pieces = []
     this.carried = null
     this.done = 0
+    this.bag = 0
     this.finished = false
     this.lockUntil = 0
     this.nextSpawn = 0
@@ -139,7 +151,7 @@ export class ChoreScene extends Phaser.Scene {
   create() {
     this.ctx = this.registry.get(CONTEXT_KEY) as LifeContext
     const chapter = this.ctx.engine.state.chapter
-    const def = SCENE[this.gig.where as Exclude<LocationId, 'prologue-1972'>]
+    const def = sceneIn(SCENE[this.gig.where as Exclude<LocationId, 'prologue-1972'>], chapter)
     this.band = def.band
     this.size = def.size
 
@@ -155,6 +167,12 @@ export class ChoreScene extends Phaser.Scene {
 
     this.drop = { x: this.gig.at.x, y: Math.min(this.band.near, this.gig.at.y) }
     this.layPieces()
+    // a bag is emptied somewhere you can see: the crate the deposit is counted into
+    if (this.shape.capacity) {
+      const x = this.drop.x * this.W
+      const y = this.drop.y * this.H
+      this.add.ellipse(x, y, this.W * 0.05, this.H * 0.022, LIFE_PALETTE.red, 0.5).setDepth(y - 3)
+    }
 
     this.cameras.main.setBounds(0, 0, this.W, this.H)
     frameCamera(this, this.cameras.main, this.W, this.H, 0.8)
@@ -260,7 +278,13 @@ export class ChoreScene extends Phaser.Scene {
         continue
       }
       if (!near) continue
-      if (this.shape.mode === 'collect' || this.shape.mode === 'sweep') {
+      if (this.shape.mode === 'collect' && this.shape.capacity) {
+        if (this.bag >= this.shape.capacity) continue // the bag is full: cash in first
+        piece.taken = true
+        piece.image.destroy()
+        this.bag += 1
+        this.ctx.bus.emit('sound', { kind: 'step', surface: 'floor' })
+      } else if (this.shape.mode === 'collect' || this.shape.mode === 'sweep') {
         piece.taken = true
         piece.image.destroy()
         this.score()
@@ -289,6 +313,16 @@ export class ChoreScene extends Phaser.Scene {
       }
     }
 
+    if (this.shape.capacity && this.bag > 0) {
+      const dx = Math.abs(nx / this.W - this.drop.x)
+      const dy = Math.abs(ny / this.H - this.drop.y)
+      if (dx < 0.07 && dy < 0.09) {
+        this.done += this.bag
+        this.bag = 0
+        this.ctx.bus.emit('sound', { kind: 'door' })
+      }
+    }
+
     this.pushHud()
     if (time > this.endsAt || this.done >= this.shape.target) this.finish()
   }
@@ -301,7 +335,9 @@ export class ChoreScene extends Phaser.Scene {
   private pushHud() {
     const left = Math.max(0, Math.ceil((this.endsAt - this.time.now) / 1000))
     this.ctx.bus.emit('hud', {
-      clock: `${this.done} / ${this.shape.target}`,
+      clock: this.shape.capacity
+        ? `${this.done} / ${this.shape.target} · ${this.bag}/${this.shape.capacity}`
+        : `${this.done} / ${this.shape.target}`,
       date: String(this.ctx.engine.state.year),
       agorot: left,
       showMoney: false,
@@ -327,9 +363,40 @@ export class ChoreScene extends Phaser.Scene {
     if (this.finished) return
     this.finished = true
     const chapter = this.ctx.engine.state.chapter
-    const base = gigPay(this.gig, chapter)
     const ratio = Phaser.Math.Clamp(this.done / this.shape.target, 0, 1)
     const perfect = this.done >= this.shape.target
+
+    /**
+     * פעילות — from its first chapter a job that became an activity is settled by the
+     * activity (`lib/life/activities.ts`): its range of B, its slot, its once-a-chapter
+     * rewards, and a person in the room who says how it went when the room is rebuilt.
+     * Before that chapter, and for every job that is only a job, the lines below run as
+     * they always did.
+     */
+    const act = activityForGig(this.gig.id, chapter)
+    if (act) {
+      const state = this.ctx.engine.state
+      // Shachor's order is part of the job: the right one is worth a fifth more on the way out
+      const order = state.flags[CHORE_ORDER_FLAG]
+      const share = Math.min(1, (perfect ? 1 : ratio) + (act.id === 'ussishkin-help' && order === 'right' ? 0.2 : 0))
+      const settled = settleActivity(state, act.id, { completed: true, score: share })
+      this.ctx.engine.dispatch(...settled.events)
+      const after = afterConversation(act.id)
+      if (after) this.ctx.engine.dispatch({ t: 'flag.set', flag: AFTER_FLAG, value: after })
+      if (this.gig.trait) {
+        this.ctx.engine.dispatch({ t: 'personality.shifted', key: this.gig.trait.key, delta: this.gig.trait.delta })
+      }
+      void this.ctx.engine.save()
+      const shekelsPaid = Math.round(settled.paid / 100)
+      this.ctx.bus.emit('toast', {
+        text: shekelsPaid > 0 ? `${this.done} מתוך ${this.shape.target}. ${shekelsPaid} ₪.` : `${this.done} מתוך ${this.shape.target}.`,
+        tone: settled.tier === 'high' ? 'red' : 'plain',
+      })
+      this.leave()
+      return
+    }
+
+    const base = gigPay(this.gig, chapter)
     const paid = Math.max(1, Math.round(base * (0.5 + 0.5 * ratio) * (perfect ? 1.2 : 1)))
 
     this.ctx.engine.dispatch(
@@ -349,6 +416,11 @@ export class ChoreScene extends Phaser.Scene {
       text: perfect ? `${this.gig.doneHe} ${paid} ₪.` : `${this.done} מתוך ${this.shape.target}. ${paid} ₪.`,
       tone: perfect ? 'red' : 'plain',
     })
+    this.leave()
+  }
+
+  /** back to the room the job was offered in, through the same fade every door plays */
+  private leave() {
     this.cameras.main.fadeOut(380, 0, 0, 0)
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start(WorldScene.KEY, { mapId: this.returnTo, spawn: this.returnSpawn })

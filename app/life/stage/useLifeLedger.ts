@@ -5,12 +5,14 @@ import { type MutableRefObject } from 'react'
 import { t } from '@/lib/i18n'
 import { bookPageFlag } from '@/lib/life/books'
 import type { loadLife } from '@/lib/life/engine'
-import { PITCH_SETTLEMENT } from '@/lib/life/football/door'
+import { PITCH_SETTLEMENT, pitchResult } from '@/lib/life/football/door'
 import { GIGS } from '@/lib/life/gigs'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE, type Shirt } from '@/lib/life/shirts'
 import { stickerFlag, tornFlag } from '@/lib/life/stickers'
-import { COIN_WHY_HE, HOOPS_WHY_HE, PENALTY_WHY_HE, TOTO_WHY_HE } from '@/lib/life/toto'
+import { settleActivity, type MechanicRequest, type Settlement } from '@/lib/life/activities'
+import { COIN_WHY_HE, HOOPS_WHY_HE, PENALTY_WHY_HE } from '@/lib/life/toto'
+import type { ActivityResult } from '@/lib/mechanics/types'
 import type { LifeState } from '@/lib/life/types'
 import { landingMinute } from '@/lib/life/world/flow'
 
@@ -113,13 +115,41 @@ export function useLifeLedger({
       return { text: t('life.pass.passed'), tone: 'plain' }
     },
 
-    /** the slip: paid per correct answer, and it costs twenty minutes whatever it pays */
-    settleToto(shekels: number) {
-      if (shekels > 0) {
-        engineRef.current?.dispatch({ t: 'money.changed', agorot: shekels * 100, why: TOTO_WHY_HE })
-      }
-      engineRef.current?.dispatch({ t: 'clock.advanced', minutes: 20 })
-      void engineRef.current?.save()
+    /**
+     * the slip: settled as the kiosk's trivia activity (`activities.ts` 'kiosk-trivia').
+     *
+     * In the 1984–86 chapters that is exactly what it always was — two shekels a right
+     * answer and twenty minutes, handed in whenever it is handed in (owner, 21.9.2026:
+     * the tested economy does not move). From 1990 the same slip pays a share of B, one
+     * hour of that decade's wage, so a right answer is not worth less every year.
+     */
+    settleToto({ hits, asked }: { hits: number; asked: number }): Settlement | null {
+      const engine = engineRef.current
+      if (!engine) return null
+      const settled = settleActivity(engine.state, 'kiosk-trivia', {
+        completed: true,
+        score: asked > 0 ? hits / asked : 0,
+      })
+      engine.dispatch(...settled.events)
+      void engine.save()
+      return settled
+    },
+
+    /**
+     * פעילות — a gate game played inside the life, settled by the life's own rules
+     * (`settleActivity`: the range of B, the slot, the once-a-chapter rewards). The room's
+     * reaction and the pause are the caller's, like every other card here.
+     */
+    settleActivity(request: MechanicRequest, result: ActivityResult): Settlement | null {
+      const engine = engineRef.current
+      if (!engine) return null
+      const settled = settleActivity(engine.state, request.activity, {
+        ...result,
+        contentId: result.contentId ?? request.contentId,
+      })
+      engine.dispatch(...settled.events)
+      void engine.save()
+      return settled
     },
 
     /** whether the child has the stake in his pocket at all — the alley never takes credit */
@@ -192,6 +222,12 @@ export function useLifeLedger({
         { t: 'energy.changed', delta: -PITCH_SETTLEMENT.energy },
         { t: 'flag.raised', flag: PITCH_SETTLEMENT.flag },
         { t: 'personality.shifted', key: PITCH_SETTLEMENT.trait.key, delta: PITCH_SETTLEMENT.trait.delta },
+        /**
+         * התוצאה, כעובדה של היום (21.9.2026). עד היום המגרש החזיר רק "שיחק" — ולכן שום
+         * סצנה לא יכלה לדעת אם ניצחו. `Y05` (חלון TOURNAMENT) צריך את זה: ניצחון מביא
+         * גביע, כל תוצאה אחרת — תמונה. דגל יום (`pitch:`), ולכן הוא לא עובר לשנה הבאה.
+         */
+        { t: 'flag.set', flag: PITCH_SETTLEMENT.resultFlag, value: pitchResult(score) },
       )
       if (score.home > score.away) {
         engineRef.current?.dispatch({

@@ -40,8 +40,9 @@ export const SCHEDULE_1986: NPCScheduleEntry[] = [
     start: DAY_START,
     end: KOBI_LEAVES,
     behavior: 'wait',
-    x: 0.63,
-    y: 0.78,
+    // in the painted armchair (0.11–0.27), the figure's own chair drawn over it (21.9.2026)
+    x: 0.19,
+    y: 0.74,
   },
 
   // ------------------------------------------------------------------------ Ofir ----

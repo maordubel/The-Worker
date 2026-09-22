@@ -172,6 +172,7 @@ export function DialogueBox({
   choices,
   portrait,
   anchor,
+  where,
   offsetTop,
   onAdvance,
   onChoose,
@@ -180,6 +181,8 @@ export function DialogueBox({
   lines: DialogueLine[]
   choices?: DialogueChoice[]
   portrait?: string | null
+  /** the place this is happening, when it is not the room on screen (`Conversation.where`) */
+  where?: string | null
   /**
    * Where the speaker is standing, as a fraction of the picture in camera space, or null
    * when the scene does not know (narration, a radio, a name nobody answers to).
@@ -227,6 +230,16 @@ export function DialogueBox({
       data-life="dialogue"
     >
       <div className={`relative flex w-full flex-col ${spoken ? (atEnd ? 'items-start' : 'items-end') : 'items-stretch'}`} data-side={spoken ? side : 'wide'}>
+        {/* ---- תג מקום: השיחה קורית במקום שאין לו ציור — ניקוסיה, טדי — והחדר על המסך
+             הוא רק המקום שבו פוגי עומד כשהוא נזכר / שומע. שלט קטן, לא שורת טקסט. ---- */}
+        {where && (
+          <span
+            className="pointer-events-none mb-1.5 self-center border-rule border-ink bg-red px-2.5 py-[5px] font-sign text-[12px] font-bold leading-none text-sheet"
+            data-life="where"
+          >
+            <bdi>{where}</bdi>
+          </span>
+        )}
         {/* ---- the speaker, standing over the top edge, on their side ------------------- */}
         {spoken && (
           <div
@@ -251,6 +264,18 @@ export function DialogueBox({
                 atEnd ? 'border-s-0' : 'border-e-0'
               }`}
             >
+              {/* בטלפון — מי שמדבר לא עומד בחדר, והתיבה אומרת את זה בלי מילה נוספת בשורה */}
+              {line.via && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={artUrl('iconPhone')}
+                  alt={t(line.via === 'video' ? 'life.dialogue.video' : 'life.dialogue.phone')}
+                  title={t(line.via === 'video' ? 'life.dialogue.video' : 'life.dialogue.phone')}
+                  draggable={false}
+                  className="me-1.5 inline-block h-[19px] w-[19px] select-none align-[-5px]"
+                  data-life="via"
+                />
+              )}
               <bdi>{line.who}</bdi>
             </span>
           </div>

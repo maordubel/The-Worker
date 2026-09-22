@@ -1,6 +1,8 @@
 import type { HistoricalAnchor } from '../anchors'
-import type { LocationId } from '../types'
+import type { ItemId, LocationId } from '../types'
 import type { KitSpec } from '../../kit/spec'
+import type { MechanicRequest } from '../activities'
+import type { MechanicWindow } from '../../mechanics/types'
 
 /**
  * הגשר — the one channel between the canvas and the DOM.
@@ -26,6 +28,8 @@ export type DialogueLine = {
   text: string
   /** the face that fills the glass for this line — see `Say.closeUp` */
   closeUp?: string
+  /** the speaker is not in the room — a phone or a screen (`Conversation.remote`) */
+  via?: 'phone' | 'video'
 }
 
 export type DialogueChoice = {
@@ -94,7 +98,7 @@ export type LifeBusEvents = {
    * the length of a conversation, so the only thing that can move under it is a shot
    * tween, and a tail that chases a tween is worse than one that is a few pixels off.
    */
-  dialogue: { lines: DialogueLine[]; choices?: DialogueChoice[]; portrait?: string | null; anchor?: number | null } | null
+  dialogue: { lines: DialogueLine[]; choices?: DialogueChoice[]; portrait?: string | null; anchor?: number | null; where?: string | null } | null
   /**
    * What the button will do, and to what.
    *
@@ -216,6 +220,11 @@ export type LifeBusEvents = {
    */
   doc: { art: string; captionHe: string | null } | null
   /**
+   * הקופסה האדומה פתוחה — 21.9.2026. אין כאן תוכן: מה שבקופסה הוא מה שבמצב, והמעטפת
+   * קוראת אותו כשהיא נפתחת (`boxContents`), כדי שחפץ שנכנס לפני רגע כבר יהיה בה.
+   */
+  box: boolean
+  /**
    * חוברת פתוחה — which booklet is being read, and on which page.
    *
    * Its own channel rather than a `doc` with a page number, because it obeys different
@@ -277,7 +286,21 @@ export type LifeBusEvents = {
    * WITHOUT their answers and are graded there, exactly the way גשר 2 does it, so a boy
    * filling in a Toto slip cannot read the results off the page.
    */
-  toto: { seed: number; perAnswerHe: string } | null
+  /**
+   * `window` and `top` from 1990 on: the slip is cut to the life's year and pays a share of
+   * B up to `top` shekels. Absent in 1984–86, where it is two shekels an answer, as it was.
+   */
+  toto: { seed: number; perAnswerHe: string; window?: MechanicWindow | null; top?: number | null } | null
+
+  /**
+   * פעילות — a gate game opened from this room (`lib/life/activities.ts`). The shell draws
+   * the gate's own board over the paused world, settles the result through the ledger and
+   * hands the room its reaction; null closes it.
+   */
+  mechanic: MechanicRequest | null
+
+  /** התיק — the bag, opened from the bedroom rather than from ☰ (the same card) */
+  bag: boolean
 
   /**
    * עץ או פלי — a half shekel, in the air, in the alley.
@@ -461,6 +484,11 @@ export type LifeBusEvents = {
     titleHe: string
     bodyHe: string
     memoryHe: string
+    /**
+     * מה נכנס לקופסה — המזהה שנשמר, החפץ, והסוף. הכרטיס מצייר את החפץ לצד המשפט
+     * (`BoxObject`), כי *"שמת את זה בקופסה האדומה"* בלי לראות מה זה הוא חצי מהרגע.
+     */
+    memory?: { id: string; item: ItemId; endingId: string; year: number }
     after?: { fromArt: string; toArt: string; lineHe: string }
     chapter?: string
     /**

@@ -77,6 +77,19 @@ export function resolveChapterAnchor(): HistoricalAnchor {
 const US = 'הפועל-תל-אביב'
 
 /**
+ * השם של היריבה כפי שהמקור כתב אותו — קודם מהשורות שעברו את רף הביטחון, ואחר כך
+ * מהרשימה המלאה (`archive.clubNames`), ורק בסוף מהסלאג. הסדר הזה הוא מה שמונע
+ * מ-`בית"ר-י-ם` להופיע על כרטיס היסטורי כ-`בית"ר י ם`.
+ */
+function opponentNameHe(slug: string): string {
+  return (
+    archive.clubs.find((row) => row.slug === slug && row.sport === 'football')?.nameHe ??
+    archive.clubNames.find((row) => row.slug === slug && (row.sport ?? 'football') === 'football')?.nameHe ??
+    slug.replace(/-/g, ' ')
+  )
+}
+
+/**
  * How many of this competition the club had won by the end of this season.
  *
  * A season label sorts lexicographically in the right order (`1968/69` < `1980/81`), which
@@ -127,7 +140,6 @@ function findDecider(season: string, competitionSlug: string): HistoricalAnchor[
 
   const atHome = match.homeClubSlug === US
   const opponentSlug = atHome ? match.awayClubSlug : match.homeClubSlug
-  const opponent = archive.clubs.find((row) => row.slug === opponentSlug && row.sport === 'football')
   const venue = match.venueSlug
     ? archive.venues.find((row) => row.slug === match.venueSlug && row.sport === 'football')
     : null
@@ -140,7 +152,7 @@ function findDecider(season: string, competitionSlug: string): HistoricalAnchor[
 
   return {
     playedOn: match.playedOn,
-    opponentHe: opponent?.nameHe ?? opponentSlug.replace(/-/g, ' '),
+    opponentHe: opponentNameHe(opponentSlug),
     scoredFor: (atHome ? match.homeScore : match.awayScore) ?? 0,
     scoredAgainst: (atHome ? match.awayScore : match.homeScore) ?? 0,
     atHome,
@@ -383,6 +395,16 @@ type AnchorSpec = {
   summaryHe?: string
   summarySourceTitle?: string
   summarySourceUrl?: string
+  /**
+   * **עוגן שקורא רגע מהארכיון במקום להקליד אותו מחדש** (21.9.2026).
+   *
+   * `summaryHe` נכתב ביד, וזו הייתה הצורה היחידה שהייתה לעובדה בלי משחק (עליית 2009,
+   * האולם החדש של 2015). היא עובדת, ויש לה מחיר: המשפט חי בשני מקומות, ומי שיתקן את
+   * הארכיון לא ידע שיש עותק שני (כלל 59). `momentSlug` מצביע על שורה ב-`moments.json`
+   * והמשפט, המקור והתאריך נקראים ממנה — כלומר הארכיון נשאר המקור היחיד, וזה גם מה
+   * שכל שאר הקובץ הזה עושה עם משחקים.
+   */
+  momentSlug?: string
 }
 
 const ANCHOR_SPECS: Record<string, AnchorSpec> = {
@@ -502,6 +524,353 @@ const ANCHOR_SPECS: Record<string, AnchorSpec> = {
     countTitles: true,
     placeholderHe: 'גמר גביע המדינה של 17.5.2000 ברמת גן',
   },
+  /**
+   * שלב ג׳ — העוגן הראשון של תסריט ההמשך, ומה שהארכיון כבר החזיק (21.9.2026).
+   *
+   * `EUROPE` הוא מסע ולא משחק: צ׳לסי בבלומפילד, לוקומוטיב, פארמה, ואז מילאן. הפרק
+   * נתלה על **משחק הגומלין** ב-21.3.2002 בסן סירו — הרגע שבו הוא נגמר — כי זו הסצנה
+   * שהתסריט כותב במפורש (`E05`: *"הצג 0:2 במילאנו לפי הארכיון"*).
+   *
+   * **וזה בדיוק מה שכלל 39 הבטיח.** אף שורה בתוכן לא נוקבת בתוצאה, ביריבה או בכובש.
+   * הארכיון מחזיק את השורה בביטחון 2 עם מקור — ESPN, עם 20,000 צופים ו-7,000 שנסעו
+   * — והסצנה קוראת אותה ברגע שהיא צריכה מספר. אם השורה תוסר, הפלייסהולדר חוזר ואומר
+   * מה הארכיון היה צריך להחזיק.
+   */
+  /**
+   * 2004 — והפעם **הארכיון לא החזיק את השורה, אז היא נקראה ונוספה** (21.9.2026).
+   *
+   * `H01` כותב *"ניצחון הדרבי 96:71 הוא עוגן"*, ו-`basketball-matches.json` החזיק שש
+   * שורות בלבד, כולן מ-1991–1993. כלל 49 אומר בדיוק מה לעשות במצב הזה: *"שים את
+   * המשחק בארכיון והסצנה מרימה אותו בלי שינוי קוד"* — ולא להקליד את התוצאה בתסריט.
+   *
+   * **והמקור הוא האתר של מכבי תל אביב עצמה**, שמדווחת על ההפסד שלה: *"הפסד שלישי
+   * העונה בליגת העל, 71-96 באוסישקין"*. שתי אמירות בלתי-תלויות באותו עמוד מסכימות —
+   * הכותרת ופירוט הרבעים, שבו הפער הסופי הוא עשרים וחמש, בדיוק כשם הסצנה (כלל 77).
+   * נוספה גם `ליגת-העל-כדורסל` ל-`competitions.json`: ב-2004 זו כבר לא הליגה
+   * הלאומית, וקישור השורה לתחרות של 1993 היה טענה שגויה על איזו ליגה זו.
+   */
+  '2004-derby': {
+    sport: 'basketball',
+    seasonLabel: '2003/04',
+    competitionSlug: 'ליגת-העל-כדורסל',
+    playedOn: '2004-03-08',
+    year: 2004,
+    headlineHe: 'הדרבי באוסישקין, 2003/04',
+    placeholderHe: 'הדרבי של 8.3.2004 באולם אוסישקין',
+  },
+  /**
+   * 2007 — שני עוגנים בחודש אחד, ושניהם **עוגני סיכום** ולא משחקים.
+   *
+   * ההקמה אינה משחק וההריסה אינה משחק, ולכן `summaryHe` — אותו מנגנון של `1997-sale`.
+   * שתי העובדות יושבות בארכיון מלפני התסריט: `association-events.json` מחזיק את
+   * 25.6.2007 עם `dateConfirmed: true` ומקור מאתר המועדון (אומת ב-20.9.2026), ו-
+   * `moments.json` + `ussishkin.json` מחזיקים את 25.7.2007 עם ציטוטי ynet.
+   *
+   * **ואף אחד מהם לא נוקב בשעת ההריסה.** `fact-conflicts.json` מחזיק סתירה פתוחה
+   * (6:39 בבוקר מול 12:00 בצהריים), וכלל 60 §3 אומר לשמור אותה ולא להכריע בה —
+   * ולכן גם `summaryHe` כאן כתוב בלעדיה.
+   */
+  '2007-founding': {
+    sport: 'basketball',
+    seasonLabel: '2007/08',
+    competitionSlug: 'ליגה-ב-כדורסל',
+    playedOn: '2007-06-25',
+    year: 2007,
+    headlineHe: 'הפועל אוסישקין נרשמה, 25.6.2007',
+    placeholderHe: 'רישום העמותה של 25.6.2007',
+    summaryHe: 'ב-25 ביוני 2007 נרשמה הפועל אוסישקין תל אביב לליגה ב׳ בכדורסל — קבוצה בבעלות אוהדים, שהוקמה בידי קבוצת אנשים ולא בידי אדם אחד.',
+    summarySourceTitle: 'אתר מועדון הכדורסל — דף הקבוצה',
+    summarySourceUrl: 'https://basket.co.il/teams/9/data?id=1142',
+  },
+  '2007-demolition': {
+    sport: 'basketball',
+    seasonLabel: '2006/07',
+    competitionSlug: 'ליגה-ב-כדורסל',
+    playedOn: '2007-07-25',
+    year: 2007,
+    headlineHe: 'אוסישקין נהרס, 25.7.2007',
+    placeholderHe: 'יום ההריסה, 25.7.2007',
+    summaryHe: 'ב-25 ביולי 2007 נהרס אולם אוסישקין. אוהדים שעמדו שם קרעו את חולצותיהם. חודש ויום קודם לכן נרשמה קבוצה חדשה שנושאת את שמו.',
+    summarySourceTitle: 'ynet — יום ההריסה של אוסישקין',
+    summarySourceUrl: 'https://www.ynet.co.il/articles/0,7340,L-3427391,00.html',
+  },
+  /**
+   * 2009 — העלייה, ו**התאריך המדויק אינו בארכיון**.
+   *
+   * `association-events.json` מחזיק את העונה הראשונה — *"22 ניצחונות ללא הפסד ועלייה
+   * לליגה א׳"* — עם `happenedOn: null` ו-`dateConfirmed: false`. זה בדיוק המצב שכלל 11
+   * מתאר: מה שלא ידוע נשאר `null` ולא מנוחש, ולכן זה עוגן סיכום. הסצנה של U05 אינה
+   * נוקבת בתוצאה, בתאריך או ביריבה — היא על מה שגדל, לא על מה שנגמר.
+   */
+  '2009-promotion': {
+    sport: 'basketball',
+    seasonLabel: '2008/09',
+    competitionSlug: 'ליגה-ב-כדורסל',
+    playedOn: '2009-06-01',
+    year: 2009,
+    headlineHe: 'העונה שנגמרה בעלייה',
+    placeholderHe: 'עונת העלייה של הפועל אוסישקין',
+    summaryHe: 'בעונתה הראשונה סיימה הפועל אוסישקין 22 ניצחונות ללא הפסד ועלתה ליגה. התאריך המדויק של משחק העלייה אינו מתועד בארכיון הזה.',
+    summarySourceTitle: 'ONE — הפועל אוסישקין, העונה הראשונה',
+    summarySourceUrl: 'https://www.one.co.il/Article/136776.html',
+  },
+  /**
+   * 2010 — שני עוגנים, ושניהם שורות ויקיפועל בביטחון 2 שהיו בארכיון מלפני התסריט.
+   *
+   * גמר הגביע של 11.5.2010 ובטדי ב-15.5.2010. **המשחק המקביל של אותו יום אינו כאן**:
+   * `matches.json` מחזיק רק את המשחקים של הפועל, והתוצאה המקבילה אינה שורה — ולכן שום
+   * סצנה לא נוקבת בה (כלל 60 §2).
+   */
+  '2010-cup': {
+    sport: 'football',
+    seasonLabel: '2009/10',
+    competitionSlug: 'גביע-המדינה',
+    playedOn: '2010-05-11',
+    year: 2010,
+    headlineHe: 'גמר גביע המדינה, 2009/10',
+    countTitles: true,
+    placeholderHe: 'גמר גביע המדינה של 11.5.2010',
+  },
+  '2010-title': {
+    sport: 'football',
+    seasonLabel: '2009/10',
+    competitionSlug: 'ליגת-העל',
+    playedOn: '2010-05-15',
+    year: 2010,
+    headlineHe: 'האליפות הוכרעה, 2009/10',
+    countTitles: true,
+    placeholderHe: 'המחזור האחרון של 15.5.2010',
+  },
+  /**
+   * 2010 — אירופה, שני עוגנים, ושתי הערות שהן נתוני ארכיון ולא נתוני LIFE.
+   *
+   * **א · הפלייאוף מול זלצבורג רשום פעמיים.** `matches.json` מחזיק 17.8 (הפועל בבית 3:2)
+   * וגם 18.8 (זלצבורג בבית 2:3), ואז 24.8 וגם 25.8 (שתיהן הפועל בבית 1:1). זה אותו תיק
+   * בשתי גרסאות — בית/חוץ הפוכים, תאריך שנבדל ביום. הסתירה נרשמה ב-`fact-conflicts.json`
+   * ולא הוכרעה מכאן (כלל 60 §3); העוגן קורא את 25.8, השורה היחידה מבין הארבע שנושאת
+   * **אצטדיון** והערה מפורטת, וזו בחירה של קריאוּת ולא פסיקה על הארכיון.
+   *
+   * **ב · בנפיקה יושבת תחת שני סלאגים** — `בנפיקה-ליסבון` ב-14.9 ו-`בנפיקה` ב-24.11.
+   * איחוד ישויות עובר ב-`entity_alias` ובידיים של בעל הבית (כלל 7), לא בפרק.
+   */
+  '2010-salzburg': {
+    sport: 'football',
+    seasonLabel: '2010/11',
+    competitionSlug: 'ליגת-האלופות',
+    playedOn: '2010-08-25',
+    year: 2010,
+    headlineHe: 'הערב שבו עלינו לשלב הבתים',
+    placeholderHe: 'משחק החזרה של הפלייאוף, 25.8.2010',
+  },
+  '2010-benfica': {
+    sport: 'football',
+    seasonLabel: '2010/11',
+    competitionSlug: 'ליגת-האלופות',
+    playedOn: '2010-11-24',
+    year: 2010,
+    headlineHe: 'שלב הבתים, המחזור החמישי',
+    placeholderHe: 'המשחק בבלומפילד של 24.11.2010',
+  },
+  /**
+   * 2012 — שני עוגנים, ואחד מהם נקרא היום.
+   *
+   * גמר הגביע של 15.5.2012 היה בארכיון מלפני התסריט. **העלייה בכדורסל של 16.5.2012
+   * לא הייתה** — התסריט נוקב בה כעובדה `H30` עם מקור, כלל 49 אומר מה עושים, והמקור
+   * (וואלה ספורט, דיווח בזמן האירוע) נקרא ואומת: הכותרת "הפועל תל אביב חוזרת לליגת
+   * העל" והגוף, 83:56 מול מכבי באר יעקב, שלוש-אחת בסדרה. שתי אמירות בלתי-תלויות
+   * באותו עמוד שמסכימות (כלל 77). האולם אינו נקוב במקור ונשאר `null`.
+   */
+  '2012-cup': {
+    sport: 'football',
+    seasonLabel: '2011/12',
+    competitionSlug: 'גביע-המדינה',
+    playedOn: '2012-05-15',
+    year: 2012,
+    headlineHe: 'גמר גביע המדינה, 2011/12',
+    countTitles: true,
+    placeholderHe: 'גמר גביע המדינה של 15.5.2012',
+  },
+  '2012-promotion': {
+    sport: 'basketball',
+    seasonLabel: '2011/12',
+    competitionSlug: 'ליגה-לאומית-כדורסל',
+    playedOn: '2012-05-16',
+    year: 2012,
+    headlineHe: 'החזרה לליגת העל בכדורסל',
+    placeholderHe: 'המשחק המכריע של 16.5.2012',
+  },
+  /**
+   * 2015 — **עוגן סיכום, כי אין תאריך של משחק.** `ussishkin.json` מחזיק את העובדה
+   * מ-ynet: אולם ביתי חדש במתחם הדרייב-אין בתחילת 2015, אחרי שבע שנים בלי בית
+   * (`homeless`). זה לא ערב מתועד — זו שנה — ולכן אותה צורה שנבחרה לעליית 2009:
+   * מה שאין לו תאריך נשאר בלי תאריך (כלל 80).
+   */
+  '2015-drivein': {
+    sport: 'basketball',
+    seasonLabel: '2014/15',
+    competitionSlug: 'ליגת-העל-כדורסל',
+    playedOn: '2015-01-01',
+    year: 2015,
+    headlineHe: 'בית חדש, אחרי שבע שנים',
+    placeholderHe: 'חנוכת האולם במתחם הדרייב-אין',
+    summaryHe:
+      'בתחילת 2015 נחנך אולם ביתי חדש במתחם הדרייב-אין, 3,400 מקומות לעומת 2,000 באוסישקין. מהריסת אוסישקין ועד אז — שבע שנים בלי בית. התאריך המדויק של הערב הראשון אינו מתועד בארכיון הזה.',
+    summarySourceTitle: 'ynet — נעים להכיר: האולם החדש של הפועל ת"א',
+    summarySourceUrl: 'https://www.ynet.co.il/articles/0,7340,L-4594709,00.html',
+  },
+  /**
+   * 2016–2017 — שני עוגנים שקוראים **רגע** מהארכיון, לא משחק.
+   *
+   * צו הקפאת ההליכים של 12.12.2016 והפחתת תשע הנקודות של 10.1.2017 הם עובדות עם
+   * תאריך ובלי משחק. שתיהן נקראו ממקורות בני הזמן ונכתבו ל-`moments.json` — הפחתת
+   * הנקודות מוצלבת בין הדיווח בן הזמן לבין טבלת הסיום של RSSSF, שנושאת את ההערה
+   * על ההפחתה ואת הסימון Relegated באותה שורה (כלל 77).
+   *
+   * **ומה שהתסריט אוסר במפורש, ונשמר:** *"לא ממציאים נושה אמיתי, שכר שלא שולם לאדם
+   * מסוים או אשמה של אדם ציבורי."* השורות בארכיון נוקבות במוסדות ובסכום הכולל בלבד;
+   * אף אדם אינו נקוב בשם, לא בארכיון ולא בסצנה (כללים 11, 17).
+   */
+  '2016-freeze': {
+    sport: 'football',
+    seasonLabel: '2016/17',
+    competitionSlug: 'ליגת-העל',
+    playedOn: '2016-12-12',
+    year: 2016,
+    headlineHe: 'דצמבר 2016',
+    placeholderHe: 'צו הקפאת ההליכים של 12.12.2016',
+    momentSlug: 'הקפאת-הליכים-2016',
+  },
+  '2017-nine': {
+    sport: 'football',
+    seasonLabel: '2016/17',
+    competitionSlug: 'ליגת-העל',
+    playedOn: '2017-01-10',
+    year: 2017,
+    headlineHe: 'תשע נקודות',
+    placeholderHe: 'הפחתת תשע הנקודות של 10.1.2017',
+    momentSlug: 'תשע-נקודות-2017',
+  },
+  /**
+   * 2018 ו-2021 — רגע בלי תאריך, ומשחק שהיה בארכיון מלפני התסריט.
+   *
+   * העלייה של 2017/18 היא **עונה** ולא ערב: RSSSF נוקב בראש הטבלה ובעלייה, ולא
+   * בערב שבו זה נחתם, ולכן ל-`עלייה-2018` אין `happenedOn` והוא נשאר `null`
+   * (כלל 80). גמר הגביע של 2.6.2021 הוא שורה רגילה.
+   */
+  '2018-promotion': {
+    sport: 'football',
+    seasonLabel: '2017/18',
+    competitionSlug: 'ליגה-לאומית',
+    playedOn: '2018-05-21',
+    year: 2018,
+    headlineHe: 'אלופת הלאומית, וחזרה למעלה',
+    placeholderHe: 'העלייה של עונת 2017/18',
+    momentSlug: 'עלייה-2018',
+  },
+  '2021-cup': {
+    sport: 'football',
+    seasonLabel: '2020/21',
+    competitionSlug: 'גביע-המדינה',
+    playedOn: '2021-06-02',
+    year: 2021,
+    headlineHe: 'גמר גביע המדינה, 2020/21',
+    placeholderHe: 'גמר הגביע של 2.6.2021',
+  },
+  /**
+   * 2023–2025 — ערב, ירידה, עלייה, וגמר אירופי.
+   *
+   * `2023-derby` הוא **המשחק השני בסדרת הגמר**, זה שהשווה אותה — לא אליפות, ולא
+   * תואר, וזה מה שהתסריט מקפיד עליו בשם. שני הרגעים בלי תאריך (`ירידה-2024`,
+   * `עלייה-2025`) נקראים מ-`moments.json`.
+   */
+  '2023-derby': {
+    sport: 'basketball',
+    seasonLabel: '2022/23',
+    competitionSlug: 'ליגת-העל-כדורסל',
+    playedOn: '2023-06-11',
+    year: 2023,
+    headlineHe: 'הדרבי של סדרת הגמר',
+    placeholderHe: 'הדרבי של 11.6.2023',
+  },
+  '2024-relegation': {
+    sport: 'football',
+    seasonLabel: '2023/24',
+    competitionSlug: 'ליגת-העל',
+    playedOn: '2024-05-18',
+    year: 2024,
+    headlineHe: 'שוב הלאומית',
+    placeholderHe: 'הירידה של עונת 2023/24',
+    momentSlug: 'ירידה-2024',
+  },
+  '2025-promotion': {
+    sport: 'football',
+    seasonLabel: '2024/25',
+    competitionSlug: 'ליגה-לאומית',
+    playedOn: '2025-05-19',
+    year: 2025,
+    headlineHe: 'אלופת הלאומית, שוב',
+    placeholderHe: 'העלייה של עונת 2024/25',
+    momentSlug: 'עלייה-2025',
+  },
+  '2025-eurocup': {
+    sport: 'basketball',
+    seasonLabel: '2024/25',
+    competitionSlug: 'יורוקאפ',
+    playedOn: '2025-04-11',
+    year: 2025,
+    headlineHe: 'היורוקאפ',
+    placeholderHe: 'המשחק שסגר את סדרת הגמר, 11.4.2025',
+  },
+  /**
+   * 7.5.2026, בוטבגרד — **הערב שהציר הראשי נגמר בו**, ושורת ארכיון ככל שורה אחרת.
+   *
+   * התסריט מסמן את הרשומה `immutable`, וזה בדיוק מה שהיא: 81 להפועל, 87 לריאל,
+   * המשחק הרביעי ברבע הגמר. שני מקורות בלתי-תלויים מסכימים על היום, על התוצאה ועל
+   * האולם, והשני נוקב גם בסדרה (כלל 77). **התוצאה אינה תנאי לסיום האישי** ואין
+   * סצנת אליפות חלופית — הפרק נגמר בשלוש הבחירות של `F04`, לא בלוח.
+   */
+  '2026-botevgrad': {
+    sport: 'basketball',
+    seasonLabel: '2025/26',
+    competitionSlug: 'יורוליג',
+    playedOn: '2026-05-07',
+    year: 2026,
+    headlineHe: 'רבע גמר היורוליג, המשחק הרביעי',
+    placeholderHe: 'הערב של 7.5.2026 בבוטבגרד',
+  },
+  /**
+   * חיי בית — שני פרקים אישיים, ולכן שני ערבים מהארכיון שקרו **לידם** ולא בתוכם.
+   * גמר הגביע של 25.5.2011 והדרבי של 11.11.2012 הם שורות ויקיפועל רגילות; הכרטיס
+   * שלהם הוא העולם שבחוץ, והפרק הוא מה שקורה בזמן שהוא קורה.
+   */
+  '2011-cup': {
+    sport: 'football',
+    seasonLabel: '2010/11',
+    competitionSlug: 'גביע-המדינה',
+    playedOn: '2011-05-25',
+    year: 2011,
+    headlineHe: 'גמר גביע המדינה, 2010/11',
+    countTitles: true,
+    placeholderHe: 'גמר הגביע של 25.5.2011',
+  },
+  '2012-derby': {
+    sport: 'football',
+    seasonLabel: '2012/13',
+    competitionSlug: 'ליגת-העל',
+    playedOn: '2012-11-11',
+    year: 2012,
+    headlineHe: 'דרבי, נובמבר 2012',
+    placeholderHe: 'הדרבי של 11.11.2012',
+  },
+  '2002-milan': {
+    sport: 'football',
+    seasonLabel: '2001/02',
+    competitionSlug: 'גביע-אופא',
+    playedOn: '2002-03-21',
+    year: 2002,
+    headlineHe: 'רבע גמר גביע אופ״א, 2001/02',
+    placeholderHe: 'משחק הגומלין של רבע הגמר, 21.3.2002 בסן סירו',
+  },
 }
 
 export const STAGE_B_ANCHOR_KEYS = Object.keys(ANCHOR_SPECS)
@@ -511,6 +880,28 @@ export function resolveStageBAnchors(): Record<string, HistoricalAnchor> {
 }
 
 function resolveSpec(key: string, spec: AnchorSpec): HistoricalAnchor {
+  if (spec.momentSlug) {
+    const moment = archive.moments.find((row) => row.slug === spec.momentSlug)
+    return {
+      id: `${key}:${spec.competitionSlug}:${spec.seasonLabel}`,
+      sport: spec.sport,
+      seasonLabel: spec.seasonLabel,
+      year: spec.year,
+      competitionSlug: spec.competitionSlug,
+      headlineHe: spec.headlineHe,
+      venueSlug: null,
+      sourceTitle: moment?.sourceTitle ?? 'content/manual/moments.json',
+      sourceUrl: moment?.sourceUrl ?? null,
+      confidence: moment ? 2 : 0,
+      titlesSoFar: null,
+      match: null,
+      // A row that is gone takes its sentence with it, and the placeholder says what is missing.
+      placeholder: moment
+        ? null
+        : { what: `${spec.placeholderHe} — אינו בארכיון.`, needs: `שורה ב-content/manual/moments.json עם slug "${spec.momentSlug}".` },
+      summaryHe: moment?.bodyHe,
+    }
+  }
   if (spec.summaryHe) {
     return {
       id: `${key}:${spec.competitionSlug}:${spec.seasonLabel}`,
@@ -578,11 +969,10 @@ function resolveSpec(key: string, spec: AnchorSpec): HistoricalAnchor {
   if (row && row.playedOn && row.homeScore !== null && row.awayScore !== null) {
     const atHome = row.homeClubSlug === US
     const opponentSlug = atHome ? row.awayClubSlug : row.homeClubSlug
-    const opponent = archive.clubs.find((r) => r.slug === opponentSlug && r.sport === 'football')
     const venue = row.venueSlug ? archive.venues.find((r) => r.slug === row.venueSlug && r.sport === 'football') : null
     match = {
       playedOn: row.playedOn,
-      opponentHe: opponent?.nameHe ?? opponentSlug.replace(/-/g, ' '),
+      opponentHe: opponentNameHe(opponentSlug),
       scoredFor: (atHome ? row.homeScore : row.awayScore) ?? 0,
       scoredAgainst: (atHome ? row.awayScore : row.homeScore) ?? 0,
       atHome,

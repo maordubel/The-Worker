@@ -1,8 +1,11 @@
 'use client'
 
-import { LifeLine, ageReached } from '@/components/life/LifeLine'
+import { BoxObject } from '@/components/life/BoxObject'
+import { LifeLine, ageReached, leadKey } from '@/components/life/LifeLine'
+import { kindArt, memoryKind, photoPlate } from '@/lib/life/boxObjects'
 import { artUrl } from '@/lib/life/runtime/art'
 import { keepsakeFor } from '@/lib/life/finale'
+import type { ItemId } from '@/lib/life/types'
 import { t } from '@/lib/i18n'
 
 /**
@@ -17,6 +20,7 @@ export function EndingCard({
   titleHe,
   bodyHe,
   memoryHe,
+  memory = null,
   after,
   chapter = '1986',
   presence = null,
@@ -25,6 +29,8 @@ export function EndingCard({
   titleHe: string
   bodyHe: string
   memoryHe: string
+  /** מה נכנס לקופסה — כדי לצייר את החפץ לצד המשפט */
+  memory?: { id: string; item: ItemId; endingId: string; year: number } | null
   /** two plates of one person, one from today and one from a decade away */
   after?: { fromArt: string; toArt: string; lineHe: string } | null
   /** which Saturday this card closes — it decides which slot of the life lights up */
@@ -48,6 +54,8 @@ export function EndingCard({
    * listened on a base would be the game telling him he was there.
    */
   const keepsake = keepsakeFor(chapter, presence)
+  const thingKind = memory ? memoryKind(memoryHe, memory.item, memory.endingId, memory.id) : null
+  const thingArt = memory && thingKind ? kindArt(thingKind, memory.item, memory.id, chapter, memoryHe) : null
   return (
     <div className="pointer-events-auto absolute inset-0 z-50 flex items-center justify-center bg-ink/85 p-gutter" data-life="ending">
       <div className="max-h-full w-full max-w-md animate-paste-in overflow-y-auto border-rule border-sheet bg-ink">
@@ -59,9 +67,36 @@ export function EndingCard({
           <p className="mt-3 font-body text-[15px] leading-relaxed text-concrete">
             <bdi>{bodyHe}</bdi>
           </p>
-          <p className="mt-4 border-t-hair border-concrete/30 pt-3 font-body text-[13px] leading-relaxed text-sheet">
-            <bdi>{memoryHe}</bdi>
-          </p>
+          {/* נכנס לקופסה — החפץ שהמשפט מדבר עליו, נוחת על שפת הפח. בלי זה "שמת את זה
+              בקופסה האדומה" היה משפט על דבר שאף אחד לא ראה (21.9.2026). כשהלילה החזיק
+              נייר אמיתי, הסריקה למטה היא החפץ, ואין צורך בשניים. */}
+          {memory && !keepsake ? (
+            <div className="mt-4 flex items-center gap-3 border-t-hair border-concrete/30 pt-3" data-life="ending-memory" data-kind={thingKind}>
+              <div className="w-[76px] shrink-0">
+                <div className="h-[64px] animate-land [animation-delay:380ms]">
+                  <BoxObject
+                    id={memory.id}
+                    kind={thingKind ?? 'item'}
+                    art={thingArt}
+                    plate={thingKind === 'photo' ? photoPlate(chapter) : null}
+                    year={memory.year}
+                    label={memoryHe}
+                  />
+                </div>
+                <div className="tin h-[9px]" aria-hidden="true" />
+                <p className="mt-1 text-center font-sign text-[9px] leading-none text-concrete">
+                  <bdi>{t('life.box.into')}</bdi>
+                </p>
+              </div>
+              <p className="font-body text-[13px] leading-relaxed text-sheet">
+                <bdi>{memoryHe}</bdi>
+              </p>
+            </div>
+          ) : (
+            <p className="mt-4 border-t-hair border-concrete/30 pt-3 font-body text-[13px] leading-relaxed text-sheet">
+              <bdi>{memoryHe}</bdi>
+            </p>
+          )}
 
           {keepsake && (
             <figure className="mt-4 border-t-hair border-concrete/30 pt-4" data-life="ending-keepsake">
@@ -108,7 +143,7 @@ export function EndingCard({
           )}
 
           <div className="mt-4">
-            <LifeLine reached={ageReached(chapter)} />
+            <LifeLine reached={ageReached(chapter)} lead={leadKey(chapter)} />
           </div>
 
           <button

@@ -18,16 +18,36 @@
  * day, and tomorrow the crates need carrying again. That is what a job is.
  */
 import { BOTTLE, WAGE, decadeOf } from './prices'
-import type { Conversation } from './content/script'
+import { gigFlagOf, workDoneFlag } from './workFlags'
+import { playableChapters } from './content/chapters'
+import { ACTIVITY, activityIn, isActivityId, payShekels, type ActivityDef } from './activities'
+import type { ChoiceDef, Conversation } from './content/script'
 import type { Condition } from './world/types'
 import { PITCH_GIG, eraForChapter, streetMatch } from './football/door'
 
-/** the chapters, in the order the life plays them (mirrors `shirts.ts`) */
-const ORDER = [
-  'a2-alley', 'a3-hall', 'a4-shirt', 'a5-first', 'a6-radio', 'a7-week', '1986',
-  '1990', '1991', '1993-cup', '1993-galil', '1995-sinai', '1996-army',
-  '1997-basket', '1998-laces', '1999-basket', '1999-cup', '2000-title', '2000-double',
-]
+/**
+ * סדר הפרקים — **נגזר, לא מועתק** (21.9.2026).
+ *
+ * כאן ישבה רשימה ידנית של תשעה־עשר פרקים עם ההערה *"mirrors `shirts.ts`"* — אבל
+ * `shirts.ts` כבר גוזר את הסדר מ-`playableChapters()` מזמן, כלומר זה היה העתק שלישי
+ * של רשימת הפרקים, והיחיד שנתקע ב-2000. שלב ג׳ נוסף, והרשימה הזאת לא ידעה.
+ *
+ * זה היה **בטוח במקרה**: בגלל שהרשימה נגמרה ב-2000, אף ג׳וב של ילד לא דלף ל-2007. אבל
+ * "בטוח כי הרשימה ישנה" הוא בדיוק התנאי שנשבר ביום שמישהו מעדכן אותה (כלל 59, ו-
+ * כלל 78 על `until`: *"`until` של ג׳וב אינו קיצור של העבודה — הוא תיאור של הדלת"*).
+ *
+ * לכן שני שינויים ביחד: הסדר נגזר מהמרשם, **והסוף של ג׳ובי הילדות נאמר בשם** —
+ * `CHILDHOOD_GIGS_END` — במקום להיות תוצאה של איפה שהרשימה נגמרה.
+ */
+const ORDER: readonly string[] = playableChapters().map((chapter) => chapter.id)
+
+/**
+ * עד כאן ג׳ובי הילדות והנערות — הבקבוקים, הארגזים, השטיפה, הגרעינים.
+ *
+ * ג׳וב בלי `until` נמשך עד כאן ולא עד סוף החיים. מבוגר מרוויח ב-`lib/life/income.ts`
+ * ובמשמרות שהתסריט כותב בשמן (B02, H03), ולא באיסוף בקבוקים ב-2007.
+ */
+const CHILDHOOD_GIGS_END = '2000-double'
 
 export type Gig = {
   id: string
@@ -88,6 +108,39 @@ export type Gig = {
    * third category has a name now and why this field is still the one on the row.
    */
   paid?: boolean
+  /**
+   * המשחק שהג׳וב הזה הוא, מפרק מסוים (21.9.2026) — `lib/life/activities.ts`.
+   *
+   * *"זו הרחבה של ה־gig הקיים של הקפה. לא ליצור job חדש במקביל."* (Maor's integration
+   * file.) So an activity that is work or a wager IS a row here: the café shift is
+   * `sweep-allenby`, the Shachor job is `chairs-end`, the paper round is `papers-round`.
+   * From `activityFrom` on, the row's "do" plays the activity (a gate mechanic over a
+   * paused room, or the chore scene with the activity's pay); before it, the row is exactly
+   * the job it always was — which is how the tested 1984–86 economy stays untouched.
+   */
+  activity?: string
+  activityFrom?: string
+  /** a bet among friends, whatever its `opens` — rule 72's third kind, for rows that are not the coin or the slip */
+  wager?: boolean
+  /**
+   * `false`: never dealt by the week's rotation — the row is there whenever its own
+   * `when` says, like the ball on the pitch. For the bets friends offer and the bottles
+   * after a match: a rotation that could deal away a friend's dare is not a week, it is a
+   * slot machine. Absent means rotated, as every job always was.
+   */
+  rotates?: boolean
+  /**
+   * false — asked from inside another conversation (the shop's order comes from the man at the
+   * counter, `fanShops` in `shirts.ts`), so the room draws no second hotspot for it.
+   */
+  spot?: false
+  /** a condition on the hotspot beyond the rotation (the bottles are there after the whistle) */
+  when?: Condition
+  /**
+   * The ways a job can be started, each a choice with its own line (Shachor asks which
+   * first). The chosen id is written to `chore:order` and the chore scene reads it.
+   */
+  steps?: readonly { id: string; textHe: string }[]
 }
 
 /**
@@ -123,7 +176,7 @@ export type GigKind = 'work' | 'wager' | 'play'
 
 export function kindOf(gig: Gig): GigKind {
   if (gig.paid === false) return 'play'
-  if (gig.opens === 'coin' || gig.opens === 'toto') return 'wager'
+  if (gig.opens === 'coin' || gig.opens === 'toto' || gig.wager) return 'wager'
   return 'work'
 }
 
@@ -212,6 +265,9 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'שתים־עשרה תיבות דואר, אצבעות שחורות מדיו. הוא שילם בלי לספור פעמיים.',
     trait: { key: 'reliability', delta: 2 },
     at: { x: 0.33, y: 0.86, w: 0.08 },
+    // from 1990 the round is planned before it is walked — `activities.ts` 'papers'
+    activity: 'papers',
+    activityFrom: '1990',
   },
   {
     id: 'shopping-neighbour',
@@ -219,6 +275,13 @@ export const GIGS: readonly Gig[] = [
     nameHe: 'השכנה מהקומה השלישית',
     labelHe: 'השקיות של השכנה',
     from: 'a2-alley',
+    /**
+     * עד 1986, ג׳וב; מ-1990, טובה (21.9.2026). *"זו encounter אנושית, לא 'job'."* In the
+     * tested 1984–86 week she stays the job she was, so no Stage A rotation moves; from 1990
+     * she is `activities.ts` 'neighbour' — a woman with bags who is sometimes in the street,
+     * asked for in a conversation, paid out of the favour slot, and sometimes not in money.
+     */
+    until: '1986',
     hours: 0.5,
     minutes: 20,
     energy: 8,
@@ -301,6 +364,9 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'המדרכה נקייה עד אבן השפה. הוא הביא לך לימונדה ולא לקח עליה כסף.',
     trait: { key: 'reliability', delta: 2 },
     at: { x: 0.78, y: 0.778, w: 0.09 },
+    // the café shift: the sweep, and then table four's argument — `activities.ts` 'cafe-shift'
+    activity: 'cafe-shift',
+    activityFrom: '1990',
   },
   {
     id: 'sell-scarves',
@@ -348,6 +414,9 @@ export const GIGS: readonly Gig[] = [
     trait: { key: 'independence', delta: 2 },
     at: { x: 0.52, y: 0.87, w: 0.08 },
     opens: 'toto',
+    // the slip IS the kiosk's trivia activity — its window and its tier live in `activities.ts`
+    activity: 'kiosk-trivia',
+    activityFrom: 'a4-shirt',
   },
   {
     id: 'alley-coin',
@@ -485,6 +554,18 @@ export const GIGS: readonly Gig[] = [
     rel: { who: 'shachor', axis: 'bond', delta: 3 },
     trait: { key: 'reliability', delta: 3 },
     at: { x: 0.3, y: 0.88, w: 0.1 },
+    /**
+     * העבודה עם שחור, משודרגת ולא משוכפלת (21.9.2026) — `activities.ts` 'ussishkin-help'.
+     * He asks which first, because the order is the job: chairs before the crowd, water
+     * before the players, the cloth last. The right order is worth more on the way out.
+     */
+    activity: 'ussishkin-help',
+    activityFrom: '1991',
+    steps: [
+      { id: 'right', textHe: 'קודם הכיסאות, אחר כך המים, הבד בסוף.' },
+      { id: 'water', textHe: 'קודם המים. שחקנים לפני אנשים.' },
+      { id: 'banner', textHe: 'קודם הבד. שיראו אותו מהכניסה.' },
+    ],
   },
   {
     id: 'board-classroom',
@@ -549,10 +630,108 @@ export const GIGS: readonly Gig[] = [
     trait: { key: 'reliability', delta: 4 },
     at: { x: 0.36, y: 0.88, w: 0.1 },
   },
+
+  /**
+   * ארבע שורות של פעילות (21.9.2026) — the gate games the life opens, where they are work
+   * or a bet. Each is a row HERE because Maor's file forbids a second jobs system; each
+   * plays as its activity from its first chapter (`activities.ts`).
+   *
+   *  · `order-shop` — the fan shop's seller needs a hand: a customer wants a shirt of a
+   *    season, and the boy builds it (the shirt game, one shirt, dated before the year).
+   *  · `rumble-pitch` — Ofir's dare on the pitch: five cards each, the losers buy the ice
+   *    lollies. A WAGER (rule 72), and it takes nothing from the pocket: there is no stake.
+   *  · `lineup-yard` — Amit's bet in the schoolyard: who started that night.
+   *  · `bottles-ground` — the bottles after the whistle at Bloomfield, in a bag that holds
+   *    four, with the clock running.
+   */
+  {
+    id: 'order-shop',
+    where: 'allenby',
+    nameHe: 'המוכר בחנות האוהדים',
+    labelHe: 'המוכר צריך עזרה',
+    from: '1990',
+    hours: 1,
+    minutes: 45,
+    energy: 6,
+    askHe: 'לקחת את ההזמנה',
+    openHe: 'המוכר מנופף בפתק מהדלת של החנות: "לקוח רוצה חולצה של עונה אחת, בדיוק כמו שהייתה. אתה מכיר את זה יותר טוב ממני."',
+    doneHe: 'החולצה על הדלפק, והלקוח מסובב אותה לאור.',
+    trait: { key: 'responsibility', delta: 2 },
+    at: { x: 0.263, y: 0.74, w: 0.062 },
+    activity: 'shop-order',
+    activityFrom: '1990',
+    rotates: false,
+    spot: false,
+  },
+  {
+    id: 'rumble-pitch',
+    where: 'pitch',
+    // the gang, not Ofir by name: nobody from the cast stands on this pitch in the nineties
+    // (rule 85 — whoever speaks, stands), and a dare is the whole pitch's anyway
+    nameHe: 'החבר׳ה במגרש',
+    labelHe: 'רויאל ראמבל על ארטיק',
+    from: '1990',
+    until: '1999-cup',
+    hours: 0.5,
+    minutes: 30,
+    energy: 6,
+    askHe: 'להתערב',
+    openHe: 'על האספלט ליד הקורה מישהו מנופף בחפיסת קלפים של שחקנים: "רויאל ראמבל. חמישה נגד חמישה, מהקלפים. המפסידים קונים ארטיק."',
+    doneHe: 'הקלפים חוזרים לחפיסה, והוויכוח על הארטיק מתחיל.',
+    trait: { key: 'courage', delta: 2 },
+    at: { x: 0.42, y: 0.9, w: 0.08 },
+    activity: 'pitch-rumble',
+    activityFrom: '1990',
+    wager: true,
+    rotates: false,
+  },
+  {
+    id: 'lineup-yard',
+    where: 'schoolyard',
+    // a boy from the class, not Amit: Amit stands in this yard only in 1991 (rule 85)
+    nameHe: 'החבר׳ה בחצר',
+    labelHe: 'התערבות על הרכב',
+    from: '1990',
+    until: '1995-sinai',
+    hours: 0.3,
+    minutes: 15,
+    energy: 3,
+    askHe: 'להתערב',
+    openHe: 'ילד מהכיתה נשען על הגדר עם העיתון מקופל: "רוצה להתערב שאתה לא זוכר מי פתח?"',
+    doneHe: 'העיתון מתקפל בחזרה.',
+    trait: { key: 'courage', delta: 1 },
+    at: { x: 0.34, y: 0.86, w: 0.08 },
+    activity: 'yard-lineup',
+    activityFrom: '1990',
+    wager: true,
+    rotates: false,
+  },
+  {
+    id: 'bottles-ground',
+    where: 'bloomfield-outside',
+    nameHe: 'אחרי השריקה',
+    labelHe: 'בקבוקים אחרי המשחק',
+    from: '1990',
+    hours: 1,
+    minutes: 30,
+    energy: 10,
+    askHe: 'לאסוף בקבוקים לפני שמנקים',
+    openHe: 'הקהל יוצא, והמדרכה מתחת לגדר מלאה בקבוקים. שקית אחת, ארבעה בקבוקים בכל סיבוב, והמנקים כבר בדרך.',
+    doneHe: 'השקית ריקה, הפיקדון בכיס.',
+    trait: { key: 'independence', delta: 2 },
+    // the left of the colonnade, clear of gate seven's portal (0.45–0.58) and the fence at 0.08
+    at: { x: 0.17, y: 0.93, w: 0.07 },
+    activity: 'bottles',
+    activityFrom: '1990',
+    rotates: false,
+    // after the whistle: the late afternoon, when the crowd has gone home
+    when: { afterMinute: 17 * 60 },
+  },
 ]
 
 export const gigId = (gig: Gig, chapter: string) => `gig-${gig.id}-${chapter}`
-export const gigFlag = (gig: Gig) => `gig:${gig.id}`
+export { gigFlagOf }
+export const gigFlag = (gig: Gig) => gigFlagOf(gig.id)
 
 /**
  * האם כסף עובר כאן בכלל — כלומר: כל מה שאינו `play`.
@@ -589,7 +768,7 @@ export function gigPay(gig: Gig, chapter: string): number {
  * kicked anything, and a chapter-scoped money rule that stopped him would be a rule about
  * an economy applied to a childhood.
  */
-export const workDoneFlag = (chapter: string) => `work:paid:${chapter}`
+export { workDoneFlag } from './workFlags'
 
 /** the flag that says this particular job is on offer in this life, this chapter */
 export const offerFlag = (gig: Gig) => `work:offer:${gig.id}`
@@ -614,7 +793,8 @@ export const offerFlag = (gig: Gig) => `work:offer:${gig.id}`
  *     rotation's end instead of the work slot's.
  */
 export function offeredIn(chapter: string, seed: string): Set<string> {
-  const eligible = GIGS.filter((gig) => isPaid(gig) && gigChapters(gig).includes(chapter))
+  // a friend's dare and the bottles after a whistle are not in the week's deal (`rotates: false`)
+  const eligible = GIGS.filter((gig) => isPaid(gig) && gig.rotates !== false && gigChapters(gig).includes(chapter))
   if (eligible.length === 0) return new Set()
   const scored = eligible
     .map((gig) => ({ id: gig.id, score: hash(`${seed}|${chapter}|${gig.id}`) }))
@@ -649,7 +829,7 @@ export function gigsIn(chapter: string, where: string): Gig[] {
 /** every chapter a gig is offered in, so a hotspot can be generated per era */
 export function gigChapters(gig: Gig): string[] {
   const from = ORDER.indexOf(gig.from)
-  const until = gig.until ? ORDER.indexOf(gig.until) : ORDER.length - 1
+  const until = ORDER.indexOf(gig.until ?? CHILDHOOD_GIGS_END)
   return ORDER.slice(from, until + 1)
 }
 
@@ -661,11 +841,73 @@ export function gigChapters(gig: Gig): string[] {
  * person's own voice, because "כבר סידרת לי היום" is a sentence a shopkeeper says and
  * "לא זמין" is a sentence a menu says.
  */
+/** the activity a gig row plays as in this chapter — null before its first chapter */
+export function gigActivity(gig: Gig, chapter: string): ActivityDef | null {
+  if (!gig.activity || !isActivityId(gig.activity)) return null
+  const def = ACTIVITY[gig.activity]
+  const order = ORDER
+  if (order.indexOf(chapter) < order.indexOf(gig.activityFrom ?? gig.from)) return null
+  return activityIn(def, chapter) ? def : null
+}
+
+/**
+ * The same three branches every gig has — done today, the chapter's work already taken, and
+ * the offer — with the offer opening the activity. Nothing is paid or flagged here: the
+ * activity settles when it ends (`settleActivity`), because a job that paid on the handshake
+ * would make the game decoration.
+ */
+function activityGigConversation(gig: Gig, chapter: string, act: ActivityDef): Conversation {
+  const top = payShekels(act, chapter, 1)
+  const quote = (text: string) => (top > 0 ? `${text} — עד ${top} ₪` : text)
+  const choices: ChoiceDef[] = gig.steps
+    ? gig.steps.map((step) => ({
+        id: `do-${step.id}`,
+        text: quote(step.textHe),
+        then: [
+          { e: 'flagValue' as const, flag: CHORE_ORDER_FLAG, value: step.id },
+          { e: 'minigame' as const, id: `chore:${gig.id}` },
+        ],
+      }))
+    : [
+        {
+          id: 'do',
+          text: quote(gig.askHe),
+          then: act.kind === 'chore' ? [{ e: 'minigame' as const, id: `chore:${gig.id}` }] : [{ e: 'mechanic' as const, activity: act.id }],
+        },
+      ]
+  return {
+    id: gigId(gig, chapter),
+    nameHe: gig.nameHe,
+    branches: [
+      { when: { flag: gigFlag(gig) } as Condition, lines: [{ who: null, text: 'עשית את זה היום כבר. מחר יש עוד.' }] },
+      ...(isPaid(gig)
+        ? [{ when: { flag: workDoneFlag(chapter) } as Condition, lines: [{ who: null, text: 'היום כבר יש מי שעושה את זה. תבוא בפעם הבאה.' }] }]
+        : []),
+      { lines: [{ who: null, text: gig.openHe }], choices: [...choices, { id: 'later', text: 'לא עכשיו.', then: [] }] },
+    ],
+  }
+}
+
+/** which way Shachor's job was started — read once, by the chore scene, on the way out */
+export const CHORE_ORDER_FLAG = 'chore:order'
+
 export function gigConversations(): Conversation[] {
   const out: Conversation[] = []
   for (const gig of GIGS) {
     for (const chapter of gigChapters(gig)) {
-      const pay = gigPay(gig, chapter)
+      /**
+       * מפרק מסוים, הג׳וב הזה הוא פעילות (`activities.ts`): the handshake opens the game —
+       * or, for Shachor's chairs, asks which first — and the pay quoted is the activity's
+       * top, in this decade's money. The Toto slip keeps its own door, as it always had,
+       * and quotes what the slip itself says it pays (the probe found "עד 5" at the counter
+       * and "עד 10" on the slip — one of the two was lying).
+       */
+      const act = gigActivity(gig, chapter)
+      const pay = act ? payShekels(act, chapter, 1) : gigPay(gig, chapter)
+      if (act && gig.opens !== 'toto') {
+        out.push(activityGigConversation(gig, chapter, act))
+        continue
+      }
       out.push({
         id: gigId(gig, chapter),
         nameHe: gig.nameHe,

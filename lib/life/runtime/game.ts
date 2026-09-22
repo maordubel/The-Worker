@@ -10,6 +10,7 @@ import type { LifeEngine } from '../engine'
 import { missedIn, takenIn } from '../opportunities'
 import { buildProfile, type LifeProfile } from '../profile'
 import type { LifeState } from '../types'
+import type { MechanicCatalog } from '../../mechanics/types'
 
 import type { LifeBus } from './bus'
 import { CONTEXT_KEY, type LifeContext } from './context'
@@ -193,6 +194,8 @@ export type LifeGameOptions = {
   prologueAnchor: HistoricalAnchor
   /** every chapter's anchor, by `Era.anchorKey` — 1986 and 1990 today */
   anchors: AnchorSet
+  /** what the archive holds before each year, for the activities (`app/life/mechanicCatalog.ts`) */
+  catalog?: MechanicCatalog
 }
 
 export function createLifeGame(options: LifeGameOptions): LifeRuntime {
@@ -205,7 +208,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     onOpen: () => undefined,
   }
 
-  const dialogue = new DialogueRunner(options.engine, options.bus, noop, options.anchor, options.anchors)
+  const dialogue = new DialogueRunner(options.engine, options.bus, noop, options.anchor, options.anchors, options.catalog)
 
   /**
    * המדדים החיים — every dispatch is diffed against the state before it, and what moved

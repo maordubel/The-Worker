@@ -123,6 +123,8 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
   {
     id: 't-boss',
     nameHe: 'הבוס',
+    // "(בטלפון.)" — השורה עצמה אומרת את זה
+    remote: { 'הבוס': 'phone' },
     branches: [
       {
         lines: [
@@ -337,11 +339,18 @@ export const ENDINGS_DOUBLE: Record<string, EndingCard> = {
 }
 
 export const BEATS_DOUBLE: Beat[] = [
-  /** הרגע השלישי של הצעיף — לפני שהערב נסגר, בזמן שעוד אפשר לתת */
+  /**
+   * הרגע השלישי של הצעיף — לפני שהערב נסגר, בזמן שעוד אפשר לתת.
+   *
+   * **`d:over`, ולא `d:stadium`** (21.9.2026): `d:stadium` לא נכתב בשום מקום, לא בתוכן
+   * ולא במנוע, כך שהרגע הזה לא יכול היה לירות גם אחרי שהקידומת `scarf:` תוקנה. אחרי
+   * השריקה, ברמת גן, לפני ההליכה הביתה — ו-`d-after` בא אחריו כי הוא מופיע אחריו ברשימה
+   * והביטים רצים אחד-אחד.
+   */
   {
     id: 'd-scarf',
     trigger: 'clock',
-    when: { all: [{ flag: 'd:stadium' }, { flag: 'scarf:given' }], none: [{ flag: 'scarf:asked:2000' }] },
+    when: { all: [{ flag: 'd:over' }, { flag: 'scarf:given' }], none: [{ flag: 'scarf:asked:2000' }, { flag: 'd:walked' }] },
     do: [{ a: 'flag', flag: 'scarf:asked:2000' }, { a: 'talk', conversation: 'scarf-kid-2000' }],
   },
   // the walk home: the family is read off the decade, once, and the conversation follows
@@ -470,7 +479,7 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
         choices: [
           { id: 'uss', text: 'ערב באוסישקין. שחור צריך עזרה, גם השבוע.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'energy', delta: -10 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
           { id: 'ticket', text: 'לסדר כרטיס — שישים שקל — והסעה. ברור.', then: [{ e: 'give', item: 'ticket-stub' }, { e: 'flag', flag: 'd:ticket' }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
-          { id: 'box', text: 'לפתוח את הקופסה האדומה. לעבור על הכל.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'wellbeing', key: 'happiness', delta: 4 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-box' }] },
+          { id: 'box', text: 'לפתוח את הקופסה האדומה. לעבור על הכל.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'wellbeing', key: 'happiness', delta: 4 }, { e: 'flag', flag: 'd:final' }, { e: 'box' }, { e: 'goto', node: 'd-box' }] },
           { id: 'army', text: 'לסגור חוב עם מישהו שכיסה עליך פעם.', when: { armyAbove: { key: 'coveredForOthers', min: 0 } }, noteHe: 'אף אחד לא כיסה עליך בצבא. אין חוב.', then: [{ e: 'army', key: 'leaveDebt', delta: -2 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
         ],
       },

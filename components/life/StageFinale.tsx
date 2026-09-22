@@ -1,5 +1,6 @@
 'use client'
 
+import { plateFor } from '@/lib/life/plates'
 import { useEffect, useRef, useState } from 'react'
 
 import { isPlaceholder } from '@/lib/life/anchors'
@@ -132,7 +133,7 @@ export function StageFinale({
           <div
             aria-hidden="true"
             className="absolute inset-0 bg-cover bg-center motion-reduce:animate-none"
-            style={{ backgroundImage: `url(${artUrl(`plate-${finale.chapter}`)})`, animation: 'plate-push 9000ms ease-out both' }}
+            style={{ backgroundImage: `url(${artUrl(plateFor(finale.chapter))})`, animation: 'plate-push 9000ms ease-out both' }}
           />
           <div aria-hidden="true" className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgb(var(--ink)) 0%, rgb(var(--ink) / .2) 50%, rgb(var(--ink) / .3) 100%)' }} />
           <Grain opacity={0.2} />

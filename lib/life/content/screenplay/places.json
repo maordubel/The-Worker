@@ -296,8 +296,8 @@
       "kind": "room-exists",
       "proposed": true,
       "repaint": {
-        "backdrop": "bloomOldGates",
-        "whyHe": "בלומפילד שבין 2000 ל-2016 — `bloomOld*` במאגר; הקיים הוא 1986"
+        "backdrop": "bloomOldTerrace",
+        "whyHe": "בלומפילד 2000–2016 — שער 5 ✓ (`bloomOldGates`); היציע מבפנים מבוקש (ART-PROMPTS §17א)"
       }
     },
     {
@@ -441,7 +441,7 @@
       "proposed": true,
       "repaint": {
         "backdrop": "bloomNewPlaza",
-        "whyHe": "בלומפילד המחודש — `bloomNew*` במאגר; הקיים הוא 1986"
+        "whyHe": "בלומפילד המחודש — ✓ מחובר (`repaints`, רצפה נמדדה); 2016–2018 הדלת נעולה"
       }
     },
     {

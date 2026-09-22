@@ -110,11 +110,11 @@ export class PassageScene extends Phaser.Scene {
       ...Object.values(ERA_1990.player.pose),
       ...ERA_1990.player.walk,
       'propPack80',
-      'propBall80',
-      'propPosters',
+      'propBall90',
+      'propFlag',
+      'propClipping90',
       'propSticker',
       'propScarfRed',
-      'propPapers',
     ]
     for (const key of need) if (!this.textures.exists(`art-${key}`)) this.load.image(`art-${key}`, artUrl(key))
   }
@@ -143,7 +143,7 @@ export class PassageScene extends Phaser.Scene {
     }
 
     // The room as it was left in 1986: the ball in the corner, the bag by the bed, small.
-    this.dress('propBall80', 0.62, 0.95, 0.06, 'ball')
+    this.dress('propBall90', 0.62, 0.95, 0.05, 'ball')
     this.dress('propPack80', 0.12, 0.83, 0.05, 'bag')
 
     // The child, where the chapter always starts him.
@@ -348,13 +348,14 @@ export class PassageScene extends Phaser.Scene {
     if (n === 2) {
       const bag = this.dressing.find((image) => image.name === 'bag')
       if (bag) this.tweens.add({ targets: bag, displayWidth: bag.displayWidth * 1.5, displayHeight: bag.displayHeight * 1.5, duration: 700 })
-      this.dress('propPapers', 0.66, 0.66, 0.05, 'wall2')
+      this.dress('propClipping90', 0.66, 0.66, 0.05, 'wall2')
       // …and he is older. The swap happens under the flash, which is where a cut belongs.
       this.player.setTexture(`art-${ERA_1990.player.pose.down}`)
       this.sizePlayer(ROOM.size.near * (ERA_1990.player.scale ?? 1))
     }
     if (n === 3) this.dress('propScarfRed', 0.9, 0.72, 0.06, 'wall3')
-    if (n === 4) this.dress('propPosters', 0.36, 0.56, 0.06, 'wall4')
+    // the wall fills: the club's flag, where the engraved fly-posters were (21.9.2026)
+    if (n === 4) this.dress('propFlag', 0.36, 0.52, 0.08, 'wall4')
   }
 
   /**

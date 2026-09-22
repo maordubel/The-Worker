@@ -46,7 +46,7 @@ export const CAST_CARDS: readonly CastCard[] = [
     id: 'kobi',
     namesHe: ['קובי'],
     roleHe: 'אבא',
-    art: 'kobi',
+    art: 'kobi-chair',
     linesHe: [
       'עובד בדפוס. חוזר עם ידיים שחורות ומדיח אותן שלוש פעמים לפני שהוא נוגע בלחם.',
       'לא אומר "אני אוהב אותך". אומר "תלבש נעליים סגורות", וזה אותו דבר בדיוק.',
@@ -118,7 +118,7 @@ export const CAST_CARDS: readonly CastCard[] = [
     id: 'usher',
     namesHe: ['סדרן', 'הסדרן'],
     roleHe: 'בדלת של אוסישקין',
-    art: 'oldMan',
+    art: 'usher',
     linesHe: [
       'מכיר את כולם בשם. את מי שלא — הוא ילמד בערב אחד.',
       'אומר "אל תשב מתחת לחור בגג" ומתכוון לזה.',
@@ -178,7 +178,7 @@ export const CAST_CARDS: readonly CastCard[] = [
     id: 'freddy',
     namesHe: ['פרדי'],
     roleHe: 'חבר מהבסיס',
-    art: 'freddy',
+    art: 'adultA2',
     linesHe: [
       'מדבר שלוש שפות ומקלל בארבע.',
       'שואל שאלה אחת בדיוק, ואז שותק עד שאתה עונה באמת.',
@@ -190,7 +190,7 @@ export const CAST_CARDS: readonly CastCard[] = [
     id: 'crowd-limor',
     namesHe: ['לימור'],
     roleHe: 'בדלת של האוטובוס',
-    art: 'keren90',
+    art: 'adultB5',
     linesHe: [
       'גובה כסף באוטובוס ומחזירה עודף לפני שספרת.',
       'יודעת מי לא שילם ולא אומרת. רושמת.',
@@ -202,7 +202,7 @@ export const CAST_CARDS: readonly CastCard[] = [
     id: 'soko',
     namesHe: ['סוקו'],
     roleHe: 'הוותיק',
-    art: 'oldMan',
+    art: 'soko',
     linesHe: [
       'ראה את האליפות של 68׳. יזכיר לך.',
       'סופר שנים בין תארים כמו שאחרים סופרים ימי הולדת.',

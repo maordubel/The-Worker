@@ -17,9 +17,31 @@ import { CONVERSATIONS_SEED } from './chapter1999basket'
 import { CONVERSATIONS_CUP99 } from './chapter1999cup'
 import { CONVERSATIONS_DOUBLE, CONVERSATIONS_TITLE } from './chapter2000double'
 import { CONVERSATIONS_BRIDGE } from './chapter2000bridge'
+import { CONVERSATIONS_EUROPE } from './chapter2002europe'
+import { CONVERSATIONS_HOME } from './chapter2006home'
+import { CONVERSATIONS_FOUNDING } from './chapter2007founding'
+import { CONVERSATIONS_2010 } from './chapter2010double'
+import { CONVERSATIONS_CHAMPIONS } from './chapter2010champions'
+import { CONVERSATIONS_GROWTH } from './chapter2012growth'
+import { CONVERSATIONS_NEWHALL } from './chapter2015newhall'
+import { CONVERSATIONS_COLLAPSE } from './chapter2016collapse'
+import { CONVERSATIONS_RETURN } from './chapter2018return'
+import { CONVERSATIONS_LATE } from './chapter2023late'
+import { CONVERSATIONS_FINALE } from './chapter2026finale'
+import { CONVERSATIONS_FAMILY } from './chapter2011family'
+import { CONVERSATIONS_PROMISES } from './chapter2021promises'
+import { CONVERSATIONS_WINDOWS } from './chapterWindows'
+import { CONVERSATIONS_TEAM } from './chapterTeam'
+import { CONVERSATIONS_CAREER } from './chapterCareer'
+import { CONVERSATIONS_FRIENDS } from './chapterFriends'
+import { CONVERSATIONS_ABROAD } from './chapterAbroad'
+import { CONVERSATIONS_ROOMS2000 } from './rooms2000Looks'
+import { CONVERSATIONS_OWNER } from './chapterOwner'
+import { CONVERSATIONS_COMBOS } from './chapterCombos'
 import { CONVERSATIONS_MATCH } from './dialogueMatch'
 import { CONVERSATIONS_A1, CONVERSATIONS_A2, CONVERSATIONS_A3, CONVERSATIONS_A4, CONVERSATIONS_A5, CONVERSATIONS_A6, CONVERSATIONS_A7 } from './chapterStageA'
 import { gigConversations } from '../gigs'
+import { CONVERSATIONS_ACTIVITIES } from './dialogueActivities'
 import { CONVERSATIONS_ROUTES } from './routes'
 import { fanShops } from '../shirts'
 import type { Conversation } from './script'
@@ -111,24 +133,38 @@ const CONVERSATIONS: Conversation[] = [
       { lines: [{ who: null, text: 'מגירה פתוחה, עיפרון שבור, וקצת חול שנכנס מהחלון.' }] },
     ],
   },
+  /**
+   * הקופסה האדומה — שתי שיחות, כי יש לה שני מקומות (`scenes.ts`, `redbox` ו-`redbox-shelf`).
+   *
+   * **"לפתוח" פותח אותה** (`{ e: 'box' }`). עד 21.9.2026 הבחירה הרימה את `open:redbox`
+   * ולא קרה כלום על המסך; והענף הראשון נפתח ב-`memory:first`, דגל יום, כך שב-1990 הקופסה
+   * הייתה אומרת "ריקה" לילד שכבר שם בה את 1986. מה שבתוכה נקרא עכשיו מהמצב, והקופסה
+   * עצמה אומרת כשהיא ריקה.
+   */
   {
     id: 'redbox',
     branches: [
       {
-        when: { flag: 'memory:first' },
         lines: [
-          { who: null, text: 'קופסת הפח האדומה. עד היום היא הייתה ריקה.' },
-          { who: null, text: 'עכשיו יש בתוכה דבר אחד, ואתה יודע בדיוק מאיזה יום הוא.' },
+          { who: null, text: 'קופסת הפח האדומה, מתחת למיטה. הציר חורק, כמו תמיד.' },
         ],
         choices: [
-          { id: 'open', text: 'לפתוח את הקופסה', then: [{ e: 'flag', flag: 'open:redbox' }] },
+          { id: 'open', text: 'לפתוח את הקופסה', then: [{ e: 'flag', flag: 'open:redbox' }, { e: 'box' }] },
           { id: 'shut', text: 'להשאיר סגורה', then: [] },
         ],
       },
+    ],
+  },
+  {
+    id: 'redbox-shelf',
+    branches: [
       {
         lines: [
-          { who: null, text: 'קופסת פח ישנה מתחת לשולחן, עם ציר שחורק. ריקה.' },
-          { who: null, text: 'אתה שומר אותה למשהו שעוד לא קרה.' },
+          { who: null, text: 'הקופסה על המדף, בין הקלטות. היא עברה איתך כל עשור, ועוד לא נגמר בה המקום.' },
+        ],
+        choices: [
+          { id: 'open', text: 'להוריד אותה ולפתוח', then: [{ e: 'flag', flag: 'open:redbox' }, { e: 'box' }] },
+          { id: 'shut', text: 'להשאיר על המדף', then: [] },
         ],
       },
     ],
@@ -888,7 +924,22 @@ const CONVERSATIONS: Conversation[] = [
           { who: 'בארי', text: 'קטן. אתה יודע לאן אתה הולך?' },
           { who: null, text: 'אתה מהנהן. הוא לא אומר כלום, רק ממשיך ללכת לידך עוד קצת.' },
         ],
-        then: [{ e: 'trait', trait: 'courage', delta: 2 }],
+        /**
+         * התחנה (21.9.2026) — the old fan's memory game, offered where he is: on the road, by
+         * the bus shelter, on the afternoon of the final. It costs the clock, which is the
+         * point on this day — the courage he gives you for walking on is kept on both roads.
+         */
+        choices: [
+          { id: 'walk', text: 'להמשיך ללכת לידו', then: [{ e: 'trait', trait: 'courage', delta: 2 }] },
+          {
+            id: 'bench',
+            text: 'לשאול אותו על פעם',
+            then: [
+              { e: 'trait', trait: 'courage', delta: 2 },
+              { e: 'goto', node: 'act-busstop-memory' },
+            ],
+          },
+        ],
       },
     ],
   },
@@ -1735,7 +1786,7 @@ const CONVERSATIONS: Conversation[] = [
  * second chapter is a second content file and not a second runner (brief §52).
  */
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
-  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_ALLENBY, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_BLOOMFIELD, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_BRIDGE, ...CONVERSATIONS_MATCH, ...CONVERSATIONS_A1, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7, ...CONVERSATIONS_SCARF, ...CONVERSATIONS_MORNING_86, ...CONVERSATIONS_ROUTES, ...fanShops(), ...gigConversations()].map(
+  [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_ALLENBY, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_BLOOMFIELD, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_BRIDGE, ...CONVERSATIONS_EUROPE, ...CONVERSATIONS_HOME, ...CONVERSATIONS_FOUNDING, ...CONVERSATIONS_2010, ...CONVERSATIONS_CHAMPIONS, ...CONVERSATIONS_GROWTH, ...CONVERSATIONS_NEWHALL, ...CONVERSATIONS_COLLAPSE, ...CONVERSATIONS_RETURN, ...CONVERSATIONS_LATE, ...CONVERSATIONS_FINALE, ...CONVERSATIONS_FAMILY, ...CONVERSATIONS_PROMISES, ...CONVERSATIONS_WINDOWS, ...CONVERSATIONS_TEAM, ...CONVERSATIONS_CAREER, ...CONVERSATIONS_FRIENDS, ...CONVERSATIONS_ABROAD, ...CONVERSATIONS_ROOMS2000, ...CONVERSATIONS_OWNER, ...CONVERSATIONS_COMBOS, ...CONVERSATIONS_MATCH, ...CONVERSATIONS_A1, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7, ...CONVERSATIONS_SCARF, ...CONVERSATIONS_MORNING_86, ...CONVERSATIONS_ROUTES, ...CONVERSATIONS_ACTIVITIES, ...fanShops(), ...gigConversations()].map(
     (conversation) => [conversation.id, conversation],
   ),
 )

@@ -24,8 +24,11 @@ import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match
 import type { Condition } from '../../world/types'
 import { cutFor, eraOfYear, filmFlag } from '../../world/transitions'
 import { bodySize, heightOf } from '../../world/heights'
+import { castFigure } from '../../world/castFigures'
+import { yearOfChapter } from '../../world/homes'
 import { LivingWorld } from '../living'
 import { GIGS, isPaid, offerFlag, offeredIn } from '../../gigs'
+import { AFTER_FLAG, CROWD_FLAG, ERA_FLAG, NEIGHBOUR_OFFER, eraOf, neighbourAsks, parliamentOf } from '../../activities'
 
 /**
  * הערבים שבהם יש כדורסל באוסישקין — the chapters whose evening happens inside the hall.
@@ -33,7 +36,8 @@ import { GIGS, isPaid, offerFlag, offeredIn } from '../../gigs'
  */
 const HALL_NIGHTS: readonly string[] = ['1991', '1993-cup', '1997-basket', '1999-basket']
 
-import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, stuckFor, TICKET_OFFICE, whenFor } from '../../world/scenes'
+import { plateFor } from '../../plates'
+import { ALL_SCENES, arrivalFor, artFor, blockedFor, needsFor, exitInEra, FULL_TIME, inEra, KICKOFF, KOBI_LEAVES, sceneFor, sceneIn, stuckFor, TICKET_OFFICE, whenFor } from '../../world/scenes'
 import { compose as composeHint, holds as hintHolds } from '../../world/hints'
 import { unmet } from '../../world/why'
 import { forcedEnding, isStalled, LAST_RESORT_MINUTES, waitingForTheClock } from '../../world/lastResort'
@@ -57,7 +61,7 @@ import { matchScriptFor, type MatchScript } from '../../content/matchScripts'
 import { DerbyFromAfar, DerbyNight, derbyMarginHe, type DerbyMood } from '../derby1991'
 import { PassageScene } from './PassageScene'
 import { meets } from '../../world/types'
-import { artUrl, extensionKeys, PARALLAX, parallaxKeys, parallaxPlane, WALK_AWAY, type ParallaxPlane } from '../art'
+import { artUrl, extensionKeys, facesLeft, PARALLAX, parallaxKeys, parallaxPlane, WALK_AWAY, type ParallaxPlane } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import type { MapPlace } from '../game'
 import { LIFE_PALETTE } from '../palette'
@@ -228,6 +232,9 @@ export class WorldScene extends Phaser.Scene {
   private stride = 0
 
   private actors: Actor[] = []
+  /** מלווים — people a conversation brought into the room, and only for it (`summonSpeakers`) */
+  private companions: Actor[] = []
+  private companionsLeave: Phaser.Time.TimerEvent | null = null
   /** the conversation the room currently has open — see `anchorFor` */
   private speaking: string | null = null
   private ambient: Ambient[] = []
@@ -321,7 +328,11 @@ export class WorldScene extends Phaser.Scene {
 
   /** `scene.restart()` reuses the instance; every mutable field is reset by hand. */
   init(data: { mapId?: LocationId; spawn?: string; from?: LocationId }) {
-    this.def = sceneFor(data.mapId ?? 'bedroom')
+    this.panLeft = null
+    // the room as it stands THIS chapter — a rebuilt ground brings its own floor (`Repaint`)
+    const chapter = (this.registry.get(CONTEXT_KEY) as LifeContext | undefined)?.engine.state.chapter
+    const room = sceneFor(data.mapId ?? 'bedroom')
+    this.def = chapter ? sceneIn(room, chapter) : room
     this.spawnName = data.spawn ?? 'start'
     this.cameFrom = data.from ?? null
     this.clearedReturn = false
@@ -551,9 +562,16 @@ export class WorldScene extends Phaser.Scene {
       ending: (id) => this.finishChapter(id),
       shot: (shot) => this.frameShot(shot),
       anchorFor: (who) => this.anchorFor(who),
+      meet: (who) => this.meetSpeaker(who),
+      cast: (names) => {
+        this.summonSpeakers(names)
+        // a breath, so a companion who had to load is standing before the camera looks
+        this.time.delayedCall(80, () => this.frameSpeakers(names))
+      },
       onOpen: (open) => {
         this.paused = open
         if (!open) this.speaking = null
+        if (!open) this.releaseCompanions()
         if (open) {
           this.vx = 0
           this.vy = 0
@@ -630,6 +648,7 @@ export class WorldScene extends Phaser.Scene {
     this.announceNewAlbums()
     this.announceSeasonTicket()
     this.offerRoute()
+    this.playActivityReaction()
 
     this.openChapterBeat(state)
 
@@ -890,7 +909,7 @@ export class WorldScene extends Phaser.Scene {
     const band = this.band()
     const depth = Phaser.Math.Clamp((y / this.H - band.far) / Math.max(1e-6, band.near - band.far), 0, 1)
     const taper = this.def.size.far / Math.max(1e-6, this.def.size.near)
-    return bodySize(figure, this.def.metre, depth, taper)
+    return bodySize(figure, this.def.metre, depth, taper, yearOfChapter(this.chapter))
   }
 
   private buildActors(state: LifeState) {
@@ -929,7 +948,8 @@ export class WorldScene extends Phaser.Scene {
       const shadow = this.add.ellipse(0, y, 40, 12, LIFE_PALETTE.ink, 0.2)
       const image = this.add.image(def.from * this.W, y, `art-${def.figure}`).setOrigin(0.5, 1)
       this.fit(image, this.bodySizeAt(def.figure, y) * this.H)
-      image.setFlipX(def.to > def.from === (WorldScene.ART_FACES < 0))
+      // walking the way he faces — a body drawn walking left (`facesLeft`) is not flipped to go left
+      image.setFlipX((def.to > def.from === (WorldScene.ART_FACES < 0)) !== facesLeft(def.figure))
       shadow.setSize(image.displayWidth * 0.55, image.displayWidth * 0.16)
       const visible = meets(state, def.when)
       image.setVisible(visible)
@@ -1006,7 +1026,7 @@ export class WorldScene extends Phaser.Scene {
       // a low hall under a tin roof: warm dust in the window light, slower than a terrace
       hall: { n: 30, tint: LIFE_PALETTE.lamp, speed: 9, alpha: 0.3, scale: 1.1 },
     }
-    const cfg = air[this.def.ambience] ?? air['day']
+    const cfg = air[this.def.air ?? this.def.ambience] ?? air['day']
     if (!cfg) return
     this.add
       .particles(0, 0, 'life-dot', {
@@ -1041,6 +1061,36 @@ export class WorldScene extends Phaser.Scene {
       if (!offered.has(gig.id) || state.flags[flag]) continue
       this.ctx.engine.dispatch({ t: 'flag.raised', flag })
     }
+    /**
+     * הרחוב של הפעילויות (21.9.2026) — written once a chapter, like the rotation above and
+     * for its reasons: flags are what a `Condition` reads, what a save keeps and what a
+     * probe prints. The neighbour stands in the street in about every other chapter; the
+     * parliament by the fence is two to four of this chapter's crowd, off the save's seed.
+     */
+    if (neighbourAsks(this.chapter, state.rng.seed) && !state.flags[NEIGHBOUR_OFFER]) {
+      this.ctx.engine.dispatch({ t: 'flag.raised', flag: NEIGHBOUR_OFFER })
+    }
+    const moneyEra = eraOf(this.chapter)
+    if (state.flags[ERA_FLAG] !== moneyEra) this.ctx.engine.dispatch({ t: 'flag.set', flag: ERA_FLAG, value: moneyEra })
+    if (!state.flags[CROWD_FLAG]) {
+      const names = parliamentOf(state, this.chapter)
+      if (names.length > 0) this.ctx.engine.dispatch({ t: 'flag.set', flag: CROWD_FLAG, value: names.join('|') })
+    }
+  }
+
+  /**
+   * התגובה בחדר — a chore returns through a scene restart, so the person who asked for it
+   * speaks when the room is built again (`act:after`, written by the chore scene). An
+   * activity played in a sheet over the paused room is answered by the shell instead.
+   */
+  private playActivityReaction() {
+    const pending = this.ctx.engine.state.flags[AFTER_FLAG]
+    if (typeof pending !== 'string' || pending === '') return
+    this.ctx.engine.dispatch({ t: 'flag.set', flag: AFTER_FLAG, value: '' })
+    this.time.delayedCall(520, () => {
+      if (this.paused || this.ctx.dialogue.open) return
+      this.ctx.dialogue.start(pending)
+    })
   }
 
   /**
@@ -1085,8 +1135,11 @@ export class WorldScene extends Phaser.Scene {
       const dy = (this.groundY - actor.image.y) / DEPTH
       const near = Math.hypot(dx, dy) < reach
       if (near) {
-        // face him: the sprite's own default direction decides which flip means "towards"
-        actor.image.setFlipX(actor.def.flip === true ? dx > 0 : dx < 0)
+        // face him. The art's own direction decides which flip means "towards" — and that is
+        // the ART's direction, not the author's `flip`: `flip: true` on a body that faces
+        // right means "looking left", and reading it as "this art faces left" turned every
+        // such person AWAY from the man walking up to them (21.9.2026)
+        actor.image.setFlipX(((dx < 0) === WorldScene.ART_FACES > 0) !== facesLeft(actor.def.figure))
       } else {
         actor.image.setFlipX(actor.def.flip === true)
       }
@@ -1532,12 +1585,51 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /**
+   * המצלמה פוגשת את מי שמדבר, שורה-שורה (21.9.2026).
+   *
+   * `frameSpeakers` מכוון את המצלמה פעם אחת, בפתיחת השיחה. בשיחה של ארבעה אנשים בטלפון
+   * זה לא מספיק: באולם האימונים של 2007 ענבל שואלת *"מי שומר את המפתח?"* מחוץ לתמונה, ובתיבה
+   * יש פנים בלי אדם. כאן, לפני כל שורה, אם מי שמדבר עומד בחדר ומחוץ לצילום — המצלמה זזה
+   * אליו (ואל פוגי, אם שניהם נכנסים), והזנב מחושב מול המקום שאליו היא זזה.
+   */
+  private panLeft: number | null = null
+
+  private speakerX(who: string): number | null {
+    if (this.player && who === this.ctx.engine.state.identity.name) return this.player.x
+    const byTalk = this.speaking ? this.actors.find((entry) => entry.def.talk === this.speaking && entry.image.visible) : undefined
+    if (byTalk && (byTalk.def.nameHe === who || !this.actors.some((e) => e.def.nameHe === who))) return byTalk.image.x
+    const byName = this.actors.find((entry) => entry.def.nameHe === who && entry.image.visible)
+    return byName ? byName.image.x : null
+  }
+
+  private meetSpeaker(who: string | null) {
+    if (!who || !this.player) return
+    const x = this.speakerX(who)
+    if (x === null) return
+    const cam = this.cameras.main
+    const view = cam.worldView
+    if (view.width <= 0) return
+    const left = this.panLeft ?? view.x
+    const margin = view.width * 0.08
+    if (x >= left + margin && x <= left + view.width - margin) return
+    const room = view.width - margin * 2
+    let cx = Math.abs(x - this.player.x) <= room ? (x + this.player.x) / 2 : x
+    const bounds = cam.getBounds()
+    cx = Phaser.Math.Clamp(cx, bounds.x + view.width / 2, bounds.right - view.width / 2)
+    this.shotting = true
+    cam.stopFollow()
+    cam.pan(cx, cam.midPoint.y, 420, 'Sine.easeInOut')
+    this.panLeft = cx - view.width / 2
+  }
+
   private anchorFor(who: string | null): number | null {
     if (!who) return null
     const view = this.cameras.main?.worldView
     if (!view || view.width <= 0) return null
+    const viewLeft = this.panLeft ?? view.x
     const at = (worldX: number): number | null => {
-      const fraction = (worldX - view.x) / view.width
+      const fraction = (worldX - viewLeft) / view.width
       // a speaker who has walked off the edge of the shot gets no tail rather than a tail
       // clamped to the corner, which would be a lie about where he is
       return fraction < -0.05 || fraction > 1.05 ? null : Math.max(0, Math.min(1, fraction))
@@ -1566,6 +1658,132 @@ export class WorldScene extends Phaser.Scene {
     }
     const byName = this.actors.find((entry) => entry.def.nameHe === who && entry.image.visible)
     return byName ? at(byName.image.x) : null
+  }
+
+  /**
+   * ------------------------------------------------ מי שמדבר — נמצא (21.9.2026) ----
+   *
+   * שיחה של ביט-שעון נפתחת בכל חדר שבו פוגי עומד, והאנשים שמדברים בה לא הוצבו בו — הם
+   * לא ידעו שהוא יהיה שם. עד היום זה נראה כמו מה שזה היה: ארבעה אנשים מדברים, והחדר ריק.
+   * עכשיו מי שמדבר ואינו עומד בחדר, אינו בטלפון (`Conversation.remote`) ואין לשיחה מקום
+   * אחר (`Conversation.where`), **נכנס** — מהצד, לידו, פונה אליו — ויוצא כשהשיחה נגמרת.
+   *
+   * רק בחיים הבוגרים (2000 והלאה), כי שם הטבלה של הגופים (`world/castFigures.ts`) יודעת
+   * איך כל אחד נראה בשנים האלה; בשנות השמונים והתשעים כל מי שמדבר כבר עומד בחדר, והמנגנון
+   * לא נוגע בהם. מי שאין לו גוף — קול, מקהלה, אדם שלא צויר — לא נכנס, ונשאר שם בתיבה בלבד.
+   */
+  private summonSpeakers(names: readonly string[]) {
+    if (yearOfChapter(this.chapter) < 2000 || !this.player) return
+    this.companionsLeave?.remove(false)
+    this.companionsLeave = null
+    const band = this.band()
+    const py = Phaser.Math.Clamp(this.player.y / this.H, band.far, band.near)
+    const px = this.player.x / this.W
+    let slot = 0
+    for (const who of names) {
+      if (this.actors.some((actor) => actor.image.visible && actor.def.nameHe === who)) continue
+      const body = castFigure(who, yearOfChapter(this.chapter))
+      if (!body) continue
+      const n = slot++
+      // right of him first, then left, then a step further out on each side
+      const side = n % 2 === 0 ? 1 : -1
+      const reach = 0.12 + Math.floor(n / 2) * 0.085
+      let x = px + side * reach
+      if (x > 0.95 || x < 0.05) x = px - side * reach
+      x = Phaser.Math.Clamp(x, 0.05, 0.95)
+      const y = Phaser.Math.Clamp(py + (n % 2 === 0 ? -0.018 : 0.012), band.far, band.near)
+      const key = `art-${body.figure}`
+      const place = () => this.placeCompanion(who, body.figure, x, y)
+      if (this.textures.exists(key)) place()
+      else {
+        this.load.image(key, artUrl(body.figure))
+        this.load.once(Phaser.Loader.Events.COMPLETE, place)
+        this.load.start()
+      }
+    }
+  }
+
+  /**
+   * המצלמה פוגשת את מי שמדבר (21.9.2026).
+   *
+   * בטלפון המצלמה מראה כ-42% מרוחב החדר, ממורכזת על פוגי (`frameWorld`). באלנבי של 2012
+   * הוא נכנס משמאל, החבורה עומדת מול בית הקפה מימין — והשיחה נפתחה עם זנב שמצביע אל מחוץ
+   * לזכוכית ושלושה אנשים שאף אחד לא רואה. שיחה שהתוכן כתב לה `shot` מקבלת את הצילום שלה;
+   * כל שיחה אחרת בחיים הבוגרים, אם מישהו מהדוברים מחוץ לתמונה, מזיזה את המצלמה אל
+   * האמצע שבינו לבין הקבוצה — ו-`frameShot(null)` בסוף השיחה מחזיר אותה אליו, כמו אחרי
+   * כל צילום.
+   */
+  private frameSpeakers(names: readonly string[]) {
+    if (yearOfChapter(this.chapter) < 2000 || this.shotting || !this.player || !this.ctx.dialogue.open) return
+    const cam = this.cameras.main
+    const xs = this.actors.filter((actor) => actor.image.visible && names.includes(actor.def.nameHe)).map((actor) => actor.baseX)
+    if (!xs.length) return
+    const view = cam.worldView
+    const margin = view.width * 0.1
+    const lo = Math.min(this.player.x, ...xs)
+    const hi = Math.max(this.player.x, ...xs)
+    if (lo >= view.x + margin && hi <= view.right - margin) return
+    // everyone if they fit; else him and the nearest of them; else the people talking — he
+    // is the one listening, and a frame of the pavement between them shows nobody
+    const room = view.width - margin * 2
+    const nearest = xs.reduce((best, x) => (Math.abs(x - this.player.x) < Math.abs(best - this.player.x) ? x : best))
+    const cx =
+      hi - lo <= room
+        ? (lo + hi) / 2
+        : Math.abs(nearest - this.player.x) <= room
+          ? (nearest + this.player.x) / 2
+          : (Math.min(...xs) + Math.max(...xs)) / 2
+    this.shotting = true
+    cam.stopFollow()
+    cam.pan(cx, cam.midPoint.y, 560, 'Sine.easeInOut')
+    this.panLeft = cx - view.width / 2
+  }
+
+  private placeCompanion(who: string, figure: string, x: number, y: number) {
+    if (!this.sys.isActive() || !this.textures.exists(`art-${figure}`)) return
+    if (this.actors.some((actor) => actor.image.visible && actor.def.nameHe === who)) return
+    const X = x * this.W
+    const Y = y * this.H
+    const shadow = this.add.ellipse(X, Y, 40, 12, LIFE_PALETTE.ink, 0.26)
+    const image = this.add.image(X, Y, `art-${figure}`).setOrigin(0.5, 1)
+    const size = this.bodySizeAt(figure, Y)
+    this.applyScale(image, shadow, Y, { far: size, near: size })
+    // he is the one they came to talk to
+    const faceLeft = X > this.player.x
+    image.setFlipX((faceLeft === WorldScene.ART_FACES > 0) !== facesLeft(figure))
+    const from = X + (faceLeft ? 1 : -1) * this.W * 0.035
+    image.x = from
+    shadow.x = from
+    image.setAlpha(0)
+    shadow.setAlpha(0)
+    this.tweens.add({ targets: [image, shadow], alpha: 1, x: X, duration: 420, ease: 'Sine.easeOut' })
+    const def: ActorDef = { id: `companion-${who}`, figure, x, y, nameHe: who }
+    const actor: Actor = { def, image, shadow, baseX: X, phase: 0 }
+    this.actors.push(actor)
+    this.companions.push(actor)
+  }
+
+  /** after the last line, a breath, and then they go the way they came */
+  private releaseCompanions() {
+    if (!this.companions.length) return
+    this.companionsLeave?.remove(false)
+    this.companionsLeave = this.time.delayedCall(1600, () => {
+      const leaving = this.companions
+      this.companions = []
+      this.companionsLeave = null
+      this.actors = this.actors.filter((actor) => !leaving.includes(actor))
+      for (const actor of leaving) {
+        this.tweens.add({
+          targets: [actor.image, actor.shadow],
+          alpha: 0,
+          duration: 380,
+          onComplete: () => {
+            actor.image.destroy()
+            actor.shadow.destroy()
+          },
+        })
+      }
+    })
   }
 
   /** How wide the person behind this conversation is drawn, or 0 if it is not a person. */
@@ -2257,7 +2475,7 @@ export class WorldScene extends Phaser.Scene {
         this.applyScale(actor.image, actor.shadow, y, { far: size, near: size })
         actor.image.y = y
       }
-      if (placement.facing) actor.image.setFlipX((placement.facing === 'left') === (WorldScene.ART_FACES > 0))
+      if (placement.facing) actor.image.setFlipX(((placement.facing === 'left') === (WorldScene.ART_FACES > 0)) !== facesLeft(actor.def.figure))
     }
   }
 
@@ -3450,6 +3668,7 @@ export class WorldScene extends Phaser.Scene {
   private frameShot(shot: ConversationShot | null) {
     const cam = this.cameras.main
     if (!shot) {
+      this.panLeft = null
       if (!this.shotting) return
       this.shotting = false
       cam.stopFollow()
@@ -3465,6 +3684,7 @@ export class WorldScene extends Phaser.Scene {
         : (this.actors.find((actor) => actor.def.id === shot.focus || actor.def.nameHe === shot.focus)
             ?.image ?? null)
 
+    this.panLeft = null
     const push = { close: 1.16, ots: 1.1, medium: 1.05, wide: 0.96 }[shot.framing]
     const narrow = cam.width < 520 ? 0.55 : 1
     this.shotting = true
@@ -4164,6 +4384,17 @@ export class WorldScene extends Phaser.Scene {
    */
   private static readonly MASTER_EVENTS: readonly string[] = [
     '1986', '1990', '1998-laces', '1999-cup', '2000-title', '2000-double',
+    /**
+     * שלב ג׳ (21.9.2026) — שני ימים, ושניהם ימים שפרסומת בהם היא עלבון.
+     *
+     * `2002-europe` נגמר בהדחה בסן סירו, ו-`2007-registered` מכיל את **יום ההריסה של
+     * אוסישקין**. כלל 28 אוסר פרסומת במהלך ריצה, והרשימה הזאת היא הדרך שבה המשחק יודע
+     * איזה פרק הוא אירוע־אב; פרק שנכתב ולא נוסף כאן היה מקבל פרסומת בזמן שאפי אומר
+     * *"אל תמצא לי עכשיו משפט יפה"*.
+     */
+    '2002-europe', '2007-registered',
+    // ...ושני ימי 2010: הגמר והמחזור האחרון
+    '2010-cup', '2010-teddy',
   ]
 
   private finishChapter(endingId: string) {
@@ -4242,6 +4473,7 @@ export class WorldScene extends Phaser.Scene {
       titleHe: card.titleHe,
       bodyHe: card.bodyHe,
       memoryHe: card.memoryHe,
+      memory: { id: `${this.era.memoryPrefix}-${card.id}`, item: card.memoryItem, endingId: card.id, year: state.year },
       chapter: this.chapter,
       ...(card.after ? { after: card.after } : {}),
       // Where he was, straight off the card the chapter chose. The shell holds up the
@@ -5049,7 +5281,7 @@ export class WorldScene extends Phaser.Scene {
       titleHe: next.bridge.titleHe,
       subHe: next.bridge.subHe,
       ms: next.bridge.ms,
-      art: `plate-${next.id}`,
+      art: plateFor(next.id),
       fromYear: state.year,
       nameHe: next.titleHe,
     })

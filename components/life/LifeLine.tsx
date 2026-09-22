@@ -1,5 +1,6 @@
 'use client'
 
+import { eraFor } from '@/lib/life/content/era'
 import { artUrl } from '@/lib/life/runtime/art'
 import { t } from '@/lib/i18n'
 
@@ -34,12 +35,27 @@ const AGES = [
   { art: 'pogi90-1', labelKey: 'life.line.age4' },
 ] as const
 
-/** the slot a chapter lights: the eight-year-old, then the twelve-year-old */
+/**
+ * המשבצת שהפרק מדליק — **לפי הגוף שהוא הולך בו** (21.9.2026).
+ *
+ * עד היום זה היה `chapter === '1990' ? 1 : 0`, שנכתב כשהיו שני פרקים. מאז נוספו ארבעים,
+ * וכרטיס הסיום של כל אחד מהם — 1996 במדים, 2019 מול בלומפילד המחודש — הדליק את **בן
+ * השמונה** ועמעם את השאר תחת *"פרק שעוד ייכתב"*. הגוף של הפרק כבר אומר את הגיל
+ * (`era.player`), ולכן המשבצת נגזרת ממנו, כמו הדיוקן בתיבה (`ownFace`).
+ */
+const SLOT_OF_BODY: Record<string, number> = { hero80: 1, teen: 1, soldier: 2, hero90: 3 }
 export function ageReached(chapter: string): number {
-  return chapter === '1990' ? 1 : 0
+  if (chapter === '1990') return 1
+  return SLOT_OF_BODY[eraFor(chapter).player.pose.down] ?? 0
 }
 
-export function LifeLine({ reached = 0 }: { reached?: number }) {
+/** "הראשון בקופסה" נכון ב-1986 ו"השני" ב-1990; אחריהם הקופסה כבר לא סופרת בקול */
+export function leadKey(chapter: string): 'life.line.lead' | 'life.line.lead2' | 'life.line.lead3' {
+  if (chapter === '1990') return 'life.line.lead2'
+  return ageReached(chapter) === 0 ? 'life.line.lead' : 'life.line.lead3'
+}
+
+export function LifeLine({ reached = 0, lead }: { reached?: number; lead?: 'life.line.lead' | 'life.line.lead2' | 'life.line.lead3' }) {
   return (
     <section className="border-hair border-concrete/40 bg-ink" data-life="lifeline">
       <header className="flex items-baseline justify-between gap-3 border-b-hair border-concrete/30 px-3 py-2">
@@ -47,7 +63,7 @@ export function LifeLine({ reached = 0 }: { reached?: number }) {
           <bdi>{t('life.line.title')}</bdi>
         </h3>
         <p className="truncate font-body text-[10px] leading-none text-concrete">
-          <bdi>{t(reached >= 1 ? 'life.line.lead2' : 'life.line.lead')}</bdi>
+          <bdi>{t(lead ?? (reached >= 1 ? 'life.line.lead2' : 'life.line.lead'))}</bdi>
         </p>
       </header>
 

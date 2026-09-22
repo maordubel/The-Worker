@@ -89,6 +89,32 @@ export type LocationId =
   | 'ramat-gan'
   /** the small ground in the Hatikva quarter, 13.5.2000 — a stand-in painting until its own */
   | 'hatikva'
+  // --- 2000–2026 (21.9.2026) — the seventeen paintings Maor delivered, as rooms ---------
+  // Persisted identifiers (rule 35): added, never renamed. `lib/life/world/rooms2000.ts`.
+  /** the rented training hall of the new team, 2007 (U04, U05) */
+  | 'hall-new'
+  /** the Drive-In arena, 2015 (N05) */
+  | 'drive-in'
+  /** a rehearsal room, 2013 (N04) */
+  | 'rehearsal'
+  /** a small newsroom over the café on Allenby (J02, Q06) */
+  | 'newsroom'
+  /** the owner branch's office, 2025 (O01–O03) — fiction from its first line */
+  | 'office'
+  /** a community room: long table, cork board, a kettle (U01, U02, P03, Z03) */
+  | 'community-room'
+  /** the community equipment store behind it (Q03) */
+  | 'storeroom'
+  /** Liron's repair workshop behind the phone shop on Allenby, 2006 (H03) */
+  | 'workshop'
+  /** an arrival terminal in Europe (F02; E05) */
+  | 'port-europe'
+  /** outside a hall in Europe (F03, F04) */
+  | 'arena-out'
+  /** the seats of the same hall (F03) */
+  | 'arena-seats'
+  /** a rented flat abroad (X02, X03, X05, Q05) */
+  | 'flat-abroad'
 
 
 /**
@@ -680,6 +706,29 @@ export type LifeState = {
   /** anchor id → how he was present for it. Attended/missed still fold beside it. */
   presence: Record<string, PresenceMode>
   laces: LacesResponse | null
+  /**
+   * פעילויות — what the gate games played inside the life left behind (21.9.2026).
+   *
+   * Additive, like `skills` was: a save from before it folds to `{}`. Folded from
+   * `activity.completed` rows, so the log still says what happened and this only counts it.
+   */
+  activities: Record<string, ActivityRecord>
+}
+
+/**
+ * One activity across a whole life: how often, how well, what it was last, which archive
+ * rows it has already paid for (`seen` — a lineup is money once), and the opinions it kept
+ * (a poll question → the pick; a chapter → the XI built with Kobi). Survives every day and
+ * every year, because it is a biography and not an afternoon.
+ */
+export type ActivityRecord = {
+  runs: number
+  /** best score, 0..100 */
+  best: number
+  lastChapter: string
+  lastTier: string
+  seen: string[]
+  answers: Record<string, string>
 }
 
 export const BOND_IDS: readonly BondId[] = ['kobi', 'rachel', 'ofir', 'amit', 'efi', 'keren']

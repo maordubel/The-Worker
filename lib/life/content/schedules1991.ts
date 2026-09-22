@@ -72,8 +72,9 @@ export const SCHEDULE_1991: NPCScheduleEntry[] = [
     start: YARD,
     end: YARD_END,
     behavior: 'wait',
-    x: 0.8,
-    y: 0.86,
+    // on the stone bench under the tree — her figure is seated (`keren90-sit`, 21.9.2026)
+    x: 0.76,
+    y: 0.68,
     facing: 'left',
   },
 

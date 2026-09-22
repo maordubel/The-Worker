@@ -1,9 +1,13 @@
 import { at } from '../clock'
 import type { LocationId } from '../types'
 
+import { ACTIVITY, activityChapters, type ActivityId } from '../activities'
 import { GIGS, gigChapters, gigId, isPaid, offerFlag } from '../gigs'
 import { SHOP_CHAPTERS, shopId } from '../shirts'
+import { CHAPTERS } from '../content/chapters'
 import type { Condition } from './types'
+import { PARENTS_AFTER_2013, chaptersWhere, livesWithParents } from './homes'
+import { BEDROOM_2000, HOME_OWN, NEW_ROOMS, PITCH_2000, STAGED, STAND_NEW, STAND_OLD } from './rooms2000'
 
 /**
  * העולם המצויר — a painted place, a strip of floor you may stand on, and a door you can
@@ -38,6 +42,50 @@ import type { Condition } from './types'
  * A comment is a claim about the code and goes stale exactly like a manifest does.
  */
 export const TICKET_OFFICE: LocationId = 'ticket-office'
+
+/**
+ * ------------------------------------------------------ בלומפילד, לפי הלוח שלו ----
+ *
+ * The ground had three lives after 1986 and the game drew one. From the summer of 2016
+ * it was a building site — *"Between 2016 and 2019, it was closed due to renovations …
+ * the three clubs had to play their home matches in Petah Tikva and Netanya up until
+ * August 2019"* (Wikipedia, Bloomfield Stadium, read 21.9.2026), and ONE's report of the
+ * opening night speaks of *"שלוש השנים האחרונות"* of hoping to go back. It reopened on
+ * Monday 26.8.2019, the first round of the season, 0:0 against Maccabi Netanya (the
+ * archive row from ויקיפועל, the venue and the occasion from ONE, article 342496).
+ *
+ * Until 21.9.2026 every chapter after 2000 walked into the 1986 painting, and the two
+ * sets that exist for exactly this — `bloomOld*` and `bloomNew*`, in the folder since the
+ * `BLOOMFIELD-2000-2019-PLUS` delivery — were wired to nothing. Maor had said it in one
+ * line (*"בלומפילד החדש למשל יש לך במאגר!"*) and the art brief even listed R02 as closed
+ * "immediately with what is already in the repository". It was not. Now:
+ *
+ *   · 2016–2018 — the doors to the ground are locked, and say why;
+ *   · `2018-return` from the reopening on, and every chapter from 2019 — the rebuilt
+ *     ground (`repaints` on `bloomfield-outside`), on its own measured floor;
+ *   · `gate5` in the 2000s — `bloomOldGates`, the same wall in its later coat of paint.
+ */
+export const BLOOMFIELD_REOPENED = 'r:reopen'
+const yearOfChapter = (chapter: string): number => Number(chapter.slice(0, 4))
+/** the chapters that stand in front of the rebuilt ground */
+export function bloomfieldRebuilt(chapter: string): boolean {
+  return chapter === '2018-return' || yearOfChapter(chapter) >= 2019
+}
+/** the chapters in which the ground is a fence and a crane */
+export const BLOOMFIELD_SHUT: readonly string[] = CHAPTERS.map((c) => c.id).filter((id) => yearOfChapter(id) >= 2016 && yearOfChapter(id) <= 2018)
+const SHUT_HE = 'בלומפילד בשיפוץ — גדר ומנופים. משחקי הבית בינתיים בעיר אחרת.'
+/** a door to the ground in those years: open only once it has reopened (in 2018-return, the jump to August 2019) */
+const shutNeeds = (): Record<string, Condition> => Object.fromEntries(BLOOMFIELD_SHUT.map((id) => [id, { flag: BLOOMFIELD_REOPENED }]))
+const shutBlocked = (): Record<string, string> => Object.fromEntries(BLOOMFIELD_SHUT.map((id) => [id, SHUT_HE]))
+
+/**
+ * **הטרנזיסטור על שולחן המטבח** — מקום אחד לשלוש השנים שהוא עומד שם (החורף של 1986,
+ * 1990, 1993). 21.9.2026: הקובץ נוקה מרקע הלוח (`cut-objects-2026-09-21.py`) ונחתך
+ * לגוף עצמו, ולכן `at.y` הוא עכשיו המקום שבו הרגליים שלו נוגעות במשטח — אמצע עומק
+ * השולחן (הקצה האחורי 0.455, הקצה הקדמי 0.48), ולא הקצה הקדמי שבו הוא נראה תלוי.
+ * `size`: בקו הרחוק של המטבח מטר הוא 0.185 מהגובה, ורדיו כזה הוא כ-16 ס״מ.
+ */
+export const TABLE_RADIO = { size: 0.03, at: { x: 0.86, y: 0.476 } } as const
 
 export const KICKOFF = at(16, 0)
 export const KOBI_LEAVES = at(15, 10)
@@ -242,6 +290,12 @@ export type LayerDef = {
 export type SceneDef = {
   id: LocationId
   titleHe: string
+  /**
+   * השם לפי שנה — אותו חדר, בעלים אחר. מ-2013 הסלון שבו פוגי גדל הוא *"אצל ההורים"*,
+   * כי לפוגי יש בית משלו (`homeAdult`), וכרטיס מקום שאומר "הסלון" בשני המקומות משקר
+   * באחד מהם.
+   */
+  titleByEra?: Record<string, string>
   art: string
   /** the same room painted in another year — `bedroom90`, `street90` */
   artByEra?: Record<string, string>
@@ -274,6 +328,13 @@ export type SceneDef = {
   exits: ExitDef[]
   layers?: LayerDef[]
   ambience: Ambience
+  /**
+   * What drifts in the air, when it is not what the ambience implies (21.9.2026). The
+   * `stadium` air is forty-six pale flecks at half opacity — paper over the terrace of the
+   * 1986 final. Over the painted daylight terraces of 2000 and 2019 it read as snow in
+   * Tel Aviv; the rooms keep sounding like a stadium and breathe like a day.
+   */
+  air?: Ambience
   arrival?: { art: string; ms: number; flag: string }
   /**
    * The arrival card by chapter, where a chapter needs a different one — or none. `null`
@@ -285,6 +346,128 @@ export type SceneDef = {
   stuckHe?: string
   /** the same line, for a chapter whose locks are different */
   stuckByEra?: Record<string, string>
+  /**
+   * אותו מקום, בניין אחר — the same room on a painting with a different floor (`Repaint`).
+   * The first that holds for the chapter wins; `sceneIn` applies it.
+   */
+  repaints?: readonly Repaint[]
+}
+
+/**
+ * ציור אחר, רצפה אחרת — when a place was REBUILT, not repainted.
+ *
+ * `artByEra` swaps the picture and keeps everything measured on the old one, which is
+ * right when the new painting is the same composition (`street90`, `allenby2000`, the
+ * 2000s `gate5` — which is literally the same wall in another coat of paint). It is wrong
+ * the moment the building itself changed: Bloomfield was closed from the summer of 2016
+ * and reopened on 26.8.2019 as a different stadium, and `bloomNewPlaza` is a paved square
+ * in front of a white shell, not a concrete colonnade. Its horizon, its floor and the size
+ * of a man standing on it are all different numbers, so a repaint carries its OWN
+ * geometry — band, taper, metre, spawns — measured off its own painting (rule 52), and
+ * says which doors and spots of the old room exist on it and where.
+ *
+ * Actors are not repainted: they are already chosen by era, and a figure placed for 1986
+ * never appears in a chapter that is painted in 2019.
+ */
+export type Repaint = {
+  /** the chapters this painting is the room in */
+  in: (chapter: string) => boolean
+  art: string
+  band: { far: number; near: number }
+  size: { far: number; near: number }
+  metre: number
+  spawns: SceneDef['spawns']
+  /** where each door of the room stands on this painting; `null` — the door is not on it */
+  doors?: Record<string, Pick<ExitDef, 'x' | 'y' | 'w' | 'h'> & { light?: ExitDef['light'] } | null>
+  /** this painting's own first sight, or none */
+  arrival?: { art: string; ms: number; flag: string } | null
+  stuckHe?: string
+  /**
+   * ------------------------------------------------ מה עוד עובר לציור (21.9.2026) ----
+   *
+   * עד היום צביעה מחדש החליפה רצפה ודלתות והשאירה את כל השאר במקום שנמדד על הציור
+   * הקודם — וזה היה נכון רק כל עוד החדר היחיד שנצבע מחדש היה רחבה ריקה. ברגע ש*חדר*
+   * מקבל ציור אחר — הבית של פוגי מ-2013, החדר של בן עשרים ושתיים, המגרש הסינתטי — כל
+   * דבר שעומד בו צריך מקום על הציור הזה, או הצהרה שאין לו:
+   *
+   *   · `titleHe` / `ambience` — איך החדר נקרא ונשמע בשנים האלה (הסלון של ההורים הוא
+   *     לא הבית של פוגי, גם כשהמנוע קורא לשניהם `home`);
+   *   · `spots` — איפה כל נקודת עניין של החדר עומדת **על הציור הזה**, או `null`: היא
+   *     לא כאן. מבחן (`tests/life-rooms-2000.test.ts`) נופל על כל נקודה בעידן שהצביעה
+   *     לא אמרה עליה כלום — זה החור שבו מגירה של 1986 מרחפת באמצע מטבח של 2013;
+   *   · `cast` — אותו דבר לאנשים שכבר עומדים בחדר;
+   *   · `hotspots` / `actors` / `layers` — מה שיש רק בציור הזה.
+   */
+  titleHe?: string
+  ambience?: Ambience
+  air?: Ambience
+  spots?: Record<string, (Pick<HotspotDef, 'x' | 'y' | 'w'> & { prop?: HotspotDef['prop']; labelHe?: string }) | null>
+  cast?: Record<string, (Pick<ActorDef, 'x' | 'y'> & { flip?: boolean; figure?: string }) | null>
+  hotspots?: readonly HotspotDef[]
+  actors?: readonly ActorDef[]
+  layers?: readonly LayerDef[]
+}
+
+/** the room as it stands in this chapter — the room itself, or the room rebuilt */
+export function sceneIn(scene: SceneDef, chapter: string): SceneDef {
+  const paint = scene.repaints?.find((r) => r.in(chapter))
+  if (!paint) {
+    const title = titleFor(scene, chapter)
+    return title === scene.titleHe ? scene : { ...scene, titleHe: title }
+  }
+  const doors = paint.doors ?? {}
+  return {
+    ...scene,
+    art: paint.art,
+    artByEra: undefined,
+    band: paint.band,
+    bandByEra: undefined,
+    size: paint.size,
+    metre: paint.metre,
+    spawns: paint.spawns,
+    arrival: paint.arrival ?? undefined,
+    arrivalByEra: undefined,
+    stuckHe: paint.stuckHe ?? scene.stuckHe,
+    stuckByEra: paint.stuckHe ? undefined : scene.stuckByEra,
+    titleHe: paint.titleHe ?? scene.titleHe,
+    titleByEra: paint.titleHe ? undefined : scene.titleByEra,
+    ambience: paint.ambience ?? scene.ambience,
+    air: paint.air ?? (paint.ambience ? undefined : scene.air),
+    exits: scene.exits.flatMap((exit) => {
+      if (!(exit.id in doors)) return [exit]
+      const at = doors[exit.id]
+      return at ? [{ ...exit, ...at, light: at.light ?? undefined }] : []
+    }),
+    hotspots: [
+      ...scene.hotspots.flatMap((spot) => {
+        const spots = paint.spots ?? {}
+        if (!(spot.id in spots)) return [spot]
+        const at = spots[spot.id]
+        return at ? [{ ...spot, ...at, prop: at.prop ?? (spot.prop ? { ...spot.prop, at: undefined } : undefined) }] : []
+      }),
+      ...(paint.hotspots ?? []),
+    ],
+    actors: [
+      ...scene.actors.flatMap((actor) => {
+        const cast = paint.cast ?? {}
+        if (!(actor.id in cast)) return [actor]
+        const at = cast[actor.id]
+        return at ? [{ ...actor, ...at }] : []
+      }),
+      ...(paint.actors ?? []),
+    ],
+    // the old building's dressing stays with the old building; the new one brings its own
+    layers: [...(paint.layers ?? [])],
+    repaints: undefined,
+  }
+}
+
+/** the room's name in this chapter — a painting's own name, a year's, or the room's */
+export function titleFor(scene: SceneDef, chapter: string): string {
+  const paint = scene.repaints?.find((r) => r.in(chapter))
+  if (paint?.titleHe) return paint.titleHe
+  if (scene.titleByEra) for (const key of eraKeys(chapter)) if (scene.titleByEra[key]) return scene.titleByEra[key]!
+  return scene.titleHe
 }
 
 /** whether this door is drawn at all in this chapter — `undefined` is always */
@@ -307,12 +490,16 @@ export function blockedFor(exit: ExitDef, chapter: string): string | null {
 
 /** the painting under this room in this chapter */
 export function artFor(scene: SceneDef, chapter: string): string {
+  const paint = scene.repaints?.find((r) => r.in(chapter))
+  if (paint) return paint.art
   if (scene.artByEra) for (const key of eraKeys(chapter)) if (scene.artByEra[key]) return scene.artByEra[key]!
   return scene.art
 }
 
 /** the arrival card this room plays in this chapter, if any */
 export function arrivalFor(scene: SceneDef, chapter: string): { art: string; ms: number; flag: string } | null {
+  const paint = scene.repaints?.find((r) => r.in(chapter))
+  if (paint) return paint.arrival ?? null
   if (scene.arrivalByEra) for (const key of eraKeys(chapter)) if (key in scene.arrivalByEra) return scene.arrivalByEra[key] ?? null
   return scene.arrival ?? null
 }
@@ -440,8 +627,13 @@ const GATE7_CLEAR = [
  * same trick the fan shop uses. So the broom is against the wall in Ussishkin from 1984
  * and the bucket appears in the car park in 1990, and neither of them is typed twice.
  */
+/** the chapters an activity is open in (`activities.ts`), less the ones a room is already full in */
+function actEra(id: ActivityId, except: readonly string[] = []): string[] {
+  return activityChapters(ACTIVITY[id]).filter((chapter) => !except.includes(chapter))
+}
+
 function gigSpots(where: string) {
-  return GIGS.filter((gig) => gig.where === where).flatMap((gig) =>
+  return GIGS.filter((gig) => gig.where === where && gig.spot !== false).flatMap((gig) =>
     gigChapters(gig).map((chapter) => ({
       id: `${gig.id}-${chapter}`,
       era: chapter,
@@ -457,8 +649,16 @@ function gigSpots(where: string) {
        * (`gigs.ts` → `offeredIn`, raised as a flag when the room is built). The two
        * contests carry no offer flag and are always there, because a ball in a yard does
        * not need anybody's permission.
+       *
+       * A row that is not in the week's deal at all (`rotates: false` — a friend's dare, the
+       * shop's order, the bottles after the whistle) is there whenever its own `when` says,
+       * and never behind an offer flag nobody raises (21.9.2026).
        */
-      ...(isPaid(gig) ? { when: { flag: offerFlag(gig) } as Condition } : {}),
+      ...(isPaid(gig) && gig.rotates !== false
+        ? { when: (gig.when ? { all: [{ flag: offerFlag(gig) }, gig.when] } : { flag: offerFlag(gig) }) as Condition }
+        : gig.when
+          ? { when: gig.when }
+          : {}),
     })),
   )
 }
@@ -489,7 +689,29 @@ const ADULT_CHAPTERS = [
   '1999-cup',
   '2000-title',
   '2000-double',
+  // שלב ג׳ — תסריט 2000–2026. אותו היגיון בדיוק: הוא בן 22 ומעלה בכולם.
+  '2000-bridge',
+  '2002-europe',
+  '2006-home',
+  '2007-table',
+  '2007-registered',
+  '2007-key',
+  '2009-up',
 ] as const
+
+/**
+ * שלושת פרקי הייסוד — **וזו רשימה שהמבנה של הפסגה כופה, לא טעם.**
+ *
+ * `USSISHKIN_FOUNDER.apex` מבקש שלוש ראיות `founding_proof` ב**שלושה פרקים שונים**
+ * בתוך חלון 2007. `route-proof-found` היא השיחה היחידה שמנפיקה ראיה כזאת, ועד
+ * 21.9.2026 היא לא הייתה מונחת בשום חדר — הפסגה היחידה במשחק שהייתה בלתי-אפשרית
+ * בהוכחה, ונמנתה בשמה ב-`tests/life-routes.test.ts` (כלל 78).
+ *
+ * לכן **נקודה חמה אחת בכל פרק**, ולא שלוש באותו חדר: שלוש באותו פרק היו נראות כמו
+ * שלוש ראיות ונספרות כאחת, כלומר שחקן שלקח את כולן היה עומד מול פסגה נעולה בלי
+ * להבין למה.
+ */
+const FOUNDING_CHAPTERS = ['2007-table', '2007-registered', '2007-key'] as const
 
 /**
  * הפעולות הקטנות — השלב שלפני המשימה, ולמה הוא היה חסר.
@@ -544,8 +766,25 @@ const SCENES: SceneDef[] = [
     stuckHe: 'המפתח במגירה, בקצה שמאל. משם גם הדלת לסלון.',
     stuckByEra: { '1990': 'הדלת לסלון — משמאל, ומשם למטבח.', '1991': 'המחברת על השולחן. הדלת לסלון — משמאל.' },
     spawns: { start: { x: 0.3, y: 0.93, facing: 'left' }, fromHome: { x: 0.14, y: 0.9, facing: 'right' } },
+    // 2000 on: the room of a man of twenty-two, measured on its own painting (`rooms2000.ts`)
+    repaints: [BEDROOM_2000],
     actors: [],
     hotspots: [
+      /**
+       * התיק שלי — what he carries, and it is the life's own card (`act-bedroom-bag` opens the
+       * profile, ☰'s "who you are"), not a site's card. Between the drawers (0.09–0.25) and
+       * the bed (0.38–0.52), where a schoolbag is dropped. Childhood only: the bag is a boy's.
+       */
+      {
+        id: 'my-bag',
+        era: actEra('bedroom-bag'),
+        x: 0.31,
+        y: 0.92,
+        w: 0.06,
+        act: 'act-bedroom-bag',
+        verb: 'look',
+        labelHe: 'התיק שלי',
+      },
       { id: 'tin-a4', era: 'a4-shirt', x: 0.45, y: 0.92, w: 0.14, act: 'tin-a4', verb: 'look', labelHe: 'הפחית מתחת למיטה' },
       { id: 'shirt-a5', era: 'a5-first', x: 0.63, y: 0.9, w: 0.1, act: 'shirt-a5', verb: 'look', labelHe: 'החולצה על הכיסא', priority: 3 },
       /**
@@ -645,21 +884,42 @@ const SCENES: SceneDef[] = [
       // It is NOT given priority — the door beside it must still win in the doorway, or
       // the way out of the first room disappears behind the furniture.
       { id: 'desk', x: 0.17, y: 0.9, w: 0.16, act: 'desk', verb: 'look', labelHe: 'המגירה' },
+      /**
+       * **הקופסה האדומה — חפץ בחדר, מ-21.9.2026.** עד היום הנקודה נקראה "הקופסה" ומה
+       * שעמד עליה היה צעיף (`propScarfRed` על פינת השידה), והיא הייתה קיימת רק ב-1986.
+       * כל פרק בחיים נגמר ב*"שמת את זה בקופסה האדומה"*, אז הקופסה עומדת בחדר בכל שנה
+       * שיש בו חדר, במקום שהתסריט אומר:
+       *
+       *   · שלב א׳ ושנות התשעים — **מתחת למיטה** (*"קופסת פח מתחת למיטה"*, המעבר של
+       *     1990): על הרצפה, משוכה חצי החוצה מתחת לקצה המיטה ליד השידה. הרצפה מתחילה
+       *     ב-0.745 והמסילה התחתונה של המיטה נגמרת ב-0.72; כ-25 ס״מ בקנה המידה של 0.765.
+       *   · משנת 2000 — **על המדף** (B01: *"החדר שלך. הקופסה על המדף."*), בקצה הימני של
+       *     המדף שמעל המיטה (הקרש ב-0.305, המדף נגמר ב-0.705).
+       *
+       * הנגיעה פותחת את הקופסה עצמה (`RedBoxSheet`), עם כל מה שבה.
+       */
       {
         id: 'redbox',
-        x: 0.89,
-        y: 0.95,
-        w: 0.08,
+        era: ['A', '1990s'],
+        x: 0.63,
+        y: 0.9,
+        w: 0.1,
         act: 'redbox',
         verb: 'look',
-        labelHe: 'הקופסה',
-        // `propScarfRed`, not `propScarf`. The seven props this game shipped with were
-        // cut from a concept board and every one of them arrived with a piece of
-        // somebody else in the frame — the old scarf carries a red fragment of a
-        // figure beside it. The September sheet drew the objects themselves.
-        // Draped over the corner of the bedside cabinet in the 4.9 painting, reached
-        // from the floor beside it.
-        prop: { key: 'propScarfRed', size: 0.085, at: { x: 0.905, y: 0.69 } },
+        labelHe: 'הקופסה האדומה',
+        prop: { key: 'propRedBox', size: 0.05, at: { x: 0.63, y: 0.764 } },
+      },
+      {
+        id: 'redbox-shelf',
+        // while he lives here (2000–2012); from 2013 the box is on his own bookcase
+        era: chaptersWhere(livesWithParents),
+        x: 0.685,
+        y: 0.9,
+        w: 0.09,
+        act: 'redbox-shelf',
+        verb: 'look',
+        labelHe: 'הקופסה האדומה',
+        prop: { key: 'propRedBox', size: 0.041, at: { x: 0.684, y: 0.305 } },
       },
     ],
     exits: [
@@ -685,6 +945,10 @@ const SCENES: SceneDef[] = [
   {
     id: 'home',
     titleHe: 'הסלון',
+    // מ-2013 יש לפוגי בית משלו; בערבים שהסלון הזה הוא שוב של ההורים — הכותרת אומרת את זה
+    titleByEra: Object.fromEntries(PARENTS_AFTER_2013.map((id) => [id, 'אצל ההורים'])),
+    // ...ובשאר הפרקים מ-2013 זה הבית שלו, על הציור שלו (`homes.ts`, `rooms2000.ts`)
+    repaints: [HOME_OWN],
     art: 'living',
     band: { far: 0.73, near: 0.97 },
     size: { far: 0.33, near: 0.43 },
@@ -706,15 +970,18 @@ const SCENES: SceneDef[] = [
       'a4-shirt': 'אבא בכורסה עם העיתון. הדלת לרחוב — שמאל.',
       'a7-week': 'אבא בכורסה. הדלת לרחוב — שמאל.',
     },
-    // The coffee table is the room's own foreground: walk up to the sofa and you pass
-    // behind it. One separated object is what turns a painting into a place.
-    layers: [{ art: 'livingTable', x: 0.3659, y: 0.5625, w: 0.1751, depth: 0.79 }],
+    // (21.9.2026) `livingTable` — a coffee table with an ashtray, cut from the living room
+    // painted BEFORE this one — stood here as a layer at 0.37–0.54, in front of the kitchen
+    // door, while this painting's own coffee table stands at 0.55–0.75 behind it: two
+    // tables, one of them floating. The room has one table, and it is the painted one.
+    layers: [],
     spawns: {
       // Every one of these sits CLEAR of the door it came through. A spawn inside its
       // own exit zone walks the player straight back where they came from, forever —
       // `tests/life.test.ts` fails the build on it now, because it happened here.
       fromBedroom: { x: 0.77, y: 0.9, facing: 'left' },
-      fromStreet: { x: 0.14, y: 0.93, facing: 'right' },
+      // clear of the door (0–0.075) and as far left of Kobi's armchair (0.11–0.27) as that allows
+      fromStreet: { x: 0.095, y: 0.93, facing: 'right' },
       fromKitchen: { x: 0.35, y: 0.87, facing: 'right' },
       // Stage B mornings begin in the middle of the room, facing the table.
       start: { x: 0.5, y: 0.9, facing: 'left' },
@@ -722,10 +989,10 @@ const SCENES: SceneDef[] = [
     actors: [
       // ---- שלב א׳, הימים שלפני השבת (chapterStageA.ts) ----
       { id: 'rachel-a2', era: 'a2-alley', figure: 'rachel', x: 0.3, y: 0.9, size: 0.42, nameHe: 'רחל', talk: 'rachel-a2', sway: 0.004 },
-      { id: 'kobi-a4', era: 'a4-shirt', figure: 'kobi-chair', x: 0.63, y: 0.78, size: 0.34, nameHe: 'קובי', talk: 'kobi-a4' },
+      { id: 'kobi-a4', era: 'a4-shirt', figure: 'kobi-chair', x: 0.19, y: 0.74, size: 0.34, nameHe: 'קובי', talk: 'kobi-a4' },
       { id: 'rachel-a4', era: 'a4-shirt', figure: 'rachel', x: 0.3, y: 0.9, size: 0.42, nameHe: 'רחל', talk: 'rachel-a4', sway: 0.004 },
       { id: 'rachel-a6', era: 'a6-radio', figure: 'rachel-tray', x: 0.3, y: 0.9, size: 0.42, nameHe: 'רחל', talk: 'rachel-a6', sway: 0.004 },
-      { id: 'kobi-a7', era: 'a7-week', figure: 'kobi-chair', x: 0.63, y: 0.78, size: 0.34, nameHe: 'קובי', talk: 'kobi-a7' },
+      { id: 'kobi-a7', era: 'a7-week', figure: 'kobi-chair', x: 0.19, y: 0.74, size: 0.34, nameHe: 'קובי', talk: 'kobi-a7' },
       { id: 'rachel-a7', era: 'a7-week', figure: 'rachel', x: 0.3, y: 0.9, size: 0.42, nameHe: 'רחל', talk: 'rachel-a7', sway: 0.004 },
       {
         id: 'kobi',
@@ -733,8 +1000,11 @@ const SCENES: SceneDef[] = [
         // drawn for and the reason the living room has somebody in it rather than a
         // cut-out standing on a rug.
         figure: 'kobi-chair',
-        x: 0.63,
-        y: 0.78,
+        // (21.9.2026) IN the painted armchair (0.11–0.27, front skirt on 0.73): the figure is
+        // drawn with its own chair, and at 0.63 it put a second armchair in the middle of
+        // the room, in front of the sofa. Drawn over the painted one, it IS the armchair.
+        x: 0.19,
+        y: 0.74,
         size: 0.34,
         nameHe: 'קובי',
         talk: 'kobi-morning',
@@ -748,7 +1018,9 @@ const SCENES: SceneDef[] = [
       {
         id: 'rachel-1991',
         era: '1991',
-        figure: 'rachel90-arms',
+        // (21.9.2026) `rachel90-arms`, `-hips` and `-door` are cut through her forehead on the
+        // sheet — a flat line where her hair should be. The poses with her whole head:
+        figure: 'rachel90',
         x: 0.6,
         y: 0.84,
         size: 0.45,
@@ -756,12 +1028,18 @@ const SCENES: SceneDef[] = [
         talk: 'rachel-1991',
         sway: 0.004,
       },
+      /**
+       * In HIS armchair, not in front of it (21.9.2026). The chair is painted at 0.11–0.27
+       * with its front skirt on 0.73 and its seat at ~0.60; a seated body with its feet on
+       * 0.74 has its hips at 0.61 — on the cushion. At 0.28/0.80 he sat on the air a step
+       * in front of the chair, for eight chapters.
+       */
       {
         id: 'kobi-1991',
         era: '1991',
         figure: 'kobi90-sitA',
-        x: 0.28,
-        y: 0.8,
+        x: 0.19,
+        y: 0.74,
         size: 0.36,
         nameHe: 'קובי',
         talk: 'kobi-1991',
@@ -785,8 +1063,8 @@ const SCENES: SceneDef[] = [
         id: 'kobi-1993',
         era: '1993-cup',
         figure: 'kobi90-paper',
-        x: 0.28,
-        y: 0.8,
+        x: 0.19,
+        y: 0.74,
         size: 0.4,
         nameHe: 'קובי',
         talk: 'kobi-1993',
@@ -795,7 +1073,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'rachel-army',
         era: '1996-army',
-        figure: 'rachel90-hips',
+        figure: 'rachel90-3q',
         x: 0.6,
         y: 0.84,
         size: 0.426,
@@ -807,16 +1085,16 @@ const SCENES: SceneDef[] = [
         id: 'kobi-army',
         era: '1996-army',
         figure: 'kobi90-paper',
-        x: 0.28,
-        y: 0.8,
+        x: 0.19,
+        y: 0.74,
         size: 0.4,
         nameHe: 'קובי',
         talk: 'kobi-army',
         sway: 0.002,
       },
       // 2.5.1998 — the careful father; 1999 and 2000 — the father with the old scarf
-      { id: 'kobi-laces', era: '1998-laces', figure: 'kobi90-paper', x: 0.28, y: 0.8, size: 0.4, nameHe: 'קובי', talk: 'kobi-laces', sway: 0.002 },
-      { id: 'rachel-laces', era: '1998-laces', figure: 'rachel90-watch', x: 0.6, y: 0.84, size: 0.426, nameHe: 'רחל', talk: 'rachel-1993', sway: 0.004 },
+      { id: 'kobi-laces', era: '1998-laces', figure: 'kobi90-paper', x: 0.19, y: 0.74, size: 0.4, nameHe: 'קובי', talk: 'kobi-laces', sway: 0.002 },
+      { id: 'rachel-laces', era: '1998-laces', figure: 'rachel90-watch', x: 0.6, y: 0.84, size: 0.426, nameHe: 'רחל', talk: 'rachel-laces', sway: 0.004 },
       { id: 'kobi-cup99', era: '1999-cup', figure: 'kobi90-bag', x: 0.28, y: 0.82, size: 0.42, nameHe: 'קובי', talk: 'kobi-cup99', sway: 0.002 },
       { id: 'kobi-title', era: '2000-title', figure: 'kobi90-stand', x: 0.28, y: 0.82, size: 0.42, nameHe: 'קובי', talk: 'kobi-title', sway: 0.002 },
       { id: 'kobi-double', era: '2000-double', figure: 'kobi90-cheer', x: 0.28, y: 0.82, size: 0.42, nameHe: 'קובי', talk: 'kobi-double', sway: 0.002 },
@@ -835,7 +1113,74 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
-      { id: 'radio', x: 0.13, y: 0.78, w: 0.1, act: 'radio', verb: 'watch', labelHe: 'הטלוויזיה' },
+      /**
+       * הטובים ביותר, עם אבא — the paper Kobi folds to make room (`act-lounge-xi`). Only in the
+       * chapters he sits in this room, and only while he is there: in 1986 until he leaves
+       * for the ground, in 1991 once he is home. Beside his chair (0.19) or, from 1999, beside
+       * where he stands (0.28).
+       */
+      {
+        id: 'xi-kobi',
+        era: actEra('lounge-xi').filter((chapter) => ['1993-cup', '1996-army', '1998-laces'].includes(chapter)),
+        x: 0.31,
+        y: 0.8,
+        w: 0.06,
+        act: 'act-lounge-xi',
+        verb: 'talk',
+        labelHe: 'הטובים ביותר, עם אבא',
+      },
+      {
+        id: 'xi-kobi-1986',
+        era: actEra('lounge-xi').filter((chapter) => chapter === '1986'),
+        x: 0.31,
+        y: 0.8,
+        w: 0.06,
+        act: 'act-lounge-xi',
+        verb: 'talk',
+        labelHe: 'הטובים ביותר, עם אבא',
+        when: { beforeMinute: KOBI_LEAVES },
+      },
+      {
+        id: 'xi-kobi-1991',
+        era: actEra('lounge-xi').filter((chapter) => chapter === '1991'),
+        x: 0.31,
+        y: 0.8,
+        w: 0.06,
+        act: 'act-lounge-xi',
+        verb: 'talk',
+        labelHe: 'הטובים ביותר, עם אבא',
+        when: { afterMinute: 17 * 60 + 40 },
+      },
+      {
+        id: 'xi-kobi-2000',
+        era: actEra('lounge-xi').filter((chapter) => ['1999-cup', '2000-title', '2000-double'].includes(chapter)),
+        x: 0.37,
+        y: 0.84,
+        w: 0.06,
+        act: 'act-lounge-xi',
+        verb: 'talk',
+        labelHe: 'הטובים ביותר, עם אבא',
+      },
+      /**
+       * החפצים שהתסריט נוקב בהם, על הרהיטים שהציור כבר מצייר (21.9.2026) — מהגיליונות
+       * של מאור מ-20.9 (`ingest-objects-2026-09-21.py`). השולחן הנמוך: מכסה 0.60, רגליים
+       * 0.72, מטר אחד בעומק הזה הוא 0.25 מהגובה; השטיח מול הספה הוא הרצפה של המזוודה.
+       */
+      // X01 — "מה נכנס למזוודה": על הרצפה, בקצה הספה — לא בדרך לדלת
+      { id: 'suitcase-x01', era: '2021-suitcase', x: 0.8, y: 0.84, w: 0.07, act: 'suitcase-x01', verb: 'look', labelHe: 'המזוודה', prop: { key: 'propSuitcase', size: 0.148, at: { x: 0.8, y: 0.785 } } },
+      // A01 — "השלט אצלו", ו"איזה ספל שלך": על השולחן הנמוך, בצד שלו
+      { id: 'remote-a01', era: '2019-armchair', x: 0.6, y: 0.8, w: 0.07, act: 'remote-a01', verb: 'look', labelHe: 'השלט', prop: { key: 'propRemote', size: 0.034, at: { x: 0.585, y: 0.606 } } },
+      { id: 'mug-a01', era: '2019-armchair', x: 0.66, y: 0.8, w: 0.05, act: 'mug-a01', verb: 'look', labelHe: 'הספלים', prop: { key: 'propMug', size: 0.026, at: { x: 0.64, y: 0.606 } } },
+      // F01 — "כמה כרטיסים?" "לנו."
+      { id: 'tickets-f01', era: '2026-plan', x: 0.68, y: 0.8, w: 0.07, act: 'tickets-f01', verb: 'look', labelHe: 'הכרטיסים', prop: { key: 'propTicketsPair', size: 0.022, at: { x: 0.67, y: 0.606 } }, when: { flag: 'f:money' } },
+      /**
+       * **הרדיו על השידה — 21.9.2026.** השיחה אומרת *"הרדיו על השידה, בין מפית לתמונה"*,
+       * קובי *"מנמיך את הרדיו"*, והנקודה נקראה "הטלוויזיה" ולא היה על השידה שום רדיו —
+       * רק הטלוויזיה שבציור. עכשיו הוא עומד על המשטח משמאל לטלוויזיה (0.125–0.18 פנוי מעל
+       * גב הכורסה, שמגיע ל-0.46), בגובה של רדיו אמיתי: `metre` בקו הרחוק הוא 0.254 לכל
+       * מטר, ורדיו כזה הוא כ-18 ס״מ.
+       */
+      { id: 'radio', x: 0.155, y: 0.78, w: 0.1, act: 'radio', verb: 'look', labelHe: 'הרדיו', prop: { key: 'propRadio', size: 0.046, at: { x: 0.153, y: 0.447 } } },
       { id: 'photo', x: 0.42, y: 0.76, w: 0.08, act: 'family-photo', verb: 'look', labelHe: 'התמונות' },
       { id: 'table', x: 0.45, y: 0.84, w: 0.1, act: 'coffee-table', verb: 'look', labelHe: 'השולחן' },
       /**
@@ -947,6 +1292,9 @@ const SCENES: SceneDef[] = [
     size: { far: 0.24, near: 0.38 },
     metre: 0.2923,
     ambience: 'kitchen',
+    // E03 (2002): the trip is packed before it is argued about — the bag by the wall, right
+    // of the table (0.45 m at a floor where a metre is 0.2 of the frame)
+    layers: [{ art: 'propBackpack', era: '2002-europe', x: 0.935, y: 0.73, w: 0.046, depth: 0.73, foot: true }],
     stuckHe: 'חזרה לסלון — משמאל.',
     stuckByEra: {
       '1990': 'הטבלה על השולחן, אבא לידה. חזרה לסלון — משמאל.',
@@ -996,8 +1344,31 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
+      /**
+       * ערימת העיתונים — the pile of old papers under the counter, tied with string
+       * (`act-kitchen-archive`): the archive, cut to what a boy could have found at home,
+       * dated before the year. At the counter's end, clear of the table's corner of the room
+       * (0.7–0.95), where every chapter's own things are.
+       */
+      {
+        id: 'old-papers',
+        era: actEra('kitchen-archive'),
+        x: 0.3,
+        y: 0.72,
+        w: 0.06,
+        act: 'act-kitchen-archive',
+        verb: 'look',
+        labelHe: 'ערימת העיתונים הישנים',
+      },
+      // (21.9.2026) על השולחן — סקאלת השולחן עצמו: 0.75 מ׳ מ-0.46 עד 0.69, כלומר 0.307 לכל מטר
+      // E03 — "דרכון בפעם הראשונה"
+      { id: 'passport-e03', era: '2002-europe', x: 0.8, y: 0.8, w: 0.06, act: 'passport-e03', verb: 'look', labelHe: 'הדרכון', prop: { key: 'propPassport', size: 0.034, at: { x: 0.878, y: 0.464 } } },
+      // C05 — קרן בטלפון (`c10-call`); הטלפון על השולחן, לא ביד של אף אחד
+      { id: 'phone-c05', era: '2010-anthem', x: 0.8, y: 0.8, w: 0.06, act: 'phone-c05', verb: 'look', labelHe: 'הטלפון', prop: { key: 'propPhone2010', size: 0.03, at: { x: 0.82, y: 0.464 } } },
+      // A02 — "מצאתי את התמונה": האלבום פתוח על השולחן
+      { id: 'album-a02', era: '2019-armchair', x: 0.82, y: 0.8, w: 0.07, act: 'album-a02', verb: 'look', labelHe: 'האלבום', prop: { key: 'propAlbum', size: 0.03, at: { x: 0.845, y: 0.464 } } },
       ...gigSpots('kitchen'),
-      { id: 'radio-a6', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
+      { id: 'radio-a6', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at } },
       // On the floor at the end of the run of cupboards, which is where a crate of empties
       // lives in a flat that takes them back for the deposit.
       { id: 'crate', x: 0.3, y: 0.92, w: 0.11, act: 'bottles', verb: 'take', labelHe: 'הבקבוקים' },
@@ -1009,8 +1380,8 @@ const SCENES: SceneDef[] = [
       { id: 'chair-1990', era: '1990', x: 0.7, y: 0.8, w: 0.06, act: 'pano:panoKitchen90', verb: 'sit', labelHe: 'הכיסא ליד השולחן' },
       // ON the table, beside the paper: drawn on the oilcloth, reached from the floor in
       // front of it.
-      { id: 'radio-1990', era: '1990', x: 0.93, y: 0.78, w: 0.05, act: 'radio-table-1990', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } } },
-      { id: 'radio-galil', era: '1993-galil', x: 0.93, y: 0.78, w: 0.05, act: 'g4-radio', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: 0.032, at: { x: 0.855, y: 0.485 } }, when: { flag: 'life:galil:d4' } },
+      { id: 'radio-1990', era: '1990', x: 0.93, y: 0.78, w: 0.05, act: 'radio-table-1990', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at } },
+      { id: 'radio-galil', era: '1993-galil', x: 0.93, y: 0.78, w: 0.05, act: 'g4-radio', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at }, when: { flag: 'life:galil:d4' } },
       // 1991: the pad and the pencil Rachel writes her lists with — and the only way out
       // of a "no" that is not a lie (§32).
       { id: 'pad-1991', era: '1991', x: 0.86, y: 0.82, w: 0.08, act: 'kitchen-note-1991', verb: 'look', labelHe: 'הפנקס' },
@@ -1080,24 +1451,13 @@ const SCENES: SceneDef[] = [
       // kerb belongs to somebody who has not left yet, so it is gone once Kobi goes and
       // the street empties eastward. A player who crosses this street at noon and again
       // at four is looking at two different afternoons, and never reads a word about it.
-      { art: 'propBunting', x: 0.245, y: 0.1, w: 0.62, depth: 0.1 },
-      { art: 'propBunting', x: 0.455, y: 0.212, w: 0.56, depth: 0.11, flip: true, alpha: 0.93 },
-      // hung over the wall the graffiti is on, at the height a person hangs a thing
+      // (21.9.2026) The pennants, the planter, the bin and the parked car that stood here
+      // were pen-and-ink engravings from the September props sheet — a drawn car at the
+      // kerb of a photographed street. Removed; the match-day street keeps its flag.
       { art: 'propBanner', x: 0.598, y: 0.398, w: 0.138, depth: 0.66 },
-      { art: 'propPlanter', x: 0.552, y: 0.736, w: 0.05, depth: 0.736, foot: true },
-      { art: 'propBin', x: 0.352, y: 0.742, w: 0.021, depth: 0.742, foot: true },
-      {
-        // West of the city-centre turning, clear of the school gate at 0.786. It used to
-        // stand at 0.845 — which since 6.9.2026 is the doorway the school gate is drawn
-        // on, and a car parked across a door is a door nobody finds.
-        art: 'propCar',
-        x: 0.66,
-        y: 0.786,
-        w: 0.1,
-        depth: 0.786,
-        foot: true,
-        when: { beforeMinute: KOBI_LEAVES },
-      },
+      // I02 (2010-friends) — Lina's banner, blank, on its two poles on the pavement between
+      // the kiosk and the pitch door: 1.6 m at a floor where a metre is 0.18 of the frame
+      { art: 'propBannerBlank', era: '2010-friends', x: 0.35, y: 0.775, w: 0.113, depth: 0.775, foot: true },
 
       // In front of everybody: the pole, the pillar, the doorway column, the canopy.
       { art: 'streetFore', x: 0, y: 0, w: 1, depth: 0.995 },
@@ -1198,12 +1558,14 @@ const SCENES: SceneDef[] = [
         talk: 'ofir-afternoon-1991',
         sway: 0.005,
       },
-      // 19.4.1993 — the street on the afternoon of the cup final. Efi and Limor have no
-      // grown figure yet (KNOWN-GAPS); they stand in the nineties' clothes until they do.
+      // 19.4.1993 — the street on the afternoon of the cup final. Efi is four years older
+      // than Pogi (`castCards.ts`: "גדול ממך בארבע שנים") — nineteen here, seventeen in
+      // 1991 — and stands on his own grown body; until 21.9.2026 it was `youngA2`, a boy of
+      // thirteen seen from behind.
       {
         id: 'efi-1993',
         era: '1993-cup',
-        figure: 'youngA2',
+        figure: 'efi96-3q',
         x: 0.32,
         y: 0.8,
         size: 0.262,
@@ -1260,10 +1622,10 @@ const SCENES: SceneDef[] = [
       { id: 'amit-laces', era: '1998-laces', figure: 'amit90-point', x: 0.63, y: 0.8, size: 0.283, nameHe: 'עמית', talk: 'ofir-laces', flip: true },
       { id: 'soko-laces', era: '1998-laces', figure: 'soko', x: 0.3, y: 0.8, size: 0.283, nameHe: 'סוקו', talk: 'soko-laces' },
       { id: 'liron-cup99', era: '1999-cup', figure: 'adultB2', x: 0.3, y: 0.8, size: 0.283, nameHe: 'לירון', talk: 'liron-cup99' },
-      { id: 'michel-cup99', era: '1999-cup', figure: 'michel96-walk1', x: 0.35, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-cup99' },
+      { id: 'michel-cup99', era: '1999-cup', figure: 'michel99-3q', x: 0.35, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-cup99' },
       { id: 'ofir-cup99', era: '1999-cup', figure: 'ofir90-arms', x: 0.58, y: 0.79, size: 0.275, nameHe: 'אופיר', talk: 'ofir-cup99' },
       { id: 'efi-cup99', era: '1999-cup', figure: 'efi96-3q', x: 0.72, y: 0.8, size: 0.262, nameHe: 'אפי', talk: 'efi-cup99', flip: true },
-      { id: 'michel-title', era: '2000-title', figure: 'michel96-walk3', x: 0.35, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-title' },
+      { id: 'michel-title', era: '2000-title', figure: 'michel99-3q', x: 0.35, y: 0.8, size: 0.283, nameHe: 'מישל', talk: 'michel-title' },
       { id: 'efi-title', era: '2000-title', figure: 'efi96-speak', x: 0.72, y: 0.8, size: 0.262, nameHe: 'אפי', talk: 'efi-title', flip: true },
       // ---- 1990: the same street, older children ----
       {
@@ -1307,7 +1669,9 @@ const SCENES: SceneDef[] = [
         // Director's Cut §43: Barry's long-term seeds must pay off across decades).
         id: 'veteran',
         era: '1990',
-        figure: 'adultA3',
+        // Barry's own body (`barry96`), as his plate (`faceBarry`) has always been — not a
+        // stranger from behind (`adultA3`) who spoke with Barry's face
+        figure: 'barry96-3q',
         x: 0.66,
         y: 0.8,
         size: 0.32,
@@ -1318,6 +1682,22 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
+      /**
+       * השכנה עם השקיות — about every other chapter (`neighbourAsks`, raised when the room is
+       * built), by the entrance, between Rafi's errands (0.4) and the cars (0.58). A favour:
+       * money, a plate or a favour owed, off the save's seed (`giftOf`).
+       */
+      {
+        id: 'neighbour-bags',
+        era: actEra('neighbour'),
+        x: 0.49,
+        y: 0.87,
+        w: 0.06,
+        act: 'act-neighbour',
+        verb: 'look',
+        labelHe: 'השכנה עם השקיות',
+        when: { flag: 'act:offer:neighbour' },
+      },
       /**
        * העבודות של הרחוב — 6.9.2026: they were being offered from the KITCHEN.
        *
@@ -1520,8 +1900,14 @@ const SCENES: SceneDef[] = [
        * room he can never choose to go back to.
        */
       {
+        // 2006 נוספה ב-21.9.2026: `H04` הוא *"נקודת מפגש לנסיעה"*, וזו התחנה. הדלת
+        // הזאת היא הדרך היחידה לשם, ו-`life:worldlines` דיווח על `ROOM_ORPHANED`
+        // בעשרה קווי חיים ברגע שהביט נכתב ולפני שהדלת נפתחה — בדיוק מה שהוא קיים
+        // בשבילו (כלל 75: ביט בחדר שאי אפשר להגיע אליו לא ירוץ לעולם).
+        // 2017-distance — `K03` עברה לכאן מבלומפילד הסגור: ב-2017 משחק בית הוא אוטובוס.
         id: 'busStation',
-        era: '1996-army',
+        // 2023/2025 — מי שגר שם חוזר לדירה דרך התחנה והנמל; 2026 — הרציף של הסיום, גם בחזרה
+        era: ['1996-army', '2006-home', '2017-distance', '2023-abroad', '2025-abroad', '2026-finale'],
         x: 0.872,
         y: 0.705,
         w: 0.06,
@@ -1555,6 +1941,65 @@ const SCENES: SceneDef[] = [
         to: 'hatikva',
         spawn: 'start',
         labelHe: 'לשכונת התקווה',
+        light: { x: 0.876, y: 0.52, w: 0.06, h: 0.38, tone: 'daylight' },
+        dwellMs: 900,
+      },
+      /**
+       * ------------------------------------------ היציאה מהשכונה, 2007–2025 ----
+       *
+       * אותו פתח (0.872) שדרכו יוצאים לתחנה, לרמת גן ולשכונת התקווה — **הדרך שבה פרק
+       * יוצא מהשכונה**, ובכל פרק היא מובילה למקום אחר. החדרים שנבנו מהציורים של 21.9.2026
+       * מקבלים אותו בשנים שלהם; אף שנה לא מחזיקה שניים באותו פתח (`tests/life-rooms-2000`).
+       */
+      {
+        id: 'hallNew',
+        era: ['2007-key', '2009-up'],
+        x: 0.872,
+        y: 0.705,
+        w: 0.06,
+        h: 0.155,
+        to: 'hall-new',
+        spawn: 'start',
+        labelHe: 'לאולם האימונים',
+        light: { x: 0.876, y: 0.52, w: 0.06, h: 0.38, tone: 'daylight' },
+        dwellMs: 900,
+      },
+      {
+        id: 'driveIn',
+        era: '2015-newhall',
+        x: 0.872,
+        y: 0.705,
+        w: 0.06,
+        h: 0.155,
+        to: 'drive-in',
+        spawn: 'start',
+        labelHe: 'לדרייב אין',
+        light: { x: 0.876, y: 0.52, w: 0.06, h: 0.38, tone: 'daylight' },
+        dwellMs: 900,
+      },
+      {
+        id: 'community',
+        era: ['2007-table', '2007-registered', '2012-five', '2016-crisis', '2023-tournament'],
+        x: 0.872,
+        y: 0.705,
+        w: 0.06,
+        h: 0.155,
+        to: 'community-room',
+        spawn: 'start',
+        labelHe: 'לחדר הקהילה',
+        light: { x: 0.876, y: 0.52, w: 0.06, h: 0.38, tone: 'daylight' },
+        dwellMs: 900,
+      },
+      {
+        id: 'office',
+        era: '2025-owner',
+        x: 0.872,
+        y: 0.705,
+        w: 0.06,
+        h: 0.155,
+        to: 'office',
+        spawn: 'start',
+        labelHe: 'למשרד',
         light: { x: 0.876, y: 0.52, w: 0.06, h: 0.38, tone: 'daylight' },
         dwellMs: 900,
       },
@@ -1616,12 +2061,10 @@ const SCENES: SceneDef[] = [
       { art: 'propBottleFull', era: '1980s', x: 0.445, y: 0.838, w: 0.019, depth: 0.838, foot: true },
       { art: 'propBottle', era: '1990s', x: 0.385, y: 0.835, w: 0.019, depth: 0.835, foot: true },
       { art: 'propBottleFull', era: '1990s', x: 0.415, y: 0.831, w: 0.019, depth: 0.831, foot: true },
-      // Against the LEFT wall, and BEHIND everyone who works here: a stand a customer
-      // walks round is dressing, a stand a customer walks behind is a wall. It was on the
-      // right for an hour and it stood in the doorway, which is the one place in a shop a
-      // newspaper rack is never put.
-      { art: 'propNewsRack', era: '1990s', x: 0.105, y: 0.815, w: 0.185, depth: 0.815, foot: true },
-      { art: 'propNewsRack', era: '2000s', x: 0.105, y: 0.815, w: 0.185, depth: 0.815, foot: true },
+      // (21.9.2026) The newspaper rack that stood here in the 1990s and 2000s is gone: it
+      // carried The Sun — "HASTA LA VISTA TAXMAN", "BRITAIN BOUNCES BACK AT LAST" — in a
+      // kiosk in south Tel Aviv. The papers of this kiosk are the ones painted on its own
+      // counter, in Hebrew.
     ],
     ambience: 'day',
     stuckHe: 'הדלפק מלפנים. לצאת — ימינה.',
@@ -1684,7 +2127,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'shopkeeper-1993',
         era: '1993-cup',
-        figure: 'oldMan-lean',
+        figure: 'oldMan-arms',
         x: 0.5,
         y: 0.8,
         size: 0.535,
@@ -1693,26 +2136,28 @@ const SCENES: SceneDef[] = [
         sway: 0.003,
       },
       // the winter of 1996/97 at the kiosk: the court sits again, with a lawyer in it
-      { id: 'shopkeeper-army', era: '1996-army', figure: 'oldMan-wipe', x: 0.5, y: 0.8, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'a4-winter', sway: 0.003 },
+      { id: 'shopkeeper-army', era: '1996-army', figure: 'oldMan-3q', x: 0.5, y: 0.8, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'a4-winter', sway: 0.003 },
       { id: 'amit-army', era: '1996-army', figure: 'amit90-point', x: 0.3, y: 0.84, size: 0.544, nameHe: 'עמית', talk: 'a4-winter', when: { flag: 'life:army:d4' } },
-      { id: 'freddy-army', era: '1996-army', figure: 'freddy-glass', x: 0.72, y: 0.85, size: 0.551, nameHe: 'פרדי', talk: 'a4-freddy', when: { flag: 'life:army:d4' }, flip: true },
+      { id: 'freddy-army', era: '1996-army', figure: 'adultA2', x: 0.72, y: 0.85, size: 0.551, nameHe: 'פרדי', talk: 'a4-freddy', when: { flag: 'life:army:d4' }, flip: true },
       { id: 'liron-army', era: '1996-army', figure: 'adultB2', x: 0.86, y: 0.86, size: 0.561, nameHe: 'לירון', talk: 'a4-liron', when: { flag: 'life:army:d4' }, flip: true },
       { id: 'yaron-army', era: '1996-army', figure: 'adultA4', x: 0.14, y: 0.86, size: 0.561, nameHe: 'ירון', talk: 'yaron-base', when: { flag: 'life:army:d4' } },
       // the same kiosk, June 1994 and August 1995: the court of the poster
-      { id: 'shopkeeper-sinai', era: '1995-sinai', figure: 'oldMan-lean', x: 0.5, y: 0.8, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-sinai', sway: 0.003 },
+      { id: 'shopkeeper-sinai', era: '1995-sinai', figure: 'oldMan-arms', x: 0.5, y: 0.8, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-sinai', sway: 0.003 },
       { id: 'ofir-sinai', era: '1995-sinai', figure: 'ofir90-arms', x: 0.28, y: 0.84, size: 0.479, nameHe: 'אופיר', talk: 'ofir-sinai' },
       { id: 'amit-sinai', era: '1995-sinai', figure: 'amit90', x: 0.74, y: 0.85, size: 0.551, nameHe: 'עמית', talk: 'amit-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
-      { id: 'freddy-sinai', era: '1995-sinai', figure: 'freddy', x: 0.86, y: 0.86, size: 0.561, nameHe: 'פרדי', talk: 'freddy-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
+      { id: 'freddy-sinai', era: '1995-sinai', figure: 'adultA2', x: 0.86, y: 0.86, size: 0.561, nameHe: 'פרדי', talk: 'freddy-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
       // 1999 — the kiosk at night: Gate 5 as work before it is iconography
       { id: 'asaf-seed', era: '1999-basket', figure: 'asaf-back', x: 0.5, y: 0.84, size: 0.551, nameHe: 'אסף', talk: 'seed-gate5' },
-      { id: 'melamed-seed', era: '1999-basket', figure: 'melamed', x: 0.3, y: 0.85, size: 0.551, nameHe: 'מלמד', talk: 'seed-gate5' },
-      { id: 'michel-seed', era: '1999-basket', figure: 'michel96-walk5', x: 0.72, y: 0.85, size: 0.551, nameHe: 'מישל', talk: 'seed-gate5', flip: true },
+      { id: 'melamed-seed', era: '1999-basket', figure: 'adultA1', x: 0.3, y: 0.85, size: 0.551, nameHe: 'מלמד', talk: 'seed-gate5' },
+      { id: 'michel-seed', era: '1999-basket', figure: 'michel99-3q', x: 0.72, y: 0.85, size: 0.551, nameHe: 'מישל', talk: 'seed-gate5', flip: true },
       { id: 'dudu-seed', era: '1999-basket', figure: 'adultA5', x: 0.86, y: 0.86, size: 0.551, nameHe: 'דודו', talk: 'seed-gate5', flip: true },
       { id: 'omer-seed', era: '1999-basket', figure: 'hermesh', x: 0.14, y: 0.86, size: 0.551, nameHe: 'עומר', talk: 'seed-gate5' },
       { id: 'ofir-kiosk', era: '1990', figure: 'ofir90', x: 0.6, y: 0.92, size: 0.479, nameHe: 'אופיר', talk: 'ofir-1990', flip: true },
       { id: 'amit-kiosk', era: '1990', figure: 'amit90', x: 0.5, y: 0.95, size: 0.479, nameHe: 'עמית', talk: 'amit-1990' },
     ],
     hotspots: [
+      // 2007-table — נקודת ההוכחה של הייסוד. אחת בכל פרק, ראה `FOUNDING_CHAPTERS`.
+      { id: 'proof-found', era: ['2007-table'], x: 0.3, y: 0.8, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'מה שצריך עד מחר' },
       /**
        * שני סימנים בקיוסק, חורף 1997 — a half-empty shelf and a column of numbers.
        *
@@ -1846,6 +2291,8 @@ const SCENES: SceneDef[] = [
     ambience: 'park',
     stuckHe: 'הכדור באמצע. חזרה לרחוב — שמאלה.',
     spawns: { fromStreet: { x: 0.13, y: 0.84, facing: 'right' } , start: { x: 0.13, y: 0.84, facing: 'right' } },
+    // מ-2000: מגרש קטן עם דשא סינתטי, ולא חצר האבנים — ציור אחר, רצפה אחרת (`rooms2000.ts`)
+    repaints: [PITCH_2000],
     actors: [
       {
         id: 'efi',
@@ -1888,7 +2335,7 @@ const SCENES: SceneDef[] = [
         // his arm raised, and it has been standing on this pitch at seven percent of
         // the frame — a tiny malformed person where the football should be — since
         // the day the scene was written. Found by looking at a screenshot.
-        prop: { key: 'propBallReal', size: 0.075 },
+        prop: { key: 'propFootball', size: 0.042 },
         priority: 3,
       },
     ],
@@ -1944,26 +2391,39 @@ const SCENES: SceneDef[] = [
     // The road fills up. A coach parks halfway along it once the ground starts pulling
     // people in, and the barrier the stewards drag out is there from the moment the
     // child first walks this way — one of them is a clock, the other is a place.
-    layers: [
-      { art: 'propBarrier', x: 0.6, y: 0.712, w: 0.075, depth: 0.712, foot: true },
-      {
-        art: 'propBus',
-        x: 0.275,
-        y: 0.748,
-        w: 0.205,
-        depth: 0.748,
-        foot: true,
-        when: { afterMinute: KOBI_LEAVES },
-      },
-    ],
+    // (21.9.2026) The coach and the barrier were engravings (see `PROP` in `art.ts`); the road
+    // fills with people instead (`ambient1986.ts`), which is what it was for.
+    layers: [],
     spawns: { fromStreet: { x: 0.085, y: 0.78, facing: 'right' }, fromGround: { x: 0.915, y: 0.78, facing: 'left' } , start: { x: 0.085, y: 0.78, facing: 'right' } },
     actors: [
       { id: 'fan1', figure: 'adultA1', x: 0.135, y: 0.76, size: 0.26, nameHe: 'אוהד', talk: 'route-fan' },
-      { id: 'fan2', figure: 'adultB1', x: 0.45, y: 0.735, size: 0.24, nameHe: 'בארי', talk: 'route-veteran' },
+      { id: 'fan2', figure: 'barry96-3q', x: 0.45, y: 0.735, size: 0.24, nameHe: 'בארי', talk: 'route-veteran' },
       { id: 'fan3', figure: 'youngA4', x: 0.78, y: 0.8, size: 0.28, nameHe: 'אוהד', talk: 'route-fan' },
       // ---- 1990: a man walking with a radio to his ear, and Kobi beside you on the way home ----
       { id: 'radio-walker', era: '1990', figure: 'adultA5', x: 0.5, y: 0.8, size: 0.32, nameHe: 'אוהד עם רדיו', talk: 'radio-walker-1990', sway: 0.03 },
       { id: 'kobi-walk', era: '1990', figure: 'kobi90-side', x: 0.84, y: 0.8, size: 0.3, nameHe: 'קובי', talk: 'kobi-found-1990', flip: true, when: { flag: 'found:kobi' } },
+      /**
+       * בארי בתחנה — the old fan the boy met on this road in 1986, waiting for a bus that is
+       * always late, and the memory game (`act-busstop-memory`) is what he does with the wait.
+       *
+       * From 1991 to the double, beside the shelter rather than in it: 0.7 belongs to the
+       * shelter's own hotspots (`shelter`, `proof-travel`). Not in 1990, whose road is the
+       * walk home with Kobi and a radio (and whose rows are that chapter's alone —
+       * `tests/life-1990.test.ts`), and not in 1996, when he is at gate seven with Kobi
+       * (`barry-gate7`) — one man, one room, one chapter. In 1986 he is `fan2` above,
+       * walking, and the same game is a choice in his conversation there.
+       * No new art (owner, 21.9.2026): the body is `barry96`, the one that is his.
+       */
+      {
+        id: 'barry-shelter',
+        era: actEra('busstop-memory', ['1986', '1990', '1996-army']),
+        figure: 'barry96-3q',
+        x: 0.61,
+        y: 0.72,
+        nameHe: 'בארי',
+        talk: 'act-busstop-memory',
+        sway: 0.003,
+      },
     ],
     hotspots: [
       ...gigSpots('route'),
@@ -2064,6 +2524,8 @@ const SCENES: SceneDef[] = [
         light: { x: 0.935, y: 0.5, w: 0.065, h: 0.4, tone: 'daylight' },
         dwellMs: 300,
         priority: 2,
+        needsByEra: shutNeeds(),
+        blockedByEra: shutBlocked(),
       },
     ],
   },
@@ -2148,6 +2610,9 @@ const SCENES: SceneDef[] = [
       fromNorth: { x: 0.62, y: 0.782, facing: 'left' },
       // back from the ground
       fromGround: { x: 0.925, y: 0.79, facing: 'left' },
+      // out of the phone shop (Liron's workshop, 2006) and down from the newsroom
+      fromShop: { x: 0.262, y: 0.8, facing: 'right' },
+      fromDesk: { x: 0.77, y: 0.8, facing: 'left' },
       // back out of the ticket office — on the pavement beside its door, never inside the
       // door zone itself (0.398–0.470), which is rule 41's infinite bounce
       fromTickets: { x: 0.500, y: 0.785, facing: 'right' },
@@ -2183,7 +2648,10 @@ const SCENES: SceneDef[] = [
          * the street is not the one worth writing.
          */
         id: 'rival',
-        era: '*',
+        // not in the two chapters where Liron — who stands on the same body — works on this
+        // corner (the kiosk of 1996, the phone shop next door in 2006): one man in a white
+        // shirt at the café and his twin behind the counter ten metres away is a clone
+        era: chaptersWhere((id) => id !== '1996-army' && id !== '2006-home'),
         figure: 'adultB2',
         x: 0.862,
         y: 0.768,
@@ -2193,6 +2661,8 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
+      // 2007-registered — נקודת ההוכחה של הייסוד. אחת בכל פרק, ראה `FOUNDING_CHAPTERS`.
+      { id: 'proof-found', era: ['2007-registered'], x: 0.47, y: 0.78, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'מה שהבטחת למסור' },
       // The blue enamel plate on the corner: 96. The one thing in the frame that says where
       // in the city this is.
       { id: 'sign', era: '*', x: 0.352, y: 0.735, w: 0.05, act: 'allenby-sign', verb: 'look', labelHe: 'המספר על הפינה', priority: 2 },
@@ -2281,6 +2751,14 @@ const SCENES: SceneDef[] = [
         dwellMs: 900,
         needs: { flag: 'saw:road' },
         blockedHe: 'משם ממשיכים לאצטדיון. אתה עוד לא יודע את הדרך — לך פעם אחת מהשכונה.',
+        /**
+         * **`B: null` — הדרך ידועה מאז 1986** (21.9.2026). `saw:road` הוא דגל יום, ולכן בכל
+         * פרק אחרי 1986 הקיצור הזה היה נעול עם *"אתה עוד לא יודע את הדרך"* — גם לגבר בן
+         * ארבעים וחמש שהלך אליו מאות פעמים. `life:worldlines` מצא את זה כ-`STALE_READ`
+         * ב-52 פרקים. שלב A שומר את הרגע המתוכנן; משלב B הדלת פתוחה, חוץ משנות הבנייה.
+         */
+        needsByEra: { B: null, ...shutNeeds() },
+        blockedByEra: shutBlocked(),
       },
       {
         /**
@@ -2330,6 +2808,52 @@ const SCENES: SceneDef[] = [
         // dwell, for the same reason (rule 41)
         dwellMs: 900,
         priority: 2,
+      },
+      /**
+       * שתי דלתות של 2006 ושל 2025, על הציור של 2000 (`allenby2000`), במקום שבו הן מצוירות:
+       * הדלת של חנות הסלולר (0.235–0.29) — מאחוריה הסדנה של לירון, שמתקנת טלפונים ורדיו
+       * (*"עכשיו כולם באים עם מספר טלפון"*); ודלת הזכוכית של בית הקפה (0.748–0.79) —
+       * המערכת בקומה שמעליו, אותו בית קפה שבו J01 פרסם בפעם הראשונה.
+       */
+      {
+        id: 'cellular',
+        era: '2006-home',
+        x: 0.235,
+        y: 0.725,
+        w: 0.055,
+        h: 0.045,
+        to: 'workshop',
+        spawn: 'start',
+        labelHe: 'לסדנה של לירון',
+        light: { x: 0.24, y: 0.43, w: 0.05, h: 0.28, tone: 'inside' },
+        dwellMs: 900,
+      },
+      {
+        // 2012-five — N04: המדרגות למרתף של אותו בניין, לחדר החזרות
+        id: 'studio',
+        era: '2012-five',
+        x: 0.235,
+        y: 0.725,
+        w: 0.055,
+        h: 0.045,
+        to: 'rehearsal',
+        spawn: 'start',
+        labelHe: 'לחדר החזרות, במרתף',
+        light: { x: 0.24, y: 0.43, w: 0.05, h: 0.28, tone: 'inside' },
+        dwellMs: 900,
+      },
+      {
+        id: 'desk',
+        era: ['2006-desk', '2025-owner'],
+        x: 0.748,
+        y: 0.725,
+        w: 0.042,
+        h: 0.045,
+        to: 'newsroom',
+        spawn: 'start',
+        labelHe: 'למערכת, מעל בית הקפה',
+        light: { x: 0.75, y: 0.48, w: 0.04, h: 0.21, tone: 'inside' },
+        dwellMs: 900,
       },
       {
         /**
@@ -2393,12 +2917,45 @@ const SCENES: SceneDef[] = [
     arrivalByEra: { '1990s': null, '2000s': null },
     stuckHe: 'תדבר עם מישהו. מישהו פה ייקח אותך פנימה.',
     stuckByEra: { '1990': 'שער 7. אבא אמר ליד העמוד. הקופה — מימין.' },
+    /**
+     * בלומפילד המחודש — from the reopening on (26.8.2019; see the Bloomfield calendar).
+     *
+     * `bloomNewPlaza` is a paved square in front of the white shell, shot from a man's eye
+     * height, and it was measured off the painting rather than inherited: the plaza meets
+     * the fence at 0.645 and a fence of about 2.2 m stands 0.04 of the frame there, which
+     * puts the horizon at ≈ 0.615. A 1.75 m man's height on the glass is then
+     * (y − 0.615) × 1.75 / 1.6 — 0.366 at the near line 0.95 and 0.137 at the far line
+     * 0.74 — so the metre is 0.2094 and the taper 0.373 (against 0.70 under the colonnade,
+     * which is a room, not a square). The spawns of the old room all stand on the square.
+     *
+     * No door into the ground and no gate five: neither the tunnel nor the terrace was
+     * painted rebuilt, and a door into a 1986 terrace from a 2019 square is a time machine.
+     */
+    repaints: [
+      {
+        in: bloomfieldRebuilt,
+        art: 'bloomNewPlaza',
+        band: { far: 0.74, near: 0.95 },
+        size: { far: 0.1367, near: 0.3664 },
+        metre: 0.2094,
+        spawns: {
+          fromRoute: { x: 0.06, y: 0.87, facing: 'right' },
+          fromTunnel: { x: 0.66, y: 0.93, facing: 'left' },
+          fromGate5: { x: 0.9, y: 0.88, facing: 'left' },
+          fromOffice: { x: 0.66, y: 0.88, facing: 'right' },
+          start: { x: 0.22, y: 0.9, facing: 'right' },
+        },
+        doors: { in: null, gate5: null },
+        arrival: { art: 'bloomNewDay', ms: 3200, flag: 'saw:bloomNew' },
+        stuckHe: 'אותו שם, מקום אחר. השלטים — לא הזיכרון.',
+      },
+    ],
     // Outside a ground on a matchday: barriers stacked where the stewards left them, a
     // wall somebody has been fly-posting for twenty years, and — taped up by a hand, not
     // printed by a club — the only line of Hebrew in this frame.
     layers: [
-      { art: 'propBarriers', x: 0.232, y: 0.826, w: 0.086, depth: 0.826, foot: true },
-      { art: 'propPosters', x: 0.688, y: 0.748, w: 0.084, depth: 0.6, foot: true },
+      // (21.9.2026) the stacked barriers and the fly-posted board were engravings; the
+      // painting has its own barriers, and the taped-up sign stays
       { art: 'propSign', x: 0.622, y: 0.63, w: 0.048, depth: 0.6, foot: true },
     ],
     // `fromOffice` stands clear of all four doors (0–0.04, 0.45–0.58, 0.715–0.785,
@@ -2437,7 +2994,7 @@ const SCENES: SceneDef[] = [
        * gate in 1985 and in 1996 is a rhyme somebody wrote on purpose.
        */
       { id: 'barry-a5', era: 'a5-first', figure: 'adultA6', x: 0.44, y: 0.91, size: 0.3, nameHe: 'אוהד ותיק', talk: 'barry-a5', sway: 0.003 },
-      { id: 'kobi-a5-gate', era: 'a5-first', figure: 'kobi', x: 0.36, y: 0.9, size: 0.3, nameHe: 'קובי', talk: 'kobi-a5-gate', sway: 0.002 },
+      { id: 'kobi-a5-gate', era: 'a5-first', figure: 'kobi-scarf', x: 0.36, y: 0.9, size: 0.3, nameHe: 'קובי', talk: 'kobi-a5-gate', sway: 0.002 },
       // 16.11.1996 — the two gates. Kobi and Barry at seven; Barry has no figure yet.
       {
         id: 'kobi-gate7',
@@ -2460,9 +3017,9 @@ const SCENES: SceneDef[] = [
          * (1.81 מ׳) — ולא הוצבו באף מקום. בארי, שיש לו שם, פנים ותפקיד, צויר בדמות
          * ניצב גנרית בגובה 1.74.
          *
-         * זה הפריט היחיד מתוך שישה שהסריקה מצאה שבאמת צריך לזוז. שלושת שחקני אפי
-         * ב-1991 וב-1993 משתמשים ב-`youngA2` **בצדק** — `efi96` הוא אפי המבוגר בגובה
-         * 1.80, ובשנים האלה הוא בן שלוש־עשרה; הוא כבר מוצב נכון ב-1999 וב-2000. ושני
+         * (21.9.2026: המשפט שהיה כאן — ששלושת שחקני אפי ב-1991 וב-1993 עומדים על `youngA2`
+         * בצדק כי אפי "בן שלוש־עשרה" — היה טעות בחשבון. אפי גדול מפוגי בארבע שנים: בן 17 ו-19.
+         * הם עומדים עכשיו על `efi96`.) ושני
          * שחקני `barry-a5` הם "אוהד ותיק" ב-1985, בכוונה בלי שם, שנה לפני הכניסה
          * הקנונית של בארי ב-1986 — לתת להם את הפלייט שלו זה להסגיר אותו מוקדם.
          */
@@ -2479,7 +3036,9 @@ const SCENES: SceneDef[] = [
       {
         // בארי — Gate 7, 1986: his canonical debut (Stage A Director's Cut §21/§53).
         id: 'veteran',
-        figure: 'adultB1',
+        // his own body from his first appearance — an old man with a shopping bag (`adultB1`)
+        // spoke with Barry's face for five years of the game
+        figure: 'barry96-3q',
         x: 0.17,
         y: 0.88,
         size: 0.24,
@@ -2497,7 +3056,7 @@ const SCENES: SceneDef[] = [
         talk: 'ofir-ground',
         when: { bond: { who: 'ofir', min: 40 } },
       },
-      { id: 'steward', figure: 'adultA4', x: 0.62, y: 0.86, size: 0.23, nameHe: 'סדרן', talk: 'steward' },
+      { id: 'steward', figure: 'bfSteward', x: 0.62, y: 0.86, size: 0.23, nameHe: 'סדרן', talk: 'steward' },
       { id: 'ticket', figure: 'adultA2', x: 0.7, y: 0.9, size: 0.26, nameHe: 'הקופאי', talk: 'ticket-window', flip: true },
       // The safe way in, and the one the brief insists on (§42): a child goes through a
       // turnstile with a family, in front of a steward, in daylight. Nobody climbs
@@ -2531,7 +3090,7 @@ const SCENES: SceneDef[] = [
       },
       // ---- 1990: gate seven is home ----
       { id: 'kobi-gate', era: '1990', figure: 'kobi90-stand', x: 0.62, y: 0.9, size: 0.33, nameHe: 'קובי', talk: 'kobi-gate-1990', flip: true },
-      { id: 'steward-1990', era: '1990', figure: 'adultA4', x: 0.4, y: 0.86, size: 0.3, nameHe: 'סדרן', talk: 'steward-1990' },
+      { id: 'steward-1990', era: '1990', figure: 'bfSteward', x: 0.4, y: 0.86, size: 0.3, nameHe: 'סדרן', talk: 'steward-1990' },
       { id: 'ticket-1990', era: '1990', figure: 'adultA2', x: 0.7, y: 0.9, size: 0.32, nameHe: 'הקופאי', talk: 'ticket-window-1990', flip: true },
       { id: 'ofir-ground', era: '1990', figure: 'ofir90', x: 0.33, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'ofir-ground-1990' },
       { id: 'vendor-1990', era: '1990', figure: 'adultA6', x: 0.88, y: 0.93, size: 0.34, nameHe: 'מוכר', talk: 'vendor-1990', flip: true },
@@ -2549,10 +3108,12 @@ const SCENES: SceneDef[] = [
       { id: 'sign-tickets', era: '1996-army', x: 0.36, y: 0.86, w: 0.09, act: 'sign-tickets', verb: 'talk', labelHe: 'הקופה', when: { flag: 'life:army:d4' } },
       { id: 'sign-two-jobs', era: '1996-army', x: 0.62, y: 0.88, w: 0.09, act: 'sign-two-jobs', verb: 'talk', labelHe: 'הסדרן', when: { flag: 'life:army:d4' } },
       { id: 'sign-creditor', era: '1996-army', x: 0.78, y: 0.85, w: 0.1, act: 'sign-creditor', verb: 'look', labelHe: 'השניים ליד המשרד', when: { flag: 'life:army:d4' } },...gigSpots('bloomfield-outside'), 
-      { id: 'gate7', era: '*', x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
+      // שלושת המבטים של ילד — "קרוסלת ברזל, גבוהה ממך", "אבא עומד שם בכל שבת". הם היו
+      // `era: '*'` ונקראו גם לאיש בן שלושים ב-2010; המקום נשאר, המשפטים שייכים לילד.
+      { id: 'gate7', era: ['1980s', '1990s'], x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
       { id: 'look-gate', era: '1990', x: 0.25, y: 0.9, w: 0.07, act: 'pano:panoGate7', verb: 'gaze', labelHe: 'סביב' },
-      { id: 'fence', era: '*', x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
-      { id: 'turnstile', era: '*', x: 0.36, y: 0.85, w: 0.09, act: 'gate-turnstile', verb: 'look', labelHe: 'הקרוסלה' },
+      { id: 'fence', era: ['1980s', '1990s'], x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
+      { id: 'turnstile', era: ['1980s', '1990s'], x: 0.36, y: 0.85, w: 0.09, act: 'gate-turnstile', verb: 'look', labelHe: 'הקרוסלה' },
       /**
        * ULTRAS · `ORGANIZE_GROUP` — הכיכר שלפני השער, במקום שאנשים עומדים בו וממתינים.
        *
@@ -2561,11 +3122,35 @@ const SCENES: SceneDef[] = [
        * עצמו, שאינו נגיש בארבעה מהפרקים הבוגרים ולכן לא יכול לשאת שלב שדורש שני פרקים.
        */
       smallAction('ORGANIZE_GROUP', 'route-organize-group', { x: 0.78, y: 0.88, w: 0.1 }, 'take', 'המפגש על עצמך'),
+      /**
+       * הפרלמנט ליד הגדר — two to four of the chapter's crowd (`parliamentOf`, off the save's
+       * seed) arguing about how a goal went in, and the goal game is the argument
+       * (`act-parliament`). In front of the barriers by the office door, on the old ground
+       * only: not in 1990, when the gate is Kobi's and the vendor stands here, not in 1998,
+       * when Asaf does, and not on the rebuilt plaza, which was never measured for it.
+       */
+      {
+        id: 'parliament',
+        era: actEra('parliament', ['1990', '1998-laces']).filter((chapter) => !bloomfieldRebuilt(chapter)),
+        x: 0.87,
+        y: 0.9,
+        w: 0.07,
+        act: 'act-parliament',
+        verb: 'talk',
+        labelHe: 'הוויכוח ליד הגדר',
+      },
     ],
     exits: [
       {
+        /**
+         * שער 5 נפתח גם ב-`2012-five` וב-`2023-tournament` (21.9.2026). `N03` ו-`Z03`
+         * הן *"מפגש אוהדים"* על מה שמציעים לאוהדים במבנה הבעלות, וזה החדר שהיציע
+         * מדבר בו מאז 96 — לא הרחבה של הגאוגרפיה אלא פרקים נוספים שנכנסים בדלת
+         * שכבר קיימת.
+         */
         id: 'gate5',
-        era: ['1996-army', '1998-laces', '1999-basket'],
+        // 2023 is not here: gate five of the old ground was rebuilt with the rest of it
+        era: ['1996-army', '1998-laces', '1999-basket', '2012-five', '2001-terrace', '2012-terrace'],
         x: 0.93,
         y: 0.82,
         w: 0.07,
@@ -2576,6 +3161,27 @@ const SCENES: SceneDef[] = [
         light: { x: 0.92, y: 0.55, w: 0.08, h: 0.4, tone: 'inside' },
         dwellMs: 500,
         priority: 2,
+      },
+      {
+        /**
+         * **ליציע החדש** (21.9.2026) — בלומפילד המחודש מבפנים (`bloomNewTerrace`) הגיע, ועד
+         * היום הרחבה הייתה חדר בלי פנים: *"No door into the ground"*, כי היציע לא היה מצויר.
+         * עכשיו הוא מצויר, והשער בין העמודים (0.615–0.665, על הרחבה) מוביל אליו — רק בשנים
+         * שבהן הרחבה היא הרחבה החדשה.
+         */
+        id: 'stand',
+        era: CHAPTERS.map((c) => c.id).filter(bloomfieldRebuilt),
+        x: 0.6,
+        y: 0.8,
+        w: 0.08,
+        h: 0.05,
+        to: 'bloomfield-inside',
+        spawn: 'start',
+        labelHe: 'ליציע',
+        light: { x: 0.615, y: 0.5, w: 0.05, h: 0.14, tone: 'inside' },
+        needsByEra: { '2018-return': { flag: BLOOMFIELD_REOPENED } },
+        blockedHe: 'עוד סגור. קודם הרחבה.',
+        dwellMs: 700,
       },
 
       /**
@@ -2643,7 +3249,7 @@ const SCENES: SceneDef[] = [
          * שהוא פותח את השיחה — אז כל משחק של הפרק נגמר ב"התחיל בלעדיך", וארבעת הסופים
          * האחרים, שהם מה ש-a4 קונה, לא נראו בעיני איש.
          */
-        whenByEra: { 'a5-first': null, '1998-laces': null, '1999-cup': null, '2000-title': null, '2000-double': null },
+        whenByEra: { 'a5-first': null, '1998-laces': null, '1999-cup': null, '2000-title': null, '2000-double': null, '2010-anthem': null },
         light: { x: 0.455, y: 0.55, w: 0.125, h: 0.28, tone: 'inside' },
         dwellMs: 260,
         priority: 3,
@@ -2728,10 +3334,15 @@ const SCENES: SceneDef[] = [
     size: { far: 0.098, near: 0.108 },
     metre: 0.0831,
     ambience: 'stadium',
+    // the stadium's sound, and the air of a day outside a gate: the terrace's paper flecks
+    // read as snow over a photographed street (21.9.2026)
+    air: 'day',
     // 5.9.2026: the boy himself at the tunnel mouth, painted — the ground opening in front of him
     arrival: { art: 'tunnelReveal', ms: 5200, flag: 'saw:reveal' },
     // 1990: he knows this terrace. The card is the arithmetic in his head, not the bowl.
     arrivalByEra: { '1990': null, '1990s': null, '2000s': null },
+    // היציע של שנות האלפיים ושל בלומפילד המחודש — כל אחד על הציור שלו (`rooms2000.ts`)
+    repaints: [STAND_NEW, STAND_OLD],
     stuckHe: 'הוא איפשהו ביציע. תסתכל טוב.',
     stuckByEra: { '1990': 'מי שיודע משהו — אומר. הרדיו, הילדים, הוותיקים. אבא ליד העמוד.' },
     spawns: { start: { x: 0.08, y: 0.748, facing: 'right' } },
@@ -2826,6 +3437,16 @@ const SCENES: SceneDef[] = [
         spawn: 'fromTunnel',
         labelHe: 'החוצה, הביתה',
         when: { flag: 'found:kobi' },
+        /**
+         * **ובכל פרק שהמנהרה פתוחה בו לגבר עם כרטיס — גם הדרך החוצה פתוחה** (21.9.2026).
+         * `found:kobi` הוא הפאזל של 24.5.1986 (*"nobody walks out of a final"*), והוא
+         * עבר בירושה לכל שנה שבה `whenByEra` של המנהרה פותח את שער 7 — כלומר מי שנכנס
+         * ליציע ב-2010 לבנפיקה (C06) לא יכול היה לצאת ממנו לליון (C07) בבית, ומי שנכנס
+         * לבלומפילד ביום של גמר ברמת גן נתקע שם. אותה מחלקה בדיוק שכלל 54 מתאר, בכיוון
+         * ההפוך: הפעם לא מנעול שנכנס — דלת יציאה שלא. `life:worldlines` (`ROOM_TRAP`).
+         */
+        // `found:kobi` is 1986's; a grown man leaves a stand when he wants to (every chapter from 2000)
+        whenByEra: { '1998-laces': null, '1999-cup': null, '2000s': null },
         light: { x: 0.292, y: 0.645, w: 0.088, h: 0.085, tone: 'daylight' },
         dwellMs: 700,
       },
@@ -2890,8 +3511,10 @@ const SCENES: SceneDef[] = [
        * left; Efi goes to the far end of the forecourt, past Shachor, which is where the
        * only other clear stretch of this band is.
        */
-      { id: 'efi-1991', era: '1991', figure: 'youngA2', x: 0.9, y: 0.9, size: 0.262, nameHe: 'אפי', talk: 'efi-1991', flip: true, sway: 0.006, when: { none: [{ flag: 'derby:over' }] } },
-      { id: 'limor-1991', era: '1991', figure: 'youngB3', x: 0.6, y: 0.9, size: 0.258, nameHe: 'לימור', talk: 'limor-1991', sway: 0.003, when: { none: [{ flag: 'uss:arrived' }] } },
+      { id: 'efi-1991', era: '1991', figure: 'efi96-3q', x: 0.9, y: 0.9, size: 0.262, nameHe: 'אפי', talk: 'efi-1991', flip: true, sway: 0.006, when: { none: [{ flag: 'derby:over' }] } },
+      // לימור — a woman who knows the side entrance; `youngB3` was a boy of thirteen from
+      // behind. She stands on the body her plate (`faceLimor`) was cut from (21.9.2026)
+      { id: 'limor-1991', era: '1991', figure: 'adultB5', x: 0.6, y: 0.9, size: 0.258, nameHe: 'לימור', talk: 'limor-1991', sway: 0.003, when: { none: [{ flag: 'uss:arrived' }] } },
       { id: 'shachor-1991', era: '1991', figure: 'shachor', x: 0.82, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'shachor-1991', flip: true, when: { none: [{ flag: 'uss:arrived' }] } },
       // ---- 11.3.1991, an hour before the doors ----
       // The usher stands BESIDE the door and not in it: a person in a doorway wins the
@@ -2929,7 +3552,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'michel-1993',
         era: '1993-cup',
-        figure: 'michel96-walk1',
+        figure: 'michel99-3q',
         x: 0.5,
         y: 0.9,
         size: 0.278,
@@ -2940,7 +3563,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'limor-1993',
         era: '1993-cup',
-        figure: 'youngB3',
+        figure: 'adultB5',
         x: 0.62,
         y: 0.9,
         size: 0.262,
@@ -2964,7 +3587,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'efi-galil',
         era: '1993-galil',
-        figure: 'youngA2',
+        figure: 'efi96-3q',
         x: 0.68,
         y: 0.9,
         size: 0.262,
@@ -2975,7 +3598,7 @@ const SCENES: SceneDef[] = [
       {
         id: 'michel-galil',
         era: '1993-galil',
-        figure: 'michel96-walk1',
+        figure: 'michel99-3q',
         x: 0.46,
         y: 0.92,
         size: 0.278,
@@ -3009,13 +3632,28 @@ const SCENES: SceneDef[] = [
       // 1997 and 1999 — the two relegation nights, and the corner that works through them
       { id: 'shachor-hall97', era: '1997-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'h1-corner', flip: true, when: { none: [{ flag: 'life:hall:d2' }] } },
       { id: 'shachor-hall98', era: '1997-basket', figure: 'shachor-back', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'h2-corner', when: { flag: 'life:hall:d2' } },
-      { id: 'limor-hall', era: '1997-basket', figure: 'youngB3', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'h1-corner', sway: 0.003 },
-      { id: 'freddy-hall', era: '1997-basket', figure: 'freddy-drink', x: 0.16, y: 0.92, size: 0.278, nameHe: 'פרדי', talk: 'h1-freddy', when: { none: [{ flag: 'life:hall:d2' }] } },
+      { id: 'limor-hall', era: '1997-basket', figure: 'adultB5', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'h1-corner', sway: 0.003 },
+      { id: 'freddy-hall', era: '1997-basket', figure: 'adultA2', x: 0.16, y: 0.92, size: 0.278, nameHe: 'פרדי', talk: 'h1-freddy', when: { none: [{ flag: 'life:hall:d2' }] } },
       { id: 'shachor-seed', era: '1999-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'seed-corner', flip: true },
-      { id: 'limor-seed', era: '1999-basket', figure: 'youngB3', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'seed-corner', sway: 0.003 },
+      { id: 'limor-seed', era: '1999-basket', figure: 'adultB5', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'seed-corner', sway: 0.003 },
       { id: 'soko-seed', era: '1999-basket', figure: 'soko', x: 0.2, y: 0.92, size: 0.278, nameHe: 'סוקו', talk: 'seed-inside' },
     ],
     hotspots: [...gigSpots('ussishkin-outside'), 
+      /**
+       * הפנקס של שחור — the black wall, opened from his folded notebook (`act-shachor-lesson`).
+       * At the corner beside him, where he stands in every one of these years (0.8–0.84), and
+       * not in 1991, when Efi waits on that corner for the derby.
+       */
+      {
+        id: 'shachor-notebook',
+        era: actEra('shachor-lesson', ['1991']).filter((chapter) => ['1993-cup', '1993-galil', '1997-basket', '1999-basket'].includes(chapter)),
+        x: 0.93,
+        y: 0.92,
+        w: 0.05,
+        act: 'act-shachor-lesson',
+        verb: 'talk',
+        labelHe: 'הפנקס של שחור',
+      },
       { id: 'bus-1993', era: '1993-cup', x: 0.15, y: 0.84, w: 0.14, act: 'bus-1993', verb: 'enter', labelHe: 'האוטובוס', priority: 3 },
 
       { id: 'queue', era: '1991', x: 0.25, y: 0.9, w: 0.12, act: 'uss-queue', verb: 'look', labelHe: 'התור' },
@@ -3191,7 +3829,10 @@ const SCENES: SceneDef[] = [
       { id: 'amit-hall', era: '1991', figure: 'amit90-cheer', x: 0.42, y: 0.9, size: 0.29, nameHe: 'עמית', talk: 'amit-hall', sway: 0.006 },
       { id: 'ofir-hall', era: '1991', figure: 'ofir90-arms', x: 0.3, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'derby:friend', flip: true, sway: 0.007 },
     ],
-    hotspots: [...gigSpots('ussishkin-hall'), 
+    hotspots: [
+      // 2007-key — נקודת ההוכחה של הייסוד. אחת בכל פרק, ראה `FOUNDING_CHAPTERS`.
+      { id: 'proof-found', era: ['2007-key'], x: 0.42, y: 0.86, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'הציוד, לפני מחר' },
+      ...gigSpots('ussishkin-hall'),
       { id: 'look-hall', era: '*', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssHall', verb: 'gaze', labelHe: 'סביב', priority: 3, when: { notFlag: 'uss:arrived' } },
       // 1991: the same look, on a night when the hall is full of people (§38).
       { id: 'look-derby', era: '1991', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssDerby', verb: 'gaze', labelHe: 'סביב', priority: 3, when: { flag: 'uss:arrived' } },
@@ -3403,7 +4044,9 @@ const SCENES: SceneDef[] = [
     actors: [
       { id: 'ofir-yard', era: '1991', figure: 'ofir90', x: 0.36, y: 0.82, size: 0.26, nameHe: 'אופיר', talk: 'ofir-yard', sway: 0.005 },
       { id: 'amit-yard', era: '1991', figure: 'amit90', x: 0.6, y: 0.86, size: 0.27, nameHe: 'עמית', talk: 'amit-yard', flip: true },
-      { id: 'keren-yard', era: '1991', figure: 'keren90', x: 0.82, y: 0.8, size: 0.25, nameHe: 'קרן', talk: 'keren-yard', flip: true },
+      // on the stone bench under the tree (0.73–0.79, seat ~0.62): `keren90` is cut at the hip,
+      // and a floor-anchored actor drew it as a torso standing on the asphalt (21.9.2026)
+      { id: 'keren-yard', era: '1991', figure: 'keren90-sit', x: 0.76, y: 0.68, size: 0.25, nameHe: 'קרן', talk: 'keren-yard', flip: true },
     ],
     hotspots: [...gigSpots('schoolyard'),
       {
@@ -3458,12 +4101,26 @@ const SCENES: SceneDef[] = [
     id: 'gate5',
     titleHe: 'שער 5',
     art: 'gate5',
+    // The same wall, the same fence, the same turnstiles — `bloomOldGates` overlays this
+    // painting pixel for pixel (checked by blending the two, 21.9.2026), repainted in the
+    // colours the ground wore between 2000 and 2016. So it is a swap, not a remeasure.
+    artByEra: { '2000s': 'bloomOldGates' },
     band: { far: 0.74, near: 0.95 },
     size: { far: 0.24, near: 0.32 },
     metre: 0.2265,
     ambience: 'stadium',
     stuckHe: 'מתחת ליציע. התוף לא מפסיק.',
-    layers: [{ art: 'overlaySmoke', x: 0.5, y: 0.5, w: 1.0, depth: 0.1, era: '*' }],
+    layers: [
+      // (21.9.2026) no red smoke at this gate: the chapters here are a November afternoon in
+      // uniform, a volunteer's first job, a meeting about the club — none of them a match
+      // with flares lit, and a red cloud over all of them read as a permanent fire
+      // T01 (2001) "ציוד, מתנדבים" and T02 (2012) "מי פותח": the drum is the equipment, on
+      // the concrete between the people who carry it (0.55 m; a metre is 0.23 here)
+      { art: 'propDrum', era: '2001-terrace', x: 0.59, y: 0.875, w: 0.078, depth: 0.875, foot: true },
+      // 1996 — "לענות למלמד": his darbuka, beside him (0.45 m)
+      { art: 'propDarbuka', era: '1996-army', x: 0.735, y: 0.895, w: 0.043, depth: 0.895, foot: true },
+      { art: 'propDrum', era: '2012-terrace', x: 0.54, y: 0.85, w: 0.075, depth: 0.85, foot: true },
+    ],
     actors: [
       {
         id: 'asaf-gate5',
@@ -3478,7 +4135,8 @@ const SCENES: SceneDef[] = [
       {
         id: 'melamed-gate5',
         era: '1996-army',
-        figure: 'melamed-play',
+        // (21.9.2026) a clean stand-in, like Freddy: see `STANDIN_FACES` in `era.ts`
+        figure: 'adultA1',
         x: 0.68,
         y: 0.9,
         size: 0.341,
@@ -3612,6 +4270,21 @@ const SCENES: SceneDef[] = [
     actors: [],
     hotspots: [
       /**
+       * הסקר בחלון — the clerk asks one question of the club's survey through the slot
+       * (`act-ticket-poll`). An answer stays in this life (owner, 21.9.2026): nothing is cast
+       * to the gate's ballot. At the window's near edge, clear of the timetable (0.52–0.64).
+       */
+      {
+        id: 'window-poll',
+        era: actEra('ticket-poll'),
+        x: 0.44,
+        y: 0.9,
+        w: 0.07,
+        act: 'act-ticket-poll',
+        verb: 'talk',
+        labelHe: 'שאלה מהקופאי',
+      },
+      /**
        * TRAVELLER · `PLAN_JOURNEY` — החלון, כי כאן כתובים השעות והמחיר.
        *
        * *"לתכנן דרך מאושרת עם מידע בדוק"* — וההבדל בין זה לבין לשלוח מישהו לדרך על סמך
@@ -3686,6 +4359,34 @@ const SCENES: SceneDef[] = [
         light: { x: 0.005, y: 0.45, w: 0.07, h: 0.4, tone: 'daylight' },
         dwellMs: 600,
       },
+      {
+        /**
+         * 7.5.2026 — עולים לאוטובוס, והוא לשדה התעופה. הדלת של האוטובוס המצויר (0.29–0.34)
+         * היא הדלת; מעבר לה — נמל ההגעה באירופה (F02). היא מחכה ל-Q10 (`f-name`) כמו שהשיחה
+         * של הדרך מחכה לה: קודם שואלים איך מציגים אותך שם, אחר כך נוסעים.
+         */
+        id: 'flight',
+        // 2023/2025: מי שגר שם וביקר בתל אביב — אותו אוטובוס, חזרה לדירה (דרך הנמל)
+        era: ['2026-finale', '2023-abroad', '2025-abroad'],
+        x: 0.28,
+        y: 0.705,
+        w: 0.075,
+        h: 0.05,
+        to: 'port-europe',
+        spawn: 'start',
+        labelHe: 'לאוטובוס, לשדה התעופה',
+        light: { x: 0.29, y: 0.3, w: 0.05, h: 0.35, tone: 'inside' },
+        needs: {
+          any: [
+            { flag: 'f:name' },
+            { flagIs: { flag: 'life:finale:party', value: 'saving' } },
+            { notFlag: 'life:finale:party' },
+          ],
+        },
+        needsByEra: { '2023-abroad': null, '2025-abroad': null },
+        blockedHe: 'רגע. קובי עוד שואל משהו.',
+        dwellMs: 700,
+      },
     ],
     spawns: { start: { x: 0.25, y: 0.8, facing: 'right' } },
   },
@@ -3718,8 +4419,11 @@ const SCENES: SceneDef[] = [
     arrival: { art: 'ramatGanGates', ms: 3400, flag: 'saw:ramatGan' },
     stuckHe: 'ארבעים אלף. אתה אחד מהם.',
     layers: [
-      { art: 'overlayHaze', x: 0.5, y: 0.5, w: 1.0, depth: 0.1, era: '*' },
-      { art: 'overlaySmoke', x: 0.5, y: 0.5, w: 1.0, depth: 0.1, era: '*' },
+      { art: 'overlayHaze', x: 0, y: 0, w: 1.0, depth: 0.1, alpha: 0.5, era: '*' },
+      // the red smoke rises from the two bottom corners of the whole frame. It was placed from the
+      // frame's CENTRE (x 0.5, y 0.5), so one corner of it lay on the pavement in the middle of the
+      // picture as a red stain — it read as blood (21.9.2026)
+      { art: 'overlaySmoke', x: 0, y: 0, w: 1.0, depth: 0.1, alpha: 0.6, era: '*' },
     ],
     actors: [],
     hotspots: [],
@@ -3751,7 +4455,18 @@ const SCENES: SceneDef[] = [
     metre: 0.2053,
     ambience: 'stadium',
     stuckHe: 'מגרש קטן. שכונה שמסתכלת מהמרפסות.',
-    layers: [{ art: 'overlaySmoke', x: 0.5, y: 0.5, w: 1.0, depth: 0.1, era: '*' }],
+    layers: [
+      // the red smoke rises from the two bottom corners of the whole frame. It was placed from the
+      // frame's CENTRE (x 0.5, y 0.5), so one corner of it lay on the pavement in the middle of the
+      // picture as a red stain — it read as blood (21.9.2026)
+      { art: 'overlaySmoke', x: 0, y: 0, w: 1.0, depth: 0.1, alpha: 0.6, era: '*' },
+      // T01 (2001) "ציוד, מתנדבים" and T02 (2012) "מי פותח": the drum is the equipment, on
+      // the concrete between the people who carry it (0.55 m; a metre is 0.23 here)
+      { art: 'propDrum', era: '2001-terrace', x: 0.59, y: 0.875, w: 0.078, depth: 0.875, foot: true },
+      // 1996 — "לענות למלמד": his darbuka, beside him (0.45 m)
+      { art: 'propDarbuka', era: '1996-army', x: 0.735, y: 0.895, w: 0.043, depth: 0.895, foot: true },
+      { art: 'propDrum', era: '2012-terrace', x: 0.54, y: 0.85, w: 0.075, depth: 0.85, foot: true },
+    ],
     actors: [],
     hotspots: [],
     exits: [
@@ -3770,7 +4485,26 @@ const SCENES: SceneDef[] = [
     ],
     spawns: { start: { x: 0.3, y: 0.9, facing: 'right' } },
   },
+
+  // 2000–2026: the rooms Maor painted, each on its own measured floor (`rooms2000.ts`)
+  ...NEW_ROOMS,
 ]
+
+/**
+ * האנשים של 2000–2026 נכנסים לחדרים שלהם — לחדר עצמו, או לציור שהחדר עומד עליו באותה
+ * שנה. שחקן שהוצב ב-2019 בסלון של ההורים לא יכול לעמוד על הרצפה של `homeAdult`, ולהפך:
+ * כל שורה ב-`STAGED` נמדדה על הציור של השנה שלה, ולכן היא נכנסת לצביעה של אותה שנה.
+ */
+for (const scene of SCENES) {
+  for (const actor of STAGED[scene.id] ?? []) {
+    const era = typeof actor.era === 'string' ? actor.era : ''
+    const paint = scene.repaints?.find((r) => r.in(era))
+    if (paint) {
+      const holder = paint as { actors?: readonly ActorDef[] }
+      holder.actors = [...(holder.actors ?? []), actor]
+    } else scene.actors.push(actor)
+  }
+}
 
 export const SCENE: Record<Exclude<LocationId, 'prologue-1972'>, SceneDef> = Object.fromEntries(
   SCENES.map((scene) => [scene.id, scene]),

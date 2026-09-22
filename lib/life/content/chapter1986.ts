@@ -186,19 +186,19 @@ export const ENDINGS: Record<string, EndingCard> = {
  * plate simply gets none and the card still reads.
  */
 export const ITEM_ART: Partial<Record<ItemId, string>> = {
-  scarf: 'propScarfRed',
-  newspaper: 'propPapers',
-  'folded-paper': 'propPapers',
+  scarf: 'propScarfKnit',
+  newspaper: 'propNewspaper',
+  'folded-paper': 'propPaperFolded',
   'football-card': 'propSticker',
   // The REAL one. `propTicket` was a mis-cut of a coin and a fragment of a coat; the
   // child's own ticket to משחק 15 is in this repository, scanned, because somebody
   // kept it for forty years. A memory of a ticket drawn as the ticket is the whole
   // argument of §50, and there was never a reason to draw a worse one beside it.
   'ticket-stub': 'docTicket',
-  coin: 'propCoins',
+  coin: 'coinPali',
   transistor: 'propRadio',
   'promotion-table': 'propClipping90',
-  'pocket-money': 'propCoins',
+  'pocket-money': 'coinPali',
   // 1991 — the objects a Monday in March leaves in a pocket
   'school-note': 'propNote',
   'hall-ticket': 'propTicket91',
