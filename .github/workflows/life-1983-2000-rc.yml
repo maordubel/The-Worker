@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: life-1983-2000-rc
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-rc:
