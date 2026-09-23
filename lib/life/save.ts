@@ -13,13 +13,16 @@ import type { MasterCheckpoint } from './checkpoint'
  * A snapshot would have to be migrated field by field; a log is re-read by whatever
  * reducer is current, which is how a save survives a chapter being rewritten.
  *
- * Quota, private mode and a browser with storage switched off all throw here. A life
- * that cannot be saved must still be playable — every write is guarded and a failure
- * is reported, never thrown at the game loop.
+ * Quota, private mode and a browser with storage switched off can all reject a write. The
+ * game must stay playable, but "playable" may not mean silently forgetting the last ten
+ * minutes. A failed write therefore keeps the newest complete file in memory and retries
+ * it on a short trailing timer. A newer write replaces the pending one — event logs are
+ * cumulative, so the newest file already contains everything the older retry wanted.
  */
 
 const KEY = 'the-worker:life'
 export const SAVE_VERSION = 4
+const RETRY_MS = 2_000
 
 export type SaveFile = {
   version: number
@@ -102,6 +105,35 @@ function migrate(raw: unknown): SaveFile | null {
   }
 }
 
+let pending: SaveFile | null = null
+let retryTimer: ReturnType<typeof setTimeout> | null = null
+
+function writeNow(file: SaveFile): boolean {
+  const store = browserStore()
+  if (!store) return false
+  try {
+    store.setItem(KEY, JSON.stringify(file))
+    return true
+  } catch {
+    return false
+  }
+}
+
+function scheduleRetry() {
+  if (retryTimer || !pending || typeof window === 'undefined') return
+  retryTimer = setTimeout(() => {
+    retryTimer = null
+    const file = pending
+    if (!file) return
+    if (writeNow(file)) {
+      // Do not clear a newer file that arrived while this one was being retried.
+      if (pending === file) pending = null
+      return
+    }
+    scheduleRetry()
+  }, RETRY_MS)
+}
+
 export const lifeStore: LifeStore = {
   async read() {
     const store = browserStore()
@@ -115,17 +147,20 @@ export const lifeStore: LifeStore = {
   },
 
   async write(file) {
-    const store = browserStore()
-    if (!store) return false
-    try {
-      store.setItem(KEY, JSON.stringify(file))
+    // Always retain the newest cumulative log until storage confirms it accepted it.
+    pending = file
+    if (writeNow(file)) {
+      if (pending === file) pending = null
       return true
-    } catch {
-      return false
     }
+    scheduleRetry()
+    return false
   },
 
   async clear() {
+    pending = null
+    if (retryTimer) clearTimeout(retryTimer)
+    retryTimer = null
     const store = browserStore()
     if (!store) return
     try {

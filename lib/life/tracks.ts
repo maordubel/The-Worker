@@ -7,55 +7,43 @@ import { flagOn, type LifeState } from './types'
  *
  * A second axis beside the supporter routes. A man is on ULTRAS or he is not; separately,
  * and at the same time, he is somebody's partner, he does something for a living, and he
- * may be somebody's father. The two axes are not a ladder and a sub-ladder — they cross,
- * and the whole reason this is a second registry rather than four more rows in
- * `LIFE_ROUTES` is that a route answers *"מי אתה יכול להיות"* in the club, and a track
- * answers what else was happening in the same years.
+ * may be somebody's father. The two axes are not a ladder and a sub-ladder — they cross.
+ * A route answers *"מי אתה יכול להיות"* in the club; a track answers what else was
+ * happening in the same years.
  *
  * ------------------------------------------------------------------------------------
  * **מה יש כאן, ומה בכוונה אין.**
  *
- * What is here is the SEAM: ids, Hebrew names, stages in order, and the flag vocabulary.
- * Deliberately absent: thresholds, ages, capabilities, audiences, proof counts and
- * rewards. Every one of those is a number, and every number in this engine is either
- * something Maor decided or something somebody made up — `routes.ts` carries the spec's
- * own tables and can point at the line each came from. Nobody has written a table for
- * these three. A `minAge: 21` on `PARENTHOOD` would look exactly as authoritative as the
- * `minAge: 21` on OWNER's practice stage, which came out of the spec, and a reader would
- * have no way to tell them apart six months from now. So the model holds the shape and
- * the content decides the substance.
+ * This file owns the track vocabulary and ordering. It deliberately does NOT invent age
+ * thresholds, attraction scores, salary requirements or a "parenthood level": the fiction
+ * decides when a life fact happened and this registry only gives that fact a durable name.
  *
- * **ומה שאין כאן בכלל זה תוכן.** No conversation, no beat, no scene row, no offer. A 2007
- * scene is what plugs in here, and until one exists this file is a seam with nothing on
- * the other side of it — which is a thing the repo is allowed to ship, because it is the
- * opposite of the defect rule 66 is about: a threshold nothing can reach looks healthy in
- * the source, while a registry with no content states its own emptiness in `needsHe`.
+ * The continuation screenplay was authored before this registry existed and already stores
+ * durable facts such as `life:partner`, `life:child` and the first adult work commitment.
+ * `world/milestones.ts` is the compatibility seam: it reconciles those facts into the
+ * `own:track:*` vocabulary instead of rewriting 114 scenes or invalidating old saves.
+ * New content may raise track stages directly once the scene genuinely establishes them.
  *
  * ------------------------------------------------------------------------------------
- * **שלושה כללים שכן מוכרעים כאן, כי שלושתם על המנוע ולא על הבדיה.**
+ * **שלושה כללים של המנוע.**
  *
  * **1 · הדגל הוא `own:`, ולכן הוא שורד חיתוך פרק.** `personFlags` in `events.ts` keeps
- * `own:` across both `day.entered` and `year.entered`. A partnership that began in one
- * chapter has to still be true in the next decade, which is precisely what `own:` is for —
- * it is the same contract `own:route:` signed and for the same reason. Do not change the
- * prefix; `events.ts` is not this file's to edit and the prefix IS the agreement with it.
+ * `own:` across both `day.entered` and `year.entered`. A partnership or parenthood fact
+ * cannot disappear because a calendar page turned.
  *
- * **2 · מזהה שלב הוא מפתח שמירה מהרגע שמשהו מרים אותו.** Nothing raises one today, so
- * every id below can still be renamed for free. The moment a scene writes
- * `own:track:PARTNERSHIP:together` into a save, renaming it drops that fact out of every
- * life that holds it — the same rule chapter ids live under (`content/chapters.ts`). If the
- * words below are wrong, they are wrong NOW and cheaply.
+ * **2 · מזהה שלב הוא מפתח שמירה.** Track stages are now live save vocabulary. Renaming
+ * `first`, `born`, `living` etc. is a migration, not copy-editing.
  *
  * **3 · השלבים הם סדר, לא ציון.** `stages` is ordered and `trackAtLeast` compares
- * positions, which is what lets a condition ask "at least living together". It is not a
- * score, nothing sums it, and there is no apex: a track has no top rung the way a route
- * does, because *"הורות"* is not an achievement with a ceiling.
+ * positions. There is no apex and no "best" family/work state: these are life conditions,
+ * not achievements. Difficulty belongs to the supporter routes and to the collisions the
+ * screenplay creates between commitments.
  */
 
 export type TrackId = 'PARTNERSHIP' | 'WORK' | 'PARENTHOOD'
 
 export type TrackStageDef = {
-  /** a save key from the first time anything raises its flag — see rule 2 above */
+  /** persisted save key once the fiction establishes it */
   id: string
   titleHe: string
 }
@@ -63,17 +51,17 @@ export type TrackStageDef = {
 export type LifeTrackDef = {
   id: TrackId
   titleHe: string
-  /** in order, earliest first. No ages, no thresholds — those belong to content. */
+  /** in order, earliest first. No ages/thresholds here — those belong to content. */
   stages: readonly TrackStageDef[]
-  /** what somebody has to WRITE before this track can happen to anybody */
+  /** remaining authored/gameplay work before the track feels fully systemic */
   needsHe: readonly string[]
 }
 
 /**
  * שלושה מסלולים, ובדיוק שלושה.
  *
- * Maor's sentence ends *"וכד'"* — and so a fourth is expected, and a fourth is not invented
- * here. Adding one is adding a row; guessing which one he meant is adding a claim.
+ * Maor's sentence ends *"וכד'"*; a fourth is not guessed here. Adding one is a product
+ * decision, not a convenience row.
  */
 export const LIFE_TRACKS = [
   {
@@ -85,9 +73,9 @@ export const LIFE_TRACKS = [
       { id: 'home', titleHe: 'בית משותף' },
     ],
     needsHe: [
-      'סצנה שבה השלב נלקח, עם אדם שאפשר היה לומר לו לא',
-      'דמות ב-characters.ts, כי מסלול בלי אדם הוא מונה',
-      'מה זה עושה ליום — זמן, כסף, ולמי אין כוח בערב',
+      'להמשיך להפוך זוגיות למחויבויות יום אמיתיות ולא רק לשיחות',
+      'לקשור בית משותף רק לסצנה שמבססת מגורים משותפים במפורש',
+      'לתת לזוגיות להשפיע על זמן, כסף והחלטות שבת בפרקים מאוחרים',
     ],
   },
   {
@@ -99,9 +87,9 @@ export const LIFE_TRACKS = [
       { id: 'living', titleHe: 'פרנסה' },
     ],
     needsHe: [
-      'סצנה שבה השלב נלקח, וההבדל בינה לבין ג׳וב של אחר צהריים',
-      'מה קורה לשעות של שבת — זו כל השאלה של המסלול הזה מול היציע',
-      'החיבור ל-gigs.ts: מה ממשיך להיות ג׳וב אחרי שיש פרנסה',
+      'לכתוב את המעבר מעבודה ראשונה למקצוע מתוך תוכן קיים ולא מסף מומצא',
+      'להראות בפרקים נבחרים מה עבודה עושה לשעות של שבת',
+      'לשמור את ההבדל בין פרנסה בוגרת לבין ג׳וב של אחר צהריים',
     ],
   },
   {
@@ -113,37 +101,24 @@ export const LIFE_TRACKS = [
       { id: 'raising', titleHe: 'מגדל' },
     ],
     needsHe: [
-      'סצנה שבה השלב נלקח, ופרק שבו הוא מבוגר מספיק',
-      'מה זה עושה ליום — ומה קורה כשיש משחק והילד חולה',
-      'ההמשך של כלל 39: ילד הוא דמות, לא מונה',
+      'להפוך את הילד מדגל לדמות מתמשכת בלי להמציא שם/מין שלא נבחרו',
+      'להכניס התנגשויות יום אמיתיות בין הורות, עבודה והפועל',
+      'להמשיך את כלל 39: ילד הוא דמות, לא מונה',
     ],
   },
-  /**
-   * `as const satisfies` ולא הערה רגילה: `satisfies` בודק את הצורה מול `LifeTrackDef`,
-   * ו-`as const` משאיר את מזהי השלבים כמילים ולא כ-`string` — וזה מה שמאפשר ל-`TrackStageId`
-   * להיות איחוד אמיתי, כך שתנאי שמבקש שלב שלא קיים לא מתקמפל.
-   */
 ] as const satisfies readonly LifeTrackDef[]
 
 export const trackById = (id: TrackId): LifeTrackDef | null => LIFE_TRACKS.find((track) => track.id === id) ?? null
 
-/** every stage id any track declares, so a condition can be typed against the real words */
 export type TrackStageId = (typeof LIFE_TRACKS)[number]['stages'][number]['id']
 
-/**
- * `own:track:<TRACK>:<stage>` — ואותה תחילית בדיוק כמו במסלולים, מאותה סיבה בדיוק.
- *
- * `personFlags` keeps `own:` across a day cut and a year cut. A track written as an
- * ordinary flag would be forgotten at the first chapter boundary, which for an axis whose
- * whole subject is the decade between chapters would mean it could never be true of
- * anybody for longer than one afternoon.
- */
+/** `own:track:<TRACK>:<stage>` — persistent for the same reason life-route titles are. */
 export const trackStageFlag = (id: TrackId, stage: string): string => `own:track:${id}:${stage}`
 
 export const hasTrackStage = (state: LifeState, id: TrackId, stage: string): boolean =>
   flagOn(state, trackStageFlag(id, stage))
 
-/** the furthest stage reached on this track — history, in the registry's own order */
+/** the furthest stage reached on this track — history, in registry order */
 export function trackStageOf(state: LifeState, id: TrackId): TrackStageDef | null {
   const track = trackById(id)
   if (!track) return null
@@ -153,12 +128,9 @@ export function trackStageOf(state: LifeState, id: TrackId): TrackStageDef | nul
 }
 
 /**
- * האם הוא לפחות כאן — the question a `Condition` asks.
- *
- * `minStage` defaults to the track's first stage, so `{ track: { id: 'PARENTHOOD' } }`
- * means "he is a father at all". An unknown stage id answers false rather than throwing,
- * because a mistyped stage in a content file should hide a line, not take the game down —
- * and `tests/life-tiers.test.ts` is what catches the typo.
+ * האם הוא לפחות כאן — `minStage` defaults to the first stage, so a condition may ask only
+ * whether this life track has begun. Unknown stage ids answer false; tests catch the typo
+ * without crashing a save at runtime.
  */
 export function trackAtLeast(state: LifeState, id: TrackId, minStage?: string): boolean {
   const track = trackById(id)
@@ -171,6 +143,6 @@ export function trackAtLeast(state: LifeState, id: TrackId, minStage?: string): 
   return track.stages.findIndex((stage) => stage.id === reached.id) >= wantedIndex
 }
 
-/** every track he is on at all — for a card, a report, or a scene that wants to know */
+/** every track this life is actually on — useful for profile, bridge and content conditions */
 export const tracksOn = (state: LifeState): readonly TrackId[] =>
   LIFE_TRACKS.filter((track) => trackStageOf(state, track.id) !== null).map((track) => track.id)

@@ -211,6 +211,17 @@ export const CHAPTERS: readonly ChapterDef[] = [
     next: '1990',
     bridge: { titleHe: '1986', subHe: 'שבת', ms: 2400 },
     anchorKey: '1986',
+    entry: (state) => {
+      const events: LifeEvent[] = [
+        { t: 'item.gained', item: 'house-key' },
+        { t: 'flag.raised', flag: 'has:key' },
+        { t: 'flag.raised', flag: 'knows:match' },
+      ]
+      if (state.flags['life:a7:refused'] || state.flags['life:a7:promised']) {
+        events.push({ t: 'flag.raised', flag: 'asked:ticket' })
+      }
+      return events
+    },
     playable: true,
   },
   {

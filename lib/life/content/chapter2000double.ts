@@ -55,7 +55,7 @@ export function objectiveTitle(state: LifeState, sceneId: string): string | null
   if (state.chapterDone) return null
   if (state.flags['t:over']) return null
   if (state.flags['t:route']) return sceneId === 'hatikva' ? null : 'שכונת התקווה. שלוש.'
-  return 'תיקו מספיק. איך מגיעים — ועם מי.'
+  return 'האליפות יכולה להיסגר היום. איך מגיעים — ועם מי.'
 }
 
 export const ENDINGS_TITLE: Record<string, EndingCard> = {
@@ -63,7 +63,7 @@ export const ENDINGS_TITLE: Record<string, EndingCard> = {
     id: 'inside',
     titleHe: 'אלופים. אין קרדיטים.',
     bodyHe:
-      'תיקו במגרש קטן בשכונה, ואתם אלופים. לא האמנת עד שאבא — או מי שהיה לידך — הסתכל עליך ואמר את המילה. שתיים ותשעים למדו אותך לא להאמין למספרים לפני השריקה. השריקה באה. האמנת. ועוד ארבעה ימים גמר גביע — אז אף אחד לא הולך לישון.',
+      'השריקה אצלכם לא הספיקה; רק כשהגיעה הידיעה מהמשחק המקביל ידעתם. ואז אתם אלופים. לא האמנת עד שאבא — או מי שהיה לידך — הסתכל עליך ואמר את המילה. שתיים ותשעים למדו אותך לא להאמין למספרים לפני השריקה. השריקה באה. האמנת. ועוד ארבעה ימים גמר גביע — אז אף אחד לא הולך לישון.',
     memoryHe: 'כרטיס ממגרש שכונתי, מודפס עקום. שמרת אותו ישר.',
     memoryItem: 'ticket-stub',
     presence: 'inside',
@@ -89,7 +89,7 @@ export const BEATS_TITLE: Beat[] = [
     do: [
       { a: 'flag', flag: 't:opened' },
       { a: 'events', events: [{ t: 'money.changed', agorot: 8000, why: 'משכורת' }] },
-      { a: 'lines', lines: [{ who: null, text: 'שבת, אמצע מאי. עשרים ושתיים. תיקו היום במגרש קטן בשכונת התקווה — ואתם אלופים. תיקו. רק תיקו.' }, { who: null, text: 'שתיים ותשעים לימדו אותך לא לחשב לפני. אז אתה לא מחשב. אתה רק לא מצליח לאכול.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'שבת, אמצע מאי. עשרים ושתיים. האליפות יכולה להיסגר היום במגרש קטן בשכונת התקווה — אבל המשחק שלכם הוא לא כל החשבון.' }, { who: null, text: 'שתיים ותשעים לימדו אותך לא לחגוג מספר לפני שאתה יודע מה קרה גם במקום האחר. אתה רק לא מצליח לאכול.' }] },
     ],
   },
   {
@@ -184,13 +184,20 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     nameHe: null,
     branches: [
       {
-        lines: [{ who: null, text: 'השריקה. יציע שלם לא בטוח שמותר.' }],
+        lines: [{ who: null, text: 'השריקה אצלכם. היציע מסתכל הצידה, אל רדיו, טלפון, פנים של מישהו שיודע.' }],
         choices: [
-          { id: 'believe', text: 'להאמין. עכשיו.', then: [{ e: 'wellbeing', key: 'happiness', delta: 12 }, { e: 'goto', node: 't-champions' }] },
-          { id: 'wait', text: 'לחכות. שמישהו יגיד את המילה.', when: { lacesIs: 'witness' }, hidden: true, then: [{ e: 'goto', node: 't-champions' }] },
-          { id: 'wait2', text: 'לחכות. שמישהו יגיד את המילה.', when: { none: [{ lacesIs: 'witness' }] }, hidden: true, then: [{ e: 'goto', node: 't-champions' }] },
+          { id: 'listen', text: 'לחפש את הידיעה, לא את החגיגה.', then: [{ e: 'goto', node: 't-confirm' }] },
+          { id: 'wait', text: 'לחכות. 1998 לימדה אותך מה שווה שמועה.', then: [{ e: 'goto', node: 't-confirm' }] },
         ],
       },
+    ],
+  },
+  {
+    id: 't-confirm',
+    nameHe: null,
+    branches: [
+      { when: { flag: 't:with-kobi' }, lines: [{ who: null, text: 'הידיעה מגיעה מהמשחק המקביל. עכשיו החשבון סגור.' }, { who: 'פוגי', text: 'בטוח?' }, { who: 'קובי', text: 'בטוח.' }], then: [{ e: 'flag', flag: 't:confirmed' }, { e: 'goto', node: 't-champions' }] },
+      { lines: [{ who: null, text: 'הידיעה מגיעה מהמשחק המקביל. לא שמועה, לא מישהו שחשב ששמע. עכשיו החשבון סגור.' }], then: [{ e: 'flag', flag: 't:confirmed' }, { e: 'goto', node: 't-champions' }] },
     ],
   },
   {
@@ -253,7 +260,7 @@ export function objectiveDouble(state: LifeState, sceneId: string): string | nul
   if (state.chapterDone) return null
   if (state.flags['d:over']) return null
   if (state.flags['d:final']) return sceneId === 'ramat-gan' ? null : 'רמת גן. הגמר.'
-  return 'ארבעה ימים. שני דברים. לא יותר.'
+  return state.flags['d:pick1'] ? 'עוד אחר הצהריים אחד לפני הגמר. לך למקום שחשוב לך.' : 'יום ראשון אחרי האליפות. הגוף, הבית, העבודה, היציע או האולם — לא הכול.'
 }
 
 export const ENDINGS_DOUBLE: Record<string, EndingCard> = {
@@ -373,9 +380,13 @@ export const BEATS_DOUBLE: Beat[] = [
     do: [
       { a: 'flag', flag: 'd:opened' },
       { a: 'events', events: [{ t: 'money.changed', agorot: 6000, why: 'מה שנשאר' }, { t: 'energy.changed', delta: -35 }] },
-      { a: 'talk', conversation: 'd-days' },
+      { a: 'flag', flag: 'd:afternoon1' }, { a: 'lines', lines: [{ who: null, text: 'יום ראשון. ארבעה ימים לגמר. אין רשימת משימות — יש עיר, גוף, משפחה ואנשים שמחכים. לך לאן שאתה בוחר.' }] },
     ],
   },
+  { id: 'd-home-afternoon', at: 'home', trigger: 'enter', when: { flag: 'd:opened', none: [{ flag: 'd:final' }] }, do: [{ a: 'talk', conversation: 'd-home-afternoon' }] },
+  { id: 'd-kiosk-afternoon', at: 'kiosk', trigger: 'enter', when: { flag: 'd:opened', none: [{ flag: 'd:final' }] }, do: [{ a: 'talk', conversation: 'd-kiosk-afternoon' }] },
+  { id: 'd-gate5-afternoon', at: 'bloomfield-outside', trigger: 'enter', when: { flag: 'd:opened', none: [{ flag: 'd:final' }] }, do: [{ a: 'talk', conversation: 'd-gate5-afternoon' }] },
+  { id: 'd-uss-afternoon', at: 'ussishkin-outside', trigger: 'enter', when: { flag: 'd:opened', none: [{ flag: 'd:final' }] }, do: [{ a: 'talk', conversation: 'd-uss-afternoon' }] },
   {
     id: 'd-stadium',
     at: 'ramat-gan',
@@ -391,98 +402,55 @@ export const BEATS_DOUBLE: Beat[] = [
 
 export const CONVERSATIONS_DOUBLE: Conversation[] = [
   {
-    id: 'd-days',
-    nameHe: null,
-    branches: [
-      {
-        lines: [
-          { who: null, text: 'ארבעה ימים בין אליפות לגמר. לא ישנת בראשון. הגוף מבקש חשבון.' },
-          { who: null, text: 'יש שבעה דברים שצריך. יש זמן לשניים.' },
-        ],
-        choices: [
-          { id: 'sleep', text: 'לישון. יום שלם.', then: [{ e: 'energy', delta: 40 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
-          { id: 'work', text: 'משמרת כפולה. תשעים שקל, וכרטיס לגמר עולה שישים.', then: [{ e: 'money', agorot: 9000, why: 'משמרת כפולה' }, { e: 'energy', delta: -15 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
-          { id: 'family', text: 'ערב עם אבא ואמא. לתקן משהו.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 6 }, { e: 'energy', delta: 10 }, { e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-days-2' }] },
-          { id: 'gate5', text: 'להכין בד עם שער 5. לילה שלם.', when: { gateEver: 'gate5' }, noteHe: 'אף פעם לא עמדת בשער 5. הבד לא שלך.', then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'energy', delta: -20 }, { e: 'flag', flag: 'd:pick1' }, { e: 'flag', flag: 'life:banner:2000' }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'לילה שלם על הרצפה של מחסן, עם צבע שמתייבש לאט.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'הכין בד' }, { e: 'goto', node: 'd-days-2' }] },
-          /**
-           * הדף עוד בחלון, שנה אחרי — ויש בו שם אחד לא נכון.
-           *
-           * הבחירה מוסתרת למי שלא תלה דף שם; אין על מה לחזור. מה שהיא עולה הוא אחד משני
-           * הדברים שיש זמן אליהם בארבעה הימים האלה, וזה המחיר הנכון: תיקון שלא עולה כלום
-           * הוא הודעה, לא תיקון.
-           */
-          { id: 'page', text: 'הדף בחלון של רפי. יש בו שם לא נכון, ואתה יודע את זה מאז.', when: { flag: 'life:page:pinned' }, hidden: true, then: [{ e: 'flag', flag: 'd:pick1' }, { e: 'goto', node: 'd-page' }] },
-        ],
-      },
+    id: 'd-home-afternoon', nameHe: null, branches: [
+      { lines: [{ who: null, text: 'בבית השקט נשמע פתאום חזק יותר מהאליפות.' }], choices: [
+        { id: 'sleep', text: 'לישון באמת.', when: { none: [{ flag: 'd:pick1:sleep' }] }, then: [{ e: 'energy', delta: 40 }, { e: 'flag', flag: 'd:pick1:sleep' }, { e: 'goto', node: 'd-next-afternoon' }] },
+        { id: 'family', text: 'לשבת עם אבא ואמא בלי לדבר על הגמר.', when: { none: [{ flag: 'd:pick1:family' }] }, then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 6 }, { e: 'energy', delta: 10 }, { e: 'flag', flag: 'd:pick1:family' }, { e: 'goto', node: 'd-next-afternoon' }] },
+        { id: 'box', text: 'לעלות לחדר ולפתוח את הקופסה האדומה.', when: { none: [{ flag: 'd:pick1:box' }] }, then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'flag', flag: 'd:pick1:box' }, { e: 'box' }, { e: 'goto', node: 'd-box' }] },
+      ] },
     ],
   },
   {
-    /**
-     * *"השם שלי גם על התיקון"* — והצורה של התיקון היא כל ההישג.
-     *
-     * הטעות **נשארת קריאה**. הדף לא יורד, לא נמחק ולא נכתב מחדש; ליד הפסקה עם השם
-     * הלא-נכון נתלה פתק שני, קטן יותר, בכתב היד של אותו אדם. ככה עושים את זה כשאין
-     * מערכת, אין עורך ואין מקום לתלות בו חוץ מחלון של קיוסק — ומי שמוחק במקום להוסיף
-     * מוחק גם את העדות שהוא טעה.
-     *
-     * `public_correction` נרשם על אותו נושא כמו `written_account` מ-1999, כי זו אותה
-     * טענה — רק שנה אחר כך ועם שם אחד שתוקן.
-     */
+    id: 'd-kiosk-afternoon', nameHe: null, branches: [
+      { lines: [{ who: null, text: 'אצל רפי יש עבודה, ויש בחלון דף ישן שאתה מכיר טוב מדי.' }], choices: [
+        { id: 'work', text: 'לקחת משמרת. הגמר עולה כסף.', when: { none: [{ flag: 'd:pick1:work' }] }, then: [{ e: 'money', agorot: 9000, why: 'משמרת כפולה' }, { e: 'energy', delta: -15 }, { e: 'flag', flag: 'd:pick1:work' }, { e: 'goto', node: 'd-next-afternoon' }] },
+        { id: 'page', text: 'לחזור לדף ולתקן את מה שאתה יודע שלא נכון.', when: { all: [{ flag: 'life:page:pinned' }], none: [{ flag: 'd:pick1:page' }] }, hidden: true, then: [{ e: 'flag', flag: 'd:pick1:page' }, { e: 'goto', node: 'd-page' }] },
+      ] },
+    ],
+  },
+  {
+    id: 'd-gate5-afternoon', nameHe: null, branches: [
+      { when: { gateEver: 'gate5' }, lines: [{ who: null, text: 'ליד בלומפילד כבר פרוש בד על הרצפה. אף אחד לא קורא לזה משימה.' }], choices: [{ id: 'banner', text: 'לרדת על הברכיים ולעבוד איתם.', when: { none: [{ flag: 'd:pick1:gate5' }] }, then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'energy', delta: -20 }, { e: 'flag', flag: 'd:pick1:gate5' }, { e: 'flag', flag: 'life:banner:2000' }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'לילה שלם על הרצפה של מחסן, עם צבע שמתייבש לאט.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'הכין בד' }, { e: 'goto', node: 'd-next-afternoon' }] }] },
+      { lines: [{ who: null, text: 'אתה מכיר את המקום. לא את העבודה הזאת. היום אין לך סיבה להישאר.' }] },
+    ],
+  },
+  {
+    id: 'd-uss-afternoon', nameHe: null, branches: [
+      { lines: [{ who: 'שחור', text: 'אליפות יפה. עכשיו תרים את הצד הזה.' }], choices: [{ id: 'help', text: 'להרים. ברור.', when: { none: [{ flag: 'd:pick1:uss' }] }, then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'energy', delta: -10 }, { e: 'flag', flag: 'd:pick1:uss' }, { e: 'goto', node: 'd-next-afternoon' }] }] },
+    ],
+  },
+  {
     id: 'd-page',
     nameHe: null,
     branches: [
       {
         lines: [
-          { who: null, text: 'הדף עוד שם. הסלוטייפ הצהיב, הנייר התגלגל בפינות, ומישהו סימן שורה בעיפרון — לא אתה.' },
-          { who: null, text: 'שני בחורים עומדים מולו. אחד מהם מצטט משפט ממנו בקול, כאילו זה דבר ידוע, ולא יודע שאתה כתבת אותו.' },
-          { who: null, text: 'ובפסקה השלישית יש שם של מישהו שלא היה שם באותו ערב. ידעת את זה כבר אז, וזה נשאר תלוי שנה.' },
+          { who: null, text: 'הדף הישן עדיין שם. הפעם אתה לא רק זוכר מה כאב בו — אתה יודע מה צריך לתקן.' },
+          { who: null, text: 'אתה מוסיף הערה קטנה בשוליים ומשאיר את המקור ליד. לא מנצח ויכוח; משאיר עקבה אמינה יותר.' },
         ],
-        choices: [
-          {
-            id: 'beside',
-            text: 'לכתוב פתק תיקון ולתלות אותו **ליד** הדף.',
-            then: [
-              { e: 'proof', kind: 'public_correction', proofId: 'public_correction:{chapter}:page', subjectHe: PAGE_SUBJECT, audience: 'public', delta: 2, noteHe: 'פתק קטן ליד הפסקה השלישית: מי באמת היה שם, ומי כתב את הטעות.' },
-              { e: 'heard', proofId: 'public_correction:{chapter}:page' },
-              { e: 'personality', key: 'honesty', delta: 4 },
-              { e: 'skill', skill: 'communication', delta: 2, why: 'תיקן בפומבי' },
-              { e: 'redheart', key: 'historyMemory', delta: 4 },
-              { e: 'toast', text: 'הטעות נשארה קריאה. זה כל העניין.', tone: 'plain' },
-              { e: 'goto', node: 'd-days-2' },
-            ],
-          },
-          {
-            id: 'replace',
-            text: 'להוריד את הדף ולכתוב אותו מחדש, נכון.',
-            then: [
-              { e: 'personality', key: 'stubbornness', delta: 2 },
-              { e: 'redheart', key: 'historyMemory', delta: 2 },
-              { e: 'toast', text: 'הדף החדש נקי, ואף אחד לא יֵדע שהיה שם שם אחר. גם אתה תשכח, בסוף.', tone: 'plain' },
-              { e: 'goto', node: 'd-days-2' },
-            ],
-          },
-          {
-            id: 'leave',
-            text: 'להשאיר. זה ישן.',
-            then: [{ e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'goto', node: 'd-days-2' }],
-          },
+        then: [
+          { e: 'redheart', key: 'historyMemory', delta: 5 },
+          { e: 'personality', key: 'honesty', delta: 2 },
+          { e: 'flag', flag: 'd:pick1:page' },
+          { e: 'goto', node: 'd-next-afternoon' },
         ],
       },
     ],
   },
   {
-    id: 'd-days-2',
-    nameHe: null,
-    branches: [
-      {
-        lines: [{ who: null, text: 'עוד דבר אחד. רק אחד.' }],
-        choices: [
-          { id: 'uss', text: 'ערב באוסישקין. שחור צריך עזרה, גם השבוע.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'energy', delta: -10 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
-          { id: 'ticket', text: 'לסדר כרטיס — שישים שקל — והסעה. ברור.', then: [{ e: 'give', item: 'ticket-stub' }, { e: 'flag', flag: 'd:ticket' }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
-          { id: 'box', text: 'לפתוח את הקופסה האדומה. לעבור על הכל.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'wellbeing', key: 'happiness', delta: 4 }, { e: 'flag', flag: 'd:final' }, { e: 'box' }, { e: 'goto', node: 'd-box' }] },
-          { id: 'army', text: 'לסגור חוב עם מישהו שכיסה עליך פעם.', when: { armyAbove: { key: 'coveredForOthers', min: 0 } }, noteHe: 'אף אחד לא כיסה עליך בצבא. אין חוב.', then: [{ e: 'army', key: 'leaveDebt', delta: -2 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
-        ],
-      },
+    id: 'd-next-afternoon', nameHe: null, branches: [
+      { when: { flag: 'd:pick1' }, lines: [{ who: null, text: 'זה הדבר השני. מחר הגמר.' }], then: [{ e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
+      { lines: [{ who: null, text: 'יום שלישי. נשאר עוד אחר הצהריים אחד לפני הגמר.' }], then: [{ e: 'flag', flag: 'd:pick1' }] },
     ],
   },
   {

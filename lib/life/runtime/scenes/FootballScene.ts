@@ -352,7 +352,6 @@ export class FootballScene extends Phaser.Scene {
       { t: 'energy.changed', delta: -16 },
       { t: 'flag.raised', flag: 'played:football' },
       { t: 'trait.shifted', trait: 'footballAffinity', delta: won ? 8 : 5 },
-      { t: 'trait.shifted', trait: 'streetSmarts', delta: 3 },
       { t: 'bond.shifted', who: 'ofir', delta: won ? 6 : 3 },
     )
     if (won) this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'won:football' })

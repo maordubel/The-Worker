@@ -137,6 +137,26 @@ export function cutsceneCard(scene: HistoricalCutscene, anchor: HistoricalAnchor
  * it, in the world, with the child in it.
  */
 export const CUTSCENES: Record<string, HistoricalCutscene> = {
+  '1993-cup': {
+    id: '1993-cup', youtubeId: 'I5FHT27dRgY', titleHe: 'גמר הגביע — ארכיון', subtitleHe: 'אחרי שפוגי כבר יודע מה קרה',
+    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=I5FHT27dRgY', completionFlag: 'cutscene:1993-cup', watchedFlag: 'watched:1993-cup', nextObjectiveHe: 'הלילה עוד לא נגמר.', fallbackHe: 'הארכיון לא נפתח. הזיכרון המאויר ממשיך.',
+  },
+  '1999-basket-context': {
+    id: '1999-basket-context', youtubeId: 'GFRF2t7jXXE', titleHe: '1999 — הקשר מהארכיון', subtitleHe: 'תיעוד תקופה, לא צילום של משחק הירידה',
+    sourceTitle: 'תיעוד תקופה — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=GFRF2t7jXXE', completionFlag: 'cutscene:1999-basket-context', watchedFlag: 'watched:1999-basket-context', nextObjectiveHe: 'חזרה לתל אביב.', fallbackHe: 'התיעוד לא נפתח. הסיפור ממשיך בלי להמציא צילום שלא קיים.',
+  },
+  '2000-title': {
+    id: '2000-title', youtubeId: 'pdQLDp_-Xgo', titleHe: 'האליפות — ארכיון', subtitleHe: 'רק אחרי שהאישור הגיע',
+    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=pdQLDp_-Xgo', completionFlag: 'cutscene:2000-title', watchedFlag: 'watched:2000-title', nextObjectiveHe: 'עוד ארבעה ימים גמר גביע.', fallbackHe: 'הארכיון לא נפתח. החגיגה המאוירת ממשיכה.',
+  },
+  '2000-double': {
+    id: '2000-double', youtubeId: 'RO14bGFcD-Q', titleHe: 'גמר הגביע — ארכיון', subtitleHe: 'הדאבל',
+    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=RO14bGFcD-Q', completionFlag: 'cutscene:2000-double', watchedFlag: 'watched:2000-double', nextObjectiveHe: 'הדרך הביתה.', fallbackHe: 'הארכיון לא נפתח. הגמר והדרך הביתה ממשיכים במשחק.',
+  },
+  '2000-penalties': {
+    id: '2000-penalties', youtubeId: 'EGlBnUQN5AQ', titleHe: 'הפנדלים — ארכיון', subtitleHe: 'רגע ממוקד מתוך הגמר',
+    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=EGlBnUQN5AQ', completionFlag: 'cutscene:2000-penalties', watchedFlag: 'watched:2000-penalties', nextObjectiveHe: 'לנשום. ואז הביתה.', fallbackHe: 'הקטע לא נפתח. רגע הפנדלים המאויר ממשיך.',
+  },
   '1986-championship': {
     id: '1986-championship',
     youtubeId: 'dFykPEa8NAE',

@@ -194,7 +194,7 @@ const CONVERSATIONS: Conversation[] = [
       {
         when: { flag: 'asked:ticket' },
         lines: [
-          { who: 'קובי', text: 'אמרתי לא. גמרנו לדבר על זה.' },
+          { who: 'קובי', text: 'שבוע שעבר אמרתי לא. אל תתחיל שוב.' },
           { who: null, text: 'הוא לא כועס. הוא פשוט לא זז.' },
         ],
       },
@@ -220,8 +220,8 @@ const CONVERSATIONS: Conversation[] = [
         choices: [
           {
             id: 'match',
-            text: 'יש היום משחק?',
-            then: [{ e: 'goto', node: 'kobi-match' }],
+            text: 'אתה עדיין לא לוקח אותי?',
+            then: [{ e: 'goto', node: 'kobi-refuse' }],
           },
           {
             id: 'nothing',
@@ -608,7 +608,6 @@ const CONVERSATIONS: Conversation[] = [
         then: [
           { e: 'bond', who: 'ofir', delta: 3 },
           { e: 'flag', flag: 'knows:pitch' },
-          { e: 'trait', trait: 'streetSmarts', delta: 2 },
         ],
       },
     ],
@@ -663,7 +662,6 @@ const CONVERSATIONS: Conversation[] = [
         ],
         then: [
           { e: 'flag', flag: 'knows:match' },
-          { e: 'trait', trait: 'streetSmarts', delta: 4 },
           { e: 'redheart', key: 'community', delta: 4 },
         ],
       },
@@ -672,7 +670,7 @@ const CONVERSATIONS: Conversation[] = [
           { who: 'אילן השכן', text: 'תגיד לאמא שלך שהמים חזרו.' },
           { who: 'אילן השכן', text: 'ואל תעבור את הכביש הגדול לבד. שמעת?' },
         ],
-        then: [{ e: 'trait', trait: 'streetSmarts', delta: 3 }],
+        then: [],
       },
     ],
   },
@@ -686,7 +684,6 @@ const CONVERSATIONS: Conversation[] = [
         ],
         then: [
           { e: 'trait', trait: 'footballAffinity', delta: 2 },
-          { e: 'trait', trait: 'streetSmarts', delta: 3 },
           { e: 'redheart', key: 'terraceCulture', delta: 4 },
         ],
       },
@@ -703,7 +700,7 @@ const CONVERSATIONS: Conversation[] = [
         then: [
           { e: 'money', agorot: 100, why: 'מציאה' },
           { e: 'flag', flag: 'found:coin' },
-          { e: 'trait', trait: 'streetSmarts', delta: 4 },
+          { e: 'personality', key: 'curiosity', delta: 1 },
           { e: 'toast', text: 'קיבלת 1 ₪' },
         ],
       },

@@ -188,10 +188,10 @@ export class PassageScene extends Phaser.Scene {
       energy: 100,
       showEnergy: false,
       place: ROOM.titleHe,
-      objective: 'החדר שלך. תסתכל מסביב.',
+      objective: 'אם משהו בחדר מושך אותך — תסתכל. הזמן ימשיך גם בלעדיו.',
       year: this.ctx.engine.state.year,
       scene: 'bedroom',
-      hint: 'ארבע שנים עוברות בחדר אחד. תסתכל על מה שהשתנה.',
+      hint: 'בחר זיכרון אחד, או תן לזמן להמשיך.',
       waitingHe: null,
     })
 
@@ -304,7 +304,7 @@ export class PassageScene extends Phaser.Scene {
       this.passYear(n)
       this.time.delayedCall(900, () => {
         this.ctx.dialogue.startLines([{ who: null, text: spot.def.afterHe }], () => {
-          if (this.seen >= this.passage.objects.length) this.finish()
+          if (this.seen >= 1) this.finish()
         })
       })
     })
@@ -328,10 +328,10 @@ export class PassageScene extends Phaser.Scene {
       energy: 100,
       showEnergy: false,
       place: ROOM.titleHe,
-      objective: n >= this.passage.objects.length ? '' : 'החדר שלך. תסתכל מסביב.',
+      objective: n >= 1 ? '' : 'אם משהו בחדר מושך אותך — תסתכל.',
       year: this.ctx.engine.state.year,
       scene: 'bedroom',
-      hint: 'ארבע שנים עוברות בחדר אחד. תסתכל על מה שהשתנה.',
+      hint: 'זיכרון אחד מספיק. הזמן לא מחכה לקליק רביעי.',
       waitingHe: null,
     })
     const dark = 1 - n * 0.09
@@ -368,7 +368,7 @@ export class PassageScene extends Phaser.Scene {
     this.ctx.bus.emit('prompt', null)
     this.ctx.bus.emit('controls', { visible: false })
     this.ctx.bus.emit('toast', { text: this.passage.toastHe, tone: 'plain' })
-    this.time.delayedCall(1600, () => {
+    const cross = () => this.time.delayedCall(900, () => {
       this.cameras.main.fadeOut(900, 0, 0, 0)
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
         const into = this.passage.into
@@ -385,5 +385,16 @@ export class PassageScene extends Phaser.Scene {
         })
       })
     })
+
+    if (this.passage.flag === 'life:passage-1990') {
+      this.ctx.bus.emit('card', { titleHe: '1989', subHe: 'לראשונה: ירידה', ms: 2200 })
+      this.time.delayedCall(2300, () => {
+        this.ctx.dialogue.startLines([
+          { who: null, text: 'שנה לפני העלייה, הייתה הירידה. בפעם הראשונה.' },
+          { who: null, text: 'קובי קיפל את העיתון והשאיר אותו על השולחן. אף אחד בבית לא הפך את זה לנאום.' },
+          { who: null, text: 'ב-1990, כששואלים כמה צריך, אתה כבר יודע למה המספר חשוב.' },
+        ], cross)
+      })
+    } else cross()
   }
 }

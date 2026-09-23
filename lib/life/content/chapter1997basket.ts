@@ -39,7 +39,7 @@ export function objectiveHall(state: LifeState): string | null {
   if (state.chapterDone) return null
   if (state.flags[H2]) return state.flags['h2:done'] ? null : 'שנה אחרי. אותו אולם. עולים.'
   if (state.flags['h1:decided']) return null
-  return 'ערב ירידה. שחור צריך ידיים. אבא צריך אותך בבלומפילד.'
+  return '27 במרץ. עדיין אפשר להישאר בחיים. שחור צריך ידיים; אבא מחכה במקום אחר.'
 }
 
 export const ENDINGS_HALL: Record<string, EndingCard> = {
@@ -76,7 +76,7 @@ export const BEATS_HALL: Beat[] = [
     do: [
       { a: 'flag', flag: H1 },
       { a: 'events', events: [{ t: 'money.changed', agorot: 3000, why: 'חופשה' }] },
-      { a: 'lines', lines: [{ who: null, text: 'אביב. חופשה של ארבעים ושמונה שעות. הגעת ישר מהתחנה, עם התיק, לפינה של אוסישקין.' }, { who: null, text: 'הערב, אם זה נגמר רע, הקבוצה הזאת יורדת ליגה בפעם הראשונה מאז שנוסדה ב-1935. ובאותו ערב בדיוק, בבלומפילד, משחק שאבא אמר עליו "אתה חייב להיות".' }] },
+      { a: 'lines', lines: [{ who: null, text: 'אביב. חופשה של ארבעים ושמונה שעות. הגעת ישר מהתחנה, עם התיק, לפינה של אוסישקין.' }, { who: null, text: '27 במרץ 1997. עוד לא ערב הירידה. זה ערב שבו עדיין אפשר להשאיר את הסיפור פתוח. ובאותו זמן אבא מחכה לך במקום אחר.' }] },
       { a: 'talk', conversation: 'h1-corner' },
     ],
   },
@@ -89,11 +89,8 @@ export const BEATS_HALL: Beat[] = [
     do: [
       { a: 'flag', flag: 'h1:decided' },
       { a: 'flag', flag: 'h1:hall' },
-      { a: 'card', titleHe: 'הערב האחרון', subHe: 'אוסישקין · ליגה', ms: 2400 },
-      { a: 'match', script: 'hall-97' },
-      { a: 'events', events: DAY(H2, 1998, 2, at(19, 30), 'אביב 1998') },
-      { a: 'card', titleHe: 'שנה אחרי', subHe: 'אוסישקין', ms: 2600 },
-      { a: 'travel', to: 'ussishkin-outside', spawn: 'start' },
+      { a: 'card', titleHe: '27.3.1997', subHe: 'אוסישקין · נשארים בחיים', ms: 2400 },
+      { a: 'talk', conversation: 'h1-chain' },
     ],
   },
   {
@@ -101,10 +98,18 @@ export const BEATS_HALL: Beat[] = [
     trigger: 'clock',
     when: { flag: 'h1:football', none: [{ flag: H2 }] },
     do: [
-      { a: 'card', titleHe: 'בלומפילד', subHe: 'באותו ערב', ms: 2400 },
+      { a: 'card', titleHe: '27.3.1997', subHe: 'אתה במקום אחר', ms: 2400 },
       { a: 'talk', conversation: 'h1-bloomfield' },
+    ],
+  },
+  {
+    id: 'h1-chain-to-h2',
+    trigger: 'clock',
+    when: { flag: 'h1:chain-complete', none: [{ flag: H2 }] },
+    delayMs: 700,
+    do: [
       { a: 'events', events: DAY(H2, 1998, 2, at(19, 30), 'אביב 1998') },
-      { a: 'card', titleHe: 'שנה אחרי', subHe: 'אוסישקין', ms: 2600 },
+      { a: 'card', titleHe: 'שנה אחרי', subHe: 'אוסישקין', ms: 2200 },
       { a: 'travel', to: 'ussishkin-outside', spawn: 'start' },
     ],
   },
@@ -186,6 +191,30 @@ export const CONVERSATIONS_HALL: Conversation[] = [
     ],
   },
   {
+    id: 'h1-chain',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הערב באוסישקין השאיר את הקבוצה בחיים. לא יותר.' },
+          { who: null, text: '30 במרץ. אילת. הפסד בחוץ, והשליטה כבר לא בידיים שלכם.' },
+          { who: null, text: 'המחזור האחרון מגיע, והפועל בכלל לא משחקת. קבוצה אחת נעלמה מהליגה, והחיים שלכם תלויים עכשיו במשחק של מישהו אחר.' },
+          { who: null, text: 'הידיעה מהרצליה מגיעה בלי כדור ביד ובלי פרקט מתחת לרגליים. הפעם זה סופי: הירידה הראשונה.' },
+        ],
+        choices: [
+          { id: 'write', text: 'לבקש מלימור לרשום את התאריך.', then: [{ e: 'rel', who: 'crowd-limor', axis: 'sharedHistory', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'redheart', key: 'historyMemory', delta: 4 }, { e: 'goto', node: 'h1-after-chain' }] },
+          { id: 'carry', text: 'לעזור לשחור לסגור את הערב.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 4 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 5 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'goto', node: 'h1-after-chain' }] },
+          { id: 'home', text: 'ללכת לאבא. אין מה לפתור עכשיו.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'institution', key: 'ussishkinWound', delta: 7 }, { e: 'goto', node: 'h1-after-chain' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'h1-after-chain',
+    nameHe: null,
+    branches: [{ lines: [{ who: null, text: 'שנה עוברת. העלייה חזרה לא מוחקת את הדרך שבה ירדתם.' }], then: [{ e: 'flag', flag: 'h1:chain-complete' }] }],
+  },
+  {
     id: 'h1-out',
     nameHe: null,
     branches: [{ lines: [{ who: null, text: 'בחוץ, בפינה, סוקו רשם בפנקס. את התאריך קודם. גם את זה כותבים.' }] }],
@@ -197,12 +226,12 @@ export const CONVERSATIONS_HALL: Conversation[] = [
       {
         lines: [
           { who: null, text: 'שער 7. אבא, ו"טוב שבאת" בשתי מילים. המשחק היה משחק של הישרדות — לא שלהם, שלכם. כל כדור היה שאלה.' },
-          { who: null, text: 'במחצית, מישהו עם טרנזיסטור מאחור: "באוסישקין נגמר. ירדו." אבא שמע. הסתכל עליך. לא אמר כלום.' },
-          { who: 'קובי', text: 'היית צריך להיות שם?' },
+          { who: null, text: 'מישהו עם טרנזיסטור מאחור מעביר את הידיעה מאוסישקין: עוד נשארו בחיים. אבא שמע. הסתכל עליך. לא אמר כלום.' },
+          { who: 'קובי', text: 'רצית להיות שם?' },
         ],
         choices: [
-          { id: 'yes', text: '"כן."', then: [{ e: 'rel', who: 'kobi', axis: 'trust', delta: 3 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'wellbeing', key: 'regret', delta: 6 }, { e: 'presence', mode: 'heard-from-friend' }] },
-          { id: 'here', text: '"הייתי צריך להיות פה."', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'redheart', key: 'familyTradition', delta: 3 }, { e: 'institution', key: 'ussishkinWound', delta: 5 }, { e: 'presence', mode: 'heard-from-friend' }] },
+          { id: 'yes', text: '"כן."', then: [{ e: 'rel', who: 'kobi', axis: 'trust', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'presence', mode: 'heard-from-friend' }, { e: 'goto', node: 'h1-chain' }] },
+          { id: 'here', text: '"הייתי צריך להיות פה."', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'redheart', key: 'familyTradition', delta: 3 }, { e: 'presence', mode: 'heard-from-friend' }, { e: 'goto', node: 'h1-chain' }] },
         ],
       },
     ],

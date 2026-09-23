@@ -181,9 +181,8 @@ export const ERA_1986: Era = {
     if (state.flags['entry:granted']) return null
     if (sceneId === 'bloomfield-outside') return OBJECTIVES.atGround
     if (state.flags['kobi:left']) return OBJECTIVES.onTheWay
-    if (state.flags['knows:match']) return OBJECTIVES.matchToday
-    if ((state.inventory['house-key'] ?? 0) > 0) return OBJECTIVES.askDad
-    return OBJECTIVES.findKey
+    if (state.flags['knows:match']) return OBJECTIVES.decideToday
+    return OBJECTIVES.matchToday
   },
   goal: goal1986,
   cutscene: '1986-championship',

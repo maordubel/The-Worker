@@ -237,6 +237,7 @@ export const OBJECTIVES = {
   findKey: 'שבת בבוקר. המפתח במגירה.',
   askDad: 'אבא בסלון.',
   matchToday: 'היום יש משחק.',
+  decideToday: 'אבא יוצא לבלומפילד. הוא כבר אמר לא. מה אתה עושה עם זה?',
   afterKobi: 'אבא יצא.',
   onTheWay: 'ללכת אחרי האנשים, מזרחה.',
   atGround: 'למצוא דרך פנימה.',

@@ -50,7 +50,7 @@ export function objectiveSeed(state: LifeState, sceneId: string): string | null 
   if (state.chapterDone) return null
   if (state.flags['seed:list']) return null
   if (state.flags['seed:hall']) return sceneId === 'kiosk' ? null : 'הקיוסק. שער 5 מחכה.'
-  return 'ערב ירידה. שוב. האולם.'
+  return '29 במרץ. לצפון. צריך את המשחק שלכם וגם חדשות מהרצליה.'
 }
 
 export const ENDINGS_SEED: Record<string, EndingCard> = {
@@ -58,7 +58,7 @@ export const ENDINGS_SEED: Record<string, EndingCard> = {
     id: 'list',
     titleHe: 'הרשימה הראשונה',
     bodyHe:
-      'ירדו שוב, ובמקום לשבור משהו כתבת דף. שמות. מה יש. מה חסר. מה לא מוכנים לוותר עליו. לא ידעת בשביל מה. סוקו אמר "תשמור". שמרת. הדף הזה ישן במגירה שנים לפני שמישהו קורא אותו בקול.',
+      'ירדו שוב, והדרך חזרה מהצפון הייתה ארוכה. במקום לשבור משהו כתבת דף. שמות. מה יש. מה חסר. מה לא מוכנים לוותר עליו. לא ידעת בשביל מה. סוקו אמר "תשמור". שמרת. הדף הזה ישן במגירה שנים לפני שמישהו קורא אותו בקול.',
     memoryHe: 'דף משבצות, שלוש כותרות, כתב יד רועד בשורה הראשונה ויציב בשלישית.',
     memoryItem: 'folded-paper',
     presence: 'inside',
@@ -67,7 +67,7 @@ export const ENDINGS_SEED: Record<string, EndingCard> = {
     id: 'anger',
     titleHe: 'רק כעס',
     bodyHe:
-      'ירדו שוב, וכעסת. על הבעלים, על השופטים, על מי שלא בא. כעס זה אמיתי וזה גם קל. סוקו הציע דף. לא לקחת. שנים אחר כך תחפש את הדף הזה ולא תמצא, כי לא כתבת אותו.',
+      'ירדו שוב, ובדרך חזרה מהצפון כעסת. על הבעלים, על השופטים, על מי שלא בא. כעס זה אמיתי וזה גם קל. סוקו הציע דף. לא לקחת. שנים אחר כך תחפש את הדף הזה ולא תמצא, כי לא כתבת אותו.',
     memoryHe: 'כרטיס מהערב. קרוע לשניים בכוונה.',
     memoryItem: 'hall-ticket',
     presence: 'inside',
@@ -84,21 +84,19 @@ export const BEATS_SEED: Beat[] = [
     do: [
       { a: 'flag', flag: 'seed:opened' },
       { a: 'events', events: [{ t: 'money.changed', agorot: 5000, why: 'משכורת ראשונה' }] },
-      { a: 'lines', lines: [{ who: null, text: 'עשרים ואחת. אחרי הצבא: עבודה מהבוקר, אולם בערב. חמישים שקל שנשארו ממשכורת ראשונה, אחרי מה שהשארת לאמא על השולחן.' }, { who: null, text: 'הערב האחרון של עונה שכולם יודעים איך היא נגמרת. שנה אחרי שעלו. אף אחד לא אמר אז "הבראנו". צדקו.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'עשרים ואחת. אחרי הצבא: עבודה מהבוקר, אולם בערב. חמישים שקל שנשארו ממשכורת ראשונה, אחרי מה שהשארת לאמא על השולחן.' }, { who: null, text: '29 במרץ 1999. הפינה של אוסישקין היא רק נקודת היציאה. המשחק בצפון, וגם משחק אחר קובע אם נשארים.' }] },
       { a: 'talk', conversation: 'seed-corner' },
     ],
   },
   {
     id: 'seed-hall',
-    at: 'ussishkin-hall',
+    at: 'bus-station',
     trigger: 'enter',
     when: { flag: 'seed:opened', none: [{ flag: 'seed:hall' }] },
     delayMs: 900,
     do: [
-      { a: 'card', titleHe: 'הערב האחרון', subHe: 'שוב', ms: 2200 },
-      { a: 'match', script: 'hall-99' },
-      { a: 'flag', flag: 'seed:hall' },
-      { a: 'toast', text: 'הקיוסק. אסף אמר שנשארים שם עד שרפי סוגר.', tone: 'plain' },
+      { a: 'card', titleHe: '29.3.1999', subHe: 'גליל עליון · בחוץ', ms: 2200 },
+      { a: 'talk', conversation: 'seed-away' },
     ],
   },
   {
@@ -230,6 +228,24 @@ export const CONVERSATIONS_SEED: Conversation[] = [
            * ההפרדה הזאת היא מה שמאפשר גם לתקן אותו אחר כך, בלי למחוק אותו.
            */
           { id: 'help', text: '"תן, אני אכתוב את הערב."', then: [{ e: 'rel', who: 'soko', axis: 'trust', delta: 5 }, { e: 'remember', who: 'soko', eventId: 'wrote-the-night-1999', significance: 'notable' }, { e: 'redheart', key: 'historyMemory', delta: 5 }, { e: 'flag', flag: 'seed:wrote' }, { e: 'flag', flag: 'life:page:1999' }, { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:page', subjectHe: PAGE_SUBJECT, noteHe: 'מה שהיה באולם, בשעה שהיה, בכתב יד של מישהו שהיה שם.' }, { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:page', subjectHe: PAGE_SUBJECT, noteHe: 'שני עמודים במחברת של סוקו. הוא לא תיקן לך מילה.' }, { e: 'skill', skill: 'communication', delta: 3, why: 'כתב את הערב' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'seed-away',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'האוטובוס עולה צפונה. אף אחד לא שר הרבה. לפני המשחק כבר ברור ששני לוחות תוצאות חשובים הערב, לא אחד.' },
+          { who: null, text: 'מקנטס לא משחק. כסף שלא שולם הפך מחדר הנהלה לחור בסגל.' },
+          { who: null, text: 'כשהערב נגמר אין חישוב להציל: גם המשחק שלכם וגם התלות בהרצליה נסגרו נגדכם. יורדים שוב.' },
+          { who: 'שחור', text: 'כשחוזרים לתל אביב לא הולכים הביתה. לרפי.' },
+        ],
+        choices: [
+          { id: 'sit', text: 'לשבת ליד שחור בדרך חזרה.', then: [{ e: 'rel', who: 'shachor', axis: 'sharedHistory', delta: 5 }, { e: 'presence', mode: 'inside' }, { e: 'flag', flag: 'seed:hall' }, { e: 'travel', to: 'kiosk', spawn: 'start' }] },
+          { id: 'write', text: 'לרשום בדרך מה קרה, לפני שהכעס מסדר את הזיכרון.', then: [{ e: 'redheart', key: 'historyMemory', delta: 5 }, { e: 'personality', key: 'honesty', delta: 2 }, { e: 'presence', mode: 'inside' }, { e: 'flag', flag: 'seed:hall' }, { e: 'travel', to: 'kiosk', spawn: 'start' }] },
         ],
       },
     ],

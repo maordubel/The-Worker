@@ -1,0 +1,42 @@
+THE WORKER — 1983–2000 DIRECT MAIN OVERLAY
+
+This ZIP contains FULL REPLACEMENT FILES, not patches.
+It is generated from the real RC checkout after applying the approved 1983–2000 Director Cut.
+
+MANUAL INSTALL:
+1. Unzip this archive.
+2. Copy its app/, components/, lib/ and tests/ paths over the ROOT of maordubel/The-Worker on main.
+3. Preserve the folder structure and overwrite existing files.
+4. Do NOT copy any old RC patch ZIPs. They are not needed.
+
+The package intentionally excludes scripts/rc, the one-shot RC workflow, and design docs.
+
+Files included:
+- app/life/stage/useLifeSheets.ts
+- components/life/ChapterCard.tsx
+- lib/life/content/chapter1986.ts
+- lib/life/content/chapter1993cup.ts
+- lib/life/content/chapter1997basket.ts
+- lib/life/content/chapter1999basket.ts
+- lib/life/content/chapter2000double.ts
+- lib/life/content/chapterStageA.ts
+- lib/life/content/chapters.ts
+- lib/life/content/dialogue.ts
+- lib/life/content/dialogue1991.ts
+- lib/life/content/era.ts
+- lib/life/content/goals.ts
+- lib/life/cutscenes.ts
+- lib/life/engine.ts
+- lib/life/income.ts
+- lib/life/runtime/scenes/BootScene.ts
+- lib/life/runtime/scenes/FootballScene.ts
+- lib/life/runtime/scenes/PassageScene.ts
+- lib/life/save.ts
+- lib/life/tracks.ts
+- lib/life/world/actions.ts
+- lib/life/world/flow.ts
+- lib/life/world/milestones.ts
+- tests/life-action-contract.test.ts
+- tests/life-flow.test.ts
+- tests/life-gameplay-pass.test.ts
+- tests/life-1983-2000-rc.test.ts

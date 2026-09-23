@@ -70,7 +70,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
               { e: 'flag', flag: 'note:answered' },
               { e: 'flag', flag: 'plan:tonight' },
               { e: 'time', minutes: 6 },
-              { e: 'personality', key: 'streetSmarts', delta: 5 },
+              { e: 'personality', key: 'reliability', delta: 2 },
               { e: 'bond', who: 'ofir', delta: 3 },
               { e: 'toast', text: 'חיכית שהגיר יתחיל לחרוק, הקפת "ברור", והעברת. הפתק נעלם קדימה.', tone: 'plain' },
             ],
@@ -439,7 +439,8 @@ export const CONVERSATIONS_1991: Conversation[] = [
             then: [
               { e: 'flag', flag: 'hw:half' },
               { e: 'time', minutes: 20 },
-              { e: 'personality', key: 'streetSmarts', delta: 4 },
+              { e: 'personality', key: 'responsibility', delta: 1 },
+              { e: 'personality', key: 'stubbornness', delta: 1 },
               { e: 'toast', text: 'שש שאלות, והמחברת נשארת פתוחה על השולחן כאילו קמת רק לרגע.', tone: 'plain' },
             ],
           },

@@ -238,26 +238,38 @@ export class LifeEngine {
   // ---- checkpoints ---------------------------------------------------------------
 
   /**
-   * להתחיל את היום מחדש — the log cut back to the moment the chapter began.
+   * להתחיל את היום מחדש — the log cut back to the latest actual day boundary.
    *
-   * There is no separate checkpoint store, because the log IS the checkpoint store:
-   * `chapter.entered` is written once at the top of every chapter, and everything after
-   * the last one is "today". Cutting there keeps the identity, the seed, the prologue and
-   * every earlier chapter exactly as they were, which is what makes the restarted day the
-   * same day with the same Pogi rather than a new life. Returns false when there is no
-   * chapter to return to — the caller must not pretend otherwise.
+   * Multi-day chapters already write `day.entered`; treating the whole chapter as "today"
+   * meant a player in 1996/2018 could lose several authored days while the menu promised
+   * only a morning reset. We now prefer the latest `day.entered` that happened inside the
+   * current chapter, and fall back to `chapter.entered` for ordinary one-day chapters.
+   * The boundary event itself is kept, so its reducer reconstructs the same morning with
+   * the same persistent life facts. Returns false only when no chapter boundary exists.
    */
   restartDay(): boolean {
-    let at = -1
+    let chapterAt = -1
     for (let i = this.events.length - 1; i >= 0; i -= 1) {
       if (this.events[i]?.t === 'chapter.entered') {
-        at = i
+        chapterAt = i
         break
       }
     }
-    if (at < 0) return false
+    if (chapterAt < 0) return false
+
+    let dayAt = -1
+    for (let i = this.events.length - 1; i > chapterAt; i -= 1) {
+      if (this.events[i]?.t === 'day.entered') {
+        dayAt = i
+        break
+      }
+    }
+
+    const at = dayAt >= 0 ? dayAt : chapterAt
     this.events = this.events.slice(0, at + 1)
     this.state = this.events.reduce<LifeState>(apply, emptyState(this.identity, this.year))
+    this.checkpoint = null
+    this.earned = []
     for (const listener of this.listeners) listener(this.state)
     this.markDirty(true)
     return true

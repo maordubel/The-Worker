@@ -33,10 +33,8 @@ const flag = (state: LifeState, name: string) => Boolean(state.flags[name])
 export const goal1986 = (state: LifeState): LocationId | null => {
   if (flag(state, 'found:kobi')) return null
   if (flag(state, 'entry:granted')) return 'bloomfield-inside'
-  if (flag(state, 'knows:match')) return 'bloomfield-outside'
-  // before he knows there is a match the day is about a key in a drawer, which is a job
-  // and not a journey
-  return (state.inventory['house-key'] ?? 0) > 0 ? 'home' : 'bedroom'
+  if (flag(state, 'kobi:left')) return 'bloomfield-outside'
+  return null
 }
 
 /** 12.5.1990 — the arithmetic at the table, then the ground, then the man in the crowd. */
@@ -127,7 +125,7 @@ export const goalLaces = (state: LifeState): LocationId | null => {
 export const goalSeed = (state: LifeState): LocationId | null => {
   if (flag(state, 'seed:list')) return null
   if (flag(state, 'seed:hall')) return 'kiosk'
-  return 'ussishkin-hall'
+  return 'bus-station'
 }
 
 /** 19.5.1999 — Ramat Gan at eight, and who you go with. */
