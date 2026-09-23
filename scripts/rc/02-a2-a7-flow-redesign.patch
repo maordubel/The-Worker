@@ -1,0 +1,222 @@
+diff --git a/lib/life/content/chapterStageA.ts b/lib/life/content/chapterStageA.ts
+--- a/lib/life/content/chapterStageA.ts
++++ b/lib/life/content/chapterStageA.ts
+@@
+ export function objectiveA2(state: LifeState, sceneId: string): string | null {
+   if (state.chapterDone) return null
+   if (state.flags['a2:played'] || state.flags['a2:late']) return null
+   if (state.flags['a2:errand'] && !state.flags['a2:bread']) return 'לחם מהקיוסק. ואז — הסמטה, לפני שהקבוצות מתמלאות.'
+-  if (sceneId === 'home') return 'אחר הצהריים. בסמטה משחקים. אמא רוצה משהו.'
++  if (sceneId === 'home') return 'אמא רוצה לחם. בסמטה כבר מתחילים לבחור קבוצות.'
+   return 'הסמטה. לפני שהקבוצות מתמלאות.'
+ }
+@@
+   {
+     id: 'a2-teams-full',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: הילדים מתחלקים לקבוצות',
+     when: { flag: A2, afterMinute: at(16, 25), none: [{ flag: 'a2:played' }, { flag: 'a2:late' }, { flag: 'a2:full' }] },
+     do: [{ a: 'flag', flag: 'a2:full' }, { a: 'toast', text: 'מהסמטה: "שניים־שניים! מי בשער?" הקבוצות נסגרו בלעדיך.', tone: 'red' }],
+   },
+@@
+   {
+     id: 'a2-after',
+     trigger: 'clock',
+-    when: { flag: 'a2:played', afterMinute: at(17, 30), none: [{ flag: 'a2:done' }] },
++    // The football itself is the clock. When the minigame ends, the afternoon resolves.
++    // Never make a six-year-old stand beside the pitch until 17:30 because the table says so.
++    when: { flag: 'played:football', none: [{ flag: 'a2:done' }] },
+     delayMs: 900,
+     do: [{ a: 'flag', flag: 'a2:done' }, { a: 'talk', conversation: 'a2-after-game' }],
+   },
+   {
+     id: 'a2-night',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: הסמטה מתרוקנת',
+     when: { flag: A2, afterMinute: at(19, 30), none: [{ flag: 'a2:played' }, { flag: 'a2:late' }] },
+     do: [{ a: 'lines', lines: [{ who: null, text: 'חושך. הכדור נגמר. מהחלון עוד רואים את הפח, ואף אחד כבר לא עומד לידו.' }] }, { a: 'ending', id: 'home' }],
+   },
+@@
+ export function objectiveA3(state: LifeState, sceneId: string): string | null {
+   if (state.chapterDone) return null
+   if (state.flags['a3:done']) return null
+   if (state.flags['a3:inside']) {
+-    if (state.flags['life:seen:ussishkin']) return 'תמצא את אפי כשתראה מספיק.'
+-    if (!state.flags['saw:parquet']) return 'אתה בפנים. תסתכל על הרצפה הזאת. ואפי איפשהו.'
+-    return 'הפרקט, היציע, החלונות. ואפי איפשהו.'
++    if (state.flags['a3:experienced']) return 'אתה בפנים. אפשר להסתובב; כשתספיק — אפי לידך.'
++    return 'נכנסת. תן למקום לקרות.'
+   }
+@@
+     do: [
+       { a: 'flag', flag: 'a3:inside' },
+       { a: 'sfx', key: 'ball-bounce', level: 0.6 },
+       { a: 'lines', lines: [{ who: null, text: 'פרקט. גובה. אור מהחלונות למעלה, ריח של גרעינים ונקניקיות מהמזנון, ורעש של הרבה אנשים בחדר סגור — כמו גשם על גג פח.' }, { who: 'אפי', text: 'זה אוסישקין. גם זה הפועל. אבא שלך לא סיפר לך?' }, { who: 'אפי', text: 'תסתובב. תראה. אני פה, לא בורח.' }] },
+       { a: 'events', events: [{ t: 'redheart.changed', key: 'basketballLove', delta: 4 }] },
++      { a: 'talk', conversation: 'a3-first-touch' },
+     ],
+   },
+-  {
+-    id: 'a3-seen',
+-    trigger: 'clock',
+-    when: {
+-      flag: 'a3:inside',
+-      all: [{ flag: 'life:seen:ussishkin' }],
+-      none: [{ flag: 'a3:done' }],
+-    },
+-    delayMs: 1200,
+-    do: [{ a: 'flag', flag: 'a3:done' }, { a: 'talk', conversation: 'a3-leaving' }],
+-  },
+   {
+     id: 'a3-late',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: המשחק נגמר',
+     when: { flag: 'a3:inside', afterMinute: at(20, 40), none: [{ flag: 'a3:done' }] },
+     do: [{ a: 'flag', flag: 'a3:done' }, { a: 'talk', conversation: 'a3-leaving' }],
+   },
+   {
+     id: 'a3-night',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: אפי יוצא מהדלת',
+     when: { flag: A3, afterMinute: at(20, 0), none: [{ flag: 'a3:inside' }, { flag: 'a3:done' }] },
+     do: [{ a: 'lines', lines: [{ who: null, text: 'חושך. אפי יצא מהדלת מזיע ולא שאל למה חיכית בחוץ.' }] }, { a: 'ending', id: 'door' }],
+   },
+ ]
+ 
+ export const CONVERSATIONS_A3: Conversation[] = [
++  {
++    id: 'a3-first-touch',
++    nameHe: null,
++    branches: [
++      {
++        lines: [
++          { who: null, text: 'כדור בורח מהפרקט ומתגלגל עד הנעל שלך. אפי מסתכל עליך, לא על הכדור.' },
++        ],
++        choices: [
++          {
++            id: 'return',
++            text: 'להחזיר לו בידיים.',
++            then: [
++              { e: 'flag', flag: 'a3:experienced' },
++              { e: 'rel', who: 'efi', axis: 'bond', delta: 2 },
++              { e: 'redheart', key: 'basketballLove', delta: 2 },
++            ],
++          },
++          {
++            id: 'bounce',
++            text: 'להקפיץ פעם אחת לפני שמחזירים.',
++            then: [
++              { e: 'flag', flag: 'a3:experienced' },
++              { e: 'redheart', key: 'basketballLove', delta: 4 },
++              { e: 'personality', key: 'curiosity', delta: 1 },
++              { e: 'sfx', key: 'ball-bounce', level: 0.7 },
++            ],
++          },
++          {
++            id: 'stop',
++            text: 'לעצור עם הרגל ולגלגל אליו.',
++            then: [
++              { e: 'flag', flag: 'a3:experienced' },
++              { e: 'redheart', key: 'footballLove', delta: 1 },
++              { e: 'redheart', key: 'basketballLove', delta: 1 },
++            ],
++          },
++        ],
++      },
++    ],
++  },
+@@
+   {
+     id: 'efi-a3-hall',
+     nameHe: 'אפי',
+     branches: [
+       {
+-        when: { any: [{ flag: 'life:seen:ussishkin' }, { all: [{ flag: 'saw:parquet' }, { flag: 'saw:stand' }] }] },
++        when: { flag: 'a3:experienced' },
+         lines: [{ who: 'אפי', text: 'נו? אמרתי לך.' }],
+         choices: [
+@@
+ export function objectiveA4(state: LifeState, sceneId: string): string | null {
+@@
+-  if (sceneId === 'bedroom') return 'ספטמבר. החולצה בחלון של רפי, 30 שקל. הפחית מתחת למיטה.'
++  if (sceneId === 'bedroom') return 'החולצה עולה 30. מה שחסכת עוד לא מספיק. רפי סוגר בשבע.'
+   return 'צריך 30. בקבוקים, שליחויות, ומה שאבא נותן — עד שבע.'
+ }
+@@
+       { a: 'flag', flag: A4 },
+       { a: 'events', events: [{ t: 'savings.changed', agorot: 1200, why: 'הפחית' }, { t: 'money.changed', agorot: 200, why: 'מהכיס' }] },
+       { a: 'lines', lines: [{ who: null, text: 'קיץ. אתה בן שבע. בחלון של רפי תלויה חולצה אדומה עם צווארון וי לבן, בלי מספר ובלי שם.' }, { who: null, text: 'מתחת למיטה שלך יש פחית עם חריץ. רפי סוגר בשבע.' }] },
++      // The tin is the decision, not a scavenger-hunt hotspot.
++      { a: 'talk', conversation: 'tin-a4' },
+     ],
+   },
+@@
+     id: 'a4-close',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: רפי סוגר את הקיוסק',
+     when: { flag: A4, afterMinute: at(19, 0), none: [{ flag: 'own:shirt85' }, { flag: 'a4:gave' }, { flag: 'a4:done' }] },
+@@
+       { a: 'flag', flag: A5 },
+       { a: 'events', events: [{ t: 'money.changed', agorot: 200, why: 'לדרך' }] },
+       { a: 'lines', lines: [{ who: null, text: 'שבת, אחת בצהריים. החולצה על הכיסא, מקופלת כמו שרפי קיפל אותה. מהרחוב — צפירה של האוטו של אבא, פעם אחת, קצרה.' }, { who: 'קובי', text: '(מלמטה) פוגי! רבע שעה!' }] },
++      // Dressing is the scene's dramatic decision. Do not require the player to find the chair.
++      { a: 'talk', conversation: 'shirt-a5' },
+     ],
+   },
+@@
+     id: 'a5-outside',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: השריקה הראשונה',
+     when: { flag: 'a5:there', afterMinute: at(16, 5), none: [{ flag: 'a5:in' }] },
+@@
+     id: 'a5-gone',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: אבא מפסיק לחכות',
+     when: { flag: A5, afterMinute: at(15, 0), none: [{ flag: 'a5:kobi-left' }, { flag: 'a5:there' }] },
+@@
+       { a: 'flag', flag: A6 },
+       { a: 'flag', flag: 'kobi:left' },
+       { a: 'flag', flag: 'knows:match' },
+       { a: 'lines', lines: [{ who: null, text: 'חורף. שבת. גשם על התריס. אבא נסע לבד — "בגשם הזה? לא." — ובמטבח, על השיש, נשאר הטרנזיסטור.' }] },
++      // The radio is the situation. It should present itself; the player should not hunt it.
++      { a: 'talk', conversation: 'radio-a6' },
+     ],
+   },
+@@
+     id: 'a6-dies',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: הסוללות נגמרות',
++    waitingHe: 'מקשיב לשידור',
+@@
+     id: 'a6-end',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: המשחק נגמר',
++    waitingHe: 'מקשיב עד השריקה',
+@@
+       {
+         lines: [{ who: null, text: 'הטרנזיסטור. האנטנה עקומה, מישהו הדביק אותה בסלוטייפ, ובגשם צריך להחזיק אותה לכיוון החלון.' }],
+         choices: [
+-          { id: 'on', text: 'להדליק.', then: [{ e: 'flag', flag: 'a6:on' }, { e: 'sfx', key: 'radio-tune', level: 0.6 }, { e: 'toast', text: 'רעש. ואז קול. ואז רעש. תחזיק את האנטנה.', tone: 'plain' }] },
++          { id: 'on', text: 'להדליק ולהישאר לידו.', then: [{ e: 'flag', flag: 'a6:on' }, { e: 'sfx', key: 'radio-tune', level: 0.6 }, { e: 'toast', text: 'רעש. ואז קול. ואז רעש. תחזיק את האנטנה.', tone: 'plain' }] },
++          { id: 'window', text: 'לקחת אותו לחלון ולחפש קליטה.', then: [{ e: 'flag', flag: 'a6:on' }, { e: 'flag', flag: 'a6:window' }, { e: 'time', minutes: 5 }, { e: 'sfx', key: 'radio-tune', level: 0.6 }, { e: 'toast', text: 'ליד החלון יש קצת פחות רעש. קצת.', tone: 'plain' }] },
+         ],
+       },
+@@
+   {
+     id: 'a7-night',
+     trigger: 'clock',
+-    waitingHe: 'ממתין: אבא מכבה את האור',
+     when: { flag: A7, afterMinute: at(20, 30), none: [{ flag: 'a7:refused' }] },
+@@
+   {
+     id: 'ofir-a7',
+@@
+-        { id: 'me-too', text: '"גם אני."', then: [{ e: 'flag', flag: 'a7:said-yes' }, { e: 'rel', who: 'ofir', axis: 'bond', delta: 3 }, { e: 'personality', key: 'courage', delta: 2 }, { e: 'toast', text: '"יאללה." הוא לחץ לך את היד כמו גדולים.', tone: 'plain' }] },
+-        { id: 'dad', text: '"תלוי באבא שלי."', then: [{ e: 'personality', key: 'reliability', delta: 1 }, { e: 'toast', text: '"תלוי באבא." הוא אמר את זה בקול שלך ולא צחק.', tone: 'plain' }] },
++        { id: 'me-too', text: '"גם אני."', then: [{ e: 'flag', flag: 'a7:knows' }, { e: 'flag', flag: 'a7:said-yes' }, { e: 'rel', who: 'ofir', axis: 'bond', delta: 3 }, { e: 'personality', key: 'courage', delta: 2 }, { e: 'toast', text: '"יאללה." הוא לחץ לך את היד כמו גדולים.', tone: 'plain' }] },
++        { id: 'dad', text: '"תלוי באבא שלי."', then: [{ e: 'flag', flag: 'a7:knows' }, { e: 'personality', key: 'reliability', delta: 1 }, { e: 'toast', text: '"תלוי באבא." הוא אמר את זה בקול שלך ולא צחק.', tone: 'plain' }] },
+@@
+-          { id: 'quiet', text: 'לא לשאול.', then: [{ e: 'personality', key: 'stubbornness', delta: 1 }, { e: 'wellbeing', key: 'loneliness', delta: 2 }] },
++          { id: 'quiet', text: 'לא לשאול.', then: [{ e: 'flag', flag: 'a7:refused' }, { e: 'flag', flag: 'life:a7:silent' }, { e: 'personality', key: 'stubbornness', delta: 1 }, { e: 'wellbeing', key: 'loneliness', delta: 2 }, { e: 'remember', who: 'kobi', eventId: 'did-not-ask-1986', significance: 'notable' }, { e: 'ending', id: 'silent' }] },
+         ],
+       },
