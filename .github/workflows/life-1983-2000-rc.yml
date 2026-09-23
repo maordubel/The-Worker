@@ -33,6 +33,62 @@ jobs:
       - name: Apply approved 1983-2000 Director RC
         run: python3 scripts/rc/run-1983-2000-rc-v6.py
 
+      - name: Build exact manual-upload overlay
+        run: |
+          rm -rf _manual-main-overlay
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil, subprocess
+
+          root = Path('.')
+          out = root / '_manual-main-overlay'
+          out.mkdir(parents=True, exist_ok=True)
+
+          tracked = subprocess.check_output(
+              ['git', 'diff', '--name-only', 'origin/main', '--', '.'],
+              text=True,
+          ).splitlines()
+          untracked = subprocess.check_output(
+              ['git', 'ls-files', '--others', '--exclude-standard'],
+              text=True,
+          ).splitlines()
+
+          skip_exact = {'.github/workflows/life-1983-2000-rc.yml'}
+          skip_prefixes = ('scripts/rc/', 'docs/', '_manual-main-overlay/')
+
+          files = []
+          for rel in dict.fromkeys(tracked + untracked):
+              if not rel or rel in skip_exact or rel.startswith(skip_prefixes):
+                  continue
+              src = root / rel
+              if not src.is_file():
+                  continue
+              dst = out / rel
+              dst.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(src, dst)
+              files.append(rel)
+
+          instructions = '''THE WORKER — 1983–2000 DIRECT MAIN OVERLAY\n\nThis ZIP contains FULL REPLACEMENT FILES, not patches.\nIt is generated from the real RC checkout after applying the approved 1983–2000 Director Cut.\n\nMANUAL INSTALL:\n1. Unzip this archive.\n2. Copy its app/, components/, lib/ and tests/ paths over the ROOT of maordubel/The-Worker on main.\n3. Preserve the folder structure and overwrite existing files.\n4. Do NOT copy any old RC patch ZIPs. They are not needed.\n\nThe package intentionally excludes scripts/rc, the one-shot RC workflow, and design docs.\n\nFiles included:\n'''
+          (out / 'UPLOAD-INSTRUCTIONS.txt').write_text(
+              instructions + ''.join(f'- {p}\n' for p in files),
+              encoding='utf-8',
+          )
+          print(f'Overlay contains {len(files)} repository files')
+          for rel in files:
+              print(rel)
+          PY
+
+      - name: Upload exact manual overlay
+        uses: actions/upload-artifact@v4
+        with:
+          name: THE-WORKER-1983-2000-DIRECT-MAIN-OVERLAY
+          path: _manual-main-overlay
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove overlay workspace copy
+        run: rm -rf _manual-main-overlay
+
       - name: Install
         run: npm ci
 
