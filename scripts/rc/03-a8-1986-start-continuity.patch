@@ -1,0 +1,81 @@
+diff --git a/lib/life/content/chapters.ts b/lib/life/content/chapters.ts
+--- a/lib/life/content/chapters.ts
++++ b/lib/life/content/chapters.ts
+@@
+   {
+     id: '1986',
+@@
+     anchorKey: '1986',
++    entry: (state) => {
++      const events: LifeEvent[] = [
++        { t: 'item.gained', item: 'house-key' },
++        { t: 'flag.raised', flag: 'has:key' },
++        { t: 'flag.raised', flag: 'knows:match' },
++      ]
++      if (state.flags['life:a7:refused'] || state.flags['life:a7:promised']) {
++        events.push({ t: 'flag.raised', flag: 'asked:ticket' })
++      }
++      return events
++    },
+     playable: true,
+   },
+diff --git a/lib/life/content/chapter1986.ts b/lib/life/content/chapter1986.ts
+--- a/lib/life/content/chapter1986.ts
++++ b/lib/life/content/chapter1986.ts
+@@
+ export const OBJECTIVES = {
+   findKey: 'שבת בבוקר. המפתח במגירה.',
+   askDad: 'אבא בסלון.',
+   matchToday: 'היום יש משחק.',
++  decideToday: 'אבא יוצא לבלומפילד. הוא כבר אמר לא. מה אתה עושה עם זה?',
+   afterKobi: 'אבא יצא.',
+   onTheWay: 'ללכת אחרי האנשים, מזרחה.',
+   atGround: 'למצוא דרך פנימה.',
+   findKobi: 'למצוא את אבא.',
+ } as const
+diff --git a/lib/life/content/era.ts b/lib/life/content/era.ts
+--- a/lib/life/content/era.ts
++++ b/lib/life/content/era.ts
+@@
+     if (state.flags['entry:granted']) return null
+     if (sceneId === 'bloomfield-outside') return OBJECTIVES.atGround
+     if (state.flags['kobi:left']) return OBJECTIVES.onTheWay
+-    if (state.flags['knows:match']) return OBJECTIVES.matchToday
+-    if ((state.inventory['house-key'] ?? 0) > 0) return OBJECTIVES.askDad
+-    return OBJECTIVES.findKey
++    if (state.flags['knows:match']) return OBJECTIVES.decideToday
++    return OBJECTIVES.matchToday
+   },
+diff --git a/lib/life/content/goals.ts b/lib/life/content/goals.ts
+--- a/lib/life/content/goals.ts
++++ b/lib/life/content/goals.ts
+@@
+ export const goal1986 = (state: LifeState): LocationId | null => {
+   if (flag(state, 'found:kobi')) return null
+   if (flag(state, 'entry:granted')) return 'bloomfield-inside'
+-  if (flag(state, 'knows:match')) return 'bloomfield-outside'
+-  // before he knows there is a match the day is about a key in a drawer, which is a job
+-  // and not a journey
+-  return (state.inventory['house-key'] ?? 0) > 0 ? 'home' : 'bedroom'
++  if (flag(state, 'kobi:left')) return 'bloomfield-outside'
++  return null
+ }
+diff --git a/lib/life/content/dialogue.ts b/lib/life/content/dialogue.ts
+--- a/lib/life/content/dialogue.ts
++++ b/lib/life/content/dialogue.ts
+@@
+       {
+         when: { flag: 'asked:ticket' },
+         lines: [
+-          { who: 'קובי', text: 'אמרתי לא. גמרנו לדבר על זה.' },
++          { who: 'קובי', text: 'שבוע שעבר אמרתי לא. אל תתחיל שוב.' },
+           { who: null, text: 'הוא לא כועס. הוא פשוט לא זז.' },
+         ],
+@@
+           {
+             id: 'match',
+-            text: 'יש היום משחק?',
+-            then: [{ e: 'goto', node: 'kobi-match' }],
++            text: 'אתה עדיין לא לוקח אותי?',
++            then: [{ e: 'goto', node: 'kobi-refuse' }],
+           },
