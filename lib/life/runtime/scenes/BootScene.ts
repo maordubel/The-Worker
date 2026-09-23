@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 
+import { OPENING_FLAG } from '../../opening'
 import { artUrl, BOOT_FIGURES } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import { LIFE_PALETTE } from '../palette'
@@ -57,12 +58,28 @@ export class BootScene extends Phaser.Scene {
     const state = ctx.engine.state
 
     if (!state.flags['prologue:done']) {
+      // The DOM Opening owns a brand-new life. Do not start interactive A1 invisibly
+      // underneath it. Opening completion raises the already-canonical persisted flag and
+      // releases the memory scene. Resumed lives that already have the flag skip this wait.
+      if (!state.flags[OPENING_FLAG]) {
+        let released = false
+        const off = ctx.engine.subscribe((next) => {
+          if (released || !next.flags[OPENING_FLAG] || next.flags['prologue:done']) return
+          released = true
+          off()
+          if (this.scene.isActive(BootScene.KEY)) this.scene.start(PrologueScene.KEY)
+        })
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+          if (!released) off()
+        })
+        return
+      }
+
       this.scene.start(PrologueScene.KEY)
       return
     }
-    // A life that finished 1986 and has not yet crossed into 1990 reopens in the passage —
-    // the four years are a scene, and a reload in the middle of it lands in it, not back
-    // in the Saturday that already ended.
+    // A life that finished 1986 and has not yet crossed into the next authored passage
+    // reopens in the passage rather than back in a Saturday that already ended.
     if (state.chapter === '1986' && state.chapterDone) {
       this.scene.start(PassageScene.KEY)
       return
