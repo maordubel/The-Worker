@@ -1,42 +1,25 @@
-THE WORKER — 1983–2000 DIRECT MAIN OVERLAY
+THE WORKER — DIRECT MAIN OVERLAY v2
+23.9.2026
 
-This ZIP contains FULL REPLACEMENT FILES, not patches.
-It is generated from the real RC checkout after applying the approved 1983–2000 Director Cut.
+THIS IS A FULL REPLACEMENT OVERLAY FOR MAIN.
+It is not a patch package and does not need any RC scripts.
 
-MANUAL INSTALL:
-1. Unzip this archive.
-2. Copy its app/, components/, lib/ and tests/ paths over the ROOT of maordubel/The-Worker on main.
-3. Preserve the folder structure and overwrite existing files.
-4. Do NOT copy any old RC patch ZIPs. They are not needed.
+UPLOAD:
+1. Open this ZIP.
+2. Copy every folder/file inside it to the ROOT of maordubel/The-Worker.
+3. Preserve paths and approve overwrite.
+4. Do not upload the original .MOV files separately; browser-ready assets are already included.
 
-The package intentionally excludes scripts/rc, the one-shot RC workflow, and design docs.
+THIS VERSION ADDS:
+- the supplied new opening film as the canonical opening asset (MP4 + WebM + poster);
+- the supplied cup83 film as a local archive reveal immediately after the interactive 1983 memory;
+- a longer-safe FilmCut with fail-open behavior and optional sound for the 1983 archive;
+- documentary chapter transitions built as TIME → WORLD → PUGI;
+- restored seeded random encounters for late Stage B;
+- a rewritten 1996 unit with the first-home-in-uniform beat on 23.11.1996;
+- an explicit physical Gate 5 choice that travels to the gate and plays a scene there;
+- a direct choice at the army bus instead of passive waiting;
+- regression tests for these Director v2 changes.
 
-Files included:
-- app/life/stage/useLifeSheets.ts
-- components/life/ChapterCard.tsx
-- lib/life/content/chapter1986.ts
-- lib/life/content/chapter1993cup.ts
-- lib/life/content/chapter1997basket.ts
-- lib/life/content/chapter1999basket.ts
-- lib/life/content/chapter2000double.ts
-- lib/life/content/chapterStageA.ts
-- lib/life/content/chapters.ts
-- lib/life/content/dialogue.ts
-- lib/life/content/dialogue1991.ts
-- lib/life/content/era.ts
-- lib/life/content/goals.ts
-- lib/life/cutscenes.ts
-- lib/life/engine.ts
-- lib/life/income.ts
-- lib/life/runtime/scenes/BootScene.ts
-- lib/life/runtime/scenes/FootballScene.ts
-- lib/life/runtime/scenes/PassageScene.ts
-- lib/life/save.ts
-- lib/life/tracks.ts
-- lib/life/world/actions.ts
-- lib/life/world/flow.ts
-- lib/life/world/milestones.ts
-- tests/life-action-contract.test.ts
-- tests/life-flow.test.ts
-- tests/life-gameplay-pass.test.ts
-- tests/life-1983-2000-rc.test.ts
+IMPORTANT:
+No GitHub files were changed by ChatGPT while preparing this package.

@@ -12,7 +12,7 @@ import { ENDINGS_1991, OBJECTIVES_1991, PORTRAIT_1991, TIP_OFF } from './chapter
 import { BEATS_1993, ENCOUNTERS_1993, ENDINGS_1993, objective1993, PORTRAIT_1993, TIP_OFF_93 } from './chapter1993cup'
 import { BEATS_GALIL, ENDINGS_GALIL, objectiveGalil, PORTRAIT_GALIL } from './chapter1993galil'
 import { BEATS_SINAI, ENDINGS_SINAI, objectiveSinai, PORTRAIT_SINAI } from './chapter1995sinai'
-import { BEATS_ARMY, ENDINGS_ARMY, objectiveArmy, PORTRAIT_ARMY } from './chapter1996army'
+import { BEATS_ARMY, ENDINGS_ARMY, objectiveArmy, PORTRAIT_ARMY } from './chapter1996director'
 import { BEATS_HALL, ENDINGS_HALL, objectiveHall, PORTRAIT_HALL } from './chapter1997basket'
 import {
   BEATS_A2, BEATS_A3, BEATS_A4, BEATS_A5, BEATS_A6, BEATS_A7,
@@ -60,6 +60,7 @@ import { HERO80_WALK, KID_WALK } from '../runtime/art'
 import { ENCOUNTERS_1986 } from './encounters1986'
 import { ENCOUNTERS_1990 } from './encounters1990'
 import { ENCOUNTERS_1991 } from './encounters1991'
+import { encountersForStageB } from './encountersStageB'
 import { OPPORTUNITIES_1986 } from './opportunities1986'
 import { OPPORTUNITIES_1990 } from './opportunities1990'
 import { OPPORTUNITIES_1991 } from './opportunities1991'
@@ -319,7 +320,7 @@ export const ERA_1993_GALIL: Era = {
   anchorKey: '1993-galil',
   schedule: [],
   opportunities: [],
-  encounters: [],
+  encounters: encountersForStageB('1993-galil'),
   ambient: AMBIENT_1990,
   endings: ENDINGS_GALIL,
   objective: (state, sceneId) => objectiveGalil(state, sceneId),
@@ -338,7 +339,7 @@ export const ERA_1995_SINAI: Era = {
   anchorKey: '1994-cup',
   schedule: [],
   opportunities: [],
-  encounters: [],
+  encounters: encountersForStageB('1995-sinai'),
   ambient: AMBIENT_1990,
   endings: ENDINGS_SINAI,
   objective: (state) => objectiveSinai(state),
@@ -357,7 +358,7 @@ export const ERA_1996_ARMY: Era = {
   anchorKey: '1997-sale',
   schedule: [],
   opportunities: [],
-  encounters: [],
+  encounters: encountersForStageB('1996-army'),
   ambient: AMBIENT_1990,
   endings: ENDINGS_ARMY,
   objective: (state, sceneId) => objectiveArmy(state, sceneId),
@@ -385,7 +386,7 @@ function stageB(chapter: string, year: number, anchorKey: string, extra: Pick<Er
     anchorKey,
     schedule: [],
     opportunities: [],
-    encounters: [],
+    encounters: encountersForStageB(chapter),
     ambient: AMBIENT_1990,
     cutscene: null,
     memoryPrefix: chapter,

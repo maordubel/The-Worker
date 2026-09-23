@@ -6,51 +6,34 @@ import { t } from '@/lib/i18n'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 
 /**
- * מעברון — four seconds of Tel Aviv, 1989, over the black between two rooms.
+ * מעברון — a short documentary breath between playable rooms.
  *
- * Maor found the film, found the promenade in it at minute sixteen, and said what it was:
- * the road between Bloomfield and Ussishkin. Nine clips were cut from it on 5.9.2026 and
- * then sat in `public/life/film` unplayed, which is the worst state a thing can be in.
- *
- * The whole design is in what it does NOT do. It has no skip button, because it is shorter
- * than the decision to press one. It has no controls, no sound (the game's own ambience
- * keeps running underneath), and it never waits for anything: the room behind it is
- * rebuilding while it plays, so when the picture goes the game is already there.
- *
- * It fades in over 400ms and out over 600ms and removes itself when the clip ends. If the
- * file will not play — an old browser, a blocked codec, a missing file — it closes itself
- * immediately and the player sees the ordinary cut, which is what they would have seen
- * anyway.
- *
- * מדוע play() ולא רק autoPlay — Maor reported the clip freezing on its still frame for
- * several seconds before the game continued — "doesn't autoplay and is stuck". The HTML
- * `autoPlay` attribute asks the browser to call `play()` for you, but when that internal
- * call is refused (a device that briefly denies autoplay, a codec it will not decode) the
- * refusal is a rejected *promise*, not a DOM `error` event — so nothing here ever heard it,
- * and the clip sat on its poster until the 6.2s hard ceiling finally closed it. Calling
- * `play()` ourselves gives us that promise: a rejection now closes the cut on the spot,
- * the same graceful skip as a decode error, instead of six silent seconds first.
+ * Most clips are four seconds. `cup83-archive` is intentionally different: it is the
+ * first real archive reveal of the game, shown after the player has already lived the
+ * 1983 memory in Kobi's arms. It may therefore run for the length of the supplied film,
+ * but it obeys the same fail-open rule as every other transition: a codec/error can never
+ * stop the life underneath it.
  */
 export function FilmCut({ film, onDone }: { film: NonNullable<LifeBusEvents['film']>; onDone: () => void }) {
+  const archive = film.clip === 'cup83-archive'
   const [gone, setGone] = useState(false)
+  const [sound, setSound] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const video = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
-    // A hard ceiling, so a clip that never fires `ended` (or a play() that never
-    // settles at all) cannot hold the game.
-    timer.current = setTimeout(() => setGone(true), 6200)
+    // The ordinary city clips are ~4 s. The supplied 1983 archive film is ~32 s.
+    // Both get a hard ceiling, so neither a missing `ended` nor a decode stall can softlock.
+    timer.current = setTimeout(() => setGone(true), archive ? 38_000 : 6_200)
 
     const attempt = video.current?.play()
-    if (attempt && typeof attempt.catch === 'function') {
-      attempt.catch(() => onDone())
-    }
+    if (attempt && typeof attempt.catch === 'function') attempt.catch(() => onDone())
 
     return () => {
       if (timer.current) clearTimeout(timer.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [film.clip])
+  }, [film.clip, archive])
 
   useEffect(() => {
     if (!gone) return
@@ -61,20 +44,11 @@ export function FilmCut({ film, onDone }: { film: NonNullable<LifeBusEvents['fil
   return (
     <div
       dir="rtl"
-      className={`pointer-events-none absolute inset-0 z-[97] flex items-center justify-center bg-ink transition-opacity duration-500 ${
-        gone ? 'opacity-0' : 'opacity-100'
-      }`}
+      className={`absolute inset-0 z-[97] flex items-center justify-center bg-ink transition-opacity duration-500 ${
+        archive ? 'pointer-events-auto' : 'pointer-events-none'
+      } ${gone ? 'opacity-0' : 'opacity-100'}`}
       data-life="film-cut"
-      aria-hidden
-      /**
-       * הפריים הראשון, מתחת לכל השאר.
-       *
-       * The still sits BEHIND the video as a background, not only as the video's poster.
-       * A poster is shown until playback starts and then discarded; a browser that cannot
-       * decode the clip at all — an old build, a locked-down codec set — would otherwise
-       * show four seconds of black, which is worse than no transition. This way the worst
-       * case is a photograph of Tel Aviv in 1989 held for four seconds, which is fine.
-       */
+      aria-hidden={!archive}
       style={{
         backgroundImage: `url(/life/film/${film.clip}.jpg)`,
         backgroundSize: 'cover',
@@ -88,20 +62,43 @@ export function FilmCut({ film, onDone }: { film: NonNullable<LifeBusEvents['fil
         src={`/life/film/${film.clip}.mp4`}
         poster={`/life/film/${film.clip}.jpg`}
         autoPlay
-        muted
+        muted={!archive || !sound}
         playsInline
         preload="auto"
         onEnded={() => setGone(true)}
         onError={onDone}
-        className="h-full w-full bg-transparent object-cover motion-safe:animate-[film-in_500ms_ease-out_both]"
+        className="h-full w-full bg-transparent object-contain motion-safe:animate-[film-in_500ms_ease-out_both]"
       />
 
-      <p className="absolute inset-x-0 bottom-[12%] text-center font-body text-[13px] leading-snug text-sheet/85 motion-safe:animate-[film-in_900ms_ease-out_both]">
-        <bdi>{film.captionHe}</bdi>
-        <span className="block pt-1 font-mono text-[10px] tabular-nums tracking-[0.18em] text-concrete/70">
-          {t('life.film.source')}
-        </span>
-      </p>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-gradient-to-t from-ink via-ink/65 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-[8%] px-gutter text-center motion-safe:animate-[film-in_900ms_ease-out_both]">
+        {archive && (
+          <span className="mb-2 inline-flex border border-red/60 bg-ink/70 px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-red">
+            ארכיון · 1983
+          </span>
+        )}
+        <p className="font-body text-[13px] leading-snug text-sheet/90">
+          <bdi>{film.captionHe}</bdi>
+          <span className="block pt-1 font-mono text-[10px] tabular-nums tracking-[0.18em] text-concrete/70">
+            {t('life.film.source')}
+          </span>
+        </p>
+      </div>
+
+      {archive && (
+        <button
+          type="button"
+          onClick={() => {
+            setSound((value) => !value)
+            const el = video.current
+            if (el) void el.play().catch(() => undefined)
+          }}
+          className="absolute bottom-4 end-4 z-[2] min-h-tap border border-sheet/20 bg-ink/75 px-3 font-body text-[11px] text-sheet/80"
+          aria-pressed={sound}
+        >
+          {sound ? 'השתק' : 'הפעל קול'}
+        </button>
+      )}
     </div>
   )
 }

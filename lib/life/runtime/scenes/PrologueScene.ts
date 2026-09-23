@@ -11,25 +11,12 @@ import { CHAPTERS } from '../../content/chapters'
 import { WorldScene } from './WorldScene'
 
 /**
- * 1 ביוני 1983 — the prologue, and the first minute of this life the player actually owns.
+ * 1 ביוני 1983 — the first minute of this life the player actually owns.
  *
- * It is one painting: a full terrace seen from inside it, dark, warm and overscanned, so
- * the slow drift across the crowd never reaches an edge and the memory never has a frame
- * around it. That much has not changed.
- *
- * What changed on 6.9.2026 is that it stopped being narration. Stage A §6 asks for "an
- * interactive prologue, not a passive movie", and it is right — a first memory you are
- * TOLD belongs to whoever told it. So the half-minute is now a conversation (`a1-1983` in
- * `chapterStageA.ts`): a five-year-old on a pair of shoulders who can do three things —
- * look, copy the crowd, and notice the red thing on the concrete — none of which can be
- * done wrong, and all of which decide who he is when the game hands him over to 1984.
- *
- * The scene stays thin on purpose. It owns the painting, the drift and the dust; the
- * BEATS live in the content layer with every other conversation in the game, which is why
- * adding a fourth one is a paragraph of Hebrew rather than a change to a Phaser scene.
- *
- * The one fact in it is the canonical anchor's headline, substituted into `{anchor}` by
- * the dialogue runner. Everything else is backs, smoke, concrete, cloth, hands and noise.
+ * The new opening film tells the family story first. Then this scene gives the player one
+ * tiny thing only film cannot give them: agency inside the memory. When that memory closes,
+ * the supplied `cup83` film becomes the first archive reveal — history after experience,
+ * never history instead of experience — and the first playable childhood day loads behind it.
  */
 export class PrologueScene extends Phaser.Scene {
   static readonly KEY = 'life-prologue'
@@ -42,7 +29,6 @@ export class PrologueScene extends Phaser.Scene {
   }
 
   preload() {
-    // 5.9.2026: the terrace from a child's height on his father's shoulders — painted for this minute
     if (!this.textures.exists('art-cup83')) this.load.image('art-cup83', artUrl('cup83'))
   }
 
@@ -62,8 +48,6 @@ export class PrologueScene extends Phaser.Scene {
     }
     const scale = place()
 
-    // A slow drift across the crowd and a slow push in. Nothing cuts, and the frame never
-    // reaches the edge of the painting.
     this.tweens.add({
       targets: image,
       x: { from: cam.width / 2 + cam.width * 0.06, to: cam.width / 2 - cam.width * 0.06 },
@@ -72,11 +56,7 @@ export class PrologueScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     })
 
-    const dark = this.add
-      .rectangle(0, 0, cam.width, cam.height, LIFE_PALETTE.night, 0.42)
-      .setOrigin(0, 0)
-      .setScrollFactor(0)
-      .setDepth(10)
+    const dark = this.add.rectangle(0, 0, cam.width, cam.height, LIFE_PALETTE.night, 0.42).setOrigin(0, 0).setScrollFactor(0).setDepth(10)
     const resize = () => {
       place()
       dark.setSize(cam.width, cam.height)
@@ -112,9 +92,6 @@ export class PrologueScene extends Phaser.Scene {
 
     this.ctx.bus.emit('place', { id: 'prologue', title: t('life.place.prologue') })
     this.ctx.bus.emit('controls', { visible: false })
-    // The interactive memory. `PROLOGUE` — the narrated version this replaced — stays as
-    // the floor: a save whose registry somehow lacks `a1-1983` still gets its 1983 rather
-    // than being dropped into 1984 with no first memory at all.
     if (!this.ctx.dialogue.start('a1-1983', () => this.finish())) {
       this.ctx.dialogue.startLines(PROLOGUE, () => this.finish())
     }
@@ -128,18 +105,25 @@ export class PrologueScene extends Phaser.Scene {
   private finish() {
     if (this.done) return
     this.done = true
-    // The first day with a floor under it is whatever the registry lists first — the
-    // spring of 1984 since 5.9.2026, the Saturday of 1986 before that. Its year and its
-    // clock are dispatched here the way every later cut dispatches them.
+
     const first = CHAPTERS.find((c) => c.playable) ?? CHAPTERS[0]!
     const state = this.ctx.engine.state
     this.ctx.engine.dispatch(
       { t: 'flag.raised', flag: 'prologue:done' },
+      { t: 'flag.raised', flag: 'life:archive:cup83-offered' },
       { t: 'year.entered', year: first.year, weekday: first.weekday, minute: first.minute },
       { t: 'chapter.entered', chapter: first.id },
       { t: 'flag.raised', flag: `life:bridge-${first.id}` },
       ...(first.entry?.(state) ?? []),
     )
+
+    // The first documentary reveal: Kobi's story became the player's memory first; only
+    // now do we open the archive. WorldScene may load behind it — FilmCut is the curtain.
+    this.ctx.bus.emit('film', {
+      clip: 'cup83-archive',
+      captionHe: 'קובי סיפר את הערב הזה במשך שנים. עכשיו הזיכרון נפתח אל הארכיון — ואז החיים של פוגי מתחילים באמת.',
+    })
+
     this.ctx.bus.emit('controls', { visible: true })
     this.cameras.main.fadeOut(900, 0, 0, 0)
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
