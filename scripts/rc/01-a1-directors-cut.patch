@@ -1,0 +1,108 @@
+diff --git a/lib/life/content/chapterStageA.ts b/lib/life/content/chapterStageA.ts
+--- a/lib/life/content/chapterStageA.ts
++++ b/lib/life/content/chapterStageA.ts
+@@
+ export const CONVERSATIONS_A1: Conversation[] = [
+@@
+-          { who: null, text: 'דרום תל אביב. 1 ביוני 1983.' },
+-          { who: null, text: 'אתה בן חמש, ואתה על הכתפיים של מישהו. אתה לא רואה כלום חוץ מראשים.' },
++          { who: null, text: 'דרום תל אביב. אתה בן חמש.' },
++          { who: null, text: 'העולם שלך כרגע הוא שתי כתפיים, ראשים, ורעש.' },
+@@
+           {
+             id: 'look-floor',
+             text: 'להסתכל על הרצפה, בין הנעליים.',
+             then: [
+               { e: 'flag', flag: 'life:a1:floor' },
++              { e: 'flag', flag: 'life:a1:noticed-red' },
+               { e: 'personality', key: 'curiosity', delta: 2 },
+-              { e: 'goto', node: 'a1-red' },
++              { e: 'goto', node: 'a1-crowd' },
+             ],
+@@
+-          { who: null, text: 'בין הנעליים, על הבטון, משהו אדום. מישהו הפיל אותו וכבר לא יחפש.' },
+-          { who: null, text: 'אתה מושיט יד למטה. הכתפיים זזות ואתה כמעט נופל.' },
++          { who: null, text: 'כשהרעש קצת יורד אתה רואה אותו שוב. הדבר האדום שעל הבטון.' },
++          { who: null, text: 'הוא כמעט נעלם מתחת לנעל של מישהו.' },
+@@
+-            text: 'להרים אותו בכל זאת.',
++            text: 'להתכופף ולקחת אותו.',
+@@
+-              { e: 'personality', key: 'impulsiveness', delta: 2 },
++              { e: 'personality', key: 'impulsiveness', delta: 1 },
+               { e: 'redheart', key: 'historyMemory', delta: 3 },
+-              { e: 'goto', node: 'a1-crowd' },
++              { e: 'goto', node: 'a1-stub' },
+@@
+-            id: 'hold',
+-            text: 'להיאחז חזק ולא לזוז.',
++            id: 'leave',
++            text: 'להשאיר אותו. לא לשחרר את אבא.',
+             then: [
+-              { e: 'rel', who: 'kobi', axis: 'trust', delta: 2 },
+-              { e: 'personality', key: 'reliability', delta: 2 },
+-              { e: 'goto', node: 'a1-crowd' },
++              { e: 'flag', flag: 'life:a1:red-left' },
++              { e: 'goto', node: 'a1-stub' },
+@@
+           {
+             id: 'clap',
+             text: 'למחוא כפיים כמו כולם.',
+             then: [
++              { e: 'flagValue', flag: 'life:a1:body', value: 'join' },
+@@
+           {
+             id: 'reach',
+             text: 'להרים ידיים אל הרעש.',
+             then: [
++              { e: 'flagValue', flag: 'life:a1:body', value: 'reach' },
+@@
+           {
+             id: 'ears',
+             text: 'לכסות את האוזניים.',
+             then: [
+-              // §6: covering your ears costs nothing. A frightened five-year-old is not a
+-              // worse supporter, and the brief says so in as many words.
+-              { e: 'personality', key: 'streetSmarts', delta: 3 },
+-              { e: 'wellbeing', key: 'stress', delta: 3 },
++              { e: 'flagValue', flag: 'life:a1:body', value: 'protect' },
+               { e: 'goto', node: 'a1-goal' },
+@@
+-          { e: 'goto', node: 'a1-stub' },
++          { e: 'goto', node: 'a1-kobi' },
+         ],
+       },
+     ],
+   },
++  {
++    id: 'a1-kobi',
++    nameHe: 'קובי',
++    branches: [
++      {
++        lines: [
++          { who: 'קובי', text: 'תחזיק חזק, פוגי.' },
++          { who: null, text: 'בתוך כל הרעש אתה שומע אותו ברור. הוא לא מסביר מה קרה. הוא רק בודק שאתה עדיין שם.' },
++        ],
++        shot: { focus: 'both', framing: 'close', duration: 900, ambienceDuck: 0.45 },
++        choices: [
++          { id: 'cling', text: 'להיצמד אליו.', then: [{ e: 'flagValue', flag: 'life:a1:instinct', value: 'family' }, { e: 'rel', who: 'kobi', axis: 'trust', delta: 3 }, { e: 'redheart', key: 'familyTradition', delta: 2 }, { e: 'goto', node: 'a1-after-kobi' }] },
++          { id: 'again', text: 'להצביע חזרה למגרש. "עוד פעם."', then: [{ e: 'flagValue', flag: 'life:a1:instinct', value: 'terrace' }, { e: 'redheart', key: 'footballLove', delta: 2 }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'personality', key: 'courage', delta: 1 }, { e: 'goto', node: 'a1-after-kobi' }] },
++          { id: 'what-happened', text: '"מה קרה?"', then: [{ e: 'flagValue', flag: 'life:a1:instinct', value: 'question' }, { e: 'personality', key: 'curiosity', delta: 3 }, { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 2 }, { e: 'goto', node: 'a1-after-kobi' }] },
++        ],
++      },
++    ],
++  },
++  {
++    id: 'a1-after-kobi',
++    nameHe: null,
++    branches: [
++      { when: { flag: 'life:a1:noticed-red' }, lines: [{ who: null, text: 'כשהקהל נפתח לרגע, אתה מחפש בעיניים את הדבר שראית קודם.' }], then: [{ e: 'goto', node: 'a1-red' }] },
++      { lines: [{ who: null, text: 'היד של אבא עדיין על הרגל שלך. הרעש יורד מדרגה אחת.' }], then: [{ e: 'goto', node: 'a1-stub' }] },
++    ],
++  },
+@@
+-          { who: null, text: 'זה הזיכרון הראשון שלך. לא בחרת בו.' },
++          { who: null, text: 'לא בחרת להגיע לשם. את מה שלקחת משם — כבר כן.' },
+@@
+-          { who: null, text: 'זה הזיכרון הראשון שלך. לא בחרת בו.' },
++          { who: null, text: 'לא בחרת להגיע לשם. מה נשאר לך ממנו — זה כבר שלך.' },
