@@ -1,0 +1,83 @@
+name: LIFE 1983-2000 RC
+
+on:
+  push:
+    branches:
+      - life/1983-2000-rc
+
+permissions:
+  contents: write
+
+concurrency:
+  group: life-1983-2000-rc
+  cancel-in-progress: false
+
+jobs:
+  build-rc:
+    if: ${{ !contains(github.event.head_commit.message, '[rc-applied]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout RC branch
+        uses: actions/checkout@v4
+        with:
+          ref: life/1983-2000-rc
+          fetch-depth: 0
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Apply approved 1983-2000 Director RC
+        run: python3 scripts/rc/apply-1983-2000-rc.py
+
+      - name: Install
+        run: npm ci
+
+      - name: Repository hygiene
+        run: npm run repo:hygiene
+
+      - name: Asset provenance
+        run: npm run assets:provenance
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: LIFE dead ends
+        run: npm run life:deadends
+
+      - name: LIFE flow
+        run: npm run life:flow
+
+      - name: LIFE worldlines
+        run: npm run life:worldlines
+
+      - name: LIFE sync
+        run: npm run life:sync
+
+      - name: LIFE 1991 probe
+        run: npm run life:1991
+
+      - name: Tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      - name: Remove one-shot RC machinery
+        run: |
+          rm -rf scripts/rc
+          rm -f .github/workflows/life-1983-2000-rc.yml
+
+      - name: Commit validated RC
+        run: |
+          git config user.name "OpenAI Release Worker"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(life): finalize 1983-2000 director cut [rc-applied]"
+          git push origin HEAD:life/1983-2000-rc
