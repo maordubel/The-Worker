@@ -1,0 +1,42 @@
+diff --git a/lib/life/runtime/scenes/FootballScene.ts b/lib/life/runtime/scenes/FootballScene.ts
+--- a/lib/life/runtime/scenes/FootballScene.ts
++++ b/lib/life/runtime/scenes/FootballScene.ts
+@@
+       { t: 'energy.changed', delta: -16 },
+       { t: 'flag.raised', flag: 'played:football' },
+       { t: 'trait.shifted', trait: 'footballAffinity', delta: won ? 8 : 5 },
+-      { t: 'trait.shifted', trait: 'streetSmarts', delta: 3 },
+       { t: 'bond.shifted', who: 'ofir', delta: won ? 6 : 3 },
+     )
+diff --git a/lib/life/content/dialogue.ts b/lib/life/content/dialogue.ts
+--- a/lib/life/content/dialogue.ts
++++ b/lib/life/content/dialogue.ts
+@@
+         then: [
+           { e: 'bond', who: 'ofir', delta: 3 },
+           { e: 'flag', flag: 'knows:pitch' },
+-          { e: 'trait', trait: 'streetSmarts', delta: 2 },
+         ],
+@@
+         then: [
+           { e: 'flag', flag: 'knows:match' },
+-          { e: 'trait', trait: 'streetSmarts', delta: 4 },
+           { e: 'redheart', key: 'community', delta: 4 },
+         ],
+@@
+-        then: [{ e: 'trait', trait: 'streetSmarts', delta: 3 }],
++        then: [],
+@@
+         then: [
+           { e: 'trait', trait: 'footballAffinity', delta: 2 },
+-          { e: 'trait', trait: 'streetSmarts', delta: 3 },
+           { e: 'redheart', key: 'terraceCulture', delta: 4 },
+         ],
+@@
+         then: [
+           { e: 'money', agorot: 100, why: 'מציאה' },
+           { e: 'flag', flag: 'found:coin' },
+-          { e: 'trait', trait: 'streetSmarts', delta: 4 },
++          { e: 'personality', key: 'curiosity', delta: 1 },
+           { e: 'toast', text: 'קיבלת 1 ₪' },
+         ],
