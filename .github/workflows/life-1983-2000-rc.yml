@@ -31,7 +31,7 @@ jobs:
           cache: npm
 
       - name: Apply approved 1983-2000 Director RC
-        run: python3 scripts/rc/apply-1983-2000-rc.py
+        run: python3 scripts/rc/run-1983-2000-rc.py
 
       - name: Install
         run: npm ci
