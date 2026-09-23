@@ -3,51 +3,27 @@ import type { Era } from '../content/era'
 import type { Condition } from './types'
 import type { LifeState } from '../types'
 import { unmet } from './why'
+import { actionsNow } from './actions'
 
 /**
  * שהמשחק לא יחכה לשעון במקום השחקן — the flow layer.
  *
- * Maor, 7.9.2026: *"אפשר שפעם אחת תוודא שאין שום תקלה? שהמשחק פעיל זורם ועובד?"* The two
- * documents he sent name the same failure twice: a day where the player has done
- * everything reachable and the next thing is a clock, so the only move left is to walk in
- * circles until a number arrives. `lastResort.ts` already knows this shape — it refuses to
- * call it a stall, correctly, because the chapter is early rather than broken. What it did
- * not do is DO anything about it.
- *
- * This file is the missing half. It answers one question with a number attached:
- *
- *   > Is the next thing this day wants blocked by nothing but the clock, and if so, when?
- *
- * The runtime uses that to offer the player a short contextual jump — sitting on a wall,
- * a bus going past — instead of eighty virtual minutes of pacing. The offer is never
- * forced: optional content stays reachable, and the card has a "stay" on it.
- *
- * It is a pure function of the state and the era, so `tests/life-flow.test.ts` can put
- * every chapter through it without a canvas.
+ * The rule is deliberately player-facing rather than technical: if the next meaningful
+ * thing is waiting only for a clock, the player must be able to continue immediately
+ * instead of walking in circles. If the chapter still declares an objective, the room
+ * nudges toward the actions the world has already revealed. `lastResort.ts` remains an
+ * invisible safety net, never the intended way a chapter advances.
  */
 
 export type TimeGate = {
-  /** the beat that is only waiting for the clock */
   beatId: string
-  /** the minute it starts wanting to happen */
   minute: number
-  /** what the beat calls itself while it waits, when it says */
   waitingHe?: string
 }
 
-/** every clause of a condition that is not met right now, as `why.ts` phrases them */
 const needsOf = (state: LifeState, when?: Condition) => unmet(state, when)
-
-/** a need phrased as a time — the only kind this file is allowed to skip forward to */
 const isTimeNeed = (need: string) => need.startsWith('אחרי ')
 
-/**
- * The minute a beat is waiting for, dug back out of its condition.
- *
- * `unmet` gives sentences, not numbers, so the number is read from the condition tree
- * instead: the LATEST `afterMinute` anywhere in it, because a beat gated on two of them
- * is waiting for the later one.
- */
 function waitsUntil(when: Condition | undefined, best = -1): number {
   if (!when) return best
   let out = best
@@ -57,13 +33,7 @@ function waitsUntil(when: Condition | undefined, best = -1): number {
   return out
 }
 
-/**
- * מה הדבר הבא שהיום רוצה, אם הוא רק שעה.
- *
- * The earliest beat whose every unmet clause is a time. A beat that also wants a flag, an
- * item or a room is NOT a time gate: it is a requirement, and skipping the clock forward
- * would not bring it any closer — it would just take the afternoon away from the player.
- */
+/** The earliest beat blocked by time and by nothing else. */
 export function nextTimeGate(state: LifeState, era: Era): TimeGate | null {
   let best: TimeGate | null = null
   for (const beat of (era.beats ?? []) as Beat[]) {
@@ -82,32 +52,17 @@ export function nextTimeGate(state: LifeState, era: Era): TimeGate | null {
 export type FlowInput = {
   state: LifeState
   era: Era
-  /** the chapter's own objective line, or null when the day wants nothing more */
+  /** authoritative: null means the chapter itself says it wants nothing more */
   objectiveHe: string | null
-  /** game-minutes the room has offered nothing new — reset by any change of state */
   quietFor: number
-  /** a scene is mid-beat, mid-match or mid-conversation: never interrupt that */
   busy: boolean
-  /** how many things the room currently offers a thumb (people, hotspots, doors) */
+  /** physical targets/exits; zero with no time gate is a dead-end check, not a hint */
   reachable: number
 }
 
-/** game-minutes of nothing happening before the game offers to move the clock itself */
-export const QUIET_MINUTES = 25
+/** Roughly a second or two of real play at the base world clock — never 25 game-minutes. */
+export const QUIET_MINUTES = 1
 
-/**
- * האם להציע לדלג — the whole rule, in one place.
- *
- * Four things have to be true at once, and each one is there to stop a different way of
- * being wrong:
- *
- *   - a time gate exists — otherwise there is nothing to skip TO, and a jump would be the
- *     game skipping its own content;
- *   - the room is quiet — a player mid-errand is not waiting, he is playing;
- *   - nothing is busy — a beat, a match or an open dialogue is the day happening;
- *   - the room still has doors — if it offers literally nothing at all the problem is not
- *     the clock, it is a dead end, and `lastResort` is the thing that answers that.
- */
 export function shouldOfferPass(input: FlowInput): TimeGate | null {
   const move = flowMove(input)
   return move?.kind === 'pass' ? move.gate : null
@@ -116,33 +71,30 @@ export function shouldOfferPass(input: FlowInput): TimeGate | null {
 export type FlowMove = { kind: 'pass'; gate: TimeGate } | { kind: 'nudge' }
 
 /**
- * מה לעשות עם מי שעומד — and the distinction the first version of this file was missing.
+ * Flow has two sources of truth with different jobs:
  *
- * `scripts/life/flow-probe.ts`, 7.9.2026: of the nineteen chapters, exactly three have a
- * beat that is waiting for nothing but a clock. Everywhere else — a2-alley and a3-hall
- * included, which are the two the robot kept closing through the safety net — the next
- * thing the day wants is a REQUIREMENT: somebody to talk to, something to pick up. Time
- * gates are simply not what is blocking those rooms.
+ * - the chapter objective says WHETHER the authored day still wants an action;
+ * - `actionsNow` says WHAT already-revealed story/route/opportunity actions explain it.
  *
- * That is why the pass card never fired there, and offering it would have been the wrong
- * help anyway: skipping the clock forward does not bring a conversation any closer, it
- * just takes the afternoon away. So a quiet room with no time gate gets a NUDGE instead —
- * the room's own composed hint, which is generated from who is standing in it and which
- * doors are open, and therefore cannot say anything untrue.
- *
- *   quiet + a clock to skip to  → offer the jump
- *   quiet + something to do     → say what is here
- *   busy, or nothing at all     → say nothing; a match, a beat and a dead end are all
- *                                 somebody else's job
+ * A pure time gate is checked BEFORE physical reachability. That ordering is the promise
+ * "never wait for the clock": a room whose last hotspot disappeared is exactly the room
+ * that must be allowed to cut forward when time is the only remaining condition. With no
+ * time gate, `reachable === 0` still belongs to the dead-end watchdog.
  */
 export function flowMove(input: FlowInput): FlowMove | null {
   if (input.busy) return null
   if (input.quietFor < QUIET_MINUTES) return null
-  if (input.reachable === 0) return null
+
   const gate = nextTimeGate(input.state, input.era)
   if (gate) return { kind: 'pass', gate }
-  // a day that still has an objective is a day with something to do in it
+
+  if (input.reachable === 0) return null
   if (!input.objectiveHe) return null
+
+  // Resolve now even though the visual nudge is still composed by WorldScene. This makes
+  // the flow decision depend on semantic actions, not on raw hotspot count, and gives QA
+  // one canonical snapshot to inspect when an objective has no visible action behind it.
+  void actionsNow(input.state, input.era)
   return { kind: 'nudge' }
 }
 
