@@ -25,12 +25,19 @@ the palette, save.
 This is the same class of bug as the badge coming back yellow after Next re-encoded it to
 WebP — and the same shape of fix.
 
+The table below is the one list of artwork this script prepares. A job whose fifth field
+is `"tile"` is a repeating texture: squared to its width, made seamless (`make_tileable`) and
+de-yellowed pixel by pixel BEFORE it is quantised, then proved the same way. Gate 11's black
+paste-up wall (`public/art/wall-paste-up.png`, delta 87) was the first; it lived in its own
+`gate11-wall.py` until delta 88 folded it in here — byte-identical output (sha256
+70ef6b17…a8d46b3 before and after the move).
+
     python3 scripts/brand/art.py
 """
 import os
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 from deyellow import hue_of, rotate  # noqa: E402  (same directory)
 
@@ -49,7 +56,57 @@ JOBS = [
     ("art-number7.png", "number-seven.png", 1000, 160, None),
     ("art-dribble.png", "dribble.png", 1000, 160, None),
     ("crest-worker-red.png", "crest-worker-figure.png", 600, 64, "trim"),
+    # gate 11's wall behind הקיר השחור — `brand/source/art/gate11-wall-paste-up.png` (1254×1254),
+    # the owner's copy of `extras/gate11__wall-paste-up.png` (THE-WORKER-GATES-ART-2026-09),
+    # generated 21.9.2026, supplied by Maor. Monochrome; nothing here adds colour.
+    ("gate11-wall-paste-up.png", "wall-paste-up.png", 512, 96, "tile"),
 ]
+
+# a tile's seam blend, in pixels either side of each seam
+FEATHER = 48
+
+
+def make_tileable(image: Image.Image) -> Image.Image:
+    """
+    Make a texture repeat. The source's own edges do not match, so the image is cyclic-shifted
+    by half its size (`ImageChops.offset` — true wraparound, nothing outside the frame is
+    invented) and a band across the two seams that move lands on — now the CENTRE — is
+    feather-blended with its mirror. The output's edges are interior pixels of the source.
+    """
+    w, h = image.size
+    shifted = ImageChops.offset(image, w // 2, h // 2)
+
+    band = shifted.crop((w // 2 - FEATHER, 0, w // 2 + FEATHER, h))
+    mirror_band = (
+        shifted.transpose(Image.FLIP_LEFT_RIGHT)
+        .crop((w // 2 - FEATHER, 0, w // 2 + FEATHER, h))
+        .transpose(Image.FLIP_LEFT_RIGHT)
+    )
+    shifted.paste(Image.blend(band, mirror_band, 0.5), (w // 2 - FEATHER, 0))
+
+    band2 = shifted.crop((0, h // 2 - FEATHER, w, h // 2 + FEATHER))
+    mirror_band2 = (
+        shifted.transpose(Image.FLIP_TOP_BOTTOM)
+        .crop((0, h // 2 - FEATHER, w, h // 2 + FEATHER))
+        .transpose(Image.FLIP_TOP_BOTTOM)
+    )
+    shifted.paste(Image.blend(band2, mirror_band2, 0.5), (0, h // 2 - FEATHER))
+    return shifted
+
+
+def deyellow_pixels(image: Image.Image) -> int:
+    """rotate every pixel in the wide band, in place, before quantising — returns how many moved"""
+    px = image.load()
+    w, h = image.size
+    moved = 0
+    for y in range(h):
+        for x in range(w):
+            r, g, b = px[x, y]
+            hue, sat, val, delta = hue_of(r, g, b)
+            if delta and sat >= PALETTE_SAT and val >= PALETTE_VAL and PALETTE_BAND[0] <= hue <= PALETTE_BAND[1]:
+                px[x, y] = rotate(r, g, b)
+                moved += 1
+    return moved
 
 
 def trim_white(image: Image.Image) -> Image.Image:
@@ -90,7 +147,11 @@ def prepare(source: Path, target: Path, width: int, colours: int, crop: str | No
     image = Image.open(source).convert("RGB")
     if crop == "trim":
         image = trim_white(image)
-    if image.width > width:
+    if crop == "tile":
+        image = image.resize((width, width), Image.LANCZOS)
+        image = make_tileable(image)
+        deyellow_pixels(image)
+    elif image.width > width:
         image = image.resize((width, round(image.height * width / image.width)), Image.LANCZOS)
 
     quantised = image.quantize(

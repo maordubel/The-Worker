@@ -298,8 +298,34 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
    * require it to be gone.
    */
   const clearDialogue = async (max = 16) => {
+    // (24.9.2026) the bag in the bedroom opens the life's card — a sheet with its own
+    // "לסגור", not a conversation, and it opens a beat AFTER the line that announces it.
+    // A player closes it; so does the harness, or it stands in front of a modal pressing
+    // arrows and reports a room with no door.
+    const closeCards = async () => {
+      await page.waitForTimeout(350)
+      // and the "נכנס לחיים שלך" card of a first meeting (Director v2): one tap per line
+      for (let i = 0; i < 8; i += 1) {
+        const cast = page.locator('[data-life="cast-card"]')
+        if ((await cast.count()) === 0) break
+        await cast.first().click().catch(() => {})
+        await page.waitForTimeout(260)
+      }
+      for (let i = 0; i < 3; i += 1) {
+        if ((await page.locator('[data-life="dialogue"]').count()) > 0) return
+        const close = page.locator('[role="dialog"] button', { hasText: 'לסגור' })
+        if ((await close.count()) === 0) return
+        await close.first().click().catch(() => {})
+        await page.waitForTimeout(300)
+      }
+    }
+    await closeCards()
     for (let i = 0; i < max; i += 1) {
-      if ((await page.locator('[data-life="dialogue"]').count()) === 0) return true
+      if ((await page.locator('[data-life="dialogue"]').count()) === 0) {
+        await closeCards()
+        if ((await page.locator('[data-life="dialogue"]').count()) === 0) return true
+        continue
+      }
       // a ballot on screen: a player picks; the harness picks the first row (5.9.2026 —
       // Kobi's morning conversation ends in a choice, and eight presses of E never chose)
       const choice = page.locator('[data-life="choice"] button').first()
@@ -443,28 +469,10 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
     report.push(`walk    ${size.name}: ${seen.join(' → ')}`)
   }
 
-  // The lock has to be real in the other direction too: a child with no key is refused,
-  // and told why. This is checked on a second, untouched save so the first one is intact.
-  if (size.name === 'phone') {
-    const refusal = await page.evaluate(async () => {
-      const key = 'the-worker:life'
-      const before = window.localStorage.getItem(key)
-      try {
-        const save = JSON.parse(before ?? '{}')
-        const events = (save.events ?? []).filter(
-          (event) => !(event.t === 'item.gained' && event.item === 'house-key'),
-        )
-        return events.length !== (save.events ?? []).length
-      } catch {
-        return false
-      }
-    })
-    report.push(`lock    phone: the key is a real event in the log (${refusal ? 'yes' : 'no'})`)
-    if (!refusal) {
-      faults += 1
-      report.push('LOCK     phone: nothing in the save granted the house key')
-    }
-  }
+  // (Director V3 §11, 24.9.2026) there is no key lock any more: the living-room door opens
+  // without the key on the string, and the walk above — which reached the street from a
+  // save that never opened the drawer — is the proof. The old check here asserted the
+  // opposite (a save with no key is refused), and it was retired with the lock.
 
   // Onboarding is not billed to the clock: walking around indoors moves nothing. The
   // baseline is re-read after every conversation, because a conversation is allowed to

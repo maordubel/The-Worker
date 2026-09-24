@@ -4,11 +4,10 @@ import { beatsAt, type Beat } from '@/lib/life/content/beats'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { BEATS_GALIL, CONVERSATIONS_GALIL, ENDINGS_GALIL } from '@/lib/life/content/chapter1993galil'
 import { BEATS_SINAI, CONVERSATIONS_SINAI, ENDINGS_SINAI } from '@/lib/life/content/chapter1995sinai'
-// (23.9.2026) The 23.9.2026 overlay replaced chapter1996army.ts's unit with
-// chapter1996director.ts's Director's Cut; this suite now checks the live unit instead of
-// the superseded file so "points every talk/goto/actor/hotspot at something that exists"
-// tests what the game actually plays.
-import { BEATS_ARMY, CONVERSATIONS_ARMY, ENDINGS_ARMY } from '@/lib/life/content/chapter1996director'
+// (24.9.2026, Director V3) chapter1996army.ts is the single live 1996 unit again — the
+// Director's Cut file was folded into it and removed — so this suite checks what the game
+// actually plays.
+import { BEATS_ARMY, CONVERSATIONS_ARMY, ENDINGS_ARMY } from '@/lib/life/content/chapter1996army'
 import { BEATS_HALL, CONVERSATIONS_HALL, ENDINGS_HALL } from '@/lib/life/content/chapter1997basket'
 import { BEATS_LACES, CONVERSATIONS_LACES, ENDINGS_LACES } from '@/lib/life/content/chapter1998laces'
 import { BEATS_SEED, CONVERSATIONS_SEED, ENDINGS_SEED } from '@/lib/life/content/chapter1999basket'
@@ -266,11 +265,20 @@ describe('שלב א׳ — the six days before the Saturday', () => {
 })
 
 describe('B6 — the bus, kept exactly', () => {
+  // (Director V3 §8, 24.9.2026) the four buttons became four places in the station: the bus
+  // door boards, the station door refuses, the bench hesitates, the timetable searches. The
+  // memory itself — words and effects — is asserted exactly as before.
   it('offers a real bus that would arrive in time, a refusal, and two hours late as the consequence', () => {
     const bus = DIALOGUE['a3-bus']!
     const open = bus.branches.find((b) => (b.choices ?? []).length > 0)!
     const ids = (open.choices ?? []).map((c) => c.id)
-    expect(ids).toEqual(expect.arrayContaining(['refuse', 'board']))
+    expect(ids).toContain('board')
+    expect(ids).not.toContain('refuse')
+    const away = DIALOGUE['a3-walk-away']!
+    const walk = away.branches.find((b) => (b.then ?? []).length > 0)!
+    expect(walk.lines.map((l) => l.text).join(' ')).toContain('לא על האוטובוס הזה')
+    const spots = SCENE['bus-station'].hotspots.filter((spot) => inEra(spot, '1996-army')).map((spot) => spot.act)
+    expect(spots).toEqual(expect.arrayContaining(['a3-bus', 'a3-walk-away', 'a3-bench', 'a3-timetable']))
     const all = open.lines.map((l) => l.text).join(' ')
     expect(all).toContain('בית"ר')
     expect(all).toContain('בזמן')
@@ -282,8 +290,8 @@ describe('B6 — the bus, kept exactly', () => {
       expect(text.includes('התקלקל') && !text.includes('"האוטובוס התקלקל."')).toBe(false)
       expect(text).not.toContain('טרמפ')
     }
-    const refuse = open.choices!.find((c) => c.id === 'refuse')!
-    expect(refuse.then.some((fx) => fx.e === 'flag' && fx.flag === 'life:bus:refused')).toBe(true)
+    expect(walk.then!.some((fx) => fx.e === 'flag' && fx.flag === 'life:bus:refused')).toBe(true)
+    expect(walk.then!.some((fx) => fx.e === 'goto' && fx.node === 'a3-refused')).toBe(true)
   })
 })
 

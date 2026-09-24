@@ -5,20 +5,30 @@ import { describe, expect, it } from 'vitest'
 const root = process.cwd()
 const file = (path: string) => readFileSync(join(root, path), 'utf8')
 
-describe('Director v2 — documentary / encounters / 1996', () => {
-  it('routes the 1996 era through the Director Cut', () => {
+describe('Director v3 — documentary / encounters / playable 1996', () => {
+  it('routes 1996 through the full gameplay chapter, not the compact menu replacement', () => {
     const era = file('lib/life/content/era.ts')
     const dialogue = file('lib/life/content/dialogue.ts')
-    expect(era).toContain("from './chapter1996director'")
-    expect(dialogue).toContain("from './chapter1996director'")
+    expect(era).toContain("from './chapter1996army'")
+    expect(dialogue).toContain("from './chapter1996army'")
   })
 
-  it('makes Gate 5 a physical choice, not a dead objective', () => {
-    const army = file('lib/life/content/chapter1996director.ts')
-    expect(army).toContain("e: 'travel', to: 'gate5'")
-    expect(army).toContain("e: 'gate', to: 'gate5', reason: 'culture'")
-    expect(army).toContain("23 בנובמבר 1996")
-    expect(army).not.toContain("16 בנובמבר 1996")
+  it('keeps the terrace decision recoverable through world conversations', () => {
+    const army = file('lib/life/content/chapter1996army.ts')
+    const scenes = file('lib/life/world/scenes.ts')
+    expect(army).toContain("id: 'kobi-gate7'")
+    expect(army).toContain("id: 'barry-gate7'")
+    expect(army).toContain("id: 'asaf-gate5'")
+    expect(scenes).toContain("to: 'gate5'")
+    expect(scenes).toContain("era: ['1996-army'")
+    expect(army).toContain('23 בנובמבר 1996')
+    expect(army).not.toContain('16 בנובמבר 1996')
+  })
+
+  it('starts the bus dilemma with the bus already present', () => {
+    const army = file('lib/life/content/chapter1996army.ts')
+    expect(army).toContain("{ a: 'flag', flag: 'a3:bus-here' }")
+    expect(army).toContain("id: 'a3-bus'")
   })
 
   it('restores seeded random encounters across late Stage B', () => {

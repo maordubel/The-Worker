@@ -1078,7 +1078,8 @@ describe('שני עשורים — the cast is on disk at both ages', () => {
     for (const [then, now] of [
       ['kobi-chair', 'kobi90-paper'],
       ['kobi-cheer', 'kobi90-cheer'],
-      ['ofir', 'ofir90-smoke'],
+      // `ofir90-smoke` is the older sheet's different man (`LEGACY_POSE`, 24.9.2026)
+      ['ofir', 'ofir90-3q'],
       ['amit', 'amit90'],
     ]) {
       expect(existsSync(join(ART, `${then}.webp`)), `${then} missing`).toBe(true)

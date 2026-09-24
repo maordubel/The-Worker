@@ -468,7 +468,8 @@ describe('פרויקט משותף עם DUBID — THE WORKER touches only what it
 
   it('leaves every older migration an empty file that says which one to run', () => {
     const dir = join(ROOT, 'supabase/migrations')
-    const live = ['20260922090000_worker_shared_project.sql', '20260922120000_worker_collector_market.sql']
+    // 24.9.2026: gate 10's duel is its own standalone file (tests/blind-cow-schema.test.ts)
+    const live = ['20260922090000_worker_shared_project.sql', '20260922120000_worker_collector_market.sql', '20260924090000_worker_blind_cow.sql']
     for (const name of readdirSync(dir)) {
       if (live.includes(name)) continue
       const body = readFileSync(join(dir, name), 'utf8')

@@ -83,6 +83,9 @@ const SHIPPED = [
   // evidence. A documentary photograph with no row saying where it came from is the
   // failure this audit was written to prevent — the wing it hangs in is beside the point.
   'public/kits',
+  // 24.9.2026 — the archive's dig table (gate 12) and the gate 11 wall paste-up
+  'public/archive',
+  'public/art',
 ]
 
 const KIND = new Set([

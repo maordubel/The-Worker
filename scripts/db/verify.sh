@@ -19,3 +19,5 @@ done
 psql -d "$DB" -v ON_ERROR_STOP=1 -q -f supabase/tests/10-portal.sql >/dev/null 2>/tmp/verify-err.txt || { cat /tmp/verify-err.txt; exit 1; }
 out=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/20-collector.sql 2>&1) || { echo "$out" | grep -E "FAIL|ERROR"; exit 1; }
 echo "$out" | grep -c PASS | xargs -I{} echo "db verify: migrations twice, portal smoke, {} collector assertions — clean"
+bc=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/30-blind-cow.sql 2>&1) || { echo "$bc" | grep -E "FAIL|ERROR"; exit 1; }
+echo "$bc" | grep -c PASS | xargs -I{} echo "db verify: {} blind-cow (gate 10 duel) assertions — clean"

@@ -14,7 +14,11 @@ import { PORTRAIT_ART } from '@/lib/life/runtime/art'
  * rebuilt Bloomfield in 2019. The plates for the older bodies existed and were wired to
  * nothing. The plate is now derived from the body; this holds it there.
  */
-const FACE_OF_BODY: Record<string, string> = { hero90: 'faceHero90', soldier: 'faceSoldier' }
+// 24.9.2026: from 2010 the young man ages (`playerFor` in `world/castFigures.ts`), and each age
+// speaks with the plate cut from its own body
+const FACE_OF_BODY: Record<string, string> = {
+  hero90: 'faceHero90', soldier: 'faceSoldier', pogi32: 'facePogi32', pogi40: 'facePogi40', pogi47: 'facePogi47',
+}
 
 describe('the protagonist speaks with the face of the body he walks in', () => {
   it('uses the grown plate in every chapter whose body is grown', () => {

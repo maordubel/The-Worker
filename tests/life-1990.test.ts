@@ -327,8 +327,9 @@ describe('הדלתות של 1990 — a twelve-year-old walks out of his own hous
     const street = sceneFor('street').exits.find((exit) => exit.id === 'route')!
     expect(meets(state, needsFor(home, '1990'))).toBe(true)
     expect(meets(state, needsFor(street, '1990'))).toBe(true)
-    // …and 1986 keeps both locks exactly as they were.
-    expect(meets(state, needsFor(home, '1986'))).toBe(false)
+    // …and 1986 keeps its road lock. The key lock is gone in every year (Director V3 §11,
+    // 24.9.2026): the front door no longer asks for the key on the string.
+    expect(meets(state, needsFor(home, '1986'))).toBe(true)
     expect(meets(state, needsFor(street, '1986'))).toBe(false)
   })
 

@@ -48,6 +48,38 @@ import { byCodePoint } from '@/scripts/ingest/lib/playerIds'
 
 const OUT = 'content/generated/match-master.json'
 const CONFIDENCE_FLOOR = 2
+const SECONDARY_INTL = 'content/manual/intl-redfans-2026-09-24.json'
+const ASIAN_FILE = 'content/manual/asian-competition-matches.json'
+const INTL_COMPETITIONS = new Set(['גביע-אלופות-אסיה', 'גביע-אסיה', 'גביע-האינטרטוטו', 'גביע-אופא', 'הליגה-האירופית', 'ליגת-האלופות', 'קונפרנס-ליג'])
+/** the enrichment's competition names → the archive's slugs */
+const SECONDARY_COMPETITION: Record<string, string[]> = {
+  'גביע אסיה': ['גביע-אסיה', 'גביע-אלופות-אסיה'],
+  'גביע אינטרטוטו': ['גביע-האינטרטוטו'],
+  'גביע אופ"א': ['גביע-אופא'],
+  'ליגת האלופות': ['ליגת-האלופות'],
+  'הליגה האירופית': ['הליגה-האירופית'],
+  'ליגת הועידה': ['קונפרנס-ליג'],
+}
+type SecondaryScorer = { nameHe: string | null; minute: number | null; stoppage: number | null; penalty: boolean; ownGoal: boolean; confidence: number | null; sourceUrl: string | null }
+type SecondaryRow = {
+  playedOn: string
+  competitionHe: string
+  stageHe: string | null
+  side: 'HOME' | 'AWAY' | 'NEUTRAL' | null
+  opponentHe: string | null
+  opponentLatin: string | null
+  scoreFor: number | null
+  scoreAgainst: number | null
+  physicalPlayed: false | null
+  venueText: string | null
+  independentFields: string[]
+  echoesRepo: boolean
+  sources: { title: string; url: string; confidence: number; fields: string[] }[]
+  scorerCoverage: string
+  scorers: SecondaryScorer[]
+  conflicts: { field: string; values: { value: unknown; source: string }[]; note: string | null }[]
+  notes: string[]
+}
 
 /** Every file the master reads. Append, never re-sort — the order is the fingerprint's. */
 export const MATCH_MASTER_INPUTS = [
@@ -64,6 +96,8 @@ export const MATCH_MASTER_INPUTS = [
   'content/manual/clubs.json',
   'content/manual/player-ids.json',
   'content/generated/player-master.json',
+  'content/manual/asian-competition-matches.json',
+  'content/manual/intl-redfans-2026-09-24.json',
 ] as const
 
 export function matchInputsSha(root: string, inputs: readonly string[] = MATCH_MASTER_INPUTS): string {
@@ -94,7 +128,13 @@ const ACTOR_KINDS: Record<string, { kind: Exclude<ActorKind, 'player'>; noteHe: 
  * abbreviation (י-ם = ירושלים) and `בית"ר ירושלים` the curated record; the 15.5.2010
  * championship row at טדי carries the first, the goal record the second.
  */
-const SAME_CLUB: [string, string][] = [['בית"ר-ירושלים', 'בית"ר-י-ם']]
+const SAME_CLUB: [string, string][] = [
+  ['בית"ר-ירושלים', 'בית"ר-י-ם'],
+  // FC Ararat Yerevan, 2001/02 UEFA Cup qualifier: the Games table spells the away leg
+  // `אררט-ירבאן` and the research doc the home leg `ארארט-ירוואן` — one club (Wildstat
+  // ARM_Ararat_Erevan holds both legs, 9.8 and 23.8.2001). Cross-check only, as above.
+  ['אררט-ירבאן', 'ארארט-ירוואן'],
+]
 
 type Row = Record<string, any>
 let ROOT = process.cwd()
@@ -197,6 +237,82 @@ export function buildMatchMaster(root = process.cwd()): { out: MatchMasterFile; 
     rowsById.set(id, [...(rowsById.get(id) ?? []), row])
   }
 
+  /* ---- the secondary international reading (ויקיפועל via the owner's enrichment, 24.9.2026) */
+  // Joined to canonical matches by date + competition (+ opponent); it mints nothing and
+  // carries none of its own ids. Only the fields its own pages state (`independentFields`)
+  // may disagree with the archive — the rest of a row echoes euro-ties.json and is not a
+  // second source. A disagreement becomes a claim; nothing is overwritten.
+  const secondaryDoc = read(SECONDARY_INTL) as { records: SecondaryRow[] }
+  const secondaryUnjoined: UnresolvedItem[] = []
+  const secondaryOpponent = new Map<string, SecondaryRow>()
+  const secondaryById = new Map<string, SecondaryRow>()
+  const intlGroups = [...rowsById.entries()].filter(([, group]) =>
+    group.some((row) => row.sport === 'football' && (row.homeClubSlug === US || row.awayClubSlug === US) && INTL_COMPETITIONS.has(row.competitionSlug)),
+  )
+  const dayDiff = (a: string, b: string) => Math.abs(Date.parse(`${a}T12:00:00Z`) - Date.parse(`${b}T12:00:00Z`)) / 86400000
+  for (const row of secondaryDoc.records) {
+    const slugs = SECONDARY_COMPETITION[row.competitionHe] ?? []
+    const opp = row.opponentHe ? clubOf(row.opponentHe) : null
+    const inComp = intlGroups.filter(([, group]) => slugs.includes((group[0] as KeyedMatch).competitionSlug))
+    const oppOf = (group: KeyedMatch[]) => {
+      const first = group[0] as KeyedMatch
+      return first.homeClubSlug === US ? first.awayClubSlug : first.homeClubSlug
+    }
+    let hits = inComp.filter(([, group]) => group.some((r) => r.playedOn === row.playedOn))
+    if (hits.length > 1 && opp) hits = hits.filter(([, group]) => sameClub(oppOf(group), opp))
+    let how = 'date'
+    if (hits.length === 0 && opp) {
+      const sideOf = (group: KeyedMatch[]) => ((group[0] as KeyedMatch).homeClubSlug === US ? 'HOME' : 'AWAY')
+      hits = inComp.filter(
+        ([, group]) =>
+          sameClub(oppOf(group), opp) &&
+          (row.side === 'NEUTRAL' || sideOf(group) === row.side) &&
+          group.some((r) => r.playedOn && dayDiff(r.playedOn, row.playedOn) <= 45),
+      )
+      how = 'opponent+side ±45 days'
+    }
+    const key = `${row.playedOn} ${row.competitionHe} ${row.opponentHe ?? '?'}`
+    if (hits.length !== 1) {
+      secondaryUnjoined.push({ kind: 'secondary-row', file: SECONDARY_INTL, key, reason: hits.length ? `ambiguous (${hits.length} matches, ${how})` : 'no canonical match on that date / against that club' })
+      continue
+    }
+    const [id, group] = hits[0] as [string, KeyedMatch[]]
+    if (secondaryById.has(id)) {
+      secondaryUnjoined.push({ kind: 'secondary-row', file: SECONDARY_INTL, key, reason: `a second row for ${id}` })
+      continue
+    }
+    secondaryById.set(id, row)
+    const base = group[0] as KeyedMatch
+    const ours = oppOf(group)
+    if (opp && !sameClub(ours, opp)) secondaryOpponent.set(id, row)
+    // a second reading of the core fields — only those the red-fans page itself states
+    const own = new Set(row.independentFields)
+    if (row.physicalPlayed === false || !(own.has('date') || own.has('score') || own.has('home_away'))) continue
+    const src = row.sources.find((s) => s.fields.some((f) => ['date', 'score', 'home_away'].includes(f))) ?? row.sources[0]
+    const usHome = row.side === 'HOME' || (row.side === 'NEUTRAL' && base.homeClubSlug === US)
+    const pseudo: KeyedMatch = {
+      ...base,
+      file: SECONDARY_INTL,
+      index: -1,
+      playedOn: own.has('date') ? row.playedOn : base.playedOn,
+      homeClubSlug: own.has('home_away') && row.side !== 'NEUTRAL' ? (usHome ? US : ours) : base.homeClubSlug,
+      awayClubSlug: own.has('home_away') && row.side !== 'NEUTRAL' ? (usHome ? ours : US) : base.awayClubSlug,
+      homeScore: base.homeScore,
+      awayScore: base.awayScore,
+      confidence: 2,
+      sourceUrl: src?.url ?? null,
+      sourceTitle: src?.title ?? 'ויקיפועל',
+    }
+    ;(pseudo as Row).venueSlug = (base as Row).venueSlug ?? null
+    ;(pseudo as Row).neutralGround = (base as Row).neutralGround === true || row.side === 'NEUTRAL'
+    if (own.has('score') && row.scoreFor !== null && row.scoreAgainst !== null) {
+      const home = pseudo.homeClubSlug === US
+      pseudo.homeScore = home ? row.scoreFor : row.scoreAgainst
+      pseudo.awayScore = home ? row.scoreAgainst : row.scoreFor
+    }
+    rowsById.set(id, [...group, pseudo])
+  }
+
   // scorer rows, by match id
   const scorerDoc = read('content/manual/match-scorers.json')
   const scorersById = new Map<string, Row[]>()
@@ -278,6 +394,117 @@ export function buildMatchMaster(root = process.cwd()): { out: MatchMasterFile; 
         })
       }
     }
+    // second and third readings of the scorers: the red-fans pages, and the Asian file's RSSSF line
+    const readings: { label: string; sourceId: string; file: string; list: ScorerEntry[] }[] = []
+    if (scorers.length > 0) {
+      readings.push({ label: 'archive', sourceId: scorers[0]?.sourceId as string, file: 'content/manual/match-scorers.json', list: scorers })
+    }
+    const toEntry = (g: SecondaryScorer | Row, fallbackUrl: string | null, fallbackTitle: string, conf: number): ScorerEntry => {
+      const person = g.ownGoal ? null : personOf(g.nameHe)
+      if (!person && !g.ownGoal && g.nameHe) unresolvedScorerNames.set(g.nameHe, (unresolvedScorerNames.get(g.nameHe) ?? 0) + 1)
+      return {
+        playerId: person?.id ?? null,
+        nameHe: g.nameHe ?? null,
+        minute: g.minute ?? null,
+        stoppage: g.stoppage ?? null,
+        penalty: g.penalty === true,
+        ownGoal: g.ownGoal === true,
+        sourceId: cite(g.sourceUrl ?? fallbackUrl, g.sourceUrl ? 'ויקיפועל — עמוד המשחק / לוח המשחקים' : fallbackTitle),
+        confidence: typeof g.confidence === 'number' ? Math.min(g.confidence, 3) : conf,
+      }
+    }
+    const secondary = secondaryById.get(entry.id)
+    if (secondary && secondary.physicalPlayed !== false && secondary.scorers.length > 0) {
+      const list = secondary.scorers.map((g) => toEntry(g, secondary.sources[0]?.url ?? null, 'ויקיפועל', 2))
+      readings.push({ label: 'red-fans', sourceId: list[0]?.sourceId as string, file: SECONDARY_INTL, list })
+    }
+    for (const row of group) {
+      if (row.file !== ASIAN_FILE || !Array.isArray((row as Row).scorers)) continue
+      const list = ((row as Row).scorers as Row[]).map((g) => toEntry(g, row.sourceUrl ?? null, row.sourceTitle ?? '', row.confidence ?? 2))
+      readings.push({ label: 'asia', sourceId: cite(row.sourceUrl, row.sourceTitle), file: ASIAN_FILE, list })
+    }
+    let scorerIdentityDisputed = false
+    if (scorers.length === 0 && readings.length > 0) scorers.push(...(readings[0] as { list: ScorerEntry[] }).list)
+    if (readings.length > 1) {
+      // Names are compared only through the Player Master (rule 7 — never fuzzily): two
+      // spellings of one unresolved name are not a disagreement, two different people are.
+      // A goal is placed by its total minute (minute + stoppage), so 90+4 and 94 agree.
+      const at = (g: ScorerEntry) => (g.minute === null ? null : g.minute + (g.stoppage ?? 0))
+      const say = (list: ScorerEntry[]) =>
+        list.map((g) => `${g.nameHe ?? '?'}${g.ownGoal ? ' (עצמי)' : ''}${g.minute !== null ? ` ${g.minute}${g.stoppage ? `+${g.stoppage}` : ''}` : ''}${g.penalty ? ' (פנדל)' : ''}`).join(' · ')
+      const ids = (list: ScorerEntry[]) => list.filter((g) => !g.ownGoal && g.playerId).map((g) => g.playerId as string).sort(byCodePoint)
+      const disagree = (a: ScorerEntry[], b: ScorerEntry[]): 'scorers' | 'scorers.minute' | null => {
+        if (a.length !== b.length) return 'scorers'
+        if (a.filter((g) => g.ownGoal).length !== b.filter((g) => g.ownGoal).length) return 'scorers'
+        const timed = a.every((g) => at(g) !== null) && b.every((g) => at(g) !== null)
+        if (timed) {
+          const ma = [...a].sort((x, y) => (at(x) as number) - (at(y) as number))
+          const mb = [...b].sort((x, y) => (at(x) as number) - (at(y) as number))
+          const sameMinutes = ma.every((g, i) => at(g) === at(mb[i] as ScorerEntry))
+          if (sameMinutes) {
+            const clash = ma.some((g, i) => {
+              const h = mb[i] as ScorerEntry
+              return g.ownGoal !== h.ownGoal || (!g.ownGoal && g.playerId && h.playerId && g.playerId !== h.playerId)
+            })
+            return clash ? 'scorers' : null
+          }
+        }
+        // minutes differ (or are missing): the people must still be the same people
+        const ia = ids(a)
+        const ib = ids(b)
+        const comparable = ia.length === a.filter((g) => !g.ownGoal).length && ib.length === b.filter((g) => !g.ownGoal).length
+        if (comparable && ia.join() !== ib.join()) return 'scorers'
+        return timed ? 'scorers.minute' : null
+      }
+      const first = readings[0] as (typeof readings)[number]
+      const verdicts = readings.slice(1).map((r) => disagree(first.list, r.list))
+      const field = verdicts.includes('scorers') ? 'scorers' : verdicts.includes('scorers.minute') ? 'scorers.minute' : null
+      if (field) {
+        claims.push({ field, values: readings.map((r) => ({ value: say(r.list), sourceId: r.sourceId, file: r.file })) })
+        scorerIdentityDisputed = field === 'scorers'
+      }
+    }
+    // the conflicts the enrichment itself preserved — kept as claims, not decided
+    if (secondary) {
+      for (const c of secondary.conflicts) {
+        const field = c.field === 'date' ? 'playedOn' : c.field === 'venue' ? 'venue' : null
+        if (!field || claims.some((x) => x.field === field)) continue
+        claims.push({
+          field,
+          values: c.values.map((v) => ({
+            value: typeof v.value === 'string' || typeof v.value === 'number' ? v.value : JSON.stringify(v.value),
+            sourceId: cite(/^https?:/.test(v.source) ? v.source : null, /^https?:/.test(v.source) ? 'ויקיפועל' : v.source),
+            file: SECONDARY_INTL,
+          })),
+        })
+      }
+      const other = secondaryOpponent.get(entry.id)
+      if (other && !claims.some((x) => x.field === 'opponent')) {
+        claims.push({
+          field: 'opponent',
+          values: [
+            { value: first.homeClubSlug === US ? first.awayClubSlug : first.homeClubSlug, sourceId: cite(first.sourceUrl, first.sourceTitle), file: first.file },
+            { value: other.opponentHe, sourceId: cite(other.sources[0]?.url ?? null, other.sources[0]?.title ?? 'ויקיפועל'), file: SECONDARY_INTL },
+          ],
+        })
+      }
+    }
+    const notPlayed =
+      secondary?.physicalPlayed === false || group.some((row) => (row as Row).status === 'walkover')
+        ? {
+            reason: 'walkover — the fixture was not played; a technical result, no match on a pitch',
+            sourceIds: [
+              ...new Set([
+                ...group.filter((row) => (row as Row).status === 'walkover').map((row) => cite(row.sourceUrl, row.sourceTitle)),
+                ...(secondary?.physicalPlayed === false && secondary.sources[0] ? [cite(secondary.sources[0].url, secondary.sources[0].title)] : []),
+              ]),
+            ].sort(byCodePoint),
+          }
+        : null
+    // a claim the enrichment preserved disputes the field exactly as two archive rows would
+    const dateClaimed = datesDisputed || claims.some((c) => c.field === 'playedOn')
+    const venueClaimed = claims.some((c) => c.field === 'venue')
+
     const events = (eventsById.get(entry.id) ?? []).map((row) => ({
       seq: row.seq ?? null,
       type: row.type,
@@ -296,7 +523,7 @@ export function buildMatchMaster(root = process.cwd()): { out: MatchMasterFile; 
       aliases: [
         ...new Set([entry.naturalKey, ...entry.aliases, ...(entry.dialects ?? []).map((d) => d.key)]),
       ],
-      playedOn: datesDisputed
+      playedOn: dateClaimed
         ? { value: null, precision: 'disputed' }
         : first.playedOn
           ? { value: first.playedOn, precision: 'day' }
@@ -315,17 +542,18 @@ export function buildMatchMaster(root = process.cwd()): { out: MatchMasterFile; 
           : { home: first.homeScore, away: first.awayScore },
       result: res,
       neutralGround: group.some((row) => (row as Row).neutralGround === true),
-      venue: distinct((row) => (row as Row).venueSlug ?? null).length === 1 ? ((first as Row).venueSlug ?? null) : null,
+      venue: !venueClaimed && distinct((row) => (row as Row).venueSlug ?? null).length === 1 ? ((first as Row).venueSlug ?? null) : null,
       claims,
       conflictRefs,
       scorers,
-      scorersDisputed: scorerRows.some((row) => confidenceOf(row, scorerDoc) < CONFIDENCE_FLOOR),
+      scorersDisputed: scorerIdentityDisputed || scorerRows.some((row) => confidenceOf(row, scorerDoc) < CONFIDENCE_FLOOR),
       events,
       lineupRef: lineupById.get(entry.id)?.matchId ?? null,
       momentIds: [],
       sourceIds: [...new Set(group.map((row) => cite(row.sourceUrl, row.sourceTitle)))].sort(byCodePoint),
       confidence: Math.max(...group.map((row) => row.confidence ?? 0)),
       mergeNote: entry.mergeNote ?? null,
+      ...(notPlayed ? { notPlayed } : {}),
     }
     matches.push(record)
     matchById.set(record.matchId, record)
@@ -701,6 +929,7 @@ export function buildMatchMaster(root = process.cwd()): { out: MatchMasterFile; 
   researchQueue.sort((a, b) => byCodePoint(a.playedOn ?? '', b.playedOn ?? '') || (a.minute ?? 0) - (b.minute ?? 0))
 
   /* ---- what could not be joined */
+  unresolved.push(...secondaryUnjoined)
   for (const d of plan.unresolvedDialects) unresolved.push({ kind: 'dialect', dialect: d.dialect, key: d.key, reason: d.reason })
   for (const pair of plan.suspectedDuplicates) unresolved.push({ kind: 'suspected-duplicate', a: pair.a, b: pair.b, reason: pair.why })
   for (const lineup of lineupDoc.records as Row[]) {

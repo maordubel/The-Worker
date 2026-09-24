@@ -41,21 +41,19 @@ describe('the discovered checklist', () => {
 
   it('1986: steps appear only after the world shows them, and tick when done', () => {
     const engine = engineIn('1986', 1986, 14 * 60)
+    // (Director V3 §11) the key is not a step any more — the day opens on the father
     let list = checklistFor(engine.state)
-    expect(list.map((s) => s.id)).toEqual(['key'])
-    expect(nextStep(engine.state)?.id).toBe('key')
-    engine.dispatch({ t: 'item.gained', item: 'house-key' })
-    list = checklistFor(engine.state)
-    expect(list.map((s) => `${s.id}${s.done ? '✓' : ''}`)).toEqual(['key✓', 'dad'])
+    expect(list.map((s) => s.id)).toEqual(['dad'])
+    expect(nextStep(engine.state)?.id).toBe('dad')
     engine.dispatch({ t: 'flag.raised', flag: 'knows:match' }, { t: 'flag.raised', flag: 'kobi:left' })
     list = checklistFor(engine.state)
-    expect(list.map((s) => s.id)).toEqual(['key', 'dad', 'east', 'gate'])
-    expect(list.filter((s) => s.done).map((s) => s.id)).toEqual(['key', 'dad'])
+    expect(list.map((s) => s.id)).toEqual(['dad', 'east', 'gate'])
+    expect(list.filter((s) => s.done).map((s) => s.id)).toEqual(['dad'])
     // the match and the search are not on the list until the gate and the goal
     expect(list.some((s) => s.id === 'kobi')).toBe(false)
     engine.dispatch({ t: 'flag.raised', flag: 'entry:granted' }, { t: 'flag.raised', flag: 'saw:goal' }, { t: 'flag.raised', flag: 'match:over' })
     list = checklistFor(engine.state)
-    expect(list.map((s) => s.id)).toEqual(['key', 'dad', 'east', 'gate', 'match', 'kobi'])
+    expect(list.map((s) => s.id)).toEqual(['dad', 'east', 'gate', 'match', 'kobi'])
     expect(nextStep(engine.state)?.id).toBe('kobi')
     engine.dispatch({ t: 'flag.raised', flag: 'found:kobi' })
     expect(nextStep(engine.state)).toBeNull()

@@ -401,7 +401,7 @@ describe('החותמות — deterministic, at most three, never bought', () => 
     for (const id of STAMPS) expect(MESSAGES[`core.stamp.${id}`], id).toBeTruthy()
   })
 
-  it('lights the wall stamp only with all twelve plates, gate 9 included', () => {
+  it('lights the wall stamp only with all thirteen plates, gate 9 included', () => {
     const gates: Profile['gates'] = {}
     for (const gate of PLAYABLE_GATES) {
       const id = gate.number === 9 ? 'royal-rumble' : gate.href
@@ -409,7 +409,7 @@ describe('החותמות — deterministic, at most three, never bought', () => 
     }
     const state = card(fresh({ gates }))
     expect(state.gates).toEqual({ lit: PLAYABLE_GATES.length, of: PLAYABLE_GATES.length })
-    expect(state.gates.of).toBe(12)
+    expect(state.gates.of).toBe(13)
     expect(cardStamps(state.stamps)[0]).toEqual({ id: 'wall', earned: true })
   })
 })

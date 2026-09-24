@@ -195,7 +195,8 @@ describe('העידן — 1991 is a chapter like the others', () => {
     const evening = { ...inMarch(20 * 60).state }
     expect(meets(evening, needsFor(front, '1991'))).toBe(false)
     expect(blockedFor(front, '1991')).toContain('אמא')
-    expect(blockedFor(front, '1986')).toContain('מפתח')
+    // (Director V3 §11) 1986 has no key lock any more, so it has no refusal sentence either
+    expect(meets(evening, needsFor(front, '1986'))).toBe(true)
     const allowed = inMarch(20 * 60, ['permission:yes']).state
     expect(meets(allowed, needsFor(front, '1991'))).toBe(true)
     const sneaking = inMarch(20 * 60, ['sneak:ready']).state

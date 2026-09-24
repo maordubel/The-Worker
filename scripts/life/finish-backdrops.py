@@ -94,7 +94,12 @@ INK = (0x15, 0x12, 0x0E)
 # to the badge's brown makes rust — both wrong for a football pitch. Below this fraction of
 # the height (the pitch and the near terrace; the far stand's beige concrete is above it)
 # every yellow-band pixel is turned GREEN instead, before the general treatment runs.
-GREEN_BELOW = {'stand': 0.40, 'bloomOldTerrace': 0.30, 'bloomNewTerrace': 0.30, 'pitchSmall': 0.30}
+GREEN_BELOW = {
+    'stand': 0.40, 'bloomOldTerrace': 0.30, 'bloomNewTerrace': 0.30, 'pitchSmall': 0.30,
+    # 24.9.2026 — the three Bloomfield photographs: the grass starts under the pitch-side ad
+    # boards, which are measured per frame, so a board is never turned green
+    'bloom80Goal': 0.695, 'bloom90Side': 0.475, 'bloom90Corner': 0.645,
+}
 GREEN_HUE = 84.0
 
 

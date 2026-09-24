@@ -1084,27 +1084,27 @@ describe('הטיוטה — phase, step-wise undo, and length in metres', () => {
 })
 
 describe('שער 8 — the catalogue holds every new sentence', () => {
-  it('names every step, phase, length and reveal key the screen asks for', () => {
+  // Delta 88: the four-step builder became a drag game — the step bar, the per-step
+  // phases, the length buckets and the pool note left the screen with it; the captions of
+  // the hands (`goal88.cap.*`) took their place.
+  it('names every caption, hint and reveal key the screen asks for', () => {
     for (const key of [
       'goal.anchorNote',
-      'goal.step.player',
-      'goal.step.action',
-      'goal.step.origin',
-      'goal.step.target',
-      'goal.phase.player',
-      'goal.phase.action',
-      'goal.phase.origin',
-      'goal.phase.target',
+      'goal88.cap.start',
+      'goal88.cap.armed',
+      'goal88.cap.holder',
+      'goal88.cap.carry',
+      'goal88.cap.loose',
+      'goal88.cap.inNet',
+      'goal88.cap.edit',
+      'goal88.goal',
+      'goal88.replay',
       'goal.phase.rolling',
-      'goal.len.short',
-      'goal.len.medium',
-      'goal.len.long',
       'goal.hint.reception',
       'goal.hint.receptionFor',
       'goal.verdict.yours',
       'goal.verdict.unnamed',
-      'goal.pool.opponent',
-      'goal.pool.note',
+      'goal.pool.opponentAria',
       'goal.reveal.continue',
       'goal.goodTouches',
     ]) {

@@ -105,6 +105,10 @@ export function keyedMatches(root: string): KeyedMatch[] {
   const files: [string, Sport][] = [
     ['content/manual/matches.json', 'football'],
     ['content/manual/basketball-matches.json', 'basketball'],
+    // A second reading of the Asian rows (RSSSF · Wildstat · Wikipedia, 24.9.2026). Same
+    // natural keys as matches.json, so it mints nothing: it adds sources, and where it
+    // disagrees (the 1970 semi-final was a walkover) the match master carries a claim.
+    ['content/manual/asian-competition-matches.json', 'football'],
   ]
   for (const [file, sport] of files) {
     const doc = read(root, file) as { confidence: number; records: MatchRow[] }
