@@ -10,6 +10,7 @@ import { Punch } from '@/components/play/Punch'
 import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
+import { firePickFxAt } from '@/components/stage/PickFx'
 import { LIVES, MAX_MULTIPLIER, rankFor } from '@/lib/game/session'
 import {
   TIMELINE_LENGTH,
@@ -21,6 +22,7 @@ import {
 import { artFor } from '@/lib/share/story'
 import { t, type MessageKey } from '@/lib/i18n'
 import { submitInsert } from './actions'
+import { useThreadCoachOpen } from './ThreadCoach'
 
 /**
  * ציר הזמן — ten cards, one at a time, into a timeline you are building.
@@ -78,12 +80,13 @@ export function TimelineBoard({
   const [celebrate, setCelebrate] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(secondsFor(0))
   const [locked, setLocked] = useState(false)
+  const coachOpen = useThreadCoachOpen()
 
   const hand = queue[run.placed] ?? null
   const total = secondsFor(run.placed)
 
   const resolve = useCallback(
-    async (slot: number) => {
+    async (slot: number, el?: HTMLElement) => {
       if (locked || !hand || run.over) return
       setLocked(true)
       const verdict = await submitInsert(seed, run.placed, slot, cursor)
@@ -91,6 +94,7 @@ export function TimelineBoard({
         setLocked(false)
         return
       }
+      if (el) firePickFxAt(el, { tone: verdict.correct ? 'red' : 'sign', haptic: verdict.correct ? 'lock' : 'miss' })
 
       const gained = verdict.correct
         ? Math.round(
@@ -123,9 +127,16 @@ export function TimelineBoard({
     [hand, locked, run.combo, run.over, run.placed, secondsLeft, seed, cursor, total],
   )
 
+  const pick = useCallback(
+    (slot: number, event: React.MouseEvent<HTMLButtonElement>) => {
+      void resolve(slot, event.currentTarget)
+    },
+    [resolve],
+  )
+
   /** the clock — running out places the card in the worst slot, which is a miss */
   useEffect(() => {
-    if (run.over || locked || !hand) return
+    if (run.over || locked || !hand || coachOpen) return
     setSecondsLeft(total)
     const started = Date.now()
     const tick = window.setInterval(() => {
@@ -141,7 +152,7 @@ export function TimelineBoard({
     return () => window.clearInterval(tick)
     // the clock belongs to the CARD, so it restarts on the card index and nothing else
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [run.placed, run.over, locked])
+  }, [run.placed, run.over, locked, coachOpen])
 
   /** after the feedback has been read, the next card deals itself */
   useEffect(() => {
@@ -233,7 +244,7 @@ export function TimelineBoard({
 
       {/* the board, with a slot between every pair */}
       <ol className="mt-2">
-        <Slot index={0} disabled={locked || !hand} onPick={resolve} />
+        <Slot index={0} disabled={locked || !hand} onPick={pick} />
         {board.map((card, index) => (
           <li key={card.id}>
             <div
@@ -241,7 +252,7 @@ export function TimelineBoard({
                 feedback?.card.id === card.id
                   ? feedback.correct
                     ? 'outline outline-4 outline-offset-2 outline-red'
-                    : 'outline outline-4 outline-offset-2 outline-ink'
+                    : 'animate-shake outline outline-4 outline-offset-2 outline-sign'
                   : ''
               }`}
             >
@@ -254,7 +265,7 @@ export function TimelineBoard({
                 </span>
               </div>
             </div>
-            <Slot index={index + 1} disabled={locked || !hand} onPick={resolve} />
+            <Slot index={index + 1} disabled={locked || !hand} onPick={pick} />
           </li>
         ))}
       </ol>
@@ -270,13 +281,13 @@ function Slot({
 }: {
   index: number
   disabled: boolean
-  onPick: (slot: number) => void
+  onPick: (slot: number, event: React.MouseEvent<HTMLButtonElement>) => void
 }) {
   return (
     <button
       type="button"
       disabled={disabled}
-      onClick={() => onPick(index)}
+      onClick={(event) => onPick(index, event)}
       aria-label={t('timeline.slot', { n: String(index + 1) })}
       className="group my-1 flex min-h-tap w-full items-center justify-center border-hair border-dashed border-ink/45 transition-colors duration-press ease-stamp hover:border-red hover:bg-red/10 disabled:opacity-0 motion-reduce:transition-none"
     >

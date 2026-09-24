@@ -2,6 +2,7 @@
 
 import { Grain, Leak, Letterbox, YearRoll } from '@/components/life/FilmFx'
 import { artUrl } from '@/lib/life/runtime/art'
+import { t, type MessageKey } from '@/lib/i18n'
 
 type DocCopy = { world: string; pogi: string }
 
@@ -12,18 +13,18 @@ type DocCopy = { world: string; pogi: string }
  * scores/opponents/scorers; exact historical facts still belong to the archive layer.
  * What this card is allowed to say is what the passing years did to the person we play.
  */
-const DOC: Record<string, DocCopy> = {
-  'הסמטה': { world: 'השכונה כבר יודעת איפה כולם משחקים אחר הצהריים.', pogi: 'פוגי לומד בפעם הראשונה שלכל בחירה קטנה יש מחיר.' },
-  'הבית האדום השני': { world: 'יש עוד בית אדום בעיר, והוא קטן, צפוף ורועש יותר.', pogi: 'אפי פותח דלת שקובי מעולם לא פתח בשבילו.' },
-  'המספר שבע על הקיר': { world: 'הגיבור שעל הקיר הופך לאיש שאנשים מתווכחים עליו.', pogi: 'פוגי מתחיל להבין שאהבה למועדון אינה הסכמה עם כולם.' },
-  'אין מקום אחד לעמוד בו': { world: 'החיים מקבלים מדים. גם היציע מתחיל להשתנות.', pogi: 'בפעם הראשונה, לעמוד במקום מסוים הוא גם להגיד מי אתה.' },
-  'גם האולם יכול לרדת': { world: 'אוסישקין כבר אינו רק בית. עכשיו צריך גם להחזיק אותו.', pogi: 'פוגי מגלה שאוהד הוא לפעמים האדם שנשאר כשכולם הולכים.' },
-  'השרוכים': { world: 'האביב מרגיש כמו חלום עד שהרדיו משנה את האוויר.', pogi: 'פוגי לא בוחר מה קרה. הוא בוחר מה לעשות עם זה.' },
-  'זה לא נגמר כשעולים': { world: 'הקירות אותם קירות. הכסף, האנשים והסבלנות כבר לא.', pogi: 'הכאב מתחיל להפוך לעבודה, רשימות וחובות.' },
-  'שש־עשרה שנה': { world: 'אחרי שנים של כמעט, שוב יש לילה שאפשר לנסוע אליו.', pogi: 'מי שנוסע איתך כבר חשוב כמעט כמו מה שמחכה בסוף הדרך.' },
-  'ארבעה ימים': { world: 'עשור שלם עומד על הקצה של עוד תשובה שמגיעה ממקום אחר.', pogi: 'מאז 1998 הוא כבר לא חוגג לפני שהוא שואל: בטוח?' },
-  'הדאבל': { world: 'ארבעה ימים מפרידים בין חגיגה אחת לאחרת. החיים לא עוצרים ביניהן.', pogi: 'עבודה, משפחה, יציע ואוסישקין מתחרים עכשיו על אותו אחר הצהריים.' },
-}
+// The documentary copy lives in messages/he.life.json (rule 10): life.chapterDoc.<n>.name
+// is the chapter name this card is shown for, .world / .pogi its two beats.
+const DOC_COUNT = 10
+const DOC: Record<string, DocCopy> = Object.fromEntries(
+  Array.from({ length: DOC_COUNT }, (_, i) => {
+    const n = i + 1
+    return [
+      t(`life.chapterDoc.${n}.name` as MessageKey),
+      { world: t(`life.chapterDoc.${n}.world` as MessageKey), pogi: t(`life.chapterDoc.${n}.pogi` as MessageKey) },
+    ]
+  }),
+)
 
 export function ChapterCard({
   titleHe,
@@ -57,8 +58,8 @@ export function ChapterCard({
       <Letterbox />
 
       <div className="absolute inset-x-0 bottom-[17%] flex flex-col items-center px-gutter text-center">
-        <div className="mb-3 inline-flex items-center gap-2 border border-sheet/15 bg-ink/65 px-2 py-1 font-mono text-[9px] tracking-[0.18em] text-sheet/65">
-          <span className="text-red">THE WORKER · תיעוד חיים</span>
+        <div className="mb-3 inline-flex items-center gap-2 border border-sheet/15 bg-ink/65 px-2 py-1 font-mono text-[9px] tabular-nums tracking-[0.18em] text-sheet/65">
+          <span className="text-red">{t('life.chapterDoc.label')}</span>
           {elapsedHe && <span>· <bdi>{elapsedHe}</bdi></span>}
         </div>
 
@@ -72,12 +73,12 @@ export function ChapterCard({
 
         {doc && (
           <div className="mt-5 max-w-[36rem] border-t border-sheet/15 pt-4">
-            <p className="font-body text-[12px] leading-relaxed text-sheet/78" style={{ animation: 'film-in 700ms 700ms ease-out both' }}>
-              <span className="me-2 font-mono text-[9px] tracking-[0.14em] text-red">העולם</span>
+            <p className="font-body text-[12px] leading-relaxed text-sheet/80" style={{ animation: 'film-in 700ms 700ms ease-out both' }}>
+              <span className="me-2 font-mono text-[9px] tabular-nums tracking-[0.14em] text-red">{t('life.chapterDoc.world')}</span>
               <bdi>{doc.world}</bdi>
             </p>
-            <p className="mt-2 font-body text-[13px] leading-relaxed text-sheet/92" style={{ animation: 'film-in 700ms 1500ms ease-out both' }}>
-              <span className="me-2 font-mono text-[9px] tracking-[0.14em] text-red">פוגי</span>
+            <p className="mt-2 font-body text-[13px] leading-relaxed text-sheet/90" style={{ animation: 'film-in 700ms 1500ms ease-out both' }}>
+              <span className="me-2 font-mono text-[9px] tabular-nums tracking-[0.14em] text-red">{t('life.chapterDoc.pogi')}</span>
               <bdi>{doc.pogi}</bdi>
             </p>
           </div>

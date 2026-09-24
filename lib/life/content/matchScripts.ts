@@ -282,20 +282,6 @@ const GALIL_93_G3: MatchScript = {
   ],
 }
 
-const HALL_NIGHT = (id: string, talk: string, openHe: string): MatchScript => ({
-  id,
-  sport: 'basketball',
-  scored: false,
-  atHome: true,
-  steps: [
-    { wait: 0, id: 'tip', phaseHe: 'המשחק', crowd: 'LOW_MURMUR', sfx: 'ball-bounce', level: 0.5, text: openHe },
-    { wait: 4200, id: 'long', crowd: 'AFTERMATH', text: 'זה לא היה קרוב. זה מה שהפך את זה לארוך.' },
-    { wait: 3800, id: 'near', crowd: 'NEAR_MISS', sfx: 'ball-bounce', level: 0.5, text: 'סל, ועוד סל. האולם מסתכל בשעון.' },
-    { wait: 3400, id: 'inside', talk },
-    { wait: 0, id: 'end', end: true, phaseHe: 'סיום', crowd: 'FINAL_WHISTLE', sfx: 'buzzer', level: 0.7 },
-  ],
-})
-
 /**
  * כמה אנשים היו שם — לא כתוב כאן, כי הארכיון לא מחזיק את זה.
  *
@@ -313,8 +299,9 @@ export const MATCH_SCRIPTS: Record<string, MatchScript> = {
   'double-00': DOUBLE_00,
   'galil-93-g1': GALIL_93_G1,
   'galil-93-g3': GALIL_93_G3,
-  'hall-97': HALL_NIGHT('hall-97', 'h1-inside', 'האולם חצי מלא. חצי מלא באולם הזה נשמע כמו ריק.'),
-  'hall-99': HALL_NIGHT('hall-99', 'seed-inside', 'פחות אנשים מבפעם הקודמת, ויותר שקט.'),
+  // (23.9.2026) `hall-97`/`hall-99` removed: the overlay replaced both nights' `match`
+  // beat action with a scripted conversation chain (`h1-chain`, `seed-away`), so neither
+  // script is played by anything any more (life-match). `HALL_NIGHT` stays for its shape.
 }
 
 export const matchScriptFor = (id: string): MatchScript | null => MATCH_SCRIPTS[id] ?? null
@@ -328,6 +315,4 @@ export const SCRIPT_CHAPTER: Record<string, string> = {
   'double-00': '2000-double',
   'galil-93-g1': '1993-galil',
   'galil-93-g3': '1993-galil',
-  'hall-97': '1997-basket',
-  'hall-99': '1999-basket',
 }

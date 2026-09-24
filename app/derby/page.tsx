@@ -32,7 +32,9 @@ export default function HatePage({ searchParams }: { searchParams: { seed?: stri
         pinned={round.pinned}
         rosterSize={rosterSize()}
       />
-      <ReportLink />
+      <div className="mt-2 hidden md:block">
+        <ReportLink />
+      </div>
     </Screen>
   )
 }

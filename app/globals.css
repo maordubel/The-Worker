@@ -1133,3 +1133,90 @@ select {
   background-position: 0 0, 3.5px 3.5px;
   opacity: 0.1;
 }
+
+/* ============================================================================
+   במת השער — the mobile gate stage (delta 87, 23.9.2026).
+
+   On a phone a gate is ONE screen: a compact header, the field, the dock. Nothing
+   scrolls the page; what does not fit lives in a slide sheet. `.fitbox` sizes a field
+   to the biggest box of its aspect that fits the space left — container-query units,
+   so a pitch is exactly as tall as the phone allows and never one pixel taller. From
+   md up the desktop layout is its own design and the box falls back to a plain
+   aspect-ratio block.
+   ========================================================================== */
+.fitbox { position: relative; min-height: 0; flex: 1 1 0%; container-type: size; display: grid; place-items: center; }
+.fitbox > .fitbox-in {
+  position: relative;
+  width: min(100cqw, calc(100cqh * var(--fit-r, 0.75)));
+  height: min(100cqh, calc(100cqw / var(--fit-r, 0.75)));
+}
+@media (min-width: 768px) {
+  .fitbox:not(.fitbox-always) { container-type: normal; display: block; flex: none; }
+  .fitbox:not(.fitbox-always) > .fitbox-in { width: 100%; height: auto; aspect-ratio: var(--fit-r, 0.75); }
+}
+
+/* the stage itself: one phone screen, the tab bar and the home indicator subtracted */
+@media (max-width: 767.98px) {
+  .stage-screen { height: 100dvh; overflow: hidden; }
+  .stage-main {
+    display: flex; flex-direction: column; min-height: 0; flex: 1 1 0%;
+    padding-bottom: calc(var(--tap) + 1.25rem + env(safe-area-inset-bottom));
+  }
+  .stage-fill { display: flex; flex-direction: column; min-height: 0; flex: 1 1 0%; }
+}
+
+/* ============================================================================
+   אפקט הבחירה — every pick is a print hit. Rays shoot out of the point, a square
+   stamp ring (radius 0) slams out of it in two misregistered plates, and the label
+   prints on an ink plate. Solid inks only and NO opacity animation: the stage is often
+   printed grass, and a fading vermilion over green passes through the yellow band
+   (rule 8, the burst note above). Everything moves, shrinks to nothing, and is removed.
+   ========================================================================== */
+@keyframes fx-ray {
+  0%   { transform: rotate(var(--a)) translateY(-6px) scaleY(0.2); }
+  45%  { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scaleY(1); }
+  100% { transform: rotate(var(--a)) translateY(calc(var(--d) * -1.5)) scaleY(0); }
+}
+@keyframes fx-ring {
+  0%   { transform: translate(-50%, -50%) rotate(-8deg) scale(0.25); }
+  60%  { transform: translate(-50%, -50%) rotate(4deg) scale(1.15); }
+  100% { transform: translate(-50%, -50%) rotate(6deg) scale(0); }
+}
+@keyframes fx-label {
+  0%   { transform: translate(-50%, 0) scale(0.4) rotate(-10deg); }
+  25%  { transform: translate(-50%, -26px) scale(1.12) rotate(-4deg); }
+  80%  { transform: translate(-50%, -38px) scale(1) rotate(-4deg); }
+  100% { transform: translate(-50%, -44px) scale(0) rotate(-4deg); }
+}
+@keyframes fx-pop {
+  0% { transform: scale(0.55) translateY(10px); }
+  55% { transform: scale(1.14) translateY(-4px); }
+  100% { transform: scale(1) translateY(0); }
+}
+@keyframes fx-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+@keyframes fx-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes fx-lift { from { transform: translateY(0) scale(1); } to { transform: translateY(-6px) scale(1.08); } }
+.fx-ray {
+  position: absolute; inset-inline-start: 0; top: calc(var(--len, 22px) * -1); width: 5px; height: var(--len, 22px);
+  margin-inline-start: -2.5px; transform-origin: 50% 100%;
+  animation: fx-ray 560ms cubic-bezier(.2,.9,.3,1) forwards;
+}
+.fx-ring { position: absolute; top: 0; inset-inline-start: 0; animation: fx-ring 520ms cubic-bezier(.16,1,.3,1) forwards; }
+.fx-label { position: absolute; top: 0; inset-inline-start: 0; animation: fx-label 900ms cubic-bezier(.2,.9,.3,1) forwards; }
+.animate-fx-pop { animation: fx-pop 380ms cubic-bezier(.16,1,.3,1) both; }
+.animate-fx-wobble { animation: fx-wobble 320ms ease-in-out 2; }
+.animate-fx-sheet-up { animation: fx-sheet-up 280ms cubic-bezier(.16,1,.3,1) both; }
+.animate-fx-lift { animation: fx-lift 160ms cubic-bezier(.16,1,.3,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .fx-ray, .fx-ring, .fx-label { display: none; }
+  .animate-fx-pop, .animate-fx-wobble, .animate-fx-sheet-up, .animate-fx-lift { animation: none; }
+}
+
+/* גרירה — the ghost that follows the finger, and the zone it is over */
+.drag-ghost { position: fixed; top: 0; inset-inline-start: 0; z-index: 70; pointer-events: none; will-change: transform; }
+[data-drop][data-drop-over="true"] { outline: 3px solid rgb(var(--red)); outline-offset: 2px; }
+[data-drag-source="true"] { filter: grayscale(1); }

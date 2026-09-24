@@ -32,11 +32,13 @@ export default function GoalPage({
   const goals = hasGoals() ? dealRun(round.seed, round.cursor, pin) : []
 
   return (
-    <Screen title={t('screen.goal.title')} sub={t('screen.goal.sub')} chrome={false}>
+    <Screen title={t('screen.goal.title')} sub={t('screen.goal.sub')} chrome={false} stage>
       {goals.length > 0 ? (
         <>
           <GoalRun goals={goals} seed={round.seed} cursor={round.cursor} pin={pin} />
-          <ReportLink />
+          <div className="shrink-0 max-md:hidden">
+            <ReportLink />
+          </div>
         </>
       ) : (
         <EmptyState title={t('empty.goal')} body={t('empty.goal.body')} />

@@ -73,8 +73,8 @@ export function FilmCut({ film, onDone }: { film: NonNullable<LifeBusEvents['fil
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-gradient-to-t from-ink via-ink/65 to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-[8%] px-gutter text-center motion-safe:animate-[film-in_900ms_ease-out_both]">
         {archive && (
-          <span className="mb-2 inline-flex border border-red/60 bg-ink/70 px-2 py-1 font-mono text-[9px] tracking-[0.16em] text-red">
-            ארכיון · 1983
+          <span className="mb-2 inline-flex border border-red/60 bg-ink/70 px-2 py-1 font-mono text-[9px] tabular-nums tracking-[0.16em] text-red">
+            {t('life.filmCut.archive1983')}
           </span>
         )}
         <p className="font-body text-[13px] leading-snug text-sheet/90">
@@ -96,7 +96,7 @@ export function FilmCut({ film, onDone }: { film: NonNullable<LifeBusEvents['fil
           className="absolute bottom-4 end-4 z-[2] min-h-tap border border-sheet/20 bg-ink/75 px-3 font-body text-[11px] text-sheet/80"
           aria-pressed={sound}
         >
-          {sound ? 'השתק' : 'הפעל קול'}
+          {sound ? t('life.filmCut.mute') : t('life.filmCut.sound')}
         </button>
       )}
     </div>

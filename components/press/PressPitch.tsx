@@ -19,16 +19,23 @@ export function PressPitch({
   className,
   /** a 3px identity band along the top edge */
   accent,
+  /**
+   * delta 87 — inside a `FitBox`: the box is already the biggest 100/122 rectangle the
+   * stage has room for, so the pitch fills it (`h-full w-full`) instead of computing its
+   * own aspect ratio from its width, which is what every other caller still does.
+   */
+  fill = false,
 }: {
   children?: ReactNode
   className?: string
   accent?: string
+  fill?: boolean
 }) {
   return (
     <div
-      className={`relative w-full overflow-hidden bg-press-grass ${className ?? ''}`}
+      className={`relative overflow-hidden bg-press-grass ${fill ? 'h-full w-full' : 'w-full'} ${className ?? ''}`}
       style={{
-        aspectRatio: '100 / 122',
+        ...(fill ? {} : { aspectRatio: '100 / 122' }),
         // The paper margin outside the pitch is a shadow, not a border, so it never
         // enters the box model. The ink line is drawn separately, above the textures.
         boxShadow: '0 0 0 5px rgb(var(--p-paper))',

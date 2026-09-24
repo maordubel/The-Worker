@@ -2,8 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
+import { RealShirtAsk } from '@/components/collector/RealShirtAsk'
 import { KitMarkArt } from '@/components/kit/KitEngineShirt'
 import { KitShirt } from '@/components/kit/KitShirt'
+import { SlideDeck } from '@/components/stage/SlideDeck'
+import { SlideSheet } from '@/components/stage/SlideSheet'
 import { Num } from '@/components/ui/Num'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { activeCollection, type Collection } from '@/lib/kit/collection'
@@ -49,11 +52,14 @@ export function KitWing({
   catalog,
   counts,
   archiveCount,
+  photos,
 }: {
   catalog: LockedKit[]
   counts: Record<Facet, number>
   /** how many photographs the archive holds — counted on the server, never guessed */
   archiveCount: number
+  /** legacyKey → the archive's own photograph, for a shirt you PROVED you built (see page.tsx) */
+  photos: Record<string, string>
 }) {
   const store = useMemo(() => activeCollection(), [])
   const [built, setBuilt] = useState<Collection>({})
@@ -62,6 +68,10 @@ export function KitWing({
   const [facet, setFacet] = useState<Facet>('all')
   const [lockedOnly, setLockedOnly] = useState(false)
   const [openKey, setOpenKey] = useState<string | null>(null)
+  // the phone stage keeps its own tab/page/sheet state — the desktop tree above is untouched
+  const [mobileTab, setMobileTab] = useState<'collection' | 'designer'>('collection')
+  const [mobilePage, setMobilePage] = useState(0)
+  const [mobileOpenKey, setMobileOpenKey] = useState<string | null>(null)
 
   // Read after mount, never during render: the server has no browser storage. Then ask the
   // server for the shirts this device can PROVE it built — a token each, or a legacy key once.
@@ -96,12 +106,15 @@ export function KitWing({
   const open = openKey ? catalog.find((kit) => kit.key === openKey) : null
   const openBuilt = open ? built[open.key] : undefined
   const openRow = open ? unlocked[open.key] : undefined
-  if (open && openBuilt && openRow) {
-    return <KitCard kit={open} row={openRow} built={openBuilt} onBack={() => setOpenKey(null)} />
-  }
-  if (open) return <LockedCard kit={open} onBack={() => setOpenKey(null)} />
 
-  return (
+  // דסקטופ — untouched (its own design, brief §"desktop keeps its own design and must not break"):
+  // the same full-page swap it always did, just gated to md+ below.
+  const desktopTree =
+    open && openBuilt && openRow ? (
+      <KitCard kit={open} row={openRow} built={openBuilt} onBack={() => setOpenKey(null)} />
+    ) : open ? (
+      <LockedCard kit={open} onBack={() => setOpenKey(null)} />
+    ) : (
     <div className="mt-stack">
       <div className="flex">
         {(['collection', 'designer'] as const).map((id) => (
@@ -221,6 +234,152 @@ export function KitWing({
         </>
       )}
     </div>
+    )
+
+  // מובייל — one screen: a segmented control instead of the tab row, a paged 2×3 collection deck
+  // instead of the long grid, real photographs on the cards that earned one, a sheet instead of a
+  // page-navigation for the detail (delta 87, 23.9.2026).
+  const mobileShown = shown
+  const PAGE_SIZE = 6
+  const mobilePages: LockedKit[][] = []
+  for (let i = 0; i < mobileShown.length; i += PAGE_SIZE) mobilePages.push(mobileShown.slice(i, i + PAGE_SIZE))
+  const mobileOpen = mobileOpenKey ? catalog.find((kit) => kit.key === mobileOpenKey) : null
+  const mobileOpenBuilt = mobileOpen ? built[mobileOpen.key] : undefined
+  const mobileOpenRow = mobileOpen ? unlocked[mobileOpen.key] : undefined
+  const pct = Math.round((owned / catalog.length) * 100)
+
+  return (
+    <>
+      <div className="hidden md:block">{desktopTree}</div>
+
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5 md:hidden">
+        {/* segmented control — collection / designer */}
+        <div className="flex shrink-0 gap-1">
+          {(['collection', 'designer'] as const).map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setMobileTab(id)}
+              aria-pressed={mobileTab === id}
+              className={`min-h-tap flex-1 border-hair font-body text-[13px] font-extrabold transition-colors duration-press ease-stamp motion-reduce:transition-none ${
+                mobileTab === id ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-sheet text-ink'
+              }`}
+            >
+              {t(`kits.tab.${id}` as MessageKey)}
+            </button>
+          ))}
+        </div>
+
+        {mobileTab === 'designer' ? (
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <KitDesignerV5 rack={rack} />
+          </div>
+        ) : (
+          <>
+            {/* HUD — progress and the way to the real archive, one line */}
+            <div className="flex shrink-0 items-center justify-between gap-2">
+              <p className="font-body text-[12px] font-bold text-muted">
+                <Num>{t('kits.progress', { n: String(owned), total: String(catalog.length) })}</Num>
+              </p>
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-14 border-hair border-ink/35 bg-paper">
+                  <div className="h-full bg-red" style={{ inlineSize: `${pct}%` }} />
+                </div>
+                <p className="font-poster text-[15px] leading-none text-ink"><Num>{`${pct}%`}</Num></p>
+              </div>
+            </div>
+
+            {/* the filter rail — one line, archive door folded into it as one more chip */}
+            <div className="flex shrink-0 gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {FACETS.map((row) => (
+                <button
+                  key={row.id}
+                  type="button"
+                  onClick={() => { setFacet(row.id); setLockedOnly(false); setMobilePage(0) }}
+                  aria-pressed={facet === row.id && !lockedOnly}
+                  className={`min-h-tap shrink-0 border-hair px-2.5 font-body text-[11px] font-extrabold ${
+                    facet === row.id && !lockedOnly ? 'border-red bg-red text-paper' : 'border-ink/40 bg-sheet text-ink'
+                  }`}
+                >
+                  {t(row.key)} · <Num>{String(counts[row.id])}</Num>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => { setLockedOnly((v) => !v); setMobilePage(0) }}
+                aria-pressed={lockedOnly}
+                className={`min-h-tap shrink-0 border-hair px-2.5 font-body text-[11px] font-extrabold ${
+                  lockedOnly ? 'border-sign bg-sign text-paper' : 'border-ink/40 bg-sheet text-muted'
+                }`}
+              >
+                {t('kits.facet.locked')} · <Num>{String(catalog.length - owned)}</Num>
+              </button>
+              <a
+                href="/kits/archive"
+                className="flex min-h-tap shrink-0 items-center gap-1 border-hair border-ink bg-ink px-2.5 font-body text-[11px] font-extrabold text-paper"
+              >
+                {t('kits.archive.enter', { n: String(archiveCount) })}
+              </a>
+            </div>
+
+            {/* the deck — 2×3 cards a page, swiped instead of scrolled */}
+            <div className="min-h-0 flex-1">
+              {mobilePages.length > 0 ? (
+                <SlideDeck
+                  tabs="dots"
+                  index={Math.min(mobilePage, mobilePages.length - 1)}
+                  onIndex={setMobilePage}
+                  panels={mobilePages.map((page, i) => ({
+                    key: String(i),
+                    label: String(i + 1),
+                    body: (
+                      <div className="grid h-full grid-cols-2 grid-rows-3 gap-1.5 p-0.5">
+                        {page.map((kit) => (
+                          <MobileShirtCard
+                            key={kit.key}
+                            kit={kit}
+                            built={built[kit.key]}
+                            row={unlocked[kit.key]}
+                            photo={photos[kit.key]}
+                            onOpen={() => setMobileOpenKey(kit.key)}
+                          />
+                        ))}
+                      </div>
+                    ),
+                  }))}
+                />
+              ) : (
+                <p className="border-rule border-ink bg-sheet p-4 text-center font-body text-step--1 text-muted">
+                  {t('kits.emptyBody')}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        {mobileOpen && (
+          <SlideSheet
+            open
+            onClose={() => setMobileOpenKey(null)}
+            title={`${t(`kits.facet.${mobileOpen.variant}` as MessageKey)} · ${mobileOpen.seasonLabel}`}
+            size="full"
+            footer={
+              mobileOpen.playable ? (
+                <a href="/kits/build" className="flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-0 font-extrabold text-paper">
+                  {t('kits.build')}
+                </a>
+              ) : undefined
+            }
+          >
+            {mobileOpenBuilt && mobileOpenRow ? (
+              <MobileCardBody kit={mobileOpen} row={mobileOpenRow} built={mobileOpenBuilt} photo={photos[mobileOpen.key]} />
+            ) : (
+              <MobileLockedBody kit={mobileOpen} />
+            )}
+          </SlideSheet>
+        )}
+      </div>
+    </>
   )
 }
 
@@ -477,4 +636,144 @@ function LockedCard({ kit, onBack }: { kit: LockedKit; onBack: () => void }) {
 function dayMonthYear(iso: string): string {
   const [year, month, day] = iso.split('-')
   return day && month && year ? `${day}.${month}.${year}` : iso
+}
+
+/* ==================================================================== מובייל — delta 87, 23.9.2026
+ *
+ * The phone deck's own card: the same rule as Gate 4's reveal (spec §15/§24) — a real photograph
+ * is drawn ONLY for a shirt this device already proved it built (`built && row`); a locked shirt
+ * still shows nothing but its outline. `photo` is never looked at unless that gate passed.
+ */
+function MobileShirtCard({
+  kit,
+  built,
+  row,
+  photo,
+  onOpen,
+}: {
+  kit: LockedKit
+  built?: { bestParts: number }
+  row?: UnlockedKit
+  photo?: string
+  onOpen: () => void
+}) {
+  const drawn = Boolean(built && row)
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className={`flex min-h-0 flex-col border-rule p-1 text-start transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none ${
+        drawn ? 'border-ink bg-sheet' : 'border-ink/40 bg-paper'
+      }`}
+    >
+      <span className="block min-h-0 flex-1 overflow-hidden">
+        {drawn && photo ? (
+          // eslint-disable-next-line @next/next/no-img-element -- the archive ships the bytes it measured (rule 69)
+          <img data-archive-photo="" src={photo} alt="" className="h-full w-full object-cover" />
+        ) : drawn ? (
+          <KitShirt spec={row!.spec} look={row!.look} marks="granted" className="block h-full w-full" />
+        ) : (
+          <LockedShirt />
+        )}
+      </span>
+      <span className="mt-1 block shrink-0 font-poster text-[14px] leading-none text-ink">
+        <Num>{kit.seasonLabel}</Num>
+      </span>
+      <span className={`block shrink-0 truncate font-body text-[10px] font-extrabold ${built ? 'text-red' : 'text-muted'}`}>
+        {built
+          ? built.bestParts >= 5
+            ? t('kits.built')
+            : t('kits.partial', { n: String(built.bestParts) })
+          : t('kits.locked')}
+      </span>
+    </button>
+  )
+}
+
+/** the photo's own filename, without the extension — the closet's identity for "have/want" */
+function slugOf(photo: string | undefined): string | null {
+  if (!photo) return null
+  return photo.split('/').pop()?.replace(/\.(webp|jpg|jpeg|png)$/i, '') ?? null
+}
+
+/** the sheet body for a shirt this device proved it built — the photo (when there is one) as the
+ * hero, the reconstruction small beside it, exactly Gate 4's reveal rule carried into Gate 5. */
+function MobileCardBody({
+  kit,
+  row,
+  built,
+  photo,
+}: {
+  kit: LockedKit
+  row: UnlockedKit
+  built: { bestParts: number; times: number; firstBuiltOn: string }
+  photo?: string
+}) {
+  const slug = slugOf(photo)
+  const rows: { k: MessageKey; v: string | null }[] = [
+    { k: 'kits.spec.season', v: kit.seasonLabel },
+    { k: 'kits.spec.variant', v: t(`kits.facet.${kit.variant}` as MessageKey) },
+    { k: 'kits.spec.pattern', v: `${row.baseHe} · ${row.patternHe}` },
+    { k: 'kits.spec.sponsor', v: row.sponsorHe },
+    { k: 'kits.spec.maker', v: row.makerHe },
+    { k: 'kits.spec.crest', v: row.crestHe },
+  ]
+  return (
+    <div className="grid gap-2">
+      {photo ? (
+        <div className="relative border-rule border-red bg-sheet p-1.5">
+          <div className="flex h-[38dvh] items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element -- the archive ships the bytes it measured (rule 69) */}
+            <img data-archive-photo="" src={photo} alt="" className="max-h-full max-w-full object-contain" />
+          </div>
+          <div className="absolute bottom-2 start-2 w-[30%] max-w-[104px] border-hair border-ink bg-paper p-1">
+            <p className="truncate text-center font-body text-[9px] font-black leading-tight text-ink">{t('kitgame.reveal.mine')}</p>
+            <div className="flex h-[64px] items-center justify-center">
+              <KitShirt spec={row.spec} look={row.look} marks="granted" className="h-full max-w-full" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <span className="mx-auto block aspect-[4/5] w-full max-w-[260px]">
+          <KitShirt spec={row.spec} look={row.look} marks="granted" title={kit.seasonLabel} className="block h-full w-full" />
+        </span>
+      )}
+
+      {slug && <RealShirtAsk slug={slug} kitId={null} />}
+
+      <dl className="border-rule border-ink bg-sheet">
+        {rows.map((line) => (
+          <div key={line.k} className="flex items-baseline justify-between gap-3 border-b-hair border-ink/20 px-3 py-2">
+            <dt className="font-body text-[11px] tracking-widest text-muted">{t(line.k)}</dt>
+            <dd className={`min-w-0 truncate font-body text-[13px] font-bold ${line.v ? 'text-ink' : 'text-muted/70'}`}>{line.v ?? t('kits.spec.none')}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {row.noteHe !== '' && <p className="font-body text-step--1 leading-relaxed text-muted">{row.noteHe}</p>}
+      {row.sourceTitle !== '' && <SourceNote />}
+
+      <div className="border-rule border-ink bg-sheet">
+        <p className="border-b-hair border-ink/30 px-3 py-2 font-display text-step-0 text-ink">{t('kits.mine')}</p>
+        <div className="grid grid-cols-3 divide-x-hair divide-ink/20" dir="ltr">
+          <Stat label={t('kits.mine.parts')} value={`${built.bestParts}/5`} />
+          <Stat label={t('kits.mine.times')} value={String(built.times)} />
+          <Stat label={t('kits.mine.first')} value={dayMonthYear(built.firstBuiltOn)} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function MobileLockedBody({ kit }: { kit: LockedKit }) {
+  return (
+    <div className="grid gap-2">
+      <span className="mx-auto block max-w-[220px] p-4">
+        <LockedShirt />
+      </span>
+      <p className="text-center font-body text-step--1 leading-relaxed text-muted">
+        {kit.playable ? t('kits.emptyBody') : t('kits.notPlayable')}
+      </p>
+    </div>
+  )
 }

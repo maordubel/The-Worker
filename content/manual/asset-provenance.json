@@ -2002,6 +2002,45 @@
    ],
    "confidence": 2,
    "noteHe": "PUMA, MACRON ו-FUJITSU נשמרו כצורה לבנה בלבד ומודפסים בדיו של הבד; פסי ARKIA נצבעו מחדש לגווני הפלטה (כלל 8), והמדידה על הקובץ המפוענח היא 0 פיקסלים צהובים. SUBARU, VISA, umbro ו-adidas הם קבצי ה-SVG שכבר בריפו (assembly/)."
+  },
+  {
+   "key": "kit-photo-templates-2026-09-23",
+   "kind": "generated",
+   "origin": "archive-scan",
+   "folder": "public/kits",
+   "match": [
+    "templates/modern-athletic/*",
+    "templates/early-2000s-athletic/*",
+    "templates/retro-90s-boxy/*",
+    "templates/retro-80s-long/*"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "חבילת הגרפיקה לשערים של צוות The Worker, THE-WORKER-GATES-ART-2026-09 (נוצרה 21.9.2026, נמסרה 22.9.2026) → scripts/kits/prepare-art-delivery.py → brand/source/kits/<גזרה> → scripts/kits/build-photo-templates.py · content/manual/kit-templates.json",
+   "treatment": [
+    "key-green",
+    "shading-map",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "ארבע הגזרות החדשות (2017+, 2000–2007, שנות ה-90, שנות ה-80 בשרוול ארוך) — שתי מפות אפורות לכל גזרה, בלי גוון ולכן בלי צהוב; המדידה אחרי פענוח רשומה בספר kit-templates. המסכות נכנסות כמסלולי SVG בלבד."
+  },
+  {
+   "key": "film-cup83-2026-09-23",
+   "kind": "video",
+   "origin": "maor-upload",
+   "folder": "public/life/film",
+   "match": [
+    "cup83-archive.mp4",
+    "cup83-archive.jpg"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "צוות The Worker — סרט הגביע 1983 שסופק למשחק החיים (מסירת DIRECT MAIN OVERLAY v2, 23.9.2026)",
+   "treatment": [
+    "encode-mp4",
+    "poster-frame"
+   ],
+   "confidence": 2,
+   "noteHe": "סרט הארכיון שמוצג מיד אחרי זיכרון 1983 האינטראקטיבי (FilmCut, מצב archive). נרשם בדלתא 87: הקבצים נכנסו לריפו בלי רשומת מקור."
   }
  ]
 }

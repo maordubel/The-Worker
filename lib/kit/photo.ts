@@ -28,7 +28,17 @@ export type PhotoGeometry = {
   torsoBox: PhotoBox
   sleeves: [string, string]
   raglan: [string, string]
-  masks: { collarCrew: string; collarV: string; cuffs: string; sidePanels: string; hem: string }
+  masks: {
+    collarCrew?: string
+    collarV?: string
+    /** delta 87 (23.9.2026): retro-90s-boxy / retro-80s-long's polo collar mask */
+    collarPolo?: string
+    cuffs?: string
+    sidePanels?: string
+    hem?: string
+    /** delta 87: retro-80s-long's three-stripe-over-shoulder mask */
+    sleeveStripe?: string
+  }
   anchors: Record<'crest' | 'maker' | 'sponsor', PhotoBox>
   supports: { patternExcept: string[]; collar: string[]; sleeves: string[] }
   missing: string[]

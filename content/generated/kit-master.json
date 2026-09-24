@@ -7,7 +7,7 @@
   "candidateOnly": 20,
   "noPhoto": 3,
   "conflicts": 4,
-  "photoComplete": 11
+  "photoComplete": 28
  },
  "kits": [
   {
@@ -151,11 +151,9 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -319,11 +317,9 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -505,11 +501,9 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -682,11 +676,9 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -850,10 +842,10 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
+     "available": true,
      "complete": false,
      "missing": [
-      "template"
+      "pattern:shoulder-panel"
      ]
     },
     "marks": {
@@ -999,10 +991,10 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
+     "available": true,
      "complete": false,
      "missing": [
-      "template"
+      "pattern:shoulder-panel"
      ]
     },
     "marks": {
@@ -1155,11 +1147,9 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -1323,11 +1313,9 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -1500,11 +1488,9 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -1649,11 +1635,9 @@
     "vector": true,
     "photo": {
      "template": "modern-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -3895,10 +3879,10 @@
     "vector": true,
     "photo": {
      "template": "early-2000s-athletic",
-     "available": false,
+     "available": true,
      "complete": false,
      "missing": [
-      "template"
+      "pattern:shoulder-panel"
      ]
     },
     "marks": {
@@ -4072,10 +4056,10 @@
     "vector": true,
     "photo": {
      "template": "early-2000s-athletic",
-     "available": false,
+     "available": true,
      "complete": false,
      "missing": [
-      "template"
+      "pattern:shoulder-panel"
      ]
     },
     "marks": {
@@ -4232,11 +4216,9 @@
     "vector": true,
     "photo": {
      "template": "early-2000s-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -4410,10 +4392,10 @@
     "vector": true,
     "photo": {
      "template": "early-2000s-athletic",
-     "available": false,
+     "available": true,
      "complete": false,
      "missing": [
-      "template"
+      "pattern:shoulder-panel"
      ]
     },
     "marks": {
@@ -4579,11 +4561,9 @@
     "vector": true,
     "photo": {
      "template": "early-2000s-athletic",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -4766,11 +4746,9 @@
     "vector": true,
     "photo": {
      "template": "retro-90s-boxy",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -4949,11 +4927,9 @@
     "vector": true,
     "photo": {
      "template": "retro-90s-boxy",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -5109,11 +5085,9 @@
     "vector": true,
     "photo": {
      "template": "retro-90s-boxy",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -5278,11 +5252,9 @@
     "vector": true,
     "photo": {
      "template": "retro-90s-boxy",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -5429,11 +5401,9 @@
     "vector": true,
     "photo": {
      "template": "retro-80s-long",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -5580,11 +5550,9 @@
     "vector": true,
     "photo": {
      "template": "retro-80s-long",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",
@@ -5721,11 +5689,9 @@
     "vector": true,
     "photo": {
      "template": "retro-80s-long",
-     "available": false,
-     "complete": false,
-     "missing": [
-      "template"
-     ]
+     "available": true,
+     "complete": true,
+     "missing": []
     },
     "marks": {
      "crest": "print",

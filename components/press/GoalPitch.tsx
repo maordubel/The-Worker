@@ -13,6 +13,8 @@ import {
 } from '@/lib/game/goal-zones'
 import { normalise, type Envelope, type ReplayPoint, type TruthTouch, type UserTouch } from '@/lib/game/replay/envelope'
 import type { TouchGrade } from '@/lib/game/replay/judge'
+import { dropZone, useDragActive, useDragSource } from '@/components/stage/useDrag'
+import { firePickFxAt } from '@/components/stage/PickFx'
 import { t } from '@/lib/i18n'
 
 /**
@@ -151,6 +153,33 @@ export function GoalPitch({
   const board = useRef<HTMLDivElement>(null)
   const byPointer = useRef(false)
   const still = usePrefersStill()
+  /**
+   * The live dashed line, following the finger while the standing figure is being
+   * dragged to its target (round 2, Maor 23.9.2026: "the characters must be dragged").
+   * Board-space coordinates, tracked outside `useDragSource` (which only follows a
+   * ghost copy of the element itself) — see `ZoneButton`'s own pointer listeners below.
+   */
+  const [dragLine, setDragLine] = useState<{ x: number; y: number } | null>(null)
+  /** whether a compatible drag (the origin figure, or a rail token) is in the air. */
+  const dragState = useDragActive()
+  const dragTargeting =
+    dragState.active && (dragState.payload?.startsWith('zone:') || dragState.payload?.startsWith('player:'))
+
+  /**
+   * The zone the touch being built already stands in, if any — so THAT zone's own
+   * button (already a real 44px control, already tap-to-place) can also be picked up
+   * and dragged, rather than a second overlay competing with it for the same few
+   * pixels (delta 87, Maor 23.9.2026: "the characters must be dragged on the screen").
+   * A drag lands on the same `onPlace` the second TAP already calls.
+   */
+  const originZone: ZoneId | null = draftOrigin
+    ? (ROWS.flatMap((row) => COLS.map((col) => `${col}${row}`)).find((id) => {
+        const rect = zoneRect(id)
+        if (!rect) return false
+        const b = toBoard(draftOrigin)
+        return b.x >= rect.x && b.x <= rect.x + rect.w && b.y >= rect.y && b.y <= rect.y + rect.h
+      }) ?? null)
+    : null
 
   /**
    * A pointer answers with the exact place it landed; the click that follows it is the
@@ -190,10 +219,10 @@ export function GoalPitch({
   }
 
   return (
-    <div ref={board} className="relative border-plate border-ink" data-goal="board">
+    <div ref={board} className="relative h-full w-full border-plate border-ink" data-goal="board">
       <svg
         viewBox={`0 ${PITCH.top} ${PITCH.w} ${PITCH.h - PITCH.top}`}
-        className="block w-full touch-manipulation"
+        className="block h-full w-full touch-manipulation"
         aria-hidden="true"
       >
         <defs>
@@ -462,19 +491,48 @@ export function GoalPitch({
           })}
         </g>
 
-        {/* the touch being built: he is standing there, the ball has not gone yet */}
+        {/* the touch being built: he is standing there, the ball has not gone yet — drawn
+            as the same running figure a committed touch gets, dashed, so it reads as a
+            CHARACTER waiting to be dragged rather than a bare ring. */}
         {draftOrigin && (
           <g pointerEvents="none" className="fig-pop">
+            <use
+              href="#figRun"
+              x={toBoard(draftOrigin).x - 16}
+              y={toBoard(draftOrigin).y - 32}
+              width="38"
+              height="42"
+              strokeWidth={2.4}
+              strokeDasharray="3 3"
+              style={{ color: 'rgb(var(--p-line))' }}
+            />
             <circle
               cx={toBoard(draftOrigin).x}
               cy={toBoard(draftOrigin).y}
               r="11"
               fill="none"
               stroke="rgb(var(--p-line))"
-              strokeWidth="2.4"
+              strokeWidth="1.6"
               strokeDasharray="4 4"
+              opacity=".7"
             />
           </g>
+        )}
+
+        {/* the live line — follows the finger while that figure is being dragged to a
+            target zone or the goal mouth. */}
+        {draftOrigin && dragLine && (
+          <line
+            pointerEvents="none"
+            x1={toBoard(draftOrigin).x}
+            y1={toBoard(draftOrigin).y}
+            x2={dragLine.x}
+            y2={dragLine.y}
+            stroke="rgb(var(--p-line))"
+            strokeWidth="2.6"
+            strokeDasharray="5 4"
+            strokeLinecap="round"
+          />
         )}
 
         {/* while the server grades: one ball runs the player's whole move, leg by leg, and
@@ -615,7 +673,10 @@ export function GoalPitch({
           onClick={() => fromKeyboard(LANDMARKS.goalMouth)}
           aria-label={t('goal.goalAria')}
           data-goal="mouth"
-          className="pointer-events-auto absolute disabled:cursor-default"
+          {...dropZone('mouth')}
+          className={`pointer-events-auto absolute transition-colors duration-press disabled:cursor-default ${
+            dragTargeting ? 'bg-red/15 data-[drop-over=true]:bg-red/35' : ''
+          }`}
           style={{
             insetInlineStart: `${(100 / PITCH.w) * 100}%`,
             top: 0,
@@ -634,21 +695,25 @@ export function GoalPitch({
             const centre = zoneCenter(id)
             if (!rect || !centre) return null
             return (
-              <button
+              <ZoneButton
                 key={id}
-                type="button"
+                id={id}
+                col={col}
+                row={row}
+                rect={rect}
                 disabled={disabled}
+                draggable={id === originZone}
+                highlight={dragTargeting}
+                boardRef={board}
                 onPointerDown={fromPointer}
                 onClick={() => fromKeyboard(centre)}
-                aria-label={t('goal.zoneAria', { zone: id, col, row: String(row) })}
-                data-goal="zone"
-                data-zone={id}
-                className="pointer-events-auto absolute disabled:cursor-default"
-                style={{
-                  insetInlineStart: `${(rect.x / PITCH.w) * 100}%`,
-                  top: `${((rect.y - PITCH.top) / (PITCH.h - PITCH.top)) * 100}%`,
-                  width: `${(rect.w / PITCH.w) * 100}%`,
-                  height: `${(rect.h / (PITCH.h - PITCH.top)) * 100}%`,
+                onDragTrack={id === originZone ? setDragLine : undefined}
+                onDragEnd={id === originZone ? () => setDragLine(null) : undefined}
+                onDrop={(zone) => {
+                  const point = zone === 'mouth' ? LANDMARKS.goalMouth : zoneCenter(zone)
+                  if (!point) return
+                  onPlace(normalise(point))
+                  firePickFxAt(document.querySelector(`[data-drop="${zone}"]`), { tone: 'red' })
                 }}
               />
             )
@@ -719,6 +784,112 @@ export function GoalPitch({
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * A zone button — the real 44px tap target it always was, plus (when `draggable`) a
+ * drag source: the finger can pick this exact spot up and carry it to another zone,
+ * which fires the caller's `onDrop` with the RELEASED zone's id (or `mouth`), the same
+ * `onPlace` a second tap already reaches.
+ */
+function ZoneButton({
+  id,
+  col,
+  row,
+  rect,
+  disabled,
+  draggable,
+  highlight = false,
+  boardRef,
+  onPointerDown,
+  onClick,
+  onDrop,
+  onDragTrack,
+  onDragEnd,
+}: {
+  id: ZoneId
+  col: string
+  row: number
+  rect: { x: number; y: number; w: number; h: number }
+  disabled: boolean
+  draggable: boolean
+  /** a compatible drag (this figure, or a rail token) is in the air — light every zone up */
+  highlight?: boolean
+  boardRef?: React.RefObject<HTMLDivElement>
+  onPointerDown: (event: React.PointerEvent) => void
+  onClick: () => void
+  onDrop: (zone: string) => void
+  /** board-space coordinates, while THIS zone's own figure is being dragged (live line) */
+  onDragTrack?: (point: { x: number; y: number } | null) => void
+  onDragEnd?: () => void
+}) {
+  const drag = useDragSource({ payload: `zone:${id}`, disabled: !draggable, onDrop })
+
+  /**
+   * A second, independent pointer listener, alongside `useDragSource`'s own — that one
+   * moves a ghost copy of the button; this one only reads the pointer to draw the live
+   * dashed line in board space, which the shared drag engine has no hook for.
+   */
+  function onDown(event: React.PointerEvent<HTMLButtonElement>) {
+    if (!draggable) {
+      onPointerDown(event)
+      return
+    }
+    drag.onPointerDown(event)
+    if (!onDragTrack) return
+    const id = event.pointerId
+    function toBoardPoint(clientX: number, clientY: number) {
+      const box = boardRef?.current?.getBoundingClientRect()
+      if (!box || box.width === 0 || box.height === 0) return null
+      return {
+        x: ((clientX - box.left) / box.width) * PITCH.w,
+        y: PITCH.top + ((clientY - box.top) / box.height) * (PITCH.h - PITCH.top),
+      }
+    }
+    function move(ev: PointerEvent) {
+      if (ev.pointerId !== id) return
+      onDragTrack?.(toBoardPoint(ev.clientX, ev.clientY))
+    }
+    function up(ev: PointerEvent) {
+      if (ev.pointerId !== id) return
+      cleanup()
+    }
+    function cleanup() {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+      onDragTrack?.(null)
+      onDragEnd?.()
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onPointerDown={onDown}
+      onClick={onClick}
+      onClickCapture={draggable ? drag.onClickCapture : undefined}
+      data-draggable={draggable ? drag['data-draggable'] : undefined}
+      aria-label={t('goal.zoneAria', { zone: id, col, row: String(row) })}
+      data-goal="zone"
+      data-zone={id}
+      {...dropZone(id)}
+      className={`pointer-events-auto absolute transition-colors duration-press disabled:cursor-default ${
+        highlight ? 'bg-red/15 data-[drop-over=true]:bg-red/35' : ''
+      }`}
+      style={{
+        ...(draggable ? drag.style : undefined),
+        insetInlineStart: `${(rect.x / PITCH.w) * 100}%`,
+        top: `${((rect.y - PITCH.top) / (PITCH.h - PITCH.top)) * 100}%`,
+        width: `${(rect.w / PITCH.w) * 100}%`,
+        height: `${(rect.h / (PITCH.h - PITCH.top)) * 100}%`,
+      }}
+    />
   )
 }
 

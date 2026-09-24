@@ -1,4 +1,4 @@
-import { BannerCloth } from '@/components/ui/BannerCloth'
+import { AwayDaysStrip } from '@/components/gates/AwayDaysStrip'
 import { TunnelPlate } from '@/components/life/TunnelPlate'
 import { Screen } from '@/components/ui/Screen'
 import { GatePlate } from '@/components/gates/GatePlate'
@@ -61,8 +61,10 @@ export default function BloomfieldPage() {
         </ul>
       </section>
 
+      {/* AWAY DAYS (23.9.2026) — where the "מקומכם בשורותינו" cloth hung: the way into
+          the next feature, announced and not yet open. */}
       <div className="mt-stack">
-        <BannerCloth>{t('wall.ranks')}</BannerCloth>
+        <AwayDaysStrip />
       </div>
     </Screen>
   )

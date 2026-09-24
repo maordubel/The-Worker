@@ -36,7 +36,7 @@ export default function ArchivePage({
   const figures = archiveFigures()
 
   return (
-    <Screen title={t('screen.archive.title')} sub={t('screen.archive.sub')}>
+    <Screen title={t('screen.archive.title')} sub={t('screen.archive.sub')} stage>
       <ArchiveApp
         decks={todayDecks(today, round.seed, round.cursor)}
         todayHe={longDateHe(today)}

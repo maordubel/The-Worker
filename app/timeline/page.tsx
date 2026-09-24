@@ -10,6 +10,7 @@ import type { PublicLevel } from '@/lib/game/thread-run'
 import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
+import { ThreadCoach } from './ThreadCoach'
 
 /**
  * שער 13 — החוט האדום (brief §23; prototype v7; owner decision 21.9.2026).
@@ -33,14 +34,17 @@ export default function TimelinePage({
     .filter((level): level is PublicLevel => level !== null)
 
   return (
-    <Screen title={t('screen.thread.title')} sub={t('screen.thread.sub')} chrome={levels.length === 0}>
-      <div className="pt-1">
+    <Screen title={t('screen.thread.title')} sub={t('screen.thread.sub')} stage>
+      <div className="shrink-0 pt-1 md:pt-0">
         <ThreadTabs active="thread" />
       </div>
       {levels.length ? (
         <>
+          <ThreadCoach />
           <ThreadBoard levels={levels} seed={round.seed} cursor={round.cursor} />
-          <ReportLink />
+          <div className="mt-2 hidden shrink-0 md:block">
+            <ReportLink />
+          </div>
         </>
       ) : (
         <EmptyState title={t('thread.empty')} body={t('help.thread.what')} />

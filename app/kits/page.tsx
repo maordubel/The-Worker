@@ -6,11 +6,28 @@ import { Screen } from '@/components/ui/Screen'
 import { archiveShirts } from '@/lib/kit/archive'
 import { lockedCatalog, facetCounts } from '@/lib/kit/catalog'
 import { t } from '@/lib/i18n'
+import { kitRecords } from '@/lib/kit/kit-master'
 import { gateMetadata } from '@/lib/seo'
 
 import { KitWing } from './KitWing'
 
 export const metadata: Metadata = gateMetadata('kits')
+
+/**
+ * legacyKey → the archive's own photograph of that exact shirt (its `src` only — a URL, not the
+ * spec). Real photographs always beat the graphics we generate (Maor, 23.9.2026): the collection
+ * card of a shirt you PROVED you built shows this instead of the drawn shirt. A card for a shirt
+ * you have not built never reaches this map (`KitWing` gates it on `built && row`, same rule as
+ * Gate 4's reveal, spec §15/§24) — the photo is the hero of a shirt you already know, never a
+ * preview of one you do not.
+ */
+function photosByKey(): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const kit of kitRecords()) {
+    if (kit.evidence.exactPhoto) out[kit.legacyKey] = kit.evidence.exactPhoto.src
+  }
+  return out
+}
 
 /**
  * שער 5 — אגף המדים.
@@ -22,13 +39,15 @@ export const metadata: Metadata = gateMetadata('kits')
 export default function KitsPage() {
   const catalog = lockedCatalog()
   return (
-    <Screen title={t('screen.kits.title')} sub={t('screen.kits.sub')}>
+    <Screen title={t('screen.kits.title')} sub={t('screen.kits.sub')} stage>
       {catalog.length > 0 ? (
-        <KitWing catalog={catalog} counts={facetCounts(catalog)} archiveCount={archiveShirts().length} />
+        <KitWing catalog={catalog} counts={facetCounts(catalog)} archiveCount={archiveShirts().length} photos={photosByKey()} />
       ) : (
         <EmptyState title={t('empty.kits')} body={t('empty.kits.body')} />
       )}
-      <ReportLink />
+      <div className="hidden md:block">
+        <ReportLink />
+      </div>
     </Screen>
   )
 }

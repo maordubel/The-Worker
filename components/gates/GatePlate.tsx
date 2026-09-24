@@ -134,15 +134,26 @@ export function GatePlate({ gate }: { gate: Gate }) {
   if (gate.href === null) {
     return (
       <div
-        className={`${className} cursor-default opacity-90`}
-        aria-label={t('gate.closed.aria', { number: String(gate.number), title: t(gate.title) })}
+        role="img"
+        className={`${className} cursor-default ${gate.soon ? '' : 'opacity-90'}`}
+        aria-label={t(gate.soon ? 'gate.soon.aria' : 'gate.closed.aria', { number: String(gate.number), title: t(gate.title) })}
       >
         {inner}
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2" aria-hidden="true">
-          <p className="mx-2 border-y-rule border-ink bg-sheet py-1 text-center font-poster text-[18px] tracking-[0.2em] text-ink sm:text-[22px]">
-            {t('gate.closed')}
-          </p>
-        </div>
+        {gate.soon ? (
+          // בקרוב — announced, not closed: a vermilion stamp slapped across the plate
+          // at the press angle, the way a "coming" bill is over-pasted on a fence.
+          <div className="absolute inset-x-0 top-[38%] -translate-y-1/2" aria-hidden="true">
+            <p className="mx-3 -rotate-6 border-plate border-red bg-sheet py-0.5 text-center font-poster text-[22px] leading-tight tracking-[0.16em] text-red sm:text-[26px]">
+              {t('stage.soon')}
+            </p>
+          </div>
+        ) : (
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2" aria-hidden="true">
+            <p className="mx-2 border-y-rule border-ink bg-sheet py-1 text-center font-poster text-[18px] tracking-[0.2em] text-ink sm:text-[22px]">
+              {t('gate.closed')}
+            </p>
+          </div>
+        )}
       </div>
     )
   }

@@ -20,6 +20,8 @@ import type { KitSpec } from '@/lib/kit/spec'
 import type { SlotRole } from '@/lib/xi/roles'
 import { fitFor, scoutGroups, SCOUT_ORDERS, type ScoutOrder } from '@/lib/xi/scout'
 import { useDialog } from '@/components/ui/useDialog'
+import { firePickFxAt } from '@/components/stage/PickFx'
+import { useDragActive, useDragSource } from '@/components/stage/useDrag'
 import { t, type MessageKey } from '@/lib/i18n'
 
 /**
@@ -96,6 +98,30 @@ export function rosterKey(entry: Searchable): string {
   return entry.id ?? entry.slug
 }
 
+/**
+ * A man with no season on record still gets a SHIRT — a plain red home jersey, no
+ * sponsor, no crest, no number (round 2, Maor: the ink-block-with-a-letter was ugly).
+ * Generic on purpose: it never claims a season the archive doesn't have.
+ */
+export const NEUTRAL_SHIRT_SPEC: KitSpec = {
+  seasonLabel: '',
+  variant: 'home',
+  base: 'red',
+  pattern: 'solid',
+  patternInk: 'cream',
+  sleeves: 'raglan',
+  sleeveInk: 'cream',
+  collar: 'crew',
+  collarInk: 'cream',
+  sponsorHe: null,
+  makerHe: null,
+  nameset: 'block-solid',
+  number: null,
+  shorts: 'cream',
+  socks: 'red',
+  crestKey: null,
+}
+
 type SheetProps = {
   title: string
   roster: RosterIndex
@@ -112,6 +138,16 @@ type SheetProps = {
   initialFilter?: Partial<RosterFilter>
   /** gate 1 at `lg`: a panel beside the pitch instead of a sheet over it */
   docked?: boolean
+  /**
+   * גיליון גיוס — delta 87, gate 1's phone picker. Opt-in (default off, so `/kits`,
+   * `/polls` and `/hapoel` keep the plain list): opens on a horizontal rail of big
+   * swipeable CARDS instead of the name list, with a "list" toggle for power users.
+   * Every card is DRAGGABLE — lift it off the rail and drop it on a pitch slot
+   * (`onDragPick`) — and still taps `onPick` like any row.
+   */
+  cardMode?: boolean
+  /** a card dropped on `[data-drop="<slotId>"]` — same contract as `onPick`, plus the zone */
+  onDragPick?: (zoneId: string, entry: Searchable, filter: RosterFilter) => void
 }
 
 export function RosterSheet(props: SheetProps) {
@@ -120,11 +156,20 @@ export function RosterSheet(props: SheetProps) {
 
 function ModalShell(props: SheetProps) {
   const dialogRef = useDialog<HTMLDivElement>(props.onClose)
+  // A card dragged UP off this sheet has to land on the pitch it is covering — see the
+  // module note on `draft:` drags. While one is in the air the whole overlay (backdrop
+  // included) steps out of the way: invisible AND `pointer-events: none`, so
+  // `document.elementFromPoint` in `useDrag.ts` reaches the slot underneath instead of
+  // this dialog's own scrim.
+  const dragState = useDragActive()
+  const dragging = props.cardMode === true && dragState.active && dragState.payload?.startsWith('draft:') === true
   return (
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="fixed inset-0 z-[60] flex flex-col bg-ink/70 outline-none"
+      className={`fixed inset-0 z-[60] flex flex-col bg-ink/70 outline-none transition-opacity duration-150 ${
+        dragging ? 'pointer-events-none opacity-0' : ''
+      }`}
       role="dialog"
       aria-modal="true"
       aria-label={props.title}
@@ -158,9 +203,22 @@ function DockedShell(props: SheetProps) {
   )
 }
 
-function RosterBody({ title, roster, taken, onPick, onClose, scout, footer, initialFilter, docked = false }: SheetProps) {
+function RosterBody({
+  title,
+  roster,
+  taken,
+  onPick,
+  onClose,
+  scout,
+  footer,
+  initialFilter,
+  docked = false,
+  cardMode = false,
+  onDragPick,
+}: SheetProps) {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<RosterFilter>({ ...NO_FILTER, ...initialFilter })
+  const [view, setView] = useState<'cards' | 'list'>(cardMode ? 'cards' : 'list')
   /**
    * The facet rows, folded away while scouting — on a 390px phone search + five filter
    * rows + fit and sort left four names visible. What IS active is always shown as chips
@@ -246,144 +304,296 @@ function RosterBody({ title, roster, taken, onPick, onClose, scout, footer, init
             {t('xi.close')}
           </button>
         </div>
-        <div className="mt-2 flex items-stretch gap-2">
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t('xi.search')}
-            aria-label={t('xi.search')}
-            inputMode="search"
-            className="min-h-tap w-full min-w-0 border-hair border-ink bg-paper px-3 font-body text-step-0 text-ink outline-none placeholder:text-muted focus-visible:border-rule"
-          />
-          {query !== '' && (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              aria-label={t('xi.clear')}
-              className="min-h-tap shrink-0 border-hair border-ink bg-paper px-3 font-body text-step-0 font-extrabold text-muted"
-            >
-              ×
-            </button>
-          )}
-        </div>
-        <p className="mt-1 font-mono text-[10.5px] tabular-nums text-muted">
-          {query === '' && !isFiltered(filter) && !scout && !refuse
-            ? t('xi.count', { n: String(roster.total) })
-            : t('roster.count', { shown: String(shown), total: String(roster.total) })}
-        </p>
+        {cardMode && view === 'cards' ? (
+          <>
+            {/* one compact line: search, a filter chip that opens everything else in a
+                folding panel, and the list toggle — delta 87 round 2 (Maor: the header
+                was eating half the sheet). */}
+            <div className="mt-2 flex items-center gap-1.5">
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={t('xi.search')}
+                aria-label={t('xi.search')}
+                inputMode="search"
+                className="min-h-tap w-full min-w-0 border-hair border-ink bg-paper px-3 font-body text-step-0 text-ink outline-none placeholder:text-muted focus-visible:border-rule"
+              />
+              <button
+                type="button"
+                onClick={() => setFacetsOpen(!facetsOpen)}
+                aria-expanded={facetsOpen}
+                className={`flex min-h-tap shrink-0 items-center gap-1 border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none ${
+                  isFiltered(filter) ? 'border-red text-red' : 'border-ink/40 text-ink'
+                }`}
+              >
+                {t('roster.find')}
+                <span aria-hidden="true" className="font-mono text-[13px]">
+                  {facetsOpen ? '−' : '+'}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('list')}
+                aria-label={t('xi.draft.list')}
+                className="grid min-h-tap w-tap shrink-0 place-items-center border-hair border-ink/40 text-ink"
+              >
+                <span aria-hidden="true" className="font-mono text-[16px] leading-none">
+                  ≡
+                </span>
+              </button>
+            </div>
+            <p className="mt-1 truncate font-body text-[10.5px] leading-snug text-muted">{t('xi.draft.hint')}</p>
 
-        <ActiveFilters filter={filter} onChange={setFilter} />
-
-        {foldable && (
-          <button
-            type="button"
-            onClick={() => setFacetsOpen(!facetsOpen)}
-            aria-expanded={facetsOpen}
-            className={`mt-1.5 flex min-h-tap w-full items-center justify-between gap-2 border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none ${
-              isFiltered(filter) ? 'border-red text-red' : 'border-ink/40 text-ink'
-            }`}
-          >
-            <span>{t('roster.find')}</span>
-            <span aria-hidden="true" className="font-mono text-[13px]">
-              {facetsOpen ? '−' : '+'}
-            </span>
-          </button>
-        )}
-
-        {facetsOpen && (
-          <RosterFilters all={roster.all} filter={filter} onChange={setFilter} showYear={scout !== undefined} />
-        )}
-
-        {scout && (
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => scout.onFitOnly(!scout.fitOnly)}
-              aria-pressed={scout.fitOnly}
-              className={`min-h-tap border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
-                scout.fitOnly ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
-              }`}
-            >
-              {t('scout.fitOnly')}
-            </button>
-            <div className="-mx-0.5 flex flex-1 gap-1 overflow-x-auto px-0.5">
-              {SCOUT_ORDERS.map((option) => (
+            {facetsOpen && (
+              <div className="mt-1.5 max-h-[38vh] overflow-y-auto border-hair border-ink/30 bg-paper p-2">
+                <p className="font-mono text-[10.5px] tabular-nums text-muted">
+                  {t('roster.count', { shown: String(shown), total: String(roster.total) })}
+                </p>
+                <ActiveFilters filter={filter} onChange={setFilter} />
+                <div className="mt-1.5">
+                  <RosterFilters all={roster.all} filter={filter} onChange={setFilter} showYear={scout !== undefined} />
+                </div>
+                {scout && (
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => scout.onFitOnly(!scout.fitOnly)}
+                      aria-pressed={scout.fitOnly}
+                      className={`min-h-tap border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                        scout.fitOnly ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                      }`}
+                    >
+                      {t('scout.fitOnly')}
+                    </button>
+                    <div className="-mx-0.5 flex flex-1 gap-1 overflow-x-auto px-0.5">
+                      {SCOUT_ORDERS.map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => scout.onOrder(option)}
+                          aria-pressed={scout.order === option}
+                          className={`flex min-h-tap shrink-0 items-center border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                            scout.order === option ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                          }`}
+                        >
+                          {t(`scout.order.${option}` as MessageKey)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {scout && scout.shortlistEntries && scout.shortlistEntries.length > 0 && (
+                  <div className="mt-1.5">
+                    <p className="font-body text-[10px] font-extrabold tracking-wide text-muted">
+                      {t('xi.shortlist.title')}
+                    </p>
+                    <ul className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
+                      {scout.shortlistEntries.map((entry) => {
+                        const key = rosterKey(entry)
+                        const blocked = (taken?.has(key) ?? false) || (refuse ? refuse(entry) !== null : false)
+                        return (
+                          <li key={key} className="flex shrink-0 items-stretch">
+                            <button
+                              type="button"
+                              disabled={blocked}
+                              onClick={() => pick(entry)}
+                              className="flex min-h-tap items-center border-hair border-ink/40 bg-paper px-2.5 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+                            >
+                              <span aria-hidden="true" className="me-1">
+                                ★
+                              </span>
+                              {entry.familyHe}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => scout.onShortlist(entry)}
+                              aria-label={t('xi.shortlist.drop', { name: entry.nameHe })}
+                              className="min-h-tap border-hair border-s-0 border-ink/40 bg-paper px-2 font-body text-[13px] leading-none text-muted"
+                            >
+                              ×
+                            </button>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="mt-2 flex items-stretch gap-2">
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={t('xi.search')}
+                aria-label={t('xi.search')}
+                inputMode="search"
+                className="min-h-tap w-full min-w-0 border-hair border-ink bg-paper px-3 font-body text-step-0 text-ink outline-none placeholder:text-muted focus-visible:border-rule"
+              />
+              {query !== '' && (
                 <button
-                  key={option}
                   type="button"
-                  onClick={() => scout.onOrder(option)}
-                  aria-pressed={scout.order === option}
-                  className={`flex min-h-tap shrink-0 items-center border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
-                    scout.order === option ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                  onClick={() => setQuery('')}
+                  aria-label={t('xi.clear')}
+                  className="min-h-tap shrink-0 border-hair border-ink bg-paper px-3 font-body text-step-0 font-extrabold text-muted"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            <p className="mt-1 font-mono text-[10.5px] tabular-nums text-muted">
+              {query === '' && !isFiltered(filter) && !scout && !refuse
+                ? t('xi.count', { n: String(roster.total) })
+                : t('roster.count', { shown: String(shown), total: String(roster.total) })}
+            </p>
+
+            <ActiveFilters filter={filter} onChange={setFilter} />
+
+            {cardMode && (
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setView('cards')}
+                  aria-pressed={(view as 'cards' | 'list') === 'cards'}
+                  className={`min-h-tap border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                    (view as 'cards' | 'list') === 'cards' ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
                   }`}
                 >
-                  {t(`scout.order.${option}` as MessageKey)}
+                  {t('xi.draft.cards')}
                 </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* the shortlist, inside the drawer — the argument you have not settled yet */}
-        {scout && scout.shortlistEntries && scout.shortlistEntries.length > 0 && (
-          <div className="mt-1.5">
-            <p className="font-body text-[10px] font-extrabold tracking-wide text-muted">{t('xi.shortlist.title')}</p>
-            <ul className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
-              {scout.shortlistEntries.map((entry) => {
-                const key = rosterKey(entry)
-                const blocked = (taken?.has(key) ?? false) || (refuse ? refuse(entry) !== null : false)
-                return (
-                  <li key={key} className="flex shrink-0 items-stretch">
-                    <button
-                      type="button"
-                      disabled={blocked}
-                      onClick={() => pick(entry)}
-                      className="flex min-h-tap items-center border-hair border-ink/40 bg-paper px-2.5 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
-                    >
-                      <span aria-hidden="true" className="me-1">
-                        ★
-                      </span>
-                      {entry.familyHe}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => scout.onShortlist(entry)}
-                      aria-label={t('xi.shortlist.drop', { name: entry.nameHe })}
-                      className="min-h-tap border-hair border-s-0 border-ink/40 bg-paper px-2 font-body text-[13px] leading-none text-muted"
-                    >
-                      ×
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )}
-
-        {/* the letter rail — family-name initials */}
-        {grouped && (
-          <ol className="-mx-1 mt-1.5 flex gap-1 overflow-x-auto pb-1">
-            {grouped.map((bucket) => (
-              <li key={bucket.letter}>
-                <a
-                  href={`#roster-letter-${bucket.letter}`}
-                  className="flex h-8 min-w-8 items-center justify-center border-hair border-ink/40 px-1.5 font-poster text-[17px] leading-none text-ink"
+                <button
+                  type="button"
+                  onClick={() => setView('list')}
+                  aria-pressed={(view as 'cards' | 'list') === 'list'}
+                  className={`min-h-tap border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                    (view as 'cards' | 'list') === 'list' ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                  }`}
                 >
-                  {bucket.letter}
-                </a>
-              </li>
-            ))}
-          </ol>
+                  {t('xi.draft.list')}
+                </button>
+              </div>
+            )}
+
+            {foldable && (
+              <button
+                type="button"
+                onClick={() => setFacetsOpen(!facetsOpen)}
+                aria-expanded={facetsOpen}
+                className={`mt-1.5 flex min-h-tap w-full items-center justify-between gap-2 border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none ${
+                  isFiltered(filter) ? 'border-red text-red' : 'border-ink/40 text-ink'
+                }`}
+              >
+                <span>{t('roster.find')}</span>
+                <span aria-hidden="true" className="font-mono text-[13px]">
+                  {facetsOpen ? '−' : '+'}
+                </span>
+              </button>
+            )}
+
+            {facetsOpen && (
+              <RosterFilters all={roster.all} filter={filter} onChange={setFilter} showYear={scout !== undefined} />
+            )}
+
+            {scout && (
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => scout.onFitOnly(!scout.fitOnly)}
+                  aria-pressed={scout.fitOnly}
+                  className={`min-h-tap border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                    scout.fitOnly ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                  }`}
+                >
+                  {t('scout.fitOnly')}
+                </button>
+                <div className="-mx-0.5 flex flex-1 gap-1 overflow-x-auto px-0.5">
+                  {SCOUT_ORDERS.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => scout.onOrder(option)}
+                      aria-pressed={scout.order === option}
+                      className={`flex min-h-tap shrink-0 items-center border-hair px-2.5 font-body text-[11.5px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                        scout.order === option ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                      }`}
+                    >
+                      {t(`scout.order.${option}` as MessageKey)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* the shortlist, inside the drawer — the argument you have not settled yet */}
+            {scout && scout.shortlistEntries && scout.shortlistEntries.length > 0 && (
+              <div className="mt-1.5">
+                <p className="font-body text-[10px] font-extrabold tracking-wide text-muted">{t('xi.shortlist.title')}</p>
+                <ul className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
+                  {scout.shortlistEntries.map((entry) => {
+                    const key = rosterKey(entry)
+                    const blocked = (taken?.has(key) ?? false) || (refuse ? refuse(entry) !== null : false)
+                    return (
+                      <li key={key} className="flex shrink-0 items-stretch">
+                        <button
+                          type="button"
+                          disabled={blocked}
+                          onClick={() => pick(entry)}
+                          className="flex min-h-tap items-center border-hair border-ink/40 bg-paper px-2.5 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+                        >
+                          <span aria-hidden="true" className="me-1">
+                            ★
+                          </span>
+                          {entry.familyHe}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => scout.onShortlist(entry)}
+                          aria-label={t('xi.shortlist.drop', { name: entry.nameHe })}
+                          className="min-h-tap border-hair border-s-0 border-ink/40 bg-paper px-2 font-body text-[13px] leading-none text-muted"
+                        >
+                          ×
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {/* the letter rail — family-name initials */}
+            {grouped && (
+              <ol className="-mx-1 mt-1.5 flex gap-1 overflow-x-auto pb-1">
+                {grouped.map((bucket) => (
+                  <li key={bucket.letter}>
+                    <a
+                      href={`#roster-letter-${bucket.letter}`}
+                      className="flex h-8 min-w-8 items-center justify-center border-hair border-ink/40 px-1.5 font-poster text-[17px] leading-none text-ink"
+                    >
+                      {bucket.letter}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </>
         )}
       </div>
 
-      <div className="px-2 pb-[calc(var(--tap)+2rem+env(safe-area-inset-bottom))]">
+      <div className={cardMode && view === 'cards' ? 'pb-2' : 'px-2 pb-[calc(var(--tap)+2rem+env(safe-area-inset-bottom))]'}>
         {hiddenLine && (
           <p className="mx-2 mt-2 border-s-rule border-red ps-2 font-body text-[11px] leading-snug text-ink">
             {hiddenLine}
           </p>
         )}
-        {buckets ? (
+        {cardMode && view === 'cards' ? (
+          <DraftRail
+            entries={buckets ? [...buckets.fit, ...buckets.other, ...buckets.unknown] : results}
+            rowProps={rowProps}
+            onDragPick={onDragPick ? (zone, entry) => onDragPick(zone, entry, filter) : undefined}
+          />
+        ) : buckets ? (
           (
             [
               ['fit', buckets.fit],
@@ -647,6 +857,134 @@ function NameRow({
       )}
     </li>
   )
+}
+
+/**
+ * הרכבת הגיוס — the picking made fun (delta 87, Maor 23.9.2026): one big card a swipe
+ * at a time instead of a list of 185 rows, and every card is a lift-off-the-rail drag
+ * onto the pitch. `axis:'up'` keeps the rail scrollable sideways with the same thumb.
+ */
+function DraftRail({
+  entries,
+  rowProps,
+  onDragPick,
+}: {
+  entries: readonly Searchable[]
+  rowProps: (entry: Searchable) => {
+    entry: Searchable
+    taken: boolean
+    onPick: () => void
+    starred: boolean
+    onStar?: () => void
+    info?: RowInfo
+    fit: boolean
+  }
+  onDragPick?: (zone: string, entry: Searchable) => void
+}) {
+  if (entries.length === 0) return null
+  return (
+    <ul className="-mx-2 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-2 pt-1">
+      {entries.map((entry) => (
+        <DraftCard key={rosterKey(entry)} {...rowProps(entry)} onDragPick={onDragPick} />
+      ))}
+    </ul>
+  )
+}
+
+function DraftCard({
+  entry,
+  taken,
+  onPick,
+  starred,
+  onStar,
+  info,
+  fit,
+  onDragPick,
+}: {
+  entry: Searchable
+  taken: boolean
+  onPick: () => void
+  starred: boolean
+  onStar?: () => void
+  info?: RowInfo
+  fit: boolean
+  onDragPick?: (zone: string, entry: Searchable) => void
+}) {
+  const parts = splitParts(entry)
+  const foreign = slotStatusOf(entry) === 'foreign'
+  const drag = useDragSource({
+    payload: `draft:${rosterKey(entry)}`,
+    axis: 'up',
+    disabled: taken || !onDragPick,
+    onDrop: (zone) => {
+      onDragPick?.(zone, entry)
+      firePickFxAt(document.querySelector(`[data-drop="${zone}"]`), { label: parts.family })
+    },
+  })
+  return (
+    <li
+      {...drag}
+      data-draft-card={rosterKey(entry)}
+      className={`flex h-[236px] w-[150px] shrink-0 snap-start touch-pan-x flex-col overflow-hidden border-hair border-ink bg-paper ${
+        taken ? 'opacity-40' : ''
+      }`}
+    >
+      <div className="relative grid h-[128px] shrink-0 place-items-center bg-press-ink">
+        <KitShirt spec={info?.kit ?? NEUTRAL_SHIRT_SPEC} density="mini" className="h-[85%] w-[85%]" />
+        {onStar && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              onStar()
+            }}
+            aria-pressed={starred}
+            aria-label={t('scout.star', { name: entry.nameHe })}
+            className={`absolute -top-0 end-0 grid h-9 w-9 place-items-center font-body text-[18px] leading-none ${
+              starred ? 'bg-ink text-paper' : 'bg-paper/85 text-ink'
+            }`}
+          >
+            ★
+          </button>
+        )}
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-0.5 p-1.5">
+        <p className="truncate font-display text-step-0 leading-tight text-ink">{parts.family}</p>
+        {parts.given !== '' && <p className="truncate font-body text-[10.5px] leading-tight text-muted">{parts.given}</p>}
+        <div className="flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap">
+          {info?.years && (
+            <span className="shrink-0 font-mono text-[10px] tabular-nums leading-none text-muted">
+              <Num>{info.years}</Num>
+            </span>
+          )}
+          {foreign && (
+            <span className="shrink-0 border-hair border-sign px-1 py-[1px] font-body text-[9px] font-extrabold leading-none text-sign">
+              {t('scout.badge.foreign')}
+            </span>
+          )}
+          {fit && (
+            <span className="shrink-0 border-hair border-ink px-1 py-[1px] font-body text-[9px] font-extrabold leading-none text-ink">
+              <span aria-hidden="true">✓ </span>
+              {t('scout.badge.fit')}
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onPick}
+          disabled={taken}
+          data-draft-place=""
+          className="mt-auto flex min-h-tap shrink-0 w-full items-center justify-center bg-red font-body text-step--1 font-extrabold text-paper transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none"
+        >
+          {taken ? t('xi.taken') : t('xi.draft.place')}
+        </button>
+      </div>
+    </li>
+  )
+}
+
+function splitParts(entry: Searchable): { family: string; given: string } {
+  return { family: entry.familyHe, given: entry.givenHe }
 }
 
 /**

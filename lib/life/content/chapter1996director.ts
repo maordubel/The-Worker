@@ -3,7 +3,10 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
+import { RHYTHM_SUBJECT, TAXI_AGOROT } from './chapter1996army'
 import type { Conversation } from './script'
+
+const ARMY_PROMISE_DONE = 'promise:army:kept'
 
 /**
  * B6 — Director's Cut.
@@ -73,7 +76,9 @@ export const ENDINGS_ARMY: Record<string, EndingCard> = {
     bodyHe: 'לילה, רדיו חלש, כביש ארוך. היציע כבר לא מקום שקובי בוחר בשבילך, והבסיס לא מקום שמחכה בסבלנות. מעכשיו כמעט לכל שבת יש מחיר.',
     memoryHe: 'קבלה מתחנת דלק. מאחור נכתב בעט: "שווה".',
     memoryItem: 'folded-paper',
-    presence: 'travelling',
+    // (23.9.2026) fixed from 'travelling', which is not a PresenceMode: the pre-overlay
+    // ending used 'inside' for this same night in Liron's car, so this restores that.
+    presence: 'inside',
   },
 }
 
@@ -158,7 +163,7 @@ export const BEATS_ARMY: Beat[] = [
     do: [
       { a: 'flag', flag: 'a3:seen' },
       { a: 'sfx', key: 'bus-door', level: 0.7 },
-      { a: 'talk', conversation: 'a3-bus-now' },
+      { a: 'talk', conversation: 'a3-bus' },
     ],
   },
   {
@@ -187,10 +192,7 @@ export const BEATS_ARMY: Beat[] = [
     delayMs: 350,
     do: [
       { a: 'flag', flag: 'a4:road' },
-      { a: 'lines', lines: [
-        { who: null, text: 'האוטו של לירון רועד מעל שמונים. הרדיו תופס תחנה, מאבד אותה, ותופס אחרת.' },
-        { who: 'לירון', text: 'אתה מסתכל כל הדרך על השעון. זה לא גורם לנו להגיע מהר יותר.' },
-      ] },
+      { a: 'talk', conversation: 'a4-road' },
       { a: 'events', events: DAY(A5, 1997, 2, at(19, 10), 'אביב 1997') },
       { a: 'travel', to: 'kiosk', spawn: 'start' },
     ],
@@ -216,6 +218,39 @@ export const BEATS_ARMY: Beat[] = [
       { a: 'talk', conversation: 'a5-close-army' },
     ],
   },
+  /**
+   * *"לא אעשה שטויות."* — restored from the pre-overlay unit (§7 B6). The promise is made
+   * on the last evening at home and tested across the whole winter, so it cannot close
+   * inside a branch: it closes here, only once the winter itself is over, and only if the
+   * two things it was about did not happen — no unauthorized leave, no lie to the commander.
+   */
+  {
+    id: 'a5-promise-kept',
+    trigger: 'clock',
+    when: {
+      all: [{ flag: 'a5:done' }, { flag: 'promise:rachel-army' }],
+      none: [{ flag: 'life:awol' }, { flag: 'life:lied:army' }, { flag: ARMY_PROMISE_DONE }],
+    },
+    do: [
+      { a: 'flag', flag: ARMY_PROMISE_DONE },
+      {
+        a: 'derive',
+        events: (state) => [
+          {
+            t: 'proof.recorded',
+            proof: {
+              kind: 'promise_kept',
+              proofId: `promise_kept:${state.chapter}:army`,
+              chapter: state.chapter,
+              year: state.year,
+              subjectHe: 'ההבטחה לאמא לפני הגיוס',
+              noteHe: 'חורף שלם. בלי נסיעה בלי חופשה, ובלי לשקר למפקד.',
+            },
+          },
+        ],
+      },
+    ],
+  },
 ]
 
 export const CONVERSATIONS_ARMY: Conversation[] = [
@@ -233,10 +268,20 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
           { who: 'רחל', text: 'הצבא זה לא שער 7. אי אפשר פשוט להגיע כשמתחשק.' },
         ],
         choices: [
+          /**
+           * *"אמא. הערב ההוא באוסישקין, כשחזרתי אחרי השעה."* — restored from the
+           * pre-overlay unit. It exists only for a player Rachel **remembers** coming home
+           * late (`relationshipMemory`, not a flag — a thing a person remembers about you),
+           * and it is what `ACH_REPAIR` waits for: the breach was recorded in 1991 as
+           * evidence, and this is the room to return to it. The repair does not erase the
+           * incident — both proofs carry the same subject and sit side by side in the ledger.
+           */
+          { id: 'repair', text: '"אמא. הערב ההוא באוסישקין, כשחזרתי אחרי השעה."', when: { relationshipMemory: { who: 'rachel', eventId: 'came-home-late-1991' } }, hidden: true, then: [{ e: 'goto', node: 'rachel-army-curfew' }] },
           {
             id: 'pack', text: 'לסגור את התיק ולשבת איתה עוד קצת.',
             then: [
               { e: 'flag', flag: 'a1:packed' },
+              { e: 'flag', flag: 'promise:rachel-army' },
               { e: 'rel', who: 'rachel', axis: 'bond', delta: 4 },
               { e: 'personality', key: 'responsibility', delta: 2 },
               { e: 'remember', who: 'rachel', eventId: 'last-night-before-army', significance: 'major' },
@@ -250,6 +295,38 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
               { e: 'redheart', key: 'footballLove', delta: 1 },
             ],
           },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * *"ראיתי מה השעה."* — restored from the pre-overlay unit. Five years, and one
+     * sentence not said since. The branch pays trust and lowers tension — it does not
+     * zero it out — and then returns to the same two answers about tomorrow evening: the
+     * chapter does not move from where it stands, a bag on the floor and a lift at six.
+     */
+    id: 'rachel-army-curfew',
+    nameHe: 'רחל',
+    branches: [
+      {
+        lines: [
+          { who: 'רחל', text: '(לא מרימה את הראש מהגרביים.) אה. זה.' },
+          { who: 'פוגי', text: 'ידעתי מה השעה. נשארתי בכל זאת.' },
+          { who: 'רחל', text: 'ידעתי שידעת. זה מה שהיה קשה, לא השעה.' },
+          { who: null, text: 'היא קיפלה את הזוג האחרון והניחה אותו על התיק.' },
+          { who: 'רחל', text: 'טוב שאמרת את זה עכשיו ולא אז. אז לא היית מתכוון.' },
+        ],
+        then: [
+          { e: 'rel', who: 'rachel', axis: 'trust', delta: 6 },
+          { e: 'rel', who: 'rachel', axis: 'tension', delta: -5 },
+          { e: 'proof', kind: 'repair_completed', proofId: 'repair_completed:{chapter}:curfew', subjectHe: 'השעה שאמא אמרה', noteHe: 'חמש שנים אחרי, בערב האחרון בבית.' },
+          { e: 'remember', who: 'rachel', eventId: 'came-back-to-1991', significance: 'major' },
+          { e: 'personality', key: 'honesty', delta: 2 },
+        ],
+        choices: [
+          { id: 'promise', text: '"לא אעשה שטויות."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'flag', flag: 'promise:rachel-army' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: 3 }] },
+          { id: 'honest', text: '"אני לא מבטיח."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: -1 }, { e: 'personality', key: 'independence', delta: 2 }, { e: 'toast', text: 'היא לא כעסה. היא ידעה.', tone: 'plain' }] },
         ],
       },
     ],
@@ -334,48 +411,77 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
       ],
     }],
   },
+  /**
+   * B6 — the bus, kept exactly (restored verbatim from the pre-overlay unit; canon per
+   * the brief: a regular Egged public bus, branded with Beit"ar Jerusalem symbols because
+   * it carries them on match days, at the central station — Pogi refuses it and arrives
+   * two hours late to base). The director's cut still gets its "direct choice instead of
+   * passive waiting": this conversation was already exactly that.
+   */
   {
-    id: 'a3-bus-now',
-    nameHe: 'נהג',
-    branches: [{
-      lines: [
-        { who: null, text: 'האוטובוס כבר ברציף. הדלת פתוחה. אם תעלה עכשיו — תגיע בזמן.' },
-        { who: null, text: 'על הצדדים שלו עדיין נשארו סימנים מימי משחק. אתה יודע בדיוק של מי.' },
-        { who: 'נהג', text: 'עולה או לא? אני סוגר.' },
-      ],
-      choices: [
-        {
-          id: 'board', text: 'לעלות. הבסיס קודם הפעם.',
-          then: [
-            { e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'a3:done' },
-            { e: 'armyRoute', route: 'trusted' },
-            { e: 'army', key: 'commanderTrust', delta: 5 },
-            { e: 'personality', key: 'reliability', delta: 2 },
-          ],
-        },
-        {
-          id: 'refuse', text: 'לא לעלות. למצוא דרך אחרת, גם אם תאחר.',
-          then: [
-            { e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'a3:done' }, { e: 'flag', flag: 'life:army:refused-bus' },
-            { e: 'armyRoute', route: 'punished' },
-            { e: 'army', key: 'commanderTrust', delta: -12 },
-            { e: 'army', key: 'leaveDebt', delta: 120 },
-            { e: 'redheart', key: 'terraceCulture', delta: 3 },
-            { e: 'remember', who: 'kobi', eventId: 'refused-bus-to-base', significance: 'major' },
-            { e: 'toast', text: 'שעתיים אחר כך, בשער הבסיס, הסיפור כבר נשמע פחות מצחיק.', tone: 'red' },
-          ],
-        },
-        {
-          id: 'hesitate', text: 'לעמוד עוד עשר שניות ולהפסיד אותו.',
-          then: [
-            { e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'a3:done' },
-            { e: 'armyRoute', route: 'negotiator' },
-            { e: 'army', key: 'commanderTrust', delta: -6 },
-            { e: 'wellbeing', key: 'stress', delta: 5 },
-          ],
-        },
-      ],
-    }],
+    id: 'a3-bus',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'a3:decided' }, lines: [{ who: null, text: 'הרציף ריק. החלטת.' }] },
+      {
+        lines: [
+          { who: null, text: 'האוטובוס. הנהג בדלת: "חייל, עולה? אני נוסע דרך הצומת שלך. בזמן."' },
+          { who: null, text: 'אגד רגיל, קו רגיל — והצדדים שלו צבועים בסמלים של בית"ר ירושלים, כי בימי משחק הוא מסיע אותם. השעון בתחנה אומר חמש חמישים ושש, וזה שלושים וארבע דקות לשער של הבסיס.' },
+        ],
+        choices: [
+          { id: 'refuse', text: '"לא. לא על האוטובוס הזה."', then: [{ e: 'sfx', key: 'bus-door', level: 0.6, delayMs: 900 }, { e: 'consequence', id: 'a3:refused', text: 'האוטובוס יצא. בלעדיך.', laterText: 'שעתיים איחור. זה יירשם.', afterMinutes: 30 }, { e: 'plate', art: 'armyRoom', titleHe: 'הבסיס', subHe: 'שעתיים אחרי השעה', ms: 2600 }, { e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:refused' }, { e: 'redheart', key: 'loyaltyReturn', delta: 6 }, { e: 'personality', key: 'stubbornness', delta: 4 }, { e: 'goto', node: 'a3-refused' }] },
+          { id: 'board', text: 'לעלות. לשתוק. להגיע בזמן.', then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:boarded' }, { e: 'wellbeing', key: 'regret', delta: 8 }, { e: 'redheart', key: 'loyaltyReturn', delta: -3 }, { e: 'personality', key: 'responsibility', delta: 2 }, { e: 'goto', node: 'a3-boarded' }] },
+          { id: 'other', text: 'לרוץ לחפש רציף אחר.', then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:searched' }, { e: 'personality', key: 'streetSmarts', delta: 2 }, { e: 'goto', node: 'a3-searched' }] },
+          { id: 'wait', text: 'לעמוד. עוד רגע.', then: [{ e: 'personality', key: 'impulsiveness', delta: -1 }, { e: 'toast', text: 'הנהג הסתכל בשעון. אתה הסתכלת באוטובוס.', tone: 'plain' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a3-refused',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הנהג משך בכתפיים וסגר. האוטובוס יצא עם השירים שלו. הרציף נשאר עם השעון.' },
+          { who: null, text: 'קו אחר, צומת אחר, והמתנה על מעקה. איך הגעת זה כבר לא הסיפור. הגעת שעתיים אחרי השעה.' },
+          { who: 'המפקד', text: 'שעתיים.' },
+          { who: 'פוגי', text: 'שעתיים.' },
+          { who: 'המפקד', text: 'סיבה?' },
+        ],
+        choices: [
+          { id: 'truth', text: '"האוטובוס בזמן היה ממותג בית"ר. לא עליתי."', then: [{ e: 'army', key: 'commanderTrust', delta: -15 }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'armyRoute', route: 'rebellious' }, { e: 'flag', flag: 'a3:done' }, { e: 'toast', text: 'הוא הסתכל עליך זמן ארוך. ואז כתב משהו. לא ידעת אם זה עונש או סיפור.', tone: 'plain' }] },
+          { id: 'lie', text: '"האוטובוס התקלקל."', then: [{ e: 'army', key: 'commanderTrust', delta: -5 }, { e: 'flag', flag: 'life:lied:army' }, { e: 'personality', key: 'streetSmarts', delta: 1 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'flag', flag: 'a3:done' }, { e: 'toast', text: 'עבד. פעם אחת זה עובד.', tone: 'plain' }] },
+          { id: 'silent', text: 'לשתוק.', then: [{ e: 'army', key: 'commanderTrust', delta: -20 }, { e: 'armyRoute', route: 'punished' }, { e: 'army', key: 'leaveDebt', delta: 2 }, { e: 'flag', flag: 'a3:done' }, { e: 'toast', text: 'שבת הבאה — בבסיס. הוא לא צעק. הוא רק אמר.', tone: 'red' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a3-boarded',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'ישבת מאחור, עם התיק על הברכיים, ושתקת שעה. הם שרו כל הדרך. אחד הציע לך גרעינים. לקחת. זה היה הדבר הכי גרוע.' },
+          { who: null, text: 'הגעת בזמן. המפקד לא ידע כלום. אתה ידעת.' },
+        ],
+        then: [{ e: 'army', key: 'commanderTrust', delta: 3 }, { e: 'armyRoute', route: 'trusted' }, { e: 'flag', flag: 'a3:done' }],
+      },
+    ],
+  },
+  {
+    id: 'a3-searched',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'רצת בין הרציפים. אין. יש אחד בשש וחצי לעיר אחרת, ומשם — לא ידעת. עלית עליו בכל זאת.' },
+          { who: null, text: 'הגעת בשמונה ורבע. שעה ושלושת רבעי. המפקד שאל. אמרת "אוטובוסים". זה היה נכון, בערך.' },
+        ],
+        then: [{ e: 'army', key: 'commanderTrust', delta: -8 }, { e: 'armyRoute', route: 'negotiator' }, { e: 'redheart', key: 'travelDrive', delta: 2 }, { e: 'flag', flag: 'a3:done' }],
+      },
+    ],
   },
   {
     id: 'a4-liron',
@@ -403,6 +509,27 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
             { e: 'personality', key: 'responsibility', delta: 2 },
           ],
         },
+      ],
+    }],
+  },
+  /**
+   * The ride itself — restored from the pre-overlay unit's `road-2` (life-reachable
+   * flagged `liron-cup99`'s `rel.liron.sharedHistory ≥ 4` gate as impossible once this
+   * chapter's only other source of it, inside the old `road-1..road-back` chain, stopped
+   * being reachable). One quiet moment in the car, before the kiosk beat picks the day
+   * back up.
+   */
+  {
+    id: 'a4-road',
+    nameHe: null,
+    branches: [{
+      lines: [
+        { who: null, text: 'האוטו של לירון רועד מעל שמונים. הרדיו תופס תחנה, מאבד אותה, ותופס אחרת.' },
+        { who: 'לירון', text: 'אתה מסתכל כל הדרך על השעון. זה לא גורם לנו להגיע מהר יותר.' },
+      ],
+      then: [
+        { e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 6 },
+        { e: 'personality', key: 'empathy', delta: 2 },
       ],
     }],
   },
@@ -438,5 +565,428 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
   // Compatibility ids used by old actors/hotspots in this era. They all lead back into
   // the Director's Cut instead of failing because an older scene still points at them.
   { id: 'kobi-army', nameHe: 'קובי', branches: [{ lines: [{ who: 'קובי', text: 'מדים זה מדים. במשחק אתה עדיין עומד לידי רק אם אתה רוצה.' }] }] },
-  { id: 'a3-left-behind', nameHe: null, branches: [{ lines: [{ who: null, text: 'האוטובוס נסגר ויוצא. הפעם ההיסוס עצמו היה הבחירה.' }], then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'a3:done' }] }] },
+
+  /**
+   * The world-static ids scenes.ts already draws bodies and hotspots for — restored
+   * verbatim from the pre-overlay unit rather than rewritten, because none of them are
+   * about the seam this director's cut fixes (the 16.11 → 23.11 date, the Gate 5 travel
+   * choice, the direct bus choice). They stand outside the beat chain, gated by the same
+   * A2–A5 flags the new beats raise, so they slot back in without touching the sequence.
+   */
+  {
+    id: 'sign-shelf',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:shelf' },
+        lines: [{ who: null, text: 'המדף עדיין חצי ריק.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'המדף מאחורי רפי חצי ריק. לא חסר משהו אחד — חסרה שורה שלמה.' },
+          { who: 'רפי מהקיוסק', text: 'לא הביאו השבוע. וגם לא בשבוע שעבר. אני לא שואל למה, הם לא עונים.' },
+        ],
+        then: [{ e: 'flag', flag: 'saw:shelf' }, { e: 'institution', key: 'footballOwnershipTrust', delta: -2 }],
+      },
+    ],
+  },
+  {
+    id: 'sign-till',
+    nameHe: 'רפי מהקיוסק',
+    branches: [
+      {
+        when: { hasSticker: 'tikva' },
+        lines: [{ who: 'רפי מהקיוסק', text: 'שמת אותה באלבום? יופי. עכשיו זה כבר לא שלי.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'רפי פותח את הקופה ומזיז את המגש. מתחת למגש, בין שטרות ישנים, מדבקה אחת.' },
+          { who: 'רפי מהקיוסק', text: 'זאת נשארה לי משנה שעברה. מאתיים שלושים ואחת. אף אחד לא ביקש.' },
+          { who: 'רפי מהקיוסק', text: 'קח. אתה היחיד פה שעוד סופר.' },
+        ],
+        then: [
+          { e: 'sticker', id: 'tikva' },
+          { e: 'toast', text: 'שלום תקוה, 231.', tone: 'red' },
+          { e: 'bond', who: 'shopkeeper', delta: 4 },
+          { e: 'redheart', key: 'historyMemory', delta: 3 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sign-paper',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:figures' },
+        lines: [{ who: null, text: 'אותו עמוד. אותם מספרים.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'העיתון פתוח על הדלפק בעמוד שאף אחד לא קורא — טור של מספרים, וכמה מהם בסוגריים.' },
+          { who: null, text: 'אתה לא יודע מה זה סוגריים במספר. אתה יודע שאף אחד לא שם אותם שם סתם.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'saw:figures' },
+          { e: 'institution', key: 'legalUnderstanding', delta: 2 },
+          { e: 'redheart', key: 'historyMemory', delta: 2 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sign-window',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:window' },
+        lines: [{ who: null, text: 'התריס עדיין למטה.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'החלון של המשרד סגור בתריס פח, ועליו דף שנתלה במסקינטייפ ונקרע בפינה.' },
+          { who: null, text: 'מתחת לדף מישהו כתב בעט משהו קצר, ואז מחק. את המחיקה רואים יותר טוב מהמילה.' },
+        ],
+        then: [{ e: 'flag', flag: 'saw:window' }, { e: 'institution', key: 'footballOwnershipTrust', delta: -3 }],
+      },
+    ],
+  },
+  {
+    id: 'sign-tickets',
+    nameHe: 'קופאית',
+    branches: [
+      {
+        when: { flag: 'saw:tickets' },
+        lines: [{ who: 'קופאית', text: 'עוד לא. אמרתי לך, עוד לא.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'בקופה יש תור של ארבעה. השלט על הזכוכית הוא של העונה שעברה.' },
+          { who: 'קופאית', text: 'מנויים לעונה הבאה? עוד לא פתחנו. כשיהיה ברור — יהיה.' },
+        ],
+        choices: [
+          {
+            id: 'ask',
+            text: '"ברור לגבי מה?"',
+            then: [
+              { e: 'flag', flag: 'saw:tickets' },
+              { e: 'institution', key: 'legalUnderstanding', delta: 2 },
+              { e: 'toast', text: 'היא הסתכלה עליך שנייה ואמרה "אתה בן כמה?" ואז חייכה ולא ענתה.', tone: 'plain' },
+            ],
+          },
+          { id: 'go', text: 'לא לשאול.', then: [{ e: 'flag', flag: 'saw:tickets' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sign-two-jobs',
+    nameHe: 'סדרן',
+    branches: [
+      {
+        when: { flag: 'saw:twojobs' },
+        lines: [{ who: 'סדרן', text: 'מה, עוד לא הלכת? יאללה, יש לי עוד ערימה.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'הסדרן שמכיר אותך בשם עומד היום עם ערימת דפים ביד ומוכר אותם. את החולצה של הסדרנים הוא עוד לובש.' },
+          { who: 'סדרן', text: 'גם וגם. לא הוסיפו לי, הורידו למישהו אחר.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'saw:twojobs' },
+          { e: 'redheart', key: 'community', delta: 3 },
+          { e: 'institution', key: 'footballOwnershipTrust', delta: -2 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'sign-creditor',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'saw:creditor' },
+        lines: [{ who: null, text: 'הם כבר לא שם.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'שני גברים בחליפות עומדים ליד המשרד. אחד מחזיק תיק, השני מחזיק סיגריה שהוא לא מעשן.' },
+          { who: null, text: '"...בסוף החודש," אמר הראשון, ואז ראה אותך והפסיק.' },
+          { who: null, text: 'עברת לידם לאט יותר משהיית צריך, וזה לא עזר.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'saw:creditor' },
+          { e: 'institution', key: 'footballOwnershipTrust', delta: -4 },
+          { e: 'wellbeing', key: 'stress', delta: 3 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'kobi-gate7',
+    nameHe: 'קובי',
+    branches: [
+      { when: { flag: 'a2:chose', gateIs: 'gate7' }, lines: [{ who: 'קובי', text: 'פה. איפה שתמיד.' }, { who: null, text: 'הוא לא שאל למה. הוא לא היה צריך.' }] },
+      { when: { flag: 'a2:chose', gateIs: 'gate5' }, lines: [{ who: 'קובי', text: 'לך. לך לשם. אני לא אחזיק אותך.' }, { who: null, text: 'הוא הסתכל למגרש כשאמר את זה. לא עליך.' }] },
+      { when: { flag: 'a2:chose' }, lines: [{ who: 'קובי', text: 'אתה לא פה ולא שם. תחליט מתישהו. זה לא מקום, זה בין.' }] },
+      {
+        lines: [
+          { who: 'קובי', text: 'שמעת אותם? מתחת ליציע? עשרים שנה שרים פה אותו שיר, ופתאום צריך תוף.' },
+          { who: 'בארי', text: 'תעזוב, קובי. גם אנחנו היינו פעם רעש.' },
+          { who: 'קובי', text: 'היינו רעש בשער 7. לא מתחתיו.' },
+        ],
+        choices: [
+          { id: 'stay', text: 'להישאר פה. ליד אבא.', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate7', reason: 'family' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'familyTradition', delta: 4 }, { e: 'remember', who: 'kobi', eventId: 'stayed-gate7-1996', significance: 'major' }, { e: 'goto', node: 'a2-after' }] },
+          { id: 'look', text: '"אני הולך לראות. אני חוזר."', then: [{ e: 'flag', flag: 'a2:looked' }, { e: 'toast', text: '"תחזור," הוא אמר, כמו שאומרים משהו שלא בטוחים בו.', tone: 'plain' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'barry-gate7',
+    nameHe: 'בארי',
+    branches: [
+      {
+        lines: [{ who: 'בארי', text: 'אבא שלך צודק וטועה באותו משפט. ראיתי את זה קורה פה לאנשים טובים. תעמוד איפה שתעמוד — רק שזה יהיה אתה שהחלטת.' }],
+        then: [{ e: 'rel', who: 'barry', axis: 'familiarity', delta: 4 }, { e: 'personality', key: 'independence', delta: 1 }],
+      },
+    ],
+  },
+  {
+    id: 'asaf-gate5',
+    nameHe: 'אסף',
+    branches: [
+      { when: { gateIs: 'gate5' }, lines: [{ who: 'אסף', text: 'אתה פה. יופי. בשבוע הבא אתה מגיע שעה לפני ומחזיק בד. אין "אני רק בא לשיר".' }] },
+      {
+        lines: [
+          { who: null, text: 'מתחת ליציע. תוף, עשרים בחורים, בד שמישהו צייר ביד. אסף באמצע, לא שר — מסתכל.' },
+          { who: 'אסף', text: 'חייל. תשמע טוב: פה לא באים לראות משחק. פה עובדים. סוחבים, תולים, מגיעים שעה לפני. כבוד מקבלים אחר כך, אם בכלל.' },
+          { who: 'מלמד', text: 'תן לו לשמוע קודם. (מלמד, עם דרבוקה בין הברכיים, מנסה קצב.) ככה? או ככה?' },
+        ],
+        choices: [
+          { id: 'join', text: '"אני איתכם."', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate5', reason: 'friends' }, { e: 'rel', who: 'asaf', axis: 'trust', delta: 3 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 5 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'remember', who: 'asaf', eventId: 'joined-gate5-1996', significance: 'major' }, { e: 'goto', node: 'a2-after' }] },
+          { id: 'rhythm', text: 'לענות למלמד: "ככה." (הראשון)', then: [{ e: 'sfx', key: 'darbuka-three-two', level: 0.8 }, { e: 'flag', flag: 'life:melamed:rhythm' }, { e: 'rel', who: 'melamed', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:rhythm', subjectHe: RHYTHM_SUBJECT, noteHe: 'שלוש, הפסקה, שתיים. מתחת ליציע, על דרבוקה של מישהו אחר.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'נתן למלמד קצב' }, { e: 'toast', text: 'מלמד ניגן את זה שוב. ושוב. אתה לא יודע עוד מה עשית.', tone: 'plain' }] },
+          { id: 'back', text: '"אני חוזר לאבא."', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate7', reason: 'family' }, { e: 'rel', who: 'asaf', axis: 'distance', delta: 3 }, { e: 'goto', node: 'a2-after' }] },
+          { id: 'neither', text: 'ללכת. לא לפה ולא לשם.', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'outside', reason: 'conflict' }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'goto', node: 'a2-after' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a2-after',
+    nameHe: null,
+    branches: [
+      { when: { gateIs: 'gate5' }, lines: [{ who: null, text: 'מהמקום החדש רואים את שער 7 באלכסון. בהפסקה אנשים נצמדים לגדר שבין 5 ל-7 ומדברים דרכה. אבא לא בא לגדר.' }, { who: null, text: 'התוף לא הפסיק תשעים דקות. בסוף לא שמעת אותו. הוא היה בפנים.' }] },
+      { when: { gateIs: 'outside' }, lines: [{ who: null, text: 'עמדת ליד הגדר שבין 5 ל-7 — מקום שעוברים בו בהפסקה ולא עומדים בו במשחק. ראית תשעים דקות לבד. זה היה הדבר הכי לא־בלומפילד שעשית.' }] },
+      { lines: [{ who: null, text: 'שער 7. השיר האיטי. הכתף של אבא ליד הכתף שלך. ומתחת ליציע, כל המשחק, תוף שאתה שומע ולא רואה.' }] },
+    ],
+  },
+  {
+    id: 'yaron-base',
+    nameHe: 'ירון',
+    branches: [
+      { when: { flag: 'life:bus:refused' }, lines: [{ who: 'ירון', text: 'שמעתי. האוטובוס. אתה יודע שזה או הסיפור הכי טוב שלך או הכי מטומטם, ותלוי מי מספר.' }, { who: 'פוגי', text: 'תלוי מי מספר.' }], then: [{ e: 'rel', who: 'yaron', axis: 'familiarity', delta: 5 }] },
+      { lines: [{ who: 'ירון', text: 'ירון, מהאוהל ליד. אם מישהו יספר לך מי אבא שלי — תגיד שכבר שמעת ותעבור נושא. אתה מהפועל? אז אנחנו מסתדרים.' }], then: [{ e: 'rel', who: 'yaron', axis: 'familiarity', delta: 4 }] },
+    ],
+  },
+  {
+    id: 'a4-winter',
+    nameHe: null,
+    branches: [
+      {
+        when: { all: [{ flag: 'saw:window' }, { flag: 'saw:figures' }] },
+        lines: [
+          { who: null, text: 'פברואר. הקיוסק, שבת בצהריים. הפעם לא מדברים על מאמן. מדברים על כסף.' },
+          { who: 'פוגי', text: 'החלון של המשרד סגור כבר שבועיים. ובעיתון יש מספרים בסוגריים.' },
+          { who: 'פרדי', text: 'אז אתה כבר יודע. סוגריים זה מינוס. וההסתדרות מוכרת.' },
+          { who: 'פרדי', text: 'יש קבוצת אנשי עסקים. זה יכול להציל את המועדון וזה יכול לקנות אותו. שני הדברים נכונים באותו רגע.' },
+          { who: 'עמית', text: 'ואנחנו נאבקים להישאר בליגה. המאמן הלך באמצע השבוע, אחרי כל השנים.' },
+        ],
+        choices: [
+          { id: 'legal', text: 'לפרדי: "מי חותם על זה בכלל?"', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 8 }, { e: 'rel', who: 'freddy', axis: 'trust', delta: 4 }, { e: 'goto', node: 'a4-freddy' }] },
+          { id: 'protest', text: '"אז נלך למשרדים. שיראו אותנו."', then: [{ e: 'institution', key: 'protestEscalation', delta: 8 }, { e: 'institution', key: 'footballOwnershipTrust', delta: -5 }, { e: 'rel', who: 'freddy', axis: 'tension', delta: 3 }, { e: 'goto', node: 'a4-freddy' }] },
+          { id: 'sinai', text: 'על המאמן: "הוא כבר לא התשובה."', then: [{ e: 'sinai', stance: 'broken' }, { e: 'flag', flag: 'life:sinai:broken' }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'goto', node: 'a4-liron' }] },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'פברואר. הקיוסק, שבת בצהריים. הפעם לא מדברים על מאמן. מדברים על כסף.' },
+          { who: 'עמית', text: 'אל תסתכל עלי, תסתכל בטבלה. אנחנו נאבקים להישאר בליגה. והמאמן הלך באמצע השבוע, אחרי כל השנים.' },
+          { who: 'פרדי', text: 'וזה עוד לא הכל. ההסתדרות מוכרת, ויש קבוצת אנשי עסקים. זה יכול להציל את המועדון וזה יכול לקנות אותו. שני הדברים נכונים באותו רגע.' },
+          { who: 'רפי מהקיוסק', text: 'העיקר שיהיה מועדון. לא אכפת לי של מי.' },
+          { who: 'אוהד', text: 'לי אכפת.' },
+        ],
+        choices: [
+          { id: 'sinai', text: 'על המאמן: "הוא לימד אותי מה זו החולצה הזאת. הוא כבר לא התשובה."', then: [{ e: 'sinai', stance: 'broken' }, { e: 'flag', flag: 'life:sinai:broken' }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'goto', node: 'a4-liron' }] },
+          { id: 'reconcile', text: '"אני עדיין אוהב את השחקן. על המאמן — נדבר בעוד עשר שנים."', then: [{ e: 'sinai', stance: 'reconciled-memory' }, { e: 'flag', flag: 'life:sinai:reconciled' }, { e: 'personality', key: 'empathy', delta: 2 }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'goto', node: 'a4-liron' }] },
+          { id: 'protest', text: 'על המכירה: "אז נלך למשרדים. שיראו אותנו."', then: [{ e: 'institution', key: 'protestEscalation', delta: 8 }, { e: 'institution', key: 'footballOwnershipTrust', delta: -5 }, { e: 'rel', who: 'freddy', axis: 'tension', delta: 3 }, { e: 'goto', node: 'a4-freddy' }] },
+          { id: 'legal', text: 'לפרדי: "מה חוקי לעשות, ומה לא?"', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 8 }, { e: 'rel', who: 'freddy', axis: 'trust', delta: 4 }, { e: 'goto', node: 'a4-freddy' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a4-freddy',
+    nameHe: 'פרדי',
+    branches: [
+      {
+        lines: [
+          { who: 'פרדי', text: 'חוקי: לעמוד, לצעוק, לכתוב, לחתום. לא חוקי: לשבור, לאיים, לחסום. ההבדל הוא לא מוסר, הוא מה שיישאר לכם למחרת.' },
+          { who: 'פרדי', text: 'ומי שרוצה שיהיה לו יום אחד מה להגיד על המועדון הזה — שילמד לקרוא מאזן. לא היום. אבל שיתחיל.' },
+        ],
+        then: [{ e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'goto', node: 'a4-liron' }],
+      },
+    ],
+  },
+  {
+    id: 'a5-kiosk',
+    nameHe: 'רפי מהקיוסק',
+    branches: [
+      {
+        when: { flag: 'a5:done' },
+        lines: [{ who: 'רפי מהקיוסק', text: 'נסעת? יופי. עכשיו לך לישון, יש לך בסיס בבוקר.' }],
+      },
+      {
+        lines: [
+          { who: 'רפי מהקיוסק', text: 'שניים ביקשו ממני להעביר לך הודעה, ואני לא דואר.' },
+          { who: 'רפי מהקיוסק', text: 'אחד: יש משחק בצפון, גביע הטוטו, ואין הסעה כי נוסעים בערך עשרה. אם אתה רוצה — אתה מוצא דרך.' },
+          { who: 'רפי מהקיוסק', text: 'שתיים: מישהו הבטיח לאסוף אותך למשחק ולא בא. הוא הבטיח, ולא בא.' },
+          { who: null, text: 'אתה יכול להספיק אחד. לא שניים.' },
+        ],
+        choices: [
+          {
+            id: 'north',
+            text: 'לצאת צפונה. בטרמפים.',
+            then: [
+              { e: 'flag', flag: 'a5:north' },
+              { e: 'redheart', key: 'travelDrive', delta: 6 },
+              { e: 'personality', key: 'riskTolerance', delta: 3 },
+              { e: 'goto', node: 'a5-north-1' },
+            ],
+          },
+          {
+            id: 'wait',
+            text: 'לחכות להסעה שהבטיחו.',
+            then: [{ e: 'flag', flag: 'a5:pickup' }, { e: 'goto', node: 'a5-pickup-1' }],
+          },
+          { id: 'neither', text: 'לחזור לבסיס מוקדם.', then: [{ e: 'army', key: 'commanderTrust', delta: 5 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'flag', flag: 'a5:done' }, { e: 'ending', id: 'home' }] },
+        ],
+      },
+    ],
+  },
+  {
+    /** the road north — the journey IS the unit, per §7 B6 */
+    id: 'a5-north-1',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'בצומת שבקצה העיר עומדים שניים שאתה מכיר מהיציע ואחד שלא. ארבעה אנשים, יד אחת מורמת, וכל אוטו שעובר הוא הימור.' },
+          { who: null, text: 'הראשון שעצר לקח שניים. אמרו לך "תמשיך אחרינו" והלכו.' },
+        ],
+        choices: [
+          {
+            id: 'alone',
+            text: 'להישאר בצומת לבד.',
+            then: [
+              { e: 'personality', key: 'stubbornness', delta: 3 },
+              { e: 'wellbeing', key: 'loneliness', delta: 3 },
+              { e: 'time', minutes: 55 },
+              { e: 'goto', node: 'a5-north-2' },
+            ],
+          },
+          {
+            id: 'pair',
+            text: 'לעצור עם השלישי ולנסות ביחד.',
+            then: [
+              { e: 'redheart', key: 'community', delta: 4 },
+              { e: 'rel', who: 'shachor', axis: 'familiarity', delta: 2 },
+              { e: 'time', minutes: 35 },
+              { e: 'goto', node: 'a5-north-2' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a5-north-2',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'משאית, אחר כך מסחרית, אחר כך אחד שנסע לחתונה והוריד אותך במקום הלא נכון. שלוש שעות, ארבעה אוטואים, וגשם קטן שלא הפסיק.' },
+          { who: null, text: 'בשער היו בערך עשרה. אתה הכרת שמונה מהם.' },
+          { who: null, text: 'אחד מהם אמר "אתה הגעת בטרמפים?" ואז לא אמר כלום, וזה היה הדבר הכי טוב ששמעת באותו חורף.' },
+        ],
+        then: [
+          { e: 'presence', mode: 'inside' },
+          { e: 'flag', flag: 'life:north:hitched' },
+          { e: 'redheart', key: 'travelDrive', delta: 5 },
+          { e: 'redheart', key: 'community', delta: 4 },
+          { e: 'remember', who: 'shachor', eventId: 'hitched-north', significance: 'major' },
+          { e: 'flag', flag: 'a5:done' },
+          { e: 'ending', id: 'road' },
+        ],
+      },
+    ],
+  },
+  {
+    /** the lift that never came, and the coins that made up for it */
+    id: 'a5-pickup-1',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'עמדת בפינה שסיכמתם עליה. ארבע וחצי, חמש פחות רבע, חמש. האוטו לא בא.' },
+          { who: null, text: 'בטלפון הציבורי אין תשובה. בכיס יש ארבעים שקל, ומונית לשם עולה יותר.' },
+        ],
+        choices: [
+          {
+            id: 'ask',
+            text: 'ללכת לשער ולהגיד שאין לך.',
+            then: [
+              { e: 'personality', key: 'courage', delta: 3 },
+              { e: 'goto', node: 'a5-pickup-2' },
+            ],
+          },
+          {
+            id: 'home',
+            text: 'ללכת הביתה ולא להגיד לאף אחד.',
+            then: [
+              { e: 'wellbeing', key: 'loneliness', delta: 5 },
+              { e: 'wellbeing', key: 'regret', delta: 4 },
+              { e: 'flag', flag: 'a5:done' },
+              { e: 'ending', id: 'home' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a5-pickup-2',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'אמרת את זה מהר, כדי לגמור. מישהו הוציא עשרים. מישהו אחר עשר. אחד נתן חמישה ואמר "זה מה שיש".' },
+          { who: null, text: 'תוך שתי דקות היה מספיק למונית, ועוד עשרה שהוא לא לקח בחזרה.' },
+          { who: null, text: 'הנהג שאל למה אתם ממהרים. אף אחד לא ענה לו.' },
+        ],
+        then: [
+          { e: 'presence', mode: 'inside' },
+          { e: 'flag', flag: 'life:carried:taxi' },
+          { e: 'flag', flag: 'owe:stand' },
+          { e: 'debt', agorot: TAXI_AGOROT, why: 'המונית ששער 5 שילם עליה' },
+          { e: 'redheart', key: 'community', delta: 7 },
+          { e: 'wellbeing', key: 'belonging', delta: 5 },
+          { e: 'personality', key: 'empathy', delta: 3 },
+          { e: 'remember', who: 'asaf', eventId: 'stand-paid-my-taxi', significance: 'major' },
+          { e: 'flag', flag: 'a5:done' },
+          { e: 'ending', id: 'road' },
+        ],
+      },
+    ],
+  },
 ]

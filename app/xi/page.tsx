@@ -34,8 +34,8 @@ export default function XIPage({
   const roster = rosterIndex()
 
   return (
-    <Screen title={t('screen.xi.title')} sub={t('screen.xi.sub')}>
-      <p className="mt-stack max-w-prose font-body text-step-0 leading-relaxed text-ink">
+    <Screen title={t('screen.xi.title')} sub={t('screen.xi.sub')} stage>
+      <p className="mt-stack max-w-prose font-body text-step-0 leading-relaxed text-ink md:block hidden">
         {t('xi.lede')}
       </p>
       <XIBuilder

@@ -232,25 +232,8 @@ const CONVERSATIONS: Conversation[] = [
       },
     ],
   },
-  {
-    id: 'kobi-match',
-    nameHe: 'קובי',
-    branches: [
-      {
-        lines: [
-          { who: 'קובי', text: 'יש.' },
-          { who: null, text: 'הוא לא מרים עיניים מהעיתון, אבל משהו בקול נפתח לשנייה.' },
-          { who: 'קובי', text: 'אני יוצא אחרי שלוש עם יעקב. אנחנו עומדים בשער שבע, איפה שתמיד.' },
-          { who: 'קובי', text: 'ואתה נשאר עם אמא.' },
-        ],
-        then: [
-          { e: 'flag', flag: 'knows:match' },
-          { e: 'bond', who: 'kobi', delta: 2 },
-          { e: 'trait', trait: 'footballAffinity', delta: 4 },
-        ],
-      },
-    ],
-  },
+  // (23.9.2026) `kobi-match` removed: the overlay replaced its goto target with
+  // `kobi-refuse` and this node was left with nothing pointing at it (life-orphans).
   {
     id: 'kobi-refuse',
     nameHe: 'קובי',

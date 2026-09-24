@@ -2,6 +2,7 @@
 
 import { KitShirt } from '@/components/kit/KitShirt'
 import { OUTFIELD_KIT, PlayerFigure } from '@/components/press/PlayerFigure'
+import { useDragSource } from '@/components/stage/useDrag'
 import type { LockerName } from '@/lib/game/lineup-sheet'
 import type { KitSpec } from '@/lib/kit/spec'
 import { t } from '@/lib/i18n'
@@ -91,5 +92,89 @@ export function LockerRack({
         })}
       </ul>
     </section>
+  )
+}
+
+/**
+ * מלתחה בנייד — the rack as a one-line rail, docked over the pitch (delta 87). A peg is
+ * still a tap ("hold him"), and now also a lift-up drag straight onto a band.
+ */
+export function LockerRail({
+  bank,
+  used,
+  selected,
+  onSelect,
+  onDrop,
+  kit,
+}: {
+  bank: readonly LockerName[]
+  used: ReadonlySet<string>
+  selected: string | null
+  onSelect: (id: string) => void
+  /** a peg dragged up and released on a band — `zone` is that band's `data-drop` id */
+  onDrop: (zone: string, payload: string) => void
+  kit: KitSpec | null
+}) {
+  return (
+    <ul className="-mx-2.5 flex snap-x gap-1.5 overflow-x-auto px-2.5 pb-1">
+      {bank.map((locker) => (
+        <LockerPeg
+          key={locker.id}
+          locker={locker}
+          taken={used.has(locker.id)}
+          isSelected={selected === locker.id}
+          onSelect={onSelect}
+          onDrop={onDrop}
+          kit={kit}
+        />
+      ))}
+    </ul>
+  )
+}
+
+function LockerPeg({
+  locker,
+  taken,
+  isSelected,
+  onSelect,
+  onDrop,
+  kit,
+}: {
+  locker: LockerName
+  taken: boolean
+  isSelected: boolean
+  onSelect: (id: string) => void
+  onDrop: (zone: string, payload: string) => void
+  kit: KitSpec | null
+}) {
+  const drag = useDragSource({
+    payload: `locker:${locker.id}`,
+    axis: 'up',
+    disabled: taken,
+    onDrop: (zone) => onDrop(zone, `locker:${locker.id}`),
+  })
+  return (
+    <li className="shrink-0 snap-start">
+      <button
+        type="button"
+        {...drag}
+        disabled={taken}
+        onClick={() => onSelect(locker.id)}
+        aria-pressed={isSelected}
+        aria-label={t('lineup.locker.aria', { name: locker.nameHe })}
+        className={`flex min-h-tap w-[74px] flex-col items-center gap-0.5 border-hair bg-press-paper px-1 pb-1.5 pt-1 transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-30 motion-reduce:transition-none ${
+          isSelected ? 'border-plate border-press-red' : 'border-press-ink/40'
+        }`}
+      >
+        {kit ? (
+          <KitShirt spec={kit} density="mini" className={`h-9 w-8 ${taken ? 'opacity-40' : ''}`} />
+        ) : (
+          <PlayerFigure kit={OUTFIELD_KIT} ghost={taken} number={null} size={32} title={locker.nameHe} />
+        )}
+        <span className="w-full truncate text-center font-body text-[10px] leading-tight text-press-ink">
+          {locker.nameHe}
+        </span>
+      </button>
+    </li>
   )
 }

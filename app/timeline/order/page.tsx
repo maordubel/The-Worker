@@ -9,6 +9,7 @@ import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
 import { TimelineBoard } from '../TimelineBoard'
+import { ThreadCoach } from '../ThreadCoach'
 
 /**
  * שער 13 · מצב שני — סדר כרונולוגי.
@@ -35,6 +36,7 @@ export default function TimelineOrderPage({
       </div>
       {deal ? (
         <>
+          <ThreadCoach />
           <TimelineBoard anchor={deal.anchor} queue={deal.queue} seed={round.seed} cursor={round.cursor} />
           <ReportLink />
         </>

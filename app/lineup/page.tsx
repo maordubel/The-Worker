@@ -83,14 +83,28 @@ export default function LineupPage({
   const graded = hasVerifiedLineup()
 
   return (
-    <Screen title={t('screen.lineup.title')} sub={t('screen.lineup.sub')}>
+    <Screen title={t('screen.lineup.title')} sub={t('screen.lineup.sub')} stage>
       {challenge ? (
-        <Intro
-          titleHe={challenge.titleHe}
-          subtitleHe={challenge.subtitleHe}
-          intro={challenge.intro}
-          sourceTitle={challenge.sourceTitle}
-        />
+        <>
+          {/* the phone stage: one line — the fixture and its date — the rest (sources,
+              the disputed-date note) moved into the board's own "פרטי המשחק" sheet */}
+          <div className="shrink-0 border-hair border-ink/40 bg-sheet px-2.5 py-1.5 md:hidden">
+            <p className="truncate font-sign text-[13px] leading-tight text-ink">{challenge.titleHe}</p>
+            {challenge.subtitleHe && (
+              <p className="truncate font-mono text-[10px] leading-tight text-sign">
+                <Num>{challenge.subtitleHe}</Num>
+              </p>
+            )}
+          </div>
+          <div className="hidden md:block">
+            <Intro
+              titleHe={challenge.titleHe}
+              subtitleHe={challenge.subtitleHe}
+              intro={challenge.intro}
+              sourceTitle={challenge.sourceTitle}
+            />
+          </div>
+        </>
       ) : (
         <p className="mt-stack font-sign text-step-1 leading-tight text-ink">{t('lineup.freeBuild')}</p>
       )}
@@ -103,10 +117,14 @@ export default function LineupPage({
           graded={graded}
           kit={challenge.kit}
           kitSeason={challenge.kitSeason}
+          intro={challenge.intro}
+          sourceTitle={challenge.sourceTitle}
         />
       )}
 
-      <ReportLink />
+      <div className="shrink-0 md:block">
+        <ReportLink />
+      </div>
     </Screen>
   )
 }

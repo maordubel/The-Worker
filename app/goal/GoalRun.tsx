@@ -10,11 +10,21 @@ import { Punch } from '@/components/play/Punch'
 import { RecordRun } from '@/components/play/RecordRun'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
 import { GoalPitch } from '@/components/press/GoalPitch'
-import { ACTION_SHORT, ReplayBuilder } from '@/components/replay/ReplayBuilder'
+import { NamePlate, OUTFIELD_KIT, PlayerFigure } from '@/components/press/PlayerFigure'
+import {
+  ACTION_LABEL,
+  ACTION_SHORT,
+  ActionGlyph,
+  ReplayBuilder,
+  StepBar,
+} from '@/components/replay/ReplayBuilder'
 import { ReplayVerdict } from '@/components/replay/ReplayVerdict'
 import { ShareRow } from '@/components/share/ShareRow'
+import { FitBox } from '@/components/stage/FitBox'
+import { dropZone, useDragActive, useDragSource } from '@/components/stage/useDrag'
+import { firePickFxAt } from '@/components/stage/PickFx'
 import { Num } from '@/components/ui/Num'
-import { GOAL_SECONDS, GOALS_PER_RUN, MAX_TOUCHES, MIN_TOUCHES } from '@/lib/game/goal-zones'
+import { GOAL_SECONDS, GOALS_PER_RUN, MAX_TOUCHES, MIN_TOUCHES, PITCH, zoneCenter } from '@/lib/game/goal-zones'
 import {
   EMPTY_BUILD,
   EMPTY_DRAFT,
@@ -22,11 +32,12 @@ import {
   phaseOf,
   undoStep,
   type BuildState,
+  type Draft,
   type DraftPhase,
 } from '@/lib/game/replay/draft'
-import type { Envelope, ReplayPoint, UserTouch } from '@/lib/game/replay/envelope'
+import { normalise, type Envelope, type ReplayPoint, type UserTouch } from '@/lib/game/replay/envelope'
 import { GOOD_SCORE } from '@/lib/game/replay/judge'
-import type { ReplayAction } from '@/lib/game/replay/vocab'
+import { REPLAY_ACTIONS, type ReplayAction } from '@/lib/game/replay/vocab'
 import { LIVES, rankFor } from '@/lib/game/session'
 import { t, type MessageKey } from '@/lib/i18n'
 import { haptic } from '@/lib/play/haptics'
@@ -34,6 +45,7 @@ import { collect } from '@/lib/profile/store'
 import { artFor } from '@/lib/share/story'
 import type { GoalChallenge, GoalVerdict } from '@/lib/game/goal'
 import type { Embedded } from '@/lib/mechanics/types'
+import { useWide } from '@/app/xi/useWide'
 import { askGoalHint, askReceptionHint, submitGoal } from './actions'
 
 /**
@@ -129,6 +141,7 @@ export function GoalRun({
    */
   embedded?: Omit<Embedded<GoalVerdict>, 'window'>
 }) {
+  const phone = useWide('(max-width: 767px)')
   const [run, setRun] = useState<Run>(NEW_RUN)
   const [build, setBuild] = useState<BuildState>(EMPTY_BUILD)
   const [verdict, setVerdict] = useState<GoalVerdict | null>(null)
@@ -256,6 +269,33 @@ export function GoalRun({
     },
     [draft, editing, touches],
   )
+
+  /**
+   * The phone's figure rail (round 2, Maor 23.9.2026): dragging a token off the rail
+   * straight onto a pitch zone sets the ACTOR and the ORIGIN in one gesture — the same
+   * two decisions two taps used to make, whichever order the draft ends up filled in.
+   * `phaseOf` reads whichever fields are set, so this only ever asks next for what is
+   * still missing (the verb, here).
+   */
+  const placeOrigin = useCallback(
+    (name: string, point: ReplayPoint) => {
+      if (verdict || grading) return
+      if (touches.length >= MAX_TOUCHES && editing === null) return
+      setBuild({ touches, editing, draft: { ...draft, actorHe: name, origin: point } })
+      haptic('tap')
+    },
+    [draft, editing, touches, verdict, grading],
+  )
+
+  function pickPlayer(name: string) {
+    setBuild((current) => ({ ...current, draft: { ...current.draft, actorHe: name } }))
+    haptic('tap')
+  }
+
+  function pickAction(action: ReplayAction) {
+    setBuild((current) => ({ ...current, draft: { ...current.draft, action } }))
+    haptic('tap')
+  }
 
   function edit(index: number) {
     const touch = touches[index]
@@ -392,14 +432,14 @@ export function GoalRun({
   const finalBeat = run.goal + 1 >= GOALS_PER_RUN || run.lives <= 0
 
   return (
-    <div className="relative">
+    <div className="relative flex min-h-0 flex-1 flex-col md:block md:flex-none">
       {/* the one gate whose glass is printed GRASS, so the paper it celebrates with
           carries no vermilion — see NO_RED_TONES. */}
       {celebrate && <Confetti tones={NO_RED_TONES} />}
       {burst && <Burst points={burst.points} combo={burst.combo} />}
 
       {/* the bar — lives, score, which goal, and a clock you read without looking */}
-      <div className="sticky top-0 z-20 -mx-gutter bg-sheet/95 px-gutter pb-2 pt-2 backdrop-blur">
+      <div className="shrink-0 sticky top-0 z-20 -mx-gutter bg-sheet/95 px-gutter pb-2 pt-2 backdrop-blur">
         <div className={embedded ? 'hidden' : 'flex items-center justify-between gap-3'}>
           <ol className="flex items-center gap-1.5" aria-label={t('run.lives')}>
             {Array.from({ length: LIVES }, (_, index) => (
@@ -426,10 +466,18 @@ export function GoalRun({
             style={{ width: `${fraction * 100}%` }}
           />
         </div>
+        {/* round 2 (Maor 23.9.2026): the four-step progress joins the HUD on a phone — the
+            who/what/where/where controls it used to sit above moved down beside the pitch. */}
+        {phone && !embedded && !verdict && <StepBar draft={draft} />}
       </div>
 
-      {/* the masthead — one goal, named, with the fixture under it */}
-      <div className="mt-2.5 border-rule border-ink bg-red px-3 py-2.5">
+      {/* the masthead — one goal, named, with the fixture under it. Compact one line on
+          the phone stage (Maor 23.9.2026: "the pitch big") — the same words move into
+          the "פרטי השער" sheet below; the full poster stays for md+. */}
+      <div className="mt-2 shrink-0 truncate border-hair border-ink/40 bg-red px-2.5 py-1.5 md:hidden">
+        <p className="truncate font-sign text-[13px] leading-tight text-paper">{challenge.titleHe}</p>
+      </div>
+      <div className="hidden md:block mt-2.5 border-rule border-ink bg-red px-3 py-2.5">
         <div className="flex items-baseline justify-between gap-2 border-b-hair border-ink pb-1.5">
           <span className="font-body text-[10px] font-extrabold tracking-widest text-ink">
             {embedded ? challenge.seasonLabel : t(stageLabel)}
@@ -459,8 +507,12 @@ export function GoalRun({
         opposite of what a wide screen is for. It is capped at 430 and centred everywhere,
         and from `lg` up it takes a 400px column with the builder beside it. On a phone the
         cap never binds, so the zone still measures its proven 48px at 320 (tests/brand).
+
+        Delta 87: under `md` this row is itself a FLEX COLUMN that fills the stage — the
+        board sits in a `FitBox` (the biggest 300/440 box the screen has room for) and the
+        builder underneath is capped and scrolls internally, so the page never does.
       */}
-      <div className="mt-2 lg:grid lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-4">
+      <div className="mt-2 flex min-h-0 flex-1 flex-col md:block md:flex-none lg:grid lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-4">
         {/* The board is sticky only where it has its OWN COLUMN.
             Making it sticky on a phone as well looked obviously right — keep the primary
             object visible while the racks scroll — and it is a softlock: a sticky element
@@ -470,23 +522,54 @@ export function GoalRun({
             intercepts pointer events`, which is the same family as the kit game's reveal
             landing inside the tab bar (rule 33) and was found the same way: by playing it.
             From `lg` up the board sits in a column of its own and cannot cover anything. */}
-        <div className="mx-auto w-full max-w-[430px] lg:sticky lg:top-16">
-          <GoalPitch
-            touches={touches}
-            draftOrigin={draft.origin && !draft.target ? draft.origin : null}
-            labels={labels}
-            truth={verdict?.truth}
-            grades={grades}
-            pairs={pairs}
-            onPlace={place}
-            disabled={verdict !== null || grading}
-            caption={caption}
-            hintEnvelope={reception?.envelope ?? null}
-            rolling={grading}
-          />
+        <div className="mx-auto flex w-full max-w-[430px] flex-1 flex-col md:block md:min-h-0 md:flex-none lg:sticky lg:top-16">
+          <FitBox
+            ratio={PITCH.w / (PITCH.h - PITCH.top)}
+            className="max-md:[min-height:min(48dvh,400px)] [@media(max-height:620px)]:max-md:[min-height:min(30dvh,240px)]"
+          >
+            <GoalPitch
+              touches={touches}
+              draftOrigin={draft.origin && !draft.target ? draft.origin : null}
+              labels={labels}
+              truth={verdict?.truth}
+              grades={grades}
+              pairs={pairs}
+              onPlace={place}
+              disabled={verdict !== null || grading}
+              caption={caption}
+              hintEnvelope={reception?.envelope ?? null}
+              rolling={grading}
+            />
+          </FitBox>
+
+          {/* round 2 (Maor 23.9.2026): "the characters must be dragged on the screen" —
+              the who/what controls dock right under the pitch on a phone instead of
+              living in the scrollable panel below it. The action row appears once a
+              figure is standing (actor + origin, verb still open); the figure rail is
+              always there, so starting the NEXT touch is always one drag away. */}
+          {phone && !verdict && (
+            <div className="mt-1 shrink-0" data-goal="dock">
+              {phaseOf(draft) === 'action' && (
+                <ActionChips draft={draft} onPick={pickAction} disabled={grading} />
+              )}
+              {touches.length === 0 && !draft.origin && (
+                <p className="px-2 pb-0.5 font-body text-[10px] leading-snug text-muted">
+                  {t('goal.stage.dragHint')}
+                </p>
+              )}
+              <PlayerRail
+                pool={challenge.pool}
+                opponents={challenge.opponents}
+                draft={draft}
+                disabled={grading}
+                onTap={pickPlayer}
+                onDragPlace={placeOrigin}
+              />
+            </div>
+          )}
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 max-md:max-h-[30dvh] max-md:min-h-[min(16dvh,110px)] [@media(max-height:620px)]:max-md:min-h-[72px] max-md:flex-1 max-md:overflow-y-auto max-md:overscroll-contain md:shrink-0">
       {verdict ? (
         <>
           {/* the way on — first thing under the board, and a real button */}
@@ -550,14 +633,9 @@ export function GoalRun({
             canFinish={touches.length >= MIN_TOUCHES}
             canUndo={canUndo(build)}
             busy={grading}
-            onPickPlayer={(name) => {
-              setBuild((current) => ({ ...current, draft: { ...current.draft, actorHe: name } }))
-              haptic('tap')
-            }}
-            onPickAction={(action: ReplayAction) => {
-              setBuild((current) => ({ ...current, draft: { ...current.draft, action } }))
-              haptic('tap')
-            }}
+            hideWhoWhat={phone}
+            onPickPlayer={pickPlayer}
+            onPickAction={pickAction}
             onClear={() => setBuild((current) => ({ ...current, draft: EMPTY_DRAFT, editing: null }))}
             onUndo={() => {
               setBuild((current) => undoStep(current))
@@ -622,12 +700,142 @@ export function GoalRun({
         </div>
       </div>
 
-      <p className="mt-2 font-body text-[11px] leading-snug text-muted">{t('goal.approximate')}</p>
+      <p className="mt-2 hidden font-body text-[11px] leading-snug text-muted md:block">
+        {t('goal.approximate')}
+      </p>
     </div>
   )
 }
 
 /** הפסק — what the run came to, and the link that hands over the identical three goals. */
+/**
+ * שורת הפועלים — the compact action-chip row, docked right above the figure rail on a
+ * phone, in place of the 4-column grid the panel below used to show (round 2, Maor
+ * 23.9.2026). One line, swipeable, the SAME `data-goal="action"` buttons the probe and
+ * the desktop panel both already know.
+ */
+function ActionChips({
+  draft,
+  onPick,
+  disabled,
+}: {
+  draft: Draft
+  onPick: (action: ReplayAction) => void
+  disabled: boolean
+}) {
+  return (
+    <ul className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1.5" data-goal="actionRow">
+      {REPLAY_ACTIONS.map((action) => {
+        const chosen = draft.action === action
+        return (
+          <li key={action} className="shrink-0">
+            <button
+              type="button"
+              onClick={() => onPick(action)}
+              aria-pressed={chosen}
+              disabled={disabled}
+              data-goal="action"
+              className={`flex min-h-tap shrink-0 items-center gap-1.5 whitespace-nowrap border-rule border-ink px-2.5 font-body text-[12px] font-extrabold transition-colors duration-press disabled:opacity-40 ${
+                chosen ? 'bg-red text-paper' : 'bg-sheet text-ink'
+              }`}
+            >
+              <ActionGlyph action={action} />
+              {t(ACTION_LABEL[action])}
+            </button>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
+/**
+ * הרכבת הנוגעים — the candidate figures, one line, swiped rather than wrapped (round 2:
+ * the old wrapped pill list hid its second row behind the tab bar at 390×844). Tap picks
+ * the actor, same as before; DRAG lifts the figure off the rail and, dropped on a pitch
+ * zone, sets the actor AND the origin together — `useDragActive` (inside `GoalPitch`)
+ * lights every zone up as a valid target the whole time this is in the air.
+ */
+function PlayerRail({
+  pool,
+  opponents,
+  draft,
+  disabled,
+  onTap,
+  onDragPlace,
+}: {
+  pool: string[]
+  opponents: string[]
+  draft: Draft
+  disabled: boolean
+  onTap: (name: string) => void
+  onDragPlace: (name: string, point: ReplayPoint) => void
+}) {
+  return (
+    <ul className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1" data-goal="pool">
+      {pool.map((name) => (
+        <PlayerToken
+          key={name}
+          name={name}
+          chosen={draft.actorHe === name}
+          opponent={opponents.includes(name)}
+          disabled={disabled}
+          onTap={onTap}
+          onDragPlace={onDragPlace}
+        />
+      ))}
+    </ul>
+  )
+}
+
+function PlayerToken({
+  name,
+  chosen,
+  opponent,
+  disabled,
+  onTap,
+  onDragPlace,
+}: {
+  name: string
+  chosen: boolean
+  opponent: boolean
+  disabled: boolean
+  onTap: (name: string) => void
+  onDragPlace: (name: string, point: ReplayPoint) => void
+}) {
+  const drag = useDragSource({
+    payload: `player:${name}`,
+    axis: 'up',
+    disabled,
+    onDrop: (zone) => {
+      const centre = zoneCenter(zone)
+      if (!centre) return
+      onDragPlace(name, normalise(centre))
+      firePickFxAt(document.querySelector(`[data-drop="${zone}"]`), { label: name })
+    },
+  })
+  return (
+    <li className="shrink-0">
+      <button
+        type="button"
+        {...drag}
+        onClick={() => onTap(name)}
+        aria-pressed={chosen}
+        aria-label={opponent ? t('goal.pool.opponentAria', { name }) : undefined}
+        disabled={disabled}
+        data-goal="player"
+        data-opponent={opponent ? 'true' : undefined}
+        className={`flex min-h-tap w-[52px] shrink-0 flex-col items-center justify-center gap-0.5 transition-transform duration-press ease-stamp active:scale-[.94] disabled:opacity-40 motion-reduce:transition-none ${
+          opponent ? 'opacity-90' : ''
+        }`}
+      >
+        <PlayerFigure kit={OUTFIELD_KIT} number={null} size={36} title={name} />
+        <NamePlate name={name} tone={chosen ? 'red' : 'ink'} />
+      </button>
+    </li>
+  )
+}
+
 function Result({ run, seed, cursor }: { run: Run; seed: number; cursor: number }) {
   const rank = rankFor(run.score) as MessageKey
   const played = run.played

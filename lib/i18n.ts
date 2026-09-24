@@ -11,6 +11,13 @@ import heCollector from '@/messages/he.collector.json'
 import heMarket from '@/messages/he.market.json'
 import heAuction from '@/messages/he.auction.json'
 import heCredits from '@/messages/he.credits.json'
+// delta 87 — the phone stage. One file for the shared stage, one per gate cluster, so the
+// four clusters written in parallel never edit the same catalogue (the he.gates.* rule).
+import heStage from '@/messages/he.stage.json'
+import heStagePlayers from '@/messages/he.stage.players.json'
+import heStageKits from '@/messages/he.stage.kits.json'
+import heStagePlay from '@/messages/he.stage.play.json'
+import heStageWings from '@/messages/he.stage.wings.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -59,6 +66,11 @@ export const CATALOGUE_FILES = {
   heMarket,
   heAuction,
   heCredits,
+  heStage,
+  heStagePlayers,
+  heStageKits,
+  heStagePlay,
+  heStageWings,
 } as const
 
 const catalogue = {
@@ -75,6 +87,11 @@ const catalogue = {
   ...heMarket,
   ...heAuction,
   ...heCredits,
+  ...heStage,
+  ...heStagePlayers,
+  ...heStageKits,
+  ...heStagePlay,
+  ...heStageWings,
 }
 
 export type MessageKey = keyof typeof catalogue

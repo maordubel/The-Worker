@@ -1907,7 +1907,8 @@ const SCENES: SceneDef[] = [
         // 2017-distance — `K03` עברה לכאן מבלומפילד הסגור: ב-2017 משחק בית הוא אוטובוס.
         id: 'busStation',
         // 2023/2025 — מי שגר שם חוזר לדירה דרך התחנה והנמל; 2026 — הרציף של הסיום, גם בחזרה
-        era: ['1996-army', '2006-home', '2017-distance', '2023-abroad', '2025-abroad', '2026-finale'],
+        // 1999-basket נוספה 23.9.2026: `seed-hall` נוסע עכשיו צפונה מהתחנה במקום לאולם.
+        era: ['1996-army', '1999-basket', '2006-home', '2017-distance', '2023-abroad', '2025-abroad', '2026-finale'],
         x: 0.872,
         y: 0.705,
         w: 0.06,
@@ -3637,6 +3638,9 @@ const SCENES: SceneDef[] = [
       { id: 'shachor-seed', era: '1999-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'seed-corner', flip: true },
       { id: 'limor-seed', era: '1999-basket', figure: 'adultB5', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'seed-corner', sway: 0.003 },
       { id: 'soko-seed', era: '1999-basket', figure: 'soko', x: 0.2, y: 0.92, size: 0.278, nameHe: 'סוקו', talk: 'seed-inside' },
+      // 2000-double, `d-uss-afternoon` (rule 85, 23.9.2026): שחור waits in his own corner
+      // for the banner errand instead of walking in after the player on room entry.
+      { id: 'shachor-double', era: '2000-double', figure: 'shachor', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'd-uss-afternoon', flip: true, when: { flag: 'd:opened', none: [{ flag: 'd:final' }] } },
     ],
     hotspots: [...gigSpots('ussishkin-outside'), 
       /**

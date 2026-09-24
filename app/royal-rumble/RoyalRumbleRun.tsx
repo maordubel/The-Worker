@@ -1,9 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type MouseEvent } from 'react'
 
 import { KitShirt } from '@/components/kit/KitShirt'
 import { RecordRun } from '@/components/play/RecordRun'
+import { FitBox } from '@/components/stage/FitBox'
+import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
+import { SlideSheet } from '@/components/stage/SlideSheet'
 import type {
   RoyalRumbleDraft,
   RoyalRumblePitchPlayer,
@@ -146,7 +149,7 @@ function DraftCard({
   player: RoyalRumblePublicPlayer
   selected: boolean
   disabled: boolean
-  onPick: () => void
+  onPick: (event: MouseEvent<HTMLButtonElement>) => void
   index: number
   kits: EraKit[]
 }) {
@@ -156,7 +159,7 @@ function DraftCard({
       disabled={disabled}
       onClick={onPick}
       aria-pressed={selected}
-      className={`group relative min-h-[232px] overflow-hidden border-rule p-0 text-start transition duration-200 active:translate-y-1 sm:min-h-[280px] ${
+      className={`group relative h-full overflow-hidden border-rule p-0 text-start transition duration-200 active:translate-y-1 sm:min-h-[280px] ${
         selected
           ? 'translate-y-1 border-red bg-red text-paper'
           : 'border-ink bg-paper text-ink hover:-translate-y-1'
@@ -167,7 +170,7 @@ function DraftCard({
         {index + 1}
       </div>
 
-      <div className="relative flex min-h-[232px] flex-col p-2.5 sm:min-h-[280px] sm:p-4">
+      <div className="relative flex h-full flex-col p-2 sm:min-h-[280px] sm:p-4">
         <div className="flex items-start justify-between gap-2">
           <div>
             <p className={`font-mono tabular-nums text-[7px] font-black tracking-[0.18em] sm:text-[9px] ${selected ? 'text-paper/70' : 'text-red'}`} dir="ltr">
@@ -178,29 +181,29 @@ function DraftCard({
             </p>
           </div>
           <div className="text-end">
-            <p className={`font-display text-[29px] leading-none sm:text-[40px] ${selected ? 'text-paper' : 'text-red'}`} dir="ltr">
+            <p className={`font-display text-[21px] leading-none sm:text-[40px] ${selected ? 'text-paper' : 'text-red'}`} dir="ltr">
               {money(player.price)}
             </p>
             <p className={`mt-1 hidden font-body text-[8px] sm:block ${selected ? 'text-paper/55' : 'text-concrete'}`}>{t('priceEntry')}</p>
           </div>
         </div>
 
-        <div className={`mx-auto mt-1.5 flex w-full justify-center overflow-visible border-y-hair py-1.5 ${selected ? 'border-paper/15 bg-transparent' : 'border-ink/10 bg-transparent'}`}>
-          <Shirt player={player} kits={kits} className="h-[108px] w-[94px] sm:h-[132px] sm:w-[116px]" />
+        <div className={`mx-auto mt-1 flex min-h-0 w-full flex-1 justify-center overflow-hidden border-y-hair py-1 ${selected ? 'border-paper/15 bg-transparent' : 'border-ink/10 bg-transparent'}`}>
+          <Shirt player={player} kits={kits} className="h-full max-h-[108px] w-auto max-w-[94px] sm:h-[132px] sm:w-[116px]" />
         </div>
 
-        <div className="mt-auto pt-2">
-          <p className="font-display text-[21px] leading-[0.92] sm:text-[29px]">{player.nameHe}</p>
-          <div className="mt-2 flex items-end justify-between gap-2">
+        <div className="mt-auto pt-1.5">
+          <p className="truncate font-display text-[15px] leading-[0.92] sm:text-[29px]">{player.nameHe}</p>
+          <div className="mt-1 flex items-end justify-between gap-2">
             <div>
-              <p className={`font-body text-[8px] ${selected ? 'text-paper/55' : 'text-concrete'}`}>{t('hapoelYears')}</p>
-              <p className="font-mono tabular-nums text-[9px] font-black" dir="ltr">{yearRange(player)}</p>
+              <p className={`hidden font-body text-[8px] sm:block ${selected ? 'text-paper/55' : 'text-concrete'}`}>{t('hapoelYears')}</p>
+              <p className="font-mono tabular-nums text-[8px] font-black sm:text-[9px]" dir="ltr">{yearRange(player)}</p>
             </div>
             <span className={`hidden border-hair px-2 py-1 font-body text-[8px] font-black sm:inline-block ${selected ? 'border-paper/35' : 'border-ink/25'}`}>
               {positionHe(player.position)}
             </span>
           </div>
-          <div className="mt-2"><PriceBars price={player.price} inverted={selected} /></div>
+          <div className="mt-1.5"><PriceBars price={player.price} inverted={selected} /></div>
         </div>
       </div>
 
@@ -227,11 +230,11 @@ function LineupRail({
   kits: EraKit[]
 }) {
   return (
-    <section className="relative overflow-hidden border-rule border-ink bg-ink p-2 text-paper sm:p-4">
+    <section className="relative overflow-hidden border-rule border-ink bg-ink p-1.5 text-paper sm:p-4">
       <div className="absolute inset-y-0 start-0 w-2 bg-red" />
-      <div className="relative mb-1.5 flex items-end justify-between gap-3 ps-2">
+      <div className="relative mb-1 flex items-end justify-between gap-3 ps-2 sm:mb-1.5">
         <div>
-          <p className="font-mono tabular-nums text-[9px] font-black tracking-[0.2em] text-red" dir="ltr">YOUR FIVE</p>
+          <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red sm:text-[9px]" dir="ltr">YOUR FIVE</p>
           <h3 className="hidden font-display text-[24px] leading-none sm:block">{t('lineupWall')}</h3>
         </div>
         <p className="hidden font-body text-[9px] text-paper/45 sm:block">{t('lineupEdit')}</p>
@@ -258,14 +261,11 @@ function LineupRail({
                   <div className="mx-auto mt-1 hidden h-12 items-center justify-center bg-transparent sm:flex">
                     <Shirt player={player} kits={kits} className="h-10 w-9" />
                   </div>
-                  <p className="mt-1 truncate font-display text-[13px] leading-none sm:text-[16px]">{player.nameHe}</p>
-                  <p className="mt-1 font-display text-[14px] text-paper/75 sm:text-[18px]" dir="ltr">{money(player.price)}</p>
+                  <p className="mt-1 truncate font-display text-[11px] leading-none sm:text-[16px]">{player.nameHe}</p>
+                  <p className="hidden font-display text-[12px] text-paper/75 sm:mt-1 sm:block sm:text-[18px]" dir="ltr">{money(player.price)}</p>
                 </>
               ) : (
-                <>
-                  <p className="mt-2 font-display text-[24px] leading-none text-paper/15">?</p>
-                  <p className="mt-1 font-body text-[8px] text-paper/35">{t('vacant')}</p>
-                </>
+                <p className="mt-1 font-display text-[16px] leading-none text-paper/15 sm:mt-2 sm:text-[24px]">?</p>
               )}
             </button>
           )
@@ -441,6 +441,8 @@ export function RoyalRumbleRun({
   const [frameIndex, setFrameIndex] = useState(0)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  /** the stage's one sheet for what used to be desktop-only fine print (delta 87) */
+  const [rulesOpen, setRulesOpen] = useState(false)
 
   const spent = picks.reduce((sum, player) => sum + (player?.price ?? 0), 0)
   const remaining = activeDraft.budget - spent
@@ -530,7 +532,7 @@ export function RoyalRumbleRun({
 
   if (phase === 'reveal' && result) {
     return (
-      <div className="relative mx-auto max-w-5xl overflow-hidden border-rule border-ink bg-ink px-3 py-4 text-paper sm:px-6 sm:py-8">
+      <div className="relative mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain border-rule border-ink bg-ink px-3 py-4 text-paper max-w-5xl sm:px-6 sm:py-8 md:block md:flex-none md:overflow-visible">
         <div className="absolute inset-y-0 start-0 w-2 bg-red" />
         <div className="relative text-center">
           <p className="font-mono tabular-nums text-[9px] font-black tracking-[0.32em] text-red" dir="ltr">OPPONENT ENTRANCE</p>
@@ -583,7 +585,7 @@ export function RoyalRumbleRun({
 
   if (phase === 'match' && result) {
     return (
-      <div className="mx-auto max-w-5xl py-2">
+      <div className="mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain max-w-5xl py-2 md:block md:flex-none md:overflow-visible">
         <MatchPitch result={result} frameIndex={frameIndex} ours={selectedPlayers} kits={kits} bare={Boolean(embedded)} />
       </div>
     )
@@ -594,7 +596,7 @@ export function RoyalRumbleRun({
     const won = result.winner === 'us'
     const draw = result.winner === 'draw'
     return (
-      <div className="mx-auto max-w-5xl pb-3 pt-1">
+      <div className="mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain max-w-5xl pb-3 pt-1 md:block md:flex-none md:overflow-visible">
         <RecordRun gate="royal-rumble" score={won ? 3 : draw ? 1 : 0} correct={won ? 1 : 0} asked={1} />
         <section className="relative overflow-hidden border-rule border-ink bg-ink px-4 py-5 text-center text-paper sm:px-8 sm:py-8">
           <div className="pointer-events-none absolute -start-8 top-1/2 -translate-y-1/2 font-display text-[190px] leading-none text-paper/5" dir="ltr">09</div>
@@ -635,30 +637,30 @@ export function RoyalRumbleRun({
   const progress = (pickedCount / activeDraft.slots.length) * 100
 
   return (
-    <div className="mx-auto max-w-5xl pb-3 pt-0">
-      <header className="relative overflow-hidden border-rule border-ink bg-ink text-paper">
+    <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none md:pb-3">
+      <header className="relative shrink-0 overflow-hidden border-rule border-ink bg-ink text-paper">
         {!embedded && <div className="pointer-events-none absolute -start-5 -top-10 font-display text-[220px] leading-none text-paper/5 sm:text-[300px]" dir="ltr">09</div>}
         <div className="absolute inset-y-0 end-0 w-2 bg-red" />
 
-        <div className="relative grid grid-cols-[1fr_auto] items-end gap-3 px-3 py-3 sm:gap-5 sm:px-6 sm:py-6">
+        <div className="relative grid grid-cols-[1fr_auto] items-end gap-3 px-3 py-1.5 sm:gap-5 sm:px-6 sm:py-6">
           <div>
             <div className="flex items-center gap-3">
-              {!embedded && <span className="border-hair border-red px-2 py-1 font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">GATE 09</span>}
+              {!embedded && <span className="hidden border-hair border-red px-2 py-1 font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red sm:inline-block" dir="ltr">GATE 09</span>}
               <span className="hidden font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/35 sm:inline" dir="ltr">5V5 · HAPOEL ALL-TIME</span>
             </div>
-            <h1 className="mt-2 font-display text-[40px] leading-[0.82] sm:mt-3 sm:text-[76px]">{t('title')}</h1>
-            <div className="mt-2 h-1.5 w-16 bg-red sm:mt-3 sm:h-2 sm:w-24" />
+            <h1 className="mt-1 font-display text-[22px] leading-[0.82] sm:mt-3 sm:text-[76px]">{t('title')}</h1>
+            <div className="mt-1 hidden h-1.5 w-16 bg-red sm:mt-3 sm:block sm:h-2 sm:w-24" />
             <p className="mt-4 hidden max-w-md font-body text-[11px] leading-relaxed text-paper/55 sm:block sm:text-[12px]">{t('heroBody')}</p>
           </div>
 
-          <div className="flex min-w-[112px] flex-col justify-end border-s-hair border-paper/15 ps-3 sm:min-w-[180px] sm:ps-5">
+          <div className="flex min-w-[90px] flex-col justify-end border-s-hair border-paper/15 ps-3 sm:min-w-[180px] sm:ps-5">
             <p className="font-mono tabular-nums text-[7px] font-black tracking-[0.15em] text-paper/35 sm:text-[8px]" dir="ltr">MONEY LEFT</p>
-            <div className="mt-1 flex items-end gap-2">
-              <p className={`font-display text-[36px] leading-none sm:text-[52px] ${remaining < 0 ? 'text-red' : 'text-paper'}`} dir="ltr">{money(remaining)}</p>
+            <div className="mt-0.5 flex items-end gap-2">
+              <p className={`font-display text-[22px] leading-none sm:text-[52px] ${remaining < 0 ? 'text-red' : 'text-paper'}`} dir="ltr">{money(remaining)}</p>
               <span className="mb-1 hidden font-body text-[9px] text-paper/35 sm:inline">{t('budgetOf', { budget: money(activeDraft.budget) })}</span>
             </div>
-            <div className="mt-2 h-1.5 bg-paper/10 sm:mt-3 sm:h-2"><div className="h-full bg-red transition-all duration-300" style={{ width: `${Math.min(100, progress)}%` }} /></div>
-            <div className="mt-1 flex justify-between font-body text-[7px] text-paper/35 sm:mt-2 sm:text-[8px]">
+            <div className="mt-1 h-1 bg-paper/10 sm:mt-3 sm:h-2"><div className="h-full bg-red transition-all duration-300" style={{ width: `${Math.min(100, progress)}%` }} /></div>
+            <div className="mt-1 hidden justify-between font-body text-[7px] text-paper/35 sm:mt-2 sm:flex sm:text-[8px]">
               <span>{t('lockedCount', { count: String(pickedCount) })}</span>
               <span>{t('archiveCount', { count: String(playerCount) })}</span>
             </div>
@@ -666,66 +668,77 @@ export function RoyalRumbleRun({
         </div>
       </header>
 
-      <div className="mt-2"><LineupRail draft={activeDraft} picks={picks} activeSlot={activeSlot} onEdit={setActiveSlot} kits={kits} /></div>
+      <div className="mt-1.5 shrink-0 md:mt-2"><LineupRail draft={activeDraft} picks={picks} activeSlot={activeSlot} onEdit={setActiveSlot} kits={kits} /></div>
 
-      <section className="mt-2 flex min-h-tap items-center justify-between gap-2 border-rule border-ink bg-paper px-3 py-1.5">
-        <div className="min-w-0">
-          <p className="font-mono tabular-nums text-[7px] font-black tracking-[0.18em] text-red" dir="ltr">SHUFFLE ×1</p>
-          <p className={`truncate font-display text-[19px] leading-none ${shuffleNotice ? 'text-red' : 'text-ink'}`}>
-            {shuffleNotice ? t('shuffleFresh') : t('shuffleTitle')}
-          </p>
-        </div>
+      {/* SHUFFLE and RULES — a compact chip rail instead of a full-width desktop bar */}
+      <div className="mt-1.5 flex shrink-0 gap-1.5 md:mt-2">
         <button
           type="button"
           disabled={shuffleUsed || busy}
-          onClick={shuffleOnce}
-          className="min-h-[40px] shrink-0 border-s-rule border-ink bg-ink px-3 font-display text-[18px] text-paper transition hover:bg-red disabled:cursor-not-allowed disabled:bg-concrete disabled:text-ink/60 sm:px-5 sm:text-[24px]"
+          onClick={(event) => {
+            shuffleOnce()
+            firePickFxAt(event.currentTarget, { tone: 'sign', haptic: 'tap' })
+          }}
+          className={`flex min-h-tap flex-1 items-center justify-between gap-2 border-hair px-2.5 font-body text-[11.5px] font-extrabold transition ${
+            shuffleUsed || busy ? 'border-ink/15 text-ink/35' : 'border-ink bg-paper text-ink'
+          }`}
         >
-          {shuffleUsed ? t('shuffleUsed') : t('shuffleAction')}
+          <span className="truncate">{shuffleNotice ? t('shuffleFresh') : shuffleUsed ? t('shuffleUsed') : t('shuffleAction')}</span>
+          <span className="shrink-0 font-mono tabular-nums text-[9px] font-black tracking-[0.16em] text-red" dir="ltr">×1</span>
         </button>
-      </section>
+        <button
+          type="button"
+          onClick={() => setRulesOpen(true)}
+          className="flex min-h-tap shrink-0 items-center border-hair border-ink/35 px-2.5 font-body text-[11.5px] font-extrabold text-ink"
+        >
+          {t('stageRulesChip')}
+        </button>
+      </div>
 
-      <section className="mt-2 border-rule border-ink bg-paper p-2 sm:p-4">
-        <div className="mb-2 grid grid-cols-[auto_1fr_auto] items-end gap-2 sm:gap-3">
-          <div className="font-display text-[38px] leading-none text-red sm:text-[62px]" dir="ltr">{String(activeSlot + 1).padStart(2, '0')}</div>
-          <div className="border-s-rule border-ink ps-3">
-            <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.2em] text-red" dir="ltr">ENTRY DRAW · PICK {activeSlot + 1}/5</p>
-            <h2 className="font-display text-[23px] leading-none sm:text-[34px]">{t('draftQuestion')}</h2>
-            <p className="mt-1 font-body text-[9px] text-concrete">{t('draftPosition', { position: positionHe(currentSlot.position) })}</p>
-          </div>
-          <div className="hidden text-end sm:block">
-            <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.16em] text-concrete" dir="ltr">SECRET RATING</p>
-            <p className="font-display text-[26px] leading-none" dir="ltr">09–99</p>
-            <p className="font-body text-[8px] text-concrete">{t('ratingNever')}</p>
-          </div>
-        </div>
-
-        <div className="relative">
-          <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
-          {currentSlot.offers.map((player, index) => (
-            <DraftCard
-              key={player.slug}
-              player={player}
-              index={index}
-              selected={picks[activeSlot]?.slug === player.slug}
-              disabled={!canPick(activeSlot, player)}
-              onPick={() => pick(activeSlot, player)}
-              kits={kits}
-            />
-          ))}
+      <section className="mt-1.5 flex min-h-0 flex-1 flex-col border-rule border-ink bg-paper p-1.5 md:mt-2 md:flex-none md:p-4">
+        <div className="mb-1 flex shrink-0 items-end gap-2 sm:gap-3">
+          <div className="font-display text-[20px] leading-none text-red sm:text-[62px]" dir="ltr">{String(activeSlot + 1).padStart(2, '0')}</div>
+          <div className="min-w-0 border-s-rule border-ink ps-2">
+            <p className="font-mono tabular-nums text-[7px] font-black tracking-[0.2em] text-red sm:text-[8px]" dir="ltr">PICK {activeSlot + 1}/5</p>
+            <h2 className="truncate font-display text-[15px] leading-none sm:text-[34px]">{t('draftQuestion')}</h2>
+            <p className="mt-0.5 hidden truncate font-body text-[9px] text-concrete sm:block">{t('draftPosition', { position: positionHe(currentSlot.position) })}</p>
           </div>
         </div>
-        <p className="mt-2 hidden text-center font-body text-[9px] text-concrete sm:block">{t('fadedNote')}</p>
+
+        <FitBox ratio={1.5} className="min-h-0 flex-1" innerClassName="flex items-stretch">
+          <div className="relative flex w-full">
+            <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
+            <div className="grid w-full grid-cols-3 gap-1.5 sm:gap-3">
+              {currentSlot.offers.map((player, index) => (
+                <DraftCard
+                  key={player.slug}
+                  player={player}
+                  index={index}
+                  selected={picks[activeSlot]?.slug === player.slug}
+                  disabled={!canPick(activeSlot, player)}
+                  onPick={(event) => {
+                    pick(activeSlot, player)
+                    firePickFxAt(event.currentTarget, { label: money(player.price), tone: 'red', haptic: 'lock' })
+                  }}
+                  kits={kits}
+                />
+              ))}
+            </div>
+          </div>
+        </FitBox>
       </section>
 
-      {error && <p className="mt-2 border-rule border-red bg-red/10 p-3 font-body text-[11px] font-black text-red">{error}</p>}
+      {error && <p className="mt-1.5 shrink-0 border-rule border-red bg-red/10 p-2.5 font-body text-[11px] font-black text-red md:mt-2 md:p-3">{error}</p>}
 
       <button
         type="button"
         disabled={!complete || remaining < 0 || busy}
-        onClick={() => void lockFive()}
-        className="group sticky bottom-2 z-40 mt-2 grid min-h-tap w-full grid-cols-[1fr_auto] items-center border-rule border-red bg-red px-5 text-start text-paper transition hover:bg-ink disabled:cursor-not-allowed disabled:border-concrete disabled:bg-concrete disabled:text-ink/55"
+        onClick={(event) => {
+          if (!complete || remaining < 0 || busy) return
+          firePickFx(event.clientX, event.clientY, { label: t('lockReady'), tone: 'red', big: true, haptic: 'lock' })
+          void lockFive()
+        }}
+        className="group mt-1.5 grid min-h-tap w-full shrink-0 grid-cols-[1fr_auto] items-center border-rule border-red bg-red px-5 text-start text-paper transition hover:bg-ink disabled:cursor-not-allowed disabled:border-concrete disabled:bg-concrete disabled:text-ink/55 md:mt-2"
       >
         <span>
           <span className="block font-mono tabular-nums text-[8px] font-black tracking-[0.2em] opacity-60" dir="ltr">LOCK THE FIVE</span>
@@ -736,12 +749,24 @@ export function RoyalRumbleRun({
         <span className="font-display text-[34px] transition sm:text-[42px] group-hover:-translate-x-1">←</span>
       </button>
 
-      <div className="mt-3 hidden gap-2 border-y-hair border-ink/15 py-3 text-center font-body text-[9px] leading-relaxed text-concrete sm:grid-cols-3">
-        <span>{t('rulePrice')}</span>
-        <span>{t('ruleRange')}</span>
-        <span>{t('ruleOpponent')}</span>
-      </div>
-      <p className="mt-2 hidden text-center font-body text-[8px] text-concrete sm:block">{t('kitNearest')}</p>
+      <SlideSheet open={rulesOpen} onClose={() => setRulesOpen(false)} title={t('stageRulesTitle')} latin="RULES">
+        <div className="flex flex-col gap-3">
+          <p className="font-body text-[13px] leading-relaxed text-ink">{t('heroBody')}</p>
+          <div className="grid gap-2">
+            <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('rulePrice')}</p>
+            <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('ruleRange')}</p>
+            <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('ruleOpponent')}</p>
+          </div>
+          <div className="border-hair border-ink/20 p-2.5">
+            <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.16em] text-concrete" dir="ltr">SECRET RATING</p>
+            <p className="mt-1 font-body text-[12px] text-ink/85">{t('ratingNever')}</p>
+          </div>
+          <p className="font-body text-[11px] text-concrete">{t('fadedNote')}</p>
+          <p className="font-body text-[11px] text-concrete">{t('kitNearest')}</p>
+          <p className="font-body text-[11px] text-concrete">{t('budgetOf', { budget: money(activeDraft.budget) })}</p>
+        </div>
+      </SlideSheet>
+
       <span className="sr-only">{cursor + 1}</span>
     </div>
   )

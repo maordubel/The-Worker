@@ -38,7 +38,7 @@ export const metadata: Metadata = gateMetadata('polls')
 export default function PollsPage() {
   const roster = rosterIndex()
   return (
-    <Screen title={t('screen.polls.title')} sub={t('screen.polls.sub')}>
+    <Screen title={t('screen.polls.title')} sub={t('screen.polls.sub')} stage>
       <BallotSheet
         roster={roster}
         shirts={shirtBoard(roster)}
@@ -46,7 +46,9 @@ export default function PollsPage() {
         numbers={numberBoard()}
         slugAliases={pickerRoster().slugAliases}
       />
-      <ReportLink />
+      <div className="mt-2 hidden shrink-0 md:block">
+        <ReportLink />
+      </div>
     </Screen>
   )
 }

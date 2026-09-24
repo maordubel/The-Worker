@@ -30,8 +30,11 @@ export function RoyalRumbleMode({
   const [mode, setMode] = useState<'solo' | 'live'>(initialRoomCode ? 'live' : 'solo')
 
   return (
-    <div>
-      <nav className="mx-auto mb-2 grid max-w-5xl grid-cols-2 border-rule border-ink bg-paper" aria-label={t('modeTitle')}>
+    <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none">
+      <nav
+        className="mx-auto mb-1.5 grid max-w-5xl shrink-0 grid-cols-2 border-rule border-ink bg-paper md:mb-2"
+        aria-label={t('modeTitle')}
+      >
         <button
           type="button"
           onClick={() => setMode('solo')}
@@ -61,7 +64,7 @@ export function RoyalRumbleMode({
           kits={kits}
         />
       ) : (
-        <div className="mx-auto max-w-5xl pb-8">
+        <div className="min-h-0 flex-1 overflow-y-auto md:mx-auto md:max-w-5xl md:flex-none md:overflow-visible md:pb-8">
           <RoyalRumbleLiveRun
             draft={draft}
             shuffleDraft={shuffleDraft}

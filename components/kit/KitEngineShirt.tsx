@@ -134,7 +134,11 @@ function PhotoGarment({ plan, spec, uid }: { plan: KitRenderPlan; spec: KitSpec;
   const sil = `sil-${uid}`
   const torso = `torso-${uid}`
   const sleeves = spec.sleeves === 'raglan' ? g.raglan : g.sleeves
-  const collarPath = spec.collar === 'v-neck' ? g.masks.collarV : g.masks.collarCrew
+  // delta 87 (23.9.2026): retro-90s-boxy / retro-80s-long deliver a polo mask too — a cut whose
+  // supports gate excludes 'polo'/'v-neck' never reaches here for that value (photoMissing already
+  // fell back to vector), so an absent mask on a supported value cannot happen
+  const collarPath =
+    spec.collar === 'v-neck' ? g.masks.collarV : spec.collar === 'polo' && g.masks.collarPolo ? g.masks.collarPolo : g.masks.collarCrew
   const W = g.canvas.w
   const H = g.canvas.h
   return (
@@ -164,6 +168,7 @@ function PhotoGarment({ plan, spec, uid }: { plan: KitRenderPlan; spec: KitSpec;
         <g clipPath={`url(#${sil})`}>
           <path d={collarPath} fill={collar} fillRule="evenodd" />
           {spec.sleeves === 'cuff' && <path d={g.masks.cuffs} fill={collar} fillRule="evenodd" />}
+          {spec.sleeves === 'shoulder-stripe' && g.masks.sleeveStripe && <path d={g.masks.sleeveStripe} fill={secondary} fillRule="evenodd" />}
           {spec.number !== null && (
             <g transform={photo.patternTransform}><FrontNumber value={spec.number} nameset={spec.nameset} dark={plan.dark} /></g>
           )}

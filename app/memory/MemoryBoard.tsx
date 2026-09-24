@@ -1,12 +1,17 @@
 'use client'
 
+import type { MouseEvent } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { ArchiveCard } from '@/components/memory/ArchiveCard'
 import { FusionPlate } from '@/components/memory/FusionPlate'
 import { PairThreads } from '@/components/memory/PairThreads'
 import { SouvenirShelf } from '@/components/memory/SouvenirShelf'
-import { LampGrid, Mast } from '@/components/ui/LampGrid'
+import { FitBox } from '@/components/stage/FitBox'
+import { firePickFx } from '@/components/stage/PickFx'
+import { SlideSheet } from '@/components/stage/SlideSheet'
+import { Mast } from '@/components/ui/LampGrid'
+import { BannerCloth } from '@/components/ui/BannerCloth'
 import { Num } from '@/components/ui/Num'
 import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
@@ -57,8 +62,15 @@ const VERDICT: Record<MemoryVerdict, MessageKey> = {
   lit: 'memory.verdict.lit',
 }
 
+/** m:ss, in `<Num>` so a bidi run never puts the colon on the wrong side of the digits */
+function clock(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60)
+  const s = totalSeconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
 /**
- * שער 6 — קיר הזיכרון.
+ * שער 6 — קיר הזיכרון (delta 87, phone stage).
  *
  * The board that was here matched pairs and counted moves, and both of those are still
  * the spine. What it did not have is the thing the prototype is actually about: a wall
@@ -66,21 +78,19 @@ const VERDICT: Record<MemoryVerdict, MessageKey> = {
  * disappearing, and a shelf that fills. Four mechanics carry that, and each one is a
  * rule rather than an effect — `lib/game/memory-run.ts` owns all four and is tested on
  * its own, because "the echo fires on the third pair and only once" is not a thing a
- * screenshot can check.
+ * screenshot can check. **None of that logic moved for delta 87** — this file only
+ * changed how it is laid out and how a closed card looks.
  *
- *  · **MEMORY FLASH.** The wall opens for three seconds before the first move, and once
- *    more on demand. It is gameplay, so it may take time (the brief's own line: time is
- *    allowed when time is the mechanic) — and it is skippable with a tap, because a
- *    player who has already photographed it should not be made to sit through the rest.
- *  · **PAIR FUSION.** `FusionPlate` — see its own note.
- *  · **MEMORY ECHO.** Three pairs in a row arms one hint; the next card you open makes
- *    its partner blink. It never opens a card, never removes one, and is spent whether
- *    or not it helped — a hint you can bank is a hint the game is played around.
- *  · **מוראל.** Pairs closed over pairs dealt. Past half the wall is lit: the lamp grid
- *    fills, the frame takes the vermilion, and the mast under it comes on. It is a
- *    fraction of a count and nothing else, which is what makes it printable — this gate
- *    grades nobody (rule 24's line about the wings), so the only mood on screen is the
- *    board's own.
+ * **Maor, 23.9.2026 — the phone stage.** Three things changed shape, none of them the
+ * game: (1) a closed card used to print its `object` and its `kind` — the topic — which
+ * made the wall very easy the moment it loaded; a closed card now wears the exact same
+ * plain back as every other closed card, in the pixels and in the `aria-label`
+ * (`ArchiveCard`). (2) the screen is one HUD strip (pairs · moves · a clock this file
+ * keeps, since the run itself never needed a clock), the board filling the rest of the
+ * phone (`FitBox`), and a dock — the three mechanic explainers, the souvenir shelf and
+ * the closing mural all moved into `SlideSheet`s instead of stacking under the board.
+ * (3) a locked pair now also fires the ground's one pick effect, `firePickFx`, from the
+ * exact point the second card was tapped.
  *
  * **The shelf outlives the run.** A closed pair is filed into the profile's collections
  * under `memory`, the same store the Ussishkin cards use, so the personal area can count
@@ -121,6 +131,19 @@ export function MemoryBoard({
   /** 3·2·1 on the flash strip; null when no flash is running */
   const [count, setCount] = useState<number | null>(null)
 
+  // The stage's three sheets — the mechanics/guide, the shelf, and the closing mural —
+  // replace what used to be stacked under the board (delta 87: "slide windows wherever
+  // possible", so nothing here needs the page itself to scroll).
+  const [guideOpen, setGuideOpen] = useState(false)
+  const [shelfOpen, setShelfOpen] = useState(false)
+  const [resultOpen, setResultOpen] = useState(false)
+
+  // The clock in the HUD strip. The run itself never needed one — `verdict()` reads
+  // moves and misses, not time — so it stays a view-only stopwatch, started the moment
+  // the wall is first lit and frozen the moment the board is finished.
+  const [startedAt, setStartedAt] = useState<number | null>(null)
+  const [elapsed, setElapsed] = useState(0)
+
   const byId = useMemo(() => new Map(pairs.map((pair) => [pair.id, pair] as const)), [pairs])
   const timers = useRef<number[]>([])
 
@@ -151,6 +174,21 @@ export function MemoryBoard({
   const lit = wallLit(run, total)
   const flashing = phase === 'flash'
 
+  // The clock ticks once a second while the board is live, and stops counting the
+  // instant the board is finished (a done wall does not keep gaining seconds while its
+  // mural sheet is open).
+  useEffect(() => {
+    if (startedAt === null || done) return
+    const id = window.setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 1000)
+    return () => window.clearInterval(id)
+  }, [startedAt, done])
+
+  // The mural opens itself the moment the wall is finished — one screen, no scroll to
+  // find out how it went.
+  useEffect(() => {
+    if (done && !embedded) setResultOpen(true)
+  }, [done, embedded])
+
   /** the countdown ticks with the beat and stops with it, however the beat ends */
   function countDown(ms: number) {
     const opened = Date.now()
@@ -167,6 +205,7 @@ export function MemoryBoard({
   }
 
   function lightTheWall() {
+    setStartedAt((at) => at ?? Date.now())
     setPhase('flash')
     setHint('memory.hint.photograph')
     countDown(FLASH_MS)
@@ -202,7 +241,7 @@ export function MemoryBoard({
     }, RE_FLASH_MS)
   }
 
-  function onFlip(id: string) {
+  function onFlip(id: string, event: MouseEvent<HTMLButtonElement>) {
     if (phase !== 'play' || fused !== null) return
 
     // The echo is read against the run BEFORE the flip, because the card being opened is
@@ -226,6 +265,12 @@ export function MemoryBoard({
       setLockedPair(pair ?? null)
       setStreakShown(outcome.run.streak)
       setHint(outcome.run.streak >= 2 ? 'memory.hint.hot' : 'memory.hint.locked')
+      // every locked pair is a pick — the one print hit the whole ground shares
+      firePickFx(event.clientX, event.clientY, {
+        label: t('memory.locked'),
+        tone: 'red',
+        haptic: 'lock',
+      })
       if (!embedded) {
         collect(SHELF, [outcome.pair])
         setKept(collected(readProfile(), SHELF).length)
@@ -237,6 +282,7 @@ export function MemoryBoard({
       setLockedPair(null)
       setWrong(outcome.run.open)
       setHint('memory.hint.wrong')
+      firePickFx(event.clientX, event.clientY, { tone: 'sign', haptic: 'miss' })
       later(() => {
         setWrong([])
         setRun(closeOpen)
@@ -249,74 +295,30 @@ export function MemoryBoard({
   const percent = Math.round(morale(run, total) * 100)
 
   return (
-    <>
-      {/* the scoreboard — what you have found, what it cost, and how hot the wall is */}
-      <div className="mt-stack border-rule border-sheet/45 bg-sheet/[.06] p-3">
-        <div className="flex items-end justify-between gap-3">
-          <dl className="flex items-end gap-4">
-            <div>
-              <dt className="font-body text-[8.5px] font-extrabold tracking-[0.18em] text-concrete">
-                {t('memory.pairs')}
-              </dt>
-              <dd className="font-poster text-[30px] leading-none text-sheet">
-                <Num>{`${found}/${total}`}</Num>
-              </dd>
-            </div>
-            <div>
-              <dt className="font-body text-[8.5px] font-extrabold tracking-[0.18em] text-concrete">
-                {t('memory.moves')}
-              </dt>
-              <dd className="font-poster text-[22px] leading-none text-sheet">
-                <Num>{String(run.moves)}</Num>
-              </dd>
-            </div>
-            <div>
-              <dt className="font-body text-[8.5px] font-extrabold tracking-[0.18em] text-concrete">
-                {t('memory.misses')}
-              </dt>
-              <dd className="font-poster text-[22px] leading-none text-sheet">
-                <Num>{String(run.misses)}</Num>
-              </dd>
-            </div>
-          </dl>
-
-          {/* מוראל — every number that can be shown as lamps is shown as lamps */}
-          <div className="w-[112px] shrink-0 text-end">
-            <LampGrid
-              total={total}
-              on={found}
-              cols={total}
-              night
-              glow={lit}
-              label={t('memory.morale.aria', { n: String(percent) })}
-            />
-            <p className="mt-1 font-mono text-[10px] tabular-nums text-concrete">
-              <Num>{`${percent}%`}</Num>
-            </p>
-          </div>
+    <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none">
+      {/* HUD strip — one line: pairs, moves, and the clock this screen keeps */}
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b-hair border-sheet/35 pb-1.5 md:mt-stack md:border-rule md:border-sheet/45 md:bg-sheet/[.06] md:p-3 md:pb-3">
+        <div className="flex items-baseline gap-3 font-mono text-[12px] tabular-nums text-sheet">
+          <span>
+            <span className="text-concrete">{t('memory.pairs')} </span>
+            <Num>{`${found}/${total}`}</Num>
+          </span>
+          <span>
+            <span className="text-concrete">{t('memory.moves')} </span>
+            <Num>{String(run.moves)}</Num>
+          </span>
+          <span aria-hidden="true" className="text-concrete">·</span>
+          <span aria-label={t('memory.stage.time')}>
+            <Num>{clock(elapsed)}</Num>
+          </span>
         </div>
+        <p className="shrink-0 font-mono text-[11px] tabular-nums text-red">
+          <Num>{`${percent}%`}</Num>
+        </p>
       </div>
 
-      {phase === 'idle' && (
-        <ul className="mt-2 grid gap-1.5 min-[480px]:grid-cols-3" aria-label={t('memory.intro.aria')}>
-          {(
-            [
-              ['MEMORY FLASH', 'memory.intro.flash'],
-              ['ARCHIVE OBJECTS', 'memory.intro.objects'],
-              ['MEMORY ECHO', 'memory.intro.echo'],
-            ] as const
-          ).map(([latin, key]) => (
-            <li key={key} className="border-hair border-sheet/35 bg-sheet/[.06] px-2.5 py-2">
-              <p className="font-latin text-[9px] font-bold tracking-[0.18em] text-red" dir="ltr">
-                {latin}
-              </p>
-              <p className="mt-0.5 font-body text-[12px] leading-snug text-concrete">{t(key)}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <p aria-live="polite" className="mt-2 font-body text-step--1 text-concrete">
+      {/* the live hint line — what just happened, and what to do next */}
+      <p aria-live="polite" className="mt-1.5 shrink-0 font-body text-step--1 text-concrete">
         {hint === 'memory.hint.hot' ? t('memory.hint.hot', { n: String(streakShown) }) : t(hint)}
         {lockedPair && (hint === 'memory.hint.locked' || hint === 'memory.hint.hot') && (
           <span className="block font-sign text-[13px] font-bold text-sheet">
@@ -328,39 +330,40 @@ export function MemoryBoard({
         )}
       </p>
 
-      <div className="mt-2 flex justify-center">
-        <div className="w-full max-w-[420px]">
-          <div
-            className={`relative grid grid-cols-4 gap-1.5 border-plate p-1.5 transition-colors duration-plate motion-reduce:transition-none ${
-              lit ? 'border-red bg-red/10' : 'border-sheet/50'
-            }`}
-            style={{ transform: 'rotate(-1.5deg)' }}
-          >
-            {cards.map((card) => (
-              <ArchiveCard
-                key={card.id}
-                card={card}
-                open={run.open.includes(card.id)}
-                done={run.done.includes(card.pair)}
-                wrong={wrong.includes(card.id)}
-                echo={echoOn === card.id}
-                flashing={flashing}
-                onFlip={onFlip}
-              />
-            ))}
-            <PairThreads cards={cards} done={run.done} cols={COLS} />
-          </div>
-          <Mast height={56} night />
+      {/* THE WALL — as big as the phone allows */}
+      <FitBox ratio={1} className="mt-1.5 md:mt-2" innerClassName="flex items-center justify-center">
+        <div
+          className={`relative grid h-full w-full grid-cols-4 gap-1.5 border-plate p-1.5 transition-colors duration-plate motion-reduce:transition-none ${
+            lit ? 'border-red bg-red/10' : 'border-sheet/50'
+          }`}
+          style={{ transform: 'rotate(-1.5deg)' }}
+        >
+          {cards.map((card) => (
+            <ArchiveCard
+              key={card.id}
+              card={card}
+              open={run.open.includes(card.id)}
+              done={run.done.includes(card.pair)}
+              wrong={wrong.includes(card.id)}
+              echo={echoOn === card.id}
+              flashing={flashing}
+              onFlip={onFlip}
+            />
+          ))}
+          <PairThreads cards={cards} done={run.done} cols={COLS} />
         </div>
+      </FitBox>
+      <div className="flex shrink-0 justify-center md:block">
+        <Mast height={28} night />
       </div>
 
-      {/* the two run tools: the second flash, and the echo's own state */}
-      <div className="mt-stack grid gap-2 sm:grid-cols-2">
+      {/* DOCK — one primary action, and the chips that open this gate's sheets */}
+      <div className="mt-2 shrink-0 md:mt-stack">
         {phase === 'idle' ? (
           <button
             type="button"
             onClick={lightTheWall}
-            className="flex min-h-tap items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none"
+            className="flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper transition-transform duration-press ease-stamp active:scale-[.98] motion-reduce:transition-none"
           >
             {t('memory.flash.cta')}
           </button>
@@ -369,7 +372,7 @@ export function MemoryBoard({
             type="button"
             onClick={extraFlash}
             disabled={run.flashUsed || flashing || done}
-            className={`flex min-h-tap items-center justify-center border-rule px-4 font-body text-[15px] font-extrabold transition-transform duration-press ease-stamp active:scale-[.98] disabled:active:scale-100 motion-reduce:transition-none ${
+            className={`flex min-h-tap w-full items-center justify-center border-rule px-4 font-body text-[15px] font-extrabold transition-transform duration-press ease-stamp active:scale-[.98] disabled:active:scale-100 motion-reduce:transition-none ${
               run.flashUsed || flashing || done
                 ? 'border-sheet/30 text-sheet/40'
                 : 'border-sheet bg-sheet/[.08] text-sheet'
@@ -379,15 +382,87 @@ export function MemoryBoard({
           </button>
         )}
 
-        <div
-          className={`border-hair p-2.5 ${
-            run.echo === 'armed' ? 'border-red bg-red/15' : 'border-sheet/30'
-          }`}
-        >
-          <p className="font-body text-[9px] font-extrabold tracking-[0.18em] text-red">
-            {t('memory.echo.title')}
-          </p>
-          <p className="mt-0.5 font-body text-[11.5px] leading-snug text-concrete">
+        <div className="mt-1.5 flex gap-1.5 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setGuideOpen(true)}
+            className={`flex min-h-tap shrink-0 items-center gap-1.5 border-hair px-2.5 font-body text-[11.5px] font-extrabold ${
+              run.echo === 'armed' ? 'border-red bg-red/15 text-sheet' : 'border-sheet/35 text-sheet/85'
+            }`}
+          >
+            {run.echo === 'armed' && <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 bg-red" />}
+            {t('memory.stage.guideChip')}
+          </button>
+          {!embedded && (
+            <button
+              type="button"
+              onClick={() => setShelfOpen(true)}
+              className="flex min-h-tap shrink-0 items-center gap-1.5 border-hair border-sheet/35 px-2.5 font-body text-[11.5px] font-extrabold text-sheet/85"
+            >
+              {t('memory.stage.shelfChip')}
+              <span className="font-mono text-[10px] tabular-nums text-red">
+                <Num>{`${found}/${total}`}</Num>
+              </span>
+            </button>
+          )}
+          {done && !embedded && (
+            <button
+              type="button"
+              onClick={() => setResultOpen(true)}
+              className="flex min-h-tap shrink-0 items-center border-hair border-red bg-red/15 px-2.5 font-body text-[11.5px] font-extrabold text-sheet"
+            >
+              {t('memory.stage.resultChip')}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {embedded && done && (
+        <div className="mt-stack shrink-0 border-rule border-sheet bg-sheet p-4">
+          <p className="font-body text-[9px] font-extrabold tracking-[0.2em] text-red">{t('memory.mural')}</p>
+          <h2 className="mt-1 font-display text-step-2 leading-tight text-ink">{t(VERDICT[verdict(run, total)])}</h2>
+          <button
+            type="button"
+            onClick={() => embedded.onResult(verdict(run, total))}
+            data-memory="back"
+            className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-0 font-extrabold text-paper"
+          >
+            {embedded.doneLabel}
+          </button>
+        </div>
+      )}
+
+      {fused && <FusionPlate pair={fused.pair} perfect={fused.perfect} onDone={() => setFused(null)} />}
+
+      {/* המנגנונים — the three mechanics explained, and the echo's own state, in a sheet
+          rather than stacked above the board (delta 87: explanatory paragraphs never sit
+          above the field). */}
+      <SlideSheet
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        title={t('memory.stage.guide.title')}
+        latin="HOW IT WORKS"
+      >
+        <ul className="grid gap-1.5" aria-label={t('memory.intro.aria')}>
+          {(
+            [
+              ['MEMORY FLASH', 'memory.intro.flash'],
+              ['ARCHIVE OBJECTS', 'memory.intro.objects'],
+              ['MEMORY ECHO', 'memory.intro.echo'],
+            ] as const
+          ).map(([latin, key]) => (
+            <li key={key} className="border-hair border-ink/25 bg-ink/[.03] px-2.5 py-2">
+              <p className="font-latin text-[9px] font-bold tracking-[0.18em] text-red" dir="ltr">
+                {latin}
+              </p>
+              <p className="mt-0.5 font-body text-[12px] leading-snug text-ink/80">{t(key)}</p>
+            </li>
+          ))}
+        </ul>
+
+        <div className={`mt-2 border-hair p-2.5 ${run.echo === 'armed' ? 'border-red bg-red/10' : 'border-ink/20'}`}>
+          <p className="font-body text-[9px] font-extrabold tracking-[0.18em] text-red">{t('memory.echo.title')}</p>
+          <p className="mt-0.5 font-body text-[11.5px] leading-snug text-ink/75">
             {run.echo === 'armed'
               ? t('memory.echo.armed')
               : run.echo === 'spent'
@@ -395,111 +470,102 @@ export function MemoryBoard({
                 : t('memory.echo.idle', { n: String(ECHO_STREAK) })}
           </p>
         </div>
-      </div>
 
-      {!embedded && <SouvenirShelf pairs={pairs} done={run.done} kept={kept} />}
+        {!embedded && (
+          <div className="mt-2">
+            <BannerCloth>{t('slogan.collective')}</BannerCloth>
+          </div>
+        )}
+      </SlideSheet>
 
-      {fused && (
-        <FusionPlate
-          pair={fused.pair}
-          perfect={fused.perfect}
-          onDone={() => setFused(null)}
-        />
+      {/* מדף המזכרות — what the run leaves behind, in its own sheet */}
+      {!embedded && (
+        <SlideSheet open={shelfOpen} onClose={() => setShelfOpen(false)} title={t('memory.shelf.title')}>
+          <SouvenirShelf pairs={pairs} done={run.done} kept={kept} />
+        </SlideSheet>
       )}
 
-      {done && (
-        <section className="mt-stack border-rule border-sheet bg-sheet p-4">
-          <p className="font-body text-[9px] font-extrabold tracking-[0.2em] text-red">
-            {t('memory.mural')}
-          </p>
-          <h2 className="mt-1 font-display text-step-2 leading-tight text-ink">
-            {t(VERDICT[verdict(run, total)])}
-          </h2>
-          {embedded && (
-            <button
-              type="button"
-              onClick={() => embedded.onResult(verdict(run, total))}
-              data-memory="back"
-              className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-0 font-extrabold text-paper"
-            >
-              {embedded.doneLabel}
-            </button>
-          )}
+      {/* קיר הזיכרון — the closing mural, opened automatically the moment the wall is done */}
+      {!embedded && (
+        <SlideSheet
+          open={resultOpen}
+          onClose={() => setResultOpen(false)}
+          title={t('memory.mural')}
+          size="full"
+        >
+          {done && (
+            <div>
+              <h2 className="font-display text-step-2 leading-tight text-ink">{t(VERDICT[verdict(run, total)])}</h2>
 
-          <dl className="mt-3 flex items-end gap-5 border-y-hair border-ink/25 py-2">
-            {(
-              [
-                ['memory.moves', String(run.moves)],
-                ['memory.misses', String(run.misses)],
-                ['memory.bestStreak', String(run.bestStreak)],
-              ] as const
-            ).map(([key, value]) => (
-              <div key={key}>
-                <dt className="font-body text-[8.5px] font-extrabold tracking-[0.16em] text-muted">
-                  {t(key)}
-                </dt>
-                <dd className="font-poster text-[26px] leading-none text-ink">
-                  <Num>{value}</Num>
-                </dd>
-              </div>
-            ))}
-          </dl>
+              <dl className="mt-3 flex items-end gap-5 border-y-hair border-ink/25 py-2">
+                {(
+                  [
+                    ['memory.moves', String(run.moves)],
+                    ['memory.misses', String(run.misses)],
+                    ['memory.bestStreak', String(run.bestStreak)],
+                  ] as const
+                ).map(([key, value]) => (
+                  <div key={key}>
+                    <dt className="font-body text-[8.5px] font-extrabold tracking-[0.16em] text-muted">{t(key)}</dt>
+                    <dd className="font-poster text-[26px] leading-none text-ink">
+                      <Num>{value}</Num>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
 
-          {/* the mural — every memory the board held, printed together */}
-          <ol className="mt-3">
-            {pairs.map((pair) => (
-              <li
-                key={pair.id}
-                className="flex flex-wrap items-baseline gap-x-2 border-b-hair border-ink/20 py-1.5"
+              {/* the mural — every memory the board held, printed together */}
+              <ol className="mt-3">
+                {pairs.map((pair) => (
+                  <li
+                    key={pair.id}
+                    className="flex flex-wrap items-baseline gap-x-2 border-b-hair border-ink/20 py-1.5"
+                  >
+                    <span className="min-w-0 flex-1 truncate font-sign text-[14px] font-bold text-ink">
+                      {numericFace(pair.a) ? <Num>{pair.a}</Num> : pair.a}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="-translate-y-[3px] min-w-[10px] flex-1 border-b border-dotted border-ink/30"
+                    />
+                    <span className="shrink-0 font-sign text-[13px] font-bold text-red">
+                      {numericFace(pair.b) ? <Num>{pair.b}</Num> : pair.b}
+                    </span>
+                    <span className="w-full basis-full font-body text-[11px] leading-tight text-muted">{pair.kind}</span>
+                  </li>
+                ))}
+              </ol>
+
+              <RecordRun gate="/memory" score={run.bestStreak} correct={total} asked={run.moves} />
+              <ShareRow
+                kind="memory"
+                params={{ s: String(seed), r: String(cursor) }}
+                headline={String(run.moves)}
+                card={{
+                  template: 'ink' as const,
+                  art: artFor('memory', run.misses === 0 ? 1 : 0),
+                  kicker: 'GATE 6 · MEMORY WALL',
+                  label: t('screen.memory.title'),
+                  eyebrow: t('memory.pairs'),
+                  hero: `${total}/${total}`,
+                  bigStat: { v: String(run.moves), k: t('memory.moves') },
+                  stats: [
+                    { k: t('memory.misses'), v: String(run.misses) },
+                    { k: t('memory.bestStreak'), v: String(run.bestStreak) },
+                  ],
+                  cta: t('share.challenge'),
+                  challenge: t('share.sameRound'),
+                }}
+              />
+              <PlayLink
+                gate="/memory"
+                className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
               >
-                <span className="min-w-0 flex-1 truncate font-sign text-[14px] font-bold text-ink">
-                  {numericFace(pair.a) ? <Num>{pair.a}</Num> : pair.a}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="-translate-y-[3px] min-w-[10px] flex-1 border-b border-dotted border-ink/30"
-                />
-                <span className="shrink-0 font-sign text-[13px] font-bold text-red">
-                  {numericFace(pair.b) ? <Num>{pair.b}</Num> : pair.b}
-                </span>
-                {/* v3: the mural says what KIND of memory each one is */}
-                <span className="w-full basis-full font-body text-[11px] leading-tight text-muted">{pair.kind}</span>
-              </li>
-            ))}
-          </ol>
-
-          {!embedded && (
-            <>
-          <RecordRun gate="/memory" score={run.bestStreak} correct={total} asked={run.moves} />
-          <ShareRow
-            kind="memory"
-            params={{ s: String(seed), r: String(cursor) }}
-            headline={String(run.moves)}
-            card={{
-              template: 'ink' as const,
-              art: artFor('memory', run.misses === 0 ? 1 : 0),
-              kicker: 'GATE 6 · MEMORY WALL',
-              label: t('screen.memory.title'),
-              eyebrow: t('memory.pairs'),
-              hero: `${total}/${total}`,
-              bigStat: { v: String(run.moves), k: t('memory.moves') },
-              stats: [
-                { k: t('memory.misses'), v: String(run.misses) },
-                { k: t('memory.bestStreak'), v: String(run.bestStreak) },
-              ],
-              cta: t('share.challenge'),
-              challenge: t('share.sameRound'),
-            }}
-          />
-          <PlayLink
-            gate="/memory"
-            className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
-          >
-            {t('run.again')}
-          </PlayLink>
-            </>
+                {t('run.again')}
+              </PlayLink>
+            </div>
           )}
-        </section>
+        </SlideSheet>
       )}
 
       {/*
@@ -537,6 +603,6 @@ export function MemoryBoard({
           </span>
         </button>
       )}
-    </>
+    </div>
   )
 }

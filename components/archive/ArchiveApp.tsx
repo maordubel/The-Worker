@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 
 import { RecordRun } from '@/components/play/RecordRun'
+import { firePickFx } from '@/components/stage/PickFx'
 import { Num } from '@/components/ui/Num'
 import { describeIds, digBox, openEntity, rabbit, searchArchive, seasonDeck } from '@/app/archive/actions'
 import { reactionSetOf, REACTIONS, type ArchiveCard, type EntityDetail, type EntityType } from '@/lib/archive/graph-types'
@@ -158,12 +159,14 @@ export function ArchiveApp({
 
   /* ------------------------------------------------------------ Mine and reactions */
 
-  function toggleSave(card: ArchiveCard) {
+  function toggleSave(card: ArchiveCard, event?: { clientX: number; clientY: number }) {
     const on = !isOn('archive.mine', card.id)
     emit({ type: 'archive_saved', entityId: card.id, on })
     setMine(onIds('archive.mine'))
     haptic(on ? 'lock' : 'tap')
     say(on ? t('archive.flash.saved') : t('archive.flash.unsaved'), cardTitle(card))
+    // saving into Mine is a pick — the one print hit the whole ground shares
+    if (on && event) firePickFx(event.clientX, event.clientY, { label: t('archive.card.saved'), tone: 'red', haptic: false })
   }
 
   function react(card: ArchiveCard, code: string) {
@@ -250,16 +253,16 @@ export function ArchiveApp({
   ]
 
   return (
-    <div className="mt-3">
+    <div className="flex min-h-0 flex-1 flex-col md:mt-3 md:block md:flex-none">
       {depth >= DEPTH_ROUND && <RecordRun gate="/archive" score={depth} />}
 
       {/* context line: where the deck came from, and Mine at a glance */}
-      <div className="flex items-center justify-between gap-2 border-b-rule border-ink pb-1.5">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b-rule border-ink pb-1.5">
         <div className="min-w-0">
-          <p className="font-latin text-[9px] font-bold tracking-[0.22em] text-sign" dir="ltr">
+          <p className="hidden font-latin text-[9px] font-bold tracking-[0.22em] text-sign md:block" dir="ltr">
             LIVING ARCHIVE
           </p>
-          <p className="truncate font-sign text-[15px] leading-tight text-ink">
+          <p className="truncate font-sign text-[14px] leading-tight text-ink md:text-[15px]">
             {context}
             {chip === 'today' && <span className="font-body text-[12px] text-muted"> · {todayHe}</span>}
           </p>
@@ -277,32 +280,34 @@ export function ArchiveApp({
         </button>
       </div>
 
-      {atMissing && <p className="mt-2 border-s-rule border-red ps-2 font-body text-[12.5px] text-ink">{t('archive.at.missing')}</p>}
+      {atMissing && <p className="mt-2 shrink-0 border-s-rule border-red ps-2 font-body text-[12.5px] text-ink">{t('archive.at.missing')}</p>}
 
-      {/* the Today chips */}
-      <div className="-mx-gutter mt-2 flex gap-1.5 overflow-x-auto px-gutter pb-1" role="group" aria-label={t('archive.chip.aria')}>
+      {/* the Today chips — the lane tabs, styled as the shared SlideDeck tab row */}
+      <div className="-mx-gutter mt-2 flex shrink-0 gap-1.5 overflow-x-auto px-gutter pb-1" role="tablist" aria-label={t('archive.chip.aria')}>
         {CHIPS.map((row) => (
           <button
             key={row}
             type="button"
+            role="tab"
             onClick={() => pickChip(row)}
+            aria-selected={chip === row}
             aria-pressed={chip === row}
-            className={`min-h-tap shrink-0 border-rule px-3 font-body text-[13px] font-bold transition-transform duration-press active:scale-[.96] motion-reduce:transition-none ${
-              chip === row ? 'border-red bg-red text-paper' : 'border-ink/40 bg-sheet text-ink'
+            className={`min-h-[40px] shrink-0 border-hair px-3 font-body text-[12px] font-extrabold leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+              chip === row ? 'border-red bg-red text-paper' : 'border-ink/40 bg-paper text-ink'
             }`}
           >
             {t(`archive.chip.${row}` as MessageKey)}
           </button>
         ))}
         {season && (
-          <button type="button" onClick={() => setLayer('time')} aria-pressed className="min-h-tap shrink-0 border-rule border-sign bg-sign px-3 font-mono text-[13px] tabular-nums text-paper">
+          <button type="button" onClick={() => setLayer('time')} aria-pressed className="min-h-[40px] shrink-0 border-hair border-sign bg-sign px-3 font-mono text-[12px] tabular-nums text-paper">
             <Num>{season}</Num>
           </button>
         )}
       </div>
 
       {/* the trail and the depth */}
-      <div className="mt-1.5 flex items-center gap-2">
+      <div className="mt-1.5 flex shrink-0 items-center gap-2">
         <ol ref={trailRef} className="-mx-1 flex min-w-0 flex-1 gap-1 overflow-x-auto px-1" aria-label={t('archive.trail.aria')}>
           {trail.map((row, i) => (
             <li key={row.id} className="flex shrink-0 items-center gap-1">
@@ -323,11 +328,11 @@ export function ArchiveApp({
         </p>
       </div>
 
-      {/* the deck */}
+      {/* the deck — the card as big as the phone allows, swiped rather than scrolled */}
       <section
         aria-roledescription="carousel"
         aria-label={t('archive.deck.aria')}
-        className={`relative mt-2 border-rule border-ink px-3 pb-3 pt-3 transition-colors duration-peel motion-reduce:transition-none ${tint}`}
+        className={`relative mt-2 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain border-rule border-ink px-3 pb-3 pt-3 transition-colors duration-peel motion-reduce:transition-none md:block md:flex-none md:overflow-visible ${tint}`}
       >
         {flash && (
           <div aria-live="polite" className="pointer-events-none absolute inset-x-3 top-3 z-10 animate-stamp-in border-plate border-ink bg-ink px-3 py-2 text-center motion-reduce:animate-none">
@@ -399,7 +404,7 @@ export function ArchiveApp({
                 </button>
                 <button
                   type="button"
-                  onClick={() => toggleSave(current)}
+                  onClick={(event) => toggleSave(current, event)}
                   aria-pressed={mine.includes(current.id)}
                   className={`min-h-tap border-rule px-2 font-body text-[14px] font-extrabold ${
                     mine.includes(current.id) ? 'border-ink bg-ink text-paper' : 'border-ink bg-paper text-ink'
@@ -440,13 +445,12 @@ export function ArchiveApp({
         )}
       </section>
 
-      <p className="mt-stack border-t-hair border-ink/30 pt-2 font-body text-[11px] leading-relaxed text-muted">{figures}</p>
-      <p className="mt-1 font-mono text-[10px] tabular-nums text-muted">
-        <Num>{`#${seed}·${cursor}`}</Num>
+      <p className="mt-1.5 shrink-0 truncate border-t-hair border-ink/30 pt-1.5 font-body text-[10px] leading-relaxed text-muted md:mt-stack md:whitespace-normal md:pt-2 md:text-[11px]">
+        {figures} <span className="font-mono text-[9px] tabular-nums"><Num>{`#${seed}·${cursor}`}</Num></span>
       </p>
 
       {/* room for the dock */}
-      <div aria-hidden="true" className="h-[76px]" />
+      <div aria-hidden="true" className="h-[76px] shrink-0 md:h-[76px]" />
 
       {/* the dock — above the tab bar, below every dialog */}
       <nav

@@ -8,6 +8,10 @@ import { KitShirt } from '@/components/kit/KitShirt'
 import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
+import { FitBox } from '@/components/stage/FitBox'
+import { firePickFxAt } from '@/components/stage/PickFx'
+import { SlideSheet } from '@/components/stage/SlideSheet'
+import { dropZone, useDragSource } from '@/components/stage/useDrag'
 import { Num } from '@/components/ui/Num'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
@@ -131,6 +135,7 @@ export function KitGameRun({
   const [log, setLog] = useState<KitVerdict[]>([])
   const [finished, setFinished] = useState(false)
   const timer = useRef<number | null>(null)
+  const shirtRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => () => {
     if (timer.current) window.clearTimeout(timer.current)
@@ -155,7 +160,7 @@ export function KitGameRun({
     remember()
     const next = { ...placed, [step]: option.id }
     setPlaced(next)
-    haptic('tap')
+    firePickFxAt(shirtRef.current, { label: option.labelHe, tone: 'red' })
     if (timer.current) window.clearTimeout(timer.current)
     if (!auto) return
     const target = nextOpen(next, active)
@@ -237,52 +242,26 @@ export function KitGameRun({
     setVerdict(null)
   }
 
-  const rows = options.length > 3 ? 2 : 1
-
   return (
     <div
       data-kit-run=""
-      className={`mx-auto grid ${embedded ? 'h-[calc(100dvh-8.5rem)] min-h-[520px]' : 'h-[100dvh]'} w-full max-w-[460px] grid-rows-[auto_auto_auto_minmax(0,1fr)_auto_auto] gap-1 overflow-hidden bg-paper px-3 pb-[max(6px,env(safe-area-inset-bottom))] pt-[max(4px,env(safe-area-inset-top))]`}
+      className={`mx-auto flex ${embedded ? 'h-[calc(100dvh-8.5rem)] min-h-[520px]' : 'min-h-0 flex-1'} w-full max-w-[460px] flex-col gap-1 overflow-hidden bg-paper px-3 pb-[max(6px,env(safe-area-inset-bottom))] pt-[max(4px,env(safe-area-inset-top))] md:h-auto md:flex-none md:py-3`}
     >
-      {/* the season is the question */}
-      <header className="flex items-center justify-between gap-2 border-b-rule border-ink">
-        <div className="min-w-0 py-1">
-          <p className="truncate font-display text-[clamp(20px,6vw,26px)] leading-none text-ink">
-            <Num>{puzzle.seasonLabel}</Num> · {variantLabel(puzzle.variant)}
-          </p>
-          <p className="mt-0.5 truncate font-body text-[11px] text-muted">
-            {/* inside the life the kicker is the gate's name and number — the sheet's own head says whose order it is */}
-            {embedded ? null : (
-              <>
-                {t('kitgame.kicker')} · <Num>{t('kitgame.shirtOf', { n: String(index + 1), total: String(puzzles.length) })}</Num>
-              </>
-            )}
-          </p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {log.length > 0 && (
-            <p className="font-poster text-[22px] leading-none text-red" dir="ltr">
-              <Num>{String(total)}</Num>
-            </p>
-          )}
-          {!embedded && (
-            <a
-              href="/"
-              aria-label={t('kitgame.exit')}
-              className="flex min-h-tap min-w-tap items-center justify-center font-body text-[20px] font-black text-ink"
-            >
-              <span aria-hidden="true">✕</span>
-            </a>
-          )}
-        </div>
-      </header>
-
-      {/* the five steps — always tappable, never a lock */}
-      <nav className="grid grid-cols-[auto_1fr] items-center gap-2" aria-label={embedded ? stepLabel(step) : t('kitgame.kicker')}>
-        <span className="font-display text-[24px] font-black leading-none text-red" dir="ltr">
-          <Num>{`${Math.min(active + 1, STEP_ORDER.length)}/${STEP_ORDER.length}`}</Num>
-        </span>
-        <ol className="grid grid-cols-5 gap-1">
+      {/* HUD strip — season, the five steps, the score, one thin line (delta 87) */}
+      <div className="flex shrink-0 items-center gap-2 border-b-rule border-ink pb-1">
+        {!embedded && (
+          <a
+            href="/"
+            aria-label={t('kitgame.exit')}
+            className="flex min-h-tap min-w-tap shrink-0 items-center justify-center font-body text-[18px] font-black text-ink"
+          >
+            <span aria-hidden="true">✕</span>
+          </a>
+        )}
+        <p className="min-w-0 flex-1 truncate font-display text-[clamp(14px,4.4vw,18px)] leading-none text-ink">
+          <Num>{puzzle.seasonLabel}</Num> · {variantLabel(puzzle.variant)}
+        </p>
+        <ol className="flex shrink-0 items-center gap-[3px]" aria-label={t('kitgame.kicker')}>
           {STEP_ORDER.map((row, i) => {
             const done = Boolean(placed[row])
             const current = i === active
@@ -294,66 +273,58 @@ export function KitGameRun({
                   disabled={Boolean(verdict)}
                   aria-current={current ? 'step' : undefined}
                   aria-label={t('kitgame.stepAria', { n: String(i + 1), step: stepLabel(row) })}
-                  className="flex min-h-tap w-full flex-col items-stretch justify-center gap-1"
+                  className="block h-[10px] min-h-0 w-[10px] p-0"
                 >
-                  <span className={`block h-[7px] ${current ? 'bg-red' : done ? 'bg-ink' : 'bg-ink/15'}`} />
-                  <span className={`block truncate text-center font-body text-[11px] font-extrabold leading-none ${current ? 'text-red' : done ? 'text-ink' : 'text-muted'}`}>
-                    {stepLabel(row)}
-                  </span>
+                  <span className={`block h-full w-full ${current ? 'bg-red' : done ? 'bg-ink' : 'bg-ink/20'}`} />
                 </button>
               </li>
             )
           })}
         </ol>
-      </nav>
-
-      <div className="text-center">
-        <h2 className="font-display text-[clamp(20px,6vw,28px)] leading-none text-red">
-          {reviewing ? t('kitgame.ask.review') : t(`kitgame.ask.${step}` as MessageKey)}
-        </h2>
-        <p className="mt-1 font-body text-[11px] font-bold text-muted">
-          {reviewing ? t('kitgame.reviewSub') : t('kitgame.askSub')}
-        </p>
+        {log.length > 0 && (
+          <p className="shrink-0 font-poster text-[18px] leading-none text-red" dir="ltr">
+            <Num>{String(total)}</Num>
+          </p>
+        )}
       </div>
+      <p className="shrink-0 text-center font-body text-[10.5px] font-bold text-muted">
+        {embedded ? null : <Num>{t('kitgame.shirtOf', { n: String(index + 1), total: String(puzzles.length) })}</Num>}
+        {embedded ? null : ' · '}
+        <Num>{`${Math.min(active + 1, STEP_ORDER.length)}/${STEP_ORDER.length}`}</Num>
+      </p>
 
-      {/* the shirt — as big as the glass allows */}
-      <div className="relative min-h-0 border-b-rule border-ink">
-        <div className="absolute inset-0 flex items-center justify-center py-1">
-          <KitShirt spec={shirt} look={puzzle.look} marks={marks} className="h-full max-w-full" title={puzzle.seasonLabel} />
+      <h2 className="shrink-0 text-center font-display text-[clamp(16px,4.8vw,22px)] leading-none text-red">
+        {reviewing ? t('kitgame.ask.review') : t(`kitgame.ask.${step}` as MessageKey)}
+      </h2>
+
+      {/* the shirt — as big as the glass allows, and the drop zone every rail item targets */}
+      <FitBox ratio={0.84} className="min-h-0">
+        <div ref={shirtRef} {...dropZone('shirt')} className="relative flex h-full w-full items-center justify-center">
+          <span
+            key={JSON.stringify(shirt)}
+            className="flex h-full w-full animate-fx-pop items-center justify-center motion-reduce:animate-none"
+          >
+            <KitShirt spec={shirt} look={puzzle.look} marks={marks} className="h-full max-w-full" title={puzzle.seasonLabel} />
+          </span>
         </div>
-      </div>
+      </FitBox>
 
       {reviewing ? (
         <ReviewPanel puzzle={puzzle} placed={placed} onEdit={goTo} onCheck={() => void check()} busy={busy} complete={complete} />
       ) : (
-        <section aria-label={t('kitgame.pick', { step: stepLabel(step) })}>
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <strong className="font-display text-[18px] leading-none text-ink">{t('kitgame.pick', { step: stepLabel(step) })}</strong>
-            {auto ? (
-              <span className="font-body text-[11px] text-muted">{t('kitgame.infoHint')}</span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => goTo(nextOpen(placed, active))}
-                className="min-h-tap px-2 font-body text-[12px] font-extrabold text-red underline underline-offset-4"
-              >
-                {t('kitgame.nextStep')}
-              </button>
-            )}
-          </div>
-          <ul
-            className={`grid grid-cols-3 gap-1.5 ${rows === 2 ? 'auto-rows-[clamp(80px,12dvh,112px)]' : 'auto-rows-[clamp(92px,16dvh,136px)]'}`}
-          >
+        <section aria-label={t('kitgame.pick', { step: stepLabel(step) })} className="shrink-0">
+          <p className="mb-1 text-center font-body text-[10.5px] font-bold text-muted">{t('stage.dragHint')}</p>
+          <ul className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {options.map((option) => (
-              <li key={option.id} className="min-h-0 min-w-0">
-                <OptionCard
+              <li key={option.id} className="w-[74px] shrink-0">
+                <RailOption
                   step={step}
                   option={option}
                   preview={shirtOf(puzzle, placed, option.patch)}
                   look={puzzle.look}
                   marks={marks}
                   selected={placed[step] === option.id}
-                  onPick={() => pick(option)}
+                  onDrop={() => pick(option)}
                   onInfo={() => setInfo(option)}
                 />
               </li>
@@ -412,15 +383,15 @@ function realShirtOf(verdict: KitVerdict, exactKits: Record<string, string> | un
   return kitId ? { slug, kitId } : null
 }
 
-/* ------------------------------------------------------------------ one card */
-function OptionCard({
+/* ------------------------------------------------------------------ one rail item — drag it onto the shirt, or tap it */
+function RailOption({
   step,
   option,
   preview,
   look,
   marks,
   selected,
-  onPick,
+  onDrop,
   onInfo,
 }: {
   step: KitStep
@@ -429,11 +400,12 @@ function OptionCard({
   look: KitPuzzle['look']
   marks: KitMarksRegime
   selected: boolean
-  onPick: () => void
+  onDrop: () => void
   onInfo: () => void
 }) {
   const hold = useRef<number | null>(null)
   const held = useRef(false)
+  const drag = useDragSource({ payload: option.id, axis: 'up', onDrop })
 
   function start() {
     held.current = false
@@ -450,25 +422,30 @@ function OptionCard({
   }
 
   return (
-    <div className={`relative h-full border-hair ${selected ? 'border-plate border-red bg-sheet' : 'border-ink/35 bg-sheet'}`}>
+    <div className={`relative h-[92px] border-hair ${selected ? 'border-plate border-red bg-sheet' : 'border-ink/35 bg-sheet'}`}>
       <button
         type="button"
-        onPointerDown={start}
+        {...drag}
+        onPointerDown={(event) => {
+          start()
+          drag.onPointerDown(event)
+        }}
         onPointerUp={stop}
         onPointerLeave={stop}
         onPointerCancel={stop}
         onContextMenu={(event) => event.preventDefault()}
-        onClick={() => {
-          if (held.current) {
+        onClick={(event) => {
+          if (event.defaultPrevented || held.current) {
             held.current = false
             return
           }
-          onPick()
+          onDrop()
         }}
         aria-pressed={selected}
+        aria-label={t('kitgame.pick', { step: option.labelHe })}
         data-kit-option=""
-        className="grid h-full min-h-tap w-full select-none grid-rows-[minmax(0,1fr)_auto] p-1 transition-transform duration-press active:scale-[.97] motion-reduce:transition-none"
-        style={{ WebkitTouchCallout: 'none' }}
+        className="grid h-full w-full select-none grid-rows-[minmax(0,1fr)_auto] p-1 transition-transform duration-press active:scale-[.97] motion-reduce:transition-none"
+        style={{ ...drag.style, WebkitTouchCallout: 'none' }}
       >
         <span className="flex min-h-0 items-center justify-center overflow-hidden">
           {step === 'body' ? (
@@ -479,7 +456,7 @@ function OptionCard({
             <KitMarkArt spec={preview} which={step} marks={marks} className="h-[80%] w-[86%]" />
           )}
         </span>
-        <span className={`block border-t-hair border-ink/20 pt-0.5 text-center font-body text-[11px] font-black leading-tight text-ink ${step === 'construction' ? 'line-clamp-2' : 'truncate'}`}>
+        <span className="block truncate border-t-hair border-ink/20 pt-0.5 text-center font-body text-[10px] font-black leading-tight text-ink">
           {option.labelHe}
         </span>
       </button>
@@ -487,11 +464,9 @@ function OptionCard({
         type="button"
         onClick={onInfo}
         aria-label={t('kitgame.info.open', { label: option.labelHe })}
-        // 40px, not the 48px tap: on a 94px card at 320 a 48px corner reaches the card's centre
-        // and swallows the tap that should place the part. Long-press is the second way in.
-        className="absolute end-0 top-0 flex h-10 w-10 items-start justify-end p-1 font-body text-[14px] font-black leading-none text-muted"
+        className="absolute end-0 top-0 flex h-8 w-8 items-start justify-end p-1 font-body text-[12px] font-black leading-none text-muted"
       >
-        <span aria-hidden="true" className="flex h-[18px] w-[18px] items-center justify-center border-hair border-ink/40 bg-paper">i</span>
+        <span aria-hidden="true" className="flex h-[15px] w-[15px] items-center justify-center border-hair border-ink/40 bg-paper">i</span>
       </button>
     </div>
   )
@@ -557,7 +532,7 @@ function InfoSheet({ option, onClose }: { option: KitOption; onClose: () => void
         aria-label={option.labelHe}
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
-        className="w-full max-w-[460px] border-t-plate border-red bg-sheet px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3"
+        className="z-[60] w-full max-w-[460px] border-t-plate border-red bg-sheet px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3"
       >
         <h3 className="font-display text-[22px] leading-none text-ink">{option.labelHe}</h3>
         <p className="mt-2 font-body text-[13px] leading-relaxed text-ink">{option.infoHe}</p>
@@ -590,7 +565,7 @@ function HintSheet({
         aria-label={t('kitgame.hint.open')}
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
-        className="w-full max-w-[460px] border-t-plate border-ink bg-sheet px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3"
+        className="z-[60] w-full max-w-[460px] border-t-plate border-ink bg-sheet px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3"
       >
         <div className="flex items-baseline justify-between gap-2">
           <h3 className="font-display text-[22px] leading-none text-ink">{t('kitgame.hint.open')}</h3>
@@ -682,33 +657,49 @@ function RevealSheet({
       </div>
 
       <div className="min-h-0 overflow-y-auto px-3 pb-3 pt-2">
-        <div className="grid grid-cols-2 gap-2">
-          <figure className="m-0 border-rule border-red bg-sheet p-1.5">
+        {photo ? (
+          // a real photograph always beats the graphics we generate (Maor, 23.9.2026): it fills the
+          // screen as the hero, our reconstruction rides along as a small corner comparison
+          <figure className="relative m-0 border-rule border-red bg-sheet p-1.5">
             <figcaption className="pb-1 text-center font-body text-[11px] font-black text-red">{t('kitgame.reveal.history')}</figcaption>
-            <div className="flex h-[min(38dvh,300px)] items-center justify-center">
-              {photo ? (
-                // eslint-disable-next-line @next/next/no-img-element -- the archive ships the bytes it measured (rule 69)
-                <img
-                  data-archive-photo=""
-                  src={photo.src}
-                  alt={t('kitgame.evidence.alt', { season: verdict.seasonLabel })}
-                  className="max-h-full max-w-full object-contain"
-                />
-              ) : (
-                <KitShirt spec={verdict.answer} look={verdict.look} marks={marks} className="h-full max-w-full" title={verdict.seasonLabel} />
-              )}
+            <div className="flex h-[min(50dvh,440px)] items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element -- the archive ships the bytes it measured (rule 69) */}
+              <img
+                data-archive-photo=""
+                src={photo.src}
+                alt={t('kitgame.evidence.alt', { season: verdict.seasonLabel })}
+                className="max-h-full max-w-full object-contain"
+              />
             </div>
             <p className="mt-1 text-center font-body text-[11px] font-bold leading-tight text-ink">
               <Num>{evidenceLabel}</Num>
             </p>
-          </figure>
-          <figure className="m-0 border-rule border-ink bg-sheet p-1.5">
-            <figcaption className="pb-1 text-center font-body text-[11px] font-black text-ink">{t('kitgame.reveal.mine')}</figcaption>
-            <div className="flex h-[min(38dvh,300px)] items-center justify-center">
-              <KitShirt spec={mine} look={verdict.look} marks={marks} className="h-full max-w-full" />
+            <div className="absolute bottom-3 start-3 w-[34%] max-w-[128px] border-hair border-ink bg-paper p-1">
+              <p className="truncate text-center font-body text-[9px] font-black leading-tight text-ink">{t('kitgame.reveal.mine')}</p>
+              <div className="flex h-[19cqw] max-h-[92px] items-center justify-center">
+                <KitShirt spec={mine} look={verdict.look} marks={marks} className="h-full max-w-full" />
+              </div>
             </div>
           </figure>
-        </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <figure className="m-0 border-rule border-red bg-sheet p-1.5">
+              <figcaption className="pb-1 text-center font-body text-[11px] font-black text-red">{t('kitgame.reveal.history')}</figcaption>
+              <div className="flex h-[min(38dvh,300px)] items-center justify-center">
+                <KitShirt spec={verdict.answer} look={verdict.look} marks={marks} className="h-full max-w-full" title={verdict.seasonLabel} />
+              </div>
+              <p className="mt-1 text-center font-body text-[11px] font-bold leading-tight text-ink">
+                <Num>{evidenceLabel}</Num>
+              </p>
+            </figure>
+            <figure className="m-0 border-rule border-ink bg-sheet p-1.5">
+              <figcaption className="pb-1 text-center font-body text-[11px] font-black text-ink">{t('kitgame.reveal.mine')}</figcaption>
+              <div className="flex h-[min(38dvh,300px)] items-center justify-center">
+                <KitShirt spec={mine} look={verdict.look} marks={marks} className="h-full max-w-full" />
+              </div>
+            </figure>
+          </div>
+        )}
 
         {verdict.evidence.kind === 'candidate' && (
           <p className="mt-1.5 font-body text-[11px] leading-snug text-muted">{t('kitgame.evidence.candidateNote')}</p>
@@ -782,7 +773,10 @@ function RoundSummary({ log, seed, cursor }: { log: KitVerdict[]; seed: number; 
   const asked = KIT_ROUND * STEP_ORDER.length
   const marks = log.flatMap((row) => row.steps.map((s) => s.correct))
   return (
-    <div data-kit-summary="" className="mx-auto min-h-[100dvh] w-full max-w-[460px] bg-paper px-3 pb-[max(16px,env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))]">
+    <div
+      data-kit-summary=""
+      className="mx-auto min-h-0 w-full max-w-[460px] flex-1 overflow-y-auto overscroll-contain bg-paper px-3 pb-[max(16px,env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))] md:min-h-[100dvh] md:flex-none md:overflow-visible"
+    >
       <div className="bg-red px-4 py-4 text-paper">
         <p className="font-body text-[11px] font-bold tracking-widest">{t('kitgame.round.kicker')}</p>
         <p className="mt-2 font-poster text-[56px] leading-none" dir="ltr">

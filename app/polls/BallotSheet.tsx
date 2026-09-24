@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { BallotSlip } from '@/components/ballot/BallotSlip'
@@ -7,6 +8,9 @@ import { Manifesto } from '@/components/ballot/Manifesto'
 import { QuestionStage } from '@/components/ballot/QuestionStage'
 import { VoteReaction } from '@/components/ballot/VoteReaction'
 import { RosterSheet } from '@/components/roster/RosterSheet'
+import { firePickFx } from '@/components/stage/PickFx'
+import { SlideSheet } from '@/components/stage/SlideSheet'
+import { ReportLink } from '@/components/ui/ReportLink'
 import type { RosterEntry, RosterIndex } from '@/lib/game/allTimeXI'
 import { filterRoster, NO_FILTER } from '@/lib/game/roster-search'
 import type { ShirtBoard } from '@/lib/xi/board'
@@ -90,6 +94,7 @@ export function BallotSheet({
   const [book, setBook] = useState<MemberBook | null>(null)
   const [stage, setStage] = useState(0)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [slipOpen, setSlipOpen] = useState(false)
   const [reacting, setReacting] = useState<{ question: PollQuestion; pick: string } | null>(null)
   const [celebrate, setCelebrate] = useState(false)
   const [xiIds, setXiIds] = useState<string[]>([])
@@ -168,6 +173,18 @@ export function BallotSheet({
     // the vote itself is anonymous (rule 76) — the progress layer hears the question only
     emit({ type: 'vote_cast', questionId: target.id })
     haptic('tap')
+    // the ballot-slip stamp — the one pick effect the whole stage shares (delta 87)
+    const at = document.activeElement as HTMLElement | null
+    if (at && stageRef.current?.contains(at)) {
+      const box = at.getBoundingClientRect()
+      firePickFx(box.left + box.width / 2, box.top + box.height / 2, { tone: 'red', haptic: false })
+    } else if (stageRef.current) {
+      const box = stageRef.current.getBoundingClientRect()
+      firePickFx(box.left + box.width / 2, box.top + Math.min(box.height, window.innerHeight) / 2, {
+        tone: 'red',
+        haptic: false,
+      })
+    }
 
     // The shirt number is the member book's own field, so answering it here answers it there.
     if (target.kind === 'number') {
@@ -268,17 +285,26 @@ export function BallotSheet({
 
   if (!ready) return null
 
+  const slipRow = (row: PollQuestion) => {
+    setStage(BALLOT.findIndex((candidate) => candidate.id === row.id))
+    setSlipOpen(false)
+  }
+
   return (
-    <div className="mt-stack">
+    <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none">
       {lost.length > 0 && (
-        <p className="mb-2 border-s-rule border-red bg-sheet px-3 py-2 font-body text-[11.5px] leading-snug text-ink">
+        <p className="mb-2 shrink-0 border-s-rule border-red bg-sheet px-3 py-2 font-body text-[11.5px] leading-snug text-ink">
           {t('poll.migrate.lost', { n: String(lost.length) })}
         </p>
       )}
 
-      {/* at lg the stage and the slip stand side by side: the question, and the rail beside it */}
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-5">
-      <div ref={stageRef} className="scroll-mt-4">
+      {/* at lg the stage and the slip stand side by side: the question, and the rail beside it.
+          On a phone the slip moves into a sheet (delta 87) — the stage is the one screen. */}
+      <div className="flex min-h-0 flex-1 flex-col md:flex-none lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-5">
+      <div
+        ref={stageRef}
+        className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-contain scroll-mt-4 md:flex-none md:overflow-visible md:block"
+      >
       {sealed ? (
         <Manifesto
           ballot={ballot}
@@ -292,7 +318,7 @@ export function BallotSheet({
       ) : (
         <>
           {complete && (
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-rule border-ink bg-ink px-3.5 py-2.5">
+            <div className="mb-2 hidden flex-wrap items-center justify-between gap-2 border-rule border-ink bg-ink px-3.5 py-2.5 md:flex">
               <p className="font-body text-[12.5px] font-extrabold text-sheet">{t('poll.run.full')}</p>
               <button
                 type="button"
@@ -303,6 +329,38 @@ export function BallotSheet({
               </button>
             </div>
           )}
+          {/* phone stage (delta 87): the ballot as eight boxes across the top — the one
+              you are on is framed, the ones you voted are stamped — and the question's
+              number printed big behind the card, two plates, the way a poll bill is set. */}
+          <ol aria-label={t('stage.play.ballotSlip')} className="mb-3 grid shrink-0 grid-cols-8 gap-1 md:hidden">
+            {BALLOT.map((row, i) => {
+              const voted = (ballot[row.id] ?? '') !== ''
+              const here = i === stage
+              return (
+                <li key={row.id}>
+                  <button
+                    type="button"
+                    onClick={() => setStage(i)}
+                    aria-current={here ? 'step' : undefined}
+                    aria-label={t('stage.play.ballotBox', { n: String(i + 1) })}
+                    className={`grid min-h-tap w-full place-items-center border-rule font-poster text-[20px] leading-none transition-transform duration-press ease-stamp active:scale-[.92] motion-reduce:transition-none ${
+                      voted ? 'border-red bg-red text-paper' : 'border-ink/40 bg-paper text-ink'
+                    } ${here ? 'outline outline-[3px] outline-offset-2 outline-ink' : ''}`}
+                  >
+                    {voted ? '✓' : i + 1}
+                  </button>
+                </li>
+              )
+            })}
+          </ol>
+          <div className="relative md:contents">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-10 end-1 font-poster text-[150px] leading-none md:hidden"
+            >
+              <span className="plate-shift absolute inset-0 text-sign/15">{stage + 1}</span>
+              <span className="plate-top relative text-red/15">{stage + 1}</span>
+            </span>
           <QuestionStage
             question={question}
             index={stage}
@@ -318,26 +376,80 @@ export function BallotSheet({
             onPosition={(code) => cast(question, code)}
             onStep={(delta) => setStage((current) => Math.min(BALLOT.length - 1, Math.max(0, current + delta)))}
           />
+          </div>
         </>
       )}
       </div>
 
-      <BallotSlip
-        ballot={ballot}
-        filled={filled}
-        complete={complete}
-        sealed={sealed}
-        nameHe={book?.nameHe ?? ''}
-        current={question.id}
-        display={display}
-        onRowTap={(row) => {
-          setStage(BALLOT.findIndex((candidate) => candidate.id === row.id))
-        }}
-        onName={saveName}
-        onSeal={seal}
-        onNewSlip={fresh}
-      />
+      <div className="hidden lg:block">
+        <BallotSlip
+          ballot={ballot}
+          filled={filled}
+          complete={complete}
+          sealed={sealed}
+          nameHe={book?.nameHe ?? ''}
+          current={question.id}
+          display={display}
+          onRowTap={slipRow}
+          onName={saveName}
+          onSeal={seal}
+          onNewSlip={fresh}
+        />
       </div>
+      </div>
+
+      {/* the dock — the slip and the seal, one line, under the stage (delta 87) */}
+      <div className="mt-2 flex shrink-0 items-center gap-2 md:hidden">
+        <button
+          type="button"
+          onClick={() => setSlipOpen(true)}
+          className="flex min-h-tap flex-1 items-center justify-between border-rule border-ink bg-paper px-3 font-body text-[13px] font-extrabold text-ink transition-transform duration-press active:scale-[.97] motion-reduce:transition-none"
+        >
+          <span>{t('stage.play.ballotSlip')}</span>
+          <span className="font-mono text-[13px] tabular-nums text-red">
+            {filled}/{BALLOT.length}
+          </span>
+        </button>
+        {!sealed && complete && (
+          <button
+            type="button"
+            onClick={seal}
+            className="min-h-tap shrink-0 bg-red px-5 font-display text-step-1 text-sheet transition-transform duration-press ease-stamp active:scale-[.95] motion-reduce:transition-none"
+          >
+            {t('poll.seal.cta')}
+          </button>
+        )}
+        {sealed && (
+          <Link
+            href="/polls/board"
+            className="flex min-h-tap shrink-0 items-center justify-center bg-red px-5 font-display text-step-1 text-sheet transition-transform duration-press ease-stamp active:scale-[.95] motion-reduce:transition-none"
+          >
+            {t('poll.board.link')}
+          </Link>
+        )}
+      </div>
+
+      <SlideSheet open={slipOpen} onClose={() => setSlipOpen(false)} title={t('stage.play.ballotSlip')} size="full">
+        <BallotSlip
+          ballot={ballot}
+          filled={filled}
+          complete={complete}
+          sealed={sealed}
+          nameHe={book?.nameHe ?? ''}
+          current={question.id}
+          display={display}
+          onRowTap={slipRow}
+          onName={saveName}
+          onSeal={() => {
+            seal()
+            setSlipOpen(false)
+          }}
+          onNewSlip={fresh}
+        />
+        <div className="px-1 pb-2">
+          <ReportLink />
+        </div>
+      </SlideSheet>
 
       {sheetOpen && question.kind === 'roster' && (
         <RosterSheet

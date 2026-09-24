@@ -379,6 +379,10 @@ export const BEATS_DOUBLE: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'flag', flag: 'd:opened' },
+      // By May 2000 Pogi has known the way to Ussishkin for fourteen years; the afternoon
+      // beat there (d-uss-afternoon) must never hang on a flag an earlier chapter only
+      // MAY have raised (life:worldlines, delta 87). Knowledge, not a key.
+      { a: 'flag', flag: 'life:knows:hall' },
       { a: 'events', events: [{ t: 'money.changed', agorot: 6000, why: 'מה שנשאר' }, { t: 'energy.changed', delta: -35 }] },
       { a: 'flag', flag: 'd:afternoon1' }, { a: 'lines', lines: [{ who: null, text: 'יום ראשון. ארבעה ימים לגמר. אין רשימת משימות — יש עיר, גוף, משפחה ואנשים שמחכים. לך לאן שאתה בוחר.' }] },
     ],
@@ -404,29 +408,33 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
   {
     id: 'd-home-afternoon', nameHe: null, branches: [
       { lines: [{ who: null, text: 'בבית השקט נשמע פתאום חזק יותר מהאליפות.' }], choices: [
-        { id: 'sleep', text: 'לישון באמת.', when: { none: [{ flag: 'd:pick1:sleep' }] }, then: [{ e: 'energy', delta: 40 }, { e: 'flag', flag: 'd:pick1:sleep' }, { e: 'goto', node: 'd-next-afternoon' }] },
-        { id: 'family', text: 'לשבת עם אבא ואמא בלי לדבר על הגמר.', when: { none: [{ flag: 'd:pick1:family' }] }, then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 6 }, { e: 'energy', delta: 10 }, { e: 'flag', flag: 'd:pick1:family' }, { e: 'goto', node: 'd-next-afternoon' }] },
-        { id: 'box', text: 'לעלות לחדר ולפתוח את הקופסה האדומה.', when: { none: [{ flag: 'd:pick1:box' }] }, then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'flag', flag: 'd:pick1:box' }, { e: 'box' }, { e: 'goto', node: 'd-box' }] },
+        { id: 'sleep', text: 'לישון באמת.', when: { none: [{ flag: 'd:pick1:sleep' }] }, noteHe: 'כבר ישנת.', then: [{ e: 'energy', delta: 40 }, { e: 'flag', flag: 'd:pick1:sleep' }, { e: 'goto', node: 'd-next-afternoon' }] },
+        { id: 'family', text: 'לשבת עם אבא ואמא בלי לדבר על הגמר.', when: { none: [{ flag: 'd:pick1:family' }] }, noteHe: 'כבר ישבת איתם.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 6 }, { e: 'energy', delta: 10 }, { e: 'flag', flag: 'd:pick1:family' }, { e: 'goto', node: 'd-next-afternoon' }] },
+        { id: 'box', text: 'לעלות לחדר ולפתוח את הקופסה האדומה.', when: { none: [{ flag: 'd:pick1:box' }] }, noteHe: 'כבר פתחת אותה היום.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'flag', flag: 'd:pick1:box' }, { e: 'box' }, { e: 'goto', node: 'd-box' }] },
       ] },
     ],
   },
   {
     id: 'd-kiosk-afternoon', nameHe: null, branches: [
       { lines: [{ who: null, text: 'אצל רפי יש עבודה, ויש בחלון דף ישן שאתה מכיר טוב מדי.' }], choices: [
-        { id: 'work', text: 'לקחת משמרת. הגמר עולה כסף.', when: { none: [{ flag: 'd:pick1:work' }] }, then: [{ e: 'money', agorot: 9000, why: 'משמרת כפולה' }, { e: 'energy', delta: -15 }, { e: 'flag', flag: 'd:pick1:work' }, { e: 'goto', node: 'd-next-afternoon' }] },
+        { id: 'work', text: 'לקחת משמרת. הגמר עולה כסף.', when: { none: [{ flag: 'd:pick1:work' }] }, noteHe: 'כבר עשית את המשמרת.', then: [{ e: 'money', agorot: 9000, why: 'משמרת כפולה' }, { e: 'energy', delta: -15 }, { e: 'flag', flag: 'd:pick1:work' }, { e: 'goto', node: 'd-next-afternoon' }] },
+        // (23.9.2026) restored from the pre-overlay unit: `d-go` still reads `d:ticket`
+        // (life-worldline flagged it as dead once `d-days-2` — the one place that used to
+        // set it — was split into these four rooms).
+        { id: 'ticket', text: 'לסדר כרטיס וההסעה — שישים שקל. ברור.', when: { none: [{ flag: 'd:pick1:ticket' }] }, noteHe: 'הכרטיס כבר בכיס.', then: [{ e: 'money', agorot: -6000, why: 'כרטיס לגמר' }, { e: 'give', item: 'ticket-stub' }, { e: 'flag', flag: 'd:ticket' }, { e: 'flag', flag: 'd:pick1:ticket' }, { e: 'goto', node: 'd-next-afternoon' }] },
         { id: 'page', text: 'לחזור לדף ולתקן את מה שאתה יודע שלא נכון.', when: { all: [{ flag: 'life:page:pinned' }], none: [{ flag: 'd:pick1:page' }] }, hidden: true, then: [{ e: 'flag', flag: 'd:pick1:page' }, { e: 'goto', node: 'd-page' }] },
       ] },
     ],
   },
   {
     id: 'd-gate5-afternoon', nameHe: null, branches: [
-      { when: { gateEver: 'gate5' }, lines: [{ who: null, text: 'ליד בלומפילד כבר פרוש בד על הרצפה. אף אחד לא קורא לזה משימה.' }], choices: [{ id: 'banner', text: 'לרדת על הברכיים ולעבוד איתם.', when: { none: [{ flag: 'd:pick1:gate5' }] }, then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'energy', delta: -20 }, { e: 'flag', flag: 'd:pick1:gate5' }, { e: 'flag', flag: 'life:banner:2000' }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'לילה שלם על הרצפה של מחסן, עם צבע שמתייבש לאט.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'הכין בד' }, { e: 'goto', node: 'd-next-afternoon' }] }] },
+      { when: { gateEver: 'gate5' }, lines: [{ who: null, text: 'ליד בלומפילד כבר פרוש בד על הרצפה. אף אחד לא קורא לזה משימה.' }], choices: [{ id: 'banner', text: 'לרדת על הברכיים ולעבוד איתם.', when: { none: [{ flag: 'd:pick1:gate5' }] }, noteHe: 'כבר עבדת איתם היום.', then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'energy', delta: -20 }, { e: 'flag', flag: 'd:pick1:gate5' }, { e: 'flag', flag: 'life:banner:2000' }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'לילה שלם על הרצפה של מחסן, עם צבע שמתייבש לאט.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'הכין בד' }, { e: 'goto', node: 'd-next-afternoon' }] }] },
       { lines: [{ who: null, text: 'אתה מכיר את המקום. לא את העבודה הזאת. היום אין לך סיבה להישאר.' }] },
     ],
   },
   {
     id: 'd-uss-afternoon', nameHe: null, branches: [
-      { lines: [{ who: 'שחור', text: 'אליפות יפה. עכשיו תרים את הצד הזה.' }], choices: [{ id: 'help', text: 'להרים. ברור.', when: { none: [{ flag: 'd:pick1:uss' }] }, then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'energy', delta: -10 }, { e: 'flag', flag: 'd:pick1:uss' }, { e: 'goto', node: 'd-next-afternoon' }] }] },
+      { lines: [{ who: 'שחור', text: 'אליפות יפה. עכשיו תרים את הצד הזה.' }], choices: [{ id: 'help', text: 'להרים. ברור.', when: { none: [{ flag: 'd:pick1:uss' }] }, noteHe: 'כבר הרמת היום.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'energy', delta: -10 }, { e: 'flag', flag: 'd:pick1:uss' }, { e: 'goto', node: 'd-next-afternoon' }] }] },
     ],
   },
   {

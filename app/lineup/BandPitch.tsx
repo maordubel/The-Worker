@@ -3,6 +3,9 @@
 import { KitShirt } from '@/components/kit/KitShirt'
 import { NamePlate, OUTFIELD_KIT, PlayerFigure } from '@/components/press/PlayerFigure'
 import { PressPitch } from '@/components/press/PressPitch'
+import { NEUTRAL_SHIRT_SPEC } from '@/components/roster/RosterSheet'
+import { ShirtToken } from '@/components/stage/ShirtToken'
+import { dropZone, useDragSource } from '@/components/stage/useDrag'
 import { Num } from '@/components/ui/Num'
 import { splitName } from '@/lib/game/roster-search'
 import { LINES, type Line, type PlacementStatus } from '@/lib/game/lineup-sheet'
@@ -197,6 +200,112 @@ function Man({
       className={`pointer-events-auto flex min-h-tap min-w-0 justify-center transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none ${width}`}
     >
       {body}
+    </button>
+  )
+}
+
+/**
+ * המגרש בנייד — gate 3's phone pitch (delta 87): the same four bands, but a man on the
+ * grass is a `ShirtToken` — no tile, no border — and every band is a drop zone
+ * (`data-drop="band-<line>"`) so a locker or a neighbour can be DRAGGED onto it, exactly
+ * like gate 1's pitch. One visual family for every "pitch" gate (Maor, 23.9.2026).
+ */
+export function BandPitchStage({
+  men,
+  kit,
+  active = null,
+  onBand,
+  onMan,
+  onDrop,
+}: {
+  men: readonly BandMan[]
+  kit: KitSpec | null
+  active?: string | null
+  onBand: (line: Line) => void
+  onMan: (playerId: string) => void
+  /** a locker (`locker:<id>`) or a man (`man:<id>`) dropped straight on a band */
+  onDrop: (line: Line, payload: string) => void
+}) {
+  return (
+    <PressPitch fill className="touch-manipulation">
+      {[...LINES].reverse().map((line) => {
+        const band = BAND[line]
+        const here = men.filter((man) => man.line === line).sort((a, b) => a.order - b.order)
+        return (
+          <div
+            key={line}
+            {...dropZone(`band-${line}`)}
+            className="absolute inset-x-[3%]"
+            style={{ top: `${band.top}%`, height: `${band.height}%` }}
+          >
+            <button
+              type="button"
+              onClick={() => onBand(line)}
+              aria-label={t('lineup.zone.placeHere', { line: t(LINE_LABEL[line]) })}
+              className="absolute inset-0 border-2 border-transparent"
+            />
+            <span className="pointer-events-none absolute start-1 top-1 z-[1] flex items-center gap-1 bg-press-ink px-1.5 py-[1px] font-body text-[10px] font-extrabold leading-tight text-press-paper">
+              {t(LINE_LABEL[line])}
+              <span className="font-mono text-[10px] tabular-nums">
+                <Num>{String(here.length)}</Num>
+              </span>
+            </span>
+            <div className="pointer-events-none relative z-[2] flex h-full items-center justify-center gap-1 px-1 pt-3 [container-type:inline-size]">
+              {here.map((man) => (
+                <ManToken
+                  key={man.playerId}
+                  man={man}
+                  kit={kit}
+                  active={active === man.playerId}
+                  onTap={onMan}
+                  onDrop={onDrop}
+                />
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </PressPitch>
+  )
+}
+
+function ManToken({
+  man,
+  kit,
+  active,
+  onTap,
+  onDrop,
+}: {
+  man: BandMan
+  kit: KitSpec | null
+  active: boolean
+  onTap: (playerId: string) => void
+  onDrop: (line: Line, payload: string) => void
+}) {
+  const family = splitName(man.nameHe).familyHe
+  const drag = useDragSource({
+    payload: `man:${man.playerId}`,
+    onDrop: (zone) => {
+      const line = zone.replace(/^band-/, '')
+      if (line !== man.line) onDrop(line as Line, `man:${man.playerId}`)
+    },
+  })
+  return (
+    <button
+      type="button"
+      {...drag}
+      onClick={() => onTap(man.playerId)}
+      aria-pressed={active}
+      aria-label={t('lineup.zone.manAria', { name: man.nameHe })}
+      className="pointer-events-auto min-h-tap min-w-0 shrink-0 transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none"
+    >
+      <ShirtToken
+        spec={kit ?? NEUTRAL_SHIRT_SPEC}
+        name={family}
+        sub={man.locked ? t('lineup.stage.locked') : undefined}
+        live={active}
+        size="sm"
+      />
     </button>
   )
 }

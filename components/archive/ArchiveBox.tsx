@@ -98,8 +98,30 @@ export function ArchiveBox({
         </button>
       </div>
 
-      {/* the table */}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-sign/20 px-gutter py-4">
+      {/*
+        השולחן — the dig table itself (delta 87, 23.9.2026).
+
+        `public/archive/dig-table-desktop.webp` (1600×900, art-directed from the
+        owner's 1672×941 original) and `dig-table-phone.webp` (900×1200, from his
+        1086×1448 original) — the box/drawer surface the brief's "קופסה" section asked
+        for. Both generated 21.9.2026, supplied by the owner; processed for this delta
+        (center-cropped to these exact ratios, re-encoded to webp) by
+        `/tmp/process_gate12.py`'s pipeline, the same de-yellow pass
+        `scripts/brand/badge.py` uses (hue band 37–76°, rotated to a warm brown at the
+        same saturation/value) — a scan of both source files found zero pixels in the
+        band, so no pixel needed rotating, and the scan itself is the record of that.
+        `bg-sign/20` stays UNDER the art as the legibility wash the cards already relied
+        on, not as a replacement for it.
+      */}
+      <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-sign/20 px-gutter py-4">
+        <picture aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 block h-full w-full">
+          <source media="(min-width: 768px)" srcSet="/archive/dig-table-desktop.webp" />
+          <img
+            src="/archive/dig-table-phone.webp"
+            alt=""
+            className="h-full w-full object-cover opacity-35"
+          />
+        </picture>
         {items.length === 0 ? (
           <p className="mx-auto max-w-sm border-hair border-concrete/40 px-3 py-3 font-body text-[13px] text-concrete">{t('archive.box.empty')}</p>
         ) : (

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 
-import { BannerCloth } from '@/components/ui/BannerCloth'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Screen } from '@/components/ui/Screen'
 import { buildRound } from '@/lib/game/memory'
@@ -21,14 +20,9 @@ export default function MemoryPage({
   const board = buildRound(round.seed, 6, round.cursor)
 
   return (
-    <Screen title={t('screen.memory.title')} sub={t('screen.memory.sub')} night>
+    <Screen title={t('screen.memory.title')} sub={t('screen.memory.sub')} night stage>
       {board.cards.length >= 4 ? (
-        <>
-          <MemoryBoard round={board} seed={round.seed} cursor={round.cursor} />
-          <div className="mt-stack">
-            <BannerCloth>{t('slogan.collective')}</BannerCloth>
-          </div>
-        </>
+        <MemoryBoard round={board} seed={round.seed} cursor={round.cursor} />
       ) : (
         <EmptyState title={t('empty.memory')} body={t('empty.memory.body')} />
       )}

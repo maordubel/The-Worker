@@ -4,6 +4,10 @@ import { useMemo, useState, useTransition } from 'react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Num } from '@/components/ui/Num'
+import { SourceNote } from '@/components/ui/SourceNote'
+import { FitBox } from '@/components/stage/FitBox'
+import { SlideSheet } from '@/components/stage/SlideSheet'
+import { firePickFxAt } from '@/components/stage/PickFx'
 import { t, type MessageKey } from '@/lib/i18n'
 import {
   COACH_NOTES,
@@ -21,13 +25,13 @@ import {
   type Placement,
 } from '@/lib/game/lineup-sheet'
 import { splitName } from '@/lib/game/roster-search'
-import type { LineupWindow } from '@/lib/game/lineup'
+import type { LineupWindow, MatchIntro } from '@/lib/game/lineup'
 import type { KitSpec } from '@/lib/kit/spec'
 import type { Embedded } from '@/lib/mechanics/types'
 import { haptic } from '@/lib/play/haptics'
 import { askCoach, submitLineup } from './actions'
-import { BandPitch, LINE_LABEL } from './BandPitch'
-import { LockerRack } from './LockerRack'
+import { BandPitch, BandPitchStage, LINE_LABEL } from './BandPitch'
+import { LockerRack, LockerRail } from './LockerRack'
 import { TeamSheet } from './TeamSheet'
 import { TunnelGate } from './TunnelGate'
 import { PlayLink } from '@/components/play/PlayLink'
@@ -79,6 +83,8 @@ export function LineupBoard({
   graded,
   kit,
   kitSeason,
+  intro = null,
+  sourceTitle = '',
   embedded,
 }: {
   bank: LockerName[]
@@ -89,6 +95,9 @@ export function LineupBoard({
   /** the season's real kit for the lockers — null where the archive has none */
   kit: KitSpec | null
   kitSeason: string | null
+  /** the match record, for the phone stage's "פרטי המשחק" sheet — absent inside LIFE */
+  intro?: MatchIntro | null
+  sourceTitle?: string
   /**
    * Opened from inside THE WORKER LIFE — the café's argument, the schoolyard's bet. The same
    * lockers, coach and grade over the one match the life pinned (the server re-derives it
@@ -111,6 +120,8 @@ export function LineupBoard({
   const [lastCall, setLastCall] = useState(false)
   const [verdict, setVerdict] = useState<LineupVerdict | null>(null)
   const [pending, startTransition] = useTransition()
+  /** the phone stage (delta 87): "מלתחה" or "פרטי המשחק" over the pitch */
+  const [mobileSheet, setMobileSheet] = useState<'rack' | 'info' | 'coach' | null>(null)
 
   const nameOf = useMemo(() => new Map(bank.map((locker) => [locker.id, locker.nameHe])), [bank])
   const used = useMemo(() => new Set(board.map((row) => row.playerId)), [board])
@@ -133,6 +144,8 @@ export function LineupBoard({
     setActive(null)
     setNote(null)
     haptic('tap')
+    const family = splitName(nameOf.get(playerId) ?? '').familyHe
+    firePickFxAt(document.querySelector(`[data-drop="band-${line}"]`), { label: family })
   }
 
   function tapBand(line: Line) {
@@ -231,6 +244,185 @@ export function LineupBoard({
 
       {!verdict && (
         <>
+          {/* ================================================================ phone stage
+              Maor, 23.9.2026: one screen, the pitch big, a locker DRAGGED onto a band. */}
+          <div className="flex min-h-0 flex-1 flex-col md:hidden">
+            <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto pb-1">
+              {LINES.map((line) => (
+                <span
+                  key={line}
+                  className="flex min-h-[30px] shrink-0 items-center gap-1 border-hair border-ink/40 px-2 font-body text-[11px] text-ink"
+                >
+                  <span className="font-mono text-[12px] tabular-nums">
+                    <Num>{String(counts[line])}</Num>
+                  </span>
+                  {t(LINE_LABEL[line])}
+                </span>
+              ))}
+              <p className="ms-auto shrink-0 font-mono text-[13px] tracking-widest text-ink">
+                <Num>{`${String(board.length).padStart(2, '0')}/${XI_SIZE}`}</Num>
+              </p>
+            </div>
+
+            <FitBox ratio={100 / 122} className="mt-1.5">
+              <BandPitchStage
+                men={men}
+                kit={kit}
+                active={active}
+                onBand={tapBand}
+                onMan={tapMan}
+                onDrop={(line, payload) => {
+                  const id = payload.replace(/^(locker|man):/, '')
+                  put(id, line)
+                }}
+              />
+            </FitBox>
+
+            {active !== null ? (
+              <div className="mt-1.5 flex shrink-0 items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={toggleLock}
+                  aria-pressed={locks.includes(active)}
+                  className={`min-h-tap flex-1 border-rule px-3 font-body text-[13px] font-extrabold transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                    locks.includes(active) ? 'border-red bg-red text-sheet' : 'border-ink bg-sheet text-ink'
+                  }`}
+                >
+                  {locks.includes(active) ? t('lineup.lock.drop') : t('lineup.lock')}
+                </button>
+                <button
+                  type="button"
+                  onClick={sendBack}
+                  className="min-h-tap flex-1 border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none"
+                >
+                  {t('lineup.zone.sendBack')}
+                </button>
+              </div>
+            ) : (
+              <p className="mt-1.5 shrink-0 truncate border-hair border-ink/30 bg-sheet px-2.5 py-1.5 font-body text-[11px] leading-snug text-ink">
+                {t(prompt)}
+              </p>
+            )}
+
+            <div className="mt-1.5 flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setTunnel(true)}
+                disabled={!complete || pending}
+                className="flex min-h-tap flex-1 items-center justify-center bg-red px-3 font-body text-step--1 font-extrabold text-paper transition-transform duration-press ease-stamp active:scale-[.97] disabled:opacity-40 motion-reduce:transition-none"
+              >
+                {pending ? t('state.loading') : t('lineup.stage.finish')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileSheet(mobileSheet === 'rack' ? null : 'rack')}
+                aria-pressed={mobileSheet === 'rack'}
+                className={`min-h-tap shrink-0 border-hair px-2.5 font-body text-[11px] font-extrabold leading-none ${
+                  mobileSheet === 'rack' ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                }`}
+              >
+                {t('lineup.stage.rack')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileSheet('coach')}
+                className="min-h-tap shrink-0 border-hair border-ink/40 bg-paper px-2.5 font-body text-[11px] font-extrabold leading-none text-ink"
+              >
+                {t('lineup.coach')}
+              </button>
+              {intro && (
+                <button
+                  type="button"
+                  onClick={() => setMobileSheet('info')}
+                  className="min-h-tap shrink-0 border-hair border-ink/40 bg-paper px-2.5 font-body text-[11px] font-extrabold leading-none text-ink"
+                >
+                  {t('lineup.stage.setup')}
+                </button>
+              )}
+            </div>
+
+            {note !== null && <p className="mt-1.5 shrink-0 font-body text-[11px] leading-snug text-red">{t(note)}</p>}
+            {lastCall && (
+              <p className="mt-1 shrink-0 border-s-rule border-red ps-2 font-body text-[11px] leading-snug text-red">
+                {t('lineup.lastCall')}
+              </p>
+            )}
+
+            {/*
+              The rack is an INLINE row, not a modal sheet — a full-screen backdrop over
+              the pitch would swallow the drag-drop the rail exists for. Toggling it
+              simply resizes the FitBox pitch above it (delta 87).
+            */}
+            {mobileSheet === 'rack' && (
+              <div className="mt-1.5 shrink-0 animate-fx-sheet-up border-hair border-ink/40 bg-sheet p-2">
+                <p className="font-body text-[10.5px] leading-snug text-muted">{t('lineup.stage.hint')}</p>
+                <div className="mt-1.5">
+                  <LockerRail
+                    bank={bank}
+                    used={used}
+                    selected={held}
+                    onSelect={(id) => {
+                      tapLocker(id)
+                      setMobileSheet(null)
+                    }}
+                    onDrop={(zone, payload) => {
+                      const line = zone.replace(/^band-/, '') as Line
+                      put(payload.replace(/^locker:/, ''), line)
+                    }}
+                    kit={kit}
+                  />
+                </div>
+              </div>
+            )}
+
+            <SlideSheet open={mobileSheet === 'coach'} onClose={() => setMobileSheet(null)} title={t('lineup.coach')} size="auto">
+              <ul className="flex flex-wrap gap-2">
+                <li className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink">
+                  <span className="font-mono text-step-0 tabular-nums">
+                    <Num>{`${locks.length}/${MAX_LOCKS}`}</Num>
+                  </span>
+                  {t('lineup.lock.left')}
+                </li>
+                <li className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink">
+                  <span className="font-mono text-step-0 tabular-nums">
+                    <Num>{`${COACH_NOTES - notes.length}/${COACH_NOTES}`}</Num>
+                  </span>
+                  {t('lineup.coach.left')}
+                </li>
+              </ul>
+              <button
+                type="button"
+                onClick={coach}
+                disabled={notes.length >= COACH_NOTES || pending}
+                className="mt-2 flex min-h-tap w-full items-center justify-center border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink disabled:opacity-40"
+              >
+                {t('lineup.coach')}
+              </button>
+              {notes.length > 0 && (
+                <ul className="mt-2 border-s-rule border-ink ps-2">
+                  {notes.map((row, index) => (
+                    <li key={`${row.kind}-${index}`} className="font-body text-step--1 leading-relaxed text-ink">
+                      {coachSentence(row)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </SlideSheet>
+
+            {intro && (
+              <SlideSheet open={mobileSheet === 'info'} onClose={() => setMobileSheet(null)} title={t('lineup.stage.setup')} size="auto">
+                <p className="font-body text-[11px] leading-snug text-muted">{t('lineup.zone.intro')}</p>
+                {intro.dateDisputed && (
+                  <p className="mt-1.5 font-body text-[11.5px] leading-snug text-ink">{t('lineup.intro.dateDisputed')}</p>
+                )}
+                {(sourceTitle !== '' || intro.matchSourceTitle) && <SourceNote newTab className="mt-2" />}
+              </SlideSheet>
+            )}
+          </div>
+
+          {/* ================================================================ desktop / tablet
+              untouched design */}
+          <div className="hidden md:block">
           <p className="mt-stack font-body text-[11px] font-extrabold tracking-widest text-muted">
             {t('lineup.room.eyebrow')}
           </p>
@@ -349,6 +541,7 @@ export function LineupBoard({
             </div>
 
             <LockerRack bank={bank} used={used} selected={held} onSelect={tapLocker} kit={kit} kitSeason={kitSeason} />
+          </div>
           </div>
         </>
       )}

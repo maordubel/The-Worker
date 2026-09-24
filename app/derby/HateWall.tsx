@@ -10,6 +10,8 @@ import { RecordRun } from '@/components/play/RecordRun'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
 import { ShareRow } from '@/components/share/ShareRow'
 import { AdSlot } from '@/components/ads/AdSlot'
+import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
+import { SlideSheet } from '@/components/stage/SlideSheet'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import {
@@ -85,6 +87,7 @@ export function HateWall({
   const [stamped, setStamped] = useState<{ won: string; out: string } | null>(null)
   const [drag, setDrag] = useState(0)
   const [revengeOpen, setRevengeOpen] = useState(false)
+  const [logOpen, setLogOpen] = useState(false)
   const start = useRef<number | null>(null)
   const captured = useRef(false)
   const counted = useRef(false)
@@ -118,13 +121,14 @@ export function HateWall({
     embedded.onResult({ duels: wall.picks.length, of: Math.max(1, order.length - 1) })
   }, [done, embedded, order.length, wall.picks.length])
 
-  function pick(side: Side) {
+  function pick(side: Side, el?: HTMLElement) {
     if (!holder || !challenger || stamped) return
-    haptic('lock')
     setDrag(0)
     start.current = null
     captured.current = false
     setStamped(side === 'holder' ? { won: holder.slug, out: challenger.slug } : { won: challenger.slug, out: holder.slug })
+    if (el) firePickFxAt(el, { tone: 'away', haptic: 'lock' })
+    else firePickFx(window.innerWidth / 2, window.innerHeight / 2, { tone: 'away', haptic: 'lock' })
   }
 
   function onDown(event: React.PointerEvent<HTMLDivElement>) {
@@ -168,12 +172,16 @@ export function HateWall({
   const choices = revengeChoices(wall)
 
   return (
-    <div className="relative -mx-gutter mt-stack select-none overflow-hidden bg-hate-field px-gutter pb-6 pt-3">
+    <div className="relative -mx-gutter mt-0.5 select-none overflow-hidden bg-hate-field px-gutter pb-2 pt-1.5 md:mt-stack md:pb-6 md:pt-3">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[url('/art/wall-paste-up.png')] bg-[length:256px_256px] bg-repeat"
+      />
       <div aria-hidden="true" className="hate-dots pointer-events-none absolute inset-0" />
       <div className="relative">
         {pinned && <FriendBanner />}
 
-        <div className="flex items-end justify-between gap-3 border-b-rule border-hate-red-light pb-2">
+        <div className="flex items-end justify-between gap-3 border-b-rule border-hate-red-light pb-1.5">
           <div>
             {!embedded && (
               <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-hate-red-light" dir="ltr">
@@ -201,11 +209,11 @@ export function HateWall({
         </div>
 
         {wall.picks.length === 0 && (
-          <p className="mt-2.5 max-w-prose font-body text-step--1 leading-relaxed text-hate-muted">{t('hate.wall.lede')}</p>
+          <p className="mt-1.5 line-clamp-2 max-w-prose font-body text-[11.5px] leading-snug text-hate-muted">{t('hate.wall.lede')}</p>
         )}
 
         {duel.noMercy && (
-          <p role="status" className="mt-2.5 border-rule border-hate-red-light bg-hate-red-deep px-3 py-2 font-body text-[12px] font-extrabold text-hate-ink">
+          <p role="status" className="mt-1.5 border-rule border-hate-red-light bg-hate-red-deep px-3 py-1.5 font-body text-[12px] font-extrabold text-hate-ink">
             <span className="block font-latin text-[9px] tracking-[0.2em] text-hate-red-light" dir="ltr">
               NO MERCY
             </span>
@@ -213,7 +221,7 @@ export function HateWall({
           </p>
         )}
 
-        <p className="mt-2.5 font-display text-step-2 leading-tight text-hate-ink">{t('hate.wall.pick')}</p>
+        <p className="mt-1 font-display text-[16px] leading-tight text-hate-ink">{t('hate.wall.pick')}</p>
 
         <div className="overflow-x-clip">
           <div
@@ -221,10 +229,10 @@ export function HateWall({
             onPointerMove={onMove}
             onPointerUp={onUp}
             onPointerCancel={onUp}
-            className="mt-2.5 touch-pan-y"
+            className="mt-1.5 touch-pan-y"
             style={{ transform: `translateX(${drag * 0.35}px)` }}
           >
-            <div className="flex items-stretch justify-between gap-2 pb-1.5">
+            <div className="flex items-stretch justify-between gap-2 pb-1">
               <SideTag label={holder.nameHe} arrow="→" active={lean >= 0.55} hint={wall.picks.length === 0 ? t('hate.wall.first') : t('hate.wall.stuck')} />
               <SideTag label={challenger.nameHe} arrow="←" active={lean <= -0.55} hint={t('hate.wall.next')} end />
             </div>
@@ -234,7 +242,7 @@ export function HateWall({
                 enemy={holder}
                 state={stamped ? (stamped.won === holder.slug ? 'won' : 'out') : 'live'}
                 holder={wall.picks.length > 0}
-                onPick={() => pick('holder')}
+                onPick={(el) => pick('holder', el)}
                 dense
               />
               <WallDamage level={damageOf(streak)} marks={streak} />
@@ -245,7 +253,7 @@ export function HateWall({
               )}
             </div>
 
-            <div className="flex items-center gap-3 py-1.5" aria-hidden="true">
+            <div className="flex items-center gap-3 py-0.5" aria-hidden="true">
               <span className="h-px flex-1 bg-hate-ink/30" />
               <span className="font-poster text-[20px] leading-none text-hate-red-light">×</span>
               <span className="h-px flex-1 bg-hate-ink/30" />
@@ -254,7 +262,7 @@ export function HateWall({
             <EnemyPlate
               enemy={challenger}
               state={stamped ? (stamped.won === challenger.slug ? 'won' : 'out') : 'live'}
-              onPick={() => pick('challenger')}
+              onPick={(el) => pick('challenger', el)}
               dense
             />
           </div>
@@ -275,51 +283,48 @@ export function HateWall({
           </button>
         )}
 
-        <div className="mt-3 grid grid-cols-[1fr_auto] items-center gap-2 border-hair border-hate-ink/30 px-3 py-2">
-          <p className="font-body text-[12px] leading-snug text-hate-muted">
-            {wall.revengeUsed
-              ? t('hate.revenge.used', { name: bySlug.get(wall.revengePick ?? '')?.nameHe ?? '' })
-              : t('hate.revenge.rule')}
-          </p>
+        <div className="mt-1 flex items-center gap-2">
+          <div className="min-w-0 flex-1 border-hair border-hate-ink/30 px-2.5 py-1.5">
+            <p className="truncate font-body text-[11px] leading-snug text-hate-muted">
+              {wall.revengeUsed
+                ? t('hate.revenge.used', { name: bySlug.get(wall.revengePick ?? '')?.nameHe ?? '' })
+                : t('hate.revenge.rule')}
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => setRevengeOpen(true)}
             disabled={choices.length === 0 || stamped !== null}
-            className="min-h-tap border-rule border-hate-red-light px-3 font-body text-[13px] font-extrabold text-hate-ink disabled:opacity-35"
+            className="min-h-tap shrink-0 border-rule border-hate-red-light px-3 font-body text-[12px] font-extrabold text-hate-ink disabled:opacity-35"
           >
             {t('hate.revenge.open')}
           </button>
+          {wall.picks.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setLogOpen(true)}
+              className="min-h-tap shrink-0 border-hair border-hate-ink/40 px-2.5 font-body text-[12px] font-extrabold text-hate-ink"
+            >
+              {t('stage.play.hateLog')}
+            </button>
+          )}
         </div>
 
-        {wall.picks.length > 0 && (
-          <ol className="mt-3 border-t-hair border-hate-ink/25" aria-label={t('hate.wall.log')}>
-            {[...wall.picks].reverse().slice(0, 6).map((entry) => (
-              <li key={entry.round} className="flex items-baseline gap-2 border-b-hair border-hate-ink/20 py-1.5">
-                <span className="w-6 shrink-0 font-mono text-[11px] tabular-nums text-hate-red-light">{entry.round}</span>
-                <span className="min-w-0 flex-1 font-body text-[12px] text-hate-ink">
-                  {t('hate.wall.logLine', {
-                    stay: bySlug.get(entry.winner)?.nameHe ?? '',
-                    out: bySlug.get(entry.loser)?.nameHe ?? '',
-                  })}
-                </span>
-                {(entry.revenge || entry.noMercy) && (
-                  <span className="shrink-0 font-body text-[10px] font-extrabold text-hate-red-light">
-                    {entry.revenge ? t('hate.revenge.mark') : t('hate.wall.noMercyMark')}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ol>
-        )}
-
-        <p className="mt-3 font-body text-[11px] leading-snug text-hate-muted">{t('hate.swipeHint')}</p>
-        {/* the charges are the terrace's ranking, and whose it is is on /credits under the
-            owner-knowledge label (rule 18 §3, spec §0.2–0.3, 22.9.2026) */}
-        <p className="mt-1 flex flex-wrap items-center gap-x-2 font-body text-[11px] text-hate-muted">
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 font-body text-[10.5px] leading-snug text-hate-muted">
+          <span>{t('hate.swipeHint')}</span>
+          <span>·</span>
           <span>{t('hate.wall.rosterNote', { count: String(rosterSize) })}</span>
           <SourceNote newTab tone="dark" group="team" />
         </p>
       </div>
+
+      {logOpen && (
+        <LogSheet
+          picks={wall.picks}
+          bySlug={bySlug}
+          onClose={() => setLogOpen(false)}
+        />
+      )}
 
       {revengeOpen && (
         <RevengeSheet
@@ -333,6 +338,40 @@ export function HateWall({
         />
       )}
     </div>
+  )
+}
+
+/** יומן הקרב — the round-by-round log, moved off the wall into a sheet (delta 87) */
+function LogSheet({
+  picks,
+  bySlug,
+  onClose,
+}: {
+  picks: Wall['picks']
+  bySlug: Map<string, Enemy>
+  onClose: () => void
+}) {
+  return (
+    <SlideSheet open onClose={onClose} title={t('stage.play.hateLog')} tone="ink">
+      <ol className="border-t-hair border-concrete/30">
+        {[...picks].reverse().map((entry) => (
+          <li key={entry.round} className="flex items-baseline gap-2 border-b-hair border-concrete/20 py-1.5">
+            <span className="w-6 shrink-0 font-mono text-[11px] tabular-nums text-hate-red-light">{entry.round}</span>
+            <span className="min-w-0 flex-1 font-body text-[12px] text-paper">
+              {t('hate.wall.logLine', {
+                stay: bySlug.get(entry.winner)?.nameHe ?? '',
+                out: bySlug.get(entry.loser)?.nameHe ?? '',
+              })}
+            </span>
+            {(entry.revenge || entry.noMercy) && (
+              <span className="shrink-0 font-body text-[10px] font-extrabold text-hate-red-light">
+                {entry.revenge ? t('hate.revenge.mark') : t('hate.wall.noMercyMark')}
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </SlideSheet>
   )
 }
 
@@ -359,7 +398,7 @@ function SideTag({ label, arrow, active, hint, end = false }: { label: string; a
       </span>
       <span className="min-w-0">
         <span className="block truncate font-body text-[11.5px] font-extrabold leading-tight">{label}</span>
-        <span className="block font-body text-[10px] leading-tight opacity-80">{hint}</span>
+        <span className="hidden font-body text-[10px] leading-tight opacity-80 min-[380px]:block">{hint}</span>
       </span>
     </span>
   )

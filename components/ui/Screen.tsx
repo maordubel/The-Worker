@@ -7,6 +7,8 @@ import { adsAllowed } from '@/lib/ads'
 import { Floodlights } from '@/components/ui/Floodlights'
 import { HelpChip } from '@/components/ui/HelpChip'
 import { SignPlate } from '@/components/ui/SignPlate'
+import { PickFxLayer } from '@/components/stage/PickFx'
+import { StageHeader } from '@/components/stage/StageHeader'
 import { TabBar } from '@/components/ui/TabBar'
 import { SITE_LABEL } from '@/lib/brand'
 import { CREDITS_PATH } from '@/lib/credits/groups'
@@ -35,6 +37,15 @@ export function Screen({
    */
   chrome = true,
   fullBleed = false,
+  /**
+   * במת השער (delta 87) — on a phone the gate is ONE screen: a 48px `StageHeader`, the
+   * gate's own field filling what is left, and nothing under it (no footer, no ad, no
+   * page scroll; secondary content goes into slide sheets). From md up the screen is the
+   * desktop design, unchanged. Children fill the stage through `.stage-fill`.
+   */
+  stage = false,
+  /** stage only — what the gate shows in the header's corner (a score, a counter) */
+  stageAside,
   children,
 }: {
   title: string
@@ -42,25 +53,42 @@ export function Screen({
   night?: boolean
   chrome?: boolean
   fullBleed?: boolean
+  stage?: boolean
+  stageAside?: ReactNode
   children: ReactNode
 }) {
   return (
-    <div className={`min-h-dvh ${night ? 'bg-ink' : ''}`}>
+    <div className={`min-h-dvh ${night ? 'bg-ink' : ''} ${stage ? 'stage-screen' : ''}`}>
       <div
         className={`mx-auto flex min-h-dvh max-w-5xl flex-col md:border-x-rule md:border-ink ${
           night ? 'bg-ink' : ''
-        }`}
+        } ${stage ? 'max-md:h-full max-md:min-h-0' : ''}`}
       >
         <main
           id="main"
           className={`relative flex-1 ${
-            fullBleed ? 'p-0' : `px-gutter pb-stack ${chrome ? 'pt-5 md:pt-10' : 'pt-2'}`
+            fullBleed
+              ? 'p-0'
+              : stage
+                ? `stage-main px-3 pt-1 md:px-gutter md:pb-stack ${chrome ? 'md:pt-10' : 'md:pt-2'}`
+                : `px-gutter pb-stack ${chrome ? 'pt-5 md:pt-10' : 'pt-2'}`
           }`}
         >
+          <PickFxLayer />
           {/* The lights come on over a night screen. On a paper screen the sun is
               already up and there is nothing to switch on. */}
           {night && <Floodlights />}
-          {chrome ? (
+          {chrome && stage ? (
+            <>
+              <div className="md:hidden">
+                <StageHeader title={title} sub={sub} aside={stageAside} night={night} />
+              </div>
+              <div className="hidden md:block">
+                <SignPlate title={title} sub={sub} />
+                <HelpChip />
+              </div>
+            </>
+          ) : chrome ? (
             <>
               <SignPlate title={title} sub={sub} />
               {/* The "?" — one per gate, described in lib/help.ts. It renders only
@@ -72,7 +100,7 @@ export function Screen({
           ) : (
             <h1 className="sr-only">{title}</h1>
           )}
-          {children}
+          {stage ? <div className="stage-fill">{children}</div> : children}
         </main>
 
         {/*
@@ -81,7 +109,7 @@ export function Screen({
           a screen cannot quietly opt itself in.
         */}
         {adsAllowed(chrome) && (
-          <div className="px-gutter">
+          <div className={`px-gutter ${stage ? 'max-md:hidden' : ''}`}>
             <AdSlot placement="reading" />
           </div>
         )}
@@ -96,7 +124,7 @@ export function Screen({
           own line at the bottom with the emblem. Three tiers instead of one.
         */}
         {chrome && (
-        <footer className="mt-stack bg-ink px-gutter pb-6 pt-5">
+        <footer className={`mt-stack bg-ink px-gutter pb-6 pt-5 ${stage ? 'max-md:hidden' : ''}`}>
           <div className="h-[6px] w-full bg-red" aria-hidden="true" />
           <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="min-w-0">
@@ -139,7 +167,7 @@ export function Screen({
           /* Space for the fixed bar + the iOS home indicator. */
           <div
             aria-hidden="true"
-            className="h-[calc(var(--tap)+1.25rem+env(safe-area-inset-bottom))]"
+            className={`h-[calc(var(--tap)+1.25rem+env(safe-area-inset-bottom))] ${stage ? 'max-md:hidden' : ''}`}
           />
         )}
       </div>

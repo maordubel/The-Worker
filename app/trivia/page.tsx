@@ -31,9 +31,11 @@ export default function TriviaWingPage({ searchParams }: { searchParams: { pick?
         ? { mode: 'mix', hard: true }
         : undefined
   return (
-    <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')}>
+    <Screen title={t('screen.trivia.title')} sub={t('screen.trivia.sub')} stage>
       <QuickPick counts={topicCounts()} eras={eras} initial={initial} />
-      <ReportLink />
+      <div className="mt-2 hidden shrink-0 md:block">
+        <ReportLink />
+      </div>
     </Screen>
   )
 }

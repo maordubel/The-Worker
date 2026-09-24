@@ -41,6 +41,9 @@ const COPY = {
   liveCountdown: 'שני הצדדים נעולים. המשחק מתחיל באותה שנייה.', liveResolving: 'מאמת את שתי החמישיות ומכין את הקרב…',
   liveWon: 'לקחת את הראש בראש.', liveDraw: 'תיקו. אף אחד לא יצא נקי.', liveLost: 'היריב לקח את הראמבל הזה.',
   liveError: 'החדר לא הסתנכרן. בדוק שהלינק והחיבור תקינים ונסה שוב.',
+  // delta 87 — the phone stage: a sheet for what used to be desktop-only fine print,
+  // so the rules are reachable on a phone too, not only hidden behind `sm:block`.
+  stageRulesChip: 'חוקי המשחק', stageRulesTitle: 'איך רויאל ראמבל עובד',
 } as const
 
 export function t(key: RoyalRumbleMessageKey, vars?: Record<string, string>): string {

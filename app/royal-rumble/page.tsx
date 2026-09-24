@@ -19,7 +19,7 @@ export default function RoyalRumblePage({ searchParams }: { searchParams: { seed
   const count = royalRumblePlayerCount()
   const kits = homeKits().map(({ seasonLabel, spec }) => ({ seasonLabel, spec }))
   return (
-    <Screen title={t('title')} sub={t('sub')} chrome={false}>
+    <Screen title={t('title')} sub={t('sub')} chrome={false} stage>
       <RoyalRumbleMatchFX />
       <RoyalRumbleMode draft={draft} shuffleDraft={shuffleDraft} matchSeed={matchSeed} cursor={round.cursor} playerCount={count} kits={kits} initialRoomCode={searchParams.room} />
       <RoyalRumbleChallenge seed={draft.seed} />

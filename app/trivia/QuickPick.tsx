@@ -3,6 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 
+import { ReportLink } from '@/components/ui/ReportLink'
+import { firePickFxAt } from '@/components/stage/PickFx'
+import { SlideSheet } from '@/components/stage/SlideSheet'
 import { Num } from '@/components/ui/Num'
 import { haptic } from '@/lib/play/haptics'
 import { pendingRevenge, readMarks, seen as seenIds } from '@/lib/profile/marks'
@@ -58,6 +61,7 @@ export function QuickPick({
   const [pending, setPending] = useState(0)
   const [busy, startBusy] = useTransition()
   const [failed, setFailed] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
 
   useEffect(() => {
     setPending(pendingRevenge(readMarks()).length)
@@ -148,8 +152,8 @@ export function QuickPick({
   }
 
   return (
-    <div className="mt-stack border-rule border-ink bg-sheet">
-      <div className="border-b-rule border-ink bg-ink px-4 py-4 text-paper">
+    <div className="flex min-h-0 flex-1 flex-col border-rule border-ink bg-sheet md:block md:flex-none">
+      <div className="hidden shrink-0 border-b-rule border-ink bg-ink px-4 py-4 text-paper md:block">
         <p className="font-latin text-[10px] font-bold tracking-[0.28em] text-red" dir="ltr">
           GATE 02 · QUICK PICK
         </p>
@@ -157,16 +161,17 @@ export function QuickPick({
         <p className="mt-1 font-body text-step--1 leading-relaxed text-concrete">{t('trivia.lobby.lede')}</p>
       </div>
 
-      <div className="grid gap-4 px-3 py-4 sm:px-4">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 md:flex-none md:overflow-visible sm:px-4">
         <div className="grid grid-cols-2 gap-2">
           <BigChoice
             active={mode === 'mix' && topic === null}
             mark="∞"
             title={t('trivia.lobby.all')}
             sub={t('trivia.lobby.all.sub')}
-            onClick={() => {
+            onClick={(el) => {
               choose('mix')
               setTopic(null)
+              firePickFxAt(el, { haptic: false })
             }}
           />
           <BigChoice
@@ -174,11 +179,14 @@ export function QuickPick({
             mark="?"
             title={t('trivia.mode.surprise')}
             sub={t('trivia.lobby.surprise.sub')}
-            onClick={() => choose('surprise')}
+            onClick={(el) => {
+              choose('surprise')
+              firePickFxAt(el, { haptic: false })
+            }}
           />
         </div>
 
-        <section aria-labelledby="qp-topics">
+        <section aria-labelledby="qp-topics" className="mt-3">
           <p id="qp-topics" className="mb-1.5 font-body text-[12px] font-bold text-muted">
             {t('trivia.lobby.pickTopic')}
           </p>
@@ -191,20 +199,23 @@ export function QuickPick({
                 <li key={slug}>
                   <button
                     type="button"
-                    onClick={() => pickTopic(slug)}
+                    onClick={(event) => {
+                      pickTopic(slug)
+                      firePickFxAt(event.currentTarget, { haptic: false })
+                    }}
                     disabled={thin}
                     aria-pressed={active}
-                    className={`flex min-h-[64px] w-full flex-col items-center justify-center gap-0.5 border-rule px-1 py-1.5 transition-transform duration-press active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none ${
+                    className={`flex min-h-[58px] w-full flex-col items-center justify-center gap-0.5 border-rule px-1 py-1 transition-transform duration-press active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none ${
                       active ? 'border-red bg-red text-sheet' : 'border-ink bg-paper text-ink'
                     }`}
                   >
-                    <span aria-hidden="true" className="font-poster text-[18px] leading-none">
+                    <span aria-hidden="true" className="font-poster text-[16px] leading-none">
                       {TOPIC_SPECS[slug].mark}
                     </span>
-                    <span className="font-body text-[12px] font-bold leading-tight">
+                    <span className="font-body text-[11px] font-bold leading-tight">
                       {t(`trivia.lobby.topic.${slug}` as MessageKey)}
                     </span>
-                    <span className={`font-mono text-[11px] tabular-nums ${active ? 'text-sheet' : 'text-muted'}`}>
+                    <span className={`font-mono text-[10px] tabular-nums ${active ? 'text-sheet' : 'text-muted'}`}>
                       <Num>{count}</Num>
                     </span>
                   </button>
@@ -214,11 +225,11 @@ export function QuickPick({
           </ul>
         </section>
 
-        <section aria-labelledby="qp-eras">
+        <section aria-labelledby="qp-eras" className="mt-3">
           <p id="qp-eras" className="mb-1.5 font-body text-[12px] font-bold text-muted">
             {t('trivia.lobby.pickEra')}
           </p>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="-mx-0.5 flex gap-1.5 overflow-x-auto px-0.5 pb-1">
             <Chip active={decade === null} onClick={() => setDecade(null)} disabled={mode !== 'mix'}>
               {t('trivia.lobby.allEras')}
             </Chip>
@@ -243,61 +254,80 @@ export function QuickPick({
           </div>
         </section>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-rule border-ink bg-paper px-3 py-2.5">
-          <p className="font-body text-step--1 font-bold text-ink" aria-live="polite">
-            {pending > 0 ? t('trivia.lobby.revengeWaiting', { n: String(pending) }) : t('trivia.lobby.revengeNone')}
-          </p>
+        {pending > 0 && (
           <button
             type="button"
-            onClick={() => choose('revenge')}
-            disabled={pending === 0}
+            onClick={(event) => {
+              choose('revenge')
+              firePickFxAt(event.currentTarget, { haptic: false })
+            }}
             aria-pressed={mode === 'revenge'}
-            className={`min-h-tap border-rule px-3 font-body text-step--1 font-extrabold transition-transform duration-press active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none ${
-              mode === 'revenge' ? 'border-red bg-red text-sheet' : 'border-ink bg-sheet text-ink'
+            className={`mt-3 flex min-h-tap w-full items-center justify-between gap-2 border-rule px-3 font-body text-step--1 font-bold transition-transform duration-press active:scale-[.98] motion-reduce:transition-none ${
+              mode === 'revenge' ? 'border-red bg-red text-sheet' : 'border-ink bg-paper text-ink'
             }`}
           >
-            {t('trivia.lobby.revengeGo')}
+            <span>{t('trivia.lobby.revengeWaiting', { n: String(pending) })}</span>
+            <span className="font-extrabold">{t('trivia.lobby.revengeGo')}</span>
           </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <Toggle
-            on={practice}
-            onClick={() => {
-              haptic('tap')
-              setPractice(!practice)
-            }}
-          >
-            {t('trivia.lobby.practice')}
-          </Toggle>
-          <Toggle
-            on={hard && mode === 'mix'}
-            disabled={mode !== 'mix'}
-            onClick={() => {
-              haptic('tap')
-              setHard(!hard)
-            }}
-          >
-            {t('trivia.lobby.hard')}
-          </Toggle>
-        </div>
+        )}
       </div>
 
-      <div className="sticky bottom-[calc(var(--tap)+1.25rem+env(safe-area-inset-bottom))] z-10 flex items-center gap-3 border-t-rule border-ink bg-ink px-3 py-3 text-paper sm:px-4">
+      {/* the dock — the more chip + the ticket + go, one line at the foot of the stage */}
+      <div className="flex shrink-0 items-center gap-2 border-t-rule border-ink bg-ink px-3 py-2.5 text-paper sm:px-4">
+        <button
+          type="button"
+          onClick={() => setMoreOpen(true)}
+          className={`min-h-tap shrink-0 border-rule px-2.5 font-body text-[12px] font-extrabold transition-transform duration-press active:scale-[.96] motion-reduce:transition-none ${
+            practice || (hard && mode === 'mix') ? 'border-red bg-red text-sheet' : 'border-concrete/50 text-concrete'
+          }`}
+        >
+          {t('stage.play.options')}
+        </button>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-step-1 leading-tight">{title}</p>
-          <p className="truncate font-body text-[12px] text-concrete">{ticket}</p>
-          {failed && <p className="font-body text-[12px] text-red">{t('trivia.lobby.failed')}</p>}
+          <p className="truncate font-display text-step-0 leading-tight">{title}</p>
+          <p className="truncate font-body text-[11px] text-concrete">{ticket}</p>
+          {failed && <p className="font-body text-[11px] text-red">{t('trivia.lobby.failed')}</p>}
         </div>
         <button
           type="button"
-          onClick={start}
+          onClick={(event) => {
+            firePickFxAt(event.currentTarget, { label: '→', haptic: false })
+            start()
+          }}
           disabled={!canStart || busy}
-          className="min-h-tap shrink-0 bg-red px-6 font-display text-step-2 text-sheet transition-transform duration-press ease-stamp active:scale-[.95] disabled:opacity-50 motion-reduce:transition-none"
+          className="min-h-tap shrink-0 bg-red px-5 font-display text-step-1 text-sheet transition-transform duration-press ease-stamp active:scale-[.95] disabled:opacity-50 motion-reduce:transition-none"
         >
           {busy ? t('trivia.lobby.building') : t('trivia.lobby.go')}
         </button>
       </div>
+
+      <SlideSheet open={moreOpen} onClose={() => setMoreOpen(false)} title={t('stage.play.options')} latin="MORE">
+        <div className="grid gap-3 pb-2 pt-1">
+          <div className="grid grid-cols-2 gap-2">
+            <Toggle
+              on={practice}
+              onClick={() => {
+                haptic('tap')
+                setPractice(!practice)
+              }}
+            >
+              {t('trivia.lobby.practice')}
+            </Toggle>
+            <Toggle
+              on={hard && mode === 'mix'}
+              disabled={mode !== 'mix'}
+              onClick={() => {
+                haptic('tap')
+                setHard(!hard)
+              }}
+            >
+              {t('trivia.lobby.hard')}
+            </Toggle>
+          </div>
+          <p className="font-body text-[12px] leading-relaxed text-muted">{t('trivia.lobby.lede')}</p>
+          <ReportLink />
+        </div>
+      </SlideSheet>
     </div>
   )
 }
@@ -317,22 +347,22 @@ function BigChoice({
   mark: string
   title: string
   sub: string
-  onClick: () => void
+  onClick: (el: HTMLElement) => void
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(event) => onClick(event.currentTarget)}
       aria-pressed={active}
-      className={`flex min-h-[92px] flex-col items-start justify-between gap-1 border-rule px-3 py-2.5 text-start transition-transform duration-press active:scale-[.97] motion-reduce:transition-none ${
+      className={`flex min-h-[80px] flex-col items-start justify-between gap-1 border-rule px-3 py-2 text-start transition-transform duration-press active:scale-[.97] motion-reduce:transition-none ${
         active ? 'border-red bg-red text-sheet' : 'border-ink bg-paper text-ink'
       }`}
     >
-      <span aria-hidden="true" className="font-poster text-[30px] leading-none">
+      <span aria-hidden="true" className="font-poster text-[26px] leading-none">
         {mark}
       </span>
-      <span className="font-display text-step-1 leading-none">{title}</span>
-      <span className={`font-body text-[12px] leading-snug ${active ? 'text-sheet' : 'text-muted'}`}>{sub}</span>
+      <span className="font-display text-step-0 leading-none">{title}</span>
+      <span className={`font-body text-[11px] leading-snug ${active ? 'text-sheet' : 'text-muted'}`}>{sub}</span>
     </button>
   )
 }

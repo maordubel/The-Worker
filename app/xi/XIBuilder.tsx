@@ -4,10 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { KitShirt } from '@/components/kit/KitShirt'
 import { Num } from '@/components/ui/Num'
-import { RosterSheet, rosterKey, type RowInfo } from '@/components/roster/RosterSheet'
+import { NEUTRAL_SHIRT_SPEC, RosterSheet, rosterKey, type RowInfo } from '@/components/roster/RosterSheet'
 import { ShareRow } from '@/components/share/ShareRow'
 import type { Embedded } from '@/lib/mechanics/types'
 import { useDialog } from '@/components/ui/useDialog'
+import { FitBox } from '@/components/stage/FitBox'
+import { SlideSheet } from '@/components/stage/SlideSheet'
+import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
+import { dropZone, useDragSource } from '@/components/stage/useDrag'
+import { ShirtToken } from '@/components/stage/ShirtToken'
 import type { Formation, PitchSlot } from '@/lib/game/lineup'
 import type { RosterEntry, RosterIndex } from '@/lib/game/allTimeXI'
 import { NO_FILTER, slotStatusOf, type RosterFilter } from '@/lib/game/roster-search'
@@ -162,6 +167,9 @@ export function XIBuilder({
   /** saved references no id answers to — said on screen, never dropped silently */
   const [lost, setLost] = useState<string[]>([])
   const wide = useWide()
+  /** the phone stage (delta 87) — under 768px the drawer is the card picker, never the docked one */
+  const phone = useWide('(max-width: 767px)')
+  const [mobileSheet, setMobileSheet] = useState<'setup' | 'bench' | 'shortlist' | 'share' | null>(null)
 
   const store = useMemo(() => activeXI(), [])
   const byId = useMemo(
@@ -264,6 +272,7 @@ export function XIBuilder({
     if (readProfile().deeds['/xi']?.mark === mark) return
     emit({ type: 'deed', gate: '/xi', mark })
     haptic('lock')
+    firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: t('xi.stage.full'), big: true, haptic: 'lock' })
   }, [embedded, ready, chosen, payload, tab])
 
   const takenKeys = useMemo(
@@ -390,6 +399,31 @@ export function XIBuilder({
     [spellFor, spellsOf, seasonForSpell, shirts.seasons],
   )
 
+  /** Exchange whoever stands in `from` and `to` — a tapped swap and a dragged one both land here. */
+  function swapSlots(from: string, to: string) {
+    if (from === to) return
+    patch((current) => {
+      const picks = { ...current.picks }
+      const versions = { ...current.versions }
+      const there = picks[to]
+      const here = picks[from]
+      if (here) picks[to] = here
+      else delete picks[to]
+      if (there) picks[from] = there
+      else delete picks[from]
+      const versionHere = versions[from]
+      const versionThere = versions[to]
+      if (versionHere) versions[to] = versionHere
+      else delete versions[to]
+      if (versionThere) versions[from] = versionThere
+      else delete versions[from]
+      const captain = current.captain === from ? to : current.captain === to ? from : current.captain
+      return { ...current, picks, versions, captain }
+    })
+    haptic('tap')
+    firePickFxAt(document.querySelector(`[data-drop="${to}"]`), { tone: 'ink' })
+  }
+
   function tapSlot(slot: PitchSlot) {
     // A swap in progress owns the next tap: the second slot is the destination, and
     // tapping the same one again is how you change your mind.
@@ -397,27 +431,7 @@ export function XIBuilder({
       const from = swapFrom
       setSwapFrom(null)
       setSelected(slot.slotId)
-      if (from === slot.slotId) return
-      haptic('tap')
-      patch((current) => {
-        const picks = { ...current.picks }
-        const versions = { ...current.versions }
-        const there = picks[slot.slotId]
-        const here = picks[from]
-        if (here) picks[slot.slotId] = here
-        else delete picks[slot.slotId]
-        if (there) picks[from] = there
-        else delete picks[from]
-        const versionHere = versions[from]
-        const versionThere = versions[slot.slotId]
-        if (versionHere) versions[slot.slotId] = versionHere
-        else delete versions[slot.slotId]
-        if (versionThere) versions[from] = versionThere
-        else delete versions[from]
-        const captain =
-          current.captain === from ? slot.slotId : current.captain === slot.slotId ? from : current.captain
-        return { ...current, picks, versions, captain }
-      })
+      swapSlots(from, slot.slotId)
       return
     }
     setSelected(slot.slotId)
@@ -427,17 +441,44 @@ export function XIBuilder({
     else if (drawer === 'slot') setDrawer(null)
   }
 
+  /** A card dropped straight on a slot — the mobile draft rail's drag-up (delta 87). */
+  function placeAt(slotId: string, entry: RosterEntry, filter: RosterFilter) {
+    if (!slotById.has(slotId)) return
+    const answer = chooseSpell(
+      sheet.challenge,
+      spellsOf(entry),
+      slotStatusOf(entry),
+      { year: filter.year, decade: filter.decade, fallbackId: shirts.defaultVersion[entry.slug] ?? null },
+      takenDecades(rows, slotId),
+    )
+    if (!answer.ok) {
+      haptic('miss')
+      return
+    }
+    patch((current) => {
+      const versions = { ...current.versions }
+      if (answer.spell.id !== '') versions[slotId] = answer.spell.id
+      else delete versions[slotId]
+      return { ...current, picks: { ...current.picks, [slotId]: entry }, versions }
+    })
+    setDrawer(null)
+    setSelected(null)
+    haptic('tap')
+  }
+
   function place(entry: RosterEntry, filter: RosterFilter = NO_FILTER) {
     if (drawer === 'twelfth') {
       patch((current) => ({ ...current, twelfth: entry }))
       setDrawer(null)
       haptic('tap')
+      firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: entry.familyHe })
       return
     }
     if (drawer === 'cut') {
       patch((current) => ({ ...current, cut: entry }))
       setDrawer(null)
       haptic('tap')
+      firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: entry.familyHe, tone: 'sign' })
       return
     }
     if (selected === null) return
@@ -454,7 +495,13 @@ export function XIBuilder({
       return { ...current, picks: { ...current.picks, [slotId]: entry }, versions }
     })
     setDrawer(null)
+    // A placement CLOSES back to the pitch — it never re-opens as the filled-slot sheet
+    // (captain/replace/swap/remove). That sheet is only for a tap on an ALREADY-filled
+    // shirt (round 2, Maor 23.9.2026).
+    setSelected(null)
     haptic('tap')
+    // every placement carries the stamp — one hit, wherever the pick came from (delta 87)
+    window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: entry.familyHe }), 0)
   }
 
   function remove(slotId: string) {
@@ -544,7 +591,7 @@ export function XIBuilder({
     [sheet.challenge],
   )
 
-  const drawerNode = drawer ? (
+  const drawerNode = drawer && !phone ? (
     <RosterSheet
       key={`${drawer}-${selected ?? ''}`}
       docked={wide}
@@ -588,8 +635,347 @@ export function XIBuilder({
     />
   ) : null
 
+  /**
+   * גיליון הגיוס בנייד — the same sheet, `cardMode` on: a rail of draft cards, dragged
+   * up onto a pitch slot (delta 87, Maor 23.9.2026 — "you must improve the player
+   * selection into a much more fun form"). Only one of `drawerNode` / `mobileDrawerNode`
+   * ever mounts, gated by `phone`, so there is never a second `role="dialog"` in the tree.
+   */
+  const mobileDrawerNode = drawer && phone ? (
+    <RosterSheet
+      key={`m-${drawer}-${selected ?? ''}`}
+      cardMode
+      title={
+        drawer === 'twelfth'
+          ? t('xi.bench.twelfth')
+          : drawer === 'cut'
+            ? t('xi.bench.cut')
+            : (openSlot?.roleHe ?? t('xi.tip.pick'))
+      }
+      roster={roster}
+      taken={takenKeys}
+      onPick={place}
+      onDragPick={drawer === 'slot' ? placeAt : undefined}
+      onClose={() => setDrawer(null)}
+      scout={
+        drawer === 'slot' && openSlot
+          ? {
+              role: openSlot.role,
+              roleHe: openSlot.roleHe,
+              order,
+              onOrder: setOrder,
+              fitOnly,
+              onFitOnly: setFitOnly,
+              shortlist: shortlisted,
+              onShortlist: toggleShortlist,
+              shortlistEntries: sheet.shortlist,
+              refuse: sheet.challenge === 'free' ? undefined : refuse,
+              describeHidden,
+              rowInfo,
+            }
+          : undefined
+      }
+      footer={
+        drawer === 'slot' && worst ? (
+          <p className="mt-2 border-hair border-ink/40 bg-paper px-3 py-2 font-body text-[11px] leading-snug text-ink">
+            {t('xi.worst.drawer')}
+          </p>
+        ) : undefined
+      }
+    />
+  ) : null
+
+  const primaryLabel = chosen >= 11 ? t('xi.stage.finish') : t('xi.stage.fillNext')
+
+  function primaryAction() {
+    if (chosen >= 11) {
+      setPoster(true)
+      return
+    }
+    const empty = sheet.formation.slots.find((slot) => !sheet.picks[slot.slotId])
+    if (empty) tapSlot(empty)
+  }
+
   return (
-    <div className="mt-stack">
+    <>
+      {/* ================================================================ the phone stage
+          Maor, 23.9.2026: "too long in an un-fun way… remove the squares around the
+          shirts… improve the player selection into a much more fun form." One screen:
+          a one-line HUD, the pitch filling the rest (ShirtToken, no tiles), a dock. */}
+      <div className="flex min-h-0 flex-1 flex-col md:hidden">
+        <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto pb-1">
+          <div role="tablist" aria-label={t('xi.tabs')} className={embedded ? 'hidden' : 'flex shrink-0 gap-1'}>
+            {XI_TABS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                role="tab"
+                aria-selected={tab === option}
+                onClick={() => {
+                  setTab(option)
+                  setSelected(null)
+                  setSwapFrom(null)
+                  setUndo(null)
+                  setDrawer(null)
+                  setMobileSheet(null)
+                }}
+                className={`min-h-[34px] shrink-0 border-hair px-2.5 font-sign text-[12px] leading-none transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+                  tab === option ? 'border-ink bg-ink text-paper' : 'border-ink/40 text-ink'
+                }`}
+              >
+                {t(`xi.tab.${option}` as MessageKey)}
+              </button>
+            ))}
+          </div>
+          {!embedded && (
+            <button
+              type="button"
+              onClick={() => setMobileSheet('setup')}
+              className="flex min-h-[34px] shrink-0 items-center gap-1.5 border-hair border-ink/40 bg-paper px-2.5 font-body text-[11.5px] font-extrabold text-ink"
+            >
+              <bdi dir="ltr">{sheet.formation.name}</bdi>
+              {sheet.challenge !== 'free' && <span aria-hidden="true" className="text-red">●</span>}
+              <span aria-hidden="true">⚙</span>
+            </button>
+          )}
+          <p className="ms-auto shrink-0 font-mono text-[13px] tracking-widest text-ink">
+            <Num>{`${chosen}/11`}</Num>
+          </p>
+        </div>
+
+        {worst && (
+          <p className="mt-1 shrink-0 truncate border-hair border-ink/40 bg-sheet px-2.5 py-1 font-body text-[10.5px] leading-snug text-ink">
+            {t('xi.worst.note')}
+          </p>
+        )}
+        {lost.length > 0 && (
+          <p className="mt-1 shrink-0 truncate border-s-rule border-red ps-2 font-body text-[10px] leading-snug text-ink">
+            {t('xi.migrate.lost', { n: String(lost.length), refs: lost.join(' · ') })}
+          </p>
+        )}
+
+        <FitBox ratio={0.75} className="mt-1.5">
+          <XIPitchStage
+            formation={sheet.formation}
+            picks={sheet.picks}
+            seasonOf={seasonOf}
+            seasons={shirts.seasons}
+            captain={sheet.captain}
+            selected={selected}
+            broken={broken}
+            onTap={tapSlot}
+            onSwap={swapSlots}
+          />
+        </FitBox>
+
+        <p className="mt-1.5 shrink-0 truncate border-hair border-ink/30 bg-sheet px-2.5 py-1.5 font-body text-[11px] leading-snug text-ink">
+          {swapFrom !== null
+            ? t('xi.tip.swap')
+            : openSlot
+              ? t('xi.tip.selected', { role: openSlot.roleHe })
+              : t('xi.tip.pick')}
+        </p>
+
+        <div className="mt-1.5 flex shrink-0 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={primaryAction}
+            className="flex min-h-tap flex-1 items-center justify-center bg-red px-3 font-body text-step--1 font-extrabold text-paper transition-transform duration-press ease-stamp active:scale-[.97] motion-reduce:transition-none"
+          >
+            {primaryLabel}
+          </button>
+          {!embedded && (
+            <>
+              <DockChip label={t('xi.stage.bench')} onClick={() => setMobileSheet('bench')} />
+              <DockChip label={`★ ${sheet.shortlist.length}`} onClick={() => setMobileSheet('shortlist')} />
+              <DockChip label={t('stage.share')} onClick={() => setMobileSheet('share')} disabled={chosen === 0} />
+            </>
+          )}
+          {embedded && (
+            <button
+              type="button"
+              onClick={() => embedded.onResult({ picks: Object.values(sheet.picks) })}
+              disabled={chosen < 11}
+              data-xi="back-stage"
+              className="min-h-tap shrink-0 border-rule border-ink bg-ink px-3 font-body text-[12px] font-extrabold text-paper disabled:opacity-40"
+            >
+              {embedded.doneLabel}
+            </button>
+          )}
+        </div>
+
+        {mobileDrawerNode}
+
+        {/* the slot sheet — a filled shirt, tapped: armband, replace, swap, remove */}
+        <SlideSheet
+          open={selected !== null && Boolean(occupant) && drawer !== 'slot'}
+          onClose={() => setSelected(null)}
+          title={openSlot?.roleHe ?? ''}
+          size="auto"
+        >
+          {openSlot && occupant && (
+            <SlotDetail
+              slot={openSlot}
+              occupant={occupant}
+              sheet={sheet}
+              rows={rows}
+              slotVersions={slotVersions}
+              swapFrom={swapFrom}
+              onCaptain={() => {
+                haptic('lock')
+                patch((current) => ({
+                  ...current,
+                  captain: current.captain === openSlot.slotId ? null : openSlot.slotId,
+                }))
+              }}
+              onReplace={() => setDrawer('slot')}
+              onSwap={() => {
+                setSwapFrom(swapFrom === openSlot.slotId ? null : openSlot.slotId)
+                setSelected(null)
+              }}
+              onRemove={() => {
+                remove(openSlot.slotId)
+                setSelected(null)
+              }}
+              onVersion={(id) => {
+                haptic('tap')
+                patch((current) => ({ ...current, versions: { ...current.versions, [openSlot.slotId]: id } }))
+              }}
+            />
+          )}
+        </SlideSheet>
+
+        <SlideSheet open={mobileSheet === 'setup'} onClose={() => setMobileSheet(null)} title={t('xi.stage.setup')} size="half">
+          <div>
+            <p className="font-body text-[10.5px] font-extrabold tracking-wide text-muted">{t('xi.dock.formation')}</p>
+            <div className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
+              {formations.map((option) => (
+                <button
+                  key={option.name}
+                  type="button"
+                  onClick={() => changeFormation(option)}
+                  aria-pressed={sheet.formation.name === option.name}
+                  className={`min-h-tap shrink-0 border-hair px-3 font-mono text-step--1 tabular-nums transition-transform duration-press ease-stamp active:scale-[.95] motion-reduce:transition-none ${
+                    sheet.formation.name === option.name ? 'border-red bg-red text-paper' : 'border-ink/40 text-ink'
+                  }`}
+                >
+                  <bdi dir="ltr">{option.name}</bdi>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mt-3">
+            <ChallengePicker
+              value={sheet.challenge}
+              onChange={(next) => {
+                haptic('tap')
+                patch((current) => ({ ...current, challenge: next }))
+              }}
+            />
+          </div>
+          <ChallengeLine verdict={verdict} picks={sheet.picks} slots={sheet.formation.slots} />
+          <p className="mt-3 font-body text-[11px] leading-snug text-muted">
+            {t('xi.dna.line', {
+              spread: String(dna.spread),
+              israeli: String(dna.origin.israeli),
+              foreign: String(dna.origin.foreign),
+            })}
+          </p>
+        </SlideSheet>
+
+        <SlideSheet open={mobileSheet === 'bench'} onClose={() => setMobileSheet(null)} title={t('xi.stage.bench')} size="auto">
+          <div className="grid gap-2">
+            <BenchCard
+              title={t('xi.bench.twelfth')}
+              note={t('xi.bench.twelfth.note')}
+              entry={sheet.twelfth}
+              onOpen={() => {
+                setSelected(null)
+                setDrawer('twelfth')
+              }}
+              onClear={() => patch((current) => ({ ...current, twelfth: null }))}
+            />
+            <BenchCard
+              title={t('xi.bench.cut')}
+              note={t('xi.bench.cut.note')}
+              entry={sheet.cut}
+              onOpen={() => {
+                setSelected(null)
+                setDrawer('cut')
+              }}
+              onClear={() => patch((current) => ({ ...current, cut: null }))}
+            />
+          </div>
+        </SlideSheet>
+
+        <SlideSheet open={mobileSheet === 'shortlist'} onClose={() => setMobileSheet(null)} title={t('xi.shortlist.title')} size="auto">
+          {sheet.shortlist.length === 0 ? (
+            <p className="font-body text-[12px] leading-snug text-muted">{t('xi.shortlist.empty')}</p>
+          ) : (
+            <ul className="flex flex-wrap gap-1.5">
+              {sheet.shortlist.map((entry) => (
+                <li key={rosterKey(entry)} className="flex items-stretch">
+                  <button
+                    type="button"
+                    disabled={selected === null || takenKeys.has(rosterKey(entry))}
+                    onClick={() => {
+                      if (selected === null) return
+                      place(entry)
+                      setMobileSheet(null)
+                    }}
+                    className="flex min-h-tap items-center border-hair border-ink/40 bg-paper px-2.5 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+                  >
+                    <span aria-hidden="true" className="me-1">★</span>
+                    {entry.familyHe}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleShortlist(entry)}
+                    aria-label={t('xi.shortlist.drop', { name: entry.nameHe })}
+                    className="min-h-tap border-hair border-s-0 border-ink/40 bg-paper px-2 font-body text-[13px] leading-none text-muted"
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {selected === null && sheet.shortlist.length > 0 && (
+            <p className="mt-2 font-body text-[11px] leading-snug text-muted">{t('xi.draft.selectFirst')}</p>
+          )}
+        </SlideSheet>
+
+        <SlideSheet open={mobileSheet === 'share'} onClose={() => setMobileSheet(null)} title={t('stage.share')} size="auto">
+          <ShareRow
+            kind={worst ? 'worst' : 'xi'}
+            params={{ total: '11' }}
+            headline={`${chosen}/11`}
+            card={{
+              template: 'xi' as const,
+              kicker: worst ? 'GATE 1 · WORST XI · ONE FAN’S OPINION' : 'GATE 1 · ALL-TIME XI',
+              label: worst ? t('xi.tab.worst') : t('screen.xi.title'),
+              eyebrow: sheet.formation.name,
+              hero: worst ? t('xi.tab.worst') : t('screen.xi.title'),
+              xi: sheet.formation.slots
+                .map((slot) => {
+                  const entry = sheet.picks[slot.slotId]
+                  if (!entry) return null
+                  const roleHe = sheet.captain === slot.slotId ? t('xi.card.captain', { role: slot.roleHe }) : slot.roleHe
+                  return { roleHe, nameHe: entry.familyHe, x: slot.x, y: slot.y }
+                })
+                .filter((slot): slot is NonNullable<typeof slot> => slot !== null),
+              stats: [],
+              cta: worst ? t('xi.worst.cta') : t('xi.cta'),
+              challenge: worst ? t('xi.worst.opinion') : benchLine(sheet.twelfth, sheet.cut) ?? t('share.sameRound'),
+            }}
+          />
+        </SlideSheet>
+      </div>
+
+      {/* ================================================================ desktop / tablet
+          untouched design — the whole grid below md is never shown; `phone` above keeps
+          the drawer from mounting twice. */}
+      <div className="mt-stack hidden md:block">
       {/* the two sheets. Same pitch, same roster, same eleven slots. */}
       <div role="tablist" aria-label={t('xi.tabs')} className={embedded ? 'hidden' : 'flex gap-1.5'}>
         {XI_TABS.map((option) => (
@@ -980,6 +1366,7 @@ export function XIBuilder({
           drawerNode
         )}
       </div>
+      </div>
 
       {poster && (
         <Poster
@@ -997,7 +1384,7 @@ export function XIBuilder({
           onClose={() => setPoster(false)}
         />
       )}
-    </div>
+    </>
   )
 }
 
@@ -1209,6 +1596,270 @@ function XIPitch({
           </button>
         )
       })}
+    </div>
+  )
+}
+
+/** A small dock chip — one of the 1-3 secondary actions beside the primary button. */
+function DockChip({ label, onClick, disabled = false }: { label: string; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="min-h-tap shrink-0 border-hair border-ink/40 bg-paper px-2.5 font-body text-[11px] font-extrabold leading-none text-ink transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none"
+    >
+      {label}
+    </button>
+  )
+}
+
+/**
+ * הדשא — the drawing every pitch gate shares (delta 87): mown bands and the chalk
+ * lines, behind whatever tokens a caller puts on it.
+ */
+function PitchGround({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`relative h-full w-full touch-manipulation overflow-hidden border-rule border-ink [container-type:inline-size] ${className}`}
+      style={{ background: 'rgb(var(--p-grass))' }}
+    >
+      <div aria-hidden="true" className="absolute inset-0">
+        {[0, 1, 2, 3, 4, 5].map((band) => (
+          <div
+            key={band}
+            className="absolute inset-x-0"
+            style={{ top: `${band * 16.6}%`, height: '8.3%', background: 'rgb(var(--p-grass-dark))' }}
+          />
+        ))}
+      </div>
+      <svg viewBox="0 0 100 133" preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden="true">
+        <g fill="none" stroke="rgb(var(--p-halo) / .8)" strokeWidth="0.6">
+          <rect x="3" y="3" width="94" height="127" />
+          <path d="M3 66.5 H97" />
+          <circle cx="50" cy="66.5" r="12" />
+          <rect x="27" y="3" width="46" height="18" />
+          <rect x="27" y="112" width="46" height="18" />
+        </g>
+      </svg>
+      {children}
+    </div>
+  )
+}
+
+/**
+ * המגרש בנייד — the phone pitch (delta 87). No tile, no boxed name: a `ShirtToken`
+ * standing straight on the grass, and every slot is a drop zone (`data-drop`) so a
+ * dragged draft card — or a dragged neighbour, for a swap — can land on it directly.
+ */
+function XIPitchStage({
+  formation,
+  picks,
+  seasonOf,
+  seasons,
+  captain,
+  selected,
+  broken,
+  onTap,
+  onSwap,
+}: {
+  formation: Formation
+  picks: Record<string, RosterEntry>
+  seasonOf: (slotId: string) => string | null
+  seasons: ShirtBoard['seasons']
+  captain: string | null
+  selected: string | null
+  broken: ReadonlySet<string>
+  onTap: (slot: PitchSlot) => void
+  onSwap: (from: string, to: string) => void
+}) {
+  return (
+    <PitchGround>
+      {formation.slots.map((slot) => {
+        const entry = picks[slot.slotId]
+        const seasonLabel = entry ? seasonOf(slot.slotId) : null
+        const season = seasonLabel ? seasons[seasonLabel] : undefined
+        const live = selected === slot.slotId
+        const off = broken.has(slot.slotId)
+        return (
+          <SlotToken
+            key={slot.slotId}
+            slot={slot}
+            entry={entry ?? null}
+            season={season ?? null}
+            live={live}
+            captain={captain === slot.slotId}
+            off={off}
+            onTap={onTap}
+            onSwap={onSwap}
+          />
+        )
+      })}
+    </PitchGround>
+  )
+}
+
+/** One slot of the phone pitch — a tap target, a drop zone, and (once filled) a drag source. */
+function SlotToken({
+  slot,
+  entry,
+  season,
+  live,
+  captain,
+  off,
+  onTap,
+  onSwap,
+}: {
+  slot: PitchSlot
+  entry: RosterEntry | null
+  season: ShirtBoard['seasons'][string] | null
+  live: boolean
+  captain: boolean
+  off: boolean
+  onTap: (slot: PitchSlot) => void
+  onSwap: (from: string, to: string) => void
+}) {
+  const drag = useDragSource({
+    payload: `xislot:${slot.slotId}`,
+    disabled: !entry,
+    onDrop: (zone) => onSwap(slot.slotId, zone),
+  })
+  const style = { insetInlineStart: `${slot.x}%`, top: `${Math.min(slot.y, 90)}%` }
+  return (
+    <button
+      type="button"
+      {...(entry ? drag : {})}
+      {...dropZone(slot.slotId)}
+      onClick={() => onTap(slot)}
+      aria-pressed={live}
+      aria-label={entry ? `${slot.roleHe} — ${entry.nameHe}` : slot.roleHe}
+      style={style}
+      className="absolute -translate-x-1/2 -translate-y-1/2 rtl:translate-x-1/2 min-h-tap min-w-tap transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none"
+    >
+      {entry ? (
+        <ShirtToken
+          spec={season?.spec ?? NEUTRAL_SHIRT_SPEC}
+          name={entry.familyHe}
+          sub={season?.seasonLabel}
+          live={live}
+          captain={captain}
+          flag={off}
+        />
+      ) : (
+        <EmptySlotMark roleHe={slot.roleHe} live={live} />
+      )}
+    </button>
+  )
+}
+
+/**
+ * An empty slot — a dashed SHIRT SILHOUETTE, not a box (round 2, Maor: remove the
+ * squares). The live slot pulses by TRANSFORM only (rule 8: no colour-opacity animation
+ * on grass).
+ */
+function EmptySlotMark({ roleHe, live }: { roleHe: string; live: boolean }) {
+  return (
+    <span className="flex flex-col items-center">
+      <svg
+        viewBox="0 0 60 72"
+        aria-hidden="true"
+        className={`block w-[11cqw] max-w-[62px] ${live ? 'animate-fx-wobble motion-reduce:animate-none' : ''}`}
+        fill="none"
+        stroke={live ? 'rgb(var(--red))' : 'rgb(var(--sheet) / .7)'}
+        strokeWidth="2.4"
+        strokeDasharray="4 3"
+        strokeLinejoin="round"
+      >
+        <path d="M20 6 L6 16 L12 26 L18 22 L18 66 L42 66 L42 22 L48 26 L54 16 L40 6 Q30 13 20 6 Z" />
+      </svg>
+      <span
+        className={`mt-0.5 block max-w-[24cqw] truncate px-1.5 py-[2px] font-body text-[10px] font-extrabold leading-tight ${
+          live ? 'text-red' : 'text-sheet/80'
+        }`}
+      >
+        {roleHe}
+      </span>
+    </span>
+  )
+}
+
+/** The filled-slot sheet: armband, versions, replace, swap, remove — one man, one screen. */
+function SlotDetail({
+  slot,
+  occupant,
+  sheet,
+  rows,
+  slotVersions,
+  swapFrom,
+  onCaptain,
+  onReplace,
+  onSwap,
+  onRemove,
+  onVersion,
+}: {
+  slot: PitchSlot
+  occupant: RosterEntry
+  sheet: Sheet
+  rows: SheetRow[]
+  slotVersions: ShirtBoard['versions'][string]
+  swapFrom: string | null
+  onCaptain: () => void
+  onReplace: () => void
+  onSwap: () => void
+  onRemove: () => void
+  onVersion: (id: string) => void
+}) {
+  return (
+    <div>
+      <p className="font-body text-step--1 text-ink">{occupant.nameHe}</p>
+      {slotVersions && slotVersions.length > 1 && (
+        <div className="mt-2">
+          <p className="font-body text-[10.5px] font-extrabold text-muted">{t('xi.version.title')}</p>
+          <div className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
+            {slotVersions.map((version) => {
+              const live = sheet.versions[slot.slotId] === version.id
+              const allowed = chooseSpell(
+                sheet.challenge,
+                [{ id: version.id, fromYear: version.fromYear, toYear: version.toYear }],
+                slotStatusOf(occupant),
+                {},
+                takenDecades(rows, slot.slotId),
+              ).ok
+              return (
+                <button
+                  key={version.id}
+                  type="button"
+                  aria-pressed={live}
+                  disabled={!allowed && !live}
+                  onClick={() => onVersion(version.id)}
+                  className={`flex min-h-tap shrink-0 flex-col items-center justify-center border-hair px-2.5 py-1 leading-tight transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-35 motion-reduce:transition-none ${
+                    live ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
+                  }`}
+                >
+                  <span className="font-mono text-[11px] tabular-nums">
+                    <bdi dir="ltr">
+                      {version.fromYear === version.toYear ? String(version.fromYear) : `${version.fromYear}–${version.toYear}`}
+                    </bdi>
+                  </span>
+                  <span className={`font-body text-[9px] ${live ? 'text-concrete' : 'text-muted'}`}>
+                    {version.seasonLabel ? t('xi.version.shirt', { season: version.seasonLabel }) : t('xi.version.noShirt')}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        <SlotButton
+          label={sheet.captain === slot.slotId ? t('xi.slot.captainOff') : t('xi.slot.captain')}
+          live={sheet.captain === slot.slotId}
+          onClick={onCaptain}
+        />
+        <SlotButton label={t('xi.slot.replace')} onClick={onReplace} />
+        <SlotButton label={swapFrom === slot.slotId ? t('xi.slot.swapping') : t('xi.slot.swap')} live={swapFrom === slot.slotId} onClick={onSwap} />
+        <SlotButton label={t('xi.slot.remove')} onClick={onRemove} />
+      </div>
     </div>
   )
 }

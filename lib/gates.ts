@@ -80,6 +80,11 @@ export type Gate = {
   playable: boolean
   /** gate 5 only — the line on the flag */
   callHe?: MessageKey
+  /**
+   * בקרוב — a closed plate that is ANNOUNCED rather than under refurbishment. Drawn with
+   * the "בקרוב" band instead of "בשיפוצים". Only meaningful with `href: null`.
+   */
+  soon?: true
 }
 
 /**
@@ -195,14 +200,22 @@ export const GATES: readonly Gate[] = [
     playable: true,
   },
   {
+    /**
+     * שער 10 — פרה עיוורת (owner decision, 23.9.2026): a new game, announced and not yet
+     * open. The member book that stood here (`/tik`) is NOT gone — it is the personal
+     * area, reached from the tab bar as "המנוי שלי", which is where Maor wants it. So the
+     * plate is a `null` href with `soon`, and nothing on the wall links to a route the
+     * gate no longer owns.
+     */
     number: 10,
-    href: '/tik',
+    href: null,
     title: 'gate.10',
-    latin: 'MEMBER BOOK · WEST',
+    latin: 'BLIND COW · WEST',
     plate: 'plain',
     stain: 'b',
     seeded: false,
     playable: false,
+    soon: true,
   },
   {
     number: 11,

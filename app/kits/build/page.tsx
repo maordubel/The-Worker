@@ -45,7 +45,7 @@ export default function KitGamePage({ searchParams }: { searchParams: { seed?: s
   }
   const puzzles = dealKitRound(round.seed, round.cursor)
   return (
-    <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false} fullBleed>
+    <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false} stage>
       <KitGameRun puzzles={puzzles} seed={round.seed} cursor={round.cursor} exactKits={exactKits()} />
     </Screen>
   )

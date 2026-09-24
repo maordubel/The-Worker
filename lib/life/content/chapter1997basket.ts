@@ -156,40 +156,10 @@ export const CONVERSATIONS_HALL: Conversation[] = [
       },
     ],
   },
-  {
-    id: 'h1-inside',
-    nameHe: null,
-    branches: [
-      {
-        lines: [
-          { who: null, text: 'גג הפח, החום, ריח של גרעינים ונקניקיות מהמזנון. הפרקט שוקע בדיוק במקום שהוא תמיד שוקע.' },
-          { who: null, text: 'אלפיים מקומות באולם הזה. הערב אפשר לספור אחד־אחד את מי שבא, ואף אחד לא רוצה.' },
-          { who: 'לימור', text: 'תעמוד לידי. אני סופרת כמה אנחנו. אני רוצה שיהיה רשום.' },
-          { who: null, text: 'שתי דקות על השעון והאולם כבר שותק. לא שקט של אבל — של אנשים שמחשבים כמה עולה להישאר.' },
-          { who: 'שחור', text: 'הארגזים. אותו סדר, הפוך.' },
-        ],
-        choices: [
-          { id: 'carry', text: 'לסחוב חזרה. עד הסוף.', then: [{ e: 'rel', who: 'shachor', axis: 'sharedHistory', delta: 6 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'presence', mode: 'inside' }, { e: 'goto', node: 'h1-out' }] },
-          { id: 'efi', text: 'לחפש את אפי קודם.', then: [{ e: 'goto', node: 'h1-efi' }] },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'h1-efi',
-    nameHe: 'אפי',
-    branches: [
-      {
-        when: { relationship: { who: 'efi', axis: 'trust', max: 45 } },
-        lines: [{ who: null, text: 'אפי לא היה. לימור אמרה שהוא "בא פחות". לא שאלת מאז מתי.' }],
-        then: [{ e: 'wellbeing', key: 'loneliness', delta: 4 }, { e: 'presence', mode: 'inside' }, { e: 'goto', node: 'h1-out' }],
-      },
-      {
-        lines: [{ who: 'אפי', text: 'ירדנו.' }, { who: 'פוגי', text: 'ירדנו.' }, { who: 'אפי', text: 'הקבוצה הזאת קיימת מ-1935 ואף פעם לא ירדה. ואני זוכר אותך על הגב שלי אחרי הגביע. ארבע שנים.' }],
-        then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 6 }, { e: 'presence', mode: 'inside' }, { e: 'goto', node: 'h1-out' }],
-      },
-    ],
-  },
+  // (23.9.2026) `h1-inside`/`h1-efi`/`h1-out` removed: the overlay moved this night from
+  // inside the hall to `h1-chain` (outside, via the parallel Herzliya result), and nothing
+  // pointed at this trio any more once its `match`/`hall-97` step stopped being played
+  // (life-orphans, life-match).
   {
     id: 'h1-chain',
     nameHe: null,
@@ -213,11 +183,6 @@ export const CONVERSATIONS_HALL: Conversation[] = [
     id: 'h1-after-chain',
     nameHe: null,
     branches: [{ lines: [{ who: null, text: 'שנה עוברת. העלייה חזרה לא מוחקת את הדרך שבה ירדתם.' }], then: [{ e: 'flag', flag: 'h1:chain-complete' }] }],
-  },
-  {
-    id: 'h1-out',
-    nameHe: null,
-    branches: [{ lines: [{ who: null, text: 'בחוץ, בפינה, סוקו רשם בפנקס. את התאריך קודם. גם את זה כותבים.' }] }],
   },
   {
     id: 'h1-bloomfield',

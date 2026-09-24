@@ -1,9 +1,12 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 
+import { BuiltByDubel } from '@/components/ui/BuiltByDubel'
 import { useDialog } from '@/components/ui/useDialog'
+import { CREDITS_PATH } from '@/lib/credits/groups'
 import { helpForRoute } from '@/lib/help'
 import { t } from '@/lib/i18n'
 
@@ -39,7 +42,7 @@ import { t } from '@/lib/i18n'
  *     one page in that gate that is a genuine "before" — nobody has started a round yet
  *     — so it is where the run's own rules (stages, lives, the clock) get explained.
  */
-export function HelpChip() {
+export function HelpChip({ compact = false }: { compact?: boolean } = {}) {
   const pathname = usePathname()
   const found = helpForRoute(pathname ?? '')
   const [open, setOpen] = useState(false)
@@ -51,13 +54,15 @@ export function HelpChip() {
 
   return (
     <>
-      <div className="mt-2 flex justify-end">
+      <div className={compact ? 'flex shrink-0' : 'mt-2 flex justify-end'}>
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-haspopup="dialog"
           aria-label={t('help.chip.aria', { gate: gateLabel })}
-          className="flex min-h-tap min-w-tap items-center justify-center border-rule border-ink bg-sheet font-poster text-[19px] leading-none text-ink transition-transform duration-press ease-stamp active:scale-[.92] motion-reduce:transition-none"
+          className={`flex items-center justify-center border-rule border-ink bg-sheet font-poster leading-none text-ink transition-transform duration-press ease-stamp active:scale-[.92] motion-reduce:transition-none ${
+            compact ? 'h-11 w-11 text-[17px]' : 'min-h-tap min-w-tap text-[19px]'
+          }`}
         >
           ?
         </button>
@@ -94,10 +99,18 @@ export function HelpChip() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 px-4 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+            <div className="flex flex-col gap-4 px-4 py-3 pb-3">
               <HelpRow label={t('help.section.what')} text={t(help.whatKey)} />
               <HelpRow label={t('help.section.score')} text={t(help.scoreKey)} />
               <HelpRow label={t('help.section.time')} text={t(help.timeKey)} />
+            </div>
+            {/* On the phone stage the colophon is not under the field (delta 87), so the
+                build credit travels with the one sheet every gate has. */}
+            <div className="flex items-center justify-between gap-3 bg-ink px-4 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 md:hidden">
+              <Link href={CREDITS_PATH} prefetch={false} className="min-h-tap inline-flex items-center font-body text-[11px] font-bold text-paper underline decoration-red decoration-2 underline-offset-4">
+                {t('footer.credits')}
+              </Link>
+              <BuiltByDubel />
             </div>
           </div>
         </div>

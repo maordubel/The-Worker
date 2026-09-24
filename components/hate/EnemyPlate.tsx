@@ -37,7 +37,7 @@ export function EnemyPlate({
   state?: 'live' | 'won' | 'out'
   /** the plate currently pinned on the hill — only meaningful while `state` is `live` */
   holder?: boolean
-  onPick?: () => void
+  onPick?: (el: HTMLButtonElement) => void
   compact?: boolean
   /**
    * The run variant. Two full plates plus the arena furniture came to ~950px on a
@@ -85,21 +85,23 @@ export function EnemyPlate({
     <button
       type="button"
       disabled={state !== 'live' || !onPick}
-      onClick={onPick}
+      onClick={(event) => onPick?.(event.currentTarget)}
       aria-label={`${t('hate.tap')} ${enemy.nameHe}`}
       className={`group relative block min-h-tap w-full overflow-hidden border-rule text-start transition-all duration-press ease-stamp motion-reduce:transition-none ${cardTone}`}
     >
-      <div className={`relative flex items-baseline justify-between gap-2 border-b-hair border-hate-ink/20 px-3 py-1.5 text-hate-ink ${headerTone}`}>
+      <div
+        className={`relative flex items-baseline justify-between gap-2 border-b-hair border-hate-ink/20 text-hate-ink ${headerTone} ${dense ? 'px-2.5 py-1' : 'px-3 py-1.5'}`}
+      >
         <span className="font-display text-[12px] leading-none">{t(category)}</span>
         <span className="font-latin text-[8px] font-bold tracking-[0.18em] text-hate-muted" dir="ltr">
           {enemy.latin}
         </span>
       </div>
 
-      <div className={`relative ${dense ? 'px-2.5 pb-2.5 pt-2' : 'px-3 pb-3 pt-2.5'}`}>
+      <div className={`relative ${dense ? 'px-2.5 pb-1 pt-1' : 'px-3 pb-3 pt-2.5'}`}>
         <div className="flex items-baseline justify-between gap-2">
           <h3
-            className={`font-poster leading-[0.82] text-hate-ink ${compact ? 'text-[30px]' : dense ? 'text-[31px] sm:text-[40px]' : 'text-[38px] sm:text-[46px]'}`}
+            className={`font-poster leading-[0.82] text-hate-ink ${compact ? 'text-[30px]' : dense ? 'text-[24px] sm:text-[34px]' : 'text-[38px] sm:text-[46px]'}`}
           >
             {enemy.nameHe}
           </h3>
@@ -113,7 +115,7 @@ export function EnemyPlate({
         {!compact && (
           <p
             className={`max-w-[46ch] font-body leading-snug text-hate-ink ${
-              dense ? 'mt-1.5 text-[12px]' : 'mt-2 text-step--1 leading-relaxed'
+              dense ? 'mt-1 line-clamp-2 text-[12px]' : 'mt-2 text-step--1 leading-relaxed'
             }`}
           >
             {enemy.chargeHe}
@@ -125,7 +127,7 @@ export function EnemyPlate({
         {enemy.keyFactHe !== '' && (
           <div
             className={`inline-block border-hair px-2 py-1 font-body font-extrabold ${
-              dense ? 'mt-1.5 text-[10px]' : 'mt-2.5 text-[10.5px]'
+              dense ? 'mt-1 text-[10px]' : 'mt-2.5 text-[10.5px]'
             } ${chargeTone}`}
           >
             {enemy.keyFactHe}
