@@ -172,7 +172,8 @@ export const ENDINGS: Record<string, EndingCard> = {
     memoryItem: 'football-card',
     after: {
       fromArt: 'ofir',
-      toArt: 'ofir90-smoke',
+      // (24.9.2026) `ofir90-smoke` is the older sheet's different man (`LEGACY_POSE`)
+      toArt: 'ofir90-3q',
       lineHe: 'אופיר ילך לבד לבלומפילד גם בפעם הבאה, וגם בשנים הבאות. יבוא יום שתלך איתו.',
     },
   },

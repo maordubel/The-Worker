@@ -71,6 +71,9 @@ function SheetBody({
   const night = tone === 'ink'
 
   function down(event: React.PointerEvent) {
+    // a press on the close button (or any control in the header) is a click, not a drag —
+    // capturing the pointer here swallowed the mouse click on "סגור" (delta 88)
+    if ((event.target as HTMLElement).closest('button, a, input')) return
     start.current = event.clientY
     ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
   }

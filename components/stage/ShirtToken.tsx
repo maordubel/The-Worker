@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 
 import { KitShirt } from '@/components/kit/KitShirt'
+import type { ShirtLook } from '@/lib/kit/playerShirt'
 import type { KitSpec } from '@/lib/kit/spec'
+import { PlayerShirt } from './PlayerShirt'
 
 /**
  * השחקן על הדשא — a picked player as a shirt standing on the grass (delta 87).
@@ -12,12 +14,17 @@ import type { KitSpec } from '@/lib/kit/spec'
  * with a pop (`animate-fx-pop`, motion only — rule 8 on grass) keyed by whoever calls it,
  * so a new pick re-stamps and an unchanged one stays still.
  *
+ * Delta 88: pass `look` (from `lib/kit/playerShirt.ts`) and the man wears his real shirt —
+ * the photograph of his era, or the engine's drawing where none exists. `spec` still works
+ * for callers that only have a drawing.
+ *
  * Sized in container units: the pitch that holds it declares `[container-type:inline-size]`
  * and the shirt is a fixed share of the pitch's width, so eleven shirts fit a 320px phone
  * and a 1200px screen alike.
  */
 export function ShirtToken({
-  spec,
+  spec = null,
+  look,
   name,
   sub,
   title,
@@ -28,7 +35,9 @@ export function ShirtToken({
   fallback,
   size = 'md',
 }: {
-  spec: KitSpec | null
+  spec?: KitSpec | null
+  /** the resolver's answer — wins over `spec` */
+  look?: ShirtLook | null
   name: string
   sub?: ReactNode
   title?: string
@@ -44,7 +53,9 @@ export function ShirtToken({
   return (
     <span className="flex animate-fx-pop flex-col items-center motion-reduce:animate-none">
       <span className={`relative block ${width} max-w-[76px] ${live ? 'animate-fx-wobble motion-reduce:animate-none' : ''}`}>
-        {spec ? (
+        {look ? (
+          <PlayerShirt look={look} eager title={title} className="aspect-[5/6] w-full" />
+        ) : spec ? (
           <KitShirt spec={spec} density="mini" className="block aspect-[5/6] h-auto w-full" title={title} />
         ) : (
           <span className="grid aspect-[5/6] w-full place-items-center bg-press-ink font-poster text-[18px] leading-none text-press-paper">

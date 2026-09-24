@@ -43,7 +43,8 @@ const AGES = [
  * השמונה** ועמעם את השאר תחת *"פרק שעוד ייכתב"*. הגוף של הפרק כבר אומר את הגיל
  * (`era.player`), ולכן המשבצת נגזרת ממנו, כמו הדיוקן בתיבה (`ownFace`).
  */
-const SLOT_OF_BODY: Record<string, number> = { hero80: 1, teen: 1, soldier: 2, hero90: 3 }
+// (24.9.2026) the grown man ages on screen — 32/40/47 are the same slot: "the young man, later"
+const SLOT_OF_BODY: Record<string, number> = { hero80: 1, teen: 1, soldier: 2, hero90: 3, pogi32: 3, pogi40: 3, pogi47: 3 }
 export function ageReached(chapter: string): number {
   if (chapter === '1990') return 1
   return SLOT_OF_BODY[eraFor(chapter).player.pose.down] ?? 0

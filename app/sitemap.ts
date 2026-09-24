@@ -23,6 +23,7 @@ import { GATES, isOpen } from '@/lib/gates'
  * and a lot is a page people send each other. `/kits/admin` is never listed (noindex, §65).
  * `/credits` is by hand too: it is not a gate but the one page every source and credit
  * lives on (spec §0.3, 22.9.2026), and every screen that states a fact links to it.
+ * `/away-days` is by hand: the journey is entered from the wall's strip, not a gate (24.9.2026).
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()
@@ -43,5 +44,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/kits/market`, lastModified: now },
     { url: `${SITE_URL}/kits/auction`, lastModified: now },
     { url: `${SITE_URL}/credits`, lastModified: now },
+    { url: `${SITE_URL}/away-days`, lastModified: now },
   ]
 }

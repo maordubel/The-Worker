@@ -1,205 +1,652 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
-import {
-  COLS,
-  LANDMARKS,
-  PITCH,
-  ROWS,
-  zoneCenter,
-  zoneRect,
-  type ZoneId,
-} from '@/lib/game/goal-zones'
+import { COLS, LANDMARKS, PITCH, ROWS, zoneCenter, zoneRect, type ZoneId } from '@/lib/game/goal-zones'
+import type { Draft } from '@/lib/game/replay/draft'
 import { normalise, type Envelope, type ReplayPoint, type TruthTouch, type UserTouch } from '@/lib/game/replay/envelope'
+import { inMouth, inferVerb, nearestMan } from '@/lib/game/replay/gesture'
 import type { TouchGrade } from '@/lib/game/replay/judge'
-import { dropZone, useDragActive, useDragSource } from '@/components/stage/useDrag'
-import { firePickFxAt } from '@/components/stage/PickFx'
+import {
+  cameraFor,
+  curvePath,
+  easeInOut,
+  easeOut,
+  flightMs,
+  liftAt,
+  pointAt,
+  pushFor,
+  toBoard,
+  type Pt,
+} from '@/lib/game/replay/motion'
+import type { ReplayAction } from '@/lib/game/replay/vocab'
+import type { ShirtLook } from '@/lib/kit/playerShirt'
+import { ACTION_LABEL } from '@/components/replay/ReplayBuilder'
+import { PlayerShirt } from '@/components/stage/PlayerShirt'
 import { t } from '@/lib/i18n'
 
 /**
- * הדשא — the pitch שחזור השער is played on, off the Goal Rebuild handoff.
+ * הדשא — the pitch שחזור השער is played on, rebuilt as a PLACE (delta 88).
  *
- * The drawing is unchanged from the version that shipped: mown stripes, a halftone screen
- * over the green, chalk that is cream rather than white, drawn players printed twice — ink
- * under at a constant 3px offset and colour over, which is the second plate and not a drop
- * shadow. What changed is what a touch IS.
+ * Maor, 24.9.2026, about the previous round: *"נורא 'לחיצה' משעממת, שום תנועה, שום אווירה,
+ * שום רגש לא מצליח להתבטא"*. Four rows of buttons asked who / what / from / to, and the
+ * pitch was a target to tap twice. So the pitch is now the whole game:
  *
- * A touch used to be a zone. It is now an ORIGIN and a DESTINATION: a drawn player where
- * he stood and a ball where he sent it, with the route between them. That is the whole of
- * why continuity can be measured at all — the question "does your touch N join your touch
- * N+1" has no meaning until the ball has somewhere to be.
+ *   · **The men stand on the grass in their real shirts** (`lib/kit/playerShirt.ts` — the
+ *     photograph of their season, the engine's drawing only where none exists), the other
+ *     side's man in navy. You DRAG them: the one who started it to where he got the ball;
+ *     then the BALL — onto a team-mate (a pass, and now he has it), into space (in behind),
+ *     into the net (the finish). Drag the man on the ball and he carries it. The verb is
+ *     read off the gesture (`lib/game/replay/gesture.ts`) and shown at the finger while
+ *     it is still in the air, so the drop is a decision you can see before you make it.
+ *   · **Every touch moves.** The ball flies a curve (a cross hangs, a pass skids, a dribble
+ *     bobbles — `lib/game/replay/motion.ts`), a trail draws behind it, the man it reaches
+ *     leans into it, and the camera follows and pushes in as the ball nears the goal.
+ *   · **The ground is there.** A stand of people behind the goal (the gate-7 crowd sheet,
+ *     printed as a single navy plate so no photographic colour lands on the grass), a
+ *     floodlit variant for a European night, and the crowd rising row by row as the move
+ *     gets closer to the goal.
+ *   · **After the whistle the move is played back** — yours in vermilion, then the
+ *     archive's in navy — at speed, end to end, into a net that ripples.
  *
- * **And after the whistle the board admits what it does not know.** The archive's route
- * prints in navy, its anchors as small crosses, and around each anchor a DASHED ELLIPSE —
- * the uncertainty envelope, sized from the reporter's own words. A player who put the ball
- * inside that ellipse was right, and can see that he was right, and can see how much room
- * the sentence left him. A single point on this board was always a claim nobody could
- * support; the ellipse is the same knowledge, honestly drawn.
+ * What did NOT change, and must not: the geometry (`lib/goal-zones.ts`), the envelopes and
+ * bridges the reveal draws, and the twenty-one real zone buttons laid over the drawing.
+ * Those buttons are the TAP path — WCAG 2.5.7 says a drag must have a single-pointer
+ * alternative, and here it is the same board: tap a man, tap the grass. A keyboard places
+ * the zone's centre, which is exactly the precision the archive holds.
  *
- * Two boards were drawn side by side in the prototype, one for the player and one for the
- * archive. At 390px that is two illegible boards, so both routes print on the ONE board
- * the player just worked on — which is also the board that can answer "why" (rule 59: the
- * pitch is one concept and it has one file).
- *
- * **Reachability, and the one place the finger may be more precise than the archive.**
- * A pointer places the exact point it touched; the keyboard places the CENTRE of a zone,
- * and that is not a lesser path — a zone centre is exactly the precision this archive
- * holds, so a keyboard player is placing the anchor itself. Twenty zone buttons plus the
- * goal make twenty-one real, focusable, labelled controls over the drawing; the picture
- * never moves, only who can reach it. `touch-action: none` on the overlay is what stops a
- * placement dragging the page out from under the thumb.
- *
- * **What the board says after the whistle, and why it is not vermilion (21.9.2026).**
- * The prototype defined a `.userTruthBridge` and never drew it; it is the missing "why
- * this score". For every touch the judge PAIRED, a dashed line now runs from where the
- * player stood to the archive's anchor for that touch — ink under, chalk over, the same
- * keyline idiom as the figures, because vermilion over printed grass is the one blend in
- * this product that passes through yellow (rule 8). A touch the player invented gets a
- * `+` beside his figure; a touch he missed gets a ring around the archive's anchor. The
- * verdict list prints the same two marks, so the board and the list speak one language.
- *
- * **And the board carries its own caption.** On a phone the builder is below the pitch
- * while the thumb is on it, so the question being asked ("tap where he stood") was off
- * screen at the exact moment it mattered. A strip along the foot of the board repeats it;
- * it is `pointer-events: none`, so it can never swallow a placement.
+ * **Rule 8 on this board.** Nothing on the grass animates its opacity — everything that
+ * appears or leaves MOVES (transform, or a stroke being drawn). Every vermilion mark is
+ * closed with an ink keyline, because red antialiased straight into printed green passes
+ * through yellow. And the only glow is the lamp's.
  */
 
-const POSES = ['#figRun', '#figRun', '#figKick', '#figVolley', '#figRun'] as const
+/** The board's visible box: a stand, the air behind the goal, and the half. */
+export const VIEW_TOP = -96
+const STAND_BOTTOM = -34
+/** the goal's tap target reaches up into the stand — a finish is a place, not a pixel */
+const MOUTH_TOP = -64
+export const VIEW_H = PITCH.h - VIEW_TOP
+/** width / height of the whole board, for the `FitBox` that holds it */
+export const BOARD_RATIO = PITCH.w / VIEW_H
 
-/**
- * קו מפתח — the ink line under every coloured figure, and the reason rule 8 needs it here.
- *
- * Vermilion over printed grass is the one blend in this product that CANNOT be made safe
- * by choosing a better red. Red and green sit on opposite sides of the wheel, so every
- * partial-coverage pixel between them — every antialiased glyph edge, every fading
- * overlay — passes through the yellow hues on its way across. A drawn figure at
- * `--p-red` on `--p-grass` measured 210 yellow pixels on a phone and 538 on a desktop,
- * and it had been doing that since the board was drawn: `npm run qa:sweep` only ever
- * loads `/goal` with nothing placed on it, so there was never a figure on the grass when
- * anybody measured. Rule 29's script, found by rule 33's playthrough.
- *
- * The fix is the press's own answer and it was already written in this file's header:
- * every mark is closed with an ink line. The figure prints three times — the offset ink
- * shadow that is the second plate, then a WIDER ink keyline at the colour's own position,
- * then the colour. The vermilion's edge now dissolves into ink instead of into grass, and
- * the keyline's own edge is ink into grass, which is a blue-green and safe.
- */
-const KEYLINE = 8
+const VIEW = { top: VIEW_TOP, height: VIEW_H, width: PITCH.w }
 
-function toBoard(point: ReplayPoint): { x: number; y: number } {
-  return { x: point.x * PITCH.w, y: point.y * PITCH.h }
+/** see the header: the ink under every coloured mark */
+const KEYLINE = 6
+
+export type PitchMan = {
+  name: string
+  look: ShirtLook | null
+  opponent: boolean
 }
 
-function colourFor(grade: TouchGrade | undefined): string {
-  if (grade === 'good') return 'rgb(var(--p-red))'
-  if (grade === 'near') return 'rgb(var(--p-red-deep))'
-  if (grade === 'bad') return 'rgb(var(--p-ink))'
-  return 'rgb(var(--p-red))'
+export type Flight = {
+  key: number
+  from: ReplayPoint
+  to: ReplayPoint
+  action: ReplayAction
+  /** the man it reaches, who leans into it */
+  receiver: string | null
+  /** somebody has it at his feet when it lands (a pass received, a carry) */
+  keeps: boolean
 }
 
-/**
- * Whether the player asked the operating system for less motion. Read once on mount —
- * SVG animation elements do not listen to CSS media queries, so the rolling ball has to
- * be left out rather than paused.
- */
+export type ReplayLeg = { from: ReplayPoint; to: ReplayPoint; action: ReplayAction; actor: string | null }
+
+export type ReplayScript = {
+  key: number
+  mine: ReplayLeg[]
+  /** the archive's move — null until the server has answered */
+  truth: ReplayLeg[] | null
+  /** the archive's last touch ends in the net */
+  goal: boolean
+}
+
+type DragState = {
+  kind: 'man' | 'ball'
+  name: string
+  at: ReplayPoint
+  over: string | null
+  /** frame-relative px, for the label at the finger */
+  px: { x: number; y: number }
+}
+
+function pct(p: Pt): { insetInlineStart: string; top: string } {
+  return { insetInlineStart: `${(p.x / PITCH.w) * 100}%`, top: `${((p.y - VIEW_TOP) / VIEW_H) * 100}%` }
+}
+
+/** where a flight starts and lands: beside the feet of whoever has the ball */
+export function flightEnds(flight: Flight): { a: Pt; b: Pt } {
+  const b = toBoard(flight.to)
+  return { a: besideFeet(toBoard(flight.from)), b: flight.keeps ? besideFeet(b) : b }
+}
+
 function usePrefersStill(): boolean {
-  const [still, setStill] = useState(true)
+  const [still, setStill] = useState(false)
   useEffect(() => {
-    const query = typeof window.matchMedia === 'function'
-      ? window.matchMedia('(prefers-reduced-motion: reduce)')
-      : null
+    const query = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
     setStill(query?.matches ?? false)
   }, [])
   return still
 }
 
-/** How long the rolling ball spends on each leg of the player's move, in seconds. */
-const ROLL_LEG = 0.42
+/** yours is always vermilion (the legend says so); a near touch prints deeper, a bad one dashed */
+function colourFor(grade: TouchGrade | undefined): string {
+  if (grade === 'near' || grade === 'bad') return 'rgb(var(--p-red-deep))'
+  return 'rgb(var(--p-red))'
+}
+
+/** The ball's drawn place beside a man's feet — so the man and the ball are both grabbable. */
+function besideFeet(p: Pt): Pt {
+  return { x: p.x + 13, y: p.y + 9 }
+}
 
 export function GoalPitch({
+  men,
+  spots,
   touches,
-  draftOrigin = null,
-  labels,
-  truth,
-  grades,
-  onPlace,
+  draft,
+  armed = null,
   disabled = false,
   caption = null,
   hintEnvelope = null,
-  rolling = false,
-  pairs,
+  night = false,
+  tension = 0,
+  heartbeat = false,
+  flight = null,
+  replay = null,
+  reveal = null,
+  plate,
+  overlay,
+  onDragMan,
+  onDragBall,
+  onTapMan,
+  onTapPoint,
+  onLanded,
+  onReplayLeg,
+  onReplayGoal,
+  onReplayDone,
+  onSkip,
 }: {
-  /** every finished touch: where he stood, where he sent it */
+  men: PitchMan[]
+  /** where every man stands now (normalised) */
+  spots: Record<string, ReplayPoint>
   touches: UserTouch[]
-  /** the touch being built — his position is down, the ball is not */
-  draftOrigin?: ReplayPoint | null
-  /** name · number · act under each placed figure */
-  labels: Array<{ nameHe: string; actHe: string; num: string }>
-  /** the archive's own move, drawn in navy with its envelopes — only after the whistle */
-  truth?: TruthTouch[]
-  grades?: Array<TouchGrade | undefined>
-  onPlace: (point: ReplayPoint) => void
+  draft: Draft
+  armed?: string | null
   disabled?: boolean
-  /** the builder's current step, printed on the board itself */
   caption?: { lead: string; text: string } | null
-  /** the one envelope the reception hint bought — chalk, dashed, before the whistle only */
   hintEnvelope?: Envelope | null
-  /** the move is with the server: a ball runs the player's own route while it is graded */
-  rolling?: boolean
-  /** after the whistle: which of the player's touches the judge paired with which */
-  pairs?: Array<{ user: number | null; truth: number | null }>
+  night?: boolean
+  /** 0..1 — the crowd rises with it */
+  tension?: number
+  /** the frame beats — the clock is nearly out, or the ball is in the box */
+  heartbeat?: boolean
+  /** one touch, just committed: fly it */
+  flight?: Flight | null
+  /** the whistle: play both moves back */
+  replay?: ReplayScript | null
+  /** after the replay: the archive's move, the grades and the pairs, drawn to stay */
+  reveal?: {
+    truth: TruthTouch[]
+    grades: Array<TouchGrade | undefined>
+    pairs: Array<{ user: number | null; truth: number | null }>
+  } | null
+  /** the TV caption — fixed over the stand, never zoomed */
+  plate?: ReactNode
+  /** the goal moment and anything else that sits over the whole frame */
+  overlay?: ReactNode
+  onDragMan: (name: string, at: ReplayPoint) => void
+  onDragBall: (at: ReplayPoint, receiver: string | null) => void
+  onTapMan: (name: string) => void
+  onTapPoint: (at: ReplayPoint) => void
+  /** a committed touch's ball has landed */
+  onLanded?: (key: number) => void
+  onReplayLeg?: (phase: 'mine' | 'truth', index: number) => void
+  onReplayGoal?: () => void
+  onReplayDone?: () => void
+  onSkip?: () => void
 }) {
-  const board = useRef<HTMLDivElement>(null)
-  const byPointer = useRef(false)
   const still = usePrefersStill()
-  /**
-   * The live dashed line, following the finger while the standing figure is being
-   * dragged to its target (round 2, Maor 23.9.2026: "the characters must be dragged").
-   * Board-space coordinates, tracked outside `useDragSource` (which only follows a
-   * ghost copy of the element itself) — see `ZoneButton`'s own pointer listeners below.
-   */
-  const [dragLine, setDragLine] = useState<{ x: number; y: number } | null>(null)
-  /** whether a compatible drag (the origin figure, or a rail token) is in the air. */
-  const dragState = useDragActive()
-  const dragTargeting =
-    dragState.active && (dragState.payload?.startsWith('zone:') || dragState.payload?.startsWith('player:'))
+  const frame = useRef<HTMLDivElement>(null)
+  const cam = useRef<HTMLDivElement>(null)
+  const ballG = useRef<SVGGElement>(null)
+  const ballShadow = useRef<SVGEllipseElement>(null)
+  const flightTrail = useRef<SVGPathElement>(null)
+  const netG = useRef<SVGGElement>(null)
+  const crowdG = useRef<SVGGElement>(null)
+  const legPaths = useRef<Array<SVGPathElement | null>>([])
+  const legKeys = useRef<Array<SVGPathElement | null>>([])
+  const animating = useRef(false)
+  const camNow = useRef({ s: 1, tx: 0, ty: 0 })
+  const camRaf = useRef<number | null>(null)
+  const [flyingKey, setFlyingKey] = useState<number | null>(null)
+  /** the last flight that has landed — until then its committed trail stays hidden */
+  const [landedKey, setLandedKey] = useState<number | null>(null)
+  const [drag, setDrag] = useState<DragState | null>(null)
+  const byPointer = useRef(false)
+  const suppressClick = useRef(false)
 
-  /**
-   * The zone the touch being built already stands in, if any — so THAT zone's own
-   * button (already a real 44px control, already tap-to-place) can also be picked up
-   * and dragged, rather than a second overlay competing with it for the same few
-   * pixels (delta 87, Maor 23.9.2026: "the characters must be dragged on the screen").
-   * A drag lands on the same `onPlace` the second TAP already calls.
-   */
-  const originZone: ZoneId | null = draftOrigin
-    ? (ROWS.flatMap((row) => COLS.map((col) => `${col}${row}`)).find((id) => {
-        const rect = zoneRect(id)
-        if (!rect) return false
-        const b = toBoard(draftOrigin)
-        return b.x >= rect.x && b.x <= rect.x + rect.w && b.y >= rect.y && b.y <= rect.y + rect.h
-      }) ?? null)
-    : null
+  const opponents = new Set(men.filter((man) => man.opponent).map((man) => man.name))
+  const live = !replay && !reveal
+  const holder = live && draft.actorHe && draft.origin ? draft.actorHe : null
+  const cbs = useRef({ onReplayLeg, onReplayGoal, onReplayDone, onLanded })
+  cbs.current = { onReplayLeg, onReplayGoal, onReplayDone, onLanded }
+  const lastTarget = touches[touches.length - 1]?.target ?? null
+  const ballRest: Pt | null = holder && draft.origin
+    ? besideFeet(toBoard(draft.origin))
+    : lastTarget
+      ? toBoard(lastTarget)
+      : null
+  const loose = !holder && lastTarget !== null
 
-  /**
-   * A pointer answers with the exact place it landed; the click that follows it is the
-   * same placement arriving twice, so it is swallowed. A click with no pointer before it
-   * is a keyboard, and that one places the zone's own centre.
-   */
+  /** where each man is drawn: the draft's man at his origin, else his spot */
+  const placeOf = useCallback(
+    (name: string): Pt | null => {
+      if (drag?.kind === 'man' && drag.name === name) return toBoard(drag.at)
+      if (holder === name && draft.origin) return toBoard(draft.origin)
+      const spot = spots[name]
+      return spot ? toBoard(spot) : null
+    },
+    [drag, holder, draft.origin, spots],
+  )
+
+  /* ------------------------------------------------------------ the camera */
+
+  const applyCam = useCallback((c: { s: number; tx: number; ty: number }) => {
+    camNow.current = c
+    const el = cam.current
+    if (!el) return
+    el.style.transform = `translate(${(c.tx * 100).toFixed(3)}%, ${(c.ty * 100).toFixed(3)}%) scale(${c.s.toFixed(4)})`
+  }, [])
+
+  /** ease the camera to a target over ms (or at once) */
+  const easeCam = useCallback(
+    (to: { s: number; tx: number; ty: number }, ms: number) => {
+      if (camRaf.current !== null) cancelAnimationFrame(camRaf.current)
+      if (still || ms <= 0) {
+        applyCam(to)
+        return
+      }
+      const from = { ...camNow.current }
+      const start = performance.now()
+      const step = (now: number) => {
+        const k = easeInOut(Math.min(1, (now - start) / ms))
+        applyCam({ s: from.s + (to.s - from.s) * k, tx: from.tx + (to.tx - from.tx) * k, ty: from.ty + (to.ty - from.ty) * k })
+        if (k < 1) camRaf.current = requestAnimationFrame(step)
+        else camRaf.current = null
+      }
+      camRaf.current = requestAnimationFrame(step)
+    },
+    [applyCam, still],
+  )
+
+  const HOME = { s: 1, tx: 0, ty: 0 }
+
+  /* ------------------------------------------------------------ the ball at rest */
+
+  const placeBall = useCallback((p: Pt | null, lift = 0) => {
+    const g = ballG.current
+    const shadow = ballShadow.current
+    if (!g || !shadow) return
+    if (!p) {
+      g.setAttribute('transform', 'translate(-100 -100)')
+      shadow.setAttribute('transform', 'translate(-100 -100)')
+      return
+    }
+    g.setAttribute('transform', `translate(${p.x.toFixed(1)} ${(p.y - lift).toFixed(1)})`)
+    shadow.setAttribute('transform', `translate(${(p.x + 2).toFixed(1)} ${(p.y + 3).toFixed(1)}) scale(${(1 - Math.min(0.5, lift / 60)).toFixed(3)})`)
+  }, [])
+
+  useLayoutEffect(() => {
+    if (animating.current) return
+    if (drag?.kind === 'ball') placeBall(toBoard(drag.at))
+    else if (drag?.kind === 'man' && drag.name === holder) placeBall(besideFeet(toBoard(drag.at)))
+    else placeBall(ballRest)
+  })
+
+  /* ------------------------------------------------------------ lean: the man it reaches */
+
+  const lean = useCallback(
+    (name: string | null) => {
+      if (!name || still) return
+      const el = frame.current?.querySelector<HTMLElement>(`[data-token="${CSS.escape(name)}"] [data-lean]`)
+      el?.animate(
+        [
+          { transform: 'translateY(0) rotate(0deg) scale(1)' },
+          { transform: 'translateY(-7px) rotate(-9deg) scale(1.12)' },
+          { transform: 'translateY(0) rotate(3deg) scale(1)' },
+          { transform: 'none' },
+        ],
+        { duration: 380, easing: 'cubic-bezier(.2,0,0,1)' },
+      )
+    },
+    [still],
+  )
+
+  const ripple = useCallback(() => {
+    if (still) return
+    netG.current?.animate(
+      [
+        { transform: 'scale(1,1)' },
+        { transform: 'scale(1.08,1.3) skewX(-5deg)' },
+        { transform: 'scale(.97,.9) skewX(3deg)' },
+        { transform: 'scale(1.02,1.08)' },
+        { transform: 'none' },
+      ],
+      { duration: 820, easing: 'ease-out' },
+    )
+    crowdG.current?.animate(
+      [
+        { transform: 'translateY(0)' },
+        { transform: 'translateY(-12px)' },
+        { transform: 'translateY(0)' },
+        { transform: 'translateY(-8px)' },
+        { transform: 'translateY(0)' },
+        { transform: 'translateY(-5px)' },
+        { transform: 'none' },
+      ],
+      { duration: 1500, easing: 'ease-out' },
+    )
+  }, [still])
+
+  /* ------------------------------------------------------------ one leg in the air */
+
+  const fly = useCallback(
+    (
+      a: Pt,
+      b: Pt,
+      action: ReplayAction,
+      trailList: Array<SVGPathElement | null>,
+      options: { speed?: number; camera: 'soft' | 'full'; onEnd: () => void },
+    ) => {
+      const len = Math.hypot(b.x - a.x, b.y - a.y)
+      const trails = trailList.filter((path): path is SVGPathElement => path !== null)
+      const total = trails[0] ? trails[0].getTotalLength() : 0
+      const draw = (k: number) => {
+        for (const trail of trails) trail.style.strokeDashoffset = `${total * (1 - k)}`
+      }
+      for (const trail of trails) trail.style.strokeDasharray = `${total} ${total}`
+      draw(0)
+      if (still) {
+        draw(1)
+        placeBall(b)
+        options.onEnd()
+        return () => undefined
+      }
+      placeBall(a)
+      const ms = flightMs(a, b, action, options.speed ?? 1)
+      const start = performance.now()
+      let raf = 0
+      const step = (now: number) => {
+        const raw = Math.min(1, (now - start) / ms)
+        const k = action === 'shot' || action === 'header' ? easeOut(raw) : easeInOut(raw)
+        const p = pointAt(a, b, action, k)
+        placeBall(p, liftAt(action, k, len))
+        draw(k)
+        // the camera rides with the ball and leans in as it nears the goal
+        const want = options.camera === 'full' ? pushFor(p, 1.55) : pushFor(p, 1.18)
+        const target = cameraFor(p, want, VIEW)
+        const c = camNow.current
+        const lerp = options.camera === 'full' ? 0.14 : 0.1
+        applyCam({ s: c.s + (target.s - c.s) * lerp, tx: c.tx + (target.tx - c.tx) * lerp, ty: c.ty + (target.ty - c.ty) * lerp })
+        if (raw < 1) raf = requestAnimationFrame(step)
+        else options.onEnd()
+      }
+      raf = requestAnimationFrame(step)
+      return () => cancelAnimationFrame(raf)
+    },
+    [applyCam, placeBall, still],
+  )
+
+  /* ------------------------------------------------------------ a committed touch flies */
+
+  useLayoutEffect(() => {
+    if (!flight || replay) return
+    animating.current = true
+    setFlyingKey(flight.key)
+    const { a, b } = flightEnds(flight)
+    let hold = 0
+    const cancel = fly(a, b, flight.action, [flightTrail.current], {
+      camera: 'soft',
+      onEnd: () => {
+        animating.current = false
+        setFlyingKey(null)
+        setLandedKey(flight.key)
+        cbs.current.onLanded?.(flight.key)
+        lean(flight.receiver)
+        if (inMouth(flight.to)) ripple()
+        hold = window.setTimeout(() => easeCam(HOME, 620), 260)
+      },
+    })
+    return () => {
+      cancel()
+      window.clearTimeout(hold)
+      animating.current = false
+      setLandedKey(flight.key)
+    }
+    // one flight per key
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flight?.key])
+
+  /* ------------------------------------------------------------ the whistle: both moves */
+
+  const script = useRef(replay)
+  script.current = replay
+  const skipRef = useRef<() => void>(() => undefined)
+
+  useEffect(() => {
+    if (!replay) return
+    animating.current = true
+    let cancelled = false
+    let cancelLeg: () => void = () => undefined
+    let timer = 0
+    const legs = () => {
+      const s = script.current
+      return s ? [...s.mine.map((leg) => ({ ...leg, phase: 'mine' as const })), ...(s.truth ?? []).map((leg) => ({ ...leg, phase: 'truth' as const }))] : []
+    }
+
+    const finish = () => {
+      if (cancelled) return
+      cancelled = true
+      cancelLeg()
+      window.clearTimeout(timer)
+      for (const path of [...legPaths.current, ...legKeys.current]) if (path) path.style.strokeDashoffset = '0'
+      animating.current = false
+      easeCam(HOME, 500)
+      cbs.current.onReplayDone?.()
+    }
+    skipRef.current = finish
+
+    const run = (index: number) => {
+      if (cancelled) return
+      const s = script.current
+      const all = legs()
+      const mineCount = s?.mine.length ?? 0
+      if (index === mineCount && !s?.truth) {
+        // the archive has not answered yet: hold the frame on the last touch
+        timer = window.setTimeout(() => run(index), 120)
+        return
+      }
+      const leg = all[index]
+      if (!leg) {
+        // the end of the archive's move
+        if (s?.goal) {
+          ripple()
+          cbs.current.onReplayGoal?.()
+          const net = cameraFor({ x: 150, y: 0 }, 1.5, VIEW)
+          easeCam(net, 500)
+          timer = window.setTimeout(finish, still ? 600 : 2600)
+        } else finish()
+        return
+      }
+      const phase = leg.phase
+      const local = phase === 'mine' ? index : index - mineCount
+      cbs.current.onReplayLeg?.(phase, local)
+      const between = phase === 'truth' && local === 0 ? (still ? 0 : 700) : still ? 0 : 200
+      if (phase === 'truth' && local === 0) easeCam(HOME, 500)
+      timer = window.setTimeout(() => {
+        if (cancelled) return
+        cancelLeg = fly(toBoard(leg.from), toBoard(leg.to), leg.action, [legPaths.current[index] ?? null, legKeys.current[index] ?? null], {
+          camera: 'full',
+          speed: 1.2,
+          onEnd: () => {
+            lean(all[index + 1]?.actor ?? null)
+            run(index + 1)
+          },
+        })
+      }, between)
+    }
+    // start every leg's trail undrawn
+    for (const path of [...legPaths.current, ...legKeys.current]) {
+      if (!path) continue
+      const total = path.getTotalLength()
+      path.style.strokeDasharray = `${total} ${total}`
+      path.style.strokeDashoffset = `${total}`
+    }
+    run(0)
+    return () => {
+      cancelled = true
+      cancelLeg()
+      window.clearTimeout(timer)
+      animating.current = false
+    }
+    // one replay per key
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [replay?.key])
+
+  /** a truth that arrives mid-replay adds its legs' trails — undrawn, until they fly */
+  useLayoutEffect(() => {
+    if (!replay?.truth) return
+    const from = replay.mine.length
+    for (let i = from; i < legPaths.current.length; i += 1) {
+      for (const path of [legPaths.current[i], legKeys.current[i]]) {
+        if (!path || path.dataset.armed === 'true') continue
+        const total = path.getTotalLength()
+        path.style.strokeDasharray = `${total} ${total}`
+        path.style.strokeDashoffset = `${total}`
+        path.dataset.armed = 'true'
+      }
+    }
+  }, [replay?.truth, replay?.mine.length])
+
+  /* ------------------------------------------------------------ the crowd and the heart */
+
+  useEffect(() => {
+    const g = crowdG.current
+    if (!g) return
+    g.style.transition = still ? 'none' : 'transform 900ms cubic-bezier(.2,0,0,1)'
+    g.style.transform = `translateY(${((1 - tension) * 16).toFixed(1)}px)`
+  }, [tension, still])
+
+  useEffect(() => {
+    if (!heartbeat || still || !frame.current) return
+    const beat = frame.current.animate(
+      [{ transform: 'scale(1)' }, { transform: 'scale(1.012)' }, { transform: 'scale(1)' }, { transform: 'scale(1.006)' }, { transform: 'scale(1)' }],
+      { duration: 900, iterations: Infinity },
+    )
+    return () => beat.cancel()
+  }, [heartbeat, still])
+
+  /* ------------------------------------------------------------ the hands */
+
+  const boardPoint = useCallback((clientX: number, clientY: number): ReplayPoint | null => {
+    const rect = cam.current?.getBoundingClientRect()
+    if (!rect || rect.width === 0 || rect.height === 0) return null
+    const x = ((clientX - rect.left) / rect.width) * PITCH.w
+    const y = VIEW_TOP + ((clientY - rect.top) / rect.height) * VIEW_H
+    return { x: Math.max(0.02, Math.min(0.98, x / PITCH.w)), y: Math.max(-0.2, Math.min(0.98, y / PITCH.h)) }
+  }, [])
+
+  const framePx = useCallback((clientX: number, clientY: number) => {
+    const rect = frame.current?.getBoundingClientRect()
+    return rect ? { x: clientX - rect.left, y: clientY - rect.top } : { x: 0, y: 0 }
+  }, [])
+
+  const spotsForDrop = useCallback(() => {
+    const out: Record<string, ReplayPoint> = {}
+    for (const man of men) {
+      const p = holder === man.name && draft.origin ? draft.origin : spots[man.name]
+      if (p) out[man.name] = p
+    }
+    return out
+  }, [men, spots, holder, draft.origin])
+
+  function grab(kind: 'man' | 'ball', name: string) {
+    return (event: React.PointerEvent<HTMLElement>) => {
+      if (disabled || event.button !== 0) return
+      const el = event.currentTarget
+      const startX = event.clientX
+      const startY = event.clientY
+      const id = event.pointerId
+      let lifted = false
+      el.setPointerCapture?.(id)
+      if (camRaf.current !== null) cancelAnimationFrame(camRaf.current)
+
+      const move = (ev: PointerEvent) => {
+        if (ev.pointerId !== id) return
+        if (!lifted) {
+          if (Math.hypot(ev.clientX - startX, ev.clientY - startY) < 8) return
+          lifted = true
+          applyCam(HOME)
+        }
+        ev.preventDefault()
+        const at = boardPoint(ev.clientX, ev.clientY)
+        if (!at) return
+        const over = kind === 'ball' ? (inMouth(at) ? 'mouth' : nearestMan(at, spotsForDrop(), holder)) : null
+        setDrag({ kind, name, at, over, px: framePx(ev.clientX, ev.clientY) })
+      }
+      const up = (ev: PointerEvent) => {
+        if (ev.pointerId !== id) return
+        cleanup()
+        if (!lifted) return
+        suppressClick.current = true
+        window.setTimeout(() => (suppressClick.current = false), 0)
+        const at = boardPoint(ev.clientX, ev.clientY)
+        setDrag(null)
+        if (!at) return
+        if (kind === 'man') onDragMan(name, at)
+        else {
+          const receiver = inMouth(at) ? null : nearestMan(at, spotsForDrop(), holder)
+          onDragBall(receiver ? spotsForDrop()[receiver] ?? at : at, receiver)
+        }
+      }
+      const cancel = (ev: PointerEvent) => {
+        if (ev.pointerId !== id) return
+        cleanup()
+        setDrag(null)
+      }
+      function cleanup() {
+        el.removeEventListener('pointermove', move)
+        el.removeEventListener('pointerup', up)
+        el.removeEventListener('pointercancel', cancel)
+      }
+      el.addEventListener('pointermove', move, { passive: false })
+      el.addEventListener('pointerup', up)
+      el.addEventListener('pointercancel', cancel)
+    }
+  }
+
+  function swallowDraggedClick(event: React.MouseEvent) {
+    if (suppressClick.current) {
+      event.preventDefault()
+      event.stopPropagation()
+      suppressClick.current = false
+    }
+  }
+
+  /** a zone tap: a pointer places where it landed, a keyboard the zone's centre */
   const fromPointer = useCallback(
     (event: React.PointerEvent) => {
       if (disabled) return
-      const rect = board.current?.getBoundingClientRect()
-      if (!rect || rect.width === 0 || rect.height === 0) return
+      const at = boardPoint(event.clientX, event.clientY)
+      if (!at) return
       byPointer.current = true
-      const across = (event.clientX - rect.left) / rect.width
-      const down = (event.clientY - rect.top) / rect.height
-      const boardY = PITCH.top + down * (PITCH.h - PITCH.top)
-      onPlace({ x: Math.max(0, Math.min(1, across)), y: boardY / PITCH.h })
+      onTapPoint(at)
     },
-    [disabled, onPlace],
+    [boardPoint, disabled, onTapPoint],
   )
-
   const fromKeyboard = useCallback(
     (point: { x: number; y: number }) => {
       if (byPointer.current) {
@@ -207,693 +654,505 @@ export function GoalPitch({
         return
       }
       if (disabled) return
-      onPlace(normalise(point))
+      onTapPoint(normalise(point))
     },
-    [disabled, onPlace],
+    [disabled, onTapPoint],
   )
 
-  const route = (from: ReplayPoint, to: ReplayPoint) => {
-    const a = toBoard(from)
-    const b = toBoard(to)
-    return `M${a.x} ${a.y} L${b.x} ${b.y}`
+  /* ------------------------------------------------------------ what the finger means */
+
+  let fingerLabel: string | null = null
+  if (drag?.kind === 'ball' && holder && draft.origin) {
+    const verb =
+      draft.action ??
+      inferVerb({
+        origin: draft.origin,
+        target: drag.over && drag.over !== 'mouth' ? spotsForDrop()[drag.over] ?? drag.at : drag.at,
+        receiver: drag.over && drag.over !== 'mouth' ? drag.over : null,
+        previous: touches[touches.length - 1]?.action ?? null,
+        opponent: opponents.has(holder),
+      })
+    fingerLabel = drag.over && drag.over !== 'mouth' ? `${t(ACTION_LABEL[verb])} ← ${drag.over}` : t(ACTION_LABEL[verb])
+  } else if (drag?.kind === 'man') {
+    fingerLabel = drag.name === holder ? t(ACTION_LABEL.dribble) : drag.name
   }
 
+  /* ------------------------------------------------------------ drawing */
+
+  const flightPath = flight ? (({ a, b }) => curvePath(a, b, flight.action))(flightEnds(flight)) : ''
+  const replayLegs = replay ? [...replay.mine.map((leg) => ({ leg, truth: false })), ...(replay.truth ?? []).map((leg) => ({ leg, truth: true }))] : []
+  const showMyTrails = !replay && !reveal
+  const ballAway = !ballRest && !drag && !replay
+
   return (
-    <div ref={board} className="relative h-full w-full border-plate border-ink" data-goal="board">
-      <svg
-        viewBox={`0 ${PITCH.top} ${PITCH.w} ${PITCH.h - PITCH.top}`}
-        className="block h-full w-full touch-manipulation"
-        aria-hidden="true"
-      >
-        <defs>
-          <symbol id="figRun" viewBox="0 0 70 80">
-            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="36" cy="12" r="8" />
-              <path d="M31 20 L42 21 L45 42 L29 41 Z" />
-              <path d="M43 25 L56 20" />
-              <path d="M31 25 L19 33" />
-              <path d="M40 42 L49 55 L46 67" />
-              <path d="M32 42 L24 53 L29 65" />
-              <path d="M46 67 L55 69" />
-              <path d="M29 65 L20 67" />
-            </g>
-          </symbol>
-          <symbol id="figKick" viewBox="0 0 70 80">
-            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="28" cy="12" r="8" />
-              <path d="M23 20 L34 20 L37 41 L22 40 Z" />
-              <path d="M35 24 L50 17" />
-              <path d="M23 25 L11 21" />
-              <path d="M26 41 L24 56 L24 68" />
-              <path d="M35 41 L48 49 L59 58" />
-              <path d="M24 68 L15 70" />
-              <path d="M59 58 L64 63" />
-            </g>
-          </symbol>
-          <symbol id="figVolley" viewBox="0 0 70 80">
-            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="44" cy="24" r="8" />
-              <path d="M38 32 L49 30 L53 48 L38 50 Z" />
-              <path d="M49 32 L61 22" />
-              <path d="M38 34 L23 32" />
-              <path d="M42 48 L31 38 L18 35" />
-              <path d="M50 50 L57 62 L52 72" />
-              <path d="M18 35 L12 39" />
-              <path d="M52 72 L44 75" />
-            </g>
-          </symbol>
-          <symbol id="figGuard" viewBox="0 0 70 80">
-            <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="34" cy="12" r="8" />
-              <path d="M28 20 L40 20 L42 42 L26 42 Z" />
-              <path d="M41 24 L54 30" />
-              <path d="M27 24 L14 30" />
-              <path d="M30 42 L25 60 L26 70" />
-              <path d="M39 42 L45 60 L44 70" />
-              <path d="M26 70 L17 72" />
-              <path d="M44 70 L53 72" />
-            </g>
-          </symbol>
-          <pattern id="pitchDots" width="5" height="5" patternUnits="userSpaceOnUse">
-            <circle cx="1.4" cy="1.4" r="1" fill="rgb(var(--p-dot))" opacity=".5" />
-          </pattern>
-          <marker id="ballHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-            <path d="M0 1 L9 5 L0 9 z" fill="rgb(var(--p-line))" />
-          </marker>
-          <marker id="truthHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-            <path d="M0 1 L9 5 L0 9 z" fill="rgb(var(--p-tekhelet))" />
-          </marker>
-        </defs>
-
-        {/* behind the goal — the air a shot ends in, and the one place a ball may land
-            that is not grass. Ink, so the net reads against it. */}
-        <rect x="0" y={PITCH.top} width={PITCH.w} height={-PITCH.top} fill="rgb(var(--p-ink))" />
-        <rect x="0" y={PITCH.top} width={PITCH.w} height={-PITCH.top} fill="url(#pitchDots)" opacity=".2" />
-
-        <rect width={PITCH.w} height={PITCH.h} fill="rgb(var(--p-grass))" />
-        <g fill="rgb(var(--p-grass-dark))">
-          {[0, 80, 160, 240, 320].map((y) => (
-            <rect key={y} y={y} width={PITCH.w} height="40" />
+    <div
+      ref={frame}
+      data-goal="board"
+      className={`relative h-full w-full overflow-hidden border-plate border-ink ${night ? 'bg-ink' : 'bg-paper'}`}
+      onPointerDownCapture={replay ? () => (animating.current && script.current?.truth ? skipRef.current() : onSkip?.()) : undefined}
+    >
+      {/* the lamps — the one glow the brand allows, and only on a floodlit night */}
+      {night && (
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-[1] flex justify-end gap-[22%] pe-[6%] pt-[2%]">
+          {[0, 1].map((lamp) => (
+            <span key={lamp} className="grid grid-cols-3 gap-[2px] bg-ink p-[3px] shadow-lamp">
+              {Array.from({ length: 6 }, (_, i) => (
+                <span key={i} className="block h-[5px] w-[6px] bg-paper" />
+              ))}
+            </span>
           ))}
-        </g>
-        <rect width={PITCH.w} height={PITCH.h} fill="url(#pitchDots)" opacity=".18" />
+        </div>
+      )}
 
-        {/* chalk — cream, because pure white does not exist in print */}
-        <g stroke="rgb(var(--p-line))" fill="none" strokeWidth="2.4">
-          <path d="M12 12 H288 M12 12 V388 M288 12 V388 M12 388 H288" />
-          <rect x="68" y="12" width="164" height="67" />
-          <rect x="113" y="12" width="74" height="22" />
-          <path d="M120.3 79 A 37 37 0 0 0 179.7 79" />
-          <path d="M113 388 A 37 37 0 0 1 187 388" />
-        </g>
-        <g stroke="rgb(var(--p-line))" fill="none" strokeWidth="1.8">
-          <path d="M20 12 A 8 8 0 0 1 12 20" />
-          <path d="M280 12 A 8 8 0 0 0 288 20" />
-        </g>
-        <g fill="rgb(var(--p-line))">
-          <circle cx={LANDMARKS.penaltySpot.x} cy={LANDMARKS.penaltySpot.y} r="2.6" />
-          <circle cx="150" cy="388" r="2.6" />
-        </g>
-        <g>
-          <rect x="129" y="-24" width="42" height="36" fill="rgb(var(--p-net))" opacity=".72" stroke="rgb(var(--p-line))" strokeWidth="2.4" />
-          <path
-            d="M136 -24 V12 M143 -24 V12 M150 -24 V12 M157 -24 V12 M164 -24 V12 M129 -16 H171 M129 -8 H171 M129 0 H171 M129 6 H171"
-            stroke="rgb(var(--p-net-line))"
-            strokeWidth=".7"
-            fill="none"
-          />
-        </g>
-
-        {/* the zone rules — dashed, so the grid reads as guidance and not as a table */}
-        <g stroke="rgb(var(--p-line))" strokeWidth=".8" opacity=".26" strokeDasharray="3 4" fill="none">
-          <path d="M68 12 V340 M123 12 V340 M178 12 V340 M233 12 V340" />
-          <path d="M13 94 H288 M13 176 H288 M13 258 H288" />
-        </g>
-
-        {/* the opposition — chalk figures already on the grass, plus a navy keeper */}
-        <g pointerEvents="none">
-          {[
-            { href: '#figGuard', x: 84, y: 26 },
-            { href: '#figGuard', x: 188, y: 96 },
-            { href: '#figRun', x: 40, y: 182 },
-            { href: '#figGuard', x: 206, y: 252 },
-          ].map((guard) => (
-            <g key={`${guard.x}-${guard.y}`}>
-              <use
-                href={guard.href}
-                x={guard.x + 3}
-                y={guard.y + 3}
-                width="44"
-                height="50"
-                strokeWidth={3}
-                style={{ color: 'rgb(var(--p-ink))' }}
-                opacity=".28"
-              />
-              <use
-                href={guard.href}
-                x={guard.x}
-                y={guard.y}
-                width="44"
-                height="50"
-                strokeWidth={3}
-                style={{ color: 'rgb(var(--p-line))' }}
-              />
-            </g>
-          ))}
-          <use
-            href="#figGuard"
-            x="128"
-            y="14"
-            width="46"
-            height="52"
-            strokeWidth={3}
-            style={{ color: 'rgb(var(--p-tekhelet))' }}
-          />
-        </g>
-
-        {/* the archive's own move — navy, and only after the whistle. Anchors as crosses,
-            envelopes as dashed ellipses: the anchor is the best reading, the ellipse is
-            how much room the sentence left. */}
-        {truth && truth.length > 0 && (
-          <g pointerEvents="none">
-            {truth.map((touch, index) => (
-              <g key={`env-${index}`}>
-                <TruthEllipse envelope={touch.origin} />
-                {index === truth.length - 1 && <TruthEllipse envelope={touch.target} />}
+      <div ref={cam} data-goal="camera" className="absolute inset-0 origin-top-left [container-type:inline-size] will-change-transform">
+        <svg viewBox={`0 ${VIEW_TOP} ${PITCH.w} ${VIEW_H}`} className="block h-full w-full" aria-hidden="true">
+          <defs>
+            <symbol id="figGuard" viewBox="0 0 70 80">
+              <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="34" cy="12" r="8" />
+                <path d="M28 20 L40 20 L42 42 L26 42 Z" />
+                <path d="M41 24 L54 30" />
+                <path d="M27 24 L14 30" />
+                <path d="M30 42 L25 60 L26 70" />
+                <path d="M39 42 L45 60 L44 70" />
               </g>
+            </symbol>
+            <pattern id="pitchDots" width="5" height="5" patternUnits="userSpaceOnUse">
+              <circle cx="1.4" cy="1.4" r="1" fill="rgb(var(--p-dot))" opacity=".5" />
+            </pattern>
+            <marker id="truthHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+              <path d="M0 1 L9 5 L0 9 z" fill="rgb(var(--p-tekhelet))" />
+            </marker>
+          </defs>
+
+          {/* the stand — the gate-7 crowd sheet, one navy plate on the sky */}
+          <rect x="0" y={VIEW_TOP} width={PITCH.w} height={STAND_BOTTOM - VIEW_TOP + 2} fill={night ? 'rgb(var(--p-ink))' : 'rgb(var(--p-paper-deep))'} />
+          <g ref={crowdG}>
+            <image
+              href="/life/art/standCrowd.webp"
+              x="-20"
+              y={VIEW_TOP + 4}
+              width={PITCH.w + 40}
+              height={STAND_BOTTOM - VIEW_TOP + 14}
+              preserveAspectRatio="xMidYMid slice"
+              style={{ filter: night ? 'grayscale(1) contrast(1.2) brightness(.95)' : 'grayscale(1) contrast(1.2) brightness(1)' }}
+            />
+            <rect x="-20" y={VIEW_TOP} width={PITCH.w + 40} height={STAND_BOTTOM - VIEW_TOP + 14} fill="rgb(var(--sign))" style={{ mixBlendMode: 'multiply' }} opacity={night ? 0.6 : 0.45} />
+          </g>
+          {/* the hoarding in front of the stand */}
+          <rect x="0" y={STAND_BOTTOM - 6} width={PITCH.w} height="8" fill="rgb(var(--p-red-deep))" />
+          <rect x="0" y={STAND_BOTTOM + 2} width={PITCH.w} height="2" fill="rgb(var(--p-ink))" />
+
+          {/* behind the goal */}
+          <rect x="0" y={STAND_BOTTOM + 4} width={PITCH.w} height={PITCH.goalY - STAND_BOTTOM} fill="rgb(var(--p-ink))" />
+
+          <rect width={PITCH.w} height={PITCH.h} fill="rgb(var(--p-grass))" />
+          <g fill="rgb(var(--p-grass-dark))">
+            {[0, 80, 160, 240, 320].map((y) => (
+              <rect key={y} y={y} width={PITCH.w} height="40" />
             ))}
-            {truth.map((touch, index) => {
-              const a = toBoard(touch.origin)
-              const b = toBoard(touch.target)
-              return (
-                <g key={`route-${index}`}>
-                  <path
-                    d={`M${a.x} ${a.y} L${b.x} ${b.y}`}
-                    fill="none"
-                    stroke="rgb(var(--p-tekhelet))"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    markerEnd="url(#truthHead)"
-                  />
-                  <path
-                    d={`M${a.x - 5} ${a.y} H${a.x + 5} M${a.x} ${a.y - 5} V${a.y + 5}`}
-                    stroke="rgb(var(--p-tekhelet))"
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                  />
-                </g>
-              )
-            })}
           </g>
-        )}
+          <rect width={PITCH.w} height={PITCH.h} fill="url(#pitchDots)" opacity=".18" />
+          {night && <rect width={PITCH.w} height={PITCH.h} fill="rgb(var(--p-ink))" opacity=".2" />}
 
-        {/* the reception hint — ONE envelope, bought, for the touch being built. Chalk on
-            an ink keyline and never filled: it says where the source admits, not where. */}
-        {hintEnvelope && !truth && (
-          <g pointerEvents="none" data-goal="reception">
-            <ellipse
-              cx={hintEnvelope.x * PITCH.w}
-              cy={hintEnvelope.y * PITCH.h}
-              rx={Math.max(4, hintEnvelope.rx * PITCH.w)}
-              ry={Math.max(4, hintEnvelope.ry * PITCH.h)}
+          <g stroke="rgb(var(--p-line))" fill="none" strokeWidth="2.4">
+            <path d="M12 12 H288 M12 12 V388 M288 12 V388 M12 388 H288" />
+            <rect x="68" y="12" width="164" height="67" />
+            <rect x="113" y="12" width="74" height="22" />
+            <path d="M120.3 79 A 37 37 0 0 0 179.7 79" />
+            <path d="M113 388 A 37 37 0 0 1 187 388" />
+          </g>
+          <g fill="rgb(var(--p-line))">
+            <circle cx={LANDMARKS.penaltySpot.x} cy={LANDMARKS.penaltySpot.y} r="2.6" />
+            <circle cx="150" cy="388" r="2.6" />
+          </g>
+          {/* the zone rules, faint: guidance, not a table */}
+          <g stroke="rgb(var(--p-line))" strokeWidth=".7" opacity=".16" strokeDasharray="3 5" fill="none">
+            <path d="M68 12 V340 M123 12 V340 M178 12 V340 M233 12 V340" />
+            <path d="M13 94 H288 M13 176 H288 M13 258 H288" />
+          </g>
+
+          {/* the net — it ripples */}
+          <g ref={netG} style={{ transformBox: 'fill-box', transformOrigin: '50% 100%' }}>
+            <rect x="126" y="-22" width="48" height="34" fill="rgb(var(--p-net))" stroke="rgb(var(--p-line))" strokeWidth="2.4" />
+            <path
+              d="M134 -22 V12 M142 -22 V12 M150 -22 V12 M158 -22 V12 M166 -22 V12 M126 -14 H174 M126 -6 H174 M126 2 H174"
+              stroke="rgb(var(--p-net-line))"
+              strokeWidth=".8"
               fill="none"
-              stroke="rgb(var(--p-ink))"
-              strokeWidth="4"
-              opacity=".55"
-            />
-            <ellipse
-              cx={hintEnvelope.x * PITCH.w}
-              cy={hintEnvelope.y * PITCH.h}
-              rx={Math.max(4, hintEnvelope.rx * PITCH.w)}
-              ry={Math.max(4, hintEnvelope.ry * PITCH.h)}
-              fill="none"
-              stroke="rgb(var(--p-line))"
-              strokeWidth="2.2"
-              strokeDasharray="6 5"
             />
           </g>
-        )}
 
-        {/* the bridges — for every PAIRED touch, from where you stood to where the archive
-            puts him. Ink under, chalk over: never vermilion on grass. */}
-        {truth && pairs && (
-          <g pointerEvents="none" data-goal="bridges">
-            {pairs.map((pair, index) => {
-              if (pair.user === null || pair.truth === null) return null
-              const mine = touches[pair.user]
-              const theirs = truth[pair.truth]
-              if (!mine || !theirs) return null
-              const a = toBoard(mine.origin)
-              const b = toBoard(theirs.origin)
-              if (Math.hypot(a.x - b.x, a.y - b.y) < 4) return null
-              const d = `M${a.x} ${a.y} L${b.x} ${b.y}`
-              return (
-                <g key={`bridge-${index}`} data-goal="bridge">
-                  <path d={d} fill="none" stroke="rgb(var(--p-ink))" strokeWidth="4.4" strokeLinecap="round" opacity=".85" />
-                  <path d={d} fill="none" stroke="rgb(var(--p-line))" strokeWidth="2" strokeLinecap="round" strokeDasharray="4 5" />
-                </g>
-              )
-            })}
+          {/* the other side's shape, in chalk — decoration, never a target */}
+          <g pointerEvents="none">
+            {[
+              { x: 92, y: 34 },
+              { x: 176, y: 88 },
+              { x: 104, y: 120 },
+            ].map((guard) => (
+              <use key={`${guard.x}`} href="#figGuard" x={guard.x} y={guard.y} width="34" height="40" strokeWidth={3} style={{ color: 'rgb(var(--p-line))' }} opacity=".7" />
+            ))}
+            {opponents.size === 0 && (
+              <use href="#figGuard" x="134" y="12" width="34" height="40" strokeWidth={3.4} style={{ color: 'rgb(var(--p-tekhelet))' }} />
+            )}
           </g>
-        )}
 
-        {/* the ball rolling between one touch and the next — your own reconstruction */}
-        <g pointerEvents="none">
-          {touches.map((touch, index) => {
-            const a = toBoard(touch.origin)
-            const b = toBoard(touch.target)
-            return (
-              <g key={`mine-${index}`}>
+          {/* the reception hint — one envelope, bought */}
+          {hintEnvelope && !reveal && (
+            <g pointerEvents="none" data-goal="reception">
+              <ellipse cx={hintEnvelope.x * PITCH.w} cy={hintEnvelope.y * PITCH.h} rx={Math.max(4, hintEnvelope.rx * PITCH.w)} ry={Math.max(4, hintEnvelope.ry * PITCH.h)} fill="none" stroke="rgb(var(--p-ink))" strokeWidth="4" opacity=".55" />
+              <ellipse cx={hintEnvelope.x * PITCH.w} cy={hintEnvelope.y * PITCH.h} rx={Math.max(4, hintEnvelope.rx * PITCH.w)} ry={Math.max(4, hintEnvelope.ry * PITCH.h)} fill="none" stroke="rgb(var(--p-line))" strokeWidth="2.2" strokeDasharray="6 5" />
+            </g>
+          )}
+
+          {/* the reveal, drawn to stay: envelopes, the archive in navy, yours in vermilion */}
+          {reveal && (
+            <g pointerEvents="none">
+              {reveal.truth.map((touch, index) => (
+                <g key={`env-${index}`}>
+                  <TruthEllipse envelope={touch.origin} />
+                  {index === reveal.truth.length - 1 && <TruthEllipse envelope={touch.target} />}
+                </g>
+              ))}
+              {reveal.truth.map((touch, index) => {
+                const a = toBoard(touch.origin)
+                const b = toBoard(touch.target)
+                return (
+                  <g key={`route-${index}`}>
+                    <path d={curvePath(a, b, touch.action)} fill="none" stroke="rgb(var(--p-ink))" strokeWidth="5.4" strokeLinecap="round" opacity=".5" />
+                    <path d={curvePath(a, b, touch.action)} fill="none" stroke="rgb(var(--p-tekhelet))" strokeWidth="3" strokeLinecap="round" markerEnd="url(#truthHead)" />
+                    <path d={`M${a.x - 5} ${a.y} H${a.x + 5} M${a.x} ${a.y - 5} V${a.y + 5}`} stroke="rgb(var(--p-tekhelet))" strokeWidth="2.4" strokeLinecap="round" />
+                  </g>
+                )
+              })}
+              <g data-goal="bridges">
+                {reveal.pairs.map((pair, index) => {
+                  if (pair.user === null || pair.truth === null) return null
+                  const mine = touches[pair.user]
+                  const theirs = reveal.truth[pair.truth]
+                  if (!mine || !theirs) return null
+                  const a = toBoard(mine.origin)
+                  const b = toBoard(theirs.origin)
+                  if (Math.hypot(a.x - b.x, a.y - b.y) < 4) return null
+                  const d = `M${a.x} ${a.y} L${b.x} ${b.y}`
+                  return (
+                    <g key={`bridge-${index}`} data-goal="bridge">
+                      <path d={d} fill="none" stroke="rgb(var(--p-ink))" strokeWidth="4.4" strokeLinecap="round" opacity=".85" />
+                      <path d={d} fill="none" stroke="rgb(var(--p-line))" strokeWidth="2" strokeLinecap="round" strokeDasharray="4 5" />
+                    </g>
+                  )
+                })}
+              </g>
+              {touches.map((touch, index) => {
+                const d = curvePath(toBoard(touch.origin), toBoard(touch.target), touch.action)
+                return (
+                  <g key={`mine-${index}`}>
+                    <path d={d} fill="none" stroke="rgb(var(--p-ink))" strokeWidth={KEYLINE} strokeLinecap="round" />
+                    <path d={d} fill="none" stroke={colourFor(reveal.grades[index])} strokeWidth="3" strokeLinecap="round" strokeDasharray={reveal.grades[index] === 'bad' ? '6 5' : undefined} />
+                  </g>
+                )
+              })}
+              {reveal.pairs.map((pair, index) => {
+                if (pair.user !== null && pair.truth === null) {
+                  const touch = touches[pair.user]
+                  if (!touch) return null
+                  const p = toBoard(touch.origin)
+                  const x = Math.min(PITCH.w - 9, p.x + 15)
+                  const y = p.y - 16
+                  return (
+                    <g key={`extra-${index}`} data-goal="extra">
+                      <rect x={x - 7} y={y - 7} width="14" height="14" fill="rgb(var(--p-ink))" />
+                      <path d={`M${x - 4} ${y} H${x + 4} M${x} ${y - 4} V${y + 4}`} stroke="rgb(var(--p-line))" strokeWidth="2.2" />
+                    </g>
+                  )
+                }
+                if (pair.user === null && pair.truth !== null) {
+                  const touch = reveal.truth[pair.truth]
+                  if (!touch) return null
+                  const p = toBoard(touch.origin)
+                  return (
+                    <g key={`missing-${index}`} data-goal="missing">
+                      <circle cx={p.x} cy={p.y} r="12" fill="none" stroke="rgb(var(--p-ink))" strokeWidth="5" />
+                      <circle cx={p.x} cy={p.y} r="12" fill="none" stroke="rgb(var(--p-line))" strokeWidth="2.2" />
+                    </g>
+                  )
+                }
+                return null
+              })}
+            </g>
+          )}
+
+          {/* the replay's trails — drawn as the ball flies them */}
+          {replay && (
+            <g pointerEvents="none" data-goal="rolling">
+              {replayLegs.map(({ leg, truth }, index) => {
+                const d = curvePath(toBoard(leg.from), toBoard(leg.to), leg.action)
+                return (
+                  <g key={`leg-${index}`}>
+                    <path
+                      ref={(el) => {
+                        legKeys.current[index] = el
+                      }}
+                      d={d}
+                      fill="none"
+                      stroke="rgb(var(--p-ink))"
+                      strokeWidth={KEYLINE}
+                      strokeLinecap="round"
+                      opacity={truth ? 0.5 : 1}
+                    />
+                    <path
+                      ref={(el) => {
+                        legPaths.current[index] = el
+                      }}
+                      d={d}
+                      fill="none"
+                      stroke={truth ? 'rgb(var(--p-tekhelet))' : 'rgb(var(--p-red))'}
+                      strokeWidth="3.2"
+                      strokeLinecap="round"
+                    />
+                  </g>
+                )
+              })}
+            </g>
+          )}
+
+          {/* the move so far, while it is being built — chalk on an ink keyline */}
+          {showMyTrails && (
+            <g pointerEvents="none">
+              {touches.map((touch, index) => {
+                const d = curvePath(toBoard(touch.origin), toBoard(touch.target), touch.action)
+                const hidden = flight !== null && landedKey !== flight.key && index === touches.length - 1
+                return (
+                  <g key={`trail-${index}`} style={hidden ? { visibility: 'hidden' } : undefined}>
+                    <path d={d} fill="none" stroke="rgb(var(--p-ink))" strokeWidth="5" strokeLinecap="round" opacity=".32" transform="translate(2,3)" />
+                    <path d={d} fill="none" stroke="rgb(var(--p-line))" strokeWidth="3" strokeLinecap="round" strokeDasharray="8 6" />
+                  </g>
+                )
+              })}
+              {flight && (
                 <path
-                  d={route(touch.origin, touch.target)}
-                  fill="none"
-                  stroke="rgb(var(--p-ink))"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                  opacity=".3"
-                  transform="translate(2,3)"
-                />
-                <path
-                  d={route(touch.origin, touch.target)}
+                  ref={flightTrail}
+                  d={flightPath}
                   fill="none"
                   stroke="rgb(var(--p-line))"
                   strokeWidth="3.4"
                   strokeLinecap="round"
-                  strokeDasharray="9 6"
-                  markerEnd="url(#ballHead)"
-                  className="ball-roll"
+                  style={flyingKey === flight.key ? undefined : { visibility: 'hidden' }}
                 />
-                <circle cx={b.x + 2} cy={b.y + 3} r="5" fill="rgb(var(--p-ink))" opacity=".3" />
-                <circle cx={b.x} cy={b.y} r="5" fill="rgb(var(--p-line))" stroke="rgb(var(--p-ink))" strokeWidth="1.6" />
-                <circle cx={a.x} cy={a.y} r="2.2" fill="rgb(var(--p-ink))" opacity=".55" />
-              </g>
-            )
-          })}
-        </g>
+              )}
+              {touches.map((touch, index) => {
+                const p = toBoard(touch.origin)
+                return (
+                  <g key={`num-${index}`}>
+                    <rect x={p.x - 19} y={p.y - 3} width="11" height="11" fill="rgb(var(--p-ink))" />
+                    <text x={p.x - 13.5} y={p.y + 5.4} textAnchor="middle" fill="rgb(var(--p-line))" style={{ fontSize: 9, fontWeight: 800 }} className="font-latin">
+                      {index + 1}
+                    </text>
+                  </g>
+                )
+              })}
+            </g>
+          )}
 
-        {/* the touch being built: he is standing there, the ball has not gone yet — drawn
-            as the same running figure a committed touch gets, dashed, so it reads as a
-            CHARACTER waiting to be dragged rather than a bare ring. */}
-        {draftOrigin && (
-          <g pointerEvents="none" className="fig-pop">
-            <use
-              href="#figRun"
-              x={toBoard(draftOrigin).x - 16}
-              y={toBoard(draftOrigin).y - 32}
-              width="38"
-              height="42"
-              strokeWidth={2.4}
-              strokeDasharray="3 3"
-              style={{ color: 'rgb(var(--p-line))' }}
-            />
-            <circle
-              cx={toBoard(draftOrigin).x}
-              cy={toBoard(draftOrigin).y}
-              r="11"
+          {/* the live curve: where the ball will go if you let go now */}
+          {drag?.kind === 'ball' && draft.origin && (
+            <path
+              pointerEvents="none"
+              d={curvePath(
+                besideFeet(toBoard(draft.origin)),
+                toBoard(drag.over && drag.over !== 'mouth' ? spotsForDrop()[drag.over] ?? drag.at : drag.at),
+                'pass',
+              )}
               fill="none"
               stroke="rgb(var(--p-line))"
-              strokeWidth="1.6"
-              strokeDasharray="4 4"
-              opacity=".7"
+              strokeWidth="2.6"
+              strokeDasharray="5 4"
+              strokeLinecap="round"
             />
-          </g>
-        )}
+          )}
 
-        {/* the live line — follows the finger while that figure is being dragged to a
-            target zone or the goal mouth. */}
-        {draftOrigin && dragLine && (
-          <line
-            pointerEvents="none"
-            x1={toBoard(draftOrigin).x}
-            y1={toBoard(draftOrigin).y}
-            x2={dragLine.x}
-            y2={dragLine.y}
-            stroke="rgb(var(--p-line))"
-            strokeWidth="2.6"
-            strokeDasharray="5 4"
-            strokeLinecap="round"
+          {/* the ball: a shadow on the grass and the ball above it */}
+          <ellipse ref={ballShadow} cx="0" cy="0" rx="5.5" ry="2.6" fill="rgb(var(--p-ink))" opacity=".35" pointerEvents="none" />
+          <g ref={ballG} pointerEvents="none" style={ballAway ? { visibility: 'hidden' } : undefined}>
+            {loose && !replay && !still && (
+              <rect x="-11" y="-11" width="22" height="22" fill="none" stroke="rgb(var(--p-line))" strokeWidth="1.8" strokeDasharray="3 3">
+                <animateTransform attributeName="transform" type="rotate" from="0" to="90" dur="2.4s" repeatCount="indefinite" />
+              </rect>
+            )}
+            <circle r="5.6" fill="rgb(var(--p-line))" stroke="rgb(var(--p-ink))" strokeWidth="1.8" />
+            <path d="M-2.2 -1.4 L0 -3 L2.2 -1.4 L1.4 1.3 L-1.4 1.3 Z" fill="rgb(var(--p-ink))" />
+          </g>
+        </svg>
+
+        {/* the tap path — twenty-one real, labelled controls over the drawing */}
+        <div dir="ltr" role="group" aria-label={t('goal.pitchAria')} className="pointer-events-none absolute inset-0" style={{ touchAction: 'none' }}>
+          <button
+            type="button"
+            disabled={disabled}
+            onPointerDown={fromPointer}
+            onClick={() => fromKeyboard(LANDMARKS.goalMouth)}
+            aria-label={t('goal.goalAria')}
+            data-goal="mouth"
+            className="pointer-events-auto absolute disabled:cursor-default"
+            style={{
+              insetInlineStart: `${(100 / PITCH.w) * 100}%`,
+              // down from the foot of the stand's first rows to the goal line: a target is
+              // not a drawing, and at 360×640 the air alone measured 38px
+              top: `${((MOUTH_TOP - VIEW_TOP) / VIEW_H) * 100}%`,
+              width: `${(100 / PITCH.w) * 100}%`,
+              height: `${((PITCH.goalY - MOUTH_TOP) / VIEW_H) * 100}%`,
+            }}
           />
-        )}
-
-        {/* while the server grades: one ball runs the player's whole move, leg by leg, and
-            round again until the verdict lands — no fixed wait, and none at all under
-            reduced motion, where it is simply not drawn. */}
-        {rolling && !still && touches.length > 0 && (
-          <g pointerEvents="none" data-goal="rolling">
-            <circle r="6" cx="0" cy="0" fill="rgb(var(--p-line))" stroke="rgb(var(--p-ink))" strokeWidth="2">
-              <animateMotion
-                dur={`${touches.length * ROLL_LEG * 2}s`}
-                repeatCount="indefinite"
-                path={touches
-                  .map((touch, index) => {
-                    const a = toBoard(touch.origin)
-                    const b = toBoard(touch.target)
-                    return `${index === 0 ? 'M' : 'L'}${a.x} ${a.y} L${b.x} ${b.y}`
-                  })
-                  .join(' ')}
-              />
-            </circle>
-          </g>
-        )}
-
-        {/* the zone rings — decorative only. The real target is the HTML button laid over
-            the same rect, below the SVG. */}
-        <g fill="rgb(var(--p-line))" opacity=".42" pointerEvents="none" className="font-latin text-[8px] font-extrabold">
           {ROWS.flatMap((row) =>
             COLS.map((col) => {
-              const rect = zoneRect(`${col}${row}`)
-              if (!rect) return null
+              const id: ZoneId = `${col}${row}`
+              const rect = zoneRect(id)
+              const centre = zoneCenter(id)
+              if (!rect || !centre) return null
               return (
-                <text key={`${col}${row}`} x={rect.x + rect.w / 2} y={rect.y + rect.h - 6} textAnchor="middle" style={{ fontSize: 8 }}>
-                  {col}
-                  {row}
-                </text>
+                <button
+                  key={id}
+                  type="button"
+                  disabled={disabled}
+                  onPointerDown={fromPointer}
+                  onClick={() => fromKeyboard(centre)}
+                  aria-label={t('goal.zoneAria', { zone: id, col, row: String(row) })}
+                  data-goal="zone"
+                  data-zone={id}
+                  className="pointer-events-auto absolute disabled:cursor-default"
+                  style={{
+                    insetInlineStart: `${(rect.x / PITCH.w) * 100}%`,
+                    top: `${((rect.y - VIEW_TOP) / VIEW_H) * 100}%`,
+                    width: `${(rect.w / PITCH.w) * 100}%`,
+                    height: `${(rect.h / VIEW_H) * 100}%`,
+                  }}
+                />
               )
             }),
           )}
-        </g>
+        </div>
 
-        {/* your touches, drawn as people */}
-        <g pointerEvents="none">
-          {touches.map((touch, index) => {
-            const point = toBoard(touch.origin)
-            const href = POSES[Math.min(index, POSES.length - 1)] ?? '#figRun'
-            const colour = colourFor(grades?.[index])
+        {/* the men, standing on the grass in their shirts */}
+        <div dir="ltr" className="pointer-events-none absolute inset-0" style={{ touchAction: 'none' }}>
+          {men.map((man) => {
+            const p = placeOf(man.name)
+            if (!p) return null
+            const isHolder = holder === man.name
+            const lifted = drag?.kind === 'man' && drag.name === man.name
+            const target = drag?.kind === 'ball' && drag.over === man.name
+            const hot = armed === man.name || isHolder || target
             return (
-              <g key={index} className="fig-pop">
-                <use
-                  href={href}
-                  x={point.x - 20}
-                  y={point.y - 39}
-                  width="46"
-                  height="52"
-                  strokeWidth={3}
-                  style={{ color: 'rgb(var(--p-ink))' }}
-                  opacity=".3"
-                />
-                {/* the keyline, and it is not decoration — see KEYLINE below */}
-                <use
-                  href={href}
-                  x={point.x - 23}
-                  y={point.y - 42}
-                  width="46"
-                  height="52"
-                  strokeWidth={KEYLINE}
-                  style={{ color: 'rgb(var(--p-ink))' }}
-                />
-                <use
-                  href={href}
-                  x={point.x - 23}
-                  y={point.y - 42}
-                  width="46"
-                  height="52"
-                  strokeWidth={3}
-                  style={{ color: colour }}
-                />
-              </g>
+              <button
+                key={man.name}
+                type="button"
+                data-goal="player"
+                data-token={man.name}
+                data-opponent={man.opponent ? 'true' : undefined}
+                data-holder={isHolder ? 'true' : undefined}
+                aria-pressed={armed === man.name || isHolder}
+                aria-label={man.opponent ? t('goal.pool.opponentAria', { name: man.name }) : man.name}
+                disabled={disabled}
+                onPointerDown={grab('man', man.name)}
+                onClickCapture={swallowDraggedClick}
+                onClick={() => onTapMan(man.name)}
+                className={`pointer-events-auto absolute flex min-h-tap min-w-[44px] -translate-x-1/2 -translate-y-[58%] flex-col items-center disabled:cursor-default ${
+                  lifted ? 'z-20' : hot ? 'z-10' : ''
+                } ${lifted || drag ? '' : 'transition-[inset-inline-start,top] duration-300 ease-stamp motion-reduce:transition-none'}`}
+                style={{ ...pct(p), touchAction: 'none' }}
+              >
+                <span
+                  data-lean
+                  className={`flex flex-col items-center transition-transform duration-press ${lifted ? '-translate-y-2 scale-110' : target ? 'scale-[1.18]' : ''} ${
+                    armed === man.name && !lifted ? 'animate-fx-wobble motion-reduce:animate-none' : ''
+                  }`}
+                >
+                  {man.look && !man.opponent ? (
+                    <PlayerShirt look={man.look} eager title={man.name} className="aspect-[5/6] w-[11.5cqw] max-w-[62px]" />
+                  ) : (
+                    <AwayShirt opponent={man.opponent} />
+                  )}
+                  <span className="mt-px block border-rule border-ink bg-ink p-[2px]">
+                    <span
+                      className={`block max-w-[27cqw] truncate px-1 font-body text-[10px] font-extrabold leading-[1.35] text-paper ${
+                        hot ? 'bg-red' : man.opponent ? 'bg-sign' : ''
+                      }`}
+                    >
+                      {man.name}
+                    </span>
+                  </span>
+                </span>
+              </button>
             )
           })}
-        </g>
 
-        {/* after the whistle: `+` beside a touch the archive does not have, and a ring
-            around an archive touch nobody placed */}
-        {truth && pairs && (
-          <g pointerEvents="none">
-            {pairs.map((pair, index) => {
-              if (pair.user !== null && pair.truth === null) {
-                const touch = touches[pair.user]
-                if (!touch) return null
-                const p = toBoard(touch.origin)
-                const x = Math.min(PITCH.w - 9, p.x + 13)
-                const y = p.y - 44
-                return (
-                  <g key={`extra-${index}`} data-goal="extra">
-                    <rect x={x - 7} y={y - 7} width="14" height="14" fill="rgb(var(--p-ink))" />
-                    <path
-                      d={`M${x - 4} ${y} H${x + 4} M${x} ${y - 4} V${y + 4}`}
-                      stroke="rgb(var(--p-line))"
-                      strokeWidth="2.2"
-                      strokeLinecap="square"
-                    />
-                  </g>
-                )
-              }
-              if (pair.user === null && pair.truth !== null) {
-                const touch = truth[pair.truth]
-                if (!touch) return null
-                const p = toBoard(touch.origin)
-                return (
-                  <g key={`missing-${index}`} data-goal="missing">
-                    <circle cx={p.x} cy={p.y} r="12" fill="none" stroke="rgb(var(--p-ink))" strokeWidth="5" />
-                    <circle cx={p.x} cy={p.y} r="12" fill="none" stroke="rgb(var(--p-line))" strokeWidth="2.2" />
-                  </g>
-                )
-              }
-              return null
-            })}
-          </g>
-        )}
-      </svg>
-
-      {/* the real tap targets — twenty-one focusable, labelled controls over the drawing.
-          `dir="ltr"` because these coordinates are the pitch's own fixed geometry, not a
-          reading order. A pointer places where it landed; a keyboard places the centre of
-          the place it chose, which is the precision the archive itself holds. */}
-      <div
-        dir="ltr"
-        role="group"
-        aria-label={t('goal.pitchAria')}
-        className="pointer-events-none absolute inset-0"
-        style={{ touchAction: 'none' }}
-      >
-        <button
-          type="button"
-          disabled={disabled}
-          onPointerDown={fromPointer}
-          onClick={() => fromKeyboard(LANDMARKS.goalMouth)}
-          aria-label={t('goal.goalAria')}
-          data-goal="mouth"
-          {...dropZone('mouth')}
-          className={`pointer-events-auto absolute transition-colors duration-press disabled:cursor-default ${
-            dragTargeting ? 'bg-red/15 data-[drop-over=true]:bg-red/35' : ''
-          }`}
-          style={{
-            insetInlineStart: `${(100 / PITCH.w) * 100}%`,
-            top: 0,
-            width: `${(100 / PITCH.w) * 100}%`,
-            // down to the goal line, not just to the top of the picture: at 320px — the
-            // narrowest screen this product supports — the air alone measures 39px and
-            // the air plus the mouth measures 51. The drawn net is 42 units wide; the
-            // TARGET is a hundred, because a button is not a drawing.
-            height: `${((PITCH.goalY - PITCH.top) / (PITCH.h - PITCH.top)) * 100}%`,
-          }}
-        />
-        {ROWS.flatMap((row) =>
-          COLS.map((col) => {
-            const id: ZoneId = `${col}${row}`
-            const rect = zoneRect(id)
-            const centre = zoneCenter(id)
-            if (!rect || !centre) return null
-            return (
-              <ZoneButton
-                key={id}
-                id={id}
-                col={col}
-                row={row}
-                rect={rect}
-                disabled={disabled}
-                draggable={id === originZone}
-                highlight={dragTargeting}
-                boardRef={board}
-                onPointerDown={fromPointer}
-                onClick={() => fromKeyboard(centre)}
-                onDragTrack={id === originZone ? setDragLine : undefined}
-                onDragEnd={id === originZone ? () => setDragLine(null) : undefined}
-                onDrop={(zone) => {
-                  const point = zone === 'mouth' ? LANDMARKS.goalMouth : zoneCenter(zone)
-                  if (!point) return
-                  onPlace(normalise(point))
-                  firePickFxAt(document.querySelector(`[data-drop="${zone}"]`), { tone: 'red' })
-                }}
-              />
-            )
-          }),
-        )}
+          {/* the ball, as a thing you can pick up — only while a man has it */}
+          {holder && ballRest && !replay && (
+            <button
+              type="button"
+              data-goal="ball"
+              aria-label={t('goal88.ballAria', { name: holder })}
+              disabled={disabled}
+              onPointerDown={grab('ball', holder)}
+              onClickCapture={swallowDraggedClick}
+              onClick={() => onTapMan(holder)}
+              className="pointer-events-auto absolute z-30 grid min-h-tap min-w-[44px] -translate-x-1/2 -translate-y-1/2 place-items-center disabled:cursor-default"
+              style={{ ...pct(ballRest), touchAction: 'none', visibility: drag?.kind === 'ball' ? 'hidden' : undefined }}
+            >
+              <span aria-hidden="true" className="block h-[26px] w-[26px] border-[2px] border-dashed border-press-line" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* the name cards — cream tickets with an ink shadow, exactly as the handoff draws them */}
-      {touches.map((touch, index) => {
-        const label = labels[index]
-        if (!label) return null
-        const point = toBoard(touch.origin)
-        return (
-          <div
-            key={index}
-            /* The pitch is GEOMETRY, not text: its x axis is fixed whatever the document
-               direction. Positioning these with a logical property put every name card on
-               the opposite touchline. The wrapper is therefore ltr and the ticket inside
-               it is rtl — the one place in this app where that is right. */
-            dir="ltr"
-            className="fig-pop pointer-events-none absolute"
-            style={{
-              insetInlineStart: `${(point.x / PITCH.w) * 100}%`,
-              top: `${((point.y + 12 - PITCH.top) / (PITCH.h - PITCH.top)) * 100}%`,
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <div dir="rtl" className="whitespace-nowrap border-rule border-ink bg-sheet px-2 py-0.5 plate-card">
-              <span className="font-body text-[11px] font-extrabold leading-tight text-ink">{label.nameHe}</span>
-            </div>
-            {/* The KEYLINE again, in HTML, and it took three goes to get right: a
-                vermilion chip whose edge antialiases straight into printed grass prints
-                yellow at about a third coverage, and rule 8 has no allowance for an edge.
-                A hairline let eighteen pixels through down one side; two pixels let a
-                single ROW through under the bottom, because the ticket is placed at a
-                percentage and lands on a fractional pixel in both axes. So the vermilion
-                is not bordered, it is INSET — the whole strip is an ink plate and the
-                chips sit inside its padding, which is four solid pixels of ink on every
-                side of the red and cannot be rounded away. */}
-            <div dir="rtl" className="mt-0.5 flex justify-center">
-              <span className="flex gap-[3px] border-rule border-ink bg-ink p-[2px]">
-                <span className="px-1 font-latin text-[9px] font-extrabold leading-[1.4] text-paper" dir="ltr">
-                  {label.num}
-                </span>
-                <span className="bg-red px-1.5 font-body text-[9px] font-extrabold leading-[1.4] text-paper">
-                  {label.actHe}
-                </span>
-              </span>
-            </div>
-          </div>
-        )
-      })}
+      {/* the label at the finger: what this drop will be */}
+      {fingerLabel && drag && (
+        <div
+          dir="ltr"
+          aria-hidden="true"
+          className="pointer-events-none absolute z-40 -translate-x-1/2"
+          style={{ insetInlineStart: drag.px.x, top: Math.max(4, drag.px.y - 64) }}
+        >
+          <span dir="rtl" className="block whitespace-nowrap border-plate border-ink bg-ink px-2 py-1 font-display text-[15px] leading-none text-paper">
+            {fingerLabel}
+          </span>
+        </div>
+      )}
 
-      {/* the caption — the builder's question, on the board where the thumb is. Never a
-          tap target: `pointer-events-none`, so a placement under it lands on the zone. */}
+      {plate}
+
       {caption && (
         <div
           data-goal="caption"
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center gap-2 bg-ink/85 px-2 py-1"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex items-center gap-2 bg-ink/85 px-2 py-1"
         >
-          <span className="shrink-0 bg-paper px-1.5 font-body text-[11px] font-extrabold leading-[1.5] text-ink">
-            {caption.lead}
-          </span>
-          <span className="min-w-0 truncate font-body text-[12px] font-extrabold leading-snug text-paper">
-            {caption.text}
-          </span>
+          <span className="shrink-0 bg-paper px-1.5 font-body text-[11px] font-extrabold leading-[1.5] text-ink">{caption.lead}</span>
+          <span className="min-w-0 truncate font-body text-[12px] font-extrabold leading-snug text-paper">{caption.text}</span>
         </div>
       )}
+
+      {overlay}
     </div>
   )
 }
 
-/**
- * A zone button — the real 44px tap target it always was, plus (when `draggable`) a
- * drag source: the finger can pick this exact spot up and carry it to another zone,
- * which fires the caller's `onDrop` with the RELEASED zone's id (or `mouth`), the same
- * `onPlace` a second tap already reaches.
- */
-function ZoneButton({
-  id,
-  col,
-  row,
-  rect,
-  disabled,
-  draggable,
-  highlight = false,
-  boardRef,
-  onPointerDown,
-  onClick,
-  onDrop,
-  onDragTrack,
-  onDragEnd,
-}: {
-  id: ZoneId
-  col: string
-  row: number
-  rect: { x: number; y: number; w: number; h: number }
-  disabled: boolean
-  draggable: boolean
-  /** a compatible drag (this figure, or a rail token) is in the air — light every zone up */
-  highlight?: boolean
-  boardRef?: React.RefObject<HTMLDivElement>
-  onPointerDown: (event: React.PointerEvent) => void
-  onClick: () => void
-  onDrop: (zone: string) => void
-  /** board-space coordinates, while THIS zone's own figure is being dragged (live line) */
-  onDragTrack?: (point: { x: number; y: number } | null) => void
-  onDragEnd?: () => void
-}) {
-  const drag = useDragSource({ payload: `zone:${id}`, disabled: !draggable, onDrop })
-
-  /**
-   * A second, independent pointer listener, alongside `useDragSource`'s own — that one
-   * moves a ghost copy of the button; this one only reads the pointer to draw the live
-   * dashed line in board space, which the shared drag engine has no hook for.
-   */
-  function onDown(event: React.PointerEvent<HTMLButtonElement>) {
-    if (!draggable) {
-      onPointerDown(event)
-      return
-    }
-    drag.onPointerDown(event)
-    if (!onDragTrack) return
-    const id = event.pointerId
-    function toBoardPoint(clientX: number, clientY: number) {
-      const box = boardRef?.current?.getBoundingClientRect()
-      if (!box || box.width === 0 || box.height === 0) return null
-      return {
-        x: ((clientX - box.left) / box.width) * PITCH.w,
-        y: PITCH.top + ((clientY - box.top) / box.height) * (PITCH.h - PITCH.top),
-      }
-    }
-    function move(ev: PointerEvent) {
-      if (ev.pointerId !== id) return
-      onDragTrack?.(toBoardPoint(ev.clientX, ev.clientY))
-    }
-    function up(ev: PointerEvent) {
-      if (ev.pointerId !== id) return
-      cleanup()
-    }
-    function cleanup() {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
-      window.removeEventListener('pointercancel', up)
-      onDragTrack?.(null)
-      onDragEnd?.()
-    }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
-    window.addEventListener('pointercancel', up)
-  }
-
+/** the other side's man, or a man with no shirt to hand: a flat printed jersey */
+function AwayShirt({ opponent }: { opponent: boolean }) {
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      onPointerDown={onDown}
-      onClick={onClick}
-      onClickCapture={draggable ? drag.onClickCapture : undefined}
-      data-draggable={draggable ? drag['data-draggable'] : undefined}
-      aria-label={t('goal.zoneAria', { zone: id, col, row: String(row) })}
-      data-goal="zone"
-      data-zone={id}
-      {...dropZone(id)}
-      className={`pointer-events-auto absolute transition-colors duration-press disabled:cursor-default ${
-        highlight ? 'bg-red/15 data-[drop-over=true]:bg-red/35' : ''
-      }`}
-      style={{
-        ...(draggable ? drag.style : undefined),
-        insetInlineStart: `${(rect.x / PITCH.w) * 100}%`,
-        top: `${((rect.y - PITCH.top) / (PITCH.h - PITCH.top)) * 100}%`,
-        width: `${(rect.w / PITCH.w) * 100}%`,
-        height: `${(rect.h / (PITCH.h - PITCH.top)) * 100}%`,
-      }}
-    />
+    <svg viewBox="0 0 50 60" className="block aspect-[5/6] w-[11.5cqw] max-w-[62px]" aria-hidden="true">
+      <path d="M17 4 L33 4 L47 13 L41 25 L37 23 L37 56 L13 56 L13 23 L9 25 L3 13 Z" fill="rgb(var(--p-ink))" transform="translate(2 2)" opacity=".35" />
+      <path
+        d="M17 4 L33 4 L47 13 L41 25 L37 23 L37 56 L13 56 L13 23 L9 25 L3 13 Z"
+        fill={opponent ? 'rgb(var(--sign))' : 'rgb(var(--p-red))'}
+        stroke="rgb(var(--p-ink))"
+        strokeWidth="3"
+        strokeLinejoin="round"
+      />
+      <path d="M20 4 Q25 11 30 4" fill="none" stroke="rgb(var(--p-line))" strokeWidth="2.4" />
+    </svg>
   )
 }
 
-/** What the source does not pin down, drawn as the shape it actually is. */
 function TruthEllipse({ envelope }: { envelope: Envelope }) {
   return (
     <ellipse

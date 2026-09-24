@@ -33,7 +33,9 @@ export function SourceNote({
   const href = creditsHref(group)
   const label = t('credits.note')
   const aria = newTab ? t('credits.note.ariaTab') : t('credits.note.aria')
-  const look = `inline-flex min-h-[28px] items-center font-body text-[11.5px] font-bold leading-snug underline decoration-1 underline-offset-2 ${
+  // the print stays 28px tall, the TOUCH target does not: an invisible ::after grows the hit
+  // area to 48px high and 8px wider on each side, at every width (WCAG 2.5.8, delta 88)
+  const look = `relative inline-flex min-h-[28px] min-w-[44px] items-center justify-center after:absolute after:inset-x-[-8px] after:inset-y-[-10px] after:content-[''] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red font-body text-[11.5px] font-bold leading-snug underline decoration-1 underline-offset-2 ${
     tone === 'dark' ? 'text-paper/85' : 'text-sign'
   } ${className}`
 

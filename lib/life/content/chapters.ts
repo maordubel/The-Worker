@@ -212,11 +212,10 @@ export const CHAPTERS: readonly ChapterDef[] = [
     bridge: { titleHe: '1986', subHe: 'שבת', ms: 2400 },
     anchorKey: '1986',
     entry: (state) => {
-      const events: LifeEvent[] = [
-        { t: 'item.gained', item: 'house-key' },
-        { t: 'flag.raised', flag: 'has:key' },
-        { t: 'flag.raised', flag: 'knows:match' },
-      ]
+      // (Director V3 §11, 24.9.2026) the house key is no longer handed over on entry to
+      // unlock a door: the door is open, and the key waits in the drawer on its string for
+      // the boy who opens it (`desk`) — a thing an eight-year-old has, not a quest
+      const events: LifeEvent[] = [{ t: 'flag.raised', flag: 'knows:match' }]
       if (state.flags['life:a7:refused'] || state.flags['life:a7:promised']) {
         events.push({ t: 'flag.raised', flag: 'asked:ticket' })
       }

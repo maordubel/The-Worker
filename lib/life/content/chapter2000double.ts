@@ -54,6 +54,8 @@ export const PORTRAIT_2000: Record<string, string> = {
 export function objectiveTitle(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags['t:over']) return null
+  // (V3) after the whistle the day is a question, and the answer is somewhere in the crowd
+  if (state.flags['t:matched'] && !state.flags['t:confirmed']) return 'השריקה אצלכם. עכשיו הידיעה מהמשחק המקביל — רדיו, טלפון. לא שמועה.'
   if (state.flags['t:route']) return sceneId === 'hatikva' ? null : 'שכונת התקווה. שלוש.'
   return 'האליפות יכולה להיסגר היום. איך מגיעים — ועם מי.'
 }
@@ -110,9 +112,11 @@ export const BEATS_TITLE: Beat[] = [
     id: 't-ground',
     at: 'hatikva',
     trigger: 'enter',
-    when: { flag: 't:route', none: [{ flag: 't:over' }] },
+    // `t:matched` first: the match is played once — the question after it is asked in the room
+    when: { flag: 't:route', none: [{ flag: 't:over' }, { flag: 't:matched' }] },
     delayMs: 1000,
     do: [
+      { a: 'flag', flag: 't:matched' },
       { a: 'card', titleHe: 'שכונת התקווה', subHe: 'המחזור שמכריע', ms: 2600, art: 'plate-2000-title' },
       { a: 'match', script: 'title-00' },
     ],
@@ -185,10 +189,69 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     branches: [
       {
         lines: [{ who: null, text: 'השריקה אצלכם. היציע מסתכל הצידה, אל רדיו, טלפון, פנים של מישהו שיודע.' }],
+        /**
+         * האישור המקביל — Director V3 §12, 24.9.2026. "לחפש את הידיעה" used to be a button
+         * that said the news had come. Now it is the search: the room holds three voices
+         * (`scenes.ts`, hatikva `t-src-*`) — a man on a balcony who has been shouting
+         * "נגמר" since the seventieth minute, a transistor that has to be listened to twice,
+         * and a stranger with a phone to one ear. The rumour counts for nothing; the radio
+         * and the phone together close the count (`t-confirm`). Waiting is still an answer.
+         */
         choices: [
-          { id: 'listen', text: 'לחפש את הידיעה, לא את החגיגה.', then: [{ e: 'goto', node: 't-confirm' }] },
+          { id: 'listen', text: 'לחפש את הידיעה, לא את החגיגה.', then: [{ e: 'flag', flag: 't:listening' }, { e: 'toast', text: 'רדיו, טלפון, פנים של מישהו שיודע. לא מי שצועק הכי חזק.', tone: 'plain' }] },
           { id: 'wait', text: 'לחכות. 1998 לימדה אותך מה שווה שמועה.', then: [{ e: 'goto', node: 't-confirm' }] },
         ],
+      },
+    ],
+  },
+  {
+    id: 't-src-rumour',
+    nameHe: null,
+    branches: [
+      { when: { flag: 't:confirmed' }, lines: [{ who: null, text: 'הוא עדיין צועק. עכשיו הוא צודק.' }] },
+      {
+        lines: [
+          { who: null, text: 'מישהו על מרפסת, בגופייה, צועק "נגמר! אלופים!" עם ידיים באוויר.' },
+          { who: null, text: 'הוא צעק את אותו דבר גם בדקה השבעים, כשזה עוד לא היה נכון. שמועה היא לא ידיעה — את זה 1998 לימדה אותך.' },
+        ],
+        then: [{ e: 'flag', flag: 't:src:rumour' }, { e: 'personality', key: 'impulsiveness', delta: -1 }],
+      },
+    ],
+  },
+  {
+    id: 't-src-radio',
+    nameHe: null,
+    branches: [
+      { when: { flag: 't:confirmed' }, lines: [{ who: null, text: 'הטרנזיסטור כבר מנגן שיר. השדר נגמר.' }] },
+      {
+        when: { all: [{ flag: 't:src:radio-half' }, { flag: 't:src:phone' }] },
+        lines: [{ who: null, text: 'הצמדת את האוזן שוב. הפעם השדר ברור: המשחק המקביל נגמר. שני מקורות, אותה תוצאה.' }],
+        then: [{ e: 'flag', flag: 't:src:radio' }, { e: 'goto', node: 't-confirm' }],
+      },
+      {
+        when: { flag: 't:src:radio-half' },
+        lines: [{ who: null, text: 'הצמדת את האוזן שוב. הפעם השדר ברור: המשחק המקביל נגמר. עכשיו רק צריך לשמוע את זה ממישהו שלא מחזיק את אותו רדיו.' }],
+        then: [{ e: 'flag', flag: 't:src:radio' }],
+      },
+      {
+        lines: [{ who: null, text: 'טרנזיסטור ביד של זקן ליד הגדר. השדר מהמשחק המקביל נקטע באמצע משפט, ורעש. הוא מכה בו בכף היד.' }],
+        then: [{ e: 'flag', flag: 't:src:radio-half' }, { e: 'toast', text: 'עוד רגע. לנסות שוב.', tone: 'plain' }],
+      },
+    ],
+  },
+  {
+    id: 't-src-phone',
+    nameHe: null,
+    branches: [
+      { when: { flag: 't:confirmed' }, lines: [{ who: null, text: 'הוא כבר לא בטלפון. הוא מחבק מישהו שהוא לא מכיר.' }] },
+      {
+        when: { flag: 't:src:radio' },
+        lines: [{ who: null, text: 'מישהו עם פלאפון, אצבע על האוזן השנייה: "נגמר שם. נגמר." אותו דבר שאמר הרדיו.' }],
+        then: [{ e: 'flag', flag: 't:src:phone' }, { e: 'goto', node: 't-confirm' }],
+      },
+      {
+        lines: [{ who: null, text: 'מישהו עם פלאפון, אצבע על האוזן השנייה, צועק לתוכו "נו? נו?" ואז: "נגמר שם." הוא לא יודע שאתה מקשיב.' }],
+        then: [{ e: 'flag', flag: 't:src:phone' }, { e: 'toast', text: 'מקור אחד. עוד אחד — וזה כבר לא שמועה.', tone: 'plain' }],
       },
     ],
   },

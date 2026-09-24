@@ -976,7 +976,6 @@
     "freddy-glass.webp",
     "freddy.webp",
     "hermesh-back.webp",
-    "hermesh.webp",
     "melamed-lean.webp",
     "melamed-listen.webp",
     "melamed-play.webp",
@@ -2041,6 +2040,194 @@
    ],
    "confidence": 2,
    "noteHe": "סרט הארכיון שמוצג מיד אחרי זיכרון 1983 האינטראקטיבי (FilmCut, מצב archive). נרשם בדלתא 87: הקבצים נכנסו לריפו בלי רשומת מקור."
+  },
+  {
+   "key": "archive-dig-table",
+   "kind": "backdrop",
+   "origin": "maor-upload",
+   "folder": "public/archive",
+   "match": [
+    "dig-table-desktop.webp",
+    "dig-table-phone.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "מסירת האמנות של השערים, THE-WORKER-GATES-ART-2026-09 (נוצר 21.9.2026) — עובד בדלתא 87: חיתוך מרכזי ליחס 16:9 (1600×900, מקור 1672×941) ו-3:4 (900×1200, מקור 1086×1448) וקידוד WebP",
+   "treatment": [
+    "crop",
+    "de-yellow",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "שולחן החפירה של שער 12 — קופסת ארכיון ריקה מלמעלה, בשתי גרסאות: רחבה למחשב וגבוהה לטלפון. שני הקבצים נוצרו ב-21.9.2026 ונמסרו על ידך; בדלתא 87 נחתכו ליחס המדויק וקודדו ל-WebP. סריקת הצהוב על שני המקורות מצאה אפס פיקסלים ברצועה, ולכן מעבר הסרת הצהוב לא הזיז אף פיקסל. בדלתא 88 רצפת הקופסה נמדדה על הקבצים (פינות הרצפה בפיקסלים) והפריטים מונחים עליה בדיוק."
+  },
+  {
+   "key": "art-figure-characters-2000-2026",
+   "kind": "figure",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "pogi32.webp",
+    "pogi32-3q.webp",
+    "pogi32-side.webp",
+    "pogi32-back.webp",
+    "pogi32-walk.webp",
+    "pogi40.webp",
+    "pogi40-3q.webp",
+    "pogi40-side.webp",
+    "pogi40-back.webp",
+    "pogi40-walk.webp",
+    "pogi47.webp",
+    "pogi47-3q.webp",
+    "pogi47-side.webp",
+    "pogi47-back.webp",
+    "pogi47-walk.webp",
+    "kobi62.webp",
+    "kobi62-3q.webp",
+    "kobi62-side.webp",
+    "kobi62-back.webp",
+    "kobi62-walk.webp",
+    "kobi72.webp",
+    "kobi72-3q.webp",
+    "kobi72-side.webp",
+    "kobi72-back.webp",
+    "kobi72-walk.webp",
+    "ofir40.webp",
+    "ofir40-3q.webp",
+    "ofir40-side.webp",
+    "ofir40-back.webp",
+    "ofir40-walk.webp",
+    "amit40.webp",
+    "amit40-3q.webp",
+    "amit40-side.webp",
+    "amit40-back.webp",
+    "amit40-walk.webp",
+    "efi44.webp",
+    "efi44-3q.webp",
+    "efi44-side.webp",
+    "efi44-back.webp",
+    "efi44-walk.webp",
+    "keren40.webp",
+    "keren40-3q.webp",
+    "keren40-side.webp",
+    "keren40-back.webp",
+    "keren40-walk.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "THE-WORKER-CHARACTERS-2000-2026-55 — חבילת הדמויות של צוות The Worker, 22.9.2026 · scripts/life/ingest-characters-2026-09-24.py",
+   "treatment": [
+    "key-green",
+    "trim-alpha",
+    "grade",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "ארבעים וחמישה גופים: פוגי בן 32/40/47, קובי בן 62/72, אופיר, עמית וקרן בני 40, אפי בן 44 — חזית, שלושה־רבעים, פרופיל, גב וצעד, על מסך ירוק. נגזרו מהירוק, הוקטנו לגובה 640, והאות N שהמודל צייר על נעלי הספורט של קרן ושל פוגי בן 32 נמחקה (README: סימנים דקורטיביים יש להסיר)."
+  },
+  {
+   "key": "art-figure-reference-2026-09-23",
+   "kind": "figure",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "hermesh.webp",
+    "hermesh-3q.webp",
+    "hermesh-ball.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "רפרנסים קנוניים שמאור אישר, 23.9.2026 (hermesh-front-green, hermesh-3q-green, hermesh-front-basketball-white) · scripts/life/ingest-characters-2026-09-24.py",
+   "treatment": [
+    "key-green",
+    "key-flat",
+    "trim-alpha",
+    "grade",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "חרמש הקנוני — האיש הקירח. גופייה אדומה וג׳ינס על ירוק (חזית ושלושה־רבעים), ותלבושת כדורסל אדומה על רקע לבן. hermesh נכתב על השם הישן, כך שההיפי בשיער הארוך שעמד שם לא נטען עוד."
+  },
+  {
+   "key": "art-portrait-cut-2026-09-24",
+   "kind": "figure",
+   "origin": "procedural",
+   "folder": "public/life/art",
+   "match": [
+    "facePogi32.webp",
+    "facePogi40.webp",
+    "facePogi47.webp",
+    "faceKobi62.webp",
+    "faceKobi72.webp",
+    "faceOfir40.webp",
+    "faceAmit40.webp",
+    "faceEfi44.webp",
+    "faceKeren40.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "פנים שנחתכו מהגוף של אותה דמות באותו גיל — scripts/life/ingest-characters-2026-09-24.py (כלל 67/88)",
+   "treatment": [
+    "cut",
+    "trim-alpha",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "לא ציור חדש: כל לוח נחתך מהחזית של הגוף באותו גיל, ברזולוציה המלאה של המקור, באותה שיטה של cast-faces-2026-09-21, כדי שהפנים בתיבה יהיו הפנים שעומדות בחדר."
+  },
+  {
+   "key": "art-portrait-rachel60",
+   "kind": "figure",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "faceRachel60.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "THE-WORKER-CHARACTERS-2000-2026-55/faceRachel60.png · scripts/life/ingest-characters-2026-09-24.py",
+   "treatment": [
+    "crop",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "רחל בת שישים — דיוקן בלבד; לפי ה-README לא התבקש לה גוף. נחתך לריבוע מהדיוקן שנמסר, ולכן הוא הלוח היחיד בחיים הבוגרים שלא נחתך מגוף, וזה מוצהר ב-PORTRAIT_ONLY."
+  },
+  {
+   "key": "art-backdrop-bloomfield-photos-2026-09-23",
+   "kind": "photo-scan",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "bloom80Goal.webp",
+    "bloom90Side.webp",
+    "bloom90Corner.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "שלושה צילומים של בלומפילד מבפנים שמאור שלח ב-23.9.2026 (bloom-80s-goal, bloom-90s-side, bloom-90s-corner) · scripts/life/finish-backdrops.py",
+   "treatment": [
+    "de-yellow",
+    "quantise",
+    "lossy-webp-measured"
+   ],
+   "confidence": 1,
+   "noteHe": "בלומפילד מהדשא, יציעים ריקים. העשור נקבע לפי שלטי הפרסום (olivetti, בנק הפועלים, טמפו — שנות השמונים; שיכון עובדים, Hertz — התשעים). מי צילם ומתי לא נמסר, ולכן הביטחון 1. השלטים הצהובים עברו de-yellow כמו כל רקע (כלל 8)."
+  },
+  {
+   "key": "gates-brand-art",
+   "kind": "generated",
+   "origin": "maor-upload",
+   "folder": "public/art",
+   "match": [
+    "celebration.png",
+    "number-seven.png",
+    "dribble.png",
+    "crest-worker-figure.png",
+    "wall-paste-up.png"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "מסירת האמנות של השערים, THE-WORKER-GATES-ART-2026-09 — מקורות ב-brand/source/art/, מעובדים ב-scripts/brand/art.py (טבלת JOBS)",
+   "treatment": [
+    "crop",
+    "de-yellow"
+   ],
+   "confidence": 2,
+   "noteHe": "חמש תמונות המותג של השערים (חגיגה, מספר שבע, דריבל, דמות הפועל מהסמל, קיר ההדבקה של שער 11). כולן נמסרו על ידך ועוברות דרך אותו צינור: חיתוך, הקטנה והסרת צהוב. הרשומה נוספה בדלתא 88, כשהתיקייה נכנסה לביקורת."
   }
  ]
 }

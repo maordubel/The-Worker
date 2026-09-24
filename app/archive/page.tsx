@@ -51,8 +51,12 @@ export default function ArchivePage({
           from: figures.earliest ? figures.earliest.slice(0, 4) : '—',
           to: figures.latest ? figures.latest.slice(0, 4) : '—',
         })}
+        report={<ReportLink />}
       />
-      <ReportLink />
+      {/* the phone stage is one screen: there the link rides in the drawer, beside the facts */}
+      <div className="hidden md:block">
+        <ReportLink />
+      </div>
     </Screen>
   )
 }

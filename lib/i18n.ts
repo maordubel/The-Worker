@@ -18,6 +18,11 @@ import heStagePlayers from '@/messages/he.stage.players.json'
 import heStageKits from '@/messages/he.stage.kits.json'
 import heStagePlay from '@/messages/he.stage.play.json'
 import heStageWings from '@/messages/he.stage.wings.json'
+import heStagePick from '@/messages/he.stage.pick.json'
+import heStageGoal88 from '@/messages/he.stage.goal88.json'
+import heStageBlindcow from '@/messages/he.stage.blindcow.json'
+import heStageAway from '@/messages/he.stage.away.json'
+import heStageWings88 from '@/messages/he.stage.wings88.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -71,6 +76,11 @@ export const CATALOGUE_FILES = {
   heStageKits,
   heStagePlay,
   heStageWings,
+  heStagePick,
+  heStageGoal88,
+  heStageBlindcow,
+  heStageAway,
+  heStageWings88,
 } as const
 
 const catalogue = {
@@ -92,6 +102,11 @@ const catalogue = {
   ...heStageKits,
   ...heStagePlay,
   ...heStageWings,
+  ...heStagePick,
+  ...heStageGoal88,
+  ...heStageBlindcow,
+  ...heStageAway,
+  ...heStageWings88,
 }
 
 export type MessageKey = keyof typeof catalogue

@@ -5,6 +5,7 @@ import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { dealChallenge, hasVerifiedLineup, type MatchIntro } from '@/lib/game/lineup'
+import { playerShirt } from '@/lib/kit/playerShirt'
 import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
@@ -117,6 +118,12 @@ export default function LineupPage({
           graded={graded}
           kit={challenge.kit}
           kitSeason={challenge.kitSeason}
+          // the night's REAL shirt — the match season's photograph where the archive has one
+          look={
+            challenge.intro.season || challenge.kitSeason
+              ? playerShirt(null, { season: challenge.intro.season || challenge.kitSeason })
+              : null
+          }
           intro={challenge.intro}
           sourceTitle={challenge.sourceTitle}
         />

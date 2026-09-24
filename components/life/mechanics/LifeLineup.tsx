@@ -35,6 +35,7 @@ export default function LifeLineup({ request, onResult }: ActivityBoardProps) {
         graded
         kit={challenge.kit}
         kitSeason={challenge.kitSeason}
+        look={challenge.look}
         embedded={{
           window: { before: request.window.before, pin: request.window.pin ?? null },
           doneLabel: backLabel(request.activity),

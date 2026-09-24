@@ -10,7 +10,9 @@ import { CONVERSATIONS_PANORAMAS } from './dialoguePanoramas'
 import { CONVERSATIONS_1993 } from './chapter1993cup'
 import { CONVERSATIONS_GALIL } from './chapter1993galil'
 import { CONVERSATIONS_SINAI } from './chapter1995sinai'
-import { CONVERSATIONS_ARMY } from './chapter1996director'
+// the world and its conversations on the same source: scenes.ts exposes kobi-gate7,
+// barry-gate7, asaf-gate5, a3-bus and the winter people, and they all live here
+import { CONVERSATIONS_ARMY } from './chapter1996army'
 import { CONVERSATIONS_HALL } from './chapter1997basket'
 import { CONVERSATIONS_LACES } from './chapter1998laces'
 import { CONVERSATIONS_SEED } from './chapter1999basket'

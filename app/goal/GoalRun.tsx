@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { AdSlot } from '@/components/ads/AdSlot'
 import { Burst } from '@/components/play/Burst'
@@ -9,88 +9,88 @@ import { PlayLink } from '@/components/play/PlayLink'
 import { Punch } from '@/components/play/Punch'
 import { RecordRun } from '@/components/play/RecordRun'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
-import { GoalPitch } from '@/components/press/GoalPitch'
-import { NamePlate, OUTFIELD_KIT, PlayerFigure } from '@/components/press/PlayerFigure'
 import {
-  ACTION_LABEL,
-  ACTION_SHORT,
-  ActionGlyph,
-  ReplayBuilder,
-  StepBar,
-} from '@/components/replay/ReplayBuilder'
+  BOARD_RATIO,
+  GoalPitch,
+  VIEW_H,
+  VIEW_TOP,
+  type Flight,
+  type PitchMan,
+  type ReplayLeg,
+  type ReplayScript,
+} from '@/components/press/GoalPitch'
+import { ACTION_LABEL, VerbStrip } from '@/components/replay/ReplayBuilder'
 import { ReplayVerdict } from '@/components/replay/ReplayVerdict'
 import { ShareRow } from '@/components/share/ShareRow'
 import { FitBox } from '@/components/stage/FitBox'
-import { dropZone, useDragActive, useDragSource } from '@/components/stage/useDrag'
-import { firePickFxAt } from '@/components/stage/PickFx'
+import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
+import { PlayerShirt } from '@/components/stage/PlayerShirt'
+import { SlideSheet } from '@/components/stage/SlideSheet'
 import { Num } from '@/components/ui/Num'
-import { GOAL_SECONDS, GOALS_PER_RUN, MAX_TOUCHES, MIN_TOUCHES, PITCH, zoneCenter } from '@/lib/game/goal-zones'
+import { GOAL_SECONDS, GOALS_PER_RUN, MAX_TOUCHES, MIN_TOUCHES, PITCH } from '@/lib/game/goal-zones'
+import { useCrowd } from '@/lib/game/replay/crowd'
+import { EMPTY_BUILD, EMPTY_DRAFT, type BuildState } from '@/lib/game/replay/draft'
+import type { Envelope, ReplayPoint, TruthTouch, UserTouch } from '@/lib/game/replay/envelope'
 import {
-  EMPTY_BUILD,
-  EMPTY_DRAFT,
-  canUndo,
-  phaseOf,
-  undoStep,
-  type BuildState,
-  type Draft,
-  type DraftPhase,
-} from '@/lib/game/replay/draft'
-import { normalise, type Envelope, type ReplayPoint, type UserTouch } from '@/lib/game/replay/envelope'
+  RECEIVE_RADIUS,
+  ballAt,
+  ballLoose,
+  focusedVerb,
+  holderOf,
+  inBox,
+  inMouth,
+  openingSpots,
+  reopen,
+  sendBall,
+  setVerb,
+  standAt,
+  tension as tensionOf,
+} from '@/lib/game/replay/gesture'
 import { GOOD_SCORE } from '@/lib/game/replay/judge'
-import { REPLAY_ACTIONS, type ReplayAction } from '@/lib/game/replay/vocab'
+import type { ReplayAction } from '@/lib/game/replay/vocab'
 import { LIVES, rankFor } from '@/lib/game/session'
 import { t, type MessageKey } from '@/lib/i18n'
 import { haptic } from '@/lib/play/haptics'
 import { collect } from '@/lib/profile/store'
 import { artFor } from '@/lib/share/story'
 import type { GoalChallenge, GoalVerdict } from '@/lib/game/goal'
+import type { Wardrobe } from '@/lib/kit/playerShirt'
 import type { Embedded } from '@/lib/mechanics/types'
 import { useWide } from '@/app/xi/useWide'
 import { askGoalHint, askReceptionHint, submitGoal } from './actions'
 
 /**
- * שחזור השער — three moves, one screen, and the count is part of the question.
+ * שחזור השער — three famous moves, rebuilt with the hands (delta 88).
  *
- * What the gate asked until now was where. It handed over the cast, the verbs and the
- * order, drew twenty squares, and graded the taps. That is a quiz about a diagram, and
- * the diagram was the lie: a zone is a claim about a position no match report ever made.
+ * Maor, 24.9.2026, on the round before: *"זה עדיין לא נוח, לא עונה על בקשותיי, לא מאפשר שום
+ * חוויה אמיתית. נורא 'לחיצה' משעממת, שום תנועה, שום אווירה, שום רגש"*. So the loop is now a
+ * piece of football rather than a form:
  *
- * Three things changed and they are one change. The move is BUILT — who, what, from
- * where, to where, as many touches as you think there were. The archive's own move is an
- * ELLIPSE per touch rather than a point, sized from the reporter's own words, so a player
- * who puts the ball anywhere the sentence admits is right and can see that he is right.
- * And the two moves are compared by ALIGNMENT rather than by position, so one touch too
- * many costs one touch's worth of credit instead of everything after it.
+ *   ACTION   drag the man who started it onto the grass; drag the ball to a team-mate, into
+ *            space, into the net; drag the man on the ball and he carries it
+ *   FEEDBACK the ball flies a curve, the receiver leans into it, the camera follows and pushes
+ *            in, the crowd rises and gets louder as the ball nears the box, the frame beats
+ *            when the clock is nearly out
+ *   REWARD   the whistle plays BOTH moves back at speed — yours in vermilion, then the
+ *            archive's in navy — into a net that ripples, the ground roars, the scorer's
+ *            real shirt and the reporter's own line of commentary; then the score
  *
- * **There is a submit button now, and it is not the one rule 21 forbids.** That rule bans
- * a "next" — a button whose only job is to let the game continue, charged to the player
- * for nothing. `סיום המהלך` is the opposite: it is the answer to the hardest part of the
- * question, because nobody told you how long the move was. The whistle still blows itself
- * when the clock runs out, on whatever is on the pitch.
+ * What is unchanged, and is the contract: the server grades (`submitGoal`), the answer never
+ * reaches the client before the whistle, a hint is fetched and paid for, a life is lost only
+ * for a touch you placed and got wrong, a good move is collected for the worker card, the
+ * run is recorded and shared, and inside THE WORKER LIFE (`embedded`) the verdict is handed
+ * back instead. The tap path is the same board (tap a man, tap the grass), and the keyboard
+ * reaches all of it — the drag is added, never required (WCAG 2.5.7).
  *
- * The clock is a whole MOVE's clock and it is generous, because the thing being rushed is
- * no longer one tap. A round of reconstruction that punishes deliberation is a round that
- * punishes the only skill it is testing.
- *
- * **The reveal is a beat, not a hold (21.9.2026).** It used to sit for a fixed nine
- * seconds and walk on whether or not the player had finished reading — brief §10's
- * "passive waiting" exactly. It is now the shared `useReveal`: a bar drains, a real
- * button walks on NOW, and the moment the player starts reading (a scroll, a touch on
- * the verdict, a key) the beat is called off and the button waits for them.
- *
- * **Hints are paid on the whistle, whoever blows it.** The clock effect is set up once
- * per goal, so the hint count it closed over was the count at kick-off — zero — and a
- * move that ran out of time was graded as if every hint had been free. The count lives
- * in a ref now, read at the moment of grading.
+ * **The reveal is a beat, not a hold** — it now starts when the replay ENDS, not when the
+ * server answers, so the ten seconds are ten seconds of reading and not of watching.
  */
 
 type Played = {
   overall: number
   continuity: number
   touches: number
-  /** matched and not bad — what RecordRun counts as right */
   matched: number
-  /** matched at GOOD_SCORE or better — the Result's "good touches" */
   good: number
 }
 
@@ -105,21 +105,64 @@ type Run = {
 
 const NEW_RUN: Run = { goal: 0, lives: LIVES, score: 0, hints: 0, played: [], over: false }
 
-/** What a rebuilt move is worth. Three perfect moves reach the top rank and no further. */
 const HINT_COST = 120
-
-/** How long the verdict holds before the next goal walks on by itself — unless read. */
 const REVEAL_MS = 10000
 
 function pointsFor(overall: number, continuity: number): number {
   return Math.round(overall * 12 + continuity * 2)
 }
 
-const PHASE_CAPTION: Record<DraftPhase, MessageKey> = {
-  player: 'goal.phase.player',
-  action: 'goal.phase.action',
-  origin: 'goal.phase.origin',
-  target: 'goal.phase.target',
+type Stage = { build: BuildState; spots: Record<string, ReplayPoint> }
+type Phase = 'build' | 'replay' | 'reveal'
+
+/**
+ * European nights are played under the lights — a UEFA Cup or a Champions League tie
+ * (the competition's own words, "אופ״א" / "אלופות", spelled by code point so no Hebrew
+ * literal sits outside the catalogue).
+ */
+const EUROPEAN = /\u05d0\u05d5\u05e4"\u05d0|\u05d0\u05dc\u05d5\u05e4\u05d5\u05ea/
+function isNight(challenge: GoalChallenge): boolean {
+  return EUROPEAN.test(challenge.competitionHe)
+}
+
+function minuteOf(challenge: GoalChallenge): string | null {
+  // "דקה 88" in the fixture line
+  const hit = /\u05d3\u05e7\u05d4\s+(\d{1,3})/.exec(challenge.subtitleHe)
+  return hit ? hit[1] ?? null : null
+}
+
+function clockText(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+function firstSentence(text: string): string {
+  const cut = text.split(/(?<=[.!?])\s/)[0] ?? text
+  return cut.length > 150 ? `${cut.slice(0, 147)}…` : cut
+}
+
+function legsOf(touches: UserTouch[]): ReplayLeg[] {
+  return touches.map((touch) => ({ from: touch.origin, to: touch.target, action: touch.action, actor: touch.actorHe }))
+}
+
+function truthLegs(truth: TruthTouch[], pool: string[]): ReplayLeg[] {
+  return truth.map((touch) => ({
+    from: { x: touch.origin.x, y: touch.origin.y },
+    to: { x: touch.target.x, y: touch.target.y },
+    action: touch.action,
+    actor: pool.includes(touch.actorHe) ? touch.actorHe : null,
+  }))
+}
+
+/** board point → screen point, off the camera layer, for the pick effect */
+function fxAtBoard(point: ReplayPoint, opts: Parameters<typeof firePickFx>[2]) {
+  const cam = document.querySelector('[data-goal="camera"]')
+  if (!cam) return
+  const rect = cam.getBoundingClientRect()
+  const x = rect.left + point.x * rect.width
+  const y = rect.top + ((point.y * PITCH.h - VIEW_TOP) / VIEW_H) * rect.height
+  firePickFx(x, y, opts)
 }
 
 export function GoalRun({
@@ -127,6 +170,7 @@ export function GoalRun({
   seed,
   cursor = 0,
   pin = null,
+  shirts,
   embedded,
 }: {
   goals: GoalChallenge[]
@@ -134,16 +178,29 @@ export function GoalRun({
   cursor?: number
   /** `/goal?g=<goalId>` — the goal dealt first; every server call re-derives with it */
   pin?: string | null
+  /** every man's shirt of that season, keyed `goalIndex|name` (the page resolves them) */
+  shirts?: Wardrobe
   /**
    * Opened from inside THE WORKER LIFE (`lib/mechanics/types.ts`): one goal, the same judge,
    * and the verdict handed back — no collection, no record, no share, no masthead number.
-   * Absent, the gate is exactly the gate.
    */
   embedded?: Omit<Embedded<GoalVerdict>, 'window'>
 }) {
   const phone = useWide('(max-width: 767px)')
+  const crowd = useCrowd(!embedded)
   const [run, setRun] = useState<Run>(NEW_RUN)
-  const [build, setBuild] = useState<BuildState>(EMPTY_BUILD)
+  const challenge = goals[run.goal]
+  const [stage, setStage] = useState<Stage>(() => ({
+    build: EMPTY_BUILD,
+    spots: challenge ? openingSpots(challenge.pool, challenge.opponents) : {},
+  }))
+  const [history, setHistory] = useState<Stage[]>([])
+  const [armed, setArmed] = useState<string | null>(null)
+  const [flight, setFlight] = useState<Flight | null>(null)
+  const [phase, setPhase] = useState<Phase>('build')
+  const [replay, setReplay] = useState<ReplayScript | null>(null)
+  const [goalMoment, setGoalMoment] = useState(false)
+  const [sheet, setSheet] = useState<null | 'hints' | 'verdict'>(null)
   const [verdict, setVerdict] = useState<GoalVerdict | null>(null)
   const [grading, setGrading] = useState(false)
   const [burst, setBurst] = useState<{ points: number; combo: number } | null>(null)
@@ -153,24 +210,193 @@ export function GoalRun({
   const [hintCount, setHintCount] = useState<string | null>(null)
   const [reception, setReception] = useState<{ envelope: Envelope; touch: number } | null>(null)
   const [asking, setAsking] = useState(false)
+  const [nudge, setNudge] = useState(0)
   const settled = useRef(false)
   const live = useRef<UserTouch[]>([])
-  /** hints bought for THIS goal — a ref, so a whistle from the clock reads today's count */
   const spent = useRef(0)
+  const flightKey = useRef(0)
+  const boxed = useRef(false)
+  const gained = useRef(0)
+  const landing = useRef<{ key: number; at: ReplayPoint; label: string; scored: boolean } | null>(null)
 
+  const { build, spots } = stage
   const { touches, draft, editing } = build
-  const challenge = goals[run.goal]
   const total = GOAL_SECONDS[Math.min(run.goal, GOAL_SECONDS.length - 1)] ?? 60
   const stageLabel = `run.stage.${run.goal + 1}` as MessageKey
-
   live.current = touches
 
-  /** the whistle: grade the whole move at once, and roll it on the pitch while we wait */
+  const men: PitchMan[] = useMemo(() => {
+    if (!challenge) return []
+    return challenge.pool.map((name) => {
+      const at = shirts?.by[`${run.goal}|${name}`]
+      return { name, opponent: challenge.opponents.includes(name), look: at === undefined ? null : shirts?.shirts[at] ?? null }
+    })
+  }, [challenge, run.goal, shirts])
+
+  const holder = holderOf(build)
+  const ball = ballAt(build)
+  const building = phase === 'build' && !grading
+
+  /* ------------------------------------------------------------ one gesture = one history step */
+
+  const commit = useCallback(
+    (next: Stage) => {
+      setHistory((list) => [...list.slice(-30), stage])
+      setStage(next)
+    },
+    [stage],
+  )
+
+  const fly = useCallback((touch: UserTouch, receiver: string | null, keeps: boolean) => {
+    flightKey.current += 1
+    setFlight({ key: flightKey.current, from: touch.origin, to: touch.target, action: touch.action, receiver, keeps })
+  }, [])
+
+  /** the ball goes — to a man, into space, into the net */
+  const send = useCallback(
+    (at: ReplayPoint, receiver: string | null, carried = false) => {
+      if (!building || !holder) return
+      const receiverAt = receiver ? spots[receiver] ?? at : null
+      const result = sendBall(build, receiverAt ?? at, {
+        receiver: receiver && receiverAt ? { name: receiver, at: receiverAt } : null,
+        opponent: challenge?.opponents.includes(holder),
+        carried,
+      })
+      if (!result) return
+      const nextSpots = { ...spots }
+      if (result.touch.action === 'dribble' || carried) nextSpots[holder] = result.touch.target
+      commit({ build: result.state, spots: nextSpots })
+      setArmed(null)
+      const keeps = holderOf(result.state) !== null
+      fly(result.touch, receiver, keeps)
+      const scored = inMouth(result.touch.target)
+      // the hit lands WITH the ball, not when the finger lets go
+      landing.current = {
+        key: flightKey.current,
+        at: keeps && receiverAt ? receiverAt : result.touch.target,
+        label: receiver ? receiver : t(ACTION_LABEL[result.touch.action]),
+        scored,
+      }
+      haptic('tap')
+    },
+    [build, building, challenge, commit, fly, holder, spots],
+  )
+
+  /** a man steps onto the grass — with the ball, or to take a loose one */
+  const stand = useCallback(
+    (name: string, at: ReplayPoint) => {
+      if (!building) return
+      const loose = ballLoose(build) ? ball : null
+      const snap =
+        loose && Math.hypot((loose.x - at.x) * PITCH.w, (loose.y - at.y) * PITCH.h) < RECEIVE_RADIUS * 1.4 ? loose : at
+      const next = standAt(build, name, snap)
+      if (next === build) {
+        setNudge((n) => n + 1)
+        return
+      }
+      commit({ build: next, spots: { ...spots, [name]: snap } })
+      setArmed(null)
+      fxAtBoard(snap, { label: name, tone: 'away' })
+    },
+    [ball, build, building, commit, spots],
+  )
+
+  function onDragMan(name: string, at: ReplayPoint) {
+    if (!building) return
+    if (name === holder) {
+      send(at, null, true)
+      return
+    }
+    if (holder) {
+      // staging a run: he moves, nobody has touched the ball
+      commit({ build, spots: { ...spots, [name]: at } })
+      haptic('tap')
+      return
+    }
+    stand(name, at)
+  }
+
+  function onDragBall(at: ReplayPoint, receiver: string | null) {
+    send(at, receiver)
+  }
+
+  function onTapMan(name: string) {
+    if (!building) return
+    if (holder) {
+      if (name === holder) {
+        setArmed((current) => (current === holder ? null : holder))
+        haptic('tap')
+        return
+      }
+      const at = spots[name]
+      if (at) send(at, name)
+      return
+    }
+    if (ballLoose(build) && ball) {
+      stand(name, ball)
+      return
+    }
+    setArmed((current) => (current === name ? null : name))
+    haptic('tap')
+  }
+
+  function onTapPoint(at: ReplayPoint) {
+    if (!building) return
+    if (holder) {
+      send(at, null, armed === holder)
+      return
+    }
+    if (armed) {
+      stand(armed, at)
+      return
+    }
+    setNudge((n) => n + 1)
+    haptic('miss')
+  }
+
+  function onVerb(action: ReplayAction, el: HTMLElement) {
+    if (!building) return
+    commit({ build: setVerb(build, action), spots })
+    firePickFxAt(el, { tone: 'red' })
+  }
+
+  function onEdit(index: number) {
+    if (!building) return
+    if (editing === index) {
+      commit({ build: { ...build, draft: EMPTY_DRAFT, editing: null }, spots })
+      return
+    }
+    const next = reopen(build, index)
+    const touch = touches[index]
+    commit({ build: next, spots: touch ? { ...spots, [touch.actorHe]: touch.origin } : spots })
+    haptic('tap')
+  }
+
+  function undo() {
+    const previous = history[history.length - 1]
+    if (!previous || !building) return
+    setHistory((list) => list.slice(0, -1))
+    setStage(previous)
+    setArmed(null)
+    haptic('tap')
+  }
+
+  function clear() {
+    if (!building) return
+    commit({ build: { ...build, draft: EMPTY_DRAFT, editing: null }, spots })
+    setArmed(null)
+  }
+
+  /* ------------------------------------------------------------ the whistle */
+
   const whistle = useCallback(
     async (placed: UserTouch[]) => {
       if (settled.current || !challenge) return
       settled.current = true
       setGrading(true)
+      setArmed(null)
+      setPhase('replay')
+      setReplay({ key: Date.now(), mine: legsOf(placed), truth: null, goal: false })
       let result: GoalVerdict | null = null
       try {
         result = await submitGoal(seed, run.goal, placed, cursor, pin)
@@ -179,132 +405,84 @@ export function GoalRun({
       }
       setGrading(false)
       if (!result) {
-        // The server did not answer. The move is still on the pitch and סיום works again:
-        // a failed round trip must never leave a run with no way forward (rule 42).
+        // no answer: back to the move, and the whistle works again (rule 42)
         settled.current = false
+        setReplay(null)
+        setPhase('build')
         return
       }
       setVerdict(result)
-
-      const gained = Math.max(
-        0,
-        pointsFor(result.metrics.overall, result.metrics.continuity) - spent.current * HINT_COST,
+      const last = result.truth[result.truth.length - 1]
+      setReplay((current) =>
+        current
+          ? {
+              ...current,
+              truth: truthLegs(result.truth, challenge.pool),
+              goal: last ? last.targetFrom === 'goal' || inMouth(last.target) : false,
+            }
+          : current,
       )
-      /**
-       * A life is lost for a touch you PLACED and got wrong — never for one you did not
-       * place at all.
-       *
-       * The first version charged for a missing touch too, and that is the gate billing
-       * the player for the one thing it deliberately refuses to tell them: a four-touch
-       * move rebuilt as two took four lives before the second goal was dealt. A hidden
-       * count already costs the alignment, the touch-count penalty and the sequence
-       * share; charging a life on top of that is charging twice for a secret.
-       */
-      const lost = result.touches.filter(
-        (line) => line.kind === 'matched' && line.grade === 'bad',
-      ).length
+
+      const points = Math.max(0, pointsFor(result.metrics.overall, result.metrics.continuity) - spent.current * HINT_COST)
+      gained.current = points
+      // a life is lost for a touch you PLACED and got wrong — never for one you did not place
+      const lost = result.touches.filter((line) => line.kind === 'matched' && line.grade === 'bad').length
       const matched = result.touches.filter((line) => line.kind === 'matched' && line.grade !== 'bad').length
       const good = result.touches.filter((line) => line.kind === 'matched' && line.grade === 'good').length
-
-      if (gained > 0) setBurst({ points: gained, combo: Math.max(1, matched) })
-      if (result.metrics.overall >= 90) setCelebrate(true)
-      // A move rebuilt well enough is KEPT — under its own goal id, in the one profile
-      // store, which is what the worker card (gate 10) reads. Never keyed by article:
-      // two goals from one report are two moves.
       if (result.metrics.overall >= GOOD_SCORE && !embedded) collect('goal', [result.goalId])
-      haptic(lost > 0 ? 'miss' : result.metrics.overall >= GOOD_SCORE ? 'lock' : 'tap')
-
       setRun((previous) => ({
-        goal: previous.goal,
+        ...previous,
         lives: Math.max(0, previous.lives - lost),
-        score: previous.score + gained,
-        hints: previous.hints,
+        score: previous.score + points,
         played: [
           ...previous.played,
-          {
-            overall: result.metrics.overall,
-            continuity: result.metrics.continuity,
-            touches: result.truth.length,
-            matched,
-            good,
-          },
+          { overall: result.metrics.overall, continuity: result.metrics.continuity, touches: result.truth.length, matched, good },
         ],
-        over: previous.over,
       }))
     },
     [challenge, cursor, embedded, pin, run.goal, seed],
   )
 
-  /**
-   * A touch is who, what, from where, to where. The moment the fourth is answered there
-   * is nothing left to decide, so the second pitch tap COMMITS it — gate 4's rule, in
-   * gate 8's shape (rule 24: a tap places; a second tap that carries no decision is a
-   * dexterity step charged for nothing, and on a phone it doubles every action).
-   */
-  const place = useCallback(
-    (point: ReplayPoint) => {
-      if (!draft.actorHe || !draft.action) return
-      if (!draft.origin) {
-        setBuild({ touches, editing, draft: { ...draft, origin: point } })
-        haptic('tap')
-        return
-      }
-      const touch: UserTouch = {
-        actorHe: draft.actorHe,
-        action: draft.action,
-        origin: draft.origin,
-        target: point,
-      }
-      if (editing !== null) {
-        setBuild({
-          touches: touches.map((item, index) => (index === editing ? touch : item)),
-          draft: EMPTY_DRAFT,
-          editing: null,
-        })
-      } else {
-        if (touches.length >= MAX_TOUCHES) return
-        setBuild({ touches: [...touches, touch], draft: EMPTY_DRAFT, editing: null })
-      }
-      haptic('lock')
-    },
-    [draft, editing, touches],
-  )
-
-  /**
-   * The phone's figure rail (round 2, Maor 23.9.2026): dragging a token off the rail
-   * straight onto a pitch zone sets the ACTOR and the ORIGIN in one gesture — the same
-   * two decisions two taps used to make, whichever order the draft ends up filled in.
-   * `phaseOf` reads whichever fields are set, so this only ever asks next for what is
-   * still missing (the verb, here).
-   */
-  const placeOrigin = useCallback(
-    (name: string, point: ReplayPoint) => {
-      if (verdict || grading) return
-      if (touches.length >= MAX_TOUCHES && editing === null) return
-      setBuild({ touches, editing, draft: { ...draft, actorHe: name, origin: point } })
-      haptic('tap')
-    },
-    [draft, editing, touches, verdict, grading],
-  )
-
-  function pickPlayer(name: string) {
-    setBuild((current) => ({ ...current, draft: { ...current.draft, actorHe: name } }))
-    haptic('tap')
+  function onLanded(key: number) {
+    const hit = landing.current
+    if (!hit || hit.key !== key) return
+    landing.current = null
+    // over printed grass the hit prints in navy and ink only — vermilion into green is yellow (rule 8)
+    fxAtBoard(hit.at, { label: hit.label, tone: 'away', big: hit.scored, haptic: hit.scored ? 'lock' : 'tap' })
+    if (hit.scored) crowd.cue('build', 0.6)
   }
 
-  function pickAction(action: ReplayAction) {
-    setBuild((current) => ({ ...current, draft: { ...current.draft, action } }))
-    haptic('tap')
+  function onReplayLeg(which: 'mine' | 'truth', index: number) {
+    const leg = which === 'mine' ? replay?.mine[index] : replay?.truth?.[index]
+    if (!leg?.actor) return
+    const actor = leg.actor
+    setStage((current) => ({ ...current, spots: { ...current.spots, [actor]: leg.from } }))
   }
 
-  function edit(index: number) {
-    const touch = touches[index]
-    if (!touch || verdict || grading) return
-    setBuild({ touches, editing: index, draft: { ...touch } })
-    haptic('tap')
+  function onReplayGoal() {
+    setGoalMoment(true)
+    crowd.cue('goal', 0.95)
+    fxAtBoard({ x: 0.5, y: -0.05 }, { tone: 'away', big: true, haptic: 'lock' })
   }
 
-  /** A hint that lands after the whistle is dropped: it would be paid for a goal gone. */
+  function onReplayDone() {
+    setGoalMoment(false)
+    setReplay(null)
+    setPhase('reveal')
+    if (!verdict) return
+    const overall = verdict.metrics.overall
+    const matched = verdict.touches.filter((line) => line.kind === 'matched' && line.grade !== 'bad').length
+    if (gained.current > 0) setBurst({ points: gained.current, combo: Math.max(1, matched) })
+    if (overall >= 90) setCelebrate(true)
+    if (overall < 40) crowd.cue('miss', 0.6)
+    else crowd.cue('after', 0.5)
+    haptic(overall >= GOOD_SCORE ? 'lock' : 'tap')
+    const board = document.querySelector('[data-goal="board"]')
+    firePickFxAt(board, { label: `${overall}%`, tone: 'away', big: overall >= GOOD_SCORE, haptic: false })
+  }
+
+  /* ------------------------------------------------------------ hints */
+
   async function ask(which: 'start' | 'count') {
     if (verdict || grading || asking) return
     const goal = run.goal
@@ -324,7 +502,6 @@ export function GoalRun({
     }
   }
 
-  /** The reception hint: ONE envelope, for the touch being built now, fetched once. */
   async function askReception() {
     if (verdict || grading || asking || reception) return
     const touch = editing ?? touches.length
@@ -336,6 +513,7 @@ export function GoalRun({
       spent.current += 1
       setRun((previous) => ({ ...previous, hints: previous.hints + 1 }))
       haptic('tap')
+      setSheet(null)
     } catch {
       // no answer, no charge
     } finally {
@@ -343,14 +521,14 @@ export function GoalRun({
     }
   }
 
-  /** the clock — running out whistles on whatever is on the pitch */
+  /* ------------------------------------------------------------ the clock */
+
   useEffect(() => {
     if (verdict || run.over || !challenge) return
     setSecondsLeft(total)
     settled.current = false
     const started = Date.now()
     const tick = window.setInterval(() => {
-      // once the whistle has gone the clock has nothing left to say
       if (settled.current) {
         window.clearInterval(tick)
         return
@@ -363,528 +541,540 @@ export function GoalRun({
       }
     }, 250)
     return () => window.clearInterval(tick)
-    // the clock belongs to the GOAL, so it restarts on the goal index and nothing else
+    // the clock belongs to the GOAL
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.goal, challenge, run.over])
 
-  /** the next goal — from the button, or from the beat running out unread */
+  /* ------------------------------------------------------------ the crowd */
+
+  const tension = phase === 'build' ? tensionOf(build) : 1
+  useEffect(() => {
+    crowd.swell(tension)
+    if (phase === 'build' && ball && inBox(ball) && !boxed.current) {
+      boxed.current = true
+      crowd.cue('build', 0.5)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tension, phase])
+
+  /* ------------------------------------------------------------ the next goal */
+
+  const runRef = useRef(run)
+  runRef.current = run
   const advance = useCallback(() => {
+    const previous = runRef.current
+    const goal = previous.goal + 1
+    const over = previous.lives <= 0 || goal >= GOALS_PER_RUN
+    const next = goals[goal]
     setBurst(null)
     setCelebrate(false)
     setVerdict(null)
-    setBuild(EMPTY_BUILD)
     setHintStart(null)
     setHintCount(null)
     setReception(null)
+    setHistory([])
+    setArmed(null)
+    setFlight(null)
+    setReplay(null)
+    setPhase('build')
+    setSheet(null)
     spent.current = 0
+    boxed.current = false
     settled.current = false
-    setRun((previous) => {
-      const goal = previous.goal + 1
-      return { ...previous, goal, over: previous.lives <= 0 || goal >= GOALS_PER_RUN }
-    })
-  }, [])
+    setStage({ build: EMPTY_BUILD, spots: next ? openingSpots(next.pool, next.opponents) : {} })
+    if (over) crowd.cue('final', 0.5)
+    setRun((current) => ({ ...current, goal, over }))
+  }, [crowd, goals])
 
-  // inside the life the verdict waits for the player: the room answers only when he walks back
-  const reveal = useReveal({ ms: REVEAL_MS, onDone: advance, active: verdict !== null && !embedded })
+  const reveal = useReveal({ ms: REVEAL_MS, onDone: advance, active: phase === 'reveal' && verdict !== null && !embedded && sheet === null })
   const { running: revealRunning, cancel: cancelReveal } = reveal
 
-  /** reading the verdict calls the beat off — the button is then the only way on */
   useEffect(() => {
-    if (!verdict || !revealRunning) return
+    if (phase !== 'reveal' || !revealRunning) return
     const stop = () => cancelReveal()
     window.addEventListener('wheel', stop, { passive: true })
-    window.addEventListener('touchmove', stop, { passive: true })
     window.addEventListener('keydown', stop)
     return () => {
       window.removeEventListener('wheel', stop)
-      window.removeEventListener('touchmove', stop)
       window.removeEventListener('keydown', stop)
     }
-  }, [verdict, revealRunning, cancelReveal])
+  }, [phase, revealRunning, cancelReveal])
 
-  if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} />
+  if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} phone={phone} />
 
-  const labels = touches.map((touch, index) => ({
-    nameHe: touch.actorHe,
-    actHe: t(ACTION_SHORT[touch.action]),
-    num: String(index + 1),
-  }))
+  /* ------------------------------------------------------------ what the board says */
 
-  const fraction = total > 0 ? Math.max(0, secondsLeft / total) : 0
+  const n = String((editing ?? touches.length) + 1)
+  const lastInNet = touches.length > 0 && inMouth(touches[touches.length - 1]!.target) && !holder
+  const full = touches.length >= MAX_TOUCHES && editing === null
+  const caption =
+    phase === 'replay'
+      ? { lead: t('goal88.replay'), text: verdict ? t('goal.legend.truth') : t('goal.legend.mine') }
+      : phase === 'reveal'
+        ? null
+        : editing !== null
+          ? { lead: t('goal.editing', { n: String(editing + 1) }), text: t('goal88.cap.edit') }
+          : full
+            ? { lead: `${MAX_TOUCHES}/${MAX_TOUCHES}`, text: t('goal.tooMany') }
+            : holder && armed === holder
+              ? { lead: t('goal.phase.touch', { n }), text: t('goal88.cap.carry', { name: holder }) }
+              : holder
+                ? { lead: t('goal.phase.touch', { n }), text: t('goal88.cap.holder') }
+                : lastInNet
+                  ? { lead: t('goal88.inNetLead'), text: t('goal88.cap.inNet') }
+                  : ballLoose(build)
+                    ? { lead: t('goal.phase.touch', { n }), text: t('goal88.cap.loose') }
+                    : armed
+                      ? { lead: t('goal.phase.touch', { n }), text: t('goal88.cap.armed', { name: armed }) }
+                      : { lead: t('goal.phase.touch', { n }), text: t('goal88.cap.start') }
+
   const grades = verdict
     ? touches.map((_, index) => {
         const line = verdict.touches.find((item) => item.userIndex === index)
         return line?.kind === 'matched' ? line.grade : line ? ('bad' as const) : undefined
       })
-    : undefined
-  const pairs = verdict?.touches.map((line) => ({ user: line.userIndex, truth: line.truthIndex }))
-  const full = touches.length >= MAX_TOUCHES
-  const caption = verdict
-    ? null
-    : grading
-      ? { lead: t('goal.whistleWait'), text: t('goal.phase.rolling') }
-      : full && editing === null
-        ? { lead: `${MAX_TOUCHES}/${MAX_TOUCHES}`, text: t('goal.tooMany') }
-        : {
-            lead: t('goal.phase.touch', { n: String((editing ?? touches.length) + 1) }),
-            text: t(PHASE_CAPTION[phaseOf(draft)]),
-          }
+    : []
+  const pairs = verdict?.touches.map((line) => ({ user: line.userIndex, truth: line.truthIndex })) ?? []
   const finalBeat = run.goal + 1 >= GOALS_PER_RUN || run.lives <= 0
+  const night = isNight(challenge)
+  const minute = minuteOf(challenge)
+  const lowClock = phase === 'build' && secondsLeft <= 15
+  const heartbeat = phase === 'build' && (lowClock || (ball !== null && inBox(ball)))
+
+  const scorer = verdict
+    ? [...verdict.truth].reverse().find((touch) => (touch.action === 'shot' || touch.action === 'header') && touch.actorKind !== 'unnamed')
+    : undefined
+  const scorerLook = scorer ? men.find((man) => man.name === scorer.actorHe)?.look ?? null : null
+
+  const plate = (
+    <div className="pointer-events-none absolute start-1.5 top-1.5 z-[3] flex max-w-[86%] flex-col items-start">
+      <div className="flex max-w-full items-stretch border-rule border-ink bg-ink">
+        <span className="grid place-items-center bg-red px-1.5 font-latin text-[9px] font-extrabold tracking-[0.16em] text-paper" dir="ltr">
+          {phase === 'replay' ? 'REPLAY' : 'LIVE'}
+        </span>
+        <span className="min-w-0 truncate px-1.5 py-0.5 font-body text-[10.5px] font-extrabold leading-tight text-paper">
+          <bdi>{challenge.opponentHe}</bdi> <Num>{challenge.scoreHe}</Num>
+        </span>
+        {minute && (
+          <span className="grid place-items-center border-s-hair border-paper/30 px-1.5 font-poster text-[15px] leading-none text-concrete">
+            <Num>{`${minute}′`}</Num>
+          </span>
+        )}
+        {!embedded && (
+          <span
+            data-goal="clock"
+            className={`grid place-items-center px-1.5 font-mono text-[11px] font-bold tabular-nums ${lowClock ? 'bg-red text-paper' : 'bg-paper text-ink'}`}
+          >
+            <Num>{clockText(secondsLeft)}</Num>
+          </span>
+        )}
+      </div>
+      {phone && (
+        <div className="flex max-w-full items-center gap-1.5 border-x-rule border-b-rule border-ink bg-paper px-1.5 py-px">
+          {!embedded && (
+            <>
+              <span className="flex gap-[2px]" aria-label={t('run.lives')}>
+                {Array.from({ length: LIVES }, (_, index) => (
+                  <span key={index} className={`block h-2 w-2 border-hair border-ink ${index < run.lives ? 'bg-red' : 'bg-transparent'}`} />
+                ))}
+              </span>
+              <span className="font-poster text-[14px] leading-none text-ink">
+                <Num>{run.score}</Num>
+              </span>
+              <span className="font-mono text-[9.5px] tabular-nums text-muted">
+                <Num>{`${run.goal + 1}/${GOALS_PER_RUN}`}</Num>
+              </span>
+            </>
+          )}
+          <span className="min-w-0 truncate font-sign text-[11px] leading-tight text-ink">{challenge.titleHe}</span>
+        </div>
+      )}
+    </div>
+  )
+
+  const overlay = goalMoment ? (
+    <div data-goal="celebration" className="pointer-events-none absolute inset-0 z-[5] flex flex-col items-center justify-center gap-2 bg-ink/75 px-4 text-center">
+      <p className="relative animate-slam-solid font-poster text-[min(34vw,150px)] leading-[0.8]">
+        <span className="plate-shift absolute inset-0 text-sign">{t('goal88.goal')}</span>
+        <span className="plate-top relative text-red">{t('goal88.goal')}</span>
+      </p>
+      {scorer && (
+        <div className="flex animate-fx-pop items-center gap-2 motion-reduce:animate-none">
+          {scorerLook && <PlayerShirt look={scorerLook} eager title={scorer.actorHe} className="aspect-[5/6] w-16" />}
+          <span className="border-plate border-ink bg-paper px-2 py-1 font-display text-[18px] leading-none text-ink">
+            <bdi>{scorer.actorHe}</bdi>
+          </span>
+        </div>
+      )}
+      {verdict && (
+        <p className="max-w-[92%] animate-slam-solid border-s-plate border-red bg-ink px-2.5 py-1.5 text-start font-body text-[12.5px] font-bold leading-snug text-paper">
+          {firstSentence(verdict.narrativeHe)}
+        </p>
+      )}
+    </div>
+  ) : null
+
+  const pitch = (
+    <GoalPitch
+      men={men}
+      spots={spots}
+      touches={touches}
+      draft={draft}
+      armed={armed}
+      disabled={!building}
+      caption={caption}
+      hintEnvelope={reception?.envelope ?? null}
+      night={night}
+      tension={tension}
+      heartbeat={heartbeat}
+      flight={flight}
+      replay={replay}
+      reveal={phase === 'reveal' && verdict ? { truth: verdict.truth, grades, pairs } : null}
+      plate={plate}
+      overlay={overlay}
+      onDragMan={onDragMan}
+      onDragBall={onDragBall}
+      onTapMan={onTapMan}
+      onTapPoint={onTapPoint}
+      onLanded={onLanded}
+      onReplayLeg={onReplayLeg}
+      onReplayGoal={onReplayGoal}
+      onReplayDone={onReplayDone}
+    />
+  )
+
+  const hintsChip = (
+    <button
+      type="button"
+      onClick={() => setSheet('hints')}
+      disabled={!building}
+      data-goal="hints"
+      className="flex min-h-tap shrink-0 items-center border-rule border-ink bg-sheet px-2 font-body text-[11.5px] font-extrabold text-ink disabled:opacity-40"
+    >
+      {t('goal.hints')}
+    </button>
+  )
+  const muteChip = (
+    <button
+      type="button"
+      onClick={crowd.toggle}
+      aria-pressed={!crowd.muted}
+      aria-label={crowd.muted ? t('goal88.soundOn') : t('goal88.soundOff')}
+      data-goal="mute"
+      className="grid min-h-tap w-11 shrink-0 place-items-center border-rule border-ink bg-sheet text-ink"
+    >
+      <SoundGlyph muted={crowd.muted} />
+    </button>
+  )
+
+  const hud = (
+    <div className="flex h-11 shrink-0 items-center gap-2" data-goal="hud">
+      {!embedded && (
+        <ol className="flex items-center gap-1" aria-label={t('run.lives')}>
+          {Array.from({ length: LIVES }, (_, index) => (
+            <li key={index} className={`h-3 w-3 border-hair border-ink ${index < run.lives ? 'bg-red' : 'bg-transparent opacity-40'}`} />
+          ))}
+        </ol>
+      )}
+      {!embedded && (
+        <p className="font-poster text-[24px] leading-none text-ink">
+          <Num>{run.score}</Num>
+        </p>
+      )}
+      <p className="min-w-0 flex-1 truncate font-sign text-[12.5px] leading-tight text-ink">
+        {!embedded && (
+          <span className="me-1 font-mono text-[10px] tabular-nums text-muted">
+            <Num>{`${run.goal + 1}/${GOALS_PER_RUN}`}</Num>
+          </span>
+        )}
+        {challenge.titleHe}
+      </p>
+      {hintsChip}
+      {!embedded && muteChip}
+    </div>
+  )
+
+  const hints = (
+    <div className="grid gap-1.5">
+      <p className="font-body text-[11px] font-extrabold tracking-widest text-muted">
+        {t('goal.hints')} · {t('goal.hint.cost', { n: String(HINT_COST) })}
+      </p>
+      <div className="grid grid-cols-3 gap-1.5">
+        <button type="button" onClick={() => void ask('start')} disabled={hintStart !== null || asking || !building} data-goal="hint-start" className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40">
+          {t('goal.hint.start')}
+        </button>
+        <button type="button" onClick={() => void ask('count')} disabled={hintCount !== null || asking || !building} data-goal="hint-count" className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40">
+          {t('goal.hint.count')}
+        </button>
+        <button type="button" onClick={() => void askReception()} disabled={reception !== null || asking || !building} data-goal="hint-reception" className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40">
+          {t('goal.hint.reception')}
+        </button>
+      </div>
+      {hintStart && (
+        <p className="font-body text-[12px] leading-snug text-ink">
+          {t('goal.sourceWords')} <bdi className="font-extrabold">{hintStart}</bdi>
+        </p>
+      )}
+      {hintCount && (
+        <p className="font-body text-[12px] leading-snug text-ink">
+          <Num>{t('goal.hint.countAnswer', { n: hintCount })}</Num>
+        </p>
+      )}
+      {reception && <p className="font-body text-[12px] leading-snug text-ink">{t('goal.hint.receptionFor', { n: String(reception.touch + 1) })}</p>}
+      <p className="font-body text-[11px] leading-snug text-muted">{t('goal.approximate')}</p>
+    </div>
+  )
+
+  const buildDock = (
+    <div className="grid gap-1.5" data-goal="dock">
+      <VerbStrip
+        touches={touches}
+        editing={editing}
+        chosen={focusedVerb(build)}
+        disabled={!building || (touches.length === 0 && !holder)}
+        wrap={!phone}
+        onVerb={onVerb}
+        onEdit={onEdit}
+      />
+      <div key={nudge} className={`flex gap-1.5 ${nudge > 0 ? 'animate-shake motion-reduce:animate-none' : ''}`}>
+        <button
+          type="button"
+          onClick={undo}
+          disabled={!building || history.length === 0}
+          aria-label={t('goal.undoStep')}
+          data-goal="undo"
+          className="flex min-h-tap shrink-0 items-center gap-1 border-rule border-ink bg-sheet px-2.5 font-body text-[12px] font-extrabold text-ink disabled:opacity-40"
+        >
+          <span aria-hidden="true" className="font-display text-[18px] leading-none">↶</span>
+          <span className="max-md:sr-only">{t('goal.undoStep')}</span>
+        </button>
+        <button
+          type="button"
+          onClick={clear}
+          disabled={!building || (!draft.actorHe && editing === null)}
+          data-goal="clear"
+          className="flex min-h-tap shrink-0 items-center border-rule border-ink bg-sheet px-2.5 font-body text-[12px] font-extrabold text-muted disabled:opacity-40"
+        >
+          {t('goal.clearTouch')}
+        </button>
+        {phone && hintsChip}
+        {phone && !embedded && muteChip}
+        <button
+          type="button"
+          onClick={() => void whistle(touches)}
+          disabled={!building || touches.length < MIN_TOUCHES}
+          data-goal="finish"
+          className="flex min-h-tap min-w-0 flex-1 items-center justify-center gap-2 bg-red px-3 font-body text-[14px] font-extrabold text-paper transition-transform duration-press ease-stamp active:scale-[.97] disabled:opacity-40 motion-reduce:transition-none"
+        >
+          <span aria-hidden="true" className="font-poster text-[20px] leading-none">
+            <Num>{touches.length}</Num>
+          </span>
+          <span className="truncate">{touches.length < MIN_TOUCHES ? (phone ? t('goal88.needTwoShort') : t('goal.needTwo')) : t('goal88.whistle')}</span>
+        </button>
+      </div>
+    </div>
+  )
+
+  const replayDock = (
+    <div className="flex min-h-tap items-center gap-2 border-rule border-ink bg-ink px-3" data-goal="dock">
+      <span className="h-2 w-2 shrink-0 animate-pulse bg-red motion-reduce:animate-none" aria-hidden="true" />
+      <p className="min-w-0 flex-1 truncate font-body text-[12.5px] font-extrabold text-paper">
+        {grading ? t('goal.phase.rolling') : verdict ? t('goal.legend.truth') : t('goal.legend.mine')}
+      </p>
+      <span className="shrink-0 font-body text-[11px] text-concrete">{t('goal88.tapSkip')}</span>
+    </div>
+  )
+
+  const revealDock = verdict ? (
+    <div className="grid gap-1.5" data-goal="dock">
+      <div className="flex items-stretch gap-1.5">
+        <div className="flex shrink-0 flex-col justify-center border-rule border-ink bg-ink px-3 py-1">
+          <p className="font-poster text-[34px] leading-none text-red" aria-live="polite">
+            <Num>{`${verdict.metrics.overall}%`}</Num>
+          </p>
+          <p className="font-body text-[9.5px] tracking-widest text-concrete">{t('goal.overall')}</p>
+        </div>
+        <ul className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 font-body text-[11px] leading-tight text-ink">
+          <li className="flex items-center gap-1.5">
+            <span className="inline-block h-[5px] w-5 bg-red" aria-hidden="true" />
+            {t('goal.legend.mine')}
+          </li>
+          <li className="flex items-center gap-1.5">
+            <span className="inline-block h-[5px] w-5 bg-sign" aria-hidden="true" />
+            {t('goal.legend.truth')}
+          </li>
+          <li className="flex items-center gap-1.5">
+            <span className="inline-block h-2 w-5 border-hair border-dashed border-sign" aria-hidden="true" />
+            {t('goal.legend.envelope')}
+          </li>
+        </ul>
+        {phone && (
+          <button
+            type="button"
+            onClick={() => {
+              cancelReveal()
+              setSheet('verdict')
+            }}
+            data-goal="details"
+            className="flex min-h-tap shrink-0 items-center border-rule border-ink bg-sheet px-2.5 font-body text-[12px] font-extrabold text-ink"
+          >
+            {t('goal88.details')}
+          </button>
+        )}
+      </div>
+      <div className="border-rule border-ink bg-ink">
+        {revealRunning && <RevealBar progress={reveal.progress} tone="sheet" />}
+        <button
+          type="button"
+          onClick={embedded ? () => embedded.onResult(verdict) : reveal.skip}
+          data-goal="continue"
+          className="flex min-h-tap w-full items-center justify-center gap-2 px-4 font-body text-step-0 font-extrabold text-paper"
+        >
+          {embedded ? embedded.doneLabel : finalBeat ? t('goal.reveal.final') : t('goal.reveal.continue')}
+          <span aria-hidden="true">←</span>
+        </button>
+      </div>
+    </div>
+  ) : null
+
+  const dock = phase === 'build' ? buildDock : phase === 'replay' ? replayDock : revealDock
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col md:block md:flex-none">
-      {/* the one gate whose glass is printed GRASS, so the paper it celebrates with
-          carries no vermilion — see NO_RED_TONES. */}
-      {celebrate && <Confetti tones={NO_RED_TONES} />}
-      {burst && <Burst points={burst.points} combo={burst.combo} />}
+    <div className="relative flex min-h-0 flex-1 flex-col md:flex-none md:flex-row md:items-start md:justify-center md:gap-6">
+      {celebrate && phase === 'reveal' && <Confetti tones={NO_RED_TONES} />}
+      {burst && phase === 'reveal' && <Burst points={burst.points} combo={burst.combo} />}
 
-      {/* the bar — lives, score, which goal, and a clock you read without looking */}
-      <div className="shrink-0 sticky top-0 z-20 -mx-gutter bg-sheet/95 px-gutter pb-2 pt-2 backdrop-blur">
-        <div className={embedded ? 'hidden' : 'flex items-center justify-between gap-3'}>
-          <ol className="flex items-center gap-1.5" aria-label={t('run.lives')}>
-            {Array.from({ length: LIVES }, (_, index) => (
-              <li
-                key={index}
-                className={`h-3.5 w-3.5 border-hair border-ink transition-all duration-press ${
-                  index < run.lives ? 'bg-red' : 'bg-transparent opacity-40'
-                }`}
-              />
-            ))}
-          </ol>
-          <p className="font-poster text-[26px] leading-none text-ink">
-            <Num>{run.score}</Num>
-          </p>
-          <p className="font-mono text-[11px] tabular-nums text-muted">
-            <Num>{`${run.goal + 1}/${GOALS_PER_RUN}`}</Num>
-          </p>
-        </div>
-        <div className="mt-1.5 h-1.5 w-full bg-ink/15">
-          <div
-            className={`h-full transition-[width] duration-200 ease-linear ${
-              fraction <= 0.28 ? 'bg-red' : 'bg-ink'
-            }`}
-            style={{ width: `${fraction * 100}%` }}
-          />
-        </div>
-        {/* round 2 (Maor 23.9.2026): the four-step progress joins the HUD on a phone — the
-            who/what/where/where controls it used to sit above moved down beside the pitch. */}
-        {phone && !embedded && !verdict && <StepBar draft={draft} />}
+
+      {/* THE FIELD — as big as the phone allows; its own fixed box on a desktop */}
+      <div className={`flex min-h-0 flex-1 flex-col ${embedded ? 'max-md:h-[min(62dvh,540px)] max-md:flex-none' : ''} md:h-[calc(100dvh-270px)] md:min-h-[460px] md:w-[calc((100dvh-270px)*0.6)] md:min-w-[278px] md:max-w-[62%] md:flex-none`}>
+        <FitBox ratio={BOARD_RATIO} always>
+          {pitch}
+        </FitBox>
       </div>
 
-      {/* the masthead — one goal, named, with the fixture under it. Compact one line on
-          the phone stage (Maor 23.9.2026: "the pitch big") — the same words move into
-          the "פרטי השער" sheet below; the full poster stays for md+. */}
-      <div className="mt-2 shrink-0 truncate border-hair border-ink/40 bg-red px-2.5 py-1.5 md:hidden">
-        <p className="truncate font-sign text-[13px] leading-tight text-paper">{challenge.titleHe}</p>
-      </div>
-      <div className="hidden md:block mt-2.5 border-rule border-ink bg-red px-3 py-2.5">
-        <div className="flex items-baseline justify-between gap-2 border-b-hair border-ink pb-1.5">
-          <span className="font-body text-[10px] font-extrabold tracking-widest text-ink">
-            {embedded ? challenge.seasonLabel : t(stageLabel)}
-          </span>
-          {!embedded && (
-            <span className="font-latin text-[9px] font-bold tracking-[0.2em] text-paper" dir="ltr">
-              MATCHDAY SPECIAL · No. 08
-            </span>
-          )}
-        </div>
-        <p className="mt-2 font-display text-step-2 leading-[0.95] text-paper">
-          {challenge.titleHe}
-        </p>
-        <p className="mt-1 font-mono text-[11px] tabular-nums text-ink">
-          <Num>{challenge.subtitleHe}</Num>
-        </p>
-        <p className="mt-0.5 font-body text-[11px] leading-snug text-ink">
-          <bdi>{challenge.competitionHe}</bdi> · <bdi>{challenge.opponentHe}</bdi> ·{' '}
-          <Num>{challenge.scoreHe}</Num>
-        </p>
-      </div>
-
-      {/*
-        One compact working screen.
-        The board is a 300×440 picture, so `w-full` on a 950px desktop column drew a pitch
-        fourteen hundred pixels tall and put every control below the fold — the exact
-        opposite of what a wide screen is for. It is capped at 430 and centred everywhere,
-        and from `lg` up it takes a 400px column with the builder beside it. On a phone the
-        cap never binds, so the zone still measures its proven 48px at 320 (tests/brand).
-
-        Delta 87: under `md` this row is itself a FLEX COLUMN that fills the stage — the
-        board sits in a `FitBox` (the biggest 300/440 box the screen has room for) and the
-        builder underneath is capped and scrolls internally, so the page never does.
-      */}
-      <div className="mt-2 flex min-h-0 flex-1 flex-col md:block md:flex-none lg:grid lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-4">
-        {/* The board is sticky only where it has its OWN COLUMN.
-            Making it sticky on a phone as well looked obviously right — keep the primary
-            object visible while the racks scroll — and it is a softlock: a sticky element
-            is still in flow, so the builder underneath scrolls UP AND UNDER it, and the
-            pinned pitch's twenty-one invisible tap targets swallow every tap meant for a
-            player's name. `npm run goal:probe` failed on the first chip with `E4 …
-            intercepts pointer events`, which is the same family as the kit game's reveal
-            landing inside the tab bar (rule 33) and was found the same way: by playing it.
-            From `lg` up the board sits in a column of its own and cannot cover anything. */}
-        <div className="mx-auto flex w-full max-w-[430px] flex-1 flex-col md:block md:min-h-0 md:flex-none lg:sticky lg:top-16">
-          <FitBox
-            ratio={PITCH.w / (PITCH.h - PITCH.top)}
-            className="max-md:[min-height:min(48dvh,400px)] [@media(max-height:620px)]:max-md:[min-height:min(30dvh,240px)]"
-          >
-            <GoalPitch
-              touches={touches}
-              draftOrigin={draft.origin && !draft.target ? draft.origin : null}
-              labels={labels}
-              truth={verdict?.truth}
-              grades={grades}
-              pairs={pairs}
-              onPlace={place}
-              disabled={verdict !== null || grading}
-              caption={caption}
-              hintEnvelope={reception?.envelope ?? null}
-              rolling={grading}
-            />
-          </FitBox>
-
-          {/* round 2 (Maor 23.9.2026): "the characters must be dragged on the screen" —
-              the who/what controls dock right under the pitch on a phone instead of
-              living in the scrollable panel below it. The action row appears once a
-              figure is standing (actor + origin, verb still open); the figure rail is
-              always there, so starting the NEXT touch is always one drag away. */}
-          {phone && !verdict && (
-            <div className="mt-1 shrink-0" data-goal="dock">
-              {phaseOf(draft) === 'action' && (
-                <ActionChips draft={draft} onPick={pickAction} disabled={grading} />
-              )}
-              {touches.length === 0 && !draft.origin && (
-                <p className="px-2 pb-0.5 font-body text-[10px] leading-snug text-muted">
-                  {t('goal.stage.dragHint')}
-                </p>
-              )}
-              <PlayerRail
-                pool={challenge.pool}
-                opponents={challenge.opponents}
-                draft={draft}
-                disabled={grading}
-                onTap={pickPlayer}
-                onDragPlace={placeOrigin}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="min-w-0 max-md:max-h-[30dvh] max-md:min-h-[min(16dvh,110px)] [@media(max-height:620px)]:max-md:min-h-[72px] max-md:flex-1 max-md:overflow-y-auto max-md:overscroll-contain md:shrink-0">
-      {verdict ? (
-        <>
-          {/* the way on — first thing under the board, and a real button */}
-          <div className="mt-2 border-rule border-ink bg-ink">
-            {revealRunning && <RevealBar progress={reveal.progress} tone="sheet" />}
-            <button
-              type="button"
-              onClick={embedded ? () => embedded.onResult(verdict) : reveal.skip}
-              data-goal="continue"
-              className="flex min-h-tap w-full items-center justify-center gap-2 px-4 font-body text-step-0 font-extrabold text-paper"
-            >
-              {embedded ? embedded.doneLabel : finalBeat ? t('goal.reveal.final') : t('goal.reveal.continue')}
-              <span aria-hidden="true">←</span>
-            </button>
-          </div>
-          <ul className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[11px] text-muted">
-            <li className="flex items-center gap-1">
-              <span className="inline-block h-2 w-4 bg-red" aria-hidden="true" />
-              {t('goal.legend.mine')}
-            </li>
-            <li className="flex items-center gap-1">
-              <span className="inline-block h-2 w-4 bg-sign" aria-hidden="true" />
-              {t('goal.legend.truth')}
-            </li>
-            <li className="flex items-center gap-1">
-              <span className="inline-block h-2 w-4 border-hair border-dashed border-sign" aria-hidden="true" />
-              {t('goal.legend.envelope')}
-            </li>
-            <li className="flex items-center gap-1">
-              <span className="inline-block h-0 w-4 border-t-2 border-dashed border-ink" aria-hidden="true" />
-              {t('goal.legend.bridge')}
-            </li>
-            <li className="flex items-center gap-1">
-              <span className="font-latin text-[13px] font-extrabold leading-none text-ink" aria-hidden="true">+</span>
-              {t('goal.verdict.extra')}
-            </li>
-            <li className="flex items-center gap-1">
-              <span className="font-latin text-[13px] font-extrabold leading-none text-ink" aria-hidden="true">○</span>
-              {t('goal.verdict.missing')}
-            </li>
-          </ul>
-          {/* touching the verdict is reading it — the beat stops and waits */}
-          <div onPointerDown={cancelReveal} onFocus={cancelReveal}>
-            <ReplayVerdict
-              metrics={verdict.metrics}
-              touches={verdict.touches}
-              narrativeHe={verdict.narrativeHe}
-              sourceTitle={verdict.sourceTitle}
-            />
-          </div>
-        </>
+      {phone ? (
+        <div className="mt-1.5 shrink-0">{dock}</div>
       ) : (
-        <>
-          <ReplayBuilder
-            pool={challenge.pool}
-            opponents={challenge.opponents}
-            draft={draft}
-            touches={touches}
-            editing={editing}
-            full={full}
-            canFinish={touches.length >= MIN_TOUCHES}
-            canUndo={canUndo(build)}
-            busy={grading}
-            hideWhoWhat={phone}
-            onPickPlayer={pickPlayer}
-            onPickAction={pickAction}
-            onClear={() => setBuild((current) => ({ ...current, draft: EMPTY_DRAFT, editing: null }))}
-            onUndo={() => {
-              setBuild((current) => undoStep(current))
-              haptic('tap')
-            }}
-            onEdit={edit}
-            onFinish={() => void whistle(touches)}
-          />
-
-          {/* the three hints, each a piece of the answer and each paid for */}
-          <div className="mt-2 border-rule border-ink bg-sheet p-3">
-            <p className="font-body text-[11px] font-extrabold tracking-widest text-muted">
-              {t('goal.hints')} · {t('goal.hint.cost', { n: String(HINT_COST) })}
-            </p>
-            <div className="mt-1.5 grid grid-cols-3 gap-1.5">
-              <button
-                type="button"
-                onClick={() => void ask('start')}
-                disabled={hintStart !== null || asking || grading}
-                data-goal="hint-start"
-                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40"
-              >
-                {t('goal.hint.start')}
-              </button>
-              <button
-                type="button"
-                onClick={() => void ask('count')}
-                disabled={hintCount !== null || asking || grading}
-                data-goal="hint-count"
-                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40"
-              >
-                {t('goal.hint.count')}
-              </button>
-              <button
-                type="button"
-                onClick={() => void askReception()}
-                disabled={reception !== null || asking || grading}
-                data-goal="hint-reception"
-                className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-1.5 text-center font-body text-[11.5px] font-extrabold leading-tight text-ink disabled:opacity-40"
-              >
-                {t('goal.hint.reception')}
-              </button>
+        <aside className="grid min-w-0 content-start gap-3 md:w-[360px] md:shrink md:max-h-[max(460px,calc(100dvh-270px))] md:overflow-y-auto md:overscroll-contain">
+          <div className="border-rule border-ink bg-red px-3 py-2.5">
+            <div className="flex items-baseline justify-between gap-2 border-b-hair border-ink pb-1.5">
+              <span className="font-body text-[10px] font-extrabold tracking-widest text-ink">{embedded ? challenge.seasonLabel : t(stageLabel)}</span>
+              {!embedded && (
+                <span className="font-latin text-[9px] font-bold tracking-[0.2em] text-paper" dir="ltr">
+                  MATCHDAY SPECIAL · No. 08
+                </span>
+              )}
             </div>
-            {hintStart && (
-              <p className="mt-1.5 font-body text-[11.5px] leading-snug text-ink">
-                {t('goal.sourceWords')} <bdi className="font-extrabold">{hintStart}</bdi>
-              </p>
-            )}
-            {hintCount && (
-              <p className="mt-1 font-body text-[11.5px] leading-snug text-ink">
-                <Num>{t('goal.hint.countAnswer', { n: hintCount })}</Num>
-              </p>
-            )}
-            {reception && (
-              <p className="mt-1 font-body text-[11.5px] leading-snug text-ink">
-                {t('goal.hint.receptionFor', { n: String(reception.touch + 1) })}
-              </p>
-            )}
+            <p className="mt-2 font-display text-step-2 leading-[0.95] text-paper">{challenge.titleHe}</p>
+            <p className="mt-1 font-mono text-[11px] tabular-nums text-ink">
+              <Num>{challenge.subtitleHe}</Num>
+            </p>
+            <p className="mt-0.5 font-body text-[11px] leading-snug text-ink">
+              <bdi>{challenge.competitionHe}</bdi> · <bdi>{challenge.opponentHe}</bdi> · <Num>{challenge.scoreHe}</Num>
+            </p>
           </div>
-        </>
+          {hud}
+          {caption && phase === 'build' && (
+            <p className="border-s-plate border-red ps-2 font-display text-step-0 leading-snug text-ink">{caption.text}</p>
+          )}
+          {dock}
+          {phase === 'build' && <div className="border-rule border-ink bg-sheet p-3">{hints}</div>}
+          {phase === 'reveal' && verdict && (
+            <div onPointerDown={cancelReveal} onFocus={cancelReveal}>
+              <ReplayVerdict metrics={verdict.metrics} touches={verdict.touches} narrativeHe={verdict.narrativeHe} sourceTitle={verdict.sourceTitle} />
+            </div>
+          )}
+        </aside>
       )}
-        </div>
-      </div>
 
-      <p className="mt-2 hidden font-body text-[11px] leading-snug text-muted md:block">
-        {t('goal.approximate')}
-      </p>
+      {phone && (
+        <SlideSheet open={sheet === 'hints'} onClose={() => setSheet(null)} title={t('goal.hints')} latin="HINTS">
+          {hints}
+        </SlideSheet>
+      )}
+      {phone && verdict && (
+        <SlideSheet open={sheet === 'verdict'} onClose={() => setSheet(null)} title={t('goal.overall')} latin="THE VERDICT" size="full">
+          <ReplayVerdict metrics={verdict.metrics} touches={verdict.touches} narrativeHe={verdict.narrativeHe} sourceTitle={verdict.sourceTitle} />
+        </SlideSheet>
+      )}
     </div>
   )
 }
 
-/** הפסק — what the run came to, and the link that hands over the identical three goals. */
-/**
- * שורת הפועלים — the compact action-chip row, docked right above the figure rail on a
- * phone, in place of the 4-column grid the panel below used to show (round 2, Maor
- * 23.9.2026). One line, swipeable, the SAME `data-goal="action"` buttons the probe and
- * the desktop panel both already know.
- */
-function ActionChips({
-  draft,
-  onPick,
-  disabled,
-}: {
-  draft: Draft
-  onPick: (action: ReplayAction) => void
-  disabled: boolean
-}) {
+function SoundGlyph({ muted }: { muted: boolean }) {
   return (
-    <ul className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1.5" data-goal="actionRow">
-      {REPLAY_ACTIONS.map((action) => {
-        const chosen = draft.action === action
-        return (
-          <li key={action} className="shrink-0">
-            <button
-              type="button"
-              onClick={() => onPick(action)}
-              aria-pressed={chosen}
-              disabled={disabled}
-              data-goal="action"
-              className={`flex min-h-tap shrink-0 items-center gap-1.5 whitespace-nowrap border-rule border-ink px-2.5 font-body text-[12px] font-extrabold transition-colors duration-press disabled:opacity-40 ${
-                chosen ? 'bg-red text-paper' : 'bg-sheet text-ink'
-              }`}
-            >
-              <ActionGlyph action={action} />
-              {t(ACTION_LABEL[action])}
-            </button>
-          </li>
-        )
-      })}
-    </ul>
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" aria-hidden="true">
+      <path d="M4 9 H8 L13 5 V19 L8 15 H4 Z" fill="currentColor" />
+      {muted ? <path d="M16 9 L21 15 M21 9 L16 15" /> : <path d="M16 8.5 Q19 12 16 15.5 M18.5 6 Q23 12 18.5 18" />}
+    </svg>
   )
 }
 
-/**
- * הרכבת הנוגעים — the candidate figures, one line, swiped rather than wrapped (round 2:
- * the old wrapped pill list hid its second row behind the tab bar at 390×844). Tap picks
- * the actor, same as before; DRAG lifts the figure off the rail and, dropped on a pitch
- * zone, sets the actor AND the origin together — `useDragActive` (inside `GoalPitch`)
- * lights every zone up as a valid target the whole time this is in the air.
- */
-function PlayerRail({
-  pool,
-  opponents,
-  draft,
-  disabled,
-  onTap,
-  onDragPlace,
-}: {
-  pool: string[]
-  opponents: string[]
-  draft: Draft
-  disabled: boolean
-  onTap: (name: string) => void
-  onDragPlace: (name: string, point: ReplayPoint) => void
-}) {
-  return (
-    <ul className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1" data-goal="pool">
-      {pool.map((name) => (
-        <PlayerToken
-          key={name}
-          name={name}
-          chosen={draft.actorHe === name}
-          opponent={opponents.includes(name)}
-          disabled={disabled}
-          onTap={onTap}
-          onDragPlace={onDragPlace}
-        />
-      ))}
-    </ul>
-  )
-}
-
-function PlayerToken({
-  name,
-  chosen,
-  opponent,
-  disabled,
-  onTap,
-  onDragPlace,
-}: {
-  name: string
-  chosen: boolean
-  opponent: boolean
-  disabled: boolean
-  onTap: (name: string) => void
-  onDragPlace: (name: string, point: ReplayPoint) => void
-}) {
-  const drag = useDragSource({
-    payload: `player:${name}`,
-    axis: 'up',
-    disabled,
-    onDrop: (zone) => {
-      const centre = zoneCenter(zone)
-      if (!centre) return
-      onDragPlace(name, normalise(centre))
-      firePickFxAt(document.querySelector(`[data-drop="${zone}"]`), { label: name })
-    },
-  })
-  return (
-    <li className="shrink-0">
-      <button
-        type="button"
-        {...drag}
-        onClick={() => onTap(name)}
-        aria-pressed={chosen}
-        aria-label={opponent ? t('goal.pool.opponentAria', { name }) : undefined}
-        disabled={disabled}
-        data-goal="player"
-        data-opponent={opponent ? 'true' : undefined}
-        className={`flex min-h-tap w-[52px] shrink-0 flex-col items-center justify-center gap-0.5 transition-transform duration-press ease-stamp active:scale-[.94] disabled:opacity-40 motion-reduce:transition-none ${
-          opponent ? 'opacity-90' : ''
-        }`}
-      >
-        <PlayerFigure kit={OUTFIELD_KIT} number={null} size={36} title={name} />
-        <NamePlate name={name} tone={chosen ? 'red' : 'ink'} />
-      </button>
-    </li>
-  )
-}
-
-function Result({ run, seed, cursor }: { run: Run; seed: number; cursor: number }) {
+/** הפסק — what the run came to, on one screen, and the link that hands over the same three. */
+function Result({ run, seed, cursor, phone }: { run: Run; seed: number; cursor: number; phone: boolean }) {
+  const [share, setShare] = useState(false)
   const rank = rankFor(run.score) as MessageKey
   const played = run.played
-  const average =
-    played.length > 0
-      ? Math.round(played.reduce((sum, item) => sum + item.overall, 0) / played.length)
-      : 0
+  const average = played.length > 0 ? Math.round(played.reduce((sum, item) => sum + item.overall, 0) / played.length) : 0
   const best = played.reduce((top, item) => Math.max(top, item.overall), 0)
-  const continuity =
-    played.length > 0
-      ? Math.round(played.reduce((sum, item) => sum + item.continuity, 0) / played.length)
-      : 0
+  const continuity = played.length > 0 ? Math.round(played.reduce((sum, item) => sum + item.continuity, 0) / played.length) : 0
   const matched = played.reduce((sum, item) => sum + item.matched, 0)
   const good = played.reduce((sum, item) => sum + item.good, 0)
   const asked = played.reduce((sum, item) => sum + item.touches, 0)
-  // of every touch the archive described, how many the player rebuilt WELL — the
-  // prototype's full-time figure, counted on the judge's own "good" line
   const goodPct = asked > 0 ? Math.round((good / asked) * 100) : 0
 
+  const row = (
+    <ShareRow
+      kind="goal"
+      params={{ h: String(average), s: String(seed), r: String(cursor) }}
+      headline={t('goal.shareHeadMove', { pct: String(average) })}
+      card={{
+        template: 'grass' as const,
+        art: artFor('goal', average / 100),
+        kicker: 'GATE 8 · REBUILD THE GOAL',
+        label: t('screen.goal.title'),
+        eyebrow: t('goal.overall'),
+        hero: `${average}%`,
+        bigStat: { v: `${best}%`, k: t('goal.bestMove') },
+        stats: [
+          { k: t('run.score'), v: String(run.score) },
+          { k: t('goal.continuityAvg'), v: `${continuity}%` },
+        ],
+        cta: t('goal.cta'),
+        challenge: t('share.sameRound'),
+      }}
+    />
+  )
+
   return (
-    <div className="mt-stack">
+    <div className="flex min-h-0 flex-1 flex-col md:mt-stack md:block">
       <Punch />
       <RecordRun gate="/goal" score={run.score} correct={matched} asked={asked} />
-      <div className="border-b-rule border-ink pb-2">
+      <div className="shrink-0 border-b-rule border-ink pb-2">
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           FULL TIME
         </p>
-        <h2 className="font-display text-step-2 leading-tight text-ink">
-          {run.lives <= 0 ? t('run.over') : t('run.survived')}
-        </h2>
+        <h2 className="font-display text-step-2 leading-tight text-ink">{run.lives <= 0 ? t('run.over') : t('run.survived')}</h2>
       </div>
 
-      <div className="mt-stack grid grid-cols-2 gap-2.5">
-        <div className="border-rule border-ink bg-ink p-4 text-center">
-          <p className="font-poster text-[52px] leading-none text-red">
-            <Num>{run.score}</Num>
+      <div className="mt-3 grid min-h-0 flex-1 grid-cols-2 content-start gap-2.5 md:flex-none">
+        <div className="animate-slam-solid border-plate border-ink bg-ink p-4 text-center motion-reduce:animate-none">
+          <p className="relative font-poster text-[60px] leading-none">
+            <span className="plate-shift absolute inset-0 text-sign">
+              <Num>{run.score}</Num>
+            </span>
+            <span className="plate-top relative text-red">
+              <Num>{run.score}</Num>
+            </span>
           </p>
-          <p className="mt-1 font-body text-[10px] tracking-widest text-concrete">
-            {t('run.score')}
-          </p>
+          <p className="mt-1 font-body text-[10px] tracking-widest text-concrete">{t('run.score')}</p>
           <p className="mt-2 font-display text-step-0 leading-tight text-paper">{t(rank)}</p>
         </div>
         <div className="border-rule border-ink bg-sheet p-4">
-          <p className="font-poster text-[34px] leading-none text-ink">
+          <p className="font-poster text-[38px] leading-none text-ink">
             <Num>{`${average}%`}</Num>
           </p>
-          <p className="mt-1 font-body text-[10px] tracking-widest text-muted">
-            {t('goal.runAverage')}
-          </p>
+          <p className="mt-1 font-body text-[10px] tracking-widest text-muted">{t('goal.runAverage')}</p>
           <p className="mt-2 font-body text-[11.5px] leading-snug text-muted">
             {t('goal.bestMove')}: <Num>{`${best}%`}</Num>
           </p>
@@ -902,43 +1092,35 @@ function Result({ run, seed, cursor }: { run: Run; seed: number; cursor: number 
         </div>
       </div>
 
-      <ShareRow
-        kind="goal"
-        params={{ h: String(average), s: String(seed), r: String(cursor) }}
-        headline={t('goal.shareHeadMove', { pct: String(average) })}
-        card={{
-          template: 'grass' as const,
-          art: artFor('goal', average / 100),
-          kicker: 'GATE 8 · REBUILD THE GOAL',
-          label: t('screen.goal.title'),
-          eyebrow: t('goal.overall'),
-          hero: `${average}%`,
-          bigStat: { v: `${best}%`, k: t('goal.bestMove') },
-          stats: [
-            { k: t('run.score'), v: String(run.score) },
-            { k: t('goal.continuityAvg'), v: `${continuity}%` },
-          ],
-          cta: t('goal.cta'),
-          challenge: t('share.sameRound'),
-        }}
-      />
+      {!phone && row}
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <PlayLink
-          gate="/goal"
-          className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-4 font-body text-step-0 font-extrabold text-ink"
-        >
+      <div className="mt-3 grid shrink-0 grid-cols-[1fr_auto_auto] gap-2 md:grid-cols-2">
+        <PlayLink gate="/goal" className="flex min-h-tap items-center justify-center bg-red px-4 font-body text-step-0 font-extrabold text-paper">
           {t('run.again')}
         </PlayLink>
-        <a
-          href="/"
-          className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper"
-        >
+        {phone && (
+          <button
+            type="button"
+            onClick={() => setShare(true)}
+            data-goal="share"
+            className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink"
+          >
+            {t('stage.share')}
+          </button>
+        )}
+        <a href="/" className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-[13px] font-extrabold text-paper">
           {t('nav.gates')}
         </a>
       </div>
 
-      <AdSlot placement="result" />
+      {phone && (
+        <SlideSheet open={share} onClose={() => setShare(false)} title={t('stage.share')} latin="SHARE">
+          {row}
+        </SlideSheet>
+      )}
+      <div className="max-md:hidden">
+        <AdSlot placement="result" />
+      </div>
     </div>
   )
 }

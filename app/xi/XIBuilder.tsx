@@ -13,6 +13,9 @@ import { SlideSheet } from '@/components/stage/SlideSheet'
 import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
 import { dropZone, useDragSource } from '@/components/stage/useDrag'
 import { ShirtToken } from '@/components/stage/ShirtToken'
+import { PlayerShirt } from '@/components/stage/PlayerShirt'
+import { PickRail, flyShirt, shirtTitle, type RailItem } from '@/components/roster/PickRail'
+import type { ShirtLook, Wardrobe } from '@/lib/kit/playerShirt'
 import type { Formation, PitchSlot } from '@/lib/game/lineup'
 import type { RosterEntry, RosterIndex } from '@/lib/game/allTimeXI'
 import { NO_FILTER, slotStatusOf, type RosterFilter } from '@/lib/game/roster-search'
@@ -30,7 +33,7 @@ import {
   type Spell,
 } from '@/lib/xi/challenge'
 import { xiDna } from '@/lib/xi/dna'
-import type { ScoutOrder } from '@/lib/xi/scout'
+import { scoutGroups, type ScoutOrder } from '@/lib/xi/scout'
 import { activeXI, migrateSheet, refResolver, restore, XI_TABS, type XITab } from '@/lib/xi/store'
 import { emit, markOf } from '@/lib/profile/events'
 import { readProfile } from '@/lib/profile/store'
@@ -131,6 +134,7 @@ export function XIBuilder({
   formations,
   roster,
   shirts,
+  wardrobe,
   slugAliases,
   tab: initialTab = 'best',
   embedded,
@@ -138,6 +142,11 @@ export function XIBuilder({
   formations: Formation[]
   roster: RosterIndex
   shirts: ShirtBoard
+  /**
+   * Every man's REAL shirt (delta 88, `lib/kit/playerShirt.ts`) — keyed by slug and by
+   * `slug@version`. Optional: a caller without it (THE WORKER LIFE) gets the engine drawings.
+   */
+  wardrobe?: Wardrobe
   /** slugs a reviewed merge retired → the id they now belong to (`pickerRoster().slugAliases`) */
   slugAliases: Readonly<Record<string, string>>
   /** which tab the link asked for — `/xi?tab=worst` (see `lib/share/copy.ts`) */
@@ -170,6 +179,10 @@ export function XIBuilder({
   /** the phone stage (delta 87) — under 768px the drawer is the card picker, never the docked one */
   const phone = useWide('(max-width: 767px)')
   const [mobileSheet, setMobileSheet] = useState<'setup' | 'bench' | 'shortlist' | 'share' | null>(null)
+  /** the phone rail's era chip — it also picks the version (and so the shirt) a man comes as */
+  const [railEra, setRailEra] = useState<number | null>(null)
+  /** the rail's "full list" — the searchable, filterable sheet, for the power user */
+  const [fullList, setFullList] = useState(false)
 
   const store = useMemo(() => activeXI(), [])
   const byId = useMemo(
@@ -394,9 +407,30 @@ export function XIBuilder({
         years: spell ? spanOf(spell) : null,
         kit: kit?.spec ?? null,
         kitSeason: kit?.seasonLabel ?? null,
+        look: wardrobeLook(wardrobe, entry, spell),
       }
     },
-    [spellFor, spellsOf, seasonForSpell, shirts.seasons],
+    [spellFor, spellsOf, seasonForSpell, shirts.seasons, wardrobe],
+  )
+
+  /** The shirt a man wears as a given spell — his REAL one where the wardrobe has it (delta 88). */
+  const lookFor = useCallback(
+    (entry: RosterEntry, spell: Spell | null): ShirtLook => {
+      const found = wardrobeLook(wardrobe, entry, spell)
+      if (found) return found
+      const season = seasonForSpell(entry, spell)
+      const kit = season ? shirts.seasons[season] : undefined
+      return { kind: 'engine', spec: kit?.spec ?? NEUTRAL_SHIRT_SPEC, seasonLabel: kit?.seasonLabel ?? '', approx: false }
+    },
+    [wardrobe, seasonForSpell, shirts.seasons],
+  )
+
+  const lookAt = useCallback(
+    (slotId: string): ShirtLook | null => {
+      const entry = sheet.picks[slotId]
+      return entry ? lookFor(entry, spellAt(slotId)) : null
+    },
+    [sheet.picks, lookFor, spellAt],
   )
 
   /** Exchange whoever stands in `from` and `to` — a tapped swap and a dragged one both land here. */
@@ -461,12 +495,28 @@ export function XIBuilder({
       else delete versions[slotId]
       return { ...current, picks: { ...current.picks, [slotId]: entry }, versions }
     })
-    setDrawer(null)
-    setSelected(null)
+    advanceFrom(slotId)
     haptic('tap')
+    window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: entry.familyHe }), 0)
   }
 
-  function place(entry: RosterEntry, filter: RosterFilter = NO_FILTER) {
+  /**
+   * After a placement: on the phone the rail stays open and moves to the NEXT empty slot
+   * (formation order), so eleven picks are eleven taps; the last one closes it. Elsewhere
+   * a placement closes back to the pitch, as it always did.
+   */
+  function advanceFrom(slotId: string) {
+    const next = phone ? sheet.formation.slots.find((slot) => slot.slotId !== slotId && !sheet.picks[slot.slotId]) : undefined
+    if (next) {
+      setSelected(next.slotId)
+      setDrawer('slot')
+      return
+    }
+    setDrawer(null)
+    setSelected(null)
+  }
+
+  function place(entry: RosterEntry, filter: RosterFilter = NO_FILTER, from: Element | null = null) {
     if (drawer === 'twelfth') {
       patch((current) => ({ ...current, twelfth: entry }))
       setDrawer(null)
@@ -494,14 +544,14 @@ export function XIBuilder({
       else delete versions[slotId]
       return { ...current, picks: { ...current.picks, [slotId]: entry }, versions }
     })
-    setDrawer(null)
-    // A placement CLOSES back to the pitch — it never re-opens as the filled-slot sheet
-    // (captain/replace/swap/remove). That sheet is only for a tap on an ALREADY-filled
-    // shirt (round 2, Maor 23.9.2026).
-    setSelected(null)
+    // A placement never re-opens as the filled-slot sheet (captain/replace/swap/remove).
+    // That sheet is only for a tap on an ALREADY-filled shirt (round 2, Maor 23.9.2026).
+    advanceFrom(slotId)
     haptic('tap')
-    // every placement carries the stamp — one hit, wherever the pick came from (delta 87)
-    window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: entry.familyHe }), 0)
+    // every placement carries the stamp — one hit, wherever the pick came from (delta 87);
+    // from the rail, the shirt first FLIES into the slot (delta 88)
+    if (from) flyShirt(from, `[data-drop="${slotId}"]`, entry.familyHe)
+    else window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: entry.familyHe }), 0)
   }
 
   function remove(slotId: string) {
@@ -636,15 +686,94 @@ export function XIBuilder({
   ) : null
 
   /**
-   * גיליון הגיוס בנייד — the same sheet, `cardMode` on: a rail of draft cards, dragged
-   * up onto a pitch slot (delta 87, Maor 23.9.2026 — "you must improve the player
-   * selection into a much more fun form"). Only one of `drawerNode` / `mobileDrawerNode`
-   * ever mounts, gated by `phone`, so there is never a second `role="dialog"` in the tree.
+   * רכבת החולצות בנייד (delta 88, Maor 24.9.2026 — "הבחירת שחקנים לא נוחה"): the phone
+   * picks from `PickRail`, docked UNDER the pitch instead of a sheet over it — the slot
+   * stays in view, the rail is already narrowed to its position, every man is his real
+   * shirt, a tap flies him in and a drag up drops him anywhere. The same rail is gate 3's.
+   * "רשימה מלאה" opens the full searchable sheet (filters, sort, shortlist) for the power
+   * user — only one of the two ever mounts, so there is never a second `role="dialog"`.
    */
-  const mobileDrawerNode = drawer && phone ? (
+  const railFilter: RosterFilter = useMemo(() => ({ ...NO_FILTER, decade: railEra ?? 'any' }), [railEra])
+  const railOpen = phone && drawer !== null && !fullList
+  const railItems = useMemo<RailItem[]>(() => {
+    if (!railOpen) return []
+    let pool: RosterEntry[] = roster.all
+    if (drawer === 'slot' && openSlot) {
+      if (refuse && sheet.challenge !== 'free') pool = pool.filter((entry) => refuse(entry) === null)
+      const groups = scoutGroups(pool, openSlot.role, order, fitOnly)
+      pool = [...groups.fit, ...groups.other, ...groups.unknown] as RosterEntry[]
+    }
+    return pool.map((entry) => {
+      const spell = (drawer === 'slot' ? spellFor(entry, railFilter) : null) ?? spellsOf(entry)[0] ?? null
+      const foreign = slotStatusOf(entry) === 'foreign'
+      return {
+        key: rosterKey(entry),
+        family: entry.familyHe,
+        given: entry.givenHe,
+        years: spell ? spanOf(spell) : null,
+        look: lookFor(entry, spell),
+        taken: takenKeys.has(rosterKey(entry)),
+        decades: decadesOf(entry),
+        search: [entry.nameHe, ...(entry.aliasesHe ?? [])].join(' '),
+        badge: foreign ? (
+          <span className="block bg-sign px-1 py-[1px] font-body text-[9px] font-extrabold leading-none text-paper">
+            {t('scout.badge.foreign')}
+          </span>
+        ) : undefined,
+      }
+    })
+  }, [railOpen, roster.all, drawer, openSlot, refuse, sheet.challenge, order, fitOnly, spellFor, railFilter, spellsOf, lookFor, takenKeys])
+
+  const railNode = railOpen ? (
+    <PickRail
+      key={drawer}
+      target={
+        drawer === 'twelfth' ? t('xi.bench.twelfth') : drawer === 'cut' ? t('xi.bench.cut') : (openSlot?.roleHe ?? t('xi.tip.pick'))
+      }
+      targetSub={drawer === 'slot' ? `${chosen}/11` : undefined}
+      items={railItems}
+      era={railEra}
+      onEra={setRailEra}
+      chips={
+        drawer === 'slot' && openSlot
+          ? [
+              {
+                key: 'fit',
+                label: t('pick.rail.fitOnly', { role: openSlot.roleHe }),
+                pressed: fitOnly,
+                onClick: () => setFitOnly(!fitOnly),
+              },
+            ]
+          : []
+      }
+      extra={
+        <button
+          type="button"
+          onClick={() => setFullList(true)}
+          aria-label={t('pick.rail.list')}
+          className="grid min-h-tap w-tap shrink-0 place-items-center border-hair border-ink/40 font-mono text-[16px] leading-none text-ink"
+        >
+          <span aria-hidden="true">≡</span>
+        </button>
+      }
+      onPick={(key, shirt) => {
+        const entry = byId.get(key)
+        if (entry) place(entry, railFilter, shirt)
+      }}
+      onDrop={drawer === 'slot' ? (zone, key) => {
+        const entry = byId.get(key)
+        if (entry) placeAt(zone, entry, railFilter)
+      } : undefined}
+      onClose={() => {
+        setDrawer(null)
+        setSelected(null)
+      }}
+    />
+  ) : null
+
+  const mobileDrawerNode = drawer && phone && fullList ? (
     <RosterSheet
       key={`m-${drawer}-${selected ?? ''}`}
-      cardMode
       title={
         drawer === 'twelfth'
           ? t('xi.bench.twelfth')
@@ -654,9 +783,11 @@ export function XIBuilder({
       }
       roster={roster}
       taken={takenKeys}
-      onPick={place}
-      onDragPick={drawer === 'slot' ? placeAt : undefined}
-      onClose={() => setDrawer(null)}
+      onPick={(entry, filter) => {
+        setFullList(false)
+        place(entry, filter)
+      }}
+      onClose={() => setFullList(false)}
       scout={
         drawer === 'slot' && openSlot
           ? {
@@ -669,6 +800,7 @@ export function XIBuilder({
               shortlist: shortlisted,
               onShortlist: toggleShortlist,
               shortlistEntries: sheet.shortlist,
+              mini: { slots: sheet.formation.slots, active: openSlot.slotId },
               refuse: sheet.challenge === 'free' ? undefined : refuse,
               describeHidden,
               rowInfo,
@@ -684,6 +816,20 @@ export function XIBuilder({
       }
     />
   ) : null
+
+  /* the phone opens ON the rail, aimed at the first empty slot: the first thing a
+     supporter sees is shirts to pick, not an instruction (delta 88) */
+  const autoOpened = useRef(false)
+  useEffect(() => {
+    if (!ready || !phone || autoOpened.current) return
+    autoOpened.current = true
+    if (drawer !== null || selected !== null) return
+    const empty = sheet.formation.slots.find((slot) => !sheet.picks[slot.slotId])
+    if (empty) {
+      setSelected(empty.slotId)
+      setDrawer('slot')
+    }
+  }, [ready, phone, drawer, selected, sheet.formation.slots, sheet.picks])
 
   const primaryLabel = chosen >= 11 ? t('xi.stage.finish') : t('xi.stage.fillNext')
 
@@ -703,7 +849,8 @@ export function XIBuilder({
           shirts… improve the player selection into a much more fun form." One screen:
           a one-line HUD, the pitch filling the rest (ShirtToken, no tiles), a dock. */}
       <div className="flex min-h-0 flex-1 flex-col md:hidden">
-        <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto pb-1">
+        <div className="flex shrink-0 items-center gap-1.5 pb-1">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto [scrollbar-width:none]">
           <div role="tablist" aria-label={t('xi.tabs')} className={embedded ? 'hidden' : 'flex shrink-0 gap-1'}>
             {XI_TABS.map((option) => (
               <button
@@ -738,7 +885,9 @@ export function XIBuilder({
               <span aria-hidden="true">⚙</span>
             </button>
           )}
-          <p className="ms-auto shrink-0 font-mono text-[13px] tracking-widest text-ink">
+        </div>
+          {/* the count sits OUTSIDE the scrolling chips, so it is never cut off */}
+          <p className="shrink-0 font-mono text-[13px] tracking-widest text-ink">
             <Num>{`${chosen}/11`}</Num>
           </p>
         </div>
@@ -759,7 +908,7 @@ export function XIBuilder({
             formation={sheet.formation}
             picks={sheet.picks}
             seasonOf={seasonOf}
-            seasons={shirts.seasons}
+            lookAt={lookAt}
             captain={sheet.captain}
             selected={selected}
             broken={broken}
@@ -768,6 +917,9 @@ export function XIBuilder({
           />
         </FitBox>
 
+        {railNode && <div className="mt-1.5 shrink-0">{railNode}</div>}
+
+        {!railNode && (
         <p className="mt-1.5 shrink-0 truncate border-hair border-ink/30 bg-sheet px-2.5 py-1.5 font-body text-[11px] leading-snug text-ink">
           {swapFrom !== null
             ? t('xi.tip.swap')
@@ -775,8 +927,9 @@ export function XIBuilder({
               ? t('xi.tip.selected', { role: openSlot.roleHe })
               : t('xi.tip.pick')}
         </p>
+        )}
 
-        <div className="mt-1.5 flex shrink-0 items-center gap-1.5">
+        <div className={`mt-1.5 shrink-0 items-center gap-1.5 ${railNode ? 'hidden' : 'flex'}`}>
           <button
             type="button"
             onClick={primaryAction}
@@ -1058,6 +1211,7 @@ export function XIBuilder({
             formation={sheet.formation}
             picks={sheet.picks}
             seasonOf={seasonOf}
+            lookAt={lookAt}
             seasons={shirts.seasons}
             captain={sheet.captain}
             selected={selected}
@@ -1373,6 +1527,7 @@ export function XIBuilder({
           formation={sheet.formation}
           picks={sheet.picks}
           seasonOf={seasonOf}
+          lookAt={lookAt}
           seasons={shirts.seasons}
           captain={sheet.captain}
           broken={broken}
@@ -1396,6 +1551,23 @@ function benchLine(twelfth: RosterEntry | null, cut: RosterEntry | null): string
   if (twelfth) return t('xi.card.twelfth', { twelfth: twelfth.familyHe })
   if (cut) return t('xi.card.cut', { cut: cut.familyHe })
   return null
+}
+
+/** His shirt as that spell, from the wardrobe — `slug@version`, then his own slug. */
+function wardrobeLook(wardrobe: Wardrobe | undefined, entry: RosterEntry, spell: Spell | null): ShirtLook | null {
+  if (!wardrobe) return null
+  const at = (spell && spell.id !== '' ? wardrobe.by[`${entry.slug}@${spell.id}`] : undefined) ?? wardrobe.by[entry.slug]
+  return at === undefined ? null : (wardrobe.shirts[at] ?? null)
+}
+
+/** Every decade (opening year) a man was at the club — the rail's era chips. */
+function decadesOf(entry: RosterEntry): number[] {
+  const from = entry.fromYear
+  if (from === null || from === undefined) return []
+  const to = entry.toYear ?? from
+  const out: number[] = []
+  for (let decade = Math.floor(from / 10) * 10; decade <= to; decade += 10) out.push(decade)
+  return out
 }
 
 function spanOf(spell: Spell): string | null {
@@ -1477,10 +1649,13 @@ function XIPitch({
   onTap,
   className = '',
   compact = false,
+  lookAt,
 }: {
   formation: Formation
   picks: Record<string, RosterEntry>
   seasonOf: (slotId: string) => string | null
+  /** the man's real shirt (delta 88) — a photograph where the archive has one */
+  lookAt?: (slotId: string) => ShirtLook | null
   seasons: ShirtBoard['seasons']
   captain: string | null
   selected?: string | null
@@ -1517,6 +1692,7 @@ function XIPitch({
         const entry = picks[slot.slotId]
         const seasonLabel = entry ? seasonOf(slot.slotId) : null
         const season = seasonLabel ? seasons[seasonLabel] : undefined
+        const look = entry && lookAt ? lookAt(slot.slotId) : null
         const live = selected === slot.slotId
         const off = broken.has(slot.slotId)
         const body = entry ? (
@@ -1526,7 +1702,9 @@ function XIPitch({
                 compact ? 'h-9 w-8' : 'h-11 w-10'
               } ${live ? 'border-rule border-press-ink' : 'border-press-ink'}`}
             >
-              {season ? (
+              {look ? (
+                <PlayerShirt look={look} eager title={shirtTitle(look)} className={compact ? 'h-8 w-7' : 'h-10 w-9'} />
+              ) : season ? (
                 <KitShirt
                   spec={season.spec}
                   density="mini"
@@ -1656,7 +1834,7 @@ function XIPitchStage({
   formation,
   picks,
   seasonOf,
-  seasons,
+  lookAt,
   captain,
   selected,
   broken,
@@ -1666,7 +1844,8 @@ function XIPitchStage({
   formation: Formation
   picks: Record<string, RosterEntry>
   seasonOf: (slotId: string) => string | null
-  seasons: ShirtBoard['seasons']
+  /** the man's real shirt, from the wardrobe (delta 88) */
+  lookAt: (slotId: string) => ShirtLook | null
   captain: string | null
   selected: string | null
   broken: ReadonlySet<string>
@@ -1677,8 +1856,7 @@ function XIPitchStage({
     <PitchGround>
       {formation.slots.map((slot) => {
         const entry = picks[slot.slotId]
-        const seasonLabel = entry ? seasonOf(slot.slotId) : null
-        const season = seasonLabel ? seasons[seasonLabel] : undefined
+        const look = entry ? lookAt(slot.slotId) : null
         const live = selected === slot.slotId
         const off = broken.has(slot.slotId)
         return (
@@ -1686,7 +1864,8 @@ function XIPitchStage({
             key={slot.slotId}
             slot={slot}
             entry={entry ?? null}
-            season={season ?? null}
+            look={look}
+            seasonLabel={entry ? (look?.seasonLabel || seasonOf(slot.slotId)) : null}
             live={live}
             captain={captain === slot.slotId}
             off={off}
@@ -1703,7 +1882,8 @@ function XIPitchStage({
 function SlotToken({
   slot,
   entry,
-  season,
+  look,
+  seasonLabel,
   live,
   captain,
   off,
@@ -1712,7 +1892,8 @@ function SlotToken({
 }: {
   slot: PitchSlot
   entry: RosterEntry | null
-  season: ShirtBoard['seasons'][string] | null
+  look: ShirtLook | null
+  seasonLabel: string | null
   live: boolean
   captain: boolean
   off: boolean
@@ -1738,9 +1919,12 @@ function SlotToken({
     >
       {entry ? (
         <ShirtToken
-          spec={season?.spec ?? NEUTRAL_SHIRT_SPEC}
+          key={look && look.kind === 'photo' ? look.src : 'engine'}
+          look={look}
+          spec={NEUTRAL_SHIRT_SPEC}
+          title={look ? shirtTitle(look) : undefined}
           name={entry.familyHe}
-          sub={season?.seasonLabel}
+          sub={seasonLabel || undefined}
           live={live}
           captain={captain}
           flag={off}
@@ -1920,6 +2104,7 @@ function Poster({
   formation,
   picks,
   seasonOf,
+  lookAt,
   seasons,
   captain,
   broken,
@@ -1933,6 +2118,7 @@ function Poster({
   formation: Formation
   picks: Record<string, RosterEntry>
   seasonOf: (slotId: string) => string | null
+  lookAt: (slotId: string) => ShirtLook | null
   seasons: ShirtBoard['seasons']
   captain: string | null
   broken: ReadonlySet<string>
@@ -1978,6 +2164,7 @@ function Poster({
             formation={formation}
             picks={picks}
             seasonOf={seasonOf}
+            lookAt={lookAt}
             seasons={seasons}
             captain={captain}
             broken={broken}

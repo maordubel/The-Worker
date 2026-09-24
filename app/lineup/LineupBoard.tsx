@@ -6,8 +6,11 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Num } from '@/components/ui/Num'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { FitBox } from '@/components/stage/FitBox'
+import { NEUTRAL_SHIRT_SPEC } from '@/components/roster/RosterSheet'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { firePickFxAt } from '@/components/stage/PickFx'
+import { PickRail, flyShirt, type RailItem } from '@/components/roster/PickRail'
+import type { ShirtLook } from '@/lib/kit/playerShirt'
 import { t, type MessageKey } from '@/lib/i18n'
 import {
   COACH_NOTES,
@@ -31,7 +34,7 @@ import type { Embedded } from '@/lib/mechanics/types'
 import { haptic } from '@/lib/play/haptics'
 import { askCoach, submitLineup } from './actions'
 import { BandPitch, BandPitchStage, LINE_LABEL } from './BandPitch'
-import { LockerRack, LockerRail } from './LockerRack'
+import { LockerRack } from './LockerRack'
 import { TeamSheet } from './TeamSheet'
 import { TunnelGate } from './TunnelGate'
 import { PlayLink } from '@/components/play/PlayLink'
@@ -83,6 +86,7 @@ export function LineupBoard({
   graded,
   kit,
   kitSeason,
+  look = null,
   intro = null,
   sourceTitle = '',
   embedded,
@@ -95,6 +99,12 @@ export function LineupBoard({
   /** the season's real kit for the lockers — null where the archive has none */
   kit: KitSpec | null
   kitSeason: string | null
+  /**
+   * The match season's REAL shirt (delta 88, `lib/kit/playerShirt.ts` pinned to the match
+   * season): every man in the room wore that night's shirt, so every locker shows it — and
+   * a per-man era shirt would leak who belongs to the season. Absent (LIFE), the drawing.
+   */
+  look?: ShirtLook | null
   /** the match record, for the phone stage's "פרטי המשחק" sheet — absent inside LIFE */
   intro?: MatchIntro | null
   sourceTitle?: string
@@ -121,7 +131,15 @@ export function LineupBoard({
   const [verdict, setVerdict] = useState<LineupVerdict | null>(null)
   const [pending, startTransition] = useTransition()
   /** the phone stage (delta 87): "מלתחה" or "פרטי המשחק" over the pitch */
-  const [mobileSheet, setMobileSheet] = useState<'rack' | 'info' | 'coach' | null>(null)
+  const [mobileSheet, setMobileSheet] = useState<'info' | 'coach' | null>(null)
+  /**
+   * The phone's picking rail (delta 88 — the same `PickRail` gate 1 picks from). It is OPEN
+   * from the first frame, aimed at a band: the keeper's, then the defence. Maor, 24.9.2026:
+   * "לא ניתן לבחור שחקנים בכלל" — the lockers used to hide behind a chip and a tap on the
+   * pitch armed a band with nothing to show for it.
+   */
+  const [railLine, setRailLine] = useState<Line>('GK')
+  const [railShut, setRailShut] = useState(false)
 
   const nameOf = useMemo(() => new Map(bank.map((locker) => [locker.id, locker.nameHe])), [bank])
   const used = useMemo(() => new Set(board.map((row) => row.playerId)), [board])
@@ -129,7 +147,7 @@ export function LineupBoard({
   const complete = board.length === XI_SIZE
 
   /** Put him in a band. A move keeps his LOCK; a twelfth man is refused and said. */
-  function put(playerId: string, line: Line) {
+  function put(playerId: string, line: Line, from: Element | null = null) {
     const next = placeOn(board, playerId, line)
     if (!next.some((row) => row.playerId === playerId && row.line === line)) {
       setNote('lineup.zone.full')
@@ -145,7 +163,21 @@ export function LineupBoard({
     setNote(null)
     haptic('tap')
     const family = splitName(nameOf.get(playerId) ?? '').familyHe
-    firePickFxAt(document.querySelector(`[data-drop="band-${line}"]`), { label: family })
+    // from the rail the shirt FLIES into the band, then the stamp (delta 88)
+    if (from) flyShirt(from, `[data-drop="band-${line}"]`, family)
+    else firePickFxAt(document.querySelector(`[data-drop="band-${line}"]`), { label: family })
+    // one keeper: once he stands, the rail moves on to the defence
+    if (line === 'GK' && railLine === 'GK') setRailLine('D')
+  }
+
+  /** The phone's band tap: a man in hand lands there; otherwise the rail is aimed at it. */
+  function tapBandStage(line: Line) {
+    if (verdict) return
+    if (held !== null) return put(held, line)
+    if (active !== null) return put(active, line)
+    setRailLine(line)
+    setRailShut(false)
+    setNote(null)
   }
 
   function tapBand(line: Line) {
@@ -232,6 +264,22 @@ export function LineupBoard({
           ? 'lineup.prompt.full'
           : 'lineup.zone.prompt.start'
 
+  const railOpen = !railShut && !complete && verdict === null
+  const railItems = useMemo<RailItem[]>(
+    () =>
+      bank.map((locker) => {
+        const parts = splitName(locker.nameHe)
+        return {
+          key: locker.id,
+          family: parts.familyHe,
+          given: parts.givenHe,
+          look: look ?? { kind: 'engine', spec: kit ?? NEUTRAL_SHIRT_SPEC, seasonLabel: kitSeason ?? '', approx: false },
+          taken: used.has(locker.id),
+        }
+      }),
+    [bank, look, kit, kitSeason, used],
+  )
+
   const men = board.map((row) => ({
     ...row,
     nameHe: nameOf.get(row.playerId) ?? row.playerId,
@@ -268,8 +316,10 @@ export function LineupBoard({
               <BandPitchStage
                 men={men}
                 kit={kit}
+                look={look}
+                target={railOpen ? railLine : null}
                 active={active}
-                onBand={tapBand}
+                onBand={tapBandStage}
                 onMan={tapMan}
                 onDrop={(line, payload) => {
                   const id = payload.replace(/^(locker|man):/, '')
@@ -297,6 +347,35 @@ export function LineupBoard({
                 >
                   {t('lineup.zone.sendBack')}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setActive(null)}
+                  aria-label={t('stage.close')}
+                  className="grid min-h-tap w-tap shrink-0 place-items-center font-mono text-[20px] leading-none text-ink"
+                >
+                  ×
+                </button>
+              </div>
+            ) : railOpen ? (
+              <div className="mt-1.5 shrink-0">
+                <PickRail
+                  target={t(LINE_LABEL[railLine])}
+                  targetSub={`${String(board.length).padStart(2, '0')}/${XI_SIZE}`}
+                  items={railItems}
+                  eras={false}
+                  searchable={bank.length > 12}
+                  chips={[
+                    { key: 'coach', label: t('lineup.coach'), pressed: false, onClick: () => setMobileSheet('coach') },
+                    ...(intro
+                      ? [{ key: 'info', label: t('lineup.stage.setup'), pressed: false, onClick: () => setMobileSheet('info') }]
+                      : []),
+                  ]}
+                  onPick={(id, shirt) => put(id, railLine, shirt)}
+                  onDrop={(zone, id) => {
+                    if (zone.startsWith('band-')) put(id, zone.replace(/^band-/, '') as Line)
+                  }}
+                  onClose={() => setRailShut(true)}
+                />
               </div>
             ) : (
               <p className="mt-1.5 shrink-0 truncate border-hair border-ink/30 bg-sheet px-2.5 py-1.5 font-body text-[11px] leading-snug text-ink">
@@ -304,6 +383,7 @@ export function LineupBoard({
               </p>
             )}
 
+            {!(railOpen && active === null) && (
             <div className="mt-1.5 flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
@@ -313,16 +393,18 @@ export function LineupBoard({
               >
                 {pending ? t('state.loading') : t('lineup.stage.finish')}
               </button>
-              <button
-                type="button"
-                onClick={() => setMobileSheet(mobileSheet === 'rack' ? null : 'rack')}
-                aria-pressed={mobileSheet === 'rack'}
-                className={`min-h-tap shrink-0 border-hair px-2.5 font-body text-[11px] font-extrabold leading-none ${
-                  mobileSheet === 'rack' ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
-                }`}
-              >
-                {t('lineup.stage.rack')}
-              </button>
+              {!complete && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActive(null)
+                    setRailShut(false)
+                  }}
+                  className="min-h-tap shrink-0 border-hair border-ink/40 bg-paper px-2.5 font-body text-[11px] font-extrabold leading-none text-ink"
+                >
+                  {t('lineup.stage.rack')}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setMobileSheet('coach')}
@@ -340,39 +422,13 @@ export function LineupBoard({
                 </button>
               )}
             </div>
+            )}
 
             {note !== null && <p className="mt-1.5 shrink-0 font-body text-[11px] leading-snug text-red">{t(note)}</p>}
             {lastCall && (
               <p className="mt-1 shrink-0 border-s-rule border-red ps-2 font-body text-[11px] leading-snug text-red">
                 {t('lineup.lastCall')}
               </p>
-            )}
-
-            {/*
-              The rack is an INLINE row, not a modal sheet — a full-screen backdrop over
-              the pitch would swallow the drag-drop the rail exists for. Toggling it
-              simply resizes the FitBox pitch above it (delta 87).
-            */}
-            {mobileSheet === 'rack' && (
-              <div className="mt-1.5 shrink-0 animate-fx-sheet-up border-hair border-ink/40 bg-sheet p-2">
-                <p className="font-body text-[10.5px] leading-snug text-muted">{t('lineup.stage.hint')}</p>
-                <div className="mt-1.5">
-                  <LockerRail
-                    bank={bank}
-                    used={used}
-                    selected={held}
-                    onSelect={(id) => {
-                      tapLocker(id)
-                      setMobileSheet(null)
-                    }}
-                    onDrop={(zone, payload) => {
-                      const line = zone.replace(/^band-/, '') as Line
-                      put(payload.replace(/^locker:/, ''), line)
-                    }}
-                    kit={kit}
-                  />
-                </div>
-              </div>
             )}
 
             <SlideSheet open={mobileSheet === 'coach'} onClose={() => setMobileSheet(null)} title={t('lineup.coach')} size="auto">
@@ -451,6 +507,7 @@ export function LineupBoard({
               <BandPitch
                 men={men}
                 kit={kit}
+                look={look}
                 active={active}
                 armed={held !== null || active !== null}
                 armedLine={armedLine}
@@ -540,7 +597,7 @@ export function LineupBoard({
               </button>
             </div>
 
-            <LockerRack bank={bank} used={used} selected={held} onSelect={tapLocker} kit={kit} kitSeason={kitSeason} />
+            <LockerRack bank={bank} used={used} selected={held} onSelect={tapLocker} kit={kit} kitSeason={kitSeason} look={look} />
           </div>
           </div>
         </>
@@ -563,6 +620,7 @@ export function LineupBoard({
           locks={locks}
           notesTaken={notes.length}
           kit={kit}
+          look={look}
           onBack={() => {
             if (embedded) return embedded.onResult(verdict)
             setVerdict(null)

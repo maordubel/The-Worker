@@ -25,6 +25,7 @@ export default function LifeRumble({ request, onResult }: ActivityBoardProps) {
         cursor={0}
         playerCount={pack.playerCount}
         kits={pack.kits}
+        looks={pack.looks}
         embedded={{
           window: { before: request.window.before },
           doneLabel: '',

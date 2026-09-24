@@ -154,7 +154,8 @@ export const CAST_CARDS: readonly CastCard[] = [
     id: 'barry',
     namesHe: ['בארי'],
     roleHe: 'שער 7',
-    art: 'barry96',
+    // the canonical Barry (Maor's reference, 23.9.2026) — `barry96` is another man (`LEGACY_POSE`)
+    art: 'barryRadio',
     linesHe: [
       'עומד באותו מקום עשרים שנה. שני צעדים ימינה מהמדרגה השלישית.',
       'אם מישהו תפס לו את המקום, הוא לא אומר כלום. הוא רק עומד לידו עד שמבינים.',

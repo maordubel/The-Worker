@@ -3,7 +3,9 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation } from './script'
+import type { Condition } from '../world/types'
+import { QUEUE_1999 } from './storyChores'
 
 /**
  * הדף על הלילה שירדנו — נושא אחד שעובר שלושה מעשים ושני פרקים.
@@ -109,6 +111,54 @@ export const BEATS_SEED: Beat[] = [
   },
 ]
 
+/**
+ * החמישה סביב הארגז — each one brings one line to the page, in his own voice, and the
+ * page closes on any three. They are the five who already speak in `seed-gate5`; the line
+ * each gives is the thing he said there, written down.
+ */
+type Voice = { who: 'asaf' | 'melamed' | 'michel' | 'dudu' | 'omer'; nameHe: string; before: string; line: string; heading: string }
+const SEED_VOICES: readonly Voice[] = [
+  { who: 'asaf', nameHe: 'אסף', before: 'שב. כולם פה. תקשיב קודם.', line: 'תכתוב "אנשים" ראשון. לא כסף, לא בעלים. אנשים שבאים גם כשיורדים.', heading: 'אנשים' },
+  { who: 'michel', nameHe: 'מישל', before: 'המפתחות האלה? של מיניבוס. אחר כך אסביר.', line: 'מיניבוס לכל משחק חוץ. תכתוב את זה תחת "מה יש". זה לא כסף, זה אנשים שמכירים אנשים.', heading: 'מיניבוס' },
+  { who: 'dudu', nameHe: 'דודו', before: 'אני? אני הרעש. תשאל את אסף מה צריך.', line: 'רעש! תכתוב "רעש". (הוא צוחק, ואז לא.) ברצינות. אולם שקט זה אולם שמוכרים.', heading: 'רעש' },
+  { who: 'omer', nameHe: 'עומר', before: '(מרים את התקליט.) אחר כך. עכשיו אסף מדבר.', line: 'מוזיקה. אם כבר עושים משהו, שיהיה עם מוזיקה טובה. תכתוב את זה למטה, איפה שלא מוותרים.', heading: 'מוזיקה' },
+  { who: 'melamed', nameHe: 'מלמד', before: '(שלוש מכות, הפסקה, שתיים.) אחר כך. עכשיו מקשיבים.', line: 'תכתוב את הקצב. לא במילים — תצייר שלוש קווים, רווח, ושניים. מי שיקרא יבין.', heading: 'הקצב' },
+]
+/** the three of the five the relationship registry already knows (`characters.ts`) */
+const KNOWN_VOICES: ReadonlySet<string> = new Set(['asaf', 'melamed', 'michel'])
+const voiceFlag = (who: string) => `seed:line:${who}`
+const voiceId = (who: string) => `seed-voice-${who}`
+
+/** any three of the five lines, spelled as the condition vocabulary can read it */
+const SEED_THREE_LINES: Condition = (() => {
+  const flags = SEED_VOICES.map((voice) => voiceFlag(voice.who))
+  const any: Condition[] = []
+  for (let a = 0; a < flags.length; a += 1)
+    for (let b = a + 1; b < flags.length; b += 1)
+      for (let c = b + 1; c < flags.length; c += 1) any.push({ all: [{ flag: flags[a]! }, { flag: flags[b]! }, { flag: flags[c]! }] })
+  return { any }
+})()
+
+/** what closing the page does — the effects the old one-button "list" carried */
+const SEED_LIST_CLOSED: ChoiceDef['then'] = [{ e: 'flag', flag: 'seed:list' }, { e: 'flag', flag: 'life:seed:list' }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 14 }, { e: 'redheart', key: 'community', delta: 6 }, { e: 'rel', who: 'asaf', axis: 'trust', delta: 5 }, { e: 'rel', who: 'freddy', axis: 'trust', delta: 4 }, { e: 'personality', key: 'responsibility', delta: 3 }, { e: 'goto', node: 'seed-close' }]
+
+function voiceConversation(voice: Voice): Conversation {
+  return {
+    id: voiceId(voice.who),
+    nameHe: voice.nameHe,
+    branches: [
+      { when: { flag: 'seed:list' }, lines: [{ who: voice.nameHe, text: 'תשמור את הדף. אל תקפל אותו יותר מדי.' }] },
+      {
+        when: { all: [{ flag: 'seed:page' }, { notFlag: voiceFlag(voice.who) }] },
+        lines: [{ who: voice.nameHe, text: voice.line }],
+        then: [{ e: 'flag', flag: voiceFlag(voice.who) }, ...(KNOWN_VOICES.has(voice.who) ? [{ e: 'rel' as const, who: voice.who, axis: 'familiarity' as const, delta: 2 }] : []), { e: 'toast', text: `על הדף: ${voice.heading}.`, tone: 'plain' }],
+      },
+      { when: { flag: 'seed:page' }, lines: [{ who: voice.nameHe, text: 'כבר כתבת אותי. תשאל את האחרים — ואז תסגור את הדף על הארגז.' }] },
+      { lines: [{ who: voice.nameHe, text: voice.before }], then: [{ e: 'goto', node: 'seed-gate5' }] },
+    ],
+  }
+}
+
 export const CONVERSATIONS_SEED: Conversation[] = [
   {
     id: 'seed-corner',
@@ -122,7 +172,13 @@ export const CONVERSATIONS_SEED: Conversation[] = [
           { who: 'שחור', text: 'אחרי.' },
         ],
         choices: [
-          { id: 'work', text: 'לעשות את התור.', then: [{ e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 5 }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 3 }, { e: 'personality', key: 'responsibility', delta: 3 }, { e: 'energy', delta: -8 }, { e: 'flag', flag: 'seed:worked' }] },
+          /**
+           * (Director V3 §12, 24.9.2026) the queue is WORKED, not agreed to: `ChoreScene`
+           * serve — people arrive at the window, wait a little, and go; reach each one and
+           * press. What it changes is scaled by how many got a ticket
+           * (`content/storyChores.ts`, `queue-99`). The answer itself commits the evening.
+           */
+          { id: 'work', text: 'לעשות את התור.', when: { notFlag: QUEUE_1999 }, hidden: true, then: [{ e: 'flag', flag: 'seed:worked' }, { e: 'minigame', id: 'chore:story:queue-99' }] },
           { id: 'owner', text: '"הוא באמת הורג את המועדון."', then: [{ e: 'institution', key: 'basketballOwnershipTrust', delta: -10 }, { e: 'institution', key: 'protestEscalation', delta: 4 }, { e: 'rel', who: 'shachor', axis: 'tension', delta: 3 }, { e: 'toast', text: '"אחרי," שחור חזר. לא הסתכל עליך.', tone: 'plain' }] },
           /**
            * שני חובות שהמשחק לקח ולא נתן להחזיר, עד עכשיו.
@@ -265,7 +321,13 @@ export const CONVERSATIONS_SEED: Conversation[] = [
           { who: 'מלמד', text: '(דרבוקה, שלוש מכות, הפסקה, שתיים.) זוכר? מ-96. אתה בחרת את הקצב הזה.' },
         ],
         choices: [
-          { id: 'list', text: 'לקחת דף. "אז נכתוב: אנשים. מה יש. מה לא מוותרים עליו."', then: [{ e: 'flag', flag: 'seed:list' }, { e: 'flag', flag: 'life:seed:list' }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 14 }, { e: 'redheart', key: 'community', delta: 6 }, { e: 'rel', who: 'asaf', axis: 'trust', delta: 5 }, { e: 'rel', who: 'freddy', axis: 'trust', delta: 4 }, { e: 'personality', key: 'responsibility', delta: 3 }, { e: 'goto', node: 'seed-close' }] },
+          /**
+           * (Director V3 §12) the list is ASSEMBLED, not chosen: the page is taken here, and
+           * then written one line at a time by walking to the people around the crate —
+           * each of them brings one thing (`seed-voice-*`). Three lines, and the page on the
+           * crate can be closed (`seed-page`). The anger stays one sentence, because anger is.
+           */
+          { id: 'list', text: 'לקחת דף. "אז נכתוב: אנשים. מה יש. מה לא מוותרים עליו."', when: { notFlag: 'seed:page' }, hidden: true, then: [{ e: 'flag', flag: 'seed:page' }, { e: 'toast', text: 'הדף ביד. עכשיו לשאול כל אחד מה הוא מביא — ולכתוב.', tone: 'plain' }] },
           { id: 'anger', text: '"מה שצריך זה שהבעלים ילך."', then: [{ e: 'flag', flag: 'seed:list' }, { e: 'institution', key: 'protestEscalation', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 2 }, { e: 'rel', who: 'freddy', axis: 'tension', delta: 4 }, { e: 'goto', node: 'seed-close' }] },
           /**
            * `owe:stand` — הכסף שנאסף בשתי דקות למונית, כדי שתגיע. אותם אנשים, אותו ארגז
@@ -283,6 +345,30 @@ export const CONVERSATIONS_SEED: Conversation[] = [
           { id: 'pin', text: 'לתת לסוקו להעתיק את הדף, ולתלות אותו בחלון של רפי.', when: { flag: 'seed:wrote' }, hidden: true, then: [{ e: 'flag', flag: 'life:page:pinned' }, { e: 'time', minutes: 20 }, { e: 'proof', kind: 'publication_proof', proofId: 'publication_proof:{chapter}:page', subjectHe: PAGE_SUBJECT, audience: 'public', delta: 3, noteHe: 'סוקו העתיק בכתב ידו, רפי הדביק מבפנים בסלוטייפ. בגובה העיניים.' }, { e: 'heard', proofId: 'publication_proof:{chapter}:page' }, { e: 'rel', who: 'soko', axis: 'bond', delta: 4 }, { e: 'toast', text: 'שני אנשים עצרו מול החלון לפני שהלכת הביתה. אחד מהם קרא את זה עד הסוף.', tone: 'plain' }] },
           { id: 'rhythm', text: 'לענות למלמד. אותו קצב.', when: { flag: 'life:melamed:rhythm' }, noteHe: 'לא למדת את הקצב שלו ב־96. אין לך מה לענות.', then: [{ e: 'sfx', key: 'darbuka-three-two', level: 0.8 }, { e: 'sfx', key: 'crowd-claps', level: 0.5, delayMs: 1700 }, { e: 'rel', who: 'melamed', axis: 'bond', delta: 6 }, { e: 'remember', who: 'melamed', eventId: 'rhythm-returned-1999', significance: 'major' }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'toast', text: 'שלוש, הפסקה, שתיים. כל הקיוסק הצטרף. ככה מתחיל שיר.', tone: 'plain' }] },
         ],
+      },
+    ],
+  },
+  ...SEED_VOICES.map(voiceConversation),
+  {
+    id: 'seed-page',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'seed:list' }, lines: [{ who: null, text: 'הארגז ההפוך. הדף כבר בכיס שלך.' }] },
+      {
+        when: { all: [{ flag: 'seed:page' }, SEED_THREE_LINES] },
+        lines: [
+          { who: null, text: 'הנחת את הדף על הארגז ועברת על מה שכתבת. שלוש כותרות: אנשים. מה יש. מה לא מוותרים עליו.' },
+          { who: null, text: 'השורה הראשונה בכתב יד רועד. השלישית כבר יציבה.' },
+        ],
+        then: SEED_LIST_CLOSED,
+      },
+      {
+        when: { flag: 'seed:page' },
+        lines: [{ who: null, text: 'על הדף שורה או שתיים. עוד לא דף. מסביב לארגז יש עוד אנשים שלא שאלת.' }],
+      },
+      {
+        lines: [{ who: null, text: 'דף משבצות ריק על הארגז, ועט שסוקו השאיר. אף אחד לא כתב עליו עדיין.' }],
+        then: [{ e: 'flag', flag: 'seed:page' }, { e: 'toast', text: 'הדף ביד. עכשיו לשאול כל אחד מה הוא מביא — ולכתוב.', tone: 'plain' }],
       },
     ],
   },

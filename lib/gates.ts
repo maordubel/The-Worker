@@ -201,21 +201,20 @@ export const GATES: readonly Gate[] = [
   },
   {
     /**
-     * שער 10 — פרה עיוורת (owner decision, 23.9.2026): a new game, announced and not yet
-     * open. The member book that stood here (`/tik`) is NOT gone — it is the personal
-     * area, reached from the tab bar as "המנוי שלי", which is where Maor wants it. So the
-     * plate is a `null` href with `soon`, and nothing on the wall links to a route the
-     * gate no longer owns.
+     * שער 10 — פרה עיוורת (owner decision, 23.9.2026; opened 24.9.2026, delta 88): up to
+     * ten verified clues about one hidden player, solo, the daily and an async duel. The
+     * member book that stood here (`/tik`) is NOT gone — it is the personal area, reached
+     * from the tab bar as "המנוי שלי". `seeded: false`: the route reads no `?seed=` — solo
+     * is dealt by the server, the daily by the date, a duel by its token.
      */
     number: 10,
-    href: null,
+    href: '/blind-cow',
     title: 'gate.10',
     latin: 'BLIND COW · WEST',
     plate: 'plain',
     stain: 'b',
     seeded: false,
-    playable: false,
-    soon: true,
+    playable: true,
   },
   {
     number: 11,

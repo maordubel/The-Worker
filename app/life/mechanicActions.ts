@@ -9,6 +9,7 @@ import { dealKitRound, type KitPuzzle } from '@/lib/game/kitBuild'
 import { dealChallenge, type Challenge } from '@/lib/game/lineup'
 import { buildRound, type MemoryRound } from '@/lib/game/memory'
 import { pairedRoyalRumbleDrafts, royalRumblePlayerCount, type RoyalRumbleDraft } from '@/lib/game/royal-rumble'
+import { playerShirt, seasonOf, wardrobe, type ShirtLook, type Wardrobe } from '@/lib/kit/playerShirt'
 import { homeKits } from '@/lib/kit/seasons'
 import { DEFAULT_SPEC } from '@/lib/kit/spec'
 import { KIT_OPTIONS, MEMORY_PAIRS, type MechanicWindow } from '@/lib/mechanics/types'
@@ -40,11 +41,20 @@ function cut(window: MechanicWindow | null | undefined): MechanicWindow | null {
 
 const seedOf = (seed: number) => (Number.isFinite(seed) ? Math.abs(Math.round(seed)) % 2147483000 : 1)
 
-/** the café argument and the schoolyard bet: one verified eleven, the match the life pinned */
-export async function dealLifeLineup(seed: number, window: MechanicWindow): Promise<Challenge | null> {
+/**
+ * the café argument and the schoolyard bet: one verified eleven, the match the life pinned —
+ * with that night's REAL shirt (delta 88), the same one on every locker, as on the gate
+ */
+export async function dealLifeLineup(
+  seed: number,
+  window: MechanicWindow,
+): Promise<(Challenge & { look: ShirtLook | null }) | null> {
   const w = cut(window)
   if (!w?.pin) return null
-  return dealChallenge(seedOf(seed), 0, { before: w.before, pin: w.pin })
+  const challenge = dealChallenge(seedOf(seed), 0, { before: w.before, pin: w.pin })
+  if (!challenge) return null
+  const season = challenge.intro.season || challenge.kitSeason
+  return { ...challenge, look: season ? playerShirt(null, { season }) : null }
 }
 
 /** the shop order: one shirt of a season before the year, three to five choices a step by age */
@@ -62,12 +72,26 @@ export async function dealLifeMemory(seed: number, window: MechanicWindow): Prom
   return round.pairs.length >= 3 ? round : null
 }
 
-/** the parliament: the one goal the life pinned, as goal one of a run — the gate's own pin */
-export async function dealLifeGoal(seed: number, window: MechanicWindow): Promise<GoalChallenge[]> {
+/**
+ * the parliament: the one goal the life pinned, as goal one of a run — the gate's own pin —
+ * and every one of our men in HIS shirt of that season (delta 88), keyed `index|name` as
+ * `/goal` keys them; the other side's men get none (they are printed in navy)
+ */
+export async function dealLifeGoal(
+  seed: number,
+  window: MechanicWindow,
+): Promise<{ goals: GoalChallenge[]; shirts: Wardrobe }> {
   const w = cut(window)
-  if (!w?.pin) return []
+  const none = { goals: [], shirts: { shirts: [], by: {} } }
+  if (!w?.pin) return none
   const [first] = dealRun(seedOf(seed), 0, w.pin)
-  return first && first.goalId === w.pin ? [first] : []
+  if (!first || first.goalId !== w.pin) return none
+  const shirts = wardrobe(
+    first.pool
+      .filter((name) => !first.opponents.includes(name))
+      .map((name) => ({ key: `0|${name}`, player: name, season: first.seasonLabel })),
+  )
+  return { goals: [first], shirts }
 }
 
 export type LifeRumble = {
@@ -75,6 +99,8 @@ export type LifeRumble = {
   shuffleDraft: RoyalRumbleDraft
   playerCount: number
   kits: Array<{ seasonLabel: string; spec: ReturnType<typeof homeKits>[number]['spec'] }>
+  /** the dealt men's REAL shirts, from before the year (delta 88) — only the 30 on the cards */
+  looks: Wardrobe
 }
 
 /** Ofir's pack: both drafts over the men of the life's years */
@@ -99,7 +125,9 @@ export async function dealLifeRumble(seed: number, window: MechanicWindow): Prom
   const kits = homeKits()
     .filter(({ seasonLabel }) => Number(seasonLabel.slice(0, 4)) < w.before)
     .map(({ seasonLabel, spec }) => ({ seasonLabel, spec }))
-  return { draft, shuffleDraft, playerCount: royalRumblePlayerCount(), kits }
+  const dealt = [...draft.slots, ...shuffleDraft.slots].flatMap((slot) => slot.offers)
+  const looks = wardrobe(dealt.map((offer) => ({ key: offer.slug, player: offer.slug, before: w.before })))
+  return { draft, shuffleDraft, playerCount: royalRumblePlayerCount(), kits, looks }
 }
 
 export type LifeWall = ReturnType<typeof dealQueue> & { rosterSize: number }
@@ -113,8 +141,11 @@ export async function dealLifeWall(seed: number, window: MechanicWindow): Promis
   return { ...queue, rosterSize: rosterSize() }
 }
 
-/** the ticket office and the living room: the men who had worn the shirt before the year */
-export async function dealLifeRoster(window: MechanicWindow) {
+/**
+ * the ticket office and the living room: the men who had worn the shirt before the year.
+ * `withShirts` (the living room's XI only — a poll draws no shirts) adds the wardrobe.
+ */
+export async function dealLifeRoster(window: MechanicWindow, withShirts = false) {
   const w = cut(window)
   if (!w) return null
   const whole = rosterIndex({ before: w.before })
@@ -150,11 +181,21 @@ export async function dealLifeRoster(window: MechanicWindow) {
     if (versions[slug]?.some((version) => version.id === id)) defaultVersion[slug] = id
   }
   const shirts = { ...board, versions, bySlug, defaultVersion }
+  // every man's REAL shirt as the life's year knew him (delta 88): a season begun before it
+  const rows: Array<{ key: string; player: string; season?: string; before: number }> = []
+  for (const entry of withShirts === true ? whole.all : []) {
+    const player = entry.id ?? entry.slug
+    rows.push({ key: entry.slug, player, before })
+    for (const version of versions[entry.slug] ?? []) {
+      rows.push({ key: `${entry.slug}@${version.id}`, player, season: version.seasonLabel ?? seasonOf(version.fromYear), before })
+    }
+  }
   // the club's home shirt of the last season before the year — the number's shirt back
   const home = homeKits().find(({ seasonLabel }) => Number(seasonLabel.slice(0, 4)) < w.before)
   return {
     roster,
     shirts,
+    wardrobe: withShirts === true ? wardrobe(rows) : undefined,
     formations: formationList(),
     slugAliases: pickerRoster().slugAliases,
     homeShirt: home?.spec ?? DEFAULT_SPEC,

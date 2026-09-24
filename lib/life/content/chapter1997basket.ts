@@ -3,7 +3,8 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation } from './script'
+import { CRATES_1997 } from './storyChores'
 
 /**
  * B7 · "גם האולם יכול לרדת" · 1996/97 – 1997/98 — the hall goes down while the ground
@@ -80,6 +81,15 @@ export const BEATS_HALL: Beat[] = [
       { a: 'talk', conversation: 'h1-corner' },
     ],
   },
+  /** back from the crates: the corner asks its question again, now that he has carried */
+  {
+    id: 'h1-after-crates',
+    at: 'ussishkin-outside',
+    trigger: 'enter',
+    when: { flag: CRATES_1997, none: [{ flag: 'h1:decided' }, { flag: 'h1:asked-after' }] },
+    delayMs: 500,
+    do: [{ a: 'flag', flag: 'h1:asked-after' }, { a: 'talk', conversation: 'h1-corner' }],
+  },
   {
     id: 'h1-hall',
     at: 'ussishkin-hall',
@@ -92,6 +102,18 @@ export const BEATS_HALL: Beat[] = [
       { a: 'card', titleHe: '27.3.1997', subHe: 'אוסישקין · נשארים בחיים', ms: 2400 },
       { a: 'talk', conversation: 'h1-chain' },
     ],
+  },
+  /**
+   * (V3 recovery) the parallel result is asked until it is answered: `h1-hall` raises
+   * `h1:decided` before it opens `h1-chain`, so a box walked out of used to leave the night
+   * with no way to `h1:chain-complete`. This beat stays armed while the hall night is open.
+   */
+  {
+    id: 'h1-chain-again',
+    trigger: 'clock',
+    when: { flag: 'h1:hall', none: [{ flag: 'h1:chain-complete' }, { flag: H2 }] },
+    delayMs: 600,
+    do: [{ a: 'talk', conversation: 'h1-chain' }],
   },
   {
     id: 'h1-football',
@@ -123,11 +145,26 @@ export const BEATS_HALL: Beat[] = [
   },
 ]
 
+/** ללכת לאבא — the same answer before the crates and after them */
+const FOOTBALL_1997: ChoiceDef['then'] = [{ e: 'flag', flag: 'h1:decided' }, { e: 'flag', flag: 'h1:football' }, { e: 'flag', flag: 'life:hall:football-night' }, { e: 'rel', who: 'shachor', axis: 'trust', delta: -5 }, { e: 'remember', who: 'shachor', eventId: 'left-relegation-night-1997', significance: 'major' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 4 }, { e: 'time', minutes: 40 }]
+
 export const CONVERSATIONS_HALL: Conversation[] = [
   {
     id: 'h1-corner',
     nameHe: null,
     branches: [
+      /** after the crates — the choice is the same, and now he has worked for one side of it */
+      {
+        when: { flag: CRATES_1997 },
+        lines: [
+          { who: 'שחור', text: 'עוד אחד. (הוא לא אומר תודה. הוא מחזיק את הדלת פתוחה.)' },
+          { who: 'לימור', text: 'שמונה. אבא שלך בשער 7, והוא מחכה.' },
+        ],
+        choices: [
+          { id: 'inside', text: 'להישאר. פנימה, לאולם.', then: [{ e: 'redheart', key: 'basketballLove', delta: 2 }, { e: 'travel', to: 'ussishkin-hall', spawn: 'fromOut' }] },
+          { id: 'football', text: 'להניח את הידיים. ללכת לאבא.', then: FOOTBALL_1997 },
+        ],
+      },
       {
         lines: [
           { who: null, text: 'שחור ליד שני ארגזים. לימור עם פנקס. פרדי בחליפה, מדבר עם מישהו בטלפון נייד בגודל של לבנה.' },
@@ -136,8 +173,15 @@ export const CONVERSATIONS_HALL: Conversation[] = [
           { who: null, text: 'שמונה. בשני המקומות.' },
         ],
         choices: [
-          { id: 'crates', text: 'לסחוב את הארגזים. להישאר באולם.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'remember', who: 'shachor', eventId: 'crates-relegation-1997', significance: 'major' }, { e: 'energy', delta: -12 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 4 }, { e: 'redheart', key: 'basketballLove', delta: 4 }, { e: 'flag', flag: 'h1:crates' }, { e: 'toast', text: 'לארגז השני חסרה ידית. שחור לא אמר תודה — אמר "עוד אחד".', tone: 'plain' }] },
-          { id: 'football', text: 'להתנצל. ללכת לאבא.', then: [{ e: 'flag', flag: 'h1:decided' }, { e: 'flag', flag: 'h1:football' }, { e: 'flag', flag: 'life:hall:football-night' }, { e: 'rel', who: 'shachor', axis: 'trust', delta: -5 }, { e: 'remember', who: 'shachor', eventId: 'left-relegation-night-1997', significance: 'major' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 4 }, { e: 'time', minutes: 40 }] },
+          /**
+           * (Director V3 §10, 24.9.2026) "לסחוב את הארגזים" is carried now, not chosen: the
+           * answer commits (`h1:crates`, Kobi waiting at eight, Shachor remembering), and
+           * the two crates are `ChoreScene` — one at a time, to the hall door, and it can be
+           * put down halfway (`content/storyChores.ts`). The hall-or-father choice comes
+           * AFTER the work, in `h1-corner`'s first branch, so it costs what it should.
+           */
+          { id: 'crates', text: 'לסחוב את הארגזים.', then: [{ e: 'flag', flag: 'h1:crates' }, { e: 'remember', who: 'shachor', eventId: 'crates-relegation-1997', significance: 'major' }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 4 }, { e: 'minigame', id: 'chore:story:crates-97' }] },
+          { id: 'football', text: 'להתנצל. ללכת לאבא.', then: FOOTBALL_1997 },
           { id: 'freddy', text: 'לשאול את פרדי מה קורה עם הכסף.', then: [{ e: 'goto', node: 'h1-freddy' }] },
         ],
       },

@@ -33,6 +33,7 @@ export function ArchiveDrawer({
   onReact,
   onRabbit,
   onSearch,
+  report,
 }: {
   detail: EntityDetail
   saved: boolean
@@ -45,6 +46,7 @@ export function ArchiveDrawer({
   onReact: (code: string) => void
   onRabbit: () => void
   onSearch: () => void
+  report?: ReactNode
 }) {
   const ref = useDialog<HTMLDivElement>(onClose)
   const { card } = detail
@@ -209,6 +211,7 @@ export function ArchiveDrawer({
               <SourceNote />
             </p>
           )}
+          {report && <div className="md:hidden">{report}</div>}
         </div>
 
         {/* the foot: keep, go deeper, or look everywhere */}

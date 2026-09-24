@@ -22,15 +22,16 @@ export function kobisShare(picks: readonly RosterEntry[]): number {
 }
 
 export default function LifeXI({ request, onResult }: ActivityBoardProps) {
-  const deal = useDeal(() => dealLifeRoster(request.window))
+  const deal = useDeal(() => dealLifeRoster(request.window, true))
   if (deal.state === 'loading') return <Waiting />
   if (deal.state === 'empty') return <Nothing onLeave={() => onResult({ completed: false, score: 0 })} />
-  const { roster, shirts, formations, slugAliases } = deal.data
+  const { roster, shirts, wardrobe, formations, slugAliases } = deal.data
   return (
     <XIBuilder
       formations={formations}
       roster={roster}
       shirts={shirts}
+      wardrobe={wardrobe}
       slugAliases={slugAliases}
       embedded={{
         doneLabel: backLabel(request.activity),

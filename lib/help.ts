@@ -93,10 +93,10 @@ const GATE_HELP: readonly GateHelp[] = [
     timeKey: 'help.archive.dock.time',
   },
   {
-    gateNumber: 10, // /tik — כרטיס פועל
-    whatKey: 'help.tik.card.what',
-    scoreKey: 'help.tik.card.score',
-    timeKey: 'help.tik.card.time',
+    gateNumber: 10, // /blind-cow — פרה עיוורת (24.9.2026; the member book /tik is off the wall)
+    whatKey: 'help.blindcow.what',
+    scoreKey: 'help.blindcow.score',
+    timeKey: 'help.blindcow.time',
   },
   {
     gateNumber: 11, // /derby — משחק השנאה

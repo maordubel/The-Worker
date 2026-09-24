@@ -5,11 +5,13 @@ import { NamePlate, OUTFIELD_KIT, PlayerFigure } from '@/components/press/Player
 import { PressPitch } from '@/components/press/PressPitch'
 import { NEUTRAL_SHIRT_SPEC } from '@/components/roster/RosterSheet'
 import { ShirtToken } from '@/components/stage/ShirtToken'
+import { PlayerShirt } from '@/components/stage/PlayerShirt'
 import { dropZone, useDragSource } from '@/components/stage/useDrag'
 import { Num } from '@/components/ui/Num'
 import { splitName } from '@/lib/game/roster-search'
 import { LINES, type Line, type PlacementStatus } from '@/lib/game/lineup-sheet'
 import type { KitSpec } from '@/lib/kit/spec'
+import type { ShirtLook } from '@/lib/kit/playerShirt'
 import { t, type MessageKey } from '@/lib/i18n'
 
 /**
@@ -63,6 +65,7 @@ const MARK_STYLE: Record<PlacementStatus, string> = {
 export function BandPitch({
   men,
   kit,
+  look = null,
   active = null,
   armed = false,
   armedLine = null,
@@ -71,6 +74,8 @@ export function BandPitch({
 }: {
   men: readonly BandMan[]
   kit: KitSpec | null
+  /** the match season's REAL shirt (delta 88) — the photograph wins over `kit` */
+  look?: ShirtLook | null
   /** the selected man, if any */
   active?: string | null
   /** a locker is held: every band is a target */
@@ -120,6 +125,7 @@ export function BandPitch({
                   key={`${man.ghost ? 'ghost-' : ''}${man.playerId}`}
                   man={man}
                   kit={kit}
+                  look={look}
                   tight={tight}
                   active={active === man.playerId}
                   onTap={onMan}
@@ -136,12 +142,14 @@ export function BandPitch({
 function Man({
   man,
   kit,
+  look,
   tight,
   active,
   onTap,
 }: {
   man: BandMan
   kit: KitSpec | null
+  look: ShirtLook | null
   tight: boolean
   active: boolean
   onTap?: (playerId: string) => void
@@ -158,6 +166,8 @@ function Man({
           <span aria-hidden="true" className="font-poster text-[14px] leading-none text-press-ink/70">
             ?
           </span>
+        ) : look ? (
+          <PlayerShirt look={look} eager className={tight ? 'h-7 w-7' : 'h-9 w-9'} />
         ) : kit ? (
           <KitShirt spec={kit} density="mini" className={tight ? 'h-7 w-6' : 'h-9 w-8'} />
         ) : (
@@ -213,6 +223,8 @@ function Man({
 export function BandPitchStage({
   men,
   kit,
+  look = null,
+  target = null,
   active = null,
   onBand,
   onMan,
@@ -220,6 +232,10 @@ export function BandPitchStage({
 }: {
   men: readonly BandMan[]
   kit: KitSpec | null
+  /** the match season's REAL shirt (delta 88, `lib/kit/playerShirt.ts`) — wins over `kit` */
+  look?: ShirtLook | null
+  /** the band the picking rail is aimed at — outlined, with a dashed shirt where he will stand */
+  target?: Line | null
   active?: string | null
   onBand: (line: Line) => void
   onMan: (playerId: string) => void
@@ -231,6 +247,7 @@ export function BandPitchStage({
       {[...LINES].reverse().map((line) => {
         const band = BAND[line]
         const here = men.filter((man) => man.line === line).sort((a, b) => a.order - b.order)
+        const aimed = target === line
         return (
           <div
             key={line}
@@ -242,9 +259,14 @@ export function BandPitchStage({
               type="button"
               onClick={() => onBand(line)}
               aria-label={t('lineup.zone.placeHere', { line: t(LINE_LABEL[line]) })}
-              className="absolute inset-0 border-2 border-transparent"
+              aria-pressed={aimed}
+              className={`absolute inset-0 border-2 ${aimed ? 'border-dashed border-press-paper' : 'border-transparent'}`}
             />
-            <span className="pointer-events-none absolute start-1 top-1 z-[1] flex items-center gap-1 bg-press-ink px-1.5 py-[1px] font-body text-[10px] font-extrabold leading-tight text-press-paper">
+            <span
+              className={`pointer-events-none absolute start-1 top-1 z-[1] flex items-center gap-1 px-1.5 py-[1px] font-body text-[10px] font-extrabold leading-tight ${
+                aimed ? 'bg-press-paper text-press-ink' : 'bg-press-ink text-press-paper'
+              }`}
+            >
               {t(LINE_LABEL[line])}
               <span className="font-mono text-[10px] tabular-nums">
                 <Num>{String(here.length)}</Num>
@@ -256,11 +278,27 @@ export function BandPitchStage({
                   key={man.playerId}
                   man={man}
                   kit={kit}
+                  look={look}
                   active={active === man.playerId}
                   onTap={onMan}
                   onDrop={onDrop}
                 />
               ))}
+              {aimed && (
+                // where the next man will stand — a dashed shirt, pulsing by transform only
+                <svg
+                  viewBox="0 0 60 72"
+                  aria-hidden="true"
+                  className="block w-[9cqw] max-w-[44px] shrink-0 animate-fx-wobble motion-reduce:animate-none"
+                  fill="none"
+                  stroke="rgb(var(--p-paper))"
+                  strokeWidth="2.6"
+                  strokeDasharray="4 3"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 6 L6 16 L12 26 L18 22 L18 66 L42 66 L42 22 L48 26 L54 16 L40 6 Q30 13 20 6 Z" />
+                </svg>
+              )}
             </div>
           </div>
         )
@@ -272,12 +310,14 @@ export function BandPitchStage({
 function ManToken({
   man,
   kit,
+  look,
   active,
   onTap,
   onDrop,
 }: {
   man: BandMan
   kit: KitSpec | null
+  look: ShirtLook | null
   active: boolean
   onTap: (playerId: string) => void
   onDrop: (line: Line, payload: string) => void
@@ -300,6 +340,7 @@ function ManToken({
       className="pointer-events-auto min-h-tap min-w-0 shrink-0 transition-transform duration-press ease-stamp active:scale-[.94] motion-reduce:transition-none"
     >
       <ShirtToken
+        look={look}
         spec={kit ?? NEUTRAL_SHIRT_SPEC}
         name={family}
         sub={man.locked ? t('lineup.stage.locked') : undefined}

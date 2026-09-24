@@ -4,9 +4,11 @@ import { useState } from 'react'
 
 import type { RoyalRumbleDraft } from '@/lib/game/royal-rumble'
 import type { KitSpec } from '@/lib/kit/spec'
+import type { Wardrobe } from '@/lib/kit/playerShirt'
 import { t } from '@/lib/royal-rumble/i18n'
 import { RoyalRumbleLiveRun } from './RoyalRumbleLiveRun'
 import { RoyalRumbleRun } from './RoyalRumbleRun'
+import { RumbleLooks } from './RumbleShirt'
 
 type EraKit = { seasonLabel: string; spec: KitSpec }
 
@@ -17,6 +19,7 @@ export function RoyalRumbleMode({
   cursor,
   playerCount,
   kits,
+  looks,
   initialRoomCode,
 }: {
   draft: RoyalRumbleDraft
@@ -25,6 +28,8 @@ export function RoyalRumbleMode({
   cursor: number
   playerCount: number
   kits: EraKit[]
+  /** every man's real shirt (`lib/kit/playerShirt.ts`) */
+  looks?: Wardrobe
   initialRoomCode?: string
 }) {
   const [mode, setMode] = useState<'solo' | 'live'>(initialRoomCode ? 'live' : 'solo')
@@ -62,16 +67,19 @@ export function RoyalRumbleMode({
           cursor={cursor}
           playerCount={playerCount}
           kits={kits}
+          looks={looks}
         />
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto md:mx-auto md:max-w-5xl md:flex-none md:overflow-visible md:pb-8">
-          <RoyalRumbleLiveRun
-            draft={draft}
-            shuffleDraft={shuffleDraft}
-            matchSeed={matchSeed}
-            kits={kits}
-            initialRoomCode={initialRoomCode}
-          />
+          <RumbleLooks looks={looks}>
+            <RoyalRumbleLiveRun
+              draft={draft}
+              shuffleDraft={shuffleDraft}
+              matchSeed={matchSeed}
+              kits={kits}
+              initialRoomCode={initialRoomCode}
+            />
+          </RumbleLooks>
         </div>
       )}
     </div>

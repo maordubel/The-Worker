@@ -7724,7 +7724,13 @@
       "sport": "football",
       "naturalKey": "football|1967/68|גביע-אלופות-אסיה|הפועל-תל-אביב|סלנגור|גמר",
       "aliases": [],
-      "mintedOn": "2026-09-21"
+      "mintedOn": "2026-09-21",
+      "dialects": [
+        {
+          "dialect": "timeline",
+          "key": "match:1967/68:הפועל-תל-אביב:סלנגור:1967-12-19"
+        }
+      ]
     },
     {
       "id": "m_26b126a4b483",

@@ -174,7 +174,8 @@ export const ENDINGS_1990: Record<string, EndingCard> = {
     memoryItem: 'newspaper',
     after: {
       fromArt: 'ofir90',
-      toArt: 'ofir90-smoke',
+      // (24.9.2026) Ofir grown — `ofir90-smoke` was another man (`LEGACY_POSE`)
+      toArt: 'ofir40-3q',
       lineHe: 'אופיר היה שם. הוא יספר לך על זה בבית הספר ביום ראשון, ולא ירחם.',
     },
   },

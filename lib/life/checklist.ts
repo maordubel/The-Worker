@@ -31,8 +31,9 @@ const ANY = (...flags: string[]): Condition => ({ any: flags.map((flag) => ({ fl
 
 export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   '1986': [
-    { id: 'key', textHe: 'המפתח. במגירה.', doneWhen: { hasItem: 'house-key' } },
-    { id: 'dad', textHe: 'לדבר עם אבא.', revealWhen: { hasItem: 'house-key' }, doneWhen: F('knows:match') },
+    // (Director V3 §11, 24.9.2026) the key is no longer the first thing the day asks for:
+    // it is in the drawer for whoever opens it, and the door does not need it
+    { id: 'dad', textHe: 'לדבר עם אבא.', doneWhen: F('knows:match') },
     { id: 'east', textHe: 'לרחוב. אחרי האנשים, מזרחה.', revealWhen: F('kobi:left'), doneWhen: ANY('entry:granted', 'entry:ticket') },
     { id: 'gate', textHe: 'שער 7. להיכנס.', revealWhen: F('kobi:left'), doneWhen: F('entry:granted') },
     { id: 'match', textHe: 'המשחק.', revealWhen: F('entry:granted'), doneWhen: F('match:over') },
@@ -84,10 +85,11 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'facts', textHe: 'הקיוסק. העובדות.', revealWhen: F('life:sinai:d2'), doneWhen: F('s2:done') },
   ],
   '1996-army': [
-    { id: 'pack', textHe: 'לארוז. להיפרד.', doneWhen: F('a1:packed') },
-    { id: 'gate', textHe: 'שער 7 או שער 5. לבחור איפה עומדים.', revealWhen: F('life:army:d2'), doneWhen: F('a2:chose') },
-    { id: 'bus', textHe: 'האוטובוס ברציף. להסתכל טוב.', revealWhen: F('life:army:d3'), doneWhen: F('a3:decided') },
+    { id: 'pack', textHe: 'לארוז את התיק. להיפרד מאמא.', doneWhen: F('a1:packed') },
+    { id: 'gate', textHe: 'שער 7, שער 5 — או הגדר באמצע. לעמוד איפשהו.', revealWhen: F('life:army:d2'), doneWhen: F('a2:chose') },
+    { id: 'bus', textHe: 'האוטובוס ברציף, הדלת פתוחה. לעלות — או לא.', revealWhen: F('life:army:d3'), doneWhen: F('a3:decided') },
     { id: 'road', textHe: 'האוטו של לירון.', revealWhen: F('life:army:d4'), doneWhen: F('a4:road') },
+    { id: 'journeys', textHe: 'שתי נסיעות. אפשר אחת.', revealWhen: F('life:army:d5'), doneWhen: F('a5:done') },
   ],
   '1997-basket': [
     { id: 'corner', textHe: 'שחור, לימור, פרדי. בפינה.', doneWhen: ANY('h1:crates', 'h1:decided') },

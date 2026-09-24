@@ -82,6 +82,8 @@ export type MatchRecord = {
   confidence: number
   /** why two natural keys share this id — an owner decision */
   mergeNote: string | null
+  /** present only on a fixture that was never played on a pitch (a walkover / technical result) */
+  notPlayed?: { reason: string; sourceIds: SourceId[] }
 }
 
 export type ActorKind = 'player' | 'opponent' | 'unnamed'
@@ -173,6 +175,8 @@ export type UnresolvedItem =
   | { kind: 'suspected-duplicate'; a: string; b: string; reason: string }
   | { kind: 'lineup'; key: string; reason: string }
   | { kind: 'scorer-name'; nameHe: string; count: number; reason: string }
+  /** a row of a secondary source (`intl-redfans-2026-09-24.json`) that joins no canonical match */
+  | { kind: 'secondary-row'; file: string; key: string; reason: string }
 
 export type MatchMasterFile = {
   schemaVersion: 1

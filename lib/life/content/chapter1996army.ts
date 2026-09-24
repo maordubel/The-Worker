@@ -3,7 +3,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation } from './script'
 
 /**
  * הקצב — נושא אחד שעובר שלושה פרקים: נוצר כאן, חוזר בקיוסק ב-1999, ונשמע מהיציע ב-2000.
@@ -34,6 +34,25 @@ const ARMY_PROMISE_DONE = 'promise:army:kept'
  * deadline, a bus that would make it, the wrong supporters on it, a refusal, two hours
  * late. Everything around it is fiction and says so by being a choice. **No amounts, no
  * scores, no names of buyers or opponents in any line.** The archive holds the season.
+ *
+ * ── Director V3 (24.9.2026) — this file is the ONLY source of 1996 again ─────────────
+ *
+ * On 23.9.2026 a compact "Director's Cut" (`chapter1996director.ts`) replaced this unit in
+ * `era.ts` and `dialogue.ts`, and the world kept pointing at conversations only this file
+ * had — Kobi and Barry at gate seven, Asaf under the stand, the bus — so a player could
+ * see the task, see the people, and have no way on. The Director file is gone; what it got
+ * right is folded in here:
+ *
+ *   · the first Saturday in uniform is **23.11.1996** (16.11 was an away fixture);
+ *   · **no passive bus wait** — the bus is at the platform the moment the day opens;
+ *   · **gate five is a place you walk to**, not a button.
+ *
+ * And the V3 contract on top of it: SEE → MOVE → DO → DECIDE → CONSEQUENCE → words. The bag
+ * is packed with the hands (three things in the living room), the terrace is chosen by
+ * where you stand (Kobi, the fence between five and seven, or the stand itself), and the
+ * bus is three things in the station — its door, the station door, the bench — and never
+ * a menu of three sentences. No mandatory choice lives only inside a one-shot beat: close
+ * any box, reload, walk away, and the world still holds a way to finish the day.
  */
 
 export const A1 = 'life:army:d1'
@@ -43,7 +62,22 @@ export const A4 = 'life:army:d4'
 export const A5 = 'life:army:d5'
 
 export const BUS_DEADLINE = at(6, 30)
-export const BUS_AT = at(5, 55)
+/**
+ * The bus is already at the platform when the playable beat starts (Director V3 §8). The
+ * deadline makes the pressure; waiting for a prop to spawn is not gameplay. The day opens
+ * on this minute, and `a3-open` raises `a3:bus-here` on arrival.
+ */
+export const BUS_AT = at(5, 52)
+/**
+ * When the bus goes without him if he does nothing at all — not a timer to beat, the
+ * consequence of standing still. About twenty seconds of a clock that stops for every box.
+ */
+export const BUS_GOES = BUS_AT + 14
+
+/** the bag in the living room — three things done with the hands before Rachel's last word */
+export const PACK_SOCKS = 'a1:pack:socks'
+export const PACK_RADIO = 'a1:pack:radio'
+export const PACK_BAG = 'a1:bag'
 
 export const PORTRAIT_ARMY: Record<string, string> = {
   'פוגי': 'faceHero80',
@@ -63,6 +97,8 @@ export const PORTRAIT_ARMY: Record<string, string> = {
   'אוהד': 'faceSupporter',
   'סדרן': 'faceUsher',
   'קופאית': 'faceWoman',
+  // (Director fold-in) the soldier of the street encounter (`96-soldier-cigarette`)
+  'חייל': 'faceSupporterB',
   // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
   // עומדים שם בכל פרק, ולכן כל מפה צריכה את הפלייטים שלהם.
   'המוכר': 'faceVendor',
@@ -72,13 +108,20 @@ export const PORTRAIT_ARMY: Record<string, string> = {
 export function objectiveArmy(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags[A5]) return state.flags['a5:done'] ? null : 'שתי נסיעות, ואפשר אחת. הקיוסק.'
-  if (state.flags[A4]) return state.flags['a4:road'] ? null : 'שבת של חורף. הקיוסק, ואוטו של לירון.'
-  if (state.flags[A3]) return state.flags['a3:decided'] ? null : 'שש וחצי בבסיס. האוטובוס ברציף.'
-  if (state.flags[A2]) {
-    if (state.gate.identity !== 'gate7' || state.flags['a2:chose']) return null
-    return sceneId === 'gate5' ? 'שער 5. תחליט איפה אתה עומד.' : 'שבת. שער 7 — או שער 5.'
+  if (state.flags[A4]) {
+    if (state.flags['a4:drive'] && !state.flags['a4:arrived']) return 'לירון מחכה באוטו.'
+    return state.flags['a4:road'] ? null : 'שבת של חורף. הקיוסק, ואוטו של לירון.'
   }
-  return state.flags['a1:packed'] ? 'עוד ערב אחד בבית.' : 'מחר בבוקר — הצבא.'
+  if (state.flags[A3]) return state.flags['a3:decided'] ? null : 'שש וחצי בבסיס. האוטובוס ברציף, הדלת פתוחה.'
+  if (state.flags[A2]) {
+    // (V3) whatever gate he stood at last year, the question is asked again in uniform —
+    // the old guard `gate.identity !== 'gate7'` hid it from anybody who was not at seven
+    if (state.flags['a2:chose']) return null
+    return sceneId === 'gate5' ? 'שער 5. להישאר פה — או לחזור לקובי.' : 'שער 7 עם אבא, שער 5 מתחת ליציע — או הגדר באמצע.'
+  }
+  if (state.flags['a1:packed']) return null
+  if (state.flags[PACK_BAG]) return 'התיק סגור. אמא מחכה.'
+  return sceneId === 'home' ? 'לארוז: הגרביים, הרדיו — ולסגור את התיק.' : 'הביתה. אמא אורזת לך תיק.'
 }
 
 export const ENDINGS_ARMY: Record<string, EndingCard> = {
@@ -89,7 +132,9 @@ export const ENDINGS_ARMY: Record<string, EndingCard> = {
       'חזרת לבסיס בזמן, או לא. עמדת בשער 7, או בשער 5, או בפינה שאין לה שם. המועדון נאבק להישאר בליגה, עבר לידיים חדשות, ומספר שבע כבר לא עומד על הקו. בחוץ אביב. בפנים עוד לא.',
     memoryHe: 'טופס חופשה, מקופל. השעה שכתובה בו והשעה שהגעת בה הן לא אותה שעה.',
     memoryItem: 'folded-paper',
-    presence: 'radio',
+    // (Director fold-in) the winter he went back to base and stayed there: 'army', which
+    // is what this card describes, not the radio of a match he was not at
+    presence: 'army',
   },
   road: {
     id: 'road',
@@ -115,20 +160,43 @@ export const BEATS_ARMY: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'flag', flag: A1 },
-      { a: 'lines', lines: [{ who: null, text: 'נובמבר. שמונה־עשרה. מחר בבוקר אוטובוס, ומחרתיים כבר יגידו לך מתי לקום.' }, { who: null, text: 'אותו רחוב, אותו ריח של שמן עמוק מהפינה. רק שהערב אתה סופר אותו במקום ללכת בו.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'נובמבר. שמונה־עשרה. מחר בבוקר אוטובוס, ומחרתיים כבר יגידו לך מתי לקום.' }, { who: null, text: 'אותו רחוב, אותו ריח של שמן עמוק מהפינה. רק שהערב אתה סופר אותו במקום ללכת בו.' }, { who: null, text: 'בבית מחכה תיק פתוח. אמא כבר הכניסה לתוכו יותר גרביים ממה שאדם אחד יכול ללבוש.' }] },
     ],
+  },
+  /**
+   * הבית — Rachel says what is missing the moment he walks in (Director fold-in: the eve
+   * is lived at home, not described on the pavement). The packing itself is three things
+   * in the room (`scenes.ts`, `pack-*`), and her `rachel-army` is also the actor standing
+   * there — so closing this box costs nothing: she is still in the room, and says it again.
+   */
+  {
+    id: 'a1-home',
+    at: 'home',
+    trigger: 'enter',
+    when: { flag: A1, none: [{ flag: 'a1:packed' }, { flag: 'a1:told' }, { flag: A2 }] },
+    delayMs: 350,
+    // `a1:told` first: a box he closes is not replayed at him — she is standing right there
+    do: [{ a: 'flag', flag: 'a1:told' }, { a: 'talk', conversation: 'rachel-army' }],
   },
   {
     id: 'a1-night',
     trigger: 'clock',
-    when: { flag: A1, afterMinute: at(21, 0), none: [{ flag: A2 }] },
+    // (V3) packing and the goodbye ARE the action — no clock to burn after them
+    when: { all: [{ flag: A1 }, { flag: 'a1:packed' }], none: [{ flag: A2 }] },
     do: [
-      { a: 'card', titleHe: 'שבת', subHe: 'הראשונה שאתה בא אליה במדים', ms: 2600 },
-      { a: 'events', events: DAY(A2, 1996, 6, at(14, 30), '16 בנובמבר 1996') },
+      { a: 'card', titleHe: '23 בנובמבר 1996', subHe: 'השבת הראשונה שאתה בא אליה במדים', ms: 2600 },
+      { a: 'events', events: DAY(A2, 1996, 6, at(14, 30), '23 בנובמבר 1996') },
       { a: 'travel', to: 'bloomfield-outside', spawn: 'start' },
     ],
   },
   // ---------------------------------------------------------------- A2 · the gates ---
+  /**
+   * The arrival has no choices, on purpose (V3 §7): Kobi calls from seven, the drum is
+   * heard from five, and control comes back. The decision is WHERE HE WALKS — to Kobi
+   * (`kobi-gate7`), through the door under the stand (`gate5` → `asaf-gate5`), or to the
+   * fence between them (`a2-between`). All three are standing in the world for as long as
+   * `a2:chose` is down, so a closed box, a reload or a walk back is never a dead end.
+   */
   {
     id: 'a2-open',
     at: 'bloomfield-outside',
@@ -140,39 +208,85 @@ export const BEATS_ARMY: Beat[] = [
       { a: 'talk', conversation: 'a2-arrive' },
     ],
   },
+  /** under the stand, the first time — the room is described before anybody speaks */
+  {
+    id: 'a2-gate5',
+    at: 'gate5',
+    trigger: 'enter',
+    when: { flag: A2, none: [{ flag: 'a2:gate5-seen' }, { flag: 'a2:chose' }] },
+    delayMs: 350,
+    do: [
+      { a: 'flag', flag: 'a2:gate5-seen' },
+      { a: 'sfx', key: 'darbuka-three-two', level: 0.5 },
+      { a: 'lines', lines: [
+        { who: null, text: 'מתחת ליציע יש פחות מקום ממה שדמיינת. בד מקופל, תוף, כמה אנשים שמכירים אחד את השני בשם.' },
+        { who: 'אסף', text: 'אם באת רק לראות — תראה. אם אתה נשאר, תזיז את התיק מהמעבר.' },
+        { who: 'מלמד', text: 'עזוב אותו. פעם ראשונה. גם אנחנו היינו פעם ראשונה.' },
+      ] },
+    ],
+  },
   {
     id: 'a2-close',
     trigger: 'clock',
     when: { all: [{ flag: A2 }, { flag: 'a2:chose' }], none: [{ flag: A3 }] },
     do: [
-      { a: 'card', titleHe: 'דצמבר', subHe: 'התחנה המרכזית · שש בבוקר', ms: 2600 },
-      { a: 'events', events: DAY(A3, 1996, 0, at(5, 40), 'דצמבר 1996') },
+      { a: 'card', titleHe: 'דצמבר 1996', subHe: 'התחנה המרכזית · לפני הזריחה', ms: 2400 },
+      { a: 'events', events: DAY(A3, 1996, 0, BUS_AT, 'דצמבר 1996') },
       { a: 'travel', to: 'bus-station', spawn: 'start' },
     ],
   },
   // ---------------------------------------------------------------- A3 · the bus ---
+  /**
+   * The bus is THERE (V3 §8) — `a3:bus-here` is raised on arrival, first thing, so a
+   * reload in the middle of the lines still finds the door open. From here the day is
+   * three places in the station: the bus door (`a3-bus`), the door out of the platform
+   * (`a3-walk-away`), and the bench (`a3-bench`); plus the timetable pole for the boy who
+   * runs to find another line (`a3-timetable`).
+   */
   {
     id: 'a3-open',
     at: 'bus-station',
     trigger: 'enter',
     when: { flag: A3, none: [{ flag: 'a3:seen' }] },
-    delayMs: 700,
+    delayMs: 450,
     do: [
       { a: 'flag', flag: 'a3:seen' },
-      { a: 'lines', lines: [{ who: null, text: 'התחנה המרכזית. חמש וארבעים. אוויר של סיגריות ודלק ולחם. בשש וחצי אתה צריך להיות בשער של הבסיס, וזה שעה נסיעה.' }, { who: null, text: 'יש אוטובוס אחד שמגיע בזמן, והוא כבר ברציף. אגד רגיל, קו רגיל — רק שהצדדים שלו צבועים בסמלים של בית"ר ירושלים. בימי משחק הוא מסיע אותם. היום הוא מסיע את כולם.' }] },
+      { a: 'flag', flag: 'a3:bus-here' },
+      { a: 'sfx', key: 'bus-door', level: 0.7 },
+      { a: 'lines', lines: [{ who: null, text: 'התחנה המרכזית. לפני הזריחה. אוויר של סיגריות ודלק ולחם. בשש וחצי אתה צריך להיות בשער של הבסיס.' }, { who: null, text: 'יש אוטובוס אחד שמגיע בזמן, והוא כבר ברציף. אגד רגיל, קו רגיל — רק שהצדדים שלו צבועים בסמלים של בית"ר ירושלים. בימי משחק הוא מסיע אותם. היום הוא מסיע את כולם.' }, { who: null, text: 'הדלת פתוחה. ההחלטה כבר מולך — לא בעוד רבע שעה.' }] },
     ],
   },
+  /**
+   * Old saves only. A save written before 24.9.2026 can stand on this platform without
+   * `a3:bus-here`; new runs raise it on entry, so this is unreachable for them and it is
+   * kept rather than deleted so that an old life is not stranded on an empty platform.
+   */
   {
     id: 'a3-bus-arrives',
     trigger: 'clock',
     when: { flag: A3, afterMinute: BUS_AT, none: [{ flag: 'a3:decided' }, { flag: 'a3:bus-here' }] },
-    do: [{ a: 'flag', flag: 'a3:bus-here' }, { a: 'sfx', key: 'bus-door', level: 0.7 }, { a: 'toast', text: 'הנהג מתניע. הדלת פתוחה. חמש חמישים וחמש.', tone: 'red' }],
+    do: [{ a: 'flag', flag: 'a3:bus-here' }, { a: 'sfx', key: 'bus-door', level: 0.7 }, { a: 'toast', text: 'הנהג מתניע. הדלת פתוחה.', tone: 'red' }],
   },
+  /** standing still is a decision too — the same one the bench makes, only slower */
   {
     id: 'a3-bus-leaves',
     trigger: 'clock',
-    when: { flag: A3, afterMinute: BUS_AT + 8, none: [{ flag: 'a3:decided' }] },
+    when: { flag: A3, afterMinute: BUS_GOES, none: [{ flag: 'a3:decided' }] },
     do: [{ a: 'flag', flag: 'a3:decided' }, { a: 'flag', flag: 'a3:hesitated' }, { a: 'talk', conversation: 'a3-left-behind' }],
+  },
+  /**
+   * The base asks, until he answers (V3 recovery rule). Every answer on the platform chains
+   * into what the morning cost — the commander's "סיבה?", the seat at the back, the other
+   * line — and a box can be walked out of (rule 42). Until 24.9.2026 walking out of that
+   * one left `a3:decided` up, the platform empty and `a3:done` down for ever. Now the
+   * morning comes back to him: a beat whose `when` still holds after it ran is armed again.
+   */
+  {
+    id: 'a3-report',
+    trigger: 'clock',
+    when: { all: [{ flag: A3 }, { flag: 'a3:decided' }], none: [{ flag: 'a3:done' }] },
+    delayMs: 600,
+    do: [{ a: 'talk', conversation: 'a3-report' }],
   },
   {
     id: 'a3-to-a4',
@@ -195,6 +309,22 @@ export const BEATS_ARMY: Beat[] = [
       { a: 'flag', flag: 'a4:seen' },
       { a: 'events', events: [{ t: 'money.changed', agorot: 6000, why: 'משכורת של חייל' }] },
       { a: 'talk', conversation: 'a4-winter' },
+    ],
+  },
+  /**
+   * The winter does not end on the road any more. Until 24.9.2026 `road-back` and Liron's
+   * "stay" both closed the chapter on an ending card, and the fifth day — Maor's two
+   * journeys — could not be reached by anybody. Now both lead here, and the chapter ends
+   * where the two journeys are offered.
+   */
+  {
+    id: 'a4-to-a5',
+    trigger: 'clock',
+    when: { flag: 'a4:done', none: [{ flag: A5 }] },
+    do: [
+      { a: 'card', titleHe: 'חורף 1997', subHe: 'אחרי הצבא ולפני האוטובוס', ms: 2400 },
+      { a: 'events', events: DAY(A5, 1997, 4, at(14, 30), 'חורף 1997') },
+      { a: 'travel', to: 'kiosk', spawn: 'start' },
     ],
   },
 
@@ -222,13 +352,15 @@ export const BEATS_ARMY: Beat[] = [
     id: 'a5-open',
     at: 'kiosk',
     trigger: 'enter',
-    when: { flag: 'a4:done', none: [{ flag: A5 }] },
+    when: { flag: A5, none: [{ flag: 'a5:seen' }] },
     delayMs: 700,
     do: [
-      { a: 'events', events: DAY(A5, 1997, 4, at(14, 30), 'חורף 1997') },
+      { a: 'flag', flag: 'a5:seen' },
       { a: 'lines', lines: [
         { who: null, text: 'אחרי הצבא ולפני האוטובוס. שעתיים בכיס, ארבעים שקל, ושתי שיחות שקורות באותו רגע ליד הדלפק.' },
       ] },
+      // Rafi is also standing at the counter (`rafi-a5`): closing this box loses nothing
+      { a: 'talk', conversation: 'a5-kiosk' },
     ],
   },
   /**
@@ -279,6 +411,46 @@ export const BEATS_ARMY: Beat[] = [
   },
 
 ]
+
+/**
+ * הערב האחרון בבית, וחמש שנים אחרי הערב ההוא באוסישקין.
+ *
+ * הבחירה השלישית קיימת רק למי שרחל **זוכרת** שחזר אחרי השעה (`relationshipMemory`,
+ * ולא דגל — זה דבר שאדם זוכר עליך). זה מה ש-`ACH_REPAIR` חיכה לו: הפרה נרשמה
+ * ב-1991 כראיה, וכאן אפשר לחזור אליה. **התיקון לא מוחק את התקרית** — שתי הראיות
+ * נושאות את אותו נושא ויושבות בפנקס זו ליד זו, וזה בדיוק מה שהפרס של ההישג מתאר.
+ *
+ * (24.9.2026) One list for both states of the closed bag, so the two cannot drift.
+ */
+const RACHEL_ARMY_CHOICES: ChoiceDef[] = [
+  { id: 'repair', text: '"אמא. הערב ההוא באוסישקין, כשחזרתי אחרי השעה."', when: { relationshipMemory: { who: 'rachel', eventId: 'came-home-late-1991' } }, hidden: true, then: [{ e: 'goto', node: 'rachel-army-curfew' }] },
+  { id: 'promise', text: '"לא אעשה שטויות."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'flag', flag: 'promise:rachel-army' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: 3 }] },
+  { id: 'honest', text: '"אני לא מבטיח."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: -1 }, { e: 'personality', key: 'independence', delta: 2 }, { e: 'toast', text: 'היא לא כעסה. היא ידעה.', tone: 'plain' }] },
+]
+
+/**
+ * מתחת ליציע — the four answers to Asaf and Melamed, one list for both ways of meeting them.
+ */
+const ASAF_GATE5_CHOICES: ChoiceDef[] = [
+  { id: 'join', text: '"אני איתכם."', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate5', reason: 'friends' }, { e: 'rel', who: 'asaf', axis: 'trust', delta: 3 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 5 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'remember', who: 'asaf', eventId: 'joined-gate5-1996', significance: 'major' }, { e: 'goto', node: 'a2-after' }] },
+  /**
+   * *"אתה לא יודע עוד מה עשית."* — והשורה הזאת הייתה נכונה גם על הפנקס.
+   *
+   * חייל בן שמונה־עשרה עונה למלמד שלוש-הפסקה-שתיים, מלמד מנגן את זה שוב, וזהו:
+   * דבר קטן שנעשה מתחת ליציע ואי אפשר לדעת מה יהיה איתו. זו **יצירה**, וזה בדיוק
+   * מה ש-`creation_proof` אמור לסמן — לא הרגע שבו מישהו שר אותה, אלא הרגע שבו
+   * היא נוצרה. מה שקורה לה אחר כך הוא שאלה אחרת, והיא נשאלת בקיוסק ב-1999
+   * וברמת גן ב-2000.
+   */
+  { id: 'rhythm', text: 'לענות למלמד: "ככה." (הראשון)', when: { notFlag: 'life:melamed:rhythm' }, hidden: true, then: [{ e: 'sfx', key: 'darbuka-three-two', level: 0.8 }, { e: 'flag', flag: 'life:melamed:rhythm' }, { e: 'rel', who: 'melamed', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:rhythm', subjectHe: RHYTHM_SUBJECT, noteHe: 'שלוש, הפסקה, שתיים. מתחת ליציע, על דרבוקה של מישהו אחר.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'נתן למלמד קצב' }, { e: 'toast', text: 'מלמד ניגן את זה שוב. ושוב. אתה לא יודע עוד מה עשית.', tone: 'plain' }] },
+  { id: 'back', text: '"אני חוזר לאבא."', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate7', reason: 'family' }, { e: 'rel', who: 'asaf', axis: 'distance', delta: 3 }, { e: 'goto', node: 'a2-after' }] },
+  { id: 'neither', text: 'ללכת. לא לפה ולא לשם.', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'outside', reason: 'conflict' }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'goto', node: 'a2-after' }] },
+]
+
+/** לעלות — the effects the "board" button always carried, on the bus door now */
+const A3_BOARD: ChoiceDef['then'] = [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:boarded' }, { e: 'wellbeing', key: 'regret', delta: 8 }, { e: 'redheart', key: 'loyaltyReturn', delta: -3 }, { e: 'personality', key: 'responsibility', delta: 2 }, { e: 'goto', node: 'a3-boarded' }]
+/** לסרב — the oral history's own answer, on the station door */
+const A3_REFUSE: ChoiceDef['then'] = [{ e: 'sfx', key: 'bus-door', level: 0.6, delayMs: 900 }, { e: 'consequence', id: 'a3:refused', text: 'האוטובוס יצא. בלעדיך.', laterText: 'שעתיים איחור. זה יירשם.', afterMinutes: 30 }, { e: 'plate', art: 'armyRoom', titleHe: 'הבסיס', subHe: 'שעתיים אחרי השעה', ms: 2600 }, { e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:refused' }, { e: 'redheart', key: 'loyaltyReturn', delta: 6 }, { e: 'personality', key: 'stubbornness', delta: 4 }, { e: 'goto', node: 'a3-refused' }]
 
 export const CONVERSATIONS_ARMY: Conversation[] = [
   /**
@@ -457,30 +629,92 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
     ],
   },
   // ================================================================== A1 ==
+  /**
+   * רחל — the last evening, in three states: she tells him what is missing; the bag is
+   * closed and she has one thing left to say; it is all said. The promise is asked AFTER
+   * the bag is shut (V3 §7): the packing is the action, her question is its payoff, and
+   * what she says first depends on what he put in it.
+   */
   {
     id: 'rachel-army',
     nameHe: 'רחל',
     branches: [
+      // any later day of the winter: he is home on leave, and the bag is long packed
+      { when: { flag: A2 }, lines: [{ who: 'רחל', text: 'באת? תאכל משהו. ואת המדים — לכביסה, לא על הכיסא.' }] },
       { when: { flag: 'a1:packed' }, lines: [{ who: 'רחל', text: 'ארזת? יופי. תאכל. לא, לא "אחר כך". עכשיו.' }] },
+      {
+        when: { all: [{ flag: PACK_BAG }, { flag: 'a1:took:radio' }] },
+        lines: [
+          { who: 'רחל', text: 'לקחת את הרדיו הקטן. חשבתי שתיקח. (היא לא אומרת את זה כמו שבח.)' },
+          { who: 'רחל', text: 'ותשמע. שם, בבסיס, כשיהיה משחק בשבת — לא לעשות שטויות. שומע? הצבא זה לא שער 7.' },
+        ],
+        choices: RACHEL_ARMY_CHOICES,
+      },
+      {
+        when: { flag: PACK_BAG },
+        lines: [
+          { who: 'רחל', text: 'השארת לו את הרדיו. הוא לא יגיד לך תודה, אבל הוא ישים לב.' },
+          { who: 'רחל', text: 'ותשמע. שם, בבסיס, כשיהיה משחק בשבת — לא לעשות שטויות. שומע? הצבא זה לא שער 7.' },
+        ],
+        choices: RACHEL_ARMY_CHOICES,
+      },
       {
         lines: [
           { who: 'רחל', text: 'שמתי לך גרביים. שמתי לך עוד גרביים. אמרו לי שאף פעם אין מספיק גרביים.' },
-          { who: 'רחל', text: 'ותשמע. שם, בבסיס, כשיהיה משחק בשבת — לא לעשות שטויות. שומע? הצבא זה לא שער 7.' },
+          { who: 'רחל', text: 'הזוגות האחרונים על השולחן. התיק ליד החדר שלך. מה שאתה רוצה לקחת משלך — תכניס בעצמך, ותסגור אותו. אני לא סוגרת לך תיק לצבא.' },
         ],
-        /**
-         * הערב האחרון בבית, וחמש שנים אחרי הערב ההוא באוסישקין.
-         *
-         * הבחירה השלישית קיימת רק למי שרחל **זוכרת** שחזר אחרי השעה (`relationshipMemory`,
-         * ולא דגל — זה דבר שאדם זוכר עליך). זה מה ש-`ACH_REPAIR` חיכה לו: הפרה נרשמה
-         * ב-1991 כראיה, וכאן אפשר לחזור אליה. **התיקון לא מוחק את התקרית** — שתי הראיות
-         * נושאות את אותו נושא ויושבות בפנקס זו ליד זו, וזה בדיוק מה שהפרס של ההישג מתאר.
-         */
+        then: [{ e: 'flag', flag: 'a1:told' }],
+      },
+    ],
+  },
+  /** the socks on the coffee table — a thing taken, not a line agreed to */
+  {
+    id: 'pack-socks',
+    nameHe: null,
+    branches: [
+      { when: { flag: PACK_SOCKS }, lines: [{ who: null, text: 'השולחן ריק. רק הסימן העגול של הכוס של אבא.' }] },
+      {
+        lines: [{ who: null, text: 'שלושה זוגות על השולחן, מקופלים כמו שרק היא מקפלת — אחד בתוך השני, כמו כדור. הכנסת אותם לכיס הצד של התיק.' }],
+        then: [{ e: 'flag', flag: PACK_SOCKS }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 1 }],
+      },
+    ],
+  },
+  /**
+   * the transistor on the sideboard — the only thing in the room that is a choice. It is
+   * Kobi's, it is how a Saturday reached this flat for twenty years, and a soldier with a
+   * radio in his bag is a soldier who will hear the score on a base. Taking it and leaving
+   * it both cost something, and Rachel notices which.
+   */
+  {
+    id: 'pack-radio',
+    nameHe: null,
+    branches: [
+      { when: { flag: PACK_RADIO }, lines: [{ who: null, text: 'השידה. המקום של הרדיו, או הרדיו עצמו.' }] },
+      {
+        lines: [{ who: null, text: 'הטרנזיסטור על השידה. הכפתור של התחנות שחוק במקום של הספורט. אבא מקשיב בו לכל שבת שהוא לא במגרש.' }],
         choices: [
-          { id: 'repair', text: '"אמא. הערב ההוא באוסישקין, כשחזרתי אחרי השעה."', when: { relationshipMemory: { who: 'rachel', eventId: 'came-home-late-1991' } }, hidden: true, then: [{ e: 'goto', node: 'rachel-army-curfew' }] },
-          { id: 'promise', text: '"לא אעשה שטויות."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'flag', flag: 'promise:rachel-army' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: 3 }] },
-          { id: 'honest', text: '"אני לא מבטיח."', then: [{ e: 'flag', flag: 'a1:packed' }, { e: 'rel', who: 'rachel', axis: 'trust', delta: -1 }, { e: 'personality', key: 'independence', delta: 2 }, { e: 'toast', text: 'היא לא כעסה. היא ידעה.', tone: 'plain' }] },
+          { id: 'take', text: 'להכניס אותו לתיק.', then: [{ e: 'flag', flag: PACK_RADIO }, { e: 'flag', flag: 'a1:took:radio' }, { e: 'redheart', key: 'footballLove', delta: 2 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 1 }, { e: 'toast', text: 'הרדיו בתיק. בשבת, בבסיס, תשמע.', tone: 'plain' }] },
+          { id: 'leave', text: 'להשאיר אותו לאבא.', then: [{ e: 'flag', flag: PACK_RADIO }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 }, { e: 'toast', text: 'הרדיו נשאר על השידה.', tone: 'plain' }] },
         ],
       },
+    ],
+  },
+  /** the bag by the bedroom door — it closes only on what is in it */
+  {
+    id: 'pack-bag',
+    nameHe: null,
+    branches: [
+      { when: { flag: PACK_BAG }, lines: [{ who: null, text: 'התיק סגור. כבד יותר ממה שהוא נראה.' }] },
+      {
+        when: { all: [{ flag: PACK_SOCKS }, { flag: PACK_RADIO }] },
+        lines: [{ who: null, text: 'הרוכסן נתקע באמצע, על הגרביים, ואז נסגר. תיק צבאי אחד, עם השם שלך בטוש על הבד.' }],
+        then: [{ e: 'flag', flag: PACK_BAG }, { e: 'personality', key: 'responsibility', delta: 1 }],
+      },
+      {
+        when: { flag: PACK_SOCKS },
+        lines: [{ who: null, text: 'התיק עוד פתוח. חסר בו משהו משלך — הרדיו על השידה, או ההחלטה להשאיר אותו.' }],
+      },
+      { lines: [{ who: null, text: 'התיק פתוח ליד הדלת לחדר שלך. הגרביים של אמא עוד על השולחן.' }] },
     ],
   },
   {
@@ -588,28 +822,26 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
     id: 'asaf-gate5',
     nameHe: 'אסף',
     branches: [
-      { when: { gateIs: 'gate5' }, lines: [{ who: 'אסף', text: 'אתה פה. יופי. בשבוע הבא אתה מגיע שעה לפני ומחזיק בד. אין "אני רק בא לשיר".' }] },
+      // (V3) `a2:chose` as well as the gate: a man who stood at five in an earlier year
+      // still gets asked tonight, in uniform — the gate alone used to answer for him
+      { when: { all: [{ flag: 'a2:chose' }, { gateIs: 'gate5' }] }, lines: [{ who: 'אסף', text: 'אתה פה. יופי. בשבוע הבא אתה מגיע שעה לפני ומחזיק בד. אין "אני רק בא לשיר".' }] },
+      { when: { flag: 'a2:chose' }, lines: [{ who: 'אסף', text: 'שבוע הבא, שעה לפני המשחק. אם אתה בא — אתה סוחב. אם לא — לא נכעס. נזכור.' }] },
+      {
+        // he did the work before he was asked to say anything — Asaf saw
+        when: { any: [{ flag: 'a2:banner' }, { flag: 'a2:bag-moved' }] },
+        lines: [
+          { who: 'אסף', text: 'ראיתי. לא ביקשתי פעמיים, וזה כבר יותר ממה שרוב מי שבא לפה עושה בערב הראשון.' },
+          { who: 'מלמד', text: 'תן לו לשמוע קודם. (מלמד, עם דרבוקה בין הברכיים, מנסה קצב.) ככה? או ככה?' },
+        ],
+        choices: ASAF_GATE5_CHOICES,
+      },
       {
         lines: [
           { who: null, text: 'מתחת ליציע. תוף, עשרים בחורים, בד שמישהו צייר ביד. אסף באמצע, לא שר — מסתכל.' },
           { who: 'אסף', text: 'חייל. תשמע טוב: פה לא באים לראות משחק. פה עובדים. סוחבים, תולים, מגיעים שעה לפני. כבוד מקבלים אחר כך, אם בכלל.' },
           { who: 'מלמד', text: 'תן לו לשמוע קודם. (מלמד, עם דרבוקה בין הברכיים, מנסה קצב.) ככה? או ככה?' },
         ],
-        choices: [
-          { id: 'join', text: '"אני איתכם."', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate5', reason: 'friends' }, { e: 'rel', who: 'asaf', axis: 'trust', delta: 3 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 5 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'remember', who: 'asaf', eventId: 'joined-gate5-1996', significance: 'major' }, { e: 'goto', node: 'a2-after' }] },
-          /**
-           * *"אתה לא יודע עוד מה עשית."* — והשורה הזאת הייתה נכונה גם על הפנקס.
-           *
-           * חייל בן שמונה־עשרה עונה למלמד שלוש-הפסקה-שתיים, מלמד מנגן את זה שוב, וזהו:
-           * דבר קטן שנעשה מתחת ליציע ואי אפשר לדעת מה יהיה איתו. זו **יצירה**, וזה בדיוק
-           * מה ש-`creation_proof` אמור לסמן — לא הרגע שבו מישהו שר אותה, אלא הרגע שבו
-           * היא נוצרה. מה שקורה לה אחר כך הוא שאלה אחרת, והיא נשאלת בקיוסק ב-1999
-           * וברמת גן ב-2000.
-           */
-          { id: 'rhythm', text: 'לענות למלמד: "ככה." (הראשון)', then: [{ e: 'sfx', key: 'darbuka-three-two', level: 0.8 }, { e: 'flag', flag: 'life:melamed:rhythm' }, { e: 'rel', who: 'melamed', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:rhythm', subjectHe: RHYTHM_SUBJECT, noteHe: 'שלוש, הפסקה, שתיים. מתחת ליציע, על דרבוקה של מישהו אחר.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'נתן למלמד קצב' }, { e: 'toast', text: 'מלמד ניגן את זה שוב. ושוב. אתה לא יודע עוד מה עשית.', tone: 'plain' }] },
-          { id: 'back', text: '"אני חוזר לאבא."', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'gate7', reason: 'family' }, { e: 'rel', who: 'asaf', axis: 'distance', delta: 3 }, { e: 'goto', node: 'a2-after' }] },
-          { id: 'neither', text: 'ללכת. לא לפה ולא לשם.', then: [{ e: 'flag', flag: 'a2:chose' }, { e: 'gate', to: 'outside', reason: 'conflict' }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'goto', node: 'a2-after' }] },
-        ],
+        choices: ASAF_GATE5_CHOICES,
       },
     ],
   },
@@ -618,11 +850,80 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { gateIs: 'gate5' }, lines: [{ who: null, text: 'מהמקום החדש רואים את שער 7 באלכסון. בהפסקה אנשים נצמדים לגדר שבין 5 ל-7 ומדברים דרכה. אבא לא בא לגדר.' }, { who: null, text: 'התוף לא הפסיק תשעים דקות. בסוף לא שמעת אותו. הוא היה בפנים.' }] },
-      { when: { gateIs: 'outside' }, lines: [{ who: null, text: 'עמדת ליד הגדר שבין 5 ל-7 — מקום שעוברים בו בהפסקה ולא עומדים בו במשחק. ראית תשעים דקות לבד. זה היה הדבר הכי לא־בלומפילד שעשית.' }] },
+      { when: { any: [{ gateIs: 'outside' }, { gateIs: 'between' }] }, lines: [{ who: null, text: 'עמדת ליד הגדר שבין 5 ל-7 — מקום שעוברים בו בהפסקה ולא עומדים בו במשחק. ראית תשעים דקות לבד. זה היה הדבר הכי לא־בלומפילד שעשית.' }] },
       { lines: [{ who: null, text: 'שער 7. השיר האיטי. הכתף של אבא ליד הכתף שלך. ומתחת ליציע, כל המשחק, תוף שאתה שומע ולא רואה.' }] },
     ],
   },
+  /**
+   * באמצע — the third place to stand, and it is a PLACE (V3 §7 "Between").
+   *
+   * Until 24.9.2026 the middle was a sentence in a menu. It is the fence between five and
+   * seven now, on the forecourt between Kobi and the door under the stand, and walking to
+   * it and pressing is the decision: the words come after, as its consequence. It stays
+   * standing for as long as nothing has been chosen, which is what makes the choice
+   * recoverable from any closed box.
+   */
+  {
+    id: 'a2-between',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'a2:chose' }, lines: [{ who: null, text: 'הגדר בין 5 ל-7. בהפסקה נצמדים אליה ומדברים דרכה.' }] },
+      {
+        lines: [
+          { who: null, text: 'נעמדת ליד הגדר. מימין השיר האיטי של שער 7, משמאל התוף. שניהם שומעים אותך לא בוחר.' },
+          { who: null, text: 'קובי הסתכל לכאן פעם אחת. אסף לא הסתכל בכלל.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'a2:chose' },
+          { e: 'gate', to: 'between', reason: 'conflict' },
+          { e: 'personality', key: 'independence', delta: 2 },
+          { e: 'wellbeing', key: 'loneliness', delta: 4 },
+          { e: 'goto', node: 'a2-after' },
+        ],
+      },
+    ],
+  },
+  /** under the stand — "תזיז את התיק מהמעבר", done with the hands */
+  {
+    id: 'a2-gate5-bag',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'a2:bag-moved' }, lines: [{ who: null, text: 'התיק שלך מתחת למדרגה, ליד התוף של מישהו אחר.' }] },
+      {
+        lines: [{ who: null, text: 'התיק הצבאי שלך באמצע המעבר, בדיוק איפה שסוחבים את התופים. הרמת אותו ודחפת אותו מתחת למדרגה.' }],
+        then: [{ e: 'flag', flag: 'a2:bag-moved' }, { e: 'rel', who: 'asaf', axis: 'familiarity', delta: 2 }],
+      },
+    ],
+  },
+  /** the cloth someone painted by hand — the other end of it is a job, not a view */
+  {
+    id: 'a2-banner',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'a2:banner' }, lines: [{ who: null, text: 'הבד מקופל שוב על המעקה. הצבע עוד לא יבש בפינה.' }] },
+      {
+        lines: [
+          { who: null, text: 'שניים מותחים בד על המעקה, והקצה השלישי נופל. תפסת אותו. אף אחד לא אמר תודה — מישהו רק אמר "חזק יותר".' },
+          { who: null, text: 'הצבע עוד לח. על היד שלך נשאר אדום.' },
+        ],
+        then: [{ e: 'flag', flag: 'a2:banner' }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'rel', who: 'asaf', axis: 'trust', delta: 1 }],
+      },
+    ],
+  },
   // ================================================================== A3 ==
+  /**
+   * האוטובוס — the oral history, kept exactly: a real deadline, a bus that would make it,
+   * the wrong supporters on it, a refusal, two hours late. What changed on 24.9.2026 is
+   * only WHERE each answer lives (V3 §8). It used to be four buttons in one box; now it is
+   * the station itself:
+   *
+   *   · the bus DOOR (`a3-bus`) — you walk to it, you hear the driver, you get on;
+   *   · the station DOOR (`a3-walk-away`) — you walk away from it: the refusal;
+   *   · the BENCH (`a3-bench`) — you sit, "עוד רגע", and the second time it is too late;
+   *   · the TIMETABLE on the pole (`a3-timetable`) — the boy who runs for another line.
+   *
+   * The words and every effect are the ones the four buttons carried.
+   */
   {
     id: 'a3-bus',
     nameHe: null,
@@ -635,13 +936,69 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
           { who: null, text: 'אגד רגיל, קו רגיל — והצדדים שלו צבועים בסמלים של בית"ר ירושלים, כי בימי משחק הוא מסיע אותם. השעון בתחנה אומר חמש חמישים ושש, וזה שלושים וארבע דקות לשער של הבסיס.' },
         ],
         choices: [
-          { id: 'refuse', text: '"לא. לא על האוטובוס הזה."', then: [{ e: 'sfx', key: 'bus-door', level: 0.6, delayMs: 900 }, { e: 'consequence', id: 'a3:refused', text: 'האוטובוס יצא. בלעדיך.', laterText: 'שעתיים איחור. זה יירשם.', afterMinutes: 30 }, { e: 'plate', art: 'armyRoom', titleHe: 'הבסיס', subHe: 'שעתיים אחרי השעה', ms: 2600 }, { e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:refused' }, { e: 'redheart', key: 'loyaltyReturn', delta: 6 }, { e: 'personality', key: 'stubbornness', delta: 4 }, { e: 'goto', node: 'a3-refused' }] },
-          { id: 'board', text: 'לעלות. לשתוק. להגיע בזמן.', then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:boarded' }, { e: 'wellbeing', key: 'regret', delta: 8 }, { e: 'redheart', key: 'loyaltyReturn', delta: -3 }, { e: 'personality', key: 'responsibility', delta: 2 }, { e: 'goto', node: 'a3-boarded' }] },
-          { id: 'other', text: 'לרוץ לחפש רציף אחר.', then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:searched' }, { e: 'personality', key: 'streetSmarts', delta: 2 }, { e: 'goto', node: 'a3-searched' }] },
-          { id: 'wait', text: 'לעמוד. עוד רגע.', then: [{ e: 'personality', key: 'impulsiveness', delta: -1 }, { e: 'toast', text: 'הנהג הסתכל בשעון. אתה הסתכלת באוטובוס.', tone: 'plain' }] },
+          { id: 'board', text: 'לעלות. לשתוק. להגיע בזמן.', then: A3_BOARD },
+          { id: 'step-back', text: 'לרדת מהמדרגה.', then: [{ e: 'toast', text: 'הנהג לא סגר את הדלת. עוד לא.', tone: 'plain' }] },
         ],
       },
       { lines: [{ who: null, text: 'הרציף. עוד אין אוטובוס. יש שעון, ויש לך תחושה שאתה כבר יודע מה תעשה.' }] },
+    ],
+  },
+  /** the refusal is a walk — away from the bus, through the station door */
+  {
+    id: 'a3-walk-away',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'a3:decided' }, lines: [{ who: null, text: 'הרציף מאחוריך.' }] },
+      {
+        lines: [
+          { who: 'פוגי', text: 'לא. לא על האוטובוס הזה.' },
+          { who: null, text: 'הנהג קרא אחריך "חייל?" פעם אחת, ולא חיכה לתשובה.' },
+        ],
+        then: A3_REFUSE,
+      },
+    ],
+  },
+  /** hesitating is sitting down — once is a breath, twice is the bus leaving without you */
+  {
+    id: 'a3-bench',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'a3:decided' }, lines: [{ who: null, text: 'הספסל רטוב מהלילה.' }] },
+      {
+        when: { flag: 'a3:bench' },
+        lines: [{ who: null, text: 'ישבת שוב. עוד רגע. ועוד רגע. הדלת של האוטובוס נסגרה באוויר, בלי שאף אחד נגע בה.' }],
+        then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'a3:hesitated' }, { e: 'sfx', key: 'bus-door', level: 0.6 }, { e: 'goto', node: 'a3-left-behind' }],
+      },
+      {
+        lines: [{ who: null, text: 'ישבת על קצה הספסל, עם התיק בין הרגליים. השעון בתחנה אומר חמש חמישים ושש.' }],
+        then: [{ e: 'flag', flag: 'a3:bench' }, { e: 'personality', key: 'impulsiveness', delta: -1 }, { e: 'toast', text: 'הנהג הסתכל בשעון. אתה הסתכלת באוטובוס.', tone: 'plain' }],
+      },
+    ],
+  },
+  /** the pole with the timetable — another line, another city, and no promise */
+  {
+    id: 'a3-timetable',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'a3:decided' }, lines: [{ who: null, text: 'לוח הזמנים. קווים לערים אחרות.' }] },
+      {
+        lines: [{ who: null, text: 'על העמוד, לוח זמנים בכתב יד. יש אחד בשש וחצי לעיר אחרת, מרציף בצד השני של התחנה.' }],
+        choices: [
+          { id: 'other', text: 'לרוץ לחפש רציף אחר.', then: [{ e: 'flag', flag: 'a3:decided' }, { e: 'flag', flag: 'life:bus:searched' }, { e: 'personality', key: 'streetSmarts', delta: 2 }, { e: 'goto', node: 'a3-searched' }] },
+          { id: 'not-yet', text: 'לא עכשיו.', then: [] },
+        ],
+      },
+    ],
+  },
+  /** which morning he is still standing in, and back into it */
+  {
+    id: 'a3-report',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'life:bus:refused' }, lines: [{ who: null, text: 'הבסיס. שער, שומר, ואז המשרד של המפקד.' }], then: [{ e: 'goto', node: 'a3-refused' }] },
+      { when: { flag: 'life:bus:boarded' }, lines: [{ who: null, text: 'האוטובוס. המושב האחורי.' }], then: [{ e: 'goto', node: 'a3-boarded' }] },
+      { when: { flag: 'life:bus:searched' }, lines: [{ who: null, text: 'הרציף האחר.' }], then: [{ e: 'goto', node: 'a3-searched' }] },
+      { lines: [{ who: null, text: 'הרציף, והאוטובוס שיצא בלעדיך.' }], then: [{ e: 'goto', node: 'a3-left-behind' }] },
     ],
   },
   {
@@ -717,6 +1074,13 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
     nameHe: null,
     branches: [
       /**
+       * Rafi stands at the counter on every day of this chapter (`shopkeeper-army` has no
+       * `when`), and until 24.9.2026 he opened February on the eve of conscription: a boy
+       * could talk to him the night before the army and be offered Liron's car and the
+       * winter's ending. Before the winter, the winter is not his to talk about.
+       */
+      { when: { notFlag: A4 }, lines: [{ who: 'רפי מהקיוסק', text: 'מחר בבוקר, אה? תביא לי משהו מהבסיס. סתם. תחזור שלם, זה מה שתביא.' }] },
+      /**
        * מי שכבר ראה — the version of this conversation for somebody who walked around
        * first. Freddy explains less, because there is less to explain to a boy who has
        * already seen the shutter and the brackets in the newspaper. The brief asks for
@@ -771,32 +1135,44 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
     id: 'a4-liron',
     nameHe: 'לירון',
     branches: [
+      // a reload in the middle of the road: the car is still outside, and the engine is running
+      {
+        when: { all: [{ flag: 'a4:drive' }, { notFlag: 'a4:arrived' }] },
+        lines: [{ who: 'לירון', text: 'האוטו מונע. אתה בא, או שאני נוסע לבד?' }],
+        then: [{ e: 'minigame', id: 'ride:1997' }],
+      },
+      // he asked once; a second visit is not a second offer (the choices below used to repeat)
+      { when: { flag: 'a4:road' }, lines: [{ who: 'לירון', text: 'בפעם הבאה תביא סוכריות. אני תמיד נגמר מהן באמצע הדרך.' }] },
       {
         lines: [
           { who: null, text: 'בדלת, גבר עם צרור מפתחות ביד ומעיל שראה חורפים. לירון. פתח לך פעם טרנזיסטור על שולחן המטבח שלו, בחיים אחרים.' },
           { who: 'לירון', text: 'משחק חוץ הערב. יש לי אוטו, יש לי רדיו שתופס חצי, ויש לי מקום אחד. אתה חייל, יש לך שעה שצריך לחזור בה?' },
         ],
         choices: [
-          { id: 'go', text: '"יש. אני נוסע."', when: { armyAbove: { key: 'commanderTrust', min: 25 } }, noteHe: 'אחרי מה שהיה — אין חופשה.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'redheart', key: 'travelDrive', delta: 4 }, { e: 'plate', art: 'lironCar', titleHe: 'האוטו של לירון', subHe: 'לילה. כביש. רדיו.', ms: 2600 }, { e: 'goto', node: 'road-1' }] },
-          { id: 'go-anyway', text: '"אין לי חופשה. נוסע בכל זאת."', when: { armyBelow: { key: 'commanderTrust', max: 24 } }, noteHe: 'המפקד סומך עליך. אתה לא זורק את זה על משחק.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'flag', flag: 'life:awol' }, { e: 'army', key: 'commanderTrust', delta: -20 }, { e: 'armyRoute', route: 'punished' }, { e: 'personality', key: 'riskTolerance', delta: 4 }, { e: 'plate', art: 'lironCar', titleHe: 'האוטו של לירון', subHe: 'לילה. כביש. רדיו.', ms: 2600 }, { e: 'goto', node: 'road-1' }] },
-          { id: 'stay', text: '"לא הפעם. אני חוזר לבסיס."', then: [{ e: 'army', key: 'commanderTrust', delta: 6 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'flag', flag: 'a4:road' }, { e: 'presence', mode: 'army' }, { e: 'ending', id: 'home' }] },
+          { id: 'go', text: '"יש. אני נוסע."', when: { armyAbove: { key: 'commanderTrust', min: 25 } }, noteHe: 'אחרי מה שהיה — אין חופשה.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'redheart', key: 'travelDrive', delta: 4 }, { e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 4 }, { e: 'flag', flag: 'a4:drive' }, { e: 'minigame', id: 'ride:1997' }] },
+          { id: 'go-anyway', text: '"אין לי חופשה. נוסע בכל זאת."', when: { armyBelow: { key: 'commanderTrust', max: 24 } }, noteHe: 'המפקד סומך עליך. אתה לא זורק את זה על משחק.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'flag', flag: 'life:awol' }, { e: 'army', key: 'commanderTrust', delta: -20 }, { e: 'armyRoute', route: 'punished' }, { e: 'personality', key: 'riskTolerance', delta: 4 }, { e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 4 }, { e: 'flag', flag: 'a4:drive' }, { e: 'minigame', id: 'ride:1997' }] },
+          { id: 'stay', text: '"לא הפעם. אני חוזר לבסיס."', then: [{ e: 'army', key: 'commanderTrust', delta: 6 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'flag', flag: 'a4:road' }, { e: 'presence', mode: 'army' }, { e: 'flag', flag: 'a4:done' }] },
         ],
       },
     ],
   },
+  /**
+   * הדרך — four stops of one ride (`content/passages.ts`, `RIDE_1997`), and each of these is
+   * asked at its own stop: the fuel needle (`road-1`), the junction (`road-2`), the lights of
+   * the ground (`road-3` → `road-back`). Until 24.9.2026 they were one chain of `goto`s read
+   * in a row; the chain is cut so the road can be ridden between them (Director V3 §9).
+   */
   {
     id: 'road-1',
     nameHe: null,
     branches: [
       {
         lines: [
-          { who: null, text: 'האוטו של לירון: ישן, נקי, עם שקית סוכריות בדלת ומברג בתא הכפפות. הרדיו תופס תחנה, מאבד, תופס.' },
-          { who: 'לירון', text: 'פעם, בשער 7, ידיעה עברה מאיש לאיש. אחד עם טרנזיסטור, אחד שמעביר הלאה. היום יש פייג׳ר. יודעים מהר, לא יודעים יותר טוב.' },
           { who: null, text: 'חצי דרך. מחוג הדלק נמוך, ותחנה אחת לפני הכביש הארוך. חייל מקבל שישים שקל בחודש, ודלק לחצי דרך עולה שלושים.' },
         ],
         choices: [
-          { id: 'fuel', text: 'לשלם חצי דלק. שלושים שקל.', when: { minAgorot: 3000 }, noteHe: 'אין.', then: [{ e: 'money', agorot: -3000, why: 'דלק, חצי' }, { e: 'rel', who: 'liron', axis: 'trust', delta: 4 }, { e: 'goto', node: 'road-2' }] },
-          { id: 'food', text: 'לקנות אוכל לשניכם בתחנה. חמישה־עשר.', when: { minAgorot: 1500 }, noteHe: 'אין.', then: [{ e: 'money', agorot: -1500, why: 'אוכל בתחנה' }, { e: 'rel', who: 'liron', axis: 'bond', delta: 3 }, { e: 'goto', node: 'road-2' }] },
+          { id: 'fuel', text: 'לשלם חצי דלק. שלושים שקל.', when: { minAgorot: 3000 }, noteHe: 'אין.', then: [{ e: 'money', agorot: -3000, why: 'דלק, חצי' }, { e: 'rel', who: 'liron', axis: 'trust', delta: 4 }] },
+          { id: 'food', text: 'לקנות אוכל לשניכם בתחנה. חמישה־עשר.', when: { minAgorot: 1500 }, noteHe: 'אין.', then: [{ e: 'money', agorot: -1500, why: 'אוכל בתחנה' }, { e: 'rel', who: 'liron', axis: 'bond', delta: 3 }] },
           /**
            * ומי ששותק — לירון משלם, והמחוג מתמלא.
            *
@@ -805,7 +1181,7 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
            * כדי שיהיה מה להחזיר. הפרעון עומד ב-1999, באותו אוטו, והוא הענף היחיד שסוגר
            * התחייבות כספית **מחוץ** לפינה של אוסישקין (`ACH_BALANCE` מבקש שניים בשני פרקים).
            */
-          { id: 'nothing', text: 'לשתוק. הוא הציע, לא אתה.', then: [{ e: 'rel', who: 'liron', axis: 'trust', delta: -2 }, { e: 'flag', flag: 'owe:liron' }, { e: 'debt', agorot: FUEL_AGOROT, why: 'חצי הדלק שלירון שילם' }, { e: 'goto', node: 'road-2' }] },
+          { id: 'nothing', text: 'לשתוק. הוא הציע, לא אתה.', then: [{ e: 'rel', who: 'liron', axis: 'trust', delta: -2 }, { e: 'flag', flag: 'owe:liron' }, { e: 'debt', agorot: FUEL_AGOROT, why: 'חצי הדלק שלירון שילם' }] },
         ],
       },
     ],
@@ -820,8 +1196,8 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
           { who: 'לירון', text: 'אני יכול לעצור בצומת. יש משם אוטובוס. אני לא נעלב. אני רק שואל.' },
         ],
         choices: [
-          { id: 'stay', text: '"תמשיכי. אני איתך."', then: [{ e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 6 }, { e: 'personality', key: 'empathy', delta: 2 }, { e: 'goto', node: 'road-3' }] },
-          { id: 'bus', text: '"תעצרי. אני אמשיך באוטובוס."', then: [{ e: 'rel', who: 'liron', axis: 'distance', delta: 5 }, { e: 'personality', key: 'stubbornness', delta: 3 }, { e: 'flag', flag: 'road:bus' }, { e: 'goto', node: 'road-3' }] },
+          { id: 'stay', text: '"תמשיכי. אני איתך."', then: [{ e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 6 }, { e: 'personality', key: 'empathy', delta: 2 }] },
+          { id: 'bus', text: '"תעצרי. אני אמשיך באוטובוס."', then: [{ e: 'rel', who: 'liron', axis: 'distance', delta: 5 }, { e: 'personality', key: 'stubbornness', delta: 3 }, { e: 'flag', flag: 'road:bus' }] },
         ],
       },
     ],
@@ -848,11 +1224,11 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
       {
         when: { flag: 'life:awol' },
         lines: [{ who: null, text: 'הדרך חזרה, בלילה, כשאתה יודע שבשער של הבסיס מחכה שיחה. לירון הוריד אותך שני רחובות לפני. "היה שווה?" "היה." "טוב. תגיד להם שהיה."' }],
-        then: [{ e: 'army', key: 'leaveDebt', delta: 2 }, { e: 'flag', flag: 'a4:done' }, { e: 'ending', id: 'road' }],
+        then: [{ e: 'army', key: 'leaveDebt', delta: 2 }, { e: 'flag', flag: 'a4:done' }],
       },
       {
         lines: [{ who: null, text: 'הדרך חזרה. תחנת דלק אחת, רדיו אחד, שיחה אחת שלא נגמרה. הגעת לבסיס בדקה האחרונה של החופשה, כמו שצריך.' }],
-        then: [{ e: 'army', key: 'commanderTrust', delta: 2 }, { e: 'flag', flag: 'a4:done' }, { e: 'ending', id: 'road' }],
+        then: [{ e: 'army', key: 'commanderTrust', delta: 2 }, { e: 'flag', flag: 'a4:done' }],
       },
     ],
   },

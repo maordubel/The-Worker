@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState, type MouseEvent } from 'react'
 
-import { KitShirt } from '@/components/kit/KitShirt'
 import { RecordRun } from '@/components/play/RecordRun'
 import { FitBox } from '@/components/stage/FitBox'
 import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
@@ -18,6 +17,8 @@ import type { Embedded } from '@/lib/mechanics/types'
 import { t } from '@/lib/royal-rumble/i18n'
 import { submitRoyalRumble } from './actions'
 import { RoyalRumbleSlotReveal } from './RoyalRumbleSlotReveal'
+import { RumbleLooks, RumbleShirt } from './RumbleShirt'
+import type { Wardrobe } from '@/lib/kit/playerShirt'
 
 type Phase = 'draft' | 'reveal' | 'match' | 'result'
 type EraKit = { seasonLabel: string; spec: KitSpec }
@@ -44,30 +45,6 @@ function yearRange(player: RoyalRumblePublicPlayer): string {
   if (player.fromYear === null && player.toYear === null) return t('activeYears')
   if (player.fromYear === player.toYear) return String(player.fromYear ?? '—')
   return `${player.fromYear ?? '—'}–${player.toYear ?? '—'}`
-}
-
-function seasonYear(label: string): number | null {
-  const match = label.match(/(\d{4})/)
-  return match ? Number(match[1]) : null
-}
-
-function kitForPlayer(player: RoyalRumblePublicPlayer, kits: EraKit[]): EraKit | null {
-  if (kits.length === 0) return null
-  const from = player.fromYear
-  const to = player.toYear
-  if (from === null && to === null) return null
-
-  const start = from ?? to ?? 0
-  const end = to ?? from ?? start
-  const midpoint = (start + end) / 2
-  const dated = kits
-    .map((kit) => ({ kit, year: seasonYear(kit.seasonLabel) }))
-    .filter((row): row is { kit: EraKit; year: number } => row.year !== null)
-
-  const inside = dated.filter(({ year }) => year >= start && year <= end)
-  const pool = inside.length > 0 ? inside : dated
-  pool.sort((a, b) => Math.abs(a.year - midpoint) - Math.abs(b.year - midpoint))
-  return pool[0]?.kit ?? null
 }
 
 function PriceBars({ price, inverted = false }: { price: number; inverted?: boolean }) {
@@ -100,42 +77,8 @@ function Shirt({
   kits: EraKit[]
   className: string
 }) {
-  const specialSeason = (() => {
-    const start = player.fromYear ?? player.toYear
-    const end = player.toYear ?? player.fromYear
-    if (start === null || start === undefined || end === null || end === undefined) return null
-    if (start <= 1985 && end >= 1985) return { season: '1985/86', src: '/kits/assembly/1985-86/home-master.svg' }
-    if (start <= 2009 && end >= 2009) return { season: '2009/10', src: '/kits/assembly/2009-10/home-master-a.svg' }
-    return null
-  })()
-  if (specialSeason) {
-    return (
-      <div className="relative flex items-center justify-center overflow-visible">
-        <img
-          src={specialSeason.src}
-          alt={t('kitSeason', { season: specialSeason.season })}
-          className={`${className} scale-[1.08] object-contain`}
-        />
-        <span className="absolute bottom-0 end-0 border border-paper/20 bg-ink px-1.5 py-0.5 font-mono tabular-nums text-[6px] font-black tracking-[0.12em] text-paper" dir="ltr">
-          {specialSeason.season}
-        </span>
-      </div>
-    )
-  }
-  const kit = kitForPlayer(player, kits)
-  if (!kit) return <div className={className} />
-  return (
-    <div className="relative flex items-center justify-center overflow-visible">
-      <KitShirt
-        spec={kit.spec}
-        className={`${className} scale-[1.04]`}
-        title={t('kitSeason', { season: kit.seasonLabel })}
-      />
-      <span className="absolute bottom-0 end-0 border border-ink/15 bg-paper px-1.5 py-0.5 font-mono tabular-nums text-[6px] font-black tracking-[0.12em] text-ink" dir="ltr">
-        {kit.seasonLabel}
-      </span>
-    </div>
-  )
+  // the man's real shirt, never an empty box (delta 88 — `RumbleShirt.tsx`)
+  return <RumbleShirt player={player} kits={kits} className={className} />
 }
 
 function DraftCard({
@@ -188,7 +131,7 @@ function DraftCard({
           </div>
         </div>
 
-        <div className={`mx-auto mt-1 flex min-h-0 w-full flex-1 justify-center overflow-hidden border-y-hair py-1 ${selected ? 'border-paper/15 bg-transparent' : 'border-ink/10 bg-transparent'}`}>
+        <div className={`mx-auto mt-1 flex min-h-[40px] w-full flex-1 justify-center overflow-hidden border-y-hair py-0.5 ${selected ? 'border-paper/15 bg-transparent' : 'border-ink/10 bg-transparent'}`}>
           <Shirt player={player} kits={kits} className="h-full max-h-[108px] w-auto max-w-[94px] sm:h-[132px] sm:w-[116px]" />
         </div>
 
@@ -203,7 +146,7 @@ function DraftCard({
               {positionHe(player.position)}
             </span>
           </div>
-          <div className="mt-1.5"><PriceBars price={player.price} inverted={selected} /></div>
+          <div className="mt-1.5 [@media(max-height:700px)]:hidden"><PriceBars price={player.price} inverted={selected} /></div>
         </div>
       </div>
 
@@ -407,7 +350,20 @@ function isPlayer(player: RoyalRumblePublicPlayer | null): player is RoyalRumble
   return player !== null
 }
 
-export function RoyalRumbleRun({
+type RunProps = Parameters<typeof RoyalRumbleRunInner>[0] & {
+  /** every man's real shirt, from the page (`lib/kit/playerShirt.ts`); absent inside LIFE */
+  looks?: Wardrobe
+}
+
+export function RoyalRumbleRun({ looks, ...props }: RunProps) {
+  return (
+    <RumbleLooks looks={looks}>
+      <RoyalRumbleRunInner {...props} />
+    </RumbleLooks>
+  )
+}
+
+function RoyalRumbleRunInner({
   draft,
   shuffleDraft,
   cursor,

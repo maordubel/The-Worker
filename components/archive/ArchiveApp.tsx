@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from 'react'
 
 import { RecordRun } from '@/components/play/RecordRun'
 import { firePickFx } from '@/components/stage/PickFx'
@@ -14,7 +14,7 @@ import { t, type MessageKey } from '@/lib/i18n'
 import { ArchiveBox } from './ArchiveBox'
 import { ArchiveDrawer } from './ArchiveDrawer'
 import { MineSheet, SearchSheet, TimeMachine } from './ArchiveSheets'
-import { ArtifactMark, CardHeadline, Eyebrow, LATIN, cardTitle } from './EntityCard'
+import { ArtifactMark, CardHeadline, LATIN, cardTitle, typeLabel } from './EntityCard'
 
 /**
  * שער 12 — הארכיון החי, on one screen (brief §22, prototype v10).
@@ -60,6 +60,7 @@ export function ArchiveApp({
   initial,
   atMissing,
   figures,
+  report,
 }: {
   decks: Record<TodayChip, ArchiveCard[]>
   todayHe: string
@@ -69,6 +70,8 @@ export function ArchiveApp({
   initial: EntityDetail | null
   atMissing: boolean
   figures: string
+  /** the report-an-error link — on a phone it lives in the drawer, where the facts are */
+  report?: ReactNode
 }) {
   const firstChip = decks.today.length ? 'today' : 'know'
   const [chip, setChip] = useState<TodayChip | null>(firstChip)
@@ -328,11 +331,19 @@ export function ArchiveApp({
         </p>
       </div>
 
-      {/* the deck — the card as big as the phone allows, swiped rather than scrolled */}
+      {/*
+        the deck — ONE card, as big as the phone allows, on a fixed grid (delta 88).
+
+        Maor, 24.9.2026: *"החלון הפנימי לא בגודל נוח, המידע שבתוך החלון הפנימי צף"*. The card
+        used to sit at the top of a second framed window with its lines wherever they fell.
+        Now the card IS the window and fills it: a head (mark · kind · the headline · the
+        date), the facts in labelled rows, and the actions and the pager pinned to its
+        foot — the same rows at every phone height, only the gap between them grows.
+      */}
       <section
         aria-roledescription="carousel"
         aria-label={t('archive.deck.aria')}
-        className={`relative mt-2 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain border-rule border-ink px-3 pb-3 pt-3 transition-colors duration-peel motion-reduce:transition-none md:block md:flex-none md:overflow-visible ${tint}`}
+        className="relative mt-2 flex min-h-0 flex-1 flex-col md:mx-auto md:block md:w-full md:max-w-[760px] md:flex-none"
       >
         {flash && (
           <div aria-live="polite" className="pointer-events-none absolute inset-x-3 top-3 z-10 animate-stamp-in border-plate border-ink bg-ink px-3 py-2 text-center motion-reduce:animate-none">
@@ -342,63 +353,88 @@ export function ArchiveApp({
         )}
 
         {current ? (
-          <>
-            <article
-              key={current.id}
-              aria-label={t('archive.deck.position', { n: String((index % deck.length) + 1), total: String(deck.length) })}
-              tabIndex={0}
-              onKeyDown={(event) => {
-                if (event.key === 'ArrowLeft') step(1)
-                if (event.key === 'ArrowRight') step(-1)
-              }}
-              onPointerDown={(event) => {
-                swipe.current = { x: event.clientX, y: event.clientY }
-              }}
-              onPointerUp={(event) => {
-                const start = swipe.current
-                swipe.current = null
-                if (!start) return
-                const dx = event.clientX - start.x
-                if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(event.clientY - start.y)) step(dx < 0 ? 1 : -1)
-              }}
-              className="relative touch-pan-y select-none border-plate border-ink bg-sheet animate-paste-in motion-reduce:animate-none"
-            >
-              <div className="flex items-start gap-3 border-b-hair border-ink/30 px-3 pb-2 pt-3">
-                <ArtifactMark card={current} className="h-16 w-16 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-latin text-[9px] font-bold tracking-[0.22em] text-sign" dir="ltr">
+          <article
+            key={current.id}
+            aria-label={t('archive.deck.position', { n: String((index % deck.length) + 1), total: String(deck.length) })}
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowLeft') step(1)
+              if (event.key === 'ArrowRight') step(-1)
+            }}
+            onPointerDown={(event) => {
+              swipe.current = { x: event.clientX, y: event.clientY }
+            }}
+            onPointerUp={(event) => {
+              const start = swipe.current
+              swipe.current = null
+              if (!start) return
+              const dx = event.clientX - start.x
+              if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(event.clientY - start.y)) step(dx < 0 ? 1 : -1)
+            }}
+            className={`relative grid min-h-0 flex-1 touch-pan-y select-none grid-rows-[auto_minmax(0,1fr)_auto] border-plate border-ink animate-paste-in motion-reduce:animate-none ${tint}`}
+          >
+            {/* the head */}
+            <header className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 border-b-rule border-ink bg-sheet px-3 pb-2.5 pt-3 [@media(max-height:700px)]:pb-1.5 [@media(max-height:700px)]:pt-2">
+              <ArtifactMark card={current} className="h-14 w-14 md:h-16 md:w-16 [@media(max-height:700px)]:h-10 [@media(max-height:700px)]:w-10" />
+              <div className="min-w-0">
+                <p className="flex items-baseline justify-between gap-2">
+                  <span className="font-latin text-[9px] font-bold tracking-[0.22em] text-sign" dir="ltr">
                     {LATIN[current.type]}
-                  </p>
-                  <h2 className="mt-0.5 font-display text-step-2 leading-tight text-ink">
-                    <CardHeadline card={current} />
-                  </h2>
-                  <Eyebrow card={current} className="mt-1" />
-                </div>
+                  </span>
+                  <span className="font-mono text-[11px] tabular-nums text-muted" aria-hidden="true">
+                    <Num>{`${(index % deck.length) + 1}/${deck.length}`}</Num>
+                  </span>
+                </p>
+                <h2 className="mt-0.5 line-clamp-3 font-display text-step-1 leading-tight text-ink md:text-step-2">
+                  <CardHeadline card={current} />
+                </h2>
               </div>
-              <div className="px-3 py-2">
+            </header>
+
+            {/* the facts, one labelled row each */}
+            <div className="min-h-0 overflow-y-auto overscroll-contain bg-sheet/80 px-3">
+              <dl className="divide-y divide-ink/20 font-body text-[13.5px] text-ink">
+                <FactRow label={t('archive.drawer.fact.type')}>
+                  <span className="font-bold text-red">{typeLabel(current)}</span>
+                </FactRow>
+                <FactRow label={t('archive.drawer.fact.when')}>
+                  <span className="font-mono tabular-nums"><Num>{current.when ?? '—'}</Num></span>
+                </FactRow>
                 {current.subHe && (
-                  <button
-                    type="button"
-                    onClick={() => setMore((v) => !v)}
-                    aria-expanded={more}
-                    className="min-h-tap border-hair border-dashed border-ink/60 px-3 font-body text-[12.5px] font-bold text-ink"
-                  >
-                    {more ? t('archive.card.less') : t('archive.card.more')}
-                  </button>
+                  <FactRow label={t('archive.card.detail')}>
+                    <button
+                      type="button"
+                      onClick={() => setMore((v) => !v)}
+                      aria-expanded={more}
+                      aria-label={more ? t('archive.card.less') : t('archive.card.more')}
+                      className="block min-h-tap w-full py-1.5 text-start leading-snug"
+                    >
+                      <bdi className={more ? '' : 'line-clamp-2'}>{current.subHe}</bdi>
+                    </button>
+                  </FactRow>
                 )}
-                {more && current.subHe && (
-                  <p className="mt-1.5 border-s-rule border-red ps-2 font-body text-[13.5px] leading-snug text-ink">
-                    <bdi>{current.subHe}</bdi>
-                  </p>
-                )}
-                {current.disputed && <p className="mt-1.5 font-body text-[11.5px] text-muted">{t('archive.card.disputed')}</p>}
-                <p className="mt-1.5 font-body text-[11.5px] text-muted">{t('archive.card.links', { n: String(current.degree) })}</p>
-              </div>
-              <div className="grid grid-cols-[1.4fr_1fr] gap-1.5 border-t-hair border-ink/30 px-3 py-2.5">
+                <FactRow label={t('archive.drawer.fact.links')}>
+                  <span className="font-mono tabular-nums"><Num>{current.degree}</Num></span>
+                </FactRow>
+              </dl>
+              {current.disputed && <p className="mt-2 border-s-rule border-red ps-2 font-body text-[12px] leading-snug text-ink">{t('archive.card.disputed')}</p>}
+            </div>
+
+            {/* the foot: the actions, then the pager */}
+            <footer className="border-t-rule border-ink bg-sheet px-3 pb-2 pt-2">
+              <div className="grid grid-cols-[auto_1.4fr_1fr_auto] items-stretch gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  aria-label={t('archive.deck.prev')}
+                  className="flex min-h-tap min-w-tap items-center justify-center border-rule border-ink bg-paper font-poster text-[24px] leading-none text-ink"
+                >
+                  ›
+                </button>
                 <button
                   type="button"
                   onClick={() => open(current.id, 'deck')}
-                  className="min-h-tap border-rule border-red bg-red px-2 font-body text-[14px] font-extrabold text-paper"
+                  className="min-h-tap border-rule border-red bg-red px-1.5 font-body text-[14px] font-extrabold leading-tight text-paper"
                 >
                   {t('archive.card.open')}
                 </button>
@@ -412,32 +448,18 @@ export function ArchiveApp({
                 >
                   {mine.includes(current.id) ? `✓ ${t('archive.card.saved')}` : t('archive.card.save')}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  aria-label={t('archive.deck.next')}
+                  className="flex min-h-tap min-w-tap items-center justify-center border-rule border-ink bg-paper font-poster text-[24px] leading-none text-ink"
+                >
+                  ‹
+                </button>
               </div>
-            </article>
-
-            <div className="mt-2 flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => step(-1)}
-                aria-label={t('archive.deck.prev')}
-                className="flex min-h-tap min-w-tap items-center justify-center border-rule border-ink bg-sheet font-poster text-[24px] leading-none text-ink"
-              >
-                ›
-              </button>
-              <p className="font-mono text-[12px] tabular-nums text-muted" aria-hidden="true">
-                <Num>{`${(index % deck.length) + 1}/${deck.length}`}</Num>
-              </p>
-              <button
-                type="button"
-                onClick={() => step(1)}
-                aria-label={t('archive.deck.next')}
-                className="flex min-h-tap min-w-tap items-center justify-center border-rule border-ink bg-sheet font-poster text-[24px] leading-none text-ink"
-              >
-                ‹
-              </button>
-            </div>
-            <p className="sr-only">{t('archive.deck.swipe')}</p>
-          </>
+              <p className="sr-only">{t('archive.deck.swipe')}</p>
+            </footer>
+          </article>
         ) : (
           <p className="border-hair border-ink/40 bg-paper px-3 py-3 font-body text-[13.5px] leading-relaxed text-ink">
             {chip === 'today' ? t('archive.today.none') : season ? t('archive.time.empty') : t('archive.chip.empty')}
@@ -445,17 +467,17 @@ export function ArchiveApp({
         )}
       </section>
 
-      <p className="mt-1.5 shrink-0 truncate border-t-hair border-ink/30 pt-1.5 font-body text-[10px] leading-relaxed text-muted md:mt-stack md:whitespace-normal md:pt-2 md:text-[11px]">
+      <p className="mt-1.5 shrink-0 truncate border-t-hair border-ink/30 pt-1.5 font-body text-[10px] leading-relaxed text-muted [@media(max-height:700px)]:hidden md:mt-stack md:!block md:whitespace-normal md:pt-2 md:text-[11px]">
         {figures} <span className="font-mono text-[9px] tabular-nums"><Num>{`#${seed}·${cursor}`}</Num></span>
       </p>
 
       {/* room for the dock */}
-      <div aria-hidden="true" className="h-[76px] shrink-0 md:h-[76px]" />
+      <div aria-hidden="true" className="hidden md:block md:h-[76px]" />
 
       {/* the dock — above the tab bar, below every dialog */}
       <nav
         aria-label={t('archive.dock.aria')}
-        className="fixed inset-x-0 bottom-[calc(var(--tap)+1.25rem+3px+env(safe-area-inset-bottom))] z-40 border-t-rule border-ink bg-sheet"
+        className="-mx-gutter mt-2 shrink-0 border-t-rule border-ink bg-sheet md:fixed md:inset-x-0 md:bottom-[calc(var(--tap)+1.25rem+3px+env(safe-area-inset-bottom))] md:z-40 md:mx-0 md:mt-0"
       >
         <ul className="mx-auto grid max-w-5xl grid-cols-5">
           {dockButtons.map((row) => {
@@ -520,12 +542,23 @@ export function ArchiveApp({
           onSave={() => toggleSave(detail.card)}
           onReact={(code) => react(detail.card, code)}
           onRabbit={dig}
+          report={report}
           onSearch={() => {
             setDetail(null)
             setLayer('search')
           }}
         />
       )}
+    </div>
+  )
+}
+
+/** one labelled row of the card: the label in a fixed column, the value beside it */
+function FactRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="grid min-h-[40px] grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-2 [@media(max-height:700px)]:min-h-[34px] md:grid-cols-[6rem_minmax(0,1fr)]">
+      <dt className="font-body text-[11px] font-extrabold text-muted">{label}</dt>
+      <dd className="min-w-0">{children}</dd>
     </div>
   )
 }

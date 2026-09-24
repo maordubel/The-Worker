@@ -27,99 +27,189 @@ export type KitBodyTemplate = {
   /** where a raglan/yoke construction meets the body */
   shoulderPanelLeft: string
   shoulderPanelRight: string
+  /** delta 88: the top line of each sleeve, neck to cuff (three stripes over the shoulder) */
+  sleeveTopLeft: string
+  sleeveTopRight: string
+  /** delta 88: a side panel along each side seam */
+  sidePanelLeft: string
+  sidePanelRight: string
 }
 
 /**
  * Canonical garment anatomy. These are NOT season designs: they are sewing silhouettes.
  * Historical surface details (pattern, colours, marks) are layered on top by KitEngine.
  * Keeping anatomy separate is the key to avoiding one generic T-shirt for 50 years.
+ *
+ * Delta 88 (24.9.2026) — Maor: *"החולצות ניראות מגוכחות בגרפיקה"*. The old outlines were drawn
+ * by hand and read as a narrow tunic with wings: a torso 0.44 as wide as it was long, sleeves
+ * straight out in a T, and a neck ring floating above the shoulder line. A real shirt laid
+ * flat (the fka-* / vp-* photographs in `public/kits/`) is about 0.68 as wide as it is long,
+ * its sleeves fall 35–50° below the shoulder line, and the collar sits IN the neckline.
+ * So every cut is now built by `cut()` from a handful of sewing measurements, measured off
+ * those photographs, and the paths follow from them — one set of proportions, six eras.
  */
-export const BODY_TEMPLATES: Record<KitBodyTemplateId, KitBodyTemplate> = {
-  'retro-70s-boxy': {
-    id: 'retro-70s-boxy', labelHe: 'גזרת שנות ה־70', yearFrom: 1949, yearTo: 1982,
-    viewBox: '0 0 360 420',
-    bodyPath: 'M118 62C135 55 151 52 166 51C171 69 189 77 180 77C171 77 189 69 194 51C209 52 225 55 242 62L252 122C248 178 247 280 252 374C221 388 139 388 108 374C113 280 112 178 108 122Z',
-    leftSleevePath: 'M118 62C92 68 66 84 48 106L18 178C31 190 48 198 67 202L97 136L108 122Z',
-    rightSleevePath: 'M242 62C268 68 294 84 312 106L342 178C329 190 312 198 293 202L263 136L252 122Z',
-    leftSleeveSeam: 'M118 62C112 80 109 100 108 122', rightSleeveSeam: 'M242 62C248 80 251 100 252 122',
-    hemPath: 'M108 364C139 376 221 376 252 364',
-    cuffLeftPath: 'M22 169C35 182 50 188 70 192', cuffRightPath: 'M338 169C325 182 310 188 290 192',
-    neck: { cx: 180, cy: 58, width: 66, depth: 25 },
-    anchors: { maker: { x: 31, y: 21, w: 11, h: 9 }, crest: { x: 58, y: 20, w: 14, h: 16 }, sponsor: { x: 26, y: 45, w: 48, h: 15 } },
-    shoulderPanelLeft: 'M118 62C105 69 97 83 92 103L108 122C111 95 114 76 118 62Z',
-    shoulderPanelRight: 'M242 62C255 69 263 83 268 103L252 122C249 95 246 76 242 62Z',
-  },
-  'retro-80s-long': {
-    id: 'retro-80s-long', labelHe: 'גזרת אמצע שנות ה־80', yearFrom: 1983, yearTo: 1989,
-    viewBox: '0 0 360 420',
-    bodyPath: 'M116 58C132 53 149 50 165 49C170 68 190 78 180 78C170 78 190 68 195 49C211 50 228 53 244 58L254 128C250 190 249 289 254 380C218 393 142 393 106 380C111 289 110 190 106 128Z',
-    leftSleevePath: 'M116 58C93 62 69 75 52 94L18 160L24 314C39 321 53 321 68 316L80 196L102 139L106 128Z',
-    rightSleevePath: 'M244 58C267 62 291 75 308 94L342 160L336 314C321 321 307 321 292 316L280 196L258 139L254 128Z',
-    leftSleeveSeam: 'M116 58C110 78 107 101 106 128', rightSleeveSeam: 'M244 58C250 78 253 101 254 128',
-    hemPath: 'M106 369C142 382 218 382 254 369',
-    cuffLeftPath: 'M23 300C38 306 53 307 69 302', cuffRightPath: 'M337 300C322 306 307 307 291 302',
-    neck: { cx: 180, cy: 56, width: 72, depth: 30 },
-    anchors: { maker: { x: 30, y: 22, w: 11, h: 9 }, crest: { x: 58, y: 20, w: 15, h: 17 }, sponsor: { x: 22, y: 42, w: 56, h: 25 } },
-    shoulderPanelLeft: 'M116 58C98 65 86 82 79 108L106 128C108 98 112 76 116 58Z',
-    shoulderPanelRight: 'M244 58C262 65 274 82 281 108L254 128C252 98 248 76 244 58Z',
-  },
-  'retro-90s-boxy': {
-    id: 'retro-90s-boxy', labelHe: 'גזרת שנות ה־90', yearFrom: 1990, yearTo: 1999,
-    viewBox: '0 0 360 420',
-    bodyPath: 'M111 60C129 54 149 51 165 50C171 68 190 77 180 77C170 77 189 68 195 50C211 51 231 54 249 60L260 124C257 181 257 286 262 377C224 392 136 392 98 377C103 286 103 181 100 124Z',
-    leftSleevePath: 'M115 60C84 66 58 82 39 104L10 168C25 182 43 190 64 194L96 130L100 124Z',
-    rightSleevePath: 'M249 60C276 66 302 82 321 104L350 168C335 182 317 190 296 194L264 130L260 124Z',
-    leftSleeveSeam: 'M111 60C105 78 101 99 100 124', rightSleeveSeam: 'M249 60C255 78 259 99 260 124',
-    hemPath: 'M99 365C136 379 224 379 261 365',
-    cuffLeftPath: 'M14 159C29 173 46 181 67 185', cuffRightPath: 'M346 159C331 173 314 181 293 185',
-    neck: { cx: 180, cy: 58, width: 72, depth: 27 },
-    anchors: { maker: { x: 29, y: 21, w: 13, h: 10 }, crest: { x: 58, y: 20, w: 15, h: 17 }, sponsor: { x: 27, y: 43, w: 46, h: 18 } },
-    shoulderPanelLeft: 'M111 60C96 66 84 82 78 106L100 124C102 96 106 75 111 60Z',
-    shoulderPanelRight: 'M249 60C264 66 276 82 282 106L260 124C258 96 254 75 249 60Z',
-  },
-  'early-2000s-athletic': {
-    id: 'early-2000s-athletic', labelHe: 'גזרת תחילת שנות ה־2000', yearFrom: 2000, yearTo: 2007,
-    viewBox: '0 0 360 420',
-    bodyPath: 'M116 58C133 52 150 50 166 49C172 68 189 76 180 76C171 76 188 68 194 49C210 50 227 52 244 58L254 118C247 182 244 285 249 376C218 390 142 390 111 376C116 285 113 182 106 118Z',
-    leftSleevePath: 'M116 58C92 64 70 79 54 99L27 153C39 164 54 171 72 174L102 124L106 118Z',
-    rightSleevePath: 'M244 58C268 64 290 79 306 99L333 153C321 164 306 171 288 174L258 124L254 118Z',
-    leftSleeveSeam: 'M116 58C111 75 108 95 106 118', rightSleeveSeam: 'M244 58C249 75 252 95 254 118',
-    hemPath: 'M111 365C142 378 218 378 249 365',
-    cuffLeftPath: 'M31 145C43 156 57 162 74 165', cuffRightPath: 'M329 145C317 156 303 162 286 165',
-    neck: { cx: 180, cy: 56, width: 68, depth: 26 },
-    anchors: { maker: { x: 30, y: 22, w: 12, h: 9 }, crest: { x: 59, y: 20, w: 15, h: 17 }, sponsor: { x: 27, y: 44, w: 46, h: 17 } },
-    shoulderPanelLeft: 'M116 58C101 64 89 78 82 99L106 118C108 92 112 73 116 58Z',
-    shoulderPanelRight: 'M244 58C259 64 271 78 278 99L254 118C252 92 248 73 244 58Z',
-  },
-  '2010s-fitted': {
-    id: '2010s-fitted', labelHe: 'גזרה צמודה 2008–2016', yearFrom: 2008, yearTo: 2016,
-    viewBox: '0 0 360 420',
-    bodyPath: 'M120 56C135 51 151 49 166 48C172 66 188 74 180 74C172 74 188 66 194 48C209 49 225 51 240 56L250 112C241 180 237 281 242 374C213 387 147 387 118 374C123 281 119 180 110 112Z',
-    leftSleevePath: 'M120 56C97 61 76 75 61 94L38 145C49 155 62 161 77 164L106 117L110 112Z',
-    rightSleevePath: 'M240 56C263 61 284 75 299 94L322 145C311 155 298 161 283 164L254 117L250 112Z',
-    leftSleeveSeam: 'M120 56C115 72 112 91 110 112', rightSleeveSeam: 'M240 56C245 72 248 91 250 112',
-    hemPath: 'M118 364C147 376 213 376 242 364',
-    cuffLeftPath: 'M42 137C53 147 66 153 80 155', cuffRightPath: 'M318 137C307 147 294 153 280 155',
-    neck: { cx: 180, cy: 55, width: 64, depth: 24 },
-    anchors: { maker: { x: 28.5, y: 22, w: 14, h: 10 }, crest: { x: 59, y: 20, w: 15, h: 17 }, sponsor: { x: 27, y: 44, w: 46, h: 18 } },
-    shoulderPanelLeft: 'M120 56C104 62 92 76 85 97L110 112C112 89 116 70 120 56Z',
-    shoulderPanelRight: 'M240 56C256 62 268 76 275 97L250 112C248 89 244 70 240 56Z',
-  },
-  'modern-athletic': {
-    id: 'modern-athletic', labelHe: 'גזרה מודרנית', yearFrom: 2017, yearTo: 2100,
-    viewBox: '0 0 360 420',
-    bodyPath: 'M123 55C138 50 153 48 167 48C173 64 187 72 180 72C173 72 187 64 193 48C207 48 222 50 237 55L247 108C238 174 235 278 240 373C212 385 148 385 120 373C125 278 122 174 113 108Z',
-    leftSleevePath: 'M123 55C101 60 81 73 67 91L45 137C55 146 67 152 81 155L109 113L113 108Z',
-    rightSleevePath: 'M237 55C259 60 279 73 293 91L315 137C305 146 293 152 279 155L251 113L247 108Z',
-    leftSleeveSeam: 'M123 55C118 70 115 88 113 108', rightSleeveSeam: 'M237 55C242 70 245 88 247 108',
-    hemPath: 'M120 363C148 374 212 374 240 363',
-    cuffLeftPath: 'M49 130C59 139 70 145 84 147', cuffRightPath: 'M311 130C301 139 290 145 276 147',
-    neck: { cx: 180, cy: 54, width: 62, depth: 22 },
-    anchors: { maker: { x: 30, y: 21, w: 12, h: 9 }, crest: { x: 59, y: 19, w: 15, h: 17 }, sponsor: { x: 29, y: 43, w: 42, h: 16 } },
-    shoulderPanelLeft: 'M123 55C108 60 96 73 89 92L113 108C115 86 119 68 123 55Z',
-    shoulderPanelRight: 'M237 55C252 60 264 73 271 92L247 108C245 86 241 68 237 55Z',
-  },
+type Pt = readonly [number, number]
+type CutSpec = {
+  id: KitBodyTemplateId
+  labelHe: string
+  yearFrom: number
+  yearTo: number
+  /** half the neck opening, the neck edge's y, and how far the front neckline drops */
+  neck: { half: number; y: number; depth: number }
+  /** the shoulder point (left side, board units) — the shoulder line runs from the neck edge to it */
+  shoulder: Pt
+  /** where the sleeve meets the side seam */
+  armpit: Pt
+  /** the narrowest point of the side seam (a fitted cut draws in, a boxy one does not) */
+  waist: Pt
+  /** the side seam at the hem, and how much the hem curves down at the centre */
+  hem: Pt
+  hemDrop: number
+  /** the sleeve's cuff: the outer (top-edge) corner and the inner (underarm) corner */
+  cuffOuter: Pt
+  cuffInner: Pt
+  anchors: Record<'maker' | 'crest' | 'sponsor', KitPlacement>
 }
+
+const CX = 180
+const f = (n: number) => Number(n.toFixed(1))
+const mirror = ([x, y]: Pt): Pt => [2 * CX - x, y]
+const pt = ([x, y]: Pt) => `${f(x)} ${f(y)}`
+const lerp = (a: Pt, b: Pt, t: number): Pt => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
+
+function cut(c: CutSpec): KitBodyTemplate {
+  const nL: Pt = [CX - c.neck.half, c.neck.y]
+  const nR = mirror(nL)
+  const sL = c.shoulder, sR = mirror(sL)
+  const aL = c.armpit, aR = mirror(aL)
+  const wL = c.waist, wR = mirror(wL)
+  const hL = c.hem, hR = mirror(hL)
+  const oL = c.cuffOuter, oR = mirror(oL)
+  const iL = c.cuffInner, iR = mirror(iL)
+  // the armhole bows outward a little between the shoulder point and the armpit
+  const armCtl = (s: Pt, a: Pt, side: 1 | -1): Pt => [(s[0] + a[0]) / 2 - side * 6, (s[1] + a[1]) / 2]
+  const backNeckY = c.neck.y + c.neck.depth * 0.22
+  const bodyPath = [
+    `M${pt(nL)}`,
+    // the shoulder line, very slightly convex
+    `Q${pt([(nL[0] + sL[0]) / 2, (nL[1] + sL[1]) / 2 - 2])} ${pt(sL)}`,
+    `Q${pt(armCtl(sL, aL, 1))} ${pt(aL)}`,
+    `Q${pt(wL)} ${pt(lerp(wL, hL, 0.55))}`,
+    `L${pt(hL)}`,
+    `Q${pt([CX, hL[1] + c.hemDrop * 2])} ${pt(hR)}`,
+    `L${pt(lerp(wR, hR, 0.55))}`,
+    `Q${pt(wR)} ${pt(aR)}`,
+    `Q${pt(armCtl(sR, aR, -1))} ${pt(sR)}`,
+    `Q${pt([(nR[0] + sR[0]) / 2, (nR[1] + sR[1]) / 2 - 2])} ${pt(nR)}`,
+    // the BACK neckline: the front one is the collar's, drawn over this
+    `Q${pt([CX, backNeckY + c.neck.depth * 0.1])} ${pt(nL)}Z`,
+  ].join('')
+  const sleeve = (s: Pt, o: Pt, i: Pt, a: Pt, side: 1 | -1) => {
+    // the top edge falls from the shoulder in a soft curve; the underarm edge runs back to the armpit
+    const top: Pt = [(s[0] + o[0]) / 2 - side * 4, (s[1] + o[1]) / 2 - 3]
+    const under: Pt = [(i[0] + a[0]) / 2 + side * 2, (i[1] + a[1]) / 2 + 2]
+    return `M${pt(s)}Q${pt(top)} ${pt(o)}L${pt(i)}Q${pt(under)} ${pt(a)}Q${pt(armCtl(s, a, side))} ${pt(s)}Z`
+  }
+  const seam = (s: Pt, a: Pt, side: 1 | -1) => `M${pt(s)}Q${pt(armCtl(s, a, side))} ${pt(a)}`
+  // a cuff band: the cuff edge moved back up the sleeve by `inset`
+  const cuffLine = (o: Pt, i: Pt, s: Pt, a: Pt, inset: number) => {
+    const oo = lerp(o, s, inset / Math.hypot(s[0] - o[0], s[1] - o[1]))
+    const ii = lerp(i, a, inset / Math.hypot(a[0] - i[0], a[1] - i[1]))
+    return `M${pt(oo)}L${pt(ii)}`
+  }
+  // along the top of the sleeve, from the neck to the cuff (the three stripes of an 80s shirt)
+  // (moved 11 units inside the outline, so a stroke along it lies on the cloth, not over the edge)
+  const topLine = (n: Pt, s: Pt, o: Pt, i: Pt) => {
+    const dx = o[0] - s[0], dy = o[1] - s[1], len = Math.hypot(dx, dy)
+    let nx = -dy / len, ny = dx / len
+    if (nx * (i[0] - o[0]) + ny * (i[1] - o[1]) < 0) { nx = -nx; ny = -ny }
+    const k = 11
+    const sh = (p: Pt): Pt => [p[0] + nx * k, p[1] + ny * k]
+    const a = lerp(n, s, 0.3), b = lerp(n, s, 0.3)
+    return `M${pt([a[0], b[1] + k])}L${pt(sh(s))}L${pt(sh(lerp(s, o, 0.97)))}`
+  }
+  const raglan = (n: Pt, s: Pt, a: Pt, side: 1 | -1) => {
+    const inner: Pt = [n[0] + side * 6, n[1] + 4]
+    return `M${pt(inner)}L${pt(n)}Q${pt([(n[0] + s[0]) / 2, (n[1] + s[1]) / 2 - 2])} ${pt(s)}Q${pt(armCtl(s, a, side))} ${pt(a)}Q${pt([(inner[0] + a[0]) / 2 + side * 10, (inner[1] + a[1]) / 2 - 6])} ${pt(inner)}Z`
+  }
+  const sidePanel = (a: Pt, w: Pt, h: Pt, side: 1 | -1, width: number) => {
+    const d = side * width
+    return `M${pt(a)}Q${pt(w)} ${pt(lerp(w, h, 0.55))}L${pt(h)}L${pt([h[0] + d, h[1] + 2])}L${pt([lerp(w, h, 0.55)[0] + d, lerp(w, h, 0.55)[1]])}Q${pt([w[0] + d, w[1]])} ${pt([a[0] + d * 0.8, a[1] + 10])}Z`
+  }
+  const hemIn = 11
+  return {
+    id: c.id, labelHe: c.labelHe, yearFrom: c.yearFrom, yearTo: c.yearTo,
+    viewBox: '0 0 360 420',
+    bodyPath,
+    leftSleevePath: sleeve(sL, oL, iL, aL, 1),
+    rightSleevePath: sleeve(sR, oR, iR, aR, -1),
+    leftSleeveSeam: seam(sL, aL, 1),
+    rightSleeveSeam: seam(sR, aR, -1),
+    hemPath: `M${pt([hL[0] + 1.5, hL[1] - hemIn])}Q${pt([CX, hL[1] - hemIn + c.hemDrop * 2])} ${pt([hR[0] - 1.5, hR[1] - hemIn])}`,
+    cuffLeftPath: cuffLine(oL, iL, sL, aL, 7),
+    cuffRightPath: cuffLine(oR, iR, sR, aR, 7),
+    neck: { cx: CX, cy: c.neck.y, width: c.neck.half * 2, depth: c.neck.depth },
+    anchors: c.anchors,
+    shoulderPanelLeft: raglan(nL, sL, aL, 1),
+    shoulderPanelRight: raglan(nR, sR, aR, -1),
+    sleeveTopLeft: topLine(nL, sL, oL, iL),
+    sleeveTopRight: topLine(nR, sR, oR, iR),
+    sidePanelLeft: sidePanel(aL, wL, hL, 1, 22),
+    sidePanelRight: sidePanel(aR, wR, hR, -1, 22),
+  }
+}
+
+const RAW: CutSpec[] = [
+  {
+    // wide and square, short sleeves cut straight — the 1950s–70s cotton shirt
+    id: 'retro-70s-boxy', labelHe: 'גזרת שנות ה־70', yearFrom: 1949, yearTo: 1982,
+    neck: { half: 30, y: 50, depth: 26 },
+    shoulder: [72, 70], armpit: [66, 158], waist: [66, 262], hem: [67, 388], hemDrop: 2,
+    cuffOuter: [14, 168], cuffInner: [54, 196],
+    anchors: { maker: { x: 29, y: 22, w: 11, h: 9 }, crest: { x: 59, y: 20, w: 14, h: 16 }, sponsor: { x: 27, y: 39, w: 46, h: 14 } },
+  },
+  {
+    // long sleeves falling close to the body, a longer, slightly flared body — mid-80s adidas
+    id: 'retro-80s-long', labelHe: 'גזרת אמצע שנות ה־80', yearFrom: 1983, yearTo: 1989,
+    neck: { half: 31, y: 48, depth: 28 },
+    shoulder: [76, 70], armpit: [72, 156], waist: [74, 262], hem: [72, 392], hemDrop: 3,
+    cuffOuter: [16, 340], cuffInner: [54, 346],
+    anchors: { maker: { x: 29, y: 22, w: 11, h: 9 }, crest: { x: 59, y: 20, w: 14, h: 16 }, sponsor: { x: 26, y: 40, w: 48, h: 16 } },
+  },
+  {
+    // the baggy 90s: the widest body, dropped shoulders, sleeves to the elbow
+    id: 'retro-90s-boxy', labelHe: 'גזרת שנות ה־90', yearFrom: 1990, yearTo: 1999,
+    neck: { half: 32, y: 48, depth: 26 },
+    shoulder: [64, 78], armpit: [60, 176], waist: [62, 270], hem: [62, 392], hemDrop: 2,
+    cuffOuter: [4, 196], cuffInner: [44, 228],
+    anchors: { maker: { x: 28, y: 22, w: 13, h: 10 }, crest: { x: 59, y: 20, w: 15, h: 16 }, sponsor: { x: 26, y: 40, w: 48, h: 17 } },
+  },
+  {
+    id: 'early-2000s-athletic', labelHe: 'גזרת תחילת שנות ה־2000', yearFrom: 2000, yearTo: 2007,
+    neck: { half: 30, y: 48, depth: 25 },
+    shoulder: [72, 70], armpit: [70, 158], waist: [76, 260], hem: [72, 390], hemDrop: 3,
+    cuffOuter: [16, 170], cuffInner: [54, 198],
+    anchors: { maker: { x: 29, y: 22, w: 12, h: 9 }, crest: { x: 59, y: 20, w: 15, h: 16 }, sponsor: { x: 27, y: 40, w: 46, h: 16 } },
+  },
+  {
+    // drawn in at the waist
+    id: '2010s-fitted', labelHe: 'גזרה צמודה 2008–2016', yearFrom: 2008, yearTo: 2016,
+    neck: { half: 29, y: 48, depth: 24 },
+    shoulder: [76, 68], armpit: [76, 152], waist: [86, 258], hem: [80, 388], hemDrop: 3,
+    cuffOuter: [22, 160], cuffInner: [60, 186],
+    anchors: { maker: { x: 29, y: 22, w: 13, h: 9 }, crest: { x: 59, y: 20, w: 15, h: 16 }, sponsor: { x: 28, y: 40, w: 44, h: 16 } },
+  },
+  {
+    // straight athletic body, short sleeves
+    id: 'modern-athletic', labelHe: 'גזרה מודרנית', yearFrom: 2017, yearTo: 2100,
+    neck: { half: 28, y: 48, depth: 22 },
+    shoulder: [76, 66], armpit: [76, 150], waist: [82, 258], hem: [78, 388], hemDrop: 2,
+    cuffOuter: [24, 152], cuffInner: [62, 178],
+    anchors: { maker: { x: 29, y: 21, w: 12, h: 9 }, crest: { x: 59, y: 19, w: 15, h: 16 }, sponsor: { x: 28, y: 39, w: 44, h: 16 } },
+  },
+]
+
+export const BODY_TEMPLATES = Object.fromEntries(RAW.map((row) => [row.id, cut(row)])) as Record<KitBodyTemplateId, KitBodyTemplate>
 
 const SEASON_TEMPLATE_OVERRIDES: Record<string, KitBodyTemplateId> = {
   '1985/86': 'retro-80s-long',

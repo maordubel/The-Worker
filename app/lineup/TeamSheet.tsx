@@ -18,6 +18,7 @@ import {
   type RevealRow,
 } from '@/lib/game/lineup-sheet'
 import type { KitSpec } from '@/lib/kit/spec'
+import type { ShirtLook } from '@/lib/kit/playerShirt'
 import { collect, collected, readProfile } from '@/lib/profile/store'
 import { haptic } from '@/lib/play/haptics'
 import { BandPitch, LINE_LABEL, type BandMan } from './BandPitch'
@@ -98,6 +99,7 @@ export function TeamSheet({
   locks,
   notesTaken,
   kit,
+  look = null,
   onBack,
   children,
 }: {
@@ -105,6 +107,8 @@ export function TeamSheet({
   locks: readonly string[]
   notesTaken: number
   kit: KitSpec | null
+  /** the match season's REAL shirt (delta 88), as on the lockers */
+  look?: ShirtLook | null
   /** back into the locker room with the same eleven still standing */
   onBack: () => void
   /** the share row and the replay link, which belong to the board that owns the round */
@@ -180,7 +184,7 @@ export function TeamSheet({
           </div>
 
           <div className="mt-3">
-            <BandPitch men={men} kit={kit} active={current?.playerId ?? null} />
+            <BandPitch men={men} kit={kit} look={look} active={current?.playerId ?? null} />
           </div>
 
           <div className="mt-3 border-rule border-ink bg-sheet p-3" aria-live="polite">
@@ -277,7 +281,7 @@ export function TeamSheet({
           )}
 
           <div className="mt-3">
-            <BandPitch men={men} kit={kit} />
+            <BandPitch men={men} kit={kit} look={look} />
           </div>
           {missing.length > 0 && (
             <p className="mt-1 font-body text-[11px] leading-snug text-muted">{t('lineup.zone.ghostNote')}</p>

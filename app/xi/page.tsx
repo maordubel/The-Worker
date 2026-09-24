@@ -6,7 +6,8 @@ import { pickerRoster } from '@/lib/archive/player-master'
 import { formationList, rosterIndex } from '@/lib/game/allTimeXI'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
-import { shirtBoard } from '@/lib/xi/board'
+import { seasonOf, wardrobe } from '@/lib/kit/playerShirt'
+import { shirtBoard, type ShirtBoard } from '@/lib/xi/board'
 import type { XITab } from '@/lib/xi/store'
 import { XIBuilder } from './XIBuilder'
 
@@ -24,6 +25,23 @@ import { XIBuilder } from './XIBuilder'
  */
 export const metadata: Metadata = gateMetadata('xi')
 
+/**
+ * Every man's REAL shirt (delta 88, `lib/kit/playerShirt.ts`): keyed by slug for his own
+ * era, and by `slug@<version>` for each version the chooser offers — the shirt follows the
+ * version, as it always did.
+ */
+function xiWardrobe(all: ReturnType<typeof rosterIndex>['all'], shirts: ShirtBoard) {
+  const rows: Array<{ key: string; player: string; season?: string }> = []
+  for (const entry of all) {
+    const player = entry.id ?? entry.slug
+    rows.push({ key: entry.slug, player })
+    for (const version of shirts.versions[entry.slug] ?? []) {
+      rows.push({ key: `${entry.slug}@${version.id}`, player, season: version.seasonLabel ?? seasonOf(version.fromYear) })
+    }
+  }
+  return wardrobe(rows)
+}
+
 export default function XIPage({
   searchParams,
 }: {
@@ -32,6 +50,7 @@ export default function XIPage({
   const asked = Array.isArray(searchParams?.tab) ? searchParams?.tab[0] : searchParams?.tab
   const tab: XITab = asked === 'worst' ? 'worst' : 'best'
   const roster = rosterIndex()
+  const shirts = shirtBoard(roster)
 
   return (
     <Screen title={t('screen.xi.title')} sub={t('screen.xi.sub')} stage>
@@ -41,7 +60,8 @@ export default function XIPage({
       <XIBuilder
         formations={formationList()}
         roster={roster}
-        shirts={shirtBoard(roster)}
+        shirts={shirts}
+        wardrobe={xiWardrobe(roster.all, shirts)}
         // the six slugs a reviewed merge retired (21.9.2026): a sheet saved under one of
         // them still opens, on the id it now belongs to
         slugAliases={pickerRoster().slugAliases}
