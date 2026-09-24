@@ -81,6 +81,89 @@ TEMPLATES = {
             'hem': 'mask-hem.png',
         },
     },
+    # the four cuts below share 2010s-fitted's camera (delta 87 art brief §a1: "same camera and
+    # light in all five cuts", shirt centred at x=561, collar ~100px from top) — so the SAME
+    # sleeve/raglan/anchor polygons apply; only each cut's OWN masks and supports differ, built
+    # from exactly the parts its delivery contained (23.9.2026, THE-WORKER-GATES-ART-2026-09).
+    'modern-athletic': {
+        'canvas': [1122, 1402],
+        'sleeveLeft': [(0, 0), (236, 0), (236, 238), (222, 330), (212, 450), (207, 556), (150, 640), (0, 640)],
+        'sleeveRight': [(1122, 0), (886, 0), (886, 238), (900, 330), (910, 450), (912, 560), (972, 640), (1122, 640)],
+        'raglanLeft': [(0, 0), (438, 0), (438, 116), (207, 556), (150, 640), (0, 640)],
+        'raglanRight': [(1122, 0), (684, 0), (684, 116), (912, 560), (972, 640), (1122, 640)],
+        'anchors': {
+            'crest': {'x': 660, 'y': 330, 'w': 132, 'h': 142},
+            'maker': {'x': 332, 'y': 356, 'w': 136, 'h': 78},
+            'sponsor': {'x': 352, 'y': 468, 'w': 418, 'h': 214},
+        },
+        'masks': {'collarCrew': 'mask-collar-crew.png'},
+        'supports': {
+            'patternExcept': ['shoulder-panel', 'yoke-v', 'side-panel'],
+            'collar': ['crew'],
+            'sleeves': ['plain', 'raglan'],
+        },
+    },
+    'early-2000s-athletic': {
+        'canvas': [1122, 1402],
+        'sleeveLeft': [(0, 0), (236, 0), (236, 238), (222, 330), (212, 450), (207, 556), (150, 640), (0, 640)],
+        'sleeveRight': [(1122, 0), (886, 0), (886, 238), (900, 330), (910, 450), (912, 560), (972, 640), (1122, 640)],
+        'raglanLeft': [(0, 0), (438, 0), (438, 116), (207, 556), (150, 640), (0, 640)],
+        'raglanRight': [(1122, 0), (684, 0), (684, 116), (912, 560), (972, 640), (1122, 640)],
+        'anchors': {
+            'crest': {'x': 660, 'y': 330, 'w': 132, 'h': 142},
+            'maker': {'x': 332, 'y': 356, 'w': 136, 'h': 78},
+            'sponsor': {'x': 352, 'y': 468, 'w': 418, 'h': 214},
+        },
+        'masks': {'collarCrew': 'mask-collar-crew.png', 'cuffs': 'mask-sleeves-cuff.png'},
+        'supports': {
+            'patternExcept': ['shoulder-panel', 'yoke-v', 'side-panel'],
+            'collar': ['crew'],
+            'sleeves': ['plain', 'cuff', 'raglan'],
+        },
+    },
+    'retro-90s-boxy': {
+        'canvas': [1122, 1402],
+        'sleeveLeft': [(0, 0), (236, 0), (236, 238), (222, 330), (212, 450), (207, 556), (150, 640), (0, 640)],
+        'sleeveRight': [(1122, 0), (886, 0), (886, 238), (900, 330), (910, 450), (912, 560), (972, 640), (1122, 640)],
+        'raglanLeft': [(0, 0), (438, 0), (438, 116), (207, 556), (150, 640), (0, 640)],
+        'raglanRight': [(1122, 0), (684, 0), (684, 116), (912, 560), (972, 640), (1122, 640)],
+        'anchors': {
+            'crest': {'x': 660, 'y': 330, 'w': 132, 'h': 142},
+            'maker': {'x': 332, 'y': 356, 'w': 136, 'h': 78},
+            'sponsor': {'x': 352, 'y': 468, 'w': 418, 'h': 214},
+        },
+        # base collar for this cut IS the polo (the archive's 90s shirts wear polo collars) — no
+        # crew mask was delivered for this cut, so 'crew' is honestly absent from supports below
+        'masks': {'collarPolo': 'mask-collar-polo.png', 'collarV': 'mask-collar-v-neck.png', 'cuffs': 'mask-sleeves-cuff.png'},
+        'supports': {
+            'patternExcept': ['shoulder-panel', 'yoke-v', 'side-panel'],
+            'collar': ['polo', 'v-neck'],
+            'sleeves': ['plain', 'cuff', 'raglan'],
+        },
+    },
+    'retro-80s-long': {
+        'canvas': [1122, 1402],
+        'sleeveLeft': [(0, 0), (236, 0), (236, 238), (222, 330), (212, 450), (207, 556), (150, 640), (0, 640)],
+        'sleeveRight': [(1122, 0), (886, 0), (886, 238), (900, 330), (910, 450), (912, 560), (972, 640), (1122, 640)],
+        'raglanLeft': [(0, 0), (438, 0), (438, 116), (207, 556), (150, 640), (0, 640)],
+        'raglanRight': [(1122, 0), (684, 0), (684, 116), (912, 560), (972, 640), (1122, 640)],
+        'anchors': {
+            'crest': {'x': 660, 'y': 330, 'w': 132, 'h': 142},
+            'maker': {'x': 332, 'y': 356, 'w': 136, 'h': 78},
+            'sponsor': {'x': 352, 'y': 468, 'w': 418, 'h': 214},
+        },
+        # long sleeves to the wrist: no separate cuff overlay was delivered (the rib cuff is baked
+        # into the sleeve itself, as it is on the real 1983–89 shirts) — 'cuff' stays out of supports
+        'masks': {
+            'collarCrew': 'mask-collar-crew.png', 'collarPolo': 'mask-collar-polo.png',
+            'collarV': 'mask-collar-v-neck.png', 'sleeveStripe': 'mask-sleeves-shoulder-stripe.png',
+        },
+        'supports': {
+            'patternExcept': ['shoulder-panel', 'yoke-v', 'side-panel'],
+            'collar': ['crew', 'polo', 'v-neck'],
+            'sleeves': ['plain', 'raglan', 'shoulder-stripe'],
+        },
+    },
 }
 
 # which V14 file becomes which sanitised source (alpha only for masks)
@@ -299,14 +382,15 @@ def build_maps(tid, cfg):
         'masks': masks,
         'anchors': cfg['anchors'],
         # what this template can draw: a generic surface pattern is a full-bleed shape clipped to the
-        # torso and needs no geometry of its own; construction-bound values need their masks
-        'supports': {
+        # torso and needs no geometry of its own; construction-bound values need their masks.
+        # Defaulted for the 2010s-fitted / V14 shape; every other cut declares its OWN supports in
+        # TEMPLATES, built from exactly the mask files that cut's delivery contained (23.9.2026) —
+        # a cut never claims a look it has no honest geometry for.
+        'supports': cfg.get('supports') or {
             'patternExcept': ['shoulder-panel', 'yoke-v'],
             'collar': ['crew', 'v-neck'],
             'sleeves': ['plain', 'cuff', 'raglan'],
         },
-        'missing': ['collar:ringer', 'collar:polo', 'collar:laced', 'sleeves:shoulder-stripe', 'sleeves:arc',
-                    'pattern:shoulder-panel', 'pattern:yoke-v'],
     }
     return geometry, written
 

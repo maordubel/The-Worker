@@ -4,7 +4,11 @@ import { beatsAt, type Beat } from '@/lib/life/content/beats'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { BEATS_GALIL, CONVERSATIONS_GALIL, ENDINGS_GALIL } from '@/lib/life/content/chapter1993galil'
 import { BEATS_SINAI, CONVERSATIONS_SINAI, ENDINGS_SINAI } from '@/lib/life/content/chapter1995sinai'
-import { BEATS_ARMY, CONVERSATIONS_ARMY, ENDINGS_ARMY } from '@/lib/life/content/chapter1996army'
+// (23.9.2026) The 23.9.2026 overlay replaced chapter1996army.ts's unit with
+// chapter1996director.ts's Director's Cut; this suite now checks the live unit instead of
+// the superseded file so "points every talk/goto/actor/hotspot at something that exists"
+// tests what the game actually plays.
+import { BEATS_ARMY, CONVERSATIONS_ARMY, ENDINGS_ARMY } from '@/lib/life/content/chapter1996director'
 import { BEATS_HALL, CONVERSATIONS_HALL, ENDINGS_HALL } from '@/lib/life/content/chapter1997basket'
 import { BEATS_LACES, CONVERSATIONS_LACES, ENDINGS_LACES } from '@/lib/life/content/chapter1998laces'
 import { BEATS_SEED, CONVERSATIONS_SEED, ENDINGS_SEED } from '@/lib/life/content/chapter1999basket'

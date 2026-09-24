@@ -16,10 +16,17 @@ describe('the kit engine — one plan, two looks', () => {
     expect(photo.look).toBe('photo')
     expect(photo.width).toBe(1122)
     expect(photo.missing).toEqual([])
+    // delta 87 (23.9.2026): retro-80s-long now HAS a photo template (the art delivery's fifth
+    // cut), so 1985/86 prints photoreal too — the template-less case moved to the 1970s, whose
+    // cut (retro-70s-boxy) the delivery never covered.
     const eighties = resolveKitRender(spec('kit-1985-86-home'), { look: 'photo' })
-    expect(eighties.look).toBe('vector')
-    expect(eighties.missing).toEqual(['template'])
-    expect(eighties.width).toBe(360)
+    expect(eighties.look).toBe('photo')
+    expect(eighties.missing).toEqual([])
+    expect(eighties.width).toBe(1122)
+    const seventies = resolveKitRender(spec('kit-1978-79-home'), { look: 'photo' })
+    expect(seventies.look).toBe('vector')
+    expect(seventies.missing).toEqual(['template'])
+    expect(seventies.width).toBe(360)
   })
 
   it('falls back, and says why, when one value has no geometry', () => {

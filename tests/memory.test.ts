@@ -388,8 +388,13 @@ describe('שער 6 v3 — the threads, the countdown and the new pairs', () => {
     }
   })
 
-  it('shows the category on a CLOSED card and names it to a screen reader', () => {
+  // Maor, 23.9.2026: the topic must be removed from a card that has not been revealed —
+  // it made the wall very easy the moment it loaded. Delta 87 flips this test's own
+  // claim: a closed card now shows NO category, in the pixels or in the aria-label, and
+  // only an OPEN or DONE card may say what it is.
+  it('never shows the category on a CLOSED card, in the pixels or to a screen reader', () => {
     const card = readFileSync(join(ROOT, 'components/memory/ArchiveCard.tsx'), 'utf8')
-    expect(card).toContain("`${t('memory.closed')} — ${card.kind}`")
+    expect(card).not.toContain("`${t('memory.closed')} — ${card.kind}`")
+    expect(card).toContain("t('memory.closed')")
   })
 })

@@ -84,7 +84,13 @@ describe('רשת הביטחון — no day stays open', () => {
    * written scene is worse than the bug it was built for.
    */
   it('does not count a chapter as stalled while a beat is merely early', () => {
-    const state = stateFor('a2-alley', { flags: { 'a2:played': true, 'life:a:d2': true }, minute: 16 * 60 })
+    // (23.9.2026) `a2-after` — the beat this used to exercise — no longer waits on a
+    // clock: the 23.9.2026 overlay closes the alley evening as soon as the boy has played,
+    // rather than at 17:30, so it is no longer "merely early" once `a2:played` is set. The
+    // property this guards (a beat blocked on nothing but a future time is not a stall) is
+    // still real — `a2-teams-full` is time-gated the same way and is still ahead of its
+    // own clock at four in the afternoon — so the scenario now exercises that beat instead.
+    const state = stateFor('a2-alley', { flags: { 'life:a:d2': true }, minute: 16 * 60 })
     expect(waitingForTheClock(state, eraFor('a2-alley'))).toBe(true)
     expect(isStalled(input('a2-alley', { state }))).toBe(false)
   })

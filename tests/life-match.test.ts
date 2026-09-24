@@ -225,10 +225,13 @@ describe('the director — steps in order, the board pushed, the clock moved for
   })
 
   it('a hall night with no archive score prints a board with no numbers', () => {
+    // (23.9.2026) was `hall-97`, before the overlay retired that script — the 1997-basket
+    // relegation night is told through `h1-chain` now, not the match minigame. `galil-93-g1`
+    // is the same shape (an unscored hall night) and still played by a beat.
     vi.useFakeTimers()
     const host = fakeHost()
-    const script = MATCH_SCRIPTS['hall-97']!
-    const director = new MatchDirector(host, script, anchorFor('hall-97'))
+    const script = MATCH_SCRIPTS['galil-93-g1']!
+    const director = new MatchDirector(host, script, anchorFor('galil-93-g1'))
     director.start()
     vi.advanceTimersByTime(scriptMs(script) + 1000)
     const boards = host.emitted.filter((e) => e.name === 'match').map((e) => e.value as NonNullable<LifeBusEvents['match']>)

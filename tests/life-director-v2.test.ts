@@ -40,7 +40,11 @@ describe('Director v2 — documentary / encounters / 1996', () => {
   it('uses documentary transitions that explicitly connect world and Pugi', () => {
     const card = file('components/life/ChapterCard.tsx')
     expect(card).toContain('TIME → WORLD → PUGI')
-    expect(card).toContain('העולם')
-    expect(card).toContain('פוגי')
+    // the two beat labels moved to the LIFE catalogue (rule 10, delta 87)
+    const life = file('messages/he.life.json')
+    expect(card).toContain("t('life.chapterDoc.world')")
+    expect(card).toContain("t('life.chapterDoc.pogi')")
+    expect(life).toContain('"life.chapterDoc.world": "העולם"')
+    expect(life).toContain('"life.chapterDoc.pogi": "פוגי"')
   })
 })

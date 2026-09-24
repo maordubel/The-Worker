@@ -1,0 +1,20 @@
+{
+  "xi.stage.setup": "הגדרות",
+  "xi.stage.bench": "ספסל",
+  "xi.stage.finish": "לפוסטר",
+  "xi.stage.fillNext": "מלאו את המשבצת הבאה",
+  "xi.stage.full": "מלא!",
+  "xi.draft.cards": "כרטיסים",
+  "xi.draft.list": "רשימה",
+  "xi.draft.hint": "החליקו לצדדים, גררו כרטיס למעלה אל המגרש",
+  "xi.draft.place": "שבצו",
+  "xi.draft.selectFirst": "בחרו משבצת במגרש כדי לשבץ מהרשימה",
+  "xi.taken": "כבר במגרש",
+  "xi.dock.formation": "מבנה",
+  "lineup.stage.setup": "פרטי המשחק",
+  "lineup.stage.rack": "מלתחה",
+  "lineup.stage.finish": "למנהרה",
+  "lineup.stage.hint": "גררו חולצה מהמלתחה אל קו, או הקישו קו ואז חולצה",
+  "lineup.stage.locked": "נעול",
+  "goal.stage.dragHint": "גררו את הדמות למקום על המגרש, או השתמשו בכפתורים"
+}

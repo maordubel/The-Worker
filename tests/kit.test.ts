@@ -234,11 +234,17 @@ describe('שער 5 — האוסף', () => {
     expect(page).toContain('lockedCatalog()')
     expect(page).not.toContain('kitCatalog(')
     expect(page).not.toContain('kitDnaRack(')
-    // and a locked card still draws nothing but an outline
+    // and a locked card still draws nothing but an outline — desktop's own full-page card
+    // (delta 87: wrapped in a ternary, not an early return, so the phone stage can sit beside it)
+    // and the phone stage's own locked sheet body
     const wing = readFileSync(join(ROOT, 'app/kits/KitWing.tsx'), 'utf8')
-    expect(wing).toContain('if (open) return <LockedCard')
-    const lockedCard = wing.slice(wing.indexOf('function LockedCard'))
+    expect(wing).toContain('<LockedCard kit={open} onBack={() => setOpenKey(null)} />')
+    expect(wing).toContain('<MobileLockedBody kit={mobileOpen} />')
+    const lockedStart = wing.indexOf('function LockedCard')
+    const lockedCard = wing.slice(lockedStart, lockedStart + wing.slice(lockedStart).indexOf('\nfunction '))
     expect(lockedCard).not.toContain('<KitShirt')
+    const mobileLockedBody = wing.slice(wing.indexOf('function MobileLockedBody'))
+    expect(mobileLockedBody).not.toContain('<KitShirt')
   })
 
   it('keeps the collection store behind its interface', () => {
