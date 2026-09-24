@@ -366,7 +366,7 @@ export function workerCard(inputs: CardInputs): WorkerCardState {
   }
   const card = book.card ?? null
 
-  const wall = GATES.filter((gate) => gate.href !== null && gate.number !== 10)
+  const wall = GATES.filter((gate) => gate.href !== null)
   const lines: CardLine[] = wall.map((gate) => {
     const href = gateId(gate.href as string)
     const line = stat(ctx, href)

@@ -12,7 +12,10 @@ import { ENDINGS_1991, OBJECTIVES_1991, PORTRAIT_1991, TIP_OFF } from './chapter
 import { BEATS_1993, ENCOUNTERS_1993, ENDINGS_1993, objective1993, PORTRAIT_1993, TIP_OFF_93 } from './chapter1993cup'
 import { BEATS_GALIL, ENDINGS_GALIL, objectiveGalil, PORTRAIT_GALIL } from './chapter1993galil'
 import { BEATS_SINAI, ENDINGS_SINAI, objectiveSinai, PORTRAIT_SINAI } from './chapter1995sinai'
-import { BEATS_ARMY, ENDINGS_ARMY, objectiveArmy, PORTRAIT_ARMY } from './chapter1996director'
+// 1996 uses the full gameplay chapter again (Director V3, 24.9.2026). The compact Director
+// replacement removed world conversations that scenes.ts still points at (Kobi/Barry/Asaf,
+// the bus, the winter); its historical and flow corrections now live in chapter1996army.ts.
+import { BEATS_ARMY, ENDINGS_ARMY, objectiveArmy, PORTRAIT_ARMY } from './chapter1996army'
 import { BEATS_HALL, ENDINGS_HALL, objectiveHall, PORTRAIT_HALL } from './chapter1997basket'
 import {
   BEATS_A2, BEATS_A3, BEATS_A4, BEATS_A5, BEATS_A6, BEATS_A7,
@@ -73,7 +76,7 @@ import { SCHEDULE_1986 } from './schedules1986'
 import { SCHEDULE_1990 } from './schedules1990'
 import { SCHEDULE_1991 } from './schedules1991'
 import { BEATS_1986 } from './threads'
-import { FACES_2000, STANDIN_FACES } from '../world/castFigures'
+import { facesFor, playerFor, STANDIN_FACES } from '../world/castFigures'
 import { AMBIENT_2000 } from './ambient2000'
 
 /**
@@ -717,7 +720,8 @@ function ownFace(era: Era): Era['portraits'] {
   let portraits = era.portraits
   // 2000 on: the people of the adult life speak with the face of the body they stand on
   // (`FACES_2000`) — Dor was a boy of thirteen in the box and a woman on the floor
-  if (era.year >= 2000) portraits = { ...portraits, ...FACES_2000 }
+  // (24.9.2026: by year — the faces age with the bodies, `castFigures.ts` `faceFromYear`)
+  if (era.year >= 2000) portraits = { ...portraits, ...facesFor(era.year) }
   // Freddy and Melamed stand on clean stand-ins from their first chapter (1995, 1996): their
   // own sheets are drawn, not photographed, and so were the plates cut from them
   else if (era.year >= 1990) portraits = { ...portraits, ...STANDIN_FACES }
@@ -821,6 +825,9 @@ for (const [chapter, beats] of Object.entries(COMBO_BEATS)) {
 }
 // ...and the face in the box, from the body on the floor (`ownFace`, above `ERAS`). In
 // place, on purpose: `eraFor('1990')` IS `ERA_1990`, and three tests hold that identity.
+// ...and the grown man ages on screen (24.9.2026): `hero90` until 2009, then 32/40/47
+// (`playerFor` in `castFigures.ts`; the same object back when nothing changes)
+for (const era of Object.values(ERAS)) era.player = playerFor(era.year, era.player)
 for (const era of Object.values(ERAS)) era.portraits = ownFace(era)
 // ...and the people crossing the picture: no cast body among them, from 2000 (`ambient2000.ts`)
 for (const era of Object.values(ERAS)) if (era.year >= 2000) era.ambient = AMBIENT_2000

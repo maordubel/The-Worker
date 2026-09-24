@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 import { eraFor } from '../../content/era'
 import { AFTER_FLAG, activityForGig, afterConversation, settleActivity } from '../../activities'
+import { STORY_CHORES, STORY_CHORE_PREFIX, type StoryChore } from '../../content/storyChores'
 import { CHORE_ORDER_FLAG, GIGS, gigFlag, gigPay, workDoneFlag, type Gig } from '../../gigs'
 import { shekels } from '../../prices'
 import type { LocationId } from '../../types'
@@ -115,16 +116,30 @@ export class ChoreScene extends Phaser.Scene {
   private finished = false
   private lockUntil = 0
   private nextSpawn = 0
+  /** a story beat played with the hands (`content/storyChores.ts`), not a paid job */
+  private story: StoryChore | null = null
+  private startedAt = 0
 
   constructor() {
     super(ChoreScene.KEY)
   }
 
   init(data: { gig?: string; returnTo?: LocationId; spawn?: string }) {
-    this.gig = GIGS.find((g) => g.id === data.gig) ?? (GIGS[0] as Gig)
-    this.shape = SHAPE[this.gig.id] ?? FALLBACK_SHAPE
+    const story = data.gig?.startsWith(STORY_CHORE_PREFIX) ? STORY_CHORES[data.gig.slice(STORY_CHORE_PREFIX.length)] ?? null : null
+    this.story = story
+    if (story) {
+      // a story chore borrows a job's shape and nothing else: no wage, no job slot, no pay line
+      const { trait: _trait, rel: _rel, ...base } = GIGS[0] as Gig
+      void _trait
+      void _rel
+      this.gig = { ...base, id: `${STORY_CHORE_PREFIX}${story.id}`, where: story.where, labelHe: story.labelHe, at: { x: story.drop.x, y: story.drop.y, w: 0.1 } }
+      this.shape = { ...story.shape }
+    } else {
+      this.gig = GIGS.find((g) => g.id === data.gig) ?? (GIGS[0] as Gig)
+      this.shape = SHAPE[this.gig.id] ?? FALLBACK_SHAPE
+    }
     this.returnTo = data.returnTo ?? (this.gig.where as LocationId)
-    this.returnSpawn = data.spawn ?? 'start'
+    this.returnSpawn = data.spawn ?? story?.returnSpawn ?? 'start'
     this.pieces = []
     this.carried = null
     this.done = 0
@@ -184,6 +199,7 @@ export class ChoreScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', this.onResize, this))
 
     this.endsAt = this.time.now + this.shape.seconds * 1000
+    this.startedAt = this.time.now
     this.ctx.bus.emit('place', { id: this.gig.where as LocationId, title: this.gig.labelHe, ambience: 'day' })
     this.ctx.bus.emit('toast', { text: this.shape.hintHe, tone: 'plain' })
     this.pushHud()
@@ -264,6 +280,13 @@ export class ChoreScene extends Phaser.Scene {
     this.placePlayer(nx, ny)
     if (this.carried) {
       this.carried.setPosition(nx, ny - this.player.displayHeight * 0.55).setDepth(ny + 1)
+    }
+
+    // (V3 §10) a story chore can be stopped halfway, and what was carried counts: the
+    // button with empty hands, after a breath, puts the work down
+    if (this.story && this.shape.mode === 'carry' && !this.carried && this.ctx.input.actionPressed && time > this.startedAt + 900) {
+      this.finish()
+      return
     }
 
     this.arrive(time)
@@ -365,6 +388,15 @@ export class ChoreScene extends Phaser.Scene {
     const chapter = this.ctx.engine.state.chapter
     const ratio = Phaser.Math.Clamp(this.done / this.shape.target, 0, 1)
     const perfect = this.done >= this.shape.target
+
+    if (this.story) {
+      const events = this.story.finish(this.done, this.shape.target)
+      if (events.length) this.ctx.engine.dispatch(...events)
+      void this.ctx.engine.save()
+      this.ctx.bus.emit('toast', { text: this.story.toastHe(this.done, this.shape.target), tone: perfect ? 'red' : 'plain' })
+      this.leave()
+      return
+    }
 
     /**
      * פעילות — from its first chapter a job that became an activity is settled by the

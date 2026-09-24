@@ -1191,6 +1191,51 @@
     1672,
     941
    ]
+  },
+  "bloom80Goal": {
+   "source": "maor-2026-09-23-stadium-photos",
+   "whatHe": "בלומפילד בשנות השמונים — מאחורי השער, יציע ריק (olivetti, בנק הפועלים, טמפו)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 1478624,
+   "deyellowed": 96784,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "bloom90Side": {
+   "source": "maor-2026-09-23-stadium-photos",
+   "whatHe": "בלומפילד בשנות התשעים — מהדשא, קו האמצע, יציע ריק (שיכון עובדים, Hertz)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 1598964,
+   "deyellowed": 211841,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "bloom90Corner": {
+   "source": "maor-2026-09-23-stadium-photos",
+   "whatHe": "בלומפילד בשנות התשעים — פינת המגרש והשער, יציע ריק",
+   "w": 1672,
+   "h": 941,
+   "bytes": 1799686,
+   "deyellowed": 221833,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
   }
  },
  "figures": {
@@ -1454,11 +1499,12 @@
    "source": "2026-09e"
   },
   "hermesh": {
-   "w": 145,
-   "h": 430,
-   "bytes": 72848,
+   "w": 192,
+   "h": 640,
+   "bytes": 28972,
    "yellowLeft": 0,
-   "source": "2026-09e"
+   "whatHe": "חרמש — גופייה אדומה וג׳ינס, חזית",
+   "source": "maor-2026-09-23-reference"
   },
   "hermesh-back": {
    "w": 164,
@@ -2128,6 +2174,382 @@
    "whatHe": "בארי עם הרדיו, שלושה־רבעים",
    "yellowLeft": 0,
    "source": "maor-2026-09-08-green-screen"
+  },
+  "pogi32": {
+   "w": 213,
+   "h": 640,
+   "bytes": 42582,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 32 — 2010–2013 · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi32-3q": {
+   "w": 202,
+   "h": 640,
+   "bytes": 38456,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 32 — 2010–2013 · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi32-side": {
+   "w": 123,
+   "h": 640,
+   "bytes": 29324,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 32 — 2010–2013 · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi32-back": {
+   "w": 216,
+   "h": 640,
+   "bytes": 40952,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 32 — 2010–2013 · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi32-walk": {
+   "w": 369,
+   "h": 640,
+   "bytes": 46460,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 32 — 2010–2013 · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi40": {
+   "w": 216,
+   "h": 640,
+   "bytes": 43376,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 40, עם צעיף — 2016–2021 · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi40-3q": {
+   "w": 207,
+   "h": 640,
+   "bytes": 41936,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 40, עם צעיף — 2016–2021 · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi40-side": {
+   "w": 136,
+   "h": 640,
+   "bytes": 30968,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 40, עם צעיף — 2016–2021 · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi40-back": {
+   "w": 216,
+   "h": 640,
+   "bytes": 45100,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 40, עם צעיף — 2016–2021 · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi40-walk": {
+   "w": 325,
+   "h": 640,
+   "bytes": 44808,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 40, עם צעיף — 2016–2021 · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi47": {
+   "w": 213,
+   "h": 640,
+   "bytes": 40050,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 47 — 2023–2026 · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi47-3q": {
+   "w": 223,
+   "h": 640,
+   "bytes": 33628,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 47 — 2023–2026 · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi47-side": {
+   "w": 120,
+   "h": 640,
+   "bytes": 25670,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 47 — 2023–2026 · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi47-back": {
+   "w": 210,
+   "h": 640,
+   "bytes": 37394,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 47 — 2023–2026 · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "pogi47-walk": {
+   "w": 340,
+   "h": 640,
+   "bytes": 41226,
+   "yellowLeft": 0,
+   "whatHe": "פוגי בן 47 — 2023–2026 · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi62": {
+   "w": 229,
+   "h": 640,
+   "bytes": 43604,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 62 — 2010–2015 · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi62-3q": {
+   "w": 224,
+   "h": 640,
+   "bytes": 37716,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 62 — 2010–2015 · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi62-side": {
+   "w": 131,
+   "h": 640,
+   "bytes": 27882,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 62 — 2010–2015 · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi62-back": {
+   "w": 230,
+   "h": 640,
+   "bytes": 42700,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 62 — 2010–2015 · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi62-walk": {
+   "w": 348,
+   "h": 640,
+   "bytes": 43726,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 62 — 2010–2015 · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi72": {
+   "w": 256,
+   "h": 640,
+   "bytes": 43100,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 72 — 2017–2026 · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi72-3q": {
+   "w": 229,
+   "h": 640,
+   "bytes": 41298,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 72 — 2017–2026 · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi72-side": {
+   "w": 146,
+   "h": 640,
+   "bytes": 29480,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 72 — 2017–2026 · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi72-back": {
+   "w": 258,
+   "h": 640,
+   "bytes": 42442,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 72 — 2017–2026 · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "kobi72-walk": {
+   "w": 334,
+   "h": 640,
+   "bytes": 45754,
+   "yellowLeft": 0,
+   "whatHe": "קובי בן 72 — 2017–2026 · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "ofir40": {
+   "w": 232,
+   "h": 640,
+   "bytes": 43264,
+   "yellowLeft": 0,
+   "whatHe": "אופיר בן 40 · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "ofir40-3q": {
+   "w": 223,
+   "h": 640,
+   "bytes": 41200,
+   "yellowLeft": 0,
+   "whatHe": "אופיר בן 40 · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "ofir40-side": {
+   "w": 131,
+   "h": 640,
+   "bytes": 30514,
+   "yellowLeft": 0,
+   "whatHe": "אופיר בן 40 · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "ofir40-back": {
+   "w": 232,
+   "h": 640,
+   "bytes": 42514,
+   "yellowLeft": 0,
+   "whatHe": "אופיר בן 40 · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "ofir40-walk": {
+   "w": 360,
+   "h": 640,
+   "bytes": 45868,
+   "yellowLeft": 0,
+   "whatHe": "אופיר בן 40 · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "amit40": {
+   "w": 205,
+   "h": 640,
+   "bytes": 37266,
+   "yellowLeft": 0,
+   "whatHe": "עמית בן 40, משקפיים · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "amit40-3q": {
+   "w": 210,
+   "h": 640,
+   "bytes": 32186,
+   "yellowLeft": 0,
+   "whatHe": "עמית בן 40, משקפיים · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "amit40-side": {
+   "w": 120,
+   "h": 640,
+   "bytes": 22718,
+   "yellowLeft": 0,
+   "whatHe": "עמית בן 40, משקפיים · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "amit40-back": {
+   "w": 210,
+   "h": 640,
+   "bytes": 36030,
+   "yellowLeft": 0,
+   "whatHe": "עמית בן 40, משקפיים · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "amit40-walk": {
+   "w": 347,
+   "h": 640,
+   "bytes": 40484,
+   "yellowLeft": 0,
+   "whatHe": "עמית בן 40, משקפיים · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "efi44": {
+   "w": 223,
+   "h": 640,
+   "bytes": 41248,
+   "yellowLeft": 0,
+   "whatHe": "אפי בן 44 · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "efi44-3q": {
+   "w": 215,
+   "h": 640,
+   "bytes": 37836,
+   "yellowLeft": 0,
+   "whatHe": "אפי בן 44 · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "efi44-side": {
+   "w": 121,
+   "h": 640,
+   "bytes": 28304,
+   "yellowLeft": 0,
+   "whatHe": "אפי בן 44 · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "efi44-back": {
+   "w": 226,
+   "h": 640,
+   "bytes": 41508,
+   "yellowLeft": 0,
+   "whatHe": "אפי בן 44 · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "efi44-walk": {
+   "w": 358,
+   "h": 640,
+   "bytes": 41348,
+   "yellowLeft": 0,
+   "whatHe": "אפי בן 44 · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "keren40": {
+   "w": 206,
+   "h": 640,
+   "bytes": 41174,
+   "yellowLeft": 0,
+   "whatHe": "קרן בת 40 · חזית",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "keren40-3q": {
+   "w": 183,
+   "h": 640,
+   "bytes": 39286,
+   "yellowLeft": 0,
+   "whatHe": "קרן בת 40 · שלושה־רבעים",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "keren40-side": {
+   "w": 125,
+   "h": 640,
+   "bytes": 29630,
+   "yellowLeft": 0,
+   "whatHe": "קרן בת 40 · פרופיל ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "keren40-back": {
+   "w": 201,
+   "h": 640,
+   "bytes": 42232,
+   "yellowLeft": 0,
+   "whatHe": "קרן בת 40 · גב",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "keren40-walk": {
+   "w": 333,
+   "h": 640,
+   "bytes": 45252,
+   "yellowLeft": 0,
+   "whatHe": "קרן בת 40 · צעד, ימינה",
+   "source": "maor-2026-09-22-characters-2000-2026"
+  },
+  "hermesh-3q": {
+   "w": 195,
+   "h": 640,
+   "bytes": 26698,
+   "yellowLeft": 0,
+   "whatHe": "חרמש — גופייה אדומה וג׳ינס, שלושה־רבעים",
+   "source": "maor-2026-09-23-reference"
+  },
+  "hermesh-ball": {
+   "w": 191,
+   "h": 640,
+   "bytes": 30530,
+   "yellowLeft": 0,
+   "whatHe": "חרמש — תלבושת כדורסל אדומה, חזית",
+   "source": "maor-2026-09-23-reference"
   }
  },
  "props": {
@@ -2835,7 +3257,7 @@
   "faceHermesh": {
    "w": 320,
    "h": 320,
-   "bytes": 90026,
+   "bytes": 10430,
    "yellowLeft": 0,
    "source": "cut from hermesh"
   },
@@ -2897,15 +3319,9 @@
   "faceBarry": {
    "w": 320,
    "h": 320,
-   "bytes": 16726,
+   "bytes": 11290,
    "yellowLeft": 0,
-   "source": "cut from barry96",
-   "box": [
-    12,
-    0,
-    242,
-    230
-   ]
+   "source": "cut from barryToday"
   },
   "faceAliza": {
    "w": 320,
@@ -3529,6 +3945,76 @@
    "bytes": 13360,
    "yellowLeft": 0,
    "source": "cut from kobi90-stand"
+  },
+  "facePogi32": {
+   "w": 320,
+   "h": 320,
+   "bytes": 14562,
+   "yellowLeft": 0,
+   "source": "cut from pogi32"
+  },
+  "facePogi40": {
+   "w": 320,
+   "h": 320,
+   "bytes": 15530,
+   "yellowLeft": 0,
+   "source": "cut from pogi40"
+  },
+  "facePogi47": {
+   "w": 320,
+   "h": 320,
+   "bytes": 14752,
+   "yellowLeft": 0,
+   "source": "cut from pogi47"
+  },
+  "faceKobi62": {
+   "w": 320,
+   "h": 320,
+   "bytes": 14656,
+   "yellowLeft": 0,
+   "source": "cut from kobi62"
+  },
+  "faceKobi72": {
+   "w": 320,
+   "h": 320,
+   "bytes": 17854,
+   "yellowLeft": 0,
+   "source": "cut from kobi72"
+  },
+  "faceOfir40": {
+   "w": 320,
+   "h": 320,
+   "bytes": 16132,
+   "yellowLeft": 0,
+   "source": "cut from ofir40"
+  },
+  "faceAmit40": {
+   "w": 320,
+   "h": 320,
+   "bytes": 13704,
+   "yellowLeft": 0,
+   "source": "cut from amit40"
+  },
+  "faceEfi44": {
+   "w": 320,
+   "h": 320,
+   "bytes": 14452,
+   "yellowLeft": 0,
+   "source": "cut from efi44"
+  },
+  "faceKeren40": {
+   "w": 320,
+   "h": 320,
+   "bytes": 19690,
+   "yellowLeft": 0,
+   "source": "cut from keren40"
+  },
+  "faceRachel60": {
+   "w": 320,
+   "h": 320,
+   "bytes": 28310,
+   "yellowLeft": 0,
+   "source": "portrait-only · maor-2026-09-22-characters-2000-2026/faceRachel60"
   }
  },
  "layers": {
@@ -6034,6 +6520,90 @@
     329
    ],
    "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloom80Goal--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 5446,
+   "source": "bloom80Goal",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloom80Goal--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6150,
+   "source": "bloom80Goal",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 164599,
+   "yellowLeft": 0
+  },
+  "bloom90Side--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7734,
+   "source": "bloom90Side",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "bloom90Side--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6992,
+   "source": "bloom90Side",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 18858,
+   "yellowLeft": 0
+  },
+  "bloom90Corner--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 10496,
+   "source": "bloom90Corner",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 36335,
+   "yellowLeft": 0
+  },
+  "bloom90Corner--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7994,
+   "source": "bloom90Corner",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 240031,
    "yellowLeft": 0
   }
  },

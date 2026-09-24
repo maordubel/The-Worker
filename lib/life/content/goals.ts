@@ -100,10 +100,12 @@ export const goalArmy = (state: LifeState): LocationId | null => {
   if (flag(state, 'life:army:d4')) return flag(state, 'a4:road') ? null : 'kiosk'
   if (flag(state, 'life:army:d3')) return flag(state, 'a3:decided') ? null : 'bus-station'
   if (flag(state, 'life:army:d2')) {
-    if (state.gate.identity !== 'gate7' || flag(state, 'a2:chose')) return null
-    return 'bloomfield-outside'
+    // (V3) asked of everybody in uniform, whatever gate he stood at before; under the stand
+    // the goal is the room he is in — pointing him back out would answer the question for him
+    if (flag(state, 'a2:chose')) return null
+    return state.location === 'gate5' ? 'gate5' : 'bloomfield-outside'
   }
-  return 'home'
+  return flag(state, 'a1:packed') ? null : 'home'
 }
 
 /** 1997–98 — the hall the night it went down, or Bloomfield with his father. */

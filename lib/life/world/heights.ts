@@ -33,12 +33,22 @@ export const DEFAULT_HEIGHT_M = 1.75
 const HEIGHTS: ReadonlyArray<readonly [string, number]> = [
   // ---------------------------------------------------------------- הילדים ----------
   // Pogi's own poses are sized by the era, not from here, but the alley children are not.
+  // 24.9.2026 — the grown man, from the 2000–2026 delivery: `pogi32` must not fall through
+  // to `pogi` (the eight-year-old, 1.30) — the longest prefix wins, and these are longer
+  ['pogi32', 1.78],
+  ['pogi40', 1.78],
+  ['pogi47', 1.78],
   ['pogi90', 1.78],
   ['pogiIDF', 1.77],
   ['pogi', 1.30],
   ['kid', 1.32],
 
   // The four from the alley, at the ages the chapters give them.
+  // …and the friends at forty (`ofir40` would otherwise find `ofir`, the boy of 1.46)
+  ['amit40', 1.72],
+  ['ofir40', 1.76],
+  ['efi44', 1.80],
+  ['keren40', 1.66],
   ['amit90', 1.72],
   ['amit', 1.42],
   ['ofir90', 1.76],
@@ -49,6 +59,9 @@ const HEIGHTS: ReadonlyArray<readonly [string, number]> = [
   ['keren', 1.38],
 
   // ------------------------------------------------------------- המשפחה -------------
+  // a man of seventy has lost a couple of centimetres; of sixty-two, one
+  ['kobi72', 1.74],
+  ['kobi62', 1.75],
   ['kobi90', 1.76],
   ['kobi', 1.76],
   ['rachel90', 1.63],

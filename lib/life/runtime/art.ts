@@ -163,6 +163,16 @@ export const BACKDROP = [
   'homeAdult', 'flatAway', 'workshopFix', 'communityRoom', 'storeroom', 'officeOwner',
   'deskNewsroom', 'rehearsal', 'driveIn', 'arenaEuroOut', 'arenaEuroSeats', 'portEurope',
   'pitchSmall', 'bedroom00', 'hallNew', 'bloomOldTerrace', 'bloomNewTerrace',
+  /**
+   * **בלומפילד מבפנים — שלושה צילומים, 23.9.2026** (`/tmp/in88/stadium`, מאור: לשים אותם
+   * כחדרי בלומפילד של העשורים שלהם). השלטים מתארכים אותם: olivetti / בנק הפועלים / טמפו
+   * הם שנות השמונים, שיכון עובדים / Hertz — התשעים. היציעים **ריקים**, ולכן הם החדר של יום
+   * בלי משחק בלבד (`STAND_80S`/`STAND_90S` ב-`world/rooms2000.ts`); ביום משחק היציע נשאר
+   * הציור עם הקהל האפוי (`stand` + `standCrowd`) — יציע ריק באמצע משחק הוא שקר גדול יותר
+   * מציור. השלטים הצהובים (נסטלה, בירה מכבי) עברו את ה-de-yellow של `finish-backdrops.py`
+   * כמו כל ציור: חריג לכלל 8 נותן רק מאור, על קובץ, אחרי שראה את המדידה.
+   */
+  'bloom80Goal', 'bloom90Side', 'bloom90Corner',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 
@@ -227,11 +237,8 @@ export const FIGURE = [
    * walked backwards in every chapter until 5.9.2026. Fifteen files were mirrored back;
    * `scripts/life/facing-check.py` now fails rather than a comment being trusted.
    */
-  'barry96', 'barry96-3q', 'barry96-side', 'barry96-back',
-  'barry96-speak', 'barry96-listen', 'barry96-concern', 'barry96-laugh',
   'efi96', 'efi96-3q', 'efi96-side', 'efi96-back',
   'efi96-speak', 'efi96-listen', 'efi96-concern', 'efi96-laugh',
-  'michel96-walk1', 'michel96-walk3', 'michel96-walk5',
   // 21.9.2026 — Michel in 1999, standing: the red tracksuit his plate was cut from. In the
   // city's cast since 8.9; in the life from the adult chapters (`CAST_2000`)
   'michel99', 'michel99-3q',
@@ -327,13 +334,8 @@ export const FIGURE = [
   'ofir90-side',
   'ofir90-back',
   'ofir90-3q',
-  'ofir90-smoke',
   'ofir90-walk',
-  'ofir90-crouch',
-  'ofir90-point',
   'ofir90-sitA',
-  'ofir90-sitB',
-  'ofir90-scarf',
   'amit90',
   'amit90-3q',
   'amit90-side',
@@ -543,7 +545,7 @@ export const FIGURE = [
    * before 2000.
    */
   'shachor', 'shachor-back', 'soko', 'soko-back', 'asaf', 'asaf-back',
-  'yosef', 'yosef-back', 'hermesh', 'hermesh-back',
+  'yosef', 'yosef-back', 'hermesh',
   'melamed', 'melamed-play', 'melamed-lean', 'melamed-listen',
   'freddy', 'freddy-glass', 'freddy-drink',
   /**
@@ -559,6 +561,29 @@ export const FIGURE = [
    * שם שיש לו קובץ צריך להיות רשום לפני שמישהו ינסה להשתמש בו, לא אחרי.
    */
   'bfSteward', 'bfVendor',
+  /**
+   * ------------------------------------------------ 2000–2026, הגיל בגוף (24.9.2026) ----
+   *
+   * `THE-WORKER-CHARACTERS-2000-2026-55`, שנמסרה ב-22.9 ולא נקלטה עד היום: פוגי בן 32/40/47,
+   * קובי בן 62/72, אופיר, עמית וקרן בני 40, אפי בן 44 — חמש תנוחות כל אחד
+   * (`scripts/life/ingest-characters-2026-09-24.py`). החזית היא המפתח החשוף, כמו `hero90`.
+   * איזה גוף בכל שנה — `castFigures.ts` (`fromYear`) ו-`playerFor` לפוגי עצמו.
+   */
+  'pogi32', 'pogi32-3q', 'pogi32-side', 'pogi32-back', 'pogi32-walk',
+  'pogi40', 'pogi40-3q', 'pogi40-side', 'pogi40-back', 'pogi40-walk',
+  'pogi47', 'pogi47-3q', 'pogi47-side', 'pogi47-back', 'pogi47-walk',
+  'kobi62', 'kobi62-3q', 'kobi62-side', 'kobi62-back', 'kobi62-walk',
+  'kobi72', 'kobi72-3q', 'kobi72-side', 'kobi72-back', 'kobi72-walk',
+  'ofir40', 'ofir40-3q', 'ofir40-side', 'ofir40-back', 'ofir40-walk',
+  'amit40', 'amit40-3q', 'amit40-side', 'amit40-back', 'amit40-walk',
+  'efi44', 'efi44-3q', 'efi44-side', 'efi44-back', 'efi44-walk',
+  'keren40', 'keren40-3q', 'keren40-side', 'keren40-back', 'keren40-walk',
+  // חרמש הקנוני — האיש הקירח (רפרנס של מאור, 23.9.2026). `hermesh` נדרס באותו שם; ההיפי
+  // בשיער הארוך שעמד עליו יצא, וגם הגב שלו (`hermesh-back`, ב-`LEGACY_POSE`). בכדורסל — באולם
+  'hermesh-3q', 'hermesh-ball',
+  // בארי הקנוני (`barry-3q-green`, מאור 23.9.2026) הוא האיש של `barryToday`: רזה, תיק צד,
+  // והטרנזיסטור. `barry96` — גבר אחר לגמרי — יצא מהזירה (`LEGACY_POSE`)
+  'barryToday', 'barryToday-3q', 'barryRadio', 'barryRadio-3q',
 ] as const
 
 /**
@@ -596,7 +621,34 @@ export const PLANNED_FIGURE = [] as const
  * drawn line — who kept playing the two-a-side as Pogi after the photographed boy took
  * over the world. Maor: *"אתה מציג את פוגי כילד כציור — זו טעות."*
  */
-export const RETIRED_FIGURE = ['fanA', 'fanB', 'fanC', 'fanD', 'fanE', 'fanF', 'fanG', 'kid'] as const
+
+/**
+ * ------------------------------------------------ אדם אחר תחת אותו שם (24.9.2026) ----
+ *
+ * קבצים שעל הדיסק ושאסור לאף **אדם** לעמוד עליהם, כי הם מישהו אחר מהאדם שהשם שלו עליהם —
+ * ולכן הם מחוץ ל-`FIGURE` ובתוך `RETIRED_FIGURE`. `life:identity` ו-
+ * `tests/life-identity.test.ts` נופלים על כל שחקן, שורת `CAST_2000` או `row.figure` שמצביעים
+ * לכאן.
+ *
+ *   · `ofir90-smoke/-crouch/-point/-sitB/-scarf` — ההערה ב-`FIGURE` אומרת את זה מ-4.9: "still
+ *     the older man and are the next thing to redraw". לא צוירו מחדש; אז הם לא עומדים.
+ *   · `michel96-walk*` — איש אחר, מצויר, בז'קט בורדו (מאור 23.9: הטרנינג האדום-לבן הוא מישל).
+ *   · `barry96*` — גבר כבד ומתולתל; בארי של מאור הוא `barryToday`/`barryRadio`.
+ *   · `hermesh-back` — הגב של ההיפי ששם לא עומד עוד.
+ */
+export const LEGACY_POSE = [
+  'ofir90-smoke', 'ofir90-crouch', 'ofir90-point', 'ofir90-sitB', 'ofir90-scarf',
+  'michel96-walk1', 'michel96-walk3', 'michel96-walk5',
+  'barry96', 'barry96-3q', 'barry96-side', 'barry96-back', 'barry96-speak', 'barry96-listen', 'barry96-concern', 'barry96-laugh',
+  'hermesh-back',
+] as const
+
+/**
+ * ...and 24.9.2026: `LEGACY_POSE` joins them. They left `FIGURE` the same day — the two ending
+ * cards that named `ofir90-smoke` point at Ofir himself now, and the cast card of Barry at
+ * the canonical Barry — so no key in either list can reach `artUrl` through a scene.
+ */
+export const RETIRED_FIGURE = ['fanA', 'fanB', 'fanC', 'fanD', 'fanE', 'fanF', 'fanG', 'kid', ...LEGACY_POSE] as const
 
 export type FigureKey = (typeof FIGURE)[number]
 
@@ -1017,6 +1069,10 @@ export const PORTRAIT_ART = [
   'faceStandB1', 'faceStandB2', 'faceStandB3', 'faceStandB4', 'faceStandB5', 'faceStandB6', 'faceStandB7',
   // the grown Efi and Kobi, from their own 1996/1990 bodies
   'faceEfi96', 'faceKobi90',
+  // 24.9.2026 — the ages of the adult life, each cut from its own body
+  // (`ingest-characters-2026-09-24.py`); Rachel at sixty is a portrait with no body (README)
+  'facePogi32', 'facePogi40', 'facePogi47', 'faceKobi62', 'faceKobi72',
+  'faceOfir40', 'faceAmit40', 'faceEfi44', 'faceKeren40', 'faceRachel60',
 ] as const
 
 /**

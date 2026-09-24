@@ -3,6 +3,8 @@ import Phaser from 'phaser'
 import { PASSAGE_1990, PASSAGE_CARD_HE } from '../../content/chapter1990'
 import { PASSAGE_1993, PASSAGE_CARD_1993_HE } from '../../content/chapter1993cup'
 import { ERA_1986, ERA_1990, ERA_1993_CUP } from '../../content/era'
+import { RIDES, RIDE_PREFIX, type Ride, type RideStop } from '../../content/passages'
+import type { LocationId } from '../../types'
 import { sceneFor } from '../../world/scenes'
 import { artUrl, extensionKeys } from '../art'
 import { fillCamera } from '../camera'
@@ -90,16 +92,36 @@ export class PassageScene extends Phaser.Scene {
   private dressing: Phaser.GameObjects.Image[] = []
   /** which bridge; defaults to the one this scene was written for */
   private passage: Passage = PASSAGES['1990']!
+  /**
+   * a ride (`content/passages.ts`) instead of a bridge — Director V3 §9, 24.9.2026.
+   * Everything the ride does lives in the `ride*` methods at the bottom; the bridge above
+   * is untouched by it.
+   */
+  private ride: Ride | null = null
+  private rideStop = -1
+  private rideTaps = 0
+  private rideSince = 0
+  private rideMark: Phaser.GameObjects.Ellipse | null = null
+  private ridePicture: Phaser.GameObjects.Image | null = null
+  private rideWaiting = false
 
   constructor() {
     super(PassageScene.KEY)
   }
 
   init(data?: { passage?: string }) {
-    this.passage = PASSAGES[data?.passage ?? '1990'] ?? PASSAGES['1990']!
+    const key = data?.passage ?? '1990'
+    this.ride = key.startsWith(RIDE_PREFIX) ? RIDES[key.slice(RIDE_PREFIX.length)] ?? null : null
+    this.passage = PASSAGES[key] ?? PASSAGES['1990']!
   }
 
   preload() {
+    if (this.ride) {
+      const art = this.ride.art
+      const ext = extensionKeys(art)
+      for (const key of [art, ext.sky, ext.ground]) if (!this.textures.exists(`art-${key}`)) this.load.image(`art-${key}`, artUrl(key))
+      return
+    }
     const ext = extensionKeys(ROOM.art)
     const need = [
       ROOM.art,
@@ -121,6 +143,10 @@ export class PassageScene extends Phaser.Scene {
 
   create() {
     this.ctx = this.registry.get(CONTEXT_KEY) as LifeContext
+    if (this.ride) {
+      this.createRide(this.ride)
+      return
+    }
     this.spots = []
     this.seen = 0
     this.busy = false
@@ -214,7 +240,12 @@ export class PassageScene extends Phaser.Scene {
     if (rect.width <= 0) return
     const canvasX = ((clientX - rect.left) / rect.width) * this.scale.width
     const cam = this.cameras.main
-    void clientY
+    if (this.ride) {
+      const canvasY = ((clientY - rect.top) / rect.height) * this.scale.height
+      const world = cam.getWorldPoint(canvasX, canvasY)
+      this.rideTap(world.x, world.y)
+      return
+    }
     this.pointAt(cam.scrollX + canvasX / cam.zoom)
   }
 
@@ -243,6 +274,10 @@ export class PassageScene extends Phaser.Scene {
 
   override update(_time: number, delta: number) {
     this.ctx.input.beginFrame()
+    if (this.ride) {
+      this.updateRide(delta)
+      return
+    }
     if (this.busy || this.done) return
     const era = this.seen >= 2 ? ERA_1990 : ERA_1986
     const input = this.ctx.input
@@ -283,6 +318,10 @@ export class PassageScene extends Phaser.Scene {
 
   /** Developer-only: the boy and the four things left to look at, for the probes. */
   where() {
+    if (this.ride) {
+      const stop = this.ride.stops[this.rideStop]
+      return { scene: 'ride', x: 0, y: 0, paused: this.busy, spots: [], stop: stop?.id ?? null, waiting: this.rideWaiting }
+    }
     return {
       scene: 'passage',
       x: Number((this.player.x / this.W).toFixed(3)),
@@ -396,5 +435,171 @@ export class PassageScene extends Phaser.Scene {
         ], cross)
       })
     } else cross()
+  }
+
+  // ------------------------------------------------------------------ the ride ----
+
+  /**
+   * The car at night: the painting fills the glass, the picture breathes the way a car
+   * does on a long road, and the stops come up one after another. No walking — the road is
+   * doing that — and no clock: a ride is a passage, and the day resumes where it lands.
+   */
+  private createRide(ride: Ride) {
+    this.done = false
+    this.busy = false
+    this.rideStop = -1
+    this.rideTaps = 0
+    this.rideSince = 0
+    this.rideWaiting = false
+    this.cameras.main.setBackgroundColor(LIFE_PALETTE.night)
+    const picture = this.add.image(0, 0, `art-${ride.art}`).setOrigin(0, 0).setDepth(-1000)
+    this.ridePicture = picture
+    this.W = picture.width
+    this.H = picture.height
+    const cam = this.cameras.main
+    const view = this.scale.gameSize
+    fillCamera(this, cam, this.W, this.H, view.height > view.width ? 1 : 1.03)
+    cam.setBounds(0, 0, this.W, this.H)
+    cam.centerOn(this.W / 2, this.H / 2)
+    cam.fadeIn(900, 0, 0, 0)
+    const onResize = () => {
+      const v = this.scale.gameSize
+      fillCamera(this, cam, this.W, this.H, v.height > v.width ? 1 : 1.03)
+      cam.centerOn(this.W / 2, this.H / 2)
+    }
+    this.scale.on('resize', onResize, this)
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', onResize, this))
+    // the road under the wheels: a slow vertical breath, never a shake (transform only)
+    this.tweens.add({ targets: picture, y: -this.H * 0.004, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+
+    this.ctx.bus.emit('frame', { picture: 0 })
+    this.ctx.bus.emit('place', { id: ride.land.mapId as LocationId, title: ride.titleHe, ambience: 'dusk' })
+    this.ctx.bus.emit('controls', { visible: true })
+    this.ctx.bus.emit('match', null)
+    this.rideHud(null)
+    this.ctx.bus.emit('sound', { kind: 'radio', on: true })
+    this.ctx.dialogue.setHooks({
+      travel: () => undefined,
+      minigame: () => undefined,
+      ending: () => undefined,
+      onOpen: (open) => {
+        this.busy = open
+      },
+    })
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => this.rideTap(pointer.worldX, pointer.worldY))
+  }
+
+  private rideHud(stop: RideStop | null) {
+    const state = this.ctx.engine.state
+    this.ctx.bus.emit('hud', {
+      clock: '',
+      date: String(state.year),
+      agorot: state.agorot,
+      showMoney: true,
+      energy: state.energy,
+      showEnergy: false,
+      place: this.ride?.titleHe ?? '',
+      objective: stop ? stop.labelHe : this.ride?.hintHe ?? '',
+      year: state.year,
+      scene: (this.ride?.land.mapId ?? 'kiosk') as LocationId,
+      hint: this.ride?.hintHe ?? '',
+      waitingHe: null,
+    })
+  }
+
+  private updateRide(delta: number) {
+    const ride = this.ride
+    if (!ride || this.done || this.busy) return
+    this.rideSince += delta
+    const next = ride.stops[this.rideStop + 1]
+    if (!this.rideWaiting) {
+      if (!next) {
+        this.finishRide()
+        return
+      }
+      if (this.rideSince >= next.gapMs) this.raiseStop(next)
+      return
+    }
+    const stop = ride.stops[this.rideStop]
+    if (!stop) return
+    if (this.ctx.input.actionPressed) {
+      this.pressStop(stop)
+      return
+    }
+    // a stop nobody touches plays by itself: the road does not strand a player who waits
+    if (this.rideSince >= stop.autoMs) this.resolveStop(stop)
+  }
+
+  private raiseStop(stop: RideStop) {
+    this.rideStop += 1
+    this.rideTaps = 0
+    this.rideSince = 0
+    this.rideWaiting = true
+    const x = stop.spot.x * this.W
+    const y = stop.spot.y * this.H
+    this.rideMark?.destroy()
+    const mark = this.add.ellipse(x, y, this.W * 0.05, this.W * 0.05, LIFE_PALETTE.red, 0).setStrokeStyle(3, LIFE_PALETTE.red, 0.9).setDepth(10)
+    this.tweens.add({ targets: mark, scale: 1.25, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    this.rideMark = mark
+    this.ctx.bus.emit('prompt', { verb: stop.verb, label: stop.labelHe, locked: false })
+    this.rideHud(stop)
+  }
+
+  private rideTap(worldX: number, worldY: number) {
+    const ride = this.ride
+    if (!ride || this.busy || this.done || !this.rideWaiting) return
+    const stop = ride.stops[this.rideStop]
+    if (!stop) return
+    const dx = worldX - stop.spot.x * this.W
+    const dy = worldY - stop.spot.y * this.H
+    // a thumb is not a cursor: generous, about a tenth of the picture
+    if (Math.hypot(dx, dy) > this.W * 0.1) return
+    this.pressStop(stop)
+  }
+
+  private pressStop(stop: RideStop) {
+    const taps = stop.taps ?? 1
+    this.rideTaps += 1
+    this.rideSince = 0
+    if (this.rideTaps < taps) {
+      if (this.rideMark) this.tweens.add({ targets: this.rideMark, angle: this.rideMark.angle + 40, duration: 180 })
+      this.ctx.bus.emit('sound', { kind: 'radio', on: true })
+      const text = stop.tapHe?.[this.rideTaps - 1]
+      if (text) this.ctx.bus.emit('toast', { text, tone: 'plain' })
+      return
+    }
+    this.resolveStop(stop)
+  }
+
+  private resolveStop(stop: RideStop) {
+    this.rideWaiting = false
+    this.rideSince = 0
+    this.rideMark?.destroy()
+    this.rideMark = null
+    this.ctx.bus.emit('prompt', null)
+    this.rideHud(null)
+    const after = () => {
+      this.rideSince = 0
+    }
+    if (stop.conversation) {
+      if (!this.ctx.dialogue.start(stop.conversation, after)) after()
+      return
+    }
+    if (stop.lines?.length) this.ctx.dialogue.startLines(stop.lines, after)
+  }
+
+  /** the ground, and back: the arrival is written once, and the world picks up where it lands */
+  private finishRide() {
+    const ride = this.ride
+    if (!ride || this.done) return
+    this.done = true
+    this.ctx.bus.emit('prompt', null)
+    this.ctx.bus.emit('sound', { kind: 'radio', on: false })
+    for (const flag of ride.flags) this.ctx.engine.dispatch({ t: 'flag.raised', flag })
+    void this.ctx.engine.save()
+    this.cameras.main.fadeOut(800, 0, 0, 0)
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.start(WorldScene.KEY, { mapId: ride.land.mapId, spawn: ride.land.spawn })
+    })
   }
 }

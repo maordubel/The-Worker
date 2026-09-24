@@ -2,7 +2,7 @@ import type { LocationId } from '../types'
 
 import { facesLeft } from '../runtime/art'
 
-import { CAST_2000, castFigure } from './castFigures'
+import { allowedFigure, CAST_2000, castFigure } from './castFigures'
 import { ADULT_LIFE, chaptersWhere, livesWithParents, ownHome, yearOfChapter } from './homes'
 import type { ActorDef, ExitDef, HotspotDef, LayerDef, Repaint, SceneDef } from './scenes'
 import type { Condition } from './types'
@@ -65,6 +65,11 @@ function cast(era: string, when: Condition | undefined, rows: readonly Row[]): A
   return rows.map((row) => {
     const figure = row.figure ?? castFigure(row.who, yearOfChapter(era))?.figure
     if (!figure) throw new Error(`rooms2000: no body for ${row.who}`)
+    // a pose is the person's own pose (24.9.2026): a named person may not be handed another
+    // man's body through `row.figure` — see `allowedFigure` in `castFigures.ts`
+    if (row.figure && !allowedFigure(row.who, yearOfChapter(era), row.figure)) {
+      throw new Error(`rooms2000: ${row.who} in ${era} cannot stand on ${row.figure} (not his family that year)`)
+    }
     const cond = row.when ?? when
     return {
       id: `${era}-${slug(row.who)}${row.figure ? `-${row.figure.split('-').pop()}` : ''}`,
@@ -268,6 +273,62 @@ export const STAND_NEW: Repaint = {
   layers: [{ art: 'propDrum', era: '2024-terrace', x: 0.625, y: 0.785, w: 0.088, depth: 0.785, foot: true }],
   arrival: null,
   stuckHe: 'היציאה — מימין, מאחורי העמוד.',
+}
+
+/**
+ * ------------------------------------------ בלומפילד מבפנים, בלי משחק (24.9.2026) ----
+ *
+ * שלושה צילומים שמאור שלח ב-23.9.2026 (`bloom80Goal`, `bloom90Side`, `bloom90Corner`) והכריע:
+ * *"חדרי הבלומפילד של העשורים שלהם."* השלטים מתארכים (olivetti / בנק הפועלים → השמונים;
+ * שיכון עובדים / Hertz → התשעים), והיציעים **ריקים**. לכן הם החדר רק ביום בלי משחק: ביום
+ * משחק — 1986, 1990, 1998-laces — `stand` עם הקהל האפוי נשאר, כי יציע ריק בזמן שהתסריט
+ * אומר "היציע קופץ" הוא שקר גדול יותר מציור. הרצפה היא הדשא שלפני השלטים — המצלמה עומדת
+ * על המגרש, ואין מדרגה קרובה לעמוד עליה.
+ *
+ * נמדד (שתי מדידות לכל צילום, לפי `art-drop-ingest` §7):
+ *   · `bloom90Side` — השער בשמאל: המשקוף (2.44 מ׳) 0.40→0.51, כלומר 0.045 למטר ב-0.51; מצלמה
+ *     בגובה עין (1.6) נותנת אופק 0.44, והמעגל (18.3 מ׳ בעומק, 0.575→0.715 על קו האמצע)
+ *     מתיישב על אותו אופק. מטר = (y − 0.44) / 1.6: 0.1625 ב-0.70, 0.2875 ב-0.90 — רמפה 1.77.
+ *   · `bloom80Goal` — השער מול המצלמה: המשקוף 0.51→0.70, 0.078 למטר בקו השער; אופק 0.575.
+ *     קו השטח הקטן (5.5 מ׳) ב-0.74 וקו הרחבה ב-0.945 מתיישבים עליו (22.7 ו-7.7 מ׳ מהמצלמה).
+ *     מטר = (y − 0.575) / 1.6: 0.128 ב-0.78, 0.222 ב-0.93 — רמפה 1.73.
+ * גבר בן 1.78 בקו הקרוב: חצי מהמסגרת (0.51 / 0.40), והעיניים שלו על האופק בכל עומק — זו
+ * הבדיקה. הדלת היא הפתח המצויר (המנהרה מתחת ל-Hertz; השער האדום מתחת ליציע מאחורי השער),
+ * והאור שלה יושב עליו; אזור הלחיצה על קו הרחוק של הרצועה, כמו ב-`STAND_OLD`.
+ */
+const NON_MATCH_80S = new Set(['a2-alley', 'a3-hall', 'a4-shirt', 'a6-radio', 'a7-week'])
+export const STAND_80S: Repaint = {
+  in: (chapter) => NON_MATCH_80S.has(chapter),
+  art: 'bloom80Goal',
+  titleHe: 'בלומפילד — המגרש',
+  air: 'day',
+  band: { far: 0.78, near: 0.93 },
+  size: { far: 0.1668, near: 0.2886 },
+  metre: 0.222,
+  spawns: { start: { x: 0.2, y: 0.86, facing: 'right' } },
+  doors: { home: { x: 0.45, y: 0.78, w: 0.1, h: 0.05, light: { x: 0.44, y: 0.52, w: 0.13, h: 0.14, tone: 'inside' } } },
+  spots: { rail: null },
+  arrival: null,
+  stuckHe: 'היציאה — מתחת ליציע, מאחורי השער.',
+}
+
+export const STAND_90S: Repaint = {
+  in: (chapter) => {
+    const year = yearOfChapter(chapter)
+    return year >= 1991 && year <= 1999 && chapter !== '1998-laces'
+  },
+  art: 'bloom90Side',
+  titleHe: 'בלומפילד — המגרש',
+  air: 'day',
+  band: { far: 0.7, near: 0.9 },
+  size: { far: 0.2113, near: 0.374 },
+  metre: 0.2875,
+  spawns: { start: { x: 0.8, y: 0.8, facing: 'left' } },
+  doors: { home: { x: 0.86, y: 0.7, w: 0.1, h: 0.05, light: { x: 0.875, y: 0.385, w: 0.055, h: 0.06, tone: 'inside' } } },
+  spots: { rail: null },
+  // the corner — the same ground from the other end, the establishing shot on the way in
+  arrival: { art: 'bloom90Corner', ms: 3200, flag: 'saw:bloom90' },
+  stuckHe: 'היציאה — המנהרה מימין, מתחת לשלט.',
 }
 
 // ================================================================= חדרים חדשים ===
@@ -802,7 +863,7 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ]),
     // 2010-anthem · C03 (c10-debut), C07 (c10-lyon)
     ...cast('2010-anthem', undefined, [
-      { who: 'אופיר', x: 0.24, y: 0.88, figure: 'ofir90-point' },
+      { who: 'אופיר', x: 0.24, y: 0.88 },
       { who: 'עמית', x: 0.42, y: 0.93, flip: true },
       { who: 'רומא', x: 0.56, y: 0.86, flip: true, when: flag('c10:benfica') },
     ]),
@@ -819,7 +880,7 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2019-armchair', undefined, [{ who: 'קובי', x: 0.19, y: 0.74, figure: 'kobi90-sitA' }]),
     // 2021-suitcase · X01 (x-suitcase) — אצל אבא ואמא, ערב לפני
     ...cast('2021-suitcase', undefined, [
-      { who: 'קובי', x: 0.6, y: 0.86, figure: 'kobi90-arms', flip: true },
+      { who: 'קובי', x: 0.6, y: 0.86, flip: true },
       { who: 'רחל', x: 0.3, y: 0.9 },
     ]),
     // 2026-plan · F01 (f-plan) — "אבא ביקש לראות את התוכנית"
@@ -840,7 +901,7 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     // ...ובלי בן/בת זוג, L08 היא שיחה עם קרן — *"קרן חברה לשיחה, לא בת זוג אוטומטית"*
     ...cast('2021-promises', { notFlag: 'life:partner' }, [{ who: 'קרן', x: 0.33, y: 0.58 }]),
     // 2023-quiet · Z04 (z-aid) — "מאיה כתבה": היא בטלפון, והבית ריק; Z05 (z-again) — קובי בא
-    ...cast('2023-quiet', flag('z:aid'), [{ who: 'קובי', x: 0.3, y: 0.6, figure: 'kobi90-arms' }]),
+    ...cast('2023-quiet', flag('z:aid'), [{ who: 'קובי', x: 0.3, y: 0.6 }]),
     // 2025-eurocup · Z06 (z-euro) — הקלסר על השולחן
     ...cast('2025-eurocup', undefined, [
       { who: 'אפי', x: 0.31, y: 0.6 },
@@ -887,14 +948,14 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2000-team', { all: [{ flag: 'y:name' }, { notFlag: 'y:match' }] }, [{ who: 'מתוקי', x: 0.26, y: 0.86 }]),
     // 2010-cup · D02 (d10-math)
     ...cast('2010-cup', flag('d10:photo'), [
-      { who: 'עמית', x: 0.3, y: 0.87, figure: 'amit90-point' },
+      { who: 'עמית', x: 0.3, y: 0.87 },
       { who: 'אופיר', x: 0.61, y: 0.88, flip: true },
       { who: 'קובי', x: 0.16, y: 0.84 },
     ]),
     // 2010-qualify · C01 (c10-qualify)
     ...cast('2010-qualify', undefined, [
       { who: 'עמית', x: 0.3, y: 0.87 },
-      { who: 'אופיר', x: 0.61, y: 0.88, flip: true, figure: 'ofir90-point' },
+      { who: 'אופיר', x: 0.61, y: 0.88, flip: true },
       { who: 'מתוקי', x: 0.87, y: 0.86, flip: true },
     ]),
     // 2011-people · L03 (l-tamar)
@@ -906,11 +967,11 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'פרדי', x: 0.87, y: 0.86, flip: true },
     ]),
     // 2017-after · P05 (p-amit)
-    ...cast('2017-after', undefined, [{ who: 'עמית', x: 0.61, y: 0.88, flip: true, figure: 'amit90-cross' }]),
+    ...cast('2017-after', undefined, [{ who: 'עמית', x: 0.61, y: 0.88, flip: true }]),
     // 2017-distance · K01 (k-told)
     ...cast('2017-distance', undefined, [{ who: 'אופיר', x: 0.61, y: 0.88, flip: true }]),
     // 2018-return · R01 (r-back)
-    ...cast('2018-return', undefined, [{ who: 'אופיר', x: 0.61, y: 0.88, flip: true, figure: 'ofir90-arms' }]),
+    ...cast('2018-return', undefined, [{ who: 'אופיר', x: 0.61, y: 0.88, flip: true }]),
     // 2021-losses · R04 (r-cup)
     ...cast('2021-losses', flag('r:indoors'), [
       { who: 'אופיר', x: 0.61, y: 0.88, flip: true },
@@ -967,7 +1028,7 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2023-tournament', undefined, [
       { who: 'אופיר', x: 0.42, y: 0.71 },
       { who: 'עמית', x: 0.55, y: 0.73, flip: true },
-      { who: 'קובי', x: 0.72, y: 0.68, flip: true, figure: 'kobi90-point' },
+      { who: 'קובי', x: 0.72, y: 0.68, flip: true },
     ]),
   ],
 
@@ -1044,12 +1105,12 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
 
   'bloomfield-outside': [
     // 2018-return · R02 (r-signs) — "פה היינו פונים", על הרחבה החדשה
-    ...cast('2018-return', flag('r:reopen'), [{ who: 'קובי', x: 0.4, y: 0.86, figure: 'kobi90-point' }]),
+    ...cast('2018-return', flag('r:reopen'), [{ who: 'קובי', x: 0.4, y: 0.86 }]),
   ],
 
   'bloomfield-inside': [
     // 2010-anthem · C06 (c10-benfica) — שלוש אפס, והפרצוף מ-1986
-    ...cast('2010-anthem', flag('c10:call'), [{ who: 'קובי', x: 0.42, y: 0.75, figure: 'kobi90-cheer' }]),
+    ...cast('2010-anthem', flag('c10:call'), [{ who: 'קובי', x: 0.42, y: 0.75 }]),
     // 2024-terrace · T03 (t-lead) — "תראה אותם"
     ...cast('2024-terrace', undefined, [{ who: 'אסף', x: 0.52, y: 0.76, flip: true }]),
   ],

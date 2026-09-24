@@ -3641,6 +3641,11 @@ export class WorldScene extends Phaser.Scene {
     const chore = id.startsWith('chore:') ? id.slice(6) : null
     const go = () => {
       void this.ctx.engine.save()
+      // (Director V3 §9) a ride — the road itself, played in `PassageScene` (`content/passages.ts`)
+      if (id.startsWith('ride:')) {
+        this.scene.start(PassageScene.KEY, { passage: id })
+        return
+      }
       if (chore) {
         this.scene.start('life-chore', { gig: chore, returnTo: this.def.id, spawn: this.spawnName })
         return
