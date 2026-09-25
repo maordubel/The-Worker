@@ -9,7 +9,7 @@ import { isYellow } from '@/lib/isYellow'
 import { MESSAGES } from '@/lib/i18n'
 import { resolveChapterAnchor, resolvePrologueAnchor } from '@/lib/life/anchor-server'
 import { CUTSCENES, cutsceneCard, cutsceneFor, embedUrl, longDateHe } from '@/lib/life/cutscenes'
-import { OPENING, openingLines, openingMs } from '@/lib/life/opening'
+import { FILM, OPENING, openingLines, openingMs } from '@/lib/life/opening'
 import { isPlaceholder, type HistoricalAnchor } from '@/lib/life/anchors'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { bodySize } from '@/lib/life/world/heights'
@@ -1336,20 +1336,14 @@ describe('הסרט מהארכיון — real footage, and nothing said over it',
  */
 describe('הפתיח — the opening, and the one line in it that is a fact', () => {
   it('names every file it plays, and every file exists', () => {
+    // 25.9.2026: the fallback is the documentary thread and plays no file at all (owner
+    // spec "OPENING DOCUMENTARY HYBRID" §1, §43). What plays is the film — both encodings
+    // and the poster, rule 30 — and the old stills stay on disk (tests/life-opening.test.ts).
     expect(OPENING.length).toBeGreaterThanOrEqual(4)
-    for (const beat of OPENING) {
-      const base = join(ROOT, beat.from === 'art' ? 'public/life/art' : 'public/life/opening', beat.art)
-      if (beat.kind === 'still') {
-        // תיקיית הגרפיקה עברה ל-WebP ב-13.9.2026; תיקיית הפתיחה נשארה PNG
-        const ext = beat.from === 'art' ? 'webp' : 'png'
-        expect(existsSync(`${base}.${ext}`), `${beat.id} → ${beat.art}.${ext}`).toBe(true)
-      } else {
-        expect(existsSync(`${base}.mp4`), `${beat.id} → ${beat.art}.mp4`).toBe(true)
-        // The poster is not optional: a crossfade INTO a video that has not buffered is a
-        // flash of black, which on a slow phone is most of the sequence.
-        expect(existsSync(`${base}-poster.png`), `${beat.id} has no poster`).toBe(true)
-      }
+    for (const path of [FILM.webm, FILM.mp4, FILM.poster]) {
+      expect(existsSync(join(ROOT, 'public', path)), path).toBe(true)
     }
+    for (const beat of OPENING) expect(beat, beat.id).not.toHaveProperty('art')
   })
 
   it('writes no fact into a caption', () => {
@@ -1398,16 +1392,19 @@ describe('הפתיח — the opening, and the one line in it that is a fact', ()
     // Half a minute is the outside edge. The skip is there from the first frame either way.
     expect(openingMs()).toBeLessThanOrEqual(32000)
     expect(openingMs()).toBeGreaterThan(12000)
-    const overlay = readFileSync(join(ROOT, 'components/life/OpeningSequence.tsx'), 'utf8')
+    const overlay = readFileSync(join(ROOT, 'components/life/OpeningDocumentary.tsx'), 'utf8')
+    const film = readFileSync(join(ROOT, 'components/life/OpeningFilm.tsx'), 'utf8')
     expect(overlay).toContain("data-life=\"opening-skip\"")
+    expect(film).toContain("data-life=\"opening-skip\"")
     // Escape moved onto the shared dialog hook — the behaviour is followed to its new
     // owner rather than asserted where it used to live (`useDialog`, delta 15.9.2026).
     expect(overlay).toContain('useDialog')
     expect(readFileSync(join(ROOT, 'components/ui/useDialog.ts'), 'utf8')).toContain("'Escape'")
     // Muted, inline and autoplaying is the one combination every mobile browser allows
     // without a gesture. A sequence that needs a tap to start is a sequence nobody sees.
-    expect(overlay).toContain('muted')
-    expect(overlay).toContain('playsInline')
+    // (the documentary plays no media; the film is what must start without a gesture)
+    expect(film).toContain('muted')
+    expect(film).toContain('playsInline')
   })
 
   it('keeps no yellow in a single frame of it, film included', () => {
@@ -1419,12 +1416,9 @@ describe('הפתיח — the opening, and the one line in it that is a fact', ()
     expect(script).toContain('def deyellow(')
     expect(script).toContain('count_yellow(arr)')
     expect(script).toContain('clean_palette(')
-    for (const beat of OPENING) {
-      if (beat.kind !== 'still') continue
-      // תיקיית הגרפיקה עברה ל-WebP ב-13.9.2026; תיקיית הפתיחה נשארה PNG.
-      const ext = beat.from === 'art' ? 'webp' : 'png'
-      const dir = beat.from === 'art' ? 'public/life/art' : 'public/life/opening'
-      const bytes = readFileSync(join(ROOT, dir, `${beat.art}.${ext}`))
+    // The stills are no longer played; they stay on disk as optional polish (spec §17).
+    for (const still of ['born', 'shoulders', 'drawing']) {
+      const bytes = readFileSync(join(ROOT, 'public/life/opening', `${still}.png`))
       expect(bytes.length).toBeGreaterThan(1000)
     }
   })

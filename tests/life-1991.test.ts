@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { STORY_CHORES } from '@/lib/life/content/storyChores'
+
 import { DEVELOPMENT_ANCHOR, isPlaceholder, type HistoricalAnchor } from '@/lib/life/anchors'
 import { resolveChapterAnchor, resolveUssishkinAnchor } from '@/lib/life/anchor-server'
 import { CHARACTERS } from '@/lib/life/characters'
@@ -341,12 +343,21 @@ describe('השיחות של 1991 — played headless through the runner', () => 
   })
 
   it('the homework is three different evenings, and each one costs its own time', () => {
+    // (Director V3 §12, 25.9.2026) the page is worked with the hands: sitting down opens the
+    // chore, and how many of the thirteen were picked up decides which evening it was
     const all = runner(['hw:given'], 16 * 60)
     all.dialogue.start('homework-1991')
     all.drain()
-    all.dialogue.choose('all')
+    all.dialogue.choose('work')
+    const homework = STORY_CHORES['homework-91']!
+    all.engine.dispatch(...homework.finish(13, 13))
     expect(all.engine.state.flags['hw:done']).toBe(true)
     expect(all.engine.state.minute).toBe(16 * 60 + 50)
+
+    const half = runner(['hw:given'], 16 * 60)
+    half.engine.dispatch(...homework.finish(7, 13))
+    expect(half.engine.state.flags['hw:half']).toBe(true)
+    expect(half.engine.state.minute).toBe(16 * 60 + 20)
 
     const fake = runner(['hw:given'], 16 * 60)
     fake.dialogue.start('homework-1991')

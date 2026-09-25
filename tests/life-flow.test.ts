@@ -6,7 +6,8 @@ import { describe, expect, it } from 'vitest'
 import { ERA_KEYS, eraFor } from '@/lib/life/content/era'
 import { emptyState } from '@/lib/life/events'
 import { MILESTONES, reconcile, reached } from '@/lib/life/world/milestones'
-import { QUIET_MINUTES, flowMove, landingMinute, nextTimeGate, shouldOfferPass } from '@/lib/life/world/flow'
+import { QUIET_MINUTES, flowMove, nextTimeGate, shouldOfferPass } from '@/lib/life/world/flow'
+import { freeTimePlan } from '@/lib/life/world/timeAdvance'
 import type { FlowInput } from '@/lib/life/world/flow'
 import { ALL_SCENES, exitInEra, whenFor } from '@/lib/life/world/scenes'
 import type { LifeState } from '@/lib/life/types'
@@ -111,7 +112,10 @@ describe('זרימה — יום שחוסם רק על השעון', () => {
     const gate = nextTimeGate(waiting, era)
     expect(gate).toBeTruthy()
     expect(gate!.minute).toBeGreaterThan(waiting.minute)
-    expect(landingMinute(gate!)).toBeLessThan(gate!.minute)
+    // (delta 90) where the advance lands is the free-time plan: never after the event
+    const plan = freeTimePlan(waiting, era)
+    expect(plan).toBeTruthy()
+    expect(plan!.plannedArrivalMinute).toBeLessThanOrEqual(gate!.minute)
   })
 
   it('is silent when the beat wants a flag as well as a time', () => {
@@ -130,7 +134,9 @@ describe('זרימה — יום שחוסם רק על השעון', () => {
     const base = { state: waiting, era, objectiveHe: null, quietFor: QUIET_MINUTES, busy: false, reachable: 3 }
     expect(shouldOfferPass(base)).toBeTruthy()
     expect(shouldOfferPass({ ...base, busy: true })).toBeNull()
-    expect(shouldOfferPass({ ...base, quietFor: QUIET_MINUTES - 1 })).toBeNull()
+    // (delta 90, free time §30) a pure time gate is DETECTED at once; when the chip is
+    // shown is paced by the shell in real seconds (FREE_TIME_TIMING), not by quiet minutes
+    expect(shouldOfferPass({ ...base, quietFor: QUIET_MINUTES - 1 })).toBeTruthy()
     // If the only meaningful thing left is time, an empty room is exactly where the game
     // must offer the cut. Requiring a hotspot here recreates the walk-in-circles bug.
     expect(shouldOfferPass({ ...base, reachable: 0 })).toBeTruthy()

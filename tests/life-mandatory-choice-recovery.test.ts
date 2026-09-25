@@ -4,8 +4,10 @@ import { BUS_AT } from '@/lib/life/content/chapter1996army'
 import { CHAPTERS } from '@/lib/life/content/chapters'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { eraFor } from '@/lib/life/content/era'
+import { MATCH_SCRIPTS } from '@/lib/life/content/matchScripts'
 import { CHECKLISTS } from '@/lib/life/checklist'
 import type { Effect } from '@/lib/life/content/script'
+import { STORY_CHORES, STORY_CHORE_PREFIX } from '@/lib/life/content/storyChores'
 import { ALL_SCENES, inEra, sceneIn } from '@/lib/life/world/scenes'
 import type { Condition } from '@/lib/life/world/types'
 
@@ -42,6 +44,14 @@ function raisedFrom(roots: readonly string[]): Set<string> {
       if (effect.e === 'flag') out.add(effect.flag)
       if (effect.e === 'flagValue' && effect.value !== false) out.add(effect.flag)
       if (effect.e === 'goto') queue.push(effect.node)
+      // (delta 90) a story chore a standing thing opens is standing too: whatever its
+      // finish raises — done in full or walked out of at once — is raised from the world
+      if (effect.e === 'minigame' && effect.id.startsWith(`chore:${STORY_CHORE_PREFIX}`)) {
+        const chore = STORY_CHORES[effect.id.slice(`chore:${STORY_CHORE_PREFIX}`.length)]
+        for (const done of chore ? [0, chore.shape.target] : []) {
+          for (const event of chore!.finish(done, chore!.shape.target)) if (event.t === 'flag.raised') out.add(event.flag)
+        }
+      }
     }
   }
   while (queue.length) {
@@ -58,8 +68,20 @@ function raisedFrom(roots: readonly string[]): Set<string> {
   return out
 }
 
-/** the chapters V3 has been applied to — the rest are listed in the delta report */
-const RECOVERABLE = ['1996-army', '1997-basket', '1999-basket', '2000-title']
+/**
+ * the flags the scene class raises by itself, whatever the player did: the whistle of the
+ * 1986 final (`WorldScene`, at `FULL_TIME`) and the end of the 1991 derby (`derby1991.ts`)
+ */
+const ENGINE_FLAGS: Record<string, readonly string[]> = { '1986': ['match:over'], '1991': ['derby:over'] }
+
+/** the chapters V3 has been applied to: every chapter of 1983–2000 (delta 88, delta 89) */
+const RECOVERABLE = [
+  'a2-alley', 'a3-hall', 'a4-shirt', 'a5-first', 'a6-radio', 'a7-week', '1986',
+  '1990', '1991', '1993-cup', '1993-galil', '1995-sinai', '1996-army', '1997-basket',
+  '1998-laces', '1999-basket', '1999-cup', '2000-title', '2000-double',
+  // (delta 90, LIFE 90-D) Stage C's feature quests
+  '2002-europe', '2006-home', '2007-table', '2007-registered', '2007-key', '2009-up', '2010-cup', '2010-teddy',
+]
 
 describe('a mandatory choice lives in the world, not only in a one-shot beat', () => {
   for (const chapter of RECOVERABLE) {
@@ -91,16 +113,59 @@ describe('a mandatory choice lives in the world, not only in a one-shot beat', (
         if (selfGuarded) continue
         for (const flag of raisedFrom(talks)) if (guards.has(flag)) rearmed.add(flag)
       }
+      // a directed match armed again until its end (`d-kickoff`): what its steps ask is asked again
+      for (const beat of eraFor(chapter).beats ?? []) {
+        const guards = new Set((beat.when?.none ?? []).flatMap((part) => (part.flag ? [part.flag] : [])))
+        const talks = beat.do.flatMap((action) => (action.a === 'match' ? (MATCH_SCRIPTS[action.script]?.steps ?? []).flatMap((step) => (step.talk ? [step.talk] : [])) : []))
+        for (const flag of raisedFrom(talks)) if (guards.has(flag)) rearmed.add(flag)
+      }
       const missing: string[] = []
       for (const step of CHECKLISTS[chapter] ?? []) {
         const flags = [...doneFlags(step.doneWhen)]
         if (!flags.length) continue
+        if (flags.some((flag) => ENGINE_FLAGS[chapter]?.includes(flag))) continue
         if (flags.some((flag) => fromWorld.has(flag) || byBeat.has(flag) || rearmed.has(flag))) continue
         missing.push(`${step.id}: ${flags.join(' | ')}`)
       }
       expect(missing, `${chapter}: steps only a one-shot beat can finish`).toEqual([])
     })
   }
+
+  /**
+   * ביט שאינו שומר על עצמו מרעיב את כל מה שאחריו (25.9.2026).
+   *
+   * A beat is armed again when its `when` still holds after it ran (rule 42) — the recovery
+   * that brings a closed box back. A beat that only raises flags (a toast, a card, a line)
+   * and is not guarded by any of them is therefore due again on the very next tick, for
+   * ever, and because the runner takes the FIRST due beat of the list, every clock beat
+   * after it is starved. 1993 had two: the bus that left at twenty to seven (the toast
+   * repeated, and the only ending of a boy who missed the bus never came) and the galil bus
+   * that starved the eight o'clock backstop. Found by the V3 streak count, fixed at source.
+   */
+  it('every beat that only raises flags is guarded by one of them, or it starves every beat after it', () => {
+    const starving: string[] = []
+    for (const chapter of CHAPTERS) {
+      for (const beat of eraFor(chapter.id).beats ?? []) {
+        const moves = beat.do.some((action) => action.a === 'talk' || action.a === 'ending' || action.a === 'travel' || action.a === 'match')
+        if (moves) continue
+        const raised = new Set<string>()
+        for (const action of beat.do) {
+          if (action.a === 'flag') raised.add(action.flag)
+          if (action.a === 'events') for (const event of action.events) if (event.t === 'flag.raised') raised.add(event.flag)
+          if (action.a === 'events') for (const event of action.events) if (event.t === 'day.entered') raised.add(event.dayId)
+        }
+        const guards = new Set<string>([
+          ...(beat.when?.none ?? []).flatMap((part) => (part.flag ? [part.flag] : [])),
+          ...(beat.when?.notFlag ? [beat.when.notFlag] : []),
+        ])
+        // a beat guarded by its own `beat:` flag is one-shot by construction
+        if (guards.has(`beat:${beat.id}`)) continue
+        if (beat.do.some((action) => action.a === 'derive')) continue
+        if (![...raised].some((flag) => guards.has(flag))) starving.push(`${chapter.id} · ${beat.id} raises [${[...raised].join(', ')}], guarded by [${[...guards].join(', ')}]`)
+      }
+    }
+    expect(starving).toEqual([])
+  })
 
   it('knows every chapter it is asked about', () => {
     const ids = new Set(CHAPTERS.map((chapter) => chapter.id))

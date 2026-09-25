@@ -33,25 +33,37 @@ import {
 describe('הכרטיסים — 1983', () => {
   const stubTaking = ['take-stub', 'ask-stub'] as const
 
+  /*
+   * (delta 90) The fact used to sit on `a1-stub`'s own `then` — and a branch that offers
+   * choices never runs its own `then` (`runtime/dialogue.ts`: with `pendingChoices` the
+   * runner applies only the chosen answer's effects). So the "unconditional" fact was never
+   * written by anyone. It now sits on every branch of `a1-after-kobi`, the node every path
+   * of the memory passes through on its way to the stub — a branch with no choices, whose
+   * `then` does run. The two tests below hold that shape.
+   */
+  const toStub = () => CONVERSATIONS_A1.find((c) => c.id === 'a1-after-kobi')
+
   it('נכתב בפרולוג כערך, לא כדגל בוליאני', () => {
     // A boolean cannot answer the question 2026 asks, which is WHO held them.
-    const node = CONVERSATIONS_A1.find((c) => c.id === 'a1-stub')
-    expect(node, 'a1-stub missing from the prologue').toBeDefined()
-
-    const branch = node?.branches[0]
-    const written = branch?.then?.find(
-      (e) => e.e === 'flagValue' && e.flag === TICKETS_1983,
-    )
-    expect(written, `${TICKETS_1983} is not written by a1-stub`).toBeDefined()
-    expect(written && 'value' in written && written.value).toBe('kobi')
+    const node = toStub()
+    expect(node, 'a1-after-kobi missing from the prologue').toBeDefined()
+    for (const branch of node!.branches) {
+      const written = branch.then?.find((e) => e.e === 'flagValue' && e.flag === TICKETS_1983)
+      expect(written, `${TICKETS_1983} is not written on the way to a1-stub`).toBeDefined()
+      expect(written && 'value' in written && written.value).toBe('kobi')
+    }
   })
 
   it('נכתב ללא תנאי — ילד בן חמש לא מרוויח את הכרטיסים ולא יכול לטעות בהם', () => {
-    const branch = CONVERSATIONS_A1.find((c) => c.id === 'a1-stub')?.branches[0]
-    // It sits on the branch's own `then`, which runs before any choice is offered —
-    // not inside one of the choices, where a player could miss it.
-    expect(branch?.when, 'the ticket fact must not be behind a condition').toBeUndefined()
-    expect(branch?.then?.some((e) => e.e === 'flagValue' && e.flag === TICKETS_1983)).toBe(true)
+    const node = toStub()!
+    // every branch writes it, so no condition can keep it from being written — and none of
+    // them offers a choice, so the runner does run the branch's `then`
+    expect(node.branches.some((b) => !b.when), 'a1-after-kobi needs a fallback branch').toBe(true)
+    for (const branch of node.branches) {
+      expect(branch.choices ?? [], 'a branch with choices never runs its own then').toEqual([])
+      expect(branch.then?.some((e) => e.e === 'flagValue' && e.flag === TICKETS_1983)).toBe(true)
+      expect(branch.then?.some((e) => e.e === 'goto'), 'the fact is on the way to the stub, not a dead end').toBe(true)
+    }
   })
 
   it('כל דרך מהצומת מגיעה הביתה — אין בחירה שמאבדת את הפרולוג', () => {

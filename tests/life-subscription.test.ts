@@ -418,7 +418,8 @@ describe('מה שהכרטיס בפרופיל מקבל', () => {
     // rule 46 / 63א: the profile card answers "who are you", never "how much"
     const reading = subscriptionReading(life(holding('1990/91', '1991/92'), 0, '1991'))
     expect(reading.streak).toBe(2)
-    const card = readFileSync(join(process.cwd(), 'components/life/ProfileCard.tsx'), 'utf8')
+    // delta 90-H: the bag's money drawer draws the card now (`ProfileCard` routes to it)
+    const card = readFileSync(join(process.cwd(), 'components/life/profile/MoneyAndSubscriptions.tsx'), 'utf8')
     expect(card).toContain('<Marks n={Math.min(subscription.streak, 12)} />')
     expect(card).not.toMatch(/\{subscription\.streak\}/)
   })

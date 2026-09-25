@@ -72,21 +72,26 @@ describe('matches — ids and keys', () => {
     }
   })
 
-  it('files the Salzburg legs as one match each, with both readings as claims', () => {
+  it('files the Salzburg legs as one match each — decided for UEFA, both readings kept in `decided`', () => {
     const leg1 = resolveMatch('2010-11-ucl-po-salzburg-1')!
     const leg2 = resolveMatch('2010-11-ucl-po-salzburg-2')!
-    expect(leg1.playedOn.precision).toBe('disputed')
-    expect(leg1.claims.find((c) => c.field === 'playedOn')?.values.map((v) => v.value).sort()).toEqual(['2010-08-17', '2010-08-18'])
-    expect(leg1.home).toBeNull()
-    expect(leg1.claims.some((c) => c.field === 'home')).toBe(true)
+    // delta 89: UEFA match 2002389 — 18.8.2010 in Salzburg; 2002390 — 24.8.2010 at Bloomfield
+    expect(leg1.playedOn).toEqual({ value: '2010-08-18', precision: 'day' })
+    expect(leg1.decided?.find((d) => d.field === 'playedOn')?.overruled.map((v) => v.value).sort()).toEqual(['2010-08-17', '2010-08-18'])
+    expect(leg1.home).toBe('זלצבורג')
+    expect(leg1.hapoelSide).toBe('away')
+    expect(leg1.score).toEqual({ home: 2, away: 3 })
+    expect(leg1.decided?.some((d) => d.field === 'home')).toBe(true)
     expect(leg1.result).toEqual({ hapoel: 3, opponent: 2 })
-    expect(isDisputed(leg1, 'playedOn')).toBe(true)
+    expect(isDisputed(leg1, 'playedOn')).toBe(false)
     expect(isDisputed(leg1, 'result')).toBe(false)
-    expect(leg2.claims.find((c) => c.field === 'playedOn')?.values.map((v) => v.value).sort()).toEqual(['2010-08-24', '2010-08-25'])
+    expect(leg2.playedOn.value).toBe('2010-08-24')
+    expect(leg2.decided?.find((d) => d.field === 'playedOn')?.overruled.map((v) => v.value).sort()).toEqual(['2010-08-24', '2010-08-25'])
     expect(leg2.result).toEqual({ hapoel: 1, opponent: 1 })
     for (const leg of [leg1, leg2]) {
       expect(leg.mergeNote).toMatch(/Maor, 21\.9\.2026/)
-      expect(leg.conflictRefs.length).toBeGreaterThan(0)
+      expect(leg.conflictRefs).toEqual([])
+      expect(leg.claims).toEqual([])
     }
   })
 })
@@ -164,14 +169,22 @@ describe('the cross-check against matches.json — no unlisted disagreement', ()
       'goal|chelsea-2001-gershon-88|minute',
       'goal|cupfinal-2010-vermouth-73|minute',
       'goal|milan-2002-kleschenko-31|minute',
-      'match|2010/11 ליגת-האלופות · פלייאוף משחק 1 · הפועל-תל-אביב — זלצבורג|played_on_and_home_away',
-      'match|2010/11 ליגת-האלופות · פלייאוף משחק 2 · הפועל-תל-אביב — זלצבורג|played_on',
     ]
     for (const key of expected) {
       expect(conflictKeys.has(key), key).toBe(true)
       const row = conflicts.find((r) => [r.entityTable, r.entityKey ?? '', r.field].join('|') === key)!
       expect(row.resolution ?? null, key).toBeNull()
       expect(row.resolvedBy ?? null, key).toBeNull()
+    }
+    // the two Salzburg rows were decided in delta 89 (UEFA) — resolved by a named decider, with decisions
+    for (const key of [
+      'match|2010/11 ליגת-האלופות · פלייאוף משחק 1 · הפועל-תל-אביב — זלצבורג|played_on_and_home_away',
+      'match|2010/11 ליגת-האלופות · פלייאוף משחק 2 · הפועל-תל-אביב — זלצבורג|played_on',
+    ]) {
+      const row = conflicts.find((r) => [r.entityTable, r.entityKey ?? '', r.field].join('|') === key)!
+      expect(String(row.resolution), key).toMatch(/^הוכרע/)
+      expect(String(row.resolvedBy), key).toMatch(/דלתא 89/)
+      expect((row.decisions as unknown[]).length, key).toBeGreaterThan(0)
     }
     // the ingest dedupes on this key — it must stay unique
     expect(conflictKeys.size).toBe(conflicts.length)
@@ -184,7 +197,9 @@ describe('the cross-check against matches.json — no unlisted disagreement', ()
       expect(moment.usable.trivia, goalId).toBe(false)
       expect(moment.usable.archive, goalId).toBe(true)
     }
-    for (const goalId of ['chelsea-2001-gershon-88', 'milan-2002-kleschenko-31', 'derby-2026-altman-90-2', 'salzburg-2010-bensahar-44']) {
+    // salzburg-2010-bensahar-44 left this list in delta 89: its match's day and home side were decided (UEFA)
+    expect(momentForGoal('salzburg-2010-bensahar-44')!.usable.replay).toBe(true)
+    for (const goalId of ['chelsea-2001-gershon-88', 'milan-2002-kleschenko-31', 'derby-2026-altman-90-2']) {
       const moment = momentForGoal(goalId)!
       expect(moment.usable.trivia, goalId).toBe(false)
       expect(moment.usable.replay, goalId).toBe(true)
@@ -245,5 +260,34 @@ describe('freshness', () => {
       serialiseMatchMaster(out) === readFileSync(join(ROOT, 'content/generated/match-master.json'), 'utf8'),
       'the builder and the committed master disagree — run `npm run matches:master`',
     ).toBe(true)
+  })
+})
+
+describe('the ויקיפועל season schedules (delta 89) — the seasons the archive could not label', () => {
+  const schedules = read('content/manual/matches-vikipoel-2026-09-25.json') as {
+    records: { seasonLabel: string; sourceSeasonLabel: string; playedOn: string; sourceUrl: string; confidence: number; homeClubSlug: string; awayClubSlug: string }[]
+    counts: Record<string, number>
+  }
+  const master = read('content/generated/match-master.json') as { matches: { season: string; sourceIds: string[] }[] }
+
+  it('is what a fresh run of ingest:vikipoel-schedules writes', async () => {
+    const { buildSchedules } = await import('@/scripts/ingest/vikipoel-schedules')
+    expect(JSON.stringify(buildSchedules())).toBe(JSON.stringify(schedules))
+  })
+
+  it('labels 1955 as 1954/55 and splits 1966-68 at 1.8.1967, keeping the wiki label on every row', () => {
+    for (const row of schedules.records) {
+      expect(row.sourceUrl).toMatch(/^https:\/\/wiki\.red-fans\.com\//)
+      expect(['1955', '1966-68']).toContain(row.sourceSeasonLabel)
+      if (row.sourceSeasonLabel === '1955') expect(row.seasonLabel).toBe('1954/55')
+      else expect(row.seasonLabel).toBe(row.playedOn < '1967-08-01' ? '1966/67' : '1967/68')
+      expect([row.homeClubSlug, row.awayClubSlug]).toContain('הפועל-תל-אביב')
+    }
+    expect(schedules.records.length).toBe(schedules.counts.newMatches)
+  })
+
+  it('reaches the master: every row a match with an id, 1954/55 no longer empty', () => {
+    expect(master.matches.filter((m) => m.season === '1954/55').length).toBe(28)
+    expect(master.matches.filter((m) => m.season === '1966/67').length).toBeGreaterThanOrEqual(25)
   })
 })

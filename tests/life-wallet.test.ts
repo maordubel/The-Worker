@@ -6,6 +6,7 @@ import { CHAPTERS } from '@/lib/life/content/chapters'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { eraFor } from '@/lib/life/content/era'
 import { SHIRT_PRICE } from '@/lib/life/content/chapterStageA'
+import { STORY_CHORES, STORY_CHORE_PREFIX } from '@/lib/life/content/storyChores'
 import { GIGS, gigChapters, gigPay, isPaid, offeredIn } from '@/lib/life/gigs'
 import { ALL_SCENES, inEra } from '@/lib/life/world/scenes'
 
@@ -214,6 +215,15 @@ describe('הארנק', () => {
       for (const id of reachedIn(chapter)) {
         for (const { effect, present } of linesOf(id)) {
           const agorot = effect.agorot as number
+          // (Director V3 §12, 25.9.2026) a job done with the hands pays from the chore's own
+          // finish — counted at a full afternoon's work, the most the hands can bring in
+          if (effect.e === 'minigame' && String(effect.id).startsWith(`chore:${STORY_CHORE_PREFIX}`)) {
+            const chore = STORY_CHORES[String(effect.id).slice(`chore:${STORY_CHORE_PREFIX}`.length)]
+            for (const event of chore?.finish(chore.shape.target, chore.shape.target) ?? []) {
+              if (event.t === 'money.changed' && event.agorot > 0) earned += event.agorot
+            }
+            continue
+          }
           if (present || (effect.e !== 'money' && effect.e !== 'withdraw') || !(agorot > 0)) continue
           earned += agorot
         }

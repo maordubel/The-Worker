@@ -18,6 +18,7 @@ import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
 import { CHAPTER } from '@/lib/life/content/chapters'
 import { eraFor } from '@/lib/life/content/era'
 import { MATCH_SCRIPTS } from '@/lib/life/content/matchScripts'
+import { STORY_CHORES, STORY_CHORE_PREFIX } from '@/lib/life/content/storyChores'
 import { LifeEngine } from '@/lib/life/engine'
 import type { LifeEvent } from '@/lib/life/events'
 import { LifeBus, type DialogueChoice } from '@/lib/life/runtime/bus'
@@ -28,8 +29,11 @@ import { meets } from '@/lib/life/world/types'
 
 export type Thing =
   | { kind: 'actor'; id: string; act: string; label: string; x: number }
-  | { kind: 'spot'; id: string; act: string; label: string; x: number }
+  | { kind: 'spot'; id: string; act: string; label: string; x: number; verb: string }
   | { kind: 'exit'; id: string; to: LocationId; spawn: string; label: string; x: number; locked: boolean }
+
+/** the verbs of a hotspot that are done with the hands (Director V3 §13 B) */
+export const HAND_VERBS: ReadonlySet<string> = new Set(['take', 'enter', 'exit', 'sit', 'play', 'buy', 'hold'])
 
 /** walking away mid-sentence — not a choice id (a choice may well be called `leave`) */
 export const WALK_AWAY = '__walk-away__'
@@ -49,6 +53,30 @@ export class WorldSim {
   private pendingTravel: { to: LocationId; spawn: string } | null = null
   /** what a beat's `talk` is answered with — a confused player closes it */
   beatAnswer: Answer = WALK_AWAY
+
+  /**
+   * מדדי V3 (§13) — what the hands did, and how long the eyes went without them.
+   *
+   * `streak` counts answers picked in a row with nothing done in between: a door walked
+   * through, a person or a thing walked up to, a played scene. A beat that opens a box by
+   * itself does not reset it — nobody moved. `verbs` is every physical verb the walk used:
+   * `walk`, the verb of a hotspot pressed (`take`, `enter`, `sit`, `play`, `buy`), and the
+   * played scene a conversation opened (`chore:carry`, `ride`, `football`, a gesture…).
+   */
+  streak = 0
+  maxStreak = 0
+  /** where in `trace` the longest streak ended */
+  streakAt = 0
+  readonly verbs = new Set<string>()
+  /** one row per thing the player did, for a failing test's message */
+  readonly trace: string[] = []
+  /** the played scenes the sim was asked to run, by kind (set by the test's `onMinigame`) */
+  verbOf: (id: string) => string = (id) => {
+    if (id.startsWith('ride:')) return 'ride'
+    if (id.startsWith(`chore:${STORY_CHORE_PREFIX}`)) return `chore:${STORY_CHORES[id.slice(`chore:${STORY_CHORE_PREFIX}`.length)]?.shape.mode ?? 'story'}`
+    if (id.startsWith('chore:')) return 'chore'
+    return id
+  }
 
   constructor(chapter: string, log?: readonly LifeEvent[]) {
     this.chapter = chapter
@@ -129,7 +157,7 @@ export class WorldSim {
     }
     for (const spot of room.hotspots) {
       if (!inEra(spot, this.chapter) || !meets(state, spot.when)) continue
-      out.push({ kind: 'spot', id: spot.id, act: spot.act, label: spot.labelHe, x: spot.x })
+      out.push({ kind: 'spot', id: spot.id, act: spot.act, label: spot.labelHe, x: spot.x, verb: spot.verb })
     }
     for (const exit of room.exits) {
       if (!exitInEra(exit, this.chapter) || !meets(state, whenFor(exit, this.chapter))) continue
@@ -159,6 +187,9 @@ export class WorldSim {
   press(id: string, answer: Answer = WALK_AWAY): boolean {
     const thing = this.find(id)
     if (!thing || thing.kind === 'exit') return false
+    this.streak = 0
+    if (thing.kind === 'spot' && HAND_VERBS.has(thing.verb)) this.verbs.add(thing.verb)
+    this.trace.push(`${thing.kind === 'spot' ? thing.verb : 'talk'}:${thing.id}`)
     this.converse(thing.act, answer)
     this.settle()
     return true
@@ -168,6 +199,9 @@ export class WorldSim {
   exit(id: string): boolean {
     const door = this.things().find((thing) => thing.kind === 'exit' && thing.id === id)
     if (!door || door.kind !== 'exit' || door.locked) return false
+    this.streak = 0
+    this.verbs.add('walk')
+    this.trace.push(`walk:${door.to}`)
     this.go(door.to)
     return true
   }
@@ -188,6 +222,10 @@ export class WorldSim {
           this.dialogue.leave()
           break
         }
+        this.streak += 1
+        if (this.streak > this.maxStreak) this.streakAt = this.trace.length
+        this.maxStreak = Math.max(this.maxStreak, this.streak)
+        this.trace.push(`choice:${id}/${pick}`)
         this.dialogue.choose(pick)
         continue
       }
@@ -206,6 +244,9 @@ export class WorldSim {
       if (this.pendingMinigame) {
         const id = this.pendingMinigame
         this.pendingMinigame = null
+        this.streak = 0
+        this.verbs.add(this.verbOf(id))
+        this.trace.push(`play:${id}`)
         this.onMinigame(id, this)
         continue
       }
@@ -221,6 +262,8 @@ export class WorldSim {
   }
 
   private beats(trigger: Beat['trigger']): boolean {
+    // the chapter has closed on its card: the runtime stops the room, and so does this
+    if (this.endings.length) return false
     const era = eraFor(this.chapter)
     let ran = false
     for (let guard = 0; guard < 12; guard += 1) {
@@ -242,6 +285,10 @@ export class WorldSim {
   private actions(list: BeatAction[]): boolean {
     for (const action of list) {
       switch (action.a) {
+        // a card over black is a cut: the moment the player was in has ended (V3 §13 A)
+        case 'card':
+          this.streak = 0
+          break
         case 'flag':
           this.engine.dispatch({ t: 'flag.raised', flag: action.flag })
           break
@@ -266,7 +313,13 @@ export class WorldSim {
         case 'match': {
           // the directed match is watched, not simulated: what it opens is what is tested
           const script = MATCH_SCRIPTS[action.script]
-          for (const step of script?.steps ?? []) if (step.talk) this.converse(step.talk, this.beatAnswer)
+          this.verbs.add('match')
+          this.trace.push(`match:${action.script}`)
+          for (const step of script?.steps ?? []) {
+            // the board moves and the terrace answers between two of its questions
+            this.streak = 0
+            if (step.talk) this.converse(step.talk, this.beatAnswer)
+          }
           if (this.pendingTravel) return true
           break
         }

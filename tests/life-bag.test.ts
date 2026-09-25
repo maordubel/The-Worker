@@ -78,7 +78,14 @@ describe('בלי מספרים, בלי ברים — והשומר מכסה עכש�
    * pass split the bag's own drawing primitives into a second component, and a guard that
    * names one path would have stopped covering the half that moved.
    */
-  const DRAWN = ['components/life/ProfileCard.tsx', 'components/life/BagShelf.tsx']
+  // delta 90-H: the dossier's own components live in `components/life/profile/` — every one
+  const DRAWN = [
+    'components/life/ProfileCard.tsx',
+    'components/life/BagShelf.tsx',
+    ...readdirSync(join(ROOT, 'components/life/profile'))
+      .filter((name) => name.endsWith('.tsx'))
+      .map((name) => `components/life/profile/${name}`),
+  ]
 
   it('draws no progress bar and prints no percentage anywhere the bag is drawn', () => {
     for (const path of DRAWN) {
@@ -102,7 +109,7 @@ describe('בלי מספרים, בלי ברים — והשומר מכסה עכש�
   it('carries no achievement vocabulary', () => {
     // Rule 63ב allows achievements now; it does NOT allow a single score, and the bag is
     // the last screen that should grow one.
-    for (const path of [...DRAWN, 'lib/life/profile.ts']) {
+    for (const path of [...DRAWN, 'lib/life/profile.ts', 'lib/life/personal.ts']) {
       const text = readFileSync(join(ROOT, path), 'utf8')
       for (const banned of ['הישג', 'ניקוד', 'תג ']) {
         expect(text.includes(banned), `${path} says ${banned}`).toBe(false)

@@ -140,7 +140,12 @@ describe('סופרגול — המעטפה', () => {
 
   it('sells the eighties page in an eighties chapter and the nineties page later', () => {
     expect(setSoldIn(state({ chapter: '1986' }))).toBe('8586')
-    expect(setSoldIn(state({ chapter: '1993-cup' }))).toBe('9293')
+    // delta 90: the nineties page the kiosk sells is one an envelope can ADD to. The 1992/93
+    // page is a single scan that closes itself (trade-only), so a counter selling it sold an
+    // empty box for seven chapters — the Batch 0 matrix's dead row.
+    const nineties = setSoldIn(state({ chapter: '1993-cup' }))
+    expect(nineties && SETS[nineties].soldIn).toBe('90s')
+    expect(openPacket(state({ chapter: '1993-cup' }), nineties as never, 0).length).toBe(PACKET_SIZE)
   })
 
   it('moves the kiosk on to the next album once a page is full', () => {

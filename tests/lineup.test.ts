@@ -289,13 +289,14 @@ describe('הקלף — what the deal hands the screen, and what it does not', ()
     expect(milan.kitSeason).toBeNull()
   })
 
-  it('introduces the match from the Match Master, and keeps a disputed date disputed', () => {
+  it('introduces the match from the Match Master, and prints a decided date (no longer disputed)', () => {
     const chelsea = dealChallenge(seedFor('2001-02-uefa-r2-chelsea'))!
     expect(chelsea.intro.playedOn).toBe('2001-10-18')
     expect(chelsea.intro.matchSourceTitle).toBeTruthy()
+    // disputed (17.8 / 18.8) until delta 89; decided for UEFA's match record 2002389 — 18.8.2010
     const salzburg = dealChallenge(seedFor('2010-11-ucl-po-salzburg-1'))!
-    expect(salzburg.intro.playedOn).toBeNull()
-    expect(salzburg.intro.dateDisputed).toBe(true)
+    expect(salzburg.intro.playedOn).toBe('2010-08-18')
+    expect(salzburg.intro.dateDisputed).toBe(false)
   })
 
   it('walks all five matches before any comes back', () => {

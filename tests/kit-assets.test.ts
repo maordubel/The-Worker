@@ -32,7 +32,12 @@ const photos = new Set(
  */
 describe('public/kits — nothing but the photographs is exempt', () => {
   const files = walk(KITS).map((path) => relative(KITS, path).split('\\').join('/'))
-  const others = files.filter((file) => !photos.has(file))
+  // 25.9.2026 (delta 89): `og/<slug>.png` is the share-card twin of `<slug>.webp` — the same
+  // photograph scaled for the image renderer (scripts/og/kit-thumbs.py). It carries exactly the
+  // yellow of the object it copies, so it is the photograph, not a new file in the hole; a twin
+  // with no photograph behind it is still caught.
+  const twinOf = (file: string) => file.replace(/^og\/(.+)\.png$/, '$1.webp')
+  const others = files.filter((file) => !photos.has(file) && !(file.startsWith('og/') && photos.has(twinOf(file))))
 
   it('is the folder the exemption names', () => {
     expect(yellowPhotoAllowed('public/kits/templates/2010s-fitted/shading.webp')).toBe(true)

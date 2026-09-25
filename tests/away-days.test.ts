@@ -171,18 +171,28 @@ describe('away days — regression cases (§34, §38)', () => {
   })
 
   it('a match with score and date but no ground goes to research, never to an invented point', () => {
-    const godset = committed.researchQueue.find((r) => r.playedOn === '1998-08-25')
-    expect(godset?.venueId).toBeNull()
-    expect(godset?.reasons.map((r) => r.code)).toContain('venue-missing')
+    // Drammen 1998 was the example until delta 89 — UEFA's match record named Marienlyst, so it
+    // is a visit now; an Intertoto away leg of 1981 is still a score and a date with no ground.
+    const godset = visitOf('m_79b2d4bbb455')
+    expect(godset?.venueId).toBe('marienlyst')
+    expect(godset?.sourceRefs).toContain('https://match.uefa.com/v5/matches?matchId=55638')
+    const vienna = committed.researchQueue.find((r) => r.matchId === 'm_03ea50267e68')
+    expect(vienna?.venueId).toBeNull()
+    expect(vienna?.reasons.map((r) => r.code)).toContain('physical-venue-unknown')
     for (const item of committed.researchQueue.filter((r) => r.venueId === null)) {
       expect(committed.visits.some((v) => v.matchId === item.matchId)).toBe(false)
     }
   })
 
-  it('a disagreement between the venue source and the master is a CONFLICT (Leeds in Florence, 2002)', () => {
-    const leeds = committed.researchQueue.find((r) => r.playedOn === '2002-11-14')
-    expect(leeds?.status).toBe('CONFLICT')
-    expect(leeds?.reasons.map((r) => r.code)).toEqual(expect.arrayContaining(['check-score', 'master-venue']))
+  it('a decided disagreement goes public with the winner, and keeps the loser (Leeds in Florence, 2002)', () => {
+    // CONFLICT until delta 89 (check-score + master-venue); decided for UEFA's record: 1:4 in Florence
+    const leeds = visitOf('m_4100110bcfb1')
+    expect(leeds?.venueId).toBe('artemio-franchi')
+    expect([leeds?.scoreFor, leeds?.scoreAgainst]).toEqual([1, 4])
+    const decided = matchMaster.matches.find((m) => m.matchId === 'm_4100110bcfb1')!.decided ?? []
+    expect(decided.map((d) => d.field).sort()).toEqual(['result', 'venue'])
+    for (const d of decided) expect(d.resolutionHe).toMatch(/^הוכרע/)
+    expect(committed.researchQueue.filter((r) => r.status === 'CONFLICT')).toEqual([])
   })
 
   it('selects by physical country, never by AWAY: an AWAY row with no ground is not placed', () => {
@@ -201,17 +211,21 @@ describe('away days — the red-fans reading (24.9.2026) folded into the canon',
     expect(semi.result).toBeNull()
   })
 
-  it('keeps the 1967 final\'s two scorer readings as a claim, and prints none of them', () => {
+  it('decides the 1967 final\'s scorers for RSSSF and keeps the red-fans reading in `decided`', () => {
     const final = byId.get('m_26a26d7e5164')!
-    expect(final.claims.find((c) => c.field === 'scorers')?.values.length).toBe(2)
-    expect(final.scorersDisputed).toBe(true)
-    expect(visitOf('m_26a26d7e5164')?.scorers).toBeNull()
+    expect(final.claims.find((c) => c.field === 'scorers')).toBeUndefined()
+    const decided = final.decided?.find((d) => d.field === 'scorers')
+    expect(decided?.overruled.length).toBe(2)
+    expect(decided?.overruled.some((v) => String(v.value).includes('בורסוק'))).toBe(true)
+    expect(final.scorersDisputed).toBe(false)
+    expect(final.scorers.filter((s) => s.ownGoal).length).toBe(1)
   })
 
-  it('never lets a preserved venue disagreement onto the map (Razgrad / DVTK, 30.7.2026)', () => {
-    expect(byId.get('m_0c4347200189')!.claims.some((c) => c.field === 'venue')).toBe(true)
-    expect(visitOf('m_0c4347200189')).toBeUndefined()
-    expect(committed.researchQueue.find((r) => r.matchId === 'm_0c4347200189')?.status).toBe('CONFLICT')
+  it('places a decided venue disagreement on the winner only (Razgrad, not DVTK, 30.7.2026)', () => {
+    const match = byId.get('m_0c4347200189')!
+    expect(match.claims.some((c) => c.field === 'venue')).toBe(false)
+    expect(match.decided?.find((d) => d.field === 'venue')?.overruled.length).toBeGreaterThanOrEqual(2)
+    expect(visitOf('m_0c4347200189')?.venueId).toBe('huvepharma')
   })
 
   it('prints no minute where the two readings disagree on it (Milan, 14.3.2002)', () => {

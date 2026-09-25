@@ -635,8 +635,22 @@ describe('הפרופיל — a person, described, never a bar', () => {
    */
   it('holds everything the profile draws with to the same rule', () => {
     const card = readFileSync(join(ROOT, 'components/life/ProfileCard.tsx'), 'utf8')
-    const imported = [...card.matchAll(/from '@\/components\/life\/([A-Za-z]+)'/g)].map((match) => match[1])
+    // delta 90-H: the card routes to `components/life/profile/*`, and those import each
+    // other relatively — so walk the whole import graph under components/life, not one hop
+    const seen = new Set<string>()
+    const queue = [...card.matchAll(/from '@\/components\/life\/([A-Za-z/]+)'/g)].map((match) => match[1] as string)
+    while (queue.length > 0) {
+      const name = queue.shift() as string
+      if (seen.has(name)) continue
+      seen.add(name)
+      const text = readFileSync(join(ROOT, `components/life/${name}.tsx`), 'utf8')
+      const dir = name.includes('/') ? name.slice(0, name.lastIndexOf('/') + 1) : ''
+      for (const match of text.matchAll(/from '@\/components\/life\/([A-Za-z/]+)'/g)) queue.push(match[1] as string)
+      for (const match of text.matchAll(/from '\.\/([A-Za-z]+)'/g)) queue.push(`${dir}${match[1]}`)
+    }
+    const imported = [...seen]
     expect(imported.length, 'the profile draws with nothing of its own').toBeGreaterThan(0)
+    expect(imported, 'the walk reaches the dossier').toContain('profile/LifeIdentitySheet')
     for (const name of imported) {
       const text = readFileSync(join(ROOT, `components/life/${name}.tsx`), 'utf8')
       expect(/%\s*<\/|toFixed|Math\.round\(.*100/.test(text), `${name} is printing a value`).toBe(false)

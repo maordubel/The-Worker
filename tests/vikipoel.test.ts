@@ -433,7 +433,11 @@ describe('ויקיפועל — a disagreement is recorded, never resolved (rule 
 
     for (const row of ours) {
       expect(row.entityTable).toBe('match')
-      expect(row.resolution, String(row.entityKey)).toBeNull()
+      // open, or decided out loud: a resolution names its decider and carries structured decisions (delta 89)
+      if (row.resolution !== null && row.resolution !== undefined) {
+        expect(String(row.resolution), String(row.entityKey)).toMatch(/^הוכרע/)
+        expect(String(row.resolvedBy ?? ''), String(row.entityKey)).not.toBe('')
+      } else expect(row.resolution ?? null, String(row.entityKey)).toBeNull()
       expect(String(row.claimA).length).toBeGreaterThan(0)
       expect(String(row.claimB).length).toBeGreaterThan(0)
       expect(row.claimA).not.toBe(row.claimB)
@@ -441,7 +445,11 @@ describe('ויקיפועל — a disagreement is recorded, never resolved (rule 
 
     // And no wiki match row survives for a date a conflict was recorded on — the curated
     // row won that slot, which is what makes the conflict a conflict and not a duplicate.
-    const conflicted = new Set(ours.map((row) => String(row.entityKey).slice(0, 10)))
+    // (A row whose claim A is UEFA's own match record is a delta-89 decision ABOUT a Games row —
+    // the 1996 Intertoto dates — not a slot a curated row won, so it is not in this check.)
+    const conflicted = new Set(
+      ours.filter((row) => !String(row.sourceAUrl ?? '').startsWith('https://match.uefa.com/')).map((row) => String(row.entityKey).slice(0, 10)),
+    )
     for (const row of wikiMatches) {
       if (row.playedOn && conflicted.has(row.playedOn as string)) {
         expect.unreachable(`a wiki row survived on ${String(row.playedOn)}, where a curated row won`)

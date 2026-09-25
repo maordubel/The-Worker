@@ -34,7 +34,9 @@ describe('F01–F04 — who can say which sentence', () => {
     expect(meets(life({ 'f:ready': true }), reunion.when)).toBe(false)
     // X05 (`2025-abroad`) is where the invitation is said; without it, nobody said it
     expect(meets(life({ 'f:ready': true, 'life:abroad': true }), reunion.when)).toBe(false)
-    expect(meets(life({ 'f:ready': true, 'life:abroad': true, 'life:finale:reunionOffered': true }), reunion.when)).toBe(true)
+    // (90-E) and the plan must say so: two tickets on two names and a meeting point (`f-tickets`)
+    expect(meets(life({ 'f:ready': true, 'life:abroad': true, 'life:finale:reunionOffered': true }), reunion.when)).toBe(false)
+    expect(meets(life({ 'f:ready': true, 'life:abroad': true, 'life:finale:reunionOffered': true, 'f:tickets': 'reunion' }), reunion.when)).toBe(true)
   })
 
   it('waits for Kobi at the agreed spot only when coming from abroad', () => {
