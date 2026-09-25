@@ -303,7 +303,13 @@ export const BEATS_ARMY: Beat[] = [
     id: 'a4-open',
     at: 'kiosk',
     trigger: 'enter',
-    when: { flag: A4, none: [{ flag: 'a4:seen' }] },
+    /**
+     * `none: A5` (25.9.2026): `a4:seen` is a day flag, and the fifth day clears it on the
+     * way into this same kiosk — so February opened a second time on the afternoon of the
+     * two journeys, with a second soldier's pay in the pocket and Freddy's whole winter
+     * again (found by the V3 dialogue-streak count). The winter belongs to its own day.
+     */
+    when: { flag: A4, none: [{ flag: 'a4:seen' }, { flag: A5 }] },
     delayMs: 700,
     do: [
       { a: 'flag', flag: 'a4:seen' },

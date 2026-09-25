@@ -1,3 +1,6 @@
+import type { LifeState } from '../types'
+import type { TimeGate } from '../world/flow'
+
 import type { EndingCard } from './chapter1986'
 import type { Say } from './script'
 
@@ -143,6 +146,51 @@ export const OBJECTIVES_1991 = {
   home: 'הביתה.',
   morning: 'בוקר. כיתה.',
 } as const
+
+/** Rachel's key in the door (`SCHEDULE_1991`, `rachel-1991` from three) */
+export const RACHEL_HOME = 15 * 60
+/** the evening the hall starts to fill: the usher at the door, Ofir leaving the street */
+export const EVENING_1991 = 18 * 60 + 30
+
+/**
+ * כשרק הזמן עומד בין הילד לדבר הבא — 1991's time gates (design pass v2 §7 1991, §12 C).
+ *
+ * The derby night is directed by the scene class, so it has no beats a clock could be
+ * waiting on — and until delta 90 that meant the flow card never came. A boy who finished
+ * page forty-one at ten in the morning walked the flat for five real minutes until his
+ * mother's schedule row began; a boy who got his "yes" at four stood in the street until
+ * the doors. Each gate below is a moment where the NEXT meaningful thing is a person or a
+ * door arriving, and nothing the player could do would bring it sooner. None of them is
+ * offered while there is still something to decide: homework not yet settled, the note
+ * on the kitchen table not yet written or refused, a spot Amit asked him to hold.
+ *
+ * (delta 90, free time §13) each gate also says WHERE: Rachel's key turns in the living
+ * room, the evening starts in the street where Ofir waits, the radio is anywhere in the
+ * flat, the tip-off is the step he is standing on.
+ */
+export function timeGate1991(state: LifeState): TimeGate | null {
+  const f = (key: string) => Boolean(state.flags[key])
+  if (state.chapterDone || f('derby:over') || f('tipoff:1991')) return null
+  const settled = f('hw:done') || f('hw:half') || f('hw:faked')
+  const decided = f('permission:yes') || f('permission:no') || f('sneak:ready') || f('night:home')
+  // 1 · school is out, the page is done (or not yet set — she sets it), and only Rachel is left
+  if (f('school:done') && !decided && !f('asked:mum') && state.minute < RACHEL_HOME && (settled || !f('hw:given'))) {
+    return { beatId: 'era:1991:rachel', minute: RACHEL_HOME, waitingHe: 'אמא חוזרת מהעבודה בשלוש. עד אז הבית שקט.', at: 'home', freeTime: { person: true } }
+  }
+  // 2 · he may go (or has left a note): the next thing is the evening itself
+  if ((f('permission:yes') || f('sneak:ready')) && !f('uss:arrived') && state.minute < EVENING_1991) {
+    return { beatId: 'era:1991:evening', minute: EVENING_1991, waitingHe: 'עד הערב. בשבע ועשרה פותחים את הדלתות באוסישקין.', at: 'street', freeTime: { eventHe: 'אופיר יוצא מהרחוב' } }
+  }
+  // 3 · he chose to stay in: the night will come to the kitchen radio
+  if (f('night:home') && state.minute < TIP_OFF) {
+    return { beatId: 'era:1991:radio', minute: TIP_OFF, waitingHe: 'ערב בבית. בשמונה, ברדיו של המטבח, מתחילים.', at: ['home', 'kitchen', 'bedroom'] }
+  }
+  // 4 · inside, the step held (or lost): only the tip-off is left
+  if (f('uss:arrived') && (f('spot:held') || f('spot:lost')) && state.minute < TIP_OFF) {
+    return { beatId: 'era:1991:tipoff', minute: TIP_OFF, waitingHe: 'המדרגה שלך. בשמונה — טיפ־אוף.', at: 'ussishkin-hall' }
+  }
+  return null
+}
 
 /**
  * הסופים — three, and none of them is a failure.

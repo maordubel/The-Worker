@@ -1,4 +1,5 @@
 import type { ShirtLook } from '@/lib/kit/playerShirt'
+import type { CrossLink } from '@/lib/links/types'
 
 /**
  * פרה עיוורת — the data contracts of gate 10 (spec GATE10-BLINDCOW-AWAYDAYS §5.1).
@@ -147,6 +148,12 @@ export type RunResult = {
   /** every clue of the question, opened or not — the whole file after the whistle */
   allClues: OpenClue[]
   archiveHref: string
+  /**
+   * The other gates he and his clues live in (delta 89, `lib/links`): his archive card,
+   * the matches of his match/goal clues — the AWAY DAYS stop where it was abroad — and a
+   * gate-8 goal he scored. Resolved after the whistle only, every target checked.
+   */
+  links: CrossLink[]
   /** his real shirt where the archive holds a photograph (`lib/kit/playerShirt.ts`) */
   shirt: ShirtLook
   shirtTitle: string

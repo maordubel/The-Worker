@@ -29,43 +29,63 @@ import { longDateHe } from './cutscenes'
  * this way rather than typing `1.6.1983` into a caption.
  */
 
+/**
+ * The six documentary modes (owner spec 25.9.2026, §16 and §50). A mode names what the beat
+ * IS — the component decides what that looks like. No CSS class ever lives in this file
+ * (§48): `mode: 'archive'`, never `className: 'bg-black border…'`.
+ *
+ *   origin    the huge year, the thread's first node, clean titles
+ *   memory    a strip of dark "paper" behind the line that turns the beat
+ *   archive   film marks, the year stamp, the archive's own line in mono
+ *   identity  the thread itself is the picture — the mark drawn again and again
+ *   lights    two cold floodlight beams and haze; never yellow, never warm
+ *   handoff   a clean frame, the title, the thread leaving the glass
+ */
+export type OpeningDocumentaryMode = 'origin' | 'memory' | 'archive' | 'identity' | 'lights' | 'handoff'
+
+export const OPENING_MODES: readonly OpeningDocumentaryMode[] = ['origin', 'memory', 'archive', 'identity', 'lights', 'handoff']
+
 export type OpeningBeat = {
   id: string
-  /** a painting held with a slow drift, or a few seconds of film */
-  kind: 'still' | 'clip'
-  /** file stem under `/life/opening` — `.png`, or `.mp4` plus `-poster.png` */
-  art: string
+  mode: OpeningDocumentaryMode
+  /** how long it holds, in milliseconds, when nobody touches anything */
+  ms: number
   /**
-   * Where the still lives. The five original beats are photographs in `/life/opening`;
-   * the frame of 2026 is a painted backdrop from the art manifest (`/life/art`), so the
-   * same picture the coda ends on is the one the film opens on.
+   * The first stretch of `ms` in which only the overline and the thread's first point are on
+   * the glass — beat 0 of the spec, the breath before the first sentence (§8).
    */
-  from?: 'opening' | 'art'
+  leadMs?: number
+  /** the line itself. Written for the beat; never a fact. */
+  captionHe: string
   /**
-   * שנה על הפריים — the year in the corner, the way a film names its time.
+   * שנה על הפריים — the year the beat is stamped with, as background architecture.
    *
-   * A stamp is a DATE and never a caption — "אחר כך" in the corner of a frame is a second
-   * subtitle, and the poster face it is set in has no Hebrew. Only where the year is
-   * KNOWN, and never typed where the archive already holds it:
-   * `stampFrom: 'anchor'` takes the year off the prologue anchor's own date, so the beat
-   * that shows the cup final is stamped 1983 because the archive says 1 June 1983 and for
-   * no other reason. A beat with neither is a beat with no year on it, which is the honest
-   * state of a photograph nobody has dated.
+   * A stamp is a DATE and never a caption, and only where the year is KNOWN, never typed
+   * where the archive already holds it: `stampFrom: 'anchor'` takes the year off the
+   * prologue anchor's own date, so the beat that shows the cup final is stamped 1983
+   * because the archive says 1 June 1983 and for no other reason. A beat with neither is
+   * a beat with no year on it, which is the honest state of a memory nobody has dated.
    */
   stampHe?: string
   stampFrom?: 'anchor'
-  /** how long it holds, in milliseconds, when nobody touches anything */
-  ms: number
-  /** the line under the picture. Written for the beat; never a fact. */
-  captionHe: string
   /**
    * A second line, built from the archive at render time.
    *
-   * `fixture` is `הפועל תל אביב — מכבי תל אביב · 3:2`, `date` is `1 ביוני 1983`. Both come
-   * from the prologue anchor and both are null when the archive cannot answer, in which
-   * case the beat simply has one line.
+   * `fixture` is `הפועל תל אביב — מכבי תל אביב · 3:2 · 1 ביוני 1983`, `date` is
+   * `1 ביוני 1983`. Both come from the prologue anchor and both are null when the archive
+   * cannot answer, in which case the beat simply has one line.
    */
   archiveLine?: 'fixture' | 'date'
+  /** a small line ABOVE the caption — a place, a register; never a fact */
+  overlineHe?: string
+  /** a small line BELOW the caption — an index of the beat, the way a documentary lists */
+  noteHe?: string
+  /**
+   * The part of `captionHe` the beat turns on. It must be a verbatim substring of the
+   * caption (asserted): it is a direction — where the paper goes, which line lands — and
+   * never a second copy of the text.
+   */
+  emphasisHe?: string
 }
 
 /**
@@ -119,53 +139,78 @@ export const FILM = {
   webm: '/life/opening/opening-film.webm',
   mp4: '/life/opening/opening-film.mp4',
   poster: '/life/opening/opening-film-poster.png',
-  /** 21.405 שניות — מה ש-`ffprobe` אמר על המקור, לא הערכה */
-  ms: 21_405,
+  /**
+   * 25.84 שניות — `ffprobe` על ה-MP4 שעלה ב-23.9.2026 (היה 21.405, הסרט של 17.9). ה-WebM
+   * של אותה העלאה נמדד 7.949 ש׳ בלבד — קידוד קטוע — ולכן ה-MP4 הוא הראשון ב-`OpeningFilm`.
+   */
+  ms: 25_840,
 } as const
 
+/**
+ * ------------------------------------------------------------------------------------
+ * **25.9.2026 — the documentary thread.** The five stills stopped being the fallback. Owner
+ * spec (OPENING DOCUMENTARY HYBRID): when the film cannot play, the player gets a SECOND
+ * real opening built from text, time, a line, typography, light, grain and rhythm — and
+ * nothing that has to be downloaded. So the beats below carry a `mode` and no `art`. The
+ * captions are the same canonical sentences, word for word (§15: this is directing, not
+ * rewriting); the entry breath and the handoff line are the only new copy.
+ *
+ * The stills and the two clips are NOT deleted (§17, and the 17.9 decision that they are
+ * the accessible half of the opening): they stay in `public/life/opening`, registered in
+ * the asset provenance, ready to come back as optional polish (§18) — never as a
+ * dependency. `tests/life-opening.test.ts` holds both halves of that.
+ *
+ * 22.8 s in all — a real alternative to the 21.4 s film, not a 27 s slideshow (§31).
+ * ------------------------------------------------------------------------------------
+ */
 export const OPENING: OpeningBeat[] = [
   {
     id: 'born',
-    kind: 'still',
-    art: 'born',
+    mode: 'origin',
     stampHe: '1978',
-    ms: 4600,
+    leadMs: 900,
+    ms: 4400,
+    overlineHe: 'דרום תל אביב',
     // The one caption the vision document wrote itself, kept word for word.
     captionHe: 'עוד לפני שידע לדבר, כבר החליטו בשבילו איפה הלב שלו יהיה.',
+    noteHe: 'בית · אבא · שבת',
   },
   {
     id: 'first-time',
-    kind: 'clip',
-    art: 'clip-family',
-    ms: 5600,
+    mode: 'memory',
+    ms: 3600,
     captionHe: 'בפעם הראשונה הוא לא זכר כלום. אבא זוכר הכול.',
+    emphasisHe: 'אבא זוכר הכול.',
   },
   {
     id: 'cup',
-    kind: 'still',
-    art: 'shoulders',
-    // The year comes off the archive row, not out of this file. On 6.9.2026 the film ran
-    // 2026 → 1978 → (nothing) → (nothing) → (nothing): after the second beat it stopped
-    // telling the player when anything was, and the sequence stopped reading as a life
-    // and started reading as a mood board.
+    mode: 'archive',
+    // The year comes off the archive row, not out of this file.
     stampFrom: 'anchor',
-    ms: 6600,
+    ms: 4800,
+    overlineHe: 'מהארכיון',
     captionHe: 'הוא לא הבין את החוקים. הוא הבין את אבא.',
     archiveLine: 'fixture',
   },
   {
     id: 'crest',
-    kind: 'still',
-    art: 'drawing',
-    ms: 4400,
+    mode: 'identity',
+    ms: 3600,
     captionHe: 'אחר כך ציירו אותו שוב ושוב, עד שהילד ידע לצייר אותו לבד.',
   },
   {
     id: 'window',
-    kind: 'clip',
-    art: 'clip-memory',
-    ms: 6000,
+    mode: 'lights',
+    ms: 3400,
     captionHe: 'ומהחלון שלו רואים את הזרקורים.',
+  },
+  {
+    id: 'handoff',
+    mode: 'handoff',
+    ms: 3000,
+    // From explanation to invitation (§14): the documentary stops talking ABOUT him and
+    // hands the player the controls.
+    captionHe: 'מכאן אתה כבר בפנים.',
   },
 ]
 
@@ -212,6 +257,32 @@ export function openingLines(beat: OpeningBeat, anchor: HistoricalAnchor): Openi
 /** Total run time if nobody skips, for the loading estimate and for the tests. */
 export function openingMs(): number {
   return OPENING.reduce((total, beat) => total + beat.ms, 0)
+}
+
+/**
+ * A caption, cut where a documentary would cut it: after a sentence, after a comma. Each
+ * piece arrives on its own breath, and the pieces joined are the caption again, character
+ * for character (asserted) — the direction never edits the sentence.
+ */
+export function captionPieces(captionHe: string): string[] {
+  const pieces = captionHe.match(/[^.,!?]+[.,!?]*\s*/g) ?? [captionHe]
+  return pieces.filter((piece) => piece.trim() !== '')
+}
+
+/**
+ * Where a frozen film hands over (the one rescue `openingAttempt.ts` allows): the beat whose
+ * share of the documentary matches the share of the film already seen, so a player who
+ * watched 1978 and the family does not watch them again.
+ */
+export function beatForFilmMs(filmMs: number): number {
+  const share = Math.max(0, Math.min(1, filmMs / FILM.ms))
+  const total = openingMs()
+  let elapsed = 0
+  for (let i = 0; i < OPENING.length; i += 1) {
+    elapsed += OPENING[i]!.ms
+    if (elapsed / total > share) return i
+  }
+  return OPENING.length - 1
 }
 
 /**

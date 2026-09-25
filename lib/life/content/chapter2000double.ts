@@ -408,6 +408,11 @@ export const ENDINGS_DOUBLE: Record<string, EndingCard> = {
   },
 }
 
+/** an afternoon was spent (V3 §12); arriving at the national stadium, and through its gates */
+export const D_DID = 'd:did'
+export const D_ARRIVED = 'd:arrived'
+export const D_IN = 'd:in'
+
 export const BEATS_DOUBLE: Beat[] = [
   /**
    * הרגע השלישי של הצעיף — לפני שהערב נסגר, בזמן שעוד אפשר לתת.
@@ -450,54 +455,152 @@ export const BEATS_DOUBLE: Beat[] = [
       { a: 'flag', flag: 'd:afternoon1' }, { a: 'lines', lines: [{ who: null, text: 'יום ראשון. ארבעה ימים לגמר. אין רשימת משימות — יש עיר, גוף, משפחה ואנשים שמחכים. לך לאן שאתה בוחר.' }] },
     ],
   },
-  { id: 'd-home-afternoon', at: 'home', trigger: 'enter', when: { flag: 'd:opened', none: [{ flag: 'd:final' }] }, do: [{ a: 'talk', conversation: 'd-home-afternoon' }] },
-  { id: 'd-kiosk-afternoon', at: 'kiosk', trigger: 'enter', when: { flag: 'd:opened', none: [{ flag: 'd:final' }] }, do: [{ a: 'talk', conversation: 'd-kiosk-afternoon' }] },
-  { id: 'd-gate5-afternoon', at: 'bloomfield-outside', trigger: 'enter', when: { flag: 'd:opened', none: [{ flag: 'd:final' }] }, do: [{ a: 'talk', conversation: 'd-gate5-afternoon' }] },
-  { id: 'd-uss-afternoon', at: 'ussishkin-outside', trigger: 'enter', when: { flag: 'd:opened', none: [{ flag: 'd:final' }] }, do: [{ a: 'talk', conversation: 'd-uss-afternoon' }] },
+  /**
+   * (Director V3 §12, 25.9.2026) "שני אחר־צהריים משחקיים וגמר — לא 'בחר 2 מתוך 7'".
+   *
+   * The four rooms used to open a menu at the door the moment he walked in. They are four
+   * places to DO something now, and what is done there is done with the hands: the sofa
+   * with his parents and the bed (sit), the red box on the shelf (take), a double shift at
+   * Rafi's counter (`chore:story:shift-00`, serving), the ticket and the minibus seat at the
+   * same counter (buy), the banner on the floor by Bloomfield (`chore:story:banner-00`, the
+   * brush), Shachor's crates at Ussishkin (`chore:story:uss-00`). Each raises `d:did`, and
+   * the week answers it: the first is Sunday, a cut to Tuesday, the second is the eve of
+   * the final (`d-next-1`, `d-next-2` → `d-next-afternoon`, the chapter's own words).
+   */
   {
+    id: 'd-next-1',
+    trigger: 'clock',
+    when: { flag: D_DID, none: [{ flag: 'd:pick1' }, { flag: 'd:final' }] },
+    delayMs: 700,
+    do: [{ a: 'card', titleHe: 'יום שלישי', subHe: 'אחר הצהריים השני', ms: 2200 }, { a: 'talk', conversation: 'd-next-afternoon' }],
+  },
+  {
+    id: 'd-next-2',
+    trigger: 'clock',
+    when: { flag: D_DID, all: [{ flag: 'd:pick1' }], none: [{ flag: 'd:final' }] },
+    delayMs: 700,
+    do: [{ a: 'talk', conversation: 'd-next-afternoon' }],
+  },
+  /** four days pass whether or not he spends them: at nine the Wednesday comes anyway */
+  {
+    id: 'd-idle',
+    trigger: 'clock',
+    when: { flag: 'd:opened', afterMinute: at(21, 0), none: [{ flag: 'd:final' }, { flag: D_DID }] },
+    do: [
+      { a: 'events', events: [{ t: 'flag.raised', flag: 'd:final' }] },
+      { a: 'card', titleHe: 'יום רביעי', subHe: 'הימים עברו בלי לשאול אותך', ms: 2400 },
+      { a: 'talk', conversation: 'd-go' },
+    ],
+  },
+  {
+    /** arriving is the forecourt: the gates are pushed through (`rg-gate-00`), then the match */
     id: 'd-stadium',
     at: 'ramat-gan',
     trigger: 'enter',
-    when: { flag: 'd:final', none: [{ flag: 'd:over' }] },
+    when: { flag: 'd:final', none: [{ flag: 'd:over' }, { flag: D_ARRIVED }] },
     delayMs: 1000,
     do: [
+      { a: 'flag', flag: D_ARRIVED },
       { a: 'card', titleHe: 'אצטדיון רמת גן', subHe: 'גמר גביע המדינה · הדאבל', ms: 2600, art: 'plate-2000-double' },
-      { a: 'match', script: 'double-00' },
+      { a: 'toast', text: 'השערים. אותו אצטדיון, שנה אחרי. אותו דחף בגב.', tone: 'plain' },
     ],
+  },
+  {
+    id: 'd-kickoff',
+    at: 'ramat-gan',
+    trigger: 'clock',
+    // armed again if the final was walked out of before its end (as the arrival beat was)
+    when: { flag: D_IN, none: [{ flag: 'd:over' }] },
+    delayMs: 800,
+    do: [{ a: 'match', script: 'double-00' }],
+  },
+  {
+    id: 'd-swept-in',
+    at: 'ramat-gan',
+    trigger: 'clock',
+    when: { flag: D_ARRIVED, afterMinute: at(19, 45), none: [{ flag: D_IN }, { flag: 'd:over' }] },
+    do: [{ a: 'flag', flag: D_IN }, { a: 'toast', text: 'הקהל נושא אותך פנימה. אין מי שיעצור ילד בן עשרים ושתיים שרץ לגמר.', tone: 'plain' }],
   },
 ]
 
 export const CONVERSATIONS_DOUBLE: Conversation[] = [
+  /** the gates of Ramat Gan, a year after the first final (V3 §12 "crowd entry") */
+  {
+    id: 'rg-gate-00',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'd:ticket' },
+        lines: [{ who: null, text: 'הכרטיס ביד, בכיס, ביד. הכרטיסן קורע אותו ומחזיר לך חצי, ואתה שם אותו בכיס של החולצה, ליד הלב, כמו מישהו שכבר עשה את זה.' }],
+        then: [{ e: 'flag', flag: D_IN }],
+      },
+      {
+        lines: [{ who: null, text: 'בלי כרטיס מסודר. מישל בשער הצדדי מנופף, מישהו מושך אותך בשרוול, ואתה עובר בין שני גבים בלי לשאול איך.' }],
+        then: [{ e: 'flag', flag: D_IN }, { e: 'redheart', key: 'community', delta: 2 }],
+      },
+    ],
+  },
   {
     id: 'd-home-afternoon', nameHe: null, branches: [
+      { when: { flag: 'd:pick1:family' }, lines: [{ who: null, text: 'כבר ישבת איתם.' }] },
       { lines: [{ who: null, text: 'בבית השקט נשמע פתאום חזק יותר מהאליפות.' }], choices: [
-        { id: 'sleep', text: 'לישון באמת.', when: { none: [{ flag: 'd:pick1:sleep' }] }, noteHe: 'כבר ישנת.', then: [{ e: 'energy', delta: 40 }, { e: 'flag', flag: 'd:pick1:sleep' }, { e: 'goto', node: 'd-next-afternoon' }] },
-        { id: 'family', text: 'לשבת עם אבא ואמא בלי לדבר על הגמר.', when: { none: [{ flag: 'd:pick1:family' }] }, noteHe: 'כבר ישבת איתם.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 6 }, { e: 'energy', delta: 10 }, { e: 'flag', flag: 'd:pick1:family' }, { e: 'goto', node: 'd-next-afternoon' }] },
-        { id: 'box', text: 'לעלות לחדר ולפתוח את הקופסה האדומה.', when: { none: [{ flag: 'd:pick1:box' }] }, noteHe: 'כבר פתחת אותה היום.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'flag', flag: 'd:pick1:box' }, { e: 'box' }, { e: 'goto', node: 'd-box' }] },
+        { id: 'family', text: 'לשבת עם אבא ואמא בלי לדבר על הגמר.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 6 }, { e: 'energy', delta: 10 }, { e: 'flag', flag: 'd:pick1:family' }, { e: 'flag', flag: D_DID }] },
+        { id: 'later', text: 'לא עכשיו.', then: [] },
+      ] },
+    ],
+  },
+  {
+    id: 'd-bed-afternoon', nameHe: null, branches: [
+      { when: { flag: 'd:pick1:sleep' }, lines: [{ who: null, text: 'כבר ישנת.' }] },
+      { lines: [{ who: null, text: 'המיטה. ארבעה ימים לגמר, ובגוף עוד כל האליפות.' }], choices: [
+        { id: 'sleep', text: 'לישון באמת.', then: [{ e: 'energy', delta: 40 }, { e: 'flag', flag: 'd:pick1:sleep' }, { e: 'flag', flag: D_DID }] },
+        { id: 'later', text: 'לא עכשיו.', then: [] },
+      ] },
+    ],
+  },
+  {
+    id: 'd-box-afternoon', nameHe: null, branches: [
+      { when: { flag: 'd:pick1:box' }, lines: [{ who: null, text: 'כבר פתחת אותה היום.' }] },
+      { lines: [{ who: null, text: 'הקופסה האדומה על המדף. המכסה לא נסגר עד הסוף כבר כמה שנים.' }], choices: [
+        { id: 'box', text: 'לעלות לחדר ולפתוח את הקופסה האדומה.', then: [{ e: 'redheart', key: 'historyMemory', delta: 6 }, { e: 'flag', flag: 'd:pick1:box' }, { e: 'box' }, { e: 'goto', node: 'd-box' }] },
+        { id: 'later', text: 'לא עכשיו.', then: [] },
       ] },
     ],
   },
   {
     id: 'd-kiosk-afternoon', nameHe: null, branches: [
       { lines: [{ who: null, text: 'אצל רפי יש עבודה, ויש בחלון דף ישן שאתה מכיר טוב מדי.' }], choices: [
-        { id: 'work', text: 'לקחת משמרת. הגמר עולה כסף.', when: { none: [{ flag: 'd:pick1:work' }] }, noteHe: 'כבר עשית את המשמרת.', then: [{ e: 'money', agorot: 9000, why: 'משמרת כפולה' }, { e: 'energy', delta: -15 }, { e: 'flag', flag: 'd:pick1:work' }, { e: 'goto', node: 'd-next-afternoon' }] },
-        // (23.9.2026) restored from the pre-overlay unit: `d-go` still reads `d:ticket`
-        // (life-worldline flagged it as dead once `d-days-2` — the one place that used to
-        // set it — was split into these four rooms).
-        { id: 'ticket', text: 'לסדר כרטיס וההסעה — שישים שקל. ברור.', when: { none: [{ flag: 'd:pick1:ticket' }] }, noteHe: 'הכרטיס כבר בכיס.', then: [{ e: 'money', agorot: -6000, why: 'כרטיס לגמר' }, { e: 'give', item: 'ticket-stub' }, { e: 'flag', flag: 'd:ticket' }, { e: 'flag', flag: 'd:pick1:ticket' }, { e: 'goto', node: 'd-next-afternoon' }] },
+        // (V3 §12) the double shift is served, customer by customer (`chore:story:shift-00`)
+        { id: 'work', text: 'לקחת משמרת. הגמר עולה כסף.', when: { none: [{ flag: 'd:pick1:work' }] }, noteHe: 'כבר עשית את המשמרת.', then: [{ e: 'minigame', id: 'chore:story:shift-00' }] },
         { id: 'page', text: 'לחזור לדף ולתקן את מה שאתה יודע שלא נכון.', when: { all: [{ flag: 'life:page:pinned' }], none: [{ flag: 'd:pick1:page' }] }, hidden: true, then: [{ e: 'flag', flag: 'd:pick1:page' }, { e: 'goto', node: 'd-page' }] },
+        { id: 'later', text: 'לא עכשיו.', then: [] },
+      ] },
+    ],
+  },
+  {
+    /**
+     * the ticket and the minibus seat, bought at the counter (`d-ticket` hotspot, verb buy).
+     * (23.9.2026) restored from the pre-overlay unit: `d-go` still reads `d:ticket`.
+     */
+    id: 'd-ticket-afternoon', nameHe: null, branches: [
+      { when: { flag: 'd:pick1:ticket' }, lines: [{ who: null, text: 'הכרטיס כבר בכיס.' }] },
+      { lines: [{ who: null, text: 'על הדלפק, ליד הקופה: פנקס ההסעות של מישל וחבילת כרטיסים לגמר בגומייה.' }], choices: [
+        { id: 'ticket', text: 'לסדר כרטיס וההסעה — שישים שקל. ברור.', when: { minAgorot: 6000 }, noteHe: 'אין שישים.', then: [{ e: 'money', agorot: -6000, why: 'כרטיס לגמר' }, { e: 'give', item: 'ticket-stub' }, { e: 'flag', flag: 'd:ticket' }, { e: 'flag', flag: 'd:pick1:ticket' }, { e: 'flag', flag: D_DID }] },
+        { id: 'later', text: 'לא עכשיו.', then: [] },
       ] },
     ],
   },
   {
     id: 'd-gate5-afternoon', nameHe: null, branches: [
-      { when: { gateEver: 'gate5' }, lines: [{ who: null, text: 'ליד בלומפילד כבר פרוש בד על הרצפה. אף אחד לא קורא לזה משימה.' }], choices: [{ id: 'banner', text: 'לרדת על הברכיים ולעבוד איתם.', when: { none: [{ flag: 'd:pick1:gate5' }] }, noteHe: 'כבר עבדת איתם היום.', then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'energy', delta: -20 }, { e: 'flag', flag: 'd:pick1:gate5' }, { e: 'flag', flag: 'life:banner:2000' }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'לילה שלם על הרצפה של מחסן, עם צבע שמתייבש לאט.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'הכין בד' }, { e: 'goto', node: 'd-next-afternoon' }] }] },
+      // (V3 §12) on the knees with the brush: the banner is painted by walking it (`chore:story:banner-00`)
+      { when: { gateEver: 'gate5' }, lines: [{ who: null, text: 'ליד בלומפילד כבר פרוש בד על הרצפה. אף אחד לא קורא לזה משימה.' }], choices: [{ id: 'banner', text: 'לרדת על הברכיים ולעבוד איתם.', when: { none: [{ flag: 'd:pick1:gate5' }] }, noteHe: 'כבר עבדת איתם היום.', then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'terraceCulture', delta: 5 }, { e: 'flag', flag: 'life:banner:2000' }, { e: 'proof', kind: 'creation_proof', proofId: 'creation_proof:{chapter}:banner', subjectHe: BANNER_SUBJECT, noteHe: 'לילה שלם על הרצפה של מחסן, עם צבע שמתייבש לאט.' }, { e: 'skill', skill: 'creativity', delta: 3, why: 'הכין בד' }, { e: 'minigame', id: 'chore:story:banner-00' }] }, { id: 'later', text: 'לא עכשיו.', then: [] }] },
       { lines: [{ who: null, text: 'אתה מכיר את המקום. לא את העבודה הזאת. היום אין לך סיבה להישאר.' }] },
     ],
   },
   {
     id: 'd-uss-afternoon', nameHe: null, branches: [
-      { lines: [{ who: 'שחור', text: 'אליפות יפה. עכשיו תרים את הצד הזה.' }], choices: [{ id: 'help', text: 'להרים. ברור.', when: { none: [{ flag: 'd:pick1:uss' }] }, noteHe: 'כבר הרמת היום.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'energy', delta: -10 }, { e: 'flag', flag: 'd:pick1:uss' }, { e: 'goto', node: 'd-next-afternoon' }] }] },
+      // (V3 §12) the side he is told to lift is lifted, crate by crate (`chore:story:uss-00`)
+      { lines: [{ who: 'שחור', text: 'אליפות יפה. עכשיו תרים את הצד הזה.' }], choices: [{ id: 'help', text: 'להרים. ברור.', when: { none: [{ flag: 'd:pick1:uss' }] }, noteHe: 'כבר הרמת היום.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'minigame', id: 'chore:story:uss-00' }] }, { id: 'later', text: 'לא עכשיו.', then: [] }] },
     ],
   },
   {
@@ -513,15 +616,15 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
           { e: 'redheart', key: 'historyMemory', delta: 5 },
           { e: 'personality', key: 'honesty', delta: 2 },
           { e: 'flag', flag: 'd:pick1:page' },
-          { e: 'goto', node: 'd-next-afternoon' },
+          { e: 'flag', flag: D_DID },
         ],
       },
     ],
   },
   {
     id: 'd-next-afternoon', nameHe: null, branches: [
-      { when: { flag: 'd:pick1' }, lines: [{ who: null, text: 'זה הדבר השני. מחר הגמר.' }], then: [{ e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
-      { lines: [{ who: null, text: 'יום שלישי. נשאר עוד אחר הצהריים אחד לפני הגמר.' }], then: [{ e: 'flag', flag: 'd:pick1' }] },
+      { when: { flag: 'd:pick1' }, lines: [{ who: null, text: 'זה הדבר השני. מחר הגמר.' }], then: [{ e: 'flagValue', flag: D_DID, value: false }, { e: 'flag', flag: 'd:final' }, { e: 'goto', node: 'd-go' }] },
+      { lines: [{ who: null, text: 'יום שלישי. נשאר עוד אחר הצהריים אחד לפני הגמר.' }], then: [{ e: 'flagValue', flag: D_DID, value: false }, { e: 'flag', flag: 'd:pick1' }] },
     ],
   },
   {
@@ -553,11 +656,12 @@ export const CONVERSATIONS_DOUBLE: Conversation[] = [
           { who: null, text: 'הכל על השולחן. ספחים, פתקים, גזירים. לא הרבה נייר, בשביל כל זה.' },
           { who: null, text: 'ומתחת לכולם פיסת בד אדומה, קטנה משהייתה. אתה לא זוכר מאיפה. אתה זוכר שהיה רועש, ושהיית גבוה.' },
         ],
-        then: [{ e: 'goto', node: 'd-go' }],
+        // (V3 §12) one of the two afternoons, like the others — it used to skip to the final
+        then: [{ e: 'flag', flag: D_DID }],
       },
       {
         lines: [{ who: null, text: 'הכל על השולחן. ספחים, פתקים, גזירים. לא הרבה נייר, בשביל כל זה.' }],
-        then: [{ e: 'goto', node: 'd-go' }],
+        then: [{ e: 'flag', flag: D_DID }],
       },
     ],
   },

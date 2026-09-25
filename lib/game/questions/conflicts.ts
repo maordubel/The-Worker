@@ -12,7 +12,15 @@ import { archive } from '../archive'
  * whole list, and the ones it drops are written into the master's `excluded` map with
  * the reason, so a question that disappears says why.
  */
-const open = archive.factConflicts.filter((row) => !row.resolution)
+const open = archive.factConflicts.filter(
+  (row) =>
+    !row.resolution ||
+    // A decision (delta 89) moves the Match Master to the winner, but the questions are
+    // built from the raw `matches.json` rows, which keep the losing reading as provenance.
+    // So a decision that CHANGES a value (date, home side, result, venue, stage, scorers)
+    // keeps the raw row out of the bank; a naming decision (same club, two spellings) does not.
+    (row.decisions ?? []).some((d) => d.field !== 'opponent'),
+)
 
 const CONTESTED = new Set(open.map((row) => `${row.entityTable}.${row.field}`))
 

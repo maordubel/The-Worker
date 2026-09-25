@@ -10,6 +10,8 @@ import type { LifeEvent } from '../events'
 import { acceptEvents, isAvailable, resolveOutcome } from '../opportunities'
 import { keepEvents, pickRedBoxItem } from '../redbox'
 import { meets } from '../world/types'
+import { resolveFollowUp, speakerOf, type FollowUpPick } from '../world/followUp'
+import type { LifeState } from '../types'
 import { BACKDROP, DOC } from './art'
 
 import type { DialogueChoice, LifeBus } from './bus'
@@ -21,20 +23,14 @@ import {
   holderOf,
   duplicates,
   missingOn,
-  openPacket,
   keptOnClose,
   setSoldIn,
   stickerFlag,
   stickerFor,
   ALBUM_SEEN,
-  PACKET_WHY_HE,
-  PACKET_NONE_HE,
-  PACKET_SHORT_HE,
-  PACKET_EMPTY_HE,
-  SETS,
   closesPage,
+  purchasePacket,
 } from '../stickers'
-import { PACKET, decadeOf } from '../prices'
 import { CONSEQUENCE_KICKER_HE, scheduleLater } from '../consequence'
 import { characterName, portraitFor } from '../characters'
 import { flagOn } from '../types'
@@ -119,25 +115,64 @@ const KEEPS_SCENE_LIVE: ReadonlySet<Effect['e']> = new Set([
   'shop', 'toto', 'coin', 'penalty', 'hoops', 'pitch', 'goto', 'travel', 'minigame', 'ending', 'doc', 'mechanic',
 ])
 
+/**
+ * קנייה היא לא חזרה (delta 90, §21 / §24.1) — a branch that is a TRADE plays in full every
+ * time: a Supergoal envelope (`packet`), bottles handed over for the deposit (`take`), a
+ * paper paid for (money going OUT). Shortening those to a follow-up line kept the money and
+ * the goods apart — the second "מעטפת סופרגול. 1 ₪." at Rafi's said a nice sentence and sold
+ * nothing, the second bag of bottles stayed in the bag. A gift (money IN, no goods back) is
+ * still paid once, exactly as `REPEAT_KEEPS` says.
+ */
+const isTrade = (effect: Effect) =>
+  effect.e === 'packet' || effect.e === 'take' || (effect.e === 'money' && effect.agorot < 0)
+
 function opensSomething(effects: readonly Effect[] | undefined): boolean {
-  return (effects ?? []).some((effect) => KEEPS_SCENE_LIVE.has(effect.e))
+  return (effects ?? []).some((effect) => KEEPS_SCENE_LIVE.has(effect.e) || isTrade(effect))
 }
 
-/** short, warm, and doesn't pretend nothing happened — the second time answers differently than the first */
-const REPEAT_LINES_HE: readonly string[] = [
-  'כבר דיברתם על זה היום.',
-  'אין חדש להוסיף — כבר סיפר לך.',
-  'מהנהן לעברך. כבר עברתם על זה.',
-  'מחייך אליך, בלי לחזור על עצמו.',
-  'אותו דבר כמו קודם. ממשיכים הלאה.',
-]
+/**
+ * What a shortened repeat may still DO (§20.8: "repeated interaction cannot reopen consumed
+ * rewards"). The flags a branch raises are idempotent and the world may be waiting on them,
+ * so they fire again exactly as authored; a bond, a trait, a shekel, twenty minutes or a
+ * toast about any of those were paid the first time and are not paid twice for pressing
+ * the same button — before 25.9.2026 every re-read of "גמרת שיעורים?" was another +2 with
+ * Ofir, forever.
+ */
+const REPEAT_KEEPS: ReadonlySet<Effect['e']> = new Set([
+  'flag', 'flagValue', 'attend', 'missed', 'presence', 'gate', 'armyRoute', 'sinai', 'laces', 'route', 'conflict', 'seize',
+])
 
-/** deterministic per conversation id, so the same beat gives the same short answer every time it repeats */
-function repeatLineFor(conversation: Conversation, branch: Branch): Say {
-  let hash = 0
-  for (let i = 0; i < conversation.id.length; i += 1) hash = (hash * 31 + conversation.id.charCodeAt(i)) | 0
-  const text = REPEAT_LINES_HE[Math.abs(hash) % REPEAT_LINES_HE.length] as string
-  return { who: branch.lines[0]?.who ?? null, text }
+export const repeatEffects = (effects: readonly Effect[] | undefined): Effect[] =>
+  (effects ?? []).filter((effect) => REPEAT_KEEPS.has(effect.e))
+
+/**
+ * What opening this conversation would put on screen right now — pure over the state, so
+ * the matrix fixture, the tests and `start()` all ask the same question.
+ *
+ * `repeat` is true when the branch was already heard to its end and nothing in it needs to
+ * stay open; then `lines` are the follow-up resolver's answer (`world/followUp.ts`) instead
+ * of the authored scene, and `pick` says which follow-up and which class.
+ */
+export type Spoken = {
+  branchIndex: number
+  branch: Branch
+  repeat: boolean
+  pick: FollowUpPick | null
+  lines: readonly Say[]
+}
+
+export function spokenNow(state: LifeState, id: string): Spoken | null {
+  const conversation = DIALOGUE[id]
+  if (!conversation) return null
+  const branchIndex = conversation.branches.findIndex((candidate) => meets(state, candidate.when))
+  if (branchIndex < 0) return null
+  const branch = conversation.branches[branchIndex] as Branch
+  const heard = flagOn(state, heardFlag(id, branchIndex))
+  const repeat = heard && !branch.choices && !opensSomething(branch.then)
+  if (!repeat) return { branchIndex, branch, repeat, pick: null, lines: branch.lines }
+  const who = speakerOf(branch.lines, conversation.nameHe ?? null)
+  const pick = resolveFollowUp(state, eraFor(state.chapter), id, who)
+  return { branchIndex, branch, repeat, pick, lines: pick.lines }
 }
 
 export class DialogueRunner {
@@ -148,6 +183,8 @@ export class DialogueRunner {
   private pendingChoices: ChoiceDef[] | null = null
   private pendingThen: Effect[] = []
   private onDone: (() => void) | null = null
+  /** the follow-up this box is showing instead of a heard branch, if it is */
+  private followUp: FollowUpPick | null = null
 
   constructor(
     private readonly engine: LifeEngine,
@@ -184,6 +221,7 @@ export class DialogueRunner {
    */
   startLines(lines: readonly Say[], done?: () => void): void {
     this.conversation = { id: '__lines__', branches: [] }
+    this.followUp = null
     this.lines = lines.map((line) => ({ ...line, text: this.fill(line.text) }))
     this.index = 0
     this.pendingChoices = null
@@ -201,9 +239,9 @@ export class DialogueRunner {
   start(id: string, done?: () => void): boolean {
     const conversation = DIALOGUE[id]
     if (!conversation) return false
-    const branchIndex = conversation.branches.findIndex((candidate) => meets(this.engine.state, candidate.when))
-    if (branchIndex < 0) return false
-    const branch = conversation.branches[branchIndex] as Branch
+    const spoken = spokenNow(this.engine.state, id)
+    if (!spoken) return false
+    const { branchIndex, branch } = spoken
 
     // The first time you meet somebody, you meet them: the card plays over the top of the
     // conversation that opened it, and the conversation is still there when it closes.
@@ -220,10 +258,11 @@ export class DialogueRunner {
     }
 
     // Second visit to the exact same branch, and nothing here needs to stay open for a
-    // choice or a door: say something shorter instead of the whole scene again.
-    const heard = flagOn(this.engine.state, heardFlag(id, branchIndex))
-    const repeats = heard && !branch.choices && !opensSomething(branch.then)
-    const lines = repeats ? [repeatLineFor(conversation, branch)] : branch.lines
+    // choice or a door: the person answers what is going on NOW (`world/followUp.ts`) —
+    // the step the live graph is on, what changed, the clock — instead of the whole scene
+    // again, and only when none of that applies, a short closing line.
+    const lines = spoken.lines
+    this.followUp = spoken.pick
 
     if (done) this.onDone = done
     this.conversation = conversation
@@ -231,7 +270,7 @@ export class DialogueRunner {
     this.lines = lines.map((line) => ({ ...line, text: this.fill(line.text) }))
     this.index = 0
     this.pendingChoices = branch.choices ?? null
-    this.pendingThen = branch.then ?? []
+    this.pendingThen = spoken.repeat ? repeatEffects(branch.then) : (branch.then ?? [])
     this.hooks.onOpen(true)
     this.hooks.shot?.(branch.shot ?? null)
     if (!conversation.where) {
@@ -309,6 +348,7 @@ export class DialogueRunner {
     const done = this.onDone
     this.onDone = null
     this.conversation = null
+    this.followUp = null
     this.lines = []
     this.pendingChoices = null
     this.pendingThen = []
@@ -401,7 +441,10 @@ export class DialogueRunner {
     // conversation, was just sat through to its end, so its repeat is now free to shorten.
     if (this.conversation && this.conversation.id !== '__lines__') {
       events.push({ t: 'flag.raised', flag: heardFlag(this.conversation.id, this.branchIndex) })
+      // a follow-up read to its end is known now: a reaction is old news, a handoff was given
+      if (this.followUp?.flag) events.push({ t: 'flag.raised', flag: this.followUp.flag })
     }
+    this.followUp = null
     let goto: string | null = null
     const after: Array<() => void> = []
     /** effects an opportunity's own outcome contributed, applied in the same pass */
@@ -632,55 +675,22 @@ export class DialogueRunner {
          * rather than inventing a page.
          */
         case 'packet': {
-          const state = this.engine.state
-          const set = setSoldIn(state)
           /**
-           * סירוב הוא תשובה — three `break`s that used to end the effect in silence.
-           *
-           * No money moved, no card opened, no sentence said: a boy tapped "מעטפה" and
-           * the game did nothing at all. From `2000-title` on that is EVERY packet choice
-           * in the game, because no album was printed for the decade and `setSoldIn`
-           * correctly returns null — so the most common outcome of the button was the one
-           * outcome that looked like a broken button. Rule 11 says the honest answer is
-           * the answer; it is never nothing.
+           * ONE transaction (delta 90, §21) — the same `purchasePacket` the shop counter and
+           * `runtime.buyPacket()` call. Every refusal (no album this decade, not enough in the
+           * pocket, an empty box) is known and SAID before a shekel moves; a packet already
+           * paid for and not yet shown (a reload mid-tear, a double tap) is shown again and
+           * never charged twice. The money, the cards and the pending mark are pushed into this
+           * branch's own events, so they land in the one dispatch the conversation makes.
            */
-          if (!set) {
-            after.push(() => this.bus.emit('toast', { text: PACKET_NONE_HE, tone: 'plain' }))
-            break
-          }
-          const price = (PACKET[decadeOf(state.chapter)] ?? 1) * 100
-          if (state.agorot < price) {
-            const short = Math.ceil((price - state.agorot) / 100)
-            after.push(() => this.bus.emit('toast', { text: `${PACKET_SHORT_HE} ${short} ₪.`, tone: 'plain' }))
-            break
-          }
-          const ids = openPacket(state, set, state.minute)
-          if (ids.length === 0) {
-            after.push(() => this.bus.emit('toast', { text: PACKET_EMPTY_HE, tone: 'plain' }))
-            break
-          }
-          const before: Record<string, number> = {}
-          for (const id of ids) before[id] = haveOf(state, id)
-          events.push({ t: 'money.changed', agorot: -price, why: PACKET_WHY_HE })
-          const counted: Record<string, number> = { ...before }
-          for (const id of ids) {
-            counted[id] = (counted[id] ?? 0) + 1
-            events.push({ t: 'flag.set', flag: stickerFlag(id), value: counted[id] as number })
-          }
-          events.push({ t: 'flag.raised', flag: ALBUM_SEEN })
-          const finished = closesPage(state, set, ids)
-          after.push(() => this.bus.emit('packet', { ids, before }))
-          if (finished) {
-            const kept = keptOnClose(state, set, ids)
-            for (const card of kept) events.push({ t: 'flag.set', flag: stickerFlag(card.id), value: 1 })
-            after.push(() =>
-              this.bus.emit('toast', { text: `${SETS[set].titleHe} — הדף מלא.`, tone: 'red' }),
-            )
-            if (kept.length > 0) {
-              const keptIds = kept.map((card) => card.id)
-              after.push(() => this.bus.emit('kept', { ids: keptIds }))
-            }
-          }
+          const bought = purchasePacket(this.engine.state)
+          events.push(...bought.events)
+          const { reveal, fullHe, kept } = bought
+          const say = bought.quote.sayHe
+          if (reveal) after.push(() => this.bus.emit('packet', reveal))
+          else if (say) after.push(() => this.bus.emit('toast', { text: say, tone: 'plain' }))
+          if (fullHe) after.push(() => this.bus.emit('toast', { text: fullHe, tone: 'red' }))
+          if (kept.length > 0) after.push(() => this.bus.emit('kept', { ids: kept }))
           break
         }
         /**
@@ -959,6 +969,10 @@ export class DialogueRunner {
       switch (effect.e) {
         case 'flag':
           events.push({ t: 'flag.raised', flag: effect.flag })
+          break
+        // a value, not a boolean — a gesture remembers HOW it went (`content/gestures.ts`)
+        case 'flagValue':
+          events.push({ t: 'flag.set', flag: effect.flag, value: effect.value })
           break
         case 'money':
           events.push({ t: 'money.changed', agorot: effect.agorot, why: effect.why })

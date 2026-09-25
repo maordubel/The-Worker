@@ -84,6 +84,7 @@ export const OBJECTIVES_1993 = {
   bus: 'האוטובוס יוצא מהפינה של אוסישקין.',
   tv: 'הטלוויזיה בסלון. אבא בכורסה.',
   after: 'הלילה עוד לא נגמר.',
+  afterWalk: 'למי מספרים קודם: האוטובוס חזרה, אופיר בקיוסק, או האור במטבח.',
   home: 'הביתה.',
 }
 
@@ -114,7 +115,7 @@ export const PASSAGE_CARD_1993_HE = 'אפריל 1993'
 
 export function objective1993(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
-  if (state.flags['final:over']) return state.flags['walked:home'] ? null : OBJECTIVES_1993.after
+  if (state.flags['final:over']) return state.flags['walked:home'] ? null : state.flags['after:walk'] ? OBJECTIVES_1993.afterWalk : OBJECTIVES_1993.after
   if (state.flags['route:tv']) return OBJECTIVES_1993.tv
   if (state.flags['route:efi'] || state.flags['route:ofir']) return sceneId === 'ussishkin-outside' ? OBJECTIVES_1993.bus : OBJECTIVES_1993.bus
   if (state.agorot < 1200 && !state.flags['money:enough']) return OBJECTIVES_1993.money
@@ -189,7 +190,11 @@ export const BEATS_1993: Beat[] = [
     id: '93-bus-gone',
     trigger: 'clock',
     waitingHe: 'ממתין: האוטובוס יוצא',
-    when: { afterMinute: BUS_LEAVES + 12, none: [{ flag: 'on:bus' }, { flag: 'route:tv' }] },
+    // `bus:gone` in its own guard (25.9.2026): without it the beat was due again on every
+    // tick after it ran (rule 42 re-arms a beat whose `when` still holds), the toast
+    // repeated for ever, and every clock beat after it in this list — eight o'clock, the
+    // street at twenty to ten, the only ending a boy who missed the bus has — was starved
+    when: { afterMinute: BUS_LEAVES + 12, none: [{ flag: 'on:bus' }, { flag: 'route:tv' }, { flag: 'bus:gone' }] },
     do: [{ a: 'toast', text: 'שש וארבעים. הפינה ריקה. האוטובוס לא חיכה לאף אחד.', tone: 'red' }, { a: 'flag', flag: 'bus:gone' }],
   },
   // eight o'clock: somewhere across the city a hall goes off
@@ -197,7 +202,7 @@ export const BEATS_1993: Beat[] = [
     id: '93-tipoff',
     trigger: 'clock',
     waitingHe: 'ממתין: הקפיצה הראשונה',
-    when: { afterMinute: TIP_OFF_93, none: [{ flag: 'on:bus' }, { flag: 'route:tv' }] },
+    when: { afterMinute: TIP_OFF_93, none: [{ flag: 'on:bus' }, { flag: 'route:tv' }, { flag: 'tipoff:93' }] },
     do: [{ a: 'toast', text: 'שמונה. ביד אליהו הרימו כדור אחד באוויר, ואתה פה.', tone: 'plain' }, { a: 'flag', flag: 'tipoff:93' }],
   },
   // the television route: the family, the chair, the final in the living room
@@ -214,6 +219,28 @@ export const BEATS_1993: Beat[] = [
       { a: 'flag', flag: 'final:over' },
       { a: 'ending', id: 'television' },
     ],
+  },
+  /**
+   * (V3 §12) the kitchen light: a boy who walks home from the corner after the final tells
+   * his father first — the `home` answer of the old menu, reached by the door
+   */
+  {
+    id: 'after-home-1993',
+    at: 'home',
+    trigger: 'enter',
+    when: { flag: 'after:walk', none: [{ flag: 'walked:home' }, { flag: 'after:group' }, { flag: 'after:ofir' }] },
+    delayMs: 600,
+    do: [
+      { a: 'events', events: [{ t: 'relationship.changed', who: 'kobi', axis: 'bond', delta: 4 }, { t: 'redheart.changed', key: 'familyTradition', delta: 2 }, { t: 'flag.raised', flag: 'after:home' }] },
+      { a: 'talk', conversation: 'close-1993' },
+    ],
+  },
+  /** and the night does end: at half past midnight the street is his way home anyway */
+  {
+    id: 'after-late-1993',
+    trigger: 'clock',
+    when: { flag: 'after:walk', afterMinute: at(23, 55), none: [{ flag: 'walked:home' }] },
+    do: [{ a: 'talk', conversation: 'close-1993' }],
   },
   // the street at nine forty: the whole neighbourhood shouts at once
   {
@@ -496,10 +523,15 @@ export const CONVERSATIONS_1993: Conversation[] = [
           { who: 'רפי מהקיוסק', text: 'יש לי מאחור ארגזים שמחכים לגב צעיר. עשרים דקות. משהו לכיס.' },
         ],
         choices: [
+          /**
+           * (Director V3 §12, 25.9.2026) "earn fare": the six shekels are six crates carried
+           * from behind the counter to the back door (`chore:story:crates-93`), a shekel a
+           * crate — and every one of them is two minutes nearer half past six.
+           */
           {
             id: 'work',
             text: 'לסדר את הארגזים.',
-            then: [{ e: 'flag', flag: 'rafi:work' }, { e: 'time', minutes: 25 }, { e: 'money', agorot: 600, why: 'ארגזים אצל רפי' }, { e: 'personality', key: 'responsibility', delta: 2 }, { e: 'toast', text: 'הוא אמר עשרים דקות. יצא עשרים וחמש, ושישה שקלים.', tone: 'plain' }],
+            then: [{ e: 'flag', flag: 'rafi:work' }, { e: 'personality', key: 'responsibility', delta: 2 }, { e: 'minigame', id: 'chore:story:crates-93' }],
           },
           {
             id: 'packet',
@@ -608,7 +640,7 @@ export const CONVERSATIONS_1993: Conversation[] = [
           { who: 'שחור', text: 'היום זה בד, לא ארגזים. אותו דבר.' },
         ],
         choices: [
-          { id: 'help', text: 'לקחת צד.', then: [{ e: 'flag', flag: 'helped:banner' }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 5 }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'energy', delta: -10 }, { e: 'time', minutes: 30 }] },
+          { id: 'help', text: 'לקחת צד.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 5 }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'minigame', id: 'chore:story:banner-93' }] },
           { id: 'no', text: '"לא הפעם."', then: [{ e: 'rel', who: 'shachor', axis: 'distance', delta: 1 }] },
         ],
       },
@@ -636,7 +668,8 @@ export const CONVERSATIONS_1993: Conversation[] = [
              * `BUS_LEAVES` is at half past six: help him late enough and the coach goes
              * without you, which is the risk, and it is Limor at the corner who tells you.
              */
-            then: [{ e: 'flag', flag: 'helped:banner' }, { e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'remember', who: 'shachor', eventId: 'carried-the-banner-1993', significance: 'major' }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'energy', delta: -10 }, { e: 'time', minutes: 30 }, { e: 'toast', text: 'הבד כבד כמו אדם, וזה לקח חצי שעה. שחור לא אמר תודה. הוא אמר "יופי".', tone: 'plain' }],
+            // (V3 §12) carried in three folds, one at a time, to the bus (`chore:story:banner-93`)
+            then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 6 }, { e: 'remember', who: 'shachor', eventId: 'carried-the-banner-1993', significance: 'major' }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'minigame', id: 'chore:story:banner-93' }],
           },
           {
             id: 'no',
@@ -863,11 +896,34 @@ export const CONVERSATIONS_1993: Conversation[] = [
           { who: 'לימור', text: 'לא הערב.' },
           { who: null, text: 'ויש רק לילה אחד כזה. ומישהו צריך לשמוע אותו ממך, עכשיו, לפני שהוא נהיה סיפור.' },
         ],
-        choices: [
-          { id: 'home', text: 'הביתה. לספר לאבא.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'familyTradition', delta: 2 }, { e: 'flag', flag: 'after:home' }, { e: 'goto', node: 'close-1993' }] },
-          { id: 'stay', text: 'להישאר עם החבר\'ה עד שהאוטובוס נגמר.', then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 6 }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'wellbeing', key: 'exhaustion', delta: 10 }, { e: 'flag', flag: 'after:group' }, { e: 'goto', node: 'close-1993' }] },
-          { id: 'ofir', text: 'לחפש את אופיר. שיֵדע.', then: [{ e: 'rel', who: 'ofir', axis: 'bond', delta: 4 }, { e: 'flag', flag: 'after:ofir' }, { e: 'goto', node: 'close-1993' }] },
-        ],
+        /**
+         * (Director V3 §12, 25.9.2026) who hears it first is where he walks, not which line
+         * he picks: the bus brings them back to the corner, and from there it is the bus
+         * again (the group, until it runs out — `bus-back-1993`), the kiosk rail (Ofir,
+         * who did not go — `ofir-after-1993`), or the kitchen light (his father — the
+         * `after-home-1993` beat). The three effects are the three the menu carried.
+         */
+        then: [{ e: 'flag', flag: 'after:walk' }, { e: 'time', minutes: 45 }, { e: 'travel', to: 'ussishkin-outside', spawn: 'start' }],
+      },
+    ],
+  },
+  {
+    id: 'after-bus-1993',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'האוטובוס חזרה עומד בפינה עם הדלת פתוחה, ומבפנים עוד שרים. אפי מושיט יד מהמדרגה.' }],
+        then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 6 }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'wellbeing', key: 'exhaustion', delta: 10 }, { e: 'flag', flag: 'after:group' }, { e: 'goto', node: 'close-1993' }],
+      },
+    ],
+  },
+  {
+    id: 'after-ofir-1993',
+    nameHe: 'אופיר',
+    branches: [
+      {
+        lines: [{ who: null, text: 'על המעקה ליד הקיוסק — אופיר, כאילו חיכה.' }],
+        then: [{ e: 'rel', who: 'ofir', axis: 'bond', delta: 4 }, { e: 'flag', flag: 'after:ofir' }, { e: 'goto', node: 'close-1993' }],
       },
     ],
   },

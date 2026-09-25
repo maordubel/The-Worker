@@ -1,6 +1,6 @@
 import { at } from '../clock'
 
-import { CURFEW, TIP_OFF } from './chapter1991'
+import { CURFEW, RACHEL_HOME as RACHEL_HOME_91, TIP_OFF } from './chapter1991'
 import type { Conversation } from './script'
 
 /**
@@ -126,7 +126,9 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: null, text: 'היא מסתכלת עליך מעל המשקפיים עוד שנייה אחת, ואז חוזרת ללוח.', },
           { who: 'המורה', text: 'לך כבר. אתה תאחר.' },
         ],
-        then: [{ e: 'flag', flag: 'school:done' }, { e: 'time', minutes: 5 }],
+        // (delta 90) she SAYS page forty-one — so it is given: without `hw:given` the desk
+        // at home said "nothing to do" to the one boy the teacher had just set it to
+        then: [{ e: 'flag', flag: 'hw:given' }, { e: 'flag', flag: 'school:done' }, { e: 'time', minutes: 5 }],
       },
       {
         when: { afterMinute: BREAK },
@@ -377,10 +379,18 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { e: 'toast', text: 'אופיר לוקח אותך. הוא יחכה ברחוב.', tone: 'plain' },
         ],
       },
+      /*
+       * (delta 90, §20.3 no omniscient NPCs) Ofir was not in the kitchen: he cannot KNOW
+       * that Rachel said no. He used to open on "אז מה, אתה לא בא?" as if he had been
+       * standing behind her. Now he asks, and the boy does not say — the "no" reaches Ofir
+       * only when Pugi says it out loud (`91-ofir-told-no`, `toldBy: 'player'`).
+       */
       {
         when: { flag: 'permission:no' },
         lines: [
-          { who: 'אופיר', text: 'אז מה, אתה לא בא?' },
+          { who: 'אופיר', text: 'נו? שאלת אותה?' },
+          { who: 'פוגי', text: 'שאלתי.' },
+          { who: 'אופיר', text: 'ו...? אתה בא או לא?' },
           { who: 'פוגי', text: 'לא יודע.' },
           { who: 'אופיר', text: 'תגיד לי עד שבע. אני לא עומד לחכות לך ברחוב כמו אידיוט.' },
         ],
@@ -421,29 +431,16 @@ export const CONVERSATIONS_1991: Conversation[] = [
           { who: null, text: 'עמוד ארבעים ואחת. שלוש עשרה שאלות, וכל אחת ארוכה יותר מהקודמת.' },
           { who: null, text: 'מהמטבח רדיו נמוך. השעון בסלון עושה את הקול שלו, ואתה שומע כל תקתוק.' },
         ],
+        /**
+         * (Director V3 §12, 25.9.2026) "homework micro-action". The page is worked, not
+         * chosen: thirteen questions are thirteen answers picked up off the desk in the
+         * time the kitchen radio allows (`chore:story:homework-91`), and how many were done
+         * is what the evening reads — all of them (`hw:done`), half (`hw:half`), or fewer
+         * (`hw:faked` — rows that only look like answers). Writing something that looks
+         * like answers without sitting down is still one sentence away, below.
+         */
         choices: [
-          {
-            id: 'all',
-            text: 'לעשות הכול. באמת.',
-            then: [
-              { e: 'flag', flag: 'hw:done' },
-              { e: 'time', minutes: 50 },
-              { e: 'personality', key: 'responsibility', delta: 8 },
-              { e: 'wellbeing', key: 'exhaustion', delta: 6 },
-              { e: 'toast', text: 'שלוש עשרה שאלות. האצבעות כואבות. אבל זה גמור, והיא תוכל לפתוח.', tone: 'plain' },
-            ],
-          },
-          {
-            id: 'half',
-            text: 'לעשות חצי, ולהשאיר פתוח באמצע.',
-            then: [
-              { e: 'flag', flag: 'hw:half' },
-              { e: 'time', minutes: 20 },
-              { e: 'personality', key: 'responsibility', delta: 1 },
-              { e: 'personality', key: 'stubbornness', delta: 1 },
-              { e: 'toast', text: 'שש שאלות, והמחברת נשארת פתוחה על השולחן כאילו קמת רק לרגע.', tone: 'plain' },
-            ],
-          },
+          { id: 'work', text: 'לשבת לעבוד.', then: [{ e: 'minigame', id: 'chore:story:homework-91' }] },
           {
             id: 'fake',
             text: 'לכתוב משהו שנראה כמו תשובות.',
@@ -464,6 +461,88 @@ export const CONVERSATIONS_1991: Conversation[] = [
     nameHe: 'רחל',
     branches: [
       // ---- the night is over: the consequence (§44) ---------------------------------
+      /*
+       * (delta 90) The door used to greet every boy who came back from the hall the same
+       * way — the one she said yes to, the one she said no to and the one who never asked.
+       * A note under a cup is a different evening from a permission, and she has read it
+       * by now. Four branches, before the two general ones: the unasked note and the note
+       * after a "no", each kept or broken. Same proofs (`:curfew`), so the ledger's promise
+       * and breach rows still count one evening once.
+       */
+      {
+        when: { all: [{ flag: 'derby:over' }, { flag: 'uss:arrived' }, { flag: 'sneak:unasked' }, { flag: 'curfew:kept' }] },
+        lines: [
+          { who: null, text: 'היא במטבח. הפתק שלך בין שתי אצבעות שלה, כמו קבלה.' },
+          { who: 'רחל', text: '"הלכתי לאוסישקין. חוזר בעשר."' },
+          { who: 'פוגי', text: 'וחזרתי.' },
+          { who: 'רחל', text: 'חזרת. לא שאלת.' },
+          { who: null, text: 'היא מקפלת את הפתק לשניים ומכניסה לכיס של החלוק. לא לפח.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'walked:home' },
+          { e: 'rel', who: 'rachel', axis: 'trust', delta: 3 },
+          { e: 'rel', who: 'rachel', axis: 'tension', delta: 2 },
+          { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:curfew-note', subjectHe: 'הפתק: "חוזר בעשר"', noteHe: 'לא שאל. כתב שעה, ועמד בה.' },
+          { e: 'remember', who: 'rachel', eventId: 'left-a-note-1991', significance: 'notable' },
+          { e: 'keep' },
+          { e: 'ending', id: 'wall' },
+        ],
+      },
+      {
+        when: { all: [{ flag: 'derby:over' }, { flag: 'uss:arrived' }, { flag: 'sneak:unasked' }, { flag: 'curfew:broken' }] },
+        lines: [
+          { who: 'רחל', text: '"חוזר בעשר."' },
+          { who: null, text: 'היא קוראת את זה בקול, בלי להרים את העיניים מהפתק. השעון מעל המקרר מתקתק.' },
+          { who: 'פוגי', text: 'זה היה דרבי.' },
+          { who: 'רחל', text: 'לא שאלת אותי, כי ידעת מה אני אגיד. ואז גם לא עמדת במה שכתבת בעצמך.' },
+          { who: null, text: 'היא לא כועסת. היא עייפה, וזה יותר גרוע.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'walked:home' },
+          { e: 'rel', who: 'rachel', axis: 'trust', delta: -6 },
+          { e: 'rel', who: 'rachel', axis: 'tension', delta: 5 },
+          { e: 'proof', kind: 'breach_discovered', proofId: 'breach_discovered:{chapter}:curfew-note', subjectHe: 'הפתק: "חוזר בעשר"', noteHe: 'כתב שעה בעצמו, והמשחק עוד היה חי.' },
+          { e: 'remember', who: 'rachel', eventId: 'broke-his-own-note-1991', significance: 'major' },
+          { e: 'keep' },
+          { e: 'ending', id: 'hall' },
+        ],
+      },
+      {
+        when: { all: [{ flag: 'derby:over' }, { flag: 'uss:arrived' }, { flag: 'permission:no' }, { flag: 'curfew:kept' }] },
+        lines: [
+          { who: 'רחל', text: 'אמרתי לא.' },
+          { who: 'פוגי', text: 'וחזרתי בזמן.' },
+          { who: 'רחל', text: 'חזרת בזמן. ועדיין אמרתי לא.' },
+          { who: null, text: 'היא מחזיקה את זה עוד רגע, ואז מושיטה לך את הצלחת שחיכתה על השיש.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'walked:home' },
+          { e: 'rel', who: 'rachel', axis: 'trust', delta: -3 },
+          { e: 'rel', who: 'rachel', axis: 'tension', delta: 3 },
+          { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:curfew-after-no', subjectHe: 'הפתק מתחת לכוס', noteHe: 'הלך אחרי "לא", וחזר בשעה.' },
+          { e: 'remember', who: 'rachel', eventId: 'went-anyway-1991', significance: 'major' },
+          { e: 'keep' },
+          { e: 'ending', id: 'wall' },
+        ],
+      },
+      {
+        when: { all: [{ flag: 'derby:over' }, { flag: 'uss:arrived' }, { flag: 'permission:no' }, { flag: 'curfew:broken' }] },
+        lines: [
+          { who: 'רחל', text: 'אמרתי לא. ואחר כך גם השעה.' },
+          { who: 'פוגי', text: 'הגג רעד. באמת רעד.' },
+          { who: 'רחל', text: 'גם אני.' },
+          { who: null, text: 'היא לא מסבירה מה זה אומר. היא מכבה את האור במטבח ונשארת לעמוד בחושך עוד רגע.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'walked:home' },
+          { e: 'rel', who: 'rachel', axis: 'trust', delta: -10 },
+          { e: 'rel', who: 'rachel', axis: 'tension', delta: 8 },
+          { e: 'proof', kind: 'breach_discovered', proofId: 'breach_discovered:{chapter}:curfew', subjectHe: 'ה"לא" של אמא', noteHe: 'הלך אחרי "לא", ולא חזר בשעה.' },
+          { e: 'remember', who: 'rachel', eventId: 'came-home-late-1991', significance: 'major' },
+          { e: 'keep' },
+          { e: 'ending', id: 'hall' },
+        ],
+      },
       {
         when: { all: [{ flag: 'derby:over' }, { flag: 'curfew:broken' }] },
         lines: [
@@ -667,6 +746,37 @@ export const CONVERSATIONS_1991: Conversation[] = [
         when: { flag: 'sneak:ready' },
         lines: [{ who: null, text: 'הפתק שלך על השולחן, מתחת לכוס ההפוכה. "חוזר בעשר. פוגי."' }],
       },
+      /**
+       * לא לשאול בכלל — the intentional non-request (design pass v2 §7 1991).
+       *
+       * The pad used to offer the note only to a boy who had been told no. A boy who
+       * decided not to ask — because he knew the answer, or because he did not want to
+       * hear it — had no way to leave a word behind, and after seven the front door told
+       * him "אמא אמרה לא" about a conversation that never happened. Not asking is a choice
+       * the evening remembers (`sneak:unasked`), not a gap in it.
+       */
+      {
+        when: { none: [{ flag: 'asked:mum' }, { flag: 'permission:yes' }, { flag: 'permission:no' }], afterMinute: RACHEL_HOME_91 },
+        lines: [
+          { who: null, text: 'שולחן המטבח. פנקס ועיפרון. אמא בסלון, ואתה עוד לא שאלת אותה כלום.' },
+          { who: null, text: 'אפשר לכתוב שורה ולצאת בלי לשאול. אפשר גם ללכת אליה.' },
+        ],
+        choices: [
+          {
+            id: 'note-unasked',
+            text: 'לכתוב "הלכתי לאוסישקין. חוזר בעשר." ולצאת.',
+            then: [
+              { e: 'flag', flag: 'sneak:ready' },
+              { e: 'flag', flag: 'sneak:unasked' },
+              { e: 'personality', key: 'independence', delta: 4 },
+              { e: 'personality', key: 'riskTolerance', delta: 4 },
+              { e: 'wellbeing', key: 'stress', delta: 5 },
+              { e: 'toast', text: 'הפתק מתחת לכוס. לא שאלת — אז גם לא אמרו לך לא.', tone: 'plain' },
+            ],
+          },
+          { id: 'go-ask', text: 'להשאיר את הפנקס. ללכת לשאול.', then: [{ e: 'toast', text: 'היא בסלון. הדלת פתוחה.', tone: 'plain' }] },
+        ],
+      },
       {
         when: { flag: 'permission:no' },
         lines: [
@@ -765,9 +875,20 @@ export const CONVERSATIONS_1991: Conversation[] = [
             ],
           },
           {
+            id: 'unasked',
+            text: '"לא שאלתי אותה."',
+            when: { flag: 'sneak:unasked' },
+            hidden: true,
+            then: [
+              { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 3 },
+              { e: 'flag', flag: 'life:efi:kept-1991' },
+              { e: 'toast', text: '"חכם. מה שלא שואלים, לא אומרים לך לא." הוא לא נשמע בטוח שזה חכם.', tone: 'plain' },
+            ],
+          },
+          {
             id: 'sneaked',
             text: '"היא לא נתנה."',
-            when: { flag: 'sneak:ready' },
+            when: { flag: 'sneak:ready', notFlag: 'sneak:unasked' },
             hidden: true,
             then: [
               { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 4 },

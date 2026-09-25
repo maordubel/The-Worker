@@ -8,6 +8,7 @@ import { CHAPTERS } from '../content/chapters'
 import type { Condition } from './types'
 import { PARENTS_AFTER_2013, chaptersWhere, livesWithParents } from './homes'
 import { BEDROOM_2000, HOME_OWN, NEW_ROOMS, PITCH_2000, STAGED, STAND_80S, STAND_90S, STAND_NEW, STAND_OLD } from './rooms2000'
+import { QUEST_SPOTS } from './quests90e'
 
 /**
  * העולם המצויר — a painted place, a strip of floor you may stand on, and a door you can
@@ -92,7 +93,9 @@ export const KOBI_LEAVES = at(15, 10)
 export const FULL_TIME = at(17, 45)
 
 /** What pressing the button will DO. The prompt is built from this plus the name. */
-export type Verb = 'talk' | 'look' | 'take' | 'buy' | 'enter' | 'exit' | 'play' | 'watch' | 'gaze' | 'sit'
+// `hold` and `listen` (Director V3 §12, 25.9.2026): a grip is not a take, and a radio in two
+// hands is not a thing you play with — the prompt reads "תחזיק …" / "תקשיב …"
+export type Verb = 'talk' | 'look' | 'take' | 'buy' | 'enter' | 'exit' | 'play' | 'watch' | 'gaze' | 'sit' | 'hold' | 'listen'
 
 /**
  * לאיזה עידן — which chapter a thing in a room belongs to.
@@ -644,6 +647,8 @@ function gigSpots(where: string) {
       verb: 'look' as const,
       labelHe: gig.labelHe,
       priority: 3,
+      // the work is a thing in the room while it is on offer (delta 90, §22.4.1 — `Gig.look`)
+      ...(gig.look ? { prop: { key: gig.look.key, size: gig.look.size } } : {}),
       /**
        * הרוטציה — a paid job is only in the room if this life was offered it this chapter
        * (`gigs.ts` → `offeredIn`, raised as a flag when the room is built). The two
@@ -710,6 +715,9 @@ const ADULT_CHAPTERS = [
  * לכן **נקודה חמה אחת בכל פרק**, ולא שלוש באותו חדר: שלוש באותו פרק היו נראות כמו
  * שלוש ראיות ונספרות כאחת, כלומר שחקן שלקח את כולן היה עומד מול פסגה נעולה בלי
  * להבין למה.
+ *
+ * (25.9.2026, דלתא 90) שלוש הנקודות עברו לחדרים של הפרקים עצמם — חדר הקהילה ואולם
+ * האימונים (`world/rooms2000.ts`) — ונפתחות רק אחרי שנעשתה עבודה בידיים (`u:did`).
  */
 const FOUNDING_CHAPTERS = ['2007-table', '2007-registered', '2007-key'] as const
 
@@ -764,7 +772,7 @@ const SCENES: SceneDef[] = [
     metre: 0.2923,
     ambience: 'interior',
     // (V3) no longer "the key is in the drawer": the key is not an objective any more
-    stuckHe: 'הדלת לסלון — בקצה שמאל. המגירה של השולחן — גם שם.',
+    stuckHe: 'הדלת לסלון — בקצה שמאל.',
     stuckByEra: { '1990': 'הדלת לסלון — משמאל, ומשם למטבח.', '1991': 'המחברת על השולחן. הדלת לסלון — משמאל.' },
     spawns: { start: { x: 0.3, y: 0.93, facing: 'left' }, fromHome: { x: 0.14, y: 0.9, facing: 'right' } },
     // 2000 on: the room of a man of twenty-two, measured on its own painting (`rooms2000.ts`)
@@ -786,8 +794,8 @@ const SCENES: SceneDef[] = [
         verb: 'look',
         labelHe: 'התיק שלי',
       },
-      { id: 'tin-a4', era: 'a4-shirt', x: 0.45, y: 0.92, w: 0.14, act: 'tin-a4', verb: 'look', labelHe: 'הפחית מתחת למיטה' },
-      { id: 'shirt-a5', era: 'a5-first', x: 0.63, y: 0.9, w: 0.1, act: 'shirt-a5', verb: 'look', labelHe: 'החולצה על הכיסא', priority: 3 },
+      { id: 'tin-a4', era: 'a4-shirt', x: 0.45, y: 0.92, w: 0.14, act: 'tin-a4', verb: 'take', labelHe: 'הפחית מתחת למיטה' },
+      { id: 'shirt-a5', era: 'a5-first', x: 0.63, y: 0.9, w: 0.1, act: 'shirt-a5', verb: 'take', labelHe: 'החולצה על הכיסא', priority: 3 },
       /**
        * מתחת לכרית — the scrap of red cloth from 1983, in every Stage A year that follows
        * it. The conversation itself checks whether it was ever picked up, so the hotspot
@@ -795,7 +803,12 @@ const SCENES: SceneDef[] = [
        * pillow that only appears when there is something under it is a hint.
        */
       { id: 'pillow-a2', era: ['a2-alley', 'a3-hall', 'a4-shirt', 'a5-first', 'a6-radio', 'a7-week'], x: 0.52, y: 0.9, w: 0.08, act: 'a2-scrap', verb: 'look', labelHe: 'מתחת לכרית' },
-      { id: 'poster-sinai', era: '1995-sinai', x: 0.5, y: 0.82, w: 0.12, act: 'poster-look', verb: 'look', labelHe: 'הפוסטר' },
+      { id: 'poster-sinai', era: '1995-sinai', x: 0.5, y: 0.82, w: 0.12, act: 'poster-look', verb: 'look', labelHe: 'הפוסטר', when: { none: [{ flag: 's2:done' }, { flag: 'life:sinai:d3' }] } },
+      // (V3 §12) 1995, at night: the wall is decided with the hand — the pin, not a menu
+      // spring 1996: the same wall, a season later — the box that ends the chapter is here
+      // again after it was closed (`s3-room` was opened once, by a beat, and lost for good)
+      { id: 'wall-s3', era: '1995-sinai', x: 0.5, y: 0.82, w: 0.12, act: 's3-room', verb: 'watch', labelHe: 'הקיר מעל המיטה', when: { flag: 'life:sinai:d3' }, priority: 5 },
+      { id: 'poster-pin', era: '1995-sinai', x: 0.5, y: 0.82, w: 0.12, act: 's2-poster', verb: 'take', labelHe: 'הנעץ שבפוסטר', when: { all: [{ flag: 's2:done' }, { notFlag: 's2:poster' }, { notFlag: 'life:sinai:d3' }] }, priority: 5 },
       { id: 'bed', x: 0.45, y: 0.92, w: 0.14, act: 'bed', verb: 'look', labelHe: 'המיטה' },
       // the wall of pictures over the bed, 0.35–0.65 in the 4.9 painting
       { id: 'poster', x: 0.63, y: 0.9, w: 0.08, act: 'poster', verb: 'look', labelHe: 'הכרזה' },
@@ -810,14 +823,23 @@ const SCENES: SceneDef[] = [
         y: 0.9,
         w: 0.16,
         act: 'homework-1991',
-        // not `sit`: "תשב על המחברת" is what the old verb produced, and a boy does not sit
-        // on his exercise book. Looking at it is what opens the homework.
-        verb: 'look',
+        // not `sit` ("תשב על המחברת" is what that verb produced, and a boy does not sit on
+        // his exercise book): `take` — he picks the notebook up and the page is worked by
+        // hand (`chore:story:homework-91`, Director V3 §12)
+        verb: 'take',
         labelHe: 'המחברת',
         priority: 3,
         prop: { key: 'propNote', size: 0.05, at: { x: 0.19, y: 0.7 } },
       },
       { id: 'bed-1991', era: '1991', x: 0.45, y: 0.92, w: 0.14, act: 'bed-1990', verb: 'look', labelHe: 'המיטה' },
+      /**
+       * (Director V3 §12, 25.9.2026) 2000, the four days — two of the afternoons are in this
+       * room: the bed (sleep, for real) and the red box on the shelf. Measured on
+       * `bedroom00` (BEDROOM_2000, band 0.66–0.88): the bed under the window at the left,
+       * the box on the top shelf above 0.51.
+       */
+      { id: 'd-bed', era: '2000-double', x: 0.24, y: 0.76, w: 0.1, act: 'd-bed-afternoon', verb: 'sit', labelHe: 'המיטה — לישון באמת', when: { all: [{ flag: 'd:opened' }, { notFlag: 'd:final' }, { notFlag: 'd:pick1:sleep' }] }, priority: 5 },
+      { id: 'd-box', era: '2000-double', x: 0.51, y: 0.72, w: 0.08, act: 'd-box-afternoon', verb: 'take', labelHe: 'הקופסה האדומה על המדף', when: { all: [{ flag: 'd:opened' }, { notFlag: 'd:final' }, { notFlag: 'd:pick1:box' }] }, priority: 5 },
       /**
        * CREATOR · `PROOF_CREATE` — הדבר שהכנת, גמור, על אותה שידה.
        *
@@ -1175,7 +1197,7 @@ const SCENES: SceneDef[] = [
       { id: 'remote-a01', era: '2019-armchair', x: 0.6, y: 0.8, w: 0.07, act: 'remote-a01', verb: 'look', labelHe: 'השלט', prop: { key: 'propRemote', size: 0.034, at: { x: 0.585, y: 0.606 } } },
       { id: 'mug-a01', era: '2019-armchair', x: 0.66, y: 0.8, w: 0.05, act: 'mug-a01', verb: 'look', labelHe: 'הספלים', prop: { key: 'propMug', size: 0.026, at: { x: 0.64, y: 0.606 } } },
       // F01 — "כמה כרטיסים?" "לנו."
-      { id: 'tickets-f01', era: '2026-plan', x: 0.68, y: 0.8, w: 0.07, act: 'tickets-f01', verb: 'look', labelHe: 'הכרטיסים', prop: { key: 'propTicketsPair', size: 0.022, at: { x: 0.67, y: 0.606 } }, when: { flag: 'f:money' } },
+      { id: 'tickets-f01', era: '2026-plan', x: 0.68, y: 0.8, w: 0.07, act: 'tickets-f01', verb: 'look', labelHe: 'הכרטיסים', prop: { key: 'propTicketsPair', size: 0.022, at: { x: 0.67, y: 0.606 } }, when: { all: [{ flag: 'f:tickets' }], none: [{ flagIs: { flag: 'f:tickets', value: 'none' } }] } },
       /**
        * **הרדיו על השידה — 21.9.2026.** השיחה אומרת *"הרדיו על השידה, בין מפית לתמונה"*,
        * קובי *"מנמיך את הרדיו"*, והנקודה נקראה "הטלוויזיה" ולא היה על השידה שום רדיו —
@@ -1201,6 +1223,10 @@ const SCENES: SceneDef[] = [
       { id: 'phone-1990', era: '1990', x: 0.13, y: 0.78, w: 0.1, act: 'phone-1990', verb: 'look', labelHe: 'הטלפון' },
       { id: 'photo-1990', era: '1990', x: 0.42, y: 0.76, w: 0.08, act: 'photo-1990', verb: 'look', labelHe: 'התמונות' },
       { id: 'tv-1993', era: '1993-cup', x: 0.13, y: 0.78, w: 0.1, act: 'tv-1993', verb: 'watch', labelHe: 'הטלוויזיה' },
+      // (V3 §12) A7 — asking is sitting down beside him, on the arm of the chair, with the page
+      { id: 'a7-armrest', era: 'a7-week', x: 0.27, y: 0.86, w: 0.07, act: 'kobi-a7', verb: 'sit', labelHe: 'המשענת של הכורסה, ליד אבא', when: { all: [{ flag: 'a7:knows' }, { notFlag: 'a7:refused' }] }, priority: 5 },
+      // (V3 §12) 2000, an afternoon on the sofa with his parents, not talking about the final
+      { id: 'd-sofa', era: '2000-double', x: 0.42, y: 0.86, w: 0.1, act: 'd-home-afternoon', verb: 'sit', labelHe: 'הספה, ליד אבא ואמא', when: { all: [{ flag: 'd:opened' }, { notFlag: 'd:final' }, { notFlag: 'd:pick1:family' }] }, priority: 5 },
       /**
        * 1996 — הערב האחרון: לארוז בידיים (Director V3 §7). Three things, in the order the
        * room offers them walking from the door: the socks on the coffee table, the
@@ -1248,7 +1274,7 @@ const SCENES: SceneDef[] = [
             ],
           },
         },
-        blockedByEra: { '1991': 'אמא אמרה לא. לא הערב. (במטבח יש פנקס ועיפרון.)' },
+        blockedByEra: { '1991': 'אחרי שבע לא יוצאים בלי מילה לאמא. (במטבח יש פנקס ועיפרון.)' },
         dwellMs: 260,
         priority: 2,
       },
@@ -1372,23 +1398,33 @@ const SCENES: SceneDef[] = [
       // A02 — "מצאתי את התמונה": האלבום פתוח על השולחן
       { id: 'album-a02', era: '2019-armchair', x: 0.82, y: 0.8, w: 0.07, act: 'album-a02', verb: 'look', labelHe: 'האלבום', prop: { key: 'propAlbum', size: 0.03, at: { x: 0.845, y: 0.464 } } },
       ...gigSpots('kitchen'),
-      { id: 'radio-a6', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at } },
+      /**
+       * (Director V3 §12, 25.9.2026) A6 — the transistor is a thing you tune, hold and carry.
+       * Alive it opens the kitchen as a passage of the hands (`ride:radio-86`: the antenna
+       * to the window, both hands on it, the half-sentences); dead it can be picked up and
+       * taken down the street to Liron (`a6:carried`).
+       */
+      { id: 'radio-a6', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6', verb: 'play', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at }, when: { none: [{ flag: 'a6:radio-dead' }] } },
+      { id: 'radio-a6-dead', era: 'a6-radio', x: 0.93, y: 0.78, w: 0.05, act: 'radio-a6-dead', verb: 'take', labelHe: 'הטרנזיסטור המת', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at }, when: { all: [{ flag: 'a6:radio-dead' }, { notFlag: 'a6:carried' }, { notFlag: 'a6:revived' }, { notFlag: 'a6:gave-up' }] } },
       // On the floor at the end of the run of cupboards, which is where a crate of empties
       // lives in a flat that takes them back for the deposit.
       { id: 'crate', x: 0.3, y: 0.92, w: 0.11, act: 'bottles', verb: 'take', labelHe: 'הבקבוקים' },
       // The little table under the mirror, with the oilcloth on it and the chairs pushed in.
       { id: 'table', x: 0.86, y: 0.9, w: 0.12, act: 'kitchen-table', verb: 'look', labelHe: 'השולחן' },
       // 1990: the paper open on the table, and the radio beside it.
-      { id: 'table-1990', era: '1990', x: 0.86, y: 0.78, w: 0.07, act: 'table-1990', verb: 'look', labelHe: 'הטבלה', priority: 2 },
+      // (V3 §12) the paper is lifted off the table and read, and the radio is tuned by hand:
+      // two of the three sources the morning triangulates (the third is Amit, in the street)
+      { id: 'table-1990', era: '1990', x: 0.86, y: 0.78, w: 0.07, act: 'table-1990', verb: 'take', labelHe: 'העיתון על הטבלה', priority: 2 },
       // sit down at the table: the kitchen from the boy's own chair
       { id: 'chair-1990', era: '1990', x: 0.7, y: 0.8, w: 0.06, act: 'pano:panoKitchen90', verb: 'sit', labelHe: 'הכיסא ליד השולחן' },
       // ON the table, beside the paper: drawn on the oilcloth, reached from the floor in
       // front of it.
-      { id: 'radio-1990', era: '1990', x: 0.93, y: 0.78, w: 0.05, act: 'radio-table-1990', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at } },
-      { id: 'radio-galil', era: '1993-galil', x: 0.93, y: 0.78, w: 0.05, act: 'g4-radio', verb: 'look', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at }, when: { flag: 'life:galil:d4' } },
+      { id: 'radio-1990', era: '1990', x: 0.93, y: 0.78, w: 0.05, act: 'radio-table-1990', verb: 'play', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at } },
+      { id: 'radio-g2', era: '1993-galil', x: 0.93, y: 0.78, w: 0.05, act: 'g2-radio-on', verb: 'play', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at }, when: { all: [{ flag: 'life:galil:d2' }, { notFlag: 'g2:chose' }, { notFlag: 'life:galil:d3' }] } },
+      { id: 'radio-galil', era: '1993-galil', x: 0.93, y: 0.78, w: 0.05, act: 'g4-radio', verb: 'play', labelHe: 'הטרנזיסטור', prop: { key: 'propRadio', size: TABLE_RADIO.size, at: TABLE_RADIO.at }, when: { flag: 'life:galil:d4' } },
       // 1991: the pad and the pencil Rachel writes her lists with — and the only way out
       // of a "no" that is not a lie (§32).
-      { id: 'pad-1991', era: '1991', x: 0.86, y: 0.82, w: 0.08, act: 'kitchen-note-1991', verb: 'look', labelHe: 'הפנקס' },
+      { id: 'pad-1991', era: '1991', x: 0.86, y: 0.82, w: 0.08, act: 'kitchen-note-1991', verb: 'take', labelHe: 'הפנקס' },
       /**
        * OWNER · `CHECK_BUDGET` — על אותו שולחן שהפנקס של 1991 מונח עליו.
        *
@@ -1599,6 +1635,8 @@ const SCENES: SceneDef[] = [
         talk: 'amit-1993',
         flip: true,
       },
+      // the Wednesday of game two: Michel beside his coach, notebook out, one seat
+      { id: 'michel-g2', era: '1993-galil', figure: 'michel99-3q', x: 0.42, y: 0.82, size: 0.275, nameHe: 'מישל', talk: 'g2-choose', sway: 0.003, when: { all: [{ flag: 'life:galil:d2' }, { notFlag: 'g2:chose' }, { notFlag: 'life:galil:d3' }] } },
       {
         id: 'ofir-galil',
         era: '1993-galil',
@@ -1744,6 +1782,23 @@ const SCENES: SceneDef[] = [
         when: { afterMinute: 20 * 60 },
       },
       { id: 'poster-1990', era: '1990', x: 0.82, y: 0.82, w: 0.05, act: 'poster-1990', verb: 'look', labelHe: 'המודעה על העמוד' },
+      /**
+       * (Director V3 §12, 25.9.2026) 1993, the finals — getting north is a thing in the
+       * street: Michel's coach with its one seat on the Wednesday (`g2-choose`), and on the
+       * decisive day the cousin's car Ofir is standing by (`g4-ofir`).
+       */
+      // A7 — the page Amit tore out of the paper, taken from his hand (`amit-a7`)
+      { id: 'a7-page', era: 'a7-week', x: 0.43, y: 0.84, w: 0.06, act: 'amit-a7', verb: 'take', labelHe: 'העמוד שעמית מחזיק', when: { notFlag: 'a7:knows' }, priority: 5 },
+      { id: 'g2-coach', era: '1993-galil', x: 0.14, y: 0.84, w: 0.1, act: 'g2-choose', verb: 'enter', labelHe: 'להסעה של מישל — מקום אחד', when: { all: [{ flag: 'life:galil:d2' }, { notFlag: 'g2:chose' }, { notFlag: 'life:galil:d3' }] }, priority: 4 },
+      { id: 'g4-car', era: '1993-galil', x: 0.72, y: 0.84, w: 0.1, act: 'g4-ofir', verb: 'enter', labelHe: 'לאוטו של הבן דוד', when: { all: [{ flag: 'life:galil:d4' }, { notFlag: 'g4:decided' }] }, priority: 4 },
+      /**
+       * 2010-teddy · D05 (LIFE 90-D) — התוכנית ליד הרכב של אולי היא לוגיסטיקה שעושים, לא
+       * משפט: הרשימה על הגג (מי עולה למקום האחרון), הכסף ביד של אולי (כרטיס ודלק), ועמית —
+       * איך חוזרים. כל אחד נדלק כשהקודם נעשה (`chapter2010double.ts`).
+       */
+      { id: 'd10-roster', era: '2010-teddy', x: 0.2, y: 0.84, w: 0.08, act: 'd10-roster', verb: 'take', labelHe: 'הרשימה של אולי, על הגג של הרכב', when: { all: [{ flagIs: { flag: 'd10:mode', value: 'venue' } }], none: [{ flag: 'd10:seated' }, { flag: 'd10:plan' }] }, priority: 5 },
+      { id: 'd10-pay', era: '2010-teddy', x: 0.32, y: 0.83, w: 0.08, act: 'd10-pay', verb: 'hold', labelHe: 'לתת לאולי — כרטיס ודלק', when: { all: [{ flag: 'd10:seated' }], none: [{ flag: 'd10:paid' }, { flag: 'd10:plan' }] }, priority: 5 },
+      { id: 'd10-promise', era: '2010-teddy', x: 0.62, y: 0.82, w: 0.08, act: 'd10-promise', verb: 'hold', labelHe: 'עמית — איך חוזרים', when: { all: [{ flag: 'd10:paid' }], none: [{ flag: 'd10:plan' }] }, priority: 5 },
       // The pole the whole near side of the street hangs off — stickers, a scrap of a
       // torn notice, and the one place a child would stop and read something.
       { id: 'pole', x: 0.82, y: 0.82, w: 0.05, act: 'street-pole', verb: 'look', labelHe: 'העמוד' },
@@ -2141,6 +2196,8 @@ const SCENES: SceneDef[] = [
         talk: 'rafi-1993',
         sway: 0.003,
       },
+      // 19.4.1993, late: Ofir on the rail by the kiosk, as if he never moved (`after-ofir-1993`)
+      { id: 'ofir-after-1993', era: '1993-cup', figure: 'ofir90-3q', x: 0.78, y: 0.86, size: 0.535, nameHe: 'אופיר', talk: 'after-ofir-1993', flip: true, when: { all: [{ flag: 'after:walk' }, { notFlag: 'walked:home' }] } },
       // the winter of 1996/97 at the kiosk: the court sits again, with a lawyer in it
       { id: 'shopkeeper-army', era: '1996-army', figure: 'oldMan-3q', x: 0.5, y: 0.8, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'a4-winter', sway: 0.003 },
       { id: 'amit-army', era: '1996-army', figure: 'amit90-point', x: 0.3, y: 0.84, size: 0.544, nameHe: 'עמית', talk: 'a4-winter', when: { flag: 'life:army:d4' } },
@@ -2152,6 +2209,8 @@ const SCENES: SceneDef[] = [
       { id: 'ofir-sinai', era: '1995-sinai', figure: 'ofir90-arms', x: 0.28, y: 0.84, size: 0.479, nameHe: 'אופיר', talk: 'ofir-sinai' },
       { id: 'amit-sinai', era: '1995-sinai', figure: 'amit90', x: 0.74, y: 0.85, size: 0.551, nameHe: 'עמית', talk: 'amit-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
       { id: 'freddy-sinai', era: '1995-sinai', figure: 'adultA2', x: 0.86, y: 0.86, size: 0.561, nameHe: 'פרדי', talk: 'freddy-sinai', flip: true, when: { flag: 'life:sinai:d2' } },
+      // (V3 §12) the third voice of the court: the young man in the door, a year on
+      { id: 'fan-sinai', era: '1995-sinai', figure: 'adultB4', x: 0.12, y: 0.86, size: 0.54, nameHe: 'אוהד צעיר', talk: 's2-fan', when: { all: [{ flag: 'life:sinai:d2' }, { notFlag: 's2:done' }] } },
       // 1999 — the kiosk at night: Gate 5 as work before it is iconography
       { id: 'asaf-seed', era: '1999-basket', figure: 'asaf-back', x: 0.5, y: 0.84, size: 0.551, nameHe: 'אסף', talk: 'seed-voice-asaf' },
       { id: 'melamed-seed', era: '1999-basket', figure: 'adultA1', x: 0.3, y: 0.85, size: 0.551, nameHe: 'מלמד', talk: 'seed-voice-melamed' },
@@ -2162,8 +2221,6 @@ const SCENES: SceneDef[] = [
       { id: 'amit-kiosk', era: '1990', figure: 'amit90', x: 0.5, y: 0.95, size: 0.479, nameHe: 'עמית', talk: 'amit-1990' },
     ],
     hotspots: [
-      // 2007-table — נקודת ההוכחה של הייסוד. אחת בכל פרק, ראה `FOUNDING_CHAPTERS`.
-      { id: 'proof-found', era: ['2007-table'], x: 0.3, y: 0.8, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'מה שצריך עד מחר' },
       /**
        * שני סימנים בקיוסק, חורף 1997 — a half-empty shelf and a column of numbers.
        *
@@ -2179,6 +2236,20 @@ const SCENES: SceneDef[] = [
        * around the crate (`seed-voice-*`), and closed here, on the crate, once three of them
        * are on it. Between מלמד (0.3) and אסף (0.5), clear of both.
        */
+      /**
+       * (Director V3 §12, 25.9.2026) 1994/95 at the counter — the radio of the cup final,
+       * leaned into (`s1-radio`), and a year later Amit's newspaper, folded on the counter at
+       * the table (`s2-paper`): one of the three voices the court is assembled from.
+       */
+      /**
+       * (V3 §12) 2000 — the counter holds two of the afternoons: Rafi's apron for a double
+       * shift (`d-kiosk-afternoon` → `chore:story:shift-00`), and the minibus notebook with
+       * the final's tickets under a rubber band (`d-ticket-afternoon`, bought).
+       */
+      { id: 'd-shift', era: '2000-double', x: 0.55, y: 0.92, w: 0.08, act: 'd-kiosk-afternoon', verb: 'take', labelHe: 'הסינר של רפי — משמרת', when: { all: [{ flag: 'd:opened' }, { notFlag: 'd:final' }] }, priority: 5 },
+      { id: 'd-ticket', era: '2000-double', x: 0.66, y: 0.9, w: 0.06, act: 'd-ticket-afternoon', verb: 'buy', labelHe: 'כרטיס והסעה לגמר — 60 ₪', when: { all: [{ flag: 'd:opened' }, { notFlag: 'd:final' }, { notFlag: 'd:pick1:ticket' }] }, priority: 5 },
+      { id: 'radio-sinai', era: '1995-sinai', x: 0.42, y: 0.88, w: 0.07, act: 's1-radio', verb: 'play', labelHe: 'הרדיו על הדלפק', when: { all: [{ flag: 'life:sinai:d1' }, { notFlag: 's1:heard' }, { notFlag: 'life:sinai:d2' }] }, priority: 5 },
+      { id: 'paper-sinai', era: '1995-sinai', x: 0.64, y: 0.9, w: 0.06, act: 's2-paper', verb: 'take', labelHe: 'העיתון המקופל על הדלפק', when: { all: [{ flag: 'life:sinai:d2' }, { notFlag: 's2:done' }] }, priority: 5 },
       { id: 'seed-page', era: '1999-basket', x: 0.4, y: 0.87, w: 0.05, act: 'seed-page', verb: 'take', labelHe: 'הדף על הארגז', when: { all: [{ flag: 'seed:hall' }, { notFlag: 'seed:list' }] }, priority: 5 },...gigSpots('kiosk'), 
       /**
        * החולצה בחלון, ואז חנות האוהדים.
@@ -2190,7 +2261,14 @@ const SCENES: SceneDef[] = [
        * `Condition` cannot ask which year it is but an `era` can — and each of those opens
        * the conversation generated for that year's rail (`lib/life/shirts.ts`).
        */
-      { id: 'shirt-rail', era: 'a4-shirt', x: 0.17, y: 0.88, w: 0.12, act: 'rafi-a4', verb: 'look', labelHe: 'החולצה על הקולב', priority: 4, prop: { key: 'shirtVisa86', size: 0.227, at: { x: 0.185, y: 0.44 } } },
+      { id: 'shirt-rail', era: 'a4-shirt', x: 0.17, y: 0.88, w: 0.12, act: 'rafi-a4', verb: 'buy', labelHe: 'חולצה מהקולב', priority: 4, prop: { key: 'shirtVisa86', size: 0.227, at: { x: 0.185, y: 0.44 } } },
+      /**
+       * (Director V3 §12, 25.9.2026) A2 — the bread is a thing on the counter you pick up,
+       * not a sentence Rafi says: the same conversation (`rafi-a2`, the clock on the wall
+       * behind him decides which line), reached by the hand. Between Rafi (0.3) and the
+       * counter (0.55), and only while the errand is open.
+       */
+      { id: 'bread-a2', era: 'a2-alley', x: 0.43, y: 0.9, w: 0.07, act: 'rafi-a2', verb: 'take', labelHe: 'הלחם של רחל', when: { all: [{ flag: 'a2:errand' }, { notFlag: 'a2:bread' }] }, priority: 5 },
       /**
        * החנות עברה — the rail hung in this window until 5.9.2026 and it has moved upstairs.
        *
@@ -2199,7 +2277,7 @@ const SCENES: SceneDef[] = [
        * to be a kiosk. So `a4-shirt` keeps its single shirt, above, and everything from
        * 1990 is in `fan-shop` — a room, with a door, and a man who works there.
        */
-      { id: 'bottles-a4', era: 'a4-shirt', x: 0.82, y: 0.88, w: 0.1, act: 'bottles-a4', verb: 'look', labelHe: 'הבקבוקים ליד הפח', when: { none: [{ flag: 'a4:bottles' }] } },{ id: 'counter', era: '*', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' },
+      { id: 'bottles-a4', era: 'a4-shirt', x: 0.82, y: 0.88, w: 0.1, act: 'bottles-a4', verb: 'take', labelHe: 'הבקבוקים ליד הפח', when: { none: [{ flag: 'a4:bottles-all' }, { flag: 'a4:bottles-paid' }] } },{ id: 'counter', era: '*', x: 0.55, y: 0.92, w: 0.14, act: 'kiosk-counter', verb: 'look', labelHe: 'הדלפק' },
       /**
        * JOURNALIST · `PROOF_REPORT` — הסטנד, ומה מחליטים לידו.
        *
@@ -2451,8 +2529,9 @@ const SCENES: SceneDef[] = [
         y: 0.7,
         w: 0.05,
         act: 'route-shortcut',
-        verb: 'look',
-        labelHe: 'הרווח בין הבתים',
+        // (V3 §12) a gap you squeeze through, not a picture you look at
+        verb: 'enter',
+        labelHe: 'לרווח בין הבתים',
         priority: 2,
       },
       { id: 'shelter', x: 0.7, y: 0.71, w: 0.08, act: 'route-shelter', verb: 'look', labelHe: 'תחנת האוטובוס' },
@@ -2675,8 +2754,6 @@ const SCENES: SceneDef[] = [
       },
     ],
     hotspots: [
-      // 2007-registered — נקודת ההוכחה של הייסוד. אחת בכל פרק, ראה `FOUNDING_CHAPTERS`.
-      { id: 'proof-found', era: ['2007-registered'], x: 0.47, y: 0.78, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'מה שהבטחת למסור' },
       // The blue enamel plate on the corner: 96. The one thing in the frame that says where
       // in the city this is.
       { id: 'sign', era: '*', x: 0.352, y: 0.735, w: 0.05, act: 'allenby-sign', verb: 'look', labelHe: 'המספר על הפינה', priority: 2 },
@@ -3050,6 +3127,9 @@ const SCENES: SceneDef[] = [
         when: { all: [{ flag: 'life:army:d2' }], none: [{ flag: 'life:army:d3' }] },
       },
       { id: 'asaf-laces', era: '1998-laces', figure: 'asaf', x: 0.86, y: 0.9, size: 0.3, nameHe: 'אסף', talk: 'asaf-laces', flip: true, when: { flag: 'l1:after' } },
+      // 2.5.1998, the ten minutes (V3 §12): Ofir on the steps, Soko on the pavement with the papers
+      { id: 'ofir-ten-98', era: '1998-laces', figure: 'ofir90-arms', x: 0.3, y: 0.88, size: 0.3, nameHe: 'אופיר', talk: 'l1-ten-ofir', when: { all: [{ flag: 'l1:ten' }, { notFlag: 'l1:cut' }] } },
+      { id: 'soko-ten-98', era: '1998-laces', figure: 'soko', x: 0.68, y: 0.9, size: 0.29, nameHe: 'סוקו', talk: 'l1-ten-soko', when: { all: [{ flag: 'l1:ten' }, { notFlag: 'l1:cut' }] } },
 
       {
         // בארי — Gate 7, 1986: his canonical debut (Stage A Director's Cut §21/§53).
@@ -3139,6 +3219,34 @@ const SCENES: SceneDef[] = [
       { id: 'look-gate', era: '1990', x: 0.25, y: 0.9, w: 0.07, act: 'pano:panoGate7', verb: 'gaze', labelHe: 'סביב' },
       { id: 'fence', era: ['1980s', '1990s'], x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
       { id: 'turnstile', era: ['1980s', '1990s'], x: 0.36, y: 0.85, w: 0.09, act: 'gate-turnstile', verb: 'look', labelHe: 'הקרוסלה' },
+      /**
+       * (Director V3 §12, 25.9.2026) the way in is a place you go through, not a line you
+       * are given.
+       *
+       *  · A5 — the first Saturday in the shirt: the turnstile is pushed once, with Kobi's
+       *    hand on your shoulder, and the terrace is behind it (`a5-turnstile`).
+       *  · A7 — a week before 24.5.1986 the ground is empty and Ofir's "גם אם צריך לטפס על
+       *    הגדר" is a gap under the fence at the third post; a boy who went and looked at it
+       *    knows a way in on the Saturday (`life:a7:scouted`).
+       *  · 1986 — three ways in that are done with the body: the hatch (buy), the turnstile
+       *    beside a father and son (the queue), and the gap — where a steward's hand on the
+       *    collar is not the end of the day but the way to the old man at the fence.
+       */
+      /**
+       * (Director V3 §12, 25.9.2026) 2.5.1998 — the ten minutes after the whistle are a
+       * place: the steps beside Ofir, the way Asaf's people are going, the middle of the
+       * forecourt where a boy can only stand and look. Soko and Ofir stand here too.
+       */
+      // 2000 — the banner on the ground outside Bloomfield, for the one who has been at five
+      { id: 'd-banner', era: '2000-double', x: 0.5, y: 0.9, w: 0.12, act: 'd-gate5-afternoon', verb: 'take', labelHe: 'המכחול, והבד על הרצפה', when: { all: [{ flag: 'd:opened' }, { notFlag: 'd:final' }, { notFlag: 'd:pick1:gate5' }, { gateEver: 'gate5' }] }, priority: 4 },
+      { id: 'l1-steps', era: '1998-laces', x: 0.24, y: 0.88, w: 0.07, act: 'l1-ten-ofir', verb: 'sit', labelHe: 'המדרגות, ליד אופיר', when: { all: [{ flag: 'l1:ten' }, { notFlag: 'l1:cut' }] }, priority: 4 },
+      { id: 'l1-follow', era: '1998-laces', x: 0.94, y: 0.88, w: 0.06, act: 'l1-ten-asaf', verb: 'exit', labelHe: 'אחרי אסף ואנשיו', when: { all: [{ flag: 'l1:ten' }, { notFlag: 'l1:cut' }] }, priority: 4 },
+      { id: 'l1-look', era: '1998-laces', x: 0.46, y: 0.86, w: 0.06, act: 'l1-ten-look', verb: 'watch', labelHe: 'מה שקורה בחוץ — לעמוד ולזכור', when: { all: [{ flag: 'l1:ten' }, { notFlag: 'l1:cut' }] }, priority: 3 },
+      { id: 'a5-turnstile', era: 'a5-first', x: 0.36, y: 0.85, w: 0.09, act: 'a5-turnstile', verb: 'enter', labelHe: 'בקרוסלה, דחיפה אחת', when: { all: [{ flag: 'a5:there' }, { notFlag: 'a5:in' }] }, priority: 4 },
+      { id: 'a7-gap', era: 'a7-week', x: 0.11, y: 0.86, w: 0.07, act: 'a7-gap', verb: 'enter', labelHe: 'לרווח מתחת לגדר, ליד העמוד השלישי', when: { flag: 'a7:knows-gap' }, priority: 4 },
+      { id: 'hatch-1986', era: '1986', x: 0.7, y: 0.88, w: 0.06, act: 'ticket-window', verb: 'buy', labelHe: 'כרטיס לילד, באשנב', when: { notFlag: 'entry:granted' }, priority: 5 },
+      { id: 'turnstile-1986', era: '1986', x: 0.36, y: 0.85, w: 0.09, act: 'gate-family', verb: 'enter', labelHe: 'לתור לקרוסלה, ליד אבא וילד', when: { notFlag: 'entry:granted' }, priority: 5 },
+      { id: 'gap-1986', era: '1986', x: 0.11, y: 0.86, w: 0.07, act: 'gap-1986', verb: 'enter', labelHe: 'לרווח מתחת לגדר', when: { all: [{ notFlag: 'entry:granted' }, { any: [{ flag: 'life:a7:scouted' }, { personalityAbove: { key: 'streetSmarts', min: 14 } }] }] }, priority: 5 },
       /**
        * ULTRAS · `ORGANIZE_GROUP` — הכיכר שלפני השער, במקום שאנשים עומדים בו וממתינים.
        *
@@ -3301,7 +3409,14 @@ const SCENES: SceneDef[] = [
     stuckHe: 'קדימה, לכיוון האור.',
     spawns: { start: { x: 0.5, y: 0.95 } },
     actors: [],
-    hotspots: [],
+    hotspots: [
+      /**
+       * (Director V3 §12, 25.9.2026) A5 — "אם אתה מאבד אותי — פה, ליד הברזל הזה." The rail
+       * at the mouth of the tunnel is the place Kobi named, and holding it is the kick-off:
+       * the first push of the terrace, a shout or two hands on the iron (`a5-kickoff`).
+       */
+      { id: 'a5-iron', era: 'a5-first', x: 0.28, y: 0.84, w: 0.09, act: 'a5-kickoff', verb: 'hold', labelHe: 'את הברזל שאבא אמר', when: { all: [{ flag: 'a5:in' }, { notFlag: 'a5:closed' }] }, priority: 5 },
+    ],
     exits: [
       {
         id: 'up',
@@ -3641,7 +3756,7 @@ const SCENES: SceneDef[] = [
         y: 0.92,
         size: 0.278,
         nameHe: 'שחור',
-        talk: 'shachor-galil',
+        talk: 'after-shachor-galil',
         when: { flag: 'life:galil:after' },
       },
       {
@@ -3683,7 +3798,21 @@ const SCENES: SceneDef[] = [
         verb: 'talk',
         labelHe: 'הפנקס של שחור',
       },
-      { id: 'bus-1993', era: '1993-cup', x: 0.15, y: 0.84, w: 0.14, act: 'bus-1993', verb: 'enter', labelHe: 'האוטובוס', priority: 3 },
+      // 1993, the decisive day: the organised bus north at the corner, until four (`g4-michel`);
+      // the day after, the step beside Michel's notebook (`after-michel`)
+      { id: 'g4-bus', era: '1993-galil', x: 0.15, y: 0.84, w: 0.14, act: 'g4-michel', verb: 'enter', labelHe: 'לאוטובוס לצפון', when: { all: [{ flag: 'life:galil:d4' }, { notFlag: 'g4:decided' }, { notFlag: 'g4:bus-gone' }] }, priority: 3 },
+      { id: 'michel-ledger', era: '1993-galil', x: 0.5, y: 0.9, w: 0.08, act: 'after-michel', verb: 'sit', labelHe: 'המדרגה ליד הפנקס של מישל', when: { all: [{ flag: 'after:open' }, { notFlag: 'after:michel' }, { notFlag: 'after:done' }] }, priority: 3 },
+      { id: 'bus-1993', era: '1993-cup', x: 0.15, y: 0.84, w: 0.14, act: 'bus-1993', verb: 'enter', labelHe: 'האוטובוס', priority: 3, when: { notFlag: 'final:over' } },
+      // (V3 §12) after the final the same bus is back at the corner, door open, still singing
+      { id: 'bus-back-1993', era: '1993-cup', x: 0.15, y: 0.84, w: 0.14, act: 'after-bus-1993', verb: 'enter', labelHe: 'לאוטובוס חזרה, עם החבר׳ה', priority: 3, when: { all: [{ flag: 'after:walk' }, { notFlag: 'walked:home' }] } },
+      /**
+       * (Director V3 §12, 25.9.2026) A3 — the way in is the queue, and you are in it: between
+       * two coats, behind Efi, up to the usher who asks your name. The usher's own box is the
+       * same one (`usher-a3`); this is the walk to it.
+       */
+      // 1997 — after the crates, staying is walking through the door you carried them to
+      { id: 'h1-door', era: '1997-basket', x: 0.3, y: 0.88, w: 0.06, act: 'h1-stay', verb: 'enter', labelHe: 'לאולם — להישאר', when: { all: [{ flag: 'h1:crates-carried' }, { notFlag: 'h1:decided' }] }, priority: 5 },
+      { id: 'a3-queue', era: 'a3-hall', x: 0.36, y: 0.9, w: 0.1, act: 'a3-queue', verb: 'enter', labelHe: 'לתור, אחרי אפי', when: { all: [{ flag: 'knows:hall' }, { notFlag: 'entry:granted' }] }, priority: 4 },
 
       { id: 'queue', era: '1991', x: 0.25, y: 0.9, w: 0.12, act: 'uss-queue', verb: 'look', labelHe: 'התור' },
     ],
@@ -3859,8 +3988,6 @@ const SCENES: SceneDef[] = [
       { id: 'ofir-hall', era: '1991', figure: 'ofir90-arms', x: 0.3, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'derby:friend', flip: true, sway: 0.007 },
     ],
     hotspots: [
-      // 2007-key — נקודת ההוכחה של הייסוד. אחת בכל פרק, ראה `FOUNDING_CHAPTERS`.
-      { id: 'proof-found', era: ['2007-key'], x: 0.42, y: 0.86, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'הציוד, לפני מחר' },
       ...gigSpots('ussishkin-hall'),
       { id: 'look-hall', era: '*', x: 0.62, y: 0.9, w: 0.16, act: 'pano:panoUssHall', verb: 'gaze', labelHe: 'סביב', priority: 3, when: { notFlag: 'uss:arrived' } },
       // 1991: the same look, on a night when the hall is full of people (§38).
@@ -3872,6 +3999,14 @@ const SCENES: SceneDef[] = [
       { id: 'the-spot', era: '1991', x: 0.5, y: 0.88, w: 0.09, act: 'hall-spot', verb: 'sit', labelHe: 'המדרגה', priority: 5 },
       { id: 'hall-rail', era: '1991', x: 0.68, y: 0.84, w: 0.1, act: 'hall-rail', verb: 'look', labelHe: 'המעקה' },
       { id: 'hall-clock', era: '1991', x: 0.86, y: 0.8, w: 0.08, act: 'hall-clock', verb: 'look', labelHe: 'השעון' },
+      /**
+       * (Director V3 §12, 25.9.2026) A3 — a place in the hall, found with the body: a step in
+       * the stand beside Efi, and a ball that rolls to your feet from the warm-up. Each is
+       * also one of the two things the evening needs him to have looked at (`saw:stand`,
+       * `saw:parquet` → `life:seen:ussishkin`), so the day closes on what he DID.
+       */
+      { id: 'a3-step', era: 'a3-hall', x: 0.55, y: 0.82, w: 0.08, act: 'a3-step', verb: 'sit', labelHe: 'מדרגה ביציע, ליד אפי', when: { all: [{ flag: 'a3:inside' }, { notFlag: 'a3:seat' }] }, priority: 5 },
+      { id: 'a3-ball', era: 'a3-hall', x: 0.4, y: 0.9, w: 0.08, act: 'a3-ball', verb: 'play', labelHe: 'הכדור שהתגלגל אליך', when: { all: [{ flag: 'a3:inside' }, { notFlag: 'a3:ball' }] }, priority: 5, prop: { key: 'propBasketball', size: 0.03 } },
       { id: 'parquet', era: '*', x: 0.4, y: 0.88, w: 0.1, act: 'uss-parquet', verb: 'look', labelHe: 'הפרקט' },
       { id: 'stand', era: '*', x: 0.55, y: 0.78, w: 0.12, act: 'uss-stand', verb: 'look', labelHe: 'היציע' },
       { id: 'windows', era: '*', x: 0.75, y: 0.8, w: 0.1, act: 'uss-windows', verb: 'look', labelHe: 'החלונות' },
@@ -4477,7 +4612,14 @@ const SCENES: SceneDef[] = [
       { art: 'overlaySmoke', x: 0, y: 0, w: 1.0, depth: 0.1, alpha: 0.6, era: '*' },
     ],
     actors: [],
-    hotspots: [],
+    /**
+     * (Director V3 §12, 25.9.2026) the two finals start at the gates: the turnstiles under
+     * the sign are pushed through, and the match is inside them (`c99-kickoff`, `d-kickoff`).
+     */
+    hotspots: [
+      { id: 'rg-gate-99', era: '1999-cup', x: 0.6, y: 0.93, w: 0.12, act: 'rg-gate-99', verb: 'enter', labelHe: 'בשערים, עם כולם', when: { all: [{ flag: 'c99:arrived' }, { notFlag: 'c99:in' }] }, priority: 4 },
+      { id: 'rg-gate-00', era: '2000-double', x: 0.6, y: 0.93, w: 0.12, act: 'rg-gate-00', verb: 'enter', labelHe: 'בשערים, עם כולם', when: { all: [{ flag: 'd:arrived' }, { notFlag: 'd:in' }] }, priority: 4 },
+    ],
     exits: [
       {
         id: 'back',
@@ -4490,6 +4632,10 @@ const SCENES: SceneDef[] = [
         labelHe: 'הביתה, אחרי המשחק',
         light: { x: 0.005, y: 0.45, w: 0.07, h: 0.4, tone: 'daylight' },
         dwellMs: 600,
+        // the gates are a place you stand in now, so the way home waits for the whistle
+        // (only once he is at the gates for the final: a boy who walked here early walks back)
+        needsByEra: { '1999-cup': { any: [{ flag: 'c99:over' }, { notFlag: 'c99:arrived' }] }, '2000-double': { any: [{ flag: 'd:over' }, { notFlag: 'd:arrived' }] } },
+        blockedByEra: { '1999-cup': 'אחרי המשחק. אף אחד לא יוצא מגמר.', '2000-double': 'אחרי המשחק. אף אחד לא יוצא מגמר.' },
       },
     ],
     spawns: { start: { x: 0.3, y: 0.96, facing: 'right' } },
@@ -4527,8 +4673,8 @@ const SCENES: SceneDef[] = [
      */
     hotspots: [
       { id: 't-src-rumour', era: '2000-title', x: 0.52, y: 0.86, w: 0.06, act: 't-src-rumour', verb: 'look', labelHe: 'הצועק מהמרפסת', when: { all: [{ flag: 't:matched' }, { notFlag: 't:confirmed' }] }, priority: 3 },
-      { id: 't-src-radio', era: '2000-title', x: 0.68, y: 0.9, w: 0.06, act: 't-src-radio', verb: 'look', labelHe: 'הטרנזיסטור ליד הגדר', when: { all: [{ flag: 't:matched' }, { notFlag: 't:confirmed' }] }, priority: 3 },
-      { id: 't-src-phone', era: '2000-title', x: 0.84, y: 0.88, w: 0.06, act: 't-src-phone', verb: 'look', labelHe: 'האיש עם הפלאפון', when: { all: [{ flag: 't:matched' }, { notFlag: 't:confirmed' }] }, priority: 3 },
+      { id: 't-src-radio', era: '2000-title', x: 0.68, y: 0.9, w: 0.06, act: 't-src-radio', verb: 'play', labelHe: 'הטרנזיסטור ליד הגדר', when: { all: [{ flag: 't:matched' }, { notFlag: 't:confirmed' }] }, priority: 3 },
+      { id: 't-src-phone', era: '2000-title', x: 0.84, y: 0.88, w: 0.06, act: 't-src-phone', verb: 'take', labelHe: 'הפלאפון של האיש ליד הגדר', when: { all: [{ flag: 't:matched' }, { notFlag: 't:confirmed' }] }, priority: 3 },
     ],
     exits: [
       {
@@ -4564,6 +4710,21 @@ for (const scene of SCENES) {
       const holder = paint as { actors?: readonly ActorDef[] }
       holder.actors = [...(holder.actors ?? []), actor]
     } else scene.actors.push(actor)
+  }
+}
+
+/**
+ * הנקודות של הפרקים הבוגרים (90-E, `quests90e.ts`) — מסירה, מקור, ציוד, כרטיס — נכנסות
+ * לציור של השנה שלהן בדיוק כמו האנשים של `STAGED`.
+ */
+for (const scene of SCENES) {
+  for (const spot of QUEST_SPOTS[scene.id] ?? []) {
+    const era = typeof spot.era === 'string' ? spot.era : ''
+    const paint = scene.repaints?.find((r) => r.in(era))
+    if (paint) {
+      const holder = paint as { hotspots?: readonly HotspotDef[] }
+      holder.hotspots = [...(holder.hotspots ?? []), spot]
+    } else scene.hotspots.push(spot)
   }
 }
 

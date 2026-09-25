@@ -174,6 +174,9 @@ export const BEDROOM_2000: Repaint = {
     'small-make-work': { x: 0.66, y: 0.74, w: 0.08 },
     'distance-window': { x: 0.36, y: 0.69, w: 0.08, labelHe: 'מהתריס החוצה' },
     'redbox-shelf': { x: 0.51, y: 0.7, w: 0.08, prop: { key: 'propRedBox', size: 0.042, at: { x: 0.51, y: 0.083 } } },
+    // (Director V3 §12, 25.9.2026) 2000-double — the bed under the window, and the same box
+    'd-bed': { x: 0.24, y: 0.76, w: 0.1 },
+    'd-box': { x: 0.51, y: 0.72, w: 0.08 },
   },
   stuckHe: 'הדלת לסלון — מימין.',
 }
@@ -367,6 +370,14 @@ export const NEW_ROOMS: SceneDef[] = [
       // is 0.10 of the frame to the metre there, so a bunch of keys is a glint)
       look('hallnew-key', years(2007, 2009), 0.12, 0.66, 0.08, 'המפתח של האולם', { key: 'propKeys', size: 0.016, at: { x: 0.1, y: 0.476 } }),
       look('hallnew-balls', years(2007, 2009), 0.34, 0.66, 0.08, 'כלוב הכדורים'),
+      // 2007-key — נקודת ההוכחה של הייסוד (ראה חדר הקהילה), אחרי שנעשתה עבודה
+      { id: 'proof-found-key', era: ['2007-key'], x: 0.42, y: 0.74, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'הציוד, לפני מחר', when: { flag: 'u:hands' } },
+      // U04 — המסירה: להראות לענבל (אחרי `kit-07`), או לתלות את הרשימה ליד הדלתות (אחרי `labels-07`)
+      { id: 'u-show', era: ['2007-key'], x: 0.5, y: 0.72, w: 0.08, act: 'u-show', verb: 'hold', labelHe: 'להראות לענבל איפה הכול', when: { all: [{ flagIs: { flag: 'u:keyPlan', value: 'sort' } }, { flag: 'u:sorted' }], none: [{ flag: 'u:key' }] }, priority: 5 },
+      // U04 — מה שנבחר ועוד לא נעשה עומד בחדר (Director V3 §7, recovery): הארגזים ליד הדלתות, הדף הריק על הספסל
+      { id: 'u-crates', era: ['2007-key'], x: 0.2, y: 0.72, w: 0.08, act: 'u-crates', verb: 'take', labelHe: 'הארגזים ליד הדלתות', when: { all: [{ flagIs: { flag: 'u:keyPlan', value: 'sort' } }], none: [{ flag: 'u:sorted' }, { flag: 'u:key' }] }, priority: 4 },
+      { id: 'u-notes', era: ['2007-key'], x: 0.72, y: 0.72, w: 0.08, act: 'u-notes', verb: 'take', labelHe: 'דף ועט, על הספסל', when: { all: [{ flagIs: { flag: 'u:keyPlan', value: 'list' } }], none: [{ flag: 'u:listed' }, { flag: 'u:key' }] }, priority: 4 },
+      { id: 'u-pin', era: ['2007-key'], x: 0.8, y: 0.7, w: 0.08, act: 'u-pin', verb: 'hold', labelHe: 'לתלות את הרשימה ליד הדלתות', when: { all: [{ flagIs: { flag: 'u:keyPlan', value: 'list' } }, { flag: 'u:listed' }], none: [{ flag: 'u:key' }] }, priority: 5 },
     ],
     layers: [{ art: 'propBasketball', era: '*', x: 0.395, y: 0.655, w: 0.018, depth: 0.655, foot: true }],
     exits: [
@@ -532,6 +543,16 @@ export const NEW_ROOMS: SceneDef[] = [
     hotspots: [
       look('community-board', '*', 0.6, 0.65, 0.1, 'לוח השעם'),
       look('community-kettle', '*', 0.74, 0.66, 0.07, 'הקומקום'),
+      /**
+       * 2007 (LIFE 90-D) — נקודת ההוכחה של הייסוד, אחת בכל פרק (`FOUNDING_CHAPTERS` ב-`scenes.ts`),
+       * בחדר של הפרק ולא בקיוסק/באלנבי שבהם ישבה עד שהחדר צויר — ורק **אחרי** שנעשתה בו
+       * עבודה בידיים (`u:hands`; ב-U02 — המסירה ליוסף, `u:did`): *"הסצנה מאשרת את התרומה בפועל"* (`USSISHKIN_FOUNDER.apex`).
+       */
+      { id: 'proof-found-table', era: ['2007-table'], x: 0.3, y: 0.8, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'מה שצריך עד מחר', when: { flag: 'u:hands' } },
+      { id: 'proof-found-registered', era: ['2007-registered'], x: 0.56, y: 0.8, w: 0.09, act: 'route-proof-found', verb: 'look', labelHe: 'מה שהבטחת למסור', when: { flag: 'u:did' } },
+      // U02 — הדף עם המספרים: שיחה בכל לחיצה (`u-calls`), ואז ביד ליוסף (`u-list`)
+      { id: 'u-phone', era: ['2007-registered'], x: 0.28, y: 0.8, w: 0.08, act: 'u-calls', verb: 'take', labelHe: 'הדף עם המספרים', when: { all: [{ flag: 'u:calls' }], none: [{ flag: 'u:deliver' }] }, priority: 4 },
+      { id: 'u-hand', era: ['2007-registered'], x: 0.4, y: 0.76, w: 0.08, act: 'u-list', verb: 'hold', labelHe: 'לתת ליוסף את הרשימה', when: { all: [{ flag: 'u:adapted' }], none: [{ flag: 'u:deliver' }] }, priority: 5 },
     ],
     // (21.9.2026) no paper on the table: a sheet drawn from above stands upright in a room
     // seen from the side, and read as a sign held up between the chairs
@@ -568,7 +589,11 @@ export const NEW_ROOMS: SceneDef[] = [
     stuckHe: 'חזרה — הדלת בקצה.',
     spawns: { start: { x: 0.5, y: 0.8, facing: 'left' } },
     actors: [],
-    hotspots: [look('store-shelves', '*', 0.2, 0.74, 0.1, 'המדפים')],
+    hotspots: [
+      look('store-shelves', '*', 0.2, 0.74, 0.1, 'המדפים'),
+      // U01, תפעול — לספור בידיים מה יש ומה אין (`u-shelves` → `chore:story:count-07`)
+      { id: 'u-shelves', era: ['2007-table'], x: 0.3, y: 0.8, w: 0.1, act: 'u-shelves', verb: 'take', labelHe: 'המדפים — מה יש, ומה חסר', when: { all: [{ flagIs: { flag: 'u:roleKind', value: 'operations' } }], none: [{ flag: 'u:counted' }] }, priority: 4 },
+    ],
     exits: [
       {
         id: 'out',
@@ -867,6 +892,9 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'עמית', x: 0.42, y: 0.93, flip: true },
       { who: 'רומא', x: 0.56, y: 0.86, flip: true, when: flag('c10:benfica') },
     ]),
+    // 2010-teddy · D05 (kobi) — "תשב כבר. אתה מסתיר עוד לפני שהתחיל." — מי שנשאר לראות עם אבא
+    // מוצא אותו בכורסה שלו (LIFE 90-D: אנשים בחדרים שבהם הסיפור אומר שהם נמצאים)
+    ...cast('2010-teddy', { flagIs: { flag: 'd10:mode', value: 'home' } }, [{ who: 'קובי', x: 0.19, y: 0.74, figure: 'kobi90-sitA' }]),
     // 2012-cups · N01 (n-cups) — קובי בכורסה שלו, רחל
     ...cast('2012-cups', undefined, [
       { who: 'קובי', x: 0.19, y: 0.74, figure: 'kobi90-sitA' },
@@ -987,10 +1015,10 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ]),
     // 2025-eurocup · Z07 (z-up)
     ...cast('2025-eurocup', flag('z:euro'), [{ who: 'קובי', x: 0.3, y: 0.86 }]),
-    // 2026-plan · F00 (f-money)
+    // 2026-plan · F00 (f-money) — אחרי התקציב קובי הולך הביתה, ומחכה לתוכנית שם (90-E)
     ...cast('2026-plan', undefined, [
       { who: 'עמית', x: 0.61, y: 0.88, flip: true },
-      { who: 'קובי', x: 0.3, y: 0.86 },
+      { who: 'קובי', x: 0.3, y: 0.86, when: { notFlag: 'f:money' } },
     ]),
   ],
 
@@ -1030,6 +1058,12 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'עמית', x: 0.55, y: 0.73, flip: true },
       { who: 'קובי', x: 0.72, y: 0.68, flip: true },
     ]),
+    // 2023-tournament · (90-E) מי שענה להודעה — מתוקי בא, אפי מהגדר; והבן, אם נקרא
+    ...cast('2023-tournament', flag('z:sub'), [
+      { who: 'מתוקי', x: 0.62, y: 0.66, flip: true },
+      { who: 'אפי', x: 0.88, y: 0.64, flip: true },
+    ]),
+    ...cast('2023-tournament', { flagIs: { flag: 'z:sub', value: 'child' } }, [{ who: 'הילד', x: 0.36, y: 0.72 }]),
   ],
 
   street: [
@@ -1101,6 +1135,11 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ]),
     // 2025-interview · J03 (j-asked)
     ...cast('2025-interview', undefined, [{ who: 'מראיינת', x: 0.7, y: 0.77, flip: true }]),
+  ],
+
+  schoolyard: [
+    // 2021-promises · L09 (pr-saturday) — ליגת ילדים, בחצר של 1991; הוא ליד הגדר (90-E)
+    ...cast('2021-promises', { all: [{ flag: 'life:child' }, { any: [{ flagIs: { flag: 'pr:ask', value: 'go' } }, { flagIs: { flag: 'pr:ask', value: 'split' } }] }] }, [{ who: 'הילד', x: 0.6, y: 0.84, flip: true }]),
   ],
 
   'bloomfield-outside': [

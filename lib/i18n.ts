@@ -23,6 +23,17 @@ import heStageGoal88 from '@/messages/he.stage.goal88.json'
 import heStageBlindcow from '@/messages/he.stage.blindcow.json'
 import heStageAway from '@/messages/he.stage.away.json'
 import heStageWings88 from '@/messages/he.stage.wings88.json'
+import heStageConnect from '@/messages/he.stage.connect.json'
+import heStageLife89 from '@/messages/he.stage.life89.json'
+import heStageAway89 from '@/messages/he.stage.away89.json'
+import heStageLife90a from '@/messages/he.stage.life90a.json'
+import heStageLife90b from '@/messages/he.stage.life90b.json'
+import heStageLife90c from '@/messages/he.stage.life90c.json'
+import heStageLife90d from '@/messages/he.stage.life90d.json'
+import heStageLife90e from '@/messages/he.stage.life90e.json'
+import heStageLife90f from '@/messages/he.stage.life90f.json'
+import heStageLife90g from '@/messages/he.stage.life90g.json'
+import heStageLife90h from '@/messages/he.stage.life90h.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -81,6 +92,17 @@ export const CATALOGUE_FILES = {
   heStageBlindcow,
   heStageAway,
   heStageWings88,
+  heStageConnect,
+  heStageLife89,
+  heStageAway89,
+  heStageLife90a,
+  heStageLife90b,
+  heStageLife90c,
+  heStageLife90d,
+  heStageLife90e,
+  heStageLife90f,
+  heStageLife90g,
+  heStageLife90h,
 } as const
 
 const catalogue = {
@@ -107,6 +129,17 @@ const catalogue = {
   ...heStageBlindcow,
   ...heStageAway,
   ...heStageWings88,
+  ...heStageConnect,
+  ...heStageLife89,
+  ...heStageAway89,
+  ...heStageLife90a,
+  ...heStageLife90b,
+  ...heStageLife90c,
+  ...heStageLife90d,
+  ...heStageLife90e,
+  ...heStageLife90f,
+  ...heStageLife90g,
+  ...heStageLife90h,
 }
 
 export type MessageKey = keyof typeof catalogue

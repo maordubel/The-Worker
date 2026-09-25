@@ -3,7 +3,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation } from './script'
 
 /**
  * B5 · "המספר שבע על הקיר" · 1994–1995 — the childhood hero becomes the decade's most
@@ -20,6 +20,12 @@ import type { Conversation } from './script'
 export const S1 = 'life:sinai:d1'
 export const S2 = 'life:sinai:d2'
 export const S3 = 'life:sinai:d3'
+
+/** the three voices of the 1995 kiosk, and the pin (Director V3 §12) */
+export const S2_PAPER = 's2:v:paper'
+export const S2_FREDDY = 's2:v:freddy'
+export const S2_FAN = 's2:v:fan'
+export const S2_POSTER = 's2:poster'
 
 export const PORTRAIT_SINAI: Record<string, string> = {
   'פוגי': 'faceHero80',
@@ -42,11 +48,11 @@ export const PORTRAIT_SINAI: Record<string, string> = {
 export function objectiveSinai(state: LifeState): string | null {
   if (state.chapterDone) return null
   if (state.flags[S3]) return null
-  if (state.flags['s2:done']) return 'החדר. הקיר.'
-  if (state.flags[S2]) return 'הקיוסק. העובדות על הדלפק.'
+  if (state.flags['s2:done']) return 'החדר. הקיר. הנעץ.'
+  if (state.flags[S2]) return 'הקיוסק. העיתון של עמית, פרדי, והבחור בדלת.'
   if (state.flags['s1:argued']) return 'הביתה. הפוסטר על הקיר.'
   if (state.flags['s1:heard']) return 'הקיוסק. כולם מדברים.'
-  return 'ערב גמר. הרדיו אצל רפי.'
+  return 'ערב גמר. הרדיו על הדלפק של רפי.'
 }
 
 export const ENDINGS_SINAI: Record<string, EndingCard> = {
@@ -87,20 +93,38 @@ export const BEATS_SINAI: Beat[] = [
     id: 's1-open',
     at: 'kiosk',
     trigger: 'enter',
-    when: { none: [{ flag: S2 }, { flag: 's1:heard' }] },
+    // `S1` in its own guard: without the box at the end of it, this beat's `when` still held
+    // after it ran, and the kiosk said its opening again every time he walked back in
+    when: { none: [{ flag: S1 }, { flag: S2 }, { flag: 's1:heard' }] },
     delayMs: 700,
     do: [
       { a: 'flag', flag: S1 },
       { a: 'lines', lines: [{ who: null, text: 'ערב של יוני. גמר גביע נגד השכנים, באצטדיון הגדול בצד השני של העיר. כרטיס עולה כסף, כסף אין, ולרפי יש רדיו על הדלפק.' }, { who: null, text: 'שש־עשרה. מעל המיטה שלך תלוי מגיל שמונה פוסטר של מספר שבע. הוא כבר לא משחק. עכשיו הוא זה שמחליף.' }] },
       { a: 'sound', kind: 'radio', on: true },
-      { a: 'talk', conversation: 's1-radio' },
-      { a: 'sound', kind: 'radio', on: false },
+      /**
+       * (Director V3 §12, 25.9.2026) the radio is not opened AT him any more: it is on the
+       * counter between the fridge and the till (`radio-sinai`), and the evening is heard
+       * by leaning in to it. The box it opens is the chapter's own `s1-radio`, word for word.
+       */
+      { a: 'toast', text: 'הרדיו של רפי על הדלפק. אופיר כבר על הארגז.', tone: 'plain' },
     ],
   },
+  /** the final is over and so is the radio */
+  {
+    id: 's1-radio-off',
+    trigger: 'clock',
+    when: { flag: 's1:heard', none: [{ flag: S2 }, { flag: 's1:radio-off' }] },
+    do: [{ a: 'flag', flag: 's1:radio-off' }, { a: 'sound', kind: 'radio', on: false }],
+  },
+  /**
+   * The walk home is his (V3 §12): after the argument the poster is reached by going to the
+   * room it hangs in. This used to cut him there on the next tick; now it only does so at
+   * the end of the night, for a boy who stayed at the kiosk until Rafi turned the sign off.
+   */
   {
     id: 's1-to-home',
     trigger: 'clock',
-    when: { flag: 's1:argued', none: [{ flag: S2 }] },
+    when: { flag: 's1:argued', afterMinute: at(22, 30), none: [{ flag: S2 }] },
     do: [{ a: 'card', titleHe: 'בלילה', subHe: 'החדר', ms: 2000 }, { a: 'travel', to: 'bedroom', spawn: 'start' }],
   },
   {
@@ -120,12 +144,50 @@ export const BEATS_SINAI: Beat[] = [
     id: 's2-open',
     at: 'kiosk',
     trigger: 'enter',
-    when: { flag: S2, none: [{ flag: 's2:done' }] },
+    when: { flag: S2, none: [{ flag: 's2:done' }, { flag: 's2:seen' }] },
     delayMs: 700,
     do: [
+      { a: 'flag', flag: 's2:seen' },
       { a: 'lines', lines: [{ who: null, text: 'שנה אחרי. שבע־עשרה. עונה שלמה של "עוד לא" ו"בשבוע הבא", ואז שני משחקים באירופה, שבועיים ביניהם, וחזרה הביתה.' }, { who: null, text: 'הקיוסק נהיה בית משפט. רפי מוכר גרעינים, ובין קפה לקפה פוסק.' }] },
-      { a: 'talk', conversation: 's2-court' },
+      /**
+       * (Director V3 §12, 25.9.2026) "לאסוף קולות סותרים בעולם". The court does not sit
+       * AT him: its three voices stand in the kiosk — Amit's newspaper folded on the counter
+       * (`paper-sinai`), Freddy by the fridge, the young man in the door — and he goes to
+       * them. When two of the three have said their piece the court sits (`s2-court-now`).
+       */
+      { a: 'toast', text: 'שלושה קולות בקיוסק: העיתון של עמית, פרדי, והבחור בדלת.', tone: 'plain' },
     ],
+  },
+  {
+    id: 's2-court-now',
+    at: 'kiosk',
+    trigger: 'clock',
+    when: {
+      flag: S2,
+      any: [
+        { all: [{ flag: S2_PAPER }, { flag: S2_FREDDY }] },
+        { all: [{ flag: S2_PAPER }, { flag: S2_FAN }] },
+        { all: [{ flag: S2_FREDDY }, { flag: S2_FAN }] },
+      ],
+      none: [{ flag: 's2:done' }],
+    },
+    delayMs: 900,
+    do: [{ a: 'talk', conversation: 's2-court' }],
+  },
+  /** and a boy who hears one voice and stands there anyway — the court sits at nine */
+  {
+    id: 's2-court-late',
+    at: 'kiosk',
+    trigger: 'clock',
+    when: { flag: S2, afterMinute: at(21, 0), none: [{ flag: 's2:done' }] },
+    do: [{ a: 'talk', conversation: 's2-court' }],
+  },
+  /** the night with the pin: at the end of it, the room — for a boy who never walked home */
+  {
+    id: 's2-home-late',
+    trigger: 'clock',
+    when: { flag: 's2:done', afterMinute: at(23, 30), none: [{ flag: S2_POSTER }] },
+    do: [{ a: 'card', titleHe: 'בלילה', subHe: 'החדר', ms: 2000 }, { a: 'travel', to: 'bedroom', spawn: 'start' }],
   },
   {
     /**
@@ -147,8 +209,9 @@ export const BEATS_SINAI: Beat[] = [
      */
     id: 's3-open',
     at: 'bedroom',
-    trigger: 'enter',
-    when: { flag: S2, all: [{ flag: 's2:done' }], none: [{ flag: S3 }] },
+    // (V3 §12) after the pin, in the same room — the wall is decided with the hand first
+    trigger: 'clock',
+    when: { flag: S2, all: [{ flag: 's2:done' }, { flag: S2_POSTER }], none: [{ flag: S3 }] },
     delayMs: 800,
     do: [
       { a: 'events', events: DAY(S3, 1996, 6, at(22, 10), 'אביב 1996') },
@@ -156,6 +219,13 @@ export const BEATS_SINAI: Beat[] = [
     ],
   },
 
+]
+
+/** the three answers to the court — the same words whichever way the court came to sit */
+const S2_COURT: ChoiceDef[] = [
+  { id: 'cut', text: 'לקטוע את פרדי: "מה השורה התחתונה?"', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 3 }, { e: 'rel', who: 'freddy', axis: 'familiarity', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
+  { id: 'listen', text: 'לתת לו לסיים.', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 6 }, { e: 'personality', key: 'curiosity', delta: 2 }, { e: 'time', minutes: 20 }, { e: 'goto', node: 's2-verdict' }] },
+  { id: 'defend', text: '"תנו לו עוד עונה. מגיע לו."', then: [{ e: 'sinai', stance: 'defending' }, { e: 'rel', who: 'ofir', axis: 'tension', delta: 5 }, { e: 'rel', who: 'amit', axis: 'tension', delta: 3 }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'redheart', key: 'loyaltyReturn', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
 ]
 
 export const CONVERSATIONS_SINAI: Conversation[] = [
@@ -170,7 +240,52 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
     { lines: [{ who: 'אופיר', text: 'גרעינים? קח, קח. הערב יהיה ארוך.' }] },
   ] },
   { id: 'amit-sinai', nameHe: 'עמית', branches: [{ lines: [{ who: 'עמית', text: 'אני לא אומר כלום. העיתון אומר. תקרא לבד, זה יותר משכנע.' }] }] },
-  { id: 'freddy-sinai', nameHe: 'פרדי', branches: [{ lines: [{ who: 'פרדי', text: '"מי אשם" זו שאלה של קיוסק. "מי מחליט" זו שאלה של עורך דין. תזכור את ההבדל, הוא יעבוד בשבילך עוד עשרים שנה.' }], then: [{ e: 'institution', key: 'legalUnderstanding', delta: 2 }] }] },
+  {
+    id: 'freddy-sinai',
+    nameHe: 'פרדי',
+    branches: [
+      // 1995, before the court sits: his voice is the one that asks a different question
+      {
+        when: { flag: S2, none: [{ flag: 's2:done' }, { flag: S2_FREDDY }] },
+        lines: [
+          { who: 'פרדי', text: 'עובדות זה יפה. תשאלו שאלה אחרת: מי נתן לו את התפקיד, ומי משאיר אותו בו. המאמן הוא לא הבעיה. המאמן הוא הכיסוי.' },
+          { who: null, text: 'פרדי. עורך דין. חליפה מקומטת, תיק על הרצפה, ומשפטים שיש להם סעיפי משנה.' },
+        ],
+        then: [{ e: 'flag', flag: S2_FREDDY }, { e: 'institution', key: 'legalUnderstanding', delta: 2 }],
+      },
+      { lines: [{ who: 'פרדי', text: '"מי אשם" זו שאלה של קיוסק. "מי מחליט" זו שאלה של עורך דין. תזכור את ההבדל, הוא יעבוד בשבילך עוד עשרים שנה.' }], then: [{ e: 'institution', key: 'legalUnderstanding', delta: 2 }] },
+    ],
+  },
+  {
+    /** the newspaper Amit folded on the counter — picked up and read, not explained */
+    id: 's2-paper',
+    nameHe: null,
+    branches: [
+      { when: { flag: S2_PAPER }, lines: [{ who: null, text: 'הטבלה לא השתנתה מאז שקראת אותה.' }] },
+      {
+        lines: [
+          { who: 'עמית', text: 'אני לא מתווכח איתך. אני שם עובדות על הדלפק. עונה שלמה. תסתכל בעצמך.' },
+          { who: null, text: 'עמית פותח עיתון על הדלפק, בעמוד שכבר היה מקופל שם. הטבלה לא צריכה הסבר.' },
+        ],
+        then: [{ e: 'flag', flag: S2_PAPER }, { e: 'redheart', key: 'historyMemory', delta: 1 }],
+      },
+    ],
+  },
+  {
+    /** the young man in the door, the same one as a year ago */
+    id: 's2-fan',
+    nameHe: 'אוהד צעיר',
+    branches: [
+      { when: { flag: S2_FAN }, lines: [{ who: 'אוהד צעיר', text: 'כיסוי־שמיסוי. שיילך.' }] },
+      {
+        lines: [
+          { who: null, text: 'אותו בחור מהדלת, שנה אחרי. אותה שקית גרעינים.' },
+          { who: 'אוהד צעיר', text: 'כיסוי־שמיסוי. שיילך.' },
+        ],
+        then: [{ e: 'flag', flag: S2_FAN }, { e: 'rel', who: 'ofir', axis: 'familiarity', delta: 1 }],
+      },
+    ],
+  },
   { id: 'poster-look', nameHe: null, branches: [
     { when: { flag: 'life:poster:gone' }, lines: [{ who: null, text: 'ריבוע בהיר על הקיר.' }] },
     { when: { flag: 'life:poster:drawer' }, lines: [{ who: null, text: 'הקיר. הפוסטר במגירה. אתה יודע בדיוק איפה.' }] },
@@ -262,6 +377,12 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
     id: 's2-court',
     nameHe: null,
     branches: [
+      /** all three voices already heard in the room: the court only has to sit */
+      {
+        when: { all: [{ flag: S2_PAPER }, { flag: S2_FREDDY }, { flag: S2_FAN }] },
+        lines: [{ who: null, text: 'העיתון של עמית, פרדי ליד המקרר, הבחור בדלת. שלושתם הסתכלו עליך באותו רגע, כאילו אתה השופט.' }],
+        choices: S2_COURT,
+      },
       {
         lines: [
           { who: 'עמית', text: 'אני לא מתווכח איתך. אני שם עובדות על הדלפק. עונה שלמה. תסתכל בעצמך.' },
@@ -270,11 +391,7 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
           { who: null, text: 'פרדי. עורך דין. חליפה מקומטת, תיק על הרצפה, ומשפטים שיש להם סעיפי משנה.' },
           { who: 'אוהד צעיר', text: 'כיסוי־שמיסוי. שיילך.' },
         ],
-        choices: [
-          { id: 'cut', text: 'לקטוע את פרדי: "מה השורה התחתונה?"', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 3 }, { e: 'rel', who: 'freddy', axis: 'familiarity', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
-          { id: 'listen', text: 'לתת לו לסיים.', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 6 }, { e: 'personality', key: 'curiosity', delta: 2 }, { e: 'time', minutes: 20 }, { e: 'goto', node: 's2-verdict' }] },
-          { id: 'defend', text: '"תנו לו עוד עונה. מגיע לו."', then: [{ e: 'sinai', stance: 'defending' }, { e: 'rel', who: 'ofir', axis: 'tension', delta: 5 }, { e: 'rel', who: 'amit', axis: 'tension', delta: 3 }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'redheart', key: 'loyaltyReturn', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
-        ],
+        choices: S2_COURT,
       },
     ],
   },
@@ -288,14 +405,14 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
           { who: null, text: 'השורה התחתונה של פרדי הייתה שלוש מילים: "זה לא עליו." אחר כך הקיוסק התפזר. אופיר יצא בלי להגיד לילה טוב, ועמית אחריו.' },
           { who: null, text: 'רפי ניגב את הדלפק. "אתה יודע שאתה לבד בזה." אמרת שכן. הוא הנהן. "גם אבא שלך היה."' },
         ],
-        then: [{ e: 'flag', flag: 's2:done' }, { e: 'goto', node: 's2-poster' }],
+        then: [{ e: 'flag', flag: 's2:done' }, { e: 'toast', text: 'בלילה, בחדר, יחכה לך הפוסטר.', tone: 'plain' }],
       },
       {
         lines: [
           { who: null, text: 'השורה התחתונה של פרדי הייתה שלוש מילים: "זה לא עליו." ואתה שמעת את עצמך אומר, בפעם הראשונה, בקול שקט מאוד: אולי.' },
           { who: null, text: 'זה לא הרגיש כמו בגידה. זה הרגיש כמו לגדול, ולא אהבת את זה.' },
         ],
-        then: [{ e: 'sinai', stance: 'doubting' }, { e: 'flag', flag: 's2:done' }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'goto', node: 's2-poster' }],
+        then: [{ e: 'sinai', stance: 'doubting' }, { e: 'flag', flag: 's2:done' }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'toast', text: 'בלילה, בחדר, יחכה לך הפוסטר.', tone: 'plain' }],
       },
     ],
   },
@@ -311,9 +428,9 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
            * what is on the wall; the third day (S3) decides what he believes, which is the
            * rupture Stage B §7 B5 asks for and which was living in the army chapter.
            */
-          { id: 'keep', text: 'משאיר. על הקיר.', then: [{ e: 'flag', flag: 'life:poster:wall' }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'flag', flag: 's2:done' }] },
-          { id: 'fold', text: 'מקפל. למגירה.', then: [{ e: 'flag', flag: 'life:poster:drawer' }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'flag', flag: 's2:done' }] },
-          { id: 'tear', text: 'מוריד.', then: [{ e: 'flag', flag: 'life:poster:gone' }, { e: 'personality', key: 'impulsiveness', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 5 }, { e: 'flag', flag: 's2:done' }] },
+          { id: 'keep', text: 'משאיר. על הקיר.', then: [{ e: 'flag', flag: 'life:poster:wall' }, { e: 'redheart', key: 'loyaltyReturn', delta: 3 }, { e: 'flag', flag: 's2:done' }, { e: 'flag', flag: S2_POSTER }] },
+          { id: 'fold', text: 'מקפל. למגירה.', then: [{ e: 'flag', flag: 'life:poster:drawer' }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'flag', flag: 's2:done' }, { e: 'flag', flag: S2_POSTER }] },
+          { id: 'tear', text: 'מוריד.', then: [{ e: 'flag', flag: 'life:poster:gone' }, { e: 'personality', key: 'impulsiveness', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 5 }, { e: 'flag', flag: 's2:done' }, { e: 'flag', flag: S2_POSTER }] },
         ],
       },
     ],

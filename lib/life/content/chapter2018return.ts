@@ -2,7 +2,8 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { Conversation, Say } from './script'
+import type { Condition } from '../world/types'
 import { PORTRAIT_COLLAPSE } from './chapter2016collapse'
 
 /**
@@ -49,6 +50,7 @@ export function objectiveReturn(state: LifeState, sceneId: string): string | nul
   if (state.chapterDone) return null
   if (!state.flags['r:back']) return sceneId === 'kiosk' ? null : 'בקיוסק. אופיר כבר אמר "חזרנו".'
   if (!state.flags['r:reopen']) return 'עונה עוברת.'
+  if (!state.flags['r:signs'] && state.flags['r:find'] === 'reading') return 'השלט החדש, ליד הכניסה. לקרוא לפני שאבא פונה.'
   if (!state.flags['r:signs']) return sceneId === 'bloomfield-outside' ? null : 'בלומפילד. אותו שם, מקום אחר.'
   return null
 }
@@ -110,7 +112,7 @@ export const BEATS_RETURN: Beat[] = [
       { a: 'travel', to: 'bloomfield-outside', spawn: 'fromRoute' },
     ],
   },
-  { id: 'r-signs', at: 'bloomfield-outside', trigger: 'enter', when: { all: [{ flag: 'r:reopen' }], none: [{ flag: 'r:signs' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'r-signs' }] },
+  { id: 'r-signs', at: 'bloomfield-outside', trigger: 'enter', when: { all: [{ flag: 'r:reopen' }], none: [{ flag: 'r:signs' }, { flag: 'r:find' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'r-signs' }] },
 ]
 
 // ------------------------------------------------------------------ Part II ------
@@ -155,8 +157,21 @@ export const ENDINGS_LOSSES: Record<string, EndingCard> = {
 
 export const BEATS_LOSSES: Beat[] = [
   { id: 'r-indoors', at: 'home', trigger: 'enter', when: { none: [{ flag: 'r:indoors' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'r-indoors' }] },
+  /** אחרי המיון — מה שנאסף לקופסה הוא מה שנאמר עליו (`archive-21`, `r:sorted`) */
+  { id: 'r-sorted', at: 'home', trigger: 'enter', when: { all: [{ flag: 'r:sortdone' }], none: [{ flag: 'r:sortsaid' }] }, delayMs: 600, do: [{ a: 'talk', conversation: 'r-sorted' }] },
   { id: 'r-cup', at: 'kiosk', trigger: 'enter', when: { all: [{ flag: 'r:indoors' }], none: [{ flag: 'r:cup' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'r-cup' }] },
   { id: 'r-young', trigger: 'clock', when: { all: [{ flag: 'r:cup' }], none: [{ flag: 'r:young' }] }, delayMs: 1500, do: [{ a: 'talk', conversation: 'r-young' }] },
+]
+
+/** מה אופיר זוכר מדצמבר 2016 — הראשון שמתאים מנצח (`chapter2016collapse.ts`, `CRISIS_*`) */
+const R_BACK_CALLBACKS: ReadonlyArray<readonly [Condition | null, Say[]]> = [
+  [{ flagIs: { flag: 'life:crisis:handed', value: 3 } }, [{ who: 'אופיר', text: 'ושלמה שאל עליך. זה עם החבילה, מלפני שנתיים. הוא אמר שבאת עד אלנבי.' }]],
+  [{ flagIs: { flag: 'life:crisis:repeat', value: 'rumour' } }, [
+    { who: 'אופיר', text: 'ואתה זוכר את ההודעה ההיא? ״אין קבוצה.״ העברת אותה גם אתה.' },
+    { who: 'פוגי', text: 'העברתי.' },
+  ]],
+  [{ any: [{ flagIs: { flag: 'life:crisis:repeat', value: 'verified' } }, { flagIs: { flag: 'life:crisis:repeat', value: 'published' } }] }, [{ who: 'אופיר', text: 'ואתה היחיד שלא כתב אז ״אין קבוצה״. שמתי לב, גם אם לא אמרתי.' }]],
+  [null, []],
 ]
 
 // ---------------------------------------------------------------- the words ------
@@ -165,14 +180,20 @@ export const CONVERSATIONS_RETURN: Conversation[] = [
   {
     id: 'r-back',
     nameHe: 'אופיר',
-    branches: [
-      {
+    /**
+     * **2016 זוכר** (90-E, Stage D — *"vignette + callback, make earlier decisions matter"*).
+     * אותה שיחה ואותן בחירות; שורה אחת של אופיר, אחרי "חזרנו.", על מה שהיומן של 2016 מוכיח:
+     * מי שמסר את שלוש החבילות ביד, ומה פוגי העביר הלאה בערב שבו אמרו "אין קבוצה".
+     */
+    branches: R_BACK_CALLBACKS.map(([when, callback]): Conversation['branches'][number] => ({
+      ...(when ? { when } : {}),
         lines: [
           { who: 'אופיר', text: 'חזרנו.' },
           { who: 'פוגי', text: 'הקבוצה חזרה.' },
           { who: 'אופיר', text: 'אתה מתקן אותי כמו עמית.' },
           { who: 'פוגי', text: 'מישהו צריך כשהוא לא פה.' },
           { who: 'אופיר', text: 'הוא פה. הוא פשוט נהנה מזה.' },
+          ...callback,
         ],
         choices: [
           {
@@ -209,6 +230,55 @@ export const CONVERSATIONS_RETURN: Conversation[] = [
             ],
           },
         ],
+      })),
+  },
+  {
+    /**
+     * (90-E) השלט החדש — **הדרך נקראת, לא נזכרת.** קובי רוצה לפנות לאן שפנו פעם; השלט אומר
+     * אחרת. ראיית הניווט נכתבת רק למי שהלך לפי מה שקרא, ונתן לאבא את החלק שהוא עוד יודע.
+     */
+    id: 'r-find',
+    nameHe: 'קובי',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'שלט כחול, חדש: ״יציע מזרחי — שערים 11–14״, וחץ ימינה. ומתחת, בקטן: ״הכניסה מהצד הצפוני סגורה במשחקים.״' },
+          { who: 'קובי', text: 'ימינה? פעם היה שמאלה. ליד הדוכן של הגרעינים.' },
+          { who: 'פוגי', text: 'פעם לא היה שער 11.' },
+        ],
+        choices: [
+          {
+            id: 'sign',
+            text: '(לפי השלט עד השער — ומשם לתת לו להוביל, לאן שהוא זוכר.)',
+            then: [
+              { e: 'flag', flag: 'r:signs' },
+              { e: 'flagValue', flag: 'r:find', value: 'sign' },
+              { e: 'time', minutes: 20 },
+              { e: 'energy', delta: -3 },
+              { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
+              { e: 'proof', kind: 'navigation', proofId: 'navigation:{chapter}:bloomfield', subjectHe: 'הדרך במקום החדש', noteHe: 'נקראה מהשילוט, ולא מזיכרון של מפה אחרת.' },
+              { e: 'presence', mode: 'inside' },
+              { e: 'attend' },
+              { e: 'toast', text: 'בשער הוא לקח את ההובלה, ישר לשורה שלכם, כאילו לא עברו שלוש שנים. קובי: "עכשיו אתה רואה?" — "כן. גם שאתה מאלתר." — "משפחתי."', tone: 'plain' },
+              { e: 'ending', id: 'found' },
+            ],
+          },
+          {
+            id: 'habit',
+            text: '(ללכת אחריו, שמאלה, כמו פעם.)',
+            then: [
+              { e: 'flag', flag: 'r:signs' },
+              { e: 'flagValue', flag: 'r:find', value: 'habit' },
+              { e: 'time', minutes: 35 },
+              { e: 'energy', delta: -5 },
+              { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 },
+              { e: 'presence', mode: 'inside' },
+              { e: 'attend' },
+              { e: 'toast', text: 'שמאלה הייתה גדר. חזרתם את כל הדרך, והוא אמר: "רציתי לבדוק שאתה יודע." — "משפחתי."', tone: 'plain' },
+              { e: 'ending', id: 'found' },
+            ],
+          },
+        ],
       },
     ],
   },
@@ -226,18 +296,12 @@ export const CONVERSATIONS_RETURN: Conversation[] = [
         ],
         choices: [
           {
+            // (90-E) the way is found on the new sign itself (`r-find`), and the proof is written there
             id: 'together',
             text: '(למצוא דרך יחד — ולתת לו להוביל חלק.)',
             then: [
-              { e: 'flag', flag: 'r:signs' },
-              { e: 'time', minutes: 30 },
-              { e: 'energy', delta: -5 },
-              { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
-              { e: 'proof', kind: 'navigation', proofId: 'navigation:{chapter}:bloomfield', subjectHe: 'הדרך במקום החדש', noteHe: 'נקראה מהשילוט, ולא מזיכרון של מפה אחרת.' },
-              { e: 'presence', mode: 'inside' },
-              { e: 'attend' },
-              { e: 'toast', text: 'קובי: "עכשיו אתה רואה?" — "כן. גם שאתה מאלתר." — "משפחתי."', tone: 'plain' },
-              { e: 'ending', id: 'found' },
+              { e: 'flagValue', flag: 'r:find', value: 'reading' },
+              { e: 'toast', text: 'קובי: "אז תקרא אתה. אני אגיד לך אם זה נשמע נכון."', tone: 'plain' },
             ],
           },
           {
@@ -297,14 +361,12 @@ export const CONVERSATIONS_RETURN: Conversation[] = [
             ],
           },
           {
+            // (90-E) the sorting is done with the hands (`chore:story:archive-21`); `r-sorted` answers the count
             id: 'archive',
             text: '(למיין את האוסף — ולכתוב מאיפה כל דבר.)',
             then: [
               { e: 'flag', flag: 'r:indoors' },
-              { e: 'time', minutes: 45 },
-              { e: 'skill', skill: 'knowledge', delta: 3, why: 'מאיפה כל דבר, לא רק מה זה' },
-              { e: 'proof', kind: 'provenance_review', proofId: 'provenance_review:{chapter}:box', subjectHe: 'הקופסה האדומה', noteHe: 'כל פריט קיבל שורת מקור, כדי שלא ישוכתב שוב.' },
-              { e: 'toast', text: 'נועם: "תכתוב גם מאיפה כל דבר." — "כדי שלא נשכתב שוב?" — "בדיוק."', tone: 'plain' },
+              { e: 'minigame', id: 'chore:story:archive-21' },
             ],
           },
           {
@@ -320,6 +382,26 @@ export const CONVERSATIONS_RETURN: Conversation[] = [
             ],
           },
         ],
+      },
+    ],
+  },
+  {
+    id: 'r-sorted',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'r:sortall' },
+        lines: [{ who: null, text: 'שש שורות מקור, בכתב יד, על פתק בתוך המכסה. מה זה, מאיפה, ומי נתן.' }],
+        then: [
+          { e: 'flag', flag: 'r:sortsaid' },
+          { e: 'skill', skill: 'knowledge', delta: 3, why: 'מאיפה כל דבר, לא רק מה זה' },
+          { e: 'proof', kind: 'provenance_review', proofId: 'provenance_review:{chapter}:box', subjectHe: 'הקופסה האדומה', noteHe: 'כל פריט קיבל שורת מקור, כדי שלא ישוכתב שוב.' },
+          { e: 'toast', text: 'נועם: "תכתוב גם מאיפה כל דבר." — "כדי שלא נשכתב שוב?" — "בדיוק."', tone: 'plain' },
+        ],
+      },
+      {
+        lines: [{ who: null, text: 'חלק מהפריטים קיבלו שורת מקור. השאר מחכים בקופסה, בלי שם — עוד לא.' }],
+        then: [{ e: 'flag', flag: 'r:sortsaid' }],
       },
     ],
   },

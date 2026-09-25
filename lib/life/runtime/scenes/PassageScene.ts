@@ -469,15 +469,16 @@ export class PassageScene extends Phaser.Scene {
     }
     this.scale.on('resize', onResize, this)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off('resize', onResize, this))
-    // the road under the wheels: a slow vertical breath, never a shake (transform only)
-    this.tweens.add({ targets: picture, y: -this.H * 0.004, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    // the road under the wheels: a slow vertical breath, never a shake (transform only) —
+    // unless the passage is a room that stands still (`Ride.still`)
+    if (!ride.still) this.tweens.add({ targets: picture, y: -this.H * 0.004, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
 
     this.ctx.bus.emit('frame', { picture: 0 })
     this.ctx.bus.emit('place', { id: ride.land.mapId as LocationId, title: ride.titleHe, ambience: 'dusk' })
     this.ctx.bus.emit('controls', { visible: true })
     this.ctx.bus.emit('match', null)
     this.rideHud(null)
-    this.ctx.bus.emit('sound', { kind: 'radio', on: true })
+    if (ride.radio !== false) this.ctx.bus.emit('sound', { kind: 'radio', on: true })
     this.ctx.dialogue.setHooks({
       travel: () => undefined,
       minigame: () => undefined,
@@ -563,7 +564,7 @@ export class PassageScene extends Phaser.Scene {
     this.rideSince = 0
     if (this.rideTaps < taps) {
       if (this.rideMark) this.tweens.add({ targets: this.rideMark, angle: this.rideMark.angle + 40, duration: 180 })
-      this.ctx.bus.emit('sound', { kind: 'radio', on: true })
+      if (this.ride?.radio !== false) this.ctx.bus.emit('sound', { kind: 'radio', on: true })
       const text = stop.tapHe?.[this.rideTaps - 1]
       if (text) this.ctx.bus.emit('toast', { text, tone: 'plain' })
       return

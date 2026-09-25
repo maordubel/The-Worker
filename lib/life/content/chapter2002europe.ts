@@ -76,6 +76,15 @@ export const ENDINGS_EUROPE: Record<string, EndingCard> = {
     memoryItem: 'folded-paper',
     presence: 'inside',
   },
+  missing: {
+    id: 'missing',
+    titleHe: 'בטיסה של הבוקר',
+    bodyHe:
+      'נגמר, וגם הספירה לא נגמרה עד הסוף. חלק עלו איתך לאוטובוס, וחלק הגיעו בטיסה של הבוקר, בלי כסף ועם סיפור. אף אחד לא נשאר שם — אבל לא בזכות הרשימה שלך, וידעת את זה.',
+    memoryHe: 'הרשימה עם הראשים, ושני שמות בלי וי.',
+    memoryItem: 'folded-paper',
+    presence: 'inside',
+  },
   alone: {
     id: 'alone',
     titleHe: 'עשר דקות',
@@ -158,10 +167,25 @@ export const BEATS_EUROPE: Beat[] = [
   {
     id: 'e-after',
     at: 'port-europe',
-    trigger: 'enter',
-    when: { all: [{ flag: 'e:flown' }], none: [{ flag: 'e:after' }] },
+    // (דלתא 90) שעון, לא דלת: מי שסגר את התיבה בטעות בטרמינל שומע אותה שוב כל עוד הוא
+    // עומד שם — הדלתות מכאן מובילות הביתה, ומשם אין דרך חזרה לסוף של הפרק
+    trigger: 'clock',
+    when: { all: [{ flag: 'e:flown' }], none: [{ flag: 'e:after' }, { flag: 'e:counted' }] },
     delayMs: 700,
     do: [{ a: 'talk', conversation: 'e-after' }],
+  },
+  /**
+   * (דלתא 90) הספירה עצמה — מי שבחר לספור ראשים עומד ליד הדלתות וסופר (`heads-02`),
+   * ורק מה שנספר באמת הוא מה שהסוף אומר. נקודת המפגש מניקוסיה (`e:meetpoint`) היא מה
+   * שנותן לו זמן: בלעדיה הם יוצאים מכל הדלתות (`heads-02-lost`).
+   */
+  {
+    id: 'e-heads',
+    at: 'port-europe',
+    trigger: 'clock',
+    when: { all: [{ flag: 'e:counted' }], none: [{ flag: 'e:after' }] },
+    delayMs: 600,
+    do: [{ a: 'talk', conversation: 'e-heads' }],
   },
 ]
 
@@ -370,7 +394,7 @@ export const CONVERSATIONS_EUROPE: Conversation[] = [
               { e: 'flagValue', flag: 'e:milanWhere', value: 'venue' },
               { e: 'time', minutes: 90 },
               { e: 'energy', delta: -8 },
-              { e: 'skill', skill: 'organization', delta: 2, why: 'לדעת לאן חוזרים' },
+              { e: 'flag', flag: 'e:meetpoint' },
               { e: 'presence', mode: 'inside' },
               { e: 'attend' },
               { e: 'toast', text: 'אופיר: "עכשיו אפשר לצרוח?" — "עכשיו תזכור לאן לחזור."', tone: 'plain' },
@@ -410,7 +434,7 @@ export const CONVERSATIONS_EUROPE: Conversation[] = [
               { e: 'flagValue', flag: 'e:milanWhere', value: 'home' },
               { e: 'time', minutes: 90 },
               { e: 'energy', delta: -5 },
-              { e: 'skill', skill: 'organization', delta: 2, why: 'לדעת לאן חוזרים' },
+              { e: 'flag', flag: 'e:meetpoint' },
               { e: 'presence', mode: 'television' },
               { e: 'toast', text: 'אופיר: "עכשיו אפשר לצרוח?" — "עכשיו תזכור לאן לחזור."', tone: 'plain' },
             ],
@@ -434,6 +458,32 @@ export const CONVERSATIONS_EUROPE: Conversation[] = [
     ],
   },
   {
+    /** אחרי הספירה — מה שנספר באמת. "ספרת גם את עצמך?" נשאל רק למי שספר עד הסוף */
+    id: 'e-heads',
+    nameHe: 'רומא',
+    branches: [
+      {
+        when: { flag: 'e:heads-all' },
+        lines: [
+          { who: null, text: 'שישה ראשים, ואתה השביעי. הדלתות של האוטובוס נסגרו על כולם.' },
+          { who: 'רומא', text: 'ספרת גם את עצמך?' },
+        ],
+        then: [
+          { e: 'flag', flag: 'e:after' },
+          { e: 'proof', kind: 'travel_proof', proofId: 'travel_proof:{chapter}:together', subjectHe: 'כולם חזרו יחד', audience: 'gate7', delta: 4 },
+          { e: 'ending', id: 'together' },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'חסרים. מישהו ראה אותם ליד הדיוטי, מישהו אחר אומר שהם כבר באוטובוס השני.' },
+          { who: 'רומא', text: 'הם יגיעו. תמיד מגיעים — בטיסה של הבוקר, בלי כסף ועם סיפור.' },
+        ],
+        then: [{ e: 'flag', flag: 'e:after' }, { e: 'ending', id: 'missing' }],
+      },
+    ],
+  },
+  {
     id: 'e-after',
     nameHe: 'רומא',
     branches: [
@@ -445,17 +495,24 @@ export const CONVERSATIONS_EUROPE: Conversation[] = [
           { who: 'עמית', text: 'פה. אתם פשוט מסתכלים רק על הרצפה.' },
         ],
         choices: [
+          /**
+           * (דלתא 90) לספור ראשים הוא עבודה בידיים ליד הדלתות, לא משפט — שני העותקים הם
+           * אותה בחירה עם מחיר אחר: מי שקבע נקודת מפגש בניקוסיה מקבל ארבעים שניות, ומי
+           * שלא — עשרים ושש. התוצאה (והראיה) נאמרת אחרי הספירה, ב-`e-heads`.
+           */
           {
             id: 'count',
             text: '(לספור ראשים עד שכולם פה.)',
-            then: [
-              { e: 'flag', flag: 'e:after' },
-              { e: 'time', minutes: 20 },
-              { e: 'energy', delta: -5 },
-              { e: 'rel', who: 'roma', axis: 'trust', delta: 3 },
-              { e: 'proof', kind: 'travel_proof', proofId: 'travel_proof:{chapter}:together', subjectHe: 'כולם חזרו יחד', audience: 'gate7', delta: 4 },
-              { e: 'ending', id: 'together' },
-            ],
+            when: { flag: 'e:meetpoint' },
+            hidden: true,
+            then: [{ e: 'minigame', id: 'chore:story:heads-02' }],
+          },
+          {
+            id: 'count-lost',
+            text: '(לספור ראשים עד שכולם פה.)',
+            when: { notFlag: 'e:meetpoint' },
+            hidden: true,
+            then: [{ e: 'minigame', id: 'chore:story:heads-02-lost' }],
           },
           {
             id: 'alone',

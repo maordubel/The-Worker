@@ -151,7 +151,9 @@ export const BEATS_GALIL: Beat[] = [
     id: 'g1-open',
     at: 'ussishkin-outside',
     trigger: 'enter',
-    when: { none: [{ flag: D2 }, { flag: D3 }, { flag: D4 }, { flag: D5 }] },
+    // `D1` too: the corner is walked back into before the hall, and the opening was said
+    // again every time (an `enter` beat whose `when` still holds is armed again)
+    when: { none: [{ flag: D1 }, { flag: D2 }, { flag: D3 }, { flag: D4 }, { flag: D5 }] },
     delayMs: 700,
     do: [
       { a: 'flag', flag: D1 },
@@ -196,15 +198,37 @@ export const BEATS_GALIL: Beat[] = [
     id: 'g2-open',
     at: 'street',
     trigger: 'enter',
-    when: { flag: D2, none: [{ flag: 'g2:chose' }, { flag: D3 }] },
+    when: { flag: D2, none: [{ flag: 'g2:chose' }, { flag: D3 }, { flag: 'g2:seen' }] },
     delayMs: 700,
-    do: [{ a: 'talk', conversation: 'g2-choose' }],
+    /**
+     * (Director V3 §12, 25.9.2026) "travel logistics + scarce seats". The Wednesday is no
+     * longer a box with three answers: the coach stands in the street with Michel beside it
+     * and ONE seat (`g2-coach` → `g2-choose`), the transistor is on the kitchen table
+     * (`radio-g2`), and a boy who does neither is the one drifting until it starts
+     * (`g2-drift`). Where he goes is what he chose.
+     */
+    do: [
+      { a: 'flag', flag: 'g2:seen' },
+      { a: 'lines', lines: [{ who: null, text: 'יום רביעי. משחק שני, אצלם, בצפון. ברחוב עומדת הסעה קטנה ולידה מישל עם הפנקס.' }, { who: null, text: 'בתיק יש מחברת עם שיעורים למחר. בבית יש אבא עם טרנזיסטור.' }] },
+    ],
+  },
+  {
+    id: 'g2-drift',
+    trigger: 'clock',
+    when: { flag: D2, afterMinute: at(21, 0), none: [{ flag: 'g2:chose' }, { flag: D3 }] },
+    do: [
+      { a: 'events', events: [{ t: 'flag.raised', flag: 'g2:chose' }, { t: 'flag.raised', flag: 'g2:home' }, { t: 'flag.raised', flag: 'g2:drifted' }, { t: 'wellbeing.changed', key: 'loneliness', delta: 3 }] },
+      { a: 'toast', text: 'הסתובבת שעה וחצי ובסוף חזרת הביתה בדיוק כשהתחיל.', tone: 'plain' },
+      { a: 'travel', to: 'kitchen', spawn: 'start' },
+    ],
   },
   {
     /** whichever way it went, the evening resolves and the next day starts */
     id: 'g2-kitchen',
     at: 'kitchen',
-    trigger: 'enter',
+    // clock, not enter: the Wednesday starts in this kitchen, and the radio on the table is
+    // what decides (`radio-g2`) — the room plays it once he has sat down to it
+    trigger: 'clock',
     when: { all: [{ flag: D2 }, { flag: 'g2:home' }], none: [{ flag: D3 }] },
     delayMs: 700,
     do: [
@@ -273,7 +297,10 @@ export const BEATS_GALIL: Beat[] = [
   {
     id: 'g4-bus-gone',
     trigger: 'clock',
-    when: { flag: D4, afterMinute: at(16, 10), none: [{ flag: 'g4:decided' }] },
+    // `g4:bus-gone` in its own guard (25.9.2026): re-armed on every tick, this beat starved
+    // the eight o'clock backstop after it — a boy who missed the bus and chose nothing was
+    // never told the night was over, and never reached the corner the day after
+    when: { flag: D4, afterMinute: at(16, 10), none: [{ flag: 'g4:decided' }, { flag: 'g4:bus-gone' }] },
     do: [{ a: 'toast', text: 'ארבע ועשרה. האוטובוס המאורגן יצא מלא. מי שלא היה עליו כבר לא יהיה.', tone: 'red' }, { a: 'flag', flag: 'g4:bus-gone' }],
   },
   {
@@ -294,11 +321,19 @@ export const BEATS_GALIL: Beat[] = [
     id: 'after-open',
     at: 'ussishkin-outside',
     trigger: 'enter',
-    when: { flag: D5, none: [{ flag: 'after:done' }] },
+    when: { flag: D5, none: [{ flag: 'after:done' }, { flag: 'after:open' }] },
     delayMs: 800,
     do: [
       { a: 'talk', conversation: 'after-galil' },
     ],
+  },
+  /** and the corner does end: at nine, Efi comes over himself */
+  {
+    id: 'after-late',
+    at: 'ussishkin-outside',
+    trigger: 'clock',
+    when: { flag: D5, afterMinute: at(21, 0), none: [{ flag: 'after:done' }] },
+    do: [{ a: 'talk', conversation: 'after-efi' }],
   },
 ]
 
@@ -309,9 +344,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     branches: [
       {
         lines: [
-          { who: null, text: 'יום רביעי. משחק שני, אצלם, בצפון. ברחוב עומדת הסעה קטנה ולידה מישל עם הפנקס.' },
           { who: 'מישל', text: 'שלושים שקל, יוצאים בארבע, חוזרים אחרי חצות. יש מקום אחד.' },
-          { who: null, text: 'בתיק יש מחברת עם שיעורים למחר. בבית יש אבא עם טרנזיסטור.' },
         ],
         choices: [
           {
@@ -329,6 +362,19 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
               { e: 'time', minutes: 120 },
             ],
           },
+          { id: 'not', text: 'לא. המקום של מישהו אחר.', then: [] },
+        ],
+      },
+    ],
+  },
+  {
+    /** the transistor on the kitchen table, on the Wednesday — staying is sitting down to it */
+    id: 'g2-radio-on',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הטרנזיסטור על השולחן, האנטנה מכוונת צפונה. מהסלון, אבא: "עוד רבע שעה."' }],
+        choices: [
           {
             id: 'home',
             text: 'להישאר. שיעורים, ואבא ליד הרדיו.',
@@ -339,18 +385,7 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
               { e: 'personality', key: 'responsibility', delta: 3 },
             ],
           },
-          {
-            id: 'neither',
-            text: 'לא זה ולא זה. לצאת לרחוב.',
-            then: [
-              { e: 'flag', flag: 'g2:chose' },
-              { e: 'flag', flag: 'g2:home' },
-              { e: 'flag', flag: 'g2:drifted' },
-              { e: 'wellbeing', key: 'loneliness', delta: 3 },
-              { e: 'toast', text: 'הסתובבת שעה וחצי ובסוף חזרת הביתה בדיוק כשהתחיל.', tone: 'plain' },
-              { e: 'time', minutes: 90 },
-            ],
-          },
+          { id: 'later', text: 'עוד לא.', then: [] },
         ],
       },
     ],
@@ -394,20 +429,14 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
     id: 'efi-galil',
     nameHe: 'אפי',
     branches: [
-      { when: { flag: D5 }, lines: [{ who: 'אפי', text: '…' }, { who: null, text: 'הוא לא מדבר. עוד לא.' }] },
+      // (V3 §12) the day after, walking up to him IS the conversation the evening is about
+      { when: { flag: D5 }, lines: [{ who: 'אפי', text: '…' }, { who: null, text: 'הוא לא מדבר. עוד לא. ואז הוא מסתכל עליך.' }], then: [{ e: 'goto', node: 'after-efi' }] },
       { when: { flag: D4 }, lines: [{ who: 'אפי', text: 'אני על האוטובוס בארבע. תהיה עליו.' }] },
       { when: { flag: D3 }, lines: [{ who: 'אפי', text: 'הערב. הבית. אין ברירה, וזה טוב שאין.' }] },
       { lines: [{ who: 'אפי', text: 'הראשון לשלושה ניצחונות. ואנחנו בבית ראשונים. מה כבר יכול לקרות.' }] },
     ],
   },
-  {
-    id: 'shachor-galil',
-    nameHe: 'שחור',
-    branches: [
-      { when: { relationshipMemory: { who: 'shachor', eventId: 'stacked-chairs-1993' } }, lines: [{ who: 'שחור', text: 'יש עוד כיסאות. תמיד יש עוד כיסאות.' }] },
-      { lines: [{ who: 'שחור', text: 'לא מדברים. סוחבים.' }] },
-    ],
-  },
+  // (25.9.2026) `shachor-galil` became `after-shachor-galil`: the same two lines, and the chairs
   // --------------------------------------------------------------------- game 1 ---
   {
     id: 'g1-inside',
@@ -671,11 +700,39 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
           { who: null, text: 'מישל עם הפנקס, משחזר: מי נסע, מי איחר, כמה עלה. כאילו אם הלוגיסטיקה תסתדר, גם התוצאה.' },
           { who: null, text: 'אפי עומד בצד. לא מדבר.' },
         ],
+        /**
+         * (Director V3 §12, 25.9.2026) the morning after is three people standing on a
+         * corner, not three buttons: the chairs are carried with Shachor
+         * (`after-shachor-galil` → `chore:story:chairs-93`), the notebook is sat over with
+         * Michel (`michel-ledger`), and walking to Efi is what the evening comes down to
+         * (`efi-galil` → `after-efi`).
+         */
+        then: [{ e: 'flag', flag: 'after:open' }],
+      },
+    ],
+  },
+  {
+    id: 'after-shachor-galil',
+    nameHe: 'שחור',
+    branches: [
+      { when: { relationshipMemory: { who: 'shachor', eventId: 'stacked-chairs-1993' } }, lines: [{ who: 'שחור', text: 'יש עוד כיסאות. תמיד יש עוד כיסאות.' }] },
+      {
+        lines: [{ who: 'שחור', text: 'לא מדברים. סוחבים.' }],
         choices: [
-          { id: 'shachor', text: 'לעזור לשחור עם הכיסאות.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 5 }, { e: 'remember', who: 'shachor', eventId: 'stacked-chairs-1993', significance: 'notable' }, { e: 'institution', key: 'ussishkinWound', delta: 3 }, { e: 'goto', node: 'after-efi' }] },
-          { id: 'michel', text: 'לשבת עם מישל והפנקס.', then: [{ e: 'rel', who: 'michel', axis: 'bond', delta: 4 }, { e: 'personality', key: 'curiosity', delta: 1 }, { e: 'goto', node: 'after-efi' }] },
-          { id: 'efi', text: 'ללכת לאפי.', then: [{ e: 'goto', node: 'after-efi' }] },
+          { id: 'shachor', text: 'לעזור לשחור עם הכיסאות.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 5 }, { e: 'remember', who: 'shachor', eventId: 'stacked-chairs-1993', significance: 'notable' }, { e: 'institution', key: 'ussishkinWound', delta: 3 }, { e: 'minigame', id: 'chore:story:chairs-93' }] },
+          { id: 'no', text: 'לא עכשיו.', then: [] },
         ],
+      },
+    ],
+  },
+  {
+    id: 'after-michel',
+    nameHe: 'מישל',
+    branches: [
+      { when: { flag: 'after:michel' }, lines: [{ who: null, text: 'הפנקס סגור. מישל לא פותח אותו שוב.' }] },
+      {
+        lines: [{ who: null, text: 'מישל עם הפנקס, משחזר: מי נסע, מי איחר, כמה עלה. אתה יושב לידו על המדרגה, והוא מראה לך את השורה שלך בלי להגיד כלום.' }],
+        then: [{ e: 'flag', flag: 'after:michel' }, { e: 'rel', who: 'michel', axis: 'bond', delta: 4 }, { e: 'personality', key: 'curiosity', delta: 1 }],
       },
     ],
   },

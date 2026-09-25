@@ -38,9 +38,10 @@ export const PORTRAIT_HOME: Record<string, string> = {
  *
  * יוצא כ-200 ₪; התסריט כתב 220. ההפרש הוא הכיול של `WAGE` מול מה שמאור זכר, ושניהם
  * באותה מציאות — ולכן המספר **נגזר** ולא מוקלד: ביום שהכיול ישתנה, הוא יזוז איתו.
+ * (דלתא 90) משולם בסוף היום (`h-work-done`), לפי מה שיצא מהחלון (`orders-06`).
  */
 import { shiftAgorot } from '../income'
-const LIRON_AGOROT = shiftAgorot(2006, 8, true)
+const LIRON_DAY = shiftAgorot(2006, 8, true)
 
 export function objectiveHome(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
@@ -112,7 +113,7 @@ export const BEATS_HOME: Beat[] = [
   {
     id: 'h-door',
     at: 'ussishkin-outside',
-    trigger: 'enter',
+    trigger: 'clock',
     when: { all: [{ flag: 'h:derby' }], none: [{ flag: 'h:door' }] },
     delayMs: 700,
     do: [{ a: 'talk', conversation: 'h-door' }],
@@ -120,7 +121,7 @@ export const BEATS_HOME: Beat[] = [
   {
     id: 'h-work',
     at: 'workshop',
-    trigger: 'enter',
+    trigger: 'clock',
     when: { all: [{ flag: 'h:door' }], none: [{ flag: 'h:work' }] },
     delayMs: 600,
     do: [{ a: 'talk', conversation: 'h-liron' }],
@@ -128,10 +129,31 @@ export const BEATS_HOME: Beat[] = [
   {
     id: 'h-oli',
     at: 'bus-station',
-    trigger: 'enter',
+    trigger: 'clock',
     when: { all: [{ flag: 'h:work' }], none: [{ flag: 'h:oli' }] },
     delayMs: 600,
     do: [{ a: 'talk', conversation: 'h-oli' }],
+  },
+  /**
+   * (דלתא 90) התגובות לעבודה שנעשתה — בחדר שבו נעשתה, מיד כשחוזרים אליו. הן, ושלוש
+   * הסצנות שבחוץ, הן ביטי שעון **של חדר** (`at` + `clock`) ולא ביטי דלת: מי שסגר תיבה
+   * בטעות שומע אותה שוב כל עוד הוא עומד שם, בלי לצאת ולהיכנס (כלל 42).
+   */
+  {
+    id: 'h-helped',
+    at: 'ussishkin-hall',
+    trigger: 'clock',
+    when: { all: [{ flag: 'h:helped' }], none: [{ flag: 'h:helpedSaid' }] },
+    delayMs: 600,
+    do: [{ a: 'talk', conversation: 'h-helped' }],
+  },
+  {
+    id: 'h-work-done',
+    at: 'workshop',
+    trigger: 'clock',
+    when: { all: [{ flag: 'h:worked' }], none: [{ flag: 'h:workSaid' }] },
+    delayMs: 600,
+    do: [{ a: 'talk', conversation: 'h-work-done' }],
   },
   /** והסגירה על השעון, מאותה סיבה כמו בשני הפרקים הקודמים (כלל 67) */
   {
@@ -157,17 +179,13 @@ export const CONVERSATIONS_HOME: Conversation[] = [
         ],
         choices: [
           {
+            /** (דלתא 90) הפירוק נעשה בידיים — הארגזים של שחור, עד הדלת (`fold-04`); שחור עונה אחרי (`h-helped`) */
             id: 'help',
             text: '(להישאר אחרי, לעזור בפירוק.)',
             then: [
               { e: 'flag', flag: 'h:derby' },
-              { e: 'time', minutes: 30 },
-              { e: 'energy', delta: -10 },
-              { e: 'skill', skill: 'organization', delta: 3, why: 'אחרי שהאולם מתרוקן' },
-              { e: 'rel', who: 'efi', axis: 'trust', delta: 3 },
-              { e: 'proof', kind: 'community_help', proofId: 'community_help:{chapter}:hall', subjectHe: 'הצד הכבד של הארגז', audience: 'ussishkin', delta: 3 },
               { e: 'attend' },
-              { e: 'toast', text: 'שחור: "אותם ארגזים, אנשים אחרים." — "אני עדיין פה."', tone: 'plain' },
+              { e: 'minigame', id: 'chore:story:fold-04' },
             ],
           },
           {
@@ -273,30 +291,20 @@ export const CONVERSATIONS_HOME: Conversation[] = [
         ],
         choices: [
           {
+            /**
+             * (דלתא 90) יום עבודה אמיתי — מה שפוגי מתחיל להחזיק ביד בגיל עשרים ושמונה, ומה
+             * שיש לו עכשיו להפסיד (§7, 2006). ההזמנות בחלון, אחת־אחת (`orders-06`): השכר
+             * לפי מה שיצא, `enterprise` בתסריט → `business` במנוע, והראיה אחרי (`h-work-done`).
+             */
             id: 'sort',
             text: '"אני ממיין לפי דחיפות. לא לפי מי שאני אוהב."',
-            then: [
-              { e: 'flag', flag: 'h:work' },
-              { e: 'time', minutes: 60 },
-              { e: 'energy', delta: -10 },
-              { e: 'money', agorot: LIRON_AGOROT, why: 'יום אצל לירון' },
-              // `enterprise` בתסריט → `business` במנוע (`SKILL_OF`)
-              { e: 'skill', skill: 'business', delta: 3, why: 'שלוש הזמנות, סדר אחד' },
-              { e: 'proof', kind: 'adult_shift', proofId: 'adult_shift:{chapter}:liron', subjectHe: 'שלוש הזמנות שיצאו בזמן', audience: 'work', delta: 3 },
-              { e: 'toast', text: 'לירון: "אל תופתע. ככה אמור להיראות יום רגיל."', tone: 'plain' },
-            ],
+            then: [{ e: 'minigame', id: 'chore:story:orders-06' }],
           },
           {
+            /** החבילות מהדלת האחורית לשולחן (`boxes-06`) — בלי שכר, כמו שהיה */
             id: 'hands',
             text: '(לעזור לירון עם הידיים, בלי קשרים.)',
-            then: [
-              { e: 'flag', flag: 'h:work' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -10 },
-              { e: 'skill', skill: 'organization', delta: 3, why: 'זוג ידיים' },
-              { e: 'rel', who: 'yaron', axis: 'trust', delta: 3 },
-              { e: 'toast', text: 'ירון: "לא ביקשתי קשרים. ביקשתי זוג ידיים."', tone: 'plain' },
-            ],
+            then: [{ e: 'minigame', id: 'chore:story:boxes-06' }],
           },
           {
             id: 'no',
@@ -308,6 +316,75 @@ export const CONVERSATIONS_HOME: Conversation[] = [
             ],
           },
         ],
+      },
+    ],
+  },
+  {
+    /** שחור, אחרי הפירוק — הראיה רק למי שסחב את כל הצד הכבד */
+    id: 'h-helped',
+    nameHe: 'שחור',
+    branches: [
+      {
+        when: { flag: 'h:helped-all' },
+        lines: [
+          { who: 'שחור', text: 'אותם ארגזים, אנשים אחרים.' },
+          { who: 'פוגי', text: 'אני עדיין פה.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'h:helpedSaid' },
+          { e: 'proof', kind: 'community_help', proofId: 'community_help:{chapter}:hall', subjectHe: 'הצד הכבד של הארגז', audience: 'ussishkin', delta: 3 },
+        ],
+      },
+      { lines: [{ who: 'שחור', text: 'גם זה. את השאר אני סוחב מאז שנולדת.' }], then: [{ e: 'flag', flag: 'h:helpedSaid' }] },
+    ],
+  },
+  {
+    /** לירון וירון, בסוף היום — מה שיצא מהחלון, לא מה שנאמר עליו */
+    id: 'h-work-done',
+    nameHe: 'לירון',
+    branches: [
+      {
+        when: { all: [{ flag: 'h:worked-sort' }, { flag: 'h:orders-all' }] },
+        lines: [{ who: 'לירון', text: 'אל תופתע. ככה אמור להיראות יום רגיל.' }],
+        then: [
+          { e: 'flag', flag: 'h:workSaid' },
+          { e: 'money', agorot: LIRON_DAY, why: 'יום אצל לירון' },
+          { e: 'proof', kind: 'adult_shift', proofId: 'adult_shift:{chapter}:liron', subjectHe: 'הזמנות שיצאו בזמן', audience: 'work', delta: 3 },
+        ],
+      },
+      {
+        when: { all: [{ flag: 'h:worked-sort' }, { flag: 'h:orders-half' }] },
+        lines: [{ who: 'לירון', text: 'לא הכול יצא, אבל מה שיצא — יצא נכון. ככה אמור להיראות יום רגיל.' }],
+        then: [
+          { e: 'flag', flag: 'h:workSaid' },
+          { e: 'money', agorot: Math.round((LIRON_DAY * 3) / 400) * 100, why: 'יום אצל לירון' },
+          { e: 'proof', kind: 'adult_shift', proofId: 'adult_shift:{chapter}:liron', subjectHe: 'הזמנות שיצאו בזמן', audience: 'work', delta: 3 },
+        ],
+      },
+      {
+        when: { all: [{ flag: 'h:worked-sort' }, { flag: 'h:orders-some' }] },
+        lines: [{ who: 'לירון', text: 'חצי יום. גם חצי יום משלמים, אבל מחר מתחילים מוקדם.' }],
+        then: [{ e: 'flag', flag: 'h:workSaid' }, { e: 'money', agorot: Math.round(LIRON_DAY / 200) * 100, why: 'חצי יום אצל לירון' }],
+      },
+      {
+        when: { flag: 'h:worked-sort' },
+        lines: [{ who: 'לירון', text: 'הטלפונים צלצלו ואתה עמדת. היום לא משלמים, ומחר — אם תרצה — מתחילים מההתחלה.' }],
+        then: [{ e: 'flag', flag: 'h:workSaid' }],
+      },
+      {
+        when: { flag: 'h:boxes-some' },
+        lines: [
+          { who: 'ירון', text: 'לא ביקשתי קשרים. ביקשתי זוג ידיים.' },
+          { who: 'לירון', text: 'והוא קיבל.' },
+        ],
+        then: [{ e: 'flag', flag: 'h:workSaid' }],
+      },
+      {
+        lines: [
+          { who: 'ירון', text: 'ביקשתי זוג ידיים.' },
+          { who: 'לירון', text: 'עזוב אותו. יש ימים שהידיים לא באות. מחר.' },
+        ],
+        then: [{ e: 'flag', flag: 'h:workSaid' }],
       },
     ],
   },

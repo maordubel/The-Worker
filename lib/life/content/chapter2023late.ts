@@ -47,9 +47,39 @@ const TRIP_2025_AGOROT = 240_000
 
 // ------------------------------------------------------------------- Part I ------
 
+/**
+ * ================================================== היצורניר — מפיקים ומשחקים (90-E) ====
+ *
+ * `NARRATIVE-QUEST-DESIGN-PASS-v2` §7 Stage E: *"squad → invite → one dropout → replace /
+ * play short → equipment → pitch → rotating friend choice → short real football action →
+ * aftermath"*. עד היום Z01 היה שאלה אחת ששלחה 45 דקות ו-`accepted_rotation` על חילוף
+ * שלא קרה. עכשיו:
+ *
+ * 1. **תפקיד** (`z-role`, מילה במילה) — לשחק, לאמן/לצלם, או רק לבוא אחרי. זו ההתחייבות.
+ * 2. **הזמנה** — הטלפון על הספסל: הקבוצה בוואטסאפ, חסרים שניים.
+ * 3. **ביטול אחד** (`z-replies`) — מתוקי בא; אפי: "הגב. לא היום." — להחליף (הבן, למי שיש;
+ *    רומא בטלפון), או לשחק חסרים ולהחליף כל חמש דקות.
+ * 4. **ציוד** — התיק: גופיות, קונוסים, בקבוק לקובי. `chore:story:kit-23` (collect), וכמה
+ *    שנאסף הוא מה שיש על הדשא.
+ * 5. **מי בחוץ ראשון** (`z-rotate`) — הדף של קובי: "אני אומר לכם מי לפתוח."
+ * 6. **משחק** — `FootballScene`, קצר, אמיתי. מי שמאמן/מצלם — צופה מהקו.
+ * 7. **אחרי** (`z-after`) — מה שקרה, בשורות של מי שהיה שם: מי יצא, מי נכנס, התוצאה.
+ *    `accepted_rotation` רק למי שבאמת יצא ראשון ושיחק אחר כך.
+ *
+ * ואז הערב (`z-derby`) והמפגש (`z-grow`) — כמו שהיו.
+ */
 export function objectiveTournament(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (!state.flags['z:role']) return sceneId === 'pitch' ? null : 'במגרש. החבורה מתחממת, ואבא כבר מסדר הרכב.'
+  const social = state.flags['z:tournament'] === 'social'
+  if (!social && !state.flags['z:after']) {
+    if (sceneId !== 'pitch') return 'המגרש. הטורניר לא יתחיל לבד.'
+    if (!state.flags['z:invited']) return 'חסרים שניים. הטלפון על הספסל — להודיע לחבורה.'
+    if (!state.flags['z:sub']) return 'מחכים לתשובות.'
+    if (!state.flags['z:kit']) return 'התיק של הציוד, ליד השער. גופיות, קונוסים, מים לאבא.'
+    if (!state.flags['z:kickoff']) return 'הדף של קובי. מי יוצא ראשון.'
+    return 'המשחק. ואחריו — מה נשאר ממנו.'
+  }
   if (!state.flags['z:derby']) return 'הדרבי. הערב.'
   if (!state.flags['z:grow']) return sceneId === 'community-room' ? null : 'חדר הקהילה. מפגש אוהדים — מדברים על מה שגדל.'
   return null
@@ -87,7 +117,17 @@ export const ENDINGS_TOURNAMENT: Record<string, EndingCard> = {
 
 export const BEATS_TOURNAMENT: Beat[] = [
   { id: 'z-role', at: 'pitch', trigger: 'enter', when: { none: [{ flag: 'z:role' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'z-role' }] },
-  { id: 'z-derby', trigger: 'clock', when: { all: [{ flag: 'z:role' }], none: [{ flag: 'z:derby' }] }, delayMs: 1300, do: [{ a: 'talk', conversation: 'z-derby' }] },
+  /** התשובות מגיעות אחרי ההודעה — ואחת מהן ביטול. שומר על עצמו ב-`z:sub` (V3 כלל 3) */
+  { id: 'z-replies', at: 'pitch', trigger: 'clock', when: { all: [{ flag: 'z:invited' }], none: [{ flag: 'z:sub' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'z-replies' }] },
+  /** חזרה מהמשחק (`FootballScene` מחזיר למגרש) — או מי שצפה מהקו */
+  { id: 'z-after', at: 'pitch', trigger: 'enter', when: { all: [{ flag: 'z:kickoff' }], none: [{ flag: 'z:after' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'z-after' }] },
+  {
+    id: 'z-derby',
+    trigger: 'clock',
+    when: { all: [{ flag: 'z:role' }], any: [{ flag: 'z:after' }, { flagIs: { flag: 'z:tournament', value: 'social' } }], none: [{ flag: 'z:derby' }] },
+    delayMs: 1300,
+    do: [{ a: 'talk', conversation: 'z-derby' }],
+  },
   /**
    * `Z03` היא *"מפגש אוהדים, 2023–2024"* — ישיבה עם פרוטוקול, לא ערב משחק. עד 21.9.2026
    * היא ישבה בשער 5 של בלומפילד **הישן**, שנבנה מחדש ב-2016–2019; עכשיו בפינת אלנבי,
@@ -186,9 +226,219 @@ export const BEATS_EUROCUP: Beat[] = [
   { id: 'z-up', at: 'kiosk', trigger: 'enter', when: { all: [{ flag: 'z:euro' }], none: [{ flag: 'z:up' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'z-up' }] },
 ]
 
+// ----------------------------------------------- the tournament words (90-E) ------
+
+type Branches = Conversation['branches']
+const Z = (flag: string, value: string) => ({ flagIs: { flag, value } }) as const
+
+/** אחרי המשחק — שורה על מי יצא ראשון, ושורה על מי נכנס במקום אפי */
+function afterBranches(): Branches {
+  const bench: Record<string, string> = {
+    me: 'יצאת ראשון, כמו שכתבת, וחמש דקות על הקו היו ארוכות יותר ממה שחשבת.',
+    ofir: 'אופיר יצא ראשון, ונכנס אחר כך כאילו חיכה לזה שנה.',
+    kobi: 'קובי הוציא את עמית ראשון. עמית לא התווכח — עם קובי אף אחד לא מתווכח.',
+  }
+  const sub: Record<string, string> = {
+    child: 'הבן שלך נגע בכדור פעמיים. בפעם השנייה הוא הסתכל עליך, ולא על השער.',
+    roma: 'רומא הגיע בדקה השמינית, בנעליים הלא נכונות, ושיחק כאילו זה גמר.',
+    short: 'ארבעה, והחלפתם כל חמש דקות. אף אחד לא נשאר בחוץ יותר מדי.',
+  }
+  const rows: Branches = []
+  for (const [b, benchLine] of Object.entries(bench)) {
+    for (const [k, subLine] of Object.entries(sub)) {
+      rows.push({
+        when: { all: [{ flag: 'played:football' }, Z('z:bench', b), Z('z:sub', k)] },
+        lines: [
+          { who: null, text: benchLine },
+          { who: null, text: subLine },
+          { who: 'אופיר', text: 'פעם היינו מתחממים בדרך.' },
+          { who: 'קובי', text: 'והיום התחממתם על הספסל. גם זה משהו.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'z:after' },
+          { e: 'flagValue', flag: 'life:tournament:sub', value: k },
+          { e: 'rel', who: 'ofir', axis: 'bond', delta: 2 },
+          ...(b === 'me'
+            ? ([
+                { e: 'proof', kind: 'accepted_rotation', proofId: 'accepted_rotation:{chapter}:tournament', subjectHe: 'זמן המשחק שלי', audience: 'gate5', delta: 3, noteHe: 'כתב מראש שהוא יוצא בחילוף, ויצא.' },
+                { e: 'heard', proofId: 'accepted_rotation:{chapter}:tournament' },
+                { e: 'toast', text: 'אפי, מהגדר: "אתה באמת יוצא בחילוף?" — "כתבתי את זה מול עדים."', tone: 'plain' },
+              ] as const)
+            : b === 'kobi'
+              ? ([{ e: 'rel', who: 'kobi', axis: 'bond', delta: 2 }] as const)
+              : ([{ e: 'rel', who: 'ofir', axis: 'trust', delta: 2 }] as const)),
+        ] as Branches[number]['then'],
+      })
+    }
+  }
+  return [
+    {
+      when: Z('z:tournament', 'support'),
+      lines: [
+        { who: null, text: 'מהקו זה נראה אחרת: אופיר מבקש כדור שלא יגיע, ועמית צועק על עצמו.' },
+        { who: 'קובי', text: 'ראית? ככה אני רואה אתכם כבר ארבעים שנה.' },
+        { who: 'פוגי', text: 'ועכשיו אני.' },
+      ],
+      then: [
+        { e: 'flag', flag: 'z:after' },
+        { e: 'energy', delta: -5 },
+        { e: 'rel', who: 'metuki', axis: 'bond', delta: 3 },
+        { e: 'toast', text: 'מתוקי: "אז הפעם אתה מחזיק לי תיק?" — "מגיע לי."', tone: 'plain' },
+      ],
+    },
+    ...rows,
+    {
+      // המשחק לא נגמר על המגרש הזה (הלשונית נסגרה, או שלא נכנס) — הערב ממשיך בלעדיו
+      lines: [{ who: null, text: 'הכדור נשאר ליד השער. מישהו כבר מקפל את הגופיות.' }],
+      then: [{ e: 'flag', flag: 'z:after' }],
+    },
+  ]
+}
+
+export const CONVERSATIONS_TOURNAMENT_QUEST: Conversation[] = [
+  {
+    id: 'z-invite',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הקבוצה בוואטסאפ עוד נקראת ״יצורניר״. שמונה אנשים, ואף אחד לא כתב בה מאז מרץ.' },
+          { who: 'פוגי', text: 'חסרים שניים. היום, במגרש, בשש.' },
+        ],
+        then: [{ e: 'flag', flag: 'z:invited' }, { e: 'time', minutes: 5 }],
+      },
+    ],
+  },
+  {
+    id: 'z-replies',
+    nameHe: 'מתוקי',
+    remote: { 'מתוקי': 'phone', 'אפי': 'phone' },
+    branches: [
+      {
+        lines: [
+          { who: 'מתוקי', text: 'בא. מביא מים.' },
+          { who: 'אפי', text: 'הגב. לא היום. סליחה.' },
+          { who: 'אפי', text: 'אבל אני בא לראות מהגדר.' },
+        ],
+        choices: [
+          {
+            id: 'child',
+            text: '(לקרוא לבן. הוא על הקו ממילא.)',
+            when: { flag: 'life:child' },
+            hidden: true,
+            then: [
+              { e: 'flagValue', flag: 'z:sub', value: 'child' },
+              { e: 'toast', text: 'הבן: "באמת?" — "באמת. רק תעמוד איפה שאני אומר." — "אני אעמוד איפה שהכדור."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'roma',
+            text: '(להתקשר לרומא. הוא אמר פעם שהוא תמיד פנוי.)',
+            then: [
+              { e: 'flagValue', flag: 'z:sub', value: 'roma' },
+              { e: 'time', minutes: 5 },
+              { e: 'toast', text: 'רומא: "רבע שעה. אל תתחילו בלעדיי." — "נתחיל. תיכנס באמצע."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'short',
+            text: '(לשחק ארבעה — ולהחליף כל חמש דקות.)',
+            then: [
+              { e: 'flagValue', flag: 'z:sub', value: 'short' },
+              { e: 'toast', text: 'עמית: "ארבעה זה פחות ריצה." — "זה יותר חילופים."', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'z-kit',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'התיק מהאוטו: גופיות, קונוסים, בקבוק מים לקובי. חצי מזה כבר מפוזר על הדשא.' },
+        ],
+        choices: [
+          { id: 'collect', text: '(לאסוף ולסדר — לפני שמתחילים.)', then: [{ e: 'minigame', id: 'chore:story:kit-23' }] },
+          {
+            id: 'as-is',
+            text: '(לשחק עם מה שיש. גופיות למי שמגיע ראשון.)',
+            then: [{ e: 'flagValue', flag: 'z:kit', value: 'none' }, { e: 'toast', text: 'שלוש גופיות לחמישה. אופיר לקח שתיים, "אחת לגיבוי".', tone: 'plain' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'z-rotate',
+    nameHe: 'קובי',
+    branches: [
+      {
+        lines: [
+          { who: 'קובי', text: 'אמרתי שאני אומר מי פותח.' },
+          { who: 'פוגי', text: 'אז תגיד.' },
+          { who: 'קובי', text: 'קודם תגיד אתה מי יוצא ראשון. את זה אני רוצה לשמוע ממך.' },
+        ],
+        choices: [
+          {
+            id: 'me',
+            text: '(אני בחוץ ראשון. כמו שכתבתי.)',
+            when: Z('z:tournament', 'player'),
+            hidden: true,
+            then: [
+              { e: 'flag', flag: 'z:kickoff' },
+              { e: 'flagValue', flag: 'z:bench', value: 'me' },
+              { e: 'minigame', id: 'football' },
+            ],
+          },
+          {
+            id: 'ofir',
+            text: '(אופיר בחוץ ראשון. הוא אמר שהברך.)',
+            then: [
+              { e: 'flag', flag: 'z:kickoff' },
+              { e: 'flagValue', flag: 'z:bench', value: 'ofir' },
+              { e: 'minigame', id: 'football' },
+            ],
+            when: Z('z:tournament', 'player'),
+            hidden: true,
+          },
+          {
+            id: 'kobi',
+            text: '(לפי הדף של קובי.)',
+            when: Z('z:tournament', 'player'),
+            hidden: true,
+            then: [
+              { e: 'flag', flag: 'z:kickoff' },
+              { e: 'flagValue', flag: 'z:bench', value: 'kobi' },
+              { e: 'minigame', id: 'football' },
+            ],
+          },
+          {
+            // מי שמאמן — הוא זה שכותב את הדף, והמשחק נראה מהקו
+            id: 'coach',
+            text: '(לכתוב את הסבב בעצמי — ולעמוד על הקו.)',
+            when: Z('z:tournament', 'support'),
+            hidden: true,
+            then: [
+              { e: 'flag', flag: 'z:kickoff' },
+              { e: 'flagValue', flag: 'z:bench', value: 'coach' },
+              { e: 'time', minutes: 30 },
+              { e: 'travel', to: 'pitch', spawn: 'start' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  { id: 'z-after', nameHe: 'קובי', branches: afterBranches() },
+]
+
 // ---------------------------------------------------------------- the words ------
 
 export const CONVERSATIONS_LATE: Conversation[] = [
+  ...CONVERSATIONS_TOURNAMENT_QUEST,
   {
     id: 'z-role',
     nameHe: 'קובי',
@@ -203,16 +453,16 @@ export const CONVERSATIONS_LATE: Conversation[] = [
         ],
         choices: [
           {
+            /**
+             * (90-E) **התחייבות, לא דיווח.** 45 הדקות, האנרגיה וה-`accepted_rotation` עברו לאן
+             * שהם קורים: ההזמנה, התיק, הדף של קובי, המשחק — וה-`z-after` שאחריו.
+             */
             id: 'play',
             text: '(לשחק זמן מוגדר — ולצאת בחילוף.)',
             then: [
               { e: 'flag', flag: 'z:role' },
               { e: 'flagValue', flag: 'z:tournament', value: 'player' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -15 },
-              { e: 'proof', kind: 'accepted_rotation', proofId: 'accepted_rotation:{chapter}:tournament', subjectHe: 'זמן המשחק שלי', audience: 'gate5', delta: 3, noteHe: 'כתב מראש שהוא יוצא בחילוף, ויצא.' },
-              { e: 'heard', proofId: 'accepted_rotation:{chapter}:tournament' },
-              { e: 'toast', text: 'אפי: "אתה באמת יוצא בחילוף?" — "כתבתי את זה מול עדים."', tone: 'plain' },
+              { e: 'toast', text: 'קובי: "שלושה. צריך חמישה." — הטלפון על הספסל.', tone: 'plain' },
             ],
           },
           {
@@ -221,10 +471,7 @@ export const CONVERSATIONS_LATE: Conversation[] = [
             then: [
               { e: 'flag', flag: 'z:role' },
               { e: 'flagValue', flag: 'z:tournament', value: 'support' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -5 },
-              { e: 'rel', who: 'metuki', axis: 'bond', delta: 3 },
-              { e: 'toast', text: 'מתוקי: "אז הפעם אתה מחזיק לי תיק?" — "מגיע לי."', tone: 'plain' },
+              { e: 'toast', text: 'קובי: "אז אתה מביא אותם, והם משחקים." — הטלפון על הספסל.', tone: 'plain' },
             ],
           },
           {

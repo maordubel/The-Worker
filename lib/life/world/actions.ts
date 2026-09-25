@@ -2,7 +2,7 @@ import { checklistFor } from '../checklist'
 import type { Era } from '../content/era'
 import { view as opportunityView } from '../opportunities'
 import { eligibleFor, offeredFlag } from '../routes'
-import type { LifeState } from '../types'
+import type { LifeState, LocationId } from '../types'
 
 /**
  * מה אפשר לעשות עכשיו — one semantic reading over systems that already exist.
@@ -25,6 +25,18 @@ export type LifeAction = {
   titleHe: string
   /** story actions can be the spine; side/route actions are choices around it */
   primary: boolean
+  /*
+   * Read-only facts for the free-time planner (SMART FREE TIME §12, delta 90). Each is
+   * `null` when the owning system does not know it — never a guess.
+   */
+  /** where it happens: the opportunity's room, or the room the chapter points the spine at */
+  location: LocationId | null
+  /** how long doing it takes, when its own system says */
+  durationMinutes: number | null
+  /** the minute it stops being possible, when it has one */
+  availableUntil: number | null
+  /** the player can know about it — every row here has already been revealed by its system */
+  knownToPlayer: boolean
 }
 
 export function actionsNow(state: LifeState, era: Era): readonly LifeAction[] {
@@ -32,7 +44,17 @@ export function actionsNow(state: LifeState, era: Era): readonly LifeAction[] {
 
   const story = checklistFor(state).filter((item) => !item.done)
   story.forEach((item, index) => {
-    actions.push({ id: `story:${item.id}`, kind: 'story', titleHe: item.textHe, primary: index === 0 })
+    actions.push({
+      id: `story:${item.id}`,
+      kind: 'story',
+      titleHe: item.textHe,
+      primary: index === 0,
+      // the chapter's own pointer is about the spine's CURRENT step, never a later one
+      location: index === 0 ? (era.goal?.(state) ?? null) : null,
+      durationMinutes: null,
+      availableUntil: null,
+      knownToPlayer: true,
+    })
   })
 
   for (const opportunity of opportunityView(state, era.opportunities ?? [])) {
@@ -42,6 +64,10 @@ export function actionsNow(state: LifeState, era: Era): readonly LifeAction[] {
       kind: 'opportunity',
       titleHe: opportunity.def.titleHe,
       primary: false,
+      location: opportunity.def.location ?? null,
+      durationMinutes: opportunity.def.costs?.minutes ?? null,
+      availableUntil: opportunity.def.expires,
+      knownToPlayer: true,
     })
   }
 
@@ -52,6 +78,10 @@ export function actionsNow(state: LifeState, era: Era): readonly LifeAction[] {
       kind: 'route',
       titleHe: invitation.titleHe,
       primary: false,
+      location: null,
+      durationMinutes: null,
+      availableUntil: null,
+      knownToPlayer: true,
     })
   }
 

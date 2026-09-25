@@ -193,11 +193,36 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'toast', text: 'קובי נתן לך 5 ₪' },
         ],
       },
+      /**
+       * (delta 90, §7 A7→A8) the three weeks-before are three different mornings. "נראה"
+       * is not "לא": a boy who was told maybe hears the maybe run out, and a boy who never
+       * asked hears his father notice the silence. Only the refusal is "I said no".
+       */
+      {
+        when: { flag: 'life:a7:promised' },
+        lines: [
+          { who: 'קובי', text: 'אמרתי "נראה".' },
+          { who: null, text: 'הוא לא מסתכל עליך. ה"נראה" של שבוע שעבר נגמר הבוקר, בלי שאף אחד אמר את זה בקול.' },
+          { who: 'קובי', text: 'לא היום, פוגי.' },
+        ],
+        then: [{ e: 'remember', who: 'kobi', eventId: 'maybe-ran-out-1986', significance: 'notable' }],
+      },
       {
         when: { flag: 'asked:ticket' },
         lines: [
           { who: 'קובי', text: 'שבוע שעבר אמרתי לא. אל תתחיל שוב.' },
           { who: null, text: 'הוא לא כועס. הוא פשוט לא זז.' },
+        ],
+      },
+      {
+        when: { flag: 'life:a7:silent', none: [{ flag: 'asked:ticket' }, { flag: 'kobi:quiet-again' }] },
+        lines: [
+          { who: 'קובי', text: 'כל השבוע לא שאלת.' },
+          { who: null, text: 'הוא אומר את זה כאילו זה מפתיע אותו יותר מכל שאלה. העיתון נשאר פתוח על אותו עמוד.' },
+        ],
+        choices: [
+          { id: 'ask', text: 'עכשיו לשאול: "קח אותי איתך."', then: [{ e: 'goto', node: 'kobi-refuse' }] },
+          { id: 'leave', text: 'גם היום לא לשאול.', then: [{ e: 'flag', flag: 'kobi:quiet-again' }, { e: 'personality', key: 'stubbornness', delta: 2 }, { e: 'remember', who: 'kobi', eventId: 'still-did-not-ask-1986', significance: 'notable' }] },
         ],
       },
       {
@@ -1757,6 +1782,42 @@ const CONVERSATIONS: Conversation[] = [
           { who: null, text: 'אתה לא מצליח לומר כלום, והתור זז.' },
         ],
         then: [{ e: 'wellbeing', key: 'loneliness', delta: 5 }],
+      },
+    ],
+  },
+  /**
+   * הרווח בגדר — the sneak, and the fail-forward it ends in (Director V3 §12, 25.9.2026).
+   *
+   * A boy who looked at the gap a week earlier (`life:a7:scouted`), or who knows his
+   * streets well enough to see one, can go under the fence. He does not get in that way:
+   * rule §42 stands — nothing is climbed and nothing is stolen — and a steward's hand on
+   * his collar is where the sneak ends. But it does not end the day. The steward walks him
+   * along the fence, and the one man at gate seven who asks "לבד, מה?" is standing exactly
+   * there (`gate-veteran`). Failing is the way to the kindness, and it costs mud and a
+   * minute of shame.
+   */
+  {
+    id: 'gap-1986',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'life:a7:scouted' },
+        lines: [
+          { who: null, text: 'העמוד השלישי. הרווח מתחת לגדר, בדיוק איפה שהיה לפני שבוע.' },
+          { who: null, text: 'אתה על הבטן, חצי גוף בפנים — ויד גדולה תופסת לך את הצווארון.' },
+          { who: 'סדרן', text: 'לאן? לבד לא נכנסים. גם לא מלמטה.' },
+          { who: null, text: 'הוא מושך אותך בחזרה לאור, לאורך הגדר, עם בוץ על החולצה — ישר לאיש הזקן עם הסיגריה.' },
+        ],
+        then: [{ e: 'flag', flag: 'entry:caught' }, { e: 'energy', delta: -5 }, { e: 'time', minutes: 6 }, { e: 'trait', trait: 'courage', delta: 2 }, { e: 'goto', node: 'gate-veteran' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'רווח צר מתחת לגדר, מלא בוץ יבש. רחב בדיוק כמו ילד.' },
+          { who: null, text: 'אתה על הבטן, חצי גוף בפנים — ויד גדולה תופסת לך את הצווארון.' },
+          { who: 'סדרן', text: 'לאן? לבד לא נכנסים. גם לא מלמטה.' },
+          { who: null, text: 'הוא מושך אותך בחזרה לאור, לאורך הגדר, עם בוץ על החולצה — ישר לאיש הזקן עם הסיגריה.' },
+        ],
+        then: [{ e: 'flag', flag: 'entry:caught' }, { e: 'energy', delta: -5 }, { e: 'time', minutes: 6 }, { e: 'goto', node: 'gate-veteran' }],
       },
     ],
   },

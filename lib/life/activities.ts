@@ -128,7 +128,7 @@ export const ACTIVITIES: readonly ActivityDef[] = [
     energy: 0,
     from: 'a4-shirt',
     until: CHILDHOOD_END,
-    claimsAtHandshake: true,
+    // the slip is settled like every activity now — flags on hand-in, not on the handshake (§22.7)
     rel: { who: 'rafi', axis: 'familiarity', delta: 2 },
   },
   {
@@ -341,6 +341,7 @@ export const ACTIVITIES: readonly ActivityDef[] = [
     where: 'home',
     hostHe: 'קובי',
     titleHe: 'הרכב כל הזמנים, עם אבא',
+    emptyHe: 'קובי מקפל את העיתון בחזרה: "לא היום. אין לי ראש לשמות."',
     slot: 'none',
     pay: null,
     minutes: 30,
@@ -356,6 +357,7 @@ export const ACTIVITIES: readonly ActivityDef[] = [
     where: 'kitchen',
     hostHe: 'העיתונים הישנים',
     titleHe: 'הערימה על השיש',
+    emptyHe: 'הערימה דקה מדי היום. שום דבר בה שלא קראת.',
     slot: 'none',
     pay: null,
     minutes: 20,
@@ -591,6 +593,18 @@ export function settleActivity(state: LifeState, id: ActivityId, result: Activit
     },
   )
   return { events, tier, paid }
+}
+
+/**
+ * פעם אחת בדיוק (§22.7, §24.2) — has this request already been settled?
+ *
+ * A request carries the `runs` it was dealt at, and settling one always writes
+ * `activity.completed`, which moves `runs` on by one. So a second `onDone` (a board that
+ * answers twice, ✕ pressed while the verdict is landing, a remount) finds `runs` already
+ * past the request and settles nothing: the time, the energy and the pay land once.
+ */
+export function alreadySettled(state: LifeState, request: { activity: ActivityId; runs: number }): boolean {
+  return (state.activities[request.activity]?.runs ?? 0) !== request.runs
 }
 
 /** money, a plate or a favour — off the seed, the same answer every time this chapter is played */

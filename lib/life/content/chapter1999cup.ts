@@ -6,6 +6,10 @@ import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
 import { GALIL_PROMISE } from './chapter1993galil'
 
+/** Ramat Gan, 19.5.1999: at the gates, and through them (Director V3 §12) */
+export const RG_99_ARRIVED = 'c99:arrived'
+export const RG_99_IN = 'c99:in'
+
 /**
  * B10 · "שש־עשרה שנה" · 19.5.1999 — the first convergence after the fractures.
  *
@@ -120,31 +124,68 @@ export const BEATS_CUP99: Beat[] = [
     do: [{ a: 'flag', flag: 'c99:route' }, { a: 'flag', flag: 'c99:away' }, { a: 'card', titleHe: 'שמונה', subHe: 'לא שם', ms: 2200 }, { a: 'talk', conversation: 'c99-away' }],
   },
   {
+    /**
+     * (Director V3 §12, 25.9.2026) "crowd entry": arriving is the forecourt, not the
+     * terrace. Forty thousand people and the gates under the sign; the way in is pushed
+     * through (`rg-gate` → `rg-gate`), and the match starts when he is in (`c99-kickoff`).
+     */
     id: 'c99-stadium',
     at: 'ramat-gan',
     trigger: 'enter',
-    when: { flag: 'c99:route', none: [{ flag: 'c99:over' }, { flag: 'arrived:late' }] },
+    when: { flag: 'c99:route', none: [{ flag: 'c99:over' }, { flag: RG_99_ARRIVED }] },
     delayMs: 1000,
     do: [
+      { a: 'flag', flag: RG_99_ARRIVED },
       { a: 'card', titleHe: 'אצטדיון רמת גן', subHe: 'גמר גביע המדינה', ms: 2600, art: 'plate-1999-cup' },
-      { a: 'match', script: 'cup-99' },
+      { a: 'toast', text: 'השערים מתחת לשלט. כולם דוחפים לאותו כיוון.', tone: 'plain' },
     ],
+  },
+  {
+    id: 'c99-kickoff',
+    at: 'ramat-gan',
+    trigger: 'clock',
+    // no guard of its own, on purpose: a final walked out of mid-shootout (the box closed at
+    // the penalties) has not been played, and is armed again, as the arrival beat always was
+    when: { flag: RG_99_IN, none: [{ flag: 'c99:over' }, { flag: 'arrived:late' }] },
+    delayMs: 800,
+    do: [{ a: 'match', script: 'cup-99' }],
   },
   // in after it started: no ninety minutes to direct — straight to the shootout
   {
     id: 'c99-stadium-late',
     at: 'ramat-gan',
-    trigger: 'enter',
-    when: { all: [{ flag: 'c99:route' }, { flag: 'arrived:late' }], none: [{ flag: 'c99:over' }] },
-    delayMs: 1000,
-    do: [
-      { a: 'card', titleHe: 'אצטדיון רמת גן', subHe: 'גמר גביע המדינה', ms: 2600, art: 'plate-1999-cup' },
-      { a: 'talk', conversation: 'c99-match' },
-    ],
+    trigger: 'clock',
+    when: { all: [{ flag: RG_99_IN }, { flag: 'arrived:late' }], none: [{ flag: 'c99:over' }] },
+    delayMs: 800,
+    do: [{ a: 'talk', conversation: 'c99-match' }],
+  },
+  /** nobody stands outside a final: at a quarter past eight the crowd carries him in */
+  {
+    id: 'c99-swept-in',
+    at: 'ramat-gan',
+    trigger: 'clock',
+    when: { flag: RG_99_ARRIVED, afterMinute: at(20, 15), none: [{ flag: RG_99_IN }, { flag: 'c99:over' }] },
+    do: [{ a: 'flag', flag: RG_99_IN }, { a: 'toast', text: 'הקהל נושא אותך פנימה. הרגליים שלך כמעט לא נוגעות בבטון.', tone: 'plain' }],
   },
 ]
 
 export const CONVERSATIONS_CUP99: Conversation[] = [
+  /** the gates of Ramat Gan, pushed through (V3 §12 "crowd entry") */
+  {
+    id: 'rg-gate-99',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'c99:with-kobi' },
+        lines: [{ who: null, text: 'התור נדחס לקרוסלות. אבא מחזיק לך את הכתף, כמו פעם — רק שהפעם אתה זה שרואה מעל הראשים.' }],
+        then: [{ e: 'flag', flag: RG_99_IN }, { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 2 }],
+      },
+      {
+        lines: [{ who: null, text: 'גוף ליד גוף, ריח של גרעינים וגומי שרוף. הכרטיסן קורע חצי כרטיס בלי להסתכל, ומישהו מאחור דוחף אותך פנימה בברך.' }],
+        then: [{ e: 'flag', flag: RG_99_IN }, { e: 'redheart', key: 'terraceCulture', delta: 2 }],
+      },
+    ],
+  },
   {
     id: 'kobi-cup99',
     nameHe: 'קובי',
@@ -202,7 +243,8 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
         when: { relationship: { who: 'liron', axis: 'sharedHistory', min: 4 } },
         lines: [{ who: 'לירון', text: 'אותו אוטו. אותו רדיו. הפעם בלי ויכוח בדרך, בסדר? בסדר.' }],
         choices: [
-          { id: 'go', text: '"בסדר. נוסעים."', then: [{ e: 'flag', flag: 'c99:route' }, { e: 'flag', flag: 'c99:with-liron' }, { e: 'rel', who: 'liron', axis: 'bond', delta: 4 }, { e: 'time', minutes: 80 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
+          // (V3 §12) the same car and the same radio, ridden: `ride:liron-99` (content/passages.ts)
+          { id: 'go', text: '"בסדר. נוסעים."', then: [{ e: 'flag', flag: 'c99:route' }, { e: 'flag', flag: 'c99:with-liron' }, { e: 'rel', who: 'liron', axis: 'bond', delta: 4 }, { e: 'time', minutes: 80 }, { e: 'minigame', id: 'ride:liron-99' }] },
           { id: 'no', text: '"לא הפעם."', then: [] },
         ],
       },
@@ -245,16 +287,16 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
           { who: null, text: 'כתבת שלושה שמות של אנשים שאתה יודע שיבואו, והשארת שורה ריקה למי שתמיד מאחר.' },
           { who: 'מישל', text: 'מי שרשום — באחריותך. אני סופר ראשים בשש ועשרים ונוסע בשש וחצי. מה שחסר, חסר.' },
         ],
+        /**
+         * (Director V3 §12, 25.9.2026) "physical gathering": the four seats are filled by
+         * going to the people, at the kiosk corner, before six twenty — they come up, a name
+         * goes in the notebook, the next one (`chore:story:minibus-99`). The seat of his own
+         * is Michel's to give afterwards, the same "עשרים. בא." at the minibus.
+         */
         then: [
-          { e: 'flag', flag: 'c99:notebook' },
-          { e: 'time', minutes: 20 },
           { e: 'skill', skill: 'organization', delta: 2, why: 'לקח פנקס ומילא מקומות' },
           { e: 'rel', who: 'michel', axis: 'trust', delta: 4 },
-          { e: 'toast', text: 'שלושה שמות בכתב שלך, בפנקס שאתה לא מחזיק.', tone: 'plain' },
-        ],
-        choices: [
-          { id: 'ride', text: '"עשרים. אני ראשון במיניבוס."', when: { minAgorot: 2000 }, noteHe: 'אין עשרים.', then: [{ e: 'money', agorot: -2000, why: 'מיניבוס של שער 5' }, { e: 'flag', flag: 'c99:route' }, { e: 'flag', flag: 'c99:with-gate5' }, { e: 'rel', who: 'michel', axis: 'bond', delta: 3 }, { e: 'rel', who: 'asaf', axis: 'bond', delta: 3 }, { e: 'time', minutes: 90 }, { e: 'travel', to: 'ramat-gan', spawn: 'start' }] },
-          { id: 'later', text: 'להחזיק את הפנקס ולהחליט אחר כך איך אתה מגיע.', then: [] },
+          { e: 'minigame', id: 'chore:story:minibus-99' },
         ],
       },
     ],

@@ -26,6 +26,9 @@ export const KICKOFF_98 = at(17, 0)
 export const HALF_98 = at(17, 47)
 export const FULL_98 = at(18, 50)
 
+/** the ten minutes after the whistle, lived in the forecourt (Director V3 §12) */
+export const L1_TEN = 'l1:ten'
+
 export const PORTRAIT_LACES: Record<string, string> = {
   'פוגי': 'faceHero80',
   'קובי': 'faceKobi',
@@ -145,6 +148,46 @@ export const BEATS_LACES: Beat[] = [
       { a: 'match', script: 'laces-98' },
       { a: 'flag', flag: 'l1:end' },
     ],
+  },
+  /**
+   * (V3 recovery) the whistle's box is where the terrace understands (`l1:inside`); a box
+   * walked out of mid-match left the day waiting for the radio route instead. It is asked
+   * again until it is heard, in the ground, after the match.
+   */
+  {
+    id: 'l1-whistle-again',
+    at: 'bloomfield-inside',
+    trigger: 'clock',
+    when: { flag: 'l1:end', none: [{ flag: 'l1:inside' }, { flag: 'l1:after' }] },
+    delayMs: 600,
+    do: [{ a: 'talk', conversation: 'l1-whistle' }],
+  },
+  /**
+   * after the whistle: out through the tunnel into the forecourt, where the ten minutes are
+   * (`l1-ten` raises `L1_TEN`; the match itself runs to its end first)
+   */
+  {
+    id: 'l1-out',
+    at: 'bloomfield-inside',
+    trigger: 'clock',
+    when: { flag: L1_TEN, all: [{ flag: 'l1:end' }], none: [{ flag: 'l1:cut' }] },
+    delayMs: 800,
+    do: [{ a: 'travel', to: 'bloomfield-outside', spawn: 'fromTunnel' }],
+  },
+  {
+    id: 'l1-ten-home',
+    at: 'home',
+    trigger: 'enter',
+    when: { flag: L1_TEN, none: [{ flag: 'l1:cut' }] },
+    delayMs: 600,
+    do: [{ a: 'talk', conversation: 'l1-ten-home' }],
+  },
+  /** ten minutes are ten minutes: whoever did none of it stood there and saw */
+  {
+    id: 'l1-ten-witness',
+    trigger: 'clock',
+    when: { flag: L1_TEN, afterMinute: FULL_98 + 26, none: [{ flag: 'l1:cut' }] },
+    do: [{ a: 'toast', text: 'עשר דקות עברו. עמדת. ראית. זכרת.', tone: 'plain' }, { a: 'talk', conversation: 'l1-ten-look' }],
   },
   // radio route: not at the ground when it happens
   {
@@ -339,13 +382,76 @@ export const CONVERSATIONS_LACES: Conversation[] = [
           { who: null, text: 'עשר דקות. אין מטרה. אין שורה על המסך שאומרת מה לעשות.' },
           { who: null, text: 'אופיר על המדרגות, לא זז. אסף ואנשים שלו הולכים לאיזשהו כיוון, מהר. סוקו כותב. מישהו צועק על מישהו שלא היה שם.' },
         ],
+        /**
+         * (Director V3 §12, 25.9.2026) "extend aftermath world action". The ten minutes with
+         * no objective are ten minutes in the forecourt now, not a list of five sentences:
+         * Ofir on the steps (`l1-steps`), Asaf's people going somewhere fast (`l1-follow`),
+         * Soko picking up newspapers (`soko-ten-98` → `chore:story:papers-98`), the way home
+         * (`l1-ten-home`), and a boy who only stands and looks (`l1-look`). The same five
+         * answers, in the words they were written in — and the clock that makes a witness
+         * of anybody who does none of them (`l1-ten-witness`).
+         */
+        then: [{ e: 'flag', flag: L1_TEN }],
+      },
+    ],
+  },
+  {
+    id: 'l1-ten-ofir',
+    nameHe: 'אופיר',
+    branches: [
+      { when: { flag: 'l1:cut' }, lines: [{ who: null, text: 'אופיר על המדרגות. אתה לידו. אף אחד מכם לא אומר כלום, וזה בסדר.' }] },
+      {
+        lines: [{ who: null, text: 'אופיר על המדרגות, לא זז. הצעיף שלו בין הברכיים, והעיניים על משהו שאתה לא רואה.' }],
         choices: [
           { id: 'stay', text: 'לשבת ליד אופיר. לא לזוז.', then: [{ e: 'laces', response: 'protector' }, { e: 'rel', who: 'ofir', axis: 'bond', delta: 6 }, { e: 'remember', who: 'ofir', eventId: 'stayed-with-me-1998', significance: 'major' }, { e: 'personality', key: 'empathy', delta: 3 }, { e: 'flag', flag: 'l1:cut' }] },
-          { id: 'run', text: 'ללכת אחרי אסף.', then: [{ e: 'laces', response: 'avenger' }, { e: 'institution', key: 'protestEscalation', delta: 12 }, { e: 'rel', who: 'asaf', axis: 'familiarity', delta: 4 }, { e: 'army', key: 'commanderTrust', delta: -5 }, { e: 'personality', key: 'riskTolerance', delta: 4 }, { e: 'goto', node: 'l1-pulled' }] },
-          { id: 'soko', text: 'ללכת עם סוקו. לאסוף עיתונים.', then: [{ e: 'laces', response: 'organizer' }, { e: 'rel', who: 'soko', axis: 'bond', delta: 6 }, { e: 'redheart', key: 'historyMemory', delta: 5 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 6 }, { e: 'flag', flag: 'l1:cut' }] },
-          { id: 'home', text: 'הביתה. לאבא.', then: [{ e: 'laces', response: 'withdrawn' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'wellbeing', key: 'loneliness', delta: 4 }, { e: 'flag', flag: 'l1:cut' }] },
-          { id: 'look', text: 'לעמוד. לראות. לזכור.', then: [{ e: 'laces', response: 'witness' }, { e: 'redheart', key: 'historyMemory', delta: 4 }, { e: 'personality', key: 'curiosity', delta: 2 }, { e: 'flag', flag: 'l1:cut' }] },
+          { id: 'not-yet', text: 'עוד רגע.', then: [] },
         ],
+      },
+    ],
+  },
+  {
+    id: 'l1-ten-asaf',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'אסף ואנשים שלו הולכים לאיזשהו כיוון, מהר. אחד מהם כבר רץ.' }],
+        choices: [
+          { id: 'run', text: 'ללכת אחרי אסף.', then: [{ e: 'laces', response: 'avenger' }, { e: 'institution', key: 'protestEscalation', delta: 12 }, { e: 'rel', who: 'asaf', axis: 'familiarity', delta: 4 }, { e: 'army', key: 'commanderTrust', delta: -5 }, { e: 'personality', key: 'riskTolerance', delta: 4 }, { e: 'goto', node: 'l1-pulled' }] },
+          { id: 'not-yet', text: 'לא.', then: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'l1-ten-soko',
+    nameHe: 'סוקו',
+    branches: [
+      {
+        lines: [{ who: 'סוקו', text: 'מה אנחנו יודעים. מה שמענו. מה אנחנו ממציאים. שלוש רשימות. אני עושה את הראשונה.' }, { who: null, text: 'הוא מרים עיתון מקומט מהמדרכה, מיישר אותו על הברך, ומרים עוד אחד.' }],
+        choices: [
+          { id: 'soko', text: 'ללכת עם סוקו. לאסוף עיתונים.', then: [{ e: 'minigame', id: 'chore:story:papers-98' }] },
+          { id: 'not-yet', text: 'לא עכשיו.', then: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'l1-ten-look',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'סוקו כותב. מישהו צועק על מישהו שלא היה שם. אתה עומד באמצע ולא זז, ורושם את כל זה בראש.' }],
+        then: [{ e: 'laces', response: 'witness' }, { e: 'redheart', key: 'historyMemory', delta: 4 }, { e: 'personality', key: 'curiosity', delta: 2 }, { e: 'flag', flag: 'l1:cut' }],
+      },
+    ],
+  },
+  {
+    id: 'l1-ten-home',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הביתה. לאבא. הוא בכורסה, הרדיו כבוי על השולחן, והוא לא שואל.' }],
+        then: [{ e: 'laces', response: 'withdrawn' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'wellbeing', key: 'loneliness', delta: 4 }, { e: 'flag', flag: 'l1:cut' }],
       },
     ],
   },

@@ -190,7 +190,12 @@ export const goalHome = (state: LifeState): LocationId | null => {
 }
 
 /** 2007 — שלושה פרקים, וכל אחד מצביע על חדר אחד בלבד */
-export const goalTable = (state: LifeState): LocationId | null => (flag(state, 'u:role') ? null : 'community-room')
+export const goalTable = (state: LifeState): LocationId | null => {
+  if (!flag(state, 'u:role')) return 'community-room'
+  // (דלתא 90) מי שלקח את התפעול סופר את המחסן בידיים לפני שהיום נסגר
+  if (state.flags['u:roleKind'] === 'operations' && !flag(state, 'u:counted')) return 'storeroom'
+  return null
+}
 export const goalRegistered = (state: LifeState): LocationId | null => {
   if (flag(state, 'u:loss')) return null
   return flag(state, 'u:deliver') ? 'ussishkin-outside' : 'community-room'
@@ -248,7 +253,17 @@ export const goalNewHall = (state: LifeState): LocationId | null => {
 /** 2016–2018 — הקיוסק, המגרש, אלנבי; ואז הקיוסק והסלון. הטבלה וההזמנה הן רגעים */
 export const goalCrisis = (state: LifeState): LocationId | null => {
   if (!flag(state, 'p:news')) return 'kiosk'
+  // (90-E) the two sources and the answer to Amit are in the kiosk
+  if (state.flags['p:info'] === 'checking') return 'kiosk'
   if (!flag(state, 'p:till')) return 'pitch'
+  if (!flag(state, 'p:deliver') && flag(state, 'p:commit')) {
+    // the next parcel still in his hands, nearest first — then back to Matuki
+    const holds = (id: string) => flag(state, `p:carry:${id}`) && !flag(state, `p:hand:${id}`)
+    if (holds('a')) return flag(state, 'p:a-moved') ? 'allenby' : 'street'
+    if (holds('b')) return 'pitch'
+    if (holds('c')) return 'allenby'
+    return 'community-room'
+  }
   if (!flag(state, 'p:deliver')) return 'community-room'
   return null
 }
@@ -275,6 +290,8 @@ export const goalLosses = (state: LifeState): LocationId | null => {
 /** 2023–2025 — המגרש והיציע; הבית והמטבח; הבית והקיוסק. הדרבי הוא רגע */
 export const goalTournament = (state: LifeState): LocationId | null => {
   if (!flag(state, 'z:role')) return 'pitch'
+  // (90-E) the tournament is produced and played on the pitch — unless he only came for the after
+  if (state.flags['z:tournament'] !== 'social' && !flag(state, 'z:after')) return 'pitch'
   if (!flag(state, 'z:derby')) return null
   if (!flag(state, 'z:grow')) return 'community-room'
   return null
@@ -293,6 +310,10 @@ export const goalEurocup = (state: LifeState): LocationId | null => {
 /** 2025–2026 — הקיוסק והסלון; ואז הרציף. האולם והדרך חזרה הם רגעים */
 export const goalPlan = (state: LifeState): LocationId | null => {
   if (!flag(state, 'f:money')) return 'kiosk'
+  // (90-E) the plan is built at the ticket office before it is shown — unless there is no money for it yet
+  const preparing = state.flags['f:funding'] === 'preparation'
+  if (!preparing && !flag(state, 'f:sheet') && (!flag(state, 'f:tickets') || !flag(state, 'life:finale:route'))) return 'ticket-office'
+  if (!preparing && !flag(state, 'f:sheet')) return null
   if (!flag(state, 'f:plan')) return 'home'
   return null
 }
@@ -326,7 +347,13 @@ export const goalPromises = (state: LifeState): LocationId | null => {
   const child = flag(state, 'life:child')
   if (child && !flag(state, 'pr:first')) return 'home'
   if (!flag(state, 'pr:promise')) return 'home'
-  if (child && !flag(state, 'pr:scarf')) return 'pitch'
+  if (child && !flag(state, 'pr:scarf')) {
+    // (90-E) L09 — two sheets to read, his Saturday in the schoolyard, and for the split the run to Bloomfield
+    const ask = state.flags['pr:ask']
+    if (ask === 'checking') return !flag(state, 'pr:saw:his') ? 'home' : !flag(state, 'pr:saw:ours') ? 'kiosk' : 'pitch'
+    if (ask === 'go' || ask === 'split') return state.flags['pr:sat'] === 'run' ? 'bloomfield-outside' : 'schoolyard'
+    return 'pitch'
+  }
   return null
 }
 

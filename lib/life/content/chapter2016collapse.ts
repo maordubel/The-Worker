@@ -52,11 +52,75 @@ const REPAY_AGOROT = 5_000
 
 // ------------------------------------------------------------------- Part I ------
 
+/**
+ * ============================================ הרשימה של מתוקי — עושים, לא אומרים ====
+ *
+ * (LIFE 90-E, 25.9.2026 — `NARRATIVE-QUEST-DESIGN-PASS-v2` §7 Stage D, §13 "2016 delivery".)
+ *
+ * עד היום P01 ו-P03 היו שתי שאלות: *"(לבדוק מה ידוע ומה לא)"* הרים `knowledge +3` ברגע
+ * הלחיצה, ו-*"(שלוש מסירות — ולוודא שהגיעו.)"* העביר שעה, הוריד אנרגיה והעניק ראיה על
+ * שלוש מסירות שאף אחת מהן לא נעשתה. זה בדיוק האנטי-דפוס §11.4: המשפט טוען שהעבודה נעשתה.
+ *
+ * **עכשיו הם פעלים בעולם, בשני חלקים:**
+ *
+ * 1. **אימות (P01).** בקיוסק שלושה קולות: הדף של פרדי (`{anchor}` — שורת הארכיון), החדשות
+ *    בטלוויזיה של הקיוסק, וההודעה בטלפון של אופיר. שניים אומרים אותו דבר; השלישי שמועה.
+ *    ואז — לעמית — **מה פוגי מוכן לחזור עליו**. `knowledge` רק למי שבדק את שני המקורות
+ *    ואמר רק את מה שבהם. מי שהתקשר לאבא או סגר חדשות להערב — לא עובר את זה, ובצדק.
+ * 2. **מסירות (P03).** מתוקי נותן רשימה של שלוש חבילות עם שמות. מתחייבים לאחת, לשלוש, או
+ *    לא. מי שהתחייב **הולך**: הדלת הירוקה ברחוב (שלמה), הספסל במגרש (בני), הדלת ליד בית
+ *    הקפה באלנבי (אורנה). **הסיבוך:** שלמה לא בבית — השכנה אומרת שהוא אצל הבת, מעל בית
+ *    הקפה באלנבי. משאירים אצלה, לוקחים אליו, או מחזירים. **החזרה:** מתוקי שואל, ומה
+ *    שהוא עונה עליו הוא הספירה ביומן (`p:n1`–`p:n3`) — לא מה שפוגי אומר. חצי עבודה היא
+ *    ביוגרפיה לגיטימית; ראיה רק על מה שנמסר ביד.
+ *
+ * **שמות בדיוניים, בלי סכומים ובלי נושים** — הכלל של הראש נשמר: שלמה, בני ואורנה הם
+ * אנשים ברשימה של קבוצת חברים, לא נושים, לא עובדי מועדון ולא אנשים ציבוריים. מה שבחבילה
+ * לא נאמר; השם עליה כן.
+ *
+ * **הספירה.** לשיחת מסירה יש שלושה ענפים — "זו הראשונה", "השנייה", "השלישית" — והיא מרימה
+ * את הדגל הבא בתור. זה היומן שמוכיח: `p:n<k>` מורם רק בידי מסירה ביד.
+ */
+
+/** the three names on Matuki's list, where each of them is, and who is there */
+export const DROPS = {
+  a: { room: 'street', whoHe: 'שלמה', placeHe: 'הדלת הירוקה ברחוב, קומה שנייה' },
+  b: { room: 'pitch', whoHe: 'בני', placeHe: 'הספסל של בני במגרש' },
+  c: { room: 'allenby', whoHe: 'אורנה', placeHe: 'הדלת ליד בית הקפה באלנבי' },
+} as const
+export type DropId = keyof typeof DROPS
+
+/** מה נמסר ביד — הספירה שמתוקי קורא, ולא מה שפוגי מספר */
+export const HANDED = (n: 1 | 2 | 3) => `p:n${n}`
+/** לחיים: כמה נמסרו ביד, ולכמה התחייב — `2018-return` זוכר (callback, Stage D) */
+export const CRISIS_HANDED = 'life:crisis:handed'
+export const CRISIS_COMMIT = 'life:crisis:commit'
+export const CRISIS_REPEAT = 'life:crisis:repeat'
+
+function dropsLeft(state: LifeState): string[] {
+  const left: string[] = []
+  for (const id of ['a', 'b', 'c'] as const) {
+    if (!state.flags[`p:carry:${id}`] || state.flags[`p:hand:${id}`]) continue
+    if (id === 'a' && state.flags['p:a-moved']) left.push('שלמה — אצל הבת, מעל בית הקפה באלנבי')
+    else left.push(`${DROPS[id].whoHe} — ${DROPS[id].placeHe}`)
+  }
+  return left
+}
+
 export function objectiveCrisis(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (!state.flags['p:news']) return sceneId === 'kiosk' ? null : 'בקיוסק. כולם מדברים, ואף אחד לא יודע.'
+  if (state.flags['p:info'] === 'checking') {
+    const seen = ['p:src:doc', 'p:src:news'].filter((flag) => state.flags[flag]).length
+    if (seen < 2) return 'שני מקורות בקיוסק: הדף של פרדי, והחדשות בטלוויזיה. והטלפון של אופיר — שמועה.'
+    return 'בדקת. עכשיו לעמית: מה אתה מעביר הלאה, ומה לא.'
+  }
   if (!state.flags['p:till']) return sceneId === 'pitch' ? null : 'במגרש. הקופה של הקבוצה שלנו.'
-  if (!state.flags['p:deliver']) return sceneId === 'community-room' ? null : 'חדר הקהילה. מתוקי עם רשימה — שמות, לא סכומים.'
+  if (!state.flags['p:deliver'] && !state.flags['p:commit']) return sceneId === 'community-room' ? null : 'חדר הקהילה. מתוקי עם רשימה — שמות, לא סכומים.'
+  if (!state.flags['p:deliver']) {
+    const left = dropsLeft(state)
+    return left.length ? `החבילות: ${left.join(' · ')}. ואז חזרה למתוקי.` : 'חזרה לחדר הקהילה. מתוקי מחכה לרשימה.'
+  }
   if (!state.flags['p:table']) return 'הטבלה. עוד מעט מעדכנים אותה.'
   return null
 }
@@ -93,9 +157,39 @@ export const ENDINGS_CRISIS: Record<string, EndingCard> = {
 
 export const BEATS_CRISIS: Beat[] = [
   { id: 'p-news', at: 'kiosk', trigger: 'enter', when: { none: [{ flag: 'p:news' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'p-news' }] },
-  { id: 'p-till', at: 'pitch', trigger: 'enter', when: { all: [{ flag: 'p:news' }], none: [{ flag: 'p:till' }] }, delayMs: 650, do: [{ a: 'talk', conversation: 'p-till' }] },
-  // P03 *"מפגש קהילתי"* — חדר הקהילה (`communityRoom`, 21.9.2026)
-  { id: 'p-deliver', at: 'community-room', trigger: 'enter', when: { all: [{ flag: 'p:till' }], none: [{ flag: 'p:deliver' }] }, delayMs: 650, do: [{ a: 'talk', conversation: 'p-deliver' }] },
+  // מי שיצא לבדוק לא ממשיך למגרש לפני שאמר לעמית מה הוא מעביר (הדגל `p:info` מתחלף ב-`p-repeat`)
+  { id: 'p-till', at: 'pitch', trigger: 'enter', when: { all: [{ flag: 'p:news' }], none: [{ flag: 'p:till' }, { flagIs: { flag: 'p:info', value: 'checking' } }] }, delayMs: 650, do: [{ a: 'talk', conversation: 'p-till' }] },
+  // P03 *"מפגש קהילתי"* — חדר הקהילה (`communityRoom`, 21.9.2026). שומר על עצמו ב-`p:commit`:
+  // מי שהתחייב ויצא עם החבילות לא נשאל שוב בכניסה (V3 כלל 3)
+  { id: 'p-deliver', at: 'community-room', trigger: 'enter', when: { all: [{ flag: 'p:till' }], none: [{ flag: 'p:deliver' }, { flag: 'p:commit' }] }, delayMs: 650, do: [{ a: 'talk', conversation: 'p-deliver' }] },
+  /**
+   * החזרה — מי שכל החבילות שלו כבר לא בידיים (נמסרו, הושארו, או הוחזרו) ונכנס לחדר, מתוקי
+   * שואל בעצמו. מי שחוזר באמצע לוחץ עליו (`p-report` בחדר).
+   */
+  {
+    id: 'p-back',
+    at: 'community-room',
+    trigger: 'enter',
+    when: {
+      all: [{ flag: 'p:commit' }],
+      none: [
+        { flag: 'p:deliver' },
+        { all: [{ flag: 'p:carry:a' }, { notFlag: 'p:hand:a' }] },
+        { all: [{ flag: 'p:carry:b' }, { notFlag: 'p:hand:b' }] },
+        { all: [{ flag: 'p:carry:c' }, { notFlag: 'p:hand:c' }] },
+      ],
+    },
+    delayMs: 650,
+    do: [{ a: 'talk', conversation: 'p-report' }],
+  },
+  /** ומי שלא חזר עד תשע — מתוקי מתקשר. אין ערב שנתקע עם חבילה ביד */
+  {
+    id: 'p-late',
+    trigger: 'clock',
+    when: { all: [{ flag: 'p:commit' }, { afterMinute: 21 * 60 }], none: [{ flag: 'p:deliver' }] },
+    delayMs: 1200,
+    do: [{ a: 'talk', conversation: 'p-report-phone' }],
+  },
   /** הטבלה היא רגע ולא חדר — היא מתעדכנת פעם אחת, והשחקן אינו מפחית ואינו מציל נקודות */
   { id: 'p-table', trigger: 'clock', when: { all: [{ flag: 'p:deliver' }], none: [{ flag: 'p:table' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'p-table' }] },
 ]
@@ -146,9 +240,309 @@ export const BEATS_AFTER: Beat[] = [
   { id: 'p-invite', trigger: 'clock', when: { all: [{ flag: 'p:choice' }], none: [{ flag: 'p:invite' }] }, delayMs: 1500, do: [{ a: 'talk', conversation: 'p-invite' }] },
 ]
 
+// ------------------------------------------------ the quest words (90-E) ------
+
+const SRC_SEEN = { all: [{ flag: 'p:src:doc' }, { flag: 'p:src:news' }] }
+
+/** מסירה ביד — שלושה ענפים, והענף הוא הספירה: הראשונה, השנייה, השלישית */
+function handoff(id: string, drop: DropId, lines: Conversation['branches'][number]['lines'], nameHe: string): Conversation {
+  const hand = (next: 1 | 2 | 3, toast: string) => ({
+    lines,
+    then: [
+      { e: 'flagValue', flag: `p:hand:${drop}`, value: 'hand' },
+      { e: 'flag', flag: HANDED(next) },
+      { e: 'time', minutes: 6 },
+      { e: 'energy', delta: -3 },
+      { e: 'toast', text: toast, tone: 'plain' },
+    ] as Conversation['branches'][number]['then'],
+  })
+  return {
+    id,
+    nameHe,
+    branches: [
+      { when: { flag: `p:hand:${drop}` }, lines: [{ who: null, text: 'השם הזה כבר מסומן ברשימה.' }] },
+      { when: { flag: HANDED(2) }, ...hand(3, `${nameHe}. שלוש ביד — הרשימה ריקה.`) },
+      { when: { flag: HANDED(1) }, ...hand(2, `${nameHe}. שתיים ביד.`) },
+      hand(1, `${nameHe}. אחת ביד.`),
+    ],
+  }
+}
+
+type Branches = Conversation['branches']
+type Choice = NonNullable<Branches[number]['choices']>[number]
+
+/**
+ * החזרה למתוקי — **מה שהוא עונה עליו הוא היומן** (`p:n1`–`p:n3`, `p:hand:*`). אותם ענפים
+ * בחדר ובטלפון; בטלפון שורת פתיחה אחת לפני.
+ */
+function reportBranches(phone: boolean): Branches {
+  const open = phone ? [{ who: null, text: 'הטלפון. מתוקי.' } as const] : []
+  const close = (handed: number) => [
+    { e: 'flag', flag: 'p:deliver' },
+    { e: 'flagValue', flag: CRISIS_HANDED, value: handed },
+  ] as const
+  const neighbor = { flagIs: { flag: 'p:hand:a', value: 'neighbor' } }
+  const neighborLine = { who: 'מתוקי', text: 'ושלמה — אצל השכנה זה לא ביד. אבל זה גם לא כלום.' } as const
+  const honest = (handed: number, toast: string): Choice => ({
+    id: 'exact',
+    text: '(לסמן בדיוק מה הגיע ביד, ומה לא.)',
+    then: [
+      ...close(handed),
+      { e: 'personality', key: 'honesty', delta: 2 },
+      { e: 'rel', who: 'metuki', axis: 'trust', delta: 3 },
+      ...(handed > 0
+        ? ([{ e: 'proof', kind: 'crisis_delivery', proofId: 'crisis_delivery:{chapter}:partial', subjectHe: 'המסירות', noteHe: 'מה שנמסר — ביד; ומה שלא — נאמר בדיוק איפה הוא.' }] as const)
+        : []),
+      { e: 'toast', text: toast, tone: 'plain' },
+    ],
+  })
+  const claim = (handed: number): Choice => ({
+    id: 'all',
+    text: '(להגיד שהכול הגיע.)',
+    then: [
+      ...close(handed),
+      { e: 'flagValue', flag: 'p:claimed', value: 'all' },
+      { e: 'personality', key: 'honesty', delta: -3 },
+      { e: 'rel', who: 'metuki', axis: 'trust', delta: -6 },
+      { e: 'toast', text: 'מתוקי: "מישהו מהרשימה התקשר לפני רבע שעה. הוא עוד מחכה." — "..." — "אז נסמן את האמת. אני אסמן."', tone: 'red' },
+    ],
+  })
+  const partial = (n: 1 | 2, withNeighbor: boolean): Branches[number] => ({
+    when: { all: [{ flagIs: { flag: 'p:commit', value: 3 } }, { flag: HANDED(n) }, { notFlag: HANDED((n + 1) as 2 | 3) }, ...(withNeighbor ? [neighbor] : [])] },
+    lines: [
+      ...open,
+      { who: 'מתוקי', text: 'נו?' },
+      { who: 'פוגי', text: n === 2 ? 'שתיים ביד.' : 'אחת ביד.' },
+      ...(withNeighbor ? [neighborLine] : []),
+      { who: 'מתוקי', text: 'מה עם השאר?' },
+    ],
+    choices: [
+      honest(n, n === 2 ? 'מתוקי: "שתיים ביד, ואת השלישית אני יודע איפה לחפש. זה לא פחות — זה מדויק."' : 'מתוקי: "אחת ביד, ואני יודע איפה השתיים. מחר מישהו ממשיך מאיפה שעצרת."'),
+      claim(n),
+    ],
+  })
+  const none = (withNeighbor: boolean): Branches[number] => ({
+    when: { all: [{ notFlag: HANDED(1) }, ...(withNeighbor ? [neighbor] : [])] },
+    lines: [
+      ...open,
+      { who: 'מתוקי', text: 'נו?' },
+      { who: 'פוגי', text: 'אף אחת לא הגיעה ביד.' },
+      ...(withNeighbor ? [neighborLine] : []),
+    ],
+    choices: [honest(0, 'מתוקי: "אז הן חוזרות לפה, ומחר מישהו אחר. תודה שאמרת ולא שתקת."')],
+  })
+  return [
+    {
+      when: { all: [{ flagIs: { flag: 'p:commit', value: 3 } }, { flag: HANDED(3) }] },
+      lines: [...open, { who: 'מתוקי', text: 'נו?' }, { who: 'פוגי', text: 'שלוש. ביד.' }, { who: 'מתוקי', text: 'גם שלמה?' }, { who: 'פוגי', text: 'גם שלמה. רק לא בכתובת שכתבת.' }],
+      then: [
+        ...close(3),
+        { e: 'energy', delta: -4 },
+        { e: 'skill', skill: 'organization', delta: 3, why: 'שלוש, ואישור על כל אחת' },
+        { e: 'rel', who: 'metuki', axis: 'bond', delta: 2 },
+        { e: 'rel', who: 'metuki', axis: 'trust', delta: 3 },
+        { e: 'proof', kind: 'crisis_delivery', proofId: 'crisis_delivery:{chapter}:three', subjectHe: 'שלוש המסירות', audience: 'gate5', delta: 4, noteHe: 'שלוש יצאו, שלוש הגיעו, ויש אישור על כל אחת.' },
+        { e: 'heard', proofId: 'crisis_delivery:{chapter}:three' },
+        { e: 'toast', text: 'מתוקי: "קיבלתי אישורים." — "עכשיו אתה הולך הביתה?" — "אם אתה עושה את הרביעית מחר."', tone: 'plain' },
+      ],
+    },
+    {
+      when: { all: [{ flagIs: { flag: 'p:commit', value: 1 } }, { flag: HANDED(1) }] },
+      lines: [...open, { who: 'מתוקי', text: 'נו?' }, { who: 'פוגי', text: 'אחת. ביד.' }],
+      then: [
+        ...close(1),
+        { e: 'rel', who: 'metuki', axis: 'bond', delta: 2 },
+        { e: 'rel', who: 'metuki', axis: 'trust', delta: 3 },
+        { e: 'proof', kind: 'crisis_delivery', proofId: 'crisis_delivery:{chapter}:one', subjectHe: 'המסירה האחת', noteHe: 'הבטיח אחת, וקיים אותה.' },
+        { e: 'toast', text: 'מתוקי: "אחת באמת יותר משלוש בערך." — "אתה צריך להדפיס את זה על חולצה."', tone: 'plain' },
+      ],
+    },
+    partial(2, true),
+    partial(2, false),
+    partial(1, true),
+    partial(1, false),
+    none(true),
+    none(false),
+  ] as Branches
+}
+
+export const CONVERSATIONS_CRISIS_QUEST: Conversation[] = [
+  // ---- P01 · שלושה קולות בקיוסק, ואחד מהם שמועה ----
+  {
+    id: 'p-src-doc',
+    nameHe: 'פרדי',
+    branches: [
+      { when: { flag: 'p:src:doc' }, lines: [{ who: 'פרדי', text: 'זה אותו דף. הוא לא השתנה מאז שקראת.' }] },
+      {
+        lines: [
+          { who: null, text: 'דף מודפס, מקופל לארבע, עם חותמת בפינה.' },
+          { who: null, text: '{anchor}.' },
+          { who: 'פרדי', text: 'זה מה שיש ביד. לא יותר ולא פחות.' },
+          { who: 'פוגי', text: 'כתוב פה ״אין קבוצה״?' },
+          { who: 'פרדי', text: 'כתוב פה שיש הליך. את השאר אנשים כותבים לבד.' },
+        ],
+        then: [{ e: 'flag', flag: 'p:src:doc' }, { e: 'time', minutes: 4 }],
+      },
+    ],
+  },
+  {
+    id: 'p-src-news',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'p:src:news' }, lines: [{ who: null, text: 'אותה כתובית רצה, בפעם הרביעית. היא לא אומרת יותר ממה שאמרה.' }] },
+      {
+        lines: [
+          { who: null, text: 'הטלוויזיה מעל הדלפק, בלי קול. כתובית רצה מתחת לקריין: צו הקפאת הליכים לחברה שמפעילה את הקבוצה.' },
+          { who: null, text: 'ובשורה השנייה, קטנה יותר: הקבוצה ממשיכה לשחק בזמן ההליך.' },
+        ],
+        then: [{ e: 'flag', flag: 'p:src:news' }, { e: 'time', minutes: 3 }],
+      },
+    ],
+  },
+  {
+    id: 'p-src-rumour',
+    nameHe: 'אופיר',
+    branches: [
+      { when: { flag: 'p:src:rumour' }, lines: [{ who: 'אופיר', text: 'עכשיו כבר שש פעמים. אותה הודעה.' }] },
+      {
+        lines: [
+          { who: null, text: 'הודעה שהועברה ארבע פעמים: ״סוגרים את הקבוצה. אין משחק בשבת.״ בלי שם, בלי מקור.' },
+          { who: 'אופיר', text: 'זה מהקבוצה של העבודה.' },
+          { who: 'פוגי', text: 'ומי כתב?' },
+          { who: 'אופיר', text: 'מישהו ששמע.' },
+        ],
+        then: [{ e: 'flag', flag: 'p:src:rumour' }, { e: 'time', minutes: 2 }],
+      },
+    ],
+  },
+  {
+    id: 'p-repeat',
+    nameHe: 'עמית',
+    branches: [
+      {
+        lines: [
+          { who: 'עמית', text: 'אז מה אני כותב לחבר׳ה? הם מחכים לך, לא לי.' },
+        ],
+        choices: [
+          {
+            id: 'fact',
+            text: '(רק מה שבדף ובחדשות: צו הקפאת הליכים, והקבוצה ממשיכה לשחק. לא ״אין קבוצה״.)',
+            when: SRC_SEEN,
+            noteHe: 'עוד לא ראית את שני המקורות — הדף של פרדי, והחדשות בטלוויזיה.',
+            then: [
+              { e: 'flagValue', flag: 'p:info', value: 'verified' },
+              { e: 'flagValue', flag: CRISIS_REPEAT, value: 'verified' },
+              { e: 'skill', skill: 'knowledge', delta: 3, why: 'הפריד ידוע מלא-ידוע' },
+              { e: 'toast', text: 'פרדי: "זה ידוע. זה עוד לא." — "אז את השני אני לא מציג כעובדה."', tone: 'plain' },
+            ],
+          },
+          {
+            /**
+             * §8 — עיתונאי ומה שמותר לפרסם: אותה בדיקה, והיא יוצאת בשם, עם המקור. רק למי שעל
+             * המסלול, ורק אחרי שני המקורות.
+             */
+            id: 'column',
+            text: '(לכתוב את זה בטור — רק מה שבשני המקורות, ועם המקור.)',
+            when: { all: [SRC_SEEN, { route: { id: 'JOURNALIST' } }] },
+            hidden: true,
+            then: [
+              { e: 'flagValue', flag: 'p:info', value: 'verified' },
+              { e: 'flagValue', flag: CRISIS_REPEAT, value: 'published' },
+              { e: 'skill', skill: 'knowledge', delta: 3, why: 'הפריד ידוע מלא-ידוע' },
+              { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:freeze', subjectHe: 'צו ההקפאה', audience: 'public', delta: 3, noteHe: 'פרסם רק את מה שבמסמך ובחדשות, עם המקור — ולא את ההודעה שהסתובבה.' },
+              { e: 'heard', proofId: 'journalism_proof:{chapter}:freeze' },
+              { e: 'toast', text: 'פרדי: "זה ידוע. זה עוד לא." — "ואת השני אני לא כותב."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'rumour',
+            text: '(להעביר את מה שכולם אומרים. ״אין קבוצה.״)',
+            then: [
+              { e: 'flagValue', flag: 'p:info', value: 'rumour' },
+              { e: 'flagValue', flag: CRISIS_REPEAT, value: 'rumour' },
+              { e: 'toast', text: 'עמית: "שלחתי." — ואחרי דקה, בטלפון של אופיר: "אז יש משחק בשבת או לא?"', tone: 'red' },
+            ],
+          },
+          {
+            id: 'silent',
+            text: '(לא להעביר כלום הערב. מי שרוצה — ישאל אותי מחר.)',
+            then: [
+              { e: 'flagValue', flag: 'p:info', value: 'silent' },
+              { e: 'flagValue', flag: CRISIS_REPEAT, value: 'silent' },
+              { e: 'toast', text: 'עמית: "גם זו הודעה." — "רק שקטה יותר."', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  // ---- P03 · הרשימה: שלושה מקומות, וכתובת אחת שמשתנה ----
+  {
+    id: 'p-drop-a',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'דפקת פעמיים על הדלת הירוקה. אין תשובה.' },
+          { who: null, text: 'השכנה מהדלת ממול פותחת על השרשרת: ״שלמה? אצל הבת שלו. מעל בית הקפה באלנבי. חוזר בשבוע הבא.״' },
+          { who: 'פוגי', text: 'ואם אשאיר אצלך?' },
+          { who: null, text: '״אני אתן לו. אם אזכור.״' },
+        ],
+        choices: [
+          {
+            id: 'neighbor',
+            text: '(להשאיר אצל השכנה. היא תמסור.)',
+            then: [
+              { e: 'flagValue', flag: 'p:hand:a', value: 'neighbor' },
+              { e: 'time', minutes: 3 },
+              { e: 'toast', text: 'החבילה אצל השכנה. השם עליה — והיא סגרה את הדלת.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'carry',
+            text: '(לקחת את זה אליו — לאלנבי, מעל בית הקפה.)',
+            then: [
+              { e: 'flag', flag: 'p:a-moved' },
+              { e: 'toast', text: 'השם לא השתנה. הכתובת כן. אלנבי, מעל בית הקפה.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'back',
+            text: '(להחזיר את החבילה למתוקי. שיחליט הוא.)',
+            then: [
+              { e: 'flagValue', flag: 'p:hand:a', value: 'back' },
+              { e: 'toast', text: 'החבילה חוזרת איתך. מתוקי ידע מה לעשות איתה.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  handoff('p-drop-a2', 'a', [
+    { who: null, text: 'קומה ראשונה מעל בית הקפה. הבת פותחת, ושלמה מאחוריה, בנעלי בית.' },
+    { who: null, text: 'הוא מסתכל על השם, בכתב של מתוקי, ואז עליך: ״באת עד לפה?״' },
+    { who: 'פוגי', text: 'הכתובת השתנתה. השם לא.' },
+  ], 'שלמה'),
+  handoff('p-drop-b', 'b', [
+    { who: null, text: 'בני על הספסל, עם שקית כדורים של הקטנים.' },
+    { who: null, text: 'הוא קורא את השם על החבילה בקול, כאילו צריך לוודא שזה הוא.' },
+    { who: 'פוגי', text: 'זה אתה.' },
+    { who: null, text: '״אז תגיד למתוקי שהגיע. ביד.״' },
+  ], 'בני'),
+  handoff('p-drop-c', 'c', [
+    { who: null, text: 'אורנה פותחת לפני שדפקת — ראתה אותך מהחלון.' },
+    { who: null, text: '״מתוקי אמר שמישהו יבוא. לא אמר שזה אתה.״' },
+    { who: 'פוגי', text: 'גם לי הוא לא אמר, עד לפני שעה.' },
+  ], 'אורנה'),
+  { id: 'p-report', nameHe: 'מתוקי', branches: reportBranches(false) },
+  { id: 'p-report-phone', nameHe: 'מתוקי', remote: { 'מתוקי': 'phone' }, branches: reportBranches(true) },
+]
+
 // ---------------------------------------------------------------- the words ------
 
 export const CONVERSATIONS_COLLAPSE: Conversation[] = [
+  ...CONVERSATIONS_CRISIS_QUEST,
   {
     id: 'p-news',
     nameHe: 'פרדי',
@@ -163,14 +557,16 @@ export const CONVERSATIONS_COLLAPSE: Conversation[] = [
         ],
         choices: [
           {
+            /**
+             * **הבחירה היא ההתחייבות, לא הבדיקה** (90-E). הבדיקה נעשית בחדר — הדף, הטלוויזיה,
+             * הטלפון — וה-`knowledge` יוצא רק ב-`p-repeat`, למי שבאמת ראה את שני המקורות.
+             */
             id: 'verify',
             text: '(לבדוק מה ידוע ומה לא — לפני שאני מעביר.)',
             then: [
               { e: 'flag', flag: 'p:news' },
-              { e: 'time', minutes: 20 },
-              { e: 'skill', skill: 'knowledge', delta: 3, why: 'הפריד ידוע מלא-ידוע' },
-              { e: 'flagValue', flag: 'p:info', value: 'verified' },
-              { e: 'toast', text: 'פרדי: "זה ידוע. זה עוד לא." — "אז את השני אני לא מציג כעובדה."', tone: 'plain' },
+              { e: 'flagValue', flag: 'p:info', value: 'checking' },
+              { e: 'toast', text: 'פרדי: "אז נתחיל מאדם אחד וממסמך אחד." — הדף אצלו, והחדשות בטלוויזיה.', tone: 'plain' },
             ],
           },
           {
@@ -272,31 +668,32 @@ export const CONVERSATIONS_COLLAPSE: Conversation[] = [
         ],
         choices: [
           {
+            /**
+             * **התחייבות, לא דיווח** (90-E, §13 "2016 delivery"). עד היום הבחירה הזאת העבירה
+             * שעה והעניקה ראיה על שלוש מסירות שלא נעשו. עכשיו היא נותנת שלוש חבילות ביד,
+             * ושלושה מקומות בעולם נדלקים. מה שנמסר ייספר ב-`p-report`.
+             */
             id: 'three',
             text: '(שלוש מסירות — ולוודא שהגיעו.)',
             then: [
-              { e: 'flag', flag: 'p:deliver' },
-              { e: 'time', minutes: 60 },
-              { e: 'energy', delta: -10 },
-              { e: 'skill', skill: 'organization', delta: 3, why: 'שלוש, ואישור על כל אחת' },
-              { e: 'rel', who: 'metuki', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'metuki', axis: 'trust', delta: 3 },
-              { e: 'proof', kind: 'crisis_delivery', proofId: 'crisis_delivery:{chapter}:three', subjectHe: 'שלוש המסירות', audience: 'gate5', delta: 4, noteHe: 'שלוש יצאו, שלוש הגיעו, ויש אישור על כל אחת.' },
-              { e: 'heard', proofId: 'crisis_delivery:{chapter}:three' },
-              { e: 'toast', text: 'מתוקי: "קיבלתי אישורים." — "עכשיו אתה הולך הביתה?" — "אם אתה עושה את הרביעית מחר."', tone: 'plain' },
+              { e: 'flag', flag: 'p:commit' },
+              { e: 'flagValue', flag: 'p:commit', value: 3 },
+              { e: 'flagValue', flag: CRISIS_COMMIT, value: 3 },
+              { e: 'flag', flag: 'p:carry:a' },
+              { e: 'flag', flag: 'p:carry:b' },
+              { e: 'flag', flag: 'p:carry:c' },
+              { e: 'toast', text: 'מתוקי: "שלמה ברחוב, בני במגרש, אורנה באלנבי. שם על כל חבילה." — "ואישור על כל אחת."', tone: 'plain' },
             ],
           },
           {
             id: 'one',
             text: '"אחת. את זה אני יכול לקיים."',
             then: [
-              { e: 'flag', flag: 'p:deliver' },
-              { e: 'time', minutes: 20 },
-              { e: 'energy', delta: -5 },
-              { e: 'rel', who: 'metuki', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'metuki', axis: 'trust', delta: 3 },
-              { e: 'proof', kind: 'crisis_delivery', proofId: 'crisis_delivery:{chapter}:one', subjectHe: 'המסירה האחת', noteHe: 'הבטיח אחת, וקיים אותה.' },
-              { e: 'toast', text: 'מתוקי: "אחת באמת יותר משלוש בערך." — "אתה צריך להדפיס את זה על חולצה."', tone: 'plain' },
+              { e: 'flag', flag: 'p:commit' },
+              { e: 'flagValue', flag: 'p:commit', value: 1 },
+              { e: 'flagValue', flag: CRISIS_COMMIT, value: 1 },
+              { e: 'flag', flag: 'p:carry:a' },
+              { e: 'toast', text: 'מתוקי: "אז שלמה. הדלת הירוקה ברחוב, קומה שנייה." — "אחת."', tone: 'plain' },
             ],
           },
           {
@@ -305,6 +702,7 @@ export const CONVERSATIONS_COLLAPSE: Conversation[] = [
             then: [
               { e: 'flag', flag: 'p:deliver' },
               { e: 'flagValue', flag: 'p:delivery', value: 'declined' },
+              { e: 'flagValue', flag: CRISIS_COMMIT, value: 0 },
               { e: 'personality', key: 'honesty', delta: 2 },
               { e: 'toast', text: 'מתוקי: "בסדר. רק תסמן שלא אספור אותך." — "מסומן."', tone: 'plain' },
             ],

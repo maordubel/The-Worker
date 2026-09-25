@@ -145,14 +145,18 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'work', textHe: 'לירון קרא לך.', revealWhen: F('h:door'), doneWhen: F('h:work') },
     { id: 'oli', textHe: 'יש נסיעה. מישהו נוהג.', revealWhen: F('h:work'), doneWhen: F('h:oli') },
   ],
+  // (דלתא 90) 2007 — מה שנלקח נעשה בידיים: המחסן, הדף עם המספרים, הציוד לפני מחר
   '2007-table': [
-    { id: 'role', textHe: 'הקיוסק. יוסף ושחור מחכים עם הדף.', doneWhen: F('u:role') },
+    { id: 'role', textHe: 'חדר הקהילה. יוסף ושחור מחכים עם הדף.', doneWhen: F('u:role') },
+    { id: 'count', textHe: 'המחסן. מה יש, ומה חסר.', revealWhen: { flagIs: { flag: 'u:roleKind', value: 'operations' } }, doneWhen: F('u:counted') },
   ],
   '2007-registered': [
-    { id: 'deliver', textHe: 'המתנדבים. מה שהבטחת.', doneWhen: F('u:deliver') },
+    { id: 'calls', textHe: 'הדף עם המספרים. שיחה אחת בכל פעם.', revealWhen: F('u:calls'), doneWhen: ANY('u:adapted', 'u:deliver') },
+    { id: 'deliver', textHe: 'המתנדבים. מה שהבטחת — ליוסף, ביד.', doneWhen: F('u:deliver') },
     { id: 'loss', textHe: 'אוסישקין. היום.', revealWhen: F('u:deliver'), doneWhen: F('u:loss') },
   ],
   '2007-key': [
+    { id: 'kit', textHe: 'מחר בשמונה מישהו אחר פותח. להכין לו.', revealWhen: F('u:keyPlan'), doneWhen: ANY('u:sorted', 'u:listed') },
     { id: 'key', textHe: 'מחר בשמונה. מישהו צריך לפתוח.', doneWhen: F('u:key') },
   ],
   '2009-up': [
@@ -165,7 +169,11 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'cup', textHe: 'גמר הגביע.', revealWhen: F('d10:derby'), doneWhen: F('d10:cup') },
   ],
   '2010-teddy': [
-    { id: 'plan', textHe: 'אולי ליד הרכב. מי בא?', doneWhen: F('d10:plan') },
+    { id: 'plan', textHe: 'אולי ליד הרכב. מי בא?', doneWhen: ANY('d10:plan', 'd10:mode') },
+    // (דלתא 90) התוכנית היא לוגיסטיקה שעושים ברחוב: מקום, כסף, ואיך חוזרים
+    { id: 'seat', textHe: 'מקום אחד נשאר ברכב.', revealWhen: { flagIs: { flag: 'd10:mode', value: 'venue' } }, doneWhen: ANY('d10:seated', 'd10:plan') },
+    { id: 'pay', textHe: 'כרטיס ודלק — ביד של אולי.', revealWhen: F('d10:seated'), doneWhen: ANY('d10:paid', 'd10:plan') },
+    { id: 'promise', textHe: 'עמית: איך חוזרים?', revealWhen: F('d10:paid'), doneWhen: F('d10:plan') },
     { id: 'title', textHe: 'שבת. שני מגרשים.', revealWhen: F('d10:plan'), doneWhen: F('d10:title') },
     { id: 'call', textHe: 'אחרי השריקה.', revealWhen: F('d10:title'), doneWhen: F('d10:call') },
     { id: 'back', textHe: 'מי נשאר מאחור.', revealWhen: F('d10:call'), doneWhen: F('d10:back') },

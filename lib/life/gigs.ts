@@ -55,6 +55,13 @@ export type Gig = {
   where: string
   /** who offers it, on the card */
   nameHe: string
+  /**
+   * when the offer is a spot in the room rather than a person's conversation: the id prefix
+   * of the actor who has to be standing in the room for it to exist (`'rachel'` — her kitchen
+   * job is not there at ten in the morning while she is at work). Read by the free-time
+   * planner through the timetable.
+   */
+  hostActor?: string
   labelHe: string
   /** first and last chapter it exists in */
   from: string
@@ -72,6 +79,15 @@ export type Gig = {
   trait?: { key: 'reliability' | 'responsibility' | 'empathy' | 'independence' | 'courage'; delta: number }
   /** where it sits in the painting */
   at: { x: number; y: number; w: number }
+  /**
+   * מה רואים כשהעבודה מוצעת (delta 90, §22.4.1) — the thing the work is, drawn where it
+   * waits: the crates by the wall, the bottles by the bin, the bundle of papers. It is drawn
+   * only while the row is on offer (the hotspot's own `when`, rotation flag included), so a
+   * week that dealt the crates SHOWS the crates, and a week that did not shows a wall.
+   * No pixel hunting: the offer is a thing in the room, not a label that appears when a
+   * thumb happens to walk over it. `size` is a fraction of the frame's height.
+   */
+  look?: { key: string; size: number }
   /**
    * שני משחקי הכסף — a gig that opens a CARD instead of the chore scene.
    *
@@ -215,6 +231,7 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'רפי סופר אותם בלי להסתכל עליך. הפיקדון בכיס.',
     trait: { key: 'independence', delta: 2 },
     at: { x: 0.72, y: 0.86, w: 0.09 },
+    look: { key: 'propBottle', size: 0.04 },
   },
   {
     id: 'crates-kiosk',
@@ -233,6 +250,7 @@ export const GIGS: readonly Gig[] = [
     rel: { who: 'rafi', axis: 'trust', delta: 3 },
     trait: { key: 'reliability', delta: 2 },
     at: { x: 0.62, y: 0.9, w: 0.1 },
+    look: { key: 'propCrate', size: 0.075 },
   },
   {
     id: 'sweep-hall',
@@ -265,6 +283,7 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'שתים־עשרה תיבות דואר, אצבעות שחורות מדיו. הוא שילם בלי לספור פעמיים.',
     trait: { key: 'reliability', delta: 2 },
     at: { x: 0.33, y: 0.86, w: 0.08 },
+    look: { key: 'propNewspaper', size: 0.05 },
     // from 1990 the round is planned before it is walked — `activities.ts` 'papers'
     activity: 'papers',
     activityFrom: '1990',
@@ -305,6 +324,7 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'הכול בפנים לפני שנפתחו השערים, ואתה בפנים איתם.',
     trait: { key: 'responsibility', delta: 2 },
     at: { x: 0.68, y: 0.9, w: 0.1 },
+    look: { key: 'propCrate', size: 0.075 },
   },
   /**
    * שלושת הג׳ובים שמאור ביקש (5.9.2026) — שליחויות לרפי, צעיפים ודגלים לפני משחק,
@@ -325,6 +345,7 @@ export const GIGS: readonly Gig[] = [
     rel: { who: 'rafi', axis: 'trust', delta: 4 },
     trait: { key: 'reliability', delta: 3 },
     at: { x: 0.4, y: 0.86, w: 0.08 },
+    look: { key: 'propNote', size: 0.035 },
   },
   /**
    * שני ג׳ובים באלנבי — 6.9.2026, with the corner itself.
@@ -349,6 +370,7 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'הכול בפנים לפני שהוא הוריד את התריס, והוא נתן לך מטבע ותקליט שרוט "כי ממילא אף אחד לא ייקח".',
     trait: { key: 'responsibility', delta: 3 },
     at: { x: 0.15, y: 0.77, w: 0.09 },
+    look: { key: 'propCrate', size: 0.075 },
   },
   {
     id: 'sweep-allenby',
@@ -382,6 +404,7 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'הארגז ריק לפני השריקה, והידיים מלאות מטבעות.',
     trait: { key: 'courage', delta: 3 },
     at: { x: 0.36, y: 0.88, w: 0.09 },
+    look: { key: 'propScarfRed', size: 0.06 },
   },
   {
     id: 'balls-hall',
@@ -398,6 +421,7 @@ export const GIGS: readonly Gig[] = [
     rel: { who: 'usher', axis: 'bond', delta: 3 },
     trait: { key: 'responsibility', delta: 3 },
     at: { x: 0.72, y: 0.86, w: 0.09 },
+    look: { key: 'propBasketball', size: 0.032 },
   },
   {
     id: 'toto-slip',
@@ -413,6 +437,7 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'הטופס על הדלפק, והוא ספר לך את מה שהגיע.',
     trait: { key: 'independence', delta: 2 },
     at: { x: 0.52, y: 0.87, w: 0.08 },
+    look: { key: 'propScorePaper', size: 0.03 },
     opens: 'toto',
     // the slip IS the kiosk's trivia activity — its window and its tier live in `activities.ts`
     activity: 'kiosk-trivia',
@@ -432,6 +457,7 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'המטבע נפל.',
     trait: { key: 'courage', delta: 2 },
     at: { x: 0.66, y: 0.9, w: 0.08 },
+    look: { key: 'coinPali', size: 0.025 },
     opens: 'coin',
   },
   /**
@@ -527,6 +553,7 @@ export const GIGS: readonly Gig[] = [
     id: 'kitchen-help',
     where: 'kitchen',
     nameHe: 'אמא',
+    hostActor: 'rachel',
     labelHe: 'לעזור לאמא במטבח',
     from: 'a3-hall',
     hours: 0.6,
@@ -606,6 +633,7 @@ export const GIGS: readonly Gig[] = [
     doneHe: 'שלושה תיקים, שתי תודות, ומטבע אחד ביד.',
     trait: { key: 'empathy', delta: 3 },
     at: { x: 0.7, y: 0.82, w: 0.1 },
+    look: { key: 'propSportsBag', size: 0.07 },
   },
   {
     id: 'banner-gate5',
@@ -629,6 +657,7 @@ export const GIGS: readonly Gig[] = [
     rel: { who: 'asaf', axis: 'trust', delta: 4 },
     trait: { key: 'reliability', delta: 4 },
     at: { x: 0.36, y: 0.88, w: 0.1 },
+    look: { key: 'propBanner', size: 0.07 },
   },
 
   /**
@@ -721,6 +750,7 @@ export const GIGS: readonly Gig[] = [
     trait: { key: 'independence', delta: 2 },
     // the left of the colonnade, clear of gate seven's portal (0.45–0.58) and the fence at 0.08
     at: { x: 0.17, y: 0.93, w: 0.07 },
+    look: { key: 'propBottle', size: 0.04 },
     activity: 'bottles',
     activityFrom: '1990',
     rotates: false,
@@ -856,9 +886,28 @@ export function gigActivity(gig: Gig, chapter: string): ActivityDef | null {
  * activity settles when it ends (`settleActivity`), because a job that paid on the handshake
  * would make the game decoration.
  */
+/**
+ * עבודה / התערבות / משחק — said on the button itself (delta 90, §22.3).
+ *
+ * The player should never wonder whether a thing is a job, a bet or just play, and the
+ * handshake is the moment he decides. So a paid row's choice reads `עבודה: … — עד 12 ₪ ·
+ * כ־45 דק׳` and a bet's `התערבות: …`. A game's door is left exactly as the boy says it
+ * ("אני הפועל." IS the door — `tests/life-progress`), because a label on it would be the
+ * menu talking over the child.
+ */
+export const GIG_KIND_HE: Record<GigKind, string> = { work: 'עבודה', wager: 'התערבות', play: 'משחק' }
+
+function labelled(gig: Gig, text: string, pay: number, minutes: number): string {
+  const kind = kindOf(gig)
+  if (kind === 'play') return text
+  const money = pay > 0 ? ` — עד ${pay} ₪` : ''
+  const time = minutes > 0 ? ` · כ־${minutes} דק׳` : ''
+  return `${GIG_KIND_HE[kind]}: ${text}${money}${time}`
+}
+
 function activityGigConversation(gig: Gig, chapter: string, act: ActivityDef): Conversation {
   const top = payShekels(act, chapter, 1)
-  const quote = (text: string) => (top > 0 ? `${text} — עד ${top} ₪` : text)
+  const quote = (text: string) => labelled(gig, text, top, act.minutes)
   const choices: ChoiceDef[] = gig.steps
     ? gig.steps.map((step) => ({
         id: `do-${step.id}`,
@@ -942,7 +991,7 @@ export function gigConversations(): Conversation[] {
                  * Appending "— עד 0 ₪" to that would be the funniest possible way to break
                  * a scene.
                  */
-                text: gig.opens === 'coin' || gig.opens === 'pitch' ? gig.askHe : `${gig.askHe} — עד ${pay} ₪`,
+                text: gig.opens === 'coin' || isPlay(gig) ? labelled(gig, gig.askHe, 0, gig.minutes) : labelled(gig, gig.askHe, pay, act?.minutes ?? gig.minutes),
                 /**
                  * The conversation agrees to the work; `ChoreScene` is the work. Nothing is
                  * paid here on purpose — the pay depends on how it went, and a gig that
@@ -951,11 +1000,15 @@ export function gigConversations(): Conversation[] {
                 then: [
                   ...(gig.rel ? [{ e: 'rel' as const, who: gig.rel.who, axis: gig.rel.axis, delta: gig.rel.delta }] : []),
                   ...(gig.opens === 'toto'
-                    ? [
-                        { e: 'flag' as const, flag: gigFlag(gig) },
-                        { e: 'flag' as const, flag: workDoneFlag(chapter) },
-                        { e: 'toto' as const },
-                      ]
+                    ? /**
+                       * The slip no longer claims the day's work on the handshake (delta 90,
+                       * §22.7 "reload safe"): the kiosk's activity settlement raises the gig
+                       * and the work flags when the slip is handed in, exactly like every other
+                       * activity. Before, a reload between "yes" and the slip spent the
+                       * chapter's paid work and paid nothing for it. The slip's own deal is
+                       * seeded off the minute, so a reload deals the same five questions.
+                       */
+                      [{ e: 'toto' as const }]
                     : gig.opens === 'coin'
                       ? [{ e: 'flag' as const, flag: workDoneFlag(chapter) }, { e: 'coin' as const }]
                       : gig.opens === 'penalty'

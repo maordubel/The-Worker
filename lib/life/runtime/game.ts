@@ -9,6 +9,7 @@ import { eraFor, type AnchorSet } from '../content/era'
 import type { LifeEngine } from '../engine'
 import { missedIn, takenIn } from '../opportunities'
 import { buildProfile, type LifeProfile } from '../profile'
+import { packetClosed, purchasePacket } from '../stickers'
 import type { LifeState } from '../types'
 import type { MechanicCatalog } from '../../mechanics/types'
 
@@ -95,8 +96,14 @@ export type LifeRuntime = {
   choose(id: string): void
   /** walk away mid-conversation: nothing is applied, the box just closes */
   leave(): void
-  /** buy one Supergoal packet at the fan shop's counter — the same transaction Rafi runs */
-  buyPacket(): void
+  /**
+   * buy one Supergoal packet at a counter — `purchasePacket` in `stickers.ts`, the ONE
+   * transaction (delta 90, §21). Refusals are said (toast) before any money moves; a
+   * packet already paid for and not yet shown is shown again, never charged twice.
+   */
+  buyPacket(): import('../stickers').PacketStatus
+  /** the reveal was put down (album or back to the room) — clears the pending packet */
+  closePacket(): void
   dismissEnding(): void
   /** the end-of-stage celebration's own button — the ending card no longer goes home */
   dismissFinale(): void
@@ -151,6 +158,13 @@ export type LifeRuntime = {
   tunnelProgress(p: number): void
   /** walk there — the minutes are charged to the clock like any journey; refused if locked */
   goTo(id: string): boolean
+  /**
+   * זמן פנוי — the plan as it stands right now, recalculated (the planner reads this on
+   * open, never a copy it kept), and the one way the shell may ask for time to pass: by
+   * plan id. The world re-plans at the tap, refuses a stale plan, and moves itself.
+   */
+  freeTime(): import('../world/timeAdvance').TimeAdvancePlan | null
+  advanceTime(planId: string): import('../world/timeAdvance').AdvanceResult
   /** cut the log back to the start of the chapter; false when there is none */
   restartDay(): boolean
   /**
@@ -182,6 +196,8 @@ export type LifeRuntime = {
     /** what the balloon's tail is told about a speaker, and the state behind that answer */
     anchor(who: string | null): { anchor: number | null; speaking: string | null; view: number; names: string[] } | null
     where(): unknown
+    /** the last free-time landing report (§33) — null before any advance */
+    landing(): unknown
   }
   destroy(): void
 }
@@ -334,7 +350,25 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     advance: () => dialogue.advance(),
     choose: (id: string) => dialogue.choose(id),
     leave: () => dialogue.leave(),
-    buyPacket: () => dialogue.buyPacket(),
+    buyPacket: () => {
+      const engine = options.engine
+      const bought = purchasePacket(engine.state)
+      if (bought.events.length > 0) {
+        engine.dispatch(...bought.events)
+        void engine.save()
+      }
+      if (bought.reveal) options.bus.emit('packet', bought.reveal)
+      else if (bought.quote.sayHe) options.bus.emit('toast', { text: bought.quote.sayHe, tone: 'plain' })
+      if (bought.fullHe) options.bus.emit('toast', { text: bought.fullHe, tone: 'red' })
+      if (bought.kept.length > 0) options.bus.emit('kept', { ids: bought.kept })
+      return bought.quote.status
+    },
+    closePacket: () => {
+      const events = packetClosed(options.engine.state)
+      if (events.length === 0) return
+      options.engine.dispatch(...events)
+      void options.engine.save()
+    },
     dismissEnding: () => worldScene()?.goHome(),
     dismissFinale: () => worldScene()?.dismissFinale(),
     markOpening: () => {
@@ -367,6 +401,9 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
     finishTunnel: () => worldScene()?.finishTunnel(),
     tunnelProgress: () => undefined,
     goTo: (id: string) => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.goTo(id) ?? false : false),
+    freeTime: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.freeTime() ?? null : null),
+    advanceTime: (planId: string) =>
+      game.scene.isActive(WorldScene.KEY) ? worldScene()?.advanceTime(planId) ?? { ok: false, reason: 'no-world' } : { ok: false, reason: 'no-world' },
     restartDay: () => options.engine.restartDay(),
     debug: {
       jump: (minutes: number) => options.engine.dispatch({ t: 'clock.advanced', minutes }),
@@ -389,6 +426,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       /** what the balloon's tail is told about a speaker, and why — see `anchorFor` */
       anchor: (who: string | null) =>
         game.scene.isActive(WorldScene.KEY) ? worldScene()?.anchorDebug(who) ?? null : null,
+      landing: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.lastLanding ?? null : null),
       where: () => {
         const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
         if (passage && game.scene.isActive(PassageScene.KEY)) return passage.where()

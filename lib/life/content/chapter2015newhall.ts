@@ -36,6 +36,8 @@ export const PORTRAIT_NEWHALL: Record<string, string> = {
 export function objectiveNewHall(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (!state.flags['nr:hall']) return sceneId === 'drive-in' ? null : 'הדרייב אין. אפי רוצה להראות משהו, ומתוקי בא.'
+  // (90-E) "הפעם אני בדקתי" — the checking is a sign at the drive-in, before the question at home
+  if (!state.flags['nr:route'] && sceneId === 'drive-in' && !state.flags['nr:checked']) return 'לפני שהולכים — השלט בתחנה ליד החניה. אבא ישאל מאיפה יוצאים.'
   if (!state.flags['nr:route']) return sceneId === 'home' ? null : 'אצל אבא. הוא שואל מאיפה יוצאים.'
   return null
 }
@@ -77,6 +79,19 @@ export const BEATS_NEWHALL: Beat[] = [
 ]
 
 export const CONVERSATIONS_NEWHALL: Conversation[] = [
+  {
+    id: 'nr-check',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'ליד החניה, שלט של תחנה: שני קווים, ואחד מהם עובר גם בשבת בערב.' },
+          { who: null, text: 'ומתחת, בכתב יד: ״הכביש לחניה נסגר אחרי משחקים — לצאת מהשער האחורי.״ דרך, וחלופה.' },
+        ],
+        then: [{ e: 'flag', flag: 'nr:checked' }, { e: 'time', minutes: 5 }],
+      },
+    ],
+  },
   {
     id: 'nr-hall',
     nameHe: 'אפי',
@@ -140,9 +155,17 @@ export const CONVERSATIONS_NEWHALL: Conversation[] = [
         ],
         choices: [
           {
+            /**
+             * (90-E, Stage D — "classify hard") **המשפט "הפעם אני בדקתי" צריך בדיקה מאחוריו.**
+             * השלט בתחנה שליד הדרייב-אין (`nr-check`) הוא הבדיקה: שני קווים, וחלופה כשהכביש
+             * נסגר. בלעדיו הבחירה אפורה, ושתי האחרות פתוחות — שום חיים לא נתקעים.
+             */
             id: 'lead',
             text: '(מסלול, חלופה — ואני מוביל.)',
+            when: { flag: 'nr:checked' },
+            noteHe: 'עוד לא בדקת. בדרייב-אין, השלט בתחנה שליד החניה — משם יוצאים ומשם חוזרים.',
             then: [
+              { e: 'flagValue', flag: 'life:route2015', value: 'led' },
               { e: 'flag', flag: 'nr:route' },
               { e: 'time', minutes: 45 },
               { e: 'energy', delta: -5 },

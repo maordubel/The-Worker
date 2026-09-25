@@ -1,7 +1,7 @@
 import { beatFlag, type Beat } from '../content/beats'
 import type { Era } from '../content/era'
 import type { Condition } from './types'
-import type { LifeState } from '../types'
+import type { LifeState, LocationId } from '../types'
 import { unmet } from './why'
 import { actionsNow } from './actions'
 
@@ -19,6 +19,26 @@ export type TimeGate = {
   beatId: string
   minute: number
   waitingHe?: string
+  /**
+   * WHERE the next thing happens (SMART FREE TIME §13) — a beat's own `at`, or the room an
+   * era gate names (Rachel's key in the door is in the living room). Omitted: anywhere.
+   */
+  at?: LocationId | readonly LocationId[]
+  freeTime?: FreeTimeMeta
+}
+
+/**
+ * Optional, never required (§14): what the planner may not be able to read off the world.
+ * `eventHe` names the event in the player's words; `arrivalBufferMinutes` overrides the
+ * room's own buffer; `allowAutoTravel: false` keeps the walk in the player's hands (a walk
+ * that IS the scene); `person: true` says the event is somebody arriving, so the wait lands
+ * on the minute itself and the person is standing there.
+ */
+export type FreeTimeMeta = {
+  eventHe?: string
+  arrivalBufferMinutes?: number
+  allowAutoTravel?: boolean
+  person?: boolean
 }
 
 const needsOf = (state: LifeState, when?: Condition) => unmet(state, when)
@@ -43,9 +63,23 @@ export function nextTimeGate(state: LifeState, era: Era): TimeGate | null {
     const minute = waitsUntil(beat.when)
     if (minute < 0 || minute <= state.minute) continue
     if (!best || minute < best.minute) {
-      best = { beatId: beat.id, minute, ...(beat.waitingHe ? { waitingHe: beat.waitingHe } : {}) }
+      best = {
+        beatId: beat.id,
+        minute,
+        ...(beat.waitingHe ? { waitingHe: beat.waitingHe } : {}),
+        ...(beat.at ? { at: beat.at } : {}),
+        ...(beat.freeTime ? { freeTime: beat.freeTime } : {}),
+      }
     }
   }
+  /*
+   * A chapter the scene class directs (1991) has no beats to wait on, and its day still
+   * has hours in which the only next thing is a person arriving — Rachel at three, the
+   * doors at seven. The era names those gates itself (`Era.timeGate`, delta 90), so the
+   * same card, Help and action graph see them (§12 C).
+   */
+  const own = era.timeGate?.(state) ?? null
+  if (own && own.minute > state.minute && (!best || own.minute < best.minute)) best = own
   return best
 }
 
@@ -60,7 +94,13 @@ export type FlowInput = {
   reachable: number
 }
 
-/** Roughly a second or two of real play at the base world clock — never 25 game-minutes. */
+/**
+ * How many quiet game-minutes before the room NUDGES (a hint toast) — about a second and a
+ * half of real play. It is no longer the trigger for any card: a pure time gate is DETECTED
+ * at once (SMART FREE TIME §30), and when the free-time chip and its planner appear is a
+ * real-time decision the shell makes (`FREE_TIME_TIMING` in `timeAdvance.ts`), because
+ * "two to four seconds" is a promise about a person's patience, not about the world clock.
+ */
 export const QUIET_MINUTES = 1
 
 export function shouldOfferPass(input: FlowInput): TimeGate | null {
@@ -83,10 +123,12 @@ export type FlowMove = { kind: 'pass'; gate: TimeGate } | { kind: 'nudge' }
  */
 export function flowMove(input: FlowInput): FlowMove | null {
   if (input.busy) return null
-  if (input.quietFor < QUIET_MINUTES) return null
 
+  // detection is immediate; the shell paces the invitation in real seconds (§30)
   const gate = nextTimeGate(input.state, input.era)
   if (gate) return { kind: 'pass', gate }
+
+  if (input.quietFor < QUIET_MINUTES) return null
 
   if (input.reachable === 0) return null
   if (!input.objectiveHe) return null
@@ -98,6 +140,8 @@ export function flowMove(input: FlowInput): FlowMove | null {
   return { kind: 'nudge' }
 }
 
-/** the minute the jump lands on: just before the beat, so the beat still plays */
-export const LANDS_BEFORE = 3
-export const landingMinute = (gate: TimeGate) => Math.max(0, gate.minute - LANDS_BEFORE)
+/*
+ * There used to be a fixed three-minute landing here: every skip landed three minutes before
+ * the beat, wherever the beat was and however far away. It is gone (SMART FREE TIME §14):
+ * where and when an advance lands is `world/timeAdvance.ts` — event − travel − buffer.
+ */

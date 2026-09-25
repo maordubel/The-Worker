@@ -234,12 +234,12 @@ export const ITEMS: Record<ItemId, { nameHe: string; noteHe: string }> = {
  * is explicit: no giant QUEST marker. This is the difference between "the day has a
  * shape" and "do this next".
  */
+// (delta 90, §11.14) `findKey` ("המפתח במגירה"), `askDad` and `afterKobi` retired: the key
+// has not been an objective since V3 and no line read the other two. Stale objective copy
+// in a canonical file is how a retired key hunt comes back.
 export const OBJECTIVES = {
-  findKey: 'שבת בבוקר. המפתח במגירה.',
-  askDad: 'אבא בסלון.',
   matchToday: 'היום יש משחק.',
   decideToday: 'אבא יוצא לבלומפילד. הוא כבר אמר לא. מה אתה עושה עם זה?',
-  afterKobi: 'אבא יצא.',
   onTheWay: 'ללכת אחרי האנשים, מזרחה.',
   atGround: 'למצוא דרך פנימה.',
   findKobi: 'למצוא את אבא.',

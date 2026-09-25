@@ -73,6 +73,11 @@ export type Beat = {
    * TOLD he is waiting, or he assumes the game is broken. Omit it and no banner shows.
    */
   waitingHe?: string
+  /**
+   * זמן פנוי — optional hints for the free-time planner (`world/timeAdvance.ts`, delta 90).
+   * Never required: without it the planner reads `at`, `waitingHe` and the room itself.
+   */
+  freeTime?: import('../world/flow').FreeTimeMeta
   do: readonly BeatAction[]
 }
 

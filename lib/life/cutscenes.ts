@@ -40,9 +40,56 @@ export type CutsceneOutcome =
   /** YouTube could not play it: embedding off, video gone, offline, API dead */
   | 'unavailable'
 
+/**
+ * How sure the game is that this film is the thing it says it is (design pass v2 §23.6).
+ *
+ * Registry presence is not proof of anything: an id copied out of an old document is a
+ * candidate until somebody has opened it and checked it is the right match, that it
+ * embeds, and whose it is. Only `locked_verified` may open by itself in the middle of a
+ * chapter; everything else is at most an archive link a player chooses to open.
+ */
+export type FootageStatus =
+  /** the owner chose it and it has been watched against the archive row — may auto-play */
+  | 'locked_verified'
+  /** sourced to the archive (a `films` row in `history/days.ts`) — optional, never automatic */
+  | 'verified_optional'
+  /** an id with no recorded check: never auto-plays, waits for a live look */
+  | 'candidate_needs_live_check'
+  /** period footage — never presented as the playable match */
+  | 'context_only'
+  /** checked and refused; kept only so the id is not proposed again */
+  | 'rejected'
+
+/**
+ * What the film is FOR (design pass v2 §23.4). Four roles, and only the first interrupts play.
+ */
+export type FootageRole =
+  /** a rare historical eruption inside the story, after the player has done the playable work */
+  | 'CINEMATIC_PAYOFF'
+  /** original highlights after an event or an ending — opened by choice */
+  | 'ARCHIVE_FOOTAGE'
+  /** a clip the Red Box unlocks later, as a documentary memory */
+  | 'RED_BOX_BONUS'
+  /** period context — never the exact match unless verified */
+  | 'BACKGROUND_CONTEXT'
+
 export type HistoricalCutscene = {
   /** stable id, stored in the save as part of a flag — never a description */
   id: string
+  /** the chapter this film belongs to (`content/chapters.ts` id) */
+  chapter: string
+  /** §23.6 — see `FootageStatus` */
+  status: FootageStatus
+  /** §23.4 — see `FootageRole` */
+  role: FootageRole
+  /**
+   * Where the game opens it, in words a test can hold: `era:<chapter>@<step>` for the
+   * chapter's own film (`Era.cutscene`, played at the step named), `beat:<id>` for a
+   * beat's `{ a: 'cutscene' }`, or null for a film nothing opens automatically.
+   */
+  trigger: string | null
+  /** why the status is what it is — the provenance, one line */
+  provenanceHe: string
   /** the YouTube video id, not a URL */
   youtubeId: string
   /** what this piece of film IS, in the game's voice — never a claim about the match */
@@ -128,7 +175,7 @@ export function cutsceneCard(scene: HistoricalCutscene, anchor: HistoricalAnchor
 }
 
 /**
- * The whole registry. One entry today, and it is written the way the tenth will be.
+ * The whole registry. Six entries, and only one of them may open by itself (§23.6).
  *
  * `dFykPEa8NAE` is the full televised summary of the match rather than the goal on its
  * own, and that was Maor's call: an eight-year-old on that terrace did not see a clip of
@@ -138,27 +185,42 @@ export function cutsceneCard(scene: HistoricalCutscene, anchor: HistoricalAnchor
  */
 export const CUTSCENES: Record<string, HistoricalCutscene> = {
   '1993-cup': {
-    id: '1993-cup', youtubeId: 'I5FHT27dRgY', titleHe: 'גמר הגביע — ארכיון', subtitleHe: 'אחרי שפוגי כבר יודע מה קרה',
+    id: '1993-cup', chapter: '1993-cup', status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', trigger: null,
+    provenanceHe: 'מזהה בלי בדיקה מתועדת ובלי שורת films בארכיון. מחכה לצפייה חיה לפני כל שימוש.',
+    youtubeId: 'I5FHT27dRgY', titleHe: 'גמר הגביע — ארכיון', subtitleHe: 'אחרי שפוגי כבר יודע מה קרה',
     sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=I5FHT27dRgY', completionFlag: 'cutscene:1993-cup', watchedFlag: 'watched:1993-cup', nextObjectiveHe: 'הלילה עוד לא נגמר.', fallbackHe: 'הארכיון לא נפתח. הזיכרון המאויר ממשיך.',
   },
   '1999-basket-context': {
-    id: '1999-basket-context', youtubeId: 'GFRF2t7jXXE', titleHe: '1999 — הקשר מהארכיון', subtitleHe: 'תיעוד תקופה, לא צילום של משחק הירידה',
+    id: '1999-basket-context', chapter: '1999-basket', status: 'context_only', role: 'BACKGROUND_CONTEXT', trigger: null,
+    provenanceHe: 'תיעוד תקופה, לא צילום של משחק הירידה — מסומן כך מאז שנרשם.',
+    youtubeId: 'GFRF2t7jXXE', titleHe: '1999 — הקשר מהארכיון', subtitleHe: 'תיעוד תקופה, לא צילום של משחק הירידה',
     sourceTitle: 'תיעוד תקופה — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=GFRF2t7jXXE', completionFlag: 'cutscene:1999-basket-context', watchedFlag: 'watched:1999-basket-context', nextObjectiveHe: 'חזרה לתל אביב.', fallbackHe: 'התיעוד לא נפתח. הסיפור ממשיך בלי להמציא צילום שלא קיים.',
   },
   '2000-title': {
-    id: '2000-title', youtubeId: 'pdQLDp_-Xgo', titleHe: 'האליפות — ארכיון', subtitleHe: 'רק אחרי שהאישור הגיע',
+    id: '2000-title', chapter: '2000-title', status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', trigger: null,
+    provenanceHe: 'מזהה בלי בדיקה מתועדת. לארכיון של 13.5.2000 אין שורת films.',
+    youtubeId: 'pdQLDp_-Xgo', titleHe: 'האליפות — ארכיון', subtitleHe: 'רק אחרי שהאישור הגיע',
     sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=pdQLDp_-Xgo', completionFlag: 'cutscene:2000-title', watchedFlag: 'watched:2000-title', nextObjectiveHe: 'עוד ארבעה ימים גמר גביע.', fallbackHe: 'הארכיון לא נפתח. החגיגה המאוירת ממשיכה.',
   },
   '2000-double': {
-    id: '2000-double', youtubeId: 'RO14bGFcD-Q', titleHe: 'גמר הגביע — ארכיון', subtitleHe: 'הדאבל',
+    id: '2000-double', chapter: '2000-double', status: 'verified_optional', role: 'ARCHIVE_FOOTAGE', trigger: null,
+    provenanceHe: 'אותו מזהה כמו film-00-full ("תקציר המשחק") בארכיון של 17.5.2000, מקור ויקיפועל — פתוח מדוח המשחק, לא אוטומטי.',
+    youtubeId: 'RO14bGFcD-Q', titleHe: 'גמר הגביע — ארכיון', subtitleHe: 'הדאבל',
     sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=RO14bGFcD-Q', completionFlag: 'cutscene:2000-double', watchedFlag: 'watched:2000-double', nextObjectiveHe: 'הדרך הביתה.', fallbackHe: 'הארכיון לא נפתח. הגמר והדרך הביתה ממשיכים במשחק.',
   },
   '2000-penalties': {
-    id: '2000-penalties', youtubeId: 'EGlBnUQN5AQ', titleHe: 'הפנדלים — ארכיון', subtitleHe: 'רגע ממוקד מתוך הגמר',
+    id: '2000-penalties', chapter: '2000-double', status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', trigger: null,
+    provenanceHe: 'סותר את הארכיון: film-00-pens של 17.5.2000 הוא RvyReKDwCC0, ולא המזהה הזה. לא בשימוש עד הכרעה.',
+    youtubeId: 'EGlBnUQN5AQ', titleHe: 'הפנדלים — ארכיון', subtitleHe: 'רגע ממוקד מתוך הגמר',
     sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=EGlBnUQN5AQ', completionFlag: 'cutscene:2000-penalties', watchedFlag: 'watched:2000-penalties', nextObjectiveHe: 'לנשום. ואז הביתה.', fallbackHe: 'הקטע לא נפתח. רגע הפנדלים המאויר ממשיך.',
   },
   '1986-championship': {
     id: '1986-championship',
+    chapter: '1986',
+    status: 'locked_verified',
+    role: 'CINEMATIC_PAYOFF',
+    trigger: 'era:1986@final-86/goal',
+    provenanceHe: 'בחירה של מאור (סיכום השידור המלא), על שורת הארכיון 24.5.1986. כל דרכי הכישלון נבדקות בדפדפן (footage-probe); ההטמעה עצמה — לאשר פעם אחת ב-/qa/life-cutscene.',
     youtubeId: 'dFykPEa8NAE',
     titleHe: 'משחק האליפות',
     subtitleHe: 'שידור מהארכיון',
@@ -166,13 +228,30 @@ export const CUTSCENES: Record<string, HistoricalCutscene> = {
     sourceUrl: 'https://www.youtube.com/watch?v=dFykPEa8NAE',
     completionFlag: 'cutscene:1986-championship',
     watchedFlag: 'watched:1986-championship',
-    nextObjectiveHe: 'מצא את אבא',
+    // the same sentence the chapter's objective prints once the film is behind him
+    nextObjectiveHe: 'למצוא את אבא.',
     fallbackHe: 'הסרט מהארכיון לא נפתח. תסתכל על המגרש — המשחק עוד רץ.',
   },
 }
 
 export function cutsceneFor(id: string): HistoricalCutscene | null {
   return CUTSCENES[id] ?? null
+}
+
+/**
+ * Only verified cinematic payoffs open by themselves (§23.6). Everything else in the
+ * registry is an archive film a player chooses, and a chapter that names one as its
+ * automatic film simply plays on without it — the same fall-through as an unknown id.
+ */
+export function autoPlayable(scene: HistoricalCutscene): boolean {
+  return scene.status === 'locked_verified' && scene.role === 'CINEMATIC_PAYOFF'
+}
+
+/** the film a chapter or a beat may open WITHOUT the player asking — or null */
+export function autoCutsceneFor(id: string | null | undefined): HistoricalCutscene | null {
+  if (!id) return null
+  const scene = cutsceneFor(id)
+  return scene && autoPlayable(scene) ? scene : null
 }
 
 /**

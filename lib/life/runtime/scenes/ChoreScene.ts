@@ -283,8 +283,9 @@ export class ChoreScene extends Phaser.Scene {
     }
 
     // (V3 §10) a story chore can be stopped halfway, and what was carried counts: the
-    // button with empty hands, after a breath, puts the work down
-    if (this.story && this.shape.mode === 'carry' && !this.carried && this.ctx.input.actionPressed && time > this.startedAt + 900) {
+    // button with empty hands, after a breath, puts the work down. A `serve` shape uses the
+    // button to serve, so it stops only when the clock does.
+    if (this.story && this.shape.mode !== 'serve' && !this.carried && this.ctx.input.actionPressed && time > this.startedAt + 900) {
       this.finish()
       return
     }

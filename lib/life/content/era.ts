@@ -8,7 +8,7 @@ import type { Beat } from './beats'
 import { AMBIENT_1986, AMBIENT_1990, type AmbientActor } from './ambient1986'
 import { ENDINGS, OBJECTIVES, PORTRAIT, type EndingCard } from './chapter1986'
 import { ENDINGS_1990, OBJECTIVES_1990, PORTRAIT_1990 } from './chapter1990'
-import { ENDINGS_1991, OBJECTIVES_1991, PORTRAIT_1991, TIP_OFF } from './chapter1991'
+import { ENDINGS_1991, OBJECTIVES_1991, PORTRAIT_1991, TIP_OFF, timeGate1991 } from './chapter1991'
 import { BEATS_1993, ENCOUNTERS_1993, ENDINGS_1993, objective1993, PORTRAIT_1993, TIP_OFF_93 } from './chapter1993cup'
 import { BEATS_GALIL, ENDINGS_GALIL, objectiveGalil, PORTRAIT_GALIL } from './chapter1993galil'
 import { BEATS_SINAI, ENDINGS_SINAI, objectiveSinai, PORTRAIT_SINAI } from './chapter1995sinai'
@@ -132,6 +132,11 @@ export type Era = {
   goal?: (state: LifeState) => LocationId | null
   /** the archival film this chapter may open onto, by registry id; null when there is none */
   cutscene: string | null
+  /**
+   * §12 C for a chapter without beats: when only TIME stands between the player and the
+   * next meaningful thing, the gate it is waiting on (see `world/flow.ts`). Optional.
+   */
+  timeGate?: (state: LifeState) => import('../world/flow').TimeGate | null
   player: PlayerFigure
   /** prefix for memory ids this chapter writes — `1986-the-goal` */
   memoryPrefix: string
@@ -280,6 +285,7 @@ export const ERA_1991: Era = {
     return OBJECTIVES_1991.school
   },
   goal: goal1991,
+  timeGate: timeGate1991,
   cutscene: null,
   player: {
     pose: { down: 'hero80', downSide: 'hero80-3q', side: 'hero80-side', up: 'hero80-back' },

@@ -4,6 +4,7 @@ import { PARTNER_TAG } from '../partner'
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
+import type { Condition } from '../world/types'
 import { PORTRAIT_FAMILY } from './chapter2011family'
 
 /**
@@ -42,9 +43,45 @@ export function objectivePromises(state: LifeState, sceneId: string): string | n
   const child = Boolean(state.flags['life:child'])
   if (child && !state.flags['pr:first']) return sceneId === 'home' ? null : 'בבית. הוא שואל אם חייבים להישאר עד הסוף.'
   if (!state.flags['pr:promise']) return sceneId === 'home' ? null : 'בבית, ליד המקרר. מישהו מחכה לשמוע מה נעשה בפעם הבאה.'
-  if (child && !state.flags['pr:scarf']) return sceneId === 'pitch' ? null : 'במגרש. בשבת הוא משחק, והוא ביקש שתבוא.'
+  if (child && !state.flags['pr:scarf']) {
+    const ask = state.flags['pr:ask']
+    if (!ask) return sceneId === 'pitch' ? null : 'במגרש. בשבת הוא משחק, והוא ביקש שתבוא.'
+    if (ask === 'checking') {
+      if (!state.flags['pr:saw:his']) return 'הדף של המשחק שלו — על המקרר בבית, ליד היומן.'
+      if (!state.flags['pr:saw:ours']) return 'לוח המשחקים — בקיוסק, ליד הדלפק.'
+      return sceneId === 'pitch' ? 'בדקת את שתי השעות. עכשיו — לו.' : 'בדקת את שתי השעות. חזרה אליו, למגרש.'
+    }
+    if (!state.flags['pr:sat']) return 'שבת. חצר בית הספר, בחמש — הוא יחפש אותך ליד הגדר.'
+    if (state.flags['pr:sat'] === 'run') return 'בלומפילד. השריקה ב-19:30 — אם לא עוצרים בדרך.'
+  }
   return null
 }
+
+/**
+ * ============================================ השבת שלו — שתי שעות, וגוף אחד (90-E) ====
+ *
+ * `NARRATIVE-QUEST-DESIGN-PASS-v2` §7 Stage D: *"use feature quests only where obligations
+ * collide … parenting logistics changing an away day"*. זה המקום היחיד בין 2011 ל-2015+2021
+ * שבו שתי התחייבויות נופלות על אותה שעה, ולכן זה המקום היחיד ששוחק. עד היום L09 הייתה
+ * שאלה אחת: *"(לבחור באירוע שלו, ולסדר את השאר.)"* העבירה 90 דקות והעניקה `child_event`
+ * — המשפט טען שהשבת קרתה (§11.4). עכשיו:
+ *
+ * 1. **הבקשה** (`pr-scarf`, במגרש) — לבוא, **לבדוק קודם**, או לומר בכנות שלא.
+ * 2. **הבדיקה** — הדף שלו על המקרר (17:00–18:15, חצר בית הספר) והלוח בקיוסק (19:30,
+ *    בלומפילד). רק מי שקרא את שניהם יודע ש**אפשר את שניהם** — וזו החלוקה (`pr-answer`).
+ * 3. **השבת** (`pr-saturday`, בחצר של בית הספר — אותה חצר של 1991) — פוגי הולך לשם בעצמו.
+ *    מי שבחר בשבת שלו: הטלפון רוטט עם שריקת הפתיחה. מי שחילק: **הסיבוך** — תיקו ב-18:15,
+ *    פנדלים. להישאר (ובלומפילד תחכה), או ללכת כמו שסוכם, ולהגיע לשריקה (`pr-whistle`).
+ * 4. **ומי שלא הגיע** — השבת עוברת בלעדיו, והדף על המקרר אומר את זה (`pr-nosat`). אין
+ *    Game Over; יש ביוגרפיה, וסיום משלה (`waited`).
+ *
+ * `child_event` נכתב רק בחצר, למי שעמד ליד הגדר. `life:saturday` נשאר לחיים — 2026 זוכר.
+ */
+export const SATURDAY = 'life:saturday'
+const ask = (value: string): Condition => ({ flagIs: { flag: 'pr:ask', value } })
+const sat = (value: string): Condition => ({ flagIs: { flag: 'pr:sat', value } })
+const COMMITTED: Condition = { any: [ask('go'), ask('split')] }
+const CHECKED: Condition = { all: [ask('checking'), { flag: 'pr:saw:his' }, { flag: 'pr:saw:ours' }] }
 
 export const ENDINGS_PROMISES: Record<string, EndingCard> = {
   repaired: {
@@ -74,6 +111,16 @@ export const ENDINGS_PROMISES: Record<string, EndingCard> = {
     memoryItem: 'folded-paper',
     presence: 'inside',
   },
+  /** (90-E) אמר שיבוא, והשבת עברה בלעדיו — גם זו ביוגרפיה, והכרטיס לא מייפה אותה */
+  waited: {
+    id: 'waited',
+    titleHe: 'חיכיתי ליד הגדר',
+    bodyHe:
+      'אמרת שתבוא, והשבת עברה בלעדיך. הוא לא צעק. הוא כתב את זה על הדף, בכתב שלו, ותלה ליד היומן — ויש הבטחות שמתקנים רק בשבת הבאה, ולא לפני.',
+    memoryHe: 'דף משחק של ילדים, עם שורה אחת בכתב יד.',
+    memoryItem: 'folded-paper',
+    presence: 'late',
+  },
 }
 
 export const BEATS_PROMISES: Beat[] = [
@@ -84,7 +131,23 @@ export const BEATS_PROMISES: Beat[] = [
    */
   // ליד המקרר של הבית שלו (`homeAdult`) — אותו חדר כמו הילד, ולכן שעון: הוא לא יוצא ונכנס כדי לשמוע
   { id: 'pr-promise', at: 'home', trigger: 'clock', when: { none: [{ flag: 'pr:promise' }], any: [{ flag: 'pr:first' }, { notFlag: 'life:child' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'pr-promise' }] },
-  { id: 'pr-scarf', at: 'pitch', trigger: 'enter', when: { all: [{ flag: 'life:child' }, { flag: 'pr:promise' }], none: [{ flag: 'pr:scarf' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'pr-scarf' }] },
+  { id: 'pr-scarf', at: 'pitch', trigger: 'enter', when: { all: [{ flag: 'life:child' }, { flag: 'pr:promise' }], none: [{ flag: 'pr:scarf' }, { flag: 'pr:ask' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'pr-scarf' }] },
+  /** (90-E) חזרה אליו עם שתי השעות — הוא שואל בעצמו; מי שהלך באמצע לוחץ עליו (`pr-answer` במגרש) */
+  { id: 'pr-answer', at: 'pitch', trigger: 'enter', when: { all: [CHECKED], none: [{ flag: 'pr:scarf' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'pr-answer' }] },
+  /** השבת — בחצר של בית הספר; מי שהתחייב הולך לשם, והיום קופץ לשבת בכרטיס */
+  {
+    id: 'pr-saturday',
+    at: 'schoolyard',
+    trigger: 'enter',
+    when: { all: [COMMITTED], none: [{ flag: 'pr:sat' }, { flag: 'pr:scarf' }] },
+    delayMs: 300,
+    do: [{ a: 'card', titleHe: 'שבת', subHe: 'חצר בית הספר · ליגת ילדים', ms: 2200 }, { a: 'talk', conversation: 'pr-saturday' }],
+  },
+  /** מי שיצא מהחצר כמו שסוכם — בלומפילד, לשריקה */
+  { id: 'pr-whistle', at: 'bloomfield-outside', trigger: 'enter', when: { all: [sat('run')], none: [{ flag: 'pr:scarf' }] }, delayMs: 500, do: [{ a: 'talk', conversation: 'pr-whistle' }] },
+  /** ומי שלא הגיע — אין ערב שנתקע: בעשר וחצי הדף על המקרר אומר את זה */
+  { id: 'pr-nosat', trigger: 'clock', when: { all: [COMMITTED, { afterMinute: 22 * 60 + 30 }], none: [{ flag: 'pr:sat' }, { flag: 'pr:scarf' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'pr-nosat' }] },
+  { id: 'pr-whistle-late', trigger: 'clock', when: { all: [sat('run'), { afterMinute: 23 * 60 }], none: [{ flag: 'pr:scarf' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'pr-whistle-late' }] },
   /** הסגירה — אחרי ההבטחה למי שאין לו ילד, ואחרי האירוע שלו למי שיש */
   { id: 'pr-close', trigger: 'clock', when: { all: [{ flag: 'pr:promise' }], none: [{ flag: 'pr:done' }], any: [{ flag: 'pr:scarf' }, { notFlag: 'life:child' }] }, delayMs: 1200, do: [{ a: 'flag', flag: 'pr:done' }, { a: 'talk', conversation: 'pr-close' }] },
 ]
@@ -233,27 +296,24 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
         ],
         choices: [
           {
+            /**
+             * (90-E) **התחייבות, לא דיווח.** השבת עצמה קורית בחצר של בית הספר (`pr-saturday`),
+             * ו-`child_event` נכתב שם — למי שעמד ליד הגדר.
+             */
             id: 'go',
-            text: '(לבחור באירוע שלו, ולסדר את השאר.)',
+            text: '(לבחור באירוע שלו. בלומפילד — בשבת אחרת.)',
             then: [
-              { e: 'flag', flag: 'pr:scarf' },
-              { e: 'time', minutes: 90 },
-              { e: 'energy', delta: -10 },
+              { e: 'flagValue', flag: 'pr:ask', value: 'go' },
               { e: 'flagValue', flag: 'pr:interest', value: 'respected' },
-              { e: 'proof', kind: 'child_event', proofId: 'child_event:{chapter}:saturday', subjectHe: 'השבת שלו', noteHe: 'רשם את השעה שלו, לא רק את שלהם.' },
-              { e: 'toast', text: 'הילד: "אתה באמת בא?" — "כן. רשמתי את השעה שלך, לא רק את שלהם."', tone: 'plain' },
+              { e: 'toast', text: 'הילד: "אתה באמת בא?" — "כן. רשמתי את השעה שלך, לא רק את שלהם." — חמש, בחצר של בית הספר.', tone: 'plain' },
             ],
           },
           {
-            id: 'split',
-            text: '(למצוא חלוקה אפשרית. בלי להבטיח את הבלתי אפשרי.)',
+            id: 'check',
+            text: '(לבדוק קודם את שתי השעות — ולחזור אליו עם תשובה.)',
             then: [
-              { e: 'flag', flag: 'pr:scarf' },
-              { e: 'time', minutes: 60 },
-              { e: 'energy', delta: -10 },
-              { e: 'flagValue', flag: 'pr:interest', value: 'coordinated' },
-              { e: 'proof', kind: 'child_event', proofId: 'child_event:{chapter}:saturday', subjectHe: 'השבת שלו', noteHe: 'בדק קודם, ואז אמר כן על החלק שבאמת אפשר.' },
-              { e: 'toast', text: 'הילד: "אתה תהיה בחלק שלי?" — "בדקתי. כן. אחר כך אצא." — "אז בסדר."', tone: 'plain' },
+              { e: 'flagValue', flag: 'pr:ask', value: 'checking' },
+              { e: 'toast', text: 'הילד: "אז תבדוק מהר." — הדף שלו על המקרר, והלוח בקיוסק.', tone: 'plain' },
             ],
           },
           {
@@ -262,6 +322,7 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
             then: [
               { e: 'flag', flag: 'pr:scarf' },
               { e: 'flagValue', flag: 'pr:childEvent', value: 'missed' },
+              { e: 'flagValue', flag: SATURDAY, value: 'told' },
               { e: 'wellbeing', key: 'regret', delta: 6 },
               { e: 'toast', text: 'הילד: "רציתי שתהיה." — "אני יודע. לא אגיד שזה לא חשוב."', tone: 'red' },
             ],
@@ -270,10 +331,208 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
       },
     ],
   },
+  // ---- (90-E) הבדיקה: שני דפים, בשני חדרים ----
+  {
+    id: 'pr-his',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'על המקרר, מתחת ליומן: דף מודפס של ליגת הילדים, עם מגנט של פיצרייה.' },
+          { who: null, text: 'שבת, 17:00, חצר בית הספר. ובעט, בכתב שלו: ״עד 18:15. אם אין הארכה.״' },
+        ],
+        then: [{ e: 'flag', flag: 'pr:saw:his' }, { e: 'time', minutes: 2 }],
+      },
+    ],
+  },
+  {
+    id: 'pr-ours',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'לוח המשחקים ליד הדלפק, בטוש שכמעט נגמר: שבת — 19:30, בלומפילד. שערים ב-18:00.' },
+          { who: null, text: 'מהחצר של בית הספר לבלומפילד: חצי שעה ברגל. אם לא עוצרים.' },
+        ],
+        then: [{ e: 'flag', flag: 'pr:saw:ours' }, { e: 'time', minutes: 3 }],
+      },
+    ],
+  },
+  {
+    id: 'pr-answer',
+    nameHe: 'הילד',
+    branches: [
+      {
+        lines: [
+          { who: 'הילד', text: 'נו?' },
+          { who: 'פוגי', text: 'בדקתי. שלך בחמש, שלהם בשבע וחצי.' },
+          { who: 'הילד', text: 'אז?' },
+        ],
+        choices: [
+          {
+            id: 'split',
+            text: '(כל המשחק שלך — ואז ישר לבלומפילד. מגיע לשריקה.)',
+            // the split is only a sentence someone can say after reading both sheets
+            when: CHECKED,
+            noteHe: 'עוד לא בדקת את שתי השעות — הדף שלו על המקרר, והלוח בקיוסק.',
+            then: [
+              { e: 'flagValue', flag: 'pr:ask', value: 'split' },
+              { e: 'flagValue', flag: 'pr:interest', value: 'coordinated' },
+              { e: 'toast', text: 'הילד: "אתה תהיה בחלק שלי?" — "בדקתי. כן. אחר כך אצא." — "אז בסדר." — "ואתה לא רץ." — "אני הולך מהר."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'go',
+            text: '(כל השבת שלך. בלי לרוץ לשום מקום.)',
+            then: [
+              { e: 'flagValue', flag: 'pr:ask', value: 'go' },
+              { e: 'flagValue', flag: 'pr:interest', value: 'respected' },
+              { e: 'toast', text: 'הילד: "גם אחרי?" — "גם אחרי. פיצה."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'miss',
+            text: '"הפעם לא אגיע." (ולשמוע את האכזבה.)',
+            then: [
+              { e: 'flag', flag: 'pr:scarf' },
+              { e: 'flagValue', flag: 'pr:childEvent', value: 'missed' },
+              { e: 'flagValue', flag: SATURDAY, value: 'told' },
+              { e: 'wellbeing', key: 'regret', delta: 6 },
+              { e: 'toast', text: 'הילד: "אז למה בדקת?" — "כדי לדעת. לא כדי לבוא." — "..."', tone: 'red' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  // ---- (90-E) השבת עצמה ----
+  {
+    id: 'pr-saturday',
+    nameHe: 'הילד',
+    branches: [
+      {
+        /** החלוקה, והסיבוך: תיקו ב-18:15, והתוכנית אמרה לצאת ב-18:15 */
+        when: ask('split'),
+        lines: [
+          { who: null, text: 'ליגת ילדים, בחצר שבה פעם למדת לבעוט. הוא מחפש אותך ליד הגדר — ומוצא, ומפסיק לחפש.' },
+          { who: null, text: '18:15. תיקו. השופט, אבא של מישהו, מסמן בידיים: פנדלים.' },
+          { who: 'הילד', text: 'אתה הולך?' },
+        ],
+        choices: [
+          {
+            id: 'stay',
+            text: '(להישאר לפנדלים שלו. בלומפילד תחכה.)',
+            then: [
+              { e: 'flag', flag: 'pr:scarf' },
+              { e: 'flagValue', flag: 'pr:sat', value: 'stayed' },
+              { e: 'flagValue', flag: SATURDAY, value: 'stayed' },
+              { e: 'time', minutes: 40 },
+              { e: 'energy', delta: -6 },
+              { e: 'proof', kind: 'child_event', proofId: 'child_event:{chapter}:saturday', subjectHe: 'השבת שלו', noteHe: 'תכנן לצאת ב-18:15, ונשאר כשהמשחק שלו התארך.' },
+              { e: 'toast', text: 'הוא בעט את הפנדל השלישי. לפני הריצה — הסתכל על הגדר.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'leave',
+            text: '(ללכת, כמו שסיכמנו. הוא יודע.)',
+            then: [
+              { e: 'flagValue', flag: 'pr:sat', value: 'run' },
+              { e: 'flagValue', flag: SATURDAY, value: 'half' },
+              { e: 'time', minutes: 15 },
+              { e: 'energy', delta: -4 },
+              { e: 'proof', kind: 'child_event', proofId: 'child_event:{chapter}:saturday', subjectHe: 'השבת שלו', noteHe: 'בדק קודם, היה בכל החלק שלו, ויצא כמו שסיכמו.' },
+              { e: 'toast', text: 'הילד: "לך. תאחר." — ומאחוריך, מהחצר: צעקה של פנדל. לא ראית של מי.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'ליגת ילדים, בחצר שבה פעם למדת לבעוט. הוא מחפש אותך ליד הגדר — ומוצא, ומפסיק לחפש.' },
+          { who: null, text: 'בכיס, הטלפון רוטט. שריקת פתיחה, בבלומפילד, בלעדיך.' },
+        ],
+        choices: [
+          {
+            id: 'off',
+            text: '(לכבות אותו.)',
+            then: [
+              { e: 'flag', flag: 'pr:scarf' },
+              { e: 'flagValue', flag: 'pr:sat', value: 'there' },
+              { e: 'flagValue', flag: SATURDAY, value: 'there' },
+              { e: 'time', minutes: 75 },
+              { e: 'energy', delta: -6 },
+              { e: 'proof', kind: 'child_event', proofId: 'child_event:{chapter}:saturday', subjectHe: 'השבת שלו', noteHe: 'רשם את השעה שלו, לא רק את שלהם — ועמד ליד הגדר.' },
+              { e: 'toast', text: 'הוא הבקיע פעם אחת, והסתכל על הגדר לפני שחגג.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'peek',
+            text: '(להשאיר אותו בכיס. להציץ רק בהפסקה.)',
+            then: [
+              { e: 'flag', flag: 'pr:scarf' },
+              { e: 'flagValue', flag: 'pr:sat', value: 'there' },
+              { e: 'flagValue', flag: SATURDAY, value: 'there' },
+              { e: 'time', minutes: 75 },
+              { e: 'energy', delta: -6 },
+              { e: 'proof', kind: 'child_event', proofId: 'child_event:{chapter}:saturday', subjectHe: 'השבת שלו', noteHe: 'רשם את השעה שלו, לא רק את שלהם — ועמד ליד הגדר.' },
+              { e: 'toast', text: 'בהפסקה הוא רץ לגדר: "מה התוצאה?" — "אחת־אפס." — "לא שלהם. שלנו!"', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pr-whistle',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'השער של בלומפילד, בנשימה אחת. השריקה עוד לא.' },
+          { who: null, text: 'בטלפון, תמונה ממישהו מההורים: הוא, עם הכדור מתחת ליד, בלי שן קדמית, מחייך.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'pr:scarf' },
+          { e: 'flagValue', flag: 'pr:sat', value: 'both' },
+          { e: 'energy', delta: -4 },
+          { e: 'toast', text: 'שני מקומות, שבת אחת. הרגליים יזכירו לך מחר.', tone: 'plain' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pr-whistle-late',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הערב נגמר בדרך. את השריקה האחרונה שמעת ברדיו של מונית שעברה.' }],
+        then: [{ e: 'flag', flag: 'pr:scarf' }],
+      },
+    ],
+  },
+  {
+    id: 'pr-nosat',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'השבת עברה. בערב, על המקרר, דף המשחק שלו — ולמטה, בעט, בכתב שלו:' },
+          { who: null, text: '״חיכיתי ליד הגדר.״' },
+        ],
+        then: [
+          { e: 'flag', flag: 'pr:scarf' },
+          { e: 'flagValue', flag: 'pr:sat', value: 'none' },
+          { e: 'flagValue', flag: SATURDAY, value: 'missed' },
+          { e: 'wellbeing', key: 'regret', delta: 8 },
+        ],
+      },
+    ],
+  },
   {
     id: 'pr-close',
     nameHe: null,
     branches: [
+      { when: sat('none'), lines: [{ who: null, text: 'הדף נשאר על המקרר. אף אחד לא הוריד אותו.' }], then: [{ e: 'ending', id: 'waited' }] },
       { when: { flag: 'pr:scarf' }, lines: [{ who: null, text: 'דף המשחק של הילדים נשאר על המקרר, ליד היומן.' }], then: [{ e: 'ending', id: 'his' }] },
       { when: { flagIs: { flag: 'pr:kind', value: 'repaired' } }, lines: [{ who: null, text: 'השורה ביומן נכתבה שוב, הפעם בעט.' }], then: [{ e: 'ending', id: 'repaired' }] },
       { lines: [{ who: null, text: 'השיחה נגמרה מאוחר, ואף אחד לא הסתכל בשעון.' }], then: [{ e: 'ending', id: 'kept' }] },

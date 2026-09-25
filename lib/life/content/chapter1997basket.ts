@@ -39,6 +39,7 @@ export const PORTRAIT_HALL: Record<string, string> = {
 export function objectiveHall(state: LifeState): string | null {
   if (state.chapterDone) return null
   if (state.flags[H2]) return state.flags['h2:done'] ? null : 'שנה אחרי. אותו אולם. עולים.'
+  if (state.flags['h1:football'] && !state.flags['h1:chain-complete']) return 'שער 7. אבא מחכה בבלומפילד.'
   if (state.flags['h1:decided']) return null
   return '27 במרץ. עדיין אפשר להישאר בחיים. שחור צריך ידיים; אבא מחכה במקום אחר.'
 }
@@ -116,12 +117,48 @@ export const BEATS_HALL: Beat[] = [
     do: [{ a: 'talk', conversation: 'h1-chain' }],
   },
   {
-    id: 'h1-football',
-    trigger: 'clock',
-    when: { flag: 'h1:football', none: [{ flag: H2 }] },
+    /**
+     * (Director V3 §12, 25.9.2026) choosing your father is a walk to him: the night at gate
+     * seven opens when the soldier arrives at Bloomfield, not on the next tick wherever he
+     * stands. The clock beat below is the same night for a boy who never gets there.
+     */
+    id: 'h1-football-gate',
+    at: 'bloomfield-outside',
+    trigger: 'enter',
+    when: { flag: 'h1:football', none: [{ flag: H2 }, { flag: 'h1:chain-complete' }, { flag: 'h1:gate-said' }] },
+    delayMs: 600,
     do: [
       { a: 'card', titleHe: '27.3.1997', subHe: 'אתה במקום אחר', ms: 2400 },
       { a: 'talk', conversation: 'h1-bloomfield' },
+    ],
+  },
+  {
+    id: 'h1-football',
+    trigger: 'clock',
+    /**
+     * `h1:chain-complete` (25.9.2026): the beat is armed again while its `when` holds (rule
+     * 42), which is its recovery — a box walked out of comes back — and it held after the
+     * chain closed too, so Gate 7 replayed on every tick until the year turned. Nobody had
+     * walked this road: the confused player's "last answer" used to loop on Freddy first.
+     */
+    when: { flag: 'h1:football', afterMinute: at(21, 30), none: [{ flag: H2 }, { flag: 'h1:chain-complete' }, { flag: 'h1:gate-said' }] },
+    do: [
+      { a: 'card', titleHe: '27.3.1997', subHe: 'אתה במקום אחר', ms: 2400 },
+      { a: 'talk', conversation: 'h1-bloomfield' },
+    ],
+  },
+  /**
+   * the night at gate seven answered, the week goes on without him: a cut to 30 March and
+   * the result from Herzliya, asked until it is answered (the same recovery as the hall's)
+   */
+  {
+    id: 'h1-chain-football',
+    trigger: 'clock',
+    when: { flag: 'h1:gate-said', none: [{ flag: 'h1:chain-complete' }, { flag: H2 }] },
+    delayMs: 600,
+    do: [
+      { a: 'card', titleHe: '30.3.1997', subHe: 'אילת, ואז הרצליה', ms: 2200 },
+      { a: 'talk', conversation: 'h1-chain' },
     ],
   },
   {
@@ -146,7 +183,7 @@ export const BEATS_HALL: Beat[] = [
 ]
 
 /** ללכת לאבא — the same answer before the crates and after them */
-const FOOTBALL_1997: ChoiceDef['then'] = [{ e: 'flag', flag: 'h1:decided' }, { e: 'flag', flag: 'h1:football' }, { e: 'flag', flag: 'life:hall:football-night' }, { e: 'rel', who: 'shachor', axis: 'trust', delta: -5 }, { e: 'remember', who: 'shachor', eventId: 'left-relegation-night-1997', significance: 'major' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 4 }, { e: 'time', minutes: 40 }]
+const FOOTBALL_1997: ChoiceDef['then'] = [{ e: 'flag', flag: 'h1:decided' }, { e: 'flag', flag: 'h1:football' }, { e: 'flag', flag: 'life:hall:football-night' }, { e: 'rel', who: 'shachor', axis: 'trust', delta: -5 }, { e: 'remember', who: 'shachor', eventId: 'left-relegation-night-1997', significance: 'major' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 4 }]
 
 export const CONVERSATIONS_HALL: Conversation[] = [
   {
@@ -182,8 +219,21 @@ export const CONVERSATIONS_HALL: Conversation[] = [
            */
           { id: 'crates', text: 'לסחוב את הארגזים.', then: [{ e: 'flag', flag: 'h1:crates' }, { e: 'remember', who: 'shachor', eventId: 'crates-relegation-1997', significance: 'major' }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 4 }, { e: 'minigame', id: 'chore:story:crates-97' }] },
           { id: 'football', text: 'להתנצל. ללכת לאבא.', then: FOOTBALL_1997 },
-          { id: 'freddy', text: 'לשאול את פרדי מה קורה עם הכסף.', then: [{ e: 'goto', node: 'h1-freddy' }] },
+          // asked once: the corner does not offer the same question twice (V3 §13 A — a player
+          // who kept asking it looped the corner box without ever doing anything)
+          { id: 'freddy', text: 'לשאול את פרדי מה קורה עם הכסף.', when: { notFlag: 'h1:asked-freddy' }, hidden: true, then: [{ e: 'flag', flag: 'h1:asked-freddy' }, { e: 'goto', node: 'h1-freddy' }] },
         ],
+      },
+    ],
+  },
+  {
+    /** (V3 §12) the same "להישאר", taken by the door rather than the corner's box */
+    id: 'h1-stay',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הדלת של האולם כבדה, והידיים עוד זוכרות את הארגז. שמונה, בשני המקומות. אתה נכנס.' }],
+        then: [{ e: 'redheart', key: 'basketballLove', delta: 2 }, { e: 'travel', to: 'ussishkin-hall', spawn: 'fromOut' }],
       },
     ],
   },
@@ -239,8 +289,9 @@ export const CONVERSATIONS_HALL: Conversation[] = [
           { who: 'קובי', text: 'רצית להיות שם?' },
         ],
         choices: [
-          { id: 'yes', text: '"כן."', then: [{ e: 'rel', who: 'kobi', axis: 'trust', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'presence', mode: 'heard-from-friend' }, { e: 'goto', node: 'h1-chain' }] },
-          { id: 'here', text: '"הייתי צריך להיות פה."', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'redheart', key: 'familyTradition', delta: 3 }, { e: 'presence', mode: 'heard-from-friend' }, { e: 'goto', node: 'h1-chain' }] },
+          // (V3 §12) the three days to Herzliya are a cut, not the next line: `h1-chain-football`
+          { id: 'yes', text: '"כן."', then: [{ e: 'rel', who: 'kobi', axis: 'trust', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'presence', mode: 'heard-from-friend' }, { e: 'flag', flag: 'h1:gate-said' }] },
+          { id: 'here', text: '"הייתי צריך להיות פה."', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'redheart', key: 'familyTradition', delta: 3 }, { e: 'presence', mode: 'heard-from-friend' }, { e: 'flag', flag: 'h1:gate-said' }] },
         ],
       },
     ],

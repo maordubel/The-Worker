@@ -1,4 +1,5 @@
 import { trackIds } from '@/lib/ads'
+import { meterProgress } from '@/lib/analytics/progress'
 import {
   saveCard,
   saveSupporter,
@@ -359,6 +360,7 @@ export function emit(event: ProgressEvent): Applied {
     void pushRemote(applied.remote)
     const ga = gaEvent(event)
     trackIds(ga.name, ga.params)
+    meterProgress(event) // delta 89: first-party measurement (lib/analytics)
   } catch {
     // the progress layer is never the reason a result screen breaks
   }

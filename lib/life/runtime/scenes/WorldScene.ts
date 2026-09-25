@@ -19,7 +19,7 @@ import { encounterEvents, rollEncounter } from '../../encounters'
 import { tickOpportunities } from '../../opportunities'
 import { placementsAt } from '../../schedules'
 import type { LifeState, LocationId } from '../../types'
-import { cutsceneCard, cutsceneFor, longDateHe, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
+import { autoCutsceneFor, cutsceneCard, longDateHe, type CutsceneOutcome, type HistoricalCutscene } from '../../cutscenes'
 import { decidingMinute, matchClock, matchPace, scoreboardAt } from '../../match'
 import type { Condition } from '../../world/types'
 import { cutFor, eraOfYear, filmFlag } from '../../world/transitions'
@@ -42,6 +42,8 @@ import { compose as composeHint, holds as hintHolds } from '../../world/hints'
 import { unmet } from '../../world/why'
 import { forcedEnding, isStalled, LAST_RESORT_MINUTES, waitingForTheClock } from '../../world/lastResort'
 import { QUIET_MINUTES, flowMove, nextTimeGate, type TimeGate } from '../../world/flow'
+import { placesFrom } from '../../world/travel'
+import { EARLY_SUFFIX, LET_PASS_SUFFIX, advanceSteps, freeTimePlan, preflight, verifyLanding, type AdvanceResult, type LandingReport, type TimeAdvancePlan } from '../../world/timeAdvance'
 import { adDirector } from '../../monetization'
 import { reconcile } from '../../world/milestones'
 import { nextStep } from '../../world/route'
@@ -584,6 +586,7 @@ export class WorldScene extends Phaser.Scene {
     })
 
     this.ctx.engine.dispatch({ t: 'moved', to: this.def.id })
+    this.freeTimeKey = ''
     // The timetable applies the MOMENT the room is drawn, not on the next minute tick.
     // Building the scene from the definition and then correcting it a second later is
     // how a player sees somebody who is not supposed to be there — and it is how the
@@ -627,6 +630,13 @@ export class WorldScene extends Phaser.Scene {
     else {
       this.beginMatch()
       this.beginNight()
+    }
+
+    // a free-time walk that just landed here: the room must have something in it (§33)
+    const landed = WorldScene.landing
+    if (landed) {
+      WorldScene.landing = null
+      this.time.delayedCall(600, () => this.checkLanding(landed.plan, landed.early))
     }
 
     /**
@@ -2227,6 +2237,7 @@ export class WorldScene extends Phaser.Scene {
     if (repaired) this.runBeats('clock')
     this.quiet(minutes)
     if (!repaired) this.lastResort()
+    this.pushFreeTime()
   }
 
   /**
@@ -2269,7 +2280,10 @@ export class WorldScene extends Phaser.Scene {
      * state this card is for.
      */
     const beats = Object.keys(state.flags).filter((flag) => flag.startsWith('beat:')).length
-    const print = `${beats}|${state.agorot}|${Object.keys(state.inventory).length}|${state.chapterDone ? 1 : 0}`
+    // (delta 90) and the objective line itself — the comment above always said so, and a
+    // chapter without beats (1991) moves ONLY by its objective, so a gate declined at noon
+    // could never be offered again in the evening
+    const print = `${beats}|${state.agorot}|${Object.keys(state.inventory).length}|${state.chapterDone ? 1 : 0}|${this.objective(state) ?? ''}`
     if (print !== this.quietPrint) {
       this.quietPrint = print
       this.quietFor = 0
@@ -2309,8 +2323,9 @@ export class WorldScene extends Phaser.Scene {
     })
     if (!move) return false
     if (move.kind === 'pass') {
+      // the offer itself is the free-time chip (`pushFreeTime`, every minute); here it only
+      // keeps the backstop from closing a day that is merely early
       this.passOffered = move.gate.beatId
-      this.ctx.bus.emit('pass', move.gate)
       return true
     }
     /**
@@ -3846,7 +3861,7 @@ export class WorldScene extends Phaser.Scene {
     // every later match is a beat's `{ a: 'match' }` in its own chapter; nothing to start here
     if (this.chapter !== '1986') return
     // The archive first, and the simulation as its fallback — see `playCutscene`.
-    const film = this.era.cutscene ? cutsceneFor(this.era.cutscene) : null
+    const film = autoCutsceneFor(this.era.cutscene) // §23.6: only a verified payoff opens by itself
     if (film && !this.ctx.engine.state.flags[film.completionFlag]) {
       this.playCutscene(film)
       return
@@ -3955,7 +3970,7 @@ export class WorldScene extends Phaser.Scene {
    * cannot play falls through to the authored minute and never blocks.
    */
   private stageGoal(then: () => void) {
-    const film = this.era.cutscene ? cutsceneFor(this.era.cutscene) : null
+    const film = autoCutsceneFor(this.era.cutscene) // §23.6: only a verified payoff opens by itself
     if (film && !this.ctx.engine.state.flags[film.completionFlag]) {
       this.afterGoal = then
       this.playCutscene(film)
@@ -4021,11 +4036,18 @@ export class WorldScene extends Phaser.Scene {
     // a film a BEAT opened: no match phase, no terrace to return to — just the next action
     if (this.afterCutscene) {
       const then = this.afterCutscene
+      const beatFilm = this.cutscene
       this.afterCutscene = null
+      this.cutscene = null
       this.ctx.bus.emit('cutscene', null)
       this.paused = false
       this.ctx.bus.emit('controls', { visible: true })
-      if (outcome === 'watched') this.ctx.engine.dispatch({ t: 'flag.raised', flag: `cutscene:watched:${this.chapter}` })
+      // (§23.3) the registry's own flags, on every outcome — and `watched` only on a watch
+      if (beatFilm) this.ctx.engine.dispatch({ t: 'flag.raised', flag: beatFilm.completionFlag })
+      if (outcome === 'watched') {
+        if (beatFilm) this.ctx.engine.dispatch({ t: 'flag.raised', flag: beatFilm.watchedFlag })
+        this.ctx.engine.dispatch({ t: 'flag.raised', flag: `cutscene:watched:${this.chapter}` })
+      }
       then()
       return
     }
@@ -4499,74 +4521,143 @@ export class WorldScene extends Phaser.Scene {
    */
   // ------------------------------------------------------------------- the map ----
 
-  /** a room crossed on foot costs about this much of the afternoon */
-  private static readonly MINUTES_PER_ROOM = 4
-
   /**
-   * המפה — every room the doors lead to from here, by the shortest way through them.
+   * המפה — every room the doors lead to from here, by the quickest way through them.
    *
-   * Breadth-first over the scene graph, through doors that EXIST right now (`when`) —
-   * a door that `needs` something the child does not have is still on the map, and the
-   * place behind it is listed with that door's name as the reason it is shut, because
-   * "the ground is there, you need a ticket" is information and a missing entry is not.
-   * Nothing is teleported: choosing a place charges the walk's minutes and plays the same
-   * fade every door plays. The rule "going somewhere IS the choice" survives, it just
-   * stops charging the player's thumb for the corridor between two decisions.
+   * The walk and its minutes are `world/travel.ts` — the ONE walk-length in the game, the
+   * same the free-time planner plans with (SMART FREE TIME §15). A door that `needs`
+   * something the child does not have is still on the map, and the place behind it is
+   * listed with that door's name as the reason it is shut. Nothing is teleported: choosing
+   * a place charges the walk's minutes and plays the same fade every door plays.
    */
   places(): MapPlace[] {
-    const state = this.ctx.engine.state
-    const known = new Set(ALL_SCENES.map((scene) => scene.id))
-    type Step = { id: LocationId; hops: number; lockedHe: string | null; spawn: string }
-    const seen = new Map<LocationId, Step>()
-    const queue: Step[] = [{ id: this.def.id, hops: 0, lockedHe: null, spawn: this.spawnName }]
-    seen.set(this.def.id, queue[0]!)
-    while (queue.length) {
-      const here = queue.shift()!
-      const scene = sceneFor(here.id)
-      for (const exit of scene.exits) {
-        if (!exitInEra(exit, this.chapter)) continue
-        if (!known.has(exit.to) || !meets(state, whenFor(exit, this.chapter))) continue
-        if (seen.has(exit.to)) continue
-        const lockedHe = here.lockedHe ?? (meets(state, needsFor(exit, this.chapter)) ? null : exit.labelHe)
-        const step: Step = { id: exit.to, hops: here.hops + 1, lockedHe, spawn: exit.spawn }
-        seen.set(exit.to, step)
-        queue.push(step)
-      }
-    }
-    return [...seen.values()].map((step) => ({
-      id: step.id,
-      titleHe: sceneFor(step.id).titleHe,
-      here: step.id === this.def.id,
-      minutes: step.hops * WorldScene.MINUTES_PER_ROOM,
-      lockedHe: step.lockedHe,
+    return placesFrom(this.ctx.engine.state, this.chapter, this.def.id, this.spawnName).map((place) => ({
+      id: place.id,
+      titleHe: place.titleHe,
+      here: place.here,
+      minutes: place.minutes,
+      lockedHe: place.lockedHe,
     }))
   }
 
   goTo(id: string): boolean {
-    const place = this.places().find((entry) => entry.id === id)
+    const place = placesFrom(this.ctx.engine.state, this.chapter, this.def.id, this.spawnName).find((entry) => entry.id === id)
     if (!place || place.here || place.lockedHe) return false
-    // Re-walk the graph for the spawn the last door lands on — the list above does not
-    // carry it, because the shell has no business knowing spawn names.
-    const state = this.ctx.engine.state
-    const prev = new Map<LocationId, { from: LocationId; spawn: string }>()
-    const queue: LocationId[] = [this.def.id]
-    const seen = new Set<LocationId>([this.def.id])
-    while (queue.length) {
-      const here = queue.shift()!
-      for (const exit of sceneFor(here).exits) {
-        if (!exitInEra(exit, this.chapter)) continue
-        if (seen.has(exit.to) || !meets(state, whenFor(exit, this.chapter))) continue
-        seen.add(exit.to)
-        prev.set(exit.to, { from: here, spawn: exit.spawn })
-        queue.push(exit.to)
-      }
-    }
-    const last = prev.get(id as LocationId)
-    if (!last) return false
     this.paused = false
     this.ctx.engine.dispatch({ t: 'clock.advanced', minutes: place.minutes })
-    this.travel(id as LocationId, last.spawn)
+    this.travel(id as LocationId, place.spawn)
     return true
+  }
+
+  // ---------------------------------------------------------------- free time ---
+
+  /** what the chip was last told, so a quiet minute does not re-render the shell */
+  private freeTimeKey = ''
+
+  private busyNow(): boolean {
+    return (
+      Boolean(this.director?.active) ||
+      this.matchPhase !== 'none' ||
+      this.beatBusy ||
+      this.beatPending ||
+      this.ctx.dialogue.open ||
+      Boolean(this.derby) ||
+      Boolean(this.afar) ||
+      this.closing
+    )
+  }
+
+  /** the plan as it stands this minute — null when the day is not waiting on the clock */
+  freeTime(): TimeAdvancePlan | null {
+    return freeTimePlan(this.ctx.engine.state, this.era, { busy: this.busyNow() })
+  }
+
+  /**
+   * זמן פנוי — detected at once, told to the shell every minute it changes (§30). The shell
+   * decides when the chip appears (real seconds, not world minutes) and never moves the
+   * clock itself: it asks `advanceTime`.
+   */
+  private pushFreeTime() {
+    const plan = this.paused ? null : this.freeTime()
+    const key = plan ? `${plan.id}|${plan.fromMinute}|${plan.optionalActions.map((row) => `${row.id}:${row.tier}`).join(',')}` : ''
+    if (key === this.freeTimeKey) return
+    this.freeTimeKey = key
+    this.ctx.bus.emit('freeTime', plan)
+  }
+
+  /**
+   * להעביר זמן — the world moves itself (§18). The shell hands a plan id; the plan is
+   * recalculated NOW (§19 — a plan opened at 17:04 is not trusted at 17:12), preflighted
+   * (§16), and then lived: the clock through every minute the world has an opinion about,
+   * with the timetable, the windows, the debts and the beats reconciled at each (§20), then
+   * the walk. The advance stops the moment something authored starts playing (§35 I).
+   */
+  advanceTime(planId: string): AdvanceResult {
+    const early = planId.endsWith(EARLY_SUFFIX)
+    const letPass = planId.endsWith(LET_PASS_SUFFIX)
+    const id = early ? planId.slice(0, -EARLY_SUFFIX.length) : letPass ? planId.slice(0, -LET_PASS_SUFFIX.length) : planId
+    if (this.busyNow()) return { ok: false, reason: 'busy' }
+    const plan = freeTimePlan(this.ctx.engine.state, this.era, { busy: false })
+    if (!plan || plan.id !== id) return { ok: false, reason: 'changed' }
+    const check = preflight(plan, { early, letPass })
+    if (!check.ok) return { ok: false, reason: check.reason }
+
+    const fromMinute = this.ctx.engine.state.minute
+    const fromHe = this.def.titleHe
+    this.setPaused(false)
+    let stopped = false
+    let walked: { to: LocationId; placeHe: string } | null = null
+    for (const step of advanceSteps(plan, this.ctx.engine.state, this.era, { early })) {
+      if (step.kind === 'travel') {
+        if (step.minutes > 0) this.ctx.engine.dispatch({ t: 'clock.advanced', minutes: step.minutes })
+        this.livedFor += step.minutes
+        walked = { to: step.to, placeHe: step.placeHe }
+        WorldScene.landing = { plan, early }
+        this.travel(step.to, step.spawn)
+        break
+      }
+      if (step.minutes <= 0) continue
+      this.ctx.engine.dispatch({ t: 'clock.advanced', minutes: step.minutes })
+      this.livedFor += step.minutes
+      this.timeTriggers()
+      this.onMinute()
+      this.pushHud()
+      if (this.busyNow()) {
+        stopped = true
+        break
+      }
+    }
+    void this.ctx.engine.save()
+    if (!walked) {
+      this.refresh()
+      this.checkLanding(plan, early)
+    }
+    this.freeTimeKey = ''
+    this.pushFreeTime()
+    return {
+      ok: true,
+      fromMinute,
+      toMinute: this.ctx.engine.state.minute,
+      fromHe,
+      toHe: walked?.placeHe ?? this.def.titleHe,
+      walked: Boolean(walked),
+      stopped,
+    }
+  }
+
+  /** a plan in flight across a scene restart — the walk lands in a NEW room */
+  private static landing: { plan: TimeAdvancePlan; early: boolean } | null = null
+  /** the last landing report, for the probes (`debug.landing()`) */
+  lastLanding: LandingReport | null = null
+
+  /** §33 — after the advance, the room must offer something: the event, a named wait, or an action */
+  private checkLanding(plan: TimeAdvancePlan, early: boolean) {
+    const actorsHere = this.actors.filter((actor) => actor.image.visible && actor.def.talk).map((actor) => actor.def.id)
+    const report = verifyLanding(this.ctx.engine.state, this.era, plan, { actorsHere, busy: this.busyNow(), early })
+    this.lastLanding = report
+    if (!report.ok && process.env.NODE_ENV !== 'production') {
+      console.warn(`[life] free-time landing in ${this.chapter}/${this.def.id}: ${report.issues.join(', ')}`)
+    }
   }
 
   setPaused(on: boolean) {
@@ -5101,11 +5192,13 @@ export class WorldScene extends Phaser.Scene {
         then()
         return
       case 'cutscene': {
-        const scene = cutsceneFor(next.id)
+        // §23.6: a beat may name any film; only a verified payoff interrupts play
+        const scene = autoCutsceneFor(next.id)
         if (!scene) {
           then()
           return
         }
+        this.cutscene = scene
         this.afterCutscene = then
         this.paused = true
         this.ctx.bus.emit('controls', { visible: false })

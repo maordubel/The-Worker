@@ -35,6 +35,7 @@
  * collecting bottles is an afternoon of packets, and the shirt in the shop gets further
  * away every time you buy one. That is the decision the feature exists to force.
  */
+import type { LifeEvent } from './events'
 import type { CharacterId, LifeState } from './types'
 import { relationshipOf } from './types'
 import { Roller } from './rng'
@@ -839,8 +840,9 @@ export const SET_NEW_HE = 'עונה חדשה של סופרגול בחנות'
  *
  * **On the hole at the other end, and why it stays a hole.** Every chapter from
  * `2000-title` is in the `00s`, no page in this album was sold in the 2000s, so this
- * answers `null` and `{ e: 'packet' }` in `runtime/dialogue.ts` breaks out doing nothing —
- * money unspent, no card, no sentence. The fix is NOT to invent a 2000s album: Maor's
+ * answers `null` — and once, `{ e: 'packet' }` in `runtime/dialogue.ts` broke out doing
+ * nothing: money unspent, no card, no sentence (since delta 90 every counter asks
+ * `purchasePacket`, which says `PACKET_NONE_HE` before a shekel moves). The fix is NOT to invent a 2000s album: Maor's
  * folder holds 1980/81, 1985/86, three eighties sheets, 1992/93, a nineties sheet,
  * 1997/98 and 1996, and a page of names for a season nobody photographed would be the
  * exact fabrication rule 11 forbids. Nor is it to keep selling the 1997/98 album in 2000
@@ -856,8 +858,21 @@ export function setSoldIn(state: LifeState): StickerSetId | null {
   const decade = decadeOf(state.chapter)
   const inDecade = setsBy(state.chapter).filter((set) => set.soldIn === decade)
   if (inDecade.length === 0) return null
-  const open = inDecade.find((set) => !pageDone(state, set.id))
-  return (open ?? (inDecade[inDecade.length - 1] as StickerSet)).id
+  /**
+   * **A page no packet can add to is not what the kiosk sells** (delta 90, Batch 0).
+   *
+   * The 1992/93 page survives `withScans` as ONE sticker — Halfon — and that one closes the
+   * page, so it is `neverInPacket` and the page's packet pool is empty. The kiosk, asked
+   * for "the first page not finished", sold that page from 1993-cup to 1999-cup: every
+   * packet in seven chapters answered "הקופסה ריקה" to a boy with an empty album. The
+   * matrix in `tests/life-economy-matrix.test.ts` found it; the fix is the kiosk rule read
+   * properly — it sells the first unfinished page it has envelopes FOR.
+   */
+  const buyable = (set: StickerSet) => packetPool(state, set.id).length > 0
+  const open = inDecade.find((set) => !pageDone(state, set.id) && buyable(set))
+  if (open) return open.id
+  const last = [...inDecade].reverse().find(buyable)
+  return (last ?? inDecade.find((set) => !pageDone(state, set.id)) ?? (inDecade[inDecade.length - 1] as StickerSet)).id
 }
 
 /**
@@ -901,12 +916,17 @@ const WEIGHT: Record<StickerRarity, number> = { common: 10, uncommon: 6, rare: 2
  * one. The lean is small enough that duplicates still happen, which is the entire social
  * mechanic: a duplicate is the only currency you can trade with.
  */
-export function openPacket(state: LifeState, set: StickerSetId, at = 0): string[] {
+/** what an envelope of this page can hold for this life — never the closing card, a short print or a torn one */
+function packetPool(state: LifeState, set: StickerSetId): StickerDef[] {
   const short = shortPrints(state, set)
-  const pool = stickersIn(set).filter(
+  return stickersIn(set).filter(
     (sticker) =>
       !sticker.neverInPacket && WEIGHT[sticker.rarity] > 0 && !short.has(sticker.id) && !isTorn(state, sticker.id),
   )
+}
+
+export function openPacket(state: LifeState, set: StickerSetId, at = 0): string[] {
+  const pool = packetPool(state, set)
   if (pool.length === 0) return []
   const roller = new Roller({ seed: state.rng.seed, cursor: state.rng.cursor + at })
   const out: string[] = []
@@ -928,6 +948,157 @@ export function openPacket(state: LifeState, set: StickerSetId, at = 0): string[
   }
   return out
 }
+
+// ---------------------------------------------------------------------------------
+// הקנייה — ONE transaction, and every counter asks it (delta 90, §21).
+// ---------------------------------------------------------------------------------
+
+/**
+ * מעטפה ששולמה ועוד לא נפתחה מול העיניים — the packet the economy already settled and the
+ * presentation has not finished showing.
+ *
+ * Money and stickers are state; the tear is presentation (§21.5). So the purchase writes
+ * this flag in the SAME dispatch that takes the money and sticks the cards in, and the
+ * shell clears it when the reveal is put down (`packetClosed`). A reload in between finds
+ * it and plays the reveal again from `packetReplay` — never a second charge, never a
+ * second grant. While it is up, a second tap on "קנה" is answered with the same packet:
+ * a double tap is one packet, not two. `album:` survives the night (rule 68).
+ *
+ * Value: `id,id,id|n,n,n` — the ids that came out and how many of each were stuck in
+ * BEFORE, so `חדש` stays true on a replay.
+ */
+export const PACKET_PENDING = 'album:packet:pending'
+/** how many packets this life has bought — the roll's cursor, so two packets in one minute differ */
+export const PACKET_COUNT = 'album:packets'
+
+export type PacketStatus = 'ok' | 'none' | 'short' | 'empty' | 'pending'
+
+/**
+ * מה הדלפק אומר לפני שנוגעים בכסף — the §21.4 card, as data.
+ *
+ * Every answer is known BEFORE a shekel moves: which album the envelope is from, what it
+ * costs, what is in the pocket, and — for the three refusals — the sentence. A counter
+ * that shows a price and a wallet and a disabled button with this line under it is a
+ * counter nobody mistakes for a dead one (§24.1).
+ */
+export type PacketQuote = {
+  status: PacketStatus
+  set: StickerSetId | null
+  /** `1985/86` — printed on the envelope */
+  seasonHe: string | null
+  titleHe: string | null
+  /** agorot */
+  price: number
+  wallet: number
+  missing: number
+  /** the refusal, in the room's words — null when the packet can be bought */
+  sayHe: string | null
+}
+
+const shekelText = (agorot: number) => `${Math.round(Math.max(0, agorot) / 100)} ₪`
+
+/** `מעטפה: 1 ₪ · יש לך 0 ₪ · חסר 1 ₪` — the §21.3 line, said before the money is asked for */
+export function packetShortHe(price: number, wallet: number): string {
+  return `מעטפה: ${shekelText(price)} · יש לך ${shekelText(wallet)} · חסר ${shekelText(price - wallet)}`
+}
+
+function pendingOf(state: LifeState): { ids: string[]; before: Record<string, number> } | null {
+  const raw = state.flags[PACKET_PENDING]
+  if (typeof raw !== 'string' || raw === '') return null
+  const [idsPart = '', countsPart = ''] = raw.split('|')
+  const ids = idsPart.split(',').filter((id) => stickerFor(id) !== null)
+  if (ids.length === 0) return null
+  const counts = countsPart.split(',').map((n) => Number(n) || 0)
+  const before: Record<string, number> = {}
+  ids.forEach((id, index) => {
+    if (!(id in before)) before[id] = counts[index] ?? 0
+  })
+  return { ids, before }
+}
+
+/** the reveal a reload owes the player — null when nothing is waiting */
+export const packetReplay = (state: LifeState) => pendingOf(state)
+
+export function packetQuote(state: LifeState): PacketQuote {
+  const set = setSoldIn(state)
+  const price = (PACKET[decadeOf(state.chapter)] ?? 1) * 100
+  const wallet = state.agorot
+  const base = {
+    set,
+    seasonHe: set ? SETS[set].seasonHe : null,
+    titleHe: set ? SETS[set].titleHe : null,
+    price,
+    wallet,
+    missing: Math.max(0, price - wallet),
+  }
+  if (pendingOf(state)) return { ...base, status: 'pending', sayHe: null }
+  if (!set) return { ...base, status: 'none', sayHe: PACKET_NONE_HE }
+  if (wallet < price) return { ...base, status: 'short', sayHe: packetShortHe(price, wallet) }
+  // the box is checked BEFORE the money, never after (§21.3: never charge and reveal nothing)
+  if (openPacket(state, set, packetCursor(state)).length === 0) return { ...base, status: 'empty', sayHe: PACKET_EMPTY_HE }
+  return { ...base, status: 'ok', sayHe: null }
+}
+
+/** the roll's offset: the minute, plus how many packets came before — the same save deals the same packets */
+function packetCursor(state: LifeState): number {
+  const bought = Number(state.flags[PACKET_COUNT] ?? 0) || 0
+  return state.minute + bought * 1009
+}
+
+/**
+ * The purchase — pure. Returns the quote, the events to dispatch (empty on any refusal
+ * and on a replay), and what the shell shows. `reveal` is set on success AND on a
+ * pending replay; `events` only on success. The caller dispatches `events` in ONE
+ * `dispatch` so the money, the cards and the pending mark land together.
+ */
+export type PacketPurchase = {
+  quote: PacketQuote
+  events: LifeEvent[]
+  reveal: { ids: string[]; before: Record<string, number> } | null
+  /** the red-box cards a closed page turns over — shown after the packet is put down */
+  kept: string[]
+  /** `1985/86 — הדף מלא.` when this packet closed its page */
+  fullHe: string | null
+  /** true when nothing was charged because this is the packet already paid for */
+  replay: boolean
+}
+
+export function purchasePacket(state: LifeState): PacketPurchase {
+  const quote = packetQuote(state)
+  const none: PacketPurchase = { quote, events: [], reveal: null, kept: [], fullHe: null, replay: false }
+  if (quote.status === 'pending') return { ...none, reveal: pendingOf(state), replay: true }
+  if (quote.status !== 'ok' || !quote.set) return none
+  const set = quote.set
+  const ids = openPacket(state, set, packetCursor(state))
+  const before: Record<string, number> = {}
+  for (const id of ids) if (!(id in before)) before[id] = haveOf(state, id)
+  const events: LifeEvent[] = [{ t: 'money.changed', agorot: -quote.price, why: PACKET_WHY_HE }]
+  const counted: Record<string, number> = { ...before }
+  for (const id of ids) {
+    counted[id] = (counted[id] ?? 0) + 1
+    events.push({ t: 'flag.set', flag: stickerFlag(id), value: counted[id] as number })
+  }
+  events.push({ t: 'flag.raised', flag: ALBUM_SEEN })
+  events.push({ t: 'flag.set', flag: PACKET_COUNT, value: (Number(state.flags[PACKET_COUNT] ?? 0) || 0) + 1 })
+  events.push({
+    t: 'flag.set',
+    flag: PACKET_PENDING,
+    value: `${ids.join(',')}|${ids.map((id) => before[id] ?? 0).join(',')}`,
+  })
+  let kept: string[] = []
+  let fullHe: string | null = null
+  if (closesPage(state, set, ids)) {
+    const cards = keptOnClose(state, set, ids)
+    for (const card of cards) events.push({ t: 'flag.set', flag: stickerFlag(card.id), value: 1 })
+    kept = cards.map((card) => card.id)
+    fullHe = `${SETS[set].titleHe} — הדף מלא.`
+  }
+  return { quote, events, reveal: { ids, before }, kept, fullHe, replay: false }
+}
+
+/** the reveal was put down — the one event that closes the transaction's presentation */
+export const packetClosed = (state: LifeState): LifeEvent[] =>
+  state.flags[PACKET_PENDING] ? [{ t: 'flag.set', flag: PACKET_PENDING, value: '' }] : []
 
 // ---------------------------------------------------------------------------------
 // ההחלפה — who has the one you are missing.

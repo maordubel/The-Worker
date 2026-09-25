@@ -381,13 +381,14 @@ export type LifeBusEvents = {
    */
   kept: { ids: readonly string[] } | null
   /**
-   * "יש לך עוד קצת זמן" — the day's next beat is waiting for the clock and nothing else.
+   * זמן פנוי — the day's next thing is waiting for the clock and nothing else (delta 90).
    *
-   * Emitted by `WorldScene` when the room has been quiet for `QUIET_MINUTES` and the flow
-   * layer (`world/flow.ts`) can name the minute the next beat wants. React answers with a
-   * card that offers to move the clock; it never moves on its own.
+   * Emitted by `WorldScene` every minute the plan changes (`world/timeAdvance.ts`): what is
+   * coming, when and where, when to leave, and what fits before. React draws the chip and
+   * the planner and paces them in real seconds (§30); it never moves the clock — it asks
+   * `runtime.advanceTime(planId)` and the world moves itself.
    */
-  pass: { beatId: string; minute: number; waitingHe?: string } | null
+  freeTime: import('../world/timeAdvance').TimeAdvancePlan | null
 
   /**
    * המנוי יצא למכירה — the one card in this game that STOPS a chapter on its way in.

@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import { t } from '@/lib/i18n'
 
 import { PROLOGUE } from '../../content/chapter1986'
+import { GESTURES, GESTURE_PREFIX, type Gesture } from '../../content/gestures'
 import { artUrl } from '../art'
 import { CONTEXT_KEY, type LifeContext } from '../context'
 import { LIFE_PALETTE } from '../palette'
@@ -23,6 +24,17 @@ export class PrologueScene extends Phaser.Scene {
 
   private ctx!: LifeContext
   private done = false
+  private image: Phaser.GameObjects.Image | null = null
+  /**
+   * a gesture in the middle of the memory (`content/gestures.ts`, V3 §12): the box has
+   * closed, a mark waits on the painting, and the next conversation opens when the hand
+   * has done it — or when it has waited long enough by itself.
+   */
+  private gesture: Gesture | null = null
+  private gestureTaps = 0
+  private gestureSince = 0
+  private gestureMark: Phaser.GameObjects.Ellipse | null = null
+  private gestureShake: Phaser.Tweens.Tween | null = null
 
   constructor() {
     super(PrologueScene.KEY)
@@ -38,6 +50,7 @@ export class PrologueScene extends Phaser.Scene {
 
     const cam = this.cameras.main
     const image = this.add.image(0, 0, 'art-cup83').setOrigin(0.5, 0.5).setScrollFactor(0)
+    this.image = image
     const source = this.textures.get('art-cup83').getSourceImage()
 
     const place = () => {
@@ -85,19 +98,96 @@ export class PrologueScene extends Phaser.Scene {
 
     this.ctx.dialogue.setHooks({
       travel: () => this.finish(),
-      minigame: () => undefined,
+      minigame: (id: string) => this.startGesture(id),
       ending: () => undefined,
       onOpen: () => undefined,
     })
 
     this.ctx.bus.emit('place', { id: 'prologue', title: t('life.place.prologue') })
     this.ctx.bus.emit('controls', { visible: false })
-    if (!this.ctx.dialogue.start('a1-1983', () => this.finish())) {
+    this.input.on('pointerdown', () => this.pressGesture())
+    if (!this.ctx.dialogue.start('a1-1983', () => this.closed())) {
       this.ctx.dialogue.startLines(PROLOGUE, () => this.finish())
     }
   }
 
+  /**
+   * A conversation closed. When it closed because it handed the hand a gesture, the
+   * gesture's hook runs right after this in the same call (`DialogueRunner.finish` closes
+   * first, then runs what the effects opened), so the decision waits one tick.
+   */
+  private closed() {
+    this.time.delayedCall(0, () => {
+      if (!this.gesture && !this.ctx.dialogue.open) this.finish()
+    })
+  }
+
+  private startGesture(id: string) {
+    const gesture = id.startsWith(GESTURE_PREFIX) ? GESTURES[id.slice(GESTURE_PREFIX.length)] : undefined
+    if (!gesture) return
+    this.gesture = gesture
+    this.gestureTaps = 0
+    this.gestureSince = 0
+    const cam = this.cameras.main
+    const x = cam.width * gesture.spot.x
+    const y = cam.height * gesture.spot.y
+    this.gestureMark?.destroy()
+    const size = Math.min(cam.width, cam.height) * 0.16
+    const mark = this.add.ellipse(x, y, size, size, LIFE_PALETTE.red, 0).setStrokeStyle(4, LIFE_PALETTE.red, 0.95).setScrollFactor(0).setDepth(30)
+    this.tweens.add({ targets: mark, scale: 1.25, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    this.gestureMark = mark
+    // the terrace erupting under him: the picture jumps, transform only
+    if (gesture.shake && this.image) {
+      const baseY = this.image.y
+      this.gestureShake = this.tweens.add({ targets: this.image, y: baseY - cam.height * 0.012, duration: 160, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    }
+    this.ctx.bus.emit('controls', { visible: true })
+    this.ctx.bus.emit('prompt', { verb: gesture.verb, label: gesture.labelHe, locked: false })
+  }
+
+  private pressGesture() {
+    const gesture = this.gesture
+    if (!gesture || this.ctx.dialogue.open) return
+    this.gestureTaps += 1
+    this.gestureSince = 0
+    if (this.gestureMark) this.tweens.add({ targets: this.gestureMark, angle: this.gestureMark.angle + 45, duration: 160 })
+    if (this.gestureTaps < gesture.taps) {
+      const text = gesture.tapHe?.[this.gestureTaps - 1]
+      if (text) this.ctx.bus.emit('toast', { text, tone: 'plain' })
+      return
+    }
+    this.resolveGesture(true)
+  }
+
+  private resolveGesture(done: boolean) {
+    const gesture = this.gesture
+    if (!gesture) return
+    this.gesture = null
+    this.gestureMark?.destroy()
+    this.gestureMark = null
+    this.gestureShake?.stop()
+    this.gestureShake = null
+    this.ctx.bus.emit('prompt', null)
+    this.ctx.bus.emit('controls', { visible: false })
+    this.ctx.dialogue.applyEffects(done ? gesture.done : gesture.ignored)
+    this.ctx.bus.emit('toast', { text: done ? gesture.doneHe : gesture.ignoredHe, tone: done ? 'red' : 'plain' })
+    if (!this.ctx.dialogue.start(gesture.next, () => this.closed())) this.finish()
+  }
+
+  override update(_time: number, delta: number) {
+    if (!this.gesture) return
+    this.ctx.input.beginFrame()
+    if (this.ctx.input.actionPressed) {
+      this.pressGesture()
+      return
+    }
+    this.gestureSince += delta
+    // a gesture nobody makes resolves by itself: a memory does not wait for the hand
+    if (this.gestureSince >= this.gesture.autoMs) this.resolveGesture(false)
+  }
+
   skip() {
+    this.gesture = null
     this.ctx.dialogue.close()
     this.finish()
   }
