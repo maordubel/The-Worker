@@ -34,6 +34,7 @@ import {
 import type {
   ActorKind,
   CrossCheck,
+  MatchDecision,
   MatchMasterFile,
   MatchRecord,
   MomentRecord,
@@ -50,6 +51,8 @@ const OUT = 'content/generated/match-master.json'
 const CONFIDENCE_FLOOR = 2
 const SECONDARY_INTL = 'content/manual/intl-redfans-2026-09-24.json'
 const ASIAN_FILE = 'content/manual/asian-competition-matches.json'
+/** the ויקיפועל season schedules (delta 89) — rows carry their own `scorers` (the `comments` line) */
+const SCHEDULES_FILE = 'content/manual/matches-vikipoel-2026-09-25.json'
 const INTL_COMPETITIONS = new Set(['גביע-אלופות-אסיה', 'גביע-אסיה', 'גביע-האינטרטוטו', 'גביע-אופא', 'הליגה-האירופית', 'ליגת-האלופות', 'קונפרנס-ליג'])
 /** the enrichment's competition names → the archive's slugs */
 const SECONDARY_COMPETITION: Record<string, string[]> = {
@@ -98,6 +101,7 @@ export const MATCH_MASTER_INPUTS = [
   'content/generated/player-master.json',
   'content/manual/asian-competition-matches.json',
   'content/manual/intl-redfans-2026-09-24.json',
+  'content/manual/matches-vikipoel-2026-09-25.json',
 ] as const
 
 export function matchInputsSha(root: string, inputs: readonly string[] = MATCH_MASTER_INPUTS): string {
@@ -214,6 +218,23 @@ export function buildMatchMaster(root = process.cwd()): { out: MatchMasterFile; 
   const conflictKey = (row: Row) => [row.entityTable, row.entityKey ?? '', row.field].join('|')
   const conflictsByMatch = new Map<string, Row[]>()
   const conflictsByGoal = new Map<string, Row[]>()
+  type Decision = { matchId: string; field: string; value: unknown; winningSourceUrl: string; winningSourceTitle: string; decidedOn?: string }
+  const decisionsByMatch = new Map<string, { row: Row; d: Decision }[]>()
+  for (const row of conflictRows) {
+    const list = (row.decisions ?? []) as Decision[]
+    if (list.length && (row.resolution === null || row.resolution === undefined)) {
+      problems.push(`decisions on an unresolved conflict: ${conflictKey(row)}`)
+      continue
+    }
+    for (const d of list) {
+      if (!registry.some((e) => e.id === d.matchId)) {
+        problems.push(`decision ${conflictKey(row)} names no registry match: ${d.matchId}`)
+        continue
+      }
+      if (!d.winningSourceUrl) problems.push(`decision ${conflictKey(row)} has no winning source`)
+      decisionsByMatch.set(d.matchId, [...(decisionsByMatch.get(d.matchId) ?? []), { row, d }])
+    }
+  }
   for (const row of conflictRows) {
     if (row.resolution !== null && row.resolution !== undefined) continue // settled by a named person
     if (row.entityTable === 'match' && row.entityKey) {
@@ -419,9 +440,9 @@ export function buildMatchMaster(root = process.cwd()): { out: MatchMasterFile; 
       readings.push({ label: 'red-fans', sourceId: list[0]?.sourceId as string, file: SECONDARY_INTL, list })
     }
     for (const row of group) {
-      if (row.file !== ASIAN_FILE || !Array.isArray((row as Row).scorers)) continue
+      if ((row.file !== ASIAN_FILE && row.file !== SCHEDULES_FILE) || !Array.isArray((row as Row).scorers)) continue
       const list = ((row as Row).scorers as Row[]).map((g) => toEntry(g, row.sourceUrl ?? null, row.sourceTitle ?? '', row.confidence ?? 2))
-      readings.push({ label: 'asia', sourceId: cite(row.sourceUrl, row.sourceTitle), file: ASIAN_FILE, list })
+      readings.push({ label: row.file === ASIAN_FILE ? 'asia' : 'schedules', sourceId: cite(row.sourceUrl, row.sourceTitle), file: row.file, list })
     }
     let scorerIdentityDisputed = false
     if (scorers.length === 0 && readings.length > 0) scorers.push(...(readings[0] as { list: ScorerEntry[] }).list)
@@ -554,6 +575,60 @@ export function buildMatchMaster(root = process.cwd()): { out: MatchMasterFile; 
       confidence: Math.max(...group.map((row) => row.confidence ?? 0)),
       mergeNote: entry.mergeNote ?? null,
       ...(notPlayed ? { notPlayed } : {}),
+    }
+    // decisions (delta 89): a fact-conflicts row that a named person resolved, carrying the
+    // structured `decisions` — the claim leaves `claims` for `decided`, where every reading
+    // it had stays (losing provenance is never deleted), and the field takes the winner.
+    for (const { row: conflictRow, d } of decisionsByMatch.get(entry.id) ?? []) {
+      const field = d.field
+      const taken = record.claims.filter((c) => c.field === field || (field === 'scorers' && c.field === 'scorers.minute'))
+      record.claims = record.claims.filter((c) => !taken.includes(c))
+      const sourceId = cite(d.winningSourceUrl, d.winningSourceTitle)
+      const decided: MatchDecision = {
+        field,
+        value: (d.value ?? null) as MatchDecision['value'],
+        sourceId,
+        conflict: conflictKey(conflictRow),
+        resolutionHe: String(conflictRow.resolution),
+        decidedBy: String(conflictRow.resolvedBy ?? ''),
+        decidedOn: String(d.decidedOn ?? ''),
+        overruled: taken.flatMap((c) => c.values),
+      }
+      record.decided = [...(record.decided ?? []), decided]
+      if (!record.sourceIds.includes(sourceId)) record.sourceIds = [...record.sourceIds, sourceId].sort(byCodePoint)
+      const scoreFrom = () => {
+        if (!record.result || record.hapoelSide === null) return null
+        return record.hapoelSide === 'home'
+          ? { home: record.result.hapoel, away: record.result.opponent }
+          : { home: record.result.opponent, away: record.result.hapoel }
+      }
+      if (field === 'playedOn') {
+        record.playedOn = typeof d.value === 'string' ? { value: d.value, precision: 'day' } : { value: null, precision: 'unknown' }
+      } else if (field === 'home') {
+        const home = String(d.value)
+        if (!record.clubs.includes(home)) problems.push(`decision ${decided.conflict}: home ${home} is not a club of ${entry.id}`)
+        record.home = home
+        record.away = record.clubs.find((c) => c !== home) ?? null
+        record.hapoelSide = home === US ? 'home' : record.away === US ? 'away' : null
+        record.score = scoreFrom()
+      } else if (field === 'result') {
+        const v = d.value as { hapoel: number; opponent: number } | null
+        record.result = v && typeof v.hapoel === 'number' ? { hapoel: v.hapoel, opponent: v.opponent } : null
+        record.score = scoreFrom()
+      } else if (field === 'venue') {
+        record.venue = typeof d.value === 'string' ? d.value : null
+      } else if (field === 'stage') {
+        record.stage = typeof d.value === 'string' ? d.value : record.stage
+      } else if (field === 'scorers') {
+        const reading = readings.find((r) => r.file.endsWith(String(d.value)))
+        if (!reading) problems.push(`decision ${decided.conflict}: no scorer reading from ${d.value} on ${entry.id}`)
+        else {
+          record.scorers = reading.list
+          record.scorersDisputed = reading.list.some((g) => g.confidence < CONFIDENCE_FLOOR)
+        }
+      } else if (field !== 'opponent') {
+        problems.push(`decision ${decided.conflict}: unknown field ${field}`)
+      }
     }
     matches.push(record)
     matchById.set(record.matchId, record)

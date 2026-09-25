@@ -2,7 +2,7 @@
 # בדיקת המסד על Postgres מקומי — לא צעד של מאור, זה הכלי של מי שכותב מיגרציה.
 #
 # מקים מסד ריק עם auth ו-storage מדומים ועם הטבלאות של DUBID לצידו (supabase/tests/00),
-# מריץ את כל supabase/migrations פעמיים ברצף, ואז את בדיקות התקיפה והזרימה (10, 20).
+# מריץ את כל supabase/migrations פעמיים ברצף, ואז את בדיקות התקיפה והזרימה (10, 20, 30, 31, 40).
 # נכשל על כל שגיאה ועל כל שורת FAIL.
 #
 #   PGHOST=/tmp PGPORT=5499 PGUSER=postgres scripts/db/verify.sh
@@ -21,3 +21,9 @@ out=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/20-collector.sql 2>&1) 
 echo "$out" | grep -c PASS | xargs -I{} echo "db verify: migrations twice, portal smoke, {} collector assertions — clean"
 bc=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/30-blind-cow.sql 2>&1) || { echo "$bc" | grep -E "FAIL|ERROR"; exit 1; }
 echo "$bc" | grep -c PASS | xargs -I{} echo "db verify: {} blind-cow (gate 10 duel) assertions — clean"
+lv=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/31-blind-cow-live.sql 2>&1) || { echo "$lv" | grep -E "FAIL|ERROR"; exit 1; }
+echo "$lv" | grep -c PASS | xargs -I{} echo "db verify: {} blind-cow LIVE duel assertions — clean"
+ev=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/40-events.sql 2>&1) || { echo "$ev" | grep -E "FAIL|ERROR"; exit 1; }
+echo "$ev" | grep -c PASS | xargs -I{} echo "db verify: {} measurement (worker_events) assertions — clean"
+ab=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/50-away-been.sql 2>&1) || { echo "$ab" | grep -E "FAIL|ERROR"; exit 1; }
+echo "$ab" | grep -c PASS | xargs -I{} echo "db verify: {} away-days \"הייתי שם\" (worker_away_been) assertions — clean"

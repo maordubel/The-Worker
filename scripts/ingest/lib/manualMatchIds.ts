@@ -109,6 +109,9 @@ export function keyedMatches(root: string): KeyedMatch[] {
     // natural keys as matches.json, so it mints nothing: it adds sources, and where it
     // disagrees (the 1970 semi-final was a walkover) the match master carries a claim.
     ['content/manual/asian-competition-matches.json', 'football'],
+    // The ויקיפועל season schedules (delta 89, 25.9.2026): the 1954/55 and 1966–68 rows the
+    // Games ingest could not label. New natural keys — `canon:ids -- --write-ids` mints them.
+    ['content/manual/matches-vikipoel-2026-09-25.json', 'football'],
   ]
   for (const [file, sport] of files) {
     const doc = read(root, file) as { confidence: number; records: MatchRow[] }

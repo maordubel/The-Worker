@@ -183,12 +183,17 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
    * runs out halfway through 1972, which then reads as a broken bedroom for the rest of
    * the run. The box tells us when it is finished; the count was only ever a guess.
    */
-  for (let i = 0; i < 40; i += 1) {
+  // (Director V3 §12, 25.9.2026) the memory has two gestures in it now — the grip and the
+  // red thing on the concrete — which close the box and put a mark on the painting with a
+  // prompt. E is the hand for those too, so the loop runs while there is a box OR a prompt.
+  const inPrologue = async () =>
+    (await page.locator('[data-life="dialogue"]').count()) > 0 || (await page.locator('[data-life="prompt"]').count()) > 0
+  for (let i = 0; i < 60; i += 1) {
     await page.keyboard.press('e')
     await page.waitForTimeout(300)
-    if ((await page.locator('[data-life="dialogue"]').count()) === 0) {
+    if (!(await inPrologue())) {
       await page.waitForTimeout(1400)
-      if ((await page.locator('[data-life="dialogue"]').count()) === 0) break
+      if (!(await inPrologue())) break
     }
   }
   /**
@@ -575,12 +580,17 @@ for (const size of TOUR_ONLY ? [] : SIZES.filter((s) => !ONLY_SIZES || ONLY_SIZE
   let sawPrompt = false
   let sawNoPrompt = false
   for (let i = 0; i < 46; i += 1) {
-    const promptText = await page.evaluate(
-      () => document.querySelector('[data-life="prompt"]')?.textContent?.trim() ?? null,
-    )
+    const promptText = await page.evaluate(() => {
+      const el = document.querySelector('[data-life="prompt"]')
+      return el?.getAttribute('aria-label') ?? el?.textContent?.trim() ?? null
+    })
     if (promptText) sawPrompt = true
     else sawNoPrompt = true
-    if (promptText && !promptText.includes('לך')) {
+    // (25.9.2026) a PERSON, by the verb the prompt names: the street of 1986 also holds the
+    // week's jobs and the things a boy picks up, and a box about a pile of newspapers is
+    // not somebody spoken to — pressing it and then finding no face made this a lottery on
+    // the seed of the job rotation
+    if (promptText && promptText.includes('תדבר')) {
       await page.keyboard.press('e')
       await page.waitForTimeout(460)
       if ((await page.locator('[data-life="dialogue"] img').count()) > 0) {
@@ -726,7 +736,21 @@ const TOUR = [
     await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' })
     await page.evaluate(
       ([where, raised]) => {
-        const events = [{ t: 'flag.raised', flag: 'prologue:done' }, { t: 'moved', to: where }]
+        /*
+         * (delta 90) The chapter, said out loud. A save with no `chapter.entered` lands in
+         * the chapter the engine defaults to — which since the prologue became playable is
+         * not 1986 — and the terrace stop then waited for a scoreboard in a year with no
+         * match (reported as LOST). The hour is the one the footage probe uses: before the
+         * final, so the terrace stop can see the director start it.
+         */
+        const events = [
+          { t: 'flag.raised', flag: 'prologue:done' },
+          { t: 'year.entered', year: 1986, weekday: 6, minute: 15 * 60 + 56 },
+          { t: 'chapter.entered', chapter: '1986' },
+          // the shop's "new shirt" card belongs to a chapter's first room, not to a tour stop
+          { t: 'flag.raised', flag: 'own:shopnews:1986' },
+          { t: 'moved', to: where },
+        ]
         for (const flag of raised) events.push({ t: 'flag.raised', flag })
         window.localStorage.setItem(
           'the-worker:life',

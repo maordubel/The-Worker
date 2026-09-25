@@ -86,12 +86,17 @@ const SHIPPED = [
   // 24.9.2026 — the archive's dig table (gate 12) and the gate 11 wall paste-up
   'public/archive',
   'public/art',
+  // 25.9.2026 — AWAY DAYS stadium photographs (§29). Every file also has a row in
+  // content/manual/away-media.json with its licence, credit, capture year and yellow count.
+  'public/away',
 ]
 
 const KIND = new Set([
   'backdrop', 'figure', 'prop', 'photo-scan', 'card', 'document', 'audio', 'video', 'ui', 'generated',
 ])
-const ORIGIN = new Set(['maor-upload', 'archive-scan', 'original-artwork', 'procedural', 'unknown'])
+// 25.9.2026 — `free-licence`: a photograph published under CC BY / CC BY-SA / PD (Wikimedia
+// Commons), fetched from its file page; author, licence and page URL live in away-media.json.
+const ORIGIN = new Set(['maor-upload', 'archive-scan', 'original-artwork', 'procedural', 'free-licence', 'unknown'])
 /** every physical thing done to a file between his hard drive and a player's browser */
 const TREATMENT = new Set([
   'none',

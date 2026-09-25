@@ -153,9 +153,12 @@ for (const chapter of CHAPTERS) {
      * the card never appears in a chapter that RESCUEs, the flow layer did not see the
      * wait, and that is a bug in the flow layer rather than in the chapter.
      */
+    // (delta 90) the offer is the free-time chip → planner → its world-action button
     const passed = await page.evaluate(() => {
-      const go = document.querySelector('[data-life="pass-go"]')
+      const go = document.querySelector('[data-life="free-time-go"]')
       if (go instanceof HTMLElement) { go.click(); return true }
+      const chip = document.querySelector('[data-life="free-time-chip"]')
+      if (chip instanceof HTMLElement) { chip.click(); return true }
       return false
     })
     if (passed) { await page.waitForTimeout(260); continue }
