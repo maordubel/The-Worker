@@ -6,7 +6,7 @@ import { Preview } from './Preview'
 import { resolvePrologueAnchor } from '@/lib/life/anchor-server'
 
 /**
- * QA only — the opening sequence, without clearing session storage to see it again.
+ * QA only — the opening (film first, or `?path=documentary` / `?path=film`), without starting a new life to see it again.
  *
  * Same discipline as the other harnesses (rule 19): `notFound()` in production, built from
  * the real component and the real anchor. Beat three prints the 1983 cup final by resolving
@@ -15,11 +15,13 @@ import { resolvePrologueAnchor } from '@/lib/life/anchor-server'
  */
 export const dynamic = 'force-dynamic'
 
-export default function Page() {
+export default function Page({ searchParams }: { searchParams?: { path?: string } }) {
   if (!qaAllowed()) notFound()
+  const path = searchParams?.path
+  const force = path === 'film' || path === 'documentary' ? path : undefined
   return (
     <div className="relative h-dvh w-full">
-      <Preview anchor={resolvePrologueAnchor()} />
+      <Preview anchor={resolvePrologueAnchor()} force={force} />
     </div>
   )
 }

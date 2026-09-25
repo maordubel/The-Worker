@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto'
 
 import { playerById } from '@/lib/archive/player-master'
 import { playerShirt } from '@/lib/kit/playerShirt'
+import { blindCowLinks } from '@/lib/links'
 
 import { BANK, openClues, questionById, yearsHe, type Filter } from './bank'
 import { SCORING_VERSION, weightedTimeMs } from './scoring'
@@ -107,6 +108,7 @@ export function resultOf(
     caughtBy: run.caughtBy,
     allClues: target.allClues,
     archiveHref: `/archive?at=${encodeURIComponent(target.playerId)}`,
+    links: blindCowLinks(target.playerId, target.allClues),
     shirt,
     shirtTitle: shirt.seasonLabel,
   }

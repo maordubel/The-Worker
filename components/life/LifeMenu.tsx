@@ -27,6 +27,7 @@ export function LifeMenu({
   debug,
   onClose,
   onProfile,
+  onMe,
   onDeck,
   onSound,
   onDebug,
@@ -48,6 +49,8 @@ export function LifeMenu({
   debug: boolean
   onClose: () => void
   onProfile: () => void
+  /** אני — the other half of the dossier, its own row (delta 90-H, spec §66) */
+  onMe?: () => void
   onDeck: (on: boolean) => void
   onSound: (on: boolean) => void
   onDebug: () => void
@@ -99,8 +102,13 @@ export function LifeMenu({
         <button type="button" className={row} onClick={onClose} data-life="menu-continue">
           <span>{t('life.menu.continue')}</span>
         </button>
+        {onMe ? (
+          <button type="button" className={row} onClick={onMe} data-life="menu-me">
+            <span>{t('life90h.menu.me')}</span>
+          </button>
+        ) : null}
         <button type="button" className={row} onClick={onProfile} data-life="menu-profile">
-          <span>{t('life.profile')}</span>
+          <span>{t('life90h.menu.bag')}</span>
         </button>
         <button type="button" className={row} onClick={onMap} data-life="menu-map">
           <span>{t('life.map')}</span>

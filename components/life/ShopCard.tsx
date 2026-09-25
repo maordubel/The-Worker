@@ -29,6 +29,7 @@ import {
   packetShekels,
   setSoldIn,
   stickersIn,
+  packetQuote,
   stuckIn,
 } from '@/lib/life/stickers'
 import type { LifeState } from '@/lib/life/types'
@@ -326,7 +327,9 @@ function Counter({
   const page = id ? stickersIn(id) : []
   const totals = albumTotals(state)
   const price = packetShekels(chapter)
-  const canPay = meets(state, { minAgorot: price * 100 })
+  // the §21.4 card: every refusal is known — and said — before a shekel moves
+  const quote = packetQuote(state)
+  const canPay = quote.status === 'ok' || quote.status === 'pending'
   const arrived = newSetsIn(chapter)
 
   return (
@@ -368,6 +371,20 @@ function Counter({
               <p className="mt-1 font-body text-[11px] leading-snug text-ink/70">
                 {t('life.shop.sgLead')}
               </p>
+              {/* המחיר והכיס, זה ליד זה — before the button, never after it */}
+              <p className="mt-1 flex flex-wrap items-baseline gap-x-3 font-mono text-[12px] tabular-nums text-ink" data-life="shop-sg-quote">
+                <span>
+                  {t('life90b.packet.price')} <bdi>{formatMoney(quote.price)}</bdi>
+                </span>
+                <span className="text-ink/70">
+                  {t('life90b.packet.wallet')} <bdi>{formatMoney(quote.wallet)}</bdi>
+                </span>
+              </p>
+              {quote.sayHe && quote.status !== 'none' && (
+                <p className="mt-1 border-s-rule border-sign ps-2 font-body text-[12px] leading-snug text-sign" data-life="shop-sg-refusal" role="status">
+                  <bdi>{quote.sayHe}</bdi>
+                </p>
+              )}
             </>
           ) : (
             <p className="mt-1 font-body text-[12px] leading-snug text-ink/70">
@@ -410,7 +427,9 @@ function Counter({
           >
             {canPay
               ? t('life.shop.sgBuy', { n: String(price) })
-              : t('life.shop.short', { n: String(shortBy(state, price)) })}
+              : quote.status === 'short'
+                ? t('life.shop.short', { n: String(shortBy(state, price)) })
+                : t('life90b.packet.emptyBtn')}
           </button>
         )}
         {onAlbum && (

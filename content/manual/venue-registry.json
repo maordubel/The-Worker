@@ -498,7 +498,8 @@
    "successorVenueId": null,
    "sourceRefs": [
     "https://www.thesportsdb.com/venue/17617-stadion-georgi-asparuhov",
-    "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
+    "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
+    "https://match.uefa.com/v5/matches?matchId=70198"
    ],
    "confidence": 2
   },
@@ -540,7 +541,8 @@
    "successorVenueId": null,
    "sourceRefs": [
     "https://www.thesportsdb.com/venue/17087-Stadio-Artemio-Franchi",
-    "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
+    "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
+    "https://match.uefa.com/v5/matches?matchId=70341"
    ],
    "confidence": 2
   },
@@ -1121,7 +1123,8 @@
    "successorVenueId": null,
    "sourceRefs": [
     "https://en.wikipedia.org/wiki/Red_Bull_Arena_(Salzburg)",
-    "https://wildstat.com/p/146/cht/3/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
+    "https://wildstat.com/p/146/cht/3/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
+    "https://match.uefa.com/v5/matches?matchId=2002389"
    ],
    "confidence": 2,
    "note": "In Wals-Siezenheim, Salzburg."
@@ -1546,7 +1549,8 @@
    "sourceRefs": [
     "https://en.wikipedia.org/wiki/Huvepharma_Arena",
     "https://mapcarta.com/W232077484",
-    "https://wildstat.com/p/146/cht/551/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
+    "https://wildstat.com/p/146/cht/551/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
+    "https://match.uefa.com/v5/matches?matchId=2048802"
    ],
    "confidence": 2,
    "note": "Wildstat writes \"Ludogorets Arena\" for 30.7.2026."
@@ -1589,6 +1593,100 @@
    ],
    "confidence": 2,
    "note": "Wildstat writes \"New Balance Arena\" for 20.8.2026 — the ground's current sponsor name."
+  },
+  {
+   "id": "marienlyst",
+   "canonicalNameHe": "אצטדיון מריאנליסט",
+   "canonicalNameLatin": "Marienlyst Stadion",
+   "aliases": [
+    "Marienlyst"
+   ],
+   "historicalNames": [],
+   "cityHe": "דרמן",
+   "cityLatin": "Drammen",
+   "countryHe": "נורווגיה",
+   "countryCode": "NO",
+   "latitude": 59.7344111,
+   "longitude": 10.2013194,
+   "openedYear": null,
+   "closedYear": null,
+   "successorVenueId": null,
+   "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=55638"
+   ],
+   "confidence": 2,
+   "note": "אופ\"א (משחק 55638): Strømsgodset 1-0 H. Tel-Aviv, 25.8.1998, Marienlyst, Drammen — קואורדינטות מאותו רישום."
+  },
+  {
+   "id": "san-marino-stadium",
+   "canonicalNameHe": "אצטדיון סן מרינו",
+   "canonicalNameLatin": "San Marino Stadium",
+   "aliases": [
+    "Stadio Olimpico",
+    "Stadio Olimpico di Serravalle"
+   ],
+   "historicalNames": [],
+   "cityHe": "סראוואלה",
+   "cityLatin": "Serravalle",
+   "countryHe": "סן מרינו",
+   "countryCode": "SM",
+   "latitude": 43.9712528,
+   "longitude": 12.4769694,
+   "openedYear": null,
+   "closedYear": null,
+   "successorVenueId": null,
+   "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=303568",
+    "https://en.wikipedia.org/wiki/San_Marino_Stadium"
+   ],
+   "confidence": 2,
+   "note": "אופ\"א (משחק 303568): Juvenes/Dogana 0-2 H. Tel-Aviv, 31.7.2008, San Marino Stadium, Serravalle. Wildstat: \"Stadio Olimpico, Serravalle\"."
+  },
+  {
+   "id": "arena-katowice",
+   "canonicalNameHe": "ארנה קטוביץ",
+   "canonicalNameLatin": "Arena Katowice",
+   "aliases": [],
+   "historicalNames": [],
+   "cityHe": "קטוביץ",
+   "cityLatin": "Katowice",
+   "countryHe": "פולין",
+   "countryCode": "PL",
+   "latitude": 50.252657,
+   "longitude": 18.974696,
+   "openedYear": 2025,
+   "closedYear": null,
+   "successorVenueId": null,
+   "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=2049189",
+    "https://en.wikipedia.org/wiki/Arena_Katowice"
+   ],
+   "confidence": 2,
+   "note": "אופ\"א (משחק 2049189): Katowice 2-1 H. Tel-Aviv, 12.8.2026, Arena Katowice — קואורדינטות מאותו רישום."
+  },
+  {
+   "id": "differdange-municipal",
+   "canonicalNameHe": "האצטדיון העירוני של דיפרדאנז'",
+   "canonicalNameLatin": "Stade Municipal de la Ville de Differdange",
+   "aliases": [
+    "Stade Municipal, Differdange"
+   ],
+   "historicalNames": [],
+   "cityHe": "דיפרדאנז'",
+   "cityLatin": "Differdange",
+   "countryHe": "לוקסמבורג",
+   "countryCode": "LU",
+   "latitude": 49.514308,
+   "longitude": 5.892292,
+   "openedYear": null,
+   "closedYear": null,
+   "successorVenueId": null,
+   "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=2009845",
+    "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
+   ],
+   "confidence": 2,
+   "note": "אופ\"א (משחק 2009845): Diddeleng 1-3 H. Tel-Aviv, 23.8.2012. F91 דודלאנז' אירחה בדיפרדאנז'."
   }
  ]
 }

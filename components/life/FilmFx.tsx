@@ -11,9 +11,19 @@ import { useEffect, useState } from 'react'
  * element and one keyframe, and every one of them respects `prefers-reduced-motion`.
  */
 
-/** film grain, jittering; `opacity` is the whole tuning knob */
-export function Grain({ opacity = 0.18 }: { opacity?: number }) {
-  return <div aria-hidden="true" className="film-grain pointer-events-none absolute inset-0" style={{ opacity }} />
+/**
+ * film grain, jittering; `opacity` is the whole tuning knob. `code` draws the same grain
+ * without the stock image (a browser-made noise tile, `.film-grain-code`) — for a screen
+ * that must be whole with every image request failing (the opening documentary, §43).
+ */
+export function Grain({ opacity = 0.18, code = false }: { opacity?: number; code?: boolean }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`film-grain ${code ? 'film-grain-code' : ''} pointer-events-none absolute inset-0`}
+      style={{ opacity }}
+    />
+  )
 }
 
 /** two black bars closing the frame to widescreen — `height` as a fraction of the glass */

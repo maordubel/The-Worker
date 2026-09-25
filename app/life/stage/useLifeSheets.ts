@@ -3,6 +3,8 @@
 import { useCallback, useState, type Dispatch, type MutableRefObject, type SetStateAction } from 'react'
 
 import { checklistFor, type ChecklistItem } from '@/lib/life/checklist'
+import { OFFER_KIND_HE, capHe, offerLineHe, offersNow, startable } from '@/lib/life/offers'
+import type { HelpOffer } from '@/components/life/HelpSheet'
 import { eraFor } from '@/lib/life/content/era'
 import type { LifeAudio } from '@/lib/life/runtime/audio'
 import type { LifeRuntime, LifeSnapshot, MapPlace } from '@/lib/life/runtime/game'
@@ -45,14 +47,25 @@ export function useLifeSheets({
   const [snapshot, setSnapshot] = useState<LifeSnapshot | null>(null)
   const [debug, setDebug] = useState(false)
 
-  const openProfile = useCallback((withDebug: boolean) => {
+  /**
+   * אני · התיק שלי (delta 90-H) — two destinations over ONE snapshot. `view` says which
+   * half of the dossier is open; turning to the other half keeps the snapshot (and the
+   * world paused) rather than re-reading the life. Never written to the save.
+   */
+  const [view, setView] = useState<'me' | 'bag'>('bag')
+
+  const openProfile = useCallback((withDebug: boolean, which: 'me' | 'bag' = 'bag') => {
     const current = runtime.current
     if (!current) return
     current.pause(true)
     setSnapshot(current.snapshot())
     setDebug(withDebug)
+    setView(which)
     audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
   }, [audio, runtime])
+
+  const openMe = useCallback(() => openProfile(false, 'me'), [openProfile])
+  const openBag = useCallback(() => openProfile(false, 'bag'), [openProfile])
 
   const closeProfile = useCallback(() => {
     setSnapshot(null)
@@ -80,6 +93,8 @@ export function useLifeSheets({
 
   const [help, setHelp] = useState(false)
   const [checklist, setChecklist] = useState<ChecklistItem[]>([])
+  const [offers, setOffers] = useState<HelpOffer[]>([])
+  const [cap, setCap] = useState<string | null>(null)
 
   /**
    * מה עכשיו — the existing help sheet is also the one place where optional life can be
@@ -105,8 +120,17 @@ export function useLifeSheets({
           done: false,
         }))
       setChecklist([...story, ...optional])
+      // אפשר עכשיו — today's offers, read off the rooms of this chapter (`lib/life/offers.ts`)
+      setOffers(
+        offersNow(state)
+          .filter(startable)
+          .map((offer) => ({ id: offer.id, kind: offer.kind, kindHe: OFFER_KIND_HE[offer.kind], lineHe: offerLineHe(offer, { kind: false }), here: offer.here })),
+      )
+      setCap(capHe(state))
     } else {
       setChecklist([])
+      setOffers([])
+      setCap(null)
     }
     setHelp(true)
     audio.current?.play('ui-open', { bus: 'ui', level: 0.5 })
@@ -187,12 +211,18 @@ export function useLifeSheets({
     snapshot,
     debug,
     openProfile,
+    openMe,
+    openBag,
+    view,
+    setView,
     closeProfile,
     gauges,
     openGauges,
     closeGauges,
     help,
     checklist,
+    offers,
+    cap,
     openHelp,
     closeHelp,
     menu,

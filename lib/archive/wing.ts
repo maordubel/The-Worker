@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { linksForEntity } from '@/lib/links'
+
 import pressFile from '@/content/manual/press-columns.json'
 import {
   beforeAfter,
@@ -532,6 +534,7 @@ export function detailOf(anyId: string): EntityDetail | null {
       })),
     })),
     sources: sourceLines(e.sourceIds, confidence),
+    links: linksForEntity(e.id),
   }
 }
 

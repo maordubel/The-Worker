@@ -1642,7 +1642,7 @@
     "quantise"
    ],
    "confidence": 2,
-   "noteHe": "סרט הפתיחה של משחק החיים — 21.4 שניות בשחקנים חיים, הכתוביות צרובות בתמונה. לא עבר de-yellow, בכוונה: זו יצירה של מאור ולא נכס שהצינור מייצר, וניקוי הצהוב היה צובע מחדש את שעת הזהב בסצנת העריסה. שלושת הקבצים נושאים חריג צהוב מאושר ב-lib/brand/yellowExemptions.ts, עם המדידה המלאה ב-docs/life/OPENING-FILM-2026-09-17.md."
+   "noteHe": "סרט הפתיחה של משחק החיים — 21.4 שניות בשחקנים חיים, הכתוביות צרובות בתמונה. לא עבר de-yellow, בכוונה: זו יצירה של מאור ולא נכס שהצינור מייצר, וניקוי הצהוב היה צובע מחדש את שעת הזהב בסצנת העריסה. שלושת הקבצים נושאים חריג צהוב מאושר ב-lib/brand/yellowExemptions.ts, עם המדידה המלאה ב-docs/life/OPENING-FILM-2026-09-17.md. 25.9.2026: ה-WebM קודד מחדש מתוך ה-MP4 שעלה ב-23.9 (הקובץ שעלה נחתך ב-7.95 ש׳), ושני הקידודים נמדדו מחדש על כל הפריימים — הערכים ב-yellowExemptions.ts."
   },
   {
    "key": "opening-clips",
@@ -2228,6 +2228,44 @@
    ],
    "confidence": 2,
    "noteHe": "חמש תמונות המותג של השערים (חגיגה, מספר שבע, דריבל, דמות הפועל מהסמל, קיר ההדבקה של שער 11). כולן נמסרו על ידך ועוברות דרך אותו צינור: חיתוך, הקטנה והסרת צהוב. הרשומה נוספה בדלתא 88, כשהתיקייה נכנסה לביקורת."
+  },
+  {
+   "key": "away-media-bloomfield-1980s",
+   "kind": "photo-scan",
+   "origin": "maor-upload",
+   "folder": "public/away",
+   "match": [
+    "bloomfield-1980s-wide.webp",
+    "bloomfield-1980s-tall.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "scripts/away-days/ingest-media.mjs ← public/life/art/bloom80Goal.webp — אחד משלושת צילומי בלומפילד שנמסרו לפרויקט ב-23.9.2026",
+   "treatment": [
+    "crop",
+    "de-yellow",
+    "lossy-webp-measured"
+   ],
+   "confidence": 1,
+   "noteHe": "בלומפילד, נקודת היציאה של המסע: השער והיציע, שנות השמונים לפי שלטי הפרסום (olivetti, בנק הפועלים, טמפו). נגזר מהקובץ של משחק החיים שכבר עבר de-yellow; כאן נחתך ל-1600×900 ול-900×1200 ונמדד מחדש על הפענוח. מי צילם ומתי בדיוק לא נמסר, ולכן הביטחון 1."
+  },
+  {
+   "key": "kit-photo-og-png",
+   "kind": "photo-scan",
+   "origin": "archive-scan",
+   "folder": "public/kits",
+   "match": [
+    "og/*.png"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "public/kits/*.webp (the kit archive itself) · scripts/og/kit-thumbs.py",
+   "treatment": [
+    "cut-out",
+    "centre",
+    "encode-webp",
+    "palette-png"
+   ],
+   "confidence": 2,
+   "noteHe": "תאום PNG קטן (עד 320×320, 128 צבעים) לכל אחד מ-168 תצלומי החולצות, בשביל כרטיסי השיתוף של שער 8 — מנוע ה-OG לא קורא WebP. אותם פיקסלים של הארכיון, מוקטנים; בלי ציון צבע ובלי הסרת צהוב (החריג של public/kits/). נבנה מחדש ב-scripts/og/kit-thumbs.py."
   }
  ]
 }

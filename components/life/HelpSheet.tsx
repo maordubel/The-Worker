@@ -7,6 +7,17 @@ import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import type { ChecklistItem } from '@/lib/life/checklist'
 import { HELP_DISCLAIMER_HE, HELP_RULES_HE, HELP_STORY_HE } from '@/lib/life/help'
+import type { OfferKind } from '@/lib/life/offers'
+
+/** one row of "אפשר עכשיו" — already in words (`offerLineHe`), with its kind for the chip */
+export type HelpOffer = { id: string; kind: OfferKind; kindHe: string; lineHe: string; here: boolean }
+
+const KIND_TONE: Record<OfferKind, string> = {
+  work: 'bg-red text-sheet',
+  wager: 'bg-sign text-sheet',
+  play: 'border-hair border-ink text-ink',
+  favour: 'border-hair border-sign text-sign',
+}
 
 /**
  * "מה עליי לעשות?" — the sheet behind the question mark.
@@ -21,6 +32,8 @@ export function HelpSheet({
   hint,
   waitingOn = null,
   checklist = [],
+  offers = [],
+  capHe = null,
   onClose,
 }: {
   objective: string | null
@@ -29,6 +42,14 @@ export function HelpSheet({
   waitingOn?: string | null
   /** the day's steps, discovered so far — see `lib/life/checklist.ts` */
   checklist?: ChecklistItem[]
+  /**
+   * אפשר עכשיו (§22.4.3) — today's offers this life can actually start, read off the world
+   * by `lib/life/offers.ts`. Work, a bet, a game or a favour, each named as what it is,
+   * with the place and roughly how long. Never a job the room does not have.
+   */
+  offers?: HelpOffer[]
+  /** the pay cap, said once it bites — the anti-grind rule is a sentence, not a hiding place */
+  capHe?: string | null
   onClose: () => void
 }) {
   const [more, setMore] = useState(false)
@@ -51,6 +72,7 @@ export function HelpSheet({
 
         <div className="overflow-y-auto">
           <div className="px-3 pt-3" data-life="help-now">
+            <p className="mb-1.5 font-display text-[11px] uppercase tracking-[0.18em] text-red">{t('life90b.offer.main')}</p>
             {objective && (
               <Cloth className="max-w-full">
                 <span>
@@ -61,18 +83,6 @@ export function HelpSheet({
             <p className="mt-3 font-body text-[15px] leading-snug text-ink" data-life="help-hint">
               <bdi>{hint}</bdi>
             </p>
-            {/* ממתין — the sentence that says nothing is broken. A player who has done
-                everything in the room and is standing still needs to know whether he is
-                waiting for a clock or missing a thing, and those look identical from
-                inside a room. */}
-            {waitingOn && (
-              <p
-                className="mt-2 border-s-rule border-red ps-2 font-body text-[13px] leading-snug text-muted"
-                data-life="help-waiting"
-              >
-                <bdi>{waitingOn}</bdi>
-              </p>
-            )}
             {checklist.length > 0 && (
               <ol className="mt-3 list-none border-t-hair border-ink pt-2" data-life="checklist">
                 {checklist.map((item) => (
@@ -87,6 +97,49 @@ export function HelpSheet({
                   </li>
                 ))}
               </ol>
+            )}
+
+            {(offers.length > 0 || capHe) && (
+              <section className="mt-3 border-t-hair border-ink pt-2" data-life="help-offers" aria-label={t('life90b.offer.can')}>
+                <p className="font-display text-[11px] uppercase tracking-[0.18em] text-red">{t('life90b.offer.can')}</p>
+                <ul className="mt-1 list-none">
+                  {offers.map((offer) => (
+                    <li
+                      key={offer.id}
+                      className="flex items-start gap-2 py-1 font-body text-[14px] leading-snug text-ink"
+                      data-life="help-offer"
+                      data-kind={offer.kind}
+                      data-here={offer.here ? '1' : '0'}
+                    >
+                      <span className={`mt-[1px] shrink-0 px-1.5 py-[1px] font-sign text-[11px] leading-tight ${KIND_TONE[offer.kind]}`}>
+                        {offer.kindHe}
+                      </span>
+                      <bdi>{offer.lineHe}</bdi>
+                    </li>
+                  ))}
+                </ul>
+                {capHe && (
+                  <p className="mt-1 font-body text-[12px] leading-snug text-muted" data-life="help-cap">
+                    <bdi>{capHe}</bdi>
+                  </p>
+                )}
+              </section>
+            )}
+
+            {/* ממתין — the sentence that says nothing is broken. A player who has done
+                everything in the room and is standing still needs to know whether he is
+                waiting for a clock or missing a thing, and those look identical from
+                inside a room. */}
+            {waitingOn && (
+              <section className="mt-3 border-t-hair border-ink pt-2" data-life="help-time">
+                <p className="font-display text-[11px] uppercase tracking-[0.18em] text-red">{t('life90b.offer.time')}</p>
+                <p
+                  className="mt-1 border-s-rule border-red ps-2 font-body text-[13px] leading-snug text-muted"
+                  data-life="help-waiting"
+                >
+                  <bdi>{waitingOn}</bdi>
+                </p>
+              </section>
             )}
           </div>
 

@@ -725,66 +725,9 @@ select {
 
 .plate-card { box-shadow: 3px 3px 0 rgb(var(--ink) / 0.45) }
 
-/* הפתיח — how a 16:9 painting sits on a phone held upright.
-   `cover` is right on a laptop and wrong on a 390×844 screen: it crops a painting to its
-   middle third and throws away the pennant, the radio and the team photograph that are the
-   whole reason the frame was painted. So the picture is CONTAINED on anything narrower
-   than 6:5 and covers everything wider. The ink ground behind it is the bars, and the
-   caption sits over them, which is what a plate under a photograph looks like anyway. */
-.opening-frame { object-fit: contain; background-size: contain }
-@media (min-aspect-ratio: 6/5) {
-  .opening-frame { object-fit: cover; background-size: cover }
-}
-
-/* הרקע שמאחורי הבד — what the bars are made of on a phone.
-   6.9.2026. Maor: "תסדר את הסרטון פתיח שיראה יפה." He was right and the letterboxing was
-   the reason: a 16:9 photograph contained inside a 390×844 phone is a strip of picture in
-   the middle of a black screen, roughly a third of the glass, with a caption floating in
-   the void under it. Cropping to cover is not the answer either — it is the reason the
-   contain rule above was written, and it throws away the pennant and the radio.
-   So the bars stop being black. The SAME picture fills the frame behind it, scaled up,
-   heavily blurred and pushed down, and the photograph sits on top of it untouched. It is
-   what a good video player does with a portrait phone, and it reads as a lit room rather
-   than as a hole. Nothing is cropped, nothing is invented, and on anything wider than 6:5
-   the backdrop is simply never seen because the picture covers it. */
-.opening-bed {
-  filter: blur(34px) saturate(0.7) brightness(0.42);
-  transform: scale(1.35);
-  background-size: cover;
-  background-position: center;
-}
-@media (min-aspect-ratio: 6/5) {
-  .opening-bed { display: none }
-}
-
-/* הבמה — where the photograph actually hangs.
-   Centring a 16:9 still inside a 390×844 phone leaves a third of the glass empty above it
-   and a third empty below, with the caption floating in the lower void a long way from the
-   picture it belongs to. A film still with a line of print under it does not look like
-   that. So on a portrait phone the picture is a plate in the upper half — pinned at 12% of
-   the height, full width, its own aspect — and the caption sits directly beneath it. A
-   hairline top and bottom makes it a frame rather than a strip. Anything wider than 6:5
-   releases both and the picture covers the whole screen, which is what a laptop wants. */
-.opening-stage {
-  position: absolute;
-  inset-inline: 0;
-  /* a quarter of the way down, so the plate sits on the eye line and the print under it
-     has room without leaving half the glass empty */
-  top: 24%;
-  /* the box IS the picture, so the hairlines land on the photograph's own edges rather
-     than on an invisible container a letterboxed still is floating inside */
-  aspect-ratio: 16 / 9;
-  box-shadow: 0 -1px 0 rgb(var(--concrete) / .22), 0 1px 0 rgb(var(--concrete) / .22), 0 22px 60px rgb(var(--ink) / .7);
-}
-.opening-stage > * { height: 100%; object-fit: cover; background-size: cover }
-/* 56.25vw is the plate's own height at 16:9 across the full width; the caption sits a
-   thumb's width under it, wherever the phone puts it */
-.opening-caption { top: calc(24% + 56.25vw + 26px); }
-@media (min-aspect-ratio: 6/5) {
-  .opening-stage { position: static; aspect-ratio: auto; height: 100%; box-shadow: none }
-  .opening-caption { top: auto; bottom: 16%; }
-}
-
+/* הפתיח — the slideshow's frame/bed/stage/caption rules left with the slideshow (25.9.2026,
+   LIFE 90-G): the fallback is now the documentary thread, see the OPENING DOCUMENTARY block
+   at the end of this file. `openingDrift` stays — the coda card still drifts on it. */
 /* הפתיח — the slow push on a held painting.
    Six percent over seven seconds and no more. A still frame under a caption reads as a
    loading screen; anything faster than this reads as a camera move, and these are
@@ -1220,3 +1163,238 @@ select {
 .drag-ghost { position: fixed; top: 0; inset-inline-start: 0; z-index: 70; pointer-events: none; will-change: transform; }
 [data-drop][data-drop-over="true"] { outline: 3px solid rgb(var(--red)); outline-offset: 2px; }
 [data-drag-source="true"] { filter: grayscale(1); }
+
+/* ============================================================================
+   OPENING DOCUMENTARY — begin (LIFE 90-G, 25.9.2026)
+   ----------------------------------------------------------------------------
+   The film's fallback as a second real opening, built from code only: no image, no
+   video, no fetch (owner spec "OPENING DOCUMENTARY HYBRID", §19–33). Seven layers:
+   ink base · vignette · grain · film marks · red thread · year · copy + controls.
+   Brand: red / ink / sheet / concrete / sign only — no yellow, gold, amber, orange,
+   the floodlights included (§52). Radius 0. The stage is ink, never printed grass,
+   so opacity fades are allowed here; the ONE place red could meet the game's
+   colours — the end of the opening — moves the thread off the glass by transform
+   before the overlay fades (rule 79).
+   Used by components/life/OpeningDocumentary.tsx and the waiting ground of
+   components/life/OpeningFilm.tsx. Nothing outside this block may reach for .odoc-*.
+   ========================================================================== */
+.odoc {
+  position: absolute; inset: 0; overflow: hidden; background: rgb(var(--ink));
+  --thread-y: 71%;
+  --gutter-doc: 28px;
+}
+@media (min-aspect-ratio: 6/5) { .odoc { --thread-y: 67%; --gutter-doc: 10vw; } }
+
+/* 1 · ink base — black with depth, never flat */
+.odoc-base {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 50% 42%, rgb(var(--concrete) / .055), transparent 62%),
+    linear-gradient(180deg, rgb(var(--sign) / .16), transparent 42%, rgb(var(--ink)) 100%),
+    rgb(var(--ink));
+}
+/* the per-mode light on the base: one layer each, faded in when the beat asks for it */
+.odoc-tint { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1200ms ease; }
+.odoc-tint-memory { background: radial-gradient(70% 45% at 62% 58%, rgb(var(--sheet) / .06), transparent 70%); }
+.odoc-tint-archive { background: linear-gradient(180deg, rgb(var(--concrete) / .035), rgb(var(--concrete) / .02)); }
+.odoc-tint-lights {
+  background:
+    radial-gradient(60% 40% at 24% 0%, rgb(var(--sheet) / .11), transparent 70%),
+    radial-gradient(90% 60% at 30% 20%, rgb(var(--concrete) / .07), transparent 75%);
+}
+.odoc[data-mode="memory"] .odoc-tint-memory,
+.odoc[data-mode="archive"] .odoc-tint-archive,
+.odoc[data-mode="lights"] .odoc-tint-lights { opacity: 1; }
+
+/* 2 · vignette — holds the eye, is not a black frame */
+.odoc-vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 88% 78% at 50% 46%, transparent 52%, rgb(var(--ink) / .82) 100%);
+}
+
+/* 3 · grain without an image: a grey fractal-noise tile drawn by the browser. Same jitter
+   as the film's stock (`.film-grain`), so the two openings share one grain. */
+.film-grain-code {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .55  0 0 0 0 .55  1.3 0 0 0 -.5'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+  mix-blend-mode: normal;
+}
+
+/* 4 · film language — sprocket marks top and bottom, and four corner marks. Archive
+   only (and a quieter clean frame at the handoff); never a film strip that eats the text. */
+.odoc-marks { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity 700ms ease; }
+.odoc[data-mode="archive"] .odoc-marks { opacity: 1; }
+.odoc[data-mode="handoff"] .odoc-marks { opacity: .45; }
+.odoc-perf {
+  position: absolute; inset-inline: 0; height: 7px;
+  background: repeating-linear-gradient(90deg, transparent 0 13px, rgb(var(--concrete) / .2) 13px 21px, transparent 21px 34px);
+}
+.odoc-perf-top { top: calc(env(safe-area-inset-top) + 9px); }
+.odoc-perf-bottom { bottom: calc(env(safe-area-inset-bottom) + 5px); }
+.odoc-frame {
+  position: absolute; inset: calc(env(safe-area-inset-top) + 26px) 16px calc(env(safe-area-inset-bottom) + 62px);
+  --c: rgb(var(--concrete) / .38);
+  background:
+    linear-gradient(var(--c), var(--c)) top left / 18px 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / 1px 18px no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / 18px 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / 1px 18px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / 18px 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / 1px 18px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / 18px 1px no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / 1px 18px no-repeat;
+}
+@media (min-aspect-ratio: 6/5) { .odoc-frame { inset: 6% 5%; } }
+
+/* the floodlights — two cold beams from below and a haze; white/grey only (§13, §52) */
+.odoc-beams { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1400ms ease; }
+.odoc[data-mode="lights"] .odoc-beams { opacity: 1; }
+.odoc-beam {
+  position: absolute; bottom: -12%; width: 24vw; height: 125%;
+  transform-origin: 50% 100%;
+  background: linear-gradient(to top, rgb(var(--sheet) / .13), rgb(var(--concrete) / .05) 50%, transparent 84%);
+  clip-path: polygon(47% 100%, 53% 100%, 100% 0, 0 0);
+}
+.odoc-beam-a { inset-inline-end: 4%; transform: rotate(-17deg); animation: odoc-sway-a 7s ease-in-out infinite alternate; }
+.odoc-beam-b { inset-inline-end: 22%; transform: rotate(-6deg); animation: odoc-sway-b 8.5s ease-in-out infinite alternate; }
+@media (min-aspect-ratio: 6/5) { .odoc-beam { width: 14vw; } }
+@keyframes odoc-sway-a { from { transform: rotate(-17deg) } to { transform: rotate(-15.4deg) } }
+@keyframes odoc-sway-b { from { transform: rotate(-6deg) } to { transform: rotate(-7.3deg) } }
+
+/* 5 · the red thread. Revealed from the start edge by two opposite transforms (the outer
+   box slides in, the inner slides back), so the line is drawn with `transform` alone and
+   its speed is the beat's own duration: the thread IS the progress (§33). Its geometry is
+   physical (x = a share of the width), so the layer is `direction: ltr` on purpose. */
+.odoc-thread {
+  position: absolute; inset-inline: 0; top: var(--thread-y); height: 64px; margin-top: -32px;
+  direction: ltr; pointer-events: none;
+  transition: transform 520ms cubic-bezier(.55,0,.8,.4);
+}
+.odoc-thread[data-exit="true"] { transform: translateX(-108%); }
+.odoc-reveal-out, .odoc-reveal-in { position: absolute; inset: 0; transition-property: transform; transition-timing-function: linear; }
+.odoc-reveal-out { overflow: hidden; transform: translateX(calc((1 - var(--p)) * 100%)); }
+.odoc-reveal-in { transform: translateX(calc((var(--p) - 1) * 100%)); }
+.odoc-line { fill: none; stroke: rgb(var(--red)); stroke-width: 2; vector-effect: non-scaling-stroke; transition: stroke-width 600ms ease; }
+.odoc[data-mode="identity"] .odoc-line { stroke-width: 3; }
+/* the drawing front — a hairline playhead riding the edge of the reveal */
+.odoc-tip { position: absolute; inset-inline-start: 0; top: 18px; width: 1px; height: 28px; background: rgb(var(--sheet) / .55); }
+.odoc-node {
+  position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px;
+  background: rgb(var(--red)); transform: rotate(45deg) scale(0);
+  transition: transform 420ms cubic-bezier(.2,.9,.3,1.2);
+}
+.odoc-node[data-lit="true"] { transform: rotate(45deg) scale(1); }
+.odoc-node[data-now="true"]::after {
+  content: ''; position: absolute; inset: -6px; border: 1px solid rgb(var(--red) / .7);
+  animation: odoc-ring 900ms cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes odoc-ring { from { transform: scale(.3) } to { transform: scale(1) } }
+.odoc-year-label {
+  position: absolute; margin-top: 12px; transform: translateX(-50%);
+  font-family: var(--font-courier), ui-monospace, monospace; font-size: 11px; letter-spacing: .08em;
+  color: rgb(var(--concrete) / .5); transition: color 600ms ease;
+}
+.odoc-year-label[data-now="true"] { color: rgb(var(--sheet)); }
+/* the mark drawn again and again (identity) — three diamonds around the node, each a hand
+   a little off the last one: the two-plate misregistration of the whole brand */
+.odoc-mark {
+  position: absolute; border: 1.5px solid rgb(var(--red)); transform: translate(-50%, -50%) rotate(45deg) scale(0);
+}
+.odoc[data-mode="identity"] .odoc-mark, .odoc[data-mode="lights"] .odoc-mark, .odoc[data-mode="handoff"] .odoc-mark {
+  animation: odoc-mark 700ms cubic-bezier(.2,.8,.2,1) var(--d, 0ms) both;
+}
+.odoc-mark-1 { width: 20px; height: 20px; }
+.odoc-mark-2 { width: 30px; height: 30px; margin: 2px 0 0 3px; border-color: rgb(var(--red) / .7); }
+.odoc-mark-3 { width: 42px; height: 42px; margin: -2px 0 0 -3px; border-color: rgb(var(--sheet) / .35); }
+@keyframes odoc-mark {
+  from { transform: translate(-50%, -50%) rotate(45deg) scale(.35); opacity: 0 }
+  to   { transform: translate(-50%, -50%) rotate(45deg) scale(1); opacity: 1 }
+}
+
+/* 6 · the year — background architecture, huge and cropped by the glass (§26) */
+.odoc-year {
+  position: absolute; pointer-events: none; line-height: .8;
+  font-family: var(--font-poster), sans-serif; font-weight: 700;
+  font-size: clamp(150px, 56vw, 400px);
+  opacity: 0; transition: opacity 1100ms ease;
+}
+@media (min-aspect-ratio: 6/5) { .odoc-year { font-size: clamp(180px, 31vw, 480px); } }
+.odoc-year[data-on="true"] { opacity: 1; animation: odoc-drift 6s ease-out both; }
+.odoc-year-a { top: 7%; inset-inline-end: -5vw; }
+.odoc-year-b { top: 9%; inset-inline-start: -4vw; }
+@media (min-aspect-ratio: 6/5) { .odoc-year-a { top: 4%; } .odoc-year-b { top: 6%; } }
+.odoc-year-ink { color: rgb(var(--sheet) / .075); }
+.odoc-year-plate { position: absolute; inset: 0; color: rgb(var(--red) / .07); transform: translate(4px, 3px); }
+@keyframes odoc-drift { from { translate: 0 0 } to { translate: 0 -8px } }
+
+/* 7 · the copy — never always in the middle (§27), always inside a reading width */
+.odoc-copy {
+  position: absolute; inset-inline: var(--gutter-doc); max-width: 28rem;
+  bottom: calc(100% - var(--thread-y) + 58px);
+}
+@media (min-aspect-ratio: 6/5) { .odoc-copy { max-width: 36rem; } }
+.odoc-copy[data-mode="memory"] { bottom: calc(100% - var(--thread-y) + 64px); }
+.odoc-copy[data-mode="archive"] { bottom: calc(100% - var(--thread-y) + 46px); }
+.odoc-copy[data-mode="identity"] { bottom: calc(100% - var(--thread-y) + 104px); }
+.odoc-copy[data-mode="lights"] { bottom: calc(100% - var(--thread-y) + 52px); margin-inline: auto; text-align: center; }
+.odoc-copy[data-mode="handoff"] { bottom: auto; top: 50%; margin-inline: auto; text-align: center; translate: 0 -60%; }
+.odoc-over {
+  font-family: var(--font-heebo), system-ui, sans-serif; font-size: 12px; font-weight: 500; letter-spacing: .08em;
+  color: rgb(var(--red)); margin-bottom: 14px;
+}
+.odoc-caption {
+  font-family: var(--font-frank), Georgia, serif; color: rgb(var(--sheet));
+  font-size: clamp(24px, 6.9vw, 40px); line-height: 1.32; text-wrap: balance;
+}
+@media (min-aspect-ratio: 6/5) { .odoc-caption { font-size: clamp(34px, 3.3vw, 56px); } }
+.odoc-copy[data-mode="handoff"] .odoc-caption { font-size: clamp(28px, 8vw, 46px); }
+@media (min-aspect-ratio: 6/5) { .odoc-copy[data-mode="handoff"] .odoc-caption { font-size: clamp(38px, 3.8vw, 60px); } }
+.odoc-piece { display: block; opacity: 0; animation: odoc-rise 900ms cubic-bezier(.2,.7,.2,1) var(--d, 0ms) both; }
+.odoc-piece[data-soft="true"] { color: rgb(var(--sheet) / .72); }
+/* the entry breath: the words are already in place (nothing jumps when they arrive), unseen */
+.odoc-copy [data-wait="true"] { animation: none; opacity: 0; }
+.odoc-archive, .odoc-note {
+  opacity: 0; animation: odoc-rise 800ms cubic-bezier(.2,.7,.2,1) var(--d, 0ms) both;
+  font-family: var(--font-courier), ui-monospace, monospace; font-size: 11px; line-height: 1.6;
+  color: rgb(var(--concrete) / .62); margin-top: 16px; font-variant-numeric: tabular-nums;
+}
+.odoc-note { font-family: var(--font-heebo), system-ui, sans-serif; font-size: 12px; letter-spacing: .1em; color: rgb(var(--concrete) / .55); }
+.odoc-archive { border-top: 1px solid rgb(var(--concrete) / .22); padding-top: 9px; display: inline-block; }
+/* memory paper — 10% of the idea: one dark ruled strip behind the line the beat turns on */
+.odoc-paper {
+  display: inline; padding: 2px 10px 4px; margin-inline-start: -10px;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  background:
+    repeating-linear-gradient(0deg, rgb(var(--concrete) / .07) 0 1px, transparent 1px 9px),
+    rgb(var(--concrete) / .085);
+  outline: 1px solid rgb(var(--concrete) / .22); outline-offset: -1px;
+}
+.odoc-paper-wrap { display: inline-block; transform: rotate(-.45deg); transform-origin: 100% 50%; }
+.odoc-brand { opacity: 0; animation: odoc-rise 1100ms cubic-bezier(.2,.7,.2,1) var(--d, 0ms) both; margin-top: 26px; }
+.odoc-brand-rule { display: block; width: 44px; height: 2px; margin: 0 auto 16px; background: rgb(var(--red)); }
+.odoc-out { animation: odoc-sink 480ms ease-in both; }
+@keyframes odoc-rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+@keyframes odoc-sink { from { opacity: 1; transform: translateY(0) } to { opacity: 0; transform: translateY(-6px) } }
+.odoc[data-leaving="true"] { opacity: 0; transition: opacity 480ms ease 460ms; }
+
+/* the gesture attempt of the film (attempt 3) — one square, one word */
+.odoc-play-mark {
+  width: 64px; height: 64px; background: rgb(var(--red)); display: grid; place-items: center;
+}
+.odoc-play-mark::before {
+  content: ''; width: 20px; height: 22px; background: rgb(var(--sheet));
+  clip-path: polygon(0 0, 100% 50%, 0 100%); margin-inline-start: 5px; direction: ltr;
+}
+
+/* reduced motion: the same composition, cut instead of moved (§38) */
+@media (prefers-reduced-motion: reduce) {
+  .odoc-reveal-out, .odoc-reveal-in, .odoc-thread, .odoc-node, .odoc-tint, .odoc-marks, .odoc-beams, .odoc-year { transition: none !important; }
+  .odoc-beam-a, .odoc-beam-b, .odoc-year[data-on="true"], .odoc-node[data-now="true"]::after { animation: none; }
+  .odoc-piece, .odoc-archive, .odoc-note, .odoc-brand, .odoc-mark { animation-duration: 1ms !important; animation-delay: 0ms !important; }
+  .odoc[data-mode="identity"] .odoc-mark, .odoc[data-mode="lights"] .odoc-mark, .odoc[data-mode="handoff"] .odoc-mark { animation-duration: 1ms !important; }
+  .odoc-out { animation: none; opacity: 0; }
+  .odoc[data-leaving="true"] { transition: none; }
+}
+/* ============================================================================
+   OPENING DOCUMENTARY — end
+   ========================================================================== */

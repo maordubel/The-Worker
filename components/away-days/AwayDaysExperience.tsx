@@ -17,9 +17,16 @@ import {
   type JourneyData,
   type VenueLite,
 } from '@/lib/away-days/journey'
+import { isBeen, myJourney } from '@/lib/away-days/been'
+import { creditLine, photoLabel, venuePhoto } from '@/lib/away-days/media'
+import { CrossLinks } from '@/components/links/CrossLinks'
 import { t } from '@/lib/i18n'
+import type { CrossLink } from '@/lib/links/types'
 import type { Camera, MapMarker } from './AwayDaysMap'
 import { AwayDaysFilters } from './AwayDaysFilters'
+import { MyJourney } from './MyJourney'
+import { useBeen } from './useBeen'
+import { VenuePhoto } from './VenuePhoto'
 import { VenueSheet } from './VenueSheet'
 import { VisitCard } from './VisitCard'
 
@@ -56,7 +63,14 @@ function zoomFor(km: number): number {
   return 3
 }
 
-export function AwayDaysExperience({ data }: { data: JourneyData }) {
+export function AwayDaysExperience({
+  data,
+  links,
+}: {
+  data: JourneyData
+  /** delta 89: each visit's doors into the other gates (the match's archive card, its scorers), by matchId */
+  links?: Record<string, CrossLink[]>
+}) {
   const total = data.visits.length
   const [mode, setMode] = useState<Mode>('journey')
   const [index, setIndex] = useState(-1) // -1 = Bloomfield, total = the end of the road
@@ -67,8 +81,32 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<Filters>(NO_FILTERS)
   const card = useRef<HTMLDivElement>(null)
+  // "הייתי שם" (spec §30) — device first, the account merged in when there is one
+  const { ledger, toggle } = useBeen()
+  const [mine, setMine] = useState(false)
+  const mineSum = useMemo(() => myJourney(data, ledger), [data, ledger])
+  const beenFor = (visitId: string) => ({ on: isBeen(ledger, visitId), onToggle: () => toggle(visitId) })
+  const originPhoto = useMemo(() => venuePhoto(data.origin.id), [data.origin.id])
 
   const go = useCallback((next: number) => setIndex(Math.max(-1, Math.min(total, next))), [total])
+
+  // delta 89 deep links (the page is static, so the query is read here, once):
+  //   ?visit=<matchId> opens that stop in the journey · ?venue=<id> opens the ground's sheet
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search)
+    const visit = query.get('visit')
+    const ground = query.get('venue')
+    if (visit) {
+      const i = data.visits.findIndex((v) => v.matchId === visit || v.id === visit)
+      if (i >= 0) {
+        setMode('journey')
+        setIndex(i)
+      }
+    } else if (ground && data.venues[ground]) {
+      setMode('explore')
+      setVenueId(ground)
+    }
+  }, [data])
   const leg = useMemo(() => (index >= 0 && index < total ? legTo(data, index) : null), [data, index, total])
 
   // the camera
@@ -142,7 +180,7 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
   useEffect(() => {
     if (mode !== 'journey') return
     const key = (event: KeyboardEvent) => {
-      if (details || howTo || venueId) return
+      if (details || howTo || venueId || mine) return
       const target = event.target as HTMLElement | null
       if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return
       if (event.key === 'ArrowLeft' || event.key === 'PageDown') {
@@ -155,7 +193,7 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
     }
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
-  }, [mode, index, go, details, howTo, venueId])
+  }, [mode, index, go, details, howTo, venueId, mine])
 
   // swipe on the card only — never on the map (§31, gesture conflict)
   const swipe = useRef<{ x: number; y: number } | null>(null)
@@ -225,6 +263,17 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
         </p>
         <button
           type="button"
+          onClick={() => setMine(true)}
+          aria-label={t('away89.mine.aria', { n: String(mineSum.matches) })}
+          className={`flex min-h-tap shrink-0 items-center gap-1 border-hair px-2 font-body text-[11.5px] font-extrabold ${
+            mineSum.matches > 0 ? 'border-red bg-red text-paper' : 'border-ink/40 text-ink'
+          }`}
+        >
+          {t('away89.mine.chip')}
+          {mineSum.matches > 0 && <span className="font-mono text-[11px] tabular-nums">{mineSum.matches}</span>}
+        </button>
+        <button
+          type="button"
           onClick={() => setHowTo(true)}
           className="min-h-tap shrink-0 border-hair border-ink/40 px-2.5 font-body text-[11.5px] font-extrabold text-ink"
         >
@@ -271,7 +320,19 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
               aria-live="polite"
             >
               {index < 0 ? (
-                <div>
+                <div className="flex gap-3">
+                {originPhoto?.tall && (
+                  <div className="relative w-[64px] shrink-0 self-start overflow-hidden border-hair border-ink bg-ink sm:w-[72px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- the ledger ships the bytes it measured (away-media.json) */}
+                    <img
+                      src={originPhoto.tall}
+                      alt={t('away89.photo.alt', { venue: data.origin.nameHe, city: data.origin.cityHe })}
+                      decoding="async"
+                      className="block aspect-[3/4] w-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
                   <p className="font-latin text-[9px] font-bold tracking-[0.3em] text-sign" dir="ltr">
                     ON THE ROAD WITH HAPOEL
                   </p>
@@ -283,16 +344,29 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
                       countries: String(data.counts.countries),
                     })}
                   </p>
+                  {originPhoto && (
+                    <p className="mt-1 truncate font-body text-[10px] leading-tight text-muted">
+                      {t('away89.photo.inline', { venue: data.origin.nameHe, label: photoLabel(originPhoto), credit: creditLine(originPhoto) })}
+                    </p>
+                  )}
+                </div>
                 </div>
               ) : index >= total ? (
                 <div>
                   <p className="font-display text-[20px] leading-tight text-ink">{t('away.end.title')}</p>
                   <p className="mt-1 font-body text-[12px] leading-snug text-muted">{t('away.end.body', { n: String(data.counts.research) })}</p>
+                  <button
+                    type="button"
+                    onClick={() => setMine(true)}
+                    className="mt-2 min-h-tap border-hair border-red px-3 font-body text-[12px] font-extrabold text-red"
+                  >
+                    {mineSum.matches > 0 ? t('away89.end.mine', { n: String(mineSum.matches) }) : t('away89.end.mineEmpty')}
+                  </button>
                 </div>
               ) : shownVisit ? (
                 <div className={`transition-opacity duration-200 motion-reduce:transition-none ${inTransit ? 'opacity-40' : 'opacity-100'}`}>
                   <div key={shownVisit.id} className={inTransit ? '' : 'animate-fx-pop'}>
-                    <VisitCard visit={shownVisit} data={data} compact showScorers={false} />
+                    <VisitCard visit={shownVisit} data={data} compact showScorers={false} been={inTransit ? undefined : beenFor(shownVisit.id)} />
                   </div>
                 </div>
               ) : null}
@@ -383,7 +457,18 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
       >
         {data.visits[index] && (
           <div>
-            <VisitCard visit={data.visits[index]!} data={data} />
+            {(() => {
+              const v = data.visits[index]!
+              const venue = data.venues[v.venueId]
+              const photo = venuePhoto(v.venueId)
+              return photo && venue ? (
+                <div className="mb-2.5">
+                  <VenuePhoto media={photo} alt={t('away89.photo.alt', { venue: venue.nameHe, city: venue.cityHe })} />
+                </div>
+              ) : null
+            })()}
+            <VisitCard visit={data.visits[index]!} data={data} been={beenFor(data.visits[index]!.id)} />
+            <CrossLinks links={links?.[data.visits[index]!.matchId]} from="away-days" className="mt-2.5" />
             {leg && !leg.sameGround && (
               <p className="mt-3 font-body text-[12px] text-muted">
                 {t('away.sheet.leg', { from: leg.from.cityHe, to: leg.to.cityHe, km: formatKm(leg.km) })}
@@ -409,6 +494,7 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
         data={data}
         venueId={venueId}
         onClose={() => setVenueId(null)}
+        been={{ isOn: (id) => isBeen(ledger, id), toggle }}
         onJourney={(id) => {
           const i = data.visits.findIndex((v) => v.id === id)
           setVenueId(null)
@@ -430,9 +516,24 @@ export function AwayDaysExperience({ data }: { data: JourneyData }) {
         <div className="space-y-2 font-body text-[13px] leading-relaxed text-ink">
           <p>{t('away.help.journey')}</p>
           <p>{t('away.help.explore')}</p>
+          <p>{t('away89.help.been')}</p>
           <p className="text-muted">{t('away.help.accuracy', { n: String(data.counts.research) })}</p>
         </div>
       </SlideSheet>
+
+      <MyJourney
+        open={mine}
+        onClose={() => setMine(false)}
+        data={data}
+        ledger={ledger}
+        onVisit={(id) => {
+          const i = data.visits.findIndex((v) => v.id === id)
+          setMine(false)
+          setVenueId(null)
+          setMode('journey')
+          if (i >= 0) go(i)
+        }}
+      />
     </div>
   )
 }

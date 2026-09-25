@@ -102,55 +102,83 @@
   },
   {
    "matchId": "m_1034209debb9",
-   "venueId": null,
-   "countryCode": null,
+   "venueId": "bloomfield",
+   "countryCode": "IL",
    "sourceRefs": [
+    "https://wiki.red-fans.com/index.php?title=1981%2F82%2F%D7%9E%D7%A9%D7%97%D7%A7%D7%99%D7%9D_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+    "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
     "https://wildstat.com/p/146/cht/515/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "content/manual/euro-ties.json"
    ],
-   "confidence": 0,
-   "check": null,
-   "status": "venue-unknown",
-   "reason": "Designated HOME; no source read names the ground, so it is not known that it was in Israel."
+   "confidence": 2,
+   "check": {
+    "playedOn": "1981-06-27",
+    "side": "HOME",
+    "for": 1,
+    "against": 3
+   },
+   "status": "in-israel",
+   "reason": "ויקיפועל, טבלת Games (עמוד הנתונים של העונה): stadium = \"אצטדיון בלומפילד\" ל-27.6.1981 — בישראל, ולכן לא יום חוץ."
   },
   {
    "matchId": "m_1d8ed809645b",
-   "venueId": null,
-   "countryCode": null,
+   "venueId": "bloomfield",
+   "countryCode": "IL",
    "sourceRefs": [
+    "https://wiki.red-fans.com/index.php?title=1981%2F82%2F%D7%9E%D7%A9%D7%97%D7%A7%D7%99%D7%9D_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+    "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
     "https://wildstat.com/p/146/cht/515/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "content/manual/euro-ties.json"
    ],
-   "confidence": 0,
-   "check": null,
-   "status": "venue-unknown",
-   "reason": "Designated HOME; no source read names the ground, so it is not known that it was in Israel."
+   "confidence": 2,
+   "check": {
+    "playedOn": "1981-07-04",
+    "side": "HOME",
+    "for": 1,
+    "against": 1
+   },
+   "status": "in-israel",
+   "reason": "ויקיפועל, טבלת Games (עמוד הנתונים של העונה): stadium = \"אצטדיון בלומפילד\" ל-4.7.1981 — בישראל, ולכן לא יום חוץ."
   },
   {
    "matchId": "m_13e80d4a88e1",
-   "venueId": null,
-   "countryCode": null,
+   "venueId": "bloomfield",
+   "countryCode": "IL",
    "sourceRefs": [
+    "https://wiki.red-fans.com/index.php?title=1982%2F83%2F%D7%9E%D7%A9%D7%97%D7%A7%D7%99%D7%9D_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+    "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
     "https://wildstat.com/p/146/cht/515/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "content/manual/euro-ties.json"
    ],
-   "confidence": 0,
-   "check": null,
-   "status": "venue-unknown",
-   "reason": "Designated HOME; no source read names the ground, so it is not known that it was in Israel."
+   "confidence": 2,
+   "check": {
+    "playedOn": "1982-06-26",
+    "side": "HOME",
+    "for": 4,
+    "against": 0
+   },
+   "status": "in-israel",
+   "reason": "ויקיפועל, טבלת Games (עמוד הנתונים של העונה): stadium = \"אצטדיון בלומפילד\" ל-26.6.1982 — בישראל, ולכן לא יום חוץ."
   },
   {
    "matchId": "m_68d63e52e424",
-   "venueId": null,
-   "countryCode": null,
+   "venueId": "bloomfield",
+   "countryCode": "IL",
    "sourceRefs": [
+    "https://wiki.red-fans.com/index.php?title=1982%2F83%2F%D7%9E%D7%A9%D7%97%D7%A7%D7%99%D7%9D_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+    "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
     "https://wildstat.com/p/146/cht/515/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "content/manual/euro-ties.json"
    ],
-   "confidence": 0,
-   "check": null,
-   "status": "venue-unknown",
-   "reason": "Designated HOME; no source read names the ground, so it is not known that it was in Israel."
+   "confidence": 2,
+   "check": {
+    "playedOn": "1982-07-03",
+    "side": "HOME",
+    "for": 2,
+    "against": 0
+   },
+   "status": "in-israel",
+   "reason": "ויקיפועל, טבלת Games (עמוד הנתונים של העונה): stadium = \"אצטדיון בלומפילד\" ל-3.7.1982 — בישראל, ולכן לא יום חוץ."
   },
   {
    "matchId": "m_e15df84e2732",
@@ -311,26 +339,40 @@
   {
    "matchId": "m_55a86aebdbc9",
    "venueId": null,
-   "countryCode": null,
+   "countryCode": "IL",
    "sourceRefs": [
+    "https://wiki.red-fans.com/index.php?title=1981%2F82%2F%D7%9E%D7%A9%D7%97%D7%A7%D7%99%D7%9D_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+    "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
     "https://wildstat.com/p/146/cht/515/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
    ],
-   "confidence": 0,
-   "check": null,
-   "status": "domestic-opponent",
-   "reason": "Both clubs Israeli (the Intertoto grouped two Israeli clubs); no ground recorded. Almost certainly not abroad — kept out of the journey, never guessed onto the map."
+   "confidence": 2,
+   "check": {
+    "playedOn": "1981-07-11",
+    "side": "AWAY",
+    "for": 1,
+    "against": 1
+   },
+   "status": "in-israel",
+   "reason": "ויקיפועל, טבלת Games: stadium = \"אצטדיון הקופסא\" (נתניה) ל-11.7.1981 — בישראל, ולכן לא יום חוץ."
   },
   {
    "matchId": "m_a185c7722dd4",
-   "venueId": null,
-   "countryCode": null,
+   "venueId": "bloomfield",
+   "countryCode": "IL",
    "sourceRefs": [
+    "https://wiki.red-fans.com/index.php?title=1981%2F82%2F%D7%9E%D7%A9%D7%97%D7%A7%D7%99%D7%9D_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+    "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
     "https://wildstat.com/p/146/cht/515/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
    ],
-   "confidence": 0,
-   "check": null,
-   "status": "domestic-opponent",
-   "reason": "Both clubs Israeli (the Intertoto grouped two Israeli clubs); no ground recorded. Almost certainly not abroad — kept out of the journey, never guessed onto the map."
+   "confidence": 2,
+   "check": {
+    "playedOn": "1981-07-14",
+    "side": "HOME",
+    "for": 1,
+    "against": 4
+   },
+   "status": "in-israel",
+   "reason": "ויקיפועל, טבלת Games (עמוד הנתונים של העונה): stadium = \"אצטדיון בלומפילד\" ל-14.7.1981 — בישראל, ולכן לא יום חוץ."
   },
   {
    "matchId": "m_543f5cb56aba",
@@ -346,15 +388,22 @@
   },
   {
    "matchId": "m_45c9517bf40f",
-   "venueId": null,
-   "countryCode": null,
+   "venueId": "bloomfield",
+   "countryCode": "IL",
    "sourceRefs": [
+    "https://wiki.red-fans.com/index.php?title=1982%2F83%2F%D7%9E%D7%A9%D7%97%D7%A7%D7%99%D7%9D_(%D7%9B%D7%93%D7%95%D7%A8%D7%92%D7%9C)",
+    "https://wiki.red-fans.com/index.php?title=Special:CargoTables/Games",
     "https://wildstat.com/p/146/cht/515/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
    ],
-   "confidence": 0,
-   "check": null,
-   "status": "domestic-opponent",
-   "reason": "Both clubs Israeli (the Intertoto grouped two Israeli clubs); no ground recorded. Almost certainly not abroad — kept out of the journey, never guessed onto the map."
+   "confidence": 2,
+   "check": {
+    "playedOn": "1982-07-10",
+    "side": "AWAY",
+    "for": 1,
+    "against": 0
+   },
+   "status": "in-israel",
+   "reason": "ויקיפועל, טבלת Games: stadium = \"אצטדיון בלומפילד\" ל-10.7.1982 (הפועל כפ\"ס מארחת בבלומפילד) — בישראל, ולכן לא יום חוץ."
   },
   {
    "matchId": "m_3848dada1459",
@@ -401,6 +450,7 @@
    "venueId": "republican-chisinau",
    "countryCode": "MD",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=51922",
     "https://wildstat.com/p/146/ch/all/club1/ISR_Hapoel_Tel_Aviv/club2/MDA_Zimbru_Chisinau",
     "content/manual/euro-ties.json#1995-uefa-q-zimbru"
    ],
@@ -454,19 +504,20 @@
   },
   {
    "matchId": "m_79b2d4bbb455",
-   "venueId": null,
+   "venueId": "marienlyst",
    "countryCode": "NO",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=55638",
     "content/manual/euro-ties.json#1998-uefa-q2-stromsgodset",
     "https://en.wikipedia.org/wiki/Hapoel_Tel_Aviv_F.C._in_international_football"
    ],
-   "confidence": 0,
-   "check": null,
-   "status": "venue-unknown",
-   "reason": "Drammen, Norway (euro-ties: \"דרמן\"); no source read names the ground, and Wildstat does not hold the tie.",
-   "candidates": [
-    "Marienlyst Stadion — Strømsgodset's ground; NOT verified for this match"
-   ]
+   "confidence": 2,
+   "check": {
+    "playedOn": "1998-08-25",
+    "side": "AWAY",
+    "for": 0,
+    "against": 1
+   }
   },
   {
    "matchId": "m_8ef74ecc34a1",
@@ -741,27 +792,27 @@
   },
   {
    "matchId": "m_685e879499af",
-   "venueId": null,
+   "venueId": "georgi-asparuhov",
    "countryCode": "BG",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=69718",
     "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "content/manual/euro-ties.json#2002-uefa-q-partizani"
    ],
-   "confidence": 0,
+   "confidence": 2,
    "check": {
     "playedOn": "2002-08-15",
     "side": "HOME",
     "for": 1,
     "against": 0
-   },
-   "status": "venue-unknown",
-   "reason": "Sofia per Wildstat and euro-ties; neither names the stadium."
+   }
   },
   {
    "matchId": "m_63e4ce123461",
    "venueId": "qemal-stafa",
    "countryCode": "AL",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=69719",
     "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
    ],
    "confidence": 2,
@@ -777,6 +828,7 @@
    "venueId": "woerthersee",
    "countryCode": "AT",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=70197",
     "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
    ],
    "confidence": 2,
@@ -792,6 +844,7 @@
    "venueId": "georgi-asparuhov",
    "countryCode": "BG",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=70198",
     "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "content/manual/euro-ties.json#2002-uefa-r1-karnten"
    ],
@@ -823,6 +876,7 @@
    "venueId": "artemio-franchi",
    "countryCode": "IT",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=70341",
     "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "content/manual/euro-ties.json#2002-uefa-r2-leeds"
    ],
@@ -1187,24 +1241,20 @@
   },
   {
    "matchId": "m_740e5380fccb",
-   "venueId": null,
+   "venueId": "san-marino-stadium",
    "countryCode": "SM",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=303568",
     "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "https://en.wikipedia.org/wiki/San_Marino_Stadium"
    ],
-   "confidence": 0,
+   "confidence": 2,
    "check": {
     "playedOn": "2008-07-31",
     "side": "AWAY",
     "for": 2,
     "against": 0
-   },
-   "status": "no-coordinates",
-   "reason": "Stadio Olimpico, Serravalle (Wildstat) = San Marino Stadium (Wikipedia); no fetched source printed its coordinates.",
-   "candidates": [
-    "San Marino Stadium (Stadio Olimpico di Serravalle)"
-   ]
+   }
   },
   {
    "matchId": "m_8a67d10d0bfe",
@@ -1511,6 +1561,7 @@
    "venueId": "red-bull-arena-salzburg",
    "countryCode": "AT",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=2002389",
     "https://wildstat.com/p/146/cht/3/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
    ],
    "confidence": 2,
@@ -1778,25 +1829,20 @@
   },
   {
    "matchId": "m_f4641fa38910",
-   "venueId": null,
+   "venueId": "differdange-municipal",
    "countryCode": "LU",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=2009845",
     "https://wildstat.com/p/146/cht/5/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "content/manual/euro-ties.json#2012-el-po-dudelange"
    ],
-   "confidence": 0,
+   "confidence": 2,
    "check": {
     "playedOn": "2012-08-23",
     "side": "AWAY",
     "for": 3,
     "against": 1
-   },
-   "status": "venue-conflict",
-   "reason": "Wildstat: \"Stade Municipal de la Ville de Differdange, Déifferdang\"; euro-ties: \"דודלנז׳\". Two sources, two towns — not guessed.",
-   "candidates": [
-    "Stade Municipal, Differdange (Wildstat)",
-    "Dudelange (euro-ties)"
-   ]
+   }
   },
   {
    "matchId": "m_877e70bdeac5",
@@ -2014,6 +2060,7 @@
    "venueId": "huvepharma",
    "countryCode": "BG",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=2048802",
     "https://wildstat.com/p/146/cht/551/club1/ISR_Hapoel_Tel_Aviv/stat/chtype"
    ],
    "confidence": 2,
@@ -2041,24 +2088,20 @@
   },
   {
    "matchId": "m_70333ef102d5",
-   "venueId": null,
+   "venueId": "arena-katowice",
    "countryCode": "PL",
    "sourceRefs": [
+    "https://match.uefa.com/v5/matches?matchId=2049189",
     "https://wildstat.com/p/146/cht/551/club1/ISR_Hapoel_Tel_Aviv/stat/chtype",
     "https://en.wikipedia.org/wiki/Arena_Katowice"
    ],
-   "confidence": 0,
+   "confidence": 2,
    "check": {
     "playedOn": "2026-08-12",
     "side": "AWAY",
     "for": 1,
     "against": 2
-   },
-   "status": "no-coordinates",
-   "reason": "Arena Katowice (Wildstat; opened 30.3.2025, Wikipedia) — no fetched source printed its coordinates.",
-   "candidates": [
-    "Arena Katowice, ul. Nowa Bukowa 1"
-   ]
+   }
   },
   {
    "matchId": "m_0960e42e5b58",

@@ -48,6 +48,12 @@ type Phase = 'card' | 'gate' | 'playing' | 'failed'
 const CARD_MS = 3400
 /** If the API has said nothing at all by now, something is wrong and the game moves on. */
 const STALL_MS = 12_000
+/**
+ * Ready and not playing after this long means the browser refused autoplay — which it
+ * does on nearly every phone. Twelve seconds of a black frame was dead time (§12): the
+ * player is offered the button as soon as the refusal is plain.
+ */
+const AUTOPLAY_MS = 2_500
 
 type YTPlayer = {
   destroy(): void
@@ -170,6 +176,13 @@ export function HistoricalCutscene({
     let cancelled = false
     let stall: number | undefined
 
+    // no network at all: the answer is already known, and nobody should wait eight seconds for it
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      setPhase('failed')
+      return
+    }
+    let autoplay: number | undefined
+
     void (async () => {
       const api = await loadYouTubeApi()
       if (cancelled) return
@@ -189,10 +202,15 @@ export function HistoricalCutscene({
               } catch {
                 /* the gate below covers it */
               }
+              window.clearTimeout(stall)
+              autoplay = window.setTimeout(() => {
+                if (!cancelled) setPhase('gate')
+              }, AUTOPLAY_MS)
             },
             onStateChange: (event) => {
               if (event.data === api.PlayerState.PLAYING) {
                 window.clearTimeout(stall)
+                window.clearTimeout(autoplay)
                 setPhase('playing')
               }
               if (event.data === api.PlayerState.ENDED) finish('watched')
@@ -213,20 +231,34 @@ export function HistoricalCutscene({
     return () => {
       cancelled = true
       window.clearTimeout(stall)
+      window.clearTimeout(autoplay)
     }
     // `finish` is stable by construction (see the ref above), so this effect runs once per
     // phase change and never because the shell re-rendered.
   }, [phase, finish])
 
   // --- nothing leaves this component without telling the runtime --------------------
+  /*
+   * (delta 90) The unmount is confirmed one tick later. React's strict mode (on in
+   * `next.config`) mounts, cleans up and mounts again every effect in development — and
+   * this cleanup used to answer that rehearsal with `skipped`, so in `next dev` the film
+   * closed itself the instant it opened and the chapter went straight to its fallback
+   * (found by `scripts/life/footage-probe.mjs`). A real unmount still reports `skipped`.
+   */
+  const mounted = useRef(false)
   useEffect(() => {
+    mounted.current = true
     return () => {
-      try {
-        player.current?.destroy()
-      } catch {
-        /* the iframe is already gone */
-      }
-      finish('skipped')
+      mounted.current = false
+      window.setTimeout(() => {
+        if (mounted.current) return
+        try {
+          player.current?.destroy()
+        } catch {
+          /* the iframe is already gone */
+        }
+        finish('skipped')
+      }, 0)
     }
   }, [finish])
 
@@ -348,7 +380,9 @@ export function HistoricalCutscene({
 
           {/* ---------- attribution, always — which film, whose, is on /credits (spec §0.3) ---------- */}
           {scene.sourceTitle !== '' && (
-            <p className="mt-3 px-gutter text-center">
+            <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 px-gutter text-center font-body text-[11px] text-concrete/60">
+              {/* whose film this is lives on /credits, like every other source in the site (the
+                  credits rule: no screen prints a source title of its own) — one note, always */}
               <SourceNote newTab tone="dark" />
             </p>
           )}

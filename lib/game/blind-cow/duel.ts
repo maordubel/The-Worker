@@ -28,7 +28,21 @@ function client() {
   })
 }
 
-export type DuelError = 'unavailable' | 'bad_identity' | 'not_found' | 'expired' | 'full' | 'not_joined' | 'not_started' | 'slow_down' | 'no_questions' | 'network'
+export type DuelError =
+  | 'unavailable'
+  | 'bad_identity'
+  | 'not_found'
+  | 'expired'
+  | 'full'
+  | 'not_joined'
+  | 'not_started'
+  | 'slow_down'
+  | 'no_questions'
+  | 'network'
+  // the live room (20260925091000_worker_blind_cow_live.sql)
+  | 'started'
+  | 'not_ready'
+  | 'too_early'
 
 type Rpc = Record<string, unknown> & { ok?: boolean; error?: string }
 
@@ -159,4 +173,53 @@ export async function duelState(me: string, token: string): Promise<DuelState | 
     winner: (data.winner as DuelState['winner']) ?? null,
     skewMs: mine?.serverNow ? mine.serverNow - Date.now() : 0,
   }
+}
+
+/* ------------------------------------------------------------------ live (spec §2.4) */
+
+/**
+ * The live room — the same duel, the same seven functions, plus three
+ * (`supabase/migrations/20260925091000_worker_blind_cow_live.sql`): who is in the room and
+ * ready, one shared go time the DATABASE sets when both are, and a start that opens both
+ * runs at that instant. The state carries no result; Realtime only says "ask again".
+ */
+export type LiveState = {
+  mySlot: 1 | 2
+  meReady: boolean
+  meStarted: boolean
+  them: { name: string | null; ready: boolean; started: boolean } | null
+  /** the shared go time, ms since epoch (database clock), once both are ready */
+  goAt: number | null
+  expired: boolean
+  /** database clock minus this server's, so the countdown runs on the database's time */
+  skewMs: number
+}
+
+function asLive(data: Rpc): LiveState | { error: DuelError } {
+  if (!data.ok) return { error: (data.error as DuelError) ?? 'network' }
+  const them = data.them as { name?: unknown; ready?: unknown; started?: unknown } | null
+  return {
+    mySlot: data.mySlot === 2 ? 2 : 1,
+    meReady: data.meReady === true,
+    meStarted: data.meStarted === true,
+    them: them ? { name: typeof them.name === 'string' ? them.name : null, ready: them.ready === true, started: them.started === true } : null,
+    goAt: typeof data.goAt === 'number' ? data.goAt : null,
+    expired: data.expired === true,
+    skewMs: typeof data.serverNow === 'number' ? data.serverNow - Date.now() : 0,
+  }
+}
+
+export async function liveState(me: string, token: string): Promise<LiveState | { error: DuelError }> {
+  return asLive(await rpc('worker_blind_cow_live_state', { p_me: me, p_token: token }))
+}
+
+export async function liveReady(me: string, token: string, ready: boolean): Promise<LiveState | { error: DuelError }> {
+  return asLive(await rpc('worker_blind_cow_live_ready', { p_me: me, p_token: token, p_ready: ready }))
+}
+
+export async function liveStart(me: string, token: string): Promise<RunView | { error: DuelError; goAt?: number }> {
+  const data = await rpc('worker_blind_cow_live_start', { p_me: me, p_token: token })
+  const run = asRun(data)
+  if (run) return run
+  return { error: (data.error as DuelError) ?? 'network', ...(typeof data.goAt === 'number' ? { goAt: data.goAt } : {}) }
 }

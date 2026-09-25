@@ -10,10 +10,14 @@ import {
   giveUpDuel,
   guessDuel,
   joinDuel,
+  liveReady,
+  liveStart,
+  liveState,
   revealDuel,
   startDuelRun,
   type DuelError,
   type DuelState,
+  type LiveState,
 } from '@/lib/game/blind-cow/duel'
 import { giveUp, guess, newRun, reveal, viewOf, type RunState } from '@/lib/game/blind-cow/engine'
 import { open, seal } from '@/lib/game/blind-cow/token'
@@ -175,4 +179,24 @@ export async function startDuelAction(token: string): Promise<ActionResult> {
   if (typeof token !== 'string' || !TOKEN.test(token)) return { view: null, verdict: 'none', error: 'not_found' }
   const out = await startDuelRun(deviceKey(), token)
   return 'error' in out ? { view: null, verdict: 'none', error: out.error } : { view: out, verdict: 'none' }
+}
+
+/* ------------------------------------------------------------------ live duel (spec §2.4) */
+
+export async function liveStateAction(token: string): Promise<LiveState | { error: DuelError }> {
+  if (typeof token !== 'string' || !TOKEN.test(token)) return { error: 'not_found' }
+  return liveState(deviceKey(), token)
+}
+
+export async function liveReadyAction(token: string, ready: boolean): Promise<LiveState | { error: DuelError }> {
+  if (typeof token !== 'string' || !TOKEN.test(token)) return { error: 'not_found' }
+  return liveReady(deviceKey(), token, ready === true)
+}
+
+/** At the go time: the run opens with its clock at that instant, for both sides. */
+export async function liveStartAction(token: string): Promise<ActionResult & { goAt?: number }> {
+  if (typeof token !== 'string' || !TOKEN.test(token)) return { view: null, verdict: 'none', error: 'not_found' }
+  const out = await liveStart(deviceKey(), token)
+  if ('error' in out) return { view: null, verdict: 'none', error: out.error, ...(out.goAt ? { goAt: out.goAt } : {}) }
+  return { view: out, verdict: 'none' }
 }

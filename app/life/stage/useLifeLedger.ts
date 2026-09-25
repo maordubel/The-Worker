@@ -10,11 +10,10 @@ import { GIGS } from '@/lib/life/gigs'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE, type Shirt } from '@/lib/life/shirts'
 import { stickerFlag, tornFlag } from '@/lib/life/stickers'
-import { settleActivity, type MechanicRequest, type Settlement } from '@/lib/life/activities'
+import { alreadySettled, settleActivity, type MechanicRequest, type Settlement } from '@/lib/life/activities'
 import { COIN_WHY_HE, HOOPS_WHY_HE, PENALTY_WHY_HE } from '@/lib/life/toto'
 import type { ActivityResult } from '@/lib/mechanics/types'
 import type { LifeState } from '@/lib/life/types'
-import { landingMinute } from '@/lib/life/world/flow'
 
 /**
  * הפנקס — the handful of places where the SHELL writes into the life.
@@ -24,8 +23,9 @@ import { landingMinute } from '@/lib/life/world/flow'
  * tells React, and React draws a sentence. React proposes nothing. But there are eight
  * screens that break the rule on purpose, because the thing that happens on them happens in
  * the DOM and nowhere else — the Toto slip, the coin in the alley, the penalty run, the free
- * throws, the shop till, the sticker somebody tears out, the clock somebody chooses to skip,
- * and the page a booklet is left open on. There is no scene under any of them to know.
+ * throws, the shop till, the sticker somebody tears out, and the page a booklet is left
+ * open on. (The clock somebody chose to skip was the eighth; since delta 90 the world
+ * skips its own clock.) There is no scene under any of them to know.
  *
  * Those eight were written inline, inside the JSX, in eight different `onDone` closures, and
  * that is exactly where a game grows a second economy. A price typed into a card is a price
@@ -105,15 +105,12 @@ export function useLifeLedger({
       return { state: engine.state, toast: { text: t('life.album.tore', { name: nameHe }), tone: 'red' } }
     },
 
-    /** the afternoon skipped forward to the minute the next beat is waiting for */
-    passTime(pass: NonNullable<LifeBusEvents['pass']>): NonNullable<LifeBusEvents['toast']> | null {
-      const engine = engineRef.current
-      if (!engine) return null
-      const jump = landingMinute(pass) - engine.state.minute
-      if (jump > 0) engine.dispatch({ t: 'clock.advanced', minutes: jump })
-      void engine.save()
-      return { text: t('life.pass.passed'), tone: 'plain' }
-    },
+    /*
+     * (delta 90) the shell’s own time skip lived here: the one place the shell moved the clock by itself,
+     * three minutes short of a beat wherever the boy stood. It is gone — free time is asked
+     * of the world (`runtime.advanceTime(planId)`, `world/timeAdvance.ts`) and the world
+     * moves itself (SMART FREE TIME §18). What remains below is what an ACTIVITY cost.
+     */
 
     /**
      * the slip: settled as the kiosk's trivia activity (`activities.ts` 'kiosk-trivia').
@@ -143,6 +140,8 @@ export function useLifeLedger({
     settleActivity(request: MechanicRequest, result: ActivityResult): Settlement | null {
       const engine = engineRef.current
       if (!engine) return null
+      // settled once, whatever the board does twice (§22.7) — `runs` has already moved past it
+      if (alreadySettled(engine.state, request)) return null
       const settled = settleActivity(engine.state, request.activity, {
         ...result,
         contentId: result.contentId ?? request.contentId,

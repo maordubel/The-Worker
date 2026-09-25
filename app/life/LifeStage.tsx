@@ -21,10 +21,11 @@ const HoopsCard = dynamic(() => import('@/components/life/HoopsCard').then((m) =
 // `tests/life-football.test.ts` fails the build if any other module imports the renderer.
 const PitchCard = dynamic(() => import('@/components/life/PitchCard').then((m) => m.PitchCard), { ssr: false })
 import { AlbumSheet } from '@/components/life/AlbumSheet'
-import { PassTime } from '@/components/life/PassTime'
-import { landingMinute } from '@/lib/life/world/flow'
-import { timeLabel } from '@/lib/life/clock'
+import { FreeTimeChip } from '@/components/life/FreeTimeChip'
+import { FreeTimePlanner } from '@/components/life/FreeTimePlanner'
+import { TimeAdvanceTransition } from '@/components/life/TimeAdvanceTransition'
 import { PacketCard } from '@/components/life/PacketCard'
+import { activityQuote } from '@/lib/life/offers'
 import { SeasonTicket } from '@/components/life/SeasonTicket'
 import { renewal, renewalWhyHe, seasonFor, subFlag, subscriptionReading } from '@/lib/life/subscription'
 import { ShopCard } from '@/components/life/ShopCard'
@@ -75,6 +76,7 @@ import { boxContents } from '@/lib/life/redboxView'
 
 import { useLifeInput } from './stage/useLifeInput'
 import { useLifeLedger } from './stage/useLifeLedger'
+import { useFreeTime } from './stage/useFreeTime'
 import { decadeOf, useLifeRuntime } from './stage/useLifeRuntime'
 import { useLifeSheets } from './stage/useLifeSheets'
 import { useUiScale } from './stage/useUiScale'
@@ -196,8 +198,7 @@ export function LifeStage({
     setPacket,
     kept,
     setKept,
-    pass,
-    setPass,
+    freeTime,
     cast,
     setCast,
     film,
@@ -232,12 +233,18 @@ export function LifeStage({
     snapshot,
     debug,
     openProfile,
+    openMe,
+    openBag,
+    view: profileView,
+    setView: setProfileView,
     closeProfile,
     gauges,
     openGauges,
     closeGauges,
     help,
     checklist,
+    offers,
+    cap,
     openHelp,
     closeHelp,
     menu,
@@ -277,13 +284,28 @@ export function LifeStage({
 
   // the bag, asked for from the bedroom desk: the same card ☰ opens, never a second one
   useEffect(() => {
-    if (bagAsked > 0) openProfile(false)
-  }, [bagAsked, openProfile])
+    if (bagAsked > 0) openBag()
+  }, [bagAsked, openBag])
 
   /** the painting fills the glass; the shell floats over it */
   const fullBleed = frame <= 0
   /** every overlay that must hide the in-world controls */
   const covered = Boolean(cast || shirt || dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel || gauges || coda || reveal)
+
+  /**
+   * זמן פנוי (delta 90) — the chip, the planner and the two-second cut. The shell paces
+   * them; the world moves the clock (`useFreeTime` → `runtime.advanceTime`). Anything that
+   * owns the glass — a card, a sheet, a match, a tutorial, a title — keeps the chip away.
+   */
+  const free = useFreeTime({
+    plan: freeTime,
+    covered: covered || Boolean(!ready || match || teach || titleCard || opening || help || album?.open || packet || kept || shop || season || toto || mechanic || coin || penalty || hoops || pitch || doc || box || book || route || film || finale),
+    runtime,
+    engineRef,
+    busRef,
+    audio,
+    dateHe: hud.date,
+  })
 
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
@@ -316,7 +338,7 @@ export function LifeStage({
         {/* No plate before there is a place: during the prologue the HUD has nothing to
             say, and an empty plate with a lone "·" in it sat in the corner of the 1983
             terrace like a bug. */}
-        {ready && !cutscene && !match && hud.place && <LifeHud hud={hud} />}
+        {ready && !cutscene && !match && hud.place && <LifeHud hud={free.chip ? { ...hud, waitingHe: null } : hud} />}
 
         {/* מד האהבה — always on the glass, under the HUD, on the reading side. The one
             number the game is allowed to show; tapping it opens all of them. */}
@@ -348,8 +370,12 @@ export function LifeStage({
             <Chip onClick={openMenu} data-life="menu-open" aria-label={t('life.menu.title')}>
               <span className="font-mono tabular-nums text-[13px] leading-none">☰</span>
             </Chip>
-            <Chip onClick={() => openProfile(false)} data-life="profile-open">
-              {t('life.profile')}
+            {/* אני · התיק — two destinations, not one card with a tab (delta 90-H) */}
+            <Chip onClick={openMe} data-life="me-open">
+              {t('life90h.hud.me')}
+            </Chip>
+            <Chip onClick={openBag} data-life="profile-open">
+              {t('life90h.hud.bag')}
             </Chip>
             <Chip onClick={openMap} data-life="map-open">
               {t('life.map')}
@@ -362,7 +388,7 @@ export function LifeStage({
             </Chip>
           </div>
         )}
-        {help && <HelpSheet objective={hud.objective} hint={hud.hint} waitingOn={hud.waitingOn ?? null} checklist={checklist} onClose={closeHelp} />}
+        {help && <HelpSheet objective={hud.objective} hint={hud.hint} waitingOn={hud.waitingOn ?? null} checklist={checklist} offers={offers} capHe={cap} onClose={closeHelp} />}
 
         {ready && !covered && controls && (touch ? deck : true) && (
           <ControlDeck
@@ -615,27 +641,33 @@ export function LifeStage({
           <PacketCard
             ids={packet.ids}
             before={packet.before}
-            onClose={() => {
+            onClose={(to) => {
               setPacket(null)
+              // the reveal is put down: the transaction's pending mark goes with it (§21.5)
+              runtime.current?.closePacket()
+              if (shop) setShopState(engineRef.current?.state ?? null)
               // a card out of the box waits for the packet to be put down, and goes first:
               // the album can wait, an ace cannot be missed
-              if (!kept) busRef.current?.emit('album', { open: true })
+              if (kept) return
+              if (to === 'album') busRef.current?.emit('album', { open: true })
+              // back to the same room — or to the counter the packet was bought at
+              else if (!shop) runtime.current?.pause(false)
             }}
           />
         )}
 
-        {pass && !packet && !kept && (
-          <PassTime
-            waitingHe={pass.waitingHe}
-            untilHe={timeLabel(landingMinute(pass))}
-            onStay={() => setPass(null)}
-            onPass={() => {
-              setPass(null)
-              const passed = ledger.passTime(pass)
-              if (passed) busRef.current?.emit('toast', passed)
-            }}
+        {free.chip && <FreeTimeChip label={free.chip.label} late={free.chip.late} onOpen={free.openPlanner} />}
+        {free.planner && (
+          <FreeTimePlanner
+            plan={free.planner.plan}
+            copy={free.planner.copy}
+            notice={free.planner.notice}
+            onClose={free.close}
+            onAdvance={free.advance}
+            onAction={free.act}
           />
         )}
+        {free.cut && <TimeAdvanceTransition cut={free.cut} onDone={free.endCut} />}
 
         {!packet && kept && (
           <PacketCard
@@ -665,10 +697,16 @@ export function LifeStage({
           <MechanicSheet
             key={`${mechanic.activity}-${mechanic.seed}`}
             request={mechanic}
+            quote={engineRef.current ? activityQuote(engineRef.current.state, mechanic.activity) : undefined}
             onDone={(result) => {
               const settled = ledger.settleActivity(mechanic, result)
               setMechanic(null)
               backToRoom(mechanic.activity, settled)
+            }}
+            onDecline={() => {
+              // "לא עכשיו" before the board: nothing began, so nothing settles (§22.6)
+              setMechanic(null)
+              runtime.current?.pause(false)
             }}
           />
         )}
@@ -775,7 +813,11 @@ export function LifeStage({
             onClose={closeMenu}
             onProfile={() => {
               setMenu(false)
-              openProfile(false)
+              openBag()
+            }}
+            onMe={() => {
+              setMenu(false)
+              openMe()
             }}
             onDeck={toggleDeck}
             sound={sound}
@@ -849,7 +891,13 @@ export function LifeStage({
           from and the engine is not allowed to store one (see `streakOf`).
         */}
         {snapshot && !debug && (
-          <ProfileCard snapshot={snapshot} subscription={subscriptionReading(snapshot.state)} onClose={closeProfile} />
+          <ProfileCard
+            snapshot={snapshot}
+            subscription={subscriptionReading(snapshot.state)}
+            view={profileView}
+            onView={setProfileView}
+            onClose={closeProfile}
+          />
         )}
         {snapshot && debug && (
           <DebugPanel snapshot={snapshot} runtime={runtime.current} onClose={closeProfile} />

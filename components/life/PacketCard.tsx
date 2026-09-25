@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Plate } from '@/components/life/Plate'
+import { firePickFxAt } from '@/components/stage/PickFx'
 import { t } from '@/lib/i18n'
 import { SETS, isAce, stickerFor, type StickerDef } from '@/lib/life/stickers'
 
@@ -25,6 +26,12 @@ import { SETS, isAce, stickerFor, type StickerDef } from '@/lib/life/stickers'
  * same component does the RED BOX (`fromBox`): one card, twice the size, held on the
  * screen with a star behind it, because a card you were given for finishing an album
  * should not arrive the way the fourth Eli Cohen of the afternoon does.
+ *
+ * Delta 90 (§21): the card is PRESENTATION ONLY. By the time it mounts, the money is gone
+ * and the stickers are stuck in (`purchasePacket` in `stickers.ts`, one dispatch), so every
+ * way out of it is safe — Escape mid-tear, a reload (the reveal replays from the pending
+ * mark), a remount (the same ids, never a second grant). It ends in TWO doors: `לאלבום`,
+ * and `סגור` straight back to the room the player was standing in.
  */
 export function PacketCard({
   ids,
@@ -38,13 +45,25 @@ export function PacketCard({
   before: Readonly<Record<string, number>>
   /** out of the red box rather than out of a packet: no envelope, one card, held */
   fromBox?: boolean
-  onClose: () => void
+  /** `album` — open the album on the page; `room` — back to the same room */
+  onClose: (to: 'album' | 'room') => void
 }) {
   const [torn, setTorn] = useState(fromBox)
   const [tearing, setTearing] = useState(false)
   const [shown, setShown] = useState(0)
-  const cards = ids.map((id) => stickerFor(id)).filter((one): one is StickerDef => one !== null)
+  // keyed on the ids, not the array: a parent that re-renders every clock tick must not
+  // restart the reveal's timer every tick (the cards would never come out)
+  const key = ids.join(',')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const cards = useMemo(() => ids.map((id) => stickerFor(id)).filter((one): one is StickerDef => one !== null), [key])
   const set = cards[0] ? SETS[cards[0].set] : null
+  // new = not in the album before AND the first of its kind in this envelope: the same face
+  // twice in one packet is one new card and one to trade, never two "חדש"
+  const freshAt = (index: number) => {
+    const sticker = cards[index]
+    if (!sticker) return false
+    return (before[sticker.id] ?? 0) === 0 && cards.findIndex((one) => one.id === sticker.id) === index
+  }
 
   /* the envelope has to actually come apart before anything is behind it */
   useEffect(() => {
@@ -63,10 +82,36 @@ export function PacketCard({
 
   const done = torn && shown >= cards.length
   const big = fromBox || cards.some((card) => isAce(card))
+  const grid = useRef<HTMLDivElement>(null)
+
+  /* each card out of the gap is a hit — new ones in red, a duplicate quietly in ink */
+  useEffect(() => {
+    if (!torn || shown === 0) return
+    const card = grid.current?.children[shown - 1]
+    const sticker = cards[shown - 1]
+    if (!card || !sticker) return
+    const fresh = freshAt(shown - 1)
+    firePickFxAt(card, { tone: fresh ? 'red' : 'ink', big: isAce(sticker) || fromBox, haptic: fresh ? 'lock' : 'tap' })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [torn, shown])
+
+  /* Escape is always safe — the transaction was settled before this card existed */
+  const close = useRef(onClose)
+  close.current = onClose
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close.current('room')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <div
       dir="rtl"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('life.packet.name')}
       data-life="packet"
       data-torn={torn ? '1' : '0'}
       className="pointer-events-auto absolute inset-0 z-[62] flex flex-col items-center justify-center bg-ink/95 px-5"
@@ -97,9 +142,9 @@ export function PacketCard({
           {big && (
             <span aria-hidden className="ace-burst pointer-events-none absolute inset-0" />
           )}
-          <div className={`grid w-full gap-2 ${big ? 'mx-auto max-w-[15rem] grid-cols-1' : 'grid-cols-3'}`}>
+          <div ref={grid} className={`grid w-full gap-2 ${big ? 'mx-auto max-w-[15rem] grid-cols-1' : 'grid-cols-3'}`}>
             {cards.map((sticker, index) => {
-              const isNew = (before[sticker.id] ?? 0) === 0
+              const isNew = freshAt(index)
               const out = index < shown
               return (
                 <div
@@ -123,27 +168,41 @@ export function PacketCard({
             {cards.map((sticker, index) => (
               <span
                 key={`${sticker.id}-label-${index}`}
-                className={`text-center font-sign text-[10px] tracking-[0.14em] transition-opacity duration-200 ${
-                  index < shown ? 'opacity-100' : 'opacity-0'
-                } ${(before[sticker.id] ?? 0) === 0 ? 'text-sheet' : 'text-concrete/70'}`}
+                data-life="packet-label"
+                data-new={freshAt(index) ? '1' : '0'}
+                className={`mx-auto px-2 py-0.5 text-center font-sign text-[11px] tracking-[0.14em] transition-transform duration-200 motion-reduce:transition-none ${
+                  index < shown ? 'scale-100' : 'scale-0'
+                } ${freshAt(index) || isAce(sticker) ? 'bg-red text-sheet' : 'border-hair border-concrete/70 text-concrete'}`}
               >
-                {isAce(sticker)
-                  ? t('life.packet.ace')
-                  : t((before[sticker.id] ?? 0) === 0 ? 'life.packet.new' : 'life.packet.dup')}
+                {isAce(sticker) ? t('life.packet.ace') : t(freshAt(index) ? 'life.packet.new' : 'life.packet.dup')}
               </span>
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            data-life="packet-close"
-            className={`min-h-tap mt-5 border-rule border-sheet px-6 font-sign text-[13px] text-sheet transition-opacity duration-200 active:bg-red motion-reduce:transition-none ${
+          <div
+            className={`mt-5 flex w-full justify-center gap-2 transition-opacity duration-200 motion-reduce:transition-none ${
               done ? 'opacity-100' : 'pointer-events-none opacity-0'
             }`}
           >
-            {fromBox ? t('life.packet.fromBox') : t('life.packet.toAlbum')}
-          </button>
+            <button
+              type="button"
+              onClick={() => onClose('album')}
+              data-life="packet-close"
+              className="min-h-tap border-rule border-sheet bg-red px-6 font-sign text-[14px] text-sheet active:bg-sign"
+            >
+              {fromBox ? t('life.packet.fromBox') : t('life.packet.toAlbum')}
+            </button>
+            {!fromBox && (
+              <button
+                type="button"
+                onClick={() => onClose('room')}
+                data-life="packet-back"
+                className="min-h-tap border-rule border-sheet px-6 font-sign text-[14px] text-sheet active:bg-red"
+              >
+                {t('life90b.packet.back')}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

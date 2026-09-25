@@ -13,6 +13,8 @@
  * `memory` collections — so a saved item in one gate is the same item in the other.
  */
 
+import type { CrossLink } from '@/lib/links/types'
+
 export type EntityType =
   | 'person'
   | 'match'
@@ -475,6 +477,8 @@ export type EntityDetail = {
   after: ArchiveCard | null
   related: RelatedGroup[]
   sources: SourceLine[]
+  /** delta 89 — the same match / man in the other gates (`lib/links`), every target checked */
+  links?: CrossLink[]
 }
 
 /** The personal reaction chips a type offers — a personal set, never a fact about the item. */

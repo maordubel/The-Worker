@@ -2419,3 +2419,221 @@ xi.name.3`, 6px), כי השם הותאם ברוחב בלבד והמקום האנ
    אומר) רשאי לחלוק על הארכיון; השאר הד של euro-ties. כובשים — שם דרך ה-Player Master בלבד; שני
    כתיבים של שם לא-מזוהה אינם מחלוקת, שני אנשים — כן (`scorers` claim + `scorersDisputed`); דקה שונה =
    `scorers.minute` (הכרטיס לא מדפיס דקות). walkover → `notPlayed`. מחלוקות שהקובץ שימר → claims.
+
+## AWAY DAYS — תמונות מגרשים ו"הייתי שם" (דלתא 89, 25.9.2026)
+
+מאור: "להוסיף תמונות אצטדיונים וכפתור 'הייתי שם'". מפרט חלק ב' §29–§30.
+
+1. **תמונה רק דרך הלדג'ר.** `content/manual/away-media.json` (צורת §29 + `assetUrlTall`, `files[]`
+   עם bytes/sha256/yellowPx לכל קובץ). אין URL של תמונה בקומפוננטה, אין hotlink. מגרש בלי שורה נשאר
+   טיפוגרפיה (fallback). כל מגרש ברג'יסטרי — כולל אינטרטוטו — יכול לקבל שורה בלי לגעת בדף.
+2. **הקבצים נכתבים רק ע"י `scripts/away-days/ingest-media.mjs <jobs.json>`** (דוגמה:
+   `scripts/away-days/media-jobs/bloomfield.json`): 1600×900 + 900×1200 WebP ב-`public/away/`, צהוב
+   נספר על הפענוח; נשאר צהוב → de-yellow (טוקן קיים) עד אפס, והקרדיט אומר "צבע מעובד". תמונת מגרש
+   מודרנית אינה "חפץ אותנטי" — אין לה חריג צהוב. הסקריפט מעדכן גם את `asset-provenance.json`
+   (`public/away` בביקורת, origin חדש `free-licence`).
+3. **רישיון:** רק Wikimedia Commons תחת CC BY / CC BY-SA / CC0 / PD, `sourceUrl` = דף ה-File, מחבר
+   ורישיון כפי שבדף. העלאה של מאור = `owner-upload` + `sourceTitle`. בלי שם הבעלים בשדה קרדיט.
+4. **כל תמונה מודפסת עם השנה שבה צולמה** ("צילום מ-2019" / "צילום משנות ה-80") על התמונה עצמה, וקרדיט
+   (מחבר · רישיון) מתחתיה עם קישור לדף המקור. לעולם לא כאילו כך נראה המגרש בערב המשחק.
+5. **"הייתי שם"** — `lib/away-days/been.ts`: `{ [visitId]: { b, at } }` ב-`worker.away.been.v1`
+   (try/catch). ביטול = שורה עם b=false, לא מחיקה; מיזוג = ה-at המאוחר מנצח, בשוויון "הייתי" מנצח.
+   החשבון: `worker_away_been` + `worker_away_been_list/_set` (security definer, authenticated בלבד,
+   אין grant לטבלה) — אותו מיזוג בדיוק. `been-sync.ts` בתבנית `marks-sync.ts`; סנכרון בכניסה לדף ובכל
+   SIGNED_IN (אורח → חשבון בלי לאבד סימון). "המסע שלי" סופר רק ביקורים ציבוריים.
+6. בדיקות: `tests/away-days-media.test.ts`, `supabase/tests/50-away-been.sql` (ב-`scripts/db/verify.sh`).
+
+## CONNECT — קישורים בין שערים, מדידה, כרטיסי שיתוף, דו-קרב חי (דלתא 89, 25.9.2026)
+
+1. **קישור נפתר בשרת ונבדק.** `lib/links/index.ts` הוא המקום היחיד שבונה href לשער אחר: כרטיס ארכיון
+   רק ל-id שה-Entity Graph מכיר, `/away-days?visit=<m_…>` רק לביקור VERIFIED, `/goal?g=` רק לשער
+   שהשער מחלק. מסך מקבל `CrossLink[]` ומצייר `components/links/CrossLinks.tsx` (שורת שבבים אחת,
+   גוללת הצידה). רמז של פרה עיוורת מצביע על משחק רק אם כל המקורות שלו הם אותו משחק. `tests/links.test.ts`
+   מחזיר כל href דרך השער שמקבל אותו. AWAY DAYS קורא `?visit=`/`?venue=` בלקוח (הדף סטטי).
+2. **המדידה היא שלנו.** `lib/analytics/*` + `app/api/track` + `worker_events_*`. אין מזהה, אין IP, אין
+   צד שלישי; המכשיר נשמר כ-sha256 עם מלח יומי שנמחק אחרי יומיים. GPC/DNT = לא נספר. אין שורה בשער:
+   `<GateMeter />` בשורש (כניסה, מגע ראשון, `tw:pickfx`, עזיבה ב-sendBeacon), הסיום מ-`emit()`.
+   שער רשאי `markStep(n)` (פרה: הרמז; שער 8: השער). שם אירוע חדש = גם ב-`EVENT_NAMES` וגם ב-check
+   של הטבלה (`tests/events-schema.test.ts`). `/qa/stats` — preview/dev, או `?key=` = `WORKER_STATS_KEY`.
+3. **כרטיס שיתוף = `next/og` בלי bidi.** כל שורה עברית עוברת `visual()` (`lib/og/bidi.ts`) ולא נשברת
+   ע"י המנוע (`lines()`). הגופנים ב-`lib/og/fonts/*.ttf` (satori לא קורא WOFF2); החולצה היא תאום
+   ה-PNG של התצלום (`public/kits/og/`, `scripts/og/kit-thumbs.py` — satori לא קורא WebP). **כרטיס של
+   שער 10 לא נושא שם ולא id** — רק מצב, רמזים, זמן, תוצאת דו-קרב (`lib/og/params.ts`).
+4. **דו-קרב חי = אותו דו-קרב.** `20260925091000_worker_blind_cow_live.sql` מוסיף רק go_at/ready ושלוש
+   פונקציות; הריצה נפתחת עם `started_at = go_at` לשני הצדדים, והשאר — שבע הפונקציות הקיימות.
+   Realtime הוא פעמון בלבד (Broadcast/Presence), המצב תמיד מהמסד; בלעדיו החדר שואל כל 1.5 שניות.
+5. **סדר הקבצים:** events (090000) ו-live (091000) רצים אחרי blind_cow; מריצים שוב את קובץ השוק או
+   הדו-קרב → מריצים אחריהם גם אותם. `scripts/db/verify.sh` מריץ הכול פעמיים + 31/40.
+
+## DATA — הכרעות, לוחות ויקיפועל ומגרשים (דלתא 89, 25.9.2026)
+
+1. **הכרעה היא שורה ב-`fact-conflicts.json`, לא עריכה של השורה המפסידה.** `resolution` (עברית, מתחיל
+   ב"הוכרע") + `resolvedBy` + `decisions: [{matchId, field, value, winningSourceUrl, winningSourceTitle,
+   decidedOn}]`. שדות: playedOn · home · result · venue · stage · scorers (value = קובץ הקריאה) · opponent
+   (כתיב בלבד). המאסטר מעביר את ה-claim ל-`decided` עם כל הקריאות (`overruled`) — הפרובננס נשאר.
+   הכרעה בלי resolution = שגיאת בנייה. סדר ראיות: אתר המפעל (UEFA `match.uefa.com/v5/matches?matchId=`)
+   > עיתונות בת-זמנה > RSSSF > ויקיפועל > ויקיפדיה.
+2. **הטריוויה קוראת את `matches.json` הגולמי**, ולכן הכרעה שמשנה ערך משאירה את השורה מחוץ לבנק
+   (`lib/game/questions/conflicts.ts`); הכרעת כתיב (`opponent`) משחררת. אחרי הכרעה: `canon:ids -- --write-ids`
+   (מפתח conflict חדש = dialect), ואז השרשרת + `trivia:master`.
+3. **לוחות המשחקים של ויקיפועל הם טבלת Games** (`{{שליפת לוח משחקים פשוטה}}`). `npm run
+   ingest:vikipoel-schedules` → `content/manual/matches-vikipoel-2026-09-25.json` (95 משחקים): `1955` →
+   1954/55; `1966-68` מפוצל ב-1.8.1967, התווית המקורית ב-`sourceSeasonLabel`. `keyedMatches` קורא אותו;
+   כובשים מעמודת comments כקריאה. יריבה רק דרך clubs.json — `ס.כ נס ציונה` מועדון חדש (confidence 1).
+4. **מגרש ממקור שנוקב בו בלבד** — UEFA API נותן שם + קואורדינטות לכל משחק מ-1995 (לא לאינטרטוטו 1996);
+   עמודת `stadium` של Games מספיקה כדי לומר "בישראל" (`in-israel`). קבוצה = מגרש הבית שלה אינו ראיה.
+5. **ויקיפועל חוסם API אחרי פרץ קריאות** ("Performing security verification"). לא עוברים אימות — מבקשים
+   מהבעלים לפתוח דף, וקוראים במנות קטנות.
+
+## LIFE — V3 על כל 1983–2000: עושים, לא בוחרים (דלתא 89, 25.9.2026)
+
+1. **כלי V3 הם נתונים, לא מנוע:** `storyChores.ts` (carry/serve/collect/sweep — בלי שכר, אפשר לעצור,
+   התוצאה לפי `done`), `passages.ts` (נסיעה; `still` = חדר עומד — רדיו המטבח של A6), `gestures.ts`
+   (1983: אחיזה + הבד האדום, `PrologueScene`; משאירים — נפתר לבד ב-`autoMs`). תשובה ששולחת לעבודה נגמרת
+   ב-`minigame`, וההחלטה שאחריה נשאלת מחדש בעולם.
+2. **החלטה = מקום/חפץ:** האוטובוס של 1993 חזרה / אופיר בקיוסק / האור במטבח; עשר הדקות של 1998 בחוץ
+   (מדרגות, אחרי אסף, עיתונים עם סוקו, הביתה, לעמוד); שני אחר־הצהריים של 2000 = ספה, מיטה, קופסה,
+   משמרת, כרטיס, בד, ארגזים — כל אחד מרים `d:did`, והשבוע עונה (`d-next-1/2`). שערי רמת גן נדחפים
+   (`rg-gate-*`) ורק אז המשחק; היציאה נעולה רק בין ההגעה לשריקה.
+3. **ביט שרק מרים דגלים חייב לשמור על עצמו באחד מהם** — אחרת הוא נדרך בכל טיק ומרעיב כל ביט אחריו
+   (1993: האוטובוס שיצא הרעיב את הסוף היחיד של מי שפספס; גליל: גיבוי השעה שמונה). נבדק לכל המשחק
+   ב-`life-mandatory-choice-recovery`.
+4. **מדדים (`§13`):** `lifeWorldSim` סופר `maxStreak` (תשובות ברצף בלי הליכה/נגיעה/משחק; כרטיס = חתך)
+   ו-`verbs`. `life-confused-player`: כל פרק 1983–2000 × 4 טמפרמנטים מגיע לסוף (1986/1990/1991 — עד
+   הכניסה; את השאר מנגנת הסצנה), ו-streak ≤ 2. `life-gameplay-density`: ≥2 פעלים פיזיים לכל פרק
+   (משמרות `gigs.ts` לא נספרות), ו-1983 נמדד על גרף השיחות (≤2).
+5. **A7 → 1986:** מי שראה את הרווח בגדר (`life:a7:scouted`) יכול לזחול בו בשבת — סדרן תופס, ומוליך
+   לבארי (`gap-1986` → `gate-veteran`): כישלון שממשיך. בלי מפתח ובלי מגירה.
+
+## LIFE — השיחה השנייה: מי שחוזרים אליו עונה על מה שקורה עכשיו (דלתא 90-A, 25.9.2026)
+
+1. **אין "כבר דיברתם על זה היום" כתשובה ראשונה.** ענף ששמעו עד הסוף (`own:heard:<id>:<n>`) ובלי בחירות
+   נענה ב-`world/followUp.ts resolveFollowUp` לפי הסדר: REACTION (פעם אחת) → DEADLINE → RECOVERY (מי שכבר
+   קיבל את ההפניה) → HANDOFF/CHECK-IN → CLOSED של השיחה → `CLOSERS` של הדמות → ורק אז המאגר הגנרי.
+2. **גרף אחד:** `world/graph.ts liveGraph` = `actionsNow` + `nextTimeGate` — אותו מקור של ה-"?" והזרימה.
+   שורה עם `step` נבחרת רק כשהצעד הזה הוא ה-main של הגרף. שורה לא יוצרת מטרה ולא מרימה דגל (חוץ מ-`fu:<id>`).
+3. **הנתונים:** `content/followUps*.ts` (שלב א׳/1986/1990, 1991, 1993–2000, מבוגרים). ממופתחים לפי מזהה שיחה
+   (`on`) או לפי דמות (`npc` — לפרקים שנבנים מחדש; שחקן חדש בחדר מקבל אותם לבד). לא עורכים את קבצי הפרקים.
+4. **אף אחד לא נביא:** `PRIVATE_FACTS` = מי היה בחדר. עובדה פרטית נאמרת רק בפי עד, עם `knows`, או
+   `toldBy: 'player'` (פוגי אומר אותה בשורה הראשונה). HANDOFF לצעד שנחשף בפרטי = CHECK-IN עד שמספרים לו.
+5. **חזרה לא משלמת פעמיים:** בחזרה מקוצרת רק דגלים/מבנים (`repeatEffects`) — בלי קשר, כסף, זמן או טוסט.
+6. **בדיקות:** `tests/life-dialogue-followups` (8 המצבים של 1991, reload, ידע, התאמת דובר, מזהים קיימים,
+   מטריצה חיה); `npm run life:followups` כותב את `tests/fixtures/life-followup-matrix.json` (Batch 0,
+   העמודה `today` נשמרת). אדם שנענה במאגר הגנרי = כישלון.
+
+## LIFE — המבוגר עושה: 2012–2026 (דלתא 90-E, 25.9.2026)
+
+1. **התחייבות ≠ דיווח.** בחירה שמתחייבת (3 מסירות, לשחק, מי משלם) לא מעבירה זמן ולא מעניקה
+   מיומנות/ראיה. העבודה נעשית בעולם (`world/quests90e.ts` → נקודות לכל חדר, נכנסות בלולאה ב-`scenes.ts`
+   כמו `STAGED`), והשיחה שאחריה **קוראת את היומן**: 2016 סופר מסירות ביד בענפים (`p:n1`–`p:n3`), 2021
+   מגיב ל-`r:sortall` (דגל `flag.raised` — `life:worldlines` לא רואה `flag.set` מתוך `finish`), 2023 נותן
+   `accepted_rotation` רק למי שיצא ראשון ושיחק.
+2. **כלים = נתונים** (`content/adultQuestsB.ts`): `kit-23`, `archive-21` (collect), `ride:terminal-26`
+   (נמל ההגעה, `still`) — נרשמים ב-`STORY_CHORES`/`RIDES` בשורת פיזור אחת.
+3. **2016:** שני מקורות (הדף `{anchor}`, החדשות) מול שמועה → `p-repeat` (עיתונאי: `journalism_proof`).
+   שלוש חבילות, כתובת אחת זזה (שלמה → אלנבי), חזרה למתוקי (בחדר, בכניסה, או בטלפון אחרי 21:00).
+4. **2026:** תקציב → קצב אבא ברחוב → קופת הכרטיסים (כרטיסים, הילד בטלפון, שלוש דרכים; האיטית עולה
+   כסף) → `f-snag` (לפי מסלול חיים: מפגש/ישיבה/יציע עיתונאים/אוטובוס אוהדים; אחרת הדרך) → רק אז קובי
+   (`f:sheet`). בנסיעה פוגי מוביל: לוח, תיק, ספסל (`TIGHT` = תוכנית דוחקת משלמת בזמן), דלת; `f-back`
+   מגיב לספסל/מרפק/עשר דקות. דגלי התוכנית ב-`life:finale:*` כדי לעבור לפרק הסיום.
+5. **2023-quiet מוגן:** "לא עכשיו" = דגל ושורה בלבד; בלי מדד, בלי ראיה, בלי יחסים (נבדק).
+7. **2011–2015 = וינייטות; משחקים רק התנגשות.** L09 (2021) היא ההתנגשות: `pr:ask` (go/checking/split) →
+   הדף על המקרר + הלוח בקיוסק → `pr-answer` (החלוקה רק למי שקרא את שניהם) → השבת בחצר של 1991
+   (`pr-saturday`, תיקו → פנדלים: להישאר או ללכת) → בלומפילד לשריקה; מי שלא הלך — `pr-nosat`, סיום `waited`.
+   `life:saturday` נזכר ב-2026 (`f-child`). 2012: מתנדב (`n-mentor`), שני דפים + שאלה (`n-ask`), מפגש
+   (`n-meeting`), קרדיטים מפה לפה (`n-cr-*`); 2018: השלט (`r-find`). ראיות רק שם.
+8. **קריאת דגל יום בפרק הבא = חור** (`STALE_READ`): מה שהנסיעה של 2026 קוראת מהתוכנית עובר ב-`life:finale:*`
+   (`TICKETS`, `ROUTE`, `SNAG`...) — `f:tickets` נמחק במעבר הפרק.
+6. `tests/life-adult-quests-b.test.ts` — Golden/Messy/Confused לכל פרק שהומר, סיום 2026 לכל מסלול חיים,
+   וגלאי §11.4: בחירה עם זמן≥20 + מיומנות/ראיה בלי סצנה ובלי תנאי על מעשה — רק ברשימה עם סיבה.
+
+## LIFE — כלכלה: סופרגול, עבודות שאפשר למצוא (דלתא 90-B, 25.9.2026)
+
+1. **קנייה אחת:** `purchasePacket(state)` ב-`stickers.ts` היא הטרנזקציה היחידה (`LifeRuntime.buyPacket` והאפקט
+   `packet` ב-`runtime/dialogue.ts` קוראים לה). ענף שהוא **קנייה** (`packet`, `take`, כסף שיוצא) לעולם לא מתקצר
+   ל-follow-up בחזרה — המעטפה השנייה אצל רפי היא קנייה שנייה (`isTrade`). "חדש" = לא היה באלבום וגם הראשון
+   מסוגו במעטפה. הסירוב (`none`/`short`/`empty`) ידוע ונאמר **לפני** שזז שקל
+   (`packetQuote` — מחיר + כיס על הדלפק). כסף + מדבקות + `album:packet:pending` נכתבים ב-dispatch אחד;
+   `PacketCard` הוא הצגה בלבד. לחיצה כפולה = אותה מעטפה; טעינה מחדש = הקריעה חוזרת (`packetReplay`), לא חיוב.
+   סגירה (`closePacket`) מנקה. שתי דלתות: `לאלבום` / `סגור` (חזרה לאותו חדר).
+2. **דלפק לא מוכר דף שמעטפה לא יכולה להוסיף לו** (`setSoldIn` + `packetPool`) — 1992/93 הוא סריקה אחת
+   שסוגרת את עצמה; הקיוסק מכר "קופסה ריקה" שבעה פרקים.
+3. **"מה מציעים היום" נקרא מהעולם, לא מוצהר:** `lib/life/offers.ts` (`offersNow`/`offersAt`/`offerPlaces`/
+   `offerNudge`/`activityQuote`) סורק את החדרים של הפרק — מה שעומד בחדר ו-`when` שלו מתקיים. הרוטציה נשארת;
+   מה שהיא חילקה מופיע ב-"?" (אפשר עכשיו: עבודה/התערבות/משחק/טובה · מקום · כ־דקות), בסימון קטן במפה (רק
+   מקום מוכר), ובחדר (`Gig.look` — הארגזים/הבקבוקים מצוירים רק כשמוצעים). התקרה נאמרת (`capHe`), לא מוסתרת.
+   בדיאלוג: `world/followUp.ts` — כשאין צעד סיפור ראשי ואין follow-up כתוב, אדם מזכיר פעם אחת עבודה פתוחה במקום
+   מוכר (`offerNudge`), לפני משפט הסגירה שלו; אף פעם לא על צעד סיפור. התיק של הילד אינו "הצעה".
+4. **הלחיצה אומרת מה זה:** בחירת עבודה/הימור = `עבודה: … — עד X ₪ · כ־N דק׳`; דלת של משחק נשארת מילה במילה
+   ("אני הפועל."), ומשחק לא מצטט שכר לעולם. לפני לוח של שער — כרטיס (`MechanicSheet quote`): סוג, זמן, שכר,
+   אנרגיה, [להתחיל] [לא עכשיו]; "לא עכשיו" לא מסלק כלום.
+5. **נסגר פעם אחת:** `alreadySettled(state, request)` — `runs` כבר זז; ה-ledger לא מסלק פעמיים. הטוטו כבר לא
+   תופס את משבצת העבודה בלחיצת היד (טעינה באמצע איבדה אותה) — מסולק כמו כל פעילות.
+6. **Batch 0 = מטריצות רגרסיה:** `tests/life-economy-matrix.test.ts` → `tests/fixtures/life-activity-matrix.json`
+   (כל ActivityId × פרק, שורת §22.8), `life-gig-matrix.json`, `life-supergoal-matrix.json`,
+   `life-activity-unplaced.json`. שורה מתה נכשלת; שינוי מכוון: `UPDATE_LIFE_MATRIX=1` וקוראים את ה-diff.
+
+## LIFE — קווסטים בוגרים א׳: 2002–2010, עושים ואז מקבלים (דלתא 90, LIFE 90-D, 25.9.2026)
+
+1. **בחירה מתחייבת; התגובה משלמת.** בחירה לא נותנת ארגון/מיומנות/אמון/ראיה יחד עם זמן או אנרגיה בלי שביצעה
+   משהו (chore, נסיעה, כסף שיצא). התגמול על עבודה נמצא ב-`then` של ענף שקורא מה היומן אומר שנעשה.
+   `tests/life-adult-quests-a.test.ts` (גלאי §11.4) — מה שלא הומר ב-2002/2006 רשום שם בשמו.
+2. **הצ'ורים הבוגרים ב-`content/storyChoresAdult.ts`** (נפרסים ב-`STORY_CHORES`). הקובץ לא מייבא `income.ts`
+   (`income → prices → chapters` מעגל); שכר מחושב בשיחת התגובה.
+3. **2007:** U01 תפקיד → המחסן (`count-07`) או האנשים בדרך לדלת (`returns-07`); U02 ארבעה/שלושה שמות בדף
+   (`u-calls`, שיחה בלחיצה, "אבל" ליד השם), תמיד מישהו מבטל (`cancelWhen`), להחליף/לצמצם, ביד ליוסף
+   (`u-list`); U04 `kit-07`/`labels-07` → ענבל/הדלת → **למחרת בשמונה** (`u-key-close`); U05 קורא
+   `life:founding:worked`/`life:founding:key`. `route-proof-found` — פעם בפרק, בחדר של הפרק, `when: u:hands`/`u:did`.
+4. **2010:** `d10:mode` = התחייבות; הרשימה/הכסף/עמית עומדים ברחוב (`d10-roster/pay/promise`, דגל מורם
+   `d10:seated` — `life:deadends` לא רואה `flagValue`); אחרי השריקה `d10-chaos` ואז ההבטחה; הראיה ב-`d10-car`;
+   התוצאה `life:teddy2010`. הבד של 2010 נצבע (`banner-10`) והראיה כשהוא עולה (`d10-banner`).
+5. **ביט הכרחי של חדר = `clock` + `at`**, לא `enter`, כשהיציאה מהחדר לא מחזירה אליו (נמל 2002, 2006): מי שסגר
+   תיבה בטעות שומע אותה שוב בלי לצאת ולהיכנס. `life-confused-player` מריץ את שלב ג' עם `seedFor` (הקו הריק).
+6. **§6 — הלחם של A2 בהבטחה של 2010:** ביט `d10-plan` מריץ `derive` (`breadMemory`) שקורא את ראיות הלחם מהפנקס
+   ומרים `d10:bread-kept`/`d10:bread-late`; `d10-promise` מוסיף שורת מספר (לא של אף אחד ברחוב). התוצאה
+   נזכרת אצל עמית (`remember`: `teddy2010-kept|renegotiated|broken`) — פרק מאוחר קורא `relationshipMemory`.
+7. **מה שנבחר ולא נעשה עומד בחדר:** U04 `u-crates`/`u-notes` (hall-new) פותחים שוב את `kit-07`/`labels-07`
+   כשהתוכנית נבחרה והצ'ור לא רץ. אנשים בחדרים: קובי בכורסה ב-2010-teddy למי שנשאר לראות בבית.
+
+## LIFE — סרט מהארכיון, שלב א׳, 1991 (דלתא 90-C, 25.9.2026)
+- **רישום ≠ חיווט (§23).** כל שורה ב-`lib/life/cutscenes.ts` נושאת `chapter`, `status` (`FootageStatus`), `role` (`FootageRole`), `trigger` ו-`provenanceHe`. רק `locked_verified` + `CINEMATIC_PAYOFF` נפתח לבד (`autoCutsceneFor`); כל השאר — `trigger: null`, לעולם לא אוטומטי. היום: רק `1986-championship`. מזהה בלי בדיקה חיה = `candidate_needs_live_check`. `tests/life-footage-wiring.test.ts` מחזיק את המטריצה כ-fixture — שינוי בה הוא החלטה.
+- **WorldScene קורא רק ל-`autoCutsceneFor`**, לא ל-`cutsceneFor`, בשלושת המקומות (era, goal, beat). ב-beat: `completionFlag` על כל תוצאה, `watchedFlag` רק על צפייה.
+- **HistoricalCutscene ו-strict mode:** ה-cleanup של unmount מאשר את עצמו טיק אחד אחר כך (`mounted` ref). בלי זה `next dev` (reactStrictMode) סגר את הסרט ברגע שנפתח ודיווח `skipped`. דפדפן: `node scripts/life/footage-probe.mjs` — blocked/skip/ended/gate/escape/reload × phone/desktop, כולם מתכנסים ל"למצוא את אבא." ו-kobi-found.
+- **ענף שיש בו `choices` לא מריץ את ה-`then` שלו** (`runtime/dialogue.ts`). עובדה "ללא תנאי" נכתבת בצומת בלי בחירות שבדרך (כך `own:tickets-1983` ב-`a1-after-kobi`).
+- **סוף ערב נכתב בשיחת הסיום עצמה, לא ב-beat שלפניה** (A2 `a2:done`, A3 `a3:done`): מי שסגר את התיבה בטעות לא מאבד את הסוף — ה-beat נדרך שוב.
+- **שלב א׳:** A1 כל מחווה = לחיצה אחת (`taps: 1`, בלי `tapHe`) — החלטת בעלים. A3 הכדור מגיע אליו בעצמו (`a3-ball`: roll/bounce/hold) והערב נגמר ב"בוא נלך" שלו, לא כשראה מספיק. A4 הארנק של אמא קורה בכניסה הראשונה הביתה עם מטבעות הפחית (`a4-wallet`). A6 הרדיו מת ושואל מיד: סוללות מהפנס / לירון בגשם / לכבות — "לכבות" סוגר מיד. A7 מקור שלישי (הרדיו של אבא), "לא לשאול" = סוף. A8 זוכר refused/promised/silent. אין מפתח/מגירה באף objective.
+- **1991:** `Era.timeGate` (`timeGate1991`) — כשרק רחל (15:00) או הערב (18:30) עומדים בין הילד לדבר הבא, כרטיס זרימה במקום הליכה. לא לשאול בכלל = `note-unasked` על הפנקס (`sneak:unasked`). אופיר לא יודע מה אמא אמרה עד שפוגי אומר (`91-ofir-told-no`); הענף המחובר שואל.
+- בדיקות: `tests/life-stagea-quest-90c.test.ts` (Golden/Messy/Confused לכל יחידה של שלב א׳, 1986, 1991).
+
+## LIFE — הפתיח: סרט קודם, דוקומנטרי כשהוא לא יכול (דלתא 90-G, 25.9.2026)
+מפרט הבעלים: `OPENING DOCUMENTARY HYBRID FINAL SPEC` (25.9.2026).
+1. **`Opening` הוא ה-orchestrator היחיד: `OpeningFilm | OpeningDocumentary`.** `OpeningSequence` (המצגת) נמחק; אין נתיב שלישי. `prefers-reduced-motion` → הדוקומנטרי במצב מופחת. QA: `/qa/life-opening?path=documentary|film`.
+2. **ניסיון הוגן לסרט = `lib/life/openingAttempt.ts`** (פונקציה טהורה, `step()`): אוטופליי 2.5 ש׳ → `load()+play()` 1.8 ש׳ → "▶ להתחיל" רק כשהמדיה תקינה והאוטופליי נדחה (7 ש׳ או עד לחיצה) → דוקומנטרי. אין לולאה; מסלול שנבחר לא מתהפך. הצלה יחידה: סרט שקפא 6 ש׳ נמסר לדוקומנטרי בביט המקביל (`beatForFilmMs`). מעבר: הסרט דוהה לדיו 420ms מעל `DocumentaryGround` — אותם פיקסלים שהדוקומנטרי מתחיל מהם.
+3. **הדוקומנטרי הוא קוד בלבד** — אין `<img>`, `url(` (מלבד data: של ה-grain), `/life/opening/`, `/life/art/`, fetch. נבדק ב-`tests/life-opening.test.ts`. `Grain code` = grain בלי תמונה.
+4. **הטקסט ב-`lib/life/opening.ts` בלבד** (`mode`, `captionHe`, `overlineHe`, `noteHe`, `emphasisHe` שחייב להיות חלק מילולי מהכיתוב). הכיתובים הקנוניים מילה במילה; `captionPieces` חותך ולא משנה תו. מחרוזות UI ב-`messages/he.stage.life90g.json`.
+5. **החוט האדום הוא מחוון ההתקדמות היחיד** — מצויר ב-transform בלבד, במהירות הביט. רק שנים שהפתיח יודע (1978, שנת העוגן) מתויגות; אין ציר חיים. בסוף החוט יוצא מהזכוכית ב-transform **לפני** שהשכבה דוהה (כלל 79).
+6. **ה-CSS בבלוק `OPENING DOCUMENTARY — begin/end` ב-globals.css**, טוקנים red/ink/sheet/concrete/sign בלבד, גם לזרקורים. קלאסי המצגת (`opening-bed/stage/frame/caption`) נמחקו; `openingDrift` נשאר (CodaCard).
+7. **התמונות והקליפים הישנים נשארים בדיסק** (§17) — הבדיקה נופלת אם נמחקו.
+8. **קול: אווירה בלבד, רק הקלטות של מאור** (`lib/life/openingAir.ts`: amb-park, radio-open, crowd-real-murmur ⊆ `LifeAudio.allowed`), כבוי עד לחיצה, AudioContext פרטי שנסגר בסוף.
+9. **הקידודים של 23.9 אינם אותו סרט:** WebM 7.949 ש׳, MP4 25.84 ש׳. לכן MP4 ראשון ב-`<source>`; `FILM.ms = 25_840`. לקודד מחדש WebM מה-MP4 (ולמדוד צהוב, כלל 61) ואז להחזיר VP9 ראשון.
+
+## LIFE — זמן פנוי / Smart Free Time (delta 90 · 90-F)
+Spec: `SMART-FREE-TIME-TIME-ADVANCE-SPEC-2026-09-25`. One system; `PassTime` and the fixed three-minute landing are gone.
+1. **The world moves the clock, never the shell.** UI asks `runtime.advanceTime(planId)` (`WorldScene.advanceTime`): re-plan at the tap (stale id → refused, "המצב השתנה"), `preflight`, then `advanceSteps` — the clock through every schedule/window/debt boundary with the minute's reconciliation, then the walk. No `clock.advanced` in `components/life/*`, `LifeStage`, `useFreeTime` (tested).
+2. **`lib/life/world/timeAdvance.ts` is the planner** (`freeTimePlan`): WHAT/WHEN from `nextTimeGate`, WHERE from `TimeGate.at` (a beat's `at`, or the room an era gate names — 1991's gates carry one), departure = event − travel − buffer (buffer by target ambience: station 8, stadium/hall 10, else 5; 0 inside the flat and for `freeTime.person`). `plannedArrivalMinute <= eventMinute` always.
+3. **`lib/life/world/travel.ts` is the only walk-length in the game** (`travelPlan`, `placesFrom`, `legMinutes`). The map's `places()`/`goTo()` read it; never multiply doors by minutes again.
+4. **No decision teleport.** A lapse beat (fires because something was NOT done, or raises `:hesitated/:missed/:gone/:late/:left`) is never waited through by the default CTA — only by the player's explicit "לתת לזה לעבור". Guided ways, `freeTime.allowAutoTravel: false`, an authored enter-beat on the way, and a shut/unknown route block the auto-walk; the CTA shows disabled with the reason.
+5. **No spoilers.** A gate with no `waitingHe`/`freeTime.eventHe` is "כרגע אין משהו שאתה חייב לעשות" — no name, no place, no walk.
+6. **Side actions are read, not registered**: `offers.ts` (host must be on the timetable now), open opportunity windows (`LifeAction.location/durationMinutes/availableUntil`, null when unknown), the album. Started through their own path (host's conversation, the map's walk, the album sheet). DOES-NOT-FIT rows only for a lapse.
+7. **Pacing is the shell's, in real seconds** (`FREE_TIME_TIMING`): chip after 3 s of a clear glass (never over a dialog/card/sheet/teach/title), planner opens by itself once per plan after 10 s untouched and only when nothing fits and the plan is safe.
+8. **Copy grows up with Pugi** (`timeAdvanceCopy.ts`, `voiceOf`: child <12, teen <18, soldier <22, adult). Keys `life90f.*` in `messages/he.stage.life90f.json`.
+9. Tests: `life-free-time`, `life-time-advance`, `-routing`, `-windows` (§35 A–K + invariants over every chapter).
+
+## LIFE — אני · התיק שלי · הסיפור שלי (delta 90-H, 25.9.2026)
+- Two destinations, one dossier: HUD `אני` (`data-life="me-open"`) and `התיק` (`profile-open`), LifeMenu rows `menu-me` / `menu-profile`, bedroom bag → bag. `useLifeSheets.openMe/openBag/view`. No tab between them; each header has a door to the other; phone swipe turns the page.
+- `components/life/ProfileCard.tsx` is the ROUTER only; everything it draws lives in `components/life/profile/*` (shell, motion, objects, pages). CSS for the layer is `components/life/profile/personal.module.css` (house tokens only, scoped reduced motion).
+- Readings: `lib/life/profile.ts` stays the one number→word translator; `lib/life/personal.ts` composes (identity, path map, constellation, story, bag). No figure is returned to print; nothing Pugi doesn't know (routes appear once offered, chapters once lived, unreached stages unnamed).
+- `presence` is biography: it is drawn in אני → הסיפור שלי, never in the bag.
+- The header keeps the literal "לסגור" button (`t('life.profile.close')`) — `scripts/life/playthrough.mjs` closes the bedroom bag by it.
+- Page state (which half/page) is React only, never saved. Session memory of the last identity/paths (for the one-time strike-through / "משהו השתנה") is module-level, not in the save.
+- Tests: `tests/life-me-bag.test.ts`. Spec + decisions: `docs/life/LIFE-PERSONAL-SYSTEM-UPGRADE.md`.

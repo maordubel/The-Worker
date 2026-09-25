@@ -21,6 +21,8 @@ import {
 } from '@/components/press/GoalPitch'
 import { ACTION_LABEL, VerbStrip } from '@/components/replay/ReplayBuilder'
 import { ReplayVerdict } from '@/components/replay/ReplayVerdict'
+import { CrossLinks } from '@/components/links/CrossLinks'
+import { ShareCardChips } from '@/components/links/ShareCard'
 import { ShareRow } from '@/components/share/ShareRow'
 import { FitBox } from '@/components/stage/FitBox'
 import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
@@ -50,7 +52,11 @@ import { GOOD_SCORE } from '@/lib/game/replay/judge'
 import type { ReplayAction } from '@/lib/game/replay/vocab'
 import { LIVES, rankFor } from '@/lib/game/session'
 import { t, type MessageKey } from '@/lib/i18n'
+import { markStep, track } from '@/lib/analytics/meter'
+import type { CrossLink } from '@/lib/links/types'
+import { goalCardQuery } from '@/lib/og/params'
 import { haptic } from '@/lib/play/haptics'
+import { SITE_URL } from '@/lib/brand'
 import { collect } from '@/lib/profile/store'
 import { artFor } from '@/lib/share/story'
 import type { GoalChallenge, GoalVerdict } from '@/lib/game/goal'
@@ -87,6 +93,8 @@ import { askGoalHint, askReceptionHint, submitGoal } from './actions'
  */
 
 type Played = {
+  /** delta 89: which goal — the result's cross-links and the share card name it */
+  goalId: string
   overall: number
   continuity: number
   touches: number
@@ -171,6 +179,7 @@ export function GoalRun({
   cursor = 0,
   pin = null,
   shirts,
+  links,
   embedded,
 }: {
   goals: GoalChallenge[]
@@ -180,6 +189,8 @@ export function GoalRun({
   pin?: string | null
   /** every man's shirt of that season, keyed `goalIndex|name` (the page resolves them) */
   shirts?: Wardrobe
+  /** delta 89: each dealt goal's doors into the other gates (`lib/links`), by goalId */
+  links?: Record<string, CrossLink[]>
   /**
    * Opened from inside THE WORKER LIFE (`lib/mechanics/types.ts`): one goal, the same judge,
    * and the verdict handed back — no collection, no record, no share, no masthead number.
@@ -436,7 +447,7 @@ export function GoalRun({
         score: previous.score + points,
         played: [
           ...previous.played,
-          { overall: result.metrics.overall, continuity: result.metrics.continuity, touches: result.truth.length, matched, good },
+          { goalId: result.goalId, overall: result.metrics.overall, continuity: result.metrics.continuity, touches: result.truth.length, matched, good },
         ],
       }))
     },
@@ -584,7 +595,13 @@ export function GoalRun({
     setStage({ build: EMPTY_BUILD, spots: next ? openingSpots(next.pool, next.opponents) : {} })
     if (over) crowd.cue('final', 0.5)
     setRun((current) => ({ ...current, goal, over }))
-  }, [crowd, goals])
+    if (!over && !embedded) markStep(goal + 1)
+  }, [crowd, goals, embedded])
+
+  // the measurement's step is the goal on the pitch (1–3); the opening one is only declared
+  useEffect(() => {
+    if (!embedded) markStep(1, undefined, true)
+  }, [embedded])
 
   const reveal = useReveal({ ms: REVEAL_MS, onDone: advance, active: phase === 'reveal' && verdict !== null && !embedded && sheet === null })
   const { running: revealRunning, cancel: cancelReveal } = reveal
@@ -600,7 +617,7 @@ export function GoalRun({
     }
   }, [phase, revealRunning, cancelReveal])
 
-  if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} phone={phone} />
+  if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} phone={phone} links={links} />
 
   /* ------------------------------------------------------------ what the board says */
 
@@ -1011,7 +1028,7 @@ function SoundGlyph({ muted }: { muted: boolean }) {
 }
 
 /** הפסק — what the run came to, on one screen, and the link that hands over the same three. */
-function Result({ run, seed, cursor, phone }: { run: Run; seed: number; cursor: number; phone: boolean }) {
+function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; cursor: number; phone: boolean; links?: Record<string, CrossLink[]> }) {
   const [share, setShare] = useState(false)
   const rank = rankFor(run.score) as MessageKey
   const played = run.played
@@ -1022,6 +1039,11 @@ function Result({ run, seed, cursor, phone }: { run: Run; seed: number; cursor: 
   const good = played.reduce((sum, item) => sum + item.good, 0)
   const asked = played.reduce((sum, item) => sum + item.touches, 0)
   const goodPct = asked > 0 ? Math.round((good / asked) * 100) : 0
+  // delta 89: the best goal of the run names the card, and every played goal its doors
+  const top = played.reduce<Played | null>((pick, item) => (!pick || item.overall > pick.overall ? item : pick), null)
+  const doors = [...new Map(played.flatMap((item) => links?.[item.goalId] ?? []).map((link) => [link.href, link])).values()].slice(0, 6)
+  const cardQuery = top ? goalCardQuery({ goalId: top.goalId, avg: average, best, score: run.score }) : null
+  const cardUrl = cardQuery ? `${SITE_URL}/goal?seed=${seed}&r=${cursor}&${cardQuery}` : null
 
   const row = (
     <ShareRow
@@ -1093,6 +1115,19 @@ function Result({ run, seed, cursor, phone }: { run: Run; seed: number; cursor: 
       </div>
 
       {!phone && row}
+
+      <CrossLinks links={doors} from="goal" className="mt-2 shrink-0" />
+      {cardQuery && cardUrl && (
+        <ul className="-mx-1 mt-2 flex shrink-0 gap-1.5 overflow-x-auto px-1" data-goal="card-share">
+          <ShareCardChips
+            imagePath={`/api/card/goal?${cardQuery}`}
+            url={cardUrl}
+            text={t('goal.shareHeadMove', { pct: String(average) })}
+            primary
+            onShared={(channel) => track('share_click', { detail: `card-${channel}` })}
+          />
+        </ul>
+      )}
 
       <div className="mt-3 grid shrink-0 grid-cols-[1fr_auto_auto] gap-2 md:grid-cols-2">
         <PlayLink gate="/goal" className="flex min-h-tap items-center justify-center bg-red px-4 font-body text-step-0 font-extrabold text-paper">

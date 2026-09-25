@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
 import { SlideSheet } from '@/components/stage/SlideSheet'
+import { markStep, track } from '@/lib/analytics/meter'
 import { t, type MessageKey } from '@/lib/i18n'
 import { emit } from '@/lib/profile/events'
 import type { DuelError, DuelState } from '@/lib/game/blind-cow/duel'
@@ -26,6 +27,7 @@ import {
 import { ClueStack } from './ClueStack'
 import { CowMark } from './CowMark'
 import { GuessDrawer } from './GuessDrawer'
+import { LiveRoom } from './LiveRoom'
 import { ResultPanel } from './ResultPanel'
 import { copyLink, gateUrl, shareOut, waHref } from './share'
 
@@ -121,10 +123,14 @@ export function BlindCowGame({
   const [name, setName] = useState('')
   const [sure, setSure] = useState(false)
   const [note, setNote] = useState<string | null>(null)
+  const [live, setLive] = useState(false)
   const counted = useRef<string | null>(null)
+  const completed = useRef<string | null>(null)
   const stack = useRef<HTMLDivElement>(null)
 
   useEffect(() => setName(readName()), [])
+  // the measurement's step is the clue on the table; the lobby is step 0 (lib/analytics)
+  useEffect(() => markStep(0, undefined, true), [])
 
   const take = useCallback((next: RunView, m: Mode) => {
     setView(next)
@@ -148,7 +154,17 @@ export function BlindCowGame({
       correct: solved ? 1 : 0,
       asked: 1,
     })
+    // spec §11 — the measurement (lib/analytics): how many clues, how long, and how it ended
+    if (solved) track('blind_cow_solved', { step: view.result.hintsUsed, value: view.result.rawElapsedMs, detail: view.mode })
+    else track('blind_cow_gave_up', { step: view.result.hintsUsed, detail: view.status === 'timeout' ? 'timeout' : view.mode })
   }, [view])
+
+  /* a duel is complete once both sides are in: counted once per duel */
+  useEffect(() => {
+    if (!duel?.winner || !token || completed.current === token) return
+    completed.current = token
+    track('blind_cow_duel_completed', { detail: duel.winner })
+  }, [duel, token])
 
   /* ---------------------------------------------------------------- duel state */
 
@@ -198,6 +214,8 @@ export function BlindCowGame({
     setFresh(1)
     take(out.view, m)
     setScreen('run')
+    track('blind_cow_started', { detail: m })
+    markStep(1)
     firePickFx(window.innerWidth / 2, window.innerHeight * 0.4, { label: t('blindcow.hud.clue', { n: '1', total: String(out.view.total) }), tone: 'red' })
   }
 
@@ -214,7 +232,11 @@ export function BlindCowGame({
     const out: ActionResult = await revealClue(mode, view.clues.length, token ?? undefined)
     setBusy(false)
     if (out.view) {
-      if (out.view.clues.length > view.clues.length) setFresh(out.view.clues.length)
+      if (out.view.clues.length > view.clues.length) {
+        setFresh(out.view.clues.length)
+        track('blind_cow_hint_revealed', { step: out.view.clues.length, detail: mode })
+        markStep(out.view.clues.length)
+      }
       take(out.view, mode)
     } else if (out.error) setError(t(DUEL_ERRORS[out.error as DuelError] ?? 'blindcow.duel.error.generic'))
   }
@@ -232,6 +254,7 @@ export function BlindCowGame({
       return 'right'
     }
     take(out.view, mode)
+    if (out.verdict === 'wrong') track('blind_cow_guess_wrong', { step: out.view.clues.length, detail: mode })
     if (out.view.status !== 'playing') setDrawer(false)
     return out.verdict
   }
@@ -277,6 +300,7 @@ export function BlindCowGame({
     }
     setDuelError(null)
     setCreated(out.token)
+    track('blind_cow_duel_created')
   }
 
   function playCreated() {
@@ -299,6 +323,7 @@ export function BlindCowGame({
       setDuelError(joined.error)
       return
     }
+    track('blind_cow_duel_joined')
     await loadDuel(token)
     setBusy(false)
   }
@@ -316,9 +341,26 @@ export function BlindCowGame({
     setFresh(1)
     take(out.view, 'duel')
     setScreen('run')
+    track('blind_cow_started', { detail: 'duel' })
+    markStep(1)
     firePickFx(window.innerWidth / 2, window.innerHeight * 0.4, { label: t('blindcow.hud.clue', { n: '1', total: String(out.view.total) }), tone: 'red' })
     void loadDuel(token)
   }
+
+  /** the live room's go: the run is open, on the shared clock (spec §2.4) */
+  const liveGo = useCallback(
+    (next: RunView) => {
+      setLive(false)
+      setMode('duel')
+      setFresh(1)
+      take(next, 'duel')
+      setScreen('run')
+      markStep(1)
+      firePickFx(window.innerWidth / 2, window.innerHeight * 0.4, { label: t('blindcow.hud.clue', { n: '1', total: String(next.total) }), tone: 'red', big: true, haptic: 'lock' })
+      if (token) void loadDuel(token)
+    },
+    [take, token, loadDuel],
+  )
 
   const inviteText = t('blindcow.share.invite')
 
@@ -374,6 +416,10 @@ export function BlindCowGame({
     )
   }
 
+  if (screen === 'duel' && live && token && duelAvailable) {
+    return <LiveRoom token={token} myName={duel?.myName ?? name} onGo={liveGo} onLeave={() => setLive(false)} />
+  }
+
   if (screen === 'duel') {
     return (
       <div className="flex min-h-0 flex-1 flex-col md:mx-auto md:block md:w-full md:max-w-[560px] md:flex-none">
@@ -423,6 +469,7 @@ export function BlindCowGame({
                   onClick={async () => {
                     const out = await shareOut(inviteText, gateUrl(`?duel=${token}`))
                     if (out === 'copied') setNote(t('blindcow.share.copied'))
+                    if (out !== 'failed') track('blind_cow_duel_shared', { detail: 'share' })
                   }}
                   className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink"
                 >
@@ -430,7 +477,7 @@ export function BlindCowGame({
                 </button>
               </li>
               <li className="shrink-0">
-                <a href={waHref(inviteText, gateUrl(`?duel=${token}`))} target="_blank" rel="noopener noreferrer" className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink">
+                <a href={waHref(inviteText, gateUrl(`?duel=${token}`))} onClick={() => track('blind_cow_duel_shared', { detail: 'whatsapp' })} target="_blank" rel="noopener noreferrer" className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink">
                   {t('blindcow.share.whatsapp')}
                 </a>
               </li>
@@ -438,7 +485,10 @@ export function BlindCowGame({
                 <button
                   type="button"
                   onClick={async () => {
-                    if (await copyLink(gateUrl(`?duel=${token}`))) setNote(t('blindcow.share.copied'))
+                    if (await copyLink(gateUrl(`?duel=${token}`))) {
+                      setNote(t('blindcow.share.copied'))
+                      track('blind_cow_duel_shared', { detail: 'copy' })
+                    }
                   }}
                   className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink"
                 >
@@ -454,9 +504,29 @@ export function BlindCowGame({
           )}
           {duelAvailable && duel && !duelError ? (
             duel.joined ? (
-              <PrimaryButton onClick={startDuel} disabled={busy}>
-                {t('blindcow.duel.start')}
-              </PrimaryButton>
+              !duel.me ? (
+                // spec §2.4: play it now, together — or on your own time, as before
+                <div className="grid grid-cols-[1fr_1.35fr] gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setLive(true)}
+                    data-live="open"
+                    className="flex min-h-tap flex-col items-center justify-center border-rule border-ink bg-ink px-2 text-paper transition-transform duration-press active:scale-[.97] motion-reduce:transition-none"
+                  >
+                    <span className="font-body text-[13.5px] font-extrabold leading-tight">{t('connect.live.open')}</span>
+                    <span className="font-latin text-[9px] font-bold tracking-[0.2em] text-concrete" dir="ltr">
+                      LIVE
+                    </span>
+                  </button>
+                  <PrimaryButton onClick={startDuel} disabled={busy}>
+                    {t('blindcow.duel.start')}
+                  </PrimaryButton>
+                </div>
+              ) : (
+                <PrimaryButton onClick={startDuel} disabled={busy}>
+                  {t('blindcow.duel.start')}
+                </PrimaryButton>
+              )
             ) : (
               <PrimaryButton onClick={acceptDuel} disabled={busy}>
                 {t('blindcow.duel.accept')}
@@ -599,18 +669,22 @@ export function BlindCowGame({
                 onClick={async () => {
                   const out = await shareOut(inviteText, gateUrl(`?duel=${created}`))
                   if (out === 'copied') setNote(t('blindcow.share.copied'))
+                  if (out !== 'failed') track('blind_cow_duel_shared', { detail: 'share' })
                 }}
                 className="flex min-h-tap items-center border-rule border-ink bg-ink px-3 font-body text-[12.5px] font-extrabold text-paper"
               >
                 {t('blindcow.duel.send')}
               </button>
-              <a href={waHref(inviteText, gateUrl(`?duel=${created}`))} target="_blank" rel="noopener noreferrer" className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink">
+              <a href={waHref(inviteText, gateUrl(`?duel=${created}`))} onClick={() => track('blind_cow_duel_shared', { detail: 'whatsapp' })} target="_blank" rel="noopener noreferrer" className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink">
                 {t('blindcow.share.whatsapp')}
               </a>
               <button
                 type="button"
                 onClick={async () => {
-                  if (await copyLink(gateUrl(`?duel=${created}`))) setNote(t('blindcow.share.copied'))
+                  if (await copyLink(gateUrl(`?duel=${created}`))) {
+                    setNote(t('blindcow.share.copied'))
+                    track('blind_cow_duel_shared', { detail: 'copy' })
+                  }
                 }}
                 className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink"
               >

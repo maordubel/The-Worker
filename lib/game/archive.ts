@@ -367,6 +367,8 @@ export const archive = {
     claimA: string
     claimB: string
     resolution?: string | null
+    /** structured decisions on a resolved match conflict (delta 89) — see build-match-master.ts */
+    decisions?: { matchId: string; field: string }[]
   }>(conflictsFile),
   /**
    * הפועל תל אביב באירופה — every UEFA tie the club has played, plus the Intertoto groups.

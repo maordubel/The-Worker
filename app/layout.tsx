@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 
 import { Analytics } from '@/components/ads/Analytics'
+import { GateMeter } from '@/components/meter/GateMeter'
 import { ADSENSE_CLIENT } from '@/lib/ads'
 import { BRAND, SITE_URL } from '@/lib/brand'
 import { DIRECTION, LOCALE, t } from '@/lib/i18n'
@@ -97,6 +98,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           strategy="afterInteractive"
         />
         <Analytics />
+        {/* first-party measurement: views, starts, finishes, where people leave (lib/analytics) */}
+        <GateMeter />
       </body>
     </html>
   )

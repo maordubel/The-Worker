@@ -1,17 +1,20 @@
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
 
+import { CrossLinks } from '@/components/links/CrossLinks'
+import { ShareCardChips } from '@/components/links/ShareCard'
 import { PlayerShirt } from '@/components/stage/PlayerShirt'
 import { SlideSheet } from '@/components/stage/SlideSheet'
+import { track } from '@/lib/analytics/meter'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { DuelState } from '@/lib/game/blind-cow/duel'
 import { secondsLabel } from '@/lib/game/blind-cow/scoring'
 import type { RunView } from '@/lib/game/blind-cow/types'
+import { blindCowCardQuery, type BlindCowCard } from '@/lib/og/params'
 
 import { CowMark } from './CowMark'
-import { gateUrl, shareOut, waHref } from './share'
+import { gateUrl } from './share'
 
 /**
  * המסך שאחרי — the file is open (spec §3 State 4): who he was, in his real shirt (the
@@ -33,7 +36,6 @@ export function ResultPanel({
   onRefreshDuel: (() => void) | null
 }) {
   const [allOpen, setAllOpen] = useState(false)
-  const [note, setNote] = useState<string | null>(null)
   const r = view.result
   if (!r) return null
   const solved = view.status === 'solved'
@@ -50,12 +52,19 @@ export function ResultPanel({
       s: secondsLabel(r.rawElapsedMs),
     })
   }
-  const url = gateUrl(view.mode === 'daily' ? '?mode=daily' : '')
-
-  async function share() {
-    const out = await shareOut(text, url)
-    if (out === 'copied') setNote(t('blindcow.share.copied'))
+  // delta 89: the shared link carries the result card (`lib/og/params.ts`) — how you did,
+  // never who he was — and its WhatsApp preview is that card
+  const card: BlindCowCard = {
+    mode: view.mode,
+    status: view.status === 'solved' ? 'solved' : view.status === 'timeout' ? 'timeout' : 'gave_up',
+    hints: r.hintsUsed,
+    tenths: Math.round(r.rawElapsedMs / 100),
+    weightedTenths: solved ? Math.round(r.weightedTimeMs / 100) : null,
+    duel: view.mode === 'duel' && duel?.winner ? (duel.winner === 'me' ? 'won' : duel.winner === 'them' ? 'lost' : duel.winner === 'tie' ? 'tie' : 'none') : null,
+    day: view.mode === 'daily' ? (view.day ?? null) : null,
   }
+  const query = blindCowCardQuery(card)
+  const url = gateUrl(`?${query}${view.mode === 'daily' ? '&mode=daily' : ''}`)
 
   const extra = Math.max(0, r.hintsUsed - 1)
 
@@ -127,33 +136,21 @@ export function ResultPanel({
       </div>
 
       <div className="mt-1.5 shrink-0 md:mx-auto md:max-w-[520px]">
+        <CrossLinks links={r.links} from="blind-cow" className="pb-1.5" />
         <ul className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1.5">
-          <li className="shrink-0">
-            <button type="button" onClick={share} className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink active:scale-[.97]">
-              {t('blindcow.share')}
-            </button>
-          </li>
-          <li className="shrink-0">
-            <a href={waHref(text, url)} target="_blank" rel="noopener noreferrer" className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink active:scale-[.97]">
-              {t('blindcow.share.whatsapp')}
-            </a>
-          </li>
+          <ShareCardChips
+            imagePath={`/api/card/blind-cow?${query}`}
+            url={url}
+            text={text}
+            primary
+            onShared={(channel) => track('blind_cow_result_shared', { detail: channel })}
+          />
           <li className="shrink-0">
             <button type="button" onClick={() => setAllOpen(true)} className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink active:scale-[.97]">
               {t('blindcow.result.all')}
             </button>
           </li>
-          <li className="shrink-0">
-            <Link href={r.archiveHref} className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink active:scale-[.97]">
-              {t('blindcow.result.archive')}
-            </Link>
-          </li>
         </ul>
-        {note && (
-          <p className="pb-1 text-center font-body text-[11px] font-extrabold text-sign" role="status">
-            {note}
-          </p>
-        )}
         <button
           type="button"
           onClick={onNext ?? onLobby}

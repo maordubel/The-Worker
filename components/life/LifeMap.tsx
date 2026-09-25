@@ -6,6 +6,7 @@ import type { LifeState, LocationId } from '@/lib/life/types'
 import { SheetHead } from '@/components/life/Plate'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
+import { OFFER_KIND_HE, offerPlaces } from '@/lib/life/offers'
 
 /**
  * המפה — the city you can move, and the same doors written out underneath it.
@@ -43,6 +44,8 @@ export function LifeMap({
   onClose: () => void
 }) {
   const dialogRef = useDialog<HTMLDivElement>(onClose)
+  // a known offer is a small mark beside its place (§22.4.4) — only places this life has reached
+  const marks = offerPlaces(state)
   return (
     <div
       className="absolute inset-0 z-40 flex items-end justify-center bg-ink/70 p-2.5 pb-[max(10px,env(safe-area-inset-bottom))] sm:items-center"
@@ -91,8 +94,18 @@ export function LifeMap({
                       : 'text-ink active:bg-red active:text-sheet'
                 }`}
               >
-                <span>
+                <span className="flex min-w-0 items-center gap-2">
                   <bdi>{place.titleHe}</bdi>
+                  {marks.has(place.id as LocationId) && (
+                    <span
+                      className={`shrink-0 px-1 font-sign text-[10px] leading-tight ${
+                        place.here ? 'border-hair border-sheet text-sheet' : 'border-hair border-red text-red'
+                      }`}
+                      data-life="map-offer"
+                    >
+                      {OFFER_KIND_HE[marks.get(place.id as LocationId) ?? 'work']}
+                    </span>
+                  )}
                 </span>
                 <span className="shrink-0 font-body text-[11px]">
                   {place.here ? (

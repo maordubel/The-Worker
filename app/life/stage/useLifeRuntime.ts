@@ -12,6 +12,7 @@ import { LifeAudio, type AmbienceKey } from '@/lib/life/runtime/audio'
 import { LifeBus, type HudState, type LifeBusEvents } from '@/lib/life/runtime/bus'
 import type { LifeRuntime } from '@/lib/life/runtime/game'
 import { lifeStore } from '@/lib/life/save'
+import { packetReplay } from '@/lib/life/stickers'
 import type { Achievement } from '@/lib/life/achievements'
 import type { LifeState } from '@/lib/life/types'
 import type { MechanicCatalog } from '@/lib/mechanics/types'
@@ -152,7 +153,7 @@ export function useLifeRuntime({
   /* what came out of the red box, waiting behind whatever is already on screen */
   const [kept, setKept] = useState<LifeBusEvents['kept']>(null)
   /* the day's next beat is waiting for the clock and the room has gone quiet */
-  const [pass, setPass] = useState<LifeBusEvents['pass']>(null)
+  const [freeTime, setFreeTime] = useState<LifeBusEvents['freeTime']>(null)
   const [cast, setCast] = useState<LifeBusEvents['cast']>(null)
   const [film, setFilm] = useState<LifeBusEvents['film']>(null)
   /** the state the shop screen is drawn against, re-read after every purchase */
@@ -428,7 +429,7 @@ export function useLifeRuntime({
         setPacket(value)
         runtime.current?.pause(Boolean(value))
       }),
-      bus.on('pass', setPass),
+      bus.on('freeTime', setFreeTime),
       bus.on('kept', (value) => {
         // queued rather than shown: the packet that closed the page is still open, and
         // two overlays at once is how a reveal turns into a pile-up
@@ -491,6 +492,14 @@ export function useLifeRuntime({
       runtime.current.resize(box.width, box.height)
       setStage(box.height)
       setReady(true)
+      // מעטפה ששולמה ולא נפתחה (§21.5): a reload between the charge and the reveal plays the
+      // reveal again — the money and the cards are already in the save, only the tear is owed
+      const owed = packetReplay(engine.state)
+      if (owed) {
+        setPacket(owed)
+        // the world waits behind the envelope, as it does after a purchase — once the room exists
+        window.setTimeout(() => runtime.current?.pause(true), 1200)
+      }
     })()
 
     return () => {
@@ -652,8 +661,8 @@ export function useLifeRuntime({
     setPacket,
     kept,
     setKept,
-    pass,
-    setPass,
+    freeTime,
+    setFreeTime,
     cast,
     setCast,
     film,

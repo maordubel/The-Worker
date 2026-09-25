@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useEffect, useRef, type ReactNode } from 'react'
 
+import { CrossLinks } from '@/components/links/CrossLinks'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import { MatchLine, Num } from '@/components/ui/Num'
@@ -111,6 +112,9 @@ export function ArchiveDrawer({
               {t('archive.card.disputed')}
             </p>
           )}
+
+          {/* delta 89 — the same match / man in the other gates: על המפה · בשער 8 */}
+          <CrossLinks links={detail.links} from="archive" className="mt-2.5" label={t('connect.row')} />
 
           {/* ואתה? — personal, never a fact */}
           <section className="mt-3" aria-labelledby="drawer-react">

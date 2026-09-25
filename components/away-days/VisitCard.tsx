@@ -1,5 +1,6 @@
 import type { JourneyData, VisitLite } from '@/lib/away-days/journey'
 import { t } from '@/lib/i18n'
+import { BeenToggle } from './BeenToggle'
 
 /**
  * כרטיס הביקור — one match, read from the master (spec §28).
@@ -31,11 +32,14 @@ export function VisitCard({
   data,
   compact = false,
   showScorers = true,
+  been,
 }: {
   visit: VisitLite
   data: JourneyData
   compact?: boolean
   showScorers?: boolean
+  /** "הייתי שם" (spec §30) — the toggle sits between the opponent and the score */
+  been?: { on: boolean; onToggle: () => boolean }
 }) {
   const venue = data.venues[visit.venueId]
   if (!venue) return null
@@ -51,8 +55,8 @@ export function VisitCard({
           {visit.stageHe ? ` · ${visit.stageHe}` : ''}
         </span>
       </p>
-      <div className="mt-1 flex items-end justify-between gap-3">
-        <div className="min-w-0">
+      <div className="mt-1 flex items-end justify-between gap-2.5">
+        <div className="min-w-0 flex-1">
           <h3 className={`truncate font-display leading-none text-ink ${compact ? 'text-[20px]' : 'text-[24px]'}`}>{visit.opponentHe}</h3>
           {visit.opponentLatin && (
             <p dir="ltr" className="mt-0.5 truncate text-end font-latin text-[9px] font-bold uppercase tracking-[0.22em] text-muted">
@@ -60,6 +64,7 @@ export function VisitCard({
             </p>
           )}
         </div>
+        {been && <BeenToggle on={been.on} onToggle={been.onToggle} city={venue.cityHe} />}
         <p className={`relative shrink-0 font-poster leading-none ${compact ? 'text-[34px]' : 'text-[44px]'}`} aria-label={`${resultLabel(visit)} ${visit.scoreFor}:${visit.scoreAgainst}`}>
           <span aria-hidden="true" dir="ltr" className="plate-shift absolute inset-0 text-concrete">
             {visit.scoreAgainst}–{visit.scoreFor}

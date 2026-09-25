@@ -84,6 +84,24 @@ export type MatchRecord = {
   mergeNote: string | null
   /** present only on a fixture that was never played on a pitch (a walkover / technical result) */
   notPlayed?: { reason: string; sourceIds: SourceId[] }
+  /**
+   * present only where a named person decided a claim (`fact-conflicts.json` row with a
+   * `resolution` and structured `decisions`, delta 89): the winning value and source, and
+   * every reading the claim held — the losing provenance stays here, never deleted.
+   */
+  decided?: MatchDecision[]
+}
+
+export type MatchDecision = {
+  field: string
+  value: string | number | null | { hapoel: number; opponent: number }
+  sourceId: SourceId
+  /** `entityTable|entityKey|field` of the fact-conflicts row that carries the decision */
+  conflict: string
+  resolutionHe: string
+  decidedBy: string
+  decidedOn: string
+  overruled: MatchClaim['values']
 }
 
 export type ActorKind = 'player' | 'opponent' | 'unnamed'

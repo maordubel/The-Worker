@@ -8,6 +8,9 @@ import { duelAvailable } from '@/lib/game/blind-cow/duel'
 import { viewOf, type RunState } from '@/lib/game/blind-cow/engine'
 import { open } from '@/lib/game/blind-cow/token'
 import { t } from '@/lib/i18n'
+import { blindCowHeadline } from '@/lib/og/cards'
+import { withCard } from '@/lib/og/meta'
+import { blindCowCardQuery, parseBlindCowCard } from '@/lib/og/params'
 
 /**
  * שער 10 — פרה עיוורת (spec GATE10-BLINDCOW-AWAYDAYS, part A).
@@ -21,10 +24,17 @@ import { t } from '@/lib/i18n'
  * `?duel=<token>` opens a duel link; `?mode=daily` (a shared daily result) puts the daily
  * on the primary button without starting its clock.
  */
-export const metadata: Metadata = {
+const BASE: Metadata = {
   title: t('screen.blindcow.title'),
   description: t('blindcow.meta.description'),
   alternates: { canonical: '/blind-cow' },
+}
+
+/** A shared result (`?bm=…&bs=…`, delta 89) previews as its card — never with a name in it. */
+export function generateMetadata({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }): Metadata {
+  const card = parseBlindCowCard(searchParams)
+  if (!card) return BASE
+  return withCard(BASE, `/api/card/blind-cow?${blindCowCardQuery(card)}`, `${blindCowHeadline(card)} · ${t('screen.blindcow.title')}`, t('connect.card.bc.cta'))
 }
 
 export const dynamic = 'force-dynamic'
@@ -41,7 +51,7 @@ function playing(view: ReturnType<typeof viewOf>) {
   return view && view.status === 'playing' ? view : null
 }
 
-export default function BlindCowPage({ searchParams }: { searchParams: { duel?: string; mode?: string } }) {
+export default function BlindCowPage({ searchParams }: { searchParams: { duel?: string; mode?: string; bm?: string } }) {
   const token = typeof searchParams.duel === 'string' && /^[0-9a-f]{32}$/.test(searchParams.duel) ? searchParams.duel : null
   return (
     <Screen title={t('screen.blindcow.title')} sub={t('screen.blindcow.sub')} stage>
@@ -52,7 +62,7 @@ export default function BlindCowPage({ searchParams }: { searchParams: { duel?: 
         initialDaily={resumed('bc_daily', 'daily')}
         duelToken={token}
         duelAvailable={duelAvailable()}
-        preferDaily={searchParams.mode === 'daily'}
+        preferDaily={searchParams.mode === 'daily' || searchParams.bm === 'd'}
       />
     </Screen>
   )

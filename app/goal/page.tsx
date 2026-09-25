@@ -5,6 +5,9 @@ import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { dealRun, hasGoals, pinnedGoal } from '@/lib/game/goal'
 import { wardrobe } from '@/lib/kit/playerShirt'
+import { goalLinks } from '@/lib/links'
+import { withCard } from '@/lib/og/meta'
+import { goalCardQuery, parseGoalCard } from '@/lib/og/params'
 import { roundFrom } from '@/lib/rotation/round'
 import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
@@ -21,7 +24,13 @@ import { GoalRun } from './GoalRun'
  * "rebuild this goal". An unknown or held id is ignored rather than refused: the link
  * still opens a run, just not a pinned one.
  */
-export const metadata: Metadata = gateMetadata('goal')
+/** A shared result (`?cg=…&ca=…`, delta 89) previews as its card: the goal, the accuracy, his shirt. */
+export function generateMetadata({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }): Metadata {
+  const base = gateMetadata('goal')
+  const card = parseGoalCard(searchParams)
+  if (!card || !pinnedGoal(card.goalId)) return base
+  return withCard(base, `/api/card/goal?${goalCardQuery(card)}`, `${card.avg}% · ${t('screen.goal.title')}`, t('connect.card.goal.cta'))
+}
 
 export default function GoalPage({
   searchParams,
@@ -43,11 +52,15 @@ export default function GoalPage({
     ),
   )
 
+  // delta 89: where each dealt goal lives in the other gates — its match's archive card,
+  // its AWAY DAYS stop when abroad, the scorer's card (lib/links, every target checked)
+  const links = Object.fromEntries(goals.map((goal) => [goal.goalId, goalLinks(goal.goalId)]))
+
   return (
     <Screen title={t('screen.goal.title')} sub={t('screen.goal.sub')} stage>
       {goals.length > 0 ? (
         <>
-          <GoalRun goals={goals} seed={round.seed} cursor={round.cursor} pin={pin} shirts={shirts} />
+          <GoalRun goals={goals} seed={round.seed} cursor={round.cursor} pin={pin} shirts={shirts} links={links} />
           <div className="shrink-0 max-md:hidden">
             <ReportLink />
           </div>
