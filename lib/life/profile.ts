@@ -1,3 +1,4 @@
+import type { CraftOutput } from '../game/craft/types'
 import { characterName } from './characters'
 import { resolvePureLove, type PureLoveResolution } from './pure-love'
 import { CHAPTERS, chapterFor } from './content/chapters'
@@ -368,6 +369,10 @@ export type WardrobeReading = {
    * the bag says it on the shelf, because that is the reason the shirt is in the bag.
    */
   wornHe: { id: string; dateHe: string; titleHe: string }[]
+  /** delta 91 — a shirt he MADE (`state.outputs['pugi:fan-shirt']`): drawn from its marks, never a photograph or a spec */
+  craft?: CraftOutput
+  /** what the shelf says about a crafted one — on him, or drying on the chair */
+  craftedHe?: string
 }
 
 /** true when this `clothing` id is already represented by a shirt row in the wardrobe */

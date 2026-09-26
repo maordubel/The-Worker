@@ -32,6 +32,7 @@ export const MECHANICS: Record<ActivityMechanic, MechanicSpec> = {
   allTimeXI: { graded: false, family: 'workspace' },
   archive: { graded: false, family: 'explore' },
   myBag: { graded: false, family: 'explore' },
+  supporterCraft: { graded: true, family: 'workspace' },
 }
 
 const unit = (value: number) => (Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0)

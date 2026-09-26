@@ -39,6 +39,7 @@ export function IdentityHero({
   portrait,
   heart,
   compact,
+  lines = [],
 }: {
   nameHe: string
   ageHe: string
@@ -48,6 +49,8 @@ export function IdentityHero({
   portrait: string | null
   heart: RedHeartReading[]
   compact: boolean
+  /** delta 91 — what the world makes of him today (`buildSceneContext`): human sentences, never a figure */
+  lines?: readonly string[]
 }) {
   return (
     <div className="flex min-w-0 flex-col" data-life="me-hero">
@@ -97,6 +100,19 @@ export function IdentityHero({
       <RevealText delay={was ? 1000 : 380} as="p" className="mt-1.5 font-body text-[14px] leading-snug text-concrete md:text-[16px]">
         <bdi>{identity.line}</bdi>
       </RevealText>
+
+      {lines.length > 0 ? (
+        <RevealText delay={was ? 1100 : 460} as="div" className="mt-3">
+          <ul className="flex flex-col gap-1" data-life="me-context">
+            {lines.map((line) => (
+              <li key={line} className="font-body text-[13px] leading-snug text-sheet/90 md:text-[14px]">
+                <span aria-hidden="true" className="me-1.5 inline-block h-[6px] w-[6px] bg-red align-middle" />
+                <bdi>{line}</bdi>
+              </li>
+            ))}
+          </ul>
+        </RevealText>
+      ) : null}
 
       {/* הלב האדום — the pulls, set as type: the bigger the word, the harder it pulls */}
       {heart.length > 0 && !compact ? (

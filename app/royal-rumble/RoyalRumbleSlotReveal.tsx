@@ -2,28 +2,45 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-import type { RoyalRumblePublicPlayer } from '@/lib/game/royal-rumble'
+import type { RoyalRumbleOffer } from '@/lib/game/royal-rumble-public'
 import { t } from '@/lib/royal-rumble/i18n'
+
+/** the whole reveal, first tick to last lock — 700–900ms and no longer (spec §47) */
+const REVEAL_MS = 780
+const TICK_MS = 60
+
+function reducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  } catch {
+    return false
+  }
+}
 
 export function RoyalRumbleSlotReveal({
   offers,
   signature,
 }: {
-  offers: RoyalRumblePublicPlayer[]
+  offers: RoyalRumbleOffer[]
   signature: string
 }) {
   const [tick, setTick] = useState(0)
   const [open, setOpen] = useState(true)
-  const names = useMemo(() => offers.map((player) => player.nameHe), [offers])
+  const names = useMemo(() => offers.map((offer) => offer.player.nameHe), [offers])
 
   useEffect(() => {
+    // under reduced motion the names simply are (rule 21: every animation is off)
+    if (reducedMotion()) {
+      setOpen(false)
+      return
+    }
     setTick(0)
     setOpen(true)
-    const spin = window.setInterval(() => setTick((value) => value + 1), 72)
+    const spin = window.setInterval(() => setTick((value) => value + 1), TICK_MS)
     const stop = window.setTimeout(() => {
       window.clearInterval(spin)
       setOpen(false)
-    }, 820)
+    }, REVEAL_MS)
     return () => {
       window.clearInterval(spin)
       window.clearTimeout(stop)
@@ -33,13 +50,14 @@ export function RoyalRumbleSlotReveal({
   if (!open || names.length === 0) return null
 
   return (
-    <div className="absolute inset-0 z-30 grid grid-cols-3 gap-2 bg-paper sm:gap-3" aria-live="polite">
-      {offers.map((player, index) => {
-        const lockAt = 5 + index * 2
+    <div className="absolute inset-0 z-30 grid grid-cols-3 gap-2 bg-paper sm:gap-3" aria-hidden="true">
+      {offers.map((offer, index) => {
+        // the three lock in a stagger — the last one just inside the budget above
+        const lockAt = 5 + index * 3
         const locked = tick >= lockAt
         const current = locked
-          ? player.nameHe
-          : names[(tick + index * 2) % names.length] ?? player.nameHe
+          ? offer.player.nameHe
+          : names[(tick + index * 2) % names.length] ?? offer.player.nameHe
         return (
           <div
             key={`${signature}-${index}`}

@@ -121,6 +121,33 @@ export const BEATS_TITLE: Beat[] = [
       { a: 'match', script: 'title-00' },
     ],
   },
+  /**
+   * הארכיון נפתח — the title, on film, once (§23.6; owner 25.9.2026: "מאשר את כולם.").
+   *
+   * Fires on the first tick after `t-champions` closes: the parallel result is confirmed
+   * (`t:confirmed`, raised in `t-confirm` before the hug) and the credits are not yet
+   * up. No `at`: a player who closed the hug and walked still gets the film where he
+   * stands. `t:film` is the beat's own guard — the registry flag is raised by the film
+   * on every outcome, but the sim never raises it. A film that cannot play falls
+   * through to `t-credits` with nothing lost.
+   */
+  {
+    id: 't-film',
+    trigger: 'clock',
+    when: { flag: 't:confirmed', none: [{ flag: 't:film' }, { flag: 't:over' }] },
+    do: [{ a: 'flag', flag: 't:film' }, { a: 'cutscene', id: '2000-title' }],
+  },
+  /**
+   * "אין קרדיטים" — the chapter's last line, and its ending, written in the closing
+   * conversation itself (delta 90-C): a player who shut the box before its `then`
+   * finds the beat armed again, because `t:over` is still down.
+   */
+  {
+    id: 't-credits',
+    trigger: 'clock',
+    when: { all: [{ flag: 't:confirmed' }, { flag: 't:film' }], none: [{ flag: 't:over' }] },
+    do: [{ a: 'talk', conversation: 't-close' }],
+  },
 ]
 
 export const CONVERSATIONS_TITLE: Conversation[] = [
@@ -263,14 +290,21 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
       { lines: [{ who: null, text: 'הידיעה מגיעה מהמשחק המקביל. לא שמועה, לא מישהו שחשב ששמע. עכשיו החשבון סגור.' }], then: [{ e: 'flag', flag: 't:confirmed' }, { e: 'goto', node: 't-champions' }] },
     ],
   },
+  /**
+   * (25.9.2026) The hug is the payoff, and the conversation ENDS on it: the archive film
+   * (`t-film`, registry `2000-title`, owner-locked — "מאשר את כולם.") opens on the next
+   * tick, and only then "אין קרדיטים" (`t-credits` → `t-close`). Until this pass the four
+   * branches chained straight into `t-close`; a dialogue cannot open a film, so the seam
+   * had to be a beat, and it sits AFTER the hug and never before it (MASTER §55).
+   */
   {
     id: 't-champions',
     nameHe: null,
     branches: [
-      { when: { flag: 't:with-kobi' }, lines: [{ who: 'קובי', text: 'אלופים. שתים־עשרה שנה.' }, { who: null, text: 'הוא אמר את זה אליך. לא למגרש. אליך. ואז חיבק, וזה היה הרבה יותר ממה שהיה בשמונים ושש, כי עכשיו היית בגובה שלו.' }], then: [{ e: 'sfx', key: 'crowd-goal', level: 0.8 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 8 }, { e: 'remember', who: 'kobi', eventId: 'champions-hug-2000', significance: 'major' }, { e: 'flag', flag: 'life:title:kobi' }, { e: 'goto', node: 't-close' }] },
-      { when: { flag: 't:with-efi' }, lines: [{ who: 'אפי', text: 'אז ככה זה אצלכם.' }, { who: 'פוגי', text: 'ככה.' }, { who: 'אפי', text: 'טוב. יפה.' }, { who: null, text: 'הוא חיבק אותך כמו אחרי הגביע ההוא. שבע שנים. אתה קפצת עליו הפעם.' }], then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 8 }, { e: 'flag', flag: 'life:title:efi' }, { e: 'goto', node: 't-close' }] },
-      { when: { flag: 't:with-gate5' }, lines: [{ who: null, text: 'הבד עלה. אסף לא חייך — אסף אף פעם לא מחייך — אבל הוא הניח יד על הראש שלך רגע.' }], then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'flag', flag: 'life:title:gate5' }, { e: 'goto', node: 't-close' }] },
-      { lines: [{ who: null, text: 'לבד באמצע כולם. אלופים. חיפשת פנים מוכרות ולא מצאת, ואז מצאת אחת, ואז זה לא היה משנה.' }], then: [{ e: 'wellbeing', key: 'loneliness', delta: 3 }, { e: 'goto', node: 't-close' }] },
+      { when: { flag: 't:with-kobi' }, lines: [{ who: 'קובי', text: 'אלופים. שתים־עשרה שנה.' }, { who: null, text: 'הוא אמר את זה אליך. לא למגרש. אליך. ואז חיבק, וזה היה הרבה יותר ממה שהיה בשמונים ושש, כי עכשיו היית בגובה שלו.' }], then: [{ e: 'sfx', key: 'crowd-goal', level: 0.8 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 8 }, { e: 'remember', who: 'kobi', eventId: 'champions-hug-2000', significance: 'major' }, { e: 'flag', flag: 'life:title:kobi' }] },
+      { when: { flag: 't:with-efi' }, lines: [{ who: 'אפי', text: 'אז ככה זה אצלכם.' }, { who: 'פוגי', text: 'ככה.' }, { who: 'אפי', text: 'טוב. יפה.' }, { who: null, text: 'הוא חיבק אותך כמו אחרי הגביע ההוא. שבע שנים. אתה קפצת עליו הפעם.' }], then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 8 }, { e: 'flag', flag: 'life:title:efi' }] },
+      { when: { flag: 't:with-gate5' }, lines: [{ who: null, text: 'הבד עלה. אסף לא חייך — אסף אף פעם לא מחייך — אבל הוא הניח יד על הראש שלך רגע.' }], then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'flag', flag: 'life:title:gate5' }] },
+      { lines: [{ who: null, text: 'לבד באמצע כולם. אלופים. חיפשת פנים מוכרות ולא מצאת, ואז מצאת אחת, ואז זה לא היה משנה.' }], then: [{ e: 'wellbeing', key: 'loneliness', delta: 3 }] },
     ],
   },
   {
@@ -422,6 +456,22 @@ export const BEATS_DOUBLE: Beat[] = [
    * השריקה, ברמת גן, לפני ההליכה הביתה — ו-`d-after` בא אחריו כי הוא מופיע אחריו ברשימה
    * והביטים רצים אחד-אחד.
    */
+  /**
+   * הארכיון נפתח — the shoot-out, on film, once (§23.6; owner 25.9.2026: "מאשר את כולם.").
+   *
+   * `d:over` is raised by "זה נגמר. דאבל." (`d-pens`, the last talk of `double-00`), so the
+   * film is the first thing the terrace does after the payoff and before the scarf and the
+   * walk home — it is listed first and the runner takes the first due beat. The full
+   * summary (`2000-double`) stays a film the match report offers; this is the only one
+   * that opens by itself in the chapter. `d:film` guards the beat (the sim never raises
+   * the registry flag); a film that cannot play hands straight on to `d-after`.
+   */
+  {
+    id: 'd-film',
+    trigger: 'clock',
+    when: { flag: 'd:over', none: [{ flag: 'd:film' }, { flag: 'd:walked' }] },
+    do: [{ a: 'flag', flag: 'd:film' }, { a: 'cutscene', id: '2000-penalties' }],
+  },
   {
     id: 'd-scarf',
     trigger: 'clock',

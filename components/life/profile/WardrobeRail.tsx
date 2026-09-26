@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -9,6 +10,9 @@ import type { WardrobeReading } from '@/lib/life/profile'
 import { artUrl } from '@/lib/life/runtime/art'
 
 import css from './personal.module.css'
+
+/** delta 91 — the shirt he made is drawn from its marks by the bench's own read-only renderer, loaded only when one hangs here */
+const CraftOutputView = dynamic(() => import('@/components/mechanics/craft/CraftOutputView').then((mod) => ({ default: mod.CraftOutputView })), { ssr: false, loading: () => null })
 
 /**
  * הארון שלי — the shirts on a rail, one in your hand, the rest on their hangers (§23–24).
@@ -110,7 +114,11 @@ export function WardrobeRail({ wardrobe }: { wardrobe: WardrobeReading[] }) {
                 aria-label={item.nameHe}
                 className="flex h-[clamp(120px,32dvh,250px)] min-h-tap w-[144px] items-center justify-center"
               >
-                {item.spec ? (
+                {item.craft ? (
+                  <span className="relative block h-full w-full" data-life="wardrobe-crafted" data-worn={item.craftedHe === t('life91m.bag.craftedWorn') ? '1' : '0'}>
+                    <CraftOutputView output={item.craft} className="h-full w-full" />
+                  </span>
+                ) : item.spec ? (
                   <KitShirt spec={item.spec} className="h-full" title={item.nameHe} />
                 ) : (
                   <span className="relative block h-full w-full">
@@ -158,7 +166,11 @@ export function WardrobeRail({ wardrobe }: { wardrobe: WardrobeReading[] }) {
         <p className="mt-1.5 font-body text-[13px] leading-snug text-concrete">
           <bdi>{shirt.noteHe}</bdi>
         </p>
-        {shirt.wornHe.length > 0 ? (
+        {shirt.craft ? (
+          <p className="mt-3 border-t-hair border-red/40 pt-2 font-body text-[12px] leading-snug text-sheet" data-life="wardrobe-crafted-line">
+            <bdi>{shirt.craftedHe}</bdi>
+          </p>
+        ) : shirt.wornHe.length > 0 ? (
           <div className="mt-3 border-t-hair border-red/40 pt-2">
             <p className="font-mono tabular-nums text-[9px] uppercase tracking-[0.14em] text-red">
               <bdi>{t('life.shop.worn')}</bdi>

@@ -32,6 +32,8 @@ export type ActivityMechanic =
   | 'allTimeXI'
   | 'archive'
   | 'myBag'
+  /** the supporter's workbench — cut, paint, spray, place (spec 25.9.2026 §18) */
+  | 'supporterCraft'
 
 export const ACTIVITY_MECHANICS: readonly ActivityMechanic[] = [
   'trivia',
@@ -45,6 +47,7 @@ export const ACTIVITY_MECHANICS: readonly ActivityMechanic[] = [
   'allTimeXI',
   'archive',
   'myBag',
+  'supporterCraft',
 ]
 
 /**
@@ -103,7 +106,22 @@ export type ActivityResult = {
   contentId?: string | null
   /** an opinion the life keeps (a poll pick, an XI) — never graded, never cast */
   answer?: string | null
+  /**
+   * מה נשאר ביד — a thing the player MADE, serialised small (a shirt's marks, a banner's
+   * coverage), never a picture. The life decides whether it is kept, where it is seen
+   * again and who reacts; the mechanic only hands it over (spec 25.9.2026 §23, §44).
+   */
+  output?: { id: string; data?: SerializableOutput }
 }
+
+/** JSON that survives a save: no functions, no dates, no class instances */
+export type SerializableOutput =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly SerializableOutput[]
+  | { readonly [key: string]: SerializableOutput }
 
 /**
  * A gate board opened from inside the life. Present → the board plays one round, draws

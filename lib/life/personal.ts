@@ -1,6 +1,7 @@
 import { t } from '../i18n'
+import { craftedWardrobe } from './callbacks'
 import { CHARACTERS, characterName, portraitFor } from './characters'
-import { CHAPTERS, anchorOwner, chapterOpen, type ChapterDef } from './content/chapters'
+import { CHAPTERS, anchorOwner, chapterFor, chapterOpen, type ChapterDef } from './content/chapters'
 import { eraFor } from './content/era'
 import { partnerId } from './partner'
 import {
@@ -636,7 +637,25 @@ export function wardrobeInOrder(state: LifeState): WardrobeReading[] {
     const at = shirt ? chapterIndex(shirt.from) : -1
     return at < 0 ? Number.MAX_SAFE_INTEGER : at
   }
-  return rows.map((row, i) => ({ row, i, at: when(row.id) })).sort((a, b) => a.at - b.at || a.i - b.i).map(({ row }) => row)
+  const bought = rows.map((row, i) => ({ row, i, at: when(row.id) }))
+  // delta 91 — the shirt he made himself hangs on the same rail, in the chapter it was made
+  const crafted = craftedWardrobe(state).map((garment, i) => ({
+    row: {
+      id: garment.outputId,
+      nameHe: t('life91m.bag.crafted'),
+      sponsorHe: '',
+      yearsHe: String(chapterFor(garment.madeIn)?.year ?? ''),
+      noteHe: garment.worn ? t('life91m.bag.craftedWorn') : t('life91m.bag.craftedOnChair'),
+      art: '',
+      spec: undefined,
+      wornHe: [],
+      craft: garment.data,
+      craftedHe: garment.worn ? t('life91m.bag.craftedWorn') : t('life91m.bag.craftedOnChair'),
+    } satisfies WardrobeReading,
+    i: rows.length + i,
+    at: chapterIndex(garment.madeIn) < 0 ? Number.MAX_SAFE_INTEGER : chapterIndex(garment.madeIn) + 0.5,
+  }))
+  return [...bought, ...crafted].sort((a, b) => a.at - b.at || a.i - b.i).map(({ row }) => row)
 }
 
 /**

@@ -235,6 +235,25 @@ export const BEATS_1993: Beat[] = [
       { a: 'talk', conversation: 'close-1993' },
     ],
   },
+  /**
+   * הארכיון נפתח — the cup final, on film, once (§23.6; owner 25.9.2026: "מאשר את כולם.").
+   *
+   * The hall is a chain of lines (`hall-1993` → `quarters-1993` → `horn-1993` →
+   * `after-1993`) and the payoff is the horn — "הגביע. אדום." — so the film comes AFTER
+   * it, on the pavement the bus brings him back to (`after-1993` travels here with
+   * `after:walk` up). Never before the horn: the boy earns the film by being there
+   * (MASTER §55). `clock` + `at`, not `enter`, so a reload on the corner still gets it;
+   * `93:film` is the beat's own guard because the sim does not raise the registry flag.
+   * A film that cannot play falls through to the walk with nothing lost (rule §23.6).
+   */
+  {
+    id: '93-film',
+    at: 'ussishkin-outside',
+    trigger: 'clock',
+    when: { flag: 'after:walk', none: [{ flag: '93:film' }, { flag: 'walked:home' }] },
+    delayMs: 900,
+    do: [{ a: 'flag', flag: '93:film' }, { a: 'cutscene', id: '1993-cup' }],
+  },
   /** and the night does end: at half past midnight the street is his way home anyway */
   {
     id: 'after-late-1993',

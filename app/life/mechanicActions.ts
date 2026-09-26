@@ -116,7 +116,9 @@ export async function dealLifeRumble(seed: number, window: MechanicWindow): Prom
     slots: d.slots.map((slot) => ({
       ...slot,
       offers: slot.offers.map((offer) =>
-        offer.toYear !== null && offer.toYear >= w.before ? { ...offer, toYear: Math.max(offer.fromYear ?? w.before - 1, w.before - 1) } : offer,
+        offer.player.toYear !== null && offer.player.toYear >= w.before
+          ? { ...offer, player: { ...offer.player, toYear: Math.max(offer.player.fromYear ?? w.before - 1, w.before - 1) } }
+          : offer,
       ),
     })),
   })
@@ -126,7 +128,7 @@ export async function dealLifeRumble(seed: number, window: MechanicWindow): Prom
     .filter(({ seasonLabel }) => Number(seasonLabel.slice(0, 4)) < w.before)
     .map(({ seasonLabel, spec }) => ({ seasonLabel, spec }))
   const dealt = [...draft.slots, ...shuffleDraft.slots].flatMap((slot) => slot.offers)
-  const looks = wardrobe(dealt.map((offer) => ({ key: offer.slug, player: offer.slug, before: w.before })))
+  const looks = wardrobe(dealt.map((offer) => ({ key: offer.player.slug, player: offer.player.slug, before: w.before })))
   return { draft, shuffleDraft, playerCount: royalRumblePlayerCount(), kits, looks }
 }
 

@@ -12,6 +12,7 @@ import {
   todayHe,
 } from '@/lib/life/personal'
 import { skillsReading } from '@/lib/life/profile'
+import { buildSceneContext, sceneContextLines } from '@/lib/life/sceneContext'
 import type { LifeSnapshot } from '@/lib/life/runtime/game'
 
 import { IdentityHero } from './IdentityHero'
@@ -219,6 +220,7 @@ export function LifeIdentitySheet({
                 portrait={portrait}
                 heart={profile.redHeart}
                 compact={false}
+                lines={sceneContextLines(buildSceneContext(state))}
               />
             </div>
             <ul className="shrink-0" aria-label={t('life90h.me.title')}>

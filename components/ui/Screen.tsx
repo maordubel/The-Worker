@@ -59,8 +59,12 @@ export function Screen({
 }) {
   return (
     <div className={`min-h-dvh ${night ? 'bg-ink' : ''} ${stage ? 'stage-screen' : ''}`}>
+      {/* A full-bleed screen is a game whose picture IS the glass (rule 52): it takes the
+          whole window on every width. The 1024px column with its side rules is the
+          reading sheet, and on a 1280px laptop it left 130px of ink either side of a room
+          — a letterbox on a screen whose one rule is "no letterbox" (delta 91). */}
       <div
-        className={`mx-auto flex min-h-dvh max-w-5xl flex-col md:border-x-rule md:border-ink ${
+        className={`flex min-h-dvh flex-col ${fullBleed ? 'w-full' : 'mx-auto max-w-5xl md:border-x-rule md:border-ink'} ${
           night ? 'bg-ink' : ''
         } ${stage ? 'max-md:h-full max-md:min-h-0' : ''}`}
       >

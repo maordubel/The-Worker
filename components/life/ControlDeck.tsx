@@ -344,8 +344,12 @@ export function ControlDeck({
    */
   // 34px of slack under a framed picture, not 20: the run caption hangs above the stick,
   // and a caption that pokes over the hairline is the plate claiming the painting again
-  const padSize = floating ? 'clamp(96px, 30vw, 134px)' : `${clamp(band - 34, 88, 134)}px`
-  const btnSize = floating ? 'clamp(70px, 21vw, 94px)' : `${clamp((band - 30) / 1.5, 64, 94)}px`
+  // vmin, not vw: a phone turned sideways is 844px wide and 390px tall, and a stick sized
+  // off the width was 250px — two thirds of the glass, over the people on the street and
+  // every door on the floor (delta 91, screens probe). Off the short side it is the same
+  // console the same phone gets upright.
+  const padSize = floating ? 'clamp(96px, 30vmin, 134px)' : `${clamp(band - 34, 88, 134)}px`
+  const btnSize = floating ? 'clamp(70px, 21vmin, 94px)' : `${clamp((band - 30) / 1.5, 64, 94)}px`
   const bSize = `calc(${btnSize} * 0.78)`
 
   /**

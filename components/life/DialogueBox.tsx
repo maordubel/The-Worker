@@ -225,7 +225,7 @@ export function DialogueBox({
     // build in a browser. Asserting on rendered Hebrew would tie the harness to the
     // wording of a line, and the wording is content — it is meant to change.
     <div
-      className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 flex items-end px-2.5 pb-2.5 pt-10"
+      className="pointer-events-auto absolute inset-x-0 bottom-0 z-30 flex items-end px-2.5 pb-[max(10px,env(safe-area-inset-bottom))] pt-10"
       style={offsetTop ? { top: offsetTop, alignItems: 'flex-start' } : undefined}
       data-life="dialogue"
     >

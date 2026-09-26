@@ -92,7 +92,7 @@ export function LifeMenu({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="relative z-[60] w-full max-w-[420px] border-rule border-ink bg-sheet outline-none"
+        className="relative z-[60] max-h-full w-full max-w-[420px] overflow-y-auto overscroll-contain border-rule border-ink bg-sheet outline-none"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-label={t('life.menu.title')}

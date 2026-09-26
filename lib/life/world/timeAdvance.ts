@@ -3,6 +3,7 @@ import { beatFlag, beatsAt, type Beat, type BeatAction } from '../content/beats'
 import type { Era } from '../content/era'
 import { GIGS } from '../gigs'
 import { offersNow, startable, type Offer } from '../offers'
+import { TIER_RANK, opportunityTier, resolveLifeOpportunities } from '../opportunityResolver'
 import { placementsAt } from '../schedules'
 import { albumTotals } from '../stickers'
 import type { LifeState, LocationId } from '../types'
@@ -461,8 +462,17 @@ export function sideActions(state: LifeState, era: Era, plan: TimeAdvancePlan): 
   }
 
   const order: Record<FreeTimeTier, number> = { safe: 0, tight: 1, untimed: 2, 'no-fit': 3 }
+  /**
+   * delta 91 — the opportunity resolver (MASTER §5, §51) ranks what fits: a situation a
+   * person asked for (a mission, on a route he holds) before a job, a job before a game; a
+   * mechanic he has just played three times steps back. It chooses only among these rows —
+   * it never adds one — and a row it hides is a row the world should not press.
+   */
+  const resolved = resolveLifeOpportunities({ state, chapter: state.chapter, scene: here })
+  const rank = (row: FreeTimeAction) => (row.kind === 'collection' || row.kind === 'social' ? TIER_RANK.optional : TIER_RANK[opportunityTier(resolved, row.id)])
   return rows
-    .sort((a, b) => order[a.tier] - order[b.tier] || Number(b.location === here) - Number(a.location === here) || (a.totalMinutes ?? 0) - (b.totalMinutes ?? 0))
+    .filter((row) => rank(row) < TIER_RANK.hidden)
+    .sort((a, b) => order[a.tier] - order[b.tier] || rank(a) - rank(b) || Number(b.location === here) - Number(a.location === here) || (a.totalMinutes ?? 0) - (b.totalMinutes ?? 0))
     .slice(0, 4)
 }
 

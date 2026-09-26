@@ -1,8 +1,10 @@
 import type { LifeState } from '../types'
+import type { LifeEvent } from '../events'
+import { careerEntry } from '../work'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation, Say } from './script'
 import { PORTRAIT_TEAM } from './chapterTeam'
 
 /**
@@ -191,8 +193,22 @@ export const ENDINGS_DESK01: Record<string, EndingCard> = {
   },
 }
 
+/** `career:media:organic|assisted|late` — a day flag for the branch the desk opens on; nothing before eighteen */
+function careerEntryEvents(state: LifeState): LifeEvent[] {
+  const entry = careerEntry(state, 'JOURNALIST')
+  return entry ? [{ t: 'flag.raised', flag: `career:media:${entry}` }] : []
+}
+
 export const BEATS_DESK01: Beat[] = [
-  { id: 'j-first', at: 'allenby', trigger: 'enter', when: { none: [{ flag: 'j:first' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'j-first' }] },
+  {
+    id: 'j-first',
+    at: 'allenby',
+    trigger: 'enter',
+    when: { none: [{ flag: 'j:first' }] },
+    delayMs: 700,
+    // delta 91 — how he arrives at the desk is derived from the evidence (MASTER §83), never stored
+    do: [{ a: 'derive', events: careerEntryEvents }, { a: 'talk', conversation: 'j-first' }],
+  },
 ]
 
 // ================================================================ J02 · 2006 ====
@@ -273,6 +289,66 @@ export const BEATS_INTERVIEW: Beat[] = [
 ]
 
 // ================================================================== the words ====
+
+/**
+ * הכניסה לעיתונות (delta 91, MASTER §27, §83) — organic, assisted, or neither, said in
+ * Amit's first sentence. `careerEntry` reads the evidence already in the ledger (a checked
+ * rumour, a written account, papers delivered) and the beat below writes ONE day flag;
+ * the scene is the same scene, the branch is the modifier (MASTER §34).
+ */
+const J_FIRST_LINES: Say[] = [
+  { who: 'שני', text: 'התמונה שלי. המשפט שלך.' },
+  { who: 'פוגי', text: 'חשבתי שאם היית איתנו—' },
+  { who: 'שני', text: 'אז היית יכול לשאול.' },
+  { who: 'עמית', text: 'גם העובדה בפסקה השנייה לא בטוחה.' },
+  { who: 'פוגי', text: 'אז טוב שעוד לא לחצתי פרסם.' },
+]
+const J_FIRST_CHOICES: ChoiceDef[] = [
+  {
+    id: 'verify',
+    text: '(לבדוק את העובדות — ולקבל רשות לתמונה לפני פרסום.)',
+    then: [
+      { e: 'flag', flag: 'j:first' },
+      { e: 'flag', flag: DESK },
+      { e: 'time', minutes: 60 },
+      { e: 'energy', delta: -5 },
+      // `documentation` בתסריט → `communication` במנוע
+      { e: 'skill', skill: 'communication', delta: 3, why: 'שתי עובדות ממקורות, ורשות לתמונה' },
+      { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:first', subjectHe: 'הפרסום הראשון', audience: 'public', delta: 4, noteHe: 'שתי עובדות ממקורות, עדות מסומנת, ודעה בנפרד. התמונה עם קרדיט.' },
+      { e: 'heard', proofId: 'journalism_proof:{chapter}:first' },
+      { e: 'rel', who: 'crowd-shani', axis: 'trust', delta: 3 },
+      { e: 'memory', item: 'clipping', id: 'j-first-verified' },
+      { e: 'toast', text: 'שני: "עכשיו אפשר לתת קרדיט כמו שצריך." — "ומה שלא הצלחתי לאמת נשאר בחוץ."', tone: 'plain' },
+      { e: 'ending', id: 'verified' },
+    ],
+  },
+  {
+    id: 'memoir',
+    text: '(לפרסם זיכרון אישי — בלי תמונה ובלי לטעון שראיתי מה שלא ראיתי.)',
+    then: [
+      { e: 'flag', flag: 'j:first' },
+      { e: 'flag', flag: DESK },
+      { e: 'time', minutes: 45 },
+      { e: 'skill', skill: 'communication', delta: 3, why: 'השאיר את ההבדל בין זיכרון לעובדה בכותרת' },
+      { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:memoir', subjectHe: 'כך אני זוכר', audience: 'public', delta: 1, noteHe: '"כך אני זוכר", ולא "כך היה".' },
+      { e: 'toast', text: 'עמית: "״כך אני זוכר״, לא ״כך היה״." — "השארתי את ההבדל בכותרת."', tone: 'plain' },
+      { e: 'ending', id: 'memoir' },
+    ],
+  },
+  {
+    id: 'rumour',
+    text: '(לפרסם את השמועה כאילו בדקתי.)',
+    then: [
+      { e: 'flag', flag: 'j:first' },
+      { e: 'flag', flag: DESK },
+      { e: 'flag', flag: DESK_UNVERIFIED },
+      { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:rumour', subjectHe: 'השמועה שפרסמתי ב-2002', noteHe: 'פורסם כאילו נבדק. לא נבדק.' },
+      { e: 'repLoss', audience: 'public', delta: -8, why: 'פרסם שמועה כאילו בדק' },
+      { e: 'toast', text: 'עמית: "שאלו על המקור. מה ענית?" — "עוד לא עניתי."', tone: 'red' },
+      { e: 'ending', id: 'rumour' },
+    ],
+  },
+]
 
 export const CONVERSATIONS_CAREER: Conversation[] = [
   {
@@ -453,59 +529,18 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
     nameHe: 'שני',
     branches: [
       {
-        lines: [
-          { who: 'שני', text: 'התמונה שלי. המשפט שלך.' },
-          { who: 'פוגי', text: 'חשבתי שאם היית איתנו—' },
-          { who: 'שני', text: 'אז היית יכול לשאול.' },
-          { who: 'עמית', text: 'גם העובדה בפסקה השנייה לא בטוחה.' },
-          { who: 'פוגי', text: 'אז טוב שעוד לא לחצתי פרסם.' },
-        ],
-        choices: [
-          {
-            id: 'verify',
-            text: '(לבדוק את העובדות — ולקבל רשות לתמונה לפני פרסום.)',
-            then: [
-              { e: 'flag', flag: 'j:first' },
-              { e: 'flag', flag: DESK },
-              { e: 'time', minutes: 60 },
-              { e: 'energy', delta: -5 },
-              // `documentation` בתסריט → `communication` במנוע
-              { e: 'skill', skill: 'communication', delta: 3, why: 'שתי עובדות ממקורות, ורשות לתמונה' },
-              { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:first', subjectHe: 'הפרסום הראשון', audience: 'public', delta: 4, noteHe: 'שתי עובדות ממקורות, עדות מסומנת, ודעה בנפרד. התמונה עם קרדיט.' },
-              { e: 'heard', proofId: 'journalism_proof:{chapter}:first' },
-              { e: 'rel', who: 'crowd-shani', axis: 'trust', delta: 3 },
-              { e: 'memory', item: 'clipping', id: 'j-first-verified' },
-              { e: 'toast', text: 'שני: "עכשיו אפשר לתת קרדיט כמו שצריך." — "ומה שלא הצלחתי לאמת נשאר בחוץ."', tone: 'plain' },
-              { e: 'ending', id: 'verified' },
-            ],
-          },
-          {
-            id: 'memoir',
-            text: '(לפרסם זיכרון אישי — בלי תמונה ובלי לטעון שראיתי מה שלא ראיתי.)',
-            then: [
-              { e: 'flag', flag: 'j:first' },
-              { e: 'flag', flag: DESK },
-              { e: 'time', minutes: 45 },
-              { e: 'skill', skill: 'communication', delta: 3, why: 'השאיר את ההבדל בין זיכרון לעובדה בכותרת' },
-              { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:memoir', subjectHe: 'כך אני זוכר', audience: 'public', delta: 1, noteHe: '"כך אני זוכר", ולא "כך היה".' },
-              { e: 'toast', text: 'עמית: "״כך אני זוכר״, לא ״כך היה״." — "השארתי את ההבדל בכותרת."', tone: 'plain' },
-              { e: 'ending', id: 'memoir' },
-            ],
-          },
-          {
-            id: 'rumour',
-            text: '(לפרסם את השמועה כאילו בדקתי.)',
-            then: [
-              { e: 'flag', flag: 'j:first' },
-              { e: 'flag', flag: DESK },
-              { e: 'flag', flag: DESK_UNVERIFIED },
-              { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:rumour', subjectHe: 'השמועה שפרסמתי ב-2002', noteHe: 'פורסם כאילו נבדק. לא נבדק.' },
-              { e: 'repLoss', audience: 'public', delta: -8, why: 'פרסם שמועה כאילו בדק' },
-              { e: 'toast', text: 'עמית: "שאלו על המקור. מה ענית?" — "עוד לא עניתי."', tone: 'red' },
-              { e: 'ending', id: 'rumour' },
-            ],
-          },
-        ],
+        when: { flag: 'career:media:organic' },
+        lines: [{ who: 'עמית', text: 'אתה ממילא כל הזמן מתקן אותנו. תכתוב.' }, ...J_FIRST_LINES],
+        choices: J_FIRST_CHOICES,
+      },
+      {
+        when: { flag: 'career:media:assisted' },
+        lines: [{ who: 'עמית', text: 'צריך שני טורים. רוצה לנסות?' }, ...J_FIRST_LINES],
+        choices: J_FIRST_CHOICES,
+      },
+      {
+        lines: J_FIRST_LINES,
+        choices: J_FIRST_CHOICES,
       },
     ],
   },

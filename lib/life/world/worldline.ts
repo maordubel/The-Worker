@@ -498,7 +498,7 @@ export function chapterReads(chapter: string, closure: Closure): StaleRead[] {
  * הוא משבצת הטובה של הפרק, ו-`chore:order` הוא התשובה על סדר העבודה באוסישקין
  * (`CHORE_ORDER_FLAG` ב-`gigs.ts`, נכתב ב-`flagValue` מתוך השיחה של הג׳וב).
  */
-export const COMPUTED_FLAG = /^(gig:|life:family:|a6:end-|spot:|book:|life:seen:|pitch:result$|act:|favour:paid:|chore:order$)/
+export const COMPUTED_FLAG = /^(gig:|life:family:|a6:end-|spot:|book:|life:seen:|pitch:result$|act:|favour:paid:|chore:order$|mission:|cb:|tifo:crew$|career:)/
 
 /**
  * `neverRaised` — תנאי שמבקש דגל ש**שום דבר** במקור לא כותב: לא תוכן, לא מנוע, לא שם

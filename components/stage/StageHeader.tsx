@@ -38,7 +38,7 @@ export function StageHeader({
       <Link
         href="/"
         aria-label={t('nav.gates')}
-        className={`grid h-11 w-9 shrink-0 place-items-center font-display text-[22px] leading-none ${night ? 'text-paper' : 'text-ink'} transition-transform duration-press ease-stamp active:scale-[.9] motion-reduce:transition-none`}
+        className={`grid h-11 w-11 shrink-0 place-items-center font-display text-[22px] leading-none ${night ? 'text-paper' : 'text-ink'} transition-transform duration-press ease-stamp active:scale-[.9] motion-reduce:transition-none`}
       >
         {/* in RTL "back" points right — the arrow is the reading direction, not a picture */}
         <span aria-hidden="true">→</span>

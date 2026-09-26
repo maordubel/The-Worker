@@ -1398,3 +1398,23 @@ select {
 /* ============================================================================
    OPENING DOCUMENTARY — end
    ========================================================================== */
+
+/* ============================================================================
+   CRAFT CALLBACKS — begin (LIFE delta 91, 25.9.2026)
+   The thing made comes back: a banner sways over the stand, confetti drifts down
+   the hall. Transform and opacity only; both stop under reduced motion (the
+   component sets `animate-none` there). No colour here — the tokens are on the
+   elements.
+   ========================================================================== */
+@keyframes craft-sway {
+  0%, 100% { transform: rotate(-0.6deg) translateY(0); }
+  50% { transform: rotate(0.6deg) translateY(2px); }
+}
+@keyframes craft-fleck {
+  0% { transform: translateY(-12vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.85; }
+  100% { transform: translateY(110vh) rotate(540deg); opacity: 0.6; }
+}
+/* ============================================================================
+   CRAFT CALLBACKS — end
+   ========================================================================== */

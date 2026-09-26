@@ -7,7 +7,16 @@ import { FitBox } from '@/components/stage/FitBox'
 import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { t as tt } from '@/lib/i18n'
-import type { RoyalRumbleDraft, RoyalRumblePublicPlayer, RoyalRumbleResult } from '@/lib/game/royal-rumble'
+import type { RoyalRumbleDraft, RoyalRumbleOffer, RoyalRumblePublicPlayer, RoyalRumbleResult } from '@/lib/game/royal-rumble'
+import {
+  canPickRoyalRumbleOffer,
+  countPicked,
+  lineupCost,
+  resolvePublicFormation,
+  toSelection,
+  type Position,
+  type RoyalRumblePick,
+} from '@/lib/game/royal-rumble-public'
 import type { KitSpec } from '@/lib/kit/spec'
 import { currentAccount, signInWithGoogle, type Account } from '@/lib/portal/sync'
 import { t } from '@/lib/royal-rumble/i18n'
@@ -20,11 +29,14 @@ import {
   type RoyalRumbleLiveRoom,
   type RoyalRumbleLiveState,
 } from './live-actions'
+import { FormationMini, slotShort } from './RoyalRumbleRun'
 import { RoyalRumbleSlotReveal } from './RoyalRumbleSlotReveal'
 import { RumbleShirt } from './RumbleShirt'
 
 type EraKit = { seasonLabel: string; spec: KitSpec }
 type Phase = 'lobby' | 'draft' | 'waiting' | 'countdown' | 'result'
+
+const POSITION_SHORT: Record<Position, string> = { GK: 'GK', DF: 'DEF', MF: 'MID', FW: 'ATT' }
 
 function money(value: number) { return `€${value}M` }
 /** the man's real shirt, never an empty box (delta 88 — `RumbleShirt.tsx`) */
@@ -47,7 +59,7 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
   const [phase, setPhase] = useState<Phase>('lobby')
   const [activeDraft, setActiveDraft] = useState(draft)
   const [shuffleUsed, setShuffleUsed] = useState(false)
-  const [picks, setPicks] = useState<Array<RoyalRumblePublicPlayer | null>>(() => Array(5).fill(null))
+  const [picks, setPicks] = useState<RoyalRumblePick[]>(() => Array.from({ length: 5 }, () => null))
   const [slot, setSlot] = useState(0)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
@@ -59,11 +71,14 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
   const autoJoin = useRef(false)
   const resolved = useRef(false)
 
-  const selected = picks.filter((p): p is RoyalRumblePublicPlayer => p !== null)
-  const spent = selected.reduce((sum, p) => sum + p.price, 0)
+  const spent = lineupCost(picks)
   const remaining = activeDraft.budget - spent
-  const complete = picks.every(Boolean)
+  const pickedCount = countPicked(picks)
+  const complete = pickedCount === 5
   const currentSlot = activeDraft.slots[slot] ?? activeDraft.slots[0]
+  const formation = resolvePublicFormation(picks)
+  // the same rule as solo (§27, §56): one shuffle, only before the first pick
+  const shuffleOpen = !shuffleUsed && pickedCount === 0 && !busy
 
   const refresh = useCallback(async (target: RoyalRumbleLiveRoom | null) => {
     if (!target) return
@@ -124,25 +139,18 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
     return () => window.clearInterval(timer)
   }, [phase, room, state?.startsAt])
 
-  function cheapestOther(except: number): number {
-    return activeDraft.slots.reduce((sum, s, index) => {
-      if (index === except) return sum
-      const picked = picks[index]
-      return sum + (picked?.price ?? Math.min(...s.offers.map((o) => o.price)))
-    }, 0)
+  // viability is the shared helper's (`lib/game/royal-rumble-public.ts`), not a second copy
+  function canPick(index: number, offer: RoyalRumbleOffer) {
+    return canPickRoyalRumbleOffer(activeDraft, picks, index, offer)
   }
-  function canPick(index: number, player: RoyalRumblePublicPlayer) {
-    const othersSpent = picks.reduce((sum, p, i) => sum + (i === index ? 0 : p?.price ?? 0), 0)
-    return othersSpent + player.price + Math.max(0, cheapestOther(index) - othersSpent) <= activeDraft.budget
-  }
-  function pick(player: RoyalRumblePublicPlayer) {
-    if (!canPick(slot, player)) return
-    setPicks((current) => current.map((item, index) => index === slot ? player : item))
+  function pick(offer: RoyalRumbleOffer) {
+    if (!canPick(slot, offer)) return
+    setPicks((current) => current.map((item, index) => index === slot ? offer : item))
     setSlot((value) => Math.min(4, value + 1))
   }
   function shuffle() {
-    if (shuffleUsed) return
-    setActiveDraft(shuffleDraft); setShuffleUsed(true); setPicks(Array(5).fill(null)); setSlot(0)
+    if (!shuffleOpen) return
+    setActiveDraft(shuffleDraft); setShuffleUsed(true); setPicks(Array.from({ length: 5 }, () => null)); setSlot(0)
   }
   async function create() {
     setBusy(true); setError(false)
@@ -152,9 +160,10 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
     setRoom(next); setCode(next.code); updateUrl(next.code); setPhase('draft'); await refresh(next)
   }
   async function lock() {
-    if (!room || !complete || remaining < 0) return
+    const selection = toSelection(picks)
+    if (!room || !selection || remaining < 0) return
     setBusy(true); setError(false)
-    const next = await lockRoyalRumbleLive(room.id, activeDraft.seed, picks.map((p) => p!.slug))
+    const next = await lockRoyalRumbleLive(room.id, activeDraft.seed, selection)
     setBusy(false)
     if (!next) { setError(true); return }
     setState(next); setPhase(next.status === 'countdown' ? 'countdown' : 'waiting')
@@ -235,12 +244,27 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
     </section>
 
     {/* the five */}
-    <section className="mt-1.5 grid shrink-0 grid-cols-5 gap-1 border-rule border-ink bg-ink p-1 text-paper md:order-2 md:mt-0 md:p-2">{activeDraft.slots.map((s, i) => <button key={`${s.position}-${i}`} type="button" onClick={() => setSlot(i)} aria-pressed={slot === i} className={`min-h-tap border p-1 text-center ${slot === i ? 'border-red bg-red' : 'border-paper/15'}`}><span className="font-mono tabular-nums text-[7px] font-black" dir="ltr">{s.position}</span><span key={picks[i]?.slug ?? 'none'} className={`mt-1 block truncate font-body text-[9px] font-black md:text-[8px] ${picks[i] ? 'animate-fx-pop motion-reduce:animate-none' : ''}`}>{picks[i]?.nameHe ?? '—'}</span></button>)}</section>
+    <section className="mt-1.5 grid shrink-0 grid-cols-[repeat(5,minmax(0,1fr))_44px] gap-1 border-rule border-ink bg-ink p-1 text-paper md:order-2 md:mt-0 md:p-2">
+      {activeDraft.slots.map((s, i) => {
+        const label = slotShort(s.rule)
+        const chosen = picks[i] ?? null
+        return (
+          <button key={`${label}-${i}`} type="button" onClick={() => setSlot(i)} aria-pressed={slot === i} aria-label={chosen ? `${label} · ${chosen.player.nameHe} · ${money(chosen.player.price)}` : `${label} · ${t('vacant')}`} className={`min-h-tap min-w-0 border p-1 text-center ${slot === i ? 'border-red bg-red' : 'border-paper/15'}`}>
+            <span className="font-mono tabular-nums text-[7px] font-black" dir="ltr">{chosen && s.rule.kind === 'flex' ? `${label}·${POSITION_SHORT[chosen.offeredAs]}` : label}</span>
+            <span key={chosen?.player.slug ?? 'none'} className={`mt-1 block truncate font-body text-[9px] font-black md:text-[8px] ${chosen ? 'animate-fx-pop motion-reduce:animate-none' : ''}`}>{chosen?.player.nameHe ?? '—'}</span>
+          </button>
+        )
+      })}
+      {/* the formation preview after FLEX (§43) — the same mini pitch as solo */}
+      <div className="flex min-w-0 flex-col justify-center border border-paper/10 p-0.5" title={formation ? (formation === 'defensive' ? t('formationDefensive') : t('formationCreative')) : t('formationPending')}>
+        {formation ? <FormationMini formation={formation} /> : <span className="text-center font-mono tabular-nums text-[7px] font-black text-paper/35" dir="ltr">1–?–?–1</span>}
+      </div>
+    </section>
 
     {/* chips — shuffle once · the room · the rules (phone); md up keeps its own bar below */}
     <div className="mt-1.5 flex shrink-0 gap-1.5 md:hidden">
-      <button type="button" disabled={shuffleUsed || busy} onClick={(event) => { shuffle(); firePickFxAt(event.currentTarget, { tone: 'sign', haptic: 'tap' }) }} className={`flex min-h-tap flex-1 items-center justify-between gap-2 border-hair px-2.5 font-body text-[11.5px] font-extrabold ${shuffleUsed || busy ? 'border-ink/15 text-ink/35' : 'border-ink bg-paper text-ink'}`}>
-        <span className="truncate">{shuffleUsed ? t('shuffleUsed') : t('shuffleAction')}</span>
+      <button type="button" disabled={!shuffleOpen} onClick={(event) => { shuffle(); firePickFxAt(event.currentTarget, { tone: 'sign', haptic: 'tap' }) }} className={`flex min-h-tap flex-1 items-center justify-between gap-2 border-hair px-2.5 font-body text-[11.5px] font-extrabold ${shuffleOpen ? 'border-ink bg-paper text-ink' : 'border-ink/15 text-ink/35'}`}>
+        <span className="truncate">{shuffleUsed ? t('shuffleUsed') : pickedCount > 0 ? t('shuffleBeforePick') : t('shuffleAction')}</span>
         <span className="shrink-0 font-mono tabular-nums text-[9px] font-black tracking-[0.16em] text-red" dir="ltr">×1</span>
       </button>
       <button type="button" onClick={() => setRoomOpen(true)} className="flex min-h-tap shrink-0 items-center border-hair border-ink bg-sheet px-2.5 font-body text-[11.5px] font-extrabold text-ink">{tt('rumble.live.roomChip')}</button>
@@ -250,25 +274,27 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
     {/* THE FIELD — the three offers, as big as the phone allows */}
     <section className="mt-1.5 flex min-h-0 flex-1 flex-col border-rule border-ink bg-paper p-1.5 text-ink md:mt-0 md:block md:flex-none md:p-5">
       <div className="mb-1 flex shrink-0 items-end justify-between gap-3">
-        <div className="min-w-0"><p className="font-mono tabular-nums text-[8px] font-black tracking-[.18em] text-red" dir="ltr">PICK {slot + 1}/5</p><h3 className="truncate font-display text-[16px] leading-none md:text-[28px]">{t('draftQuestion')}</h3></div>
+        <div className="min-w-0"><p className="font-mono tabular-nums text-[8px] font-black tracking-[.18em] text-red" dir="ltr">PICK {slot + 1}/5 · {slotShort(currentSlot.rule)}</p><h3 className="truncate font-display text-[16px] leading-none md:text-[28px]">{currentSlot.rule.kind === 'flex' ? t('flexQuestion') : t('draftQuestion')}</h3></div>
         <p className="hidden font-display text-[34px] text-red md:block" dir="ltr">{money(remaining)}</p>
       </div>
       <FitBox ratio={1.5} className="min-h-0 flex-1" innerClassName="flex items-stretch">
         <div className="relative flex w-full md:mt-3">
           <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${slot}`} />
-          <div className="grid w-full grid-cols-3 gap-1.5 sm:gap-3">{currentSlot.offers.map((player) => {
-            const active = picks[slot]?.slug === player.slug
-            const disabled = !canPick(slot, player)
+          <div className="grid w-full grid-cols-3 gap-1.5 sm:gap-3">{currentSlot.offers.map((offer) => {
+            const { player, offeredAs } = offer
+            const active = picks[slot]?.player.slug === player.slug
+            const disabled = !canPick(slot, offer)
             return (
               <button
-                key={player.slug}
+                key={`${player.slug}-${offeredAs}`}
                 type="button"
                 disabled={disabled}
                 aria-pressed={active}
-                onClick={(event) => { pick(player); firePickFxAt(event.currentTarget, { label: money(player.price), tone: 'red', haptic: 'lock' }) }}
-                className={`flex h-full min-h-0 flex-col border-rule p-1.5 text-start transition duration-200 active:translate-y-1 md:min-h-[245px] md:p-2 ${active ? 'translate-y-1 border-red bg-red text-paper' : 'border-ink bg-paper text-ink'} ${disabled ? 'opacity-25 grayscale' : ''}`}
+                aria-label={disabled ? t('cardBlocked', { name: player.nameHe, price: money(player.price) }) : t('cardAria', { name: player.nameHe, position: POSITION_SHORT[offeredAs], price: money(player.price) })}
+                onClick={(event) => { pick(offer); firePickFxAt(event.currentTarget, { label: money(player.price), tone: 'red', haptic: 'lock' }) }}
+                className={`flex h-full min-h-tap flex-col border-rule p-1.5 text-start transition duration-200 active:translate-y-1 motion-reduce:transition-none md:min-h-[245px] md:p-2 ${active ? 'translate-y-1 border-red bg-red text-paper' : 'border-ink bg-paper text-ink'} ${disabled ? 'opacity-25 grayscale' : ''}`}
               >
-                <div className="flex shrink-0 items-start justify-between"><span className="font-mono tabular-nums text-[8px] font-black text-red" dir="ltr">{player.position}</span><span className={`font-display text-[20px] leading-none md:text-[28px] ${active ? 'text-paper' : 'text-red'}`} dir="ltr">{money(player.price)}</span></div>
+                <div className="flex shrink-0 items-start justify-between"><span className={`font-mono tabular-nums text-[8px] font-black ${currentSlot.rule.kind === 'flex' ? 'border-hair px-1' : ''} ${active ? 'border-paper/50' : 'border-red text-red'}`} dir="ltr">{POSITION_SHORT[offeredAs]}</span><span className={`font-display text-[20px] leading-none md:text-[28px] ${active ? 'text-paper' : 'text-red'}`} dir="ltr">{money(player.price)}</span></div>
                 <div className="mt-1 flex min-h-[40px] flex-1 items-center justify-center overflow-hidden md:mt-2 md:h-[112px] md:flex-none">
                   <Shirt player={player} kits={kits} className="h-full max-h-[116px] w-auto max-w-[102px] md:h-[116px] md:w-[102px]" />
                 </div>
@@ -280,7 +306,7 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
       </FitBox>
     </section>
 
-    <div className="hidden gap-2 md:order-3 md:grid md:grid-cols-2"><button type="button" disabled={shuffleUsed || busy} onClick={shuffle} className="min-h-tap border-rule border-ink bg-paper px-4 text-start font-display text-[22px] text-ink disabled:opacity-35">{shuffleUsed ? t('shuffleUsed') : t('shuffleAction')}</button><button type="button" disabled={!lockable} onClick={(event) => { firePickFx(event.clientX, event.clientY, { label: t('liveLock'), tone: 'red', big: true, haptic: 'lock' }); void lock() }} className="min-h-tap border-rule border-red bg-red px-4 text-start font-display text-[24px] text-paper disabled:opacity-35">{busy ? t('locking') : t('liveLock')}</button></div>
+    <div className="hidden gap-2 md:order-3 md:grid md:grid-cols-2"><button type="button" disabled={!shuffleOpen} onClick={shuffle} className="min-h-tap border-rule border-ink bg-paper px-4 text-start font-display text-[22px] text-ink disabled:opacity-35">{shuffleUsed ? t('shuffleUsed') : pickedCount > 0 ? t('shuffleBeforePick') : t('shuffleAction')}</button><button type="button" disabled={!lockable} onClick={(event) => { firePickFx(event.clientX, event.clientY, { label: t('liveLock'), tone: 'red', big: true, haptic: 'lock' }); void lock() }} className="min-h-tap border-rule border-red bg-red px-4 text-start font-display text-[24px] text-paper disabled:opacity-35">{busy ? t('locking') : t('liveLock')}</button></div>
     {error && <p className="mt-1.5 shrink-0 border-rule border-red bg-red/10 p-2.5 font-body text-[11px] font-black text-red md:order-4 md:mt-0 md:p-3 md:text-[10px]">{t('liveError')}</p>}
 
     {/* the one primary action on a phone */}
@@ -301,6 +327,8 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
         <p className="font-body text-[13px] leading-relaxed text-ink">{t('liveCreateBody')}</p>
         <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('rulePrice')}</p>
         <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('ruleRange')}</p>
+        <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('flexHint')}</p>
+        <p className="border-s-rule border-red ps-2.5 font-body text-[12px] leading-relaxed text-ink/85">{t('shuffleBeforePick')}</p>
         <p className="font-body text-[11px] text-concrete">{t('budgetOf', { budget: money(activeDraft.budget) })}</p>
       </div>
     </SlideSheet>

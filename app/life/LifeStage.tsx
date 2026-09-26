@@ -32,6 +32,8 @@ import { ShopCard } from '@/components/life/ShopCard'
 import { StageFinale } from '@/components/life/StageFinale'
 import { TotoCard } from '@/components/life/TotoCard'
 import { MechanicSheet } from '@/components/life/MechanicSheet'
+import { CraftCallback } from '@/components/life/CraftCallback'
+import type { LocationId } from '@/lib/life/types'
 import { afterConversation, type ActivityId, type Settlement } from '@/lib/life/activities'
 import { describeMoneyChange } from '@/lib/life/money'
 import type { MechanicCatalog } from '@/lib/mechanics/types'
@@ -310,7 +312,7 @@ export function LifeStage({
   return (
     <div className="relative h-[100dvh] min-h-[100dvh] w-full overflow-hidden bg-ink">
       <div
-        className="life-glass relative h-full w-full overflow-hidden border-y-hair border-ink bg-ink"
+        className="life-glass relative h-full w-full overflow-hidden bg-ink"
         data-decade={decadeOf(hud.year)}
         data-controls={controls ? '1' : '0'}
         style={{ '--ui-scale': uiScale } as React.CSSProperties}
@@ -325,6 +327,12 @@ export function LifeStage({
             className="pointer-events-none absolute inset-x-0 z-10 h-[2px] bg-red/70"
             style={{ top: frame - 1 }}
           />
+        )}
+
+        {/* מה שנראה שוב (delta 91) — the banner painted years ago over the stand, the confetti
+            in the hall: drawn from the kept output, over the painting, under every sheet */}
+        {ready && !cutscene && !opening && hud.place && engineRef.current && (
+          <CraftCallback state={engineRef.current.state} room={hud.scene as LocationId} frame={frame} />
         )}
 
         {!ready && (

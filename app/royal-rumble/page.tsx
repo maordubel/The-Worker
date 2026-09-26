@@ -21,10 +21,11 @@ export default function RoyalRumblePage({ searchParams }: { searchParams: { seed
   const count = royalRumblePlayerCount()
   const kits = homeKits().map(({ seasonLabel, spec }) => ({ seasonLabel, spec }))
   // every man's REAL shirt, by any slug he answers to (delta 88 — "אסור שיהיה שחקן ללא חולצה")
-  const dealt = [...draft.slots, ...shuffleDraft.slots].flatMap((slot) => slot.offers)
+  // V2 wraps every card as `{ player, offeredAs }` (spec §5) — the wardrobe wants the man
+  const dealt = [...draft.slots, ...shuffleDraft.slots].flatMap((slot) => slot.offers.map((offer) => offer.player))
   const rows = new Map<string, { key: string; player: string | ReturnType<typeof allPlayers>[number] }>()
   for (const player of allPlayers()) for (const key of [player.slug, ...player.slugAliases]) rows.set(key, { key, player })
-  for (const offer of dealt) if (!rows.has(offer.slug)) rows.set(offer.slug, { key: offer.slug, player: offer.nameHe })
+  for (const player of dealt) if (!rows.has(player.slug)) rows.set(player.slug, { key: player.slug, player: player.nameHe })
   const looks = wardrobe(rows.values())
   return (
     <Screen title={t('title')} sub={t('sub')} chrome={false} stage>

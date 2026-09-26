@@ -11,7 +11,7 @@ const COPY = {
   opponentBody: 'החמישייה שמולך כבר נקבעה לפני הבחירה הראשונה שלך. אין התאמות, אין רחמים.',
   won: 'נשארת אחרון בזירה.', draw: 'אף חמישייה לא נפלה.', lost: 'הפעם זרקו אותך מהזירה.',
   resultSecret: 'המספרים האמיתיים נשארים בחדר הסגור. המחיר מספר רק באיזה אזור איכות השחקן נמצא — לא כמה הוא באמת חזק.',
-  yourFive: 'החמישייה שלך', theirFive: 'החמישייה שנכנסה מולך', again: 'עוד רויאל ראמבל',
+  yourFive: 'החמישייה שלך', theirFive: 'החמישייה שנכנסה מולך', again: 'עוד קרב',
   heroBody: 'שלושה שמות נכנסים בכל סיבוב. אחד נשאר. בנה חמישייה ב־15 מיליון — בלי לראות לעולם את הציון האמיתי של אף שחקן.',
   budgetOf: 'מתוך {budget}', lockedCount: '{count}/5 נעולים', archiveCount: '{count} במאגר',
   draftQuestion: 'שלושה נכנסים. מי נשאר?', draftPosition: 'עמדה: {position} · המחיר גלוי, האיכות המדויקת לא.',
@@ -44,6 +44,23 @@ const COPY = {
   // delta 87 — the phone stage: a sheet for what used to be desktop-only fine print,
   // so the rules are reachable on a phone too, not only hidden behind `sm:block`.
   stageRulesChip: 'חוקי המשחק', stageRulesTitle: 'איך רויאל ראמבל עובד',
+  // delta 91 — Royal Rumble V2 (spec §41–§43, §50–§54, §72): FLEX, the two formations, the
+  // result line, the shuffle that closes after the first pick, "עוד קרב" and the recent five.
+  flex: 'FLEX', flexQuestion: 'מגן או קשר?', flexDefence: 'מגן', flexMidfield: 'קשר',
+  flexHint: 'הבחירה הזאת סוגרת את האמצע: מגן נותן חמישייה הגנתית, קשר נותן חמישייה יוצרת.',
+  formationDefensive: 'חמישייה הגנתית · 1–2–1–1', formationCreative: 'חמישייה יוצרת · 1–1–2–1',
+  formationDefensiveHeld: 'החמישייה ההגנתית החזיקה.', formationCreativeMade: 'שני הקשרים יצרו את ההבדל.',
+  formationPending: 'הצורה נסגרת אחרי בחירה 4',
+  valuePick: 'המציאה שלך: {name}.', matchHero: 'גיבור הקרב: {name}.', starPick: 'ההשקעה הגדולה החזירה: {name}.',
+  shuffleBeforePick: 'שאפל רק לפני הבחירה הראשונה',
+  recentTitle: 'הקרבות האחרונים', recentEmpty: 'הקרב הראשון שלך. השאר יתווספו כאן.',
+  recentWin: 'ניצחון', recentDraw: 'תיקו', recentLoss: 'הפסד',
+  offeredAsLabel: 'מוצע כ{position}', cardAria: '{name} · {position} · {price}', cardBlocked: '{name} · {price} · לא משאיר כסף להשלים חמישייה',
+  playBuildOurs: '{helper} מרוויח מטר, מרים את הראש ומוצא את {player}.',
+  playBuildTheirs: '{helper} מושך את הלחץ ומשחרר את {player} קדימה.',
+  playShotOurs: '{player} נכנס למצב. היציע כבר עומד.', playShotTheirs: '{player} מול השער. החמישייה שלך נסוגה עד הקו.',
+  playGoalOurs: 'שער! {player} שם את זה בפנים.', playGoalTheirs: 'היריבה כובשת. {player}.',
+  playReset: 'הקצב לא יורד. תיקול באמצע, הכדור שוב חופשי והזירה נפתחת.', playRegroup: 'החמישיות מסתדרות מחדש. אין זמן לנשום במשחק של דקה.',
 } as const
 
 export function t(key: RoyalRumbleMessageKey, vars?: Record<string, string>): string {

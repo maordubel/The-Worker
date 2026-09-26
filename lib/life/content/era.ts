@@ -72,6 +72,7 @@ import {
   goalHall, goalLaces, goalSeed, goalCup99, goalTitle, goalDouble, goalBridge, goalEurope, goalHome, goalTable, goalRegistered, goalKeyNight, goalUp, goalCup10, goalTeddy, goalQualify, goalAnthem, goalCups, goalFive, goalNewHall, goalCrisis, goalAfter, goalReturn, goalLosses, goalTournament, goalQuiet, goalEurocup, goalPlan, goalFinale, goalPeople, goalHousehold, goalPromises, goalDistance, goalArmchair, goalTeam, goalTerrace01, goalTerrace02, goalTerrace03, goalDesk01, goalDesk02, goalInterview, goalFriends, goalLina, goalSuitcase, goalVisit, goalOwner, goalAbroad, goalReunion,
 } from './goals'
 import { HEARD_BEATS, HEARD_CHAPTERS } from './routes'
+import { CALLBACK_BEATS } from './callbackBeats'
 import { SCHEDULE_1986 } from './schedules1986'
 import { SCHEDULE_1990 } from './schedules1990'
 import { SCHEDULE_1991 } from './schedules1991'
@@ -822,6 +823,13 @@ for (const chapter of HEARD_CHAPTERS) {
   const era = ERAS[chapter]
   if (!era) continue
   ERAS[chapter] = { ...era, beats: [...(era.beats ?? []), ...HEARD_BEATS] }
+}
+// ...the world callbacks (delta 91, `content/callbackBeats.ts`): a banner painted years ago is
+// seen over the stand, a friend turns up in the shirt made for him — attached once, to every
+// chapter old enough, behind the chapter's own beats for the same reason as the hearings above
+for (const [chapter, beats] of Object.entries(CALLBACK_BEATS)) {
+  const era = ERAS[chapter]
+  if (era) ERAS[chapter] = { ...era, beats: [...(era.beats ?? []), ...beats] }
 }
 // ...the COMBINATIONS scenes that live inside other chapters (`chapterCombos.ts`), after
 // each chapter's own beats so its opening, its clock and its ending stay its own business

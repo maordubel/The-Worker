@@ -100,7 +100,7 @@ export function LifeHud({ hud }: { hud: HudState }) {
       {/* The cloth hangs UNDER the chip row, on the reading side, never across the
           buttons: a long objective used to lie over "מפה" on a 390px phone. */}
       {hud.objective && (
-        <div className="absolute inset-x-2.5 flex justify-end" style={{ top: 'calc(104px + env(safe-area-inset-top))' }}>
+        <div className="absolute inset-x-2.5 flex justify-end" style={{ top: 'calc(112px + env(safe-area-inset-top))' }}>
           <Cloth className="max-w-[78%]" data-life="objective-cloth">
             <span data-life="objective">
               <bdi>{hud.objective}</bdi>

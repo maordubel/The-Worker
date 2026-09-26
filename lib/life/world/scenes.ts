@@ -794,6 +794,12 @@ const SCENES: SceneDef[] = [
         verb: 'look',
         labelHe: 'התיק שלי',
       },
+      /**
+       * חולצה משלי (delta 91) — Kobi's old white shirt on the chair, a marker and a note from
+       * Rachel (`act-fan-shirt` → the bench, `fan-shirt-first`). Beside the bag on the chair,
+       * 1990–1995: the years a boy makes one because the shop's costs more than the tin holds.
+       */
+      { id: 'fan-shirt', era: actEra('fan-shirt'), x: 0.24, y: 0.9, w: 0.06, act: 'act-fan-shirt', verb: 'take', labelHe: 'החולצה הלבנה על הכיסא' },
       { id: 'tin-a4', era: 'a4-shirt', x: 0.45, y: 0.92, w: 0.14, act: 'tin-a4', verb: 'take', labelHe: 'הפחית מתחת למיטה' },
       { id: 'shirt-a5', era: 'a5-first', x: 0.63, y: 0.9, w: 0.1, act: 'shirt-a5', verb: 'take', labelHe: 'החולצה על הכיסא', priority: 3 },
       /**
@@ -1799,6 +1805,14 @@ const SCENES: SceneDef[] = [
       { id: 'd10-roster', era: '2010-teddy', x: 0.2, y: 0.84, w: 0.08, act: 'd10-roster', verb: 'take', labelHe: 'הרשימה של אולי, על הגג של הרכב', when: { all: [{ flagIs: { flag: 'd10:mode', value: 'venue' } }], none: [{ flag: 'd10:seated' }, { flag: 'd10:plan' }] }, priority: 5 },
       { id: 'd10-pay', era: '2010-teddy', x: 0.32, y: 0.83, w: 0.08, act: 'd10-pay', verb: 'hold', labelHe: 'לתת לאולי — כרטיס ודלק', when: { all: [{ flag: 'd10:seated' }], none: [{ flag: 'd10:paid' }, { flag: 'd10:plan' }] }, priority: 5 },
       { id: 'd10-promise', era: '2010-teddy', x: 0.62, y: 0.82, w: 0.08, act: 'd10-promise', verb: 'hold', labelHe: 'עמית — איך חוזרים', when: { all: [{ flag: 'd10:paid' }], none: [{ flag: 'd10:plan' }] }, priority: 5 },
+      /**
+       * delta 91 — two things Ofir brings to the street. The white shirt of his brother's,
+       * folded on the fence beside where he stands (`act-friend-shirt`, in the chapters he
+       * stands here); and Asaf's rolled stencil against the kiosk wall (`act-wall-stencil`).
+       * Both are the CREATOR/ULTRAS slices' asks (`content/performedMissions.ts`).
+       */
+      { id: 'friend-shirt', era: ['1993-cup', '1996-army', '1998-laces', '1999-cup'], x: 0.6, y: 0.83, w: 0.05, act: 'act-friend-shirt', verb: 'take', labelHe: 'החולצה שאופיר הביא, על הגדר' },
+      { id: 'wall-stencil', era: ['1998-laces', '1999-cup', '2000-title', '2000-double'], x: 0.2, y: 0.83, w: 0.06, act: 'act-wall-stencil', verb: 'take', labelHe: 'הקרטון המגולגל ליד הקיוסק' },
       // The pole the whole near side of the street hangs off — stickers, a scrap of a
       // torn notice, and the one place a child would stop and read something.
       { id: 'pole', x: 0.82, y: 0.82, w: 0.05, act: 'street-pole', verb: 'look', labelHe: 'העמוד' },
@@ -3814,6 +3828,8 @@ const SCENES: SceneDef[] = [
       { id: 'h1-door', era: '1997-basket', x: 0.3, y: 0.88, w: 0.06, act: 'h1-stay', verb: 'enter', labelHe: 'לאולם — להישאר', when: { all: [{ flag: 'h1:crates-carried' }, { notFlag: 'h1:decided' }] }, priority: 5 },
       { id: 'a3-queue', era: 'a3-hall', x: 0.36, y: 0.9, w: 0.1, act: 'a3-queue', verb: 'enter', labelHe: 'לתור, אחרי אפי', when: { all: [{ flag: 'knows:hall' }, { notFlag: 'entry:granted' }] }, priority: 4 },
 
+      // delta 91 — the stack of old papers and the scissors by the hall door (`act-hall-confetti`, Efi's ask)
+      { id: 'hall-confetti', era: ['1991', '1993-galil'], x: 0.4, y: 0.9, w: 0.05, act: 'act-hall-confetti', verb: 'take', labelHe: 'ערימת העיתונים ליד הדלת' },
       { id: 'queue', era: '1991', x: 0.25, y: 0.9, w: 0.12, act: 'uss-queue', verb: 'look', labelHe: 'התור' },
     ],
     exits: [
@@ -4350,6 +4366,14 @@ const SCENES: SceneDef[] = [
        * the rest. It belongs in `ussishkin-outside`/`ussishkin-hall` on the day the three
        * 2007 chapters are written, and it is one row when they are.
        */
+      /**
+       * delta 91 — the cloth on the concrete and two unopened tins (`act-banner-letters`: Asaf's
+       * "הצבע הגיע רק עכשיו"), between the gig's edge of the cloth (0.36) and the group at the
+       * turnstiles (0.62); and in the two terrace chapters the tifo night Erez hands over
+       * (`act-tifo-night`) — the coordinate-and-craft mission whose evidence is `leadership_proof`.
+       */
+      { id: 'banner-letters', era: ['1998-laces', '1999-basket'], x: 0.48, y: 0.9, w: 0.06, act: 'act-banner-letters', verb: 'take', labelHe: 'הבד על הרצפה, ופחי הצבע' },
+      { id: 'tifo-night', era: ['2001-terrace', '2012-terrace'], x: 0.46, y: 0.9, w: 0.06, act: 'act-tifo-night', verb: 'take', labelHe: 'הבד המגולגל, ושלושה אנשים' },
       {
         id: 'proof-lead',
         era: ['1998-laces', '1999-basket'],

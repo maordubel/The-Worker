@@ -175,7 +175,8 @@ export function cutsceneCard(scene: HistoricalCutscene, anchor: HistoricalAnchor
 }
 
 /**
- * The whole registry. Six entries, and only one of them may open by itself (§23.6).
+ * The whole registry. Six entries; four of them may open by themselves (§23.6) — 1986, and
+ * the three the owner locked on 25.9.2026 ("מאשר את כולם.") — each at exactly one trigger.
  *
  * `dFykPEa8NAE` is the full televised summary of the match rather than the goal on its
  * own, and that was Maor's call: an eight-year-old on that terrace did not see a clip of
@@ -184,11 +185,22 @@ export function cutsceneCard(scene: HistoricalCutscene, anchor: HistoricalAnchor
  * it, in the world, with the child in it.
  */
 export const CUTSCENES: Record<string, HistoricalCutscene> = {
+  /**
+   * 25.9.2026 — three films were put to the owner with one question ("watch each once
+   * and say which to lock; until then only 1986 opens by itself") and he answered all of
+   * them in three words: **"מאשר את כולם."** That is the owner, on the specific asset, in
+   * his own words — the form §23.6 asks for — so the three are `locked_verified` payoffs
+   * and each one has exactly one trigger, after the chapter's own payoff and never before
+   * it (MASTER §55: big moments suspend systems; the film is the eruption AFTER the boy
+   * has done the work, not instead of it).
+   */
   '1993-cup': {
-    id: '1993-cup', chapter: '1993-cup', status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', trigger: null,
-    provenanceHe: 'מזהה בלי בדיקה מתועדת ובלי שורת films בארכיון. מחכה לצפייה חיה לפני כל שימוש.',
+    id: '1993-cup', chapter: '1993-cup', status: 'locked_verified', role: 'CINEMATIC_PAYOFF', trigger: 'beat:93-film',
+    provenanceHe: 'אושר בידי מאור ב-25.9.2026 אחרי צפייה, על המזהה הזה: "מאשר את כולם." (עד אז: מזהה בלי בדיקה מתועדת ובלי שורת films בארכיון). נפתח פעם אחת, על המדרכה בפינת אוסישקין, אחרי הצפירה והגביע — לא לפניהם.',
     youtubeId: 'I5FHT27dRgY', titleHe: 'גמר הגביע — ארכיון', subtitleHe: 'אחרי שפוגי כבר יודע מה קרה',
-    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=I5FHT27dRgY', completionFlag: 'cutscene:1993-cup', watchedFlag: 'watched:1993-cup', nextObjectiveHe: 'הלילה עוד לא נגמר.', fallbackHe: 'הארכיון לא נפתח. הזיכרון המאויר ממשיך.',
+    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=I5FHT27dRgY', completionFlag: 'cutscene:1993-cup', watchedFlag: 'watched:1993-cup',
+    // the same sentence `objective1993` prints once `after:walk` is up and the film is behind him
+    nextObjectiveHe: 'למי מספרים קודם: האוטובוס חזרה, אופיר בקיוסק, או האור במטבח.', fallbackHe: 'הארכיון לא נפתח. הזיכרון המאויר ממשיך.',
   },
   '1999-basket-context': {
     id: '1999-basket-context', chapter: '1999-basket', status: 'context_only', role: 'BACKGROUND_CONTEXT', trigger: null,
@@ -197,10 +209,12 @@ export const CUTSCENES: Record<string, HistoricalCutscene> = {
     sourceTitle: 'תיעוד תקופה — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=GFRF2t7jXXE', completionFlag: 'cutscene:1999-basket-context', watchedFlag: 'watched:1999-basket-context', nextObjectiveHe: 'חזרה לתל אביב.', fallbackHe: 'התיעוד לא נפתח. הסיפור ממשיך בלי להמציא צילום שלא קיים.',
   },
   '2000-title': {
-    id: '2000-title', chapter: '2000-title', status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', trigger: null,
-    provenanceHe: 'מזהה בלי בדיקה מתועדת. לארכיון של 13.5.2000 אין שורת films.',
+    id: '2000-title', chapter: '2000-title', status: 'locked_verified', role: 'CINEMATIC_PAYOFF', trigger: 'beat:t-film',
+    provenanceHe: 'אושר בידי מאור ב-25.9.2026 אחרי צפייה, על המזהה הזה: "מאשר את כולם." (עד אז: מזהה בלי בדיקה מתועדת; לארכיון של 13.5.2000 אין שורת films). נפתח פעם אחת בשכונת התקווה, אחרי שהידיעה מהמשחק המקביל אושרה והחיבוק כבר קרה (t-champions) — ורק אז "אין קרדיטים" (t-close).',
     youtubeId: 'pdQLDp_-Xgo', titleHe: 'האליפות — ארכיון', subtitleHe: 'רק אחרי שהאישור הגיע',
-    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=pdQLDp_-Xgo', completionFlag: 'cutscene:2000-title', watchedFlag: 'watched:2000-title', nextObjectiveHe: 'עוד ארבעה ימים גמר גביע.', fallbackHe: 'הארכיון לא נפתח. החגיגה המאוירת ממשיכה.',
+    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=pdQLDp_-Xgo', completionFlag: 'cutscene:2000-title', watchedFlag: 'watched:2000-title',
+    // the chapter prints no objective in the ground after `t:confirmed`; this is the line `t-close` speaks next
+    nextObjectiveHe: 'עוד ארבעה ימים גמר גביע.', fallbackHe: 'הארכיון לא נפתח. החגיגה המאוירת ממשיכה.',
   },
   '2000-double': {
     id: '2000-double', chapter: '2000-double', status: 'verified_optional', role: 'ARCHIVE_FOOTAGE', trigger: null,
@@ -208,11 +222,22 @@ export const CUTSCENES: Record<string, HistoricalCutscene> = {
     youtubeId: 'RO14bGFcD-Q', titleHe: 'גמר הגביע — ארכיון', subtitleHe: 'הדאבל',
     sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=RO14bGFcD-Q', completionFlag: 'cutscene:2000-double', watchedFlag: 'watched:2000-double', nextObjectiveHe: 'הדרך הביתה.', fallbackHe: 'הארכיון לא נפתח. הגמר והדרך הביתה ממשיכים במשחק.',
   },
+  /**
+   * Two ids for the shoot-out, and only one plays. The archive row `film-00-pens` of
+   * 17.5.2000 carries `RvyReKDwCC0`; the owner watched THIS id (`EGlBnUQN5AQ`) and approved
+   * it, so this is the one that opens — he approved what he watched, not a row he did not.
+   * Both are kept here in words so the next reader is not asked to trust. The full summary
+   * (`2000-double`, `RO14bGFcD-Q`) stays `verified_optional` from the match report: the
+   * shoot-out beat (`d-film`) is the only automatic film in the chapter, so nobody is ever
+   * shown two films back to back.
+   */
   '2000-penalties': {
-    id: '2000-penalties', chapter: '2000-double', status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', trigger: null,
-    provenanceHe: 'סותר את הארכיון: film-00-pens של 17.5.2000 הוא RvyReKDwCC0, ולא המזהה הזה. לא בשימוש עד הכרעה.',
+    id: '2000-penalties', chapter: '2000-double', status: 'locked_verified', role: 'CINEMATIC_PAYOFF', trigger: 'beat:d-film',
+    provenanceHe: 'אושר בידי מאור ב-25.9.2026 אחרי צפייה, על המזהה הזה (EGlBnUQN5AQ): "מאשר את כולם." שורת הארכיון film-00-pens של 17.5.2000 נושאת RvyReKDwCC0 — שני המזהים נשמרים, זה שנצפה ואושר הוא שמתנגן. נפתח פעם אחת ברמת גן, אחרי "זה נגמר. דאבל." (d-pens) ולפני ההליכה הביתה (d-after); תקציר המשחק המלא (2000-double) נשאר אופציונלי ולא אוטומטי.',
     youtubeId: 'EGlBnUQN5AQ', titleHe: 'הפנדלים — ארכיון', subtitleHe: 'רגע ממוקד מתוך הגמר',
-    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=EGlBnUQN5AQ', completionFlag: 'cutscene:2000-penalties', watchedFlag: 'watched:2000-penalties', nextObjectiveHe: 'לנשום. ואז הביתה.', fallbackHe: 'הקטע לא נפתח. רגע הפנדלים המאויר ממשיך.',
+    sourceTitle: 'ארכיון וידאו — YouTube', sourceUrl: 'https://www.youtube.com/watch?v=EGlBnUQN5AQ', completionFlag: 'cutscene:2000-penalties', watchedFlag: 'watched:2000-penalties',
+    // `objectiveDouble` prints nothing once `d:over` is up — the walk home (`d-after`) opens by itself right after
+    nextObjectiveHe: 'לנשום. ואז הביתה.', fallbackHe: 'הקטע לא נפתח. רגע הפנדלים המאויר ממשיך.',
   },
   '1986-championship': {
     id: '1986-championship',

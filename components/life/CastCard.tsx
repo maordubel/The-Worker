@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
 
 import { t } from '@/lib/i18n'
@@ -35,13 +34,14 @@ export function CastCard({ cast, onClose }: { cast: NonNullable<LifeBusEvents['c
       <p className="font-display text-[12px] uppercase tracking-[0.24em] text-red">{t('life.cast.kicker')}</p>
 
       <div className="relative my-3 min-h-0 w-[min(52vw,260px)] flex-1">
-        <Image
+        {/* A plain <img>, not next/image: the optimiser re-encodes the cut-out (rules 61, 69)
+            and on a phone it handed back a 63px-wide version of a 201px figure — measured by
+            the screens probe (delta 91). The bytes on disk are the bytes that were scanned. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={`/life/art/${cast.art}.webp`}
           alt={cast.nameHe}
-          fill
-          sizes="(max-width: 640px) 52vw, 260px"
-          className="object-contain object-bottom motion-safe:animate-[cast-land_620ms_cubic-bezier(.2,.8,.2,1)_both]"
-          priority
+          className="absolute inset-0 h-full w-full object-contain object-bottom motion-safe:animate-[cast-land_620ms_cubic-bezier(.2,.8,.2,1)_both]"
         />
       </div>
 

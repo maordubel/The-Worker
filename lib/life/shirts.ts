@@ -475,6 +475,17 @@ export function isNewThisChapter(shirt: Shirt, chapter: string): boolean {
 export const wornFlag = (id: string, chapter: string) => `own:worn:${id}:${chapter}`
 
 /**
+ * החולצה שהכין בעצמו — עליו (delta 91). Not a `SHIRTS` row: a crafted shirt is a
+ * `CraftOutput` kept under `pugi:fan-shirt` (`state.outputs`), and this flag says he put it
+ * on. `own:`, so it survives every day and year like the shirts he bought. Read by the bag's
+ * wardrobe (`lib/life/callbacks.ts craftedWardrobe`) and the "אני" lines; the world's figure
+ * is a cut of a painted board and does not redress.
+ */
+export const WEAR_CRAFTED_FLAG = 'own:wear:fan-shirt'
+
+export const wearsCrafted = (state: LifeState): boolean => state.flags[WEAR_CRAFTED_FLAG] === true
+
+/**
  * איזו חולצה היית לובש — the newest one you own that already existed by this chapter.
  *
  * Nobody in 1999 puts on the shirt he queued for in 1985 to go to a cup final; he puts on

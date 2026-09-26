@@ -1,6 +1,8 @@
 import type { ActivityMechanic, ActivityResult, MechanicCatalog, MechanicWindow } from '../mechanics/types'
 import { levelForAge } from '../mechanics/types'
 import { chapterFor, playableChapters } from './content/chapters'
+import { missionForActivity } from './content/performedMissions'
+import { missionEvents } from './missions'
 import { pickCrowd } from './crowd'
 import type { LifeEvent } from './events'
 import { gigFlagOf, workDoneFlag } from './workFlags'
@@ -37,7 +39,10 @@ import type {
  *    the whole anti-grind rule, and it is two flags.
  *  · **Stage A does not move.** The 1984–86 chapters are the tested economy of the shirt
  *    (rules 68, 72, `tests/life-wallet.test.ts`): favours there pay no money and the Toto
- *    slip keeps its two shekels an answer. Owner's decision, 21.9.2026.
+ *    slip keeps its two shekels an answer. Owner's decision, 21.9.2026. (25.9.2026, owner:
+ *    "לאפשר להרוויח יותר" — A4 grew in its own fiction, not here: Rafi's eight crates and a
+ *    paid run upstairs written in `chapterStageA.ts` on the `favour:paid:a4-shirt` flag.
+ *    No activity in Stage A pays a favour; the wallet test holds the new number.)
  *  · **Nothing here can take money away.** No stake, no fine, no price to enter. So no
  *    activity can put a boy below a ticket he could afford before it — the softlock the
  *    file asks about cannot get worse, and `tests/life-activities.test.ts` says so for
@@ -61,6 +66,13 @@ export type ActivityId =
   | 'bedroom-bag'
   | 'lounge-xi'
   | 'kitchen-archive'
+  // --- delta 91 — Performed Missions (`content/performedMissions.ts` says what each one MEANS)
+  | 'hall-confetti'
+  | 'banner-letters'
+  | 'wall-stencil'
+  | 'tifo-night'
+  | 'fan-shirt'
+  | 'friend-shirt'
 
 export type Slot = 'work' | 'favour' | 'none'
 
@@ -366,6 +378,102 @@ export const ACTIVITIES: readonly ActivityDef[] = [
     until: CHILDHOOD_END,
     redHeart: { key: 'historyMemory', delta: 2 },
   },
+  /**
+   * סדנת האוהדים (delta 91) — six rows, one mechanic. The bench is `supporterCraft`; WHICH
+   * job is on it comes from the mission the activity plays as in this chapter
+   * (`missionForActivity` → the recipe id rides in `MechanicRequest.contentId`). A favour
+   * here pays nothing: nobody hands a boy money for painting letters. The skill the doing
+   * teaches is on the mission; what the room says afterwards is `act-<id>-after`.
+   */
+  {
+    id: 'hall-confetti',
+    kind: 'supporterCraft',
+    where: 'ussishkin-outside',
+    hostHe: 'אפי',
+    titleHe: 'לחתוך קונפטי',
+    slot: 'favour',
+    pay: null,
+    minutes: 20,
+    energy: 4,
+    from: '1991',
+    until: '1993-galil',
+    emptyHe: 'אפי מסתכל על הערימה: "נגמרו העיתונים. מחר יביאו עוד."',
+  },
+  {
+    id: 'banner-letters',
+    kind: 'supporterCraft',
+    where: 'gate5',
+    hostHe: 'אסף',
+    titleHe: 'לעזור עם השלט',
+    slot: 'favour',
+    pay: null,
+    minutes: 25,
+    energy: 6,
+    from: '1998-laces',
+    until: '1999-basket',
+    emptyHe: 'אסף מנער פח ריק: "הצבע לא הגיע. תחזור כשיהיה."',
+    rel: { who: 'asaf', axis: 'trust', delta: 3 },
+  },
+  {
+    id: 'wall-stencil',
+    kind: 'supporterCraft',
+    where: 'street',
+    hostHe: 'אופיר',
+    titleHe: 'להכין סטנסיל',
+    slot: 'favour',
+    pay: null,
+    minutes: 30,
+    energy: 6,
+    from: '1998-laces',
+    until: '2000-double',
+    emptyHe: 'אופיר מגלגל את הקרטון בחזרה: "לא היום. יש מישהו על הקיר."',
+    rel: { who: 'ofir', axis: 'sharedHistory', delta: 2 },
+  },
+  {
+    id: 'tifo-night',
+    kind: 'supporterCraft',
+    where: 'gate5',
+    hostHe: 'ארז',
+    titleHe: 'ערב תפאורה',
+    slot: 'favour',
+    pay: null,
+    minutes: 60,
+    energy: 14,
+    from: '2001-terrace',
+    until: '2012-terrace',
+    emptyHe: 'ארז מסתכל על השעון: "הבד עוד לא כאן. בלי בד אין ערב."',
+    rel: { who: 'crowd-erez', axis: 'trust', delta: 4 },
+  },
+  {
+    id: 'fan-shirt',
+    kind: 'supporterCraft',
+    where: 'bedroom',
+    hostHe: 'החדר שלך',
+    titleHe: 'חולצה משלי',
+    slot: 'none',
+    pay: null,
+    minutes: 30,
+    energy: 4,
+    from: '1990',
+    until: '1995-sinai',
+    emptyHe: 'הטוש יבש. בפעם הבאה, עם טוש חדש.',
+    redHeart: { key: 'footballLove', delta: 1 },
+  },
+  {
+    id: 'friend-shirt',
+    kind: 'supporterCraft',
+    where: 'street',
+    hostHe: 'אופיר',
+    titleHe: 'תכין גם לי',
+    slot: 'favour',
+    pay: null,
+    minutes: 35,
+    energy: 5,
+    from: '1993-cup',
+    until: '1999-cup',
+    emptyHe: 'אופיר מושך בכתפיים: "שכחתי את החולצה בבית. מחר."',
+    rel: { who: 'ofir', axis: 'bond', delta: 3 },
+  },
 ]
 
 export const ACTIVITY: Record<ActivityId, ActivityDef> = Object.fromEntries(
@@ -454,6 +562,13 @@ export const ACTIVITY_CONVERSATIONS: Record<ActivityId, { ask: string | null; af
   'bedroom-bag': { ask: 'act-bedroom-bag', after: null },
   'lounge-xi': { ask: 'act-lounge-xi', after: 'act-lounge-xi-after' },
   'kitchen-archive': { ask: 'act-kitchen-archive', after: 'act-kitchen-archive-after' },
+  // delta 91 — the asks are the missions' PERSON + NEED + PLACE + TIME (`content/dialogueMissions.ts`)
+  'hall-confetti': { ask: 'act-hall-confetti', after: 'act-hall-confetti-after' },
+  'banner-letters': { ask: 'act-banner-letters', after: 'act-banner-letters-after' },
+  'wall-stencil': { ask: 'act-wall-stencil', after: 'act-wall-stencil-after' },
+  'tifo-night': { ask: 'act-tifo-night', after: 'act-tifo-night-after' },
+  'fan-shirt': { ask: 'act-fan-shirt', after: 'act-fan-shirt-after' },
+  'friend-shirt': { ask: 'act-friend-shirt', after: 'act-friend-shirt-after' },
 }
 
 /** the conversation a room plays when the player comes back from an activity — '' when there is none */
@@ -577,6 +692,14 @@ export function settleActivity(state: LifeState, id: ActivityId, result: Activit
     if (said === 'owe') events.push({ t: 'flag.raised', flag: 'owe:neighbour' })
   }
 
+  /**
+   * המשימה שהפעילות היא (delta 91, MASTER §22): base effects → mission → proof → output →
+   * callback flags, in ONE settlement. `missionEvents` is idempotent on `mission:<id>:done`,
+   * so a board that answers twice or a log folded twice leaves one mission, one output, one
+   * claim. Walking away (`completed: false`) reaches none of it.
+   */
+  if (result.completed) events.push(...missionEvents(state, id, result, tier))
+
   events.push(
     { t: 'flag.set', flag: tierFlag(id), value: tier },
     { t: 'flag.set', flag: eraFlag(id), value: eraOf(chapter) },
@@ -658,7 +781,16 @@ export function pickContent(state: LifeState, id: ActivityId, catalog: MechanicC
   const def = ACTIVITY[id]
   const window = windowFor(state, def)
   const kind = def.kind
-  if (kind === 'chore' || kind === 'route' || kind === 'myBag') return { window, contentId: null }
+  if (kind === 'supporterCraft') {
+    // the workbench needs no archive row: the recipe comes from the mission, never from a deal
+    // (`MechanicRequest.contentId` carries the recipe id — the bench's contract, delta 91)
+    const mission = missionForActivity(id, state.chapter)
+    if (!mission || mission.mechanic.kind !== 'supporterCraft') return null
+    return { window, contentId: mission.mechanic.recipe }
+  }
+  if (kind === 'chore' || kind === 'route' || kind === 'myBag') {
+    return { window, contentId: null }
+  }
   if (kind === 'poll') {
     const answered = state.activities[id]?.seen ?? []
     const next = (catalog.items.poll ?? []).find((item) => !answered.includes(item.id))

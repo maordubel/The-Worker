@@ -196,6 +196,8 @@ export type LifeRuntime = {
     /** what the balloon's tail is told about a speaker, and the state behind that answer */
     anchor(who: string | null): { anchor: number | null; speaking: string | null; view: number; names: string[] } | null
     where(): unknown
+    /** the framing on the glass — camera, painting, child, doors — in canvas pixels (screens probe) */
+    view(): unknown
     /** the last free-time landing report (§33) — null before any advance */
     landing(): unknown
   }
@@ -427,6 +429,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       anchor: (who: string | null) =>
         game.scene.isActive(WorldScene.KEY) ? worldScene()?.anchorDebug(who) ?? null : null,
       landing: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.lastLanding ?? null : null),
+      view: () => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.view() ?? null : null),
       where: () => {
         const passage = game.scene.getScene(PassageScene.KEY) as unknown as PassageScene | null
         if (passage && game.scene.isActive(PassageScene.KEY)) return passage.where()

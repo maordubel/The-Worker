@@ -52,7 +52,7 @@ export function Chip({
   className?: string
 } & Record<string, unknown>) {
   return (
-    <button type="button" onClick={onClick} className={`group flex min-h-tap items-start ${className}`} {...rest}>
+    <button type="button" onClick={onClick} className={`group flex min-h-tap min-w-tap items-start justify-center ${className}`} {...rest}>
       <span
         className={`relative mt-2 block border-rule transition-colors duration-press motion-reduce:transition-none ${
           live ? 'border-ink bg-red text-sheet' : 'border-ink bg-sheet text-ink group-active:bg-red group-active:text-sheet'

@@ -60,6 +60,9 @@ const IMMEDIATE: ReadonlySet<LifeEvent['t']> = new Set([
   // Recognition must not be lost to a tab closing on the trailing edge of an autosave.
   'achievement.earned',
   'reputation.heard',
+  // delta 91 — a mission done and a thing made are not lost to a tab closing on the trailing edge
+  'mission.completed',
+  'output.kept',
 ])
 
 export class LifeEngine {

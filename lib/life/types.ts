@@ -35,6 +35,8 @@
  * replaced it — a line that says `trait: 'footballAffinity'` moves the Red Heart.
  */
 
+import type { CraftOutput } from '../game/craft/types'
+
 /**
  * Every place the game can put you. The list grows with the decades.
  *
@@ -713,6 +715,69 @@ export type LifeState = {
    * `activity.completed` rows, so the log still says what happened and this only counts it.
    */
   activities: Record<string, ActivityRecord>
+
+  // --- Performed Missions (delta 91, 25.9.2026) — additive; an old save folds to blanks ---
+  /**
+   * עבודה כהקשר, לא כמערכת (MASTER §24). Four optional fields and nothing else: everything
+   * else about work is DERIVED (`lib/life/work.ts`). A save from before folds to `{}` and
+   * `resolveWorkProfile` infers the rest from routes and evidence.
+   */
+  work: WorkState
+  /**
+   * עייפות מכניקה (MASTER §47) — the last mechanics played and the last mission kinds done,
+   * newest last, capped at `RECENT_CAP`. Folded from `activity.completed` / `mission.completed`
+   * rows, so an old log grows them on read; never written directly.
+   */
+  recentMechanics: string[]
+  recentMissionKinds: string[]
+  /** משימות שבוצעו — one row per mission per chapter (`mission.completed`), idempotent */
+  missions: MissionRecord[]
+  /**
+   * מה שנשאר ביד — a crafted thing the world shows again (MASTER §44): keyed by the
+   * mission's `outputId` (`stand:banner`, `pugi:fan-shirt`); the latest kept wins.
+   */
+  outputs: Record<string, KeptOutput>
+}
+
+export type ProfessionId = 'media' | 'organization' | 'business' | 'creative' | 'technical' | 'international' | 'general'
+
+export type WorkState = {
+  profession?: ProfessionId
+  mode?: 'regular' | 'freelance' | 'selfEmployed' | 'betweenJobs'
+  responsibility?: 'help' | 'own' | 'coordinate' | 'lead'
+  workplaceId?: string
+}
+
+export type MissionRecord = {
+  id: string
+  chapter: string
+  year: number
+  /** the tier the room reacted to */
+  tier: string
+  /** the mission's kind — `supporterCraft:banner`, `microAssign` — what fatigue reads */
+  kind: string
+}
+
+/**
+ * A kept output is small by construction: `data` is a normalised `CraftOutput` (0..1
+ * coordinates, three decimals, capped marks and points — `lib/life/callbacks.ts` clamps it
+ * before the event is written), never a picture and never a pointer trail.
+ */
+export type KeptOutput = {
+  outputId: string
+  missionId: string
+  chapter: string
+  year: number
+  /** the engine's own measure of the target, 0..1 — the world picks a tier off it */
+  measure: number
+  data: CraftOutput
+}
+
+/** the fatigue window — "last 5–8" (MASTER §47) */
+export const RECENT_CAP = 8
+
+export function blankWork(): WorkState {
+  return {}
 }
 
 /**

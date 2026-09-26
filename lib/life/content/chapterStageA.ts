@@ -1193,7 +1193,34 @@ export const CONVERSATIONS_A4: Conversation[] = [
            * (`chore:story:crates-85`), and the pay is counted per crate. The agreement is
            * what this choice says; the hour is what the hands do after it.
            */
-          { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'proof', kind: 'paid_shift', proofId: 'paid_shift:{chapter}', subjectHe: 'הארגזים של רפי', noteHe: 'שעה של ארגזים, ושכר שנספר ביד' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'minigame', id: 'chore:story:crates-85' }] },
+          { id: 'work', text: '"יש משהו לעשות? לסדר, לסחוב?"', when: { none: [{ flag: 'a4:worked' }] }, noteHe: 'כבר סידרת לו את הארגזים היום.', then: [{ e: 'flag', flag: 'a4:worked' }, { e: 'proof', kind: 'paid_shift', proofId: 'paid_shift:{chapter}', subjectHe: 'הארגזים של רפי', noteHe: 'שעה וחצי של ארגזים, ושכר שנספר ביד' }, { e: 'personality', key: 'reliability', delta: 2 }, { e: 'minigame', id: 'chore:story:crates-85' }] },
+          /**
+           * הטובה — המשלוח למעלה (owner, 25.9.2026: "לאפשר להרוויח יותר").
+           *
+           * The chapter's own afternoon reached 29 ₪ against a 30 ₪ shirt, so the shirt hung
+           * on the week's street job. This is the second money slot the anti-grind rule
+           * allows (`favour:paid:<chapter>`, `activities.ts`): one paid favour, after the
+           * crates, paid by the neighbour and not by Rafi — a run upstairs is not a shift.
+           * Once a chapter, and only for a boy who already carried the crates: Rafi does not
+           * send a stranger up with the milk.
+           */
+          {
+            id: 'favour',
+            text: '"יש עוד משהו? אני מהיר."',
+            when: { flag: 'a4:worked', none: [{ flag: 'a4:favour' }] },
+            noteHe: 'רפי כבר שלח אותך למעלה היום.',
+            then: [
+              { e: 'flag', flag: 'a4:favour' },
+              { e: 'flag', flag: 'favour:paid:a4-shirt' },
+              { e: 'time', minutes: 15 },
+              { e: 'energy', delta: -6 },
+              { e: 'money', agorot: 400, why: 'המשלוח למעלה' },
+              { e: 'personality', key: 'reliability', delta: 1 },
+              { e: 'rel', who: 'rafi', axis: 'trust', delta: 2 },
+              { e: 'sfx', key: 'coins', level: 0.5 },
+              { e: 'toast', text: '"למעלה, שלישית. חלב ולחם. היא משלמת, לא אני." היא שילמה לך בדלת — 4 ₪ — ואמרה: "תגיד לו שהחלב של אתמול היה חמוץ."', tone: 'plain' },
+            ],
+          },
           /**
            * המעטפה מול החולצה — the whole economy of this chapter in one row of choices.
            *

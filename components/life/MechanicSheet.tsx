@@ -51,6 +51,7 @@ const BOARDS: Partial<Record<ActivityKind, ComponentType<ActivityBoardProps>>> =
   poll: lazyBoard(() => import('./mechanics/LifePoll')),
   allTimeXI: lazyBoard(() => import('./mechanics/LifeXI')),
   archive: lazyBoard(() => import('./mechanics/LifeArchive')),
+  supporterCraft: lazyBoard(() => import('./mechanics/LifeCraft')),
 }
 
 /** the one button of the pre-launch card, in the verb of what it is */

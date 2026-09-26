@@ -501,10 +501,7 @@ export class WorldScene extends Phaser.Scene {
     // repaint, once the viewport is real. (It was invisible on the older, softer art and
     // obvious the moment a clean sky arrived.)
     this.repaintGrade?.()
-    // The camera may never wander further than the thin margin above and below the
-    // painting: the extension strips exist for the edge case, not as scenery.
-    const margin = Math.min(this.ext, this.H * WorldScene.MARGIN)
-    this.cameras.main.setBounds(0, -margin, this.W, this.H + 2 * margin)
+    this.boundCamera()
     this.cameras.main.startFollow(this.player, true, 0.09, 0.09)
     this.followPlayer()
     /**
@@ -1316,8 +1313,35 @@ export class WorldScene extends Phaser.Scene {
     cam.setFollowOffset(-lead + driftX, (0.68 - 0.5) * view + driftY)
   }
 
+  /**
+   * עד לאן המצלמה רשאית לנדוד — the thin margin above and below the painting, and on a
+   * phone held upright a little more of the ground.
+   *
+   * The margin is the diorama's dark edge: the extension strips exist for that edge case,
+   * not as scenery. But with the painting's height filling the glass (`frameWorld`) the
+   * world was exactly one screen tall, the camera could not move vertically at all, and
+   * the 68% that `followPlayer` asks for was a number nothing could honour: a child on
+   * the near line stood at 85–88% of the glass — under the deck, with the prompt strip
+   * across his shins, on every phone (delta 91, measured by `screens-probe`). So in
+   * portrait the bottom bound dips into the ground strip by up to 14% of the view: the
+   * camera can lift him clear of the console, and what that reveals under his feet is
+   * the strip the console covers anyway. Landscape and desktop keep the tight margin —
+   * the legend there is a thin line, and the smear would show.
+   */
+  private boundCamera() {
+    const cam = this.cameras.main
+    const margin = Math.min(this.ext, this.H * WorldScene.MARGIN)
+    const view = cam.height / (cam.zoom || 1)
+    // ...and a phone turned sideways (a glass shorter than 0.6 of its width) is a
+    // console over the floor as well; a laptop at 1280×800 is 0.625 and keeps the margin.
+    const console = cam.height > cam.width || cam.height / cam.width < 0.6
+    const dip = console ? Math.max(0, Math.min(this.ext - margin, view * 0.14)) : 0
+    cam.setBounds(0, -margin, this.W, this.H + 2 * margin + dip)
+  }
+
   private onResize() {
     this.frameWorld()
+    this.boundCamera()
     this.followPlayer()
   }
 
@@ -1348,6 +1372,7 @@ export class WorldScene extends Phaser.Scene {
     if (view.width === this.framedW && view.height === this.framedH) return
     if (view.width <= 0 || view.height <= 0) return
     this.frameWorld()
+    this.boundCamera()
     this.followPlayer()
   }
 
@@ -4770,6 +4795,57 @@ export class WorldScene extends Phaser.Scene {
       push(`~${walker.def.id}`, walker.image.texture.key.replace('art-', ''), walker.image.y, walker.image.displayHeight)
     }
     return rows.sort((a, b) => b.h - a.h)
+  }
+
+  /**
+   * מה הזכוכית מראה — the framing, measured (delta 91, the screens pass).
+   *
+   * Every number here is in CANVAS pixels (the drawing buffer, `scale.gameSize`), and the
+   * probe divides by `canvas.width / canvas.clientWidth` to get CSS pixels. The painting's
+   * rectangle is the ORIGINAL painting, not its sky/ground strips, so "the strip is showing"
+   * and "the ink is showing" can be told apart: above `painting.top` there is sky strip for
+   * `strip.sky` more pixels and ink beyond that. The child's rectangle is his display box
+   * with `feet` at `groundY`. Doors are their zones, on the glass, so a probe can ask
+   * whether the deck is lying on one.
+   */
+  view() {
+    const cam = this.cameras.main
+    const zoom = cam.zoom || 1
+    const half = { x: cam.width / 2, y: cam.height / 2 }
+    const sx = (x: number) => (x - cam.scrollX - half.x) * zoom + half.x + cam.x
+    const sy = (y: number) => (y - cam.scrollY - half.y) * zoom + half.y + cam.y
+    const sky = this.textures.exists(`art-${extensionKeys(this.art).sky}`) ? this.textures.get(`art-${extensionKeys(this.art).sky}`).getSourceImage() : null
+    const ground = this.textures.exists(`art-${extensionKeys(this.art).ground}`) ? this.textures.get(`art-${extensionKeys(this.art).ground}`).getSourceImage() : null
+    const skyH = sky && typeof sky.height === 'number' ? (sky.height / Math.max(1, sky.width)) * this.W : 0
+    const groundH = ground && typeof ground.height === 'number' ? (ground.height / Math.max(1, ground.width)) * this.W : 0
+    const band = this.band()
+    const rect = (x: number, y: number, w: number, h: number) => ({
+      x: Number(sx(x).toFixed(1)),
+      y: Number(sy(y).toFixed(1)),
+      w: Number((w * zoom).toFixed(1)),
+      h: Number((h * zoom).toFixed(1)),
+    })
+    return {
+      art: this.art,
+      world: { w: this.W, h: this.H },
+      canvas: { w: cam.width, h: cam.height },
+      zoom: Number(zoom.toFixed(4)),
+      scroll: { x: Number(cam.scrollX.toFixed(1)), y: Number(cam.scrollY.toFixed(1)) },
+      painting: rect(0, 0, this.W, this.H),
+      /** the strips continue the painting above and below, in canvas pixels */
+      strip: { sky: Number((skyH * zoom).toFixed(1)), ground: Number((groundH * zoom).toFixed(1)) },
+      floor: { far: Number(sy(band.far * this.H).toFixed(1)), near: Number(sy(band.near * this.H).toFixed(1)) },
+      player: {
+        ...rect(this.player.x - this.player.displayWidth / 2, this.groundY - this.player.displayHeight, this.player.displayWidth, this.player.displayHeight),
+        feet: Number(sy(this.groundY).toFixed(1)),
+        visible: this.player.visible,
+      },
+      doors: this.exits.map((exit) => ({ id: exit.id, ...rect(exit.x * this.W, exit.y * this.H, exit.w * this.W, exit.h * this.H) })),
+      people: this.actors.filter((actor) => actor.image.visible).map((actor) => ({
+        id: actor.def.id,
+        ...rect(actor.image.x - actor.image.displayWidth / 2, actor.image.y - actor.image.displayHeight, actor.image.displayWidth, actor.image.displayHeight),
+      })),
+    }
   }
 
   /** Developer-only: where the child is, as the doors see him — for the probes. */

@@ -146,8 +146,10 @@ export function offerEntries(chapter: string): readonly Entry[] {
 function kindFor(source: Source): OfferKind {
   if (source.gig) return kindOf(source.gig)
   const def = source.activity
-  if (!def || def.slot === 'none' || !def.pay) return 'play'
-  return def.slot === 'favour' ? 'favour' : 'work'
+  if (!def || def.slot === 'none') return 'play'
+  // a favour that pays nothing is still a favour (delta 91: painting Asaf's letters is not "משחק")
+  if (def.slot === 'favour') return 'favour'
+  return def.pay ? 'work' : 'play'
 }
 
 function statusFor(state: LifeState, source: Source, kind: OfferKind, payTop: number): OfferStatus {
@@ -157,7 +159,8 @@ function statusFor(state: LifeState, source: Source, kind: OfferKind, payTop: nu
     if (isPaid(source.gig) && state.flags[workDoneFlag(chapter)]) return 'taken'
     return payTop > 0 || kind === 'play' ? 'open' : 'unpaid'
   }
-  if (kind === 'favour' && (isStageA(chapter) || state.flags[favourFlag(chapter)])) return 'unpaid'
+  // a favour that never paid cannot be "unpaid this time"
+  if (kind === 'favour' && payTop > 0 && (isStageA(chapter) || state.flags[favourFlag(chapter)])) return 'unpaid'
   return 'open'
 }
 

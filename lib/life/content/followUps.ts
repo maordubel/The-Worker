@@ -5,6 +5,7 @@ import { FOLLOW_UPS_1991 } from './followUps1991'
 import { FOLLOW_UPS_ADULT } from './followUpsAdult'
 import { FOLLOW_UPS_STAGE_A } from './followUpsStageA'
 import { FOLLOW_UPS_STAGE_B } from './followUpsStageB'
+import { FOLLOW_UPS_MISSIONS } from './callbackBeats'
 
 /**
  * השיחה השנייה — authored follow-ups for a conversation the player comes back to
@@ -163,5 +164,6 @@ export const FOLLOW_UPS: readonly FollowUp[] = [
   ...FOLLOW_UPS_1991,
   ...FOLLOW_UPS_STAGE_B,
   ...FOLLOW_UPS_ADULT,
+  ...FOLLOW_UPS_MISSIONS,
   ...STRANGERS,
 ]

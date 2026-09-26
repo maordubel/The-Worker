@@ -272,13 +272,20 @@ export const STORY_CHORES: Record<string, StoryChore> = {
     toastHe: (done, target) =>
       done >= target ? 'חמישה בקבוקים. מלוכלכים. שווים.' : done > 0 ? `${done} בקבוקים ביד. השאר התגלגלו מתחת למכונית.` : 'הבקבוקים נשארו ליד הפח. מישהו אחר ייקח אותם.',
   },
-  /** A4 · the crates behind Rafi's counter, one at a time to the back door — a shekel each */
+  /**
+   * A4 · the crates behind Rafi's counter, one at a time to the back door — a shekel each.
+   *
+   * Eight, not five (owner, 25.9.2026 — "לאפשר להרוויח יותר"): the afternoon's own work
+   * used to reach 29 ₪ against a 30 ₪ shirt, so the shirt needed the week's street job too.
+   * Rafi has always had eight crates by the wall (`crates-kiosk`: "שמונה ארגזים ליד הקיר");
+   * A4 now counts all of them. `seconds` grew with the pile so the pace per crate is unchanged.
+   */
   'crates-85': {
     id: 'crates-85',
     where: 'kiosk',
     drop: { x: 0.9, y: 0.9 },
     labelHe: 'הארגזים של רפי',
-    shape: { mode: 'carry', art: 'propCrate', target: 5, seconds: 45, hintHe: 'ארגז אחד כל פעם, עד הדלת האחורית. רפי סופר. כפתור — להפסיק.' },
+    shape: { mode: 'carry', art: 'propCrate', target: 8, seconds: 70, hintHe: 'ארגז אחד כל פעם, עד הדלת האחורית. רפי סופר. כפתור — להפסיק.' },
     returnSpawn: 'start',
     finish: (done, target) => {
       const carried = Math.max(0, Math.min(done, target))
@@ -292,7 +299,7 @@ export const STORY_CHORES: Record<string, StoryChore> = {
       return events
     },
     toastHe: (done, target) =>
-      done >= target ? 'שעה של ארגזים, אחד־אחד. 5 ₪ ובקבוק קולה שלא ביקשת.' : done > 0 ? `${done} ארגזים, ${done} ₪. את השאר רפי יסחוב מחר.` : 'רפי הרים גבה. "אז למה שאלת?"',
+      done >= target ? 'שעה וחצי של ארגזים, אחד־אחד. 8 ₪ ובקבוק קולה שלא ביקשת.' : done > 0 ? `${done} ארגזים, ${done} ₪. את השאר רפי יסחוב מחר.` : 'רפי הרים גבה. "אז למה שאלת?"',
   },
 
   'queue-99': {

@@ -6,10 +6,14 @@ import {
   blankRelationship,
   blankReputation,
   blankSkills,
+  blankWork,
   clamp,
+  RECENT_CAP,
   RELATIONSHIP_AXES,
   TRAIT_ROUTE,
+  type KeptOutput,
   type ProofRecord,
+  type WorkState,
   type ReputationAudience,
   type SkillId,
   type BondId,
@@ -209,6 +213,21 @@ export type LifeEvent =
   /** HOW he was there — folds into attended/missed as well, so old readers agree */
   | { t: 'presence.recorded'; anchorId: string; mode: PresenceMode }
   | { t: 'laces.marked'; response: LacesResponse }
+  // --- delta 91, Performed Missions (25.9.2026) — every row below folds to a no-op on an older build
+  /**
+   * משימה שבוצעה — the authored situation around an activity, done (`settleActivity`, one
+   * settlement: base effects → mission → proof → output → callback flags). Idempotent on
+   * `id` + `chapter`, so a log folded twice is one mission.
+   */
+  | { t: 'mission.completed'; id: string; chapter: string; year: number; tier: string; kind: string }
+  /**
+   * מה שנשאר ביד — a crafted thing, kept under its world key (`stand:banner`). Marks in 0..1,
+   * capped and rounded BEFORE this row is written (`keepOutput` in `lib/life/callbacks.ts`);
+   * the reducer trusts it. The latest under a key replaces the one before.
+   */
+  | { t: 'output.kept'; output: KeptOutput }
+  /** עבודה — a change of profession, mode, responsibility or workplace; a patch, never a replace */
+  | { t: 'work.changed'; patch: Partial<WorkState> }
 
 /** A day is 24×60. The clock wraps rather than running past midnight into nonsense. */
 export const MINUTES_IN_DAY = 24 * 60
@@ -355,6 +374,11 @@ export function emptyState(identity: PlayerIdentity, year: number): LifeState {
     presence: {},
     laces: null,
     activities: {},
+    work: blankWork(),
+    recentMechanics: [],
+    recentMissionKinds: [],
+    missions: [],
+    outputs: {},
   }
 }
 
@@ -436,6 +460,11 @@ function personFlags(flags: Record<string, boolean | string | number>): Record<s
       kept[flag] = value
   }
   return kept
+}
+
+/** the last `RECENT_CAP` of a list with `next` appended — newest last */
+function recent(list: readonly string[], next: string): string[] {
+  return [...list, next].slice(-RECENT_CAP)
 }
 
 export function apply(state: LifeState, event: LifeEvent): LifeState {
@@ -889,7 +918,34 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
             answers,
           },
         },
+        // the fatigue window (MASTER §47) — derived from the same row, so an old log grows it on read
+        recentMechanics: recent(state.recentMechanics ?? [], event.mechanic),
       }
+    }
+
+    // --- delta 91, Performed Missions ------------------------------------------------
+
+    case 'mission.completed': {
+      const missions = state.missions ?? []
+      if (missions.some((row) => row.id === event.id && row.chapter === event.chapter)) return state
+      return {
+        ...state,
+        missions: [...missions, { id: event.id, chapter: event.chapter, year: event.year, tier: event.tier, kind: event.kind }],
+        recentMissionKinds: recent(state.recentMissionKinds ?? [], event.kind),
+      }
+    }
+
+    case 'output.kept':
+      return { ...state, outputs: { ...(state.outputs ?? {}), [event.output.outputId]: event.output } }
+
+    case 'work.changed': {
+      const patch: Partial<WorkState> = {}
+      // an explicit `undefined` in a patch clears nothing; only a value moves a field
+      if (event.patch.profession !== undefined) patch.profession = event.patch.profession
+      if (event.patch.mode !== undefined) patch.mode = event.patch.mode
+      if (event.patch.responsibility !== undefined) patch.responsibility = event.patch.responsibility
+      if (event.patch.workplaceId !== undefined) patch.workplaceId = event.patch.workplaceId
+      return { ...state, work: { ...(state.work ?? blankWork()), ...patch } }
     }
 
     case 'dialogue.choice_made':

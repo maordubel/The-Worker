@@ -1,10 +1,13 @@
 'use server'
 
-import { playRoyalRumbleHeadToHead, type RoyalRumbleResult } from '@/lib/game/royal-rumble'
+import { playRoyalRumbleHeadToHead, type RoyalRumbleResult, type RoyalRumbleSelection } from '@/lib/game/royal-rumble'
+import { ROYAL_RUMBLE_DRAFT_VERSION, parseLivePicks, parseSelection, toLivePicks } from '@/lib/game/royal-rumble-public'
 import { createClient } from '@/lib/supabase/server'
 
 export type RoyalRumbleLiveRoom = { id: string; code: string; matchSeed: number }
 export type RoyalRumbleLiveState = RoyalRumbleLiveRoom & {
+  /** the draft generation the room's picks are read under (spec §73) */
+  draftVersion: typeof ROYAL_RUMBLE_DRAFT_VERSION
   status: 'waiting' | 'drafting' | 'countdown' | 'playing' | 'finished' | 'expired'
   isHost: boolean
   opponentJoined: boolean
@@ -20,10 +23,9 @@ function seed(value: unknown): number | null {
   const out = Math.trunc(value)
   return out >= 0 && out <= 0xffffffff ? out >>> 0 : null
 }
-function picks(value: unknown): string[] | null {
-  if (!Array.isArray(value) || value.length !== 5) return null
-  const out = value.filter((item): item is string => typeof item === 'string' && item.length > 0)
-  return out.length === 5 && new Set(out).size === 5 ? out : null
+/** the V2 wire form of a room's picks — the parsers live with the public helpers (§73) */
+function picks(value: unknown): RoyalRumbleSelection[] | null {
+  return parseLivePicks(value)
 }
 function liveStatus(value: unknown): RoyalRumbleLiveState['status'] {
   return value === 'waiting' || value === 'drafting' || value === 'countdown' || value === 'playing' || value === 'finished' || value === 'expired' ? value : 'expired'
@@ -57,15 +59,16 @@ export async function getRoyalRumbleLiveState(roomId: string): Promise<RoyalRumb
   if (error) return null
   const row = one<any>(data)
   if (!row) return null
-  return { id: row.room_id, code: row.code, matchSeed: Number(row.match_seed) >>> 0, status: liveStatus(row.status), isHost: Boolean(row.is_host), opponentJoined: Boolean(row.opponent_joined), youReady: Boolean(row.you_ready), opponentReady: Boolean(row.opponent_ready), startsAt: row.starts_at, expiresAt: row.expires_at }
+  return { id: row.room_id, code: row.code, matchSeed: Number(row.match_seed) >>> 0, draftVersion: ROYAL_RUMBLE_DRAFT_VERSION, status: liveStatus(row.status), isHost: Boolean(row.is_host), opponentJoined: Boolean(row.opponent_joined), youReady: Boolean(row.you_ready), opponentReady: Boolean(row.opponent_ready), startsAt: row.starts_at, expiresAt: row.expires_at }
 }
 
-export async function lockRoyalRumbleLive(roomId: string, offerSeed: number, slugs: string[]): Promise<RoyalRumbleLiveState | null> {
-  if (slugs.length !== 5 || new Set(slugs).size !== 5) return null
+export async function lockRoyalRumbleLive(roomId: string, offerSeed: number, selection: RoyalRumbleSelection[]): Promise<RoyalRumbleLiveState | null> {
+  const payload = parseSelection(selection)
+  if (!payload) return null
   const supabase = createClient() as any
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return null
-  const { error } = await supabase.rpc('worker_rr_lock', { p_room_id: roomId, p_offer_seed: offerSeed >>> 0, p_picks: slugs })
+  const { error } = await supabase.rpc('worker_rr_lock', { p_room_id: roomId, p_offer_seed: offerSeed >>> 0, p_picks: toLivePicks(payload) })
   if (error) return null
   return getRoyalRumbleLiveState(roomId)
 }

@@ -34,6 +34,10 @@ import heStageLife90e from '@/messages/he.stage.life90e.json'
 import heStageLife90f from '@/messages/he.stage.life90f.json'
 import heStageLife90g from '@/messages/he.stage.life90g.json'
 import heStageLife90h from '@/messages/he.stage.life90h.json'
+// delta 91 — the supporter's workbench (`craft.*`): one file for one mechanic, so the bench
+// and the missions that open it never edit the same catalogue.
+import heStageCraft from '@/messages/he.stage.craft.json'
+import heStageLife91m from '@/messages/he.stage.life91m.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -103,6 +107,8 @@ export const CATALOGUE_FILES = {
   heStageLife90f,
   heStageLife90g,
   heStageLife90h,
+  heStageCraft,
+  heStageLife91m,
 } as const
 
 const catalogue = {
@@ -140,6 +146,8 @@ const catalogue = {
   ...heStageLife90f,
   ...heStageLife90g,
   ...heStageLife90h,
+  ...heStageCraft,
+  ...heStageLife91m,
 }
 
 export type MessageKey = keyof typeof catalogue
