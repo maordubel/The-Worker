@@ -97,8 +97,9 @@ describe('פעילויות — the table', () => {
 
   it('names no gate number and no gate route — the life knows mechanics, not the wall', () => {
     for (const path of ['lib/life/activities.ts', 'lib/mechanics/types.ts', 'lib/mechanics/registry.ts', 'lib/life/content/dialogueActivities.ts']) {
-      // `gate7` as a reputation AUDIENCE is the life's own word for the away terrace (rule 79), never shown
-      const text = readFileSync(path, 'utf8').replace(/audience: 'gate7'/g, '')
+      // `gate7` as a reputation AUDIENCE is the life's own word for the away terrace (rule 79), never shown;
+      // `gate5` as a ROOM is Bloomfield's own curva under the stand (a `LocationId`, rule 9), not a gate on the wall
+      const text = readFileSync(path, 'utf8').replace(/audience: 'gate7'/g, '').replace(/where: 'gate5'/g, '')
       expect(/gate\s?\d|שער\s?\d|'\/(trivia|lineup|kits|memory|goal|polls|xi|derby|archive|timeline)/.test(text), path).toBe(false)
     }
   })

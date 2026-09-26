@@ -135,8 +135,11 @@ describe('גרפית וטכנית — the console is hardware, and it is measura
   it('sizes off the GLASS when the painting is full-bleed', () => {
     // since rule 52 the deck is handed `height: 0`, so every clamp off the band answered
     // with its own minimum — the smallest console this file draws, on the biggest screen
-    expect(DECK).toContain('clamp(96px, 30vw, 134px)')
-    expect(DECK).toContain('clamp(70px, 21vw, 94px)')
+    // …and off the SHORT side of it (delta 91): a phone turned sideways is 844 wide and
+    // 390 tall, and a stick at 30vw was two thirds of that glass, over the street.
+    expect(DECK).toContain('clamp(96px, 30vmin, 134px)')
+    expect(DECK).toContain('clamp(70px, 21vmin, 94px)')
+    expect(DECK).not.toMatch(/\d+vw/)
   })
 
   it('keeps the home indicator clear', () => {

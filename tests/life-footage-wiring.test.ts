@@ -49,16 +49,21 @@ function triggers(): Row[] {
 }
 
 /**
- * The matrix, as of delta 90. A change here is a design decision (a film wired, retired or
+ * The matrix, as of delta 91. A change here is a design decision (a film wired, retired or
  * verified) and must be made on purpose — which is what a fixture is for.
+ *
+ * 25.9.2026: the three candidates were watched by the owner and locked in one sentence —
+ * **"מאשר את כולם."** — so each is a `CINEMATIC_PAYOFF` with exactly one beat trigger,
+ * placed after its chapter's payoff (the horn, the hug, the shoot-out). The full 2000
+ * summary stays optional: the double never shows two films back to back.
  */
 const MATRIX: Record<string, { status: string; role: string; auto: boolean; triggeredBy: string[] }> = {
   '1986-championship': { status: 'locked_verified', role: 'CINEMATIC_PAYOFF', auto: true, triggeredBy: ['1986/era'] },
-  '1993-cup': { status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', auto: false, triggeredBy: [] },
+  '1993-cup': { status: 'locked_verified', role: 'CINEMATIC_PAYOFF', auto: true, triggeredBy: ['1993-cup/beat:93-film'] },
   '1999-basket-context': { status: 'context_only', role: 'BACKGROUND_CONTEXT', auto: false, triggeredBy: [] },
-  '2000-title': { status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', auto: false, triggeredBy: [] },
+  '2000-title': { status: 'locked_verified', role: 'CINEMATIC_PAYOFF', auto: true, triggeredBy: ['2000-title/beat:t-film'] },
   '2000-double': { status: 'verified_optional', role: 'ARCHIVE_FOOTAGE', auto: false, triggeredBy: [] },
-  '2000-penalties': { status: 'candidate_needs_live_check', role: 'ARCHIVE_FOOTAGE', auto: false, triggeredBy: [] },
+  '2000-penalties': { status: 'locked_verified', role: 'CINEMATIC_PAYOFF', auto: true, triggeredBy: ['2000-double/beat:d-film'] },
 }
 
 describe('footage wiring — registry ↔ trigger matrix (§23.3)', () => {
@@ -88,7 +93,21 @@ describe('footage wiring — registry ↔ trigger matrix (§23.3)', () => {
       expect(mine.length, `${id} is a verified payoff that nothing opens — dead registry data`).toBe(1)
       expect(eraFor(mine[0]!.chapter).chapter).toBe(scene.chapter)
       expect(scene.trigger, `${id} names no trigger`).toBeTruthy()
+      // the registry's `trigger` is the same string the content generates — not a claim beside it
+      expect(scene.trigger).toBe(mine[0]!.via === 'era' ? scene.trigger : mine[0]!.via)
     }
+  })
+
+  it('a chapter never opens two films by itself (the 2000 double keeps its full summary optional)', () => {
+    const byChapter = new Map<string, string[]>()
+    for (const row of rows) {
+      if (!autoCutsceneFor(row.film)) continue
+      const chapter = eraFor(row.chapter).chapter
+      byChapter.set(chapter, [...(byChapter.get(chapter) ?? []), row.film])
+    }
+    for (const [chapter, films] of byChapter) expect(films, chapter).toHaveLength(1)
+    expect(CUTSCENES['2000-double']!.status).toBe('verified_optional')
+    expect(CUTSCENES['2000-double']!.trigger).toBeNull()
   })
 
   it('an unverified film never opens by itself, even if a chapter names it', () => {
@@ -106,6 +125,71 @@ describe('footage wiring — registry ↔ trigger matrix (§23.3)', () => {
     for (const [id, scene] of Object.entries(CUTSCENES)) {
       expect(chapters.has(scene.chapter), `${id} → unknown chapter ${scene.chapter}`).toBe(true)
       expect(scene.provenanceHe.length, id).toBeGreaterThan(10)
+    }
+  })
+})
+
+/**
+ * 25.9.2026 — "מאשר את כולם." The three films the owner locked, each held to the same two
+ * things the 1986 slice is held to: it opens AFTER the chapter's payoff, and the objective
+ * the registry promises is the one the chapter prints (or the chapter prints nothing and
+ * the next beat takes over at once).
+ */
+describe('the three films locked on 25.9.2026', () => {
+  const beatOf = (chapter: string, id: string): Beat => {
+    const beat = ((eraFor(chapter).beats ?? []) as readonly Beat[]).find((row) => row.id === id)
+    expect(beat, `${chapter} has no beat ${id}`).toBeDefined()
+    return beat!
+  }
+  const cutsceneIn = (beat: Beat) => beat.do.find((action) => action.a === 'cutscene')
+
+  it('1993: the film opens on the pavement after the horn, and hands him the walk-home question', () => {
+    const film = CUTSCENES['1993-cup']!
+    const beat = beatOf('1993-cup', '93-film')
+    expect(cutsceneIn(beat)).toEqual({ a: 'cutscene', id: '1993-cup' })
+    // after the horn: `after:walk` is raised by `after-1993`, the conversation the horn leads into
+    expect(JSON.stringify(beat.when)).toContain('after:walk')
+    expect(beat.at).toBe('ussishkin-outside')
+    const era = eraFor('1993-cup')
+    const after = { flags: { 'final:over': true, 'after:walk': true, '93:film': true, [film.completionFlag]: true }, agorot: 0 } as unknown as LifeState
+    expect(era.objective(after, 'ussishkin-outside', true)).toBe(film.nextObjectiveHe)
+  })
+
+  it('2000 title: the film opens after the confirmation and the hug, and the credits come after the film', () => {
+    const beats = (eraFor('2000-title').beats ?? []) as readonly Beat[]
+    const film = beats.findIndex((row) => row.id === 't-film')
+    const credits = beats.findIndex((row) => row.id === 't-credits')
+    expect(film).toBeGreaterThan(-1)
+    expect(credits).toBeGreaterThan(film)
+    expect(cutsceneIn(beats[film]!)).toEqual({ a: 'cutscene', id: '2000-title' })
+    expect(JSON.stringify(beats[film]!.when)).toContain('t:confirmed')
+    expect(JSON.stringify(beats[credits]!.when)).toContain('t:film')
+    expect(beats[credits]!.do).toEqual([{ a: 'talk', conversation: 't-close' }])
+    // the hug no longer chains into the credits — the film sits between them
+    const title = readFileSync(join(ROOT, 'lib/life/content/chapter2000double.ts'), 'utf8')
+    const champions = title.slice(title.indexOf("id: 't-champions'"), title.indexOf("id: 't-close'"))
+    expect(champions).not.toContain("node: 't-close'")
+  })
+
+  it('2000 double: the shoot-out film is the first beat after "זה נגמר. דאבל.", before the walk home', () => {
+    const beats = (eraFor('2000-double').beats ?? []) as readonly Beat[]
+    const film = beats.findIndex((row) => row.id === 'd-film')
+    const walk = beats.findIndex((row) => row.id === 'd-after')
+    expect(film).toBeGreaterThan(-1)
+    expect(walk).toBeGreaterThan(film)
+    expect(cutsceneIn(beats[film]!)).toEqual({ a: 'cutscene', id: '2000-penalties' })
+    expect(JSON.stringify(beats[film]!.when)).toContain('d:over')
+    // the id that plays is the one the owner watched; the archive's other id is named in the provenance
+    const scene = CUTSCENES['2000-penalties']!
+    expect(scene.youtubeId).toBe('EGlBnUQN5AQ')
+    expect(scene.provenanceHe).toContain('RvyReKDwCC0')
+    expect(scene.provenanceHe).toContain('מאשר את כולם')
+  })
+
+  it('every locked film quotes the owner in its provenance', () => {
+    for (const scene of Object.values(CUTSCENES)) {
+      if (scene.status !== 'locked_verified') continue
+      expect(scene.provenanceHe, scene.id).toMatch(/מאור/)
     }
   })
 })

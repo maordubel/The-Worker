@@ -79,17 +79,21 @@ describe('הארנק', () => {
    * ולמה זה לא ניואנס: **החולצה הייתה בלתי-אפשרית מתמטית.**
    *
    * `a4-shirt` is named after a thirty-shekel shirt and its whole afternoon — the tin,
-   * the pocket money, the bottles, the boxes at Rafi's — yields twenty-seven. With the
+   * the pocket money, the bottles, the boxes at Rafi's — yielded twenty-seven. With the
    * pocket emptied at every `day.entered` that was the entire budget, so `own:shirt85`
    * could not be raised by anybody, ever; and with it went the A6 echo that reads that
    * flag, the `tveria85` shirt in the wardrobe, and the chapter's own `shirt` ending.
    *
-   * Carrying the wallet is what closes the three-shekel gap, which is why this number is
-   * asserted rather than remembered: the day somebody re-balances the chapter and the
-   * afternoon covers thirty on its own, this test says so and can be deleted on purpose
-   * instead of passing for a reason nobody checked.
+   * **The day this comment foresaw came on 25.9.2026.** The owner was told the afternoon
+   * reaches 29 against the 30 and that the shirt therefore hangs on the week's street job,
+   * and answered **"לאפשר להרוויח יותר."** So the afternoon was re-balanced in fiction —
+   * Rafi's eight crates are all counted (`crates-85`, 5 → 8) and the run upstairs pays
+   * from the favour slot (`favour:paid:a4-shirt`, 4 ₪) — and the assertion FLIPS rather than
+   * disappears (rule 65): the afternoon alone now covers the shirt, with a little over, and
+   * this test says by how much. The carried wallet (rule 68) is unchanged and still tested
+   * above; it is no longer what makes the shirt possible.
    */
-  it('הפרק לבדו לא מגיע למחיר החולצה — ולכן ההעברה היא מה שמאפשרת אותה', () => {
+  it('הפרק לבדו מגיע למחיר החולצה ועוד קצת — מאור, 25.9.2026: "לאפשר להרוויח יותר."', () => {
     const effectsOf = (id: string) => {
       const out: Array<Record<string, unknown> & { e: string }> = []
       for (const branch of DIALOGUE[id]?.branches ?? []) {
@@ -119,6 +123,13 @@ describe('הארנק', () => {
       for (const effect of effectsOf(id)) {
         const agorot = effect.agorot as number
         if ((effect.e === 'money' || effect.e === 'withdraw') && agorot > 0) pocket += agorot
+        // the crates are carried in the chore scene and paid from its own finish — counted at a full pile
+        if (effect.e === 'minigame' && String(effect.id).startsWith(`chore:${STORY_CHORE_PREFIX}`)) {
+          const chore = STORY_CHORES[String(effect.id).slice(`chore:${STORY_CHORE_PREFIX}`.length)]
+          for (const event of chore?.finish(chore.shape.target, chore.shape.target) ?? []) {
+            if (event.t === 'money.changed' && event.agorot > 0) pocket += event.agorot
+          }
+        }
       }
     }
     for (const beat of era.beats ?? []) {
@@ -133,7 +144,12 @@ describe('הארנק', () => {
         }
       }
     }
-    expect(pocket).toBeLessThan(SHIRT_PRICE)
+    // 36 ₪ for a boy who does everything the afternoon offers: the tin (12), the pocket (2),
+    // five bottles (5), Kobi's five (5), eight crates (8), the run upstairs (4). Not 30 exactly:
+    // the owner released the last-shekel tension on purpose.
+    expect(pocket).toBeGreaterThanOrEqual(SHIRT_PRICE)
+    expect(pocket).toBeLessThanOrEqual(SHIRT_PRICE + 1000)
+    expect(pocket).toBe(3600)
   })
 
   /**
@@ -257,7 +273,11 @@ describe('הארנק', () => {
       }
     }
 
-    expect(earned, 'the afternoon alone was never meant to cover it').toBeLessThan(SHIRT_PRICE)
+    // 25.9.2026 — "לאפשר להרוויח יותר.": since the eight crates and the run upstairs, the
+    // afternoon covers the shirt WITHOUT the present and without the street job (34 ₪ with
+    // A2's three; 31 on the day). The assertion flipped rather than vanished (rule 65); the
+    // thinnest-week sweep below still holds so a poor rotation can never take the shirt away.
+    expect(earned, 'the afternoon covers it on its own since 25.9.2026').toBeGreaterThanOrEqual(SHIRT_PRICE)
     expect(thinnestWeek, 'every week has to offer some paid work').toBeGreaterThan(0)
     expect(
       earned + thinnestWeek,

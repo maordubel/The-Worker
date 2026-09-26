@@ -22,6 +22,7 @@
     "qa:sweep": "node scripts/brand/qa-sweep.mjs",
     "goal:probe": "node scripts/brand/goal-probe.mjs",
     "life:play": "node scripts/life/playthrough.mjs",
+    "life:screens": "tsx scripts/life/screens-probe.mjs",
     "life:pitch": "node scripts/life/pitch-probe.mjs",
     "life:deadends": "tsx scripts/life/deadend-audit.ts",
     "life:budget": "tsx scripts/life/budget-audit.ts",
@@ -62,6 +63,7 @@
     "away-days:validate": "tsx scripts/away-days/validate-master.ts",
     "away-days:report": "tsx scripts/away-days/research-report.ts",
     "blind-cow:build": "tsx scripts/blind-cow/build-bank.ts",
+    "rumble:audit": "tsx scripts/royal-rumble/audit.ts",
     "blind-cow:validate": "tsx scripts/blind-cow/validate-bank.ts"
   },
   "dependencies": {
