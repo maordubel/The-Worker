@@ -54,6 +54,7 @@ import { PORTRAIT_GROWTH, objectiveCups, objectiveFive, ENDINGS_CUPS, ENDINGS_FI
 import { PORTRAIT_NEWHALL, objectiveNewHall, ENDINGS_NEWHALL, BEATS_NEWHALL } from './chapter2015newhall'
 import { PORTRAIT_COLLAPSE, objectiveCrisis, objectiveAfter, ENDINGS_CRISIS, ENDINGS_AFTER, BEATS_CRISIS, BEATS_AFTER } from './chapter2016collapse'
 import { PORTRAIT_RETURN, objectiveReturn, objectiveLosses, ENDINGS_RETURN, ENDINGS_LOSSES, BEATS_RETURN, BEATS_LOSSES } from './chapter2018return'
+import { PORTRAIT_HOME24, objectiveHome24, goalHome24, ENDINGS_HOME24, BEATS_HOME24 } from './chapter2024home'
 import { PORTRAIT_LATE, objectiveTournament, objectiveQuiet, objectiveEurocup, ENDINGS_TOURNAMENT, ENDINGS_QUIET, ENDINGS_EUROCUP, BEATS_TOURNAMENT, BEATS_QUIET, BEATS_EUROCUP } from './chapter2023late'
 import { PORTRAIT_FINALE, objectivePlan, objectiveFinale, ENDINGS_PLAN, ENDINGS_FINALE, BEATS_PLAN, BEATS_FINALE } from './chapter2026finale'
 import { PORTRAIT_FAMILY, objectivePeople, objectiveHousehold, ENDINGS_PEOPLE, ENDINGS_HOUSEHOLD, BEATS_PEOPLE, BEATS_HOUSEHOLD } from './chapter2011family'
@@ -551,6 +552,11 @@ export const ERA_2023_QUIET = stageB('2023-quiet', 2023, '2024-relegation', {
   endings: ENDINGS_QUIET, objective: (state, sceneId) => objectiveQuiet(state, sceneId),
   goal: goalQuiet, portraits: PORTRAIT_LATE, beats: BEATS_QUIET, player: YOUNG_MAN,
 })
+/** 2024 — איפה הבית? (תנ"ך מהדורה 2) */
+export const ERA_2024_HOME = stageB('2024-home', 2024, '2024-safra', {
+  endings: ENDINGS_HOME24, objective: (state, sceneId) => objectiveHome24(state, sceneId),
+  goal: goalHome24, portraits: PORTRAIT_HOME24, beats: BEATS_HOME24, player: YOUNG_MAN,
+})
 export const ERA_2025_EUROCUP = stageB('2025-eurocup', 2025, '2025-eurocup', {
   endings: ENDINGS_EUROCUP, objective: (state, sceneId) => objectiveEurocup(state, sceneId),
   goal: goalEurocup, portraits: PORTRAIT_LATE, beats: BEATS_EUROCUP, player: YOUNG_MAN,
@@ -781,6 +787,7 @@ const ERAS: Record<string, Era> = {
   '2021-losses': ERA_2021_LOSSES,
   '2023-tournament': ERA_2023_TOURNAMENT,
   '2023-quiet': ERA_2023_QUIET,
+  '2024-home': ERA_2024_HOME,
   '2025-eurocup': ERA_2025_EUROCUP,
   '2026-plan': ERA_2026_PLAN,
   '2026-finale': ERA_2026_FINALE,

@@ -930,6 +930,8 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2021-promises', { notFlag: 'life:partner' }, [{ who: 'קרן', x: 0.33, y: 0.58 }]),
     // 2023-quiet · Z04 (z-aid) — "מאיה כתבה": היא בטלפון, והבית ריק; Z05 (z-again) — קובי בא
     ...cast('2023-quiet', flag('z:aid'), [{ who: 'קובי', x: 0.3, y: 0.6 }]),
+    // 2024-home · H24c (h24-night, h24-with-kobi, h24-after) — קובי אצלו בערב של אחד־עשר בינואר
+    ...cast('2024-home', flag('h24:concern'), [{ who: 'קובי', x: 0.3, y: 0.6 }]),
     // 2025-eurocup · Z06 (z-euro) — הקלסר על השולחן
     ...cast('2025-eurocup', undefined, [
       { who: 'אפי', x: 0.31, y: 0.6 },
@@ -1012,6 +1014,12 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'עמית', x: 0.3, y: 0.87 },
       { who: 'אופיר', x: 0.61, y: 0.88, flip: true },
       { who: 'קרן', x: 0.87, y: 0.86, flip: true },
+    ]),
+    // 2024-home · H24a (h24-rumor, h24-card-done, h24-ask) — הקיוסק, קיץ
+    ...cast('2024-home', undefined, [
+      { who: 'מתוקי', x: 0.3, y: 0.87 },
+      { who: 'עמית', x: 0.47, y: 0.88, flip: true },
+      { who: 'אופיר', x: 0.61, y: 0.88, flip: true },
     ]),
     // 2025-eurocup · Z07 (z-up)
     ...cast('2025-eurocup', flag('z:euro'), [{ who: 'קובי', x: 0.3, y: 0.86 }]),
@@ -1241,6 +1249,13 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'אפי', x: 0.46, y: 0.8 },
       { who: 'מתוקי', x: 0.6, y: 0.82, flip: true },
     ]),
+    // 2024-home · H24b (h24-small, h24-meeting) — "אנחנו באמת לא נכנסים פה"; ואחרי זה,
+    // על הפרקט, פגישה פתוחה: יוסף מהעמותה, והבעלים בווידאו על מסך (`remote`)
+    ...cast('2024-home', flag('h24:ask'), [
+      { who: 'אפי', x: 0.46, y: 0.8 },
+      { who: 'יבגני', x: 0.6, y: 0.82, flip: true },
+    ]),
+    ...cast('2024-home', flag('h24:small'), [{ who: 'יוסף', x: 0.34, y: 0.84 }]),
   ],
 
   rehearsal: [

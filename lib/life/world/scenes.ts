@@ -2082,7 +2082,7 @@ const SCENES: SceneDef[] = [
       },
       {
         id: 'driveIn',
-        era: '2015-newhall',
+        era: ['2015-newhall', '2024-home'],
         x: 0.872,
         y: 0.705,
         w: 0.06,

@@ -1172,10 +1172,33 @@ export const CHAPTERS: readonly ChapterDef[] = [
     weekday: 1,
     minute: MIN(21, 0),
     start: { location: 'home', spawn: 'start' },
-    next: '2025-eurocup',
+    next: '2024-home',
     bridge: { titleHe: 'שיחה', subHe: 'מחו״ל', ms: 3000 },
     anchorKey: '2024-relegation',
     hudDateHe: '2024',
+    playable: true,
+  },
+  /**
+   * H24a–H24c · 2024 — **הפרק הראשי היחיד של השנה** (תנ"ך מהדורה 2, §12, §24). הכדורגל
+   * נקנה והכדורסל עובר אולם, באותו חורף ובאותה קבוצת וואטסאפ. `chapter2024home.ts`.
+   * המשחק הראשון בהיכל הגדול הוא נסיעה (`ride:menora-25`) ולא יום משחק שהולכים בו, ולכן
+   * אין טקס ארון (`matchRitual: 'none'`).
+   */
+  {
+    id: '2024-home',
+    stage: 'C',
+    unit: 'H24a–H24c',
+    titleHe: 'איפה הבית?',
+    matchRitual: 'none',
+    dateHe: 'יולי 2024 – ינואר 2025',
+    year: 2024,
+    weekday: 0,
+    minute: MIN(11, 0),
+    start: { location: 'kiosk', spawn: 'start' },
+    next: '2025-eurocup',
+    bridge: { titleHe: 'ירדנו', subHe: 'ואז הופיע עוד בעלים', ms: 3200 },
+    anchorKey: '2024-safra',
+    hudDateHe: 'קיץ 2024',
     playable: true,
   },
   {

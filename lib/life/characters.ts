@@ -487,7 +487,7 @@ const REGISTRY: CharacterDefinition[] = [
   { id: 'fan-azoulay', displayNameHe: 'אזולאי', category: 'rival', activeEras: ['2000', '2010'], tags: ['maccabi-haifa', 'kiryat-eliezer', 'warm'] },
   { id: 'fan-erez-haifa', displayNameHe: 'ארז מחיפה', category: 'rival', activeEras: ['2000', '2010'], tags: ['maccabi-haifa', 'kiryat-eliezer', 'dry'] },
   { id: 'shlomi-tattoo', displayNameHe: 'שלומי קעקוע', aliases: ['שלומי'], category: 'rival', activeEras: ['2000'], tags: ['beitar', 'confrontation', 'off-screen-death'] },
-  { id: 'yevgeny', displayNameHe: 'יבגני', category: 'supporter', activeEras: ['2000', '2010'], tags: ['ultras', 'leader'], provenance: 'composite' },
+  { id: 'yevgeny', displayNameHe: 'יבגני', category: 'supporter', activeEras: ['2000', '2010', '2020'], tags: ['ultras', 'leader'], provenance: 'composite' },
   { id: 'neta-katamin', displayNameHe: 'נטע גופן', aliases: ['נטע'], category: 'friend', activeEras: ['2010', '2020'], tags: ['katamin', 'bass', 'producer'], provenance: 'composite' },
   { id: 'gur-katamin', displayNameHe: 'גור שפיגל', aliases: ['גור'], category: 'friend', activeEras: ['2010', '2020'], tags: ['katamin', 'drums'], provenance: 'composite' },
   {
@@ -597,6 +597,7 @@ export const SPEAKING_ROLES: Readonly<Record<string, string>> = {
   'קול מהרדיו': 'שדר. לא דמות, מקור מידע',
   מראיינת: 'מי ששואלת בראיון מקצועי — התפקיד הוא השאלה',
   אדם: 'נפתר בענף הבעלות; ראו את השורה שלו במרשם',
+  'נציג הבעלים': 'בדיוני — מי שמדבר בשם הבעלים מול האוהדים ב-2024 (`2024-home`). הבעלים עצמם אנשים אמיתיים ואינם מדברים במשחק (תנ"ך §29)',
 }
 
 /**

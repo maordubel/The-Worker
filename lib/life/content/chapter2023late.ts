@@ -2,7 +2,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation } from './script'
 import { PORTRAIT_RETURN } from './chapter2018return'
 
 /**
@@ -134,7 +134,14 @@ export const BEATS_TOURNAMENT: Beat[] = [
    * התחליף של `communityRoom` כמו `U02` (ART-PROMPTS, נספח ב׳).
    */
   // Z03 *"מפגש אוהדים"* — חדר הקהילה (`communityRoom`, 21.9.2026)
-  { id: 'z-grow', at: 'community-room', trigger: 'enter', when: { all: [{ flag: 'z:derby' }], none: [{ flag: 'z:grow' }] }, delayMs: 650, do: [{ a: 'talk', conversation: 'z-grow' }] },
+  /**
+   * **Z03b — הדף על הלוח (תנ"ך מהדורה 2).** 19.7.2023: 51 · 30 · 19 — הבעלים החדש, משקיע
+   * שני, והעמותה. הסצנה לא מדפיסה אף שם ולא אף תוצאת הצבעה (לא אומתה, §7), ולא נותנת
+   * לאף אדם אמיתי שורה (§29). היא שואלת מה חשוב לך לשמור — לא בעד או נגד. `z-grow`
+   * ("מי מחליט כשגדלים") בא אחריה, באותו חדר, כי זו אותה שאלה בדיוק.
+   */
+  { id: 'z-owner', at: 'community-room', trigger: 'enter', when: { all: [{ flag: 'z:derby' }], none: [{ flag: 'z:owner' }] }, delayMs: 650, do: [{ a: 'talk', conversation: 'z-owner' }] },
+  { id: 'z-grow', at: 'community-room', trigger: 'clock', when: { all: [{ flag: 'z:derby' }, { flag: 'z:owner' }], none: [{ flag: 'z:grow' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'z-grow' }] },
 ]
 
 // ------------------------------------------------------------------ Part II ------
@@ -142,6 +149,7 @@ export const BEATS_TOURNAMENT: Beat[] = [
 export function objectiveQuiet(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (!state.flags['z:aid']) return sceneId === 'home' ? null : 'מאיה כתבה. אין פה משימה.'
+  if (!state.flags['z:where']) return 'אחד־עשר במאי. איפה אתה כשזה נגמר.'
   if (!state.flags['z:again']) return sceneId === 'home' ? null : 'אבא אצלך, בפינת המטבח. שוב המילה הזאת.'
   return null
 }
@@ -178,8 +186,14 @@ export const ENDINGS_QUIET: Record<string, EndingCard> = {
 
 export const BEATS_QUIET: Beat[] = [
   { id: 'z-aid', at: 'home', trigger: 'enter', when: { none: [{ flag: 'z:aid' }] }, delayMs: 800, do: [{ a: 'talk', conversation: 'z-aid' }] },
+  /**
+   * **Z05 — 11.5.2024 (תנ"ך מהדורה 2).** הירידה קיבלה ערב (`2024-relegation` קורא את 0:2
+   * לאשדוד), ולכן לפני שקובי אומר "עוד פעם" השחקן בוחר איפה הוא עומד כשזה קורה. אין
+   * "להציל את הקבוצה" — המחיר היחיד הוא איפה ועם מי. נדרך מחדש עד שיש תשובה (V3 כלל 2).
+   */
+  { id: 'z-where', at: 'home', trigger: 'clock', when: { all: [{ flag: 'z:aid' }], none: [{ flag: 'z:where' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'z-where' }] },
   // קובי אצלו, בפינת המטבח של `homeAdult` — אותו חדר כמו ההודעה של מאיה, ולכן שעון
-  { id: 'z-again', at: 'home', trigger: 'clock', when: { all: [{ flag: 'z:aid' }], none: [{ flag: 'z:again' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'z-again' }] },
+  { id: 'z-again', at: 'home', trigger: 'clock', when: { all: [{ flag: 'z:aid' }, { flag: 'z:where' }], none: [{ flag: 'z:again' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'z-again' }] },
 ]
 
 // ----------------------------------------------------------------- Part III ------
@@ -187,6 +201,7 @@ export const BEATS_QUIET: Beat[] = [
 export function objectiveEurocup(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (!state.flags['z:euro']) return sceneId === 'home' ? null : 'הגמר באירופה. איפה אתה בערב הזה.'
+  if (state.flags['life:menora:2025'] && !state.flags['z:glad']) return sceneId === 'home' ? null : 'אפי עוד בבית. יש לו שאלה אחת.'
   if (!state.flags['z:up']) return sceneId === 'kiosk' ? null : 'אבא בקיוסק. חזרנו לליגה, והוא כבר מסתכל קדימה.'
   return null
 }
@@ -223,7 +238,22 @@ export const ENDINGS_EUROCUP: Record<string, EndingCard> = {
 
 export const BEATS_EUROCUP: Beat[] = [
   { id: 'z-euro', at: 'home', trigger: 'enter', when: { none: [{ flag: 'z:euro' }] }, delayMs: 800, do: [{ a: 'talk', conversation: 'z-euro' }] },
-  { id: 'z-up', at: 'kiosk', trigger: 'enter', when: { all: [{ flag: 'z:euro' }], none: [{ flag: 'z:up' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'z-up' }] },
+  /**
+   * **Z06 — "אתה שמח?" (תנ"ך מהדורה 2).** מי שעבר את החורף של 2024 (`life:menora:2025`,
+   * `2024-home`) — הלך, נשאר בחוץ, או בבית — שומע מאפי את השאלה שהתנ"ך קורא לה הלב של
+   * הפרק: מה קורה כשהדבר שהתנגדת לו מצליח. אין תשובה נכונה, ואין מחיר.
+   */
+  { id: 'z-glad', at: 'home', trigger: 'clock', when: { all: [{ flag: 'z:euro' }, { flag: 'life:menora:2025' }], none: [{ flag: 'z:glad' }] }, delayMs: 1300, do: [{ a: 'talk', conversation: 'z-glad' }] },
+  /** **Z07 — חוט הקיץ של 2024.** קובי זוכר מה אמרת על הבעלים החדשים, לפני שהוא שואל על הדרכון */
+  { id: 'z-safra', at: 'kiosk', trigger: 'enter', when: { all: [{ flag: 'z:euro' }, { flag: 'life:ownership:football' }], none: [{ flag: 'z:safra' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'z-safra' }] },
+  {
+    id: 'z-up',
+    at: 'kiosk',
+    trigger: 'enter',
+    when: { all: [{ flag: 'z:euro' }, { any: [{ flag: 'z:safra' }, { notFlag: 'life:ownership:football' }] }], none: [{ flag: 'z:up' }] },
+    delayMs: 700,
+    do: [{ a: 'talk', conversation: 'z-up' }],
+  },
 ]
 
 // ----------------------------------------------- the tournament words (90-E) ------
@@ -437,6 +467,25 @@ export const CONVERSATIONS_TOURNAMENT_QUEST: Conversation[] = [
 
 // ---------------------------------------------------------------- the words ------
 
+/** Z06 — three honest answers, and none of them costs anything (תנ"ך מהדורה 2) */
+function gladChoices(): ChoiceDef[] {
+  const answers: Array<[string, string, string]> = [
+    ['angry', '"כי אני עדיין כועס."', 'אפי: "טוב. אל תפסיק מחר." — "לא הבטחתי כלום."'],
+    ['missed', '"כי התגעגעתי."', 'אפי: "למה?" — "לשמוח בלי לחשוב."'],
+    ['both', '"כי שניהם נכונים."', 'אפי: "זאת התשובה הכי גרועה." — "וגם הכי נכונה." — "כן."'],
+  ]
+  return answers.map(([value, text, toast]) => ({
+    id: value,
+    text,
+    then: [
+      { e: 'flag', flag: 'z:glad' },
+      { e: 'flagValue', flag: 'life:eurocup:feeling', value },
+      { e: 'rel', who: 'efi', axis: 'bond', delta: 2 },
+      { e: 'toast', text: toast, tone: 'plain' },
+    ],
+  }))
+}
+
 export const CONVERSATIONS_LATE: Conversation[] = [
   ...CONVERSATIONS_TOURNAMENT_QUEST,
   {
@@ -529,6 +578,79 @@ export const CONVERSATIONS_LATE: Conversation[] = [
               { e: 'proof', kind: 'kept_boundary', proofId: 'kept_boundary:{chapter}:derby', subjectHe: 'ההבטחה שהייתה לפני הערב', noteHe: 'הלך באמצע הכי טוב, כי כבר סיכם.' },
               { e: 'personality', key: 'honesty', delta: 3 },
               { e: 'toast', text: 'אופיר: "כבר הולך?" — "הערב גדול. גם ההבטחה שלי קיימת."', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'z-owner',
+    nameHe: 'יוסף',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'על לוח השעם, דף מודפס, ושלושה מספרים בכתב גדול מהשאר: חמישים ואחת. שלושים. תשע־עשרה.' },
+          { who: null, text: 'מתחת, בכתב קטן: אספת חברים. הצבעה אחריה.' },
+          { who: 'אפי', text: 'בשנת 2007 הכסף היה אלפיים שקל במעטפה. לא התגעגעתי לזה.' },
+          { who: 'פוגי', text: 'גם אני לא.' },
+          { who: 'אפי', text: 'אז למה אתה נראה ככה?' },
+          { who: 'יוסף', text: 'יש לך שאלה? עכשיו הזמן, לפני שמצביעים.' },
+        ],
+        choices: [
+          {
+            id: 'venue',
+            text: '"מה קורה אם יום אחד ירצו להעביר אולם?"',
+            then: [
+              { e: 'flag', flag: 'z:owner' },
+              { e: 'flag', flag: 'life:assembly:asked-venue' },
+              { e: 'flagValue', flag: 'life:ownership:basket', value: 'wary' },
+              { e: 'skill', skill: 'knowledge', delta: 2, why: 'שאל על מה שלא כתוב בדף' },
+              { e: 'toast', text: 'יוסף: "זה נושא שנדבר עליו כשיגיע." — "אני אזכיר לך."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'stop',
+            text: '"מה העמותה עוד יכולה לעצור?"',
+            then: [
+              { e: 'flag', flag: 'z:owner' },
+              { e: 'flagValue', flag: 'life:ownership:basket', value: 'kept-list' },
+              { e: 'skill', skill: 'knowledge', delta: 2, why: 'בדק מה נשאר לחברים' },
+              { e: 'toast', text: 'יוסף: "נציגות בדירקטוריון, הנוער, הנשים, הקהילה." — "והשאר?" — "והשאר זה מה שמצביעים עליו."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'vote-for',
+            text: '(להצביע בעד. הקבוצה צריכה לגדול.)',
+            when: { flag: 'life:founding:role' },
+            noteHe: 'רק חברי עמותה מצביעים.',
+            then: [
+              { e: 'flag', flag: 'z:owner' },
+              { e: 'flagValue', flag: 'life:ownership:basket', value: 'trust' },
+              { e: 'flagValue', flag: 'life:ownership:basket:vote', value: 'for' },
+              { e: 'toast', text: 'הטלפון: "הצבעת." בלי מספר, כי אין לך מספר. רק את הקול שלך.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'vote-against',
+            text: '(להצביע נגד. לא כך.)',
+            when: { flag: 'life:founding:role' },
+            noteHe: 'רק חברי עמותה מצביעים.',
+            then: [
+              { e: 'flag', flag: 'z:owner' },
+              { e: 'flagValue', flag: 'life:ownership:basket', value: 'wary' },
+              { e: 'flagValue', flag: 'life:ownership:basket:vote', value: 'against' },
+              { e: 'remember', who: 'efi', eventId: 'voted-against-2023', significance: 'notable' },
+              { e: 'toast', text: 'הטלפון: "הצבעת." אפי לא שאל על מה. הוא ידע, וזה היה בסדר.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'quiet',
+            text: '(לא לשאול. לקרוא עוד פעם, ולשתוק.)',
+            then: [
+              { e: 'flag', flag: 'z:owner' },
+              { e: 'flagValue', flag: 'life:ownership:basket', value: 'absent' },
+              { e: 'toast', text: 'יוסף: "גם לשתוק זה להשתתף." — "אז השתתפתי."', tone: 'plain' },
             ],
           },
         ],
@@ -646,6 +768,86 @@ export const CONVERSATIONS_LATE: Conversation[] = [
     ],
   },
   {
+    id: 'z-where',
+    nameHe: 'קובי',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'אחד־עשר במאי. אשדוד בבלומפילד, וכולם יודעים מה המספר שצריך.' },
+          { who: 'קובי', text: 'אני בא איתך. אם זה נגמר, אני לא רוצה לשמוע את זה בטלפון.' },
+        ],
+        choices: [
+          {
+            id: 'kobi',
+            text: '(ללכת עם אבא. בקצב שלו, במדרגות.)',
+            then: [
+              { e: 'flag', flag: 'z:where' },
+              { e: 'flagValue', flag: 'life:relegation:2024:where', value: 'kobi' },
+              { e: 'presence', mode: 'inside' },
+              { e: 'attend' },
+              { e: 'time', minutes: 180 },
+              { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
+              { e: 'remember', who: 'kobi', eventId: 'relegation-together-2024', significance: 'major' },
+              { e: 'toast', text: 'בשריקה הוא לא אמר כלום. הוא שם יד על המעקה, ואחר כך על הכתף שלך.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'child',
+            text: '(ללכת עם הילד.)',
+            when: { flag: 'life:child' },
+            hidden: true,
+            then: [
+              { e: 'flag', flag: 'z:where' },
+              { e: 'flagValue', flag: 'life:relegation:2024:where', value: 'child' },
+              { e: 'presence', mode: 'inside' },
+              { e: 'attend' },
+              { e: 'time', minutes: 180 },
+              { e: 'toast', text: 'הילד: "למה כולם שקטים?" — "כי זה נגמר." — "אז למה לא הולכים?" — "כי עוד לא נגמר לגמרי."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'gate',
+            text: '(לשער. מישהו צריך להחזיק את הבד עד הסוף.)',
+            then: [
+              { e: 'flag', flag: 'z:where' },
+              { e: 'flagValue', flag: 'life:relegation:2024:where', value: 'gate' },
+              { e: 'presence', mode: 'inside' },
+              { e: 'attend' },
+              { e: 'time', minutes: 180 },
+              { e: 'energy', delta: -10 },
+              { e: 'redheart', key: 'terraceCulture', delta: 2 },
+              { e: 'toast', text: 'אופיר, כשמקפלים: "אז זהו. לאומית." — "עונה." — "אמרת את זה גם ב־17." — "וצדקתי."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'armchair',
+            text: '(לראות בבית. אבא יבוא לפה.)',
+            then: [
+              { e: 'flag', flag: 'z:where' },
+              { e: 'flagValue', flag: 'life:relegation:2024:where', value: 'armchair' },
+              { e: 'presence', mode: 'television' },
+              { e: 'time', minutes: 120 },
+              { e: 'toast', text: 'השלט אצלו. בדקה האחרונה הוא הנמיך את הקול, כאילו זה יעזור.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'abroad',
+            text: '(בדירה, בחו״ל. סטרים עם השהיה.)',
+            when: { flag: 'life:abroad' },
+            hidden: true,
+            then: [
+              { e: 'flag', flag: 'z:where' },
+              { e: 'flagValue', flag: 'life:relegation:2024:where', value: 'abroad' },
+              { e: 'presence', mode: 'television' },
+              { e: 'time', minutes: 120 },
+              { e: 'toast', text: 'ההודעה של אופיר הגיעה לפני התמונה: "זהו." התמונה הגיעה עשרים שניות אחריה ולא אמרה שום דבר חדש.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'z-again',
     nameHe: 'קובי',
     branches: [
@@ -754,6 +956,60 @@ export const CONVERSATIONS_LATE: Conversation[] = [
             ],
           },
         ],
+      },
+    ],
+  },
+  {
+    id: 'z-glad',
+    nameHe: 'אפי',
+    branches: [
+      {
+        when: { relationshipMemory: { who: 'efi', eventId: 'voted-against-2023' } },
+        lines: [
+          { who: 'אפי', text: 'הצבעת נגד.' },
+          { who: 'פוגי', text: 'כן.' },
+          { who: 'אפי', text: 'ועכשיו?' },
+          { who: 'פוגי', text: 'עכשיו אני שמח נגד.' },
+          { who: 'אפי', text: 'אז למה אתה נראה כאילו אתה מתנצל?' },
+        ],
+        choices: gladChoices(),
+      },
+      {
+        lines: [
+          { who: 'אפי', text: 'אתה שמח?' },
+          { who: 'פוגי', text: 'כן.' },
+          { who: 'אפי', text: 'אז למה אתה נראה כאילו אתה מתנצל?' },
+        ],
+        choices: gladChoices(),
+      },
+    ],
+  },
+  {
+    id: 'z-safra',
+    nameHe: 'קובי',
+    branches: [
+      ...([
+        ['hope-careful', 'נו, מותר כבר לשמוח?', 'בזהירות.', 'זה מה שאמרת בקיץ.'],
+        ['refuse-hope', 'אמרת לא להתאהב.', 'לא התאהבתי. עלינו.', 'זה אותו דבר, רק בלי להודות.'],
+        ['football-first', 'אמרת שמעניין אותך רק ההרכב.', 'והיה צודק.', 'אז תגיד את זה גם למי שקנה.'],
+        ['structure', 'קראת בסוף מה כתוב במבנה?', 'עדיין קורא.', 'בינתיים עלו בלי לחכות לך.'],
+      ] as const).map(([value, a, b, c]) => ({
+        when: { flagIs: { flag: 'life:ownership:football', value } },
+        lines: [
+          { who: null, text: 'על הקיר בקיוסק, דף חדש: "לאומית 2024/25 — מקום ראשון."' },
+          { who: 'קובי', text: a },
+          { who: 'פוגי', text: b },
+          { who: 'קובי', text: c },
+          { who: 'קובי', text: 'אמרת עונה. היית צודק.' },
+        ],
+        then: [{ e: 'flag', flag: 'z:safra' }, { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 2 }] as Branches[number]['then'],
+      })),
+      {
+        lines: [
+          { who: null, text: 'על הקיר בקיוסק, דף חדש: "לאומית 2024/25 — מקום ראשון."' },
+          { who: 'קובי', text: 'עונה אחת. כמו שאמרו.' },
+        ],
+        then: [{ e: 'flag', flag: 'z:safra' }],
       },
     ],
   },

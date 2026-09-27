@@ -584,6 +584,17 @@
  },
  {
   "entry": "shop:counter",
+  "chapter": "2024-home",
+  "where": "allenby",
+  "claims": null,
+  "price": 600,
+  "set": null,
+  "empty": "none: אין פה מעטפות סופרגול בשנים האלה. האלבומים נגמרו עם העשור.",
+  "full": "none: אין פה מעטפות סופרגול בשנים האלה. האלבומים נגמרו עם העשור.",
+  "dead": []
+ },
+ {
+  "entry": "shop:counter",
   "chapter": "2025-eurocup",
   "where": "allenby",
   "claims": null,

@@ -46,6 +46,8 @@ export const QUEST_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
     { id: 'pr-his', era: '2021-promises', x: 0.31, y: 0.6, w: 0.05, act: 'pr-his', verb: 'look', labelHe: 'הדף של המשחק שלו', when: all(is('pr:ask', 'checking'), no('pr:saw:his')), priority: 3 },
   ],
   kiosk: [
+    // 2024 · H24a — הלוח על הקיר: ארבעה פתקים, כל אחד לעמודה (`h24-card-1`…`h24-card-done`)
+    { id: 'h24-board', era: '2024-home', x: 0.7, y: 0.9, w: 0.06, act: 'h24-card-1', verb: 'take', labelHe: 'הלוח — ארבעה פתקים', when: all(f('h24:rumor'), no('h24:board')), priority: 4 },
     // 2021 · L09 — לוח המשחקים ליד הדלפק (`pr-ours`)
     { id: 'pr-ours', era: '2021-promises', x: 0.7, y: 0.9, w: 0.06, act: 'pr-ours', verb: 'look', labelHe: 'לוח המשחקים', when: all(is('pr:ask', 'checking'), no('pr:saw:ours')), priority: 3 },
     // 2016 · P01 — שני מקורות ושמועה, ואז: מה פוגי מעביר (`p-repeat`)

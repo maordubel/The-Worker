@@ -2,8 +2,8 @@
  "schemaVersion": 1,
  "bankVersion": 3,
  "builtFrom": {
-  "playerMasterSha": "b7f23e7c0069efb1",
-  "matchMasterSha": "93ba73bda344540d"
+  "playerMasterSha": "c0c8cc3a40c131ab",
+  "matchMasterSha": "01a2f62e5424782a"
  },
  "rules": {
   "minConfidence": 2,

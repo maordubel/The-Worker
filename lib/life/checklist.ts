@@ -226,14 +226,23 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   '2023-tournament': [
     { id: 'role', textHe: 'איזה תפקיד אתה לוקח.', doneWhen: F('z:role') },
     { id: 'derby', textHe: 'הדרבי, ומה כותבים מתחת לתמונה.', revealWhen: F('z:role'), doneWhen: F('z:derby') },
-    { id: 'grow', textHe: 'מי מחליט כשגדלים.', revealWhen: F('z:derby'), doneWhen: F('z:grow') },
+    { id: 'owner', textHe: 'הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.', revealWhen: F('z:derby'), doneWhen: F('z:owner') },
+    { id: 'grow', textHe: 'מי מחליט כשגדלים.', revealWhen: F('z:owner'), doneWhen: F('z:grow') },
   ],
   '2023-quiet': [
     { id: 'aid', textHe: 'מאיה. אין פה משימה.', doneWhen: F('z:aid') },
-    { id: 'again', textHe: 'אבא, שוב.', revealWhen: F('z:aid'), doneWhen: F('z:again') },
+    { id: 'where', textHe: 'אחד־עשר במאי. איפה אתה כשזה נגמר.', revealWhen: F('z:aid'), doneWhen: F('z:where') },
+    { id: 'again', textHe: 'אבא, שוב.', revealWhen: F('z:where'), doneWhen: F('z:again') },
+  ],
+  '2024-home': [
+    { id: 'rumor', textHe: 'הקיוסק. מי קונה, ומה באמת נחתם.', doneWhen: F('h24:board') },
+    { id: 'ask', textHe: 'עמית שואל מה אתה אומר.', revealWhen: F('h24:board'), doneWhen: F('h24:ask') },
+    { id: 'small', textHe: 'הדרייב אין. עד אז מה?', revealWhen: F('h24:ask'), doneWhen: F('h24:concern') },
+    { id: 'ticket', textHe: 'המנוי: להעביר, לא להעביר, או לחכות לבורר.', revealWhen: F('h24:concern'), doneWhen: F('h24:night') },
   ],
   '2025-eurocup': [
     { id: 'euro', textHe: 'הגמר באירופה.', doneWhen: F('z:euro') },
+    { id: 'glad', textHe: 'אפי שואל אם אתה שמח.', revealWhen: { all: [F('z:euro'), F('life:menora:2025')] }, doneWhen: F('z:glad') },
     { id: 'up', textHe: 'הדרכון של אבא.', revealWhen: F('z:euro'), doneWhen: F('z:up') },
   ],
   '2026-plan': [

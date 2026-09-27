@@ -1,6 +1,6 @@
 {
  "schemaVersion": 2,
- "inputsSha": "95c2c1cf16486cbc061506c7551e62c3e8ac7ec025e5811053d69eff7c89b3de",
+ "inputsSha": "81a54e4be25c9690867a56f95029bc101ac71502ebf698e2f1010c80fccc6060",
  "inputs": [
   "content/manual/player-ids.json",
   "content/manual/player-aliases.json",

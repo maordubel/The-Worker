@@ -85,6 +85,8 @@ const NR_HALL_CHOICES: ChoiceDef[] = [
             text: '(זיכרון אחד קצר — ואז שיבחר מקום בעצמו.)',
             then: [
               { e: 'flag', flag: 'nr:hall' },
+              // (תנ"ך מהדורה 2, N05) — הערב הראשון; `2024-home` חוזר אליו ("שורה שבע")
+              { e: 'flag', flag: 'life:drivein:first-night' },
               { e: 'time', minutes: 20 },
               { e: 'rel', who: 'metuki', axis: 'bond', delta: 3 },
               { e: 'memory', item: 'folded-paper', id: 'nr-new-hall' },
@@ -96,6 +98,8 @@ const NR_HALL_CHOICES: ChoiceDef[] = [
             text: '(להתעקש על איך היה פעם.)',
             then: [
               { e: 'flag', flag: 'nr:hall' },
+              // (תנ"ך מהדורה 2, N05) — הערב הראשון; `2024-home` חוזר אליו ("שורה שבע")
+              { e: 'flag', flag: 'life:drivein:first-night' },
               { e: 'flagValue', flag: 'nr:gatekeeping', value: true },
               { e: 'rel', who: 'metuki', axis: 'bond', delta: -1 },
               { e: 'toast', text: 'אפי: "אתה מראה לו אולם או בודק אם הוא ראוי לו?" — "נסחפתי קצת."', tone: 'red' },
@@ -106,6 +110,8 @@ const NR_HALL_CHOICES: ChoiceDef[] = [
             text: '(לשמור את ההשוואה לעצמי, ולקבוע טקס חדש.)',
             then: [
               { e: 'flag', flag: 'nr:hall' },
+              // (תנ"ך מהדורה 2, N05) — הערב הראשון; `2024-home` חוזר אליו ("שורה שבע")
+              { e: 'flag', flag: 'life:drivein:first-night' },
               { e: 'flagValue', flag: 'nr:ritual', value: true },
               { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
               { e: 'redheart', key: 'terraceCulture', delta: 3 },
@@ -140,6 +146,7 @@ export const CONVERSATIONS_NEWHALL: Conversation[] = [
          */
         when: { flag: 'life:uss:there' },
         lines: [
+          { who: null, text: 'העירייה חנכה את האולם בדצמבר, עם מזוזה ומספריים, בלי אף אחד מאיתנו. הערב פותחים אותו אנחנו.' },
           { who: null, text: 'אפי עוצר רגע ליד הקו. לא מסתכל עליך. כמו מי שמחכה שיגידו לו שמותר.' },
           { who: 'אפי', text: 'פה יהיה לנו מקום.' },
           { who: 'פוגי', text: 'זה לא אוסישקין.' },
@@ -151,6 +158,7 @@ export const CONVERSATIONS_NEWHALL: Conversation[] = [
       },
       {
         lines: [
+          { who: null, text: 'העירייה חנכה את האולם בדצמבר, עם מזוזה ומספריים, בלי אף אחד מאיתנו. הערב פותחים אותו אנחנו.' },
           { who: 'אפי', text: 'פה יהיה לנו מקום.' },
           { who: 'פוגי', text: 'זה לא אוסישקין.' },
           { who: 'אפי', text: 'לא אמרתי שזה אוסישקין.' },
