@@ -282,15 +282,29 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   '2006-desk': [{ id: 'fix', textHe: 'מה נשאר מהפרסום ההוא.', doneWhen: F('j:fix') }],
   '2012-terrace': [{ id: 'hand', textHe: 'מי פותח כשאתה לא בא.', doneWhen: F('t:hand') }],
   '2024-terrace': [{ id: 'lead', textHe: 'הם מחכים שתסביר.', doneWhen: F('t:lead') }],
-  '2025-interview': [{ id: 'asked', textHe: 'שלוש שאלות.', doneWhen: F('j:asked') }],
+  '2025-interview': [
+    { id: 'where', textHe: 'איפה מדברים.', doneWhen: ANY('j:where', 'j:asked') },
+    { id: 'item', textHe: 'מה על השולחן בסמטה.', revealWhen: { flagIs: { flag: 'life:interview:at', value: 'jaffa' } }, doneWhen: ANY('life:interview:item', 'j:asked') },
+    { id: 'asked', textHe: 'שלוש שאלות.', doneWhen: F('j:asked') },
+  ],
   '2010-friends': [
     { id: 'meet', textHe: 'רומא מביא אנשים.', doneWhen: F('i:meet') },
     { id: 'banner', textHe: 'השם של מי על הבד.', revealWhen: F('i:meet'), doneWhen: F('i:banner') },
     { id: 'lineup', textHe: 'מי האורח ומי החבר.', revealWhen: F('i:banner'), doneWhen: F('i:lineup') },
   ],
-  '2024-lina': [{ id: 'call', textHe: 'לינה קראה מה כתבת.', doneWhen: F('i:call') }],
-  '2021-suitcase': [{ id: 'suitcase', textHe: 'מה נכנס למזוודה.', doneWhen: F('x:suitcase') }],
-  '2023-visit': [{ id: 'visit', textHe: 'יומיים, לא עשור.', doneWhen: F('x:visit') }],
+  '2024-lina': [
+    { id: 'phone', textHe: 'לינה קראה מה כתבת.', doneWhen: ANY('i:phone', 'i:call') },
+    { id: 'tower', textHe: 'מגדל השעון, ביפו.', revealWhen: F('i:jaffa'), doneWhen: ANY('i:tower', 'i:call') },
+    { id: 'call', textHe: 'לדבר לאט.', doneWhen: F('i:call') },
+  ],
+  '2021-suitcase': [
+    { id: 'suitcase', textHe: 'מה נכנס למזוודה.', doneWhen: F('x:suitcase') },
+    { id: 'sea', textHe: 'ערב אחרון על הים.', revealWhen: F('x:move'), doneWhen: F('x:sea') },
+  ],
+  '2023-visit': [
+    { id: 'visit', textHe: 'יומיים, לא עשור.', doneWhen: F('x:visit') },
+    { id: 'evening', textHe: 'הערב שבחרת.', revealWhen: { any: [{ flagIs: { flag: 'life:abroad:visit', value: 'family' } }, { flagIs: { flag: 'life:abroad:visit', value: 'friends' } }] }, doneWhen: F('x:evening') },
+  ],
   '2023-abroad': [
     { id: 'phone', textHe: 'ההודעה מאבא.', doneWhen: F('x:phone') },
     { id: 'call', textHe: 'אצלם כבר התחיל.', doneWhen: F('x:call') },
@@ -306,7 +320,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2017-distance': [
     { id: 'told', textHe: 'אופיר.', doneWhen: F('k:told') },
-    { id: 'life', textHe: 'איפה כן היית.', revealWhen: F('k:told'), doneWhen: F('k:life') },
+    { id: 'life', textHe: 'איפה כן היית — קרן, על הטיילת.', revealWhen: F('k:told'), doneWhen: F('k:life') },
     { id: 'back', textHe: 'התחנה. האוטובוס של משחק הבית.', revealWhen: F('k:life'), doneWhen: F('k:back') },
   ],
   '2019-armchair': [

@@ -2,7 +2,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation, Effect } from './script'
 import { PORTRAIT_WINDOWS } from './chapterWindows'
 
 /**
@@ -38,9 +38,14 @@ export const ABROAD = 'life:abroad'
 // =================================================================== X01 · 2021 ====
 
 export function objectiveSuitcase(state: LifeState, sceneId: string): string | null {
-  if (state.chapterDone || state.flags['x:suitcase']) return null
-  return sceneId === 'home' ? null : 'אצל אבא ואמא. מה נכנס למזוודה.'
+  if (state.chapterDone) return null
+  if (!state.flags['x:suitcase']) return sceneId === 'home' ? null : 'אצל אבא ואמא. מה נכנס למזוודה.'
+  if (state.flags['x:move'] && !state.flags['x:sea']) return sceneId === 'promenade' ? null : 'ערב אחרון. הים — דרך הקשת באלנבי.'
+  return null
 }
+
+/** מה מהעיר נכנס למזוודה — `2023-visit` שואל עליו (`x-sunset`) */
+export const ABROAD_CARRY = 'life:abroad:carry'
 
 export const ENDINGS_SUITCASE: Record<string, EndingCard> = {
   move: {
@@ -69,15 +74,40 @@ export const ENDINGS_SUITCASE: Record<string, EndingCard> = {
   },
 }
 
+/**
+ * **הערב האחרון על הים (27.9.2026).** מי שסוגר תוכנית מעבר (X01.1) לא נפרד בסלון: הוא יוצא
+ * לערב אחרון בטיילת, בשקיעה, וקרן שם — מי שהלכה איתו שם ב-2017 (`life:distance:sea`) אומרת
+ * את זה. הבחירה היא מה מהעיר נכנס למזוודה (`life:abroad:carry`), ו-`2023-visit` שואל עליו
+ * כשהוא חוזר ליומיים. מי שלא יוצא לא נתקע: בחצות המזוודה נסגרת בלי כלום מהים (`x-sea-late`).
+ */
 export const BEATS_SUITCASE: Beat[] = [
   { id: 'x-suitcase', at: 'home', trigger: 'enter', when: { none: [{ flag: 'x:suitcase' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'x-suitcase' }] },
+  { id: 'x-sea', at: 'promenade', trigger: 'enter', when: { all: [{ flag: 'x:move' }], none: [{ flag: 'x:sea' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'x-sea' }] },
+  {
+    id: 'x-sea-late',
+    trigger: 'clock',
+    when: { all: [{ flag: 'x:move' }, { afterMinute: 23 * 60 + 45 }], none: [{ flag: 'x:sea' }] },
+    delayMs: 600,
+    waitingHe: 'ערב אחרון. הים עוד שם.',
+    do: [
+      { a: 'flag', flag: 'x:sea' },
+      { a: 'events', events: [{ t: 'flag.set', flag: ABROAD_CARRY, value: 'none' }] },
+      { a: 'toast', text: 'המזוודה נסגרה בחצות. מהים לא נכנס כלום — הוא נשאר פה, עם כתובת.' },
+      { a: 'ending', id: 'move' },
+    ],
+  },
 ]
 
 // =================================================================== X04 · 2023 ====
 
 export function objectiveVisit(state: LifeState, sceneId: string): string | null {
-  if (state.chapterDone || state.flags['x:visit']) return null
-  return sceneId === 'kiosk' ? null : 'יומיים בארץ. בקיוסק כבר מחכים.'
+  if (state.chapterDone) return null
+  if (!state.flags['x:visit']) return sceneId === 'kiosk' ? null : 'יומיים בארץ. בקיוסק כבר מחכים.'
+  if (state.flags['x:evening']) return null
+  const visit = state.flags['life:abroad:visit']
+  if (visit === 'family') return sceneId === 'promenade' ? null : 'בערב, אבא מחכה על הטיילת.'
+  if (visit === 'friends') return sceneId === 'jaffa-alley' ? null : 'בערב, יפו — בית הקפה בסמטה.'
+  return null
 }
 
 export const ENDINGS_VISIT: Record<string, EndingCard> = {
@@ -107,8 +137,50 @@ export const ENDINGS_VISIT: Record<string, EndingCard> = {
   },
 }
 
+/**
+ * **הערב עצמו (27.9.2026).** X04 היה בחירה ואז כרטיס סיום: *"בחרת ערב משפחה"* — בלי שהערב
+ * קרה. עכשיו הוא קורה, בעיר: ערב משפחה הוא קובי על הטיילת בשקיעה (והוא שואל על מה שנכנס
+ * למזוודה ב-2021), וערב חברים הוא יפו — אופיר ועמית בבית הקפה בסמטה. שני הערבים מתחילים
+ * בערב (השעון קופץ לשם בכניסה, `eveningAt`), ושני ערבים חופפים נשארים מה שהיו: כרטיס אחד.
+ * מי שלא הולך לא נתקע — בעשר וחצי הערב נגמר בלעדיו, אותו סוף (`x-evening-late`).
+ */
+const eveningAt = (minute: number) => (state: LifeState) =>
+  state.minute < minute ? [{ t: 'clock.advanced' as const, minutes: minute - state.minute }] : []
+
 export const BEATS_VISIT: Beat[] = [
   { id: 'x-visit', at: 'kiosk', trigger: 'enter', when: { none: [{ flag: 'x:visit' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'x-visit' }] },
+  {
+    id: 'x-sunset',
+    at: 'promenade',
+    trigger: 'enter',
+    when: { all: [{ flagIs: { flag: 'life:abroad:visit', value: 'family' } }], none: [{ flag: 'x:evening' }] },
+    delayMs: 900,
+    do: [{ a: 'derive', events: eveningAt(18 * 60 + 50) }, { a: 'talk', conversation: 'x-sunset' }],
+  },
+  {
+    id: 'x-jaffa',
+    at: 'jaffa-alley',
+    trigger: 'enter',
+    when: { all: [{ flagIs: { flag: 'life:abroad:visit', value: 'friends' } }], none: [{ flag: 'x:evening' }] },
+    delayMs: 900,
+    do: [{ a: 'derive', events: eveningAt(20 * 60) }, { a: 'talk', conversation: 'x-jaffa' }],
+  },
+  {
+    id: 'x-evening-late-family',
+    trigger: 'clock',
+    when: { all: [{ flagIs: { flag: 'life:abroad:visit', value: 'family' } }, { afterMinute: 22 * 60 + 30 }], none: [{ flag: 'x:evening' }] },
+    delayMs: 600,
+    waitingHe: 'אבא על הטיילת.',
+    do: [{ a: 'flag', flag: 'x:evening' }, { a: 'toast', text: 'קובי חיכה על הטיילת עד שהחשיך, ואז הלך הביתה ברגל. מחר ארוחת בוקר.' }, { a: 'ending', id: 'family' }],
+  },
+  {
+    id: 'x-evening-late-friends',
+    trigger: 'clock',
+    when: { all: [{ flagIs: { flag: 'life:abroad:visit', value: 'friends' } }, { afterMinute: 22 * 60 + 30 }], none: [{ flag: 'x:evening' }] },
+    delayMs: 600,
+    waitingHe: 'אופיר ועמית ביפו.',
+    do: [{ a: 'flag', flag: 'x:evening' }, { a: 'toast', text: 'אופיר שלח תמונה של שני כיסאות ריקים בסמטה. "שמרנו לך."' }, { a: 'ending', id: 'friends' }],
+  },
 ]
 
 // ========================================================== X02–X03, Q05 · 2023 ====
@@ -229,12 +301,12 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
             text: '(לקחת מזכרת שכבר יש — ולסגור תוכנית מעבר.)',
             then: [
               { e: 'flag', flag: 'x:suitcase' },
+              { e: 'flag', flag: 'x:move' },
               { e: 'flag', flag: ABROAD },
               { e: 'flagValue', flag: 'life:abroad:plan', value: 'planning' },
               { e: 'wellbeing', key: 'stress', delta: 10 },
               { e: 'proof', kind: 'residence_plan', proofId: 'residence_plan:{chapter}:move', subjectHe: 'המעבר', noteHe: 'תוכנית מוסכמת עם עיר, מועד ותקציב — לא מדינה כבונוס.' },
-              { e: 'toast', text: 'רחל: "ומה שלא לקחת?" — "נשאר עם כתובת. לא נזרק."', tone: 'plain' },
-              { e: 'ending', id: 'move' },
+              { e: 'toast', text: 'רחל: "ומה שלא לקחת?" — "נשאר עם כתובת. לא נזרק." — ואתה יוצא לים, לערב אחרון.', tone: 'plain' },
             ],
           },
           {
@@ -283,8 +355,7 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
               { e: 'flagValue', flag: 'life:abroad:visit', value: 'family' },
               { e: 'time', minutes: 90 },
               { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
-              { e: 'toast', text: 'אופיר: "אז ניפגש לקפה מחר, אם מתאים." — "כן. בלי להבטיח משחק לפני הטיסה."', tone: 'plain' },
-              { e: 'ending', id: 'family' },
+              { e: 'toast', text: 'אופיר: "אז ניפגש לקפה מחר, אם מתאים." — "כן. בלי להבטיח משחק לפני הטיסה." הערב — אבא, על הטיילת.', tone: 'plain' },
             ],
           },
           {
@@ -295,8 +366,7 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
               { e: 'flagValue', flag: 'life:abroad:visit', value: 'friends' },
               { e: 'time', minutes: 90 },
               { e: 'rel', who: 'ofir', axis: 'bond', delta: 3 },
-              { e: 'toast', text: 'רחל: "מחר ארוחת בוקר?" — "מחר אני אצלכם." — "אז תהנה הערב."', tone: 'plain' },
-              { e: 'ending', id: 'friends' },
+              { e: 'toast', text: 'רחל: "מחר ארוחת בוקר?" — "מחר אני אצלכם." — "אז תהנה הערב." הערב — יפו, הסמטה.', tone: 'plain' },
             ],
           },
           {
@@ -309,6 +379,110 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
               { e: 'rel', who: 'keren', axis: 'trust', delta: -2 },
               { e: 'toast', text: 'קרן: "רשמת את אותה שעה פעמיים." — "אני אספיק." — "זאת בדיוק הבעיה."', tone: 'red' },
               { e: 'ending', id: 'overbooked' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+
+  // ------------------------------------------------------- X01 · הערב האחרון ----
+  {
+    /**
+     * קרן על הטיילת, בשקיעה. מי שהלך איתה שם ב-2017 (`life:distance:sea`) שומע את זה ממנה;
+     * השאלה היא מה מהעיר נכנס למזוודה — ו-`2023-visit` (`x-sunset`) ישאל עליו.
+     */
+    id: 'x-sea',
+    nameHe: 'קרן',
+    branches: [
+      {
+        when: { flag: 'life:distance:sea' },
+        lines: [
+          { who: 'קרן', text: 'אותה טיילת כמו אז. רק שהפעם אתה זה שנוסע.' },
+          { who: 'פוגי', text: 'אז אמרתי לך "לא הייתי". עכשיו אני אומר "אני לא אהיה".' },
+          { who: 'קרן', text: 'אז תיקח משהו מפה. לא בשביל להתגעגע — בשביל לדעת מאיפה.' },
+        ],
+        choices: seaChoices(),
+      },
+      {
+        lines: [
+          { who: 'קרן', text: 'באתי להגיד שלום. בלי נאומים.' },
+          { who: 'פוגי', text: 'תודה על הבלי נאומים.' },
+          { who: 'קרן', text: 'אז תיקח משהו מפה. לא בשביל להתגעגע — בשביל לדעת מאיפה.' },
+        ],
+        choices: seaChoices(),
+      },
+    ],
+  },
+
+  // ------------------------------------------------------- X04 · הערב עצמו ----
+  {
+    /** ערב המשפחה — קובי על הטיילת, בשקיעה, שואל על מה שנכנס למזוודה ב-2021 */
+    id: 'x-sunset',
+    nameHe: 'קובי',
+    branches: [
+      {
+        when: { flagIs: { flag: ABROAD_CARRY, value: 'photo' } },
+        lines: [
+          { who: 'קובי', text: 'אמא אמרה ערב משפחה. אז הבאתי את המשפחה לים.' },
+          { who: 'קובי', text: 'התמונה של השלט — עוד יש לך אותה?' },
+          { who: 'פוגי', text: 'כרקע בטלפון. כל בוקר, "תמיד על הים", במקום שאין בו ים.' },
+        ],
+        choices: sunsetChoices(),
+      },
+      {
+        when: { flagIs: { flag: ABROAD_CARRY, value: 'sand' } },
+        lines: [
+          { who: 'קובי', text: 'אמא אמרה ערב משפחה. אז הבאתי את המשפחה לים.' },
+          { who: 'קובי', text: 'והצנצנת עם החול?' },
+          { who: 'פוגי', text: 'על אדן החלון. שם אין חול, אז היא נראית כמו משהו.' },
+        ],
+        choices: sunsetChoices(),
+      },
+      {
+        lines: [
+          { who: 'קובי', text: 'אמא אמרה ערב משפחה. אז הבאתי את המשפחה לים.' },
+          { who: 'קובי', text: 'לא לקחת כלום מפה, כשנסעת.' },
+          { who: 'פוגי', text: 'לקחתי. רק לא בכיס.' },
+        ],
+        choices: sunsetChoices(),
+      },
+    ],
+  },
+  {
+    /** ערב החברים — יפו, בית הקפה בסמטה, אופיר ועמית */
+    id: 'x-jaffa',
+    nameHe: 'אופיר',
+    branches: [
+      {
+        lines: [
+          { who: 'אופיר', text: 'בחרת יפו. אז אתה משלם.' },
+          { who: 'עמית', text: 'הוא גר בחו״ל. הוא משלם בכל מקרה.' },
+          { who: 'אופיר', text: 'יש לנו ערב אחד. אז מה, אתה מספר או שואל?' },
+        ],
+        choices: [
+          {
+            id: 'ask',
+            text: '(לשאול מה קרה אצלם — ולא לספר על שם.)',
+            then: [
+              { e: 'flag', flag: 'x:evening' },
+              { e: 'time', minutes: 90 },
+              { e: 'rel', who: 'ofir', axis: 'bond', delta: 2 },
+              { e: 'remember', who: 'ofir', eventId: 'x04-jaffa-listened', significance: 'notable' },
+              { e: 'toast', text: 'אופיר מדבר שעה על היציע ועל העבודה, ועמית מתקן כל מספר שהוא אומר. אתה לא מספר כלום, וזה הערב הכי טוב שהיה לך השנה.', tone: 'plain' },
+              { e: 'ending', id: 'friends' },
+            ],
+          },
+          {
+            id: 'tell',
+            text: '(לספר על שם — הדירה, העבודה, אלכס.)',
+            then: [
+              { e: 'flag', flag: 'x:evening' },
+              { e: 'time', minutes: 90 },
+              { e: 'rel', who: 'amit', axis: 'bond', delta: 2 },
+              { e: 'remember', who: 'amit', eventId: 'x04-jaffa-told', significance: 'notable' },
+              { e: 'toast', text: 'עמית שואל על כל פרט, אופיר שואל רק אם יש שם קבוצה. "יש." — "אז אתה בסדר."', tone: 'plain' },
+              { e: 'ending', id: 'friends' },
             ],
           },
         ],
@@ -591,3 +765,66 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
     ],
   },
 ]
+
+/**
+ * X01 · מה מהעיר נכנס למזוודה — שלוש תשובות, וכל אחת נשמרת (`life:abroad:carry`) כדי שקובי
+ * ישאל עליה בשקיעה של 2023. אף אחת לא "נכונה": צילום, חופן חול, או כלום — כולן סוגרות את
+ * אותה תוכנית (`move`).
+ */
+function seaChoices(): ChoiceDef[] {
+  const close = (value: string, toast: string): Effect[] => [
+    { e: 'flag', flag: 'x:sea' },
+    { e: 'flagValue', flag: ABROAD_CARRY, value },
+    { e: 'time', minutes: 30 },
+    { e: 'remember', who: 'keren', eventId: 'x01-last-evening', significance: 'notable' },
+    { e: 'toast', text: toast, tone: 'plain' },
+    { e: 'ending', id: 'move' },
+  ]
+  return [
+    {
+      id: 'photo',
+      text: '(לצלם את השלט — "תמיד על הים" — ולשמור בטלפון.)',
+      then: close('photo', 'קרן: "עמוד מולו. לא את השלט לבד." — היא מצלמת. השלט, ואתה לידו, ואור כתום.'),
+    },
+    {
+      id: 'sand',
+      text: '(למלא צנצנת קטנה בחול מהחוף.)',
+      then: close('sand', 'קרן מחזיקה את הצנצנת בזמן שאתה ממלא. "זה לא יעבור בבידוק." — "אז אני אסביר."'),
+    },
+    {
+      id: 'nothing',
+      text: '(לא לקחת כלום. הים נשאר פה, עם כתובת.)',
+      then: close('none', 'קרן: "זה גם תשובה." — "זאת התשובה שאני יכול לסחוב."'),
+    },
+  ]
+}
+
+/** X04 · ערב המשפחה — ללכת איתו עד יפו בקצב שלו, או לשבת ולשמוע אותו */
+function sunsetChoices(): ChoiceDef[] {
+  return [
+    {
+      id: 'walk',
+      text: '(ללכת איתו לאורך הים, עד יפו — לאט, בקצב שלו.)',
+      then: [
+        { e: 'flag', flag: 'x:evening' },
+        { e: 'time', minutes: 60 },
+        { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
+        { e: 'remember', who: 'kobi', eventId: 'x04-sunset-walk', significance: 'major' },
+        { e: 'toast', text: 'קובי עוצר כל כמה מטרים "לראות את הים", ושניכם יודעים שזה בשביל הברכיים. אתם מגיעים למגדל השעון בחושך.', tone: 'plain' },
+        { e: 'ending', id: 'family' },
+      ],
+    },
+    {
+      id: 'sit',
+      text: '(לשבת על הספסל — ולתת לו לספר על העונה.)',
+      then: [
+        { e: 'flag', flag: 'x:evening' },
+        { e: 'time', minutes: 60 },
+        { e: 'rel', who: 'kobi', axis: 'trust', delta: 3 },
+        { e: 'remember', who: 'kobi', eventId: 'x04-sunset-bench', significance: 'notable' },
+        { e: 'toast', text: 'הוא מספר על כל משחק כאילו לא ראית אותו, ואתה לא מתקן אותו אף פעם אחת.', tone: 'plain' },
+        { e: 'ending', id: 'family' },
+      ],
+    },
+  ]
+}

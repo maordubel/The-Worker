@@ -48,7 +48,7 @@ export const PORTRAIT_WINDOWS: Record<string, string> = {
 export function objectiveDistance(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (!state.flags['k:told']) return sceneId === 'kiosk' ? null : 'אופיר בקיוסק. הוא שמע מאבא.'
-  if (!state.flags['k:life']) return sceneId === 'home' ? null : 'השנים האלה. איפה כן היית.'
+  if (!state.flags['k:life']) return sceneId === 'promenade' ? null : 'קרן בטיילת, מול הים — דרך הקשת באלנבי.'
   if (!state.flags['k:back']) return sceneId === 'bus-station' ? null : 'בתחנה. אופיר חשב שלא תבוא.'
   return null
 }
@@ -85,7 +85,24 @@ export const ENDINGS_DISTANCE: Record<string, EndingCard> = {
 
 export const BEATS_DISTANCE: Beat[] = [
   { id: 'k-told', at: 'kiosk', trigger: 'enter', when: { none: [{ flag: 'k:told' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'k-told' }] },
-  { id: 'k-life', at: 'home', trigger: 'enter', when: { all: [{ flag: 'k:told' }], none: [{ flag: 'k:life' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'k-life' }] },
+  /**
+   * **K02 על הטיילת (27.9.2026).** *"היית איפשהו"* נאמר עד היום בסלון. בשנים שלא היה ביציע
+   * הוא היה — בין השאר — פה: הטיילת היא המקום שתל אביבי הולך אליו כשאין משחק, והיא עכשיו
+   * המקום שבו קרן שואלת. המילים לא זזו; מה שנוסף הוא שהוא הלך לשם ברגליים, והיא הולכת למים
+   * אחרי שענה (`k-keren-walks`). `life:distance:sea` שורד את הפרק ו-`2021-suitcase` קורא אותו.
+   */
+  { id: 'k-life', at: 'promenade', trigger: 'enter', when: { all: [{ flag: 'k:told' }], none: [{ flag: 'k:life' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'k-life' }] },
+  {
+    id: 'k-keren-walks',
+    at: 'promenade',
+    trigger: 'clock',
+    when: { all: [{ flag: 'k:life' }], none: [{ flag: 'k:keren-gone' }] },
+    delayMs: 1200,
+    do: [
+      { a: 'actorCue', actorId: '2017-distance-keren', cue: 'leave', to: 'right', durationMs: 2600 },
+      { a: 'flag', flag: 'k:keren-gone' },
+    ],
+  },
   /**
    * בתחנה ולא בבלומפילד (21.9.2026). ב-2017 בלומפילד היה אתר בנייה ומשחקי הבית שוחקו
    * בעיר אחרת, כך שמי שחוזר חוזר לאוטובוס — וזה גם מה ש-K03 אומרת: *"אין לך מקום שמור,
@@ -196,6 +213,7 @@ export const CONVERSATIONS_WINDOWS: Conversation[] = [
     branches: [
       {
         lines: [
+          { who: 'קרן', text: 'אמרו לי שבשבתות אתה פה. מול הים, ולא ביציע.' },
           { who: 'קרן', text: 'כשאתה מספר על השנים האלה, אתה אומר ״לא הייתי״.' },
           { who: 'פוגי', text: 'כי לא הייתי שם.' },
           { who: 'קרן', text: 'היית איפשהו.' },
@@ -208,6 +226,8 @@ export const CONVERSATIONS_WINDOWS: Conversation[] = [
             text: '(פרויקט עבודה אחד, מתועד, עד הסוף.)',
             then: [
               { e: 'flag', flag: 'k:life' },
+              { e: 'flagValue', flag: 'life:distance:sea', value: 'work' },
+              { e: 'remember', who: 'keren', eventId: 'k02-promenade', significance: 'notable' },
               { e: 'time', minutes: 60 },
               // `enterprise` בתסריט → `business` במנוע
               { e: 'skill', skill: 'business', delta: 3, why: 'אין שער בדקה תשעים, יש סוף' },
@@ -220,6 +240,8 @@ export const CONVERSATIONS_WINDOWS: Conversation[] = [
             text: '(מסורת עם אנשים מחוץ לכדורגל.)',
             then: [
               { e: 'flag', flag: 'k:life' },
+              { e: 'flagValue', flag: 'life:distance:sea', value: 'people' },
+              { e: 'remember', who: 'keren', eventId: 'k02-promenade', significance: 'notable' },
               { e: 'time', minutes: 45 },
               { e: 'rel', who: 'keren', axis: 'bond', delta: 3 },
               { e: 'proof', kind: 'distance_life', proofId: 'distance_life:{chapter}:people', subjectHe: 'היום הקבוע בחודש', noteHe: 'שאל מה מתאים לכולם, לפני שקבע.' },
@@ -231,6 +253,8 @@ export const CONVERSATIONS_WINDOWS: Conversation[] = [
             text: '(לסיים משהו יצירתי — ולהראות למי שבחרתי.)',
             then: [
               { e: 'flag', flag: 'k:life' },
+              { e: 'flagValue', flag: 'life:distance:sea', value: 'make' },
+              { e: 'remember', who: 'keren', eventId: 'k02-promenade', significance: 'notable' },
               { e: 'time', minutes: 60 },
               { e: 'skill', skill: 'creativity', delta: 3, why: 'נגמר, ולא נשאר במגירה' },
               { e: 'rel', who: 'yonatan', axis: 'bond', delta: 3 },

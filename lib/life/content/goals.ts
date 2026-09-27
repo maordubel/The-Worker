@@ -369,7 +369,7 @@ export const goalPromises = (state: LifeState): LocationId | null => {
 /** חלונות — הריחוק (קיוסק, בית, בלומפילד מבחוץ) והכורסה (בית, מטבח, רחוב) */
 export const goalDistance = (state: LifeState): LocationId | null => {
   if (!flag(state, 'k:told')) return 'kiosk'
-  if (!flag(state, 'k:life')) return 'home'
+  if (!flag(state, 'k:life')) return 'promenade'
   if (!flag(state, 'k:back')) return 'bus-station'
   return null
 }
@@ -387,16 +387,38 @@ export const goalTerrace02 = (state: LifeState): LocationId | null => (flag(stat
 export const goalTerrace03 = (state: LifeState): LocationId | null => (flag(state, 't:lead') ? null : 'bloomfield-inside')
 export const goalDesk01 = (state: LifeState): LocationId | null => (flag(state, 'j:first') ? null : 'allenby')
 export const goalDesk02 = (state: LifeState): LocationId | null => (flag(state, 'j:fix') ? null : 'newsroom')
-export const goalInterview = (state: LifeState): LocationId | null => (flag(state, 'j:asked') ? null : 'allenby')
+export const goalInterview = (state: LifeState): LocationId | null => {
+  if (flag(state, 'j:asked')) return null
+  // J03 ביפו (27.9.2026): מי שבחר בסמטה הולך אליה; השאר — אלנבי
+  return state.flags['life:interview:at'] === 'jaffa' ? 'jaffa-alley' : 'allenby'
+}
 export const goalFriends = (state: LifeState): LocationId | null => {
   if (!flag(state, 'i:meet')) return 'allenby'
   if (!flag(state, 'i:banner')) return 'street'
   if (!flag(state, 'i:lineup')) return 'pitch'
   return null
 }
-export const goalLina = (state: LifeState): LocationId | null => (flag(state, 'i:call') ? null : 'home')
-export const goalSuitcase = (state: LifeState): LocationId | null => (flag(state, 'x:suitcase') ? null : 'home')
-export const goalVisit = (state: LifeState): LocationId | null => (flag(state, 'x:visit') ? null : 'kiosk')
+/** I04 ביפו (27.9.2026): הטלפון בבית → מגדל השעון → המקום שבחרתם לדבר בו */
+export const goalLina = (state: LifeState): LocationId | null => {
+  if (flag(state, 'i:call')) return null
+  if (!flag(state, 'i:phone')) return 'home'
+  if (!flag(state, 'i:jaffa')) return null
+  if (!flag(state, 'i:tower')) return 'jaffa'
+  const walk = state.flags['life:lina:walk']
+  return walk === 'alley' ? 'jaffa-alley' : walk === 'boulevard' ? 'jaffa-boulevard' : null
+}
+/** X01: מי שסגר תוכנית מעבר יוצא לערב אחרון בטיילת */
+export const goalSuitcase = (state: LifeState): LocationId | null => {
+  if (!flag(state, 'x:suitcase')) return 'home'
+  return flag(state, 'x:move') && !flag(state, 'x:sea') ? 'promenade' : null
+}
+/** X04: הקיוסק, ואז הערב שנבחר — קובי בטיילת או החברים בסמטה ביפו */
+export const goalVisit = (state: LifeState): LocationId | null => {
+  if (!flag(state, 'x:visit')) return 'kiosk'
+  if (flag(state, 'x:evening')) return null
+  const visit = state.flags['life:abroad:visit']
+  return visit === 'family' ? 'promenade' : visit === 'friends' ? 'jaffa-alley' : null
+}
 /** הדירה שם — ערב אחד בבית, ושני פרקים שלא יוצאים ממנה */
 export const goalAbroad = (state: LifeState): LocationId | null => (flag(state, 'x:done') ? null : 'flat-abroad')
 export const goalReunion = (state: LifeState): LocationId | null => (flag(state, 'x:reunion') ? null : 'flat-abroad')

@@ -1170,7 +1170,8 @@ export const CHAPTERS: readonly ChapterDef[] = [
     dateHe: '2024',
     year: 2024,
     weekday: 1,
-    minute: MIN(21, 0),
+    // 27.9.2026 — מוקדם בבוקר: הם נחתו בחמש, והמלון רק בשתיים (`chapterFriends.ts`, יפו)
+    minute: MIN(6, 40),
     start: { location: 'home', spawn: 'start' },
     next: '2024-home',
     bridge: { titleHe: 'שיחה', subHe: 'מחו״ל', ms: 3000 },

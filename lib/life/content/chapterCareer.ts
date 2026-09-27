@@ -254,8 +254,14 @@ export const BEATS_DESK02: Beat[] = [
 
 export function objectiveInterview(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone || state.flags['j:asked']) return null
+  if (state.flags[INTERVIEW_AT] === 'jaffa') return sceneId === 'jaffa-alley' ? null : 'יפו, הסמטה. היא כבר בבית הקפה.'
   return sceneId === 'allenby' ? null : 'באלנבי. פעם אחת שואלים אותך.'
 }
+
+/** איפה נערך הראיון — אלנבי, או הסמטה ביפו (`j-where`) */
+export const INTERVIEW_AT = 'life:interview:at'
+/** מה הונח על השולחן בסמטה: עובדה, שמועה או דעה (`j-archive`) */
+export const INTERVIEW_ITEM = 'life:interview:item'
 
 export const ENDINGS_INTERVIEW: Record<string, EndingCard> = {
   asked: {
@@ -284,8 +290,39 @@ export const ENDINGS_INTERVIEW: Record<string, EndingCard> = {
   },
 }
 
+/**
+ * **J03 — איפה שואלים אותך (27.9.2026).** מאור: *"שפגישה מסויימת תהיה ביפו למשל."* הראיון
+ * נפתח באלנבי כמו תמיד, אבל המראיינת שואלת קודם איפה — ומי שבוחר ביפו הולך ברגליים דרך
+ * הקשת, לאורך הים ומתחת למגדל השעון, אל בית הקפה בסמטה. שם, לפני שלוש השאלות, מה שהבאת
+ * מהארכיון מונח על השולחן, והוא אחד משלושה: **עובדה** (כרטיס עם תאריך ומקור), **שמועה**
+ * (משהו ששמעת, מסומן ככזה ובלי שם), או **דעה** (הטור שלך, מסומן כדעה). אותה הבחנה
+ * שהעיתונות של J01–J02 בנויה עליה, בפעם היחידה שהוא בצד השני של השאלות. שלוש השאלות
+ * (`j-asked`) לא זזו; הסמטה היא לפניהן.
+ * מי שיצא ליפו ולא הגיע לא נתקע: בשתיים היא מוותרת, בנימוס (`j-waited`).
+ */
 export const BEATS_INTERVIEW: Beat[] = [
-  { id: 'j-asked', at: 'allenby', trigger: 'enter', when: { none: [{ flag: 'j:asked' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'j-asked' }] },
+  { id: 'j-where', at: 'allenby', trigger: 'enter', when: { none: [{ flag: 'j:where' }, { flag: 'j:asked' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'j-where' }] },
+  {
+    id: 'j-archive',
+    at: 'jaffa-alley',
+    trigger: 'enter',
+    when: { all: [{ flagIs: { flag: INTERVIEW_AT, value: 'jaffa' } }], none: [{ flag: 'j:asked' }] },
+    delayMs: 900,
+    do: [{ a: 'talk', conversation: 'j-archive' }],
+  },
+  {
+    id: 'j-waited',
+    trigger: 'clock',
+    when: { all: [{ flagIs: { flag: INTERVIEW_AT, value: 'jaffa' } }, { afterMinute: 14 * 60 }], none: [{ flag: 'j:asked' }] },
+    delayMs: 600,
+    waitingHe: 'היא בבית הקפה בסמטה, ביפו.',
+    do: [
+      { a: 'flag', flag: 'j:asked' },
+      { a: 'events', events: [{ t: 'flag.set', flag: 'life:desk:interview', value: 'declined' }] },
+      { a: 'toast', text: 'הודעה מהמראיינת: "חיכיתי בסמטה. אם תשנה דעתך, תגיד."' },
+      { a: 'ending', id: 'declined' },
+    ],
+  },
 ]
 
 // ================================================================== the words ====
@@ -603,6 +640,86 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
   },
 
   // ------------------------------------------------------------------ J03 ------
+  {
+    /** J03 · איפה — באלנבי, או ביפו */
+    id: 'j-where',
+    nameHe: 'מראיינת',
+    branches: [
+      {
+        lines: [
+          { who: 'מראיינת', text: 'כאן רועש, והשולחן ליד משפחה של מישהו. יש לך מקום שאתה מעדיף?' },
+        ],
+        choices: [
+          {
+            id: 'here',
+            text: '(כאן, באלנבי — איפה שהתחלתי לכתוב.)',
+            then: [
+              { e: 'flag', flag: 'j:where' },
+              { e: 'flagValue', flag: INTERVIEW_AT, value: 'allenby' },
+              { e: 'goto', node: 'j-asked' },
+            ],
+          },
+          {
+            id: 'jaffa',
+            text: '(ביפו — בית קפה בסמטה. ואני מביא משהו מהארכיון.)',
+            then: [
+              { e: 'flag', flag: 'j:where' },
+              { e: 'flagValue', flag: INTERVIEW_AT, value: 'jaffa' },
+              { e: 'toast', text: 'מראיינת: "אני לוקחת מונית. אתה?" — "אני הולך. דרך הקשת, לאורך הים."', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * J03 · מה על השולחן — עובדה, שמועה או דעה. ההבחנה שהעבודה שלו בנויה עליה, כשהוא הנשאל.
+     * כל אחת נרשמת (`life:interview:item`) ונשמרת כפריט בקופסה, ואז שלוש השאלות (`j-asked`).
+     */
+    id: 'j-archive',
+    nameHe: 'מראיינת',
+    branches: [
+      {
+        lines: [
+          { who: 'מראיינת', text: 'שקט פה. הבנתי למה.' },
+          { who: 'מראיינת', text: 'הבאת משהו מהארכיון. מה זה?' },
+        ],
+        choices: [
+          {
+            id: 'fact',
+            text: '(כרטיס עם תאריך — עובדה, עם מקור.)',
+            then: [
+              { e: 'flagValue', flag: INTERVIEW_ITEM, value: 'fact' },
+              { e: 'memory', item: 'ticket-stub', id: 'j-jaffa-fact' },
+              { e: 'toast', text: 'מראיינת: "תאריך, מחיר, מספר שער." — "ומי שהיה איתי. את זה לא כתוב עליו."', tone: 'plain' },
+              { e: 'goto', node: 'j-asked' },
+            ],
+          },
+          {
+            id: 'heard',
+            text: '(משהו ששמעתי ביציע — מסומן "שמעתי", ובלי שם.)',
+            then: [
+              { e: 'flagValue', flag: INTERVIEW_ITEM, value: 'heard' },
+              { e: 'memory', item: 'folded-paper', id: 'j-jaffa-heard' },
+              { e: 'toast', text: 'מראיינת: "ומי סיפר?" — "בגלל זה כתוב \'שמעתי\'. השם נשאר אצלי."', tone: 'plain' },
+              { e: 'goto', node: 'j-asked' },
+            ],
+          },
+          {
+            id: 'opinion',
+            text: '(הטור שלי — מסומן כדעה.)',
+            then: [
+              { e: 'flagValue', flag: INTERVIEW_ITEM, value: 'opinion' },
+              { e: 'memory', item: 'clipping', id: 'j-jaffa-opinion' },
+              { e: 'toast', text: 'מראיינת: "כתוב עליו \'דעה\' באותיות גדולות." — "כי מישהו פעם לא הבדיל."', tone: 'plain' },
+              { e: 'goto', node: 'j-asked' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   {
     id: 'j-asked',
     nameHe: 'מראיינת',
