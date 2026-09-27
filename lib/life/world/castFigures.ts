@@ -167,7 +167,10 @@ export const CAST_2000: Readonly<Record<string, CastFigure>> = {
   'ירון': { figure: 'adultA4', standIn: true },
   'אילן': { figure: 'adultB1', standIn: true },
   'אילן השכן': { figure: 'adultB1', standIn: true },
-  'בתיה': { figure: 'adultB6', standIn: true },
+  // בתיה עומדת על עצמה מ-27.9.2026: מאור, *"יש צילום שלה בתיקייה, ובמשחק היא עומדת על גוף
+  // תחליפי. לחתוך אותה מהצילום? כן."* — `batya` + `faceBatya`, נחתכו מהצילום
+  // (`scripts/life/ingest-batya-2026-09-27.py`). אישה בת ~60, ולכן רק מ-2000 (`activeEras`)
+  'בתיה': { figure: 'batya' },
   'אולי': { figure: 'adultA6', standIn: true },
 
   // ---- אנשים שהחיים פוגשים
@@ -193,7 +196,8 @@ export const CAST_2000: Readonly<Record<string, CastFigure>> = {
   // מ-1991. שלוש נשים שנפגשות באותו ערב (2011-people) חייבות שלושה גופים, ואף אחד מהם לא
   // של קרן, שחוזרת בכל חיים שבהם אין בן/בת זוג. יש בדיוק חמש נשים מצוירות בגיל הזה —
   // B3, B5, B6, B7 והמורה — וזה כל התקציב: קרן, מלאני, דור, תמר ושני. מי שנשאר (לינה,
-  // בתיה, ענבל, נטע, מיכל) חולק גוף עם מישהי שלא נפגשת איתה באותו פרק.
+  // ענבל, נטע, מיכל) חולק גוף עם מישהי שלא נפגשת איתה באותו פרק. (בתיה יצאה מהרשימה
+  // ב-27.9.2026 — יש לה גוף משלה, מהצילום.)
   'מלאני': { figure: 'adultB7', standIn: true },
   'דור': { figure: 'adultB6', standIn: true },
   'תמר': { figure: 'adultB5', standIn: true },
@@ -237,7 +241,7 @@ export const FACES_2000: Readonly<Record<string, string>> = {
   'תמר': 'faceStandB5',
   'לינה': 'faceStandB5',
   'דור': 'faceStandB6',
-  'בתיה': 'faceStandB6',
+  'בתיה': 'faceBatya',
   'מלאני': 'faceStandB7',
   'ענבל': 'faceStandB7',
   'נטע': 'faceStandB7',

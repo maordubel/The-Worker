@@ -141,7 +141,8 @@ const REGISTRY: CharacterDefinition[] = [
     id: 'keren',
     displayNameHe: 'קרן',
     category: 'friend',
-    activeEras: ['1986', '1990', '2000', '2010'],
+    // (27.9.2026) + '2020': היא מדברת ב-`2021-promises` ועומדת בקיוסק ב-`2023-visit`
+    activeEras: ['1986', '1990', '2000', '2010', '2020'],
     portraitSet: 'faceKeren',
     tags: ['neighbourhood'],
   },
@@ -292,7 +293,9 @@ const REGISTRY: CharacterDefinition[] = [
     id: 'liron',
     displayNameHe: 'לירון',
     category: 'supporter',
-    activeEras: ['1980', '1990'],
+    // (27.9.2026) + '2000': הסדנה באלנבי ב-`2006-home` (H03) היא שלו בתסריט — קריאה של
+    // התסריט (כלל 18), כמו שחור ופרדי למטה
+    activeEras: ['1980', '1990', '2000'],
     tags: ['radio', 'gate7', 'repairs', 'car'],
   },
   {
@@ -330,7 +333,9 @@ const REGISTRY: CharacterDefinition[] = [
     displayNameHe: 'מישל בר־כליפא',
     aliases: ['מישל'],
     category: 'supporter',
-    activeEras: ['1990s'],
+    // (27.9.2026) + `2000-double`: המיניבוס של שער 5 לגמר של 2000 הוא שלו בתוכן — המרשם
+    // פשוט לא ידע. פרק אחד בשמו, לא עשור: אדם אמיתי, ולא ממציאים לו שנים (כלל 18)
+    activeEras: ['1990s', '2000-double'],
     tags: ['transport', 'network', 'memorial'],
     provenance: 'real',
   },
@@ -338,7 +343,9 @@ const REGISTRY: CharacterDefinition[] = [
     id: 'soko',
     displayNameHe: 'סוקו',
     category: 'supporter',
-    activeEras: ['1990'],
+    // (27.9.2026) + '2000': הוא כבר מדבר ב-`2000-double`, ומ-27.9 הוא זה שמצלם את הכניסה
+    // לאוסישקין ב-2006 (H02.2) — התפקיד שבתיה החזיקה בטעות (מאור)
+    activeEras: ['1990', '2000'],
     tags: ['archive', 'records'],
   },
   /**
@@ -400,7 +407,18 @@ const REGISTRY: CharacterDefinition[] = [
   { id: 'asaf', displayNameHe: 'אסף', category: 'supporter', activeEras: ['1996+'], provenance: 'composite', tags: ['gate5', 'organiser'] },
   { id: 'omer-hermesh', displayNameHe: 'עומר חרמש', aliases: ['עומר'], category: 'friend', activeEras: ['1997+'], provenance: 'real', tags: ['records', 'travel', 'memorial'] },
   { id: 'uli', displayNameHe: 'אולי', category: 'friend', activeEras: ['2000', '2010'], tags: ['away', 'risk'] },
-  { id: 'batya', displayNameHe: 'בתיה', category: 'supporter', activeEras: ['2000', '2010', '2020'], tags: ['neighbourhood', 'comedy', 'memory'] },
+  /**
+   * בתיה — החברה המבוגרת מהשכונה (מאור, 27.9.2026).
+   *
+   * *"בתיה אמורה להיות החברה המבוגרת מהשכונה, חברה כייפית אוהדת הפועל"* — והיא *"לוקחת
+   * ל'סוקו' ול'מישל' את התפקיד"*. שני התיקונים: המשפט על הצילום של הכניסה (2006, H02.2)
+   * עבר לסוקו, ו-`memory` ירד מהתגיות — "זיכרון חי" בספר הוא זיכרון של שכונה ואוכל, לא
+   * ארכיון (סוקו) ולא רשימות וקשרים (מישל). מה שלה: אוכל, קיצורי דרך, קללות אוהבות,
+   * השחקנים כילדיה, ודאגה לקובי. `content/batya.ts`.
+   * **רק מ-2000:** הגוף שלה נחתך מצילום של אישה בת שישים (`batya`); בשנות ה-80/90 היא
+   * הייתה צריכה גוף צעיר יותר, ואין כזה — אז היא לא ממוקמת לפני 2000, בכוונה.
+   */
+  { id: 'batya', displayNameHe: 'בתיה', category: 'supporter', activeEras: ['2000', '2010', '2020'], portraitSet: 'faceBatya', tags: ['neighbourhood', 'comedy', 'food', 'shortcuts', 'care'] },
   { id: 'yonatan', displayNameHe: 'יונתן', category: 'friend', activeEras: ['2010', '2020'], tags: ['music', 'rival-friend'] },
 
   { id: 'melanie', displayNameHe: 'מלאני', category: 'other', activeEras: ['2010', '2020'], tags: ['relationship'] },

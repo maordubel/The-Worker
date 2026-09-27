@@ -54,7 +54,7 @@ const slug = (who: string) =>
     'לירון': 'liron', 'ירון': 'yaron', 'אילן': 'ilan', 'בתיה': 'batya', 'אולי': 'oli', 'לינה': 'lina', 'ניקו': 'nico',
     'שני': 'shani', 'מאיה': 'maya', 'מיכל': 'michal', 'אדם': 'adam', 'מראיינת': 'interviewer', 'גור': 'gur', 'יונתן': 'yonatan',
     'נטע': 'neta', 'ענבל': 'inbal', 'יבגני': 'yevgeny', 'הילד': 'child', 'מלאני': 'melanie', 'דור': 'dor', 'תמר': 'tamar',
-    'אלכס': 'alex', 'האורח': 'guest',
+    'אלכס': 'alex', 'האורח': 'guest', 'סוקו': 'soko',
   })[who] ?? 'extra'
 
 /**
@@ -116,6 +116,10 @@ const look = (id: string, era: HotspotDef['era'], x: number, y: number, w: numbe
   ...(prop ? { prop } : {}),
   ...(when ? { when } : {}),
 })
+
+/** one person in a staged group who may be spoken to — the others stay silent (see the header) */
+const talkTo = (who: string, conversation: string) => (actor: ActorDef): ActorDef =>
+  actor.nameHe === who ? { ...actor, talk: conversation } : actor
 
 const flag = (name: string): Condition => ({ flag: name })
 const all = (...names: string[]): Condition => ({ all: names.map((n) => ({ flag: n })) })
@@ -1224,7 +1228,9 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2019-armchair', flag('a:photo'), [
       { who: 'אילן', x: 0.5, y: 0.73 },
       { who: 'בתיה', x: 0.58, y: 0.745, flip: true },
-    ]),
+    ]).map(talkTo('בתיה', 'batya-19')),
+    // 2026-plan · בתיה (27.9.2026) — השכנה, מול הסמטה, עם קופסה לדרך לבולגריה (`content/batya.ts`)
+    ...cast('2026-plan', undefined, [{ who: 'בתיה', x: 0.67, y: 0.745, flip: true }]).map(talkTo('בתיה', 'batya-26')),
     // 2023-quiet · Q08 (q-hall)
     ...cast('2023-quiet', { flag: 'own:route:USSISHKIN_FOUNDER:entry' }, [{ who: 'אפי', x: 0.56, y: 0.74, flip: true }]),
   ],
@@ -1315,10 +1321,12 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
 
   'ussishkin-outside': [
     // 2006-home · H02 (h-door)
+    // (27.9.2026) סוקו עומד כאן עם המצלמה — "תצלם גם את הכניסה" הוא שלו, לא של בתיה (מאור)
     ...cast('2006-home', flag('h:derby'), [
       { who: 'אפי', x: 0.55, y: 0.9, flip: true },
       { who: 'בתיה', x: 0.72, y: 0.88, flip: true },
-    ]),
+      { who: 'סוקו', x: 0.4, y: 0.89 },
+    ]).map(talkTo('בתיה', 'batya-06')),
     // 2007-registered · U03 (u-loss)
     // (delta 92, §8 Beat 4) the morning of 25.7.2007: Efi, Shachor, Inbal — outside, mostly quiet
     ...cast('2007-registered', flag('u:news'), [

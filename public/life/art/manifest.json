@@ -2714,7 +2714,7 @@
    "h": 640,
    "bytes": 37266,
    "yellowLeft": 0,
-   "whatHe": "עמית בן 40, משקפיים · חזית",
+   "whatHe": "עמית בן 40, בלי משקפיים · חזית",
    "source": "maor-2026-09-22-characters-2000-2026"
   },
   "amit40-3q": {
@@ -2722,7 +2722,7 @@
    "h": 640,
    "bytes": 32186,
    "yellowLeft": 0,
-   "whatHe": "עמית בן 40, משקפיים · שלושה־רבעים",
+   "whatHe": "עמית בן 40, בלי משקפיים · שלושה־רבעים",
    "source": "maor-2026-09-22-characters-2000-2026"
   },
   "amit40-side": {
@@ -2730,7 +2730,7 @@
    "h": 640,
    "bytes": 22718,
    "yellowLeft": 0,
-   "whatHe": "עמית בן 40, משקפיים · פרופיל ימינה",
+   "whatHe": "עמית בן 40, בלי משקפיים · פרופיל ימינה",
    "source": "maor-2026-09-22-characters-2000-2026"
   },
   "amit40-back": {
@@ -2738,7 +2738,7 @@
    "h": 640,
    "bytes": 36030,
    "yellowLeft": 0,
-   "whatHe": "עמית בן 40, משקפיים · גב",
+   "whatHe": "עמית בן 40, בלי משקפיים · גב",
    "source": "maor-2026-09-22-characters-2000-2026"
   },
   "amit40-walk": {
@@ -2746,7 +2746,7 @@
    "h": 640,
    "bytes": 40484,
    "yellowLeft": 0,
-   "whatHe": "עמית בן 40, משקפיים · צעד, ימינה",
+   "whatHe": "עמית בן 40, בלי משקפיים · צעד, ימינה",
    "source": "maor-2026-09-22-characters-2000-2026"
   },
   "efi44": {
@@ -2852,6 +2852,14 @@
    "yellowLeft": 0,
    "source": "maor-approved-2026-09-27",
    "whatHe": "קובי בכורסה, טרנינג שנות ה-90, קורא הפועל"
+  },
+  "batya": {
+   "w": 220,
+   "h": 640,
+   "bytes": 25852,
+   "yellowLeft": 0,
+   "whatHe": "בתיה — השכנה הוותיקה מבלומפילד, חזית (2000–2026)",
+   "source": "maor-2026-09-27-approved-photo/בתיה.jpg"
   }
  },
  "props": {
@@ -4317,6 +4325,13 @@
    "bytes": 28310,
    "yellowLeft": 0,
    "source": "portrait-only · maor-2026-09-22-characters-2000-2026/faceRachel60"
+  },
+  "faceBatya": {
+   "w": 320,
+   "h": 320,
+   "bytes": 17540,
+   "yellowLeft": 0,
+   "source": "cut from batya"
   }
  },
  "layers": {

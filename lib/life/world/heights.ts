@@ -77,6 +77,7 @@ const HEIGHTS: ReadonlyArray<readonly [string, number]> = [
   ['teacher', 1.66],
   ['veteran', 1.68],
   ['neighbour', 1.62],
+  ['batya', 1.60], // the photograph of 27.9.2026: a short, solid woman of sixty
   ['shachor', 1.78],
   ['soko', 1.68],
   ['freddy', 1.79],

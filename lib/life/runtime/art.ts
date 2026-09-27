@@ -596,6 +596,9 @@ export const FIGURE = [
   // בארי הקנוני (`barry-3q-green`, מאור 23.9.2026) הוא האיש של `barryToday`: רזה, תיק צד,
   // והטרנזיסטור. `barry96` — גבר אחר לגמרי — יצא מהזירה (`LEGACY_POSE`)
   'barryToday', 'barryToday-3q', 'barryRadio', 'barryRadio-3q',
+  // בתיה מהצילום בתיקייה המאושרת (מאור 27.9.2026: "לחתוך אותה מהצילום? כן.") — חזית אחת,
+  // עד היום עמדה על `adultB6` (`scripts/life/ingest-batya-2026-09-27.py`)
+  'batya',
 ] as const
 
 /**
@@ -1056,6 +1059,7 @@ export const PORTRAIT_ART = [
   'faceFreddy',
   'faceMelamed',
   'faceHermesh',
+  'faceBatya',
   'faceYosef',
   'faceUsher',
   'faceVendor',
