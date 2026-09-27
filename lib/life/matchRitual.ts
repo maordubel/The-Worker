@@ -30,6 +30,11 @@ export type MatchRitualDef = {
   allowPlain: boolean
   /** the shirts that make sense for the day first — the rest of the wardrobe after them */
   prefer: Shirt['kind']
+  /**
+   * (delta 93) the day is a match he goes to only in SOME lives — 2010: only the one who
+   * took the seat in Oli's car goes to Teddy. Absent: every life that reaches the chapter.
+   */
+  when?: (state: LifeState) => boolean
 }
 
 const F = (eventId: string, allowPlain = true): MatchRitualDef => ({ eventId, allowPlain, prefer: 'football' })
@@ -56,6 +61,9 @@ export const MATCH_RITUALS: Readonly<Record<string, MatchRitualDef>> = {
   '2006-home': B('2006-derby'),
   '2009-up': B('2009-promotion'),
   '2010-cup': F('2010-cup'),
+  // delta 93 — both were match days nobody dressed for
+  '1998-laces': F('1998-laces'),
+  '2010-teddy': { ...F('2010-teddy'), when: (state) => state.flags['d10:mode'] === 'venue' },
   '2024-terrace': F('2024-terrace'),
   '2025-eurocup': B('2025-eurocup'),
   '2026-finale': B('2026-botevgrad'),
@@ -79,6 +87,7 @@ export function ritualFor(state: LifeState, chapter: string): MatchRitualDef | n
   const def = MATCH_RITUALS[chapter]
   if (!def) return null
   if (state.chapterDone) return null
+  if (def.when && !def.when(state)) return null
   if (ritualOptions(state, chapter).length === 0) return null
   return def
 }

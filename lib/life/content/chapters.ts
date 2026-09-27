@@ -57,6 +57,14 @@ export type ChapterDef = {
    * "וגם"; זה "או". פרק עם שניהם צריך את שניהם.
    */
   whenAny?: readonly string[]
+  /**
+   * (delta 93) the pre-match wardrobe. `MATCH_RITUALS` is the list of match days; this is
+   * the chapter saying so out loud when it is NOT one — a day whose match is heard, watched
+   * at home, or passed through as a card and time. `tests/life-match-ritual.test.ts` asks
+   * every attended-match chapter for one or the other, so a new match day cannot slip in
+   * without a decision.
+   */
+  matchRitual?: 'required' | 'none'
   /** what a card would say — never a scoreline */
   dateHe: string
   year: number
@@ -791,6 +799,7 @@ export const CHAPTERS: readonly ChapterDef[] = [
    */
   {
     id: '2012-cups',
+    matchRitual: 'none',
     stage: 'C',
     unit: 'N01',
     titleHe: 'שלושה גביעים ואותה הבטחה',
@@ -871,6 +880,7 @@ export const CHAPTERS: readonly ChapterDef[] = [
    */
   {
     id: '2015-newhall',
+    matchRitual: 'none',
     stage: 'C',
     unit: 'N05–N06',
     titleHe: 'בית עם כתובת אחרת',
@@ -957,6 +967,7 @@ export const CHAPTERS: readonly ChapterDef[] = [
    */
   {
     id: '2018-return',
+    matchRitual: 'none',
     stage: 'C',
     unit: 'R01–R02',
     titleHe: 'עלינו, לא חזרנו אחורה',
@@ -1018,6 +1029,7 @@ export const CHAPTERS: readonly ChapterDef[] = [
    */
   {
     id: '2021-promises',
+    matchRitual: 'none',
     stage: 'C',
     unit: 'L07–L09',
     titleHe: 'אמרת שתחזור',

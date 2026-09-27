@@ -5,6 +5,7 @@ import { eraFor } from './content/era'
 import { missionDoneFlag, missionForActivity, missionKind, type PerformedMissionDef } from './content/performedMissions'
 import { offersNow, startable, type Offer } from './offers'
 import { statusOf } from './opportunities'
+import { directiveFor, opportunityFromDirective, type StoryOpportunity } from './storyDirector'
 import { routeAtLeast } from './routes'
 import type { CharacterId, LifeState, LocationId } from './types'
 
@@ -37,7 +38,14 @@ import type { CharacterId, LifeState, LocationId } from './types'
 export type OpportunityTier = 'must' | 'strong' | 'optional' | 'ambient' | 'hidden'
 
 export type LifeOpportunities = {
+  /** the story's claim on this moment (PRE_MATCH › DILEMMA › MUST) — delta 93, brief §1 */
   mandatory?: string
+  story?: StoryOpportunity
+  /**
+   * the ONE thing the world presses now: the story when it claims the moment, otherwise the
+   * first strong or optional side offer. A side offer is never primary under a mandatory.
+   */
+  primary?: string
   strong?: string[]
   optional?: string[]
   ambient?: string[]
@@ -146,12 +154,35 @@ export function resolveLifeOpportunities(input: ResolveInput): LifeOpportunities
   const keptStrong = strong.filter((id) => kept.has(id) || id.startsWith('callback:') || id.startsWith('window:'))
   const keptOptional = optional.filter((id) => kept.has(id))
 
-  // `mandatory` is reserved for a window the chapter authors as a must; nothing today writes it
+  // 1–3 · the story director (delta 93): PRE_MATCH › DILEMMA › MUST, above every side tier.
+  // Side offers are still ranked (the planner and the debug overlay read them) but none of
+  // them is primary while the story holds the moment.
+  const story = storyNow(state, chapter, here)
   const out: LifeOpportunities = { tiers }
+  if (story) {
+    tiers[story.id] = 'must'
+    out.mandatory = story.id
+    out.story = story
+    out.primary = story.id
+  } else {
+    const first = keptStrong[0] ?? keptOptional[0]
+    if (first) out.primary = first
+  }
   if (keptStrong.length) out.strong = keptStrong
   if (keptOptional.length) out.optional = keptOptional
   if (ambient.length) out.ambient = ambient
   return out
+}
+
+function storyNow(state: LifeState, chapter: string, here: LocationId): StoryOpportunity | null {
+  // the director reads the chapter's era; a state whose chapter the director was not asked
+  // about (a test's hand-built snapshot) has no story claim rather than a thrown error
+  if (chapter !== state.chapter) return null
+  try {
+    return opportunityFromDirective(directiveFor({ state, scene: here }))
+  } catch {
+    return null
+  }
 }
 
 /** the tier of one offer id (`act:<id>` / `gig:<id>`) — `hidden` for one the resolver never saw */

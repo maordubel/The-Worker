@@ -75,7 +75,7 @@ const RULES: Partial<Record<MapPlaceId, Rule[]>> = {
       // World Lifecycle (27.9.2026): after 25.7.2007 the pin stays — and says what it is now
       whyHe: 'האולם נהרס ב-25.7.2007. הסמן נשאר, המקום לא',
       when: (s) => !USSISHKIN.canTravel(s),
-      labelHe: 'אוסישקין ז"ל',
+      labelHe: 'אוסישקין הי"ד',
       subHe: 'המקום כבר איננו.',
     },
     {

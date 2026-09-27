@@ -262,8 +262,8 @@ describe('World Lifecycle — after 25.7.2007 the hall is gone', () => {
   it('the pin stays, and says what it is now', () => {
     const pin = MAP_PLACES.find((p) => p.id === 'ussishkin')!
     const state = stateWith(after[0]!, { 'life:knows:hall': true })
-    expect(placeLabel(pin, state).labelHe).toBe('אוסישקין ז"ל')
-    expect(placeLabel(pin, stateWith('1991', { 'life:knows:hall': true })).labelHe).not.toBe('אוסישקין ז"ל')
+    expect(placeLabel(pin, state).labelHe).toBe('אוסישקין הי"ד')
+    expect(placeLabel(pin, stateWith('1991', { 'life:knows:hall': true })).labelHe).not.toBe('אוסישקין הי"ד')
   })
 
   it('a save standing inside is moved out once, with a line — never the scene again', () => {

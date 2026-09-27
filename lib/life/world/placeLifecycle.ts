@@ -13,7 +13,7 @@ import type { Condition } from './types'
  *
  * `ussishkin-hall` נשאר מזהה חוקי: שמירות, זיכרונות, היסטוריית פרקים, פלאשבקים ו-2006
  * (שמתחיל בתוך האולם) כולם מחזיקים אותו. מה שמשתנה הוא runtime: `canTravel` שקר, והשם
- * על המפה הוא «אוסישקין ז"ל».
+ * על המפה הוא «אוסישקין הי"ד».
  *
  * ── מתי ────────────────────────────────────────────────────────────────────────
  *
@@ -70,7 +70,7 @@ export const USSISHKIN: PlaceLifecycle = {
   fallback: 'allenby',
   entry: 'ussishkin-outside',
   state: ussishkinState,
-  titleHe: (life) => (ussishkinState(life) === 'active' ? 'אולם אוסישקין' : 'אוסישקין ז"ל'),
+  titleHe: (life) => (ussishkinState(life) === 'active' ? 'אולם אוסישקין' : 'אוסישקין הי"ד'),
   canTravel: (life) => ussishkinState(life) === 'active',
   blockedHe: () => 'המקום כבר איננו.',
 }

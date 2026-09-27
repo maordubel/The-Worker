@@ -152,6 +152,35 @@ export function directiveFor(input: DirectorInput): MainStoryDirective | null {
   }
 }
 
+// ---------------------------------------------------------------- the resolver's view ---
+
+/**
+ * The story's claim on this moment, in the resolver's vocabulary (delta 93, brief §1).
+ * `rank` is the precedence the resolver sorts by: PRE_MATCH › DILEMMA › MUST, all of them
+ * above every side tier. TRANSITION is not written by any chapter yet and is never
+ * mandatory.
+ */
+export type StoryOpportunity = {
+  id: string
+  mode: Exclude<DirectiveMode, 'TRANSITION'>
+  rank: 0 | 1 | 2
+  titleHe: string
+  destinations: LocationId[]
+}
+
+const MODE_RANK: Record<StoryOpportunity['mode'], StoryOpportunity['rank']> = { PRE_MATCH: 0, DILEMMA: 1, MUST: 2 }
+
+export function opportunityFromDirective(directive: MainStoryDirective | null): StoryOpportunity | null {
+  if (!directive || directive.mode === 'TRANSITION') return null
+  return {
+    id: `story:${directive.id}`,
+    mode: directive.mode,
+    rank: MODE_RANK[directive.mode],
+    titleHe: directive.objectiveHe,
+    destinations: directiveDestinations(directive),
+  }
+}
+
 /** the rooms the directive sends him to — what the door lights and the free-time planner read */
 export function directiveDestinations(directive: MainStoryDirective | null): LocationId[] {
   return (directive?.destinations ?? []).map((d) => d.to)

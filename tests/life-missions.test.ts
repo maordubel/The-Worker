@@ -322,7 +322,9 @@ describe('the resolver — pure, deterministic, 0–2 good ones (MASTER §5, §4
     const here = at('1998-laces', 'gate5')
     const resolved = resolveLifeOpportunities({ state: here })
     expect(resolved.optional).toContain('act:banner-letters')
-    expect(resolved.mandatory).toBeUndefined()
+    // delta 93: the story director claims the moment; the side offer is ranked but never primary
+    expect(resolved.mandatory).toMatch(/^story:/)
+    expect(resolved.primary).toBe(resolved.mandatory)
     // elsewhere — in a room this life already knows (an offer is never revealed from nowhere)
     const away = at('1998-laces', 'street', { flags: { 'life:been:gate5': true } })
     expect(resolveLifeOpportunities({ state: away }).tiers['act:banner-letters']).toBe('ambient')

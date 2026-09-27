@@ -2665,7 +2665,7 @@ Spec: `SMART-FREE-TIME-TIME-ADVANCE-SPEC-2026-09-25`. One system; `PassTime` and
 4. **`lib/life/world/placeLifecycle.ts`.** אחרי `2007-registered` הדלת לאוסישקין לא קיימת
    (`exitInEra`), ובתוך הפרק היא נסגרת כש-`life:place:ussishkin = 'demolished'` עולה בביט 7 (`whenFor`).
    דלתות בתוך המקום לא נסגרות לעולם. מטרה/פעולה/במאי לעולם לא מכוונים לשם (`sceneAlive`);
-   המפה: «אוסישקין ז"ל» (`labels.ts`); שמירה שעומדת בפנים זזה פעם אחת לאלנבי (`BootScene`).
+   המפה: «אוסישקין הי"ד» (`labels.ts`); שמירה שעומדת בפנים זזה פעם אחת לאלנבי (`BootScene`).
    ההריסה היא שבעה ביטים (ערב אחרון → טלפון בבוקר → הליכה → אנשים → אבק בלי HUD → בחירה אנושית
    → העולם משתנה), בלי פרס. `life:uss:there`/`life:uss:lossKind` נקראים ב-2009/2012/2015/2026.
 5. **סרט = מדיניות אחת וכפתור אחד.** `lib/life/filmPlayback.ts` + `FilmSkipButton` בפתיח, בדוקומנטרי
