@@ -851,6 +851,20 @@ export const NEW_ROOMS: SceneDef[] = [
         spawn: 'fromBus',
         labelHe: 'טיסה חזרה הביתה',
         light: { x: 0.925, y: 0.1, w: 0.075, h: 0.4, tone: 'daylight' },
+        /**
+         * 2010 (27.9.2026, `city2027/europe2010.ts`) — the flight home waits for the evening
+         * he flew out for: the match is behind the glass doors, not behind this one.
+         */
+        needsByEra: {
+          '2010-qualify': { none: [{ all: [{ flagIs: { flag: 'c10:tripTo', value: 'salzburg' } }], none: [{ flag: 'c10:salzDone' }] }] },
+          '2010-anthem': {
+            none: [
+              { all: [{ flagIs: { flag: 'life:trip2010', value: 'lisbon' } }], none: [{ flag: 'c10:debut' }] },
+              { all: [{ flagIs: { flag: 'life:trip2010', value: 'lyon' } }, { flag: 'c10:benfica' }], none: [{ flag: 'c10:lyon' }] },
+            ],
+          },
+        },
+        blockedByEra: { '2010-qualify': 'המשחק עוד לפניך — האוטובוס לאצטדיון בדלתות הזכוכית.', '2010-anthem': 'המשחק עוד לפניך — האוטובוס לאצטדיון בדלתות הזכוכית.' },
         dwellMs: 900,
       },
     ],
@@ -1003,6 +1017,53 @@ export const NEW_ROOMS: SceneDef[] = [
  * בין הרהיטים, ה-`y` בתוך הרצועה של אותו ציור באותה שנה.
  */
 export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
+  // ------------------------------------------ טדי ואירופה 2010 (27.9.2026) ----
+  // `city2027/europe2010.ts` — the away ends. Everyone stands on the walkway, left of the
+  // point where the rail recedes into the band (x ≤ 0.8), clear of the spawn at 0.1.
+  teddy: [
+    // D06–D08 — the ones who came: Ofir (by car or by bus), Metuki (the same), Amit with the phone
+    ...cast('2010-teddy', { all: [{ flag: 'd10:road' }], none: [{ flag: 'd10:chaos' }] }, [
+      { who: 'מתוקי', x: 0.47, y: 0.89 },
+      { who: 'עמית', x: 0.66, y: 0.83, flip: true },
+    ]),
+    ...cast('2010-teddy', flag('d10:road'), [{ who: 'אופיר', x: 0.56, y: 0.86, flip: true }]),
+    // D08 — after the chaos Oli comes up from the car park to collect his list
+    ...cast('2010-teddy', flag('d10:chaos'), [{ who: 'אולי', x: 0.3, y: 0.88 }]),
+    // the away end itself: people who are not in the story, and more of them after the whistle
+    ...cast('2010-teddy', flag('d10:road'), [
+      { who: 'אוהד', x: 0.76, y: 0.82, figure: 'adultA3', flip: true },
+      { who: 'אוהד', x: 0.24, y: 0.82, figure: 'adultA5' },
+    ]),
+    ...cast('2010-teddy', flag('d10:call'), [
+      { who: 'אוהד', x: 0.38, y: 0.94, figure: 'youngA4' },
+      { who: 'אוהד', x: 0.71, y: 0.95, figure: 'youngB4' },
+    ]),
+  ],
+  'away-salzburg': [
+    // C01b — Ofir chose his city before the draw, and this was it
+    ...cast('2010-qualify', { flagIs: { flag: 'c10:tripTo', value: 'salzburg' } }, [
+      { who: 'אופיר', x: 0.7, y: 0.82, flip: true },
+      { who: 'אוהד', x: 0.78, y: 0.86, figure: 'adultA3', flip: true },
+      { who: 'אוהד', x: 0.36, y: 0.8, figure: 'youngA4' },
+    ]),
+  ],
+  'away-lisbon': [
+    // C03 away — Roma who arranged it, Ofir who would not miss it; Amit is on the phone
+    ...cast('2010-anthem', { flagIs: { flag: 'life:trip2010', value: 'lisbon' } }, [
+      { who: 'רומא', x: 0.58, y: 0.87, flip: true },
+      { who: 'אופיר', x: 0.67, y: 0.9, flip: true },
+      { who: 'אוהד', x: 0.46, y: 0.86, figure: 'adultA5' },
+      { who: 'אוהד', x: 0.76, y: 0.94, figure: 'youngA4', flip: true },
+    ]),
+  ],
+  'away-lyon': [
+    // C07 away — Roma under the cloth; Amit and Ofir call from the living room
+    ...cast('2010-anthem', { flagIs: { flag: 'life:trip2010', value: 'lyon' } }, [
+      { who: 'רומא', x: 0.55, y: 0.85, flip: true },
+      { who: 'אוהד', x: 0.66, y: 0.88, figure: 'adultA3', flip: true },
+      { who: 'אוהד', x: 0.2, y: 0.92, figure: 'youngA4' },
+    ]),
+  ],
   home: [
     // 2000-bridge · B00 (b-home) — רחל בסלון, לפני שקובי חוזר
     ...cast('2000-bridge', undefined, [{ who: 'רחל', x: 0.3, y: 0.9, figure: 'rachel90' }]),
@@ -1472,6 +1533,10 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'אופיר', x: 0.46, y: 0.68, flip: true },
       { who: 'רומא', x: 0.6, y: 0.66, flip: true },
       { who: 'עמית', x: 0.2, y: 0.7 },
+    ]),
+    // 2010-anthem · the terminal on the way to Lisbon or Lyon — Roma holds the tickets (27.9.2026)
+    ...cast('2010-anthem', { any: [{ all: [{ flag: 'c10:lisFlown' }], none: [{ flag: 'c10:debut' }] }, { all: [{ flag: 'c10:lyonFlown' }], none: [{ flag: 'c10:lyon' }] }] }, [
+      { who: 'רומא', x: 0.46, y: 0.68, flip: true },
     ]),
     // 2026-finale · F02 (f-road) — "יש לי את הכרטיסים"
     ...cast('2026-finale', undefined, [{ who: 'קובי', x: 0.46, y: 0.68, flip: true }]),

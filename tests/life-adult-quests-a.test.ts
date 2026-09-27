@@ -321,12 +321,28 @@ describe('2010 · D05–D09 — a plan made before the biggest night, and lived 
     expect(sim.press('d10-promise', promise)).toBe(true)
   }
 
+  /**
+   * (27.9.2026) Teddy is a ROOM: the road card carries whoever took the seat into the away
+   * end, the night is lived there (a spot at the rail, the whistle, the call, the chaos, the
+   * promise), and the car is where he goes out of the door on the left — back to his street.
+   */
+  function teddy(sim: WorldSim, spot = 'rail') {
+    expect(sim.location).toBe('teddy')
+    expect(sim.opened).toContain('d10-away')
+    if (has(sim, 'd10-spot')) expect(sim.press('d10-spot', spot)).toBe(true)
+    expect(sim.state.flags['d10:back']).toBe(true)
+    expect(sim.exit('home')).toBe(true)
+    expect(sim.location).toBe('street')
+  }
+
   it('golden · Metuki in the last seat, the promise kept through the crowd — the proof when Amit sees you at the car', () => {
     const sim = venue('metuki', 'promise', 'keep')
     plan(sim, 'metuki', 'promise')
+    teddy(sim)
     expect(sim.state.flags['promise:return2010']).toBe(true)
-    // the night explodes before the question is asked
-    expect(sim.opened).toEqual(expect.arrayContaining(['d10-title', 'd10-call', 'd10-chaos', 'd10-back', 'd10-car']))
+    // the night explodes before the question is asked — in the away end itself
+    expect(sim.opened).toEqual(expect.arrayContaining(['d10-title-away', 'd10-call-away', 'd10-chaos', 'd10-back', 'd10-car']))
+    expect(sim.opened).not.toContain('d10-title')
     expect(sim.opened.indexOf('d10-chaos')).toBeLessThan(sim.opened.indexOf('d10-back'))
     expect(sim.state.flags[TEDDY_2010]).toBe('kept')
     expect(proof(sim, 'promise_kept:2010-teddy:return')).toBe(true)
@@ -339,8 +355,9 @@ describe('2010 · D05–D09 — a plan made before the biggest night, and lived 
   it('messy · Ofir picked up from the office, the plan changed beforehand and aloud: a taxi', () => {
     const sim = venue('ofir', 'promise', 'change')
     plan(sim, 'ofir', 'promise')
+    teddy(sim, 'phone')
     expect(sim.opened).toContain('d10-pickup')
-    expect(sim.opened.indexOf('d10-pickup')).toBeLessThan(sim.opened.indexOf('d10-title'))
+    expect(sim.opened.indexOf('d10-pickup')).toBeLessThan(sim.opened.indexOf('d10-title-away'))
     expect(sim.state.flags[TEDDY_2010]).toBe('renegotiated')
     expect(proof(sim, 'promise_renegotiated:2010-teddy:return')).toBe(true)
     sim.go('kitchen')
@@ -354,6 +371,7 @@ describe('2010 · D05–D09 — a plan made before the biggest night, and lived 
       return pick('venue', 'metuki', 'pay', 'promise', 'ours', 'here', 'forget', 'amit')(choices)
     }, {}, 1, PURSE)
     plan(sim, 'metuki', 'promise')
+    teddy(sim)
     expect(sim.state.flags[TEDDY_2010]).toBe('broken')
     expect(proof(sim, 'promise_kept')).toBe(false)
     expect(meets(sim.state, { relationshipMemory: { who: 'amit', eventId: 'teddy2010-broken' } })).toBe(true)
@@ -365,6 +383,7 @@ describe('2010 · D05–D09 — a plan made before the biggest night, and lived 
   it('the honest "I do not promise what I do not know" is not tested as a broken promise', () => {
     const sim = venue('metuki', 'honest', 'keep')
     plan(sim, 'metuki', 'honest')
+    teddy(sim)
     expect(sim.state.flags['promise:return2010']).toBeFalsy()
     expect(sim.state.flags[TEDDY_2010]).toBe('unpromised')
     sim.go('kitchen')

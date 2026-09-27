@@ -218,6 +218,10 @@ export const goalCup10 = (state: LifeState): LocationId | null => {
 /** 2010, החלק השני — הרחוב ליד הרכב, ואז המטבח בבוקר */
 export const goalTeddy = (state: LifeState): LocationId | null => {
   if (!flag(state, 'd10:plan')) return 'street'
+  // (27.9.2026) the away end is a room: whoever took the seat stands in it until the way out
+  const venue = state.flags['d10:mode'] === 'venue'
+  if (venue && flag(state, 'd10:road') && !flag(state, 'd10:back')) return 'teddy'
+  if (venue && flag(state, 'd10:back') && !flag(state, 'd10:carDone')) return 'street'
   if (flag(state, 'd10:back') && !flag(state, 'd10:morning')) return 'kitchen'
   return null
 }
