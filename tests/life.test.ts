@@ -21,7 +21,7 @@ import { LIFE_PALETTE } from '@/lib/life/runtime/palette'
 import { ALL_SCENES, SCENE } from '@/lib/life/world/scenes'
 import { SHIRT, ARTEFACT, artUrl, BACKDROP, DOC, EMBLEM, EMBLEM_OF_GAUGE_GROUP, EMBLEM_OF_RESOURCE, EMBLEM_OF_ROUTE, EMBLEM_OF_SKILL, EMBLEM_OF_TRACK, extensionKeys, FIGURE, HERO80_WALK, ICON, ICON_OF_VERB, isArtefact, KID_POSE, KID_WALK, KID_WALK_AWAY, LAYER, PANORAMA, PROP } from '@/lib/life/runtime/art'
 import { PANO_SPOTS } from '@/lib/life/content/panoramas'
-import { ERA_1986, ERA_1990, ERA_1991 } from '@/lib/life/content/era'
+import { ERA_1986, ERA_1990, ERA_1991, eraFor } from '@/lib/life/content/era'
 import { arrivalFor, exitInEra, inEra } from '@/lib/life/world/scenes'
 import { CHAPTERS } from '@/lib/life/content/chapters'
 import { meets } from '@/lib/life/world/types'
@@ -818,6 +818,22 @@ describe('העולם — every door leads somewhere that exists', () => {
   it('walks from the bedroom to the terrace', () => {
     const seen = new Set<string>(['bedroom'])
     const queue = ['bedroom']
+    /**
+     * (27.9.2026) a chapter's own `travel` is a way in too — the road to Teddy, the flight to
+     * Lisbon — exactly as `life:worldlines` counts it (`closureFor`: *"travel הוא דלת"*). The
+     * away ends of 2010 have a door OUT on foot and a way IN by car or plane, not a doorway
+     * in somebody's street.
+     */
+    for (const chapter of CHAPTERS) {
+      for (const beat of eraFor(chapter.id).beats ?? []) {
+        for (const action of beat.do) {
+          if (action.a === 'travel' && !seen.has(action.to)) {
+            seen.add(action.to)
+            queue.push(action.to)
+          }
+        }
+      }
+    }
     while (queue.length > 0) {
       const id = queue.shift() as keyof typeof SCENE
       for (const exit of SCENE[id]?.exits ?? []) {

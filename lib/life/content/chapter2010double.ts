@@ -31,8 +31,9 @@ import { PORTRAIT_FOUNDING } from './chapter2007founding'
  * וזה גם מה ש-`ACH_NEW_PLAN` סופר: שינוי מראש **שאחריו קיום**, על אותו נושא.
  *
  * **החדרים.** `D01` הוא *"מגרש החברים"* ויושב על `pitch` של 1986 עד ש-`pitchSmall` ינחת
- * (`life:places` מדפיס את זה בשמו). טדי אינו חדר, ולכן מי שנוסע למגרש חווה אותו ככרטיס
- * וזמן — אותה החלטה של צ׳לסי ב-E01 — והסלון הוא החלופה שהתסריט עצמו כתב.
+ * (`life:places` מדפיס את זה בשמו). **מ-27.9.2026 טדי הוא חדר** (`world/city2027/europe2010.ts`,
+ * ציור קונספט של יציע אורחים): מי שנוסע עומד בו — המעקה, הבד, השריקה והכאוס — ויוצא ממנו
+ * ברגליים. מי שבסלון או מרחוק רואה אותו כמו קודם, ככרטיס ותג מקום.
  */
 
 /**
@@ -139,6 +140,15 @@ export function objectiveTeddy(state: LifeState, sceneId: string): string | null
     if (!state.flags['d10:paid']) return 'אולי מחכה לכסף — כרטיס ודלק.'
     return 'עמית רוצה לדעת איך חוזרים.'
   }
+  // (27.9.2026) whoever took the seat stands in the away end — Teddy is a room now
+  if (state.flags['d10:mode'] === 'venue' && state.flags['d10:road'] && !state.flags['d10:back']) {
+    if (sceneId !== 'teddy') return 'טדי. יציע האורחים.'
+    if (!state.flags['d10:title'] && !state.flags['d10:spot']) return 'מקום ליד המעקה. החבר׳ה כבר שם.'
+    if (!state.flags['d10:title']) return 'שני מגרשים, לב אחד.'
+    if (!state.flags['d10:call']) return 'השריקה. למי אתה מתקשר.'
+    return 'מי נשאר מאחור.'
+  }
+  if (state.flags['d10:mode'] === 'venue' && state.flags['d10:back'] && !state.flags['d10:carDone']) return sceneId === 'teddy' ? 'היציאה משמאל. הרכב של אולי.' : null
   if (!state.flags['d10:title']) return 'שבת. שני מגרשים, לב אחד.'
   if (!state.flags['d10:call']) return 'אחרי השריקה. למי אתה מתקשר.'
   if (!state.flags['d10:back']) return 'מי נשאר מאחור.'
@@ -238,29 +248,57 @@ export const BEATS_TEDDY: Beat[] = [
     delayMs: 1200,
     do: [{ a: 'flag', flag: 'd10:pickedUp' }, { a: 'card', titleHe: 'המשרד של אופיר', subHe: '15:40', ms: 2200 }, { a: 'talk', conversation: 'd10-pickup' }],
   },
-  // D06 — טדי אינו מצויר: כרטיס שאומר לאן נסענו, ותג מקום בתיבה לאורך שלוש השיחות שם
+  /**
+   * (27.9.2026) D06 — **טדי הוא חדר.** מי שלקח את המקום ברכב של אולי נוסע אליו באמת
+   * (`city2027/europe2010.ts`): כרטיס של דרך, ואז יציע האורחים עצמו — מקום ליד המעקה, הבד
+   * של מישהו אחר, השריקה, והכאוס שבולע את מתוקי — ורק אז הדלת משמאל, לחניה. מי שראה
+   * מהסלון או מרחוק ממשיך בדיוק כמו קודם: כרטיס, ותג מקום בתיבה.
+   */
   {
-    id: 'd10-title',
+    id: 'd10-road',
     trigger: 'clock',
-    when: {
-      all: [{ flag: 'd10:plan' }, { any: [{ notFlag: 'd10:needsPickup' }, { flag: 'd10:pickedUp' }, { none: [VENUE] }] }],
-      none: [{ flag: 'd10:title' }],
-    },
-    delayMs: 1400,
-    do: [{ a: 'card', titleHe: 'שבת', subHe: 'טדי', ms: 2400 }, { a: 'talk', conversation: 'd10-title' }],
+    when: { all: [{ flag: 'd10:plan' }, VENUE, { any: [{ notFlag: 'd10:needsPickup' }, { flag: 'd10:pickedUp' }] }], none: [{ flag: 'd10:road' }] },
+    delayMs: 1200,
+    do: [{ a: 'flag', flag: 'd10:road' }, { a: 'card', titleHe: 'שבת', subHe: 'טדי', ms: 2400 }, { a: 'travel', to: 'teddy', spawn: 'start' }],
   },
-  { id: 'd10-call', trigger: 'clock', when: { all: [{ flag: 'd10:title' }], none: [{ flag: 'd10:call' }] }, delayMs: 1200, do: [{ a: 'card', titleHe: 'השריקה', subHe: 'אלופים', ms: 1800 }, { a: 'talk', conversation: 'd10-call' }] },
-  /** הסיבוך — הלילה מתפוצץ. רק למי שנסע; מי שבסלון לא צריך לאסוף אף אחד מאף חניה */
-  { id: 'd10-chaos', trigger: 'clock', when: { all: [{ flag: 'd10:call' }, VENUE], none: [{ flag: 'd10:chaos' }] }, delayMs: 900, do: [{ a: 'flag', flag: 'd10:chaos' }, { a: 'talk', conversation: 'd10-chaos' }] },
+  { id: 'd10-away', at: 'teddy', trigger: 'enter', when: { all: [{ flag: 'd10:road' }], none: [{ flag: 'd10:away' }] }, delayMs: 800, do: [{ a: 'crowd', state: 'LOW_MURMUR' }, { a: 'talk', conversation: 'd10-away' }] },
+  /** מקום ליד המעקה נלקח — ועכשיו העדכונים מתחילים להגיע */
+  { id: 'd10-title-away', at: 'teddy', trigger: 'clock', when: { all: [{ flag: 'd10:away' }, { flag: 'd10:spot' }], none: [{ flag: 'd10:title' }] }, delayMs: 1200, do: [{ a: 'crowd', state: 'BUILDING_TENSION' }, { a: 'talk', conversation: 'd10-title-away' }] },
+  /** מי שעומד ולא בוחר מקום — עמית בא אליו עם הטלפון (fail-forward: אין מקום, יש עדכון) */
+  {
+    id: 'd10-nudge',
+    at: 'teddy',
+    trigger: 'clock',
+    when: { all: [{ flag: 'd10:away' }], none: [{ flag: 'd10:spot' }, { flag: 'd10:title' }] },
+    delayMs: 18000,
+    do: [{ a: 'actorCue', actorId: '2010-teddy-amit', cue: 'approach', target: 'player' }, { a: 'flag', flag: 'd10:spot' }, { a: 'crowd', state: 'BUILDING_TENSION' }, { a: 'talk', conversation: 'd10-title-away' }],
+  },
+  {
+    id: 'd10-call-away',
+    at: 'teddy',
+    trigger: 'clock',
+    when: { all: [{ flag: 'd10:title' }, VENUE], none: [{ flag: 'd10:call' }] },
+    delayMs: 1400,
+    do: [{ a: 'sound', kind: 'whistle', blasts: 3 }, { a: 'crowd', state: 'FINAL_WHISTLE' }, { a: 'card', titleHe: 'השריקה', subHe: 'אלופים', ms: 1800 }, { a: 'sound', kind: 'roar', big: 2 }, { a: 'talk', conversation: 'd10-call-away' }],
+  },
+  { id: 'd10-title', trigger: 'clock', when: { all: [{ flag: 'd10:plan' }], none: [{ flag: 'd10:title' }, VENUE] }, delayMs: 1400, do: [{ a: 'card', titleHe: 'שבת', subHe: 'טדי', ms: 2400 }, { a: 'talk', conversation: 'd10-title' }] },
+  { id: 'd10-call', trigger: 'clock', when: { all: [{ flag: 'd10:title' }], none: [{ flag: 'd10:call' }, VENUE] }, delayMs: 1200, do: [{ a: 'card', titleHe: 'השריקה', subHe: 'אלופים', ms: 1800 }, { a: 'talk', conversation: 'd10-call' }] },
+  /** הסיבוך — הלילה מתפוצץ, ביציע עצמו. רק למי שנסע; מי שבסלון לא צריך לאסוף אף אחד מאף חניה */
+  { id: 'd10-chaos', at: 'teddy', trigger: 'clock', when: { all: [{ flag: 'd10:call' }, VENUE], none: [{ flag: 'd10:chaos' }] }, delayMs: 900, do: [{ a: 'flag', flag: 'd10:chaos' }, { a: 'talk', conversation: 'd10-chaos' }] },
+  { id: 'd10-back-away', at: 'teddy', trigger: 'clock', when: { all: [{ flag: 'd10:chaos' }, VENUE], none: [{ flag: 'd10:back' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'd10-back' }] },
   {
     id: 'd10-back',
     trigger: 'clock',
-    when: { all: [{ flag: 'd10:call' }, { any: [{ flag: 'd10:chaos' }, { none: [VENUE] }] }], none: [{ flag: 'd10:back' }] },
+    when: { all: [{ flag: 'd10:call' }], none: [{ flag: 'd10:back' }, VENUE] },
     delayMs: 1200,
     do: [{ a: 'talk', conversation: 'd10-back' }],
   },
-  /** ברכב — העולם מגיב למה שנעשה עם ההבטחה, והראיה נרשמת כאן (§13) */
-  { id: 'd10-car', trigger: 'clock', when: { all: [{ flag: 'd10:back' }, VENUE], none: [{ flag: 'd10:carDone' }] }, delayMs: 1000, do: [{ a: 'talk', conversation: 'd10-car' }] },
+  /**
+   * ברכב — העולם מגיב למה שנעשה עם ההבטחה, והראיה נרשמת כאן (§13). (27.9.2026) הוא יוצא
+   * מהיציע בדלת משמאל, והנסיעה היא חתך: כרטיס של איילון, והשיחה מתויגת "בדרך הביתה" —
+   * הרחוב שלו הוא המקום שבו הוא נוחת, לא המקום שבו היא נאמרת.
+   */
+  { id: 'd10-car', at: 'street', trigger: 'clock', when: { all: [{ flag: 'd10:back' }, VENUE], none: [{ flag: 'd10:carDone' }] }, delayMs: 900, do: [{ a: 'card', titleHe: 'איילון', subHe: 'אחרי חצות', ms: 2000 }, { a: 'talk', conversation: 'd10-car' }] },
   {
     id: 'd10-morning',
     at: 'kitchen',
@@ -336,6 +374,29 @@ const PROMISE_CHOICES: ChoiceDef[] = [
       { e: 'flag', flag: 'd10:unpromised' },
       { e: 'personality', key: 'honesty', delta: 2 },
       { e: 'toast', text: 'עמית: "לפחות אמרת לפני. זה כבר משהו."', tone: 'plain' },
+    ],
+  },
+]
+
+/** D06 בטדי — אותן מילים, אבל אבא בהודעה ולא לידך (התסריט: "ללא התחזות לנוכחות") */
+const TITLE_AWAY_LINES = [
+  { who: 'עמית', text: 'יש עדכון.' },
+  { who: 'אופיר', text: 'אל תגיד לפני שבדקת.' },
+  { who: 'פוגי', text: 'זה אתה אומר?' },
+  { who: 'אופיר', text: 'למדתי. כואב, אבל למדתי.' },
+  { who: 'קובי', text: 'תראו את המשחק שלכם רגע.' },
+]
+
+const TITLE_AWAY_CHOICES: ChoiceDef[] = [
+  TITLE_CHOICES[0]!,
+  TITLE_CHOICES[1]!,
+  {
+    id: 'beside',
+    text: '(לענות לאבא: "אני פה.")',
+    then: [
+      { e: 'flag', flag: 'd10:title' },
+      { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
+      { e: 'toast', text: 'קובי: "אל תעזוב רגע." — "אני פה."', tone: 'plain' },
     ],
   },
 ]
@@ -770,7 +831,6 @@ export const CONVERSATIONS_2010: Conversation[] = [
     /** הלילה מתפוצץ — ומה שנבחר ברחוב (מי ברכב) הוא מה שמסתבך עכשיו */
     id: 'd10-chaos',
     nameHe: null,
-    where: 'טדי, אחרי',
     branches: [
       {
         when: { flagIs: { flag: 'd10:seat', value: 'ofir' } },
@@ -799,7 +859,8 @@ export const CONVERSATIONS_2010: Conversation[] = [
   {
     id: 'd10-back',
     nameHe: 'אולי',
-    where: 'ביציאה מטדי',
+    // (27.9.2026) נאמרת ביציע עצמו, או בסלון; עמית כבר ליד הרכב, והוא בטלפון
+    remote: { 'עמית': 'phone' },
     branches: [
       {
         when: { flag: 'promise:return2010' },
@@ -877,7 +938,7 @@ export const CONVERSATIONS_2010: Conversation[] = [
      */
     id: 'd10-car',
     nameHe: 'עמית',
-    where: 'ביציאה מטדי',
+    where: 'בדרך הביתה',
     branches: [
       {
         when: { all: [{ flagIs: { flag: 'd10:return', value: 'kept' } }, { flagIs: { flag: 'd10:seat', value: 'metuki' } }] },
@@ -938,6 +999,162 @@ export const CONVERSATIONS_2010: Conversation[] = [
       {
         lines: [{ who: null, text: 'הרכב של אולי יצא בלעדיך, כמו שסיכמתם. חזרת באוטובוס של שתיים, עם כל העיר.' }],
         then: [{ e: 'flag', flag: 'd10:carDone' }, { e: 'flagValue', flag: TEDDY_2010, value: 'unpromised' }],
+      },
+    ],
+  },
+  // ------------------------------------------------ טדי, מבפנים (27.9.2026) ------
+  {
+    /** ההגעה — אולי נשאר למטה, והחבר׳ה עולים לבטון */
+    id: 'd10-away',
+    nameHe: 'עמית',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'טדי. יציע האורחים, והבטון עוד חם מהשמש. אולי נשאר למטה לחפש חניה.' },
+          { who: 'אופיר', text: 'תראה אותם. כולם באו.' },
+          { who: 'עמית', text: 'יש פה פס אחד של קליטה. אני מחזיק את הטלפון גבוה.' },
+          { who: 'פוגי', text: 'רק אל תגיד לי כלום לפני שבדקת.' },
+        ],
+        then: [{ e: 'flag', flag: 'd10:away' }],
+      },
+    ],
+  },
+  {
+    /** איפה עומדים — לראות, או לשמוע. שני מקומות, ומה שכל אחד עולה */
+    id: 'd10-spot',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'המעקה מלא עד הכתפיים. יש מקום אחד בשורה הראשונה, ומקום מאחור, ליד עמית, איפה שיש קליטה.' }],
+        choices: [
+          {
+            id: 'rail',
+            text: '(לשורה הראשונה. לראות, לא לשמוע.)',
+            then: [
+              { e: 'flag', flag: 'd10:spot' },
+              { e: 'flagValue', flag: 'd10:spotAt', value: 'rail' },
+              { e: 'redheart', key: 'terraceCulture', delta: 2 },
+              { e: 'toast', text: 'אתה רואה כל דשא. את מה שקורה במגרש השני תשמע אחרון.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'phone',
+            text: '(מאחור, ליד עמית והטלפון.)',
+            then: [
+              { e: 'flag', flag: 'd10:spot' },
+              { e: 'flagValue', flag: 'd10:spotAt', value: 'phone' },
+              { e: 'rel', who: 'amit', axis: 'bond', delta: 1 },
+              { e: 'toast', text: 'עמית מרים את הטלפון מעל הראשים. חצי מהדשא מוסתר לך.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /** הבד של מישהו אחר, על המעקה — לקשור לידו משהו שלך, לחזק אותו, או להשאיר */
+    id: 'd10-cloth',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'על המעקה תלוי בד אדום-לבן של מישהו אחר, קשור בחוט אחד. הרוח מהמגרש כבר מושכת אותו.' }],
+        choices: [
+          {
+            id: 'scarf',
+            text: '(לקשור לידו את הצעיף שלך.)',
+            then: [
+              { e: 'flag', flag: 'd10:cloth' },
+              { e: 'flagValue', flag: 'd10:clothKind', value: 'scarf' },
+              { e: 'redheart', key: 'terraceCulture', delta: 2 },
+              { e: 'toast', text: 'הצעיף על המעקה. מאחוריך מישהו מרים אגודל.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'knot',
+            text: '(לחזק את הקשר שלו. זה לא שלך, אבל זה שלנו.)',
+            then: [
+              { e: 'flag', flag: 'd10:cloth' },
+              { e: 'flagValue', flag: 'd10:clothKind', value: 'knot' },
+              { e: 'personality', key: 'responsibility', delta: 2 },
+              { e: 'toast', text: 'קשר כפול. הבד מפסיק לרעוד.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'leave',
+            text: '(להשאיר. מי שתלה — יקשור.)',
+            then: [{ e: 'flag', flag: 'd10:cloth' }, { e: 'flagValue', flag: 'd10:clothKind', value: 'left' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /** מה שנשאר על המעקה — לפני השריקה, ואחריה */
+    id: 'd10-scarf',
+    nameHe: null,
+    branches: [
+      { when: { flag: 'd10:call' }, lines: [{ who: null, text: 'מישהו שאתה לא מכיר שר עם הצעיף שלך ביד. זה בסדר. הוא יחזיר אותו למעקה.' }] },
+      { lines: [{ who: null, text: 'הצעיף שלך, בין הבד של מישהו אחר לדשא.' }] },
+    ],
+  },
+  {
+    /** D06 ביציע עצמו — אבא בטלפון, והחבר׳ה לידך. אותן שלוש הבחירות, בלי תג מקום */
+    id: 'd10-title-away',
+    nameHe: 'עמית',
+    remote: { 'קובי': 'phone' },
+    branches: [
+      {
+        when: { flagIs: { flag: 'd10:spotAt', value: 'rail' } },
+        lines: [{ who: null, text: 'מהשורה הראשונה הכול קרוב — הדשא, הקווים, הגב של השוער. הטלפון של עמית רחוק שלוש שורות.' }, ...TITLE_AWAY_LINES],
+        choices: TITLE_AWAY_CHOICES,
+      },
+      { lines: [{ who: null, text: 'הטלפון של עמית מעל הראשים, והמסך שלו נדלק ונכבה.' }, ...TITLE_AWAY_LINES], choices: TITLE_AWAY_CHOICES },
+    ],
+  },
+  {
+    /** D07 ביציע — השריקה כבר נשמעה; למי מתקשרים, או את מי מחבקים */
+    id: 'd10-call-away',
+    nameHe: 'אופיר',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'השריקה. אלופים. היציע קופץ, והמעקה רועד תחת הידיים.' },
+          { who: 'פוגי', text: 'אני לא יודע למי להתקשר.' },
+          { who: 'אופיר', text: 'למי שאתה רוצה.' },
+          { who: 'פוגי', text: 'כולם מתקשרים.' },
+          { who: 'אופיר', text: 'אז פעם אחת לא עמית יחליט לפי טבלה.' },
+        ],
+        choices: [
+          {
+            id: 'kobi',
+            text: '(להתקשר לאבא. להרים את הטלפון אל היציע, שישמע.)',
+            then: [
+              { e: 'flag', flag: 'd10:call' },
+              { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
+              { e: 'remember', who: 'kobi', eventId: 'first-call-2010', significance: 'major' },
+              { e: 'toast', text: '"אבא?" — "אני שומע אתכם מפה." — "אני לא יודע מה להגיד." — "אז אל תגיד. תחזיק את הטלפון עוד רגע."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'efi',
+            text: '(להתקשר לאפי.)',
+            then: [
+              { e: 'flag', flag: 'd10:call' },
+              { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
+              { e: 'remember', who: 'efi', eventId: 'first-call-2010', significance: 'major' },
+              { e: 'toast', text: 'אפי: "אני שומע אתכם עד לפה." — "רציתי שתהיה רגע בפנים."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'here',
+            text: '(להכניס את הטלפון לכיס ולחבק את אופיר.)',
+            then: [
+              { e: 'flag', flag: 'd10:call' },
+              { e: 'rel', who: 'ofir', axis: 'bond', delta: 3 },
+              { e: 'toast', text: 'אופיר: "תכניס את הטלפון לכיס." — "הוא נפל כבר פעמיים."', tone: 'plain' },
+            ],
+          },
+        ],
       },
     ],
   },

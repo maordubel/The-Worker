@@ -44,6 +44,7 @@ import { ALL_SCENES, exitInEra, needsFor, whenFor } from '../../lib/life/world/s
 import {
   areaFlags,
   beatRooms,
+  couldHold,
   branchFlags,
   carryableBefore,
   chapterFlags,
@@ -298,6 +299,10 @@ const checkOrphans = (chapter: string, worldline: Worldline, closure: Closure): 
    */
   for (const beat of beatRooms(chapter)) {
     if (beat.rooms.some((where) => closure.rooms.has(where))) continue
+    // (27.9.2026) a beat this worldline could never arm is not an orphan here — it belongs to
+    // another life (the away evenings of 2010 fire only for whoever chose that city); the
+    // same monotone test the doors, actors and spots of the closure already pass through
+    if (!couldHold(beat.when, closure.flags, ENGINE_FLAGS)) continue
     report({
       level: 'HOLE',
       code: 'ROOM_ORPHANED',

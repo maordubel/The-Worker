@@ -281,11 +281,12 @@ function beatsOf(chapter: string): readonly BeatRow[] {
  * נספר כיתום בשנים שבלומפילד סגור, אף שברחוב הוא יורה כרגיל. ביט הוא יתום רק כשאף אחד
  * מהחדרים שלו אינו בהישג יד — אותו כלל שהמפגשים כבר נבדקים בו (`encounter.locations.every`).
  */
-export function beatRooms(chapter: string): Array<{ id: string; rooms: readonly LocationId[] }> {
-  const out: Array<{ id: string; rooms: readonly LocationId[] }> = []
+export function beatRooms(chapter: string): Array<{ id: string; rooms: readonly LocationId[]; when?: Condition }> {
+  const out: Array<{ id: string; rooms: readonly LocationId[]; when?: Condition }> = []
   for (const beat of beatsOf(chapter)) {
     if (!beat.at) continue
-    out.push({ id: beat.id ?? '?', rooms: Array.isArray(beat.at) ? (beat.at as readonly LocationId[]) : [beat.at as LocationId] })
+    const when = (beat as { when?: Condition }).when
+    out.push({ id: beat.id ?? '?', rooms: Array.isArray(beat.at) ? (beat.at as readonly LocationId[]) : [beat.at as LocationId], ...(when ? { when } : {}) })
   }
   return out
 }
