@@ -2,7 +2,8 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation } from './script'
+import { JAFFA_LOOKS } from '../world/city2027/jaffa'
 import { PORTRAIT_CHAMPIONS } from './chapter2010champions'
 
 /**
@@ -81,7 +82,13 @@ export const BEATS_FRIENDS: Beat[] = [
 
 export function objectiveLina(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone || state.flags['i:call']) return null
-  return sceneId === 'home' ? null : 'בבית. לינה קראה מה כתבת.'
+  if (!state.flags['i:phone']) return sceneId === 'home' ? null : 'בבית. לינה קראה מה כתבת.'
+  if (!state.flags['i:jaffa']) return null
+  if (!state.flags['i:tower']) return sceneId === 'jaffa' ? null : 'יפו, מגדל השעון. דרך הקשת באלנבי, ולאורך הים.'
+  const walk = state.flags[LINA_WALK]
+  if (walk === 'alley') return sceneId === 'jaffa-alley' ? null : 'הסמטה, בית הקפה. קודם קפה.'
+  if (walk === 'boulevard') return sceneId === 'jaffa-boulevard' ? null : 'השדרה, כשהתריסים עוד סגורים.'
+  return null
 }
 
 export const ENDINGS_LINA: Record<string, EndingCard> = {
@@ -111,13 +118,59 @@ export const ENDINGS_LINA: Record<string, EndingCard> = {
   },
 }
 
+/**
+ * **I04 ביפו (27.9.2026).** מאור, על הרקעים שאיש לא הלך בהם: *"שפגישה מסויימת תהיה ביפו
+ * למשל."* הוויכוח עם לינה היה שיחת טלפון בתשע בערב; עכשיו הוא בוקר. הם נחתו בחמש, המלון
+ * רק בשתיים, והם מסתובבים ביפו מאז — ולינה מתקשרת בשש וארבעים, כי קראה מה כתבת וכי היא
+ * פה. אותה שיחה, אותן שלוש תשובות, אותם שלושה סופים (`ENDINGS_LINA`) — רק שעכשיו אפשר גם
+ * ללכת אליה, ולבחור איפה מדברים:
+ *
+ *   בית (הטלפון) ──לבוא──▶ מגדל השעון (לינה וניקו) ──▶ הסמטה · השדרה · כאן
+ *                 └─לדבר עכשיו──▶ `i-call-now` (בטלפון, כמו קודם)
+ *
+ * **ומי שלא מגיע לא נתקע** (כלל 75, חוזה 0.4): בתשע וחצי הם הולכים לישון במלון, ולינה
+ * מתקשרת שוב — `i-late` פותח את אותה שיחה בטלפון. `life:lina:walk` שורד את הפרק, ו-`i-talk`
+ * קורא את `life:lina:photo` (התמונה מתחת לשעון). איפה נפגשתם נרשם אצל לינה כזיכרון
+ * (`i04-jaffa` / `i04-phone`).
+ */
+export const LINA_WALK = 'life:lina:walk'
+export const LINA_PHOTO = 'life:lina:photo'
+
 export const BEATS_LINA: Beat[] = [
-  { id: 'i-call', at: 'home', trigger: 'enter', when: { none: [{ flag: 'i:call' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'i-call' }] },
+  { id: 'i-call', at: 'home', trigger: 'enter', when: { none: [{ flag: 'i:phone' }, { flag: 'i:call' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'i-call' }] },
+  { id: 'i-tower', at: 'jaffa', trigger: 'enter', when: { all: [{ flag: 'i:jaffa' }], none: [{ flag: 'i:tower' }, { flag: 'i:call' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'i-tower' }] },
+  {
+    id: 'i-talk-alley',
+    at: 'jaffa-alley',
+    trigger: 'enter',
+    when: { all: [{ flag: 'i:tower' }, { flagIs: { flag: LINA_WALK, value: 'alley' } }], none: [{ flag: 'i:call' }] },
+    delayMs: 900,
+    do: [{ a: 'talk', conversation: 'i-talk' }],
+  },
+  {
+    id: 'i-talk-boulevard',
+    at: 'jaffa-boulevard',
+    trigger: 'enter',
+    when: { all: [{ flag: 'i:tower' }, { flagIs: { flag: LINA_WALK, value: 'boulevard' } }], none: [{ flag: 'i:call' }] },
+    delayMs: 900,
+    do: [{ a: 'talk', conversation: 'i-talk' }],
+  },
+  /** fail-forward: בתשע וחצי הם במלון, והשיחה חוזרת לטלפון — בכל חדר שבו פוגי עומד */
+  {
+    id: 'i-late',
+    trigger: 'clock',
+    when: { all: [{ flag: 'i:jaffa' }, { afterMinute: 9 * 60 + 30 }], none: [{ flag: 'i:call' }, { flag: 'i:late' }] },
+    delayMs: 800,
+    waitingHe: 'הם ביפו, ליד מגדל השעון.',
+    do: [{ a: 'flag', flag: 'i:late' }, { a: 'talk', conversation: 'i-late' }],
+  },
 ]
 
 // ======================================================================== the words ====
 
 export const CONVERSATIONS_FRIENDS: Conversation[] = [
+  // העיר שעל הים — מה שהעיניים אומרות בחדרים של `world/city2027/jaffa.ts`
+  ...JAFFA_LOOKS,
   {
     id: 'i-meet',
     nameHe: 'רומא',
@@ -281,56 +334,228 @@ export const CONVERSATIONS_FRIENDS: Conversation[] = [
   {
     id: 'i-call',
     nameHe: 'לינה',
-    // "בגלל זה התקשרתי" — ורומא על אותו קו
-    remote: { 'לינה': 'phone', 'רומא': 'phone' },
+    // שש וארבעים בבוקר. היא ביפו; השיחה בטלפון
+    remote: { 'לינה': 'phone' },
     branches: [
       {
         lines: [
           { who: 'לינה', text: 'קראתי מה כתבת, ולא הבנתי למה התכוונת.' },
           { who: 'פוגי', text: 'אז תשאלי אותי, לא את כל מי שמגיב שם.' },
           { who: 'לינה', text: 'בגלל זה התקשרתי.' },
-          { who: 'רומא', text: 'אני נשאר רק אם שניכם רוצים.' },
-          { who: 'פוגי', text: 'בואו נדבר לאט.' },
+          { who: 'לינה', text: 'ועוד משהו. נחתנו בחמש. אנחנו ביפו, ניקו ואני, מתחת למגדל השעון — והמלון רק בשתיים.' },
         ],
         choices: [
           {
-            id: 'explain',
-            text: '(להסביר את העמדה שלי — ולשאול מה היא שמעה.)',
+            id: 'come',
+            text: '(לבוא אליהם — ולדבר בפנים.)',
             then: [
-              { e: 'flag', flag: 'i:call' },
-              { e: 'time', minutes: 30 },
-              // `mediation` בתסריט → `communication` במנוע. **לא** אישיות ולא מוניטין: איך
-              // מתווכחים נמדד, על מה — לא (*"לא מנקד אידאולוגיה"*).
-              { e: 'skill', skill: 'communication', delta: 3, why: 'התווכח עם חברה, לא עם קהל' },
-              { e: 'rel', who: 'lina', axis: 'bond', delta: 2 },
-              { e: 'proof', kind: 'disagreed_without_proxy', proofId: 'disagreed_without_proxy:{chapter}:lina', subjectHe: 'המחלוקת עם לינה', noteHe: 'דיבר בשם עצמו, לא בשם ציבור.' },
-              { e: 'toast', text: 'לינה: "אני עדיין לא מסכימה עם הכול." — "גם אני. אבל עכשיו אני מבין למה את מתכוונת."', tone: 'plain' },
-              { e: 'ending', id: 'understood' },
+              { e: 'flag', flag: 'i:phone' },
+              { e: 'flag', flag: 'i:jaffa' },
+              { e: 'rel', who: 'lina', axis: 'trust', delta: 2 },
+              { e: 'toast', text: 'לינה: "קודם קפה." — "כמו אז. תני לי חצי שעה — אני בא לאורך הים."', tone: 'plain' },
             ],
           },
           {
-            id: 'pause',
-            text: '(להגדיר גבול — ולהפסיק כרגע את השיחה.)',
+            id: 'phone',
+            text: '(לדבר עכשיו, בטלפון.)',
+            then: [{ e: 'flag', flag: 'i:phone' }, { e: 'goto', node: 'i-call-now' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /** הדרך הישנה — השיחה בטלפון, לינה ורומא על אותו קו (I04 כפי שנכתבה) */
+    id: 'i-call-now',
+    nameHe: 'לינה',
+    remote: { 'לינה': 'phone', 'רומא': 'phone' },
+    branches: [
+      {
+        lines: [
+          { who: 'רומא', text: 'אני נשאר רק אם שניכם רוצים.' },
+          { who: 'פוגי', text: 'בואו נדבר לאט.' },
+        ],
+        choices: linaChoices('phone'),
+      },
+    ],
+  },
+  {
+    /** בתשע וחצי — הם במלון, והשיחה חוזרת לטלפון (fail-forward) */
+    id: 'i-late',
+    nameHe: 'לינה',
+    remote: { 'לינה': 'phone', 'רומא': 'phone' },
+    branches: [
+      {
+        lines: [
+          { who: 'לינה', text: 'חיכינו מתחת לשעון. ניקו נרדם על ספסל, אז חזרנו למלון.' },
+          { who: 'לינה', text: 'אבל אני עדיין רוצה לשמוע אותך. רומא על הקו.' },
+          { who: 'רומא', text: 'אני נשאר רק אם שניכם רוצים.' },
+          { who: 'פוגי', text: 'בואו נדבר לאט.' },
+        ],
+        choices: linaChoices('late'),
+      },
+    ],
+  },
+  {
+    /** מתחת למגדל השעון — לינה וניקו, ארבע-עשרה שנה אחרי אלנבי */
+    id: 'i-tower',
+    nameHe: 'לינה',
+    branches: [
+      {
+        // נגיעה בהם אחרי שבחרת לאן — הם כבר בדרך
+        when: { flag: 'i:tower' },
+        lines: [{ who: 'לינה', text: 'אנחנו אחריך. אתה זה שיודע איפה.' }],
+      },
+      {
+        lines: [
+          { who: 'ניקו', text: 'ארבע-עשרה שנה. אתה נראה כמו מישהו שהתעורר לפני רבע שעה.' },
+          { who: 'פוגי', text: 'לפני עשרים דקות. והלכתי לאורך הים.' },
+          { who: 'לינה', text: 'לפני שמדברים — תראה לנו את העיר שלך. לא את זו מהטלפון.' },
+        ],
+        choices: [
+          {
+            id: 'alley',
+            text: '(לסמטה, לבית הקפה — קודם קפה.)',
             then: [
-              { e: 'flag', flag: 'i:call' },
-              { e: 'flagValue', flag: 'life:lina', value: 'paused' },
-              { e: 'toast', text: 'לינה: "בסדר. לא נפתור את זה בכוח." — "נדבר כשנוכל להקשיב."', tone: 'plain' },
-              { e: 'ending', id: 'paused' },
+              { e: 'flag', flag: 'i:tower' },
+              { e: 'flagValue', flag: LINA_WALK, value: 'alley' },
+              { e: 'rel', who: 'nico', axis: 'bond', delta: 2 },
+              { e: 'toast', text: 'ניקו: "קפה. סוף סוף מישהו מבין אותי." — "מתחת לקשתות, משמאל."', tone: 'plain' },
             ],
           },
           {
-            id: 'bounded',
-            text: '(להמשיך את החברות — סביב תחום מוסכם אחר.)',
+            id: 'boulevard',
+            text: '(דרך השדרה, כשהתריסים עוד סגורים — ללכת ולדבר.)',
             then: [
-              { e: 'flag', flag: 'i:call' },
-              { e: 'flagValue', flag: 'life:lina', value: 'bounded' },
+              { e: 'flag', flag: 'i:tower' },
+              { e: 'flagValue', flag: LINA_WALK, value: 'boulevard' },
               { e: 'rel', who: 'lina', axis: 'bond', delta: 2 },
-              { e: 'toast', text: 'לינה: "אפשר לדבר על הביקור שתכננו, בלי להעמיד פנים שהכול נפתר." — "זה מתאים לי."', tone: 'plain' },
-              { e: 'ending', id: 'bounded' },
+              { e: 'toast', text: 'לינה: "עיר לפני שהיא מתעוררת. זה מה שרציתי." — "ימינה, לשדרה."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'here',
+            text: '(כאן, מתחת לשעון. בלי לזוז.)',
+            then: [
+              { e: 'flag', flag: 'i:tower' },
+              { e: 'flagValue', flag: LINA_WALK, value: 'tower' },
+              { e: 'goto', node: 'i-talk' },
             ],
           },
         ],
       },
     ],
   },
+  {
+    /** פעולת צד: תמונה של שלושתכם מתחת לשעון — ו-`i-talk` זוכר אותה */
+    id: 'jaffa-photo',
+    nameHe: 'ניקו',
+    branches: [
+      {
+        when: { flag: LINA_PHOTO },
+        lines: [{ who: 'ניקו', text: 'כבר צילמנו. אתה יצאת עם עיניים סגורות, וזה נשאר.' }],
+      },
+      {
+        lines: [
+          { who: 'ניקו', text: 'רגע. תעמוד באמצע — אתה המקומי.' },
+          { who: 'לינה', text: 'בלי לחייך בכוח. רק תעמוד.' },
+        ],
+        then: [
+          { e: 'flag', flag: LINA_PHOTO },
+          { e: 'time', minutes: 5 },
+          { e: 'rel', who: 'nico', axis: 'bond', delta: 1 },
+          { e: 'toast', text: 'שלושה אנשים מתחת למגדל השעון, ואחד מהם עם עיניים סגורות.', tone: 'plain' },
+        ],
+      },
+    ],
+  },
+  {
+    /** I04 בפנים — איפה שבחרת לעמוד. רומא על הרמקול של הטלפון של לינה */
+    id: 'i-talk',
+    nameHe: 'לינה',
+    remote: { 'רומא': 'phone' },
+    branches: [
+      {
+        when: { flag: LINA_PHOTO },
+        lines: [
+          { who: 'ניקו', text: 'שלחתי לרומא את התמונה. הוא כתב "סוף סוף", ומתקשר.' },
+          { who: 'לינה', text: 'עכשיו תסביר לי. לא לכולם — לי.' },
+          { who: 'רומא', text: 'אני נשאר רק אם שניכם רוצים.' },
+          { who: 'פוגי', text: 'בואו נדבר לאט.' },
+        ],
+        choices: linaChoices('jaffa'),
+      },
+      {
+        lines: [
+          { who: 'לינה', text: 'עכשיו תסביר לי. לא לכולם — לי.' },
+          { who: 'לינה', text: 'ורומא על הרמקול, כי הוא ביקש.' },
+          { who: 'רומא', text: 'אני נשאר רק אם שניכם רוצים.' },
+          { who: 'פוגי', text: 'בואו נדבר לאט.' },
+        ],
+        choices: linaChoices('jaffa'),
+      },
+    ],
+  },
 ]
+
+/**
+ * שלוש התשובות של I04 — אותן מילים בכל מקום שהשיחה קורית, והמקום נרשם כזיכרון אצל לינה:
+ * `i04-jaffa` למי שבא אליה, `i04-phone` למי שלא. זה מה שהחברות זוכרת, לא מי צדק.
+ */
+function linaChoices(where: 'phone' | 'late' | 'jaffa'): ChoiceDef[] {
+  const met = where === 'jaffa'
+  const remember = { e: 'remember', who: 'lina', eventId: met ? 'i04-jaffa' : 'i04-phone', significance: met ? 'major' : 'notable' } as const
+  return [
+    {
+      id: 'explain',
+      text: '(להסביר את העמדה שלי — ולשאול מה היא שמעה.)',
+      then: [
+        { e: 'flag', flag: 'i:call' },
+        { e: 'time', minutes: 30 },
+        // `mediation` בתסריט → `communication` במנוע. **לא** אישיות ולא מוניטין: איך
+        // מתווכחים נמדד, על מה — לא (*"לא מנקד אידאולוגיה"*).
+        { e: 'skill', skill: 'communication', delta: 3, why: 'התווכח עם חברה, לא עם קהל' },
+        { e: 'rel', who: 'lina', axis: 'bond', delta: 2 },
+        remember,
+        { e: 'proof', kind: 'disagreed_without_proxy', proofId: 'disagreed_without_proxy:{chapter}:lina', subjectHe: 'המחלוקת עם לינה', noteHe: 'דיבר בשם עצמו, לא בשם ציבור.' },
+        {
+          e: 'toast',
+          text: met
+            ? 'לינה: "אני עדיין לא מסכימה עם הכול." — "גם אני. אבל עכשיו אני מבין למה את מתכוונת." ניקו חוזר עם שלוש כוסות.'
+            : 'לינה: "אני עדיין לא מסכימה עם הכול." — "גם אני. אבל עכשיו אני מבין למה את מתכוונת."',
+          tone: 'plain',
+        },
+        { e: 'ending', id: 'understood' },
+      ],
+    },
+    {
+      id: 'pause',
+      text: '(להגדיר גבול — ולהפסיק כרגע את השיחה.)',
+      then: [
+        { e: 'flag', flag: 'i:call' },
+        { e: 'flagValue', flag: 'life:lina', value: 'paused' },
+        remember,
+        {
+          e: 'toast',
+          text: met
+            ? 'לינה: "בסדר. לא נפתור את זה בכוח." — "נדבר כשנוכל להקשיב." ניקו מושיט לך קפה בכל זאת.'
+            : 'לינה: "בסדר. לא נפתור את זה בכוח." — "נדבר כשנוכל להקשיב."',
+          tone: 'plain',
+        },
+        { e: 'ending', id: 'paused' },
+      ],
+    },
+    {
+      id: 'bounded',
+      text: '(להמשיך את החברות — סביב תחום מוסכם אחר.)',
+      then: [
+        { e: 'flag', flag: 'i:call' },
+        { e: 'flagValue', flag: 'life:lina', value: 'bounded' },
+        { e: 'rel', who: 'lina', axis: 'bond', delta: 2 },
+        remember,
+        { e: 'toast', text: 'לינה: "אפשר לדבר על הביקור שתכננו, בלי להעמיד פנים שהכול נפתר." — "זה מתאים לי."', tone: 'plain' },
+        { e: 'ending', id: 'bounded' },
+      ],
+    },
+  ]
+}

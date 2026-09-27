@@ -1039,8 +1039,7 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     // 2013-household · L04 (hh-diary) ליד המקרר, L05 (hh-parent)
     ...partner('2013-household', undefined, { x: 0.33, y: 0.58 }),
     ...cast('2013-household', undefined, [{ who: 'קרן', x: 0.33, y: 0.58, when: { notFlag: 'life:partner' } }]),
-    // 2017-distance · K02 (k-life) — קרן, ליד הספה
-    ...cast('2017-distance', flag('k:told'), [{ who: 'קרן', x: 0.67, y: 0.6, flip: true }]),
+    // 2017-distance · K02 (k-life) — עברה לטיילת (27.9.2026): ראה `promenade` למטה
     // 2021-promises · L07 (pr-first), L08 (pr-promise), Q07 (q-week)
     ...cast('2021-promises', undefined, [
       { who: 'הילד', x: 0.44, y: 0.64, when: flag('life:child') },
@@ -1265,8 +1264,8 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'יוסף', x: 0.735, y: 0.785, flip: true },
       { who: 'שחור', x: 0.8, y: 0.755, flip: true },
     ]),
-    // 2025-interview · J03 (j-asked)
-    ...cast('2025-interview', undefined, [{ who: 'מראיינת', x: 0.7, y: 0.77, flip: true }]),
+    // 2025-interview · J03 (j-where, j-asked) — בבית הקפה באלנבי; מי שבחר ביפו פוגש אותה בסמטה
+    ...cast('2025-interview', { none: [{ flagIs: { flag: 'life:interview:at', value: 'jaffa' } }] }, [{ who: 'מראיינת', x: 0.7, y: 0.77, flip: true }]),
   ],
 
   schoolyard: [
@@ -1490,5 +1489,54 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     // 2026-finale · F03 "ובמושבים" — קובי לידך
     ...cast('2026-finale', undefined, [{ who: 'קובי', x: 0.5, y: 0.78, flip: true }]),
     ...cast('2026-finale', { flagIs: { flag: 'life:finale:party', value: 'three' } }, [{ who: 'הילד', x: 0.4, y: 0.8, flip: true }]),
+  ],
+  /**
+   * ===================================================== העיר שעל הים (27.9.2026) ====
+   * `world/city2027/jaffa.ts`. כל שורה עומדת על ריצוף ריק של הציור שלה — לא בתוך אדם מצויר,
+   * לא בתוך העגלה בסמטה, לא בתוך פתח — והמספר ליד כל אחת אומר איזה פער זה.
+   */
+  promenade: [
+    // 2017-distance · K02 (k-life) — קרן על הטיילת ביום, בריצוף הריק לפני המדרגות (0.25–0.47);
+    // אחרי השיחה היא הולכת למים (`k-keren-walks`) ולא חוזרת לחדר הזה
+    ...cast('2017-distance', { all: [{ flag: 'k:told' }], none: [{ flag: 'k:keren-gone' }] }, [{ who: 'קרן', x: 0.4, y: 0.84, flip: true }]),
+    // 2021-suitcase · X01 (x-sea) — הערב האחרון, בשקיעה: קרן, בריצוף הריק מתחת לזוג המצויר (0.47–0.62)
+    ...cast('2021-suitcase', flag('x:move'), [{ who: 'קרן', x: 0.58, y: 0.9, flip: true }]),
+    // 2023-visit · X04 (x-sunset) — ערב המשפחה: קובי מחכה לו על הטיילת, באותו מקום
+    ...cast('2023-visit', { flagIs: { flag: 'life:abroad:visit', value: 'family' } }, [{ who: 'קובי', x: 0.58, y: 0.9, flip: true }]),
+  ],
+
+  jaffa: [
+    // 2024-lina · I04 (i-tower) — מתחת למגדל השעון, לפני העציצים (0.40–0.45, 0.57–0.62)
+    ...cast(
+      '2024-lina',
+      { all: [{ flag: 'i:jaffa' }], none: [{ flagIs: { flag: 'life:lina:walk', value: 'alley' } }, { flagIs: { flag: 'life:lina:walk', value: 'boulevard' } }] },
+      [
+        { who: 'לינה', x: 0.44, y: 0.9, flip: true },
+        { who: 'ניקו', x: 0.57, y: 0.91, flip: true },
+      ],
+    ).map((actor) => ({ ...actor, talk: 'i-tower' })),
+  ],
+
+  'jaffa-alley': [
+    // 2024-lina · I04 (i-talk) — מול בית הקפה, בין הפנס לאופניים; ניקו לפני העגלה
+    ...cast('2024-lina', { flagIs: { flag: 'life:lina:walk', value: 'alley' } }, [
+      { who: 'לינה', x: 0.81, y: 0.88, flip: true },
+      { who: 'ניקו', x: 0.64, y: 0.91, flip: true },
+    ]),
+    // 2023-visit · X04 (x-jaffa) — ערב החברים: אופיר ועמית כבר בבית הקפה
+    ...cast('2023-visit', { flagIs: { flag: 'life:abroad:visit', value: 'friends' } }, [
+      { who: 'אופיר', x: 0.64, y: 0.91, flip: true },
+      { who: 'עמית', x: 0.81, y: 0.88, flip: true },
+    ]),
+    // 2025-interview · J03 (j-archive, j-asked) — המראיינת, ליד הדלת הכחולה
+    ...cast('2025-interview', { flagIs: { flag: 'life:interview:at', value: 'jaffa' } }, [{ who: 'מראיינת', x: 0.81, y: 0.88, flip: true }]),
+  ],
+
+  'jaffa-boulevard': [
+    // 2024-lina · I04 (i-talk) — על המדרכה השמאלית, בין עמוד התאורה לקיוסק הסגור
+    ...cast('2024-lina', { flagIs: { flag: 'life:lina:walk', value: 'boulevard' } }, [
+      { who: 'לינה', x: 0.44, y: 0.76, flip: true },
+      { who: 'ניקו', x: 0.56, y: 0.77, flip: true },
+    ]),
   ],
 }
