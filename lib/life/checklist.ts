@@ -239,6 +239,8 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'ask', textHe: 'עמית שואל מה אתה אומר.', revealWhen: F('h24:board'), doneWhen: F('h24:ask') },
     { id: 'small', textHe: 'הדרייב אין. עד אז מה?', revealWhen: F('h24:ask'), doneWhen: F('h24:concern') },
     { id: 'ticket', textHe: 'המנוי: להעביר, לא להעביר, או לחכות לבורר.', revealWhen: F('h24:concern'), doneWhen: F('h24:night') },
+    // S5 — the first night is a room (`menora`, 27.9.2026)
+    { id: 'menora', textHe: 'ההיכל. למצוא את המקום, לחפש פנים — ולשבת.', revealWhen: { flagIs: { flag: 'life:menora:2025', value: 'went' } }, doneWhen: F('h24:inside') },
   ],
   '2025-eurocup': [
     { id: 'euro', textHe: 'הגמר באירופה.', doneWhen: F('z:euro') },
@@ -277,10 +279,19 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'match', textHe: 'עוד התקפה אחת.', revealWhen: F('y:train'), doneWhen: F('y:match') },
     { id: 'after', textHe: 'אחרי המשחק.', revealWhen: F('y:match'), doneWhen: F('y:after') },
   ],
-  '2001-terrace': [{ id: 'first', textHe: 'מה אתה יכול לקחת עד הסוף.', doneWhen: F('t:first') }],
+  '2001-terrace': [
+    { id: 'first', textHe: 'מה אתה יכול לקחת עד הסוף.', doneWhen: F('t:first') },
+    // under the stand (`gate5-stand`, 27.9.2026): three jobs, time for two, and the gate at five
+    { id: 'prep', textHe: 'מתחת ליציע: הדגלים, הבד, החבלים. זמן לשתיים.', revealWhen: F('t:prep'), doneWhen: F('t:open') },
+    { id: 'open', textHe: 'השער נפתח. מי עשה מה.', revealWhen: F('t:open'), doneWhen: F('t:credit') },
+  ],
   '2002-desk': [{ id: 'first', textHe: 'הפרסום הראשון.', doneWhen: F('j:first') }],
   '2006-desk': [{ id: 'fix', textHe: 'מה נשאר מהפרסום ההוא.', doneWhen: F('j:fix') }],
-  '2012-terrace': [{ id: 'hand', textHe: 'מי פותח כשאתה לא בא.', doneWhen: F('t:hand') }],
+  '2012-terrace': [
+    { id: 'hand', textHe: 'מי פותח כשאתה לא בא.', doneWhen: F('t:hand') },
+    // the test on the gate-5 stairs (27.9.2026)
+    { id: 'test', textHe: 'ההחלטה הראשונה של יבגני — ומה אתה עושה איתה.', revealWhen: { any: [{ flagIs: { flag: 't:mode', value: 'trust' } }, { flagIs: { flag: 't:mode', value: 'small' } }] }, doneWhen: F('t:test') },
+  ],
   '2024-terrace': [{ id: 'lead', textHe: 'הם מחכים שתסביר.', doneWhen: F('t:lead') }],
   '2025-interview': [{ id: 'asked', textHe: 'שלוש שאלות.', doneWhen: F('j:asked') }],
   '2010-friends': [

@@ -378,8 +378,14 @@ export const goalTeam = (state: LifeState): LocationId | null => {
   return null
 }
 /** חלונות CAREER — סצנה אחת כל אחד, ולכן יעד אחד */
-export const goalTerrace01 = (state: LifeState): LocationId | null => (flag(state, 't:first') ? null : 'gate5')
-export const goalTerrace02 = (state: LifeState): LocationId | null => (flag(state, 't:hand') ? null : 'gate5')
+/** T01 — Asaf at the gate, then the work under the stand until the gate opens (`gate5-stand`, 27.9.2026) */
+export const goalTerrace01 = (state: LifeState): LocationId | null => {
+  if (!flag(state, 't:first')) return 'gate5'
+  if (state.flags['life:terrace:role'] !== 'active') return null
+  return flag(state, 't:credit') ? null : 'gate5-stand'
+}
+/** T02 — Yevgeny waits under the stand, by the stairs; the test happens there too */
+export const goalTerrace02 = (state: LifeState): LocationId | null => (flag(state, 't:hand') && !flag(state, 't:mode') ? null : flag(state, 't:test') ? null : 'gate5-stand')
 export const goalTerrace03 = (state: LifeState): LocationId | null => (flag(state, 't:lead') ? null : 'bloomfield-inside')
 export const goalDesk01 = (state: LifeState): LocationId | null => (flag(state, 'j:first') ? null : 'allenby')
 export const goalDesk02 = (state: LifeState): LocationId | null => (flag(state, 'j:fix') ? null : 'newsroom')

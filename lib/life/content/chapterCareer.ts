@@ -1,10 +1,12 @@
+import { at } from '../clock'
 import type { LifeState } from '../types'
 import type { LifeEvent } from '../events'
 import { careerEntry } from '../work'
+import type { Condition } from '../world/types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { ChoiceDef, Conversation, Say } from './script'
+import type { ChoiceDef, Conversation, Effect, Say } from './script'
 import { PORTRAIT_TEAM } from './chapterTeam'
 
 /**
@@ -47,9 +49,36 @@ export const DESK_UNVERIFIED = 'life:desk:unverified'
 // ================================================================ T01 · 2001 ====
 
 export function objectiveTerrace01(state: LifeState, sceneId: string): string | null {
-  if (state.chapterDone || state.flags['t:first']) return null
-  return sceneId === 'gate5' ? null : 'שער 5. אסף מחפש ידיים, לא צעקות.'
+  if (state.chapterDone) return null
+  const f = state.flags
+  if (!f['t:first']) return sceneId === 'gate5' ? null : 'שער 5. אסף מחפש ידיים, לא צעקות.'
+  if (f[TERRACE_ROLE] !== 'active') return null
+  if (f['t:open']) return f['t:credit'] ? null : 'השער נפתח. מי עשה מה.'
+  if (sceneId !== 'gate5-stand') return 'דרך הקרוסלות, מתחת ליציע. בחמש פותחים.'
+  const done = T01_TASKS.filter((task) => f[`t:task:${task}`]).length
+  return done === 0 ? 'שלוש עבודות מתחת ליציע, וזמן לשתיים. בחמש פותחים.' : 'עוד אחת. השער נפתח בחמש, עם או בלי.'
 }
+
+/**
+ * T01 · S1–S3 מתחת ליציע (27.9.2026, `gate5-stand`): שלוש עבודות — הדגלים, הבד, החבלים — וזמן
+ * לשתיים; כשהשתיים נגמרו, או בחמש, השער נפתח (`t:open`) והחדר נבנה מחדש עם מה שנעשה ומה שלא
+ * (`world/city2027/stadiumSide.ts`). ואז השאלה שהיציע תמיד שואל: מי עשה את זה (`t-credit`).
+ */
+export const T01_TASKS = ['flags', 'banner', 'rope'] as const
+export const T01_GATE = at(17, 0)
+/** how he answered "who did it" — read by Yevgeny in 2012 (`t-hand`) */
+export const TERRACE_CREDIT = 'life:terrace:credit'
+/** 2012 — whether he let Yevgeny's decision stand; read by Asaf in 2024 (`t-lead`) */
+export const TERRACE_HANDOFF = 'life:terrace:handoff'
+
+const T01_TWO: Condition = {
+  any: [
+    { all: [{ flag: 't:task:flags' }, { flag: 't:task:banner' }] },
+    { all: [{ flag: 't:task:flags' }, { flag: 't:task:rope' }] },
+    { all: [{ flag: 't:task:banner' }, { flag: 't:task:rope' }] },
+  ],
+}
+const T01_ROLE: Condition = { flagIs: { flag: TERRACE_ROLE, value: 'active' } }
 
 export const ENDINGS_TERRACE01: Record<string, EndingCard> = {
   gear: {
@@ -76,18 +105,93 @@ export const ENDINGS_TERRACE01: Record<string, EndingCard> = {
     memoryHe: 'מקום ביציע, בלי תפקיד.',
     memoryItem: 'ticket-stub',
   },
+  blamed: {
+    id: 'blamed',
+    titleHe: 'מה שנשאר על הרצפה',
+    bodyHe:
+      'כששאלו מה לא נגמר, אמרת שם של מישהו אחר. זה היה נכון בחצי, וכולם שמעו את החצי השני. אסף לא אמר כלום. בערב הבא הוא נתן לך אותה עבודה, ועמד לידך עד שנגמרה.',
+    memoryHe: 'חבל אחד, לא קשור.',
+    memoryItem: 'folded-paper',
+  },
+  late: {
+    id: 'late',
+    titleHe: 'השער לא חיכה',
+    bodyHe:
+      'לקחת תפקיד, ובחמש השער נפתח בלעדיך. מלמד וארז סחבו את מה שהיה שלך, ואף אחד לא עשה מזה עניין. שאלת מי סחב, ואסף אמר: בפעם הבאה — אתה. זה לא היה עונש. זה היה תור.',
+    memoryHe: 'דגל שמישהו אחר העלה.',
+    memoryItem: 'folded-paper',
+  },
 }
 
 export const BEATS_TERRACE01: Beat[] = [
   { id: 't-first', at: 'gate5', trigger: 'enter', when: { none: [{ flag: 't:first' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 't-first' }] },
+  // S1 — under the stand: three jobs, time for two, and the gate at five
+  {
+    id: 't-prep',
+    at: 'gate5-stand',
+    trigger: 'enter',
+    when: { all: [{ flag: 't:first' }, T01_ROLE], none: [{ flag: 't:prep' }, { flag: 't:open' }] },
+    delayMs: 700,
+    do: [
+      { a: 'flag', flag: 't:prep' },
+      {
+        a: 'lines',
+        lines: [
+          { who: null, text: 'מתחת ליציע. ריח של צבע ושל בטון רטוב. הדגלים עוד על הגדר, הבד על הרצפה עם שלוש אותיות חסרות, והחבלים על הקיר.' },
+          { who: 'אסף', text: 'בחמש פותחים. שלוש עבודות, ויש לך זמן לשתיים. תבחר, ותגמור מה שבחרת.' },
+        ],
+      },
+    ],
+  },
+  // S3 — the gate opens: two jobs done, or five o'clock came first. The room is rebuilt with it.
+  {
+    id: 't-gate',
+    at: 'gate5-stand',
+    trigger: 'clock',
+    when: { all: [{ flag: 't:first' }, T01_ROLE, { any: [T01_TWO, { afterMinute: T01_GATE }] }], none: [{ flag: 't:open' }] },
+    delayMs: 900,
+    do: [
+      { a: 'flag', flag: 't:open' },
+      { a: 'crowd', state: 'CHANT' },
+      { a: 'card', titleHe: 'חמש', subHe: 'השער נפתח', ms: 2000 },
+      { a: 'travel', to: 'gate5-stand', spawn: 'stairs' },
+    ],
+  },
+  // and a man who never went in: the gate opens without him, and he is carried down the stairs by it
+  {
+    id: 't-gate-late',
+    at: 'gate5',
+    trigger: 'clock',
+    when: { all: [{ flag: 't:first' }, T01_ROLE, { afterMinute: T01_GATE + 15 }], none: [{ flag: 't:open' }] },
+    do: [
+      { a: 'flag', flag: 't:open' },
+      { a: 'flag', flag: 't:late' },
+      { a: 'toast', text: 'חמש ורבע. השער נפתח בלעדיך — מישהו אחר סחב את מה שהיה שלך.', tone: 'red' },
+      { a: 'travel', to: 'gate5-stand', spawn: 'stairs' },
+    ],
+  },
+  {
+    id: 't-open',
+    at: 'gate5-stand',
+    trigger: 'enter',
+    when: { all: [{ flag: 't:open' }], none: [{ flag: 't:credit' }] },
+    delayMs: 1400,
+    do: [{ a: 'talk', conversation: 't-credit' }],
+  },
 ]
 
 // ================================================================ T02 · 2012 ====
 
 export function objectiveTerrace02(state: LifeState, sceneId: string): string | null {
-  if (state.chapterDone || state.flags['t:hand']) return null
-  return sceneId === 'gate5' ? null : 'שער 5. יבגני רוצה להוביל — באמת.'
+  if (state.chapterDone) return null
+  const f = state.flags
+  if (!f['t:hand']) return sceneId === 'gate5-stand' ? 'יבגני ליד המדרגות.' : 'שער 5, מתחת ליציע. יבגני רוצה להוביל — באמת.'
+  if (!f['t:test']) return 'הדגל הגדול. מה יבגני מחליט — ומה אתה עושה עם זה.'
+  return null
 }
+
+/** the two modes Yevgeny's first decision is tested under (the handover closes at once) */
+const T02_TESTED: Condition = { any: [{ flagIs: { flag: 't:mode', value: 'trust' } }, { flagIs: { flag: 't:mode', value: 'small' } }] }
 
 export const ENDINGS_TERRACE02: Record<string, EndingCard> = {
   trust: {
@@ -114,10 +218,71 @@ export const ENDINGS_TERRACE02: Record<string, EndingCard> = {
     memoryHe: 'תיק מסירה, מלא.',
     memoryItem: 'folded-paper',
   },
+  stepped: {
+    id: 'stepped',
+    titleHe: 'הדגל על המעקה',
+    bodyHe:
+      'נתת לו סמכות, ובהחלטה הראשונה שלו נכנסת. הדגל עלה למעקה, כמו תמיד, ויבגני לא התווכח. זה היה נכון על הדגל ולא נכון על יבגני — ושניכם ידעתם את זה עוד לפני שהשער נפתח.',
+    memoryHe: 'דף גבולות, עם סעיף אחד מחוק.',
+    memoryItem: 'folded-paper',
+  },
 }
 
 export const BEATS_TERRACE02: Beat[] = [
-  { id: 't-hand', at: 'gate5', trigger: 'enter', when: { none: [{ flag: 't:hand' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 't-hand' }] },
+  // S1 — Yevgeny does not come out to ask; he waits by the stairs, under the stand
+  {
+    id: 't-hand-wait',
+    at: 'gate5',
+    trigger: 'enter',
+    when: { none: [{ flag: 't:hand' }, { flag: 't:waited' }] },
+    delayMs: 700,
+    do: [{ a: 'flag', flag: 't:waited' }, { a: 'toast', text: 'יבגני לא בחוץ. הוא מחכה מתחת ליציע, ליד המדרגות — ולא יבוא לבקש.', tone: 'plain' }],
+  },
+  // S3 — the test: somebody else makes a small decision while he watches
+  {
+    id: 't-test',
+    at: 'gate5-stand',
+    trigger: 'clock',
+    when: { all: [{ flag: 't:hand' }, T02_TESTED], none: [{ flag: 't:test' }] },
+    delayMs: 1800,
+    do: [{ a: 'actorCue', actorId: 'stand-yevgeny', cue: 'gesture' }, { a: 'talk', conversation: 't-test' }],
+  },
+  // the consequence is seen: the room is rebuilt with the flag where it ended up, then the day closes
+  {
+    id: 't-test-seen',
+    at: 'gate5-stand',
+    trigger: 'clock',
+    when: { all: [{ flag: 't:test' }], none: [{ flag: 't:seen' }] },
+    delayMs: 1200,
+    do: [{ a: 'flag', flag: 't:seen' }, { a: 'card', titleHe: 'חמש', subHe: 'השער נפתח', ms: 1800 }, { a: 'travel', to: 'gate5-stand', spawn: 'stairs' }],
+  },
+  {
+    id: 't-close-let',
+    at: 'gate5-stand',
+    trigger: 'enter',
+    when: { all: [{ flag: 't:seen' }, { flagIs: { flag: 't:mode', value: 'trust' } }, { flagIs: { flag: TERRACE_HANDOFF, value: 'let' } }] },
+    delayMs: 1600,
+    do: [
+      { a: 'lines', lines: [{ who: null, text: 'הדגל הגדול על הקיר, לא על המעקה. המדרגות פנויות, והזרם עולה בלי להיתקע. זה לא איך שאתה היית עושה. זה עובד.' }] },
+      { a: 'ending', id: 'trust' },
+    ],
+  },
+  {
+    id: 't-close-small',
+    at: 'gate5-stand',
+    trigger: 'enter',
+    when: { all: [{ flag: 't:seen' }, { flagIs: { flag: 't:mode', value: 'small' } }] },
+    delayMs: 1600,
+    do: [{ a: 'lines', lines: [{ who: null, text: 'שניכם מחזיקים את הקצוות של הדגל, ואחד מכם מחליט איפה הוא נתלה. קטן, ומבוצע.' }] }, { a: 'ending', id: 'small' }],
+  },
+  {
+    id: 't-close-stepped',
+    at: 'gate5-stand',
+    trigger: 'enter',
+    when: { all: [{ flag: 't:seen' }, { flagIs: { flag: 't:mode', value: 'trust' } }, { flagIs: { flag: TERRACE_HANDOFF, value: 'stepped' } }] },
+    delayMs: 1600,
+    do: [{ a: 'lines', lines: [{ who: null, text: 'הדגל על המעקה, כמו תמיד. הזרם נתקע עליו שנייה בכל מדרגה. יבגני מחזיק את הקצה ולא מסתכל עליך.' }] }, { a: 'ending', id: 'stepped' }],
+  },
 ]
 
 // ================================================================ T03 · 2024 ====
@@ -350,7 +515,356 @@ const J_FIRST_CHOICES: ChoiceDef[] = [
   },
 ]
 
+const T_HAND_CHOICES: ChoiceDef[] = [
+  {
+    id: 'trust',
+    text: '(לתת לו סמכות — ולסכם גבולות מראש.)',
+    // the commit (27.9.2026): whether he meant it is tested on the stairs (`t-test`)
+    then: [
+      { e: 'flag', flag: 't:hand' },
+      { e: 'flagValue', flag: 't:mode', value: 'trust' },
+      { e: 'time', minutes: 20 },
+      { e: 'rel', who: 'yevgeny', axis: 'trust', delta: 3 },
+      { e: 'toast', text: 'יבגני: "אז מהרגע הזה אני מחליט. גם על הדגל הגדול."', tone: 'plain' },
+    ],
+  },
+  {
+    id: 'small',
+    text: '(לנהל יחד תפקיד מצומצם יותר.)',
+    then: [
+      { e: 'flag', flag: 't:hand' },
+      { e: 'flagValue', flag: 't:mode', value: 'small' },
+      { e: 'time', minutes: 20 },
+      { e: 'energy', delta: -10 },
+      { e: 'toast', text: 'אסף: "קטן ומבוצע עדיף מגדול שמחכה לך." — "מסכים."', tone: 'plain' },
+    ],
+  },
+  {
+    id: 'handover',
+    text: '(לוותר על האחריות — ולמסור אותה לפני האירוע.)',
+    then: [
+      { e: 'flag', flag: 't:hand' },
+      { e: 'flagValue', flag: TERRACE_ROLE, value: 'former' },
+      { e: 'proof', kind: 'handover', proofId: 'handover:{chapter}:terrace', subjectHe: 'התפקיד שמסרתי ליבגני', audience: 'gate5', delta: 2, noteHe: 'נמסר לפני האירוע, עם כל מה שצריך כדי להחליט.' },
+      { e: 'heard', proofId: 'handover:{chapter}:terrace' },
+      { e: 'toast', text: 'יבגני: "אני לוקח. תעביר את המידע." — "הכול כאן."', tone: 'plain' },
+      { e: 'ending', id: 'handed' },
+    ],
+  },
+]
+
+const T_LEAD_CHOICES: ChoiceDef[] = [
+  {
+    id: 'lead',
+    text: '(לחלק תפקידים, לשאול מי יכול — ולבצע.)',
+    then: [
+      { e: 'flag', flag: 't:lead' },
+      { e: 'time', minutes: 60 },
+      { e: 'energy', delta: -15 },
+      { e: 'skill', skill: 'organization', delta: 5, why: 'שלושה צוותים ומחסור אחד' },
+      { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:teams', subjectHe: 'שלושה צוותים ומחסור אחד', audience: 'gate5', delta: 6, noteHe: 'החלטה על אנשים: מי יכול, מה חסר, ומי סוגר את זה.' },
+      { e: 'heard', proofId: 'leadership_proof:{chapter}:teams' },
+      { e: 'toast', text: 'אסף: "עכשיו תן להם לעבוד." — "אני כבר רוצה לתקן הכול." — "אז תתחיל מעצמך."', tone: 'plain' },
+      { e: 'ending', id: 'lead' },
+    ],
+  },
+  {
+    id: 'mentor',
+    text: '(לבקש חניכה בתפקיד אחד — במקום להעמיד פנים שאני מוכן.)',
+    then: [
+      { e: 'flag', flag: 't:lead' },
+      { e: 'time', minutes: 45 },
+      { e: 'energy', delta: -10 },
+      { e: 'skill', skill: 'organization', delta: 3, why: 'ביקש חניכה במקום להעמיד פנים' },
+      { e: 'proof', kind: 'mentored_role', proofId: 'mentored_role:{chapter}:terrace', subjectHe: 'תפקיד אחד, עם חונך', audience: 'gate5', delta: 2, noteHe: 'ביקש ללמוד תפקיד אחד לפני שלקח שלושה.' },
+      { e: 'toast', text: 'אסף: "זאת התחלה טובה." — "לא הורדת לי דרגה?" — "אנחנו לא בצבא."', tone: 'plain' },
+      { e: 'ending', id: 'mentored' },
+    ],
+  },
+  {
+    id: 'exit',
+    text: '(לסיים תקופה — ולהשאיר מחליף שהסכים.)',
+    then: [
+      { e: 'flag', flag: 't:lead' },
+      { e: 'flagValue', flag: TERRACE_ROLE, value: 'former' },
+      { e: 'proof', kind: 'clean_exit', proofId: 'clean_exit:{chapter}:terrace', subjectHe: 'התקופה שסיימתי ביציע', audience: 'gate5', delta: 2, noteHe: 'יצא עם מחליף שהסכים, ולא דרך דלת אחורית.' },
+      { e: 'heard', proofId: 'clean_exit:{chapter}:terrace' },
+      { e: 'toast', text: 'אסף: "התפקיד עובר. השנים שלך נשארות." — "זה מה שהיה חשוב לי."', tone: 'plain' },
+      { e: 'ending', id: 'exit' },
+    ],
+  },
+]
+
+/**
+ * ------------------------------------------ T01 · מתחת ליציע, והשער שנפתח (27.9.2026) ---
+ *
+ * The proof of a role is written when the gate opens and he answers for the work — not when he
+ * says yes to Asaf. Which proof and which ending follow the role he took (`t:kind`); what he said
+ * about who did it is `life:terrace:credit`, and Yevgeny remembers it in 2012 (`t-hand`).
+ */
+const T01_PROOF: Record<'gear' | 'people', Effect[]> = {
+  gear: [
+    { e: 'skill', skill: 'organization', delta: 3, why: 'החזיר ציוד מסודר, והראה לבא איפה הכול' },
+    { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:gear', subjectHe: 'הציוד של היציע', audience: 'gate5', delta: 4, noteHe: 'תפקיד הכנה שנלקח עד הסוף, וציוד שחזר מסודר.' },
+    { e: 'heard', proofId: 'leadership_proof:{chapter}:gear' },
+  ],
+  people: [
+    // `mediation` בתסריט → `communication` במנוע
+    { e: 'skill', skill: 'communication', delta: 3, why: 'וידא שכל אחד אישר, אחד אחד' },
+    { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:volunteers', subjectHe: 'המתנדבים של הערב', audience: 'gate5', delta: 4, noteHe: 'כל מי שאמר שיהיה — היה, כי מישהו שאל אותו.' },
+    { e: 'heard', proofId: 'leadership_proof:{chapter}:volunteers' },
+  ],
+}
+
+const KIND = (kind: 'gear' | 'people'): Condition => ({ all: [{ flagIs: { flag: 't:kind', value: kind } }], none: [{ flag: 't:late' }] })
+
+function creditChoices(): ChoiceDef[] {
+  const out: ChoiceDef[] = []
+  for (const kind of ['gear', 'people'] as const) {
+    out.push(
+      {
+        id: `took-${kind}`,
+        text: '"אני."',
+        when: KIND(kind),
+        hidden: true,
+        then: [
+          { e: 'flag', flag: 't:credit' },
+          { e: 'flagValue', flag: TERRACE_CREDIT, value: 'took' },
+          ...T01_PROOF[kind],
+          { e: 'rel', who: 'melamed', axis: 'tension', delta: 3 },
+          { e: 'toast', text: 'מלמד, מהמדרגה העליונה: "אתה. בטח." אסף לא אמר כלום.', tone: 'plain' },
+          { e: 'ending', id: kind },
+        ],
+      },
+      {
+        id: `shared-${kind}`,
+        text: '"כולנו. ארז הביא את הצבע, מלמד את הסולם."',
+        when: KIND(kind),
+        hidden: true,
+        then: [
+          { e: 'flag', flag: 't:credit' },
+          { e: 'flagValue', flag: TERRACE_CREDIT, value: 'shared' },
+          ...T01_PROOF[kind],
+          { e: 'rel', who: 'asaf', axis: 'trust', delta: 3 },
+          { e: 'redheart', key: 'community', delta: 2 },
+          { e: 'toast', text: 'ארז: "עכשיו תראה למי הבא איפה הכול." — "לא שומרים ידע רק בשביל שיצטרכו אותי."', tone: 'plain' },
+          { e: 'ending', id: kind },
+        ],
+      },
+      {
+        id: `quiet-${kind}`,
+        text: '(לשתוק, ולהמשיך לסחוב.)',
+        when: KIND(kind),
+        hidden: true,
+        then: [
+          { e: 'flag', flag: 't:credit' },
+          { e: 'flagValue', flag: TERRACE_CREDIT, value: 'quiet' },
+          ...T01_PROOF[kind],
+          { e: 'toast', text: 'אף אחד לא שאל שוב. בסוף הערב אסף נתן לך את המפתח של הארגז.', tone: 'plain' },
+          { e: 'ending', id: kind },
+        ],
+      },
+    )
+  }
+  out.push(
+    {
+      id: 'blamed',
+      text: '"מלמד היה אמור לגמור את מה שנשאר."',
+      when: { none: [{ flag: 't:late' }] },
+      hidden: true,
+      then: [
+        { e: 'flag', flag: 't:credit' },
+        { e: 'flagValue', flag: TERRACE_CREDIT, value: 'blamed' },
+        { e: 'rel', who: 'melamed', axis: 'tension', delta: 6 },
+        { e: 'repLoss', audience: 'gate5', delta: -3, why: 'הפיל על אחר את מה שלא נגמר' },
+        { e: 'toast', text: 'מלמד לא ענה. הוא ירד, הרים את מה שנשאר, והלך איתו למעלה.', tone: 'red' },
+        { e: 'ending', id: 'blamed' },
+      ],
+    },
+    {
+      id: 'absent',
+      text: '"לא הייתי פה. מי סחב?"',
+      when: { flag: 't:late' },
+      hidden: true,
+      then: [
+        { e: 'flag', flag: 't:credit' },
+        { e: 'flagValue', flag: TERRACE_CREDIT, value: 'absent' },
+        { e: 'rel', who: 'asaf', axis: 'trust', delta: 1 },
+        { e: 'toast', text: 'אסף: "מלמד וארז. בפעם הבאה — אתה."', tone: 'plain' },
+        { e: 'ending', id: 'late' },
+      ],
+    },
+  )
+  return out
+}
+
+/** S2 — the banner is made by hand: a stencil that is slow and straight, or a brush that is fast */
+const T_BANNER_CHOICES: ChoiceDef[] = [
+  {
+    id: 'stencil',
+    text: '(לגזור שבלונה, להניח, ולצבוע אות אחרי אות.)',
+    then: [
+      { e: 'flag', flag: 't:task:banner' },
+      { e: 'flagValue', flag: 't:banner', value: 'stencil' },
+      { e: 'time', minutes: 25 },
+      { e: 'energy', delta: -8 },
+      { e: 'toast', text: 'שלוש אותיות, ישרות כמו בדפוס. הצבע עוד רטוב כשמרימים.', tone: 'plain' },
+    ],
+  },
+  {
+    id: 'brush',
+    text: '(ביד חופשית, מהר — שיתייבש עד חמש.)',
+    then: [
+      { e: 'flag', flag: 't:task:banner' },
+      { e: 'flagValue', flag: 't:banner', value: 'brush' },
+      { e: 'time', minutes: 12 },
+      { e: 'energy', delta: -4 },
+      { e: 'toast', text: 'האות האחרונה עקומה קצת. מרחוק, מהיציע ממול, אף אחד לא יראה.', tone: 'plain' },
+    ],
+  },
+]
+
+/** T02 · S3 — Yevgeny's first decision, and whether it stands */
+const LET_PROOF: Record<'trust' | 'small', Effect[]> = {
+  trust: [
+    { e: 'skill', skill: 'organization', delta: 5, why: 'האציל סמכות אמיתית, ולא נכנס בהחלטה הראשונה' },
+    { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:delegated', subjectHe: 'הסמכות שנתתי ליבגני', audience: 'gate5', delta: 4, noteHe: 'ציוד, מידע ותנאי החלטה — ואת ההחלטה הראשונה השארתי לו.' },
+    { e: 'heard', proofId: 'leadership_proof:{chapter}:delegated' },
+  ],
+  small: [
+    { e: 'skill', skill: 'organization', delta: 3, why: 'קטן ומבוצע' },
+    { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:shared', subjectHe: 'התפקיד שהוקטן', audience: 'gate5', delta: 4, noteHe: 'תפקיד מצומצם שבוצע, במקום גדול שחיכה.' },
+    { e: 'heard', proofId: 'leadership_proof:{chapter}:shared' },
+  ],
+}
+
+function testChoices(): ChoiceDef[] {
+  const out: ChoiceDef[] = []
+  for (const mode of ['trust', 'small'] as const) {
+    const when: Condition = { flagIs: { flag: 't:mode', value: mode } }
+    out.push(
+      {
+        id: `let-${mode}`,
+        text: '(לתת לזה לעמוד.)',
+        when,
+        hidden: true,
+        then: [
+          { e: 'flag', flag: 't:test' },
+          { e: 'flagValue', flag: TERRACE_HANDOFF, value: 'let' },
+          ...LET_PROOF[mode],
+          { e: 'rel', who: 'yevgeny', axis: 'trust', delta: 3 },
+          { e: 'toast', text: 'יבגני: "עכשיו אני יודע מתי להחליט ומתי להתקשר." — "ואני יודע מתי לא להפריע."', tone: 'plain' },
+        ],
+      },
+      {
+        id: `step-${mode}`,
+        text: '"על המעקה. כמו תמיד."',
+        when,
+        hidden: true,
+        then: [
+          { e: 'flag', flag: 't:test' },
+          { e: 'flagValue', flag: TERRACE_HANDOFF, value: 'stepped' },
+          ...(mode === 'small' ? LET_PROOF.small : []),
+          { e: 'rel', who: 'yevgeny', axis: 'trust', delta: -4 },
+          { e: 'toast', text: 'יבגני לא התווכח. הוא הרים את הקצה ועלה.', tone: 'red' },
+        ],
+      },
+    )
+  }
+  return out
+}
+
+const T_EXTRA: Conversation[] = [
+  {
+    id: 't-task-flags',
+    nameHe: null,
+    branches: [
+      {
+        when: { flagIs: { flag: 't:kind', value: 'people' } },
+        lines: [
+          { who: null, text: 'אתה לא סוחב. אתה מתקשר לשניים שאמרו שיבואו, ואחד מהם באמת בא. שישה דגלים, שלוש עליות, ואתה סופר אותם למעלה.' },
+        ],
+        then: [{ e: 'flag', flag: 't:task:flags' }, { e: 'time', minutes: 20 }, { e: 'energy', delta: -3 }, { e: 'toast', text: 'הדגלים למעלה. השני שלא בא — שלח הודעה בשש.', tone: 'plain' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'שישה דגלים על הגדר, כל אחד כבד מכפי שהוא נראה. שלוש עליות במדרגות, שניים בכל פעם, והמעקה החלוד תחת היד.' },
+        ],
+        then: [{ e: 'flag', flag: 't:task:flags' }, { e: 'time', minutes: 20 }, { e: 'energy', delta: -10 }, { e: 'toast', text: 'הדגלים למעלה. הכתפיים יזכרו את זה מחר.', tone: 'plain' }],
+      },
+    ],
+  },
+  {
+    id: 't-task-banner',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הבד על הרצפה. "הפועל" כבר שם, ושלוש אותיות בסוף עוד חסרות. פח צבע אדום אחד, שני מכחולים, ודף קרטון.' },
+        ],
+        choices: T_BANNER_CHOICES,
+      },
+    ],
+  },
+  {
+    id: 't-task-rope',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'החבלים על הקיר. למעלה, בראש המדרגות, המעקה שהבד נקשר אליו כל שבת. קשר כפול, ועוד אחד ליתר ביטחון — כמו שאסף לימד מישהו פעם.' },
+        ],
+        then: [{ e: 'flag', flag: 't:task:rope' }, { e: 'time', minutes: 20 }, { e: 'energy', delta: -6 }, { e: 'toast', text: 'המעקה קשור. כשהבד יעלה, יהיה לו במה להיאחז.', tone: 'plain' }],
+      },
+    ],
+  },
+  {
+    id: 't-credit',
+    nameHe: 'אסף',
+    branches: [
+      {
+        when: { flag: 't:late' },
+        lines: [
+          { who: null, text: 'השער פתוח. הזרם עולה במדרגות, ואתה עומד בתחתית כמו מי שהגיע לבד.' },
+          { who: 'אסף', text: 'הדגלים עלו. מישהו אחר סחב.' },
+        ],
+        choices: creditChoices(),
+      },
+      {
+        when: { flag: 't:task:banner' },
+        lines: [
+          { who: null, text: 'השער נפתח. הזרם עולה במדרגות, צעיפים ורעש, והבד שצבעת כבר על הקיר.' },
+          { who: 'אסף', text: 'מי עשה את זה?' },
+        ],
+        choices: creditChoices(),
+      },
+      {
+        lines: [
+          { who: null, text: 'השער נפתח. הזרם עולה במדרגות, והבד עוד מגולגל על הרצפה עם שלוש אותיות חסרות. מה שלא נגמר — לא נגמר.' },
+          { who: 'אסף', text: 'אז מה נגמר, ומי עשה אותו?' },
+        ],
+        choices: creditChoices(),
+      },
+    ],
+  },
+  {
+    id: 't-test',
+    nameHe: 'יבגני',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'סדרן יורד במדרגות עם הדגל הגדול מגולגל על הכתף, ושואל את החלל: על המעקה או על הקיר?' },
+          { who: 'יבגני', text: 'על הקיר. על המעקה הוא חוסם את המדרגות.' },
+          { who: null, text: 'תמיד הוא היה על המעקה. אתה תלית אותו שם שתים־עשרה שנה. יבגני לא מסתכל עליך.' },
+        ],
+        choices: testChoices(),
+      },
+    ],
+  },
+]
+
 export const CONVERSATIONS_CAREER: Conversation[] = [
+  ...T_EXTRA,
   {
     id: 't-first',
     nameHe: 'אסף',
@@ -367,16 +881,13 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
           {
             id: 'gear',
             text: '(לבצע תפקיד הכנה — ולהחזיר את הציוד מסודר.)',
+            // the commit (27.9.2026): the work itself is under the stand (`gate5-stand`), and the
+            // proof is written when the gate opens and he answers for it (`t-credit`)
             then: [
               { e: 'flag', flag: 't:first' },
               { e: 'flagValue', flag: TERRACE_ROLE, value: 'active' },
-              { e: 'time', minutes: 60 },
-              { e: 'energy', delta: -15 },
-              { e: 'skill', skill: 'organization', delta: 3, why: 'החזיר ציוד מסודר, והראה לבא איפה הכול' },
-              { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:gear', subjectHe: 'הציוד של היציע', audience: 'gate5', delta: 4, noteHe: 'תפקיד הכנה שנלקח עד הסוף, וציוד שחזר מסודר.' },
-              { e: 'heard', proofId: 'leadership_proof:{chapter}:gear' },
-              { e: 'toast', text: 'ארז: "עכשיו תראה למי הבא איפה הכול." — "לא שומרים ידע רק בשביל שיצטרכו אותי."', tone: 'plain' },
-              { e: 'ending', id: 'gear' },
+              { e: 'flagValue', flag: 't:kind', value: 'gear' },
+              { e: 'toast', text: 'אסף: "מתחת ליציע, דרך הקרוסלות. בחמש פותחים."', tone: 'plain' },
             ],
           },
           {
@@ -385,14 +896,8 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
             then: [
               { e: 'flag', flag: 't:first' },
               { e: 'flagValue', flag: TERRACE_ROLE, value: 'active' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -5 },
-              // `mediation` בתסריט → `communication` במנוע
-              { e: 'skill', skill: 'communication', delta: 3, why: 'וידא שכל אחד אישר, אחד אחד' },
-              { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:volunteers', subjectHe: 'המתנדבים של הערב', audience: 'gate5', delta: 4, noteHe: 'כל מי שאמר שיהיה — היה, כי מישהו שאל אותו.' },
-              { e: 'heard', proofId: 'leadership_proof:{chapter}:volunteers' },
-              { e: 'toast', text: 'יבגני: "תוודא שכל אחד אישר, לא רק נקרא בקבוצה." — "אחד אחד."', tone: 'plain' },
-              { e: 'ending', id: 'people' },
+              { e: 'flagValue', flag: 't:kind', value: 'people' },
+              { e: 'toast', text: 'יבגני: "תוודא שכל אחד אישר, לא רק נקרא בקבוצה. כולם מתחת ליציע."', tone: 'plain' },
             ],
           },
           {
@@ -414,6 +919,17 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
     nameHe: 'יבגני',
     branches: [
       {
+        // what he said in 2001 when the gate opened (`t-credit`) — Yevgeny was there
+        when: { flagIs: { flag: TERRACE_CREDIT, value: 'took' } },
+        lines: [
+          { who: 'יבגני', text: 'ב־2001, כששאלו מי תלה את הבד, אמרת "אני".' },
+          { who: 'פוגי', text: 'תלינו כמה.' },
+          { who: 'יבגני', text: 'אז היום אני רוצה שישאלו אותי. ואם אני מחליט, אני מחליט גם כשזה לא איך שאתה עושה.' },
+          { who: 'אסף', text: 'אז בשביל זה אנחנו פה.' },
+        ],
+        choices: T_HAND_CHOICES,
+      },
+      {
         lines: [
           { who: 'יבגני', text: 'אם אתה נותן לי להוביל, אני מחליט חלק מהדברים.' },
           { who: 'פוגי', text: 'ברור.' },
@@ -421,48 +937,7 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
           { who: 'פוגי', text: 'לזה הגעתי קצת פחות מוכן.' },
           { who: 'אסף', text: 'אז בשביל זה אנחנו פה.' },
         ],
-        choices: [
-          {
-            id: 'trust',
-            text: '(לתת לו סמכות — ולסכם גבולות מראש.)',
-            then: [
-              { e: 'flag', flag: 't:hand' },
-              { e: 'time', minutes: 45 },
-              { e: 'skill', skill: 'organization', delta: 5, why: 'האציל סמכות אמיתית, עם גבולות שסוכמו' },
-              { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:delegated', subjectHe: 'הסמכות שנתתי ליבגני', audience: 'gate5', delta: 4, noteHe: 'ציוד, מידע ותנאי החלטה — לא רק שם ברשימה.' },
-              { e: 'heard', proofId: 'leadership_proof:{chapter}:delegated' },
-              { e: 'rel', who: 'yevgeny', axis: 'trust', delta: 3 },
-              { e: 'toast', text: 'יבגני: "עכשיו אני יודע מתי להחליט ומתי להתקשר." — "ואני יודע מתי לא להפריע."', tone: 'plain' },
-              { e: 'ending', id: 'trust' },
-            ],
-          },
-          {
-            id: 'small',
-            text: '(לנהל יחד תפקיד מצומצם יותר.)',
-            then: [
-              { e: 'flag', flag: 't:hand' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -10 },
-              { e: 'skill', skill: 'organization', delta: 3, why: 'קטן ומבוצע' },
-              { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:shared', subjectHe: 'התפקיד שהוקטן', audience: 'gate5', delta: 4, noteHe: 'תפקיד מצומצם שבוצע, במקום גדול שחיכה.' },
-              { e: 'heard', proofId: 'leadership_proof:{chapter}:shared' },
-              { e: 'toast', text: 'אסף: "קטן ומבוצע עדיף מגדול שמחכה לך." — "מסכים."', tone: 'plain' },
-              { e: 'ending', id: 'small' },
-            ],
-          },
-          {
-            id: 'handover',
-            text: '(לוותר על האחריות — ולמסור אותה לפני האירוע.)',
-            then: [
-              { e: 'flag', flag: 't:hand' },
-              { e: 'flagValue', flag: TERRACE_ROLE, value: 'former' },
-              { e: 'proof', kind: 'handover', proofId: 'handover:{chapter}:terrace', subjectHe: 'התפקיד שמסרתי ליבגני', audience: 'gate5', delta: 2, noteHe: 'נמסר לפני האירוע, עם כל מה שצריך כדי להחליט.' },
-              { e: 'heard', proofId: 'handover:{chapter}:terrace' },
-              { e: 'toast', text: 'יבגני: "אני לוקח. תעביר את המידע." — "הכול כאן."', tone: 'plain' },
-              { e: 'ending', id: 'handed' },
-            ],
-          },
-        ],
+        choices: T_HAND_CHOICES,
       },
     ],
   },
@@ -471,6 +946,27 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
     nameHe: 'אסף',
     branches: [
       {
+        // 2012, on the gate-5 stairs: he let Yevgeny's first decision stand (`t-test`)
+        when: { flagIs: { flag: TERRACE_HANDOFF, value: 'let' } },
+        lines: [
+          { who: 'אסף', text: 'תראה אותם.' },
+          { who: 'אסף', text: 'ב־2012 נתת ליבגני להחליט על הדגל, ולא נכנסת. הוא עוד מספר את זה לחדשים.' },
+          { who: 'פוגי', text: 'הוא צדק על הדגל.' },
+          { who: 'אסף', text: 'לא בגלל הדגל הוא מספר. היום אני עוזר לך.' },
+        ],
+        choices: T_LEAD_CHOICES,
+      },
+      {
+        when: { flagIs: { flag: TERRACE_HANDOFF, value: 'stepped' } },
+        lines: [
+          { who: 'אסף', text: 'תראה אותם.' },
+          { who: 'אסף', text: 'ב־2012 נכנסת ליבגני בהחלטה הראשונה שלו. הם זוכרים את זה יותר ממה שאתה חושב.' },
+          { who: 'פוגי', text: 'אז?' },
+          { who: 'אסף', text: 'אז היום תסביר, ותשאיר להם מקום לטעות. אני עוזר לך.' },
+        ],
+        choices: T_LEAD_CHOICES,
+      },
+      {
         lines: [
           { who: 'אסף', text: 'תראה אותם.' },
           { who: 'פוגי', text: 'מה?' },
@@ -478,47 +974,7 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
           { who: 'פוגי', text: 'חשבתי שאתה מסביר.' },
           { who: 'אסף', text: 'היום אני עוזר לך.' },
         ],
-        choices: [
-          {
-            id: 'lead',
-            text: '(לחלק תפקידים, לשאול מי יכול — ולבצע.)',
-            then: [
-              { e: 'flag', flag: 't:lead' },
-              { e: 'time', minutes: 60 },
-              { e: 'energy', delta: -15 },
-              { e: 'skill', skill: 'organization', delta: 5, why: 'שלושה צוותים ומחסור אחד' },
-              { e: 'proof', kind: 'leadership_proof', proofId: 'leadership_proof:{chapter}:teams', subjectHe: 'שלושה צוותים ומחסור אחד', audience: 'gate5', delta: 6, noteHe: 'החלטה על אנשים: מי יכול, מה חסר, ומי סוגר את זה.' },
-              { e: 'heard', proofId: 'leadership_proof:{chapter}:teams' },
-              { e: 'toast', text: 'אסף: "עכשיו תן להם לעבוד." — "אני כבר רוצה לתקן הכול." — "אז תתחיל מעצמך."', tone: 'plain' },
-              { e: 'ending', id: 'lead' },
-            ],
-          },
-          {
-            id: 'mentor',
-            text: '(לבקש חניכה בתפקיד אחד — במקום להעמיד פנים שאני מוכן.)',
-            then: [
-              { e: 'flag', flag: 't:lead' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -10 },
-              { e: 'skill', skill: 'organization', delta: 3, why: 'ביקש חניכה במקום להעמיד פנים' },
-              { e: 'proof', kind: 'mentored_role', proofId: 'mentored_role:{chapter}:terrace', subjectHe: 'תפקיד אחד, עם חונך', audience: 'gate5', delta: 2, noteHe: 'ביקש ללמוד תפקיד אחד לפני שלקח שלושה.' },
-              { e: 'toast', text: 'אסף: "זאת התחלה טובה." — "לא הורדת לי דרגה?" — "אנחנו לא בצבא."', tone: 'plain' },
-              { e: 'ending', id: 'mentored' },
-            ],
-          },
-          {
-            id: 'exit',
-            text: '(לסיים תקופה — ולהשאיר מחליף שהסכים.)',
-            then: [
-              { e: 'flag', flag: 't:lead' },
-              { e: 'flagValue', flag: TERRACE_ROLE, value: 'former' },
-              { e: 'proof', kind: 'clean_exit', proofId: 'clean_exit:{chapter}:terrace', subjectHe: 'התקופה שסיימתי ביציע', audience: 'gate5', delta: 2, noteHe: 'יצא עם מחליף שהסכים, ולא דרך דלת אחורית.' },
-              { e: 'heard', proofId: 'clean_exit:{chapter}:terrace' },
-              { e: 'toast', text: 'אסף: "התפקיד עובר. השנים שלך נשארות." — "זה מה שהיה חשוב לי."', tone: 'plain' },
-              { e: 'ending', id: 'exit' },
-            ],
-          },
-        ],
+        choices: T_LEAD_CHOICES,
       },
     ],
   },

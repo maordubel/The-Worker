@@ -56,15 +56,21 @@ export function objectiveHome24(state: LifeState, sceneId: string): string | nul
   if (!f['h24:concern']) return sceneId === 'drive-in' ? 'על הפרקט, פגישה פתוחה. הבעלים בווידאו, על מסך.' : 'הדרייב אין. פגישה פתוחה, והבעלים בווידאו.'
   if (!f['h24:ticket'] || f['h24:ticket'] === 'waiting') return sceneId === 'home' ? 'הטלפון. המנוי.' : 'הביתה. הטלפון מחכה עם שאלה אחת.'
   if (!f['h24:night']) return 'אחד־עשר בינואר. איפה אתה בערב הזה.'
+  // S5 — the first night is a room now (`menora`): find the seat, look for faces, sit
+  if (f[MENORA_2025] === 'went' && !f['h24:inside']) {
+    if (sceneId !== 'menora') return 'ההיכל. הכרטיס בטלפון.'
+    return f['h24:seat'] ? 'הכיסא שלך. לשבת — מתי שתרצה.' : 'השורה הראשונה, ליד המעקה. למצוא את המקום.'
+  }
   return null
 }
 
-export const goalHome24 = (state: LifeState): 'kiosk' | 'drive-in' | 'home' | null => {
+export const goalHome24 = (state: LifeState): 'kiosk' | 'drive-in' | 'home' | 'menora' | null => {
   const f = state.flags
   if (!f['h24:rumor'] || !f['h24:board'] || !f['h24:ask']) return 'kiosk'
   if (!f['h24:small']) return 'drive-in'
   if (!f['h24:concern']) return 'drive-in'
   if (!f['h24:night']) return 'home'
+  if (f[MENORA_2025] === 'went' && !f['h24:inside']) return 'menora'
   return null
 }
 
@@ -476,7 +482,93 @@ const DOOR: Branches = [
   },
 ]
 
-/** the ride's closing stop — the night in the big hall, and the one line it gets */
+/**
+ * ---------------------------------------------------- S5 · הערב הראשון, כחדר (27.9.2026) ---
+ *
+ * The ride lands in the arena (`menora`, `world/city2027/stadiumSide.ts`) an hour before, with the
+ * hall still filling. Three things in it, and one of them closes the night:
+ *   · the seat (`h24-find-seat`) — the ticket's row and number, the front row by the rail;
+ *   · the faces (`h24-faces`) — who from the small hall is here, read from the life he had;
+ *   · sitting (`h24-inside`) — the commit: sit when the ticket says, or stand at the rail through
+ *     the first song. Both are "went"; which one is `life:menora:2025:how`, and Kobi asks.
+ * Efi walks up once (`h24-efi-menora`, the actor's `initiative`). Nothing here is a number.
+ */
+export const MENORA_HOW = 'life:menora:2025:how'
+/** who he found in the stand — read by Kobi at home (`h24-after`) */
+export const MENORA_FACES = 'h24:faces'
+
+const FIND_SEAT: Branches = [
+  {
+    lines: [
+      { who: null, text: 'השורה הראשונה, ליד המעקה. המספר מהכרטיס מודפס על משענת בצבע אחר, ומעליו כיסוי אדום חדש.' },
+      { who: null, text: 'פעם ישבו פה אחרים. המושב זוכר אותם יותר ממך.' },
+    ],
+    then: [{ e: 'flag', flag: 'h24:seat' }, { e: 'toast', text: 'המקום שלך. אפשר לשבת — או עוד רגע לעמוד.', tone: 'plain' }],
+  },
+]
+
+const FACES: Branches = [
+  {
+    // מי שישב בשורה שבע בערב הראשון בדרייב אין (2015)
+    when: { flag: 'life:drivein:first-night' },
+    lines: [
+      { who: null, text: 'שתי שורות מעליך — שלושה אנשים משורה שבע של הדרייב אין. אחד מרים יד. השני מסתכל על התקרה, כאילו הוא סופר אותה.' },
+      { who: null, text: 'בית זה לא הקירות. בית זה מי שיושב שתי שורות מעליך.' },
+    ],
+    then: [{ e: 'flagValue', flag: MENORA_FACES, value: 'row7' }, { e: 'redheart', key: 'community', delta: 2 }],
+  },
+  {
+    // מי שקיפל את הבד ב-11.5.2024 (Z05)
+    when: { flagIs: { flag: 'life:relegation:2024:where', value: 'gate' } },
+    lines: [
+      { who: null, text: 'ביציע ממול, מגולגל על הברכיים של מישהו — הבד שקיפלתם במאי. הוא לא פורש אותו. הוא רק מחזיק.' },
+    ],
+    then: [{ e: 'flagValue', flag: MENORA_FACES, value: 'banner' }, { e: 'redheart', key: 'community', delta: 1 }],
+  },
+  {
+    lines: [
+      { who: null, text: 'אתה סורק את היציע ומחפש פנים. רוב הפנים חדשות — ילדים עם צעיפים שנקנו השבוע, זוגות שבאו לראות.' },
+      { who: null, text: 'אפי, ליד המעבר, הוא היחיד כאן שמכיר אותך בשם.' },
+    ],
+    then: [{ e: 'flagValue', flag: MENORA_FACES, value: 'efi' }],
+  },
+]
+
+const EFI_MENORA: Branches = [
+  {
+    lines: [
+      { who: 'אפי', text: 'נו. בית?' },
+      { who: 'פוגי', text: 'שאלה של אפי.' },
+      { who: 'אפי', text: 'שאלה של מי שעבר. אתה עברת איתי.' },
+    ],
+    choices: [
+      {
+        id: 'not-yet',
+        text: '"עוד לא."',
+        then: [{ e: 'flag', flag: 'h24:efi-menora' }, { e: 'rel', who: 'efi', axis: 'trust', delta: 2 }, { e: 'toast', text: 'אפי: "גם אני לא. אבל ישבתי."', tone: 'plain' }],
+      },
+      {
+        id: 'who-comes',
+        text: '"בית זה מי שבא."',
+        then: [{ e: 'flag', flag: 'h24:efi-menora' }, { e: 'rel', who: 'efi', axis: 'bond', delta: 2 }, { e: 'toast', text: 'אפי מסתכל על שלוש השורות הריקות לידו. "אז עוד לא כולם באו."', tone: 'plain' }],
+      },
+    ],
+  },
+]
+
+/** the commit — sitting down in the big hall; it closes the night and takes him home */
+const SAT = (how: 'sat' | 'stood', toastHe: string): Effect[] => [
+  { e: 'flagValue', flag: MENORA_HOW, value: how },
+  { e: 'presence', mode: 'inside' },
+  { e: 'attend' },
+  { e: 'rel', who: 'efi', axis: 'bond', delta: 2 },
+  { e: 'remember', who: 'efi', eventId: 'menora-went-2025', significance: 'notable' },
+  { e: 'flag', flag: 'h24:inside' },
+  { e: 'time', minutes: 150 },
+  { e: 'toast', text: toastHe, tone: 'red' },
+  { e: 'travel', to: 'home', spawn: 'start' },
+]
+
 const INSIDE: Branches = [
   {
     lines: [
@@ -484,18 +576,38 @@ const INSIDE: Branches = [
       { who: 'פוגי', text: 'גדול.' },
       { who: null, text: 'אף אחד לא שמע. היה רועש מדי.' },
     ],
-    then: [
-      { e: 'presence', mode: 'inside' },
-      { e: 'attend' },
-      { e: 'rel', who: 'efi', axis: 'bond', delta: 2 },
-      { e: 'remember', who: 'efi', eventId: 'menora-went-2025', significance: 'notable' },
-      { e: 'flag', flag: 'h24:inside' },
+    choices: [
+      { id: 'sit', text: '(לשבת. הכרטיס אומר שזה המקום.)', then: SAT('sat', 'ישבת. השריקה, ושעתיים שהאולם הזה לא שמע מעולם — ואז הדרך הביתה.') },
+      { id: 'stand', text: '(לעמוד ליד המעקה עד שהשיר הראשון נגמר — ואז לשבת.)', then: SAT('stood', 'עמדת עד סוף השיר, ורק אז ישבת. אף אחד לא ביקש ממך לשבת. שעתיים, ואז הביתה.') },
     ],
   },
 ]
 
-/** back home after the big hall — the ride lands here (`h24:inside`), and the evening closes */
+/** back home after the big hall — `h24-inside` travels here (`h24:inside`), and the evening closes */
 const AFTER: Branches = [
+  {
+    // who he found in the stand (`h24:faces`) — the answer Kobi gets
+    when: { flagIs: { flag: MENORA_FACES, value: 'row7' } },
+    lines: [
+      { who: 'קובי', text: 'נו?' },
+      { who: 'פוגי', text: 'גדול. שורה שבע באה, כמעט כולה.' },
+      { who: 'קובי', text: 'אז זה לא אולם חדש. זה אותם אנשים במקום רחב.' },
+      { who: 'פוגי', text: 'עוד לא יודע.' },
+      { who: 'קובי', text: 'זאת תשובה של מי שהיה שם.' },
+    ],
+    then: [{ e: 'flag', flag: 'h24:after' }, { e: 'ending', id: 'went' }],
+  },
+  {
+    when: { flagIs: { flag: MENORA_HOW, value: 'stood' } },
+    lines: [
+      { who: 'קובי', text: 'נו? ישבת?' },
+      { who: 'פוגי', text: 'אחרי השיר.' },
+      { who: 'קובי', text: 'אני בגיל שלך לא ישבתי אף פעם. לא היה על מה.' },
+      { who: 'פוגי', text: 'עכשיו יש על מה. זה חלק מהבעיה.' },
+      { who: 'קובי', text: 'זאת תשובה של מי שהיה שם.' },
+    ],
+    then: [{ e: 'flag', flag: 'h24:after' }, { e: 'ending', id: 'went' }],
+  },
   {
     lines: [
       { who: 'קובי', text: 'נו?' },
@@ -551,5 +663,9 @@ export const CONVERSATIONS_HOME24: Conversation[] = [
   { id: 'h24-with-kobi', nameHe: 'קובי', branches: WITH_KOBI },
   { id: 'h24-after', nameHe: 'קובי', branches: AFTER },
   { id: 'h24-door', nameHe: null, where: 'הכניסה להיכל', branches: DOOR },
-  { id: 'h24-inside', nameHe: null, where: 'בפנים', branches: INSIDE },
+  { id: 'h24-inside', nameHe: null, branches: INSIDE },
+  // S5 — the room of the first night (`menora`)
+  { id: 'h24-find-seat', nameHe: null, branches: FIND_SEAT },
+  { id: 'h24-faces', nameHe: null, branches: FACES },
+  { id: 'h24-efi-menora', nameHe: 'אפי', branches: EFI_MENORA },
 ]

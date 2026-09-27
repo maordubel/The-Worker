@@ -1519,9 +1519,9 @@
   "ussExtDusk": {
    "source": "maor-2026-09-27-backgrounds",
    "whatHe": "אוסישקין מבחוץ, ערב משחק",
-   "w": 2048,
-   "h": 1152,
-   "bytes": 2344828,
+   "w": 1920,
+   "h": 1080,
+   "bytes": 416090,
    "deyellowed": 294072,
    "yellowLeft": 0,
    "box": [
@@ -7421,9 +7421,9 @@
    "yellowLeft": 0
   },
   "ussExtDusk--sky": {
-   "w": 2048,
-   "h": 403,
-   "bytes": 10116,
+   "w": 1920,
+   "h": 378,
+   "bytes": 8954,
    "source": "ussExtDusk",
    "box": [
     0,
@@ -7435,9 +7435,9 @@
    "yellowLeft": 0
   },
   "ussExtDusk--ground": {
-   "w": 2048,
-   "h": 403,
-   "bytes": 9430,
+   "w": 1920,
+   "h": 378,
+   "bytes": 8976,
    "source": "ussExtDusk",
    "box": [
     0,

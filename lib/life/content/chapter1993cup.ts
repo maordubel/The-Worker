@@ -42,6 +42,9 @@ const QUEUE_AGOROT = 2000
 
 export const BUS_LEAVES = at(18, 30)
 
+/** the payphone at the Dan stop (`bs-phone-1993`) — what his mother knows at midnight (`close-1993`) */
+export const CALL_1993 = 'life:1993:call'
+
 /**
  * מתי נועל השער הצדדי — eight o'clock, and Efi has been saying so since the chapter was
  * written: "תגיד לו שהשער הצדדי נסגר בשמונה, לא בתשע כמו שהוא חושב". It closes at eight.
@@ -168,6 +171,18 @@ export const ENDINGS_1993: Record<string, EndingCard> = {
 // BEATS — what the day does by itself.
 // ---------------------------------------------------------------------------------
 export const BEATS_1993: Beat[] = [
+  // the Dan stop on the corner (27.9.2026): the wait is a place, not a gap
+  {
+    id: '93-stop',
+    at: 'bus-stop',
+    trigger: 'enter',
+    when: { none: [{ flag: 'bs:seen' }, { flag: 'on:bus' }, { flag: 'final:over' }] },
+    delayMs: 700,
+    do: [
+      { a: 'flag', flag: 'bs:seen' },
+      { a: 'lines', lines: [{ who: null, text: 'התחנה של "דן" בפינה. הקו הרגיל — והערב, בזכות מישל, גם האוטובוס להיכל. עיתונים על המעמד, טלפון ציבורי, ואנשים שמחכים לדברים אחרים.' }] },
+    ],
+  },
   {
     id: '93-open',
     at: 'home',
@@ -990,9 +1005,117 @@ export const CONVERSATIONS_1993: Conversation[] = [
         ],
         then: [{ e: 'rel', who: 'ofir', axis: 'sharedHistory', delta: 4 }, { e: 'flag', flag: 'walked:home' }, { e: 'ending', id: 'inside' }],
       },
+      /**
+       * the call from the Dan stop (`bs-phone-1993`, 27.9.2026) — what his mother knew when he
+       * walked in is what he told her from the payphone
+       */
+      {
+        when: { flagIs: { flag: CALL_1993, value: 'truth' } },
+        lines: [
+          { who: null, text: 'ירדת בפינה והלכת את השאר לבד. האור במטבח דלוק, ואמא יושבת ליד השולחן עם כוס תה שהתקררה.' },
+          { who: 'רחל', text: 'אמרת היכל. היית בהיכל?' },
+          { who: null, text: 'הנהנת. היא קמה, שמה את הכוס בכיור, ואמרה "לילה טוב" בקול של מי שחיכתה ולא תגיד.' },
+        ],
+        then: [{ e: 'rel', who: 'rachel', axis: 'trust', delta: 3 }, { e: 'flag', flag: 'walked:home' }, { e: 'ending', id: 'inside' }],
+      },
+      {
+        when: { flagIs: { flag: CALL_1993, value: 'cover' } },
+        lines: [
+          { who: null, text: 'ירדת בפינה והלכת את השאר לבד. אמא בפתח הדלת, בחלוק.' },
+          { who: 'רחל', text: 'איך היה אצל אפי?' },
+          { who: null, text: 'אמרת "בסדר". הקול הצרוד אמר משהו אחר, והיא שמעה את שניהם.' },
+        ],
+        then: [{ e: 'rel', who: 'rachel', axis: 'trust', delta: -2 }, { e: 'flag', flag: 'walked:home' }, { e: 'ending', id: 'inside' }],
+      },
       {
         lines: [{ who: null, text: 'ירדת בפינה והלכת את השאר לבד. חלון פתוח, רדיו במרפסת, מישהו צוחק בקומה שנייה. הרחוב שמע. אתה היית שם.' }],
         then: [{ e: 'flag', flag: 'walked:home' }, { e: 'ending', id: 'inside' }],
+      },
+    ],
+  },
+
+  // ============================================================ the Dan stop ==
+  /**
+   * התחנה בפינה (27.9.2026, `bus-stop`, `world/city2027/stadiumSide.ts`) — B3 S2 "travel". The
+   * wait for the bus used to be a hotspot on the pavement; now it is the "Dan" shelter on the
+   * corner: the evening papers (a shekel out of a fare that is exactly 36), the payphone (a call
+   * home, and what his mother knows when he comes back — `close-1993`), and the people under the
+   * tin roof who are not going to any final. The bus boards from here (`bus-1993`).
+   */
+  {
+    id: 'bs-papers-1993',
+    nameHe: null,
+    branches: [
+      {
+        when: { minAgorot: 100 },
+        lines: [
+          { who: null, text: 'על המעמד — העיתונים של הערב. בעמוד האחורי, תמונה של ההיכל הגדול מלמעלה, וכותרת על הערב הזה בלי מילה אחת על איך הוא ייגמר.' },
+        ],
+        choices: [
+          {
+            id: 'buy',
+            text: '(לקנות אחד. שקל. לשמור לקופסה.)',
+            then: [
+              { e: 'flag', flag: 'bs:papers' },
+              { e: 'money', agorot: -100, why: 'עיתון ערב בתחנה' },
+              { e: 'flagValue', flag: 'life:1993:paper', value: 'kept' },
+              { e: 'toast', text: 'העיתון מקופל בכיס האחורי. שקל פחות לאוטובוס — תספור שוב לפני שהוא מגיע.', tone: 'plain' },
+            ],
+          },
+          { id: 'read', text: '(לקרוא את הכותרת בעמידה, ולהחזיר.)', then: [{ e: 'flag', flag: 'bs:papers' }, { e: 'time', minutes: 4 }, { e: 'toast', text: 'המוכר מסתכל עליך כמו על כל מי שקורא בחינם. הוא רגיל.', tone: 'plain' }] },
+        ],
+      },
+      {
+        lines: [{ who: null, text: 'העיתונים של הערב על המעמד. אין לך שקל מיותר, ואתה יודע בדיוק למה.' }],
+        then: [{ e: 'flag', flag: 'bs:papers' }],
+      },
+    ],
+  },
+  {
+    id: 'bs-phone-1993',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הטלפון הציבורי האדום, והאסימון האחרון שלך. אמא עוד לא יודעת מזה כלום.' },
+        ],
+        choices: [
+          {
+            id: 'truth',
+            text: '(להתקשר ולהגיד את האמת: ההיכל, עם אפי, חוזר בחצות.)',
+            then: [
+              { e: 'flag', flag: 'bs:phone' },
+              { e: 'flagValue', flag: CALL_1993, value: 'truth' },
+              { e: 'time', minutes: 5 },
+              { e: 'rel', who: 'rachel', axis: 'trust', delta: 2 },
+              { e: 'toast', text: 'שקט בקו. ואז: "תחזיק את הארנק בכיס הקדמי." זה היה ה"כן" שלה.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'cover',
+            text: '(להתקשר ולהגיד שאתה אצל אפי. זה חצי נכון.)',
+            then: [
+              { e: 'flag', flag: 'bs:phone' },
+              { e: 'flagValue', flag: CALL_1993, value: 'cover' },
+              { e: 'time', minutes: 3 },
+              { e: 'toast', text: '"אצל אפי. בסדר." היא לא שאלה עוד. זה היה גרוע יותר מאם הייתה שואלת.', tone: 'plain' },
+            ],
+          },
+          { id: 'hang', text: '(להרים ולהניח. אחר כך.)', then: [{ e: 'flag', flag: 'bs:phone' }, { e: 'flagValue', flag: CALL_1993, value: 'none' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'bs-wait-1993',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'מתחת לגג הפח: אישה עם סל ירקות, שני חיילים שישנים בעמידה, ואיש זקן שמסתכל על הצעיף שלך ואומר "גמר, אה?" בלי לחכות לתשובה.' },
+          { who: null, text: 'רובם לא נוסעים לשום גמר. הם נוסעים הביתה. הערב הזה שלך, לא שלהם — והם לא מתנגדים.' },
+        ],
+        then: [{ e: 'flag', flag: 'bs:wait' }, { e: 'wellbeing', key: 'belonging', delta: 1 }],
       },
     ],
   },

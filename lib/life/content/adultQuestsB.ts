@@ -86,25 +86,29 @@ export const RIDE_TERMINAL_26: Ride = {
 }
 
 /**
- * 11.1.2025 — הערב הראשון בהיכל הגדול (`2024-home`, חלק ג'). אין ציור של ההיכל, ולכן
- * הנסיעה עומדת על ציור ההיכל הכללי (`arenaEuroSeats` — קונספט, לא שחזור, בלי שלט ובלי
- * שם) ו**לא נוחתת בו**: היא נוחתת בבית, כי הסיפור של הערב הזה הוא מה שמחכה אחריו.
- * ארבע עצירות, ואף אחת לא נוקבת במספר: קופות סגורות זו העובדה היחידה, והיא נאמרת במילים.
+ * 11.1.2025 — הערב הראשון בהיכל הגדול (`2024-home`, חלק ג').
+ *
+ * **מ-27.9.2026 יש להיכל ציור (`menoraSeats`) וחדר (`menora`, `world/city2027/stadiumSide.ts`).**
+ * הנסיעה היא הכניסה: הדלת והמסדרון, הדגלים מהתקרה, השיר הראשון — על אותו ציור שהחדר עומד
+ * עליו, כך שכשהיא נגמרת המצלמה לא מחליפה מקום; היא רק מחזירה לשחקן את הרגליים. היא **נוחתת
+ * בהיכל** (`h24:arrived`), ושם הוא מוצא את הכיסא, מחפש פנים, ויושב (H24 §S5 — "האם זה בית"
+ * נענה במה שרואים). הבית, ושאלה אחת של קובי, באים אחרי השריקה (`h24-inside` → `h24-after`).
+ * אף עצירה לא נוקבת במספר: קופות סגורות זו העובדה היחידה, והיא נאמרת במילים.
  */
 export const RIDE_MENORA_25: Ride = {
   id: 'menora-25',
-  art: 'arenaEuroSeats',
+  art: 'menoraSeats',
   titleHe: 'ההיכל הגדול',
   hintHe: 'ערב ראשון. מה שנדלק — לגעת בו.',
   still: true,
+  radio: false,
   stops: [
-    { id: 'gate', spot: { x: 0.2, y: 0.42 }, verb: 'watch', labelHe: 'המסדרון, והקהל', gapMs: 1400, autoMs: 8000, lines: [{ who: null, text: 'מסדרון רחב מדי. אנשים באדום, יותר מכל ערב בדרייב אין, ורובם לא מכירים אותך.' }] },
-    { id: 'flags', spot: { x: 0.5, y: 0.2 }, verb: 'look', labelHe: 'הדגלים מהתקרה', gapMs: 2400, autoMs: 8000, lines: [{ who: null, text: 'מישהו תלה אדום על כל מה שהיה כחול. זה נראה כמו ניצחון. זה נראה גם כמו תחפושת.' }] },
-    { id: 'noise', spot: { x: 0.64, y: 0.5 }, verb: 'listen', labelHe: 'השיר הראשון', gapMs: 2600, autoMs: 8000, lines: [{ who: null, text: 'השיר הראשון מגיע מהצד השני של האולם, לפני שאתה מספיק להצטרף. אתה מצטרף בבית השני.' }] },
-    { id: 'seat', spot: { x: 0.4, y: 0.66 }, verb: 'hold', labelHe: 'הכיסא בשורה הראשונה', gapMs: 2600, autoMs: 9000, conversation: 'h24-inside' },
+    { id: 'gate', spot: { x: 0.93, y: 0.4 }, verb: 'watch', labelHe: 'הדלת, והמסדרון שמאחוריה', gapMs: 1400, autoMs: 8000, lines: [{ who: null, text: 'מסדרון רחב מדי. אנשים באדום, יותר מכל ערב בדרייב אין, ורובם לא מכירים אותך.' }] },
+    { id: 'flags', spot: { x: 0.5, y: 0.2 }, verb: 'look', labelHe: 'הדגלים מהתקרה', gapMs: 2400, autoMs: 8000, lines: [{ who: null, text: 'מישהו תלה אדום על כל מה שהיה בצבע אחר. זה נראה כמו ניצחון. זה נראה גם כמו תחפושת.' }] },
+    { id: 'noise', spot: { x: 0.64, y: 0.5 }, verb: 'listen', labelHe: 'השיר הראשון', gapMs: 2600, autoMs: 8000, lines: [{ who: null, text: 'השיר הראשון מגיע מהצד השני של האולם, לפני שאתה מספיק להצטרף. שעה לפני, וההיכל עוד מתמלא.' }] },
   ],
-  land: { mapId: 'home', spawn: 'start' },
-  flags: ['h24:inside'],
+  land: { mapId: 'menora', spawn: 'start' },
+  flags: ['h24:arrived'],
 }
 
 export const QUEST_RIDES_B: Record<string, Ride> = { [RIDE_TERMINAL_26.id]: RIDE_TERMINAL_26, [RIDE_MENORA_25.id]: RIDE_MENORA_25 }

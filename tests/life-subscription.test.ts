@@ -201,9 +201,10 @@ describe('קופת כרטיסים — דלת אחת, חדר אחד, וציור �
     const others = ALL_SCENES.filter((scene) => scene.id !== office.id)
     // one room, one painting: if a second scene ever takes it, this says so out loud
     expect(others.some((scene) => scene.art === 'ticketOffice')).toBe(false)
-    // and `undercroft` goes back to being a painting with no scene on it (rule 43),
-    // which is what it was before 16.9.2026 — not a room this game quietly kept two of
-    expect(ALL_SCENES.some((scene) => scene.art === 'undercroft')).toBe(false)
+    // and `undercroft` is not the office: from 16.9.2026 it was a painting with no scene, and
+    // from 27.9.2026 it is its own room — under Bloomfield's stand, 1990 (`world/city2027/
+    // stadiumSide.ts`). Flipped, not deleted (rule 80): exactly one room, and never this one.
+    expect(ALL_SCENES.filter((scene) => scene.art === 'undercroft').map((scene) => scene.id)).toEqual(['undercroft'])
   })
 
   it('הדלת יוצאת מאלנבי ורק משם', () => {
