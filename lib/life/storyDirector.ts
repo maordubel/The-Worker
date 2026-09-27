@@ -181,6 +181,27 @@ export function opportunityFromDirective(directive: MainStoryDirective | null): 
   }
 }
 
+/**
+ * (delta 93, brief §1) "לא להעביר זמן כשיש משהו לעשות". The free-time chip offers to let the
+ * afternoon pass until the next gate; it may not while the story is asking for something
+ * NOW — the wardrobe before a match, two reasons to leave the flat, or a MUST that points
+ * at a room other than the one the wait would take him to. Pure: the planner stays the
+ * planner, and this only says whether its offer is honest this minute.
+ */
+export function storyHoldsTheMoment(
+  directive: MainStoryDirective | null,
+  plan: { targetLocation?: LocationId | null },
+  here: LocationId,
+  /** can he walk there right now — a door that opens at half past six is not a reason not to wait */
+  reachableNow: (to: LocationId) => boolean = () => true,
+): boolean {
+  if (!directive) return false
+  if (directive.mode === 'PRE_MATCH' || directive.mode === 'DILEMMA') return true
+  if (directive.mode !== 'MUST') return false
+  const target = plan.targetLocation ?? here
+  return directiveDestinations(directive).some((to) => to !== here && to !== target && reachableNow(to))
+}
+
 /** the rooms the directive sends him to — what the door lights and the free-time planner read */
 export function directiveDestinations(directive: MainStoryDirective | null): LocationId[] {
   return (directive?.destinations ?? []).map((d) => d.to)

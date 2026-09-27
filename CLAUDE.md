@@ -2705,3 +2705,7 @@ Spec: `SMART-FREE-TIME-TIME-ADVANCE-SPEC-2026-09-25`. One system; `PassTime` and
     שפוגי מקבל מתנה מקובי"*), חתוך מהרקע ומהצל ב-`scripts/life/cut-first-shirt-2026-09-27.py`, הפס הזהוב
     של VISA הוחשך לחום (חוק 8, נמדד על הפענוח). `visa86` תלויה ברכבת מ-`a4-shirt`. חיים שקנו `tveria85`
     לפני כן שומרים אותה.
+11. **סבב שני (27.9.2026):** `storyHoldsTheMoment` — זמן פנוי לא מציע לחכות בזמן טקס/דילמה, או כש-MUST
+    מצביע על חדר אחר שאפשר ללכת אליו עכשיו. `ActorDef.initiative` — קובי ביציע של 1986 סוגר את
+    המטרים האחרונים בעצמו (פעם בביקור, עד `found:kobi`). סרט הארכיון של 1983 (`FilmCut`) נושא את
+    `FilmSkipButton`. QA: `node scripts/life/delta93-qa-probe.mjs` (A5 ארון · 2007 בלי HUD · שמירה ישנה).

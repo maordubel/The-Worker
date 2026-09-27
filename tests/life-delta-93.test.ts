@@ -18,7 +18,7 @@ import { FIRST_SHIRT_GIFT_NOTE_HE, wardrobeReading } from '@/lib/life/profile'
 import { boxContents } from '@/lib/life/redboxView'
 import { outfitFlag } from '@/lib/life/shirts'
 import { ALL_DECADES_COMPLETE } from '@/lib/life/stickers'
-import { directiveFor, opportunityFromDirective } from '@/lib/life/storyDirector'
+import { directiveFor, opportunityFromDirective, storyHoldsTheMoment } from '@/lib/life/storyDirector'
 import type { LifeState, LocationId } from '@/lib/life/types'
 import { sceneAlive } from '@/lib/life/world/placeLifecycle'
 import { ALL_SCENES, inEra } from '@/lib/life/world/scenes'
@@ -218,3 +218,36 @@ describe('shirt callbacks, miss reasons, the regular supporter (brief §22–§2
     expect(ALL_DECADES_COMPLETE).toBe(false)
   })
 })
+
+// ============================================================ the round after --
+describe('delta 93, second pass — free time, initiative, film skip', () => {
+  it('free time never offers to wait while the story asks for something now', () => {
+    const dilemma = directiveFor({ state: life('a2-alley', { flags: { 'life:a:d2': true } }), scene: 'home' as LocationId })
+    expect(storyHoldsTheMoment(dilemma, { targetLocation: null }, 'home' as LocationId)).toBe(true)
+    const must = directiveFor({ state: life('a4-shirt', { agorot: 3000, flags: { 'life:a:d4': true } }), scene: 'home' as LocationId })
+    expect(storyHoldsTheMoment(must, { targetLocation: null }, 'home' as LocationId)).toBe(true)
+    // the wait already goes where the story points — honest
+    expect(storyHoldsTheMoment(must, { targetLocation: 'kiosk' as LocationId }, 'home' as LocationId)).toBe(false)
+    // a door that is not open yet is no reason to refuse the wait
+    expect(storyHoldsTheMoment(must, { targetLocation: null }, 'home' as LocationId, () => false)).toBe(false)
+    expect(storyHoldsTheMoment(null, { targetLocation: null }, 'home' as LocationId)).toBe(false)
+  })
+
+  it('Kobi in the stand closes the last metres himself — once, and only until he is found', () => {
+    const kobi = ALL_SCENES.find((scene) => scene.id === 'bloomfield-inside')?.actors.find((actor) => actor.id === 'kobi-crowd')
+    expect(kobi?.initiative?.reachM).toBeGreaterThan(0)
+    expect(meets(life('1986', { flags: { 'found:kobi': true } }), kobi?.initiative?.when)).toBe(false)
+    const src = read('lib/life/runtime/scenes/WorldScene.ts')
+    const body = src.slice(src.indexOf('private maybeInitiative('), src.indexOf('/** the boy turns to somebody'))
+    expect(body).toContain('this.busyNow()')
+    expect(body).toContain('this.initiated.add(')
+    expect(body).not.toContain('engine.dispatch')
+  })
+
+  it('every film a player sits through carries the one skip button', () => {
+    for (const file of ['components/life/OpeningFilm.tsx', 'components/life/OpeningDocumentary.tsx', 'components/life/HistoricalCutscene.tsx', 'components/life/FilmCut.tsx']) {
+      expect(read(file), file).toContain('<FilmSkipButton')
+    }
+  })
+})
+

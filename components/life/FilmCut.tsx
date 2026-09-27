@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { FilmSkipButton } from '@/components/life/FilmSkipButton'
 import { t } from '@/lib/i18n'
 import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 
@@ -84,6 +85,10 @@ export function FilmCut({ film, onDone }: { film: NonNullable<LifeBusEvents['fil
           </span>
         </p>
       </div>
+
+      {/* (delta 93, brief §29) the long archive film carries the same skip as every other film;
+          the four-second city breaths are not interactive and need none */}
+      {archive && <FilmSkipButton onSkip={() => setGone(true)} data-life="film-cut-skip" />}
 
       {archive && (
         <button

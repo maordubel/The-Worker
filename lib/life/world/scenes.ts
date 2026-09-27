@@ -168,6 +168,13 @@ export type ActorDef = {
   when?: Condition
   flip?: boolean
   sway?: number
+  /**
+   * (delta 93, brief §19–§21) הוא ניגש אליך — a person who takes the last step himself.
+   * When the boy comes within `reachM` metres (and `when` holds), the actor walks up to him
+   * and opens his own `talk` once per visit to the room. The player still has to go and
+   * find him; the meeting is not a tap on a statue. Presentation only (`WorldScene`).
+   */
+  initiative?: { reachM: number; when?: Condition }
 }
 
 export type HotspotDef = {
@@ -3595,6 +3602,8 @@ const SCENES: SceneDef[] = [
         nameHe: 'קובי',
         talk: 'kobi-found',
         when: { flag: 'match:over' },
+        // he sees the boy first: the last two metres are his (delta 93)
+        initiative: { reachM: 2.2, when: { none: [{ flag: 'found:kobi' }] } },
       },
       { id: 'terrace-a', figure: 'adultA4', x: 0.47, y: 0.722, size: 0.122, nameHe: 'אוהד', talk: 'terrace-fan' },
       { id: 'terrace-b', figure: 'adultB1', x: 0.56, y: 0.749, size: 0.13, nameHe: 'אוהד', talk: 'terrace-fan', flip: true },

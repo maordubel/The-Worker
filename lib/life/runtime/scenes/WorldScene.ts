@@ -42,7 +42,7 @@ import { compose as composeHint, holds as hintHolds } from '../../world/hints'
 import { unmet } from '../../world/why'
 import { forcedEnding, isStalled, LAST_RESORT_MINUTES, waitingForTheClock } from '../../world/lastResort'
 import { QUIET_MINUTES, flowMove, nextTimeGate, type TimeGate } from '../../world/flow'
-import { placesFrom } from '../../world/travel'
+import { placesFrom, travelPlan } from '../../world/travel'
 import { EARLY_SUFFIX, LET_PASS_SUFFIX, advanceSteps, freeTimePlan, preflight, verifyLanding, type AdvanceResult, type LandingReport, type TimeAdvancePlan } from '../../world/timeAdvance'
 import { adDirector } from '../../monetization'
 import { reconcile } from '../../world/milestones'
@@ -58,7 +58,7 @@ import { buildFinale } from '../../finale'
 import { retryFor } from '../../content/retry1986'
 import { TransistorNet } from '../match1990'
 import { MatchDirector } from '../matchDirector'
-import { directiveFor, type MainStoryDirective } from '../../storyDirector'
+import { directiveFor, storyHoldsTheMoment, type MainStoryDirective } from '../../storyDirector'
 import { wearEvents } from '../../matchRitual'
 import { sceneAlive } from '../../world/placeLifecycle'
 import { CONSEQUENCE_KICKER_HE, dueConsequences, shownEvent } from '../../consequence'
@@ -411,6 +411,7 @@ export class WorldScene extends Phaser.Scene {
     // actor cues are presentation: a room change ends every one of them (delta 93)
     this.cued = new Set()
     this.cueGone = new Set()
+    this.initiated = new Set()
     this.pendingCue = null
     this.restoreHud()
   }
@@ -1418,6 +1419,7 @@ export class WorldScene extends Phaser.Scene {
     this.moveAmbient(delta)
     this.living?.update(delta)
     this.noticePlayer()
+    this.maybeInitiative()
     this.tickClock(delta)
     this.net?.tick(delta)
     this.derby?.tick(delta)
@@ -4685,7 +4687,12 @@ export class WorldScene extends Phaser.Scene {
 
   /** the plan as it stands this minute — null when the day is not waiting on the clock */
   freeTime(): TimeAdvancePlan | null {
-    return freeTimePlan(this.ctx.engine.state, this.era, { busy: this.busyNow() })
+    const plan = freeTimePlan(this.ctx.engine.state, this.era, { busy: this.busyNow() })
+    if (!plan) return null
+    const state = this.ctx.engine.state
+    const here = this.def.id as LocationId
+    const walkable = (to: LocationId) => travelPlan(state, this.chapter, here, to).reachable
+    return storyHoldsTheMoment(this.directive, plan, here, walkable) ? null : plan
   }
 
   /**
@@ -5349,6 +5356,38 @@ export class WorldScene extends Phaser.Scene {
         this.tweens.add({ targets: actor.image, y: actor.image.y - actor.image.displayHeight * 0.025, duration: ms(cue.durationMs, 220), yoyo: true, ease: 'Sine.easeOut', onComplete: done })
         return
       }
+    }
+  }
+
+  /** people who already took their step in this room — once a visit */
+  private initiated = new Set<string>()
+
+  /**
+   * הוא ניגש אליך (`ActorDef.initiative`) — the boy walked close; the man closes the gap
+   * and speaks first. Never over an open box, a film, the wardrobe or a running beat, and
+   * once per visit, so walking away from him is still a choice the room respects.
+   */
+  private maybeInitiative() {
+    if (!this.player || this.busyNow() || this.ritualOpen || this.cutscene || this.closing) return
+    const state = this.ctx.engine.state
+    for (const actor of this.actors) {
+      const initiative = actor.def.initiative
+      const talk = actor.def.talk
+      if (!initiative || !talk || !actor.image.visible || this.initiated.has(actor.def.id)) continue
+      if (initiative.when && !meets(state, initiative.when)) continue
+      const dx = this.player.x - actor.image.x
+      const dy = (this.groundY - actor.image.y) / DEPTH
+      if (Math.hypot(dx, dy) > this.def.metre * initiative.reachM * this.W) continue
+      this.initiated.add(actor.def.id)
+      if (this.goal) this.clearGoal()
+      this.beatBusy = true
+      this.actorCue({ a: 'actorCue', actorId: actor.def.id, cue: 'approach', target: 'player', durationMs: 700 }, () => {
+        this.beatBusy = false
+        if (!this.sys.isActive() || this.ctx.dialogue.open) return
+        this.speaking = talk
+        this.ctx.dialogue.start(talk)
+      })
+      return
     }
   }
 
