@@ -41,9 +41,10 @@ export function MerchLinks({
               aria-label={t('merch.open', { name: link.nameHe })}
               className="inline-flex min-h-tap items-center gap-2 border-rule border-ink bg-sheet px-3 font-body text-[12.5px] font-bold text-ink transition-transform duration-press ease-stamp focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red active:scale-[.97] motion-reduce:transition-none"
             >
-              <bdi>{link.nameHe}</bdi>
+              {/* (delta 93) the club store is a general shop — never "buy this shirt" */}
+              <bdi>{link.kind === 'official-club' ? t('merch.cta.official') : t('merch.cta.replica')}</bdi>
               <span className={`font-body text-[10.5px] ${link.kind === 'official-club' ? 'text-red' : 'text-sign'}`}>
-                {link.kind === 'official-club' ? t('credits.community.official') : t('credits.community.independent')}
+                {link.kind === 'official-club' ? t('credits.community.official') : `${link.nameHe} · ${t('credits.community.independent')}`}
               </span>
             </a>
             <p className={`mt-0.5 max-w-prose font-body text-[11.5px] leading-snug ${tone === 'dark' ? 'text-concrete' : 'text-muted'}`}>{link.disclosureHe}</p>

@@ -107,3 +107,28 @@ describe('/credits — the community shelf', () => {
     expect(component).toContain('rel="noopener noreferrer"')
   })
 })
+
+describe('delta 93 — the club store is a general store, the replica says it is one', () => {
+  it('scopes every official link to the general store and every replica to its seasons', () => {
+    for (const link of MERCH_LINKS) {
+      if (link.kind === 'official-club') expect(link.scope, link.id).toBe('general-store')
+      else {
+        expect(link.scope, link.id).toBe('season')
+        expect(link.seasons?.length ?? link.shirtIds?.length ?? 0, link.id).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('never offers to "buy this shirt" — the CTAs are the store and a nostalgic replica', () => {
+    expect(MESSAGES['merch.cta.official']).toBe('לחנות הרשמית של הפועל תל אביב')
+    expect(MESSAGES['merch.cta.replica']).toBe('מצא רפליקה נוסטלגית')
+    const component = read('components/life/MerchLinks.tsx')
+    expect(component).toContain("t('merch.cta.official')")
+    expect(component).toContain("t('merch.cta.replica')")
+    for (const text of Object.values(MESSAGES).filter((v): v is string => typeof v === 'string')) {
+      expect(text).not.toContain('לקניית החולצה')
+    }
+    // the replica's disclosure is printed on every showing
+    expect(component).toContain('link.disclosureHe')
+  })
+})

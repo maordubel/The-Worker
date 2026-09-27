@@ -1,4 +1,5 @@
 import type { LifeEvent } from '../events'
+import { missFlag } from '../missReason'
 import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
@@ -215,7 +216,19 @@ export const BEATS_TEDDY: Beat[] = [
     trigger: 'enter',
     when: { none: [{ flag: 'd10:plan' }, { flag: 'd10:mode' }] },
     delayMs: 700,
-    do: [{ a: 'derive', events: breadMemory }, { a: 'talk', conversation: 'd10-plan' }],
+    // (delta 93) Oli comes off the car to him — the seat is offered, not found
+    do: [{ a: 'derive', events: breadMemory }, { a: 'actorCue', actorId: '2010-teddy-oli', cue: 'approach', target: 'player' }, { a: 'talk', conversation: 'd10-plan' }],
+  },
+  /**
+   * (delta 93, brief §23) למה לא טדי — once the plan is home or on the phone, the reason is
+   * recorded: a boy whose pocket could not cover the ticket and the petrol missed it for
+   * MONEY; everyone else chose. Read off the state at that moment, never guessed later.
+   */
+  {
+    id: 'd10-miss',
+    trigger: 'clock',
+    when: { all: [{ flag: 'd10:plan' }], any: [{ flagIs: { flag: 'd10:mode', value: 'home' } }, { flagIs: { flag: 'd10:mode', value: 'remote' } }], none: [{ flag: missFlag('2010-teddy') }] },
+    do: [{ a: 'derive', events: (state) => [{ t: 'flag.set', flag: missFlag('2010-teddy'), value: state.flags['d10:gaveSeat'] ? 'choice' : state.agorot < TICKET_TEDDY + FUEL_SHARE ? 'money' : 'choice' }] }],
   },
   /** האיסוף מהמשרד — נסיעה שגרתית, דחוסה לכרטיס ושלוש שורות (§7: "compress routine travel") */
   {

@@ -323,6 +323,10 @@ export class WorldSim {
           if (this.pendingTravel) return true
           break
         }
+        // (delta 93) presentation only: the sim records who took the step, nothing else moves
+        case 'actorCue':
+          this.trace.push(`cue:${action.actorId}:${action.cue}`)
+          break
         case 'ending':
           this.endings.push(action.id)
           this.engine.dispatch({ t: 'chapter.completed', chapter: this.chapter })

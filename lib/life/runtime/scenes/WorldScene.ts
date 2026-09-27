@@ -12,7 +12,7 @@ import { chapterFor, nextPlayable, playableChapters, type ChapterDef } from '../
 import { arrivedBetween, onSale, ownedShirts, wearingAt, wornFlag, SHIRT_NEW_HE } from '../../shirts'
 import { albumNewsFlag, setsArrivedBetween, SET_NEW_HE } from '../../stickers'
 import { holdsSeason, seasonOnSaleIn, subNewsFlag } from '../../subscription'
-import { beatFlag, beatsAt, type Beat, type BeatAction } from '../../content/beats'
+import { beatFlag, beatsAt, type ActorCue, type Beat, type BeatAction } from '../../content/beats'
 import type { ConversationShot } from '../../content/script'
 import { crowdSpeaker } from '../../crowd'
 import { encounterEvents, rollEncounter } from '../../encounters'
@@ -408,6 +408,11 @@ export class WorldScene extends Phaser.Scene {
     // is gone, and a `beatBusy` left true here silences every beat in the next one.
     this.beatBusy = false
     this.beatPending = false
+    // actor cues are presentation: a room change ends every one of them (delta 93)
+    this.cued = new Set()
+    this.cueGone = new Set()
+    this.pendingCue = null
+    this.restoreHud()
   }
 
   preload() {
@@ -567,6 +572,8 @@ export class WorldScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.input.off('pointerdown', onPointerDown)
       this.input.off('pointermove', onPointerMove)
+      // a HUD a beat turned off never outlives the room it was turned off in
+      this.restoreHud()
     })
 
     this.ctx.dialogue.setHooks({
@@ -1151,7 +1158,7 @@ export class WorldScene extends Phaser.Scene {
     if (!this.player) return
     const reach = this.def.metre * 1.6 * this.W
     for (const actor of this.actors) {
-      if (!actor.image.visible) continue
+      if (!actor.image.visible || this.cued.has(actor.def.id)) continue
       const dx = this.player.x - actor.image.x
       const dy = (this.groundY - actor.image.y) / DEPTH
       const near = Math.hypot(dx, dy) < reach
@@ -2172,7 +2179,7 @@ export class WorldScene extends Phaser.Scene {
 
   private moveActors(delta: number) {
     for (const actor of this.actors) {
-      if (!actor.def.sway || !actor.image.visible) continue
+      if (!actor.def.sway || !actor.image.visible || this.cued.has(actor.def.id)) continue
       actor.phase += (delta / 1000) * 1.1
       actor.image.x = actor.baseX + Math.sin(actor.phase) * actor.def.sway * this.W
       actor.shadow.x = actor.image.x
@@ -2702,7 +2709,7 @@ export class WorldScene extends Phaser.Scene {
       entry.image.setVisible(meets(state, entry.def.when))
     }
     for (const actor of this.actors) {
-      const visible = meets(state, actor.def.when)
+      const visible = meets(state, actor.def.when) && !this.cueGone.has(actor.def.id)
       actor.image.setVisible(visible)
       actor.shadow.setVisible(visible)
     }
@@ -2775,6 +2782,7 @@ export class WorldScene extends Phaser.Scene {
       /** and what the DAY is waiting for, when the room itself is finished */
       waitingOn: this.waitingOn(),
       waitingHe: this.waitingFor(state),
+      pendingCue: this.pendingCue,
       director: dilemma
         ? {
             id: dilemma.id,
@@ -4532,6 +4540,7 @@ export class WorldScene extends Phaser.Scene {
   ]
 
   private finishChapter(endingId: string) {
+    this.restoreHud()
     const state = this.ctx.engine.state
     const key = state.flags['arrived:late'] && endingId === 'home' ? 'late' : endingId
 
@@ -5218,8 +5227,148 @@ export class WorldScene extends Phaser.Scene {
    * waits for its last line, a card for its hold). One beat at a time; a second row that
    * is also due fires on the next tick, which is the next frame.
    */
+  // ------------------------------------------------------------ actor cues (delta 93) --
+
+  /** actors whose position a cue owns right now — the sway and the head-turn leave them be */
+  private cued = new Set<string>()
+  /** actors a `leave` cue walked out; `refresh` keeps them out until the room changes */
+  private cueGone = new Set<string>()
+  /** the cue waiting for the glass to clear — what the debug overlay prints */
+  pendingCue: string | null = null
+  /** a beat turned the HUD off; every exit path turns it back on */
+  private hudHidden = false
+
+  private restoreHud() {
+    if (!this.hudHidden) return
+    this.hudHidden = false
+    this.ctx?.bus.emit('hudVisible', { visible: true })
+  }
+
+  /**
+   * A cue waits for the glass: a conversation, a film, the wardrobe, an ending card. It is
+   * retried, never dropped — an initiative that fires into an open dialogue is the bug the
+   * brief (§37) names — and a scene that is no longer running lets it go.
+   */
+  private whenFree(run: () => void, tries = 0) {
+    if (!this.sys.isActive()) return
+    const blocked = this.ctx.dialogue.open || Boolean(this.cutscene) || this.ritualOpen || this.closing
+    if (!blocked || tries > 240) {
+      run()
+      return
+    }
+    this.time.delayedCall(250, () => this.whenFree(run, tries + 1))
+  }
+
+  /**
+   * יוזמה — a person takes the first step (brief §9–§12, §21).
+   *
+   * Four moves and no AI: come in from the edge, walk up to him, turn to him, go. The
+   * position is the room's own (the actor's `x`), so a cue never invents a place in the
+   * painting; `approach` stops a short step from the boy on the side the man came from.
+   * An actor the room does not have is a no-op — the conversation that follows still
+   * plays, so a missing figure is a missing picture and never a stuck chapter.
+   */
+  private actorCue(cue: ActorCue, then: () => void) {
+    const actor = this.actors.find((entry) => entry.def.id === cue.actorId)
+    if (!actor || !this.sys.isActive()) {
+      this.pendingCue = null
+      then()
+      return
+    }
+    this.pendingCue = `${cue.actorId}:${cue.cue}`
+    const done = () => {
+      this.pendingCue = null
+      then()
+    }
+    const face = (towardX: number) => {
+      const left = towardX < actor.image.x
+      actor.image.setFlipX((left === WorldScene.ART_FACES > 0) !== facesLeft(actor.def.figure))
+    }
+    const targetX = (target: 'player' | string): number | null => {
+      if (target === 'player') return this.player?.x ?? null
+      const other = this.actors.find((entry) => entry.def.id === target && entry.image.visible)
+      return other ? other.image.x : null
+    }
+    const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const ms = (value: number | undefined, fallback: number) => (reduced ? 1 : Math.max(1, value ?? fallback))
+    this.cued.add(actor.def.id)
+    switch (cue.cue) {
+      case 'enter': {
+        this.cueGone.delete(actor.def.id)
+        actor.image.setVisible(true)
+        actor.shadow.setVisible(true)
+        const side = cue.from ?? (actor.baseX > (this.player?.x ?? this.W / 2) ? 'right' : 'left')
+        // "right" is the painting's right: the far edge in the reading direction's mirror
+        const from = actor.baseX + (side === 'right' ? 1 : -1) * this.W * 0.1
+        actor.image.x = from
+        actor.shadow.x = from
+        actor.image.setAlpha(0)
+        actor.shadow.setAlpha(0)
+        face(actor.baseX)
+        this.tweens.add({ targets: [actor.image, actor.shadow], alpha: 1, x: actor.baseX, duration: ms(cue.durationMs, 760), ease: 'Sine.easeOut', onComplete: done })
+        return
+      }
+      case 'approach': {
+        const toward = targetX(cue.target)
+        if (toward === null) {
+          done()
+          return
+        }
+        const gap = this.def.metre * 0.62 * this.W
+        const stop = toward + (actor.image.x > toward ? gap : -gap)
+        face(toward)
+        actor.baseX = stop
+        this.tweens.add({ targets: [actor.image, actor.shadow], x: stop, duration: ms(cue.durationMs, 900), ease: 'Sine.easeInOut', onComplete: () => {
+          if (this.player && cue.target === 'player') this.faceBoyTo(actor.image.x)
+          done()
+        } })
+        return
+      }
+      case 'turn': {
+        const toward = targetX(cue.target)
+        if (toward !== null) face(toward)
+        if (this.player && cue.target === 'player') this.faceBoyTo(actor.image.x)
+        done()
+        return
+      }
+      case 'leave': {
+        const side = cue.to ?? (actor.image.x > this.W / 2 ? 'right' : 'left')
+        const to = actor.image.x + (side === 'right' ? 1 : -1) * this.W * 0.12
+        face(to)
+        this.tweens.add({ targets: [actor.image, actor.shadow], alpha: 0, x: to, duration: ms(cue.durationMs, 820), ease: 'Sine.easeIn', onComplete: () => {
+          this.cueGone.add(actor.def.id)
+          actor.image.setVisible(false)
+          actor.shadow.setVisible(false)
+          actor.image.setAlpha(1)
+          actor.shadow.setAlpha(1)
+          done()
+        } })
+        return
+      }
+      case 'gesture': {
+        this.tweens.add({ targets: actor.image, y: actor.image.y - actor.image.displayHeight * 0.025, duration: ms(cue.durationMs, 220), yoyo: true, ease: 'Sine.easeOut', onComplete: done })
+        return
+      }
+    }
+  }
+
+  /** the boy turns to somebody who has walked up to him */
+  private faceBoyTo(x: number) {
+    if (!this.player) return
+    this.lastDir = 'side'
+    this.facing = x < this.player.x ? -1 : 1
+    this.player.setTexture(`art-${this.era.player.pose.side}`)
+    this.player.setFlipX(this.facing !== WorldScene.ART_FACES)
+  }
+
   private runBeats(trigger: Beat['trigger']) {
     if (this.beatBusy) return
+    // (delta 93) a person's initiative waits for the conversation the player is in; it is
+    // tried again on the next tick, never dropped
+    if (this.ctx.dialogue.open) {
+      if (trigger === 'enter') this.beatPending = true
+      return
+    }
     // An arrival shot, a reveal or a sheet has the room paused: an `enter` beat waits at
     // the door instead of being dropped, and `update` knocks again once the room runs.
     if (this.paused) {
@@ -5243,6 +5392,7 @@ export class WorldScene extends Phaser.Scene {
     this.beatBusy = true
     this.runActions([...due.do], () => {
       this.beatBusy = false
+      this.restoreHud()
       /**
        * ביט שקרה ולא קרה — a beat the player walked out of has not happened.
        *
@@ -5347,6 +5497,14 @@ export class WorldScene extends Phaser.Scene {
         return
       case 'presence':
         this.ctx.engine.dispatch({ t: 'presence.recorded', anchorId: this.anchor.id, mode: next.mode })
+        then()
+        return
+      case 'actorCue':
+        this.whenFree(() => this.actorCue(next, then))
+        return
+      case 'hud':
+        this.hudHidden = !next.visible
+        this.ctx.bus.emit('hudVisible', { visible: next.visible })
         then()
         return
       case 'cutscene': {

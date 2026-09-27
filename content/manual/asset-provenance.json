@@ -1,5 +1,5 @@
 {
- "note": "מאיפה הגיע כל נכס מתועד ששולח למשחק — 1,218 קבצים תחת public/life, מקובצים ל־44 שורות. השדה origin עונה על שאלה אחת בלבד: איך הקובץ הזה נכנס לריפו. הוא אינו טוען לדעת מי צייר, צילם או מחזיק בזכויות על מה שרואים בתמונה. כל שורה מצטטת את הסקריפט או המניפסט בריפו שממנו הידיעה נלקחה; שום כתובת אינטרנט לא הומצאה, ובכל מקום שבו המקור אינו רשום בשום מקום כתוב origin: \"unknown\" ו־confidence: 0 — ארבע שורות כאלה, והן מחכות לאישור של מאור. סולם הביטחון: 2 = הריפו מתעד את המקור במפורש; 1 = מתועד, אבל היוצר או הרישיון של החומר המקורי אינם ידועים; 0 = לא מתועד כלל. origin: maor-upload | archive-scan | original-artwork | procedural | unknown. kind: backdrop | figure | prop | photo-scan | card | document | audio | video | ui | generated. treatment הוא רשימת הפעולות שהקובץ עבר, ו־de-yellow בתוכה הוא חוק 8 (אין צהוב בשום מקום) שנאכף על הנכס עצמו ולא רק על הקוד. הבדיקה: scripts/life/asset-provenance.mjs — נכשלת אם קובץ חדש נחת ואף שורה לא מכסה אותו, או אם שורה כאן כבר לא מכסה כלום. ההסבר לבעלים: docs/life/ASSET-PROVENANCE.md.",
+ "note": "מאיפה הגיע כל נכס מתועד ששולח למשחק — 1,218 קבצים תחת public/life, מקובצים ל־45 שורות. השדה origin עונה על שאלה אחת בלבד: איך הקובץ הזה נכנס לריפו. הוא אינו טוען לדעת מי צייר, צילם או מחזיק בזכויות על מה שרואים בתמונה. כל שורה מצטטת את הסקריפט או המניפסט בריפו שממנו הידיעה נלקחה; שום כתובת אינטרנט לא הומצאה, ובכל מקום שבו המקור אינו רשום בשום מקום כתוב origin: \"unknown\" ו־confidence: 0 — ארבע שורות כאלה, והן מחכות לאישור של מאור. סולם הביטחון: 2 = הריפו מתעד את המקור במפורש; 1 = מתועד, אבל היוצר או הרישיון של החומר המקורי אינם ידועים; 0 = לא מתועד כלל. origin: maor-upload | archive-scan | original-artwork | procedural | unknown. kind: backdrop | figure | prop | photo-scan | card | document | audio | video | ui | generated. treatment הוא רשימת הפעולות שהקובץ עבר, ו־de-yellow בתוכה הוא חוק 8 (אין צהוב בשום מקום) שנאכף על הנכס עצמו ולא רק על הקוד. הבדיקה: scripts/life/asset-provenance.mjs — נכשלת אם קובץ חדש נחת ואף שורה לא מכסה אותו, או אם שורה כאן כבר לא מכסה כלום. ההסבר לבעלים: docs/life/ASSET-PROVENANCE.md.",
  "confidence": 1,
  "source": {
   "kind": "manual",
@@ -1104,8 +1104,7 @@
     "shirtKing.webp",
     "shirtRedDevil.webp",
     "shirtShikun.webp",
-    "shirtVisa85.webp",
-    "shirtVisa86.webp"
+    "shirtVisa85.webp"
    ],
    "sourceUrl": null,
    "sourceTitle": "צילומי החולצות של צוות The Worker, 5.9.2026 — scripts/life/cut-shirts-2026-09-05.py + fit-shirts-2026-09-06.py",
@@ -1117,7 +1116,27 @@
     "grade"
    ],
    "confidence": 2,
-   "noteHe": "תשע חולצות אמיתיות שצילמת. זה לא ציור אלא צילום מוצר שנוקה מהרקע. הפס הזהוב של VISA הוא הדבר היחיד בתיקייה שנגע בחוק הצהוב באמת — הוא יצא בגוון נחושת וממשיך להיקרא VISA."
+   "noteHe": "שמונה חולצות אמיתיות שצילמת. זה לא ציור אלא צילום מוצר שנוקה מהרקע. הפס הזהוב של VISA הוא הדבר היחיד בתיקייה שנגע בחוק הצהוב באמת — הוא יצא בגוון נחושת וממשיך להיקרא VISA."
+  },
+  {
+   "key": "art-shirt-first-gift",
+   "kind": "photo-scan",
+   "origin": "maor-upload",
+   "folder": "public/life/art",
+   "match": [
+    "shirtVisa86.webp"
+   ],
+   "sourceUrl": null,
+   "sourceTitle": "תמונת החולצה שצוות The Worker שלח ב־27.9.2026 — scripts/life/cut-first-shirt-2026-09-27.py",
+   "treatment": [
+    "key-flat",
+    "halo",
+    "trim-alpha",
+    "de-yellow",
+    "lossy-webp-measured"
+   ],
+   "confidence": 2,
+   "noteHe": "החולצה הראשונה של פוגי, זו שקובי קונה לו אצל רפי. נחתכה מהרקע ומהצל, והפס הזהוב של VISA הוחשך לחום (חוק 8)."
   },
   {
    "key": "art-shirt-drawn",

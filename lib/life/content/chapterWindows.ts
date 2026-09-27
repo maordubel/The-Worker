@@ -1,5 +1,6 @@
 import type { LifeState } from '../types'
 
+import { missed } from '../missReason'
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
 import type { Conversation } from './script'
@@ -290,6 +291,7 @@ export const CONVERSATIONS_WINDOWS: Conversation[] = [
             then: [
               { e: 'flag', flag: 'k:back' },
               { e: 'rel', who: 'ofir', axis: 'bond', delta: 1 },
+              missed('2017-return', 'distance'),
               { e: 'toast', text: 'אופיר: "אז קפה בשבוע הבא?" — "קפה כן."', tone: 'plain' },
               { e: 'ending', id: 'away' },
             ],

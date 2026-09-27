@@ -52,6 +52,25 @@ export type BeatAction =
   | { a: 'cutscene'; id: string }
   /** events computed from the state at that moment — the one place a beat may look at the whole decade */
   | { a: 'derive'; events: (state: LifeState) => readonly LifeEvent[] }
+  /**
+   * (delta 93) a person in the room takes the first step — enters, walks up to him, turns,
+   * leaves. PRESENTATION ONLY: nothing here is saved, and an actor the room cannot find is a
+   * no-op, so a missing figure can never hold a scene. Content says WHO moves; the story
+   * director never does.
+   */
+  | ActorCue
+  /**
+   * (delta 93) the HUD, off and back on — for a moment that should be seen without a clock
+   * on it (the demolition). Runtime only; the room puts it back on exit, skip or error.
+   */
+  | { a: 'hud'; visible: boolean }
+
+export type ActorCue =
+  | { a: 'actorCue'; actorId: string; cue: 'enter'; from?: 'left' | 'right'; durationMs?: number }
+  | { a: 'actorCue'; actorId: string; cue: 'approach'; target: 'player' | string; durationMs?: number }
+  | { a: 'actorCue'; actorId: string; cue: 'leave'; to?: 'left' | 'right'; durationMs?: number }
+  | { a: 'actorCue'; actorId: string; cue: 'turn'; target: 'player' | string }
+  | { a: 'actorCue'; actorId: string; cue: 'gesture'; durationMs?: number }
 
 export type Beat = {
   id: string

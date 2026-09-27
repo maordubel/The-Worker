@@ -1557,8 +1557,8 @@ const SCENES: SceneDef[] = [
       { id: 'efi-a3', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'אפי', talk: 'efi-a3', sway: 0.006, when: { any: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }] } },
       { id: 'efi-a3-stranger', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'ילד עם כדור כתום', talk: 'efi-a3', sway: 0.006, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }] } },
       // A4 — the second chance, on the step by the kiosk door (plan §3.2); gone once he has an answer
-      { id: 'efi-a4', era: 'a4-shirt', figure: 'efi', x: 0.34, y: 0.8, size: 0.26, nameHe: 'אפי', talk: 'efi-a4', sway: 0.006, when: { flag: 'life:efi:deferred', none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:declined' }] } },
-      { id: 'efi-a4-stranger', era: 'a4-shirt', figure: 'efi', x: 0.34, y: 0.8, size: 0.26, nameHe: 'ילד עם כדור כתום', talk: 'efi-a4', sway: 0.006, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:declined' }, { flag: 'life:efi:deferred' }] } },
+      { id: 'efi-a4', era: 'a4-shirt', figure: 'efi', x: 0.34, y: 0.8, size: 0.26, nameHe: 'אפי', talk: 'efi-a4', sway: 0.006, when: { flag: 'life:efi:deferred', none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:declined' }, { flag: 'a4:ready-to-buy' }] } },
+      { id: 'efi-a4-stranger', era: 'a4-shirt', figure: 'efi', x: 0.34, y: 0.8, size: 0.26, nameHe: 'ילד עם כדור כתום', talk: 'efi-a4', sway: 0.006, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:declined' }, { flag: 'life:efi:deferred' }, { flag: 'a4:ready-to-buy' }] } },
       { id: 'kobi-a5', era: 'a5-first', figure: 'kobi-side', x: 0.66, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-a5', flip: true, when: { none: [{ flag: 'a5:kobi-left' }] } },
       { id: 'liron-a6', era: 'a6-radio', figure: 'adultB2', x: 0.56, y: 0.8, size: 0.29, nameHe: 'לירון', talk: 'liron-a6' },
       { id: 'amit-a7', era: 'a7-week', figure: 'amit', x: 0.36, y: 0.79, size: 0.26, nameHe: 'עמית', talk: 'amit-a7' },
@@ -2193,6 +2193,12 @@ const SCENES: SceneDef[] = [
        */
       { id: 'rafi-a2', era: 'a2-alley', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-a2', sway: 0.004 },
       { id: 'rafi-a4', era: 'a4-shirt', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-a4', sway: 0.004 },
+      /*
+       * (delta 93) קובי בא — not a person who waits to be tapped. He is in the kiosk only from
+       * the moment the thirty is on the counter (`a4:kobi-came`, raised by the beat that
+       * walks him in from the street door), and he has no `talk`: the beat speaks for him.
+       */
+      { id: 'kobi-a4-kiosk', era: 'a4-shirt', figure: 'kobi-side', x: 0.6, y: 0.92, size: 0.32, nameHe: 'קובי', when: { flag: 'a4:kobi-came' } },
       // 1996/97, the fifth day: Rafi passing on two messages he did not want to carry (§19)
       { id: 'rafi-a5', era: '1996-army', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'a5-kiosk', sway: 0.004, when: { flag: 'life:army:d5' } },
       {

@@ -465,12 +465,17 @@ export const BEATS_REGISTERED: Beat[] = [
       },
       { a: 'sfx', key: 'ball-bounce', level: 0.25 },
       { a: 'wait', ms: 900 },
+      // (delta 93, brief §28) the dust is seen without a clock on it — the HUD comes back on
+      // the line after, and on every way out of this beat (skip, reload, a room change)
+      { a: 'hud', visible: false },
       { a: 'card', titleHe: 'אוסישקין', subHe: '25.7.2007', ms: 3600 },
       { a: 'lines', lines: [{ who: null, text: 'אבק. מהדלת שנכנסת בה בפעם הראשונה נשארת המסגרת, ואחר כך גם היא לא.' }] },
+      { a: 'hud', visible: true },
     ],
   },
   /** Beat 6 — asked until it is answered, while he stands at the fence */
-  { id: 'u-choice', at: 'ussishkin-outside', trigger: 'clock', when: { all: [{ flag: 'u:seen' }], none: [{ flag: 'u:loss' }] }, delayMs: 1300, do: [{ a: 'talk', conversation: 'u-loss' }] },
+  /** (delta 93) Efi takes the step: he walks over from the fence before he asks */
+  { id: 'u-choice', at: 'ussishkin-outside', trigger: 'clock', when: { all: [{ flag: 'u:seen' }], none: [{ flag: 'u:loss' }] }, delayMs: 1300, do: [{ a: 'actorCue', actorId: '2007-registered-efi-concern', cue: 'approach', target: 'player' }, { a: 'talk', conversation: 'u-loss' }] },
   { id: 'u-reg-close', trigger: 'clock', when: { all: [{ flag: 'u:loss' }], none: [{ flag: 'u:done' }] }, delayMs: 1600, do: [{ a: 'talk', conversation: 'u-loss-close' }] },
 ]
 
@@ -937,10 +942,11 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
             text: '(להישאר ליד אפי.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
-              { e: 'flagValue', flag: 'u:lossKind', value: 'together' },
               { e: 'flagValue', flag: USS_LOSS_KIND, value: 'together' },
               { e: 'time', minutes: 30 },
               { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
+              // (delta 93, brief §22/§47) what happened, not only how close: he stayed
+              { e: 'remember', who: 'efi', eventId: 'npc:efi:stood-with-me:2007', significance: 'major' },
               { e: 'attend' },
             ],
           },
@@ -949,9 +955,9 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
             text: '(להתקשר לאבא.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
-              { e: 'flagValue', flag: 'u:lossKind', value: 'father' },
               { e: 'flagValue', flag: USS_LOSS_KIND, value: 'father' },
               { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
+              { e: 'remember', who: 'kobi', eventId: 'npc:kobi:stayed-on-the-line:2007', significance: 'minor' },
               { e: 'attend' },
               { e: 'toast', text: 'קובי: "אני יודע. שמעתי ברדיו." שתיקה. "אתה שם?" — "אני שם."', tone: 'plain' },
             ],
@@ -961,7 +967,6 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
             text: '(לעזור לאסוף את האנשים — שלא יעמדו לבד.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
-              { e: 'flagValue', flag: 'u:lossKind', value: 'people' },
               { e: 'flagValue', flag: USS_LOSS_KIND, value: 'people' },
               { e: 'rel', who: 'shachor', axis: 'bond', delta: 2 },
               { e: 'attend' },
@@ -973,7 +978,6 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
             text: '(ללכת לבד.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
-              { e: 'flagValue', flag: 'u:lossKind', value: 'alone' },
               { e: 'flagValue', flag: USS_LOSS_KIND, value: 'alone' },
               { e: 'attend' },
               { e: 'toast', text: 'אפי לא עצר אותך. הוא הבין לפניך.', tone: 'plain' },
@@ -985,7 +989,6 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
             text: '(לצלם את המקום. לא אותו.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
-              { e: 'flagValue', flag: 'u:lossKind', value: 'documented' },
               { e: 'flagValue', flag: USS_LOSS_KIND, value: 'documented' },
               { e: 'flag', flag: 'own:photo:ussishkinLoss' },
               { e: 'attend' },
@@ -997,7 +1000,6 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
             text: '(לכתוב את השמות שהיו פה.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
-              { e: 'flagValue', flag: 'u:lossKind', value: 'names' },
               { e: 'flagValue', flag: USS_LOSS_KIND, value: 'names' },
               { e: 'flag', flag: 'own:uss:names' },
               { e: 'time', minutes: 15 },
@@ -1014,11 +1016,11 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
     id: 'u-loss-close',
     nameHe: null,
     branches: [
-      { when: { flagIs: { flag: 'u:lossKind', value: 'father' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ואבא שלך נשאר על הקו עד שנגמר האבק.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'father' }] },
-      { when: { flagIs: { flag: 'u:lossKind', value: 'people' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ואף אחד לא עמד מול זה לבד.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'people' }] },
-      { when: { flagIs: { flag: 'u:lossKind', value: 'alone' } }, lines: [{ who: null, text: 'חודש בין השניים. את השני ראית מהקצה של הרחוב, ואז הלכת.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'alone' }] },
-      { when: { flagIs: { flag: 'u:lossKind', value: 'documented' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'documented' }] },
-      { when: { flagIs: { flag: 'u:lossKind', value: 'names' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, והשמות נשארו על נייר.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'names' }] },
+      { when: { flagIs: { flag: USS_LOSS_KIND, value: 'father' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ואבא שלך נשאר על הקו עד שנגמר האבק.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'father' }] },
+      { when: { flagIs: { flag: USS_LOSS_KIND, value: 'people' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ואף אחד לא עמד מול זה לבד.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'people' }] },
+      { when: { flagIs: { flag: USS_LOSS_KIND, value: 'alone' } }, lines: [{ who: null, text: 'חודש בין השניים. את השני ראית מהקצה של הרחוב, ואז הלכת.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'alone' }] },
+      { when: { flagIs: { flag: USS_LOSS_KIND, value: 'documented' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'documented' }] },
+      { when: { flagIs: { flag: USS_LOSS_KIND, value: 'names' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, והשמות נשארו על נייר.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'names' }] },
       { lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ועמדתם שם עד שהחשיך.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'together' }] },
     ],
   },

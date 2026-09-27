@@ -178,6 +178,8 @@ export function useLifeRuntime({
   const lastPlace = useRef<string | null>(null)
   const [card, setCard] = useState<HistoricalAnchor | null>(null)
   const [controls, setControls] = useState(true)
+  /** (delta 93) a beat can take the HUD off the glass for a moment — the demolition */
+  const [hudOn, setHudOn] = useState(true)
   const [touch, setTouch] = useState(false)
   const [persisted, setPersisted] = useState(true)
   /**
@@ -466,6 +468,7 @@ export function useLifeRuntime({
       }),
     )
     unsubscribe.push(bus.on('controls', (value) => setControls(value.visible)))
+    unsubscribe.push(bus.on('hudVisible', (value) => setHudOn(value.visible)))
     unsubscribe.push(bus.on('anchor', (value) => setCard(value.showing ? value.anchor : null)))
     unsubscribe.push(bus.on('frame', (value) => setFrame(value.picture)))
 
@@ -683,6 +686,7 @@ export function useLifeRuntime({
     card,
     setCard,
     controls,
+    hudOn,
     touch,
     persisted,
     frame,

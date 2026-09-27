@@ -144,12 +144,12 @@ describe('הארנק', () => {
         }
       }
     }
-    // 36 ₪ for a boy who does everything the afternoon offers: the tin (12), the pocket (2),
-    // five bottles (5), Kobi's five (5), eight crates (8), the run upstairs (4). Not 30 exactly:
-    // the owner released the last-shekel tension on purpose.
+    // 31 ₪ for a boy who does everything the afternoon offers: the tin (12), the pocket (2),
+    // five bottles (5), eight crates (8), the run upstairs (4). Kobi's five are gone (delta
+    // 93) — he pays for the shirt at the counter instead, and the thirty stays in the pocket.
     expect(pocket).toBeGreaterThanOrEqual(SHIRT_PRICE)
     expect(pocket).toBeLessThanOrEqual(SHIRT_PRICE + 1000)
-    expect(pocket).toBe(3600)
+    expect(pocket).toBe(3100)
   })
 
   /**

@@ -441,7 +441,14 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
     id: 'ACH_SHIRT_GIFT',
     titleHe: 'המתנה הראשונה',
     proofKinds: ['first_shirt_bought', 'gift_received'],
+    /**
+     * (delta 93) the gift is now the shirt itself: Kobi walks into the kiosk behind a boy
+     * who already has the thirty on the counter, and pays. `a4:kobi-gifted-shirt` is that
+     * moment. The two older readings stay for the lives that lived them — the five shekels
+     * at home (`a4:kobi-gave`) and the ledger pair written beside them.
+     */
     earned: (state) =>
+      (flagOn(state, 'own:shirt85') && (flagOn(state, 'life:first-shirt:gift') || flagOn(state, 'a4:kobi-gifted-shirt'))) ||
       (hasProof(state, 'first_shirt_bought') && hasProof(state, 'gift_received')) ||
       (flagOn(state, 'own:shirt85') && flagOn(state, 'a4:kobi-gave')),
     reward: {
@@ -466,10 +473,16 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
      * `a4:worked` מוכיח שכר; שום דגל לא מוכיח את **היעדר** המתנה, ואישור על סמך "לא ראינו
      * מתנה" היה נותן את ההישג גם למי שלקח חמישה שקל מאבא. עדיף חסר מאשר שקר.
      */
+    /**
+     * (delta 93) "הכסף שחסכתי" is truer than it was: the thirty he saved is still in his
+     * pocket after the counter. What it may not have is MONEY that was a present — the
+     * shirt his father bought him is not money, so the ledger line for it
+     * (`first_shirt_gift:*`) does not count against him; Kobi's old five shekels do.
+     */
     earned: (state) =>
       hasProof(state, 'first_shirt_bought') &&
       hasProof(state, 'paid_shift') &&
-      !hasProof(state, 'gift_received') &&
+      !proofsOf(state, 'gift_received').some((row) => !row.proofId.startsWith('first_shirt_gift:')) &&
       !hasProof(state, 'loan_taken') &&
       state.debt === 0,
     reward: {

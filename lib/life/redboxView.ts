@@ -41,7 +41,7 @@ export type BoxThing = {
   source: 'ending' | 'moment' | 'keepsake'
 }
 
-type EndingRow = { titleHe: string; memoryHe: string; chapter: string; endingId: string }
+type EndingRow = { titleHe: string; memoryHe: string; chapter: string; endingId: string; legacyUnless?: { flag: string; titleHe: string; memoryHe: string } }
 let ENDING_BY_MEMORY: Map<string, EndingRow> | null = null
 
 function endingIndex(): Map<string, EndingRow> {
@@ -52,7 +52,7 @@ function endingIndex(): Map<string, EndingRow> {
     for (const card of Object.values(era.endings ?? {})) {
       if (!card?.memoryHe) continue
       const id = `${era.memoryPrefix}-${card.id}`
-      if (!out.has(id)) out.set(id, { titleHe: card.titleHe, memoryHe: card.memoryHe, chapter, endingId: card.id })
+      if (!out.has(id)) out.set(id, { titleHe: card.titleHe, memoryHe: card.memoryHe, chapter, endingId: card.id, ...(card.legacyUnless ? { legacyUnless: card.legacyUnless } : {}) })
     }
   }
   ENDING_BY_MEMORY = out
@@ -90,7 +90,10 @@ export function boxContents(state: LifeState): BoxThing[] {
   for (const memory of state.memories) {
     if (seen.has(memory.id)) continue
     seen.add(memory.id)
-    const ending = endings.get(memory.id) ?? null
+    const found = endings.get(memory.id) ?? null
+    // an older life keeps the words its ending was written in (delta 93, brief §44)
+    const ending = found?.legacyUnless && !state.flags[found.legacyUnless.flag] ? { ...found, titleHe: found.legacyUnless.titleHe, memoryHe: found.legacyUnless.memoryHe } : found
+    const gift = Boolean(found?.legacyUnless && state.flags[found.legacyUnless.flag])
     rows.push(
       thing(memory.id, memory.year, memory.atMinute, memory.item, ending?.memoryHe ?? null, ending?.endingId ?? null, ending?.chapter ?? null, {
         nameHe: ITEMS[memory.item]?.nameHe ?? '',
@@ -99,6 +102,9 @@ export function boxContents(state: LifeState): BoxThing[] {
         source: ending ? 'ending' : 'moment',
       }),
     )
+    // the first shirt he was given is the one in the box, not the archive's 1984/85 stand-in
+    const last = rows[rows.length - 1]
+    if (gift && last?.kind === 'shirt') last.art = 'shirtVisa86'
   }
   for (const kept of state.redBox) {
     if (seen.has(kept.id)) continue

@@ -36,6 +36,8 @@
   "credits.community.shops": "איפה קונים חולצה",
   "credits.community.official": "רשמי",
   "credits.community.independent": "עצמאי · רפליקה",
-  "merch.title": "מצא רפליקה / חולצה רשמית",
-  "merch.open": "{name} — נפתח בלשונית חדשה"
+  "merch.title": "איפה קונים",
+  "merch.open": "{name} — נפתח בלשונית חדשה",
+  "merch.cta.official": "לחנות הרשמית של הפועל תל אביב",
+  "merch.cta.replica": "מצא רפליקה נוסטלגית"
 }

@@ -97,6 +97,13 @@ export type EndingCard = {
    */
   presence?: import('../types').PresenceMode
   /**
+   * (delta 93) the words a save written BEFORE this ending changed keeps. The memory is
+   * looked up by its ending id, so a new text would rewrite an old life's Red Box; when
+   * `flag` is not up in that life, the box reads these instead (brief §44 — no gift given
+   * retroactively, not even in a caption).
+   */
+  legacyUnless?: { flag: string; titleHe: string; memoryHe: string }
+  /**
    * כעבור חמש־עשרה שנה — the last thing the day shows you is the same person, older.
    *
    * This is the hinge the whole life simulation turns on, and it is cheaper and truer to

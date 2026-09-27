@@ -305,7 +305,9 @@ describe('A4 · the shirt — the tin, the wallet on the table, the counter', ()
     // the family wallet is VISIBLE: it happened to him on the way through the flat
     expect(sim.state.flags['a4:wallet-seen']).toBe(true)
     expect(sim.state.flags['a4:kept']).toBe(true)
-    visit(sim, 'kobi-a4', pick('ask'))
+    visit(sim, 'kobi-a4', pick('almost'))
+    // (delta 93) his father gives nothing at home now — he only knows
+    expect(sim.state.flags['a4:kobi-knows']).toBe(true)
     sim.go('kiosk')
     visit(sim, 'rafi-a4', pick('work'))
     sim.go('kiosk')
@@ -314,8 +316,9 @@ describe('A4 · the shirt — the tin, the wallet on the table, the counter', ()
       sim.go('kiosk')
       visit(sim, 'rafi-a4', read)
     }
+    if (sim.state.agorot < 3000 && !sim.state.flags['a4:favour']) visit(sim, 'rafi-a4', pick('favour'))
     /*
-     * 12 in the tin + 2 in the pocket + Kobi's 5 + the crates + the bottles = 29. The last
+     * 12 in the tin + 2 in the pocket + the crates + the bottles + the run upstairs. The last
      * shekel is the week's street job (`gigs.ts` rotation, one paid job a chapter): the
      * shirt is "about six afternoons away" by design, and the afternoon shows him where.
      */
@@ -327,10 +330,53 @@ describe('A4 · the shirt — the tin, the wallet on the table, the counter', ()
       sim.press(job!.id, read)
       sim.go('kiosk')
     }
+    const before = sim.state.agorot
+    expect(before).toBeGreaterThanOrEqual(3000)
     visit(sim, 'rafi-a4', pick('buy'))
-    expect(sim.state.agorot, 'thirty on the counter').toBeGreaterThanOrEqual(0)
+    // (delta 93) the counting was his; his father walked in and paid — and the money stayed
+    expect(sim.state.flags['a4:ready-to-buy']).toBe(true)
+    expect(sim.trace).toContain('cue:kobi-a4-kiosk:enter')
+    expect(sim.trace).toContain('cue:kobi-a4-kiosk:approach')
+    expect(sim.state.flags['a4:kobi-gifted-shirt']).toBe(true)
     expect(sim.state.flags['own:shirt85']).toBe(true)
+    expect(sim.state.agorot, 'the thirty is still his').toBe(before)
+    expect(remembered(sim, 'first-shirt-gift-1985')).toBe(true)
+    expect(sim.state.proofs.some((row) => row.kind === 'gift_received' && row.proofId.startsWith('first_shirt_gift:'))).toBe(true)
     expect(sim.endings).toEqual(['shirt'])
+  })
+  it('the gift is never a rescue: short of thirty there is no counter, and seven o’clock closes it', () => {
+    const sim = make('a4-shirt')
+    hands(sim, 'none')
+    sim.converse('tin-a4', pick('take'))
+    sim.beatAnswer = pick('keep')
+    sim.go('home')
+    sim.go('kiosk')
+    visit(sim, 'rafi-a4', read)
+    expect(sim.state.agorot).toBeLessThan(3000)
+    expect(sim.state.flags['a4:ready-to-buy']).toBeFalsy()
+    for (let i = 0; i < 12 && !sim.endings.length; i++) sim.wait(60)
+    expect(sim.state.flags['a4:kobi-gifted-shirt']).toBeFalsy()
+    expect(sim.endings).toEqual(['notYet'])
+  })
+  it('the tin on his mother’s table is not paid back by his father the same day', () => {
+    const sim = make('a4-shirt')
+    sim.converse('tin-a4', pick('take'))
+    sim.beatAnswer = pick('give')
+    sim.go('home')
+    expect(sim.endings).toEqual(['gave'])
+    expect(sim.state.flags['a4:kobi-gifted-shirt']).toBeFalsy()
+    expect(sim.state.flags['own:shirt85']).toBeFalsy()
+  })
+  it('more than thirty: the exact balance is kept', () => {
+    const sim = make('a4-shirt')
+    sim.converse('tin-a4', pick('take'))
+    sim.beatAnswer = pick('keep')
+    sim.go('home')
+    sim.engine.dispatch({ t: 'money.changed', agorot: 4370 - sim.state.agorot, why: 'test' })
+    sim.go('kiosk')
+    visit(sim, 'rafi-a4', pick('buy'))
+    expect(sim.state.flags['own:shirt85']).toBe(true)
+    expect(sim.state.agorot).toBe(4370)
   })
   it('messy: the tin goes on his mother’s table — a different summer, not a worse one', () => {
     const sim = make('a4-shirt')

@@ -79,7 +79,8 @@ export type Effect =
    * is still in the collection in 2000. The card it raises is the moment, not a receipt:
    * the first one says so in as many words.
    */
-  | { e: 'shirt'; id: string }
+  /** `giftHe`: the card names who gave it (delta 93 — the first shirt, from his father) */
+  | { e: 'shirt'; id: string; giftHe?: string }
   /** the fan shop: the whole rail, drawn, as a screen rather than a room */
   | { e: 'shop' }
   /** a Toto slip: five questions from the site's own bank, two shekels each */

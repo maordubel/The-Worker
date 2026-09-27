@@ -207,6 +207,9 @@ describe('תנאי הוא שאלה על החיים, ולא ווו בתסריט',
     expect(earnedIds(withFlags({ 'own:shirt85': true, 'a4:kobi-gave': true }))).toContain('ACH_SHIRT_GIFT')
     expect(earnedIds(withFlags({ 'own:shirt85': true, 'a4:kobi': true }))).not.toContain('ACH_SHIRT_GIFT')
     expect(earnedIds(withProofs([proof('first_shirt_bought'), proof('gift_received')]))).toContain('ACH_SHIRT_GIFT')
+    // delta 93: the gift is the shirt itself, at the counter
+    expect(earnedIds(withFlags({ 'own:shirt85': true, 'a4:kobi-gifted-shirt': true }))).toContain('ACH_SHIRT_GIFT')
+    expect(earnedIds(withFlags({ 'own:shirt85': true, 'a4:kobi-knows': true }))).not.toContain('ACH_SHIRT_GIFT')
   })
 
   /**
@@ -229,14 +232,14 @@ describe('תנאי הוא שאלה על החיים, ולא ווו בתסריט',
       }
       return out
     }
-    expect(kindsIn('rafi-a4'), 'the purchase and the hour of crates').toEqual(
-      expect.arrayContaining(['first_shirt_bought', 'paid_shift']),
-    )
-    expect(kindsIn('kobi-a4'), 'the five shekels from his father').toContain('gift_received')
-    // and the branch that refuses them records nothing, or the negative evidence is a lie
-    const refused = DIALOGUE['kobi-a4']?.branches.flatMap((branch) => branch.choices ?? []).find((choice) => choice.id === 'alone')
-    expect(refused?.then.some((effect) => effect.e === 'proof')).toBe(false)
-    expect(refused?.then.some((effect) => effect.e === 'flag' && effect.flag === 'a4:kobi-gave')).toBe(false)
+    expect(kindsIn('rafi-a4'), 'the hour of crates').toContain('paid_shift')
+    // (delta 93) the thirty reaches the counter, and the father pays: two ledger lines, two places
+    expect(kindsIn('rafi-a4-counter'), 'the thirty on the counter').toContain('first_shirt_bought')
+    expect(kindsIn('kobi-shirt-gift-a4'), 'the shirt from his father').toContain('gift_received')
+    // and the talk at home records nothing and hands over nothing any more
+    expect(kindsIn('kobi-a4')).toEqual([])
+    const home = DIALOGUE['kobi-a4']?.branches.flatMap((branch) => [...(branch.then ?? []), ...(branch.choices ?? []).flatMap((choice) => choice.then)]) ?? []
+    expect(home.some((effect) => effect.e === 'money' || (effect.e === 'flag' && effect.flag === 'a4:kobi-gave'))).toBe(false)
   })
 
   /**
@@ -250,6 +253,9 @@ describe('תנאי הוא שאלה על החיים, ולא ווו בתסריט',
     expect(earnedIds(ledger)).toContain('ACH_SHIRT_SELF')
     const withGift = withProofs([proof('first_shirt_bought'), proof('paid_shift'), proof('gift_received')])
     expect(earnedIds(withGift)).not.toContain('ACH_SHIRT_SELF')
+    // delta 93: the shirt his father bought is not money — the thirty he saved is still his
+    const shirtGift = withProofs([proof('first_shirt_bought'), proof('paid_shift'), proof('gift_received', { proofId: 'first_shirt_gift:a4-shirt' })])
+    expect(earnedIds(shirtGift)).toContain('ACH_SHIRT_SELF')
   })
 
   it('counts the radio only when the repair was carried through', () => {

@@ -474,6 +474,9 @@ function recent(list: readonly string[], next: string): string[] {
  */
 export const LEGACY_FLAG_ALIASES: Readonly<Record<string, string>> = {
   'life:a2:efi': 'life:efi:met',
+  // delta 93: Kobi no longer gives five shekels for the shirt; an old save's five stay, and
+  // the flag now reads as what it also always meant — he knows about the shirt
+  'a4:kobi-gave': 'a4:kobi-knows',
 }
 
 export function apply(state: LifeState, event: LifeEvent): LifeState {

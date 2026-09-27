@@ -1127,10 +1127,22 @@ export const CONVERSATIONS_A3: Conversation[] = [
  */
 export const SHIRT_PRICE = shirtAgorot('a4-shirt')
 
+/** (delta 93) the life remembers who paid for the first shirt — `life:` survives every cut */
+export const FIRST_SHIRT_GIFT_FLAG = 'life:first-shirt:gift'
+/**
+ * the shirt his father bought him — Maor, 27.9.2026, with the photograph: *"השתמש בחולצה זו
+ * בתור החולצה שפוגי מקבל מתנה מקובי."* The red pinstripe with VISA on the chest and the white
+ * bands; its art is that photograph, cut clean (`scripts/life/cut-first-shirt-2026-09-27.py`).
+ * A life that bought `tveria85` before this keeps it.
+ */
+export const FIRST_SHIRT_GIFT_ID = 'visa86'
+
 export function objectiveA4(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (state.flags['own:shirt85']) return null
-  if (state.agorot >= SHIRT_PRICE) return 'יש את ה־30. לרפי, לפני שבע.'
+  // at the counter: the day is somebody else's for a minute — no line, no arrow
+  if (state.flags['a4:ready-to-buy']) return null
+  if (state.agorot >= SHIRT_PRICE) return 'יש את ה־30. לרפי, לפני שבע. החולצה מחכה.'
   // the thirty exists, but part of it is still under the bed — and Rafi counts hands
   if (state.savings + state.agorot >= SHIRT_PRICE) return 'יש את ה־30, אבל חלק בפחית. לרוקן, ואז לרפי.'
   if (sceneId === 'bedroom') return 'החולצה עולה 30. מה שחסכת עוד לא מספיק. רפי סוגר בשבע.'
@@ -1138,12 +1150,19 @@ export function objectiveA4(state: LifeState, sceneId: string): string | null {
 }
 
 export const ENDINGS_A4: Record<string, EndingCard> = {
+  /**
+   * החולצה הראשונה שלי (delta 93, brief §4, §16). He counted to thirty himself, put it on
+   * the counter himself — and his father walked in behind him and paid. The money stays
+   * in his pocket (§17): the afternoon's work was real, and so is what it bought him later.
+   * A life that finished A4 before this change keeps its own words (`legacyUnless`).
+   */
   shirt: {
     id: 'shirt',
-    titleHe: 'החולצה',
-    bodyHe: 'ספרת את הפחית שלוש פעמים. רפי ספר פעם אחת ונתן. אדומה, צווארון וי לבן, בלי מספר ובלי שם, גדולה עליך בשתי מידות כי "תגדל". לא לבשת אותה. השארת אותה על הכיסא ליד המיטה, שתראה אותה בבוקר.',
-    memoryHe: 'החולצה על הכיסא, לפני שהיא הייתה שלך באמת.',
+    titleHe: 'החולצה הראשונה שלי',
+    bodyHe: 'ספרת עד שלושים. בקבוקים, ארגזים, מטבעות מהפחית, ריצה אחת למעלה. כשהנחת הכול על הדלפק, אבא הופיע מאחוריך ואמר לרפי לתת לך את החולצה. ניסית להגיד שיש לך כסף. הוא כבר שילם. את המטבעות אספת בחזרה לכיס. החולצה הייתה גדולה עליך בשתי מידות. אבא אמר: "תגדל."',
+    memoryHe: 'החולצה הראשונה שלי, שאבא קנה לי במתנה.',
     memoryItem: 'folded-paper',
+    legacyUnless: { flag: FIRST_SHIRT_GIFT_FLAG, titleHe: 'החולצה', memoryHe: 'החולצה על הכיסא, לפני שהיא הייתה שלך באמת.' },
   },
   notYet: {
     id: 'notYet',
@@ -1195,8 +1214,33 @@ export const BEATS_A4: Beat[] = [
   {
     id: 'a4-close',
     trigger: 'clock',
-    when: { flag: A4, afterMinute: at(19, 0), none: [{ flag: 'own:shirt85' }, { flag: 'a4:gave' }, { flag: 'a4:done' }] },
+    when: { flag: A4, afterMinute: at(19, 0), none: [{ flag: 'own:shirt85' }, { flag: 'a4:gave' }, { flag: 'a4:done' }, { flag: 'a4:ready-to-buy' }] },
     do: [{ a: 'flag', flag: 'a4:done' }, { a: 'lines', lines: [{ who: null, text: 'התריס של רפי ירד בשבע, עם רעש. החולצה נשארה בפנים, בחושך.' }] }, { a: 'ending', id: 'notYet' }],
+  },
+  {
+    /**
+     * קובי יוזם (delta 93, brief §8–§13, §40). Five things have to be true first, and all
+     * five are HIS: he worked, he reached thirty, he walked to Rafi, he put it on the
+     * counter — only then does his father come in behind him. Never a rescue: a boy short
+     * of thirty, or one who gave the tin to his mother and did not rebuild it, never gets
+     * here (`a4:ready-to-buy` is raised by the counter alone, and only at thirty).
+     *
+     * The step is the father's: he comes in from the street, walks up, and speaks first.
+     * `a4:kobi-came` is raised before the cue so the room already holds him when he enters,
+     * and the beat re-arms until the gift is recorded — a box closed by mistake does not
+     * lose the ending.
+     */
+    id: 'a4-kobi-arrives',
+    at: 'kiosk',
+    trigger: 'clock',
+    when: { flag: 'a4:ready-to-buy', none: [{ flag: 'a4:kobi-gifted-shirt' }, { flag: 'own:shirt85' }] },
+    delayMs: 500,
+    do: [
+      { a: 'flag', flag: 'a4:kobi-came' },
+      { a: 'actorCue', actorId: 'kobi-a4-kiosk', cue: 'enter' },
+      { a: 'actorCue', actorId: 'kobi-a4-kiosk', cue: 'approach', target: 'player' },
+      { a: 'talk', conversation: 'kobi-shirt-gift-a4' },
+    ],
   },
 ]
 
@@ -1270,6 +1314,7 @@ export const CONVERSATIONS_A4: Conversation[] = [
     nameHe: 'רפי מהקיוסק',
     branches: [
       { when: { flag: 'own:shirt85' }, lines: [{ who: 'רפי מהקיוסק', text: 'תלבש אותה בכבוד. ותכבס ביד.' }] },
+      { when: { flag: 'a4:ready-to-buy' }, lines: [{ who: 'רפי מהקיוסק', text: 'רגע. מישהו מאחוריך.' }] },
       {
         when: { hasItem: 'bottle', flag: BOTTLES_ALL_85 },
         lines: [{ who: 'רפי מהקיוסק', text: 'בקבוקים? תביא. שקל לבקבוק. ואל תביא לי את המלוכלכים של הסמטה — טוב, תביא.' }],
@@ -1284,7 +1329,11 @@ export const CONVERSATIONS_A4: Conversation[] = [
         when: { minAgorot: SHIRT_PRICE },
         lines: [{ who: 'רפי מהקיוסק', text: 'החולצה? 30 שקל. יש לך? תספור על הדלפק, לא בכיס.' }],
         choices: [
-          { id: 'buy', text: 'לספור על הדלפק. הכל.', then: [{ e: 'money', agorot: -SHIRT_PRICE, why: 'החולצה' }, { e: 'own', item: 'shirt85' }, { e: 'shirt', id: 'tveria85' }, { e: 'proof', kind: 'first_shirt_bought', proofId: 'first_shirt_bought:{chapter}', subjectHe: 'החולצה מהחלון של רפי', noteHe: 'נספרה על הדלפק, מטבע־מטבע' }, { e: 'redheart', key: 'footballLove', delta: 5 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'remember', who: 'shopkeeper', eventId: 'bought-shirt-1985', significance: 'major' }, { e: 'sfx', key: 'coins', level: 0.7 }, { e: 'toast', text: 'הוא קיפל אותה פעמיים והכניס לשקית של לחם.', tone: 'red' }, { e: 'goto', node: 'rafi-a4-bought' }] },
+          /**
+           * (delta 93) the counting is his; the paying is not. The choice no longer spends a
+           * shekel — it puts the thirty on the counter, and the room turns to the door.
+           */
+          { id: 'buy', text: 'לספור על הדלפק. הכל.', then: [{ e: 'flag', flag: 'a4:ready-to-buy' }, { e: 'sfx', key: 'coins', level: 0.7 }, { e: 'goto', node: 'rafi-a4-counter' }] },
           { id: 'wait', text: '"עוד לא. בשבוע הבא."', then: [{ e: 'toast', text: '"בשבוע הבא היא עוד פה." הוא לא היה בטוח.', tone: 'plain' }] },
         ],
       },
@@ -1351,32 +1400,87 @@ export const CONVERSATIONS_A4: Conversation[] = [
     ],
   },
   {
-    id: 'rafi-a4-bought',
+    /** (delta 93) the thirty on the counter — no choice: the next step is somebody else's */
+    id: 'rafi-a4-counter',
     nameHe: null,
-    branches: [{ lines: [{ who: null, text: 'השקית ביד. הביתה, לא בריצה. בריצה היא יכולה ליפול.' }], then: [{ e: 'ending', id: 'shirt' }] }],
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'המטבעות עולים על הדלפק אחד־אחד.' },
+          { who: null, text: 'רפי מסדר אותם לקבוצות.' },
+          { who: null, text: 'לפני שהוא מגיע לשלושים — קול מאחוריך.' },
+        ],
+        // he reached the counter with his own thirty: the legacy ledger line, said honestly
+        then: [{ e: 'proof', kind: 'first_shirt_bought', proofId: 'first_shirt_bought:{chapter}', subjectHe: 'החולצה מהחלון של רפי', noteHe: 'הגיע לדלפק עם הכסף; קובי שילם במקומו.' }],
+      },
+    ],
   },
   {
     /**
-     * שני דגלים, לא אחד — ולמה זה לא קוסמטיקה.
+     * אני קונה (delta 93, brief §13–§14, §41). Short, and not sentimental: he saw the boy
+     * work, and that is the whole speech. No shekel leaves the pocket — the coins go back
+     * into it in one line, with no popup to count them.
+     */
+    id: 'kobi-shirt-gift-a4',
+    nameHe: 'קובי',
+    branches: [
+      {
+        when: { flag: 'a4:kobi-gifted-shirt' },
+        lines: [{ who: 'קובי', text: 'לבית. היא לא מתקמטת בשקית, אבל בכל זאת.' }],
+      },
+      {
+        lines: [
+          { who: 'רפי מהקיוסק', text: 'שלושים. יש לו.' },
+          { who: 'קובי', text: 'אני יודע.' },
+          { who: 'פוגי', text: 'מה אתה עושה פה?' },
+          { who: 'קובי', text: 'מה, אסור לי לעבור ברחוב?' },
+          { who: 'קובי', text: 'תן לו.' },
+          { who: 'פוגי', text: 'יש לי כסף.' },
+          { who: 'קובי', text: 'ראיתי.' },
+          { who: 'קובי', text: 'זה שלך. אני קונה.' },
+          { who: null, text: 'קובי דחף את המטבעות חזרה אליך. "זה שלך."' },
+        ],
+        then: [
+          { e: 'flag', flag: 'a4:kobi-gifted-shirt' },
+          // the day flag dies at the chapter cut; this one is the life's (bio, box, callbacks)
+          { e: 'flag', flag: FIRST_SHIRT_GIFT_FLAG },
+          { e: 'own', item: 'shirt85' },
+          { e: 'shirt', id: FIRST_SHIRT_GIFT_ID, giftHe: 'החולצה הראשונה שלך. אבא קנה אותה.' },
+          { e: 'proof', kind: 'gift_received', proofId: 'first_shirt_gift:{chapter}', subjectHe: 'קובי', noteHe: 'החולצה הראשונה — מתנה מאבא' },
+          { e: 'remember', who: 'kobi', eventId: 'first-shirt-gift-1985', significance: 'major' },
+          { e: 'remember', who: 'kobi', eventId: 'npc:kobi:showed-up:1985', significance: 'major' },
+          { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 },
+          { e: 'redheart', key: 'familyTradition', delta: 4 },
+          { e: 'redheart', key: 'footballLove', delta: 5 },
+          { e: 'personality', key: 'reliability', delta: 3 },
+          { e: 'remember', who: 'shopkeeper', eventId: 'bought-shirt-1985', significance: 'major' },
+          { e: 'flag', flag: 'a4:done' },
+          { e: 'ending', id: 'shirt' },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * קובי יודע (delta 93, brief §18). He no longer hands over five shekels for the shirt:
+     * the surprise at the counter is his, and a father who paid a sixth of it at home would
+     * have nothing to walk in with. He asks, he hears, he knows — `a4:kobi-knows` — and
+     * that is why he is on the street when the coins go on the counter.
      *
-     * `a4:kobi` היה מורם בשני הענפים: זה שלוקח את החמישה שקל וזה שמסרב להם. הוא נכון
-     * לשאלה שהוא נשאל עליה ("דיברנו על זה"), והוא חסר־ערך לכל שאלה על מימון — ולכן
-     * `ACH_SHIRT_GIFT` לא היה ניתן להשגה בידי אף אחד: התנאי שלו הצביע על דגל שעלה גם
-     * כשלא הייתה מתנה, אז הוא נכתב מלכתחילה מול `a4:kobi-gave`, דגל שלא קיים.
-     *
-     * `a4:kobi-gave` עולה עכשיו רק בענף שלוקח, לצד `gift_received` בפנקס. הענף שמסרב
-     * לא רושם כלום — וזאת בדיוק הראיה השלילית ש-`ACH_SHIRT_SELF` דורש: הוא לא נשען על
-     * "לא ראינו מתנה", הוא נשען על פנקס שרושם מתנה בכל פעם שיש אחת.
+     * A save from before this change carries `a4:kobi-gave` with the money already in its
+     * pocket; nothing is taken back, and the reducer reads that flag as `a4:kobi-knows`
+     * too (`LEGACY_FLAG_ALIASES`). `a4:kobi` still means "we talked about it".
      */
     id: 'kobi-a4',
     nameHe: 'קובי',
     branches: [
-      { when: { flag: 'a4:kobi' }, lines: [{ who: 'קובי', text: 'דיברנו על זה. השאר — שלך.' }] },
+      { when: { flag: 'a4:kobi' }, lines: [{ who: 'קובי', text: 'דיברנו על זה. לפני שבע, הוא אמר?' }] },
       {
-        lines: [{ who: 'קובי', text: 'החולצה מהחלון של רפי? יפה. כמה חסר לך?' }],
+        lines: [{ who: 'קובי', text: 'עוד על החולצה הזאת?' }],
         choices: [
-          { id: 'ask', text: '"הרבה."', then: [{ e: 'flag', flag: 'a4:kobi' }, { e: 'flag', flag: 'a4:kobi-gave' }, { e: 'money', agorot: 500, why: 'מאבא' }, { e: 'proof', kind: 'gift_received', proofId: 'gift_received:{chapter}', subjectHe: 'קובי', noteHe: 'חמישה שקל מהכיס שלו, בלי לספור' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'toast', text: 'הוא הוציא 5 שקל מהכיס בלי לספור. "השאר שלך."', tone: 'plain' }] },
-          { id: 'alone', text: '"אני אסתדר לבד."', then: [{ e: 'flag', flag: 'a4:kobi' }, { e: 'personality', key: 'stubbornness', delta: 2 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 }, { e: 'toast', text: 'הוא הנהן. אצלו זה מחמאה.', tone: 'plain' }] },
+          { id: 'buying', text: '"אני קונה אותה."', then: [{ e: 'flag', flag: 'a4:kobi' }, { e: 'flag', flag: 'a4:kobi-knows' }, { e: 'personality', key: 'stubbornness', delta: 1 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 }, { e: 'toast', text: 'הוא הנהן. אצלו זה מחמאה.', tone: 'plain' }] },
+          { id: 'almost', text: '"כמעט יש לי."', then: [{ e: 'flag', flag: 'a4:kobi' }, { e: 'flag', flag: 'a4:kobi-knows' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 }, { e: 'toast', text: '"כמעט זה הרבה," הוא אמר, וחזר לעיתון.', tone: 'plain' }] },
+          { id: 'leave', text: '"עזוב."', then: [{ e: 'flag', flag: 'a4:kobi' }, { e: 'flag', flag: 'a4:kobi-knows' }, { e: 'toast', text: 'הוא עזב. אבל הוא ראה את הפחית ריקה על המיטה.', tone: 'plain' }] },
         ],
       },
     ],

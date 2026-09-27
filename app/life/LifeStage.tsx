@@ -39,6 +39,7 @@ import { describeMoneyChange } from '@/lib/life/money'
 import type { MechanicCatalog } from '@/lib/mechanics/types'
 import { ControlDeck, TapChip } from '@/components/life/ControlDeck'
 import { DebugPanel } from '@/components/life/DebugPanel'
+import { LifeDevOverlay, useLifeDebug } from '@/components/life/LifeDevOverlay'
 import { DialogueBox } from '@/components/life/DialogueBox'
 import { RetryCard } from '@/components/life/RetryCard'
 import { EndingCard } from '@/components/life/EndingCard'
@@ -216,6 +217,7 @@ export function LifeStage({
     card,
     setCard,
     controls,
+    hudOn,
     touch,
     persisted,
     frame,
@@ -298,6 +300,8 @@ export function LifeStage({
    * — and the button rings once beside it.
    */
   const teaching = teach && (teach.id !== 'act' || prompt) ? teach : null
+  /** (delta 93) the director's own view, dev builds + `?lifeDebug=1` only */
+  const devOverlay = useLifeDebug()
   const pulseAct = teaching?.id === 'act'
 
   /** the painting fills the glass; the shell floats over it */
@@ -312,7 +316,7 @@ export function LifeStage({
    */
   const free = useFreeTime({
     plan: freeTime,
-    covered: covered || Boolean(!ready || match || teach || titleCard || opening || help || album?.open || packet || kept || shop || season || toto || mechanic || coin || penalty || hoops || pitch || doc || box || book || route || film || finale),
+    covered: covered || !hudOn || Boolean(!ready || match || teach || titleCard || opening || help || album?.open || packet || kept || shop || season || toto || mechanic || coin || penalty || hoops || pitch || doc || box || book || route || film || finale),
     runtime,
     engineRef,
     busRef,
@@ -357,11 +361,11 @@ export function LifeStage({
         {/* No plate before there is a place: during the prologue the HUD has nothing to
             say, and an empty plate with a lone "·" in it sat in the corner of the 1983
             terrace like a bug. */}
-        {ready && !cutscene && !match && hud.place && <LifeHud hud={free.chip ? { ...hud, waitingHe: null } : hud} />}
+        {ready && hudOn && !cutscene && !match && hud.place && <LifeHud hud={free.chip ? { ...hud, waitingHe: null } : hud} />}
 
         {/* מד האהבה — always on the glass, under the HUD, on the reading side. The one
             number the game is allowed to show; tapping it opens all of them. */}
-        {ready && !cutscene && !opening && hud.place && (
+        {ready && hudOn && !cutscene && !opening && hud.place && (
           <div className="absolute z-30" style={{ insetInlineEnd: 10, top: 'calc(58px + env(safe-area-inset-top))' }}>
             <HeartBadge value={love.value} bump={love.bump} onOpen={openGauges} />
           </div>
@@ -378,7 +382,7 @@ export function LifeStage({
         {/* התיק — one small plate under the clock. It is the only permanent control on
             the glass that is not the console: everything else about the player's state
             is learned by looking at people. */}
-        {ready && !covered && (
+        {ready && hudOn && !covered && (
           <div
             className="absolute z-30 flex items-start gap-1"
             style={{ insetInlineStart: 10, top: 'calc(58px + env(safe-area-inset-top))' }}
@@ -435,6 +439,8 @@ export function LifeStage({
         )}
 
         {ready && teaching && !covered && <Teach id={teaching.id} touch={touch} />}
+
+        {process.env.NODE_ENV !== 'production' && devOverlay && ready && engineRef.current && <LifeDevOverlay state={engineRef.current.state} hud={hud} />}
 
         {/* the story director's dilemma card — never over the teaching line (delta 92) */}
         {ready && hud.director && !covered && !teaching && <DirectorCard director={hud.director} />}

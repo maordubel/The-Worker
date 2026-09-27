@@ -580,7 +580,7 @@ export class DialogueRunner {
             this.bus.emit('shirt', {
               kind: 'bought' as const,
               art: shirt.art,
-              titleHe: had === 0 ? 'קנית את חולצת הפועל הראשונה שלך!' : 'עוד אחת לארון.',
+              titleHe: effect.giftHe ?? (had === 0 ? 'קנית את חולצת הפועל הראשונה שלך!' : 'עוד אחת לארון.'),
               nameHe: shirt.nameHe,
               sponsorHe: shirt.sponsorHe,
               yearsHe: shirt.yearsHe,

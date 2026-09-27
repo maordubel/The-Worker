@@ -315,7 +315,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   'a4-shirt': [
     { id: 'tin', textHe: 'הקופה מתחת למיטה.', doneWhen: F('a4:tin') },
-    { id: 'earn', textHe: 'בקבוקים, שליחויות, מה שאבא נותן.', revealWhen: F('a4:tin'), doneWhen: ANY('a4:worked', 'a4:kobi', 'own:shirt85') },
+    { id: 'earn', textHe: 'בקבוקים, ארגזים, ריצה למעלה — עד 30.', revealWhen: F('a4:tin'), doneWhen: ANY('a4:worked', 'a4:ready-to-buy', 'own:shirt85') },
     { id: 'shirt', textHe: 'להספיק לרפי עד שבע.', revealWhen: F('a4:tin'), doneWhen: ANY('own:shirt85', 'a4:gave') },
   ],
   'a5-first': [

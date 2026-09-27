@@ -23,11 +23,19 @@ export type ShirtId = Shirt['id']
 
 export type MerchKind = 'official-club' | 'independent-replica'
 
+/**
+ * (delta 93, brief §30) what the link promises. The club's store is a GENERAL store: it is
+ * linked under an old shirt as "the club's shop", never as "buy this shirt" — it does not
+ * sell a 1986 kit, and a link placed under one must not imply it does.
+ */
+export type MerchScope = 'general-store' | 'season'
+
 export type MerchLink = {
   id: string
   nameHe: string
   url: string
   kind: MerchKind
+  scope: MerchScope
   /** printed beside the link every time it is shown — never behind a tooltip */
   disclosureHe: string
   /** the shirts this shop is linked to; absent together with `seasons` = every shirt */
@@ -42,13 +50,15 @@ export const MERCH_LINKS: readonly MerchLink[] = [
     nameHe: 'החנות הרשמית של הפועל תל אביב',
     url: 'https://shop.htafc.co.il/shop/',
     kind: 'official-club',
-    disclosureHe: 'מוצר רשמי של המועדון.',
+    scope: 'general-store',
+    disclosureHe: 'החנות הכללית של המועדון — לא בהכרח החולצה הזאת.',
   },
   {
     id: 'mishak-hashabbat',
     nameHe: 'משחק השבת',
     url: 'https://www.mishakhashabbat.com/',
     kind: 'independent-replica',
+    scope: 'season',
     disclosureHe:
       'אתר עצמאי לשימור ההיסטוריה של הפועל תל אביב. חלק מהחולצות המוצעות בו הן חולצות רפליקה נוסטלגיות ואינן חולצות משחק מקוריות מהעונה ההיסטורית.',
     // No shirt id in `lib/life/shirts.ts` is certainly the shirt this shop reproduces, so it

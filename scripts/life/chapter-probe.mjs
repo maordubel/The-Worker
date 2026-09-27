@@ -178,15 +178,18 @@ const SCRIPTS = {
     dayEnd: true,
   },
   'a4-shirt': {
-    seed: [{ t: 'year.entered', year: 1985, weekday: 0, minute: 9 * 60 + 30 }, { t: 'chapter.entered', chapter: 'a4-shirt' }, { t: 'moved', to: 'bedroom' }],
+    // (delta 93) Kobi's five are gone — the probe seeds the rest; the chore scenes are not played here
+    seed: [{ t: 'year.entered', year: 1985, weekday: 0, minute: 9 * 60 + 30 }, { t: 'chapter.entered', chapter: 'a4-shirt' }, { t: 'money.changed', agorot: 2000, why: 'seed' }, { t: 'moved', to: 'bedroom' }],
     steps: [
       ['wait', 2500], ['shot', 'open'], ['clear'],
       ['talk', 'tin-a4'], ['choose', 'take'], ['clear'],
       // bottles and crates first (11 + 3 + 4 = 18 is exactly the shirt), then Kobi's five: the day's three ways to earn, all seen
       ['go', 'street'], ['wait', 800], ['go', 'pitch'], ['wait', 1200], ['talk', 'bottles-a4'], ['choose', 'collect'], ['clear'],
       ['go', 'street'], ['wait', 800], ['go', 'kiosk'], ['wait', 1200], ['talk', 'rafi-a4'], ['clear'], ['talk', 'rafi-a4'], ['choose', 'work'], ['clear'],
-      ['go', 'street'], ['wait', 800], ['go', 'home'], ['wait', 1000], ['talk', 'kobi-a4'], ['choose', 'ask'], ['clear'],
-      ['go', 'street'], ['wait', 800], ['go', 'kiosk'], ['wait', 1200], ['talk', 'rafi-a4'], ['choose', 'buy'], ['clear'], ['clear'], ['expect-flag', 'own:shirt85'],
+      ['go', 'street'], ['wait', 800], ['go', 'home'], ['wait', 1000], ['talk', 'kobi-a4'], ['choose', 'almost'], ['clear'], ['expect-flag', 'a4:kobi-knows'],
+      // the thirty on the counter, and the man at the door (delta 93)
+      ['go', 'street'], ['wait', 800], ['go', 'kiosk'], ['wait', 1200], ['talk', 'rafi-a4'], ['shot', 'counter-ask'], ['choose', 'buy'],
+      ['wait', 3200], ['shot', 'kobi-comes'], ['clear'], ['clear'], ['expect-flag', 'a4:kobi-gifted-shirt'], ['expect-flag', 'own:shirt85'],
     ],
     dayEnd: true,
   },

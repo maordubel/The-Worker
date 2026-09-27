@@ -119,12 +119,20 @@ const SHIRT_ROWS: readonly Omit<Shirt, 'price'>[] = [
     kind: 'football',
   },
   {
+    /**
+     * (27.9.2026) the first shirt — the one Kobi buys at Rafi's counter in A4. Maor handed
+     * over the photograph and named it the gift, so it hangs in the kiosk from the summer of
+     * 1985 (`from: 'a4-shirt'`) and the art is that photograph, cut from its backdrop and
+     * with VISA's gold band taken to brown (rule 8). The archive files the VISA sponsorship
+     * later (1988/89, `kit-designs.json`); this row says "mid-eighties" and names no season,
+     * and the owner's instruction is what puts it on the rail — not an archive claim.
+     */
     id: 'visa86',
     art: 'shirtVisa86',
     nameHe: 'החולצה האדומה, פסים',
     sponsorHe: 'VISA',
     yearsHe: 'אמצע שנות ה־80',
-    from: '1986',
+    from: 'a4-shirt',
     noteHe: 'אדידס, פסי רוחב לבנים על השרוול, וסמל הפועל מעל הלב.',
     kind: 'football',
   },

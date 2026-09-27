@@ -380,13 +380,19 @@ export function clothingIsShirt(item: string): string | null {
   return CLOTHING_IS_SHIRT[item] ?? null
 }
 
+/**
+ * (delta 93, brief §33) the first shirt, in his own words — only for the life in which his
+ * father bought it at the counter. A save that bought it itself keeps the archive's note.
+ */
+export const FIRST_SHIRT_GIFT_NOTE_HE = 'החולצה הראשונה שלי. אבא קנה לי אותה במתנה ב־1985. את הכסף חסכתי בעצמי. בסוף הוא לא נתן לי לשלם.'
+
 export function wardrobeReading(state: LifeState): WardrobeReading[] {
   return ownedShirts(state).map((shirt) => ({
     id: shirt.id,
     nameHe: shirt.nameHe,
     sponsorHe: shirt.sponsorHe,
     yearsHe: shirt.yearsHe,
-    noteHe: shirt.noteHe,
+    noteHe: shirt.id === 'visa86' && (state.flags['life:first-shirt:gift'] || state.flags['a4:kobi-gifted-shirt']) ? FIRST_SHIRT_GIFT_NOTE_HE : shirt.noteHe,
     art: shirt.art,
     spec: shirt.spec,
     wornHe: wornIn(state, shirt.id)

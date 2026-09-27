@@ -1,4 +1,5 @@
 import type { LifeState } from '../types'
+import { missed } from '../missReason'
 import { PARTNER_TAG } from '../partner'
 
 import type { Beat } from './beats'
@@ -323,6 +324,7 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
               { e: 'flag', flag: 'pr:scarf' },
               { e: 'flagValue', flag: 'pr:childEvent', value: 'missed' },
               { e: 'flagValue', flag: SATURDAY, value: 'told' },
+              missed('2021-child-saturday', 'choice'),
               { e: 'wellbeing', key: 'regret', delta: 6 },
               { e: 'toast', text: 'הילד: "רציתי שתהיה." — "אני יודע. לא אגיד שזה לא חשוב."', tone: 'red' },
             ],
@@ -397,6 +399,7 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
               { e: 'flag', flag: 'pr:scarf' },
               { e: 'flagValue', flag: 'pr:childEvent', value: 'missed' },
               { e: 'flagValue', flag: SATURDAY, value: 'told' },
+              missed('2021-child-saturday', 'choice'),
               { e: 'wellbeing', key: 'regret', delta: 6 },
               { e: 'toast', text: 'הילד: "אז למה בדקת?" — "כדי לדעת. לא כדי לבוא." — "..."', tone: 'red' },
             ],
@@ -523,6 +526,8 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
           { e: 'flag', flag: 'pr:scarf' },
           { e: 'flagValue', flag: 'pr:sat', value: 'none' },
           { e: 'flagValue', flag: SATURDAY, value: 'missed' },
+          // he meant to be there and the day ran out before he was
+          missed('2021-child-saturday', 'late'),
           { e: 'wellbeing', key: 'regret', delta: 8 },
         ],
       },

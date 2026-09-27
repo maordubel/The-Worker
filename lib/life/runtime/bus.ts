@@ -90,6 +90,8 @@ export type HudState = {
    * The story director's card (plan §2.2) — only for a DILEMMA: two destinations at the same
    * weight, no arrow, no right answer. Null the rest of the time.
    */
+  /** (delta 93) the actor cue waiting for the glass — read by the dev overlay only */
+  pendingCue?: string | null
   director?: {
     id: string
     mode: 'DILEMMA'
@@ -546,6 +548,8 @@ export type LifeBusEvents = {
   } | null
   /** touch controls only matter on a touch device; the runtime says when they help */
   controls: { visible: boolean }
+  /** (delta 93) a beat takes the HUD off the glass for a moment and puts it back */
+  hudVisible: { visible: boolean }
   saved: number
   /**
    * How tall the painting actually is on screen, in CSS pixels.
