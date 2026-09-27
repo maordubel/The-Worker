@@ -117,6 +117,32 @@ export type LocationId =
   | 'arena-seats'
   /** a rented flat abroad (X02, X03, X05, Q05) */
   | 'flat-abroad'
+  // --- the city, 27.9.2026 — the backgrounds pack and the approved folder, as places ------
+  // Persisted identifiers (rule 35). Rooms in `lib/life/world/city2027/`.
+  /** Teddy, the away end, 2010 (the title decided on the road) */
+  | 'teddy'
+  /** Salzburg, the away section, August 2010 */
+  | 'away-salzburg'
+  /** Lisbon, Estádio da Luz, the away section, September 2010 */
+  | 'away-lisbon'
+  /** Lyon, Gerland, the away section, December 2010 */
+  | 'away-lyon'
+  /** Jaffa: Jerusalem Boulevard and the clock tower, 2000s–2020s */
+  | 'jaffa'
+  /** a Jaffa alley with a café — where people meet who do not want an office */
+  | 'jaffa-alley'
+  /** Jerusalem Boulevard before the shutters open */
+  | 'jaffa-boulevard'
+  /** the promenade, Tel Aviv–Jaffa, by the sea */
+  | 'promenade'
+  /** the big arena, from the seats, 2025 */
+  | 'menora'
+  /** inside Bloomfield, the stairs up to the gate-5 stand, 1990s–2015 */
+  | 'gate5-stand'
+  /** under the stand at Bloomfield, the vendors and the turnstiles, 1980s–1990s */
+  | 'undercroft'
+  /** a "Dan" bus shelter, 1980s–1990s */
+  | 'bus-stop'
 
 
 /**

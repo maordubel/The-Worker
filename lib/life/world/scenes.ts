@@ -8,6 +8,7 @@ import { CHAPTERS } from '../content/chapters'
 import type { Condition } from './types'
 import { goneForChapter, lifecycleOfScene, lifecycleWhen } from './placeLifecycle'
 import { PARENTS_AFTER_2013, chaptersWhere, livesWithParents } from './homes'
+import { CITY_EXITS, CITY_ROOMS } from './city2027'
 import { BEDROOM_2000, HOME_OWN, NEW_ROOMS, PITCH_2000, PITCH_2000S, STAGED, STAND_80S, STAND_90S, STAND_NEW, STAND_OLD } from './rooms2000'
 import { QUEST_SPOTS } from './quests90e'
 
@@ -4798,6 +4799,8 @@ const SCENES: SceneDef[] = [
 
   // 2000–2026: the rooms Maor painted, each on its own measured floor (`rooms2000.ts`)
   ...NEW_ROOMS,
+  // the city, 27.9.2026 — `world/city2027/` (Jaffa, the promenade, Teddy, Europe 2010, Menora…)
+  ...CITY_ROOMS,
 ]
 
 /**
@@ -4813,6 +4816,27 @@ for (const scene of SCENES) {
       const holder = paint as { actors?: readonly ActorDef[] }
       holder.actors = [...(holder.actors ?? []), actor]
     } else scene.actors.push(actor)
+  }
+}
+
+/**
+ * הדלתות אל העיר (27.9.2026) — every door into a place of `world/city2027/` is declared by
+ * the area that owns the place and added here to the room it opens from. A door that
+ * belongs to a painting of certain years goes into that painting's `doors`-less exit list
+ * exactly like any other exit: `era` on the exit decides the years it exists.
+ */
+for (const { from, exit, onPaint } of CITY_EXITS) {
+  const scene = SCENES.find((s) => s.id === from)
+  if (!scene) throw new Error(`city exit from unknown room ${from}`)
+  scene.exits.push(exit)
+  // a room repainted in the door's years places the door on THAT painting (`Repaint.doors`)
+  if (onPaint) {
+    for (const paint of scene.repaints ?? []) {
+      const at = onPaint[paint.art]
+      if (at === undefined) continue
+      const holder = paint as { doors?: Record<string, unknown> }
+      holder.doors = { ...(holder.doors ?? {}), [exit.id]: at }
+    }
   }
 }
 
