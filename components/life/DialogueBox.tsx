@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { createArmGate, installPointerWatch, isPointerDown, onPointerChange } from '@/lib/life/inputArm'
+
 import type { DialogueChoice, DialogueLine } from '@/lib/life/runtime/bus'
 import { artUrl } from '@/lib/life/runtime/art'
 import { DEFAULT_IDENTITY } from '@/lib/life/content/chapter1986'
@@ -167,6 +169,37 @@ function useTypewriter(text: string, key: string) {
   return { shown, done, finish: () => setShown(text.length) }
 }
 
+
+/**
+ * הקלפי נדרכת — P0 (27.9.2026). A ballot is disarmed when it appears and arms on the first
+ * frame after the gesture that revealed it has been released (`lib/life/inputArm.ts`).
+ * A tap in between is ignored, not queued: the tap that closed a line never picks a row.
+ */
+function useArmedBallot(visible: boolean, key: string): boolean {
+  const [armed, setArmed] = useState(false)
+  useEffect(() => {
+    if (!visible) return
+    installPointerWatch()
+    const gate = createArmGate()
+    if (isPointerDown()) gate.pointerDown()
+    gate.reveal()
+    setArmed(false)
+    let raf = 0
+    const tick = () => {
+      gate.frame()
+      if (gate.armed) setArmed(true)
+      else raf = requestAnimationFrame(tick)
+    }
+    const off = onPointerChange((down) => (down ? gate.pointerDown() : gate.pointerUp()))
+    raf = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(raf)
+      off()
+    }
+  }, [visible, key])
+  return armed
+}
+
 export function DialogueBox({
   lines,
   choices,
@@ -208,6 +241,7 @@ export function DialogueBox({
   const { shown, done, finish } = useTypewriter(text, `${serial.current}`)
   const side = useSides(line?.who ?? null, serial.current)
   const rtl = useRtl()
+  const ballotArmed = useArmedBallot(Boolean(choices && choices.length > 0) && done, `${serial.current}`)
 
   if (!line) return null
   const spoken = Boolean(line.who)
@@ -356,7 +390,11 @@ export function DialogueBox({
           {/* the choices — a ballot, one row each, the red square filling on press. A phone on
               its side has 390px of height: the ballot scrolls rather than losing its last row. */}
           {hasChoices && done && (
-            <ul className={`max-h-[46vh] overflow-y-auto border-t-hair ${spoken ? 'border-ink' : 'border-sheet/30'}`} data-life="choices">
+            <ul
+              className={`max-h-[46vh] overflow-y-auto border-t-hair ${spoken ? 'border-ink' : 'border-sheet/30'}`}
+              data-life="choices"
+              data-armed={ballotArmed ? 'true' : 'false'}
+            >
               {choices!.map((choice, index) => (
                 <li
                   key={choice.id}
@@ -368,7 +406,9 @@ export function DialogueBox({
                   <button
                     type="button"
                     disabled={choice.enabled === false}
-                    onClick={() => onChoose(choice.id)}
+                    onClick={() => {
+                      if (ballotArmed) onChoose(choice.id)
+                    }}
                     className={`group flex min-h-tap w-full items-center gap-3 py-2 pe-3 ps-4 text-start transition-colors duration-press disabled:opacity-45 motion-reduce:transition-none ${
                       spoken ? 'active:bg-red/10' : 'active:bg-sheet/10'
                     }`}

@@ -130,7 +130,7 @@ const all = (...names: string[]): Condition => ({ all: names.map((n) => ({ flag:
  * המסגרת: יוצאים מהמגרש דרך השער, כמו שנכנסים.
  */
 export const PITCH_2000: Repaint = {
-  in: (chapter) => yearOfChapter(chapter) >= 2000,
+  in: (chapter) => yearOfChapter(chapter) >= 2010,
   art: 'pitchSmall',
   titleHe: 'המגרש של השכונה',
   band: { far: 0.62, near: 0.82 },
@@ -149,6 +149,16 @@ export const PITCH_2000: Repaint = {
   // a ball at the centre spot is true of every afternoon on a pitch like this
   layers: [{ art: 'propFootball', era: ADULT_LIFE, x: 0.515, y: 0.66, w: 0.023, depth: 0.66, foot: true }],
   stuckHe: 'השער בגדר — משמאל, מאחורי השער הקטן.',
+}
+
+/**
+ * 2000–2009: the same neighbourhood pitch before it was laid synthetic (pitchPark00, 27.9.2026) —
+ * the same camera as `pitchSmall`, checked by overlay, so every measurement carries over.
+ */
+export const PITCH_2000S: Repaint = {
+  ...PITCH_2000,
+  in: (chapter) => yearOfChapter(chapter) >= 2000 && yearOfChapter(chapter) < 2010,
+  art: 'pitchPark00',
 }
 
 // ======================================================= החדר · bedroom00 ===
@@ -741,7 +751,7 @@ export const NEW_ROOMS: SceneDef[] = [
   {
     id: 'arena-out',
     titleHe: 'מחוץ לאולם',
-    art: 'arenaEuroOut',
+    art: 'botevgradOut2026',
     band: { far: 0.69, near: 0.9 },
     size: { far: 0.2324, near: 0.403 },
     metre: 0.31,
@@ -787,7 +797,7 @@ export const NEW_ROOMS: SceneDef[] = [
   {
     id: 'arena-seats',
     titleHe: 'המושבים',
-    art: 'arenaEuroSeats',
+    art: 'botevgradSeats2026',
     band: { far: 0.72, near: 0.94 },
     size: { far: 0.2925, near: 0.4713 },
     metre: 0.3625,

@@ -8,7 +8,7 @@ import { CHAPTERS } from '../content/chapters'
 import type { Condition } from './types'
 import { goneForChapter, lifecycleOfScene, lifecycleWhen } from './placeLifecycle'
 import { PARENTS_AFTER_2013, chaptersWhere, livesWithParents } from './homes'
-import { BEDROOM_2000, HOME_OWN, NEW_ROOMS, PITCH_2000, STAGED, STAND_80S, STAND_90S, STAND_NEW, STAND_OLD } from './rooms2000'
+import { BEDROOM_2000, HOME_OWN, NEW_ROOMS, PITCH_2000, PITCH_2000S, STAGED, STAND_80S, STAND_90S, STAND_NEW, STAND_OLD } from './rooms2000'
 import { QUEST_SPOTS } from './quests90e'
 
 /**
@@ -2142,7 +2142,9 @@ const SCENES: SceneDef[] = [
     titleHe: 'הקיוסק',
     art: 'kiosk',
     // the two evenings at the kiosk are painted as evenings
-    artByEra: { '1995-sinai': 'kioskNight', '1999-basket': 'kioskNight' },
+    // 27.9.2026: the same counter across three decades (kiosk00/10/20 — same camera, checked by
+    // overlay) — until then 1986's kiosk stood in every chapter up to 2026
+    artByEra: { '1995-sinai': 'kioskNight', '1999-basket': 'kioskNight', '2000s': 'kiosk00', '2010s': 'kiosk10', '2020s': 'kiosk20' },
     // Repainted 3.9.2026, and the old one was not a worse painting of this place — it was
     // a painting of a DIFFERENT place. `kiosk` has always been an interior the child walks
     // into, and the art was a shopfront seen from the pavement, so the backdrop and the
@@ -2457,7 +2459,7 @@ const SCENES: SceneDef[] = [
     stuckHe: 'הכדור באמצע. חזרה לרחוב — שמאלה.',
     spawns: { fromStreet: { x: 0.13, y: 0.84, facing: 'right' } , start: { x: 0.13, y: 0.84, facing: 'right' } },
     // מ-2000: מגרש קטן עם דשא סינתטי, ולא חצר האבנים — ציור אחר, רצפה אחרת (`rooms2000.ts`)
-    repaints: [PITCH_2000],
+    repaints: [PITCH_2000S, PITCH_2000],
     actors: [
       {
         id: 'efi',
@@ -2733,6 +2735,8 @@ const SCENES: SceneDef[] = [
       '1996-army': 'allenby90', '1997-basket': 'allenby90', '1998-laces': 'allenby90',
       '1999-basket': 'allenby90', '1999-cup': 'allenby90',
       '2000-title': 'allenby2000', '2000-double': 'allenby2000', '2000s': 'allenby2000',
+      // 27.9.2026 — the same corner, a decade on (allenby20: same camera, checked by overlay)
+      '2010s': 'allenby20', '2020s': 'allenby20',
     },
     /**
      * המדרכה היא הרצפה — the band is the pavement, and it stops at the kerb.
@@ -3077,6 +3081,9 @@ const SCENES: SceneDef[] = [
     id: 'bloomfield-outside',
     titleHe: 'בלומפילד — מבחוץ',
     art: 'gate7',
+    // 27.9.2026 — gate7Old: the same gate, 2000–2015 (same camera). The rebuilt ground is a
+    // `repaints` row and wins over this for the years it stands.
+    artByEra: { '2000s': 'gate7Old', '2010s': 'gate7Old' },
     band: { far: 0.8, near: 0.95 },
     // the painted men at the turnstiles are big; a child at 0.2 stood at their knees
     size: { far: 0.23, near: 0.33 },
@@ -4282,6 +4289,8 @@ const SCENES: SceneDef[] = [
     id: 'schoolyard',
     titleHe: 'החצר',
     art: 'schoolyard',
+    // 27.9.2026 — the same yard thirty years on, for his son's school (schoolyard20, same camera)
+    artByEra: { '2020s': 'schoolyard20' },
     band: { far: 0.68, near: 0.95 },
     size: { far: 0.18, near: 0.28 },
     metre: 0.202,

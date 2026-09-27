@@ -101,6 +101,8 @@ GREEN_BELOW = {
     'bloom80Goal': 0.695, 'bloom90Side': 0.475, 'bloom90Corner': 0.645,
 }
 GREEN_HUE = 84.0
+# a dated ingest may add its own grass lines for one run (ingest-backgrounds-2026-09-27.py)
+GREEN_BELOW.update(json.loads(os.environ.get('WORKER_GREEN_EXTRA', '{}')))
 
 
 def green_grass(im, from_y):

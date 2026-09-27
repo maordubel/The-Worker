@@ -173,6 +173,15 @@ export const BACKDROP = [
    * כמו כל ציור: חריג לכלל 8 נותן רק מאור, על קובץ, אחרי שראה את המדידה.
    */
   'bloom80Goal', 'bloom90Side', 'bloom90Corner',
+  /**
+   * **27.9.2026 — THE-WORKER-LIFE-BACKGROUNDS-2026-09-27 + the approved folder**
+   * (`scripts/life/ingest-backgrounds-2026-09-27.py`). The decade redresses keep the camera of
+   * the room they redress (checked by overlay); the stadiums are concept drafts, recorded as
+   * such in the manifest (`conceptHe`).
+   */
+  'kiosk00', 'kiosk10', 'kiosk20', 'street10', 'busStation20', 'menoraSeats', 'schoolyard20',
+  'gate7Old', 'allenby20', 'pitchPark00', 'teddy2010', 'salzburg2010', 'lyon2010', 'benfica2010',
+  'botevgradOut2026', 'botevgradSeats2026', 'jaffa00', 'gate5Stand', 'ussExtDusk',
 ] as const
 export type BackdropKey = (typeof BACKDROP)[number]
 

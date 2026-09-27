@@ -22,8 +22,9 @@ async function play(page, pick = [], rounds = 40) {
     if (await has(page, '[data-life="ending"]')) return 'ending'
     let choices = await page.$$('[data-life="choice"]')
     if (choices.length) {
-      // a choice that has just appeared is guarded against the tap that closed the line before it
-      await page.waitForTimeout(900)
+      // P0: a ballot arms after the revealing gesture is released (lib/life/inputArm.ts) — wait
+      // for the gate, not a clock
+      await page.waitForSelector('[data-life="choices"][data-armed="true"]', { timeout: 5000 }).catch(() => {})
       choices = await page.$$('[data-life="choice"]')
       if (!choices.length) continue
       const texts = await Promise.all(choices.map((c) => c.textContent()))

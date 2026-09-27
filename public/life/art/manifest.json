@@ -603,17 +603,19 @@
    ]
   },
   "ramatGan": {
-   "w": 3936,
-   "h": 1536,
-   "bytes": 864718,
-   "yellowLeft": 0,
-   "source": "2026-09-05",
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "אצטדיון רמת גן — גמרי 1999–2000",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה, 27.9.2026)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 394988,
    "deyellowed": 0,
+   "yellowLeft": 0,
    "box": [
     0,
     0,
-    1600,
-    624
+    1672,
+    941
    ]
   },
   "hatikva": {
@@ -1235,6 +1237,298 @@
     0,
     1672,
     941
+   ]
+  },
+  "kiosk00": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "הקיוסק של רפי — שנות ה־2000",
+   "w": 1672,
+   "h": 941,
+   "bytes": 398382,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "kiosk10": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "הקיוסק של רפי — שנות ה־2010",
+   "w": 1672,
+   "h": 941,
+   "bytes": 340704,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "kiosk20": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "הקיוסק של רפי — שנות ה־2020",
+   "w": 1672,
+   "h": 941,
+   "bytes": 383450,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "street10": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "הרחוב ליד הבית — 2010–2026",
+   "w": 1672,
+   "h": 941,
+   "bytes": 537200,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "busStation20": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "תחנת אוטובוסי אוהדים — 2017–2026",
+   "w": 1672,
+   "h": 941,
+   "bytes": 477502,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "menoraSeats": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "היכל מנורה — מהמושבים, 2025",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה, 27.9.2026)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 338878,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "schoolyard20": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "חצר בית הספר — 2021",
+   "w": 1672,
+   "h": 941,
+   "bytes": 501138,
+   "deyellowed": 62354,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "gate7Old": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "בלומפילד מבחוץ — לפני השיפוץ, 2000–2015",
+   "w": 1672,
+   "h": 941,
+   "bytes": 447882,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "allenby20": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "פינת אלנבי — 2010–2026",
+   "w": 1672,
+   "h": 941,
+   "bytes": 485270,
+   "deyellowed": 46738,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "pitchPark00": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "המגרש השכונתי — דשא טבעי, 2000",
+   "w": 1672,
+   "h": 941,
+   "bytes": 603536,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "teddy2010": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "טדי — 2010, יציע האורחים",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה, 27.9.2026)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 354142,
+   "deyellowed": 59134,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "salzburg2010": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "זלצבורג — 2010, יציע האורחים",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה, 27.9.2026)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 360980,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "lyon2010": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "ליון, ז׳רלאן — 2010, יציע האורחים",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה, 27.9.2026)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 349454,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "benfica2010": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "ליסבון, אצטדיון האור — 2010",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה, 27.9.2026)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 381480,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "botevgradOut2026": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "בוטבגרד — מחוץ לאולם, 2026",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה, 27.9.2026)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 439600,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "botevgradSeats2026": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "בוטבגרד — מהמושבים, 2026",
+   "conceptHe": "קונספט לפי תיאור, לא שחזור אדריכלי מאומת (README של החבילה, 27.9.2026)",
+   "w": 1672,
+   "h": 941,
+   "bytes": 257920,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1672,
+    941
+   ]
+  },
+  "jaffa00": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "שדרות ירושלים ומגדל השעון, יפו — שנות ה־2000",
+   "w": 1942,
+   "h": 809,
+   "bytes": 1932296,
+   "deyellowed": 335112,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    1942,
+    809
+   ]
+  },
+  "gate5Stand": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "הכניסה ליציע שער 5 — שנות ה־90 וה־2000",
+   "w": 2007,
+   "h": 784,
+   "bytes": 367312,
+   "deyellowed": 0,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    2007,
+    784
+   ]
+  },
+  "ussExtDusk": {
+   "source": "maor-2026-09-27-backgrounds",
+   "whatHe": "אוסישקין מבחוץ, ערב משחק",
+   "w": 2048,
+   "h": 1152,
+   "bytes": 2344828,
+   "deyellowed": 294072,
+   "yellowLeft": 0,
+   "box": [
+    0,
+    0,
+    2048,
+    1152
    ]
   }
  },
@@ -5419,29 +5713,29 @@
    "yellowLeft": 0
   },
   "ramatGan--sky": {
-   "w": 3936,
-   "h": 537,
-   "bytes": 134604,
+   "w": 1672,
+   "h": 329,
+   "bytes": 3932,
    "source": "ramatGan",
    "box": [
     0,
     0,
-    3936,
-    537
+    1672,
+    329
    ],
    "deyellowed": 0,
    "yellowLeft": 0
   },
   "ramatGan--ground": {
-   "w": 3936,
-   "h": 537,
-   "bytes": 472440,
+   "w": 1672,
+   "h": 329,
+   "bytes": 9094,
    "source": "ramatGan",
    "box": [
     0,
     0,
-    3936,
-    537
+    1672,
+    329
    ],
    "deyellowed": 0,
    "yellowLeft": 0
@@ -6620,6 +6914,538 @@
     329
    ],
    "deyellowed": 240031,
+   "yellowLeft": 0
+  },
+  "kiosk00--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8072,
+   "source": "kiosk00",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kiosk00--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7826,
+   "source": "kiosk00",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kiosk10--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8308,
+   "source": "kiosk10",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kiosk10--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7788,
+   "source": "kiosk10",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kiosk20--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7996,
+   "source": "kiosk20",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "kiosk20--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8268,
+   "source": "kiosk20",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "street10--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 13714,
+   "source": "street10",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "street10--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7804,
+   "source": "street10",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "busStation20--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6222,
+   "source": "busStation20",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "busStation20--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 11864,
+   "source": "busStation20",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "menoraSeats--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8962,
+   "source": "menoraSeats",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "menoraSeats--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8354,
+   "source": "menoraSeats",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "schoolyard20--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7978,
+   "source": "schoolyard20",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "schoolyard20--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7330,
+   "source": "schoolyard20",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "gate7Old--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6938,
+   "source": "gate7Old",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "gate7Old--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 10176,
+   "source": "gate7Old",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "allenby20--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 11980,
+   "source": "allenby20",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "allenby20--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 6358,
+   "source": "allenby20",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "pitchPark00--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 11240,
+   "source": "pitchPark00",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "pitchPark00--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 9872,
+   "source": "pitchPark00",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "teddy2010--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 9730,
+   "source": "teddy2010",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "teddy2010--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 9316,
+   "source": "teddy2010",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "salzburg2010--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8732,
+   "source": "salzburg2010",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "salzburg2010--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8420,
+   "source": "salzburg2010",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "lyon2010--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 5894,
+   "source": "lyon2010",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "lyon2010--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 9836,
+   "source": "lyon2010",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "benfica2010--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 10346,
+   "source": "benfica2010",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "benfica2010--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 9026,
+   "source": "benfica2010",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "botevgradOut2026--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8012,
+   "source": "botevgradOut2026",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "botevgradOut2026--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 8268,
+   "source": "botevgradOut2026",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "botevgradSeats2026--sky": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7176,
+   "source": "botevgradSeats2026",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "botevgradSeats2026--ground": {
+   "w": 1672,
+   "h": 329,
+   "bytes": 7706,
+   "source": "botevgradSeats2026",
+   "box": [
+    0,
+    0,
+    1672,
+    329
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "jaffa00--sky": {
+   "w": 1942,
+   "h": 283,
+   "bytes": 9944,
+   "source": "jaffa00",
+   "box": [
+    0,
+    0,
+    1942,
+    283
+   ],
+   "deyellowed": 44143,
+   "yellowLeft": 0
+  },
+  "jaffa00--ground": {
+   "w": 1942,
+   "h": 283,
+   "bytes": 11142,
+   "source": "jaffa00",
+   "box": [
+    0,
+    0,
+    1942,
+    283
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "gate5Stand--sky": {
+   "w": 2007,
+   "h": 274,
+   "bytes": 5566,
+   "source": "gate5Stand",
+   "box": [
+    0,
+    0,
+    2007,
+    274
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "gate5Stand--ground": {
+   "w": 2007,
+   "h": 274,
+   "bytes": 9170,
+   "source": "gate5Stand",
+   "box": [
+    0,
+    0,
+    2007,
+    274
+   ],
+   "deyellowed": 0,
+   "yellowLeft": 0
+  },
+  "ussExtDusk--sky": {
+   "w": 2048,
+   "h": 403,
+   "bytes": 10116,
+   "source": "ussExtDusk",
+   "box": [
+    0,
+    0,
+    2048,
+    403
+   ],
+   "deyellowed": 16168,
+   "yellowLeft": 0
+  },
+  "ussExtDusk--ground": {
+   "w": 2048,
+   "h": 403,
+   "bytes": 9430,
+   "source": "ussExtDusk",
+   "box": [
+    0,
+    0,
+    2048,
+    403
+   ],
+   "deyellowed": 0,
    "yellowLeft": 0
   }
  },
