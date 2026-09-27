@@ -1,6 +1,6 @@
 import { kitAssemblyForSeason, type KitPlacement } from './assembly'
 import { BODY_TEMPLATES, bodyTemplateForSeason, type KitBodyTemplate, type KitBodyTemplateId } from './body-templates'
-import { crestArt } from './crestMarks'
+import { crestArt, seasonStartYear } from './crestMarks'
 import { markFor, type MakerMarkId } from './maker-marks'
 import { grantedMaker, grantedSponsor, makerAssetForName, sponsorAssetForName } from './mark-library'
 import { photoGeometry, photoMissing, type PhotoBox, type PhotoGeometry } from './photo'
@@ -165,7 +165,7 @@ export function resolveKitRender(
     }
   }
 
-  const crestSrc = crestArt(spec.crestKey, dark)
+  const crestSrc = crestArt(spec.crestKey, dark, seasonStartYear(spec.seasonLabel))
   const realMaker = marks === 'granted' ? grantedMaker(spec.makerHe, spec.seasonLabel) : null
   const altMaker = markFor(spec.makerHe, spec.seasonLabel)
   const realSponsor = marks === 'granted' ? grantedSponsor(spec.sponsorHe) : null

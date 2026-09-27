@@ -1,7 +1,7 @@
 import { useId } from 'react'
 
 import { MakerMark, markFor } from '@/components/kit/MakerMark'
-import { crestArt } from '@/lib/kit/crestMarks'
+import { crestArt, seasonStartYear } from '@/lib/kit/crestMarks'
 import {
   COLOUR_VAR,
   type CollarId,
@@ -177,7 +177,7 @@ export function KitPlate({
         ) : (
           <Sponsor text={spec.sponsorHe} ink={patternInk} />
         )}
-        {gone.has('crest') ? <Gap slot="crest" /> : <Crest crestKey={spec.crestKey} darkCloth={!light} />}
+        {gone.has('crest') ? <Gap slot="crest" /> : <Crest crestKey={spec.crestKey} darkCloth={!light} year={seasonStartYear(spec.seasonLabel)} />}
         {gone.has('maker') ? (
           <Gap slot="maker" />
         ) : (
@@ -459,8 +459,8 @@ function Maker({ text, season, ink }: { text: string | null; season: string; ink
  * yellow back into the main badge at 62px (rule 8). All seven files scan clean and they
  * ship exactly as drawn.
  */
-function Crest({ crestKey, darkCloth }: { crestKey: string | null; darkCloth: boolean }) {
-  const href = crestArt(crestKey, darkCloth)
+function Crest({ crestKey, darkCloth, year }: { crestKey: string | null; darkCloth: boolean; year?: number | null }) {
+  const href = crestArt(crestKey, darkCloth, year)
   if (!href) return null
   const box = SLOTS.crest
   return (

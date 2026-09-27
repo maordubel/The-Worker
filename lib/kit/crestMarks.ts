@@ -33,6 +33,12 @@ export type CrestMark = {
   onRed?: string
   /** what a supporter names it by, so the eras are told apart without naming a season */
   tellHe: string
+  /**
+   * The same era's LATER drawing, from a given year — the eighties print of the original mark
+   * (27.9.2026, Maor: *"נא תהפוך אותו לשחור ולבן ותשמש בו בשחור ולבן לפי הצורך"*). Black on a
+   * light shirt, white on a red one; the cream original was dropped, and with it its yellow.
+   */
+  late?: { fromYear: number; file: string; onRed: string }
 }
 
 export const CREST_MARKS: readonly CrestMark[] = [
@@ -42,6 +48,7 @@ export const CREST_MARKS: readonly CrestMark[] = [
     file: 'worker-hapoel',
     onRed: 'worker-white',
     tellHe: 'הפועל בלי מסגרת',
+    late: { fromYear: 1980, file: 'worker-80s-ink', onRed: 'worker-80s-white' },
   },
   {
     key: 'ball-waves',
@@ -58,9 +65,13 @@ export const CREST_MARKS: readonly CrestMark[] = [
     tellHe: 'כתר בצבעים',
   },
   {
+    // 27.9.2026 — Maor: *"שתיהם נכונות, עם הכיתוב השחור השתמשו בשתיהם"*. The flat mark on a
+    // light shirt, the sewn patch (its own oval ground) on a red one. keter-ball.png, the red
+    // lettering, stays on disk and prints nowhere.
     key: 'keter-ball',
     nameHe: 'תקופת כתר',
-    file: 'keter-ball',
+    file: 'keter-ball-black',
+    onRed: 'keter-ball-patch',
     tellHe: 'כתר על הכדור',
   },
   {
@@ -79,7 +90,7 @@ export const CREST_MARKS: readonly CrestMark[] = [
 
 /** Every file this table can ask for — the test checks each one is on disk. */
 export const CREST_FILES: readonly string[] = [
-  ...new Set(CREST_MARKS.flatMap((mark) => [mark.file, mark.onRed].filter(Boolean) as string[])),
+  ...new Set(CREST_MARKS.flatMap((mark) => [mark.file, mark.onRed, mark.late?.file, mark.late?.onRed].filter(Boolean) as string[])),
 ]
 
 export function crestMark(key: string | null): CrestMark | null {
@@ -88,8 +99,17 @@ export function crestMark(key: string | null): CrestMark | null {
 }
 
 /** The artwork to print, given the shirt it is printing onto. */
-export function crestArt(key: string | null, darkCloth: boolean): string | null {
+export function crestArt(key: string | null, darkCloth: boolean, year?: number | null): string | null {
   const mark = crestMark(key)
   if (!mark) return null
+  if (mark.late && typeof year === 'number' && year >= mark.late.fromYear) {
+    return `/brand/crests/${darkCloth ? mark.late.onRed : mark.late.file}.png`
+  }
   return `/brand/crests/${darkCloth && mark.onRed ? mark.onRed : mark.file}.png`
+}
+
+/** `"1985/86"` → 1985; anything else → null */
+export function seasonStartYear(label: string | null | undefined): number | null {
+  const m = /(\d{4})/.exec(label ?? '')
+  return m ? Number(m[1]) : null
 }
