@@ -26,8 +26,8 @@ import {
  * page a kiosk sells, not only 1985/86, through the `acquisition` field.
  */
 
-/** the ids as they were on 27.9.2026 — saves key on them (`album:sg:<id>`), so they never move */
-const SET_IDS_SNAPSHOT = ['8081', '8586', 'sg80a', 'sgcup', 'sg80b', '9293', 'sg90', 'sg978', '96', 'box']
+/** the ids as they were on 27.9.2026 (the 2000s pages appended the same evening — appended, never inserted) — saves key on them (`album:sg:<id>`), so they never move */
+const SET_IDS_SNAPSHOT = ['8081', '8586', 'sg80a', 'sgcup', 'sg80b', '9293', 'sg90', 'sg978', 'sg0203', 'sg00', '96', 'box']
 const STICKER_IDS_SNAPSHOT = [
   'bezredno', 'landau', 'eli-cohen', 'ekhoiz', 'zano',
   'a-sg80a-00', 'a-sg80a-01', 'a-sg80a-02', 'a-sg80a-04', 'a-sg80a-05', 'a-sg80a-06', 'a-sg80a-07', 'a-sg80a-08',
@@ -43,6 +43,9 @@ const STICKER_IDS_SNAPSHOT = [
   'd-sg978-00', 'd-sg978-01', 'd-sg978-02', 'd-sg978-04', 'd-sg978-05', 'd-sg978-06', 'd-sg978-07', 'd-sg978-08',
   'd-sg978-09', 'd-sg978-10', 'd-sg978-11', 'd-sg978-12', 'd-sg978-14', 'd-sg978-15', 'd-sg978-17',
   'd-kt-dreslia', 'd-kt-moskal', 'd-hand-shitrit', 'd-kt-simrotic', 'd-kt-tikva', 'd-sg978-03',
+  'e-sg0203-00', 'e-sg0203-08', 'e-sg0203-02', 'e-sg0203-03', 'e-sg0203-04', 'e-sg0203-05', 'e-sg0203-06',
+  'e-sg0203-07', 'e-sg0203-09', 'e-sg0203-10', 'e-sg0203-11', 'e-sg0203-12', 'e-sg0203-01', 'e-sg0203-13',
+  'f-sg00-balili', 'f-sg00-elimelech', 'f-hand-antebi', 'f-hand-talchen', 'f-hand-avrbrl',
   'tikva',
   'box-ace-chodorov', 'box-ace-levkovich', 'box-ace-tish', 'box-ace-primo', 'box-ace-feingboim',
   'box-hand-hershkovitz', 'box-hand-rufnik',
@@ -107,10 +110,13 @@ describe('סופרגול — כיסוי העשורים', () => {
     }
   })
 
-  it('holds the eighties and nineties as verified and the three later decades as gaps', () => {
+  // 27.9.2026 — the 2000s flipped: the approved folder carried a real 2002/03 set and three
+  // album stickers from 2004 and 2007. The two later decades are still gaps, by name.
+  it('holds the eighties, nineties and 2000s as verified and the two later decades as gaps', () => {
     expect(STICKER_ERA_COVERAGE['80s'].status).toBe('verified')
     expect(STICKER_ERA_COVERAGE['90s'].status).toBe('verified')
-    for (const era of ['00s', '10s', '20s'] as const) expect(STICKER_ERA_COVERAGE[era].status, era).toBe('asset-gap')
+    expect(STICKER_ERA_COVERAGE['00s'].status).toBe('verified')
+    for (const era of ['10s', '20s'] as const) expect(STICKER_ERA_COVERAGE[era].status, era).toBe('asset-gap')
   })
 
   it('does not claim every decade while any is a gap', () => {

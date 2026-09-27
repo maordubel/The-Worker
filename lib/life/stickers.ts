@@ -51,6 +51,8 @@ export type StickerSetId =
   | '9293'
   | 'sg90'
   | 'sg978'
+  | 'sg0203'
+  | 'sg00'
   | '96'
   | 'box'
 
@@ -235,6 +237,26 @@ const SET_ROWS: Record<StickerSetId, SetRow> = {
     soldIn: '90s',
     acquisition: 'packet',
     narrativeRole: 'childhood',
+  },
+  sg0203: {
+    id: 'sg0203',
+    titleHe: 'הפועל · 2002/03',
+    seasonHe: 'עונת 2002/03',
+    shortHe: '02/03',
+    frame: '98',
+    soldIn: '00s',
+    acquisition: 'packet',
+    narrativeRole: 'callback',
+  },
+  sg00: {
+    id: 'sg00',
+    titleHe: 'הפועל תל־אביב · שנות האלפיים',
+    seasonHe: 'מדבקות מהאלבום, 2002–2007',
+    shortHe: '00s',
+    frame: '98',
+    soldIn: '00s',
+    acquisition: 'packet',
+    narrativeRole: 'callback',
   },
   '96': {
     id: '96',
@@ -697,6 +719,50 @@ function withScans(rows: readonly StickerDraft[]): StickerDef[] {
   return out
 }
 
+
+/**
+ * שנות האלפיים — the decade the gap document said had no scans (27.9.2026). It had: the
+ * approved folder carries a full 2002/03 card set (thirteen men and the squad card), the
+ * pair of Diadora stickers from the same season, and three album stickers from 2004 and
+ * 2007 with the tape under them in his own hand. Names are the ones printed on the cards.
+ */
+const FROM_SET_0203 = 'סדרת קלפים, עונת 2002/03; מהחומרים של צוות The Worker.'
+const FROM_SHEET_00 = 'מדבקות מהאלבום, שנות האלפיים; מהחומרים של צוות The Worker.'
+
+const SG0203: StickerDef[] = page('sg0203', 'e', FROM_SET_0203, [
+  ['sg0203-00', 'יגאל אנטבי'],
+  ['sg0203-08', 'שביט אלימלך'],
+  ['sg0203-02', 'סלים טועמה'],
+  ['sg0203-03', 'גאבור הלמאי'],
+  ['sg0203-04', 'שי אבוטבול'],
+  ['sg0203-05', 'סרגיי קלשנקו'],
+  ['sg0203-06.png', 'יוסי אבוקסיס'],
+  ['sg0203-07', 'פיני בלילי'],
+  ['sg0203-09', 'כפיר אודי'],
+  ['sg0203-10', 'דניס אונישנקו'],
+  ['sg0203-11', 'אסי דומב'],
+  ['sg0203-12', 'בן לוז'],
+  ['sg0203-01', 'דרור קשטן', 'מאמן'],
+  ['sg0203-13', 'הקבוצה'],
+])
+
+const HAND_00: Record<string, string> = {
+  'hand-antebi': 'סגר את אגף שמאל לעשר שנים. חצי מתאומי המגדל',
+  'hand-talchen': 'נשמה, הגנה, מלחמה',
+  'hand-avrbrl': 'מהספסל לגמר הגביע',
+}
+
+const SG00: StickerDef[] = page('sg00', 'f', FROM_SHEET_00, [
+  ['sg00-balili.png', 'פיני בלילי'],
+  ['sg00-elimelech.png', 'שביט אלימלך'],
+  ['hand-antebi.png', 'יגאל אנטבי'],
+  ['hand-talchen.png', 'טל חן'],
+  ['hand-avrbrl.png', 'ניל אברבנל'],
+]).map((sticker) => {
+  const key = Object.keys(HAND_00).find((k) => sticker.scan.includes(k))
+  return key ? { ...sticker, handHe: HAND_00[key] } : sticker
+})
+
 export const STICKERS: readonly StickerDef[] = [
   ...S8081,
   ...withScans(S8586),
@@ -706,6 +772,8 @@ export const STICKERS: readonly StickerDef[] = [
   ...withScans(S9293),
   ...SG90,
   ...SG978,
+  ...SG0203,
+  ...SG00,
   ...S96,
   ...SBOX,
 ]
@@ -725,6 +793,8 @@ export const SET_ORDER: readonly StickerSetId[] = [
   '9293',
   'sg90',
   'sg978',
+  'sg0203',
+  'sg00',
   '96',
   'box',
 ]
