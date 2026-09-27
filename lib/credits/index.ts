@@ -4,6 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { HISTORY_DAYS } from '@/lib/life/history/days'
+import { MERCH_LINKS, merchLink, type MerchLink } from '@/lib/merch'
 
 import { CREDIT_GROUPS, OWNER_KNOWLEDGE_LABEL, type CreditGroupKey } from './groups'
 
@@ -60,6 +61,27 @@ export type CreditGroup = { key: CreditGroupKey; entries: CreditEntry[]; count: 
 export type CreditsIndex = {
   groups: CreditGroup[]
   totals: { entries: number; citations: number; files: number }
+  /** קהילה, אספנות וקישורים — beside the sources, never counted as one */
+  community: CommunityShelf
+}
+
+/**
+ * A community credit: somebody who keeps the club's memory, thanked by name. It is NOT a
+ * source — no fact, asset or scan cites it, it is not in `totals`, and `groupOf` can never
+ * put a citation here. `descKey` is the message the page prints under the name (rule 10).
+ */
+export type CommunityEntry = {
+  id: string
+  title: string
+  url: string
+  host: string | null
+  descKey: 'credits.community.mishak-hashabbat.desc'
+}
+
+export type CommunityShelf = {
+  entries: CommunityEntry[]
+  /** the purchase links, straight from the merch registry, each carrying its disclosure */
+  shops: readonly MerchLink[]
 }
 
 const MANUAL = 'content/manual'
@@ -232,6 +254,23 @@ export function collectCitations(root: string = process.cwd()): Citation[] {
   return out.filter((row) => !NO_CITATION.test(row.title) && !INTERNAL.test(row.title))
 }
 
+/**
+ * הקהילה — thanked, not cited. Name and address come from the merch registry so the site is
+ * spelled once in the product; the description is the page's own words (messages).
+ */
+const COMMUNITY_ROWS: ReadonlyArray<{ merchId: string; descKey: CommunityEntry['descKey'] }> = [
+  { merchId: 'mishak-hashabbat', descKey: 'credits.community.mishak-hashabbat.desc' },
+]
+
+export function communityShelf(): CommunityShelf {
+  const entries = COMMUNITY_ROWS.flatMap(({ merchId, descKey }): CommunityEntry[] => {
+    const link = merchLink(merchId)
+    if (!link) return []
+    return [{ id: `community-${link.id}`, title: link.nameHe, url: link.url, host: hostOf(link.url), descKey }]
+  })
+  return { entries, shops: MERCH_LINKS }
+}
+
 let cached: CreditsIndex | null = null
 
 /** The page's data: citations deduplicated by title, counted, grouped, in page order. */
@@ -282,6 +321,7 @@ export function creditsIndex(root?: string): CreditsIndex {
       citations: groups.reduce((sum, group) => sum + group.count, 0),
       files: files.size,
     },
+    community: communityShelf(),
   }
   if (root === undefined) cached = index
   return index

@@ -244,6 +244,18 @@ export const BEATS_FINALE: Beat[] = [
       { a: 'crowd', state: 'AFTERMATH' },
     ],
   },
+  /**
+   * (delta 92, upgrade plan §10) the smallest callback to 25.7.2007: one question from the
+   * father beside him, and no exposition. Only for a life that stood at the fence.
+   */
+  {
+    id: 'f-uss',
+    at: 'arena-seats',
+    trigger: 'clock',
+    when: { all: [{ flag: 'f:inside' }, { flag: 'life:uss:there' }], none: [{ flag: 'f:uss' }, { flag: 'f:back' }] },
+    delayMs: 1400,
+    do: [{ a: 'flag', flag: 'f:uss' }, { a: 'lines', lines: [{ who: 'קובי', text: 'גם באוסישקין היה רועש ככה?' }, { who: 'פוגי', text: 'יותר. הגג היה נמוך.' }] }],
+  },
   /** F04 — *"מחוץ לאולם, אחרי המשחק"* */
   { id: 'f-back', at: 'arena-out', trigger: 'enter', when: { all: [{ flag: 'f:seats' }, { flag: 'f:inside' }], none: [{ flag: 'f:back' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'f-back' }] },
 ]

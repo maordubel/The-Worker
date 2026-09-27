@@ -493,8 +493,21 @@ export const wearsCrafted = (state: LifeState): boolean => state.flags[WEAR_CRAF
  * order, restricted to the ones that exist by now. A player who owns nothing wore nothing,
  * and the chapter records nothing — which is also true, and is its own kind of memory.
  */
+/**
+ * מה שנבחר בארון לפני המשחק (Pre-Match Ritual, 27.9.2026) — `own:outfit:<chapter>`, a
+ * shirt id or `'plain'`. Declared here rather than in `matchRitual.ts` because the reading
+ * below has to honour it and `matchRitual.ts` already reads this file.
+ */
+export const OUTFIT_PREFIX = 'own:outfit:'
+export const outfitFlag = (chapter: string) => `${OUTFIT_PREFIX}${chapter}`
+export const PLAIN_OUTFIT = 'plain'
+
 export function wearingAt(state: LifeState, log: readonly { t: string; flag?: string }[], chapter: string): Shirt | null {
   const available = new Set(onSale(chapter).map((shirt) => shirt.id))
+  // what he CHOSE before the match wins over what he would have grabbed
+  const chosen = state.flags[outfitFlag(chapter)]
+  if (chosen === PLAIN_OUTFIT) return null
+  if (typeof chosen === 'string' && available.has(chosen) && owns(state, chosen)) return SHIRTS.find((row) => row.id === chosen) ?? null
   let latest: Shirt | null = null
   for (const event of log) {
     if (event.t !== 'flag.raised' || !event.flag?.startsWith('own:shirt:')) continue

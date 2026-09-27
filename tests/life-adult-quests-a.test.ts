@@ -155,12 +155,26 @@ describe('2007 · U02 — the calls, one at a time, and the one who cancels', ()
     expect(sim.state.flags[FOUNDING_CALLS]).toBe('replaced')
     expect(sim.state.skills.organization).toBeGreaterThan(before)
     expect(has(sim, 'proof-found-registered')).toBe(true)
+    /*
+     * (delta 92, upgrade plan §8) the demolition is a walk now: the last evening inside,
+     * the morning call at home, the walk back to the fence, and only then the choice.
+     */
+    expect(sim.state.flags['u:lastEve']).toBe(true)
+    sim.go('ussishkin-hall')
+    expect(sim.state.flags['u:last']).toBe(true)
+    expect(sim.state.flags['life:place:ussishkin']).toBeUndefined()
+    sim.go('ussishkin-outside')
+    expect(sim.state.flags['u:morning']).toBe(true)
+    expect(sim.state.flags['u:news']).toBe(true)
     sim.go('ussishkin-outside')
     expect(sim.endings).toEqual(['together'])
+    // Beat 7 — only now is the hall gone from the world
+    expect(sim.state.flags['life:place:ussishkin']).toBe('demolished')
+    expect(sim.state.flags['life:uss:lossKind']).toBe('together')
   })
 
   it('messy · "three calls, not thirty", and the honest short list', () => {
-    const sim = start('2007-registered', pick('late', 'call'))
+    const sim = start('2007-registered', pick('late', 'father'))
     expect(sim.state.flags['u:want']).toBe(3)
     for (const id of ['batya', 'yaron', 'melamed']) sim.press('u-phone', `call-${id}`)
     expect(sim.state.flags['u:cancel']).toBe('melamed')
@@ -168,8 +182,12 @@ describe('2007 · U02 — the calls, one at a time, and the one who cancels', ()
     sim.press('u-hand', pick())
     expect(sim.state.flags[FOUNDING_CALLS]).toBe('reduced')
     expect(sim.state.personality.honesty).toBeGreaterThan(50)
+    // (delta 92) he never goes in that last evening: the night ends by itself, the call comes at home
+    for (let hour = 0; hour < 8 && !sim.state.flags['u:morning']; hour += 1) sim.wait(60)
+    expect(sim.state.flags['u:news']).toBe(true)
     sim.go('ussishkin-outside')
-    expect(sim.endings).toEqual(['remote'])
+    expect(sim.endings).toEqual(['father'])
+    expect(sim.state.flags['life:place:ussishkin']).toBe('demolished')
   })
 
   it('confused · the cancellation box closed by mistake rings again; the sheet still holds the empty line', () => {

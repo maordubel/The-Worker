@@ -842,7 +842,7 @@ export const CONVERSATIONS_1991: Conversation[] = [
         when: { relationshipMemory: { who: 'efi', eventId: 'said-that-in-1984' } },
         lines: [
           { who: 'אפי', text: 'באת. אחרי שבע שנים.' },
-          { who: 'אפי', text: 'שאלתי אותך פעם, ליד הסמטה. אמרת שזה לבנות.' },
+          { who: 'אפי', text: 'שאלתי אותך פעם, ברחוב שלך. אמרת שזה לבנות.' },
           { who: null, text: 'הוא לא אמר את זה ברוגז. הוא אמר את זה כמו מישהו שסופר.' },
         ],
         then: [{ e: 'rel', who: 'efi', axis: 'bond', delta: 2 }, { e: 'wellbeing', key: 'regret', delta: 3 }],

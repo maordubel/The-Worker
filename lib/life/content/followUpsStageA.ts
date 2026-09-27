@@ -22,22 +22,6 @@ export const FOLLOW_UPS_STAGE_A: FollowUp[] = [
     lines: [{ who: 'רחל', text: 'עוד פה? שומעים אותם מהחלון. הם כבר בוחרים קבוצות.' }],
   },
   {
-    id: 'a2-efi-bread',
-    chapter: 'a2-alley',
-    on: ['efi-a2'],
-    cls: 'HANDOFF',
-    step: 'bread',
-    lines: [{ who: 'אפי', text: 'הלחם של אמא שלך. רפי מאחוריך. אני לא בורח לשום מקום.' }],
-  },
-  {
-    id: 'a2-efi-alley',
-    chapter: 'a2-alley',
-    on: ['efi-a2'],
-    cls: 'HANDOFF',
-    step: 'alley',
-    lines: [{ who: 'אפי', text: 'הסמטה מתמלאת. לך, לפני שאין לך מקום. את האולם אני אראה לך ביום אחר.' }],
-  },
-  {
     id: 'a2-rafi-alley',
     chapter: 'a2-alley',
     on: ['rafi-a2'],

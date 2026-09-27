@@ -56,6 +56,26 @@ export type StickerSetId =
 
 export type StickerRarity = 'common' | 'uncommon' | 'rare' | 'kept'
 
+/**
+ * העשור של הדף — the decade a page belongs to, read off its own face (`eraOf`).
+ *
+ * The type names five decades; the archive holds pages from two. `STICKER_ERA_COVERAGE`
+ * below says which is which, out loud, so a screen can never advertise "every decade"
+ * while three of them are empty (27.9.2026).
+ */
+export type StickerEra = '80s' | '90s' | '00s' | '10s' | '20s'
+
+/**
+ * איך הדף מגיע לידיים — how the life hands a page over, as the code already does it:
+ * `packet` is a kiosk envelope (`soldIn` set), `gift` is somebody giving it (Rafi's till,
+ * 1996), `archive` is something older found in the house (the drawer booklet, the red box).
+ * `special` is reserved for a page that arrives by none of these; no page uses it yet.
+ */
+export type StickerAcquisition = 'packet' | 'gift' | 'archive' | 'special'
+
+/** what the page is FOR in the story — the boy's own album, a kept thing, or a thing come back */
+export type StickerNarrativeRole = 'childhood' | 'nostalgia' | 'callback'
+
 export type StickerSet = {
   id: StickerSetId
   titleHe: string
@@ -86,7 +106,17 @@ export type StickerSet = {
   /** the poster that opens the page, when the archive has one */
   posterArt?: string
   posterSourceHe?: string
+  /** the decade of the page — DERIVED (`eraOf`), never typed on a row that prints a year */
+  era: StickerEra
+  acquisition: StickerAcquisition
+  narrativeRole?: StickerNarrativeRole
 }
+
+/**
+ * A page as authored. `era` is derived like `from`; only a page whose face prints neither a
+ * year nor a decade it was sold in (the red box) states it, and the test says which one.
+ */
+type SetRow = Omit<StickerSet, 'from' | 'era'> & { era?: StickerEra }
 
 export type StickerDef = {
   id: string
@@ -123,7 +153,7 @@ export type StickerDef = {
   neverInPacket?: boolean
 }
 
-const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
+const SET_ROWS: Record<StickerSetId, SetRow> = {
   '8081': {
     id: '8081',
     titleHe: 'סופרגול · 1980/81',
@@ -131,6 +161,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: '80/81',
     frame: '80',
     soldIn: null,
+    acquisition: 'archive',
+    narrativeRole: 'nostalgia',
   },
   '8586': {
     id: '8586',
@@ -139,6 +171,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: '85/86',
     frame: '86',
     soldIn: '80s',
+    acquisition: 'packet',
+    narrativeRole: 'childhood',
   },
   sg80a: {
     id: 'sg80a',
@@ -147,6 +181,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: 'הסגל',
     frame: '86',
     soldIn: '80s',
+    acquisition: 'packet',
+    narrativeRole: 'childhood',
   },
   sgcup: {
     id: 'sgcup',
@@ -155,6 +191,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: 'הגביע',
     frame: '86',
     soldIn: '80s',
+    acquisition: 'packet',
+    narrativeRole: 'childhood',
   },
   sg80b: {
     id: 'sg80b',
@@ -163,6 +201,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: 'מספרים',
     frame: '86',
     soldIn: '80s',
+    acquisition: 'packet',
+    narrativeRole: 'childhood',
   },
   '9293': {
     id: '9293',
@@ -173,6 +213,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     soldIn: '90s',
     posterArt: '/life/docs/sg-squad-93.jpg',
     posterSourceHe: 'תצלום הסגל, עונת 1992/93 — מהחומרים של צוות The Worker.',
+    acquisition: 'packet',
+    narrativeRole: 'childhood',
   },
   sg90: {
     id: 'sg90',
@@ -181,6 +223,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: '90s',
     frame: '93',
     soldIn: '90s',
+    acquisition: 'packet',
+    narrativeRole: 'childhood',
   },
   sg978: {
     id: 'sg978',
@@ -189,6 +233,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: '97/98',
     frame: '98',
     soldIn: '90s',
+    acquisition: 'packet',
+    narrativeRole: 'childhood',
   },
   '96': {
     id: '96',
@@ -197,6 +243,8 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: '1996',
     frame: '96',
     soldIn: null,
+    acquisition: 'gift',
+    narrativeRole: 'callback',
   },
   box: {
     id: 'box',
@@ -205,6 +253,10 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
     shortHe: 'הקופסה',
     frame: '80',
     soldIn: null,
+    acquisition: 'archive',
+    narrativeRole: 'nostalgia',
+    // the cards are older than the life; the page enters it in the eighties, at the front
+    era: '80s',
   },
 }
 
@@ -226,7 +278,7 @@ const SET_ROWS: Record<StickerSetId, Omit<StickerSet, 'from'>> = {
  * announce and sits at the front of the life, because it was in somebody's drawer before
  * the boy was born.
  */
-function fromOf(row: Omit<StickerSet, 'from'>): string {
+function fromOf(row: SetRow): string {
   const season = /(\d{4})/.exec(row.seasonHe)
   if (season) return chapterOnOrAfter(Number(season[1]))
   if (row.soldIn) {
@@ -236,12 +288,63 @@ function fromOf(row: Omit<StickerSet, 'from'>): string {
   return CHAPTER_ORDER[0] as string
 }
 
+/** `1985` → `'80s'`, `2004` → `'00s'` — the decade a four-digit year sits in */
+export function eraOfYear(year: number): StickerEra {
+  if (year < 1990) return '80s'
+  if (year < 2000) return '90s'
+  if (year < 2010) return '00s'
+  if (year < 2020) return '10s'
+  return '20s'
+}
+
+/**
+ * העשור של הדף — the same two steps as `fromOf`, and a third only where neither applies:
+ * the season printed on the page, else the decade a kiosk sold it in, else what the row
+ * states (the red box alone, whose face prints no year and which no kiosk sold).
+ */
+function eraOf(row: SetRow): StickerEra {
+  const season = /(\d{4})/.exec(row.seasonHe)
+  if (season) return eraOfYear(Number(season[1]))
+  if (row.soldIn) return row.soldIn
+  if (row.era) return row.era
+  throw new Error(`sticker set ${row.id} has no season, no decade and no stated era`)
+}
+
 export const SETS: Record<StickerSetId, StickerSet> = Object.fromEntries(
-  (Object.keys(SET_ROWS) as StickerSetId[]).map((id) => [
-    id,
-    { ...(SET_ROWS[id] as Omit<StickerSet, 'from'>), from: fromOf(SET_ROWS[id] as Omit<StickerSet, 'from'>) },
-  ]),
+  (Object.keys(SET_ROWS) as StickerSetId[]).map((id) => {
+    const row = SET_ROWS[id] as SetRow
+    return [id, { ...row, era: eraOf(row), from: fromOf(row) }]
+  }),
 ) as Record<StickerSetId, StickerSet>
+
+export const STICKER_ERAS: readonly StickerEra[] = ['80s', '90s', '00s', '10s', '20s']
+
+export type StickerEraCoverage = { status: 'verified' } | { status: 'asset-gap'; noteHe: string }
+
+const GAP_NOTE_HE =
+  'אין באוסף סריקות אמיתיות של אלבומים או מדבקות של הפועל תל אביב מהעשור הזה. העשור ייפתח רק כשיגיעו סריקות אמיתיות — לא ממציאים דף.'
+
+/**
+ * כיסוי העשורים — which decades a real, scanned page stands behind, and which are a gap.
+ *
+ * COMPUTED, not typed: a decade is `verified` the moment one set of that era exists (and a
+ * set only exists if it survives `withScans`), and `asset-gap` otherwise. So the day a real
+ * 2000s scan arrives and a page is added, this flips on its own; nobody edits a status.
+ */
+const COVERED_ERAS = new Set(Object.values(SETS).map((set) => set.era))
+
+export const STICKER_ERA_COVERAGE: Record<StickerEra, StickerEraCoverage> = Object.fromEntries(
+  STICKER_ERAS.map((era) => [
+    era,
+    COVERED_ERAS.has(era) ? { status: 'verified' } : { status: 'asset-gap', noteHe: GAP_NOTE_HE },
+  ]),
+) as Record<StickerEra, StickerEraCoverage>
+
+/**
+ * "כל העשורים" — false while any decade is a gap. A screen that wants to say the album spans
+ * every decade asks this first, and says nothing of the kind while it is false.
+ */
+export const ALL_DECADES_COMPLETE: boolean = STICKER_ERAS.every((era) => STICKER_ERA_COVERAGE[era].status === 'verified')
 
 /** the line that goes under every scan on this page, and says only where it came from */
 const FROM_ALBUM = 'מדבקת סופרגול מהאלבום של צוות The Worker.'

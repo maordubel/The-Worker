@@ -38,6 +38,8 @@ import heStageLife90h from '@/messages/he.stage.life90h.json'
 // and the missions that open it never edit the same catalogue.
 import heStageCraft from '@/messages/he.stage.craft.json'
 import heStageLife91m from '@/messages/he.stage.life91m.json'
+// delta 92 — the story director, the first-mission cues and the pre-match wardrobe
+import heStageLife92 from '@/messages/he.stage.life92.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -109,6 +111,7 @@ export const CATALOGUE_FILES = {
   heStageLife90h,
   heStageCraft,
   heStageLife91m,
+  heStageLife92,
 } as const
 
 const catalogue = {
@@ -148,6 +151,7 @@ const catalogue = {
   ...heStageLife90h,
   ...heStageCraft,
   ...heStageLife91m,
+  ...heStageLife92,
 }
 
 export type MessageKey = keyof typeof catalogue

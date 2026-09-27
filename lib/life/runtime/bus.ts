@@ -86,6 +86,17 @@ export type HudState = {
    * waited for. Null the rest of the time; a banner that is always there is wallpaper.
    */
   waitingHe: string | null
+  /**
+   * The story director's card (plan §2.2) — only for a DILEMMA: two destinations at the same
+   * weight, no arrow, no right answer. Null the rest of the time.
+   */
+  director?: {
+    id: string
+    mode: 'DILEMMA'
+    titleHe: string
+    footHe: string | null
+    destinations: { labelHe: string; reasonHe: string; here: boolean }[]
+  } | null
 }
 
 export type LifeBusEvents = {
@@ -109,6 +120,8 @@ export type LifeBusEvents = {
   prompt: { verb: string; label: string; locked?: boolean } | null
   /** the one line of onboarding the game shows, or null once it is done */
   teach: { id: 'move' | 'act' } | null
+  /** לפני שיוצאים — the pre-match wardrobe is open (plan §4); the world waits for `wear()` */
+  ritual: { chapter: string; eventId: string; allowPlain: boolean } | null
   /**
    * A toast is a sentence — and since 4.9.2026 it can carry a thing: the art of the
    * object that just changed hands (`art`) and a one-word kicker over it ("לקופסה

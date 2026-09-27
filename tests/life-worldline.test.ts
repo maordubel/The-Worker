@@ -145,17 +145,27 @@ describe('11.3.1991 — הדלת לאוסישקין', () => {
 })
 
 describe('מה עובר גבול של פרק', () => {
-  it('`carryableBefore` על הקו המינימלי לא נושא את ידיעת האולם, ועל המקסימלי כן', () => {
-    expect(carryableBefore('1991', MINIMAL).has('life:knows:hall')).toBe(false)
+  /**
+   * (delta 92, upgrade plan §3 — rule 65/80, the guard turns rather than softens.) Until
+   * 27.9.2026 the difference between the two lines was a whole CHAPTER: `a3-hall` was only
+   * for a boy who had answered Efi in the A2 alley. Now A3 is where Efi is met, on every
+   * line, and the hall's knowledge is a CHOICE inside it — with A4 as the second chance.
+   * So both lines carry it into 1991, and the two chapters that can teach it are named.
+   */
+  it('`carryableBefore` נושא את ידיעת האולם על שני הקווים — הפגישה עם אפי היא בחירה בתוך A3, לא פרק מותנה', () => {
+    expect(carryableBefore('1991', MINIMAL).has('life:knows:hall')).toBe(true)
     expect(carryableBefore('1991', MAXIMAL).has('life:knows:hall')).toBe(true)
   })
 
-  it('ההבדל הוא `a3-hall`, ולא משהו אחר', () => {
+  it('`a3-hall` על כל קו, ומי שאמר "לא עכשיו" מקבל הזדמנות שנייה ב-`a4-shirt`', () => {
     const minimalChapters = chaptersOn(MINIMAL).map((chapter) => chapter.id)
     const maximalChapters = chaptersOn(MAXIMAL).map((chapter) => chapter.id)
-    expect(minimalChapters).not.toContain('a3-hall')
+    expect(minimalChapters).toContain('a3-hall')
     expect(maximalChapters).toContain('a3-hall')
     expect(chapterFlags('a3-hall').has('life:knows:hall')).toBe(true)
+    expect(chapterFlags('a3-hall').has('life:efi:met')).toBe(true)
+    expect(chapterFlags('a4-shirt').has('life:efi:met')).toBe(true)
+    expect(chapterFlags('a4-shirt').has('life:knows:hall')).toBe(true)
   })
 
   it('`carryableBefore` נושא רק דגלים ששורדים חצות, ולעולם לא דגל של הפרק עצמו', () => {

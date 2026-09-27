@@ -2,7 +2,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation } from './script'
 import { PORTRAIT_GROWTH } from './chapter2012growth'
 
 /**
@@ -78,33 +78,8 @@ export const BEATS_NEWHALL: Beat[] = [
   { id: 'nr-route', at: 'home', trigger: 'enter', when: { all: [{ flag: 'nr:hall' }], none: [{ flag: 'nr:route' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'nr-route' }] },
 ]
 
-export const CONVERSATIONS_NEWHALL: Conversation[] = [
-  {
-    id: 'nr-check',
-    nameHe: null,
-    branches: [
-      {
-        lines: [
-          { who: null, text: 'ליד החניה, שלט של תחנה: שני קווים, ואחד מהם עובר גם בשבת בערב.' },
-          { who: null, text: 'ומתחת, בכתב יד: ״הכביש לחניה נסגר אחרי משחקים — לצאת מהשער האחורי.״ דרך, וחלופה.' },
-        ],
-        then: [{ e: 'flag', flag: 'nr:checked' }, { e: 'time', minutes: 5 }],
-      },
-    ],
-  },
-  {
-    id: 'nr-hall',
-    nameHe: 'אפי',
-    branches: [
-      {
-        lines: [
-          { who: 'אפי', text: 'פה יהיה לנו מקום.' },
-          { who: 'פוגי', text: 'זה לא אוסישקין.' },
-          { who: 'אפי', text: 'לא אמרתי שזה אוסישקין.' },
-          { who: 'מתוקי', text: 'מותר לי לאהוב את זה בלי לעבור מבחן?' },
-          { who: 'פוגי', text: 'כן. מגיע לך.' },
-        ],
-        choices: [
+/** the three answers at the new hall — the same for a man who was at the fence and one who was not */
+const NR_HALL_CHOICES: ChoiceDef[] = [
           {
             id: 'short',
             text: '(זיכרון אחד קצר — ואז שיבחר מקום בעצמו.)',
@@ -137,7 +112,52 @@ export const CONVERSATIONS_NEWHALL: Conversation[] = [
               { e: 'toast', text: 'אפי: "לפני משחק נפגשים פה?" — "כן. נקבע משהו משלנו."', tone: 'plain' },
             ],
           },
+        ]
+
+export const CONVERSATIONS_NEWHALL: Conversation[] = [
+  {
+    id: 'nr-check',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'ליד החניה, שלט של תחנה: שני קווים, ואחד מהם עובר גם בשבת בערב.' },
+          { who: null, text: 'ומתחת, בכתב יד: ״הכביש לחניה נסגר אחרי משחקים — לצאת מהשער האחורי.״ דרך, וחלופה.' },
         ],
+        then: [{ e: 'flag', flag: 'nr:checked' }, { e: 'time', minutes: 5 }],
+      },
+    ],
+  },
+  {
+    id: 'nr-hall',
+    nameHe: 'אפי',
+    branches: [
+      {
+        /**
+         * (delta 92, upgrade plan §10) the payoff of 25.7.2007: a man who stood at the fence
+         * that morning hears Efi stop for a breath before the sentence. The words are the
+         * same — the pause is the demolition, remembered.
+         */
+        when: { flag: 'life:uss:there' },
+        lines: [
+          { who: null, text: 'אפי עוצר רגע ליד הקו. לא מסתכל עליך. כמו מי שמחכה שיגידו לו שמותר.' },
+          { who: 'אפי', text: 'פה יהיה לנו מקום.' },
+          { who: 'פוגי', text: 'זה לא אוסישקין.' },
+          { who: 'אפי', text: 'לא אמרתי שזה אוסישקין.' },
+          { who: 'מתוקי', text: 'מותר לי לאהוב את זה בלי לעבור מבחן?' },
+          { who: 'פוגי', text: 'כן. מגיע לך.' },
+        ],
+        choices: NR_HALL_CHOICES,
+      },
+      {
+        lines: [
+          { who: 'אפי', text: 'פה יהיה לנו מקום.' },
+          { who: 'פוגי', text: 'זה לא אוסישקין.' },
+          { who: 'אפי', text: 'לא אמרתי שזה אוסישקין.' },
+          { who: 'מתוקי', text: 'מותר לי לאהוב את זה בלי לעבור מבחן?' },
+          { who: 'פוגי', text: 'כן. מגיע לך.' },
+        ],
+        choices: NR_HALL_CHOICES,
       },
     ],
   },

@@ -108,10 +108,10 @@ export const CHAPTERS: readonly ChapterDef[] = [
     id: 'a3-hall',
     stage: 'A',
     unit: 'A3',
-    // Only for a boy who actually stood with Efi in the spring (Stage A §7). Skipping it
-    // is a real loss: no hall, no usher who says your name, and an Efi who remembers being
-    // asked and not answered.
-    when: ['life:a2:efi'],
+    // (delta 92, upgrade plan §3) Every life plays A3 now: it is where Efi is MET, as a new
+    // person on the street. It used to be only for a boy who had answered him in the A2
+    // alley — which made the whole basketball branch depend on pressing an unmarked NPC in
+    // the first mission. "Not now" here is still a real answer, and A4 asks once more.
     titleHe: 'הבית האדום השני',
     dateHe: 'סתיו 1984',
     year: 1984,

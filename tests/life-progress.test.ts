@@ -78,7 +78,9 @@ describe('הרצף — every chapter leads somewhere', () => {
   it('walks to the same end with no window open, skipping exactly the windows', () => {
     const walked = walk({})
     for (const chapter of windowed) expect(walked, chapter.id).not.toContain(chapter.id)
-    expect(walked).not.toContain('a3-hall')
+    // (delta 92, plan §3) A3 is where Efi is MET now, so it is on every life — the
+    // basketball branch is a choice inside it (and A4 asks once more), not a gate before it
+    expect(walked).toContain('a3-hall')
     expect(walked.length).toBe(playableChapters().length - windowed.length)
     expect(walked[walked.length - 1]).toBe(lastPlayable().id)
     expect(new Set(walked).size).toBe(walked.length)

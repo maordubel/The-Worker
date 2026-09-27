@@ -1,4 +1,5 @@
 import { WEAR_CRAFTED_FLAG } from '../shirts'
+import { SETS, stuckIn, type StickerSetId } from '../stickers'
 import type { LocationId } from '../types'
 import { ALL_SCENES, inEra } from '../world/scenes'
 import type { Beat } from './beats'
@@ -79,8 +80,46 @@ export const CALLBACK_BEATS: Readonly<Record<string, readonly Beat[]>> = (() => 
     when: { all: [{ flag: callbackFlag('shirt:ofir:next') }], none: [{ flag: madeFlag('ofir:fan-shirt') }, { flag: callbackFlag('shirt:ofir:heard') }] },
     do: [{ a: 'talk', conversation: 'cb-friend-shirt-seen' }],
   })
+  /**
+   * סופרגול, שלושים שנה אחר כך (delta 92, upgrade plan §5.6): DO → REMEMBER → SEE AGAIN.
+   * A boy who stuck a page of the eighties into the album finds it in a box in the flat of
+   * a grown man, and says one sentence — no collection count, no progress bar. The look is
+   * read off the album at that moment (`derive`), so a life that never bought a packet
+   * finds a box of exercise books and nothing more.
+   */
+  add(['2013-household'], {
+    id: 'cb-album-look',
+    at: 'home',
+    trigger: 'enter',
+    delayMs: 2600,
+    when: { none: [{ flag: 'own:album:looked-2013' }] },
+    do: [
+      { a: 'flag', flag: 'own:album:looked-2013' },
+      { a: 'derive', events: (state) => (EIGHTIES.some((set) => stuckIn(state, set) > 0) ? [{ t: 'flag.raised', flag: 'cb:album80s' }] : []) },
+    ],
+  })
+  add(['2013-household'], {
+    id: 'cb-album-line',
+    at: 'home',
+    trigger: 'clock',
+    delayMs: 900,
+    when: { all: [{ flag: 'cb:album80s' }], none: [{ flag: 'own:album:said-2013' }] },
+    do: [
+      { a: 'flag', flag: 'own:album:said-2013' },
+      {
+        a: 'lines',
+        lines: [
+          { who: null, text: 'בארגז מתחת למיטה, בין מחברות ישנות: האלבום. מדבקה אחת עקומה, בדיוק כמו שהדבקת אותה.' },
+          { who: 'פוגי', text: 'יש לי את זה מאז שהייתי שמונה.' },
+        ],
+      },
+    ],
+  })
   return out
 })()
+
+/** the albums of the eighties — the pages a boy of eight could have filled */
+const EIGHTIES = (Object.keys(SETS) as StickerSetId[]).filter((id) => SETS[id].era === '80s' && SETS[id].acquisition === 'packet')
 
 /**
  * ומה שאנשים אומרים כשהם רואים (world/followUp.ts): a REACTION is news once, in the mouth of

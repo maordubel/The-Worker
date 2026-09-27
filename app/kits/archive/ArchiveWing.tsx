@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { HaveWantBar } from '@/components/collector/HaveWantBar'
+import { MerchLinks } from '@/components/life/MerchLinks'
 import { MerchantOffers } from '@/components/collector/MerchantOffers'
 import { Num } from '@/components/ui/Num'
 import { SourceNote } from '@/components/ui/SourceNote'
@@ -482,6 +483,9 @@ function ShirtSheet({
       </dl>
 
       <MerchantOffers slug={shirt.slug} kitId={kitId} season={shirt.seasonLabel} />
+
+      {/* (delta 92, plan §11.5) the store links — secondary, each with its official/replica line */}
+      <MerchLinks shirtId={shirt.slug} season={shirt.seasonLabel ?? (shirt.yearRaw ? String(shirt.yearRaw) : null)} />
 
       {/* the source and the photographer live on /credits (spec §0.3, 22.9.2026) */}
       {source && <SourceNote group="photo" className="mt-2" />}

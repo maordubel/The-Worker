@@ -104,6 +104,8 @@ export type LifeRuntime = {
   buyPacket(): import('../stickers').PacketStatus
   /** the reveal was put down (album or back to the room) — clears the pending packet */
   closePacket(): void
+  /** the pre-match wardrobe's choice — a shirt id or `'plain'`; false when refused */
+  wear(choice: string): boolean
   dismissEnding(): void
   /** the end-of-stage celebration's own button — the ending card no longer goes home */
   dismissFinale(): void
@@ -371,6 +373,7 @@ export function createLifeGame(options: LifeGameOptions): LifeRuntime {
       options.engine.dispatch(...events)
       void options.engine.save()
     },
+    wear: (choice: string) => (game.scene.isActive(WorldScene.KEY) ? worldScene()?.wear(choice) ?? false : false),
     dismissEnding: () => worldScene()?.goHome(),
     dismissFinale: () => worldScene()?.dismissFinale(),
     markOpening: () => {

@@ -10,8 +10,14 @@
  * and `sourceUrl` it had, because integrity needs them — only the UI stops scattering them.
  */
 
-/** Page order. `team` is the owner-knowledge label; `assets` is asset provenance. */
-export const CREDIT_GROUPS = ['club', 'press', 'wiki', 'photo', 'data', 'research', 'team', 'assets', 'other'] as const
+/**
+ * Page order. `team` is the owner-knowledge label; `assets` is asset provenance.
+ * `community` (27.9.2026) is the one shelf that is NOT sources: people and sites who keep the
+ * club's memory, and the shop links (`lib/merch.ts`). Nothing is ever grouped onto it by
+ * `groupOf` — it is filled from `COMMUNITY` in `lib/credits/index.ts`, so no fact or asset
+ * can cite it by accident.
+ */
+export const CREDIT_GROUPS = ['club', 'press', 'wiki', 'photo', 'data', 'research', 'team', 'assets', 'community', 'other'] as const
 
 export type CreditGroupKey = (typeof CREDIT_GROUPS)[number]
 

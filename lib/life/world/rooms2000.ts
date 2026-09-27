@@ -1188,7 +1188,12 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'בתיה', x: 0.72, y: 0.88, flip: true },
     ]),
     // 2007-registered · U03 (u-loss)
-    ...cast('2007-registered', flag('u:deliver'), [{ who: 'אפי', x: 0.72, y: 0.9, flip: true, figure: 'efi96-concern' }]),
+    // (delta 92, §8 Beat 4) the morning of 25.7.2007: Efi, Shachor, Inbal — outside, mostly quiet
+    ...cast('2007-registered', flag('u:news'), [
+      { who: 'אפי', x: 0.72, y: 0.9, flip: true, figure: 'efi96-concern' },
+      { who: 'שחור', x: 0.55, y: 0.89, flip: true },
+      { who: 'ענבל', x: 0.38, y: 0.9 },
+    ]),
   ],
 
   'bus-station': [

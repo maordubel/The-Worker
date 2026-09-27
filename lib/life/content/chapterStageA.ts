@@ -73,7 +73,8 @@ export function objectiveA2(state: LifeState, sceneId: string): string | null {
     // (delta 90, §7 A2) the promise the boy framed is the one the line repeats back
     if (state.flags['a2:agreed']) return 'הבטחת: לחם לפני חמש. והקבוצות בסמטה לא מחכות.'
     if (state.flags['a2:after']) return 'אמרת "אחרי המשחק". הסמטה — לפני שהקבוצות מתמלאות.'
-    return 'לחם מהקיוסק. ואז — הסמטה, לפני שהקבוצות מתמלאות.'
+    // (delta 92, plan §2.2) two reasons at the same weight — the line does not order them
+    return 'לחם לאמא, וקבוצות בסמטה. אותו אחר צהריים.'
   }
   if (sceneId === 'home') return 'אמא רוצה לחם. בסמטה כבר מתחילים לבחור קבוצות.'
   return 'הסמטה. לפני שהקבוצות מתמלאות.'
@@ -658,66 +659,19 @@ export const CONVERSATIONS_A2: Conversation[] = [
       {
         lines: [{ who: 'אופיר', text: 'פוגי, איתי. אתה מאחורה. לא לגעת ביד, ולא לברוח מהכדור.' }],
         choices: [
-          { id: 'play', text: 'להיכנס.', then: [{ e: 'flag', flag: 'a2:played' }, { e: 'rel', who: 'ofir', axis: 'bond', delta: 4 }, { e: 'rel', who: 'efi', axis: 'familiarity', delta: 2 }, { e: 'remember', who: 'ofir', eventId: 'first-team-1984', significance: 'major' }, { e: 'wellbeing', key: 'happiness', delta: 6 }, { e: 'sfx', key: 'ball-kick', level: 0.7 }, { e: 'minigame', id: 'football' }] },
+          { id: 'play', text: 'להיכנס.', then: [{ e: 'flag', flag: 'a2:played' }, { e: 'rel', who: 'ofir', axis: 'bond', delta: 4 }, { e: 'remember', who: 'ofir', eventId: 'first-team-1984', significance: 'major' }, { e: 'wellbeing', key: 'happiness', delta: 6 }, { e: 'sfx', key: 'ball-kick', level: 0.7 }, { e: 'minigame', id: 'football' }] },
           { id: 'watch', text: 'לעמוד ולראות קודם.', then: [{ e: 'personality', key: 'curiosity', delta: 1 }, { e: 'toast', text: '"תעמוד. אבל תעמוד רחוק מהשער."', tone: 'plain' }] },
         ],
       },
     ],
   },
-  {
-    /**
-     * אפי, באביב 1984 — the sentence that decides whether the autumn happens.
-     *
-     * Stage A §7 asks that the Ussishkin branch open "only after meaningful Efi engagement
-     * in A2" and that skipping it cost something real. This is the engagement: a boy with a
-     * basketball under his arm at the edge of a football game he will not be picked for,
-     * saying the thing children say when they want to be asked about the thing they love.
-     * Answering him raises `life:a2:efi`, which is what `a3-hall`'s `when` reads two
-     * autumns later.
-     *
-     * There is no prompt and no marker on him, and that is the cost working both ways: a
-     * player who talks to everybody finds it, and a player who goes straight to the
-     * football — which is exactly what the day is asking him to do — does not, and gets a
-     * different childhood. Efi remembers either way.
-     */
-    id: 'efi-a2',
-    nameHe: 'אפי',
-    branches: [
-      {
-        when: { flag: 'life:a2:efi' },
-        lines: [{ who: 'אפי', text: 'אמרתי לך. באחד הימים.' }],
-      },
-      {
-        lines: [
-          { who: null, text: 'אפי לא נכנס. הוא עומד בצד עם כדור אחר — כתום, גדול, מנוקד.' },
-          { who: 'אפי', text: 'אתה יודע שיש עוד משחק? לא כזה. בפנים, על עץ.' },
-        ],
-        choices: [
-          {
-            id: 'ask',
-            text: '"איפה בפנים?"',
-            then: [
-              { e: 'flag', flag: 'life:a2:efi' },
-              { e: 'rel', who: 'efi', axis: 'bond', delta: 4 },
-              { e: 'redheart', key: 'basketballLove', delta: 3 },
-              { e: 'remember', who: 'efi', eventId: 'asked-about-the-hall-1984', significance: 'major' },
-              { e: 'toast', text: '"לא עכשיו. באחד הימים אני לוקח אותך." הוא אמר את זה כמו הבטחה, ולא כמו תירוץ.', tone: 'plain' },
-            ],
-          },
-          {
-            id: 'shrug',
-            text: '"כדורסל זה לבנות."',
-            then: [
-              { e: 'rel', who: 'efi', axis: 'distance', delta: 3 },
-              { e: 'remember', who: 'efi', eventId: 'said-that-in-1984', significance: 'major' },
-              { e: 'toast', text: 'הוא לא ענה. הוא הלך לקיר עם הכדור הכתום והמשיך לבד.', tone: 'plain' },
-            ],
-          },
-          { id: 'later', text: 'לא עכשיו. הקבוצות מתמלאות.', then: [] },
-        ],
-      },
-    ],
-  },
+  /*
+   * (delta 92, upgrade plan §2.3/§3) Efi is not in A2 any more. The first mission already
+   * teaches moving, acting, a clock, a dilemma and a consequence; the seed of the hall split
+   * the player's attention in half. He is met in A3, on the street, as a new person — and a
+   * boy who says "not now" there gets a second chance in A4. `life:a2:efi` in an old log is
+   * read as `life:efi:met` (`LEGACY_FLAG_ALIASES`, events.ts).
+   */
   {
     id: 'a2-after-game',
     nameHe: null,
@@ -751,8 +705,11 @@ export function objectiveA3(state: LifeState, sceneId: string): string | null {
     return 'האולם סביבך. אפי לידך.'
   }
   if (sceneId === 'ussishkin-outside') return 'התור לדלת. אפי מכיר את הסדרן, והסדרן אוהב שמות.'
+  // (delta 92, plan §3.1) a boy who said "not now" is not sent anywhere: the evening is his
+  if (state.flags['life:efi:deferred'] && !state.flags['life:efi:met']) return null
   if (state.flags['knows:hall'] || state.flags['life:knows:hall']) return 'ללכת עם אפי — דרך מרכז תל אביב.'
-  return 'אפי מחכה ברחוב. תשאל אותו לאן.'
+  if (state.flags['life:efi:met']) return 'אפי מחכה ברחוב. תשאל אותו לאן.'
+  return 'ילד שאתה לא מכיר, בקצה הרחוב, עם כדור כתום.'
 }
 
 export const ENDINGS_A3: Record<string, EndingCard> = {
@@ -762,6 +719,14 @@ export const ENDINGS_A3: Record<string, EndingCard> = {
     bodyHe: 'הסדרן ידע את השם של אפי. ואז שאל את שלך, ואמר אותו בקול, כאילו זה דבר שאומרים. בפנים: פרקט ששוקע, גג פח שמטפטף על השורה הראשונה, וכדור שעשה קול אחר מכל כדור ששמעת. לא ראית משחק. ראית מקום.',
     memoryHe: 'הסדרן שאמר את השם שלך.',
     memoryItem: 'ticket-stub',
+  },
+  /** (delta 92) "לא עכשיו" — the evening without the hall, and nothing is locked by it */
+  street: {
+    id: 'street',
+    titleHe: 'לא עכשיו',
+    bodyHe: 'הילד עם הכדור הכתום הלך לכיוון הקיר, ואתה נשארת ברחוב שאתה מכיר. שיחקת עם מה שהיה, עד שקראו לך הביתה. לא ידעת אז שיש עוד בית, ושהוא עוד יחכה לך פעם אחת.',
+    memoryHe: 'כדור כתום, מתרחק.',
+    memoryItem: 'coin',
   },
   door: {
     id: 'door',
@@ -781,7 +746,13 @@ export const BEATS_A3: Beat[] = [
     delayMs: 700,
     do: [
       { a: 'flag', flag: A3 },
-      { a: 'lines', lines: [{ who: null, text: 'אותו רחוב, שנה אחרי. אתה כבר יודע איפה הבור במדרכה.' }, { who: 'אפי', text: 'פוגי. יש מקום שאתה לא מכיר ואני כן. אחרי הקיר, ימינה — למרכז תל אביב. בוא.' }] },
+      /**
+       * (delta 92, upgrade plan §3.1) Efi is a NEW person here, not a friend who already
+       * knows everything: the street says there is a boy you do not know with an orange
+       * ball, and walking up to him is the player's own act. A life that answered him in the
+       * old A2 (`life:efi:met` via the legacy alias) is greeted by name in `efi-a3`.
+       */
+      { a: 'lines', lines: [{ who: null, text: 'אותו רחוב, שנה אחרי. אתה כבר יודע איפה הבור במדרכה.' }, { who: null, text: 'בקצה הרחוב, ליד הקיר, ילד שאתה לא מכיר מקפיץ כדור כתום. גדול, מנוקד, וכל הקפצה שלו נשמעת כמו דלת שנטרקת.' }] },
     ],
   },
   {
@@ -859,8 +830,26 @@ export const BEATS_A3: Beat[] = [
   {
     id: 'a3-night',
     trigger: 'clock',
-    when: { flag: A3, afterMinute: at(20, 0), none: [{ flag: 'a3:inside' }, { flag: 'a3:done' }] },
+    when: { all: [{ flag: A3 }, { flag: 'life:efi:met' }], afterMinute: at(20, 0), none: [{ flag: 'a3:inside' }, { flag: 'a3:done' }] },
     do: [{ a: 'lines', lines: [{ who: null, text: 'חושך. אפי יצא מהדלת מזיע ולא שאל למה חיכית בחוץ.' }] }, { a: 'ending', id: 'door' }],
+  },
+  {
+    /**
+     * (delta 92, plan §3.1) "לא עכשיו" is an answer, not a lock: the evening closes on the
+     * street, the life keeps `life:efi:deferred`, and A4 gives him the second chance.
+     */
+    id: 'a3-not-now',
+    trigger: 'clock',
+    when: { flag: 'life:efi:deferred', none: [{ flag: 'life:efi:met' }, { flag: 'a3:inside' }, { flag: 'a3:done' }] },
+    delayMs: 1800,
+    do: [{ a: 'lines', lines: [{ who: null, text: 'הכדור הכתום מתרחק לכיוון הקיר, הקפצה ועוד הקפצה, עד שהוא נבלע בפינה. הרחוב שלך נשאר שלך.' }] }, { a: 'flag', flag: 'a3:done' }, { a: 'ending', id: 'street' }],
+  },
+  {
+    /** and a boy who never walked up to him at all: the same evening, by the clock */
+    id: 'a3-night-alone',
+    trigger: 'clock',
+    when: { flag: A3, afterMinute: at(20, 0), none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }, { flag: 'a3:inside' }, { flag: 'a3:done' }] },
+    do: [{ a: 'lines', lines: [{ who: null, text: 'חושך. הילד עם הכדור הכתום כבר לא בקצה הרחוב. מישהו קורא לך מהחלון.' }] }, { a: 'flag', flag: 'a3:done' }, { a: 'ending', id: 'street' }],
   },
 ]
 
@@ -944,6 +933,7 @@ export const CONVERSATIONS_A3: Conversation[] = [
        * first the landmark he remembers, then the words the grown-ups use.
        */
       {
+        when: { flag: 'life:efi:met' },
         lines: [
           { who: 'אפי', text: 'אחרי הקיר, ימינה. זה מרכז תל אביב, ומשם אלנבי.' },
           { who: 'אפי', text: 'אני הולך. אתה בא או לא?' },
@@ -952,6 +942,93 @@ export const CONVERSATIONS_A3: Conversation[] = [
           { e: 'flag', flag: 'knows:hall' },
           { e: 'flag', flag: 'life:knows:hall' },
           { e: 'toast', text: 'בקצה הרחוב, ליד הקיר: "למרכז תל אביב".', tone: 'plain' },
+        ],
+      },
+      {
+        when: { flag: 'life:efi:deferred' },
+        lines: [{ who: 'אפי', text: 'אמרת לא עכשיו. זה בסדר. יש עוד משחק, הוא לא בורח.' }],
+      },
+      // the first time: he is a boy you do not know yet
+      { lines: [{ who: null, text: 'הוא מפסיק להקפיץ כשאתה מתקרב, ומחזיק את הכדור מתחת ליד.' }], then: [{ e: 'goto', node: 'efi-a3-meet' }] },
+    ],
+  },
+  {
+    /**
+     * אפי — ההיכרות (delta 92, upgrade plan §3.1).
+     *
+     * Four ways to answer a boy you have never met, and three of them walk you to the hall:
+     * talk, ask about the ball, or just follow. The fourth — "not now", or the old
+     * "basketball is for girls" — closes nothing for good: it raises `life:efi:deferred` and
+     * A4 brings him back once, naturally, by Rafi's kiosk. The memory ids are the ones the
+     * old A2 wrote, so 1991 still remembers the boy who laughed.
+     */
+    id: 'efi-a3-meet',
+    nameHe: 'אפי',
+    branches: [
+      {
+        lines: [
+          { who: 'אפי', text: 'אתה פוגי, נכון? מהסמטה. אני אפי.' },
+          { who: 'אפי', text: 'יש עוד משחק, אתה יודע. לא כזה. בפנים, על עץ.' },
+        ],
+        choices: [
+          {
+            id: 'talk',
+            text: '"אתה גר פה?"',
+            then: [
+              { e: 'flag', flag: 'life:efi:met' },
+              { e: 'flag', flag: 'knows:hall' },
+              { e: 'flag', flag: 'life:knows:hall' },
+              { e: 'rel', who: 'efi', axis: 'bond', delta: 4 },
+              { e: 'remember', who: 'efi', eventId: 'asked-about-the-hall-1984', significance: 'major' },
+              { e: 'toast', text: '"פה, ליד. ואני הולך עכשיו למקום שאתה לא מכיר. אחרי הקיר, ימינה. בא?"', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'ball',
+            text: '"מה זה הכדור הזה?"',
+            then: [
+              { e: 'flag', flag: 'life:efi:met' },
+              { e: 'flag', flag: 'knows:hall' },
+              { e: 'flag', flag: 'life:knows:hall' },
+              { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
+              { e: 'redheart', key: 'basketballLove', delta: 3 },
+              { e: 'remember', who: 'efi', eventId: 'asked-about-the-hall-1984', significance: 'major' },
+              { e: 'sfx', key: 'ball-bounce', level: 0.6 },
+              { e: 'toast', text: '"כדורסל. משחקים אותו בפנים, והרצפה עונה לך." הוא נותן לך להקפיץ אותו פעם אחת. "בוא, אני אראה לך איפה."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'follow',
+            text: 'ללכת אחריו, בלי לשאול.',
+            then: [
+              { e: 'flag', flag: 'life:efi:met' },
+              { e: 'flag', flag: 'knows:hall' },
+              { e: 'flag', flag: 'life:knows:hall' },
+              { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
+              { e: 'personality', key: 'courage', delta: 1 },
+              { e: 'remember', who: 'efi', eventId: 'asked-about-the-hall-1984', significance: 'major' },
+              { e: 'toast', text: 'הוא לא חיכה לתשובה. הוא התחיל ללכת לכיוון הקיר, ואתה אחריו.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'not-now',
+            text: '"לא עכשיו."',
+            then: [
+              { e: 'flag', flag: 'life:efi:deferred' },
+              { e: 'rel', who: 'efi', axis: 'familiarity', delta: 1 },
+              { e: 'toast', text: 'הוא משך בכתפיים והמשיך להקפיץ לכיוון הקיר. "טוב. הוא לא בורח, המשחק."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'girls',
+            text: '"כדורסל זה לבנות."',
+            then: [
+              { e: 'flag', flag: 'life:efi:deferred' },
+              { e: 'rel', who: 'efi', axis: 'distance', delta: 3 },
+              { e: 'remember', who: 'efi', eventId: 'said-that-in-1984', significance: 'major' },
+              { e: 'toast', text: 'הוא לא ענה. הוא הלך לקיר עם הכדור הכתום והמשיך לבד.', tone: 'plain' },
+            ],
+          },
         ],
       },
     ],
@@ -1120,6 +1197,32 @@ export const BEATS_A4: Beat[] = [
     trigger: 'clock',
     when: { flag: A4, afterMinute: at(19, 0), none: [{ flag: 'own:shirt85' }, { flag: 'a4:gave' }, { flag: 'a4:done' }] },
     do: [{ a: 'flag', flag: 'a4:done' }, { a: 'lines', lines: [{ who: null, text: 'התריס של רפי ירד בשבע, עם רעש. החולצה נשארה בפנים, בחושך.' }] }, { a: 'ending', id: 'notYet' }],
+  },
+]
+
+/** the two answers in A4 — yes opens the hall for the life; no is the second no, and it holds */
+const EFI_A4_CHOICES: ChoiceDef[] = [
+  {
+    id: 'where',
+    text: '"איפה?"',
+    then: [
+      { e: 'flag', flag: 'life:efi:met' },
+      { e: 'flag', flag: 'life:knows:hall' },
+      { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
+      { e: 'redheart', key: 'basketballLove', delta: 2 },
+      { e: 'remember', who: 'efi', eventId: 'asked-about-the-hall-1985', significance: 'major' },
+      { e: 'toast', text: '"אוסישקין. אחרי הקיר, ימינה, ועוד הרבה. בפעם הבאה אני לוקח אותך — אל תשאל את אבא שלך, פשוט תבוא."', tone: 'plain' },
+    ],
+  },
+  {
+    id: 'no',
+    text: '"לא. יש לי חולצה לקנות."',
+    then: [
+      { e: 'flag', flag: 'life:efi:declined' },
+      { e: 'rel', who: 'efi', axis: 'distance', delta: 2 },
+      { e: 'remember', who: 'efi', eventId: 'said-no-twice-1985', significance: 'minor' },
+      { e: 'toast', text: 'הוא הנהן, כאילו ידע. "בסדר. אני לא שואל פעם שלישית." והוא לא שאל.', tone: 'plain' },
+    ],
   },
 ]
 
@@ -1292,6 +1395,35 @@ export const CONVERSATIONS_A4: Conversation[] = [
         ],
       },
       { lines: [{ who: 'רחל', text: 'החולצה? יפה. רק שתדע — ארבע כביסות והיא ורודה, ואני לא קונה לך שנייה.' }] },
+    ],
+  },
+  {
+    /**
+     * אפי, פעם שנייה — the recovery (delta 92, upgrade plan §3.2).
+     *
+     * Only for a life that has not met him (`life:efi:met` unset) and has not said no twice.
+     * He is on the step by Rafi's kiosk, where the boy is anyway with the shirt on his mind —
+     * not a system window, a person on a street. After this the branch may close for real:
+     * a boy who says no twice lives a different childhood, and nothing ahead of him locks.
+     */
+    id: 'efi-a4',
+    nameHe: 'אפי',
+    branches: [
+      {
+        when: { flag: 'life:efi:deferred' },
+        lines: [
+          { who: null, text: 'הילד עם הכדור הכתום, על המדרגה ליד הקיוסק. הוא מזהה אותך לפני שאתה מזהה אותו.' },
+          { who: 'אפי', text: 'אתה הילד מהסמטה, נכון? אמרתי לך שיש עוד משחק.' },
+        ],
+        choices: EFI_A4_CHOICES,
+      },
+      {
+        lines: [
+          { who: null, text: 'ילד עם כדור כתום יושב על המדרגה ליד הקיוסק ומגלגל אותו בין הרגליים.' },
+          { who: 'אפי', text: 'אתה פוגי, נכון? אני אפי. יש עוד משחק, אתה יודע. לא כזה — בפנים, על עץ.' },
+        ],
+        choices: EFI_A4_CHOICES,
+      },
     ],
   },
 ]

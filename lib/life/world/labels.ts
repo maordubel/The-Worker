@@ -1,4 +1,5 @@
 import { flagOn, relationshipOf, type LifeState } from '../types'
+import { USSISHKIN } from './placeLifecycle'
 
 import type { MapPlaceDef, MapPlaceId } from '../map'
 
@@ -70,6 +71,13 @@ const RULES: Partial<Record<MapPlaceId, Rule[]>> = {
     },
   ],
   ussishkin: [
+    {
+      // World Lifecycle (27.9.2026): after 25.7.2007 the pin stays — and says what it is now
+      whyHe: 'האולם נהרס ב-25.7.2007. הסמן נשאר, המקום לא',
+      when: (s) => !USSISHKIN.canTravel(s),
+      labelHe: 'אוסישקין ז"ל',
+      subHe: 'המקום כבר איננו.',
+    },
     {
       whyHe: 'האולם הפך לבית שני — קהילה, כדורסל, או שניהם',
       when: (s) => heart(s, 'basketballLove') >= 40 || heart(s, 'community') >= 45,

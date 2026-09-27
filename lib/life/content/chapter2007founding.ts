@@ -1,3 +1,4 @@
+import { at } from '../clock'
 import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
@@ -77,6 +78,14 @@ const HAS_ROLE: Condition = { any: [{ flagIs: { flag: FOUNDING_ROLE, value: 'ope
 export const FOUNDING_KEY = 'life:founding:key'
 /** מה ש-U02 מסר ליוסף — `replaced` / `reduced` */
 export const FOUNDING_CALLS = 'life:founding:calls'
+/** (delta 92) who he was with on 25.7.2007 — read by 2009, 2012, 2015, 2026 */
+export const USS_LOSS_KIND = 'life:uss:lossKind'
+/** Beat 7: the day ends, and only then is the hall gone from the world (`placeLifecycle.ts`) */
+const DEMOLISHED_NOW: Effect[] = [
+  { e: 'flag', flag: 'u:done' },
+  { e: 'flagValue', flag: 'life:place:ussishkin', value: 'demolished' },
+  { e: 'flag', flag: 'life:uss:there' },
+]
 
 export const PORTRAIT_FOUNDING: Record<string, string> = {
   ...PORTRAIT_HOME,
@@ -148,7 +157,14 @@ export function objectiveRegistered(state: LifeState, sceneId: string): string |
     if (meets(state, ENOUGH)) return 'הרשימה מלאה. עכשיו הטלפון יחזור.'
     return 'הדף עם המספרים. שיחה אחת בכל פעם.'
   }
-  if (!state.flags['u:loss']) return sceneId === 'ussishkin-outside' ? null : 'אוסישקין. היום.'
+  // (delta 92, upgrade plan §8) the demolition as a walk, in seven beats
+  if (!state.flags['u:lastEve']) return null
+  if (!state.flags['u:morning']) {
+    if (sceneId === 'ussishkin-hall') return state.flags['u:last'] ? 'אפשר להישאר כמה שרוצים. הערב לא מבקש כלום.' : null
+    return 'אוסישקין. הוא עוד עומד.'
+  }
+  if (!state.flags['u:news']) return null
+  if (!state.flags['u:loss']) return sceneId === 'ussishkin-outside' ? null : 'אוסישקין. עכשיו. ברגל.'
   return null
 }
 
@@ -202,6 +218,38 @@ export const ENDINGS_REGISTERED: Record<string, EndingCard> = {
     bodyHe:
       'צילמת את המקום ולא את האנשים, כי אפי ביקש. שנים אחר כך זו הייתה התמונה היחידה שמישהו יכול היה להראות לילד שלא היה שם.',
     memoryHe: 'תמונה של קיר שאיננו.',
+    memoryItem: 'folded-paper',
+    presence: 'inside',
+  },
+  father: {
+    id: 'father',
+    titleHe: 'אבא על הקו',
+    bodyHe: 'חודש אחרי שנרשמה קבוצה נהרס האולם שבו התחיל הכול. התקשרת לאבא שלך. הוא שמע ברדיו, ולא ניתק עד שהאבק שקע. לא דיברתם הרבה.',
+    memoryHe: 'שתיקה בטלפון, ארוכה ונכונה.',
+    memoryItem: 'folded-paper',
+    presence: 'inside',
+  },
+  people: {
+    id: 'people',
+    titleHe: 'אף אחד לבד',
+    bodyHe: 'חודש אחרי שנרשמה קבוצה נהרס האולם שבו התחיל הכול. אספת את מי שעמד בצד, אחד־אחד, עד שעמדתם ביחד מול הגדר. זה לא הציל כלום, וזה לא היה הרעיון.',
+    memoryHe: 'שורה של אנשים מול גדר.',
+    memoryItem: 'folded-paper',
+    presence: 'inside',
+  },
+  alone: {
+    id: 'alone',
+    titleHe: 'מהקצה של הרחוב',
+    bodyHe: 'חודש אחרי שנרשמה קבוצה נהרס האולם שבו התחיל הכול. ראית את זה מהקצה של הרחוב ואז הלכת, לבד. אפי לא עצר אותך. שנים אחר כך הוא עוד יזכיר שהבין.',
+    memoryHe: 'הרחוב, מהצד השני.',
+    memoryItem: 'folded-paper',
+    presence: 'inside',
+  },
+  names: {
+    id: 'names',
+    titleHe: 'השמות שהיו פה',
+    bodyHe: 'חודש אחרי שנרשמה קבוצה נהרס האולם שבו התחיל הכול. כתבת על גב קבלה את השמות של מי שהיה שם, גם של אלה שכבר לא באים. הקבלה עוד אצלך.',
+    memoryHe: 'קבלה מלאה שמות.',
     memoryItem: 'folded-paper',
     presence: 'inside',
   },
@@ -327,8 +375,103 @@ export const BEATS_REGISTERED: Beat[] = [
     delayMs: 1400,
     do: [{ a: 'talk', conversation: 'u-cancel' }],
   },
-  { id: 'u-loss', at: 'ussishkin-outside', trigger: 'enter', when: { all: [{ flag: 'u:deliver' }], none: [{ flag: 'u:loss' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'u-loss' }] },
-  { id: 'u-reg-close', trigger: 'clock', when: { all: [{ flag: 'u:loss' }], none: [{ flag: 'u:done' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'u-loss-close' }] },
+  /**
+   * ======================================= 25.7.2007 — ההריסה, כהליכה (דלתא 92, §8) ===
+   *
+   * Ussishkin is not another location: the game taught the player to walk there as a boy.
+   * So its end is a walk too, in seven beats, and none of them is a reward, a QTE, a
+   * collectible or a gauge:
+   *
+   *  1 · the last evening it is still a place — he can go in, and nothing says "last time";
+   *  2 · the news — a person on the phone the next morning, not a notification;
+   *  3 · the way there — on his own feet (`goalRegistered`), no cut from the call to the dust;
+   *  4 · people outside — Efi, Shachor, Inbal, and mostly quiet;
+   *  5 · the demolition — no HUD, the hall's own sound going out, dust;
+   *  6 · a human choice — who to be with, not what to think (`u-loss`);
+   *  7 · the world changes — `life:place:ussishkin = 'demolished'` rises in the closing
+   *      conversation and not before (`placeLifecycle.ts`): from that line the door from
+   *      Allenby is gone, and every chapter after this one has a memorial on the map.
+   *
+   * The choice moves people and callbacks (`life:uss:lossKind`), never the fact.
+   */
+  {
+    id: 'u-last',
+    trigger: 'clock',
+    when: { all: [{ flag: 'u:deliver' }], none: [{ flag: 'u:lastEve' }] },
+    delayMs: 1400,
+    do: [{ a: 'flag', flag: 'u:lastEve' }, { a: 'card', titleHe: '24 ביולי 2007', subHe: 'ערב', ms: 2400 }],
+  },
+  {
+    id: 'u-last-hall',
+    at: 'ussishkin-hall',
+    trigger: 'enter',
+    when: { all: [{ flag: 'u:lastEve' }], none: [{ flag: 'u:last' }, { flag: 'u:morning' }] },
+    delayMs: 1100,
+    do: [
+      { a: 'flag', flag: 'u:last' },
+      { a: 'sfx', key: 'amb-hall', level: 0.35 },
+      {
+        a: 'lines',
+        lines: [
+          { who: null, text: 'האולם ריק. אין משחק, אין אף אחד בדלת. הפרקט שוקע באותו מקום שהוא שקע תמיד.' },
+          { who: null, text: 'המדרגה שמצאת כשהיית ילד עדיין שם, בין הברך של מישהו שכבר לא בא לתיק של מישהו אחר.' },
+        ],
+      },
+    ],
+  },
+  {
+    /** the morning after: a person, a phone, and the walk is his (Beat 2) */
+    id: 'u-news',
+    trigger: 'enter',
+    // after he has been inside, the next room he walks into is already the next morning
+    when: { all: [{ flag: 'u:last' }], none: [{ flag: 'u:morning' }, { at: 'ussishkin-hall' }] },
+    delayMs: 900,
+    // `travel` ends its beat, so the call is a beat of its own, in the flat
+    do: [
+      { a: 'flag', flag: 'u:morning' },
+      { a: 'card', titleHe: '25 ביולי 2007', subHe: 'בוקר', ms: 2600 },
+      { a: 'travel', to: 'home', spawn: 'start' },
+    ],
+  },
+  /** …and a life that never went in that evening: the night ends on its own, and the morning comes */
+  {
+    id: 'u-news-late',
+    trigger: 'clock',
+    when: { all: [{ flag: 'u:lastEve' }], afterMinute: at(23, 0), none: [{ flag: 'u:morning' }, { flag: 'u:last' }] },
+    do: [
+      { a: 'flag', flag: 'u:morning' },
+      { a: 'card', titleHe: '25 ביולי 2007', subHe: 'בוקר', ms: 2600 },
+      { a: 'travel', to: 'home', spawn: 'start' },
+    ],
+  },
+  /** the phone rings until it is answered — a box closed by mistake rings again */
+  { id: 'u-news-call', at: 'home', trigger: 'clock', when: { all: [{ flag: 'u:morning' }], none: [{ flag: 'u:news' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'u-news' }] },
+  {
+    /** Beats 4–6: people outside, the demolition with no HUD, then the one human choice */
+    id: 'u-loss',
+    at: 'ussishkin-outside',
+    trigger: 'enter',
+    when: { all: [{ flag: 'u:news' }], none: [{ flag: 'u:loss' }, { flag: 'u:seen' }] },
+    delayMs: 900,
+    do: [
+      { a: 'flag', flag: 'u:seen' },
+      {
+        a: 'lines',
+        lines: [
+          { who: null, text: 'גדר זמנית. אנשים בחוץ, לא הרבה. אף אחד לא מדבר בקול.' },
+          { who: 'שחור', text: 'באת.' },
+          { who: 'ענבל', text: 'מהבוקר הם פה.' },
+        ],
+      },
+      { a: 'sfx', key: 'ball-bounce', level: 0.25 },
+      { a: 'wait', ms: 900 },
+      { a: 'card', titleHe: 'אוסישקין', subHe: '25.7.2007', ms: 3600 },
+      { a: 'lines', lines: [{ who: null, text: 'אבק. מהדלת שנכנסת בה בפעם הראשונה נשארת המסגרת, ואחר כך גם היא לא.' }] },
+    ],
+  },
+  /** Beat 6 — asked until it is answered, while he stands at the fence */
+  { id: 'u-choice', at: 'ussishkin-outside', trigger: 'clock', when: { all: [{ flag: 'u:seen' }], none: [{ flag: 'u:loss' }] }, delayMs: 1300, do: [{ a: 'talk', conversation: 'u-loss' }] },
+  { id: 'u-reg-close', trigger: 'clock', when: { all: [{ flag: 'u:loss' }], none: [{ flag: 'u:done' }] }, delayMs: 1600, do: [{ a: 'talk', conversation: 'u-loss-close' }] },
 ]
 
 export const BEATS_KEY: Beat[] = [
@@ -346,7 +489,18 @@ export const BEATS_KEY: Beat[] = [
 ]
 
 export const BEATS_UP: Beat[] = [
-  { id: 'u-after', at: 'hall-new', trigger: 'enter', when: { none: [{ flag: 'u:after' }] }, delayMs: 800, do: [{ a: 'talk', conversation: 'u-after' }] },
+  {
+    id: 'u-after',
+    at: 'hall-new',
+    trigger: 'enter',
+    when: { none: [{ flag: 'u:after' }] },
+    delayMs: 800,
+    do: [
+      // (delta 92, upgrade plan §10) two years after the fence: the promotion has no hall to go back to
+      { a: 'lines', lines: [{ who: null, text: 'מישהו שואל איפה חוגגים. אף אחד לא עונה מיד. אין לאן לחזור.' }] },
+      { a: 'talk', conversation: 'u-after' },
+    ],
+  },
   { id: 'u-up-close', trigger: 'clock', when: { all: [{ flag: 'u:after' }], none: [{ flag: 'u:done' }] }, delayMs: 1100, do: [{ a: 'talk', conversation: 'u-up-close' }] },
 ]
 
@@ -746,6 +900,26 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
     ],
   },
   {
+    /** Beat 2 — the news, from a person (a phone, the morning after) */
+    id: 'u-news',
+    nameHe: 'שחור',
+    remote: { 'שחור': 'phone' },
+    branches: [
+      {
+        lines: [
+          { who: 'שחור', text: 'אתה ער?' },
+          { who: 'שחור', text: 'הם באוסישקין. עם הכלים. מהבוקר.' },
+          { who: 'שחור', text: 'אני לא אומר לך לבוא. אני רק אומר.' },
+        ],
+        then: [{ e: 'flag', flag: 'u:news' }],
+      },
+    ],
+  },
+  {
+    /**
+     * Beat 6 — the human choice. Not "what do you think about it": who to be with, what to
+     * do with your hands. Every answer leaves the hall exactly as demolished.
+     */
     id: 'u-loss',
     nameHe: 'אפי',
     branches: [
@@ -760,38 +934,75 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
         choices: [
           {
             id: 'stay',
-            text: '"אני נשאר עוד קצת."',
+            text: '(להישאר ליד אפי.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
               { e: 'flagValue', flag: 'u:lossKind', value: 'together' },
+              { e: 'flagValue', flag: USS_LOSS_KIND, value: 'together' },
               { e: 'time', minutes: 30 },
               { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
-              { e: 'wellbeing', key: 'regret', delta: 4 },
               { e: 'attend' },
             ],
           },
           {
+            id: 'father',
+            text: '(להתקשר לאבא.)',
+            then: [
+              { e: 'flag', flag: 'u:loss' },
+              { e: 'flagValue', flag: 'u:lossKind', value: 'father' },
+              { e: 'flagValue', flag: USS_LOSS_KIND, value: 'father' },
+              { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
+              { e: 'attend' },
+              { e: 'toast', text: 'קובי: "אני יודע. שמעתי ברדיו." שתיקה. "אתה שם?" — "אני שם."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'people',
+            text: '(לעזור לאסוף את האנשים — שלא יעמדו לבד.)',
+            then: [
+              { e: 'flag', flag: 'u:loss' },
+              { e: 'flagValue', flag: 'u:lossKind', value: 'people' },
+              { e: 'flagValue', flag: USS_LOSS_KIND, value: 'people' },
+              { e: 'rel', who: 'shachor', axis: 'bond', delta: 2 },
+              { e: 'attend' },
+              { e: 'toast', text: 'בתיה, ירון, שניים שלא הכרת. עומדים ביחד, וזה כל מה שהיה אפשר לעשות.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'alone',
+            text: '(ללכת לבד.)',
+            then: [
+              { e: 'flag', flag: 'u:loss' },
+              { e: 'flagValue', flag: 'u:lossKind', value: 'alone' },
+              { e: 'flagValue', flag: USS_LOSS_KIND, value: 'alone' },
+              { e: 'attend' },
+              { e: 'toast', text: 'אפי לא עצר אותך. הוא הבין לפניך.', tone: 'plain' },
+            ],
+          },
+          {
+            // screenplay U03.2 — kept: the place, not the people, and only with a yes
             id: 'photo',
             text: '(לצלם את המקום. לא אותו.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
               { e: 'flagValue', flag: 'u:lossKind', value: 'documented' },
+              { e: 'flagValue', flag: USS_LOSS_KIND, value: 'documented' },
               { e: 'flag', flag: 'own:photo:ussishkinLoss' },
-              { e: 'time', minutes: 15 },
-              { e: 'skill', skill: 'knowledge', delta: 2, why: 'מה שהיה פה' },
               { e: 'attend' },
               { e: 'toast', text: 'אפי: "את המקום, כן. אותי לא עכשיו."', tone: 'plain' },
             ],
           },
           {
-            id: 'call',
-            text: '(לא ללכת. להתקשר.)',
+            id: 'names',
+            text: '(לכתוב את השמות שהיו פה.)',
             then: [
               { e: 'flag', flag: 'u:loss' },
-              { e: 'flagValue', flag: 'u:lossKind', value: 'remote' },
-              { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
-              { e: 'presence', mode: 'late' },
-              { e: 'toast', text: 'אפי: "אין לי הרבה מה להגיד." — "אני לא ממהר."', tone: 'plain' },
+              { e: 'flagValue', flag: 'u:lossKind', value: 'names' },
+              { e: 'flagValue', flag: USS_LOSS_KIND, value: 'names' },
+              { e: 'flag', flag: 'own:uss:names' },
+              { e: 'time', minutes: 15 },
+              { e: 'attend' },
+              { e: 'toast', text: 'על גב קבלה: הסדרן, אפי, לימור, "הילד שנתן את הכדור". הרשימה ארוכה ממה שחשבת.', tone: 'plain' },
             ],
           },
         ],
@@ -799,12 +1010,16 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
     ],
   },
   {
+    /** Beat 7 — the world changes, and only here */
     id: 'u-loss-close',
     nameHe: null,
     branches: [
-      { when: { flagIs: { flag: 'u:lossKind', value: 'documented' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס.' }], then: [{ e: 'flag', flag: 'u:done' }, { e: 'ending', id: 'documented' }] },
-      { when: { flagIs: { flag: 'u:lossKind', value: 'remote' } }, lines: [{ who: null, text: 'חודש בין השניים, ואת השני לא ראית.' }], then: [{ e: 'flag', flag: 'u:done' }, { e: 'ending', id: 'remote' }] },
-      { lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ועמדתם שם עד שהחשיך.' }], then: [{ e: 'flag', flag: 'u:done' }, { e: 'ending', id: 'together' }] },
+      { when: { flagIs: { flag: 'u:lossKind', value: 'father' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ואבא שלך נשאר על הקו עד שנגמר האבק.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'father' }] },
+      { when: { flagIs: { flag: 'u:lossKind', value: 'people' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ואף אחד לא עמד מול זה לבד.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'people' }] },
+      { when: { flagIs: { flag: 'u:lossKind', value: 'alone' } }, lines: [{ who: null, text: 'חודש בין השניים. את השני ראית מהקצה של הרחוב, ואז הלכת.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'alone' }] },
+      { when: { flagIs: { flag: 'u:lossKind', value: 'documented' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'documented' }] },
+      { when: { flagIs: { flag: 'u:lossKind', value: 'names' } }, lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, והשמות נשארו על נייר.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'names' }] },
+      { lines: [{ who: null, text: 'חודש בין השניים. אחד נרשם, אחד נהרס, ועמדתם שם עד שהחשיך.' }], then: [...DEMOLISHED_NOW, { e: 'ending', id: 'together' }] },
     ],
   },
   {

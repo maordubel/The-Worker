@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { relocateIfGone } from '../../world/placeLifecycle'
 
 import { OPENING_FLAG } from '../../opening'
 import { artUrl, BOOT_FIGURES } from '../art'
@@ -84,7 +85,20 @@ export class BootScene extends Phaser.Scene {
       this.scene.start(PassageScene.KEY)
       return
     }
-    const location = state.location === 'prologue' || state.location === 'prologue-1972' ? 'bedroom' : state.location
-    this.scene.start(WorldScene.KEY, { mapId: location, spawn: 'start' })
+    let spawn = 'start'
+    let location: string = state.location === 'prologue' || state.location === 'prologue-1972' ? 'bedroom' : state.location
+    /**
+     * A save standing inside a place that is gone (World Lifecycle, plan §16): moved ONCE to
+     * the street outside, with one line — never a crash, never the destruction scene again.
+     */
+    const gone = relocateIfGone(state, location)
+    if (gone) {
+      location = gone.to
+      // back down through the archway — the way a person walks away from where the hall was
+      spawn = 'fromNorth'
+      const bus = ctx.bus
+      setTimeout(() => bus.emit('toast', { text: gone.noticeHe, tone: 'plain' }), 1200)
+    }
+    this.scene.start(WorldScene.KEY, { mapId: location, spawn })
   }
 }

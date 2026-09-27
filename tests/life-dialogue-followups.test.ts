@@ -330,7 +330,8 @@ describe('1991 · Ofir → homework → Rachel (§20.7)', () => {
  * from the follow-up files: it is the question, they are the answer.
  */
 const HELPERS: Record<string, Record<string, readonly string[]>> = {
-  'a2-alley': { bread: ['efi-a2'], alley: ['rachel-a2', 'rafi-a2'] },
+  // (delta 92) Efi is not in A2 any more; Rafi answers for the bread himself
+  'a2-alley': { bread: ['rafi-a2'], alley: ['rachel-a2', 'rafi-a2'] },
   'a3-hall': { efi: ['efi-a3', 'usher-a3'] },
   'a4-shirt': { tin: ['kobi-a4', 'rachel-a4'], shirt: ['kobi-a4'] },
   'a5-first': { dress: ['kobi-a5'] },

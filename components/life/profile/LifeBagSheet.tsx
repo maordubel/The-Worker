@@ -77,7 +77,7 @@ export function LifeBagSheet({
         {page === 'carry' ? (
           <CurrentCarry carried={reading.carried} card={reading.card} />
         ) : page === 'wardrobe' ? (
-          <WardrobeRail wardrobe={reading.wardrobe} />
+          <WardrobeRail wardrobe={reading.wardrobe} merch />
         ) : page === 'memories' ? (
           <MemoryDrawer things={reading.memories} onShare={onShare} />
         ) : page === 'money' ? (

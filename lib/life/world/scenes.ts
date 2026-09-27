@@ -6,6 +6,7 @@ import { GIGS, gigChapters, gigId, isPaid, offerFlag } from '../gigs'
 import { SHOP_CHAPTERS, shopId } from '../shirts'
 import { CHAPTERS } from '../content/chapters'
 import type { Condition } from './types'
+import { goneForChapter, lifecycleOfScene, lifecycleWhen } from './placeLifecycle'
 import { PARENTS_AFTER_2013, chaptersWhere, livesWithParents } from './homes'
 import { BEDROOM_2000, HOME_OWN, NEW_ROOMS, PITCH_2000, STAGED, STAND_80S, STAND_90S, STAND_NEW, STAND_OLD } from './rooms2000'
 import { QUEST_SPOTS } from './quests90e'
@@ -141,7 +142,8 @@ export function eraKeys(chapter: string): string[] {
 
 /** Doors are geography: a door with no era is a door in every year. */
 export function exitInEra(exit: ExitDef, chapter: string): boolean {
-  return inEra(exit, chapter, '*')
+  // a place that is gone for the whole chapter is not geography any more (World Lifecycle)
+  return inEra(exit, chapter, '*') && (insideLifecyclePlace(exit) || !goneForChapter(chapter, exit.to))
 }
 
 export type ActorDef = {
@@ -475,6 +477,30 @@ export function titleFor(scene: SceneDef, chapter: string): string {
 
 /** whether this door is drawn at all in this chapter — `undefined` is always */
 export function whenFor(exit: ExitDef, chapter: string): Condition | undefined {
+  const base = authoredWhen(exit, chapter)
+  // a place that is gone is not a door any more (World Lifecycle, 27.9.2026): folded in
+  // here so every reader of a door — the room, the route, the map, travel — agrees. Doors
+  // INSIDE the place are never closed by it: whoever is standing there can always leave.
+  const gone = insideLifecyclePlace(exit) ? null : lifecycleWhen(chapter, exit.to)
+  if (!gone) return base
+  return base ? { all: [base, gone] } : gone
+}
+
+/** a door that belongs to a room of a lifecycle place and leads to another room of it */
+let INTERNAL: Set<string> | null = null
+function insideLifecyclePlace(exit: ExitDef): boolean {
+  if (!INTERNAL) {
+    INTERNAL = new Set()
+    for (const scene of ALL_SCENES) {
+      const place = lifecycleOfScene(scene.id)
+      if (!place) continue
+      for (const e of scene.exits) if (place.scenes.includes(e.to)) INTERNAL.add(`${e.id}>${e.to}`)
+    }
+  }
+  return INTERNAL.has(`${exit.id}>${exit.to}`)
+}
+
+function authoredWhen(exit: ExitDef, chapter: string): Condition | undefined {
   if (exit.whenByEra) for (const key of eraKeys(chapter)) if (key in exit.whenByEra) return exit.whenByEra[key] ?? undefined
   return exit.when
 }
@@ -1524,7 +1550,15 @@ const SCENES: SceneDef[] = [
     },
     actors: [
       // ---- שלב א׳, הימים שלפני השבת ----
-      { id: 'efi-a3', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'אפי', talk: 'efi-a3', sway: 0.006 },
+      /**
+       * (delta 92, plan §3) A3 — before they have met he is a boy you do not know yet, and the
+       * prompt says so; afterwards he is Efi. One body, two names, never both at once.
+       */
+      { id: 'efi-a3', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'אפי', talk: 'efi-a3', sway: 0.006, when: { any: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }] } },
+      { id: 'efi-a3-stranger', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'ילד עם כדור כתום', talk: 'efi-a3', sway: 0.006, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }] } },
+      // A4 — the second chance, on the step by the kiosk door (plan §3.2); gone once he has an answer
+      { id: 'efi-a4', era: 'a4-shirt', figure: 'efi', x: 0.34, y: 0.8, size: 0.26, nameHe: 'אפי', talk: 'efi-a4', sway: 0.006, when: { flag: 'life:efi:deferred', none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:declined' }] } },
+      { id: 'efi-a4-stranger', era: 'a4-shirt', figure: 'efi', x: 0.34, y: 0.8, size: 0.26, nameHe: 'ילד עם כדור כתום', talk: 'efi-a4', sway: 0.006, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:declined' }, { flag: 'life:efi:deferred' }] } },
       { id: 'kobi-a5', era: 'a5-first', figure: 'kobi-side', x: 0.66, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-a5', flip: true, when: { none: [{ flag: 'a5:kobi-left' }] } },
       { id: 'liron-a6', era: 'a6-radio', figure: 'adultB2', x: 0.56, y: 0.8, size: 0.29, nameHe: 'לירון', talk: 'liron-a6' },
       { id: 'amit-a7', era: 'a7-week', figure: 'amit', x: 0.36, y: 0.79, size: 0.26, nameHe: 'עמית', talk: 'amit-a7' },
@@ -2151,12 +2185,12 @@ const SCENES: SceneDef[] = [
     },
     spawns: { fromStreet: { x: 0.74, y: 0.93, facing: 'left' } , start: { x: 0.74, y: 0.93, facing: 'left' } },
     actors: [
-      { id: 'ofir-a2', era: 'a2-alley', figure: 'ofir', x: 0.6, y: 0.92, size: 0.403, nameHe: 'אופיר', talk: 'alley-a2', sway: 0.009 },
-      { id: 'amit-a2', era: 'a2-alley', figure: 'amit', x: 0.83, y: 0.87, size: 0.403, nameHe: 'עמית', talk: 'alley-a2', flip: true },
-      // 6.9.2026: his own conversation. He used to route to `alley-a2` with everybody else,
-      // which meant the boy who opens the door to the whole basketball branch had nothing
-      // to say about it (Stage A §7).
-      { id: 'efi-a2', era: 'a2-alley', figure: 'efi', x: 0.26, y: 0.74, size: 0.403, nameHe: 'אפי', talk: 'efi-a2', sway: 0.01 },
+      /*
+       * (delta 92, upgrade plan §2.3) A2's kiosk is Rafi's and nobody else's. Ofir and Amit
+       * used to stand here, beside the bread, which meant the day's dilemma — the kiosk OR
+       * the alley — was staged in one room and the world told a different story from the
+       * chapter. They are on the pitch now, choosing teams; Efi is not in A2 at all.
+       */
       { id: 'rafi-a2', era: 'a2-alley', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-a2', sway: 0.004 },
       { id: 'rafi-a4', era: 'a4-shirt', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'rafi-a4', sway: 0.004 },
       // 1996/97, the fifth day: Rafi passing on two messages he did not want to carry (§19)
@@ -2412,6 +2446,13 @@ const SCENES: SceneDef[] = [
         sway: 0.01,
       },
       { id: 'amit', figure: 'amit', x: 0.83, y: 0.87, size: 0.26, nameHe: 'עמית', talk: 'pitch-kids', flip: true },
+      /**
+       * A2 · spring 1984 (delta 92, plan §2.3) — the alley's two captains, on the ground the
+       * teams are chosen on, so walking here IS one side of the afternoon's dilemma. The
+       * teams filling up (`a2:full`) is the clock you can see.
+       */
+      { id: 'ofir-a2', era: 'a2-alley', figure: 'ofir', x: 0.6, y: 0.92, size: 0.3, nameHe: 'אופיר', talk: 'alley-a2', sway: 0.009 },
+      { id: 'amit-a2', era: 'a2-alley', figure: 'amit', x: 0.83, y: 0.87, size: 0.26, nameHe: 'עמית', talk: 'alley-a2', flip: true },
       // Ofir moves here at twenty to two. The street he was leaning on is empty by then,
       // and a player who goes looking for him where he was is a player learning that
       // people have afternoons of their own.

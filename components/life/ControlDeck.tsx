@@ -287,7 +287,14 @@ export function ControlDeck({
   onAxis,
   onAction,
   onCancel,
+  pulse = false,
 }: {
+  /**
+   * The first-mission cue (27.9.2026, plan §2.2 Cue 2): the action button pulses ONCE,
+   * while the player is in reach of his first thing and has not yet pressed. Not a light
+   * show — one ring, then still. Off under reduced motion.
+   */
+  pulse?: boolean
   /** where the painting ends, in CSS pixels */
   top: number
   /** how much room is left under it */
@@ -459,7 +466,9 @@ export function ControlDeck({
           <span className={`font-body text-[11px] leading-none ${muted}`} dir="rtl">
             <bdi>{verb ? t(`life.verb.short.${verb}` as MessageKey) : t('life.deck.act')}</bdi>
           </span>
-          <Cap live={Boolean(verb) && !locked}>E</Cap>
+          <span className={pulse ? 'life-teach-pulse relative inline-flex' : 'relative inline-flex'} data-teach={pulse ? '1' : undefined}>
+            <Cap live={Boolean(verb) && !locked}>E</Cap>
+          </span>
         </div>
       </div>
     )
@@ -615,6 +624,7 @@ export function ControlDeck({
               onUp={() => onCancel(false)}
             />
           )}
+          <span className={pulse ? 'life-teach-pulse relative inline-flex' : 'relative inline-flex'} data-teach={pulse ? '1' : undefined}>
           <ArcadeButton
             size={btnSize}
             mark="a"
@@ -628,6 +638,7 @@ export function ControlDeck({
             onDown={() => onAction(true)}
             onUp={() => onAction(false)}
           />
+          </span>
         </div>
       </div>
     </>
@@ -679,7 +690,10 @@ export function TapChip({
   label,
   locked,
   onAction,
+  pulse = false,
 }: {
+  /** the first-mission cue, as on the deck's A */
+  pulse?: boolean
   verb: string | null
   label: string | null
   locked: boolean
@@ -696,6 +710,7 @@ export function TapChip({
         type="button"
         data-life="prompt"
         data-deck="chip"
+        data-teach={pulse ? '1' : undefined}
         aria-label={label}
         onPointerDown={(event) => {
           event.preventDefault()
@@ -710,7 +725,7 @@ export function TapChip({
           setHeld(false)
           onAction(false)
         }}
-        className={`pointer-events-auto relative flex min-h-tap max-w-full items-center gap-2.5 border-rule px-4 py-2 font-sign text-[15px] leading-none transition-colors duration-press motion-reduce:transition-none ${
+        className={`${pulse ? 'life-teach-pulse ' : ''}pointer-events-auto relative flex min-h-tap max-w-full items-center gap-2.5 border-rule px-4 py-2 font-sign text-[15px] leading-none transition-colors duration-press motion-reduce:transition-none ${
           locked
             ? 'border-red bg-ink text-red'
             : held

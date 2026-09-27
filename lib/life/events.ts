@@ -467,6 +467,15 @@ function recent(list: readonly string[], next: string): string[] {
   return [...list, next].slice(-RECENT_CAP)
 }
 
+/**
+ * שמות ישנים של דגלים — the log keeps the old spelling forever; the reducer reads it as the
+ * new one too. `life:a2:efi` was "answered Efi in the A2 alley"; from 27.9.2026 Efi is met in
+ * A3 (or recovered in A4), and the life-level fact is `life:efi:met`.
+ */
+export const LEGACY_FLAG_ALIASES: Readonly<Record<string, string>> = {
+  'life:a2:efi': 'life:efi:met',
+}
+
 export function apply(state: LifeState, event: LifeEvent): LifeState {
   switch (event.t) {
     case 'life.started': {
@@ -652,8 +661,15 @@ export function apply(state: LifeState, event: LifeEvent): LifeState {
       return { ...state, flags: { ...state.flags, [flag]: event.year } }
     }
 
-    case 'flag.raised':
-      return { ...state, flags: { ...state.flags, [event.flag]: true } }
+    case 'flag.raised': {
+      /**
+       * A flag renamed by a later design, kept true in an old log (plan §16). The save is a
+       * log, so this is the migration: a life that answered Efi in the A2 alley has MET him,
+       * and is never asked to meet him again in A3.
+       */
+      const alias = LEGACY_FLAG_ALIASES[event.flag]
+      return { ...state, flags: { ...state.flags, [event.flag]: true, ...(alias ? { [alias]: true } : {}) } }
+    }
 
     case 'flag.set':
       return { ...state, flags: { ...state.flags, [event.flag]: event.value } }

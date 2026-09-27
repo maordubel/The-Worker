@@ -17,7 +17,7 @@ export const EFI_USSISHKIN: GuidedMemory = {
   leaderId: 'efi',
   leaderHe: 'אפי',
   routeId: 'efi-to-ussishkin',
-  start: { flag: 'life:a2:efi', none: [{ flag: 'a3:inside' }, { flag: 'a3:done' }] },
+  start: { flag: 'life:efi:met', none: [{ flag: 'a3:inside' }, { flag: 'a3:done' }] },
   /**
    * מה שנלמד בדרך — וזאת הנקודה שלמענה כל זה נבנה.
    *

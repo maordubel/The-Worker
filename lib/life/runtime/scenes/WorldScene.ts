@@ -58,6 +58,9 @@ import { buildFinale } from '../../finale'
 import { retryFor } from '../../content/retry1986'
 import { TransistorNet } from '../match1990'
 import { MatchDirector } from '../matchDirector'
+import { directiveFor, type MainStoryDirective } from '../../storyDirector'
+import { wearEvents } from '../../matchRitual'
+import { sceneAlive } from '../../world/placeLifecycle'
 import { CONSEQUENCE_KICKER_HE, dueConsequences, shownEvent } from '../../consequence'
 import { matchScriptFor, type MatchScript } from '../../content/matchScripts'
 import { DerbyFromAfar, DerbyNight, derbyMarginHe, type DerbyMood } from '../derby1991'
@@ -270,6 +273,14 @@ export class WorldScene extends Phaser.Scene {
   private hoverRing!: Phaser.GameObjects.Ellipse
 
   private paused = false
+  /**
+   * The story director's directive for this room (plan §1) — recomputed with the HUD.
+   * `ritualOpen` keeps the pre-match wardrobe from being offered twice in one room.
+   */
+  private directive: MainStoryDirective | null = null
+  private ritualOpen = false
+  /** the doors that lead to a DILEMMA's destinations — lit equally, never one arrow */
+  private dilemmaExits = new Set<string>()
   private minuteAcc = 0
   private timeScale = 1
   /** the engine's flag version as of the last refresh — see `LifeEngine.flagVersion` */
@@ -348,6 +359,9 @@ export class WorldScene extends Phaser.Scene {
     this.lastDir = 'down'
     this.stride = 0
     this.paused = false
+    this.directive = null
+    this.ritualOpen = false
+    this.dilemmaExits = new Set()
     this.minuteAcc = 0
     this.timeScale = 1
     this.flagCount = 0
@@ -2720,6 +2734,21 @@ export class WorldScene extends Phaser.Scene {
 
   private pushHud() {
     const state = this.ctx.engine.state
+    this.directive = directiveFor({
+      state,
+      scene: this.def.id as LocationId,
+      era: this.era,
+      matchOver: this.matchPhase === 'over' || Boolean(state.flags['match:over']),
+    })
+    this.dilemmaExits = new Set(
+      this.directive?.mode === 'DILEMMA'
+        ? (this.directive.destinations ?? [])
+            .map((d) => (d.to === this.def.id ? null : nextStep(state, this.chapter, this.def.id as LocationId, d.to)?.exitId ?? null))
+            .filter((id): id is string => Boolean(id))
+        : [],
+    )
+    this.maybeOpenRitual()
+    const dilemma = this.directive?.mode === 'DILEMMA' ? this.directive : null
     this.ctx.bus.emit('hud', {
       clock: clockLabel(state.weekday, state.minute),
       date: state.dateHe ?? this.chapterDate() ?? longDateHe(this.anchor.match?.playedOn) ?? String(state.year),
@@ -2746,7 +2775,46 @@ export class WorldScene extends Phaser.Scene {
       /** and what the DAY is waiting for, when the room itself is finished */
       waitingOn: this.waitingOn(),
       waitingHe: this.waitingFor(state),
+      director: dilemma
+        ? {
+            id: dilemma.id,
+            mode: 'DILEMMA',
+            titleHe: dilemma.objectiveHe,
+            footHe: dilemma.reasonHe ?? null,
+            destinations: (dilemma.destinations ?? []).map((d) => ({ labelHe: d.labelHe, reasonHe: d.reasonHe, here: d.to === this.def.id })),
+          }
+        : null,
     })
+  }
+
+  /**
+   * לפני שיוצאים — the pre-match wardrobe (plan §4). Opened by the world, once per room,
+   * when the director says the match needs a shirt and nothing else is holding the glass.
+   * The world waits while it is open; `wear()` is the only way it closes.
+   */
+  private maybeOpenRitual() {
+    const directive = this.directive
+    if (!directive || directive.mode !== 'PRE_MATCH' || !directive.ritual) return
+    if (this.ritualOpen || this.busyNow() || this.closing) return
+    this.ritualOpen = true
+    this.paused = true
+    const ritual = directive.ritual
+    this.time.delayedCall(450, () => {
+      this.ctx.bus.emit('ritual', { chapter: this.chapter, eventId: ritual.eventId, allowPlain: ritual.allowPlain })
+    })
+  }
+
+  /** the choice from the wardrobe — one event, then the world runs again */
+  wear(choice: string): boolean {
+    const events = wearEvents(this.ctx.engine.state, this.chapter, choice)
+    if (events.length === 0) return false
+    this.ctx.engine.dispatch(...events)
+    void this.ctx.engine.save()
+    this.ctx.bus.emit('ritual', null)
+    this.ritualOpen = false
+    this.paused = false
+    this.pushHud()
+    return true
   }
 
   /**
@@ -2891,6 +2959,11 @@ export class WorldScene extends Phaser.Scene {
    */
   private hintNow(): string | null {
     const state = this.ctx.engine.state
+    // a dilemma is said as it is: two reasons, the same weight, and the clock (plan §2.2)
+    if (this.directive?.mode === 'DILEMMA') {
+      const ways = (this.directive.destinations ?? []).map((d) => `${d.labelHe} — ${d.reasonHe}`)
+      return [this.directive.objectiveHe + ':', ways.join(' '), this.directive.reasonHe].filter(Boolean).join(' ')
+    }
     // who is standing here AND can be spoken to AND is currently drawn
     const people = this.actors
       .filter((actor) => actor.image.visible && actor.def.talk && actor.def.nameHe)
@@ -2961,8 +3034,13 @@ export class WorldScene extends Phaser.Scene {
    */
   private aim2goal(): GoalAim | null {
     const state = this.ctx.engine.state
+    // a DILEMMA has two destinations at the same weight: pointing at one would be the game
+    // choosing for him (plan §2.2) — both doors are lit instead (`pulseLights`)
+    if (this.directive?.mode === 'DILEMMA') return null
     const want = this.era.goal?.(state) ?? null
     if (!want || want === this.def.id) return null
+    // never at a place that is gone (World Lifecycle, plan §9.5)
+    if (!sceneAlive(state, want)) return null
     const aim = aimForGoal(state, this.chapter, this.def.id as LocationId, want, (who) =>
       whereIs(state, this.era.schedule, who),
     )
@@ -2973,6 +3051,8 @@ export class WorldScene extends Phaser.Scene {
     const state = this.ctx.engine.state
     const open = this.exits.filter((exit) => meets(state, whenFor(exit, this.chapter)))
     if (open.length === 0) return null
+    // a dilemma is never pointed: both of its doors glow, and that is the whole hint
+    if (this.directive?.mode === 'DILEMMA') return null
     // The arrow at the edge of the glass points at the way to the chapter's own
     // destination when it has one, and at the widest door only when it does not. Pointing
     // confidently at the wrong door is worse than not pointing.
@@ -2986,7 +3066,9 @@ export class WorldScene extends Phaser.Scene {
     const boost = this.stuckLevel > 0 ? 0.22 : 0
     for (const light of this.doorLights) {
       const near =
-        this.target?.kind === 'exit' && this.target.exit.id === light.exit.id ? 0.26 : 0
+        (this.target?.kind === 'exit' && this.target.exit.id === light.exit.id ? 0.26 : 0) +
+        // the two ways a dilemma can go, marked in the world at the same strength
+        (this.dilemmaExits.has(light.exit.id) ? 0.16 : 0)
       const wave = 0.06 * Math.sin(this.breathe * 1.5 + light.exit.x * 8)
       light.image.setAlpha(light.base + wave + boost + near)
     }

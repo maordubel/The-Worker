@@ -103,6 +103,8 @@ export function useLifeRuntime({
   const [dialogue, setDialogue] = useState<LifeBusEvents['dialogue']>(null)
   const [prompt, setPrompt] = useState<LifeBusEvents['prompt']>(null)
   const [teach, setTeach] = useState<LifeBusEvents['teach']>(null)
+  /** the pre-match wardrobe (delta 92) — opened by the world, closed only by a choice */
+  const [ritual, setRitual] = useState<LifeBusEvents['ritual']>(null)
   const [toast, setToast] = useState<LifeBusEvents['toast']>(null)
   const toastNow = useRef<LifeBusEvents['toast']>(null)
   const toastQueue = useRef<NonNullable<LifeBusEvents['toast']>[]>([])
@@ -293,6 +295,7 @@ export function useLifeRuntime({
       }),
     )
     unsubscribe.push(bus.on('teach', setTeach))
+    unsubscribe.push(bus.on('ritual', setRitual))
     unsubscribe.push(
       bus.on('toast', (value) => {
         // a reward or a price ("הכרת", "תוצאה") waits its turn behind the line on screen;
@@ -606,6 +609,7 @@ export function useLifeRuntime({
     dialogue,
     prompt,
     teach,
+    ritual,
     toast,
     sound,
     setSound,

@@ -1,4 +1,5 @@
 import { checklistFor } from '../checklist'
+import { sceneAlive } from './placeLifecycle'
 import type { Era } from '../content/era'
 import { view as opportunityView } from '../opportunities'
 import { eligibleFor, offeredFlag } from '../routes'
@@ -39,6 +40,12 @@ export type LifeAction = {
   knownToPlayer: boolean
 }
 
+/** the chapter's pointer, never at a place that is gone (World Lifecycle, plan §9.5) */
+function liveGoal(state: LifeState, era: Era): LocationId | null {
+  const want = era.goal?.(state) ?? null
+  return want && sceneAlive(state, want) ? want : null
+}
+
 export function actionsNow(state: LifeState, era: Era): readonly LifeAction[] {
   const actions: LifeAction[] = []
 
@@ -50,7 +57,7 @@ export function actionsNow(state: LifeState, era: Era): readonly LifeAction[] {
       titleHe: item.textHe,
       primary: index === 0,
       // the chapter's own pointer is about the spine's CURRENT step, never a later one
-      location: index === 0 ? (era.goal?.(state) ?? null) : null,
+      location: index === 0 ? liveGoal(state, era) : null,
       durationMinutes: null,
       availableUntil: null,
       knownToPlayer: true,

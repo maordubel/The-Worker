@@ -3,11 +3,23 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import { Grain } from '@/components/life/FilmFx'
+import { FilmSkipButton } from '@/components/life/FilmSkipButton'
 import { DocumentaryGround } from '@/components/life/OpeningDocumentary'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
+import { nextFilmStep, outcomeForPlayError, type FilmNext } from '@/lib/life/filmPlayback'
 import { FILM } from '@/lib/life/opening'
-import { clockFor, FILM_CLOCK, FILM_START, signalForPlayError, step } from '@/lib/life/openingAttempt'
+import { clockFor, FILM_CLOCK, FILM_START, step, type FilmSignal } from '@/lib/life/openingAttempt'
+
+/**
+ * The shared policy's answer, in this film's own vocabulary. `retry-muted` is handled by the
+ * caller (it is an action, not a state); `run` needs no signal — `timeupdate` proves it.
+ */
+function signalFor(next: FilmNext): FilmSignal | null {
+  if (next === 'gate') return 'refused'
+  if (next === 'fallback') return 'broken'
+  return null
+}
 
 /** what the film hands the documentary when it cannot go on */
 export type FilmHandover = { sound: boolean; atMs: number }
@@ -60,19 +72,36 @@ export function OpeningFilm({ onDone, onFallback }: { onDone: () => void; onFall
   }, [])
   const dialogRef = useDialog<HTMLDivElement>(finish)
 
-  const tryPlay = useCallback(() => {
+  /**
+   * One attempt, judged by `lib/life/filmPlayback.ts` — the same policy the historical films
+   * obey: refused with sound → the same attempt again, muted; refused muted → the gate (or,
+   * after the gate's own gesture, the documentary); a media error → the documentary.
+   */
+  const tryPlay = useCallback((gestured = false) => {
     const el = video.current
     if (!el) return
-    try {
-      const pending = el.play()
-      pending?.catch((error: unknown) => {
-        const next = signalForPlayError(error)
-        if (next) signal(next)
-      })
-    } catch (error) {
-      const next = signalForPlayError(error)
-      if (next) signal(next)
+    const attempt = () => {
+      try {
+        el.play()?.catch(judge)
+      } catch (error) {
+        judge(error)
+      }
     }
+    function judge(error: unknown) {
+      if (!el) return
+      const outcome = outcomeForPlayError(error, el.muted)
+      if (!outcome) return
+      const next = nextFilmStep(outcome, { gestured })
+      if (next === 'retry-muted') {
+        el.muted = true
+        setSound(false)
+        attempt()
+        return
+      }
+      const sig = signalFor(next)
+      if (sig) signal(sig)
+    }
+    attempt()
   }, [])
 
   // --- the browser knows neither encoding: nothing to wait for ----------------------
@@ -213,12 +242,7 @@ export function OpeningFilm({ onDone, onFallback }: { onDone: () => void; onFall
             const el = video.current
             if (!el) return
             el.muted = !soundRef.current
-            try {
-              const pending = el.play()
-              pending?.catch((error: unknown) => signal(signalForPlayError(error) ?? 'broken'))
-            } catch {
-              signal('broken')
-            }
+            tryPlay(true)
           }}
           aria-label={t('life90g.film.playLabel')}
           data-life="opening-play"
@@ -247,15 +271,8 @@ export function OpeningFilm({ onDone, onFallback }: { onDone: () => void; onFall
         {sound ? t('life.opening.sound.on') : t('life.opening.sound.off')}
       </button>
 
-      <button
-        type="button"
-        onClick={finish}
-        data-life="opening-skip"
-        className="absolute z-10 flex min-h-tap items-center px-3 font-body text-[12px] text-concrete/60"
-        style={{ insetInlineStart: 12, bottom: 'max(10px, env(safe-area-inset-bottom))' }}
-      >
-        {t('life.cutscene.skip')}
-      </button>
+      {/* skip, from the first frame — the shared control; Escape is `useDialog`'s */}
+      <FilmSkipButton onSkip={finish} data-life="opening-skip" />
     </div>
   )
 }

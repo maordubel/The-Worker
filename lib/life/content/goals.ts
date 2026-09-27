@@ -198,7 +198,12 @@ export const goalTable = (state: LifeState): LocationId | null => {
 }
 export const goalRegistered = (state: LifeState): LocationId | null => {
   if (flag(state, 'u:loss')) return null
-  return flag(state, 'u:deliver') ? 'ussishkin-outside' : 'community-room'
+  if (!flag(state, 'u:deliver')) return 'community-room'
+  // (delta 92, §8) the last evening: the hall itself; the morning after: the walk to the fence
+  if (!flag(state, 'u:lastEve')) return null
+  if (!flag(state, 'u:morning')) return flag(state, 'u:last') ? null : 'ussishkin-hall'
+  if (!flag(state, 'u:news')) return null
+  return 'ussishkin-outside'
 }
 export const goalKeyNight = (state: LifeState): LocationId | null => (flag(state, 'u:key') ? null : 'hall-new')
 /** 2009 — אולם האימונים, אחרי משחק העלייה */

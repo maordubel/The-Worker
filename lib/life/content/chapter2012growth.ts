@@ -290,6 +290,8 @@ export const CONVERSATIONS_GROWTH: Conversation[] = [
           { who: 'פוגי', text: 'לא בהתחלה.' },
           { who: 'אפי', text: 'אף אחד לא היה בהתחלה חוץ מארבעה, ושניים מהם רבו.' },
           { who: 'יוסף', text: 'אנחנו לא סופרים ותק. אנחנו סופרים מי בא שוב.' },
+          // (delta 92, upgrade plan §10) five years on: a fan remembers the PLACE, not the work
+          { who: 'פוגי', text: 'אני זוכר את המקום. את המדרגה, ואת הגג שטפטף על השורה הראשונה.' },
         ],
         choices: [
           {

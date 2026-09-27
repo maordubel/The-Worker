@@ -63,6 +63,8 @@ import { HelpSheet } from '@/components/life/HelpSheet'
 import { Chip } from '@/components/life/Plate'
 import { ProfileCard } from '@/components/life/ProfileCard'
 import { Teach } from '@/components/life/Teach'
+import { DirectorCard } from '@/components/life/DirectorCard'
+import { RitualSheet } from '@/components/life/RitualSheet'
 import { RedBoxSheet } from '@/components/life/RedBoxSheet'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
@@ -145,6 +147,7 @@ export function LifeStage({
     dialogue,
     prompt,
     teach,
+    ritual,
     toast,
     sound,
     setSound,
@@ -289,10 +292,18 @@ export function LifeStage({
     if (bagAsked > 0) openBag()
   }, [bagAsked, openBag])
 
+  /**
+   * The first-mission cues (delta 92, plan §2.2): "move" until he has moved; "act" only while
+   * something is actually in reach — a sentence about a button with nothing to press is noise
+   * — and the button rings once beside it.
+   */
+  const teaching = teach && (teach.id !== 'act' || prompt) ? teach : null
+  const pulseAct = teaching?.id === 'act'
+
   /** the painting fills the glass; the shell floats over it */
   const fullBleed = frame <= 0
   /** every overlay that must hide the in-world controls */
-  const covered = Boolean(cast || shirt || dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel || gauges || coda || reveal)
+  const covered = Boolean(ritual || cast || shirt || dialogue || ending || retry || card || cutscene || snapshot || menu || places || pano || tunnel || gauges || coda || reveal)
 
   /**
    * זמן פנוי (delta 90) — the chip, the planner and the two-second cut. The shell paces
@@ -409,6 +420,7 @@ export function LifeStage({
             onAxis={onAxis}
             onAction={onAction}
             onCancel={onCancel}
+            pulse={pulseAct}
           />
         )}
 
@@ -418,10 +430,27 @@ export function LifeStage({
             label={prompt ? `${t(`life.verb.${prompt.verb}` as MessageKey)} ${prompt.label}` : null}
             locked={prompt?.locked ?? false}
             onAction={onAction}
+            pulse={pulseAct}
           />
         )}
 
-        {ready && teach && !covered && <Teach id={teach.id} touch={touch} />}
+        {ready && teaching && !covered && <Teach id={teaching.id} touch={touch} />}
+
+        {/* the story director's dilemma card — never over the teaching line (delta 92) */}
+        {ready && hud.director && !covered && !teaching && <DirectorCard director={hud.director} />}
+
+        {/* לפני שיוצאים — the pre-match wardrobe; the world waits for a choice */}
+        {/* it waits its turn behind a card the room raised first (a new shirt, a title, a film) */}
+        {ready && ritual && engineRef.current && !shirt && !card && !cutscene && !titleCard && !dialogue && !ending && (
+          <RitualSheet
+            state={engineRef.current.state}
+            chapter={ritual.chapter}
+            allowPlain={ritual.allowPlain}
+            onWear={(choice) => {
+              runtime.current?.wear(choice)
+            }}
+          />
+        )}
 
         {toast && !cutscene && <Stamp toast={toast} />}
 

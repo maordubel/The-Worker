@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { KitShirt } from '@/components/kit/KitShirt'
+import { MerchLinks } from '@/components/life/MerchLinks'
 import { t } from '@/lib/i18n'
 import type { WardrobeReading } from '@/lib/life/profile'
 import { artUrl } from '@/lib/life/runtime/art'
@@ -28,7 +29,27 @@ const CraftOutputView = dynamic(() => import('@/components/mechanics/craft/Craft
  * way through it: the two arrows and the keyboard's ← → do the same (WCAG — a swipe
  * always has a tap alternative), and it opens on the newest shirt.
  */
-export function WardrobeRail({ wardrobe }: { wardrobe: WardrobeReading[] }) {
+/**
+ * The same rail, asked a question (delta 92, plan §4): before a match the world opens this
+ * wardrobe — not a second one — with one action under the shirt in your hand. `noteFor`
+ * is the line that makes it a memory ("לבשת אותה לאחרונה ב…").
+ */
+export type WardrobeAction = {
+  labelFor: (id: string) => string
+  onPick: (id: string) => void
+  noteFor?: (id: string) => string | null
+}
+
+export function WardrobeRail({
+  wardrobe,
+  action = null,
+  merch = false,
+}: {
+  wardrobe: WardrobeReading[]
+  action?: WardrobeAction | null
+  /** the shop links under the shirt — in the bag, never inside the pre-match ritual */
+  merch?: boolean
+}) {
   const rail = useRef<HTMLUListElement | null>(null)
   const [active, setActive] = useState(Math.max(0, wardrobe.length - 1))
 
@@ -155,6 +176,24 @@ export function WardrobeRail({ wardrobe }: { wardrobe: WardrobeReading[] }) {
         </button>
       </div>
 
+      {/* the ritual's one action sits above the biography, never scrolled away under it */}
+      {action && (
+        <div className="flex shrink-0 flex-col gap-1.5 px-4 pb-2 md:px-6" data-life="wardrobe-action">
+          {action.noteFor?.(shirt.id) ? (
+            <p className="font-body text-[12.5px] leading-snug text-sheet">
+              <bdi>{action.noteFor(shirt.id)}</bdi>
+            </p>
+          ) : null}
+          <button
+            type="button"
+            data-life="wardrobe-wear"
+            onClick={() => action.onPick(shirt.id)}
+            className="min-h-tap self-start border-rule border-sheet bg-red px-5 font-display text-[17px] text-sheet transition-transform duration-press ease-stamp focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sheet active:scale-[.97] motion-reduce:transition-none"
+          >
+            <bdi>{action.labelFor(shirt.id)}</bdi>
+          </button>
+        </div>
+      )}
       {/* the biography of the shirt in your hand */}
       <div key={shirt.id} className={`${css.drawer} min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 md:px-6`} aria-live="polite" data-life="wardrobe-bio">
         <p className="font-poster text-[40px] leading-none tabular-nums text-sheet">
@@ -191,6 +230,7 @@ export function WardrobeRail({ wardrobe }: { wardrobe: WardrobeReading[] }) {
             <bdi>{t('life90h.bag.notWorn')}</bdi>
           </p>
         )}
+        {merch && !shirt.craft ? <MerchLinks shirtId={shirt.id} season={shirt.yearsHe} tone="dark" className="pb-2" /> : null}
       </div>
     </div>
   )

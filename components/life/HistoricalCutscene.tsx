@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { FilmSkipButton } from '@/components/life/FilmSkipButton'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
+import { nextFilmStep, type FilmNext, type FilmOutcome } from '@/lib/life/filmPlayback'
 import { embedUrl, type CutsceneCard, type CutsceneOutcome, type HistoricalCutscene as Def } from '@/lib/life/cutscenes'
 import { SourceNote } from '@/components/ui/SourceNote'
 
@@ -27,8 +29,14 @@ import { SourceNote } from '@/components/ui/SourceNote'
  *
  * **Two buttons and no more.** `הפעל את רגע האליפות` appears when the browser refuses to
  * autoplay with sound, which it will on nearly every phone — that is not an error and it
- * is not presented as one, it is the moment the player chooses to start. `דלג` is small,
- * bottom corner, always there.
+ * is not presented as one, it is the moment the player chooses to start. The skip is the
+ * shared `FilmSkipButton`, bottom corner, always there.
+ *
+ * **One policy with the opening film** (`lib/life/filmPlayback.ts`): try at once; refused
+ * with sound → `mute()` and try again; muted and running → it runs (a sound button offers
+ * the sound back); refused even muted → the gate; a player error or a blocked API → the
+ * slate. After the gate's own gesture, a second refusal is the slate too — nothing is
+ * asked twice.
  *
  * ## Failing well
  *
@@ -54,10 +62,14 @@ const STALL_MS = 12_000
  * player is offered the button as soon as the refusal is plain.
  */
 const AUTOPLAY_MS = 2_500
+/** After ▶ was pressed: a gesture that still produced nothing by now is a real refusal. */
+const GESTURE_MS = 6_000
 
 type YTPlayer = {
   destroy(): void
   playVideo(): void
+  mute(): void
+  unMute(): void
   getCurrentTime(): number
   getDuration(): number
 }
@@ -131,6 +143,8 @@ export function HistoricalCutscene({
   onDone: (outcome: CutsceneOutcome) => void
 }) {
   const [phase, setPhase] = useState<Phase>('card')
+  /** the film is running muted because autoplay with sound was refused */
+  const [muted, setMuted] = useState(false)
   const frame = useRef<HTMLIFrameElement | null>(null)
   const player = useRef<YTPlayer | null>(null)
   /** `onDone` exactly once, from wherever it is reached, including unmount. */
@@ -178,16 +192,44 @@ export function HistoricalCutscene({
 
     // no network at all: the answer is already known, and nobody should wait eight seconds for it
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-      setPhase('failed')
+      if (nextFilmStep('blocked') === 'fallback') setPhase('failed')
       return
     }
     let autoplay: number | undefined
+    /** where the shared policy has this film: with sound first, then muted */
+    let tryingMuted = false
+
+    const apply = (next: FilmNext, target: YTPlayer | null) => {
+      if (cancelled) return
+      if (next === 'fallback') {
+        setPhase('failed')
+        return
+      }
+      if (next === 'gate') {
+        setPhase('gate')
+        return
+      }
+      if (next === 'retry-muted' && target) {
+        tryingMuted = true
+        setMuted(true)
+        try {
+          target.mute()
+          target.playVideo()
+        } catch {
+          apply(nextFilmStep('refused-muted'), null)
+          return
+        }
+        window.clearTimeout(autoplay)
+        autoplay = window.setTimeout(() => apply(nextFilmStep('refused-muted'), null), AUTOPLAY_MS)
+      }
+    }
+    const judge = (outcome: FilmOutcome, target: YTPlayer | null = null) => apply(nextFilmStep(outcome), target)
 
     void (async () => {
       const api = await loadYouTubeApi()
       if (cancelled) return
       if (!api || !frame.current) {
-        setPhase('failed')
+        judge('blocked')
         return
       }
       try {
@@ -195,32 +237,35 @@ export function HistoricalCutscene({
           events: {
             onReady: (event) => {
               // Autoplay with sound is blocked on most phones and on Safari everywhere.
-              // Calling play and watching for a state change is how we find out; if the
-              // state never changes, `stall` offers the player the button instead.
-              try {
-                event.target.playVideo()
-              } catch {
-                /* the gate below covers it */
-              }
+              // Calling play and watching for a state change is how we find out: no PLAYING
+              // within AUTOPLAY_MS is a refusal, and the policy says what comes next.
+              const target = event.target
               window.clearTimeout(stall)
-              autoplay = window.setTimeout(() => {
-                if (!cancelled) setPhase('gate')
-              }, AUTOPLAY_MS)
+              try {
+                target.playVideo()
+              } catch {
+                judge('refused-with-sound', target)
+                return
+              }
+              autoplay = window.setTimeout(
+                () => judge(tryingMuted ? 'refused-muted' : 'refused-with-sound', target),
+                AUTOPLAY_MS,
+              )
             },
             onStateChange: (event) => {
               if (event.data === api.PlayerState.PLAYING) {
                 window.clearTimeout(stall)
                 window.clearTimeout(autoplay)
-                setPhase('playing')
+                if (nextFilmStep('started') === 'run') setPhase('playing')
               }
               if (event.data === api.PlayerState.ENDED) finish('watched')
             },
             // 2 bad id · 5 html5 error · 100 gone · 101/150 embedding disabled
-            onError: () => setPhase('failed'),
+            onError: () => judge('error'),
           },
         })
       } catch {
-        setPhase('failed')
+        judge('blocked')
         return
       }
       stall = window.setTimeout(() => {
@@ -269,14 +314,40 @@ export function HistoricalCutscene({
   // when it ends — none of which the old listener did.
   const dialogRef = useDialog<HTMLDivElement>(() => finish('skipped'))
 
+  // --- the gate's gesture: with sound, since a finger is what the browser wanted ------------
+  const gestured = useRef<number | undefined>(undefined)
   const start = () => {
     try {
+      player.current?.unMute()
       player.current?.playVideo()
+      setMuted(false)
     } catch {
       setPhase('failed')
       return
     }
     setPhase('playing')
+    // a gesture that still starts nothing is the last refusal — the policy says slate
+    window.clearTimeout(gestured.current)
+    const began = player.current?.getCurrentTime?.() ?? 0
+    gestured.current = window.setTimeout(() => {
+      let now = began
+      try {
+        now = player.current?.getCurrentTime() ?? began
+      } catch {
+        /* treat as not moved */
+      }
+      if (now <= began && nextFilmStep('refused-muted', { gestured: true }) === 'fallback') setPhase('failed')
+    }, GESTURE_MS)
+  }
+  useEffect(() => () => window.clearTimeout(gestured.current), [])
+
+  const unmute = () => {
+    try {
+      player.current?.unMute()
+      setMuted(false)
+    } catch {
+      /* the film keeps running muted */
+    }
   }
 
   return (
@@ -402,15 +473,20 @@ export function HistoricalCutscene({
         </div>
       ) : null}
 
-      {/* ---------- skip, small, always ---------- */}
-      <button
-        type="button"
-        onClick={() => finish('skipped')}
-        className="absolute bottom-4 flex min-h-tap items-center px-3 font-body text-[11px] text-concrete/45"
-        style={{ insetInlineStart: 12 }}
-      >
-        {t('life.cutscene.skip')}
-      </button>
+      {/* ---------- sound back, when the film had to start muted ---------- */}
+      {muted && phase === 'playing' ? (
+        <button
+          type="button"
+          onClick={unmute}
+          className="absolute z-10 flex min-h-tap items-center border-hair border-sheet bg-ink px-4 font-body text-[15px] text-sheet"
+          style={{ insetInlineEnd: 12, bottom: 'max(12px, env(safe-area-inset-bottom))' }}
+        >
+          {t('life.opening.sound.off')}
+        </button>
+      ) : null}
+
+      {/* ---------- skip, always — the shared control; Escape is `useDialog`'s ---------- */}
+      <FilmSkipButton onSkip={() => finish('skipped')} />
     </div>
   )
 }

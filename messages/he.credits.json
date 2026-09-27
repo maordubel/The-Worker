@@ -29,5 +29,13 @@
   "credits.group.assets.title": "מקור הנכסים",
   "credits.group.assets.desc": "גרפיקה, קול, סרט וסריקות — מאיפה כל חבילה נכנסה למשחק. מה שנוצר בקוד אינו מקור של אף אחד ולכן אינו כאן.",
   "credits.group.other.title": "מקורות נוספים",
-  "credits.group.other.desc": "מה שאינו שייך לאף מדף אחר."
+  "credits.group.other.desc": "מה שאינו שייך לאף מדף אחר.",
+  "credits.group.community.title": "קהילה, אספנות וקישורים",
+  "credits.group.community.desc": "מי ששומר על הזיכרון של המועדון, וקישורים לרכישת חולצות. אלה תודות וקישורים — לא מקורות, ואף עובדה במשחק אינה נשענת עליהם.",
+  "credits.community.mishak-hashabbat.desc": "שימור, תיעוד ואספנות היסטורית של הפועל תל אביב",
+  "credits.community.shops": "איפה קונים חולצה",
+  "credits.community.official": "רשמי",
+  "credits.community.independent": "עצמאי · רפליקה",
+  "merch.title": "מצא רפליקה / חולצה רשמית",
+  "merch.open": "{name} — נפתח בלשונית חדשה"
 }

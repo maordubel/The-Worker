@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 
 import { Grain, Letterbox } from '@/components/life/FilmFx'
+import { FilmSkipButton } from '@/components/life/FilmSkipButton'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
@@ -329,15 +330,8 @@ export function OpeningDocumentary({
       >
         {sound ? t('life.opening.sound.on') : t('life.opening.sound.off')}
       </button>
-      <button
-        type="button"
-        onClick={finish}
-        data-life="opening-skip"
-        className="absolute z-10 flex min-h-tap items-center px-3 font-body text-[12px] text-concrete/60"
-        style={{ insetInlineStart: 12, bottom: 'max(10px, env(safe-area-inset-bottom))' }}
-      >
-        {t('life.cutscene.skip')}
-      </button>
+      {/* (delta 92, plan §7) the same skip as the film and the archive cutscenes — never a quieter one */}
+      <FilmSkipButton onSkip={finish} data-life="opening-skip" />
     </div>
   )
 }
