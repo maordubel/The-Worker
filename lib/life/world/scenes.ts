@@ -9,7 +9,7 @@ import type { Condition } from './types'
 import { goneForChapter, lifecycleOfScene, lifecycleWhen } from './placeLifecycle'
 import { PARENTS_AFTER_2013, chaptersWhere, livesWithParents } from './homes'
 import { CITY_EXITS, CITY_ROOMS } from './city2027'
-import { BEDROOM_2000, HOME_OWN, NEW_ROOMS, PITCH_2000, PITCH_2000S, STAGED, STAND_80S, STAND_90S, STAND_NEW, STAND_OLD } from './rooms2000'
+import { BEDROOM_2000, BUS_STATION_2017, HOME_OWN, NEW_ROOMS, PITCH_2000, PITCH_2000S, STAGED, STAND_80S, STAND_90S, STAND_NEW, STAND_OLD, STREET_2010 } from './rooms2000'
 import { QUEST_SPOTS } from './quests90e'
 
 /**
@@ -126,8 +126,26 @@ export function stageOf(chapter: string): 'A' | 'B' {
   return chapter === '1986' || chapter === 'prologue' || /^a\d/.test(chapter) ? 'A' : 'B'
 }
 
+/**
+ * העשור המדויק — `2012-five` is a chapter of the 2010s, `2024-home` of the 2020s (27.9.2026).
+ *
+ * `decadeOf` stops at `'2000s'` on purpose: from 2000 it means "the adult life", and every
+ * `'2000s'` key in the rooms (the street's nineties painting, the open road east) is written to
+ * hold for every year after it. The decade redresses of 27.9.2026 needed the other meaning —
+ * `kiosk10` for the 2010s, `kiosk20` for the 2020s — and were keyed `'2010s'`/`'2020s'`, which
+ * `decadeOf` never returns, so the kiosk of 2002 stood in every chapter until 2026 and
+ * `allenby20` / `schoolyard20` were never drawn. The exact decade is read FIRST (after the
+ * chapter itself), so a `'2010s'` key wins over `'2000s'` and everything written for `'2000s'`
+ * keeps meaning what it meant. Before 2010 the two are the same string.
+ */
+export function exactDecadeOf(chapter: string): string {
+  const year = Number(chapter.slice(0, 4))
+  if (!Number.isFinite(year) || year < 2010) return decadeOf(chapter)
+  return `${Math.floor(year / 10) * 10}s`
+}
+
 function eraMatches(era: string, chapter: string): boolean {
-  return era === '*' || era === chapter || era === decadeOf(chapter) || era === stageOf(chapter)
+  return era === '*' || era === chapter || era === exactDecadeOf(chapter) || era === decadeOf(chapter) || era === stageOf(chapter)
 }
 
 export function inEra(def: { era?: EraTag }, chapter: string, fallback: EraTag = '1986'): boolean {
@@ -138,7 +156,9 @@ export function inEra(def: { era?: EraTag }, chapter: string, fallback: EraTag =
 
 /** the keys a per-era table is read by, most specific first */
 export function eraKeys(chapter: string): string[] {
-  return [chapter, decadeOf(chapter), stageOf(chapter)]
+  const exact = exactDecadeOf(chapter)
+  const decade = decadeOf(chapter)
+  return exact === decade ? [chapter, decade, stageOf(chapter)] : [chapter, exact, decade, stageOf(chapter)]
 }
 
 /** Doors are geography: a door with no era is a door in every year. */
@@ -1531,6 +1551,8 @@ const SCENES: SceneDef[] = [
       '1990': 'אופיר ועמית ליד הקיוסק. מזרחה — אחרי האדומים.',
       '1991': 'בית הספר בקצה הרחוב, מזרחה יוצאים מהשכונה, הבית מאחורייך.',
     },
+    // 2010–2026: the same street on its own painting (`street10`), on its own measured floor
+    repaints: [STREET_2010],
     layers: [
       // Behind everybody: the near paving and the kerb, with the tree shadows on it.
       { art: 'streetGround', x: 0, y: 0, w: 1, depth: 0.69 },
@@ -4618,6 +4640,8 @@ const SCENES: SceneDef[] = [
     size: { far: 0.185, near: 0.29 },
     metre: 0.2106,
     ambience: 'station',
+    // 2017–2026: the fans' platform on its own painting (`busStation20`, `rooms2000.ts`)
+    repaints: [BUS_STATION_2017],
     stuckHe: 'רציף. שעון. אוטובוס אחד שמגיע בזמן.',
     actors: [],
     hotspots: [
@@ -4682,15 +4706,22 @@ const SCENES: SceneDef[] = [
   },
 
   // ------------------------------------------------------- אצטדיון רמת גן (1999, 2000) ----
-  // `ramatGan` is the lower terrace on a final night, painted 5.9.2026. From 17.9.2026 it
-  // also has an OUTSIDE — see the arrival card below.
+  // אצטדיון רמת גן — ציור ייעודי, קונספט ולא שחזור אדריכלי (27.9.2026). `ramatGan` נכתב מחדש
+  // תחת אותו שם: לא עוד היציע התחתון של 5.9.2026 (2.56:1) אלא ציור 16:9 מהמסדרון שליד
+  // המסלול — מדרגות עולות ליציע משמאל, המעקה והגדר מול המגרש המואר, הזרקורים. הכול נמדד מחדש:
+  //   · הגדר עם המעקה (כ-2.2 מ׳) עומדת בבסיס 0.79 מימין ו-0.705 משמאל, והראש שלה ב-0.55 לכל
+  //     אורכה — כלומר הראש שלה הוא האופק, והמצלמה בגובה הגדר: אופק 0.55, מטר = 0.4625 × (y − 0.55).
+  //   · הרצועה היא רצפת המסדרון מלפני הגדר (0.80–0.95, רמפה 1.6). גבר בן 1.78 ב-0.80 הוא 0.206
+  //     מהמסגרת, ארבע חמישיות מהגדר שמאחוריו — זו הבדיקה.
+  // השערים הם המדרגות משמאל (למעלה, ליציע); הדרך הביתה — ימינה, לאורך הגדר, אל מחוץ לתמונה.
+  // From 17.9.2026 it also has an OUTSIDE — see the arrival card below.
   {
     id: 'ramat-gan',
     titleHe: 'אצטדיון רמת גן',
     art: 'ramatGan',
-    band: { far: 0.872, near: 0.99 },
-    size: { far: 0.2, near: 0.27 },
-    metre: 0.1911,
+    band: { far: 0.8, near: 0.95 },
+    size: { far: 0.1503, near: 0.2405 },
+    metre: 0.185,
     ambience: 'stadium',
     /**
      * השערים של רמת גן — the arrival, and it is an arrival rather than a room.
@@ -4707,34 +4738,33 @@ const SCENES: SceneDef[] = [
      * been to the national stadium, and forty thousand people are the point.
      */
     arrival: { art: 'ramatGanGates', ms: 3400, flag: 'saw:ramatGan' },
-    stuckHe: 'ארבעים אלף. אתה אחד מהם.',
-    layers: [
-      { art: 'overlayHaze', x: 0, y: 0, w: 1.0, depth: 0.1, alpha: 0.5, era: '*' },
-      // the red smoke rises from the two bottom corners of the whole frame. It was placed from the
-      // frame's CENTRE (x 0.5, y 0.5), so one corner of it lay on the pavement in the middle of the
-      // picture as a red stain — it read as blood (21.9.2026)
-      { art: 'overlaySmoke', x: 0, y: 0, w: 1.0, depth: 0.1, alpha: 0.6, era: '*' },
-    ],
+    stuckHe: 'המדרגות ליציע — משמאל. הביתה — ימינה, לאורך הגדר.',
+    // (27.9.2026) no overlays on the new painting: it carries its own floodlight glow, and the old
+    // full-frame haze and red smoke — laid over the 5.9 terrace — covered the stairs, the way out
+    // and both pylons, and hung red smoke over an empty concourse
+    layers: [],
     actors: [],
     /**
      * (Director V3 §12, 25.9.2026) the two finals start at the gates: the turnstiles under
      * the sign are pushed through, and the match is inside them (`c99-kickoff`, `d-kickoff`).
      */
     hotspots: [
-      { id: 'rg-gate-99', era: '1999-cup', x: 0.6, y: 0.93, w: 0.12, act: 'rg-gate-99', verb: 'enter', labelHe: 'בשערים, עם כולם', when: { all: [{ flag: 'c99:arrived' }, { notFlag: 'c99:in' }] }, priority: 4 },
-      { id: 'rg-gate-00', era: '2000-double', x: 0.6, y: 0.93, w: 0.12, act: 'rg-gate-00', verb: 'enter', labelHe: 'בשערים, עם כולם', when: { all: [{ flag: 'd:arrived' }, { notFlag: 'd:in' }] }, priority: 4 },
+      // the stairs up into the stand (0–0.16), where the queue for the turnstiles starts
+      { id: 'rg-gate-99', era: '1999-cup', x: 0.1, y: 0.83, w: 0.12, act: 'rg-gate-99', verb: 'enter', labelHe: 'במדרגות ליציע, עם כולם', when: { all: [{ flag: 'c99:arrived' }, { notFlag: 'c99:in' }] }, priority: 4 },
+      { id: 'rg-gate-00', era: '2000-double', x: 0.1, y: 0.83, w: 0.12, act: 'rg-gate-00', verb: 'enter', labelHe: 'במדרגות ליציע, עם כולם', when: { all: [{ flag: 'd:arrived' }, { notFlag: 'd:in' }] }, priority: 4 },
     ],
     exits: [
       {
         id: 'back',
-        x: 0.0,
-        y: 0.7,
-        w: 0.08,
-        h: 0.3,
+        // the concourse carries on out of the frame to the right, along the fence
+        x: 0.94,
+        y: 0.8,
+        w: 0.06,
+        h: 0.15,
         to: 'street',
         spawn: 'fromFar',
         labelHe: 'הביתה, אחרי המשחק',
-        light: { x: 0.005, y: 0.45, w: 0.07, h: 0.4, tone: 'daylight' },
+        light: { x: 0.95, y: 0.74, w: 0.05, h: 0.22, tone: 'daylight' },
         dwellMs: 600,
         // the gates are a place you stand in now, so the way home waits for the whistle
         // (only once he is at the gates for the final: a boy who walked here early walks back)
@@ -4742,7 +4772,7 @@ const SCENES: SceneDef[] = [
         blockedByEra: { '1999-cup': 'אחרי המשחק. אף אחד לא יוצא מגמר.', '2000-double': 'אחרי המשחק. אף אחד לא יוצא מגמר.' },
       },
     ],
-    spawns: { start: { x: 0.3, y: 0.96, facing: 'right' } },
+    spawns: { start: { x: 0.62, y: 0.87, facing: 'left' } },
   },
 
   // ------------------------------------------------------ שכונת התקווה (13.5.2000) ----

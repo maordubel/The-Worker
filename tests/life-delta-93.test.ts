@@ -21,7 +21,7 @@ import { ALL_DECADES_COMPLETE } from '@/lib/life/stickers'
 import { directiveFor, opportunityFromDirective, storyHoldsTheMoment } from '@/lib/life/storyDirector'
 import type { LifeState, LocationId } from '@/lib/life/types'
 import { sceneAlive } from '@/lib/life/world/placeLifecycle'
-import { ALL_SCENES, inEra } from '@/lib/life/world/scenes'
+import { ALL_SCENES, inEra, sceneIn } from '@/lib/life/world/scenes'
 import { meets } from '@/lib/life/world/types'
 
 /**
@@ -133,7 +133,9 @@ describe('actorCue (brief §9–§12, §36–§37)', () => {
         for (const action of beat.do) {
           if (action.a !== 'actorCue') continue
           count++
-          const found = ALL_SCENES.some((scene) => scene.actors.some((actor) => actor.id === action.actorId && inEra(actor, chapter.id)))
+          // the room as the chapter draws it — a repainted room (`street10` from 2010) carries its
+          // people on the painting (`Repaint.actors`), which is where `WorldScene` reads them
+          const found = ALL_SCENES.some((scene) => sceneIn(scene, chapter.id).actors.some((actor) => actor.id === action.actorId && inEra(actor, chapter.id)))
           expect(found, `${chapter.id}/${beat.id} → ${action.actorId}`).toBe(true)
         }
       }

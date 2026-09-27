@@ -76,14 +76,18 @@ def _decade(ch):
     return '2000s' if y>=2000 else ('1990s' if y>=1990 else '1980s')
 def _stage(ch):
     return 'A' if ch in ('1986','prologue') or (len(ch)>1 and ch[0]=='a' and ch[1].isdigit()) else 'B'
-DEC=_decade(ERA); STG=_stage(ERA)
-def _one(e): return e=='*' or e==ERA or e==DEC or e==STG
+def _exact(ch):
+    try: y=int(ch[:4])
+    except Exception: return _decade(ch)
+    return f'{y//10*10}s' if y>=2010 else _decade(ch)
+DEC=_decade(ERA); EXACT=_exact(ERA); STG=_stage(ERA)
+def _one(e): return e=='*' or e==ERA or e==EXACT or e==DEC or e==STG
 def in_era(x, fallback='1986'):
     e=x.get('era', fallback)
     return any(_one(i) for i in e) if isinstance(e,list) else _one(e)
 for sc in d['scenes']:
     art=None
-    for key in (ERA, DEC, STG):
+    for key in (ERA, EXACT, DEC, STG):
         art=(sc.get('artByEra') or {}).get(key)
         if art: break
     art=art or sc['art']

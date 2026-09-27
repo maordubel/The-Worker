@@ -9,7 +9,8 @@ import { facesLeft } from '@/lib/life/runtime/art'
 import { heightOf, bodySize } from '@/lib/life/world/heights'
 import { livesWithParents, ownHome, PARENTS_AFTER_2013, yearOfChapter } from '@/lib/life/world/homes'
 import { NEW_ROOMS, STAGED } from '@/lib/life/world/rooms2000'
-import { ALL_SCENES, exitInEra, inEra, sceneIn } from '@/lib/life/world/scenes'
+import { AMBIENT_REPAINTS } from '@/lib/life/content/ambient2000'
+import { ALL_SCENES, artFor, exitInEra, inEra, sceneIn } from '@/lib/life/world/scenes'
 import manifest from '@/public/life/art/manifest.json'
 import { syncRows } from '@/lib/life/world/sync'
 
@@ -287,5 +288,61 @@ describe('מי שעובר ברקע — לא אחד מהקאסט (21.9.2026)', ()
     // the crowd sheets' walkers, read off the pictures on 21.9.2026
     for (const left of ['adultA1', 'adultB1', 'youngA1', 'youngA7', 'youngB1']) expect(facesLeft(left), left).toBe(true)
     for (const right of ['adultA7', 'adultB4', 'adultB7', 'kobi90-stand', 'hero90']) expect(facesLeft(right), right).toBe(false)
+  })
+})
+
+describe('עוברי אורח על ציור אחר (27.9.2026)', () => {
+  it('maps from the floor the rows were written on — the room’s own band, not a copy that drifts', () => {
+    for (const entry of AMBIENT_REPAINTS) {
+      const scene = ALL_SCENES.find((room) => room.id === entry.location)!
+      expect(entry.from, entry.location).toEqual(scene.band)
+      expect(scene.repaints ?? [], entry.location).toContain(entry.paint)
+    }
+  })
+
+  it('keeps every passer-by of a repainted room on the painting’s own walk band', () => {
+    for (const id of ADULT) {
+      for (const row of eraFor(id).ambient) {
+        const entry = AMBIENT_REPAINTS.find((e) => e.location === row.location && e.paint.in(id))
+        if (!entry) continue
+        expect(row.y, `${id}: ${row.id}`).toBeGreaterThanOrEqual(entry.paint.band.far)
+        expect(row.y, `${id}: ${row.id}`).toBeLessThanOrEqual(entry.paint.band.near)
+      }
+    }
+  })
+})
+
+describe('street10 · busStation20 · ramatGan — the 16:9 paintings of 27.9.2026', () => {
+  it('draws the street from 2010, the fans’ platform from 2017, and neither before', () => {
+    const street = ALL_SCENES.find((room) => room.id === 'street')!
+    const bus = ALL_SCENES.find((room) => room.id === 'bus-station')!
+    expect(sceneIn(street, '2009-up').art).not.toBe('street10')
+    expect(sceneIn(street, '2010-cup').art).toBe('street10')
+    expect(sceneIn(street, '2026-finale').art).toBe('street10')
+    expect(sceneIn(bus, '2006-home').art).toBe('busStation')
+    expect(sceneIn(bus, '2017-distance').art).toBe('busStation20')
+  })
+
+  it('keeps every ramp inside what a lens does, and the reference height where it was measured', () => {
+    const rooms = [
+      sceneIn(ALL_SCENES.find((room) => room.id === 'street')!, '2012-five'),
+      sceneIn(ALL_SCENES.find((room) => room.id === 'bus-station')!, '2026-finale'),
+      ALL_SCENES.find((room) => room.id === 'ramat-gan')!,
+    ]
+    for (const room of rooms) {
+      expect(room.size.near / room.size.far, `${room.id}/${room.art}`).toBeLessThanOrEqual(1.8)
+      expect(room.size.near / room.metre, `${room.id}/${room.art}`).toBeCloseTo(1.3, 1)
+    }
+  })
+
+  it('reads the decade redresses by the exact decade — kiosk10 in the 2010s, kiosk20 in the 2020s', () => {
+    const kiosk = ALL_SCENES.find((room) => room.id === 'kiosk')!
+    expect(artFor(kiosk, '2002-europe')).toBe('kiosk00')
+    expect(artFor(kiosk, '2012-five')).toBe('kiosk10')
+    expect(artFor(kiosk, '2024-home')).toBe('kiosk20')
+    expect(artFor(ALL_SCENES.find((room) => room.id === 'allenby')!, '2021-promises')).toBe('allenby20')
+    expect(artFor(ALL_SCENES.find((room) => room.id === 'schoolyard')!, '2021-promises')).toBe('schoolyard20')
+    // what was written for '2000s' still holds for every year after it
+    expect(artFor(ALL_SCENES.find((room) => room.id === 'bloomfield-outside')!, '2012-five')).toBe('gate7Old')
   })
 })

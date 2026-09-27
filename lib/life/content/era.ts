@@ -79,7 +79,7 @@ import { SCHEDULE_1990 } from './schedules1990'
 import { SCHEDULE_1991 } from './schedules1991'
 import { BEATS_1986 } from './threads'
 import { facesFor, playerFor, STANDIN_FACES } from '../world/castFigures'
-import { AMBIENT_2000 } from './ambient2000'
+import { ambientFor } from './ambient2000'
 
 /**
  * העידן — everything about a chapter that the runtime used to import by name.
@@ -851,7 +851,8 @@ for (const [chapter, beats] of Object.entries(COMBO_BEATS)) {
 for (const era of Object.values(ERAS)) era.player = playerFor(era.year, era.player)
 for (const era of Object.values(ERAS)) era.portraits = ownFace(era)
 // ...and the people crossing the picture: no cast body among them, from 2000 (`ambient2000.ts`)
-for (const era of Object.values(ERAS)) if (era.year >= 2000) era.ambient = AMBIENT_2000
+// (27.9.2026) on the floor of the painting the room stands on that year — `street10`, `busStation20`
+for (const era of Object.values(ERAS)) if (era.year >= 2000) era.ambient = ambientFor(era.year)
 // ...and in the nineties, the stand-in bodies of the named people of those years (Melamed on
 // A1, Freddy on A2, Yaron on A4) do not cross the picture as strangers either
 const NINETIES_CAST = new Set(['adultA1', 'adultA2', 'adultA4'])

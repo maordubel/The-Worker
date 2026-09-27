@@ -344,6 +344,115 @@ export const STAND_90S: Repaint = {
   stuckHe: 'היציאה — המנהרה מימין, מתחת לשלט.',
 }
 
+// ===================================================== הרחוב · street10 · 2010–2026 ===
+/**
+ * הרחוב ליד הבית, 2010–2026 (`street10`, 27.9.2026) — אותו רחוב, ציור 16:9 ולא 2.56:1.
+ *
+ * הקומפוזיציה היא של `street`/`street90` (הדלת עם ה-12 משמאל, הקיוסק, הסמטה, החומה עם
+ * הכתובת האדומה, העמוד, הרחוב הצדדי עם הסוככים מימין) — אבל המצלמה נמוכה וקרובה, אז שום
+ * מספר של הציור הישן לא עובר. עד היום כל פרק מ-2010 עמד על הרחוב של שנות התשעים.
+ *
+ * נמדד (שתי מדידות):
+ *   · אופק 0.59 — נקודת המגוז של הרחוב הצדדי: קו בסיס הבתים (0.625 → 0.665) וקו תחתית
+ *     הסוככים (0.53 → 0.49) נפגשים ב-(0.63, 0.585); רצפת הסמטה נגמרת ב-0.61.
+ *   · הקיוסק: מתחתית הסוכך (0.405) עד רגלי הדלפק (0.675) — פתח של כ-2.25 מ׳; החומה עם
+ *     הכתובת (0.415 → 0.655) כ-2.6 מ׳. מטר = 1.4 × (y − 0.59): 0.14 ב-0.69, 0.231 ב-0.755.
+ *     כלומר המצלמה נמוכה (כ-0.7 מ׳): ראשים של מבוגרים גבוהים מהאופק, וזה נכון לציור הזה.
+ * הרצועה היא החצי האחורי של המדרכה, מבסיס הבתים (0.69–0.755, רמפה 1.65): קרוב לדלתות. החצי
+ * הקדמי, עד שפת המדרכה (0.77), נשאר ריק — בגובה המצלמה הזאת כל צעד קדימה הוא עוד חצי גוף.
+ * גבר בן 1.78 בגב המדרכה ליד הקיוסק: ארבע חמישיות מהפתח, מועבר לעומק הדלפק — זו הבדיקה.
+ *
+ * הדלתות: הבית (הדלת עם ה-12), הקיוסק, הסמטה למגרש — כמו תמיד. מימין לחומה הרחוב הצדדי
+ * הוא ארבעת הפתחים שהיו פזורים בציור הרחב: הפנייה עצמה (למרכז), הדלת תחת הסוכך הראשון
+ * (בית הספר), הדלת תחת השני (היציאה של הפרק — התחנה, חדר הקהילה, הדרייב אין, המשרד),
+ * והדלת בקצה (מזרחה). צפוף — ולכן כולן רדודות, בגב המדרכה, עם שהייה (`dwellMs`) כמו תמיד.
+ */
+const STREET_SLOT: Pick<ExitDef, 'x' | 'y' | 'w' | 'h'> & { light: ExitDef['light'] } = {
+  x: 0.9,
+  y: 0.69,
+  w: 0.045,
+  h: 0.03,
+  light: { x: 0.903, y: 0.51, w: 0.028, h: 0.15, tone: 'daylight' },
+}
+export const STREET_2010: Repaint = {
+  in: (chapter) => yearOfChapter(chapter) >= 2010,
+  art: 'street10',
+  band: { far: 0.69, near: 0.755 },
+  size: { far: 0.182, near: 0.3003 },
+  metre: 0.231,
+  spawns: {
+    fromHome: { x: 0.14, y: 0.73, facing: 'right' },
+    fromKiosk: { x: 0.2, y: 0.735, facing: 'right' },
+    fromPitch: { x: 0.44, y: 0.735, facing: 'left' },
+    fromRoute: { x: 0.93, y: 0.74, facing: 'left' },
+    fromUss: { x: 0.78, y: 0.74, facing: 'left' },
+    fromCentre: { x: 0.78, y: 0.74, facing: 'left' },
+    fromSchool: { x: 0.84, y: 0.745, facing: 'left' },
+    fromBus: { x: 0.8, y: 0.74, facing: 'right' },
+    fromFar: { x: 0.8, y: 0.745, facing: 'right' },
+    start: { x: 0.44, y: 0.735, facing: 'right' },
+  },
+  doors: {
+    // the door with the 12 on it (0.035–0.10), up its three steps
+    home: { x: 0, y: 0.69, w: 0.09, h: 0.065, light: { x: 0.035, y: 0.29, w: 0.065, h: 0.37, tone: 'inside' } },
+    // the counter under the tin awning (0.225–0.36)
+    kiosk: { x: 0.225, y: 0.69, w: 0.135, h: 0.03, light: { x: 0.225, y: 0.4, w: 0.14, h: 0.28, tone: 'inside' } },
+    // the alley between the kiosk's building and the wall (0.42–0.54)
+    pitch: { x: 0.425, y: 0.69, w: 0.1, h: 0.03, light: { x: 0.435, y: 0.4, w: 0.09, h: 0.28, tone: 'inside' } },
+    // the side street itself, turning in past the pole
+    centre: { x: 0.805, y: 0.69, w: 0.045, h: 0.03, light: { x: 0.81, y: 0.55, w: 0.04, h: 0.13, tone: 'daylight' } },
+    // the door under the first awning (0.87–0.89)
+    school: { x: 0.855, y: 0.69, w: 0.045, h: 0.03, light: { x: 0.866, y: 0.515, w: 0.03, h: 0.145, tone: 'daylight' } },
+    // the far door at the end of the row (0.965–0.99), and the edge of the frame beyond it
+    route: { x: 0.95, y: 0.69, w: 0.05, h: 0.065, light: { x: 0.962, y: 0.505, w: 0.032, h: 0.16, tone: 'daylight' } },
+    // the chapter's way out of the neighbourhood: the door under the second awning (0.905–0.93)
+    busStation: STREET_SLOT,
+    ramatGan: STREET_SLOT,
+    hatikva: STREET_SLOT,
+    hallNew: STREET_SLOT,
+    driveIn: STREET_SLOT,
+    community: STREET_SLOT,
+    office: STREET_SLOT,
+  },
+  spots: {
+    wall: { x: 0.64, y: 0.725, w: 0.09 },
+    'alley-view': { x: 0.475, y: 0.74, w: 0.05 },
+    'kiosk-view': { x: 0.2, y: 0.74, w: 0.05 },
+    // 2010-teddy · D05 — Oli's list, his cash, Amit: beside the people they belong to (`STAGED.street`)
+    'd10-roster': { x: 0.24, y: 0.745, w: 0.06 },
+    'd10-pay': { x: 0.34, y: 0.745, w: 0.06 },
+    'd10-promise': { x: 0.62, y: 0.75, w: 0.06 },
+  },
+  // I02 (2010-friends) — Lina's banner, blank, on its two poles against the wall with the red
+  // writing, clear of every door: 1.6 m where a metre is 0.189 of the frame (1672 × 0.17 = 284 px)
+  layers: [{ art: 'propBannerBlank', era: '2010-friends', x: 0.665, y: 0.725, w: 0.17, depth: 0.725, foot: true }],
+  stuckHe: 'הקיוסק משמאל, הסמטה למגרש באמצע. מימין לחומה — הרחוב הצדדי: למרכז, לבית הספר, ומזרחה.',
+}
+
+// ============================================== התחנה המרכזית · busStation20 · 2017– ===
+/**
+ * רציף האוטובוסים של האוהדים, 2017–2026 (`busStation20`, 27.9.2026) — אותו רציף של 1996,
+ * אותה מצלמה, אבל ציור 16:9: הרציף מתחיל גבוה יותר במסגרת ומתחתיו רואים את הכביש.
+ *
+ * נמדד: האוטובוס (כ-3.2 מ׳) מהגג 0.16 עד הגלגלים 0.54, הספסל (מושב 0.45 מ׳) 0.50 → 0.555 —
+ * שניהם 0.12–0.125 למטר על 0.545. האופק 0.43, בסיס הרציפים הרחוקים. מטר = 1.087 × (y − 0.43).
+ * הרצועה היא הרציף עצמו, מלפני הספסל עד השפה האדומה-לבנה (0.58–0.665, רמפה 1.57).
+ * דלת האוטובוס (0.30–0.40) היא הדלת לשדה התעופה, כמו בציור הישן.
+ */
+export const BUS_STATION_2017: Repaint = {
+  in: (chapter) => yearOfChapter(chapter) >= 2017,
+  art: 'busStation20',
+  band: { far: 0.58, near: 0.665 },
+  size: { far: 0.212, near: 0.3321 },
+  metre: 0.2555,
+  spawns: { start: { x: 0.2, y: 0.63, facing: 'right' } },
+  doors: {
+    back: { x: 0, y: 0.58, w: 0.06, h: 0.085, light: { x: 0.0, y: 0.47, w: 0.05, h: 0.19, tone: 'daylight' } },
+    flight: { x: 0.3, y: 0.58, w: 0.09, h: 0.025, light: { x: 0.305, y: 0.235, w: 0.09, h: 0.28, tone: 'inside' } },
+  },
+  stuckHe: 'רציף. האוטובוס משמאל, הדלת פתוחה. חזרה לשכונה — בקצה השמאלי.',
+}
+
 // ================================================================= חדרים חדשים ===
 
 /** the neighbourhood's way out (the street's x 0.872 slot): every room below comes back to it */
@@ -744,13 +853,14 @@ export const NEW_ROOMS: SceneDef[] = [
   },
 
   /**
-   * מחוץ לאולם באירופה — F03 *"מחוץ לאולם"* ו-F04 *"מחוץ לאולם, אחרי המשחק"*.
-   * קונספט כללי (README החבילה): לא שחזור של בוטבגרד, ולכן אין בו שלט ואין שם. נמדד:
-   * מתקני האופניים (0.8) והדלתות (2.4) על 0.5 — אופק 0.404.
+   * מחוץ לאולם בבוטבגרד — F03 *"מחוץ לאולם"* ו-F04 *"מחוץ לאולם, אחרי המשחק"*.
+   * מ-27.9.2026 הציור הוא `botevgradOut2026`: האולם עצמו, עם השלט **АРЕНА БОТЕВГРАД** מעל
+   * הכניסה — לא עוד הקונספט הכללי בלי שם (`arenaEuroOut`). אותה מצלמה (נבדק בלוח): הדלתות
+   * (2.4) 0.345–0.5 ומתקני האופניים (0.8) על 0.5 — אופק 0.404, וכל מספר כאן נשאר.
    */
   {
     id: 'arena-out',
-    titleHe: 'מחוץ לאולם',
+    titleHe: 'מחוץ לאולם בבוטבגרד',
     art: 'botevgradOut2026',
     band: { far: 0.69, near: 0.9 },
     size: { far: 0.2324, near: 0.403 },
@@ -791,12 +901,13 @@ export const NEW_ROOMS: SceneDef[] = [
   },
 
   /**
-   * מהמושבים באותו אולם — F03 *"ובמושבים"*. נמדד מהמגרש: טבעת (3.05) מ-0.28 ל-0.4 —
-   * אופק 0.36. הרצועה היא המעבר מאחורי השורה העליונה.
+   * מהמושבים באותו אולם — F03 *"ובמושבים"*. מ-27.9.2026 `botevgradSeats2026`: האולם
+   * בבוטבגרד, עם השם על הקיר והסמל מעל היציע. אותה מצלמה: טבעת (3.05) מ-0.28 ל-0.4 —
+   * אופק 0.36. הרצועה היא המעבר מאחורי השורה העליונה; הדלת מימין (0.905–0.955).
    */
   {
     id: 'arena-seats',
-    titleHe: 'המושבים',
+    titleHe: 'המושבים בבוטבגרד',
     art: 'botevgradSeats2026',
     band: { far: 0.72, near: 0.94 },
     size: { far: 0.2925, near: 0.4713 },
@@ -1093,26 +1204,29 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'עמית', x: 0.34, y: 0.82, flip: true },
       { who: 'מתוקי', x: 0.368, y: 0.755, flip: true },
     ]),
+    // ---- from 2010 the street is `street10` (STREET_2010): the pavement is 0.69–0.77, the
+    // kiosk's way in 0.225–0.36 and the alley's 0.425–0.525 at the back of it (0.69–0.72), so
+    // everybody below stands on the walk band (0.69–0.755) in front of both (27.9.2026)
     // 2010-teddy · D05 (d10-plan) — ליד הרכב של אולי
     ...cast('2010-teddy', undefined, [
-      { who: 'אולי', x: 0.3, y: 0.78 },
-      { who: 'אופיר', x: 0.5, y: 0.82, flip: true },
-      { who: 'עמית', x: 0.62, y: 0.79, flip: true },
+      { who: 'אולי', x: 0.29, y: 0.735 },
+      { who: 'אופיר', x: 0.5, y: 0.745, flip: true },
+      { who: 'עמית', x: 0.67, y: 0.735, flip: true },
     ]),
-    // 2010-friends · I02 (i-banner)
+    // 2010-friends · I02 (i-banner) — beside the blank banner in front of the alley
     ...cast('2010-friends', flag('i:meet'), [
-      { who: 'לינה', x: 0.5, y: 0.79, flip: true },
-      { who: 'רומא', x: 0.62, y: 0.81, flip: true },
+      { who: 'לינה', x: 0.53, y: 0.74, flip: true },
+      { who: 'רומא', x: 0.72, y: 0.745, flip: true },
     ]),
     // 2011-people · L02 (l-dor)
-    ...cast('2011-people', flag('l:melanie'), [{ who: 'דור', x: 0.52, y: 0.8, flip: true }]),
+    ...cast('2011-people', flag('l:melanie'), [{ who: 'דור', x: 0.56, y: 0.74, flip: true }]),
     // 2019-armchair · A03 (a-saturday) — אילן ובתיה, והסולם
     ...cast('2019-armchair', flag('a:photo'), [
-      { who: 'אילן', x: 0.455, y: 0.78 },
-      { who: 'בתיה', x: 0.5, y: 0.8, flip: true },
+      { who: 'אילן', x: 0.5, y: 0.73 },
+      { who: 'בתיה', x: 0.58, y: 0.745, flip: true },
     ]),
     // 2023-quiet · Q08 (q-hall)
-    ...cast('2023-quiet', { flag: 'own:route:USSISHKIN_FOUNDER:entry' }, [{ who: 'אפי', x: 0.5, y: 0.8, flip: true }]),
+    ...cast('2023-quiet', { flag: 'own:route:USSISHKIN_FOUNDER:entry' }, [{ who: 'אפי', x: 0.56, y: 0.74, flip: true }]),
   ],
 
   allenby: [
@@ -1220,11 +1334,13 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'אולי', x: 0.55, y: 0.78, flip: true },
       { who: 'אופיר', x: 0.68, y: 0.8, flip: true },
     ]),
-    // 2017-distance · K03 (k-back)
-    ...cast('2017-distance', flag('k:life'), [{ who: 'אופיר', x: 0.58, y: 0.78, flip: true }]),
-    // 2026-finale · Q10 (f-name) — הרציף, לפני
-    ...cast('2026-finale', undefined, [{ who: 'קובי', x: 0.52, y: 0.78, flip: true }]),
-    ...cast('2026-finale', { flagIs: { flag: 'life:finale:party', value: 'three' } }, [{ who: 'הילד', x: 0.62, y: 0.8, flip: true }]),
+    // ---- from 2017 the platform is `busStation20` (BUS_STATION_2017): the platform floor is
+    // 0.58–0.665, the timetable pole stands at 0.53 and the bench at 0.595–0.765 (27.9.2026)
+    // 2017-distance · K03 (k-back) — in front of the bench
+    ...cast('2017-distance', flag('k:life'), [{ who: 'אופיר', x: 0.64, y: 0.625, flip: true }]),
+    // 2026-finale · Q10 (f-name) — הרציף, לפני: between the bus door and the pole
+    ...cast('2026-finale', undefined, [{ who: 'קובי', x: 0.47, y: 0.615, flip: true }]),
+    ...cast('2026-finale', { flagIs: { flag: 'life:finale:party', value: 'three' } }, [{ who: 'הילד', x: 0.6, y: 0.635, flip: true }]),
   ],
 
   'ticket-office': [

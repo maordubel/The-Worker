@@ -69,10 +69,11 @@ export const QUEST_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
   'community-room': [
     { id: 'p-report', era: '2016-crisis', x: 0.45, y: 0.7, w: 0.07, act: 'p-report', verb: 'talk', labelHe: 'מתוקי — להחזיר את הרשימה', when: all(f('p:commit'), no('p:deliver')), priority: 3 },
   ],
+  // (27.9.2026) both chapters stand on `street10` — the green door is the narrow one beside the kiosk (0.39–0.41)
   street: [
     // 2026 · F00 → F01 — אבא הולך הביתה לפניך, ובדרך רואים איך
-    { id: 'f-pace-seen', era: '2026-plan', x: 0.55, y: 0.78, w: 0.06, act: 'f-pace-seen', verb: 'watch', labelHe: 'אבא, בדרך הביתה', when: all(f('f:money'), no('f:saw:pace'), no('f:plan')), priority: 2 },
-    { id: 'p-drop-a', era: '2016-crisis', x: 0.66, y: 0.75, w: 0.05, act: 'p-drop-a', verb: 'take', labelHe: 'הדלת הירוקה — שלמה, קומה שנייה', when: all(f('p:carry:a'), no('p:hand:a'), no('p:a-moved')), priority: 3 },
+    { id: 'f-pace-seen', era: '2026-plan', x: 0.55, y: 0.74, w: 0.06, act: 'f-pace-seen', verb: 'watch', labelHe: 'אבא, בדרך הביתה', when: all(f('f:money'), no('f:saw:pace'), no('f:plan')), priority: 2 },
+    { id: 'p-drop-a', era: '2016-crisis', x: 0.395, y: 0.725, w: 0.05, act: 'p-drop-a', verb: 'take', labelHe: 'הדלת הירוקה — שלמה, קומה שנייה', when: all(f('p:carry:a'), no('p:hand:a'), no('p:a-moved')), priority: 3 },
   ],
   pitch: [
     // 2021 · L09 — חזרה אליו עם שתי השעות (מי שהלך באמצע השיחה)

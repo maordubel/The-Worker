@@ -1,4 +1,6 @@
 import { CAST_2000 } from '../world/castFigures'
+import { BUS_STATION_2017, STREET_2010 } from '../world/rooms2000'
+import type { Repaint } from '../world/scenes'
 
 import { AMBIENT_1990, type AmbientActor } from './ambient1986'
 
@@ -49,3 +51,31 @@ export const AMBIENT_2000: readonly AmbientActor[] = [
   ...AMBIENT_1990.filter((row) => !CAST_BODIES.has(row.figure) && row.figure !== 'manCap'),
   ...MATCH_DAY,
 ]
+
+/**
+ * ------------------------------------------ עוברי אורח על ציור אחר (27.9.2026) ----
+ *
+ * שורה של עובר אורח היא שבר של הציור שהיא נכתבה עליו. מ-2010 הרחוב הוא `street10` ומ-2017
+ * הרציף הוא `busStation20` — ציורי 16:9 עם רצפה אחרת — ו-`y: 0.9` שהיה המדרכה הקרובה של
+ * `street90` הוא הכביש של `street10`, שם הגוף היה מצויר בגודל של הקו הקרוב ועומד באוויר.
+ * לכן כל שורה של החדרים האלה עוברת מהרצועה שהיא נכתבה עליה לרצועה של הציור, לפי העומק:
+ * מי שהלך בגב המדרכה הולך בגב המדרכה, ומי שהלך בחזית — בחזית.
+ *
+ * `from` היא הרצועה של הציור הישן, כפי שהיא ב-`scenes.ts`; `tests/life-rooms-2000.test.ts`
+ * משווה אותה לחדר, כדי שהמספר הזה לא יישאר מאחור כשמישהו ימדוד את החדר מחדש.
+ */
+export const AMBIENT_REPAINTS: ReadonlyArray<{ location: AmbientActor['location']; fromYear: number; from: { far: number; near: number }; paint: Repaint }> = [
+  { location: 'street', fromYear: 2010, from: { far: 0.705, near: 0.86 }, paint: STREET_2010 },
+  { location: 'bus-station', fromYear: 2017, from: { far: 0.705, near: 0.86 }, paint: BUS_STATION_2017 },
+]
+
+/** the passers-by of a year, each on the floor of the painting his room stands on that year */
+export function ambientFor(year: number): readonly AmbientActor[] {
+  return AMBIENT_2000.map((row) => {
+    const map = AMBIENT_REPAINTS.find((entry) => entry.location === row.location && year >= entry.fromYear)
+    if (!map) return row
+    const depth = Math.max(0, Math.min(1, (row.y - map.from.far) / (map.from.near - map.from.far)))
+    const y = map.paint.band.far + depth * (map.paint.band.near - map.paint.band.far)
+    return { ...row, y: Number(y.toFixed(4)) }
+  })
+}
