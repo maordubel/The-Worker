@@ -58,6 +58,8 @@ export function ShirtCard({ shirt, onClose }: { shirt: NonNullable<LifeBusEvents
               sizes="(max-width: 640px) 62vw, 320px"
               className="object-contain"
               priority
+              // the bytes shipped are the bytes measured for yellow (rule 61) — no re-encode
+              unoptimized
             />
           </div>
         )}

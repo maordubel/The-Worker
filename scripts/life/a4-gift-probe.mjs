@@ -28,4 +28,6 @@ for (let i = 0; i < 40; i++) {
   if (st.cast) { await page.locator('[data-life="cast-card"]').click().catch(() => {}); continue }
   if (st.d) await page.evaluate(() => window.__life.advance())
 }
+await page.waitForTimeout(1800)
+await page.screenshot({ path: `data/life-shots/d93-a4-${W}-card.png` })
 await browser.close()

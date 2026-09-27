@@ -1237,7 +1237,7 @@ export const BEATS_A4: Beat[] = [
     delayMs: 500,
     do: [
       { a: 'flag', flag: 'a4:kobi-came' },
-      { a: 'actorCue', actorId: 'kobi-a4-kiosk', cue: 'enter' },
+      { a: 'actorCue', actorId: 'kobi-a4-kiosk', cue: 'enter', from: 'right' },
       { a: 'actorCue', actorId: 'kobi-a4-kiosk', cue: 'approach', target: 'player' },
       { a: 'talk', conversation: 'kobi-shirt-gift-a4' },
     ],

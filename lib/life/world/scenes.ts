@@ -2198,7 +2198,7 @@ const SCENES: SceneDef[] = [
        * the moment the thirty is on the counter (`a4:kobi-came`, raised by the beat that
        * walks him in from the street door), and he has no `talk`: the beat speaks for him.
        */
-      { id: 'kobi-a4-kiosk', era: 'a4-shirt', figure: 'kobi-side', x: 0.6, y: 0.92, size: 0.32, nameHe: 'קובי', when: { flag: 'a4:kobi-came' } },
+      { id: 'kobi-a4-kiosk', era: 'a4-shirt', figure: 'kobi-side', x: 0.8, y: 0.92, size: 0.32, nameHe: 'קובי', when: { flag: 'a4:kobi-came' } },
       // 1996/97, the fifth day: Rafi passing on two messages he did not want to carry (§19)
       { id: 'rafi-a5', era: '1996-army', figure: 'oldMan', x: 0.3, y: 0.9, size: 0.535, nameHe: 'רפי מהקיוסק', talk: 'a5-kiosk', sway: 0.004, when: { flag: 'life:army:d5' } },
       {

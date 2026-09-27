@@ -5314,7 +5314,7 @@ export class WorldScene extends Phaser.Scene {
           done()
           return
         }
-        const gap = this.def.metre * 0.62 * this.W
+        const gap = this.def.metre * 0.4 * this.W
         const stop = toward + (actor.image.x > toward ? gap : -gap)
         face(toward)
         actor.baseX = stop
