@@ -1352,6 +1352,18 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2024-terrace', undefined, [{ who: 'אסף', x: 0.52, y: 0.76, flip: true }]),
   ],
 
+  // under the gate-5 stand (`world/city2027/stadiumSide.ts`, 27.9.2026) — the stairs are 0.56–0.8,
+  // so the people who wait stand at their foot and to the right of the corridor (0.28–0.47)
+  'gate5-stand': [
+    // 2001-terrace · T01 S1–S3 (t-prep, t-credit) — אסף at the foot of the stairs, מלמד by the ropes
+    ...cast('2001-terrace', flag('t:first'), [
+      { who: 'אסף', x: 0.58, y: 0.84 },
+      { who: 'מלמד', x: 0.88, y: 0.88, flip: true },
+    ]),
+    // 2012-terrace · T02 (t-hand) — אסף in front of the pillar, left of Yevgeny's stairs, for the "בשביל זה אנחנו פה"
+    ...cast('2012-terrace', undefined, [{ who: 'אסף', x: 0.47, y: 0.88 }]),
+  ],
+
   gate5: [
     // 2001-terrace · T01 (t-first)
     ...cast('2001-terrace', undefined, [

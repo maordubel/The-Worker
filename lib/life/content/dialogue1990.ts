@@ -614,6 +614,19 @@ export const CONVERSATIONS_1990: Conversation[] = [
         when: { flag: 'entry:granted' },
         lines: [{ who: 'קובי', text: 'פנימה. שער 7, ליד העמוד. אני אחריך.' }],
       },
+      /**
+       * מה ששמעת מתחת ליציע (`uc-radio-1990`, 27.9.2026) — the boy brings it to the gate before
+       * his father says a word, and his father already knew it. Then the ordinary meeting.
+       */
+      {
+        when: { flag: 'uc:carry', none: [{ flag: 'uc:told' }] },
+        lines: [
+          { who: 'פוגי', text: 'אבא, מתחת ליציע אומרים שבמחצית פותחים את השערים.' },
+          { who: 'קובי', text: 'אומרים. אני אמרתי את זה לאיש עם הטרנזיסטור לפני עשרים שנה.' },
+          { who: 'קובי', text: 'וטוב שבאת אליי עם זה, ולא לכל השער. רוב האנשים פה רק מעבירים הלאה.' },
+        ],
+        then: [{ e: 'flag', flag: 'uc:told' }, { e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 2 }, { e: 'goto', node: 'kobi-gate-1990' }],
+      },
       {
         lines: [
           { who: 'קובי', text: 'הנה אתה.' },
@@ -638,6 +651,20 @@ export const CONVERSATIONS_1990: Conversation[] = [
       {
         when: { flag: 'entry:granted' },
         lines: [{ who: 'סדרן', text: 'קדימה, פנימה, לא לעצור בקרוסלה. אחריך יש עוד אלף.' }],
+      },
+      // (27.9.2026) the boy who heard it under the stand (`uc-radio-1990`) was standing here first
+      {
+        when: { all: [{ afterMinute: 16 * 60 + 48 }, { flag: 'uc:half' }] },
+        lines: [
+          { who: 'סדרן', text: 'מחצית. פותחים. תיכנס, רק לא בריצה.' },
+          { who: null, text: 'ידעת. עמדת פה עוד לפני שהסדרן הוציא את המפתח — ראשון בתור, מול עשרים ילדים ששמעו את זה ממך.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'entry:granted' },
+          { e: 'flag', flag: 'entry:half' },
+          { e: 'personality', key: 'streetSmarts', delta: 2 },
+          { e: 'toast', text: 'המחצית. נכנסים — ראשון.', tone: 'red' },
+        ],
       },
       // The old mercy of Israeli grounds: at half-time the gates open and whoever is
       // still outside walks in for the second half. A boy with no ticket, no father at
@@ -784,6 +811,95 @@ export const CONVERSATIONS_1990: Conversation[] = [
           { e: 'remember', who: 'kobi', eventId: '1990-found', significance: 'major' },
           { e: 'toast', text: 'הביתה. ברגל, ביחד.', tone: 'red' },
         ],
+      },
+    ],
+  },
+
+  // ======================================================= under the stand ========
+  /**
+   * מתחת ליציע (27.9.2026, `undercroft`, `world/city2027/stadiumSide.ts`) — the approach under
+   * the stand before the whistle, one door along the forecourt from gate seven. B1 S2: "the
+   * surroundings; every check costs minutes". Three small things and one of them is the chapter's
+   * own subject — a rumour, and what a twelve-year-old does with it. The rumour is the one fact
+   * this afternoon already holds (the steward opens the gates at half-time, `steward-1990`), so
+   * nothing here says a word about Yavne or a number: it is information about the GROUND.
+   */
+  {
+    id: 'uc-radio-1990',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'ליד העמוד השלישי, איש עם טרנזיסטור צמוד לאוזן, ושלושה ילדים סביבו כמו סביב מדורה.' },
+          { who: 'אוהד עם רדיו', text: 'היום במחצית פותחים. תמיד כשמלא — פותחים. מי שבחוץ, נכנס לחצי השני.' },
+          { who: null, text: 'אחד הילדים כבר רץ לספר למישהו.' },
+        ],
+        choices: [
+          {
+            id: 'ask',
+            text: '(לשאול מאיפה הוא יודע.)',
+            then: [
+              { e: 'flag', flag: 'uc:heard' },
+              { e: 'flag', flag: 'uc:half' },
+              { e: 'flagValue', flag: 'life:1990:undercroft', value: 'asked' },
+              { e: 'time', minutes: 6 },
+              { e: 'personality', key: 'curiosity', delta: 2 },
+              { e: 'toast', text: '"ארבעים שנה אני עומד פה. תשאל את הסדרן — אבל אחרי שהוא פותח."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'carry',
+            text: '(לרוץ לספר לאבא, בשער 7.)',
+            then: [
+              { e: 'flag', flag: 'uc:heard' },
+              { e: 'flag', flag: 'uc:half' },
+              { e: 'flag', flag: 'uc:carry' },
+              { e: 'flagValue', flag: 'life:1990:undercroft', value: 'carried' },
+              { e: 'toast', text: 'שני ילדים כבר רצים לפניך עם אותה ידיעה. השמועה הולכת מהר יותר ממך.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'doubt',
+            text: '(לא להאמין. שמועות.)',
+            then: [
+              { e: 'flag', flag: 'uc:heard' },
+              { e: 'flagValue', flag: 'life:1990:undercroft', value: 'doubted' },
+              { e: 'personality', key: 'stubbornness', delta: 1 },
+              { e: 'toast', text: 'האיש מחזיר את הטרנזיסטור לאוזן. "תראה בעצמך במחצית."', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'uc-cart-1990',
+    nameHe: null,
+    branches: [
+      {
+        when: { minAgorot: 200 },
+        lines: [{ who: null, text: 'עגלה עם שמשייה, שקי גרעינים ובקבוקי גזוז בקרח שנמס. המוכר לא מסתכל על הכסף — רק על השעון.' }],
+        choices: [
+          { id: 'seeds', text: '(גרעינים. שניים.)', then: [{ e: 'flag', flag: 'uc:cart' }, { e: 'money', agorot: -200, why: 'גרעינים מתחת ליציע' }, { e: 'flag', flag: 'bought:snack' }, { e: 'wellbeing', key: 'happiness', delta: 2 }, { e: 'toast', text: 'שקית גרעינים, חמה מהשמש.', tone: 'red' }] },
+          { id: 'no', text: '(לא עכשיו.)', then: [{ e: 'flag', flag: 'uc:cart' }] },
+        ],
+      },
+      {
+        lines: [{ who: null, text: 'עגלה עם שמשייה. אין לך שקל, והמוכר יודע את זה לפני שאתה פותח את הפה.' }],
+        then: [{ e: 'flag', flag: 'uc:cart' }],
+      },
+    ],
+  },
+  {
+    id: 'uc-lanes-1990',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'המעברים בין המעקות ריקים. מספרים צבועים על הבטון, ובסוף כל אחד — קרוסלה נעולה. התור האמיתי בקופה, ובאורך של שלוש קרוסלות.' },
+          { who: null, text: 'אתה סופר אותו פעמיים. יותר אנשים מכרטיסים.' },
+        ],
+        then: [{ e: 'flag', flag: 'uc:lanes' }, { e: 'time', minutes: 5 }],
       },
     ],
   },

@@ -3736,6 +3736,20 @@ const SCENES: SceneDef[] = [
     ambience: 'dusk',
     stuckHe: 'הכניסה לאולם באמצע, מתחת לגג. חזרה לרחוב — משמאל.',
     stuckByEra: { '1991': 'הסדרן ליד הדלת, המוכר מימין. פנימה — באמצע.' },
+    /**
+     * ערב משחק (27.9.2026) — `ussExtDusk` is the same corner at dusk with the crowd painted in:
+     * the first sight of the hall on a night it plays (A3's reveal, the derby, the finals, the
+     * two relegation nights). It is the CARD, not the room — the walkable room stays the empty
+     * `ussExt`, whose floor every person here is measured on. Afternoons (1993-cup, the double)
+     * and days nobody plays get no card.
+     */
+    arrivalByEra: {
+      'a3-hall': { art: 'ussExtDusk', ms: 3000, flag: 'saw:ussDusk' },
+      '1991': { art: 'ussExtDusk', ms: 3000, flag: 'saw:ussDusk' },
+      '1993-galil': { art: 'ussExtDusk', ms: 3000, flag: 'saw:ussDusk' },
+      '1997-basket': { art: 'ussExtDusk', ms: 3000, flag: 'saw:ussDusk' },
+      '1999-basket': { art: 'ussExtDusk', ms: 3000, flag: 'saw:ussDusk' },
+    },
     spawns: {
       fromStreet: { x: 0.12, y: 0.9, facing: 'right' },
       fromHall: { x: 0.5, y: 0.93, facing: 'left' },
