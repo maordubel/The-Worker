@@ -149,9 +149,10 @@ export const BEATS_EUROPE: Beat[] = [
     trigger: 'clock',
     when: { all: [{ flag: 'e:trip' }], none: [{ flag: 'e:milan' }] },
     delayMs: 1200,
+    // (27.9.2026) הכרטיס נושא את הגרפיקה שמאור אישר למגרש חוץ באירופה — תמונה, לא חדר.
     // ניקוסיה אינה מצוירת, והחדר שפוגי עומד בו הוא לא היא: כרטיס אומר לאן קפצנו, ותג
     // המקום בתיבה (`Conversation.where`) מחזיק את זה לאורך השיחה
-    do: [{ a: 'card', titleHe: 'ניקוסיה', subHe: 'משחק בית, אי אחר', ms: 2400 }, { a: 'talk', conversation: 'e-milan' }],
+    do: [{ a: 'card', titleHe: 'ניקוסיה', subHe: 'משחק בית, אי אחר', ms: 2400, art: 'plate-2002-nicosia' }, { a: 'talk', conversation: 'e-milan' }],
   },
   /**
    * E05 — *"בסוף צריך למצוא את האוטובוס"*. אחרי המשחק במילאן, בטרמינל שהאוטובוס עומד

@@ -851,6 +851,19 @@ const SCENES: SceneDef[] = [
       { id: 'bed', x: 0.45, y: 0.92, w: 0.14, act: 'bed', verb: 'look', labelHe: 'המיטה' },
       // the wall of pictures over the bed, 0.35–0.65 in the 4.9 painting
       { id: 'poster', x: 0.63, y: 0.9, w: 0.08, act: 'poster', verb: 'look', labelHe: 'הכרזה' },
+      // 27.9.2026 — the second poster, Maor's approved one: the cup holders, beside the bed from
+      // the first Stage A year to the last year he sleeps here. Not in the painting; looking opens
+      // the paper itself (a `doc`), so nothing is drawn on a wall that was painted without it.
+      {
+        id: 'poster-cup',
+        era: ['a2-alley', 'a3-hall', 'a4-shirt', 'a5-first', 'a6-radio', 'a7-week', '1986', '1990', '1991', '1993-cup', '1993-galil', '1995-sinai', '1996-army', '1997-basket', '1998-laces'],
+        x: 0.34,
+        y: 0.84,
+        w: 0.06,
+        act: 'poster-cup',
+        verb: 'look',
+        labelHe: 'פוסטר הגביע',
+      },
       // 1990: the same room, four years on. The drawer holds the scarf now, not a key.
       { id: 'bed-1990', era: '1990', x: 0.45, y: 0.92, w: 0.14, act: 'bed-1990', verb: 'look', labelHe: 'המיטה' },
       { id: 'drawer-1990', era: '1990', x: 0.17, y: 0.9, w: 0.16, act: 'drawer-1990', verb: 'look', labelHe: 'המגירה' },
@@ -1101,10 +1114,11 @@ const SCENES: SceneDef[] = [
       {
         id: 'kobi-1991',
         era: '1991',
-        figure: 'kobi90-sitA',
+        // the approved armchair look (27.9.2026): drawn with its own chair, like `kobi-chair`
+        figure: 'kobi90-chair',
         x: 0.19,
         y: 0.74,
-        size: 0.36,
+        size: 0.34,
         nameHe: 'קובי',
         talk: 'kobi-1991',
         when: { afterMinute: 17 * 60 + 40 },
@@ -1126,10 +1140,10 @@ const SCENES: SceneDef[] = [
       {
         id: 'kobi-1993',
         era: '1993-cup',
-        figure: 'kobi90-paper',
+        figure: 'kobi90-chair',
         x: 0.19,
         y: 0.74,
-        size: 0.4,
+        size: 0.34,
         nameHe: 'קובי',
         talk: 'kobi-1993',
         sway: 0.002,

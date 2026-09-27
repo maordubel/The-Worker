@@ -2550,6 +2550,14 @@
    "yellowLeft": 0,
    "whatHe": "חרמש — תלבושת כדורסל אדומה, חזית",
    "source": "maor-2026-09-23-reference"
+  },
+  "kobi90-chair": {
+   "w": 489,
+   "h": 640,
+   "bytes": 109876,
+   "yellowLeft": 0,
+   "source": "maor-approved-2026-09-27",
+   "whatHe": "קובי בכורסה, טרנינג שנות ה-90, קורא הפועל"
   }
  },
  "props": {
@@ -4195,6 +4203,14 @@
    "bytes": 907204,
    "yellowLeft": 0,
    "source": "scans 2026-09-16"
+  },
+  "docPosterCup": {
+   "w": 1000,
+   "h": 707,
+   "bytes": 404932,
+   "yellowLeft": 0,
+   "source": "maor-approved-2026-09-27",
+   "whatHe": "פוסטר הקבוצה מחזיקת הגביע, לקיר בחדר של פוגי"
   }
  },
  "extensions": {
@@ -10945,6 +10961,14 @@
    "bytes": 1072266,
    "yellowLeft": 0,
    "source": "art delivery 2026-09-16"
+  },
+  "plate-2002-nicosia": {
+   "w": 1280,
+   "h": 720,
+   "bytes": 175582,
+   "yellowLeft": 0,
+   "source": "maor-approved-2026-09-27",
+   "whatHe": "אצטדיון חוץ באירופה — כרטיס ניקוסיה 2002"
   }
  },
  "shirts": {

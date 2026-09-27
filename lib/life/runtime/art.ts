@@ -327,6 +327,9 @@ export const FIGURE = [
   'kobi90-bag',
   'kobi90-lean',
   'kobi90-sitA',
+  // 27.9.2026 — the approved armchair look: the nineties tracksuit, הפועל open on his knee.
+  // `kobi-chair` (denim) stays the eighties; Maor: "שיהיה לו כמה לוקים".
+  'kobi90-chair',
   'kobi90-point',
   'kobi90-paper',
   'kobi90-sitB',
@@ -966,6 +969,9 @@ export const DOC = [
   'docCup99', 'docPage99', 'docTikva99', 'docSeason9899',
   'docSeason9900',
   'docTicket2000', 'docProgramme2000', 'docRedBall2000', 'docDouble2000',
+  // 27.9.2026 — the poster Maor approved for the boy's wall ("לתלייה בחדר של פוגי בשנות 80 90").
+  // The paper says what it is on itself: the cup holders, and the words פוסטר למזכרת.
+  'docPosterCup',
   // 17.9.2026 — the scanned objects. Spread rather than re-typed, so the two lists cannot
   // disagree about which keys a `{ e: 'doc' }` effect accepts.
   ...ARTEFACT,

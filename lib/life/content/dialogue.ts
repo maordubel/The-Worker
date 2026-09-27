@@ -120,6 +120,21 @@ const CONVERSATIONS: Conversation[] = [
     ],
   },
   {
+    id: 'poster-cup',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'ליד המיטה, בגובה העיניים כששוכבים: מחזיקת הגביע. אחת־עשרה חולצות אדומות בשורה אחת.' },
+          { who: null, text: 'למטה כתוב "פוסטר למזכרת", כאילו מישהו חשב שאפשר לשכוח.' },
+        ],
+        then: [
+          { e: 'doc', art: 'docPosterCup', captionHe: 'פוסטר למזכרת — הפועל תל אביב מחזיקת גביע המדינה. מהאוסף של צוות The Worker.' },
+          { e: 'redheart', key: 'footballLove', delta: 1 },
+        ],
+      },
+    ],
+  },
+  {
     id: 'desk',
     branches: [
       {
