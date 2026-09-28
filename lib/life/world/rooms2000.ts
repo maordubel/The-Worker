@@ -536,7 +536,14 @@ export const NEW_ROOMS: SceneDef[] = [
     spawns: { start: { x: 0.24, y: 0.82, facing: 'right' } },
     actors: [],
     hotspots: [look('drivein-court', '2015-newhall', 0.6, 0.76, 0.12, 'הפרקט החדש')],
-    layers: [{ art: 'propBasketball', era: '*', x: 0.8, y: 0.745, w: 0.012, depth: 0.745, foot: true }],
+    layers: [
+      { art: 'propBasketball', era: '*', x: 0.8, y: 0.745, w: 0.012, depth: 0.745, foot: true },
+      // (pass D) 2015 · N05 — what was prepared is there when the doors open: the old banner on
+      // the railing over the entrance (0.37 on the board), red flags on the seats to the right
+      { art: 'propBanner', era: '2015-newhall', x: 0.12, y: 0.33, w: 0.14, depth: 0.5, when: { flag: 'nr:did:banner' } },
+      { art: 'propFlag', era: '2015-newhall', x: 0.84, y: 0.43, w: 0.04, depth: 0.5, when: { flag: 'nr:did:confetti' } },
+      { art: 'propFlag', era: '2015-newhall', x: 0.93, y: 0.46, w: 0.035, depth: 0.5, when: { flag: 'nr:did:confetti' } },
+    ],
     exits: [
       BACK_TO_STREET('החוצה, הביתה', { x: 0.0, y: 0.73, w: 0.07, h: 0.2 }, { x: 0.05, y: 0.25, w: 0.15, h: 0.3, tone: 'inside' }),
     ],
@@ -640,7 +647,7 @@ export const NEW_ROOMS: SceneDef[] = [
     actors: [],
     hotspots: [
       // (pass D) while the seller's hour runs, the board and the window are the triangle's (`questsPassD.ts`)
-      look('office-board', '2025-owner', 0.39, 0.62, 0.1, 'הלוח עם המספרים', undefined, { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] }),
+      look('office-board', '2025-owner', 0.42, 0.62, 0.1, 'הלוח עם המספרים', undefined, { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] }),
       look('office-window', '2025-owner', 0.87, 0.66, 0.08, 'החלון', undefined, { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] }),
     ],
     exits: [
@@ -1461,6 +1468,14 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'אפי', x: 0.46, y: 0.8 },
       { who: 'מתוקי', x: 0.6, y: 0.82, flip: true },
     ]),
+    // (pass D) N05 S4 — six thirty: the doors open on the hall he prepared (`nr-doors` rebuilds the room)
+    ...cast('2015-newhall', flag('nr:crowd'), [
+      { who: 'אוהד', x: 0.78, y: 0.8, figure: 'adultA3', flip: true },
+      { who: 'אוהד', x: 0.34, y: 0.78, figure: 'youngA4' },
+      { who: 'אוהד', x: 0.9, y: 0.86, figure: 'youngB4', flip: true },
+    ]),
+    // …and the family he waited for at the doors, standing where he showed them
+    ...cast('2015-newhall', all('nr:crowd', 'nr:did:families'), [{ who: 'אוהד', x: 0.22, y: 0.84, figure: 'adultA5' }]),
     // 2024-home · H24b (h24-small, h24-meeting) — "אנחנו באמת לא נכנסים פה"; ואחרי זה,
     // על הפרקט, פגישה פתוחה: יוסף מהעמותה, והבעלים בווידאו על מסך (`remote`)
     ...cast('2024-home', flag('h24:ask'), [

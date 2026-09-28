@@ -22,14 +22,21 @@ const HOUR = all(f('o:brief'), no('o:verdict'))
 const MONEY_OPEN = all(HOUR, no('o:tri:money'), no('o:tri:partner'))
 
 export const PASS_D_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
+  'drive-in': [
+    // 2015 · N05 — before the crowd: four things in the empty hall, time for two (`chapter2015newhall.ts`)
+    { id: 'nr-spot-banner', era: '2015-newhall', x: 0.3, y: 0.76, w: 0.06, act: 'nr-do-banner', verb: 'hold', labelHe: 'הבד הישן — למעקה מעל הכניסה', when: all(f('nr:prep'), no('nr:crowd'), no('nr:did:banner')), priority: 4 },
+    { id: 'nr-spot-confetti', era: '2015-newhall', x: 0.86, y: 0.78, w: 0.06, act: 'nr-do-confetti', verb: 'take', labelHe: 'נייר אדום — למושבים מימין', when: all(f('nr:prep'), no('nr:crowd'), no('nr:did:confetti')), priority: 4 },
+    { id: 'nr-spot-families', era: '2015-newhall', x: 0.16, y: 0.8, w: 0.05, act: 'nr-do-families', verb: 'talk', labelHe: 'הדלתות — לחכות למשפחות', when: all(f('nr:prep'), no('nr:crowd'), no('nr:did:families')), priority: 4 },
+    { id: 'nr-spot-seat', era: '2015-newhall', x: 0.72, y: 0.76, w: 0.05, act: 'nr-do-seat', verb: 'sit', labelHe: 'שורה — לשבת', when: all(f('nr:prep'), no('nr:crowd'), no('nr:did:seat')), priority: 3 },
+  ],
   home: [
     // 2013 · L04 — the diary on the fridge, while the week is still half empty (`hh-week-resume`)
     { id: 'hh-diary-fridge', era: '2013-household', x: 0.31, y: 0.6, w: 0.05, act: 'hh-week-resume', verb: 'look', labelHe: 'היומן על המקרר', when: all(f('hh:week'), no('hh:planned')), priority: 4 },
   ],
   office: [
-    { id: 'o-spot-money', era: '2025-owner', x: 0.39, y: 0.62, w: 0.08, act: 'o-tri-money', verb: 'look', labelHe: 'הלוח של מיכל — העתודה', when: MONEY_OPEN, priority: 4 },
+    { id: 'o-spot-money', era: '2025-owner', x: 0.45, y: 0.62, w: 0.08, act: 'o-tri-money', verb: 'look', labelHe: 'הלוח של מיכל — העתודה', when: MONEY_OPEN, priority: 4 },
     { id: 'o-spot-partner', era: '2025-owner', x: 0.52, y: 0.66, w: 0.05, act: 'o-tri-partner', verb: 'talk', labelHe: 'פרדי — הדרך המהירה', when: MONEY_OPEN, priority: 3 },
-    { id: 'o-spot-squad', era: '2025-owner', x: 0.6, y: 0.72, w: 0.05, act: 'o-tri-squad', verb: 'watch', labelHe: 'המחשב — המנהל המקצועי בווידאו', when: all(HOUR, no('o:tri:squad')), priority: 4 },
+    { id: 'o-spot-squad', era: '2025-owner', x: 0.25, y: 0.64, w: 0.05, act: 'o-tri-squad', verb: 'watch', labelHe: 'המחשב — המנהל המקצועי בווידאו', when: all(HOUR, no('o:tri:squad')), priority: 4 },
     { id: 'o-spot-fans', era: '2025-owner', x: 0.9, y: 0.7, w: 0.06, act: 'o-tri-fans', verb: 'talk', labelHe: 'יבגני, ליד החלון', when: all(HOUR, no('o:tri:fans')), priority: 4 },
   ],
 }

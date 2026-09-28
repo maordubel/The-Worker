@@ -201,7 +201,8 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2015-newhall': [
     { id: 'hall', textHe: 'האולם החדש. עם מי שלא ראה את הישן.', doneWhen: F('nr:hall') },
-    { id: 'route', textHe: 'מאיפה יוצאים.', revealWhen: F('nr:hall'), doneWhen: F('nr:route') },
+    { id: 'prep', textHe: 'עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.', revealWhen: F('nr:prep'), doneWhen: F('nr:crowd') },
+    { id: 'route', textHe: 'מאיפה יוצאים.', revealWhen: F('nr:first'), doneWhen: F('nr:route') },
   ],
   '2016-crisis': [
     { id: 'news', textHe: 'מה ידוע, ומה עוד לא.', doneWhen: F('p:news') },
@@ -220,7 +221,8 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2021-losses': [
     { id: 'indoors', textHe: 'ערב בבית. אבא על המסך.', doneWhen: F('r:indoors') },
-    { id: 'cup', textHe: 'אחרי הגמר.', revealWhen: F('r:indoors'), doneWhen: F('r:cup') },
+    { id: 'final', textHe: 'הגמר, על המסך הקטן בקיוסק.', revealWhen: F('r:indoors'), doneWhen: F('r:final') },
+    { id: 'cup', textHe: 'אחרי הגמר.', revealWhen: F('r:final'), doneWhen: F('r:cup') },
     { id: 'young', textHe: 'ערב שכואב לאנשים אחרים.', revealWhen: F('r:cup'), doneWhen: F('r:young') },
   ],
   '2023-tournament': [

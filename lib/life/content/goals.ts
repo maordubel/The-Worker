@@ -255,6 +255,8 @@ export const goalFive = (state: LifeState): LocationId | null => {
 /** 2015–2016 — הרחוב לפני האולם החדש, ואז הסלון של אבא */
 export const goalNewHall = (state: LifeState): LocationId | null => {
   if (!flag(state, 'nr:hall')) return 'drive-in'
+  // (pass D) the empty hall, the doors, the first game — all in the drive-in
+  if (flag(state, 'nr:prep') && !flag(state, 'nr:first')) return 'drive-in'
   if (!flag(state, 'nr:route')) return 'home'
   return null
 }

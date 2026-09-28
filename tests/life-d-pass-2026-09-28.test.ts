@@ -273,3 +273,51 @@ describe('2013-household — five evenings, seven things, and the week happens',
     expect(sim.find('hh-diary-fridge')).toBeDefined()
   })
 })
+
+// ================================================ 2015-newhall — the hall before the crowd ===
+
+describe('2015-newhall — four things in an empty hall, time for two, and the crowd walks into what was done', () => {
+  function hall() {
+    const sim = new WorldSim('2015-newhall')
+    sim.beatAnswer = pick('short', 'hang', 'cut', 'door', 'sit')
+    sim.go('drive-in')
+    return sim
+  }
+
+  it('after Efi’s sentence the empty hall offers four things at once', () => {
+    const sim = hall()
+    expect(sim.state.flags['nr:prep']).toBe(true)
+    const spots = sim.things().filter((t) => t.kind === 'spot').map((t) => t.id)
+    for (const id of ['nr-spot-banner', 'nr-spot-confetti', 'nr-spot-families', 'nr-spot-seat']) expect(spots).toContain(id)
+  })
+
+  it('two done and the doors open; the third is gone, and the room is rebuilt with the banner up', () => {
+    const sim = hall()
+    sim.press('nr-spot-banner', pick('hang'))
+    sim.press('nr-spot-families', pick('door'))
+    expect(sim.state.flags['nr:crowd']).toBe(true)
+    expect(sim.find('nr-spot-confetti')).toBeUndefined()
+    expect(sim.state.flags['nr:seen:banner']).toBe(true)
+    expect(sim.state.flags['nr:seen:confetti']).toBe(true)
+    expect(sim.state.flags['nr:first']).toBe(true)
+    expect(sim.state.flags['life:drivein:banner']).toBe(true)
+  })
+
+  it('a man who sits and does not help is a choice with a price, not a skip', () => {
+    const sim = hall()
+    sim.engine.dispatch({ t: 'relationship.changed', who: 'efi', axis: 'bond', delta: 10 })
+    const before = sim.state.relationships?.['efi']?.bond ?? 0
+    sim.press('nr-spot-seat', pick('sit'))
+    expect(sim.state.flags['life:drivein:row']).toBe('seven')
+    const after = sim.state.relationships?.['efi']?.bond ?? 0
+    expect(after).toBeLessThan(before)
+  })
+
+  it('doing nothing: six thirty comes, the doors open on an unprepared hall, and the chapter goes on', () => {
+    const sim = hall()
+    sim.wait(120)
+    expect(sim.state.flags['nr:crowd']).toBe(true)
+    expect(sim.state.flags['nr:first']).toBe(true)
+    expect(sim.state.flags['nr:did:banner']).toBeUndefined()
+  })
+})
