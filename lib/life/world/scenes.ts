@@ -1298,7 +1298,7 @@ const SCENES: SceneDef[] = [
       { id: 'photo-1990', era: '1990', x: 0.42, y: 0.76, w: 0.08, act: 'photo-1990', verb: 'look', labelHe: 'התמונות' },
       { id: 'tv-1993', era: '1993-cup', x: 0.13, y: 0.78, w: 0.1, act: 'tv-1993', verb: 'watch', labelHe: 'הטלוויזיה' },
       // (V3 §12) A7 — asking is sitting down beside him, on the arm of the chair, with the page
-      { id: 'a7-armrest', era: 'a7-week', x: 0.27, y: 0.86, w: 0.07, act: 'kobi-a7', verb: 'sit', labelHe: 'המשענת של הכורסה, ליד אבא', when: { all: [{ flag: 'a7:knows' }, { notFlag: 'a7:refused' }] }, priority: 5 },
+      { id: 'a7-armrest', era: 'a7-week', x: 0.27, y: 0.86, w: 0.07, act: 'a7-armrest', verb: 'sit', labelHe: 'המשענת של הכורסה, ליד אבא', when: { all: [{ flag: 'a7:knows' }, { notFlag: 'a7:refused' }] }, priority: 5 },
       // (V3 §12) 2000, an afternoon on the sofa with his parents, not talking about the final
       { id: 'd-sofa', era: '2000-double', x: 0.42, y: 0.86, w: 0.1, act: 'd-home-afternoon', verb: 'sit', labelHe: 'הספה, ליד אבא ואמא', when: { all: [{ flag: 'd:opened' }, { notFlag: 'd:final' }, { notFlag: 'd:pick1:family' }] }, priority: 5 },
       /**
@@ -1599,11 +1599,21 @@ const SCENES: SceneDef[] = [
        * prompt says so; afterwards he is Efi. One body, two names, never both at once.
        */
       { id: 'efi-a3', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'אפי', talk: 'efi-a3', sway: 0.006, when: { any: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }] } },
-      { id: 'efi-a3-stranger', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'ילד עם כדור כתום', talk: 'efi-a3', sway: 0.006, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }] } },
+      // (pass 28.9.2026, brief §3 S1 "אפי מגיע ביוזמת NPC") the stranger closes the last
+      // metres himself when the boy wanders near — the first step of this friendship is his
+      { id: 'efi-a3-stranger', era: 'a3-hall', figure: 'efi', x: 0.62, y: 0.79, size: 0.26, nameHe: 'ילד עם כדור כתום', talk: 'efi-a3', sway: 0.006, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }] }, initiative: { reachM: 2.4, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:deferred' }] } } },
       // A4 — the second chance, on the step by the kiosk door (plan §3.2); gone once he has an answer
       { id: 'efi-a4', era: 'a4-shirt', figure: 'efi', x: 0.34, y: 0.8, size: 0.26, nameHe: 'אפי', talk: 'efi-a4', sway: 0.006, when: { flag: 'life:efi:deferred', none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:declined' }, { flag: 'a4:ready-to-buy' }] } },
       { id: 'efi-a4-stranger', era: 'a4-shirt', figure: 'efi', x: 0.34, y: 0.8, size: 0.26, nameHe: 'ילד עם כדור כתום', talk: 'efi-a4', sway: 0.006, when: { none: [{ flag: 'life:efi:met' }, { flag: 'life:efi:declined' }, { flag: 'life:efi:deferred' }, { flag: 'a4:ready-to-buy' }] } },
       { id: 'kobi-a5', era: 'a5-first', figure: 'kobi-side', x: 0.66, y: 0.8, size: 0.32, nameHe: 'קובי', talk: 'kobi-a5', flip: true, when: { none: [{ flag: 'a5:kobi-left' }] } },
+      /**
+       * (pass 28.9.2026, brief §5 S2 "street social test") the first time the shirt is worn
+       * in public it is worn past the two boys who have seen him every day of his life —
+       * Ofir with a ball under his arm, Amit on the kerb. They are here only until the car
+       * goes; Ofir walks up by himself (`a5-street`).
+       */
+      { id: 'ofir-a5', era: 'a5-first', figure: 'ofir', x: 0.48, y: 0.8, size: 0.26, nameHe: 'אופיר', talk: 'ofir-a5', flip: true, sway: 0.008, when: { none: [{ flag: 'a5:there' }] } },
+      { id: 'amit-a5', era: 'a5-first', figure: 'amit', x: 0.36, y: 0.79, size: 0.26, nameHe: 'עמית', talk: 'ofir-a5', when: { none: [{ flag: 'a5:there' }] } },
       { id: 'liron-a6', era: 'a6-radio', figure: 'adultB2', x: 0.56, y: 0.8, size: 0.29, nameHe: 'לירון', talk: 'liron-a6' },
       { id: 'amit-a7', era: 'a7-week', figure: 'amit', x: 0.36, y: 0.79, size: 0.26, nameHe: 'עמית', talk: 'amit-a7' },
       { id: 'ofir-a7', era: 'a7-week', figure: 'ofir', x: 0.56, y: 0.79, size: 0.26, nameHe: 'אופיר', talk: 'ofir-a7', flip: true, sway: 0.006 },
@@ -2849,6 +2859,25 @@ const SCENES: SceneDef[] = [
          * put the other colours on the glass, and a rivalry you can see coming from across
          * the street is not the one worth writing.
          */
+        /**
+         * אפי בקשת (pass 28.9.2026, brief §3 S2 — "intersection אחד") — A3's walk has one
+         * real fork, and it is this corner: tickets, the shop, the café, the arch. Efi
+         * waits under the arch and steps out to meet the boy who comes near.
+         */
+        id: 'efi-a3-arch',
+        era: 'a3-hall',
+        figure: 'efi',
+        x: 0.655,
+        y: 0.785,
+        size: 0.31,
+        nameHe: 'אפי',
+        talk: 'efi-a3-arch',
+        flip: true,
+        sway: 0.006,
+        when: { all: [{ flag: 'life:efi:met' }], none: [{ flag: 'a3:inside' }] },
+        initiative: { reachM: 2.2, when: { none: [{ flag: 'a3:arch' }] } },
+      },
+      {
         id: 'rival',
         // not in the two chapters where Liron — who stands on the same body — works on this
         // corner (the kiosk of 1996, the phone shop next door in 2006): one man in a white
@@ -4104,7 +4133,9 @@ const SCENES: SceneDef[] = [
       { id: 'hooper-b', era: '*', figure: 'hooperRed-stretch', x: 0.45, y: 0.73, size: 0.16, nameHe: 'שחקן', sway: 0.004 },
       // The usher by the door: the one person who talks, and what he says depends on
       // whether there is a game tonight.
-      { id: 'usher', era: '*', figure: 'usher', x: 0.2, y: 0.9, size: 0.3, nameHe: 'סדרן', talk: 'usher-hall', sway: 0.003 },
+      // (pass 28.9.2026) not in A3: that evening has a game on, and its own usher below
+      { id: 'usher', era: chaptersWhere((id) => id !== 'a3-hall'), figure: 'usher', x: 0.2, y: 0.9, size: 0.3, nameHe: 'סדרן', talk: 'usher-hall', sway: 0.003 },
+      { id: 'usher-a3-in', era: 'a3-hall', figure: 'usher', x: 0.2, y: 0.9, size: 0.3, nameHe: 'סדרן', talk: 'usher-a3-hall', sway: 0.003 },
       /**
        * אפי ליד המעקה — the boy who brought him, standing where he said he would be.
        *
@@ -4136,7 +4167,10 @@ const SCENES: SceneDef[] = [
        * `saw:parquet` → `life:seen:ussishkin`), so the day closes on what he DID.
        */
       { id: 'a3-step', era: 'a3-hall', x: 0.55, y: 0.82, w: 0.08, act: 'a3-step', verb: 'sit', labelHe: 'מדרגה ביציע, ליד אפי', when: { all: [{ flag: 'a3:inside' }, { notFlag: 'a3:seat' }] }, priority: 5 },
-      { id: 'a3-ball', era: 'a3-hall', x: 0.4, y: 0.9, w: 0.08, act: 'a3-ball', verb: 'play', labelHe: 'הכדור שהתגלגל אליך', when: { all: [{ flag: 'a3:inside' }, { notFlag: 'a3:ball' }] }, priority: 5, prop: { key: 'propBasketball', size: 0.03 } },
+      { id: 'a3-ball', era: 'a3-hall', x: 0.4, y: 0.9, w: 0.08, act: 'a3-ball', verb: 'play', labelHe: 'הכדור שהתגלגל אליך', when: { all: [{ flag: 'a3:inside' }, { notFlag: 'a3:ball' }, { notFlag: 'a3:tipoff' }] }, priority: 5, prop: { key: 'propBasketball', size: 0.03 } },
+      // (pass 28.9.2026, brief §3 S4) the painted door under the far basket, open a crack
+      // for the warm-up only — the whistle shuts it (`a3-tipoff`)
+      { id: 'a3-locker', era: 'a3-hall', x: 0.86, y: 0.8, w: 0.06, act: 'a3-locker', verb: 'look', labelHe: 'הדלת מתחת לסל, פתוחה סדק', when: { all: [{ flag: 'a3:inside' }, { notFlag: 'a3:locker' }, { notFlag: 'a3:tipoff' }] }, priority: 4 },
       { id: 'parquet', era: '*', x: 0.4, y: 0.88, w: 0.1, act: 'uss-parquet', verb: 'look', labelHe: 'הפרקט' },
       { id: 'stand', era: '*', x: 0.55, y: 0.78, w: 0.12, act: 'uss-stand', verb: 'look', labelHe: 'היציע' },
       { id: 'windows', era: '*', x: 0.75, y: 0.8, w: 0.1, act: 'uss-windows', verb: 'look', labelHe: 'החלונות' },

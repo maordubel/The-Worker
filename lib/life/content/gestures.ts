@@ -62,11 +62,13 @@ export const GESTURES: Record<string, Gesture> = {
     autoMs: 5200,
     shake: true,
     done: [
+      { e: 'flag', flag: 'life:a1:grip' },
       { e: 'flagValue', flag: 'life:a1:grip', value: 'held' },
       { e: 'rel', who: 'kobi', axis: 'trust', delta: 1 },
       { e: 'personality', key: 'courage', delta: 1 },
     ],
     ignored: [
+      { e: 'flag', flag: 'life:a1:grip' },
       { e: 'flagValue', flag: 'life:a1:grip', value: 'caught' },
       { e: 'wellbeing', key: 'stress', delta: 2 },
       { e: 'rel', who: 'kobi', axis: 'familiarity', delta: 2 },
@@ -74,6 +76,31 @@ export const GESTURES: Record<string, Gesture> = {
     doneHe: 'שתי ידיים בשיער שלו. לא נפלת.',
     ignoredHe: 'החלקת. יד גדולה תפסה אותך בקרסול והחזירה אותך למעלה, בלי להסתכל.',
     next: 'a1-goal',
+  },
+  /**
+   * הצעיף של אבא (pass 28.9.2026, brief §1 S1 "לגעת בצעיף") — the fourth way a five-year-old
+   * meets the terrace: not with his eyes but with his hand, on the one soft thing in reach.
+   * It is the first time the red touches him, and 24.5.1985's gate (`kobi-a5-gate`, Kobi in
+   * that same scarf) and 24.5.1986's shoulders (`kobi-shoulders-1986`) both remember it.
+   */
+  'scarf-1983': {
+    id: 'scarf-1983',
+    spot: { x: 0.56, y: 0.7 },
+    verb: 'hold',
+    labelHe: 'את הצעיף של אבא',
+    taps: 1,
+    autoMs: 4800,
+    // the plain raise first (the audits read raises, and the value is what callbacks ask)
+    done: [
+      { e: 'flag', flag: 'life:a1:scarf' },
+      { e: 'flagValue', flag: 'life:a1:scarf', value: 'held' },
+      { e: 'redheart', key: 'familyTradition', delta: 2 },
+      { e: 'rel', who: 'kobi', axis: 'familiarity', delta: 2 },
+    ],
+    ignored: [{ e: 'flag', flag: 'life:a1:scarf' }, { e: 'flagValue', flag: 'life:a1:scarf', value: 'seen' }],
+    doneHe: 'צמר מחוספס, חם מהצוואר שלו. אתה מחזיק קצה אחד ולא עוזב.',
+    ignoredHe: 'הקצה האדום מתנופף מול הפנים שלך, קרוב — ואז נעלם מעבר לכתף.',
+    next: 'a1-crowd',
   },
   /** the red thing on the concrete — only for a child who looked at the floor */
   'red-1983': {

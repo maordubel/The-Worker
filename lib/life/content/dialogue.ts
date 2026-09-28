@@ -49,8 +49,15 @@ import { CONVERSATIONS_ACTIVITIES } from './dialogueActivities'
 import { CONVERSATIONS_MISSIONS } from './dialogueMissions'
 import { CONVERSATIONS_ROUTES } from './routes'
 import { fanShops } from '../shirts'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation } from './script'
 import { CONVERSATIONS_MORNING_86, CONVERSATIONS_SCARF } from './threads'
+
+/** (pass 28.9.2026) Efi's hall, offered to a boy who has already been inside (A3) */
+const EFI_HALL_KNOWN: ChoiceDef[] = [
+  { id: 'go', text: 'בוא נלך.', then: [{ e: 'seize', opportunity: 'efi-hall' }, { e: 'goto', node: 'efi-hall-after' }] },
+  { id: 'no', text: 'היום יש משחק.', when: { flag: 'knows:match' }, noteHe: 'צריך לדעת שיש היום משחק', then: [{ e: 'redheart', key: 'footballLove', delta: 5 }, { e: 'rel', who: 'efi', axis: 'distance', delta: 4 }, { e: 'toast', text: '"היום זה שלך," הוא אמר. "בשבוע הבא — שלי." הוא לא נעלב.', tone: 'plain' }] },
+  { id: 'later', text: 'אולי אחר כך.', then: [] },
+]
 
 /**
  * שבת אחת ב-1986 — the chapter's words.
@@ -210,6 +217,31 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'bond', who: 'kobi', delta: 3 },
           { e: 'toast', text: 'קובי נתן לך 5 ₪' },
         ],
+      },
+      /**
+       * (pass 28.9.2026, brief §7→§8) the lie from last Saturday meets its morning: he did
+       * talk to Ofir's father. Nothing is said about it twice; the boy is let go on the
+       * same terms as any other no — and the reunion in the stand knows (`kobi-found`
+       * reads `lied:rachel`; this one is `life:a7:lied`).
+       */
+      {
+        when: { flag: 'life:a7:lied', none: [{ flag: 'kobi:lie-met' }] },
+        lines: [
+          { who: 'קובי', text: 'דיברתי עם אבא של אופיר.' },
+          { who: null, text: 'הוא לא מוסיף כלום. הוא הופך דף בעיתון, והדף רועש.' },
+          { who: 'קובי', text: 'הוא עובד היום. אבל אתה ידעת את זה.' },
+        ],
+        then: [{ e: 'flag', flag: 'kobi:lie-met' }, { e: 'rel', who: 'kobi', axis: 'trust', delta: -4 }, { e: 'rel', who: 'kobi', axis: 'tension', delta: 3 }, { e: 'remember', who: 'kobi', eventId: 'caught-the-lie-1986', significance: 'major' }, { e: 'wellbeing', key: 'regret', delta: 3 }],
+      },
+      /** the car he offered to wash — still dirty, and his father says so, almost smiling */
+      {
+        when: { flag: 'life:a7:bargained', none: [{ flag: 'kobi:car-met' }] },
+        lines: [
+          { who: 'קובי', text: 'האוטו עוד מלוכלך, אגב.' },
+          { who: null, text: 'הוא אומר את זה לעיתון. זה כמעט חיוך, וזה עדיין לא.' },
+          { who: 'קובי', text: 'לא היום, פוגי. תשטוף בשבוע הבא.' },
+        ],
+        then: [{ e: 'flag', flag: 'kobi:car-met' }, { e: 'rel', who: 'kobi', axis: 'familiarity', delta: 2 }],
       },
       /**
        * (delta 90, §7 A7→A8) the three weeks-before are three different mornings. "נראה"
@@ -578,6 +610,19 @@ const CONVERSATIONS: Conversation[] = [
     id: 'ofir-wall',
     nameHe: 'אופיר',
     branches: [
+      /**
+       * (pass 28.9.2026, brief §7 S3 → §8 S2) "שתיים, ליד הקיוסק" — the plan made through
+       * a window last Saturday, kept. Ofir is the one who remembers it; the route is his.
+       */
+      {
+        when: { flagIs: { flag: 'life:a7:plan', value: 'ofir' }, none: [{ flag: 'ofir:plan-met' }] },
+        lines: [
+          { who: 'אופיר', text: 'אמרנו שתיים. באת.' },
+          { who: null, text: 'הוא קופץ מהקיר ומנער את המכנסיים, כאילו כל השבוע עמד פה.' },
+          { who: 'אופיר', text: 'אני יודע את הדרך. אחרי האנשים, מזרחה. אל תעצור באמצע.' },
+        ],
+        then: [{ e: 'flag', flag: 'ofir:plan-met' }, { e: 'flag', flag: 'route:known' }, { e: 'flag', flag: 'knows:match' }, { e: 'flag', flag: 'ofir:knows' }, { e: 'rel', who: 'ofir', axis: 'trust', delta: 4 }, { e: 'remember', who: 'ofir', eventId: 'kept-the-plan-1986', significance: 'major' }],
+      },
       {
         when: { flag: 'played:football' },
         lines: [
@@ -1326,7 +1371,7 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'trait', trait: 'independence', delta: 10 },
           { e: 'remember', who: 'kobi', eventId: 'came-anyway', significance: 'major' },
           { e: 'keep' },
-          { e: 'ending', id: 'home' },
+          { e: 'goto', node: 'kobi-shoulders-1986' },
         ],
       },
       {
@@ -1348,7 +1393,7 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'trait', trait: 'independence', delta: 12 },
           { e: 'remember', who: 'kobi', eventId: 'broke-the-promise', significance: 'major' },
           { e: 'keep' },
-          { e: 'ending', id: 'home' },
+          { e: 'goto', node: 'kobi-shoulders-1986' },
         ],
       },
       {
@@ -1369,7 +1414,7 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'redheart', key: 'community', delta: 10 },
           { e: 'trait', trait: 'independence', delta: 9 },
           { e: 'keep' },
-          { e: 'ending', id: 'home' },
+          { e: 'goto', node: 'kobi-shoulders-1986' },
         ],
       },
       {
@@ -1392,7 +1437,7 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'trait', trait: 'independence', delta: 10 },
           { e: 'remember', who: 'kobi', eventId: 'came-anyway', significance: 'major' },
           { e: 'keep' },
-          { e: 'ending', id: 'home' },
+          { e: 'goto', node: 'kobi-shoulders-1986' },
         ],
       },
       {
@@ -1411,7 +1456,7 @@ const CONVERSATIONS: Conversation[] = [
           { e: 'bond', who: 'kobi', delta: 12 },
           { e: 'trait', trait: 'independence', delta: 10 },
           { e: 'keep' },
-          { e: 'ending', id: 'home' },
+          { e: 'goto', node: 'kobi-shoulders-1986' },
         ],
       },
     ],
@@ -1421,6 +1466,61 @@ const CONVERSATIONS: Conversation[] = [
   // ההתנגשות — the people who are only there for part of the afternoon.
   // =================================================================================
 
+  {
+    /**
+     * על הכתפיים, שוב (pass 28.9.2026, brief §8 S5 "קובי יוזם את הצעד האחרון"). Whatever
+     * the reunion was, it ends where the life began: the father lifts the eight-year-old
+     * onto his shoulders, and the five-year-old of 1983 answers in him — the scarf he held,
+     * the "again" he pointed, the question he asked, the ankle he was caught by. Nothing
+     * here is chosen; it is read off what the prologue's hand did (`life:a1:*`). Then the
+     * card. The reversal is 2026's to pay.
+     */
+    id: 'kobi-shoulders-1986',
+    nameHe: 'קובי',
+    branches: [
+      {
+        when: { flagIs: { flag: 'life:a1:scarf', value: 'held' } },
+        lines: [
+          { who: null, text: 'הוא מתכופף, ובתנועה אחת אתה למעלה, על הכתפיים. הצעיף שלו מתחת לידיים שלך — אותו צמר.' },
+          { who: null, text: 'אתה מחזיק קצה, כמו אז. הוא מרגיש את זה, ולא אומר כלום, ורק מהדק את היד על הקרסול.' },
+        ],
+        then: [{ e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 4 }, { e: 'flagValue', flag: 'life:a8:shoulders', value: 'scarf' }, { e: 'ending', id: 'home' }],
+      },
+      {
+        when: { flagIs: { flag: 'life:a1:instinct', value: 'terrace' } },
+        lines: [
+          { who: null, text: 'הוא מתכופף, ובתנועה אחת אתה למעלה, על הכתפיים, מעל כל הראשים.' },
+          { who: null, text: 'אתה מצביע למגרש, לדשא שכבר מלא אנשים. "עוד פעם," אתה אומר.' },
+          { who: 'קובי', text: 'את זה אמרת גם כשהיית בן חמש.' },
+        ],
+        then: [{ e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 4 }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'flagValue', flag: 'life:a8:shoulders', value: 'again' }, { e: 'ending', id: 'home' }],
+      },
+      {
+        when: { flagIs: { flag: 'life:a1:instinct', value: 'question' } },
+        lines: [
+          { who: null, text: 'הוא מתכופף, ובתנועה אחת אתה למעלה, על הכתפיים.' },
+          { who: null, text: '"מה קרה?" אתה שואל, כמו אז, כשלא הבנת כלום.' },
+          { who: 'קובי', text: 'הפעם אני אסביר לך. הכל. בדרך הביתה.' },
+        ],
+        then: [{ e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 4 }, { e: 'personality', key: 'curiosity', delta: 1 }, { e: 'flagValue', flag: 'life:a8:shoulders', value: 'answered' }, { e: 'ending', id: 'home' }],
+      },
+      {
+        when: { flagIs: { flag: 'life:a1:grip', value: 'caught' } },
+        lines: [
+          { who: null, text: 'הוא מתכופף, ובתנועה אחת אתה למעלה, על הכתפיים. היד שלו נסגרת על הקרסול שלך — באותו מקום בדיוק.' },
+          { who: 'קובי', text: 'תחזיק חזק, פוגי.' },
+        ],
+        then: [{ e: 'rel', who: 'kobi', axis: 'sharedHistory', delta: 4 }, { e: 'flagValue', flag: 'life:a8:shoulders', value: 'caught' }, { e: 'ending', id: 'home' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'הוא מתכופף, ובתנועה אחת אתה למעלה, על הכתפיים, כמו כשהיית קטן.' },
+          { who: 'קובי', text: 'תחזיק חזק, פוגי.' },
+        ],
+        then: [{ e: 'flagValue', flag: 'life:a8:shoulders', value: 'held' }, { e: 'ending', id: 'home' }],
+      },
+    ],
+  },
   {
     id: 'rachel-doorway',
     nameHe: 'רחל',
@@ -1496,6 +1596,16 @@ const CONVERSATIONS: Conversation[] = [
     id: 'amit-street',
     nameHe: 'עמית',
     branches: [
+      /** (pass 28.9.2026) "עם עמית. הוא יודע איזה שער." — and he does */
+      {
+        when: { flagIs: { flag: 'life:a7:plan', value: 'amit' }, none: [{ flag: 'knows:gate7' }] },
+        lines: [
+          { who: 'עמית', text: 'סיכמנו. תראה.' },
+          { who: null, text: 'הוא פותח את העיתון על העמוד הנכון, זה שהוא קרע לך בשבת, ומצביע על מספר.' },
+          { who: 'עמית', text: 'שער שבע. כולם מהשכונה שם. לא שש, לא שמונה.' },
+        ],
+        then: [{ e: 'seize', opportunity: 'amit-paper' }, { e: 'flag', flag: 'knows:gate7' }, { e: 'rel', who: 'amit', axis: 'trust', delta: 3 }, { e: 'remember', who: 'amit', eventId: 'kept-the-plan-1986', significance: 'notable' }],
+      },
       {
         when: { flag: 'knows:gate7' },
         lines: [{ who: 'עמית', text: 'מה, שכחת? שער שבע. לך.' }],
@@ -1641,6 +1751,38 @@ const CONVERSATIONS: Conversation[] = [
         lines: [
           { who: null, text: 'אפי כבר לא פה. הכדור שלו נשאר ליד האבן, והוא לא כזה שמשאיר כדור.' },
         ],
+      },
+      /**
+       * (pass 28.9.2026) a boy who has already been inside Ussishkin (A3) is not told there
+       * is a hall — he is reminded of what his body did there. Same choice, same cost.
+       */
+      {
+        // …and what his body did there, two years ago, is what Efi remembers first
+        when: { flag: 'life:knows:hall', flagIs: { flag: 'life:a3:locker', value: 'wished' }, none: [{ flag: 'saw:hall' }] },
+        shot: { focus: 'efi', framing: 'medium' },
+        lines: [
+          { who: 'אפי', text: 'אוסישקין, עכשיו. יש אימון פתוח.' },
+          { who: 'אפי', text: 'והענק מהמסדרון, זה שאמרת לו "בהצלחה"? הוא עוד שואל איפה הילד הקטן.' },
+        ],
+        choices: EFI_HALL_KNOWN,
+      },
+      {
+        when: { flag: 'life:knows:hall', flagIs: { flag: 'life:a3:usher', value: 'door' }, none: [{ flag: 'saw:hall' }] },
+        shot: { focus: 'efi', framing: 'medium' },
+        lines: [
+          { who: 'אפי', text: 'אוסישקין, עכשיו. יש אימון פתוח.' },
+          { who: 'אפי', text: 'הסדרן קורא לך "שומר הדלת". תבוא, יש לו בשבילך דלת.' },
+        ],
+        choices: EFI_HALL_KNOWN,
+      },
+      {
+        when: { flag: 'life:knows:hall', none: [{ flag: 'saw:hall' }] },
+        shot: { focus: 'efi', framing: 'medium' },
+        lines: [
+          { who: null, text: 'אפי מקפיץ את הכדור הכתום על המדרכה, פעם, ועוד פעם.' },
+          { who: 'אפי', text: 'אוסישקין, עכשיו. יש אימון פתוח. אתה זוכר את הרצפה?' },
+        ],
+        choices: EFI_HALL_KNOWN,
       },
       {
         // The other life. It closes at two, and the player almost certainly does not
@@ -1846,6 +1988,7 @@ const CONVERSATIONS: Conversation[] = [
  * 1986 steward and `steward-1990` the 1990 one, and a scene names which it wants — so a
  * second chapter is a second content file and not a second runner (brief §52).
  */
+
 export const DIALOGUE: Record<string, Conversation> = Object.fromEntries(
   [...CONVERSATIONS, ...CONVERSATIONS_1990, ...CONVERSATIONS_1991, ...CONVERSATIONS_ALLENBY, ...CONVERSATIONS_USSISHKIN, ...CONVERSATIONS_PANORAMAS, ...CONVERSATIONS_BLOOMFIELD, ...CONVERSATIONS_1993, ...CONVERSATIONS_GALIL, ...CONVERSATIONS_SINAI, ...CONVERSATIONS_ARMY, ...CONVERSATIONS_HALL, ...CONVERSATIONS_LACES, ...CONVERSATIONS_SEED, ...CONVERSATIONS_CUP99, ...CONVERSATIONS_TITLE, ...CONVERSATIONS_DOUBLE, ...CONVERSATIONS_BRIDGE, ...CONVERSATIONS_EUROPE, ...CONVERSATIONS_HOME, ...CONVERSATIONS_FOUNDING, ...CONVERSATIONS_2010, ...CONVERSATIONS_CHAMPIONS, ...CONVERSATIONS_GROWTH, ...CONVERSATIONS_NEWHALL, ...CONVERSATIONS_COLLAPSE, ...CONVERSATIONS_RETURN, ...CONVERSATIONS_LATE, ...CONVERSATIONS_HOME24, ...CONVERSATIONS_FINALE, ...CONVERSATIONS_FAMILY, ...CONVERSATIONS_PROMISES, ...CONVERSATIONS_WINDOWS, ...CONVERSATIONS_TEAM, ...CONVERSATIONS_CAREER, ...CONVERSATIONS_FRIENDS, ...CONVERSATIONS_ABROAD, ...CONVERSATIONS_ROOMS2000, ...CONVERSATIONS_BATYA, ...CONVERSATIONS_OWNER, ...CONVERSATIONS_COMBOS, ...CONVERSATIONS_MATCH, ...CONVERSATIONS_A1, ...CONVERSATIONS_A2, ...CONVERSATIONS_A3, ...CONVERSATIONS_A4, ...CONVERSATIONS_A5, ...CONVERSATIONS_A6, ...CONVERSATIONS_A7, ...CONVERSATIONS_SCARF, ...CONVERSATIONS_MORNING_86, ...CONVERSATIONS_ROUTES, ...CONVERSATIONS_ACTIVITIES, ...CONVERSATIONS_MISSIONS, ...fanShops(), ...gigConversations()].map(
     (conversation) => [conversation.id, conversation],

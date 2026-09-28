@@ -512,9 +512,15 @@ describe('זיכרון — somebody remembers what you did', () => {
     expect(reunion?.branches.length ?? 0).toBeGreaterThanOrEqual(4)
     const conditional = reunion?.branches.filter((branch) => branch.when) ?? []
     expect(conditional.length).toBeGreaterThanOrEqual(3)
-    // and every one of them still ends the day
+    // and every one of them still ends the day — itself, or (pass 28.9.2026) through the one
+    // node it hands to: the shoulders, where every branch ends it
+    const ends = (then: readonly { e: string; node?: string }[] | undefined, depth = 0): boolean =>
+      (then ?? []).some((effect) =>
+        effect.e === 'ending' ||
+        (effect.e === 'goto' && depth < 2 && (DIALOGUE[effect.node!]?.branches ?? []).length > 0 && (DIALOGUE[effect.node!]?.branches ?? []).every((b) => ends(b.then as never, depth + 1))),
+      )
     for (const branch of reunion?.branches ?? []) {
-      expect((branch.then ?? []).some((effect) => effect.e === 'ending')).toBe(true)
+      expect(ends(branch.then as never)).toBe(true)
     }
   })
 

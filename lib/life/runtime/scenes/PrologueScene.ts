@@ -19,6 +19,11 @@ import { WorldScene } from './WorldScene'
  * the supplied `cup83` film becomes the first archive reveal — history after experience,
  * never history instead of experience — and the first playable childhood day loads behind it.
  */
+/** the terrace is seen before it is asked about */
+const OPEN_AFTER_MS = 1600
+/** a question left alone this long gets the terrace moving under it once */
+const IDLE_SURGE_MS = 9000
+
 export class PrologueScene extends Phaser.Scene {
   static readonly KEY = 'life-prologue'
 
@@ -105,10 +110,36 @@ export class PrologueScene extends Phaser.Scene {
 
     this.ctx.bus.emit('place', { id: 'prologue', title: t('life.place.prologue') })
     this.ctx.bus.emit('controls', { visible: false })
-    this.input.on('pointerdown', () => this.pressGesture())
-    if (!this.ctx.dialogue.start('a1-1983', () => this.closed())) {
-      this.ctx.dialogue.startLines(PROLOGUE, () => this.finish())
-    }
+    this.input.on('pointerdown', () => {
+      this.idleMs = 0
+      this.pressGesture()
+    })
+    /*
+     * (pass 28.9.2026, brief §1 S1) the eye first, then the box: the terrace fades in and
+     * drifts for a breath before the first question covers the bottom of the glass — a
+     * menu before the scene is seen is a form, not a memory.
+     */
+    this.time.delayedCall(OPEN_AFTER_MS, () => {
+      if (this.done) return
+      if (!this.ctx.dialogue.start('a1-1983', () => this.closed())) {
+        this.ctx.dialogue.startLines(PROLOGUE, () => this.finish())
+      }
+    })
+  }
+
+  /**
+   * (pass 28.9.2026, brief §1 S1 "after 8–10 s without input the crowd moves and Kobi shifts")
+   * a child who does not answer is still on a terrace: the picture surges once under him
+   * and the crowd roars, and then the question waits again. Transform only; never a timer
+   * that decides for him.
+   */
+  private idleMs = 0
+  private surge() {
+    if (!this.image) return
+    const cam = this.cameras.main
+    const baseY = this.image.y
+    this.tweens.add({ targets: this.image, y: baseY - cam.height * 0.018, duration: 180, yoyo: true, repeat: 2, ease: 'Sine.easeInOut', onComplete: () => this.image?.setY(baseY) })
+    this.ctx.bus.emit('sound', { kind: 'sample', key: 'crowd-swell', level: 0.45 })
   }
 
   /**
@@ -175,7 +206,15 @@ export class PrologueScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number) {
-    if (!this.gesture) return
+    if (!this.gesture) {
+      if (!this.ctx.dialogue.open || this.done) return
+      this.idleMs += delta
+      if (this.idleMs >= IDLE_SURGE_MS) {
+        this.idleMs = 0
+        this.surge()
+      }
+      return
+    }
     this.ctx.input.beginFrame()
     if (this.ctx.input.actionPressed) {
       this.pressGesture()

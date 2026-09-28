@@ -80,6 +80,8 @@ function hands(sim: WorldSim, share: 'all' | 'half' | 'none' = 'all') {
 const read = (choices: readonly DialogueChoice[]) => choices.find((c) => c.enabled)?.id ?? WALK_AWAY
 
 const pick = (id: string) => (choices: readonly DialogueChoice[]) => (choices.some((c) => c.id === id && c.enabled) ? id : WALK_AWAY)
+/** the first of these ids the box offers — a player with a plan across several boxes */
+const pickAny = (...ids: string[]) => (choices: readonly DialogueChoice[]) => ids.find((id) => choices.some((c) => c.id === id && c.enabled)) ?? WALK_AWAY
 
 function remembered(sim: WorldSim, eventId: string): boolean {
   return sim.engine.log().some((event: LifeEvent) => event.t === 'relationship.memory_added' && (event as { memory: { eventId: string } }).memory.eventId === eventId)
@@ -214,10 +216,13 @@ describe('A2 · 1984 — the promise, the bread, the teams', () => {
     sim.go('kiosk')
     visit(sim, 'rafi-a2', read)
     expect(sim.state.flags['a2:bread']).toBe(true)
-    visit(sim, 'alley-a2', pick('play'))
+    // (pass 28.9.2026) the loaf is in his hand at the pitch: it goes on the wall, meets the ball
+    visit(sim, 'alley-a2', pick('wall'))
+    expect(sim.state.flags['a2:played']).toBe(true)
     expect(flowHolds(sim)).toBe(true)
     sim.go('home')
     expect(sim.endings).toEqual(['played'])
+    expect(sim.state.flags['life:a2:home']).toBe('truth')
   })
   it('messy: "after the game", football first, and the bread never bought — still an evening', () => {
     const sim = make('a2-alley')
@@ -440,11 +445,13 @@ describe('A6 · radio winter — persistence, not a timer', () => {
   const at1535 = () => 15 * 60 + 36
   it('golden: the radio dies, he takes the torch batteries, and keeps listening on purpose', () => {
     const sim = tuned()
-    toDeath(sim, (choices) => (choices.some((c) => c.id === 'batteries') ? 'batteries' : choices.some((c) => c.id === 'listen-on') ? 'listen-on' : WALK_AWAY))
+    toDeath(sim, pickAny('batteries', 'listen-on', 'stay'))
     expect(sim.state.flags['a6:revived']).toBe(true)
     expect(sim.state.flags['a6:listen-on']).toBe(true)
     sim.wait(1)
     expect(sim.endings).toEqual(['heard'])
+    // (pass 28.9.2026) the winter closes on the wet father at the door, and the life keeps it
+    expect(sim.state.flags['life:a6:after']).toBe('stayed')
   })
   it('messy: he runs it through the rain to Liron and holds the wire', () => {
     const sim = tuned()
@@ -453,13 +460,16 @@ describe('A6 · radio winter — persistence, not a timer', () => {
     expect(eraFor('a6-radio').goal?.(sim.state)).toBe('street')
     sim.go('street')
     visit(sim, 'liron-a6', pick('hold'))
+    sim.beatAnswer = pick('ask')
     sim.wait(1)
     expect(sim.endings).toEqual(['liron'])
+    expect(sim.state.flags['life:a6:after']).toBe('asked')
   })
   it('messy: switching it off ends the thought at once — no hour of rain to wait out', () => {
     const sim = tuned()
-    toDeath(sim, pick('leave'))
+    toDeath(sim, pickAny('leave', 'away'))
     expect(sim.endings).toEqual(['quiet'])
+    expect(sim.state.flags['life:a6:after']).toBe('away')
   })
   it('messy: walked away from the dead radio, the question waits on the counter', () => {
     const sim = tuned()
