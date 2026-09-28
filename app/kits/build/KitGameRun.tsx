@@ -1,12 +1,13 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { RealShirtAsk, RealShirtPending } from '@/components/collector/RealShirtAsk'
 import { KitMarkArt } from '@/components/kit/KitEngineShirt'
 import { KitShirt } from '@/components/kit/KitShirt'
-import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
+import { UniversalExit } from '@/components/result/UniversalExit'
 import { ShareRow } from '@/components/share/ShareRow'
 import { FitBox } from '@/components/stage/FitBox'
 import { firePickFxAt } from '@/components/stage/PickFx'
@@ -18,8 +19,10 @@ import { useDialog } from '@/components/ui/useDialog'
 import {
   HINT_KINDS,
   KIT_HINT_PENALTY,
-  KIT_ROUND,
+  KIT_MODE_SIZE,
   STEP_ORDER,
+  kitNextCursor,
+  type KitMode,
   type KitHintAnswer,
   type KitHintKind,
   type KitOption,
@@ -34,8 +37,12 @@ import type { KitMarksRegime } from '@/lib/kit/engine'
 import type { KitSpec } from '@/lib/kit/spec'
 import type { Embedded } from '@/lib/mechanics/types'
 import { haptic } from '@/lib/play/haptics'
+import { track } from '@/lib/analytics/meter'
+import { readProfile, setRotation } from '@/lib/profile/store'
+import type { NextAction } from '@/lib/results/types'
+import { microFeedback, tierFromShare, voice, voiceAction, type ResultTier } from '@/lib/voice'
 
-import { askKitHint, submitKit } from './actions'
+import { askKitHint, nextAfterKits, submitKit } from './actions'
 
 /**
  * שער 4 — חידון המדים. Maor's V14 layout on the one engine and the server deal.
@@ -108,10 +115,17 @@ export function KitGameRun({
   cursor = 0,
   embedded,
   exactKits,
+  mode: chosenMode = null,
 }: {
   puzzles: KitPuzzle[]
   seed: number
   cursor?: number
+  /**
+   * Full (5) or Quick (3) — ONE RED WORLD §13. `null` = the link named no mode, so the gate opens
+   * on its line and asks. A deal is always five; Quick plays the first three and the cursor moves
+   * three (`kitNextCursor`).
+   */
+  mode?: KitMode | null
   embedded?: KitEmbedded
   /**
    * archive slug → Kit Master id for the shirts with an exact photograph, for the closet question on
@@ -141,8 +155,11 @@ export function KitGameRun({
     if (timer.current) window.clearTimeout(timer.current)
   }, [])
 
-  const puzzle = puzzles[index]
-  if (finished || !puzzle) return <RoundSummary log={log} seed={seed} cursor={cursor} />
+  const [mode, setMode] = useState<KitMode | null>(embedded ? 'full' : chosenMode)
+  const played = mode ? puzzles.slice(0, KIT_MODE_SIZE[mode]) : puzzles
+  if (!mode) return <KitIntro onPick={setMode} />
+  const puzzle = played[index]
+  if (finished || !puzzle) return <RoundSummary log={log} seed={seed} cursor={cursor} mode={mode} />
 
   const complete = STEP_ORDER.every((step) => Boolean(placed[step]))
   const reviewing = active === REVIEW
@@ -229,7 +246,7 @@ export function KitGameRun({
       embedded.onResult(verdict)
       return
     }
-    if (index + 1 >= puzzles.length) {
+    if (index + 1 >= played.length) {
       setVerdict(null)
       setFinished(true)
       return
@@ -288,13 +305,13 @@ export function KitGameRun({
         )}
       </div>
       <p className="shrink-0 text-center font-body text-[10.5px] font-bold text-muted">
-        {embedded ? null : <Num>{t('kitgame.shirtOf', { n: String(index + 1), total: String(puzzles.length) })}</Num>}
+        {embedded ? null : <Num>{t('kitgame.shirtOf', { n: String(index + 1), total: String(played.length) })}</Num>}
         {embedded ? null : ' · '}
         <Num>{`${Math.min(active + 1, STEP_ORDER.length)}/${STEP_ORDER.length}`}</Num>
       </p>
 
       <h2 className="shrink-0 text-center font-display text-[clamp(16px,4.8vw,22px)] leading-none text-red">
-        {reviewing ? t('kitgame.ask.review') : t(`kitgame.ask.${step}` as MessageKey)}
+        {voiceAction(4, reviewing ? 'review' : step)}
       </h2>
 
       {/* the shirt — as big as the glass allows, and the drop zone every rail item targets */}
@@ -361,7 +378,7 @@ export function KitGameRun({
           verdict={verdict}
           mine={shirt}
           onNext={next}
-          last={index + 1 >= puzzles.length}
+          last={index + 1 >= played.length}
           marks={marks}
           doneLabel={embedded?.doneLabel}
           real={embedded ? null : realShirtOf(verdict, exactKits)}
@@ -648,12 +665,16 @@ function RevealSheet({
         <p className="font-body text-[11px] font-bold tracking-widest text-paper/80">{t('kitgame.reveal.kicker')}</p>
         <div className="mt-1 flex items-end justify-between gap-3">
           <h2 className="font-display text-[clamp(22px,6.6vw,30px)] leading-none">
-            {verdict.perfect ? t('kitgame.reveal.perfect') : <Num>{t('kitgame.reveal.score', { right: String(verdict.right) })}</Num>}
+            {revealLine(verdict) ?? <Num>{t('kitgame.reveal.score', { right: String(verdict.right) })}</Num>}
           </h2>
           <p className="font-poster text-[36px] leading-none" dir="ltr">
             <Num>{String(verdict.score)}</Num>
           </p>
         </div>
+        {/* the micro line (§13): "יושב בדיוק." for a shirt that came back, "לא החולצה הזאת." when it did not */}
+        <p className="mt-1 font-body text-[12px] font-bold text-paper/90">
+          {microFeedback(4, verdict.right >= 3 ? 'correct' : 'wrong', verdict.puzzleId, 0)?.line}
+        </p>
       </div>
 
       <div className="min-h-0 overflow-y-auto px-3 pb-3 pt-2">
@@ -766,28 +787,155 @@ function StepRow({ row }: { row: StepVerdict }) {
   )
 }
 
+/* ------------------------------------------------------------------ the voice */
+
+/**
+ * The reveal's headline (§13): a perfect shirt is "לא שכחת פרט."; a shirt whose ONLY miss was
+ * the sponsor is "הספונסר ברח. החולצה לא."; one other miss is the voice's `near`. Anything
+ * else keeps its count.
+ */
+function revealLine(verdict: KitVerdict): string | null {
+  if (verdict.perfect) return voice({ gate: 4, moment: 'result', result: 'perfect', seed: verdict.puzzleId }).title
+  const missed = verdict.steps.filter((row) => !row.correct)
+  if (missed.length === 1 && missed[0]?.step === 'sponsor') return voiceAction(4, 'nearSponsor')
+  if (missed.length === 1) return voice({ gate: 4, moment: 'result', result: 'near', seed: verdict.puzzleId }).title
+  return null
+}
+
+/** The round's tier: every step right, one detail short (the sponsor has its own line), or a share. */
+function roundTier(log: readonly KitVerdict[]): { tier: ResultTier; sponsorOnly: boolean } {
+  const steps = log.flatMap((row) => row.steps)
+  const missed = steps.filter((row) => !row.correct)
+  if (steps.length > 0 && missed.length === 0) return { tier: 'perfect', sponsorOnly: false }
+  if (missed.length === 1) return { tier: 'near', sponsorOnly: missed[0]?.step === 'sponsor' }
+  return { tier: tierFromShare(steps.length > 0 ? (steps.length - missed.length) / steps.length : 0), sponsorOnly: false }
+}
+
+/* ------------------------------------------------------------------ the opening */
+
+/**
+ * "את החולצה אתה זוכר בלי לראות אותה?" — and the one choice before the first shirt: Full (5)
+ * or Quick (3). Nothing else stands between the line and the game (§13, §54: first action in 3s).
+ */
+function KitIntro({ onPick }: { onPick: (mode: KitMode) => void }) {
+  const line = voice({ gate: 4, moment: 'intro' })
+  return (
+    <section data-kit-intro="" className="mx-auto flex w-full max-w-[460px] flex-1 flex-col justify-center gap-3 bg-paper px-4 py-6">
+      <h1 className="font-display text-[clamp(26px,8vw,36px)] leading-[1.05] text-ink">{line.title}</h1>
+      {line.body && <p className="font-body text-step-0 leading-relaxed text-muted">{line.body}</p>}
+      <div className="mt-2 grid gap-2">
+        {(['full', 'quick'] as const).map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            data-kit-mode={mode}
+            onClick={(event) => {
+              firePickFxAt(event.currentTarget, { tone: 'ink', haptic: 'tap' })
+              onPick(mode)
+            }}
+            className={`flex min-h-tap flex-col items-start justify-center border-rule px-4 py-2 text-start transition-transform duration-press active:scale-[.98] motion-reduce:transition-none ${
+              mode === 'full' ? 'border-red bg-red text-paper' : 'border-ink bg-sheet text-ink'
+            }`}
+          >
+            <span className="font-display text-step-1 leading-tight">{voiceAction(4, `mode.${mode}`)}</span>
+            <span className={`font-body text-[12px] leading-snug ${mode === 'full' ? 'text-paper' : 'text-muted'}`}>
+              {voiceAction(4, `mode.${mode}.body`)}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 /* ------------------------------------------------------------------ the round */
-function RoundSummary({ log, seed, cursor }: { log: KitVerdict[]; seed: number; cursor: number }) {
+function RoundSummary({ log, seed, cursor, mode }: { log: KitVerdict[]; seed: number; cursor: number; mode: KitMode }) {
+  const router = useRouter()
   const score = log.reduce((sum, row) => sum + row.score, 0)
   const right = log.reduce((sum, row) => sum + row.right, 0)
-  const asked = KIT_ROUND * STEP_ORDER.length
+  const asked = log.length * STEP_ORDER.length
   const marks = log.flatMap((row) => row.steps.map((s) => s.correct))
+  // the cursor counts SHIRTS: the next round starts where this one stopped (§13)
+  const size = KIT_MODE_SIZE[mode]
+  const following = kitNextCursor(cursor, log.length)
+  const { tier, sponsorOnly } = roundTier(log)
+  const spoken = voice({ gate: 4, moment: 'result', result: tier, seed: `${seed}:${cursor}:${mode}` })
+  if (sponsorOnly) spoken.title = voiceAction(4, 'nearSponsor') ?? spoken.title
+  const [next, setNext] = useState<NextAction[]>([])
+  useEffect(() => {
+    track('run_complete', { detail: 'kits-build', value: right })
+    // the device's own deck moves on by the shirts it spent — never a friend's deck (a shared seed)
+    const own = readProfile().rotation['/kits/build']
+    if (!own || own.seed === seed) setRotation('/kits/build', { seed, cursor: following })
+    let live = true
+    nextAfterKits({
+      context: {
+        gateId: 4,
+        runId: `${seed}:${cursor}:${mode}`,
+        score,
+        // the shirt that slipped most is the one the archive card is for (§13 cross-links)
+        archiveEntityIds: [...log]
+          .sort((a, b) => a.right - b.right)
+          .map((row) => `${row.seasonLabel}|${row.variant}`),
+      },
+    })
+      .then((answer) => {
+        if (live) setNext(answer.next)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+    // one round, one context
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     <div
       data-kit-summary=""
       className="mx-auto min-h-0 w-full max-w-[460px] flex-1 overflow-y-auto overscroll-contain bg-paper px-3 pb-[max(16px,env(safe-area-inset-bottom))] pt-[max(8px,env(safe-area-inset-top))] md:min-h-[100dvh] md:flex-none md:overflow-visible"
     >
-      <div className="bg-red px-4 py-4 text-paper">
-        <p className="font-body text-[11px] font-bold tracking-widest">{t('kitgame.round.kicker')}</p>
-        <p className="mt-2 font-poster text-[56px] leading-none" dir="ltr">
-          <Num>{String(score)}</Num>
-        </p>
-        <p className="font-body text-[12px]">{t('kitgame.round.points')}</p>
-        <p className="mt-2 font-display text-step-1 leading-none">
+      <UniversalExit
+        voice={spoken}
+        next={next}
+        from="kits-build"
+        again={{
+          label: t('kitgame.round.again'),
+          onClick: () => {
+            setRotation('/kits/build', { seed, cursor: following })
+            router.push(`/kits/build?seed=${seed}&r=${following}&n=${size}`)
+          },
+        }}
+        share={
+          <ShareRow
+            kind="kit"
+            // the link hands over the SAME round in the same mode — `n` travels with the seed
+            route={`/kits/build?n=${size}`}
+            params={{ total: String(asked), s: String(seed), r: String(cursor) }}
+            headline={String(right)}
+            card={{
+              template: 'score' as const,
+              kicker: 'GATE 04 · KITS',
+              label: t('kitgame.round.cardLabel'),
+              eyebrow: t('kitgame.round.cardEyebrow'),
+              hero: `${right}/${asked}`,
+              bigStat: { v: String(score), k: t('kitgame.round.points') },
+              stats: log.map((row) => ({ k: row.seasonLabel, v: `${row.right}/5` })).slice(0, 3),
+              cta: t('kitgame.round.cardCta'),
+              challenge: t('kitgame.round.cardChallenge'),
+              marks,
+            }}
+          />
+        }
+      >
+      <p className="mt-2 flex items-baseline justify-between gap-3 border-b-hair border-ink/25 pb-1 font-body text-[12px] text-ink">
+        <span>
           <Num>{t('kitgame.round.steps', { n: String(right), total: String(asked) })}</Num>
-        </p>
-      </div>
-      <ul className="mt-2 grid grid-cols-5 gap-1">
+        </span>
+        <span className="font-poster text-[26px] leading-none text-red" dir="ltr">
+          <Num>{String(score)}</Num>
+        </span>
+      </p>
+      <ul className={`mt-2 grid gap-1 ${log.length > 3 ? 'grid-cols-5' : 'grid-cols-3'}`}>
         {log.map((row) => (
           <li key={row.puzzleId} className="border-rule border-ink bg-sheet p-1.5 text-center">
             <p className="font-mono tabular-nums text-[11px] font-black text-ink">
@@ -801,33 +949,7 @@ function RoundSummary({ log, seed, cursor }: { log: KitVerdict[]; seed: number; 
       </ul>
       <RecordRun gate="/kits/build" score={score} correct={right} asked={asked} />
       <RealShirtPending />
-      <div className="mt-3">
-        <ShareRow
-          kind="kit"
-          params={{ total: String(asked), s: String(seed), r: String(cursor) }}
-          headline={String(right)}
-          card={{
-            template: 'score' as const,
-            kicker: 'GATE 04 · KITS',
-            label: t('kitgame.round.cardLabel'),
-            eyebrow: t('kitgame.round.cardEyebrow'),
-            hero: `${right}/${asked}`,
-            bigStat: { v: String(score), k: t('kitgame.round.points') },
-            stats: log.map((row) => ({ k: row.seasonLabel, v: `${row.right}/5` })).slice(0, 3),
-            cta: t('kitgame.round.cardCta'),
-            challenge: t('kitgame.round.cardChallenge'),
-            marks,
-          }}
-        />
-      </div>
-      <div className="mt-3 grid gap-2 sm:grid-cols-2">
-        <PlayLink gate="/kits/build" className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-4 font-body text-step-0 font-extrabold text-ink">
-          {t('kitgame.round.again')}
-        </PlayLink>
-        <a href="/kits" className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-step-0 font-extrabold text-paper">
-          {t('kitgame.round.studio')}
-        </a>
-      </div>
+      </UniversalExit>
     </div>
   )
 }

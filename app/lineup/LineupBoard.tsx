@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Num } from '@/components/ui/Num'
@@ -32,7 +32,10 @@ import type { LineupWindow, MatchIntro } from '@/lib/game/lineup'
 import type { KitSpec } from '@/lib/kit/spec'
 import type { Embedded } from '@/lib/mechanics/types'
 import { haptic } from '@/lib/play/haptics'
-import { askCoach, submitLineup } from './actions'
+import { track } from '@/lib/analytics/meter'
+import type { NextAction } from '@/lib/results/types'
+import { tierFromShare, voice, voiceAction, type ResultTier } from '@/lib/voice'
+import { askCoach, nextAfterLineup, submitLineup } from './actions'
 import { BandPitch, BandPitchStage, LINE_LABEL } from './BandPitch'
 import { LockerRack } from './LockerRack'
 import { TeamSheet } from './TeamSheet'
@@ -71,6 +74,20 @@ const COACH_LINE: Record<CoachNote['kind'], MessageKey> = {
   stillOut: 'lineup.coach.stillOut',
   benchOn: 'lineup.coach.benchOn',
   lineRight: 'lineup.coach.lineRight',
+}
+
+/** §12 — the rail asks the plan's questions for the keeper and the back line; the rest by name. */
+function railPrompt(line: Line): string {
+  if (line === 'GK') return voiceAction(3, 'gk') ?? t(LINE_LABEL[line])
+  if (line === 'D') return voiceAction(3, 'defence') ?? t(LINE_LABEL[line])
+  if (line === 'M') return voiceAction(3, 'midfield') ?? t(LINE_LABEL[line])
+  return voiceAction(3, 'attack') ?? t(LINE_LABEL[line])
+}
+
+/** "מצאת 9 מתוך 11." — found is a starter on the pitch at all; every one of them is `perfect`. */
+function lineupTier(verdict: LineupVerdict): ResultTier {
+  if (verdict.total > 0 && verdict.starters >= verdict.total) return 'perfect'
+  return tierFromShare(verdict.total > 0 ? verdict.starters / verdict.total : 0)
 }
 
 function coachSentence(note: CoachNote): string {
@@ -129,6 +146,24 @@ export function LineupBoard({
   const [tunnel, setTunnel] = useState(false)
   const [lastCall, setLastCall] = useState(false)
   const [verdict, setVerdict] = useState<LineupVerdict | null>(null)
+  /** the Universal Exit's doors — asked for once a sheet comes back (§6, §38) */
+  const [next, setNext] = useState<NextAction[]>([])
+  const opening = voice({ gate: 3, moment: 'intro' })
+  useEffect(() => {
+    if (!verdict || embedded) return
+    track('run_complete', { detail: 'lineup', value: verdict.starters })
+    let live = true
+    nextAfterLineup(seed, cursor, verdict.starters, verdict.missing.map((man) => man.playerId))
+      .then((answer) => {
+        if (live) setNext(answer.next)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+    // one sheet, one context
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verdict])
   const [pending, startTransition] = useTransition()
   /** the phone stage (delta 87): "מלתחה" or "פרטי המשחק" over the pitch */
   const [mobileSheet, setMobileSheet] = useState<'info' | 'coach' | null>(null)
@@ -338,7 +373,7 @@ export function LineupBoard({
                     locks.includes(active) ? 'border-red bg-red text-sheet' : 'border-ink bg-sheet text-ink'
                   }`}
                 >
-                  {locks.includes(active) ? t('lineup.lock.drop') : t('lineup.lock')}
+                  {locks.includes(active) ? t('lineup.lock.drop') : voiceAction(3, 'lock')}
                 </button>
                 <button
                   type="button"
@@ -359,13 +394,13 @@ export function LineupBoard({
             ) : railOpen ? (
               <div className="mt-1.5 shrink-0">
                 <PickRail
-                  target={t(LINE_LABEL[railLine])}
+                  target={railPrompt(railLine)}
                   targetSub={`${String(board.length).padStart(2, '0')}/${XI_SIZE}`}
                   items={railItems}
                   eras={false}
                   searchable={bank.length > 12}
                   chips={[
-                    { key: 'coach', label: t('lineup.coach'), pressed: false, onClick: () => setMobileSheet('coach') },
+                    { key: 'coach', label: voiceAction(3, 'hint') ?? '', pressed: false, onClick: () => setMobileSheet('coach') },
                     ...(intro
                       ? [{ key: 'info', label: t('lineup.stage.setup'), pressed: false, onClick: () => setMobileSheet('info') }]
                       : []),
@@ -410,7 +445,7 @@ export function LineupBoard({
                 onClick={() => setMobileSheet('coach')}
                 className="min-h-tap shrink-0 border-hair border-ink/40 bg-paper px-2.5 font-body text-[11px] font-extrabold leading-none text-ink"
               >
-                {t('lineup.coach')}
+                {voiceAction(3, 'hint')}
               </button>
               {intro && (
                 <button
@@ -431,7 +466,7 @@ export function LineupBoard({
               </p>
             )}
 
-            <SlideSheet open={mobileSheet === 'coach'} onClose={() => setMobileSheet(null)} title={t('lineup.coach')} size="auto">
+            <SlideSheet open={mobileSheet === 'coach'} onClose={() => setMobileSheet(null)} title={voiceAction(3, 'hint') ?? ''} size="auto">
               <ul className="flex flex-wrap gap-2">
                 <li className="flex min-h-[34px] items-center gap-2 border-hair border-ink px-2 font-body text-[12px] text-ink">
                   <span className="font-mono text-step-0 tabular-nums">
@@ -452,7 +487,7 @@ export function LineupBoard({
                 disabled={notes.length >= COACH_NOTES || pending}
                 className="mt-2 flex min-h-tap w-full items-center justify-center border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink disabled:opacity-40"
               >
-                {t('lineup.coach')}
+                {voiceAction(3, 'hint')}
               </button>
               {notes.length > 0 && (
                 <ul className="mt-2 border-s-rule border-ink ps-2">
@@ -479,10 +514,9 @@ export function LineupBoard({
           {/* ================================================================ desktop / tablet
               untouched design */}
           <div className="hidden md:block">
-          <p className="mt-stack font-body text-[11px] font-extrabold tracking-widest text-muted">
-            {t('lineup.room.eyebrow')}
-          </p>
-          <p className="mt-1 font-body text-step--1 leading-snug text-muted">{t('lineup.room.lede')}</p>
+          {/* §12 — the gate opens on a line: "את המשחק אתה זוכר. מי עלה לדשא?" */}
+          <p className="mt-stack font-display text-step-1 leading-tight text-ink">{opening.title}</p>
+          {opening.body && <p className="mt-1 font-body text-step--1 leading-snug text-muted">{opening.body}</p>}
 
           {/* the zone counters — how many men stand in each band, never who, never out of what */}
           <ul className="mt-3 flex flex-wrap gap-2">
@@ -533,7 +567,7 @@ export function LineupBoard({
                     active !== null && locks.includes(active) ? 'border-red bg-red text-sheet' : 'border-ink bg-sheet text-ink'
                   }`}
                 >
-                  {active !== null && locks.includes(active) ? t('lineup.lock.drop') : t('lineup.lock')}
+                  {active !== null && locks.includes(active) ? t('lineup.lock.drop') : voiceAction(3, 'lock')}
                 </button>
                 <button
                   type="button"
@@ -549,7 +583,7 @@ export function LineupBoard({
                   disabled={notes.length >= COACH_NOTES || pending}
                   className="col-span-2 flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink transition-transform duration-press ease-stamp active:scale-[.96] disabled:opacity-40 motion-reduce:transition-none sm:col-span-1"
                 >
-                  {t('lineup.coach')}
+                  {voiceAction(3, 'hint')}
                 </button>
               </div>
 
@@ -621,6 +655,46 @@ export function LineupBoard({
           notesTaken={notes.length}
           kit={kit}
           look={look}
+          seed={`${seed}:${cursor}`}
+          spoken={voice({
+            gate: 3,
+            moment: 'result',
+            result: lineupTier(verdict),
+            seed: `${seed}:${cursor}`,
+            vars: { n: String(verdict.starters) },
+          })}
+          doors={embedded ? [] : next}
+          share={
+            embedded ? undefined : (
+              // The card is the SHEET, not the score (rule 19): what travels is the team the
+              // player sent out, by band, with the score beside the title. The x/y are the
+              // display spots of the bands — nothing about them was graded.
+              <ShareRow
+                kind="lineup"
+                params={{ s: String(seed), r: String(cursor) }}
+                headline={`${verdict.starters}/${verdict.total}`}
+                card={{
+                  template: 'xi' as const,
+                  kicker: 'GATE 3 · THE LINE-UP',
+                  label: t('screen.lineup.title'),
+                  eyebrow: `${verdict.starters}/${verdict.total}`,
+                  hero: t('screen.lineup.title'),
+                  xi: board.map((row) => {
+                    const spot = displaySpot(row.order, counts[row.line], row.line)
+                    return {
+                      roleHe: t(LINE_LABEL[row.line]),
+                      nameHe: splitName(nameOf.get(row.playerId) ?? '').familyHe,
+                      x: spot.x,
+                      y: spot.y,
+                    }
+                  }),
+                  stats: [],
+                  cta: t('share.challenge'),
+                  challenge: t('share.sameRound'),
+                }}
+              />
+            )
+          }
           onBack={() => {
             if (embedded) return embedded.onResult(verdict)
             setVerdict(null)
@@ -639,35 +713,6 @@ export function LineupBoard({
           ) : (
             <>
           <RecordRun gate="/lineup" correct={verdict.exact} asked={verdict.total} score={verdict.exact} />
-          {/*
-            The card is the SHEET, not the score (rule 19): what travels is the team the
-            player sent out, by band, with the score beside the title. The x/y are the
-            display spots of the bands — nothing about them was graded.
-          */}
-          <ShareRow
-            kind="lineup"
-            params={{ s: String(seed), r: String(cursor) }}
-            headline={`${verdict.exact}/${verdict.total}`}
-            card={{
-              template: 'xi' as const,
-              kicker: 'GATE 3 · THE LINE-UP',
-              label: t('screen.lineup.title'),
-              eyebrow: `${verdict.exact}/${verdict.total}`,
-              hero: t('screen.lineup.title'),
-              xi: board.map((row) => {
-                const spot = displaySpot(row.order, counts[row.line], row.line)
-                return {
-                  roleHe: t(LINE_LABEL[row.line]),
-                  nameHe: splitName(nameOf.get(row.playerId) ?? '').familyHe,
-                  x: spot.x,
-                  y: spot.y,
-                }
-              }),
-              stats: [],
-              cta: t('share.challenge'),
-              challenge: t('share.sameRound'),
-            }}
-          />
           <PlayLink
             gate="/lineup"
             className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"

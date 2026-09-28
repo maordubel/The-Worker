@@ -7,7 +7,7 @@ import { accepted, kitRecords, playableKits, specOf, type KitMasterRecord } from
 import { photoMissing } from '@/lib/kit/photo'
 import { COLLARS, COLOUR_NAME, DEFAULT_SPEC, PATTERNS, SLEEVES, type KitSpec } from '@/lib/kit/spec'
 import { hintReceipt, signKitUnlock, verifyHintReceipt } from '@/lib/kit/unlock'
-import { positionOf, takeFrom } from '@/lib/rotation/deck'
+import { cycleSeed, positionOf } from '@/lib/rotation/deck'
 
 import { rng, shuffle } from './archive'
 import {
@@ -269,19 +269,52 @@ function deal(seed: number, cursor: number, window?: KitWindow): Dealt[] {
   return out
 }
 
+/**
+ * The gate's round from a cursor that counts SHIRTS (`kitNextCursor`, §13): the seed shuffles the
+ * pool once per cycle, and the round is the next KIT_ROUND shirts of that walk from `offset`. A
+ * round that runs off the end of a cycle continues into the next cycle's shuffle, skipping a shirt
+ * it already holds — so no shirt repeats before the deck is spent, whatever mix of Quick (3) and
+ * Full (5) rounds walked the cursor there.
+ */
+export function kitRoundAt<T extends { id: string }>(pool: readonly T[], seed: number, offset: number, size = KIT_ROUND): T[] {
+  if (pool.length === 0) return []
+  const start = Number.isFinite(offset) && offset > 0 ? Math.floor(offset) : 0
+  const decks = new Map<number, T[]>()
+  const deck = (cycle: number) => {
+    let found = decks.get(cycle)
+    if (!found) {
+      found = shuffle([...pool], rng(cycleSeed(seed, cycle)))
+      decks.set(cycle, found)
+    }
+    return found
+  }
+  const out: T[] = []
+  const seen = new Set<string>()
+  for (let k = start; out.length < Math.min(size, pool.length) && k < start + size + pool.length; k++) {
+    const item = deck(Math.floor(k / pool.length))[k % pool.length] as T
+    if (seen.has(item.id)) continue
+    seen.add(item.id)
+    out.push(item)
+  }
+  return out
+}
+
 function dealFresh(seed: number, cursor: number, window?: KitWindow): Dealt[] {
   const all = kitRecords()
   const pool = playableKits()
-  const at = positionOf(seed, cursor, pool.length, KIT_ROUND)
-  const random = rng(at.seed)
   let round: KitMasterRecord[]
+  let random: () => number
   if (window) {
+    const at = positionOf(seed, cursor, pool.length, KIT_ROUND)
+    random = rng(at.seed)
     const eligible = pool.filter((kit) => seasonStart(kit) < window.before)
     const pinned = window.pin ? eligible.find((kit) => kit.id === window.pin) : undefined
     round = pinned ? [pinned] : shuffle([...eligible], random).slice(0, 1)
   } else {
-    // the gate's own round, exactly as it was: the same stream shuffles the pool, then the options
-    round = takeFrom(shuffle([...pool], random), at.slot * KIT_ROUND, KIT_ROUND)
+    // the gate's own round: KIT_ROUND shirts from the cursor's shirt; the options shuffle on
+    // their own stream, keyed by seed AND cursor, so the same link deals the same options
+    round = kitRoundAt(pool, seed, cursor, KIT_ROUND)
+    random = rng(cycleSeed(seed, cursor + 1) ^ 0x5bd1e995)
   }
 
   return round.map((kit, index) => {

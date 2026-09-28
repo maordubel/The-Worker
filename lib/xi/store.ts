@@ -66,6 +66,13 @@ export type SavedXI = {
   shortlist?: string[]
   /** the rule the sheet is being built under (`lib/xi/challenge.ts`); absent = free */
   challenge?: ChallengeId
+  /**
+   * The Manager Prompt this sheet accepted (`lib/xi/prompt.ts`): the seed and cursor that dealt
+   * it, so the share link can hand the SAME prompt over — never the picks. Absent = none.
+   */
+  prompt?: { seed: number; cursor: number }
+  /** ids — "the five you picked before", frozen when that prompt was accepted */
+  forbidden?: string[]
   /** ISO date it was last saved */
   savedOn: string
 }
@@ -81,6 +88,15 @@ export interface XIStore {
   read(): Promise<XIBook>
   save(tab: XITab, sheet: XISheet): Promise<void>
   clear(): Promise<void>
+}
+
+/** a stored prompt reference, or null when it is not one */
+function promptOf(value: unknown): { seed: number; cursor: number } | null {
+  if (typeof value !== 'object' || value === null) return null
+  const { seed, cursor } = value as { seed?: unknown; cursor?: unknown }
+  if (typeof seed !== 'number' || !Number.isFinite(seed) || seed <= 0) return null
+  if (typeof cursor !== 'number' || !Number.isFinite(cursor) || cursor < 0) return null
+  return { seed: Math.floor(seed), cursor: Math.floor(cursor) }
 }
 
 function isTab(value: string): value is XITab {
@@ -129,6 +145,10 @@ export class LocalXIStore implements XIStore {
             ? sheet.shortlist.filter((slug): slug is string => typeof slug === 'string')
             : [],
           ...(isChallenge(sheet.challenge) ? { challenge: sheet.challenge } : {}),
+          ...(promptOf(sheet.prompt) ? { prompt: promptOf(sheet.prompt) as { seed: number; cursor: number } } : {}),
+          ...(Array.isArray(sheet.forbidden)
+            ? { forbidden: sheet.forbidden.filter((id): id is string => typeof id === 'string').slice(0, 5) }
+            : {}),
           savedOn: sheet.savedOn ?? '',
         }
       }
@@ -194,6 +214,8 @@ export function restore(
   cut: string | null
   shortlist: string[]
   challenge: ChallengeId
+  prompt: { seed: number; cursor: number } | null
+  forbidden: string[]
 } | null {
   if (!sheet) return null
   const formation = formations.find((option) => option.name === sheet.formation)
@@ -222,6 +244,8 @@ export function restore(
     cut: sheet.cut ?? null,
     shortlist: sheet.shortlist ?? [],
     challenge: sheet.challenge ?? 'free',
+    prompt: sheet.prompt ?? null,
+    forbidden: sheet.forbidden ?? [],
   }
 }
 
@@ -302,6 +326,10 @@ export function migrateSheet(sheet: SavedXI, resolve: RefResolver): { sheet: Sav
       ...(cut !== undefined ? { cut } : {}),
       shortlist,
       ...(sheet.challenge !== undefined ? { challenge: sheet.challenge } : {}),
+      ...(sheet.prompt ? { prompt: sheet.prompt } : {}),
+      ...(sheet.forbidden
+        ? { forbidden: sheet.forbidden.map((ref) => one(ref)).filter((id): id is string => typeof id === 'string') }
+        : {}),
       savedOn: sheet.savedOn,
     },
     unresolved,

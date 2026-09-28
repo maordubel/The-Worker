@@ -4,6 +4,8 @@ import { crestLabel } from '@/lib/game/kitBuild'
 import { kitByLegacyKey, kitRecord, specOf } from '@/lib/kit/kit-master'
 import { COLOUR_NAME, PATTERNS, type KitSpec } from '@/lib/kit/spec'
 import { signKitUnlock, verifyKitUnlock } from '@/lib/kit/unlock'
+import { gateHref } from '@/lib/links'
+import { recommend, type NextAction, type ResultContext } from '@/lib/results/context'
 
 /**
  * שער 5 — the shirts a device proved it built, and nothing else.
@@ -79,4 +81,27 @@ export async function kitDnaFor(
     minted[row.key] = { token: signKitUnlock(kit.id, dna), dna }
   }
   return { rows: [...rows.values()], minted }
+}
+
+/**
+ * The wardrobe's Universal Exit (ONE RED WORLD §6, §14): the act that fills the closet is gate
+ * 4, so it is the first door; the second is the archive card of a shirt already HOME — never of
+ * a locked one, which would hand over the answer gate 4 asks for (rule 24). Hrefs from `lib/links`.
+ */
+const KIT_KEY = /^\d{4}(\/\d{2})?\|(home|away|third)$/
+
+export async function nextAfterWardrobe(input: { built: string[] }): Promise<{ context: ResultContext; next: NextAction[] }> {
+  const keys = Array.isArray(input?.built)
+    ? input.built.filter((key): key is string => typeof key === 'string' && KIT_KEY.test(key)).slice(-6).reverse()
+    : []
+  const context: ResultContext = { gateId: 5, kitIds: keys, archiveEntityIds: keys }
+  const build = gateHref(4)
+  const doors: NextAction[] = build
+    ? [{ kind: 'gate', href: build, label: 'voice.next.gate.4', subject: null, reason: 'wardrobe→build' }]
+    : []
+  for (const door of recommend(context, { exclude: doors.map((door) => door.href) })) {
+    if (doors.length >= 2) break
+    doors.push(door)
+  }
+  return { context, next: doors }
 }

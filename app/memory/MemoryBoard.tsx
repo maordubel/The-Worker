@@ -16,6 +16,10 @@ import { Num } from '@/components/ui/Num'
 import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
+import { UniversalExit } from '@/components/result/UniversalExit'
+import { track } from '@/lib/analytics/meter'
+import type { NextAction } from '@/lib/results/types'
+import { hashSeed, microFeedback, voice, voiceAction, type ResultTier } from '@/lib/voice'
 import { artFor } from '@/lib/share/story'
 import { collect, collected, readProfile } from '@/lib/profile/store'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -55,12 +59,19 @@ const COLS = 4
  * cheapest form: a `Record` typed against the union costs one object and makes every key
  * both checkable and greppable.
  */
-const VERDICT: Record<MemoryVerdict, MessageKey> = {
-  flawless: 'memory.verdict.flawless',
-  sharp: 'memory.verdict.sharp',
-  solid: 'memory.verdict.solid',
-  lit: 'memory.verdict.lit',
+/** The wall's four verdicts in the voice's tiers (§15): a count of memories, never a grade. */
+const VERDICT_TIER: Record<MemoryVerdict, ResultTier> = {
+  flawless: 'perfect',
+  sharp: 'high',
+  solid: 'mid',
+  lit: 'low',
 }
+
+/**
+ * The hint line: a catalogue key for the mechanics (flash, find, echo, hot streak), or a line
+ * the voice spoke (§15) — the opening, "חזר למקום.", "לא זה." — with what it was about.
+ */
+type Hint = MessageKey | { line: string; kind: 'intro' | 'locked' | 'wrong' }
 
 /** m:ss, in `<Num>` so a bidi run never puts the colon on the wrong side of the digits */
 function clock(totalSeconds: number): string {
@@ -103,10 +114,16 @@ export function MemoryBoard({
   seed,
   cursor = 0,
   embedded,
+  links = {},
+  next = [],
 }: {
   round: MemoryRound
   seed: number
   cursor?: number
+  /** pair id → its archive card (`/archive?at=…`), resolved and CHECKED on the server (§15) */
+  links?: Readonly<Record<string, string>>
+  /** the Universal Exit's one or two doors, resolved on the server from the same round (§6) */
+  next?: readonly NextAction[]
   /**
    * Opened from inside THE WORKER LIFE — the old fan at the bus stop remembers. The same wall
    * and the same four verdicts; nothing is filed on the shelf, nothing is recorded or shared,
@@ -123,7 +140,8 @@ export function MemoryBoard({
   const [wrong, setWrong] = useState<string[]>([])
   const [echoOn, setEchoOn] = useState<string | null>(null)
   const [fused, setFused] = useState<{ pair: MemoryPair; perfect: boolean } | null>(null)
-  const [hint, setHint] = useState<MessageKey>('memory.hint.start')
+  // §15 — the wall opens on the voice: "תסתכל טוב. עוד רגע זה נעלם."
+  const [hint, setHint] = useState<Hint>(() => ({ line: voice({ gate: 6, moment: 'intro' }).title, kind: 'intro' }))
   const [streakShown, setStreakShown] = useState(0)
   const [kept, setKept] = useState<number | null>(null)
   /** the pair just locked — the v3 "MEMORY LOCKED" panel, folded into the hint line */
@@ -264,10 +282,14 @@ export function MemoryBoard({
       if (pair) setFused({ pair, perfect: outcome.perfect })
       setLockedPair(pair ?? null)
       setStreakShown(outcome.run.streak)
-      setHint(outcome.run.streak >= 2 ? 'memory.hint.hot' : 'memory.hint.locked')
+      setHint(
+        outcome.run.streak >= 2
+          ? 'memory.hint.hot'
+          : { line: microFeedback(6, 'correct', `${seed}:${cursor}`, outcome.run.done.length)?.line ?? '', kind: 'locked' },
+      )
       // every locked pair is a pick — the one print hit the whole ground shares
       firePickFx(event.clientX, event.clientY, {
-        label: t('memory.locked'),
+        label: microFeedback(6, 'correct', `${seed}:${cursor}`, outcome.run.done.length)?.line ?? '',
         tone: 'red',
         haptic: 'lock',
       })
@@ -281,7 +303,7 @@ export function MemoryBoard({
     if (outcome.kind === 'miss') {
       setLockedPair(null)
       setWrong(outcome.run.open)
-      setHint('memory.hint.wrong')
+      setHint({ line: microFeedback(6, 'wrong', `${seed}:${cursor}`, outcome.run.misses)?.line ?? '', kind: 'wrong' })
       firePickFx(event.clientX, event.clientY, { tone: 'sign', haptic: 'miss' })
       later(() => {
         setWrong([])
@@ -293,6 +315,21 @@ export function MemoryBoard({
 
   const found = run.done.length
   const percent = Math.round(morale(run, total) * 100)
+
+  // §15 — "6 זיכרונות חזרו למקום.": the wall's verdict in the voice, and one memory kept
+  const spoken = voice({
+    gate: 6,
+    moment: 'result',
+    result: VERDICT_TIER[verdict(run, total)],
+    seed: `${seed}:${cursor}`,
+    vars: { n: String(total) },
+  })
+  const souvenir = pairs.length > 0 ? (pairs[hashSeed(`${seed}:${cursor}|souvenir`) % pairs.length] ?? null) : null
+  useEffect(() => {
+    if (done && !embedded) track('run_complete', { detail: 'memory', value: run.moves })
+    // once, when the wall closes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done])
 
   return (
     <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none">
@@ -319,8 +356,12 @@ export function MemoryBoard({
 
       {/* the live hint line — what just happened, and what to do next */}
       <p aria-live="polite" className="mt-1.5 shrink-0 font-body text-step--1 text-concrete">
-        {hint === 'memory.hint.hot' ? t('memory.hint.hot', { n: String(streakShown) }) : t(hint)}
-        {lockedPair && (hint === 'memory.hint.locked' || hint === 'memory.hint.hot') && (
+        {hint === 'memory.hint.hot'
+          ? t('memory.hint.hot', { n: String(streakShown) })
+          : typeof hint === 'string'
+            ? t(hint)
+            : hint.line}
+        {lockedPair && (hint === 'memory.hint.hot' || (typeof hint !== 'string' && hint.kind === 'locked')) && (
           <span className="block font-sign text-[13px] font-bold text-sheet">
             {t('memory.hint.lockedFact')}{' '}
             {numericFace(lockedPair.a) ? <Num>{lockedPair.a}</Num> : lockedPair.a}
@@ -378,7 +419,7 @@ export function MemoryBoard({
                 : 'border-sheet bg-sheet/[.08] text-sheet'
             }`}
           >
-            {run.flashUsed ? t('memory.flash.spent') : t('memory.flash.again')}
+            {run.flashUsed ? t('memory.flash.spent') : voiceAction(6, 'flash')}
           </button>
         )}
 
@@ -420,7 +461,7 @@ export function MemoryBoard({
       {embedded && done && (
         <div className="mt-stack shrink-0 border-rule border-sheet bg-sheet p-4">
           <p className="font-body text-[9px] font-extrabold tracking-[0.2em] text-red">{t('memory.mural')}</p>
-          <h2 className="mt-1 font-display text-step-2 leading-tight text-ink">{t(VERDICT[verdict(run, total)])}</h2>
+          <h2 className="mt-1 font-display text-step-2 leading-tight text-ink">{spoken.title}</h2>
           <button
             type="button"
             onClick={() => embedded.onResult(verdict(run, total))}
@@ -494,9 +535,33 @@ export function MemoryBoard({
           size="full"
         >
           {done && (
-            <div>
-              <h2 className="font-display text-step-2 leading-tight text-ink">{t(VERDICT[verdict(run, total)])}</h2>
-
+            <UniversalExit
+              voice={spoken}
+              next={next}
+              from="memory"
+              share={
+                <ShareRow
+                  kind="memory"
+                  params={{ s: String(seed), r: String(cursor) }}
+                  headline={String(run.moves)}
+                  card={{
+                    template: 'ink' as const,
+                    art: artFor('memory', run.misses === 0 ? 1 : 0),
+                    kicker: 'GATE 6 · MEMORY WALL',
+                    label: t('screen.memory.title'),
+                    eyebrow: t('memory.pairs'),
+                    hero: `${total}/${total}`,
+                    bigStat: { v: String(run.moves), k: t('memory.moves') },
+                    stats: [
+                      { k: t('memory.misses'), v: String(run.misses) },
+                      { k: t('memory.bestStreak'), v: String(run.bestStreak) },
+                    ],
+                    cta: t('share.challenge'),
+                    challenge: t('share.sameRound'),
+                  }}
+                />
+              }
+            >
               <dl className="mt-3 flex items-end gap-5 border-y-hair border-ink/25 py-2">
                 {(
                   [
@@ -514,56 +579,38 @@ export function MemoryBoard({
                 ))}
               </dl>
 
-              {/* the mural — every memory the board held, printed together */}
+              {/* §15 — "אחד מהם נשאר אצלך": one memory of the wall, chosen by the round, kept */}
+              {souvenir && (
+                <div className="mt-3 border-rule border-red bg-sheet p-3" data-memory="souvenir">
+                  <p className="font-body text-[10px] font-extrabold tracking-widest text-red">{voiceAction(6, 'souvenir')}</p>
+                  <MuralFace pair={souvenir} href={links[souvenir.id]} />
+                </div>
+              )}
+
+              {/* the mural — every memory the board held, printed together; each one a door to
+                  its archive card where the archive holds it (§15) */}
               <ol className="mt-3">
                 {pairs.map((pair) => (
                   <li
                     key={pair.id}
                     className="flex flex-wrap items-baseline gap-x-2 border-b-hair border-ink/20 py-1.5"
                   >
-                    <span className="min-w-0 flex-1 truncate font-sign text-[14px] font-bold text-ink">
-                      {numericFace(pair.a) ? <Num>{pair.a}</Num> : pair.a}
-                    </span>
-                    <span
-                      aria-hidden="true"
-                      className="-translate-y-[3px] min-w-[10px] flex-1 border-b border-dotted border-ink/30"
-                    />
-                    <span className="shrink-0 font-sign text-[13px] font-bold text-red">
-                      {numericFace(pair.b) ? <Num>{pair.b}</Num> : pair.b}
-                    </span>
+                    <MuralFace pair={pair} href={links[pair.id]} />
                     <span className="w-full basis-full font-body text-[11px] leading-tight text-muted">{pair.kind}</span>
                   </li>
                 ))}
               </ol>
 
               <RecordRun gate="/memory" score={run.bestStreak} correct={total} asked={run.moves} />
-              <ShareRow
-                kind="memory"
-                params={{ s: String(seed), r: String(cursor) }}
-                headline={String(run.moves)}
-                card={{
-                  template: 'ink' as const,
-                  art: artFor('memory', run.misses === 0 ? 1 : 0),
-                  kicker: 'GATE 6 · MEMORY WALL',
-                  label: t('screen.memory.title'),
-                  eyebrow: t('memory.pairs'),
-                  hero: `${total}/${total}`,
-                  bigStat: { v: String(run.moves), k: t('memory.moves') },
-                  stats: [
-                    { k: t('memory.misses'), v: String(run.misses) },
-                    { k: t('memory.bestStreak'), v: String(run.bestStreak) },
-                  ],
-                  cta: t('share.challenge'),
-                  challenge: t('share.sameRound'),
-                }}
-              />
-              <PlayLink
-                gate="/memory"
-                className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
-              >
-                {t('run.again')}
-              </PlayLink>
-            </div>
+            </UniversalExit>
+          )}
+          {done && (
+            <PlayLink
+              gate="/memory"
+              className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"
+            >
+              {t('run.again')}
+            </PlayLink>
           )}
         </SlideSheet>
       )}
@@ -604,5 +651,36 @@ export function MemoryBoard({
         </button>
       )}
     </div>
+  )
+}
+
+/**
+ * One memory of the wall, printed as the mural prints it — and, where the archive holds the
+ * thing, a door to its card (§15: "כל pair/souvenir → archive deep link"). The href was resolved
+ * and checked on the server; a memory the archive does not hold is printed, not linked.
+ */
+function MuralFace({ pair, href }: { pair: MemoryPair; href?: string }) {
+  const body = (
+    <>
+      <span className="min-w-0 flex-1 truncate font-sign text-[14px] font-bold text-ink">
+        {numericFace(pair.a) ? <Num>{pair.a}</Num> : pair.a}
+      </span>
+      <span aria-hidden="true" className="-translate-y-[3px] min-w-[10px] flex-1 border-b border-dotted border-ink/30" />
+      <span className="shrink-0 font-sign text-[13px] font-bold text-red">
+        {numericFace(pair.b) ? <Num>{pair.b}</Num> : pair.b}
+      </span>
+    </>
+  )
+  return href ? (
+    <a
+      href={href}
+      data-memory-link={pair.id}
+      className="flex min-h-tap w-full min-w-0 items-baseline gap-x-2 underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-sign"
+    >
+      {body}
+      <span aria-hidden="true" className="shrink-0 font-body text-[11px] text-muted">←</span>
+    </a>
+  ) : (
+    <span className="flex w-full min-w-0 items-baseline gap-x-2">{body}</span>
   )
 }

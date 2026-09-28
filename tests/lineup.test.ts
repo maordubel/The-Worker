@@ -3,6 +3,8 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { microFeedback } from '@/lib/voice'
+
 import lineupsFile from '@/content/manual/lineups.json'
 import { matchById } from '@/lib/archive/match-master'
 import { resolvePlayer } from '@/lib/archive/player-master'
@@ -688,10 +690,13 @@ describe('מפתחות שנבנים בזמן ריצה — every one of them exis
   })
 
   it('has a word and a note for every verdict the reveal can print', () => {
+    // ONE RED WORLD §12 (28.9.2026): the right man and the man who did not start now speak in
+    // the voice's own pools ("עלה איתם." / "לא באותו ערב.", `lib/voice`); the middle verdict —
+    // a starter in the wrong band — keeps its own word. Flipped, not softened (rules 65, 80).
+    expect(microFeedback(3, 'correct', 1, 0)?.line).toBeTruthy()
+    expect(microFeedback(3, 'wrong', 1, 0)?.line).toBeTruthy()
     for (const key of [
-      'lineup.reveal.ok',
       'lineup.reveal.mid',
-      'lineup.reveal.no',
       'lineup.reveal.ok.note',
       'lineup.reveal.mid.note',
       'lineup.reveal.no.note',

@@ -174,3 +174,29 @@ export function shirtBoard(roster: RosterIndex): ShirtBoard {
     withVersions: Object.keys(versions).length,
   }
 }
+
+/**
+ * "גביעים בלבד" — the Manager Prompt's cup rule (`lib/xi/prompt.ts`), computed from the Player
+ * Master and nothing else: for each roster slug, the opening year of every season the club
+ * lifted a CUP (a `גביע-…` competition — State Cup, Toto Cup) with him in the squad, read off
+ * `spells[].titles`, which the master joined from `squads.json` × `trophies.json`. A man the
+ * master records no cup season for is absent, and the rule refuses him and says so on screen.
+ */
+export function cupYearsBySlug(roster: RosterIndex): Record<string, number[]> {
+  const out: Record<string, number[]> = {}
+  for (const entry of roster.all) {
+    const person = resolvePlayer(entry.id ?? entry.slug)
+    if (!person) continue
+    const years = new Set<number>()
+    for (const spell of person.spells) {
+      for (const title of spell.titles) {
+        if (!title.competitionSlug.startsWith('גביע-')) continue
+        const year = Number(title.seasonLabel.slice(0, 4))
+        if (Number.isFinite(year) && year > 0) years.add(year)
+      }
+    }
+    // order carries nothing: the rule only asks whether a chosen spell CONTAINS one of them
+    if (years.size > 0) out[entry.slug] = [...years]
+  }
+  return out
+}

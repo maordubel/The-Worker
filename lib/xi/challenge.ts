@@ -25,13 +25,44 @@
  * here as the three fields a rule needs.
  */
 
-export type ChallengeId = 'free' | 'decades' | 'pre2000' | 'modern' | 'israeli' | 'foreign'
+export type ChallengeId =
+  | 'free'
+  | 'decades'
+  | 'pre2000'
+  | 'modern'
+  | 'israeli'
+  | 'foreign'
+  // the Manager Prompt's rules (`lib/xi/prompt.ts`, ONE RED WORLD §10) — never in the picker
+  | 'pre1990'
+  | 'the2000s'
+  | 'cups'
+  | 'fresh'
 
+/** the six the picker offers */
 export const CHALLENGES: readonly ChallengeId[] = ['free', 'decades', 'pre2000', 'modern', 'israeli', 'foreign']
 
+/** the rules only a Manager Prompt sets — each computed from the archive, never typed */
+export const PROMPT_CHALLENGES: readonly ChallengeId[] = ['pre1990', 'the2000s', 'cups', 'fresh']
+
 export function isChallenge(value: unknown): value is ChallengeId {
-  return typeof value === 'string' && (CHALLENGES as readonly string[]).includes(value)
+  return (
+    typeof value === 'string' &&
+    ((CHALLENGES as readonly string[]).includes(value) || (PROMPT_CHALLENGES as readonly string[]).includes(value))
+  )
 }
+
+/** "רק עד 1990" — the chosen spell began before this season. */
+export const UNTIL_YEAR = 1990
+
+/**
+ * What a rule may need to know about the MAN rather than the spell. Both are derived on the
+ * server from sourced rows and handed down; absent means the archive holds nothing.
+ *
+ *  · `cupYears` — the opening years of the seasons the club won a CUP (גביע המדינה, גביע
+ *    הטוטו) while the squad table puts him in the squad: Player Master `spells[].titles`.
+ *  · `forbidden` — one of the five this device picked before, for "חמישה שכבר בחרת אסורים".
+ */
+export type ManFacts = { cupYears?: readonly number[]; forbidden?: boolean }
 
 /** The first season a "2000 and after" spell may start in, and the last "before 2000" one. */
 export const MODERN_FROM = 2000
@@ -75,12 +106,27 @@ export type Refusal =
   | 'undated'
   /** "one per decade", and every decade his spells began in is already taken */
   | 'decade-taken'
+  /** "cups only", and no spell of his holds a season the club lifted a cup in the squad table */
+  | 'no-cup'
+  /** "five you picked before are forbidden", and he is one of the five */
+  | 'forbidden'
 
 /** Does this ONE spell satisfy the era rules? The decade rule needs the rest of the sheet. */
 function eraPasses(challenge: ChallengeId, spell: Spell): boolean {
   if (challenge === 'pre2000') return spell.fromYear !== null && spell.fromYear < MODERN_FROM
   if (challenge === 'modern') return spell.toYear !== null && spell.toYear >= MODERN_FROM
+  if (challenge === 'pre1990') return spell.fromYear !== null && spell.fromYear < UNTIL_YEAR
+  if (challenge === 'the2000s') {
+    return spell.fromYear !== null && spell.fromYear <= 2009 && (spell.toYear ?? spell.fromYear) >= 2000
+  }
   return true
+}
+
+/** Does this spell hold a season the club won a cup in, with him in the squad? */
+export function spellHoldsCup(spell: Spell, cupYears: readonly number[] | undefined): boolean {
+  if (spell.fromYear === null || !cupYears || cupYears.length === 0) return false
+  const to = spell.toYear ?? spell.fromYear
+  return cupYears.some((year) => year >= (spell.fromYear as number) && year <= to)
 }
 
 function slotRefusal(challenge: ChallengeId, status: SlotStatus): Refusal | null {
@@ -126,12 +172,19 @@ export function chooseSpell(
   wish: SpellWish = {},
   /** decades already begun in by the OTHER slots of the sheet */
   taken: ReadonlySet<number> = new Set(),
+  /** what the rule knows about the man himself (cups, the forbidden five) */
+  man: ManFacts = {},
 ): { ok: true; spell: Spell } | { ok: false; why: Refusal } {
   const slot = slotRefusal(challenge, status)
   if (slot) return { ok: false, why: slot }
+  if (challenge === 'fresh' && man.forbidden) return { ok: false, why: 'forbidden' }
 
   let candidates = spells.filter((spell) => eraPasses(challenge, spell))
   if (candidates.length === 0) return { ok: false, why: 'era' }
+  if (challenge === 'cups') {
+    candidates = candidates.filter((spell) => spellHoldsCup(spell, man.cupYears))
+    if (candidates.length === 0) return { ok: false, why: 'no-cup' }
+  }
 
   if (challenge === 'decades') {
     const dated = candidates.filter((spell) => decadeOf(spell) !== null)
@@ -151,7 +204,7 @@ export function chooseSpell(
 }
 
 /** One occupied slot of the sheet, as a rule sees it. */
-export type SheetRow = { slotId: string; spell: Spell; status: SlotStatus }
+export type SheetRow = { slotId: string; spell: Spell; status: SlotStatus; man?: ManFacts }
 
 export type ChallengeStatus = {
   challenge: ChallengeId
@@ -178,6 +231,14 @@ export function challengeStatus(challenge: ChallengeId, rows: readonly SheetRow[
       continue
     }
     if (!eraPasses(challenge, row.spell)) {
+      broken.push(row.slotId)
+      continue
+    }
+    if (challenge === 'cups' && !spellHoldsCup(row.spell, row.man?.cupYears)) {
+      broken.push(row.slotId)
+      continue
+    }
+    if (challenge === 'fresh' && row.man?.forbidden) {
       broken.push(row.slotId)
       continue
     }

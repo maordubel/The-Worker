@@ -3,6 +3,8 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { microFeedback, voice } from '@/lib/voice'
+
 import { buildBoard, buildRound, type MemoryCard } from '@/lib/game/memory'
 import {
   ECHO_STREAK,
@@ -243,17 +245,19 @@ describe('שער 6 — הריצה', () => {
   })
 
   it('has every closing line and hint in the catalogue', () => {
+    // ONE RED WORLD §15 (28.9.2026): the four closing verdicts, the opening and the locked /
+    // missed beats now speak in the voice (`lib/voice`, gate 6) — each verdict has a line in
+    // its tier, and the beats have their pools. Flipped, not softened (rules 65, 80).
+    for (const tier of ['perfect', 'high', 'mid', 'low'] as const) {
+      expect(voice({ gate: 6, moment: 'result', result: tier, vars: { n: '6' } }).title, tier).toBeTruthy()
+    }
+    expect(voice({ gate: 6, moment: 'intro' }).title).toBeTruthy()
+    expect(microFeedback(6, 'correct', 1, 0)?.line).toBeTruthy()
+    expect(microFeedback(6, 'wrong', 1, 0)?.line).toBeTruthy()
     for (const key of [
-      'memory.verdict.flawless',
-      'memory.verdict.sharp',
-      'memory.verdict.solid',
-      'memory.verdict.lit',
-      'memory.hint.start',
       'memory.hint.photograph',
       'memory.hint.find',
       'memory.hint.remember',
-      'memory.hint.wrong',
-      'memory.hint.locked',
       'memory.hint.hot',
       'memory.hint.echo',
       'memory.echo.idle',

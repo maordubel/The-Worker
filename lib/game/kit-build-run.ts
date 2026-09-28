@@ -55,6 +55,33 @@ export const STEP_WEIGHT: Record<KitStep, number> = Object.fromEntries(
 export const SHIRT_POINTS = 100
 export const PERFECT_BONUS = 15
 export const KIT_ROUND = 5
+
+/**
+ * The two ways to play a round (ONE RED WORLD §13): Full is five shirts, Quick is three. A deal
+ * is always KIT_ROUND shirts from the cursor; Quick plays the first three of them.
+ */
+export type KitMode = 'full' | 'quick'
+export const KIT_MODE_SIZE: Readonly<Record<KitMode, number>> = { full: KIT_ROUND, quick: 3 }
+
+/** `?n=3` → quick, `?n=5` → full; anything else is no choice yet (the intro asks). */
+export function kitModeFrom(raw: string | string[] | undefined): KitMode | null {
+  const value = Number(Array.isArray(raw) ? raw[0] : raw)
+  if (value === KIT_MODE_SIZE.quick) return 'quick'
+  if (value === KIT_MODE_SIZE.full) return 'full'
+  return null
+}
+
+/**
+ * The cursor of gate 4 counts SHIRTS, not rounds: a round starts at the cursor's shirt in the
+ * seed's deck, and the next round starts where this one stopped — so the cursor advances by the
+ * number of shirts actually CONSUMED (3 for Quick, 5 for Full), never by one slice. Mixing the
+ * two modes therefore never repeats a shirt before the whole deck was dealt (§13, §49).
+ */
+export function kitNextCursor(cursor: number, consumed: number): number {
+  const safe = Number.isFinite(cursor) && cursor > 0 ? Math.floor(cursor) : 0
+  return safe + Math.max(0, Math.floor(consumed))
+}
+
 export const KIT_HINT_PENALTY = 8
 export const KIT_HINT_LIMIT = 3
 /** the DNA of a shirt opens in the studio when its base score reaches this (≈ V5's six of eight) */

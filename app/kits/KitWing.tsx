@@ -9,11 +9,15 @@ import { SlideDeck } from '@/components/stage/SlideDeck'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { Num } from '@/components/ui/Num'
 import { SourceNote } from '@/components/ui/SourceNote'
+import { ExitNext, UniversalExit } from '@/components/result/UniversalExit'
 import { activeCollection, type Collection } from '@/lib/kit/collection'
+import { closestDecade, decadeWord, readLifeKitKeys } from '@/lib/kit/wardrobe'
+import type { NextAction } from '@/lib/results/types'
+import { voice, voiceAction } from '@/lib/voice'
 import type { Facet, LockedKit } from '@/lib/kit/catalog'
 import { t, type MessageKey } from '@/lib/i18n'
 
-import { kitDnaFor, type UnlockedKit } from './actions'
+import { kitDnaFor, nextAfterWardrobe, type UnlockedKit } from './actions'
 import { KitDesignerV5 } from './KitDesignerV5'
 
 /**
@@ -72,6 +76,20 @@ export function KitWing({
   const [mobileTab, setMobileTab] = useState<'collection' | 'designer'>('collection')
   const [mobilePage, setMobilePage] = useState(0)
   const [mobileOpenKey, setMobileOpenKey] = useState<string | null>(null)
+  /** catalogue keys this device's LIFE save owns — read through the LIFE save reader, nothing else */
+  const [lifeKeys, setLifeKeys] = useState<ReadonlySet<string>>(() => new Set())
+  /** the Universal Exit's doors (§6) */
+  const [next, setNext] = useState<NextAction[]>([])
+
+  useEffect(() => {
+    let live = true
+    void readLifeKitKeys().then((keys) => {
+      if (live) setLifeKeys(keys)
+    })
+    return () => {
+      live = false
+    }
+  }, [])
 
   // Read after mount, never during render: the server has no browser storage. Then ask the
   // server for the shirts this device can PROVE it built — a token each, or a legacy key once.
@@ -99,6 +117,30 @@ export function KitWing({
     [unlocked],
   )
   const owned = Object.keys(built).length
+  // §14 — the hero is COUNTED ("14 מתוך 33 חזרו לארון"), the objective is DERIVED (the decade
+  // closest to closing), and neither is typed anywhere
+  const opening = voice({ gate: 5, moment: 'intro', vars: { n: String(owned), total: String(catalog.length) } })
+  const goal = closestDecade(catalog, built)
+  const objective = goal
+    ? goal.left === 1
+      ? voiceAction(5, 'oneLeft', { decade: decadeWord(goal.decade) })
+      : voiceAction(5, 'objective.many', { n: String(goal.left), decade: decadeWord(goal.decade) })
+    : owned > 0
+      ? voiceAction(5, 'objective.done')
+      : null
+  const closing = voice({ gate: 5, moment: 'result', result: 'done', seed: owned })
+  const builtKeys = Object.keys(built).join('|')
+  useEffect(() => {
+    let live = true
+    nextAfterWardrobe({ built: builtKeys ? builtKeys.split('|') : [] })
+      .then((answer) => {
+        if (live) setNext(answer.next)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+  }, [builtKeys])
   const shown = catalog
     .filter((kit) => facet === 'all' || kit.variant === facet)
     .filter((kit) => !lockedOnly || !built[kit.key])
@@ -111,7 +153,14 @@ export function KitWing({
   // the same full-page swap it always did, just gated to md+ below.
   const desktopTree =
     open && openBuilt && openRow ? (
-      <KitCard kit={open} row={openRow} built={openBuilt} onBack={() => setOpenKey(null)} />
+      <KitCard
+        kit={open}
+        row={openRow}
+        built={openBuilt}
+        life={lifeKeys.has(open.key)}
+        photo={Boolean(photos[open.key])}
+        onBack={() => setOpenKey(null)}
+      />
     ) : open ? (
       <LockedCard kit={open} onBack={() => setOpenKey(null)} />
     ) : (
@@ -139,14 +188,15 @@ export function KitWing({
           {/* progress — the one number the wing is about */}
           <div className="mt-stack flex items-end justify-between gap-4">
             <div>
-              <p className="font-display text-step-2 leading-none text-ink">
-                {t('kits.collection')}
+              <p className="font-display text-step-2 leading-none text-ink">{opening.title}</p>
+              <p className="mt-2 font-body text-step--1 text-muted" data-kits="hero">
+                {opening.body}
               </p>
-              <p className="mt-2 font-body text-step--1 text-muted">
-                <Num>
-                  {t('kits.progress', { n: String(owned), total: String(catalog.length) })}
-                </Num>
-              </p>
+              {objective && (
+                <p className="mt-1 font-sign text-step--1 text-red" data-kits="objective">
+                  {objective}
+                </p>
+              )}
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <div className="h-2.5 w-24 border-hair border-ink/35 bg-paper sm:w-40">
@@ -231,6 +281,10 @@ export function KitWing({
               {t('kits.emptyBody')}
             </p>
           )}
+
+          {/* §6 — the wing closes like every gate: the line, one or two doors. No share row:
+              the wing has no run to hand over, and it builds no second share system (rule 19). */}
+          {owned > 0 && <UniversalExit voice={closing} next={next} from="kits" />}
         </>
       )}
     </div>
@@ -278,9 +332,16 @@ export function KitWing({
           <>
             {/* HUD — progress and the way to the real archive, one line */}
             <div className="flex shrink-0 items-center justify-between gap-2">
-              <p className="font-body text-[12px] font-bold text-muted">
-                <Num>{t('kits.progress', { n: String(owned), total: String(catalog.length) })}</Num>
-              </p>
+              <div className="min-w-0">
+                <p className="truncate font-body text-[12px] font-bold text-muted" data-kits="hero">
+                  {opening.body}
+                </p>
+                {objective && (
+                  <p className="truncate font-sign text-[11.5px] leading-tight text-red" data-kits="objective">
+                    {objective}
+                  </p>
+                )}
+              </div>
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-14 border-hair border-ink/35 bg-paper">
                   <div className="h-full bg-red" style={{ inlineSize: `${pct}%` }} />
@@ -354,6 +415,12 @@ export function KitWing({
                 </p>
               )}
             </div>
+            {/* §6 on the phone stage: the doors only, compact — the hero above is the emotion */}
+            {owned > 0 && next.length > 0 && (
+              <div className="shrink-0">
+                <ExitNext next={next} from="kits" compact />
+              </div>
+            )}
           </>
         )}
 
@@ -372,7 +439,13 @@ export function KitWing({
             }
           >
             {mobileOpenBuilt && mobileOpenRow ? (
-              <MobileCardBody kit={mobileOpen} row={mobileOpenRow} built={mobileOpenBuilt} photo={photos[mobileOpen.key]} />
+              <MobileCardBody
+                kit={mobileOpen}
+                row={mobileOpenRow}
+                built={mobileOpenBuilt}
+                photo={photos[mobileOpen.key]}
+                life={lifeKeys.has(mobileOpen.key)}
+              />
             ) : (
               <MobileLockedBody kit={mobileOpen} />
             )}
@@ -431,7 +504,7 @@ function ShirtCard({
           ? built.bestParts >= 5
             ? t('kits.built')
             : t('kits.partial', { n: String(built.bestParts) })
-          : t('kits.locked')}
+          : voiceAction(5, 'locked')}
       </span>
       {/* The sponsor is one of the five answers gate 4 asks for. It appears on a shirt
           you have assembled and on no other — and this page cannot print it for any other,
@@ -467,11 +540,15 @@ function KitCard({
   kit,
   row,
   built,
+  life,
+  photo,
   onBack,
 }: {
   kit: LockedKit
   row: UnlockedKit
   built: { bestParts: number; times: number; firstBuiltOn: string }
+  life: boolean
+  photo: boolean
   onBack: () => void
 }) {
   const rows: { k: MessageKey; v: string | null }[] = [
@@ -561,6 +638,8 @@ function KitCard({
         </div>
       </div>
 
+      <Provenance life={life} photo={photo} />
+
       {kit.playable && (
         <a
           href="/kits/build"
@@ -604,7 +683,7 @@ function LockedCard({ kit, onBack }: { kit: LockedKit; onBack: () => void }) {
       </button>
 
       <div className="mt-3 bg-ink px-4 py-3 text-paper">
-        <p className="font-body text-[10px] tracking-widest text-concrete">{t('kits.locked')}</p>
+        <p className="font-body text-[10px] tracking-widest text-concrete">{voiceAction(5, 'locked')}</p>
         <p className="mt-1 font-display text-step-2 leading-tight">
           {t(`kits.facet.${kit.variant}` as MessageKey)} · <Num>{kit.seasonLabel}</Num>
         </p>
@@ -684,7 +763,7 @@ function MobileShirtCard({
           ? built.bestParts >= 5
             ? t('kits.built')
             : t('kits.partial', { n: String(built.bestParts) })
-          : t('kits.locked')}
+          : voiceAction(5, 'locked')}
       </span>
     </button>
   )
@@ -703,11 +782,13 @@ function MobileCardBody({
   row,
   built,
   photo,
+  life = false,
 }: {
   kit: LockedKit
   row: UnlockedKit
   built: { bestParts: number; times: number; firstBuiltOn: string }
   photo?: string
+  life?: boolean
 }) {
   const slug = slugOf(photo)
   const rows: { k: MessageKey; v: string | null }[] = [
@@ -761,7 +842,40 @@ function MobileCardBody({
           <Stat label={t('kits.mine.first')} value={dayMonthYear(built.firstBuiltOn)} />
         </div>
       </div>
+
+      <Provenance life={life} photo={Boolean(photo)} />
     </div>
+  )
+}
+
+/**
+ * איך היא חזרה אליך (§14) — the shirt's provenance, one line per layer, and a line is drawn ONLY
+ * when it is true for this person: ✓ gate 4 (a card only exists for a shirt built there), ✓ LIFE
+ * when the device's LIFE save owns this season's shirt, ○ the archive's photograph when there is
+ * one (a door, not a claim). LIFE adds a story to the object; it never stands in for the build.
+ */
+function Provenance({ life, photo }: { life: boolean; photo: boolean }) {
+  return (
+    <ul data-kit-provenance="" className="mt-2 grid gap-1 border-rule border-ink bg-sheet px-3 py-2 font-body text-[12.5px] text-ink">
+      <li data-prov="gate4">
+        <span aria-hidden="true" className="me-1.5 font-extrabold text-red">✓</span>
+        {voiceAction(5, 'prov.gate4')}
+      </li>
+      {life && (
+        <li data-prov="life">
+          <span aria-hidden="true" className="me-1.5 font-extrabold text-red">✓</span>
+          {voiceAction(5, 'prov.life')}
+        </li>
+      )}
+      {photo && (
+        <li data-prov="photo">
+          <span aria-hidden="true" className="me-1.5 text-muted">○</span>
+          <a href="/kits/archive" className="underline underline-offset-4">
+            {voiceAction(5, 'prov.photo')}
+          </a>
+        </li>
+      )}
+    </ul>
   )
 }
 

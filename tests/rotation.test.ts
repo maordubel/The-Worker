@@ -143,7 +143,10 @@ const MODES: Array<{
   {
     name: 'kits',
     size: 5,
-    ids: (seed, cursor) => dealKitRound(seed, cursor).map((puzzle) => puzzle.id),
+    // Gate 4's cursor counts SHIRTS since ONE RED WORLD §13 (Quick spends 3, Full 5 —
+    // `kitNextCursor`), so "the next round" of a Full player is five shirts on, not one.
+    // The guarantee this table holds is unchanged; only the address of round N moved.
+    ids: (seed, round) => dealKitRound(seed, round * 5).map((puzzle) => puzzle.id),
   },
   {
     name: 'memory',

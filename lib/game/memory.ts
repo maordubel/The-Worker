@@ -163,6 +163,21 @@ function seasonEnd(label: string): number | null {
   return Math.floor(start / 100) * 100 + end + (end < start % 100 ? 100 : 0)
 }
 
+/**
+ * A memory pair → the Entity Graph id of the thing it remembers (ONE RED WORLD §15: "every pair
+ * and souvenir → archive deep link"). The pair ids are already archive keys; four kinds are the
+ * graph's own ids, the European tie is `tie:` there, a kit spell is its MAKER, and an election
+ * result names a person the graph does not hold as an entity — so it answers null, not a guess.
+ * The caller still checks the id with `archiveHref`, so a key the graph lacks opens nothing.
+ */
+export function memoryEntityId(pairId: string): string | null {
+  if (/^(trophy|moment|goal|crest):/.test(pairId)) return pairId
+  if (pairId.startsWith('euro:')) return `tie:${pairId.slice('euro:'.length)}`
+  const kit = /^kit:([^:]+):/.exec(pairId)
+  if (kit) return `maker:${kit[1]}`
+  return null
+}
+
 export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryWindow): MemoryRound {
   // The board used to be one board: the gate linked `?seed=7`, the route defaulted to
   // 7, and there was no replay link at all, so every player on every visit turned over

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Screen } from '@/components/ui/Screen'
-import { dealKitRound, kitPuzzleCount, KIT_ROUND } from '@/lib/game/kitBuild'
+import { dealKitRound, kitModeFrom, kitPuzzleCount, KIT_ROUND } from '@/lib/game/kitBuild'
 import { t } from '@/lib/i18n'
 import { playableKits } from '@/lib/kit/kit-master'
 import { roundFrom } from '@/lib/rotation/round'
@@ -34,8 +34,10 @@ function exactKits(): Record<string, string> {
  * one full-bleed screen the height of the phone (Maor's V14 layout). The round is dealt here, on
  * the server, and nothing the client receives says which option is right (rule 4).
  */
-export default function KitGamePage({ searchParams }: { searchParams: { seed?: string; r?: string } }) {
+export default function KitGamePage({ searchParams }: { searchParams: { seed?: string; r?: string; n?: string } }) {
   const round = roundFrom(searchParams)
+  // `?n=3` Quick · `?n=5` Full (§13). No `n` = no choice yet: the gate opens on its line and asks.
+  const mode = kitModeFrom(searchParams.n)
   if (kitPuzzleCount() < KIT_ROUND) {
     return (
       <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false}>
@@ -46,7 +48,7 @@ export default function KitGamePage({ searchParams }: { searchParams: { seed?: s
   const puzzles = dealKitRound(round.seed, round.cursor)
   return (
     <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false} stage>
-      <KitGameRun puzzles={puzzles} seed={round.seed} cursor={round.cursor} exactKits={exactKits()} />
+      <KitGameRun puzzles={puzzles} seed={round.seed} cursor={round.cursor} mode={mode} exactKits={exactKits()} />
     </Screen>
   )
 }

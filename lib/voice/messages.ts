@@ -54,7 +54,26 @@ export const VOICES: Readonly<Record<GateNo, GateVoice>> = {
     result: { done: lines(1, 'done', 2, { eyebrow: true, body: true }) } satisfies Tiers,
     correct: [],
     wrong: [],
-    actions: acts(1, ['slot', 'picked', 'version', 'captain', 'twelfth', 'lastCut']),
+    actions: acts(1, [
+      'slot',
+      'picked',
+      'version',
+      'captain',
+      'twelfth',
+      'lastCut',
+      // the Manager Prompt (§10, lib/xi/prompt.ts) — one line per prompt, and its controls
+      'prompt.title',
+      'prompt.link',
+      'prompt.accept',
+      'prompt.other',
+      'prompt.drop',
+      'prompt.until1990',
+      'prompt.noForeign',
+      'prompt.the2000s',
+      'prompt.cups',
+      'prompt.tomorrow',
+      'prompt.fresh5',
+    ]),
     whatsapp: k('voice.g1.whatsapp'),
   },
   2: {
@@ -80,7 +99,7 @@ export const VOICES: Readonly<Record<GateNo, GateVoice>> = {
     },
     correct: micro(3, 'correct', 2),
     wrong: micro(3, 'wrong', 2),
-    actions: acts(3, ['gk', 'defence', 'lock', 'hint']),
+    actions: acts(3, ['gk', 'defence', 'midfield', 'attack', 'lock', 'hint', 'missed', 'wrongIn', 'noneMissed', 'noneWrong']),
     whatsapp: k('voice.g3.whatsapp'),
   },
   4: {
@@ -94,7 +113,12 @@ export const VOICES: Readonly<Record<GateNo, GateVoice>> = {
     },
     correct: micro(4, 'correct', 2),
     wrong: micro(4, 'wrong', 2),
-    actions: { ...acts(4, ['body', 'construction', 'crest', 'maker', 'sponsor', 'review']), nearSponsor: k('voice.g4.near.sponsor.title') },
+    actions: {
+      ...acts(4, ['body', 'construction', 'crest', 'maker', 'sponsor', 'review']),
+      // Full (5) or Quick (3) — §13
+      ...acts(4, ['mode.full', 'mode.full.body', 'mode.quick', 'mode.quick.body']),
+      nearSponsor: k('voice.g4.near.sponsor.title'),
+    },
     whatsapp: k('voice.g4.whatsapp'),
   },
   5: {
@@ -102,7 +126,7 @@ export const VOICES: Readonly<Record<GateNo, GateVoice>> = {
     result: { done: lines(5, 'done', 2) },
     correct: [],
     wrong: [],
-    actions: acts(5, ['locked', 'oneLeft']),
+    actions: acts(5, ['locked', 'oneLeft', 'objective.many', 'objective.done', 'prov.gate4', 'prov.life', 'prov.photo']),
     whatsapp: k('voice.g5.whatsapp'),
   },
   6: {

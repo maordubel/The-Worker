@@ -497,6 +497,17 @@ export function advanceRotation(gate: string, mint: () => number): Rotation {
   return next
 }
 
+/**
+ * Put the device at an exact place in a gate's deck. For a deck whose cursor does not move one
+ * slice per round — gate 4 counts SHIRTS, and a Quick round spends three where a Full one spends
+ * five (`kitNextCursor`) — so "again" lands where the last round actually stopped.
+ */
+export function setRotation(gate: string, next: Rotation): Rotation {
+  const safe = { seed: Math.max(1, Math.floor(next.seed)), cursor: Math.max(0, Math.floor(next.cursor)) }
+  update((profile) => ({ ...profile, rotation: { ...profile.rotation, [gate]: safe } }))
+  return safe
+}
+
 /** Consecutive days up to and including today. Yesterday still counts as alive. */
 export function streak(profile: Profile, from: Date = new Date()): number {
   const days = new Set(profile.days)

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
+import { ExitEmotion, ExitNext, ExitShare } from '@/components/result/UniversalExit'
 import { Num } from '@/components/ui/Num'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { t, type MessageKey } from '@/lib/i18n'
@@ -21,6 +22,9 @@ import type { KitSpec } from '@/lib/kit/spec'
 import type { ShirtLook } from '@/lib/kit/playerShirt'
 import { collect, collected, readProfile } from '@/lib/profile/store'
 import { haptic } from '@/lib/play/haptics'
+import { track } from '@/lib/analytics/meter'
+import type { NextAction } from '@/lib/results/types'
+import { microFeedback, voiceAction, type VoiceOut } from '@/lib/voice'
 import { BandPitch, LINE_LABEL, type BandMan } from './BandPitch'
 import { useFastWalk } from './fastWalk'
 
@@ -65,10 +69,17 @@ const STATUS_STYLE: Record<PlacementStatus, string> = {
   not_in_xi: 'border-ink bg-sheet text-ink line-through',
 }
 
-const VERDICT_WORD: Record<PlacementStatus, MessageKey> = {
-  exact: 'lineup.reveal.ok',
-  wrong_line: 'lineup.reveal.mid',
-  not_in_xi: 'lineup.reveal.no',
+/**
+ * The walk's micro-feedback (§12): a right man speaks in the voice's `correct` pool ("עלה
+ * איתם."), a man who did not start in its `wrong` pool ("לא באותו ערב."), walked by his place
+ * in the reveal so eleven verdicts do not repeat one line. The middle case — a starter in
+ * the wrong band — keeps its own sourced word; the voice has no line for "right man,
+ * wrong line".
+ */
+function verdictWord(row: RevealRow, seed: string, index: number): string {
+  if (row.status === 'exact') return microFeedback(3, 'correct', seed, index)?.line ?? ''
+  if (row.status === 'not_in_xi') return microFeedback(3, 'wrong', seed, index)?.line ?? ''
+  return t('lineup.reveal.mid')
 }
 
 const STATUS_LABEL: Record<PlacementStatus, MessageKey> = {
@@ -100,6 +111,10 @@ export function TeamSheet({
   notesTaken,
   kit,
   look = null,
+  seed = '0',
+  spoken,
+  doors = [],
+  share,
   onBack,
   children,
 }: {
@@ -109,6 +124,14 @@ export function TeamSheet({
   kit: KitSpec | null
   /** the match season's REAL shirt (delta 88), as on the lockers */
   look?: ShirtLook | null
+  /** the round, for the voice's deterministic walk through its pools */
+  seed?: string
+  /** the result line — "מצאת 9 מתוך 11." (lib/voice, §12) */
+  spoken: VoiceOut
+  /** the Universal Exit's one or two doors (§6) */
+  doors?: readonly NextAction[]
+  /** the gate's one share (rule 19), under "שלח ליציע" */
+  share?: ReactNode
   /** back into the locker room with the same eleven still standing */
   onBack: () => void
   /** the share row and the replay link, which belong to the board that owns the round */
@@ -116,12 +139,18 @@ export function TeamSheet({
 }) {
   const rows = buildReveal(verdict, locks)
   const missing = missingStarters(verdict)
+  /** the men sent out who did not start that night — "who you put in by mistake" */
+  const wrongIn = rows.filter((row) => row.status === 'not_in_xi')
 
   // Read once, on the first client render — this only mounts after a submission.
   const [stage, setStage] = useState<'reveal' | 'sheet'>(() =>
     opensAtSummary(collected(readProfile(), REVEAL_SET)) ? 'sheet' : 'reveal',
   )
   const [index, setIndex] = useState(-1)
+  // the exit's measurement (§37): the sheet is the result a person stops at
+  useEffect(() => {
+    if (stage === 'sheet') track('result_view', { detail: 'lineup' })
+  }, [stage])
 
   function step() {
     if (index >= rows.length - 1) return
@@ -208,7 +237,7 @@ export function TeamSheet({
                   <span aria-hidden="true" className="me-1">
                     {STATUS_MARK[current.status]}
                   </span>
-                  {t(VERDICT_WORD[current.status])}
+                  {verdictWord(current, seed, index)}
                 </p>
                 <p className="mt-1 font-body text-step--1 leading-relaxed text-muted">{verdictNote(current)}</p>
               </>
@@ -258,18 +287,12 @@ export function TeamSheet({
       )}
 
       {stage === 'sheet' && (
-        <section className="mt-stack">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="font-display text-step-2 leading-tight text-ink">{t('lineup.report.title')}</h2>
-          </div>
-          <p className="mt-1 font-body text-step--1 leading-snug text-muted">{t('lineup.report.lede')}</p>
-
-          <p className="mt-stack font-display text-step-4 leading-none text-ink">
-            <Num>{`${verdict.exact}/${verdict.total}`}</Num>{' '}
-            <span className="font-body text-step-0">{t('lineup.exact')}</span>
-          </p>
+        <section className="mt-stack" data-exit="universal">
+          {/* §6 layer 1 — "מצאת 9 מתוך 11." No percentage: a count of men. */}
+          <ExitEmotion voice={spoken} />
 
           <ul className="mt-3 flex flex-wrap gap-2">
+            <Tally label={t('lineup.exact')} value={running.exact} />
             <Tally label={t('lineup.zone.wrongLine')} value={running.wrongLine} />
             {verdict.benchKnown && <Tally label={t('lineup.benchTrap')} value={running.bench} />}
             <Tally label={t('lineup.locksRight')} value={running.locksRight} of={running.locksUsed} />
@@ -313,13 +336,22 @@ export function TeamSheet({
             ))}
           </ul>
 
-          <div className="mt-stack border-rule border-ink bg-sheet p-3">
-            <p className="font-body text-[11px] font-extrabold tracking-widest text-muted">{t('lineup.left.title')}</p>
-            <p className="mt-1 font-body text-step--1 leading-relaxed text-ink">
-              {missing.length === 0
-                ? t('lineup.left.none')
-                : missing.map((man) => `${man.nameHe} (${t(LINE_LABEL[man.line])})`).join(' · ')}
-            </p>
+          {/* §12 — after the reveal: who you missed, and who you put in by mistake */}
+          <div className="mt-stack grid gap-2 sm:grid-cols-2" data-lineup="after">
+            <div className="border-rule border-ink bg-sheet p-3" data-lineup="missed">
+              <p className="font-body text-[11px] font-extrabold tracking-widest text-muted">{voiceAction(3, 'missed')}</p>
+              <p className="mt-1 font-body text-step--1 leading-relaxed text-ink">
+                {missing.length === 0
+                  ? voiceAction(3, 'noneMissed')
+                  : missing.map((man) => `${man.nameHe} (${t(LINE_LABEL[man.line])})`).join(' · ')}
+              </p>
+            </div>
+            <div className="border-rule border-ink bg-sheet p-3" data-lineup="wrong-in">
+              <p className="font-body text-[11px] font-extrabold tracking-widest text-muted">{voiceAction(3, 'wrongIn')}</p>
+              <p className="mt-1 font-body text-step--1 leading-relaxed text-ink">
+                {wrongIn.length === 0 ? voiceAction(3, 'noneWrong') : wrongIn.map((row) => row.nameHe).join(' · ')}
+              </p>
+            </div>
           </div>
 
           {verdict.sourceTitle !== '' && <SourceNote newTab className="mt-3" />}
@@ -343,6 +375,12 @@ export function TeamSheet({
               {t('lineup.reveal.again')}
             </button>
           </div>
+
+          {/* §6 layers 2 and 3 — one or two doors, then "שלח ליציע" (the gate's own share) */}
+          <ExitNext next={doors} from="lineup" />
+          <ExitShare label={spoken.ctaShare} from="lineup">
+            {share}
+          </ExitShare>
 
           {children}
         </section>

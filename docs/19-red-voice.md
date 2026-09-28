@@ -145,3 +145,36 @@ Supabase → SQL Editor, paste that file and run it; the last line must read
 References: `app/trivia/MatchReport.tsx` + `app/trivia/TriviaRun.tsx` (full exit, voice
 micro-feedback for plain hits/misses; named reactions — deep/fast/fire/onit/timeout — kept),
 `components/blind-cow/ResultPanel.tsx` + `GuessDrawer.tsx` + `BlindCowGame.tsx` (compact parts).
+
+## Adopted: gates 1, 3, 4, 5, 6 (28.9.2026, plan §10, §12–§15)
+
+`tests/one-red-world-gates-a.test.ts` holds all of it: the lines verbatim, the retired keys gone,
+the prompt rotation, the rules computed from data, the shirt-counting cursor.
+
+- **1 `/xi`** — opens on "תן את ההפועל שלך." (desktop line, phone CTA), "מי עומד אצלך כאן?" on a
+  selected slot, "נכנס להרכב." after a pick, the captain/12th/last-cut questions on their controls
+  (the last cut was already stored with the sheet). The poster ends on the Universal Exit ("זאת
+  הפועל שלך.", no score), doors from `nextAfterXI` (`app/xi/actions.ts`), the existing ShareRow.
+  **Manager Prompt** (`lib/xi/prompt.ts`): six prompts, a seeded deck walked by the device's own
+  cursor (`/xi#prompt`); each narrowing prompt is a rule `lib/xi/challenge.ts` enforces —
+  `pre1990`, `israeli` (foreign-slot record), `the2000s`, `cups` (Player Master cup seasons,
+  `cupYearsBySlug`), `fresh` (the sheet's first five, frozen on accept). "משחק אחד מחר" narrows
+  nothing and enforces nothing. A prompt the device cannot compute is skipped. The share link is
+  `/xi?prompt=<seed>&r=<cursor>` — the prompt, never the picks.
+- **3 `/lineup`** — the plan's questions on the rail (keeper, back line), "זה שלך. נועל.", "רמז
+  מהספסל.", the walk's verdicts from the voice's pools, and the sheet opens on "מצאת 9 מתוך 11."
+  (starters found, no %) followed by who was missed and who was put in by mistake. Doors:
+  `nextAfterLineup` (the match re-derived from seed+cursor; the same match's lineup excluded).
+- **4 `/kits/build`** — opens on its line and asks **Full (5) or Quick (3)** (`?n=5|3`). The
+  cursor now counts SHIRTS (`kitRoundAt`, `kitNextCursor`): a round is five shirts from the
+  cursor, Quick plays three, and "again" / the device's deck move by the shirts consumed
+  (`setRotation`). The step questions, "לא שכחת פרט." / "הספונסר ברח. החולצה לא." on the reveal,
+  the round's exit with the wardrobe as the first door (`nextAfterKits`).
+- **5 `/kits`** — "הארון שלך." with "{n} מתוך {total} חזרו לארון." (counted), one objective
+  (`closestDecade`: the decade closest to closing), "עוד לא חזרה אליך." on locked cards (which
+  still show nothing), and a provenance list on BUILT cards only: ✓ gate 4, ✓ LIFE when the
+  device's LIFE save owns the season (`lib/kit/wardrobe.ts` through `lib/life/save.ts` — no LIFE
+  runtime), ○ the archive photo. No share row: the wing has no run.
+- **6 `/memory`** — opens on "תסתכל טוב. עוד רגע זה נעלם.", "חזר למקום." / "לא זה.", "עוד מבט
+  אחד.", the mural's verdict in the voice's tiers, a seeded souvenir ("אחד מהם נשאר אצלך."), and
+  every pair/souvenir a link to its archive card where the graph holds it (`memoryEntityId`).

@@ -23,6 +23,7 @@ import type { ShirtBoard } from '@/lib/xi/board'
 import {
   CHALLENGES,
   challengeStatus,
+  type ManFacts,
   chooseSpell,
   spellsFor,
   takenDecades,
@@ -39,6 +40,14 @@ import { emit, markOf } from '@/lib/profile/events'
 import { readProfile } from '@/lib/profile/store'
 import { haptic } from '@/lib/play/haptics'
 import { t, type MessageKey } from '@/lib/i18n'
+import { UniversalExit } from '@/components/result/UniversalExit'
+import { track } from '@/lib/analytics/meter'
+import type { NextAction } from '@/lib/results/types'
+import { microFeedback, voice, voiceAction } from '@/lib/voice'
+import { advanceRotation, rotationFor } from '@/lib/profile/store'
+import { mintSeed } from '@/lib/rotation/deck'
+import { FRESH_COUNT, PROMPT_RULE, XI_OPENING, dealPrompt, forbiddenFive, promptAt, promptQuery, type PromptId } from '@/lib/xi/prompt'
+import { nextAfterXI } from './actions'
 import { useWide } from './useWide'
 
 /**
@@ -104,6 +113,10 @@ type Sheet = {
   shortlist: RosterEntry[]
   /** the rule this sheet is built under */
   challenge: ChallengeId
+  /** the Manager Prompt accepted for this sheet — its seed and cursor, never the picks */
+  prompt: { seed: number; cursor: number } | null
+  /** ids: "the five you picked before", frozen when `fresh5` was accepted */
+  forbidden: string[]
 }
 
 /** What a removal has to remember in order to be undoable. */
@@ -119,8 +132,13 @@ function emptySheet(formation: Formation): Sheet {
     cut: null,
     shortlist: [],
     challenge: 'free',
+    prompt: null,
+    forbidden: [],
   }
 }
+
+/** The device's own deck of Manager Prompts (rule 31) — kept apart from any round deck. */
+const PROMPT_DECK = '/xi#prompt'
 
 const REFUSAL_KEY: Record<Refusal, MessageKey> = {
   'no-record': 'xi.challenge.hidden.noRecord',
@@ -128,6 +146,8 @@ const REFUSAL_KEY: Record<Refusal, MessageKey> = {
   era: 'xi.challenge.hidden.era',
   undated: 'xi.challenge.hidden.undated',
   'decade-taken': 'xi.challenge.hidden.decadeTaken',
+  'no-cup': 'xi.challenge.hidden.noCup',
+  forbidden: 'xi.challenge.hidden.forbidden',
 }
 
 export function XIBuilder({
@@ -138,6 +158,8 @@ export function XIBuilder({
   slugAliases,
   tab: initialTab = 'best',
   embedded,
+  cupYears = {},
+  promptLink = null,
 }: {
   formations: Formation[]
   roster: RosterIndex
@@ -151,6 +173,13 @@ export function XIBuilder({
   slugAliases: Readonly<Record<string, string>>
   /** which tab the link asked for — `/xi?tab=worst` (see `lib/share/copy.ts`) */
   tab?: XITab
+  /**
+   * roster slug → the opening years of the seasons the club lifted a cup with him in the squad
+   * (Player Master `spells[].titles`, cup competitions only) — what "גביעים בלבד" enforces
+   */
+  cupYears?: Readonly<Record<string, readonly number[]>>
+  /** `/xi?prompt=<seed>&r=<cursor>` — a Manager Prompt somebody handed over (never picks) */
+  promptLink?: { seed: number; cursor: number } | null
   /**
    * Opened from inside THE WORKER LIFE — the living room, Kobi with the paper. One sheet (the
    * best), over the men who had worn the shirt before the life's year; nothing read from or
@@ -183,6 +212,17 @@ export function XIBuilder({
   const [railEra, setRailEra] = useState<number | null>(null)
   /** the rail's "full list" — the searchable, filterable sheet, for the power user */
   const [fullList, setFullList] = useState(false)
+  /** the voice's micro line after a placement ("נכנס להרכב.") — shown for a beat, then gone */
+  const [said, setSaid] = useState<string | null>(null)
+  const saidTimer = useRef<number | null>(null)
+  const sayPicked = useCallback(() => {
+    setSaid(voiceAction(1, 'picked'))
+    if (saidTimer.current !== null) window.clearTimeout(saidTimer.current)
+    saidTimer.current = window.setTimeout(() => setSaid(null), 1600)
+  }, [])
+  useEffect(() => () => {
+    if (saidTimer.current !== null) window.clearTimeout(saidTimer.current)
+  }, [])
 
   const store = useMemo(() => activeXI(), [])
   const byId = useMemo(
@@ -232,6 +272,8 @@ export function XIBuilder({
             .map((id) => byId.get(id))
             .filter((entry): entry is RosterEntry => entry !== undefined),
           challenge: restored.challenge,
+          prompt: restored.prompt,
+          forbidden: restored.forbidden,
         }
       }
       setSheets((current) => ({ ...current, ...found }))
@@ -257,6 +299,8 @@ export function XIBuilder({
       ...(sheet.cut ? { cut: rosterKey(sheet.cut) } : {}),
       shortlist: sheet.shortlist.map((entry) => rosterKey(entry)),
       ...(sheet.challenge !== 'free' ? { challenge: sheet.challenge } : {}),
+      ...(sheet.prompt ? { prompt: sheet.prompt } : {}),
+      ...(sheet.forbidden.length > 0 ? { forbidden: sheet.forbidden } : {}),
     }),
     [sheet],
   )
@@ -285,7 +329,7 @@ export function XIBuilder({
     if (readProfile().deeds['/xi']?.mark === mark) return
     emit({ type: 'deed', gate: '/xi', mark })
     haptic('lock')
-    firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: t('xi.stage.full'), big: true, haptic: 'lock' })
+    firePickFx(window.innerWidth / 2, window.innerHeight / 2, { label: voiceAction(1, 'picked') ?? '', big: true, haptic: 'lock' })
   }, [embedded, ready, chosen, payload, tab])
 
   const takenKeys = useMemo(
@@ -309,6 +353,15 @@ export function XIBuilder({
   const spellsOf = useCallback(
     (entry: RosterEntry): Spell[] => spellsFor(entry, shirts.versions[entry.slug]),
     [shirts.versions],
+  )
+
+  /** What a rule knows about the man himself — his cup seasons, and whether he is one of the forbidden five. */
+  const manOf = useCallback(
+    (entry: RosterEntry): ManFacts => ({
+      cupYears: cupYears[entry.slug],
+      forbidden: sheet.forbidden.includes(rosterKey(entry)),
+    }),
+    [cupYears, sheet.forbidden],
   )
 
   /** The spell this slot's man stands for — his chosen version, or his only spell. */
@@ -353,8 +406,9 @@ export function XIBuilder({
           slotId: slot.slotId,
           spell: spellAt(slot.slotId) as Spell,
           status: slotStatusOf(sheet.picks[slot.slotId] as RosterEntry),
+          man: manOf(sheet.picks[slot.slotId] as RosterEntry),
         })),
-    [sheet.formation, sheet.picks, spellAt],
+    [sheet.formation, sheet.picks, spellAt, manOf],
   )
   const verdict = useMemo(() => challengeStatus(sheet.challenge, rows), [sheet.challenge, rows])
   const broken = useMemo(() => new Set(verdict.broken), [verdict.broken])
@@ -377,10 +431,11 @@ export function XIBuilder({
         slotStatusOf(entry),
         {},
         takenDecades(rows, selected),
+        manOf(entry),
       )
       return answer.ok ? null : answer.why
     },
-    [drawer, sheet.challenge, spellsOf, rows, selected],
+    [drawer, sheet.challenge, spellsOf, rows, selected, manOf],
   )
 
   /** The spell a pick would stand for under the drawer's filters and the challenge. */
@@ -392,10 +447,11 @@ export function XIBuilder({
         slotStatusOf(entry),
         { year: filter.year, decade: filter.decade, fallbackId: shirts.defaultVersion[entry.slug] ?? null },
         drawer === 'slot' ? takenDecades(rows, selected) : new Set(),
+        manOf(entry),
       )
       return answer.ok ? answer.spell : null
     },
-    [drawer, sheet.challenge, spellsOf, shirts.defaultVersion, rows, selected],
+    [drawer, sheet.challenge, spellsOf, shirts.defaultVersion, rows, selected, manOf],
   )
 
   const rowInfo = useCallback(
@@ -484,6 +540,7 @@ export function XIBuilder({
       slotStatusOf(entry),
       { year: filter.year, decade: filter.decade, fallbackId: shirts.defaultVersion[entry.slug] ?? null },
       takenDecades(rows, slotId),
+      manOf(entry),
     )
     if (!answer.ok) {
       haptic('miss')
@@ -497,6 +554,7 @@ export function XIBuilder({
     })
     advanceFrom(slotId)
     haptic('tap')
+    sayPicked()
     window.setTimeout(() => firePickFxAt(document.querySelector(`[data-drop="${slotId}"]`), { label: entry.familyHe }), 0)
   }
 
@@ -548,6 +606,7 @@ export function XIBuilder({
     // That sheet is only for a tap on an ALREADY-filled shirt (round 2, Maor 23.9.2026).
     advanceFrom(slotId)
     haptic('tap')
+    sayPicked()
     // every placement carries the stamp — one hit, wherever the pick came from (delta 87);
     // from the rail, the shirt first FLIES into the slot (delta 88)
     if (from) flyShirt(from, `[data-drop="${slotId}"]`, entry.familyHe)
@@ -831,7 +890,153 @@ export function XIBuilder({
     }
   }, [ready, phone, drawer, selected, sheet.formation.slots, sheet.picks])
 
-  const primaryLabel = chosen >= 11 ? t('xi.stage.finish') : t('xi.stage.fillNext')
+  /** Rule 19: the ONE share system — the same row in the dock, on the desktop and under "שלח ליציע". */
+  const shareRoute = !worst && sheet.prompt ? `/xi?${promptQuery(sheet.prompt.seed, sheet.prompt.cursor)}` : undefined
+  const shareNode = (
+    <ShareRow
+      // Gate 1 has its own `kind` and is in `SEEDLESS`; the worst eleven shares as its own
+      // kind so the link opens the tab it is about and says whose opinion it is. A sheet
+      // built under a Manager Prompt hands over the PROMPT (`?prompt=`), never the picks.
+      kind={worst ? 'worst' : 'xi'}
+      route={shareRoute}
+      params={{ total: '11' }}
+      headline={`${chosen}/11`}
+      card={{
+        template: 'xi' as const,
+        kicker: worst ? 'GATE 1 · WORST XI · ONE FAN’S OPINION' : 'GATE 1 · ALL-TIME XI',
+        label: worst ? t('xi.tab.worst') : t('screen.xi.title'),
+        eyebrow: sheet.formation.name,
+        hero: worst ? t('xi.tab.worst') : t('screen.xi.title'),
+        // The armband rides on the role line and the bench on the foot line — both are
+        // lines the template already measures (rule 19), so nothing new is placed.
+        xi: sheet.formation.slots
+          .map((slot) => {
+            const entry = sheet.picks[slot.slotId]
+            if (!entry) return null
+            const roleHe = sheet.captain === slot.slotId ? t('xi.card.captain', { role: slot.roleHe }) : slot.roleHe
+            return { roleHe, nameHe: entry.familyHe, x: slot.x, y: slot.y }
+          })
+          .filter((slot): slot is NonNullable<typeof slot> => slot !== null),
+        stats: [],
+        cta: worst ? t('xi.worst.cta') : t('xi.cta'),
+        challenge: worst ? t('xi.worst.opinion') : benchLine(sheet.twelfth, sheet.cut) ?? t('share.sameRound'),
+      }}
+    />
+  )
+
+  /* ------------------------------------------------ the Manager Prompt (§10) */
+
+  /** "the five you picked before" — this sheet's first five, in pitch order, as it stands now */
+  const priorFive = useMemo(
+    () =>
+      forbiddenFive(
+        Object.fromEntries(Object.entries(sheet.picks).map(([slot, entry]) => [slot, rosterKey(entry)])),
+        sheet.formation.slots.map((slot) => slot.slotId),
+      ),
+    [sheet.picks, sheet.formation.slots],
+  )
+  /** A prompt this device cannot compute is skipped, never faked (lib/xi/prompt.ts). */
+  const canPrompt = useCallback(
+    (id: PromptId) => {
+      if (id === 'fresh5') return priorFive.length >= FRESH_COUNT
+      if (id === 'cups') return Object.keys(cupYears).length > 0
+      return true
+    },
+    [priorFive, cupYears],
+  )
+  const [offer, setOffer] = useState<{ seed: number; cursor: number; id: PromptId; linked: boolean } | null>(null)
+  useEffect(() => {
+    if (!ready || embedded || offer) return
+    if (promptLink) {
+      const dealt = dealPrompt(promptLink.seed, promptLink.cursor, canPrompt)
+      if (dealt) setOffer({ seed: promptLink.seed, ...dealt, linked: true })
+      return
+    }
+    const rotation = rotationFor(PROMPT_DECK, mintSeed)
+    const dealt = dealPrompt(rotation.seed, rotation.cursor, canPrompt)
+    if (dealt) setOffer({ seed: rotation.seed, ...dealt, linked: false })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- deal once, after the saved sheet is read
+  }, [ready])
+  const activePrompt: PromptId | null = sheet.prompt ? promptAt(sheet.prompt.seed, sheet.prompt.cursor) : null
+
+  function acceptPrompt() {
+    if (!offer) return
+    const { id, seed, cursor } = offer
+    patch((current) => ({
+      ...current,
+      challenge: PROMPT_RULE[id],
+      prompt: { seed, cursor },
+      forbidden: id === 'fresh5' ? priorFive : [],
+    }))
+    // the device's deck moves past what it was just handed, so the next visit asks something new
+    if (!offer.linked) {
+      const at = rotationFor(PROMPT_DECK, mintSeed).cursor
+      for (let step = at; step <= cursor; step++) advanceRotation(PROMPT_DECK, mintSeed)
+    }
+    haptic('lock')
+  }
+
+  function otherPrompt() {
+    if (!offer) return
+    const dealt = dealPrompt(offer.seed, offer.cursor + 1, canPrompt)
+    if (dealt) setOffer({ ...offer, ...dealt })
+    haptic('tap')
+  }
+
+  function dropPrompt() {
+    patch((current) => ({ ...current, challenge: 'free', prompt: null, forbidden: [] }))
+    haptic('tap')
+  }
+
+  const promptCard =
+    embedded || worst || (!activePrompt && !offer) ? null : (
+      <PromptCard
+        id={activePrompt ?? (offer?.id as PromptId)}
+        active={activePrompt !== null}
+        linked={activePrompt === null && Boolean(offer?.linked)}
+        onAccept={acceptPrompt}
+        onOther={otherPrompt}
+        onDrop={dropPrompt}
+      />
+    )
+
+  /* ------------------------------------------------ the result (§6, Universal Exit) */
+
+  const spoken = voice({ gate: 1, moment: 'result', result: 'done', seed: markOf(payload) })
+  const [next, setNext] = useState<NextAction[]>([])
+  const exitMark = useRef<string | null>(null)
+  useEffect(() => {
+    if (!poster || worst || embedded || chosen < 11) return
+    const mark = markOf(payload)
+    if (exitMark.current === mark) return
+    exitMark.current = mark
+    track('run_complete', { detail: 'xi', value: chosen })
+    const ids = [
+      sheet.captain ? sheet.picks[sheet.captain]?.id : undefined,
+      sheet.twelfth?.id,
+      sheet.cut?.id,
+    ].filter((id): id is string => typeof id === 'string')
+    let live = true
+    nextAfterXI({
+      context: {
+        gateId: 1,
+        runId: sheet.prompt ? `${sheet.prompt.seed}:${sheet.prompt.cursor}` : undefined,
+        playerIds: ids,
+        choices: { formation: sheet.formation.name, ...(activePrompt ? { prompt: activePrompt } : {}) },
+      },
+    })
+      .then((answer) => {
+        if (live) setNext(answer.next)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+  }, [poster, worst, embedded, chosen, payload, sheet, activePrompt])
+
+  // §10 — the gate opens on a line, not on controls: "תן את ההפועל שלך." and its first move
+  const intro = voice({ gate: 1, moment: 'intro', seed: XI_OPENING })
+  const primaryLabel = chosen >= 11 ? t('xi.stage.finish') : chosen === 0 ? (intro.ctaPrimary ?? intro.title) : t('xi.stage.fillNext')
 
   function primaryAction() {
     if (chosen >= 11) {
@@ -887,10 +1092,19 @@ export function XIBuilder({
           )}
         </div>
           {/* the count sits OUTSIDE the scrolling chips, so it is never cut off */}
+          {said !== null && railNode && (
+            <p aria-hidden="true" className="shrink-0 font-sign text-[11.5px] leading-none text-red">
+              {said}
+            </p>
+          )}
           <p className="shrink-0 font-mono text-[13px] tracking-widest text-ink">
             <Num>{`${chosen}/11`}</Num>
           </p>
         </div>
+        <p className="sr-only" aria-live="polite">
+          {said ?? ''}
+        </p>
+        {promptCard && (activePrompt !== null || offer?.linked) && <div className="mt-1 shrink-0">{promptCard}</div>}
 
         {worst && (
           <p className="mt-1 shrink-0 truncate border-hair border-ink/40 bg-sheet px-2.5 py-1 font-body text-[10.5px] leading-snug text-ink">
@@ -921,10 +1135,14 @@ export function XIBuilder({
 
         {!railNode && (
         <p className="mt-1.5 shrink-0 truncate border-hair border-ink/30 bg-sheet px-2.5 py-1.5 font-body text-[11px] leading-snug text-ink">
-          {swapFrom !== null
+          {said !== null
+            ? said
+            : swapFrom !== null
             ? t('xi.tip.swap')
-            : openSlot
-              ? t('xi.tip.selected', { role: openSlot.roleHe })
+            : chosen === 0 && !openSlot
+              ? intro.title
+              : openSlot
+              ? `${openSlot.roleHe} · ${voiceAction(1, 'slot')}`
               : t('xi.tip.pick')}
         </p>
         )}
@@ -994,11 +1212,13 @@ export function XIBuilder({
                 haptic('tap')
                 patch((current) => ({ ...current, versions: { ...current.versions, [openSlot.slotId]: id } }))
               }}
+              manOf={manOf}
             />
           )}
         </SlideSheet>
 
         <SlideSheet open={mobileSheet === 'setup'} onClose={() => setMobileSheet(null)} title={t('xi.stage.setup')} size="half">
+          {promptCard && !(activePrompt !== null || offer?.linked) && <div className="mb-3">{promptCard}</div>}
           <div>
             <p className="font-body text-[10.5px] font-extrabold tracking-wide text-muted">{t('xi.dock.formation')}</p>
             <div className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
@@ -1022,7 +1242,7 @@ export function XIBuilder({
               value={sheet.challenge}
               onChange={(next) => {
                 haptic('tap')
-                patch((current) => ({ ...current, challenge: next }))
+                patch((current) => ({ ...current, challenge: next, prompt: null, forbidden: [] }))
               }}
             />
           </div>
@@ -1040,7 +1260,7 @@ export function XIBuilder({
           <div className="grid gap-2">
             <BenchCard
               title={t('xi.bench.twelfth')}
-              note={t('xi.bench.twelfth.note')}
+              note={voiceAction(1, 'twelfth') ?? ''}
               entry={sheet.twelfth}
               onOpen={() => {
                 setSelected(null)
@@ -1050,7 +1270,7 @@ export function XIBuilder({
             />
             <BenchCard
               title={t('xi.bench.cut')}
-              note={t('xi.bench.cut.note')}
+              note={voiceAction(1, 'lastCut') ?? ''}
               entry={sheet.cut}
               onOpen={() => {
                 setSelected(null)
@@ -1099,29 +1319,7 @@ export function XIBuilder({
         </SlideSheet>
 
         <SlideSheet open={mobileSheet === 'share'} onClose={() => setMobileSheet(null)} title={t('stage.share')} size="auto">
-          <ShareRow
-            kind={worst ? 'worst' : 'xi'}
-            params={{ total: '11' }}
-            headline={`${chosen}/11`}
-            card={{
-              template: 'xi' as const,
-              kicker: worst ? 'GATE 1 · WORST XI · ONE FAN’S OPINION' : 'GATE 1 · ALL-TIME XI',
-              label: worst ? t('xi.tab.worst') : t('screen.xi.title'),
-              eyebrow: sheet.formation.name,
-              hero: worst ? t('xi.tab.worst') : t('screen.xi.title'),
-              xi: sheet.formation.slots
-                .map((slot) => {
-                  const entry = sheet.picks[slot.slotId]
-                  if (!entry) return null
-                  const roleHe = sheet.captain === slot.slotId ? t('xi.card.captain', { role: slot.roleHe }) : slot.roleHe
-                  return { roleHe, nameHe: entry.familyHe, x: slot.x, y: slot.y }
-                })
-                .filter((slot): slot is NonNullable<typeof slot> => slot !== null),
-              stats: [],
-              cta: worst ? t('xi.worst.cta') : t('xi.cta'),
-              challenge: worst ? t('xi.worst.opinion') : benchLine(sheet.twelfth, sheet.cut) ?? t('share.sameRound'),
-            }}
-          />
+          {shareNode}
         </SlideSheet>
       </div>
 
@@ -1194,13 +1392,16 @@ export function XIBuilder({
             </p>
           </div>
 
+          {/* ------------------------------------------- the Manager Prompt (§10) */}
+          {promptCard && <div className="mt-3">{promptCard}</div>}
+
           {/* ----------------------------------------------------- the challenge */}
           {!embedded && (
           <ChallengePicker
             value={sheet.challenge}
             onChange={(next) => {
               haptic('tap')
-              patch((current) => ({ ...current, challenge: next }))
+              patch((current) => ({ ...current, challenge: next, prompt: null, forbidden: [] }))
             }}
           />
           )}
@@ -1226,7 +1427,7 @@ export function XIBuilder({
             {swapFrom !== null
               ? t('xi.tip.swap')
               : openSlot
-                ? t('xi.tip.selected', { role: openSlot.roleHe })
+                ? `${openSlot.roleHe} · ${voiceAction(1, 'slot')}`
                 : t('xi.tip.pick')}
           </p>
 
@@ -1252,7 +1453,7 @@ export function XIBuilder({
                   */}
                   {slotVersions.length > 1 && (
                     <div className="mt-2">
-                      <p className="font-body text-[10.5px] font-extrabold text-muted">{t('xi.version.title')}</p>
+                      <p className="font-body text-[10.5px] font-extrabold text-muted">{voiceAction(1, 'version', { name: occupant.familyHe })}</p>
                       <div className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
                         {slotVersions.map((version) => {
                           const live = sheet.versions[openSlot.slotId] === version.id
@@ -1262,6 +1463,7 @@ export function XIBuilder({
                             slotStatusOf(occupant),
                             {},
                             takenDecades(rows, openSlot.slotId),
+                            manOf(occupant),
                           ).ok
                           return (
                             <button
@@ -1301,7 +1503,7 @@ export function XIBuilder({
 
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     <SlotButton
-                      label={sheet.captain === openSlot.slotId ? t('xi.slot.captainOff') : t('xi.slot.captain')}
+                      label={sheet.captain === openSlot.slotId ? t('xi.slot.captainOff') : (voiceAction(1, 'captain') ?? '')}
                       live={sheet.captain === openSlot.slotId}
                       onClick={() => {
                         haptic('lock')
@@ -1368,6 +1570,7 @@ export function XIBuilder({
                             slotStatusOf(entry),
                             {},
                             takenDecades(rows, selected),
+                            manOf(entry),
                           ).ok)
                       }
                       onClick={() => {
@@ -1378,6 +1581,7 @@ export function XIBuilder({
                           slotStatusOf(entry),
                           { fallbackId: shirts.defaultVersion[entry.slug] ?? null },
                           takenDecades(rows, selected),
+                          manOf(entry),
                         )
                         if (!spell.ok) return
                         const slotId = selected
@@ -1414,7 +1618,7 @@ export function XIBuilder({
           <section className="mt-2 grid gap-2 sm:grid-cols-2">
             <BenchCard
               title={t('xi.bench.twelfth')}
-              note={t('xi.bench.twelfth.note')}
+              note={voiceAction(1, 'twelfth') ?? ''}
               entry={sheet.twelfth}
               onOpen={() => {
                 setSelected(null)
@@ -1424,7 +1628,7 @@ export function XIBuilder({
             />
             <BenchCard
               title={t('xi.bench.cut')}
-              note={t('xi.bench.cut.note')}
+              note={voiceAction(1, 'lastCut') ?? ''}
               entry={sheet.cut}
               onOpen={() => {
                 setSelected(null)
@@ -1477,33 +1681,7 @@ export function XIBuilder({
             {t('xi.version.coverage', { n: String(shirts.withVersions) })}
           </p>
 
-          {!embedded && <ShareRow
-            // Gate 1 has its own `kind` and is in `SEEDLESS`; the worst eleven shares as its
-            // own kind so the link opens the tab it is about and says whose opinion it is.
-            kind={worst ? 'worst' : 'xi'}
-            params={{ total: '11' }}
-            headline={`${chosen}/11`}
-            card={{
-              template: 'xi' as const,
-              kicker: worst ? 'GATE 1 · WORST XI · ONE FAN’S OPINION' : 'GATE 1 · ALL-TIME XI',
-              label: worst ? t('xi.tab.worst') : t('screen.xi.title'),
-              eyebrow: sheet.formation.name,
-              hero: worst ? t('xi.tab.worst') : t('screen.xi.title'),
-              // The armband rides on the role line and the bench on the foot line — both
-              // are lines the template already measures (rule 19), so nothing new is placed.
-              xi: sheet.formation.slots
-                .map((slot) => {
-                  const entry = sheet.picks[slot.slotId]
-                  if (!entry) return null
-                  const roleHe = sheet.captain === slot.slotId ? t('xi.card.captain', { role: slot.roleHe }) : slot.roleHe
-                  return { roleHe, nameHe: entry.familyHe, x: slot.x, y: slot.y }
-                })
-                .filter((slot): slot is NonNullable<typeof slot> => slot !== null),
-              stats: [],
-              cta: worst ? t('xi.worst.cta') : t('xi.cta'),
-              challenge: worst ? t('xi.worst.opinion') : benchLine(sheet.twelfth, sheet.cut) ?? t('share.sameRound'),
-            }}
-          />}
+          {!embedded && shareNode}
         </div>
 
         {/* the drawer: beside the pitch at lg, a sheet over it on a phone */}
@@ -1536,8 +1714,13 @@ export function XIBuilder({
           twelfthHe={sheet.twelfth?.nameHe ?? null}
           cutHe={sheet.cut?.nameHe ?? null}
           worst={worst}
+          title={worst ? t('xi.tab.worst') : (spoken.eyebrow ?? spoken.title)}
           onClose={() => setPoster(false)}
-        />
+        >
+          {!worst && chosen >= 11 && (
+            <UniversalExit voice={spoken} next={next} from="xi" share={shareNode} />
+          )}
+        </Poster>
       )}
     </>
   )
@@ -1980,11 +2163,13 @@ function SlotDetail({
   onSwap,
   onRemove,
   onVersion,
+  manOf,
 }: {
   slot: PitchSlot
   occupant: RosterEntry
   sheet: Sheet
   rows: SheetRow[]
+  manOf: (entry: RosterEntry) => ManFacts
   slotVersions: ShirtBoard['versions'][string]
   swapFrom: string | null
   onCaptain: () => void
@@ -1998,7 +2183,7 @@ function SlotDetail({
       <p className="font-body text-step--1 text-ink">{occupant.nameHe}</p>
       {slotVersions && slotVersions.length > 1 && (
         <div className="mt-2">
-          <p className="font-body text-[10.5px] font-extrabold text-muted">{t('xi.version.title')}</p>
+          <p className="font-body text-[10.5px] font-extrabold text-muted">{voiceAction(1, 'version', { name: occupant.familyHe })}</p>
           <div className="-mx-0.5 mt-1 flex gap-1 overflow-x-auto px-0.5 pb-1">
             {slotVersions.map((version) => {
               const live = sheet.versions[slot.slotId] === version.id
@@ -2008,6 +2193,7 @@ function SlotDetail({
                 slotStatusOf(occupant),
                 {},
                 takenDecades(rows, slot.slotId),
+                manOf(occupant),
               ).ok
               return (
                 <button
@@ -2036,7 +2222,7 @@ function SlotDetail({
       )}
       <div className="mt-2 flex flex-wrap gap-1.5">
         <SlotButton
-          label={sheet.captain === slot.slotId ? t('xi.slot.captainOff') : t('xi.slot.captain')}
+          label={sheet.captain === slot.slotId ? t('xi.slot.captainOff') : (voiceAction(1, 'captain') ?? '')}
           live={sheet.captain === slot.slotId}
           onClick={onCaptain}
         />
@@ -2113,7 +2299,9 @@ function Poster({
   twelfthHe,
   cutHe,
   worst,
+  title,
   onClose,
+  children,
 }: {
   formation: Formation
   picks: Record<string, RosterEntry>
@@ -2127,7 +2315,11 @@ function Poster({
   twelfthHe: string | null
   cutHe: string | null
   worst: boolean
+  /** the poster's own line — the worst tab's name, or the voice's eyebrow */
+  title: string
   onClose: () => void
+  /** the Universal Exit (§6) — the emotion, one or two doors, "שלח ליציע" */
+  children?: React.ReactNode
 }) {
   const dialogRef = useDialog<HTMLDivElement>(onClose)
   const captainHe = captain ? (picks[captain]?.nameHe ?? null) : null
@@ -2139,7 +2331,7 @@ function Poster({
       className="fixed inset-0 z-[60] flex flex-col justify-end bg-ink/70 outline-none"
       role="dialog"
       aria-modal="true"
-      aria-label={t('xi.poster.title')}
+      aria-label={title}
     >
       <button type="button" aria-label={t('xi.close')} className="min-h-[6vh] flex-1" onClick={onClose} />
       <div className="max-h-[92vh] animate-slam-solid overflow-y-auto overscroll-contain border-t-rule border-ink bg-sheet px-4 pb-[calc(var(--tap)+2rem+env(safe-area-inset-bottom))] pt-3">
@@ -2150,7 +2342,7 @@ function Poster({
                 {worst ? 'GATE 1 · WORST XI' : 'GATE 1 · YOUR XI'}
               </p>
               <p className="font-display text-step-1 leading-tight text-ink">
-                {worst ? t('xi.tab.worst') : t('xi.poster.title')}
+                {title}
               </p>
             </div>
             <button type="button" onClick={onClose} className="min-h-tap shrink-0 px-2 font-body text-[12px] font-extrabold text-red">
@@ -2169,6 +2361,8 @@ function Poster({
             captain={captain}
             broken={broken}
           />
+
+          {children}
 
           <p className="mt-2 font-body text-[11.5px] leading-snug text-muted">
             {worst ? t('xi.poster.note.worst') : t('xi.poster.note')}
@@ -2224,5 +2418,68 @@ function DnaRow({ label, value, latin = false }: { label: string; value: string;
       <dt className="font-body text-[12px] text-muted">{label}</dt>
       <dd className="font-sign text-step--1 text-ink">{latin ? <Num>{value}</Num> : value}</dd>
     </div>
+  )
+}
+
+/**
+ * המאמן אומר — one Manager Prompt, offered or in force (ONE RED WORLD §10). Optional: the
+ * sheet is whole without it. Offered → take it or ask for another; in force → drop it. The rule
+ * itself is enforced by `lib/xi/challenge.ts` and reported by the challenge line and the poster.
+ */
+function PromptCard({
+  id,
+  active,
+  linked,
+  onAccept,
+  onOther,
+  onDrop,
+}: {
+  id: PromptId
+  active: boolean
+  /** handed over by a link — "somebody sent you this question" */
+  linked: boolean
+  onAccept: () => void
+  onOther: () => void
+  onDrop: () => void
+}) {
+  return (
+    <section
+      data-xi="prompt"
+      data-prompt={id}
+      className={`flex items-center gap-2 border-hair px-2.5 py-1.5 ${active ? 'border-red bg-paper' : 'border-ink/50 bg-sheet'}`}
+    >
+      <div className="min-w-0 flex-1">
+        <p className="font-body text-[9.5px] font-extrabold tracking-widest text-red">
+          {voiceAction(1, linked ? 'prompt.link' : 'prompt.title')}
+        </p>
+        <p className="truncate font-sign text-[13px] leading-tight text-ink">{voiceAction(1, `prompt.${id}`)}</p>
+      </div>
+      {active ? (
+        <button
+          type="button"
+          onClick={onDrop}
+          className="min-h-tap shrink-0 border-hair border-ink/40 px-2.5 font-body text-[11.5px] font-extrabold text-ink"
+        >
+          {voiceAction(1, 'prompt.drop')}
+        </button>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={onOther}
+            className="min-h-tap shrink-0 border-hair border-ink/40 px-2.5 font-body text-[11.5px] font-extrabold text-ink"
+          >
+            {voiceAction(1, 'prompt.other')}
+          </button>
+          <button
+            type="button"
+            onClick={onAccept}
+            className="min-h-tap shrink-0 bg-red px-3 font-body text-[11.5px] font-extrabold text-paper transition-transform duration-press active:scale-[.97] motion-reduce:transition-none"
+          >
+            {voiceAction(1, 'prompt.accept')}
+          </button>
+        </>
+      )}
+    </section>
   )
 }
