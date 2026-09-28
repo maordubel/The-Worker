@@ -33,6 +33,10 @@ const CUPS_GOING = any(f('n:go'), is('n:plan', 'elsewhere'))
 const I_NEED_OPEN = (need: string): Condition => all(f('i:needs'), no(`i:need:${need}`), no('i:banner'))
 
 export const PASS_C_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
+  'ussishkin-hall': [
+    // 2006-home · H01 S4 — a red scrap of confetti on the parquet, for whoever was there
+    { id: 'h-confetti', era: '2006-home', x: 0.52, y: 0.9, w: 0.05, act: 'h-confetti', verb: 'take', labelHe: 'פתק קונפטי אדום על הפרקט', when: all(f('h:derby'), no('h:confetti'), no('h:tv'), no('h:door')), priority: 3 },
+  ],
   newsroom: [
     // 2006-desk · J02 S1 — what 2002 left on the desk: the letter (after a rumour), or the envelope (after the truth)
     { id: 'j2-letter', era: '2006-desk', x: 0.44, y: 0.72, w: 0.06, act: 'j2-letter', verb: 'take', labelHe: 'המכתב בכתב יד', when: all(f('life:desk:unverified'), no('j2:read'), no('j:fix')), prop: { key: 'propNoteOpen', size: 0.022, at: { x: 0.44, y: 0.405 } }, priority: 5 },

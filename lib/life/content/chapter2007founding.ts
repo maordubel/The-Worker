@@ -446,6 +446,21 @@ export const BEATS_REGISTERED: Beat[] = [
   },
   /** the phone rings until it is answered — a box closed by mistake rings again */
   { id: 'u-news-call', at: 'home', trigger: 'clock', when: { all: [{ flag: 'u:morning' }], none: [{ flag: 'u:news' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'u-news' }] },
+  /**
+   * pass C (28.9.2026) — the scrap of confetti he kept from the derby of 2004 (`life:uss:confetti`,
+   * `2006-home`), in his wallet, while the dust settles. One line, before anybody speaks.
+   */
+  {
+    id: 'u-confetti',
+    at: 'ussishkin-outside',
+    trigger: 'clock',
+    when: { all: [{ flag: 'u:seen' }, { flag: 'life:uss:confetti' }], none: [{ flag: 'u:confettiSeen' }, { flag: 'u:loss' }] },
+    delayMs: 600,
+    do: [
+      { a: 'flag', flag: 'u:confettiSeen' },
+      { a: 'lines', lines: [{ who: null, text: 'בארנק, מאחורי התעודה, פתק קונפטי אדום מהדרבי של 2004. שלוש שנים הוא היה שם, ורק עכשיו אתה יודע למה.' }] },
+    ],
+  },
   {
     /** Beats 4–6: people outside, the demolition with no HUD, then the one human choice */
     id: 'u-loss',
