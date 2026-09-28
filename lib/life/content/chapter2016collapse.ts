@@ -199,7 +199,9 @@ export const BEATS_CRISIS: Beat[] = [
 export function objectiveAfter(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
   if (!state.flags['p:amit']) return sceneId === 'kiosk' ? null : 'עמית מחכה בקיוסק. לא בשביל חדשות.'
-  if (!state.flags['p:choice']) return sceneId === 'home' ? null : 'אבא שואל שאלה אחת, והפעם היא אליך.'
+  if (!state.flags['p:choice'] && !state.flags['p:asked']) return sceneId === 'home' ? null : 'אבא שואל שאלה אחת, והפעם היא אליך.'
+  // (pass D) the answer is in the room: the renewal form, the chair beside him, the phone on the sofa
+  if (!state.flags['p:choice']) return sceneId === 'home' ? 'הטופס על השולחן, הכיסא ליד אבא, הטלפון על הספה.' : 'אצל אבא. התשובה בחדר.'
   if (!state.flags['p:invite']) return 'אפי שאל אם אתה בא בשישי.'
   return null
 }
@@ -236,7 +238,7 @@ export const ENDINGS_AFTER: Record<string, EndingCard> = {
 
 export const BEATS_AFTER: Beat[] = [
   { id: 'p-amit', at: 'kiosk', trigger: 'enter', when: { none: [{ flag: 'p:amit' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'p-amit' }] },
-  { id: 'p-choice', at: 'home', trigger: 'enter', when: { all: [{ flag: 'p:amit' }], none: [{ flag: 'p:choice' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'p-choice' }] },
+  { id: 'p-choice', at: 'home', trigger: 'enter', when: { all: [{ flag: 'p:amit' }], none: [{ flag: 'p:choice' }, { flag: 'p:asked' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'p-choice' }] },
   { id: 'p-invite', trigger: 'clock', when: { all: [{ flag: 'p:choice' }], none: [{ flag: 'p:invite' }] }, delayMs: 1500, do: [{ a: 'talk', conversation: 'p-invite' }] },
 ]
 
@@ -873,6 +875,17 @@ export const CONVERSATIONS_COLLAPSE: Conversation[] = [
           { who: 'פוגי', text: 'אתה כבר עברת את זה.' },
           { who: 'קובי', text: 'כן. אבל היום אני שואל אותך.' },
         ],
+        // (pass D, §44 S3 — "live route shift, not a route menu") the answer is a thing in the room
+        then: [{ e: 'flag', flag: 'p:asked' }],
+      },
+    ],
+  },
+  {
+    id: 'p-do-central',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'על השולחן, מתחת לעיתון: טופס חידוש המנוי. העט של אבא לידו, כאילו במקרה.' }],
         choices: [
           {
             id: 'central',
@@ -886,6 +899,18 @@ export const CONVERSATIONS_COLLAPSE: Conversation[] = [
               { e: 'toast', text: 'קובי: "אז נבדוק מתי המשחק הבא." — "ולא ניקח את כל השבת על עצמנו."', tone: 'plain' },
             ],
           },
+          { id: 'not-yet', text: '(עוד לא.)', then: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'p-do-peripheral',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הכיסא הקטן ליד הכורסה שלו. מול הטלוויזיה, איפה שישבת כשהיית בן עשר.' }],
+        choices: [
           {
             id: 'peripheral',
             text: '"אוהד מזדמן. ולפעמים לראות איתך."',
@@ -897,6 +922,18 @@ export const CONVERSATIONS_COLLAPSE: Conversation[] = [
               { e: 'toast', text: 'קובי: "אז לפעמים." — "אתה לא כועס?" — "אני שואל אם אתה בא לאכול."', tone: 'plain' },
             ],
           },
+          { id: 'not-yet', text: '(עוד לא.)', then: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'p-do-distance',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הטלפון על הספה. הקבוצה של שער 5: מאתיים הודעות מאז הבוקר, ואף אחת מהן לא שואלת מה שלומך.' }],
+        choices: [
           {
             id: 'distance',
             text: '"אני לוקח הפסקה. אחר כך אחליט אם חוזר."',
@@ -908,6 +945,7 @@ export const CONVERSATIONS_COLLAPSE: Conversation[] = [
               { e: 'toast', text: 'קובי: "מה להעביר לך בינתיים?" — "רק אם קורה משהו שאתה רוצה לדבר עליו." — "עליך אני יכול להתקשר?"', tone: 'plain' },
             ],
           },
+          { id: 'not-yet', text: '(עוד לא.)', then: [] },
         ],
       },
     ],

@@ -34,6 +34,10 @@ export const PASS_D_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
     { id: 'nr-spot-seat', era: '2015-newhall', x: 0.72, y: 0.76, w: 0.05, act: 'nr-do-seat', verb: 'sit', labelHe: 'שורה — לשבת', when: all(f('nr:prep'), no('nr:crowd'), no('nr:did:seat')), priority: 3 },
   ],
   home: [
+    // 2017 · P06 — Kobi's question answered with a thing in his living room, not a line from a menu
+    { id: 'p-spot-form', era: '2017-after', x: 0.72, y: 0.77, w: 0.06, act: 'p-do-central', verb: 'take', labelHe: 'טופס המנוי, על השולחן', when: all(f('p:asked'), no('p:choice')), priority: 4 },
+    { id: 'p-spot-chair', era: '2017-after', x: 0.3, y: 0.78, w: 0.05, act: 'p-do-peripheral', verb: 'sit', labelHe: 'הכיסא ליד אבא, מול הטלוויזיה', when: all(f('p:asked'), no('p:choice')), priority: 4 },
+    { id: 'p-spot-phone', era: '2017-after', x: 0.85, y: 0.77, w: 0.05, act: 'p-do-distance', verb: 'hold', labelHe: 'הטלפון על הספה — הקבוצה של שער 5', when: all(f('p:asked'), no('p:choice')), priority: 4 },
     // 2013 · L04 — the diary on the fridge, while the week is still half empty (`hh-week-resume`)
     { id: 'hh-diary-fridge', era: '2013-household', x: 0.31, y: 0.6, w: 0.05, act: 'hh-week-resume', verb: 'look', labelHe: 'היומן על המקרר', when: all(f('hh:week'), no('hh:planned')), priority: 4 },
   ],

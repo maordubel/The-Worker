@@ -364,3 +364,37 @@ describe('X01 → X05 — the last corner of the suitcase, and a promise with a 
     expect(DIALOGUE['f-walk-shirt']!.branches[first]!.lines[0]!.text).toContain('הצעיף')
   })
 })
+
+// ============================================ 2017-after — the answer is a thing in the room ===
+
+describe('2017-after — Kobi asks, and the answer is the form, the chair or the phone', () => {
+  function atKobis() {
+    const sim = new WorldSim('2017-after')
+    seed(sim, { 'p:amit': true })
+    sim.beatAnswer = pick()
+    sim.go('home')
+    return sim
+  }
+
+  it('the question has no menu: three things in his living room', () => {
+    const sim = atKobis()
+    expect(sim.state.flags['p:asked']).toBe(true)
+    expect(sim.state.flags['p:choice']).toBeUndefined()
+    const spots = sim.things().filter((t) => t.kind === 'spot').map((t) => t.id)
+    for (const id of ['p-spot-form', 'p-spot-chair', 'p-spot-phone']) expect(spots).toContain(id)
+  })
+
+  it('the phone on the sofa is the break — and it opens the decade-long window', () => {
+    const sim = atKobis()
+    sim.press('p-spot-phone', pick('distance'))
+    expect(sim.state.flags['life:distance']).toBe(true)
+    expect(sim.find('p-spot-form')).toBeUndefined()
+  })
+
+  it('touching a thing by mistake is not an answer', () => {
+    const sim = atKobis()
+    sim.press('p-spot-chair', pick('not-yet'))
+    expect(sim.state.flags['p:choice']).toBeUndefined()
+    expect(sim.find('p-spot-chair')).toBeDefined()
+  })
+})
