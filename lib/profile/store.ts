@@ -21,6 +21,7 @@
  *     blocked storage and corrupted JSON all resolve to an empty profile.
  */
 
+import { addDays, todayInIsrael } from '@/lib/date/israel'
 import { canonicalGate, wallGate } from './gate-id'
 
 const KEY = 'worker.profile.v1'
@@ -109,8 +110,9 @@ export function emptyStat(): GateStat {
   return { plays: 0, best: 0, bestRate: 0, lastOn: '', correct: 0, asked: 0 }
 }
 
+/** the supporter's calendar day — Israel's, not UTC's (`lib/date/israel.ts`) */
 export function today(): string {
-  return new Date().toISOString().slice(0, 10)
+  return todayInIsrael()
 }
 
 export function readProfile(): Profile {
@@ -498,14 +500,14 @@ export function advanceRotation(gate: string, mint: () => number): Rotation {
 /** Consecutive days up to and including today. Yesterday still counts as alive. */
 export function streak(profile: Profile, from: Date = new Date()): number {
   const days = new Set(profile.days)
-  const cursor = new Date(from)
+  let cursor = todayInIsrael(from)
   // A streak survives until the end of the next day: somebody who played last night and
   // opens the app at nine in the morning has not "broken" anything.
-  if (!days.has(iso(cursor))) cursor.setDate(cursor.getDate() - 1)
+  if (!days.has(cursor)) cursor = addDays(cursor, -1)
   let count = 0
-  while (days.has(iso(cursor))) {
+  while (days.has(cursor)) {
     count += 1
-    cursor.setDate(cursor.getDate() - 1)
+    cursor = addDays(cursor, -1)
   }
   return count
 }
@@ -514,16 +516,9 @@ export function streak(profile: Profile, from: Date = new Date()): number {
 export function historyGrid(profile: Profile, from: Date = new Date()): boolean[] {
   const days = new Set(profile.days)
   const out: boolean[] = []
-  for (let back = HISTORY_DAYS - 1; back >= 0; back -= 1) {
-    const day = new Date(from)
-    day.setDate(from.getDate() - back)
-    out.push(days.has(iso(day)))
-  }
+  const end = todayInIsrael(from)
+  for (let back = HISTORY_DAYS - 1; back >= 0; back -= 1) out.push(days.has(addDays(end, -back)))
   return out
-}
-
-function iso(date: Date): string {
-  return date.toISOString().slice(0, 10)
 }
 
 export function totalPlays(profile: Profile): number {

@@ -5,6 +5,7 @@ import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { decades } from '@/lib/archive/graph'
 import { archiveFigures, detailOf, longDateHe, todayDecks } from '@/lib/archive/wing'
+import { todayInIsrael } from '@/lib/date/israel'
 import { t } from '@/lib/i18n'
 import { roundFrom } from '@/lib/rotation/round'
 import { gateMetadata } from '@/lib/seo'
@@ -30,7 +31,8 @@ export default function ArchivePage({
   searchParams: { seed?: string; r?: string; at?: string }
 }) {
   const round = roundFrom(searchParams)
-  const today = new Date().toISOString().slice(0, 10)
+  // the day it is in Tel Aviv, not in UTC — from midnight to 02:00 UTC is still yesterday (§21)
+  const today = todayInIsrael()
   const at = typeof searchParams.at === 'string' ? searchParams.at.slice(0, 160) : null
   const initial = at ? detailOf(at) : null
   const figures = archiveFigures()

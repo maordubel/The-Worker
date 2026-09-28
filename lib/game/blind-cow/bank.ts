@@ -69,10 +69,8 @@ export function dailyQuestion(day: string): BlindCowQuestion | null {
   return pool[h.readUInt32BE(0) % pool.length] ?? null
 }
 
-/** The Israel date — the daily turns over at midnight in Tel Aviv, not in UTC. */
-export function todayInIsrael(now: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now)
-}
+/** The Israel date — the daily turns over at midnight in Tel Aviv, not in UTC. One helper, shared with the archive. */
+export { todayInIsrael } from '@/lib/date/israel'
 
 export function openClues(q: BlindCowQuestion, count: number): OpenClue[] {
   return q.clueIds.slice(0, Math.max(0, count)).map((id, i) => {

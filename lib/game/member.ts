@@ -15,6 +15,7 @@
  * can move it to approved — the card says so rather than pretending.
  */
 
+import { addDays, todayInIsrael } from '@/lib/date/israel'
 import venues from '@/content/manual/venues.json'
 import { GATES } from '@/lib/gates'
 
@@ -118,8 +119,9 @@ export type MemberBook = {
 
 export const QUARTER_SLOTS = 90
 
+/** the supporter's calendar day — Israel's (`lib/date/israel.ts`); a punch at 00:30 is today's */
 function today(): string {
-  return new Date().toISOString().slice(0, 10)
+  return todayInIsrael()
 }
 
 /** A file number that looks issued rather than generated. Stable once written. */
@@ -374,7 +376,7 @@ export function applyCardPatch(
     number: patch.number !== undefined ? cleanNumber(patch.number) ?? book.number : book.number,
     card: {
       ...merged,
-      issuedOn: firstIssue ? now.toISOString().slice(0, 10) : prior.issuedOn,
+      issuedOn: firstIssue ? todayInIsrael(now) : prior.issuedOn,
       editedAt: now.toISOString(),
     },
   }
@@ -429,11 +431,7 @@ export function approvedCount(book: MemberBook): number {
 export function quarterGrid(book: MemberBook): boolean[] {
   const punched = new Set(book.punches)
   const out: boolean[] = []
-  const now = new Date()
-  for (let back = QUARTER_SLOTS - 1; back >= 0; back -= 1) {
-    const day = new Date(now)
-    day.setDate(now.getDate() - back)
-    out.push(punched.has(day.toISOString().slice(0, 10)))
-  }
+  const end = todayInIsrael()
+  for (let back = QUARTER_SLOTS - 1; back >= 0; back -= 1) out.push(punched.has(addDays(end, -back)))
   return out
 }

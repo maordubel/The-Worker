@@ -28,6 +28,7 @@
  * migrated, because an absent field already means the only thing it could mean.
  */
 
+import { todayInIsrael } from '@/lib/date/israel'
 import { ownerSpelling } from '@/lib/canon/spelling'
 import type { Formation } from '@/lib/game/lineup'
 import { isChallenge, type ChallengeId } from './challenge'
@@ -152,7 +153,7 @@ export class LocalXIStore implements XIStore {
       const current = await this.read()
       const next: XIBook = {
         ...current,
-        [tab]: { ...sheet, savedOn: new Date().toISOString().slice(0, 10) },
+        [tab]: { ...sheet, savedOn: todayInIsrael() },
       }
       window.localStorage.setItem(KEY, JSON.stringify(next))
     } catch {

@@ -9,6 +9,8 @@
  * existed keeps working: Gate 5 accepts its key once and hands back a token (`app/kits/actions.ts`).
  */
 
+import { todayInIsrael } from '@/lib/date/israel'
+
 const KEY = 'worker.kits.v1'
 
 export type BuiltKit = {
@@ -102,7 +104,7 @@ export class LocalCollectionStore implements CollectionStore {
       const current = await this.read()
       const key = kitKey(entry.seasonLabel, entry.variant)
       const existing = current[key]
-      const today = new Date().toISOString().slice(0, 10)
+      const today = todayInIsrael()
       const parts = Math.max(0, Math.min(5, Math.floor(entry.parts)))
       const score = entry.score ?? 0
       const hints = entry.hintsUsed ?? 99

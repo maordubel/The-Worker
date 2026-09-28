@@ -1,5 +1,6 @@
 'use client'
 
+import { todayInIsrael } from '@/lib/date/israel'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -243,7 +244,7 @@ export function BallotSheet({
     // ids, a code and message keys only — through the progress layer's one entry point.
     emit({
       type: 'ballot_sealed',
-      supporter: supporterRecord(ballot, reasons, new Date().toISOString().slice(0, 10)),
+      supporter: supporterRecord(ballot, reasons, todayInIsrael()),
     })
     haptic('lock')
   }
