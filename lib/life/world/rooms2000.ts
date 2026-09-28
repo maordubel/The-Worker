@@ -35,7 +35,7 @@ const years = (from: number, to = 9999) => chaptersWhere((id) => yearOfChapter(i
 const PARENTS_YEARS = chaptersWhere(livesWithParents)
 const OWN_HOME = chaptersWhere(ownHome)
 
-type Row = {
+export type Row = {
   who: string
   x: number
   y: number
@@ -61,7 +61,7 @@ const slug = (who: string) =>
  * אנשים בחדר, בפרק אחד. `when` של הקבוצה הוא התנאי שהשיחה שלהם מחכה לו — בלי ה-`none`
  * שלה, כי מי שדיבר כבר נשאר.
  */
-function cast(era: string, when: Condition | undefined, rows: readonly Row[]): ActorDef[] {
+export function cast(era: string, when: Condition | undefined, rows: readonly Row[]): ActorDef[] {
   return rows.map((row) => {
     const figure = row.figure ?? castFigure(row.who, yearOfChapter(era))?.figure
     if (!figure) throw new Error(`rooms2000: no body for ${row.who}`)
@@ -88,7 +88,7 @@ function cast(era: string, when: Condition | undefined, rows: readonly Row[]): A
 /**
  * `PARTNER` — שלוש אפשרויות, גוף אחד לכל אחת, ורק מי שנבחר עומד בחדר.
  */
-function partner(era: string, when: Condition | undefined, at: { x: number; y: number; flip?: boolean }): ActorDef[] {
+export function partner(era: string, when: Condition | undefined, at: { x: number; y: number; flip?: boolean }): ActorDef[] {
   const whom: Array<[string, string]> = [['melanie', 'מלאני'], ['dor', 'דור'], ['tamar', 'תמר']]
   return whom.map(([id, name]) => ({
     id: `${era}-partner-${id}`,

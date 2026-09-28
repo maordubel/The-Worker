@@ -192,7 +192,9 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'lyon', textHe: 'הערב האחרון.', revealWhen: F('c10:benfica'), doneWhen: F('c10:lyon') },
   ],
   '2012-cups': [
-    { id: 'cup', textHe: 'גמר. ומה שצריך להודיע לפניו.', doneWhen: F('n:cups') },
+    { id: 'word', textHe: 'הטלפון בסלון: השעה שהובטחה.', doneWhen: F('n:word') },
+    { id: 'cup', textHe: 'גמר. ומה שצריך להודיע לפניו.', revealWhen: F('n:word'), doneWhen: F('n:cups') },
+    { id: 'place', textHe: 'מה שבחרת לערב — במקום שלו.', revealWhen: F('n:cups'), doneWhen: F('n:done') },
   ],
   '2012-five': [
     { id: 'five', textHe: 'פינת אלנבי. חמש שנים.', doneWhen: F('n:five') },
@@ -285,8 +287,15 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'prep', textHe: 'מתחת ליציע: הדגלים, הבד, החבלים. זמן לשתיים.', revealWhen: F('t:prep'), doneWhen: F('t:open') },
     { id: 'open', textHe: 'השער נפתח. מי עשה מה.', revealWhen: F('t:open'), doneWhen: F('t:credit') },
   ],
-  '2002-desk': [{ id: 'first', textHe: 'הפרסום הראשון.', doneWhen: F('j:first') }],
-  '2006-desk': [{ id: 'fix', textHe: 'מה נשאר מהפרסום ההוא.', doneWhen: F('j:fix') }],
+  '2002-desk': [
+    { id: 'cards', textHe: 'על השולחן: ראיתי, עובדה, שמעתי.', doneWhen: F('j:board') },
+    { id: 'check', textHe: 'שני על התמונה, הקופאי על הרשימה.', revealWhen: F('j:verifying'), doneWhen: F('j:second') },
+    { id: 'first', textHe: 'הפרסום הראשון — לפני תשע, או אחרי.', doneWhen: F('j:first') },
+  ],
+  '2006-desk': [
+    { id: 'desk', textHe: 'מה מחכה על השולחן שלך.', doneWhen: F('j2:read') },
+    { id: 'fix', textHe: 'מה נשאר מהפרסום ההוא.', revealWhen: F('j2:read'), doneWhen: F('j:fix') },
+  ],
   '2012-terrace': [
     { id: 'hand', textHe: 'מי פותח כשאתה לא בא.', doneWhen: F('t:hand') },
     // the test on the gate-5 stairs (27.9.2026)

@@ -242,7 +242,16 @@ export const goalAnthem = (state: LifeState): LocationId | null => {
 }
 
 /** 2011–2013 — הגביע השלישי בסלון; ואז אלנבי, היציע, וחדר שאינו חדר */
-export const goalCups = (state: LifeState): LocationId | null => (flag(state, 'n:cups') ? null : 'home')
+/** 2012-cups (pass C) — the hour, Kobi, then the place the plan names: fridge and street door, sofa, or the promise */
+export const goalCups = (state: LifeState): LocationId | null => {
+  if (!flag(state, 'n:cups')) return 'home'
+  const plan = state.flags['n:plan']
+  const promised: LocationId = state.flags['life:partner'] ? 'allenby' : 'street'
+  if (plan === 'there' && !flag(state, 'n:final')) return flag(state, 'n:fridge') ? 'street' : 'kitchen'
+  if (plan === 'sofa' && !flag(state, 'n:watching')) return 'home'
+  if ((flag(state, 'n:go') || plan === 'elsewhere') && !flag(state, 'n:sat') && !flag(state, 'n:moved')) return promised
+  return null
+}
 export const goalFive = (state: LifeState): LocationId | null => {
   if (!flag(state, 'n:five')) return 'allenby'
   if (!flag(state, 'n:own')) return 'gate5'
@@ -391,7 +400,12 @@ export const goalTerrace01 = (state: LifeState): LocationId | null => {
 /** T02 — Yevgeny waits under the stand, by the stairs; the test happens there too */
 export const goalTerrace02 = (state: LifeState): LocationId | null => (flag(state, 't:hand') && !flag(state, 't:mode') ? null : flag(state, 't:test') ? null : 'gate5-stand')
 export const goalTerrace03 = (state: LifeState): LocationId | null => (flag(state, 't:lead') ? null : 'bloomfield-inside')
-export const goalDesk01 = (state: LifeState): LocationId | null => (flag(state, 'j:first') ? null : 'allenby')
+export const goalDesk01 = (state: LifeState): LocationId | null => {
+  if (flag(state, 'j:first')) return null
+  // J01 (pass C) — verifying sends him to the ticket office for the second source, then back
+  if (flag(state, 'j:verifying') && flag(state, 'j:photoOk') && !flag(state, 'j:second')) return 'ticket-office'
+  return 'allenby'
+}
 export const goalDesk02 = (state: LifeState): LocationId | null => (flag(state, 'j:fix') ? null : 'newsroom')
 export const goalInterview = (state: LifeState): LocationId | null => {
   if (flag(state, 'j:asked')) return null

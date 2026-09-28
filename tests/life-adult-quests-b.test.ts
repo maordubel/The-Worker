@@ -781,7 +781,6 @@ const ALLOWED: Record<string, string> = {
   'hh-diary/calendar': 'vignette — an agreement between two people is said, not performed',
   'hh-first/evening': 'vignette — the first evening with a baby is not a challenge (§11.12)',
   'hh-first/grandparents': 'vignette — asking Kobi and Rachel for help is the act',
-  'n-cups/venue': 'micro-quest in the room — Rachel is standing there; telling her is the verb, the time is the match',
   'p-till/ask': 'dialogue-native — asking for consent and waiting for the answer',
   'p-amit/review': 'vignette — sitting over the till with Amit, a year after',
   'r-back/successor': 'dialogue-native — the talk with the successor is the act',

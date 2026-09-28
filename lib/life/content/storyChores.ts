@@ -3,6 +3,7 @@ import type { LocationId } from '../types'
 
 import { QUEST_CHORES_B } from './adultQuestsB'
 import { STORY_CHORES_ADULT } from './storyChoresAdult'
+import { STORY_CHORES_PASS_C } from './storyChoresPassC'
 
 /**
  * עבודה בעלילה — a story beat done with the hands (Director V3 §10, 24.9.2026).
@@ -422,4 +423,6 @@ export const STORY_CHORES: Record<string, StoryChore> = {
   ...QUEST_CHORES_B,
   // 2002–2010 (LIFE 90-D) — the founding, Liron's day, the head count, the banner of 2010
   ...STORY_CHORES_ADULT,
+  // 2000–2012 (pass C, 28.9.2026) — the chapters' own hands: Amit's move of 2012, …
+  ...STORY_CHORES_PASS_C,
 }

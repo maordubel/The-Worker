@@ -322,11 +322,8 @@ export const CONVERSATIONS_BRIDGE: Conversation[] = [
             then: [
               { e: 'flag', flag: 'b:commit' },
               { e: 'flagValue', flag: 'b:commitKind', value: 'roads' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -5 },
-              { e: 'skill', skill: 'organization', delta: 4, why: 'סידור נסיעה' },
-              { e: 'rel', who: 'amit', axis: 'trust', delta: 3 },
-              { e: 'toast', text: 'עמית: "הפעם כתוב גם מי אישר."', tone: 'plain' },
+              // pass C: the list is written at the counter (`list-00`); the skill is what was written
+              { e: 'minigame', id: 'chore:story:list-00' },
             ],
           },
           {

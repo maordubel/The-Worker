@@ -274,7 +274,8 @@ describe('2009 · U05 — the world remembers what was done in 2007', () => {
     const offered: string[] = []
     const sim = start('2009-up', (choices) => {
       offered.push(...choices.map((choice) => choice.id))
-      return 'guest'
+      // pass C: the hall empties after the photograph (`u-empty`) — somebody else closes
+      return choices.some((choice) => choice.id === 'guest') ? 'guest' : 'delegate'
     })
     expect(offered).not.toContain('share')
     expect(offered).not.toContain('handover')

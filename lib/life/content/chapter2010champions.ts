@@ -2,7 +2,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { ChoiceDef, Conversation } from './script'
+import type { ChoiceDef, Conversation, Say } from './script'
 import type { Condition } from '../world/types'
 import { PORTRAIT_2010 } from './chapter2010double'
 
@@ -310,6 +310,88 @@ const DEBUT_AWAY_CHOICES: ChoiceDef[] = [
 
 // ---------------------------------------------------------------- the words ------
 
+/** C05 — Keren on the phone, and the three ways to answer her */
+const C10_CALL_LINES: Say[] = [
+  { who: 'קרן', text: 'אתה מספר לי מה עשית בכל דקה במשחק.' },
+  { who: 'פוגי', text: 'זה רע?' },
+  { who: 'קרן', text: 'שאלתי מה שלומך.' },
+  { who: 'פוגי', text: 'אה.' },
+  { who: 'קרן', text: 'גם ״אה״ זה יותר אישי מהתוצאה.' },
+]
+const C10_CALL_CHOICES: ChoiceDef[] = [
+          {
+            id: 'tell',
+            text: '(לספר לה מה באמת עובר עליי.)',
+            then: [
+              { e: 'flag', flag: 'c10:call' },
+              { e: 'time', minutes: 15 },
+              { e: 'rel', who: 'keren', axis: 'bond', delta: 3 },
+              { e: 'wellbeing', key: 'regret', delta: -4 },
+              { e: 'toast', text: 'קרן: "הנה. אותך רציתי לשמוע." — "עם פרשנות?" — "תנסה בלי."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'later',
+            text: '"עכשיו אין לי מילים. מחר בערב, אם מתאים לך."',
+            then: [
+              { e: 'flag', flag: 'c10:call' },
+              { e: 'flag', flag: 'promise:callKeren' },
+              { e: 'toast', text: 'קרן: "בסדר. רק אל תכתוב ״נדבר״ ותיעלם." — "מחר בערב, אם מתאים לך." — "מתאים."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'result',
+            text: '(להחזיר את השיחה לתוצאה.)',
+            then: [
+              { e: 'flag', flag: 'c10:call' },
+              { e: 'rel', who: 'keren', axis: 'bond', delta: -1 },
+              { e: 'flagValue', flag: 'c10:kerenUnheard', value: true },
+              { e: 'toast', text: 'קרן: "אז תתקשר כשתרצה לדבר איתי."', tone: 'red' },
+            ],
+          },
+        ]
+
+/** C04 — the hosting evening's three answers (both branches of `c10-host`) */
+const C10_HOST_CHOICES: ChoiceDef[] = [
+          {
+            id: 'hosted',
+            text: '(לקיים את האירוח שסיכמתי.)',
+            then: [
+              { e: 'flag', flag: 'c10:host' },
+              { e: 'time', minutes: 60 },
+              { e: 'energy', delta: -5 },
+              { e: 'money', agorot: -6000, why: 'מה שקונים לערב עם אורחים' },
+              { e: 'rel', who: 'lina', axis: 'bond', delta: 2 },
+              { e: 'rel', who: 'lina', axis: 'trust', delta: 5 },
+              /**
+               * הקהל הזה הוא `international` — יציע בהמבורג שמכיר אותך אינו הציבור
+               * הישראלי, **וגם אינו שער 7**: שער 7 הם האוהדים שלנו בחוץ, וזה אוהדים של
+               * מישהו אחר שעומדים אִתנו (כלל 79 ב׳). והם היו בחדר, אז `heard` משלם מיד.
+               */
+              { e: 'proof', kind: 'hosted_guests', proofId: 'hosted_guests:{chapter}:evening', subjectHe: 'הערב שלא בוטל', audience: 'international', delta: 4, noteHe: 'סוכם לפני המשחק, התקיים אחרי, ולא הוזכר בו מה קרה במגרש.' },
+              { e: 'heard', proofId: 'hosted_guests:{chapter}:evening' },
+              { e: 'toast', text: 'לינה: "תודה שלא ביטלת." — "הזמנתי אותך, לא את התוצאה."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'helped',
+            text: '(לעזור למתוקי, ואז להושיב אותו.)',
+            // pass C: the plates are carried to the table (`plates-10`), and only then does he sit
+            then: [{ e: 'minigame', id: 'chore:story:plates-10' }],
+          },
+          {
+            id: 'handover',
+            text: '"אני לא אוכל. אני מודיע עכשיו, ויש מחליף מוסכם."',
+            then: [
+              { e: 'flag', flag: 'c10:host' },
+              { e: 'flagValue', flag: 'c10:hostEnd', value: 'handed_over' },
+              { e: 'personality', key: 'honesty', delta: 3 },
+              { e: 'rel', who: 'roma', axis: 'trust', delta: 2 },
+              { e: 'toast', text: 'רומא: "אני לוקח את זה. פעם הבאה נדבר מראש." — "תודה. אני לא אכתוב ״מסודר״ עד שאתה אומר."', tone: 'plain' },
+            ],
+          },
+        ]
+
 export const CONVERSATIONS_CHAMPIONS: Conversation[] = [
   {
     id: 'c10-qualify',
@@ -327,15 +409,11 @@ export const CONVERSATIONS_CHAMPIONS: Conversation[] = [
           {
             id: 'organise',
             text: '(לקחת אחריות על ערב הצפייה. לכתוב את עצמך ראשון.)',
-            then: [
-              { e: 'flag', flag: 'c10:qualify' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -5 },
-              { e: 'skill', skill: 'organization', delta: 3, why: 'בכל פעם מישהו אחר מסדר בסוף' },
-              /** `organization.qualifiers2010` בתסריט → ראיה עם נושא, בלי קהל: אף אחד חיצוני לא ראה */
-              { e: 'proof', kind: 'organised_evening', proofId: 'organised_evening:{chapter}:qualifiers', subjectHe: 'ערב הצפייה החוזר', noteHe: 'שלושה סיבובים, אותה דירה, ומי שמסדר רשום מראש.' },
-              { e: 'toast', text: 'מתוקי: "בכל פעם מישהו אחר מסדר בסוף." — "תכתוב אותי ראשון."', tone: 'plain' },
-            ],
+            /**
+             * pass C: `organization.qualifiers2010` בתסריט → the evening is SET UP (`qualify-10`: chairs,
+             * cups, the aerial, the list), and the skill and the proof are paid by how much of it he did.
+             */
+            then: [{ e: 'minigame', id: 'chore:story:qualify-10' }],
           },
           {
             id: 'venue',
@@ -556,58 +634,23 @@ export const CONVERSATIONS_CHAMPIONS: Conversation[] = [
     nameHe: 'לינה',
     branches: [
       {
+        // pass C (28.9.2026) — they slept on his parents' sofa in September (`life:intl:hosted`)
+        when: { flag: 'life:intl:hosted' },
+        lines: [
+          { who: 'לינה', text: 'חשבתי שלא תרצו להיפגש אחרי המשחק.' },
+          { who: 'רומא', text: 'אמא שלך שאלה אם הם חוזרים לספה. אמרתי שזה תלוי בך.' },
+          { who: 'פוגי', text: 'זה תלוי בה. אני רק ישן בחדר ליד.' },
+        ],
+        choices: C10_HOST_CHOICES,
+      },
+      {
         lines: [
           { who: 'לינה', text: 'חשבתי שלא תרצו להיפגש אחרי המשחק.' },
           { who: 'פוגי', text: 'אנחנו יודעים לאכול גם אחרי הפסד.' },
           { who: 'מתוקי', text: 'בפועל אנחנו מאוד מנוסים.' },
           { who: 'רומא', text: 'מישהו סוף סוף מצא תחום שאנחנו מובילים בו.' },
         ],
-        choices: [
-          {
-            id: 'hosted',
-            text: '(לקיים את האירוח שסיכמתי.)',
-            then: [
-              { e: 'flag', flag: 'c10:host' },
-              { e: 'time', minutes: 60 },
-              { e: 'energy', delta: -5 },
-              { e: 'money', agorot: -6000, why: 'מה שקונים לערב עם אורחים' },
-              { e: 'rel', who: 'lina', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'lina', axis: 'trust', delta: 5 },
-              /**
-               * הקהל הזה הוא `international` — יציע בהמבורג שמכיר אותך אינו הציבור
-               * הישראלי, **וגם אינו שער 7**: שער 7 הם האוהדים שלנו בחוץ, וזה אוהדים של
-               * מישהו אחר שעומדים אִתנו (כלל 79 ב׳). והם היו בחדר, אז `heard` משלם מיד.
-               */
-              { e: 'proof', kind: 'hosted_guests', proofId: 'hosted_guests:{chapter}:evening', subjectHe: 'הערב שלא בוטל', audience: 'international', delta: 4, noteHe: 'סוכם לפני המשחק, התקיים אחרי, ולא הוזכר בו מה קרה במגרש.' },
-              { e: 'heard', proofId: 'hosted_guests:{chapter}:evening' },
-              { e: 'toast', text: 'לינה: "תודה שלא ביטלת." — "הזמנתי אותך, לא את התוצאה."', tone: 'plain' },
-            ],
-          },
-          {
-            id: 'helped',
-            text: '(לעזור למתוקי, ואז להושיב אותו.)',
-            then: [
-              { e: 'flag', flag: 'c10:host' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -5 },
-              { e: 'rel', who: 'metuki', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'metuki', axis: 'trust', delta: 3 },
-              { e: 'proof', kind: 'community_help', proofId: 'community_help:{chapter}:evening', subjectHe: 'הצלחות של מתוקי', noteHe: 'לקח צלחות, ואחר כך הושיב אותו.' },
-              { e: 'toast', text: 'מתוקי: "אתה יכול לקחת צלחות?" — "כן. ואחר כך אתה יושב."', tone: 'plain' },
-            ],
-          },
-          {
-            id: 'handover',
-            text: '"אני לא אוכל. אני מודיע עכשיו, ויש מחליף מוסכם."',
-            then: [
-              { e: 'flag', flag: 'c10:host' },
-              { e: 'flagValue', flag: 'c10:hostEnd', value: 'handed_over' },
-              { e: 'personality', key: 'honesty', delta: 3 },
-              { e: 'rel', who: 'roma', axis: 'trust', delta: 2 },
-              { e: 'toast', text: 'רומא: "אני לוקח את זה. פעם הבאה נדבר מראש." — "תודה. אני לא אכתוב ״מסודר״ עד שאתה אומר."', tone: 'plain' },
-            ],
-          },
-        ],
+        choices: C10_HOST_CHOICES,
       },
     ],
   },
@@ -618,45 +661,14 @@ export const CONVERSATIONS_CHAMPIONS: Conversation[] = [
     remote: { 'קרן': 'phone' },
     branches: [
       {
-        lines: [
-          { who: 'קרן', text: 'אתה מספר לי מה עשית בכל דקה במשחק.' },
-          { who: 'פוגי', text: 'זה רע?' },
-          { who: 'קרן', text: 'שאלתי מה שלומך.' },
-          { who: 'פוגי', text: 'אה.' },
-          { who: 'קרן', text: 'גם ״אה״ זה יותר אישי מהתוצאה.' },
-        ],
-        choices: [
-          {
-            id: 'tell',
-            text: '(לספר לה מה באמת עובר עליי.)',
-            then: [
-              { e: 'flag', flag: 'c10:call' },
-              { e: 'time', minutes: 15 },
-              { e: 'rel', who: 'keren', axis: 'bond', delta: 3 },
-              { e: 'wellbeing', key: 'regret', delta: -4 },
-              { e: 'toast', text: 'קרן: "הנה. אותך רציתי לשמוע." — "עם פרשנות?" — "תנסה בלי."', tone: 'plain' },
-            ],
-          },
-          {
-            id: 'later',
-            text: '"עכשיו אין לי מילים. מחר בערב, אם מתאים לך."',
-            then: [
-              { e: 'flag', flag: 'c10:call' },
-              { e: 'flag', flag: 'promise:callKeren' },
-              { e: 'toast', text: 'קרן: "בסדר. רק אל תכתוב ״נדבר״ ותיעלם." — "מחר בערב, אם מתאים לך." — "מתאים."', tone: 'plain' },
-            ],
-          },
-          {
-            id: 'result',
-            text: '(להחזיר את השיחה לתוצאה.)',
-            then: [
-              { e: 'flag', flag: 'c10:call' },
-              { e: 'rel', who: 'keren', axis: 'bond', delta: -1 },
-              { e: 'flagValue', flag: 'c10:kerenUnheard', value: true },
-              { e: 'toast', text: 'קרן: "אז תתקשר כשתרצה לדבר איתי."', tone: 'red' },
-            ],
-          },
-        ],
+        // pass C (28.9.2026) — the birthday he moved to Sunday for the cup (`life:cup2010:owed`)
+        when: { flagIs: { flag: 'life:cup2010:owed', value: 'keren' } },
+        lines: [{ who: 'קרן', text: 'הבאת עוגה ביום ראשון. בדקתי אם זה תירוץ. זאת הייתה עוגה.' }, ...C10_CALL_LINES],
+        choices: C10_CALL_CHOICES,
+      },
+      {
+        lines: C10_CALL_LINES,
+        choices: C10_CALL_CHOICES,
       },
     ],
   },

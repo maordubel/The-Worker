@@ -350,11 +350,27 @@ export const BEATS_TABLE: Beat[] = [
    * הסגירה — רק אחרי שמה שנלקח נעשה (או נעזב באמצע), ולא ברגע שנאמר. הדגל `u:done`
    * מורם **בשיחה**, כך שמי שסוגר את התיבה בטעות מקבל אותה שוב (כלל 42).
    */
+  /**
+   * U01 S3 (pass C, 28.9.2026) — **הלוח של יוסף.** *"NPC-completed items appear too · review
+   * what moved without you."* בזמן שהוא ספר או שאל, האחרים עשו את שלהם — והלוח בחדר הקהילה
+   * מראה את זה בכתב יד של כל אחד, ומה שאף אחד לא לקח — ריק.
+   */
+  {
+    id: 'u-board',
+    at: 'community-room',
+    trigger: 'clock',
+    when: {
+      all: [{ flag: 'u:role' }, { any: [{ flagIs: { flag: 'u:roleKind', value: 'supporter' } }, { flag: 'u:counted' }, { flag: 'u:asked' }] }],
+      none: [{ flag: 'u:board' }, { flag: 'u:done' }],
+    },
+    delayMs: 900,
+    do: [{ a: 'talk', conversation: 'u-board' }],
+  },
   {
     id: 'u-table-close',
     trigger: 'clock',
     when: {
-      all: [{ flag: 'u:role' }, { any: [{ flagIs: { flag: 'u:roleKind', value: 'supporter' } }, { flag: 'u:counted' }, { flag: 'u:asked' }] }],
+      all: [{ flag: 'u:role' }, { flag: 'u:board' }, { any: [{ flagIs: { flag: 'u:roleKind', value: 'supporter' } }, { flag: 'u:counted' }, { flag: 'u:asked' }] }],
       none: [{ flag: 'u:done' }],
     },
     delayMs: 1100,
@@ -446,6 +462,21 @@ export const BEATS_REGISTERED: Beat[] = [
   },
   /** the phone rings until it is answered — a box closed by mistake rings again */
   { id: 'u-news-call', at: 'home', trigger: 'clock', when: { all: [{ flag: 'u:morning' }], none: [{ flag: 'u:news' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'u-news' }] },
+  /**
+   * pass C (28.9.2026) — the scrap of confetti he kept from the derby of 2004 (`life:uss:confetti`,
+   * `2006-home`), in his wallet, while the dust settles. One line, before anybody speaks.
+   */
+  {
+    id: 'u-confetti',
+    at: 'ussishkin-outside',
+    trigger: 'clock',
+    when: { all: [{ flag: 'u:seen' }, { flag: 'life:uss:confetti' }], none: [{ flag: 'u:confettiSeen' }, { flag: 'u:loss' }] },
+    delayMs: 600,
+    do: [
+      { a: 'flag', flag: 'u:confettiSeen' },
+      { a: 'lines', lines: [{ who: null, text: 'בארנק, מאחורי התעודה, פתק קונפטי אדום מהדרבי של 2004. שלוש שנים הוא היה שם, ורק עכשיו אתה יודע למה.' }] },
+    ],
+  },
   {
     /** Beats 4–6: people outside, the demolition with no HUD, then the one human choice */
     id: 'u-loss',
@@ -506,8 +537,25 @@ export const BEATS_UP: Beat[] = [
       { a: 'talk', conversation: 'u-after' },
     ],
   },
-  { id: 'u-up-close', trigger: 'clock', when: { all: [{ flag: 'u:after' }], none: [{ flag: 'u:done' }] }, delayMs: 1100, do: [{ a: 'talk', conversation: 'u-up-close' }] },
+  /**
+   * U05 S2–S3 (pass C, 28.9.2026) — **האולם מתרוקן.** *"lock/clean/child/delegate appear ·
+   * choose one or delegate · if delegated, someone else closes · proves system > martyrdom."*
+   * The celebration ends and four things are left in the hall; one is his, or none is — and the
+   * last light is read from which (`life:2009:closed`, heard again in 2012).
+   */
+  { id: 'u-empty', at: 'hall-new', trigger: 'clock', when: { all: [{ flag: 'u:after' }], none: [{ flag: 'u:closed' }, { flagIs: { flag: 'u:afterKind', value: 'remote' } }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'u-empty' }] },
+  { id: 'u-lastlight', trigger: 'clock', when: { all: [{ flag: 'u:closed' }], none: [{ flag: 'u:lastlight' }] }, delayMs: 1000, do: [{ a: 'talk', conversation: 'u-lastlight' }] },
+  {
+    id: 'u-up-close',
+    trigger: 'clock',
+    when: { all: [{ flag: 'u:after' }, { any: [{ flag: 'u:lastlight' }, { flagIs: { flag: 'u:afterKind', value: 'remote' } }] }], none: [{ flag: 'u:done' }] },
+    delayMs: 1100,
+    do: [{ a: 'talk', conversation: 'u-up-close' }],
+  },
 ]
+
+/** who closed the hall the night of the promotion — `self`, `child`, `chairs`, `delegated` (read in 2012) */
+export const CLOSED_2009 = 'life:2009:closed'
 
 // -------------------------------------------------------------------- conversations
 
@@ -1217,6 +1265,66 @@ export const CONVERSATIONS_FOUNDING: Conversation[] = [
         ],
         choices: AFTER_CHOICES,
       },
+    ],
+  },
+  /** U01 S3 — the board in the community room: what moved while he was busy */
+  {
+    id: 'u-board',
+    nameHe: 'יוסף',
+    branches: [
+      {
+        when: { flagIs: { flag: 'u:roleKind', value: 'operations' } },
+        lines: [
+          { who: null, text: 'על הלוח ליד הדלת, שלושה טורים. "שעות אולם" — וי, בכתב של יוסף. "שחקנים" — שישה שמות, בכתב של אפי. "טופס עמותה" — חצי, ושחור כתב לידו "מחר".' },
+          { who: 'יוסף', text: 'אתה ספרת, הם הביאו. ככה זה אמור לעבוד.' },
+        ],
+        then: [{ e: 'flag', flag: 'u:board' }],
+      },
+      {
+        when: { flagIs: { flag: 'u:roleKind', value: 'people' } },
+        lines: [
+          { who: null, text: 'על הלוח ליד הדלת: "מחסן" — שחור ספר לבד, וכתב "אין" ליד שלושה דברים. "שעות אולם" — וי. ולידם הטור שלך, עם השמות שתפסת בדרך לדלת.' },
+          { who: 'יוסף', text: 'שחור לא ביקש עזרה. הוא גם לא היה צריך.' },
+        ],
+        then: [{ e: 'flag', flag: 'u:board' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'על הלוח ליד הדלת, שלושה טורים מלאים — בשלושה כתבי יד. אף אחד מהם לא שלך, וזה לא הפריע לאף אחד.' },
+          { who: 'יוסף', text: 'מי שבא — בא. בפעם הבאה אולי תכתוב משהו.' },
+        ],
+        then: [{ e: 'flag', flag: 'u:board' }],
+      },
+    ],
+  },
+  /** U05 S2 — the hall empties: four things left, one of them his — or none */
+  {
+    id: 'u-empty',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'התמונה צולמה. האולם מתרוקן, ונשארים ארבעה דברים: האורות, הכיסאות, ילד בן תשע שמחכה לאבא שלו ליד הדלת, והמפתח.' },
+          { who: 'יוסף', text: 'מי סוגר היום?' },
+        ],
+        choices: [
+          { id: 'lights', text: '(אני. אורות, דלתות, מפתח.)', then: [{ e: 'flag', flag: 'u:closed' }, { e: 'flagValue', flag: CLOSED_2009, value: 'self' }, { e: 'time', minutes: 30 }, { e: 'energy', delta: -6 }] },
+          { id: 'chairs', text: '(הכיסאות. לקפל, ולהעמיד ליד הקיר.)', then: [{ e: 'minigame', id: 'chore:story:chairs-09' }] },
+          { id: 'child', text: '(לחכות עם הילד עד שאבא שלו מגיע.)', then: [{ e: 'flag', flag: 'u:closed' }, { e: 'flagValue', flag: CLOSED_2009, value: 'child' }, { e: 'time', minutes: 25 }, { e: 'rel', who: 'yosef', axis: 'bond', delta: 1 }] },
+          { id: 'delegate', text: '(ענבל סוגרת היום. להגיד לה עכשיו, ולתת את המפתח.)', then: [{ e: 'flag', flag: 'u:closed' }, { e: 'flagValue', flag: CLOSED_2009, value: 'delegated' }, { e: 'rel', who: 'crowd-inbal', axis: 'trust', delta: 3 }, { e: 'toast', text: 'ענבל: "אני סוגרת. ואתה הולך הביתה, לא נשאר לבדוק."', tone: 'plain' }] },
+        ],
+      },
+    ],
+  },
+  /** U05 S3 — the last light, read from who closed */
+  {
+    id: 'u-lastlight',
+    nameHe: null,
+    branches: [
+      { when: { flagIs: { flag: CLOSED_2009, value: 'delegated' } }, lines: [{ who: null, text: 'מהחניה ראית את האור האחרון נכבה. לא אתה כיבית אותו, והאולם נסגר בדיוק אותו דבר.' }], then: [{ e: 'flag', flag: 'u:lastlight' }] },
+      { when: { flagIs: { flag: CLOSED_2009, value: 'child' } }, lines: [{ who: null, text: 'אבא של הילד הגיע באחת־עשרה ועשרים, מתנצל. את האור כיבה שחור. הילד נופף מהחלון של הרכב.' }], then: [{ e: 'flag', flag: 'u:lastlight' }] },
+      { when: { flagIs: { flag: CLOSED_2009, value: 'chairs' } }, lines: [{ who: null, text: 'הכיסאות ליד הקיר, בשורות. יוסף כיבה את האור ושאל אם גם את זה ספרת.' }], then: [{ e: 'flag', flag: 'u:lastlight' }] },
+      { lines: [{ who: null, text: 'כיבית את האור האחרון בעצמך, ונשארת רגע בחושך של אולם שהוא כבר לא חדש.' }], then: [{ e: 'flag', flag: 'u:lastlight' }] },
     ],
   },
   {

@@ -165,7 +165,27 @@ export const BEATS_HOME: Beat[] = [
   },
 ]
 
+/**
+ * H01 S4 (pass C, 28.9.2026) — *"one confetti/paper remains in pocket · keep/drop · future
+ * demolition callback."* A red scrap on the parquet after the derby, for whoever was in the
+ * hall. Kept, it is `life:uss:confetti` — and on 25.7.2007, outside the fence, it is in his wallet.
+ */
+export const USS_CONFETTI = 'life:uss:confetti'
+
 export const CONVERSATIONS_HOME: Conversation[] = [
+  {
+    id: 'h-confetti',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'פתק קונפטי אדום על הפרקט, דרוך. מישהו גזר אותו מעיתון של אתמול, ואפשר עוד לקרוא חצי מילה.' }],
+        choices: [
+          { id: 'keep', text: '(לקפל אותו לארנק.)', then: [{ e: 'flag', flag: 'h:confetti' }, { e: 'flag', flag: USS_CONFETTI }, { e: 'toast', text: 'בארנק, מאחורי התעודה. לא סיבה. סתם.', tone: 'plain' }] },
+          { id: 'drop', text: '(להשאיר אותו על הפרקט. זה המקום שלו.)', then: [{ e: 'flag', flag: 'h:confetti' }, { e: 'toast', text: 'מחר בבוקר מישהו יטאטא אותו. ככה זה אמור להיות.', tone: 'plain' }] },
+        ],
+      },
+    ],
+  },
   {
     id: 'h-derby',
     nameHe: 'אפי',
@@ -207,6 +227,7 @@ export const CONVERSATIONS_HOME: Conversation[] = [
               { e: 'flag', flag: 'h:derby' },
               { e: 'rel', who: 'efi', axis: 'bond', delta: 3 },
               { e: 'presence', mode: 'television' },
+              { e: 'flag', flag: 'h:tv' },
               { e: 'toast', text: 'אפי: "שמעת את האולם?" — "גם כשהנמכתי."', tone: 'plain' },
             ],
           },
