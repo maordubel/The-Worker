@@ -242,7 +242,16 @@ export const goalAnthem = (state: LifeState): LocationId | null => {
 }
 
 /** 2011–2013 — הגביע השלישי בסלון; ואז אלנבי, היציע, וחדר שאינו חדר */
-export const goalCups = (state: LifeState): LocationId | null => (flag(state, 'n:cups') ? null : 'home')
+/** 2012-cups (pass C) — the hour, Kobi, then the place the plan names: fridge and street door, sofa, or the promise */
+export const goalCups = (state: LifeState): LocationId | null => {
+  if (!flag(state, 'n:cups')) return 'home'
+  const plan = state.flags['n:plan']
+  const promised: LocationId = state.flags['life:partner'] ? 'allenby' : 'street'
+  if (plan === 'there' && !flag(state, 'n:final')) return flag(state, 'n:fridge') ? 'street' : 'kitchen'
+  if (plan === 'sofa' && !flag(state, 'n:watching')) return 'home'
+  if ((flag(state, 'n:go') || plan === 'elsewhere') && !flag(state, 'n:sat') && !flag(state, 'n:moved')) return promised
+  return null
+}
 export const goalFive = (state: LifeState): LocationId | null => {
   if (!flag(state, 'n:five')) return 'allenby'
   if (!flag(state, 'n:own')) return 'gate5'

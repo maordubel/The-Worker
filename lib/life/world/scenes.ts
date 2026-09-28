@@ -11,6 +11,7 @@ import { PARENTS_AFTER_2013, chaptersWhere, livesWithParents } from './homes'
 import { CITY_EXITS, CITY_ROOMS } from './city2027'
 import { BEDROOM_2000, BUS_STATION_2017, HOME_OWN, NEW_ROOMS, PITCH_2000, PITCH_2000S, STAGED, STAND_80S, STAND_90S, STAND_NEW, STAND_OLD, STREET_2010 } from './rooms2000'
 import { QUEST_SPOTS } from './quests90e'
+import { PASS_C_SPOTS, PASS_C_STAGED } from './passC'
 
 /**
  * העולם המצויר — a painted place, a strip of floor you may stand on, and a door you can
@@ -4853,7 +4854,7 @@ const SCENES: SceneDef[] = [
  * כל שורה ב-`STAGED` נמדדה על הציור של השנה שלה, ולכן היא נכנסת לצביעה של אותה שנה.
  */
 for (const scene of SCENES) {
-  for (const actor of STAGED[scene.id] ?? []) {
+  for (const actor of [...(STAGED[scene.id] ?? []), ...(PASS_C_STAGED[scene.id] ?? [])]) {
     const era = typeof actor.era === 'string' ? actor.era : ''
     const paint = scene.repaints?.find((r) => r.in(era))
     if (paint) {
@@ -4889,7 +4890,7 @@ for (const { from, exit, onPaint } of CITY_EXITS) {
  * לציור של השנה שלהן בדיוק כמו האנשים של `STAGED`.
  */
 for (const scene of SCENES) {
-  for (const spot of QUEST_SPOTS[scene.id] ?? []) {
+  for (const spot of [...(QUEST_SPOTS[scene.id] ?? []), ...(PASS_C_SPOTS[scene.id] ?? [])]) {
     const era = typeof spot.era === 'string' ? spot.era : ''
     const paint = scene.repaints?.find((r) => r.in(era))
     if (paint) {

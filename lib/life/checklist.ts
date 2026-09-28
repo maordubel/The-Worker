@@ -192,7 +192,9 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'lyon', textHe: 'הערב האחרון.', revealWhen: F('c10:benfica'), doneWhen: F('c10:lyon') },
   ],
   '2012-cups': [
-    { id: 'cup', textHe: 'גמר. ומה שצריך להודיע לפניו.', doneWhen: F('n:cups') },
+    { id: 'word', textHe: 'הטלפון בסלון: השעה שהובטחה.', doneWhen: F('n:word') },
+    { id: 'cup', textHe: 'גמר. ומה שצריך להודיע לפניו.', revealWhen: F('n:word'), doneWhen: F('n:cups') },
+    { id: 'place', textHe: 'מה שבחרת לערב — במקום שלו.', revealWhen: F('n:cups'), doneWhen: F('n:done') },
   ],
   '2012-five': [
     { id: 'five', textHe: 'פינת אלנבי. חמש שנים.', doneWhen: F('n:five') },
