@@ -60,6 +60,9 @@ import heShare from '@/messages/he.share.json'
 // daily, the group debate, the week and the pairs. One file, so the personal-area agent never
 // appends to the same catalogue.
 import heStand from '@/messages/he.stand.json'
+// 28.9.2026 — the personal area: אני / התיק שלי, the memory map, the memories, the public
+// identity (`personal.*`, docs/21-personal-area.md). One file, so the area has one home.
+import hePersonal from '@/messages/he.personal.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -139,6 +142,7 @@ export const CATALOGUE_FILES = {
   heDaily,
   heShare,
   heStand,
+  hePersonal,
 } as const
 
 const catalogue = {
@@ -186,6 +190,7 @@ const catalogue = {
   ...heDaily,
   ...heShare,
   ...heStand,
+  ...hePersonal,
 }
 
 export type MessageKey = keyof typeof catalogue

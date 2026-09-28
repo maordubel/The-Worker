@@ -17,7 +17,6 @@ import { cardExtras, type CardExtras } from './actions'
 import { CardEditor } from './CardEditor'
 import { draftBook, draftDirty, draftOf, patchOf, revengeOf, type CardDraft } from './cardView'
 import { IssueBeat } from './IssueBeat'
-import { KeptPanel } from './KeptPanel'
 import { MemberBook } from './MemberBook'
 import { OathPanel } from './OathPanel'
 import { SignUpPlate } from './SignUpPlate'
@@ -25,14 +24,17 @@ import { Standing } from './Standing'
 import { StoryPanel } from './StoryPanel'
 import { WorkerCard } from './WorkerCard'
 
-export const TABS = ['card', 'oath', 'story', 'kept', 'details'] as const
+/**
+ * 'kept' (מה ששמרתי) moved out on 28.9.2026: it is now its own destination, התיק שלי at
+ * `/tik/file` (ONE RED WORLD §24). An old `/tik#kept` link is sent there on arrival.
+ */
+export const TABS = ['card', 'oath', 'story', 'details'] as const
 export type TabId = (typeof TABS)[number]
 
 const TAB_LABEL: Readonly<Record<TabId, { he: Parameters<typeof t>[0]; latin: string }>> = {
   card: { he: 'tik.tab.card', latin: 'CARD' },
   oath: { he: 'tik.tab.oath', latin: 'OATH' },
   story: { he: 'tik.tab.story', latin: 'STORY' },
-  kept: { he: 'tik.tab.kept', latin: 'KEPT' },
   details: { he: 'tik.tab.details', latin: 'DETAILS' },
 }
 
@@ -91,6 +93,10 @@ export function CardTabs({ shirt, kitsTotal }: { shirt: KitSpec; kitsTotal: numb
     setDevice(readDevice())
     setMarks(nextMarks)
     const fromHash = () => {
+      if (window.location.hash === '#kept') {
+        window.location.replace('/tik/file')
+        return
+      }
       const id = window.location.hash.replace('#', '') as TabId
       if (TABS.includes(id)) setTab(id)
     }
@@ -237,7 +243,7 @@ export function CardTabs({ shirt, kitsTotal }: { shirt: KitSpec; kitsTotal: numb
         <div
           role="tablist"
           aria-label={t('tik.tab.label')}
-          className="grid grid-cols-5 border-b-rule border-ink"
+          className="grid grid-cols-4 border-b-rule border-ink"
         >
           {TABS.map((id) => {
             const on = tab === id
@@ -289,20 +295,6 @@ export function CardTabs({ shirt, kitsTotal }: { shirt: KitSpec; kitsTotal: numb
           )}
           {tab === 'oath' && <OathPanel state={state} names={names} onEdit={openEditor} />}
           {tab === 'story' && <StoryPanel state={state} names={names} onEdit={openEditor} />}
-          {tab === 'kept' && (
-            <KeptPanel
-              state={savedState}
-              extras={extras}
-              kitKeys={kitKeys}
-              collections={{
-                xi: device.xi,
-                ballot: device.ballot,
-                archiveSeen: activeIn(profile, 'archive').length,
-                lifeEvents: device.life?.events ?? null,
-                lifeYear: device.life?.year ?? null,
-              }}
-            />
-          )}
           {tab === 'details' && draft !== null && (
             <>
               <CardEditor

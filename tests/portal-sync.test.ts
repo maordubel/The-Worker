@@ -482,6 +482,8 @@ describe('פרויקט משותף עם DUBID — THE WORKER touches only what it
       '20260928090000_worker_events_taxonomy.sql',
       // 28.9.2026 (ONE RED WORLD §8, §45): "היציע שלי" — standalone (tests/stand.test.ts)
       '20260928120000_worker_stands.sql',
+      // 28.9.2026 (ONE RED WORLD §35): the public identity, "אדום #N" (tests/personal-area.test.ts)
+      '20260928130000_worker_public_identity.sql',
     ]
     for (const name of readdirSync(dir)) {
       if (live.includes(name)) continue
