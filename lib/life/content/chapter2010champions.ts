@@ -376,15 +376,8 @@ const C10_HOST_CHOICES: ChoiceDef[] = [
           {
             id: 'helped',
             text: '(לעזור למתוקי, ואז להושיב אותו.)',
-            then: [
-              { e: 'flag', flag: 'c10:host' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -5 },
-              { e: 'rel', who: 'metuki', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'metuki', axis: 'trust', delta: 3 },
-              { e: 'proof', kind: 'community_help', proofId: 'community_help:{chapter}:evening', subjectHe: 'הצלחות של מתוקי', noteHe: 'לקח צלחות, ואחר כך הושיב אותו.' },
-              { e: 'toast', text: 'מתוקי: "אתה יכול לקחת צלחות?" — "כן. ואחר כך אתה יושב."', tone: 'plain' },
-            ],
+            // pass C: the plates are carried to the table (`plates-10`), and only then does he sit
+            then: [{ e: 'minigame', id: 'chore:story:plates-10' }],
           },
           {
             id: 'handover',
@@ -416,15 +409,11 @@ export const CONVERSATIONS_CHAMPIONS: Conversation[] = [
           {
             id: 'organise',
             text: '(לקחת אחריות על ערב הצפייה. לכתוב את עצמך ראשון.)',
-            then: [
-              { e: 'flag', flag: 'c10:qualify' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -5 },
-              { e: 'skill', skill: 'organization', delta: 3, why: 'בכל פעם מישהו אחר מסדר בסוף' },
-              /** `organization.qualifiers2010` בתסריט → ראיה עם נושא, בלי קהל: אף אחד חיצוני לא ראה */
-              { e: 'proof', kind: 'organised_evening', proofId: 'organised_evening:{chapter}:qualifiers', subjectHe: 'ערב הצפייה החוזר', noteHe: 'שלושה סיבובים, אותה דירה, ומי שמסדר רשום מראש.' },
-              { e: 'toast', text: 'מתוקי: "בכל פעם מישהו אחר מסדר בסוף." — "תכתוב אותי ראשון."', tone: 'plain' },
-            ],
+            /**
+             * pass C: `organization.qualifiers2010` בתסריט → the evening is SET UP (`qualify-10`: chairs,
+             * cups, the aerial, the list), and the skill and the proof are paid by how much of it he did.
+             */
+            then: [{ e: 'minigame', id: 'chore:story:qualify-10' }],
           },
           {
             id: 'venue',

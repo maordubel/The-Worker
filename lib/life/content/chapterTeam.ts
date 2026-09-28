@@ -307,14 +307,8 @@ export const CONVERSATIONS_TEAM: Conversation[] = [
           {
             id: 'onetwo',
             text: '(להתאמן על אחד־שתיים עם אופיר.)',
-            then: [
-              { e: 'flag', flag: 'y:train' },
-              { e: 'time', minutes: 30 },
-              { e: 'energy', delta: -8 },
-              { e: 'rel', who: 'ofir', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'ofir', axis: 'trust', delta: 2 },
-              { e: 'toast', text: 'אופיר: "תמסור לפני שאני צועק." — "זה משאיר לי חצי שנייה."', tone: 'plain' },
-            ],
+            // pass C: the drill is played on the dirt (`onetwo-00`), and the passes are what Ofir remembers
+            then: [{ e: 'minigame', id: 'chore:story:onetwo-00' }],
           },
           {
             id: 'rest',

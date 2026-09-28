@@ -320,16 +320,8 @@ export const CONVERSATIONS_FRIENDS: Conversation[] = [
           {
             id: 'help',
             text: '(לעזור בהקמה — בלי חתימה ובלי שיוך.)',
-            then: [
-              { e: 'flag', flag: 'i:banner' },
-              { e: 'flagValue', flag: 'life:intl:banner', value: 'helped' },
-              { e: 'time', minutes: 30 },
-              { e: 'energy', delta: -5 },
-              { e: 'rel', who: 'lina', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'lina', axis: 'trust', delta: 3 },
-              { e: 'proof', kind: 'practical_help', proofId: 'practical_help:{chapter}:banner', subjectHe: 'ההקמה, בלי השם שלי', noteHe: 'עזר בידיים, ולא חתם.' },
-              { e: 'toast', text: 'לינה: "אפשר. נדע להודות על מה שבאמת עשית." — "זה כל מה שביקשתי."', tone: 'plain' },
-            ],
+            // pass C: the help is done with the hands (`banner-up-10`); the proof is paid by what was tied
+            then: [{ e: 'minigame', id: 'chore:story:banner-up-10' }],
           },
           {
             id: 'no',

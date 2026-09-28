@@ -79,7 +79,8 @@ export const PROMISE_2012 = 'life:promise:2012'
 export const PROMISE_2012_SAID = 'life:promise:2012:said'
 /** what the evening was — `there`, `sofa`, `elsewhere` (N01) */
 export const CUPS_2012 = 'life:cups2012'
-const HAS_PARTNER: Condition = { flag: 'life:partner' }
+/** the three partners 2011 can write — named, because `life:partner` is a value, not a raise (`life:deadends`) */
+const HAS_PARTNER: Condition = { any: ['melanie', 'dor', 'tamar'].map((value) => ({ flagIs: { flag: 'life:partner', value } })) }
 const NO_PARTNER: Condition = { notFlag: 'life:partner' }
 const PLAN = (value: string): Condition => ({ flagIs: { flag: 'n:plan', value } })
 const SAID = (value: string): Condition => ({ flagIs: { flag: PROMISE_2012_SAID, value } })
@@ -315,6 +316,8 @@ export const BEATS_FIVE: Beat[] = [
     delayMs: 1400,
     do: [{ a: 'flag', flag: 'n:toRoom' }, { a: 'card', titleHe: '2013', subHe: 'חדר החזרות', ms: 2200 }, { a: 'travel', to: 'rehearsal', spawn: 'start' }],
   },
+  /** U05 → N02 (pass C): Shachor, at the corner, on who has been closing the hall since the night of 2009 */
+  { id: 'n-key', at: 'allenby', trigger: 'clock', when: { all: [{ flag: 'n:five' }, { flag: 'life:2009:closed' }], none: [{ flag: 'n:key' }] }, delayMs: 1600, do: [{ a: 'talk', conversation: 'n-key' }] },
   /** L02 → N02: whoever was promised the hour on the night of the cup, on the phone weeks later */
   { id: 'n-echo', trigger: 'clock', when: { all: [{ flag: 'n:five' }, { flag: PROMISE_2012 }], none: [{ flag: 'n:echo' }] }, delayMs: 2400, do: [{ a: 'talk', conversation: 'n-echo' }] },
   { id: 'n-room', at: 'rehearsal', trigger: 'enter', when: { all: [{ flag: 'n:toRoom' }], none: [{ flag: 'n:room' }, { flag: 'n:credit' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'n-room' }] },
@@ -603,6 +606,17 @@ export const CONVERSATIONS_CUPS_2012: Conversation[] = [
       { when: { all: [KEPT_AS('renegotiated'), PLAN('there')] }, lines: [{ who: null, text: 'מהשריקה לשולחן — עשרים דקות, כמו שאמרת.' }], then: [{ e: 'flag', flag: 'n:done' }, { e: 'attend' }, { e: 'ending', id: 'there' }] },
       { when: { all: [KEPT_AS('renegotiated'), PLAN('sofa')] }, lines: [{ who: null, text: 'קובי נשאר מול המסך עם הטקס. אתה כבר היית בדרך.' }], then: [{ e: 'flag', flag: 'n:done' }, { e: 'ending', id: 'sofa' }] },
       { lines: [{ who: null, text: 'את הגמר שמעת ממישהו אחר. את הערב — לא.' }], then: [{ e: 'flag', flag: 'n:done' }, { e: 'ending', id: 'elsewhere' }] },
+    ],
+  },
+  /** 2012-five — Shachor, on the night of 2009 and who closes now (`life:2009:closed`) */
+  {
+    id: 'n-key',
+    nameHe: 'שחור',
+    branches: [
+      { when: { flagIs: { flag: 'life:2009:closed', value: 'delegated' } }, lines: [{ who: 'שחור', text: 'מאז שנתת לענבל את המפתח בלילה ההוא, היא סוגרת. אני ישן בלילות.' }], then: [{ e: 'flag', flag: 'n:key' }] },
+      { when: { flagIs: { flag: 'life:2009:closed', value: 'child' } }, lines: [{ who: 'שחור', text: 'הילד שחיכית איתו לאבא שלו — הוא בנוער עכשיו. שואל עליך.' }], then: [{ e: 'flag', flag: 'n:key' }] },
+      { when: { flagIs: { flag: 'life:2009:closed', value: 'chairs' } }, lines: [{ who: 'שחור', text: 'הכיסאות עדיין עומדים ליד הקיר כמו שהעמדת אותם. אף אחד לא העז לשנות.' }], then: [{ e: 'flag', flag: 'n:key' }] },
+      { lines: [{ who: 'שחור', text: 'אתה עדיין זה שסוגר? שלוש שנים? תן את המפתח למישהו לפני שהוא נהיה חלק מהיד.' }], then: [{ e: 'flag', flag: 'n:key' }] },
     ],
   },
   /** 2012-five — the one who was promised the hour, weeks later, on the phone (`life:promise:2012`) */

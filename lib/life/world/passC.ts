@@ -24,7 +24,8 @@ const is = (flag: string, value: string | number): Condition => ({ flagIs: { fla
 const all = (...conditions: Condition[]): Condition => ({ all: conditions })
 const any = (...conditions: Condition[]): Condition => ({ any: conditions })
 
-const HAS_PARTNER = f('life:partner')
+/** the three partners `l-close` can write (2011) — named, because the flag is a value, not a raise */
+const HAS_PARTNER = any(is('life:partner', 'melanie'), is('life:partner', 'dor'), is('life:partner', 'tamar'))
 const NO_PARTNER = no('life:partner')
 /** 2012-cups — the evening goes to whoever was promised the hour */
 const CUPS_GOING = any(f('n:go'), is('n:plan', 'elsewhere'))
@@ -63,7 +64,7 @@ export const PASS_C_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
   ],
   allenby: [
     // 2010-friends · I01 S2 — Roma: what is not done by hand is given to him, or refused out loud
-    { id: 'i-roma', era: '2010-friends', x: 0.672, y: 0.8, w: 0.04, act: 'i-roma', verb: 'talk', labelHe: 'רומא — מה אתה נותן לו', when: all(f('i:needs'), no('i:banner')), priority: 4 },
+    { id: 'i-roma', era: '2010-friends', x: 0.672, y: 0.8, w: 0.04, act: 'i-roma', verb: 'talk', labelHe: 'רומא — מה אתה נותן לו', when: all(f('i:needs'), no('i:banner'), any(no('i:need:bed'), no('i:need:tickets'), no('i:need:translate'))), priority: 4 },
     // 2002-desk · J01 S1 — three cards on the café table, each with where it comes from
     { id: 'j-phone', era: '2002-desk', x: 0.745, y: 0.8, w: 0.03, act: 'j-ev-phone', verb: 'take', labelHe: 'הטלפון של עמית — ההודעה מהיציע', when: all(f('j:brief'), no('j:ev:phone'), no('j:first')), priority: 4 },
     { id: 'j-notes', era: '2002-desk', x: 0.785, y: 0.8, w: 0.03, act: 'j-ev-notes', verb: 'take', labelHe: 'הפנקס שלך — מה ראית בשש בבוקר', when: all(f('j:brief'), no('j:ev:notes'), no('j:first')), priority: 4 },
