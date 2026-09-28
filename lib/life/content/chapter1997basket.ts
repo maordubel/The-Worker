@@ -265,18 +265,83 @@ export const CONVERSATIONS_HALL: Conversation[] = [
           { who: null, text: 'המחזור האחרון מגיע, והפועל בכלל לא משחקת. קבוצה אחת נעלמה מהליגה, והחיים שלכם תלויים עכשיו במשחק של מישהו אחר.' },
           { who: null, text: 'הידיעה מהרצליה מגיעה בלי כדור ביד ובלי פרקט מתחת לרגליים. הפעם זה סופי: הירידה הראשונה.' },
         ],
+        /**
+         * B7 S2 (implementation pass 27.9.2026) — *"לעזור לפרק / להישאר / להתווכח / לצאת"*,
+         * and the bible's founder seed: *"מי שנשאר אחרי הפסד מקבל יותר community proof ממי
+         * שמגיע רק לחגיגות."* Staying and carrying after the loss are proofs now, with the
+         * night as their subject; arguing is heat, and it is remembered too. `life:hall:1997`
+         * says which, and 1999 — the second relegation — reads it at the same corner.
+         */
         choices: [
-          { id: 'write', text: 'לבקש מלימור לרשום את התאריך.', then: [{ e: 'rel', who: 'crowd-limor', axis: 'sharedHistory', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'redheart', key: 'historyMemory', delta: 4 }, { e: 'goto', node: 'h1-after-chain' }] },
-          { id: 'carry', text: 'לעזור לשחור לסגור את הערב.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 4 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 5 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'goto', node: 'h1-after-chain' }] },
-          { id: 'home', text: 'ללכת לאבא. אין מה לפתור עכשיו.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'institution', key: 'ussishkinWound', delta: 7 }, { e: 'goto', node: 'h1-after-chain' }] },
+          { id: 'carry', text: 'לעזור לשחור לפרק ולסגור את הערב.', then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 4 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 5 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'energy', delta: -8 }, { e: 'flagValue', flag: 'life:hall:1997', value: 'carried' }, { e: 'proof', kind: 'community_help', proofId: 'community_help:{chapter}:relegation', subjectHe: 'הלילה שהאולם ירד', noteHe: 'פירק עם שחור את מה שנשאר, אחרי שכולם הלכו.' }, { e: 'goto', node: 'h1-after-chain' }] },
+          { id: 'stay', text: 'להישאר. לשבת על המדרגה עד שמכבים.', then: [{ e: 'redheart', key: 'basketballLove', delta: 3 }, { e: 'wellbeing', key: 'loneliness', delta: 3 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'flagValue', flag: 'life:hall:1997', value: 'stayed' }, { e: 'proof', kind: 'community_help', proofId: 'community_help:{chapter}:relegation', subjectHe: 'הלילה שהאולם ירד', noteHe: 'נשאר עד שכיבו את האור. מישהו צריך לראות איך זה נראה ריק.' }, { e: 'goto', node: 'h1-after-chain' }] },
+          { id: 'argue', text: 'להתווכח. "מי שמכר את האולם הזה—"', then: [{ e: 'institution', key: 'protestEscalation', delta: 6 }, { e: 'institution', key: 'basketballOwnershipTrust', delta: -6 }, { e: 'rel', who: 'freddy', axis: 'tension', delta: 3 }, { e: 'personality', key: 'impulsiveness', delta: 2 }, { e: 'flagValue', flag: 'life:hall:1997', value: 'argued' }, { e: 'toast', text: 'פרדי הקשיב עד הסוף. "צודק. ומחר בבוקר, מה אתה עושה עם זה?" לא היה לך מה לענות.', tone: 'plain' }, { e: 'goto', node: 'h1-after-chain' }] },
+          { id: 'write', text: 'לבקש מלימור לרשום את התאריך.', then: [{ e: 'rel', who: 'crowd-limor', axis: 'sharedHistory', delta: 4 }, { e: 'institution', key: 'ussishkinWound', delta: 8 }, { e: 'redheart', key: 'historyMemory', delta: 4 }, { e: 'flagValue', flag: 'life:hall:1997', value: 'wrote' }, { e: 'goto', node: 'h1-after-chain' }] },
+          { id: 'home', text: 'לצאת. ללכת לאבא. אין מה לפתור עכשיו.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 3 }, { e: 'institution', key: 'ussishkinWound', delta: 7 }, { e: 'flagValue', flag: 'life:hall:1997', value: 'left' }, { e: 'goto', node: 'h1-after-chain' }] },
         ],
       },
     ],
   },
+  /**
+   * B7 S3 — outside, a few people left. The corner is where Efi is, if he came tonight: walk
+   * home with him or alone. Nobody else is asked; a boy who heard it at gate seven walks
+   * home with his father, and that is already written (`h1-bloomfield`).
+   */
   {
     id: 'h1-after-chain',
     nameHe: null,
-    branches: [{ lines: [{ who: null, text: 'שנה עוברת. העלייה חזרה לא מוחקת את הדרך שבה ירדתם.' }], then: [{ e: 'flag', flag: 'h1:chain-complete' }] }],
+    branches: [
+      {
+        when: { flag: 'h1:efi-met', none: [{ flag: 'h1:football' }, { flag: 'h1:walked' }, { flagIs: { flag: 'life:hall:1997', value: 'left' } }] },
+        lines: [
+          { who: null, text: 'בחוץ נשארו ארבעה אנשים ופח אשפה מלא כוסות. אפי עומד מתחת לפנס עם הידיים בכיסים.' },
+          { who: 'אפי', text: 'אני הולך דרך אלנבי. אתה?' },
+        ],
+        choices: [
+          { id: 'efi', text: '"דרך אלנבי."', then: [{ e: 'flag', flag: 'h1:walked' }, { e: 'flagValue', flag: 'life:hall:walked', value: 'efi' }, { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 5 }, { e: 'rel', who: 'efi', axis: 'trust', delta: 2 }, { e: 'toast', text: 'עשרים דקות, ואף אחד מכם לא אמר את המילה "ירדנו". בפינה של בוגרשוב הוא אמר "נחזור". לא שאל.', tone: 'plain' }, { e: 'goto', node: 'h1-after-chain' }] },
+          { id: 'alone', text: '"אני לבד הערב."', then: [{ e: 'flag', flag: 'h1:walked' }, { e: 'flagValue', flag: 'life:hall:walked', value: 'alone' }, { e: 'wellbeing', key: 'loneliness', delta: 3 }, { e: 'rel', who: 'efi', axis: 'distance', delta: 1 }, { e: 'toast', text: 'הוא הנהן, כאילו גם הוא רצה את זה. הלכתם לשני כיוונים, ושניכם הסתכלתם אחורה פעם אחת.', tone: 'plain' }, { e: 'goto', node: 'h1-after-chain' }] },
+        ],
+      },
+      { lines: [{ who: null, text: 'שנה עוברת. העלייה חזרה לא מוחקת את הדרך שבה ירדתם.' }], then: [{ e: 'flag', flag: 'h1:chain-complete' }] },
+    ],
+  },
+  /**
+   * אפי, 1997 — B7 S1: *"למצוא מקום / אפי — dynamic presence"*. He is at the corner on the
+   * relegation night and his first sentence is what he remembers of the north: a boy who
+   * sat beside him the whole way home in May 1993 finds a place already kept.
+   */
+  {
+    id: 'efi-hall-97',
+    nameHe: 'אפי',
+    branches: [
+      {
+        when: { flag: 'h1:efi-met' },
+        lines: [{ who: 'אפי', text: 'המקום ליד המעקה. אל תאחר אליו.' }],
+      },
+      {
+        when: { flagIs: { flag: 'life:galil:seat', value: 'efi' } },
+        lines: [
+          { who: 'אפי', text: 'שמרתי לך מקום בפנים. ליד המעקה. כמו שישבת לידי באוטובוס מהצפון.' },
+          { who: null, text: 'הוא לא שואל איפה היית חצי שנה. הוא רואה את התיק של הצבא ומבין לבד.' },
+        ],
+        then: [{ e: 'flag', flag: 'h1:efi-met' }, { e: 'rel', who: 'efi', axis: 'bond', delta: 3 }, { e: 'flag', flag: 'h1:kept-spot' }],
+      },
+      {
+        when: { relationship: { who: 'efi', axis: 'distance', min: 8 } },
+        lines: [
+          { who: 'אפי', text: 'חייל. יופי. באת לאולם או שבאת לראות איך הוא נופל?' },
+          { who: null, text: 'הוא לא מחכה לתשובה. הוא נכנס בלי להחזיק לך את הדלת.' },
+        ],
+        then: [{ e: 'flag', flag: 'h1:efi-met' }],
+      },
+      {
+        lines: [
+          { who: 'אפי', text: 'באת. אני לא אשאל איך השגת חופשה. אל תספר לי.' },
+          { who: 'אפי', text: 'היום זה או שנשארים, או שזה מתחיל להיגמר. תעמוד לידי.' },
+        ],
+        then: [{ e: 'flag', flag: 'h1:efi-met' }, { e: 'rel', who: 'efi', axis: 'familiarity', delta: 2 }],
+      },
+    ],
   },
   {
     id: 'h1-bloomfield',

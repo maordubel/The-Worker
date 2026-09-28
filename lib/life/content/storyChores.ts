@@ -56,6 +56,67 @@ const RAFI_CRATE_85 = 100
 const D_DID_00 = 'd:did'
 
 export const STORY_CHORES: Record<string, StoryChore> = {
+  /**
+   * B5 S2 · אביב 1996 — the banner under the colonnade at gate seven, three words against the
+   * man on his wall (implementation pass 27.9.2026: *"להצטרף ליצור"*). The brush is the
+   * joining; how many of the letters are his is what the wall at home says back to him.
+   */
+  'banner-96': {
+    id: 'banner-96',
+    where: 'bloomfield-outside',
+    drop: { x: 0.24, y: 0.9 },
+    labelHe: 'הבד מתחת לעמודים',
+    shape: { mode: 'sweep', target: 10, seconds: 35, hintHe: 'עשר אותיות על הבד. לעבור על כל אחת עם המכחול, עד שהיא אדומה. כפתור — לקום.' },
+    returnSpawn: 'start',
+    finish: (done, target) => {
+      const painted = Math.max(0, Math.min(done, target))
+      const events: LifeEvent[] = [
+        { t: 'flag.raised', flag: 's3:g:done' },
+        { t: 'flag.set', flag: 'life:sinai:gate', value: 'painted' },
+        { t: 'energy.changed', delta: -8 },
+        { t: 'clock.advanced', minutes: 10 + painted },
+        { t: 'institution.changed', key: 'protestEscalation', delta: 2 + Math.round((6 * painted) / target) },
+      ]
+      if (painted >= target) events.push({ t: 'redheart.changed', key: 'terraceCulture', delta: 2 })
+      return events
+    },
+    toastHe: (done, target) =>
+      done >= target ? 'עשר אותיות, בכתב שלך. בחצי השני הן יהיו על הגדר, מול הספסל שלו.' : done > 0 ? `${done} אותיות שלך. את השאר גמר הבחור מהדלת, עקום.` : 'הנחת את המכחול. הבחור מהדלת לא אמר כלום, ולקח אותו.',
+  },
+  /**
+   * B2 · 11.3.1991 — "ילד. שני ארגזים, מהאוטו לדלת." (שחור). Until the implementation pass
+   * of 27.9.2026 this was a sentence and a toast; the brief's hall job is the hands: two
+   * crates from the car at the corner to the hall door, one at a time, twenty minutes of an
+   * evening that also has a spot to hold. Half of it counts — Shachor carries the other one.
+   */
+  'crates-91': {
+    id: 'crates-91',
+    where: 'ussishkin-outside',
+    drop: { x: 0.39, y: 0.86 },
+    labelHe: 'הארגזים של שחור',
+    shape: { mode: 'carry', art: 'propCrate', target: 2, seconds: 30, hintHe: 'ארגז אחד כל פעם, מהאוטו לדלת של האולם. כפתור — להניח.' },
+    returnSpawn: 'start',
+    finish: (done, target) => {
+      const carried = Math.max(0, Math.min(done, target))
+      const events: LifeEvent[] = [
+        { t: 'flag.raised', flag: 'helped:crates-1991' },
+        { t: 'energy.changed', delta: -4 * Math.max(1, carried) },
+        { t: 'clock.advanced', minutes: 8 + 6 * carried },
+      ]
+      if (carried > 0) {
+        events.push(
+          { t: 'relationship.changed', who: 'shachor', axis: 'bond', delta: 2 + 2 * carried },
+          { t: 'redheart.changed', key: 'community', delta: 2 * carried },
+          {
+            t: 'relationship.memory_added',
+            memory: { characterId: 'shachor', eventId: 'carried-crates-1991', significance: carried >= target ? 'major' : 'notable', year: 1991, atMinute: 18 * 60 + 40 },
+          },
+        )
+      }
+      return events
+    },
+    toastHe: (done, target) => (done >= target ? 'שני ארגזים. הכתפיים כואבות. הוא אמר "יאללה" וזה היה תודה.' : done > 0 ? 'ארגז אחד. את השני שחור הרים לבד, ולא אמר כלום על זה.' : 'שחור הרים את שניהם לבד. לא הסתכל אחורה.'),
+  },
   /** B11b · a double shift at Rafi's counter — "הגמר עולה כסף", paid by the customer served */
   'shift-00': {
     id: 'shift-00',

@@ -248,6 +248,19 @@ export const CONVERSATIONS_1990: Conversation[] = [
         ],
         then: [{ e: 'flag', flag: 'walked:home' }, { e: 'keep' }, { e: 'ending', id: 'late' }],
       },
+      /**
+       * הטלפון מתחת ליציע (B1 S4, 27.9.2026) — a boy who called home before the radio did
+       * does not get asked "נו?". She already knows, and she knows who told her first.
+       */
+      {
+        when: { flag: 'found:kobi', flagIs: { flag: 'life:1990:called', value: 'first' }, none: [{ flag: 'entry:late' }] },
+        lines: [
+          { who: 'רחל', text: 'אני יודעת. אתה אמרת לי.' },
+          { who: null, text: 'היא לא אומרת "נו". היא מסתכלת על קובי, ואחר כך עליך, כמו שמסתכלים על מי שהביא את החדשות הביתה.' },
+          { who: 'רחל', text: 'הרדיו אמר את זה עשר דקות אחריך. נעליים בחוץ.' },
+        ],
+        then: [{ e: 'rel', who: 'rachel', axis: 'trust', delta: 3 }, { e: 'flag', flag: 'walked:home' }, { e: 'keep' }, { e: 'ending', id: 'home' }],
+      },
       {
         when: { flag: 'found:kobi' },
         lines: [
@@ -443,6 +456,8 @@ export const CONVERSATIONS_1990: Conversation[] = [
         then: [
           { e: 'wellbeing', key: 'happiness', delta: 4 },
           { e: 'bond', who: 'amit', delta: 2 },
+          // a scrap for the note at half-time (`content/noteBoards.ts`)
+          { e: 'flag', flag: 'net:src:amit' },
         ],
         /**
          * *"שמעת ממי?"* — אופיר שואל את זה, ואף אחד לא עונה. הבחירה הזאת היא מי שכן.
@@ -481,6 +496,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
           { who: 'רפי מהקיוסק', text: 'קנית עיתון — תקרא עיתון. הטבלה לא זזה מזה שמסתכלים עליה.' },
           { who: 'רפי מהקיוסק', text: 'ואם אתה שואל אותי — יבנה משחקת בבית שלה. ובבית, במחזור אחרון, אף אחד לא מפסיד. תרשום.' },
         ],
+        then: [{ e: 'flag', flag: 'net:src:rafi' }],
       },
       {
         when: { minAgorot: 300 },
@@ -900,6 +916,134 @@ export const CONVERSATIONS_1990: Conversation[] = [
           { who: null, text: 'אתה סופר אותו פעמיים. יותר אנשים מכרטיסים.' },
         ],
         then: [{ e: 'flag', flag: 'uc:lanes' }, { e: 'time', minutes: 5 }],
+      },
+    ],
+  },
+  /**
+   * ================================================= הפתק · מחצית (B1 S3, 27.9.2026) ===
+   *
+   * `TransistorNet.halftime()` opens this once. The note itself is a board over the paused
+   * ground (`content/noteBoards.ts`, `notebook-1990`): the scraps are only what this boy
+   * actually heard today, and the columns are about how he knows, not whether it is true.
+   * Not writing is an answer too — the half ends and the numbers stay in his head.
+   */
+  {
+    id: 'net-half-1990',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'מחצית. מסביבך כולם מחשבים בקול, ואף אחד לא מסכים עם אף אחד.' },
+          { who: null, text: 'בכיס — השוליים של העיתון מהבוקר, וחצי עיפרון.' },
+        ],
+        choices: [
+          { id: 'write', text: 'לכתוב. מה אני יודע, ומאיפה.', when: { notFlag: 'net:noted' }, then: [{ e: 'minigame', id: 'board:notebook-1990' }] },
+          { id: 'watch', text: 'לא. להסתכל על היציע.', then: [{ e: 'flag', flag: 'net:noted' }, { e: 'toast', text: 'היציע מחשב בשבילך. בקולות שונים, בתוצאות שונות.', tone: 'plain' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'net-note-kobi-1990',
+    nameHe: 'קובי',
+    branches: [
+      {
+        when: { flagIs: { flag: 'life:1990:notebook', value: 'clean' } },
+        lines: [
+          { who: null, text: 'אבא קורא את הפתק מעל הכתף שלך, הפוך, בלי לבקש.' },
+          { who: 'קובי', text: 'מי לימד אותך לכתוב ככה?' },
+          { who: 'פוגי', text: 'אתה. "תלך, תשמע, ותחזור להגיד לי."' },
+          { who: null, text: 'הוא מקפל את הפתק לארבע ושם בכיס החולצה. ואז מושיט לך את הטרנזיסטור.' },
+          { who: 'קובי', text: 'חצי שני — אתה על האוזן. אני על הדשא.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'net:handed' },
+          { e: 'rel', who: 'kobi', axis: 'trust', delta: 5 },
+          { e: 'rel', who: 'kobi', axis: 'familiarity', delta: 2 },
+          { e: 'remember', who: 'kobi', eventId: 'the-note-1990', significance: 'notable' },
+          { e: 'toast', text: 'הטרנזיסטור אצלך. מה שהוא שומע — אתה שומע ראשון.', tone: 'red' },
+        ],
+      },
+      {
+        when: { flagIs: { flag: 'life:1990:notebook', value: 'mostly' } },
+        lines: [
+          { who: null, text: 'אבא מסתכל על הפתק, ושם אצבע על שורה אחת.' },
+          { who: 'קובי', text: 'את זה לא שמעת בעצמך. את זה אמרו לך.' },
+          { who: null, text: 'הוא לא מוחק. הוא רק משאיר את האצבע שם עוד שנייה, כדי שתזכור איזו שורה.' },
+        ],
+        then: [{ e: 'rel', who: 'kobi', axis: 'familiarity', delta: 2 }, { e: 'personality', key: 'curiosity', delta: 1 }],
+      },
+      {
+        when: { flagIs: { flag: 'life:1990:notebook', value: 'mixed' } },
+        lines: [
+          { who: 'קובי', text: 'הכול פה נכון?' },
+          { who: 'פוגי', text: '…כן?' },
+          { who: 'קובי', text: 'אז בשביל מה אני סוחב רדיו.' },
+        ],
+        then: [{ e: 'rel', who: 'kobi', axis: 'tension', delta: 1 }],
+      },
+      {
+        lines: [
+          { who: 'קובי', text: 'תגמור את זה בבית. עכשיו תסתכל על הדשא.' },
+        ],
+      },
+    ],
+  },
+  /**
+   * ================================== הטלפון מתחת ליציע · אחרי השריקה (B1 S4) ===
+   *
+   * The crowd understands before or after him according to where he got his news. The one
+   * thing a twelve-year-old can do with being first is tell somebody: an asimon, a payphone
+   * on a concrete pillar, and his mother in a kitchen with the other radio station on. Being
+   * FIRST is only possible for a boy whose note was honest and whose radio was at his ear;
+   * everybody else is told by his mother what the radio already said.
+   */
+  {
+    id: 'uc-phone-1990',
+    nameHe: 'רחל',
+    remote: { 'רחל': 'phone' },
+    branches: [
+      {
+        when: { flag: 'life:1990:called' },
+        lines: [{ who: null, text: 'השפופרת עוד חמה. כבר התקשרת.' }],
+      },
+      {
+        when: { minAgorot: 100, any: [{ flagIs: { flag: 'life:1990:notebook', value: 'clean' } }, { flag: 'net:handed' }, { flag: 'net:toldKobi' }] },
+        lines: [
+          { who: null, text: 'אסימון, חריץ, צליל. מסביב אנשים רצים לדשא, ואתה עומד עם הגב אליהם ומחכה שיענו.' },
+          { who: 'רחל', text: 'הלו?' },
+          { who: 'פוגי', text: 'אמא. עלינו.' },
+          { who: 'רחל', text: 'ברדיו עוד לא אמרו כלום.' },
+          { who: 'פוגי', text: 'יגידו. בדקתי.' },
+          { who: null, text: 'שקט בקו. ואז, מהמטבח, הקול של השדר — עולה, אומר את זה, בדיוק מה שאמרת.' },
+          { who: 'רחל', text: '…טוב. תביא את אבא הביתה.' },
+        ],
+        then: [
+          { e: 'money', agorot: -100, why: 'אסימון' },
+          { e: 'flagValue', flag: 'life:1990:called', value: 'first' },
+          { e: 'rel', who: 'rachel', axis: 'trust', delta: 4 },
+          { e: 'skill', skill: 'communication', delta: 2, why: 'הביא ידיעה הביתה, ראשון, ובדוקה' },
+          { e: 'time', minutes: 8 },
+          { e: 'toast', text: 'הפעם הראשונה שסיפרת למישהו משהו לפני הרדיו.', tone: 'red' },
+        ],
+      },
+      {
+        when: { minAgorot: 100 },
+        lines: [
+          { who: null, text: 'אסימון, חריץ, צליל. מסביב אנשים רצים לדשא.' },
+          { who: 'רחל', text: 'הלו? — אני יודעת, אני יודעת. הרדיו אמר כבר לפני רבע שעה. אבא איתך?' },
+          { who: 'פוגי', text: 'עוד לא מצאתי אותו.' },
+          { who: 'רחל', text: 'אז תמצא. ותחזרו ביחד.' },
+        ],
+        then: [
+          { e: 'money', agorot: -100, why: 'אסימון' },
+          { e: 'flagValue', flag: 'life:1990:called', value: 'second' },
+          { e: 'time', minutes: 6 },
+          { e: 'toast', text: 'הרדיו היה מהיר ממך. בפעם הבאה.', tone: 'plain' },
+        ],
+      },
+      {
+        lines: [{ who: null, text: 'אין לך אסימון, ואין לך שקל לקנות אחד. הטלפון מאחורי העמוד מחכה למישהו אחר.' }],
       },
     ],
   },

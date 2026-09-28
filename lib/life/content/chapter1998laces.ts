@@ -427,8 +427,18 @@ export const CONVERSATIONS_LACES: Conversation[] = [
     nameHe: 'סוקו',
     branches: [
       {
-        lines: [{ who: 'סוקו', text: 'מה אנחנו יודעים. מה שמענו. מה אנחנו ממציאים. שלוש רשימות. אני עושה את הראשונה.' }, { who: null, text: 'הוא מרים עיתון מקומט מהמדרכה, מיישר אותו על הברך, ומרים עוד אחד.' }],
+        lines: [
+          { who: 'סוקו', text: 'מה אנחנו יודעים. מה שמענו. מה אנחנו ממציאים. שלוש רשימות. אני עושה את הראשונה.' },
+          { who: null, text: 'הוא מרים עיתון מקומט מהמדרכה, מיישר אותו על הברך, ומרים עוד אחד.' },
+        ],
+        /**
+         * (implementation pass 27.9.2026, B8 S3) the three lists are a thing he can DO, not
+         * only a thing Soko says: the scraps of the terrace, each with the name of whoever
+         * said it, onto three pages on the concrete step (`board:lists-1998`). Where the two
+         * accusations land is what the Monday — and 2000 — will hand back to him.
+         */
         choices: [
+          { id: 'lists', text: 'לשבת איתו על שלוש הרשימות.', when: { notFlag: 'l1:lists' }, then: [{ e: 'minigame', id: 'board:lists-1998' }] },
           { id: 'soko', text: 'ללכת עם סוקו. לאסוף עיתונים.', then: [{ e: 'minigame', id: 'chore:story:papers-98' }] },
           { id: 'not-yet', text: 'לא עכשיו.', then: [] },
         ],
@@ -507,6 +517,13 @@ export const CONVERSATIONS_LACES: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { lacesIs: 'protector' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. את זה למדת ביום ראשון, בכיתה, בלי אף אחד מהמדרגות.' }], then: [{ e: 'ending', id: 'protector' }] },
+      /**
+       * (B8 S4) the Red Box note, in his own wording — where he put the accusations on
+       * Soko's step is how he writes the day down for himself
+       */
+      { when: { lacesIs: 'organizer', flagIs: { flag: 'life:laces:lists', value: 'strict' } }, lines: [{ who: null, text: 'בערב כתבת פתק לקופסה האדומה, בשני טורים: מה ראיתי. מה אמרו. מילה אחת בכל טור לא עברה לטור השני, גם כשרצית.' }], then: [{ e: 'ending', id: 'organizer' }] },
+      { when: { lacesIs: 'organizer', flagIs: { flag: 'life:laces:lists', value: 'certain' } }, lines: [{ who: null, text: 'בערב כתבת פתק לקופסה האדומה, בשורה אחת, בכתב חזק: "סידרו את זה." לא כתבת מאיפה אתה יודע. באותו לילה זה לא נראה חשוב.' }], then: [{ e: 'ending', id: 'organizer' }] },
+      { when: { lacesIs: 'organizer', flagIs: { flag: 'life:laces:lists', value: 'torn' } }, lines: [{ who: null, text: 'בערב כתבת פתק לקופסה האדומה ומחקת אותו פעמיים. מה שנשאר: "לא יודע. שמעתי. לא יודע."' }], then: [{ e: 'ending', id: 'organizer' }] },
       { when: { lacesIs: 'organizer' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. סוקו היה אומר: תרשום גם את זה. רשמת.' }], then: [{ e: 'ending', id: 'organizer' }] },
       { when: { lacesIs: 'avenger' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. את זה למדת ביום ראשון, אחרי שכבר קמת פעם אחת.' }], then: [{ e: 'ending', id: 'avenger' }] },
       { when: { lacesIs: 'withdrawn' }, lines: [{ who: null, text: 'משחק אחד שינה איך שאתה שומע מילה. את זה למדת ביום ראשון, אחרי לילה שלם של שקט בסלון.' }], then: [{ e: 'ending', id: 'withdrawn' }] },

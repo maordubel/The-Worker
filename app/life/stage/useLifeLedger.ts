@@ -12,6 +12,8 @@ import { onSale, ownedShirts, SHIRT_FIRST_HE, SHIRT_MORE_HE, type Shirt } from '
 import { stickerFlag, tornFlag } from '@/lib/life/stickers'
 import { alreadySettled, settleActivity, type MechanicRequest, type Settlement } from '@/lib/life/activities'
 import { COIN_WHY_HE, HOOPS_WHY_HE, PENALTY_WHY_HE } from '@/lib/life/toto'
+import { NOTE_BOARDS } from '@/lib/life/content/noteBoards'
+import { settleWith } from '@/lib/life/noteBoards'
 import type { ActivityResult } from '@/lib/mechanics/types'
 import type { LifeState } from '@/lib/life/types'
 
@@ -49,6 +51,27 @@ export function useLifeLedger({
   engineRef: MutableRefObject<Awaited<ReturnType<typeof loadLife>> | null>
 }) {
   return {
+    /**
+     * הפתק, מקופל — what the note says, asked BEFORE anything is written (the sheet prints it
+     * on the folded note), and then the same placements settled into the life. Two calls on
+     * the same paused state give the same sentence and the same events.
+     */
+    previewBoard(id: string, placed: Record<string, string>): string {
+      const engine = engineRef.current
+      const def = NOTE_BOARDS[id]
+      if (!engine || !def) return ''
+      return settleWith(def, placed, engine.state).verdictHe
+    },
+    settleBoard(id: string, placed: Record<string, string>): string | null {
+      const engine = engineRef.current
+      const def = NOTE_BOARDS[id]
+      if (!engine || !def) return null
+      const outcome = settleWith(def, placed, engine.state)
+      engine.dispatch(...outcome.events)
+      void engine.save()
+      return outcome.after ?? null
+    },
+
     /** the booklet remembers the page it was put down on, in the save and not in the browser */
     writeBookPage(id: string, page: number) {
       const engine = engineRef.current

@@ -113,6 +113,8 @@ export function useLifeRuntime({
   const [retry, setRetry] = useState<LifeBusEvents['retry']>(null)
   const [match, setMatch] = useState<LifeBusEvents['match']>(null)
   const [doc, setDoc] = useState<LifeBusEvents['doc']>(null)
+  /** הפתק — the note he sorts what he has heard on (`lib/life/noteBoards.ts`) */
+  const [board, setBoard] = useState<LifeBusEvents['board']>(null)
   const [box, setBox] = useState(false)
   const [book, setBook] = useState<LifeBusEvents['book']>(null)
   const [cutscene, setCutscene] = useState<LifeBusEvents['cutscene']>(null)
@@ -398,6 +400,11 @@ export function useLifeRuntime({
         setCoin(value)
         runtime.current?.pause(Boolean(value))
       }),
+      bus.on('board', (value) => {
+        setBoard(value)
+        runtime.current?.pause(Boolean(value))
+        if (value) sfx.play('box-item', { bus: 'ui', level: 0.5 })
+      }),
       bus.on('penalty', (value) => {
         setPenalty(value)
         runtime.current?.pause(Boolean(value))
@@ -623,6 +630,8 @@ export function useLifeRuntime({
     match,
     doc,
     setDoc,
+    board,
+    setBoard,
     box,
     setBox,
     book,

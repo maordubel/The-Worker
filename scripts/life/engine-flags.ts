@@ -43,6 +43,8 @@ export function raisedInSource(root = process.cwd()): Set<string> {
     }
     for (const source of sources) {
       for (const m of source.matchAll(/flag\.raised',\s*flag:\s*'([^']+)'/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])
+      // a VALUE written by a played board or a chore (`t: 'flag.set'`) is a write as much as a raise
+      for (const m of source.matchAll(/flag\.set',\s*flag:\s*'([^']+)'/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])
       for (const m of source.matchAll(/t:\s*'flag\.raised',\s*flag:\s*`([^`$]+)`/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])
       for (const m of source.matchAll(/raise\('([^']+)'\)/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])
       for (const m of source.matchAll(/e:\s*'flag',\s*flag:\s*'([^']+)'/g)) if (m[1]) RAISED_IN_SOURCE.add(m[1])

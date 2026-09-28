@@ -958,15 +958,8 @@ export const CONVERSATIONS_1991: Conversation[] = [
           {
             id: 'help',
             text: 'לסחוב.',
-            then: [
-              { e: 'flag', flag: 'helped:crates-1991' },
-              { e: 'rel', who: 'shachor', axis: 'bond', delta: 5 },
-              { e: 'remember', who: 'shachor', eventId: 'carried-crates-1991', significance: 'major' },
-              { e: 'redheart', key: 'community', delta: 4 },
-              { e: 'energy', delta: -8 },
-              { e: 'time', minutes: 20 },
-              { e: 'toast', text: 'עשרים דקות. הכתפיים כואבות. הוא אמר "יאללה" וזה היה תודה.', tone: 'plain' },
-            ],
+            // (implementation pass 27.9.2026, B2 S3) carried, not said: `chore:story:crates-91`
+            then: [{ e: 'minigame', id: 'chore:story:crates-91' }],
           },
           {
             id: 'later',

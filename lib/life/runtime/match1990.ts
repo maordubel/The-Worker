@@ -277,6 +277,13 @@ export class TransistorNet {
     if (this.halfSaid) return
     this.halfSaid = true
     this.ctx.bus.emit('toast', { text: 'מחצית. כולם מחשבים. אף אחד לא מסכים.', tone: 'plain' })
+    /**
+     * הפתק (implementation pass 27.9.2026, B1 S3). Half-time is the fifteen minutes the
+     * terrace does arithmetic, and the boy has a pencil and the margin of a newspaper. The
+     * box offers the note; the note itself is `board:notebook-1990` over the paused ground,
+     * and whatever is on it is read by Kobi, by the whistle and by a phone after it.
+     */
+    if (!this.ctx.engine.state.flags['net:noted']) this.ctx.dialogue.start('net-half-1990')
   }
 
   private dropRadio() {
@@ -343,7 +350,8 @@ export class TransistorNet {
 
     if (id === 'net:kobi') {
       const lost = Boolean(state.flags['radio:lost'])
-      const held = Boolean(state.flags['radio:saved'])
+      // a rescued transistor — or one handed over because the boy's note was clean — is at the ear
+      const held = Boolean(state.flags['radio:saved']) || Boolean(state.flags['net:handed'])
       const mine = this.yavneOn('radio')
       const fresh = this.known.from === 'radio' && this.known.yavneAt > this.director.playedMinute() - 4 && this.known.yavne !== this.yavneOn('kobi').margin
       if (fresh && !state.flags['net:toldKobi']) {
@@ -389,6 +397,7 @@ export class TransistorNet {
     }
     if (id === 'net:brain') {
       // he is repeating the slow radio and does not know it — `repeats: 'radio'` in the preset
+      if (!state.flags['net:src:brain']) this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'net:src:brain' })
       const heard = this.yavneOn('brain')
       const up = this.goals > heard.margin
       this.say([
@@ -438,7 +447,7 @@ export class TransistorNet {
     if (!this.ctx.engine.state.flags['net:heard']) {
       this.ctx.engine.dispatch({ t: 'flag.raised', flag: 'net:heard' })
     }
-    this.ctx.engine.dispatch({ t: 'flag.set', flag: 'net:known', value: heard.lineHe })
+    this.ctx.engine.dispatch({ t: 'flag.set', flag: 'net:known', value: heard.lineHe }, { t: 'flag.set', flag: 'net:known:from', value: from })
   }
 
   private say(lines: Say[]) {

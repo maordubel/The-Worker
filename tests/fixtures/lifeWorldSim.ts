@@ -26,6 +26,8 @@ import { DialogueRunner } from '@/lib/life/runtime/dialogue'
 import type { LocationId } from '@/lib/life/types'
 import { SCENE, inEra, exitInEra, needsFor, sceneIn, whenFor } from '@/lib/life/world/scenes'
 import { meets } from '@/lib/life/world/types'
+import { NOTE_BOARDS } from '@/lib/life/content/noteBoards'
+import { BOARD_PREFIX, resolveCards, settleWith, type NoteBoardDef } from '@/lib/life/noteBoards'
 
 export type Thing =
   | { kind: 'actor'; id: string; act: string; label: string; x: number }
@@ -123,6 +125,9 @@ export class WorldSim {
   }
 
   readonly minigames: string[] = []
+  /** where the sim puts each scrap of a board — a test may replace it (the default is honest) */
+  boardPlacement: (def: NoteBoardDef) => Record<string, string> = (def) =>
+    Object.fromEntries(resolveCards(def, this.engine.state).map((card) => [card.id, card.fits ?? def.columns[0]!.id]))
   private pendingMinigame: string | null = null
   /**
    * what a played interaction does when the sim reaches it — a chore, a ride. The default
@@ -247,6 +252,18 @@ export class WorldSim {
         this.streak = 0
         this.verbs.add(this.verbOf(id))
         this.trace.push(`play:${id}`)
+        // הפתק — a board is a sheet over the room, not a scene: the sim sorts every scrap into
+        // its honest column (or the first one) and folds it, exactly as the shell settles it
+        if (id.startsWith(BOARD_PREFIX)) {
+          const def = NOTE_BOARDS[id.slice(BOARD_PREFIX.length)]
+          if (def) {
+            const placed = this.boardPlacement(def)
+            const outcome = settleWith(def, placed, this.engine.state)
+            this.engine.dispatch(...outcome.events)
+            if (outcome.after) this.converse(outcome.after, this.beatAnswer)
+          }
+          continue
+        }
         this.onMinigame(id, this)
         continue
       }

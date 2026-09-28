@@ -37,6 +37,7 @@ export const PORTRAIT_SINAI: Record<string, string> = {
   'בארי': 'faceBarry',
   'פרדי': 'faceFreddy',
   'אוהד צעיר': 'faceYoung',
+  'אוהד ותיק': 'faceSupporterB',
   'אוהד': 'faceSupporter',
   'סדרן': 'faceUsher',
   // שני הקבועים של אלנבי — שני השחקנים האלה מתויגים `era: '*'` ב-`scenes.ts`, כלומר הם
@@ -47,7 +48,11 @@ export const PORTRAIT_SINAI: Record<string, string> = {
 
 export function objectiveSinai(state: LifeState): string | null {
   if (state.chapterDone) return null
-  if (state.flags[S3]) return null
+  if (state.flags[S3]) {
+    if (state.flags['s3:wall']) return null
+    if (state.flags['s3:g:left']) return 'הביתה. הקיר.'
+    return 'שער 7. הבד, האיש בחולצה הישנה, והסדרן.'
+  }
   if (state.flags['s2:done']) return 'החדר. הקיר. הנעץ.'
   if (state.flags[S2]) return 'הקיוסק. העיתון של עמית, פרדי, והבחור בדלת.'
   if (state.flags['s1:argued']) return 'הביתה. הפוסטר על הקיר.'
@@ -213,16 +218,80 @@ export const BEATS_SINAI: Beat[] = [
     trigger: 'clock',
     when: { flag: S2, all: [{ flag: 's2:done' }, { flag: S2_POSTER }], none: [{ flag: S3 }] },
     delayMs: 800,
+    /**
+     * (implementation pass 27.9.2026, B5 S2–S3) the spring of 1996 does not begin in the
+     * bedroom any more. It begins at gate seven on a Saturday, where the argument of the
+     * kiosk has become a banner on the concrete, a man in an old number-seven shirt, and a
+     * steward looking at his watch — *"action, not opinion poll"*. The wall is where it ends.
+     */
     do: [
-      { a: 'events', events: DAY(S3, 1996, 6, at(22, 10), 'אביב 1996') },
-      { a: 'talk', conversation: 's3-room' },
+      { a: 'events', events: DAY(S3, 1996, 6, at(16, 20), 'אביב 1996') },
+      { a: 'card', titleHe: 'אביב 1996', subHe: 'שער 7 · עוד עונה', ms: 2600 },
+      { a: 'travel', to: 'bloomfield-outside', spawn: 'fromRoute' },
     ],
+  },
+  {
+    id: 's3-gate',
+    at: 'bloomfield-outside',
+    trigger: 'enter',
+    when: { flag: S3, none: [{ flag: 's3:g:seen' }, { flag: 's3:g:left' }] },
+    delayMs: 700,
+    do: [
+      { a: 'flag', flag: 's3:g:seen' },
+      {
+        a: 'lines',
+        lines: [
+          { who: null, text: 'שבת. שער 7, ארבע וחצי. מתחת לעמודים פורשים בד לבן על הבטון, והבחור מהדלת של הקיוסק מחזיק מכחול.' },
+          { who: null, text: 'ליד הדלת האדומה, איש מבוגר בכובע קסקט. מתחת לסוודר — חולצה אדומה ישנה, והשבע מציץ מהגב. שניים צעירים ממנו אומרים לו משהו, ומחכים לראות מה הוא יעשה.' },
+        ],
+      },
+      { a: 'toast', text: 'הבד על הבטון. האיש בחולצה הישנה. והסדרן, שמסתכל בשעון.', tone: 'plain' },
+    ],
+  },
+  /** S3 — the world proves the conflict: gate seven is pulled shut, whatever he did */
+  {
+    id: 's3-shut',
+    at: 'bloomfield-outside',
+    trigger: 'clock',
+    when: { flag: S3, any: [{ flag: 's3:g:done' }, { afterMinute: at(17, 10) }], none: [{ flag: 's3:g:left' }] },
+    delayMs: 900,
+    do: [{ a: 'talk', conversation: 's3-shut-96' }],
+  },
+  /** a boy who walked away from the gate before it shut still ends the day in his room */
+  {
+    id: 's3-home-late',
+    trigger: 'clock',
+    when: { flag: S3, afterMinute: at(19, 30), none: [{ flag: 's3:wall' }] },
+    do: [{ a: 'flag', flag: 's3:g:left' }, { a: 'card', titleHe: 'בערב', subHe: 'החדר', ms: 2000 }, { a: 'travel', to: 'bedroom', spawn: 'start' }],
+  },
+  /** home, the same evening: the wall hears about the gate first (S4) */
+  {
+    id: 's3-home',
+    at: 'bedroom',
+    trigger: 'enter',
+    when: { flag: S3, none: [{ flag: 's3:wall' }] },
+    delayMs: 800,
+    do: [{ a: 'flag', flag: 's3:wall' }, { a: 'talk', conversation: 's3-wall-96' }],
   },
 
 ]
 
 /** the three answers to the court — the same words whichever way the court came to sit */
 const S2_COURT: ChoiceDef[] = [
+  /**
+   * (implementation pass 27.9.2026, B5 S2) before answering, the claims are sorted by hand —
+   * the table, the lawyer's theory, the stranger's anger, his father's minute — into what is
+   * a fact, what is a claim and what is a feeling (`board:court-1995`). The court sits again
+   * afterwards with one more answer on it for a boy who kept the three apart.
+   */
+  { id: 'sort', text: 'רגע. לסדר לעצמי מה מזה עובדה.', when: { notFlag: 's2:sorted' }, then: [{ e: 'minigame', id: 'board:court-1995' }] },
+  {
+    id: 'both',
+    text: '"את השחקן אני אוהב. על המינוי — אולי פרדי צודק."',
+    when: { flagIs: { flag: 'life:sinai:ledger', value: 'clean' } },
+    hidden: true,
+    then: [{ e: 'sinai', stance: 'doubting' }, { e: 'rel', who: 'freddy', axis: 'trust', delta: 5 }, { e: 'rel', who: 'ofir', axis: 'familiarity', delta: 2 }, { e: 'institution', key: 'legalUnderstanding', delta: 3 }, { e: 'goto', node: 's2-verdict' }],
+  },
   { id: 'cut', text: 'לקטוע את פרדי: "מה השורה התחתונה?"', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 3 }, { e: 'rel', who: 'freddy', axis: 'familiarity', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
   { id: 'listen', text: 'לתת לו לסיים.', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 6 }, { e: 'personality', key: 'curiosity', delta: 2 }, { e: 'time', minutes: 20 }, { e: 'goto', node: 's2-verdict' }] },
   { id: 'defend', text: '"תנו לו עוד עונה. מגיע לו."', then: [{ e: 'sinai', stance: 'defending' }, { e: 'rel', who: 'ofir', axis: 'tension', delta: 5 }, { e: 'rel', who: 'amit', axis: 'tension', delta: 3 }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'redheart', key: 'loyaltyReturn', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
@@ -433,6 +502,138 @@ export const CONVERSATIONS_SINAI: Conversation[] = [
           { id: 'tear', text: 'מוריד.', then: [{ e: 'flag', flag: 'life:poster:gone' }, { e: 'personality', key: 'impulsiveness', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 5 }, { e: 'flag', flag: 's2:done' }, { e: 'flag', flag: S2_POSTER }] },
         ],
       },
+    ],
+  },
+  /**
+   * ============================================= שער 7, אביב 1996 (B5 S2–S4, 27.9.2026) ===
+   * Three things to do with the hands, and none of them is a sentence about him. What the
+   * boy did is `life:sinai:gate` (painted / defended / watched), and it outlives the year.
+   */
+  {
+    id: 's3-banner-96',
+    nameHe: 'אוהד צעיר',
+    branches: [
+      { when: { flag: 's3:g:done' }, lines: [{ who: 'אוהד צעיר', text: 'עוד מעט תולים. תראה מהצד השני.' }] },
+      {
+        lines: [
+          { who: 'אוהד צעיר', text: 'אתה. מהקיוסק. שלוש מילים — "המאמן, הביתה." לא על השחקן. על המאמן.' },
+          { who: null, text: 'הוא מושיט לך מכחול, ולא מסתכל אם לקחת. יש לו עוד שלושה.' },
+        ],
+        choices: [
+          { id: 'paint', text: 'לקחת את המכחול. לרדת על הברכיים.', then: [{ e: 'minigame', id: 'chore:story:banner-96' }] },
+          { id: 'no', text: '"לא את זה. לא אני."', then: [{ e: 'personality', key: 'stubbornness', delta: 1 }, { e: 'toast', text: '"בסדר. תסתכל איך אחרים עושים את זה."', tone: 'plain' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 's3-seven-96',
+    nameHe: 'אוהד ותיק',
+    branches: [
+      { when: { flagIs: { flag: 'life:sinai:gate', value: 'defended' } }, lines: [{ who: 'אוהד ותיק', text: 'תודה, ילד. לך תשב. אני בסדר.' }] },
+      {
+        lines: [
+          { who: null, text: '"תוריד את החולצה, זקן. הוא הורס לנו את העונה." — "שבע של מי, של המאמן?"' },
+          { who: null, text: 'האיש לא עונה להם. הוא מושך את הסוודר למטה, מעל החולצה, כמו שמכסים משהו שמגיע לו כבוד.' },
+        ],
+        choices: [
+          {
+            id: 'stand',
+            text: 'לעמוד לידו. בלי להגיד כלום.',
+            then: [
+              { e: 'flag', flag: 's3:g:done' },
+              { e: 'flagValue', flag: 'life:sinai:gate', value: 'defended' },
+              { e: 'personality', key: 'empathy', delta: 3 },
+              { e: 'personality', key: 'courage', delta: 2 },
+              { e: 'redheart', key: 'loyaltyReturn', delta: 2 },
+              { e: 'time', minutes: 8 },
+              { e: 'goto', node: 's3-seven-stood' },
+            ],
+          },
+          { id: 'away', text: 'לא להתערב.', then: [] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 's3-seven-stood',
+    nameHe: 'אוהד ותיק',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'עמדת לידו. השניים הסתכלו עליך, ועל החולצה שלו, ועל החולצה שלך, והלכו לעזור עם הבד.' },
+          { who: 'אוהד ותיק', text: 'בשמונים ושש הוא נתן את הכדור במקום לקחת. אני הייתי שם.' },
+          { who: 'פוגי', text: 'גם אני.' },
+          { who: null, text: 'הוא מסתכל עליך כאילו אתה צעיר מדי בשביל זה. ואז מבין את החשבון, ומחייך.' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 's3-watch-96',
+    nameHe: null,
+    branches: [
+      { when: { flag: 's3:g:done' }, lines: [{ who: null, text: 'השער. הבד. האנשים. אתה כבר יודע איך זה נראה.' }] },
+      {
+        lines: [
+          { who: null, text: 'אתה נשען על הגדר ולא זז. בד, מכחולים, שני צעירים שמחפשים במי להתחכך, איש בחולצה ישנה שלא נותן להם.' },
+          { who: null, text: 'והסדרן, שמסתכל בשעון ואז על הבד ואז שוב בשעון. אתה רושם את כל זה בראש.' },
+        ],
+        then: [{ e: 'flag', flag: 's3:g:done' }, { e: 'flagValue', flag: 'life:sinai:gate', value: 'watched' }, { e: 'redheart', key: 'historyMemory', delta: 3 }, { e: 'personality', key: 'curiosity', delta: 2 }, { e: 'time', minutes: 10 }],
+      },
+    ],
+  },
+  {
+    id: 's3-shut-96',
+    nameHe: 'סדרן',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הבד עולה על הגדר. שתי דקות, והסדרן כבר מושך את השער.' },
+          { who: 'סדרן', text: 'שער 7 סגור! מי שבפנים — בפנים. מי שרוצה — מסביב, דרך חמש.' },
+          { who: null, text: 'מבפנים שרים את השם שלו, ומחוץ לגדר צועקים עליו. אותו שם.' },
+        ],
+        choices: [
+          { id: 'around', text: 'מסביב. דרך שער 5.', then: [{ e: 'flag', flag: 's3:g:left' }, { e: 'flag', flag: 's3:g:around' }, { e: 'time', minutes: 25 }, { e: 'goto', node: 's3-around-96' }] },
+          { id: 'home', text: 'הביתה. היום לא.', then: [{ e: 'flag', flag: 's3:g:left' }, { e: 'flag', flag: 's3:g:home' }, { e: 'wellbeing', key: 'regret', delta: 2 }, { e: 'time', minutes: 40 }, { e: 'travel', to: 'bedroom', spawn: 'start' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 's3-around-96',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'מסביב, דרך שער 5. צעירים, תוף, ואף אחד לא מכיר אותך. נכנסת כשכבר התחיל.' },
+          { who: null, text: 'ראית אותו מלמעלה, על הקו, מאמן, עם הידיים בכיסים. מהיציע הזה הוא נראה קטן. לא ידעת אם זה בגלל המרחק.' },
+        ],
+        then: [{ e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'time', minutes: 120 }, { e: 'travel', to: 'bedroom', spawn: 'start' }],
+      },
+    ],
+  },
+  /** S4 — the wall hears about the gate before the rupture is said (and never tells him what to think) */
+  {
+    id: 's3-wall-96',
+    nameHe: null,
+    branches: [
+      {
+        when: { flagIs: { flag: 'life:sinai:gate', value: 'painted' } },
+        lines: [{ who: null, text: 'הצבע האדום עוד על הציפורניים. עשר אותיות נגד המאמן, ומעל המיטה — השחקן. אותו אדם.' }],
+        then: [{ e: 'goto', node: 's3-room' }],
+      },
+      {
+        when: { flagIs: { flag: 'life:sinai:gate', value: 'defended' } },
+        lines: [{ who: null, text: 'עמדת היום ליד מישהו בחולצה עם שבע על הגב. עכשיו אתה עומד מול הקיר, ושם תלוי אותו מספר.' }],
+        then: [{ e: 'goto', node: 's3-room' }],
+      },
+      {
+        when: { flagIs: { flag: 'life:sinai:gate', value: 'watched' } },
+        lines: [{ who: null, text: 'ראית היום איך בד נעשה, איך שער נסגר, איך אותו שם נשמע משני צדדים של גדר. הקיר שקט.' }],
+        then: [{ e: 'goto', node: 's3-room' }],
+      },
+      { lines: [{ who: null, text: 'הביתה, לפני שהשער נסגר. הקיר מחכה, כמו תמיד.' }], then: [{ e: 'goto', node: 's3-room' }] },
     ],
   },
   {

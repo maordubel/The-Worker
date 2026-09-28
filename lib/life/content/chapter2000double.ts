@@ -236,6 +236,27 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { flag: 't:confirmed' }, lines: [{ who: null, text: 'הוא עדיין צועק. עכשיו הוא צודק.' }] },
+      /**
+       * 1998's lists, two years later (implementation pass 27.9.2026): the man on the balcony
+       * is the terrace at Bloomfield all over again, and where the boy put the accusations on
+       * Soko's step is how he hears a man shouting a result now.
+       */
+      {
+        when: { flagIs: { flag: 'life:laces:lists', value: 'certain' } },
+        lines: [
+          { who: null, text: 'מישהו על מרפסת, בגופייה, צועק "נגמר! אלופים!" עם ידיים באוויר.' },
+          { who: null, text: 'לפני שנתיים, על מדרגה ליד סוקו, היית כותב את זה בטור של מה שיודעים. הגוף שלך עוד רוצה. הפעם אתה מחכה.' },
+        ],
+        then: [{ e: 'flag', flag: 't:src:rumour' }, { e: 'personality', key: 'impulsiveness', delta: -2 }],
+      },
+      {
+        when: { any: [{ flagIs: { flag: 'life:laces:lists', value: 'strict' } }, { flagIs: { flag: 'life:1990:notebook', value: 'clean' } }] },
+        lines: [
+          { who: null, text: 'מישהו על מרפסת, בגופייה, צועק "נגמר! אלופים!" עם ידיים באוויר.' },
+          { who: null, text: 'אתה יודע באיזה טור זה נכתב. אתה יודע את זה מגיל שתים־עשרה. עוד מקור אחד.' },
+        ],
+        then: [{ e: 'flag', flag: 't:src:rumour' }],
+      },
       {
         lines: [
           { who: null, text: 'מישהו על מרפסת, בגופייה, צועק "נגמר! אלופים!" עם ידיים באוויר.' },
@@ -302,9 +323,55 @@ export const CONVERSATIONS_TITLE: Conversation[] = [
     nameHe: null,
     branches: [
       { when: { flag: 't:with-kobi' }, lines: [{ who: 'קובי', text: 'אלופים. שתים־עשרה שנה.' }, { who: null, text: 'הוא אמר את זה אליך. לא למגרש. אליך. ואז חיבק, וזה היה הרבה יותר ממה שהיה בשמונים ושש, כי עכשיו היית בגובה שלו.' }], then: [{ e: 'sfx', key: 'crowd-goal', level: 0.8 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 8 }, { e: 'remember', who: 'kobi', eventId: 'champions-hug-2000', significance: 'major' }, { e: 'flag', flag: 'life:title:kobi' }] },
-      { when: { flag: 't:with-efi' }, lines: [{ who: 'אפי', text: 'אז ככה זה אצלכם.' }, { who: 'פוגי', text: 'ככה.' }, { who: 'אפי', text: 'טוב. יפה.' }, { who: null, text: 'הוא חיבק אותך כמו אחרי הגביע ההוא. שבע שנים. אתה קפצת עליו הפעם.' }], then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 8 }, { e: 'flag', flag: 'life:title:efi' }] },
-      { when: { flag: 't:with-gate5' }, lines: [{ who: null, text: 'הבד עלה. אסף לא חייך — אסף אף פעם לא מחייך — אבל הוא הניח יד על הראש שלך רגע.' }], then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'flag', flag: 'life:title:gate5' }] },
-      { lines: [{ who: null, text: 'לבד באמצע כולם. אלופים. חיפשת פנים מוכרות ולא מצאת, ואז מצאת אחת, ואז זה לא היה משנה.' }], then: [{ e: 'wellbeing', key: 'loneliness', delta: 3 }] },
+      { when: { flag: 't:with-efi' }, lines: [{ who: 'אפי', text: 'אז ככה זה אצלכם.' }, { who: 'פוגי', text: 'ככה.' }, { who: 'אפי', text: 'טוב. יפה.' }, { who: null, text: 'הוא חיבק אותך כמו אחרי הגביע ההוא. שבע שנים. אתה קפצת עליו הפעם.' }], then: [{ e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 8 }, { e: 'flag', flag: 'life:title:efi' }, { e: 'goto', node: 't-call' }] },
+      { when: { flag: 't:with-gate5' }, lines: [{ who: null, text: 'הבד עלה. אסף לא חייך — אסף אף פעם לא מחייך — אבל הוא הניח יד על הראש שלך רגע.' }], then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 6 }, { e: 'flag', flag: 'life:title:gate5' }, { e: 'goto', node: 't-call' }] },
+      { lines: [{ who: null, text: 'לבד באמצע כולם. אלופים. חיפשת פנים מוכרות ולא מצאת, ואז מצאת אחת, ואז זה לא היה משנה.' }], then: [{ e: 'wellbeing', key: 'loneliness', delta: 3 }, { e: 'goto', node: 't-call' }] },
+    ],
+  },
+  /**
+   * B11a S3 (implementation pass 27.9.2026) — *"who gets first hug/call — act, not dialogue
+   * list."* The hug is whoever came with him; the CALL is the one thing he does with his own
+   * hands in the minute after, and only a man who is not standing next to his father has
+   * one to make. The stranger's phone from the fence is still warm. Ten years ago a boy put
+   * an asimon into a pillar under the stand at Bloomfield (`life:1990:called`), and his
+   * mother remembers who told her first.
+   */
+  {
+    id: 't-call',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'האיש עם הפלאפון עוד ליד הגדר. הוא מושיט אותו לכל מי שעובר, כמו שמושיטים סיגריה.' }],
+        choices: [
+          { id: 'call', text: 'לקחת את הפלאפון. להתקשר הביתה.', then: [{ e: 'goto', node: 't-call-home' }] },
+          { id: 'stay', text: 'לא. להישאר כאן, בתוך זה.', then: [{ e: 'flagValue', flag: 'life:title:call', value: 'stayed' }, { e: 'redheart', key: 'terraceCulture', delta: 2 }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 't-call-home',
+    nameHe: 'רחל',
+    remote: { 'רחל': 'phone', 'קובי': 'phone' },
+    branches: [
+      {
+        when: { flagIs: { flag: 'life:1990:called', value: 'first' } },
+        lines: [
+          { who: 'רחל', text: 'הלו? — אני יודעת. אבא כבר קופץ פה על הספה.' },
+          { who: 'רחל', text: 'בתשעים אתה היית הראשון. מהטלפון שמתחת ליציע. היום הרדיו ניצח אותך.' },
+          { who: null, text: 'היא צוחקת. ברקע קובי צועק משהו שאי אפשר להבין, ואת זה כן אפשר להבין.' },
+        ],
+        then: [{ e: 'flagValue', flag: 'life:title:call', value: 'home' }, { e: 'rel', who: 'rachel', axis: 'bond', delta: 4 }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 }, { e: 'remember', who: 'rachel', eventId: 'called-home-2000', significance: 'notable' }],
+      },
+      {
+        lines: [
+          { who: 'קובי', text: '(עונה לפני הצלצול השני.) נו?' },
+          { who: 'פוגי', text: 'אלופים.' },
+          { who: null, text: 'שקט. לא של קו שנפל — של אדם שמנסה לא לבכות בטלפון של זר.' },
+          { who: 'קובי', text: 'תביא את עצמך הביתה. אני מחכה ער.' },
+        ],
+        then: [{ e: 'flagValue', flag: 'life:title:call', value: 'home' }, { e: 'rel', who: 'kobi', axis: 'bond', delta: 5 }, { e: 'remember', who: 'kobi', eventId: 'called-home-2000', significance: 'notable' }],
+      },
     ],
   },
   {
