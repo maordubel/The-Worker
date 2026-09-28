@@ -8,10 +8,13 @@ import { homeKits } from '@/lib/kit/seasons'
 import { DEFAULT_SPEC } from '@/lib/kit/spec'
 import { shirtBoard } from '@/lib/xi/board'
 import { numberBoard } from '@/lib/polls/wore-server'
+import { debateRoundView } from '@/lib/polls/debates-server'
+import { roundFrom } from '@/lib/rotation/round'
 import { gateMetadata } from '@/lib/seo'
 import { t } from '@/lib/i18n'
 
 import { BallotSheet } from './BallotSheet'
+import { TerraceWing } from './TerraceWing'
 
 export const metadata: Metadata = gateMetadata('polls')
 
@@ -34,17 +37,34 @@ export const metadata: Metadata = gateMetadata('polls')
  * And two since 21.9.2026: who wore each number, season-bound and sourced (the number
  * question's reaction — `lib/polls/wore-server.ts`), and the retired-slug map, so the
  * voter's own gate 1 eleven can be offered as shortcuts whatever key it was saved under.
+ *
+ * **28.9.2026 — two halves (ONE RED WORLD §16, P0.3).** The ballot above is הכרטיס שלי
+ * and is unchanged. Beside it, הוויכוח של היציע: a rotating handful of opinion debates
+ * from `content/manual/terrace-debates.json`, dealt by `?seed=` and `?r=` through the house
+ * rotation, with list options read from the masters here on the server. So the gate now
+ * does read a seed — for the debates only; the ballot still has none.
  */
-export default function PollsPage() {
+export default function PollsPage({ searchParams = {} }: { searchParams?: { seed?: string; r?: string; tab?: string } }) {
   const roster = rosterIndex()
+  const round = roundFrom(searchParams)
+  const debate = debateRoundView(round.seed, round.cursor)
   return (
     <Screen title={t('screen.polls.title')} sub={t('screen.polls.sub')} stage>
-      <BallotSheet
+      <TerraceWing
+        initialTab={searchParams.tab === 'debate' ? 'debate' : 'card'}
+        debates={debate.debates}
         roster={roster}
-        shirts={shirtBoard(roster)}
-        shirt={homeKits()[0]?.spec ?? DEFAULT_SPEC}
-        numbers={numberBoard()}
-        slugAliases={pickerRoster().slugAliases}
+        slot={debate.slot}
+        slices={debate.slices}
+        ballot={
+          <BallotSheet
+            roster={roster}
+            shirts={shirtBoard(roster)}
+            shirt={homeKits()[0]?.spec ?? DEFAULT_SPEC}
+            numbers={numberBoard()}
+            slugAliases={pickerRoster().slugAliases}
+          />
+        }
       />
       <div className="mt-2 hidden shrink-0 md:block">
         <ReportLink />

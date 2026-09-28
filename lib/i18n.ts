@@ -42,6 +42,8 @@ import heStageLife91m from '@/messages/he.stage.life91m.json'
 import heStageLife92 from '@/messages/he.stage.life92.json'
 // 28.9.2026 — Stage B pass: the note board (`components/life/NoteBoardSheet.tsx`)
 import heStageLifeB28 from '@/messages/he.stage.lifeB28.json'
+// 28.9.2026 — gate 7 split: הכרטיס שלי / הוויכוח של היציע (`terrace.*`, ONE RED WORLD §16)
+import heStageTerrace from '@/messages/he.stage.terrace.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -115,6 +117,7 @@ export const CATALOGUE_FILES = {
   heStageLife91m,
   heStageLife92,
   heStageLifeB28,
+  heStageTerrace,
 } as const
 
 const catalogue = {
@@ -156,6 +159,7 @@ const catalogue = {
   ...heStageLife91m,
   ...heStageLife92,
   ...heStageLifeB28,
+  ...heStageTerrace,
 }
 
 export type MessageKey = keyof typeof catalogue
