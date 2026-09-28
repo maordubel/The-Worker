@@ -1613,6 +1613,9 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2021-suitcase', flag('x:move'), [{ who: 'קרן', x: 0.58, y: 0.9, flip: true }]),
     // 2023-visit · X04 (x-sunset) — ערב המשפחה: קובי מחכה לו על הטיילת, באותו מקום
     ...cast('2023-visit', { flagIs: { flag: 'life:abroad:visit', value: 'family' } }, [{ who: 'קובי', x: 0.58, y: 0.9, flip: true }]),
+    // (pass D) 2021-promises · L08 — the evening that was promised, at the same empty paving (0.47–0.62)
+    ...partner('2021-promises', flag('pr:out'), { x: 0.58, y: 0.9, flip: true }),
+    ...cast('2021-promises', { all: [{ flag: 'pr:out' }, { notFlag: 'life:partner' }] }, [{ who: 'קרן', x: 0.58, y: 0.9, flip: true }]),
   ],
 
   jaffa: [

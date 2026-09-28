@@ -274,6 +274,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'first', textHe: 'המשחק הראשון שלו.', revealWhen: F('life:child'), doneWhen: F('pr:first') },
     { id: 'promise', textHe: 'מה נעשה בפעם הבאה.', doneWhen: F('pr:promise') },
     { id: 'scarf', textHe: 'השבת שלו.', revealWhen: { all: [F('life:child'), F('pr:promise')] }, doneWhen: F('pr:scarf') },
+    { id: 'evening', textHe: 'הערב עצמו. הטיילת, והטלפון בכיס.', revealWhen: F('pr:out'), doneWhen: F('pr:evened') },
   ],
   '2000-team': [
     { id: 'name', textHe: 'שם עד מחר.', doneWhen: F('y:name') },

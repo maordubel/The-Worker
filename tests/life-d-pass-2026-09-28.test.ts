@@ -446,3 +446,37 @@ describe('2025-eurocup — the celebration has somebody else’s morning in it',
     expect(sim.state.flags['life:eurocup:night']).toBe('moved:work')
   })
 })
+
+// ============================================ 2021-promises — the evening itself, without a child ===
+
+describe('2021-promises — the life without a child keeps its promise in a place, with the phone in the pocket', () => {
+  it('Keren: the evening happens on the promenade, and leaving for the match is written into the diary', () => {
+    const sim = new WorldSim('2021-promises')
+    sim.beatAnswer = pick('meet', 'leave')
+    sim.go('home')
+    sim.wait(2)
+    expect(sim.state.flags['pr:out']).toBe(true)
+    expect(sim.location).toBe('promenade')
+    expect(sim.state.flags['life:promise2021']).toBe('left')
+    expect(sim.endings).toEqual(['repaired'])
+  })
+
+  it('a partner and a repaired promise: the phone face down all evening', () => {
+    const sim = new WorldSim('2021-promises')
+    seed(sim, { 'life:partner': 'dor', 'promise:householdEvening': true })
+    sim.beatAnswer = pick('do', 'down')
+    sim.go('home')
+    sim.wait(2)
+    expect(sim.state.flags['life:promise2021']).toBe('present')
+    expect(sim.endings).toEqual(['repaired'])
+  })
+
+  it('the life with a child is not sent to the promenade — its evening is the Saturday', () => {
+    const sim = new WorldSim('2021-promises')
+    seed(sim, { 'life:child': true, 'life:partner': 'melanie', 'promise:householdEvening': true, 'pr:first': true })
+    sim.beatAnswer = pick('do')
+    sim.go('home')
+    sim.wait(2)
+    expect(sim.state.flags['pr:out']).toBeUndefined()
+  })
+})

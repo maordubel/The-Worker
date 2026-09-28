@@ -358,6 +358,8 @@ export const goalPromises = (state: LifeState): LocationId | null => {
   const child = flag(state, 'life:child')
   if (child && !flag(state, 'pr:first')) return 'home'
   if (!flag(state, 'pr:promise')) return 'home'
+  // (pass D) the promised evening itself, for the life without a child
+  if (!child && flag(state, 'pr:out') && !flag(state, 'pr:evened')) return 'promenade'
   if (child && !flag(state, 'pr:scarf')) {
     // (90-E) L09 — two sheets to read, his Saturday in the schoolyard, and for the split the run to Bloomfield
     const ask = state.flags['pr:ask']
