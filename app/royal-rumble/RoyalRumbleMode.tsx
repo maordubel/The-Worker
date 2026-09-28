@@ -17,6 +17,7 @@ export function RoyalRumbleMode({
   shuffleDraft,
   matchSeed,
   cursor,
+  roundSeed,
   playerCount,
   kits,
   looks,
@@ -26,6 +27,8 @@ export function RoyalRumbleMode({
   shuffleDraft: RoyalRumbleDraft
   matchSeed: number
   cursor: number
+  /** the `?seed=` the route read — the Live room's URL carries it with `r`, not the offer seed */
+  roundSeed?: number
   playerCount: number
   kits: EraKit[]
   /** every man's real shirt (`lib/kit/playerShirt.ts`) */
@@ -76,6 +79,8 @@ export function RoyalRumbleMode({
               draft={draft}
               shuffleDraft={shuffleDraft}
               matchSeed={matchSeed}
+              roundSeed={roundSeed}
+              cursor={cursor}
               kits={kits}
               initialRoomCode={initialRoomCode}
             />

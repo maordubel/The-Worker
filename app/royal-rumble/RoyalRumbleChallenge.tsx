@@ -4,14 +4,19 @@ import { useState } from 'react'
 
 import { firePickFxAt } from '@/components/stage/PickFx'
 import { t } from '@/lib/royal-rumble/i18n'
+import { royalRumbleShareHref } from '@/lib/game/royal-rumble-seeds'
 
-export function RoyalRumbleChallenge({ seed }: { seed: number }) {
+/**
+ * `seed` is the board's own offer seed — printed as the code. The LINK carries the round
+ * (`roundSeed` + `cursor`), because the route folds the cursor in again: a link that named
+ * the offer seed without `r` would only reproduce the board by accident of cursor 0.
+ */
+export function RoyalRumbleChallenge({ seed, roundSeed, cursor = 0 }: { seed: number; roundSeed?: number; cursor?: number }) {
   const [state, setState] = useState<'idle' | 'copied' | 'shared'>('idle')
   const code = String(seed >>> 0).padStart(8, '0').slice(-8)
 
   async function share() {
-    const url = new URL('/royal-rumble', window.location.origin)
-    url.searchParams.set('seed', String(seed >>> 0))
+    const url = new URL(royalRumbleShareHref(roundSeed ?? seed, roundSeed === undefined ? 0 : cursor), window.location.origin)
     const text = t('challengeText', { code })
 
     try {

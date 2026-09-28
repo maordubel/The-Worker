@@ -27,7 +27,7 @@ import {
   type RoyalRumbleSelection,
   type RoyalRumbleSlotRule,
 } from './royal-rumble-public'
-import { alternateRoyalRumbleOfferSeed, royalRumbleMatchSeed } from './royal-rumble-seeds'
+import { alternateRoyalRumbleOfferSeed, royalRumbleMatchSeed, royalRumbleRoundSeed } from './royal-rumble-seeds'
 
 export {
   ROYAL_RUMBLE_BALANCE_VERSION,
@@ -792,6 +792,20 @@ export function pairedRoyalRumbleDrafts(
   if (fallback) return { draft: fallback.draft, shuffleDraft: fallback.shuffleDraft }
   const draft = dealRoyalRumbleDraft(seed >>> 0, window)
   return { draft, shuffleDraft: dealRoyalRumbleDraft(alternateRoyalRumbleOfferSeed(draft.seed), window) }
+}
+
+/**
+ * The pair a ROUND deals — `?seed=` and `?r=` folded once (`royalRumbleRoundSeed`), then the
+ * usual paired search. The route calls this and nothing else, so the draft, the shuffle,
+ * the opponent, the match and the validation all follow the cursor together (ONE RED
+ * WORLD §18).
+ */
+export function royalRumbleRoundDrafts(
+  seed: number,
+  cursor: number,
+  window?: RumbleWindow,
+): { draft: RoyalRumbleDraft; shuffleDraft: RoyalRumbleDraft } {
+  return pairedRoyalRumbleDrafts(royalRumbleRoundSeed(seed, cursor), window)
 }
 
 /* ------------------------------------------------------------------ validation */

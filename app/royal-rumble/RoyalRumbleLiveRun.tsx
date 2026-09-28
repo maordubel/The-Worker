@@ -45,10 +45,13 @@ function Shirt({ player, kits, className = 'h-[116px] w-[102px]' }: { player: Ro
 }
 function Lamp({ on }: { on: boolean }) { return <span className={`inline-block h-2.5 w-2.5 ${on ? 'bg-red' : 'border border-paper/40'}`} /> }
 
-export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initialRoomCode }: {
+export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, roundSeed, cursor = 0, kits, initialRoomCode }: {
   draft: RoyalRumbleDraft
   shuffleDraft: RoyalRumbleDraft
   matchSeed: number
+  /** the round the route read (§18): the room link hands over `seed` + `r`, so the guest deals the same board */
+  roundSeed?: number
+  cursor?: number
   kits: EraKit[]
   initialRoomCode?: string
 }) {
@@ -92,10 +95,13 @@ export function RoyalRumbleLiveRun({ draft, shuffleDraft, matchSeed, kits, initi
 
   const updateUrl = useCallback((roomCode: string) => {
     const url = new URL(window.location.href)
-    url.searchParams.set('seed', String(draft.seed >>> 0))
+    // the round, not the offer seed: the route folds `r` in again on arrival
+    url.searchParams.set('seed', String((roundSeed ?? draft.seed) >>> 0))
+    if (roundSeed !== undefined && cursor > 0) url.searchParams.set('r', String(cursor))
+    else url.searchParams.delete('r')
     url.searchParams.set('room', roomCode)
     window.history.replaceState({}, '', url.toString())
-  }, [draft.seed])
+  }, [cursor, draft.seed, roundSeed])
 
   const join = useCallback(async (roomCode: string) => {
     if (!account || !roomCode.trim()) return

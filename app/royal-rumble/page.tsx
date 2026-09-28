@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { Screen } from '@/components/ui/Screen'
-import { pairedRoyalRumbleDrafts, royalRumblePlayerCount } from '@/lib/game/royal-rumble'
+import { royalRumbleRoundDrafts, royalRumblePlayerCount } from '@/lib/game/royal-rumble'
 import { royalRumbleMatchSeed } from '@/lib/game/royal-rumble-seeds'
 import { allPlayers } from '@/lib/archive/player-master'
 import { homeKits } from '@/lib/kit/seasons'
@@ -16,7 +16,8 @@ export const metadata: Metadata = { title: t('title'), description: t('descripti
 
 export default function RoyalRumblePage({ searchParams }: { searchParams: { seed?: string; r?: string; room?: string } }) {
   const round = roundFrom(searchParams)
-  const { draft, shuffleDraft } = pairedRoyalRumbleDrafts(round.seed)
+  // the cursor is part of the round (ONE RED WORLD §18): `seed=X&r=1` is another board
+  const { draft, shuffleDraft } = royalRumbleRoundDrafts(round.seed, round.cursor)
   const matchSeed = royalRumbleMatchSeed(draft.seed)
   const count = royalRumblePlayerCount()
   const kits = homeKits().map(({ seasonLabel, spec }) => ({ seasonLabel, spec }))
@@ -30,8 +31,8 @@ export default function RoyalRumblePage({ searchParams }: { searchParams: { seed
   return (
     <Screen title={t('title')} sub={t('sub')} chrome={false} stage>
       <RoyalRumbleMatchFX />
-      <RoyalRumbleMode draft={draft} shuffleDraft={shuffleDraft} matchSeed={matchSeed} cursor={round.cursor} playerCount={count} kits={kits} looks={looks} initialRoomCode={searchParams.room} />
-      <RoyalRumbleChallenge seed={draft.seed} />
+      <RoyalRumbleMode draft={draft} shuffleDraft={shuffleDraft} matchSeed={matchSeed} cursor={round.cursor} roundSeed={round.seed} playerCount={count} kits={kits} looks={looks} initialRoomCode={searchParams.room} />
+      <RoyalRumbleChallenge seed={draft.seed} roundSeed={round.seed} cursor={round.cursor} />
     </Screen>
   )
 }
