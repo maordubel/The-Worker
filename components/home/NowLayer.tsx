@@ -12,6 +12,7 @@ import { lifeStore } from '@/lib/life/save'
 import { onIds, readProfile } from '@/lib/profile/store'
 
 import { DailyCard } from './DailyCard'
+import { StandHooks } from './StandHooks'
 
 /**
  * שכבת ה"עכשיו" — above the gate wall, never instead of it (ONE RED WORLD §55).
@@ -46,6 +47,7 @@ export function NowLayer({ daily, greeting }: { daily: Daily; greeting: Greeting
         <DailyCard daily={daily} />
       </div>
       <Returns />
+      <StandHooks daily={daily} />
       <p className="mt-3">
         <a
           href="#gates"

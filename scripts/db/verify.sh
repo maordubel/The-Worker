@@ -2,7 +2,7 @@
 # בדיקת המסד על Postgres מקומי — לא צעד של מאור, זה הכלי של מי שכותב מיגרציה.
 #
 # מקים מסד ריק עם auth ו-storage מדומים ועם הטבלאות של DUBID לצידו (supabase/tests/00),
-# מריץ את כל supabase/migrations פעמיים ברצף, ואז את בדיקות התקיפה והזרימה (10, 20, 30, 31, 40).
+# מריץ את כל supabase/migrations פעמיים ברצף, ואז את בדיקות התקיפה והזרימה (10, 20, 30, 31, 40, 41, 50, 60).
 # נכשל על כל שגיאה ועל כל שורת FAIL.
 #
 #   PGHOST=/tmp PGPORT=5499 PGUSER=postgres scripts/db/verify.sh
@@ -29,3 +29,5 @@ ab=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/50-away-been.sql 2>&1) |
 echo "$ab" | grep -c PASS | xargs -I{} echo "db verify: {} away-days \"הייתי שם\" (worker_away_been) assertions — clean"
 tx=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/41-events-taxonomy.sql 2>&1) || { echo "$tx" | grep -E "FAIL|ERROR"; exit 1; }
 echo "$tx" | grep -c PASS | xargs -I{} echo "db verify: {} event taxonomy (ONE RED WORLD §37) assertions — clean"
+st=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/60-stand.sql 2>&1) || { echo "$st" | grep -E "FAIL|ERROR"; exit 1; }
+echo "$st" | grep -c PASS | xargs -I{} echo "db verify: {} \"היציע שלי\" (worker_stand_*) attack and flow assertions — clean"

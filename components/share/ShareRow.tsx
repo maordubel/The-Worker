@@ -13,6 +13,7 @@ import { challengeUrl, dareKey, whatsappHref, telegramHref, type ShareKind } fro
 import { renderStory, type StoryCard } from '@/lib/share/story'
 import { t, type MessageKey } from '@/lib/i18n'
 import { SHARE_KEY } from '@/lib/voice/messages'
+import { StandPost } from './StandPost'
 
 /**
  * שורת השיתוף — "שלח ליציע" (ONE RED WORLD §2.1): four ways out of the app, in the order
@@ -220,6 +221,7 @@ export function ShareRow({
           {t('share.copy')}
         </button>
       </div>
+      <StandPost link={link} headline={headline} />
 
       {note && (
         <p aria-live="polite" className="mt-2 font-body text-[11px] text-red">

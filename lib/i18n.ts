@@ -56,6 +56,10 @@ import heDaily from '@/messages/he.daily.json'
 // 28.9.2026 — Share V2 and the challenge layer (`lib/share`, `lib/challenges`): the
 // artefact cards, the invite lines and the comparison (`challenge.*`, `compare.*`, `artefact.*`).
 import heShare from '@/messages/he.share.json'
+// 28.9.2026 — "היציע שלי" (`lib/stand`, ONE RED WORLD §8, §30–§35): friend stands, the group
+// daily, the group debate, the week and the pairs. One file, so the personal-area agent never
+// appends to the same catalogue.
+import heStand from '@/messages/he.stand.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -134,6 +138,7 @@ export const CATALOGUE_FILES = {
   heStageRouter,
   heDaily,
   heShare,
+  heStand,
 } as const
 
 const catalogue = {
@@ -180,6 +185,7 @@ const catalogue = {
   ...heStageRouter,
   ...heDaily,
   ...heShare,
+  ...heStand,
 }
 
 export type MessageKey = keyof typeof catalogue
