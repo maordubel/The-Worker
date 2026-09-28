@@ -37,11 +37,37 @@ export const INTERNATIONAL = 'life:international'
 
 // ================================================================ I01–I03 · 2010 ====
 
+/**
+ * **I01–I03 — מעבר ג׳, 28.9.2026** (`IMPLEMENTATION-PASS-PROGRAMMER` §35): *"Roma arrives with
+ * Lina/Nico plus practical need · ticket/bed/translation vs existing obligation · solve one
+ * yourself, delegate another, refuse · the conversation about differences happens after deeds."*
+ *
+ * · **S1** — רומא מביא אנשים, ושלושה דברים מעשיים לפני שבע ורבע (`I01_NEEDS_BY`): איפה ישנים
+ *   (הספה בסלון), שני כרטיסים (הקופה, בכסף שלו), ותרגום של הנוסח (הבד ברחוב).
+ * · **S2** — שלושה מקומות, זמן לשניים. מה שלא נעשה ביד — נמסר לרומא, או מסורב בקול. מה שנשאר
+ *   פתוח בשבע ורבע רומא עושה בעצמו, בפרצוף (`dropped`).
+ * · **S3** — השולחן באלנבי בלילה (`i-table`): השיחה על ההבדלים קורית אחרי המעשים, ונקראת מהם.
+ *
+ * `life:intl:hosted` (הם ישנו אצלו) שורד ונקרא אצל לינה ב-`2010-anthem` (`c10-host`).
+ */
+export const I01_NEEDS = ['bed', 'tickets', 'translate'] as const
+/** the evening's hour for the three needs — after it, Roma does what is left himself */
+export const I01_NEEDS_BY = 20 * 60 + 15
+export const INTL_HOSTED = 'life:intl:hosted'
+const NEED = (need: string) => `i:need:${need}`
+const NEEDS_SETTLED = { all: I01_NEEDS.map((need) => ({ flag: NEED(need) })) }
+
 export function objectiveFriends(state: LifeState, sceneId: string): string | null {
+  const f = state.flags
   if (state.chapterDone) return null
-  if (!state.flags['i:meet']) return sceneId === 'allenby' ? null : 'באלנבי. רומא מביא אנשים.'
-  if (!state.flags['i:banner']) return sceneId === 'street' ? null : 'ברחוב, על המדרכה. השם של מי על הבד.'
-  if (!state.flags['i:lineup']) return sceneId === 'pitch' ? null : 'המגרש. אימון ידידות — ומתוקי חשב שהיום הוא בפנים.'
+  if (!f['i:meet']) return sceneId === 'allenby' ? null : 'באלנבי. רומא מביא אנשים.'
+  if (f['i:needs'] && !f['i:banner'] && I01_NEEDS.some((need) => !f[NEED(need)])) {
+    const left = I01_NEEDS.filter((need) => !f[NEED(need)]).map((need) => ({ bed: 'הספה בסלון', tickets: 'שני כרטיסים בקופה', translate: 'הנוסח על הבד' })[need])
+    return `עד שבע ורבע: ${left.join(' · ')}. מה שלא תעשה — לתת לרומא, או לסרב.`
+  }
+  if (!f['i:banner']) return sceneId === 'street' ? null : 'ברחוב, על המדרכה. השם של מי על הבד.'
+  if (!f['i:lineup']) return sceneId === 'pitch' ? null : 'המגרש. אימון ידידות — ומתוקי חשב שהיום הוא בפנים.'
+  if (!f['i:table']) return sceneId === 'allenby' ? null : 'אלנבי, בלילה. השולחן בבית הקפה.'
   return null
 }
 
@@ -74,8 +100,32 @@ export const ENDINGS_FRIENDS: Record<string, EndingCard> = {
 
 export const BEATS_FRIENDS: Beat[] = [
   { id: 'i-meet', at: 'allenby', trigger: 'enter', when: { none: [{ flag: 'i:meet' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'i-meet' }] },
-  { id: 'i-banner', at: 'street', trigger: 'enter', when: { all: [{ flag: 'i:meet' }], none: [{ flag: 'i:banner' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'i-banner' }] },
+  /** S1 — Roma's three practical things, said right after the introductions (`clock` + `at`) */
+  { id: 'i-needs', at: 'allenby', trigger: 'clock', when: { all: [{ flag: 'i:meet' }], none: [{ flag: 'i:needs' }, { flagIs: { flag: 'i:meeting', value: 'later' } }] }, delayMs: 1000, do: [{ a: 'talk', conversation: 'i-needs' }] },
+  /** S2 — a quarter past eight: what is still open, Roma does himself, with a face */
+  {
+    id: 'i-needs-drop',
+    trigger: 'clock',
+    when: { all: [{ flag: 'i:needs' }, { afterMinute: I01_NEEDS_BY }], none: [NEEDS_SETTLED] },
+    delayMs: 800,
+    do: [
+      { a: 'derive', events: (state) => I01_NEEDS.filter((need) => !state.flags[NEED(need)]).map((need) => ({ t: 'flag.set' as const, flag: NEED(need), value: 'dropped' })) },
+      { a: 'toast', text: 'רומא, בהודעה: "סידרתי את מה שנשאר. לא תשאל איך."', tone: 'red' },
+    ],
+  },
+  {
+    id: 'i-banner',
+    at: 'street',
+    trigger: 'enter',
+    when: { all: [{ flag: 'i:meet' }, { any: [NEEDS_SETTLED, { flagIs: { flag: 'i:meeting', value: 'later' } }] }], none: [{ flag: 'i:banner' }] },
+    delayMs: 700,
+    do: [{ a: 'talk', conversation: 'i-banner' }],
+  },
   { id: 'i-lineup', at: 'pitch', trigger: 'enter', when: { all: [{ flag: 'i:banner' }], none: [{ flag: 'i:lineup' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'i-lineup' }] },
+  /** S3 — the late table: the talk about differences happens after the deeds, and is read from them */
+  { id: 'i-table', at: 'allenby', trigger: 'enter', when: { all: [{ flag: 'i:lineup' }], none: [{ flag: 'i:table' }] }, delayMs: 800, do: [{ a: 'talk', conversation: 'i-table' }] },
+  /** the one close path — the ending is read from what was done on the pitch; written in the conversation (90-C) */
+  { id: 'i-close', trigger: 'clock', when: { all: [{ flag: 'i:table' }], none: [{ flag: 'i:done' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'i-close' }] },
 ]
 
 // ======================================================================= I04 · 2024 ====
@@ -167,6 +217,20 @@ export const BEATS_LINA: Beat[] = [
 ]
 
 // ======================================================================== the words ====
+
+/** S3 — two ways to talk at the table; neither is a position, both are a way of being with them */
+const I_TABLE_CHOICES: ChoiceDef[] = [
+  {
+    id: 'ask',
+    text: '(לשאול מה שונה אצלם ביציע — ולהקשיב עד הסוף.)',
+    then: [{ e: 'flag', flag: 'i:table' }, { e: 'flagValue', flag: 'life:intl:table', value: 'asked' }, { e: 'time', minutes: 40 }, { e: 'rel', who: 'lina', axis: 'bond', delta: 2 }, { e: 'toast', text: 'לינה דיברה עשרים דקות בלי הפסקה. ניקו אמר שזה קצר, אצלה.', tone: 'plain' }],
+  },
+  {
+    id: 'tell',
+    text: '(לספר על שער 5 — מי עומד שם, ולמה.)',
+    then: [{ e: 'flag', flag: 'i:table' }, { e: 'flagValue', flag: 'life:intl:table', value: 'told' }, { e: 'time', minutes: 40 }, { e: 'rel', who: 'nico', axis: 'bond', delta: 2 }, { e: 'redheart', key: 'terraceCulture', delta: 2 }, { e: 'toast', text: 'ניקו רשם על מפית: "שער 5". ליתר ביטחון, גם בעברית.', tone: 'plain' }],
+  },
+]
 
 export const CONVERSATIONS_FRIENDS: Conversation[] = [
   // העיר שעל הים — מה שהעיניים אומרות בחדרים של `world/city2027/jaffa.ts`
@@ -302,7 +366,7 @@ export const CONVERSATIONS_FRIENDS: Conversation[] = [
               { e: 'rel', who: 'metuki', axis: 'trust', delta: 5 },
               { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:lineup', subjectHe: 'ההרכב שהובטח למתוקי באימון הידידות', noteHe: 'אמר לו שהוא בפנים, והוא היה בפנים. ניקו קיבל אימון משלו.' },
               { e: 'toast', text: 'מתוקי: "תודה שזכרת." — "זאת הייתה הבטחה, לא תזכורת."', tone: 'plain' },
-              { e: 'ending', id: 'kept' },
+              { e: 'flagValue', flag: 'i:lineupKind', value: 'kept' },
             ],
           },
           {
@@ -312,7 +376,7 @@ export const CONVERSATIONS_FRIENDS: Conversation[] = [
               { e: 'flag', flag: 'i:lineup' },
               { e: 'rel', who: 'metuki', axis: 'bond', delta: 2 },
               { e: 'toast', text: 'מתוקי: "אני רוצה לשחק היום. לזה התכוננתי." — "אז נשארים עם מה שסיכמנו."', tone: 'plain' },
-              { e: 'ending', id: 'asked' },
+              { e: 'flagValue', flag: 'i:lineupKind', value: 'asked' },
             ],
           },
           {
@@ -324,10 +388,144 @@ export const CONVERSATIONS_FRIENDS: Conversation[] = [
               { e: 'rel', who: 'metuki', axis: 'bond', delta: -4 },
               { e: 'rel', who: 'metuki', axis: 'trust', delta: -8 },
               { e: 'toast', text: 'מתוקי: "אני חוזר הביתה. אתם תסתדרו עם הסידורים." — "מתוקי—" — "נדבר אחר כך."', tone: 'red' },
-              { e: 'ending', id: 'benched' },
+              { e: 'flagValue', flag: 'i:lineupKind', value: 'benched' },
             ],
           },
         ],
+      },
+    ],
+  },
+  // ------------------------------------------------------------ pass C · S1–S3 ------
+  {
+    id: 'i-close',
+    nameHe: null,
+    branches: [
+      { when: { flagIs: { flag: 'i:lineupKind', value: 'benched' } }, lines: [{ who: null, text: 'מתוקי לא בא לשולחן. הכיסא שלו נשאר ליד הקיר, ואף אחד לא ישב עליו.' }], then: [{ e: 'flag', flag: 'i:done' }, { e: 'ending', id: 'benched' }] },
+      { when: { flagIs: { flag: 'i:lineupKind', value: 'asked' } }, lines: [{ who: null, text: 'מתוקי ישב בקצה, עם הנעליים עוד בשקית. הוא שיחק היום, והוא אמר את זה פעמיים.' }], then: [{ e: 'flag', flag: 'i:done' }, { e: 'ending', id: 'asked' }] },
+      { lines: [{ who: null, text: 'מתוקי ישב ליד ניקו, והראה לו על מפית איך עומדים בהרכב שהובטח.' }], then: [{ e: 'flag', flag: 'i:done' }, { e: 'ending', id: 'kept' }] },
+    ],
+  },
+  {
+    id: 'i-needs',
+    nameHe: 'רומא',
+    branches: [
+      {
+        lines: [
+          { who: 'רומא', text: 'ועוד שלושה דברים, לפני שבע ורבע. איפה הם ישנים הלילה.' },
+          { who: 'לינה', text: 'שני כרטיסים למשחק בשבת. אנחנו משלמים, רק אין לנו איך לקנות.' },
+          { who: 'ניקו', text: 'והנוסח של הבד — בעברית. שלא נכתוב משהו שאנחנו לא מבינים.' },
+          { who: 'פוגי', text: 'ומה אתה לוקח?' },
+          { who: 'רומא', text: 'את מה שתיתן לי. ומה שתגיד לא — תגיד בקול, לא בשתיקה.' },
+        ],
+        then: [{ e: 'flag', flag: 'i:needs' }],
+      },
+    ],
+  },
+  /** S2 — Roma, for what is not done by hand: hand it over, or say no out loud */
+  {
+    id: 'i-roma',
+    nameHe: 'רומא',
+    branches: [
+      {
+        when: NEEDS_SETTLED,
+        lines: [{ who: 'רומא', text: 'שלושה מתוך שלושה. עכשיו הבד.' }],
+      },
+      {
+        lines: [{ who: 'רומא', text: 'מה אתה נותן לי, ומה אתה לא עושה בכלל?' }],
+        choices: [
+          { id: 'give-bed', text: '(הלינה — לרומא. אצל אמא שלו יש מיטה.)', when: { notFlag: NEED('bed') }, hidden: true, then: [{ e: 'flagValue', flag: NEED('bed'), value: 'roma' }, { e: 'rel', who: 'roma', axis: 'trust', delta: 1 }, { e: 'toast', text: 'רומא: "אמא שלי תשאל מי הם. אני אגיד שאתה." — "תגיד שאתה."', tone: 'plain' }] },
+          { id: 'give-tickets', text: '(הכרטיסים — לרומא. יש לו חבר בקופה.)', when: { notFlag: NEED('tickets') }, hidden: true, then: [{ e: 'flagValue', flag: NEED('tickets'), value: 'roma' }, { e: 'toast', text: 'רומא: "החבר בקופה יגיד שזאת טובה אחרונה." — "הוא אומר את זה מ-2002."', tone: 'plain' }] },
+          { id: 'give-translate', text: '(התרגום — לרומא. הוא יביא את אפי.)', when: { notFlag: NEED('translate') }, hidden: true, then: [{ e: 'flagValue', flag: NEED('translate'), value: 'roma' }, { e: 'toast', text: 'רומא: "אפי יתרגם, ואחר כך יתווכח על כל מילה." — "זה חלק מהתרגום."', tone: 'plain' }] },
+          { id: 'no-tickets', text: '(כרטיסים — לא. שיעמדו בתור בשבת, כמו כולם.)', when: { notFlag: NEED('tickets') }, hidden: true, then: [{ e: 'flagValue', flag: NEED('tickets'), value: 'refused' }, { e: 'rel', who: 'lina', axis: 'bond', delta: -1 }, { e: 'toast', text: 'לינה: "בסדר. תור זה גם ביקור." — אמרה, ולא לגמרי בחיוך.', tone: 'plain' }] },
+          { id: 'no-bed', text: '(לינה — לא אצלי. אין לי איך, ואני אומר את זה עכשיו.)', when: { notFlag: NEED('bed') }, hidden: true, then: [{ e: 'flagValue', flag: NEED('bed'), value: 'refused' }, { e: 'toast', text: 'ניקו: "אכסניה ליד הים. גם זה תל אביב." — "זה יותר תל אביב ממני."', tone: 'plain' }] },
+        ],
+      },
+    ],
+  },
+  /** S2 · by hand — the sofa (a chore), the ticket window (money), the banner's words (time) */
+  {
+    id: 'i-bed',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הספה בסלון: עיתונים, שלט, מעיל של אבא, קופסה שאף אחד לא זוכר מה בתוכה. לשניים צריך את כולה.' }],
+        choices: [
+          { id: 'clear', text: '(לפנות אותה. דבר־דבר.)', then: [{ e: 'minigame', id: 'chore:story:sofa-10' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'i-tickets',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הקופה פתוחה עד שמונה. שני כרטיסים ליציע, שישים כל אחד. לינה אמרה שהם משלמים — אחר כך.' }],
+        choices: [
+          {
+            id: 'buy',
+            text: '(לקנות שניים. מהכסף שלי, עד שיחזירו.)',
+            when: { minAgorot: 12000 },
+            noteHe: 'אין בכיס מאה עשרים.',
+            then: [{ e: 'money', agorot: -12000, why: 'שני כרטיסים ללינה וניקו' }, { e: 'flagValue', flag: NEED('tickets'), value: 'self' }, { e: 'time', minutes: 10 }, { e: 'flag', flag: 'own:tickets-intl-2010' }, { e: 'toast', text: 'שני כרטיסים, בכיס של החולצה. הקופאי: "אורחים? אז שיבואו מוקדם."', tone: 'plain' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'i-translate',
+    nameHe: 'לינה',
+    branches: [
+      {
+        lines: [
+          { who: 'לינה', text: 'תקרא לי שורה, ותגיד לי מה היא אומרת. לא מה היא רוצה להגיד.' },
+          { who: 'פוגי', text: '"היציע שלנו פתוח. לגזענות — אין כרטיס."' },
+          { who: 'ניקו', text: 'את החצי השני אני אזכור.' },
+        ],
+        then: [{ e: 'flagValue', flag: NEED('translate'), value: 'self' }, { e: 'time', minutes: 20 }, { e: 'rel', who: 'nico', axis: 'bond', delta: 2 }],
+      },
+    ],
+  },
+  /**
+   * S3 — the late table. Nobody asks what he believes; they talk about the evening, and the
+   * evening is what he did: who slept where, who stood in which queue, whose words the cloth says.
+   */
+  {
+    id: 'i-table',
+    nameHe: 'לינה',
+    branches: [
+      {
+        when: { flagIs: { flag: NEED('bed'), value: 'self' } },
+        lines: [
+          { who: 'ניקו', text: 'הספה שלך קצרה מהשם שלך.' },
+          { who: 'לינה', text: 'אצלנו לא מארחים ככה. אצלנו נותנים כתובת של אכסניה ומאחלים בהצלחה.' },
+          { who: 'פוגי', text: 'אצלנו גם. רק שאמא שלי לא יודעת.' },
+        ],
+        choices: I_TABLE_CHOICES,
+      },
+      {
+        when: { any: [{ flagIs: { flag: NEED('tickets'), value: 'refused' } }, { flagIs: { flag: NEED('bed'), value: 'refused' } }] },
+        lines: [
+          { who: 'לינה', text: 'אמרת לא בקול. זה יותר ממה שרוב האנשים עושים.' },
+          { who: 'ניקו', text: 'והתור בשבת — אני אספר עליו בבית כמו על מסע.' },
+        ],
+        choices: I_TABLE_CHOICES,
+      },
+      {
+        when: { any: I01_NEEDS.map((need) => ({ flagIs: { flag: NEED(need), value: 'dropped' } })) },
+        lines: [
+          { who: 'רומא', text: 'את מה שנשאר סידרתי בעצמי. לא שאלת, אז לא סיפרתי.' },
+          { who: 'לינה', text: 'זה בסדר. רק תדע שהוא לא ישן.' },
+        ],
+        choices: I_TABLE_CHOICES,
+      },
+      {
+        lines: [
+          { who: 'לינה', text: 'כולם בבית שלכם מתווכחים ככה?' },
+          { who: 'פוגי', text: 'רק על מה שחשוב. כלומר על הכול.' },
+        ],
+        choices: I_TABLE_CHOICES,
       },
     ],
   },

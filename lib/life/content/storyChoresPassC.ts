@@ -35,6 +35,22 @@ function move(id: string, target: number, hintHe: string): StoryChore {
 }
 
 export const STORY_CHORES_PASS_C: Record<string, StoryChore> = {
+  /** I01 · 2010 — the sofa cleared for two guests: newspapers, the remote, Kobi's coat, a box */
+  'sofa-10': {
+    id: 'sofa-10',
+    where: 'home',
+    drop: { x: 0.73, y: 0.74 },
+    labelHe: 'הספה, לשניים',
+    shape: { mode: 'collect', art: 'propPaperFolded', target: 4, seconds: 30, hintHe: 'עיתונים, שלט, המעיל של אבא, קופסה. לגשת לכל אחד ולהרים. כפתור — לעצור.' },
+    returnSpawn: 'start',
+    finish: (done, target) => {
+      const cleared = clamp(done, target)
+      const events: LifeEvent[] = [{ t: 'flag.set', flag: 'i:need:bed', value: cleared > 0 ? 'self' : 'dropped' }, { t: 'clock.advanced', minutes: 5 * cleared + 5 }]
+      if (cleared > 0) events.push({ t: 'flag.raised', flag: 'life:intl:hosted' }, { t: 'relationship.changed', who: 'lina', axis: 'trust', delta: cleared >= target ? 3 : 1 })
+      return events
+    },
+    toastHe: (done, target) => (done >= target ? 'הספה פנויה. רחל הביאה שמיכה נוספת בלי שביקשת.' : done > 0 ? 'חצי ספה. ניקו אמר שהוא ישן גם על חצי.' : 'הספה נשארה כמו שהיא. רומא ימצא מיטה אחרת.'),
+  },
   'move-12': move('move-12', 8, 'שמונה ארגזים מהמדרכה לטנדר בפינה. אחד כל פעם. כפתור — להפסיק.'),
   'move-12-late': move('move-12-late', 3, 'שלושה שנשארו. אחד כל פעם, לטנדר. כפתור — להפסיק.'),
 }

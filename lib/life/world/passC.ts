@@ -29,6 +29,9 @@ const NO_PARTNER = no('life:partner')
 /** 2012-cups — the evening goes to whoever was promised the hour */
 const CUPS_GOING = any(f('n:go'), is('n:plan', 'elsewhere'))
 
+/** 2010-friends — Roma's three practical things are open until they are done, given, or refused */
+const I_NEED_OPEN = (need: string): Condition => all(f('i:needs'), no(`i:need:${need}`), no('i:banner'))
+
 export const PASS_C_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
   newsroom: [
     // 2006-desk · J02 S1 — what 2002 left on the desk: the letter (after a rumour), or the envelope (after the truth)
@@ -39,18 +42,24 @@ export const PASS_C_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
     { id: 'j2-recorder', era: '2006-desk', x: 0.575, y: 0.72, w: 0.05, act: 'j2-source', verb: 'hold', labelHe: 'ההקלטה והטלפון — מקור שני', when: all(f('j2:checking'), no('j:fix')), priority: 5 },
   ],
   'ticket-office': [
+    // 2010-friends · I01 S2 — two tickets, his money, until the window closes at eight
+    { id: 'i-tickets', era: '2010-friends', x: 0.5, y: 0.92, w: 0.07, act: 'i-tickets', verb: 'buy', labelHe: 'שני כרטיסים ללינה וניקו', when: all(I_NEED_OPEN('tickets'), { beforeMinute: 20 * 60 }), priority: 5 },
     // 2002-desk · J01 S2 — the second source: the cashier, and his list
     { id: 'j-second', era: '2002-desk', x: 0.5, y: 0.92, w: 0.07, act: 'j-second', verb: 'talk', labelHe: 'הקופאי — לשאול על הסוכן', when: all(f('j:verifying'), no('j:second'), no('j:first')), priority: 5 },
+  ],
+  home: [
+    // 2010-friends · I01 S2 — the sofa, cleared for two
+    { id: 'i-bed', era: '2010-friends', x: 0.73, y: 0.74, w: 0.12, act: 'i-bed', verb: 'hold', labelHe: 'הספה — לפנות אותה לשניים', when: I_NEED_OPEN('bed'), priority: 4 },
+    // 2012-cups · N01.2 — the sofa, beside Kobi's armchair
+    { id: 'n-sofa', era: '2012-cups', x: 0.73, y: 0.74, w: 0.12, act: 'n-tv', verb: 'sit', labelHe: 'הספה — לשבת עם אבא לגמר', when: all(is('n:plan', 'sofa'), no('n:watching')), priority: 4 },
   ],
   kitchen: [
     // 2012-cups · N01.1 — "לתאם את הבית מראש": the diary on the fridge, before the door
     { id: 'n-fridge', era: '2012-cups', x: 0.67, y: 0.8, w: 0.07, act: 'n-fridge', verb: 'hold', labelHe: 'היומן על המקרר — לכתוב את הערב', when: all(is('n:plan', 'there'), no('n:fridge'), no('n:final')), prop: { key: 'propPlanner', size: 0.03, at: { x: 0.672, y: 0.47 } }, priority: 4 },
   ],
-  home: [
-    // 2012-cups · N01.2 — the sofa, beside Kobi's armchair
-    { id: 'n-sofa', era: '2012-cups', x: 0.73, y: 0.74, w: 0.12, act: 'n-tv', verb: 'sit', labelHe: 'הספה — לשבת עם אבא לגמר', when: all(is('n:plan', 'sofa'), no('n:watching')), priority: 4 },
-  ],
   allenby: [
+    // 2010-friends · I01 S2 — Roma: what is not done by hand is given to him, or refused out loud
+    { id: 'i-roma', era: '2010-friends', x: 0.672, y: 0.8, w: 0.04, act: 'i-roma', verb: 'talk', labelHe: 'רומא — מה אתה נותן לו', when: all(f('i:needs'), no('i:banner')), priority: 4 },
     // 2002-desk · J01 S1 — three cards on the café table, each with where it comes from
     { id: 'j-phone', era: '2002-desk', x: 0.745, y: 0.8, w: 0.03, act: 'j-ev-phone', verb: 'take', labelHe: 'הטלפון של עמית — ההודעה מהיציע', when: all(f('j:brief'), no('j:ev:phone'), no('j:first')), priority: 4 },
     { id: 'j-notes', era: '2002-desk', x: 0.785, y: 0.8, w: 0.03, act: 'j-ev-notes', verb: 'take', labelHe: 'הפנקס שלך — מה ראית בשש בבוקר', when: all(f('j:brief'), no('j:ev:notes'), no('j:first')), priority: 4 },
@@ -63,6 +72,8 @@ export const PASS_C_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
     { id: 'n-table', era: '2012-cups', x: 0.82, y: 0.77, w: 0.06, act: 'n-table', verb: 'sit', labelHe: 'השולחן בבית הקפה — לשבת', when: all(HAS_PARTNER, f('n:arrived'), no('n:sat')), priority: 4 },
   ],
   street: [
+    // 2010-friends · I01 S2 — the banner's words, with Lina, line by line
+    { id: 'i-translate', era: '2010-friends', x: 0.585, y: 0.745, w: 0.05, act: 'i-translate', verb: 'hold', labelHe: 'הנוסח של הבד — לתרגם עם לינה', when: I_NEED_OPEN('translate'), priority: 4 },
     // 2011-people · L01 S2 — Dor's posters on the wall: her plan, and a roll of tape for his hands
     { id: 'l-posters', era: '2011-people', x: 0.68, y: 0.74, w: 0.07, act: 'l-posters', verb: 'take', labelHe: 'הפוסטרים של דור — לתלות על הקיר', when: all(any(is('l:dorKind', 'task'), is('l:dorKind', 'asked')), no('l:posters')), priority: 4 },
     // 2012-cups · L02 S3 — Amit's boxes, if the first box was closed before the work started
