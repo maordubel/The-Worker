@@ -23,7 +23,7 @@ const C = BRAND
 type Box = { width: number; height: number }
 
 /** Two plates, one word: navy under, vermilion over, offset down-left like the screen's plate-shift. */
-function Plates({ text, size, font, under = C.sign, over = C.red, shift }: { text: string; size: number; font: string; under?: string; over?: string; shift?: number }) {
+export function Plates({ text, size, font, under = C.sign, over = C.red, shift }: { text: string; size: number; font: string; under?: string; over?: string; shift?: number }) {
   const d = shift ?? Math.max(3, Math.round(size / 26))
   return (
     <div style={{ display: 'flex', position: 'relative', fontFamily: font, fontSize: size, lineHeight: 1, fontWeight: font === 'Heebo' ? 800 : font === 'Frank' ? 900 : 700 }}>
@@ -33,7 +33,7 @@ function Plates({ text, size, font, under = C.sign, over = C.red, shift }: { tex
   )
 }
 
-function Frame({ box, children }: { box: Box; children: ReactElement | ReactElement[] }) {
+export function Frame({ box, children }: { box: Box; children: ReactElement | ReactElement[] }) {
   const pad = Math.round(box.width * 0.03)
   const rule = Math.round(pad / 3)
   const off = Math.round(pad / 3)
@@ -76,18 +76,18 @@ function Cow({ size }: { size: number }) {
   )
 }
 
-function Line({ text, size, color = C.ink, weight = 800, font = 'Heebo' }: { text: string; size: number; color?: string; weight?: number; font?: string }) {
+export function Line({ text, size, color = C.ink, weight = 800, font = 'Heebo' }: { text: string; size: number; color?: string; weight?: number; font?: string }) {
   return (
     <div style={{ display: 'flex', fontFamily: font, fontWeight: weight, fontSize: size, color, lineHeight: 1.15, whiteSpace: 'nowrap' }}>{visual(text)}</div>
   )
 }
 
-function Latin({ text, size, color = C.sign }: { text: string; size: number; color?: string }) {
+export function Latin({ text, size, color = C.sign }: { text: string; size: number; color?: string }) {
   return <div style={{ display: 'flex', fontFamily: 'Archivo', fontWeight: 800, fontSize: size, letterSpacing: size * 0.22, color }}>{text}</div>
 }
 
 /** A figure over its caption, in a cell with an ink rule — the result screen's stat row. */
-function Stat({ value, label, size, dark = false }: { value: string; label: string; size: number; dark?: boolean }) {
+export function Stat({ value, label, size, dark = false }: { value: string; label: string; size: number; dark?: boolean }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: `${size * 0.12}px ${size * 0.3}px`, backgroundColor: dark ? C.ink : C.paper, border: `${Math.max(3, size / 22)}px solid ${C.ink}` }}>
       <div style={{ display: 'flex', fontFamily: 'Karantina', fontWeight: 700, fontSize: size, lineHeight: 1, color: dark ? C.red : C.ink }}>{value}</div>

@@ -52,7 +52,8 @@ await browser.close()
  */
 const SAFE = 260
 const STORY_H = 1920
-const SAFE_STRICT = ['closet', 'wanted', 'gaps', 'match']
+// Share V2's artefacts (28.9.2026) are held to it too — every one of them, from the start.
+const SAFE_STRICT = ['closet', 'wanted', 'gaps', 'match', 'slip', 'programme', 'collector', 'contact', 'debate', 'freeze', 'poster', 'clue', 'black', 'clipping', 'strip', 'ticket']
 
 let faults = 0
 for (const [template, boxes] of Object.entries(report ?? {})) {

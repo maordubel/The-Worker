@@ -1,33 +1,55 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
+import { mintChallengeAction } from '@/app/c/actions'
+import { track } from '@/lib/analytics/meter'
+import { GATE_ROUTE, type ChallengeGate, type ChallengeParams, type ChallengeResult } from '@/lib/challenges/contract'
+import { challengeLink } from '@/lib/challenges/create'
+import { inviteLine, telegramInviteHref, whatsappInviteHref } from '@/lib/challenges/invite'
+import { decodeChallenge } from '@/lib/challenges/resolve'
 import { emit, type ShareChannel } from '@/lib/profile/events'
 import { challengeUrl, dareKey, whatsappHref, telegramHref, type ShareKind } from '@/lib/share/copy'
 import { renderStory, type StoryCard } from '@/lib/share/story'
 import { t, type MessageKey } from '@/lib/i18n'
+import { SHARE_KEY } from '@/lib/voice/messages'
 
 /**
- * שורת השיתוף — four ways out of the app, in the order they actually get used.
+ * שורת השיתוף — "שלח ליציע" (ONE RED WORLD §2.1): four ways out of the app, in the order
+ * they actually get used. The ONE share system (rule 19).
  *
- * 1. **סטורי** — renders the 1080×1920 PNG and hands it to `navigator.share({ files })`,
- *    which on a phone opens the sheet with Instagram Stories and WhatsApp Status in it.
- *    On a desktop, or anywhere the file share is unsupported, it downloads instead, and
- *    the button says so rather than failing silently.
- * 2. **וואטסאפ** — a written Hebrew message plus the challenge link, because the group
- *    chat is where Israeli football actually happens.
+ * 1. **סטורי** — renders the 1080×1920 artefact (`lib/share/story.ts`, §28) and hands it
+ *    to `navigator.share({ files })`; on a desktop it downloads instead, and says so.
+ * 2. **וואטסאפ** — the gate's own short human line (§29), then the link on its own line.
  * 3. **טלגרם** — the same, for the channels.
  * 4. **העתק קישור** — the fallback that always works.
  *
- * Every route out carries `?seed=`, so what arrives is not a boast but a dare: the
- * exact same round, playable by whoever opens it.
+ * **Share V2 · the challenge.** A gate that passes `challenge` (the run it played and what
+ * the player did) gets a `/c/<code>` link instead of the bare `?seed=` one: the landing
+ * there carries the Open Graph card, re-checks that the seed still deals the same run,
+ * and forwards the recipient into the identical run with the comparison waiting at the
+ * end (`lib/challenges`). The code is minted on the server once the row is on screen
+ * (the run's fingerprint, and for gate 10 the sealed man, are the server's to take);
+ * until it answers — or if it never does — every button falls back to the plain
+ * same-seed link, so a share never waits on the network to work.
  */
+export type ShareChallenge = {
+  gate: ChallengeGate
+  /** what the player did — REAL ids; the challenge hashes them before they travel */
+  result?: ChallengeResult
+  params?: ChallengeParams
+  /** defaults to `params.s` / `params.r` of the row */
+  seed?: number
+  cursor?: number
+}
+
 export function ShareRow({
   kind,
   params,
   headline,
   card,
   route,
+  challenge,
 }: {
   kind: ShareKind
   /** whatever the message template needs, plus `s` for the seed and `r` for the cursor */
@@ -42,15 +64,55 @@ export function ShareRow({
   headline: string
   /** the story card; omit and the story button is hidden */
   card?: StoryCard
+  /** Share V2 — make the link a challenge (same run + the comparison at the end) */
+  challenge?: ShareChallenge
 }) {
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState<MessageKey | null>(null)
+  const [code, setCode] = useState<string | null>(null)
   const seed = params.s ?? '1'
   const cursor = params.r ?? '0'
   const vars = { ...params, headline }
+
+  const draftKey = challenge ? JSON.stringify(challenge) : ''
+  useEffect(() => {
+    if (!challenge) return
+    let live = true
+    const draft = {
+      gate: challenge.gate,
+      seed: challenge.seed ?? (challenge.gate === 1 || challenge.gate === 10 ? undefined : Number(seed)),
+      cursor: challenge.cursor ?? Number(cursor),
+      params: challenge.params ?? {},
+      ...(challenge.result ? { result: challenge.result } : {}),
+    }
+    mintChallengeAction(draft)
+      .then((minted) => {
+        if (live) setCode(minted)
+      })
+      .catch(() => {
+        // no code: the plain same-seed link is still a real link
+      })
+    return () => {
+      live = false
+    }
+    // the draft is compared by value — a new object with the same run is not a new challenge
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftKey, seed, cursor])
+
+  // the minted code, read back — for gate 10 its result is the server's, not the page's
+  const decoded = code ? decodeChallenge(code) : null
+  const link = code ? challengeLink(code) : challengeUrl(kind, seed, cursor, route)
+  const gateRoute = challenge ? GATE_ROUTE[challenge.gate] : undefined
+
   // Every way out is a share on the card (`profile.shares`), counted when it actually
-  // happened — a sheet opened, a link copied — never on a failed attempt.
-  const shared = (channel: ShareChannel) => emit({ type: 'shared', kind, channel })
+  // happened — a sheet opened, a link copied — never on a failed attempt. Share V2 adds
+  // the plan's own names (§37): `share_created` per channel, `challenge_created` when the
+  // thing shared was a challenge.
+  const shared = (channel: ShareChannel) => {
+    emit({ type: 'shared', kind, channel })
+    track('share_created', { detail: `${kind}:${channel}`, ...(gateRoute ? { gate: gateRoute } : {}) })
+    if (decoded && challenge) track('challenge_created', { detail: `g${challenge.gate}:${channel}`, gate: GATE_ROUTE[challenge.gate] })
+  }
 
   async function story() {
     if (!card || busy) return
@@ -65,7 +127,7 @@ export function ShareRow({
         typeof navigator.canShare === 'function' &&
         navigator.canShare({ files: [file] })
       if (shareable) {
-        await navigator.share({ files: [file], text: challengeUrl(kind, seed, cursor, route) })
+        await navigator.share({ files: [file], text: link })
         shared('story')
       } else {
         const url = URL.createObjectURL(blob)
@@ -86,7 +148,7 @@ export function ShareRow({
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(challengeUrl(kind, seed, cursor, route))
+      await navigator.clipboard.writeText(link)
       shared('copy')
       setNote('share.copied')
     } catch {
@@ -94,20 +156,22 @@ export function ShareRow({
     }
   }
 
+  const wa = code && decoded ? whatsappInviteHref(decoded, code) : whatsappHref(kind, vars, seed, cursor, route)
+  const tg = code && decoded ? telegramInviteHref(decoded, code) : telegramHref(kind, vars, seed, cursor, route)
+
   return (
-    <section aria-label={t('share.title')} className="mt-stack border-rule border-ink bg-ink p-4">
+    <section aria-label={t(SHARE_KEY)} data-share-row={code ? 'challenge' : 'seed'} className="mt-stack border-rule border-ink bg-ink p-4">
       <div className="flex items-baseline justify-between gap-3">
-        <p className="font-display text-step-1 leading-none text-paper">{t('share.title')}</p>
+        <p className="font-display text-step-1 leading-none text-paper">{t(SHARE_KEY)}</p>
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           SPREAD IT
         </p>
       </div>
       {/* The dare describes what the LINK does, so it cannot be one sentence for every
           gate: a gate with a seed hands over the identical round, and the polls wing
-          hands over a blank slip. Printing "אותן שאלות, אותו סדר, אותו שעון" under a
-          ballot would be describing a round that does not exist. */}
+          hands over a blank slip. A challenge says it in the gate's own voice (§29). */}
       <p className="mt-1.5 font-body text-[11.5px] leading-relaxed text-concrete">
-        {t(dareKey(kind))}
+        {decoded ? inviteLine(decoded) : t(dareKey(kind))}
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
@@ -131,7 +195,7 @@ export function ShareRow({
           </button>
         )}
         <a
-          href={whatsappHref(kind, vars, seed, cursor, route)}
+          href={wa}
           onClick={() => shared('whatsapp')}
           target="_blank"
           rel="noopener noreferrer"
@@ -140,7 +204,7 @@ export function ShareRow({
           {t('share.whatsapp')}
         </a>
         <a
-          href={telegramHref(kind, vars, seed, cursor, route)}
+          href={tg}
           onClick={() => shared('telegram')}
           target="_blank"
           rel="noopener noreferrer"
