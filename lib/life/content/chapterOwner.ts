@@ -679,6 +679,7 @@ export const CONVERSATIONS_OWNER: Conversation[] = [
             when: { beforeMinute: DEADLINE - MIN_FANS },
             noteHe: 'ארבעים דקות על הספרים, ואין ארבעים עד שמונה.',
             then: [
+              { e: 'flag', flag: 'o:tri:fans' },
               { e: 'flagValue', flag: 'o:tri:fans', value: 'books' },
               { e: 'time', minutes: MIN_FANS },
               { e: 'rel', who: 'yevgeny', axis: 'trust', delta: 4 },
@@ -692,6 +693,7 @@ export const CONVERSATIONS_OWNER: Conversation[] = [
             when: { beforeMinute: DEADLINE - MIN_FANS },
             noteHe: 'ארבעים דקות של ניסוח, ואין ארבעים עד שמונה.',
             then: [
+              { e: 'flag', flag: 'o:tri:fans' },
               { e: 'flagValue', flag: 'o:tri:fans', value: 'seat' },
               { e: 'flagValue', flag: 'life:owner:fanseat', value: true },
               { e: 'time', minutes: MIN_FANS },

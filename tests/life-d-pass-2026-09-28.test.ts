@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { DIALOGUE } from '@/lib/life/content/dialogue'
+import { RIDES, RIDE_PREFIX } from '@/lib/life/content/passages'
+import { meets } from '@/lib/life/world/types'
 import type { LifeEvent } from '@/lib/life/events'
 import type { DialogueChoice } from '@/lib/life/runtime/bus'
 
@@ -122,5 +125,82 @@ describe('2025-owner — money, sport, trust: two corners before eight', () => {
     expect(fans.find((c) => c.id === 'books')?.enabled).toBe(false)
     const squad = choicesOf(sim, 'o-tri-squad')
     expect(squad.find((c) => c.id === 'two')?.enabled).toBe(true)
+  })
+})
+
+// ============================================ 2026-finale — the walk and the last word ===
+
+describe('2026-finale — the walk after F04, and the last word is Kobi’s', () => {
+  function outside(flags: Record<string, boolean | string | number>, close = 'father') {
+    const sim = new WorldSim('2026-finale')
+    seed(sim, { 'f:name': true, 'f:road': true, 'f:seats': true, 'f:inside': true, ...flags })
+    const heard: string[] = []
+    sim.onMinigame = (id, world) => {
+      const ride = RIDES[id.replace(RIDE_PREFIX, '')]
+      if (!ride) return
+      for (const stop of ride.stops) {
+        if (!stop.conversation) continue
+        heard.push(stop.conversation)
+        world.converse(stop.conversation, pick())
+      }
+      for (const flag of ride.flags) world.engine.dispatch({ t: 'flag.raised', flag })
+      world.go(ride.land.mapId as never)
+    }
+    sim.beatAnswer = pick(close)
+    sim.go('arena-out')
+    return { sim, heard }
+  }
+
+  it('the answer outside the hall starts a walk; the card comes only after it', () => {
+    const { sim, heard } = outside({ 'life:finale:party': 'two' })
+    expect(heard).toEqual(['f-walk-step', 'f-walk-shirt', 'f-walk-phone', 'f-walk-sign', 'f-walk-road'])
+    expect(sim.state.flags['f:walked']).toBe(true)
+    expect(sim.endings).toEqual(['together'])
+  })
+
+  it('every walk stop answers the life it is walked in — and has its own line for a life without the thing', () => {
+    for (const id of ['f-walk-step', 'f-walk-shirt', 'f-walk-phone', 'f-walk-sign']) {
+      const conversation = DIALOGUE[id]
+      expect(conversation, id).toBeDefined()
+      expect(conversation!.branches.length, id).toBeGreaterThan(2)
+      // the last branch has no `when`: nobody walks past a stop in silence
+      expect(conversation!.branches[conversation!.branches.length - 1]!.when, id).toBeUndefined()
+    }
+  })
+
+  it('the shirt, the shoulders, the child, the work: the branch chosen is the life', () => {
+    const state = (flags: Record<string, boolean | string | number>) => {
+      const sim = new WorldSim('2026-finale')
+      seed(sim, flags)
+      return sim.state
+    }
+    const first = (id: string, flags: Record<string, boolean | string | number>) =>
+      DIALOGUE[id]!.branches.findIndex((branch) => meets(state(flags), branch.when))
+    expect(first('f-walk-shirt', { 'own:outfit:2026-finale': 'visa86', 'life:first-shirt:gift': true })).toBe(0)
+    expect(first('f-walk-shirt', { 'own:outfit:2026-finale': 'plain' })).toBe(3)
+    expect(first('f-walk-step', { 'life:a1:grip': 'caught' })).toBe(0)
+    expect(first('f-walk-phone', { 'life:finale:party': 'three', 'life:child': true })).toBe(0)
+    expect(first('f-walk-sign', { 'life:owner:role': 'controlling_owner', 'life:owner:triangle': 'money_squad' })).toBe(0)
+  })
+
+  it('three generations close on the child’s word, and a life elsewhere on "ותתקשר גם משם"', () => {
+    const three = outside({ 'life:finale:party': 'three', 'life:child': true }, 'three')
+    expect(three.sim.endings).toEqual(['generations'])
+    const abroad = outside({ 'life:finale:party': 'reunion', 'life:abroad': true }, 'mine')
+    expect(abroad.sim.endings).toEqual(['mine'])
+  })
+
+  it('a reload in the middle of the walk offers the walk again, never a room without a door', () => {
+    const sim = new WorldSim('2026-finale')
+    seed(sim, { 'f:name': true, 'f:road': true, 'f:seats': true, 'f:inside': true, 'f:back': true, 'life:finale:close': 'together' })
+    let offered = 0
+    sim.onMinigame = (id) => {
+      if (id === 'ride:walk-26') offered += 1
+    }
+    sim.beatAnswer = pick()
+    sim.go('arena-out')
+    sim.wait(2)
+    expect(offered).toBeGreaterThan(0)
+    expect(sim.endings).toEqual([])
   })
 })
