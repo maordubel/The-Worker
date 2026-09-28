@@ -29,7 +29,7 @@ import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
 import { PlayerShirt } from '@/components/stage/PlayerShirt'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { Num } from '@/components/ui/Num'
-import { GOAL_SECONDS, GOALS_PER_RUN, MAX_TOUCHES, MIN_TOUCHES, PITCH } from '@/lib/game/goal-zones'
+import { GOAL_SECONDS, GOALS_PER_RUN, MAX_TOUCHES, MIN_TOUCHES, PITCH, zoneCentre100, zoneIndexAt } from '@/lib/game/goal-zones'
 import { useCrowd } from '@/lib/game/replay/crowd'
 import { EMPTY_BUILD, EMPTY_DRAFT, type BuildState } from '@/lib/game/replay/draft'
 import type { Envelope, ReplayPoint, TruthTouch, UserTouch } from '@/lib/game/replay/envelope'
@@ -63,7 +63,10 @@ import { goalCardQuery } from '@/lib/og/params'
 import { haptic } from '@/lib/play/haptics'
 import { SITE_URL } from '@/lib/brand'
 import { collect } from '@/lib/profile/store'
-import { artFor } from '@/lib/share/story'
+import { freezeCard } from '@/lib/share/artefacts'
+import { entityHash } from '@/lib/challenges/wire'
+import type { ChallengeResult } from '@/lib/challenges/contract'
+import { CompareCard } from '@/components/share/CompareCard'
 import type { GoalChallenge, GoalVerdict } from '@/lib/game/goal'
 import type { Wardrobe } from '@/lib/kit/playerShirt'
 import type { Embedded } from '@/lib/mechanics/types'
@@ -107,6 +110,8 @@ type Played = {
   good: number
   /** ONE RED WORLD §17 — the key mismatch in words ("המסירה השנייה ברחה קצת"), null when there was none */
   miss: string | null
+  /** the player's route as zone indices — what a challenge compares (§44), never the archive's */
+  zones: number[]
 }
 
 type Run = {
@@ -462,6 +467,7 @@ export function GoalRun({
             matched,
             good,
             miss: mismatchLine(keyMismatch(result)),
+            zones: placed[0] ? [zoneIndexAt(placed[0].origin), ...placed.map((touch) => zoneIndexAt(touch.target))].slice(0, 16) : [],
           },
         ],
       }))
@@ -632,7 +638,7 @@ export function GoalRun({
     }
   }, [phase, revealRunning, cancelReveal])
 
-  if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} phone={phone} links={links} />
+  if (run.over || !challenge) return <Result run={run} seed={seed} cursor={cursor} phone={phone} links={links} pin={pin} />
 
   /* ------------------------------------------------------------ what the board says */
 
@@ -1060,7 +1066,7 @@ function SoundGlyph({ muted }: { muted: boolean }) {
  * two natural doors from `recommend()` — LIFE only for a chapter this device finished —
  * and "שלח ליציע", closed, holding the gate's own share (rule 19).
  */
-function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; cursor: number; phone: boolean; links?: Record<string, CrossLink[]> }) {
+function Result({ run, seed, cursor, phone, links, pin = null }: { run: Run; seed: number; cursor: number; phone: boolean; links?: Record<string, CrossLink[]>; pin?: string | null }) {
   const [share, setShare] = useState(false)
   const [next, setNext] = useState<NextAction[]>([])
   const played = run.played
@@ -1120,27 +1126,20 @@ function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; c
       </ul>
     ) : null
 
+  const goalResult: ChallengeResult = { gate: 8, accuracy: played.map((p) => p.overall), routes: played.map((p) => p.zones) }
   const row = (
     <>
       <ShareRow
         kind="goal"
         params={{ h: String(average), s: String(seed), r: String(cursor) }}
         headline={t('goal.shareHeadMove', { pct: String(average) })}
-        card={{
-          template: 'grass' as const,
-          art: artFor('goal', average / 100),
-          kicker: 'GATE 8 · REBUILD THE GOAL',
-          label: t('screen.goal.title'),
-          eyebrow: t('goal.overall'),
-          hero: `${average}%`,
-          bigStat: { v: `${best}%`, k: t('goal.bestMove') },
-          stats: [
-            { k: t('run.score'), v: String(run.score) },
-            { k: t('goal.continuityAvg'), v: `${continuity}%` },
-          ],
-          cta: t('goal.cta'),
-          challenge: t('share.sameRound'),
-        }}
+        card={freezeCard({
+          match: t('screen.goal.title'),
+          route: (played[played.length - 1]?.zones ?? []).map((z) => zoneCentre100(z)),
+          accuracy: average,
+          clock: `${played.length}/${GOALS_PER_RUN}`,
+        })}
+        challenge={{ gate: 8, params: { goalHash: pin ? entityHash(pin) : undefined }, result: goalResult }}
       />
       {chips}
     </>
@@ -1150,6 +1149,7 @@ function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; c
     <div className="flex min-h-0 flex-1 flex-col md:mt-stack md:block">
       <Punch />
       <RecordRun gate="/goal" score={run.score} correct={matched} asked={asked} />
+      <CompareCard gate={8} mine={goalResult} />
       <div className="shrink-0 border-b-rule border-ink pb-2" data-goal="words-run">
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           FULL TIME

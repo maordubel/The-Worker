@@ -9,7 +9,10 @@ import { SlideDeck } from '@/components/stage/SlideDeck'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { Num } from '@/components/ui/Num'
 import { SourceNote } from '@/components/ui/SourceNote'
-import { ExitNext, UniversalExit } from '@/components/result/UniversalExit'
+import { ExitNext, ExitShare, UniversalExit } from '@/components/result/UniversalExit'
+import { ShareRow } from '@/components/share/ShareRow'
+import { collectorCard } from '@/lib/share/artefacts'
+import { whatsappLine } from '@/lib/voice/select'
 import { activeCollection, type Collection } from '@/lib/kit/collection'
 import { closestDecade, decadeWord, readLifeKitKeys } from '@/lib/kit/wardrobe'
 import type { NextAction } from '@/lib/results/types'
@@ -117,6 +120,25 @@ export function KitWing({
     [unlocked],
   )
   const owned = Object.keys(built).length
+  // "זה הארון שלי." (§28) — the collector card of the shirt last built and PROVED (a row the
+  // server drew), with the closet's count beside it. No round to hand over: the link opens
+  // the wing, never a Gate 4 answer — a locked shirt stays an outline (rule 24).
+  const latest = Object.values(unlocked)
+    .map((row) => ({ row, when: built[row.key]?.lastBuiltOn ?? '', parts: built[row.key]?.bestParts ?? 0 }))
+    .sort((a, b) => b.when.localeCompare(a.when))[0]
+  const closetShare = latest ? (
+    <ShareRow
+      kind="closet"
+      route="/kits"
+      params={{}}
+      headline={t('kits.shareHead', { n: String(owned), total: String(catalog.length) })}
+      card={{
+        ...collectorCard({ season: latest.row.seasonLabel, serial: owned, kit: latest.row.spec, right: latest.parts, total: 5 }),
+        kicker: 'GATE 5 · THE CLOSET',
+        cta: whatsappLine(5),
+      }}
+    />
+  ) : undefined
   // §14 — the hero is COUNTED ("14 מתוך 33 חזרו לארון"), the objective is DERIVED (the decade
   // closest to closing), and neither is typed anywhere
   const opening = voice({ gate: 5, moment: 'intro', vars: { n: String(owned), total: String(catalog.length) } })
@@ -282,9 +304,9 @@ export function KitWing({
             </p>
           )}
 
-          {/* §6 — the wing closes like every gate: the line, one or two doors. No share row:
-              the wing has no run to hand over, and it builds no second share system (rule 19). */}
-          {owned > 0 && <UniversalExit voice={closing} next={next} from="kits" />}
+          {/* §6 — the wing closes like every gate: the line, one or two doors, and the closet
+              card through the ONE share system (rule 19) — it hands over the wing, not a run. */}
+          {owned > 0 && <UniversalExit voice={closing} next={next} from="kits" share={closetShare} />}
         </>
       )}
     </div>
@@ -419,6 +441,13 @@ export function KitWing({
             {owned > 0 && next.length > 0 && (
               <div className="shrink-0">
                 <ExitNext next={next} from="kits" compact />
+              </div>
+            )}
+            {owned > 0 && closetShare && (
+              <div className="shrink-0">
+                <ExitShare label={closing.ctaShare} from="kits">
+                  {closetShare}
+                </ExitShare>
               </div>
             )}
           </>

@@ -126,6 +126,10 @@ export default function LineupPage({
           }
           intro={challenge.intro}
           sourceTitle={challenge.sourceTitle}
+          fixture={{
+            titleHe: challenge.titleHe,
+            dateHe: challenge.subtitleHe ?? (challenge.intro.playedOn ? dayHe(challenge.intro.playedOn) : ''),
+          }}
         />
       )}
 

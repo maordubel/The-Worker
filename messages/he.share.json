@@ -111,5 +111,10 @@
   "artefact.clipping.title": "מהארכיון",
   "share.msg.blindcow": "{headline}\nאותו שחקן, אותם רמזים. אל תגלו בקבוצה.",
   "share.msg.rumble": "{headline}\nאותם קלפים בדיוק. תן את החמישה שלך.",
-  "share.msg.thread": "{headline}\nאותם קצוות, אותו חוט. איזה דרך אתה מוצא?"
+  "share.msg.thread": "{headline}\nאותם קצוות, אותו חוט. איזה דרך אתה מוצא?",
+  "share.msg.archive": "מצאתי את זה בארכיון.\n{headline}\nפתח את הסיפור.",
+  "share.dare.archive": "הקישור פותח את אותו פריט בארכיון — את הסיפור עצמו, לא סיבוב.",
+  "share.msg.life": "{headline}\nהסיפור מחכה באותו מקום. תתחיל משלך.",
+  "share.dare.life": "הקישור פותח את הפרק הזה מההתחלה שלו — לא מאמצע.",
+  "kits.shareHead": "{n} מתוך {total} חולצות בארון"
 }

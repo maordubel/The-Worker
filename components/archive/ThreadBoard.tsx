@@ -6,6 +6,10 @@ import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
 import { ExitNext } from '@/components/result/UniversalExit'
+import { CompareCard } from '@/components/share/CompareCard'
+import { ShareRow } from '@/components/share/ShareRow'
+import type { ChallengeResult } from '@/lib/challenges/contract'
+import { stripCard } from '@/lib/share/artefacts'
 import { track } from '@/lib/analytics/meter'
 import { microFeedback, tierFromShare, voice } from '@/lib/voice'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
@@ -874,6 +878,12 @@ function Success({
 function Result({ outcomes, total, seed, cursor }: { outcomes: Outcome[]; total: number; seed: number; cursor: number }) {
   const closed = outcomes.filter((o) => o.closed)
   const score = outcomes.reduce((sum, o) => sum + o.score, 0)
+  const mine: ChallengeResult = {
+    gate: 13,
+    variant: 'thread',
+    steps: outcomes.map((o) => (o.closed ? o.stops + 1 : 0)),
+    solved: outcomes.map((o) => o.closed),
+  }
   const spoken = voice({ gate: 13, moment: 'result', result: tierFromShare(total > 0 ? closed.length / total : 0), seed: `${seed}:${cursor}`, vars: { n: String(closed.reduce((sum, o) => sum + o.stops + 1, 0)) } })
   const [next, setNext] = useState<NextAction[]>([])
   useEffect(() => {
@@ -937,9 +947,22 @@ function Result({ outcomes, total, seed, cursor }: { outcomes: Outcome[]; total:
           </li>
         ))}
       </ol>
+      <CompareCard gate={13} mine={mine} />
       <div className="mt-3">
         <ExitNext next={next} from="timeline-thread" />
       </div>
+      <ShareRow
+        kind="thread"
+        params={{ s: String(seed), r: String(cursor) }}
+        headline={`${closed.length}/${total}`}
+        card={stripCard({
+          variant: 'thread',
+          // the two ends each level showed at its start — never the route between them
+          rows: outcomes.map((o) => ({ text: `${cardTitle(o.start)} ← ${cardTitle(o.end)}`, ok: o.closed })),
+          steps: closed.reduce((sum, o) => sum + o.stops + 1, 0),
+        })}
+        challenge={{ gate: 13, params: { variant: 'thread' }, result: mine }}
+      />
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <PlayLink gate="/timeline" className="flex min-h-tap items-center justify-center border-rule border-red bg-red px-4 font-body text-step-0 font-extrabold text-paper">
           {t('thread.result.again')}

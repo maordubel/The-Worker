@@ -7,7 +7,7 @@ import { accepted, kitRecords, playableKits, specOf, type KitMasterRecord } from
 import { photoMissing } from '@/lib/kit/photo'
 import { COLLARS, COLOUR_NAME, DEFAULT_SPEC, PATTERNS, SLEEVES, type KitSpec } from '@/lib/kit/spec'
 import { hintReceipt, signKitUnlock, verifyHintReceipt } from '@/lib/kit/unlock'
-import { cycleSeed, positionOf } from '@/lib/rotation/deck'
+import { cycleSeed, positionOf, takeFrom } from '@/lib/rotation/deck'
 
 import { rng, shuffle } from './archive'
 import {
@@ -259,11 +259,11 @@ export function kitYears(): Array<{ id: string; year: number }> {
     .filter((row) => Number.isFinite(row.year) && row.year > 0)
 }
 
-function deal(seed: number, cursor: number, window?: KitWindow): Dealt[] {
-  const key = `${seed}|${cursor}|${window ? `${window.before}:${window.pin ?? ''}:${window.options ?? ''}` : ''}`
+function deal(seed: number, cursor: number, window?: KitWindow, legacy = false): Dealt[] {
+  const key = `${seed}|${cursor}|${window ? `${window.before}:${window.pin ?? ''}:${window.options ?? ''}` : ''}|${legacy && !window ? 'L' : ''}`
   const hit = DEALT.get(key)
   if (hit) return hit
-  const out = dealFresh(seed, cursor, window)
+  const out = dealFresh(seed, cursor, window, legacy)
   DEALT.set(key, out)
   if (DEALT.size > 64) DEALT.delete(DEALT.keys().next().value as string)
   return out
@@ -299,12 +299,26 @@ export function kitRoundAt<T extends { id: string }>(pool: readonly T[], seed: n
   return out
 }
 
-function dealFresh(seed: number, cursor: number, window?: KitWindow): Dealt[] {
+/**
+ * A link shared before the cursor counted SHIRTS (`?seed=&r=k`, no `n`) addressed ROUND k: one
+ * shuffle of the pool per cycle of `ceil(pool/5)` rounds, the k-th slice of five, and the options
+ * drawn on the SAME stream after the shuffle. `legacy` replays exactly that deal, so a link in
+ * somebody's chat from before the change still hands over the round it was bragging about.
+ */
+function legacyRound(seed: number, k: number, pool: readonly KitMasterRecord[]): { round: KitMasterRecord[]; random: () => number } {
+  const at = positionOf(seed, k, pool.length, KIT_ROUND)
+  const random = rng(at.seed)
+  return { round: takeFrom(shuffle([...pool], random), at.slot * KIT_ROUND, KIT_ROUND), random }
+}
+
+function dealFresh(seed: number, cursor: number, window?: KitWindow, legacy = false): Dealt[] {
   const all = kitRecords()
   const pool = playableKits()
   let round: KitMasterRecord[]
   let random: () => number
-  if (window) {
+  if (!window && legacy) {
+    ;({ round, random } = legacyRound(seed, cursor, pool))
+  } else if (window) {
     const at = positionOf(seed, cursor, pool.length, KIT_ROUND)
     random = rng(at.seed)
     const eligible = pool.filter((kit) => seasonStart(kit) < window.before)
@@ -356,8 +370,8 @@ export function kitPuzzleCount(): number {
   return playableKits().length
 }
 
-export function dealKitRound(seed: number, cursor = 0, window?: KitWindow): KitPuzzle[] {
-  return deal(seed, cursor, window).map((row) => row.puzzle)
+export function dealKitRound(seed: number, cursor = 0, window?: KitWindow, legacy = false): KitPuzzle[] {
+  return deal(seed, cursor, window, legacy).map((row) => row.puzzle)
 }
 
 /* ------------------------------------------------------------------ grading */
@@ -446,8 +460,9 @@ export function gradeKitPuzzle(
   receipts: readonly string[] = [],
   claimedHints = 0,
   window?: KitWindow,
+  legacy = false,
 ): KitVerdict | null {
-  const row = deal(seed, cursor, window)[index]
+  const row = deal(seed, cursor, window, legacy)[index]
   if (!row) return null
   const { kit, puzzle } = row
   const truthSpec = specOf(kit)
@@ -501,9 +516,9 @@ export function gradeKitPuzzle(
 }
 
 /* ------------------------------------------------------------------ hints */
-export function kitHint(seed: number, index: number, kind: KitHintKind, cursor = 0, window?: KitWindow): KitHintAnswer | null {
+export function kitHint(seed: number, index: number, kind: KitHintKind, cursor = 0, window?: KitWindow, legacy = false): KitHintAnswer | null {
   if (!HINT_KINDS.includes(kind)) return null
-  const row = deal(seed, cursor, window)[index]
+  const row = deal(seed, cursor, window, legacy)[index]
   if (!row) return null
   const f = row.kit.fields
   const flip = (seed + cursor + index) % 2 === 0

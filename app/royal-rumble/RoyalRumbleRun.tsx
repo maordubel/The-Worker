@@ -31,6 +31,8 @@ import type { KitSpec } from '@/lib/kit/spec'
 import type { Embedded } from '@/lib/mechanics/types'
 import { t } from '@/lib/royal-rumble/i18n'
 import { ExitNext } from '@/components/result/UniversalExit'
+import { CompareCard } from '@/components/share/CompareCard'
+import { RoyalRumbleChallenge } from './RoyalRumbleChallenge'
 import { track } from '@/lib/analytics/meter'
 import type { NextAction } from '@/lib/results/types'
 import { voice, voiceAction, type ResultTier } from '@/lib/voice'
@@ -501,6 +503,7 @@ function RoyalRumbleRunInner({
   draft,
   shuffleDraft,
   cursor,
+  roundSeed,
   playerCount,
   kits,
   embedded,
@@ -509,6 +512,8 @@ function RoyalRumbleRunInner({
   draft: RoyalRumbleDraft
   shuffleDraft: RoyalRumbleDraft
   cursor: number
+  /** the round the page dealt (`?seed=`) — what a challenge link hands over; absent inside LIFE */
+  roundSeed?: number
   playerCount: number
   kits: EraKit[]
   /**
@@ -546,6 +551,11 @@ function RoyalRumbleRunInner({
   const complete = pickedCount === activeDraft.slots.length
   const currentSlot = activeDraft.slots[activeSlot] ?? activeDraft.slots[0]
   const selectedPlayers = useMemo(() => picks.filter(isPick), [picks])
+  /** slug → name over both boards — the challenger's five come back as hashes (§44) */
+  const rumbleNames = useMemo(
+    () => Object.fromEntries([draft, shuffleDraft].flatMap((d) => d.slots.flatMap((slot) => slot.offers.map((offer) => [offer.player.slug, offer.player.nameHe])))),
+    [draft, shuffleDraft],
+  )
   const formation = resolvePublicFormation(picks)
   // one shuffle, and only before the first pick (§27)
   const shuffleOpen = allowShuffle && !shuffleUsed && pickedCount === 0 && phase === 'draft' && !busy
@@ -771,6 +781,17 @@ function RoyalRumbleRunInner({
           <span><span className="block font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/60" dir="ltr">RUN IT BACK</span><span className="font-display text-[27px]">{t('again')}</span></span>
           <span className="font-display text-[38px] transition group-hover:-translate-x-1 motion-reduce:transition-none" aria-hidden="true">←</span>
         </a>
+
+        <CompareCard gate={9} mine={{ gate: 9, picks: selectedPlayers.map((offer) => offer.player.slug) }} names={rumbleNames} />
+
+        {roundSeed !== undefined && (
+          <RoyalRumbleChallenge
+            seed={activeDraft.seed}
+            roundSeed={roundSeed}
+            cursor={cursor}
+            five={selectedPlayers.map((offer) => ({ slug: offer.player.slug, roleHe: positionHe(offer.offeredAs), nameHe: offer.player.nameHe }))}
+          />
+        )}
 
         <div className="mt-3 shrink-0">
           <ExitNext next={next} from="royal-rumble" />

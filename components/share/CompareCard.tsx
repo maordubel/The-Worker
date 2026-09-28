@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useRef } from 'react'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
 
 import { track } from '@/lib/analytics/meter'
 import { compareResults, type CompareOut } from '@/lib/challenges/compare'
@@ -25,7 +25,29 @@ import { t } from '@/lib/i18n'
  * Names never come from the link: `names` is the gate's own id → name map, hashed here
  * so the challenger's hashes can find them.
  */
-export function CompareCard({
+type CompareProps = {
+  gate: ChallengeGate
+  /** this player's result, with real ids — hashed here before comparing */
+  mine: ChallengeResult | null
+  /** id → name, from the gate's own roster (XI, rumble, memory) */
+  names?: Readonly<Record<string, string>>
+  /** the challenge code, when the gate already holds it; otherwise read from `?ch=` */
+  code?: string | null
+}
+
+/**
+ * `useSearchParams` in a statically rendered route needs a Suspense boundary of its own,
+ * or the build bails the whole page out to client rendering — so the card brings one.
+ */
+export function CompareCard(props: CompareProps) {
+  return (
+    <Suspense fallback={null}>
+      <CompareInner {...props} />
+    </Suspense>
+  )
+}
+
+function CompareInner({
   gate,
   mine,
   names,

@@ -11,6 +11,8 @@ import { REACTIONS, reactionSetOf, type ConfidenceWord, type EntityDetail, type 
 import { crestArt } from '@/lib/kit/crestMarks'
 import { t, type MessageKey } from '@/lib/i18n'
 import { voiceAction } from '@/lib/voice'
+import { ShareRow } from '@/components/share/ShareRow'
+import { clippingCard } from '@/lib/share/artefacts'
 import { GateRouter } from './GateRouter'
 import { ArtifactMark, CloseMark, EntityRow, Eyebrow, LATIN, cardTitle, typeLabel } from './EntityCard'
 
@@ -222,6 +224,15 @@ export function ArchiveDrawer({
               <SourceNote />
             </p>
           )}
+          {/* gate 12's share (§28): the press clipping — "מצאתי את זה בארכיון." — and a link
+              to this very item, never a round (rule 19) */}
+          <ShareRow
+            kind="archive"
+            route={`/archive?at=${encodeURIComponent(card.id)}`}
+            params={{}}
+            headline={title}
+            card={clippingCard({ date: card.when ?? '', headline: title, caption: clippingCaption(detail.what, typeLabel(card)), label: `ARCHIVE · ${LATIN[card.type]}` })}
+          />
           {report && <div className="md:hidden">{report}</div>}
         </div>
 
@@ -276,6 +287,20 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
       {children}
     </section>
   )
+}
+
+/** one line under the clipping's headline: the item's own words, never a column's full text */
+function clippingCaption(what: WhatBlock, fallback: string): string {
+  switch (what.kind) {
+    case 'text':
+      return what.text.length > 200 ? `${what.text.slice(0, 199).trimEnd()}…` : what.text
+    case 'match':
+      return [what.competitionHe, what.stage].filter(Boolean).join(' · ') || fallback
+    case 'quote':
+      return what.byline || fallback
+    default:
+      return fallback
+  }
 }
 
 function What({ what }: { what: WhatBlock }) {

@@ -6,6 +6,7 @@ import { gateMetadata } from '@/lib/seo'
 import { resolveChapterAnchor, resolvePrologueAnchor, resolveStageBAnchor, resolveUssishkinAnchor, resolveStageBAnchors } from '@/lib/life/anchor-server'
 
 import { lifeDoors } from '@/lib/life/bridge'
+import { chapterFor } from '@/lib/life/content/chapters'
 
 import { LifeStage } from './LifeStage'
 import { resolveMechanicCatalog } from './mechanicCatalog'
@@ -21,7 +22,19 @@ import { resolveMechanicCatalog } from './mechanicCatalog'
  *
  * `chrome={false}` because a game screen belongs to the game (rule 21).
  */
-export const metadata: Metadata = gateMetadata('life')
+/**
+ * A shared ticket lands here with `?ch=<chapter>` (§28, `StageFinale`): the chapter names the
+ * preview ("חזרתי עכשיו ל־1986.") and nothing else — the game still opens where THIS device's
+ * life stands, never in the middle of somebody else's chapter.
+ */
+export function generateMetadata({ searchParams }: { searchParams?: { ch?: string | string[] } }): Metadata {
+  const base = gateMetadata('life')
+  const raw = Array.isArray(searchParams?.ch) ? searchParams?.ch[0] : searchParams?.ch
+  const chapter = typeof raw === 'string' && raw.length <= 40 ? chapterFor(raw) : null
+  if (!chapter) return base
+  const description = t('artefact.ticket.cta', { year: String(chapter.year) })
+  return { ...base, description, openGraph: { ...base.openGraph, description }, twitter: { ...base.twitter, description } }
+}
 
 export default function LifePage() {
   const anchor = resolveChapterAnchor()

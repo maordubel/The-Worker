@@ -116,10 +116,16 @@ export function KitGameRun({
   embedded,
   exactKits,
   mode: chosenMode = null,
+  legacy = false,
 }: {
   puzzles: KitPuzzle[]
   seed: number
   cursor?: number
+  /**
+   * A link from before the cursor counted shirts (`?seed=&r=k`, no `n`): `cursor` is ROUND k and
+   * the server replays the old deal (`legacyRound` in `lib/game/kitBuild.ts`). Always Full.
+   */
+  legacy?: boolean
   /**
    * Full (5) or Quick (3) — ONE RED WORLD §13. `null` = the link named no mode, so the gate opens
    * on its line and asks. A deal is always five; Quick plays the first three and the cursor moves
@@ -159,7 +165,7 @@ export function KitGameRun({
   const played = mode ? puzzles.slice(0, KIT_MODE_SIZE[mode]) : puzzles
   if (!mode) return <KitIntro onPick={setMode} />
   const puzzle = played[index]
-  if (finished || !puzzle) return <RoundSummary log={log} seed={seed} cursor={cursor} mode={mode} />
+  if (finished || !puzzle) return <RoundSummary log={log} seed={seed} cursor={cursor} mode={mode} legacy={legacy} />
 
   const complete = STEP_ORDER.every((step) => Boolean(placed[step]))
   const reviewing = active === REVIEW
@@ -211,7 +217,7 @@ export function KitGameRun({
   async function hint(kind: KitHintKind) {
     if (busy || hints.some((row) => row.kind === kind)) return
     setBusy(true)
-    const answer = await askKitHint(seed, index, kind, cursor, lifeWindow)
+    const answer = await askKitHint(seed, index, kind, cursor, lifeWindow, legacy)
     setBusy(false)
     if (answer) {
       setHints((rows) => [...rows, answer])
@@ -222,7 +228,7 @@ export function KitGameRun({
   async function check() {
     if (!complete || busy || !puzzle) return
     setBusy(true)
-    const answer = await submitKit(seed, index, placed, cursor, hints.map((row) => row.receipt), hints.length, lifeWindow)
+    const answer = await submitKit(seed, index, placed, cursor, hints.map((row) => row.receipt), hints.length, lifeWindow, legacy)
     setBusy(false)
     if (!answer) return
     setVerdict(answer)
@@ -849,7 +855,7 @@ function KitIntro({ onPick }: { onPick: (mode: KitMode) => void }) {
 }
 
 /* ------------------------------------------------------------------ the round */
-function RoundSummary({ log, seed, cursor, mode }: { log: KitVerdict[]; seed: number; cursor: number; mode: KitMode }) {
+function RoundSummary({ log, seed, cursor, mode, legacy = false }: { log: KitVerdict[]; seed: number; cursor: number; mode: KitMode; legacy?: boolean }) {
   const router = useRouter()
   const score = log.reduce((sum, row) => sum + row.score, 0)
   const right = log.reduce((sum, row) => sum + row.right, 0)
@@ -857,7 +863,8 @@ function RoundSummary({ log, seed, cursor, mode }: { log: KitVerdict[]; seed: nu
   const marks = log.flatMap((row) => row.steps.map((s) => s.correct))
   // the cursor counts SHIRTS: the next round starts where this one stopped (§13)
   const size = KIT_MODE_SIZE[mode]
-  const following = kitNextCursor(cursor, log.length)
+  // a legacy round k sat where shirt k×5 sits now, so the deck carries on from the shirt after it
+  const following = kitNextCursor(legacy ? cursor * KIT_MODE_SIZE.full : cursor, log.length)
   const { tier, sponsorOnly } = roundTier(log)
   const spoken = voice({ gate: 4, moment: 'result', result: tier, seed: `${seed}:${cursor}:${mode}` })
   if (sponsorOnly) spoken.title = voiceAction(4, 'nearSponsor') ?? spoken.title
@@ -908,8 +915,9 @@ function RoundSummary({ log, seed, cursor, mode }: { log: KitVerdict[]; seed: nu
         share={
           <ShareRow
             kind="kit"
-            // the link hands over the SAME round in the same mode — `n` travels with the seed
-            route={`/kits/build?n=${size}`}
+            // the link hands over the SAME round in the same mode — `n` travels with the seed; a
+            // legacy round is re-shared in its own form (no `n`), the only form that deals it
+            route={legacy ? '/kits/build' : `/kits/build?n=${size}`}
             params={{ total: String(asked), s: String(seed), r: String(cursor) }}
             headline={String(right)}
             card={{

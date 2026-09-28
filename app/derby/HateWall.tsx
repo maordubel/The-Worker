@@ -1,5 +1,6 @@
 'use client'
 
+import { blackCard } from '@/lib/share/artefacts'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -576,21 +577,9 @@ function StillHere({
           kind="hate"
           params={{ s: String(seed), r: String(cursor), out: knocked || '—', n: String(verdict.streak), code: verdict.code }}
           headline={survivor.nameHe}
-          card={{
-            // no painting on this card (v3): a black wall and the names are the picture
-            template: 'ink' as const,
-            kicker: 'GATE 11 · THE BLACK WALL',
-            label: t('screen.derby.title'),
-            eyebrow: t('hate.dna.still'),
-            hero: survivor.nameHe,
-            bigStat: { v: String(verdict.streak), k: t('hate.still.rounds') },
-            stats: [
-              { k: t('hate.dna.first'), v: verdict.firstOut?.nameHe ?? '—' },
-              { k: t('hate.dna.code'), v: verdict.code },
-            ],
-            cta: t('hate.wall.cta'),
-            challenge: t('share.sameRound'),
-          }}
+          // §28: the black poster — no vermilion (rule 9), the one left standing and every
+          // name torn down, in order
+          card={blackCard({ rows: [{ name: survivor.nameHe, out: false }, ...verdict.out.map((enemy) => ({ name: enemy.nameHe, out: true }))] })}
         />
         </ExitShare>
 

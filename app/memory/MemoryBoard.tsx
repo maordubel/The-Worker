@@ -20,7 +20,9 @@ import { UniversalExit } from '@/components/result/UniversalExit'
 import { track } from '@/lib/analytics/meter'
 import type { NextAction } from '@/lib/results/types'
 import { hashSeed, microFeedback, voice, voiceAction, type ResultTier } from '@/lib/voice'
-import { artFor } from '@/lib/share/story'
+import { contactCard } from '@/lib/share/artefacts'
+import type { ChallengeResult } from '@/lib/challenges/contract'
+import { CompareCard } from '@/components/share/CompareCard'
 import { collect, collected, readProfile } from '@/lib/profile/store'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { MemoryPair, MemoryRound } from '@/lib/game/memory'
@@ -314,6 +316,7 @@ export function MemoryBoard({
   }
 
   const found = run.done.length
+  const memoryResult: ChallengeResult = { gate: 6, moves: run.moves, misses: run.misses, order: run.done, perfect: run.perfect }
   const percent = Math.round(morale(run, total) * 100)
 
   // §15 — "6 זיכרונות חזרו למקום.": the wall's verdict in the voice, and one memory kept
@@ -544,24 +547,16 @@ export function MemoryBoard({
                   kind="memory"
                   params={{ s: String(seed), r: String(cursor) }}
                   headline={String(run.moves)}
-                  card={{
-                    template: 'ink' as const,
-                    art: artFor('memory', run.misses === 0 ? 1 : 0),
-                    kicker: 'GATE 6 · MEMORY WALL',
-                    label: t('screen.memory.title'),
-                    eyebrow: t('memory.pairs'),
-                    hero: `${total}/${total}`,
-                    bigStat: { v: String(run.moves), k: t('memory.moves') },
-                    stats: [
-                      { k: t('memory.misses'), v: String(run.misses) },
-                      { k: t('memory.bestStreak'), v: String(run.bestStreak) },
-                    ],
-                    cta: t('share.challenge'),
-                    challenge: t('share.sameRound'),
-                  }}
+                  card={contactCard({
+                    moves: run.moves,
+                    // the things, never what each one pairs with — the pairing is the answer
+                    frames: pairs.map((pair) => ({ label: pair.a, hit: run.perfect.includes(pair.id) })),
+                  })}
+                  challenge={{ gate: 6, result: memoryResult }}
                 />
               }
             >
+              <CompareCard gate={6} mine={memoryResult} names={Object.fromEntries(pairs.map((pair) => [pair.id, pair.a]))} />
               <dl className="mt-3 flex items-end gap-5 border-y-hair border-ink/25 py-2">
                 {(
                   [

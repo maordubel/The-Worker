@@ -8,7 +8,6 @@ import { homeKits } from '@/lib/kit/seasons'
 import { wardrobe } from '@/lib/kit/playerShirt'
 import { t } from '@/lib/royal-rumble/i18n'
 import { roundFrom } from '@/lib/rotation/round'
-import { RoyalRumbleChallenge } from './RoyalRumbleChallenge'
 import { RoyalRumbleMatchFX } from './RoyalRumbleMatchFX'
 import { RoyalRumbleMode } from './RoyalRumbleMode'
 
@@ -32,7 +31,6 @@ export default function RoyalRumblePage({ searchParams }: { searchParams: { seed
     <Screen title={t('title')} sub={t('sub')} chrome={false} stage>
       <RoyalRumbleMatchFX />
       <RoyalRumbleMode draft={draft} shuffleDraft={shuffleDraft} matchSeed={matchSeed} cursor={round.cursor} roundSeed={round.seed} playerCount={count} kits={kits} looks={looks} initialRoomCode={searchParams.room} />
-      <RoyalRumbleChallenge seed={draft.seed} roundSeed={round.seed} cursor={round.cursor} />
     </Screen>
   )
 }

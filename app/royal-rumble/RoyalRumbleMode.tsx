@@ -68,6 +68,7 @@ export function RoyalRumbleMode({
           draft={draft}
           shuffleDraft={shuffleDraft}
           cursor={cursor}
+          roundSeed={roundSeed}
           playerCount={playerCount}
           kits={kits}
           looks={looks}

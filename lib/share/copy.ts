@@ -33,6 +33,9 @@ export type ShareKind =
   | 'blindcow'
   | 'rumble'
   | 'thread'
+  // gate 12 and THE WORKER LIFE (28.9.2026) — a story to open, not a round to beat
+  | 'archive'
+  | 'life'
 
 const ROUTE: Record<ShareKind, string> = {
   hate: '/derby',
@@ -59,6 +62,9 @@ const ROUTE: Record<ShareKind, string> = {
   blindcow: '/blind-cow',
   rumble: '/royal-rumble',
   thread: '/timeline',
+  // both always pass `route`: the archive item (`/archive?at=<id>`), the LIFE landing (`/life?ch=`)
+  archive: '/archive',
+  life: '/life',
 }
 
 /** The link a share sends people to — the same round, not the front door. */
@@ -70,7 +76,7 @@ const ROUTE: Record<ShareKind, string> = {
  * stapled to it would be a parameter the page ignores, which is the kind of small lie
  * that makes a URL untrustworthy to read.
  */
-const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'worst', 'member', 'closet', 'wanted', 'gaps', 'match', 'blindcow'])
+const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'worst', 'member', 'closet', 'wanted', 'gaps', 'match', 'blindcow', 'archive', 'life'])
 
 /**
  * The line under the share row says what the LINK does (see `ShareRow`), so a kind that hands
@@ -82,6 +88,8 @@ const DARE: Partial<Record<ShareKind, MessageKey>> = {
   wanted: 'collector.share.dare.wanted',
   gaps: 'collector.share.dare.gaps',
   match: 'collector.share.dare.match',
+  archive: 'share.dare.archive',
+  life: 'share.dare.life',
 }
 
 export function dareKey(kind: ShareKind): MessageKey {

@@ -8,6 +8,7 @@ import { BALLOT, type Ballot, type PollQuestion } from '@/lib/polls/ballot'
 import type { PickFact } from '@/lib/polls/pickFact'
 import type { SupporterId as Id } from '@/lib/polls/supporter'
 import { t } from '@/lib/i18n'
+import { debateCard } from '@/lib/share/artefacts'
 
 /**
  * המניפסט — what a sealed slip turns into (players.md §2, Gate 7 "A — Manifesto").
@@ -67,7 +68,9 @@ export function Manifesto({
           kind="polls"
           params={{ n: String(supporter.filled) }}
           headline={t('poll.slip')}
-          card={{
+          // §28: the debate sticker — "אני לקחתי את X. מה אתה אומר?" — on the favourite; a
+          // slip with no favourite marked still travels as the whole printed ballot
+          card={supporter.favourite ? debateCard({ question: t('poll.favourite'), pick: supporter.favourite }) : {
             template: 'ballot' as const,
             kicker: 'GATE 7 · THE BALLOT',
             label: t('screen.polls.title'),

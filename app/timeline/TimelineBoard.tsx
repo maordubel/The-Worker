@@ -19,7 +19,9 @@ import {
   type BlindCard,
   type DatedCard,
 } from '@/lib/game/timeline-run'
-import { artFor } from '@/lib/share/story'
+import { stripCard } from '@/lib/share/artefacts'
+import type { ChallengeResult } from '@/lib/challenges/contract'
+import { CompareCard } from '@/components/share/CompareCard'
 import { t, type MessageKey } from '@/lib/i18n'
 import { ExitEmotion, ExitNext, ExitShare } from '@/components/result/UniversalExit'
 import { track } from '@/lib/analytics/meter'
@@ -174,7 +176,7 @@ export function TimelineBoard({
   }, [feedback])
 
   if (run.over && !feedback)
-    return <Result run={run} board={board} seed={seed} cursor={cursor} missed={missed} />
+    return <Result run={run} board={board} seed={seed} cursor={cursor} missed={missed} queue={queue} />
 
   const fraction = total > 0 ? Math.max(0, secondsLeft / total) : 0
 
@@ -313,13 +315,18 @@ function Result({
   seed,
   cursor,
   missed,
+  queue,
 }: {
   run: Run
   board: DatedCard[]
   seed: number
   cursor: number
   missed: string[]
+  queue: BlindCard[]
 }) {
+  // ten ticks, one per card in the order it was DEALT — never the true order, which is the answer
+  const marks = Array.from({ length: TIMELINE_LENGTH }, (_, i) => run.history[i] ?? false)
+  const mine: ChallengeResult = { gate: 13, variant: 'order', marks }
   const rank = rankFor(run.score) as MessageKey
   // §22: "הסיפור חזר לסדר." — the board is always the true order, whatever was placed wrong
   const spoken = {
@@ -383,6 +390,8 @@ function Result({
         </div>
       </div>
 
+      <CompareCard gate={13} mine={mine} />
+
       {/* the finished chronology — the thing the run actually built */}
       <p className="mt-stack font-body text-[11px] tracking-widest text-muted">
         {t('timeline.built')}
@@ -410,21 +419,11 @@ function Result({
         route="/timeline/order"
         params={{ c: String(run.correct), s: String(seed), r: String(cursor) }}
         headline={`${run.correct}/${TIMELINE_LENGTH}`}
-        card={{
-          template: 'year' as const,
-          art: artFor('timeline', run.correct / TIMELINE_LENGTH),
-          kicker: 'GATE 13 · TIMELINE',
-          label: t('screen.timeline.title'),
-          eyebrow: t('timeline.placed'),
-          hero: `${run.correct}/${TIMELINE_LENGTH}`,
-          bigStat: { v: String(run.score), k: t('run.score') },
-          stats: [
-            { k: t('run.best'), v: String(run.bestCombo) },
-            { k: t('timeline.placed'), v: `${run.correct}/${TIMELINE_LENGTH}` },
-          ],
-          cta: t('timeline.cta'),
-          challenge: t('share.sameRound'),
-        }}
+        card={stripCard({
+          variant: 'order',
+          rows: queue.slice(0, TIMELINE_LENGTH).map((card, i) => ({ text: card.title, ok: marks[i] ?? false })),
+        })}
+        challenge={{ gate: 13, params: { variant: 'order' }, result: mine }}
       />
       </ExitShare>
 

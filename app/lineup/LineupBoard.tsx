@@ -42,7 +42,10 @@ import { TeamSheet } from './TeamSheet'
 import { TunnelGate } from './TunnelGate'
 import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
+import { CompareCard } from '@/components/share/CompareCard'
 import { ShareRow } from '@/components/share/ShareRow'
+import type { ChallengeResult } from '@/lib/challenges/contract'
+import { programmeCard } from '@/lib/share/artefacts'
 
 /**
  * שער 3 — חדר ההלבשה.
@@ -96,6 +99,14 @@ function coachSentence(note: CoachNote): string {
   return t(COACH_LINE[note.kind], { n: String(note.n), of: String(note.of) })
 }
 
+/** per slot of the real XI (keeper first): did the player put that man in his band? */
+function lineupResult(verdict: LineupVerdict): ChallengeResult {
+  return {
+    gate: 3,
+    found: verdict.solution.map((m) => verdict.rows.some((r) => r.playerId === m.playerId && r.status === 'exact')),
+  }
+}
+
 export function LineupBoard({
   bank,
   seed,
@@ -106,6 +117,7 @@ export function LineupBoard({
   look = null,
   intro = null,
   sourceTitle = '',
+  fixture = null,
   embedded,
 }: {
   bank: LockerName[]
@@ -125,6 +137,8 @@ export function LineupBoard({
   /** the match record, for the phone stage's "פרטי המשחק" sheet — absent inside LIFE */
   intro?: MatchIntro | null
   sourceTitle?: string
+  /** the fixture as the intro prints it — the programme's masthead (never the eleven) */
+  fixture?: { titleHe: string; dateHe: string } | null
   /**
    * Opened from inside THE WORKER LIFE — the café's argument, the schoolyard's bet. The same
    * lockers, coach and grade over the one match the life pinned (the server re-derives it
@@ -673,25 +687,12 @@ export function LineupBoard({
                 kind="lineup"
                 params={{ s: String(seed), r: String(cursor) }}
                 headline={`${verdict.starters}/${verdict.total}`}
-                card={{
-                  template: 'xi' as const,
-                  kicker: 'GATE 3 · THE LINE-UP',
-                  label: t('screen.lineup.title'),
-                  eyebrow: `${verdict.starters}/${verdict.total}`,
-                  hero: t('screen.lineup.title'),
-                  xi: board.map((row) => {
-                    const spot = displaySpot(row.order, counts[row.line], row.line)
-                    return {
-                      roleHe: t(LINE_LABEL[row.line]),
-                      nameHe: splitName(nameOf.get(row.playerId) ?? '').familyHe,
-                      x: spot.x,
-                      y: spot.y,
-                    }
-                  }),
-                  stats: [],
-                  cta: t('share.challenge'),
-                  challenge: t('share.sameRound'),
-                }}
+                card={programmeCard({
+                  match: fixture?.titleHe ?? t('screen.lineup.title'),
+                  date: fixture?.dateHe ?? '',
+                  slots: verdict.solution.map((man) => ({ role: t(LINE_LABEL[man.line]), found: verdict.rows.some((r) => r.playerId === man.playerId && r.status === 'exact') })),
+                })}
+                challenge={{ gate: 3, result: lineupResult(verdict) }}
               />
             )
           }
@@ -713,6 +714,7 @@ export function LineupBoard({
           ) : (
             <>
           <RecordRun gate="/lineup" correct={verdict.exact} asked={verdict.total} score={verdict.exact} />
+          <CompareCard gate={3} mine={lineupResult(verdict)} />
           <PlayLink
             gate="/lineup"
             className="mt-3 flex min-h-tap w-full items-center justify-center bg-red px-4 font-body text-step-1 font-extrabold text-paper"

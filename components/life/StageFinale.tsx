@@ -13,6 +13,8 @@ import type { LifeBusEvents } from '@/lib/life/runtime/bus'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
+import { ShareRow } from '@/components/share/ShareRow'
+import { ticketCard } from '@/lib/share/artefacts'
 
 type Finale = NonNullable<LifeBusEvents['finale']>
 
@@ -96,6 +98,7 @@ export function StageFinale({
   // Resolved by the runtime, which holds the flags: a chapter can be conditional on the
   // life since 6.9.2026, so what comes next is not a property of the chain alone.
   const nextYearLabel = finale.nextYear ? String(finale.nextYear) : ''
+  const ticketYear = String(chapter?.year ?? finale.anchor.year)
 
   // A card that opens halfway down is a card somebody scrolled by accident.
   useEffect(() => {
@@ -378,6 +381,21 @@ export function StageFinale({
                 </span>
               )}
             </button>
+
+            {/* §28: the ticket — "חזרתי עכשיו ל־1986." Its link opens the LIFE landing and
+                names the chapter (the preview says which), never a place inside it */}
+            <ShareRow
+              kind="life"
+              route={`/life?ch=${encodeURIComponent(finale.chapter)}`}
+              params={{}}
+              headline={t('artefact.ticket.cta', { year: ticketYear })}
+              card={ticketCard({
+                year: ticketYear,
+                place: match?.venueHe ?? chapter?.titleHe ?? '',
+                line: finale.becameHe,
+                serial: chapter ? `NO. ${chapter.unit}` : '',
+              })}
+            />
           </section>
         </div>
       </div>

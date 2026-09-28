@@ -36,10 +36,11 @@ export async function submitKit(
   receipts: string[] = [],
   claimedHints = 0,
   window?: KitWindow,
+  legacy = false,
 ): Promise<KitVerdict | null> {
   if (!Number.isInteger(seed) || !Number.isInteger(index) || !Number.isInteger(cursor)) return null
   const proofs = Array.isArray(receipts) ? receipts.filter((r): r is string => typeof r === 'string').slice(0, 6) : []
-  return gradeKitPuzzle(seed, index, clean(placed), cursor, proofs, Number(claimedHints) || 0, cleanWindow(window))
+  return gradeKitPuzzle(seed, index, clean(placed), cursor, proofs, Number(claimedHints) || 0, cleanWindow(window), legacy === true)
 }
 
 /**
@@ -59,9 +60,10 @@ export async function askKitHint(
   kind: KitHintKind,
   cursor = 0,
   window?: KitWindow,
+  legacy = false,
 ): Promise<KitHintAnswer | null> {
   if (!Number.isInteger(seed) || !Number.isInteger(index) || !Number.isInteger(cursor)) return null
-  return kitHint(seed, index, kind, cursor, cleanWindow(window))
+  return kitHint(seed, index, kind, cursor, cleanWindow(window), legacy === true)
 }
 
 /**

@@ -1,76 +1,50 @@
 'use client'
 
-import { useState } from 'react'
-
-import { firePickFxAt } from '@/components/stage/PickFx'
+import { ShareRow } from '@/components/share/ShareRow'
 import { t } from '@/lib/royal-rumble/i18n'
-import { t as tt } from '@/lib/i18n'
-import { voiceAction, whatsappLine } from '@/lib/voice'
-import { royalRumbleShareHref } from '@/lib/game/royal-rumble-seeds'
+import { posterCard } from '@/lib/share/artefacts'
+import { voiceAction } from '@/lib/voice'
 
 /**
+ * "אותם קלפים, אותו יריב" — the gate's challenge banner, now on the result screen and
+ * sharing through the ONE share system (rule 19): the five-player poster (§28) and a
+ * challenge link that hands over the same round (`?seed=` + `r`) with this five hashed
+ * for the comparison at the end. The live H2H is a different thing and keeps its room.
+ *
  * `seed` is the board's own offer seed — printed as the code. The LINK carries the round
- * (`roundSeed` + `cursor`), because the route folds the cursor in again: a link that named
- * the offer seed without `r` would only reproduce the board by accident of cursor 0.
+ * (`roundSeed` + `cursor`), because the route folds the cursor in again.
  */
-export function RoyalRumbleChallenge({ seed, roundSeed, cursor = 0 }: { seed: number; roundSeed?: number; cursor?: number }) {
-  const [state, setState] = useState<'idle' | 'copied' | 'shared'>('idle')
+export function RoyalRumbleChallenge({
+  seed,
+  roundSeed,
+  cursor = 0,
+  five,
+}: {
+  seed: number
+  roundSeed: number
+  cursor?: number
+  /** the five the player sent out, in slot order — slug for the challenge, role + name for the poster */
+  five: ReadonlyArray<{ slug: string; roleHe: string; nameHe: string }>
+}) {
   const code = String(seed >>> 0).padStart(8, '0').slice(-8)
 
-  async function share() {
-    const url = new URL(royalRumbleShareHref(roundSeed ?? seed, roundSeed === undefined ? 0 : cursor), window.location.origin)
-    // §18: "אלה החמישה שלי. תן את שלך." — the gate's one WhatsApp line, and the board's code
-    const text = `${whatsappLine(9)} #${code}`
-
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'The Worker · Royal Rumble', text, url: url.toString() })
-        setState('shared')
-      } else {
-        await navigator.clipboard.writeText(`${text}\n${url.toString()}`)
-        setState('copied')
-      }
-    } catch {
-      // Cancelling a native share sheet is not an error state worth showing.
-    }
-  }
-
-  const action =
-    state === 'copied'
-      ? t('challengeCopied')
-      : state === 'shared'
-        ? t('challengeShared')
-        : tt('voice.share')
-
   return (
-    <aside className="relative mx-auto mt-1.5 max-w-5xl shrink-0 overflow-hidden border-rule border-ink bg-paper text-ink md:mt-2">
+    <aside className="relative mx-auto mt-3 w-full max-w-5xl shrink-0 overflow-hidden border-rule border-ink bg-paper text-ink">
       <div className="absolute inset-y-0 start-0 w-2 bg-red" />
-      <div className="absolute -start-3 -top-9 hidden font-display text-[120px] leading-none text-ink/5 sm:block" dir="ltr">09</div>
-      <div className="relative grid grid-cols-[1fr_auto] items-center gap-2 p-1.5 ps-3 sm:gap-3 sm:p-4 sm:ps-6">
-        <div className="min-w-0">
-          <div className="hidden flex-wrap items-center gap-2 sm:flex">
-            <span className="font-mono tabular-nums text-[8px] font-black tracking-[0.22em] text-red" dir="ltr">SAME RUMBLE · SAME ENEMY</span>
-            <span className="border-hair border-ink/20 px-2 py-0.5 font-mono tabular-nums text-[9px] font-black tracking-[0.12em]" dir="ltr">#{code}</span>
-          </div>
-          <h2 className="truncate font-display text-[15px] leading-none sm:mt-1 sm:text-[29px]">{voiceAction(9, 'sameCards')}</h2>
-          <p className="mt-1 hidden max-w-2xl font-body text-[9px] leading-relaxed text-concrete sm:block sm:text-[10px]">
-            {t('challengeBody')}
-          </p>
+      <div className="relative p-3 ps-5 sm:p-4 sm:ps-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono tabular-nums text-[8px] font-black tracking-[0.22em] text-red" dir="ltr">SAME RUMBLE · SAME ENEMY</span>
+          <span className="border-hair border-ink/20 px-2 py-0.5 font-mono tabular-nums text-[9px] font-black tracking-[0.12em]" dir="ltr">#{code}</span>
         </div>
-        <button
-          type="button"
-          onClick={(event) => {
-            void share()
-            firePickFxAt(event.currentTarget, { tone: 'ink', haptic: 'tap' })
-          }}
-          className="group flex min-h-tap min-w-0 items-center justify-between border-rule border-red bg-red px-3 text-paper transition hover:bg-ink sm:px-4"
-        >
-          <span>
-            <span className="hidden font-mono tabular-nums text-[7px] sm:block font-black tracking-[0.18em] text-paper/60" dir="ltr">CHALLENGE A FRIEND</span>
-            <span className="font-display text-[14px] sm:text-[20px]">{action}</span>
-          </span>
-          <span className="font-display text-[20px] transition group-hover:-translate-x-1 sm:text-[26px]">←</span>
-        </button>
+        <h2 className="mt-1 font-display text-[20px] leading-none sm:text-[29px]">{voiceAction(9, 'sameCards')}</h2>
+        <p className="mt-1 max-w-2xl font-body text-[10px] leading-relaxed text-concrete">{t('challengeBody')}</p>
+        <ShareRow
+          kind="rumble"
+          params={{ s: String(roundSeed), r: String(cursor) }}
+          headline={`#${code}`}
+          card={posterCard({ rows: five.map((man) => ({ role: man.roleHe, name: man.nameHe })) })}
+          challenge={{ gate: 9, result: { gate: 9, picks: five.map((man) => man.slug) } }}
+        />
       </div>
     </aside>
   )

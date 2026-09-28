@@ -34,10 +34,14 @@ function exactKits(): Record<string, string> {
  * one full-bleed screen the height of the phone (Maor's V14 layout). The round is dealt here, on
  * the server, and nothing the client receives says which option is right (rule 4).
  */
-export default function KitGamePage({ searchParams }: { searchParams: { seed?: string; r?: string; n?: string } }) {
+export default function KitGamePage({ searchParams }: { searchParams: { seed?: string; r?: string; n?: string; from?: string } }) {
   const round = roundFrom(searchParams)
   // `?n=3` Quick · `?n=5` Full (§13). No `n` = no choice yet: the gate opens on its line and asks.
-  const mode = kitModeFrom(searchParams.n)
+  // A SHARED link with no `n` is the legacy form (`?seed=&r=k&from=share`, minted before the cursor
+  // counted shirts): `r` names ROUND k of the old deal, played Full. Links shared now always carry
+  // `n`. The wall's own links (`/tik`, no `from`) also lack `n` but count shirts — `from` tells them apart.
+  const legacy = round.pinned && searchParams.n === undefined && searchParams.from === 'share'
+  const mode = legacy ? 'full' : kitModeFrom(searchParams.n)
   if (kitPuzzleCount() < KIT_ROUND) {
     return (
       <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false}>
@@ -45,10 +49,10 @@ export default function KitGamePage({ searchParams }: { searchParams: { seed?: s
       </Screen>
     )
   }
-  const puzzles = dealKitRound(round.seed, round.cursor)
+  const puzzles = dealKitRound(round.seed, round.cursor, undefined, legacy)
   return (
     <Screen title={t('screen.kitgame.title')} sub={t('screen.kitgame.sub')} chrome={false} stage>
-      <KitGameRun puzzles={puzzles} seed={round.seed} cursor={round.cursor} mode={mode} exactKits={exactKits()} />
+      <KitGameRun puzzles={puzzles} seed={round.seed} cursor={round.cursor} mode={mode} legacy={legacy} exactKits={exactKits()} />
     </Screen>
   )
 }

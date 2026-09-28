@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react'
 import { CrossLinks } from '@/components/links/CrossLinks'
 import { ExitNext, ExitShare } from '@/components/result/UniversalExit'
 import { ShareCardChips } from '@/components/links/ShareCard'
+import { CompareCard } from '@/components/share/CompareCard'
+import { ShareRow } from '@/components/share/ShareRow'
+import { clueCard } from '@/lib/share/artefacts'
 import { PlayerShirt } from '@/components/stage/PlayerShirt'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { track } from '@/lib/analytics/meter'
@@ -157,20 +160,34 @@ export function ResultPanel({
       </div>
 
       <div className="mt-1.5 shrink-0 md:mx-auto md:max-w-[520px]">
+        {view.mode !== 'duel' && (
+          <CompareCard
+            gate={10}
+            mine={{ gate: 10, hints: r.hintsUsed, wrong: Math.min(99, r.wrongGuesses), status: view.status === 'solved' ? 'solved' : view.status === 'timeout' ? 'timeout' : 'gave_up' }}
+          />
+        )}
         <CrossLinks links={r.links} from="blind-cow" className="pb-1.5" />
         <ExitNext next={r.next} from="blind-cow" compact />
+        <ExitShare label={spoken.ctaShare} from="blind-cow">
+          {/* the ONE share system (rule 19): the clue card — how many clues, never who — and a
+              challenge whose man is sealed on the server (§44); the OG chips ride under it */}
+          <ShareRow
+            kind="blindcow"
+            params={{}}
+            headline={text}
+            card={clueCard({ hints: r.hintsUsed, total: 10, solved })}
+            challenge={{ gate: 10 }}
+          />
+          <ul className="-mx-1 mt-1.5 flex gap-1.5 overflow-x-auto px-1">
+            <ShareCardChips
+              imagePath={`/api/card/blind-cow?${query}`}
+              url={url}
+              text={text}
+              onShared={(channel) => track('blind_cow_result_shared', { detail: channel })}
+            />
+          </ul>
+        </ExitShare>
         <div className="-mx-1 mt-1.5 flex gap-1.5 overflow-x-auto px-1 pb-1.5">
-          <ExitShare label={spoken.ctaShare} from="blind-cow" compact>
-            <ul className="flex shrink-0 gap-1.5">
-              <ShareCardChips
-                imagePath={`/api/card/blind-cow?${query}`}
-                url={url}
-                text={text}
-                primary
-                onShared={(channel) => track('blind_cow_result_shared', { detail: channel })}
-              />
-            </ul>
-          </ExitShare>
           <button type="button" onClick={() => setAllOpen(true)} className="flex min-h-tap shrink-0 items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink active:scale-[.97]">
             {t('blindcow.result.all')}
           </button>

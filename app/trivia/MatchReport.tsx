@@ -7,15 +7,17 @@ import { AdSlot } from '@/components/ads/AdSlot'
 import { Punch } from '@/components/play/Punch'
 import { RecordRun } from '@/components/play/RecordRun'
 import { UniversalExit } from '@/components/result/UniversalExit'
+import { CompareCard } from '@/components/share/CompareCard'
 import { ShareRow } from '@/components/share/ShareRow'
 import { Num } from '@/components/ui/Num'
 import { Q_TYPES } from '@/lib/game/questions/types'
 import { LIVES, RUN_LENGTH, type Session } from '@/lib/game/session'
 import { nextChallenges, reportOf, tierFor, type AnswerLog } from '@/lib/game/trivia-report'
-import type { Topic } from '@/lib/game/topics'
+import { topicSpec, type Topic } from '@/lib/game/topics'
+import type { ChallengeResult } from '@/lib/challenges/contract'
+import { slipCard } from '@/lib/share/artefacts'
 import { pendingRevenge, readMarks } from '@/lib/profile/marks'
 import { pushMarks } from '@/lib/portal/marks-sync'
-import { artFor } from '@/lib/share/story'
 import { track } from '@/lib/analytics/meter'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { NextAction, ResultContext } from '@/lib/results/types'
@@ -128,6 +130,11 @@ export function MatchReport({
   if (hard) query.set('hard', '1')
   const route = `/trivia/${personal ? 'general' : topic}${query.toString() ? `?${query.toString()}` : ''}`
 
+  // the twelve as ticks — the challenge's result and the slip's row of marks (§28)
+  const challengeMarks = Array.from({ length: RUN_LENGTH }, (_, i) => log[i]?.correct ?? false)
+  const mine: ChallengeResult = { gate: 2, marks: challengeMarks }
+  const topicLabel = t(topicSpec(personal ? 'general' : topic).titleKey as MessageKey)
+
   const strongest = report.strongest ? t(`trivia.lobby.topic.${report.strongest}` as MessageKey) : '—'
   const spoken = voice({ gate: 2, moment: 'result', result: VOICE_TIER[tier] ?? 'mid', seed: `${seed}:${cursor}`, vars: { n: String(session.correct) } })
 
@@ -141,6 +148,7 @@ export function MatchReport({
     <div className="mt-stack animate-slam">
       <Punch />
       {!practice && <RecordRun gate="/trivia" score={session.score} correct={session.correct} asked={RUN_LENGTH} />}
+      {!practice && !personal && <CompareCard gate={2} mine={mine} />}
 
       <UniversalExit
         voice={spoken}
@@ -154,22 +162,8 @@ export function MatchReport({
               params={{ s: String(seed), r: personal ? '0' : String(cursor), total: String(RUN_LENGTH) }}
               route={route}
               headline={String(session.correct)}
-              card={{
-                template: 'score' as const,
-                art: artFor('trivia', session.correct / RUN_LENGTH),
-                kicker: 'GATE 2 · QUICK PICK',
-                label: t('screen.trivia.title'),
-                eyebrow: t('run.score'),
-                hero: String(session.score),
-                bigStat: { v: `${session.correct}/${RUN_LENGTH}`, k: t('run.right') },
-                stats: [
-                  { k: t('trivia.report.combo'), v: `×${session.bestCombo}` },
-                  { k: t('trivia.report.topic'), v: strongest },
-                ],
-                cta: t('share.challenge'),
-                challenge: t('share.sameRound'),
-                marks: session.history,
-              }}
+              card={slipCard({ topic: topicLabel, marks: challengeMarks })}
+              challenge={personal ? undefined : { gate: 2, params: { topic, ...(era !== null && { era }), hard }, result: mine }}
             />
           )
         }

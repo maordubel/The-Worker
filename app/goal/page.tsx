@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
+import { goalFromHash } from '@/lib/challenges/runs'
 import { dealRun, hasGoals, pinnedGoal } from '@/lib/game/goal'
 import { wardrobe } from '@/lib/kit/playerShirt'
 import { goalLinks } from '@/lib/links'
@@ -35,10 +36,13 @@ export function generateMetadata({ searchParams }: { searchParams: Record<string
 export default function GoalPage({
   searchParams,
 }: {
-  searchParams: { seed?: string; r?: string; g?: string | string[] }
+  searchParams: { seed?: string; r?: string; g?: string | string[]; gh?: string | string[] }
 }) {
   const round = roundFrom(searchParams)
-  const pin = pinnedGoal(Array.isArray(searchParams.g) ? searchParams.g[0] : searchParams.g)
+  // a challenge pins its goal as a HASH (the id names the scorer, §44); `g` stays the plain pin
+  const pin =
+    pinnedGoal(Array.isArray(searchParams.g) ? searchParams.g[0] : searchParams.g) ??
+    goalFromHash(Array.isArray(searchParams.gh) ? searchParams.gh[0] : searchParams.gh)
   const goals = hasGoals() ? dealRun(round.seed, round.cursor, pin) : []
   // Delta 88: every man on the pitch wears HIS shirt of THAT season — the photograph where
   // the archive has one (lib/kit/playerShirt.ts). Keyed `goalIndex|name`; the other side's

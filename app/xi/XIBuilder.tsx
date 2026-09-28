@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { KitShirt } from '@/components/kit/KitShirt'
 import { Num } from '@/components/ui/Num'
 import { NEUTRAL_SHIRT_SPEC, RosterSheet, rosterKey, type RowInfo } from '@/components/roster/RosterSheet'
+import { CompareCard } from '@/components/share/CompareCard'
+import type { ChallengeResult } from '@/lib/challenges/contract'
 import { ShareRow } from '@/components/share/ShareRow'
 import type { Embedded } from '@/lib/mechanics/types'
 import { useDialog } from '@/components/ui/useDialog'
@@ -311,6 +313,8 @@ export function XIBuilder({
   }, [embedded, ready, tab, payload, store])
 
   const chosen = Object.keys(sheet.picks).length
+  /** id → name for the comparison — the challenger's picks come back as hashes (§44) */
+  const rosterNames = useMemo(() => Object.fromEntries(roster.all.map((entry) => [rosterKey(entry), entry.nameHe])), [roster.all])
 
   /*
    * מעשה — a wing has no round, so a full eleven is its deed. Reported through the
@@ -892,6 +896,25 @@ export function XIBuilder({
 
   /** Rule 19: the ONE share system — the same row in the dock, on the desktop and under "שלח ליציע". */
   const shareRoute = !worst && sheet.prompt ? `/xi?${promptQuery(sheet.prompt.seed, sheet.prompt.cursor)}` : undefined
+  // Gate 1's challenge (§10): the PROMPT travels (`/xi?prompt=<seed>&r=`), never the picks;
+  // the eleven ride along hashed so the comparison can be drawn once the friend has picked.
+  const xiPicks = sheet.formation.slots.flatMap((slot) => {
+    const entry = sheet.picks[slot.slotId]
+    return entry ? [rosterKey(entry)] : []
+  })
+  const captainEntry = sheet.captain !== null ? sheet.picks[sheet.captain] : undefined
+  const xiResult: ChallengeResult | null =
+    !worst && xiPicks.length > 0
+      ? { gate: 1, picks: xiPicks, captain: captainEntry ? rosterKey(captainEntry) : null, twelfth: sheet.twelfth ? rosterKey(sheet.twelfth) : null }
+      : null
+  const xiChallenge =
+    xiResult === null
+      ? undefined
+      : {
+          gate: 1 as const,
+          ...(sheet.prompt ? { cursor: sheet.prompt.cursor, params: { prompt: String(sheet.prompt.seed) } } : {}),
+          result: xiResult,
+        }
   const shareNode = (
     <ShareRow
       // Gate 1 has its own `kind` and is in `SEEDLESS`; the worst eleven shares as its own
@@ -901,6 +924,7 @@ export function XIBuilder({
       route={shareRoute}
       params={{ total: '11' }}
       headline={`${chosen}/11`}
+      challenge={xiChallenge}
       card={{
         template: 'xi' as const,
         kicker: worst ? 'GATE 1 · WORST XI · ONE FAN’S OPINION' : 'GATE 1 · ALL-TIME XI',
@@ -1717,6 +1741,7 @@ export function XIBuilder({
           title={worst ? t('xi.tab.worst') : (spoken.eyebrow ?? spoken.title)}
           onClose={() => setPoster(false)}
         >
+          {!worst && chosen >= 11 && <CompareCard gate={1} mine={xiResult} names={rosterNames} />}
           {!worst && chosen >= 11 && (
             <UniversalExit voice={spoken} next={next} from="xi" share={shareNode} />
           )}

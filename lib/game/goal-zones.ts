@@ -168,3 +168,30 @@ export const MAX_TOUCHES = 5
  * player think about the only thing this gate is testing.
  */
 export const GOAL_SECONDS = [100, 85, 70] as const
+
+/**
+ * A normalised board point → the zone index a challenge carries (0–19 the grid, row-major
+ * from the goal; 20 the mouth). The inverse of the comparison's `zonePoint`, so both
+ * routes draw on the same twenty squares (ONE RED WORLD §44).
+ */
+export function zoneIndexAt(point: { x: number; y: number }): number {
+  const px = point.x * PITCH.w
+  const py = point.y * PITCH.h
+  if (py < PITCH.y0) return 20
+  const col = Math.min(COLS.length - 1, Math.max(0, Math.floor((px - PITCH.x0) / PITCH.cw)))
+  const row = Math.min(ROWS.length - 1, Math.max(0, Math.floor((py - PITCH.y0) / PITCH.ch)))
+  return row * COLS.length + col
+}
+
+/** A zone index → its centre on the share card's scale: 0–100 across, 0 (goal line) to 100 down. */
+export function zoneCentre100(index: number): { x: number; y: number } {
+  if (index >= 20) return { x: 50, y: 2 }
+  const col = index % COLS.length
+  const row = Math.floor(index / COLS.length)
+  const x = PITCH.x0 + col * PITCH.cw + PITCH.cw / 2
+  const y = PITCH.y0 + row * PITCH.ch + PITCH.ch / 2
+  return {
+    x: Math.round(((x - PITCH.left) / (PITCH.right - PITCH.left)) * 100),
+    y: Math.round(((y - PITCH.goalY) / (PITCH.halfY - PITCH.goalY)) * 100),
+  }
+}
