@@ -1,3 +1,4 @@
+import { noteDailyProgress } from '@/lib/daily/progress'
 import type { ProgressEvent } from '@/lib/profile/events'
 
 import { finishVisit, track } from './meter'
@@ -10,6 +11,7 @@ import { finishVisit, track } from './meter'
  * no pick, no name, no id: the gate, the channel, and at most the score as one integer.
  */
 export function meterProgress(event: ProgressEvent): void {
+  noteDailyProgress() // היום בהפועל: did this report finish one of today's three? (lib/daily)
   switch (event.type) {
     case 'gate_completed':
       finishVisit(event.gate, typeof event.score === 'number' ? event.score : undefined)

@@ -51,6 +51,8 @@ import heVoice from '@/messages/he.voice.json'
 // (`bridge.*`) and gate 8's key-mismatch words (`goalMiss.*`). One file, so the parallel
 // gate agents never append to the same catalogue.
 import heStageRouter from '@/messages/he.stage.router.json'
+// 28.9.2026 — היום בהפועל and the home "now" layer (`lib/daily`, ONE RED WORLD §7, §55)
+import heDaily from '@/messages/he.daily.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -127,6 +129,7 @@ export const CATALOGUE_FILES = {
   heStageTerrace,
   heVoice,
   heStageRouter,
+  heDaily,
 } as const
 
 const catalogue = {
@@ -171,6 +174,7 @@ const catalogue = {
   ...heStageTerrace,
   ...heVoice,
   ...heStageRouter,
+  ...heDaily,
 }
 
 export type MessageKey = keyof typeof catalogue
