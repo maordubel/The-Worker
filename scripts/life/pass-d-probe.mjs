@@ -110,7 +110,7 @@ await run('owner — the triangle', enter(2025, 2, 18 * 60 + 30, '2025-owner', '
   const f = await flags(page)
   if (f['life:owner:triangle'] !== 'money_squad') fault(`owner: triangle ${f['life:owner:triangle']}`)
   if (!f['o:teamGo']) fault('owner: the meeting did not agree')
-  if (!heard.some((l) => l.includes('גם אני שומע את זה פעם ראשונה'))) fault('owner: Yevgeny never answered the squad deal')
+  if (!heard.some((l) => l.includes('ביבגני אף אחד לא נגע'))) fault('owner: Yevgeny never answered the squad deal')
 })
 
 await run('finale — the last walk', enter(2026, 4, 22 * 60, '2026-finale', 'arena-out', [
