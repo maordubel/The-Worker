@@ -70,6 +70,7 @@ import { RitualSheet } from '@/components/life/RitualSheet'
 import { RedBoxSheet } from '@/components/life/RedBoxSheet'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { HistoricalAnchor } from '@/lib/life/anchors'
+import type { LifeDoor } from '@/lib/life/memoryPassport'
 import { loadLife } from '@/lib/life/engine'
 import { acceptEvents, eligibleFor, gapsFor, nearestRoute, routesWorthShowing, stageOutOfReachFor } from '@/lib/life/routes'
 import type { LifeBus } from '@/lib/life/runtime/bus'
@@ -124,6 +125,7 @@ export function LifeStage({
   prologueAnchor,
   anchors,
   catalog,
+  doors = {},
 }: {
   anchor: HistoricalAnchor
   prologueAnchor: HistoricalAnchor
@@ -131,6 +133,8 @@ export function LifeStage({
   anchors: Record<string, HistoricalAnchor>
   /** what the archive holds before each year, for the activities (`app/life/mechanicCatalog.ts`) */
   catalog: MechanicCatalog
+  /** ONE RED WORLD §23.1 — each finished chapter's one or two doors into the archive (`lib/life/bridge.ts`) */
+  doors?: Record<string, LifeDoor[]>
 }) {
   const holder = useRef<HTMLDivElement | null>(null)
   const runtime = useRef<LifeRuntime | null>(null)
@@ -987,6 +991,7 @@ export function LifeStage({
             after={ending.after ?? null}
             chapter={ending.chapter ?? '1986'}
             presence={ending.presence ?? null}
+            doors={doors[ending.chapter ?? '1986'] ?? []}
             onClose={() => {
               setEnding(null)
               runtime.current?.dismissEnding()

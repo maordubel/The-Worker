@@ -145,3 +145,23 @@ Supabase → SQL Editor, paste that file and run it; the last line must read
 References: `app/trivia/MatchReport.tsx` + `app/trivia/TriviaRun.tsx` (full exit, voice
 micro-feedback for plain hits/misses; named reactions — deep/fast/fire/onit/timeout — kept),
 `components/blind-cow/ResultPanel.tsx` + `GuessDrawer.tsx` + `BlindCowGame.tsx` (compact parts).
+
+## Wave 2 — gates 7 · 8 · 9 · 11 · 12 · 13, the router and the LIFE bridge (28.9.2026)
+
+- **Adopted:** 7 (the debate's words + a closing line; reasons are `voice.g7.act.why.*`), 8 (per-goal
+  and run result: "הרגע היה שם." + the key mismatch from `lib/game/replay/mismatch.ts`, "ככה זה קרה."
+  when clean), 9 (§18 lines; the kickoff frame reads `voiceAction(9,'kickoff')`), 11 ("זה מי שנשאר
+  אצלך.", opinion tagged "דעת יציע", every black-file entry = מי · מה קרה · מתי · מקור · למה זה
+  בתיק), 12 (landing "מה חזר היום?", "היום לפני", dig = preview then open, "היום הארכיון שקט."),
+  13 (Red Thread "יש חיבור." / "החוט לא עובר כאן." / "מצאת דרך."; order "הסיפור חזר לסדר.").
+  Each finished run emits `run_complete` and asks its gate's server action (`nextAfter…`) for
+  `recommend()` doors. Replaced strings were deleted.
+- **Cross Gate Router:** `lib/links/actions.ts` → `actionsFor(entity)`; drawn by
+  `components/archive/GateRouter.tsx`. `tests/router.test.ts` returns every href through its gate.
+- **LIFE bridge:** `lib/life/bridge.ts` (server-only, derived from the anchors + masters),
+  `lib/life/memoryPassport.ts` (client-safe fold of the save: `livedIt(passport, id)` for other
+  gates — gate 5 kits). LIFE → gates: the ending card's "הארכיון" block (≤2 doors). Gates → LIFE:
+  the archive drawer's "חווית את הרגע הזה ב-LIFE" and gate 8's result door, only for a chapter the
+  device's save COMPLETED. `tests/life-bridge.test.ts`.
+- **Not done here (owned by Share V2):** a share for the archive item and the Red Thread run —
+  `lib/share` has no `archive` kind and the `timeline` message is the order game's.

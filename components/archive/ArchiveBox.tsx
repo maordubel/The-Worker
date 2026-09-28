@@ -8,6 +8,7 @@ import { SlideSheet } from '@/components/stage/SlideSheet'
 import { useDialog } from '@/components/ui/useDialog'
 import type { ArchiveCard } from '@/lib/archive/graph-types'
 import { t } from '@/lib/i18n'
+import { voiceAction } from '@/lib/voice'
 import { ArtifactMark, CardHeadline, CloseMark, Eyebrow, LATIN } from './EntityCard'
 
 /**
@@ -114,8 +115,25 @@ export function ArchiveBox({
   const floor = (
     <BoxFloor items={items} lifted={lifted} busy={busy} onTap={tap} variant={phone ? 'phone' : 'desk'} />
   )
+  // §21 — the first tap lifts the item and PREVIEWS it (what it is, when); the second opens it
+  const preview = items.find((card) => card.id === lifted) ?? null
   const controls = (
     <>
+      {preview && (
+        <div className="mb-2 flex items-center gap-2 border-rule border-paper bg-paper px-2.5 py-1.5 text-ink" data-archive="preview" aria-live="polite">
+          <div className="min-w-0 flex-1">
+            <CardHeadline card={preview} className="block truncate font-sign text-[13.5px] leading-tight text-ink" />
+            <p className="truncate font-body text-[11px] text-muted">{[preview.subHe, preview.when].filter(Boolean).join(' · ')}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onOpen(preview.id)}
+            className="min-h-tap shrink-0 border-rule border-ink bg-red px-3 font-body text-[13px] font-extrabold text-paper"
+          >
+            {voiceAction(12, 'open')}
+          </button>
+        </div>
+      )}
       <div className="-mx-gutter flex gap-1.5 overflow-x-auto px-gutter pb-2" role="group" aria-label={t('archive.time.decade')}>
         <button
           type="button"
@@ -151,7 +169,7 @@ export function ArchiveBox({
   if (phone) {
     // the phone: the shared slide sheet, the box filling its body, the controls pinned below
     return (
-      <SlideSheet open onClose={onClose} title={t('archive.box.title')} latin="OPEN THE ARCHIVE BOX" size="full" tone="ink" footer={controls}>
+      <SlideSheet open onClose={onClose} title={voiceAction(12, 'dig') ?? ''} latin="OPEN THE ARCHIVE BOX" size="full" tone="ink" footer={controls}>
         <div className="flex h-full min-h-[300px] flex-col">
           <p className="shrink-0 pb-2 font-body text-[12px] leading-snug text-concrete [@media(max-height:700px)]:hidden">{t('archive.box.lede')}</p>
           {floor}
@@ -178,7 +196,7 @@ function DeskBox({ onClose, controls, children }: { onClose: () => void; control
           <p className="font-latin text-[10px] font-bold tracking-[0.24em] text-red" dir="ltr">
             OPEN THE ARCHIVE BOX
           </p>
-          <h2 className="font-display text-step-3 leading-tight text-paper">{t('archive.box.title')}</h2>
+          <h2 className="font-display text-step-3 leading-tight text-paper">{voiceAction(12, 'dig')}</h2>
           <p className="font-body text-[12.5px] leading-snug text-concrete">{t('archive.box.lede')}</p>
         </div>
         <button

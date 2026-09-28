@@ -37,6 +37,11 @@ import { recordDuelTaken } from '@/lib/profile/store'
 import { withRound } from '@/lib/rotation/deck'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { Embedded } from '@/lib/mechanics/types'
+import { ExitNext, ExitShare } from '@/components/result/UniversalExit'
+import { track } from '@/lib/analytics/meter'
+import type { NextAction } from '@/lib/results/types'
+import { voice, voiceAction } from '@/lib/voice'
+import { nextAfterWall } from './file/actions'
 import { WallDamage } from './WallDamage'
 
 /**
@@ -84,6 +89,7 @@ export function HateWall({
   embedded?: Omit<Embedded<{ duels: number; of: number }>, 'window'>
 }) {
   const [wall, setWall] = useState<Wall>(() => startWall(order, noMercy))
+  const intro = voice({ gate: 11, moment: 'intro', seed: `${seed}:${cursor}` })
   const [stamped, setStamped] = useState<{ won: string; out: string } | null>(null)
   const [drag, setDrag] = useState(0)
   const [revengeOpen, setRevengeOpen] = useState(false)
@@ -209,7 +215,10 @@ export function HateWall({
         </div>
 
         {wall.picks.length === 0 && (
-          <p className="mt-1.5 line-clamp-2 max-w-prose font-body text-[11.5px] leading-snug text-hate-muted">{t('hate.wall.lede')}</p>
+          // §20: "אחד נשאר על הקיר." — and the rule under it: a file for every name, the rest is the terrace's opinion
+          <p className="mt-1.5 line-clamp-2 max-w-prose font-body text-[11.5px] leading-snug text-hate-muted" data-hate="intro">
+            <span className="font-extrabold text-hate-ink">{intro.title}</span> {intro.body}
+          </p>
         )}
 
         {duel.noMercy && (
@@ -466,6 +475,23 @@ function StillHere({
   const [bad, setBad] = useState(false)
   const { survivor } = verdict
   const knocked = verdict.out.slice(0, 4).map((enemy) => enemy.nameHe).join(', ')
+  // §20: "זה מי שנשאר אצלך." — not "King"
+  const spoken = voice({ gate: 11, moment: 'result', result: 'done', seed: `${seed}:${cursor}` })
+  const [next, setNext] = useState<NextAction[]>([])
+  useEffect(() => {
+    track('run_complete', { detail: 'derby', value: verdict.streak })
+    let live = true
+    nextAfterWall(survivor.nameHe, `${seed}:${cursor}`)
+      .then((answer) => {
+        if (live) setNext(answer)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+    // one wall, one context
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // הקיר שנשאר עומד נרשם בכרטיס הפועל (שער 10): זרע + מי ששרד. פעם אחת לכל הצגה של
   // הסיום — `derby.walls` הוא קבוצה, ולכן חזרה לאותו קיר לא מנפחת את הספירה.
@@ -498,7 +524,8 @@ function StillHere({
           <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-hate-red-light" dir="ltr">
             STILL HERE · THE BLACK WALL
           </p>
-          <h2 className="font-display text-step-2 leading-tight text-hate-ink">{t('hate.still.title')}</h2>
+          <h2 className="font-display text-step-2 leading-tight text-hate-ink" data-exit="emotion">{spoken.title}</h2>
+          {spoken.body && <p className="mt-0.5 font-body text-[12px] leading-snug text-hate-muted">{spoken.body}</p>}
         </div>
 
         <div className="relative mt-3">
@@ -511,7 +538,11 @@ function StillHere({
 
         <Record enemy={survivor} />
 
-        <p className="mt-2.5 border-rule border-hate-ink/40 bg-hate-card px-3 py-2.5 font-body text-step--1 text-hate-ink">
+        {/* §20: opinion is labelled as the terrace's opinion — never as a fact about him */}
+        <p className="mt-2.5 border-rule border-hate-ink/40 bg-hate-card px-3 py-2.5 font-body text-step--1 text-hate-ink" data-hate="opinion">
+          <span className="me-1.5 inline-block border-hair border-hate-ink/50 px-1 py-px align-middle font-body text-[9.5px] font-extrabold tracking-wider text-hate-muted">
+            {voiceAction(11, 'opinion')}
+          </span>
           {t('hate.still.terrace', { name: verdict.terracePick.nameHe })}
         </p>
 
@@ -540,6 +571,7 @@ function StillHere({
           <p className="mt-1 text-center font-body text-[11px] text-hate-muted">{t('hate.code.explain')}</p>
         </section>
 
+        <ExitShare label={spoken.ctaShare} from="derby">
         <ShareRow
           kind="hate"
           params={{ s: String(seed), r: String(cursor), out: knocked || '—', n: String(verdict.streak), code: verdict.code }}
@@ -560,6 +592,7 @@ function StillHere({
             challenge: t('share.sameRound'),
           }}
         />
+        </ExitShare>
 
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {/* the SAME wall — a plain link: PlayLink would move the deck on */}
@@ -581,6 +614,10 @@ function StillHere({
           >
             {t('hate.blackfile')}
           </a>
+        </div>
+
+        <div className="mt-3">
+          <ExitNext next={next} from="derby" />
         </div>
 
         <form onSubmit={playCode} className="mt-3 flex gap-2">
@@ -623,11 +660,23 @@ function Record({ enemy }: { enemy: Enemy }) {
   if (enemy.record === 'none') return null
   const line = enemy.detailHe !== '' ? enemy.detailHe : enemy.keyFactHe
   if (line === '') return null
+  // §20 — מי · מה קרה · מתי · מקור · למה זה בתיק. `eraHe` is the row's own era, the charge
+  // is the category the record files him under, never a sentence written about him here.
   return (
-    <div className="mt-2 border-rule border-hate-ink/40 bg-hate-card p-3">
+    <div className="mt-2 border-rule border-hate-ink/40 bg-hate-card p-3" data-blackfile="record">
       <p className="font-body text-[10px] tracking-widest text-hate-muted">{t('hate.record')}</p>
-      <p className="mt-1 font-body text-step--1 leading-relaxed text-hate-ink">{line}</p>
-      <SourceNote newTab tone="dark" group={enemy.record === 'maor' ? 'team' : null} className="mt-1" />
+      <dl className="mt-1 grid gap-1">
+        <RecordRow k={t('blackfile.who')} v={enemy.nameHe} />
+        <RecordRow k={t('blackfile.what')} v={line} />
+        {enemy.eraHe !== '' && <RecordRow k={t('blackfile.when')} v={enemy.eraHe} />}
+        <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-2">
+          <dt className="font-body text-[10px] font-extrabold text-hate-muted">{t('blackfile.source')}</dt>
+          <dd className="min-w-0">
+            <SourceNote newTab tone="dark" group={enemy.record === 'maor' ? 'team' : null} />
+          </dd>
+        </div>
+        <RecordRow k={t('blackfile.why')} v={t(`hate.cat.${enemy.category}` as MessageKey)} />
+      </dl>
     </div>
   )
 }
@@ -637,6 +686,15 @@ function DnaCell({ k, v }: { k: string; v: string }) {
     <div className="border-hair border-hate-ink/30 bg-hate-field px-2 py-1.5">
       <dt className="font-body text-[10px] text-hate-muted">{k}</dt>
       <dd className="mt-0.5 font-body text-[13px] font-extrabold leading-tight text-hate-ink">{v}</dd>
+    </div>
+  )
+}
+
+function RecordRow({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-2">
+      <dt className="font-body text-[10px] font-extrabold text-hate-muted">{k}</dt>
+      <dd className="min-w-0 font-body text-step--1 leading-relaxed text-hate-ink">{v}</dd>
     </div>
   )
 }

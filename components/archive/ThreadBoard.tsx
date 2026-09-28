@@ -5,13 +5,17 @@ import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 
 import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
+import { ExitNext } from '@/components/result/UniversalExit'
+import { track } from '@/lib/analytics/meter'
+import { microFeedback, tierFromShare, voice } from '@/lib/voice'
 import { RevealBar, useReveal } from '@/components/play/Reveal'
 import { firePickFxAt } from '@/components/stage/PickFx'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { Num } from '@/components/ui/Num'
 import { SourceNote } from '@/components/ui/SourceNote'
 import { useDialog } from '@/components/ui/useDialog'
-import { closeThread, linkThread } from '@/app/timeline/actions'
+import { closeThread, linkThread, nextAfterThread } from '@/app/timeline/actions'
+import type { NextAction } from '@/lib/results/types'
 import { ENTITY_TYPES, type ArchiveCard, type EntityType, type SourceLine } from '@/lib/archive/graph-types'
 import { costsIntegrity, ruleStates, type ClosedEdge, type PublicLevel, type RuleKey } from '@/lib/game/thread-run'
 import { haptic } from '@/lib/play/haptics'
@@ -77,6 +81,9 @@ export function ThreadBoard({ levels, seed, cursor }: { levels: PublicLevel[]; s
   const [path, setPath] = useState<Stop[]>([])
   const [integrity, setIntegrity] = useState(levels[0]?.integrity ?? 3)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
+  const intro = voice({ gate: 13, moment: 'intro', seed: `${seed}:${cursor}` })
+  // "מצאת דרך." — the route is closed; the number of steps is the figure beside it
+  const found = voice({ gate: 13, moment: 'result', result: 'high', seed: `${seed}:${cursor}`, vars: { n: String(path.length + 1) } })
   const [torn, setTorn] = useState<string | null>(null)
   const [filter, setFilter] = useState<EntityType | null>(null)
   const [success, setSuccess] = useState<{ edges: ClosedEdge[]; stops: number; optimum: number; score: number } | null>(null)
@@ -142,7 +149,8 @@ export function ThreadBoard({ levels, seed, cursor }: { levels: PublicLevel[]; s
       if (result.ok) {
         haptic('lock')
         setPath((old) => [...old, { card, labelKey: result.labelKey, params: result.params, sources: result.sources }])
-        setFeedback({ tone: 'ok', big: t('thread.feedback.ok'), small: label(result.labelKey, result.params) })
+        // §22: physical-thread words — "יש חיבור." — and the edge the archive holds under it
+        setFeedback({ tone: 'ok', big: microFeedback(13, 'correct', seed, path.length)?.line ?? '', small: label(result.labelKey, result.params) })
         // the one pick effect the whole ground shares — fired from the knot that just locked
         firePickFxAt(knot, { label: '✓', tone: 'red', haptic: false })
         // the thread just grew: keep its end in view, without yanking a page that already shows it
@@ -155,7 +163,8 @@ export function ThreadBoard({ levels, seed, cursor }: { levels: PublicLevel[]; s
       if (costsIntegrity(result.reason)) tear(result.reason, card.id)
       else {
         firePickFxAt(knot, { tone: 'sign', haptic: false })
-        setFeedback({ tone: 'info', big: t(REASON[result.reason] ?? 'thread.feedback.noEdge') })
+        // §22: "החוט לא עובר כאן." — and why, in the archive's terms
+        setFeedback({ tone: 'info', big: microFeedback(13, 'wrong', seed, path.length)?.line ?? '', small: t(REASON[result.reason] ?? 'thread.feedback.noEdge') })
       }
     })
   }
@@ -233,6 +242,12 @@ export function ThreadBoard({ levels, seed, cursor }: { levels: PublicLevel[]; s
             {t('thread.level', { n: String(level.index + 1), total: String(level.total) })}
             <span className="font-body text-[13px] text-muted"> · {t(`thread.tier.${level.tier}` as MessageKey)}</span>
           </p>
+          {/* §22 — the intro, once, before the first knot: "בהפועל הכול מתחבר בסוף." */}
+          {level.index === 0 && path.length === 0 && (
+            <p className="mt-0.5 line-clamp-2 font-body text-[12px] leading-snug text-ink" data-thread="intro">
+              <b className="font-display text-[13.5px]">{intro.title}</b> <span className="text-muted">{intro.body}</span>
+            </p>
+          )}
         </div>
         <div className="shrink-0 text-end">
           <p className="font-body text-[11px] font-bold text-muted">{t('thread.integrity')}</p>
@@ -488,7 +503,7 @@ export function ThreadBoard({ levels, seed, cursor }: { levels: PublicLevel[]; s
           {broken
             ? t('thread.broken.body')
             : success
-              ? t('thread.success.title')
+              ? found.title
               : t('stage.play.thread.instruct', {
                   name: path.length ? cardTitle((path[path.length - 1] as Stop).card) : cardTitle(level.start),
                 })}
@@ -784,6 +799,8 @@ function Success({
 }) {
   const ref = useDialog<HTMLDivElement>(onNext)
   const [shown, setShown] = useState(false)
+  // §22: "מצאת דרך." — the shortest route is perfect, a longer one is still a way
+  const found = voice({ gate: 13, moment: 'result', result: success.stops <= success.optimum ? 'perfect' : 'high', seed: level.ref, vars: { n: String(success.stops + 1) } })
   const beat = useReveal({ ms: 700 * success.edges.length + 600, active: !shown, onDone: () => setShown(true) })
   const visible = shown ? success.edges.length : Math.max(1, Math.ceil((1 - beat.progress) * success.edges.length))
 
@@ -793,7 +810,7 @@ function Success({
       tabIndex={-1}
       role="dialog"
       aria-modal="true"
-      aria-label={t('thread.success.title')}
+      aria-label={found.title}
       className="fixed inset-0 z-[60] flex flex-col justify-end bg-ink/70 outline-none sm:justify-center"
     >
       <div className="max-h-[90dvh] w-full animate-sheet-in overflow-y-auto border-t-plate border-red bg-sheet motion-reduce:animate-none sm:mx-auto sm:max-w-[560px] sm:border-plate">
@@ -801,7 +818,7 @@ function Success({
           <p className="font-latin text-[10px] font-bold tracking-[0.24em] text-red" dir="ltr">
             {t('thread.success.kicker')}
           </p>
-          <h2 className="font-display text-step-3 leading-tight">{t('thread.success.title')}</h2>
+          <h2 className="font-display text-step-3 leading-tight">{found.title}</h2>
           <p className="font-body text-[13px] text-concrete">
             {t('thread.success.body', { stops: String(success.stops), optimum: String(success.optimum) })} ·{' '}
             <b className="text-paper">{t('thread.success.points', { n: String(success.score) })}</b>
@@ -857,6 +874,23 @@ function Success({
 function Result({ outcomes, total, seed, cursor }: { outcomes: Outcome[]; total: number; seed: number; cursor: number }) {
   const closed = outcomes.filter((o) => o.closed)
   const score = outcomes.reduce((sum, o) => sum + o.score, 0)
+  const spoken = voice({ gate: 13, moment: 'result', result: tierFromShare(total > 0 ? closed.length / total : 0), seed: `${seed}:${cursor}`, vars: { n: String(closed.reduce((sum, o) => sum + o.stops + 1, 0)) } })
+  const [next, setNext] = useState<NextAction[]>([])
+  useEffect(() => {
+    track('run_complete', { detail: 'timeline-thread', value: closed.length })
+    let live = true
+    // the ResultContext: every anchor of a closed route is a canonical archive id
+    nextAfterThread(closed.flatMap((o) => [o.start.id, o.end.id]), `${seed}:${cursor}`, score)
+      .then((answer) => {
+        if (live) setNext(answer)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+    // one run, one context
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     <div className="mt-3">
       <RecordRun gate="/timeline" seed={seed} score={score} correct={closed.length} asked={total} />
@@ -864,7 +898,7 @@ function Result({ outcomes, total, seed, cursor }: { outcomes: Outcome[]; total:
         <p className="font-latin text-[10px] font-bold tracking-[0.24em] text-red" dir="ltr">
           GATE 13 · THE RED THREAD
         </p>
-        <h2 className="font-display text-step-3 leading-tight">{t('thread.result.title')}</h2>
+        <h2 className="font-display text-step-3 leading-tight" data-exit="emotion">{spoken.title}</h2>
         <p className="mt-1 font-body text-[13.5px] leading-relaxed text-concrete">
           {t('thread.result.body', { closed: String(closed.length), total: String(total) })}
         </p>
@@ -903,6 +937,9 @@ function Result({ outcomes, total, seed, cursor }: { outcomes: Outcome[]; total:
           </li>
         ))}
       </ol>
+      <div className="mt-3">
+        <ExitNext next={next} from="timeline-thread" />
+      </div>
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <PlayLink gate="/timeline" className="flex min-h-tap items-center justify-center border-rule border-red bg-red px-4 font-body text-step-0 font-extrabold text-paper">
           {t('thread.result.again')}

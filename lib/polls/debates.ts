@@ -56,10 +56,11 @@ export function debateQuestionId(id: string): string {
 
 /** the four "why" chips (§16) — the voter's own, never sent anywhere */
 export const DEBATE_REASONS: readonly { id: string; he: MessageKey }[] = [
-  { id: 'saw', he: 'terrace.reason.saw' },
-  { id: 'father', he: 'terrace.reason.father' },
-  { id: 'just-him', he: 'terrace.reason.justHim' },
-  { id: 'moment', he: 'terrace.reason.moment' },
+  // the words are the Red Voice's (ONE RED WORLD §16), one home for gate 7's lines
+  { id: 'saw', he: 'voice.g7.act.why.saw' },
+  { id: 'father', he: 'voice.g7.act.why.dad' },
+  { id: 'just-him', he: 'voice.g7.act.why.him' },
+  { id: 'moment', he: 'voice.g7.act.why.moment' },
 ]
 
 export function isDebateReason(value: string): boolean {

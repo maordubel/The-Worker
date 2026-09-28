@@ -47,6 +47,10 @@ import heStageTerrace from '@/messages/he.stage.terrace.json'
 // 28.9.2026 — the Red Voice (`lib/voice`, docs/19-red-voice.md): every gate's intro, result
 // and micro-feedback lines, and the shared "שלח ליציע". One file, so the voice has one home.
 import heVoice from '@/messages/he.voice.json'
+// 28.9.2026 — wave 2, gates 7–13: the Cross Gate Router (`router.*`), the LIFE bridge
+// (`bridge.*`) and gate 8's key-mismatch words (`goalMiss.*`). One file, so the parallel
+// gate agents never append to the same catalogue.
+import heStageRouter from '@/messages/he.stage.router.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -122,6 +126,7 @@ export const CATALOGUE_FILES = {
   heStageLifeB28,
   heStageTerrace,
   heVoice,
+  heStageRouter,
 } as const
 
 const catalogue = {
@@ -165,6 +170,7 @@ const catalogue = {
   ...heStageLifeB28,
   ...heStageTerrace,
   ...heVoice,
+  ...heStageRouter,
 }
 
 export type MessageKey = keyof typeof catalogue

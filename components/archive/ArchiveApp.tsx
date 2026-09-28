@@ -7,6 +7,8 @@ import { firePickFx } from '@/components/stage/PickFx'
 import { Num } from '@/components/ui/Num'
 import { describeIds, digBox, openEntity, rabbit, searchArchive, seasonDeck } from '@/app/archive/actions'
 import { reactionSetOf, REACTIONS, type ArchiveCard, type EntityDetail, type EntityType } from '@/lib/archive/graph-types'
+import { readCompletedChapters } from '@/lib/life/memoryPassport'
+import { voice, voiceAction } from '@/lib/voice'
 import { haptic } from '@/lib/play/haptics'
 import { emit, telemetry } from '@/lib/profile/events'
 import { isOn, onIds } from '@/lib/profile/store'
@@ -76,7 +78,8 @@ export function ArchiveApp({
   const firstChip = decks.today.length ? 'today' : 'know'
   const [chip, setChip] = useState<TodayChip | null>(firstChip)
   const [deck, setDeck] = useState<ArchiveCard[]>(decks[firstChip])
-  const [context, setContext] = useState<string>(t('archive.context.today'))
+  // §21 — the default landing asks "מה חזר היום?" rather than showing a dock of systems
+  const [context, setContext] = useState<string>(() => voice({ gate: 12, moment: 'intro', seed: `${seed}:${cursor}` }).title)
   const [season, setSeason] = useState<string | null>(null)
   const [index, setIndex] = useState(0)
   const [more, setMore] = useState(false)
@@ -99,6 +102,11 @@ export function ArchiveApp({
   useEffect(() => {
     setMine(onIds('archive.mine'))
     setReactions(onIds('archive.react'))
+  }, [])
+  // the LIFE chapters this device finished — read once, never sent anywhere (§23.2)
+  const [lived, setLived] = useState<string[]>([])
+  useEffect(() => {
+    void readCompletedChapters().then(setLived)
   }, [])
 
   // an entry through `?at=` still counts as having looked at it
@@ -155,7 +163,7 @@ export function ArchiveApp({
         return
       }
       haptic('lock')
-      say(t('archive.flash.rabbit'), cardTitle(next.card))
+      say(voiceAction(12, 'rabbit') ?? '', cardTitle(next.card))
       show(next, 'rabbit')
     })
   }
@@ -191,7 +199,7 @@ export function ArchiveApp({
     setDeck(decks[next])
     setIndex(0)
     setMore(false)
-    setContext(t(`archive.chip.${next}` as MessageKey))
+    setContext(next === 'today' ? (voiceAction(12, 'today') ?? '') : t(`archive.chip.${next}` as MessageKey))
   }
 
   function step(dir: 1 | -1) {
@@ -299,7 +307,7 @@ export function ArchiveApp({
               chip === row ? 'border-red bg-red text-paper' : 'border-ink/40 bg-paper text-ink'
             }`}
           >
-            {t(`archive.chip.${row}` as MessageKey)}
+            {row === 'today' ? voiceAction(12, 'today') : t(`archive.chip.${row}` as MessageKey)}
           </button>
         ))}
         {season && (
@@ -324,7 +332,7 @@ export function ArchiveApp({
               </button>
             </li>
           ))}
-          {trail.length === 0 && <li className="font-body text-[11.5px] text-muted">{t('archive.trail.title')}</li>}
+          {trail.length === 0 && <li className="font-body text-[11.5px] text-muted">{voiceAction(12, 'trail')}</li>}
         </ol>
         <p className="shrink-0 border-rule border-ink bg-ink px-2 py-1 font-body text-[11px] font-bold text-paper" aria-label={t('archive.depth.aria', { n: String(depth) })}>
           {t('archive.depth')} <span className="font-mono tabular-nums text-red"><Num>{depth}</Num></span>
@@ -462,7 +470,7 @@ export function ArchiveApp({
           </article>
         ) : (
           <p className="border-hair border-ink/40 bg-paper px-3 py-3 font-body text-[13.5px] leading-relaxed text-ink">
-            {chip === 'today' ? t('archive.today.none') : season ? t('archive.time.empty') : t('archive.chip.empty')}
+            {chip === 'today' ? voiceAction(12, 'empty') : season ? t('archive.time.empty') : t('archive.chip.empty')}
           </p>
         )}
       </section>
@@ -543,6 +551,7 @@ export function ArchiveApp({
           onReact={(code) => react(detail.card, code)}
           onRabbit={dig}
           report={report}
+          lived={lived}
           onSearch={() => {
             setDetail(null)
             setLayer('search')

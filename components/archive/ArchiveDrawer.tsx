@@ -10,6 +10,8 @@ import { MatchLine, Num } from '@/components/ui/Num'
 import { REACTIONS, reactionSetOf, type ConfidenceWord, type EntityDetail, type RelatedItem, type WhatBlock } from '@/lib/archive/graph-types'
 import { crestArt } from '@/lib/kit/crestMarks'
 import { t, type MessageKey } from '@/lib/i18n'
+import { voiceAction } from '@/lib/voice'
+import { GateRouter } from './GateRouter'
 import { ArtifactMark, CloseMark, EntityRow, Eyebrow, LATIN, cardTitle, typeLabel } from './EntityCard'
 
 /**
@@ -35,6 +37,7 @@ export function ArchiveDrawer({
   onRabbit,
   onSearch,
   report,
+  lived = [],
 }: {
   detail: EntityDetail
   saved: boolean
@@ -48,6 +51,8 @@ export function ArchiveDrawer({
   onRabbit: () => void
   onSearch: () => void
   report?: ReactNode
+  /** the LIFE chapters this device's save completed — the router's LIFE door reads it */
+  lived?: readonly string[]
 }) {
   const ref = useDialog<HTMLDivElement>(onClose)
   const { card } = detail
@@ -115,6 +120,8 @@ export function ArchiveDrawer({
 
           {/* delta 89 — the same match / man in the other gates: על המפה · בשער 8 */}
           <CrossLinks links={detail.links} from="archive" className="mt-2.5" label={t('connect.row')} />
+          {/* ONE RED WORLD §21 — the gates that can serve this entity, and LIFE when it was lived */}
+          <GateRouter router={detail.router} lived={lived} />
 
           {/* ואתה? — personal, never a fact */}
           <section className="mt-3" aria-labelledby="drawer-react">
@@ -234,7 +241,7 @@ export function ArchiveDrawer({
             disabled={busy || rabbitEmpty}
             className="min-h-tap border-rule border-red bg-red px-2 font-body text-[13px] font-extrabold leading-tight text-paper disabled:opacity-50"
           >
-            {t('archive.drawer.rabbit')}
+            {voiceAction(12, 'rabbit')}
           </button>
           <button type="button" onClick={onSearch} className="min-h-tap border-rule border-ink bg-sheet px-2 font-body text-[13px] font-bold leading-tight text-ink">
             {t('archive.drawer.deep')}

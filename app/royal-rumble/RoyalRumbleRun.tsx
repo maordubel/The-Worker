@@ -30,7 +30,11 @@ import {
 import type { KitSpec } from '@/lib/kit/spec'
 import type { Embedded } from '@/lib/mechanics/types'
 import { t } from '@/lib/royal-rumble/i18n'
-import { submitRoyalRumble } from './actions'
+import { ExitNext } from '@/components/result/UniversalExit'
+import { track } from '@/lib/analytics/meter'
+import type { NextAction } from '@/lib/results/types'
+import { voice, voiceAction, type ResultTier } from '@/lib/voice'
+import { nextAfterRumble, submitRoyalRumble } from './actions'
 import { RoyalRumbleSlotReveal } from './RoyalRumbleSlotReveal'
 import { RumbleLooks, RumbleShirt } from './RumbleShirt'
 import type { Wardrobe } from '@/lib/kit/playerShirt'
@@ -531,6 +535,10 @@ function RoyalRumbleRunInner({
   /** the stage's one sheet for what used to be desktop-only fine print (delta 87) */
   const [rulesOpen, setRulesOpen] = useState(false)
   const [history, setHistory] = useState<RoyalRumbleHistoryItem[]>([])
+  /** ONE RED WORLD §6 — at most two natural doors after the whistle, from `recommend()` */
+  const [next, setNext] = useState<NextAction[]>([])
+  // §18: "תן חמישייה." — the gate's own opening line, the same for the same board
+  const intro = voice({ gate: 9, moment: 'intro', seed: activeDraft.seed })
 
   const spent = lineupCost(picks)
   const remaining = activeDraft.budget - spent
@@ -616,6 +624,23 @@ function RoyalRumbleRunInner({
     embedded.onResult(result)
   }, [embedded, phase, result])
 
+  // the ResultContext of a finished rumble: the five he chose, resolved on the server (§5, §38)
+  useEffect(() => {
+    if (embedded || phase !== 'result' || !result) return
+    track('run_complete', { detail: 'royal-rumble', value: result.scoreFor })
+    let live = true
+    nextAfterRumble(selectedPlayers.map((offer) => offer.player.slug), `${activeDraft.seed}`)
+      .then((answer) => {
+        if (live) setNext(answer)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+    // one whistle, one context
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, result, embedded])
+
   useEffect(() => {
     if (phase !== 'match' || !result) return
     if (frameIndex >= result.frames.length - 1) {
@@ -632,7 +657,7 @@ function RoyalRumbleRunInner({
         <div className="absolute inset-y-0 start-0 w-2 bg-red" />
         <div className="relative text-center">
           <p className="font-mono tabular-nums text-[9px] font-black tracking-[0.32em] text-red" dir="ltr">OPPONENT ENTRANCE</p>
-          <h2 className="mt-2 font-display text-[38px] leading-[0.85] sm:text-[66px]">{t('opponentTitle')}</h2>
+          <h2 className="mt-2 font-display text-[38px] leading-[0.85] sm:text-[66px]">{voiceAction(9, 'opponent')}</h2>
           <p className="mx-auto mt-4 hidden max-w-lg font-body text-[11px] text-paper/50 sm:block">{t('opponentBody')}</p>
         </div>
 
@@ -696,6 +721,9 @@ function RoyalRumbleRunInner({
     const won = result.winner === 'us'
     const draw = result.winner === 'draw'
     const formationLine = result.formation === 'defensive' ? t('formationDefensiveHeld') : t('formationCreativeMade')
+    // §18: "זאת החמישייה שלך. זה מה שיצא." — competitive, never toxic; the tier only picks the body
+    const tier: ResultTier = won ? 'high' : draw ? 'done' : 'low'
+    const spoken = voice({ gate: 9, moment: 'result', result: tier, seed: activeDraft.seed })
     return (
       <div className="mx-auto flex min-h-0 w-full flex-1 flex-col overflow-y-auto overscroll-contain max-w-5xl pb-3 pt-1 md:block md:flex-none md:overflow-visible">
         <RecordRun gate="royal-rumble" score={won ? 3 : draw ? 1 : 0} correct={won ? 1 : 0} asked={1} />
@@ -705,9 +733,10 @@ function RoyalRumbleRunInner({
           <p className="relative font-mono tabular-nums text-[9px] font-black tracking-[0.3em] text-red" dir="ltr">FULL TIME · ROYAL RUMBLE</p>
           <p className="relative mt-3 font-display text-[92px] leading-[0.8] sm:text-[132px]" dir="ltr">{result.scoreFor}–{result.scoreAgainst}</p>
           <div className="relative mx-auto mt-5 h-1 w-20 bg-red" />
-          <h2 className="relative mt-5 font-display text-[34px] leading-none sm:text-[46px]">
-            {won ? t('won') : draw ? t('draw') : t('lost')}
+          <h2 className="relative mt-5 font-display text-[34px] leading-none sm:text-[46px]" data-exit="emotion">
+            {spoken.title}
           </h2>
+          {spoken.body && <p className="relative mt-2 font-body text-[13px] text-paper/80">{spoken.body}</p>}
           {/* the small story (§50): one line the server chose, one line the formation earned */}
           <div className="relative mx-auto mt-4 flex max-w-lg flex-col items-center gap-1.5">
             {result.highlight && (
@@ -742,6 +771,10 @@ function RoyalRumbleRunInner({
           <span><span className="block font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/60" dir="ltr">RUN IT BACK</span><span className="font-display text-[27px]">{t('again')}</span></span>
           <span className="font-display text-[38px] transition group-hover:-translate-x-1 motion-reduce:transition-none" aria-hidden="true">←</span>
         </a>
+
+        <div className="mt-3 shrink-0">
+          <ExitNext next={next} from="royal-rumble" />
+        </div>
 
         {/* the recent five (§54): this browser's last rounds, never a lever on the seed */}
         <section className="mt-3 shrink-0 border-rule border-ink bg-paper p-3 text-ink">
@@ -789,7 +822,10 @@ function RoyalRumbleRunInner({
             </div>
             <h1 className="mt-1 font-display text-[22px] leading-[0.82] sm:mt-3 sm:text-[76px]">{t('title')}</h1>
             <div className="mt-1 hidden h-1.5 w-16 bg-red sm:mt-3 sm:block sm:h-2 sm:w-24" />
-            <p className="mt-4 hidden max-w-md font-body text-[11px] leading-relaxed text-paper/55 sm:block sm:text-[12px]">{t('heroBody')}</p>
+            <p className="mt-1 max-w-md font-body text-[11px] leading-snug text-paper/70 sm:mt-4 sm:text-[12px] sm:leading-relaxed" data-rumble="intro">
+              <span className="font-extrabold text-paper">{intro.title}</span>
+              {intro.body && <span className="hidden sm:inline"> {intro.body}</span>}
+            </p>
           </div>
 
           <div className="flex min-w-[96px] flex-col justify-end border-s-hair border-paper/15 ps-3 sm:min-w-[180px] sm:ps-5">
