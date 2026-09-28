@@ -1,31 +1,33 @@
 import type { MessageKey } from '@/lib/i18n'
 
 /**
- * שערי הפועל — the nine gates.
+ * שערי הפועל — the thirteen gates.
  *
  * The navigation is not a list of game modes. It is Bloomfield's gate plan, and a
  * player picks a mode by walking through a gate. That is the whole idea in Maor's
  * design: "אתה לא בוחר מצב משחק מרשימה. אתה נכנס בשער."
  *
- * The gate numbers are the ground's real ones, which is why they do not run 1..13.
- * Inventing one to tidy the grid would be exactly the kind of small lie this project
- * does not tell — and so is hanging a plate over a route that does not exist.
+ * The gate numbers are the ground's real ones. Inventing one to tidy the grid would be
+ * exactly the kind of small lie this project does not tell — and so is hanging a plate
+ * over a route that does not exist.
  *
- * **Gate 12 opened on 17.9.2026** as `/archive`, the archive wing, once the corpus
- * behind it existed: 1,385 press columns, every one with a full ISO date, beside the
- * 3,068 dated matches the archive already held.
+ * **What the array below holds today (28.9.2026) — thirteen plates, every one a door:**
  *
- * **Gate 9 is on the wall and is not a door.** Maor: *"תפתח גם את שער 9 ותרשום
- * 'בשיפוצים' ונחליט בהמשך למה הוא יהיה."* So it is a plate with no `href` at all —
- * `href: null` rather than a route that 404s, which is the case this file has always
- * argued about gate 7: a gate that points at nothing is worse than a gap. The type
- * forces every consumer to decide what to do with a gate that goes nowhere, which is
- * the point of writing it as `null` instead of an empty string.
+ *   1 `/xi` הרכב כל הזמנים · 2 `/trivia` אגף הטריוויות · 3 `/lineup` חידון ההרכב ·
+ *   4 `/kits/build` משחק המדים · 5 `/kits` אגף המדים (the curva) · 6 `/memory` ·
+ *   7 `/polls` הכרטיס שלי + הוויכוח של היציע · 8 `/goal` שחזור השער ·
+ *   9 `/royal-rumble` · 10 `/blind-cow` פרה עיוורת · 11 `/derby` משחק השנאה (the away
+ *   end) · 12 `/archive` הארכיון החי · 13 `/timeline` החוט האדום.
  *
- * Gate 7 is the polls wing, which is what Maor replaced the crest game with. It stood
- * empty on the wall for one delta rather than pointing at a route that did not exist —
- * a gate that goes nowhere is worse than a gap, and these numbers are the ground's own
- * anyway, so they were never going to run 1..13.
+ * This comment used to describe an older wall — "nine gates", gate 9 a plate "בשיפוצים"
+ * with no href, gate 10 the personal area. All three stopped being true: gate 9 opened as
+ * the Royal Rumble, gate 10 became Blind Cow on 24.9.2026 (the member book `/tik` is still
+ * there, as "המנוי שלי" in the tab bar, not on the wall), and every plate now has a route.
+ * A count in prose is a claim about the code (rules 45, 73) — read the array, not this list.
+ *
+ * `href: null` is still in the type, and still means what it meant: a plate the ground
+ * has and the app does not, drawn closed by `GatePlate` ("בשיפוצים", or "בקרוב" with
+ * `soon`) rather than a route that 404s. No gate uses it today.
  *
  * Two gates are special and the rest follow one template:
  *   · **Gate 5** is the ultras' gate. It gets the full bill — rays, the flag, the
@@ -34,6 +36,9 @@ import type { MessageKey } from '@/lib/i18n'
  *   · **Gate 11** is the away end. It carries NO vermilion at all: navy only, no
  *     flag, no rays. Whoever walks in sees somebody else's poster, which is the
  *     point of the game behind it.
+ *
+ * The product map — route, state, seed, persistence, share, archive and LIFE links and
+ * tests for every gate — is `docs/18-product-map.md`.
  */
 
 export type Gate = {
@@ -58,10 +63,12 @@ export type Gate = {
   /**
    * האם השער מחלק סבב — does the route behind this plate READ `?seed=`?
    *
-   * Six of them do. The other five are wings and a personal area: `/xi` is free play
-   * over the whole roster, `/kits` is a collection, `/polls` is a ballot, `/tik` is
-   * your own card, and `/trivia` is the TOPIC PICKER — the seeded route is
-   * `/trivia/<topic>`, one deck each, which is why the picker itself must not carry one.
+   * Nine of them do (3, 4, 6, 7, 8, 9, 11, 12, 13). The other four do not: `/xi` is free
+   * play over the whole roster, `/kits` is a collection, `/blind-cow` is dealt by the
+   * server, the date or a duel token, and `/trivia` is the TOPIC PICKER — the seeded route
+   * is `/trivia/<topic>`, one deck each, which is why the picker itself must not carry one.
+   * `/polls` reads a seed since 28.9.2026 for its DEBATES only (ONE RED WORLD §16); the
+   * identity ballot beside them has none.
    *
    * Until 17.9.2026 the wall and the personal area stapled `?seed=…&r=…` onto all
    * eleven. Four of those parameters were read by nobody, and the fifth — `/trivia` —
@@ -71,11 +78,12 @@ export type Gate = {
    */
   seeded: boolean
   /**
-   * האם משחקים בו — gate 10 is the personal area, and you cannot finish a round of it.
+   * האם משחקים בו — can a supporter finish a round of it?
    *
-   * It is on the wall because it is a place in the ground, not because it is a game. It
-   * is excluded from "how many gates have you been through", which otherwise printed a
-   * denominator nobody could ever reach.
+   * Written for the day gate 10 was the personal area: a place in the ground rather than
+   * a game, excluded from "how many gates have you been through" so that count did not
+   * print a denominator nobody could reach. Every gate on the wall today is playable; the
+   * flag stays so a future non-game plate cannot quietly enter that denominator.
    */
   playable: boolean
   /** gate 5 only — the line on the flag */
@@ -176,7 +184,8 @@ export const GATES: readonly Gate[] = [
     latin: 'THE BALLOT · SOUTH',
     plate: 'plain',
     stain: 'a',
-    seeded: false,
+    // the debates rotate (`lib/polls/debates.ts`); the identity ballot reads no seed
+    seeded: true,
     playable: true,
   },
   {
@@ -266,7 +275,7 @@ export function isOpen(gate: Gate): gate is Gate & { href: string } {
   return gate.href !== null
 }
 
-/** The gates a supporter can actually finish a round of — everything but the personal area. */
+/** The gates a supporter can actually finish a round of — open and `playable` (today: all thirteen). */
 export const PLAYABLE_GATES: ReadonlyArray<Gate & { href: string }> = GATES.filter(
   (gate): gate is Gate & { href: string } => gate.playable && isOpen(gate),
 )

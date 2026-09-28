@@ -23,8 +23,9 @@ export const metadata: Metadata = gateMetadata('polls')
  *
  * The roster is built on the server, where the archive lives, and handed down as names
  * only — the same payload the all-time XI takes. Nothing about a ballot needs grading,
- * so there is no server action here and no seed: this gate has no right answer, which
- * is the entire point of it.
+ * so the ballot has no seed and nothing to grade: this gate has no right answer, which
+ * is the entire point of it. (The seed read below deals the DEBATES — see the note at
+ * the end of this comment.)
  *
  * Two more payloads go down with it, and neither is new work: `shirtBoard` is the join
  * gate 1 already receives (`lib/xi/board.ts` — the seasons sent once, a player as two
