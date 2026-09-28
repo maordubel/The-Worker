@@ -246,6 +246,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2025-eurocup': [
     { id: 'euro', textHe: 'הגמר באירופה.', doneWhen: F('z:euro') },
+    { id: 'night', textHe: 'חצות וחצי, ומישהו מחכה למחר.', revealWhen: F('z:euro'), doneWhen: F('z:collide') },
     { id: 'glad', textHe: 'אפי שואל אם אתה שמח.', revealWhen: { all: [F('z:euro'), F('life:menora:2025')] }, doneWhen: F('z:glad') },
     { id: 'up', textHe: 'הדרכון של אבא.', revealWhen: F('z:euro'), doneWhen: F('z:up') },
   ],

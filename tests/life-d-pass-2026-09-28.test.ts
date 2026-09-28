@@ -425,3 +425,24 @@ describe('2019-armchair — the match from home is interrupted, and the Saturday
     expect(sim.endings).toEqual(['fixed'])
   })
 })
+
+// ============================================ 2025-eurocup — the night against the morning ===
+
+describe('2025-eurocup — the celebration has somebody else’s morning in it', () => {
+  it('the child’s tournament at eight: going to bed is kept, staying is a price', () => {
+    const sim = new WorldSim('2025-eurocup')
+    seed(sim, { 'life:child': true })
+    sim.beatAnswer = pick('together', 'night')
+    sim.go('home')
+    sim.wait(3)
+    expect(sim.state.flags['life:eurocup:night']).toBe('night:child')
+  })
+
+  it('without a partner or a child, it is the meeting at eight — and moving it needs her yes', () => {
+    const sim = new WorldSim('2025-eurocup')
+    sim.beatAnswer = pick('together', 'move')
+    sim.go('home')
+    sim.wait(3)
+    expect(sim.state.flags['life:eurocup:night']).toBe('moved:work')
+  })
+})
