@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { DIALOGUE } from '@/lib/life/content/dialogue'
 import { RIDES, RIDE_PREFIX } from '@/lib/life/content/passages'
 import { meets } from '@/lib/life/world/types'
+import { STORY_CHORES } from '@/lib/life/content/storyChores'
 import type { LifeEvent } from '@/lib/life/events'
 import type { DialogueChoice } from '@/lib/life/runtime/bus'
 
@@ -396,5 +397,31 @@ describe('2017-after — Kobi asks, and the answer is the form, the chair or the
     sim.press('p-spot-chair', pick('not-yet'))
     expect(sim.state.flags['p:choice']).toBeUndefined()
     expect(sim.find('p-spot-chair')).toBeDefined()
+  })
+})
+
+// ============================================ 2019-armchair — the ten minutes, and the shelf ===
+
+describe('2019-armchair — the match from home is interrupted, and the Saturday is done with the hands', () => {
+  it('watching with Kobi, Rachel asks for ten minutes — and the photo waits for the answer', () => {
+    const sim = new WorldSim('2019-armchair')
+    sim.beatAnswer = pick('watch', 'help')
+    sim.go('home')
+    expect(sim.state.flags['life:armchair:ten']).toBe('roof')
+  })
+
+  it('fixing Ilan’s shelf is a chore; the level decides what Ilan says, and the chapter ends after it', () => {
+    const sim = new WorldSim('2019-armchair')
+    seed(sim, { 'a:remote': true, 'a:photo': true })
+    sim.onMinigame = (id, world) => {
+      const chore = STORY_CHORES[id.replace('chore:story:', '')]
+      if (!chore) return
+      world.engine.dispatch(...chore.finish(chore.shape.target, chore.shape.target))
+      world.go(chore.where)
+    }
+    sim.beatAnswer = pick('fix')
+    sim.go('street')
+    expect(sim.state.flags['a:shelf']).toBe('straight')
+    expect(sim.endings).toEqual(['fixed'])
   })
 })

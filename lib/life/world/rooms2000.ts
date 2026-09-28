@@ -1105,6 +1105,8 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2017-after', flag('p:amit'), [{ who: 'קובי', x: 0.19, y: 0.74, figure: 'kobi90-sitB' }]),
     // 2019-armchair · A01 (a-remote) — "סלון קובי": השלט אצלו
     ...cast('2019-armchair', undefined, [{ who: 'קובי', x: 0.19, y: 0.74, figure: 'kobi90-sitA' }]),
+    // (pass D) A02 — Rachel in the doorway with an empty basket (`a-interrupt`)
+    ...cast('2019-armchair', { flagIs: { flag: 'a:how', value: 'watch' } }, [{ who: 'רחל', x: 0.42, y: 0.84 }]),
     // 2021-suitcase · X01 (x-suitcase) — אצל אבא ואמא, ערב לפני
     ...cast('2021-suitcase', undefined, [
       { who: 'קובי', x: 0.6, y: 0.86, flip: true },
