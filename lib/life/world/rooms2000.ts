@@ -536,7 +536,14 @@ export const NEW_ROOMS: SceneDef[] = [
     spawns: { start: { x: 0.24, y: 0.82, facing: 'right' } },
     actors: [],
     hotspots: [look('drivein-court', '2015-newhall', 0.6, 0.76, 0.12, 'הפרקט החדש')],
-    layers: [{ art: 'propBasketball', era: '*', x: 0.8, y: 0.745, w: 0.012, depth: 0.745, foot: true }],
+    layers: [
+      { art: 'propBasketball', era: '*', x: 0.8, y: 0.745, w: 0.012, depth: 0.745, foot: true },
+      // (pass D) 2015 · N05 — what was prepared is there when the doors open: the old banner on
+      // the railing over the entrance (0.37 on the board), red flags on the seats to the right
+      { art: 'propBanner', era: '2015-newhall', x: 0.12, y: 0.33, w: 0.14, depth: 0.5, when: { flag: 'nr:did:banner' } },
+      { art: 'propFlag', era: '2015-newhall', x: 0.84, y: 0.43, w: 0.04, depth: 0.5, when: { flag: 'nr:did:confetti' } },
+      { art: 'propFlag', era: '2015-newhall', x: 0.93, y: 0.46, w: 0.035, depth: 0.5, when: { flag: 'nr:did:confetti' } },
+    ],
     exits: [
       BACK_TO_STREET('החוצה, הביתה', { x: 0.0, y: 0.73, w: 0.07, h: 0.2 }, { x: 0.05, y: 0.25, w: 0.15, h: 0.3, tone: 'inside' }),
     ],
@@ -639,11 +646,17 @@ export const NEW_ROOMS: SceneDef[] = [
     spawns: { start: { x: 0.2, y: 0.72, facing: 'right' } },
     actors: [],
     hotspots: [
-      look('office-board', '2025-owner', 0.39, 0.62, 0.1, 'הלוח עם המספרים'),
-      look('office-window', '2025-owner', 0.87, 0.66, 0.08, 'החלון'),
+      // (pass D) while the seller's hour runs, the board and the window are the triangle's (`questsPassD.ts`)
+      look('office-board', '2025-owner', 0.42, 0.62, 0.1, 'הלוח עם המספרים', undefined, { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] }),
+      look('office-window', '2025-owner', 0.87, 0.66, 0.08, 'החלון', undefined, { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] }),
     ],
     exits: [
-      BACK_TO_STREET('החוצה', { x: 0.0, y: 0.6, w: 0.08, h: 0.22 }, { x: 0.005, y: 0.0, w: 0.08, h: 0.6, tone: 'inside' }),
+      {
+        ...BACK_TO_STREET('החוצה', { x: 0.0, y: 0.6, w: 0.08, h: 0.22 }, { x: 0.005, y: 0.0, w: 0.08, h: 0.6, tone: 'inside' }),
+        // (pass D) 2025 · O02 — the seller wants an answer by eight, and nobody leaves the room before it
+        needs: { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] },
+        blockedHe: 'עד שמונה אתה פה. המוכר מחכה לתשובה, לא לך.',
+      },
     ],
   },
 
@@ -1092,6 +1105,8 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2017-after', flag('p:amit'), [{ who: 'קובי', x: 0.19, y: 0.74, figure: 'kobi90-sitB' }]),
     // 2019-armchair · A01 (a-remote) — "סלון קובי": השלט אצלו
     ...cast('2019-armchair', undefined, [{ who: 'קובי', x: 0.19, y: 0.74, figure: 'kobi90-sitA' }]),
+    // (pass D) A02 — Rachel in the doorway with an empty basket (`a-interrupt`)
+    ...cast('2019-armchair', { flagIs: { flag: 'a:how', value: 'watch' } }, [{ who: 'רחל', x: 0.42, y: 0.84 }]),
     // 2021-suitcase · X01 (x-suitcase) — אצל אבא ואמא, ערב לפני
     ...cast('2021-suitcase', undefined, [
       { who: 'קובי', x: 0.6, y: 0.86, flip: true },
@@ -1455,6 +1470,14 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'אפי', x: 0.46, y: 0.8 },
       { who: 'מתוקי', x: 0.6, y: 0.82, flip: true },
     ]),
+    // (pass D) N05 S4 — six thirty: the doors open on the hall he prepared (`nr-doors` rebuilds the room)
+    ...cast('2015-newhall', flag('nr:crowd'), [
+      { who: 'אוהד', x: 0.78, y: 0.8, figure: 'adultA3', flip: true },
+      { who: 'אוהד', x: 0.34, y: 0.78, figure: 'youngA4' },
+      { who: 'אוהד', x: 0.9, y: 0.86, figure: 'youngB4', flip: true },
+    ]),
+    // …and the family he waited for at the doors, standing where he showed them
+    ...cast('2015-newhall', all('nr:crowd', 'nr:did:families'), [{ who: 'אוהד', x: 0.22, y: 0.84, figure: 'adultA5' }]),
     // 2024-home · H24b (h24-small, h24-meeting) — "אנחנו באמת לא נכנסים פה"; ואחרי זה,
     // על הפרקט, פגישה פתוחה: יוסף מהעמותה, והבעלים בווידאו על מסך (`remote`)
     ...cast('2024-home', flag('h24:ask'), [
@@ -1495,6 +1518,8 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'מיכל', x: 0.66, y: 0.63, flip: true, figure: 'adultB5', when: { all: [{ flag: 'o:forkGo' }, { flagIs: { flag: 'life:partner', value: 'melanie' } }] } },
       { who: 'אדם', x: 0.8, y: 0.66, flip: true },
     ]),
+    // (pass D) O02 — Yevgeny came without being asked, and waits at the window (the trust corner)
+    ...cast('2025-owner', flag('o:brief'), [{ who: 'יבגני', x: 0.92, y: 0.7, flip: true }]),
   ],
 
   'community-room': [
@@ -1588,6 +1613,9 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     ...cast('2021-suitcase', flag('x:move'), [{ who: 'קרן', x: 0.58, y: 0.9, flip: true }]),
     // 2023-visit · X04 (x-sunset) — ערב המשפחה: קובי מחכה לו על הטיילת, באותו מקום
     ...cast('2023-visit', { flagIs: { flag: 'life:abroad:visit', value: 'family' } }, [{ who: 'קובי', x: 0.58, y: 0.9, flip: true }]),
+    // (pass D) 2021-promises · L08 — the evening that was promised, at the same empty paving (0.47–0.62)
+    ...partner('2021-promises', flag('pr:out'), { x: 0.58, y: 0.9, flip: true }),
+    ...cast('2021-promises', { all: [{ flag: 'pr:out' }, { notFlag: 'life:partner' }] }, [{ who: 'קרן', x: 0.58, y: 0.9, flip: true }]),
   ],
 
   jaffa: [

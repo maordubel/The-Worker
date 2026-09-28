@@ -52,8 +52,8 @@ export const ENDINGS_SUITCASE: Record<string, EndingCard> = {
     id: 'move',
     titleHe: 'נשאר עם כתובת',
     bodyHe:
-      'לקחת מזכרת שכבר הייתה לך וסגרת תוכנית מעבר. רחל שאלה מה עם מה שלא לקחת, ואמרת שזה נשאר עם כתובת ולא נזרק — וקובי לא שאל על הצעיף עוד פעם, כי ראה אותו במזוודה.',
-    memoryHe: 'הצעיף, מקופל בין חולצות.',
+      'לקחת מזכרת שכבר הייתה לך וסגרת תוכנית מעבר. רחל שאלה מה עם מה שלא לקחת, ואמרת שזה נשאר עם כתובת ולא נזרק — וקובי ראה מה נכנס לפינה האחרונה של המזוודה, ולא שאל עוד.',
+    memoryHe: 'הפינה האחרונה של המזוודה.',
     memoryItem: 'scarf',
   },
   prepare: {
@@ -253,7 +253,11 @@ export const BEATS_ABROAD: Beat[] = [
 // ================================================================== X05 · 2025 ====
 
 export function objectiveReunion(state: LifeState, sceneId: string): string | null {
-  if (state.chapterDone || state.flags['x:reunion']) return null
+  if (state.chapterDone) return null
+  // (pass D) a date before a promise; and after the promise, the thing from the suitcase
+  if (state.flags['x:invited'] && !state.flags['x:packed']) return null
+  if (state.flags['x:later'] && !state.flags['x:leave']) return 'המחשב על השולחן. לבקש חופש במאי.'
+  if (state.flags['x:reunion']) return null
   return sceneId === 'flat-abroad' ? 'הפעם אתה מתקשר אליו.' : 'הדירה שם.'
 }
 
@@ -276,11 +280,46 @@ export const ENDINGS_REUNION: Record<string, EndingCard> = {
   },
 }
 
+/**
+ * (pass D, §61) **הפעם אני מחכה לך — ומה זה עולה.** השיחה עם קובי נפתחת כמו שנכתבה, אבל
+ * ההזמנה עצמה (`invite`) אפורה עד שיש תאריך: המחשב על השולחן, והבוס שם — שבוע בסוף הרבעון,
+ * שלושה ימים, או חופש בלי תשלום. מי שאומר "אחזור אליך עם תאריכים" (`later`) הולך לבקש, וקובי
+ * מתקשר שוב. אחרי ההזמנה, מה שנכנס לפינה של המזוודה ב-2021 יוצא מהארון (`x-pack`): לארוז
+ * עכשיו, או להשאיר על הספה עד מאי — ורק אז הכרטיס.
+ */
+export const LEAVE = 'life:finale:leave'
+const UNPAID_AGOROT = 60_000
 export const BEATS_REUNION: Beat[] = [
-  { id: 'x-reunion', at: 'flat-abroad', trigger: 'enter', when: { none: [{ flag: 'x:reunion' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'x-reunion' }] },
+  { id: 'x-reunion', at: 'flat-abroad', trigger: 'enter', when: { none: [{ flag: 'x:reunion' }, { flag: 'x:later' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'x-reunion' }] },
+  { id: 'x-reunion-again', at: 'flat-abroad', trigger: 'clock', when: { all: [{ flag: 'x:later' }, { flag: 'x:leave' }], none: [{ flag: 'x:reunion' }] }, delayMs: 1600, do: [{ a: 'talk', conversation: 'x-reunion' }] },
+  { id: 'x-pack', at: 'flat-abroad', trigger: 'clock', when: { all: [{ flag: 'x:invited' }], none: [{ flag: 'x:packed' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'x-pack' }] },
 ]
 
 // ==================================================================== the words ====
+
+/** (pass D) packing for May — now, or set aside on the sofa until then; the ticket closes the evening either way */
+const PACK_CHOICES = (item: string): ChoiceDef[] => [
+  {
+    id: 'pack',
+    text: '(לארוז אותו עכשיו. חודשים לפני.)',
+    then: [
+      { e: 'flag', flag: 'x:packed' },
+      { e: 'flagValue', flag: 'life:finale:packed', value: item },
+      { e: 'toast', text: 'המזוודה עומדת פתוחה בפינה, עם דבר אחד בתוכה. אלכס שואל אם אתה עובר דירה. "רק ליומיים."', tone: 'plain' },
+      { e: 'ending', id: 'invite' },
+    ],
+  },
+  {
+    id: 'aside',
+    text: '(להשאיר אותו בחוץ, שיראו אותו כל ערב, עד מאי.)',
+    then: [
+      { e: 'flag', flag: 'x:packed' },
+      { e: 'flagValue', flag: 'life:finale:packed', value: `${item}:aside` },
+      { e: 'toast', text: 'הוא נשאר איפה שרואים אותו. כל ערב, עד מאי, מישהו בבית הזה שואל "עוד כמה?".', tone: 'plain' },
+      { e: 'ending', id: 'invite' },
+    ],
+  },
+]
 
 export const CONVERSATIONS_ABROAD: Conversation[] = [
   {
@@ -307,6 +346,8 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
               { e: 'wellbeing', key: 'stress', delta: 10 },
               { e: 'proof', kind: 'residence_plan', proofId: 'residence_plan:{chapter}:move', subjectHe: 'המעבר', noteHe: 'תוכנית מוסכמת עם עיר, מועד ותקציב — לא מדינה כבונוס.' },
               { e: 'toast', text: 'רחל: "ומה שלא לקחת?" — "נשאר עם כתובת. לא נזרק." — ואתה יוצא לים, לערב אחרון.', tone: 'plain' },
+              // (pass D, §50 S2) the red box flies in the hand bag; the suitcase has one corner left
+              { e: 'goto', node: 'x-corner' },
             ],
           },
           {
@@ -328,6 +369,53 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
               { e: 'flagValue', flag: 'life:abroad:plan', value: 'not_now' },
               { e: 'toast', text: 'רחל: "זו ההחלטה שלך?" — "כן. כרגע." — "אז זה מספיק."', tone: 'plain' },
               { e: 'ending', id: 'stay' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /**
+     * (pass D, §50 S1–S2) **הפינה האחרונה במזוודה.** הקופסה האדומה טסה בתיק היד (`redbox-abroad`);
+     * במזוודה נשארה פינה אחת, ושלושה דברים מתחרים עליה — הצעיף שקובי שאל עליו, החולצה הראשונה
+     * (רק למי שיש), או כלום, והכול נשאר אצל אבא עם כתובת. מה שנכנס יוצא שוב ב-2025 (`x-pack`).
+     */
+    id: 'x-corner',
+    nameHe: 'רחל',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'המזוודה על המיטה, פתוחה. הקופסה האדומה כבר בתיק היד — מזוודה אפשר לאבד. נשארה פינה אחת.' },
+          { who: 'רחל', text: 'אחד. לא שלושה. אני מכירה אותך.' },
+        ],
+        choices: [
+          {
+            id: 'scarf',
+            text: '(הצעיף. כן, באוגוסט.)',
+            then: [
+              { e: 'flagValue', flag: 'life:abroad:corner', value: 'scarf' },
+              { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 },
+              { e: 'toast', text: 'קובי, מהסלון: "אמרתי לך." — "לא אמרת כלום, שאלת." — "זה אותו דבר אצלנו."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'shirt',
+            text: '(החולצה הראשונה. מקופלת פעמיים, הסמל למעלה.)',
+            when: { any: [{ flag: 'life:first-shirt:gift' }, { flag: 'own:shirt85' }] },
+            hidden: true,
+            then: [
+              { e: 'flagValue', flag: 'life:abroad:corner', value: 'shirt' },
+              { e: 'toast', text: 'רחל: "היא כבר לא עולה עליך." — "היא לא בשביל ללבוש."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'none',
+            text: '(כלום. הכול נשאר פה, עם כתובת — ויש סיבה לחזור.)',
+            then: [
+              { e: 'flagValue', flag: 'life:abroad:corner', value: 'none' },
+              { e: 'rel', who: 'rachel', axis: 'bond', delta: 2 },
+              { e: 'toast', text: 'רחל: "אז אני שומרת." — "את תמיד שומרת." — "מישהו צריך."', tone: 'plain' },
             ],
           },
         ],
@@ -722,6 +810,72 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
 
   // ------------------------------------------------------------ X05 · 2025 ----
   {
+    id: 'x-leave',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'המחשב על השולחן הנמוך. מייל אחד פתוח, לבוס: "שבוע במאי?" — והסמן מהבהב אחרי סימן השאלה.' },
+          { who: null, text: 'מאי הוא סוף הרבעון. כולם יודעים. גם אתה.' },
+        ],
+        choices: [
+          {
+            id: 'week',
+            text: '(לבקש שבוע. לשלם על זה בעבודה.)',
+            then: [
+              { e: 'flag', flag: 'x:leave' },
+              { e: 'flagValue', flag: LEAVE, value: 'week' },
+              { e: 'repLoss', audience: 'work', delta: -3, why: 'שבוע חופש בסוף הרבעון' },
+              { e: 'toast', text: 'תשובה אחרי עשר דקות: "שבוע. ואתה סוגר את הדוח לפני." — עכשיו יש תאריך, ויש לילות.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'three',
+            text: '(שלושה ימים: טיסה, משחק, טיסה.)',
+            then: [
+              { e: 'flag', flag: 'x:leave' },
+              { e: 'flagValue', flag: LEAVE, value: 'three' },
+              { e: 'toast', text: '"שלושה ימים אין בעיה." — שלושה ימים, ואבא בקצב שלו. זה יהיה צפוף.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'unpaid',
+            text: '(חופש בלי תשלום. הכסף — ולא הרבעון.)',
+            when: { minAgorot: UNPAID_AGOROT },
+            noteHe: 'אין בחשבון מה ששבוע בלי משכורת עולה.',
+            then: [
+              { e: 'flag', flag: 'x:leave' },
+              { e: 'flagValue', flag: LEAVE, value: 'unpaid' },
+              { e: 'money', agorot: -UNPAID_AGOROT, why: 'שבוע בלי משכורת' },
+              { e: 'toast', text: 'אישרו מיד. חופש בלי תשלום תמיד מאשרים מיד.', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    /** (pass D, §61 S3) what went into the suitcase's last corner in 2021 comes out for May */
+    id: 'x-pack',
+    nameHe: null,
+    branches: [
+      {
+        when: { flagIs: { flag: 'life:abroad:corner', value: 'shirt' } },
+        lines: [{ who: null, text: 'בארון, מתחת לסוודרים: החולצה הראשונה, מקופלת פעמיים כמו שרחל קיפלה אותה. ארבע שנים היא לא יצאה משם.' }],
+        choices: PACK_CHOICES('shirt'),
+      },
+      {
+        when: { flagIs: { flag: 'life:abroad:corner', value: 'scarf' } },
+        lines: [{ who: null, text: 'הצעיף, על גב הספה, איפה שהוא תמיד. מאי — וכבר לא צריך להסביר לאבא למה באוגוסט.' }],
+        choices: PACK_CHOICES('scarf'),
+      },
+      {
+        lines: [{ who: null, text: 'במזוודה הריקה, בכיס הפנימי: פתק בכתב של רחל. "מה שלא לקחת — אצלנו. עם כתובת."' }],
+        choices: PACK_CHOICES('note'),
+      },
+    ],
+  },
+  {
     id: 'x-reunion',
     nameHe: 'קובי',
     remote: { 'קובי': 'video' },
@@ -739,12 +893,25 @@ export const CONVERSATIONS_ABROAD: Conversation[] = [
             // X05.1
             id: 'invite',
             text: '(להזמין אותו — ולתכנן יחד.)',
+            // (pass D) a promise with a date: the leave is asked for first
+            when: { flag: 'x:leave' },
+            noteHe: 'עוד אין תאריך. המחשב על השולחן — קודם לבקש חופש במאי.',
             then: [
               { e: 'flag', flag: 'x:reunion' },
+              { e: 'flag', flag: 'x:invited' },
               { e: 'flag', flag: 'life:finale:reunionOffered' },
               { e: 'proof', kind: 'finale_invited', proofId: 'finale_invited:{chapter}:kobi', subjectHe: 'ההזמנה לאירופה', noteHe: 'הזמין, ואמר איפה יחכה.' },
               { e: 'toast', text: 'קובי: "אתה מחכה לי?" — "בנקודה שנסכם. הפעם לא תצטרך לחפש ביציע."', tone: 'plain' },
-              { e: 'ending', id: 'invite' },
+            ],
+          },
+          {
+            id: 'later',
+            text: '(להגיד לו שאחזור אליו עם תאריכים.)',
+            when: { notFlag: 'x:leave' },
+            hidden: true,
+            then: [
+              { e: 'flag', flag: 'x:later' },
+              { e: 'toast', text: 'קובי: "תאריכים. אתה נשמע כמו עמית." — "אני נשמע כמו מי שלא רוצה להבטיח סתם."', tone: 'plain' },
             ],
           },
           {

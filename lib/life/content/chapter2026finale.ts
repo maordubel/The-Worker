@@ -206,6 +206,35 @@ export const ENDINGS_FINALE: Record<string, EndingCard> = {
   },
 }
 
+/**
+ * (pass D) איך הערב נסגר — התשובה של F04 (`together` / `generations` / `mine`), שנשמרת עד
+ * שההליכה נגמרת ורק אז הופכת לכרטיס. **המילה האחרונה של קובי ושל פוגי**, לא של הטבלה:
+ * 1983 הפוך — הוא שואל לאן, ואתה אומר "אחריי".
+ */
+export const CLOSE = 'life:finale:close'
+const LAST_WORDS: ReadonlyArray<readonly [string, Say[]]> = [
+  ['together', [
+    { who: null, text: 'הרחוב נגמר בצומת. אור אחד בבוטבגרד עוד דולק, והוא של מסעדה.' },
+    { who: 'קובי', text: 'לאן עכשיו?' },
+    { who: 'פוגי', text: 'אחריי, אבא.' },
+    { who: null, text: 'הוא לוקח את המרפק שלך. לא את היד — את המרפק. כמו שאתה לקחת את שלו, פעם, בשער 7.' },
+    { who: 'קובי', text: 'אחריך.' },
+  ]],
+  ['generations', [
+    { who: null, text: 'הרחוב נגמר בצומת. הילד כבר שם, מחכה, ומסמן עם כל היד.' },
+    { who: 'הילד', text: 'בואו!' },
+    { who: 'קובי', text: 'שמעת איך הוא אומר את זה?' },
+    { who: 'פוגי', text: 'שמעתי. ככה אמרת לי, כשהייתי על הכתפיים.' },
+    { who: 'קובי', text: 'אז קדימה. היום כולנו אחריו.' },
+  ]],
+  ['mine', [
+    { who: null, text: 'הרחוב נגמר בצומת. מחר בבוקר יש טיסה, לכל אחד מכם למקום אחר.' },
+    { who: 'קובי', text: 'ומחר אתה שם.' },
+    { who: 'פוגי', text: 'מחר שם. הערב — אחריי.' },
+    { who: 'קובי', text: 'אחריך. ותתקשר גם משם.' },
+  ]],
+]
+
 export const BEATS_FINALE: Beat[] = [
   /**
    * `Q10` — *"חלון לפני F02"*: איך קובי יציג אותו שם. רק למי שנוסע איתו (`PARTY` שאינו
@@ -258,6 +287,19 @@ export const BEATS_FINALE: Beat[] = [
   },
   /** F04 — *"מחוץ לאולם, אחרי המשחק"* */
   { id: 'f-back', at: 'arena-out', trigger: 'enter', when: { all: [{ flag: 'f:seats' }, { flag: 'f:inside' }], none: [{ flag: 'f:back' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'f-back' }] },
+  /**
+   * (pass D) §63 S5 — the walk. `f-back` starts it; a life reloaded in the middle of it finds
+   * him outside the hall again with the street still ahead, and the walk offered once more.
+   */
+  { id: 'f-walk-again', at: 'arena-out', trigger: 'clock', when: { all: [{ flag: 'f:back' }], none: [{ flag: 'f:walked' }] }, delayMs: 1600, do: [{ a: 'talk', conversation: 'f-walk-go' }] },
+  ...LAST_WORDS.map(([close, lines]): Beat => ({
+    id: `f-last-${close}`,
+    at: 'arena-out',
+    trigger: 'enter',
+    when: { all: [{ flag: 'f:walked' }, { flagIs: { flag: CLOSE, value: close } }], none: [{ flag: 'f:last' }] },
+    delayMs: 900,
+    do: [{ a: 'flag', flag: 'f:last' }, { a: 'crowd', state: 'AFTERMATH' }, { a: 'lines', lines }, { a: 'ending', id: close }],
+  })),
 ]
 
 /** מה קובי אומר על הדף — הראשון שמתאים מנצח; האחרון הוא מי שעוד לא בנה תוכנית */
@@ -741,9 +783,271 @@ const ROAD_CHOICES: Choice[] = [
   },
 ]
 
+/**
+ * ============================================= ההליכה האחרונה (pass D, §63 S5) ====
+ *
+ * ארבע עצירות, וכל אחת נפתחת לחיים שהיו לו — ולחיים שלא, שורה משלהם ולא שתיקה. הסדר
+ * של הענפים הוא סדר העדיפות: מה שהוא הכי הרבה שלו מנצח.
+ */
+const OUTFIT = 'own:outfit:2026-finale'
+const wore = (shirt: string): Condition => ({ flagIs: { flag: OUTFIT, value: shirt } })
+const routeAt = (id: string, stage: 'entry' | 'practice' | 'apex'): Condition => ({ flag: `own:route:${id}:${stage}` })
+const TEDDY = 'life:teddy2010'
+
+export const CONVERSATIONS_WALK: Conversation[] = [
+  {
+    id: 'f-walk-go',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הוא עומד מחוץ לאולם ומחכה שתזוז ראשון. היום זה ככה.' }],
+        then: [{ e: 'minigame', id: 'ride:walk-26' }],
+      },
+    ],
+  },
+  {
+    /** הכתפיים — 1.6.1983, הפוך. `life:a1:grip` (`gestures.ts`) הוא מה שהיד של הילד עשתה אז */
+    id: 'f-walk-step',
+    nameHe: 'קובי',
+    branches: [
+      {
+        when: { flagIs: { flag: 'life:a1:grip', value: 'caught' } },
+        lines: [
+          { who: null, text: 'במדרגה האחרונה הוא מאט, והיד שלו מחפשת משהו להישען עליו. היא מוצאת את הכתף שלך.' },
+          { who: 'קובי', text: 'פעם ישבת עליהן.' },
+          { who: 'פוגי', text: 'ונאחזתי לך בשיער.' },
+          { who: 'קובי', text: 'כמעט נפלת. תפסתי אותך בזמן.' },
+          { who: 'פוגי', text: 'היום אני תופס.' },
+        ],
+      },
+      {
+        when: { flagIs: { flag: 'life:a1:grip', value: 'held' } },
+        lines: [
+          { who: null, text: 'במדרגה האחרונה הוא מאט, והיד שלו מחפשת משהו להישען עליו. היא מוצאת את הכתף שלך.' },
+          { who: 'קובי', text: 'פעם ישבת עליהן. החזקת חזק, ולא זזת כל המשחק.' },
+          { who: 'פוגי', text: 'למדתי ממך איך מחזיקים.' },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'במדרגה האחרונה הוא מאט, והיד שלו מחפשת משהו להישען עליו. היא מוצאת את הכתף שלך.' },
+          { who: 'קובי', text: 'פעם ישבת עליהן.' },
+          { who: 'פוגי', text: 'אני לא זוכר.' },
+          { who: 'קובי', text: 'אני זוכר מספיק בשביל שנינו.' },
+        ],
+      },
+    ],
+  },
+  {
+    /** החולצה — מה שנלבש בטקס הבוקר (`own:outfit:2026-finale`), והחולצה הראשונה שמאחוריה */
+    id: 'f-walk-shirt',
+    nameHe: 'קובי',
+    branches: [
+      {
+        when: { all: [wore('visa86'), { flag: 'life:first-shirt:gift' }] },
+        lines: [
+          { who: null, text: 'המעיל נפתח ברוח, ומתחתיו אדום של פעם — עם הפס הכהה על החזה.' },
+          { who: 'קובי', text: 'ארבעים שנה, והצווארון עוד מחזיק.' },
+          { who: 'פוגי', text: 'ספרתי שלושים שקל על הדלפק, ואתה שילמת.' },
+          { who: 'קובי', text: 'ועוד פעם הייתי משלם.' },
+        ],
+      },
+      {
+        when: wore('tveria85'),
+        lines: [
+          { who: null, text: 'המעיל נפתח ברוח, ומתחתיו החולצה מהקיוסק של רפי.' },
+          { who: 'קובי', text: 'את זאת קנית לבד. מהפחית.' },
+          { who: 'פוגי', text: 'שבועיים של בקבוקים.' },
+          { who: 'קובי', text: 'אני זוכר את הצלצול של המטבעות. כל הבית שמע.' },
+        ],
+      },
+      {
+        when: { all: [{ flag: OUTFIT }, { none: [wore('plain')] }] },
+        lines: [
+          { who: null, text: 'המעיל נפתח ברוח, ומתחתיו אדום.' },
+          { who: 'קובי', text: 'מאיזו שנה זאת?' },
+          { who: 'פוגי', text: 'משנה טובה.' },
+          { who: 'קובי', text: 'על חולצה אין שנים רעות. יש רק כביסות.' },
+        ],
+      },
+      {
+        // (pass D) the scarf that took the suitcase's last corner in 2021, packed for May in 2025
+        when: { any: [{ flagIs: { flag: 'life:finale:packed', value: 'scarf' } }, { flagIs: { flag: 'life:finale:packed', value: 'scarf:aside' } }] },
+        lines: [
+          { who: null, text: 'בלי חולצה של הקבוצה. אבל הצעיף — זה שנכנס לפינה האחרונה של המזוודה — סביב הצוואר, במאי.' },
+          { who: 'קובי', text: 'לקחת אותו לשם, והבאת אותו לפה.' },
+          { who: 'פוגי', text: 'הוא יודע את הדרך יותר טוב ממני.' },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'המעיל סגור עד למעלה. מתחתיו סוודר, בלי שום צבע של קבוצה.' },
+          { who: 'קובי', text: 'באת בלי חולצה?' },
+          { who: 'פוגי', text: 'באתי איתך. זה מספיק צבע.' },
+        ],
+      },
+    ],
+  },
+  {
+    /** הטלפון — הילד (לידו, או בבית), ההבטחה של 2013, או מי שמחכה לו בחיים האחרים */
+    id: 'f-walk-phone',
+    nameHe: 'קובי',
+    remote: { 'הילד': 'phone', PARTNER: 'phone', 'עמית': 'phone', 'אלכס': 'phone' },
+    branches: [
+      {
+        when: party('three'),
+        lines: [
+          { who: null, text: 'הילד הולך שלושה צעדים לפניכם, ומסתובב לבדוק שאתם באים. הטלפון בכיס שלך שקט — כל מי שצריך נמצא פה.' },
+          { who: 'קובי', text: 'הוא מסתובב בדיוק כמו שאתה הסתובבת.' },
+          { who: 'פוגי', text: 'ואתה תמיד היית שם.' },
+          { who: 'קובי', text: 'לא תמיד. אבל הוא לא צריך לדעת את זה הערב.' },
+        ],
+      },
+      {
+        when: { all: [{ flag: 'life:child' }, { flagIs: { flag: 'life:saturday', value: 'missed' } }] },
+        lines: [
+          { who: null, text: 'הטלפון רוטט. הודעה מהבית.' },
+          { who: 'הילד', text: 'ניצחנו?' },
+          { who: 'פוגי', text: 'הפסדנו. אבל סבא הלך כל הדרך. ובשבת שלך אני בא בזמן — כתבתי את זה.' },
+          { who: 'קובי', text: 'כתבת. זה כבר יותר ממה שאני עשיתי.' },
+        ],
+      },
+      {
+        when: { flag: 'life:child' },
+        lines: [
+          { who: null, text: 'הטלפון רוטט. הודעה מהבית.' },
+          { who: 'הילד', text: 'ניצחנו?' },
+          { who: 'פוגי', text: 'הפסדנו. אבל סבא הלך כל הדרך.' },
+          { who: 'קובי', text: 'תכתוב לו שסבא הלך לאט בכוונה. שיהיה לו מה לחקות.' },
+        ],
+      },
+      {
+        when: { all: [{ flag: 'life:partner' }, { flag: 'promise:householdEvening' }] },
+        lines: [
+          { who: null, text: 'הטלפון רוטט.' },
+          { who: 'PARTNER', text: 'איך הוא?' },
+          { who: 'פוגי', text: 'הולך לאט, מדבר מהר. ואת הערב שלנו לא שכחתי — ביום ראשון, כמו שכתוב על המקרר.' },
+          { who: 'קובי', text: 'על המקרר. אצלנו זה היה על הלוח במטבח, ורחל מחקה מה שלא קרה.' },
+        ],
+      },
+      {
+        when: { flag: 'life:partner' },
+        lines: [
+          { who: null, text: 'הטלפון רוטט.' },
+          { who: 'PARTNER', text: 'איך הוא?' },
+          { who: 'פוגי', text: 'הולך לאט, מדבר מהר.' },
+          { who: 'קובי', text: 'תגיד לה שאני שומע.' },
+        ],
+      },
+      {
+        when: { flag: 'life:abroad' },
+        lines: [
+          { who: null, text: 'הטלפון רוטט. הודעה מהמקום השני.' },
+          { who: 'אלכס', text: 'המפתח אצל השכנה. אל תמהר.' },
+          { who: 'קובי', text: 'יש לך שם מישהו שמחכה.' },
+          { who: 'פוגי', text: 'ויש לי פה מישהו שהלכתי אחריו ארבעים שנה.' },
+        ],
+      },
+      {
+        when: { flagIs: { flag: TEDDY, value: 'broken' } },
+        lines: [
+          { who: null, text: 'הטלפון רוטט.' },
+          { who: 'עמית', text: 'חזרתם ביחד?' },
+          { who: 'פוגי', text: 'ביחד. את זה למדתי בטדי, בדרך הקשה.' },
+          { who: 'קובי', text: 'הדרך הקשה היא היחידה שנשארת.' },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'הטלפון שקט. אף אחד לא צריך לדעת איפה אתה עכשיו, חוץ ממנו.' },
+          { who: 'קובי', text: 'אין לך למי לספר?' },
+          { who: 'פוגי', text: 'אני מספר לך.' },
+        ],
+      },
+    ],
+  },
+  {
+    /** the street — the last stop, and the one that says the walk happened (the ride's own flag too) */
+    id: 'f-walk-road',
+    nameHe: null,
+    branches: [
+      {
+        lines: [{ who: null, text: 'הרחוב מתרוקן לאט. הוא הולך בקצב שלו, ואתה לא צריך לחשוב על זה יותר — הרגליים כבר יודעות.' }],
+        then: [{ e: 'flag', flag: 'f:walked' }],
+      },
+    ],
+  },
+  {
+    /** השלט — מה שהוא עושה היום (המסלול), ומה שנהרס ב-2007 */
+    id: 'f-walk-sign',
+    nameHe: 'קובי',
+    branches: [
+      {
+        when: { all: [{ flagIs: { flag: 'life:owner:role', value: 'controlling_owner' } }, { flagIs: { flag: 'life:owner:triangle', value: 'money_squad' } }] },
+        lines: [
+          { who: 'קובי', text: 'ובעל הבית של הקבוצה הולך איתי ברגל.' },
+          { who: 'פוגי', text: 'בעל הבית של שורה בגיליון.' },
+          { who: 'קובי', text: 'והאוהדים עוד כועסים על הקיץ ההוא?' },
+          { who: 'פוגי', text: 'יבגני מתקשר כל שבוע. זה סימן שעוד לא ויתר עליי.' },
+        ],
+      },
+      {
+        when: { flagIs: { flag: 'life:owner:role', value: 'controlling_owner' } },
+        lines: [
+          { who: 'קובי', text: 'ובעל הבית של הקבוצה הולך איתי ברגל.' },
+          { who: 'פוגי', text: 'בעל הבית של שורה בגיליון.' },
+          { who: 'קובי', text: 'אז תגיד לשורה שהיום אתה בחופש.' },
+        ],
+      },
+      {
+        when: routeAt('JOURNALIST', 'apex'),
+        lines: [
+          { who: 'קובי', text: 'תכתוב על זה?' },
+          { who: 'פוגי', text: 'לא על המשחק. עליך.' },
+          { who: 'קובי', text: 'אז תכתוב שהלכתי לאט בכוונה.' },
+        ],
+      },
+      {
+        when: routeAt('ULTRAS', 'practice'),
+        lines: [
+          { who: 'קובי', text: 'ומי מוביל את השירים בבית, כשאתה פה?' },
+          { who: 'פוגי', text: 'מישהו שלימדתי. הוא יותר טוב ממני.' },
+          { who: 'קובי', text: 'זה הדבר הכי טוב שאפשר להגיד על מישהו.' },
+        ],
+      },
+      {
+        when: routeAt('USSISHKIN_FOUNDER', 'entry'),
+        lines: [
+          { who: null, text: 'מעל הכניסה, אותיות שאתה לא יודע לקרוא. אתה קורא אותן בכל זאת: אולם.' },
+          { who: 'קובי', text: 'אצלנו היה כתוב אוסישקין, בצבע שהתקלף.' },
+          { who: 'פוגי', text: 'ואחרי שנפל, בנינו אחד משלנו.' },
+          { who: 'קובי', text: 'אתם בניתם. אני רק באתי כל שבת.' },
+        ],
+      },
+      {
+        when: { flagIs: { flag: 'life:uss:lossKind', value: 'father' } },
+        lines: [
+          { who: null, text: 'מעל הכניסה, אותיות שאתה לא יודע לקרוא. אתה קורא אותן בכל זאת: אולם.' },
+          { who: 'קובי', text: 'אתה זוכר שדיברנו בטלפון כשאוסישקין נפל?' },
+          { who: 'פוגי', text: 'לא נתת לי לנתק.' },
+          { who: 'קובי', text: 'לא רציתי שתעמוד שם לבד. גם היום לא.' },
+        ],
+      },
+      {
+        lines: [
+          { who: null, text: 'מעל הכניסה, אותיות שאתה לא יודע לקרוא. אתה קורא אותן בכל זאת: אולם.' },
+          { who: 'קובי', text: 'ומחר עבודה?' },
+          { who: 'פוגי', text: 'מחר. היום — זה.' },
+        ],
+      },
+    ],
+  },
+]
+
 export const CONVERSATIONS_FINALE: Conversation[] = [
   ...CONVERSATIONS_PLAN_QUEST,
   ...CONVERSATIONS_TRIP_QUEST,
+  ...CONVERSATIONS_WALK,
   {
     id: 'f-name',
     nameHe: 'קובי',
@@ -1072,7 +1376,9 @@ export const CONVERSATIONS_FINALE: Conversation[] = [
               { e: 'flagValue', flag: 'life:ending', value: 'father_and_child' },
               { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 },
               { e: 'remember', who: 'kobi', eventId: 'finale-2026', significance: 'major' },
-              { e: 'ending', id: 'together' },
+              // (pass D) the walk before the card — `ridesPassD.ts`, and the last word in `f-last`
+              { e: 'flagValue', flag: CLOSE, value: 'together' },
+              { e: 'minigame', id: 'ride:walk-26' },
             ],
           },
           {
@@ -1084,7 +1390,9 @@ export const CONVERSATIONS_FINALE: Conversation[] = [
               { e: 'flag', flag: 'f:back' },
               { e: 'flagValue', flag: 'life:ending', value: 'three_generations' },
               { e: 'remember', who: 'kobi', eventId: 'finale-2026', significance: 'major' },
-              { e: 'ending', id: 'generations' },
+              // (pass D) the walk before the card — `ridesPassD.ts`, and the last word in `f-last`
+              { e: 'flagValue', flag: CLOSE, value: 'generations' },
+              { e: 'minigame', id: 'ride:walk-26' },
             ],
           },
           {
@@ -1098,7 +1406,9 @@ export const CONVERSATIONS_FINALE: Conversation[] = [
               { e: 'flagValue', flag: 'life:ending', value: 'reunion_in_europe' },
               { e: 'rel', who: 'kobi', axis: 'trust', delta: 3 },
               { e: 'remember', who: 'kobi', eventId: 'finale-2026', significance: 'major' },
-              { e: 'ending', id: 'mine' },
+              // (pass D) the walk before the card — `ridesPassD.ts`, and the last word in `f-last`
+              { e: 'flagValue', flag: CLOSE, value: 'mine' },
+              { e: 'minigame', id: 'ride:walk-26' },
             ],
           },
         ],
@@ -1127,7 +1437,9 @@ export const CONVERSATIONS_FINALE: Conversation[] = [
               { e: 'flagValue', flag: 'life:ending', value: 'father_and_child' },
               { e: 'rel', who: 'kobi', axis: 'bond', delta: 4 },
               { e: 'remember', who: 'kobi', eventId: 'finale-2026', significance: 'major' },
-              { e: 'ending', id: 'together' },
+              // (pass D) the walk before the card — `ridesPassD.ts`, and the last word in `f-last`
+              { e: 'flagValue', flag: CLOSE, value: 'together' },
+              { e: 'minigame', id: 'ride:walk-26' },
             ],
           },
           {
@@ -1139,7 +1451,9 @@ export const CONVERSATIONS_FINALE: Conversation[] = [
               { e: 'flag', flag: 'f:back' },
               { e: 'flagValue', flag: 'life:ending', value: 'three_generations' },
               { e: 'remember', who: 'kobi', eventId: 'finale-2026', significance: 'major' },
-              { e: 'ending', id: 'generations' },
+              // (pass D) the walk before the card — `ridesPassD.ts`, and the last word in `f-last`
+              { e: 'flagValue', flag: CLOSE, value: 'generations' },
+              { e: 'minigame', id: 'ride:walk-26' },
             ],
           },
           {
@@ -1153,7 +1467,9 @@ export const CONVERSATIONS_FINALE: Conversation[] = [
               { e: 'flagValue', flag: 'life:ending', value: 'reunion_in_europe' },
               { e: 'rel', who: 'kobi', axis: 'trust', delta: 3 },
               { e: 'remember', who: 'kobi', eventId: 'finale-2026', significance: 'major' },
-              { e: 'ending', id: 'mine' },
+              // (pass D) the walk before the card — `ridesPassD.ts`, and the last word in `f-last`
+              { e: 'flagValue', flag: CLOSE, value: 'mine' },
+              { e: 'minigame', id: 'ride:walk-26' },
             ],
           },
         ],

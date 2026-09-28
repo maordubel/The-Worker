@@ -2,7 +2,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation, Say } from './script'
+import type { Branch, Conversation, Say } from './script'
 import type { Condition } from '../world/types'
 import { PORTRAIT_COLLAPSE } from './chapter2016collapse'
 
@@ -159,7 +159,12 @@ export const BEATS_LOSSES: Beat[] = [
   { id: 'r-indoors', at: 'home', trigger: 'enter', when: { none: [{ flag: 'r:indoors' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'r-indoors' }] },
   /** אחרי המיון — מה שנאסף לקופסה הוא מה שנאמר עליו (`archive-21`, `r:sorted`) */
   { id: 'r-sorted', at: 'home', trigger: 'enter', when: { all: [{ flag: 'r:sortdone' }], none: [{ flag: 'r:sortsaid' }] }, delayMs: 600, do: [{ a: 'talk', conversation: 'r-sorted' }] },
-  { id: 'r-cup', at: 'kiosk', trigger: 'enter', when: { all: [{ flag: 'r:indoors' }], none: [{ flag: 'r:cup' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'r-cup' }] },
+  /**
+   * (pass D, §48 S2) the loss itself — on the kiosk's screen, a result that is fixed. No
+   * trivia and no minute: what he can choose is how he stays in the room with it.
+   */
+  { id: 'r-final', at: 'kiosk', trigger: 'enter', when: { all: [{ flag: 'r:indoors' }], none: [{ flag: 'r:final' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'r-final' }] },
+  { id: 'r-cup', at: 'kiosk', trigger: 'clock', when: { all: [{ flag: 'r:indoors' }, { flag: 'r:final' }], none: [{ flag: 'r:cup' }] }, delayMs: 1300, do: [{ a: 'talk', conversation: 'r-cup' }] },
   { id: 'r-young', trigger: 'clock', when: { all: [{ flag: 'r:cup' }], none: [{ flag: 'r:young' }] }, delayMs: 1500, do: [{ a: 'talk', conversation: 'r-young' }] },
 ]
 
@@ -175,6 +180,14 @@ const R_BACK_CALLBACKS: ReadonlyArray<readonly [Condition | null, Say[]]> = [
 ]
 
 // ---------------------------------------------------------------- the words ------
+
+/** (pass D) what the end of the final looked like to Ofir — `life:cup2021:watched` */
+const CUP_OPENERS: ReadonlyArray<readonly [Condition | null, Say[]]> = [
+  [{ flagIs: { flag: 'life:cup2021:watched', value: 'whistle' } }, [{ who: 'אופיר', text: 'ראית עד השריקה. אני הפסקתי באמצע, ולא הלכתי.' }]],
+  [{ flagIs: { flag: 'life:cup2021:watched', value: 'outside' } }, [{ who: 'אופיר', text: 'יצאת לפני הסוף. גם אני רציתי, רק לא היו לי רגליים.' }]],
+  [{ flagIs: { flag: 'life:cup2021:watched', value: 'ofir' } }, [{ who: 'אופיר', text: 'הפסקת להסתכל על המסך באמצע. ראיתי.' }]],
+  [null, []],
+]
 
 export const CONVERSATIONS_RETURN: Conversation[] = [
   {
@@ -406,11 +419,43 @@ export const CONVERSATIONS_RETURN: Conversation[] = [
     ],
   },
   {
-    id: 'r-cup',
-    nameHe: 'אופיר',
+    id: 'r-final',
+    nameHe: null,
     branches: [
       {
         lines: [
+          { who: null, text: 'הקיוסק. המסך הקטן מעל המקרר, ושמונה אנשים שעומדים כאילו יש להם כרטיס.' },
+          { who: null, text: '{anchor}.' },
+          { who: null, text: 'אופיר לא מסתכל על המסך. הוא מסתכל על הבקבוק שלו.' },
+        ],
+        choices: [
+          {
+            id: 'stay',
+            text: '(לראות עד השריקה. עד הסוף, גם כשכבר ברור.)',
+            then: [{ e: 'flag', flag: 'r:final' }, { e: 'flagValue', flag: 'life:cup2021:watched', value: 'whistle' }, { e: 'time', minutes: 25 }, { e: 'wellbeing', key: 'stress', delta: 4 }, { e: 'toast', text: 'השריקה. אף אחד לא זז. מישהו מכבה את הקול ומשאיר את התמונה.', tone: 'plain' }],
+          },
+          {
+            id: 'off',
+            text: '(לצאת החוצה לפני הסוף. לשמוע אותו מהמדרכה.)',
+            then: [{ e: 'flag', flag: 'r:final' }, { e: 'flagValue', flag: 'life:cup2021:watched', value: 'outside' }, { e: 'time', minutes: 15 }, { e: 'wellbeing', key: 'stress', delta: -3 }, { e: 'toast', text: 'מהמדרכה שומעים את הסוף בלי לראות: קריאה אחת, ואז שקט של קיוסק.', tone: 'plain' }],
+          },
+          {
+            id: 'ofir',
+            text: '(להסתכל על אופיר, לא על המסך.)',
+            then: [{ e: 'flag', flag: 'r:final' }, { e: 'flagValue', flag: 'life:cup2021:watched', value: 'ofir' }, { e: 'time', minutes: 25 }, { e: 'rel', who: 'ofir', axis: 'trust', delta: 2 }, { e: 'toast', text: 'את הסוף ראית על הפנים שלו. זה היה מספיק ברור.', tone: 'plain' }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'r-cup',
+    nameHe: 'אופיר',
+    /** (pass D) Ofir answers how the end was watched before anything is offered to him */
+    branches: CUP_OPENERS.map(([when, extra]): Branch => ({
+      ...(when ? { when } : {}),
+        lines: [
+          ...extra,
           { who: 'פוגי', text: 'אתה רוצה לדבר?' },
           { who: 'אופיר', text: 'לא עכשיו.' },
           { who: 'פוגי', text: 'אוכל?' },
@@ -451,8 +496,7 @@ export const CONVERSATIONS_RETURN: Conversation[] = [
             ],
           },
         ],
-      },
-    ],
+    })),
   },
   {
     id: 'r-young',

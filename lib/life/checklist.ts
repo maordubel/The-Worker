@@ -203,7 +203,8 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2015-newhall': [
     { id: 'hall', textHe: 'האולם החדש. עם מי שלא ראה את הישן.', doneWhen: F('nr:hall') },
-    { id: 'route', textHe: 'מאיפה יוצאים.', revealWhen: F('nr:hall'), doneWhen: F('nr:route') },
+    { id: 'prep', textHe: 'עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.', revealWhen: F('nr:prep'), doneWhen: F('nr:crowd') },
+    { id: 'route', textHe: 'מאיפה יוצאים.', revealWhen: F('nr:first'), doneWhen: F('nr:route') },
   ],
   '2016-crisis': [
     { id: 'news', textHe: 'מה ידוע, ומה עוד לא.', doneWhen: F('p:news') },
@@ -222,7 +223,8 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2021-losses': [
     { id: 'indoors', textHe: 'ערב בבית. אבא על המסך.', doneWhen: F('r:indoors') },
-    { id: 'cup', textHe: 'אחרי הגמר.', revealWhen: F('r:indoors'), doneWhen: F('r:cup') },
+    { id: 'final', textHe: 'הגמר, על המסך הקטן בקיוסק.', revealWhen: F('r:indoors'), doneWhen: F('r:final') },
+    { id: 'cup', textHe: 'אחרי הגמר.', revealWhen: F('r:final'), doneWhen: F('r:cup') },
     { id: 'young', textHe: 'ערב שכואב לאנשים אחרים.', revealWhen: F('r:cup'), doneWhen: F('r:young') },
   ],
   '2023-tournament': [
@@ -246,6 +248,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2025-eurocup': [
     { id: 'euro', textHe: 'הגמר באירופה.', doneWhen: F('z:euro') },
+    { id: 'night', textHe: 'חצות וחצי, ומישהו מחכה למחר.', revealWhen: F('z:euro'), doneWhen: F('z:collide') },
     { id: 'glad', textHe: 'אפי שואל אם אתה שמח.', revealWhen: { all: [F('z:euro'), F('life:menora:2025')] }, doneWhen: F('z:glad') },
     { id: 'up', textHe: 'הדרכון של אבא.', revealWhen: F('z:euro'), doneWhen: F('z:up') },
   ],
@@ -273,6 +276,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'first', textHe: 'המשחק הראשון שלו.', revealWhen: F('life:child'), doneWhen: F('pr:first') },
     { id: 'promise', textHe: 'מה נעשה בפעם הבאה.', doneWhen: F('pr:promise') },
     { id: 'scarf', textHe: 'השבת שלו.', revealWhen: { all: [F('life:child'), F('pr:promise')] }, doneWhen: F('pr:scarf') },
+    { id: 'evening', textHe: 'הערב עצמו. הטיילת, והטלפון בכיס.', revealWhen: F('pr:out'), doneWhen: F('pr:evened') },
   ],
   '2000-team': [
     { id: 'name', textHe: 'שם עד מחר.', doneWhen: F('y:name') },
@@ -319,6 +323,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2021-suitcase': [
     { id: 'suitcase', textHe: 'מה נכנס למזוודה.', doneWhen: F('x:suitcase') },
+    { id: 'corner', textHe: 'הפינה האחרונה במזוודה.', revealWhen: F('x:move'), doneWhen: { flag: 'life:abroad:corner' } },
     { id: 'sea', textHe: 'ערב אחרון על הים.', revealWhen: F('x:move'), doneWhen: F('x:sea') },
   ],
   '2023-visit': [
@@ -330,11 +335,15 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'call', textHe: 'אצלם כבר התחיל.', doneWhen: F('x:call') },
     { id: 'alex', textHe: 'גם פה יש לך מפתח.', doneWhen: F('x:alex') },
   ],
-  '2025-abroad': [{ id: 'reunion', textHe: 'הפעם אתה מחכה לו.', doneWhen: F('x:reunion') }],
+  '2025-abroad': [
+    { id: 'reunion', textHe: 'הפעם אתה מחכה לו.', doneWhen: F('x:reunion') },
+    { id: 'leave', textHe: 'תאריך. המחשב, והחופש במאי.', revealWhen: F('x:later'), doneWhen: F('x:leave') },
+    { id: 'pack', textHe: 'מה שנכנס לפינה של המזוודה, ב-2021.', revealWhen: F('x:invited'), doneWhen: F('x:packed') },
+  ],
   '2025-owner': [
     { id: 'fork', textHe: 'סכום, לא תוצאה.', doneWhen: F('o:fork') },
-    { id: 'team', textHe: 'מי יעבוד איתך.', revealWhen: F('o:forkGo'), doneWhen: F('o:team') },
-    { id: 'money', textHe: 'כסף שיש וכסף שנראה שיש.', revealWhen: F('o:teamGo'), doneWhen: F('o:money') },
+    { id: 'money', textHe: 'עד שמונה: הכסף, המגרש, האנשים — זמן לשניים.', revealWhen: F('o:brief'), doneWhen: F('o:money') },
+    { id: 'team', textHe: 'מי יעבוד איתך.', revealWhen: F('o:dealGo'), doneWhen: F('o:team') },
     { id: 'sign', textHe: 'השבוע של כולם.', revealWhen: F('o:moneyGo'), doneWhen: F('o:sign') },
     { id: 'monday', textHe: 'ביום שני עדיין צריך לפתוח.', revealWhen: F('o:signGo'), doneWhen: F('o:monday') },
   ],

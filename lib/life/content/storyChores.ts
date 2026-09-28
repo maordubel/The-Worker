@@ -2,6 +2,7 @@ import type { LifeEvent } from '../events'
 import type { LocationId } from '../types'
 
 import { QUEST_CHORES_B } from './adultQuestsB'
+import { STORY_CHORES_PASS_D } from './choresPassD'
 import { STORY_CHORES_ADULT } from './storyChoresAdult'
 import { STORY_CHORES_PASS_C } from './storyChoresPassC'
 
@@ -425,4 +426,6 @@ export const STORY_CHORES: Record<string, StoryChore> = {
   ...STORY_CHORES_ADULT,
   // 2000–2012 (pass C, 28.9.2026) — the chapters' own hands: Amit's move of 2012, …
   ...STORY_CHORES_PASS_C,
+  // 2013–2026 (pass D, 28.9.2026) — the Saturday of 2019
+  ...STORY_CHORES_PASS_D,
 }

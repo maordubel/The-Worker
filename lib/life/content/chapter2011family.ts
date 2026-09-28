@@ -1,9 +1,11 @@
 import type { LifeState } from '../types'
 import { PARTNER_TAG } from '../partner'
 
-import type { Beat } from './beats'
+import type { Beat, BeatAction } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { ChoiceDef, Conversation, Effect } from './script'
+import type { Condition } from '../world/types'
+import type { LifeEvent } from '../events'
 import { PORTRAIT_GROWTH } from './chapter2012growth'
 
 /**
@@ -134,10 +136,241 @@ export const ENDINGS_HOUSEHOLD: Record<string, EndingCard> = {
   },
 }
 
+// ======================================================= השבוע — pass D (§41, 28.9.2026) ====
+/**
+ * **היומן שעל המקרר, כמשחק.** `IMPLEMENTATION-PASS-PROGRAMMER` §41: *"5 evenings, 7 demands;
+ * drag commitments · only 1–2 approaches can be completed before the pressure closes ·
+ * consequences occur, not summarized · calendar now marked/crossed"*.
+ *
+ * מי שבוחר לבנות יומן (`calendar`), להבטיח בלי לבדוק (`promise`), או — בבית העצמאי — לכתוב
+ * בו גם משהו שאינו משחק (`own`), יושב מול השבוע: חמישה ערבים, שבעה דברים, ולכל דבר הערבים
+ * שבהם הוא קיים (הליגה של אופיר רק בשני וברביעי, המעבר של מתוקי בשלישי וברביעי, הפגישה בשער
+ * 5 רק ברביעי, אבא ואמא רק בחמישי). **רביעי הוא הצוואר**, ושני דברים תמיד נשארים בחוץ.
+ *
+ * ואז השבוע **קורה** — ערב אחרי ערב, כרטיס לכל אחד (`hh-live-*`) — ומה שנשאר בחוץ עונה
+ * בקולו (`hh-miss-*`): אופיר שיחק עם תשעה, הספה של מתוקי נשארה בקומה השלישית. ביום חמישי
+ * בלילה היומן על המקרר מסומן ומחוק (`hh-fridge`), ורק אז נשאלת השאלה על הורות.
+ *
+ * מי שהבטיח "ערב קבוע" בלי לבדוק גילה שהערב הוא רביעי — הצוואר — והשבוע יודע אם שמר
+ * עליו (`life:household:week`, נקרא ב-2021).
+ */
+type Day = 'sun' | 'mon' | 'tue' | 'wed' | 'thu'
+type Demand = 'us' | 'work' | 'ofir' | 'metuki' | 'terrace' | 'parents' | 'alone'
+const DAYS: ReadonlyArray<{ id: Day; he: string; demands: readonly Demand[] }> = [
+  { id: 'sun', he: 'ראשון', demands: ['us', 'work', 'alone'] },
+  { id: 'mon', he: 'שני', demands: ['us', 'ofir', 'work'] },
+  { id: 'tue', he: 'שלישי', demands: ['us', 'metuki', 'work'] },
+  { id: 'wed', he: 'רביעי', demands: ['us', 'ofir', 'terrace', 'metuki'] },
+  { id: 'thu', he: 'חמישי', demands: ['us', 'parents', 'alone'] },
+]
+/** the conversation ids of the week, spelled in full (rule 71 — a generated id is named once) */
+export const WEEK_NODES = {
+  pair: { sun: 'hh-week-pair-sun', mon: 'hh-week-pair-mon', tue: 'hh-week-pair-tue', wed: 'hh-week-pair-wed', thu: 'hh-week-pair-thu' },
+  solo: { sun: 'hh-week-solo-sun', mon: 'hh-week-solo-mon', tue: 'hh-week-solo-tue', wed: 'hh-week-solo-wed', thu: 'hh-week-solo-thu' },
+} as const
+type Mode = keyof typeof WEEK_NODES
+const DEMAND_TEXT: Record<Demand, Record<Mode, string>> = {
+  us: { pair: '(ערב שלנו. בלי טלפון על השולחן.)', solo: '(קרן. היא אורזת, ואמרת שתבוא.)' },
+  work: { pair: '(משמרת ערב — הדדליין ביום שלישי.)', solo: '(משמרת ערב — הדדליין ביום שלישי.)' },
+  ofir: { pair: '(ליגת הקיץ של אופיר — חסר להם חמישי.)', solo: '(ליגת הקיץ של אופיר — חסר להם חמישי.)' },
+  metuki: { pair: '(מתוקי עובר דירה. ארגזים, שלוש קומות.)', solo: '(מתוקי עובר דירה. ארגזים, שלוש קומות.)' },
+  terrace: { pair: '(הפגישה בשער 5 — מחלקים תפקידים לעונה.)', solo: '(הפגישה בשער 5 — מחלקים תפקידים לעונה.)' },
+  parents: { pair: '(ארוחת ערב אצל קובי ורחל.)', solo: '(ארוחת ערב אצל קובי ורחל.)' },
+  alone: { pair: '(ערב לבד. ספה, ושום דבר.)', solo: '(ערב לבד. ספה, ושום דבר.)' },
+}
+const WEEK = 'life:household:week'
+const next = (mode: Mode, day: Day): string | null => {
+  const i = DAYS.findIndex((d) => d.id === day)
+  const following = DAYS[i + 1]
+  return following ? WEEK_NODES[mode][following.id] : null
+}
+function weekChoices(mode: Mode, day: Day, demands: readonly Demand[]): ChoiceDef[] {
+  return demands.map((demand) => {
+    const then: Effect[] = [
+      { e: 'flag', flag: `hh:wk:${demand}` },
+      { e: 'flagValue', flag: `hh:wk:${day}`, value: demand },
+    ]
+    const after = next(mode, day)
+    if (after) then.push({ e: 'goto', node: after })
+    else then.push({ e: 'flag', flag: 'hh:planned' }, { e: 'toast', text: 'היומן נסגר. חמישה ערבים, ושני דברים שלא נכנסו.', tone: 'plain' })
+    return { id: demand, text: DEMAND_TEXT[demand][mode], when: { notFlag: `hh:wk:${demand}` }, hidden: true, then }
+  })
+}
+const DAY_LINE: Record<Day, string> = {
+  sun: 'יום ראשון. שלוש שורות ביומן, וערב אחד.',
+  mon: 'יום שני. אופיר כתב בקבוצה שבשני משחקים — ומי שלא בא, שיגיד.',
+  tue: 'יום שלישי. הדדליין של העבודה, ומתוקי שואל מי יכול לסחוב.',
+  wed: 'יום רביעי. כולם רוצים את רביעי.',
+  thu: 'יום חמישי. רחל כבר קנתה דג.',
+}
+function weekNode(mode: Mode, day: (typeof DAYS)[number]): Conversation {
+  return {
+    id: WEEK_NODES[mode][day.id],
+    nameHe: null,
+    branches: [
+      ...(mode === 'pair' && day.id === 'wed'
+        ? [
+            {
+              when: { flag: 'promise:householdEvening' },
+              lines: [
+                { who: null, text: 'יום רביעי. כולם רוצים את רביעי.' },
+                { who: null, text: 'ובשורה של רביעי, בכתב שלך: "ערב קבוע." הבטחת בלי לבדוק, והערב הקבוע נפל על היום הכי מלא בשבוע.' },
+              ],
+              choices: weekChoices(mode, day.id, day.demands),
+            },
+          ]
+        : []),
+      { lines: [{ who: null, text: DAY_LINE[day.id] }], choices: weekChoices(mode, day.id, day.demands) },
+    ],
+  }
+}
+export const CONVERSATIONS_WEEK: Conversation[] = (['pair', 'solo'] as const).flatMap((mode) => DAYS.map((day) => weekNode(mode, day)))
+
+/**
+ * a box closed in the middle of the week is not a week lost: the diary on the fridge opens it
+ * again at the first evening still empty (`hh-week-again`, and the fridge itself — `questsPassD.ts`)
+ */
+export const CONVERSATION_WEEK_RESUME: Conversation = {
+  id: 'hh-week-resume',
+  nameHe: null,
+  branches: (['pair', 'solo'] as const).flatMap((mode) =>
+    DAYS.map((day) => ({
+      when: {
+        all: [mode === 'pair' ? { flag: 'life:partner' } : { notFlag: 'life:partner' }],
+        none: [{ flag: `hh:wk:${day.id}` }],
+      },
+      lines: [{ who: null, text: 'היומן על המקרר. השבוע עוד חצי ריק, והעט עוד תלוי בחוט.' }],
+      then: [{ e: 'goto' as const, node: WEEK_NODES[mode][day.id] }],
+    })),
+  ),
+}
+
+/** one evening, lived — the card the week shows for what was written in it */
+const SNAP: Record<Demand, { pair: string; solo: string }> = {
+  us: { pair: 'ערב שלכם. הטלפון נשאר במגירה, ורק פעם אחת רצית לבדוק.', solo: 'קרן, עשרים ארגזים, ופיצה על הרצפה. היא לא אמרה תודה — היא אמרה "תבוא לבקר".' },
+  work: { pair: 'משמרת ערב. הגשת בזמן, ואף אחד לא אמר כלום — שזה אצלם מחמאה.', solo: 'משמרת ערב. הגשת בזמן, ואף אחד לא אמר כלום — שזה אצלם מחמאה.' },
+  ofir: { pair: 'ליגת הקיץ. נכנסת כחמישי, בעטת פעמיים, ואופיר צעק עליך כאילו אתם בני שש־עשרה.', solo: 'ליגת הקיץ. נכנסת כחמישי, בעטת פעמיים, ואופיר צעק עליך כאילו אתם בני שש־עשרה.' },
+  metuki: { pair: 'שלוש קומות עם ספה. מתוקי קילל כל מדרגה בשמה.', solo: 'שלוש קומות עם ספה. מתוקי קילל כל מדרגה בשמה.' },
+  terrace: { pair: 'שער 5, מתחת ליציע. חילקו תפקידים, ולקחת את מה שאף אחד לא רצה.', solo: 'שער 5, מתחת ליציע. חילקו תפקידים, ולקחת את מה שאף אחד לא רצה.' },
+  parents: { pair: 'אצל קובי ורחל. דג, ושאלה אחת על נכדים שאף אחד לא ענה עליה.', solo: 'אצל קובי ורחל. דג, ושאלה אחת על נכדים שאף אחד לא ענה עליה.' },
+  alone: { pair: 'ערב לבד. ספה, שום דבר, ובעשר כבר ישנת.', solo: 'ערב לבד. ספה, שום דבר, ובעשר כבר ישנת.' },
+}
+const DAY_TITLE: Record<Day, string> = { sun: 'יום ראשון', mon: 'יום שני', tue: 'יום שלישי', wed: 'יום רביעי', thu: 'יום חמישי' }
+
+const lived = (day: Day): Condition => ({ flag: `hh:live:${day}` })
+const PAIR: Condition = { flag: 'life:partner' }
+/** what was left out answers in its own voice — and costs what it costs */
+const MISS: ReadonlyArray<{ demand: Demand; say: string; events: LifeEvent[] }> = [
+  { demand: 'ofir', say: 'אופיר, בהודעה: "שיחקנו עם תשעה. הפסדנו בכבוד. תבוא לפעם הבאה, או תגיד שלא."', events: [{ t: 'relationship.changed', who: 'ofir', axis: 'bond', delta: -3 }] },
+  { demand: 'metuki', say: 'מתוקי: "הספה נשארה בקומה השלישית. גם אני, קצת."', events: [{ t: 'relationship.changed', who: 'metuki', axis: 'trust', delta: -3 }] },
+  { demand: 'terrace', say: 'בשער 5 חילקו את התפקידים בלעדיך. קיבלת את מה שנשאר: לסחוב את הדגלים.', events: [{ t: 'relationship.changed', who: 'yevgeny', axis: 'bond', delta: -2 }] },
+  { demand: 'parents', say: 'רחל, בטלפון: "קובי שם צלחת בשבילך. אחר כך הוריד."', events: [{ t: 'relationship.changed', who: 'rachel', axis: 'bond', delta: -3 }, { t: 'relationship.changed', who: 'kobi', axis: 'bond', delta: -2 }] },
+  { demand: 'work', say: 'המנהלת: "אז ביום רביעי בבוקר, לפני כולם." — ורביעי בבוקר, לפני כולם.', events: [{ t: 'wellbeing.changed', key: 'stress', delta: 8 }] },
+  { demand: 'alone', say: 'חמישה ערבים ואף אחד לא שלך. ביום שישי קמת עייף, בלי לדעת ממה.', events: [{ t: 'energy.changed', delta: -10 }] },
+]
+
+const WEEK_OPEN: Condition = { all: [{ flag: 'hh:planned' }] }
+export const BEATS_WEEK: Beat[] = [
+  { id: 'hh-week-again', at: 'home', trigger: 'clock', when: { all: [{ flag: 'hh:week' }], none: [{ flag: 'hh:planned' }] }, delayMs: 2600, do: [{ a: 'talk', conversation: 'hh-week-resume' }] },
+  { id: 'hh-live-card', at: 'home', trigger: 'clock', when: { all: [WEEK_OPEN], none: [{ flag: 'hh:live:start' }] }, delayMs: 700, do: [{ a: 'flag', flag: 'hh:live:start' }, { a: 'card', titleHe: 'השבוע', subHe: 'חמישה ערבים, כמו שכתבת אותם', ms: 1800 }] },
+  // one card per evening, in order — each waits for the one before it
+  ...DAYS.flatMap((day, i): Beat[] =>
+    day.demands.flatMap((demand): Beat[] =>
+      (['pair', 'solo'] as const).map((mode): Beat => ({
+        id: `hh-live-${day.id}-${demand}-${mode}`,
+        at: 'home',
+        trigger: 'clock',
+        when: {
+          all: [
+            { flag: i === 0 ? 'hh:live:start' : `hh:live:${DAYS[i - 1]!.id}` },
+            { flagIs: { flag: `hh:wk:${day.id}`, value: demand } },
+            mode === 'pair' ? PAIR : { notFlag: 'life:partner' },
+          ],
+          none: [lived(day.id)],
+        },
+        delayMs: 250,
+        do: [{ a: 'flag', flag: `hh:live:${day.id}` }, { a: 'card', titleHe: DAY_TITLE[day.id], subHe: SNAP[demand][mode], ms: 2300 }],
+      })),
+    ),
+  ),
+  // what was left out, after Thursday
+  ...MISS.map(({ demand, say, events }): Beat => ({
+    id: `hh-miss-${demand}`,
+    at: 'home',
+    trigger: 'clock',
+    when: { all: [lived('thu')], none: [{ flag: `hh:wk:${demand}` }, { flag: `hh:missed:${demand}` }] },
+    delayMs: 500,
+    do: [{ a: 'flag', flag: `hh:missed:${demand}` }, { a: 'events', events }, { a: 'toast', text: say, tone: 'red' }] as BeatAction[],
+  })),
+  // Thursday night, the fridge: the week written down, crossed out where it did not happen
+  {
+    id: 'hh-fridge',
+    at: 'home',
+    trigger: 'clock',
+    when: { all: [lived('thu')], none: [{ flag: 'hh:lived' }] },
+    delayMs: 1400,
+    do: [
+      {
+        a: 'derive',
+        events: (state) => {
+          const f = state.flags
+          const promised = Boolean(f['promise:householdEvening'])
+          const value = !f['hh:wk:us'] ? 'no-us' : promised ? (f['hh:wk:wed'] === 'us' ? 'kept' : 'broken') : 'us'
+          return [{ t: 'flag.set', flag: WEEK, value }]
+        },
+      },
+      { a: 'talk', conversation: 'hh-fridge' },
+      { a: 'flag', flag: 'hh:lived' },
+    ],
+  },
+]
+
+export const CONVERSATION_FRIDGE: Conversation = {
+  id: 'hh-fridge',
+  nameHe: null,
+  branches: [
+    {
+      when: { flagIs: { flag: WEEK, value: 'broken' } },
+      lines: [
+        { who: null, text: 'חמישי בלילה. היומן על המקרר: ארבעה ערבים עם וי, ורביעי מחוק בשני קווים. "ערב קבוע", ומעליו, בכתב אחר: "היה".' },
+        { who: PARTNER_TAG, text: 'לא כעסתי על רביעי. כעסתי שגיליתי אותו מהמקרר.' },
+      ],
+    },
+    {
+      when: { flagIs: { flag: WEEK, value: 'kept' } },
+      lines: [
+        { who: null, text: 'חמישי בלילה. היומן על המקרר: חמישה ערבים עם וי, ורביעי מוקף בעיגול — בכתב שלך ובכתב שלה.' },
+        { who: PARTNER_TAG, text: 'שמרת את רביעי. עם כל מה שנפל עליו.' },
+      ],
+    },
+    {
+      when: { all: [PAIR, { flagIs: { flag: WEEK, value: 'no-us' } }] },
+      lines: [
+        { who: null, text: 'חמישי בלילה. היומן על המקרר מלא. חמישה ערבים, חמישה ויים, ואף אחד מהם לא שלכם.' },
+        { who: PARTNER_TAG, text: 'עשית הכול. חוץ ממה שביקשתי.' },
+      ],
+    },
+    {
+      when: PAIR,
+      lines: [{ who: null, text: 'חמישי בלילה. היומן על המקרר: חמישה ערבים עם וי, ושתי שורות מחוקות — בכתב שלך, לא שלה.' }],
+    },
+    {
+      when: { flagIs: { flag: WEEK, value: 'no-us' } },
+      lines: [
+        { who: null, text: 'חמישי בלילה. היומן על המקרר מלא, וקרן עברה דירה בלי שעזרת לסחוב.' },
+        { who: 'קרן', text: 'בסדר גמור. רק תדע שספרתי ארגזים.' },
+      ],
+    },
+    { lines: [{ who: null, text: 'חמישי בלילה. היומן על המקרר: חמישה ערבים עם וי, ושתי שורות מחוקות.' }] },
+  ],
+}
+
 export const BEATS_HOUSEHOLD: Beat[] = [
   { id: 'hh-diary', at: 'home', trigger: 'enter', when: { none: [{ flag: 'hh:diary' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'hh-diary' }] },
   // באותו חדר כמו היומן (`homeAdult`: המטבח הוא הפינה של הסלון) — ולכן שעון ולא דלת: אין דלת לעבור בה
-  { id: 'hh-parent', at: 'home', trigger: 'clock', when: { all: [{ flag: 'hh:diary' }], none: [{ flag: 'hh:parent' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'hh-parent' }] },
+  // (pass D) after the week, if there was one — the question comes on Thursday night, by the fridge
+  { id: 'hh-parent', at: 'home', trigger: 'clock', when: { all: [{ flag: 'hh:diary' }], none: [{ flag: 'hh:parent' }], any: [{ notFlag: 'hh:week' }, { flag: 'hh:lived' }] }, delayMs: 1400, do: [{ a: 'talk', conversation: 'hh-parent' }] },
+  ...BEATS_WEEK,
   /**
    * **מעבר הזמן, ורק כששני התנאים מתקיימים.** כוונה להורות **ובן/בת זוג** —
    * ולא "רצה, ולכן קרה". הוא רץ אחרי `hh:parent`, והוא המקום היחיד במשחק
@@ -146,9 +379,13 @@ export const BEATS_HOUSEHOLD: Beat[] = [
   { id: 'hh-first', trigger: 'clock', when: { all: [{ flag: 'hh:parent' }, { flagIs: { flag: 'hh:intent', value: 'yes' } }, { flag: 'life:partner' }], none: [{ flag: 'hh:first' }] }, delayMs: 1600, do: [{ a: 'talk', conversation: 'hh-first' }] },
 ]
 
+
 // ---------------------------------------------------------------- the words ------
 
 export const CONVERSATIONS_FAMILY: Conversation[] = [
+  ...CONVERSATIONS_WEEK,
+  CONVERSATION_WEEK_RESUME,
+  CONVERSATION_FRIDGE,
   {
     id: 'l-melanie',
     nameHe: 'מלאני',
@@ -414,6 +651,9 @@ export const CONVERSATIONS_FAMILY: Conversation[] = [
             id: 'calendar',
             text: '(ערב משותף — ולכל אחד זמן משלו.)',
             then: [
+              // (pass D) the week itself, on the fridge — five evenings, seven things
+              { e: 'flag', flag: 'hh:week' },
+              { e: 'goto', node: WEEK_NODES.pair.sun },
               { e: 'flag', flag: 'hh:diary' },
               { e: 'time', minutes: 25 },
               { e: 'flagValue', flag: 'hh:home', value: 'shared_calendar' },
@@ -435,6 +675,9 @@ export const CONVERSATIONS_FAMILY: Conversation[] = [
             id: 'promise',
             text: '"ערב קבוע. אני מבטיח." (בלי לבדוק את היומן.)',
             then: [
+              // (pass D) the week itself, on the fridge — five evenings, seven things
+              { e: 'flag', flag: 'hh:week' },
+              { e: 'goto', node: WEEK_NODES.pair.sun },
               { e: 'flag', flag: 'hh:diary' },
               { e: 'flag', flag: 'promise:householdEvening' },
               { e: 'flagValue', flag: 'hh:home', value: 'promise_needs_capacity' },
@@ -461,6 +704,9 @@ export const CONVERSATIONS_FAMILY: Conversation[] = [
             id: 'own',
             text: '(לכתוב ביומן גם דברים שהם לא משחקים.)',
             then: [
+              // (pass D) the week itself, on the fridge — five evenings, seven things
+              { e: 'flag', flag: 'hh:week' },
+              { e: 'goto', node: WEEK_NODES.solo.sun },
               { e: 'flag', flag: 'hh:diary' },
               { e: 'time', minutes: 25 },
               { e: 'flagValue', flag: 'hh:home', value: 'own_place' },

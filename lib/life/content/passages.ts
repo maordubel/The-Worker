@@ -1,6 +1,7 @@
 import type { Say } from './script'
 
 import { QUEST_RIDES_B } from './adultQuestsB'
+import { RIDES_PASS_D } from './ridesPassD'
 
 /**
  * הדרך עצמה — a passage you ride, not a paragraph you read (Director V3 §9, 24.9.2026).
@@ -168,4 +169,4 @@ export const RIDE_LIRON_99: Ride = {
   flags: ['c99:rode'],
 }
 
-export const RIDES: Record<string, Ride> = { [RIDE_1997.id]: RIDE_1997, [RIDE_RADIO_86.id]: RIDE_RADIO_86, [RIDE_LIRON_99.id]: RIDE_LIRON_99, ...QUEST_RIDES_B }
+export const RIDES: Record<string, Ride> = { [RIDE_1997.id]: RIDE_1997, [RIDE_RADIO_86.id]: RIDE_RADIO_86, [RIDE_LIRON_99.id]: RIDE_LIRON_99, ...QUEST_RIDES_B, ...RIDES_PASS_D }

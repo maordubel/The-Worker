@@ -153,8 +153,15 @@ export const ENDINGS_ARMCHAIR: Record<string, EndingCard> = {
 
 export const BEATS_ARMCHAIR: Beat[] = [
   { id: 'a-remote', at: 'home', trigger: 'enter', when: { none: [{ flag: 'a:remote' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'a-remote' }] },
-  { id: 'a-photo', at: 'kitchen', trigger: 'enter', when: { all: [{ flag: 'a:remote' }], none: [{ flag: 'a:photo' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'a-photo' }] },
+  /**
+   * (pass D, §47 S2) the match from home is interrupted — Rachel, the laundry, the rain — and
+   * what he does with the next ten minutes is the benefit-cost of the armchair
+   */
+  { id: 'a-interrupt', at: 'home', trigger: 'clock', when: { all: [{ flagIs: { flag: 'a:how', value: 'watch' } }], none: [{ flag: 'a:interrupt' }] }, delayMs: 2200, do: [{ a: 'talk', conversation: 'a-interrupt' }] },
+  { id: 'a-photo', at: 'kitchen', trigger: 'enter', when: { all: [{ flag: 'a:remote' }], none: [{ flag: 'a:photo' }], any: [{ flag: 'a:interrupt' }, { none: [{ flagIs: { flag: 'a:how', value: 'watch' } }] }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'a-photo' }] },
   { id: 'a-saturday', at: 'street', trigger: 'enter', when: { all: [{ flag: 'a:photo' }], none: [{ flag: 'a:saturday' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'a-saturday' }] },
+  // the shelf, as the level read it
+  { id: 'a-fixed', at: 'street', trigger: 'enter', when: { all: [{ flag: 'a:shelf' }], none: [{ flag: 'a:fixed' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'a-fixed' }] },
 ]
 
 // ---------------------------------------------------------------- the words ------
@@ -325,6 +332,82 @@ export const CONVERSATIONS_WINDOWS: Conversation[] = [
     ],
   },
   {
+    id: 'a-interrupt',
+    nameHe: 'רחל',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'באמצע המחצית השנייה רחל עומדת בפתח, עם סל ריק.' },
+          { who: 'רחל', text: 'הכביסה על הגג, ויורד גשם בעוד עשר דקות. אני לא מבקשת מאבא שלך.' },
+          { who: 'קובי', text: 'היא לא מבקשת ממני כבר ארבעים שנה.' },
+        ],
+        choices: [
+          {
+            id: 'help',
+            text: '(לעלות איתה לגג. עשר דקות בלי המשחק.)',
+            then: [
+              { e: 'flag', flag: 'a:interrupt' },
+              { e: 'flagValue', flag: 'life:armchair:ten', value: 'roof' },
+              { e: 'time', minutes: 15 },
+              { e: 'rel', who: 'rachel', axis: 'bond', delta: 3 },
+              { e: 'toast', text: 'על הגג, הטיפות הראשונות. מלמטה שומעים את קובי צועק על השופט — אז כנראה עוד לא נגמר.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'stay',
+            text: '(להישאר מול המסך. "עוד רגע, אמא.")',
+            then: [
+              { e: 'flag', flag: 'a:interrupt' },
+              { e: 'flagValue', flag: 'life:armchair:ten', value: 'screen' },
+              { e: 'rel', who: 'kobi', axis: 'bond', delta: 1 },
+              { e: 'rel', who: 'rachel', axis: 'bond', delta: -2 },
+              { e: 'toast', text: 'רחל עלתה לבד. הכביסה ירדה רטובה, והיא לא אמרה כלום — שזה אצלה משפט שלם.', tone: 'red' },
+            ],
+          },
+          {
+            id: 'both',
+            text: '(להוריד את הכביסה עם הטלפון ביד, והמשחק עליו.)',
+            then: [
+              { e: 'flag', flag: 'a:interrupt' },
+              { e: 'flagValue', flag: 'life:armchair:ten', value: 'both' },
+              { e: 'time', minutes: 15 },
+              { e: 'wellbeing', key: 'stress', delta: 3 },
+              { e: 'toast', text: 'חצי כביסה, חצי משחק, ושום דבר מהם לא עד הסוף. רחל: "גם זה משהו." — קובי: "גם זה משהו."', tone: 'plain' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'a-fixed',
+    nameHe: 'אילן',
+    branches: [
+      {
+        when: { flagIs: { flag: 'a:shelf', value: 'straight' } },
+        lines: [
+          { who: 'אילן', text: 'ישר?' },
+          { who: 'פוגי', text: 'יחסית לקיר.' },
+          { who: 'בתיה', text: 'הקיר ותיק. תכבדו.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'a:fixed' },
+          { e: 'proof', kind: 'home_project', proofId: 'home_project:{chapter}:wall', subjectHe: 'הקיר של אילן', noteHe: 'ישר, יחסית לקיר.' },
+          { e: 'toast', text: 'אילן: "ישר?" — "יחסית לקיר." — בתיה: "הקיר ותיק. תכבדו."', tone: 'plain' },
+          { e: 'ending', id: 'fixed' },
+        ],
+      },
+      {
+        lines: [
+          { who: 'אילן', text: 'הוא עומד.' },
+          { who: 'פוגי', text: 'קצת עקום.' },
+          { who: 'בתיה', text: 'גם אתם. ועדיין עומדים.' },
+        ],
+        then: [{ e: 'flag', flag: 'a:fixed' }, { e: 'ending', id: 'fixed' }],
+      },
+    ],
+  },
+  {
     id: 'a-remote',
     nameHe: 'קובי',
     branches: [
@@ -342,6 +425,7 @@ export const CONVERSATIONS_WINDOWS: Conversation[] = [
             text: '(לראות קצת, ולדבר איתו.)',
             then: [
               { e: 'flag', flag: 'a:remote' },
+              { e: 'flagValue', flag: 'a:how', value: 'watch' },
               { e: 'time', minutes: 45 },
               { e: 'energy', delta: -5 },
               { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
@@ -433,15 +517,12 @@ export const CONVERSATIONS_WINDOWS: Conversation[] = [
           {
             id: 'fix',
             text: '(לעזור לאילן בתיקון פשוט.)',
+            // (pass D, §47 S3) the Saturday is done with the hands — `shelf-19` (`choresPassD.ts`),
+            // and `a-fixed` answers what the level says
             then: [
               { e: 'flag', flag: 'a:saturday' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -10 },
               { e: 'rel', who: 'neighbour', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'neighbour', axis: 'trust', delta: 3 },
-              { e: 'proof', kind: 'home_project', proofId: 'home_project:{chapter}:wall', subjectHe: 'הקיר של אילן', noteHe: 'ישר, יחסית לקיר.' },
-              { e: 'toast', text: 'אילן: "ישר?" — "יחסית לקיר." — בתיה: "הקיר ותיק. תכבדו."', tone: 'plain' },
-              { e: 'ending', id: 'fixed' },
+              { e: 'minigame', id: 'chore:story:shelf-19' },
             ],
           },
           {

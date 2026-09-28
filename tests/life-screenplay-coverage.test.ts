@@ -68,7 +68,8 @@ describe('THE WORKER LIFE — the screenplay is in the game', () => {
     'F04.3': ['f-back', 'mine'],
     'J02.1': ['j-fix', 'correct'],
     'O02.1': ['o-team', 'agree'],
-    'O03.1': ['o-money', 'covered'],
+    // (pass D, 28.9.2026) O03 is the money corner of the seller's hour now — the same choice, the same gate
+    'O03.1': ['o-tri-money', 'covered'],
     'Y05.2': ['y-after', 'repair'],
   }
 

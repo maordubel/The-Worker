@@ -4,7 +4,7 @@ import { PARTNER_TAG } from '../partner'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { Conversation } from './script'
+import type { Conversation, Say } from './script'
 import type { Condition } from '../world/types'
 import { PORTRAIT_FAMILY } from './chapter2011family'
 
@@ -131,6 +131,22 @@ export const BEATS_PROMISES: Beat[] = [
    * כשיש ילד לחכות לו.
    */
   // ליד המקרר של הבית שלו (`homeAdult`) — אותו חדר כמו הילד, ולכן שעון: הוא לא יוצא ונכנס כדי לשמוע
+  /**
+   * (pass D) the week of 2013, eight years on — the diary on the fridge (`life:household:week`,
+   * `chapter2011family.ts`) is the evidence the promise is weighed against. One sentence, before it.
+   */
+  ...([
+    ['kept', 'ב-2013 שמרת את רביעי, עם כל מה שנפל עליו. אני עוד זוכרת את העיגול על המקרר.'],
+    ['broken', 'ב-2013 גיליתי את רביעי מהמקרר. שלא אגלה גם את זה ככה.'],
+    ['no-us', 'פעם היה לך יומן מלא, בלי אף ערב שלנו. אני בודקת אם הוא עוד תלוי שם.'],
+  ] as const).map(([value, text]): Beat => ({
+    id: `pr-week-${value}`,
+    at: 'home',
+    trigger: 'clock',
+    when: { all: [{ flag: 'life:partner' }, { flagIs: { flag: 'life:household:week', value } }], none: [{ flag: 'pr:promise' }, { flag: 'pr:weekSaid' }], any: [{ flag: 'pr:first' }, { notFlag: 'life:child' }] },
+    delayMs: 900,
+    do: [{ a: 'flag', flag: 'pr:weekSaid' }, { a: 'lines', lines: [{ who: PARTNER_TAG, text }] }],
+  })),
   { id: 'pr-promise', at: 'home', trigger: 'clock', when: { none: [{ flag: 'pr:promise' }], any: [{ flag: 'pr:first' }, { notFlag: 'life:child' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'pr-promise' }] },
   { id: 'pr-scarf', at: 'pitch', trigger: 'enter', when: { all: [{ flag: 'life:child' }, { flag: 'pr:promise' }], none: [{ flag: 'pr:scarf' }, { flag: 'pr:ask' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'pr-scarf' }] },
   /** (90-E) חזרה אליו עם שתי השעות — הוא שואל בעצמו; מי שהלך באמצע לוחץ עליו (`pr-answer` במגרש) */
@@ -150,7 +166,35 @@ export const BEATS_PROMISES: Beat[] = [
   { id: 'pr-nosat', trigger: 'clock', when: { all: [COMMITTED, { afterMinute: 22 * 60 + 30 }], none: [{ flag: 'pr:sat' }, { flag: 'pr:scarf' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'pr-nosat' }] },
   { id: 'pr-whistle-late', trigger: 'clock', when: { all: [sat('run'), { afterMinute: 23 * 60 }], none: [{ flag: 'pr:scarf' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'pr-whistle-late' }] },
   /** הסגירה — אחרי ההבטחה למי שאין לו ילד, ואחרי האירוע שלו למי שיש */
-  { id: 'pr-close', trigger: 'clock', when: { all: [{ flag: 'pr:promise' }], none: [{ flag: 'pr:done' }], any: [{ flag: 'pr:scarf' }, { notFlag: 'life:child' }] }, delayMs: 1200, do: [{ a: 'flag', flag: 'pr:done' }, { a: 'talk', conversation: 'pr-close' }] },
+  /**
+   * (pass D, §49 S2b — *"equally dense promise to partner/family/work/person: show up /
+   * renegotiate / break"*) the life without a child does not close on a sentence: the evening
+   * that was kept or repaired happens, at sunset on the promenade, and the phone is in the pocket.
+   */
+  {
+    id: 'pr-out',
+    trigger: 'clock',
+    when: { all: [{ flag: 'pr:evening' }, { notFlag: 'life:child' }], none: [{ flag: 'pr:out' }] },
+    delayMs: 1400,
+    do: [{ a: 'flag', flag: 'pr:out' }, { a: 'card', titleHe: 'הערב עצמו', subHe: 'הטיילת, בשקיעה', ms: 2200 }, { a: 'travel', to: 'promenade', spawn: 'start' }],
+  },
+  { id: 'pr-evening', at: 'promenade', trigger: 'enter', when: { all: [{ flag: 'pr:out' }], none: [{ flag: 'pr:evened' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'pr-evening' }] },
+  { id: 'pr-close', trigger: 'clock', when: { all: [{ flag: 'pr:promise' }, { any: [{ notFlag: 'pr:evening' }, { flag: 'pr:evened' }, { flag: 'life:child' }] }], none: [{ flag: 'pr:done' }], any: [{ flag: 'pr:scarf' }, { notFlag: 'life:child' }] }, delayMs: 1200, do: [{ a: 'flag', flag: 'pr:done' }, { a: 'talk', conversation: 'pr-close' }] },
+]
+
+/** (pass D) the evening that was promised, and who it is with */
+const EVENING_OPENERS: ReadonlyArray<readonly [Condition, Say[]]> = [
+  [{ flag: 'life:partner' }, [
+    { who: null, text: 'הטיילת, בשקיעה. שולחן אחד מול הים, ושני כיסאות שלא זזים.' },
+    { who: PARTNER_TAG, text: 'אז הערב אתה פה.' },
+    { who: 'פוגי', text: 'הערב אני פה.' },
+    { who: null, text: 'בכיס, הטלפון. יש משחק הערב, ואתה יודע באיזו דקה בדיוק הוא מתחיל.' },
+  ]],
+  [{ notFlag: 'life:partner' }, [
+    { who: null, text: 'הטיילת, בשקיעה. קרן כבר שם, עם שתי כוסות קפה ואחת מהן שלך.' },
+    { who: 'קרן', text: 'עשר שנים ומשהו. בוא נראה אם אתה יודע לשבת.' },
+    { who: null, text: 'בכיס, הטלפון. יש משחק הערב, ואתה יודע באיזו דקה בדיוק הוא מתחיל.' },
+  ]],
 ]
 
 export const CONVERSATIONS_PROMISES: Conversation[] = [
@@ -240,6 +284,8 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
               { e: 'flag', flag: 'pr:promise' },
               { e: 'flagValue', flag: 'pr:kind', value: 'repaired' },
               { e: 'time', minutes: 45 },
+              // (pass D, §49 S2b) the evening itself — on the promenade, with the phone in the pocket
+              { e: 'flag', flag: 'pr:evening' },
               { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:evening', subjectHe: 'הערב הקבוע', noteHe: 'הגיע בזמן, לפי מה שאמר.' },
               { e: 'toast', text: '"הפעם הגעת בזמן." — "הפעם תכננתי לפי מה שאמרתי."', tone: 'plain' },
             ],
@@ -273,6 +319,8 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
               { e: 'flag', flag: 'pr:promise' },
               { e: 'flagValue', flag: 'pr:kind', value: 'kept' },
               { e: 'time', minutes: 30 },
+              // (pass D, §49 S2b) the evening itself — on the promenade, with the phone in the pocket
+              { e: 'flag', flag: 'pr:evening' },
               { e: 'rel', who: 'keren', axis: 'bond', delta: 2 },
               { e: 'rel', who: 'keren', axis: 'trust', delta: 5 },
               { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:keren', subjectHe: 'המפגש עם קרן, עשר שנים אחרי', noteHe: 'לא הייתה הפרה לתקן; היה מפגש, והוא קרה.' },
@@ -282,6 +330,49 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
         ],
       },
     ],
+  },
+  {
+    id: 'pr-evening',
+    nameHe: null,
+    branches: EVENING_OPENERS.map(([when, lines]) => ({
+      when,
+      lines,
+      choices: [
+        {
+          id: 'down',
+          text: '(הטלפון הפוך על השולחן. כל הערב.)',
+          then: [
+            { e: 'flag', flag: 'pr:evened' },
+            { e: 'flagValue', flag: 'life:promise2021', value: 'present' },
+            { e: 'time', minutes: 90 },
+            { e: 'wellbeing', key: 'loneliness', delta: -6 },
+            { e: 'toast', text: 'בתשע ועשרים הטלפון רטט שלוש פעמים ברצף. לא הפכת אותו. בעשר כבר לא זכרת שהוא שם.', tone: 'plain' },
+          ],
+        },
+        {
+          id: 'peek',
+          text: '(להציץ פעם אחת — ולהגיד בקול שהצצת.)',
+          then: [
+            { e: 'flag', flag: 'pr:evened' },
+            { e: 'flagValue', flag: 'life:promise2021', value: 'peeked' },
+            { e: 'time', minutes: 90 },
+            { e: 'personality', key: 'honesty', delta: 2 },
+            { e: 'toast', text: '"הצצתי." — "ראיתי." — "אחת." — "אחת זה בסדר. שתיים זה כבר ערב אחר."', tone: 'plain' },
+          ],
+        },
+        {
+          id: 'leave',
+          text: '(לקום באמצע. יש משחק, ואפשר עוד להספיק את המחצית.)',
+          then: [
+            { e: 'flag', flag: 'pr:evened' },
+            { e: 'flagValue', flag: 'life:promise2021', value: 'left' },
+            { e: 'time', minutes: 40 },
+            { e: 'wellbeing', key: 'regret', delta: 6 },
+            { e: 'toast', text: 'הספקת את המחצית. את הערב — לא. בדרך הביתה ההודעה היחידה בטלפון הייתה ממנה: "הגעת?"', tone: 'red' },
+          ],
+        },
+      ],
+    })),
   },
   {
     id: 'pr-scarf',
@@ -539,6 +630,7 @@ export const CONVERSATIONS_PROMISES: Conversation[] = [
     branches: [
       { when: sat('none'), lines: [{ who: null, text: 'הדף נשאר על המקרר. אף אחד לא הוריד אותו.' }], then: [{ e: 'ending', id: 'waited' }] },
       { when: { flag: 'pr:scarf' }, lines: [{ who: null, text: 'דף המשחק של הילדים נשאר על המקרר, ליד היומן.' }], then: [{ e: 'ending', id: 'his' }] },
+      { when: { flagIs: { flag: 'life:promise2021', value: 'left' } }, lines: [{ who: null, text: 'השורה ביומן נכתבה שוב, בעט — ומתחתיה, בעיפרון, סימן שאלה קטן.' }], then: [{ e: 'ending', id: 'repaired' }] },
       { when: { flagIs: { flag: 'pr:kind', value: 'repaired' } }, lines: [{ who: null, text: 'השורה ביומן נכתבה שוב, הפעם בעט.' }], then: [{ e: 'ending', id: 'repaired' }] },
       { lines: [{ who: null, text: 'השיחה נגמרה מאוחר, ואף אחד לא הסתכל בשעון.' }], then: [{ e: 'ending', id: 'kept' }] },
     ],

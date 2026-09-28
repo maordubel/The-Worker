@@ -239,6 +239,12 @@ export const ENDINGS_EUROCUP: Record<string, EndingCard> = {
 export const BEATS_EUROCUP: Beat[] = [
   { id: 'z-euro', at: 'home', trigger: 'enter', when: { none: [{ flag: 'z:euro' }] }, delayMs: 800, do: [{ a: 'talk', conversation: 'z-euro' }] },
   /**
+   * (pass D, §58 S3) *"celebration overlaps promise/work/family — victory costs time too"*. The
+   * night of the final has somebody else's evening in it: the partner's, the child's, or a
+   * meeting at eight. Keep it, move it by an hour with their yes, or let the night win.
+   */
+  { id: 'z-collide', at: 'home', trigger: 'clock', when: { all: [{ flag: 'z:euro' }], none: [{ flag: 'z:collide' }] }, delayMs: 1500, do: [{ a: 'talk', conversation: 'z-collide' }] },
+  /**
    * **Z06 — "אתה שמח?" (תנ"ך מהדורה 2).** מי שעבר את החורף של 2024 (`life:menora:2025`,
    * `2024-home`) — הלך, נשאר בחוץ, או בבית — שומע מאפי את השאלה שהתנ"ך קורא לה הלב של
    * הפרק: מה קורה כשהדבר שהתנגדת לו מצליח. אין תשובה נכונה, ואין מחיר.
@@ -485,6 +491,43 @@ function gladChoices(): ChoiceDef[] {
     ],
   }))
 }
+
+/** (pass D) the night of the final against the morning after — three answers, three prices */
+const COLLIDE_CHOICES = (whose: 'child' | 'partner' | 'work'): ChoiceDef[] => [
+  {
+    id: 'keep',
+    text: whose === 'work' ? '(ללכת לישון. המצגת לא יודעת שזכינו.)' : '(ללכת לישון עכשיו. מחר זה שלהם.)',
+    then: [
+      { e: 'flag', flag: 'z:collide' },
+      { e: 'flagValue', flag: 'life:eurocup:night', value: `kept:${whose}` },
+      { e: 'energy', delta: 10 },
+      ...(whose === 'work' ? [] : [{ e: 'personality' as const, key: 'honesty' as const, delta: 2 }]),
+      { e: 'toast', text: 'אפי, מהדלת: "הולך? בגמר?" — "הגמר נגמר. מחר מתחיל." — הוא לא התווכח. הוא שר בשבילך עוד בית.', tone: 'plain' },
+    ],
+  },
+  {
+    id: 'move',
+    text: whose === 'work' ? '(לכתוב לה: מתחיל בתשע, לא בשמונה — ולבקש שתאשר.)' : '(לשאול אם אפשר שעה אחר כך. ולחכות לתשובה.)',
+    then: [
+      { e: 'flag', flag: 'z:collide' },
+      { e: 'flagValue', flag: 'life:eurocup:night', value: `moved:${whose}` },
+      { e: 'time', minutes: 60 },
+      { e: 'toast', text: whose === 'work' ? 'התשובה הגיעה באחת ועשרים: "תשע. ותביא קפה לכולם." — מחיר הוגן.' : 'התשובה הגיעה אחרי עשר דקות: "שעה. לא שעתיים." — שעה.', tone: 'plain' },
+    ],
+  },
+  {
+    id: 'night',
+    text: '(להישאר עד הסוף. מחר יסתדר.)',
+    then: [
+      { e: 'flag', flag: 'z:collide' },
+      { e: 'flagValue', flag: 'life:eurocup:night', value: `night:${whose}` },
+      { e: 'time', minutes: 150 },
+      { e: 'energy', delta: -20 },
+      { e: 'wellbeing', key: 'regret', delta: 4 },
+      { e: 'toast', text: whose === 'work' ? 'בשמונה פתחת את המצגת עם קול של יציע. אף אחד לא אמר כלום. כולם ראו.' : 'בבוקר, שעה באיחור ועם קול של יציע. "זכיתם?" — "זכינו." — "אני רואה."', tone: 'red' },
+    ],
+  },
+]
 
 export const CONVERSATIONS_LATE: Conversation[] = [
   ...CONVERSATIONS_TOURNAMENT_QUEST,
@@ -771,6 +814,23 @@ export const CONVERSATIONS_LATE: Conversation[] = [
     id: 'z-where',
     nameHe: 'קובי',
     branches: [
+      /**
+       * (pass D, §53 S3 — *"confirm by natural state, not menu if known"*) a man who lives in
+       * the other place is not offered the stairs at Bloomfield: where he was is where he lives
+       */
+      {
+        when: { flag: 'life:abroad' },
+        lines: [
+          { who: null, text: 'אחד־עשר במאי. אשדוד בבלומפילד — ואתה בדירה שם, עם סטרים שמאחר בעשרים שניות לכל העולם.' },
+          { who: null, text: 'ההודעה של אופיר הגיעה לפני התמונה: "זהו." התמונה הגיעה עשרים שניות אחריה ולא אמרה שום דבר חדש.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'z:where' },
+          { e: 'flagValue', flag: 'life:relegation:2024:where', value: 'abroad' },
+          { e: 'presence', mode: 'television' },
+          { e: 'time', minutes: 120 },
+        ],
+      },
       {
         lines: [
           { who: null, text: 'אחד־עשר במאי. אשדוד בבלומפילד, וכולם יודעים מה המספר שצריך.' },
@@ -901,6 +961,35 @@ export const CONVERSATIONS_LATE: Conversation[] = [
     ],
   },
 
+  {
+    id: 'z-collide',
+    nameHe: null,
+    remote: { PARTNER: 'phone', 'הילד': 'phone' },
+    branches: [
+      {
+        when: { flag: 'life:child' },
+        lines: [
+          { who: null, text: 'חצות וחצי. בסלון עוד שרים. הטלפון רוטט.' },
+          { who: 'הילד', text: 'אמרת שמחר אתה לוקח אותי לטורניר. בשמונה.' },
+        ],
+        choices: COLLIDE_CHOICES('child'),
+      },
+      {
+        when: { flag: 'life:partner' },
+        lines: [
+          { who: null, text: 'חצות וחצי. בסלון עוד שרים. הטלפון רוטט.' },
+          { who: 'PARTNER', text: 'מחר בבוקר ההורים שלי. אמרת שתהיה ער ובן אדם.' },
+        ],
+        choices: COLLIDE_CHOICES('partner'),
+      },
+      {
+        lines: [
+          { who: null, text: 'חצות וחצי. בסלון עוד שרים. הטלפון רוטט: הודעה מהעבודה. "מחר בשמונה, המצגת. אתה פותח."' },
+        ],
+        choices: COLLIDE_CHOICES('work'),
+      },
+    ],
+  },
   // ----------------------------------------------------------------- Z06–Z07 ------
   {
     id: 'z-euro',
