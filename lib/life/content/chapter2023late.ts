@@ -771,6 +771,23 @@ export const CONVERSATIONS_LATE: Conversation[] = [
     id: 'z-where',
     nameHe: 'קובי',
     branches: [
+      /**
+       * (pass D, §53 S3 — *"confirm by natural state, not menu if known"*) a man who lives in
+       * the other place is not offered the stairs at Bloomfield: where he was is where he lives
+       */
+      {
+        when: { flag: 'life:abroad' },
+        lines: [
+          { who: null, text: 'אחד־עשר במאי. אשדוד בבלומפילד — ואתה בדירה שם, עם סטרים שמאחר בעשרים שניות לכל העולם.' },
+          { who: null, text: 'ההודעה של אופיר הגיעה לפני התמונה: "זהו." התמונה הגיעה עשרים שניות אחריה ולא אמרה שום דבר חדש.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'z:where' },
+          { e: 'flagValue', flag: 'life:relegation:2024:where', value: 'abroad' },
+          { e: 'presence', mode: 'television' },
+          { e: 'time', minutes: 120 },
+        ],
+      },
       {
         lines: [
           { who: null, text: 'אחד־עשר במאי. אשדוד בבלומפילד, וכולם יודעים מה המספר שצריך.' },
