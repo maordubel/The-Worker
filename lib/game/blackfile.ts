@@ -79,6 +79,14 @@ export type CardVerdict = {
   id: string
   correct: boolean
   answer: Verdict
+  /**
+   * ONE RED WORLD §20 — every black-file entry says who, what happened, when, its source
+   * and why it is in the file. `whoHe` is the record's own name; `why` is the row's KIND
+   * (a crossing, a myth the terrace believes, a dated event) — the reason the row exists,
+   * never a sentence invented about the man. Sent after the answer, so it earns nothing.
+   */
+  whoHe: string | null
+  why: 'crossing' | 'myth' | 'event'
   titleHe: string
   bodyHe: string
   toClubHe: string | null
@@ -132,6 +140,8 @@ export function judge(id: string, answer: Verdict): CardVerdict | null {
     id,
     correct: answer === truth,
     answer: truth,
+    whoHe: row.personNameHe ?? null,
+    why: row.kind,
     titleHe: row.titleHe,
     bodyHe: row.bodyHe,
     toClubHe: row.toClubHe ?? null,

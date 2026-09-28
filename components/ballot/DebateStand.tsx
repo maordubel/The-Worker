@@ -11,7 +11,9 @@ import type { Tally } from '@/lib/polls/ballot'
 import { boardDisplay, rankRows } from '@/lib/polls/board'
 import { activeDebateStore, type DebateReasons, type DebateVotes } from '@/lib/polls/debate-store'
 import { DEBATE_REASONS, type DebateView } from '@/lib/polls/debates'
+import { ExitEmotion } from '@/components/result/UniversalExit'
 import { t } from '@/lib/i18n'
+import { voice, voiceAction } from '@/lib/voice'
 
 /**
  * הוויכוח של היציע — gate 7's second half (ONE RED WORLD §16, P0.3).
@@ -116,7 +118,7 @@ export function DebateStand({
           {t('terrace.latin')}
         </p>
         <h2 id="terrace-open" className="mt-1 font-display text-step-2 leading-tight text-ink">
-          {t('terrace.open')}
+          {voice({ gate: 7, moment: 'intro', seed: slot }).title}
         </h2>
         <p className="mt-1 font-mono text-[11px] tabular-nums text-concrete">
           {t('terrace.round', { n: String(slot + 1), of: String(slices) })}
@@ -146,7 +148,7 @@ export function DebateStand({
                     </button>
                   ) : (
                     <div className="mt-3">
-                      <p className="font-body text-[12px] font-extrabold text-red">{t('terrace.mine')}</p>
+                      <p className="font-body text-[12px] font-extrabold text-red">{voiceAction(7, 'voted')}</p>
                       <p className="font-display text-step-2 leading-tight text-ink">
                         <bdi>{label(debate, pick)}</bdi>
                       </p>
@@ -176,7 +178,7 @@ export function DebateStand({
                             onClick={() => void askCount(debate.id)}
                             className="min-h-tap border-rule border-red bg-paper px-4 font-display text-step-0 text-red transition-transform duration-press active:scale-[.97] motion-reduce:transition-none"
                           >
-                            {t('terrace.seeCount')}
+                            {voiceAction(7, 'seeTerrace')}
                           </button>
                         )}
                         <button
@@ -196,6 +198,14 @@ export function DebateStand({
           )
         })}
       </ol>
+
+      {/* §16 — every debate of the slice answered: the voice closes it. No count is invented
+          here; the terrace's numbers are only ever the ones the store read back. */}
+      {debates.length > 0 && debates.every((debate) => votes[debate.id]) && (
+        <div className="shrink-0 border-t-rule border-ink py-2" data-terrace="done">
+          <ExitEmotion voice={voice({ gate: 7, moment: 'result', result: 'done', seed: slot })} compact />
+        </div>
+      )}
 
       <div className="shrink-0 pt-1">
         <PlayLink

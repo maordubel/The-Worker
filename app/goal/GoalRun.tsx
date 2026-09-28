@@ -49,8 +49,13 @@ import {
   tension as tensionOf,
 } from '@/lib/game/replay/gesture'
 import { GOOD_SCORE } from '@/lib/game/replay/judge'
+import { goalTier, keyMismatch, mismatchLine } from '@/lib/game/replay/mismatch'
+import { ExitEmotion, ExitNext, ExitShare } from '@/components/result/UniversalExit'
+import { readCompletedChapters } from '@/lib/life/memoryPassport'
+import type { NextAction } from '@/lib/results/types'
+import { voice, type ResultTier } from '@/lib/voice'
 import type { ReplayAction } from '@/lib/game/replay/vocab'
-import { LIVES, rankFor } from '@/lib/game/session'
+import { LIVES } from '@/lib/game/session'
 import { t, type MessageKey } from '@/lib/i18n'
 import { markStep, track } from '@/lib/analytics/meter'
 import type { CrossLink } from '@/lib/links/types'
@@ -63,7 +68,7 @@ import type { GoalChallenge, GoalVerdict } from '@/lib/game/goal'
 import type { Wardrobe } from '@/lib/kit/playerShirt'
 import type { Embedded } from '@/lib/mechanics/types'
 import { useWide } from '@/app/xi/useWide'
-import { askGoalHint, askReceptionHint, submitGoal } from './actions'
+import { askGoalHint, askReceptionHint, nextAfterGoalRun, submitGoal } from './actions'
 
 /**
  * שחזור השער — three famous moves, rebuilt with the hands (delta 88).
@@ -100,6 +105,8 @@ type Played = {
   touches: number
   matched: number
   good: number
+  /** ONE RED WORLD §17 — the key mismatch in words ("המסירה השנייה ברחה קצת"), null when there was none */
+  miss: string | null
 }
 
 type Run = {
@@ -447,7 +454,15 @@ export function GoalRun({
         score: previous.score + points,
         played: [
           ...previous.played,
-          { goalId: result.goalId, overall: result.metrics.overall, continuity: result.metrics.continuity, touches: result.truth.length, matched, good },
+          {
+            goalId: result.goalId,
+            overall: result.metrics.overall,
+            continuity: result.metrics.continuity,
+            touches: result.truth.length,
+            matched,
+            good,
+            miss: mismatchLine(keyMismatch(result)),
+          },
         ],
       }))
     },
@@ -653,6 +668,10 @@ export function GoalRun({
     : []
   const pairs = verdict?.touches.map((line) => ({ user: line.userIndex, truth: line.truthIndex })) ?? []
   const finalBeat = run.goal + 1 >= GOALS_PER_RUN || run.lives <= 0
+  // ONE RED WORLD §17: the reveal leads with words — "הרגע היה שם." and the key mismatch
+  const miss = verdict ? keyMismatch(verdict) : null
+  const missLine = mismatchLine(miss)
+  const spokenGoal = verdict ? voice({ gate: 8, moment: 'result', result: goalTier(verdict.metrics.overall, miss), seed: `${seed}:${cursor}:${run.goal}` }) : null
   const night = isNight(challenge)
   const minute = minuteOf(challenge)
   const lowClock = phase === 'build' && secondsLeft <= 15
@@ -911,20 +930,28 @@ export function GoalRun({
           </p>
           <p className="font-body text-[9.5px] tracking-widest text-concrete">{t('goal.overall')}</p>
         </div>
-        <ul className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 font-body text-[11px] leading-tight text-ink">
-          <li className="flex items-center gap-1.5">
-            <span className="inline-block h-[5px] w-5 bg-red" aria-hidden="true" />
-            {t('goal.legend.mine')}
-          </li>
-          <li className="flex items-center gap-1.5">
-            <span className="inline-block h-[5px] w-5 bg-sign" aria-hidden="true" />
-            {t('goal.legend.truth')}
-          </li>
-          <li className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-5 border-hair border-dashed border-sign" aria-hidden="true" />
-            {t('goal.legend.envelope')}
-          </li>
-        </ul>
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5" data-goal="words">
+          {spokenGoal && <p className="font-display text-[16px] leading-tight text-ink">{spokenGoal.title}</p>}
+          {(missLine ?? spokenGoal?.body) && (
+            <p className="font-body text-[11.5px] leading-snug text-ink" data-goal="miss">
+              {missLine ?? spokenGoal?.body}
+            </p>
+          )}
+          <ul className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-body text-[10px] leading-tight text-muted">
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-[4px] w-4 bg-red" aria-hidden="true" />
+              {t('goal.legend.mine')}
+            </li>
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-[4px] w-4 bg-sign" aria-hidden="true" />
+              {t('goal.legend.truth')}
+            </li>
+            <li className="flex items-center gap-1">
+              <span className="inline-block h-[6px] w-4 border-hair border-dashed border-sign" aria-hidden="true" />
+              {t('goal.legend.envelope')}
+            </li>
+          </ul>
+        </div>
         {phone && (
           <button
             type="button"
@@ -1027,10 +1054,15 @@ function SoundGlyph({ muted }: { muted: boolean }) {
   )
 }
 
-/** הפסק — what the run came to, on one screen, and the link that hands over the same three. */
+/**
+ * הפסק — what the run came to, on one screen (ONE RED WORLD §6, §17): the emotion first
+ * ("הרגע היה שם." and the one thing that slipped, or "ככה זה קרה."), the figures, at most
+ * two natural doors from `recommend()` — LIFE only for a chapter this device finished —
+ * and "שלח ליציע", closed, holding the gate's own share (rule 19).
+ */
 function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; cursor: number; phone: boolean; links?: Record<string, CrossLink[]> }) {
   const [share, setShare] = useState(false)
-  const rank = rankFor(run.score) as MessageKey
+  const [next, setNext] = useState<NextAction[]>([])
   const played = run.played
   const average = played.length > 0 ? Math.round(played.reduce((sum, item) => sum + item.overall, 0) / played.length) : 0
   const best = played.reduce((top, item) => Math.max(top, item.overall), 0)
@@ -1045,38 +1077,84 @@ function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; c
   const cardQuery = top ? goalCardQuery({ goalId: top.goalId, avg: average, best, score: run.score }) : null
   const cardUrl = cardQuery ? `${SITE_URL}/goal?seed=${seed}&r=${cursor}&${cardQuery}` : null
 
+  // the run in words: every goal clean is "ככה זה קרה."; otherwise the best goal's one slip
+  const clean = played.length > 0 && played.every((item) => item.miss === null && item.overall >= GOOD_SCORE)
+  const tier: ResultTier = clean ? 'perfect' : goalTier(average, top?.miss ? { kind: 'near', action: null, place: null, name: null } : null)
+  const spoken = voice({ gate: 8, moment: 'result', result: tier, seed: `${seed}:${cursor}` })
+  const words = { ...spoken, body: (tier === 'near' || tier === 'high' || tier === 'mid') && top?.miss ? top.miss : spoken.body }
+
+  useEffect(() => {
+    track('run_complete', { detail: 'goal', value: run.score })
+    let live = true
+    readCompletedChapters()
+      .then((lived) =>
+        nextAfterGoalRun({
+          goalIds: played.map((item) => item.goalId),
+          runId: `${seed}:${cursor}`,
+          score: run.score,
+          lived,
+          exclude: doors.map((door) => door.href),
+        }),
+      )
+      .then((answer) => {
+        if (live) setNext(answer)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+    // one run, one context: the run is final when the result mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const chips =
+    cardQuery && cardUrl ? (
+      <ul className="-mx-1 mt-2 flex shrink-0 gap-1.5 overflow-x-auto px-1" data-goal="card-share">
+        <ShareCardChips
+          imagePath={`/api/card/goal?${cardQuery}`}
+          url={cardUrl}
+          text={t('goal.shareHeadMove', { pct: String(average) })}
+          primary
+          onShared={(channel) => track('share_click', { detail: `card-${channel}` })}
+        />
+      </ul>
+    ) : null
+
   const row = (
-    <ShareRow
-      kind="goal"
-      params={{ h: String(average), s: String(seed), r: String(cursor) }}
-      headline={t('goal.shareHeadMove', { pct: String(average) })}
-      card={{
-        template: 'grass' as const,
-        art: artFor('goal', average / 100),
-        kicker: 'GATE 8 · REBUILD THE GOAL',
-        label: t('screen.goal.title'),
-        eyebrow: t('goal.overall'),
-        hero: `${average}%`,
-        bigStat: { v: `${best}%`, k: t('goal.bestMove') },
-        stats: [
-          { k: t('run.score'), v: String(run.score) },
-          { k: t('goal.continuityAvg'), v: `${continuity}%` },
-        ],
-        cta: t('goal.cta'),
-        challenge: t('share.sameRound'),
-      }}
-    />
+    <>
+      <ShareRow
+        kind="goal"
+        params={{ h: String(average), s: String(seed), r: String(cursor) }}
+        headline={t('goal.shareHeadMove', { pct: String(average) })}
+        card={{
+          template: 'grass' as const,
+          art: artFor('goal', average / 100),
+          kicker: 'GATE 8 · REBUILD THE GOAL',
+          label: t('screen.goal.title'),
+          eyebrow: t('goal.overall'),
+          hero: `${average}%`,
+          bigStat: { v: `${best}%`, k: t('goal.bestMove') },
+          stats: [
+            { k: t('run.score'), v: String(run.score) },
+            { k: t('goal.continuityAvg'), v: `${continuity}%` },
+          ],
+          cta: t('goal.cta'),
+          challenge: t('share.sameRound'),
+        }}
+      />
+      {chips}
+    </>
   )
 
   return (
     <div className="flex min-h-0 flex-1 flex-col md:mt-stack md:block">
       <Punch />
       <RecordRun gate="/goal" score={run.score} correct={matched} asked={asked} />
-      <div className="shrink-0 border-b-rule border-ink pb-2">
+      <div className="shrink-0 border-b-rule border-ink pb-2" data-goal="words-run">
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           FULL TIME
         </p>
-        <h2 className="font-display text-step-2 leading-tight text-ink">{run.lives <= 0 ? t('run.over') : t('run.survived')}</h2>
+        <ExitEmotion voice={words} compact />
       </div>
 
       <div className="mt-3 grid min-h-0 flex-1 grid-cols-2 content-start gap-2.5 md:flex-none">
@@ -1090,7 +1168,6 @@ function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; c
             </span>
           </p>
           <p className="mt-1 font-body text-[10px] tracking-widest text-concrete">{t('run.score')}</p>
-          <p className="mt-2 font-display text-step-0 leading-tight text-paper">{t(rank)}</p>
         </div>
         <div className="border-rule border-ink bg-sheet p-4">
           <p className="font-poster text-[38px] leading-none text-ink">
@@ -1114,20 +1191,10 @@ function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; c
         </div>
       </div>
 
-      {!phone && row}
-
       <CrossLinks links={doors} from="goal" className="mt-2 shrink-0" />
-      {cardQuery && cardUrl && (
-        <ul className="-mx-1 mt-2 flex shrink-0 gap-1.5 overflow-x-auto px-1" data-goal="card-share">
-          <ShareCardChips
-            imagePath={`/api/card/goal?${cardQuery}`}
-            url={cardUrl}
-            text={t('goal.shareHeadMove', { pct: String(average) })}
-            primary
-            onShared={(channel) => track('share_click', { detail: `card-${channel}` })}
-          />
-        </ul>
-      )}
+      <div className="mt-2 shrink-0">
+        <ExitNext next={next} from="goal" compact />
+      </div>
 
       <div className="mt-3 grid shrink-0 grid-cols-[1fr_auto_auto] gap-2 md:grid-cols-2">
         <PlayLink gate="/goal" className="flex min-h-tap items-center justify-center bg-red px-4 font-body text-step-0 font-extrabold text-paper">
@@ -1136,11 +1203,14 @@ function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; c
         {phone && (
           <button
             type="button"
-            onClick={() => setShare(true)}
+            onClick={() => {
+              if (!share) track('share_open', { detail: 'goal' })
+              setShare(true)
+            }}
             data-goal="share"
             className="flex min-h-tap items-center justify-center border-rule border-ink bg-sheet px-3 font-body text-[13px] font-extrabold text-ink"
           >
-            {t('stage.share')}
+            {spoken.ctaShare}
           </button>
         )}
         <a href="/" className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-[13px] font-extrabold text-paper">
@@ -1148,8 +1218,13 @@ function Result({ run, seed, cursor, phone, links }: { run: Run; seed: number; c
         </a>
       </div>
 
+      {!phone && (
+        <ExitShare label={spoken.ctaShare} from="goal">
+          {row}
+        </ExitShare>
+      )}
       {phone && (
-        <SlideSheet open={share} onClose={() => setShare(false)} title={t('stage.share')} latin="SHARE">
+        <SlideSheet open={share} onClose={() => setShare(false)} title={spoken.ctaShare} latin="SHARE">
           {row}
         </SlideSheet>
       )}

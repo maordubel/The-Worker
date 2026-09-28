@@ -170,10 +170,12 @@ describe('no vote is invented, and the ballot is untouched', () => {
     expect(ballot).toContain("const REASON_KEY = 'worker.ballot.reasons.v1'")
   })
 
-  it('prints the spec’s lines, and the four reasons', () => {
-    expect(MESSAGES['terrace.open']).toBe('אין פה תשובה נכונה. בגלל זה באנו.')
-    expect(MESSAGES['terrace.mine']).toBe('זאת הבחירה שלך.')
-    expect(MESSAGES['terrace.seeCount']).toBe('רוצה לראות מה היציע אמר?')
+  it('prints the spec’s lines, and the four reasons — from the Red Voice (lib/voice)', () => {
+    // wave 2 moved gate 7's words into `messages/he.voice.json`; the lines themselves did not move
+    expect(MESSAGES['voice.g7.intro.0.title']).toBe('אין פה תשובה נכונה. בגלל זה באנו.')
+    expect(MESSAGES['voice.g7.act.voted']).toBe('זאת הבחירה שלך.')
+    expect(MESSAGES['voice.g7.act.seeTerrace']).toBe('רוצה לראות מה היציע אמר?')
+    expect(MESSAGES['terrace.open']).toBeUndefined()
     expect(DEBATE_REASONS.map((reason) => MESSAGES[reason.he])).toEqual(['ראיתי בעיניים', 'אבא סיפר לי', 'פשוט הוא', 'הרגע הזה'])
   })
 })

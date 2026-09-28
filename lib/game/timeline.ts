@@ -5,6 +5,7 @@ import { matchLine } from '@/components/ui/Num'
 import { createHash } from 'node:crypto'
 
 import { positionOf, takeFrom } from '@/lib/rotation/deck'
+import { resolveMatchId } from '@/lib/archive/match-master'
 import { archive, nameOf, rng, shuffle } from './archive'
 import { TIMELINE_LENGTH, type BlindCard, type DatedCard } from './timeline-run'
 
@@ -94,6 +95,8 @@ function safeHint(raw: string): string {
  * Nothing about what the pool CONTAINS changes here.
  */
 let cachedPool: DatedCard[] | null = null
+/** card id → the archive key it was built from (`match:<season>:<home>:<away>:<day>`) — server-only */
+const cardKey = new Map<string, string>()
 
 function pool(): DatedCard[] {
   return (cachedPool ??= buildPool())
@@ -114,8 +117,10 @@ function buildPool(): DatedCard[] {
 
   for (const match of archive.matches) {
     if (!match.playedOn) continue
+    const key = `match:${match.seasonLabel}:${match.homeClubSlug}:${match.awayClubSlug}:${match.playedOn}`
+    cardKey.set(publicId(key), key)
     out.push({
-      id: publicId(`match:${match.seasonLabel}:${match.homeClubSlug}:${match.awayClubSlug}:${match.playedOn}`),
+      id: publicId(key),
       title: matchLine(
         nameOf.club(match.homeClubSlug),
         match.homeScore,
@@ -285,4 +290,31 @@ export function gradeInsert(
     board: boardAfter(seed, placed + 1, cursor),
     done: placed + 1 >= TIMELINE_LENGTH,
   }
+}
+
+/**
+ * Can gate 13's timeline serve this day? (ONE RED WORLD §21, the Cross Gate Router)
+ *
+ * The pool keeps one card per date, so a day that is in it is a day a run can deal. The
+ * router asks this before it offers "סדר את זה בציר" for a match — the door exists only
+ * when the timeline actually holds the day. `before` bounds a season's half-open window.
+ */
+export function timelineHasDate(iso: string): boolean {
+  return pool().some((card) => card.on === iso)
+}
+
+export function timelineHasDateIn(fromIso: string, beforeIso: string): boolean {
+  return pool().some((card) => card.on >= fromIso && card.on < beforeIso)
+}
+
+/**
+ * The canonical match a dealt card stands for — ONLY after the run, for the ResultContext
+ * (ONE RED WORLD §5). The key is gate 13's own dialect, which the Match Master already
+ * lists among every match's aliases; a card that is not a match (a moment, a tie, a
+ * grievance) answers null rather than a guess.
+ */
+export function matchOfCard(id: string): string | null {
+  pool()
+  const key = cardKey.get(id)
+  return key ? resolveMatchId(key) : null
 }

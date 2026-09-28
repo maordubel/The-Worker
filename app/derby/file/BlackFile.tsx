@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, type ReactNode } from 'react'
 
 import { AdSlot } from '@/components/ads/AdSlot'
 import { Num } from '@/components/ui/Num'
@@ -8,7 +8,9 @@ import { PlayLink } from '@/components/play/PlayLink'
 import { RecordRun } from '@/components/play/RecordRun'
 import { ShareRow } from '@/components/share/ShareRow'
 import { artFor } from '@/lib/share/story'
+import { SourceNote } from '@/components/ui/SourceNote'
 import { t, type MessageKey } from '@/lib/i18n'
+import { microFeedback } from '@/lib/voice'
 import type { CardVerdict, FileCard, PairCard, PairVerdict } from '@/lib/game/blackfile'
 import { submitCard, submitPair } from './actions'
 
@@ -131,7 +133,7 @@ export function BlackFile({
               </button>
             </div>
           ) : (
-            cardVerdict && <Reveal verdict={cardVerdict} onNext={next} />
+            cardVerdict && <Reveal verdict={cardVerdict} onNext={next} seed={seed} step={step} />
           )}
         </>
       ) : pair ? (
@@ -162,7 +164,7 @@ export function BlackFile({
           {pairVerdict && (
             <div className="mt-3 border-rule border-sign bg-hate-card p-3">
               <p className="font-body text-step-0 font-extrabold text-hate-ink">
-                {pairVerdict.correct ? t('derby.right') : t('derby.wrong')}
+                {microFeedback(11, pairVerdict.correct ? 'correct' : 'wrong', seed, step)?.line}
               </p>
               <p className="mt-1 font-mono text-[11px] tabular-nums text-hate-muted">
                 <bdi dir="ltr">{pairVerdict.aDate}</bdi> · <bdi dir="ltr">{pairVerdict.bDate}</bdi>
@@ -184,14 +186,31 @@ export function BlackFile({
 }
 
 /** The reveal is the game. Being wrong here should teach you something true. */
-function Reveal({ verdict, onNext }: { verdict: CardVerdict; onNext: () => void }) {
+function Reveal({ verdict, onNext, seed, step }: { verdict: CardVerdict; onNext: () => void; seed: number; step: number }) {
   return (
     <div className="mt-3 border-rule border-sign bg-hate-card p-4">
       <p className="font-body text-step-0 font-extrabold text-hate-ink">
-        {verdict.correct ? t('derby.right') : t('derby.wrong')}
+        {microFeedback(11, verdict.correct ? 'correct' : 'wrong', seed, step)?.line}
       </p>
-      <p className="mt-2 font-display text-step-1 leading-tight text-hate-ink">{verdict.titleHe}</p>
-      <p className="mt-1 font-body text-step--1 leading-relaxed text-hate-muted">{verdict.bodyHe}</p>
+      {/* §20 — the entry: מי · מה קרה · מתי · מקור · למה זה בתיק. The dl under it keeps the figures. */}
+      <dl className="mt-2 grid gap-1.5" data-blackfile="entry">
+        {verdict.whoHe && <FileRow k={t('blackfile.who')} v={<span className="font-display text-step-1 leading-tight">{verdict.whoHe}</span>} />}
+        <FileRow
+          k={t('blackfile.what')}
+          v={
+            <>
+              <span className="block font-display text-step-0 leading-tight">{verdict.titleHe}</span>
+              <span className="mt-0.5 block font-body text-step--1 leading-relaxed text-hate-muted">{verdict.bodyHe}</span>
+            </>
+          }
+        />
+        <FileRow
+          k={t('blackfile.when')}
+          v={verdict.happenedOn ? <bdi dir="ltr" className="font-mono tabular-nums">{verdict.happenedOn}</bdi> : <span className="text-hate-muted">{t('blackfile.whenUnknown')}</span>}
+        />
+        <FileRow k={t('blackfile.source')} v={<SourceNote newTab tone="dark" group="team" />} />
+        <FileRow k={t('blackfile.why')} v={t(`blackfile.why.${verdict.why}` as MessageKey)} />
+      </dl>
 
       <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
         {verdict.toClubHe && (
@@ -205,14 +224,6 @@ function Reveal({ verdict, onNext }: { verdict: CardVerdict; onNext: () => void 
             <dt className="font-body text-[10px] tracking-widest text-hate-muted">{t('derby.fee')}</dt>
             <dd className="font-poster text-[22px] leading-none text-sign">
               <Num>{`€${verdict.feeEur.toLocaleString('en-US')}`}</Num>
-            </dd>
-          </div>
-        )}
-        {verdict.happenedOn && (
-          <div>
-            <dt className="font-body text-[10px] tracking-widest text-hate-muted">{t('derby.when')}</dt>
-            <dd className="font-mono text-step-0 tabular-nums text-hate-ink">
-              <bdi dir="ltr">{verdict.happenedOn}</bdi>
             </dd>
           </div>
         )}
@@ -298,6 +309,16 @@ function Done({
       />
 
       <AdSlot placement="result" />
+    </div>
+  )
+}
+
+/** one line of a black-file entry: the label in a fixed column, the record beside it */
+function FileRow({ k, v }: { k: string; v: ReactNode }) {
+  return (
+    <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-baseline gap-2 border-b-hair border-hate-ink/20 pb-1.5">
+      <dt className="font-body text-[10px] font-extrabold tracking-widest text-hate-muted">{k}</dt>
+      <dd className="min-w-0 font-body text-[13px] text-hate-ink">{v}</dd>
     </div>
   )
 }

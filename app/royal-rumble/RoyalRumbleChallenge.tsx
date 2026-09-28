@@ -4,6 +4,8 @@ import { useState } from 'react'
 
 import { firePickFxAt } from '@/components/stage/PickFx'
 import { t } from '@/lib/royal-rumble/i18n'
+import { t as tt } from '@/lib/i18n'
+import { voiceAction, whatsappLine } from '@/lib/voice'
 import { royalRumbleShareHref } from '@/lib/game/royal-rumble-seeds'
 
 /**
@@ -17,7 +19,8 @@ export function RoyalRumbleChallenge({ seed, roundSeed, cursor = 0 }: { seed: nu
 
   async function share() {
     const url = new URL(royalRumbleShareHref(roundSeed ?? seed, roundSeed === undefined ? 0 : cursor), window.location.origin)
-    const text = t('challengeText', { code })
+    // §18: "אלה החמישה שלי. תן את שלך." — the gate's one WhatsApp line, and the board's code
+    const text = `${whatsappLine(9)} #${code}`
 
     try {
       if (navigator.share) {
@@ -37,7 +40,7 @@ export function RoyalRumbleChallenge({ seed, roundSeed, cursor = 0 }: { seed: nu
       ? t('challengeCopied')
       : state === 'shared'
         ? t('challengeShared')
-        : t('challengeShare')
+        : tt('voice.share')
 
   return (
     <aside className="relative mx-auto mt-1.5 max-w-5xl shrink-0 overflow-hidden border-rule border-ink bg-paper text-ink md:mt-2">
@@ -49,7 +52,7 @@ export function RoyalRumbleChallenge({ seed, roundSeed, cursor = 0 }: { seed: nu
             <span className="font-mono tabular-nums text-[8px] font-black tracking-[0.22em] text-red" dir="ltr">SAME RUMBLE · SAME ENEMY</span>
             <span className="border-hair border-ink/20 px-2 py-0.5 font-mono tabular-nums text-[9px] font-black tracking-[0.12em]" dir="ltr">#{code}</span>
           </div>
-          <h2 className="truncate font-display text-[15px] leading-none sm:mt-1 sm:text-[29px]">{t('challengeTitle')}</h2>
+          <h2 className="truncate font-display text-[15px] leading-none sm:mt-1 sm:text-[29px]">{voiceAction(9, 'sameCards')}</h2>
           <p className="mt-1 hidden max-w-2xl font-body text-[9px] leading-relaxed text-concrete sm:block sm:text-[10px]">
             {t('challengeBody')}
           </p>

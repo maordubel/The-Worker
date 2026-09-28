@@ -6,7 +6,10 @@ import { kindArt, memoryKind, photoPlate } from '@/lib/life/boxObjects'
 import { artUrl } from '@/lib/life/runtime/art'
 import { keepsakeFor } from '@/lib/life/finale'
 import type { ItemId } from '@/lib/life/types'
-import { t } from '@/lib/i18n'
+import Link from 'next/link'
+
+import type { LifeDoor } from '@/lib/life/memoryPassport'
+import { t, type MessageKey } from '@/lib/i18n'
 
 /**
  * סוף היום — not a score screen.
@@ -24,6 +27,7 @@ export function EndingCard({
   after,
   chapter = '1986',
   presence = null,
+  doors = [],
   onClose,
 }: {
   titleHe: string
@@ -37,6 +41,13 @@ export function EndingCard({
   chapter?: string
   /** where he was for the thing that happened — only somebody who was there kept a stub */
   presence?: string | null
+  /**
+   * ONE RED WORLD §23.1 — at most two optional doors out of the story, AFTER it is told:
+   * "מה באמת קרה" → the archive, and "את השער הזה כבר חיית" → gate 8 when it deals the
+   * goal. Derived on the server (`lib/life/bridge.ts`); set apart and labelled "הארכיון"
+   * so the sourced facts never read as part of the fiction above them.
+   */
+  doors?: readonly LifeDoor[]
   onClose: () => void
 }) {
   // 1986's second plate is the man fifteen years on; 1990's is the same man tomorrow.
@@ -140,6 +151,28 @@ export function EndingCard({
                 <bdi>{after.lineHe}</bdi>
               </p>
             </div>
+          )}
+
+          {doors.length > 0 && (
+            <nav className="mt-4 border-t-hair border-dashed border-concrete/50 pt-3" data-life="ending-archive" aria-label={t('bridge.doors.title')}>
+              <p className="flex items-center gap-2">
+                <span className="border-hair border-sheet px-1 py-px font-body text-[9.5px] font-extrabold tracking-wider text-sheet">{t('bridge.tag.archive')}</span>
+                <span className="font-body text-[11px] leading-snug text-concrete">{t('bridge.doors.note')}</span>
+              </p>
+              <ul className={`mt-2 grid gap-1.5 ${doors.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                {doors.slice(0, 2).map((door) => (
+                  <li key={door.href}>
+                    <Link
+                      href={door.href}
+                      data-life-door={door.kind}
+                      className="flex min-h-tap items-center justify-center border-rule border-sheet bg-sheet px-2 text-center font-body text-[13px] font-extrabold leading-tight text-ink transition-transform duration-press active:scale-[.98] motion-reduce:transition-none"
+                    >
+                      {t(door.label as MessageKey)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           )}
 
           <div className="mt-4">

@@ -21,7 +21,11 @@ import {
 } from '@/lib/game/timeline-run'
 import { artFor } from '@/lib/share/story'
 import { t, type MessageKey } from '@/lib/i18n'
-import { submitInsert } from './actions'
+import { ExitEmotion, ExitNext, ExitShare } from '@/components/result/UniversalExit'
+import { track } from '@/lib/analytics/meter'
+import type { NextAction } from '@/lib/results/types'
+import { voice, voiceAction } from '@/lib/voice'
+import { nextAfterOrder, submitInsert } from './actions'
 import { useThreadCoachOpen } from './ThreadCoach'
 
 /**
@@ -80,6 +84,8 @@ export function TimelineBoard({
   const [celebrate, setCelebrate] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState(secondsFor(0))
   const [locked, setLocked] = useState(false)
+  /** the cards placed in the wrong gap — the ResultContext asks about them after the run */
+  const [missed, setMissed] = useState<string[]>([])
   const coachOpen = useThreadCoachOpen()
 
   const hand = queue[run.placed] ?? null
@@ -104,6 +110,7 @@ export function TimelineBoard({
         : 0
 
       setFeedback({ correct: verdict.correct, card: verdict.card, position: verdict.position })
+      if (!verdict.correct) setMissed((old) => [...old, verdict.card.id])
       setBoard(verdict.board)
       if (gained > 0) setBurst({ points: gained, combo: run.combo + 1 })
       if (verdict.correct && run.combo + 1 >= 4) setCelebrate(true)
@@ -167,7 +174,7 @@ export function TimelineBoard({
   }, [feedback])
 
   if (run.over && !feedback)
-    return <Result run={run} board={board} seed={seed} cursor={cursor} />
+    return <Result run={run} board={board} seed={seed} cursor={cursor} missed={missed} />
 
   const fraction = total > 0 ? Math.max(0, secondsLeft / total) : 0
 
@@ -210,7 +217,7 @@ export function TimelineBoard({
       {hand && !feedback && (
         <div className="mt-2.5 border-plate border-ink bg-red px-4 py-3">
           <p className="font-body text-[10px] font-extrabold tracking-widest text-ink">
-            {t('timeline.hand')}
+            {voiceAction(13, 'where')}
           </p>
           <p className="mt-1 font-display text-step-2 leading-tight text-paper">{hand.title}</p>
           {hand.hint !== '' && (
@@ -240,7 +247,9 @@ export function TimelineBoard({
         </div>
       )}
 
-      <p className="mt-3 font-body text-[11.5px] leading-snug text-muted">{t('timeline.note')}</p>
+      {/* §22: "תנסה לסדר את הזיכרון." — then the rule, once */}
+      {run.placed === 0 && <p className="mt-3 font-display text-step-0 leading-tight text-ink">{voiceAction(13, 'orderIntro')}</p>}
+      <p className="mt-1 font-body text-[11.5px] leading-snug text-muted">{t('timeline.note')}</p>
 
       {/* the board, with a slot between every pair */}
       <ol className="mt-2">
@@ -303,13 +312,36 @@ function Result({
   board,
   seed,
   cursor,
+  missed,
 }: {
   run: Run
   board: DatedCard[]
   seed: number
   cursor: number
+  missed: string[]
 }) {
   const rank = rankFor(run.score) as MessageKey
+  // §22: "הסיפור חזר לסדר." — the board is always the true order, whatever was placed wrong
+  const spoken = {
+    ...voice({ gate: 13, moment: 'result', result: 'done', seed: `${seed}:${cursor}` }),
+    title: voiceAction(13, 'ordered') ?? '',
+    body: voiceAction(13, 'orderedBody') ?? undefined,
+  }
+  const [next, setNext] = useState<NextAction[]>([])
+  useEffect(() => {
+    track('run_complete', { detail: 'timeline-order', value: run.correct })
+    let live = true
+    nextAfterOrder(missed, `${seed}:${cursor}`, run.score)
+      .then((answer) => {
+        if (live) setNext(answer)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+    // one run, one context
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     <div className="mt-stack">
       <Punch />
@@ -325,9 +357,7 @@ function Result({
         <p className="font-latin text-[9px] font-bold tracking-[0.2em] text-red" dir="ltr">
           FULL TIME
         </p>
-        <h2 className="font-display text-step-2 leading-tight text-ink">
-          {run.lives <= 0 ? t('run.over') : t('run.survived')}
-        </h2>
+        <ExitEmotion voice={spoken} compact />
       </div>
 
       <div className="mt-stack grid grid-cols-2 gap-2.5">
@@ -372,6 +402,9 @@ function Result({
       </ol>
 
 
+      <ExitNext next={next} from="timeline-order" />
+
+      <ExitShare label={spoken.ctaShare} from="timeline-order">
       <ShareRow
         kind="timeline"
         route="/timeline/order"
@@ -393,6 +426,7 @@ function Result({
           challenge: t('share.sameRound'),
         }}
       />
+      </ExitShare>
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <PlayLink

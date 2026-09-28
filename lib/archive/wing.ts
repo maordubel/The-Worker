@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { linksForEntity } from '@/lib/links'
+import { actionsFor } from '@/lib/links/actions'
 
 import pressFile from '@/content/manual/press-columns.json'
 import {
@@ -535,6 +536,8 @@ export function detailOf(anyId: string): EntityDetail | null {
     })),
     sources: sourceLines(e.sourceIds, confidence),
     links: linksForEntity(e.id),
+    // ONE RED WORLD §21 — the Cross Gate Router: what this entity can do in the other gates
+    router: actionsFor(e.id),
   }
 }
 

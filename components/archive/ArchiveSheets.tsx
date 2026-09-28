@@ -6,6 +6,7 @@ import { useDialog } from '@/components/ui/useDialog'
 import { Num } from '@/components/ui/Num'
 import { ENTITY_TYPES, type ArchiveCard, type EntityType } from '@/lib/archive/graph-types'
 import { t, type MessageKey } from '@/lib/i18n'
+import { voiceAction } from '@/lib/voice'
 import { CloseMark, EntityRow } from './EntityCard'
 
 /**
@@ -224,7 +225,7 @@ export function SearchSheet({
 
 export function MineSheet({ cards, loading, onOpen, onClose }: { cards: ArchiveCard[]; loading: boolean; onOpen: (id: string) => void; onClose: () => void }) {
   return (
-    <Sheet label={t('archive.mine.aria')} latin="MY ARCHIVE" title={t('archive.mine.title')} onClose={onClose} tall>
+    <Sheet label={t('archive.mine.aria')} latin="MY ARCHIVE" title={voiceAction(12, 'mine') ?? ''} onClose={onClose} tall>
       <p className="font-body text-[12.5px] text-muted">{t('archive.mine.lede')}</p>
       {loading ? (
         <p className="mt-3 font-body text-[13px] text-muted">{t('archive.loading')}</p>

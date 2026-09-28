@@ -479,6 +479,15 @@ export type EntityDetail = {
   sources: SourceLine[]
   /** delta 89 — the same match / man in the other gates (`lib/links`), every target checked */
   links?: CrossLink[]
+  /**
+   * ONE RED WORLD §21 — the Cross Gate Router (`lib/links/actions.ts`): the gates that can
+   * actually serve this entity, and the LIFE chapters it is lived in (drawn only when the
+   * device's save has completed one — the server never knows that).
+   */
+  router?: {
+    actions: { kind: string; gate: number; href: string; label: string }[]
+    lifeChapters: string[]
+  }
 }
 
 /** The personal reaction chips a type offers — a personal set, never a fact about the item. */

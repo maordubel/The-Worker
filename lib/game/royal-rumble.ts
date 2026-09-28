@@ -4,6 +4,7 @@ import { createHmac } from 'node:crypto'
 
 import { allPlayers, namesOf, type PlayerMasterRecord } from '@/lib/archive/player-master'
 import { t as rumbleText } from '@/lib/royal-rumble/i18n'
+import { voiceAction } from '@/lib/voice'
 
 import { archive } from './archive'
 import { ROYAL_RUMBLE_PRICE_OVERRIDES } from './royal-rumble-prices'
@@ -1014,7 +1015,8 @@ function simulateWithTallies(
       at: 0,
       scoreFor,
       scoreAgainst,
-      commentaryHe: rumbleText('kickoff'),
+      // §18: "יאללה." — the kickoff line is the gate's voice (lib/voice), not this file's copy
+      commentaryHe: voiceAction(9, 'kickoff') ?? '',
       ball: { x: 50, y: 50 },
       us: usShape,
       them: themShape,
