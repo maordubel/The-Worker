@@ -312,6 +312,7 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   ],
   '2021-suitcase': [
     { id: 'suitcase', textHe: 'מה נכנס למזוודה.', doneWhen: F('x:suitcase') },
+    { id: 'corner', textHe: 'הפינה האחרונה במזוודה.', revealWhen: F('x:move'), doneWhen: { flag: 'life:abroad:corner' } },
     { id: 'sea', textHe: 'ערב אחרון על הים.', revealWhen: F('x:move'), doneWhen: F('x:sea') },
   ],
   '2023-visit': [
@@ -323,7 +324,11 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
     { id: 'call', textHe: 'אצלם כבר התחיל.', doneWhen: F('x:call') },
     { id: 'alex', textHe: 'גם פה יש לך מפתח.', doneWhen: F('x:alex') },
   ],
-  '2025-abroad': [{ id: 'reunion', textHe: 'הפעם אתה מחכה לו.', doneWhen: F('x:reunion') }],
+  '2025-abroad': [
+    { id: 'reunion', textHe: 'הפעם אתה מחכה לו.', doneWhen: F('x:reunion') },
+    { id: 'leave', textHe: 'תאריך. המחשב, והחופש במאי.', revealWhen: F('x:later'), doneWhen: F('x:leave') },
+    { id: 'pack', textHe: 'מה שנכנס לפינה של המזוודה, ב-2021.', revealWhen: F('x:invited'), doneWhen: F('x:packed') },
+  ],
   '2025-owner': [
     { id: 'fork', textHe: 'סכום, לא תוצאה.', doneWhen: F('o:fork') },
     { id: 'money', textHe: 'עד שמונה: הכסף, המגרש, האנשים — זמן לשניים.', revealWhen: F('o:brief'), doneWhen: F('o:money') },

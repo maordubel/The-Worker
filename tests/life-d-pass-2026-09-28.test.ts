@@ -177,7 +177,7 @@ describe('2026-finale — the walk after F04, and the last word is Kobi’s', ()
     const first = (id: string, flags: Record<string, boolean | string | number>) =>
       DIALOGUE[id]!.branches.findIndex((branch) => meets(state(flags), branch.when))
     expect(first('f-walk-shirt', { 'own:outfit:2026-finale': 'visa86', 'life:first-shirt:gift': true })).toBe(0)
-    expect(first('f-walk-shirt', { 'own:outfit:2026-finale': 'plain' })).toBe(3)
+    expect(first('f-walk-shirt', { 'own:outfit:2026-finale': 'plain' })).toBe(4)
     expect(first('f-walk-step', { 'life:a1:grip': 'caught' })).toBe(0)
     expect(first('f-walk-phone', { 'life:finale:party': 'three', 'life:child': true })).toBe(0)
     expect(first('f-walk-sign', { 'life:owner:role': 'controlling_owner', 'life:owner:triangle': 'money_squad' })).toBe(0)
@@ -319,5 +319,48 @@ describe('2015-newhall — four things in an empty hall, time for two, and the c
     expect(sim.state.flags['nr:crowd']).toBe(true)
     expect(sim.state.flags['nr:first']).toBe(true)
     expect(sim.state.flags['nr:did:banner']).toBeUndefined()
+  })
+})
+
+// ============================================ 2021-suitcase + 2025-abroad — one corner, one date ===
+
+describe('X01 → X05 — the last corner of the suitcase, and a promise with a date', () => {
+  it('2021: the move opens the corner; the shirt is offered only to a life that has it', () => {
+    const sim = new WorldSim('2021-suitcase')
+    const seen: string[][] = []
+    sim.beatAnswer = (choices) => {
+      if (choices.some((c) => c.id === 'move')) return 'move'
+      seen.push(choices.map((c) => c.id))
+      return choices.find((c) => c.id === 'scarf')?.id ?? WALK_AWAY
+    }
+    sim.go('home')
+    expect(sim.state.flags['life:abroad:corner']).toBe('scarf')
+    expect(seen[0]).not.toContain('shirt')
+
+    const gifted = new WorldSim('2021-suitcase')
+    seed(gifted, { 'life:first-shirt:gift': true })
+    expect(choicesOf(gifted, 'x-corner').map((c) => c.id)).toContain('shirt')
+  })
+
+  it('2025: the invitation waits for a date — the laptop, the leave, and Kobi calls back', () => {
+    const sim = new WorldSim('2025-abroad')
+    seed(sim, { 'life:abroad': true, 'life:abroad:corner': 'shirt' })
+    sim.beatAnswer = pick('later', 'invite', 'aside')
+    sim.go('flat-abroad')
+    expect(sim.state.flags['x:later']).toBe(true)
+    expect(sim.state.flags['x:reunion']).toBeUndefined()
+    sim.press('x-spot-leave', pick('three'))
+    expect(sim.state.flags['life:finale:leave']).toBe('three')
+    expect(sim.state.flags['x:invited']).toBe(true)
+    // the shirt from the corner came out, and was left where it is seen
+    expect(sim.state.flags['life:finale:packed']).toBe('shirt:aside')
+    expect(sim.endings).toEqual(['invite'])
+  })
+
+  it('2026: a scarf packed for May is on the walk out of the hall', () => {
+    const sim = new WorldSim('2026-finale')
+    seed(sim, { 'life:finale:packed': 'scarf' })
+    const first = DIALOGUE['f-walk-shirt']!.branches.findIndex((branch) => meets(sim.state, branch.when))
+    expect(DIALOGUE['f-walk-shirt']!.branches[first]!.lines[0]!.text).toContain('הצעיף')
   })
 })

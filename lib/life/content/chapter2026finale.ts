@@ -871,6 +871,15 @@ export const CONVERSATIONS_WALK: Conversation[] = [
         ],
       },
       {
+        // (pass D) the scarf that took the suitcase's last corner in 2021, packed for May in 2025
+        when: { any: [{ flagIs: { flag: 'life:finale:packed', value: 'scarf' } }, { flagIs: { flag: 'life:finale:packed', value: 'scarf:aside' } }] },
+        lines: [
+          { who: null, text: 'בלי חולצה של הקבוצה. אבל הצעיף — זה שנכנס לפינה האחרונה של המזוודה — סביב הצוואר, במאי.' },
+          { who: 'קובי', text: 'לקחת אותו לשם, והבאת אותו לפה.' },
+          { who: 'פוגי', text: 'הוא יודע את הדרך יותר טוב ממני.' },
+        ],
+      },
+      {
         lines: [
           { who: null, text: 'המעיל סגור עד למעלה. מתחתיו סוודר, בלי שום צבע של קבוצה.' },
           { who: 'קובי', text: 'באת בלי חולצה?' },

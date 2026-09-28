@@ -22,6 +22,10 @@ const HOUR = all(f('o:brief'), no('o:verdict'))
 const MONEY_OPEN = all(HOUR, no('o:tri:money'), no('o:tri:partner'))
 
 export const PASS_D_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
+  'flat-abroad': [
+    // 2025 · X05 — the laptop on the low table: the leave for May, before the promise (`x-leave`)
+    { id: 'x-spot-leave', era: '2025-abroad', x: 0.49, y: 0.66, w: 0.06, act: 'x-leave', verb: 'take', labelHe: 'המחשב — לבקש חופש במאי', prop: { key: 'propLaptop', size: 0.05, at: { x: 0.495, y: 0.447 } }, when: all(f('x:later'), no('x:leave')), priority: 4 },
+  ],
   'drive-in': [
     // 2015 · N05 — before the crowd: four things in the empty hall, time for two (`chapter2015newhall.ts`)
     { id: 'nr-spot-banner', era: '2015-newhall', x: 0.3, y: 0.76, w: 0.06, act: 'nr-do-banner', verb: 'hold', labelHe: 'הבד הישן — למעקה מעל הכניסה', when: all(f('nr:prep'), no('nr:crowd'), no('nr:did:banner')), priority: 4 },
