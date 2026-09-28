@@ -1,10 +1,14 @@
 import { AwayDaysStrip } from '@/components/gates/AwayDaysStrip'
+import { NowLayer } from '@/components/home/NowLayer'
 import { TunnelPlate } from '@/components/life/TunnelPlate'
 import { Screen } from '@/components/ui/Screen'
 import { GatePlate } from '@/components/gates/GatePlate'
 import { Intro } from '@/components/ui/Intro'
 import { StructuredData } from '@/components/seo/StructuredData'
 import { Standfirst } from '@/components/ui/Standfirst'
+import { greetingKey, hourInIsrael } from '@/lib/daily/copy'
+import { resolveDaily } from '@/lib/daily/resolve'
+import { todayInIsrael } from '@/lib/date/israel'
 import { GATES, wallOrder } from '@/lib/gates'
 import { t } from '@/lib/i18n'
 
@@ -19,8 +23,19 @@ import { t } from '@/lib/i18n'
  * nothing, a "today's sheet" that was placeholder copy, and a "paste a new sheet"
  * button that went to trivia. A screen that has to be explained is a screen that is
  * wrong.
+ *
+ * 28.9.2026 — ONE RED WORLD §55: a "now" layer sits ABOVE the wall, never instead of it —
+ * a greeting, היום בהפועל (three things for today's Israel date, `lib/daily`), and the
+ * device's own way back into the archive and LIFE. The wall is untouched under it, and the
+ * opening still plays over all of it (rule 30). The daily is resolved here, on the server,
+ * for the date it is in Tel Aviv; the page is re-rendered every five minutes so the day
+ * turns over at midnight there, not at midnight UTC.
  */
+export const revalidate = 300
+
 export default function BloomfieldPage() {
+  const now = new Date()
+  const daily = resolveDaily(todayInIsrael(now))
   return (
     <Screen title={t('screen.home.title')} sub={t('screen.home.sub')}>
       {/* An overlay, not a route: the wall below is already rendered and complete, so
@@ -36,9 +51,13 @@ export default function BloomfieldPage() {
           somebody who arrived from a shared link; one line does. */}
       <Standfirst />
 
+      {/* the "now" layer — compact, so a first visit still meets the gate plan on the
+          first screen; the returning rows appear only when the device holds something */}
+      <NowLayer daily={daily} greeting={greetingKey(hourInIsrael(now))} />
+
       {/* THE WORKER LIFE is now the wall's own first plate — a tunnel, not a gate — so
           the section header names both what it contains. */}
-      <section aria-label={t('wall.howYouGetIn')} className="mt-stack">
+      <section id="gates" aria-label={t('wall.howYouGetIn')} className="mt-stack scroll-mt-4">
         <div className="flex items-baseline justify-between gap-3">
           <p className="font-display text-[15px] text-ink">{t('wall.howYouGetIn')}</p>
           <h2 className="font-latin text-[10px] font-bold tracking-[0.24em] text-sign" dir="ltr">
