@@ -9,6 +9,8 @@ import type { Daily } from '@/lib/daily/types'
 import { t } from '@/lib/i18n'
 import { placeOfScene } from '@/lib/life/map'
 import { lifeStore } from '@/lib/life/save'
+import { softLine, type MemoryReading } from '@/lib/profile/memories'
+import { readRawDevice, recordsFrom } from '@/lib/profile/records'
 import { onIds, readProfile } from '@/lib/profile/store'
 
 import { DailyCard } from './DailyCard'
@@ -83,9 +85,17 @@ async function readLife(): Promise<LifeResume | null> {
 function Returns() {
   const [saved, setSaved] = useState<SavedArchiveItem | null>(null)
   const [life, setLife] = useState<LifeResume | null>(null)
+  const [memory, setMemory] = useState<MemoryReading | null>(null)
 
   useEffect(() => {
     let live = true
+    try {
+      // ONE RED WORLD §24 — at most ONE soft line from the personal file: the last memory the
+      // device's own records reached. Nothing when none has; never a count.
+      setMemory(softLine(recordsFrom(readRawDevice(readProfile()))))
+    } catch {
+      // no records: no line
+    }
     try {
       const ids = onIds('archive.mine', readProfile())
       if (ids.length > 0) {
@@ -106,8 +116,17 @@ function Returns() {
     }
   }, [])
 
-  if (!saved && !life) return null
+  if (!saved && !life && !memory) return null
   return (
+    <>
+      {memory && (
+        <p className="mt-2 font-body text-[13px] text-muted" data-home="memory-line">
+          <Link href="/tik/file" className="inline-flex min-h-tap items-center underline decoration-ink/30 underline-offset-4 hover:text-ink">
+            {t('personal.home.memory', { title: t(memory.titleKey) })}
+          </Link>
+        </p>
+      )}
+      {(saved || life) && (
     <ul className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2" data-home="returns">
       {saved && (
         <li>
@@ -151,5 +170,7 @@ function Returns() {
         </li>
       )}
     </ul>
+      )}
+    </>
   )
 }

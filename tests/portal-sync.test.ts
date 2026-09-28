@@ -480,6 +480,8 @@ describe('פרויקט משותף עם DUBID — THE WORKER touches only what it
       '20260925092000_worker_away_been.sql',
       // 28.9.2026 (ONE RED WORLD §37): widens the event name check only (tests/events-schema.test.ts)
       '20260928090000_worker_events_taxonomy.sql',
+      // 28.9.2026 (ONE RED WORLD §35): the public identity, "אדום #N" (tests/personal-area.test.ts)
+      '20260928130000_worker_public_identity.sql',
     ]
     for (const name of readdirSync(dir)) {
       if (live.includes(name)) continue

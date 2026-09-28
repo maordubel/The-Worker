@@ -37,6 +37,7 @@ export type GateSeoSlug =
   | 'polls'
   | 'goal'
   | 'tik'
+  | 'tik-file'
   | 'derby'
   | 'derby-file'
   | 'timeline'
@@ -152,6 +153,8 @@ const GATE_SEO: Record<GateSeoSlug, GateSeoEntry> = {
     image: 'goal',
   },
   tik: { path: '/tik', titleKey: 'screen.tik.title', descriptionKey: 'tik.lede', image: 'tik' },
+  // ONE RED WORLD §24 — the second destination of the personal area
+  'tik-file': { path: '/tik/file', titleKey: 'personal.file.title', descriptionKey: 'personal.file.sub', image: 'tik' },
   derby: {
     path: '/derby',
     titleKey: 'screen.derby.title',

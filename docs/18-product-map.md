@@ -34,8 +34,12 @@ ONE RED WORLD §39, P0.4 (28.9.2026). **נגזר מהקוד, לא מהזיכרו
 | 12 הארכיון החי | `/archive` (`?at=`) | `ArchiveApp` (Today · Dig · Search · Mine · Trail) | כן — `roundFrom` → `todayDecks(todayInIsrael(), seed, cursor)` | פרופיל (`emit` — "שלי") | אין `ShareRow` | הוא עצמו; `ArchiveDrawer` → `CrossLinks` (`linksForEntity`) | `archive` (`LifeArchive` על `EntityCard`) | `archive`, `entity-graph`, `links`, `date-israel` |
 | 13 החוט האדום | `/timeline` · `/timeline/order` | `ThreadBoard` / `TimelineBoard` | כן — `roundFrom` בשני המסלולים (`dealThreadRun`) | פרופיל (`emit`) | `timeline` | `ThreadBoard` מקשר `/archive?at=` | — | `thread`, `timeline`, `identity` |
 | LIFE | `/life` (לא שער — לוחית מעל הקיר, כלל 39) | `lib/life/` — יומן אירועים append-only (`LifeEvent[]`) | זרע משלו בתוך השמירה (`rng.seeded`, `lib/life/rng.ts`) | מקומי `the-worker:life` (`lib/life/save.ts`, `SAVE_VERSION`); לא בסנכרון הפורטל | אין (כרטיסי LIFE לא מדפיסים ציון — `life-share`) | רק דרך `lib/life/anchor-server.ts` (כלל 39); `LifeArchive` | פותח את לוחות השערים (1, 3, 4/5, 6, 7, 8, 9, 11, 12, טריוויה) דרך `lib/mechanics/` + `app/life/mechanicActions.ts`; `/tik` (`KeptPanel`) מקשר ל-`/life` | ‎`life.test` + ‎108 קבצי `tests/life-*.test.ts` |
+| האזור האישי | `/tik` (אני) · `/tik/file` (התיק שלי) | `CardTabs` + `MeArea` / `FileArea` | לא | מקומי: כל המאגרים דרך `lib/profile/records.ts`; הזהות הציבורית `worker.public.v1` ↔ `worker_profile.public_*` / `supporter_no` (`lib/portal/public-sync.ts`) | `member` (כרטיס) | `KeptPanel`, דרכון LIFE → `/archive?at=` | דרכון LIFE (`fileExtras`, פרקים שהושלמו בלבד) | `personal-area`, `worker-card`, `portal-sync` |
 
 ## מה המפה חושפת (פתוח, לא תוקן במעבר הזה)
+
+- **האזור האישי (28.9.2026, `docs/21-personal-area.md`):** מפת הזיכרון והזיכרונות קוראים את
+  המכשיר בלבד; LIFE עדיין לא מסתנכרן, ולכן דרכון LIFE הוא של המכשיר.
 
 - **שער 7 · הוויכוח אין לו שיתוף.** המפרט (§16) מבקש "אני לקחתי את X. מה אתה אומר?" — זה
   Phase 4 (SHARE V2); `polls` נשאר SEEDLESS כי הכרטיס שלי באמת אין לו סבב.

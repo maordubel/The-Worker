@@ -2,6 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { Database } from '@/types/database'
 
+import { publicIdentityHandler } from './public-sync'
+
 /**
  * עוד מה לסנכרן — the hook point for a sync this file does not know about yet.
  *
@@ -39,6 +41,8 @@ export type SyncHandler = {
 
 export const SYNC_HANDLERS: SyncHandler[] = [
   // gate 2 · Revenge — `lib/portal/marks-sync.ts` goes here (challenge cluster).
+  // ONE RED WORLD §35 — the public identity ("אדום #N" or a nickname), newest edit wins.
+  publicIdentityHandler,
 ]
 
 /** Add a handler at runtime. Idempotent by id. */

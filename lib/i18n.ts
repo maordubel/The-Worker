@@ -56,6 +56,9 @@ import heDaily from '@/messages/he.daily.json'
 // 28.9.2026 — Share V2 and the challenge layer (`lib/share`, `lib/challenges`): the
 // artefact cards, the invite lines and the comparison (`challenge.*`, `compare.*`, `artefact.*`).
 import heShare from '@/messages/he.share.json'
+// 28.9.2026 — the personal area: אני / התיק שלי, the memory map, the memories, the public
+// identity (`personal.*`, docs/21-personal-area.md). One file, so the area has one home.
+import hePersonal from '@/messages/he.personal.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -134,6 +137,7 @@ export const CATALOGUE_FILES = {
   heStageRouter,
   heDaily,
   heShare,
+  hePersonal,
 } as const
 
 const catalogue = {
@@ -180,6 +184,7 @@ const catalogue = {
   ...heStageRouter,
   ...heDaily,
   ...heShare,
+  ...hePersonal,
 }
 
 export type MessageKey = keyof typeof catalogue

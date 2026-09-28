@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 
 import { ClosetDoor } from '@/components/collector/ClosetDoor'
+import { AreaSwitch } from '@/components/profile/AreaSwitch'
+import { MeArea } from '@/components/profile/MeArea'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
 import { kitCatalog } from '@/lib/kit/catalog'
@@ -31,8 +33,11 @@ export default function TikPage() {
   const kitsTotal = kitCatalog().length
   return (
     <Screen title={t('screen.tik.title')} sub={t('screen.tik.sub')}>
+      {/* ONE RED WORLD §24 — two destinations: this is "אני"; "התיק שלי" is /tik/file */}
+      <AreaSwitch active="me" />
       <p className="mt-stack max-w-prose font-body text-step-0 leading-relaxed text-ink">{t('tik.card.lede')}</p>
       <CardTabs shirt={shirt} kitsTotal={kitsTotal} />
+      <MeArea />
       {/* the closet is the account's other half: the card is who you are, the closet is what hangs at home */}
       <ClosetDoor />
       <ReportLink />
