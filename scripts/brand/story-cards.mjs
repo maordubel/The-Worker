@@ -23,7 +23,9 @@ const p = await b.newPage({ viewport:{width:1400,height:900}, deviceScaleFactor:
 await p.goto(`${BASE}/qa/story`,{waitUntil:'networkidle'})
 await p.waitForSelector('[data-story-proof="ready"]',{timeout:30000})
 await p.waitForTimeout(600)
-for (const n of ['ballot','ink','xi','score','year']) {
+// Share V2 (28.9.2026) — the twelve artefacts join the sheet: one per gate (ONE RED WORLD §28)
+const ARTEFACTS = ['slip','programme','collector','contact','debate','freeze','poster','clue','black','clipping','strip','strip-order','ticket']
+for (const n of ['ballot','ink','xi','score','year', ...ARTEFACTS]) {
   await p.locator(`#proof-${n} canvas`).screenshot({ path:`${OUT}/card-${n}.png` })
 }
 await b.close()
