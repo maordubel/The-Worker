@@ -53,6 +53,9 @@ import heVoice from '@/messages/he.voice.json'
 import heStageRouter from '@/messages/he.stage.router.json'
 // 28.9.2026 — היום בהפועל and the home "now" layer (`lib/daily`, ONE RED WORLD §7, §55)
 import heDaily from '@/messages/he.daily.json'
+// 28.9.2026 — Share V2 and the challenge layer (`lib/share`, `lib/challenges`): the
+// artefact cards, the invite lines and the comparison (`challenge.*`, `compare.*`, `artefact.*`).
+import heShare from '@/messages/he.share.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -130,6 +133,7 @@ export const CATALOGUE_FILES = {
   heVoice,
   heStageRouter,
   heDaily,
+  heShare,
 } as const
 
 const catalogue = {
@@ -175,6 +179,7 @@ const catalogue = {
   ...heVoice,
   ...heStageRouter,
   ...heDaily,
+  ...heShare,
 }
 
 export type MessageKey = keyof typeof catalogue

@@ -29,6 +29,10 @@ export type ShareKind =
   | 'wanted'
   | 'gaps'
   | 'match'
+  // Share V2 (28.9.2026) — the gates that shared through a system of their own
+  | 'blindcow'
+  | 'rumble'
+  | 'thread'
 
 const ROUTE: Record<ShareKind, string> = {
   hate: '/derby',
@@ -51,6 +55,10 @@ const ROUTE: Record<ShareKind, string> = {
   wanted: '/kits/archive',
   gaps: '/kits/closet',
   match: '/kits/market',
+  // gate 10 has no seed: its same-run link is always a challenge (`/c/…`, the man sealed)
+  blindcow: '/blind-cow',
+  rumble: '/royal-rumble',
+  thread: '/timeline',
 }
 
 /** The link a share sends people to — the same round, not the front door. */
@@ -62,7 +70,7 @@ const ROUTE: Record<ShareKind, string> = {
  * stapled to it would be a parameter the page ignores, which is the kind of small lie
  * that makes a URL untrustworthy to read.
  */
-const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'worst', 'member', 'closet', 'wanted', 'gaps', 'match'])
+const SEEDLESS: ReadonlySet<ShareKind> = new Set<ShareKind>(['polls', 'xi', 'worst', 'member', 'closet', 'wanted', 'gaps', 'match', 'blindcow'])
 
 /**
  * The line under the share row says what the LINK does (see `ShareRow`), so a kind that hands

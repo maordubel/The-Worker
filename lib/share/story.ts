@@ -24,7 +24,7 @@ export const STORY_H = 1920
 export const SAFE = 260
 
 // one line: `tests/brand.test.ts` reads the declared templates off it
-export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art' | 'xi' | 'ballot' | 'closet' | 'wanted' | 'gaps' | 'match'
+export type StoryTemplate = 'score' | 'grass' | 'ink' | 'kit' | 'year' | 'art' | 'xi' | 'ballot' | 'closet' | 'wanted' | 'gaps' | 'match' | 'slip' | 'programme' | 'collector' | 'contact' | 'debate' | 'freeze' | 'poster' | 'clue' | 'black' | 'clipping' | 'strip' | 'ticket'
 
 /**
  * הארון — the collector's four cards (spec §45–§49), each a whole card with its own layout,
@@ -140,6 +140,8 @@ export type StoryCard = {
   art?: ArtKey
   /** the collector's cards — present means the card is drawn by `drawCollectorCard` */
   collector?: CollectorStory
+  /** Share V2's artefacts (§28) — present means the card is drawn by `drawArtefactCard` */
+  artefact?: ArtefactStory
 }
 
 /**
@@ -663,6 +665,13 @@ export function drawStory(
   // THE CLOSET · four whole cards of their own (spec §45–§49).
   if (card.collector && template === card.collector.kind) {
     drawCollectorCard(ctx, card, card.collector, badge)
+    ctx.restore()
+    return
+  }
+
+  // SHARE V2 · one artefact per gate (§28), each a whole card of its own.
+  if (card.artefact && template === card.artefact.kind) {
+    drawArtefactCard(ctx, card, card.artefact, badge)
     ctx.restore()
     return
   }
@@ -1834,6 +1843,841 @@ function grass(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = '#46A04B'
   for (let y = 0; y < STORY_H; y += 320) ctx.fillRect(0, y, STORY_W, 160)
   dots(ctx, BRAND.ink, 0.1, 18)
+}
+
+/* ------------------------------------------------------------------ Share V2 · the artefacts */
+
+/**
+ * החפצים — one artefact per gate (ONE RED WORLD §28): "לא template אחד". A result is not a
+ * score on a coloured plate; it is the OBJECT the run leaves behind — the slip, the
+ * programme, the ticket — so a feed of these reads like a supporters' archive (§28).
+ *
+ * Every artefact is built the same way the collector cards are: the head from the safe
+ * line DOWN, the foot from the credit strip UP, the object fitted into what is MEASURED to
+ * be left (rule 19). Every block of type reports its ink and sits inside the 260px safe
+ * zones (rule 22); `npm run story:overlap` checks both, on the worst strings the app can
+ * produce (`app/qa/story`). Every string arrives already worded (`lib/share/artefacts.ts`)
+ * — the card draws, it never translates (rule 10) — and none of them is an answer (§27.6).
+ */
+export type ArtefactStory =
+  | {
+      /** gate 2 — the old score slip / quiz ticket */
+      kind: 'slip'
+      topic: string
+      figure: string
+      figureLabel: string
+      /** every answer of the run, in order — the slip prints all of them (rule 19) */
+      marks: boolean[]
+    }
+  | {
+      /** gate 3 — the match programme: the slots, ticked, and NEVER the names (§44) */
+      kind: 'programme'
+      match: string
+      date: string
+      found: string
+      slots: Array<{ role: string; found: boolean }>
+    }
+  | {
+      /** gate 4 — the collector card: the shirt as built, the season, the tally */
+      kind: 'collector'
+      season: string
+      serial: string
+      kit: KitSpec
+      figure: string
+      figureLabel: string
+    }
+  | {
+      /** gate 6 — the contact sheet: every frame of the wall, hit or missed */
+      kind: 'contact'
+      figure: string
+      figureLabel: string
+      frames: Array<{ label: string; hit: boolean }>
+    }
+  | {
+      /** gate 7 — the debate sticker: "אני לקחתי את X. מה אתה אומר?" */
+      kind: 'debate'
+      took: string
+      pick: string
+      ask: string
+    }
+  | {
+      /** gate 8 — the broadcast freeze frame: your route on the pitch */
+      kind: 'freeze'
+      bug: string
+      clock: string
+      /** the route as played, 0–100 across and 0 (the goal line) to 100 down the half */
+      route: Array<{ x: number; y: number }>
+      figure: string
+      figureLabel: string
+    }
+  | {
+      /** gate 9 — the five-player poster */
+      kind: 'poster'
+      rows: Array<{ role: string; name: string }>
+    }
+  | {
+      /** gate 10 — the clue card: a silhouette, the clues used, never the man */
+      kind: 'clue'
+      used: number
+      total: number
+      figure: string
+      figureLabel: string
+    }
+  | {
+      /** gate 11 — the black poster. No vermilion (rule 9: the away end) */
+      kind: 'black'
+      rows: Array<{ name: string; out: boolean }>
+    }
+  | {
+      /** gate 12 — the press clipping */
+      kind: 'clipping'
+      masthead: string
+      date: string
+      headline: string
+      caption: string
+      label: string
+    }
+  | {
+      /** gate 13 — the paper strip and the red thread through it */
+      kind: 'strip'
+      figure: string
+      figureLabel: string
+      rows: Array<{ text: string; ok: boolean }>
+    }
+  | {
+      /** THE WORKER LIFE — the ticket and its stub */
+      kind: 'ticket'
+      title: string
+      year: string
+      place: string
+      line: string
+      stub: string
+      serial: string
+    }
+
+type Ink = { ascent: number; descent: number; height: number }
+type Tone = { kicker: string; title: string; under: string; challenge: string; foot: { name: string; text: string; rule: string } }
+
+const A_PAD = 76
+const A_RIGHT = STORY_W - A_PAD
+const A_WIDTH = STORY_W - A_PAD * 2
+const F_SUEZ = '"Suez One", serif'
+const F_POSTER = 'Karantina, sans-serif'
+const F_BODY = 'Heebo, sans-serif'
+const F_LATIN = 'Archivo, sans-serif'
+
+/** Shrink a line until it fits the box, both ways — never a guessed multiple (rule 19). */
+function sized(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  face: string,
+  weight: string,
+  start: number,
+  maxW: number,
+  maxH: number,
+  min = 18,
+): { size: number; box: Ink; width: number } {
+  let size = start
+  for (;;) {
+    ctx.font = `${weight} ${size}px ${face}`
+    const box = textBox(ctx, text)
+    const width = ctx.measureText(text).width
+    if ((width <= maxW && box.height <= maxH) || size <= min) return { size, box, width }
+    size -= 2
+  }
+}
+
+/** A right-anchored line, drawn and recorded. Latin runs print left to right. */
+function put(ctx: CanvasRenderingContext2D, label: string, text: string, right: number, base: number, colour: string, extra = 0): void {
+  ctx.direction = isLatinRun(text) ? 'ltr' : 'rtl'
+  ctx.textAlign = 'right'
+  ctx.fillStyle = colour
+  ctx.fillText(text, right, base)
+  recordInk(ctx, label, text, right, base, extra)
+  ctx.direction = 'rtl'
+}
+
+/** A centred line, drawn and recorded against its real ink. */
+function putCentre(ctx: CanvasRenderingContext2D, label: string, text: string, cx: number, base: number, colour: string): void {
+  ctx.direction = isLatinRun(text) ? 'ltr' : 'rtl'
+  ctx.textAlign = 'center'
+  ctx.fillStyle = colour
+  ctx.fillText(text, cx, base)
+  recordInk(ctx, label, text, cx + ctx.measureText(text).width / 2, base)
+  ctx.textAlign = 'right'
+  ctx.direction = 'rtl'
+}
+
+function artefactHead(ctx: CanvasRenderingContext2D, card: StoryCard, tone: Tone): number {
+  const headFoot = collectorKicker(ctx, card.kicker, tone.kicker)
+  const title = sized(ctx, card.hero, F_SUEZ, '400', 92, A_WIDTH, 120)
+  const base = headFoot + 36 + title.box.ascent
+  ctx.font = `400 ${title.size}px ${F_SUEZ}`
+  ctx.direction = 'rtl'
+  ctx.textAlign = 'right'
+  plateText(ctx, card.hero, A_RIGHT, base, { under: tone.under, over: tone.title, offset: 8, skew: -6 })
+  recordInk(ctx, 'artefact.title', card.hero, A_RIGHT, base, 8)
+  return base + title.box.descent + 8
+}
+
+function artefactFoot(ctx: CanvasRenderingContext2D, card: StoryCard, tone: Tone, badge: CanvasImageSource | null): number {
+  const challengeY = STORY_H - SAFE - 236
+  const size = fit(ctx, card.challenge, 28, A_WIDTH, F_BODY, '400')
+  ctx.font = `400 ${size}px ${F_BODY}`
+  put(ctx, 'challenge', card.challenge, A_RIGHT, challengeY, tone.challenge)
+  const top = challengeY - textBox(ctx, card.challenge).ascent
+  foot(ctx, card, tone.foot, badge)
+  return top - 44
+}
+
+/**
+ * A figure and its label on one baseline — "9/12 זכרתי" — as big as the box allows. The
+ * figure is measured first and the label is fitted into what it leaves (as `xi` does).
+ */
+function figureLine(
+  ctx: CanvasRenderingContext2D,
+  prefix: string,
+  figure: string,
+  label: string,
+  right: number,
+  top: number,
+  maxW: number,
+  maxH: number,
+  colours: { figure: string; under: string; label: string },
+): number {
+  const fig = sized(ctx, figure, F_POSTER, '700', 300, maxW * 0.62, maxH, 60)
+  const lab = sized(ctx, label, F_SUEZ, '400', 88, Math.max(120, maxW - fig.width - 40), Math.max(40, fig.box.height * 0.5), 22)
+  const base = top + Math.max(0, (maxH - fig.box.height) / 2) + fig.box.ascent
+  ctx.font = `700 ${fig.size}px ${F_POSTER}`
+  ctx.direction = 'ltr'
+  ctx.textAlign = 'right'
+  plateText(ctx, figure, right, base, { under: colours.under, over: colours.figure, offset: 10, skew: 0 })
+  recordInk(ctx, `${prefix}.figure`, figure, right, base, 10)
+  ctx.direction = 'rtl'
+  ctx.font = `400 ${lab.size}px ${F_SUEZ}`
+  put(ctx, `${prefix}.label`, label, right - fig.width - 40, base, colours.label)
+  return base + fig.box.descent + 10
+}
+
+function panel(ctx: CanvasRenderingContext2D, top: number, bottom: number, fill: string, stroke: string, line = 8): void {
+  ctx.fillStyle = fill
+  ctx.fillRect(A_PAD, top, A_WIDTH, bottom - top)
+  ctx.strokeStyle = stroke
+  ctx.lineWidth = line
+  ctx.strokeRect(A_PAD, top, A_WIDTH, bottom - top)
+}
+
+/** A tick box: filled red for yes, an outlined box with a cut through it for no. */
+function tick(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, on: boolean, ink = BRAND.ink): void {
+  if (on) {
+    ctx.fillStyle = BRAND.red
+    ctx.fillRect(x, y, size, size)
+    return
+  }
+  ctx.strokeStyle = ink
+  ctx.lineWidth = Math.max(3, size * 0.1)
+  ctx.strokeRect(x, y, size, size)
+  ctx.beginPath()
+  ctx.moveTo(x + size * 0.2, y + size * 0.8)
+  ctx.lineTo(x + size * 0.8, y + size * 0.2)
+  ctx.stroke()
+}
+
+function drawArtefactCard(ctx: CanvasRenderingContext2D, card: StoryCard, body: ArtefactStory, badge: CanvasImageSource | null): void {
+  const dark = body.kind === 'contact' || body.kind === 'freeze' || body.kind === 'black' || body.kind === 'ticket'
+  const redGround = body.kind === 'debate' || body.kind === 'programme'
+  // ── the ground ──────────────────────────────────────────────────────────
+  if (dark) {
+    ctx.fillStyle = BRAND.ink
+    ctx.fillRect(0, 0, STORY_W, STORY_H)
+    if (body.kind !== 'black') {
+      ctx.fillStyle = BRAND.red
+      ctx.fillRect(0, 0, STORY_W, 96)
+      ctx.fillRect(0, STORY_H - 96, STORY_W, 96)
+    }
+  } else if (redGround) {
+    ctx.fillStyle = BRAND.red
+    ctx.fillRect(0, 0, STORY_W, STORY_H)
+    dots(ctx, BRAND.ink, 0.14)
+  } else if (body.kind === 'collector') {
+    ctx.fillStyle = BRAND.paper
+    ctx.fillRect(0, 0, STORY_W, STORY_H)
+    rays(ctx, STORY_W + 120, -180, 0.3)
+  } else {
+    ctx.fillStyle = BRAND.sheet
+    ctx.fillRect(0, 0, STORY_W, STORY_H)
+    dots(ctx, BRAND.ink, 0.09)
+  }
+
+  // gate 11 carries no vermilion at all — its foot is the sign plate
+  const tone: Tone =
+    body.kind === 'black'
+      ? { kicker: BRAND.concrete, title: BRAND.sheet, under: BRAND.sign, challenge: BRAND.concrete, foot: { name: BRAND.sheet, text: BRAND.sheet, rule: BRAND.sign } }
+      : dark
+        ? { kicker: BRAND.red, title: BRAND.sheet, under: BRAND.red, challenge: BRAND.concrete, foot: { name: BRAND.red, text: BRAND.sheet, rule: BRAND.red } }
+        : redGround
+          ? { kicker: BRAND.ink, title: BRAND.sheet, under: BRAND.ink, challenge: BRAND.ink, foot: { name: BRAND.ink, text: BRAND.sheet, rule: BRAND.ink } }
+          : { kicker: BRAND.sign, title: BRAND.ink, under: BRAND.red, challenge: BRAND.sign, foot: { name: BRAND.red, text: BRAND.ink, rule: BRAND.red } }
+
+  const top = artefactHead(ctx, card, tone) + 40
+  const floor = artefactFoot(ctx, card, tone, badge)
+  ctx.direction = 'rtl'
+  ctx.textAlign = 'right'
+
+  switch (body.kind) {
+    case 'slip':
+      return slip(ctx, body, top, floor)
+    case 'programme':
+      return programme(ctx, body, top, floor)
+    case 'collector':
+      return collectorCardBody(ctx, body, top, floor)
+    case 'contact':
+      return contact(ctx, body, top, floor)
+    case 'debate':
+      return debate(ctx, body, top, floor)
+    case 'freeze':
+      return freeze(ctx, body, top, floor)
+    case 'poster':
+      return poster(ctx, body, top, floor)
+    case 'clue':
+      return clue(ctx, body, top, floor)
+    case 'black':
+      return blackPoster(ctx, body, top, floor)
+    case 'clipping':
+      return clipping(ctx, body, top, floor)
+    case 'strip':
+      return strip(ctx, body, top, floor)
+    case 'ticket':
+      return ticket(ctx, body, top, floor)
+  }
+}
+
+/* ── gate 2 · the score slip ───────────────────────────────────────────── */
+function slip(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'slip' }>, top: number, floor: number): void {
+  panel(ctx, top, floor, BRAND.paper, BRAND.ink)
+  // the perforation along the tear — cut out of the slip in the ground's colour
+  ctx.fillStyle = BRAND.sheet
+  for (let x = A_PAD + 30; x < A_PAD + A_WIDTH - 10; x += 40) {
+    ctx.beginPath()
+    ctx.arc(x, top, 9, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  const inR = A_RIGHT - 44
+  const inW = A_WIDTH - 88
+  let y = top + 52
+  const topic = sized(ctx, body.topic, F_BODY, '400', 36, inW, 56)
+  ctx.font = `400 ${topic.size}px ${F_BODY}`
+  put(ctx, 'slip.topic', body.topic, inR, y + topic.box.ascent, BRAND.sign)
+  y += topic.box.height + 26
+  ctx.fillStyle = BRAND.ink
+  ctx.fillRect(A_PAD + 44, y, inW, 4)
+  y += 34
+
+  const marks = body.marks.slice(0, 12)
+  const cols = 6
+  const rows = Math.max(1, Math.ceil(marks.length / cols))
+  const gap = 16
+  const cell = Math.min(110, (inW - gap * (cols - 1)) / cols)
+  const gridH = rows * cell + (rows - 1) * gap
+  const gridTop = floor - 48 - gridH
+  figureLine(ctx, 'slip', body.figure, body.figureLabel, inR, y, inW, gridTop - 40 - y, { figure: BRAND.red, under: BRAND.sign, label: BRAND.ink })
+  marks.forEach((mark, index) => {
+    const col = index % cols
+    const row = Math.floor(index / cols)
+    const x = inR - col * (cell + gap) - cell
+    const cy = gridTop + row * (cell + gap)
+    tick(ctx, x, cy, cell, mark)
+    const n = String(index + 1)
+    ctx.font = `800 ${Math.round(cell * 0.36)}px ${F_LATIN}`
+    const box = textBox(ctx, n)
+    putCentre(ctx, `slip.n.${index}`, n, x + cell / 2, cy + cell / 2 + box.ascent / 2, mark ? BRAND.sheet : BRAND.muted)
+  })
+}
+
+/* ── gate 3 · the match programme ──────────────────────────────────────── */
+function programme(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'programme' }>, top: number, floor: number): void {
+  panel(ctx, top, floor, BRAND.sheet, BRAND.ink)
+  const inR = A_RIGHT - 40
+  const inW = A_WIDTH - 80
+  let y = top + 40
+  const match = sized(ctx, body.match, F_SUEZ, '400', 64, inW, 84)
+  ctx.font = `400 ${match.size}px ${F_SUEZ}`
+  put(ctx, 'programme.match', body.match, inR, y + match.box.ascent, BRAND.ink)
+  y += match.box.height + 20
+  const date = sized(ctx, body.date, F_BODY, '400', 32, inW, 44)
+  ctx.font = `400 ${date.size}px ${F_BODY}`
+  put(ctx, 'programme.date', body.date, inR, y + date.box.ascent, BRAND.sign)
+  y += date.box.height + 22
+  const found = sized(ctx, body.found, F_SUEZ, '400', 58, inW, 76)
+  ctx.font = `400 ${found.size}px ${F_SUEZ}`
+  put(ctx, 'programme.found', body.found, inR, y + found.box.ascent, BRAND.red)
+  y += found.box.height + 24
+  ctx.fillStyle = BRAND.ink
+  ctx.fillRect(A_PAD + 40, y, inW, 6)
+  y += 20
+
+  const slots = body.slots
+  const rowH = (floor - 24 - y) / Math.max(1, slots.length)
+  const box = Math.min(40, rowH * 0.62)
+  slots.forEach((slot, index) => {
+    const rowTop = y + index * rowH
+    const mid = rowTop + rowH / 2
+    tick(ctx, A_PAD + 40, mid - box / 2, box, slot.found)
+    const n = String(index + 1)
+    const num = sized(ctx, n, F_LATIN, '800', Math.min(36, rowH * 0.6), 60, rowH * 0.7, 14)
+    ctx.font = `800 ${num.size}px ${F_LATIN}`
+    put(ctx, `programme.n.${index}`, n, inR, mid + num.box.ascent / 2, BRAND.red)
+    const role = sized(ctx, slot.role, F_BODY, '400', Math.min(40, rowH * 0.62), inW - 80 - box - 40, rowH * 0.8, 14)
+    ctx.font = `400 ${role.size}px ${F_BODY}`
+    put(ctx, `programme.role.${index}`, slot.role, inR - 76, mid + role.box.ascent / 2 - role.box.descent / 2, BRAND.ink)
+  })
+}
+
+/* ── gate 4 · the collector card ───────────────────────────────────────── */
+function collectorCardBody(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'collector' }>, top: number, floor: number): void {
+  panel(ctx, top, floor, BRAND.sheet, BRAND.ink, 10)
+  ctx.strokeStyle = BRAND.red
+  ctx.lineWidth = 4
+  ctx.strokeRect(A_PAD + 18, top + 18, A_WIDTH - 36, floor - top - 36)
+  const inR = A_RIGHT - 44
+  const inW = A_WIDTH - 88
+  let y = top + 50
+  const season = sized(ctx, body.season, F_POSTER, '700', 110, inW * 0.66, 120, 40)
+  ctx.font = `700 ${season.size}px ${F_POSTER}`
+  put(ctx, 'collector.season', body.season, inR, y + season.box.ascent, BRAND.ink)
+  const serial = sized(ctx, body.serial, F_LATIN, '800', 34, inW * 0.3, 44, 14)
+  ctx.font = `800 ${serial.size}px ${F_LATIN}`
+  put(ctx, 'collector.serial', body.serial, A_PAD + 44 + serial.width, y + serial.box.ascent, BRAND.red)
+  y += season.box.height + 30
+
+  // the tally at the foot of the card, then the shirt as big as the room between allows
+  const figTop = floor - 44 - 150
+  const room = figTop - 30 - y
+  const kitWidth = Math.max(180, Math.min(inW * 0.72, room / 1.2))
+  drawKit(ctx, body.kit, (STORY_W - kitWidth) / 2, y + Math.max(0, (room - kitWidth * 1.2) / 2), kitWidth)
+  figureLine(ctx, 'collector', body.figure, body.figureLabel, inR, figTop, inW, 150, { figure: BRAND.red, under: BRAND.sign, label: BRAND.ink })
+}
+
+/* ── gate 6 · the contact sheet ────────────────────────────────────────── */
+function contact(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'contact' }>, top: number, floor: number): void {
+  const inR = A_RIGHT
+  const after = figureLine(ctx, 'contact', body.figure, body.figureLabel, inR, top, A_WIDTH, 170, { figure: BRAND.red, under: BRAND.sheet, label: BRAND.sheet })
+  const frames = body.frames.slice(0, 12)
+  const cols = frames.length > 6 ? 3 : 2
+  const rows = Math.max(1, Math.ceil(frames.length / cols))
+  // the film: sprocket holes down both edges, frames between them
+  const filmTop = after + 30
+  const filmBottom = floor
+  ctx.fillStyle = BRAND.sign
+  ctx.fillRect(A_PAD, filmTop, A_WIDTH, filmBottom - filmTop)
+  ctx.fillStyle = BRAND.ink
+  for (let y = filmTop + 16; y < filmBottom - 24; y += 44) {
+    ctx.fillRect(A_PAD + 12, y, 22, 26)
+    ctx.fillRect(A_RIGHT - 34, y, 22, 26)
+  }
+  const gap = 18
+  const left = A_PAD + 52
+  const width = A_WIDTH - 104
+  const fw = (width - gap * (cols - 1)) / cols
+  const fh = (filmBottom - filmTop - 36 - gap * (rows - 1)) / rows
+  frames.forEach((frame, index) => {
+    const col = index % cols
+    const row = Math.floor(index / cols)
+    const x = left + width - (col + 1) * fw - col * gap
+    const y = filmTop + 18 + row * (fh + gap)
+    ctx.fillStyle = BRAND.paper
+    ctx.fillRect(x, y, fw, fh)
+    if (frame.hit) {
+      ctx.strokeStyle = BRAND.red
+      ctx.lineWidth = 10
+      ctx.strokeRect(x + 5, y + 5, fw - 10, fh - 10)
+    } else {
+      ctx.strokeStyle = BRAND.concrete
+      ctx.lineWidth = 4
+      ctx.beginPath()
+      ctx.moveTo(x + 12, y + 12)
+      ctx.lineTo(x + fw - 12, y + fh - 12)
+      ctx.moveTo(x + fw - 12, y + 12)
+      ctx.lineTo(x + 12, y + fh - 12)
+      ctx.stroke()
+    }
+    const n = String(index + 1).padStart(2, '0')
+    const num = sized(ctx, n, F_LATIN, '800', 22, fw * 0.3, fh * 0.2, 12)
+    ctx.font = `800 ${num.size}px ${F_LATIN}`
+    put(ctx, `contact.n.${index}`, n, x + fw - 18, y + 18 + num.box.ascent, BRAND.muted)
+    const room = fh - 18 - num.box.height - 30
+    const label = sized(ctx, frame.label, F_SUEZ, '400', Math.min(48, room * 0.7), fw - 36, room, 14)
+    ctx.font = `400 ${label.size}px ${F_SUEZ}`
+    const base = y + 18 + num.box.height + 12 + (room - label.box.height) / 2 + label.box.ascent
+    putCentre(ctx, `contact.label.${index}`, frame.label, x + fw / 2, base, BRAND.ink)
+  })
+}
+
+/* ── gate 7 · the debate sticker ───────────────────────────────────────── */
+function debate(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'debate' }>, top: number, floor: number): void {
+  const took = sized(ctx, body.took, F_SUEZ, '400', 70, A_WIDTH, 90)
+  ctx.font = `400 ${took.size}px ${F_SUEZ}`
+  const tookBase = top + took.box.ascent
+  put(ctx, 'debate.took', body.took, A_RIGHT, tookBase, BRAND.ink)
+
+  // the question, in an ink panel anchored to the foot
+  const ask = sized(ctx, body.ask, F_SUEZ, '400', 84, A_WIDTH - 72, 110)
+  const panelH = 44 + ask.box.height + 44
+  const panelTop = floor - panelH
+  ctx.fillStyle = BRAND.ink
+  ctx.fillRect(A_PAD, panelTop, A_WIDTH, panelH)
+  ctx.font = `400 ${ask.size}px ${F_SUEZ}`
+  put(ctx, 'debate.ask', body.ask, A_RIGHT - 36, panelTop + 44 + ask.box.ascent, BRAND.sheet)
+
+  // the pick, as big as the room between allows
+  const roomTop = tookBase + took.box.descent + 36
+  const roomBottom = panelTop - 44
+  const pick = sized(ctx, body.pick, F_POSTER, '700', 320, A_WIDTH, roomBottom - roomTop - 14, 60)
+  ctx.font = `700 ${pick.size}px ${F_POSTER}`
+  const base = roomTop + Math.max(0, (roomBottom - roomTop - pick.box.height - 14) / 2) + pick.box.ascent
+  ctx.direction = isLatinRun(body.pick) ? 'ltr' : 'rtl'
+  plateText(ctx, body.pick, A_RIGHT, base, { under: BRAND.ink, over: BRAND.sheet, offset: 14, skew: 0 })
+  recordInk(ctx, 'debate.pick', body.pick, A_RIGHT, base, 14)
+  ctx.direction = 'rtl'
+}
+
+/* ── gate 8 · the broadcast freeze frame ───────────────────────────────── */
+function freeze(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'freeze' }>, top: number, floor: number): void {
+  const figTop = floor - 170
+  const pitchTop = top
+  const pitchBottom = figTop - 36
+  const h = pitchBottom - pitchTop
+  ctx.fillStyle = PITCH_GREEN
+  ctx.fillRect(A_PAD, pitchTop, A_WIDTH, h)
+  ctx.fillStyle = PITCH_STRIPE
+  for (let i = 0; i < 8; i += 2) ctx.fillRect(A_PAD, pitchTop + (i * h) / 8, A_WIDTH, h / 8)
+  // the attacking half: goal at the top, the box, the arc
+  ctx.strokeStyle = BRAND.sheet
+  ctx.lineWidth = 5
+  ctx.strokeRect(A_PAD + 20, pitchTop + 20, A_WIDTH - 40, h - 40)
+  ctx.strokeRect(A_PAD + A_WIDTH * 0.2, pitchTop + 20, A_WIDTH * 0.6, h * 0.3)
+  ctx.strokeRect(A_PAD + A_WIDTH * 0.36, pitchTop + 20, A_WIDTH * 0.28, h * 0.12)
+  ctx.fillStyle = BRAND.sheet
+  ctx.fillRect(A_PAD + A_WIDTH * 0.42, pitchTop + 8, A_WIDTH * 0.16, 12)
+
+  // the route: the ink plate first, the red over it — the second plate, not a shadow
+  const pts = body.route.slice(0, 16).map((p) => ({
+    x: A_PAD + 40 + (Math.max(0, Math.min(100, p.x)) / 100) * (A_WIDTH - 80),
+    y: pitchTop + 40 + (Math.max(0, Math.min(100, p.y)) / 100) * (h - 80),
+  }))
+  for (const [colour, off] of [[BRAND.ink, 6], [BRAND.red, 0]] as const) {
+    ctx.strokeStyle = colour
+    ctx.lineWidth = 12
+    ctx.beginPath()
+    pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x + off, p.y + off) : ctx.lineTo(p.x + off, p.y + off)))
+    ctx.stroke()
+    ctx.fillStyle = colour
+    for (const p of pts) {
+      ctx.beginPath()
+      ctx.arc(p.x + off, p.y + off, 16, 0, Math.PI * 2)
+      ctx.fill()
+    }
+  }
+
+  // the broadcaster's bug, in the corner the pitch does not need
+  const bug = sized(ctx, body.bug, F_LATIN, '800', 30, 320, 40, 14)
+  const clock = sized(ctx, body.clock, F_POSTER, '700', 60, 200, 64, 20)
+  const bugH = Math.max(bug.box.height, clock.box.height) + 28
+  const bugW = bug.width + clock.width + 60
+  const bx = A_PAD + 34
+  const by = pitchBottom - 34 - bugH
+  ctx.fillStyle = BRAND.ink
+  ctx.fillRect(bx, by, bugW, bugH)
+  ctx.fillStyle = BRAND.red
+  ctx.fillRect(bx, by, 10, bugH)
+  ctx.font = `800 ${bug.size}px ${F_LATIN}`
+  put(ctx, 'freeze.bug', body.bug, bx + 26 + bug.width, by + bugH / 2 + bug.box.ascent / 2, BRAND.sheet)
+  ctx.font = `700 ${clock.size}px ${F_POSTER}`
+  put(ctx, 'freeze.clock', body.clock, bx + bugW - 14, by + bugH / 2 + clock.box.ascent / 2 - clock.box.descent / 2, BRAND.red)
+
+  figureLine(ctx, 'freeze', body.figure, body.figureLabel, A_RIGHT, figTop, A_WIDTH, 170, { figure: BRAND.red, under: BRAND.sheet, label: BRAND.sheet })
+}
+
+/* ── gate 9 · the five-player poster ───────────────────────────────────── */
+function poster(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'poster' }>, top: number, floor: number): void {
+  const rows = body.rows
+  const rowH = (floor - top) / Math.max(1, rows.length)
+  rows.forEach((row, index) => {
+    const rowTop = top + index * rowH
+    if (index > 0) {
+      ctx.fillStyle = BRAND.ink
+      ctx.fillRect(A_PAD, rowTop, A_WIDTH, 6)
+    }
+    const n = String(index + 1)
+    const num = sized(ctx, n, F_POSTER, '700', Math.min(200, rowH * 0.8), 160, rowH * 0.8, 40)
+    ctx.font = `700 ${num.size}px ${F_POSTER}`
+    const numBase = rowTop + (rowH - num.box.height) / 2 + num.box.ascent
+    ctx.direction = 'ltr'
+    plateText(ctx, n, A_RIGHT, numBase, { under: BRAND.sign, over: BRAND.red, offset: 8, skew: 0 })
+    recordInk(ctx, `poster.n.${index}`, n, A_RIGHT, numBase, 8)
+    ctx.direction = 'rtl'
+    const textRight = A_RIGHT - num.width - 40
+    const room = textRight - A_PAD
+    const role = sized(ctx, row.role, F_BODY, '400', Math.min(32, rowH * 0.2), room, rowH * 0.25, 14)
+    const name = sized(ctx, row.name, F_SUEZ, '400', Math.min(96, rowH * 0.5), room, rowH * 0.5, 18)
+    const blockH = role.box.height + 12 + name.box.height
+    const blockTop = rowTop + (rowH - blockH) / 2
+    ctx.font = `400 ${role.size}px ${F_BODY}`
+    put(ctx, `poster.role.${index}`, row.role, textRight, blockTop + role.box.ascent, BRAND.sign)
+    ctx.font = `400 ${name.size}px ${F_SUEZ}`
+    put(ctx, `poster.name.${index}`, row.name, textRight, blockTop + role.box.height + 12 + name.box.ascent, BRAND.ink)
+  })
+}
+
+/* ── gate 10 · the clue card ───────────────────────────────────────────── */
+function clue(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'clue' }>, top: number, floor: number): void {
+  panel(ctx, top, floor, BRAND.paper, BRAND.ink)
+  const inR = A_RIGHT - 44
+  const inW = A_WIDTH - 88
+  const figTop = floor - 44 - 170
+  const total = Math.max(1, Math.min(12, body.total))
+  const gap = 14
+  const pip = Math.min(64, (inW - gap * (total - 1)) / total)
+  const pipTop = figTop - 40 - pip
+  // the silhouette — a man with no face, the whole point of the gate
+  const room = pipTop - 40 - (top + 40)
+  const r = Math.min(room * 0.24, 150)
+  const cx = STORY_W / 2
+  const headY = top + 40 + r
+  ctx.fillStyle = BRAND.sign
+  ctx.beginPath()
+  ctx.arc(cx, headY, r, 0, Math.PI * 2)
+  ctx.fill()
+  const shoulders = top + 40 + room
+  ctx.beginPath()
+  ctx.moveTo(cx - r * 2.3, shoulders)
+  ctx.quadraticCurveTo(cx - r * 2.1, headY + r * 1.25, cx, headY + r * 1.15)
+  ctx.quadraticCurveTo(cx + r * 2.1, headY + r * 1.25, cx + r * 2.3, shoulders)
+  ctx.closePath()
+  ctx.fill()
+  const q = sized(ctx, '?', F_POSTER, '700', Math.round(r * 1.5), r * 1.4, r * 1.5, 30)
+  ctx.font = `700 ${q.size}px ${F_POSTER}`
+  putCentre(ctx, 'clue.mark', '?', cx, headY + q.box.ascent / 2 - q.box.descent / 2, BRAND.sheet)
+  // the clues used, as pips — filled up to the one that caught him
+  const used = Math.max(0, Math.min(total, body.used))
+  const rowW = total * pip + (total - 1) * gap
+  for (let i = 0; i < total; i += 1) {
+    const x = cx + rowW / 2 - (i + 1) * pip - i * gap
+    if (i < used) {
+      ctx.fillStyle = BRAND.red
+      ctx.fillRect(x, pipTop, pip, pip)
+    } else {
+      ctx.strokeStyle = BRAND.ink
+      ctx.lineWidth = 4
+      ctx.strokeRect(x, pipTop, pip, pip)
+    }
+  }
+  figureLine(ctx, 'clue', body.figure, body.figureLabel, inR, figTop, inW, 170, { figure: BRAND.red, under: BRAND.sign, label: BRAND.ink })
+}
+
+/* ── gate 11 · the black poster ────────────────────────────────────────── */
+function blackPoster(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'black' }>, top: number, floor: number): void {
+  const rows = body.rows.slice(0, 12)
+  const rowH = (floor - top) / Math.max(1, rows.length)
+  rows.forEach((row, index) => {
+    const rowTop = top + index * rowH
+    if (index > 0) {
+      ctx.fillStyle = BRAND.muted
+      ctx.fillRect(A_PAD, rowTop, A_WIDTH, 2)
+    }
+    const n = String(index + 1).padStart(2, '0')
+    const num = sized(ctx, n, F_LATIN, '800', Math.min(30, rowH * 0.4), 80, rowH * 0.5, 12)
+    ctx.font = `800 ${num.size}px ${F_LATIN}`
+    const mid = rowTop + rowH / 2
+    put(ctx, `black.n.${index}`, n, A_PAD + num.width, mid + num.box.ascent / 2, BRAND.concrete)
+    const name = sized(ctx, row.name, F_SUEZ, '400', Math.min(72, rowH * 0.62), A_WIDTH - 120, rowH * 0.75, 14)
+    ctx.font = `400 ${name.size}px ${F_SUEZ}`
+    const base = mid + name.box.ascent / 2 - name.box.descent / 2
+    put(ctx, `black.name.${index}`, row.name, A_RIGHT, base, row.out ? BRAND.concrete : BRAND.sheet)
+    if (row.out) {
+      ctx.fillStyle = BRAND.sheet
+      ctx.fillRect(A_RIGHT - name.width, base - name.box.ascent * 0.4, name.width, 4)
+    }
+  })
+}
+
+/* ── gate 12 · the press clipping ──────────────────────────────────────── */
+function clipping(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'clipping' }>, top: number, floor: number): void {
+  const left = A_PAD + 16
+  const width = A_WIDTH - 32
+  const right = left + width
+  // the paper, torn along the foot
+  ctx.fillStyle = BRAND.paper
+  ctx.beginPath()
+  ctx.moveTo(left, top)
+  ctx.lineTo(right, top)
+  ctx.lineTo(right, floor - 12)
+  let tooth = 0
+  for (let x = right - 18; x > left; x -= 18) {
+    tooth += 1
+    ctx.lineTo(x, tooth % 2 === 1 ? floor : floor - 24)
+  }
+  ctx.lineTo(left, floor - 12)
+  ctx.closePath()
+  ctx.fill()
+  ctx.strokeStyle = BRAND.ink
+  ctx.lineWidth = 4
+  ctx.stroke()
+
+  const inR = right - 40
+  const inW = width - 80
+  let y = top + 40
+  const mast = sized(ctx, body.masthead, F_SUEZ, '400', 56, inW * 0.62, 70)
+  ctx.font = `400 ${mast.size}px ${F_SUEZ}`
+  const mastBase = y + mast.box.ascent
+  put(ctx, 'clipping.masthead', body.masthead, inR, mastBase, BRAND.ink)
+  const date = sized(ctx, body.date, F_BODY, '400', 30, inW - mast.width - 40, 40, 14)
+  ctx.font = `400 ${date.size}px ${F_BODY}`
+  put(ctx, 'clipping.date', body.date, left + 40 + date.width, mastBase, BRAND.sign)
+  y = mastBase + mast.box.descent + 18
+  ctx.fillStyle = BRAND.ink
+  ctx.fillRect(left + 40, y, inW, 8)
+  ctx.fillRect(left + 40, y + 14, inW, 3)
+  y += 50
+
+  // the label stamp, anchored to the foot of the clipping
+  const lab = sized(ctx, body.label, F_LATIN, '800', 28, inW * 0.6, 40, 12)
+  const stampH = lab.box.height + 28
+  const stampTop = floor - 24 - 36 - stampH
+  ctx.fillStyle = BRAND.ink
+  ctx.fillRect(left + 40, stampTop, lab.width + 36, stampH)
+  ctx.font = `800 ${lab.size}px ${F_LATIN}`
+  put(ctx, 'clipping.label', body.label, left + 40 + 18 + lab.width, stampTop + 14 + lab.box.ascent, BRAND.sheet)
+
+  // the headline (up to three lines) and the caption (up to four), fitted into the rest
+  const bottom = stampTop - 36
+  let headSize = 88
+  let capSize = 36
+  let head: string[] = []
+  let cap: string[] = []
+  let headBoxes: Ink[] = []
+  let capBoxes: Ink[] = []
+  for (;;) {
+    ctx.font = `400 ${headSize}px ${F_SUEZ}`
+    head = wrapLines(ctx, body.headline, inW)
+    headBoxes = head.map((line) => textBox(ctx, line))
+    ctx.font = `400 ${capSize}px ${F_BODY}`
+    cap = wrapLines(ctx, body.caption, inW)
+    capBoxes = cap.map((line) => textBox(ctx, line))
+    const h = headBoxes.reduce((s, b) => s + b.height + 14, 0) + 26 + capBoxes.reduce((s, b) => s + b.height + 12, 0)
+    if ((h <= bottom - y && head.length <= 3 && cap.length <= 4) || headSize <= 30) break
+    headSize -= 4
+    capSize = Math.max(22, capSize - 1)
+  }
+  head.forEach((line, i) => {
+    const box = headBoxes[i] as Ink
+    ctx.font = `400 ${headSize}px ${F_SUEZ}`
+    put(ctx, `clipping.head.${i}`, line, inR, y + box.ascent, BRAND.ink)
+    y += box.height + 14
+  })
+  y += 26
+  cap.slice(0, 4).forEach((line, i) => {
+    const box = capBoxes[i] as Ink
+    ctx.font = `400 ${capSize}px ${F_BODY}`
+    put(ctx, `clipping.caption.${i}`, line, inR, y + box.ascent, BRAND.muted)
+    y += box.height + 12
+  })
+}
+
+/* ── gate 13 · the paper strip and the thread ──────────────────────────── */
+function strip(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'strip' }>, top: number, floor: number): void {
+  const after = figureLine(ctx, 'strip', body.figure, body.figureLabel, A_RIGHT, top, A_WIDTH, 170, { figure: BRAND.red, under: BRAND.sign, label: BRAND.ink })
+  const rows = body.rows.slice(0, 12)
+  const stripTop = after + 30
+  panel(ctx, stripTop, floor, BRAND.paper, BRAND.ink, 6)
+  const rowH = (floor - stripTop - 20) / Math.max(1, rows.length)
+  const knotX = A_RIGHT - 50
+  // the thread first, so every knot sits on it
+  ctx.strokeStyle = BRAND.red
+  ctx.lineWidth = 8
+  ctx.beginPath()
+  ctx.moveTo(knotX, stripTop + 10 + rowH / 2)
+  ctx.lineTo(knotX, stripTop + 10 + rowH * (rows.length - 0.5))
+  ctx.stroke()
+  rows.forEach((row, index) => {
+    const mid = stripTop + 10 + index * rowH + rowH / 2
+    const r = Math.min(18, rowH * 0.22)
+    ctx.fillStyle = row.ok ? BRAND.red : BRAND.paper
+    ctx.strokeStyle = BRAND.red
+    ctx.lineWidth = 5
+    ctx.beginPath()
+    ctx.arc(knotX, mid, r, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+    const text = sized(ctx, row.text, F_SUEZ, '400', Math.min(52, rowH * 0.56), A_WIDTH - 140, rowH * 0.78, 14)
+    ctx.font = `400 ${text.size}px ${F_SUEZ}`
+    put(ctx, `strip.row.${index}`, row.text, knotX - 44, mid + text.box.ascent / 2 - text.box.descent / 2, row.ok ? BRAND.ink : BRAND.muted)
+  })
+}
+
+/* ── THE WORKER LIFE · the ticket ──────────────────────────────────────── */
+function ticket(ctx: CanvasRenderingContext2D, body: Extract<ArtefactStory, { kind: 'ticket' }>, top: number, floor: number): void {
+  const h = floor - top
+  panel(ctx, top, floor, BRAND.sheet, BRAND.sheet, 2)
+  // the stub on the far edge, torn along a perforation, with the notches cut out of it
+  const stubW = Math.round(A_WIDTH * 0.26)
+  const cut = A_PAD + stubW
+  ctx.fillStyle = BRAND.ink
+  for (const y of [top, floor]) {
+    ctx.beginPath()
+    ctx.arc(cut, y, 28, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.strokeStyle = BRAND.muted
+  ctx.lineWidth = 4
+  ctx.setLineDash([14, 12])
+  ctx.beginPath()
+  ctx.moveTo(cut, top + 40)
+  ctx.lineTo(cut, floor - 40)
+  ctx.stroke()
+  ctx.setLineDash([])
+
+  // the stub: its word and its number
+  const stub = sized(ctx, body.stub, F_SUEZ, '400', 56, stubW - 48, 70)
+  ctx.font = `400 ${stub.size}px ${F_SUEZ}`
+  putCentre(ctx, 'ticket.stub', body.stub, A_PAD + stubW / 2, top + h * 0.3 + stub.box.ascent, BRAND.red)
+  const serial = sized(ctx, body.serial, F_LATIN, '800', 40, stubW - 48, 50, 12)
+  ctx.font = `800 ${serial.size}px ${F_LATIN}`
+  putCentre(ctx, 'ticket.serial', body.serial, A_PAD + stubW / 2, top + h * 0.3 + stub.box.height + 40 + serial.box.ascent, BRAND.ink)
+
+  // the ticket proper
+  const inR = A_RIGHT - 44
+  const inW = A_RIGHT - 44 - (cut + 44)
+  let y = top + 50
+  const title = sized(ctx, body.title, F_BODY, '400', 36, inW, 48)
+  ctx.font = `400 ${title.size}px ${F_BODY}`
+  put(ctx, 'ticket.title', body.title, inR, y + title.box.ascent, BRAND.sign)
+  y += title.box.height + 24
+  // the line under the place, fitted from the foot of the ticket upward
+  ctx.font = `400 34px ${F_BODY}`
+  const lines = wrapLines(ctx, body.line, inW).slice(0, 3)
+  const boxes = lines.map((line) => textBox(ctx, line))
+  const linesH = boxes.reduce((s, b) => s + b.height + 12, 0)
+  let ly = floor - 50 - linesH
+  lines.forEach((line, i) => {
+    const box = boxes[i] as Ink
+    ctx.font = `400 34px ${F_BODY}`
+    put(ctx, `ticket.line.${i}`, line, inR, ly + box.ascent, BRAND.ink)
+    ly += box.height + 12
+  })
+  const placeRoomBottom = floor - 50 - linesH - 30
+  const place = sized(ctx, body.place, F_SUEZ, '400', 64, inW, 84)
+  const placeBase = placeRoomBottom - place.box.descent
+  ctx.font = `400 ${place.size}px ${F_SUEZ}`
+  put(ctx, 'ticket.place', body.place, inR, placeBase, BRAND.ink)
+  const yearRoom = placeBase - place.box.ascent - 30 - y
+  const year = sized(ctx, body.year, F_POSTER, '700', 320, inW, yearRoom - 14, 60)
+  ctx.font = `700 ${year.size}px ${F_POSTER}`
+  const yearBase = y + Math.max(0, (yearRoom - year.box.height - 14) / 2) + year.box.ascent
+  ctx.direction = isLatinRun(body.year) ? 'ltr' : 'rtl'
+  plateText(ctx, body.year, inR, yearBase, { under: BRAND.ink, over: BRAND.red, offset: 12, skew: 0 })
+  recordInk(ctx, 'ticket.year', body.year, inR, yearBase, 12)
+  ctx.direction = 'rtl'
 }
 
 /* ------------------------------------------------------------------ the PNG */

@@ -5,6 +5,20 @@ import { useEffect, useState } from 'react'
 import { closetCard, gapsCard, matchCard, wantedCard } from '@/lib/collector/cards'
 import { handleLabel } from '@/lib/collector/labels'
 import { DEFAULT_SPEC } from '@/lib/kit/spec'
+import {
+  blackCard,
+  clippingCard,
+  clueCard,
+  collectorCard,
+  contactCard,
+  debateCard,
+  freezeCard,
+  posterCard,
+  programmeCard,
+  slipCard,
+  stripCard,
+  ticketCard,
+} from '@/lib/share/artefacts'
 import { drawStory, lastInkBoxes, type InkBox, type StoryCard } from '@/lib/share/story'
 
 /**
@@ -250,6 +264,71 @@ const CASES: Array<{ name: string; card: StoryCard }> = [
   { name: 'gaps-complete', card: gapsCard('שנות ה-50', '5/5', []) },
   { name: 'match', card: matchCard('1994 בערך', '2016 בערך') },
   { name: 'match-buy', card: matchCard('2016/17', null) },
+  /*
+   * Share V2 (28.9.2026) — one artefact per gate (ONE RED WORLD §28), built by the SAME
+   * builders the gates call (`lib/share/artefacts.ts`), with the worst strings each can be
+   * handed: the longest name, the longest match line, a full list for every list card.
+   */
+  { name: 'slip', card: slipCard({ topic: 'גביעי אירופה — שנות ה־90, קשה', marks: [true, false, true, true, false, true, true, true, false, true, true, true] }) },
+  { name: 'slip-short', card: slipCard({ topic: 'היסטוריה', marks: [false, false, false, false, false, false] }) },
+  {
+    name: 'programme',
+    card: programmeCard({
+      match: 'הפועל תל אביב — מכבי חיפה, גמר גביע המדינה',
+      date: 'שבת, 24 במאי 1986 · אצטדיון בלומפילד',
+      slots: ['שוער', 'מגן ימני', 'בלם', 'בלם', 'מגן שמאלי', 'קשר אחורי', 'קשר', 'קשר התקפי', 'כנף ימין', 'חלוץ', 'כנף שמאל'].map((role, i) => ({ role, found: i % 3 !== 1 })),
+    }),
+  },
+  { name: 'collector', card: collectorCard({ season: '1994 בערך · שלישית', serial: 33, kit: { ...DEFAULT_SPEC, number: 99 }, right: 5, total: 5 }) },
+  {
+    name: 'contact',
+    card: contactCard({ moves: 999, frames: Array.from({ length: 12 }, (_, i) => ({ label: i % 2 ? LONG_NAME : 'אליפות 1985/86', hit: i % 4 !== 0 })) }),
+  },
+  { name: 'contact-six', card: contactCard({ moves: 6, frames: Array.from({ length: 6 }, (_, i) => ({ label: 'גביע המדינה 1983', hit: i !== 2 })) }) },
+  { name: 'debate', card: debateCard({ question: 'הזר הכי טוב שלבש אדום', pick: LONG_NAME }) },
+  { name: 'debate-short', card: debateCard({ question: 'השוער', pick: 'בונו' }) },
+  {
+    name: 'freeze',
+    card: freezeCard({
+      match: 'הפועל תל אביב — בנפיקה, ליגת האלופות 2010',
+      route: [{ x: 10, y: 90 }, { x: 40, y: 70 }, { x: 85, y: 55 }, { x: 60, y: 30 }, { x: 50, y: 5 }],
+      accuracy: 100,
+      clock: "90+4'",
+    }),
+  },
+  {
+    name: 'poster',
+    card: posterCard({
+      rows: [
+        { role: 'שוער', name: LONG_NAME },
+        { role: 'בלם', name: 'אנטביקה' },
+        { role: 'קשר', name: LONG_NAME },
+        { role: 'חלוץ', name: 'דמיאנוביץ' },
+        { role: 'חלוץ', name: LONG_NAME },
+      ],
+    }),
+  },
+  { name: 'clue', card: clueCard({ hints: 10, total: 10, solved: false }) },
+  { name: 'clue-early', card: clueCard({ hints: 1, total: 10, solved: true }) },
+  { name: 'black', card: blackCard({ rows: Array.from({ length: 12 }, (_, i) => ({ name: i % 2 ? LONG_NAME : 'אבי נמני', out: i < 11 })) }) },
+  {
+    name: 'clipping',
+    card: clippingCard({
+      date: '25.5.1986',
+      headline: 'הפועל תל אביב אלופת המדינה בפעם העשירית: גילי לנדאו בדקה ה־86',
+      caption: 'בלומפילד מלא עד אפס מקום, והיציע הדרומי לא הפסיק לשיר גם אחרי השריקה. כתבה מתוך מעריב ספורט, עמוד 3.',
+      label: 'ARCHIVE · M_9F2C0A41B7D3',
+    }),
+  },
+  {
+    name: 'strip',
+    card: stripCard({ variant: 'thread', steps: 12, rows: Array.from({ length: 12 }, (_, i) => ({ text: i % 2 ? LONG_NAME : 'גמר גביע המדינה 1983', ok: i !== 5 })) }),
+  },
+  { name: 'strip-order', card: stripCard({ variant: 'order', rows: Array.from({ length: 10 }, (_, i) => ({ text: 'העלייה לליגת העל 2009', ok: i % 3 !== 0 })) }) },
+  {
+    name: 'ticket',
+    card: ticketCard({ year: '1986', place: 'בלומפילד · יציע דרומי', line: 'יש זיכרונות שלא היו שלי — עד ששיחקתי אותם. אבא החזיק לי את היד כל המשחק.', serial: 'NO. 053' }),
+  },
 ]
 
 type Report = Record<string, InkBox[]>
