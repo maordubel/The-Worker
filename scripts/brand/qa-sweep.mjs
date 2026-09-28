@@ -36,6 +36,10 @@ import { readFileSync } from 'node:fs'
 // cannot import TypeScript, and a copied list is how two lists drift).
 const EXEMPT_PATHS = [...readFileSync(new URL('../../lib/brand/yellowExemptions.ts', import.meta.url), 'utf8')
   .matchAll(/path: '(public\/[^']+)'/g)].map((m) => m[1].slice('public'.length))
+// ...and the approved photograph FOLDERS (rule 69: public/kits/ — the archive's photographed
+// shirts, which gates 1, 3, 8 and 9 now print on the pitch through PlayerShirt).
+const EXEMPT_FOLDERS = [...readFileSync(new URL('../../lib/brand/yellowExemptions.ts', import.meta.url), 'utf8')
+  .matchAll(/folder: '(public\/[^']+)'/g)].map((m) => m[1].slice('public'.length))
 
 const BASE = process.argv[2] ?? 'http://127.0.0.1:3000'
 const EXECUTABLE = process.env.PW_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
@@ -68,6 +72,8 @@ const ROUTES = [
   // and rule 8 does not care that they were drawn by a Graphics call. What this sweep
   // cannot do is PLAY it; `scripts/life/playthrough.mjs` does that.
   '/life',
+  // ONE RED WORLD (28.9.2026): the stand, the personal file, a challenge landing, the red thread
+  '/stand', '/tik/file', '/blind-cow', '/royal-rumble', '/timeline/order',
 ]
 const WIDTHS = [320, 390, 768, 1440]
 
@@ -139,7 +145,10 @@ for (const width of WIDTHS) {
        * cancels forty prefetches is visible rather than silent.
        */
       const aborted = request.failure()?.errorText === 'net::ERR_ABORTED'
-      if (aborted && request.url().includes('_rsc=')) {
+      // ...and, from 28.9.2026, a server action the page fired on mount (the personal area
+      // asks the server which LIFE chapters it may name). The reload cancels it the same way.
+      const action = request.method() === 'POST' && Boolean(request.headers()['next-action'])
+      if (aborted && (request.url().includes('_rsc=') || action)) {
         cancelled.push(request.url())
         return
       }
@@ -169,7 +178,7 @@ for (const width of WIDTHS) {
      * `display: none` so the layout, and therefore the overflow measurement, is the
      * layout a reader actually gets.
      */
-    const hidden = await page.evaluate((exempt) => {
+    const hidden = await page.evaluate(([exempt, folders]) => {
       const photos = [...document.querySelectorAll('[data-archive-photo]')]
       for (const photo of photos) photo.style.visibility = 'hidden'
       // photographs collectors uploaded of their own shirts: the colour is the object's (rule 90)
@@ -179,12 +188,12 @@ for (const width of WIDTHS) {
       const files = [...document.querySelectorAll('img, image, video, source')].filter((node) => {
         const src = node.getAttribute('src') || node.getAttribute('href') || node.getAttribute('xlink:href') || ''
         const path = src.split('?')[0].replace(/^https?:\/\/[^/]+/, '')
-        return exempt.includes(path)
+        return exempt.includes(path) || folders.some((folder) => path.startsWith(folder))
       })
       for (const node of files) (node.style ? node.style : node).visibility = 'hidden'
       for (const node of files) node.setAttribute('visibility', 'hidden')
       return photos.length + files.length
-    }, EXEMPT_PATHS)
+    }, [EXEMPT_PATHS, EXEMPT_FOLDERS])
     if (route === '/kits/archive' && hidden === 0) {
       errors.push('no [data-archive-photo] found on the archive — the sweep would be measuring a page that is not there')
     }

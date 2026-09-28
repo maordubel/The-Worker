@@ -2149,6 +2149,8 @@ function SlotToken({
  * squares). The live slot pulses by TRANSFORM only (rule 8: no colour-opacity animation
  * on grass).
  */
+const SLOT_SHIRT = 'M20 6 L6 16 L12 26 L18 22 L18 66 L42 66 L42 22 L48 26 L54 16 L40 6 Q30 13 20 6 Z'
+
 function EmptySlotMark({ roleHe, live }: { roleHe: string; live: boolean }) {
   return (
     <span className="flex flex-col items-center">
@@ -2157,16 +2159,21 @@ function EmptySlotMark({ roleHe, live }: { roleHe: string; live: boolean }) {
         aria-hidden="true"
         className={`block w-[11cqw] max-w-[62px] ${live ? 'animate-fx-wobble motion-reduce:animate-none' : ''}`}
         fill="none"
-        stroke={live ? 'rgb(var(--red))' : 'rgb(var(--sheet) / .7)'}
-        strokeWidth="2.4"
-        strokeDasharray="4 3"
         strokeLinejoin="round"
       >
-        <path d="M20 6 L6 16 L12 26 L18 22 L18 66 L42 66 L42 22 L48 26 L54 16 L40 6 Q30 13 20 6 Z" />
+        {/* red never meets the grass directly — an anti-aliased red edge on green is olive,
+            which is yellow by hue (rule 8; the goal pitch rule "every red line on an ink line") */}
+        {live && <path d={SLOT_SHIRT} stroke="rgb(var(--ink))" strokeWidth="4.6" />}
+        <path
+          d={SLOT_SHIRT}
+          stroke={live ? 'rgb(var(--red))' : 'rgb(var(--sheet) / .7)'}
+          strokeWidth="2.4"
+          strokeDasharray="4 3"
+        />
       </svg>
       <span
         className={`mt-0.5 block max-w-[24cqw] truncate px-1.5 py-[2px] font-body text-[10px] font-extrabold leading-tight ${
-          live ? 'text-red' : 'text-sheet/80'
+          live ? 'bg-sheet text-red' : 'text-sheet/80'
         }`}
       >
         {roleHe}
