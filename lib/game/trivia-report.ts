@@ -22,16 +22,20 @@ export type AnswerLog = {
 }
 
 /** the reaction to one answer — a message key; its `.sub` key is the second line */
-export function reactionFor(entry: AnswerLog, streak: number, index: number): { key: string } {
+export function reactionFor(entry: AnswerLog, streak: number, index: number): { key: string | null } {
+  // index stays in the signature: the plain lines are walked by it in the voice pool
+  void index
   if (!entry.correct) {
     if (entry.timeout) return { key: 'trivia.react.timeout' }
-    return { key: `trivia.react.miss.${index % 4}` }
+    // the plain miss speaks in the Red Voice (`lib/voice`, gate 2 `wrong` pool)
+    return { key: null }
   }
   if (entry.difficulty >= 5) return { key: 'trivia.react.deep' }
   if (!entry.hinted && entry.elapsed > 0 && entry.elapsed <= 3) return { key: 'trivia.react.fast' }
   if (streak >= 5) return { key: 'trivia.react.fire' }
   if (streak >= 3) return { key: 'trivia.react.onit' }
-  return { key: `trivia.react.hit.${index % 4}` }
+  // the plain hit speaks in the Red Voice (gate 2 `correct` pool): "כן." · "זה נשאר." · …
+  return { key: null }
 }
 
 /** the streak callout — only at the numbers a terrace would shout */

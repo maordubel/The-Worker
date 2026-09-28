@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest'
  */
 const ROOT = join(__dirname, '..')
 const FILES = ['supabase/migrations/20260925090000_worker_events.sql', 'supabase/migrations/20260925091000_worker_blind_cow_live.sql']
+const TAXONOMY = 'supabase/migrations/20260928090000_worker_events_taxonomy.sql'
 
 function code(path: string): string {
   return readFileSync(join(ROOT, path), 'utf8')
@@ -74,8 +75,13 @@ describe('the measurement file', () => {
     expect(sql).toContain('> 240 then')
   })
 
-  it('accepts exactly the events the client sends', () => {
-    const names = /name\s+text not null check \(name in \(([\s\S]*?)\)\)/.exec(sql)?.[1] ?? ''
+  it('accepts exactly the events the client sends — as the latest check on the column says', () => {
+    // the column's check was widened on 28.9.2026 by the taxonomy file; that file's list is
+    // the one in force, and the original file's list must be a subset of it (nothing retired)
+    const original = [...(/name\s+text not null check \(name in \(([\s\S]*?)\)\)/.exec(sql)?.[1] ?? '').matchAll(/'([a-z_]+)'/g)].map((m) => m[1])
+    const latest = code(TAXONOMY)
+    const names = /add constraint worker_event_name_check check \(name in \(([\s\S]*?)\)\)/.exec(latest)?.[1] ?? ''
+    for (const name of original) expect(names).toContain(`'${name}'`)
     const list = [...names.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort()
     const client = readFileSync(join(ROOT, 'lib/analytics/events.ts'), 'utf8')
     const declared = [...(/EVENT_NAMES = \[([\s\S]*?)\] as const/.exec(client)?.[1] ?? '').matchAll(/'([a-z_]+)'/g)].map((m) => m[1]).sort()
@@ -104,5 +110,31 @@ describe('the live duel file', () => {
   })
   it('ends on its check line', () => {
     expect(readFileSync(join(ROOT, FILES[1] as string), 'utf8')).toContain('live_functions 3 · live_columns 2 · blind_cow_functions 18 · anon_can_write 0 · auth_triggers 0')
+  })
+})
+
+describe('the taxonomy file (ONE RED WORLD §37, 28.9.2026)', () => {
+  const sql = code(TAXONOMY)
+
+  it('only replaces the name check on worker_event — no table, function, grant or auth', () => {
+    expect(sql).not.toMatch(/create (table|or replace function|trigger|policy)/i)
+    expect(sql).not.toMatch(/\bgrant\b/i)
+    expect(sql).not.toMatch(/\bauth\./i)
+    expect(sql).not.toMatch(/drop\s+(table|function|schema|column)/i)
+    for (const m of sql.matchAll(/\balter table\s+(?:public\.)?(\w+)/gi)) expect(m[1]).toBe('worker_event')
+    expect(sql).toContain('drop constraint if exists worker_event_name_check,')
+  })
+
+  it('carries every name of the plan (§37) except gate_open, which is gate_view', () => {
+    for (const name of [
+      'run_start', 'run_complete', 'result_view', 'archive_open', 'entity_follow', 'life_chapter_complete',
+      'share_open', 'share_created', 'share_joined', 'challenge_created', 'challenge_joined', 'challenge_complete',
+      'stand_created', 'stand_joined', 'stand_daily_complete', 'daily_open', 'daily_item_complete', 'daily_complete',
+    ]) expect(sql).toContain(`'${name}'`)
+    expect(sql).not.toContain("'gate_open'")
+  })
+
+  it('ends on its check line', () => {
+    expect(readFileSync(join(ROOT, TAXONOMY), 'utf8')).toContain('event_names 36 · anon_can_read 0 · auth_triggers 0')
   })
 })

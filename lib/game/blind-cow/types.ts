@@ -1,5 +1,6 @@
 import type { ShirtLook } from '@/lib/kit/playerShirt'
 import type { CrossLink } from '@/lib/links/types'
+import type { NextAction, ResultContext } from '@/lib/results/types'
 
 /**
  * פרה עיוורת — the data contracts of gate 10 (spec GATE10-BLINDCOW-AWAYDAYS §5.1).
@@ -154,6 +155,13 @@ export type RunResult = {
    * gate-8 goal he scored. Resolved after the whistle only, every target checked.
    */
   links: CrossLink[]
+  /**
+   * ONE RED WORLD (28.9.2026): the run as a ResultContext (§5) — him, the matches his
+   * clues name, how many clues — and at most two next doors from `recommend()` (§38),
+   * never repeating a chip already in `links`.
+   */
+  context: ResultContext
+  next: NextAction[]
   /** his real shirt where the archive holds a photograph (`lib/kit/playerShirt.ts`) */
   shirt: ShirtLook
   shirtTitle: string

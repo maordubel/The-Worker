@@ -28,6 +28,28 @@ export const EVENT_NAMES = [
   'blind_cow_duel_completed',
   'blind_cow_result_shared',
   'blind_cow_live_started',
+  // ONE RED WORLD §37 (28.9.2026) — one vocabulary for every gate instead of one per feature.
+  // `gate_open` of the plan IS `gate_view` above; a second name for the same moment would
+  // split one count in two. The table's check is widened by
+  // `supabase/migrations/20260928090000_worker_events_taxonomy.sql`.
+  'run_start',
+  'run_complete',
+  'result_view',
+  'archive_open',
+  'entity_follow',
+  'life_chapter_complete',
+  'share_open',
+  'share_created',
+  'share_joined',
+  'challenge_created',
+  'challenge_joined',
+  'challenge_complete',
+  'stand_created',
+  'stand_joined',
+  'stand_daily_complete',
+  'daily_open',
+  'daily_item_complete',
+  'daily_complete',
 ] as const
 
 export type EventName = (typeof EVENT_NAMES)[number]

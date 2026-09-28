@@ -5,6 +5,8 @@ import { matchById, momentForGoal } from '@/lib/archive/match-master'
 import { playerById } from '@/lib/archive/player-master'
 import { awayDaysMaster } from '@/lib/away-days/data'
 import { BANK } from '@/lib/game/blind-cow/bank'
+import { lineupYears } from '@/lib/game/lineup'
+import { GATES, isOpen } from '@/lib/gates'
 import type { OpenClue } from '@/lib/game/blind-cow/types'
 import { goalYears } from '@/lib/game/goal'
 
@@ -89,6 +91,54 @@ export function matchOfGoal(goalId: string | null | undefined): string | null {
 
 export function goalHref(goalId: string): string {
   return `/goal?g=${encodeURIComponent(goalId)}`
+}
+
+/* ------------------------------------------------------------------ gate doors (28.9.2026) */
+
+/**
+ * A whole gate's front door, by its number on the wall — only when the gate is open
+ * (`href` non-null in `lib/gates.ts`). The Universal Exit's "עוד משהו טבעי" reaches other
+ * gates through this and nothing else, so a closed plate can never be recommended.
+ */
+export function gateHref(gateNumber: number): string | null {
+  const gate = GATES.find((g) => g.number === gateNumber)
+  return gate && isOpen(gate) ? (gate.href.split('?')[0] ?? null) : null
+}
+
+/** AWAY DAYS' front door — the journey itself, not a stop on it. */
+export function awayDaysHref(): string {
+  return '/away-days'
+}
+
+/** A goal gate 8 actually deals — the id checked against the deck, or null. */
+export function playableGoalHref(goalId: string | null | undefined): string | null {
+  return goalId && goalYears().some((g) => g.id === goalId) ? goalHref(goalId) : null
+}
+
+let lineupMatches: Set<string> | null = null
+/**
+ * Gate 3's door for a match — only when that match is one of the verified XIs the gate
+ * deals. The gate reads `?seed=` only, so the door is the gate itself; the check is what
+ * keeps "נסה את ההרכב" from being offered for a match nobody can assemble.
+ */
+export function lineupHref(matchId: string | null | undefined): string | null {
+  if (!matchId) return null
+  lineupMatches ??= new Set(lineupYears().map((row) => row.id))
+  return lineupMatches.has(matchId) ? gateHref(3) : null
+}
+
+/**
+ * LIFE's door — only for a chapter the caller says is unlocked (§23.2: never reveal future
+ * LIFE content, never spoil). It opens the LIFE landing, never the middle of a chapter:
+ * the landing is the one return point that is always safe.
+ */
+export function lifeHref(chapterId: string | null | undefined, unlocked: (chapterId: string) => boolean): string | null {
+  if (!chapterId) return null
+  try {
+    return unlocked(chapterId) ? '/life' : null
+  } catch {
+    return null
+  }
 }
 
 /* ------------------------------------------------------------------ subjects */

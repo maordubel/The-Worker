@@ -3,7 +3,7 @@ import 'server-only'
 import { rotate } from '@/lib/rotation/deck'
 
 import { rng, shuffle } from './archive'
-import { allQuestions, poolValues, questionById } from './question-master'
+import { allQuestions, factById, poolValues, questionById } from './question-master'
 import { hash } from './questions/draft'
 import type {
   AnswerValue,
@@ -445,6 +445,25 @@ export function gradeAnswer(id: string, answer: AnswerValue): Verdict | null {
     explanation: question.explanation,
     difficulty: question.difficulty,
   }
+}
+
+/**
+ * The archive entities behind a set of questions — through each question's facts, in the
+ * order the questions came. Used AFTER a run for the Universal Exit's doors (ONE RED WORLD
+ * §11: "wrong answer → archive entity"); the ids are canonical, the facts never leave.
+ */
+export function entitiesOfQuestions(ids: readonly string[]): string[] {
+  const out: string[] = []
+  for (const id of ids) {
+    const question = questionById(id)
+    if (!question) continue
+    for (const factId of question.factIds) {
+      for (const entityId of factById(factId)?.entityIds ?? []) {
+        if (!out.includes(entityId)) out.push(entityId)
+      }
+    }
+  }
+  return out
 }
 
 /* -------------------------------------------------------------------------- hints */
