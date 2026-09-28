@@ -438,7 +438,7 @@ export const CONVERSATIONS_LACES: Conversation[] = [
          * accusations land is what the Monday — and 2000 — will hand back to him.
          */
         choices: [
-          { id: 'lists', text: 'לשבת איתו על שלוש הרשימות.', when: { notFlag: 'l1:lists' }, then: [{ e: 'minigame', id: 'board:lists-1998' }] },
+          { id: 'lists', text: 'לשבת איתו על שלוש הרשימות.', when: { notFlag: 'l1:lists' }, noteHe: 'כבר עברתם על הרשימות.', then: [{ e: 'minigame', id: 'board:lists-1998' }] },
           { id: 'soko', text: 'ללכת עם סוקו. לאסוף עיתונים.', then: [{ e: 'minigame', id: 'chore:story:papers-98' }] },
           { id: 'not-yet', text: 'לא עכשיו.', then: [] },
         ],

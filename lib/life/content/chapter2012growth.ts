@@ -534,6 +534,11 @@ export const CONVERSATIONS_CUPS_2012: Conversation[] = [
         ],
         then: [{ e: 'flag', flag: 'n:arrived' }, { e: 'flagValue', flag: PROMISE_2012, value: 'kept' }],
       },
+      {
+        // the fallback a partner-less save can reach if the beat's gate ever drifts (life.test)
+        lines: [{ who: null, text: 'אלנבי בערב. הרדיו של הקיוסק עוד מדבר על הגמר.' }],
+        then: [{ e: 'flag', flag: 'n:arrived' }],
+      },
     ],
   },
   {

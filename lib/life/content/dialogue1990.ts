@@ -937,7 +937,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
           { who: null, text: 'בכיס — השוליים של העיתון מהבוקר, וחצי עיפרון.' },
         ],
         choices: [
-          { id: 'write', text: 'לכתוב. מה אני יודע, ומאיפה.', when: { notFlag: 'net:noted' }, then: [{ e: 'minigame', id: 'board:notebook-1990' }] },
+          { id: 'write', text: 'לכתוב. מה אני יודע, ומאיפה.', when: { notFlag: 'net:noted' }, noteHe: 'כבר כתבת. הפתק בכיס.', then: [{ e: 'minigame', id: 'board:notebook-1990' }] },
           { id: 'watch', text: 'לא. להסתכל על היציע.', then: [{ e: 'flag', flag: 'net:noted' }, { e: 'toast', text: 'היציע מחשב בשבילך. בקולות שונים, בתוצאות שונות.', tone: 'plain' }] },
         ],
       },

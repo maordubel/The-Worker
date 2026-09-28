@@ -137,6 +137,8 @@ const NO_PLATE_YET: ReadonlySet<string> = new Set([
    * הפנים של רומא או של מתוקי (כלל 67). ב-`ART-PROMPTS-2000-2026.md` §16 אין לו בקשה עדיין.
    */
   'יבגני',
+  // המנהל המקצועי — תפקיד בשיחת וידאו אחת של 2025 (`SPEAKING_ROLES`), מסך ולא אדם בחדר (28.9.2026)
+  'המנהל המקצועי',
   /**
    * שלושה מחלונות CAREER (21.9.2026), באותו נימוק: שורה ברישום, בלי `portraitSet`.
    * שני (`crowd-shani`) — הצלמת של J01–J03; ארז (`crowd-erez`) — שורה אחת ב-T01;
@@ -210,6 +212,9 @@ describe('לכל דמות הפנים שלה', () => {
     const loud: string[] = []
     for (const [who, lines] of speakers()) {
       if (resolves(who)) continue
+      // PARTNER is never drawn as PARTNER: resolveSpeaker swaps in Melanie, Dor or Tamar, and
+      // each has a face (see NO_PLATE_YET). Pass D grew the tag past twenty lines (28.9.2026).
+      if (who === 'PARTNER') continue
       if (lines > 20) loud.push(`${who}: ${lines} שורות ואין לו פנים`)
     }
     expect(loud, loud.join('\n')).toEqual([])

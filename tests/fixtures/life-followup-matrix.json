@@ -30,7 +30,7 @@
   {
    "chapter": "a2-alley",
    "conversation": "allenby-cafe",
-   "branch": 1,
+   "branch": 0,
    "who": null,
    "whoId": null,
    "step": "alley",
@@ -94,19 +94,6 @@
   },
   {
    "chapter": "a2-alley",
-   "conversation": "alley-a2",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "bread",
-   "stepHe": "לחם מהקיוסק.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "a2-alley",
    "conversation": "alley-look",
    "branch": 0,
    "who": null,
@@ -129,19 +116,6 @@
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "a2-alley",
-   "conversation": "efi-a2",
-   "branch": 0,
-   "who": "אפי",
-   "whoId": "efi",
-   "step": "bread",
-   "stepHe": "לחם מהקיוסק.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "HANDOFF:a2-efi-bread"
    ]
   },
   {
@@ -336,8 +310,7 @@
    "stepHe": "אפי אמר שיש משהו אחרי הקיר.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
-    "HANDOFF:a3-efi-named",
-    "RECOVERY:a3-efi-come-again"
+    "HANDOFF:a3-efi-named"
    ]
   },
   {
@@ -353,6 +326,19 @@
     "HANDOFF:a3-efi-come",
     "HANDOFF:a3-efi-named",
     "RECOVERY:a3-efi-come-again"
+   ]
+  },
+  {
+   "chapter": "a3-hall",
+   "conversation": "efi-a3-arch",
+   "branch": 0,
+   "who": "אפי",
+   "whoId": "efi",
+   "step": "efi",
+   "stepHe": "אפי אמר שיש משהו אחרי הקיר.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:closer:efi"
    ]
   },
   {
@@ -414,7 +400,7 @@
    "who": null,
    "whoId": null,
    "step": "earn",
-   "stepHe": "בקבוקים, שליחויות, מה שאבא נותן.",
+   "stepHe": "בקבוקים, ארגזים, ריצה למעלה — עד 30.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -527,7 +513,7 @@
   {
    "chapter": "a4-shirt",
    "conversation": "allenby-sign",
-   "branch": 1,
+   "branch": 0,
    "who": null,
    "whoId": null,
    "step": "shirt",
@@ -582,6 +568,19 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "earn",
+   "stepHe": "בקבוקים, ארגזים, ריצה למעלה — עד 30.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "a4-shirt",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "shirt",
    "stepHe": "להספיק לרפי עד שבע.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
@@ -624,6 +623,19 @@
    "step": "tin",
    "stepHe": "הקופה מתחת למיטה.",
    "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "a4-shirt",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "earn",
+   "stepHe": "בקבוקים, ארגזים, ריצה למעלה — עד 30.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -660,11 +672,23 @@
    "branch": 0,
    "who": "קובי",
    "whoId": "kobi",
+   "step": "earn",
+   "stepHe": "בקבוקים, ארגזים, ריצה למעלה — עד 30.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "HANDOFF:a4-kobi-shirt"
+   ]
+  },
+  {
+   "chapter": "a4-shirt",
+   "conversation": "kobi-a4",
+   "branch": 0,
+   "who": "קובי",
+   "whoId": "kobi",
    "step": "shirt",
    "stepHe": "להספיק לרפי עד שבע.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
-    "DEADLINE:a4-kobi-seven",
     "HANDOFF:a4-kobi-shirt"
    ]
   },
@@ -684,7 +708,7 @@
   {
    "chapter": "a4-shirt",
    "conversation": "rachel-a4",
-   "branch": 2,
+   "branch": 3,
    "who": "רחל",
    "whoId": "rachel",
    "step": "tin",
@@ -701,7 +725,7 @@
    "who": null,
    "whoId": null,
    "step": "earn",
-   "stepHe": "בקבוקים, שליחויות, מה שאבא נותן.",
+   "stepHe": "בקבוקים, ארגזים, ריצה למעלה — עד 30.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -716,6 +740,19 @@
    "step": "shirt",
    "stepHe": "להספיק לרפי עד שבע.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "a4-shirt",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "earn",
+   "stepHe": "בקבוקים, ארגזים, ריצה למעלה — עד 30.",
+   "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
    ]
@@ -827,7 +864,7 @@
   {
    "chapter": "a5-first",
    "conversation": "kobi-a5",
-   "branch": 4,
+   "branch": 6,
    "who": "קובי",
    "whoId": "kobi",
    "step": "dress",
@@ -836,6 +873,32 @@
    "now": [
     "HANDOFF:a5-kobi-dress",
     "RECOVERY:a5-kobi-dress-again"
+   ]
+  },
+  {
+   "chapter": "a5-first",
+   "conversation": "ofir-a5",
+   "branch": 0,
+   "who": "אופיר",
+   "whoId": "ofir",
+   "step": "dress",
+   "stepHe": "להתלבש לבד.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:closer:ofir"
+   ]
+  },
+  {
+   "chapter": "a5-first",
+   "conversation": "ofir-a5",
+   "branch": 0,
+   "who": "אופיר",
+   "whoId": "ofir",
+   "step": "gate",
+   "stepHe": "שער 7. אבא.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:closer:ofir"
    ]
   },
   {
@@ -1061,32 +1124,6 @@
   },
   {
    "chapter": "a6-radio",
-   "conversation": "gate-seven",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "liron",
-   "stepHe": "לירון ברחוב מתקן רדיו.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "a6-radio",
-   "conversation": "kiosk-counter",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "liron",
-   "stepHe": "לירון ברחוב מתקן רדיו.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "a6-radio",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
@@ -1122,19 +1159,6 @@
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "a6-radio",
-   "conversation": "liron-a6",
-   "branch": 0,
-   "who": "לירון",
-   "whoId": "liron",
-   "step": "liron",
-   "stepHe": "לירון ברחוב מתקן רדיו.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "HANDOFF:a6-liron-hold"
    ]
   },
   {
@@ -1160,7 +1184,8 @@
    "stepHe": "לירון ברחוב מתקן רדיו.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
-    "HANDOFF:a6-rachel-liron"
+    "HANDOFF:a6-rachel-liron",
+    "RECOVERY:a6-rachel-liron-again"
    ]
   },
   {
@@ -1179,7 +1204,7 @@
   {
    "chapter": "a6-radio",
    "conversation": "radio-a6",
-   "branch": 2,
+   "branch": 3,
    "who": null,
    "whoId": null,
    "step": "radio",
@@ -1387,7 +1412,7 @@
   {
    "chapter": "1986",
    "conversation": "amit-street",
-   "branch": 0,
+   "branch": 1,
    "who": "עמית",
    "whoId": "amit",
    "step": "match",
@@ -3454,7 +3479,7 @@
   {
    "chapter": "1991",
    "conversation": "kitchen-note-1991",
-   "branch": 2,
+   "branch": 3,
    "who": null,
    "whoId": null,
    "step": "derby",
@@ -3467,7 +3492,7 @@
   {
    "chapter": "1991",
    "conversation": "kitchen-note-1991",
-   "branch": 2,
+   "branch": 3,
    "who": null,
    "whoId": null,
    "step": "hall",
@@ -3480,7 +3505,7 @@
   {
    "chapter": "1991",
    "conversation": "kitchen-note-1991",
-   "branch": 2,
+   "branch": 3,
    "who": null,
    "whoId": null,
    "step": "hw",
@@ -3501,6 +3526,19 @@
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "HANDOFF:91-kobi-nudge"
+   ]
+  },
+  {
+   "chapter": "1991",
+   "conversation": "kobi-1991",
+   "branch": 1,
+   "who": "קובי",
+   "whoId": "kobi",
+   "step": "derby",
+   "stepHe": "הדרבי.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:closer:kobi"
    ]
   },
   {
@@ -3633,6 +3671,19 @@
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:closer:ofir"
+   ]
+  },
+  {
+   "chapter": "1991",
+   "conversation": "ofir-afternoon-1991",
+   "branch": 2,
+   "who": "אופיר",
+   "whoId": "ofir",
+   "step": "permission",
+   "stepHe": "רשות מאמא. או דרך אחרת.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "RECOVERY:91-ofir-asked-again"
    ]
   },
   {
@@ -3800,7 +3851,7 @@
   {
    "chapter": "1991",
    "conversation": "rachel-1991",
-   "branch": 3,
+   "branch": 7,
    "who": "רחל",
    "whoId": "rachel",
    "step": "derby",
@@ -3813,7 +3864,7 @@
   {
    "chapter": "1991",
    "conversation": "rachel-1991",
-   "branch": 3,
+   "branch": 7,
    "who": "רחל",
    "whoId": "rachel",
    "step": "hall",
@@ -3826,7 +3877,7 @@
   {
    "chapter": "1991",
    "conversation": "rachel-1991",
-   "branch": 4,
+   "branch": 8,
    "who": "רחל",
    "whoId": "rachel",
    "step": "permission",
@@ -3839,7 +3890,7 @@
   {
    "chapter": "1991",
    "conversation": "rachel-1991",
-   "branch": 7,
+   "branch": 11,
    "who": "רחל",
    "whoId": "rachel",
    "step": "hw",
@@ -3852,7 +3903,7 @@
   {
    "chapter": "1991",
    "conversation": "rachel-1991",
-   "branch": 7,
+   "branch": 11,
    "who": "רחל",
    "whoId": "rachel",
    "step": "school",
@@ -4157,19 +4208,6 @@
    "step": "derby",
    "stepHe": "הדרבי.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "1991",
-   "conversation": "uss-board",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "הדרבי.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
    ]
@@ -6895,19 +6933,6 @@
   },
   {
    "chapter": "1998-laces",
-   "conversation": "route-make-work",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "dad",
-   "stepHe": "אבא זהיר. להגיד לו משהו.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "1998-laces",
    "conversation": "route-write-account",
    "branch": 1,
    "who": null,
@@ -7430,6 +7455,19 @@
   {
    "chapter": "1999-cup",
    "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "route",
+   "stepHe": "עם מי נוסעים לרמת גן.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "1999-cup",
+   "conversation": "allenby-cafe",
    "branch": 1,
    "who": null,
    "whoId": null,
@@ -7690,7 +7728,7 @@
   {
    "chapter": "2000-title",
    "conversation": "t-src-rumour",
-   "branch": 1,
+   "branch": 3,
    "who": null,
    "whoId": null,
    "step": "ground",
@@ -8781,142 +8819,12 @@
   },
   {
    "chapter": "2001-terrace",
-   "conversation": "allenby-cafe",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
-   "conversation": "allenby-records",
-   "branch": 2,
-   "who": "המוכר",
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:x-allenby-records"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
-   "conversation": "allenby-rival",
-   "branch": 1,
-   "who": "הגבר",
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:x-allenby-rival"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
-   "conversation": "allenby-sign",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
-   "conversation": "allenby-window",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
-   "conversation": "alley-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
-   "conversation": "kiosk-counter",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
-   "conversation": "kiosk-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
    "conversation": "route-banner",
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2001-terrace",
-   "conversation": "wall-writing",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "first",
-   "stepHe": "מה אתה יכול לקחת עד הסוף.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "allenby-cafe",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
+   "step": "open",
+   "stepHe": "השער נפתח. מי עשה מה.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -8954,37 +8862,11 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "allenby-cafe",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "allenby-records",
-   "branch": 2,
-   "who": "המוכר",
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:x-allenby-records"
    ]
   },
   {
@@ -9019,19 +8901,6 @@
    "branch": 1,
    "who": "הגבר",
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:x-allenby-rival"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "allenby-rival",
-   "branch": 1,
-   "who": "הגבר",
-   "whoId": null,
    "step": "beds",
    "stepHe": "רומא מחפש איפה להשכיב שלושה.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
@@ -9058,19 +8927,6 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "allenby-sign",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "beds",
    "stepHe": "רומא מחפש איפה להשכיב שלושה.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
@@ -9097,34 +8953,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "allenby-window",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "allenby-window",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -9152,19 +8982,6 @@
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "alley-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
    ]
@@ -9214,19 +9031,6 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "kiosk-counter",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
    "step": "beds",
    "stepHe": "רומא מחפש איפה להשכיב שלושה.",
    "today": "כבר דיברתם על זה היום.",
@@ -9243,19 +9047,6 @@
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
    "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "kiosk-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -9305,19 +9096,6 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "passport-e03",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
    "step": "beds",
    "stepHe": "רומא מחפש איפה להשכיב שלושה.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
@@ -9353,32 +9131,6 @@
   },
   {
    "chapter": "2002-europe",
-   "conversation": "port-board",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-banner",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
    "conversation": "route-banner",
    "branch": 0,
    "who": null,
@@ -9399,19 +9151,6 @@
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
    "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-check-budget",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -9448,19 +9187,6 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-distance-offer",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "beds",
    "stepHe": "רומא מחפש איפה להשכיב שלושה.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
@@ -9477,19 +9203,6 @@
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-make-work",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
    ]
@@ -9526,19 +9239,6 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-organize-group",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
@@ -9552,35 +9252,9 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-plan-journey",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-verify-report",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
    ]
@@ -9617,34 +9291,8 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-work-commitment",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "route-write-account",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -9671,19 +9319,6 @@
    "whoId": null,
    "step": "trip",
    "stepHe": "רבע גמר. שולחן המטבח.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2002-europe",
-   "conversation": "wall-writing",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "after",
-   "stepHe": "מה עושים עכשיו.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -9734,8 +9369,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2002-desk",
+   "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -9747,8 +9395,21 @@
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2002-desk",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -9760,8 +9421,21 @@
    "branch": 1,
    "who": "הגבר",
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2002-desk",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:x-allenby-rival"
@@ -9773,8 +9447,21 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2002-desk",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -9786,8 +9473,21 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2002-desk",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -9799,8 +9499,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2002-desk",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -9812,8 +9525,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -9825,8 +9538,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2002-desk",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -9838,8 +9564,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -9851,8 +9577,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "first",
-   "stepHe": "הפרסום הראשון.",
+   "step": "cards",
+   "stepHe": "על השולחן: ראיתי, עובדה, שמעתי.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2002-desk",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "check",
+   "stepHe": "שני על התמונה, הקופאי על הרשימה.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -9866,19 +9605,6 @@
    "whoId": null,
    "step": "derby",
    "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "allenby-cafe",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -9918,19 +9644,6 @@
    "whoId": null,
    "step": "derby",
    "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "allenby-cafe",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -9981,19 +9694,6 @@
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:x-allenby-records"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "allenby-records",
-   "branch": 2,
-   "who": "המוכר",
-   "whoId": null,
    "step": "oli",
    "stepHe": "יש נסיעה. מישהו נוהג.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
@@ -10033,19 +9733,6 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "allenby-sign",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
    "step": "oli",
    "stepHe": "יש נסיעה. מישהו נוהג.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
@@ -10085,8 +9772,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -10113,19 +9800,6 @@
    "whoId": null,
    "step": "derby",
    "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "allenby-window",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -10176,19 +9850,6 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "alley-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
    "step": "oli",
    "stepHe": "יש נסיעה. מישהו נוהג.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
@@ -10211,195 +9872,130 @@
   },
   {
    "chapter": "2006-home",
-   "conversation": "kiosk-counter",
+   "conversation": "batya-06",
    "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "kiosk-counter",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "kiosk-counter",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "kiosk-counter",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "kiosk-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "kiosk-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "kiosk-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "kiosk-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-banner",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-banner",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-banner",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-banner",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-check-budget",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-check-budget",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-distance-offer",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
+   "who": "בתיה",
+   "whoId": "batya",
    "step": "oli",
    "stepHe": "יש נסיעה. מישהו נוהג.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:closer:batya"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "batya-06",
+   "branch": 0,
+   "who": "בתיה",
+   "whoId": "batya",
+   "step": "work",
+   "stepHe": "לירון קרא לך.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:closer:batya"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "work",
+   "stepHe": "לירון קרא לך.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "work",
+   "stepHe": "לירון קרא לך.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "work",
+   "stepHe": "לירון קרא לך.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "route-check-budget",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "work",
+   "stepHe": "לירון קרא לך.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -10445,32 +10041,6 @@
   },
   {
    "chapter": "2006-home",
-   "conversation": "route-help-team",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-make-work",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
    "conversation": "route-make-work",
    "branch": 1,
    "who": null,
@@ -10501,32 +10071,6 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-organize-group",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-organize-group",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "work",
    "stepHe": "לירון קרא לך.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
@@ -10542,32 +10086,6 @@
    "whoId": null,
    "step": "derby",
    "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-plan-journey",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-plan-journey",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
@@ -10605,32 +10123,6 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-verify-report",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-verify-report",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "work",
    "stepHe": "לירון קרא לך.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
@@ -10657,19 +10149,6 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-work-commitment",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
    "step": "oli",
    "stepHe": "יש נסיעה. מישהו נוהג.",
    "today": "כבר דיברתם על זה היום.",
@@ -10685,19 +10164,6 @@
    "whoId": null,
    "step": "work",
    "stepHe": "לירון קרא לך.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "route-write-account",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -10757,533 +10223,299 @@
   },
   {
    "chapter": "2006-home",
-   "conversation": "usher-hall",
+   "conversation": "uss-basket",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-basket",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "door",
+   "stepHe": "אוסישקין. מבחוץ, הפעם.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-basket",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-board",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-board",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "door",
+   "stepHe": "אוסישקין. מבחוץ, הפעם.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-board",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-parquet",
    "branch": 1,
-   "who": "סדרן",
-   "whoId": "usher",
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-parquet",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "door",
+   "stepHe": "אוסישקין. מבחוץ, הפעם.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-parquet",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-stand",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-stand",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "door",
+   "stepHe": "אוסישקין. מבחוץ, הפעם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-stand",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-windows",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-windows",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "door",
+   "stepHe": "אוסישקין. מבחוץ, הפעם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "uss-windows",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "work",
    "stepHe": "לירון קרא לך.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "workshop-phones",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "workshop-phones",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "workshop-radio",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-home",
+   "conversation": "workshop-radio",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "oli",
+   "stepHe": "יש נסיעה. מישהו נוהג.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-desk",
+   "conversation": "newsroom-board",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "desk",
+   "stepHe": "מה מחכה על השולחן שלך.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:closer:usher"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-basket",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-basket",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-basket",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-basket",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-board",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-board",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-board",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-board",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-parquet",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-parquet",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-parquet",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-parquet",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "מחייך אליך, בלי לחזור על עצמו.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-stand",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-stand",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-stand",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-stand",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-windows",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-windows",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-windows",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "uss-windows",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "wall-writing",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "wall-writing",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "wall-writing",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "wall-writing",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "workshop-phones",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "workshop-phones",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "workshop-phones",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "workshop-phones",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "workshop-radio",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "derby",
-   "stepHe": "אפי גורר אותך לאולם. יש דרבי.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "workshop-radio",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "door",
-   "stepHe": "אוסישקין. מבחוץ, הפעם.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "workshop-radio",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "oli",
-   "stepHe": "יש נסיעה. מישהו נוהג.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-home",
-   "conversation": "workshop-radio",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "work",
-   "stepHe": "לירון קרא לך.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "allenby-cafe",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "allenby-records",
-   "branch": 2,
-   "who": "המוכר",
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
-   "now": [
-    "CLOSED:x-allenby-records"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "allenby-rival",
-   "branch": 1,
-   "who": "הגבר",
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:x-allenby-rival"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "allenby-sign",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "allenby-window",
-   "branch": 1,
-   "who": null,
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "מהנהן לעברך. כבר עברתם על זה.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "alley-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "אין חדש להוסיף — כבר סיפר לך.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "kiosk-counter",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "kiosk-look",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -11307,6 +10539,19 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "desk",
+   "stepHe": "מה מחכה על השולחן שלך.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2006-desk",
+   "conversation": "newsroom-screen",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "fix",
    "stepHe": "מה נשאר מהפרסום ההוא.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
@@ -11315,26 +10560,13 @@
    ]
   },
   {
-   "chapter": "2006-desk",
-   "conversation": "route-banner",
+   "chapter": "2007-table",
+   "conversation": "allenby-cafe",
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
-   "today": "כבר דיברתם על זה היום.",
-   "now": [
-    "CLOSED:generic"
-   ]
-  },
-  {
-   "chapter": "2006-desk",
-   "conversation": "wall-writing",
-   "branch": 0,
-   "who": null,
-   "whoId": null,
-   "step": "fix",
-   "stepHe": "מה נשאר מהפרסום ההוא.",
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11347,7 +10579,20 @@
    "who": null,
    "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11359,8 +10604,21 @@
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -11372,8 +10630,21 @@
    "branch": 1,
    "who": "הגבר",
    "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:x-allenby-rival"
@@ -11385,9 +10656,48 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "role",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "allenby-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -11399,7 +10709,7 @@
    "who": null,
    "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -11411,8 +10721,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -11424,8 +10747,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "community-board",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11437,8 +10773,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "community-kettle",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
@@ -11450,8 +10799,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11463,8 +10825,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -11476,9 +10851,100 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
    "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "role",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-check-budget",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-distance-offer",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-make-work",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-organize-group",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-plan-journey",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-verify-report",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
    ]
@@ -11490,7 +10956,7 @@
    "who": null,
    "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -11502,8 +10968,47 @@
    "branch": 1,
    "who": null,
    "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-work-commitment",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "route-write-account",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "store-shelves",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11516,7 +11021,20 @@
    "who": null,
    "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-table",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "count",
+   "stepHe": "המחסן. מה יש, ומה חסר.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11529,7 +11047,20 @@
    "who": null,
    "whoId": null,
    "step": "role",
-   "stepHe": "הקיוסק. יוסף ושחור מחכים עם הדף.",
+   "stepHe": "חדר הקהילה. יוסף ושחור מחכים עם הדף.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11542,7 +11073,7 @@
    "who": null,
    "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11568,7 +11099,7 @@
    "who": null,
    "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11593,8 +11124,21 @@
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -11619,8 +11163,21 @@
    "branch": 1,
    "who": "הגבר",
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:x-allenby-rival"
@@ -11645,8 +11202,21 @@
    "branch": 1,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -11684,8 +11254,21 @@
    "branch": 1,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -11710,8 +11293,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -11736,8 +11332,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "community-board",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11762,8 +11371,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "community-kettle",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
@@ -11788,8 +11410,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11814,8 +11449,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -11840,8 +11488,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -11905,8 +11566,8 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -11944,8 +11605,21 @@
    "branch": 1,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "route-verify-report",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -11970,8 +11644,21 @@
    "branch": 1,
    "who": null,
    "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "route-work-commitment",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -12010,7 +11697,7 @@
    "who": null,
    "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -12036,7 +11723,20 @@
    "who": null,
    "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2007-registered",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "calls",
+   "stepHe": "הדף עם המספרים. שיחה אחת בכל פעם.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -12049,7 +11749,7 @@
    "who": null,
    "whoId": null,
    "step": "deliver",
-   "stepHe": "המתנדבים. מה שהבטחת.",
+   "stepHe": "המתנדבים. מה שהבטחת — ליוסף, ביד.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -14462,6 +14162,19 @@
   },
   {
    "chapter": "2011-people",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tamar",
+   "stepHe": "תמר.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2011-people",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
@@ -14521,6 +14234,58 @@
    "step": "tamar",
    "stepHe": "תמר.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2011-people",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "dor",
+   "stepHe": "דור.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2011-people",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tamar",
+   "stepHe": "תמר.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2011-people",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "dor",
+   "stepHe": "דור.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2011-people",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tamar",
+   "stepHe": "תמר.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -14609,9 +14374,35 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "גמר. ומה שצריך להודיע לפניו.",
+   "step": "place",
+   "stepHe": "מה שבחרת לערב — במקום שלו.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2012-cups",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "word",
+   "stepHe": "הטלפון בסלון: השעה שהובטחה.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2012-cups",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "place",
+   "stepHe": "מה שבחרת לערב — במקום שלו.",
+   "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
    ]
@@ -14622,8 +14413,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "גמר. ומה שצריך להודיע לפניו.",
+   "step": "place",
+   "stepHe": "מה שבחרת לערב — במקום שלו.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2012-cups",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "word",
+   "stepHe": "הטלפון בסלון: השעה שהובטחה.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -14635,8 +14439,21 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "גמר. ומה שצריך להודיע לפניו.",
+   "step": "place",
+   "stepHe": "מה שבחרת לערב — במקום שלו.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2012-cups",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "word",
+   "stepHe": "הטלפון בסלון: השעה שהובטחה.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -14891,6 +14708,19 @@
   },
   {
    "chapter": "2012-five",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "own",
+   "stepHe": "פרדי, והדפים.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2012-five",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
@@ -14937,6 +14767,32 @@
    "step": "own",
    "stepHe": "פרדי, והדפים.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2012-five",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "own",
+   "stepHe": "פרדי, והדפים.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2012-five",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "own",
+   "stepHe": "פרדי, והדפים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -14995,6 +14851,19 @@
   },
   {
    "chapter": "2012-five",
+   "conversation": "store-shelves",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "own",
+   "stepHe": "פרדי, והדפים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2012-five",
    "conversation": "wall-writing",
    "branch": 0,
    "who": null,
@@ -15333,12 +15202,64 @@
   },
   {
    "chapter": "2015-newhall",
+   "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "route",
+   "stepHe": "מאיפה יוצאים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
    "conversation": "allenby-records",
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
    "step": "hall",
    "stepHe": "האולם החדש. עם מי שלא ראה את הישן.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "route",
+   "stepHe": "מאיפה יוצאים.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -15359,12 +15280,64 @@
   },
   {
    "chapter": "2015-newhall",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "route",
+   "stepHe": "מאיפה יוצאים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
    "conversation": "allenby-sign",
    "branch": 1,
    "who": null,
    "whoId": null,
    "step": "hall",
    "stepHe": "האולם החדש. עם מי שלא ראה את הישן.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "route",
+   "stepHe": "מאיפה יוצאים.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -15385,12 +15358,51 @@
   },
   {
    "chapter": "2015-newhall",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "route",
+   "stepHe": "מאיפה יוצאים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
    "conversation": "alley-look",
    "branch": 0,
    "who": null,
    "whoId": null,
    "step": "hall",
    "stepHe": "האולם החדש. עם מי שלא ראה את הישן.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -15417,6 +15429,19 @@
    "whoId": null,
    "step": "hall",
    "stepHe": "האולם החדש. עם מי שלא ראה את הישן.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "drivein-court",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -15450,6 +15475,19 @@
   },
   {
    "chapter": "2015-newhall",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
    "conversation": "kiosk-look",
    "branch": 0,
    "who": null,
@@ -15467,9 +15505,48 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "route",
    "stepHe": "מאיפה יוצאים.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "hall",
+   "stepHe": "האולם החדש. עם מי שלא ראה את הישן.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "hall",
+   "stepHe": "האולם החדש. עם מי שלא ראה את הישן.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -15489,12 +15566,38 @@
   },
   {
    "chapter": "2015-newhall",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "route",
+   "stepHe": "מאיפה יוצאים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
    "conversation": "wall-writing",
    "branch": 0,
    "who": null,
    "whoId": null,
    "step": "hall",
    "stepHe": "האולם החדש. עם מי שלא ראה את הישן.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2015-newhall",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "prep",
+   "stepHe": "עד שש וחצי: הבד, הנייר, הדלתות, השורה — זמן לשניים.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -15899,6 +16002,84 @@
    "step": "till",
    "stepHe": "הקופה של הקבוצה.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "jaffa-bustan",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "deliver",
+   "stepHe": "הרשימה של מתוקי.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "jaffa-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "deliver",
+   "stepHe": "הרשימה של מתוקי.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "jaffa-kiosk",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "deliver",
+   "stepHe": "הרשימה של מתוקי.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "jaffa-shutters",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "deliver",
+   "stepHe": "הרשימה של מתוקי.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "deliver",
+   "stepHe": "הרשימה של מתוקי.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "till",
+   "stepHe": "הקופה של הקבוצה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
    ]
@@ -16009,6 +16190,58 @@
   },
   {
    "chapter": "2016-crisis",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "deliver",
+   "stepHe": "הרשימה של מתוקי.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "till",
+   "stepHe": "הקופה של הקבוצה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "deliver",
+   "stepHe": "הרשימה של מתוקי.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "till",
+   "stepHe": "הקופה של הקבוצה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2016-crisis",
    "conversation": "route-banner",
    "branch": 0,
    "who": null,
@@ -16269,6 +16502,71 @@
   },
   {
    "chapter": "2017-after",
+   "conversation": "jaffa-bustan",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "choice",
+   "stepHe": "מה עכשיו. אבא שואל.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-after",
+   "conversation": "jaffa-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "choice",
+   "stepHe": "מה עכשיו. אבא שואל.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-after",
+   "conversation": "jaffa-kiosk",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "choice",
+   "stepHe": "מה עכשיו. אבא שואל.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-after",
+   "conversation": "jaffa-shutters",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "choice",
+   "stepHe": "מה עכשיו. אבא שואל.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-after",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "choice",
+   "stepHe": "מה עכשיו. אבא שואל.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-after",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
@@ -16315,6 +16613,32 @@
    "step": "choice",
    "stepHe": "מה עכשיו. אבא שואל.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-after",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "choice",
+   "stepHe": "מה עכשיו. אבא שואל.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-after",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "choice",
+   "stepHe": "מה עכשיו. אבא שואל.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -16391,7 +16715,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -16430,7 +16754,7 @@
    "who": "המוכר",
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -16469,7 +16793,7 @@
    "who": "הגבר",
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:x-allenby-rival"
@@ -16508,7 +16832,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -16547,7 +16871,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -16586,7 +16910,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -16625,7 +16949,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
@@ -16664,7 +16988,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -16703,7 +17027,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -16724,6 +17048,71 @@
   },
   {
    "chapter": "2017-distance",
+   "conversation": "jaffa-bustan",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "back",
+   "stepHe": "התחנה. האוטובוס של משחק הבית.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
+   "conversation": "jaffa-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "back",
+   "stepHe": "התחנה. האוטובוס של משחק הבית.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
+   "conversation": "jaffa-kiosk",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "back",
+   "stepHe": "התחנה. האוטובוס של משחק הבית.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
+   "conversation": "jaffa-shutters",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "back",
+   "stepHe": "התחנה. האוטובוס של משחק הבית.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "back",
+   "stepHe": "התחנה. האוטובוס של משחק הבית.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
@@ -16742,7 +17131,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -16781,7 +17170,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -16796,6 +17185,58 @@
    "step": "told",
    "stepHe": "אופיר.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "back",
+   "stepHe": "התחנה. האוטובוס של משחק הבית.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "life",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "back",
+   "stepHe": "התחנה. האוטובוס של משחק הבית.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2017-distance",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "life",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -16820,7 +17261,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -16859,7 +17300,7 @@
    "who": null,
    "whoId": null,
    "step": "life",
-   "stepHe": "איפה כן היית.",
+   "stepHe": "איפה כן היית — קרן, על הטיילת.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -16893,12 +17334,38 @@
   },
   {
    "chapter": "2018-return",
+   "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "signs",
+   "stepHe": "בלומפילד המחודש. השילוט, לא הזיכרון.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2018-return",
    "conversation": "allenby-records",
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
    "step": "back",
    "stepHe": "חזרנו — או שהקבוצה חזרה.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2018-return",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "signs",
+   "stepHe": "בלומפילד המחודש. השילוט, לא הזיכרון.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -16919,6 +17386,19 @@
   },
   {
    "chapter": "2018-return",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "signs",
+   "stepHe": "בלומפילד המחודש. השילוט, לא הזיכרון.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2018-return",
    "conversation": "allenby-sign",
    "branch": 1,
    "who": null,
@@ -16932,12 +17412,38 @@
   },
   {
    "chapter": "2018-return",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "signs",
+   "stepHe": "בלומפילד המחודש. השילוט, לא הזיכרון.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2018-return",
    "conversation": "allenby-window",
    "branch": 1,
    "who": null,
    "whoId": null,
    "step": "back",
    "stepHe": "חזרנו — או שהקבוצה חזרה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2018-return",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "signs",
+   "stepHe": "בלומפילד המחודש. השילוט, לא הזיכרון.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -17029,6 +17535,19 @@
    "whoId": null,
    "step": "back",
    "stepHe": "חזרנו — או שהקבוצה חזרה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2018-return",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "signs",
+   "stepHe": "בלומפילד המחודש. השילוט, לא הזיכרון.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -17205,6 +17724,19 @@
   },
   {
    "chapter": "2019-armchair",
+   "conversation": "batya-19",
+   "branch": 0,
+   "who": "בתיה",
+   "whoId": "batya",
+   "step": "saturday",
+   "stepHe": "השבת שלך.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:closer:batya"
+   ]
+  },
+  {
+   "chapter": "2019-armchair",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
@@ -17303,6 +17835,32 @@
    "step": "saturday",
    "stepHe": "השבת שלך.",
    "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2019-armchair",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "photo",
+   "stepHe": "התמונה של עמית.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2019-armchair",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "photo",
+   "stepHe": "התמונה של עמית.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -17417,8 +17975,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -17443,8 +18001,8 @@
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -17469,8 +18027,8 @@
    "branch": 1,
    "who": "הגבר",
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:x-allenby-rival"
@@ -17495,8 +18053,8 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -17521,8 +18079,8 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -17547,8 +18105,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -17573,8 +18131,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
@@ -17599,8 +18157,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -17625,8 +18183,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -17651,8 +18209,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -17677,8 +18235,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -17699,12 +18257,38 @@
   },
   {
    "chapter": "2021-losses",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-losses",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-losses",
    "conversation": "route-banner",
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -17729,8 +18313,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -17742,8 +18326,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "cup",
-   "stepHe": "אחרי הגמר.",
+   "step": "final",
+   "stepHe": "הגמר, על המסך הקטן בקיוסק.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -17763,6 +18347,370 @@
    ]
   },
   {
+   "chapter": "2021-promises",
+   "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "flat-fridge",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "flat-table",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "flat-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-promises",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב עצמו. הטיילת, והטלפון בכיס.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
    "chapter": "2021-suitcase",
    "conversation": "alley-look",
    "branch": 0,
@@ -17777,6 +18725,58 @@
   },
   {
    "chapter": "2021-suitcase",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
    "conversation": "kiosk-look",
    "branch": 0,
    "who": null,
@@ -17784,6 +18784,84 @@
    "step": "suitcase",
    "stepHe": "מה נכנס למזוודה.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "promenade-bench",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "promenade-hut",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "suitcase-x01",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "suitcase-x01",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
    ]
@@ -17803,6 +18881,58 @@
   },
   {
    "chapter": "2021-suitcase",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "corner",
+   "stepHe": "הפינה האחרונה במזוודה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "sea",
+   "stepHe": "ערב אחרון על הים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2021-suitcase",
    "conversation": "wall-writing",
    "branch": 0,
    "who": null,
@@ -17833,8 +18963,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -17872,8 +19002,8 @@
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -17911,8 +19041,8 @@
    "branch": 1,
    "who": "הגבר",
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:x-allenby-rival"
@@ -17950,8 +19080,8 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -17989,8 +19119,8 @@
    "branch": 1,
    "who": null,
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -18028,8 +19158,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -18180,6 +19310,71 @@
   },
   {
    "chapter": "2023-tournament",
+   "conversation": "jaffa-bustan",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "הדרבי, ומה כותבים מתחת לתמונה.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
+   "conversation": "jaffa-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "הדרבי, ומה כותבים מתחת לתמונה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
+   "conversation": "jaffa-kiosk",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "הדרבי, ומה כותבים מתחת לתמונה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
+   "conversation": "jaffa-shutters",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "הדרבי, ומה כותבים מתחת לתמונה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "הדרבי, ומה כותבים מתחת לתמונה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
@@ -18223,8 +19418,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:generic"
@@ -18239,6 +19434,58 @@
    "step": "role",
    "stepHe": "איזה תפקיד אתה לוקח.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "הדרבי, ומה כותבים מתחת לתמונה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "derby",
+   "stepHe": "הדרבי, ומה כותבים מתחת לתמונה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-tournament",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -18262,8 +19509,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -18314,8 +19561,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -18340,8 +19587,8 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "grow",
-   "stepHe": "מי מחליט כשגדלים.",
+   "step": "owner",
+   "stepHe": "הדף על הלוח: חמישים ואחת, שלושים, תשע־עשרה.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -18570,6 +19817,32 @@
   },
   {
    "chapter": "2023-abroad",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
+   "stepHe": "ההודעה מאבא.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-abroad",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
+   "stepHe": "ההודעה מאבא.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-abroad",
    "conversation": "route-banner",
    "branch": 0,
    "who": null,
@@ -18779,6 +20052,32 @@
   {
    "chapter": "2023-visit",
    "conversation": "allenby-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "allenby-cafe",
    "branch": 1,
    "who": null,
    "whoId": null,
@@ -18787,6 +20086,19 @@
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
    ]
   },
   {
@@ -18808,6 +20120,19 @@
    "branch": 1,
    "who": "הגבר",
    "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
    "step": "visit",
    "stepHe": "יומיים, לא עשור.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
@@ -18821,9 +20146,35 @@
    "branch": 1,
    "who": null,
    "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
    "step": "visit",
    "stepHe": "יומיים, לא עשור.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -18847,9 +20198,35 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "visit",
    "stepHe": "יומיים, לא עשור.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
    ]
@@ -18873,9 +20250,61 @@
    "branch": 0,
    "who": null,
    "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "visit",
    "stepHe": "יומיים, לא עשור.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "promenade-bench",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "promenade-hut",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
    ]
@@ -18888,6 +20317,32 @@
    "whoId": null,
    "step": "visit",
    "stepHe": "יומיים, לא עשור.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2023-visit",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "evening",
+   "stepHe": "הערב שבחרת.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -19091,11 +20546,37 @@
   {
    "chapter": "2024-lina",
    "conversation": "allenby-cafe",
-   "branch": 0,
+   "branch": 1,
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -19108,7 +20589,33 @@
    "who": "המוכר",
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -19121,7 +20628,33 @@
    "who": "הגבר",
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:x-allenby-rival"
@@ -19134,6 +20667,19 @@
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
@@ -19142,12 +20688,51 @@
   },
   {
    "chapter": "2024-lina",
-   "conversation": "allenby-window",
+   "conversation": "allenby-sign",
    "branch": 1,
    "who": null,
    "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "allenby-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -19160,7 +20745,33 @@
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -19173,7 +20784,33 @@
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "flat-fridge",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "flat-fridge",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
    "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
@@ -19186,7 +20823,33 @@
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "flat-table",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "flat-table",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -19199,8 +20862,47 @@
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "flat-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "flat-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
    ]
@@ -19212,7 +20914,33 @@
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -19225,8 +20953,86 @@
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -19238,6 +21044,84 @@
    "who": null,
    "whoId": null,
    "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
+   "stepHe": "לינה קראה מה כתבת.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "call",
+   "stepHe": "לדבר לאט.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-lina",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "phone",
    "stepHe": "לינה קראה מה כתבת.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
@@ -19250,8 +21134,385 @@
    "branch": 0,
    "who": null,
    "whoId": null,
-   "step": "call",
-   "stepHe": "לינה קראה מה כתבת.",
+   "step": "tower",
+   "stepHe": "מגדל השעון, ביפו.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "ticket",
+   "stepHe": "המנוי: להעביר, לא להעביר, או לחכות לבורר.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "flat-fridge",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "flat-table",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "flat-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "ticket",
+   "stepHe": "המנוי: להעביר, לא להעביר, או לחכות לבורר.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "rumor",
+   "stepHe": "הקיוסק. מי קונה, ומה באמת נחתם.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "small",
+   "stepHe": "הדרייב אין. עד אז מה?",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2024-home",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "ticket",
+   "stepHe": "המנוי: להעביר, לא להעביר, או לחכות לבורר.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -19539,6 +21800,32 @@
    "step": "up",
    "stepHe": "הדרכון של אבא.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-eurocup",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "up",
+   "stepHe": "הדרכון של אבא.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-eurocup",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "up",
+   "stepHe": "הדרכון של אבא.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -19623,12 +21910,64 @@
   },
   {
    "chapter": "2025-interview",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
    "conversation": "allenby-records",
    "branch": 2,
    "who": "המוכר",
    "whoId": null,
    "step": "asked",
    "stepHe": "שלוש שאלות.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:x-allenby-records"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "allenby-records",
+   "branch": 2,
+   "who": "המוכר",
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
    "now": [
     "CLOSED:x-allenby-records"
@@ -19649,12 +21988,64 @@
   },
   {
    "chapter": "2025-interview",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "allenby-rival",
+   "branch": 1,
+   "who": "הגבר",
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:x-allenby-rival"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
    "conversation": "allenby-sign",
    "branch": 1,
    "who": null,
    "whoId": null,
    "step": "asked",
    "stepHe": "שלוש שאלות.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "allenby-sign",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -19675,12 +22066,64 @@
   },
   {
    "chapter": "2025-interview",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "allenby-window",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
    "conversation": "alley-look",
    "branch": 0,
    "who": null,
    "whoId": null,
    "step": "asked",
    "stepHe": "שלוש שאלות.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "alley-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
    "now": [
     "CLOSED:generic"
@@ -19701,12 +22144,64 @@
   },
   {
    "chapter": "2025-interview",
+   "conversation": "flat-fridge",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "flat-fridge",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
    "conversation": "flat-table",
    "branch": 0,
    "who": null,
    "whoId": null,
    "step": "asked",
    "stepHe": "שלוש שאלות.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "flat-table",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "flat-table",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
    "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
@@ -19727,12 +22222,142 @@
   },
   {
    "chapter": "2025-interview",
+   "conversation": "flat-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "flat-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "jaffa-bustan",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "asked",
+   "stepHe": "שלוש שאלות.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "jaffa-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "asked",
+   "stepHe": "שלוש שאלות.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "jaffa-kiosk",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "asked",
+   "stepHe": "שלוש שאלות.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "jaffa-shutters",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "asked",
+   "stepHe": "שלוש שאלות.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "asked",
+   "stepHe": "שלוש שאלות.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
    "whoId": null,
    "step": "asked",
    "stepHe": "שלוש שאלות.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "kiosk-counter",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -19753,12 +22378,116 @@
   },
   {
    "chapter": "2025-interview",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "kiosk-look",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "asked",
+   "stepHe": "שלוש שאלות.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "asked",
+   "stepHe": "שלוש שאלות.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
    "conversation": "route-banner",
    "branch": 0,
    "who": null,
    "whoId": null,
    "step": "asked",
    "stepHe": "שלוש שאלות.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "route-banner",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -19779,12 +22508,64 @@
   },
   {
    "chapter": "2025-interview",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "terrace-rail",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
    "conversation": "wall-writing",
    "branch": 0,
    "who": null,
    "whoId": null,
    "step": "asked",
    "stepHe": "שלוש שאלות.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "item",
+   "stepHe": "מה על השולחן בסמטה.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-interview",
+   "conversation": "wall-writing",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "where",
+   "stepHe": "איפה מדברים.",
    "today": "כבר דיברתם על זה היום.",
    "now": [
     "CLOSED:generic"
@@ -19987,6 +22768,32 @@
   },
   {
    "chapter": "2025-owner",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "fork",
+   "stepHe": "סכום, לא תוצאה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-owner",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "fork",
+   "stepHe": "סכום, לא תוצאה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-owner",
    "conversation": "route-banner",
    "branch": 0,
    "who": null,
@@ -20078,6 +22885,19 @@
   },
   {
    "chapter": "2025-abroad",
+   "conversation": "allenby-cafe",
+   "branch": 1,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
    "conversation": "allenby-records",
    "branch": 2,
    "who": "המוכר",
@@ -20111,6 +22931,19 @@
    "step": "reunion",
    "stepHe": "הפעם אתה מחכה לו.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
+   "conversation": "allenby-window",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -20176,6 +23009,71 @@
    "step": "reunion",
    "stepHe": "הפעם אתה מחכה לו.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
+   "conversation": "jaffa-bustan",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
+   "conversation": "jaffa-cafe",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "כבר דיברתם על זה היום.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
+   "conversation": "jaffa-kiosk",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
+   "conversation": "jaffa-shutters",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
    ]
@@ -20221,6 +23119,32 @@
   },
   {
    "chapter": "2025-abroad",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "reunion",
+   "stepHe": "הפעם אתה מחכה לו.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2025-abroad",
    "conversation": "route-banner",
    "branch": 0,
    "who": null,
@@ -20416,6 +23340,32 @@
   },
   {
    "chapter": "2026-plan",
+   "conversation": "batya-26",
+   "branch": 0,
+   "who": "בתיה",
+   "whoId": "batya",
+   "step": "money",
+   "stepHe": "מי משלם, ועל מה.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:closer:batya"
+   ]
+  },
+  {
+   "chapter": "2026-plan",
+   "conversation": "batya-26",
+   "branch": 0,
+   "who": "בתיה",
+   "whoId": "batya",
+   "step": "plan",
+   "stepHe": "להראות לאבא את התוכנית.",
+   "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:closer:batya"
+   ]
+  },
+  {
+   "chapter": "2026-plan",
    "conversation": "kiosk-counter",
    "branch": 0,
    "who": null,
@@ -20462,6 +23412,32 @@
    "step": "plan",
    "stepHe": "להראות לאבא את התוכנית.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2026-plan",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "plan",
+   "stepHe": "להראות לאבא את התוכנית.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2026-plan",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "plan",
+   "stepHe": "להראות לאבא את התוכנית.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]
@@ -20644,6 +23620,19 @@
    "step": "road",
    "stepHe": "הרציף, הטיסה, ונמל ההגעה.",
    "today": "אותו דבר כמו קודם. ממשיכים הלאה.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2026-finale",
+   "conversation": "jaffa-tower",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "road",
+   "stepHe": "הרציף, הטיסה, ונמל ההגעה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
    "now": [
     "CLOSED:generic"
    ]
@@ -20696,6 +23685,32 @@
    "step": "seats",
    "stepHe": "מחוץ לאולם. היום אתה אחריי.",
    "today": "אין חדש להוסיף — כבר סיפר לך.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2026-finale",
+   "conversation": "promenade-sign",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "road",
+   "stepHe": "הרציף, הטיסה, ונמל ההגעה.",
+   "today": "מחייך אליך, בלי לחזור על עצמו.",
+   "now": [
+    "CLOSED:generic"
+   ]
+  },
+  {
+   "chapter": "2026-finale",
+   "conversation": "promenade-steps",
+   "branch": 0,
+   "who": null,
+   "whoId": null,
+   "step": "road",
+   "stepHe": "הרציף, הטיסה, ונמל ההגעה.",
+   "today": "מהנהן לעברך. כבר עברתם על זה.",
    "now": [
     "CLOSED:generic"
    ]

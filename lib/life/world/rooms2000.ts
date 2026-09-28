@@ -1477,7 +1477,7 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'אוהד', x: 0.9, y: 0.86, figure: 'youngB4', flip: true },
     ]),
     // …and the family he waited for at the doors, standing where he showed them
-    ...cast('2015-newhall', all('nr:crowd', 'nr:did:families'), [{ who: 'אוהד', x: 0.22, y: 0.84, figure: 'adultA5' }]),
+    ...cast('2015-newhall', all('nr:crowd', 'nr:did:families'), [{ who: 'אוהד', x: 0.34, y: 0.84, figure: 'adultA5' }]),
     // 2024-home · H24b (h24-small, h24-meeting) — "אנחנו באמת לא נכנסים פה"; ואחרי זה,
     // על הפרקט, פגישה פתוחה: יוסף מהעמותה, והבעלים בווידאו על מסך (`remote`)
     ...cast('2024-home', flag('h24:ask'), [
@@ -1610,12 +1610,12 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
     // אחרי השיחה היא הולכת למים (`k-keren-walks`) ולא חוזרת לחדר הזה
     ...cast('2017-distance', { all: [{ flag: 'k:told' }], none: [{ flag: 'k:keren-gone' }] }, [{ who: 'קרן', x: 0.4, y: 0.84, flip: true }]),
     // 2021-suitcase · X01 (x-sea) — הערב האחרון, בשקיעה: קרן, בריצוף הריק מתחת לזוג המצויר (0.47–0.62)
-    ...cast('2021-suitcase', flag('x:move'), [{ who: 'קרן', x: 0.58, y: 0.9, flip: true }]),
+    ...cast('2021-suitcase', flag('x:move'), [{ who: 'קרן', x: 0.58, y: 0.87, flip: true }]),
     // 2023-visit · X04 (x-sunset) — ערב המשפחה: קובי מחכה לו על הטיילת, באותו מקום
     ...cast('2023-visit', { flagIs: { flag: 'life:abroad:visit', value: 'family' } }, [{ who: 'קובי', x: 0.58, y: 0.9, flip: true }]),
     // (pass D) 2021-promises · L08 — the evening that was promised, at the same empty paving (0.47–0.62)
-    ...partner('2021-promises', flag('pr:out'), { x: 0.58, y: 0.9, flip: true }),
-    ...cast('2021-promises', { all: [{ flag: 'pr:out' }, { notFlag: 'life:partner' }] }, [{ who: 'קרן', x: 0.58, y: 0.9, flip: true }]),
+    ...partner('2021-promises', flag('pr:out'), { x: 0.58, y: 0.87, flip: true }),
+    ...cast('2021-promises', { all: [{ flag: 'pr:out' }, { notFlag: 'life:partner' }] }, [{ who: 'קרן', x: 0.58, y: 0.87, flip: true }]),
   ],
 
   jaffa: [

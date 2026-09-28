@@ -744,7 +744,8 @@ export const CONVERSATIONS_2010: Conversation[] = [
     nameHe: 'אולי',
     remote: { 'אולי': 'phone' },
     branches: (['there', 'screen', 'late'] as const).map((kind) => ({
-      when: { flagIs: { flag: 'd10:cupKind', value: kind } },
+      // the last kind is the fallback: a life that reached Teddy without a cup night still gets the call
+      when: kind === 'late' ? undefined : { flagIs: { flag: 'd10:cupKind', value: kind } },
       lines: [
         { who: 'אולי', text: kind === 'there' ? 'ראיתי אותך ביציע עם אבא שלך. עכשיו שבת: טדי. יש לי רכב וארבעה מקומות.' : 'עכשיו שבת: טדי. יש לי רכב וארבעה מקומות.' },
         { who: 'פוגי', text: 'עוד לא ירדתי מהגביע.' },

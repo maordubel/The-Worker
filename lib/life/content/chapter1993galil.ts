@@ -719,9 +719,9 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
           { who: null, text: 'אפי על המדרגה, הצעיף בין הידיים, לא קם. ילד בן עשר עם כובע גדול מדי מסתובב בין השורות ושואל כל אחד "אתה עם האוטובוס?". והתוף של שחור, והבד המגולגל, באמצע המעבר.' },
         ],
         choices: [
-          { id: 'efi', text: 'לשבת ליד אפי.', when: { notFlag: 'g4:p:efi' }, then: [{ e: 'flag', flag: 'g4:p:efi' }, { e: 'goto', node: 'g4-p-efi' }] },
-          { id: 'kid', text: 'ללכת לילד עם הכובע.', when: { notFlag: 'g4:p:kid' }, then: [{ e: 'flag', flag: 'g4:p:kid' }, { e: 'goto', node: 'g4-p-kid' }] },
-          { id: 'gear', text: 'להרים את התוף והבד.', when: { notFlag: 'g4:p:gear' }, then: [{ e: 'flag', flag: 'g4:p:gear' }, { e: 'goto', node: 'g4-p-gear' }] },
+          { id: 'efi', text: 'לשבת ליד אפי.', when: { notFlag: 'g4:p:efi' }, hidden: true, then: [{ e: 'flag', flag: 'g4:p:efi' }, { e: 'goto', node: 'g4-p-efi' }] },
+          { id: 'kid', text: 'ללכת לילד עם הכובע.', when: { notFlag: 'g4:p:kid' }, hidden: true, then: [{ e: 'flag', flag: 'g4:p:kid' }, { e: 'goto', node: 'g4-p-kid' }] },
+          { id: 'gear', text: 'להרים את התוף והבד.', when: { notFlag: 'g4:p:gear' }, hidden: true, then: [{ e: 'flag', flag: 'g4:p:gear' }, { e: 'goto', node: 'g4-p-gear' }] },
         ],
       },
     ],

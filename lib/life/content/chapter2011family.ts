@@ -330,14 +330,14 @@ export const CONVERSATION_FRIDGE: Conversation = {
   nameHe: null,
   branches: [
     {
-      when: { flagIs: { flag: WEEK, value: 'broken' } },
+      when: { all: [PAIR, { flagIs: { flag: WEEK, value: 'broken' } }] },
       lines: [
         { who: null, text: 'חמישי בלילה. היומן על המקרר: ארבעה ערבים עם וי, ורביעי מחוק בשני קווים. "ערב קבוע", ומעליו, בכתב אחר: "היה".' },
         { who: PARTNER_TAG, text: 'לא כעסתי על רביעי. כעסתי שגיליתי אותו מהמקרר.' },
       ],
     },
     {
-      when: { flagIs: { flag: WEEK, value: 'kept' } },
+      when: { all: [PAIR, { flagIs: { flag: WEEK, value: 'kept' } }] },
       lines: [
         { who: null, text: 'חמישי בלילה. היומן על המקרר: חמישה ערבים עם וי, ורביעי מוקף בעיגול — בכתב שלך ובכתב שלה.' },
         { who: PARTNER_TAG, text: 'שמרת את רביעי. עם כל מה שנפל עליו.' },

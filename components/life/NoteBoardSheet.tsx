@@ -176,7 +176,7 @@ export function NoteBoardSheet({
                 }}
                 // the lifted scrap rides ABOVE the finger, so what is under the finger is the column
                 style={drag ? { position: 'fixed', left: drag.x - 130, top: drag.y - 124, width: 260, zIndex: 5 } : undefined}
-                className={`w-full max-w-[320px] -rotate-1 touch-none select-none border-hair border-ink/30 bg-sheet px-4 pb-3 pt-3 shadow-none ${drag ? 'rotate-2 opacity-90' : ''}`}
+                className={`w-full max-w-[320px] -rotate-1 touch-none select-none border-hair border-ink/30 bg-sheet px-4 pb-3 pt-3 ${drag ? 'rotate-2 opacity-90' : ''}`}
               >
                 <p className="font-sign text-[17px] leading-snug text-ink">
                   <bdi>{current.textHe}</bdi>

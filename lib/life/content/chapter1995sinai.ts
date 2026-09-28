@@ -284,7 +284,7 @@ const S2_COURT: ChoiceDef[] = [
    * a fact, what is a claim and what is a feeling (`board:court-1995`). The court sits again
    * afterwards with one more answer on it for a boy who kept the three apart.
    */
-  { id: 'sort', text: 'רגע. לסדר לעצמי מה מזה עובדה.', when: { notFlag: 's2:sorted' }, then: [{ e: 'minigame', id: 'board:court-1995' }] },
+  { id: 'sort', text: 'רגע. לסדר לעצמי מה מזה עובדה.', when: { notFlag: 's2:sorted' }, noteHe: 'כבר סידרת.', then: [{ e: 'minigame', id: 'board:court-1995' }] },
   {
     id: 'both',
     text: '"את השחקן אני אוהב. על המינוי — אולי פרדי צודק."',
