@@ -131,6 +131,22 @@ export const BEATS_PROMISES: Beat[] = [
    * כשיש ילד לחכות לו.
    */
   // ליד המקרר של הבית שלו (`homeAdult`) — אותו חדר כמו הילד, ולכן שעון: הוא לא יוצא ונכנס כדי לשמוע
+  /**
+   * (pass D) the week of 2013, eight years on — the diary on the fridge (`life:household:week`,
+   * `chapter2011family.ts`) is the evidence the promise is weighed against. One sentence, before it.
+   */
+  ...([
+    ['kept', 'ב-2013 שמרת את רביעי, עם כל מה שנפל עליו. אני עוד זוכרת את העיגול על המקרר.'],
+    ['broken', 'ב-2013 גיליתי את רביעי מהמקרר. שלא אגלה גם את זה ככה.'],
+    ['no-us', 'פעם היה לך יומן מלא, בלי אף ערב שלנו. אני בודקת אם הוא עוד תלוי שם.'],
+  ] as const).map(([value, text]): Beat => ({
+    id: `pr-week-${value}`,
+    at: 'home',
+    trigger: 'clock',
+    when: { all: [{ flag: 'life:partner' }, { flagIs: { flag: 'life:household:week', value } }], none: [{ flag: 'pr:promise' }, { flag: 'pr:weekSaid' }], any: [{ flag: 'pr:first' }, { notFlag: 'life:child' }] },
+    delayMs: 900,
+    do: [{ a: 'flag', flag: 'pr:weekSaid' }, { a: 'lines', lines: [{ who: PARTNER_TAG, text }] }],
+  })),
   { id: 'pr-promise', at: 'home', trigger: 'clock', when: { none: [{ flag: 'pr:promise' }], any: [{ flag: 'pr:first' }, { notFlag: 'life:child' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'pr-promise' }] },
   { id: 'pr-scarf', at: 'pitch', trigger: 'enter', when: { all: [{ flag: 'life:child' }, { flag: 'pr:promise' }], none: [{ flag: 'pr:scarf' }, { flag: 'pr:ask' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'pr-scarf' }] },
   /** (90-E) חזרה אליו עם שתי השעות — הוא שואל בעצמו; מי שהלך באמצע לוחץ עליו (`pr-answer` במגרש) */

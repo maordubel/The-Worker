@@ -22,6 +22,10 @@ const HOUR = all(f('o:brief'), no('o:verdict'))
 const MONEY_OPEN = all(HOUR, no('o:tri:money'), no('o:tri:partner'))
 
 export const PASS_D_SPOTS: Partial<Record<LocationId, HotspotDef[]>> = {
+  home: [
+    // 2013 · L04 — the diary on the fridge, while the week is still half empty (`hh-week-resume`)
+    { id: 'hh-diary-fridge', era: '2013-household', x: 0.31, y: 0.6, w: 0.05, act: 'hh-week-resume', verb: 'look', labelHe: 'היומן על המקרר', when: all(f('hh:week'), no('hh:planned')), priority: 4 },
+  ],
   office: [
     { id: 'o-spot-money', era: '2025-owner', x: 0.39, y: 0.62, w: 0.08, act: 'o-tri-money', verb: 'look', labelHe: 'הלוח של מיכל — העתודה', when: MONEY_OPEN, priority: 4 },
     { id: 'o-spot-partner', era: '2025-owner', x: 0.52, y: 0.66, w: 0.05, act: 'o-tri-partner', verb: 'talk', labelHe: 'פרדי — הדרך המהירה', when: MONEY_OPEN, priority: 3 },

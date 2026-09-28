@@ -204,3 +204,72 @@ describe('2026-finale — the walk after F04, and the last word is Kobi’s', ()
     expect(sim.endings).toEqual([])
   })
 })
+
+// ================================================ 2013-household — the week on the fridge ===
+
+describe('2013-household — five evenings, seven things, and the week happens', () => {
+  function home(flags: Record<string, boolean | string | number>, diary: string, week: string[]) {
+    const sim = new WorldSim('2013-household')
+    seed(sim, flags)
+    let n = 0
+    sim.beatAnswer = (choices) => {
+      // the diary answer first, then one demand per evening, then whatever comes after
+      const ids = choices.map((c) => c.id)
+      if (ids.includes(diary)) return diary
+      const want = week[n]
+      if (want && ids.includes(want)) {
+        n += 1
+        return want
+      }
+      return choices.find((c) => c.enabled)?.id ?? WALK_AWAY
+    }
+    sim.go('home')
+    for (let i = 0; i < 30 && !sim.state.flags['hh:lived']; i += 1) sim.wait(1)
+    return sim
+  }
+
+  it('Wednesday is the neck: whatever is written, two things stay out and answer in their own voice', () => {
+    const sim = home({ 'life:partner': 'melanie' }, 'calendar', ['work', 'ofir', 'us', 'terrace', 'parents'])
+    expect(sim.state.flags['hh:planned']).toBe(true)
+    expect(sim.state.flags['hh:lived']).toBe(true)
+    // metuki and "alone" were left out — both paid for
+    expect(sim.state.flags['hh:missed:metuki']).toBe(true)
+    expect(sim.state.flags['hh:missed:alone']).toBe(true)
+    expect(sim.state.flags['hh:missed:ofir']).toBeUndefined()
+    expect(sim.state.flags['life:household:week']).toBe('us')
+  })
+
+  it('a promise made without the diary lands on the fullest evening, and the week knows if it was kept', () => {
+    const kept = home({ 'life:partner': 'dor' }, 'promise', ['work', 'ofir', 'metuki', 'us', 'parents'])
+    expect(kept.state.flags['life:household:week']).toBe('kept')
+    const broken = home({ 'life:partner': 'dor' }, 'promise', ['us', 'ofir', 'work', 'terrace', 'parents'])
+    expect(broken.state.flags['life:household:week']).toBe('broken')
+  })
+
+  it('a demand appears only on the evenings it exists, and never twice', () => {
+    const sim = new WorldSim('2013-household')
+    seed(sim, { 'life:partner': 'tamar', 'hh:wk:ofir': true })
+    const wed = choicesOf(sim, 'hh-week-pair-wed').map((c) => c.id)
+    expect(wed).toContain('terrace')
+    expect(wed).not.toContain('ofir')
+    expect(wed).not.toContain('parents')
+  })
+
+  it('the life without a partner plays the same week, and Keren’s move is the evening that counts', () => {
+    const sim = home({}, 'own', ['alone', 'ofir', 'metuki', 'terrace', 'parents'])
+    expect(sim.state.flags['life:household:week']).toBe('no-us')
+    expect(sim.state.flags['hh:missed:work']).toBe(true)
+  })
+
+  it('the question about parenthood waits for Thursday night', () => {
+    const sim = new WorldSim('2013-household')
+    seed(sim, { 'life:partner': 'melanie' })
+    sim.beatAnswer = (choices) => (choices.some((c) => c.id === 'calendar') ? 'calendar' : WALK_AWAY)
+    sim.go('home')
+    sim.wait(5)
+    expect(sim.opened).not.toContain('hh-parent')
+    // …and a week closed half way is offered again, at the first empty evening
+    expect(sim.opened).toContain('hh-week-resume')
+    expect(sim.find('hh-diary-fridge')).toBeDefined()
+  })
+})
