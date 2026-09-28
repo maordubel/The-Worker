@@ -1157,6 +1157,14 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
         choices: [
           { id: 'go', text: '"יש. אני נוסע."', when: { armyAbove: { key: 'commanderTrust', min: 25 } }, noteHe: 'אחרי מה שהיה — אין חופשה.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'redheart', key: 'travelDrive', delta: 4 }, { e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 4 }, { e: 'flag', flag: 'a4:drive' }, { e: 'minigame', id: 'ride:1997' }] },
           { id: 'go-anyway', text: '"אין לי חופשה. נוסע בכל זאת."', when: { armyBelow: { key: 'commanderTrust', max: 24 } }, noteHe: 'המפקד סומך עליך. אתה לא זורק את זה על משחק.', then: [{ e: 'flag', flag: 'a4:road' }, { e: 'flag', flag: 'life:awol' }, { e: 'army', key: 'commanderTrust', delta: -20 }, { e: 'armyRoute', route: 'punished' }, { e: 'personality', key: 'riskTolerance', delta: 4 }, { e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 4 }, { e: 'flag', flag: 'a4:drive' }, { e: 'minigame', id: 'ride:1997' }] },
+          /**
+           * החלפה (implementation pass 27.9.2026, B6 S1; bible B6 "Swap: למצוא חייל אחר —
+           * relationship/debt"). No leave, and no lie: Yaron from the next tent takes this
+           * Saturday's guard, and the Saturday is owed. `life:swap:yaron` outlives the winter
+           * and he calls it in at the kiosk in the spring (`a5-kiosk`), on the one evening
+           * there is something else to do.
+           */
+          { id: 'swap', text: '"ירון, תחליף אותי בשמירה של השבת? אני חייב לך אחת."', when: { all: [{ armyBelow: { key: 'commanderTrust', max: 24 } }, { relationship: { who: 'yaron', axis: 'familiarity', min: 4 } }] }, hidden: true, then: [{ e: 'flag', flag: 'a4:road' }, { e: 'flag', flag: 'life:swap:yaron' }, { e: 'army', key: 'leaveDebt', delta: 1 }, { e: 'rel', who: 'yaron', axis: 'trust', delta: 3 }, { e: 'remember', who: 'yaron', eventId: 'took-my-shabbat-1997', significance: 'major' }, { e: 'rel', who: 'liron', axis: 'sharedHistory', delta: 4 }, { e: 'toast', text: 'ירון לא שאל לאן. "שבת אחת. אני אזכיר לך."', tone: 'plain' }, { e: 'flag', flag: 'a4:drive' }, { e: 'minigame', id: 'ride:1997' }] },
           { id: 'stay', text: '"לא הפעם. אני חוזר לבסיס."', then: [{ e: 'army', key: 'commanderTrust', delta: 6 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'wellbeing', key: 'regret', delta: 4 }, { e: 'flag', flag: 'a4:road' }, { e: 'presence', mode: 'army' }, { e: 'flag', flag: 'a4:done' }] },
         ],
       },
@@ -1245,6 +1253,21 @@ export const CONVERSATIONS_ARMY: Conversation[] = [
       {
         when: { flag: 'a5:done' },
         lines: [{ who: 'רפי מהקיוסק', text: 'נסעת? יופי. עכשיו לך לישון, יש לך בסיס בבוקר.' }],
+      },
+      /** the Saturday Yaron gave in the winter, called in on the evening there are two other things to do */
+      {
+        when: { flag: 'life:swap:yaron', none: [{ flag: 'life:swap:repaid' }, { flag: 'life:swap:broken' }] },
+        lines: [
+          { who: 'רפי מהקיוסק', text: 'שלושה ביקשו ממני להעביר לך הודעה, ואני לא דואר.' },
+          { who: 'רפי מהקיוסק', text: 'אחד: משחק בצפון, בלי הסעה. שתיים: מישהו הבטיח לאסוף אותך ולא בא.' },
+          { who: 'רפי מהקיוסק', text: 'ושלוש: חייל בשם ירון התקשר מהבסיס. אמר "השבת שלי. הוא יודע."' },
+          { who: null, text: 'אתה יכול להספיק אחד. לא שלושה.' },
+        ],
+        choices: [
+          { id: 'repay', text: 'לחזור לבסיס. לשמירה של ירון.', then: [{ e: 'flag', flag: 'life:swap:repaid' }, { e: 'army', key: 'leaveDebt', delta: -1 }, { e: 'army', key: 'commanderTrust', delta: 4 }, { e: 'rel', who: 'yaron', axis: 'trust', delta: 6 }, { e: 'personality', key: 'reliability', delta: 3 }, { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:yaron', subjectHe: 'השבת של ירון', noteHe: 'החליף אותו בחורף. החזיר באביב, בערב שהיה לו משהו אחר לעשות.' }, { e: 'flag', flag: 'a5:done' }, { e: 'ending', id: 'home' }] },
+          { id: 'north', text: 'לצאת צפונה. בטרמפים. ירון יסתדר.', then: [{ e: 'flag', flag: 'life:swap:broken' }, { e: 'rel', who: 'yaron', axis: 'trust', delta: -6 }, { e: 'remember', who: 'yaron', eventId: 'did-not-return-shabbat-1997', significance: 'major' }, { e: 'flag', flag: 'a5:north' }, { e: 'redheart', key: 'travelDrive', delta: 6 }, { e: 'goto', node: 'a5-north-1' }] },
+          { id: 'wait', text: 'לחכות להסעה שהבטיחו.', then: [{ e: 'flag', flag: 'life:swap:broken' }, { e: 'rel', who: 'yaron', axis: 'trust', delta: -6 }, { e: 'remember', who: 'yaron', eventId: 'did-not-return-shabbat-1997', significance: 'major' }, { e: 'flag', flag: 'a5:pickup' }, { e: 'goto', node: 'a5-pickup-1' }] },
+        ],
       },
       {
         lines: [

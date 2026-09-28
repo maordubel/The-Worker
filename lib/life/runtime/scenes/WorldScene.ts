@@ -57,7 +57,7 @@ import type { HistoricalAnchor } from '../../anchors'
 import { buildFinale } from '../../finale'
 import { retryFor } from '../../content/retry1986'
 import { TransistorNet } from '../match1990'
-import { BOARD_PREFIX, boardView } from '../../noteBoards'
+import { BOARD_PREFIX, boardView, settleWith } from '../../noteBoards'
 import { NOTE_BOARDS } from '../../content/noteBoards'
 import { MatchDirector } from '../matchDirector'
 import { directiveFor, storyHoldsTheMoment, type MainStoryDirective } from '../../storyDirector'
@@ -3791,8 +3791,18 @@ export class WorldScene extends Phaser.Scene {
      */
     if (id.startsWith(BOARD_PREFIX)) {
       const def = NOTE_BOARDS[id.slice(BOARD_PREFIX.length)]
-      const view = def ? boardView(def, this.ctx.engine.state) : null
-      if (view) this.ctx.bus.emit('board', view)
+      if (!def) return
+      const view = boardView(def, this.ctx.engine.state)
+      if (view) {
+        this.ctx.bus.emit('board', view)
+        return
+      }
+      // too little on the table to sort: the note is folded empty at once, and the story goes
+      // on — a choice that opens nothing and stays on offer is a loop, not a decision
+      const outcome = settleWith(def, {}, this.ctx.engine.state)
+      this.ctx.engine.dispatch(...outcome.events)
+      this.ctx.bus.emit('toast', { text: outcome.verdictHe, tone: 'plain' })
+      if (outcome.after) this.talk(outcome.after)
       return
     }
     this.paused = true

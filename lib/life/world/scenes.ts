@@ -3306,6 +3306,9 @@ const SCENES: SceneDef[] = [
       { id: 'ticket-1990', era: '1990', figure: 'adultA2', x: 0.7, y: 0.9, size: 0.32, nameHe: 'הקופאי', talk: 'ticket-window-1990', flip: true },
       { id: 'ofir-ground', era: '1990', figure: 'ofir90', x: 0.33, y: 0.93, size: 0.3, nameHe: 'אופיר', talk: 'ofir-ground-1990' },
       { id: 'vendor-1990', era: '1990', figure: 'adultA6', x: 0.88, y: 0.93, size: 0.34, nameHe: 'מוכר', talk: 'vendor-1990', flip: true },
+      // B5 S2 (27.9.2026) — spring 1996 at gate seven: the banner, and the man in the old number seven
+      { id: 'fan-gate96', era: '1995-sinai', figure: 'adultB4', x: 0.17, y: 0.9, size: 0.3, nameHe: 'אוהד צעיר', talk: 's3-banner-96', when: { flag: 'life:sinai:d3', none: [{ flag: 's3:g:left' }] } },
+      { id: 'seven-gate96', era: '1995-sinai', figure: 'manCap', x: 0.8, y: 0.92, size: 0.3, nameHe: 'אוהד בחולצה ישנה', talk: 's3-seven-96', flip: true, when: { flag: 'life:sinai:d3', none: [{ flag: 's3:g:left' }] } },
     ],
     hotspots: [
       /**
@@ -3329,6 +3332,8 @@ const SCENES: SceneDef[] = [
       { id: 'a2-between', era: '1996-army', x: 0.7, y: 0.88, w: 0.08, act: 'a2-between', verb: 'look', labelHe: 'להישאר רגע באמצע, ליד הגדר', when: { all: [{ flag: 'life:army:d2' }, { notFlag: 'a2:chose' }, { notFlag: 'life:army:d3' }] }, priority: 3 },...gigSpots('bloomfield-outside'), 
       // שלושת המבטים של ילד — "קרוסלת ברזל, גבוהה ממך", "אבא עומד שם בכל שבת". הם היו
       // `era: '*'` ונקראו גם לאיש בן שלושים ב-2010; המקום נשאר, המשפטים שייכים לילד.
+      { id: 's3-banner', era: '1995-sinai', x: 0.27, y: 0.91, w: 0.08, act: 's3-banner-96', verb: 'take', labelHe: 'המכחול, והבד על הבטון', when: { flag: 'life:sinai:d3', none: [{ flag: 's3:g:left' }, { flag: 's3:g:done' }] }, priority: 5, prop: { key: 'propBannerBlank', size: 0.045, at: { x: 0.28, y: 0.935 } } },
+      { id: 's3-watch', era: '1995-sinai', x: 0.66, y: 0.87, w: 0.06, act: 's3-watch-96', verb: 'watch', labelHe: 'להישען על הגדר ולהסתכל', when: { flag: 'life:sinai:d3', none: [{ flag: 's3:g:left' }, { flag: 's3:g:done' }] }, priority: 4 },
       { id: 'gate7', era: ['1980s', '1990s'], x: 0.515, y: 0.86, w: 0.07, act: 'gate-seven', verb: 'look', labelHe: 'שער 7' },
       { id: 'look-gate', era: '1990', x: 0.25, y: 0.9, w: 0.07, act: 'pano:panoGate7', verb: 'gaze', labelHe: 'סביב' },
       { id: 'fence', era: ['1980s', '1990s'], x: 0.08, y: 0.85, w: 0.07, act: 'fence-look', verb: 'look', labelHe: 'הגדר' },
@@ -3906,7 +3911,7 @@ const SCENES: SceneDef[] = [
       { id: 'limor-hall', era: '1997-basket', figure: 'adultB5', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'h1-corner', sway: 0.003 },
       { id: 'freddy-hall', era: '1997-basket', figure: 'adultA2', x: 0.16, y: 0.92, size: 0.278, nameHe: 'פרדי', talk: 'h1-freddy', when: { none: [{ flag: 'life:hall:d2' }] } },
       // B7 S1 (27.9.2026) — Efi at the corner on the relegation night: who he kept a place for
-      { id: 'efi-hall97', era: '1997-basket', figure: 'efi96-3q', x: 0.44, y: 0.91, size: 0.262, nameHe: 'אפי', talk: 'efi-hall-97', flip: true, sway: 0.006, when: { none: [{ flag: 'life:hall:d2' }, { flag: 'h1:football' }] } },
+      { id: 'efi-hall97', era: '1997-basket', figure: 'efi96-3q', x: 0.245, y: 0.9, size: 0.262, nameHe: 'אפי', talk: 'efi-hall-97', flip: true, sway: 0.006, when: { none: [{ flag: 'life:hall:d2' }, { flag: 'h1:football' }] } },
       { id: 'shachor-seed', era: '1999-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'seed-corner', flip: true },
       { id: 'limor-seed', era: '1999-basket', figure: 'adultB5', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'seed-corner', sway: 0.003 },
       { id: 'soko-seed', era: '1999-basket', figure: 'soko', x: 0.2, y: 0.92, size: 0.278, nameHe: 'סוקו', talk: 'seed-inside' },

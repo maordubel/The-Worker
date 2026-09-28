@@ -1008,7 +1008,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         lines: [{ who: null, text: 'השפופרת עוד חמה. כבר התקשרת.' }],
       },
       {
-        when: { minAgorot: 50, any: [{ flagIs: { flag: 'life:1990:notebook', value: 'clean' } }, { flag: 'net:handed' }, { flag: 'net:toldKobi' }] },
+        when: { minAgorot: 100, any: [{ flagIs: { flag: 'life:1990:notebook', value: 'clean' } }, { flag: 'net:handed' }, { flag: 'net:toldKobi' }] },
         lines: [
           { who: null, text: 'אסימון, חריץ, צליל. מסביב אנשים רצים לדשא, ואתה עומד עם הגב אליהם ומחכה שיענו.' },
           { who: 'רחל', text: 'הלו?' },
@@ -1019,7 +1019,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
           { who: 'רחל', text: '…טוב. תביא את אבא הביתה.' },
         ],
         then: [
-          { e: 'money', agorot: -50, why: 'אסימון' },
+          { e: 'money', agorot: -100, why: 'אסימון' },
           { e: 'flagValue', flag: 'life:1990:called', value: 'first' },
           { e: 'rel', who: 'rachel', axis: 'trust', delta: 4 },
           { e: 'skill', skill: 'communication', delta: 2, why: 'הביא ידיעה הביתה, ראשון, ובדוקה' },
@@ -1028,7 +1028,7 @@ export const CONVERSATIONS_1990: Conversation[] = [
         ],
       },
       {
-        when: { minAgorot: 50 },
+        when: { minAgorot: 100 },
         lines: [
           { who: null, text: 'אסימון, חריץ, צליל. מסביב אנשים רצים לדשא.' },
           { who: 'רחל', text: 'הלו? — אני יודעת, אני יודעת. הרדיו אמר כבר לפני רבע שעה. אבא איתך?' },
@@ -1036,14 +1036,14 @@ export const CONVERSATIONS_1990: Conversation[] = [
           { who: 'רחל', text: 'אז תמצא. ותחזרו ביחד.' },
         ],
         then: [
-          { e: 'money', agorot: -50, why: 'אסימון' },
+          { e: 'money', agorot: -100, why: 'אסימון' },
           { e: 'flagValue', flag: 'life:1990:called', value: 'second' },
           { e: 'time', minutes: 6 },
           { e: 'toast', text: 'הרדיו היה מהיר ממך. בפעם הבאה.', tone: 'plain' },
         ],
       },
       {
-        lines: [{ who: null, text: 'אין לך אסימון, ואין לך חצי שקל לקנות אחד. הטלפון על העמוד מחכה למישהו אחר.' }],
+        lines: [{ who: null, text: 'אין לך אסימון, ואין לך שקל לקנות אחד. הטלפון מאחורי העמוד מחכה למישהו אחר.' }],
       },
     ],
   },

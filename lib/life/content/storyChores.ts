@@ -57,6 +57,33 @@ const D_DID_00 = 'd:did'
 
 export const STORY_CHORES: Record<string, StoryChore> = {
   /**
+   * B5 S2 · אביב 1996 — the banner under the colonnade at gate seven, three words against the
+   * man on his wall (implementation pass 27.9.2026: *"להצטרף ליצור"*). The brush is the
+   * joining; how many of the letters are his is what the wall at home says back to him.
+   */
+  'banner-96': {
+    id: 'banner-96',
+    where: 'bloomfield-outside',
+    drop: { x: 0.24, y: 0.9 },
+    labelHe: 'הבד מתחת לעמודים',
+    shape: { mode: 'sweep', target: 10, seconds: 35, hintHe: 'עשר אותיות על הבד. לעבור על כל אחת עם המכחול, עד שהיא אדומה. כפתור — לקום.' },
+    returnSpawn: 'start',
+    finish: (done, target) => {
+      const painted = Math.max(0, Math.min(done, target))
+      const events: LifeEvent[] = [
+        { t: 'flag.raised', flag: 's3:g:done' },
+        { t: 'flag.set', flag: 'life:sinai:gate', value: 'painted' },
+        { t: 'energy.changed', delta: -8 },
+        { t: 'clock.advanced', minutes: 10 + painted },
+        { t: 'institution.changed', key: 'protestEscalation', delta: 2 + Math.round((6 * painted) / target) },
+      ]
+      if (painted >= target) events.push({ t: 'redheart.changed', key: 'terraceCulture', delta: 2 })
+      return events
+    },
+    toastHe: (done, target) =>
+      done >= target ? 'עשר אותיות, בכתב שלך. בחצי השני הן יהיו על הגדר, מול הספסל שלו.' : done > 0 ? `${done} אותיות שלך. את השאר גמר הבחור מהדלת, עקום.` : 'הנחת את המכחול. הבחור מהדלת לא אמר כלום, ולקח אותו.',
+  },
+  /**
    * B2 · 11.3.1991 — "ילד. שני ארגזים, מהאוטו לדלת." (שחור). Until the implementation pass
    * of 27.9.2026 this was a sentence and a toast; the brief's hall job is the hands: two
    * crates from the car at the corner to the hall door, one at a time, twenty minutes of an

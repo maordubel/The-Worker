@@ -218,7 +218,7 @@ export const STADIUM_ROOMS: SceneDef[] = [
       { id: 'uc-cart', era: '1990', x: 0.84, y: 0.86, w: 0.07, act: 'uc-cart-1990', verb: 'buy', labelHe: 'גרעינים מהעגלה', when: { none: [F('uc:cart')] }, priority: 2 },
       { id: 'uc-lanes', era: '1990', x: 0.4, y: 0.9, w: 0.1, act: 'uc-lanes-1990', verb: 'look', labelHe: 'המעברים הריקים', when: { none: [F('uc:lanes')] }, priority: 2 },
       // B1 S4 (27.9.2026) — after the whistle, the payphone on the pillar: tell home before the radio does
-      { id: 'uc-phone', era: '1990', x: 0.22, y: 0.88, w: 0.07, act: 'uc-phone-1990', verb: 'hold', labelHe: 'הטלפון על העמוד — להתקשר הביתה', when: { all: [F('match:over')], none: [F('life:1990:called')] }, priority: 5 },
+      { id: 'uc-phone', era: '1990', x: 0.21, y: 0.88, w: 0.07, act: 'uc-phone-1990', verb: 'hold', labelHe: 'הטלפון הציבורי מאחורי העמוד — להתקשר הביתה', when: { all: [F('match:over')], none: [F('life:1990:called')] }, priority: 5 },
     ],
     exits: [
       {
