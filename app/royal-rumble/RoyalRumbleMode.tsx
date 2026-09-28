@@ -6,6 +6,7 @@ import type { RoyalRumbleDraft } from '@/lib/game/royal-rumble'
 import type { KitSpec } from '@/lib/kit/spec'
 import type { Wardrobe } from '@/lib/kit/playerShirt'
 import { t } from '@/lib/royal-rumble/i18n'
+import { LivedRumbleDoor } from './LivedRumbleDoor'
 import { RoyalRumbleLiveRun } from './RoyalRumbleLiveRun'
 import { RoyalRumbleRun } from './RoyalRumbleRun'
 import { RumbleLooks } from './RumbleShirt'
@@ -39,6 +40,7 @@ export function RoyalRumbleMode({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none">
+      {mode === 'solo' && <LivedRumbleDoor />}
       <nav
         className="mx-auto mb-1.5 grid max-w-5xl shrink-0 grid-cols-2 border-rule border-ink bg-paper md:mb-2"
         aria-label={t('modeTitle')}

@@ -36,7 +36,7 @@ export type LifeArchiveBridge = {
  * LIFE → gates (§23.1): one door of a finished chapter's recap, derived on the server by
  * `lifeDoors()` and handed down — the shell never builds a link. `label` is a message key.
  */
-export type LifeDoor = { kind: 'archive' | 'goal'; href: string; label: string }
+export type LifeDoor = { kind: 'archive' | 'goal' | 'trivia'; href: string; label: string }
 
 /** §23.3 — one chapter as this person lived it. */
 export type LifeMemory = LifeArchiveBridge & {

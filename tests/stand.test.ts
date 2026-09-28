@@ -12,6 +12,7 @@ import {
   cleanNick,
   cleanStandCode,
   cleanStandName,
+  defaultStandNick,
   gateOfPath,
   publicName,
   standPath,
@@ -80,8 +81,10 @@ describe('the contract — the device refuses what the database would', () => {
     expect(gateOfPath('/life')).toBeNull()
   })
 
-  it('prints a nickname or "אדום #N" and nothing else', () => {
-    expect(publicName(7, null)).toBe('אדום #7')
+  it('prints a nickname or "אדום מהיציע #N" and nothing else', () => {
+    // §35 — the stand's own number is worded apart from the account-wide "אדום #N"
+    expect(publicName(7, null)).toBe('אדום מהיציע #7')
+    expect(publicName(7, null)).not.toMatch(/^אדום #/)
     expect(publicName(7, 'אבי')).toBe('אבי')
   })
 })
@@ -231,5 +234,22 @@ describe('the seams — small, and the privacy holds in the code too', () => {
     const home = read('components/stand/StandHome.tsx')
     const guest = home.slice(home.indexOf('function Guest('), home.indexOf('function Member('))
     expect(guest).toContain('<DailyCard daily={daily} />')
+  })
+})
+
+describe('one public identity (§35, 28.9.2026)', () => {
+  it('the stand defaults to the public nickname, cleaned by the stand rule; anonymous stays empty', () => {
+    expect(defaultStandNick({ mode: 'nickname', nickname: 'שער 5' })).toBe('שער 5')
+    expect(defaultStandNick({ mode: 'nickname', nickname: 'me@mail.com' })).toBe('memail.com')
+    expect(defaultStandNick({ mode: 'anonymous', nickname: 'שער 5' })).toBe('')
+    expect(defaultStandNick({ mode: 'nickname', nickname: '' })).toBe('')
+  })
+
+  it('the forms read the device preference, and the override re-joins — no new SQL path', () => {
+    const home = read('components/stand/StandHome.tsx')
+    const index = read('components/stand/StandIndex.tsx')
+    for (const code of [home, index]) expect(code).toContain('defaultStandNick(readPref())')
+    expect(home).toMatch(/function NickEdit[\s\S]*joinStandAction\(code, nick\)/)
+    expect(home + index).not.toMatch(/supporter_no|worker_public_label|publicIdentity\(/)
   })
 })

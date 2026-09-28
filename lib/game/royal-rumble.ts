@@ -387,10 +387,38 @@ function pickWeighted(items: readonly RatedPlayer[], random: () => number): Rate
  * pitch in THE WORKER LIFE holds only men who had played for the club before `before`,
  * on both sides of the dare. Absent, the pools are the gate's.
  */
-export type RumbleWindow = { before: number }
+export type RumbleWindow = {
+  before?: number
+  /**
+   * "השנים שחיית עד עכשיו" (ONE RED WORLD §18, 28.9.2026) — a themed draft over the men of
+   * the LIFE chapters this device has finished, by slug. Built ONLY on the server
+   * (`lib/life/livedPool.ts`); a client-sent window is cut to `before` by the action. It is
+   * a separate mode with its own seed namespace (`royalRumbleLivedSeed`), so the canonical
+   * board of any seed is untouched — `tests/life-payoffs.test.ts` holds the hashes.
+   */
+  only?: readonly string[]
+}
+
+const onlySets = new WeakMap<readonly string[], Set<string>>()
+function onlySet(only: readonly string[]): Set<string> {
+  let set = onlySets.get(only)
+  if (!set) {
+    set = new Set(only)
+    onlySets.set(only, set)
+  }
+  return set
+}
 
 function inWindow(player: RatedPlayer, window?: RumbleWindow): boolean {
-  return !window || (player.fromYear !== null && player.fromYear < window.before)
+  if (!window) return true
+  if (typeof window.before === 'number' && !(player.fromYear !== null && player.fromYear < window.before)) return false
+  if (window.only && !onlySet(window.only).has(player.slug)) return false
+  return true
+}
+
+function windowKey(window?: RumbleWindow): string {
+  if (!window) return ''
+  return `${window.before ?? ''}|${window.only ? [...window.only].sort().join(',') : ''}`
 }
 
 const POSITIONS: readonly Position[] = ['GK', 'DF', 'MF', 'FW']
@@ -400,13 +428,15 @@ const poolsByWindow = new Map<string, PositionPool>()
 
 /** the men who can be dealt AS this position over this window, bucketed by price — built once */
 function positionPool(position: Position, window?: RumbleWindow): PositionPool {
-  const key = `${position}|${window?.before ?? ''}`
+  const key = `${position}|${windowKey(window)}`
   const cached = poolsByWindow.get(key)
   if (cached) return cached
   const all = pool().filter((player) => player.positions.includes(position) && inWindow(player, window))
   const byPrice = new Map<RoyalRumblePrice, RatedPlayer[]>()
   for (const player of all) byPrice.set(player.price, [...(byPrice.get(player.price) ?? []), player])
   const built = { all, byPrice }
+  // a lived-years window is one per device's set of chapters: bound the memo, never the gate's own
+  if (poolsByWindow.size > 96) for (const k of [...poolsByWindow.keys()]) if (k.endsWith('|') === false) poolsByWindow.delete(k)
   poolsByWindow.set(key, built)
   return built
 }

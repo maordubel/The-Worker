@@ -63,6 +63,9 @@ import heStand from '@/messages/he.stand.json'
 // 28.9.2026 — the personal area: אני / התיק שלי, the memory map, the memories, the public
 // identity (`personal.*`, docs/21-personal-area.md). One file, so the area has one home.
 import hePersonal from '@/messages/he.personal.json'
+// 28.9.2026 — the last ONE RED WORLD pass: LIFE payoffs (§10, §11, §15, §18, §19) and songs in
+// context (§3) — `redworld.*`. One file, so this pass never appends to another catalogue.
+import heRedWorld from '@/messages/he.stage.redworld.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -143,6 +146,7 @@ export const CATALOGUE_FILES = {
   heShare,
   heStand,
   hePersonal,
+  heRedWorld,
 } as const
 
 const catalogue = {
@@ -191,6 +195,7 @@ const catalogue = {
   ...heShare,
   ...heStand,
   ...hePersonal,
+  ...heRedWorld,
 }
 
 export type MessageKey = keyof typeof catalogue

@@ -5,7 +5,7 @@ import { t } from '@/lib/i18n'
 import { gateMetadata } from '@/lib/seo'
 import { resolveChapterAnchor, resolvePrologueAnchor, resolveStageBAnchor, resolveUssishkinAnchor, resolveStageBAnchors } from '@/lib/life/anchor-server'
 
-import { lifeDoors } from '@/lib/life/bridge'
+import { lifeDoors, lifeTriviaDoors } from '@/lib/life/bridge'
 import { chapterFor } from '@/lib/life/content/chapters'
 
 import { LifeStage } from './LifeStage'
@@ -46,7 +46,7 @@ export default function LifePage() {
 
   return (
     <Screen title={t('life.title')} sub={t('life.sub')} chrome={false} fullBleed night>
-      <LifeStage anchor={anchor} prologueAnchor={prologueAnchor} anchors={anchors} catalog={resolveMechanicCatalog()} doors={lifeDoors()} />
+      <LifeStage anchor={anchor} prologueAnchor={prologueAnchor} anchors={anchors} catalog={resolveMechanicCatalog()} doors={lifeDoors()} trivia={lifeTriviaDoors()} />
     </Screen>
   )
 }

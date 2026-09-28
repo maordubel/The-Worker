@@ -55,3 +55,22 @@ export function royalRumbleShareHref(seed: number, cursor: number): string {
   const r = Number.isFinite(cursor) && cursor > 0 ? Math.floor(cursor) : 0
   return r > 0 ? `/royal-rumble?seed=${s}&r=${r}` : `/royal-rumble?seed=${s}`
 }
+
+/**
+ * "השנים שחיית עד עכשיו" (ONE RED WORLD §18) — the themed draft's OWN seed namespace. The
+ * route seed is salted and avalanched before it reaches the composer, so `seed=X` in the
+ * themed mode and `seed=X` on the gate are unrelated boards, and nothing here can move
+ * what `royalRumbleRoundSeed` deals. Never 0 (`readSeed`), never equal to its input.
+ */
+export const ROYAL_RUMBLE_LIVED_SALT = 0x4c1fe0d5
+
+export function royalRumbleLivedSeed(seed: number, cursor = 0): number {
+  const base = royalRumbleRoundSeed(seed, cursor)
+  let h = (base ^ ROYAL_RUMBLE_LIVED_SALT) >>> 0
+  h ^= h >>> 16
+  h = Math.imul(h, 0x7feb352d) >>> 0
+  h ^= h >>> 15
+  h = Math.imul(h, 0x846ca68b) >>> 0
+  h = (h ^ (h >>> 16)) >>> 0
+  return h === 0 || h === base ? (h ^ 0x9e3779b1) >>> 0 || 1 : h
+}

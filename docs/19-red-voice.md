@@ -86,6 +86,11 @@ Rows below confidence 2 (the terrace titles the source names without describing)
 surfaced in the archive only. Moods per song type are this file's classification, stated
 as such.
 
+**Songs in context (28.9.2026).** `lib/voice/songLine.ts` + `components/voice/SongLine.tsx`: one
+small line (title · "מהיציע" · link to the wiki) on exactly three screens — the daily recap
+(`DailyCard`, by date), the archive landing (by date) and a LIFE chapter recap (`EndingCard`, by
+chapter). Metadata only; confidence < 2 stays archive-only; `tests/songs-context.test.ts` holds it.
+
 **Owner step to complete it (click-only, in a browser):** open
 `https://wiki.red-fans.com/index.php?title=Special:Export`, add the categories `שירים`,
 `שירים מהיציע` and `שירי שחקנים`, tick "include only the current revision", export, and

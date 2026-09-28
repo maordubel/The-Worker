@@ -22,7 +22,7 @@ export function questionById(id: string | null | undefined): BlindCowQuestion | 
 }
 
 /** The lobby's filters (spec §3 State 1) — few, and each one a real facet of the bank. */
-export const FILTERS = ['all', 'israeli', 'foreign', 'legend', 'hardcore', '1950', '1960', '1970', '1980', '1990', '2000', '2010', '2020'] as const
+export const FILTERS = ['all', 'israeli', 'foreign', 'legend', 'hardcore', 'lived', '1950', '1960', '1970', '1980', '1990', '2000', '2010', '2020'] as const
 export type Filter = (typeof FILTERS)[number]
 
 export function cleanFilter(value: unknown): Filter {
@@ -40,6 +40,9 @@ function matches(q: BlindCowQuestion, filter: Filter): boolean {
       return q.tags.legend
     case 'hardcore':
       return q.eligibleModes.includes('hardcore')
+    case 'lived':
+      // the lived pool needs the device's finished chapters — `livedSoloPool` builds it
+      return false
     default: {
       const decade = Number(filter)
       // the 1950 chip also takes the thirties and forties: three thin decades, one door
@@ -52,9 +55,20 @@ export function soloPool(filter: Filter): BlindCowQuestion[] {
   return BANK.questions.filter((q) => q.eligibleModes.includes('solo') && matches(q, filter))
 }
 
+/**
+ * "תן לי מישהו מהשנים שחיית עכשיו" (ONE RED WORLD §19) — the solo questions whose man
+ * belongs to the LIFE chapters this device finished. The id set is built on the server
+ * (`lib/life/livedPool.ts`); only its size, never a member, is told to the page.
+ */
+export const LIVED_MIN = 10
+
+export function livedSoloPool(playerIds: ReadonlySet<string>): BlindCowQuestion[] {
+  return BANK.questions.filter((q) => q.eligibleModes.includes('solo') && playerIds.has(q.targetPlayerId))
+}
+
 /** A fresh solo question — server randomness, and not one of the last ones he saw. */
-export function pickSolo(filter: Filter, recent: readonly string[]): BlindCowQuestion | null {
-  const pool = soloPool(filter)
+export function pickSolo(filter: Filter, recent: readonly string[], lived?: readonly BlindCowQuestion[]): BlindCowQuestion | null {
+  const pool = filter === 'lived' ? [...(lived ?? [])] : soloPool(filter)
   if (!pool.length) return null
   const fresh = pool.filter((q) => !recent.includes(q.id))
   const from = fresh.length ? fresh : pool

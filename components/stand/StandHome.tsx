@@ -9,7 +9,8 @@ import { track } from '@/lib/analytics/meter'
 import { SITE_URL } from '@/lib/brand'
 import type { Daily, DailyItem } from '@/lib/daily/types'
 import { t, type MessageKey } from '@/lib/i18n'
-import { publicName, type Peek, type StandError, type StandHome as Home } from '@/lib/stand/contract'
+import { readPref } from '@/lib/profile/identity'
+import { defaultStandNick, publicName, type Peek, type StandError, type StandHome as Home } from '@/lib/stand/contract'
 import type { StandDebate } from '@/lib/stand/debate'
 import { forgetStand, noteStandDailyComplete, rememberStand, todayReport } from '@/lib/stand/local'
 import { groupStory, notYetLine, objectives, pairLines } from '@/lib/stand/story'
@@ -122,6 +123,7 @@ export function StandHome({
       debate={debate}
       program={program}
       weekStart={weekStart}
+      onChanged={loadHome}
       onLeft={() => {
         forgetStand(code)
         window.location.assign('/stand')
@@ -144,6 +146,8 @@ function BackLink() {
 
 function Guest({ peek, daily, onJoined }: { peek: Peek; daily: Daily; onJoined: () => Promise<void> }) {
   const [nick, setNick] = useState('')
+  // §35 — the public nickname this device chose is the default; it can be changed for this stand
+  useEffect(() => setNick((have) => have || defaultStandNick(readPref())), [])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<StandError | null>(null)
 
@@ -221,6 +225,7 @@ function Member({
   debate,
   program,
   weekStart,
+  onChanged,
   onLeft,
 }: {
   home: Home
@@ -228,6 +233,7 @@ function Member({
   debate: StandDebate | null
   program: Station[]
   weekStart: string
+  onChanged: () => Promise<void>
   onLeft: () => void
 }) {
   const discover = daily.items.find((item) => item.slot === 'discover') ?? null
@@ -243,6 +249,7 @@ function Member({
             {t('stand.mine.members', { n: String(home.members) })} · <bdi>{publicName(home.you.no, home.you.nick)}</bdi>{' '}
             <span className="text-[11px]">({t('stand.member.you')})</span>
           </p>
+          <NickEdit code={home.code} current={home.you.nick} onChanged={onChanged} />
         </div>
         <div className="hidden md:block md:w-80">
           <Invite code={home.code} name={home.name} />
@@ -266,6 +273,73 @@ function Member({
         <Leave code={home.code} onLeft={onLeft} />
       </div>
     </div>
+  )
+}
+
+/**
+ * §35 — the per-stand override. A member may be called something else in THIS stand than
+ * the public nickname; re-joining with a new nickname is how the database already updates
+ * it (`worker_stand_join` on an existing member), so no new function and no new privilege.
+ * An empty field returns to the stand's anonymous "אדום מהיציע #N".
+ */
+function NickEdit({ code, current, onChanged }: { code: string; current: string | null; onChanged: () => Promise<void> }) {
+  const [open, setOpen] = useState(false)
+  const [nick, setNick] = useState(current ?? '')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<StandError | null>(null)
+  if (!open) {
+    return (
+      <button
+        type="button"
+        data-stand="nick-edit"
+        onClick={() => {
+          setNick(current ?? defaultStandNick(readPref()))
+          setOpen(true)
+        }}
+        className="mt-1 inline-flex min-h-tap items-center font-body text-[12px] font-extrabold text-red underline underline-offset-4"
+      >
+        {t('stand.nick.edit')}
+      </button>
+    )
+  }
+  return (
+    <form
+      className="mt-2 flex flex-wrap items-end gap-2"
+      onSubmit={async (event) => {
+        event.preventDefault()
+        if (busy) return
+        setBusy(true)
+        setError(null)
+        const out = await joinStandAction(code, nick)
+        setBusy(false)
+        if (!out.ok) return setError(out.error)
+        setOpen(false)
+        await onChanged()
+      }}
+    >
+      <label className="flex min-w-0 flex-1 flex-col gap-1 font-body text-[12px] text-muted">
+        {t('stand.nick.label')}
+        <input
+          value={nick}
+          onChange={(event) => setNick(event.target.value)}
+          maxLength={20}
+          placeholder={t('stand.join.nickPh')}
+          data-stand="nick-override"
+          className="min-h-tap border-hair border-ink/40 bg-paper px-3 font-body text-step-0 text-ink"
+        />
+      </label>
+      <button type="submit" disabled={busy} className="flex min-h-tap items-center justify-center bg-ink px-4 font-body text-[13px] font-extrabold text-paper disabled:opacity-60">
+        {t('stand.nick.save')}
+      </button>
+      <button type="button" onClick={() => setOpen(false)} className="flex min-h-tap items-center justify-center border-hair border-ink px-3 font-body text-[13px] font-extrabold text-ink">
+        {t('stand.leave.no')}
+      </button>
+      {error && (
+        <p role="status" className="w-full font-body text-[12px] text-muted">
+          {t(errorKey(error))}
+        </p>
+      )}
+    </form>
   )
 }
 

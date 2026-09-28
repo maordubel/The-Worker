@@ -4,6 +4,7 @@ import { entity } from '@/lib/archive/graph'
 import { allMatches } from '@/lib/archive/match-master'
 import { playerById } from '@/lib/archive/player-master'
 import { archiveHref, goalIdsOfMatch, playableGoalHref } from '@/lib/links'
+import { eraTriviaHref } from '@/lib/links/eraTrivia'
 
 import {
   resolveChapterAnchor,
@@ -159,6 +160,26 @@ export function lifeDoors(): Record<string, LifeDoor[]> {
     const goal = row.goalIds.map((id) => playableGoalHref(id)).find((href): href is string => Boolean(href))
     if (goal) doors.push({ kind: 'goal', href: goal, label: 'bridge.door.goal' })
     if (doors.length) out[row.chapterId] = doors.slice(0, 2)
+  }
+  return out
+}
+
+/**
+ * §11 — the chapter recap's quiet question, "רוצה לבדוק מה נשאר מהשנה הזאת?", as a door
+ * into an ERA round of gate 2. Kept apart from `lifeDoors()` (those stay at most two, and
+ * are about the moment; this is about the years). Offered only for a chapter with a real
+ * sourced anchor — a bridge row — and only when the trivia gate can deal a full round of
+ * that decade (`eraTriviaHref`, the same check the Cross Gate Router uses). Never a quiz
+ * that pops: it is a link on the card, after the story is told.
+ */
+export function lifeTriviaDoors(): Record<string, LifeDoor> {
+  const out: Record<string, LifeDoor> = {}
+  for (const row of lifeBridge()) {
+    const anchorId = row.matchIds[0] ?? row.entityIds.find((id) => id.startsWith('season:')) ?? null
+    const e = anchorId ? entity(anchorId) : null
+    if (!e || e.sport !== 'football') continue
+    const href = eraTriviaHref(e.year)
+    if (href) out[row.chapterId] = { kind: 'trivia', href, label: 'redworld.recap.trivia' }
   }
   return out
 }

@@ -27,6 +27,7 @@ import { collect, collected, readProfile } from '@/lib/profile/store'
 import { t, type MessageKey } from '@/lib/i18n'
 import type { MemoryPair, MemoryRound } from '@/lib/game/memory'
 import type { Embedded } from '@/lib/mechanics/types'
+import { readCompletedChapters } from '@/lib/life/memoryPassport'
 import {
   ECHO_MS,
   ECHO_STREAK,
@@ -117,6 +118,7 @@ export function MemoryBoard({
   cursor = 0,
   embedded,
   links = {},
+  lived = {},
   next = [],
 }: {
   round: MemoryRound
@@ -124,6 +126,12 @@ export function MemoryBoard({
   cursor?: number
   /** pair id → its archive card (`/archive?at=…`), resolved and CHECKED on the server (§15) */
   links?: Readonly<Record<string, string>>
+  /**
+   * ONE RED WORLD §15 — pair id → the LIFE chapters its archive entity is lived in
+   * (`chaptersOfEntity`, server). A pair gets "את זה כבר ראית ב-LIFE" only when THIS
+   * device's save has FINISHED one of them — never a chapter ahead, never a character's name.
+   */
+  lived?: Readonly<Record<string, readonly string[]>>
   /** the Universal Exit's one or two doors, resolved on the server from the same round (§6) */
   next?: readonly NextAction[]
   /**
@@ -165,6 +173,19 @@ export function MemoryBoard({
   const [elapsed, setElapsed] = useState(0)
 
   const byId = useMemo(() => new Map(pairs.map((pair) => [pair.id, pair] as const)), [pairs])
+  /** §15 — the chapters this device finished; read once, only on the gate (not inside LIFE) */
+  const [livedDone, setLivedDone] = useState<readonly string[]>([])
+  useEffect(() => {
+    if (embedded || Object.keys(lived).length === 0) return
+    let alive = true
+    void readCompletedChapters().then((done) => {
+      if (alive) setLivedDone(done)
+    })
+    return () => {
+      alive = false
+    }
+  }, [embedded, lived])
+  const livedPair = useCallback((pairId: string) => (lived[pairId] ?? []).some((chapter) => livedDone.includes(chapter)), [lived, livedDone])
   const timers = useRef<number[]>([])
 
   /** every timer this screen starts is parked here, so leaving mid-beat cancels all of them */
@@ -592,6 +613,11 @@ export function MemoryBoard({
                   >
                     <MuralFace pair={pair} href={links[pair.id]} />
                     <span className="w-full basis-full font-body text-[11px] leading-tight text-muted">{pair.kind}</span>
+                    {livedPair(pair.id) && (
+                      <span className="w-full basis-full font-body text-[11px] font-extrabold leading-tight text-red" data-memory-lived={pair.id}>
+                        {t('redworld.memory.lived')}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ol>

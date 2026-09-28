@@ -1,6 +1,15 @@
 'use server'
 
-import { playRoyalRumble, type RoyalRumbleResult, type RoyalRumbleSelection, type RumbleWindow } from '@/lib/game/royal-rumble'
+import {
+  pairedRoyalRumbleDrafts,
+  playRoyalRumble,
+  type RoyalRumbleDraft,
+  type RoyalRumbleResult,
+  type RoyalRumbleSelection,
+  type RumbleWindow,
+} from '@/lib/game/royal-rumble'
+import { royalRumbleLivedSeed } from '@/lib/game/royal-rumble-seeds'
+import { cleanChapters, livedRumbleWindow } from '@/lib/life/livedPool'
 import { parseSelection } from '@/lib/game/royal-rumble-public'
 import { resolvePlayerId } from '@/lib/archive/player-master'
 import { recommend, type NextAction, type ResultContext } from '@/lib/results/context'
@@ -20,7 +29,7 @@ export async function submitRoyalRumble(
   const picks = parseSelection(selection)
   if (!picks) return null
   // `window` is THE WORKER LIFE's pack: the same match, over the men of the life's years only
-  const cut = window && Number.isFinite(window.before) ? { before: Math.round(window.before) } : undefined
+  const cut = window && typeof window.before === 'number' && Number.isFinite(window.before) ? { before: Math.round(window.before) } : undefined
   return playRoyalRumble(seed, picks, cut)
 }
 
@@ -37,4 +46,33 @@ export async function nextAfterRumble(slugs: string[], runId: string): Promise<N
     .filter((id): id is string => Boolean(id))
   const context: ResultContext = { gateId: 9, runId: typeof runId === 'string' ? runId.slice(0, 32) : undefined, playerIds }
   return recommend(context)
+}
+
+/* ------------------------------------------------------------------ "השנים שחיית עד עכשיו" */
+
+/**
+ * ONE RED WORLD §18 — the themed draft over the men of this device's FINISHED LIFE chapters.
+ * A separate mode: its own route (`/royal-rumble/lived`), its own seed namespace
+ * (`royalRumbleLivedSeed`), and a window built HERE from the chapter ids (a client can
+ * claim chapters, never slugs). The canonical board of a seed does not move.
+ */
+export async function livedRumbleOpen(chapters: string[]): Promise<boolean> {
+  return livedRumbleWindow(cleanChapters(chapters)) !== null
+}
+
+export async function dealLivedRumble(
+  chapters: string[],
+  seed: number,
+  cursor = 0,
+): Promise<{ draft: RoyalRumbleDraft; shuffleDraft: RoyalRumbleDraft } | null> {
+  const window = livedRumbleWindow(cleanChapters(chapters))
+  if (!window || !Number.isFinite(seed)) return null
+  return pairedRoyalRumbleDrafts(royalRumbleLivedSeed(Math.floor(Math.abs(seed)) >>> 0, Number.isFinite(cursor) ? cursor : 0), window)
+}
+
+export async function submitLivedRumble(seed: number, selection: RoyalRumbleSelection[], chapters: string[]): Promise<RoyalRumbleResult | null> {
+  const picks = parseSelection(selection)
+  const window = livedRumbleWindow(cleanChapters(chapters))
+  if (!picks || !window || !Number.isFinite(seed)) return null
+  return playRoyalRumble(seed >>> 0, picks, window)
 }

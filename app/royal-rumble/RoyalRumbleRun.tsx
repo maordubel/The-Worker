@@ -25,6 +25,7 @@ import {
   type RoyalRumbleFormation,
   type RoyalRumbleHistoryItem,
   type RoyalRumblePick,
+  type RoyalRumbleSelection,
   type RoyalRumbleSlotRule,
 } from '@/lib/game/royal-rumble-public'
 import type { KitSpec } from '@/lib/kit/spec'
@@ -508,6 +509,7 @@ function RoyalRumbleRunInner({
   kits,
   embedded,
   allowShuffle = true,
+  themed,
 }: {
   draft: RoyalRumbleDraft
   shuffleDraft: RoyalRumbleDraft
@@ -525,6 +527,13 @@ function RoyalRumbleRunInner({
   embedded?: Omit<Embedded<RoyalRumbleResult>, 'window'> & { window: { before: number } }
   /** a scene may say "these are the cards, deal with it" (§74) */
   allowShuffle?: boolean
+  /**
+   * ONE RED WORLD §18 — "השנים שחיית עד עכשיו", a separate themed mode over the men of the
+   * LIFE chapters this device finished. It plays through its own action (the server rebuilds
+   * the window from the chapters), keeps no recent-five history and hands over no challenge
+   * link: those belong to the canonical gate's seed, and this is not that board.
+   */
+  themed?: { submit: (seed: number, selection: RoyalRumbleSelection[]) => Promise<RoyalRumbleResult | null>; againHref: string }
 }) {
   const [phase, setPhase] = useState<Phase>('draft')
   const [activeDraft, setActiveDraft] = useState(draft)
@@ -594,7 +603,7 @@ function RoyalRumbleRunInner({
     if (!selection || remaining < 0 || busy) return
     setBusy(true)
     setError(null)
-    const resolved = await submitRoyalRumble(activeDraft.seed, selection, embedded?.window)
+    const resolved = themed ? await themed.submit(activeDraft.seed, selection) : await submitRoyalRumble(activeDraft.seed, selection, embedded?.window)
     setBusy(false)
     if (!resolved) {
       setError(t('invalidFive'))
@@ -603,7 +612,7 @@ function RoyalRumbleRunInner({
     setResult(resolved)
     setPhase('reveal')
     setRevealCount(0)
-    if (!embedded) {
+    if (!embedded && !themed) {
       setHistory(
         pushHistory({
           seed: activeDraft.seed,
@@ -777,14 +786,14 @@ function RoyalRumbleRunInner({
           </section>
         </div>
 
-        <a href="/royal-rumble" className="group mt-3 flex min-h-tap shrink-0 items-center justify-between border-rule border-red bg-red px-5 text-paper transition hover:bg-ink motion-reduce:transition-none">
+        <a href={themed?.againHref ?? '/royal-rumble'} className="group mt-3 flex min-h-tap shrink-0 items-center justify-between border-rule border-red bg-red px-5 text-paper transition hover:bg-ink motion-reduce:transition-none">
           <span><span className="block font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-paper/60" dir="ltr">RUN IT BACK</span><span className="font-display text-[27px]">{t('again')}</span></span>
           <span className="font-display text-[38px] transition group-hover:-translate-x-1 motion-reduce:transition-none" aria-hidden="true">←</span>
         </a>
 
-        <CompareCard gate={9} mine={{ gate: 9, picks: selectedPlayers.map((offer) => offer.player.slug) }} names={rumbleNames} />
+        {!themed && <CompareCard gate={9} mine={{ gate: 9, picks: selectedPlayers.map((offer) => offer.player.slug) }} names={rumbleNames} />}
 
-        {roundSeed !== undefined && (
+        {roundSeed !== undefined && !themed && (
           <RoyalRumbleChallenge
             seed={activeDraft.seed}
             roundSeed={roundSeed}
@@ -798,7 +807,7 @@ function RoyalRumbleRunInner({
         </div>
 
         {/* the recent five (§54): this browser's last rounds, never a lever on the seed */}
-        <section className="mt-3 shrink-0 border-rule border-ink bg-paper p-3 text-ink">
+        {!themed && <section className="mt-3 shrink-0 border-rule border-ink bg-paper p-3 text-ink">
           <p className="font-mono tabular-nums text-[8px] font-black tracking-[0.18em] text-red" dir="ltr">RECENT</p>
           <h3 className="font-display text-[20px]">{t('recentTitle')}</h3>
           {history.length <= 1 ? (
@@ -818,7 +827,7 @@ function RoyalRumbleRunInner({
               ))}
             </ol>
           )}
-        </section>
+        </section>}
       </div>
     )
   }

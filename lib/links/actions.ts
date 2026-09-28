@@ -8,11 +8,12 @@ import { BANK } from '@/lib/game/blind-cow/bank'
 import { factById, allQuestions } from '@/lib/game/question-master'
 import { priceForPlayer } from '@/lib/game/royal-rumble'
 import { timelineHasDate, timelineHasDateIn } from '@/lib/game/timeline'
-import { ROUND_LENGTH, eligible } from '@/lib/game/trivia'
+import { ROUND_LENGTH } from '@/lib/game/trivia'
 import type { MessageKey } from '@/lib/i18n'
 import { kitRecords } from '@/lib/kit/kit-master'
 import { chaptersOfEntity } from '@/lib/life/bridge'
 
+import { eraTriviaHref } from './eraTrivia'
 import { gateHref, goalHref, goalIdsOfMatch, lineupHref, playableGoalHref } from './index'
 
 /**
@@ -74,19 +75,11 @@ function questionsAbout(id: string): string[] {
   return questionsByEntity.get(id) ?? []
 }
 
-const eraDepth = new Map<number, number>()
-function eraRound(decade: number): boolean {
-  if (!eraDepth.has(decade)) eraDepth.set(decade, eligible({ topic: null, decade, hard: false }).length)
-  return (eraDepth.get(decade) ?? 0) >= ROUND_LENGTH
-}
-
 /** A trivia round that serves the entity: twelve questions about it, or a full round of its era. */
 export function triviaHref(id: string, year: number | null): string | null {
   const own = [...questionsAbout(id)].sort()
   if (own.length >= ROUND_LENGTH) return `/trivia/general?q=${own.slice(0, ROUND_LENGTH).join('.')}`
-  if (year === null || !Number.isFinite(year)) return null
-  const decade = Math.floor(year / 10) * 10
-  return eraRound(decade) ? `/trivia/general?era=${decade}` : null
+  return eraTriviaHref(year)
 }
 
 /* ------------------------------------------------------------------ players */

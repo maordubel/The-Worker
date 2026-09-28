@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { ArchiveApp } from '@/components/archive/ArchiveApp'
 import { ReportLink } from '@/components/ui/ReportLink'
+import { SongLine } from '@/components/voice/SongLine'
 import { Screen } from '@/components/ui/Screen'
 import { decades } from '@/lib/archive/graph'
 import { archiveFigures, detailOf, longDateHe, todayDecks } from '@/lib/archive/wing'
@@ -54,6 +55,7 @@ export default function ArchivePage({
           to: figures.latest ? figures.latest.slice(0, 4) : '—',
         })}
         report={<ReportLink />}
+        song={<SongLine surface="archive" seed={today} />}
       />
       {/* the phone stage is one screen: there the link rides in the drawer, beside the facts */}
       <div className="hidden md:block">

@@ -35,11 +35,31 @@ options the brief allowed:
   members, and clearing site data means leaving the stand. Moving a stand to an account can come
   later as a single link, `worker_market_uid()`, and it isn't built.
 
-**Public identity (§35).** A member appears only as a nickname they typed (up to 20 characters,
-with `@` removed so an email address can't get in out of habit) or as **"אדום #N"**. N is the join
-order **within that stand**, not a global number, so two stands can't be linked into one person.
+**Public identity (§35).** A member appears only as a nickname or as **"אדום מהיציע #N"**. N is the
+join order **within that stand**, not a global number, so two stands can't be linked into one person.
 There is no `user_id`, email, name or account column anywhere. Nothing that leaves the database
 carries a hash or a key (checked in `60-stand.sql`).
+
+**One public identity (28.9.2026).** The personal area (`docs/21-personal-area.md`,
+`lib/profile/identity.ts`) already gives a supporter ONE public face: a nickname they chose, or the
+account-wide **"אדום #N"**. The stand now follows it instead of asking again:
+
+- **The default nickname is the public one.** When this device's public mode is `nickname`, the
+  create and join forms open with that nickname filled in (`defaultStandNick(readPref())`,
+  `lib/stand/contract.ts`), cleaned by the stand's own rule (20 characters, no `@`). Anonymous →
+  the field stays empty and the stand prints its own fallback. Nothing about the account crosses:
+  the value is read from the device's own `worker.public.v1`, and the form sends a nickname, the
+  same field it always sent.
+- **Per-stand override.** "לשנות את הכינוי ביציע הזה" on the member screen re-joins with the new
+  nickname — `worker_stand_join` on an existing member already updates only `nickname`, so this
+  needs no new function, no new privilege and no SQL change. An empty field returns to the
+  anonymous fallback in that stand only.
+- **Two numbers, two words.** The anonymous fallback used to print "אדום #N" — the same words as
+  the account-wide supporter number, with a different N in every stand. It now reads
+  **"אדום מהיציע #N"** (`stand.member.anon`), so a stand's join order can never be read as the
+  supporter number (`tests/stand.test.ts`). The account number is not shown inside a stand at
+  all; linking the two would join the stand to the account, which the device-key model exists to
+  prevent.
 
 **What gets stored (the minimum), per member per day:** which of the three daily items were done;
 the daily Blind Cow result (status, clues, wrong guesses); the choice in the stand's debate. Per

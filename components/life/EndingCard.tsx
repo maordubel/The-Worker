@@ -9,6 +9,7 @@ import type { ItemId } from '@/lib/life/types'
 import Link from 'next/link'
 
 import type { LifeDoor } from '@/lib/life/memoryPassport'
+import { SongLine } from '@/components/voice/SongLine'
 import { t, type MessageKey } from '@/lib/i18n'
 
 /**
@@ -28,6 +29,7 @@ export function EndingCard({
   chapter = '1986',
   presence = null,
   doors = [],
+  trivia = null,
   onClose,
 }: {
   titleHe: string
@@ -48,6 +50,12 @@ export function EndingCard({
    * so the sourced facts never read as part of the fiction above them.
    */
   doors?: readonly LifeDoor[]
+  /**
+   * ONE RED WORLD §11 — "רוצה לבדוק מה נשאר מהשנה הזאת?": an optional door into an era
+   * round of gate 2, derived on the server (`lifeTriviaDoors`) only for a chapter with a real
+   * sourced anchor whose decade the trivia gate can serve. Never a quiz that pops.
+   */
+  trivia?: LifeDoor | null
   onClose: () => void
 }) {
   // 1986's second plate is the man fifteen years on; 1990's is the same man tomorrow.
@@ -153,14 +161,14 @@ export function EndingCard({
             </div>
           )}
 
-          {doors.length > 0 && (
+          {(doors.length > 0 || trivia) && (
             <nav className="mt-4 border-t-hair border-dashed border-concrete/50 pt-3" data-life="ending-archive" aria-label={t('bridge.doors.title')}>
               <p className="flex items-center gap-2">
                 <span className="border-hair border-sheet px-1 py-px font-body text-[9.5px] font-extrabold tracking-wider text-sheet">{t('bridge.tag.archive')}</span>
                 <span className="font-body text-[11px] leading-snug text-concrete">{t('bridge.doors.note')}</span>
               </p>
               <ul className={`mt-2 grid gap-1.5 ${doors.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                {doors.slice(0, 2).map((door) => (
+                {doors.filter((door) => door.kind !== 'trivia').slice(0, 2).map((door) => (
                   <li key={door.href}>
                     <Link
                       href={door.href}
@@ -172,8 +180,21 @@ export function EndingCard({
                   </li>
                 ))}
               </ul>
+              {trivia && (
+                <Link
+                  href={trivia.href}
+                  data-life-door="trivia"
+                  className="mt-1.5 flex min-h-tap items-center justify-between gap-2 border-hair border-sheet/60 px-3 font-body text-[13px] font-extrabold leading-tight text-sheet"
+                >
+                  <span>{t(trivia.label as MessageKey)}</span>
+                  <span aria-hidden="true">←</span>
+                </Link>
+              )}
             </nav>
           )}
+
+          {/* §3 — one line from the terrace, the same one for the same chapter; a song's title, never a verse */}
+          <SongLine surface="life" seed={chapter} tone="ink" className="mt-3" />
 
           <div className="mt-4">
             <LifeLine reached={ageReached(chapter)} lead={leadKey(chapter)} />

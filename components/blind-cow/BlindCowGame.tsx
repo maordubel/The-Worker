@@ -8,6 +8,7 @@ import { markStep, track } from '@/lib/analytics/meter'
 import { t, type MessageKey } from '@/lib/i18n'
 import { microFeedback } from '@/lib/voice'
 import { emit } from '@/lib/profile/events'
+import { readCompletedChapters } from '@/lib/life/memoryPassport'
 import type { DuelError, DuelState } from '@/lib/game/blind-cow/duel'
 import { scoringConfig, secondsLabel } from '@/lib/game/blind-cow/scoring'
 import type { SearchEntry } from '@/lib/game/blind-cow/search'
@@ -17,6 +18,7 @@ import {
   duelStateAction,
   giveUpRun,
   joinDuelAction,
+  livedFilterOpen,
   revealClue,
   startDaily,
   startDuelAction,
@@ -59,6 +61,9 @@ const FILTERS: { id: string; key: MessageKey }[] = [
   { id: '2010', key: 'blindcow.filter.2010' },
   { id: '2020', key: 'blindcow.filter.2020' },
 ]
+
+/** §19 — shown only when this device finished a LIFE chapter and the server says the pool holds ten */
+const LIVED_FILTER: { id: string; key: MessageKey } = { id: 'lived', key: 'redworld.blindcow.lived' as MessageKey }
 
 const DUEL_ERRORS: Partial<Record<DuelError, MessageKey>> = {
   expired: 'blindcow.duel.error.expired',
@@ -111,6 +116,13 @@ export function BlindCowGame({
   const [solo, setSolo] = useState<RunView | null>(resumable)
   const [skew, setSkew] = useState(0)
   const [filter, setFilter] = useState('all')
+  /**
+   * ONE RED WORLD §19 — "תן לי מישהו מהשנים שחיית עכשיו". The finished LIFE chapters are a
+   * fact about this device's save; the server answers only whether the pool is deep enough
+   * (ten or more men) and never who is in it. No chapter finished → no chip at all.
+   */
+  const [lived, setLived] = useState<string[]>([])
+  const [livedOpen, setLivedOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fresh, setFresh] = useState<number | null>(null)
@@ -130,6 +142,19 @@ export function BlindCowGame({
   const stack = useRef<HTMLDivElement>(null)
 
   useEffect(() => setName(readName()), [])
+  useEffect(() => {
+    let alive = true
+    void readCompletedChapters().then(async (chapters) => {
+      if (!alive || chapters.length === 0) return
+      const open = await livedFilterOpen(chapters).catch(() => false)
+      if (!alive || !open) return
+      setLived(chapters)
+      setLivedOpen(true)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
   // the measurement's step is the clue on the table; the lobby is step 0 (lib/analytics)
   useEffect(() => markStep(0, undefined, true), [])
 
@@ -205,7 +230,7 @@ export function BlindCowGame({
     if (busy) return
     setBusy(true)
     setError(null)
-    const out = m === 'daily' ? await startDaily() : await startSolo(filter)
+    const out = m === 'daily' ? await startDaily() : await startSolo(filter, filter === 'lived' ? lived : [])
     setBusy(false)
     if (!out.view) {
       setError(t('blindcow.filter.empty'))
@@ -562,7 +587,7 @@ export function BlindCowGame({
         <div className="mb-1.5">
           <p className="sr-only">{t('blindcow.filter.label')}</p>
           <ul className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1" aria-label={t('blindcow.filter.label')}>
-            {FILTERS.map((f) => (
+            {(livedOpen ? [FILTERS[0]!, LIVED_FILTER, ...FILTERS.slice(1)] : FILTERS).map((f) => (
               <li key={f.id} className="shrink-0">
                 <button
                   type="button"

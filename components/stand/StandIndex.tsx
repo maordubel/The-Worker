@@ -7,7 +7,8 @@ import { createStandAction, myStandsAction } from '@/app/stand/actions'
 import { track } from '@/lib/analytics/meter'
 import type { Daily } from '@/lib/daily/types'
 import { t, type MessageKey } from '@/lib/i18n'
-import { publicName, type StandError, type StandRef } from '@/lib/stand/contract'
+import { readPref } from '@/lib/profile/identity'
+import { defaultStandNick, publicName, type StandError, type StandRef } from '@/lib/stand/contract'
 import { localStands, rememberStand, todayReport, writeLocalStands, type LocalStand } from '@/lib/stand/local'
 import type { Station } from '@/lib/stand/week'
 
@@ -100,6 +101,8 @@ const ERROR_KEY: Partial<Record<StandError, MessageKey>> = {
 function Create() {
   const [name, setName] = useState('')
   const [nick, setNick] = useState('')
+  // §35 — the public nickname this device chose is the stand's default; editable per stand
+  useEffect(() => setNick((have) => have || defaultStandNick(readPref())), [])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<StandError | null>(null)
 

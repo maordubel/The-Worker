@@ -9,6 +9,7 @@ import { DAILY_METER_GATE, readDay, rulesOf, settleDay, updateDay } from '@/lib/
 import { DAILY_SLOTS, type Daily, type DailyItem, type DailySlot } from '@/lib/daily/types'
 import { t } from '@/lib/i18n'
 import { emit } from '@/lib/profile/events'
+import { SongLine } from '@/components/voice/SongLine'
 
 /**
  * היום בהפועל — the card (ONE RED WORLD §7, §55). Three things, none of them required.
@@ -138,6 +139,8 @@ export function DailyCard({ daily }: { daily: Daily }) {
       {recap && (
         <div className="border-t-hair border-ink/40 px-3 py-2" data-daily="recap">
           <p className="font-display text-[16px] leading-tight text-ink md:text-[18px]">{t(recap)}</p>
+          {/* §3 — one line from the terrace on the recap, the same song all day */}
+          <SongLine surface="daily" seed={daily.date} className="mt-0.5" />
           {count === DAILY_SLOTS.length ? (
             <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-3">
               <button

@@ -2,6 +2,7 @@ import { decodeChallenge } from '@/lib/challenges/resolve'
 import { GATES } from '@/lib/gates'
 import { t } from '@/lib/i18n'
 import { wallGate } from '@/lib/profile/gate-id'
+import type { PublicPref } from '@/lib/profile/identity'
 
 /**
  * "היציע שלי" — the contract (ONE RED WORLD §8, §30–§35, §45). Client-safe.
@@ -13,7 +14,7 @@ import { wallGate } from '@/lib/profile/gate-id'
  *
  * **Who you are in a stand.** Never an account, an email or a name: the device holds a
  * random key in an httpOnly cookie, the database keeps its sha256, and the only public
- * identity is a nickname the member typed or "אדום #N" — N is the order of joining INSIDE
+ * identity is a nickname the member typed or "אדום מהיציע #N" — N is the order of joining INSIDE
  * this stand, so two stands cannot be joined up into one person (§35). See `docs/20-stand.md`.
  */
 
@@ -77,7 +78,22 @@ export function gateOfPath(path: string): number | null {
   return GATES.find((gate) => gate.href?.split('?')[0] === plate)?.number ?? null
 }
 
-/** The public name — the only one a stand ever prints. */
+/**
+ * ONE RED WORLD §35 — one public identity. The nickname a stand is joined (or opened) under
+ * BY DEFAULT is the public nickname this device chose in the personal area
+ * (`lib/profile/identity.ts`), cleaned by the stand's own rule. Anonymous → empty, and the
+ * stand prints its own fallback. The member can still type another one for this stand.
+ */
+export function defaultStandNick(pref: { mode: PublicPref['mode']; nickname: string }): string {
+  return pref.mode === 'nickname' ? (cleanNick(pref.nickname) ?? '') : ''
+}
+
+/**
+ * The public name — the only one a stand ever prints. The anonymous fallback is
+ * "אדום מהיציע #N": N is the join order inside THIS stand, and the words keep it from being
+ * read as the account-wide supporter number "אדום #N" (§35 — two numbering systems that
+ * looked the same confused people).
+ */
 export function publicName(no: number, nick: string | null): string {
   return nick ?? t('stand.member.anon', { n: String(no) })
 }

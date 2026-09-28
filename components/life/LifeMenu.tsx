@@ -1,6 +1,7 @@
 'use client'
 
 import { SheetHead } from '@/components/life/Plate'
+import { StayedWithMe } from '@/components/life/StayedWithMe'
 import { useDialog } from '@/components/ui/useDialog'
 import { t } from '@/lib/i18n'
 
@@ -123,6 +124,8 @@ export function LifeMenu({
             <span>{t('life.route.menu')}</span>
           </button>
         )}
+        {/* ONE RED WORLD §10 — only when a man of his XI belongs to a finished chapter */}
+        <StayedWithMe rowClass={row} />
         <button type="button" className={row} onClick={() => onSound(!sound)} data-life="menu-sound">
           <span>{t('life.menu.sound')}</span>
           <span className="font-mono text-[11px] tabular-nums" dir="ltr">

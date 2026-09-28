@@ -126,6 +126,7 @@ export function LifeStage({
   anchors,
   catalog,
   doors = {},
+  trivia = {},
 }: {
   anchor: HistoricalAnchor
   prologueAnchor: HistoricalAnchor
@@ -135,6 +136,8 @@ export function LifeStage({
   catalog: MechanicCatalog
   /** ONE RED WORLD §23.1 — each finished chapter's one or two doors into the archive (`lib/life/bridge.ts`) */
   doors?: Record<string, LifeDoor[]>
+  /** ONE RED WORLD §11 — a finished chapter's era-trivia door, when the gate can serve its decade */
+  trivia?: Record<string, LifeDoor>
 }) {
   const holder = useRef<HTMLDivElement | null>(null)
   const runtime = useRef<LifeRuntime | null>(null)
@@ -992,6 +995,7 @@ export function LifeStage({
             chapter={ending.chapter ?? '1986'}
             presence={ending.presence ?? null}
             doors={doors[ending.chapter ?? '1986'] ?? []}
+            trivia={trivia[ending.chapter ?? '1986'] ?? null}
             onClose={() => {
               setEnding(null)
               runtime.current?.dismissEnding()

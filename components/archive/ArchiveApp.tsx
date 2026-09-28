@@ -63,6 +63,7 @@ export function ArchiveApp({
   atMissing,
   figures,
   report,
+  song,
 }: {
   decks: Record<TodayChip, ArchiveCard[]>
   todayHe: string
@@ -74,6 +75,8 @@ export function ArchiveApp({
   figures: string
   /** the report-an-error link — on a phone it lives in the drawer, where the facts are */
   report?: ReactNode
+  /** §3 — the landing's one song line (`components/voice/SongLine.tsx`), chosen by the date */
+  song?: ReactNode
 }) {
   const firstChip = decks.today.length ? 'today' : 'know'
   const [chip, setChip] = useState<TodayChip | null>(firstChip)
@@ -478,6 +481,7 @@ export function ArchiveApp({
       <p className="mt-1.5 shrink-0 truncate border-t-hair border-ink/30 pt-1.5 font-body text-[10px] leading-relaxed text-muted [@media(max-height:700px)]:hidden md:mt-stack md:!block md:whitespace-normal md:pt-2 md:text-[11px]">
         {figures} <span className="font-mono text-[9px] tabular-nums"><Num>{`#${seed}·${cursor}`}</Num></span>
       </p>
+      {song && <div className="shrink-0 truncate pt-0.5 [@media(max-height:700px)]:hidden md:!block md:whitespace-normal">{song}</div>}
 
       {/* room for the dock */}
       <div aria-hidden="true" className="hidden md:block md:h-[76px]" />

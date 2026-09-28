@@ -3,7 +3,7 @@
 import { randomBytes } from 'node:crypto'
 import { cookies } from 'next/headers'
 
-import { cleanFilter, dailyQuestion, pickSolo, todayInIsrael } from '@/lib/game/blind-cow/bank'
+import { LIVED_MIN, cleanFilter, dailyQuestion, livedSoloPool, pickSolo, todayInIsrael } from '@/lib/game/blind-cow/bank'
 import {
   createDuel,
   duelState,
@@ -21,6 +21,7 @@ import {
 } from '@/lib/game/blind-cow/duel'
 import { giveUp, guess, newRun, reveal, viewOf, type RunState } from '@/lib/game/blind-cow/engine'
 import { open, seal } from '@/lib/game/blind-cow/token'
+import { cleanChapters, livedPlayerIds } from '@/lib/life/livedPool'
 import type { RunView } from '@/lib/game/blind-cow/types'
 
 /**
@@ -78,10 +79,26 @@ function cleanName(name: unknown): string | null {
 
 /* ------------------------------------------------------------------ solo / daily */
 
-export async function startSolo(filter: string): Promise<ActionResult> {
+/** the lived pool of this device's finished LIFE chapters — `null` below the floor */
+function livedPool(chapters: unknown) {
+  const pool = livedSoloPool(livedPlayerIds(cleanChapters(chapters)))
+  return pool.length >= LIVED_MIN ? pool : null
+}
+
+/**
+ * §19 — may the lobby offer "תן לי מישהו מהשנים שחיית עכשיו"? A yes/no only: which men are
+ * in the pool is the answer to the game, so neither the ids nor the count leave the server.
+ */
+export async function livedFilterOpen(chapters: string[]): Promise<boolean> {
+  return livedPool(chapters) !== null
+}
+
+export async function startSolo(filter: string, chapters: string[] = []): Promise<ActionResult> {
   const f = cleanFilter(filter)
   const previous = open<RunState>(cookies().get(COOKIE.solo)?.value)
-  const q = pickSolo(f, previous?.recent ?? [])
+  const lived = f === 'lived' ? livedPool(chapters) : null
+  if (f === 'lived' && !lived) return { view: null, verdict: 'none', error: 'empty' }
+  const q = pickSolo(f, previous?.recent ?? [], lived ?? undefined)
   if (!q) return { view: null, verdict: 'none', error: 'empty' }
   const state = newRun('solo', q, Date.now(), { filter: f, recent: previous?.recent ?? [] })
   store(state)
