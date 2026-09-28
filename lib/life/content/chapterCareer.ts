@@ -326,9 +326,39 @@ export const BEATS_TERRACE03: Beat[] = [
 
 // ================================================================ J01 · 2002 ====
 
+/**
+ * **J01 — מעבר ג׳, 28.9.2026** (`IMPLEMENTATION-PASS-PROGRAMMER` §25). היה שיחה אחת ושלוש
+ * בחירות. הבריף: *"collect 3 evidence cards · FACT/HEARD/OPINION · publish/verify/call/kill ·
+ * speed has benefit; accuracy has cost."* עכשיו זה ערב עם שעון:
+ *
+ * · **S1 — על השולחן בבית הקפה שלושה דברים**, וכל אחד הוא כרטיס עם מקור: הפנקס שלו (ראיתי),
+ *   ההקלטה עם הקופאי (עובדה ממקור), והטלפון של עמית (שמעתי). התמונה של שני — שלה, עד שהיא אומרת.
+ * · **S2 — הלוח.** אחרי שניים מהשלושה עמית פותח את הלוח: לבדוק (לשני — על התמונה, ולקופה —
+ *   על הרשימה), לפרסם זיכרון (רק אם הפנקס אצלו), לפרסם את השמועה (רק אם הטלפון), או לגנוז.
+ * · **S3 — הגיליון נסגר בתשע.** מי שבודק ומספיק — מפרסם נכון. מי שבודק ולא מספיק — בוחר
+ *   מול השעון: מה שיש עכשיו, או השבוע הבא (`late`, ועדיין נכון). מהירות שווה משהו; דיוק עולה.
+ */
+export const J01_DEADLINE = at(21, 0)
+const J01_CARDS = ['notes', 'tape', 'phone'] as const
+const J01_TWO: Condition = {
+  any: [
+    { all: [{ flag: 'j:ev:notes' }, { flag: 'j:ev:tape' }] },
+    { all: [{ flag: 'j:ev:notes' }, { flag: 'j:ev:phone' }] },
+    { all: [{ flag: 'j:ev:tape' }, { flag: 'j:ev:phone' }] },
+  ],
+}
+
 export function objectiveDesk01(state: LifeState, sceneId: string): string | null {
-  if (state.chapterDone || state.flags['j:first']) return null
-  return sceneId === 'allenby' ? null : 'באלנבי. עמית ושני, והפרסום הראשון.'
+  const f = state.flags
+  if (state.chapterDone || f['j:first']) return null
+  if (!f['j:brief']) return sceneId === 'allenby' ? null : 'באלנבי. עמית ושני, והפרסום הראשון.'
+  if (f['j:verifying']) {
+    if (!f['j:photoOk']) return 'שני — לבקש רשות לתמונה. הגיליון נסגר בתשע.'
+    if (!f['j:second']) return sceneId === 'ticket-office' ? 'הקופאי, מאחורי החלון.' : 'הקופה, ליד הקשת — לשאול את הקופאי שוב. בתשע סוגרים.'
+    return sceneId === 'allenby' ? 'עמית, עם מה שבדקת.' : 'חזרה לאלנבי, לעמית. יש לך שני מקורות.'
+  }
+  const got = J01_CARDS.filter((card) => f[`j:ev:${card}`]).length
+  return got >= 2 ? 'עמית מחכה ליד הלוח.' : `על השולחן בבית הקפה: ${got === 0 ? 'שלושה דברים' : 'עוד אחד'}. הגיליון נסגר בתשע.`
 }
 
 export const ENDINGS_DESK01: Record<string, EndingCard> = {
@@ -356,6 +386,22 @@ export const ENDINGS_DESK01: Record<string, EndingCard> = {
     memoryHe: 'הודעה שלא נענתה: "מה המקור?"',
     memoryItem: 'folded-paper',
   },
+  late: {
+    id: 'late',
+    titleHe: 'השבוע הבא, ונכון',
+    bodyHe:
+      'הגיליון נסגר בתשע בלעדיך. עמית אמר שזה עולה משהו — מישהו אחר יכתוב על התור הזה קודם — ואמרת שאתה יודע. בשבוע שאחרי הכתבה יצאה עם הרשימה של הקופה, עם שם הצלמת, ובלי המילה "סוכן".',
+    memoryHe: 'טיוטה עם תאריך של שבוע אחרי.',
+    memoryItem: 'clipping',
+  },
+  killed: {
+    id: 'killed',
+    titleHe: 'לגנוז זה גם החלטה',
+    bodyHe:
+      'אספת, הקשבת, ובסוף לא היה לך משהו שאתה יכול לעמוד מאחוריו. גנזת. עמית לא ניסה לשכנע — הוא רק שם את הפנקס שלך בכיס שלך, ואמר שיש עוד גיליונות.',
+    memoryHe: 'פנקס, שלושה עמודים, שום כותרת.',
+    memoryItem: 'folded-paper',
+  },
 }
 
 /** `career:media:organic|assisted|late` — a day flag for the branch the desk opens on; nothing before eighteen */
@@ -374,13 +420,38 @@ export const BEATS_DESK01: Beat[] = [
     // delta 91 — how he arrives at the desk is derived from the evidence (MASTER §83), never stored
     do: [{ a: 'derive', events: careerEntryEvents }, { a: 'talk', conversation: 'j-first' }],
   },
+  /** S2 — two cards on the table, and Amit opens the board (`clock` + `at`: a closed box comes back) */
+  { id: 'j-board', at: 'allenby', trigger: 'clock', when: { all: [{ flag: 'j:brief' }, J01_TWO], none: [{ flag: 'j:board' }, { flag: 'j:first' }, { flag: 'j:verifying' }] }, delayMs: 1100, do: [{ a: 'talk', conversation: 'j-board' }] },
+  /** S3 — back at the café with both sources, before nine */
+  { id: 'j-verified', at: 'allenby', trigger: 'clock', when: { all: [{ flag: 'j:verifying' }, { flag: 'j:photoOk' }, { flag: 'j:second' }, { beforeMinute: J01_DEADLINE }], none: [{ flag: 'j:first' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'j-verified' }] },
+  /** S3 — nine o'clock: the paper closes, whoever is still checking */
+  { id: 'j-deadline', trigger: 'clock', when: { all: [{ flag: 'j:brief' }, { afterMinute: J01_DEADLINE }], none: [{ flag: 'j:first' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'j-deadline' }] },
 ]
 
 // ================================================================ J02 · 2006 ====
 
+/**
+ * **J02 — מעבר ג׳, 28.9.2026** (`IMPLEMENTATION-PASS-PROGRAMMER` §27): *"affected person /
+ * temptation differs by 2002 state; prominent/small/call/defend; verified route gets a new
+ * tempting scoop instead."*
+ *
+ * · מי שפרסם ב-2002 את השמועה מוצא על השולחן **מכתב** — מהקופאי שהשמועה הייתה עליו, ארבע שנים
+ *   אחרי. מה שנשאר לו לבחור הוא איפה התיקון יושב: גלוי (J02.1), קטן, אחרי שיחה איתו, או לא בכלל.
+ * · מי שבדק, או כתב זיכרון, מוצא **מעטפה בלי שם** — דף מהנהלה, בלי מקור. הפיתוי הוא אותו פיתוי
+ *   של 2002, רק מהצד השני: לפרסם מהר, לבדוק (J02.2 — ההקלטה והטלפון על השולחן), או לדחות (J02.3).
+ *
+ * `life:desk:j2` נושא את מה שנבחר הלאה (2010, ו-J03).
+ */
+export const DESK_J2 = 'life:desk:j2'
+
 export function objectiveDesk02(state: LifeState, sceneId: string): string | null {
-  if (state.chapterDone || state.flags['j:fix']) return null
-  return sceneId === 'newsroom' ? null : 'במערכת, מעל בית הקפה. מה נשאר מהפרסום ההוא.'
+  const f = state.flags
+  if (state.chapterDone || f['j:fix']) return null
+  if (sceneId !== 'newsroom') return 'במערכת, מעל בית הקפה. מה נשאר מהפרסום ההוא.'
+  if (!f['j2:read']) return f[DESK_UNVERIFIED] ? 'מכתב על השולחן שלך, בכתב יד.' : 'מעטפה על השולחן שלך, בלי שם.'
+  if (f['j2:calling']) return 'הטלפון על השולחן — להתקשר אליו לפני שמתקנים.'
+  if (f['j2:checking']) return 'ההקלטה על השולחן — מקור שני, עצמאי.'
+  return null
 }
 
 export const ENDINGS_DESK02: Record<string, EndingCard> = {
@@ -408,11 +479,47 @@ export const ENDINGS_DESK02: Record<string, EndingCard> = {
     memoryHe: 'טיוטה, בתיקייה "לא עכשיו".',
     memoryItem: 'folded-paper',
   },
+  small: {
+    id: 'small',
+    titleHe: 'באותיות שאף אחד לא רואה',
+    bodyHe:
+      'תיקנת, בעמוד האחרון, בשתי שורות. שבוע אחר כך הגיע מכתב שני, קצר מהראשון: "גם את זה לא קראו." שני לא אמרה "אמרתי לך". היא לא הייתה צריכה.',
+    memoryHe: 'גזיר של שתי שורות, מתחת למודעה.',
+    memoryItem: 'clipping',
+  },
+  called: {
+    id: 'called',
+    titleHe: 'במילים שלו',
+    bodyHe:
+      'התקשרת אליו לפני שתיקנת. הוא לא סלח בטלפון, והוא גם לא ביקש. התיקון יצא באותו עמוד, באותו גודל, עם משפט אחד שלו בתוכו — והמשפט הזה היה הדבר היחיד בעיתון באותו יום שאף אחד לא ערך.',
+    memoryHe: 'התיקון, ומרכאות סביב שורה אחת.',
+    memoryItem: 'clipping',
+  },
+  defended: {
+    id: 'defended',
+    titleHe: 'עמדתי מאחוריו',
+    bodyHe:
+      'לא תיקנת. אמרת שזה מה ששמעת אז, וזה נכון — שמעת. עמית לא התווכח, רק הזיז את השם שלך מהטור של השבוע הבא. המכתב נשאר במגירה, ואתה ידעת בדיוק איזו.',
+    memoryHe: 'מכתב בכתב יד, במגירה.',
+    memoryItem: 'folded-paper',
+  },
+  leak: {
+    id: 'leak',
+    titleHe: 'לפני כולם',
+    bodyHe:
+      'פרסמת את הדף כמו שהוא, מהר, לפני כולם. יומיים קראו לך. ביום השלישי התקשרו לשאול מאיפה, ולא הייתה לך תשובה שאפשר להדפיס.',
+    memoryHe: 'מעטפה חומה, בלי שם, ריקה.',
+    memoryItem: 'folded-paper',
+  },
 }
 
 export const BEATS_DESK02: Beat[] = [
-  // J02 *"מערכת קטנה"* — המערכת שמעל בית הקפה (`deskNewsroom`, 21.9.2026)
-  { id: 'j-fix', at: 'newsroom', trigger: 'enter', when: { none: [{ flag: 'j:fix' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'j-fix' }] },
+  // J02 *"מערכת קטנה"* — המערכת שמעל בית הקפה (`deskNewsroom`, 21.9.2026); on the desk, what 2002 left
+  { id: 'j2-arrive', at: 'newsroom', trigger: 'enter', when: { none: [{ flag: 'j2:arrive' }, { flag: 'j:fix' }] }, delayMs: 600, do: [{ a: 'talk', conversation: 'j2-arrive' }] },
+  // the letter was his rumour's person; the correction is what's left of it (`clock` + `at`)
+  { id: 'j-fix', at: 'newsroom', trigger: 'clock', when: { all: [{ flag: 'j2:read' }, { flag: DESK_UNVERIFIED }], none: [{ flag: 'j:fix' }, { flag: 'j2:calling' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'j-fix' }] },
+  // the envelope was a temptation; the scoop is what's done with it
+  { id: 'j2-scoop', at: 'newsroom', trigger: 'clock', when: { all: [{ flag: 'j2:read' }, { notFlag: DESK_UNVERIFIED }], none: [{ flag: 'j:fix' }, { flag: 'j2:checking' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'j2-scoop' }] },
 ]
 
 // ================================================================ J03 · 2025 ====
@@ -505,32 +612,53 @@ const J_FIRST_LINES: Say[] = [
   { who: 'עמית', text: 'גם העובדה בפסקה השנייה לא בטוחה.' },
   { who: 'פוגי', text: 'אז טוב שעוד לא לחצתי פרסם.' },
 ]
+/** J01 S1 — the table is laid: three things on it, and nine o'clock */
+const J01_BRIEF: Effect[] = [
+  { e: 'flag', flag: 'j:brief' },
+  { e: 'toast', text: 'על השולחן בבית הקפה: הפנקס שלך, ההקלטה, והטלפון של עמית. הגיליון נסגר בתשע.', tone: 'plain' },
+]
+
+/** J01 S3 — the verified publication: two facts from sources, the witness marked, the photo with a credit */
+const J01_VERIFIED: Effect[] = [
+  { e: 'flag', flag: 'j:first' },
+  { e: 'flag', flag: DESK },
+  { e: 'flagValue', flag: 'life:desk:first', value: 'verified' },
+  { e: 'time', minutes: 20 },
+  // `documentation` בתסריט → `communication` במנוע
+  { e: 'skill', skill: 'communication', delta: 3, why: 'שתי עובדות ממקורות, ורשות לתמונה' },
+  { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:first', subjectHe: 'הפרסום הראשון', audience: 'public', delta: 4, noteHe: 'שתי עובדות ממקורות, עדות מסומנת, ודעה בנפרד. התמונה עם קרדיט.' },
+  { e: 'heard', proofId: 'journalism_proof:{chapter}:first' },
+  { e: 'rel', who: 'crowd-shani', axis: 'trust', delta: 3 },
+  { e: 'memory', item: 'clipping', id: 'j-first-verified' },
+]
+
+/**
+ * J01 S2 — the board. The screenplay's three answers, and a fourth the brief asks for (kill).
+ * Each is open only when what it rests on is on the table: a memoir needs his own notebook,
+ * a rumour needs the phone. Verifying does not publish — it sends him to two people (`j-photo`,
+ * `j-second`) against the clock.
+ */
 const J_FIRST_CHOICES: ChoiceDef[] = [
   {
     id: 'verify',
     text: '(לבדוק את העובדות — ולקבל רשות לתמונה לפני פרסום.)',
     then: [
-      { e: 'flag', flag: 'j:first' },
-      { e: 'flag', flag: DESK },
-      { e: 'time', minutes: 60 },
-      { e: 'energy', delta: -5 },
-      // `documentation` בתסריט → `communication` במנוע
-      { e: 'skill', skill: 'communication', delta: 3, why: 'שתי עובדות ממקורות, ורשות לתמונה' },
-      { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:first', subjectHe: 'הפרסום הראשון', audience: 'public', delta: 4, noteHe: 'שתי עובדות ממקורות, עדות מסומנת, ודעה בנפרד. התמונה עם קרדיט.' },
-      { e: 'heard', proofId: 'journalism_proof:{chapter}:first' },
-      { e: 'rel', who: 'crowd-shani', axis: 'trust', delta: 3 },
-      { e: 'memory', item: 'clipping', id: 'j-first-verified' },
-      { e: 'toast', text: 'שני: "עכשיו אפשר לתת קרדיט כמו שצריך." — "ומה שלא הצלחתי לאמת נשאר בחוץ."', tone: 'plain' },
-      { e: 'ending', id: 'verified' },
+      { e: 'flag', flag: 'j:board' },
+      { e: 'flag', flag: 'j:verifying' },
+      { e: 'toast', text: 'עמית: "שני, בשביל התמונה. הקופה, בשביל הרשימה. תשע — סוגרים, איתך או בלעדיך."', tone: 'plain' },
     ],
   },
   {
     id: 'memoir',
     text: '(לפרסם זיכרון אישי — בלי תמונה ובלי לטעון שראיתי מה שלא ראיתי.)',
+    when: { flag: 'j:ev:notes' },
+    noteHe: 'הפנקס שלך עוד על השולחן. בלי מה שראית — אין זיכרון לפרסם.',
     then: [
+      { e: 'flag', flag: 'j:board' },
       { e: 'flag', flag: 'j:first' },
       { e: 'flag', flag: DESK },
-      { e: 'time', minutes: 45 },
+      { e: 'flagValue', flag: 'life:desk:first', value: 'memoir' },
+      { e: 'time', minutes: 20 },
       { e: 'skill', skill: 'communication', delta: 3, why: 'השאיר את ההבדל בין זיכרון לעובדה בכותרת' },
       { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:memoir', subjectHe: 'כך אני זוכר', audience: 'public', delta: 1, noteHe: '"כך אני זוכר", ולא "כך היה".' },
       { e: 'toast', text: 'עמית: "״כך אני זוכר״, לא ״כך היה״." — "השארתי את ההבדל בכותרת."', tone: 'plain' },
@@ -540,7 +668,11 @@ const J_FIRST_CHOICES: ChoiceDef[] = [
   {
     id: 'rumour',
     text: '(לפרסם את השמועה כאילו בדקתי.)',
+    when: { flag: 'j:ev:phone' },
+    noteHe: 'את השמועה שמעת רק מהטלפון של עמית — והוא עוד על השולחן.',
     then: [
+      { e: 'flag', flag: 'j:board' },
+      { e: 'flagValue', flag: 'life:desk:first', value: 'rumour' },
       { e: 'flag', flag: 'j:first' },
       { e: 'flag', flag: DESK },
       { e: 'flag', flag: DESK_UNVERIFIED },
@@ -548,6 +680,127 @@ const J_FIRST_CHOICES: ChoiceDef[] = [
       { e: 'repLoss', audience: 'public', delta: -8, why: 'פרסם שמועה כאילו בדק' },
       { e: 'toast', text: 'עמית: "שאלו על המקור. מה ענית?" — "עוד לא עניתי."', tone: 'red' },
       { e: 'ending', id: 'rumour' },
+    ],
+  },
+  {
+    id: 'kill',
+    text: '(לגנוז. אין לי עוד משהו שאני יכול לעמוד מאחוריו.)',
+    then: [
+      { e: 'flag', flag: 'j:board' },
+      { e: 'flag', flag: 'j:first' },
+      { e: 'flagValue', flag: 'life:desk:first', value: 'killed' },
+      { e: 'toast', text: 'עמית: "לגנוז זה גם החלטה. רק אל תעשה ממנה הרגל."', tone: 'plain' },
+      { e: 'ending', id: 'killed' },
+    ],
+  },
+]
+
+/** S3 — nine o'clock, whoever is still checking: what there is now, or next week and right */
+const J_DEADLINE_CHOICES: ChoiceDef[] = [
+  {
+    id: 'late',
+    text: '(לתת לגיליון להיסגר בלעדיי — ולפרסם בשבוע הבא, בדוק.)',
+    when: { flag: 'j:verifying' },
+    hidden: true,
+    then: [
+      { e: 'flag', flag: 'j:first' },
+      { e: 'flag', flag: DESK },
+      { e: 'flag', flag: 'life:desk:late' },
+      { e: 'flagValue', flag: 'life:desk:first', value: 'late' },
+      { e: 'skill', skill: 'communication', delta: 2, why: 'בדק, גם כשזה עלה את הגיליון' },
+      { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:first', subjectHe: 'הפרסום הראשון — שבוע אחרי', audience: 'public', delta: 2, noteHe: 'יצא שבוע מאוחר, עם הרשימה של הקופה ועם שם הצלמת.' },
+      { e: 'ending', id: 'late' },
+    ],
+  },
+  ...J_FIRST_CHOICES.filter((choice) => choice.id !== 'verify').map((choice) => ({ ...choice, id: `now-${choice.id}` })),
+]
+
+/** S1 — the three cards on the café table; each says where it comes from */
+const J_CARD = (id: string, card: string, lines: Say[], toast: string): Conversation => ({
+  id,
+  nameHe: null,
+  branches: [{ lines, then: [{ e: 'flag', flag: `j:ev:${card}` }, { e: 'time', minutes: 5 }, { e: 'toast', text: toast, tone: 'plain' }] }],
+})
+
+export const CONVERSATIONS_DESK01: Conversation[] = [
+  J_CARD('j-ev-notes', 'notes', [{ who: null, text: 'הפנקס שלך. שש בבוקר, התור בקופה: "שמונים איש לפני שפתחו. אחד עם כיסא מתקפל." את זה ראית בעיניים.' }], 'כרטיס: ראיתי — עדות. תסומן כעדות, לא כעובדה.'),
+  J_CARD('j-ev-tape', 'tape', [{ who: null, text: 'ההקלטה מאתמול. הקופאי, בקול עייף: "קיבלנו מאתיים. חילקנו מאתיים. מי שעמד — קיבל."' }], 'כרטיס: עובדה — ממקור, מוקלטת.'),
+  J_CARD('j-ev-phone', 'phone', [{ who: null, text: 'הטלפון של עמית. הודעה ממישהו מהיציע: "שמעתי שחצי מהכרטיסים הלכו לסוכן."' }], 'כרטיס: שמעתי — לא נבדק. מי כתב את זה, ומאיפה הוא יודע?'),
+  {
+    id: 'j-board',
+    nameHe: 'עמית',
+    branches: [
+      {
+        lines: [
+          { who: 'עמית', text: 'מה יש לך. לא מה אתה חושב — מה יש לך.' },
+          { who: 'פוגי', text: 'מה שראיתי, מה שהוקלט, ומה ששמעתי.' },
+          { who: 'עמית', text: 'שלושה דברים שונים. תחליט איזה מהם הכותרת.' },
+        ],
+        choices: J_FIRST_CHOICES,
+      },
+    ],
+  },
+  {
+    id: 'j-photo',
+    nameHe: 'שני',
+    branches: [
+      {
+        lines: [
+          { who: 'שני', text: 'אתה מבקש עכשיו? לפני?' },
+          { who: 'פוגי', text: 'לפני.' },
+          { who: 'שני', text: 'אז כן. והשם שלי מתחת, לא בסוף העמוד.' },
+        ],
+        then: [{ e: 'flag', flag: 'j:photoOk' }, { e: 'time', minutes: 5 }, { e: 'rel', who: 'crowd-shani', axis: 'bond', delta: 2 }],
+      },
+    ],
+  },
+  {
+    id: 'j-second',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'מאחורי הזכוכית, הקופאי לא מרים את הראש: "סוכן? אין סוכן. יש רשימה."' },
+          { who: null, text: 'הוא מחליק אותה דרך החריץ. מאתיים שמות, מאתיים כרטיסים — ושלושה עם כוכבית: "ויתר, הכרטיס חזר לתור".' },
+        ],
+        then: [{ e: 'flag', flag: 'j:second' }, { e: 'time', minutes: 15 }, { e: 'toast', text: 'כרטיס: עובדה — מקור שני, רשימה ביד. השמועה לא עמדה בה.', tone: 'plain' }],
+      },
+    ],
+  },
+  {
+    id: 'j-verified',
+    nameHe: 'שני',
+    branches: [
+      {
+        lines: [
+          { who: 'עמית', text: 'רשימה, הקלטה, ועדות מסומנת. והסוכן?' },
+          { who: 'פוגי', text: 'לא נכנס. לא מצאתי אותו.' },
+          { who: 'שני', text: 'עכשיו אפשר לתת קרדיט כמו שצריך.' },
+          { who: 'פוגי', text: 'ומה שלא הצלחתי לאמת נשאר בחוץ.' },
+        ],
+        then: [...J01_VERIFIED, { e: 'ending', id: 'verified' }],
+      },
+    ],
+  },
+  {
+    id: 'j-deadline',
+    nameHe: 'עמית',
+    branches: [
+      {
+        when: { flag: 'j:verifying' },
+        lines: [
+          { who: 'עמית', text: 'תשע. הגיליון נסגר.' },
+          { who: 'פוגי', text: 'חסר לי עוד מקור אחד.' },
+          { who: 'עמית', text: 'אז תחליט: מה שיש עכשיו, או נכון בשבוע הבא. מישהו אחר אולי יכתוב על התור הזה קודם.' },
+        ],
+        choices: J_DEADLINE_CHOICES,
+      },
+      {
+        lines: [
+          { who: 'עמית', text: 'תשע. הגיליון נסגר, ואתה עוד לא החלטת מה יש לך.' },
+        ],
+        choices: J_DEADLINE_CHOICES,
+      },
     ],
   },
 ]
@@ -901,6 +1154,7 @@ const T_EXTRA: Conversation[] = [
 ]
 
 export const CONVERSATIONS_CAREER: Conversation[] = [
+  ...CONVERSATIONS_DESK01,
   ...T_EXTRA,
   {
     id: 't-first',
@@ -1021,19 +1275,20 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
     id: 'j-first',
     nameHe: 'שני',
     branches: [
+      // pass C (28.9.2026): the opening no longer decides — it lays the table (`J01_BRIEF`)
       {
         when: { flag: 'career:media:organic' },
         lines: [{ who: 'עמית', text: 'אתה ממילא כל הזמן מתקן אותנו. תכתוב.' }, ...J_FIRST_LINES],
-        choices: J_FIRST_CHOICES,
+        then: J01_BRIEF,
       },
       {
         when: { flag: 'career:media:assisted' },
         lines: [{ who: 'עמית', text: 'צריך שני טורים. רוצה לנסות?' }, ...J_FIRST_LINES],
-        choices: J_FIRST_CHOICES,
+        then: J01_BRIEF,
       },
       {
         lines: J_FIRST_LINES,
-        choices: J_FIRST_CHOICES,
+        then: J01_BRIEF,
       },
     ],
   },
@@ -1058,6 +1313,7 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
             noteHe: 'אין מה לתקן. מה שפרסמת עמד.',
             then: [
               { e: 'flag', flag: 'j:fix' },
+              { e: 'flagValue', flag: DESK_J2, value: 'corrected' },
               { e: 'time', minutes: 30 },
               { e: 'skill', skill: 'communication', delta: 3, why: 'תיקן באותו מקום ובאותו גודל' },
               { e: 'proof', kind: 'public_correction', proofId: 'public_correction:{chapter}:rumour', subjectHe: 'השמועה שפרסמתי ב-2002', audience: 'public', delta: 4, noteHe: 'תיקון גלוי עם מקור, בלי למחוק את מה שנכתב.' },
@@ -1067,17 +1323,126 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
             ],
           },
           {
+            id: 'small',
+            text: '(תיקון קטן, בעמוד האחרון.)',
+            then: [
+              { e: 'flag', flag: 'j:fix' },
+              { e: 'flagValue', flag: DESK_J2, value: 'small' },
+              { e: 'repLoss', audience: 'public', delta: -2, why: 'תיקון שאף אחד לא רואה' },
+              { e: 'toast', text: 'שני: "תשאיר מקום לתיקון. לא באותיות שאף אחד לא רואה." — אמרה, ולא חזרה על זה.', tone: 'red' },
+              { e: 'ending', id: 'small' },
+            ],
+          },
+          {
+            id: 'call',
+            text: '(להתקשר אליו קודם — ורק אז לתקן, במילים שלו.)',
+            then: [
+              { e: 'flag', flag: 'j2:calling' },
+              { e: 'toast', text: 'המספר כתוב בתחתית המכתב, בעט כחול. הטלפון על השולחן.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'defend',
+            text: '(לעמוד מאחורי מה שנכתב.)',
+            then: [
+              { e: 'flag', flag: 'j:fix' },
+              { e: 'flagValue', flag: DESK_J2, value: 'defended' },
+              { e: 'repLoss', audience: 'public', delta: -6, why: 'עמד מאחורי שמועה' },
+              { e: 'toast', text: 'עמית: "אתה יכול. רק תדע שמהיום זה גם שלך."', tone: 'red' },
+              { e: 'ending', id: 'defended' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  /** J02 — what is on his desk when he walks in: the letter, or the envelope */
+  {
+    id: 'j2-arrive',
+    nameHe: null,
+    branches: [
+      { when: { flag: DESK_UNVERIFIED }, lines: [{ who: null, text: 'על השולחן שלך מכתב בכתב יד, בבולים ישנים. מישהו הביא אותו ביד, כי אין עליו חותמת.' }], then: [{ e: 'flag', flag: 'j2:arrive' }] },
+      { lines: [{ who: null, text: 'על השולחן שלך מעטפה חומה, בלי שם ובלי בול. מישהו דחף אותה מתחת לדלת.' }], then: [{ e: 'flag', flag: 'j2:arrive' }] },
+    ],
+  },
+  {
+    id: 'j2-letter',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: '"ארבע שנים קוראים לי \'זה מהעיתון\'. לא מכרתי שום כרטיס לשום סוכן. הרשימה עדיין אצלי, אם מישהו ירצה לראות אותה פעם."' },
+          { who: null, text: 'חתום: הקופאי, מהקופה ליד הקשת. ומתחת, בעט כחול — מספר טלפון.' },
+        ],
+        then: [{ e: 'flag', flag: 'j2:read' }, { e: 'wellbeing', key: 'regret', delta: 5 }],
+      },
+    ],
+  },
+  {
+    id: 'j2-call',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'הוא עונה בצלצול השני, כאילו חיכה ארבע שנים ליד המכשיר.' },
+          { who: null, text: '"אתה לא צריך להתנצל בטלפון. תכתוב שזה לא נכון, באותו מקום שכתבת שכן. ותכתוב שהרשימה אצלי."' },
+          { who: 'פוגי', text: 'באותו מקום. באותו גודל. והמשפט שלך בתוכו.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'j:fix' },
+          { e: 'flagValue', flag: DESK_J2, value: 'called' },
+          { e: 'time', minutes: 30 },
+          { e: 'skill', skill: 'communication', delta: 3, why: 'התקשר לפני שתיקן, ותיקן במילים שלו' },
+          { e: 'proof', kind: 'public_correction', proofId: 'public_correction:{chapter}:rumour', subjectHe: 'השמועה שפרסמתי ב-2002', audience: 'public', delta: 5, noteHe: 'תיקון גלוי, אחרי שיחה עם מי שנפגע, במילים שלו.' },
+          { e: 'heard', proofId: 'public_correction:{chapter}:rumour' },
+          { e: 'toast', text: 'עמית: "עכשיו הקורא יכול להבין מה השתנה." — "ואני צריך לחיות עם זה שיראו."', tone: 'plain' },
+          { e: 'ending', id: 'called' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'j2-envelope',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'דף אחד. טבלה של משכורות, עם לוגו של מועדון בפינה, בלי חתימה ובלי תאריך.' },
+          { who: null, text: 'אם זה נכון — זה שער ראשון. אם לא — זה מכתב אחר, בעוד ארבע שנים, על שולחן של מישהו.' },
+        ],
+        then: [{ e: 'flag', flag: 'j2:read' }],
+      },
+    ],
+  },
+  {
+    id: 'j2-scoop',
+    nameHe: 'עמית',
+    branches: [
+      {
+        lines: [
+          { who: 'שני', text: 'מאיפה זה?' },
+          { who: 'פוגי', text: 'מתחת לדלת.' },
+          { who: 'עמית', text: 'אז אין לזה מקור. יש לזה כתובת.' },
+        ],
+        choices: [
+          {
             id: 'second',
             text: '(להפיק פרסום שני — עם מקור עצמאי.)',
             then: [
+              { e: 'flag', flag: 'j2:checking' },
+              { e: 'toast', text: 'ההקלטה על השולחן, והטלפון לידה. מקור שני — מישהו שלא דחף מעטפה מתחת לדלת.', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'leak',
+            text: '(לפרסם את הדף כמו שהוא. מהר, לפני כולם.)',
+            then: [
               { e: 'flag', flag: 'j:fix' },
-              { e: 'time', minutes: 60 },
-              { e: 'energy', delta: -5 },
-              { e: 'skill', skill: 'communication', delta: 3, why: 'מקור עצמאי, ורשות לתמונה' },
-              { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:second', subjectHe: 'הפרסום השני', audience: 'public', delta: 4, noteHe: 'מקור עצמאי, ושם הצלמת מתחת לתמונה.' },
-              { e: 'heard', proofId: 'journalism_proof:{chapter}:second' },
-              { e: 'toast', text: 'שני: "הסכימו לשימוש בתמונה הזאת." — "והשם שלה נשאר מתחתיה."', tone: 'plain' },
-              { e: 'ending', id: 'second' },
+              { e: 'flagValue', flag: DESK_J2, value: 'leak' },
+              { e: 'flag', flag: DESK_UNVERIFIED },
+              { e: 'proof', kind: 'written_account', proofId: 'written_account:{chapter}:leak', subjectHe: 'הדף מהמעטפה', noteHe: 'פורסם לפני כולם. לא נבדק.' },
+              { e: 'toast', text: 'יומיים היית הראשון. ביום השלישי התקשרו לשאול מאיפה.', tone: 'red' },
+              { e: 'ending', id: 'leak' },
             ],
           },
           {
@@ -1086,10 +1451,34 @@ export const CONVERSATIONS_CAREER: Conversation[] = [
             then: [
               { e: 'flag', flag: 'j:fix' },
               { e: 'flag', flag: 'life:desk:held' },
+              { e: 'flagValue', flag: DESK_J2, value: 'held' },
               { e: 'toast', text: 'עמית: "זה לא יופיע היום." — "עדיף שזה לא יופיע ככה."', tone: 'plain' },
               { e: 'ending', id: 'held' },
             ],
           },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'j2-source',
+    nameHe: 'שני',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'שלוש שיחות. שתיים לא עונות. השלישית — רואה החשבון של המועדון, שלא מוכן שיצטטו אותו, ומוכן לומר שהטבלה של השנה שעברה.' },
+          { who: 'שני', text: 'הסכימו לשימוש בתמונה הזאת.' },
+          { who: 'פוגי', text: 'והשם שלה נשאר מתחתיה.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'j:fix' },
+          { e: 'flagValue', flag: DESK_J2, value: 'second' },
+          { e: 'time', minutes: 45 },
+          { e: 'energy', delta: -5 },
+          { e: 'skill', skill: 'communication', delta: 3, why: 'מקור עצמאי, ורשות לתמונה' },
+          { e: 'proof', kind: 'journalism_proof', proofId: 'journalism_proof:{chapter}:second', subjectHe: 'הפרסום השני', audience: 'public', delta: 4, noteHe: 'מקור עצמאי, ושם הצלמת מתחת לתמונה. והטבלה — של השנה שעברה, וכך כתוב.' },
+          { e: 'heard', proofId: 'journalism_proof:{chapter}:second' },
+          { e: 'ending', id: 'second' },
         ],
       },
     ],

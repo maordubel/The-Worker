@@ -400,7 +400,12 @@ export const goalTerrace01 = (state: LifeState): LocationId | null => {
 /** T02 — Yevgeny waits under the stand, by the stairs; the test happens there too */
 export const goalTerrace02 = (state: LifeState): LocationId | null => (flag(state, 't:hand') && !flag(state, 't:mode') ? null : flag(state, 't:test') ? null : 'gate5-stand')
 export const goalTerrace03 = (state: LifeState): LocationId | null => (flag(state, 't:lead') ? null : 'bloomfield-inside')
-export const goalDesk01 = (state: LifeState): LocationId | null => (flag(state, 'j:first') ? null : 'allenby')
+export const goalDesk01 = (state: LifeState): LocationId | null => {
+  if (flag(state, 'j:first')) return null
+  // J01 (pass C) — verifying sends him to the ticket office for the second source, then back
+  if (flag(state, 'j:verifying') && flag(state, 'j:photoOk') && !flag(state, 'j:second')) return 'ticket-office'
+  return 'allenby'
+}
 export const goalDesk02 = (state: LifeState): LocationId | null => (flag(state, 'j:fix') ? null : 'newsroom')
 export const goalInterview = (state: LifeState): LocationId | null => {
   if (flag(state, 'j:asked')) return null

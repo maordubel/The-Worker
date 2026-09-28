@@ -44,9 +44,12 @@ export const PORTRAIT_FAMILY: Record<string, string> = {
 
 export function objectivePeople(state: LifeState, sceneId: string): string | null {
   if (state.chapterDone) return null
-  if (!state.flags['l:melanie']) return sceneId === 'allenby' ? null : 'פינת אלנבי. מישהי מחכה, והטלפון בכיס.'
-  if (!state.flags['l:dor']) return sceneId === 'street' ? null : 'ברחוב. דור מארגנת משהו, ולא ביקשה עזרה.'
-  if (!state.flags['l:tamar']) return sceneId === 'kiosk' ? null : 'בקיוסק. תמר שאלה שאלה, ולא על הפועל.'
+  const f = state.flags
+  if (!f['l:melanie']) return sceneId === 'allenby' ? null : 'פינת אלנבי. מישהי מחכה, והטלפון בכיס.'
+  if (f['l:melanieKind'] === 'task' && !f['l:mutual:melanie'] && !f['l:dor']) return 'המחזיר של מלאני. מול השמש, לפני שהאור הולך.'
+  if (!f['l:dor']) return sceneId === 'street' ? null : 'ברחוב. דור מארגנת משהו, ולא ביקשה עזרה.'
+  if ((f['l:dorKind'] === 'task' || f['l:dorKind'] === 'asked') && !f['l:posters'] && !f['l:tamar']) return 'הפוסטרים של דור, על הקיר. היא לא תחכה.'
+  if (!f['l:tamar']) return sceneId === 'kiosk' ? null : 'בקיוסק. תמר שאלה שאלה, ולא על הפועל.'
   return null
 }
 
@@ -84,7 +87,12 @@ export const BEATS_PEOPLE: Beat[] = [
   { id: 'l-melanie', at: 'allenby', trigger: 'enter', when: { none: [{ flag: 'l:melanie' }] }, delayMs: 700, do: [{ a: 'talk', conversation: 'l-melanie' }] },
   { id: 'l-dor', at: 'street', trigger: 'enter', when: { all: [{ flag: 'l:melanie' }], none: [{ flag: 'l:dor' }] }, delayMs: 650, do: [{ a: 'talk', conversation: 'l-dor' }] },
   { id: 'l-tamar', at: 'kiosk', trigger: 'enter', when: { all: [{ flag: 'l:dor' }], none: [{ flag: 'l:tamar' }] }, delayMs: 650, do: [{ a: 'talk', conversation: 'l-tamar' }] },
-  { id: 'l-close', trigger: 'clock', when: { all: [{ flag: 'l:tamar' }], none: [{ flag: 'l:done' }] }, delayMs: 1300, do: [{ a: 'flag', flag: 'l:done' }, { a: 'talk', conversation: 'l-close' }] },
+  /**
+   * the invitations — and `l:done` is written by the conversation, not by the beat before it
+   * (90-C): the first version raised it here, so a player who closed the box by mistake never
+   * saw an ending at all (pass C, 28.9.2026, found by the confused player).
+   */
+  { id: 'l-close', trigger: 'clock', when: { all: [{ flag: 'l:tamar' }], none: [{ flag: 'l:done' }] }, delayMs: 1300, do: [{ a: 'talk', conversation: 'l-close' }] },
 ]
 
 // ------------------------------------------------------------------ Part II ------
@@ -157,12 +165,13 @@ export const CONVERSATIONS_FAMILY: Conversation[] = [
           {
             id: 'listen',
             text: '(להניח את הטלפון. לשאול מה היא רוצה לעשות.)',
+            // pass C (L01 S1): what she wants to do is a task — the reflector against the
+            // sun, before the light goes — and the evening is decided by doing it, not by the answer
             then: [
               { e: 'flag', flag: 'l:melanie' },
-              { e: 'time', minutes: 45 },
-              { e: 'rel', who: 'melanie', axis: 'bond', delta: 3 },
-              { e: 'flag', flag: 'l:mutual:melanie' },
-              { e: 'toast', text: 'מלאני: "קפה במקום שאפשר לשמוע בו." — "דרישה מוגזמת, אבל אנסה."', tone: 'plain' },
+              { e: 'flagValue', flag: 'l:melanieKind', value: 'task' },
+              { e: 'rel', who: 'melanie', axis: 'bond', delta: 2 },
+              { e: 'toast', text: 'מלאני: "קודם תחזיק לי את המחזיר מול השמש. אחר כך קפה במקום שאפשר לשמוע בו." — "דרישה מוגזמת, אבל אנסה."', tone: 'plain' },
             ],
           },
           {
@@ -212,25 +221,24 @@ export const CONVERSATIONS_FAMILY: Conversation[] = [
           {
             id: 'join',
             text: '(לשאול מה התוכנית שלה — ולהצטרף אם מתאים.)',
+            // pass C (L01 S2): her plan is the posters for Friday's evening on the wall, and she
+            // leads it — joining is taking the tape, not saying yes
             then: [
               { e: 'flag', flag: 'l:dor' },
-              { e: 'time', minutes: 45 },
-              { e: 'energy', delta: -5 },
+              { e: 'flagValue', flag: 'l:dorKind', value: 'task' },
               { e: 'rel', who: 'dor', axis: 'bond', delta: 2 },
-              { e: 'rel', who: 'dor', axis: 'trust', delta: 3 },
-              { e: 'flag', flag: 'l:mutual:dor' },
               { e: 'toast', text: 'דור: "אני מארגנת, אתה עוזר. מתאים?" — "מתאים. בלי לגנוב את ההגה."', tone: 'plain' },
             ],
           },
           {
             id: 'other',
             text: '(להציע ערב אחר. בלי כדורגל.)',
+            // …and she has her own goal tonight: she says no to the evening, and yes to the tape
             then: [
               { e: 'flag', flag: 'l:dor' },
-              { e: 'time', minutes: 45 },
-              { e: 'rel', who: 'dor', axis: 'bond', delta: 3 },
-              { e: 'flag', flag: 'l:mutual:dor' },
-              { e: 'toast', text: 'דור: "אתה יודע לעשות את זה?" — "עוד לא ניסינו." — "אז נבדוק."', tone: 'plain' },
+              { e: 'flagValue', flag: 'l:dorKind', value: 'asked' },
+              { e: 'rel', who: 'dor', axis: 'bond', delta: 1 },
+              { e: 'toast', text: 'דור: "אתה יודע לעשות את זה?" — "עוד לא ניסינו." — "אז נבדוק. אבל לא הערב — הערב יש לי קיר."', tone: 'plain' },
             ],
           },
           {
@@ -296,10 +304,54 @@ export const CONVERSATIONS_FAMILY: Conversation[] = [
       },
     ],
   },
+  /** L01 S1 (pass C) — Melanie's reflector, against the sun, before the light goes */
+  {
+    id: 'l-reflector',
+    nameHe: 'מלאני',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'מחזיר כסוף, גדול ממה שנראה, והרוח מושכת אותו לצד השני.' },
+          { who: 'מלאני', text: 'שמאלה. לא, השמאל שלי. עכשיו אל תזוז.' },
+          { who: 'מלאני', text: 'יצא. ולא בגלל המצלמה.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'l:reflector' },
+          { e: 'flag', flag: 'l:mutual:melanie' },
+          { e: 'time', minutes: 25 },
+          { e: 'energy', delta: -4 },
+          { e: 'rel', who: 'melanie', axis: 'trust', delta: 3 },
+          { e: 'toast', text: 'מלאני הראתה לך את התמונה. אתה לא בה, והיא טובה.', tone: 'plain' },
+        ],
+      },
+    ],
+  },
+  /** L01 S2 (pass C) — Dor's posters on the wall: her plan, her order, his hands */
+  {
+    id: 'l-posters',
+    nameHe: 'דור',
+    branches: [
+      {
+        lines: [
+          { who: 'דור', text: 'ישר. לא ישר שלך — ישר של קיר.' },
+          { who: null, text: 'שישה פוסטרים. את החמישי שלך היא הזיזה שני סנטימטר, בלי להגיד.' },
+        ],
+        then: [
+          { e: 'flag', flag: 'l:posters' },
+          { e: 'flag', flag: 'l:mutual:dor' },
+          { e: 'time', minutes: 30 },
+          { e: 'energy', delta: -5 },
+          { e: 'rel', who: 'dor', axis: 'trust', delta: 3 },
+          { e: 'toast', text: 'דור: "לא גנבת את ההגה." — "רק את הנייר דבק."', tone: 'plain' },
+        ],
+      },
+    ],
+  },
   {
     /**
-     * **ההסכמה ההדדית, ורק אחרי שלושת המפגשים.** אין כאן "בחר אחת משלוש" — יש
-     * שאלה אחת על מי שכבר היה הדדי, והיא מוצעת רק למי שיש לו את מי להציע.
+     * **ההסכמה ההדדית, ורק אחרי שלושת המפגשים.** אין כאן "בחר אחת משלוש" — ההזמנה מגיעה
+     * **מהן**, רק ממי שהערב איתה היה הדדי (מעשה, לא תשובה), ופוגי עונה לה: כן, או לא הערב.
+     * (מעבר ג׳, 28.9.2026: `l:done` נכתב כאן, בכל ענף — לא בביט שלפני.)
      */
     id: 'l-close',
     nameHe: null,
@@ -307,39 +359,39 @@ export const CONVERSATIONS_FAMILY: Conversation[] = [
       {
         when: { any: [{ flag: 'l:mutual:melanie' }, { flag: 'l:mutual:dor' }, { flag: 'l:mutual:tamar' }] },
         lines: [
-          { who: null, text: 'שלושה ערבים, ואחד מהם עוד לא נגמר בראש שלך.' },
+          { who: null, text: 'שלושה ערבים. הטלפון רוטט — מישהי כתבה ראשונה.' },
         ],
         choices: [
           {
             id: 'melanie',
-            text: '(לכתוב למלאני.)',
+            text: '(מלאני: "מחר יש אור טוב בשש. באים?" — לענות כן.)',
             when: { flag: 'l:mutual:melanie' },
             hidden: true,
-            then: [{ e: 'flagValue', flag: 'life:partner', value: 'melanie' }, { e: 'ending', id: 'chose' }],
+            then: [{ e: 'flag', flag: 'l:done' }, { e: 'flagValue', flag: 'life:partner', value: 'melanie' }, { e: 'ending', id: 'chose' }],
           },
           {
             id: 'dor',
-            text: '(לכתוב לדור.)',
+            text: '(דור: "נשארו לי שני קירות ביפו. אתה בא עם הנייר דבק?" — לענות כן.)',
             when: { flag: 'l:mutual:dor' },
             hidden: true,
-            then: [{ e: 'flagValue', flag: 'life:partner', value: 'dor' }, { e: 'ending', id: 'chose' }],
+            then: [{ e: 'flag', flag: 'l:done' }, { e: 'flagValue', flag: 'life:partner', value: 'dor' }, { e: 'ending', id: 'chose' }],
           },
           {
             id: 'tamar',
-            text: '(לכתוב לתמר.)',
+            text: '(תמר: "יש לי עוד שאלה. בערב?" — לענות כן.)',
             when: { flag: 'l:mutual:tamar' },
             hidden: true,
-            then: [{ e: 'flagValue', flag: 'life:partner', value: 'tamar' }, { e: 'ending', id: 'chose' }],
+            then: [{ e: 'flag', flag: 'l:done' }, { e: 'flagValue', flag: 'life:partner', value: 'tamar' }, { e: 'ending', id: 'chose' }],
           },
           {
             id: 'none',
-            text: '(לא לכתוב לאף אחד הערב.)',
-            then: [{ e: 'ending', id: 'friends' }],
+            text: '(לענות "לא הערב" — ולהתכוון לזה.)',
+            then: [{ e: 'flag', flag: 'l:done' }, { e: 'ending', id: 'friends' }],
           },
         ],
       },
-      { when: { flag: 'l:crossed' }, lines: [{ who: null, text: 'ההודעה נשארה לא נשלחת. זה היה הדבר הנכון.' }], then: [{ e: 'ending', id: 'alone' }] },
-      { lines: [{ who: null, text: 'שלושה מספרים חדשים בטלפון, וכולם עונים.' }], then: [{ e: 'ending', id: 'friends' }] },
+      { when: { flag: 'l:crossed' }, lines: [{ who: null, text: 'ההודעה נשארה לא נשלחת. זה היה הדבר הנכון.' }], then: [{ e: 'flag', flag: 'l:done' }, { e: 'ending', id: 'alone' }] },
+      { lines: [{ who: null, text: 'שלושה מספרים חדשים בטלפון, וכולם עונים.' }], then: [{ e: 'flag', flag: 'l:done' }, { e: 'ending', id: 'friends' }] },
     ],
   },
 
