@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { AdSlot } from '@/components/ads/AdSlot'
 import { Punch } from '@/components/play/Punch'
 import { RecordRun } from '@/components/play/RecordRun'
+import { UniversalExit } from '@/components/result/UniversalExit'
 import { ShareRow } from '@/components/share/ShareRow'
 import { Num } from '@/components/ui/Num'
 import { Q_TYPES } from '@/lib/game/questions/types'
@@ -15,8 +16,34 @@ import type { Topic } from '@/lib/game/topics'
 import { pendingRevenge, readMarks } from '@/lib/profile/marks'
 import { pushMarks } from '@/lib/portal/marks-sync'
 import { artFor } from '@/lib/share/story'
+import { track } from '@/lib/analytics/meter'
 import { t, type MessageKey } from '@/lib/i18n'
+import type { NextAction, ResultContext } from '@/lib/results/types'
+import { voice, type ResultTier } from '@/lib/voice'
+import { nextAfterRun } from './actions'
 import type { RunMode } from './TriviaRun'
+
+/** the report's six tiers, in the Red Voice's five words (§11: high / medium / low) */
+const VOICE_TIER: Record<string, ResultTier> = { perfect: 'perfect', great: 'high', good: 'high', wild: 'mid', rough: 'low', out: 'low' }
+
+/** The run as a ResultContext (§5): what happened, which topics held and which slipped. */
+export function triviaContext(log: readonly AnswerLog[], score: number, seed: number, cursor: number, personal: boolean): ResultContext {
+  const byTopic = new Map<string, { right: number; asked: number }>()
+  for (const entry of log) {
+    const row = byTopic.get(entry.topic) ?? { right: 0, asked: 0 }
+    row.asked += 1
+    if (entry.correct) row.right += 1
+    byTopic.set(entry.topic, row)
+  }
+  const rows = [...byTopic.entries()].sort(([a], [b]) => a.localeCompare(b))
+  return {
+    gateId: 2,
+    runId: personal ? `q:${log.length}` : `${seed}:${cursor}`,
+    score,
+    strengths: rows.filter(([, r]) => r.asked >= 2 && r.right === r.asked).map(([topic]) => topic),
+    weakTopics: rows.filter(([, r]) => r.asked - r.right > r.right).map(([topic]) => topic),
+  }
+}
 
 /**
  * דוח משחק — Quick Pick's Match Report.
@@ -61,6 +88,24 @@ export function MatchReport({
   onAgain: () => void
 }) {
   const [pending, setPending] = useState(0)
+  const [next, setNext] = useState<NextAction[]>([])
+  // the result emits its ResultContext; the server answers with at most two doors (§38)
+  useEffect(() => {
+    if (practice) return
+    const context = triviaContext(log, session.score, seed, cursor, personal)
+    track('run_complete', { detail: 'trivia', value: session.correct })
+    let live = true
+    nextAfterRun({ context, wrong: log.filter((entry) => !entry.correct).map((entry) => entry.id) })
+      .then((answer) => {
+        if (live) setNext(answer.next)
+      })
+      .catch(() => {})
+    return () => {
+      live = false
+    }
+    // one run, one context: the log is final when the report mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   useEffect(() => {
     const marks = readMarks()
     setPending(pendingRevenge(marks).length)
@@ -84,29 +129,56 @@ export function MatchReport({
   const route = `/trivia/${personal ? 'general' : topic}${query.toString() ? `?${query.toString()}` : ''}`
 
   const strongest = report.strongest ? t(`trivia.lobby.topic.${report.strongest}` as MessageKey) : '—'
+  const spoken = voice({ gate: 2, moment: 'result', result: VOICE_TIER[tier] ?? 'mid', seed: `${seed}:${cursor}`, vars: { n: String(session.correct) } })
+
+  // "תן לי 12 אחרים" — the same deck's next twelve (§1.4: new, not random)
+  const otherQuery = new URLSearchParams({ seed: String(seed), r: String(cursor + 1) })
+  if (era !== null) otherQuery.set('era', String(era))
+  if (hard) otherQuery.set('hard', '1')
+  const otherRoute = `/trivia/${topic}?${otherQuery.toString()}`
 
   return (
     <div className="mt-stack animate-slam">
       <Punch />
       {!practice && <RecordRun gate="/trivia" score={session.score} correct={session.correct} asked={RUN_LENGTH} />}
 
-      <div className="border-rule border-ink bg-ink p-5 text-center text-paper">
-        <p className="font-latin text-[10px] font-bold tracking-[0.28em] text-red" dir="ltr">
-          FULL TIME · GATE 2{practice ? ' · PRACTICE' : ''}
-        </p>
-        <h2 className="mt-2 font-display text-step-4 leading-tight">{t(`trivia.report.tier.${tier}` as MessageKey)}</h2>
-        <p className="mx-auto mt-2 max-w-[36ch] font-body text-step--1 leading-relaxed text-concrete">
-          {t(`trivia.report.strap.${tier}` as MessageKey, {
-            n: String(session.correct),
-            combo: String(session.bestCombo),
-          })}
-        </p>
+      <UniversalExit
+        voice={spoken}
+        next={next}
+        from="trivia"
+        again={{ label: t('voice.g2.cta.again'), onClick: onAgain }}
+        share={
+          practice ? undefined : (
+            <ShareRow
+              kind="trivia"
+              params={{ s: String(seed), r: personal ? '0' : String(cursor), total: String(RUN_LENGTH) }}
+              route={route}
+              headline={String(session.correct)}
+              card={{
+                template: 'score' as const,
+                art: artFor('trivia', session.correct / RUN_LENGTH),
+                kicker: 'GATE 2 · QUICK PICK',
+                label: t('screen.trivia.title'),
+                eyebrow: t('run.score'),
+                hero: String(session.score),
+                bigStat: { v: `${session.correct}/${RUN_LENGTH}`, k: t('run.right') },
+                stats: [
+                  { k: t('trivia.report.combo'), v: `×${session.bestCombo}` },
+                  { k: t('trivia.report.topic'), v: strongest },
+                ],
+                cta: t('share.challenge'),
+                challenge: t('share.sameRound'),
+                marks: session.history,
+              }}
+            />
+          )
+        }
+      >
         {revengeCount !== null && (
-          <p className="mt-2 font-body text-[12px] text-concrete">
+          <p className="mt-2 text-center font-body text-[12px] text-muted">
             {t('trivia.report.revengeRun', { n: String(revengeCount), m: String(Math.max(0, RUN_LENGTH - revengeCount)) })}
           </p>
         )}
-      </div>
 
       <div className="mt-2 grid grid-cols-4 gap-1.5">
         <Tile label={t('run.score')} value={practice ? '—' : String(session.score)} />
@@ -154,45 +226,22 @@ export function MatchReport({
       )}
 
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={onAgain}
-          className="flex min-h-tap items-center justify-center bg-red px-3 font-body text-step-0 font-extrabold text-paper transition-transform duration-press active:scale-[.97] motion-reduce:transition-none"
-        >
-          {t('trivia.report.again')}
-        </button>
+        {!personal && (
+          <Link
+            href={otherRoute}
+            className="flex min-h-tap items-center justify-center border-rule border-ink bg-paper px-3 font-body text-step-0 font-extrabold text-ink"
+          >
+            {t('voice.g2.cta.other')}
+          </Link>
+        )}
         <Link
           href="/trivia"
-          className="flex min-h-tap items-center justify-center border-rule border-ink bg-ink px-3 font-body text-step-0 font-extrabold text-paper"
+          className={`flex min-h-tap items-center justify-center border-rule border-ink bg-ink px-3 font-body text-step-0 font-extrabold text-paper ${personal ? 'col-span-2' : ''}`}
         >
           {t('trivia.report.lobby')}
         </Link>
       </div>
-
-      {!practice && (
-        <ShareRow
-          kind="trivia"
-          params={{ s: String(seed), r: personal ? '0' : String(cursor), total: String(RUN_LENGTH) }}
-          route={route}
-          headline={String(session.correct)}
-          card={{
-            template: 'score' as const,
-            art: artFor('trivia', session.correct / RUN_LENGTH),
-            kicker: 'GATE 2 · QUICK PICK',
-            label: t('screen.trivia.title'),
-            eyebrow: t('run.score'),
-            hero: String(session.score),
-            bigStat: { v: `${session.correct}/${RUN_LENGTH}`, k: t('run.right') },
-            stats: [
-              { k: t('trivia.report.combo'), v: `×${session.bestCombo}` },
-              { k: t('trivia.report.topic'), v: strongest },
-            ],
-            cta: t('share.challenge'),
-            challenge: t('share.sameRound'),
-            marks: session.history,
-          }}
-        />
-      )}
+      </UniversalExit>
 
       <p className="mt-2 text-center font-mono text-[11px] tabular-nums text-muted">
         <bdi dir="ltr">

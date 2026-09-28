@@ -6,6 +6,7 @@ import { firePickFxAt } from '@/components/stage/PickFx'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { t } from '@/lib/i18n'
 import { searchPlayers, type SearchEntry } from '@/lib/game/blind-cow/search'
+import { microFeedback } from '@/lib/voice'
 
 /**
  * מגירת הניחוש — search, not a free text box (spec §3 State 3). The list is the Player
@@ -52,7 +53,9 @@ export function GuessDrawer({
     if (verdict === 'wrong') {
       setShaking(entry.id)
       setMissed(true)
-      firePickFxAt(row, { tone: 'sign', haptic: 'miss', label: t('blindcow.drawer.wrong') })
+      // the Red Voice's miss ("עוד לא." · "לא הוא." …), walked by the number of tries, and the cost
+      const said = microFeedback(10, 'wrong', 'blind-cow', tried.length)?.line ?? t('blindcow.drawer.wrong')
+      firePickFxAt(row, { tone: 'sign', haptic: 'miss', label: `${said} ${t('blindcow.drawer.penalty')}` })
       window.setTimeout(() => setShaking(null), 360)
     }
   }

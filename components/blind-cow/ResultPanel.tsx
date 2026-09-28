@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { CrossLinks } from '@/components/links/CrossLinks'
+import { ExitNext, ExitShare } from '@/components/result/UniversalExit'
 import { ShareCardChips } from '@/components/links/ShareCard'
 import { PlayerShirt } from '@/components/stage/PlayerShirt'
 import { SlideSheet } from '@/components/stage/SlideSheet'
@@ -12,6 +13,7 @@ import type { DuelState } from '@/lib/game/blind-cow/duel'
 import { secondsLabel } from '@/lib/game/blind-cow/scoring'
 import type { RunView } from '@/lib/game/blind-cow/types'
 import { blindCowCardQuery, type BlindCowCard } from '@/lib/og/params'
+import { tierFromClues, voice } from '@/lib/voice'
 
 import { CowMark } from './CowMark'
 import { gateUrl } from './share'
@@ -37,9 +39,23 @@ export function ResultPanel({
 }) {
   const [allOpen, setAllOpen] = useState(false)
   const r = view.result
+  const tier = r ? tierFromClues(view.status === 'solved', r.hintsUsed) : 'low'
+  useEffect(() => {
+    if (r) track('result_view', { detail: `blind-cow:${tier}` })
+    // one result, one view
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [r?.playerId])
   if (!r) return null
   const solved = view.status === 'solved'
-  const head = solved ? t('blindcow.result.solved') : view.status === 'timeout' ? t('blindcow.result.timeout') : t('blindcow.result.gaveUp')
+  // the Red Voice (§19): "השם כבר היה שם." — same run, same line (seeded by the run itself)
+  const spoken = voice({
+    gate: 10,
+    moment: 'result',
+    result: tier,
+    seed: `${view.mode}:${view.day ?? ''}:${r.playerId}:${r.hintsUsed}`,
+    vars: { n: String(r.hintsUsed) },
+  })
+  const head = spoken.title
   const caught = r.caughtBy ? r.allClues.find((c) => c.n === r.caughtBy) : null
 
   const dailyTag = view.mode === 'daily' && view.day ? t('blindcow.share.dailyTag', { date: view.day.split('-').reverse().join('.') }) : ''
@@ -77,6 +93,11 @@ export function ResultPanel({
             {head}
           </p>
         </div>
+        {spoken.body && (
+          <p data-exit="emotion" className="max-w-full shrink-0 truncate text-center font-body text-[12px] leading-snug text-muted">
+            {spoken.body}
+          </p>
+        )}
         <div className="flex min-h-0 w-full flex-1 items-center justify-center gap-3">
           <PlayerShirt
             look={r.shirt}
@@ -137,20 +158,23 @@ export function ResultPanel({
 
       <div className="mt-1.5 shrink-0 md:mx-auto md:max-w-[520px]">
         <CrossLinks links={r.links} from="blind-cow" className="pb-1.5" />
-        <ul className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1.5">
-          <ShareCardChips
-            imagePath={`/api/card/blind-cow?${query}`}
-            url={url}
-            text={text}
-            primary
-            onShared={(channel) => track('blind_cow_result_shared', { detail: channel })}
-          />
-          <li className="shrink-0">
-            <button type="button" onClick={() => setAllOpen(true)} className="flex min-h-tap items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink active:scale-[.97]">
-              {t('blindcow.result.all')}
-            </button>
-          </li>
-        </ul>
+        <ExitNext next={r.next} from="blind-cow" compact />
+        <div className="-mx-1 mt-1.5 flex gap-1.5 overflow-x-auto px-1 pb-1.5">
+          <ExitShare label={spoken.ctaShare} from="blind-cow" compact>
+            <ul className="flex shrink-0 gap-1.5">
+              <ShareCardChips
+                imagePath={`/api/card/blind-cow?${query}`}
+                url={url}
+                text={text}
+                primary
+                onShared={(channel) => track('blind_cow_result_shared', { detail: channel })}
+              />
+            </ul>
+          </ExitShare>
+          <button type="button" onClick={() => setAllOpen(true)} className="flex min-h-tap shrink-0 items-center border-rule border-ink bg-paper px-3 font-body text-[12.5px] font-extrabold text-ink active:scale-[.97]">
+            {t('blindcow.result.all')}
+          </button>
+        </div>
         <button
           type="button"
           onClick={onNext ?? onLobby}

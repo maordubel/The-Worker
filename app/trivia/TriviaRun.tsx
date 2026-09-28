@@ -23,6 +23,7 @@ import type { Topic } from '@/lib/game/topics'
 import { haptic } from '@/lib/play/haptics'
 import { recordAnswer } from '@/lib/profile/marks'
 import { t, type MessageKey } from '@/lib/i18n'
+import { microFeedback } from '@/lib/voice'
 import { requestHint, submitAnswer } from './actions'
 import { MatchReport } from './MatchReport'
 import { StageBreak } from './StageBreak'
@@ -89,7 +90,9 @@ export function TriviaRun({
   const [heat, setHeat] = useState(HEAT_START)
   const [burst, setBurst] = useState<{ points: number; combo: number } | null>(null)
   const [reaction, setReaction] = useState<{
-    key: string
+    /** the reaction's words — a named reaction's key, or the Red Voice's line for a plain hit/miss */
+    line: string
+    sub: string | null
     points: number
     timeout: boolean
     /** the clock when the answer was committed — what `advance` scores, same as the burst */
@@ -125,8 +128,11 @@ export function TriviaRun({
       }
       const run = correct ? trailingStreak([...log, entry]) : 0
       const picked = reactionFor(entry, run, index)
+      const spoken = picked.key
+        ? { line: t(picked.key as MessageKey), sub: t(`${picked.key}.sub` as MessageKey) }
+        : microFeedback(2, correct ? 'correct' : 'wrong', seed, index)
       setVerdict(result)
-      setReaction({ ...picked, points: gained, timeout, left })
+      setReaction({ line: spoken?.line ?? '', sub: spoken?.sub ?? null, points: gained, timeout, left })
       setLog((current) => [...current, entry])
       setHeat((current) => heatAfter(current, entry))
       recordAnswer(question.id, correct)
@@ -148,7 +154,7 @@ export function TriviaRun({
           : t('trivia.announceWrong', { lives: String(session.lives - 1) }),
       )
     },
-    [question, total, hinted, cap, session, log, practice, index],
+    [question, total, hinted, cap, session, log, practice, index, seed],
   )
 
   const next = useCallback(() => {
@@ -350,7 +356,8 @@ export function TriviaRun({
         {reaction && (
           <Feedback
             correct={verdict?.correct ?? false}
-            reactionKey={reaction.key}
+            line={reaction.line}
+            sub={reaction.sub}
             points={reaction.points}
             timeout={reaction.timeout}
             hinted={hinted}
@@ -389,7 +396,8 @@ function Pill({ children, strong = false }: { children: React.ReactNode; strong?
 /** the verdict plate — the reaction, the points, and what the archive says, every time */
 function Feedback({
   correct,
-  reactionKey,
+  line,
+  sub,
   points,
   timeout,
   hinted,
@@ -402,7 +410,8 @@ function Feedback({
   onNext,
 }: {
   correct: boolean
-  reactionKey: string
+  line: string
+  sub: string | null
   points: number
   timeout: boolean
   hinted: boolean
@@ -432,8 +441,8 @@ function Feedback({
           {correct ? '✓' : '✗'}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block font-display text-step-1 leading-tight text-ink">{t(reactionKey as MessageKey)}</span>
-          <span className="block font-body text-[12px] text-muted">{t(`${reactionKey}.sub` as MessageKey)}</span>
+          <span className="block font-display text-step-1 leading-tight text-ink">{line}</span>
+          {sub && <span className="block font-body text-[12px] text-muted">{sub}</span>}
         </span>
         {correct && (
           <span className="shrink-0 font-poster text-[24px] leading-none text-red">

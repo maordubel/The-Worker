@@ -1,7 +1,8 @@
 'use server'
 
-import { dealPersonalRun, gradeAnswer, hintFor, type Hint, type RunPlan } from '@/lib/game/trivia'
-import type { AnswerValue, Verdict } from '@/lib/game/questions/types'
+import { dealPersonalRun, entitiesOfQuestions, gradeAnswer, hintFor, type Hint, type RunPlan } from '@/lib/game/trivia'
+import { Q_TOPICS, type AnswerValue, type Verdict } from '@/lib/game/questions/types'
+import { recommend, type NextAction, type ResultContext } from '@/lib/results/context'
 
 /**
  * Server authority for gate 2 (rule 4). The client holds question ids and options, never
@@ -49,4 +50,37 @@ export async function planPersonal(
     { wrong: ids(ledger?.wrong, 200), seen: ids(ledger?.seen, 2000) },
     Number.isFinite(seed) ? Math.trunc(seed) : 1,
   )
+}
+
+/**
+ * The Universal Exit's "עוד משהו טבעי" for a finished run (ONE RED WORLD §5, §38).
+ *
+ * The screen sends the ResultContext it can build itself — gate, run, score, the topics it
+ * went well and badly on — plus the ids of the questions that slipped. The server adds
+ * what only it may know: the archive entities behind those questions (a question's facts
+ * name them; the client never holds a fact), and asks `recommend()` for at most two doors,
+ * every href checked by `lib/links`. Called after the whistle only, so nothing here can
+ * help a run in progress.
+ */
+export async function nextAfterRun(input: {
+  context: ResultContext
+  wrong: string[]
+}): Promise<{ context: ResultContext; next: NextAction[] }> {
+  const topics = new Set<string>(Q_TOPICS)
+  const slugs = (list: unknown) =>
+    Array.isArray(list) ? list.filter((s): s is string => typeof s === 'string' && topics.has(s)).slice(0, 7) : []
+  const raw = input?.context
+  const context: ResultContext = {
+    gateId: 2,
+    runId: typeof raw?.runId === 'string' ? raw.runId.slice(0, 64) : undefined,
+    score: typeof raw?.score === 'number' && Number.isFinite(raw.score) ? Math.trunc(raw.score) : undefined,
+    strengths: slugs(raw?.strengths),
+    weakTopics: slugs(raw?.weakTopics),
+  }
+  const wrong = Array.isArray(input?.wrong) ? input.wrong.filter((id): id is string => typeof id === 'string' && ID.test(id)).slice(0, 12) : []
+  const entityIds = entitiesOfQuestions(wrong)
+  context.matchIds = entityIds.filter((id) => id.startsWith('m_')).slice(0, 3)
+  context.playerIds = entityIds.filter((id) => id.startsWith('p_')).slice(0, 3)
+  context.archiveEntityIds = entityIds.filter((id) => !id.startsWith('m_') && !id.startsWith('p_')).slice(0, 3)
+  return { context, next: recommend(context) }
 }

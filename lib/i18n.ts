@@ -42,6 +42,9 @@ import heStageLife91m from '@/messages/he.stage.life91m.json'
 import heStageLife92 from '@/messages/he.stage.life92.json'
 // 28.9.2026 — Stage B pass: the note board (`components/life/NoteBoardSheet.tsx`)
 import heStageLifeB28 from '@/messages/he.stage.lifeB28.json'
+// 28.9.2026 — the Red Voice (`lib/voice`, docs/19-red-voice.md): every gate's intro, result
+// and micro-feedback lines, and the shared "שלח ליציע". One file, so the voice has one home.
+import heVoice from '@/messages/he.voice.json'
 
 /**
  * Minimal i18n. No dependency: one locale ships today, the shape is ready for more.
@@ -115,6 +118,7 @@ export const CATALOGUE_FILES = {
   heStageLife91m,
   heStageLife92,
   heStageLifeB28,
+  heVoice,
 } as const
 
 const catalogue = {
@@ -156,6 +160,7 @@ const catalogue = {
   ...heStageLife91m,
   ...heStageLife92,
   ...heStageLifeB28,
+  ...heVoice,
 }
 
 export type MessageKey = keyof typeof catalogue

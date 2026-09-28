@@ -6,6 +6,7 @@ import { firePickFx, firePickFxAt } from '@/components/stage/PickFx'
 import { SlideSheet } from '@/components/stage/SlideSheet'
 import { markStep, track } from '@/lib/analytics/meter'
 import { t, type MessageKey } from '@/lib/i18n'
+import { microFeedback } from '@/lib/voice'
 import { emit } from '@/lib/profile/events'
 import type { DuelError, DuelState } from '@/lib/game/blind-cow/duel'
 import { scoringConfig, secondsLabel } from '@/lib/game/blind-cow/scoring'
@@ -248,7 +249,7 @@ export function BlindCowGame({
     if (!out.view) return 'none'
     if (out.verdict === 'right') {
       setDrawer(false)
-      firePickFx(window.innerWidth / 2, window.innerHeight * 0.42, { label: t('blindcow.result.solved'), tone: 'red', big: true, haptic: 'lock' })
+      firePickFx(window.innerWidth / 2, window.innerHeight * 0.42, { label: microFeedback(10, 'correct', `${mode}:${entry.id}`, 0)?.line ?? t('blindcow.result.solved'), tone: 'red', big: true, haptic: 'lock' })
       take(out.view, mode)
       if (mode === 'duel' && token) void loadDuel(token)
       return 'right'

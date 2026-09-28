@@ -27,3 +27,5 @@ ev=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/40-events.sql 2>&1) || {
 echo "$ev" | grep -c PASS | xargs -I{} echo "db verify: {} measurement (worker_events) assertions — clean"
 ab=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/50-away-been.sql 2>&1) || { echo "$ab" | grep -E "FAIL|ERROR"; exit 1; }
 echo "$ab" | grep -c PASS | xargs -I{} echo "db verify: {} away-days \"הייתי שם\" (worker_away_been) assertions — clean"
+tx=$(psql -d "$DB" -v ON_ERROR_STOP=1 -f supabase/tests/41-events-taxonomy.sql 2>&1) || { echo "$tx" | grep -E "FAIL|ERROR"; exit 1; }
+echo "$tx" | grep -c PASS | xargs -I{} echo "db verify: {} event taxonomy (ONE RED WORLD §37) assertions — clean"
