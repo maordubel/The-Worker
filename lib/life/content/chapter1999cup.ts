@@ -113,7 +113,7 @@ export const BEATS_CUP99: Beat[] = [
     do: [
       { a: 'flag', flag: 'c99:opened' },
       { a: 'events', events: [{ t: 'money.changed', agorot: 7000, why: 'משכורת' }] },
-      { a: 'lines', lines: [{ who: null, text: 'יום רביעי, סוף מאי. גמר גביע, הערב, ברמת גן. שש־עשרה שנה מאז שאבא הרים אותך מעל קהל בגמר גביע. אתה לא זוכר אותו. הוא זוכר.' }, { who: null, text: 'יש כרטיס, אולי. יש דרך, אולי. יש אנשים שיסעו איתך — כל אחד באוטו אחר.' }] },
+      { a: 'lines', lines: [{ who: null, text: 'יום רביעי, סוף מאי. גמר גביע, הערב, ברמת גן. שש־עשרה שנה מאז שאבא הרים אותך מעל קהל בגמר גביע. אתה לא זוכר אותו. הוא זוכר.' }, { who: null, text: 'יש כרטיס, אולי. יש דרך, אולי. יש אנשים שיסעו איתך — כל אחד באוטו אחר. ובחדר, מתחת למיטה, הקופסה האדומה.' }] },
     ],
   },
   // the routes close at their hours
@@ -566,10 +566,87 @@ export const CONVERSATIONS_CUP99: Conversation[] = [
           { who: null, text: 'אחר כך. שער 7 בצד אחד עם הדגלים הישנים, שער 5 בצד השני עם הבד, ובאמצע — אתה. ליד המעקה בוכה מישהו זקן ואומר "שלום תקוה", ולא מסביר למה.' },
         ],
         choices: [
-          { id: 'both', text: 'ללכת לאבא, ואז לאסף. לחבק את שניהם.', when: { gateEver: 'gate5' }, noteHe: 'אף פעם לא עמדת בשער 5. אסף לא מחכה לך.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 5 }, { e: 'rel', who: 'asaf', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'loyaltyReturn', delta: 5 }, { e: 'flag', flag: 'c99:over' }, { e: 'flag', flag: 'life:cup99:together' }, { e: 'ending', id: 'together' }] },
-          { id: 'kobi', text: 'לאבא.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'remember', who: 'kobi', eventId: 'cup-hug-1999', significance: 'major' }, { e: 'flag', flag: 'c99:over' }, { e: 'flag', flag: 'life:cup99:together' }, { e: 'ending', id: 'together' }] },
+          { id: 'both', text: 'ללכת לאבא, ואז לאסף. לחבק את שניהם.', when: { gateEver: 'gate5' }, noteHe: 'אף פעם לא עמדת בשער 5. אסף לא מחכה לך.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 5 }, { e: 'rel', who: 'asaf', axis: 'bond', delta: 4 }, { e: 'redheart', key: 'loyaltyReturn', delta: 5 }, { e: 'goto', node: 'c99-kobi-hug' }] },
+          { id: 'kobi', text: 'לאבא.', then: [{ e: 'rel', who: 'kobi', axis: 'bond', delta: 6 }, { e: 'remember', who: 'kobi', eventId: 'cup-hug-1999', significance: 'major' }, { e: 'goto', node: 'c99-kobi-hug' }] },
           { id: 'gate5', text: 'לאסף ולבד.', when: { gateEver: 'gate5' }, hidden: true, then: [{ e: 'rel', who: 'asaf', axis: 'bond', delta: 5 }, { e: 'rel', who: 'kobi', axis: 'distance', delta: 4 }, { e: 'flag', flag: 'c99:over' }, { e: 'ending', id: 'divided' }] },
           { id: 'alone', text: 'להישאר באמצע. לראות את שניהם מרחוק.', then: [{ e: 'wellbeing', key: 'loneliness', delta: 5 }, { e: 'personality', key: 'independence', delta: 2 }, { e: 'flag', flag: 'c99:over' }, { e: 'ending', id: 'divided' }] },
+        ],
+      },
+    ],
+  },
+  /**
+   * B10 S4 (implementation pass 27.9.2026) — *"Kobi notices the object only if actually
+   * carried."* The hug is the same hug; what his father sees in it depends on what came out
+   * of the red box this afternoon (`c99-box`) and what he put on for the day. Bible B10:
+   * *"קובי יכול לזהות first shirt: 'עוד יש לך את הדבר הזה?'"* — the stub of 1983 is the
+   * truer object for "sixteen years", and it is asked of first.
+   */
+  {
+    id: 'c99-kobi-hug',
+    nameHe: 'קובי',
+    branches: [
+      {
+        when: { flagIs: { flag: 'c99:carry', value: 'stub' } },
+        lines: [
+          { who: null, text: 'בחיבוק משהו נופל מהכיס של החולצה שלך. הוא מרים אותו לפניך.' },
+          { who: 'קובי', text: 'זה…' },
+          { who: null, text: 'ספח קרוע, דהוי, שש־עשרה שנה בקופסה. הוא הופך אותו פעמיים.' },
+          { who: 'קובי', text: 'עוד יש לך את הדבר הזה?' },
+          { who: 'פוגי', text: 'אתה נתת לי אותו.' },
+          { who: null, text: 'הוא לא עונה. הוא מחזיר לך אותו לכיס בעצמו, ומכפתר.' },
+        ],
+        then: [
+          { e: 'rel', who: 'kobi', axis: 'bond', delta: 5 },
+          { e: 'remember', who: 'kobi', eventId: 'stub-returned-1999', significance: 'major' },
+          { e: 'flag', flag: 'life:cup99:stub' },
+          { e: 'redheart', key: 'familyTradition', delta: 4 },
+          { e: 'flag', flag: 'c99:over' },
+          { e: 'flag', flag: 'life:cup99:together' },
+          { e: 'ending', id: 'together' },
+        ],
+      },
+      {
+        when: { any: [{ flagIs: { flag: 'own:outfit:1999-cup', value: 'visa86' } }, { flagIs: { flag: 'own:outfit:1999-cup', value: 'tveria85' } }] },
+        lines: [
+          { who: null, text: 'הוא מתרחק חצי צעד כדי להסתכל עליך, והיד שלו נשארת על הכתף.' },
+          { who: 'קובי', text: 'עוד יש לך אותה?' },
+          { who: null, text: 'החולצה הראשונה. צמודה מדי כבר שנים. לבשת אותה בכל זאת.' },
+        ],
+        then: [
+          { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
+          { e: 'redheart', key: 'familyTradition', delta: 2 },
+          { e: 'flag', flag: 'c99:over' },
+          { e: 'flag', flag: 'life:cup99:together' },
+          { e: 'ending', id: 'together' },
+        ],
+      },
+      {
+        lines: [{ who: null, text: 'הוא לא אמר כלום. שש־עשרה שנה, והיד שלו על העורף שלך כמו שהייתה על הרגל שלך אז.' }],
+        then: [{ e: 'flag', flag: 'c99:over' }, { e: 'flag', flag: 'life:cup99:together' }, { e: 'ending', id: 'together' }],
+      },
+    ],
+  },
+  /**
+   * B10 S1 — the red box before leaving: what goes to Ramat Gan in a shirt pocket. A thing
+   * carried can be noticed (`c99-kobi-hug`); a thing left home cannot. Nothing is a
+   * reward — the stub is only on offer to a boy who took it from his father's hand in 1983.
+   */
+  {
+    id: 'c99-box',
+    nameHe: null,
+    branches: [
+      {
+        when: { flag: 'c99:carry' },
+        lines: [{ who: null, text: 'הקופסה סגורה. מה שלקחת — בכיס.' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'הקופסה האדומה, משוכה חצי מתחת למיטה. שש־עשרה שנה של דברים, ובתחתית — הדבר הראשון.' },
+          { who: null, text: 'גמר גביע. מה לוקחים לרמת גן?' },
+        ],
+        choices: [
+          { id: 'stub', text: 'את הספח מ־83. לכיס של החולצה.', when: { flag: 'own:stub-1983' }, hidden: true, then: [{ e: 'flagValue', flag: 'c99:carry', value: 'stub' }, { e: 'redheart', key: 'historyMemory', delta: 2 }, { e: 'toast', text: 'ספח קרוע, דהוי. הוא נכנס לכיס כאילו הכיס נתפר בשבילו.', tone: 'red' }] },
+          { id: 'nothing', text: 'כלום. היום לא צריך קמע.', then: [{ e: 'flagValue', flag: 'c99:carry', value: 'none' }, { e: 'personality', key: 'independence', delta: 1 }] },
         ],
       },
     ],

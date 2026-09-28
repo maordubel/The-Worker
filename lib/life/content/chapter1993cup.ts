@@ -849,15 +849,99 @@ export const CONVERSATIONS_1993: Conversation[] = [
       },
     ],
   },
+  /**
+   * הנסיעה — B3 S2 (implementation pass 27.9.2026): *"לשמור מקום / לעזור למישהו / לבחור מי
+   * יושב לידך — social friction"*. The ride used to be a paragraph between the door and the
+   * hall. It is one decision now, and every answer costs something the others do not: the
+   * one free seat held for Efi against a man twice your size, the banner pole held upright
+   * for forty minutes in the aisle, or the window beside Limor and her tin of coins.
+   *
+   * `life:1993:seat` outlives the night on purpose. Three weeks later a bus leaves for the
+   * north (`1993-galil`), and who kept a seat for whom in April is who keeps one in May.
+   */
   {
     id: 'ride-1993',
     nameHe: null,
     branches: [
+      // the side gate is not a bus: two boys on foot through an alley, and a man with a cigarette
+      {
+        when: { flag: 'in:sideGate' },
+        lines: [
+          { who: null, text: 'הסמטה, פח זבל, דלת ברזל חצי פתוחה. האיש עם הסיגריה סופר שלושים בלי להסתכל לכם בפנים.' },
+          { who: 'אופיר', text: 'אמרתי לך. בלי תור, בלי לימור.' },
+          { who: null, text: 'ואז אתם בפנים, מהצד הלא נכון של ההיכל, ורצים במסדרון לכיוון הרעש.' },
+        ],
+        then: [{ e: 'flagValue', flag: 'life:1993:seat', value: 'ofir' }, { e: 'goto', node: 'hall-1993' }],
+      },
       {
         lines: [
           { who: null, text: 'האוטובוס מלא ואף אחד לא יושב. מישהו מאחור התחיל שיר, מישהו מקדימה ענה בשיר אחר, ובאמצע הדרך זה הפך לשיר אחד.' },
+          { who: null, text: 'מקום אחד פנוי ליד החלון. אפי עוד בדלת עם לימור. שחור במעבר, מחזיק את המוט של הבד בשתי ידיים והאוטובוס קופץ.' },
+        ],
+        choices: [
+          {
+            id: 'efi',
+            text: 'לשים את התיק על המקום. "תפוס — לאפי."',
+            then: [
+              { e: 'flagValue', flag: 'life:1993:seat', value: 'efi' },
+              { e: 'rel', who: 'efi', axis: 'bond', delta: 4 },
+              { e: 'personality', key: 'stubbornness', delta: 2 },
+              { e: 'energy', delta: -6 },
+              { e: 'toast', text: 'אחד גדול ממך פעמיים ניסה לשבת. לא זזת. אפי נפל על הכיסא ואמר "יא משוגע" בחיוך.', tone: 'plain' },
+              { e: 'goto', node: 'ride-1993-window' },
+            ],
+          },
+          {
+            id: 'pole',
+            text: 'לקחת צד של המוט משחור.',
+            then: [
+              { e: 'flagValue', flag: 'life:1993:seat', value: 'pole' },
+              { e: 'rel', who: 'shachor', axis: 'trust', delta: 4 },
+              { e: 'redheart', key: 'community', delta: 2 },
+              { e: 'energy', delta: -12 },
+              { e: 'toast', text: 'ארבעים דקות עם הידיים למעלה. בכל פנייה הבד רצה ליפול, ובכל פנייה לא נתתם לו.', tone: 'plain' },
+              { e: 'goto', node: 'ride-1993-window' },
+            ],
+          },
+          {
+            id: 'limor',
+            text: 'לשבת ליד לימור. לעזור לה לספור.',
+            then: [
+              { e: 'flagValue', flag: 'life:1993:seat', value: 'limor' },
+              { e: 'rel', who: 'crowd-limor', axis: 'trust', delta: 4 },
+              { e: 'skill', skill: 'organization', delta: 1, why: 'ספר עם לימור את הכסף של האוטובוס' },
+              { e: 'toast', text: 'קופסת פח, מטבעות, רשימה בעיפרון. היא סופרת בקול ואתה רושם. חסר שקל וחצי. "תמיד חסר שקל וחצי."', tone: 'plain' },
+              { e: 'goto', node: 'ride-1993-window' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ride-1993-window',
+    nameHe: null,
+    branches: [
+      {
+        when: { flagIs: { flag: 'life:1993:seat', value: 'limor' } },
+        lines: [
           { who: 'לימור', text: 'מהחלון הזה רואים את כל העיר. שלוש שנים אני נוסעת בקו הזה, ורק בערבים כאלה הוא מלא.' },
           { who: null, text: 'ואז הוא שם, מאחורי בניין ועוד בניין: היכל לבן, ענק, אורות מכל הצדדים. לא הבית שלנו. הערב, כן.' },
+        ],
+        then: [{ e: 'goto', node: 'hall-1993' }],
+      },
+      {
+        when: { flagIs: { flag: 'life:1993:seat', value: 'pole' } },
+        lines: [
+          { who: 'שחור', text: 'עוד פנייה. ועוד אחת. יאללה.' },
+          { who: null, text: 'את ההיכל לא ראית מהחלון. ראית אותו כשהדלת נפתחה והבד יצא ראשון, ואתה אחריו.' },
+        ],
+        then: [{ e: 'goto', node: 'hall-1993' }],
+      },
+      {
+        lines: [
+          { who: 'אפי', text: 'תסתכל. תסתכל עכשיו.' },
+          { who: null, text: 'מאחורי בניין ועוד בניין: היכל לבן, ענק, אורות מכל הצדדים. אפי מצמיד את המצח לזכוכית כמו ילד, ואתה לידו, כמו ילד.' },
         ],
         then: [{ e: 'goto', node: 'hall-1993' }],
       },

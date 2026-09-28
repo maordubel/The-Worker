@@ -235,6 +235,12 @@ export type LifeBusEvents = {
    */
   doc: { art: string; captionHe: string | null } | null
   /**
+   * הפתק — scraps of what he has heard and the pencil columns he sorts them into
+   * (`lib/life/noteBoards.ts`, implementation pass 27.9.2026). Plain data: the sheet never
+   * reads the registry, and what comes back is only where each scrap was put.
+   */
+  board: import('../noteBoards').NoteBoardView | null
+  /**
    * הקופסה האדומה פתוחה — 21.9.2026. אין כאן תוכן: מה שבקופסה הוא מה שבמצב, והמעטפת
    * קוראת אותו כשהיא נפתחת (`boxContents`), כדי שחפץ שנכנס לפני רגע כבר יהיה בה.
    */

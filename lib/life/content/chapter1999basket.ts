@@ -159,19 +159,8 @@ function voiceConversation(voice: Voice): Conversation {
   }
 }
 
-export const CONVERSATIONS_SEED: Conversation[] = [
-  {
-    id: 'seed-corner',
-    nameHe: null,
-    branches: [
-      {
-        lines: [
-          { who: 'לימור', text: 'תור. קופה. סדרן שלא שילמו לו. אני עושה את הסדרן הערב. אתה עושה את התור.' },
-          { who: 'שחור', text: 'ומי שמדבר על הבעלים — שידבר אחרי. הערב עובדים.' },
-          { who: 'אוהד', text: 'הבעלים הזה הורג את המועדון!' },
-          { who: 'שחור', text: 'אחרי.' },
-        ],
-        choices: [
+/** the corner's answers — the same whatever the corner remembers of 1997 */
+const SEED_CORNER_CHOICES: ChoiceDef[] = [
           /**
            * (Director V3 §12, 24.9.2026) the queue is WORKED, not agreed to: `ChoreScene`
            * serve — people arrive at the window, wait a little, and go; reach each one and
@@ -196,7 +185,45 @@ export const CONVERSATIONS_SEED: Conversation[] = [
            */
           { id: 'debt-shachor', text: '"שחור. ההפרש מהצפון."', when: { flag: 'owe:shachor' }, noteHe: 'אתה לא חייב לשחור הפרש.', then: [{ e: 'goto', node: 'seed-owed-shachor' }] },
           { id: 'debt-group', text: 'להחזיר לתור את מה שהתור שם עליך פעם.', when: { flag: 'owe:group' }, noteHe: 'התור מעולם לא שם עליך כלום.', then: [{ e: 'goto', node: 'seed-owed-queue' }] },
+        ]
+
+export const CONVERSATIONS_SEED: Conversation[] = [
+  {
+    id: 'seed-corner',
+    nameHe: null,
+    branches: [
+      /**
+       * (implementation pass 27.9.2026) the corner remembers 1997 — the bible's founder seed,
+       * *"מי שנשאר אחרי הפסד"*: Limor and Shachor saw who stayed when the hall went down the
+       * first time, and they say so before they hand out the work. The work is the same.
+       */
+      {
+        when: { any: [{ flagIs: { flag: 'life:hall:1997', value: 'stayed' } }, { flagIs: { flag: 'life:hall:1997', value: 'carried' } }] },
+        lines: [
+          { who: 'לימור', text: 'אתה. אתה נשארת בפעם הקודמת, כשכיבו. אז אתה יודע איך זה נראה אחרי.' },
+          { who: 'לימור', text: 'תור. קופה. סדרן שלא שילמו לו. אני עושה את הסדרן הערב. אתה עושה את התור.' },
+          { who: 'שחור', text: 'ומי שמדבר על הבעלים — שידבר אחרי. הערב עובדים.' },
         ],
+        choices: SEED_CORNER_CHOICES,
+      },
+      {
+        when: { flagIs: { flag: 'life:hall:1997', value: 'argued' } },
+        lines: [
+          { who: 'לימור', text: 'תור. קופה. סדרן שלא שילמו לו. אני עושה את הסדרן הערב. אתה עושה את התור.' },
+          { who: 'שחור', text: 'ואתה — הערב בלי נאומים. נאמת מספיק בפעם הקודמת, ואף כיסא לא זז מזה.' },
+          { who: 'אוהד', text: 'הבעלים הזה הורג את המועדון!' },
+          { who: 'שחור', text: 'אחרי.' },
+        ],
+        choices: SEED_CORNER_CHOICES,
+      },
+      {
+        lines: [
+          { who: 'לימור', text: 'תור. קופה. סדרן שלא שילמו לו. אני עושה את הסדרן הערב. אתה עושה את התור.' },
+          { who: 'שחור', text: 'ומי שמדבר על הבעלים — שידבר אחרי. הערב עובדים.' },
+          { who: 'אוהד', text: 'הבעלים הזה הורג את המועדון!' },
+          { who: 'שחור', text: 'אחרי.' },
+        ],
+        choices: SEED_CORNER_CHOICES,
       },
     ],
   },

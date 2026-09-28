@@ -670,7 +670,158 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
           { who: null, text: 'זה היה קרוב. קרוב מדי. יש רגע לקראת הסוף שבו כולם עומדים ואף אחד לא נושם, ואתה יודע שאת הרגע הזה תזכור יותר מהתוצאה.' },
           { who: null, text: 'הצפירה. לא שלכם.' },
         ],
-        then: [{ e: 'wellbeing', key: 'stress', delta: 5 }, { e: 'redheart', key: 'travelDrive', delta: 3 }, { e: 'flag', flag: 'life:galil:there' }, { e: 'goto', node: 'g4-done' }],
+        then: [{ e: 'wellbeing', key: 'stress', delta: 5 }, { e: 'redheart', key: 'travelDrive', delta: 3 }, { e: 'flag', flag: 'life:galil:there' }, { e: 'goto', node: 'g4-empties' }],
+      },
+    ],
+  },
+  /**
+   * ==================================== אחרי הצפירה, בצפון (B4 S1–S3, 27.9.2026) ===
+   *
+   * *"אפשר לזכות בגביע ועדיין להרגיש שהבית מתפרק."* The bus route used to go from the horn
+   * straight to the next evening. Now the hall empties around them first, and three things
+   * need somebody before Michel's bus leaves: Efi, who cannot get up; a ten-year-old from Tel
+   * Aviv who came alone and cannot find the bus; the drum and the rolled banner, which will
+   * not walk to the car park by themselves. **There is time for two.** The third is not a
+   * failure — somebody else does it, not always well — and the ride home shows which.
+   *
+   * A conversation and not a room: there is no painting of a hall in the north, and a
+   * borrowed Ussishkin would be a lie about where they were (rule 82). The people are the
+   * scene; `g4:p:*` counts the hands.
+   */
+  {
+    id: 'g4-empties',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'האולם מתרוקן מלמטה למעלה. הצד שלהם שר עוד שיר ויוצא. הצד שלכם לא זז.' },
+          { who: null, text: 'מישהו מכבה חצי מהאורות. הרעש נגמר, ואז נגמר גם ההד שלו.' },
+        ],
+        choices: [
+          { id: 'stay', text: 'להישאר עוד רגע במקום. לא לזוז.', then: [{ e: 'wellbeing', key: 'loneliness', delta: 2 }, { e: 'redheart', key: 'basketballLove', delta: 2 }, { e: 'time', minutes: 6 }, { e: 'goto', node: 'g4-three' }] },
+          { id: 'move', text: 'לקום. יש מה לעשות.', then: [{ e: 'personality', key: 'responsibility', delta: 1 }, { e: 'goto', node: 'g4-three' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'g4-three',
+    nameHe: null,
+    branches: [
+      {
+        when: { all: [{ any: [{ flag: 'g4:p:efi' }, { flag: 'g4:p:kid' }] }, { any: [{ flag: 'g4:p:gear' }, { all: [{ flag: 'g4:p:efi' }, { flag: 'g4:p:kid' }] }] }] },
+        lines: [{ who: null, text: 'צפירה מהחניה — לא של המשחק. מישל, עם היד על הצופר של האוטובוס.' }],
+        then: [{ e: 'goto', node: 'g4-bus-home' }],
+      },
+      {
+        lines: [
+          { who: null, text: 'שלושה דברים, ומישל כבר צועק מהחניה "עשר דקות".' },
+          { who: null, text: 'אפי על המדרגה, הצעיף בין הידיים, לא קם. ילד בן עשר עם כובע גדול מדי מסתובב בין השורות ושואל כל אחד "אתה עם האוטובוס?". והתוף של שחור, והבד המגולגל, באמצע המעבר.' },
+        ],
+        choices: [
+          { id: 'efi', text: 'לשבת ליד אפי.', when: { notFlag: 'g4:p:efi' }, then: [{ e: 'flag', flag: 'g4:p:efi' }, { e: 'goto', node: 'g4-p-efi' }] },
+          { id: 'kid', text: 'ללכת לילד עם הכובע.', when: { notFlag: 'g4:p:kid' }, then: [{ e: 'flag', flag: 'g4:p:kid' }, { e: 'goto', node: 'g4-p-kid' }] },
+          { id: 'gear', text: 'להרים את התוף והבד.', when: { notFlag: 'g4:p:gear' }, then: [{ e: 'flag', flag: 'g4:p:gear' }, { e: 'goto', node: 'g4-p-gear' }] },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'g4-p-efi',
+    nameHe: 'אפי',
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'ישבת לידו. לא אמרת כלום, כי אין מה להגיד, והוא לא אמר כלום, כי הוא לא יכול.' },
+          { who: 'אפי', text: 'הגביע היה אמיתי, כן?' },
+          { who: 'פוגי', text: 'אמיתי.' },
+          { who: null, text: 'הוא קם. לא כי הרגיש יותר טוב. כי קמת איתו.' },
+        ],
+        then: [{ e: 'rel', who: 'efi', axis: 'bond', delta: 4 }, { e: 'rel', who: 'efi', axis: 'trust', delta: 3 }, { e: 'remember', who: 'efi', eventId: 'sat-with-me-north-1993', significance: 'major' }, { e: 'time', minutes: 5 }, { e: 'goto', node: 'g4-three' }],
+      },
+    ],
+  },
+  {
+    id: 'g4-p-kid',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: '"אתה עם האוטובוס של מישל?" הוא לא בוכה. הוא מחזיק את זה מאחורי השיניים, כמו שלמדת להחזיק בגילו.' },
+          { who: null, text: 'לקחת אותו ביד עד החניה. מישל הסתכל עליו, מצא את השם בפנקס, ושם עליו וי בעט.' },
+          { who: 'מישל', text: 'ישבת בשורה שלוש בהלוך. אתה יושב בשורה שלוש בחזור.' },
+        ],
+        then: [{ e: 'rel', who: 'michel', axis: 'trust', delta: 4 }, { e: 'redheart', key: 'community', delta: 3 }, { e: 'personality', key: 'empathy', delta: 2 }, { e: 'time', minutes: 5 }, { e: 'goto', node: 'g4-three' }],
+      },
+    ],
+  },
+  {
+    id: 'g4-p-gear',
+    nameHe: 'שחור',
+    branches: [
+      {
+        lines: [
+          { who: 'שחור', text: 'לא מדברים. סוחבים.' },
+          { who: null, text: 'התוף על הכתף, הבד מתחת לזרוע, והמדרגות של אולם זר שאתה לא יודע איפה הן נגמרות. שחור הולך לפניך ולא מסתכל אחורה, כי הוא יודע שאתה שם.' },
+        ],
+        then: [{ e: 'rel', who: 'shachor', axis: 'bond', delta: 4 }, { e: 'institution', key: 'supporterOwnershipSeed', delta: 3 }, { e: 'energy', delta: -10 }, { e: 'time', minutes: 7 }, { e: 'goto', node: 'g4-three' }],
+      },
+    ],
+  },
+  /**
+   * האוטובוס חזרה — S3: "מה שלא פתרת נראה". What nobody did is on the bus with them, and
+   * the seat is the last decision of the night: `life:galil:seat` is read in the corner the
+   * next evening, and in 1997, when the hall goes down and Efi either kept a place or did not.
+   */
+  {
+    id: 'g4-bus-home',
+    nameHe: null,
+    branches: [
+      {
+        lines: [
+          { who: null, text: 'האוטובוס חזרה. שקט כמו כיתה בבחינה.' },
+        ],
+        then: [{ e: 'goto', node: 'g4-unsolved' }],
+      },
+    ],
+  },
+  {
+    id: 'g4-unsolved',
+    nameHe: null,
+    branches: [
+      {
+        when: { notFlag: 'g4:p:efi' },
+        lines: [{ who: null, text: 'אפי עלה אחרון. סוקו הביא אותו בזרוע, כמו שמביאים מישהו מבית חולים. הוא ישב מקדימה, לבד, עם הראש על החלון.' }],
+        then: [{ e: 'rel', who: 'efi', axis: 'distance', delta: 2 }, { e: 'goto', node: 'g4-seat' }],
+      },
+      {
+        when: { notFlag: 'g4:p:kid' },
+        lines: [{ who: null, text: 'הילד עם הכובע יושב ליד הנהג. מישהו מצא אותו, בסוף, אחרי שמישל ספר פעמיים וחסר אחד. העיניים שלו אדומות, והוא מעמיד פנים שזה מהאורות.' }],
+        then: [{ e: 'goto', node: 'g4-seat' }],
+      },
+      {
+        lines: [{ who: 'שחור', text: 'התוף נשאר שם. בחניה, או בתוך האולם. נקנה חדש.' }, { who: null, text: 'הוא אמר את זה כאילו זה לא משנה. זה היה התוף מהגביע.' }],
+        then: [{ e: 'rel', who: 'shachor', axis: 'tension', delta: 2 }, { e: 'goto', node: 'g4-seat' }],
+      },
+    ],
+  },
+  {
+    id: 'g4-seat',
+    nameHe: null,
+    branches: [
+      // the seat he kept for Efi in April is kept for him in May — the NPC acts first
+      {
+        when: { flagIs: { flag: 'life:1993:seat', value: 'efi' }, flag: 'g4:p:efi' },
+        lines: [{ who: 'אפי', text: 'שמרתי לך. כמו שאתה שמרת לי, בגביע.' }, { who: null, text: 'הוא שם את התיק שלו על הברכיים, ומפנה לך את החלון.' }],
+        then: [{ e: 'flagValue', flag: 'life:galil:seat', value: 'efi' }, { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 5 }, { e: 'goto', node: 'g4-done' }],
+      },
+      {
+        lines: [{ who: null, text: 'מקום אחד ליד כל אחד. שלוש שעות של כביש חשוך.' }],
+        choices: [
+          { id: 'efi', text: 'ליד אפי.', then: [{ e: 'flagValue', flag: 'life:galil:seat', value: 'efi' }, { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 4 }, { e: 'toast', text: 'הוא נרדם על הכתף שלך ליד חדרה, או העמיד פנים. לא זזת עד תל אביב.', tone: 'plain' }, { e: 'goto', node: 'g4-done' }] },
+          { id: 'kid', text: 'ליד הילד עם הכובע.', then: [{ e: 'flagValue', flag: 'life:galil:seat', value: 'kid' }, { e: 'personality', key: 'empathy', delta: 2 }, { e: 'redheart', key: 'community', delta: 2 }, { e: 'toast', text: 'הוא שאל אותך אם זה תמיד ככה. אמרת שלא. שיקרת קצת, והוא ידע.', tone: 'plain' }, { e: 'goto', node: 'g4-done' }] },
+          { id: 'shachor', text: 'מאחור, ליד שחור.', then: [{ e: 'flagValue', flag: 'life:galil:seat', value: 'shachor' }, { e: 'rel', who: 'shachor', axis: 'sharedHistory', delta: 4 }, { e: 'toast', text: 'שחור ספר מקלות של תוף על הברכיים, בשקט, כל הדרך. אחת־שתיים. אחת־שתיים.', tone: 'plain' }, { e: 'goto', node: 'g4-done' }] },
+        ],
       },
     ],
   },
@@ -763,6 +914,15 @@ export const CONVERSATIONS_GALIL: Conversation[] = [
           { e: 'rel', who: 'efi', axis: 'trust', delta: 8 },
           { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 6 },
           { e: 'proof', kind: 'promise_kept', proofId: 'promise_kept:{chapter}:galil', subjectHe: GALIL_PROMISE, noteHe: 'אמר "מה שלא יהיה", ועלה על האוטובוס.' },
+          { e: 'goto', node: 'after-soko' },
+        ],
+      },
+      {
+        when: { flag: 'life:galil:there', flagIs: { flag: 'life:galil:seat', value: 'efi' } },
+        lines: [{ who: 'אפי', text: 'ישבת לידי כל הדרך.' }, { who: 'פוגי', text: 'ישבתי.' }, { who: 'אפי', text: 'לא דיברנו.' }, { who: null, text: 'הוא לא אמר תודה. הוא אמר את זה כמו מי שרושם משהו בפנקס שאין לו.' }],
+        then: [
+          { e: 'rel', who: 'efi', axis: 'trust', delta: 8 },
+          { e: 'rel', who: 'efi', axis: 'sharedHistory', delta: 6 },
           { e: 'goto', node: 'after-soko' },
         ],
       },

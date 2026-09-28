@@ -994,6 +994,8 @@ const SCENES: SceneDef[] = [
        *
        * הנגיעה פותחת את הקופסה עצמה (`RedBoxSheet`), עם כל מה שבה.
        */
+      // B10 S1 (27.9.2026) — 1999-cup: the box before the final; what goes to Ramat Gan in a pocket
+      { id: 'c99-box', era: '1999-cup', x: 0.63, y: 0.9, w: 0.1, act: 'c99-box', verb: 'take', labelHe: 'הקופסה האדומה — מה לוקחים לגמר', when: { none: [{ flag: 'c99:carry' }, { flag: 'c99:route' }] }, priority: 6 },
       {
         id: 'redbox',
         era: ['A', '1990s'],
@@ -3903,6 +3905,8 @@ const SCENES: SceneDef[] = [
       { id: 'shachor-hall98', era: '1997-basket', figure: 'shachor-back', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'h2-corner', when: { flag: 'life:hall:d2' } },
       { id: 'limor-hall', era: '1997-basket', figure: 'adultB5', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'h1-corner', sway: 0.003 },
       { id: 'freddy-hall', era: '1997-basket', figure: 'adultA2', x: 0.16, y: 0.92, size: 0.278, nameHe: 'פרדי', talk: 'h1-freddy', when: { none: [{ flag: 'life:hall:d2' }] } },
+      // B7 S1 (27.9.2026) — Efi at the corner on the relegation night: who he kept a place for
+      { id: 'efi-hall97', era: '1997-basket', figure: 'efi96-3q', x: 0.44, y: 0.91, size: 0.262, nameHe: 'אפי', talk: 'efi-hall-97', flip: true, sway: 0.006, when: { none: [{ flag: 'life:hall:d2' }, { flag: 'h1:football' }] } },
       { id: 'shachor-seed', era: '1999-basket', figure: 'shachor', x: 0.8, y: 0.92, size: 0.278, nameHe: 'שחור', talk: 'seed-corner', flip: true },
       { id: 'limor-seed', era: '1999-basket', figure: 'adultB5', x: 0.62, y: 0.9, size: 0.262, nameHe: 'לימור', talk: 'seed-corner', sway: 0.003 },
       { id: 'soko-seed', era: '1999-basket', figure: 'soko', x: 0.2, y: 0.92, size: 0.278, nameHe: 'סוקו', talk: 'seed-inside' },

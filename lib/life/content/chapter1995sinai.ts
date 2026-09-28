@@ -223,6 +223,20 @@ export const BEATS_SINAI: Beat[] = [
 
 /** the three answers to the court — the same words whichever way the court came to sit */
 const S2_COURT: ChoiceDef[] = [
+  /**
+   * (implementation pass 27.9.2026, B5 S2) before answering, the claims are sorted by hand —
+   * the table, the lawyer's theory, the stranger's anger, his father's minute — into what is
+   * a fact, what is a claim and what is a feeling (`board:court-1995`). The court sits again
+   * afterwards with one more answer on it for a boy who kept the three apart.
+   */
+  { id: 'sort', text: 'רגע. לסדר לעצמי מה מזה עובדה.', when: { notFlag: 's2:sorted' }, then: [{ e: 'minigame', id: 'board:court-1995' }] },
+  {
+    id: 'both',
+    text: '"את השחקן אני אוהב. על המינוי — אולי פרדי צודק."',
+    when: { flagIs: { flag: 'life:sinai:ledger', value: 'clean' } },
+    hidden: true,
+    then: [{ e: 'sinai', stance: 'doubting' }, { e: 'rel', who: 'freddy', axis: 'trust', delta: 5 }, { e: 'rel', who: 'ofir', axis: 'familiarity', delta: 2 }, { e: 'institution', key: 'legalUnderstanding', delta: 3 }, { e: 'goto', node: 's2-verdict' }],
+  },
   { id: 'cut', text: 'לקטוע את פרדי: "מה השורה התחתונה?"', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 3 }, { e: 'rel', who: 'freddy', axis: 'familiarity', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },
   { id: 'listen', text: 'לתת לו לסיים.', then: [{ e: 'institution', key: 'legalUnderstanding', delta: 6 }, { e: 'personality', key: 'curiosity', delta: 2 }, { e: 'time', minutes: 20 }, { e: 'goto', node: 's2-verdict' }] },
   { id: 'defend', text: '"תנו לו עוד עונה. מגיע לו."', then: [{ e: 'sinai', stance: 'defending' }, { e: 'rel', who: 'ofir', axis: 'tension', delta: 5 }, { e: 'rel', who: 'amit', axis: 'tension', delta: 3 }, { e: 'wellbeing', key: 'loneliness', delta: 6 }, { e: 'redheart', key: 'loyaltyReturn', delta: 4 }, { e: 'goto', node: 's2-verdict' }] },

@@ -57,6 +57,8 @@ import type { HistoricalAnchor } from '../../anchors'
 import { buildFinale } from '../../finale'
 import { retryFor } from '../../content/retry1986'
 import { TransistorNet } from '../match1990'
+import { BOARD_PREFIX, boardView } from '../../noteBoards'
+import { NOTE_BOARDS } from '../../content/noteBoards'
 import { MatchDirector } from '../matchDirector'
 import { directiveFor, storyHoldsTheMoment, type MainStoryDirective } from '../../storyDirector'
 import { wearEvents } from '../../matchRitual'
@@ -3508,6 +3510,19 @@ export class WorldScene extends Phaser.Scene {
       if (this.ctx.engine.state.flags['found:kobi']) return
       this.ctx.bus.emit('toast', { text: 'הוא איפשהו כאן. ליד העמוד, אמרו. תמצא אותו.', tone: 'plain' })
     })
+    /**
+     * B1 S4 (27.9.2026) — the crowd understands before or after him by the quality of what
+     * he heard. A boy whose note was honest and whose ear was on the radio knew a breath
+     * before the roar, and the one thing to do with being first is to tell somebody.
+     */
+    const knewFirst = state.flags['life:1990:notebook'] === 'clean' || Boolean(state.flags['net:handed']) || Boolean(state.flags['net:toldKobi'])
+    this.time.delayedCall(5600, () => {
+      if (this.ctx.engine.state.flags['life:1990:called']) return
+      this.ctx.bus.emit('toast', {
+        text: knewFirst ? 'ידעת רגע לפני הרעש. בכיס יש אסימון, ומתחת ליציע — טלפון על עמוד.' : 'היציע הבין לפניך. מישהו כבר רץ לטלפון מתחת ליציע.',
+        tone: knewFirst ? 'red' : 'plain',
+      })
+    })
   }
 
   /**
@@ -3769,6 +3784,17 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private startMinigame(id: string) {
+    /**
+     * הפתק (`lib/life/noteBoards.ts`) — not a scene: a sheet over the paused room. A board
+     * with nothing on the table does not open at all (a boy who asked nobody has nothing to
+     * sort), and the world simply goes on.
+     */
+    if (id.startsWith(BOARD_PREFIX)) {
+      const def = NOTE_BOARDS[id.slice(BOARD_PREFIX.length)]
+      const view = def ? boardView(def, this.ctx.engine.state) : null
+      if (view) this.ctx.bus.emit('board', view)
+      return
+    }
     this.paused = true
     const chore = id.startsWith('chore:') ? id.slice(6) : null
     const go = () => {

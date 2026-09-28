@@ -10,6 +10,7 @@ import { ShirtCard } from '@/components/life/ShirtCard'
 import { CastCard } from '@/components/life/CastCard'
 import { FilmCut } from '@/components/life/FilmCut'
 import { CoinCard } from '@/components/life/CoinCard'
+import { NoteBoardSheet } from '@/components/life/NoteBoardSheet'
 import dynamic from 'next/dynamic'
 // Three.js is real weight (~150KB+ gz) that nine players in ten never touch this
 // session — these two are the only 3D rooms in the game, so they load on demand,
@@ -159,6 +160,8 @@ export function LifeStage({
     match,
     doc,
     setDoc,
+    board,
+    setBoard,
     box,
     setBox,
     book,
@@ -316,7 +319,7 @@ export function LifeStage({
    */
   const free = useFreeTime({
     plan: freeTime,
-    covered: covered || !hudOn || Boolean(!ready || match || teach || titleCard || opening || help || album?.open || packet || kept || shop || season || toto || mechanic || coin || penalty || hoops || pitch || doc || box || book || route || film || finale),
+    covered: covered || !hudOn || Boolean(!ready || match || teach || titleCard || opening || help || album?.open || packet || kept || shop || season || toto || mechanic || coin || penalty || hoops || pitch || doc || board || box || book || route || film || finale),
     runtime,
     engineRef,
     busRef,
@@ -525,6 +528,22 @@ export function LifeStage({
         )}
 
         {doc && <DocSheet art={doc.art} captionHe={doc.captionHe} onClose={() => setDoc(null)} />}
+
+        {/* הפתק — the scraps of what he heard, sorted by hand (`lib/life/noteBoards.ts`) */}
+        {board && (
+          <NoteBoardSheet
+            key={board.id}
+            board={board}
+            settle={(placed) => ledger.previewBoard(board.id, placed)}
+            onDone={(placed) => {
+              const after = ledger.settleBoard(board.id, placed)
+              audio.current?.play('ui-close', { bus: 'ui', level: 0.5 })
+              setBoard(null)
+              runtime.current?.pause(false)
+              if (after) runtime.current?.talk(after)
+            }}
+          />
+        )}
 
         {/* הקופסה האדומה — נקראת מהמצב ברגע שהיא נפתחת, כדי שמה שנכנס לפני רגע יהיה בה */}
         {box && (

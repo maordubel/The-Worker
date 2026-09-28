@@ -56,6 +56,40 @@ const RAFI_CRATE_85 = 100
 const D_DID_00 = 'd:did'
 
 export const STORY_CHORES: Record<string, StoryChore> = {
+  /**
+   * B2 · 11.3.1991 — "ילד. שני ארגזים, מהאוטו לדלת." (שחור). Until the implementation pass
+   * of 27.9.2026 this was a sentence and a toast; the brief's hall job is the hands: two
+   * crates from the car at the corner to the hall door, one at a time, twenty minutes of an
+   * evening that also has a spot to hold. Half of it counts — Shachor carries the other one.
+   */
+  'crates-91': {
+    id: 'crates-91',
+    where: 'ussishkin-outside',
+    drop: { x: 0.39, y: 0.86 },
+    labelHe: 'הארגזים של שחור',
+    shape: { mode: 'carry', art: 'propCrate', target: 2, seconds: 30, hintHe: 'ארגז אחד כל פעם, מהאוטו לדלת של האולם. כפתור — להניח.' },
+    returnSpawn: 'start',
+    finish: (done, target) => {
+      const carried = Math.max(0, Math.min(done, target))
+      const events: LifeEvent[] = [
+        { t: 'flag.raised', flag: 'helped:crates-1991' },
+        { t: 'energy.changed', delta: -4 * Math.max(1, carried) },
+        { t: 'clock.advanced', minutes: 8 + 6 * carried },
+      ]
+      if (carried > 0) {
+        events.push(
+          { t: 'relationship.changed', who: 'shachor', axis: 'bond', delta: 2 + 2 * carried },
+          { t: 'redheart.changed', key: 'community', delta: 2 * carried },
+          {
+            t: 'relationship.memory_added',
+            memory: { characterId: 'shachor', eventId: 'carried-crates-1991', significance: carried >= target ? 'major' : 'notable', year: 1991, atMinute: 18 * 60 + 40 },
+          },
+        )
+      }
+      return events
+    },
+    toastHe: (done, target) => (done >= target ? 'שני ארגזים. הכתפיים כואבות. הוא אמר "יאללה" וזה היה תודה.' : done > 0 ? 'ארגז אחד. את השני שחור הרים לבד, ולא אמר כלום על זה.' : 'שחור הרים את שניהם לבד. לא הסתכל אחורה.'),
+  },
   /** B11b · a double shift at Rafi's counter — "הגמר עולה כסף", paid by the customer served */
   'shift-00': {
     id: 'shift-00',
