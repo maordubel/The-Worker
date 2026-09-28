@@ -75,7 +75,7 @@ def wide(arr):
     so what the encoder rings around it lands outside 38–70"""
     a = arr.astype(float); rgb = a[..., :3] / 255
     h, s, v = hsv(rgb)
-    band = (h >= 29) & (h <= 84) & (s >= 0.12) & (v >= 0.16)
+    band = (h >= 29) & (h <= 76) & (s >= 0.12) & (v >= 0.16)
     rgb[band] = hsv2rgb(np.full_like(h, 26.0), np.minimum(s, 0.5), v)[band]
     a[..., :3] = rgb * 255
     return a.round().clip(0, 255).astype(np.uint8)
