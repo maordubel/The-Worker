@@ -1612,7 +1612,7 @@ const SCENES: SceneDef[] = [
        * Ofir with a ball under his arm, Amit on the kerb. They are here only until the car
        * goes; Ofir walks up by himself (`a5-street`).
        */
-      { id: 'ofir-a5', era: 'a5-first', figure: 'ofir', x: 0.48, y: 0.8, size: 0.26, nameHe: 'אופיר', talk: 'ofir-a5', flip: true, sway: 0.008, when: { none: [{ flag: 'a5:there' }] } },
+      { id: 'ofir-a5', era: 'a5-first', figure: 'ofir', x: 0.55, y: 0.8, size: 0.26, nameHe: 'אופיר', talk: 'ofir-a5', flip: true, sway: 0.008, when: { none: [{ flag: 'a5:there' }] } },
       { id: 'amit-a5', era: 'a5-first', figure: 'amit', x: 0.36, y: 0.79, size: 0.26, nameHe: 'עמית', talk: 'ofir-a5', when: { none: [{ flag: 'a5:there' }] } },
       { id: 'liron-a6', era: 'a6-radio', figure: 'adultB2', x: 0.56, y: 0.8, size: 0.29, nameHe: 'לירון', talk: 'liron-a6' },
       { id: 'amit-a7', era: 'a7-week', figure: 'amit', x: 0.36, y: 0.79, size: 0.26, nameHe: 'עמית', talk: 'amit-a7' },

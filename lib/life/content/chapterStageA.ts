@@ -1268,7 +1268,7 @@ export const CONVERSATIONS_A3: Conversation[] = [
         lines: [
           { who: null, text: 'הדלת מתחת לסל פתוחה סדק. מסדרון חשוך, ריח של משחה חריפה ושל גומי, ובסופו ספסל.' },
           { who: null, text: 'על הספסל יושב שחקן ענק ומלפף סרט סביב הקרסול. הוא מרים את העיניים ורואה אותך בדלת.' },
-          { who: 'שחקן', text: 'אתה הלכת לאיבוד, או שבאת לראות?' },
+          { who: null, text: '"אתה הלכת לאיבוד," הוא שואל בקול עמוק, "או שבאת לראות?"' },
         ],
         choices: [
           { id: 'wish', text: '"בהצלחה."', then: [{ e: 'flag', flag: 'a3:locker' }, { e: 'flagValue', flag: 'life:a3:locker', value: 'wished' }, { e: 'time', minutes: 20 }, { e: 'redheart', key: 'basketballLove', delta: 4 }, { e: 'personality', key: 'courage', delta: 2 }, { e: 'toast', text: 'הוא קם, והראש שלו כמעט נוגע בתקרה של המסדרון. "תצעק חזק. אנחנו שומעים הכל מלמטה."', tone: 'red' }] },

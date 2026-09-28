@@ -228,7 +228,8 @@ describe('I — an authored scene inside the wait is played, not skipped', () =>
   it('a3-hall: the wait lands one minute before the conversation, and the conversation then plays', () => {
     const sim = new WorldSim('a3-hall')
     sim.beatAnswer = read
-    sim.engine.dispatch({ t: 'flag.raised', flag: 'a3:inside' }, { t: 'clock.advanced', minutes: Math.max(0, at(18) - sim.state.minute) })
+    // (pass 28.9.2026) the tip-off whistle (18:05, a toast, no scene) has blown: the wait is to the lights-off conversation
+    sim.engine.dispatch({ t: 'flag.raised', flag: 'a3:inside' }, { t: 'flag.raised', flag: 'a3:tipoff' }, { t: 'clock.advanced', minutes: Math.max(0, at(18) - sim.state.minute) })
     const plan = freeTimePlan(sim.state, eraFor('a3-hall'))
     expect(plan).toBeTruthy()
     expect(plan!.plannedArrivalMinute).toBe(plan!.eventMinute - 1)

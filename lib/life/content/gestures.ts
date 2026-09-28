@@ -85,7 +85,7 @@ export const GESTURES: Record<string, Gesture> = {
    */
   'scarf-1983': {
     id: 'scarf-1983',
-    spot: { x: 0.56, y: 0.7 },
+    spot: { x: 0.31, y: 0.64 },
     verb: 'hold',
     labelHe: 'את הצעיף של אבא',
     taps: 1,
