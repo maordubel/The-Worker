@@ -2,7 +2,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { ChoiceDef, Conversation } from './script'
+import type { ChoiceDef, Conversation, Say } from './script'
 import type { Condition } from '../world/types'
 import { PORTRAIT_2010 } from './chapter2010double'
 
@@ -309,6 +309,47 @@ const DEBUT_AWAY_CHOICES: ChoiceDef[] = [
 ]
 
 // ---------------------------------------------------------------- the words ------
+
+/** C05 — Keren on the phone, and the three ways to answer her */
+const C10_CALL_LINES: Say[] = [
+  { who: 'קרן', text: 'אתה מספר לי מה עשית בכל דקה במשחק.' },
+  { who: 'פוגי', text: 'זה רע?' },
+  { who: 'קרן', text: 'שאלתי מה שלומך.' },
+  { who: 'פוגי', text: 'אה.' },
+  { who: 'קרן', text: 'גם ״אה״ זה יותר אישי מהתוצאה.' },
+]
+const C10_CALL_CHOICES: ChoiceDef[] = [
+          {
+            id: 'tell',
+            text: '(לספר לה מה באמת עובר עליי.)',
+            then: [
+              { e: 'flag', flag: 'c10:call' },
+              { e: 'time', minutes: 15 },
+              { e: 'rel', who: 'keren', axis: 'bond', delta: 3 },
+              { e: 'wellbeing', key: 'regret', delta: -4 },
+              { e: 'toast', text: 'קרן: "הנה. אותך רציתי לשמוע." — "עם פרשנות?" — "תנסה בלי."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'later',
+            text: '"עכשיו אין לי מילים. מחר בערב, אם מתאים לך."',
+            then: [
+              { e: 'flag', flag: 'c10:call' },
+              { e: 'flag', flag: 'promise:callKeren' },
+              { e: 'toast', text: 'קרן: "בסדר. רק אל תכתוב ״נדבר״ ותיעלם." — "מחר בערב, אם מתאים לך." — "מתאים."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'result',
+            text: '(להחזיר את השיחה לתוצאה.)',
+            then: [
+              { e: 'flag', flag: 'c10:call' },
+              { e: 'rel', who: 'keren', axis: 'bond', delta: -1 },
+              { e: 'flagValue', flag: 'c10:kerenUnheard', value: true },
+              { e: 'toast', text: 'קרן: "אז תתקשר כשתרצה לדבר איתי."', tone: 'red' },
+            ],
+          },
+        ]
 
 /** C04 — the hosting evening's three answers (both branches of `c10-host`) */
 const C10_HOST_CHOICES: ChoiceDef[] = [
@@ -631,45 +672,14 @@ export const CONVERSATIONS_CHAMPIONS: Conversation[] = [
     remote: { 'קרן': 'phone' },
     branches: [
       {
-        lines: [
-          { who: 'קרן', text: 'אתה מספר לי מה עשית בכל דקה במשחק.' },
-          { who: 'פוגי', text: 'זה רע?' },
-          { who: 'קרן', text: 'שאלתי מה שלומך.' },
-          { who: 'פוגי', text: 'אה.' },
-          { who: 'קרן', text: 'גם ״אה״ זה יותר אישי מהתוצאה.' },
-        ],
-        choices: [
-          {
-            id: 'tell',
-            text: '(לספר לה מה באמת עובר עליי.)',
-            then: [
-              { e: 'flag', flag: 'c10:call' },
-              { e: 'time', minutes: 15 },
-              { e: 'rel', who: 'keren', axis: 'bond', delta: 3 },
-              { e: 'wellbeing', key: 'regret', delta: -4 },
-              { e: 'toast', text: 'קרן: "הנה. אותך רציתי לשמוע." — "עם פרשנות?" — "תנסה בלי."', tone: 'plain' },
-            ],
-          },
-          {
-            id: 'later',
-            text: '"עכשיו אין לי מילים. מחר בערב, אם מתאים לך."',
-            then: [
-              { e: 'flag', flag: 'c10:call' },
-              { e: 'flag', flag: 'promise:callKeren' },
-              { e: 'toast', text: 'קרן: "בסדר. רק אל תכתוב ״נדבר״ ותיעלם." — "מחר בערב, אם מתאים לך." — "מתאים."', tone: 'plain' },
-            ],
-          },
-          {
-            id: 'result',
-            text: '(להחזיר את השיחה לתוצאה.)',
-            then: [
-              { e: 'flag', flag: 'c10:call' },
-              { e: 'rel', who: 'keren', axis: 'bond', delta: -1 },
-              { e: 'flagValue', flag: 'c10:kerenUnheard', value: true },
-              { e: 'toast', text: 'קרן: "אז תתקשר כשתרצה לדבר איתי."', tone: 'red' },
-            ],
-          },
-        ],
+        // pass C (28.9.2026) — the birthday he moved to Sunday for the cup (`life:cup2010:owed`)
+        when: { flagIs: { flag: 'life:cup2010:owed', value: 'keren' } },
+        lines: [{ who: 'קרן', text: 'הבאת עוגה ביום ראשון. בדקתי אם זה תירוץ. זאת הייתה עוגה.' }, ...C10_CALL_LINES],
+        choices: C10_CALL_CHOICES,
+      },
+      {
+        lines: C10_CALL_LINES,
+        choices: C10_CALL_CHOICES,
       },
     ],
   },

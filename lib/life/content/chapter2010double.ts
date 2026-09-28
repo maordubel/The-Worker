@@ -4,7 +4,7 @@ import type { LifeState } from '../types'
 
 import type { Beat } from './beats'
 import type { EndingCard } from './chapter1986'
-import type { ChoiceDef, Conversation } from './script'
+import type { ChoiceDef, Conversation, Say } from './script'
 import type { Condition } from '../world/types'
 import { PORTRAIT_FOUNDING } from './chapter2007founding'
 
@@ -83,7 +83,9 @@ export function objectiveCup10(state: LifeState, sceneId: string): string | null
   if (!state.flags['d10:photo']) return sceneId === 'pitch' ? null : 'המגרש של החבר׳ה. תמונה, לפני שהכול משתנה.'
   if (!state.flags['d10:math']) return sceneId === 'kiosk' ? null : 'בקיוסק עמית כבר מחשב.'
   if (!state.flags['d10:derby']) return 'אחרי הדרבי. אפס אפס, והכול רועש.'
+  if (!state.flags['d10:week']) return 'שלישי: משמרת, יום הולדת, וגמר. משהו זז.'
   if (!state.flags['d10:cup']) return 'גמר הגביע. הוא לא חימום.'
+  if (!state.flags['d10:hooked']) return 'הטלפון. אולי, על שבת.'
   return null
 }
 
@@ -127,8 +129,21 @@ export const BEATS_CUP10: Beat[] = [
   { id: 'd10-banner', trigger: 'clock', when: { all: [{ flag: 'd10:banner-full' }], none: [{ flag: 'd10:bannerUp' }, { flag: 'd10:derby' }] }, delayMs: 900, do: [{ a: 'talk', conversation: 'd10-banner' }] },
   /** הדרבי והגמר הם רגעים, לא חדרים — שניהם על השעון (כלל 67); כרטיס הוא חתך של יום */
   { id: 'd10-derby', trigger: 'clock', when: { all: [{ flag: 'd10:math' }], none: [{ flag: 'd10:derby' }, { all: [{ flag: 'd10:banner-full' }], none: [{ flag: 'd10:bannerUp' }] }] }, delayMs: 1200, do: [{ a: 'card', titleHe: 'הדרבי', subHe: '8.5.2010', ms: 2000 }, { a: 'talk', conversation: 'd10-derby' }] },
-  { id: 'd10-cup', trigger: 'clock', when: { all: [{ flag: 'd10:derby' }], none: [{ flag: 'd10:cup' }] }, delayMs: 1400, do: [{ a: 'card', titleHe: 'גמר הגביע', subHe: '11.5.2010', ms: 2000 }, { a: 'talk', conversation: 'd10-cup' }] },
+  /**
+   * D03→D04 (pass C, 28.9.2026) — **הלוח של השבוע.** שלישי, 11 במאי: משמרת ערב, יום ההולדת של
+   * קרן, והגמר. אחד מהם זז, ובקול: להחליף משמרת (ולהיות חייב שבת בבוקר — שבת של טדי), להזיז
+   * את קרן לראשון, או להשאיר הכול ולשמוע את הגמר בהודעה. `life:cup2010:owed` נקרא בטדי.
+   */
+  { id: 'd10-week', trigger: 'clock', when: { all: [{ flag: 'd10:derby' }], none: [{ flag: 'd10:week' }] }, delayMs: 1200, do: [{ a: 'talk', conversation: 'd10-week' }] },
+  { id: 'd10-cup', trigger: 'clock', when: { all: [{ flag: 'd10:week' }], none: [{ flag: 'd10:cup' }] }, delayMs: 1400, do: [{ a: 'card', titleHe: 'גמר הגביע', subHe: '11.5.2010', ms: 2000 }, { a: 'talk', conversation: 'd10-cup' }] },
+  /** D04→D05 — ארבעה ימים לפני טדי, אולי כבר מתקשר; התשובה (עכשיו, או אחר כך) נקראת ברחוב של שבת */
+  { id: 'd10-hook', trigger: 'clock', when: { all: [{ flag: 'd10:cup' }], none: [{ flag: 'd10:hooked' }] }, delayMs: 1600, do: [{ a: 'talk', conversation: 'd10-hook' }] },
 ]
+
+/** who the swap of the week was paid by — `shift` (a Saturday morning owed), `keren` (Sunday), `none` */
+export const CUP2010_OWED = 'life:cup2010:owed'
+/** how he answered Oli four days before Teddy — `now` or `later` */
+export const TEDDY_ASKED = 'life:teddy2010:asked'
 
 // ------------------------------------------------------------------ Part II ------
 
@@ -219,6 +234,23 @@ function breadMemory(state: LifeState): LifeEvent[] {
 }
 
 export const BEATS_TEDDY: Beat[] = [
+  /**
+   * pass C (28.9.2026) — **השבת שהוחלפה ביום שלישי.** מי שהחליף את המשמרת של הגמר (`d10-week`)
+   * עבד הבוקר משש, ומגיע לרחוב של טדי עייף. לא עונש — חשבון.
+   */
+  {
+    id: 'd10-owed',
+    at: 'street',
+    trigger: 'enter',
+    when: { all: [{ flagIs: { flag: CUP2010_OWED, value: 'shift' } }], none: [{ flag: 'd10:owedPaid' }] },
+    delayMs: 300,
+    do: [
+      { a: 'flag', flag: 'd10:owedPaid' },
+      { a: 'card', titleHe: 'שש בבוקר', subHe: 'המשמרת שהחלפת בשביל הגמר', ms: 2200 },
+      { a: 'events', events: [{ t: 'energy.changed', delta: -15 }] },
+      { a: 'toast', text: 'שבע שעות על הרגליים, ועוד טדי. אולי: "שתית קפה?" — "שלושה."', tone: 'plain' },
+    ],
+  },
   /** המחויבות — מצב, ועוד לא תוכנית. היא שומרת על עצמה בשני הדגלים, ולכן חוזרת עד שנענתה */
   {
     id: 'd10-plan',
@@ -401,6 +433,51 @@ const TITLE_AWAY_CHOICES: ChoiceDef[] = [
   },
 ]
 
+/** D05 — the street by Oli's car: the screenplay's opening, and its three answers */
+const D10_PLAN_LINES: Say[] = [
+  { who: 'אולי', text: 'מי בא איתנו?' },
+  { who: 'פוגי', text: 'כולם בסדר.' },
+  { who: 'אולי', text: 'לא שאלתי מה שלומם.' },
+  { who: 'עמית', text: 'אני צריך לדעת איך חוזרים.' },
+  { who: 'אופיר', text: 'אחרי האליפות.' },
+  { who: 'אולי', text: 'יופי. זה לא כתוב בלוח האוטובוסים.' },
+]
+const D10_PLAN_CHOICES: ChoiceDef[] = [
+          {
+            /**
+             * (דלתא 90) ההתחייבות, ולא התוכנית. הרשימה, הכסף והחזרה נעשים ברחוב, אחד
+             * אחרי השני. הכסף נבדק כבר כאן — מגבלה צריכה להיות מובנת לפני שהיא עולה (§15).
+             */
+            id: 'venue',
+            text: '(לסגור רשימה: מי עולה, מי חוזר, ואיך.)',
+            when: { minAgorot: TICKET_TEDDY + FUEL_SHARE },
+            noteHe: 'אין לך כסף לכרטיס ודלק.',
+            then: [
+              { e: 'flagValue', flag: 'd10:mode', value: 'venue' },
+              { e: 'toast', text: 'אולי: "אם מישהו נשאר, הוא אומר. אף אחד לא מנחש."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'kobi',
+            text: '"אני רואה עם אבא. בסלון."',
+            then: [
+              { e: 'flag', flag: 'd10:plan' },
+              { e: 'flagValue', flag: 'd10:mode', value: 'home' },
+              { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 },
+              { e: 'toast', text: 'קובי: "תשב כבר. אתה מסתיר עוד לפני שהתחיל."', tone: 'plain' },
+            ],
+          },
+          {
+            id: 'remote',
+            text: '"תעדכן אותי. הכול, בלי \'תקשיב\'."',
+            then: [
+              { e: 'flag', flag: 'd10:plan' },
+              { e: 'flagValue', flag: 'd10:mode', value: 'remote' },
+              { e: 'toast', text: 'עמית: "תוצאה בלבד או הכול?" — "הכול."', tone: 'plain' },
+            ],
+          },
+        ]
+
 export const CONVERSATIONS_2010: Conversation[] = [
   {
     id: 'd10-photo',
@@ -575,6 +652,8 @@ export const CONVERSATIONS_2010: Conversation[] = [
           {
             id: 'go',
             text: '(ללכת לגמר, עם אבא.)',
+            when: { notFlag: 'd10:cupSkip' },
+            noteHe: 'השארת את הערב לקרן ולמשמרת. אמרת את זה בקול.',
             then: [
               { e: 'flag', flag: 'd10:cup' },
               { e: 'time', minutes: 90 },
@@ -582,12 +661,14 @@ export const CONVERSATIONS_2010: Conversation[] = [
               { e: 'rel', who: 'kobi', axis: 'bond', delta: 3 },
               { e: 'presence', mode: 'inside' },
               { e: 'attend' },
-              { e: 'ending', id: 'there' },
+              { e: 'flagValue', flag: 'd10:cupKind', value: 'there' },
             ],
           },
           {
             id: 'tv',
             text: '(לראות מהסלון, עם אופיר.)',
+            when: { notFlag: 'd10:cupSkip' },
+            noteHe: 'השארת את הערב לקרן ולמשמרת. אמרת את זה בקול.',
             then: [
               { e: 'flag', flag: 'd10:cup' },
               { e: 'time', minutes: 90 },
@@ -595,7 +676,7 @@ export const CONVERSATIONS_2010: Conversation[] = [
               { e: 'rel', who: 'ofir', axis: 'bond', delta: 3 },
               { e: 'presence', mode: 'television' },
               { e: 'toast', text: 'אופיר: "מי קופץ ראשון מפיל את השולחן." — "תזיז אותו עכשיו."', tone: 'plain' },
-              { e: 'ending', id: 'screen' },
+              { e: 'flagValue', flag: 'd10:cupKind', value: 'screen' },
             ],
           },
           {
@@ -604,61 +685,103 @@ export const CONVERSATIONS_2010: Conversation[] = [
             then: [
               { e: 'flag', flag: 'd10:cup' },
               { e: 'presence', mode: 'late' },
-              { e: 'ending', id: 'late' },
+              { e: 'flagValue', flag: 'd10:cupKind', value: 'late' },
             ],
           },
         ],
       },
     ],
   },
+  /** D03→D04 (pass C) — the week on the phone: one thing moves, and somebody pays for it */
   {
-    id: 'd10-plan',
-    nameHe: 'אולי',
+    id: 'd10-week',
+    nameHe: null,
     branches: [
       {
         lines: [
-          { who: 'אולי', text: 'מי בא איתנו?' },
-          { who: 'פוגי', text: 'כולם בסדר.' },
-          { who: 'אולי', text: 'לא שאלתי מה שלומם.' },
-          { who: 'עמית', text: 'אני צריך לדעת איך חוזרים.' },
-          { who: 'אופיר', text: 'אחרי האליפות.' },
-          { who: 'אולי', text: 'יופי. זה לא כתוב בלוח האוטובוסים.' },
+          { who: null, text: 'היומן בטלפון, שלישי, 11 במאי: "משמרת ערב — 17:00". "קרן — יום הולדת, 20:00". ובאמצע, בלי שעה: "גמר".' },
+          { who: null, text: 'שלושה דברים בערב אחד. אחד מהם זז, ומישהו משלם על זה.' },
         ],
         choices: [
           {
-            /**
-             * (דלתא 90) ההתחייבות, ולא התוכנית. הרשימה, הכסף והחזרה נעשים ברחוב, אחד
-             * אחרי השני. הכסף נבדק כבר כאן — מגבלה צריכה להיות מובנת לפני שהיא עולה (§15).
-             */
-            id: 'venue',
-            text: '(לסגור רשימה: מי עולה, מי חוזר, ואיך.)',
-            when: { minAgorot: TICKET_TEDDY + FUEL_SHARE },
-            noteHe: 'אין לך כסף לכרטיס ודלק.',
+            id: 'shift',
+            text: '(להחליף את המשמרת — ולהיות חייב שבת בבוקר.)',
             then: [
-              { e: 'flagValue', flag: 'd10:mode', value: 'venue' },
-              { e: 'toast', text: 'אולי: "אם מישהו נשאר, הוא אומר. אף אחד לא מנחש."', tone: 'plain' },
+              { e: 'flag', flag: 'd10:week' },
+              { e: 'flagValue', flag: CUP2010_OWED, value: 'shift' },
+              { e: 'toast', text: 'המחליף: "שבת, שש בבוקר. אתה לא שוכח." — "שבת. שש." (השבת של טדי.)', tone: 'red' },
             ],
           },
           {
-            id: 'kobi',
-            text: '"אני רואה עם אבא. בסלון."',
+            id: 'keren',
+            text: '(להתקשר לקרן — להזיז לראשון, עכשיו ולא בשמונה.)',
             then: [
-              { e: 'flag', flag: 'd10:plan' },
-              { e: 'flagValue', flag: 'd10:mode', value: 'home' },
-              { e: 'rel', who: 'kobi', axis: 'bond', delta: 2 },
-              { e: 'toast', text: 'קובי: "תשב כבר. אתה מסתיר עוד לפני שהתחיל."', tone: 'plain' },
+              { e: 'flag', flag: 'd10:week' },
+              { e: 'flagValue', flag: CUP2010_OWED, value: 'keren' },
+              { e: 'rel', who: 'keren', axis: 'trust', delta: 1 },
+              { e: 'rel', who: 'keren', axis: 'tension', delta: 2 },
+              { e: 'toast', text: 'קרן: "ראשון. ואתה מביא עוגה, לא תירוץ." — "עוגה."', tone: 'plain' },
             ],
           },
           {
-            id: 'remote',
-            text: '"תעדכן אותי. הכול, בלי \'תקשיב\'."',
+            id: 'none',
+            text: '(לא להזיז כלום. הגמר — בהודעה.)',
             then: [
-              { e: 'flag', flag: 'd10:plan' },
-              { e: 'flagValue', flag: 'd10:mode', value: 'remote' },
-              { e: 'toast', text: 'עמית: "תוצאה בלבד או הכול?" — "הכול."', tone: 'plain' },
+              { e: 'flag', flag: 'd10:week' },
+              { e: 'flag', flag: 'd10:cupSkip' },
+              { e: 'flagValue', flag: CUP2010_OWED, value: 'none' },
+              { e: 'rel', who: 'keren', axis: 'bond', delta: 2 },
+              { e: 'toast', text: 'אופיר: "גמר בהודעה?" — "יש לי משמרת ויום הולדת. בסדר הזה."', tone: 'plain' },
             ],
           },
         ],
+      },
+    ],
+  },
+  /** D04 → D05 (pass C) — four days before Teddy, Oli on the phone: answer now, or later */
+  {
+    id: 'd10-hook',
+    nameHe: 'אולי',
+    remote: { 'אולי': 'phone' },
+    branches: (['there', 'screen', 'late'] as const).map((kind) => ({
+      when: { flagIs: { flag: 'd10:cupKind', value: kind } },
+      lines: [
+        { who: 'אולי', text: kind === 'there' ? 'ראיתי אותך ביציע עם אבא שלך. עכשיו שבת: טדי. יש לי רכב וארבעה מקומות.' : 'עכשיו שבת: טדי. יש לי רכב וארבעה מקומות.' },
+        { who: 'פוגי', text: 'עוד לא ירדתי מהגביע.' },
+        { who: 'אולי', text: 'אז תרד. אני סוגר רשימה.' },
+      ],
+      choices: [
+        {
+          id: 'now',
+          text: '"אני בפנים. תרשום אותי."',
+          then: [{ e: 'flag', flag: 'd10:hooked' }, { e: 'flagValue', flag: TEDDY_ASKED, value: 'now' }, { e: 'ending', id: kind }],
+        },
+        {
+          id: 'later',
+          text: '"אני אחזור אליך. לא כשאני עוד בגביע."',
+          then: [{ e: 'flag', flag: 'd10:hooked' }, { e: 'flagValue', flag: TEDDY_ASKED, value: 'later' }, { e: 'ending', id: kind }],
+        },
+      ],
+    })),
+  },
+  {
+    id: 'd10-plan',
+    nameHe: 'אולי',
+    // pass C (28.9.2026) — what he answered four days ago on the phone (`d10-hook`) opens the street
+    branches: [
+      {
+        when: { flagIs: { flag: TEDDY_ASKED, value: 'now' } },
+        lines: [{ who: 'אולי', text: 'אמרת "תרשום אותי" לפני ארבעה ימים. רשמתי. עכשיו השאר.' }, ...D10_PLAN_LINES],
+        choices: D10_PLAN_CHOICES,
+      },
+      {
+        when: { flagIs: { flag: TEDDY_ASKED, value: 'later' } },
+        lines: [{ who: 'אולי', text: 'אמרת שתחזור אליי. לא חזרת, אז אני בא אליך.' }, ...D10_PLAN_LINES],
+        choices: D10_PLAN_CHOICES,
+      },
+      {
+        lines: D10_PLAN_LINES,
+        choices: D10_PLAN_CHOICES,
       },
     ],
   },
