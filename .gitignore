@@ -13,3 +13,6 @@ delta/
 scripts/life/.scene-dump.ts
 docs/life-shots/
 docs/goal-shots/
+
+# agent worktrees (local only)
+.claude/worktrees/
