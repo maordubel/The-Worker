@@ -324,8 +324,8 @@ export const CHECKLISTS: Record<string, readonly ChecklistStep[]> = {
   '2025-abroad': [{ id: 'reunion', textHe: 'הפעם אתה מחכה לו.', doneWhen: F('x:reunion') }],
   '2025-owner': [
     { id: 'fork', textHe: 'סכום, לא תוצאה.', doneWhen: F('o:fork') },
-    { id: 'team', textHe: 'מי יעבוד איתך.', revealWhen: F('o:forkGo'), doneWhen: F('o:team') },
-    { id: 'money', textHe: 'כסף שיש וכסף שנראה שיש.', revealWhen: F('o:teamGo'), doneWhen: F('o:money') },
+    { id: 'money', textHe: 'עד שמונה: הכסף, המגרש, האנשים — זמן לשניים.', revealWhen: F('o:brief'), doneWhen: F('o:money') },
+    { id: 'team', textHe: 'מי יעבוד איתך.', revealWhen: F('o:dealGo'), doneWhen: F('o:team') },
     { id: 'sign', textHe: 'השבוע של כולם.', revealWhen: F('o:moneyGo'), doneWhen: F('o:sign') },
     { id: 'monday', textHe: 'ביום שני עדיין צריך לפתוח.', revealWhen: F('o:signGo'), doneWhen: F('o:monday') },
   ],

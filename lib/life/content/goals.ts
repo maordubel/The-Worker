@@ -430,8 +430,9 @@ export const goalAbroad = (state: LifeState): LocationId | null => (flag(state, 
 export const goalReunion = (state: LifeState): LocationId | null => (flag(state, 'x:reunion') ? null : 'flat-abroad')
 export const goalOwner = (state: LifeState): LocationId | null => {
   if (!flag(state, 'o:fork')) return 'office'
-  if (flag(state, 'o:forkGo') && !flag(state, 'o:team')) return 'office'
-  if (flag(state, 'o:teamGo') && !flag(state, 'o:money')) return 'office'
+  // (pass D) the seller's hour, then the meeting — both in the office
+  if (flag(state, 'o:forkGo') && !flag(state, 'o:verdict')) return 'office'
+  if (flag(state, 'o:dealGo') && !flag(state, 'o:team')) return 'office'
   if (flag(state, 'o:moneyGo') && !flag(state, 'o:sign')) return 'home'
   if (flag(state, 'o:signGo') && flag(state, 'own:route:JOURNALIST:entry') && !flag(state, 'o:conflict') && !flag(state, 'own:route:conflict:stop_covering') && !flag(state, 'own:route:conflict:personal_column') && !flag(state, 'own:route:conflict:disclose_and_pay')) return 'newsroom'
   if (flag(state, 'o:signGo') && !flag(state, 'o:monday')) return 'ticket-office'

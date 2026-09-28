@@ -639,11 +639,17 @@ export const NEW_ROOMS: SceneDef[] = [
     spawns: { start: { x: 0.2, y: 0.72, facing: 'right' } },
     actors: [],
     hotspots: [
-      look('office-board', '2025-owner', 0.39, 0.62, 0.1, 'הלוח עם המספרים'),
-      look('office-window', '2025-owner', 0.87, 0.66, 0.08, 'החלון'),
+      // (pass D) while the seller's hour runs, the board and the window are the triangle's (`questsPassD.ts`)
+      look('office-board', '2025-owner', 0.39, 0.62, 0.1, 'הלוח עם המספרים', undefined, { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] }),
+      look('office-window', '2025-owner', 0.87, 0.66, 0.08, 'החלון', undefined, { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] }),
     ],
     exits: [
-      BACK_TO_STREET('החוצה', { x: 0.0, y: 0.6, w: 0.08, h: 0.22 }, { x: 0.005, y: 0.0, w: 0.08, h: 0.6, tone: 'inside' }),
+      {
+        ...BACK_TO_STREET('החוצה', { x: 0.0, y: 0.6, w: 0.08, h: 0.22 }, { x: 0.005, y: 0.0, w: 0.08, h: 0.6, tone: 'inside' }),
+        // (pass D) 2025 · O02 — the seller wants an answer by eight, and nobody leaves the room before it
+        needs: { any: [{ notFlag: 'o:brief' }, { flag: 'o:verdict' }] },
+        blockedHe: 'עד שמונה אתה פה. המוכר מחכה לתשובה, לא לך.',
+      },
     ],
   },
 
@@ -1495,6 +1501,8 @@ export const STAGED: Partial<Record<LocationId, ActorDef[]>> = {
       { who: 'מיכל', x: 0.66, y: 0.63, flip: true, figure: 'adultB5', when: { all: [{ flag: 'o:forkGo' }, { flagIs: { flag: 'life:partner', value: 'melanie' } }] } },
       { who: 'אדם', x: 0.8, y: 0.66, flip: true },
     ]),
+    // (pass D) O02 — Yevgeny came without being asked, and waits at the window (the trust corner)
+    ...cast('2025-owner', flag('o:brief'), [{ who: 'יבגני', x: 0.92, y: 0.7, flip: true }]),
   ],
 
   'community-room': [
