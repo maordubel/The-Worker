@@ -850,7 +850,7 @@ function RoyalRumbleRunInner({
   const slotName = currentSlot.rule.kind === 'flex' ? t('flex') : positionHe(currentSlot.rule.position)
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col md:block md:flex-none md:pb-3">
+    <div className="flex min-h-0 flex-1 flex-col max-md:flex-none md:block md:flex-none md:pb-3">
       <header data-rumble="header" className="relative shrink-0 overflow-hidden border-rule border-ink bg-red text-paper">
         {!embedded && <div className="pointer-events-none absolute -start-4 -top-8 font-display text-[190px] leading-none text-ink/10 sm:text-[300px]" dir="ltr" aria-hidden="true">09</div>}
 
@@ -916,7 +916,7 @@ function RoyalRumbleRunInner({
         </button>
       </div>
 
-      <section className="mt-1.5 flex min-h-0 flex-1 flex-col border-rule border-ink bg-paper p-1.5 md:mt-2 md:flex-none md:p-4">
+      <section className="mt-1.5 flex min-h-0 flex-1 flex-col border-rule border-ink bg-paper p-2 max-md:flex-none md:mt-2 md:flex-none md:p-4">
         <div className="mb-1 flex shrink-0 items-end gap-2 sm:gap-3">
           <div className="font-display text-[20px] leading-none text-red sm:text-[62px]" dir="ltr">{String(activeSlot + 1).padStart(2, '0')}</div>
           <div className="min-w-0 border-s-rule border-ink ps-2">
@@ -928,6 +928,29 @@ function RoyalRumbleRunInner({
           </div>
         </div>
 
+        <div className="md:hidden">
+          <div className="relative">
+            <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
+            <div className="grid w-full grid-cols-3 gap-1.5 [&>button]:min-h-[270px]" role="group" aria-label={`${slotShort(currentSlot.rule)} · ${flexSlot ? t('flexQuestion') : t('draftQuestion')}`}>
+              {currentSlot.offers.map((offer, index) => (
+                <DraftCard
+                  key={`${offer.player.slug}-${offer.offeredAs}-m`}
+                  offer={offer}
+                  index={index}
+                  flex={flexSlot}
+                  selected={picks[activeSlot]?.player.slug === offer.player.slug}
+                  disabled={!canPick(activeSlot, offer)}
+                  onPick={(event) => {
+                    pick(activeSlot, offer)
+                    firePickFxAt(event.currentTarget, { label: money(offer.player.price), tone: 'red', haptic: offer.player.price === 5 ? 'lock' : 'tap', big: offer.player.price === 5 })
+                  }}
+                  kits={kits}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="max-md:hidden">
         <FitBox ratio={1.08} className="min-h-0 flex-1" innerClassName="flex items-stretch">
           <div className="relative flex w-full">
             <RoyalRumbleSlotReveal offers={currentSlot.offers} signature={`${activeDraft.seed}-${activeSlot}`} />
@@ -950,6 +973,7 @@ function RoyalRumbleRunInner({
             </div>
           </div>
         </FitBox>
+        </div>
       </section>
 
       {error && <p className="mt-1.5 shrink-0 border-rule border-red bg-red/10 p-2.5 font-body text-[11px] font-black text-red md:mt-2 md:p-3" role="alert">{error}</p>}
@@ -962,7 +986,7 @@ function RoyalRumbleRunInner({
           firePickFx(event.clientX, event.clientY, { label: t('lockReady'), tone: 'red', big: true, haptic: 'lock' })
           void lockFive()
         }}
-        className="group mt-1.5 grid min-h-tap w-full shrink-0 grid-cols-[1fr_auto] items-center border-rule border-red bg-red px-5 text-start text-paper transition hover:bg-ink disabled:cursor-not-allowed disabled:border-concrete disabled:bg-concrete disabled:text-ink/55 motion-reduce:transition-none md:mt-2"
+        className="group mt-1.5 grid min-h-tap w-full shrink-0 grid-cols-[1fr_auto] items-center border-rule border-red bg-red px-5 text-start text-paper transition hover:bg-ink disabled:cursor-not-allowed disabled:border-concrete disabled:bg-concrete disabled:text-ink/55 motion-reduce:transition-none md:mt-2 max-md:sticky max-md:bottom-0 max-md:z-10"
       >
         <span className="min-w-0">
           <span className="block truncate font-mono tabular-nums text-[8px] font-black tracking-[0.2em] opacity-60" dir="ltr">

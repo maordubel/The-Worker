@@ -34,7 +34,7 @@ describe('priceForPlayer', () => {
 
   it('the canonical ten are this exact set — changing it is an owner decision', () => {
     expect(new Set(players.filter((player) => player.price === 5).map((player) => player.slug))).toEqual(
-      new Set(['יעקב-חודורוב', 'שמעון-גרשון', 'ריפעת-טורק', 'משה-סיני', 'יוסי-אבוקסיס', 'סלים-טועמה', 'ערן-זהבי', 'שייע-פייגנבוים', 'גילי-לנדאו', 'שבתאי-לוי']),
+      new Set(['יעקב-חודורוב', 'שלום-תקוה', 'ריפעת-טורק', 'משה-סיני', 'יוסי-אבוקסיס', 'סלים-טועמה', 'דוד-פרימו', 'שייע-פייגנבוים', 'גילי-לנדאו', 'שבתאי-לוי']),
     )
     for (const row of ROYAL_RUMBLE_CANONICAL_FIVES) expect(row.reasonHe.length, row.slug).toBeGreaterThan(5)
   })

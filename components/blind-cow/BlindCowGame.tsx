@@ -129,6 +129,7 @@ export function BlindCowGame({
   const [fresh, setFresh] = useState<number | null>(null)
   const [drawer, setDrawer] = useState(false)
   const [howto, setHowto] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [duelSheet, setDuelSheet] = useState(false)
   const [token, setToken] = useState<string | null>(duelToken)
   const [duel, setDuel] = useState<DuelState | null>(null)
@@ -576,7 +577,6 @@ export function BlindCowGame({
   /* ---------------------------------------------------------------- lobby */
 
   const dailyLabel = daily ? (daily.status === 'solved' ? t('blindcow.daily.done') : daily.status === 'playing' ? t('blindcow.daily') : t('blindcow.daily.played')) : t('blindcow.daily')
-  const [filtersOpen, setFiltersOpen] = useState(false)
   const openDaily = () => (daily ? resume(daily, 'daily') : void begin('daily'))
 
   return (

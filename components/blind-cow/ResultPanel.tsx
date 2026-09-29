@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import Link from 'next/link'
+import { noteCrossLink } from '@/components/meter/GateMeter'
 import { CrossLinks } from '@/components/links/CrossLinks'
 import { ExitNext, ExitShare } from '@/components/result/UniversalExit'
 import { ShareCardChips } from '@/components/links/ShareCard'
@@ -86,6 +88,7 @@ export function ResultPanel({
   const url = gateUrl(`?${query}${view.mode === 'daily' ? '&mode=daily' : ''}`)
 
   const extra = Math.max(0, r.hintsUsed - 1)
+  const archiveLink = r.links.find((link) => link.kind === 'archive') ?? null
 
   return (
     <div className="flex min-h-0 flex-1 flex-col md:block">
@@ -119,6 +122,20 @@ export function ResultPanel({
             )}
             {r.shirtTitle && (
               <p className="mt-0.5 font-body text-[11px] text-muted">{t('blindcow.result.shirt', { season: r.shirtTitle })}</p>
+            )}
+            {archiveLink && (
+              <Link
+                href={archiveLink.href}
+                data-blindcow="archive-link"
+                onClick={() => {
+                  track('cross_link_click', { detail: 'blind-cow:archive-primary' })
+                  noteCrossLink()
+                }}
+                className="mt-2 flex min-h-tap items-center justify-between gap-2 border-rule border-ink bg-ink px-2.5 font-body text-[13px] font-extrabold text-paper active:scale-[.97]"
+              >
+                <span>{t('blindcow.result.archive')}</span>
+                <span aria-hidden="true">←</span>
+              </Link>
             )}
           </div>
         </div>

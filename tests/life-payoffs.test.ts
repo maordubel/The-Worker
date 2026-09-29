@@ -134,10 +134,10 @@ describe('§19 — Blind Cow "מהשנים שחיית": the answer never leaves 
 
 describe('§18 — the themed Rumble never touches the canonical one', () => {
   // the canonical boards of three seeds, hashed BEFORE the themed mode existed (28.9.2026) and
-  // re-pinned once when the balance version went 2→3 (29.9.2026, Gate 9): the deal is salted with the
+  // re-pinned when the balance version went 2→3 and again when the owner re-priced players (29.9.2026, Gate 9): the deal is salted with the
   // version, so a new price ladder is a new board by design. The themed mode still changes nothing.
   const CANON: Array<[number, number, string]> = [
-    [12345, 0, '945ff97c331dd4b3a34f907cafb1ca400f1f6897434799c14943ee05882b5ffe'],
+    [12345, 0, '46863df2d11c8e0cf5f865d789332fbf823114656eb8597b144fe5d4c9d2c30a'],
     [7, 2, 'ac90293c6208184093fc06f1d4f64799e9b3a187dedc4fd1e7d9e0870ebf0265'],
     [2026, 1, '820f5575a141377d1e4b17747209f0dd93207efa74e1a2599158bb171ec377e8'],
   ]
