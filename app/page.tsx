@@ -5,7 +5,6 @@ import { Screen } from '@/components/ui/Screen'
 import { GatePlate } from '@/components/gates/GatePlate'
 import { Intro } from '@/components/ui/Intro'
 import { StructuredData } from '@/components/seo/StructuredData'
-import { Standfirst } from '@/components/ui/Standfirst'
 import { greetingKey, hourInIsrael } from '@/lib/daily/copy'
 import { resolveDaily } from '@/lib/daily/resolve'
 import { todayInIsrael } from '@/lib/date/israel'
@@ -47,24 +46,14 @@ export default function BloomfieldPage() {
           thirteen claims where there is one. */}
       <StructuredData />
 
-      {/* And the human half. A wall of numbered plates is beautiful and says nothing to
-          somebody who arrived from a shared link; one line does. */}
-      <Standfirst />
-
       {/* the "now" layer — compact, so a first visit still meets the gate plan on the
           first screen; the returning rows appear only when the device holds something */}
       <NowLayer daily={daily} greeting={greetingKey(hourInIsrael(now))} />
 
-      {/* THE WORKER LIFE is now the wall's own first plate — a tunnel, not a gate — so
-          the section header names both what it contains. */}
-      <section id="gates" aria-label={t('wall.howYouGetIn')} className="mt-stack scroll-mt-4">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="font-display text-[15px] text-ink">{t('wall.howYouGetIn')}</p>
-          <h2 className="font-latin text-[10px] font-bold tracking-[0.24em] text-sign" dir="ltr">
-            HOW YOU GET IN
-          </h2>
-        </div>
-        <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
+      {/* THE WORKER LIFE is the wall's own first plate — a tunnel, not a gate. The wall
+          carries no heading (owner, 29.9.2026): the plates are the explanation. */}
+      <section id="gates" aria-label={t('home.gates.aria')} className="mt-stack scroll-mt-4">
+        <ul className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
           {/* The tunnel is the head of the grid, above gate 5 — full width, same span
               rule as the curva below it, but never one of the eleven (rule 24, 39). */}
           <li className="col-span-2 lg:col-span-3">

@@ -1,7 +1,7 @@
 'use client'
 
 import { SlideSheet } from '@/components/stage/SlideSheet'
-import { NO_FILTERS, filterOptions, type Filters, type JourneyData } from '@/lib/away-days/journey'
+import { NO_FILTERS, activeFilterCount, filterOptions, type Filters, type JourneyData } from '@/lib/away-days/journey'
 import type { Result } from '@/lib/away-days/types'
 import { t } from '@/lib/i18n'
 
@@ -39,7 +39,9 @@ export function AwayDaysFilters({
           <button
             type="button"
             onClick={() => onChange(NO_FILTERS)}
-            className="min-h-tap shrink-0 border-hair border-ink/40 px-3 font-body text-[12px] font-extrabold text-ink"
+            disabled={activeFilterCount(filters) === 0}
+            data-away="filters-clear"
+            className="min-h-tap shrink-0 border-hair border-ink/40 px-3 font-body text-[12px] font-extrabold text-ink disabled:opacity-40"
           >
             {t('away.filter.clear')}
           </button>
@@ -91,7 +93,7 @@ function Group({ label, children }: { label: string; children: React.ReactNode }
   return (
     <fieldset className="mb-3">
       <legend className="mb-1.5 font-sign text-[13px] text-sign">{label}</legend>
-      <div className="flex flex-wrap gap-1.5">{children}</div>
+      <div className="flex flex-wrap gap-2">{children}</div>
     </fieldset>
   )
 }
@@ -102,10 +104,15 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
       type="button"
       aria-pressed={on}
       onClick={onClick}
-      className={`min-h-tap border-hair px-3 font-body text-[12px] font-extrabold transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
+      className={`inline-flex min-h-tap items-center gap-1.5 border-hair px-3 font-body text-[12px] font-extrabold transition-transform duration-press ease-stamp active:scale-[.96] motion-reduce:transition-none ${
         on ? 'border-ink bg-ink text-paper' : 'border-ink/40 bg-paper text-ink'
       }`}
     >
+      {on && (
+        <span aria-hidden="true" className="text-[11px] leading-none">
+          ✓
+        </span>
+      )}
       {children}
     </button>
   )

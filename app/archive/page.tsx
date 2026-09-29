@@ -5,7 +5,7 @@ import { ReportLink } from '@/components/ui/ReportLink'
 import { SongLine } from '@/components/voice/SongLine'
 import { Screen } from '@/components/ui/Screen'
 import { decades } from '@/lib/archive/graph'
-import { archiveFigures, detailOf, longDateHe, todayDecks } from '@/lib/archive/wing'
+import { archiveFigures, detailOf, kitShelf, longDateHe, todayDecks } from '@/lib/archive/wing'
 import { todayInIsrael } from '@/lib/date/israel'
 import { t } from '@/lib/i18n'
 import { roundFrom } from '@/lib/rotation/round'
@@ -22,14 +22,15 @@ import { gateMetadata } from '@/lib/seo'
  * read-model that reads the clock cannot be tested), the five deals (from `?seed=` and
  * `?r=`, rule 24), and `?at=<id>` — a deep link from `/hapoel`, gate 13 or gate 10 that
  * opens one entity's drawer, legacy ids resolved (`euro:`, `kit:<maker>:<from>`, a
- * roster slug). The graph itself never reaches the browser.
+ * roster slug). `?show=kits` opens the deck on every canonical kit (Gate 5's "full collection").
+ * The graph itself never reaches the browser.
  */
 export const metadata: Metadata = gateMetadata('archive')
 
 export default function ArchivePage({
   searchParams,
 }: {
-  searchParams: { seed?: string; r?: string; at?: string }
+  searchParams: { seed?: string; r?: string; at?: string; show?: string }
 }) {
   const round = roundFrom(searchParams)
   // the day it is in Tel Aviv, not in UTC — from midnight to 02:00 UTC is still yesterday (§21)
@@ -37,6 +38,8 @@ export default function ArchivePage({
   const at = typeof searchParams.at === 'string' ? searchParams.at.slice(0, 160) : null
   const initial = at ? detailOf(at) : null
   const figures = archiveFigures()
+  // `?show=kits` — Gate 5's "full collection": the deck opens on every canonical kit
+  const shelf = searchParams.show === 'kits' ? kitShelf() : undefined
 
   return (
     <Screen title={t('screen.archive.title')} sub={t('screen.archive.sub')} stage>
@@ -47,6 +50,7 @@ export default function ArchivePage({
         seed={round.seed}
         cursor={round.cursor}
         initial={initial}
+        shelf={shelf}
         atMissing={at !== null && initial === null}
         figures={t('archive.figures', {
           columns: String(figures.columns),

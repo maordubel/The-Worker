@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ReportLink } from '@/components/ui/ReportLink'
 import { Screen } from '@/components/ui/Screen'
-import { archiveShirts } from '@/lib/kit/archive'
 import { lockedCatalog, facetCounts } from '@/lib/kit/catalog'
 import { t } from '@/lib/i18n'
 import { kitRecords } from '@/lib/kit/kit-master'
@@ -41,7 +40,7 @@ export default function KitsPage() {
   return (
     <Screen title={t('screen.kits.title')} sub={t('screen.kits.sub')} stage>
       {catalog.length > 0 ? (
-        <KitWing catalog={catalog} counts={facetCounts(catalog)} archiveCount={archiveShirts().length} photos={photosByKey()} />
+        <KitWing catalog={catalog} counts={facetCounts(catalog)} photos={photosByKey()} />
       ) : (
         <EmptyState title={t('empty.kits')} body={t('empty.kits.body')} />
       )}

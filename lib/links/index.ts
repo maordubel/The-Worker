@@ -10,7 +10,7 @@ import { GATES, isOpen } from '@/lib/gates'
 import type { OpenClue } from '@/lib/game/blind-cow/types'
 import { goalYears } from '@/lib/game/goal'
 
-import type { CrossLink, CrossLinkKind } from './types'
+import { KIT_COLLECTION_HREF, type CrossLink, type CrossLinkKind } from './types'
 
 /**
  * קישורים בין שערים — where else does this player, this match, live? (delta 89)
@@ -103,6 +103,11 @@ export function goalHref(goalId: string): string {
 export function gateHref(gateNumber: number): string | null {
   const gate = GATES.find((g) => g.number === gateNumber)
   return gate && isOpen(gate) ? (gate.href.split('?')[0] ?? null) : null
+}
+
+/** Gate 5's "full collection": the Archive's shelf of every canonical kit. */
+export function kitCollectionHref(): string {
+  return KIT_COLLECTION_HREF
 }
 
 /** AWAY DAYS' front door — the journey itself, not a stop on it. */

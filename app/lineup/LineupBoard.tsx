@@ -87,10 +87,10 @@ function railPrompt(line: Line): string {
   return voiceAction(3, 'attack') ?? t(LINE_LABEL[line])
 }
 
-/** "מצאת 9 מתוך 11." — found is a starter on the pitch at all; every one of them is `perfect`. */
+/** "מצאת 9 מתוך 11." — found is a starter in HIS band; eleven in the wrong bands is not `perfect`. */
 function lineupTier(verdict: LineupVerdict): ResultTier {
-  if (verdict.total > 0 && verdict.starters >= verdict.total) return 'perfect'
-  return tierFromShare(verdict.total > 0 ? verdict.starters / verdict.total : 0)
+  if (verdict.perfect) return 'perfect'
+  return tierFromShare(verdict.total > 0 ? verdict.exact / verdict.total : 0)
 }
 
 function coachSentence(note: CoachNote): string {
@@ -165,9 +165,9 @@ export function LineupBoard({
   const opening = voice({ gate: 3, moment: 'intro' })
   useEffect(() => {
     if (!verdict || embedded) return
-    track('run_complete', { detail: 'lineup', value: verdict.starters })
+    track('run_complete', { detail: 'lineup', value: verdict.exact })
     let live = true
-    nextAfterLineup(seed, cursor, verdict.starters, verdict.missing.map((man) => man.playerId))
+    nextAfterLineup(seed, cursor, verdict.exact, verdict.missing.map((man) => man.playerId))
       .then((answer) => {
         if (live) setNext(answer.next)
       })
@@ -675,7 +675,7 @@ export function LineupBoard({
             moment: 'result',
             result: lineupTier(verdict),
             seed: `${seed}:${cursor}`,
-            vars: { n: String(verdict.starters) },
+            vars: { n: String(verdict.exact) },
           })}
           doors={embedded ? [] : next}
           share={
@@ -686,7 +686,7 @@ export function LineupBoard({
               <ShareRow
                 kind="lineup"
                 params={{ s: String(seed), r: String(cursor) }}
-                headline={`${verdict.starters}/${verdict.total}`}
+                headline={`${verdict.exact}/${verdict.total}`}
                 card={programmeCard({
                   match: fixture?.titleHe ?? t('screen.lineup.title'),
                   date: fixture?.dateHe ?? '',

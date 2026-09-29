@@ -19,6 +19,7 @@ import type { NextAction } from '@/lib/results/types'
 import { voice, voiceAction } from '@/lib/voice'
 import type { Facet, LockedKit } from '@/lib/kit/catalog'
 import { t, type MessageKey } from '@/lib/i18n'
+import { KIT_COLLECTION_HREF } from '@/lib/links/types'
 
 import { kitDnaFor, nextAfterWardrobe, type UnlockedKit } from './actions'
 import { KitDesignerV5 } from './KitDesignerV5'
@@ -58,25 +59,22 @@ const FACETS: { id: Facet; key: MessageKey }[] = [
 export function KitWing({
   catalog,
   counts,
-  archiveCount,
   photos,
 }: {
   catalog: LockedKit[]
   counts: Record<Facet, number>
-  /** how many photographs the archive holds — counted on the server, never guessed */
-  archiveCount: number
   /** legacyKey → the archive's own photograph, for a shirt you PROVED you built (see page.tsx) */
   photos: Record<string, string>
 }) {
   const store = useMemo(() => activeCollection(), [])
   const [built, setBuilt] = useState<Collection>({})
   const [unlocked, setUnlocked] = useState<Record<string, UnlockedKit>>({})
-  const [tab, setTab] = useState<'collection' | 'designer'>('collection')
+  const [tab, setTab] = useState<'collection' | 'designer'>('designer')
   const [facet, setFacet] = useState<Facet>('all')
   const [lockedOnly, setLockedOnly] = useState(false)
   const [openKey, setOpenKey] = useState<string | null>(null)
   // the phone stage keeps its own tab/page/sheet state — the desktop tree above is untouched
-  const [mobileTab, setMobileTab] = useState<'collection' | 'designer'>('collection')
+  const [mobileTab, setMobileTab] = useState<'collection' | 'designer'>('designer')
   const [mobilePage, setMobilePage] = useState(0)
   const [mobileOpenKey, setMobileOpenKey] = useState<string | null>(null)
   /** catalogue keys this device's LIFE save owns — read through the LIFE save reader, nothing else */
@@ -188,7 +186,7 @@ export function KitWing({
     ) : (
     <div className="mt-stack">
       <div className="flex">
-        {(['collection', 'designer'] as const).map((id) => (
+        {(['designer', 'collection'] as const).map((id) => (
           <button
             key={id}
             type="button"
@@ -268,21 +266,21 @@ export function KitWing({
             </button>
           </div>
 
-          {/* The way out to the photographs.
-              A drawn shirt and a photograph of that shirt are two different claims, and
-              the collection is about the first. Rather than mixing 168 photographs into
-              a grid whose whole point is what you can rebuild from memory, the archive
-              gets its own door — and the door says what is behind it. */}
+          {/* The way out to the full collection.
+              The historical shirts live in the Archive — Gate 12's own shelf, one card per
+              canonical kit — not in this personal wall, which is only what THIS device
+              rebuilt. The door says how many are behind it (KIT_COLLECTION_HREF). */}
           <a
-            href="/kits/archive"
+            href={KIT_COLLECTION_HREF}
+            data-kits="full-collection"
             className="mt-3 flex items-center justify-between gap-3 border-rule border-ink bg-ink px-4 py-3 text-paper"
           >
             <span className="min-w-0">
               <span className="block font-display text-step-0 leading-tight">
-                <Num>{t('kits.archive.enter', { n: String(archiveCount) })}</Num>
+                <Num>{t('kits.fullCollection', { n: String(catalog.length) })}</Num>
               </span>
               <span className="mt-1 block font-body text-[11.5px] leading-snug text-concrete">
-                {t('kits.archive.enterBody')}
+                {t('kits.fullCollectionBody')}
               </span>
             </span>
             <span aria-hidden="true" className="shrink-0 font-poster text-[22px] leading-none text-red">
@@ -331,7 +329,7 @@ export function KitWing({
       <div className="flex min-h-0 flex-1 flex-col gap-1.5 md:hidden">
         {/* segmented control — collection / designer */}
         <div className="flex shrink-0 gap-1">
-          {(['collection', 'designer'] as const).map((id) => (
+          {(['designer', 'collection'] as const).map((id) => (
             <button
               key={id}
               type="button"
@@ -398,10 +396,11 @@ export function KitWing({
                 {t('kits.facet.locked')} · <Num>{String(catalog.length - owned)}</Num>
               </button>
               <a
-                href="/kits/archive"
+                href={KIT_COLLECTION_HREF}
+                data-kits="full-collection"
                 className="flex min-h-tap shrink-0 items-center gap-1 border-hair border-ink bg-ink px-2.5 font-body text-[11px] font-extrabold text-paper"
               >
-                {t('kits.archive.enter', { n: String(archiveCount) })}
+                {t('kits.fullCollection', { n: String(catalog.length) })}
               </a>
             </div>
 

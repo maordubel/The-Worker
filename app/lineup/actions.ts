@@ -18,6 +18,8 @@ export async function submitLineup(
   cursor = 0,
   window?: LineupWindow,
 ): Promise<LineupVerdict | null> {
+  // a round is an integer seed and an integer cursor; anything else is not a round
+  if (!Number.isInteger(seed) || !Number.isInteger(cursor)) return null
   // `window` is THE WORKER LIFE's: the same grade, re-derived over the match the life dealt
   return gradeLineup(seed, placements, cursor, cleanWindow(window))
 }
@@ -41,6 +43,7 @@ export async function askCoach(
   index = 0,
   window?: LineupWindow,
 ): Promise<CoachNote | null> {
+  if (!Number.isInteger(seed) || !Number.isInteger(cursor) || !Number.isInteger(index)) return null
   return coachNote(seed, placements, cursor, index, cleanWindow(window))
 }
 
@@ -58,9 +61,10 @@ export async function nextAfterLineup(
   cursor: number,
   found: number,
   missed: string[],
+  window?: LineupWindow,
 ): Promise<{ context: ResultContext; next: NextAction[] }> {
   if (!Number.isInteger(seed) || !Number.isInteger(cursor)) return { context: { gateId: 3 }, next: [] }
-  const matchId = dealChallenge(seed, cursor)?.intro.matchId ?? null
+  const matchId = dealChallenge(seed, cursor, cleanWindow(window))?.intro.matchId ?? null
   const context: ResultContext = {
     gateId: 3,
     runId: `${seed}:${cursor}`,

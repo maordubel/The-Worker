@@ -86,6 +86,7 @@ describe('retired files are tombstones', () => {
     'app/trivia/TopicWall.tsx', // → QuickPick.tsx, gate 2 v5 (21.9.2026)
     'app/trivia/TriviaRound.tsx', // → TriviaRun.tsx; dead since the run moved onto one screen
     'app/derby/HateHill.tsx', // → HateWall.tsx, gate 11 v3 (21.9.2026)
+    'components/ui/Standfirst.tsx', // → nothing: the home page prints no standfirst (29.9.2026)
     'app/archive/ArchiveWing.tsx', // → components/archive/ArchiveApp.tsx, gate 12 v10 (21.9.2026)
   ]
 

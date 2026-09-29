@@ -68,6 +68,18 @@ export type Decoy = {
 
 export type PlacementStatus = 'exact' | 'wrong_line' | 'not_in_xi'
 
+/**
+ * The four honest outcomes of a sheet (Gate 3 grading, 29.9.2026). A placed man is
+ * `correct` (started, right band), `wrongBand` (started, wrong band) or `wrongPlayer`
+ * (did not start); a starter nobody placed is `missed`. `starters` alone can never say
+ * "perfect": eleven starters in the wrong bands is eleven found and none right.
+ */
+export type LineupOutcome = 'correct' | 'wrongBand' | 'wrongPlayer' | 'missed'
+
+export function outcomeOf(status: PlacementStatus): Exclude<LineupOutcome, 'missed'> {
+  return status === 'exact' ? 'correct' : status === 'wrong_line' ? 'wrongBand' : 'wrongPlayer'
+}
+
 export type PlacementVerdict = {
   playerId: string
   nameHe: string
@@ -85,6 +97,10 @@ export type SheetMan = { playerId: string; nameHe: string; line: Line }
 export type LineupVerdict = {
   /** starters placed in the band they started in */
   exact: number
+  /** the four outcomes, counted once on the server: correct + wrongBand + wrongPlayer = placed */
+  counts: Record<LineupOutcome, number>
+  /** every one of the eleven, each in his own band — the only "perfect" there is */
+  perfect: boolean
   /** starters placed at all, whatever the band */
   starters: number
   total: number

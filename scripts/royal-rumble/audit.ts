@@ -24,6 +24,7 @@ loader._resolveFilename = function (this: unknown, request: string, ...rest: unk
   return resolve.call(this, request, ...rest)
 }
 
+import { reportOf, type AuditPlayer } from '../../lib/game/royal-rumble-audit'
 import type { RoyalRumbleSelection } from '../../lib/game/royal-rumble-public'
 
 type Stat = { avg: number; p10: number; p50: number; p90: number; min: number; max: number }
@@ -100,6 +101,31 @@ async function main() {
     console.log(`  €${tier} ↑ ${top.slice(0, 8).map((p) => `${p.nameHe}(${p.position}${p.overridden ? '*' : ''})`).join(' · ')}`)
     console.log(`  €${tier} ↓ ${top.slice(-5).map((p) => `${p.nameHe}(${p.position}${p.overridden ? '*' : ''})`).join(' · ')}`)
   }
+
+  /* ---------------------------------------------------------------- rating & price review (V3) */
+  const review = reportOf(players as unknown as AuditPlayer[])
+  const line = (p: AuditPlayer) =>
+    `${p.nameHe.padEnd(18)} ${p.position} ${String(p.fromYear ?? '----').padEnd(5)} rating ${String(p.rating).padStart(2)} · €${p.price} (suggested €${p.suggested}) · ${p.confidence}` +
+    ` · peak ${p.factors.peak.toFixed(2)} long ${p.factors.longevity.toFixed(2)} out ${p.factors.output.toFixed(2)} hon ${p.factors.honours.toFixed(2)} big ${p.factors.bigGames.toFixed(2)} leg ${p.factors.legacy.toFixed(2)}` +
+    (p.overrideReasonHe ? ` · ${p.overrideReasonHe}` : '')
+  console.log('\n== RATING & PRICE REVIEW ==')
+  console.log('-- top 30 by rating')
+  for (const p of review.top30) console.log('  ' + line(p))
+  console.log(`-- the €5 (exactly ${review.fives.length})`)
+  for (const p of review.fives) console.log('  ' + line(p))
+  for (const tier of [4, 3, 2, 1] as const) {
+    console.log(`-- highest-rated €${tier}`)
+    for (const p of review.highestByTier[tier]) console.log('  ' + line(p))
+  }
+  console.log('-- lowest-rated €4/€5')
+  for (const p of review.lowestElite) console.log('  ' + line(p))
+  console.log('-- per position (count · average rating · €1..€5)')
+  for (const [pos, r] of Object.entries(review.positions)) console.log(`  ${pos} ${r.count} · ${r.averageRating.toFixed(1)} · ${r.tiers.join(' / ')}`)
+  console.log('-- per era (count · €1..€5 · premium share)')
+  for (const [era, r] of Object.entries(review.eras)) console.log(`  ${era.padEnd(8)} ${r.count} · ${r.tiers.join(' / ')} · ${(100 * r.premiumShare).toFixed(0)}%`)
+  console.log('-- evidence confidence: ' + (['high', 'medium', 'low'] as const).map((c) => `${c} ${players.filter((p) => p.confidence === c).length}`).join(' · '))
+  console.log(`-- suspected anomalies (${review.anomalies.length})`)
+  for (const a of review.anomalies) console.log(`  [${a.kind}] ${a.nameHe} — ${a.detail}`)
 
   /* ---------------------------------------------------------------- boards (§62) */
   console.log('\n== BOARDS ==')

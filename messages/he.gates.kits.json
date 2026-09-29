@@ -52,7 +52,6 @@
   "kitgame.reveal.hints": "רמזים: {n} · −{p}",
   "kitgame.reveal.bonus": "חולצה מושלמת · +{n}",
   "kitgame.reveal.tolerant": "המקורות חלוקים כאן — התשובה שלך מתקבלת.",
-  "kitgame.reveal.truthWas": "במקור: {truth}",
   "kitgame.reveal.collected": "החולצה נכנסה לאוסף שלך.",
   "kitgame.reveal.dna": "ה-DNA שלה נפתח בסטודיו.",
   "kitgame.evidence.exact": "צילום מהארכיון",
@@ -94,5 +93,16 @@
   "kits.shield.body": "עוד לא הרכבת אותה. הקש כדי להציג בכל זאת.",
   "kits.shield.aria": "הצג את החולצה של {date}",
   "kits.dna.use": "קח ממנה DNA",
-  "kits.dna.used": "ה-DNA בשימוש"
+  "kits.dna.used": "ה-DNA בשימוש",
+  "kitgame.field.base": "צבע",
+  "kitgame.field.pattern": "דוגמה",
+  "kitgame.field.secondary": "צבע שני",
+  "kitgame.field.collar": "צווארון",
+  "kitgame.field.collarInk": "צבע צווארון",
+  "kitgame.field.sleeves": "שרוול",
+  "kitgame.field.sleeveInk": "צבע שרוול",
+  "kitgame.field.crest": "סמל",
+  "kitgame.field.maker": "יצרן",
+  "kitgame.field.sponsor": "ספונסר",
+  "kitgame.reveal.fieldWas": "במקור {truth}"
 }

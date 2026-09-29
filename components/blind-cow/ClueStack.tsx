@@ -61,7 +61,12 @@ export function ClueStack({ clues, total, fresh }: { clues: OpenClue[]; total: n
                     <span className="plate-top relative text-red">{clue.n}</span>
                   </span>
                   <span className="min-w-0 flex-1 px-2.5 py-2">
-                    <span className="block font-body text-[10px] font-extrabold tracking-widest text-sign">{clue.labelHe}</span>
+                    <span className="flex items-center gap-1.5 font-body text-[10px] font-extrabold tracking-widest text-sign">
+                      {clue.labelHe}
+                      <span data-blindcow="new" className="bg-red px-1 py-px text-[9.5px] leading-none text-paper">
+                        {t('blindcow.clue.new')}
+                      </span>
+                    </span>
                     <span className="mt-0.5 block font-sign text-[17px] leading-snug text-ink [@media(max-height:680px)]:text-[15px]">
                       <bdi>{clue.valueHe}</bdi>
                     </span>
@@ -72,7 +77,7 @@ export function ClueStack({ clues, total, fresh }: { clues: OpenClue[]; total: n
                   <span className="w-5 shrink-0 text-center font-poster text-[17px] leading-none text-red" aria-hidden="true">
                     {clue.n}
                   </span>
-                  <span className="min-w-0 flex-1 font-body text-[12.5px] leading-snug text-ink">
+                  <span className="min-w-0 flex-1 font-body text-[12.5px] leading-snug text-ink/70">
                     <span className="font-extrabold text-sign">{clue.labelHe}</span> · <bdi>{clue.valueHe}</bdi>
                   </span>
                 </>

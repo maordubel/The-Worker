@@ -35,11 +35,6 @@ export function VenueSheet({
     <SlideSheet open={Boolean(venue)} onClose={onClose} title={venue?.nameHe ?? ''} latin={venue?.nameLatin ?? undefined} size="auto">
       {venue && (
         <div>
-          {photo && (
-            <div className="mb-2.5">
-              <VenuePhoto media={photo} alt={t('away89.photo.alt', { venue: venue.nameHe, city: venue.cityHe })} />
-            </div>
-          )}
           <p className="font-sign text-[13px] text-sign">
             {venue.cityHe} · {venue.countryHe}
           </p>
@@ -58,6 +53,11 @@ export function VenueSheet({
                 </span>
               ))}
             </p>
+          )}
+          {photo && (
+            <div className="mt-3">
+              <VenuePhoto media={photo} alt={t('away89.photo.alt', { venue: venue.nameHe, city: venue.cityHe })} />
+            </div>
           )}
           <ul className="mt-3 divide-y divide-ink/15 border-y border-ink/15">
             {visits.map((v) => (

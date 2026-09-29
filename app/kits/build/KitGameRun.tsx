@@ -783,10 +783,19 @@ function StepRow({ row }: { row: StepVerdict }) {
           </span>
         </span>
       </div>
-      {wrong.length > 0 && (
-        <p className="mt-0.5 font-body text-[11px] leading-snug text-muted">
-          {t('kitgame.reveal.truthWas', { truth: [...new Set(wrong.map((f) => f.truthHe))].join(' · ') })}
-        </p>
+      {(wrong.length > 0 || row.fields.length > 1) && (
+        <ul className="mt-0.5 space-y-px font-body text-[11px] leading-snug text-muted" data-kit-fields="">
+          {row.fields.map((f) => (
+            <li key={f.field} className="flex items-baseline gap-1.5">
+              <span className={`w-3 shrink-0 font-black ${f.ok ? 'text-ink' : 'text-red'}`} aria-label={f.ok ? t('kitgame.reveal.stepRight') : t('kitgame.reveal.stepWrong')}>
+                {f.ok ? '✓' : '✕'}
+              </span>
+              <span>
+                {t(`kitgame.field.${f.field}` as MessageKey)}: {f.ok ? f.truthHe : t('kitgame.reveal.fieldWas', { truth: f.truthHe })}
+              </span>
+            </li>
+          ))}
+        </ul>
       )}
       {row.tolerant && <p className="mt-0.5 font-body text-[11px] leading-snug text-sign">{t('kitgame.reveal.tolerant')}</p>}
     </li>

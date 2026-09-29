@@ -426,7 +426,11 @@ export function BlindCowGame({
             className="flex min-h-tap flex-col items-center justify-center border-rule border-ink bg-paper px-2 py-1 text-ink transition-transform duration-press active:scale-[.97] disabled:opacity-40 motion-reduce:transition-none"
           >
             <span className="font-body text-[14px] font-extrabold leading-tight">{last ? t('blindcow.more.none') : t('blindcow.more')}</span>
-            {!last && <span className="font-mono text-[10px] tabular-nums text-sign">{t('blindcow.more.cost')}</span>}
+            {!last && (
+              <span className="font-mono text-[10px] tabular-nums text-sign">
+                {t('blindcow.more.cost')} · {t('blindcow.more.left', { n: String(view.total - view.clues.length) })}
+              </span>
+            )}
           </button>
           <button
             type="button"

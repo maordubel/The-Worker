@@ -21,7 +21,7 @@ export const ROYAL_RUMBLE_BUDGET = 15
 export const ROYAL_RUMBLE_LINEUP_SIZE = 5
 export const ROYAL_RUMBLE_OFFERS_PER_SLOT = 3
 /** the composer + pricing generation; a board dealt under another version is another board (§14, §59) */
-export const ROYAL_RUMBLE_BALANCE_VERSION = 2
+export const ROYAL_RUMBLE_BALANCE_VERSION = 3
 /** what a persisted Live pick carries so a V1 room is never read as V2 (§73) */
 export const ROYAL_RUMBLE_DRAFT_VERSION = 2
 

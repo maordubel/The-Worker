@@ -280,6 +280,9 @@ export function AwayDaysMap({
                   : { 'aria-hidden': true })}
               >
                 {interactive && <rect x={-hit / 2} y={-hit / 2} width={hit} height={hit} className="focus fill-ink/0 stroke-transparent" strokeWidth={2} />}
+                {m.state === 'active' && interactive && (
+                  <rect data-away="marker-ring" x={-s / 2 - 4} y={-s / 2 - 4} width={s + 8} height={s + 8} className="fill-none stroke-sheet" strokeWidth={1.4} />
+                )}
                 {m.state === 'active' && <rect x={-s / 2 + 2} y={-s / 2 + 2} width={s} height={s} className="fill-sign" />}
                 <rect
                   x={-s / 2}

@@ -7,8 +7,7 @@ import { savedArchiveItem, type SavedArchiveItem } from '@/lib/daily/actions'
 import { greetingKey, hourInIsrael, type GreetingKey } from '@/lib/daily/copy'
 import type { Daily } from '@/lib/daily/types'
 import { t } from '@/lib/i18n'
-import { placeOfScene } from '@/lib/life/map'
-import { lifeStore } from '@/lib/life/save'
+import { readLifeResume, type LifeResume } from '@/lib/life/resume'
 import { softLine, type MemoryReading } from '@/lib/profile/memories'
 import { readRawDevice, recordsFrom } from '@/lib/profile/records'
 import { onIds, readProfile } from '@/lib/profile/store'
@@ -46,7 +45,7 @@ export function NowLayer({ daily, greeting }: { daily: Daily; greeting: Greeting
     <section aria-label={t('home.now.aria')} data-home="now" className="mt-stack">
       <p className="font-display text-[22px] leading-tight text-ink md:text-[28px]">{t(hello)}</p>
       <div className="mt-2">
-        <DailyCard daily={daily} />
+        <DailyCard daily={daily} variant="compact" />
       </div>
       <Returns />
       <StandHooks daily={daily} />
@@ -61,27 +60,6 @@ export function NowLayer({ daily, greeting }: { daily: Daily; greeting: Greeting
       </p>
     </section>
   )
-}
-
-type LifeResume = { year: number; placeHe: string | null }
-
-/** Reads the LIFE save without Phaser: the save module imports types only. */
-async function readLife(): Promise<LifeResume | null> {
-  try {
-    const file = await lifeStore.read()
-    if (!file || !Number.isFinite(file.year)) return null
-    let placeHe: string | null = null
-    for (let i = file.events.length - 1; i >= 0; i -= 1) {
-      const event = file.events[i] as { t?: string; to?: unknown }
-      if (event?.t === 'moved' && typeof event.to === 'string') {
-        placeHe = placeOfScene(event.to as Parameters<typeof placeOfScene>[0])?.labelHe ?? null
-        break
-      }
-    }
-    return { year: file.year, placeHe }
-  } catch {
-    return null
-  }
 }
 
 function Returns() {
@@ -110,7 +88,7 @@ function Returns() {
     } catch {
       // no profile: nothing came back from the archive
     }
-    void readLife().then((resume) => {
+    void readLifeResume().then((resume) => {
       if (live) setLife(resume)
     })
     return () => {

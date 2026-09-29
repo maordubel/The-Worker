@@ -3,6 +3,7 @@ import 'server-only'
 import { positionOf, takeFrom } from '@/lib/rotation/deck'
 import { archive, nameOf, rng, shuffle } from './archive'
 import { currentSeasonStartYear, seasonsInSpell } from './seasons'
+import { pairStrength, themedOrder, themeOf, type MemoryPairType, type MemoryStrength } from './memory-quality'
 
 /**
  * Memory pairs, drawn from the archive rather than invented.
@@ -71,6 +72,18 @@ export type MemoryPair = {
   b: string
   kind: string
   object: MemoryObject
+  /** the relationship the archive states between the two faces (`memory-quality.ts`) */
+  type: MemoryPairType
+  /** 1–3, never 0: a pair with no stated link is not dealt */
+  strength: Exclude<MemoryStrength, 0>
+  /** the decade the pair belongs to (`d1990`), or `undated` */
+  theme: string
+  /**
+   * The one archive fact printed when the pair is found — a sentence the row itself holds
+   * (a moment's first line, a goal's own caption). Null where the row holds none: the plate then
+   * prints the two faces and nothing more, never a sentence nobody sourced (rule 11).
+   */
+  factHe: string | null
 }
 
 export type MemoryRound = {
@@ -80,6 +93,9 @@ export type MemoryRound = {
 
 type Candidate = {
   pair: string
+  type: MemoryPairType
+  /** one archive sentence for the locked-pair plate — see `MemoryPair.factHe` */
+  fact?: string | null
   a: string
   b: string
   kind: string
@@ -95,6 +111,18 @@ type Candidate = {
   year?: number | null
 }
 
+/** The first sentence of a row's own text, at most 120 characters — "one concise archive fact". */
+export function firstSentence(text: string | null | undefined, max = 120): string | null {
+  const trimmed = (text ?? '').replace(/\s+/g, ' ').trim()
+  if (trimmed === '') return null
+  const end = trimmed.search(/[.!?](\s|$)/)
+  const sentence = end === -1 ? trimmed : trimmed.slice(0, end + 1)
+  if (sentence.length <= max) return sentence
+  const cut = sentence.slice(0, max)
+  const space = cut.lastIndexOf(' ')
+  return `${cut.slice(0, space > 40 ? space : max).replace(/[,;:\s]+$/, '')}…`
+}
+
 function kitCandidates(): Candidate[] {
   const openThrough = currentSeasonStartYear()
   return archive.kitSupply
@@ -107,6 +135,8 @@ function kitCandidates(): Candidate[] {
       const span = first === last ? (first ?? '') : `${first}–${last}`
       return {
         pair: `kit:${row.manufacturerSlug}:${row.fromLabel}`,
+        type: 'maker-span' as const,
+        fact: null,
         a: nameOf.manufacturer(row.manufacturerSlug),
         b: span,
         kind: 'יצרן ותקופה',
@@ -188,6 +218,8 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
       .filter((row) => row.result === 'won')
       .map((row) => ({
         pair: `trophy:${row.competitionSlug}:${row.seasonLabel}`,
+        type: 'trophy-season' as const,
+        fact: null,
         a: nameOf.competition(row.competitionSlug),
         b: row.seasonLabel,
         kind: 'תואר ועונה',
@@ -199,6 +231,8 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
       .filter((row) => row.happenedOn !== null)
       .map((row) => ({
         pair: `moment:${row.slug}`,
+        type: 'moment-year' as const,
+        fact: firstSentence(row.bodyHe),
         a: row.titleHe,
         b: (row.happenedOn as string).slice(0, 4),
         kind: 'רגע ושנה',
@@ -215,6 +249,8 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
       .filter(({ year }) => /^\d{4}$/.test(year))
       .map(({ goal, year }) => ({
         pair: `goal:${goal.goalId}`,
+        type: 'goal-year' as const,
+        fact: firstSentence(goal.subtitleHe),
         a: goal.titleHe,
         b: year,
         kind: 'שער ושנה',
@@ -226,6 +262,8 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
       .filter((tie) => !tie.opponentHe.includes(' · '))
       .map((tie) => ({
         pair: `euro:${tie.slug}`,
+        type: 'tie-season' as const,
+        fact: firstSentence(tie.notableHe),
         a: tie.opponentHe,
         b: tie.seasonLabel,
         kind: 'לילה אירופי ועונה',
@@ -237,6 +275,8 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
       .filter((row) => row.toYear !== null && row.toYear !== row.fromYear)
       .map((row) => ({
         pair: `crest:${row.fromYear}`,
+        type: 'crest-years' as const,
+        fact: firstSentence(row.changeHe),
         a: row.nameHe,
         b: `${row.fromYear}–${row.toYear}`,
         kind: 'סמל ושנים',
@@ -248,6 +288,8 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
       .filter((row) => row.votes !== null && row.rank !== null && row.rank <= 6)
       .map((row) => ({
         pair: `election:${row.electionSlug}:${row.personNameHe}`,
+        type: 'candidate-votes' as const,
+        fact: firstSentence(row.occupationHe),
         a: row.personNameHe,
         b: `${row.votes} קולות`,
         kind: 'בחירות העמותה',
@@ -267,6 +309,10 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
   // over a pool that fills four, `takeFrom` wrapped, and every board from the fifth on
   // re-dealt a pair the same lap had already dealt — the one guarantee
   // `lib/rotation/deck.ts` exists to make. 17.9.2026.
+  // a pair with no stated link is never dealt (`memory-quality.ts` — strength 0)
+  const linked = candidates.filter((candidate) => pairStrength(candidate) > 0)
+  candidates.length = 0
+  candidates.push(...linked)
   if (window) {
     const kept = candidates.filter((candidate) => {
       const year = candidate.year
@@ -292,15 +338,14 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
   // be two or three pairs of every board, and a wall of three "לילה אירופי" tabs is one
   // question asked three times. The order is still one fixed permutation of the pool, so
   // consecutive windows stay disjoint — the rotation promise is unchanged.
-  const byKind = new Map<string, Candidate[]>()
-  for (const candidate of distinct) byKind.set(candidate.kind, [...(byKind.get(candidate.kind) ?? []), candidate])
-  const spread: Candidate[] = []
-  for (let depth = 0; spread.length < distinct.length; depth += 1) {
-    for (const list of byKind.values()) {
-      const next = list[depth]
-      if (next) spread.push(next)
-    }
-  }
+  //
+  // v4 (29.9.2026): the deck is cut into boards that share a stretch of history — a decade,
+  // in whole blocks of six, spread across kinds inside it — and only what no decade can fill a
+  // board with is mixed. See `themedOrder`; it is still one fixed permutation of the pool.
+  const spread = themedOrder(
+    distinct.map((candidate) => ({ ...candidate, theme: themeOf(candidate.year) })),
+    pairs,
+  )
 
   // The window slides AFTER the de-duplication, so a later board is still six distinct
   // faces rather than six rows that happen to sit next to each other in the raw pool.
@@ -338,6 +383,10 @@ export function buildRound(seed: number, pairs = 6, cursor = 0, window?: MemoryW
       b: candidate.b,
       kind: candidate.kind,
       object: candidate.object,
+      type: candidate.type,
+      strength: pairStrength(candidate) as Exclude<MemoryStrength, 0>,
+      theme: candidate.theme,
+      factHe: candidate.fact ?? null,
     })),
     cards,
   }

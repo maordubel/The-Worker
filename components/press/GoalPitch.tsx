@@ -1066,11 +1066,17 @@ export function GoalPitch({
                     armed === man.name && !lifted ? 'animate-fx-wobble motion-reduce:animate-none' : ''
                   }`}
                 >
-                  {man.look && !man.opponent ? (
-                    <PlayerShirt look={man.look} eager title={man.name} className="aspect-[5/6] w-[11.5cqw] max-w-[62px]" />
-                  ) : (
-                    <AwayShirt opponent={man.opponent} />
-                  )}
+                  {/* the active man carries a ring: ink under paper, so it reads on any grass */}
+                  <span
+                    data-goal-active={hot ? 'true' : undefined}
+                    className={`block ${hot ? 'outline outline-[3px] outline-offset-[3px] outline-[rgb(var(--p-line))] [box-shadow:0_0_0_6px_rgb(var(--p-ink))]' : ''}`}
+                  >
+                    {man.look && !man.opponent ? (
+                      <PlayerShirt look={man.look} eager title={man.name} className="aspect-[5/6] w-[11.5cqw] max-w-[62px]" />
+                    ) : (
+                      <AwayShirt opponent={man.opponent} />
+                    )}
+                  </span>
                   <span className="mt-px block border-rule border-ink bg-ink p-[2px]">
                     <span
                       className={`block max-w-[27cqw] truncate px-1 font-body text-[10px] font-extrabold leading-[1.35] text-paper ${

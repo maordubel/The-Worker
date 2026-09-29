@@ -874,11 +874,13 @@ export function GoalRun({
         editing={editing}
         chosen={focusedVerb(build)}
         disabled={!building || (touches.length === 0 && !holder)}
+        showVerbs={!building || touches.length > 0 || editing !== null || holder !== null || armed !== null}
         wrap={!phone}
         onVerb={onVerb}
         onEdit={onEdit}
       />
       <div key={nudge} className={`flex gap-1.5 ${nudge > 0 ? 'animate-shake motion-reduce:animate-none' : ''}`}>
+        {(history.length > 0 || !phone) && (
         <button
           type="button"
           onClick={undo}
@@ -890,6 +892,8 @@ export function GoalRun({
           <span aria-hidden="true" className="font-display text-[18px] leading-none">↶</span>
           <span className="max-md:sr-only">{t('goal.undoStep')}</span>
         </button>
+        )}
+        {(draft.actorHe || editing !== null || !phone) && (
         <button
           type="button"
           onClick={clear}
@@ -899,6 +903,7 @@ export function GoalRun({
         >
           {t('goal.clearTouch')}
         </button>
+        )}
         {phone && hintsChip}
         {phone && !embedded && muteChip}
         <button

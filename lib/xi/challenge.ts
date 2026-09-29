@@ -32,6 +32,9 @@ export type ChallengeId =
   | 'modern'
   | 'israeli'
   | 'foreign'
+  // the decade mission (Gate 1, 29.9.2026): every chosen spell overlaps one of the decades the
+  // builder picked — `ChallengeParams.allowedDecades`, one to three of them
+  | 'span'
   // the Manager Prompt's rules (`lib/xi/prompt.ts`, ONE RED WORLD §10) — never in the picker
   | 'pre1990'
   | 'the2000s'
@@ -39,7 +42,56 @@ export type ChallengeId =
   | 'fresh'
 
 /** the six the picker offers */
-export const CHALLENGES: readonly ChallengeId[] = ['free', 'decades', 'pre2000', 'modern', 'israeli', 'foreign']
+export const CHALLENGES: readonly ChallengeId[] = [
+  'free',
+  'decades',
+  'pre2000',
+  'modern',
+  'israeli',
+  'foreign',
+  'span',
+]
+
+/**
+ * What a challenge may carry besides its id. Kept apart from `ChallengeId` so the persisted id
+ * set is untouched (the smallest migration): a saved sheet without `allowedDecades` reads back
+ * exactly as it always did.
+ */
+export type ChallengeParams = { allowedDecades?: readonly number[] }
+
+/** A mission may ask for at most this many decades at once. */
+export const SPAN_MAX = 3
+
+/** The decades a mission can name: the first the club has a squad in, to the current one. */
+export const SPAN_DECADES: readonly number[] = [1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]
+
+/** What a fresh "decade mission" opens on. */
+export const SPAN_DEFAULT: readonly number[] = [1990]
+
+/**
+ * The decades a stored or typed value may hold: whole decades from `SPAN_DECADES`, no repeats,
+ * ascending, at most `SPAN_MAX`. Anything else is dropped rather than repaired.
+ */
+export function cleanDecades(value: unknown): number[] {
+  if (!Array.isArray(value)) return []
+  const out = new Set<number>()
+  for (const item of value) {
+    if (typeof item === 'number' && SPAN_DECADES.includes(item)) out.add(item)
+  }
+  return [...out].sort((a, b) => a - b).slice(0, SPAN_MAX)
+}
+
+/** The decades after one is switched on or off: kept ascending, never fewer than one, never more than three. */
+export function toggleDecade(current: readonly number[], decade: number): number[] {
+  const kept = cleanDecades(current)
+  if (kept.includes(decade)) return kept.length === 1 ? kept : kept.filter((d) => d !== decade)
+  return kept.length >= SPAN_MAX ? kept : cleanDecades([...kept, decade])
+}
+
+/** 1990 → "90", 2000 → "2000": the number the sentence "שנות ה־…" is written with. */
+export function decadeWord(decade: number): string {
+  return decade < 2000 ? String(decade % 100) : String(decade)
+}
 
 /** the rules only a Manager Prompt sets — each computed from the archive, never typed */
 export const PROMPT_CHALLENGES: readonly ChallengeId[] = ['pre1990', 'the2000s', 'cups', 'fresh']
@@ -112,7 +164,11 @@ export type Refusal =
   | 'forbidden'
 
 /** Does this ONE spell satisfy the era rules? The decade rule needs the rest of the sheet. */
-function eraPasses(challenge: ChallengeId, spell: Spell): boolean {
+function eraPasses(challenge: ChallengeId, spell: Spell, params: ChallengeParams = {}): boolean {
+  if (challenge === 'span') {
+    const asked = cleanDecades(params.allowedDecades)
+    return asked.length === 0 || asked.some((decade) => overlaps(spell, decade))
+  }
   if (challenge === 'pre2000') return spell.fromYear !== null && spell.fromYear < MODERN_FROM
   if (challenge === 'modern') return spell.toYear !== null && spell.toYear >= MODERN_FROM
   if (challenge === 'pre1990') return spell.fromYear !== null && spell.fromYear < UNTIL_YEAR
@@ -174,13 +230,19 @@ export function chooseSpell(
   taken: ReadonlySet<number> = new Set(),
   /** what the rule knows about the man himself (cups, the forbidden five) */
   man: ManFacts = {},
+  /** what the mission itself carries (the decades of a decade mission) */
+  params: ChallengeParams = {},
 ): { ok: true; spell: Spell } | { ok: false; why: Refusal } {
   const slot = slotRefusal(challenge, status)
   if (slot) return { ok: false, why: slot }
   if (challenge === 'fresh' && man.forbidden) return { ok: false, why: 'forbidden' }
 
-  let candidates = spells.filter((spell) => eraPasses(challenge, spell))
-  if (candidates.length === 0) return { ok: false, why: 'era' }
+  let candidates = spells.filter((spell) => eraPasses(challenge, spell, params))
+  if (candidates.length === 0) {
+    // a man whose every spell is undated cannot be placed in ANY decade — say so, not "era"
+    if (challenge === 'span' && spells.every((spell) => spell.fromYear === null)) return { ok: false, why: 'undated' }
+    return { ok: false, why: 'era' }
+  }
   if (challenge === 'cups') {
     candidates = candidates.filter((spell) => spellHoldsCup(spell, man.cupYears))
     if (candidates.length === 0) return { ok: false, why: 'no-cup' }
@@ -222,7 +284,12 @@ export type ChallengeStatus = {
  * The decade rule flags the LATER slot of a clash (pitch order), so the report names one
  * man per extra decade rather than accusing both.
  */
-export function challengeStatus(challenge: ChallengeId, rows: readonly SheetRow[], size = 11): ChallengeStatus {
+export function challengeStatus(
+  challenge: ChallengeId,
+  rows: readonly SheetRow[],
+  size = 11,
+  params: ChallengeParams = {},
+): ChallengeStatus {
   const broken: string[] = []
   const seen = new Set<number>()
   for (const row of rows) {
@@ -230,7 +297,7 @@ export function challengeStatus(challenge: ChallengeId, rows: readonly SheetRow[
       broken.push(row.slotId)
       continue
     }
-    if (!eraPasses(challenge, row.spell)) {
+    if (!eraPasses(challenge, row.spell, params)) {
       broken.push(row.slotId)
       continue
     }
@@ -252,7 +319,9 @@ export function challengeStatus(challenge: ChallengeId, rows: readonly SheetRow[
     }
   }
   const complete = rows.length >= size
-  return { challenge, complete, broken, met: complete && broken.length === 0 }
+  // a decade mission with no decade named asks nothing and so is never "met"
+  const named = challenge !== 'span' || cleanDecades(params.allowedDecades).length > 0
+  return { challenge, complete, broken, met: complete && named && broken.length === 0 }
 }
 
 /** The decades begun in by every occupied slot except one — what the next pick may not reuse. */

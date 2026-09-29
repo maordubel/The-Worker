@@ -64,6 +64,7 @@ export function ArchiveApp({
   figures,
   report,
   song,
+  shelf,
 }: {
   decks: Record<TodayChip, ArchiveCard[]>
   todayHe: string
@@ -77,12 +78,18 @@ export function ArchiveApp({
   report?: ReactNode
   /** §3 — the landing's one song line (`components/voice/SongLine.tsx`), chosen by the date */
   song?: ReactNode
+  /** Gate 5's "full collection" (`/archive?show=kits`): every canonical kit, opened as the deck */
+  shelf?: ArchiveCard[]
 }) {
   const firstChip = decks.today.length ? 'today' : 'know'
-  const [chip, setChip] = useState<TodayChip | null>(firstChip)
-  const [deck, setDeck] = useState<ArchiveCard[]>(decks[firstChip])
+  const [chip, setChip] = useState<TodayChip | null>(shelf && shelf.length > 0 ? null : firstChip)
+  const [deck, setDeck] = useState<ArchiveCard[]>(shelf && shelf.length > 0 ? shelf : decks[firstChip])
   // §21 — the default landing asks "מה חזר היום?" rather than showing a dock of systems
-  const [context, setContext] = useState<string>(() => voice({ gate: 12, moment: 'intro', seed: `${seed}:${cursor}` }).title)
+  const [context, setContext] = useState<string>(() =>
+    shelf && shelf.length > 0
+      ? t('archive.kits.context', { n: String(shelf.length) })
+      : voice({ gate: 12, moment: 'intro', seed: `${seed}:${cursor}` }).title,
+  )
   const [season, setSeason] = useState<string | null>(null)
   const [index, setIndex] = useState(0)
   const [more, setMore] = useState(false)

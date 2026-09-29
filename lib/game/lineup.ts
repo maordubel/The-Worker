@@ -380,6 +380,9 @@ export function dealChallenge(seed: number, cursor = 0, window?: LineupWindow): 
 
 /* ------------------------------------------------------------------ grading */
 
+/** How much of a submitted array is even read — far above eleven, far below a payload attack. */
+const MAX_BOARD_INPUT = 64
+
 /**
  * The placements a client may send: ids from THIS deal's bank, one band each, at most
  * eleven. Anything else is dropped, so a forged request cannot grade a name that was
@@ -389,7 +392,9 @@ function cleanPlacements(record: LineupRecord, placements: readonly Placement[])
   const bank = new Set([...Object.values(record.xiIds ?? {}), ...(record.decoys ?? []).map((decoy) => decoy.id)])
   const seen = new Set<string>()
   const out: Placement[] = []
-  for (const row of placements) {
+  // a board is at most eleven men; a longer array is a forged request, not a bigger team
+  const rows = Array.isArray(placements) ? placements.slice(0, MAX_BOARD_INPUT) : []
+  for (const row of rows) {
     if (!row || typeof row.playerId !== 'string' || !isLine(row.line)) continue
     if (!bank.has(row.playerId) || seen.has(row.playerId)) continue
     seen.add(row.playerId)
@@ -406,6 +411,7 @@ export function gradeLineup(
   cursor = 0,
   window?: LineupWindow,
 ): LineupVerdict | null {
+  if (!Number.isInteger(seed) || !Number.isInteger(cursor)) return null
   const record = chosen(seed, cursor, window)
   if (!record) return null
   const starters = startersOf(record)
@@ -433,13 +439,23 @@ export function gradeLineup(
     }
   }
 
+  const exact = rows.filter((row) => row.status === 'exact').length
+  const missing = solution.filter((man) => !placed.has(man.playerId))
+  const counts = {
+    correct: exact,
+    wrongBand: rows.filter((row) => row.status === 'wrong_line').length,
+    wrongPlayer: rows.filter((row) => row.status === 'not_in_xi').length,
+    missed: missing.length,
+  }
   return {
-    exact: rows.filter((row) => row.status === 'exact').length,
+    exact,
+    counts,
+    perfect: exact === XI_SIZE && rows.length === XI_SIZE,
     starters: rows.filter((row) => row.status !== 'not_in_xi').length,
     total: XI_SIZE,
     rows,
     solution,
-    missing: solution.filter((man) => !placed.has(man.playerId)),
+    missing,
     benchKnown: subsOf(record).size > 0,
     sourceTitle: record.sourceTitle ?? file.source.title,
     sourceUrl: record.sourceUrl ?? file.source.url ?? null,
